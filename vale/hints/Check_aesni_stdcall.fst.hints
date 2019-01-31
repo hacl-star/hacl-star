@@ -37,7 +37,7 @@
         "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-      "94ded426d3b23bc389daa4b6ff2a4d7c"
+      "f2271a9b04d9e78febdba1640cfd7414"
     ],
     [
       "Check_aesni_stdcall.lemma_ghost_check_aesni_stdcall",
@@ -65,7 +65,7 @@
         "refinement_interpretation_X64.Memory_Tm_refine_fbe118802ec633823b44d14b43f1c732"
       ],
       0,
-      "f3d5b592140534a5f8837c27d696cc54"
+      "e00a62f88560f30127674a23a1f069ec"
     ],
     [
       "Check_aesni_stdcall.create_initial_vale_state",
@@ -103,7 +103,7 @@
         "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-      "943406e68809604893f8817a3cc7749c"
+      "f564d9c1d80949e1a9a90c32d4ad31ce"
     ],
     [
       "Check_aesni_stdcall.create_lemma",
@@ -183,7 +183,7 @@
         "typing_X64.Vale.Xmms.of_fun"
       ],
       0,
-      "b2245c3ddac359104e1e9f949d023275"
+      "7591b46e1369a2d9d3be6636afb048c2"
     ],
     [
       "Check_aesni_stdcall.implies_pre",
@@ -273,7 +273,7 @@
         "typing_tok_X64.Machine_s.Rsp@tok"
       ],
       0,
-      "3b75035859a66a6e0ba3568e8f4aad2e"
+      "18f46fd321efe344067016455dcb1aec"
     ],
     [
       "Check_aesni_stdcall.implies_post",
@@ -314,7 +314,7 @@
         "refinement_interpretation_X64.Memory_Tm_refine_fbe118802ec633823b44d14b43f1c732"
       ],
       0,
-      "09457b2f66e376e2dc40108a8cc18c5b"
+      "38ea3114fdf42c621dc4410af27b8541"
     ],
     [
       "Check_aesni_stdcall.lemma_ghost_check_aesni_stdcall",
@@ -509,7 +509,7 @@
         "typing_tok_X64.Machine_s.Rsp@tok"
       ],
       0,
-      "24faf50e05d233fa67a3d2eae3f3d6f1"
+      "a7fc4df8e90ba1971f22c8407db68a89"
     ],
     [
       "Check_aesni_stdcall.check_aesni_stdcall",
@@ -520,7 +520,8 @@
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
         "assumption_FStar.Monotonic.HyperHeap.Mod_set_def", "b2t_def",
-        "bool_inversion", "equation_Check_aesni_stdcall.full_post_cond",
+        "bool_inversion", "bool_typing",
+        "equation_Check_aesni_stdcall.full_post_cond",
         "equation_Check_aesni_stdcall.lemma_ghost_check_aesni_stdcall",
         "equation_Check_aesni_stdcall.post_cond",
         "equation_Check_aesni_stdcall.pre_cond",
@@ -569,14 +570,20 @@
         "lemma_FStar.Set.lemma_equal_elim",
         "lemma_FStar.Set.lemma_equal_intro",
         "lemma_FStar.Set.mem_complement", "lemma_FStar.Set.mem_intersect",
-        "lemma_FStar.Set.mem_singleton", "lemma_FStar.UInt.pow2_values",
+        "lemma_FStar.Set.mem_singleton", "lemma_FStar.Set.mem_subset",
+        "lemma_FStar.UInt.pow2_values",
         "lemma_LowStar.Monotonic.Buffer.length_null_2",
-        "lemma_LowStar.Monotonic.Buffer.loc_includes_region_buffer",
-        "lemma_LowStar.Monotonic.Buffer.loc_union_loc_none_l",
+        "lemma_LowStar.Monotonic.Buffer.loc_includes_region_buffer_",
+        "lemma_LowStar.Monotonic.Buffer.loc_includes_region_region",
+        "lemma_LowStar.Monotonic.Buffer.loc_includes_region_region_",
+        "lemma_LowStar.Monotonic.Buffer.loc_includes_trans_backwards",
+        "lemma_LowStar.Monotonic.Buffer.loc_includes_union_r_",
+        "lemma_LowStar.Monotonic.Buffer.loc_union_comm",
         "lemma_LowStar.Monotonic.Buffer.loc_union_loc_none_r",
-        "lemma_LowStar.Monotonic.Buffer.modifies_fresh_frame_popped",
         "lemma_LowStar.Monotonic.Buffer.modifies_loc_includes",
-        "lemma_LowStar.Monotonic.Buffer.modifies_trans",
+        "lemma_LowStar.Monotonic.Buffer.modifies_remove_fresh_frame",
+        "lemma_LowStar.Monotonic.Buffer.modifies_trans_linear",
+        "lemma_LowStar.Monotonic.Buffer.popped_modifies",
         "primitive_Prims.op_AmpAmp", "primitive_Prims.op_Equality",
         "primitive_Prims.op_LessThanOrEqual", "primitive_Prims.op_Negation",
         "primitive_Prims.op_Subtraction",
@@ -624,7 +631,7 @@
         "typing_LowStar.Monotonic.Buffer.loc_union", "typing_Prims.pow2"
       ],
       0,
-      "171cc47f2875092024044f6494f650a5"
+      "0181414cea38517f1bae84331e3ef9d2"
     ]
   ]
 ]

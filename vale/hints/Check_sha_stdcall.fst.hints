@@ -37,7 +37,7 @@
         "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-      "073d1904e653b734d3f68e780947d243"
+      "0059d0e2f22af9f0679fba58dec21303"
     ],
     [
       "Check_sha_stdcall.lemma_ghost_check_sha_stdcall",
@@ -65,7 +65,7 @@
         "refinement_interpretation_X64.Memory_Tm_refine_fbe118802ec633823b44d14b43f1c732"
       ],
       0,
-      "a312019d48c7aeb09cb4fb15055d3c50"
+      "99331e8488c0115a3403b5cd6e393487"
     ],
     [
       "Check_sha_stdcall.create_initial_vale_state",
@@ -103,7 +103,7 @@
         "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-      "5a24feecf4d054ae0e7c643bcc7d3dcc"
+      "632b81fafbd77e99a9c35ba09c3e5ee7"
     ],
     [
       "Check_sha_stdcall.create_lemma",
@@ -183,7 +183,7 @@
         "typing_X64.Vale.Xmms.of_fun"
       ],
       0,
-      "13b8930bbc257eafe670e2b263a01509"
+      "c50cf1e43076ce7e8000acb8016078a9"
     ],
     [
       "Check_sha_stdcall.implies_pre",
@@ -273,7 +273,7 @@
         "typing_tok_X64.Machine_s.Rsp@tok"
       ],
       0,
-      "b2a4a1deef7102e5ed4f26ba948be22d"
+      "0bfef250926c7c037c2f99472d3b7996"
     ],
     [
       "Check_sha_stdcall.implies_post",
@@ -314,7 +314,7 @@
         "refinement_interpretation_X64.Memory_Tm_refine_fbe118802ec633823b44d14b43f1c732"
       ],
       0,
-      "99eb5ea1c8219ac07938b1ca8cb5974e"
+      "a2f766c0fd39ab6d9273e7b011972941"
     ],
     [
       "Check_sha_stdcall.lemma_ghost_check_sha_stdcall",
@@ -509,7 +509,7 @@
         "typing_tok_X64.Machine_s.Rsp@tok"
       ],
       0,
-      "4ceb909d11f391ee4c09c5de17b5bc85"
+      "0267530b14101b82df204fd91bf4439c"
     ],
     [
       "Check_sha_stdcall.check_sha_stdcall",
@@ -520,7 +520,8 @@
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
         "assumption_FStar.Monotonic.HyperHeap.Mod_set_def", "b2t_def",
-        "bool_inversion", "equation_Check_sha_stdcall.full_post_cond",
+        "bool_inversion", "bool_typing",
+        "equation_Check_sha_stdcall.full_post_cond",
         "equation_Check_sha_stdcall.lemma_ghost_check_sha_stdcall",
         "equation_Check_sha_stdcall.post_cond",
         "equation_Check_sha_stdcall.pre_cond",
@@ -569,14 +570,20 @@
         "lemma_FStar.Set.lemma_equal_elim",
         "lemma_FStar.Set.lemma_equal_intro",
         "lemma_FStar.Set.mem_complement", "lemma_FStar.Set.mem_intersect",
-        "lemma_FStar.Set.mem_singleton", "lemma_FStar.UInt.pow2_values",
+        "lemma_FStar.Set.mem_singleton", "lemma_FStar.Set.mem_subset",
+        "lemma_FStar.UInt.pow2_values",
         "lemma_LowStar.Monotonic.Buffer.length_null_2",
-        "lemma_LowStar.Monotonic.Buffer.loc_includes_region_buffer",
-        "lemma_LowStar.Monotonic.Buffer.loc_union_loc_none_l",
+        "lemma_LowStar.Monotonic.Buffer.loc_includes_region_buffer_",
+        "lemma_LowStar.Monotonic.Buffer.loc_includes_region_region",
+        "lemma_LowStar.Monotonic.Buffer.loc_includes_region_region_",
+        "lemma_LowStar.Monotonic.Buffer.loc_includes_trans_backwards",
+        "lemma_LowStar.Monotonic.Buffer.loc_includes_union_r_",
+        "lemma_LowStar.Monotonic.Buffer.loc_union_comm",
         "lemma_LowStar.Monotonic.Buffer.loc_union_loc_none_r",
-        "lemma_LowStar.Monotonic.Buffer.modifies_fresh_frame_popped",
         "lemma_LowStar.Monotonic.Buffer.modifies_loc_includes",
-        "lemma_LowStar.Monotonic.Buffer.modifies_trans",
+        "lemma_LowStar.Monotonic.Buffer.modifies_remove_fresh_frame",
+        "lemma_LowStar.Monotonic.Buffer.modifies_trans_linear",
+        "lemma_LowStar.Monotonic.Buffer.popped_modifies",
         "primitive_Prims.op_AmpAmp", "primitive_Prims.op_Equality",
         "primitive_Prims.op_LessThanOrEqual", "primitive_Prims.op_Negation",
         "primitive_Prims.op_Subtraction",
@@ -624,7 +631,7 @@
         "typing_LowStar.Monotonic.Buffer.loc_union", "typing_Prims.pow2"
       ],
       0,
-      "0af15ce69fcb35645b0482cd6cb72b6d"
+      "8515edf3f4956d0eebbd98668130857a"
     ]
   ]
 ]
