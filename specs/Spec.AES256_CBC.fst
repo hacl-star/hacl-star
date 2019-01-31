@@ -64,7 +64,7 @@ val concat_with_last_block:
   } ->
   first_part:lseq uint8 first_part_length ->
   last_block:block ->
-  out:seq uint8{length out <> 0 /\ length out % blocklen == 0}
+  Tot (out:seq uint8{length out = first_part_length + blocklen})
 let concat_with_last_block first_part_length first_part last_block =
   if first_part_length < blocklen then begin
     let out = create blocklen (u8 0) in
@@ -79,15 +79,18 @@ let concat_with_last_block first_part_length first_part last_block =
     update_sub out lastfull_offset blocklen last_block
   end
 
+#set-options "--z3rlimit 70"
+
 val aes256_cbc_encrypt:
   key:skey ->
   iv:block ->
   msg:seq uint8{length msg + blocklen <= max_size_t} ->
   msglen:size_nat{msglen == length msg} ->
-  All.ML (out:seq uint8{length out <> 0 /\ length out % blocklen == 0 /\ length out <= max_size_t})
+  Tot (out:seq uint8{
+    length out <> 0 /\ length out % blocklen == 0 /\ length out <= length msg + blocklen
+  })
 let aes256_cbc_encrypt key iv msg msglen =
   let fullblocks = (msglen / blocklen) * blocklen in
-  assert_norm(fullblocks % blocklen = 0);
   let final = msglen % blocklen in
   let msg1 = sub #uint8 #(length msg) msg 0 fullblocks in
   let last = sub #uint8 #(length msg) msg fullblocks final in
@@ -133,7 +136,7 @@ val aes256_cbc_decrypt:
     length cip <= max_size_t
   } ->
   ciplen:size_nat{ciplen == length cip} ->
-  out:option (seq uint8)
+  out:option (out':seq uint8{length out' <= length cip})
 let aes256_cbc_decrypt key iv cip ciplen =
   let kex = keyExpansion key in
   let out : lseq uint8 ciplen = create ciplen (u8 0) in
