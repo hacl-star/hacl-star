@@ -46,7 +46,7 @@ let call_c_normal_t : normal call_c_t = as_normal_t #call_c_t call_c
 
 ////////////////////////////////////////////////////////////////////////////////
 //Now memcpy
-module VM = Vale_memcpy
+module VM = Test.Vale_memcpy
 
 [@__reduce__] unfold
 let vm_dom = dom
@@ -59,7 +59,7 @@ let vm_pre : VSig.vale_pre 24 vm_dom =
     (src:ib64)
     (va_s0:V.va_state)
     (sb:IX64.stack_buffer 24) ->
-      VM.va_pre c va_s0 IA.win (as_vale_buffer sb) (as_vale_buffer dst) (as_vale_immbuffer src)
+      VM.va_req_memcpy c va_s0 IA.win (as_vale_buffer sb) (as_vale_buffer dst) (as_vale_immbuffer src)
 
 [@__reduce__] unfold
 let vm_post : VSig.vale_post 24 vm_dom =
@@ -70,10 +70,10 @@ let vm_post : VSig.vale_post 24 vm_dom =
     (sb:IX64.stack_buffer 24)
     (va_s1:V.va_state)
     (f:V.va_fuel) ->
-      VM.va_post c va_s0 va_s1 f IA.win (as_vale_buffer sb) (as_vale_buffer dst) (as_vale_immbuffer src)
+      VM.va_ens_memcpy c va_s0 IA.win (as_vale_buffer sb) (as_vale_buffer dst) (as_vale_immbuffer src) va_s1 f
 
 module VS = X64.Vale.State
-#set-options "--print_effect_args"
+#set-options "--print_effect_args --z3rlimit 20"
 
 (* The vale lemma doesn't quite suffice to prove the modifies clause
    expected of the interop layer;
@@ -208,7 +208,7 @@ let memcpy_test
     x                                      //with equalities of buffer views
                                            //back to equalities of buffers
 
-module VC = Vale_check_aesni_stdcall
+module VC = X64.Cpuidstdcall
 
 [@__reduce__] unfold
 let aesni_dom : IX64.arity_ok td = []
@@ -219,7 +219,7 @@ let aesni_pre : VSig.vale_pre 8 aesni_dom =
   fun (c:V.va_code)
     (va_s0:V.va_state)
     (sb:IX64.stack_buffer 8) ->
-      VC.va_pre c va_s0 IA.win (as_vale_buffer sb)
+      VC.va_req_check_aesni_stdcall c va_s0 IA.win (as_vale_buffer sb)
 
 [@__reduce__] unfold
 let aesni_post : VSig.vale_post 8 aesni_dom =
@@ -228,7 +228,7 @@ let aesni_post : VSig.vale_post 8 aesni_dom =
     (sb:IX64.stack_buffer 8)
     (va_s1:V.va_state)
     (f:V.va_fuel) ->
-      VC.va_post c va_s0 va_s1 f IA.win (as_vale_buffer sb)
+      VC.va_ens_check_aesni_stdcall c va_s0 IA.win (as_vale_buffer sb) va_s1 f
 
 (* The vale lemma doesn't quite suffice to prove the modifies clause
    expected of the interop layer *)
