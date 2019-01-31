@@ -52,7 +52,7 @@ module VM = Test.Vale_memcpy
 let vm_dom = dom
 open X64.MemoryAdapters
 (* Need to rearrange the order of arguments *)
-[@__reduce__] unfold
+[@__reduce__]
 let vm_pre : VSig.vale_pre 24 vm_dom =
   fun (c:V.va_code)
     (dst:b64)
@@ -61,7 +61,7 @@ let vm_pre : VSig.vale_pre 24 vm_dom =
     (sb:IX64.stack_buffer 24) ->
       VM.va_req_memcpy c va_s0 IA.win (as_vale_buffer sb) (as_vale_buffer dst) (as_vale_immbuffer src)
 
-[@__reduce__] unfold
+[@__reduce__]
 let vm_post : VSig.vale_post 24 vm_dom =
   fun (c:V.va_code)
     (dst:b64)
@@ -214,14 +214,14 @@ module VC = X64.Cpuidstdcall
 let aesni_dom : IX64.arity_ok td = []
 
 (* Need to rearrange the order of arguments *)
-[@__reduce__] unfold
+[@__reduce__]
 let aesni_pre : VSig.vale_pre 8 aesni_dom =
   fun (c:V.va_code)
     (va_s0:V.va_state)
     (sb:IX64.stack_buffer 8) ->
       VC.va_req_check_aesni_stdcall c va_s0 IA.win (as_vale_buffer sb)
 
-[@__reduce__] unfold
+[@__reduce__]
 let aesni_post : VSig.vale_post 8 aesni_dom =
   fun (c:V.va_code)
     (va_s0:V.va_state)
