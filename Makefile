@@ -1,7 +1,7 @@
-# This Makefile covers the lib, specs and code directory of HACL*.
+# This Makefile covers all of the present repository (HACL* + Vale + EverCrypt)
+# with the exclusion of legacy code found in secure_api, code/old and specs/old.
 #
-# The dependency graph, encoded by hand in this Makefile, is artistically
-# rendered as follows:
+# From a high-level perspective, the coarse-grained dependency graph is:
 #
 #            merkle_tree
 #                |
@@ -11,63 +11,74 @@
 #           /   \  /                      |
 #         lib   specs                  specs/old
 #
-# This Makefile verifies, tests, extracts and compiles HACL*. It delegates
-# building secure_api, vale, providers, merkle_tree to recursive make
-# invocations.
 
 # -2. Top-level entry points, delegating to recursive make invocations via pattern
 # rules.
 
-all: secure_api.build secure_api/merkle_tree.build \
-  compile-compact compile-generic compile-compact-msvc
+# TODO: compile-merkle-tree, compile-evercrypt + variants
+all: secure_api.build compile-compact compile-generic compile-compact-msvc
 
 # Any file in code/tests is taken to contain a `main` function.
 # Any file in specs/tests is taken to contain a `test` function.
-test: providers.test secure_api/merkle_tree.test test-c test-ml
+# TODO: test-merkle-tree, test-evercrypt
+test: test-c test-ml
 test-c: $(subst .,_,$(patsubst %.fst,test-c-%,$(notdir $(wildcard code/tests/*.fst))))
 test-ml: $(subst .,_,$(patsubst %.fst,test-ml-%,$(notdir $(wildcard specs/tests/*.fst))))
 
 ci: all test
 
-.PHONY: %.test
-%.test: %.build
-	$(MAKE) -C $* test
+# Backwards-compat target
+.PHONY: secure_api.build
+secure_api.build:
+	$(MAKE) -C secure_api
 
-.PHONY: %.build
-%.build:
-	$(MAKE) -C $*
+# -2. Configuration
 
-# -1. Complete dependency graph for HACL*
+IMPORT_FSTAR_TYPES = $(VALE_HOME)/bin/importFStarTypes.exe
+PYTHON3 = $(shell tools/findpython3.sh)
+ifeq ($(OS),Windows_NT)
+  MONO =
+else
+  MONO = mono
+endif
 
-ROOTS = $(wildcard $(addsuffix /*.fsti,$(DIRS)) $(addsuffix /*.fst,$(DIRS)))
+# -1. Complete dependency graph for HACL* + Vale
+
+FSTAR_ROOTS = $(wildcard $(addsuffix /*.fsti,$(DIRS)) $(addsuffix /*.fst,$(SOURCE_DIRS))) \
+  $(TACTIC_DIRS)/CanonCommMonoid.fst
+VALE_ROOTS = $(filter-out %.types.vaf,$(wildcard $(addsuffix /*.vaf,$(VALE_DIRS))))
 
 include Makefile.common
 
 ifndef MAKE_RESTARTS
 .depend: .FORCE
-	@$(FSTAR_NO_FLAGS) --dep full $(ROOTS) --extract '* -Prims -LowStar -Lib.Buffer -Hacl -FStar +FStar.Endianness +FStar.Kremlin.Endianness' > $@
+	$(FSTAR_NO_FLAGS) --dep full $(FSTAR_ROOTS) --extract '* -Prims -LowStar -Lib.Buffer -Hacl -FStar +FStar.Endianness +FStar.Kremlin.Endianness' > $@
+
+.vale-depend: .FORCE
+	@$(PYTHON3) tools/valedepend.py \
+	  $(addprefix -include ,$(INCLUDES)) \
+	  $(addprefix -in ,$(VALE_ROOTS)) > $@
 
 .PHONY: .FORCE
 .FORCE:
 endif
 
 include .depend
+include .vale-depend
 
-# 0. Convenience targets for subsets of HACL*
+# 0. First stage: running Vale to generate proper F* files
 
-ALL_CHECKED_FILES	= $(addsuffix .checked,$(ROOTS))
+%.dump: %.checked
+	$(FSTAR) --dump_module $(basename $(notdir $*)) \
+          --print_implicits --print_universes --print_effect_args --print_full_names \
+	  --print_bound_var_types --ugly --admit_smt_queries true \
+	  $* > $@
 
-SPEC_CHECKED_FILES	= $(filter $(HACL_HOME)/specs/%,$(ALL_CHECKED_FILES))
-CODE_CHECKED_FILES	= $(filter $(HACL_HOME)/code/%,$(ALL_CHECKED_FILES))
+%.types.vaf:
+	$(MONO) $(IMPORT_FSTAR_TYPES) $(addprefix -in ,$^) -out $@
 
-verify-specs: $(SPEC_CHECKED_FILES)
-verify-code: $(CODE_CHECKED_FILES)
+%.fst: 
 
-# 1. Manual, finely crafted dependency edges (see artistic rendition above).
-
-vale.build: verify-specs
-providers.build: compile-compact vale.build
-secure_api/merkle_tree.build: providers.build
 
 # 2. Verification
 

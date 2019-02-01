@@ -1,6 +1,7 @@
 # This makefile can be safely included from a subdirectory for the purposes of
 # exposing the %.fst-in target
 HACL_HOME	?= ..
+VALE_HOME	?= $(HACL_HOME)/../vale
 FSTAR_HOME	?= $(HACL_HOME)/../FStar
 KREMLIN_HOME	?= $(HACL_HOME)/../kremlin
 MLCRYPTO_HOME	?= $(HACL_HOME)/../MLCrypto
