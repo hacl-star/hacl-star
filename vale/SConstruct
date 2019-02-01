@@ -280,10 +280,19 @@ fstar_record_hints = ' --record_hints' if record_hints else ''
 vale_scons_args = '-disableVerify -omitUnverified' if is_single_vaf else ''
 vale_includes = f'-include {File("code/lib/util/operator.vaf")}'
 
-verify_paths = [
-  'code',
-  'specs',
-]
+if min_test:
+  verify_paths = [
+    'code/arch',
+    'code/lib',
+    'code/crypto/poly1305',
+    'code/thirdPartyPorts/OpenSSL/poly1305',
+    'specs',
+  ]
+else:
+  verify_paths = [
+    'code',
+    'specs',
+  ]
 
 class ExternalFile:
   def __init__ (self, filename):
@@ -331,13 +340,9 @@ no_extraction_files = [File(x) for x in [
 # Note that the entries below are prefixes of blacklisted files
 #
 min_test_suite_blacklist = [File(x) for x in [
-  'obj/code/crypto/aes/x64/X64.GCMencrypt.fst',
-  'obj/code/crypto/aes/x64/X64.GCMdecrypt.fst',
-  'obj/code/thirdPartyPorts/OpenSSL/poly1305/x64/X64.Poly1305.fst',
-  'obj/code/crypto/aes/x64/X64.GHash',
-  'obj/code/crypto/aes/x64/X64.GCTR.fst',
-  'obj/code/crypto/aes/x64/X64.AES.fst',
-  'obj/code/thirdPartyPorts/Intel/aes/x64/X64.AESCTR',
+  'code/arch/x64/X64.Vale.InsSha.vaf'
+]] + [Dir(x) for x in [
+  'code/arch/x64/interop/',
 ]]
 
 manual_dependencies = {
@@ -803,6 +808,9 @@ def process_fstar_file(env, file, fstar_includes):
           extract_fstar_file(options, file, fstar_includes)
 
 def vale_dependency_scan(env, file):
+  if min_test and on_black_list(file, min_test_suite_blacklist):
+    print(f'Skipping {file} because it is on min_test_suite_blacklist')
+    return
   contents = file.get_text_contents()
   dirname = os.path.dirname(str(file))
   vaf_includes = vale_include_re.findall(contents)
@@ -906,11 +914,19 @@ def recursive_glob(env, pattern, strings = False):
   split = os.path.split(pattern) # [0] is the directory, [1] is the actual pattern
   platform_directory = split[0] #os.path.normpath(split[0])
   for d in os.listdir(platform_directory):
-    if os.path.isdir(os.path.join(platform_directory, d)):
-      newpattern = os.path.join(split[0], d, split[1])
-      matches.append(recursive_glob(env, newpattern, strings))
+    f = os.path.join(platform_directory, d)
+    if os.path.isdir(f):
+      if min_test and on_black_list(f, min_test_suite_blacklist):
+        print(f'Skipping {f} because it is on min_test_suite_blacklist')
+      else:
+        newpattern = os.path.join(split[0], d, split[1])
+        matches.append(recursive_glob(env, newpattern, strings))
   files = env.Glob(pattern, strings=strings)
-  matches.append(files)
+  for f in files:
+    if min_test and on_black_list(f, min_test_suite_blacklist):
+      print(f'Skipping {f} because it is on min_test_suite_blacklist')
+    else:
+      matches.append(f)
   return Flatten([File(x) for x in matches])
 
 # Verify *.fst, *.fsti, *.vaf files in a list of directories.  This enumerates
