@@ -21,6 +21,7 @@ let op_String_Assignment = Map.upd
 type ins:eqtype =
   | Cpuid      : ins
   | Mov64      : dst:operand -> src:operand -> ins
+  | MovBe64    : dst:operand -> src:operand -> ins
   | Cmovc64    : dst:operand -> src:operand -> ins
   | Add64      : dst:operand -> src:operand -> ins
   | AddLea64   : dst:operand -> src1:operand -> src2:operand -> ins
@@ -39,11 +40,13 @@ type ins:eqtype =
   | Push       : src:operand -> ins
   | Pop        : dst:operand -> ins
   | Paddd      : dst:xmm -> src:xmm -> ins
+  |VPaddd      : dst:xmm -> src1:xmm -> src2:xmm -> ins
   | Pxor       : dst:xmm -> src:xmm -> ins
   | Pslld      : dst:xmm -> amt:int -> ins
   | Psrld      : dst:xmm -> amt:int -> ins
   | Psrldq     : dst:xmm -> amt:int -> ins
   | Palignr    : dst:xmm -> src:xmm -> amount:imm8 -> ins
+  |VPalignr    : dst:xmm -> src1:xmm -> src2:xmm -> amount:imm8 -> ins
   | Shufpd     : dst:xmm -> src:xmm -> permutation:imm8 -> ins
   | Pshufb     : dst:xmm -> src:xmm -> ins
   | Pshufd     : dst:xmm -> src:xmm -> permutation:imm8 -> ins
@@ -60,6 +63,8 @@ type ins:eqtype =
   | AESNI_dec_last      : dst:xmm -> src:xmm -> ins
   | AESNI_imc           : dst:xmm -> src:xmm -> ins
   | AESNI_keygen_assist : dst:xmm -> src:xmm -> imm8 -> ins
+  | VAESNI_enc          : dst:xmm -> src1:xmm -> src2:xmm -> ins
+  | VAESNI_enc_last     : dst:xmm -> src1:xmm -> src2:xmm -> ins  
   | SHA256_rnds2 : dst:xmm -> src:xmm -> ins
   | SHA256_msg1  : dst:xmm -> src:xmm -> ins
   | SHA256_msg2  : dst:xmm -> src:xmm -> ins
@@ -426,6 +431,58 @@ let update_cf_of (new_cf new_of:bool) :st unit =
   s <-- get;
   set ( { s with flags = update_cf' (update_of' s.flags new_of) new_cf } )
 
+
+(* Factor out common instruction shortcuts *)
+let paddd (src1 src2:quad32) : quad32 =
+  (Mkfour ((src1.lo0 + src2.lo0) % pow2_32)
+          ((src1.lo1 + src2.lo1) % pow2_32)
+          ((src1.hi2 + src2.hi2) % pow2_32)
+          ((src1.hi3 + src2.hi3) % pow2_32))
+
+let palignr (src1 src2:quad32) (amount:int) : option quad32 =
+  if amount = 4 then
+    Some (Mkfour src2.lo1 src2.hi2 src2.hi3 src1.lo0)
+  else if amount = 8 then
+    Some (Mkfour src2.hi2 src2.hi3 src1.lo0 src1.lo1)
+  else None
+
+let pshufb (src1 src2:quad32) : option quad32 =
+    // We only spec a restricted version sufficient for a handful of standard patterns
+    if is_full_byte_reversal_mask src2 then
+      Some (reverse_bytes_quad32 src1)
+    else if is_high_dup_reversal_mask src2 then
+      Some (Mkfour (reverse_bytes_nat32 src1.hi3)
+                   (reverse_bytes_nat32 src1.hi2)
+                   (reverse_bytes_nat32 src1.hi3)
+                   (reverse_bytes_nat32 src1.hi2))
+    else if is_lower_upper_byte_reversal_mask src2 then
+     Some (Mkfour (reverse_bytes_nat32 src1.lo1)
+                  (reverse_bytes_nat32 src1.lo0)
+                  (reverse_bytes_nat32 src1.hi3)
+                  (reverse_bytes_nat32 src1.hi2))
+    else None
+
+let pclmulqdq (src1 src2:quad32) : Option quad32
+      let Mkfour a0 a1 a2 a3 = eval_xmm dst s in
+      let Mkfour b0 b1 b2 b3 = eval_xmm src s in
+      let f x0 x1 y0 y1 =
+        let x = Math.Poly2.Bits_s.of_double32 (Mktwo x0 x1) in
+        let y = Math.Poly2.Bits_s.of_double32 (Mktwo y0 y1) in
+        update_xmm dst ins (Math.Poly2.Bits_s.to_quad32 (Math.Poly2_s.mul x y))
+        in
+      match imm with
+      | 0 -> f a0 a1 b0 b1
+      | 1 -> f a2 a3 b0 b1
+      | 16 -> f a0 a1 b2 b3
+      | 17 -> f a2 a3 b2 b3
+      | _ -> None
+
+let aesni_enc (src1 src2:quad32) : quad32 = 
+  quad32_xor (AES_s.mix_columns_LE (AES_s.sub_bytes (AES_s.shift_rows_LE src1))) src2
+
+let aesni_enc_last  (src1 src2:quad32) : quad32 = 
+  (quad32_xor (AES_s.sub_bytes (AES_s.shift_rows_LE src1)) src2)
+
 (* Core definition of instruction semantics *)
 let eval_ins (ins:ins) : st unit =
   s <-- get;
@@ -440,6 +497,12 @@ let eval_ins (ins:ins) : st unit =
     check (valid_operand src);;
     update_operand_preserve_flags dst (eval_operand src s)
     
+  | MovBe64 dst src ->
+    check (valid_operand src);;
+    let src_bytes = le_nat64_to_bytes (eval_operand src s) in
+    let reversed_bytes = Collections.Seqs_s.reverse_seq src_bytes in
+    update_operand_preserve_flags dst (le_bytes_to_nat64 reversed_bytes)
+        
   | Cmovc64 dst src ->
     check (valid_operand src);;
     update_operand_preserve_flags dst (eval_operand (if cf s.flags then src else dst) s)
@@ -551,12 +614,10 @@ let eval_ins (ins:ins) : st unit =
 // since all possibilities are valid, thanks to dependent types
 
   | Paddd dst src ->
-    let src_q = eval_xmm src s in
-    let dst_q = eval_xmm dst s in
-    update_xmm dst ins (Mkfour ((dst_q.lo0 + src_q.lo0) % pow2_32)
-                               ((dst_q.lo1 + src_q.lo1) % pow2_32)
-                               ((dst_q.hi2 + src_q.hi2) % pow2_32)
-                               ((dst_q.hi3 + src_q.hi3) % pow2_32))
+    update_xmm dst ins (paddd (eval_xmm dst s) (eval_xmm src s))
+
+  |VPaddd dst src1 src2 ->
+    update_xmm dst ins (paddd (eval_xmm src1 s) (eval_xmm src2 s))
 
   | Pxor dst src ->
     update_xmm_preserve_flags dst (quad32_xor (eval_xmm dst s) (eval_xmm src s))
@@ -582,14 +643,17 @@ let eval_ins (ins:ins) : st unit =
   | Palignr dst src amount ->
     // We only spec a restricted version sufficient for a handful of standard patterns
     check_imm (amount = 4 || amount = 8);;
-    let src_q = eval_xmm src s in
-    let dst_q = eval_xmm dst s in
-    if amount = 4 then
-      update_xmm dst ins (Mkfour src_q.lo1 src_q.hi2 src_q.hi3 dst_q.lo0)
-    else if amount = 8 then
-      update_xmm dst ins (Mkfour src_q.hi2 src_q.hi3 dst_q.lo0 dst_q.lo1)
-    else fail
-
+    (match (palignr (eval_xmm src s) (eval_xmm dst s) amount) with
+     | Some result -> update_xmm dst ins result
+     | None -> fail)
+     
+  | Palignr dst src amount ->
+    // We only spec a restricted version sufficient for a handful of standard patterns
+    check_imm (amount = 4 || amount = 8);;
+    (match (palignr (eval_xmm src1 s) (eval_xmm src2 s) amount) with
+     | Some result -> update_xmm dst ins result
+     | None -> fail)  
+     
   | Shufpd dst src permutation ->
     check_imm (0 <= permutation && permutation < 4);;
     let src_q = eval_xmm src s in
@@ -601,24 +665,15 @@ let eval_ins (ins:ins) : st unit =
     update_xmm dst ins result
 
   | Pshufb dst src ->
-    let src_q = eval_xmm src s in
-    let dst_q = eval_xmm dst s in
-    // We only spec a restricted version sufficient for a handful of standard patterns
-    check_imm (is_full_byte_reversal_mask src_q || is_high_dup_reversal_mask src_q || is_lower_upper_byte_reversal_mask src_q);;
-    if is_full_byte_reversal_mask src_q then
-      update_xmm dst ins (reverse_bytes_quad32 dst_q)
-    else if is_high_dup_reversal_mask src_q then
-      update_xmm dst ins (Mkfour (reverse_bytes_nat32 dst_q.hi3)
-                                 (reverse_bytes_nat32 dst_q.hi2)
-                                 (reverse_bytes_nat32 dst_q.hi3)
-                                 (reverse_bytes_nat32 dst_q.hi2))
-    else if is_lower_upper_byte_reversal_mask src_q then
-      update_xmm dst ins (Mkfour (reverse_bytes_nat32 dst_q.lo1)
-                                 (reverse_bytes_nat32 dst_q.lo0)
-                                 (reverse_bytes_nat32 dst_q.hi3)
-                                 (reverse_bytes_nat32 dst_q.hi2))
-    else fail
-
+    (match pshufb (eval_xmm dst s) (eval_xmm src s) with
+     | Some result -> update_xmm dst ins result
+     | None -> fail)
+     
+  |VPshufb dst src1 src2 ->
+    (match pshufb (eval_xmm src1 s) (eval_xmm src2 s) with
+     | Some result -> update_xmm dst ins result
+     | None -> fail)
+     
   | Pshufd dst src permutation ->
     let bits:bits_of_byte = byte_to_twobits permutation in
     let src_val = eval_xmm src s in
@@ -688,15 +743,19 @@ let eval_ins (ins:ins) : st unit =
 
   | AESNI_enc dst src ->
     check_imm aesni_enabled;;
-    let dst_q = eval_xmm dst s in
-    let src_q = eval_xmm src s in
-    update_xmm dst ins (quad32_xor (AES_s.mix_columns_LE (AES_s.sub_bytes (AES_s.shift_rows_LE dst_q))) src_q)
-
+    update_xmm dst ins (aesni_enc (eval_xmm dst s) (eval_xmm src s))
+    
+  | VAESNI_enc dst src1 src2 ->
+    check_imm aesni_enabled;;
+    update_xmm dst ins (aesni_enc (eval_xmm src1 s) (eval_xmm src2 s))
+    
   | AESNI_enc_last dst src ->
     check_imm aesni_enabled;;
-    let dst_q = eval_xmm dst s in
-    let src_q = eval_xmm src s in
-    update_xmm dst ins (quad32_xor (AES_s.sub_bytes (AES_s.shift_rows_LE dst_q)) src_q)
+    update_xmm dst ins (aesni_enc_last (eval_xmm dst s) (eval_xmm src s))
+
+  | VAESNI_enc_last dst src1 src2 ->
+    check_imm aesni_enabled;;
+    update_xmm dst ins (aesni_enc_last (eval_xmm src1 s) (eval_xmm src2 s))
 
   | AESNI_dec dst src ->
     check_imm aesni_enabled;;
