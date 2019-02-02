@@ -16,6 +16,9 @@ CFLAGS=-I $(HACL_HOME)/code/lib/kremlin -I $(HACL_HOME)/specs -I $(KREMLIN_HOME)
 %.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
+all: test
+test: test-blake2s.exe
+
 #
 # Blake2 (version s)
 #
