@@ -76,3 +76,7 @@ let core_create_lemma_taint_hyp
     BigOps.big_and'_forall (LSig.taint_hyp_arg mem taint_map) args
 
 let buffer_writeable_reveal t x = ()
+
+let buffer_read_reveal h s b i =
+  let b_v = BV.mk_buffer_view b Views.view64 in
+  BV.as_seq_sel h b_v i
