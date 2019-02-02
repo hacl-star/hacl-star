@@ -295,16 +295,17 @@ let bv128_64_64_lowerUpper128u_int (x0 x1:uint_t 64) (xx0 xx1:uint_t 128) : Lemm
 
 let bv128_64_64_lowerUpper128u_helper (x0 x1:uint_t 64) (xx0 xx1:uint_t 128) : Lemma
   (requires x0 == xx0 /\ x1 == xx1)
-        (ensures int2bv (lowerUpper128u x0 x1) == bv128_64_64 (int2bv x0) (int2bv x1))
+  (ensures int2bv (lowerUpper128u x0 x1) == bv128_64_64 (int2bv x0) (int2bv x1))
   =
-  // int2bv (lowerUpper128u x0 x1)
-  bv128_64_64_lowerUpper128u_bv_lhs_lu x0 x1 xx0 xx1;
-  // bvadd (bvmul #128 (int2bv xx1) 0x10000000000000000) (int2bv xx0)
-  bv128_64_64_lowerUpper128u_int x0 x1 xx0 xx1;
-  // bvor (bvshl (int2bv xx1) 64) (int2bv xx0)
-  bv128_64_64_lowerUpper128u_bv_rhs2 x0 x1 xx0 xx1;
-  // bv128_64_64 (int2bv x0) (int2bv x1)
-  ()
+  calc (==) {
+    int2bv (lowerUpper128u x0 x1);
+    == { bv128_64_64_lowerUpper128u_bv_lhs_lu x0 x1 xx0 xx1 }
+    bvadd (bvmul #128 (int2bv xx1) 0x10000000000000000) (int2bv xx0);
+    == { bv128_64_64_lowerUpper128u_int x0 x1 xx0 xx1 }
+    bvor (bvshl (int2bv xx1) 64) (int2bv xx0);
+    == { bv128_64_64_lowerUpper128u_bv_rhs2 x0 x1 xx0 xx1 }
+    bv128_64_64 (int2bv x0) (int2bv x1);
+  }
 
 let bv128_64_64_lowerUpper128u (x0 x1:nat) :
   Lemma (requires (FStar.UInt.size x0 64 /\ FStar.UInt.size x1 64))
