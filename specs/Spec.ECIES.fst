@@ -47,18 +47,29 @@ let hash_of_cs (cs:ciphersuite) : Hash.algorithm =
 
 /// Constants
 
+inline_for_extraction
+let size_label_nonce: size_nat = 11
+
+inline_for_extraction
+let size_label_key: size_nat = 9
+
 (** Constants for ECIES labels *)
-let const_label_nonce : lbytes 11 =
+let label_nonce_list : l:list uint8{List.Tot.length l == size_label_nonce} =
   [@inline_let]
   let l = [u8 0x65; u8 0x63; u8 0x69; u8 0x65; u8 0x73; u8 0x20; u8 0x6e; u8 0x6f; u8 0x6e; u8 0x63; u8 0x65] in
-  assert_norm(List.Tot.length l == 11);
-  createL l
+  assert_norm(List.Tot.length l == size_label_nonce);
+  l
 
-let const_label_key : lbytes 9 =
+let label_key_list : l:list uint8{List.Tot.length l == size_label_key} =
   [@inline_let]
   let l = [u8 0x65; u8 0x63; u8 0x69; u8 0x65; u8 0x73; u8 0x20; u8 0x6b; u8 0x65; u8 0x79] in
-  assert_norm(List.Tot.length l == 9);
-  createL l
+  assert_norm(List.Tot.length l == size_label_key);
+  l
+
+
+let label_nonce : lbytes size_label_nonce = createL label_nonce_list
+let label_key : lbytes size_label_key = createL label_key_list
+
 
 
 /// Constants sizes
@@ -96,7 +107,7 @@ let encap cs e pk context =
   | Some secret ->
     let salt = epk @| pk in
     let extracted = HKDF.hkdf_extract (hash_of_cs cs) salt secret in
-    let info = (id_of_cs cs) @| const_label_key @| context in
+    let info = (id_of_cs cs) @| label_key @| context in
     let key = HKDF.hkdf_expand (hash_of_cs cs) extracted info (size_key cs) in
     e', Some (key, epk)
 
@@ -115,7 +126,7 @@ let decap cs sk epk context =
   | Some secret ->
     let salt = epk @| pk in
     let extracted = HKDF.hkdf_extract (hash_of_cs cs) salt secret in
-    let info = (id_of_cs cs) @| const_label_key @| context in
+    let info = (id_of_cs cs) @| label_key @| context in
     let key = HKDF.hkdf_expand (hash_of_cs cs) extracted info (size_key cs) in
     Some key
 
