@@ -176,3 +176,9 @@ val logand_lemma: a:uint64 -> b:uint64 ->
       v (a `logand` b) == v b))
   [SMTPat (a `logand` b)]
 let logand_lemma a b = admit()
+
+val logor_disjoint64: a:uint64 -> b:uint64 -> m:pos{m < 64}
+  -> Lemma
+    (requires v a < pow2 m /\ v b % pow2 m == 0)
+    (ensures v (a `logor` b) == v a + v b)
+let logor_disjoint64 a b m = admit()

@@ -1385,12 +1385,6 @@ let load_tup64_lemma0 f lo hi =
   load_tup64_lemma0_lo lo;
   load_tup64_lemma0_hi hi
 
-val logor_disjoint64: a:uint64 -> b:uint64 -> m:pos{m < 64}
-  -> Lemma
-    (requires v a < pow2 m /\ v b % pow2 m == 0)
-    (ensures v (a `logor` b) == v a + v b)
-let logor_disjoint64 a b m = admit()
-
 val load_tup64_lemma:
     lo:uint64
   -> hi:uint64
@@ -1443,16 +1437,145 @@ val load_felem5_lemma_i:
 let load_felem5_lemma_i #w lo hi i =
   assert (as_tup64_i (load_felem5 #w lo hi) i == load_tup64_lemma (vec_v lo).[i] (vec_v hi).[i])
 
+val lemma_store_felem_lo: f:tup64_5 -> lo:uint64 ->
+  Lemma
+    (requires tup64_fits5 f (1, 1, 1, 1, 1))
+    (ensures
+     (let (f0, f1, f2, f3, f4) = f in
+     let lo = f0 |. (f1 <<. 26ul) |. (f2 <<. 52ul) in
+     v lo == v f0 + v f1 * pow2 26 + (v f2 * pow2 52) % pow2 64))
+let lemma_store_felem_lo f lo =
+  let (f0, f1, f2, f3, f4) = f in
+  assert_norm (max26 = pow2 26 - 1);
+  let lo = f0 |. (f1 <<. 26ul) |. (f2 <<. 52ul) in
+  FStar.Math.Lemmas.pow2_multiplication_modulo_lemma_1 (v f1) 26 26;
+  logor_disjoint64 f0 (f1 <<. 26ul) 26;
+  assert (v (f0 |. (f1 <<. 26ul)) == v f0 + v f1 * pow2 26);
+  assert_norm (pow2 26 * pow2 26 = pow2 52);
+  assert (v f0 + v f1 * pow2 26 < pow2 52);
+  assert (((v f2 * pow2 52) % pow2 64) % pow2 52 = 0);
+  logor_disjoint64 (f0 |. (f1 <<. 26ul)) (f2 <<. 52ul) 52
+
+val lemma_store_felem_hi: f:tup64_5 -> hi:uint64 ->
+  Lemma
+    (requires tup64_fits5 f (1, 1, 1, 1, 1))
+    (ensures
+     (let (f0, f1, f2, f3, f4) = f in
+     let hi = (f2 >>. 12ul) |. (f3 <<. 14ul) |. (f4 <<. 40ul) in
+     v hi == v f2 / pow2 12 + v f3 * pow2 14 + (v f4 * pow2 40) % pow2 64))
+let lemma_store_felem_hi f hi =
+  let (f0, f1, f2, f3, f4) = f in
+  assert_norm (max26 = pow2 26 - 1);
+  let hi = (f2 >>. 12ul) |. (f3 <<. 14ul) |. (f4 <<. 40ul) in
+  FStar.Math.Lemmas.lemma_div_lt (v f2) 26 12;
+  assert (v f2 / pow2 12 < pow2 14);
+  assert_norm (pow2 26 * pow2 14 = pow2 40);
+  assert_norm (pow2 40 < pow2 64);
+  FStar.Math.Lemmas.modulo_lemma (v f3 * pow2 14) (pow2 64);
+  FStar.Math.Lemmas.pow2_multiplication_modulo_lemma_1 (v f3) 14 14;
+  assert ((v f3 * pow2 14) % pow2 14 = 0);
+  logor_disjoint64 (f2 >>. 12ul) (f3 <<. 14ul) 14;
+  assert (v ((f2 >>. 12ul) |. (f3 <<. 14ul)) == v f2 / pow2 12 + v f3 * pow2 14);
+  FStar.Math.Lemmas.lemma_mult_le_right (pow2 14) (v f3) (pow2 26 - 1);
+  assert (v f2 / pow2 12 + v f3 * pow2 14 < pow2 40);
+  FStar.Math.Lemmas.pow2_modulo_modulo_lemma_1 (v f4 * pow2 40) 40 64;
+  //assert (((v f4 * pow2 40) % pow2 64) % pow2 40 = (v f4 * pow2 40) % pow2 40);
+  FStar.Math.Lemmas.pow2_multiplication_modulo_lemma_1 (v f4) 40 40;
+  //assert ((v f4 * pow2 40) % pow2 40 = 0);
+  logor_disjoint64 ((f2 >>. 12ul) |. (f3 <<. 14ul)) (f4 <<. 40ul) 40
+
+val lemma_tup64_mod_pow2_128: f:tup64_5 ->
+  Lemma
+  (requires tup64_fits5 f (1, 1, 1, 1, 1))
+  (ensures (
+    let (f0, f1, f2, f3, f4) = f in
+    (as_nat5 f) % pow2 128 ==
+    v f0 + v f1 * pow26 + v f2 * pow26 * pow26 +
+    v f3 * pow26 * pow26 * pow26 + (v f4 % pow2 24) * pow26 * pow26 * pow26 * pow26))
+let lemma_tup64_mod_pow2_128 f =
+  let (f0, f1, f2, f3, f4) = f in
+  assert ((as_nat5 f) % pow2 128 ==
+   (v f0 + v f1 * pow26 + v f2 * pow26 * pow26 +
+    v f3 * pow26 * pow26 * pow26 + v f4 * pow26 * pow26 * pow26 * pow26) % pow2 128);
+  FStar.Math.Lemmas.lemma_mod_plus_distr_r (v f0 + v f1 * pow26 + v f2 * pow26 * pow26 +
+    v f3 * pow26 * pow26 * pow26) (v f4 * pow26 * pow26 * pow26 * pow26) (pow2 128);
+  assert_norm (pow26 = pow2 26);
+  assert_norm (pow2 26 * pow2 26 * pow2 26 * pow2 26 = pow2 104);
+  assert ((v f4 * pow26 * pow26 * pow26 * pow26) % pow2 128 = (v f4 * pow2 104) % pow2 128);
+  FStar.Math.Lemmas.pow2_multiplication_modulo_lemma_2 (v f4) 128 104;
+  assert ((v f4 * pow26 * pow26 * pow26 * pow26) % pow2 128 = (v f4 % pow2 24) * pow2 104);
+  assert ((as_nat5 f) % pow2 128 ==
+   (v f0 + v f1 * pow26 + v f2 * pow26 * pow26 +
+    v f3 * pow26 * pow26 * pow26 + (v f4 % pow2 24) * pow26 * pow26 * pow26 * pow26) % pow2 128);
+
+  let f4' = u64 (v f4 % pow2 24) in
+  let f' = (f0, f1, f2, f3, f4') in
+  assert (as_nat5 f' <= pow2 26 - 1 + (pow2 26 - 1) * pow26 +
+    (pow2 26 - 1) * pow26 * pow26 + (pow2 26 - 1) * pow26 * pow26 * pow26 +
+    (pow2 24 - 1) * pow26 * pow26 * pow26 * pow26);
+  assert (as_nat5 f' <= pow2 24 * pow26 * pow26 * pow26 * pow26 - 1);
+  assert_norm (pow2 24 * pow2 26 * pow2 26 * pow2 26 * pow2 26 = pow2 128);
+  assert (as_nat5 f' < pow2 128);
+  FStar.Math.Lemmas.modulo_lemma (as_nat5 f') (pow2 128)
+
+val lemma_tup64_as_nat: f:tup64_5 ->
+  Lemma (
+    let (f0, f1, f2, f3, f4) = f in
+    as_nat5 f == v f0 + v f1 * pow2 26 +
+      v f2 * pow2 52 + v f3 * pow2 78 + v f4 * pow2 104)
+let lemma_tup64_as_nat f =
+  let (f0, f1, f2, f3, f4) = f in
+  assert (as_nat5 f == v f0 + v f1 * pow26 + v f2 * pow26 * pow26 +
+    v f3 * pow26 * pow26 * pow26 + v f4 * pow26 * pow26 * pow26 * pow26);
+  assert_norm (pow26 = pow2 26);
+  assert_norm (pow2 26 * pow2 26 = pow2 52);
+  assert_norm (pow2 26 * pow2 26 * pow2 26 = pow2 78);
+  assert_norm (pow2 26 * pow2 26 * pow2 26 * pow2 26 = pow2 104)
+
 val store_tup64_lemma:
     f:tup64_5
   -> Pure (uint64 & uint64)
-    (requires True)
+    (requires tup64_fits5 f (1, 1, 1, 1, 1))
     (ensures (fun (lo, hi) -> v hi * pow2 64 + v lo == as_nat5 f % pow2 128))
 let store_tup64_lemma f =
   let (f0, f1, f2, f3, f4) = f in
   let lo = f0 |. (f1 <<. 26ul) |. (f2 <<. 52ul) in
   let hi = (f2 >>. 12ul) |. (f3 <<. 14ul) |. (f4 <<. 40ul) in
-  admit();
+  lemma_store_felem_lo f lo;
+  lemma_store_felem_hi f hi;
+
+  assert (v lo == v f0 + v f1 * pow2 26 + (v f2 * pow2 52) % pow2 64);
+  assert (v hi == v f2 / pow2 12 + v f3 * pow2 14 + (v f4 * pow2 40) % pow2 64);
+
+  assert (v lo + v hi * pow2 64 ==
+    v f0 + v f1 * pow2 26 + (v f2 * pow2 52) % pow2 64 +
+    (v f2 / pow2 12 + v f3 * pow2 14 + (v f4 * pow2 40) % pow2 64) * pow2 64);
+  assert (v lo + v hi * pow2 64 ==
+    v f0 + v f1 * pow2 26 + (v f2 * pow2 52) % pow2 64 +
+    v f2 / pow2 12 * pow2 64 + v f3 * pow2 14 * pow2 64 + (v f4 * pow2 40) % pow2 64 * pow2 64);
+  FStar.Math.Lemmas.multiple_division_lemma (v f2) (pow2 52);
+  assert (v f2 == v f2 * pow2 52 / pow2 52);
+  assert ((v f2 * pow2 52) % pow2 64 + v f2 / pow2 12 * pow2 64 ==
+    (v f2 * pow2 52) % pow2 64 + (v f2 * pow2 52 / pow2 52) / pow2 12 * pow2 64);
+  FStar.Math.Lemmas.division_multiplication_lemma  (v f2 * pow2 52) (pow2 52) (pow2 12);
+  assert_norm (pow2 52 * pow2 12 = pow2 64);
+  assert ((v f2 * pow2 52) % pow2 64 + v f2 / pow2 12 * pow2 64 ==
+    (v f2 * pow2 52) % pow2 64 + v f2 * pow2 52 / pow2 64 * pow2 64);
+  FStar.Math.Lemmas.euclidean_division_definition (v f2 * pow2 52) (pow2 64);
+  assert (v lo + v hi * pow2 64 ==
+    v f0 + v f1 * pow2 26 + v f2 * pow2 52 +
+    v f3 * pow2 14 * pow2 64 + (v f4 * pow2 40) % pow2 64 * pow2 64);
+  FStar.Math.Lemmas.pow2_multiplication_modulo_lemma_2 (v f4) 64 40;
+  assert (v lo + v hi * pow2 64 ==
+    v f0 + v f1 * pow2 26 + v f2 * pow2 52 +
+    v f3 * pow2 14 * pow2 64 + (v f4 % pow2 24) * pow2 40 * pow2 64);
+  assert_norm (pow2 40 * pow2 64 = pow2 104);
+  assert_norm (pow2 14 * pow2 64 = pow2 78);
+  assert (v lo + v hi * pow2 64 ==
+    v f0 + v f1 * pow2 26 + v f2 * pow2 52 +
+    v f3 * pow2 78 + (v f4 % pow2 24) * pow2 104);
+  lemma_tup64_mod_pow2_128 f;
+  lemma_tup64_as_nat (f0, f1, f2, f3, u64 (v f4 % pow2 24));
   lo, hi
 
 val store_felem5_lemma_i:
