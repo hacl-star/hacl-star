@@ -130,11 +130,6 @@ let lowstar_add1 : lowstar_add1_t  =
 let lowstar_add1_normal_t : normal lowstar_add1_t
   = as_normal_t #lowstar_add1_t lowstar_add1
 
-module T = FStar.Tactics
-
-open X64.CPU_Features_s
-
-open Fast_defs
 open Vale.AsLowStar.MemoryHelpers
 
 let fast_add1
@@ -170,37 +165,98 @@ let fast_add1
   let x, _ = lowstar_add1_normal_t out f1 f2 () in
   x
   
-let as_nat (b:B.buffer UInt64.t{B.length b == 4}) (h:HS.mem) : GTot nat =
-  let s = B.as_seq h b in
-  let s0 = UInt64.v (Seq.index s 0) in
-  let s1 = UInt64.v (Seq.index s 1) in
-  let s2 = UInt64.v (Seq.index s 2) in
-  let s3 = UInt64.v (Seq.index s 3) in
-  pow2_four s0 s1 s2 s3
+let rec ghost_copy64_8 (b:u256) (b8:b8{B.length b8 == 32}) 
+  (h0:HS.mem{B.live h0 b /\ B.live h0 b8}) 
+  (h_accu:HS.mem{B.live h_accu b /\ B.live h_accu b8 /\ 
+    FStar.HyperStack.ST.equal_domains h0 h_accu /\
+    B.modifies (B.loc_buffer b8) h0 h_accu})
+  (i:nat{i <= 4}) : 
+  Ghost (x:HS.mem{FStar.HyperStack.ST.equal_domains h0 x})
+  (requires (forall (j:nat{j < i}). 
+    Seq.index (B.as_seq h0 b) j == low_buffer64_read h_accu b8 j))
+  (ensures fun h1 ->
+    B.live h1 b /\ B.live h1 b8 /\
+    B.modifies (B.loc_buffer b8) h0 h1 /\
+    (forall (j:nat{j < 4}). {:pattern low_buffer64_read h1 b8 j} Seq.index (B.as_seq h0 b) j == low_buffer64_read h1 b8 j))
+   (decreases %[4 - i])
+  =
+  if i >= 4 then h_accu
+  else
+    let bv = BV.mk_buffer_view b8 Views.view64 in
+    let v = Seq.index (B.as_seq h0 b) i in
+    BV.as_buffer_mk_buffer_view b8 Views.view64;
+    BV.get_view_mk_buffer_view b8 Views.view64;
+    BV.length_eq bv;      
+    BV.upd_equal_domains h_accu bv i v;
+    BV.upd_modifies h_accu bv i v;
+    let h1 = BV.upd h_accu bv i v in
+    let aux (j:nat{j <= i}) : Lemma
+      (Seq.index (B.as_seq h0 b) j == low_buffer64_read h1 b8 j) =
+      BV.sel_upd bv i j v h_accu
+    in Classical.forall_intro aux;  
+    ghost_copy64_8 b b8 h0 h1 (i+1)
 
-unfold
-let u256 = b:B.buffer UInt64.t{B.length b == 4}
 
-
-let ghost64_8 (b:u256) (b8:b8{B.length b8 == 32}) : Stack unit
+let copy64_8 (b:u256) (b8:b8{B.length b8 == 32}) : Stack unit
   (requires fun h -> B.live h b /\ B.live h b8)
   (ensures fun h0 _ h -> 
     B.live h b /\ B.live h b8 /\ 
     B.modifies (B.loc_buffer b8) h0 h /\
-    (forall (i:nat{i < 4}). {:pattern low_buffer64_read h b8 i} Seq.index (B.as_seq h0 b) i == low_buffer64_read h b8 i)) = admit()
+    (forall (i:nat{i < 4}). {:pattern low_buffer64_read h b8 i} Seq.index (B.as_seq h0 b) i == low_buffer64_read h b8 i)) =
+    IA.st_put (fun h0 -> B.live h0 b /\ B.live h0 b8) (fun h0 -> (), ghost_copy64_8 b b8 h0 h0 0)
 
-let ghost8_64 (b:u256) (b8:b8{B.length b8 == 32}) : Stack unit
-  (requires fun _ -> True)
-  (ensures fun h0 _ h -> B.live h b /\ B.live h0 b8 /\ B.modifies (B.loc_buffer b) h0 h /\
-    (forall (i:nat{i < 4}). Seq.index (B.as_seq h b) i == low_buffer64_read h0 b8 i)) = admit()
 
-let ghost8_64_imm (b:u256) (b8:b8{B.length b8 == 32}) : Stack unit
+let ghost_copy8_64 (b:u256) (b8:b8{B.length b8 == 32})
+  (h0:HS.mem{B.live h0 b /\ B.live h0 b8})
+  : Ghost  (x:HS.mem{FStar.HyperStack.ST.equal_domains h0 x})
+  (requires True)
+  (ensures fun h1 ->
+    B.live h1 b /\ B.live h1 b8 /\
+    B.modifies (B.loc_buffer b) h0 h1 /\
+    (forall (j:nat{j < 4}). Seq.index (B.as_seq h1 b) j == low_buffer64_read h0 b8 j)) 
+  = let bv = BV.mk_buffer_view b8 Views.view64 in
+    let s = BV.as_seq h0 bv in
+    BV.as_buffer_mk_buffer_view b8 Views.view64;
+    BV.get_view_mk_buffer_view b8 Views.view64;
+    BV.length_eq bv;
+    B.g_upd_seq_as_seq b s h0;
+    Classical.forall_intro (BV.as_seq_sel h0 bv);
+    B.g_upd_seq b s h0
+
+let imm_ghost_copy8_64 (b:u256) (b8:b8{B.length b8 == 32})
+  (h0:HS.mem{B.live h0 b /\ B.live h0 b8 /\
+    (forall (j:nat{j < 4}). Seq.index (B.as_seq h0 b) j == low_buffer64_read h0 b8 j)})
+  : Ghost  (x:HS.mem{FStar.HyperStack.ST.equal_domains h0 x})
+  (requires True)
+  (ensures fun h1 -> h1 == h0)
+  = let bv = BV.mk_buffer_view b8 Views.view64 in
+    let s = BV.as_seq h0 bv in
+    BV.as_buffer_mk_buffer_view b8 Views.view64;
+    BV.get_view_mk_buffer_view b8 Views.view64;
+    BV.length_eq bv;
+    B.g_upd_seq_as_seq b s h0;
+    Classical.forall_intro (BV.as_seq_sel h0 bv);
+    assert (Seq.equal (B.as_seq h0 b) (BV.as_seq h0 bv));
+    B.lemma_g_upd_with_same_seq b h0;
+    B.g_upd_seq b s h0
+
+
+let copy8_64 (b:u256) (b8:b8{B.length b8 == 32}) : Stack unit
+  (requires fun h -> B.live h b /\ B.live h b8)
+  (ensures fun h0 _ h1 -> B.live h1 b /\ B.live h0 b8 /\ B.modifies (B.loc_buffer b) h0 h1 /\
+    (forall (i:nat{i < 4}). Seq.index (B.as_seq h1 b) i == low_buffer64_read h0 b8 i))
+  = IA.st_put (fun h0 -> B.live h0 b /\ B.live h0 b8) (fun h0 -> (), ghost_copy8_64 b b8 h0)
+
+let imm_copy8_64 (b:u256) (b8:b8{B.length b8 == 32}) : Stack unit
   (requires fun h -> B.live h b /\ B.live h b8 /\
     (forall (i:nat{i < 4}). Seq.index (B.as_seq h b) i == low_buffer64_read h b8 i))
-  (ensures fun h0 _ h -> h0 == h) = admit()
+  (ensures fun h0 _ h -> h0 == h) 
+  = IA.st_put 
+    (fun h0 -> B.live h0 b /\ B.live h0 b8 /\ (forall (j:nat{j < 4}). Seq.index (B.as_seq h0 b) j == low_buffer64_read h0 b8 j))
+    (fun h0 -> (), imm_ghost_copy8_64 b b8 h0)
+  
 
-
-let fast_add1_test
+let fast_add1_alloca
   (out64:u256)
   (f164:u256)
   (out:b8)
@@ -228,14 +284,14 @@ let fast_add1_test
       (B.loc_union (B.loc_buffer out64) (B.loc_buffer f1))
       (B.loc_buffer out)) h0 h1 /\
     as_nat out64 h1 + pow2_256 `op_Multiply` UInt64.v c == as_nat f164 h0 + UInt64.v f2)
-  = ghost64_8 out64 out;
-    ghost64_8 f164 f1;
+  = copy64_8 out64 out;
+    copy64_8 f164 f1;
     let x = fast_add1 out f1 f2 in
-    ghost8_64_imm f164 f1;
-    ghost8_64 out64 out;
+    imm_copy8_64 f164 f1;
+    copy8_64 out64 out;
     x
 
-let final_fast_add1
+let add1
   (out:u256)
   (f1:u256)
   (f2:uint64)
@@ -251,7 +307,7 @@ let final_fast_add1
   = push_frame();
     let out8 = B.alloca (UInt8.uint_to_t 0) (UInt32.uint_to_t 32) in
     let f18 = B.alloca (UInt8.uint_to_t 0) (UInt32.uint_to_t 32) in
-    let x = fast_add1_test out f1 out8 f18 f2 in
+    let x = fast_add1_alloca out f1 out8 f18 f2 in
     pop_frame();
     x
     
