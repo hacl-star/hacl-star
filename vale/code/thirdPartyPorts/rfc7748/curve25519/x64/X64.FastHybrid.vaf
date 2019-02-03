@@ -822,12 +822,12 @@ procedure{:quick} fadd(
     carry_pass(true, 0, dst_b);
 }
 
-procedure{:quick}{:public} fadd_stdcall(
+procedure{:quick}{:public}{:exportSpecs} fadd_stdcall(
     inline win:bool,
+    ghost stack_b:buffer64,    
     ghost dst_b:buffer64,
     ghost inA_b:buffer64,
-    ghost inB_b:buffer64,
-    ghost stack_b:buffer64)
+    ghost inB_b:buffer64)
     lets
         dst_ptr @= rdi; inA_ptr @= rsi; inB_ptr @= rdx;
         dst_in := (if win then rcx else rdi);
@@ -835,8 +835,8 @@ procedure{:quick}{:public} fadd_stdcall(
         inB_in := (if win then r8 else rdx);
     reads memTaint;
     modifies
-        rax; rbx; rcx; rdx; rdi; rsi; r8; r9; r10; r11; r12; r13; r14;
-        rsp; efl; mem;
+        rax; rbx; rcx; rdx; rsi; rdi; rbp; rsp; r8; r9; r10; r11; r12; r13; r14; r15;     
+        efl; mem;
     requires
         adx_enabled && bmi2_enabled;
         buffers_disjoint(dst_b, inA_b) || dst_b == inA_b;
@@ -849,7 +849,7 @@ procedure{:quick}{:public} fadd_stdcall(
         validDstAddrs64(mem, dst_in, dst_b, 4, memTaint, Secret);
         validSrcAddrs64(mem, inA_in, inA_b, 4, memTaint, Secret);
         validSrcAddrs64(mem, inB_in, inB_b, 4, memTaint, Secret);
-        valid_stack_slots(mem, rsp, stack_b, 1, memTaint);
+        valid_stack_slots(mem, rsp, stack_b, 2, memTaint);
     ensures
         let a0 := old(buffer64_read(inA_b, 0, mem));
         let a1 := old(buffer64_read(inA_b, 1, mem));
@@ -879,10 +879,21 @@ procedure{:quick}{:public} fadd_stdcall(
         modifies_buffer_2(dst_b, stack_b, old(mem), mem);
         validSrcAddrs64(mem, dst_in, dst_b, 4, memTaint, Secret);
 
-        rsi == old(rsi);
-        r12 == old(r12);
-        r13 == old(r13);
-        r14 == old(r14);
+        win ==>  rbx == old(rbx);
+        win ==>  rbp == old(rbp);
+        win ==>  rdi == old(rdi);
+        win ==>  rsi == old(rsi);
+        win ==>  rsp == old(rsp);
+        win ==>  r12 == old(r12);
+        win ==>  r13 == old(r13);
+        win ==>  r14 == old(r14);
+        win ==>  r15 == old(r15);
+        !win ==>  rbx == old(rbx);
+        !win ==>  rbp == old(rbp);
+        !win ==>  r12 == old(r12);
+        !win ==>  r13 == old(r13);
+        !win ==>  r14 == old(r14);
+        !win ==>  r15 == old(r15);
 
         rsp == old(rsp);
 {
@@ -890,6 +901,7 @@ procedure{:quick}{:public} fadd_stdcall(
     // Line up the rest of the arguments
     inline if (win) {
         // Store callee-save registers
+        Push(rdi, stack_b, 1);
         Push(rsi, stack_b, 0);
 
         Mov64(dst_ptr, rcx);
@@ -901,6 +913,7 @@ procedure{:quick}{:public} fadd_stdcall(
 
     inline if (win) {
         Pop(rsi, stack_b, 0);
+        Pop(rdi, stack_b, 1);
     }
 }
 

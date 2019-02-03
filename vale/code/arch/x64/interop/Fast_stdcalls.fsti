@@ -30,3 +30,16 @@ val add1
     B.live h1 out /\ B.live h1 f1 /\
     B.modifies (B.loc_buffer out) h0 h1 /\
     as_nat out h1 + pow2_256 `op_Multiply` UInt64.v c == as_nat f1 h0 + UInt64.v f2)  
+
+val fadd
+  (out:u256)
+  (f1:u256)
+  (f2:u256)
+  : Stack unit
+    (requires fun h -> 
+      adx_enabled /\ bmi2_enabled /\
+      B.live h f1 /\ B.live h f2 /\ B.live h out /\
+      B.disjoint out f1 /\ B.disjoint out f2 /\ B.disjoint f1 f2)
+    (ensures  fun h0 _ h1 ->
+      B.modifies (B.loc_buffer out) h0 h1 /\
+      (as_nat out h1) % prime == (as_nat f1 h0 + as_nat f2 h0) % prime)

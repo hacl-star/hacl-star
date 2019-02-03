@@ -18,7 +18,7 @@ val copy_down (#t:base_typ) (b:b_t t) (b8:b_t TUInt8) : Stack unit
   (ensures fun h0 _ h -> 
     B.live h b /\ B.live h b8 /\ 
     B.modifies (B.loc_buffer b8) h0 h /\
-    (forall (i:nat{i < B.length b}). {:pattern low_buffer_read t h b8 i} Seq.index (B.as_seq h0 b) i == low_buffer_read t h b8 i))
+    (forall (i:nat{i < B.length b}). Seq.index (B.as_seq h0 b) i == low_buffer_read t h b8 i))
 
 val copy_up (#t:base_typ) (b:b_t t) (b8:b_t TUInt8) : Stack unit
   (requires fun h -> B.live h b /\ B.live h b8 /\ B.length b8 == B.length b * view_n t)
