@@ -293,9 +293,6 @@ class ExternalFile:
     return 'obj/external/' + os.path.basename(self.filename)
 
 external_files = [
-  ExternalFile(f'{fstar_path}/examples/tactics/CanonCommSwaps.fst'),
-  ExternalFile(f'{fstar_path}/examples/tactics/CanonCommMonoid.fst'),
-  ExternalFile(f'{fstar_path}/examples/tactics/CanonCommSemiring.fst'),
   ExternalFile(f'{kremlin_path}/kremlib/C.Loops.fst'),
   ExternalFile(f'{kremlin_path}/kremlib/Spec.Loops.fst'),
   ExternalFile(f'{kremlin_path}/kremlib/FStar.Kremlin.Endianness.fst'),
