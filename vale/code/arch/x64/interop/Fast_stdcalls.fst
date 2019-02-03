@@ -148,14 +148,14 @@ let fast_add1
     B.live h1 out /\ B.live h1 f1 /\
     B.modifies (B.loc_buffer out) h0 h1 /\
     (
-    let a0 = UInt64.v (low_buffer64_read h0 f1 0) in
-    let a1 = UInt64.v (low_buffer64_read h0 f1 1) in
-    let a2 = UInt64.v (low_buffer64_read h0 f1 2) in
-    let a3 = UInt64.v (low_buffer64_read h0 f1 3) in    
-    let d0 = UInt64.v (low_buffer64_read h1 out 0) in
-    let d1 = UInt64.v (low_buffer64_read h1 out 1) in
-    let d2 = UInt64.v (low_buffer64_read h1 out 2) in
-    let d3 = UInt64.v (low_buffer64_read h1 out 3) in
+    let a0 = UInt64.v (low_buffer_read TUInt64 h0 f1 0) in
+    let a1 = UInt64.v (low_buffer_read TUInt64 h0 f1 1) in
+    let a2 = UInt64.v (low_buffer_read TUInt64 h0 f1 2) in
+    let a3 = UInt64.v (low_buffer_read TUInt64 h0 f1 3) in    
+    let d0 = UInt64.v (low_buffer_read TUInt64 h1 out 0) in
+    let d1 = UInt64.v (low_buffer_read TUInt64 h1 out 1) in
+    let d2 = UInt64.v (low_buffer_read TUInt64 h1 out 2) in
+    let d3 = UInt64.v (low_buffer_read TUInt64 h1 out 3) in
     let a = pow2_four a0 a1 a2 a3 in
     let d = pow2_five d0 d1 d2 d3 (UInt64.v c) in
     d = a + UInt64.v f2
@@ -173,11 +173,11 @@ let rec ghost_copy64_8 (b:u256) (b8:b8{B.length b8 == 32})
   (i:nat{i <= 4}) : 
   Ghost (x:HS.mem{FStar.HyperStack.ST.equal_domains h0 x})
   (requires (forall (j:nat{j < i}). 
-    Seq.index (B.as_seq h0 b) j == low_buffer64_read h_accu b8 j))
+    Seq.index (B.as_seq h0 b) j == low_buffer_read TUInt64 h_accu b8 j))
   (ensures fun h1 ->
     B.live h1 b /\ B.live h1 b8 /\
     B.modifies (B.loc_buffer b8) h0 h1 /\
-    (forall (j:nat{j < 4}). {:pattern low_buffer64_read h1 b8 j} Seq.index (B.as_seq h0 b) j == low_buffer64_read h1 b8 j))
+    (forall (j:nat{j < 4}). {:pattern low_buffer_read TUInt64 h1 b8 j} Seq.index (B.as_seq h0 b) j == low_buffer_read TUInt64 h1 b8 j))
    (decreases %[4 - i])
   =
   if i >= 4 then h_accu
@@ -191,7 +191,7 @@ let rec ghost_copy64_8 (b:u256) (b8:b8{B.length b8 == 32})
     BV.upd_modifies h_accu bv i v;
     let h1 = BV.upd h_accu bv i v in
     let aux (j:nat{j <= i}) : Lemma
-      (Seq.index (B.as_seq h0 b) j == low_buffer64_read h1 b8 j) =
+      (Seq.index (B.as_seq h0 b) j == low_buffer_read TUInt64 h1 b8 j) =
       BV.sel_upd bv i j v h_accu
     in Classical.forall_intro aux;  
     ghost_copy64_8 b b8 h0 h1 (i+1)
@@ -202,7 +202,7 @@ let copy64_8 (b:u256) (b8:b8{B.length b8 == 32}) : Stack unit
   (ensures fun h0 _ h -> 
     B.live h b /\ B.live h b8 /\ 
     B.modifies (B.loc_buffer b8) h0 h /\
-    (forall (i:nat{i < 4}). {:pattern low_buffer64_read h b8 i} Seq.index (B.as_seq h0 b) i == low_buffer64_read h b8 i)) =
+    (forall (i:nat{i < 4}). {:pattern low_buffer_read TUInt64 h b8 i} Seq.index (B.as_seq h0 b) i == low_buffer_read TUInt64 h b8 i)) =
     IA.st_put (fun h0 -> B.live h0 b /\ B.live h0 b8) (fun h0 -> (), ghost_copy64_8 b b8 h0 h0 0)
 
 
@@ -213,7 +213,7 @@ let ghost_copy8_64 (b:u256) (b8:b8{B.length b8 == 32})
   (ensures fun h1 ->
     B.live h1 b /\ B.live h1 b8 /\
     B.modifies (B.loc_buffer b) h0 h1 /\
-    (forall (j:nat{j < 4}). Seq.index (B.as_seq h1 b) j == low_buffer64_read h0 b8 j)) 
+    (forall (j:nat{j < 4}). Seq.index (B.as_seq h1 b) j == low_buffer_read TUInt64 h0 b8 j)) 
   = let bv = BV.mk_buffer_view b8 Views.view64 in
     let s = BV.as_seq h0 bv in
     BV.as_buffer_mk_buffer_view b8 Views.view64;
@@ -225,7 +225,7 @@ let ghost_copy8_64 (b:u256) (b8:b8{B.length b8 == 32})
 
 let imm_ghost_copy8_64 (b:u256) (b8:b8{B.length b8 == 32})
   (h0:HS.mem{B.live h0 b /\ B.live h0 b8 /\
-    (forall (j:nat{j < 4}). Seq.index (B.as_seq h0 b) j == low_buffer64_read h0 b8 j)})
+    (forall (j:nat{j < 4}). Seq.index (B.as_seq h0 b) j == low_buffer_read TUInt64 h0 b8 j)})
   : Ghost  (x:HS.mem{FStar.HyperStack.ST.equal_domains h0 x})
   (requires True)
   (ensures fun h1 -> h1 == h0)
@@ -244,15 +244,15 @@ let imm_ghost_copy8_64 (b:u256) (b8:b8{B.length b8 == 32})
 let copy8_64 (b:u256) (b8:b8{B.length b8 == 32}) : Stack unit
   (requires fun h -> B.live h b /\ B.live h b8)
   (ensures fun h0 _ h1 -> B.live h1 b /\ B.live h0 b8 /\ B.modifies (B.loc_buffer b) h0 h1 /\
-    (forall (i:nat{i < 4}). Seq.index (B.as_seq h1 b) i == low_buffer64_read h0 b8 i))
+    (forall (i:nat{i < 4}). Seq.index (B.as_seq h1 b) i == low_buffer_read TUInt64 h0 b8 i))
   = IA.st_put (fun h0 -> B.live h0 b /\ B.live h0 b8) (fun h0 -> (), ghost_copy8_64 b b8 h0)
 
 let imm_copy8_64 (b:u256) (b8:b8{B.length b8 == 32}) : Stack unit
   (requires fun h -> B.live h b /\ B.live h b8 /\
-    (forall (i:nat{i < 4}). Seq.index (B.as_seq h b) i == low_buffer64_read h b8 i))
+    (forall (i:nat{i < 4}). Seq.index (B.as_seq h b) i == low_buffer_read TUInt64 h b8 i))
   (ensures fun h0 _ h -> h0 == h) 
   = IA.st_put 
-    (fun h0 -> B.live h0 b /\ B.live h0 b8 /\ (forall (j:nat{j < 4}). Seq.index (B.as_seq h0 b) j == low_buffer64_read h0 b8 j))
+    (fun h0 -> B.live h0 b /\ B.live h0 b8 /\ (forall (j:nat{j < 4}). Seq.index (B.as_seq h0 b) j == low_buffer_read TUInt64 h0 b8 j))
     (fun h0 -> (), imm_ghost_copy8_64 b b8 h0)
   
 

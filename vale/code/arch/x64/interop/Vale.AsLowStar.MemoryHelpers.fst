@@ -77,6 +77,6 @@ let core_create_lemma_taint_hyp
 
 let buffer_writeable_reveal t x = ()
 
-let buffer_read_reveal h s b i =
-  let b_v = BV.mk_buffer_view b Views.view64 in
+let buffer_read_reveal t h s b i =
+  let b_v = BV.mk_buffer_view b (LSig.view_of_base_typ t) in
   BV.as_seq_sel h b_v i

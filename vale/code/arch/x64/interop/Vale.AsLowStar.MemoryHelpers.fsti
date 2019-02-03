@@ -199,16 +199,18 @@ val core_create_lemma_taint_hyp
 val buffer_writeable_reveal (t:ME.base_typ) (x:buf_t t) : Lemma
   (ME.buffer_writeable (as_vale_buffer x))
 
-let low_buffer64_read (h:HS.mem) (b:(buf_t TUInt64){B.live h b}) (i:nat{i < B.length b / 8}) : GTot UInt64.t =
-  let b_v = BV.mk_buffer_view b Views.view64 in
-  BV.as_buffer_mk_buffer_view b Views.view64;
-  BV.get_view_mk_buffer_view b Views.view64;
+let low_buffer_read (t:ME.base_typ) (h:HS.mem) (b:(buf_t t){B.live h b}) (i:nat{i < B.length b / view_n t}) : GTot (base_typ_as_type t) =
+  let view = LSig.view_of_base_typ t in
+  let b_v = BV.mk_buffer_view b view in
+  BV.as_buffer_mk_buffer_view b view;
+  BV.get_view_mk_buffer_view b view;
   BV.length_eq b_v;  
   BV.sel h b_v i
 
-val buffer_read_reveal (h:HS.mem) (s:ME.mem) (b:(buf_t TUInt64){B.live h b}) (i:nat{i < B.length b / 8}) : Lemma
+val buffer_read_reveal (t:ME.base_typ) (h:HS.mem) (s:ME.mem) (b:(buf_t t){B.live h b}) (i:nat{i < B.length b / view_n t}) : Lemma
   (requires Seq.equal 
-    (LSig.nat_to_uint_seq_t TUInt64 (ME.buffer_as_seq s (as_vale_buffer b)))
-    (BV.as_seq h (BV.mk_buffer_view b Views.view64)))
-  (ensures V.buffer64_read (as_vale_buffer b) i s == UInt64.v (low_buffer64_read h b i) ) 
-  [SMTPat (low_buffer64_read h b i); SMTPat (V.buffer64_read (as_vale_buffer b) i s)]
+    (LSig.nat_to_uint_seq_t t (ME.buffer_as_seq s (as_vale_buffer b)))
+    (BV.as_seq h (BV.mk_buffer_view b (LSig.view_of_base_typ t))))
+  (ensures LSig.nat_to_uint t (ME.buffer_read (as_vale_buffer b) i s) == 
+    low_buffer_read t h b i ) 
+  [SMTPat (low_buffer_read t h b i); SMTPat (ME.buffer_read (as_vale_buffer b) i s)]
