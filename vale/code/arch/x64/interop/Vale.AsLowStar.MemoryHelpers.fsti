@@ -199,7 +199,7 @@ val core_create_lemma_taint_hyp
 val buffer_writeable_reveal (t:ME.base_typ) (x:buf_t t) : Lemma
   (ME.buffer_writeable (as_vale_buffer x))
 
-let low_buffer_read (t:ME.base_typ) (h:HS.mem) (b:(buf_t t){B.live h b}) (i:nat{i < B.length b / view_n t}) : GTot (base_typ_as_type t) =
+let low_buffer_read (t:base_typ) (h:HS.mem) (b:(buf_t t){B.live h b}) (i:nat{i < B.length b / view_n t}) : GTot (base_typ_as_type t) =
   let view = LSig.view_of_base_typ t in
   let b_v = BV.mk_buffer_view b view in
   BV.as_buffer_mk_buffer_view b view;
@@ -207,7 +207,7 @@ let low_buffer_read (t:ME.base_typ) (h:HS.mem) (b:(buf_t t){B.live h b}) (i:nat{
   BV.length_eq b_v;  
   BV.sel h b_v i
 
-val buffer_read_reveal (t:ME.base_typ) (h:HS.mem) (s:ME.mem) (b:(buf_t t){B.live h b}) (i:nat{i < B.length b / view_n t}) : Lemma
+val buffer_read_reveal (t:base_typ) (h:HS.mem) (s:ME.mem) (b:(buf_t t){B.live h b}) (i:nat{i < B.length b / view_n t}) : Lemma
   (requires Seq.equal 
     (LSig.nat_to_uint_seq_t t (ME.buffer_as_seq s (as_vale_buffer b)))
     (BV.as_seq h (BV.mk_buffer_view b (LSig.view_of_base_typ t))))
