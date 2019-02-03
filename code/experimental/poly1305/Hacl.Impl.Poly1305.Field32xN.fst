@@ -933,7 +933,7 @@ val mod_add128:
 let mod_add128 #w (a0, a1) (b0, b1) = admit();
   let r0 = vec_add_mod a0 b0 in
   let r1 = vec_add_mod a1 b1 in
-  let c = r0 ^| ((r0 ^| b0) || (r0 -| b0) ^| b0) >>| 63ul in
+  let c = r0 ^| ((r0 ^| b0) `vec_or` (r0 -| b0) ^| b0) >>| 63ul in
   let r1 = vec_add_mod r1 c in
   (r0, r1)
 

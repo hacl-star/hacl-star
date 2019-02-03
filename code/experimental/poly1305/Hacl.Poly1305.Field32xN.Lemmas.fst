@@ -1189,6 +1189,183 @@ let carry_reduce_felem5_lemma #w f =
   assert (felem_wide_fits5 f (57, 37, 30, 21, 13));
   carry_wide_felem5_eval_lemma f
 
+
+val lemma_subtract_p5_0:
+    f:tup64_5{tup64_fits5 f (1, 1, 1, 1, 1)}
+  -> f':tup64_5
+  -> Lemma
+    (requires
+      (let (f0, f1, f2, f3, f4) = f in
+      let (f0', f1', f2', f3', f4') = f' in
+      (v f4 <> 0x3ffffff || v f3 <> 0x3ffffff || v f2 <> 0x3ffffff || v f1 <> 0x3ffffff || v f0 < 0x3fffffb) /\
+      (v f0' = v f0 && v f1' = v f1 && v f2' = v f2 && v f3' = v f3 && v f4' = v f4)))
+    (ensures as_nat5 f' == as_nat5 f % prime)
+let lemma_subtract_p5_0 f f' =
+  let (f0, f1, f2, f3, f4) = f in
+  let (f0', f1', f2', f3', f4') = f' in
+  assert_norm (max26 = pow2 26 - 1);
+  assert_norm (0x3ffffff = max26);
+  assert_norm (0x3fffffb = max26 - 4);
+  assert (as_nat5 f == v f0 + v f1 * pow26 + v f2 * pow26 * pow26 +
+    v f3 * pow26 * pow26 * pow26 + v f4 * pow26 * pow26 * pow26 * pow26);
+  assert (as_nat5 f <= pow26 - 5 + (pow2 26 - 1) * pow26 + (pow2 26 - 1) * pow26 * pow26 +
+    (pow2 26 - 1) * pow26 * pow26 * pow26 + (pow2 26 - 1) * pow26 * pow26 * pow26 * pow26);
+  assert_norm (pow2 26 * pow26 * pow26 * pow26 * pow26 = pow2 130);
+  assert (as_nat5 f < pow2 130 - 5);
+  assert (as_nat5 f == as_nat5 f');
+  FStar.Math.Lemmas.modulo_lemma (as_nat5 f') prime
+
+val lemma_subtract_p5_1:
+    f:tup64_5{tup64_fits5 f (1, 1, 1, 1, 1)}
+  -> f':tup64_5
+  -> Lemma
+    (requires
+      (let (f0, f1, f2, f3, f4) = f in
+      let (f0', f1', f2', f3', f4') = f' in
+      (v f4 = 0x3ffffff && v f3 = 0x3ffffff && v f2 = 0x3ffffff && v f1 = 0x3ffffff && v f0 >= 0x3fffffb) /\
+      (v f0' = v f0 - 0x3fffffb && v f1' = v f1 - 0x3ffffff && v f2' = v f2 - 0x3ffffff &&
+	v f3' = v f3 - 0x3ffffff && v f4' = v f4 - 0x3ffffff)))
+    (ensures as_nat5 f' == as_nat5 f % prime)
+let lemma_subtract_p5_1 f f' =
+  let (f0, f1, f2, f3, f4) = f in
+  let (f0', f1', f2', f3', f4') = f' in
+  assert_norm (max26 = pow2 26 - 1);
+  assert_norm (0x3ffffff = max26);
+  assert_norm (0x3fffffb = max26 - 4);
+  assert (as_nat5 f' % prime ==
+    (v f0' + v f1' * pow26 + v f2' * pow26 * pow26 +
+     v f3' * pow26 * pow26 * pow26 + v f4' * pow26 * pow26 * pow26 * pow26) % prime);
+  assert (as_nat5 f' % prime ==
+    (v f0 - (pow2 26 - 5) + (v f1 - (pow2 26 - 1)) * pow26 + (v f2 - (pow2 26 - 1)) * pow26 * pow26 +
+    (v f3 - (pow2 26 - 1)) * pow26 * pow26 * pow26 + (v f4 - (pow2 26 - 1)) * pow26 * pow26 * pow26 * pow26) % prime);
+  assert_norm (pow2 26 * pow26 * pow26 * pow26 * pow26 = pow2 130);
+  assert (as_nat5 f' % prime ==
+    (v f0 + v f1 * pow2 26 + v f2 * pow26 * pow26 +
+    v f3 * pow26 * pow26 * pow26 +
+    v f4 * pow26 * pow26 * pow26 * pow26 - prime) % prime);
+  FStar.Math.Lemmas.lemma_mod_sub
+    (v f0 + v f1 * pow2 26 + v f2 * pow26 * pow26 +
+    v f3 * pow26 * pow26 * pow26 + v f4 * pow26 * pow26 * pow26 * pow26) 1 prime
+
+val lemma_subtract_p5:
+    f:tup64_5{tup64_fits5 f (1, 1, 1, 1, 1)}
+  -> f':tup64_5
+  -> Lemma
+    (requires
+      (let (f0, f1, f2, f3, f4) = f in
+      let (f0', f1', f2', f3', f4') = f' in
+      ((v f4 = 0x3ffffff && v f3 = 0x3ffffff && v f2 = 0x3ffffff && v f1 = 0x3ffffff && v f0 >= 0x3fffffb) /\
+      (v f0' = v f0 - 0x3fffffb && v f1' = v f1 - 0x3ffffff && v f2' = v f2 - 0x3ffffff &&
+	v f3' = v f3 - 0x3ffffff && v f4' = v f4 - 0x3ffffff)) \/
+      ((v f4 <> 0x3ffffff || v f3 <> 0x3ffffff || v f2 <> 0x3ffffff || v f1 <> 0x3ffffff || v f0 < 0x3fffffb) /\
+      (v f0' = v f0 && v f1' = v f1 && v f2' = v f2 && v f3' = v f3 && v f4' = v f4))))
+    (ensures as_nat5 f' == as_nat5 f % prime)
+let lemma_subtract_p5 f f' =
+  let (f0, f1, f2, f3, f4) = f in
+  let (f0', f1', f2', f3', f4') = f' in
+  assert_norm (max26 = pow2 26 - 1);
+  if ((v f4 <> 0x3ffffff || v f3 <> 0x3ffffff || v f2 <> 0x3ffffff || v f1 <> 0x3ffffff || v f0 < 0x3fffffb) &&
+     (v f0' = v f0 && v f1' = v f1 && v f2' = v f2 && v f3' = v f3 && v f4' = v f4))
+  then lemma_subtract_p5_0 f f'
+  else lemma_subtract_p5_1 f f'
+
+val eq_mask_logand_lemma: a:uint64 -> b:uint64 -> c:uint64 ->
+  Lemma
+  (requires True)
+  (ensures
+    (if v a = v b then
+      v (c `logand` (eq_mask a b)) == v c
+    else
+      v (c `logand` (eq_mask a b)) == 0))
+  [SMTPat (c `logand` (eq_mask a b))]
+let eq_mask_logand_lemma a b c = admit()
+
+val gte_mask_logand_lemma: a:uint64 -> b:uint64 -> c:uint64 ->
+  Lemma
+  (requires True)
+  (ensures
+    (if v a >= v b then
+      v (c `logand` (gte_mask a b)) == v c
+    else
+      v (c `logand` (gte_mask a b)) == 0))
+  [SMTPat (c `logand` (gte_mask a b))]
+let gte_mask_logand_lemma a b c = admit()
+
+val eq_mask_lemma: a:uint64 -> b:uint64 ->
+  Lemma
+  (requires True)
+  (ensures
+  (if v a = v b then
+    v (eq_mask a b) == pow2 64 - 1
+  else
+    v (eq_mask a b) == 0))
+  [SMTPat (eq_mask a b)]
+let eq_mask_lemma a b = admit()
+
+val gte_mask_lemma: a:uint64 -> b:uint64 ->
+  Lemma
+  (requires True)
+  (ensures
+    (if v a >= v b then
+      v (gte_mask a b) == pow2 64 - 1
+    else
+      v (gte_mask a b) == 0))
+  [SMTPat (gte_mask a b)]
+let gte_mask_lemma a b = admit()
+
+val logand_lemma: a:uint64 -> b:uint64 ->
+  Lemma
+  (requires v a = 0 \/ v a = pow2 64 - 1)
+  (ensures
+    (if v a = 0 then
+      v (a `logand` b) == 0
+    else
+      v (a `logand` b) == v b))
+  [SMTPat (a `logand` b)]
+let logand_lemma a b = admit()
+
+inline_for_extraction
+val subtract_p5_s:
+    #w:lanes
+  -> f:felem5 w{felem_fits5 f (1, 1, 1, 1, 1)}
+  -> i:nat{i < w}
+  -> Pure tup64_5
+    (requires True)
+    (ensures (fun out ->
+      tup64_fits5 out (1, 1, 1, 1, 1) /\
+      as_nat5 out == as_nat5 (as_tup64_i f i) % prime))
+let subtract_p5_s #w f i =
+  let (f0, f1, f2, f3, f4) = as_tup64_i f i in
+  let mask0 = eq_mask f4 (u64 0x3ffffff) in
+  let mask1 = mask0 &. eq_mask f3 (u64 0x3ffffff) in
+  let mask2 = mask1 &. eq_mask f2 (u64 0x3ffffff) in
+  let mask3 = mask2 &. eq_mask f1 (u64 0x3ffffff) in
+  let mask4 = mask3 &. gte_mask f0 (u64 0x3fffffb) in
+
+  let p0 = mask4 &. u64 0x3fffffb in
+  let p1 = mask4 &. u64 0x3ffffff in
+  let p2 = mask4 &. u64 0x3ffffff in
+  let p3 = mask4 &. u64 0x3ffffff in
+  let p4 = mask4 &. u64 0x3ffffff in
+
+  let f0' = f0 -. p0 in
+  let f1' = f1 -. p1 in
+  let f2' = f2 -. p2 in
+  let f3' = f3 -. p3 in
+  let f4' = f4 -. p4 in
+  lemma_subtract_p5 (f0, f1, f2, f3, f4) (f0', f1', f2', f3', f4');
+  (f0', f1', f2', f3', f4')
+
+val subtract_p5_felem5_lemma_i:
+    #w:lanes
+  -> f:felem5 w{felem_fits5 f (1, 1, 1, 1, 1)}
+  -> i:nat{i < w}
+  -> Lemma (
+      tup64_fits5 (as_tup64_i (subtract_p5 #w f) i) (1, 1, 1, 1, 1) /\
+      as_nat5 (as_tup64_i (subtract_p5 #w f) i) == as_nat5 (as_tup64_i f i) % prime)
+let subtract_p5_felem5_lemma_i #w f i =
+  assert (subtract_p5_s #w f i == as_tup64_i (subtract_p5 #w f) i)
+
 val subtract_p5_felem5_lemma:
     #w:lanes
   -> f:felem5 w
@@ -1197,4 +1374,15 @@ val subtract_p5_felem5_lemma:
     (ensures
       felem_fits5 (subtract_p5 f) (1, 1, 1, 1, 1) /\
       (fas_nat5 (subtract_p5 f)).[0] == (feval5 f).[0])
-let subtract_p5_felem5_lemma #w f = admit()
+let subtract_p5_felem5_lemma #w f =
+  match w with
+  | 1 ->
+    subtract_p5_felem5_lemma_i #w f 0
+  | 2 ->
+    subtract_p5_felem5_lemma_i #w f 0;
+    subtract_p5_felem5_lemma_i #w f 1
+  | 4 ->
+    subtract_p5_felem5_lemma_i #w f 0;
+    subtract_p5_felem5_lemma_i #w f 1;
+    subtract_p5_felem5_lemma_i #w f 2;
+    subtract_p5_felem5_lemma_i #w f 3

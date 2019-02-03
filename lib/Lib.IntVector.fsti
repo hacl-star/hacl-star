@@ -219,8 +219,8 @@ inline_for_extraction noextract
 let ( ^| ) #t #w = vec_xor #t #w
 inline_for_extraction noextract
 let ( &| ) #t #w = vec_and #t #w
-inline_for_extraction noextract
-let ( || ) #t #w = vec_or #t #w
+//inline_for_extraction noextract
+//let ( || ) #t #w = vec_or #t #w
 inline_for_extraction noextract
 let ( ~| ) #t #w = vec_not #t #w
 inline_for_extraction noextract
