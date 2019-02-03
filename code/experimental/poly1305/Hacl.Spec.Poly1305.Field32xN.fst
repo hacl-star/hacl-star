@@ -339,12 +339,25 @@ let reduce_felem5 #w (f0, f1, f2, f3, f4) =
   subtract_p5 (f0, f1, f2, f3, f4)
 
 inline_for_extraction noextract
+val load_felem5:
+    #w:lanes
+  -> lo:uint64xN w
+  -> hi:uint64xN w
+  -> f:felem5 w
+let load_felem5 #w lo hi =
+  let f0 = vec_and lo (mask26 w) in
+  let f1 = vec_and (vec_shift_right lo 26ul) (mask26 w) in
+  let f2 = vec_or (vec_shift_right lo 52ul) (vec_shift_left (vec_and hi (mask14 w)) 12ul) in
+  let f3 = vec_and (vec_shift_right hi 14ul) (mask26 w) in
+  let f4 = vec_shift_right hi 40ul in
+  (f0, f1, f2, f3, f4)
+
+inline_for_extraction noextract
 val store_felem5:
     #w:lanes
   -> f:felem5 w
   -> uint64xN w & uint64xN w
 let store_felem5 #w (f0, f1, f2, f3, f4) =
-  let (f0, f1, f2, f3, f4) = carry_felem5 (f0, f1, f2, f3, f4) in
   let lo = vec_or (vec_or f0 (vec_shift_left f1 26ul)) (vec_shift_left f2 52ul) in
   let hi = vec_or (vec_or (vec_shift_right f2 12ul) (vec_shift_left f3 14ul)) (vec_shift_left f4 40ul) in
   lo, hi

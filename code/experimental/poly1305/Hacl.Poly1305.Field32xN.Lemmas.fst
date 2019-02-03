@@ -1328,3 +1328,62 @@ let subtract_p5_felem5_lemma #w f =
     subtract_p5_felem5_lemma_i #w f 1;
     subtract_p5_felem5_lemma_i #w f 2;
     subtract_p5_felem5_lemma_i #w f 3
+
+val load_tup64_lemma:
+    lo:uint64
+  -> hi:uint64
+  -> Pure tup64_5
+    (requires True)
+    (ensures (fun f ->
+      tup64_fits5 f (1, 1, 1, 1, 1) /\
+      as_nat5 f < pow2 128 /\
+      as_nat5 f % prime == v hi * pow2 64 + v lo))
+let load_tup64_lemma lo hi =
+  let mask26 = u64 0x3ffffff in
+  assert_norm (0x3ffffff = pow2 26 - 1);
+  let f0 = lo &. mask26 in
+  let f1 = (lo >>. 26ul) &. mask26 in
+  let f2 = (lo >>. 52ul) |. ((hi &. u64 0x3fff) <<. 12ul) in
+  let f3 = (hi >>. 14ul) &. mask26 in
+  let f4 = hi >>. 40ul in admit();
+  (f0, f1, f2, f3, f4)
+
+val load_felem5_lemma_i:
+    #w:lanes
+  -> lo:uint64xN w
+  -> hi:uint64xN w
+  -> i:nat{i < w}
+  -> Lemma
+    (let f = as_tup64_i (load_felem5 #w lo hi) i in
+    tup64_fits5 f (1, 1, 1, 1, 1) /\
+    as_nat5 f < pow2 128 /\
+    as_nat5 f % prime == (uint64xN_v hi).[i] * pow2 64 + (uint64xN_v lo).[i])
+let load_felem5_lemma_i #w lo hi i =
+  assert (as_tup64_i (load_felem5 #w lo hi) i == load_tup64_lemma (vec_v lo).[i] (vec_v hi).[i])
+
+val store_tup64_lemma:
+    f:tup64_5
+  -> Pure (uint64 & uint64)
+    (requires True)
+    (ensures (fun (lo, hi) -> v hi * pow2 64 + v lo == as_nat5 f % pow2 128))
+let store_tup64_lemma f =
+  let (f0, f1, f2, f3, f4) = f in
+  let lo = f0 |. (f1 <<. 26ul) |. (f2 <<. 52ul) in
+  let hi = (f2 >>. 12ul) |. (f3 <<. 14ul) |. (f4 <<. 40ul) in
+  admit();
+  lo, hi
+
+val store_felem5_lemma_i:
+    #w:lanes
+  -> f:felem5 w
+  -> i:nat{i < w}
+  -> Lemma
+    (requires felem_fits5 f (1, 1, 1, 1, 1))
+    (ensures
+      (let (lo, hi) = store_felem5 f in
+      (uint64xN_v hi).[i] * pow2 64 + (uint64xN_v lo).[i] == (fas_nat5 f).[i] % pow2 128))
+let store_felem5_lemma_i #w f i =
+  let (lo, hi) = store_felem5 f in
+  let loi = (vec_v lo).[i] in
+  let hii = (vec_v hi).[i] in
+  assert (store_tup64_lemma (as_tup64_i f i) == (loi, hii))

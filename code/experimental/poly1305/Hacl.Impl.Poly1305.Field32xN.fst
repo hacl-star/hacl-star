@@ -406,12 +406,14 @@ val load_felem:
       felem_less h1 f (pow2 128) /\
       feval h1 f == LSeq.createi #S.pfelem w
 	(fun i -> (uint64xN_v hi).[i] * pow2 64 + (uint64xN_v lo).[i]))
-let load_felem #w f lo hi = admit();
-  f.(0ul) <- vec_and lo (mask26 w);
-  f.(1ul) <- vec_and (vec_shift_right lo 26ul) (mask26 w);
-  f.(2ul) <- vec_or (vec_shift_right lo 52ul) (vec_shift_left (vec_and hi (mask14 w)) 12ul);
-  f.(3ul) <- vec_and (vec_shift_right hi 14ul) (mask26 w);
-  f.(4ul) <- vec_shift_right hi 40ul
+let load_felem #w f lo hi =
+  let (f0, f1, f2, f3, f4) = load_felem5 #w lo hi in
+  load_felem5_lemma #w lo hi;
+  f.(0ul) <- f0;
+  f.(1ul) <- f1;
+  f.(2ul) <- f2;
+  f.(3ul) <- f3;
+  f.(4ul) <- f4
 
 inline_for_extraction
 val load_precompute_r1:
@@ -682,11 +684,11 @@ val store_felem:
   -> f:felem w
   -> Stack (uint64xN w & uint64xN w)
     (requires fun h ->
-      live h f /\ felem_fits h f (1, 1, 1, 1, 3))
+      live h f /\ felem_fits h f (1, 1, 1, 1, 1))
     (ensures  fun h0 (lo, hi) h1 -> h0 == h1 /\
       (forall (i:nat). i < w ==>
 	(uint64xN_v hi).[i] * pow2 64 + (uint64xN_v lo).[i] == (fas_nat h0 f).[i] % pow2 128))
-let store_felem #w f = admit();
+let store_felem #w f =
   let f0 = f.(0ul) in
   let f1 = f.(1ul) in
   let f2 = f.(2ul) in
