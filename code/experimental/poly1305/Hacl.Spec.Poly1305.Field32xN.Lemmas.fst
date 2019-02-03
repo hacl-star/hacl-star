@@ -450,8 +450,10 @@ val reduce_felem5_eval_lemma:
       felem_fits5 (reduce_felem5 f) (1, 1, 1, 1, 1) /\
       (feval5 f).[0] == (fas_nat5 (reduce_felem5 f)).[0])
     [SMTPat (reduce_felem5 f)]
-let reduce_felem5_eval_lemma #w f1 = admit()
-
+let reduce_felem5_eval_lemma #w f =
+  carry_reduce_felem5_lemma #w f;
+  subtract_p5_felem5_lemma #w (carry_full_felem5 f)
+  
 inline_for_extraction noextract
 val fmul_r2_normalize50:
     acc:felem5 2
@@ -533,16 +535,6 @@ let fmul_r2_normalize51 a fa1 =
     ((as_nat5 ((vec_v a0).[0],(vec_v a1).[0],(vec_v a2).[0],(vec_v a3).[0],(vec_v a4).[0])) % S.prime)
     (as_nat5 ((vec_v a10).[0],(vec_v a11).[0],(vec_v a12).[0],(vec_v a13).[0],(vec_v a14).[0])) S.prime;
   (o0, o1, o2, o3, o4)
-
-val carry_full_felem5_lemma:
-    #w:lanes
-  -> f:felem5 w
-  -> Lemma
-    (requires felem_fits5 f (4, 8, 4, 4, 4))
-    (ensures
-      acc_inv_t (carry_full_felem5 f) /\
-      feval5 (carry_full_felem5 f) == feval5 f)
-let carry_full_felem5_lemma #w f = admit()
 
 inline_for_extraction noextract
 val fmul_r2_normalize5_lemma:
