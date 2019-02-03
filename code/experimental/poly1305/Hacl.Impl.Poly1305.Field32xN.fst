@@ -405,7 +405,7 @@ val load_felem:
       felem_fits h1 f (1, 1, 1, 1, 1) /\
       felem_less h1 f (pow2 128) /\
       feval h1 f == LSeq.createi #S.pfelem w
-	(fun i -> uint_v (vec_v hi).[i] * pow2 64 + uint_v (vec_v lo).[i]))
+	(fun i -> (uint64xN_v hi).[i] * pow2 64 + (uint64xN_v lo).[i]))
 let load_felem #w f lo hi = admit();
   f.(0ul) <- vec_and lo (mask26 w);
   f.(1ul) <- vec_and (vec_shift_right lo 26ul) (mask26 w);
@@ -438,7 +438,7 @@ let load_precompute_r1 p r0 r1 =
   load_felem r r_vec0 r_vec1;
   let h1 = ST.get () in
   LSeq.eq_intro
-    (LSeq.createi #S.pfelem 1 (fun i -> uint_v (vec_v r_vec1).[i] * pow2 64 + uint_v (vec_v r_vec0).[i]))
+    (LSeq.createi #S.pfelem 1 (fun i -> (uint64xN_v r_vec1).[i] * pow2 64 + (uint64xN_v r_vec0).[i]))
     (LSeq.create 1 (uint_v r1 * pow2 64 + uint_v r0));
   assert (feval h1 r == LSeq.create 1 (uint_v r1 * pow2 64 + uint_v r0));
   precompute_shift_reduce r5 r;
@@ -471,7 +471,7 @@ let load_precompute_r2 p r0 r1 =
   load_felem r r_vec0 r_vec1;
   let h1 = ST.get () in
   LSeq.eq_intro
-    (LSeq.createi #S.pfelem 2 (fun i -> uint_v (vec_v r_vec1).[i] * pow2 64 + uint_v (vec_v r_vec0).[i]))
+    (LSeq.createi #S.pfelem 2 (fun i -> (uint64xN_v r_vec1).[i] * pow2 64 + (uint64xN_v r_vec0).[i]))
     (LSeq.create 2 (uint_v r1 * pow2 64 + uint_v r0));
   assert (feval h1 r == LSeq.create 2 (uint_v r1 * pow2 64 + uint_v r0));
 
@@ -504,7 +504,7 @@ let load_precompute_r4 p r0 r1 =
   load_felem r r_vec0 r_vec1;
   let h1 = ST.get () in
   LSeq.eq_intro
-    (LSeq.createi #S.pfelem 4 (fun i -> uint_v (vec_v r_vec1).[i] * pow2 64 + uint_v (vec_v r_vec0).[i]))
+    (LSeq.createi #S.pfelem 4 (fun i -> (uint64xN_v r_vec1).[i] * pow2 64 + (uint64xN_v r_vec0).[i]))
     (LSeq.create 4 (uint_v r1 * pow2 64 + uint_v r0));
   assert (feval h1 r == LSeq.create 4 (uint_v r1 * pow2 64 + uint_v r0));
 
@@ -685,7 +685,7 @@ val store_felem:
       live h f /\ felem_fits h f (1, 1, 1, 1, 3))
     (ensures  fun h0 (lo, hi) h1 -> h0 == h1 /\
       (forall (i:nat). i < w ==>
-	v (vec_v hi).[i] * pow2 64 + v (vec_v lo).[i] == (fas_nat h0 f).[i] % pow2 128))
+	(uint64xN_v hi).[i] * pow2 64 + (uint64xN_v lo).[i] == (fas_nat h0 f).[i] % pow2 128))
 let store_felem #w f = admit();
   let f0 = f.(0ul) in
   let f1 = f.(1ul) in
@@ -703,7 +703,7 @@ val store_felem1_le:
     (ensures  fun h0 _ h1 ->
      (let r0, r1 = r in
       modifies (loc b) h0 h1 /\
-      as_seq h1 b == BSeq.nat_to_bytes_le 16 (v (vec_v r1).[0] * pow2 64 + v (vec_v r0).[0])))
+      as_seq h1 b == BSeq.nat_to_bytes_le 16 ((uint64xN_v r1).[0] * pow2 64 + (uint64xN_v r0).[0])))
 let store_felem1_le b (r0, r1) =
   let h0 = ST.get () in
   vec_store_le (sub b 0ul 8ul) r0;
@@ -721,7 +721,7 @@ val store_felem2_le:
     (ensures  fun h0 _ h1 ->
      (let r0, r1 = r in
       modifies (loc b) h0 h1 /\
-      as_seq h1 b == BSeq.nat_to_bytes_le 16 (v (vec_v r1).[0] * pow2 64 + v (vec_v r0).[0])))
+      as_seq h1 b == BSeq.nat_to_bytes_le 16 ((uint64xN_v r1).[0] * pow2 64 + (uint64xN_v r0).[0])))
 let store_felem2_le b (f0, f1) =
   let r0 = vec_interleave_low f0 f1 in
   vec_interleave_low_lemma64_2 f0 f1;
@@ -737,7 +737,7 @@ val store_felem4_le:
     (ensures  fun h0 _ h1 ->
      (let r0, r1 = r in
       modifies (loc b) h0 h1 /\
-      as_seq h1 b == BSeq.nat_to_bytes_le 16 (v (vec_v r1).[0] * pow2 64 + v (vec_v r0).[0])))
+      as_seq h1 b == BSeq.nat_to_bytes_le 16 ((uint64xN_v r1).[0] * pow2 64 + (uint64xN_v r0).[0])))
 let store_felem4_le b (f0, f1) =
   push_frame ();
   let lo = vec_interleave_low f0 f1 in
@@ -771,7 +771,7 @@ val store_felem_le:
     (ensures  fun h0 _ h1 ->
      (let r0, r1 = r in
       modifies (loc b) h0 h1 /\
-      as_seq h1 b == BSeq.nat_to_bytes_le 16 (v (vec_v r1).[0] * pow2 64 + v (vec_v r0).[0])))
+      as_seq h1 b == BSeq.nat_to_bytes_le 16 ((uint64xN_v r1).[0] * pow2 64 + (uint64xN_v r0).[0])))
 let store_felem_le #w b r =
   match w with
   | 1 -> store_felem1_le b r
@@ -928,8 +928,8 @@ val mod_add128:
     (ensures (fun (r0, r1) ->
       let (a0, a1) = a in
       let (b0, b1) = b in
-      v (vec_v r1).[0] * pow2 64 + v (vec_v r0).[0] ==
-	((v (vec_v a1).[0] + v (vec_v b1).[0]) * pow2 64 + (v (vec_v a0).[0] + v (vec_v b0).[0])) % pow2 128))
+      (uint64xN_v r1).[0] * pow2 64 + (uint64xN_v r0).[0] ==
+	(((uint64xN_v a1).[0] + (uint64xN_v b1).[0]) * pow2 64 + (uint64xN_v a0).[0] + (uint64xN_v b0).[0]) % pow2 128))
 let mod_add128 #w (a0, a1) (b0, b1) = admit();
   let r0 = vec_add_mod a0 b0 in
   let r1 = vec_add_mod a1 b1 in
@@ -954,15 +954,10 @@ val fadd128_store_felem_le:
 let fadd128_store_felem_le #w out f1 f2 =
   let h0 = ST.get () in
   let (f10, f11) = store_felem #w f1 in
-  assert (v (vec_v f11).[0] * pow2 64 + v (vec_v f10).[0] == (fas_nat h0 f1).[0] % pow2 128);
   let (f20, f21) = store_felem #w f2 in
-  assert (v (vec_v f21).[0] * pow2 64 + v (vec_v f20).[0] == (fas_nat h0 f2).[0] % pow2 128);
   let (f30, f31) = mod_add128 #w (f10, f11) (f20, f21) in
   store_felem_le out (f30, f31);
   let h1 = ST.get () in
-  assert (as_seq h1 out == BSeq.nat_to_bytes_le 16 ((v (vec_v f31).[0] * pow2 64 + v (vec_v f30).[0])));
-  assert (v (vec_v f31).[0] * pow2 64 + v (vec_v f30).[0] ==
-   ((v (vec_v f11).[0] + v (vec_v f21).[0]) * pow2 64 + (v (vec_v f10).[0] + v (vec_v f20).[0])) % pow2 128);
-  assert (v (vec_v f31).[0] * pow2 64 + v (vec_v f30).[0] ==
+  assert ((uint64xN_v f31).[0] * pow2 64 + (uint64xN_v f30).[0] ==
     ((fas_nat h0 f1).[0] % pow2 128 + (fas_nat h0 f2).[0] % pow2 128) % pow2 128);
   FStar.Math.Lemmas.modulo_distributivity ((fas_nat h0 f1).[0]) ((fas_nat h0 f2).[0]) (pow2 128)

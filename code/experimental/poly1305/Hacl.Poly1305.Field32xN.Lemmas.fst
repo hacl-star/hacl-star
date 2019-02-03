@@ -3,12 +3,13 @@ module Hacl.Poly1305.Field32xN.Lemmas
 open Lib.IntTypes
 open Lib.IntVector
 open Lib.Sequence
+open Lib.Lemmas
 open FStar.Mul
 
 open Hacl.Spec.Poly1305.Vec
 include Hacl.Spec.Poly1305.Field32xN
 
-#reset-options "--z3rlimit 100 --using_facts_from '* -FStar.Seq'"
+#reset-options "--z3rlimit 20 --using_facts_from '* -FStar.Seq'"
 
 val lemma_prime: unit ->
   Lemma (pow2 130 % prime = 5)
@@ -62,27 +63,24 @@ val fadd5_eval_lemma_i:
     (requires felem_fits5 f1 (1,2,1,1,1) /\ felem_fits5 f2 (1,1,1,1,1))
     (ensures  (feval5 (fadd5 f1 f2)).[i] == pfadd (feval5 f1).[i] (feval5 f2).[i])
 let fadd5_eval_lemma_i #w f1 f2 i =
-  let (f10, f11, f12, f13, f14) = f1 in
-  let (f20, f21, f22, f23, f24) = f2 in
   let o = fadd5 f1 f2 in
-  let (o0, o1, o2, o3, o4) = o in
+  let (f10, f11, f12, f13, f14) = as_tup64_i f1 i in
+  let (f20, f21, f22, f23, f24) = as_tup64_i f2 i in
+  let (o0, o1, o2, o3, o4) = as_tup64_i o i in
 
-  FStar.Math.Lemmas.modulo_lemma (v ((vec_v f10).[i]) + v ((vec_v f20).[i])) (pow2 64);
-  FStar.Math.Lemmas.modulo_lemma (v ((vec_v f11).[i]) + v ((vec_v f21).[i])) (pow2 64);
-  FStar.Math.Lemmas.modulo_lemma (v ((vec_v f12).[i]) + v ((vec_v f22).[i])) (pow2 64);
-  FStar.Math.Lemmas.modulo_lemma (v ((vec_v f13).[i]) + v ((vec_v f23).[i])) (pow2 64);
-  FStar.Math.Lemmas.modulo_lemma (v ((vec_v f14).[i]) + v ((vec_v f24).[i])) (pow2 64);
-  assert (
-    as_nat5 ((vec_v o0).[i],(vec_v o1).[i],(vec_v o2).[i],(vec_v o3).[i],(vec_v o4).[i]) ==
-    as_nat5 ((vec_v f10).[i],(vec_v f11).[i],(vec_v f12).[i],(vec_v f13).[i],(vec_v f14).[i]) +
-    as_nat5 ((vec_v f20).[i],(vec_v f21).[i],(vec_v f22).[i],(vec_v f23).[i],(vec_v f24).[i]));
+  FStar.Math.Lemmas.modulo_lemma (v f10 + v f20) (pow2 64);
+  FStar.Math.Lemmas.modulo_lemma (v f11 + v f21) (pow2 64);
+  FStar.Math.Lemmas.modulo_lemma (v f12 + v f20) (pow2 64);
+  FStar.Math.Lemmas.modulo_lemma (v f13 + v f23) (pow2 64);
+  FStar.Math.Lemmas.modulo_lemma (v f14 + v f24) (pow2 64);
+  assert (as_nat5 (o0, o1, o2, o3, o4) ==
+    as_nat5 (f10, f11, f12, f13, f14) + as_nat5 (f20, f21, f22, f23, f24));
   FStar.Math.Lemmas.lemma_mod_plus_distr_l
-    (as_nat5 ((vec_v f10).[i],(vec_v f11).[i],(vec_v f12).[i],(vec_v f13).[i],(vec_v f14).[i]))
-    (as_nat5 ((vec_v f20).[i],(vec_v f21).[i],(vec_v f22).[i],(vec_v f23).[i],(vec_v f24).[i])) prime;
+    (as_nat5 (f10, f11, f12, f13, f14)) (as_nat5 (f20, f21, f22, f23, f24)) prime;
   FStar.Math.Lemmas.lemma_mod_plus_distr_r
-    ((as_nat5 ((vec_v f10).[i],(vec_v f11).[i],(vec_v f12).[i],(vec_v f13).[i],(vec_v f14).[i])) % prime)
-    (as_nat5 ((vec_v f20).[i],(vec_v f21).[i],(vec_v f22).[i],(vec_v f23).[i],(vec_v f24).[i])) prime;
-  assert ((feval5 o).[i] == pfadd (feval5 f1).[i] (feval5 f2).[i])
+    (as_nat5 (f10, f11, f12, f13, f14) % prime) (as_nat5 (f20, f21, f22, f23, f24)) prime
+
+#set-options "--z3rlimit 100"
 
 val smul_felem5_fits_lemma_i:
     #w:lanes
@@ -93,14 +91,14 @@ val smul_felem5_fits_lemma_i:
   -> i:nat{i < w}
   -> Lemma
     (requires felem_fits1 u1 m1 /\ felem_fits1 f2 m2)
-    (ensures  uint_v (vec_v (vec_mul_mod f2 u1)).[i] <= m1 * m2 * max26 * max26)
+    (ensures  (uint64xN_v (vec_mul_mod f2 u1)).[i] <= m1 * m2 * max26 * max26)
 let smul_felem5_fits_lemma_i #w #m1 #m2 u1 f2 i =
   let o = vec_mul_mod f2 u1 in
-  assert (uint_v (vec_v o).[i] == (uint_v (vec_v f2).[i] * uint_v (vec_v u1).[i]) % pow2 64);
-  lemma_mult_le (uint_v (vec_v f2).[i]) (m2 * max26) (uint_v (vec_v u1).[i]) (m1 * max26);
-  assert (uint_v (vec_v f2).[i] * uint_v (vec_v u1).[i] <= m1 * m2 * max26 * max26);
-  FStar.Math.Lemmas.modulo_lemma (uint_v (vec_v f2).[i] * uint_v (vec_v u1).[i]) (pow2 64);
-  assert (uint_v (vec_v o).[i] == uint_v (vec_v f2).[i] * uint_v (vec_v u1).[i])
+  assert ((uint64xN_v o).[i] == ((uint64xN_v f2).[i] * (uint64xN_v u1).[i]) % pow2 64);
+  lemma_mult_le (uint64xN_v f2).[i] (m2 * max26) (uint64xN_v u1).[i] (m1 * max26);
+  assert ((uint64xN_v f2).[i] * (uint64xN_v u1).[i] <= m1 * m2 * max26 * max26);
+  FStar.Math.Lemmas.modulo_lemma ((uint64xN_v f2).[i] * (uint64xN_v u1).[i]) (pow2 64);
+  assert ((uint64xN_v o).[i] == (uint64xN_v f2).[i] * (uint64xN_v u1).[i])
 
 val smul_mod_lemma:
     #m1:scale32
@@ -168,16 +166,17 @@ val smul_add_felem5_fits_lemma_i:
       felem_fits1 u1 m1 /\ felem_fits1 f2 m2 /\
       felem_wide_fits1 acc1 m3 /\ m3 + m1 * m2 <= 4096)
     (ensures
-      uint_v (vec_v (vec_add_mod acc1 (vec_mul_mod f2 u1))).[i] <= (m3 + m1 * m2) * max26 * max26)
+      (uint64xN_v (vec_add_mod acc1 (vec_mul_mod f2 u1))).[i] <= (m3 + m1 * m2) * max26 * max26)
 let smul_add_felem5_fits_lemma_i #w #m1 #m2 #m3 u1 f2 acc1 i =
+  assert_norm (max26 = pow2 26 - 1);
   let o = vec_add_mod acc1 (vec_mul_mod f2 u1) in
-  assert (v (vec_v o).[i] == (v (vec_v acc1).[i] + (v (vec_v f2).[i] * v (vec_v u1).[i]) % pow2 64) % pow2 64);
-  lemma_mult_le (uint_v (vec_v f2).[i]) (m2 * max26) (uint_v (vec_v u1).[i]) (m1 * max26);
-  assert (uint_v (vec_v f2).[i] * uint_v (vec_v u1).[i] <= m1 * m2 * max26 * max26);
-  FStar.Math.Lemmas.modulo_lemma (uint_v (vec_v f2).[i] * uint_v (vec_v u1).[i]) (pow2 64);
-  assert (v (vec_v o).[i] == (v (vec_v acc1).[i] + v (vec_v f2).[i] * v (vec_v u1).[i]) % pow2 64);
-  assert (v (vec_v acc1).[i] + v (vec_v f2).[i] * v (vec_v u1).[i] <= m3 * max26 * max26 + m1 * m2 * max26 * max26);
-  assert (v (vec_v acc1).[i] + v (vec_v f2).[i] * v (vec_v u1).[i] <= (m3 + m1 * m2) * max26 * max26)
+  assert ((uint64xN_v o).[i] == ((uint64xN_v acc1).[i] + ((uint64xN_v f2).[i] * (uint64xN_v u1).[i]) % pow2 64) % pow2 64);
+  lemma_mult_le (uint64xN_v f2).[i] (m2 * max26) (uint64xN_v u1).[i] (m1 * max26);
+  assert ((uint64xN_v f2).[i] * (uint64xN_v u1).[i] <= m1 * m2 * max26 * max26);
+  FStar.Math.Lemmas.modulo_lemma ((uint64xN_v f2).[i] * (uint64xN_v u1).[i]) (pow2 64);
+  assert ((uint64xN_v o).[i] == ((uint64xN_v acc1).[i] + (uint64xN_v f2).[i] * (uint64xN_v u1).[i]) % pow2 64);
+  assert ((uint64xN_v acc1).[i] + (uint64xN_v f2).[i] * (uint64xN_v u1).[i] <= m3 * max26 * max26 + m1 * m2 * max26 * max26);
+  assert ((uint64xN_v acc1).[i] + (uint64xN_v f2).[i] * (uint64xN_v u1).[i] <= (m3 + m1 * m2) * max26 * max26)
 
 val smul_add_mod_lemma:
     #m1:scale32
@@ -840,17 +839,17 @@ val acc_inv_lemma_i:
       (let (i0, i1, i2, i3, i4) = acc in
        let i1' = vec_add_mod i1 cin in
        let acc1 = (i0, i1', i2, i3, i4) in
-      (if uint_v (vec_v i1').[i] >= pow2 26 then
+      (if (uint64xN_v i1').[i] >= pow2 26 then
 	 tup64_fits5 (as_tup64_i acc1 i) (1, 2, 1, 1, 1) /\
-	 uint_v (vec_v i1').[i] % pow2 26 < 73
+	 (uint64xN_v i1').[i] % pow2 26 < 73
        else tup64_fits5 (as_tup64_i acc1 i) (1, 1, 1, 1, 1))))
 let acc_inv_lemma_i #w acc cin i =
   let (i0, i1, i2, i3, i4) = acc in
   let i1' = vec_add_mod i1 cin in
   assert ((vec_v i1').[i] == (vec_v i1).[i] +. (vec_v cin).[i]);
-  assert (v (vec_v i1).[i] + v (vec_v cin).[i] <= max26 + 72);
+  assert ((uint64xN_v i1).[i] + (uint64xN_v cin).[i] <= max26 + 72);
   assert_norm (max26 = pow2 26 - 1);
-  FStar.Math.Lemmas.euclidean_division_definition (v (vec_v i1).[i] + v (vec_v cin).[i]) (pow2 26)
+  FStar.Math.Lemmas.euclidean_division_definition ((uint64xN_v i1).[i] + (uint64xN_v cin).[i]) (pow2 26)
 
 val acc_inv_lemma:
     #w:lanes
@@ -1091,8 +1090,6 @@ let carry_reduce_lemma_i #w l cin i =
   FStar.Math.Lemmas.pow2_modulo_modulo_lemma_1 (v li') 26 32;
   FStar.Math.Lemmas.pow2_minus 32 26
 
-//#set-options "--max_fuel 2"
-
 val carry_reduce_felem5_fits_lemma_i0:
     #w:lanes
   -> f:felem5 w
@@ -1268,61 +1265,6 @@ let lemma_subtract_p5 f f' =
      (v f0' = v f0 && v f1' = v f1 && v f2' = v f2 && v f3' = v f3 && v f4' = v f4))
   then lemma_subtract_p5_0 f f'
   else lemma_subtract_p5_1 f f'
-
-val eq_mask_logand_lemma: a:uint64 -> b:uint64 -> c:uint64 ->
-  Lemma
-  (requires True)
-  (ensures
-    (if v a = v b then
-      v (c `logand` (eq_mask a b)) == v c
-    else
-      v (c `logand` (eq_mask a b)) == 0))
-  [SMTPat (c `logand` (eq_mask a b))]
-let eq_mask_logand_lemma a b c = admit()
-
-val gte_mask_logand_lemma: a:uint64 -> b:uint64 -> c:uint64 ->
-  Lemma
-  (requires True)
-  (ensures
-    (if v a >= v b then
-      v (c `logand` (gte_mask a b)) == v c
-    else
-      v (c `logand` (gte_mask a b)) == 0))
-  [SMTPat (c `logand` (gte_mask a b))]
-let gte_mask_logand_lemma a b c = admit()
-
-val eq_mask_lemma: a:uint64 -> b:uint64 ->
-  Lemma
-  (requires True)
-  (ensures
-  (if v a = v b then
-    v (eq_mask a b) == pow2 64 - 1
-  else
-    v (eq_mask a b) == 0))
-  [SMTPat (eq_mask a b)]
-let eq_mask_lemma a b = admit()
-
-val gte_mask_lemma: a:uint64 -> b:uint64 ->
-  Lemma
-  (requires True)
-  (ensures
-    (if v a >= v b then
-      v (gte_mask a b) == pow2 64 - 1
-    else
-      v (gte_mask a b) == 0))
-  [SMTPat (gte_mask a b)]
-let gte_mask_lemma a b = admit()
-
-val logand_lemma: a:uint64 -> b:uint64 ->
-  Lemma
-  (requires v a = 0 \/ v a = pow2 64 - 1)
-  (ensures
-    (if v a = 0 then
-      v (a `logand` b) == 0
-    else
-      v (a `logand` b) == v b))
-  [SMTPat (a `logand` b)]
-let logand_lemma a b = admit()
 
 inline_for_extraction
 val subtract_p5_s:
