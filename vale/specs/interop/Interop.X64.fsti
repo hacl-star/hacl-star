@@ -56,7 +56,7 @@ let calling_conventions (s0:TS.traceState) (s1:TS.traceState) =
 
 let max_arity : nat = if IA.win then 4 else 6
 let reg_nat = i:nat{i < max_arity}
-let arity_ok 'a = l:list 'a { List.Tot.length l < max_arity }
+let arity_ok 'a = l:list 'a { List.Tot.length l <= max_arity }
 
 let register_of_arg_i (i:reg_nat) : MS.reg =
   let open MS in
@@ -131,7 +131,7 @@ let update_regs (x:arg)
   : GTot registers
   = upd_reg regs i (arg_as_nat64 x)
 
-let max_slots = n:pos{n < UInt32.n /\ n % 8 == 0}
+let max_slots = n:pos{UInt.size n UInt32.n /\ n % 8 == 0}
 
 let stack_buffer (num_b8_slots:max_slots) =
   b:buf_t TUInt64{
@@ -147,7 +147,7 @@ let regs_with_stack (regs:registers) (#num_b8_slots:_) (stack_b:stack_buffer num
       else regs r
 
 [@__reduce__]
-let rec register_of_args (n:nat{n < max_arity})
+let rec register_of_args (n:nat{n <= max_arity})
                          (args:list arg{List.Tot.length args = n})
                          (regs:registers) : GTot registers =
     match args with
@@ -434,7 +434,7 @@ val wrap_variadic (c:TS.tainted_code) : as_lowstar_sig c
 [@__reduce__]
 let (++) (#t:td) (x:td_as_type t) (args:list arg) = (| t, x |) :: args
 
-let arity_ok_2 (l:list 'a) (m:list 'b) = List.length l + List.length m < max_arity
+let arity_ok_2 (l:list 'a) (m:list 'b) = List.length l + List.length m <= max_arity
 
 [@__reduce__]
 let rec rel_gen_t
@@ -464,7 +464,7 @@ let rec prediction_t
       (c:TS.tainted_code)
       (num_b8_slots:max_slots)
       (dom:list td)
-      (args:list arg{List.length dom + List.length args < max_arity})
+      (args:list arg{List.length dom + List.length args <= max_arity})
       (pre_rel:rel_gen_t c dom args (prediction_pre_rel_t c))
       (post_rel:rel_gen_t c dom args (prediction_post_rel_t c num_b8_slots))
     = match dom with
@@ -517,7 +517,7 @@ let rec as_lowstar_sig_t
       (c:TS.tainted_code)
       (num_b8_slots:max_slots)
       (dom:list td)
-      (args:list arg{List.length dom + List.length args < max_arity})
+      (args:list arg{List.length dom + List.length args <= max_arity})
       (pre_rel:rel_gen_t c dom args (prediction_pre_rel_t c))
       (post_rel:rel_gen_t c dom args (prediction_post_rel_t c num_b8_slots))
       (predict:prediction_t down_mem c num_b8_slots dom args pre_rel post_rel) =
@@ -560,7 +560,7 @@ let rec as_lowstar_sig_t_weak
       (c:TS.tainted_code)
       (num_b8_slots:max_slots)
       (dom:list td)
-      (args:list arg{List.length dom + List.length args < max_arity})
+      (args:list arg{List.length dom + List.length args <= max_arity})
       (pre_rel:rel_gen_t c dom args (prediction_pre_rel_t c))
       (post_rel:rel_gen_t c dom args (prediction_post_rel_t c num_b8_slots))
       (predict:prediction_t down_mem c num_b8_slots dom args pre_rel post_rel) =
