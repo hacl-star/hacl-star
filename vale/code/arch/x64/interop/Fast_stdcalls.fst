@@ -210,7 +210,7 @@ let fadd_post : VSig.vale_post 16 fadd_dom =
     (f:V.va_fuel) ->
       FH.va_ens_fadd_stdcall c va_s0 IA.win (as_vale_buffer sb) (as_vale_buffer out) (as_vale_buffer f1) (as_vale_buffer f2) va_s1 f
 
-#set-options "--z3rlimit 20"
+#set-options "--z3rlimit 100"
 
 [@__reduce__] unfold
 let fadd_lemma'
@@ -287,9 +287,9 @@ let fast_fadd
     B.length f2 == 32 /\ 
     B.length out == 32 /\ 
     B.length f1 == 32 /\
-    B.disjoint out f1 /\
-    B.disjoint out f2 /\
-    B.disjoint f1 f2)
+    (B.disjoint out f1 \/ out == f1) /\
+    (B.disjoint out f2 \/ out == f2) /\
+    (B.disjoint f1 f2 \/ f1 == f2))
   (ensures fun h0 c h1 -> 
     B.live h1 out /\ B.live h1 f1 /\ B.live h1 f2 /\
     B.modifies (B.loc_buffer out) h0 h1 /\
@@ -317,7 +317,7 @@ let fast_fadd
   ()
 
 
-#set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
+#push-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
 
 let fadd out f1 f2
   = push_frame();
@@ -333,4 +333,151 @@ let fadd out f1 f2
     copy_up out out8;
     pop_frame();
     x
-    
+
+#pop-options
+
+(* Need to rearrange the order of arguments *)
+[@__reduce__]
+let fsub_pre : VSig.vale_pre 16 fadd_dom =
+  fun (c:V.va_code)
+    (out:b64)
+    (f1:b64)
+    (f2:b64)
+    (va_s0:V.va_state)
+    (sb:IX64.stack_buffer 16) ->
+      FH.va_req_fsub_stdcall c va_s0 IA.win (as_vale_buffer sb) 
+        (as_vale_buffer out) (as_vale_buffer f1) (as_vale_buffer f2)
+
+[@__reduce__]
+let fsub_post : VSig.vale_post 16 fadd_dom =
+  fun (c:V.va_code)
+    (out:b64)
+    (f1:b64)
+    (f2:b64)
+    (va_s0:V.va_state)
+    (sb:IX64.stack_buffer 16)
+    (va_s1:V.va_state)
+    (f:V.va_fuel) ->
+      FH.va_ens_fsub_stdcall c va_s0 IA.win (as_vale_buffer sb) (as_vale_buffer out) (as_vale_buffer f1) (as_vale_buffer f2) va_s1 f
+
+[@__reduce__] unfold
+let fsub_lemma'
+    (code:V.va_code)
+    (_win:bool)
+    (out:b64)
+    (f1:b64)
+    (f2:b64)
+    (va_s0:V.va_state)
+    (sb:IX64.stack_buffer 16)
+ : Ghost (V.va_state & V.va_fuel)
+     (requires
+       fsub_pre code out f1 f2 va_s0 sb)
+     (ensures (fun (va_s1, f) ->
+       V.eval_code code va_s0 f va_s1 /\
+       VSig.vale_calling_conventions va_s0 va_s1 /\
+       fsub_post code out f1 f2 va_s0 sb va_s1 f /\
+       ME.buffer_readable VS.(va_s1.mem) (as_vale_buffer out) /\
+       ME.buffer_readable VS.(va_s1.mem) (as_vale_buffer f1) /\ 
+       ME.buffer_readable VS.(va_s1.mem) (as_vale_buffer f2) /\ 
+       ME.buffer_writeable (as_vale_buffer out) /\ 
+       ME.buffer_writeable (as_vale_buffer f1) /\
+       ME.buffer_writeable (as_vale_buffer f2) /\       
+       ME.modifies (ME.loc_union (ME.loc_buffer (as_vale_buffer sb))
+                   (ME.loc_union (ME.loc_buffer (as_vale_buffer out))
+                                 ME.loc_none)) va_s0.VS.mem va_s1.VS.mem
+ )) = 
+   let va_s1, f = FH.va_lemma_fsub_stdcall code va_s0 IA.win (as_vale_buffer sb) (as_vale_buffer out) (as_vale_buffer f1) (as_vale_buffer f2) in
+   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 out;   
+   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 f1;   
+   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 f2;   
+   va_s1, f                                   
+
+(* Prove that fsub_lemma' has the required type *)
+let fsub_lemma = as_t #(VSig.vale_sig fsub_pre fsub_post) fsub_lemma'
+
+let code_fsub = FH.va_code_fsub_stdcall IA.win
+
+(* Here's the type expected for the fsub wrapper *)
+[@__reduce__]
+let lowstar_fsub_t =
+  IX64.as_lowstar_sig_t_weak
+    Interop.down_mem
+    code_fsub
+    16
+    fadd_dom
+    []
+    _
+    _
+    (W.mk_prediction code_fsub fadd_dom [] (fsub_lemma code_fsub IA.win))
+
+(* And here's the fsub wrapper itself *)
+let lowstar_fsub : lowstar_fsub_t  =
+  IX64.wrap
+    Interop.down_mem
+    code_fsub
+    16
+    fadd_dom
+    (W.mk_prediction code_fsub fadd_dom [] (fsub_lemma code_fsub IA.win))
+
+let lowstar_fsub_normal_t //: normal lowstar_fsub_t
+  = as_normal_t #lowstar_fsub_t lowstar_fsub
+
+let fast_fsub
+  (out:b8)
+  (f1:b8)
+  (f2:b8) 
+  : Stack unit
+  (requires fun h -> 
+    adx_enabled /\ bmi2_enabled /\
+    B.live h f2 /\
+    B.live h f1 /\ 
+    B.live h out /\ 
+    B.length f2 == 32 /\ 
+    B.length out == 32 /\ 
+    B.length f1 == 32 /\
+    (B.disjoint out f1 \/ out == f1) /\
+    (B.disjoint out f2 \/ out == f2) /\
+    (B.disjoint f1 f2 \/ f1 == f2))
+  (ensures fun h0 c h1 -> 
+    B.live h1 out /\ B.live h1 f1 /\ B.live h1 f2 /\
+    B.modifies (B.loc_buffer out) h0 h1 /\
+    (
+    let a0 = UInt64.v (low_buffer_read TUInt64 h0 f1 0) in
+    let a1 = UInt64.v (low_buffer_read TUInt64 h0 f1 1) in
+    let a2 = UInt64.v (low_buffer_read TUInt64 h0 f1 2) in
+    let a3 = UInt64.v (low_buffer_read TUInt64 h0 f1 3) in
+    let b0 = UInt64.v (low_buffer_read TUInt64 h0 f2 0) in
+    let b1 = UInt64.v (low_buffer_read TUInt64 h0 f2 1) in
+    let b2 = UInt64.v (low_buffer_read TUInt64 h0 f2 2) in
+    let b3 = UInt64.v (low_buffer_read TUInt64 h0 f2 3) in     
+    let d0 = UInt64.v (low_buffer_read TUInt64 h1 out 0) in
+    let d1 = UInt64.v (low_buffer_read TUInt64 h1 out 1) in
+    let d2 = UInt64.v (low_buffer_read TUInt64 h1 out 2) in
+    let d3 = UInt64.v (low_buffer_read TUInt64 h1 out 3) in
+    let a = pow2_four a0 a1 a2 a3 in
+    let b = pow2_four b0 b1 b2 b3 in
+    let d = pow2_four d0 d1 d2 d3 in
+    d % prime = (a - b) % prime
+    )
+    )
+  = 
+  let x, _ = lowstar_fsub_normal_t out f1 f2 () in
+  ()
+
+
+#set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
+
+let fsub out f1 f2
+  = push_frame();
+    let out8 = B.alloca (UInt8.uint_to_t 0) (UInt32.uint_to_t 32) in
+    let f18 = B.alloca (UInt8.uint_to_t 0) (UInt32.uint_to_t 32) in
+    let f28 = B.alloca (UInt8.uint_to_t 0) (UInt32.uint_to_t 32) in
+    copy_down out out8;
+    copy_down f2 f28;
+    copy_down f1 f18;
+    let x = fast_fsub out8 f18 f28 in
+    imm_copy_up f1 f18;
+    imm_copy_up f2 f28;
+    copy_up out out8;
+    pop_frame();
+    x
