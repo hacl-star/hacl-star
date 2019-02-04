@@ -167,10 +167,14 @@ let print_ins (ins:tainted_ins) (p:printer) =
     let first, second = p.op_order (print_xmm dst p) (print_xmm src p) in
       first ^ ", " ^ second
   in
+  let print_xmms_3 (dst src1 src2:xmm) =
+    print_pair (print_xmm dst p) (print_xmms src1 src2)
+  in
   let ins = ins.i in
   match ins with
   | Cpuid -> "  cpuid"
   | Mov64 dst src -> p.ins_name   "  mov"   [dst; src] ^ print_ops dst src
+  | MovBe64 dst src -> p.ins_name "  movbe" [dst; src] ^ print_ops dst src
   | Cmovc64 dst src -> p.ins_name "  cmovc" [dst; src] ^ print_ops dst src  
   | Add64 dst src -> p.ins_name   "  add"   [dst; src] ^ print_ops dst src
   | AddLea64 dst src1 src2 -> let name = p.ins_name "  lea" [dst; src1; src2] in
@@ -197,24 +201,33 @@ let print_ins (ins:tainted_ins) (p:printer) =
   | Shl64 dst amt -> p.ins_name "  shl" [dst; amt] ^ print_shift dst amt
   | Push src      -> p.ins_name "  push" [src] ^ print_operand src p
   | Pop dst       -> p.ins_name "  pop"  [dst] ^ print_operand dst p
-  | Paddd dst src          -> "  paddd "      ^ print_xmms dst src
-  | Pxor dst src           -> "  pxor "       ^ print_xmms dst src
-  | Pslld dst amt          -> "  pslld "      ^ print_pair (print_xmm dst p) (print_imm8 amt p)
-  | Psrld dst amt          -> "  psrld "      ^ print_pair (print_xmm dst p) (print_imm8 amt p)
-  | Psrldq dst amt         -> "  psrldq "     ^ print_pair (print_xmm dst p) (print_imm8 amt p)
-  | Palignr dst src amount -> "  palignr "    ^ print_pair (print_xmms dst src) (print_imm8 amount p)
-  | Shufpd dst src perm    -> "  shufpd "     ^ print_pair (print_xmms dst src) (print_imm8 perm p)
-  | Pshufb dst src         -> "  pshufb "     ^ print_xmms dst src
-  | Pshufd dst src count   -> "  pshufd "     ^ print_pair (print_xmms dst src) (print_imm8 count p)
-  | Pcmpeqd dst src        -> "  pcmpeqd "    ^ print_xmms dst src
-  | Pextrq dst src index   -> "  pextrq "     ^ print_pair (print_op_xmm dst src) (print_imm8 index p)
-  | Pinsrd dst src index   -> "  pinsrd "     ^ print_pair (print_xmm_op32 dst src) (print_imm8 index p)
-  | Pinsrq dst src index   -> "  pinsrq "     ^ print_pair (print_xmm_op dst src) (print_imm8 index p)
-  | VPSLLDQ dst src count  -> "  vpslldq "    ^ print_pair (print_xmms dst src) (print_imm8 count p)
-  | MOVDQU dst src         -> "  movdqu "     ^ print_pair (print_mov128_op dst p) (print_mov128_op src p)
-  | Pclmulqdq dst src imm  -> "  pclmulqdq "  ^ print_pair (print_xmms dst src) (print_imm8 imm p)
-  | AESNI_enc dst src      -> "  aesenc "     ^ print_xmms dst src
-  | AESNI_enc_last dst src -> "  aesenclast " ^ print_xmms dst src
+  | Paddd dst src                -> "  paddd "      ^ print_xmms dst src
+  |VPaddd dst src1 src2          -> "  vpaddd "     ^ print_xmms_3 dst src1 src2
+  | Pxor dst src                 -> "  pxor "       ^ print_xmms dst src
+  |VPxor dst src1 src2           -> "  vpxor "      ^ print_xmms_3 dst src1 src2
+  | Pslld dst amt                -> "  pslld "      ^ print_pair (print_xmm dst p) (print_imm8 amt p)
+  | Psrld dst amt                -> "  psrld "      ^ print_pair (print_xmm dst p) (print_imm8 amt p)
+  | Psrldq dst amt               -> "  psrldq "     ^ print_pair (print_xmm dst p) (print_imm8 amt p)
+  | Palignr dst src amount       -> "  palignr "    ^ print_pair (print_xmms dst src) (print_imm8 amount p)
+  |VPalignr dst src1 src2 amount -> "  vpalignr "   ^ print_pair (print_xmms_3 dst src1 src2) (print_imm8 amount p)  
+  | Shufpd dst src perm          -> "  shufpd "     ^ print_pair (print_xmms dst src) (print_imm8 perm p)
+  |VShufpd dst src1 src2 perm    -> "  vshufpd "    ^ print_pair (print_xmms_3 dst src1 src2) (print_imm8 perm p)
+  | Pshufb dst src               -> "  pshufb "     ^ print_xmms dst src
+  |VPshufb dst src1 src2         -> "  vpshufb "    ^ print_xmms_3 dst src1 src2 
+  | Pshufd dst src count         -> "  pshufd "     ^ print_pair (print_xmms dst src) (print_imm8 count p)
+  | Pcmpeqd dst src              -> "  pcmpeqd "    ^ print_xmms dst src
+  | Pextrq dst src index         -> "  pextrq "     ^ print_pair (print_op_xmm dst src) (print_imm8 index p)
+  | Pinsrd dst src index         -> "  pinsrd "     ^ print_pair (print_xmm_op32 dst src) (print_imm8 index p)
+  | Pinsrq dst src index         -> "  pinsrq "     ^ print_pair (print_xmm_op dst src) (print_imm8 index p)
+  | VPSLLDQ dst src count        -> "  vpslldq "    ^ print_pair (print_xmms dst src) (print_imm8 count p)
+  | Vpsrldq dst src count        -> "  vpsrldq "    ^ print_pair (print_xmms dst src) (print_imm8 count p)
+  | MOVDQU dst src               -> "  movdqu "     ^ print_pair (print_mov128_op dst p) (print_mov128_op src p)
+  | Pclmulqdq dst src imm        -> "  pclmulqdq "  ^ print_pair (print_xmms dst src) (print_imm8 imm p)
+  |VPclmulqdq dst src1 src2 imm  -> "  vpclmulqdq " ^ print_pair (print_xmms_3 dst src1 src2) (print_imm8 imm p)  
+  | AESNI_enc dst src            -> "  aesenc "     ^ print_xmms dst src
+  | AESNI_enc_last dst src       -> "  aesenclast " ^ print_xmms dst src
+  |VAESNI_enc dst src1 src2      -> "  aesenc "     ^ print_xmms_3 dst src1 src2 
+  |VAESNI_enc_last dst src1 src2 -> "  aesenclast " ^ print_xmms_3 dst src1 src2
   | AESNI_dec dst src      -> "  aesdec "     ^ print_xmms dst src
   | AESNI_dec_last dst src -> "  aesdeclast " ^ print_xmms dst src
   | AESNI_imc dst src      -> "  aesimc "     ^ print_xmms dst src

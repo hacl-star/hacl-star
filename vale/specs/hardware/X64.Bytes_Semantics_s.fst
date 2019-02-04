@@ -670,11 +670,11 @@ let eval_ins (ins:ins) : st unit =
      
   | Shufpd dst src permutation ->
     check_imm (0 <= permutation && permutation < 4);;
-    update_xmm dst ins (shufpd (eval_xmm dst s) (eval_xmm src s))
+    update_xmm dst ins (shufpd (eval_xmm dst s) (eval_xmm src s) permutation)
     
   |VShufpd dst src1 src2 permutation ->
     check_imm (0 <= permutation && permutation < 4);;
-    update_xmm dst ins (shufpd (eval_xmm src1 s) (eval_xmm src2 s))
+    update_xmm dst ins (shufpd (eval_xmm src1 s) (eval_xmm src2 s) permutation)
     
   | Pshufb dst src ->
     (match pshufb (eval_xmm dst s) (eval_xmm src s) with
