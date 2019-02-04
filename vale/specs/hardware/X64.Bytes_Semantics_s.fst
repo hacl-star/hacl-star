@@ -42,12 +42,14 @@ type ins:eqtype =
   | Paddd      : dst:xmm -> src:xmm -> ins
   |VPaddd      : dst:xmm -> src1:xmm -> src2:xmm -> ins
   | Pxor       : dst:xmm -> src:xmm -> ins
+  |VPxor       : dst:xmm -> src1:xmm -> src2:xmm -> ins
   | Pslld      : dst:xmm -> amt:int -> ins
   | Psrld      : dst:xmm -> amt:int -> ins
   | Psrldq     : dst:xmm -> amt:int -> ins
   | Palignr    : dst:xmm -> src:xmm -> amount:imm8 -> ins
   |VPalignr    : dst:xmm -> src1:xmm -> src2:xmm -> amount:imm8 -> ins
   | Shufpd     : dst:xmm -> src:xmm -> permutation:imm8 -> ins
+  |VShufpd     : dst:xmm -> src1:xmm -> src2:xmm -> permutation:imm8 -> ins    
   | Pshufb     : dst:xmm -> src:xmm -> ins
   |VPshufb     : dst:xmm -> src1:xmm -> src2:xmm -> ins
   | Pshufd     : dst:xmm -> src:xmm -> permutation:imm8 -> ins
@@ -56,6 +58,7 @@ type ins:eqtype =
   | Pinsrd     : dst:xmm -> src:operand -> index:imm8 -> ins
   | Pinsrq     : dst:xmm -> src:operand -> index:imm8 -> ins
   | VPSLLDQ    : dst:xmm -> src:xmm -> count:imm8 -> ins
+  | Vpsrldq    : dst:xmm -> src:xmm -> count:imm8 -> ins
   | MOVDQU     : dst:mov128_op -> src:mov128_op -> ins  // We let the assembler complain about attempts to use two memory ops
   | Pclmulqdq  : dst:xmm -> src:xmm -> imm:int -> ins
   |VPclmulqdq  : dst:xmm -> src1:xmm -> src2:xmm -> imm:int -> ins
@@ -448,6 +451,12 @@ let palignr (src1 src2:quad32) (amount:int) : option quad32 =
     Some (Mkfour src2.hi2 src2.hi3 src1.lo0 src1.lo1)
   else None
 
+let shufpd (src1 src2:quad32) (permutation:int) : quad32 =
+    Mkfour (if permutation % 2 = 0 then src1.lo0 else src1.hi2)
+           (if permutation % 2 = 0 then src1.lo1 else src1.hi3)
+           (if (permutation / 2) % 2 = 0 then src2.lo0 else src2.hi2)
+           (if (permutation / 2) % 2 = 0 then src2.lo1 else src2.hi3)
+           
 let pshufb (src1 src2:quad32) : option quad32 =
     // We only spec a restricted version sufficient for a handful of standard patterns
     if is_full_byte_reversal_mask src2 then
@@ -624,6 +633,9 @@ let eval_ins (ins:ins) : st unit =
   | Pxor dst src ->
     update_xmm_preserve_flags dst (quad32_xor (eval_xmm dst s) (eval_xmm src s))
 
+  |VPxor dst src1 src2 ->
+    update_xmm_preserve_flags dst (quad32_xor (eval_xmm src1 s) (eval_xmm src2 s))
+
   | Pslld dst amt ->
     check_imm (0 <= amt && amt < 32);;
     update_xmm_preserve_flags dst (four_map (fun i -> ishl i amt) (eval_xmm dst s))
@@ -658,14 +670,12 @@ let eval_ins (ins:ins) : st unit =
      
   | Shufpd dst src permutation ->
     check_imm (0 <= permutation && permutation < 4);;
-    let src_q = eval_xmm src s in
-    let dst_q = eval_xmm dst s in
-    let result = Mkfour (if permutation % 2 = 0 then dst_q.lo0 else dst_q.hi2)
-                        (if permutation % 2 = 0 then dst_q.lo1 else dst_q.hi3)
-                        (if (permutation / 2) % 2 = 0 then src_q.lo0 else src_q.hi2)
-                        (if (permutation / 2) % 2 = 0 then src_q.lo1 else src_q.hi3) in
-    update_xmm dst ins result
-
+    update_xmm dst ins (shufpd (eval_xmm dst s) (eval_xmm src s))
+    
+  |VShufpd dst src1 src2 permutation ->
+    check_imm (0 <= permutation && permutation < 4);;
+    update_xmm dst ins (shufpd (eval_xmm src1 s) (eval_xmm src2 s))
+    
   | Pshufb dst src ->
     (match pshufb (eval_xmm dst s) (eval_xmm src s) with
      | Some result -> update_xmm dst ins result
@@ -716,9 +726,18 @@ let eval_ins (ins:ins) : st unit =
     update_xmm_preserve_flags dst (insert_nat64 dst_q (eval_operand src s) (index % 2))
 
   | VPSLLDQ dst src count ->
-    check_imm (count = 4);;  // We only spec the one very special case we need
+    check_imm (count = 4 || count = 8);;  // We only spec the two very special cases we need
     let src_q = eval_xmm src s in
-    let shifted_xmm = Mkfour 0 src_q.lo0 src_q.lo1 src_q.hi2 in
+    let shifted_xmm = 
+        if count = 4 then Mkfour 0 src_q.lo0 src_q.lo1 src_q.hi2 
+        else Mkfour 0 0 src_q.lo0 src_q.lo1
+    in
+    update_xmm_preserve_flags dst shifted_xmm
+
+  | Vpsrldq dst src count ->
+    check_imm (count = 8);;  // We only spec the one very special case we need
+    let src_q = eval_xmm src s in
+    let shifted_xmm = Mkfour src_q.hi2 src_q.hi3 0 0 in
     update_xmm_preserve_flags dst shifted_xmm
 
   | MOVDQU dst src ->
