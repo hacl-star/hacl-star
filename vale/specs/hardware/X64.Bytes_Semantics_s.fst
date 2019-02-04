@@ -510,9 +510,7 @@ let eval_ins (ins:ins) : st unit =
     
   | MovBe64 dst src ->
     check (valid_operand src);;
-    let src_bytes = le_nat64_to_bytes (eval_operand src s) in
-    let reversed_bytes = Collections.Seqs_s.reverse_seq src_bytes in
-    update_operand_preserve_flags dst (le_bytes_to_nat64 reversed_bytes)
+    update_operand_preserve_flags dst (reverse_bytes_nat64 (eval_operand src s))
         
   | Cmovc64 dst src ->
     check (valid_operand src);;
@@ -657,7 +655,7 @@ let eval_ins (ins:ins) : st unit =
   | Palignr dst src amount ->
     // We only spec a restricted version sufficient for a handful of standard patterns
     check_imm (amount = 4 || amount = 8);;
-    (match (palignr (eval_xmm src s) (eval_xmm dst s) amount) with
+    (match (palignr (eval_xmm dst s) (eval_xmm src s) amount) with
      | Some result -> update_xmm dst ins result
      | None -> fail)
      
