@@ -49,6 +49,7 @@ type ins:eqtype =
   |VPalignr    : dst:xmm -> src1:xmm -> src2:xmm -> amount:imm8 -> ins
   | Shufpd     : dst:xmm -> src:xmm -> permutation:imm8 -> ins
   | Pshufb     : dst:xmm -> src:xmm -> ins
+  |VPshufb     : dst:xmm -> src1:xmm -> src2:xmm -> ins
   | Pshufd     : dst:xmm -> src:xmm -> permutation:imm8 -> ins
   | Pcmpeqd    : dst:xmm -> src:xmm -> ins
   | Pextrq     : dst:operand -> src:xmm -> index:imm8 -> ins
@@ -57,6 +58,7 @@ type ins:eqtype =
   | VPSLLDQ    : dst:xmm -> src:xmm -> count:imm8 -> ins
   | MOVDQU     : dst:mov128_op -> src:mov128_op -> ins  // We let the assembler complain about attempts to use two memory ops
   | Pclmulqdq  : dst:xmm -> src:xmm -> imm:int -> ins
+  |VPclmulqdq  : dst:xmm -> src1:xmm -> src2:xmm -> imm:int -> ins
   | AESNI_enc           : dst:xmm -> src:xmm -> ins
   | AESNI_enc_last      : dst:xmm -> src:xmm -> ins
   | AESNI_dec           : dst:xmm -> src:xmm -> ins
@@ -462,20 +464,20 @@ let pshufb (src1 src2:quad32) : option quad32 =
                   (reverse_bytes_nat32 src1.hi2))
     else None
 
-let pclmulqdq (src1 src2:quad32) : Option quad32
-      let Mkfour a0 a1 a2 a3 = eval_xmm dst s in
-      let Mkfour b0 b1 b2 b3 = eval_xmm src s in
-      let f x0 x1 y0 y1 =
-        let x = Math.Poly2.Bits_s.of_double32 (Mktwo x0 x1) in
-        let y = Math.Poly2.Bits_s.of_double32 (Mktwo y0 y1) in
-        update_xmm dst ins (Math.Poly2.Bits_s.to_quad32 (Math.Poly2_s.mul x y))
-        in
-      match imm with
-      | 0 -> f a0 a1 b0 b1
-      | 1 -> f a2 a3 b0 b1
-      | 16 -> f a0 a1 b2 b3
-      | 17 -> f a2 a3 b2 b3
-      | _ -> None
+let pclmulqdq (src1 src2:quad32) (imm:int) : option quad32 =
+    let Mkfour a0 a1 a2 a3 = src1 in
+    let Mkfour b0 b1 b2 b3 = src2 in
+    let f x0 x1 y0 y1 =
+      let x = Math.Poly2.Bits_s.of_double32 (Mktwo x0 x1) in
+      let y = Math.Poly2.Bits_s.of_double32 (Mktwo y0 y1) in
+      Math.Poly2.Bits_s.to_quad32 (Math.Poly2_s.mul x y)
+    in
+    match imm with
+    | 0 -> Some (f a0 a1 b0 b1)
+    | 1 -> Some (f a2 a3 b0 b1)
+    | 16 -> Some (f a0 a1 b2 b3)
+    | 17 -> Some (f a2 a3 b2 b3)
+    | _ -> None
 
 let aesni_enc (src1 src2:quad32) : quad32 = 
   quad32_xor (AES_s.mix_columns_LE (AES_s.sub_bytes (AES_s.shift_rows_LE src1))) src2
@@ -647,7 +649,7 @@ let eval_ins (ins:ins) : st unit =
      | Some result -> update_xmm dst ins result
      | None -> fail)
      
-  | Palignr dst src amount ->
+  |VPalignr dst src1 src2 amount ->
     // We only spec a restricted version sufficient for a handful of standard patterns
     check_imm (amount = 4 || amount = 8);;
     (match (palignr (eval_xmm src1 s) (eval_xmm src2 s) amount) with
@@ -725,22 +727,16 @@ let eval_ins (ins:ins) : st unit =
 
   | Pclmulqdq dst src imm ->
     check_imm pclmulqdq_enabled;;
-    (
-      let Mkfour a0 a1 a2 a3 = eval_xmm dst s in
-      let Mkfour b0 b1 b2 b3 = eval_xmm src s in
-      let f x0 x1 y0 y1 =
-        let x = Math.Poly2.Bits_s.of_double32 (Mktwo x0 x1) in
-        let y = Math.Poly2.Bits_s.of_double32 (Mktwo y0 y1) in
-        update_xmm dst ins (Math.Poly2.Bits_s.to_quad32 (Math.Poly2_s.mul x y))
-        in
-      match imm with
-      | 0 -> f a0 a1 b0 b1
-      | 1 -> f a2 a3 b0 b1
-      | 16 -> f a0 a1 b2 b3
-      | 17 -> f a2 a3 b2 b3
-      | _ -> fail
-    )
-
+    (match pclmulqdq (eval_xmm dst s) (eval_xmm src s) imm with
+     | Some result -> update_xmm dst ins result
+     | None -> fail)
+     
+  |VPclmulqdq dst src1 src2 imm ->
+    check_imm pclmulqdq_enabled;;
+    (match pclmulqdq (eval_xmm src1 s) (eval_xmm src2 s) imm with
+     | Some result -> update_xmm dst ins result
+     | None -> fail)
+     
   | AESNI_enc dst src ->
     check_imm aesni_enabled;;
     update_xmm dst ins (aesni_enc (eval_xmm dst s) (eval_xmm src s))
