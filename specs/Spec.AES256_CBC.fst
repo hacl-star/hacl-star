@@ -136,13 +136,13 @@ val aes256_cbc_decrypt:
     length cip <= max_size_t
   } ->
   ciplen:size_nat{ciplen == length cip} ->
-  out:option (out':seq uint8{length out' <= length cip})
+  Tot (out:option (out':seq uint8{length out' <= length cip}))
 let aes256_cbc_decrypt key iv cip ciplen =
   let kex = keyExpansion key in
   let out : lseq uint8 ciplen = create ciplen (u8 0) in
   let out = cbc_decrypt_blocks out kex iv cip ciplen 0 in
   let pad : uint8 = index #uint8 #ciplen out (ciplen - 1) in
-  let msglen = ciplen - (uint_to_nat pad) in
-  if msglen >= 0 && msglen <= blocklen then
-    Some (sub #uint8 #ciplen out 0 msglen)
+  let pad = uint_to_nat pad in
+  if pad >= 0 && pad <= blocklen then
+    Some (sub #uint8 #ciplen out 0 (ciplen - pad))
   else None
