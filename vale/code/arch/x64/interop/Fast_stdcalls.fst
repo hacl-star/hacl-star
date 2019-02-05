@@ -20,6 +20,7 @@ module MS = X64.Machine_s
 
 module FU = X64.FastUtil
 module FH = X64.FastHybrid
+module FW = X64.FastWide
 
 let b8 = B.buffer UInt8.t
 let uint64 = UInt64.t
@@ -465,7 +466,7 @@ let fast_fsub
   ()
 
 
-#set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
+#push-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
 
 let fsub out f1 f2
   = push_frame();
@@ -481,3 +482,178 @@ let fsub out f1 f2
     copy_up out out8;
     pop_frame();
     x
+
+#pop-options
+
+[@__reduce__] unfold
+let fmul_dom: IX64.arity_ok td =
+  let y = [t64_mod; t64_no_mod; t64_mod; t64_no_mod] in
+  assert_norm (List.length y = 4);
+  y
+
+(* Need to rearrange the order of arguments *)
+[@__reduce__]
+let fmul_pre : VSig.vale_pre 48 fmul_dom =
+  fun (c:V.va_code)
+    (tmp:b64)
+    (f1:b64)
+    (out:b64)
+    (f2:b64)
+    (va_s0:V.va_state)
+    (sb:IX64.stack_buffer 48) ->
+      FW.va_req_fmul_stdcall c va_s0 IA.win (as_vale_buffer sb) 
+        (as_vale_buffer tmp) (as_vale_buffer f1) (as_vale_buffer out) (as_vale_buffer f2)
+
+[@__reduce__]
+let fmul_post : VSig.vale_post 48 fmul_dom =
+  fun (c:V.va_code)
+    (tmp:b64)
+    (f1:b64)
+    (out:b64)
+    (f2:b64)
+    (va_s0:V.va_state)
+    (sb:IX64.stack_buffer 48)
+    (va_s1:V.va_state)
+    (f:V.va_fuel) ->
+      FW.va_ens_fmul_stdcall c va_s0 IA.win (as_vale_buffer sb) (as_vale_buffer tmp) (as_vale_buffer f1) (as_vale_buffer out) (as_vale_buffer f2) va_s1 f
+
+#set-options "--z3rlimit 100"
+
+[@__reduce__] unfold
+let fmul_lemma'
+    (code:V.va_code)
+    (_win:bool)
+    (tmp:b64)
+    (f1:b64)
+    (out:b64)
+    (f2:b64)
+    (va_s0:V.va_state)
+    (sb:IX64.stack_buffer 48)
+ : Ghost (V.va_state & V.va_fuel)
+     (requires
+       fmul_pre code tmp f1 out f2 va_s0 sb)
+     (ensures (fun (va_s1, f) ->
+       V.eval_code code va_s0 f va_s1 /\
+       VSig.vale_calling_conventions va_s0 va_s1 /\
+       fmul_post code tmp f1 out f2 va_s0 sb va_s1 f /\
+       ME.buffer_readable VS.(va_s1.mem) (as_vale_buffer out) /\
+       ME.buffer_readable VS.(va_s1.mem) (as_vale_buffer f1) /\ 
+       ME.buffer_readable VS.(va_s1.mem) (as_vale_buffer f2) /\ 
+       ME.buffer_readable VS.(va_s1.mem) (as_vale_buffer tmp) /\ 
+       ME.buffer_writeable (as_vale_buffer out) /\ 
+       ME.buffer_writeable (as_vale_buffer f1) /\
+       ME.buffer_writeable (as_vale_buffer f2) /\       
+       ME.buffer_writeable (as_vale_buffer tmp) /\       
+       ME.modifies (ME.loc_union (ME.loc_buffer (as_vale_buffer sb))
+                   (ME.loc_union (ME.loc_buffer (as_vale_buffer out))
+                   (ME.loc_union (ME.loc_buffer (as_vale_buffer tmp))
+                                 ME.loc_none))) va_s0.VS.mem va_s1.VS.mem
+ )) = 
+   let va_s1, f = FW.va_lemma_fmul_stdcall code va_s0 IA.win (as_vale_buffer sb) (as_vale_buffer tmp) (as_vale_buffer f1) (as_vale_buffer out) (as_vale_buffer f2) in
+   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 out;   
+   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 f1;   
+   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 f2;   
+   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 tmp;      
+   va_s1, f                                   
+
+(* Prove that fmul_lemma' has the required type *)
+let fmul_lemma = as_t #(VSig.vale_sig fmul_pre fmul_post) fmul_lemma'
+
+let code_fmul = FW.va_code_fmul_stdcall IA.win
+
+(* Here's the type expected for the fmul wrapper *)
+[@__reduce__]
+let lowstar_fmul_t =
+  IX64.as_lowstar_sig_t_weak
+    Interop.down_mem
+    code_fmul
+    48
+    fmul_dom
+    []
+    _
+    _
+    (W.mk_prediction code_fmul fmul_dom [] (fmul_lemma code_fmul IA.win))
+
+(* And here's the fmul wrapper itself *)
+let lowstar_fmul : lowstar_fmul_t  =
+  IX64.wrap
+    Interop.down_mem
+    code_fmul
+    48
+    fmul_dom
+    (W.mk_prediction code_fmul fmul_dom [] (fmul_lemma code_fmul IA.win))
+
+let lowstar_fmul_normal_t //: normal lowstar_fmul_t
+  = as_normal_t #lowstar_fmul_t lowstar_fmul
+
+
+let fast_fmul
+  (tmp:b8)
+  (f1:b8)
+  (out:b8) 
+  (f2:b8)
+  : Stack unit
+  (requires fun h -> 
+    adx_enabled /\ bmi2_enabled /\
+    B.live h f2 /\
+    B.live h f1 /\ 
+    B.live h out /\ 
+    B.live h tmp /\
+    B.length f2 == 32 /\ 
+    B.length out == 32 /\ 
+    B.length f1 == 32 /\
+    B.length tmp == 64 /\
+    (B.disjoint out f1 \/ out == f1) /\
+    (B.disjoint out f2 \/ out == f2) /\
+    (B.disjoint out tmp \/ out == tmp) /\
+    (B.disjoint f1 f2 \/ f1 == f2) /\
+    B.disjoint f1 tmp /\
+    B.disjoint f2 tmp)
+  (ensures fun h0 c h1 ->
+    B.live h1 out /\ B.live h1 f1 /\ B.live h1 f2 /\ B.live h1 tmp /\
+    B.modifies (B.loc_union (B.loc_buffer out) (B.loc_buffer tmp)) h0 h1 /\
+    (
+    let a0 = UInt64.v (low_buffer_read TUInt64 h0 f1 0) in
+    let a1 = UInt64.v (low_buffer_read TUInt64 h0 f1 1) in
+    let a2 = UInt64.v (low_buffer_read TUInt64 h0 f1 2) in
+    let a3 = UInt64.v (low_buffer_read TUInt64 h0 f1 3) in
+    let b0 = UInt64.v (low_buffer_read TUInt64 h0 f2 0) in
+    let b1 = UInt64.v (low_buffer_read TUInt64 h0 f2 1) in
+    let b2 = UInt64.v (low_buffer_read TUInt64 h0 f2 2) in
+    let b3 = UInt64.v (low_buffer_read TUInt64 h0 f2 3) in     
+    let d0 = UInt64.v (low_buffer_read TUInt64 h1 out 0) in
+    let d1 = UInt64.v (low_buffer_read TUInt64 h1 out 1) in
+    let d2 = UInt64.v (low_buffer_read TUInt64 h1 out 2) in
+    let d3 = UInt64.v (low_buffer_read TUInt64 h1 out 3) in
+    let a = pow2_four a0 a1 a2 a3 in
+    let b = pow2_four b0 b1 b2 b3 in
+    let d = pow2_four d0 d1 d2 d3 in
+    d % prime = (a * b) % prime
+    )
+    )
+  = 
+  let x, _ = lowstar_fmul_normal_t tmp f1 out f2 () in
+  ()
+
+
+#push-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 200"
+
+let fmul tmp f1 out f2 = admit() // Allocations too expensive...
+  // = push_frame();
+  //   let out8 = B.alloca (UInt8.uint_to_t 0) (UInt32.uint_to_t 32) in
+  //   let f18 = B.alloca (UInt8.uint_to_t 0) (UInt32.uint_to_t 32) in
+  //   let f28 = B.alloca (UInt8.uint_to_t 0) (UInt32.uint_to_t 32) in
+  //   let tmp8 = B.alloca (UInt8.uint_to_t 0) (UInt32.uint_to_t 64) in
+  //   copy_down out out8;
+  //   copy_down f2 f28;
+  //   copy_down f1 f18;
+  //   copy_down tmp tmp8;
+  //   let x = fast_fmul tmp8 f18 out8 f28 in
+  //   imm_copy_up f1 f18;
+  //   imm_copy_up f2 f28;
+  //   copy_up tmp tmp8;
+  //   copy_up out out8;
+  //   pop_frame();
+  //   x
+
+#pop-options
