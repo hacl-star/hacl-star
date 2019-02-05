@@ -98,12 +98,14 @@ let poly1305_encode_last #s f len b =
   assume (BSeq.nat_from_bytes_le (as_seq h0 b) == BSeq.nat_from_bytes_le (as_seq h0 tmp));
   load_felem_le f tmp;
   let h1 = ST.get () in
+  lemma_feval_is_fas_nat h1 f;
+  assert (forall (i:nat). i < width s ==> (feval h1 f).[i] == (fas_nat h1 f).[i]);
   assert (feval h1 f == LSeq.create (width s) (BSeq.nat_from_bytes_le (as_seq h0 tmp)));
   LSeq.eq_intro
     (LSeq.create (width s) (BSeq.nat_from_bytes_le (as_seq h0 tmp)))
     (LSeq.create (width s) (BSeq.nat_from_bytes_le (as_seq h0 b)));
   assert (BSeq.nat_from_bytes_le (as_seq h0 b) < pow2 (v len * 8));
-  assume (F32xN.felem_less #(width s) h1 f (pow2 (v len * 8)));
+  assert (F32xN.felem_less #(width s) h1 f (pow2 (v len * 8)));
   set_bit f (len *! 8ul);
   pop_frame()
 

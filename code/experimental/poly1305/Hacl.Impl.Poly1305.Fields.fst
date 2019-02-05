@@ -116,6 +116,13 @@ let limb_v #s x =
   | M128 -> F32xN.uint64xN_v #2 x
   | M256 -> F32xN.uint64xN_v #4 x
 
+val lemma_feval_is_fas_nat: #s:field_spec -> h:mem -> f:felem s ->
+  Lemma
+    (requires felem_less #(width s) h f (pow2 128))
+    (ensures  (forall (i:nat). i < width s ==> (feval h f).[i] == (fas_nat h f).[i]))
+let lemma_feval_is_fas_nat #s h f =
+  lemma_feval_is_fas_nat #(width s) h f
+
 inline_for_extraction
 val create_felem:
     s:field_spec

@@ -13,17 +13,36 @@ module S = Hacl.Spec.Poly1305.Vec
 
 #reset-options "--z3rlimit 100 --using_facts_from '* -FStar.Seq'"
 
-// val lemma_feval_is_fas_nat:
-//   #w:lanes
-//   -> f:felem5 w
-//   -> i:size_nat{i < w}
-//   -> Lemma
-//     (requires felem_less5 f (pow2 128))
-//     (ensures (feval5 f).[i] == (fas_nat5 f).[i])
-// let lemma_feval_is_fas_nat #w f i =
-//   assert_norm (pow2 128 < S.prime);
-//   assert ((feval5 f).[i] == (as_nat5 (transpose f).[i]) % S.prime);
-//   FStar.Math.Lemmas.modulo_lemma (as_nat5 (transpose f).[i]) S.prime
+val lemma_feval_is_fas_nat_i:
+  #w:lanes
+  -> f:felem5 w
+  -> i:size_nat{i < w}
+  -> Lemma
+    (requires felem_less5 f (pow2 128))
+    (ensures (feval5 f).[i] == (fas_nat5 f).[i])
+let lemma_feval_is_fas_nat_i #w f i =
+  assert_norm (pow2 128 < S.prime);
+  assert ((feval5 f).[i] == (as_nat5 (transpose f).[i]) % S.prime);
+  FStar.Math.Lemmas.modulo_lemma (as_nat5 (transpose f).[i]) S.prime
+
+val lemma_feval_is_fas_nat:
+  #w:lanes
+  -> f:felem5 w
+  -> Lemma
+    (requires felem_less5 f (pow2 128))
+    (ensures  (forall (i:nat). i < w ==> (fas_nat5 f).[i] == (feval5 f).[i]))
+let lemma_feval_is_fas_nat #w f =
+  match w with
+  | 1 ->
+    lemma_feval_is_fas_nat_i #w f 0
+  | 2 ->
+    lemma_feval_is_fas_nat_i #w f 0;
+    lemma_feval_is_fas_nat_i #w f 1
+  | 4 ->
+    lemma_feval_is_fas_nat_i #w f 0;
+    lemma_feval_is_fas_nat_i #w f 1;
+    lemma_feval_is_fas_nat_i #w f 2;
+    lemma_feval_is_fas_nat_i #w f 3
 
 val precomp_r5_fits_lemma:
     #w:lanes

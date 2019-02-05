@@ -59,6 +59,16 @@ noextract
 let felem_less (#w:lanes) (h:mem) (f:felem w) (max:nat) : Type0 =
   felem_less5 (as_tup5 h f) max
 
+val lemma_feval_is_fas_nat:
+    #w:lanes
+  -> h:mem
+  -> f:felem w
+  -> Lemma
+    (requires felem_less h f (pow2 128))
+    (ensures  (forall (i:nat). i < w ==> (feval h f).[i] == (fas_nat h f).[i]))
+let lemma_feval_is_fas_nat #w h f =
+  lemma_feval_is_fas_nat (as_tup5 h f)
+
 val fmul_precomp_r_pre:
     #w:lanes
   -> h:mem
@@ -688,11 +698,12 @@ val bytes_to_limbs:
        (uint64xN_v hi).[i] * pow2 64 + (uint64xN_v lo).[i] ==
        BSeq.nat_from_bytes_le (as_seq h0 b)))
 let bytes_to_limbs #w b =
+  let h0 = ST.get () in
   let lo = uint_from_bytes_le #U64 (sub b 0ul 8ul) in
   let hi = uint_from_bytes_le #U64 (sub b 8ul 8ul) in
   let f0 = vec_load lo w in
   let f1 = vec_load hi w in
-  admit();
+  uint_from_bytes_le_lemma (as_seq h0 b);
   f0, f1
 
 inline_for_extraction
