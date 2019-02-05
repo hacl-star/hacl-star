@@ -794,7 +794,7 @@ val fmul_r1_normalize:
       acc_inv_t (as_tup5 h1 out) /\
      (let r = feval h0 (gsub p 0ul 5ul) in
       (feval h1 out).[0] == S.normalize_1 (feval h0 out) r))
-[@ CInline]
+//[@ CInline]
 let fmul_r1_normalize out p =
   let r = sub p 0ul 5ul in
   let r5 = sub p 5ul 5ul in
@@ -814,7 +814,7 @@ val fmul_r2_normalize:
       acc_inv_t (as_tup5 h1 out) /\
      (let r = feval h0 (gsub p 0ul 5ul) in
       (feval h1 out).[0] == S.normalize_2 (feval h0 out) r))
-[@ CInline]
+//[@ CInline]
 let fmul_r2_normalize out p =
   let r = sub p 0ul 5ul in
   let r2 = sub p 10ul 5ul in
@@ -859,7 +859,7 @@ val fmul_r4_normalize:
       acc_inv_t (as_tup5 h1 out) /\
      (let r = feval h0 (gsub p 0ul 5ul) in
       (feval h1 out).[0] == S.normalize_4 (feval h0 out) r))
-[@ CInline]
+//[@ CInline]
 let fmul_r4_normalize out p =
   let r = sub p 0ul 5ul in
   let r_5 = sub p 5ul 5ul in
@@ -913,7 +913,7 @@ val fmul_rn_normalize:
       acc_inv_t (as_tup5 h1 out) /\
      (let r = feval h0 (gsub p 0ul 5ul) in
       (feval h1 out).[0] == S.normalize_n (feval h0 out) r))
-[@ CInline]
+//[@ CInline]
 let fmul_rn_normalize #w out p =
   match w with
   | 1 -> fmul_r1_normalize out p
