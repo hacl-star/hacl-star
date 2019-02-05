@@ -638,22 +638,22 @@ let fast_fmul
 
 #push-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 200"
 
-let fmul tmp f1 out f2 = admit() // Allocations too expensive...
-  // = push_frame();
-  //   let out8 = B.alloca (UInt8.uint_to_t 0) (UInt32.uint_to_t 32) in
-  //   let f18 = B.alloca (UInt8.uint_to_t 0) (UInt32.uint_to_t 32) in
-  //   let f28 = B.alloca (UInt8.uint_to_t 0) (UInt32.uint_to_t 32) in
-  //   let tmp8 = B.alloca (UInt8.uint_to_t 0) (UInt32.uint_to_t 64) in
-  //   copy_down out out8;
-  //   copy_down f2 f28;
-  //   copy_down f1 f18;
-  //   copy_down tmp tmp8;
-  //   let x = fast_fmul tmp8 f18 out8 f28 in
-  //   imm_copy_up f1 f18;
-  //   imm_copy_up f2 f28;
-  //   copy_up tmp tmp8;
-  //   copy_up out out8;
-  //   pop_frame();
-  //   x
+let fmul tmp f1 out f2
+  = push_frame();
+    let out8 = B.alloca (UInt8.uint_to_t 0) (UInt32.uint_to_t 32) in
+    let f18 = B.alloca (UInt8.uint_to_t 0) (UInt32.uint_to_t 32) in
+    let f28 = B.alloca (UInt8.uint_to_t 0) (UInt32.uint_to_t 32) in
+    let tmp8 = B.alloca (UInt8.uint_to_t 0) (UInt32.uint_to_t 64) in
+    copy_down out out8;
+    copy_down f2 f28;
+    copy_down f1 f18;
+    copy_down tmp tmp8;
+    let x = fast_fmul tmp8 f18 out8 f28 in
+    imm_copy_up f1 f18;
+    imm_copy_up f2 f28;
+    copy_up tmp tmp8;
+    copy_up out out8;
+    pop_frame();
+    x
 
 #pop-options
