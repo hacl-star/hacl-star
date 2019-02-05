@@ -68,7 +68,12 @@ function fetch_kremlin() {
     fi
     cd kremlin
     git fetch origin
-    local ref=$(if [ -f ../.kremlin_version ]; then cat ../.kremlin_version | tr -d '\r\n'; else echo origin/master; fi)
+    local ref=$(jq -c -r '.RepoVersions["kremlin_version"]' "$rootPath/.docker/build/config.json" )
+    if [[ $ref == "" || $ref == "null" ]]; then
+        echo "Unable to find RepoVersions.kremlin_version on $rootPath/.docker/build/config.json"
+        return -1
+    fi
+
     echo Switching to KreMLin $ref
     git reset --hard $ref
     cd ..
@@ -86,7 +91,12 @@ function fetch_mlcrypto() {
     fi
     cd mlcrypto
     git fetch origin
-    local ref=$(if [ -f ../.mlcrypto_version ]; then cat ../.mlcrypto_version | tr -d '\r\n'; else echo origin/master; fi)
+    local ref=$(jq -c -r '.RepoVersions["mlcrypto_version"]' "$rootPath/.docker/build/config.json" )
+    if [[ $ref == "" || $ref == "null" ]]; then
+        echo "Unable to find RepoVersions.mlcrypto_version on $rootPath/.docker/build/config.json"
+        return -1
+    fi
+
     echo Switching to MLCrypto $ref
     git reset --hard $ref
     git submodule update
@@ -101,7 +111,12 @@ function fetch_mitls() {
     fi
     cd mitls-fstar
     git fetch origin
-    local ref=$(if [ -f ../.mitls_version ]; then cat ../.mitls_version | tr -d '\r\n'; else echo origin/master; fi)
+    local ref=$(jq -c -r '.RepoVersions["mitls_version"]' "$rootPath/.docker/build/config.json" )
+    if [[ $ref == "" || $ref == "null" ]]; then
+        echo "Unable to find RepoVersions.mitls_version on $rootPath/.docker/build/config.json"
+        return -1
+    fi
+
     echo Switching to mitls-fstar $ref
     git reset --hard $ref
     git clean -fdx
@@ -226,5 +241,6 @@ export MAKEFLAGS="$MAKEFLAGS -Otarget"
 
 export_home FSTAR "$(pwd)/FStar"
 cd hacl-star
+rootPath=$(pwd)
 exec_build
 cd ..
