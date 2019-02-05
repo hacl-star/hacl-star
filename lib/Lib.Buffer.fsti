@@ -755,34 +755,6 @@ val loop_blocks:
       as_seq h1 write ==
       Seq.repeat_blocks #a #(Seq.lseq b (v blen)) (v blocksize) (as_seq h0 inp) spec_f spec_l (as_seq h0 write))
 
-inline_for_extraction noextract
-val loop_blocks_multi_inv:
-    #a:Type0
-  -> #b_spec:Type0
-  -> #b:Type0
-  -> #blen:size_t
-  -> h':mem
-  -> inv:(mem -> Type0)
-  -> refl:(mem -> GTot b_spec)
-  -> blocksize:size_t{v blocksize > 0}
-  -> inpLen:size_t
-  -> inp:lbuffer a inpLen{v inpLen % v blocksize = 0}
-  -> spec_f:(mem -> GTot (Seq.lseq a (v blocksize) -> b_spec -> b_spec))
-  -> f:(inp:lbuffer a blocksize
-       -> w:lbuffer b blen -> Stack unit
-          (requires fun h ->
-            live h inp /\ live h w /\ disjoint inp w /\ inv h)
-          (ensures  fun h0 _ h1 ->
-            modifies1 w h0 h1 /\ inv h1 /\
-            refl h1 == spec_f h' (as_seq h0 inp) (refl h0)))
-  -> write:lbuffer b blen ->
-  Stack unit
-    (requires fun h -> h == h' /\
-      live h inp /\ live h write /\ disjoint inp write /\ inv h)
-    (ensures  fun h0 _ h1 ->
-      modifies1 write h0 h1 /\ inv h1 /\
-      refl h1 == Seq.repeat_blocks_multi #a #b_spec (v blocksize) (as_seq h0 inp) (spec_f h') (refl h0))
-
 open FStar.Mul
 (*
 (** Fills a buffer block by block using a function with an accumulator *)

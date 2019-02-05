@@ -308,62 +308,6 @@ let loop_blocks #a #b #blen bs inpLen inp spec_f spec_l f l w =
   let last = sub #_ #_ #inpLen inp (nb *. bs) rem in
   l rem last w
 
-inline_for_extraction noextract
-val loop_blocks_multi_inv_f:
-    #a:Type0
-  -> #b_spec:Type0
-  -> #b:Type0
-  -> #blen:size_t
-  -> h':mem
-  -> inv:(mem -> Type0)
-  -> refl:(mem -> GTot b_spec)
-  -> blocksize:size_t{v blocksize > 0}
-  -> inpLen:size_t
-  -> inp:lbuffer a inpLen{v inpLen % v blocksize = 0}
-  -> spec_f:(mem -> GTot (Seq.lseq a (v blocksize) -> b_spec -> b_spec))
-  -> f:(inp:lbuffer a blocksize
-       -> w:lbuffer b blen -> Stack unit
-          (requires fun h ->
-            live h inp /\ live h w /\ disjoint inp w /\ inv h)
-          (ensures  fun h0 _ h1 ->
-            modifies (loc w) h0 h1 /\ inv h1 /\
-            refl h1 == spec_f h' (as_seq h0 inp) (refl h0)))
-  -> nb:size_t{v nb == v inpLen / v blocksize}
-  -> i:size_t{v i < v nb}
-  -> w:lbuffer b blen ->
-  Stack unit
-    (requires fun h ->
-      live h inp /\ live h w /\ disjoint inp w /\ inv h)
-    (ensures  fun h0 _ h1 ->
-      modifies (loc w) h0 h1 /\ inv h1 /\
-      refl h1 ==
-      Sequence.repeat_blocks_f (v blocksize) (as_seq h0 inp) (spec_f h') (v nb) (v i) (refl h0))
-
-let loop_blocks_multi_inv_f #a #b_spec #b #blen h' inv refl bs inpLen inp spec_f f nb i w =
-  assert ((v i + 1) * v bs <= v nb * v bs);
-  let block = sub #_ #_ #inpLen inp (i *. bs) bs in
-  f block w
-
-#reset-options "--max_fuel 2 --z3rlimit 100"
-
-let loop_blocks_multi_inv #a #b_spec #b #blen h' inv_w refl bs inpLen inp spec_f f w =
-  let nb = inpLen /. bs in
-  let rem = inpLen %. bs in
-
-  let h0 = ST.get () in
-  [@ inline_let]
-  let spec_fh h0 = Seq.repeat_blocks_f (v bs) (as_seq h0 inp) (spec_f h') (v nb) in
-
-  [@ inline_let]
-  let inv h (i:nat{i <= v nb}) =
-    modifies1 w h0 h /\ inv_w h /\
-    refl h == Loop.repeati i (spec_fh h0) (refl h0) in
-
-  Lib.Loops.for (size 0) nb inv
-    (fun i ->
-      Loop.unfold_repeati (v nb) (spec_fh h0) (refl h0) (v i);
-      loop_blocks_multi_inv_f #a #b_spec #b #blen h' inv_w refl bs inpLen inp spec_f f nb i w)
-
 #set-options "--z3rlimit 400 --max_fuel 1"
 
 let fill_blocks #t h0 len n output a_spec refl footprint spec impl =

@@ -523,22 +523,22 @@ val poly1305_finish_:
       modifies (loc tag |+| loc ctx) h0 h1 /\
       as_seq h1 tag == S.finish #(width s) (as_seq h0 key) (as_get_acc h0 ctx))
 let poly1305_finish_ #s tag key ctx =
-  push_frame ();
   let acc = get_acc ctx in
-  reduce_felem acc;
-
   let ks = sub key 16ul 16ul in
-  let sk = create (nlimb s) (limb_zero s) in
-  let h2 = ST.get () in
-  load_felem_le sk ks;
-  let h3 = ST.get () in
-  assert_norm (pow2 128 < S.prime);
-  assert ((feval h3 sk).[0] == BSeq.nat_from_bytes_le (as_seq h2 ks));
-  assert ((feval h3 sk).[0] == (F32xN.as_nat5 (F32xN.transpose #(width s) (F32xN.as_tup5 h3 sk)).[0]) % S.prime);
-  FStar.Math.Lemmas.modulo_lemma (F32xN.as_nat5 (F32xN.transpose #(width s) (F32xN.as_tup5 h3 sk)).[0]) S.prime;
-  assert ((F32xN.fas_nat #(width s) h3 sk).[0] == (feval h3 sk).[0]);
-  fadd128_store_felem_le #s tag acc sk;
-  pop_frame ()
+
+  let h0 = ST.get () in
+  reduce_felem acc;
+  let h1 = ST.get () in
+  assert ((fas_nat h1 acc).[0] == (feval h0 acc).[0]);
+  let (f10, f11) = felem_to_limbs acc in
+  assert ((limb_v f11).[0] * pow2 64 + (limb_v f10).[0] == (fas_nat h1 acc).[0] % pow2 128);
+  let (f20, f21) = bytes_to_limbs #s ks in
+  assert ((limb_v f21).[0] * pow2 64 + (limb_v f20).[0] == BSeq.nat_from_bytes_le (as_seq h0 ks));
+  let (f30, f31) = mod_add128 (f10, f11) (f20, f21) in
+  assert ((limb_v f31).[0] * pow2 64 + (limb_v f30).[0] ==
+    ((fas_nat h1 acc).[0] % pow2 128 + BSeq.nat_from_bytes_le (as_seq h0 ks)) % pow2 128);
+  FStar.Math.Lemmas.lemma_mod_plus_distr_l (fas_nat h1 acc).[0] (BSeq.nat_from_bytes_le (as_seq h0 ks)) (pow2 128);
+  store_felem_le tag f30 f31
 
 (* WRAPPER TO PREVENT INLINING *)
 [@CInline]

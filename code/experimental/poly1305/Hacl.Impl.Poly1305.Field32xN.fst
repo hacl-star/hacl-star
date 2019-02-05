@@ -182,7 +182,6 @@ let copy_felem #w #m f1 f2 =
   f1.(3ul) <- f2.(3ul);
   f1.(4ul) <- f2.(4ul)
 
-//[@CInline]
 inline_for_extraction
 val fadd:
     #w:lanes
@@ -679,6 +678,24 @@ let load_felem_le #w f b =
   LSeq.eq_intro (feval h1 f) (LSeq.create w (BSeq.nat_from_bytes_le (as_seq h0 b)))
 
 inline_for_extraction
+val bytes_to_limbs:
+    #w:lanes
+  -> b:lbuffer uint8 16ul
+  -> Stack (uint64xN w & uint64xN w)
+    (requires fun h -> live h b)
+    (ensures  fun h0 (lo, hi) h1 -> h0 == h1 /\
+     (forall (i:nat). i < w ==>
+       (uint64xN_v hi).[i] * pow2 64 + (uint64xN_v lo).[i] ==
+       BSeq.nat_from_bytes_le (as_seq h0 b)))
+let bytes_to_limbs #w b =
+  let lo = uint_from_bytes_le #U64 (sub b 0ul 8ul) in
+  let hi = uint_from_bytes_le #U64 (sub b 8ul 8ul) in
+  let f0 = vec_load lo w in
+  let f1 = vec_load hi w in
+  admit();
+  f0, f1
+
+inline_for_extraction
 val store_felem:
     #w:lanes
   -> f:felem w
@@ -699,14 +716,14 @@ let store_felem #w f =
 inline_for_extraction
 val store_felem1_le:
     b:lbuffer uint8 16ul
-  -> r:(uint64xN 1 & uint64xN 1)
+  -> lo:uint64xN 1
+  -> hi:uint64xN 1
   -> Stack unit
     (requires fun h -> live h b)
     (ensures  fun h0 _ h1 ->
-     (let r0, r1 = r in
       modifies (loc b) h0 h1 /\
-      as_seq h1 b == BSeq.nat_to_bytes_le 16 ((uint64xN_v r1).[0] * pow2 64 + (uint64xN_v r0).[0])))
-let store_felem1_le b (r0, r1) =
+      as_seq h1 b == BSeq.nat_to_bytes_le 16 ((uint64xN_v hi).[0] * pow2 64 + (uint64xN_v lo).[0]))
+let store_felem1_le b r0 r1 =
   let h0 = ST.get () in
   vec_store_le (sub b 0ul 8ul) r0;
   vec_store_le (sub b 8ul 8ul) r1;
@@ -717,14 +734,14 @@ let store_felem1_le b (r0, r1) =
 inline_for_extraction
 val store_felem2_le:
     b:lbuffer uint8 16ul
-  -> r:(uint64xN 2 & uint64xN 2)
+  -> lo:uint64xN 2
+  -> hi:uint64xN 2
   -> Stack unit
     (requires fun h -> live h b)
     (ensures  fun h0 _ h1 ->
-     (let r0, r1 = r in
       modifies (loc b) h0 h1 /\
-      as_seq h1 b == BSeq.nat_to_bytes_le 16 ((uint64xN_v r1).[0] * pow2 64 + (uint64xN_v r0).[0])))
-let store_felem2_le b (f0, f1) =
+      as_seq h1 b == BSeq.nat_to_bytes_le 16 ((uint64xN_v hi).[0] * pow2 64 + (uint64xN_v lo).[0]))
+let store_felem2_le b f0 f1 =
   let r0 = vec_interleave_low f0 f1 in
   vec_interleave_low_lemma64_2 f0 f1;
   vec_store_le b r0;
@@ -733,14 +750,14 @@ let store_felem2_le b (f0, f1) =
 inline_for_extraction
 val store_felem4_le:
     b:lbuffer uint8 16ul
-  -> r:(uint64xN 4 & uint64xN 4)
+  -> lo:uint64xN 4
+  -> hi:uint64xN 4
   -> Stack unit
     (requires fun h -> live h b)
     (ensures  fun h0 _ h1 ->
-     (let r0, r1 = r in
       modifies (loc b) h0 h1 /\
-      as_seq h1 b == BSeq.nat_to_bytes_le 16 ((uint64xN_v r1).[0] * pow2 64 + (uint64xN_v r0).[0])))
-let store_felem4_le b (f0, f1) =
+      as_seq h1 b == BSeq.nat_to_bytes_le 16 ((uint64xN_v hi).[0] * pow2 64 + (uint64xN_v lo).[0]))
+let store_felem4_le b f0 f1 =
   push_frame ();
   let lo = vec_interleave_low f0 f1 in
   let hi = vec_interleave_high f0 f1 in
@@ -767,18 +784,18 @@ inline_for_extraction
 val store_felem_le:
     #w:lanes
   -> b:lbuffer uint8 16ul
-  -> r:(uint64xN w & uint64xN w)
+  -> lo:uint64xN w
+  -> hi:uint64xN w
   -> Stack unit
     (requires fun h -> live h b)
     (ensures  fun h0 _ h1 ->
-     (let r0, r1 = r in
       modifies (loc b) h0 h1 /\
-      as_seq h1 b == BSeq.nat_to_bytes_le 16 ((uint64xN_v r1).[0] * pow2 64 + (uint64xN_v r0).[0])))
-let store_felem_le #w b r =
+      as_seq h1 b == BSeq.nat_to_bytes_le 16 ((uint64xN_v hi).[0] * pow2 64 + (uint64xN_v lo).[0]))
+let store_felem_le #w b lo hi =
   match w with
-  | 1 -> store_felem1_le b r
-  | 2 -> store_felem2_le b r
-  | 4 -> store_felem4_le b r
+  | 1 -> store_felem1_le b lo hi
+  | 2 -> store_felem2_le b lo hi
+  | 4 -> store_felem4_le b lo hi
 
 inline_for_extraction
 val fmul_r1_normalize:
@@ -794,7 +811,6 @@ val fmul_r1_normalize:
       acc_inv_t (as_tup5 h1 out) /\
      (let r = feval h0 (gsub p 0ul 5ul) in
       (feval h1 out).[0] == S.normalize_1 (feval h0 out) r))
-//[@ CInline]
 let fmul_r1_normalize out p =
   let r = sub p 0ul 5ul in
   let r5 = sub p 5ul 5ul in
@@ -814,7 +830,6 @@ val fmul_r2_normalize:
       acc_inv_t (as_tup5 h1 out) /\
      (let r = feval h0 (gsub p 0ul 5ul) in
       (feval h1 out).[0] == S.normalize_2 (feval h0 out) r))
-//[@ CInline]
 let fmul_r2_normalize out p =
   let r = sub p 0ul 5ul in
   let r2 = sub p 10ul 5ul in
@@ -859,7 +874,6 @@ val fmul_r4_normalize:
       acc_inv_t (as_tup5 h1 out) /\
      (let r = feval h0 (gsub p 0ul 5ul) in
       (feval h1 out).[0] == S.normalize_4 (feval h0 out) r))
-//[@ CInline]
 let fmul_r4_normalize out p =
   let r = sub p 0ul 5ul in
   let r_5 = sub p 5ul 5ul in
@@ -913,7 +927,6 @@ val fmul_rn_normalize:
       acc_inv_t (as_tup5 h1 out) /\
      (let r = feval h0 (gsub p 0ul 5ul) in
       (feval h1 out).[0] == S.normalize_n (feval h0 out) r))
-//[@ CInline]
 let fmul_rn_normalize #w out p =
   match w with
   | 1 -> fmul_r1_normalize out p
@@ -938,28 +951,3 @@ let mod_add128 #w (a0, a1) (b0, b1) = admit();
   let c = r0 ^| ((r0 ^| b0) `vec_or` (r0 -| b0) ^| b0) >>| 63ul in
   let r1 = vec_add_mod r1 c in
   (r0, r1)
-
-inline_for_extraction
-val fadd128_store_felem_le:
-    #w:lanes
-  -> out:lbuffer uint8 16ul
-  -> f1:felem w
-  -> f2:felem w
-  -> Stack unit
-    (requires fun h ->
-      live h out /\ live h f1 /\ live h f2 /\
-      felem_fits h f1 (1, 1, 1, 1, 1) /\
-      felem_fits h f2 (1, 1, 1, 1, 1))
-    (ensures  fun h0 _ h1 ->
-      modifies (loc out) h0 h1 /\
-      as_seq h1 out == BSeq.nat_to_bytes_le 16 (((fas_nat h0 f1).[0] + (fas_nat h0 f2).[0]) % pow2 128))
-let fadd128_store_felem_le #w out f1 f2 =
-  let h0 = ST.get () in
-  let (f10, f11) = store_felem #w f1 in
-  let (f20, f21) = store_felem #w f2 in
-  let (f30, f31) = mod_add128 #w (f10, f11) (f20, f21) in
-  store_felem_le out (f30, f31);
-  let h1 = ST.get () in
-  assert ((uint64xN_v f31).[0] * pow2 64 + (uint64xN_v f30).[0] ==
-    ((fas_nat h0 f1).[0] % pow2 128 + (fas_nat h0 f2).[0] % pow2 128) % pow2 128);
-  FStar.Math.Lemmas.modulo_distributivity ((fas_nat h0 f1).[0]) ((fas_nat h0 f2).[0]) (pow2 128)
