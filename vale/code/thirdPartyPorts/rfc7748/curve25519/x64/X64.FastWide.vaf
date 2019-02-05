@@ -175,13 +175,13 @@ procedure{:quick}{:public}{:exportSpecs} fmul_stdcall(
 }
 
 #reset-options "--z3rlimit 30"
-procedure{:quick}{:public} fmul2_stdcall(
+procedure{:quick}{:public}{:exportSpecs} fmul2_stdcall(
     inline win:bool,
-    ghost dst_b:buffer64,
-    ghost inA_b:buffer64,
-    ghost inB_b:buffer64,
+    ghost stack_b:buffer64,
     ghost tmp_b:buffer64,
-    ghost stack_b:buffer64)
+    ghost inA_b:buffer64,
+    ghost dst_b:buffer64,
+    ghost inB_b:buffer64)
     lets
         tmp_ptr @= rdi; inA_ptr @= rsi; dst_ptr @= rdx; inB_ptr @= rcx;
         tmp_in := (if win then rcx else rdi);
@@ -190,8 +190,8 @@ procedure{:quick}{:public} fmul2_stdcall(
         inB_in := (if win then r9  else rcx);
     reads memTaint;
     modifies
-        rax; rbx; rcx; rdx; rdi; rsi; r8; r9; r10; r11; r12; r13; r14;
-        rsp; efl; mem;
+        rax; rbx; rcx; rdx; rsi; rdi; rbp; rsp; r8; r9; r10; r11; r12; r13; r14; r15;             
+        efl; mem;
     requires
         adx_enabled && bmi2_enabled;
         buffers_disjoint(dst_b, inA_b) || dst_b == inA_b;
@@ -210,7 +210,7 @@ procedure{:quick}{:public} fmul2_stdcall(
         validSrcAddrs64(mem, inA_in, inA_b, 8, memTaint, Secret);
         validSrcAddrs64(mem, inB_in, inB_b, 8, memTaint, Secret);
         validDstAddrs64(mem, tmp_in, tmp_b, 16, memTaint, Secret);
-        valid_stack_slots(mem, rsp, stack_b, if win then 5 else 4, memTaint);
+        valid_stack_slots(mem, rsp, stack_b, 6, memTaint);
     ensures
         let a0 := old(buffer64_read(inA_b, 0, mem));
         let a1 := old(buffer64_read(inA_b, 1, mem));
@@ -262,21 +262,33 @@ procedure{:quick}{:public} fmul2_stdcall(
         modifies_buffer_3(dst_b, tmp_b, stack_b, old(mem), mem);
         validSrcAddrs64(mem, dst_in, dst_b, 4, memTaint, Secret);
 
-        win ==> rsi == old(rsi);
-        r12 == old(r12);
-        r13 == old(r13);
-        r14 == old(r14);
+        win ==>  rbx == old(rbx);
+        win ==>  rbp == old(rbp);
+        win ==>  rdi == old(rdi);
+        win ==>  rsi == old(rsi);
+        win ==>  rsp == old(rsp);
+        win ==>  r12 == old(r12);
+        win ==>  r13 == old(r13);
+        win ==>  r14 == old(r14);
+        win ==>  r15 == old(r15);
+        !win ==>  rbx == old(rbx);
+        !win ==>  rbp == old(rbp);
+        !win ==>  r12 == old(r12);
+        !win ==>  r13 == old(r13);
+        !win ==>  r14 == old(r14);
+        !win ==>  r15 == old(r15);
 
         rsp == old(rsp);
 {
-    Push(r12, stack_b, 3 + bool_bit(win));
-    Push(r13, stack_b, 2 + bool_bit(win));
-    Push(r14, stack_b, 1 + bool_bit(win));
+    Push(r12, stack_b, 5);
+    Push(r13, stack_b, 4);
+    Push(r14, stack_b, 3);
 
     // Line up the rest of the arguments
     inline if (win) {
         // Store callee-save registers
-        Push(rsi, stack_b, 1);
+        Push(rsi, stack_b, 2);
+        Push(rdi, stack_b, 1);
 
         Mov64(tmp_ptr, rcx);
         Mov64(inA_ptr, rdx);
@@ -284,34 +296,39 @@ procedure{:quick}{:public} fmul2_stdcall(
         //Mov64(dst_ptr, r9);
         Push(r8, stack_b, 0);        // Save dst_ptr, since fast_multiply will clobber it
     } else {
-        Push(dst_ptr, stack_b, 0);   // Save dst_ptr, since fast_multiply will clobber it
+        Push(dst_ptr, stack_b, 2);   // Save dst_ptr, since fast_multiply will clobber it
     }
 
     fast_multiply(0, tmp_b, inA_b, inB_b);
     fast_multiply(4, tmp_b, inA_b, inB_b);
 
     Mov64(inA_ptr, tmp_ptr);
-    Pop(rdi, stack_b, 0);
+    inline if (win) {
+        Pop(rdi, stack_b, 0);
+    } else {
+        Pop(rdi, stack_b, 2);
+    }
 
     carry_wide(0, dst_b, tmp_b);
     carry_wide(4, dst_b, tmp_b);
 
     inline if (win) {
-        Pop(rsi, stack_b, 1);
+        Pop(rdi, stack_b, 1);
+        Pop(rsi, stack_b, 2);
     } 
 
-    Pop(r14, stack_b, 1 + bool_bit(win));
-    Pop(r13, stack_b, 2 + bool_bit(win));
-    Pop(r12, stack_b, 3 + bool_bit(win));
+    Pop(r14, stack_b, 3);
+    Pop(r13, stack_b, 4);
+    Pop(r12, stack_b, 5);
 }
 
 
-procedure{:quick}{:public} fsqr_stdcall(
+procedure{:quick}{:public}{:exportSpecs} fsqr_stdcall(
     inline win:bool,
-    ghost dst_b:buffer64,
-    ghost inA_b:buffer64,
+    ghost stack_b:buffer64,
     ghost tmp_b:buffer64,
-    ghost stack_b:buffer64)
+    ghost inA_b:buffer64,
+    ghost dst_b:buffer64)
     lets
         tmp_ptr @= rdi; inA_ptr @= rsi; dst_ptr @= rdx; 
         tmp_in := (if win then rcx else rdi);
@@ -319,8 +336,8 @@ procedure{:quick}{:public} fsqr_stdcall(
         dst_in := (if win then r8  else rdx);
     reads memTaint;
     modifies
-        rax; rbx; rcx; rdx; rdi; rsi; r8; r9; r10; r11; r12; r13; r14; r15;
-        rsp; efl; mem;
+        rax; rbx; rcx; rdx; rsi; rdi; rbp; rsp; r8; r9; r10; r11; r12; r13; r14; r15;
+        efl; mem;
     requires
         adx_enabled && bmi2_enabled;
         buffers_disjoint(dst_b, inA_b) || dst_b == inA_b;
@@ -335,7 +352,7 @@ procedure{:quick}{:public} fsqr_stdcall(
         validDstAddrs64(mem, dst_in, dst_b, 4, memTaint, Secret);
         validSrcAddrs64(mem, inA_in, inA_b, 4, memTaint, Secret);
         validDstAddrs64(mem, tmp_in, tmp_b, 8, memTaint, Secret);
-        valid_stack_slots(mem, rsp, stack_b, if win then 6 else 5, memTaint);
+        valid_stack_slots(mem, rsp, stack_b, 7, memTaint);
     ensures
         let a0 := old(buffer64_read(inA_b, 0, mem));
         let a1 := old(buffer64_read(inA_b, 1, mem));
@@ -359,53 +376,69 @@ procedure{:quick}{:public} fsqr_stdcall(
         modifies_buffer_3(dst_b, tmp_b, stack_b, old(mem), mem);
         validSrcAddrs64(mem, dst_in, dst_b, 4, memTaint, Secret);
 
-        win ==> rsi == old(rsi);
-        r12 == old(r12);
-        r13 == old(r13);
-        r14 == old(r14);
-        r15 == old(r15);
+        win ==>  rbx == old(rbx);
+        win ==>  rbp == old(rbp);
+        win ==>  rdi == old(rdi);
+        win ==>  rsi == old(rsi);
+        win ==>  rsp == old(rsp);
+        win ==>  r12 == old(r12);
+        win ==>  r13 == old(r13);
+        win ==>  r14 == old(r14);
+        win ==>  r15 == old(r15);
+        !win ==>  rbx == old(rbx);
+        !win ==>  rbp == old(rbp);
+        !win ==>  r12 == old(r12);
+        !win ==>  r13 == old(r13);
+        !win ==>  r14 == old(r14);
+        !win ==>  r15 == old(r15);
 
         rsp == old(rsp);
 {
-    Push(r15, stack_b, 4 + bool_bit(win));
-    Push(r12, stack_b, 3 + bool_bit(win));
-    Push(r13, stack_b, 2 + bool_bit(win));
-    Push(r14, stack_b, 1 + bool_bit(win));
+    Push(r15, stack_b, 6);
+    Push(r12, stack_b, 5);
+    Push(r13, stack_b, 4);
+    Push(r14, stack_b, 3);
 
     // Line up the rest of the arguments
     inline if (win) {
         // Store callee-save registers
-        Push(rsi, stack_b, 1);
+        Push(rsi, stack_b, 2);
+        Push(rdi, stack_b, 1);
 
         Mov64(tmp_ptr, rcx);
         Mov64(inA_ptr, rdx);
         //Mov64(dst_ptr, r9);
         Push(r8, stack_b, 0);        // Save dst_ptr, since fast_multiply will clobber it
     } else {
-        Push(dst_ptr, stack_b, 0);   // Save dst_ptr, since fast_multiply will clobber it
+        Push(dst_ptr, stack_b, 2);   // Save dst_ptr, since fast_multiply will clobber it
     }
 
     fast_sqr(0, tmp_b, inA_b);
     Mov64(inA_ptr, tmp_ptr);
-    Pop(rdi, stack_b, 0);
+    inline if (win) {
+        Pop(rdi, stack_b, 0);
+    } else {
+        Pop(rdi, stack_b, 2);
+    }
     carry_wide(0, dst_b, tmp_b);
 
     inline if (win) {
-        Pop(rsi, stack_b, 1);
+        Pop(rdi, stack_b, 1);
+        Pop(rsi, stack_b, 2);
     } 
 
-    Pop(r14, stack_b, 1 + bool_bit(win));
-    Pop(r13, stack_b, 2 + bool_bit(win));
-    Pop(r12, stack_b, 3 + bool_bit(win));
-    Pop(r15, stack_b, 4 + bool_bit(win));
+    Pop(r14, stack_b, 3);
+    Pop(r13, stack_b, 4);
+    Pop(r12, stack_b, 5);
+    Pop(r15, stack_b, 6);
 }
 
-procedure{:quick}{:public} fsqr2_stdcall(
+procedure{:quick}{:public}{:exportSpecs} fsqr2_stdcall(
     inline win:bool,
-    ghost dst_b:buffer64,
-    ghost inA_b:buffer64,
+    ghost stack_b:buffer64,
     ghost tmp_b:buffer64,
-    ghost stack_b:buffer64)
+    ghost inA_b:buffer64,
+    ghost dst_b:buffer64)
     lets
         tmp_ptr @= rdi; inA_ptr @= rsi; dst_ptr @= rdx; 
         tmp_in := (if win then rcx else rdi);
@@ -413,8 +446,8 @@ procedure{:quick}{:public} fsqr2_stdcall(
         dst_in := (if win then r8  else rdx);
     reads memTaint;
     modifies
-        rax; rbx; rcx; rdx; rdi; rsi; r8; r9; r10; r11; r12; r13; r14; r15;
-        rsp; efl; mem;
+        rax; rbx; rcx; rdx; rsi; rdi; rbp; rsp; r8; r9; r10; r11; r12; r13; r14; r15;
+        efl; mem;    
     requires
         adx_enabled && bmi2_enabled;
         buffers_disjoint(dst_b, inA_b) || dst_b == inA_b;
@@ -429,7 +462,7 @@ procedure{:quick}{:public} fsqr2_stdcall(
         validDstAddrs64(mem, dst_in, dst_b, 8, memTaint, Secret);
         validSrcAddrs64(mem, inA_in, inA_b, 8, memTaint, Secret);
         validDstAddrs64(mem, tmp_in, tmp_b, 16, memTaint, Secret);
-        valid_stack_slots(mem, rsp, stack_b, if win then 6 else 5, memTaint);
+        valid_stack_slots(mem, rsp, stack_b, 7, memTaint);
     ensures
         let a0  := old(buffer64_read(inA_b, 0, mem));
         let a1  := old(buffer64_read(inA_b, 1, mem));
@@ -464,47 +497,63 @@ procedure{:quick}{:public} fsqr2_stdcall(
         modifies_buffer_3(dst_b, tmp_b, stack_b, old(mem), mem);
         validSrcAddrs64(mem, dst_in, dst_b, 8, memTaint, Secret);
 
-        win ==> rsi == old(rsi);
-        r12 == old(r12);
-        r13 == old(r13);
-        r14 == old(r14);
-        r15 == old(r15);
+        win ==>  rbx == old(rbx);
+        win ==>  rbp == old(rbp);
+        win ==>  rdi == old(rdi);
+        win ==>  rsi == old(rsi);
+        win ==>  rsp == old(rsp);
+        win ==>  r12 == old(r12);
+        win ==>  r13 == old(r13);
+        win ==>  r14 == old(r14);
+        win ==>  r15 == old(r15);
+        !win ==>  rbx == old(rbx);
+        !win ==>  rbp == old(rbp);
+        !win ==>  r12 == old(r12);
+        !win ==>  r13 == old(r13);
+        !win ==>  r14 == old(r14);
+        !win ==>  r15 == old(r15);
 
         rsp == old(rsp);
 {
-    Push(r15, stack_b, 4 + bool_bit(win));
-    Push(r12, stack_b, 3 + bool_bit(win));
-    Push(r13, stack_b, 2 + bool_bit(win));
-    Push(r14, stack_b, 1 + bool_bit(win));
+    Push(r15, stack_b, 6);
+    Push(r12, stack_b, 5);
+    Push(r13, stack_b, 4);
+    Push(r14, stack_b, 3);
 
     // Line up the rest of the arguments
     inline if (win) {
         // Store callee-save registers
-        Push(rsi, stack_b, 1);
+        Push(rsi, stack_b, 2);
+        Push(rdi, stack_b, 1);
 
         Mov64(tmp_ptr, rcx);
         Mov64(inA_ptr, rdx);
         //Mov64(dst_ptr, r9);
         Push(r8, stack_b, 0);        // Save dst_ptr, since fast_multiply will clobber it
     } else {
-        Push(dst_ptr, stack_b, 0);   // Save dst_ptr, since fast_multiply will clobber it
+        Push(dst_ptr, stack_b, 2);   // Save dst_ptr, since fast_multiply will clobber it
     }
 
     fast_sqr(0, tmp_b, inA_b);
     fast_sqr(4, tmp_b, inA_b);
     Mov64(inA_ptr, tmp_ptr);
-    Pop(rdi, stack_b, 0);
+    inline if (win) {
+        Pop(rdi, stack_b, 0);
+    } else {
+        Pop(rdi, stack_b, 2);
+    }
     carry_wide(0, dst_b, tmp_b);
     carry_wide(4, dst_b, tmp_b);
 
     inline if (win) {
-        Pop(rsi, stack_b, 1);
+        Pop(rdi, stack_b, 1);
+        Pop(rsi, stack_b, 2);
     } 
 
-    Pop(r14, stack_b, 1 + bool_bit(win));
-    Pop(r13, stack_b, 2 + bool_bit(win));
-    Pop(r12, stack_b, 3 + bool_bit(win));
-    Pop(r15, stack_b, 4 + bool_bit(win));
+    Pop(r14, stack_b, 3);
+    Pop(r13, stack_b, 4);
+    Pop(r12, stack_b, 5);
+    Pop(r15, stack_b, 6);
 }
 
 
