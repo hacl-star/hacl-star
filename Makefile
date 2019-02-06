@@ -12,11 +12,13 @@
 #         lib   specs                  specs/old
 #
 
-# -2. Top-level entry points, delegating to recursive make invocations via pattern
-# rules.
+
+##########################
+# Top-level entry points #
+##########################
 
 # TODO: compile-merkle-tree, compile-evercrypt + variants
-all: secure_api.old compile-compact compile-generic compile-compact-msvc
+all: compile-compact compile-generic compile-compact-msvc # secure_api.old
 
 # Any file in code/tests is taken to contain a `main` function.
 # Any file in specs/tests is taken to contain a `test` function.
@@ -32,7 +34,10 @@ ci: all test
 secure_api.old:
 	$(MAKE) -C secure_api
 
-# -2. Configuration
+
+#################
+# Configuration #
+#################
 
 IMPORT_FSTAR_TYPES = $(VALE_HOME)/bin/importFStarTypes.exe
 PYTHON3 = $(shell tools/findpython3.sh)
@@ -42,19 +47,23 @@ else
   MONO = mono
 endif
 
-# -1. Complete dependency graph for HACL* + Vale
 
-# The set of .vaf files we want to translate to F*. This excludes operator.vaf
-# (Vale generates an empty fst/fsti pair), and build artifacts that end with
-# .types.vaf.
-VALE_ROOTS = $(filter-out %operator.vaf,$(filter-out %.types.vaf,$(wildcard $(addsuffix /*.vaf,$(VALE_DIRS)))))
+####################################################
+# Dependency graphs for Vale, then F* source files #
+####################################################
+
+# The set of .vaf files we want to translate to F*.
+VALE_ROOTS = $(filter-out %.types.vaf,$(wildcard $(addsuffix /*.vaf,$(VALE_DIRS))))
+
+# F* files stemming from Vale files
 VALE_FSTS = $(patsubst %.vaf,%.fst,$(VALE_ROOTS))
 
-# The set of F* files -- only complete in the second stage of this build.
+# The complete set of F* files -- only meaningful in the second stage of this build.
 FSTAR_ROOTS = $(wildcard $(addsuffix /*.fsti,$(DIRS)) $(addsuffix /*.fst,$(DIRS)))
 
 include Makefile.common
 
+# We currently force regeneration of three depend files... this is... long...
 ifndef MAKE_RESTARTS
 .fstar-depend-%: .FORCE
 	@$(FSTAR_NO_FLAGS) --dep $* $(FSTAR_ROOTS) --extract '* -Prims -LowStar -Lib.Buffer -Hacl -FStar +FStar.Endianness +FStar.Kremlin.Endianness' > $@
@@ -73,7 +82,10 @@ endif
 include .fstar-depend-full
 include .vale-depend
 
-# 0. First stage: running Vale to generate proper F* files
+
+###################################################
+# First stage: producing F* files from Vale files #
+###################################################
 
 %.dump: %.checked
 	$(FSTAR) --dump_module $(subst prims,Prims,$(basename $(notdir $*))) \
@@ -84,22 +96,36 @@ include .vale-depend
 %.types.vaf:
 	$(MONO) $(IMPORT_FSTAR_TYPES) $(addprefix -in ,$^) -out $@
 
-%.fst:
+# Always pass operator.vaf as an -include to Vale, except for the file itself.
+VALE_FLAGS = -include $(HACL_HOME)/vale/code/lib/util/operator.vaf
+
+$(HACL_HOME)/vale/code/lib/util/operator.fst: VALE_FLAGS=
+
+%.fsti:
 	@if ! [ "$*.vaf" == "$<" ]; then echo "Makefile bug: trying to produce an .fst without a .vaf"; false; fi
 	$(MONO) $(VALE_HOME)/bin/vale.exe -fstarText -quickMods \
 	  -typecheck -include $*.types.vaf \
-	  -include $(HACL_HOME)/vale/code/lib/util/operator.vaf \
+	  $(VALE_FLAGS) \
 	  -in $< -out $@ -outi $@i
 
 # Force linearization of the rule above
 %.fst: %.fsti
 
+# A pseudo-target for the first stage.
 vaf-to-fst: $(VALE_FSTS)
 
-# 2. Verification
+
+####################################
+# Second stage: verifying F* files #
+####################################
+
+$(HACL_HOME)/vale/%.checked: FSTAR_FLAGS=--z3cliopt smt.arith.nl=false \
+  --z3cliopt smt.QI.EAGER_THRESHOLD=100 --z3cliopt smt.CASE_SPLIT=3 \
+  --smtencoding.elim_box true --smtencoding.l_arith_repr native \
+  --smtencoding.nl_arith_repr wrapped
 
 %.checked:
-	$(FSTAR) $< && \
+	$(FSTAR) $(FSTAR_FLAGS) $< && \
 	touch $@
 
 # 3. Extraction. Note that all the C files are prefixed with Hacl_. Cleaner!
