@@ -24,6 +24,7 @@ module S = Spec.SHA3
 let keccak_rotc :x:ilbuffer rotc_t 24ul{witnessed x S.keccak_rotc /\ recallable x}
   = createL_global rotc_list
 
+inline_for_extraction
 let piln_list: x:list piln_t{List.Tot.length x <= max_size_t} =
   assert_norm (List.Tot.length piln_list <= max_size_t);
   piln_list
@@ -489,7 +490,7 @@ let squeeze_inner rateInBytes outputByteLen s output i =
   storeState rateInBytes s output;
   state_permute s
 
-#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
+#reset-options "--z3rlimit 150 --max_fuel 1 --max_ifuel 1"
 
 val squeeze:
     s:state
@@ -514,7 +515,7 @@ let squeeze s rateInBytes outputByteLen output =
     (fun h i -> as_seq h s)
     (fun _ -> loc s)
     (fun h0 -> S.squeeze_inner (v rateInBytes) (v outputByteLen))
-    (fun i block -> squeeze_inner rateInBytes outputByteLen s block i);
+    (fun i -> squeeze_inner rateInBytes outputByteLen s (sub blocks (i *! rateInBytes) rateInBytes) i);
   storeState remOut s last;
   let h1 = ST.get() in
   Seq.lemma_split (as_seq h1 output) (v outBlocks * v rateInBytes);

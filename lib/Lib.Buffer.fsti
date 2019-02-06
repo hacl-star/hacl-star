@@ -818,7 +818,7 @@ val fill_blocks:
   Stack unit
     (requires fun h -> h0 == h /\ live h output)
     (ensures  fun _ _ h1 ->
-      B.modifies (B.loc_union (footprint (v n)) (loc (gsub output 0ul (n *! len)))) h0 h1 /\
+      B.modifies (B.loc_union (footprint (v n)) (loc output)) h0 h1 /\
      (let s, o = Seq.generate_blocks (v len) (v n) a_spec (spec h0) (refl h0 0) in
       refl h1 (v n) == s /\
       as_seq #_ #t h1 (gsub output (size 0) (n *! len)) == o))

@@ -49,7 +49,7 @@ val uint_from_bytes_le:
     (requires fun h0 -> live h0 i)
     (ensures  fun h0 o h1 ->
       h0 == h1 /\ live h1 i /\
-      uint_v o == uint_v (BS.uint_from_bytes_le #t #l (as_seq h0 i)))
+      o == BS.uint_from_bytes_le #t #l (as_seq h0 i))
 
 inline_for_extraction
 val uint_from_bytes_be:
