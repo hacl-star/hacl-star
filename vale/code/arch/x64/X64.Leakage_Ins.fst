@@ -51,7 +51,7 @@ let check_if_ins_consumes_fixed_time ins ts =
   else
   let ts' = set_taints dsts ts taint in
   let b, ts' = match i with
-    | S.Mov64 dst _ | S.AddLea64 dst _ _ | S.Cmovc64 dst _ -> begin
+    | S.Mov64 dst _ | S.MovBe64 dst _ | S.AddLea64 dst _ _ | S.Cmovc64 dst _ -> begin
       match dst with
         | OConst _ -> false, ts (* Should not happen *)
         | OReg r -> fixedTime, ts'
@@ -1360,6 +1360,7 @@ let lemma_ins_same_public ts ins s1 s2 fuel =
   match ins.i with
   | S.Cpuid -> ()
   | S.Mov64 _ _ -> lemma_mov_same_public ts ins s1 s2 fuel
+  | S.MovBe64 _ _ -> () // TODO
   | S.Cmovc64 _ _ -> lemma_cmovc_same_public ts ins s1 s2 fuel
   | S.Add64 _ _ -> lemma_add_same_public ts ins s1 s2 fuel
   | S.AddLea64 _ _ _ -> lemma_addlea_same_public ts ins s1 s2 fuel
