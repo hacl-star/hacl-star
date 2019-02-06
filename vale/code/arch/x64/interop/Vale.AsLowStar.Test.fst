@@ -76,8 +76,7 @@ module VS = X64.Vale.State
 #set-options "--print_effect_args --z3rlimit 20"
 
 (* The vale lemma doesn't quite suffice to prove the modifies clause
-   expected of the interop layer;
-   So, that's assumed for now ... to be fixed *)
+   expected of the interop layer *)
 [@__reduce__] unfold
 let vm_lemma'
     (code:V.va_code)
@@ -201,7 +200,7 @@ let memcpy_test
       B.live h1 dst /\
       B.as_seq h1 dst == B.as_seq h1 src)
 //  by (T.dump "A") (* in case you want to look at the VC *)
-  = assume (~ (eq3 #(B.buffer UInt8.t) #(IB.ibuffer UInt8.t) dst src));
+  = Vale.LowStarHelpers.lemma_different_preorders_different_buffers dst src; 
     let x, _ = lowstar_memcpy_normal_t dst src () in //This is a call to the interop wrapper
     let h1 = get () in
     lbv_as_seq_eq dst src Views.view64 h1; //And a lemma to rephrase the Vale postcondition 

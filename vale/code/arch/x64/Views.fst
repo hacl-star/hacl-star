@@ -19,10 +19,9 @@ let inverses16 (u:unit) =
 let inverses32 (u:unit) =
   reveal_opaque get32_def;
   reveal_opaque put32_def;
-  let aux (x:Seq.lseq U8.t 4) : Lemma (put32 (get32 x) == x) =
-    assert (Seq.equal x (put32 (get32 x)))
-  in Classical.forall_intro aux
-
+  Classical.forall_intro (four_to_seq_to_four_LE #nat8);
+  Classical.forall_intro (seq_to_four_to_seq_LE #nat8)
+  
 #reset-options "--z3rlimit 20"
 let inverses64 (u:unit) =
   reveal_opaque get64_def;

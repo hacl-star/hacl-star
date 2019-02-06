@@ -474,7 +474,7 @@ let rec disjoint_or_eq_fresh
       all_live_cons hd tl h0;
       disjoint_or_eq_fresh x tl h0;
       match hd with
-      | (|TD_ImmBuffer _ _, y|) -> assume (~(eq3 #(B.buffer UInt8.t) #(IB.ibuffer UInt8.t) x y))
+      | (|TD_ImmBuffer _ _, y|) -> Vale.LowStarHelpers.lemma_different_preorders_different_buffers x y
       | _ -> ()
 
 let rec write_taint

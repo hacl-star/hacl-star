@@ -80,3 +80,13 @@ let buffer_writeable_reveal t x = ()
 let buffer_read_reveal t h s b i =
   let b_v = BV.mk_buffer_view b (LSig.view_of_base_typ t) in
   BV.as_seq_sel h b_v i
+
+let imm_buffer_read_reveal t h s b i =
+  let b_v = BV.mk_buffer_view b (LSig.view_of_base_typ t) in
+  BV.as_seq_sel h b_v i
+
+let buffer_as_seq_reveal_tuint128 x va_s = ()
+
+let immbuffer_as_seq_reveal_tuint128 x va_s = ()
+
+let bounded_buffer_addrs t h b s = ()

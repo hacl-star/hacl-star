@@ -19,6 +19,7 @@ module SL = X64.Vale.StateLemmas
 module VL = X64.Vale.Lemmas
 module ST = FStar.HyperStack.ST
 module I = Interop
+open FStar.Mul
 
 val as_vale_buffer_len (#t:base_typ) (x:buf_t t)
    : Lemma (V.buffer_length (as_vale_buffer x) == B.length x / view_n t)
@@ -214,3 +215,43 @@ val buffer_read_reveal (t:base_typ) (h:HS.mem) (s:ME.mem) (b:(buf_t t){B.live h 
   (ensures LSig.nat_to_uint t (ME.buffer_read (as_vale_buffer b) i s) == 
     low_buffer_read t h b i ) 
   [SMTPat (low_buffer_read t h b i); SMTPat (ME.buffer_read (as_vale_buffer b) i s)]
+
+let imm_low_buffer_read (t:base_typ) (h:HS.mem) (b:(ibuf_t t){B.live h b}) (i:nat{i < B.length b / view_n t}) : GTot (base_typ_as_type t) =
+  let view = LSig.view_of_base_typ t in
+  let b_v = BV.mk_buffer_view b view in
+  BV.as_buffer_mk_buffer_view b view;
+  BV.get_view_mk_buffer_view b view;
+  BV.length_eq b_v;  
+  BV.sel h b_v i
+
+val imm_buffer_read_reveal (t:base_typ) (h:HS.mem) (s:ME.mem) (b:(ibuf_t t){B.live h b}) (i:nat{i < B.length b / view_n t}) : Lemma
+  (requires Seq.equal 
+    (LSig.nat_to_uint_seq_t t (ME.buffer_as_seq s (as_vale_immbuffer b)))
+    (BV.as_seq h (BV.mk_buffer_view b (LSig.view_of_base_typ t))))
+  (ensures LSig.nat_to_uint t (ME.buffer_read (as_vale_immbuffer b) i s) == 
+    imm_low_buffer_read t h b i ) 
+  [SMTPat (imm_low_buffer_read t h b i); SMTPat (ME.buffer_read (as_vale_immbuffer b) i s)]
+
+val buffer_as_seq_reveal_tuint128
+  (x:buf_t TUInt128)
+  (va_s:V.va_state) : Lemma
+  (let y = as_vale_buffer x in
+   let h = hs_of_mem (as_mem va_s.VS.mem) in
+   Seq.equal 
+    (LSig.nat_to_uint_seq_t TUInt128 (ME.buffer_as_seq va_s.VS.mem y))
+    (V.buffer128_as_seq va_s.VS.mem (as_vale_buffer x)))
+  [SMTPat (V.buffer128_as_seq va_s.VS.mem (as_vale_buffer x))]
+
+val immbuffer_as_seq_reveal_tuint128
+  (x:ibuf_t TUInt128)
+  (va_s:V.va_state) : Lemma
+  (let y = as_vale_immbuffer x in
+   let h = hs_of_mem (as_mem va_s.VS.mem) in
+   Seq.equal 
+    (LSig.nat_to_uint_seq_t TUInt128 (ME.buffer_as_seq va_s.VS.mem y))
+    (V.buffer128_as_seq va_s.VS.mem (as_vale_immbuffer x)))
+  [SMTPat (V.buffer128_as_seq va_s.VS.mem (as_vale_immbuffer x))]
+
+val bounded_buffer_addrs (t:base_typ) (h:HS.mem) (b:buf_t t{B.live h b}) (s:ME.mem) : Lemma
+  (ME.buffer_addr #t (as_vale_buffer b) s + B.length b < Words_s.pow2_64)
+
