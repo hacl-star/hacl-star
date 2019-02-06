@@ -1185,7 +1185,7 @@ if not is_help:
     for x in vaf_dump_deps:
       compute_module_types(env, x)
 
-  if fstar_extract:
+  if fstar_extract and not min_test:
     # Build AES-GCM
     aesgcm_asm = extract_assembly_code(env, 'aesgcm', File('code/crypto/aes/x64/Main.ml'),
       [File('code/crypto/aes/x64/X64.GCMdecrypt.vaf')], File('code/lib/util/CmdLineParser.ml'))
