@@ -22,6 +22,7 @@ let as_nat (b:B.buffer UInt64.t{B.length b == 4}) (h:HS.mem) : GTot nat =
   let s3 = UInt64.v (Seq.index s 3) in
   pow2_four s0 s1 s2 s3
 
+[@ (CCConv "stdcall") ]
 val add1
   (out:u256)
   (f1:u256)
@@ -36,6 +37,7 @@ val add1
     B.modifies (B.loc_buffer out) h0 h1 /\
     as_nat out h1 + pow2_256 * UInt64.v c == as_nat f1 h0 + UInt64.v f2)  
 
+[@ (CCConv "stdcall") ]
 val fadd
   (out:u256)
   (f1:u256)
@@ -51,6 +53,7 @@ val fadd
       B.modifies (B.loc_buffer out) h0 h1 /\
       (as_nat out h1) % prime == (as_nat f1 h0 + as_nat f2 h0) % prime)
 
+[@ (CCConv "stdcall") ]
 val fsub
   (out:u256)
   (f1:u256)
@@ -66,6 +69,7 @@ val fsub
       B.modifies (B.loc_buffer out) h0 h1 /\
       (as_nat out h1) % prime == (as_nat f1 h0 - as_nat f2 h0) % prime)
 
+[@ (CCConv "stdcall") ]
 val fmul 
   (tmp:u512)
   (f1:u256)
@@ -85,7 +89,8 @@ val fmul
     (ensures  fun h0 _ h1 ->
       B.modifies (B.loc_union (B.loc_buffer out) (B.loc_buffer tmp)) h0 h1 /\
       (as_nat out h1) % prime == (as_nat f1 h0 * as_nat f2 h0) % prime)
- 
+
+[@ (CCConv "stdcall") ]
 val fmul2
   (tmp:u1024)
   (f1:u512)
@@ -113,6 +118,7 @@ val fmul2
       (as_nat out0 h1) % prime == (as_nat f10 h0 * as_nat f20 h0) % prime /\
       (as_nat out1 h1) % prime == (as_nat f11 h0 * as_nat f21 h0) % prime))
 
+[@ (CCConv "stdcall") ]
 val fmul1
   (out:u256)
   (f1:u256) 
@@ -126,6 +132,7 @@ val fmul1
       B.modifies (B.loc_buffer out) h0 h1 /\
       as_nat out h1 % prime == (as_nat f1 h0 * UInt64.v f2) % prime)
 
+[@ (CCConv "stdcall") ]
 val fsqr
   (tmp:u512)
   (f1:u256)
@@ -142,6 +149,7 @@ val fsqr
       B.modifies (B.loc_union (B.loc_buffer out) (B.loc_buffer tmp)) h0 h1 /\
       (as_nat out h1) % prime == (as_nat f1 h0 * as_nat f1 h0) % prime)
 
+[@ (CCConv "stdcall") ]
 val fsqr2
   (tmp:u1024)
   (f1:u512)
@@ -163,6 +171,7 @@ val fsqr2
       (as_nat out0 h1) % prime == (as_nat f10 h0 * as_nat f10 h0) % prime /\
       (as_nat out1 h1) % prime == (as_nat f11 h0 * as_nat f11 h0) % prime))
 
+[@ (CCConv "stdcall") ]
 val cswap2
   (p0:u512)
   (p1:u512)
