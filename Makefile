@@ -16,7 +16,7 @@
 # rules.
 
 # TODO: compile-merkle-tree, compile-evercrypt + variants
-all: secure_api.build compile-compact compile-generic compile-compact-msvc
+all: secure_api.old compile-compact compile-generic compile-compact-msvc
 
 # Any file in code/tests is taken to contain a `main` function.
 # Any file in specs/tests is taken to contain a `test` function.
@@ -28,8 +28,8 @@ test-ml: $(subst .,_,$(patsubst %.fst,test-ml-%,$(notdir $(wildcard specs/tests/
 ci: all test
 
 # Backwards-compat target
-.PHONY: secure_api.build
-secure_api.build:
+.PHONY: secure_api.old
+secure_api.old:
 	$(MAKE) -C secure_api
 
 # -2. Configuration
@@ -44,26 +44,27 @@ endif
 
 # -1. Complete dependency graph for HACL* + Vale
 
-FSTAR_ROOTS = $(wildcard $(addsuffix /*.fsti,$(DIRS)) $(addsuffix /*.fst,$(SOURCE_DIRS))) \
-  $(TACTIC_DIRS)/CanonCommMonoid.fst
+FSTAR_ROOTS = $(wildcard $(addsuffix /*.fsti,$(DIRS)) $(addsuffix /*.fst,$(DIRS)))
 VALE_ROOTS = $(filter-out %.types.vaf,$(wildcard $(addsuffix /*.vaf,$(VALE_DIRS))))
 
 include Makefile.common
 
 ifndef MAKE_RESTARTS
-.depend: .FORCE
-	$(FSTAR_NO_FLAGS) --dep full $(FSTAR_ROOTS) --extract '* -Prims -LowStar -Lib.Buffer -Hacl -FStar +FStar.Endianness +FStar.Kremlin.Endianness' > $@
+.fstar-depend-%: .FORCE
+	@$(FSTAR_NO_FLAGS) --dep $* $(FSTAR_ROOTS) --extract '* -Prims -LowStar -Lib.Buffer -Hacl -FStar +FStar.Endianness +FStar.Kremlin.Endianness' > $@
 
-.vale-depend: .FORCE
+.vale-depend: .fstar-depend-make .FORCE
 	@$(PYTHON3) tools/valedepend.py \
 	  $(addprefix -include ,$(INCLUDES)) \
-	  $(addprefix -in ,$(VALE_ROOTS)) > $@
+	  $(addprefix -in ,$(VALE_ROOTS)) \
+	  -dep $< \
+	  > $@
 
 .PHONY: .FORCE
 .FORCE:
 endif
 
-include .depend
+include .fstar-depend-full
 include .vale-depend
 
 # 0. First stage: running Vale to generate proper F* files
@@ -76,8 +77,6 @@ include .vale-depend
 
 %.types.vaf:
 	$(MONO) $(IMPORT_FSTAR_TYPES) $(addprefix -in ,$^) -out $@
-
-%.fst: 
 
 
 # 2. Verification

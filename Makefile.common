@@ -4,6 +4,7 @@
 HACL_HOME 	?= .
 KREMLIN_HOME 	?= $(HACL_HOME)/../kremlin
 FSTAR_HOME	?= $(HACL_HOME)/../FStar
+VALE_HOME	?= $(HACL_HOME)/../vale
 
 # TODO: no more separate variable definitions?
 LIB_DIR		= $(HACL_HOME)/lib
@@ -35,9 +36,7 @@ VALE_DIRS	= \
   $(HACL_HOME)/vale/specs/defs \
   $(HACL_HOME)/vale/specs/hardware \
   $(HACL_HOME)/vale/specs/math
-TACTIC_DIRS	= $(FSTAR_HOME)/examples/tactics
-SOURCE_DIRS	= $(LIB_DIR) $(SPECS_DIR) $(CODE_DIRS) $(VALE_DIRS)
-DIRS		= $(SOURCE_DIRS) $(TACTIC_DIRS)
+DIRS		= $(LIB_DIR) $(SPECS_DIR) $(CODE_DIRS) $(VALE_DIRS)
 
 
 INCLUDES = \
