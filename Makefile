@@ -49,20 +49,20 @@ VALE_ROOTS = $(filter-out %.types.vaf,$(wildcard $(addsuffix /*.vaf,$(VALE_DIRS)
 
 include Makefile.common
 
-ifndef MAKE_RESTARTS
-.fstar-depend-%: .FORCE
-	@$(FSTAR_NO_FLAGS) --dep $* $(FSTAR_ROOTS) --extract '* -Prims -LowStar -Lib.Buffer -Hacl -FStar +FStar.Endianness +FStar.Kremlin.Endianness' > $@
+# ifndef MAKE_RESTARTS
+# .fstar-depend-%: .FORCE
+# 	@$(FSTAR_NO_FLAGS) --dep $* $(FSTAR_ROOTS) --extract '* -Prims -LowStar -Lib.Buffer -Hacl -FStar +FStar.Endianness +FStar.Kremlin.Endianness' > $@
 
-.vale-depend: .fstar-depend-make .FORCE
-	@$(PYTHON3) tools/valedepend.py \
-	  $(addprefix -include ,$(INCLUDES)) \
-	  $(addprefix -in ,$(VALE_ROOTS)) \
-	  -dep $< \
-	  > $@
+# .vale-depend: .fstar-depend-make .FORCE
+# 	@$(PYTHON3) tools/valedepend.py \
+# 	  $(addprefix -include ,$(INCLUDES)) \
+# 	  $(addprefix -in ,$(VALE_ROOTS)) \
+# 	  -dep $< \
+# 	  > $@
 
-.PHONY: .FORCE
-.FORCE:
-endif
+# .PHONY: .FORCE
+# .FORCE:
+# endif
 
 include .fstar-depend-full
 include .vale-depend
@@ -78,6 +78,14 @@ include .vale-depend
 %.types.vaf:
 	$(MONO) $(IMPORT_FSTAR_TYPES) $(addprefix -in ,$^) -out $@
 
+%.fst:
+	@if ! [ "$*.vaf" == "$<" ]; then echo "Makefile bug: trying to produce an .fst without a .vaf"; false; fi
+	$(MONO) $(VALE_HOME)/bin/vale.exe -fstarText -quickMods \
+	  -typecheck $(filter %.types.vaf,$<) \
+	  -in $< -out $@ -outi $@i
+
+# Force linearization of the rule above
+%.fsti: %.fst
 
 # 2. Verification
 

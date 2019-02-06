@@ -32,7 +32,7 @@ deps_file = args.deps_file
 ##################################################################################################
 
 deps = {}  # map target names to source names
-commands = {}  # map target names to commands (recipes)
+#commands = {}  # map target names to commands (recipes)
 dump_deps = {}  # map F* type .dump file names x.dump to sets of .dump file names that x.dump depends on
 vaf_dump_deps = {}  # map .vaf file names x.vaf to sets of .dump file names that x.vaf depends on
 vaf_vaf_deps = {}  # map .vaf file names x.vaf to sets of y.vaf file names that x.vaf depends on
@@ -48,6 +48,7 @@ cwd = os.path.normpath(os.getcwd()).replace('\\', '/')
 
 def norm(path):
     p = os.path.normpath(path).replace('\\', '/')
+    return p
     if p.startswith(cwd):
         p = p[len(cwd) + 1:]
     return p
@@ -71,14 +72,15 @@ def depends(target, source):
     target = norm(target)
     source = norm(source)
     if not (target in deps):
-        deps[target] = set()
-    deps[target].add(source)
+        deps[target] = []
+    if not source in deps[target]:
+        deps[target].append(source)
 
-def command(target, cmd):
-    target = norm(target)
-    if not (target in deps):
-        deps[target] = set()
-    commands[target] = cmd
+#def command(target, cmd):
+#    target = norm(target)
+#    if not (target in deps):
+#        deps[target] = []
+#    commands[target] = cmd
 
 def find_fsti(module):
     for d in inc_dirs:
@@ -108,22 +110,18 @@ def vale_dependency_scan(vaf):
         if vale_fstar_re.search(attrs):
             dumpsourcebase = to_obj_dir(find_fsti(inc))
             dumpsourcefile = dumpsourcebase + '.dump'
-            depends(types_vaf, dumpsourcefile)
             vaf_dump_deps[vaf].add(dumpsourcefile)
         else:
             f = norm(os.path.join('code' if vale_from_base_re.search(attrs) else dirname, inc))
             ffsti = to_obj_dir(file_drop_extension(f) + '.fsti')
-            ftypes_vaf = to_obj_dir(file_drop_extension(f) + '.types.vaf')
             depends(fst, ffsti)
             depends(fsti, ffsti)
-            depends(types_vaf, ftypes_vaf)
             vaf_vaf_deps[vaf].add(f)
 
 def vale_types_command(source_vaf):
     source_base = file_drop_extension(to_obj_dir(source_vaf))
     types_vaf = source_base + '.types.vaf'
     done = set()
-    dumps = []
     def collect_dumps_in_order(x):
         if not (x in done):
             done.add(x)
@@ -131,16 +129,10 @@ def vale_types_command(source_vaf):
                 # if x depends on y, y must appear first
                 collect_dumps_in_order(y)
             x_vaf = re.sub('\.dump$', '.types.vaf', x)
-            dumps.append(x)
+            depends(types_vaf, x)
     for vaf in sorted(vaf_vaf_deps[source_vaf] | {source_vaf}):
         for x in sorted(vaf_dump_deps[vaf]):
             collect_dumps_in_order(x)
-    # FIXME this is supposed to be a set which is not ordered so adding a single
-    # entry with spaces in it to get the right order
-    # FIXME this is supposed to generate a command but instead we really just
-    # want dependencies
-    deps[types_vaf] = set()
-    deps[types_vaf].add(" ".join([x for x in dumps]))
 
 def compute_fstar_deps():
     with open(deps_file, "r") as lines:
@@ -192,7 +184,7 @@ if deps_file != None:
 
 for target in sorted(deps.keys()):
     print(target + " : " + " ".join(list(deps[target])))
-    if (target in commands):
-        print('\t' + commands[target])
+#    if (target in commands):
+#        print('\t' + commands[target])
     print()
 
