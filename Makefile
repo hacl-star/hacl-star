@@ -44,25 +44,31 @@ endif
 
 # -1. Complete dependency graph for HACL* + Vale
 
+# The set of .vaf files we want to translate to F*. This excludes operator.vaf
+# (Vale generates an empty fst/fsti pair), and build artifacts that end with
+# .types.vaf.
+VALE_ROOTS = $(filter-out %operator.vaf,$(filter-out %.types.vaf,$(wildcard $(addsuffix /*.vaf,$(VALE_DIRS)))))
+VALE_FSTS = $(patsubst %.vaf,%.fst,$(VALE_ROOTS))
+
+# The set of F* files -- only complete in the second stage of this build.
 FSTAR_ROOTS = $(wildcard $(addsuffix /*.fsti,$(DIRS)) $(addsuffix /*.fst,$(DIRS)))
-VALE_ROOTS = $(filter-out %.types.vaf,$(wildcard $(addsuffix /*.vaf,$(VALE_DIRS))))
 
 include Makefile.common
 
-# ifndef MAKE_RESTARTS
-# .fstar-depend-%: .FORCE
-# 	@$(FSTAR_NO_FLAGS) --dep $* $(FSTAR_ROOTS) --extract '* -Prims -LowStar -Lib.Buffer -Hacl -FStar +FStar.Endianness +FStar.Kremlin.Endianness' > $@
+ifndef MAKE_RESTARTS
+.fstar-depend-%: .FORCE
+	@$(FSTAR_NO_FLAGS) --dep $* $(FSTAR_ROOTS) --extract '* -Prims -LowStar -Lib.Buffer -Hacl -FStar +FStar.Endianness +FStar.Kremlin.Endianness' > $@
 
-# .vale-depend: .fstar-depend-make .FORCE
-# 	@$(PYTHON3) tools/valedepend.py \
-# 	  $(addprefix -include ,$(INCLUDES)) \
-# 	  $(addprefix -in ,$(VALE_ROOTS)) \
-# 	  -dep $< \
-# 	  > $@
+.vale-depend: .fstar-depend-make .FORCE
+	@$(PYTHON3) tools/valedepend.py \
+	  $(addprefix -include ,$(INCLUDES)) \
+	  $(addprefix -in ,$(VALE_ROOTS)) \
+	  -dep $< \
+	  > $@
 
-# .PHONY: .FORCE
-# .FORCE:
-# endif
+.PHONY: .FORCE
+.FORCE:
+endif
 
 include .fstar-depend-full
 include .vale-depend
@@ -70,7 +76,7 @@ include .vale-depend
 # 0. First stage: running Vale to generate proper F* files
 
 %.dump: %.checked
-	$(FSTAR) --dump_module $(basename $(notdir $*)) \
+	$(FSTAR) --dump_module $(subst prims,Prims,$(basename $(notdir $*))) \
           --print_implicits --print_universes --print_effect_args --print_full_names \
 	  --print_bound_var_types --ugly --admit_smt_queries true \
 	  $* > $@
@@ -81,11 +87,14 @@ include .vale-depend
 %.fst:
 	@if ! [ "$*.vaf" == "$<" ]; then echo "Makefile bug: trying to produce an .fst without a .vaf"; false; fi
 	$(MONO) $(VALE_HOME)/bin/vale.exe -fstarText -quickMods \
-	  -typecheck $(filter %.types.vaf,$<) \
+	  -typecheck -include $*.types.vaf \
+	  -include $(HACL_HOME)/vale/code/lib/util/operator.vaf \
 	  -in $< -out $@ -outi $@i
 
 # Force linearization of the rule above
-%.fsti: %.fst
+%.fst: %.fsti
+
+vaf-to-fst: $(VALE_FSTS)
 
 # 2. Verification
 
