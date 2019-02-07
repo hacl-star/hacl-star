@@ -17,6 +17,12 @@
 # Top-level entry points #
 ##########################
 
+# This is a staged Makefile, because we first need to generate .fst files out of
+# .vaf files in order to get a full dependency graph for the .fst files.
+all_:
+	$(MAKE) vaf-to-fst
+	$(MAKE)
+
 # TODO: compile-merkle-tree, compile-evercrypt + variants
 all: compile-compact compile-generic compile-compact-msvc # secure_api.old
 
@@ -102,7 +108,7 @@ VALE_FLAGS = -include $(HACL_HOME)/vale/code/lib/util/operator.vaf
 $(HACL_HOME)/vale/code/lib/util/operator.fst: VALE_FLAGS=
 
 %.fsti:
-	@if ! [ "$*.vaf" == "$<" ]; then echo "Makefile bug: trying to produce an .fst without a .vaf"; false; fi
+	@if [ x"$^" == x ]; then echo "Makefile bug: trying to produce an .fst without a .vaf"; false; fi
 	$(MONO) $(VALE_HOME)/bin/vale.exe -fstarText -quickMods \
 	  -typecheck -include $*.types.vaf \
 	  $(VALE_FLAGS) \
@@ -119,16 +125,70 @@ vaf-to-fst: $(VALE_FSTS)
 # Second stage: verifying F* files #
 ####################################
 
-$(HACL_HOME)/vale/%.checked: FSTAR_FLAGS=--z3cliopt smt.arith.nl=false \
+# A litany of file-specific options, replicating exactly what was in SConstruct
+# before. TODO move these within the files themselves, or at least simplify.
+VALE_FSTAR_FLAGS_NOSMT=--z3cliopt smt.arith.nl=false \
   --z3cliopt smt.QI.EAGER_THRESHOLD=100 --z3cliopt smt.CASE_SPLIT=3 \
-  --smtencoding.elim_box true --smtencoding.l_arith_repr native \
-  --smtencoding.nl_arith_repr wrapped
+  --max_fuel 1 --max_ifuel 1 \
+  --initial_ifuel 0 --use_extracted_interfaces true
 
+VALE_FSTAR_FLAGS=$(VALE_FSTAR_FLAGS_NOSMT) \
+  --smtencoding.elim_box true --smtencoding.l_arith_repr native \
+  --smtencoding.nl_arith_repr wrapped 
+
+$(HACL_HOME)/vale/%.checked: FSTAR_FLAGS=$(VALE_FSTAR_FLAGS) --use_two_phase_tc false
+
+$(HACL_HOME)/vale/code/arch/x64/Views.fst.checked: \
+  FSTAR_FLAGS=$(shell echo $(VALE_FSTAR_FLAGS) | \
+    sed 's/--smtencoding.nl_arith_repr wrapped//; \
+      s/--smtencoding.nl_arith_repr native//')
+
+$(HACL_HOME)/vale/code/arch/x64/X64.Bytes_Semantics.fst.checked: \
+  FSTAR_FLAGS=$(shell echo $(VALE_FSTAR_FLAGS) | \
+    sed 's/--smtencoding.nl_arith_repr wrapped//; \
+      s/--smtencoding.nl_arith_repr native//')
+
+$(HACL_HOME)/vale/code/arch/x64/X64.BufferViewStore.fst.checked: \
+  FSTAR_FLAGS=$(VALE_FSTAR_FLAGS_NOSMT) --smtencoding.elim_box true
+
+$(HACL_HOME)/vale/code/lib/collections/Collections.Lists.fst.checked: \
+  FSTAR_FLAGS=$(shell echo $(VALE_FSTAR_FLAGS) | \
+    sed s/--z3cliopt smt.QI.EAGER_THRESHOLD=100//')
+
+$(HACL_HOME)/vale/code/crypto/poly1305/x64/X64.Poly1305.Util.fst.checked: \
+  FSTAR_FLAGS=$(VALE_FSTAR_FLAGS_NOSMT)
+
+$(HACL_HOME)/vale/code/crypto/poly1305/x64/X64.Poly1305.Util.fsti.checked: \
+  FSTAR_FLAGS=$(VALE_FSTAR_FLAGS_NOSMT)
+
+$(HACL_HOME)/vale/code/arch/X64.Memory.fst.checked: \
+  FSTAR_FLAGS=$(shell echo $(VALE_FSTAR_FLAGS_NOSMT) | \
+    sed 's/--use_extracted_interfaces true//; \
+      s/--z3cliopt smt.arith.nl=false//')
+
+$(HACL_HOME)/vale/code/arch/X64.Memory_Sems.fst.checked: \
+  FSTAR_FLAGS=$(shell echo $(VALE_FSTAR_FLAGS_NOSMT) | \
+    sed 's/--use_extracted_interfaces true//; \
+      s/--z3cliopt smt.arith.nl=false//')
+
+$(HACL_HOME)/vale/code/arch/x64/Interop.fst.checked: \
+  FSTAR_FLAGS=$(shell echo $(VALE_FSTAR_FLAGS_NOSMT) | \
+    sed 's/--use_extracted_interfaces true//; \
+      s/--z3cliopt smt.QI.EAGER_THRESHOLD=100//; \
+      s/--smtencoding.elim_box true//')
+
+$(HACL_HOME)/vale/code/lib/util/BufferViewHelpers.fst.checked: \
+  FSTAR_FLAGS=$(shell echo $(VALE_FSTAR_FLAGS) | \
+    sed 's/--z3cliopt smt.arith.nl=false//;')
+
+# The actual invocation.
 %.checked:
 	$(FSTAR) $(FSTAR_FLAGS) $< && \
 	touch $@
 
-# 3. Extraction. Note that all the C files are prefixed with Hacl_. Cleaner!
+#######################################################################
+# Extraction. Note that all the HACL C files are prefixed with Hacl_. #
+#######################################################################
 
 .PRECIOUS: %.krml
 
