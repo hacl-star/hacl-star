@@ -331,6 +331,7 @@ val map_blocks:
   -> g:(i:nat{i == length inp / blocksize} -> len:size_nat{len < blocksize} -> s:lseq a len -> lseq a len) ->
   Tot (out:seq a {length out == length inp})
 
+(*
 #set-options "--z3rlimit 400 --max_ifuel 1"
 
 val map_blocks_multi_lemma:
@@ -362,6 +363,7 @@ val map_blocks_lemma:
       Seq.index (map_blocks blocksize inp f g) i ==
       Seq.index (g blocks rem (Seq.slice inp (blocks * blocksize) (length inp))) (i % blocksize)))
     [SMTPat (Seq.index (map_blocks #a blocksize inp f g) i)]
+*)
 
 val map_blocks_n_fits_lemma:
     len:nat ->
@@ -372,6 +374,7 @@ val map_blocks_n_fits_lemma:
     Lemma (n * i + j < len / blocksize)
 	  [SMTPat (n * i + j < len / blocksize)]
 
+(*
 val map_blocks_n_lemma:
     #a:Type0
   -> blocksize:size_nat{blocksize > 0}
@@ -434,3 +437,4 @@ val map_blocks_multi1_lemma:
 
 
 
+*)

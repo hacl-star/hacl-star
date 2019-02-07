@@ -326,10 +326,7 @@ let vec_load_be t w b =
 let vec_to_bytes_le #vt #w v = admit()
 let vec_to_bytes_be #vt #w v = admit()
 
-let vec_store_le #t #w b v = 
-=======
 let vec_store_le #t #w b v =
->>>>>>> _dev_combinators_poly
   match t,w with
   | U128,1 -> vec128_store_le b v
   | _,1 -> Lib.ByteBuffer.uint_to_bytes_le #t #SEC b v
