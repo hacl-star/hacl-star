@@ -275,7 +275,7 @@ HAND_WRITTEN_C	= Lib.PrintBuffer Lib.RandomBuffer
 HAND_WRITTEN_FILES = $(wildcard $(LIB_DIR)/c/*.c)
 DEFAULT_FLAGS	= $(addprefix -library ,$(HAND_WRITTEN_C)) \
   -bundle Lib.*[rename=Hacl_Lib] -bundle Hacl.Test.* \
-  $(addprefix -bundle ,
+  $(addprefix -bundle , \
     'X64.*' 'Arch.*' 'Words.*' 'Vale.*' \
     'Collections.*' 'SHA_helpers' Prop_s Collections Types_s Words_s Views AES_s \
     Workarounds 'Math.*' Interop TypesNative_s)
