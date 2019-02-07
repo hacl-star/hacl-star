@@ -266,17 +266,6 @@ let vec_clmul_hi_hi x y = admit()
 
 let vec_from_bytes_le vt w b = uints_from_bytes_le #vt #SEC #w b
 let vec_from_bytes_be vt w b = uints_from_bytes_be #vt #SEC #w b
-let cast #t #w x = admit()
-let vec_aes_enc x = admit()
-let vec_aes_enc_lemma x = admit()
-let vec_aes_enc_last x = admit()
-let vec_aes_enc_last_lemma x = admit()
-let vec_aes_keygen_assist x = admit()
-let vec_aes_keygen_assist_lemma x = admit()
-let vec_clmul_lo_lo x = admit()
-let vec_clmul_lo_hi x = admit()
-let vec_clmul_hi_lo x = admit()
-let vec_clmul_hi_hi x = admit()
 
 let vec_load_le vt w b = admit()
 let vec_load_be vt w b = admit()

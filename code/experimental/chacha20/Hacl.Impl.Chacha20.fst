@@ -120,7 +120,7 @@ val chacha20_encrypt_block: ctx:state ->
 [@ CInline ]
 let chacha20_encrypt_block ctx out incr text =
     push_frame();
-    let k = create 16ul (u32 0) in
+   let k = create 16ul (u32 0) in
     chacha20_core k ctx incr;
     xor_block out k text;
     pop_frame()

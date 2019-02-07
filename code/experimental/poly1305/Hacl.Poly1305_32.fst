@@ -101,4 +101,3 @@ val poly1305_mac:
       as_seq h1 o == S.poly1305 #1 (as_seq #MUT #uint8 #len h0 text) (as_seq h0 key))
 let poly1305_mac o t l k =
   poly1305_mac #M32 o l t k
->>>>>>> _dev_combinators_poly
