@@ -14,9 +14,6 @@ open Lib.NatMod
 (* Point addition *)
 type aff_point = tuple2 elem elem           // Affine point
 type ext_point = tuple4 elem elem elem elem // Homogeneous extended coordinates
-let fsub (x:elem) (y:elem) = x -% y
-let fadd (x:elem) (y:elem) = x +% y
-let fmul (x:elem) (y:elem) = x *% y
 
 let modp_inv (x:elem) : Tot elem =
   x **% (prime - 2)

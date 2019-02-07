@@ -184,7 +184,7 @@ let sub_mod_lemma #t #l a b = ()
 
 let sub #t #l a b =
   match t with
-  | U1 -> (UInt8.sub a b) 
+  | U1 -> (UInt8.sub a b)
   | U8 -> (UInt8.sub a b)
   | U16 -> (UInt16.sub a b)
   | U32 -> (UInt32.sub a b)
@@ -206,7 +206,7 @@ let decr_lemma #t #l a = ()
 
 let logxor #t #l a b =
   match t with
-  | U1 -> (UInt8.logxor a b) 
+  | U1 -> (UInt8.logxor a b)
   | U8 -> (UInt8.logxor a b)
   | U16 -> (UInt16.logxor a b)
   | U32 -> (UInt32.logxor a b)
@@ -318,9 +318,7 @@ let lte_mask #t #l a b =
 private
 val mod_mask_value: #t:inttype -> #l:secrecy_level -> m:shiftval t ->
   Lemma (uint_v (mod_mask #t #l m) == pow2 (uint_v m) - 1)
-
 let mod_mask_value #t #l m =
-  admit();
   if uint_v m > 0 then begin
     let m = uint_v m in
     pow2_lt_compat (bits t) m;
@@ -329,8 +327,9 @@ let mod_mask_value #t #l m =
     UInt.shift_left_value_lemma #(bits t) 1 m
   end
 
+#set-options "--max_fuel 1"
+
 let mod_mask_lemma #t #l a m =
-  admit();
   mod_mask_value #t #l m;
   if uint_v m = 0 then
     UInt.logand_lemma_1 #(bits t) (uint_v a)
@@ -428,4 +427,3 @@ let gte #t x y =
   | U128 -> UInt128.gte x y
 
 let gte_lemma #t x y = ()
-

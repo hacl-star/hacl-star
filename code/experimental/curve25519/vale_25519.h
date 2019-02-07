@@ -1,12 +1,26 @@
-extern void mul(const uint64_t* dst, const uint64_t* in_a, const uint64_t* in_b);
-extern void sqr(const uint64_t* dst, const uint64_t* in_a);
-extern uint64_t mul1(const uint64_t* dst, const uint64_t* in_a, uint64_t b);
+/////////////////////////////////////////////////////////////////
+// These are now all internal to the public functions below
+/////////////////////////////////////////////////////////////////
+
+//extern void mul(const uint64_t* dst, const uint64_t* in_a, const uint64_t* in_b);
+//extern void sqr(const uint64_t* dst, const uint64_t* in_a);
+//extern uint64_t mul1(const uint64_t* dst, const uint64_t* in_a, uint64_t b);
+//extern uint64_t add(const uint64_t* dst, const uint64_t* in_a, const uint64_t* in_b);
+//extern uint64_t sub1(const uint64_t* dst, const uint64_t* in_a, uint64_t b);
+//extern uint64_t sub(const uint64_t* dst, const uint64_t* in_a, const uint64_t* in_b);
+//extern void mul2(const uint64_t* dst, const uint64_t* in_a, const uint64_t* in_b);
+//extern void sqr2(const uint64_t* dst, const uint64_t* in_a);
+//extern void carry_wide(uint64_t* dst, uint64_t* tmp);
+
+/////////////////////////////////////////////////////////////////
+// Exported from Vale
+/////////////////////////////////////////////////////////////////
+
 extern uint64_t add1(const uint64_t* dst, const uint64_t* in_a, uint64_t b);
-extern uint64_t add(const uint64_t* dst, const uint64_t* in_a, const uint64_t* in_b);
-extern uint64_t sub1(const uint64_t* dst, const uint64_t* in_a, uint64_t b);
-extern uint64_t sub(const uint64_t* dst, const uint64_t* in_a, const uint64_t* in_b);
-extern void mul2(const uint64_t* dst, const uint64_t* in_a, const uint64_t* in_b);
-extern void sqr2(const uint64_t* dst, const uint64_t* in_a);
+
+extern void fadd(uint64_t* dst, const uint64_t* in_a, const uint64_t* in_b);
+extern void fsub(uint64_t* dst, const uint64_t* in_a, const uint64_t* in_b);
+extern void fmul1(uint64_t* dst, const uint64_t* in_a, const uint64_t in_b);
 
 extern void fmul_v(const uint64_t* tmp, const uint64_t* in_a, const uint64_t* dst, const uint64_t* in_b);
 extern void fmul2_v(const uint64_t* tmp, const uint64_t* in_a, const uint64_t* dst, const uint64_t* in_b);
@@ -23,10 +37,10 @@ void carry_pass(uint64_t* dst, const uint64_t c_in) {
 }
 */
 
-extern void carry_wide(uint64_t* dst, uint64_t* tmp);
-extern void fadd(uint64_t* dst, const uint64_t* in_a, const uint64_t* in_b);
-extern void fsub(uint64_t* dst, const uint64_t* in_a, const uint64_t* in_b);
-extern void fmul1(uint64_t* dst, const uint64_t* in_a, const uint64_t in_b);
+/////////////////////////////////////////////////////////////////
+// Wrappers to align arguments
+/////////////////////////////////////////////////////////////////
+
 
 #define force_inline inline __attribute((always_inline))
 
@@ -55,36 +69,10 @@ void fsqr2(uint64_t* dst, const uint64_t* in_a, uint64_t* tmp) {
 }
 
 
-static force_inline void cswap1(uint8_t bit, uint64_t *const p0, uint64_t *const p1) {
-  uint64_t temp;
-  __asm__ __volatile__(
-    "test %9, %9 ;"
-    "movq %0, %8 ;"
-    "cmovnzq %4, %0 ;"
-    "cmovnzq %8, %4 ;"
-    "movq %1, %8 ;"
-    "cmovnzq %5, %1 ;"
-    "cmovnzq %8, %5 ;"
-    "movq %2, %8 ;"
-    "cmovnzq %6, %2 ;"
-    "cmovnzq %8, %6 ;"
-    "movq %3, %8 ;"
-    "cmovnzq %7, %3 ;"
-    "cmovnzq %8, %7 ;"
-    : "+r"(p0[0]), "+r"(p0[1]), "+r"(p0[2]), "+r"(p0[3]),
-      "+r"(p1[0]), "+r"(p1[1]), "+r"(p1[2]), "+r"(p1[3]),
-      "=r"(temp)
-    : "r"(bit)
-    : "cc"
-  );
+extern void cswap2_v(uint64_t *const p0, uint64_t *const p1, uint8_t bit);
+static inline void cswap2(uint8_t bit, uint64_t *const p0, uint64_t *const p1) {
+  cswap2_v(p0, p1, bit);
 }
-
-static force_inline void cswap2(uint8_t bit, uint64_t *const p0, uint64_t *const p1) {
-  cswap1(bit,p0,p1);
-  cswap1(bit,p0+4,p1+4);
-}
-
-
 
 static force_inline void cselect1(uint8_t bit, uint64_t *const px,
                            uint64_t *const py) {

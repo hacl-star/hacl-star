@@ -1,36 +1,19 @@
-module Hacl.Spec.Curve25519.Finv.Field51
+module Hacl.Spec.Curve25519.Finv
 
 open FStar.Mul
-open Lib.Sequence
 open Lib.IntTypes
-
-open Hacl.Spec.Curve25519.Field51.Definition
-open Hacl.Spec.Curve25519.Field51
+open NatPrime
 
 #reset-options "--z3rlimit 50 --max_fuel 2 --max_ifuel 0 --using_facts_from '* -FStar.Seq'"
-
-let felem5 = x:felem5{felem_fits5 x (1, 2, 1, 1, 1)}
-let one5:felem5 = (u64 1, u64 0, u64 0, u64 0, u64 0)
 
 let one:felem =
   assert_norm (1 < prime);
   1
 
-val fmul5: f1:felem5 -> f2:felem5 -> r:felem5{feval r == (feval f1 * feval f2) % prime}
-let fmul5 f1 f2 = fmul5 f1 f2
-
-val fsqr5: f1:felem5 -> r:felem5{feval r == (feval f1 * feval f1) % prime}
-let fsqr5 f1 = fsqr5 f1
-
 val pow: a:felem -> b:nat -> res:felem
 let rec pow a b =
   if b = 0 then 1
   else fmul a (pow a (b - 1))
-
-val pow5: a:felem5 -> b:nat -> res:felem5
-let rec pow5 a b =
-  if b = 0 then one5
-  else fmul5 a (pow5 a (b - 1))
 
 val lemma_pow_one: x:felem
   -> Lemma
@@ -102,36 +85,23 @@ let fsquare_times inp n =
   assert (out == pow inp (pow2 n));
   out
 
-val fsquare_times5:
-    inp:felem5
-  -> n:size_nat{0 < n}
-  -> out:felem5{feval out == fsquare_times (feval inp) n}
-let fsquare_times5 inp n =
-  let out:felem5 = fsqr5 inp in
-  lemma_pow_one (feval inp);
-  lemma_pow_add (feval inp) 1 1;
-  assert_norm (pow2 1 = 2);
-  assert (feval out == pow (feval inp) (pow2 1));
-  let out =
-    Lib.LoopCombinators.repeati_inductive #felem5 (n - 1)
-    (fun i out -> feval out == pow (feval inp) (pow2 (i + 1)))
-    (fun i out ->
-      let res = fsqr5 out in
-      lemma_pow_one (feval out);
-      lemma_pow_add (feval out) 1 1;
-      lemma_pow_mul (feval inp) (pow2 (i + 1)) (pow2 1);
-      res) out in
-  assert (feval out == pow (feval inp) (pow2 n));
-  out
-
 let pow_inv:nat =
   assert_norm (pow2 255 - 21 > 0);
   pow2 255 - 21
 
+let pow_t0:nat =
+  assert_norm (pow2 255 - pow2 5 > 0);
+  pow2 255 - pow2 5
+
 #set-options "--max_fuel 0 --max_ifuel 0"
 
-val finv: inp:felem -> out:felem{out == pow inp (pow2 255 - 21)}
-let finv i =
+val finv0: inp:felem ->
+  Pure (tuple2 felem felem)
+  (requires True)
+  (ensures fun (a, t0) ->
+    a == pow inp 11 /\
+    t0 == pow inp (pow2 255 - pow2 5))
+let finv0 i =
   (* 2 *)  let a  = fsquare_times i 1 in
   assert (a == pow i 2);
   (* 8 *)  let t0 = fsquare_times a 2 in
@@ -211,35 +181,13 @@ let finv i =
   lemma_pow_mul i (pow2 250 - 1) (pow2 5);
   assert_norm ((pow2 250 - 1) * pow2 5 = pow2 255 - pow2 5);
   assert (t0 == pow i (pow2 255 - pow2 5));
+  a, t0
+
+val finv: inp:felem -> out:felem{out == pow inp (pow2 255 - 21)}
+let finv i =
+  let a, t0 = finv0 i in
   (* 2^255 - 21 *) let o = fmul t0 a in
   lemma_pow_add i (pow2 255 - pow2 5) 11;
   assert_norm (pow2 255 - pow2 5 + 11 = pow2 255 - 21);
   assert (o == pow i (pow2 255 - 21));
-  o
-
-val finv5: inp:felem5 -> out:felem5{feval out == pow (feval inp) (pow2 255 - 21)}
-let finv5 i =
-  (* 2 *)  let a  = fsquare_times5 i 1 in
-  (* 8 *)  let t0 = fsquare_times5 a 2 in
-  (* 9 *)  let b  = fmul5 t0 i in
-  (* 11 *) let a  = fmul5 b a in
-  (* 22 *) let t0 = fsquare_times5 a 1 in
-  (* 2^5 - 2^0 = 31 *) let b = fmul5 t0 b in
-  (* 2^10 - 2^5 *) let t0 = fsquare_times5 b 5 in
-  (* 2^10 - 2^0 *) let b = fmul5 t0 b in
-  (* 2^20 - 2^10 *) let t0 = fsquare_times5 b 10 in
-  (* 2^20 - 2^0 *) let c = fmul5 t0 b in
-  (* 2^40 - 2^20 *) let t0 = fsquare_times5 c 20 in
-  (* 2^40 - 2^0 *) let t0 = fmul5 t0 c in
-  (* 2^50 - 2^10 *) let t0 = fsquare_times5 t0 10 in
-  (* 2^50 - 2^0 *) let b = fmul5 t0 b in
-  (* 2^100 - 2^50 *) let t0 = fsquare_times5 b 50 in
-  (* 2^100 - 2^0 *) let c = fmul5 t0 b in
-  (* 2^200 - 2^100 *) let t0 = fsquare_times5 c 100 in
-  (* 2^200 - 2^0 *) let t0 = fmul5 t0 c in
-  (* 2^250 - 2^50 *) let t0 = fsquare_times5 t0 50 in
-  (* 2^250 - 2^0 *) let t0 = fmul5 t0 b in
-  (* 2^255 - 2^5 *) let t0 = fsquare_times5 t0 5 in
-  (* 2^255 - 21 *) let o = fmul5 t0 a in
-  assert (feval o == finv (feval i));
   o

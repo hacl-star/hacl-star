@@ -60,7 +60,7 @@ aesgcm-ni-c/Hacl_AesGCM_NI.c: aesgcm-ni-c/out.krml
 	   -minimal -add-include '"kremlib.h"' -add-include '"vec128.h"' -drop Lib.Vec128 -bundle 'Hacl.AesGCM.NI=*'
 
 aesgcm-ni.exe: aesgcm-ni-c/Hacl_AesGCM_NI.c aesgcm-ni-test.c
-	$(CC) -march=native -mtune=native -O3 -I $(KREMLIN_HOME)/kremlib/c -I $(KREMLIN_HOME)/include -I . aesgcm-ni-c/Hacl_AesGCM_NI.c $(KREMLIN_HOME)/kremlib/c/testlib.o aesgcm-ni-test.c -o aesgcm-ni.exe
+	$(CC) -march=native -mtune=native -O3 -I $(KREMLIN_HOME)/kremlib/c -I $(KREMLIN_HOME)/include -I . aesgcm-ni-c/Hacl_AesGCM_NI.c $(KREMLIN_HOME)/kremlib/dist/generic/testlib.o aesgcm-ni-test.c -o aesgcm-ni.exe
 	./aesgcm-ni.exe
 
 aesgcm-m32-c/out.krml: $(AESGCM_M32_FILES)
@@ -71,7 +71,7 @@ aesgcm-m32-c/Hacl_AesGCM_M32.c: aesgcm-m32-c/out.krml
 	   -minimal -add-include '"kremlib.h"' -add-include '"vec128.h"' -drop Lib.Vec128 -bundle 'Hacl.AesGCM.M32=*'
 
 aesgcm-m32.exe: aesgcm-m32-c/Hacl_AesGCM_M32.c aesgcm-m32-test.c
-	$(CC) -march=native -mtune=native -O3 -I $(KREMLIN_HOME)/kremlib/c -I $(KREMLIN_HOME)/include -I . aesgcm-m32-c/Hacl_AesGCM_M32.c $(KREMLIN_HOME)/kremlib/c/testlib.o aesgcm-m32-test.c -o aesgcm-m32.exe
+	$(CC) -march=native -mtune=native -O3 -I $(KREMLIN_HOME)/kremlib/c -I $(KREMLIN_HOME)/include -I . aesgcm-m32-c/Hacl_AesGCM_M32.c $(KREMLIN_HOME)/kremlib/dist/generic/testlib.o aesgcm-m32-test.c -o aesgcm-m32.exe
 	./aesgcm-m32.exe
 
 aesgcm-perf: aesgcm-ni.exe  aesgcm-m32.exe
@@ -131,7 +131,7 @@ $(OUTPUT_DIR)/%.krml: | .depend
 
 # 2. Generation of .c files
 
-KREMLIN_TESTLIB=-add-include '"extracted/TestLib.h"' $(KREMLIB)/c/testlib.c
+KREMLIN_TESTLIB=-add-include '"dist/generic/TestLib.h"' $(KREMLIB)/dist/generic/testlib.c
 
 KREMLIN=$(KREMLIN_HOME)/krml
 
