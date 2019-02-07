@@ -104,10 +104,10 @@ include .vale-depend
 %.types.vaf:
 	$(MONO) $(IMPORT_FSTAR_TYPES) $(addprefix -in ,$^) -out $@
 
-# Always pass operator.vaf as an -include to Vale, except for the file itself.
-VALE_FLAGS = -include $(HACL_HOME)/vale/code/lib/util/operator.vaf
+# Always pass Operator.vaf as an -include to Vale, except for the file itself.
+VALE_FLAGS = -include $(HACL_HOME)/vale/code/lib/util/Operator.vaf
 
-$(HACL_HOME)/vale/code/lib/util/operator.fst: VALE_FLAGS=
+$(HACL_HOME)/vale/code/lib/util/Operator.fst: VALE_FLAGS=
 
 %.fst:
 	@if [ "x$<" = x ]; then echo "Makefile bug: trying to produce an .fst without a .vaf"; false; fi
