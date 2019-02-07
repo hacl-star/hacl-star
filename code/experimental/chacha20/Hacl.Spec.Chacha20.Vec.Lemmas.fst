@@ -11,9 +11,12 @@ open Hacl.Spec.Chacha20.Vec
 
 #set-options "--max_fuel 1 --z3rlimit 300"
 
-val line_lemma: #w:lanes -> a:idx -> b:idx -> d:idx -> s:rotval U32 -> m:state w ->
-  Lemma (ensures (transpose_state (line #w a b d s m) == map (Scalar.line a b d s) (transpose_state m)))
-	[SMTPat (transpose_state (line #w a b d s m))]
+val line_lemma: #w:lanes -> a:index_t -> b:index_t -> d:index_t -> 
+			   s:rotval_t -> m:state w ->
+    Lemma (transpose_state (line #w a b d s m) == 
+	   map (Scalar.line a b d s) (transpose_state m))
+
+
 let line_lemma #w a b d s m = 
   match w with
   | 1 -> 
@@ -407,3 +410,15 @@ let chacha20_update_lemma (st0: Scalar.state) (msg: bytes{length msg / size_bloc
 		(fun j b -> Scalar.chacha20_encrypt_block (Scalar.add_counter j st0) (4*i) b)
 		(fun j l b -> Scalar.chacha20_encrypt_last (Scalar.add_counter j st0) (4*i) l b))))
 
+
+val chacha20_encrypt_bytes_lemma: #w:lanes -> 
+    k:key -> n:nonce -> c:counter -> 
+    msg:bytes{length msg/size_block <= max_size_t} ->
+    Lemma (chacha20_encrypt_bytes #w k n c msg == 
+	   Scalar.chacha20_encrypt_bytes k n c msg)
+
+
+		let res = chacha20_encrypt_last st0 incr len b in
+		res == map_blocks size_block b 
+		  (fun i -> Scalar.chacha20_encrypt_block (transpose_state st0).[i] (w*incr))
+		  (fun i -> Scalar.chacha20_encrypt_last (transpose_state st0).[i] (w*incr))))

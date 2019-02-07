@@ -48,11 +48,20 @@ let transpose_state (#w:lanes) (st:state w) : lseq (lseq uint32 16) w  =
 			    (vec_v st.[8]).[i] (vec_v st.[9]).[i] (vec_v st.[10]).[i] (vec_v st.[11]).[i]
 			    (vec_v st.[12]).[i] (vec_v st.[13]).[i] (vec_v st.[14]).[i] (vec_v st.[15]).[i] in
 	  x)
-  
 
-let line (#w:lanes) (a:idx) (b:idx) (d:idx) (s:rotval U32) (m:state w) : state w =
-  let m = m.[a] <- (m.[a] +| m.[b]) in
-  let m = m.[d] <- ((m.[d] ^| m.[a]) <<<| s) in m
+
+let lanes : Type0 = n:width{n == 1 \/ n == 4 \/ n == 8}
+let uint32xN (w:lanes) : Type0 = vec_t U32 w
+
+let state (w:lanes) : Type0 = lseq (uint32xN w) 16
+
+let line (#w:lanes) (a:index_t) (b:index_t) (d:index_t) 
+		    (s:rotval_t) (m:state w) : state w =
+  let m = array.copy m in
+  let m = m.[ a ] <- m.[ a ] +| m.[ b ] in
+  let m = m.[ d ] <- m.[ d ] ^| m.[ a ] in
+  let m = m.[ d ] <- uint32xN_rotate_left m.[ d ] s in
+  m
 
 
 let quarter_round (#w:lanes) a b c d : shuffle w =

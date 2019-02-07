@@ -187,11 +187,20 @@ let xor_block #w o st b =
 
 
 inline_for_extraction
-val line: #w:lanes -> st:state w -> a:index -> b:index -> d:index -> r:rotval U32 -> ST unit
-		  (requires (fun h -> live h st /\ v a <> v d))
-		  (ensures (fun h0 _ h1 -> modifies (loc st) h0 h1 /\
-		    as_seq h1 st == Spec.line (v a) (v b) (v d) r (as_seq h0 st)))
+val line: #w:lanes -> st:state w -> 
+	  a:index -> b:index -> d:index -> 
+	  r:rotval U32 -> ST unit
+	  (requires (fun h -> live h st))
+	  (ensures (fun h0 _ h1 -> modifies (loc st) h0 h1 /\
+		    as_seq h1 st == 
+		    Spec.line (v a) (v b) (v d) 
+			      r (as_seq h0 st)))
 let line #w st a b d r = 
+  st.(a) <- st.(a) +| st.(b);
+  st.(a) <- st.(a) ^| st.(d);
+  st.(d) <- st.(d) <<<| r
+
+
   let sta = st.(a) in
   let stb = st.(b) in
   let std = st.(d) in
