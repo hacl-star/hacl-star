@@ -95,6 +95,7 @@ val update_small:
     (ensures fun h0 s' h1 ->
       update_post a s s' prev data len h0 h1)
 
+#push-options "--z3rlimit_factor 4"
 let split_at_last_small (a: Hash.alg) (b: bytes) (d: bytes): Lemma
   (requires (
     let _, rest = split_at_last a b in
@@ -110,6 +111,7 @@ let split_at_last_small (a: Hash.alg) (b: bytes) (d: bytes): Lemma
   assert ((S.length b + S.length d) / block_length a = S.length b / block_length a);
   assert (S.equal (S.append (S.append blocks rest) d) (S.append blocks' rest'));
   ()
+#pop-options
 
 #push-options "--z3rlimit 100"
 let add_len_small a (total_len: UInt64.t) (len: UInt32.t): Lemma
