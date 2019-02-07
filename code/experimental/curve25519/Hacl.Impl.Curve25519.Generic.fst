@@ -32,7 +32,7 @@ val footprint: h0:mem ->
 inline_for_extraction noextract
 let footprint h0 l impl = impl()
 
-unfold let scalar = lbuffer uint64 4ul
+unfold let scalar = lbuffer uint8 32ul
 unfold let point (s:field_spec) = lbuffer (limb s) (2ul *. nlimb s)
 
 (* NEEDED ONLY FOR WRAPPERS *)
@@ -41,24 +41,12 @@ unfold let point51 = lbuffer uint64 10ul
 unfold let point64 = lbuffer uint64 8ul
 (* NEEDED ONLY FOR WRAPPERS *)
 
-
-inline_for_extraction
-val decode_scalar: o:scalar -> i:lbuffer uint8 32ul -> Stack unit
-			 (requires fun h0 -> live h0 o /\ live h0 i /\ disjoint o i)
-			 (ensures fun h0 _ h1 -> modifies (loc o) h0 h1)
-inline_for_extraction
-let decode_scalar o i =
-  uints_from_bytes_le #U64 o i;
-  o.(0ul) <- o.(0ul) &. u64 0xfffffffffffffff8;
-  o.(3ul) <- o.(3ul) &. u64 0x7fffffffffffffff;
-  o.(3ul) <- o.(3ul) |. u64 0x4000000000000000
-
 inline_for_extraction
 val scalar_bit: s:scalar -> n:size_t{v n < 256} -> Stack uint64
 			 (requires fun h0 -> live h0 s)
 			 (ensures fun h0 r h1 -> h0 == h1)
 inline_for_extraction
-let scalar_bit s n = (s.(n /. 64ul) >>. (n %. 64ul)) &. (u64 1)
+let scalar_bit s n = to_u64 ((s.(n /. 8ul) >>. (n %. 8ul)) &. (u8 1))
 
 inline_for_extraction
 val decode_point_: #s:field_spec -> o:point s -> i:lbuffer uint8 32ul -> Stack unit
@@ -111,7 +99,7 @@ let encode_point_ #s o i =
   let tmp = create_felem s in
   let u64s = create 4ul (u64 0) in
   let tmp_w = create (2ul *. nwide s) (wide_zero s) in
-  admit();  
+  admit();
   finv #s tmp z tmp_w;
   fmul #s tmp tmp x tmp_w;
   store_felem u64s tmp;
@@ -302,13 +290,18 @@ let montgomery_ladder_ #s out key init =
   let swap = create 1ul (u64 0) in
   let tmp1 = create (4ul *. nlimb s) (limb_zero s) in
   let tmp2 = create (2ul *. nwide s) (wide_zero s) in
+  // bit 255 is 0 and bit 254 is 1
+  cswap2 #s (u64 1) p0 p1;
+  point_add_and_double #s init p0 p1 tmp1 tmp2;
+  swap.(0ul) <- u64 1;
+
   let h0 = ST.get() in
   //Got about 1K speedup by removing 4 iterations here.
   //First iteration can be skipped because top bit of scalar is 0
-  loop2 h0 252ul p01 swap
+  loop2 h0 251ul p01 swap
     (fun h -> (fun i s -> s))
     (fun i ->
-         let bit = scalar_bit key (254ul -. i) in
+         let bit = scalar_bit key (253ul -. i) in
 	 let sw = swap.(0ul) ^. bit in
          cswap2 #s sw p0 p1;
          point_add_and_double #s init p0 p1 tmp1 tmp2;
@@ -352,11 +345,9 @@ val scalarmult: #s:field_spec
 inline_for_extraction
 let scalarmult #s out priv pub =
     push_frame ();
-    let scalar = create 4ul (u64 0) in
-    decode_scalar scalar priv;
     let init = create (2ul *. nlimb s) (limb_zero s) in
     decode_point #s init pub;
-    montgomery_ladder #s init scalar init;
+    montgomery_ladder #s init priv init;
     encode_point #s out init;
     pop_frame()
 
