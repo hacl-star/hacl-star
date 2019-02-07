@@ -85,6 +85,11 @@ let imm_buffer_read_reveal t h s b i =
   let b_v = BV.mk_buffer_view b (LSig.view_of_base_typ t) in
   BV.as_seq_sel h b_v i
 
+let buffer_as_seq_invert t h s b =
+  assert (Seq.equal 
+    (ME.buffer_as_seq s (as_vale_buffer b))
+    (LSig.uint_to_nat_seq_t t (BV.as_seq h (BV.mk_buffer_view b (LSig.view_of_base_typ t)))))
+    
 let buffer_as_seq_reveal_tuint128 x va_s = ()
 
 let immbuffer_as_seq_reveal_tuint128 x va_s = ()

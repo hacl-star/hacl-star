@@ -25,11 +25,30 @@ let nat_to_uint (t:ME.base_typ) (x:ME.base_typ_as_vale_type t)
     | TUInt64  -> UInt64.uint_to_t x
     | TUInt128 -> x
 
+
+let uint_to_nat (t:ME.base_typ) (x:base_typ_as_type t)
+  : ME.base_typ_as_vale_type t
+  = let open ME in
+    match t with
+    | TUInt8   -> UInt8.v x
+    | TUInt16  -> UInt16.v x
+    | TUInt32  -> UInt32.v x
+    | TUInt64  -> UInt64.v x
+    | TUInt128 -> x
+
 let nat_to_uint_seq_t
       (t:ME.base_typ)
       (b:Seq.seq (ME.base_typ_as_vale_type t))
     : Seq.seq (base_typ_as_type t)
     = Seq.init (Seq.length b) (fun (i:nat{i < Seq.length b}) -> nat_to_uint t (Seq.index b i))
+
+
+let uint_to_nat_seq_t
+      (t:ME.base_typ)
+      (b:Seq.seq (base_typ_as_type t))
+    : Seq.seq (ME.base_typ_as_vale_type t)
+    = Seq.init (Seq.length b) (fun (i:nat{i < Seq.length b}) -> uint_to_nat t (Seq.index b i))
+
 
 [@__reduce__]
 let view_of_base_typ (t:ME.base_typ)

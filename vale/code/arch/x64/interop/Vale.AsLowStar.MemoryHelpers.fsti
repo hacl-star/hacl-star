@@ -232,6 +232,15 @@ val imm_buffer_read_reveal (t:base_typ) (h:HS.mem) (s:ME.mem) (b:(ibuf_t t){B.li
     imm_low_buffer_read t h b i ) 
   [SMTPat (imm_low_buffer_read t h b i); SMTPat (ME.buffer_read (as_vale_immbuffer b) i s)]
 
+val buffer_as_seq_invert (t:base_typ) (h:HS.mem) (s:ME.mem) (b:(buf_t t){B.live h b}) : Lemma
+  (requires Seq.equal 
+    (LSig.nat_to_uint_seq_t t (ME.buffer_as_seq s (as_vale_buffer b)))
+    (BV.as_seq h (BV.mk_buffer_view b (LSig.view_of_base_typ t))))
+  (ensures ME.buffer_as_seq s (as_vale_buffer b) == 
+    (LSig.uint_to_nat_seq_t t (BV.as_seq h (BV.mk_buffer_view b (LSig.view_of_base_typ t)))))
+  [SMTPat (BV.as_seq h (BV.mk_buffer_view b (LSig.view_of_base_typ t)));
+   SMTPat (ME.buffer_as_seq s (as_vale_buffer b))]
+
 val buffer_as_seq_reveal_tuint128
   (x:buf_t TUInt128)
   (va_s:V.va_state) : Lemma

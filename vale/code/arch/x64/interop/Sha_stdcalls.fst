@@ -97,15 +97,9 @@ let sha_lemma'
      (ensures (fun (va_s1, f) ->
        V.eval_code code va_s0 f va_s1 /\
        VSig.vale_calling_conventions va_s0 va_s1 /\
-       sha_post code ctx_b in_b num_val k_b va_s0 sb va_s1 f /\
-       // ME.buffer_readable VS.(va_s1.mem) (as_vale_buffer ctx_b) /\
-       // ME.buffer_readable VS.(va_s1.mem) (as_vale_buffer in_b) /\ 
-       // ME.buffer_readable VS.(va_s1.mem) (as_vale_immbuffer k_b) /\       
+       sha_post code ctx_b in_b num_val k_b va_s0 sb va_s1 f /\       
        ME.buffer_writeable (as_vale_buffer ctx_b) /\ 
-       ME.buffer_writeable (as_vale_buffer in_b) // /\ 
-       // ME.modifies (ME.loc_union (ME.loc_buffer (as_vale_buffer sb))
-       //             (ME.loc_union (ME.loc_buffer (as_vale_buffer ctx_b))
-       //                           ME.loc_none)) va_s0.VS.mem va_s1.VS.mem
+       ME.buffer_writeable (as_vale_buffer in_b)
  )) = 
    let va_s1, f = SH.va_lemma_sha_update_bytes_stdcall code va_s0 IA.win (as_vale_buffer sb) (as_vale_buffer ctx_b) (as_vale_buffer in_b) (UInt64.v num_val) (as_vale_immbuffer k_b) in
    Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt128 ctx_b;   
