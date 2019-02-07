@@ -4,14 +4,7 @@ open Lib.IntTypes
 open Lib.IntVector
 open Lib.Sequence
 
-(* high-level spec *)
-let prime:pos =
-  assert_norm (pow2 130 - 5 > 0);
-  pow2 130 - 5
-
-let pfelem = x:nat{x < prime}
-let pfadd (f1:pfelem) (f2:pfelem) : pfelem = (f1 + f2) % prime
-let pfmul (f1:pfelem) (f2:pfelem) : pfelem = (f1 `op_Multiply` f2) % prime
+open Hacl.Spec.Poly1305.Vec
 
 (* low-level spec *)
 let scale32 = s:nat{s <= 64}
@@ -169,7 +162,9 @@ let uint64xN_v (#w:lanes) (e:uint64xN w) : lseq nat w =
 let uint64xN_fits (#w:lanes) (x:uint64xN w) (m:nat) =
   forall (i:nat). i < w ==> uint_v (vec_v x).[i] < m
 
-
+noextract
+let felem_less5 (#w:lanes) (f:felem5 w) (max:nat) : Type0 =
+  forall (i:nat). i < w ==> as_nat5 (as_tup64_i f i) < max
 
 noextract
 let acc_inv_t (#w:lanes) (acc:felem5 w) : Type0 =
@@ -177,19 +172,24 @@ let acc_inv_t (#w:lanes) (acc:felem5 w) : Type0 =
   forall (i:nat). i < w ==>
    (if uint_v (vec_v o1).[i] >= pow2 26 then
       tup64_fits5 (as_tup64_i acc i) (1, 2, 1, 1, 1) /\
-      uint_v (vec_v o1).[i] % pow2 26 < 64
+      uint_v (vec_v o1).[i] % pow2 26 < 73
     else tup64_fits5 (as_tup64_i acc i) (1, 1, 1, 1, 1))
 
-noextract
+inline_for_extraction noextract
 val precomp_r5:
     #w:lanes
   -> r:felem5 w
   -> r5:felem5 w
 let precomp_r5 #w (r0, r1, r2, r3, r4) =
+  [@inline_let]
   let r50 = vec_smul_mod r0 (u64 5) in
+  [@inline_let]
   let r51 = vec_smul_mod r1 (u64 5) in
+  [@inline_let]
   let r52 = vec_smul_mod r2 (u64 5) in
+  [@inline_let]
   let r53 = vec_smul_mod r3 (u64 5) in
+  [@inline_let]
   let r54 = vec_smul_mod r4 (u64 5) in
   (r50, r51, r52, r53, r54)
 
@@ -277,6 +277,92 @@ let carry26 #w l cin =
   (vec_and l (mask26 w), vec_shift_right l 26ul)
 
 inline_for_extraction noextract
+val carry_felem5:
+    #w:lanes
+  -> inp:felem5 w
+  -> out:felem5 w
+let carry_felem5 #w (i0, i1, i2, i3, i4) =
+  let tmp0,c0 = carry26 i0 (zero w) in
+  let tmp1,c1 = carry26 i1 c0 in
+  let tmp2,c2 = carry26 i2 c1 in
+  let tmp3,c3 = carry26 i3 c2 in
+  let tmp4 = vec_add_mod i4 c3 in
+  (tmp0, tmp1, tmp2, tmp3, tmp4)
+
+inline_for_extraction noextract
+val carry_full_felem5:
+    #w:lanes
+  -> inp:felem5 w
+  -> out:felem5 w
+let carry_full_felem5 #w (f0, f1, f2, f3, f4) =
+  let tmp0,c0 = carry26 f0 (zero w) in
+  let tmp1,c1 = carry26 f1 c0 in
+  let tmp2,c2 = carry26 f2 c1 in
+  let tmp3,c3 = carry26 f3 c2 in
+  let tmp4,c4 = carry26 f4 c3 in
+  [@inline_let]
+  let tmp0',c5 = carry26 tmp0 (vec_smul_mod c4 (u64 5)) in
+  [@inline_let]
+  let tmp1' = vec_add_mod tmp1 c5 in
+  (tmp0', tmp1', tmp2, tmp3, tmp4)
+
+
+inline_for_extraction noextract
+val subtract_p5:
+    #w:lanes
+  -> f:felem5 w
+  -> out:felem5 w
+let subtract_p5 #w (f0, f1, f2, f3, f4) =
+  let mh = vec_load (u64 0x3ffffff) w in
+  let ml = vec_load (u64 0x3fffffb) w in
+  let mask = vec_eq_mask f4 mh in
+  let mask = vec_and mask (vec_eq_mask f3 mh) in
+  let mask = vec_and mask (vec_eq_mask f2 mh) in
+  let mask = vec_and mask (vec_eq_mask f1 mh) in
+  let mask = vec_and mask (vec_gte_mask f0 ml) in
+  let ph = vec_and mask mh in
+  let pl = vec_and mask ml in
+  let o0 = vec_sub_mod f0 pl in
+  let o1 = vec_sub_mod f1 ph in
+  let o2 = vec_sub_mod f2 ph in
+  let o3 = vec_sub_mod f3 ph in
+  let o4 = vec_sub_mod f4 ph in
+  (o0, o1, o2, o3, o4)
+
+inline_for_extraction noextract
+val reduce_felem5:
+    #w:lanes
+  -> f:felem5 w
+  -> out:felem5 w
+let reduce_felem5 #w (f0, f1, f2, f3, f4) =
+  let (f0, f1, f2, f3, f4) = carry_full_felem5 (f0, f1, f2, f3, f4) in
+  subtract_p5 (f0, f1, f2, f3, f4)
+
+inline_for_extraction noextract
+val load_felem5:
+    #w:lanes
+  -> lo:uint64xN w
+  -> hi:uint64xN w
+  -> f:felem5 w
+let load_felem5 #w lo hi =
+  let f0 = vec_and lo (mask26 w) in
+  let f1 = vec_and (vec_shift_right lo 26ul) (mask26 w) in
+  let f2 = vec_or (vec_shift_right lo 52ul) (vec_shift_left (vec_and hi (mask14 w)) 12ul) in
+  let f3 = vec_and (vec_shift_right hi 14ul) (mask26 w) in
+  let f4 = vec_shift_right hi 40ul in
+  (f0, f1, f2, f3, f4)
+
+inline_for_extraction noextract
+val store_felem5:
+    #w:lanes
+  -> f:felem5 w
+  -> uint64xN w & uint64xN w
+let store_felem5 #w (f0, f1, f2, f3, f4) =
+  let lo = vec_or (vec_or f0 (vec_shift_left f1 26ul)) (vec_shift_left f2 52ul) in
+  let hi = vec_or (vec_or (vec_shift_right f2 12ul) (vec_shift_left f3 14ul)) (vec_shift_left f4 40ul) in
+  lo, hi
+
+inline_for_extraction noextract
 val carry26_wide:
     #w:lanes
   -> l:uint64xN w
@@ -335,3 +421,85 @@ let fmul_rn5 #w (f10, f11, f12, f13, f14) (rn0, rn1, rn2, rn3, rn4) (rn50, rn51,
   let (t0, t1, t2, t3, t4) = mul_felem5 (f10, f11, f12, f13, f14)
     (rn0, rn1, rn2, rn3, rn4) (rn50, rn51, rn52, rn53, rn54) in
   carry_wide_felem5 (t0, t1, t2, t3, t4)
+
+inline_for_extraction noextract
+val fmul_r2_normalize5:
+    acc:felem5 2
+  -> r:felem5 2
+  -> r2:felem5 2
+  -> out:felem5 2
+let fmul_r2_normalize5 (a0, a1, a2, a3, a4) (r0, r1, r2, r3, r4) (r20, r21, r22, r23, r24) =
+  let r20 = vec_interleave_low r20 r0 in
+  let r21 = vec_interleave_low r21 r1 in
+  let r22 = vec_interleave_low r22 r2 in
+  let r23 = vec_interleave_low r23 r3 in
+  let r24 = vec_interleave_low r24 r4 in
+
+  let (r250, r251, r252, r253, r254) = precomp_r5 #2 (r20, r21, r22, r23, r24) in
+  let (o0, o1, o2, o3, o4) = fmul_r5 #2 (a0, a1, a2, a3, a4) (r20, r21, r22, r23, r24) (r250, r251, r252, r253, r254) in
+
+  let o0 = vec_add_mod o0 (vec_interleave_high o0 o0) in
+  let o1 = vec_add_mod o1 (vec_interleave_high o1 o1) in
+  let o2 = vec_add_mod o2 (vec_interleave_high o2 o2) in
+  let o3 = vec_add_mod o3 (vec_interleave_high o3 o3) in
+  let o4 = vec_add_mod o4 (vec_interleave_high o4 o4) in
+  carry_full_felem5 (o0, o1, o2, o3, o4)
+
+inline_for_extraction
+val fmul_r4_normalize5:
+    acc:felem5 4
+  -> r:felem5 4
+  -> r_5:felem5 4
+  -> r4:felem5 4
+  -> out:felem5 4
+let fmul_r4_normalize5 (a0, a1, a2, a3, a4) (r10, r11, r12, r13, r14) (r150, r151, r152, r153, r154) (r40, r41, r42, r43, r44) =
+  let (r20, r21, r22, r23, r24) =
+    fmul_r5 (r10, r11, r12, r13, r14) (r10, r11, r12, r13, r14) (r150, r151, r152, r153, r154) in
+  let (r30, r31, r32, r33, r34) =
+    fmul_r5 (r20, r21, r22, r23, r24) (r10, r11, r12, r13, r14) (r150, r151, r152, r153, r154) in
+
+  let v12120 = vec_interleave_low r20 r10 in
+  let v34340 = vec_interleave_low r40 r30 in
+  let r12340 = cast U64 4 (vec_interleave_low (cast U128 2 v34340) (cast U128 2 v12120)) in
+
+  let v12121 = vec_interleave_low r21 r11 in
+  let v34341 = vec_interleave_low r41 r31 in
+  let r12341 = cast U64 4 (vec_interleave_low (cast U128 2 v34341) (cast U128 2 v12121)) in
+
+  let v12122 = vec_interleave_low r22 r12 in
+  let v34342 = vec_interleave_low r42 r32 in
+  let r12342 = cast U64 4 (vec_interleave_low (cast U128 2 v34342) (cast U128 2 v12122)) in
+
+  let v12123 = vec_interleave_low r23 r13 in
+  let v34343 = vec_interleave_low r43 r33 in
+  let r12343 = cast U64 4 (vec_interleave_low (cast U128 2 v34343) (cast U128 2 v12123)) in
+
+  let v12124 = vec_interleave_low r24 r14 in
+  let v34344 = vec_interleave_low r44 r34 in
+  let r12344 = cast U64 4 (vec_interleave_low (cast U128 2 v34344) (cast U128 2 v12124)) in
+
+  let (r123450, r123451, r123452, r123453, r123454) = precomp_r5 #4 (r12340, r12341, r12342, r12343, r12344) in
+  let (o0, o1, o2, o3, o4) =
+    fmul_r5 #4 (a0, a1, a2, a3, a4) (r12340, r12341, r12342, r12343, r12344)
+      (r123450, r123451, r123452, r123453, r123454) in
+
+  let v00 = cast U64 4 (vec_interleave_high (cast U128 2 o0) (cast U128 2 o0)) in
+  let v10 = vec_add_mod o0 v00 in
+  let v20 = vec_add_mod v10 (vec_permute4 v10 1ul 1ul 1ul 1ul) in
+
+  let v01 = cast U64 4 (vec_interleave_high (cast U128 2 o1) (cast U128 2 o1)) in
+  let v11 = vec_add_mod o1 v01 in
+  let v21 = vec_add_mod v11 (vec_permute4 v11 1ul 1ul 1ul 1ul) in
+
+  let v02 = cast U64 4 (vec_interleave_high (cast U128 2 o2) (cast U128 2 o2)) in
+  let v12 = vec_add_mod o2 v02 in
+  let v22 = vec_add_mod v12 (vec_permute4 v12 1ul 1ul 1ul 1ul) in
+
+  let v03 = cast U64 4 (vec_interleave_high (cast U128 2 o3) (cast U128 2 o3)) in
+  let v13 = vec_add_mod o3 v03 in
+  let v23 = vec_add_mod v13 (vec_permute4 v13 1ul 1ul 1ul 1ul) in
+
+  let v04 = cast U64 4 (vec_interleave_high (cast U128 2 o4) (cast U128 2 o4)) in
+  let v14 = vec_add_mod o4 v04 in
+  let v24 = vec_add_mod v14 (vec_permute4 v14 1ul 1ul 1ul 1ul) in
+  carry_full_felem5 (v20, v21, v22, v23, v24)

@@ -202,7 +202,7 @@ map2 (Ints.logor #vt) v1 v2
 let vec_not #vt #w (v1:vec_t vt w) : vec_t vt w =
 map (Ints.lognot #vt) v1
 
-let vec_not_lemma #vt #w (v1:vec_t vt w) = admit()
+let vec_not_lemma #vt #w (v1:vec_t vt w) = ()
 
 let vec_shift_right #vt #w v1 s =
   map (shift_right_i s) v1
@@ -266,6 +266,18 @@ let vec_clmul_hi_hi x y = admit()
 
 let vec_from_bytes_le vt w b = uints_from_bytes_le #vt #SEC #w b
 let vec_from_bytes_be vt w b = uints_from_bytes_be #vt #SEC #w b
+let cast #t #w x = admit()
+let vec_aes_enc x = admit()
+let vec_aes_enc_lemma x = admit()
+let vec_aes_enc_last x = admit()
+let vec_aes_enc_last_lemma x = admit()
+let vec_aes_keygen_assist x = admit()
+let vec_aes_keygen_assist_lemma x = admit()
+let vec_clmul_lo_lo x = admit()
+let vec_clmul_lo_hi x = admit()
+let vec_clmul_hi_lo x = admit()
+let vec_clmul_hi_hi x = admit()
+
 let vec_load_le vt w b = admit()
 let vec_load_be vt w b = admit()
 let vec_to_bytes_le #vt #w v = uints_to_bytes_le #vt #SEC #w v
