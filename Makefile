@@ -10,7 +10,6 @@
 #           code   vale                code/old
 #           /   \  /                      |
 #         lib   specs                  specs/old
-#
 
 
 ##########################
@@ -73,8 +72,7 @@ include Makefile.common
 ifndef NODEPEND
 ifndef MAKE_RESTARTS
 .fstar-depend-%: .FORCE
-	@$(FSTAR_NO_FLAGS) --dep $* $(FSTAR_ROOTS) --extract '* -Prims -LowStar -Lib.Buffer -Hacl -FStar +FStar.Endianness +FStar.Kremlin.Endianness' > $@
-
+	@$(FSTAR_NO_FLAGS) --dep $* $(FSTAR_ROOTS) --extract '* -Prims -LowStar -Lib.Buffer -Hacl -FStar +FStar.Endianness +FStar.Kremlin.Endianness -EverCrypt -MerkleTree -Vale.Tactics -CanonCommMonoid -CanonCommSemiring -FastHybrid_helpers -FastMul_helpers -FastSqr_helpers -FastUtil_helpers' > $@
 .vale-depend: .fstar-depend-make .FORCE
 	@$(PYTHON3) tools/valedepend.py \
 	  $(addprefix -include ,$(INCLUDES)) \
@@ -91,9 +89,9 @@ include .fstar-depend-full
 include .vale-depend
 
 
-###################################################
-# First stage: producing F* files from Vale files #
-###################################################
+#################################################
+# First stage: compiling vaf files to fst files #
+#################################################
 
 %.dump: %.checked
 	$(FSTAR) --dump_module $(subst prims,Prims,$(basename $(notdir $*))) \
@@ -125,9 +123,9 @@ append-gitignore:
 	echo $(patsubst %.fst,%.fsti,$(VALE_FSTS)) | sed 's!$(HACL_HOME)!\n!g' >> .gitignore
 
 
-####################################
-# Second stage: verifying F* files #
-####################################
+################################################
+# Verifying F* files to produce .checked files #
+################################################
 
 # A litany of file-specific options, replicating exactly what was in SConstruct
 # before. TODO move these within the files themselves, or at least simplify.
@@ -202,9 +200,55 @@ $(HACL_HOME)/vale/code/lib/util/BufferViewHelpers.fst.checked: \
 	$(FSTAR) $(FSTAR_FLAGS) $< && \
 	touch $@
 
-#######################################################################
-# Extraction. Note that all the HACL C files are prefixed with Hacl_. #
-#######################################################################
+
+###############################################################################
+# Extracting (checked files) to OCaml, producing executables, running them to #
+# print ASM files                                                             #
+###############################################################################
+
+include $(FSTAR_HOME)/ulib/ml/Makefile.include
+
+TAC = $(shell which tac >/dev/null 2>&1 && echo "tac" || echo "tail -r")
+
+ALL_CMX_FILES = $(patsubst %.ml,%.cmx,$(shell echo $(ALL_ML_FILES) | $(TAC)))
+
+OCAMLOPT += -I $(OUTPUT_DIR)
+
+%.cmx: %.ml
+	$(OCAMLOPT) -c $< -o $@
+
+$(OUTPUT_DIR)/%.ml:
+	$(FSTAR) $(subst .checked,,$<) --codegen OCaml --extract_module $(subst .fst.checked,,$(notdir $<))
+
+dist/vale/%-mingw.S: dist/vale/%.exe
+	$< GCC Win > $@
+
+dist/vale/%-msvc.S: dist/vale/%.exe
+	$< MASM Win > $@
+
+dist/vale/%-linux.S: dist/vale/%.exe
+	$< GCC Linux > $@
+
+dist/vale/%-darwin.S: dist/vale/%.exe
+	$< GCC MacOS > $@
+
+dist/vale/%.exe: $(ALL_CMX_FILES) vale/code/lib/util/CmdLineParser.ml $(ML_MAIN)
+	mkdir -p $(dir $@)
+	$(OCAMLOPT) $^ -o $@ -I vale/code/lib/util
+
+dist/vale/cpuid.exe: ML_MAIN=vale/code/lib/util/x64/CpuidMain.ml
+dist/vale/aesgcm.exe: ML_MAIN=vale/code/crypto/aes/x64/Main.ml
+dist/vale/sha256.exe: ML_MAIN=vale/code/crypto/sha/ShaMain.ml
+dist/vale/curve25519.exe: ML_MAIN=vale/code/crypto/ecc/curve25519/Main25519.ml
+
+# A pseudo-target for generating just Vale assemblies
+vale-asm: $(foreach P,cpuid aesgcm sha256 curve25519,\
+  $(addprefix dist/vale/,$P-mingw.S $P-msvc.S $P-linux.S $P-darwin.S))
+
+
+###########################################################################
+# Extracting (checked files) to krml, then running kremlin to generate C. #
+###########################################################################
 
 .PRECIOUS: %.krml
 
@@ -230,7 +274,11 @@ COMPACT_FLAGS=-bundle Hacl.Hash.MD5+Hacl.Hash.Core.MD5+Hacl.Hash.SHA1+Hacl.Hash.
 HAND_WRITTEN_C	= Lib.PrintBuffer Lib.RandomBuffer
 HAND_WRITTEN_FILES = $(wildcard $(LIB_DIR)/c/*.c)
 DEFAULT_FLAGS	= $(addprefix -library ,$(HAND_WRITTEN_C)) \
-  -bundle Lib.*[rename=Hacl_Lib] -bundle Hacl.Test.*
+  -bundle Lib.*[rename=Hacl_Lib] -bundle Hacl.Test.* \
+  $(addprefix -bundle ,
+    'X64.*' 'Arch.*' 'Words.*' 'Vale.*' \
+    'Collections.*' 'SHA_helpers' Prop_s Collections Types_s Words_s Views AES_s \
+    Workarounds 'Math.*' Interop TypesNative_s)
 
 # For the time being, we rely on the old extraction to give us self-contained
 # files
@@ -293,12 +341,18 @@ dist/test/c/%.c: $(ALL_KRML_FILES)
 	  -minimal -add-include '"kremlib.h"' \
 	  -bundle '*[rename=$*]' $^
 
-# 4. Compilation (recursive make invocation relying on KreMLin-generated Makefile)
+
+###################################################################################
+# C Compilation (recursive make invocation relying on KreMLin-generated Makefile) #
+###################################################################################
 
 compile-%: dist/%/Makefile.basic
 	$(MAKE) -C $(dir $<) -f $(notdir $<)
 
-# 5. C tests
+
+###########
+# C tests #
+###########
 
 .PRECIOUS: dist/test/c/%.exe
 dist/test/c/%.exe: dist/test/c/%.c compile-generic
@@ -310,21 +364,10 @@ dist/test/c/%.exe: dist/test/c/%.c compile-generic
 test-c-%: dist/test/c/%.exe
 	$<
 
-# 5. OCaml tests, for specs
 
-include $(FSTAR_HOME)/ulib/ml/Makefile.include
-
-TAC = $(shell which tac >/dev/null 2>&1 && echo "tac" || echo "tail -r")
-
-ALL_CMX_FILES = $(patsubst %.ml,%.cmx,$(shell echo $(ALL_ML_FILES) | $(TAC)))
-
-OCAMLOPT += -I $(OUTPUT_DIR)
-
-%.cmx: %.ml
-	$(OCAMLOPT) -c $< -o $@
-
-$(OUTPUT_DIR)/%.ml:
-	$(FSTAR) $(subst .checked,,$<) --codegen OCaml --extract_module $(subst .fst.checked,,$(notdir $<))
+#######################
+# OCaml tests (specs) #
+#######################
 
 .PRECIOUS: dist/test/ml/%_AutoTest.ml
 dist/test/ml/%_AutoTest.ml:
