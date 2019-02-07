@@ -140,7 +140,7 @@ dist/%/Makefile.basic: $(ALL_KRML_FILES) | .depend
 	  -tmpdir $(dir $@) \
 	  $(addprefix -ccopt ,$(CFLAGS)) \
 	  -warn-error +9 \
-	  -fparentheses -fcurly-braces -fno-shadow \
+	  -fparentheses -fcurly-braces -fno-shadow -ftail-calls \
 	  -o libmerkletree.a \
 	  $^
 
