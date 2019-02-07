@@ -309,10 +309,10 @@ let a2: b:ilbuffer uint8 4ul{recallable b} =
 val main: unit -> St int
 let main () =
   push_frame();
-  B.recall b1;
-  B.recall b2;
-  B.recall a1;
-  B.recall a2;
+  recall b1;
+  recall b2;
+  recall a1;
+  recall a2;
   [@inline_let]
   let l0 = [u8 1; u8 2; u8 3] in
   let b0 : lbuffer uint8 3ul = createL l0 in

@@ -2,6 +2,7 @@ module Hacl.Spec.Curve25519.Field51.Definition
 
 open Lib.Sequence
 open Lib.IntTypes
+open NatPrime
 
 #reset-options "--z3rlimit 20"
 
@@ -78,10 +79,6 @@ assume val lemma_pow_128_51: _:unit{pow2 128 == 67108864 * pow51 * pow51}
 // assume val lemma_pow_51_3: _:unit{pow2 153 == pow51 * pow51 * pow51}
 // assume val lemma_pow_51_4: _:unit{pow2 204 == pow51 * pow51 * pow51 * pow51}
 
-let prime:pos =
-  assert_norm (pow2 255 - 19 > 0);
-  pow2 255 - 19
-
 let felem_fits1 (x:uint64) (m:scale64) =
   uint_v x <= m * max51
 
@@ -120,18 +117,5 @@ let wide_as_nat5 f =
   uint_v s0 + (uint_v s1 * pow51) + (uint_v s2 * pow51 * pow51) +
     (uint_v s3 * pow51 * pow51 * pow51) + (uint_v s4 * pow51 * pow51 * pow51 * pow51)
 
-let felem = x:nat{x < prime}
 let feval (f:felem5) : GTot felem = (as_nat5 f) % prime
 let feval_wide (f:felem_wide5) : GTot felem = (wide_as_nat5 f) % prime
-
-val fadd: felem -> felem -> felem
-let fadd f1 f2 = (f1 + f2) % prime
-
-val fsub: felem -> felem -> felem
-let fsub f1 f2 = (f1 - f2) % prime
-
-val fmul: felem -> felem -> felem
-let fmul f1 f2 = (f1 * f2) % prime
-
-val fsqr: felem -> felem
-let fsqr f1 = (f1 * f1) % prime
