@@ -21,7 +21,7 @@
 # .vaf files in order to get a full dependency graph for the .fst files.
 all_:
 	$(MAKE) vaf-to-fst
-	$(MAKE)
+	$(MAKE) all
 
 # TODO: compile-merkle-tree, compile-evercrypt + variants
 all: compile-compact compile-generic compile-compact-msvc # secure_api.old
@@ -70,6 +70,7 @@ FSTAR_ROOTS = $(wildcard $(addsuffix /*.fsti,$(DIRS)) $(addsuffix /*.fst,$(DIRS)
 include Makefile.common
 
 # We currently force regeneration of three depend files... this is... long...
+ifndef NODEPEND
 ifndef MAKE_RESTARTS
 .fstar-depend-%: .FORCE
 	@$(FSTAR_NO_FLAGS) --dep $* $(FSTAR_ROOTS) --extract '* -Prims -LowStar -Lib.Buffer -Hacl -FStar +FStar.Endianness +FStar.Kremlin.Endianness' > $@
@@ -83,6 +84,7 @@ ifndef MAKE_RESTARTS
 
 .PHONY: .FORCE
 .FORCE:
+endif
 endif
 
 include .fstar-depend-full
@@ -107,18 +109,20 @@ VALE_FLAGS = -include $(HACL_HOME)/vale/code/lib/util/operator.vaf
 
 $(HACL_HOME)/vale/code/lib/util/operator.fst: VALE_FLAGS=
 
-%.fsti:
-	@if [ x"$^" == x ]; then echo "Makefile bug: trying to produce an .fst without a .vaf"; false; fi
+%.fst:
+	@if [ "x$<" = x ]; then echo "Makefile bug: trying to produce an .fst without a .vaf"; false; fi
 	$(MONO) $(VALE_HOME)/bin/vale.exe -fstarText -quickMods \
 	  -typecheck -include $*.types.vaf \
 	  $(VALE_FLAGS) \
 	  -in $< -out $@ -outi $@i
 
-# Force linearization of the rule above
-%.fst: %.fsti
-
 # A pseudo-target for the first stage.
 vaf-to-fst: $(VALE_FSTS)
+
+# When refresh is needed
+append-gitignore:
+	echo $(VALE_FSTS) | sed 's!$(HACL_HOME)!\n!g' >> .gitignore
+	echo $(patsubst %.fst,%.fsti,$(VALE_FSTS)) | sed 's!$(HACL_HOME)!\n!g' >> .gitignore
 
 
 ####################################
@@ -134,14 +138,24 @@ VALE_FSTAR_FLAGS_NOSMT=--z3cliopt smt.arith.nl=false \
 
 VALE_FSTAR_FLAGS=$(VALE_FSTAR_FLAGS_NOSMT) \
   --smtencoding.elim_box true --smtencoding.l_arith_repr native \
-  --smtencoding.nl_arith_repr wrapped 
+  --smtencoding.nl_arith_repr wrapped
 
-$(HACL_HOME)/vale/%.checked: FSTAR_FLAGS=$(VALE_FSTAR_FLAGS) --use_two_phase_tc false
+$(HACL_HOME)/vale/%.checked: \
+  FSTAR_FLAGS=$(VALE_FSTAR_FLAGS) --use_two_phase_tc false
+
+$(HACL_HOME)/vale/specs/%.checked: \
+  FSTAR_FLAGS=$(VALE_FSTAR_FLAGS)
+$(HACL_HOME)/vale/code/%.checked: \
+  FSTAR_FLAGS=$(VALE_FSTAR_FLAGS)
+
+$(HACL_HOME)/vale/code/arch/x64/interop/%.checked: \
+  FSTAR_FLAGS=$(shell echo $(VALE_FSTAR_FLAGS_NOSMT | \
+    sed 's/--z3cliopt smt.arith.nl=false//; \
+      --z3cliopt smt.QI.EAGER_THRESHOLD=100//'))
 
 $(HACL_HOME)/vale/code/arch/x64/Views.fst.checked: \
   FSTAR_FLAGS=$(shell echo $(VALE_FSTAR_FLAGS) | \
-    sed 's/--smtencoding.nl_arith_repr wrapped//; \
-      s/--smtencoding.nl_arith_repr native//')
+    sed 's/--smtencoding.nl_arith_repr wrapped/--smtencoding.nl_arith_repr native/;')
 
 $(HACL_HOME)/vale/code/arch/x64/X64.Bytes_Semantics.fst.checked: \
   FSTAR_FLAGS=$(shell echo $(VALE_FSTAR_FLAGS) | \
@@ -161,24 +175,26 @@ $(HACL_HOME)/vale/code/crypto/poly1305/x64/X64.Poly1305.Util.fst.checked: \
 $(HACL_HOME)/vale/code/crypto/poly1305/x64/X64.Poly1305.Util.fsti.checked: \
   FSTAR_FLAGS=$(VALE_FSTAR_FLAGS_NOSMT)
 
-$(HACL_HOME)/vale/code/arch/X64.Memory.fst.checked: \
+$(HACL_HOME)/vale/code/arch/x64/X64.Memory.fst.checked: \
   FSTAR_FLAGS=$(shell echo $(VALE_FSTAR_FLAGS_NOSMT) | \
     sed 's/--use_extracted_interfaces true//; \
-      s/--z3cliopt smt.arith.nl=false//')
+      s/--z3cliopt smt.arith.nl=false//') \
+      --smtencoding.elim_box true
 
-$(HACL_HOME)/vale/code/arch/X64.Memory_Sems.fst.checked: \
+$(HACL_HOME)/vale/code/arch/x64/X64.Memory_Sems.fst.checked: \
   FSTAR_FLAGS=$(shell echo $(VALE_FSTAR_FLAGS_NOSMT) | \
     sed 's/--use_extracted_interfaces true//; \
-      s/--z3cliopt smt.arith.nl=false//')
+      s/--z3cliopt smt.arith.nl=false//') \
+      --smtencoding.elim_box true
 
 $(HACL_HOME)/vale/code/arch/x64/Interop.fst.checked: \
   FSTAR_FLAGS=$(shell echo $(VALE_FSTAR_FLAGS_NOSMT) | \
     sed 's/--use_extracted_interfaces true//; \
-      s/--z3cliopt smt.QI.EAGER_THRESHOLD=100//; \
-      s/--smtencoding.elim_box true//')
+      s/--z3cliopt smt.QI.EAGER_THRESHOLD=100//') \
+      --smtencoding.elim_box true
 
 $(HACL_HOME)/vale/code/lib/util/BufferViewHelpers.fst.checked: \
-  FSTAR_FLAGS=$(shell echo $(VALE_FSTAR_FLAGS) | \
+  FSTAR_FLAGS=$(shell echo $(VALE_FSTAR_FLAGS_NOSMT) | \
     sed 's/--z3cliopt smt.arith.nl=false//;')
 
 # The actual invocation.

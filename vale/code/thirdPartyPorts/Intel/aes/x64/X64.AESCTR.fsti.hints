@@ -1,0 +1,100 @@
+[
+  "äP“‚¹TçÅp\u000bÿ§‡ËÎ>",
+  [
+    [
+      "X64.AESCTR.aes_reqs",
+      1,
+      1,
+      0,
+      [ "@query" ],
+      0,
+      "f3d6d40af5edebd5a4ee7e9d921ec973"
+    ],
+    [
+      "X64.AESCTR.va_lemma_aes_ctr_encrypt",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "AES_s_pretyping_443f63aed29daed744644bd1799d3a91",
+        "constructor_distinct_AES_s.AES_128",
+        "constructor_distinct_AES_s.AES_256",
+        "equality_tok_AES_s.AES_128@tok", "equality_tok_AES_s.AES_256@tok",
+        "equation_Types_s.quad32", "equation_Words_s.nat32",
+        "equation_X64.AESCTR.aes_reqs",
+        "fuel_guarded_inversion_Words_s.four",
+        "fuel_guarded_inversion_X64.Vale.State.state",
+        "primitive_Prims.op_Equality", "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_X64.AESCTR_Tm_refine_5aa2c403299cbc9471b78b205d35a43f",
+        "typing_tok_AES_s.AES_128@tok"
+      ],
+      0,
+      "315ee0de998fad156e691d2e06e40556"
+    ],
+    [
+      "X64.AESCTR.va_wp_aes_ctr_encrypt",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "AES_s_pretyping_443f63aed29daed744644bd1799d3a91",
+        "constructor_distinct_AES_s.AES_128",
+        "constructor_distinct_AES_s.AES_256",
+        "equality_tok_AES_s.AES_128@tok", "equality_tok_AES_s.AES_256@tok",
+        "equation_X64.AESCTR.aes_reqs", "primitive_Prims.op_Equality",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0", "typing_tok_AES_s.AES_128@tok"
+      ],
+      0,
+      "e0f41ec764972e0665f9ac2432fd64c6"
+    ],
+    [
+      "X64.AESCTR.va_wpProof_aes_ctr_encrypt",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.squash",
+        "refinement_interpretation_Prims_Tm_refine_8d65e998a07dd53ec478e27017d9dba5"
+      ],
+      0,
+      "99615dcd95398d5a454cee91741768e2"
+    ],
+    [
+      "X64.AESCTR.va_lemma_aes_counter_loop",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Words_s.nat32",
+        "refinement_interpretation_X64.AESCTR_Tm_refine_03136da4c9b8262f3b3cc67547ff9d8d"
+      ],
+      0,
+      "ed4dc83aef61ec8605a754b7c1222ffd"
+    ],
+    [
+      "X64.AESCTR.va_wp_aes_counter_loop",
+      1,
+      1,
+      0,
+      [ "@query" ],
+      0,
+      "7350984f5497898a88a5c9918e8769f7"
+    ],
+    [
+      "X64.AESCTR.va_wpProof_aes_counter_loop",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.squash",
+        "refinement_interpretation_Prims_Tm_refine_8d65e998a07dd53ec478e27017d9dba5"
+      ],
+      0,
+      "621819c8d8b3c05c34724322bcd1ebcc"
+    ]
+  ]
+]

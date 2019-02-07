@@ -5,10 +5,10 @@
       "FastUtil_helpers.sub_carry",
       1,
       1,
-      1,
+      0,
       [ "@query" ],
       0,
-      "4bd95dff28ff6eaed79a740359c30ed6"
+      "4e1b323e10dfa2452a676ba9dbca7b54"
     ],
     [
       "FastUtil_helpers.lemma_sub2",
@@ -42,7 +42,7 @@
         "typing_FStar.UInt.fits"
       ],
       0,
-      "530f4eb242e512ca56137fa2efdec1c6"
+      "bb67b6676e64cfe94aa7f459e9168c2f"
     ],
     [
       "FastUtil_helpers.lemma_pow2_int_23",
@@ -50,25 +50,29 @@
       0,
       0,
       [
-        "@query", "equation_FastUtil_helpers.pow2int_three",
-        "equation_FastUtil_helpers.pow2int_two",
-        "projection_inverse_BoxInt_proj_0"
+        "@MaxIFuel_assumption", "@query",
+        "equation_FastUtil_helpers.pow2int_three",
+        "equation_FastUtil_helpers.pow2int_two", "int_inversion",
+        "int_typing", "projection_inverse_BoxInt_proj_0",
+        "typing_FastUtil_helpers.pow2int_three"
       ],
       0,
-      "308c401cf2e8b6c26444d8be2d092916"
+      "b25a93d69faf41198e56ea3657e61e5e"
     ],
     [
       "FastUtil_helpers.lemma_pow2_int_34",
       1,
-      0,
+      1,
       0,
       [
-        "@query", "equation_FastUtil_helpers.pow2int_four",
-        "equation_FastUtil_helpers.pow2int_three",
-        "projection_inverse_BoxInt_proj_0"
+        "@MaxIFuel_assumption", "@query",
+        "equation_FastUtil_helpers.pow2int_four",
+        "equation_FastUtil_helpers.pow2int_three", "int_inversion",
+        "projection_inverse_BoxInt_proj_0",
+        "typing_FastUtil_helpers.pow2int_four"
       ],
       0,
-      "7cd715e2a37b8baa6202c0ecd23991b3"
+      "f81bd1fbd3cb39f5e0da3f08faf5cb93"
     ],
     [
       "FastUtil_helpers.lemma_sub3",
@@ -83,7 +87,7 @@
         "refinement_interpretation_Prims_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "67cd3983a59c058c56f85ec4514736c5"
+      "35599fafda2b7bb79083ee5889bc8a88"
     ],
     [
       "FastUtil_helpers.lemma_sub3",
@@ -91,18 +95,18 @@
       0,
       0,
       [
-        "@MaxIFuel_assumption", "@query",
-        "equation_FStar.Reflection.Data.var", "equation_Fast_defs.bit",
+        "@MaxIFuel_assumption", "@query", "equation_Fast_defs.bit",
         "equation_Prims.eqtype", "equation_Prims.nat",
-        "equation_Words_s.nat64",
-        "function_token_typing_FStar.Reflection.Data.var",
+        "equation_Types_s.twobits", "equation_Words_s.nat64",
+        "equation_Words_s.natN", "function_token_typing_Types_s.twobits",
+        "haseqFStar.Seq.Base_Tm_refine_5514fbe9e08dfda40f950a7b9f1b2b98",
         "projection_inverse_BoxInt_proj_0",
         "projection_inverse_FStar.Pervasives.Native.Mktuple2__2",
         "refinement_interpretation_Prims_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
         "true_interp"
       ],
       0,
-      "4eb981cd43dd9dfdeb1162ce7fcf9d40"
+      "cdad7aef2f15ea0aa5d596b270f0c5e8"
     ],
     [
       "FastUtil_helpers.lemma_sub3",
@@ -134,7 +138,7 @@
         "typing_FStar.UInt.fits"
       ],
       0,
-      "19085e72a34e72ab590ee60265b24ddc"
+      "b731682b311fec6051fa15b334018f1e"
     ],
     [
       "FastUtil_helpers.lemma_sub3",
@@ -143,7 +147,7 @@
       0,
       [ "@query" ],
       0,
-      "15f4d96e1a70f6572a2abca172c8eaa9"
+      "14ddf68b2cc10f5e79eac7fed9c0f047"
     ],
     [
       "FastUtil_helpers.lemma_sub3",
@@ -156,7 +160,7 @@
         "refinement_interpretation_FastUtil_helpers_Tm_refine_477f5ede545e510cd973ea01bc1f278b"
       ],
       0,
-      "48d4edeed1a3704e8af8ffbfbb1b4794"
+      "385542fa3cbd7d3f2932f17aa44d89a0"
     ],
     [
       "FastUtil_helpers.lemma_sub",
@@ -171,7 +175,7 @@
         "refinement_interpretation_Prims_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "a23753924e86ab2c9aa76213cb71c86a"
+      "f3f423720b7713cd4ce38f1651fdf90b"
     ],
     [
       "FastUtil_helpers.lemma_sub",
@@ -190,7 +194,7 @@
         "true_interp"
       ],
       0,
-      "9ae56227386b6c1a7f81fe70d1be3a43"
+      "0485747e537bb943c0e79cdb8a4d021b"
     ],
     [
       "FastUtil_helpers.lemma_sub",
@@ -215,7 +219,7 @@
         "refinement_interpretation_Prims_Tm_refine_a4038d5aed1633b5ecbb4e499b1c66ad"
       ],
       0,
-      "3eadf4f7236a4ba15d4e30c019cc6824"
+      "e870f117dd2067d79bc7ef2f602a7bb7"
     ],
     [
       "FastUtil_helpers.lemma_sub",
@@ -224,7 +228,7 @@
       0,
       [ "@query" ],
       0,
-      "60e66572e857298e671e32294bc5840f"
+      "2a1ab944d86ca883a2893bc69996bbe2"
     ],
     [
       "FastUtil_helpers.lemma_sub",
@@ -238,7 +242,7 @@
         "refinement_interpretation_FastUtil_helpers_Tm_refine_260d838a743983e1c94d9b9bbfe24c0a"
       ],
       0,
-      "da9104645ead642a1f9b4357eb8d8455"
+      "eca447d81a736558257d4cfcc1dfc31d"
     ]
   ]
 ]
