@@ -11,7 +11,7 @@ open Hacl.Spec.Poly1305.Field32xN
 open Hacl.Poly1305.Field32xN.Lemmas
 module S = Hacl.Spec.Poly1305.Vec
 
-#reset-options "--z3rlimit 100 --using_facts_from '* -FStar.Seq'"
+#reset-options "--z3rlimit 100 --max_fuel 2 --using_facts_from '* -FStar.Seq'"
 
 val lemma_feval_is_fas_nat_i:
   #w:lanes
@@ -314,6 +314,8 @@ let mul_felem5_fits_lemma #w f1 r r5 =
   smul_add_felem5_fits_lemma #w #2 #(5,5,5,1,2) #(27,17,10,9,7) f13 (r52,r53,r54,r0,r1) (a20,a21,a22,a23,a24);
   let (a40,a41,a42,a43,a44) = smul_add_felem5 #w f14 (r51,r52,r53,r54,r0) (a30,a31,a32,a33,a34) in
   smul_add_felem5_fits_lemma #w #2 #(10,5,5,5,1) #(37,27,20,11,11) f14 (r51,r52,r53,r54,r0) (a30,a31,a32,a33,a34)
+
+#set-options "--z3rlimit 300"
 
 val mul_felem5_eval_lemma_i:
     #w:lanes
