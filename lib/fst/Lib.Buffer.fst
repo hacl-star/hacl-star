@@ -424,7 +424,7 @@ val lemma_eq_disjoint:
   -> h1: mem
   -> Lemma
   (requires (live h0 b1 /\ live h0 b2 /\ eq_or_disjoint b1 b2 /\
-	     modifies1 #a1 #n (gsub b1 0ul n) h0 h1))
+	     modifies1 (gsub b1 0ul n) h0 h1))
   (ensures (let b2s = gsub b2 n (clen2 -! n) in
 	    as_seq h0 b2s == as_seq h1 b2s /\
 	    Seq.index (as_seq h0 b2) (v n) ==
