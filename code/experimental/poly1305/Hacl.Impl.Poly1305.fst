@@ -108,8 +108,6 @@ let poly1305_init_ #s ctx key =
 (* WRAPPER TO PREVENT INLINING *)
 [@CInline]
 let poly1305_init_32 (ctx:poly1305_ctx M32) (k:lbuffer uint8 32ul) = poly1305_init_ #M32 ctx k
-inline_for_extraction
-let poly1305_init_64 (ctx:poly1305_ctx M64) (k:lbuffer uint8 32ul) = poly1305_init_ #M64 ctx k
 [@CInline]
 let poly1305_init_128 (ctx:poly1305_ctx M128) (k:lbuffer uint8 32ul) = poly1305_init_ #M128 ctx k
 inline_for_extraction
@@ -122,7 +120,6 @@ val poly1305_init: #s:field_spec -> ctx:poly1305_ctx s -> key:lbuffer uint8 32ul
 let poly1305_init #s ctx key = 
    match s with
    | M32 -> poly1305_init_32 ctx key
-   | M64 -> poly1305_init_64 ctx key
    | M128 -> poly1305_init_128 ctx key
    | M256 -> poly1305_init_256 ctx key
 (* WRAPPER to Prevent Inlining *)
@@ -188,8 +185,6 @@ let poly1305_update_ #s ctx len text =
 (* WRAPPER TO PREVENT INLINING *)
 [@CInline]
 let poly1305_update_32 (ctx:poly1305_ctx M32) (len:size_t) (text:lbuffer uint8 len) = poly1305_update_ #M32 ctx len text
-inline_for_extraction
-let poly1305_update_64 (ctx:poly1305_ctx M64) (len:size_t) (text:lbuffer uint8 len) = poly1305_update_ #M64 ctx len text
 [@CInline]
 let poly1305_update_128 (ctx:poly1305_ctx M128) (len:size_t) (text:lbuffer uint8 len) = poly1305_update_ #M128 ctx len text
 inline_for_extraction
@@ -202,7 +197,6 @@ val poly1305_update: #s:field_spec -> ctx:poly1305_ctx s -> len:size_t -> text:l
 let poly1305_update #s ctx len text = 
    match s with
    | M32 -> poly1305_update_32 ctx len text
-   | M64 -> poly1305_update_64 ctx len text
    | M128 -> poly1305_update_128 ctx len text
    | M256 -> poly1305_update_256 ctx len text
 (* WRAPPER to Prevent Inlining *)
@@ -224,11 +218,9 @@ let poly1305_finish_ #s ctx tag =
 (* WRAPPER TO PREVENT INLINING *)
 [@CInline]
 let poly1305_finish_32 (ctx:poly1305_ctx M32) (tag:lbuffer uint8 16ul) = poly1305_finish_ #M32 ctx tag
-inline_for_extraction
-let poly1305_finish_64 (ctx:poly1305_ctx M64) (tag:lbuffer uint8 16ul) = poly1305_finish_ #M64 ctx tag
 [@CInline]
 let poly1305_finish_128 (ctx:poly1305_ctx M128) (tag:lbuffer uint8 16ul) = poly1305_finish_ #M128 ctx tag
-inline_for_extraction
+[@CInline]
 let poly1305_finish_256 (ctx:poly1305_ctx M256) (tag:lbuffer uint8 16ul) = poly1305_finish_ #M256 ctx tag
 
 inline_for_extraction noextract
@@ -238,7 +230,6 @@ val poly1305_finish: #s:field_spec -> ctx:poly1305_ctx s -> tag:lbuffer uint8 16
 let poly1305_finish #s ctx tag = 
    match s with
    | M32 -> poly1305_finish_32 ctx tag
-   | M64 -> poly1305_finish_64 ctx tag
    | M128 -> poly1305_finish_128 ctx tag
    | M256 -> poly1305_finish_256 ctx tag
 (* WRAPPER to Prevent Inlining *)
