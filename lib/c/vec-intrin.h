@@ -45,6 +45,7 @@ typedef __m128i Lib_IntVector_Intrinsics_vec128;
 #define Lib_IntVector_Intrinsics_vec128_lognot(x0) \
   (_mm_xor_si128(x0, _mm_set1_epi32(-1)))
 
+
 #define Lib_IntVector_Intrinsics_vec128_shift_left(x0, x1) \
   (_mm_slli_si128(x0, (x1)/8))
 
@@ -62,6 +63,18 @@ typedef __m128i Lib_IntVector_Intrinsics_vec128;
 
 #define Lib_IntVector_Intrinsics_vec128_shift_right32(x0, x1) \
   (_mm_srli_epi32(x0, x1))
+
+#define Lib_IntVector_Intrinsics_vec128_rotate_left32_8(x0) \
+  (_mm_shuffle_epi8(x0, _mm_set_epi8(14,13,12,15,10,9,8,11,6,5,4,7,2,1,0,3)))
+
+#define Lib_IntVector_Intrinsics_vec128_rotate_left32_16(x0) \
+  (_mm_shuffle_epi8(x0, _mm_set_epi8(13,12,15,14,9,8,11,10,5,4,7,6,1,0,3,2)))
+
+#define Lib_IntVector_Intrinsics_vec128_rotate_left32(x0,x1)	\
+  ((x1 == 8? Lib_IntVector_Intrinsics_vec128_rotate_left32_8(x0) : (x1 == 16? Lib_IntVector_Intrinsics_vec128_rotate_left32_16(x0) : _mm_xor_si128(_mm_slli_epi32(x0,x1),_mm_srli_epi32(x0,32-x1)))))
+
+#define Lib_IntVector_Intrinsics_vec128_rotate_right32(x0,x1)	\
+  (Lib_IntVector_Intrinsics_vec128_rotate_left32(x0,32-x1))
 
 #define Lib_IntVector_Intrinsics_vec128_shuffle32(x0, x1, x2, x3, x4)	\
   (_mm_shuffle_epi32(x0, _MM_SHUFFLE(x1,x2,x3,x4)))
@@ -206,6 +219,22 @@ typedef __m256i Lib_IntVector_Intrinsics_vec256;
 
 #define Lib_IntVector_Intrinsics_vec256_shift_right32(x0, x1) \
   (_mm256_srli_epi32(x0, x1))
+
+#define Lib_IntVector_Intrinsics_vec256_rotate_left32_8(x0) \
+  (_mm256_shuffle_epi8(x0, _mm256_set_epi8(14,13,12,15,10,9,8,11,6,5,4,7,2,1,0,3,14,13,12,15,10,9,8,11,6,5,4,7,2,1,0,3)))
+
+#define Lib_IntVector_Intrinsics_vec256_rotate_left32_16(x0) \
+  (_mm256_shuffle_epi8(x0, _mm256_set_epi8(13,12,15,14,9,8,11,10,5,4,7,6,1,0,3,2,13,12,15,14,9,8,11,10,5,4,7,6,1,0,3,2)))
+
+#define Lib_IntVector_Intrinsics_vec256_rotate_left32(x0,x1)	\
+  ((x1 == 8? Lib_IntVector_Intrinsics_vec256_rotate_left32_8(x0) : (x1 == 16? Lib_IntVector_Intrinsics_vec256_rotate_left32_16(x0) : _mm256_or_si256(_mm256_slli_epi32(x0,x1),_mm256_srli_epi32(x0,32-x1)))))
+
+#define Lib_IntVector_Intrinsics_vec256_rotate_right32(x0,x1)	\
+  (Lib_IntVector_Intrinsics_vec256_rotate_left32(x0,32-x1))
+
+#define Lib_IntVector_Intrinsics_vec128_shuffle32(x0, x1, x2, x3, x4)	\
+  (_mm_shuffle_epi32(x0, _MM_SHUFFLE(x1,x2,x3,x4)))
+
 
 #define Lib_IntVector_Intrinsics_vec256_shuffle64(x0,  x1, x2, x3, x4)	\
   (_mm256_permute4x64_epi64(x0, _MM_SHUFFLE(x1,x2,x3,x4)))

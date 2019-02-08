@@ -204,12 +204,19 @@ let vec_shift_left (#t:v_inttype) (#w:width) (x:vec_t t w) (y:shiftval t) =
   | U128,2 -> vec256_shift_left x y
 
 let vec_rotate_right (#t:v_inttype) (#w:width) (x:vec_t t w) (y:rotval t) =
-  vec_or (vec_shift_right x y) (vec_shift_left x (size (bits t) -. y))
+  match t,w with
+  | U32,4 -> vec128_rotate_right32 x y
+  | U32,8 -> vec256_rotate_right32 x y
+  | _,_ ->  vec_or (vec_shift_left x (size (bits t) -. y)) (vec_shift_right x y)
 
-let vec_rotate_left (#t:v_inttype) (#w:width) (x:vec_t t w) (y:rotval t) =
-  vec_or (vec_shift_left x y) (vec_shift_right x (size (bits t) -. y))
+let vec_rotate_left (#t:v_inttype) (#w:width) (x:vec_t t w) (y:rotval t) = 
+  match t,w with
+  | U32,4 -> vec128_rotate_left32 x y
+  | U32,8 -> vec256_rotate_left32 x y
+  | _,_ ->  vec_or (vec_shift_left x y) (vec_shift_right x (size (bits t) -. y))
 
-let vec_eq_mask (#t:v_inttype) (#w:width) (x:vec_t t w) (y:vec_t t w) =
+ 
+let vec_eq_mask (#t:v_inttype) (#w:width) (x:vec_t t w) (y:vec_t t w) = 
   match t,w with
   | U128,1 -> admit()
   | _,1 -> (eq_mask (x <: uint_t t SEC) y) <: vec_t t w
