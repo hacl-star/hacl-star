@@ -8,9 +8,9 @@
 #include <unistd.h>
 #include <time.h>
 #include <stdbool.h>
-#include "openssl/chacha.h"
+//#include "openssl/chacha.h"
 
-#define ossl_chacha20(cipher,plain,len,nonce,key,ctr) (CRYPTO_chacha_20(cipher,plain,len,nonce,key,ctr))
+//#define ossl_chacha20(cipher,plain,len,nonce,key,ctr) (CRYPTO_chacha_20(cipher,plain,len,nonce,key,ctr))
 
 typedef uint64_t cycles;
 
@@ -184,6 +184,7 @@ int main() {
   if (ok) printf("Success!\n");
   else printf("FAILED!\n");
 
+/*
   ossl_chacha20(comp,in,in_len,k,n,1);
   printf("OpenSSL computed:");
   for (int i = 0; i < 114; i++)
@@ -198,6 +199,7 @@ int main() {
     ok = ok & (exp[i] == comp[i]);
   if (ok) printf("Success!\n");
   else printf("FAILED!\n");
+*/
 
   uint64_t len = SIZE;
   uint8_t plain[SIZE];
@@ -296,6 +298,7 @@ int main() {
   double diff5 = (double)(t2 - t1)/CLOCKS_PER_SEC;
   uint64_t cyc5 = b - a;
 
+/*
   memset(plain,'P',SIZE);
   memset(key,'K',16);
   memset(nonce,'N',12);
@@ -313,6 +316,7 @@ int main() {
   t2 = clock();
   double diff6 = (double)(t2 - t1)/CLOCKS_PER_SEC;
   uint64_t cyc6 = b - a;
+*/
 
   uint64_t count = ROUNDS * SIZE;
 
@@ -336,8 +340,9 @@ int main() {
   printf("cycles for %" PRIu64 " bytes: %" PRIu64 " (%.2fcycles/byte)\n",count,(uint64_t)cyc5,(double)cyc5/count);
   printf("bw %8.2f MB/s\n",(double)count/(diff5 * 1000000.0));
   
+/*
   printf("OpenSSL Chacha20\n");
   printf("cycles for %" PRIu64 " bytes: %" PRIu64 " (%.2fcycles/byte)\n",count,(uint64_t)cyc6,(double)cyc6/count);
   printf("bw %8.2f MB/s\n",(double)count/(diff6 * 1000000.0));
-  
+  */
 }

@@ -75,9 +75,15 @@ chacha20-vec256-c/Hacl_Chacha20_Vec256.c: chacha20-vec256-c/out.krml
 	 $(KREMLIN) $(KREMLIN_ARGS) -tmpdir chacha20-vec256-c  $^ -skip-compilation \
 	   -minimal -add-include '"vec-intrin.h"' -add-include '"kremlib.h"' -bundle 'Hacl.Chacha20_Vec256=*'
 
+
 chacha20-vec.exe: chacha20-vec32-c/Hacl_Chacha20_Vec32.c chacha20-vec128-c/Hacl_Chacha20_Vec128.c chacha20-vec256-c/Hacl_Chacha20_Vec256.c
-	$(CC) -march=native -mtune=native -O3 -I $(KREMLIN_HOME)/kremlib/c -I $(KREMLIN_HOME)/include -I $(HACL_HOME)/lib/c -I . chacha20-vec32-c/Hacl_Chacha20_Vec32.c chacha20-vec128-c/Hacl_Chacha20_Vec128.c chacha20-vec256-c/Hacl_Chacha20_Vec256.c $(HACL_HOME)/snapshots/hacl-c/Hacl_Chacha20.c $(HACL_HOME)/snapshots/hacl-c/Hacl_Chacha20_Vec128.c chacha20-vec-test.c -o chacha20-vec.exe $(KREMLIN_HOME)/kremlib/c/testlib.o -ldl -lpthread -I ../boringssl/include ../boringssl/build/crypto/libcrypto.a
+	$(CC) -march=native -mtune=native -O3 -I $(KREMLIN_HOME)/kremlib/c -I $(KREMLIN_HOME)/include -I $(HACL_HOME)/lib/c -I . chacha20-vec32-c/Hacl_Chacha20_Vec32.c chacha20-vec128-c/Hacl_Chacha20_Vec128.c chacha20-vec256-c/Hacl_Chacha20_Vec256.c $(HACL_HOME)/snapshots/hacl-c/Hacl_Chacha20.c $(HACL_HOME)/snapshots/hacl-c/Hacl_Chacha20_Vec128.c chacha20-vec-test.c -o chacha20-vec.exe $(KREMLIN_HOME)/kremlib/c/testlib.o 
 	./chacha20-vec.exe
+
+
+# chacha20-vec.exe: chacha20-vec32-c/Hacl_Chacha20_Vec32.c chacha20-vec128-c/Hacl_Chacha20_Vec128.c chacha20-vec256-c/Hacl_Chacha20_Vec256.c
+# 	$(CC) -march=native -mtune=native -O3 -I $(KREMLIN_HOME)/kremlib/c -I $(KREMLIN_HOME)/include -I $(HACL_HOME)/lib/c -I . chacha20-vec32-c/Hacl_Chacha20_Vec32.c chacha20-vec128-c/Hacl_Chacha20_Vec128.c chacha20-vec256-c/Hacl_Chacha20_Vec256.c $(HACL_HOME)/snapshots/hacl-c/Hacl_Chacha20.c $(HACL_HOME)/snapshots/hacl-c/Hacl_Chacha20_Vec128.c chacha20-vec-test.c -o chacha20-vec.exe $(KREMLIN_HOME)/kremlib/c/testlib.o -ldl -lpthread -I ../boringssl/include ../boringssl/build/crypto/libcrypto.a
+# 	./chacha20-vec.exe
 
 chacha20-vec-perf: chacha20-vec.exe
 

@@ -50,17 +50,11 @@ let transpose_state (#w:lanes) (st:state w) : lseq (lseq uint32 16) w  =
 	  x)
 
 
-let lanes : Type0 = n:width{n == 1 \/ n == 4 \/ n == 8}
-let uint32xN (w:lanes) : Type0 = vec_t U32 w
-
-let state (w:lanes) : Type0 = lseq (uint32xN w) 16
-
-let line (#w:lanes) (a:index_t) (b:index_t) (d:index_t) 
-		    (s:rotval_t) (m:state w) : state w =
-  let m = array.copy m in
+let line (#w:lanes) (a:idx) (b:idx) (d:idx) 
+		    (s:rotval U32) (m:state w) : state w =
   let m = m.[ a ] <- m.[ a ] +| m.[ b ] in
   let m = m.[ d ] <- m.[ d ] ^| m.[ a ] in
-  let m = m.[ d ] <- uint32xN_rotate_left m.[ d ] s in
+  let m = m.[ d ] <- vec_rotate_left m.[ d ] s in
   m
 
 

@@ -196,11 +196,6 @@ val line: #w:lanes -> st:state w ->
 		    Spec.line (v a) (v b) (v d) 
 			      r (as_seq h0 st)))
 let line #w st a b d r = 
-  st.(a) <- st.(a) +| st.(b);
-  st.(a) <- st.(a) ^| st.(d);
-  st.(d) <- st.(d) <<<| r
-
-
   let sta = st.(a) in
   let stb = st.(b) in
   let std = st.(d) in
