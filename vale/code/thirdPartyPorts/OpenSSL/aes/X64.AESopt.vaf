@@ -117,22 +117,25 @@ procedure {:quick} {:verify true} loop6x_preamble(
     requires
         // Valid ptrs and buffers
         validDstAddrs128(mem, ivp, iv_b, 1, memTaint, Secret);
+        buffers_disjoint128(iv_b, keys_b);
 
         // AES reqs
         aes_reqs(alg, key_words, round_keys, keys_b, key, mem, memTaint);
         rndkey == index(round_keys, 0);
 
     ensures
-//        inout0 == rounds_opaque(old(inout0), round_keys, 1);
-//        inout1 == rounds_opaque(old(quad32_xor(inout1, rndkey)), round_keys, 1);
-//        inout2 == rounds_opaque(old(quad32_xor(inout2, rndkey)), round_keys, 1);
-//        inout3 == rounds_opaque(old(quad32_xor(inout3, rndkey)), round_keys, 1);
-//        inout4 == rounds_opaque(old(quad32_xor(inout4, rndkey)), round_keys, 1);
-//        inout5 == rounds_opaque(old(quad32_xor(inout5, rndkey)), round_keys, 1);
+        inout0 == rounds_opaque(old(inout0), round_keys, 1);
+        inout1 == rounds_opaque(old(quad32_xor(inout1, rndkey)), round_keys, 1);
+        inout2 == rounds_opaque(old(quad32_xor(inout2, rndkey)), round_keys, 1);
+        inout3 == rounds_opaque(old(quad32_xor(inout3, rndkey)), round_keys, 1);
+        inout4 == rounds_opaque(old(quad32_xor(inout4, rndkey)), round_keys, 1);
+        inout5 == rounds_opaque(old(quad32_xor(inout5, rndkey)), round_keys, 1);
 //
 //        buffer128_read(iv_b, 0, mem) == old(add_wrap_quad32(T2, inout5));
 {
+    assert{:quick_type} length(round_keys) == nr(alg) + 1; // REVIEW: Why is this needed?
     init_rounds_opaque(inout0, round_keys);
+//    assert inout0 == rounds_opaque(inout0, round_keys, 0);
 
     VPaddd(T1, T2, inout5); // OpenSSL uses VPaddb
     VPxor(inout1, inout1, rndkey); init_rounds_opaque(inout1, round_keys);
@@ -141,6 +144,11 @@ procedure {:quick} {:verify true} loop6x_preamble(
     Store128_buffer(ivp, T1, 0, Secret, iv_b, 0);   // # save next counter value
     VPxor(inout3, inout3, rndkey); init_rounds_opaque(inout3, round_keys);
     Load128_buffer(T2, key, 0x10-0x80, Secret, keys_b, 1); // # borrow $T2 for $rndkey
+//    assert T2 == buffer128_read(keys_b, 1, mem);
+//
+//    assert {:quick_type} length(buffer128_as_seq(mem, keys_b)) == nr(alg) + 1;
+//    assert T2 == index(buffer128_as_seq(mem, keys_b), 1);
+//    assert T2 == index(round_keys, 1);
 
     VAESNI_enc(inout0, inout0, T2);
     VPxor(inout4, inout4, rndkey); init_rounds_opaque(inout4, round_keys);
@@ -182,7 +190,7 @@ procedure {:quick} loop6x_plain(
 
     modifies
         inout0; inout1; inout2; inout3; inout4; inout5; rndkey;
-        mem; efl;
+        efl;
 
     requires
         // AES reqs
