@@ -27,7 +27,8 @@ all_:
 	$(MAKE) all
 
 # TODO: compile-merkle-tree, compile-evercrypt + variants
-all: compile-compact compile-generic compile-compact-msvc # secure_api.old
+all: compile-compact compile-generic compile-compact-msvc \
+  # secure_api.old
 
 # Any file in code/tests is taken to contain a `main` function.
 # Any file in specs/tests is taken to contain a `test` function.
@@ -77,8 +78,12 @@ include Makefile.common
 # We currently force regeneration of three depend files... this is... long...
 ifndef NODEPEND
 ifndef MAKE_RESTARTS
+
+# Note that the --extract argument only controls what is extracted for OCaml,
+# meaning we can eliminate large chunks of the dependency graph, since we only
+# need to run: Vale stuff, and HACL spec tests.
 .fstar-depend-%: .FORCE
-	@$(FSTAR_NO_FLAGS) --dep $* $(FSTAR_ROOTS) --extract '* -Prims -LowStar -Lib.Buffer -Hacl -FStar +FStar.Endianness +FStar.Kremlin.Endianness -EverCrypt -MerkleTree -Vale.Tactics -CanonCommMonoid -CanonCommSemiring -FastHybrid_helpers -FastMul_helpers -FastSqr_helpers -FastUtil_helpers -TestLib -Test.Lowstarize' > $@
+	@$(FSTAR_NO_FLAGS) --dep $* $(FSTAR_ROOTS) --extract '* -Prims -LowStar -Lib.Buffer -Hacl -FStar +FStar.Endianness +FStar.Kremlin.Endianness -EverCrypt -MerkleTree -Vale.Tactics -CanonCommMonoid -CanonCommSemiring -FastHybrid_helpers -FastMul_helpers -FastSqr_helpers -FastUtil_helpers -TestLib -EverCrypt -MerkleTree -Test -Vale_memcpy' > $@
 
 .vale-depend: .fstar-depend-make .FORCE
 	@$(PYTHON3) tools/valedepend.py \
@@ -134,7 +139,7 @@ append-gitignore:
 ################################################
 
 # A litany of file-specific options, replicating exactly what was in SConstruct
-# before. TODO move these within the files themselves, or at least simplify.
+# before. TODO simplification would be good.
 VALE_FSTAR_FLAGS_NOSMT=--z3cliopt smt.arith.nl=false \
   --z3cliopt smt.QI.EAGER_THRESHOLD=100 --z3cliopt smt.CASE_SPLIT=3 \
   --max_fuel 1 --max_ifuel 1 \
@@ -230,6 +235,7 @@ ALL_CMX_FILES = $(patsubst %.ml,%.cmx,$(shell echo $(ALL_ML_FILES) | $(TAC)))
 
 OCAMLOPT += -I $(OUTPUT_DIR)
 
+.PRECIOUS: %.cmx
 %.cmx: %.ml
 	$(OCAMLOPT) -c $< -o $@
 
@@ -256,11 +262,12 @@ dist/vale/cpuid.exe: ML_MAIN=vale/code/lib/util/x64/CpuidMain.ml
 dist/vale/aesgcm.exe: ML_MAIN=vale/code/crypto/aes/x64/Main.ml
 dist/vale/sha256.exe: ML_MAIN=vale/code/crypto/sha/ShaMain.ml
 dist/vale/curve25519.exe: ML_MAIN=vale/code/crypto/ecc/curve25519/Main25519.ml
-
-# A pseudo-target for generating just Vale assemblies
-vale-asm: $(foreach P,cpuid aesgcm sha256 curve25519,\
+	
+VALE_ASMS = $(foreach P,cpuid aesgcm sha256 curve25519,\
   $(addprefix dist/vale/,$P-mingw.S $P-msvc.S $P-linux.S $P-darwin.S))
 
+# A pseudo-target for generating just Vale assemblies
+vale-asm: $(VALE_ASMS)
 
 ###########################################################################
 # Extracting (checked files) to krml, then running kremlin to generate C. #
@@ -274,9 +281,31 @@ $(OUTPUT_DIR)/%.krml:
 	  $(notdir $(subst .checked,,$<)) && \
 	touch $@
 
-COMPACT_FLAGS=-bundle Hacl.Hash.MD5+Hacl.Hash.Core.MD5+Hacl.Hash.SHA1+Hacl.Hash.Core.SHA1+Hacl.Hash.SHA2+Hacl.Hash.Core.SHA2+Hacl.Hash.Core.SHA2.Constants=Hacl.Hash.*[rename=Hacl_Hash] \
-  -bundle Hacl.Impl.SHA3+Hacl.SHA3=[rename=Hacl_SHA3] \
+HAND_WRITTEN_C		= Lib.PrintBuffer Lib.RandomBuffer
+HAND_WRITTEN_FILES 	= $(wildcard $(LIB_DIR)/c/*.c)
+# TODO: put all the Vale files under a single namespace to avoid this nonsense
+# TODO: actually remove EverCrypt.Bytes rather than disabling it here.
+DEFAULT_FLAGS		=\
+  $(addprefix -library ,$(HACL_HAND_WRITTEN_C)) \
   -bundle Prims \
+  -bundle Lib.*[rename=Hacl_Lib] \
+  -bundle EverCrypt.Bytes \
+  -bundle MerkleTree.Spec,MerkleTree.Spec.*,MerkleTree.New.High,MerkleTree.New.High.* \
+  -bundle CanonCommMonoid,CanonCommSemiring,CanonCommSwaps[rename=Unused] \
+  -bundle FastUtil_helpers,FastHybrid_helpers,FastSqr_helpers,FastMul_helpers[rename=Unused2] \
+  -bundle Opaque_s,Map16,Test.Vale_memcpy,Fast_defs,Interop_Printer,Memcpy[rename=Unused3] \
+  -bundle X64.*,Arch.*,Words.*,Vale.*,Collections.*,Collections,SHA_helpers[rename=Unused4] \
+  -bundle Prop_s,Types_s,Words_s,Views,AES_s,Workarounds,Math.*,Interop,TypesNative_s[rename=Unused5] \
+  -bundle GF128_s,GF128,Poly1305.Spec_s,GCTR,GCTR_s,GHash_s,GCM_helpers,GHash[rename=Unused6] \
+  -bundle AES_helpers,AES256_helpers,GCM_s,GCM,Interop_assumptions[rename=Unused6] \
+  -bundle 'Check_aesni_stdcall,Check_sha_stdcall,Sha_update_bytes_stdcall[rename=Vale]' \
+  -library 'Sha_update_bytes_stdcall' \
+  -library 'Check_sha_stdcall' \
+  -library 'Check_aesni_stdcall' \
+
+COMPACT_FLAGS	=\
+  -bundle Hacl.Hash.MD5+Hacl.Hash.Core.MD5+Hacl.Hash.SHA1+Hacl.Hash.Core.SHA1+Hacl.Hash.SHA2+Hacl.Hash.Core.SHA2+Hacl.Hash.Core.SHA2.Constants=Hacl.Hash.*[rename=Hacl_Hash] \
+  -bundle Hacl.Impl.SHA3+Hacl.SHA3=[rename=Hacl_SHA3] \
   -bundle LowStar.* \
   -bundle C,C.String,C.Loops,Spec.Loops,C.Endianness,FStar.*[rename=Hacl_Kremlib] \
   -bundle 'Test.*,WindowsHack' \
@@ -286,15 +315,6 @@ COMPACT_FLAGS=-bundle Hacl.Hash.MD5+Hacl.Hash.Core.MD5+Hacl.Hash.SHA1+Hacl.Hash.
   -add-include '"kremlin/c_endianness.h"' \
   -add-include '<string.h>' \
   -fno-shadow -fcurly-braces
-
-HAND_WRITTEN_C	= Lib.PrintBuffer Lib.RandomBuffer
-HAND_WRITTEN_FILES = $(wildcard $(LIB_DIR)/c/*.c)
-DEFAULT_FLAGS	= $(addprefix -library ,$(HAND_WRITTEN_C)) \
-  -bundle Lib.*[rename=Hacl_Lib] -bundle Hacl.Test.* \
-  $(addprefix -bundle , \
-    'X64.*' 'Arch.*' 'Words.*' 'Vale.*' \
-    'Collections.*' 'SHA_helpers' Prop_s Collections Types_s Words_s Views AES_s \
-    Workarounds 'Math.*' Interop TypesNative_s)
 
 # For the time being, we rely on the old extraction to give us self-contained
 # files
@@ -312,21 +332,25 @@ HACL_OLD_FILES=\
   code/old/poly1305/poly-c/Hacl_Poly1305_64.c \
   code/old/api/aead-c/Hacl_Chacha20Poly1305.c
 
-dist/compact/Makefile.basic: EXTRA=$(COMPACT_FLAGS)
+dist/compact/Makefile.basic: KRML_EXTRA=$(COMPACT_FLAGS)
 
-dist/compact-msvc/Makefile.basic: EXTRA=$(COMPACT_FLAGS) -falloca -ftail-calls
+dist/compact-msvc/Makefile.basic: KRML_EXTRA=$(COMPACT_FLAGS) -falloca -ftail-calls
 
-dist/compact-c89/Makefile.basic: EXTRA=$(COMPACT_FLAGS) -fc89 -ccopt -std=c89
+dist/compact-c89/Makefile.basic: KRML_EXTRA=$(COMPACT_FLAGS) -fc89 -ccopt -std=c89
 dist/compact-c89/Makefile.basic: HACL_OLD_FILES:=$(subst -c,-c89,$(HACL_OLD_FILES))
 
+# When extracting our libraries, we purposely don't distribute tests
 .PRECIOUS: dist/%/Makefile.basic
-dist/%/Makefile.basic: $(ALL_KRML_FILES) dist/headers/Makefile.basic $(HAND_WRITTEN_FILES) | old-extract-c
+dist/%/Makefile.basic: $(ALL_KRML_FILES) dist/hacl-headers/Makefile.basic \
+  $(HAND_WRITTEN_FILES) $(VALE_ASMS) | old-extract-c
 	mkdir -p $(dir $@)
 	cp $(HACL_OLD_FILES) $(patsubst %.c,%.h,$(HACL_OLD_FILES)) $(dir $@)
-	cp $(HAND_WRITTEN_FILES) dist/headers/*.h $(dir $@)
-	$(KRML) $(DEFAULT_FLAGS) $(EXTRA) \
+	cp $(HAND_WRITTEN_FILES) dist/hacl-headers/*.h $(dir $@)
+	cp $(VALE_ASMS) $(dir $@)
+	$(KRML) $(DEFAULT_FLAGS) $(KRML_EXTRA) \
 	  -tmpdir $(dir $@) -skip-compilation \
 	  -bundle Spec.*[rename=Hacl_Spec] $(filter %.krml,$^) \
+	  -bundle Test,Test.*,Hacl.Test.* \
 	  -ccopt -Wno-unused \
 	  -warn-error @4 \
 	  -fparentheses \
@@ -335,10 +359,10 @@ dist/%/Makefile.basic: $(ALL_KRML_FILES) dist/headers/Makefile.basic $(HAND_WRIT
 	  -o libhacl.a
 
 # Auto-generates headers for the hand-written C files. If a signature changes on
-# the F* side, hopefully this will ensure the C file breaks. Note that there's
+# the F* side, hopefully this will ensure the C file breaks. Note that there is
 # no conflict between the headers because this generates
 # Lib_Foobar while the run above generates a single Hacl_Lib.
-dist/headers/Makefile.basic: $(ALL_KRML_FILES)
+dist/hacl-headers/Makefile.basic: $(ALL_KRML_FILES)
 	$(KRML) \
 	  -tmpdir $(dir $@) -skip-compilation \
 	  $(patsubst %,-bundle %=,$(HAND_WRITTEN_C)) \
