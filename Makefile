@@ -138,22 +138,46 @@ VALE_FSTAR_FLAGS=$(VALE_FSTAR_FLAGS_NOSMT) \
   --smtencoding.elim_box true --smtencoding.l_arith_repr native \
   --smtencoding.nl_arith_repr wrapped
 
+# By default Vale files don't use two phase tc
 $(HACL_HOME)/vale/%.checked: \
   FSTAR_FLAGS=$(VALE_FSTAR_FLAGS) --use_two_phase_tc false
 
+# Except for the files in specs/ and code/
 $(HACL_HOME)/vale/specs/%.checked: \
   FSTAR_FLAGS=$(VALE_FSTAR_FLAGS)
 $(HACL_HOME)/vale/code/%.checked: \
   FSTAR_FLAGS=$(VALE_FSTAR_FLAGS)
 
+# Except for the interop files, which apparently are ok with two phase TC.
 $(HACL_HOME)/vale/code/arch/x64/interop/%.checked: \
-  FSTAR_FLAGS=$(shell echo $(VALE_FSTAR_FLAGS_NOSMT | \
+  FSTAR_FLAGS=$(shell echo $(VALE_FSTAR_FLAGS_NOSMT) | \
     sed 's/--z3cliopt smt.arith.nl=false//; \
       s/--z3cliopt smt.QI.EAGER_THRESHOLD=100//'))
+
+# Except for the files coming from vaf files, which also don't work with two
+# phase tc.
+$(patsubst %.fst,%.fst.checked,$(VALE_FSTS)) \
+$(patsubst %.fst,%.fsti.checked,$(VALE_FSTS)): \
+  FSTAR_FLAGS=$(VALE_FSTAR_FLAGS) --use_two_phase_tc false
+
+# Then a series of individual overrides.
+$(HACL_HOME)/vale/code/arch/x64/Interop.fst.checked: \
+  FSTAR_FLAGS=$(shell echo $(VALE_FSTAR_FLAGS_NOSMT) | \
+    sed 's/--use_extracted_interfaces true//; \
+      s/--z3cliopt smt.QI.EAGER_THRESHOLD=100//') \
+      --smtencoding.elim_box true
+
+$(HACL_HOME)/vale/code/lib/util/BufferViewHelpers.fst.checked: \
+  FSTAR_FLAGS=$(shell echo $(VALE_FSTAR_FLAGS_NOSMT) | \
+    sed 's/--z3cliopt smt.arith.nl=false//;')
 
 $(HACL_HOME)/vale/code/arch/x64/Views.fst.checked: \
   FSTAR_FLAGS=$(shell echo $(VALE_FSTAR_FLAGS) | \
     sed 's/--smtencoding.nl_arith_repr wrapped/--smtencoding.nl_arith_repr native/;')
+
+$(HACL_HOME)/vale/code/lib/collections/Collections.Lists.fst.checked: \
+  FSTAR_FLAGS=$(shell echo $(VALE_FSTAR_FLAGS) | \
+    sed s/--z3cliopt smt.QI.EAGER_THRESHOLD=100//')
 
 $(HACL_HOME)/vale/code/arch/x64/X64.Bytes_Semantics.fst.checked: \
   FSTAR_FLAGS=$(shell echo $(VALE_FSTAR_FLAGS) | \
@@ -162,10 +186,6 @@ $(HACL_HOME)/vale/code/arch/x64/X64.Bytes_Semantics.fst.checked: \
 
 $(HACL_HOME)/vale/code/arch/x64/X64.BufferViewStore.fst.checked: \
   FSTAR_FLAGS=$(VALE_FSTAR_FLAGS_NOSMT) --smtencoding.elim_box true
-
-$(HACL_HOME)/vale/code/lib/collections/Collections.Lists.fst.checked: \
-  FSTAR_FLAGS=$(shell echo $(VALE_FSTAR_FLAGS) | \
-    sed s/--z3cliopt smt.QI.EAGER_THRESHOLD=100//')
 
 $(HACL_HOME)/vale/code/crypto/poly1305/x64/X64.Poly1305.Util.fst.checked: \
   FSTAR_FLAGS=$(VALE_FSTAR_FLAGS_NOSMT)
@@ -185,21 +205,7 @@ $(HACL_HOME)/vale/code/arch/x64/X64.Memory_Sems.fst.checked: \
       s/--z3cliopt smt.arith.nl=false//') \
       --smtencoding.elim_box true
 
-$(HACL_HOME)/vale/code/arch/x64/Interop.fst.checked: \
-  FSTAR_FLAGS=$(shell echo $(VALE_FSTAR_FLAGS_NOSMT) | \
-    sed 's/--use_extracted_interfaces true//; \
-      s/--z3cliopt smt.QI.EAGER_THRESHOLD=100//') \
-      --smtencoding.elim_box true
-
-$(HACL_HOME)/vale/code/lib/util/BufferViewHelpers.fst.checked: \
-  FSTAR_FLAGS=$(shell echo $(VALE_FSTAR_FLAGS_NOSMT) | \
-    sed 's/--z3cliopt smt.arith.nl=false//;')
-
-$(patsubst %.fst,%.fst.checked,$(VALE_FSTS)) \
-$(patsubst %.fst,%.fsti.checked,$(VALE_FSTS)): \
-  FSTAR_FLAGS=$(VALE_FSTAR_FLAGS) --use_two_phase_tc false
-
-# The actual invocation.
+# The actual default invocation
 %.checked:
 	$(FSTAR) $(FSTAR_FLAGS) $< && \
 	touch $@
