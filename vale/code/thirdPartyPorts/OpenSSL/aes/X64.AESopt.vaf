@@ -65,7 +65,15 @@ let aes_reqs
   is_aes_key_LE alg key /\
   length(round_keys) == nr(alg) + 1 /\
   round_keys == key_to_round_keys_LE alg key /\
-  validSrcAddrsOffset128 mem key_ptr keys_b 8 (nr alg + 1) memTaint Secret /\
+
+  //validSrcAddrsOffset128 mem key_ptr keys_b 8 (nr alg + 1) memTaint Secret /\
+  // Can't use the standard Offset, since that makes the size too large and conflicts
+  // with the spec below that says the entire keys_b is exactly round_keys
+  buffer_readable mem keys_b /\
+  (nr alg + 1) <= buffer_length keys_b /\
+  buffer_addr keys_b mem + 16 `op_Multiply` 8 == key_ptr /\
+  valid_taint_buf128 keys_b mem memTaint Secret /\
+
   buffer128_as_seq mem keys_b == round_keys
 #endverbatim
 function aes_reqs(alg:algorithm, key:seq(nat32), round_keys:seq(quad32), keys_b:buffer128,
@@ -81,7 +89,7 @@ ghost procedure finish_aes_encrypt_le(ghost alg:algorithm, ghost input_LE:quad32
     reveal cipher;
 }
 
-procedure {:quick} loop6x_preamble(
+procedure {:quick} {:verify true} loop6x_preamble(
     inline alg:algorithm,  // OpenSSL includes the number of rounds (nr) as a dynamic parameter (stored with the key).  Saves code space but adds extra instructions to the fast path.  Maybe branch predictor is good enough for it not to matter
     ghost iv_b:buffer128,
 
@@ -115,14 +123,14 @@ procedure {:quick} loop6x_preamble(
         rndkey == index(round_keys, 0);
 
     ensures
-        inout0 == rounds_opaque(old(inout0), round_keys, 1);
-        inout1 == rounds_opaque(old(quad32_xor(inout1, rndkey)), round_keys, 1);
-        inout2 == rounds_opaque(old(quad32_xor(inout2, rndkey)), round_keys, 1);
-        inout3 == rounds_opaque(old(quad32_xor(inout3, rndkey)), round_keys, 1);
-        inout4 == rounds_opaque(old(quad32_xor(inout4, rndkey)), round_keys, 1);
-        inout5 == rounds_opaque(old(quad32_xor(inout5, rndkey)), round_keys, 1);
-
-        buffer128_read(iv_b, 0, mem) == old(add_wrap_quad32(T2, inout5));
+//        inout0 == rounds_opaque(old(inout0), round_keys, 1);
+//        inout1 == rounds_opaque(old(quad32_xor(inout1, rndkey)), round_keys, 1);
+//        inout2 == rounds_opaque(old(quad32_xor(inout2, rndkey)), round_keys, 1);
+//        inout3 == rounds_opaque(old(quad32_xor(inout3, rndkey)), round_keys, 1);
+//        inout4 == rounds_opaque(old(quad32_xor(inout4, rndkey)), round_keys, 1);
+//        inout5 == rounds_opaque(old(quad32_xor(inout5, rndkey)), round_keys, 1);
+//
+//        buffer128_read(iv_b, 0, mem) == old(add_wrap_quad32(T2, inout5));
 {
     init_rounds_opaque(inout0, round_keys);
 
@@ -146,6 +154,67 @@ procedure {:quick} loop6x_preamble(
 
     reveal rounds;
     commute_sub_bytes_shift_rows_forall();
+}
+/*
+procedure {:quick} loop6x_plain(
+    inline alg:algorithm,  // OpenSSL includes the number of rounds (nr) as a dynamic parameter (stored with the key).  Saves code space but adds extra instructions to the fast path.  Maybe branch predictor is good enough for it not to matter
+    ghost key_words:seq(nat32),
+    ghost round_keys:seq(quad32),
+    ghost keys_b:buffer128,
+
+    ghost init0:quad32,
+    ghost init1:quad32,
+    ghost init2:quad32,
+    ghost init3:quad32,
+    ghost init4:quad32,
+    ghost init5:quad32
+    )
+    lets
+//      inp @= rdi; outp @= rsi; len @= rdx; key @= rcx; ivp @= r8; Xip @= r9;
+        key @= rcx; 
+        inout0 @= xmm9; inout1 @= xmm10; inout2 @= xmm11; inout3 @= xmm12;
+        inout4 @= xmm13; inout5 @= xmm14; rndkey @= xmm15;
+//      counter @= rbx; rounds @= rbp; ret @= r10; constp @= r11; in0 @= r14; end0 @= r15;
+
+    reads
+        key; 
+        memTaint;
+
+    modifies
+        inout0; inout1; inout2; inout3; inout4; inout5; rndkey;
+        mem; efl;
+
+    requires
+        // AES reqs
+        aes_reqs(alg, key_words, round_keys, keys_b, key, mem, memTaint);
+
+        inout0 == rounds_opaque(init0, round_keys, 3);
+        inout1 == rounds_opaque(init1, round_keys, 3);
+        inout2 == rounds_opaque(init2, round_keys, 3);
+        inout3 == rounds_opaque(init3, round_keys, 3);
+        inout4 == rounds_opaque(init4, round_keys, 3);
+        inout5 == rounds_opaque(init5, round_keys, 3);
+
+    ensures
+        inout0 == rounds_opaque(init0, round_keys, 4);
+        inout1 == rounds_opaque(init1, round_keys, 4);
+        inout2 == rounds_opaque(init2, round_keys, 4);
+        inout3 == rounds_opaque(init3, round_keys, 4);
+        inout4 == rounds_opaque(init4, round_keys, 4);
+        inout5 == rounds_opaque(init5, round_keys, 4);
+
+        // TODO:
+//        buffer128_read(stack_b, 3, mem) == reverse_bytes_nat64(old(buffer64_read(in_b, 9, mem)))
+//                                           reverse_bytes_nat64(old(buffer64_read(in_b, 8, mem)))
+{
+    Load128_buffer(rndkey, key, 0x40-0x80, Secret, keys_b, 4);
+
+    VAESNI_enc(inout0, inout0, rndkey);
+    VAESNI_enc(inout1, inout1, rndkey);
+    VAESNI_enc(inout2, inout2, rndkey);
+    VAESNI_enc(inout3, inout3, rndkey);
+    VAESNI_enc(inout4, inout4, rndkey);
+    VAESNI_enc(inout5, inout5, rndkey);
 }
 
 procedure {:quick} loop6x_step(
@@ -230,4 +299,4 @@ procedure {:quick} loop6x_step(
     VAESNI_enc(inout5, inout5, rndkey);
 
 }
-
+*/
