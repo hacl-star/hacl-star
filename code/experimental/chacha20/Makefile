@@ -14,8 +14,8 @@ all: chacha20-vec-perf
 
 verify: test
 
-#CC=/usr/local/Cellar/llvm/7.0.0/bin/clang-7
-CC=gcc-8
+#CC=clang-7
+CC=gcc
 
 CHACHA20_FILES= $(HACL_HOME)/lib/fst/Lib.IntTypes.fst \
 	$(HACL_HOME)/lib/fst/Lib.RawIntTypes.fst \
@@ -36,7 +36,7 @@ chacha20-c/Hacl_Chacha20.c: chacha20-c/out.krml
 	   -minimal -add-include '"kremlib.h"' -bundle 'Hacl.Chacha20=*'
 
 chacha20.exe: chacha20-c/Hacl_Chacha20.c chacha20-c/out.krml
-	$(CC) -march=native -mtune=native -O3 -I $(KREMLIN_HOME)/kremlib/c -I $(KREMLIN_HOME)/include -I . chacha20-c/Hacl_Chacha20.c $(KREMLIN_HOME)/kremlib/c/testlib.o chacha20-test.c -o chacha20.exe 
+	$(CC) -march=native -mtune=native -O3 -I $(KREMLIN_HOME)/kremlib/c -I $(KREMLIN_HOME)/include -I . chacha20-c/Hacl_Chacha20.c $(KREMLIN_HOME)/kremlib/c/testlib.o $(HACL_HOME)/snapshots/hacl-c/Hacl_Chacha20.c chacha20-test.c -o chacha20.exe 
 	./chacha20.exe
 
 chacha20-perf: chacha20.exe
@@ -76,7 +76,7 @@ chacha20-vec256-c/Hacl_Chacha20_Vec256.c: chacha20-vec256-c/out.krml
 	   -minimal -add-include '"vec-intrin.h"' -add-include '"kremlib.h"' -bundle 'Hacl.Chacha20_Vec256=*'
 
 chacha20-vec.exe: chacha20-vec32-c/Hacl_Chacha20_Vec32.c chacha20-vec128-c/Hacl_Chacha20_Vec128.c chacha20-vec256-c/Hacl_Chacha20_Vec256.c
-	$(CC) -march=native -mtune=native -O3 -I $(KREMLIN_HOME)/kremlib/c -I $(KREMLIN_HOME)/include -I $(HACL_HOME)/lib/c -I . chacha20-vec32-c/Hacl_Chacha20_Vec32.c chacha20-vec128-c/Hacl_Chacha20_Vec128.c chacha20-vec256-c/Hacl_Chacha20_Vec256.c $(KREMLIN_HOME)/kremlib/c/testlib.o chacha20-vec-test.c -o chacha20-vec.exe 
+	$(CC) -march=native -mtune=native -O3 -I $(KREMLIN_HOME)/kremlib/c -I $(KREMLIN_HOME)/include -I $(HACL_HOME)/lib/c -I . chacha20-vec32-c/Hacl_Chacha20_Vec32.c chacha20-vec128-c/Hacl_Chacha20_Vec128.c chacha20-vec256-c/Hacl_Chacha20_Vec256.c $(HACL_HOME)/snapshots/hacl-c/Hacl_Chacha20.c $(HACL_HOME)/snapshots/hacl-c/Hacl_Chacha20_Vec128.c chacha20-vec-test.c -o chacha20-vec.exe $(KREMLIN_HOME)/kremlib/c/testlib.o -ldl -lpthread -I ../boringssl/include ../boringssl/build/crypto/libcrypto.a
 	./chacha20-vec.exe
 
 chacha20-vec-perf: chacha20-vec.exe

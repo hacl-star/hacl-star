@@ -8,6 +8,9 @@
 #include <unistd.h>
 #include <time.h>
 #include <stdbool.h>
+#include "openssl/chacha.h"
+
+#define ossl_chacha20(cipher,plain,len,nonce,key,ctr) (CRYPTO_chacha_20(cipher,plain,len,nonce,key,ctr))
 
 typedef uint64_t cycles;
 
@@ -35,8 +38,30 @@ extern void Hacl_Chacha20_Vec32_chacha20_encrypt(int in_len, uint8_t* out, uint8
 extern void Hacl_Chacha20_Vec128_chacha20_encrypt(int in_len, uint8_t* out, uint8_t* in, uint8_t* k, uint8_t* n, uint32_t c);
 extern void Hacl_Chacha20_Vec256_chacha20_encrypt(int in_len, uint8_t* out, uint8_t* in, uint8_t* k, uint8_t* n, uint32_t c);
 
-#define ROUNDS 16384
-#define SIZE   81920
+extern void Hacl_Chacha20_chacha20(
+  uint8_t *output,
+  uint8_t *plain,
+  uint32_t len,
+  uint8_t *k,
+  uint8_t *n1,
+  uint32_t ctr
+				   );
+extern void
+Hacl_Chacha20_Vec128_chacha20(
+  uint8_t *output,
+  uint8_t *plain,
+  uint32_t len,
+  uint8_t *k,
+  uint8_t *n1,
+  uint32_t ctr
+			      );
+
+extern void CRYPTO_chacha_20(uint8_t *out, const uint8_t *in,
+                                     size_t in_len, const uint8_t key[32],
+                                     const uint8_t nonce[12], uint32_t counter);
+
+#define ROUNDS 100000
+#define SIZE   8192
 
 int main() {
   int in_len = 114;
@@ -129,6 +154,51 @@ int main() {
   if (ok) printf("Success!\n");
   else printf("FAILED!\n");
 
+  Hacl_Chacha20_chacha20(comp,in,in_len,k,n,1);
+  printf("Master computed:");
+  for (int i = 0; i < 114; i++)
+    printf("%02x",comp[i]);
+  printf("\n");
+  printf("expected:");
+  for (int i = 0; i < 114; i++)
+    printf("%02x",exp[i]);
+  printf("\n");
+  ok = true;
+  for (int i = 0; i < 32; i++)
+    ok = ok & (exp[i] == comp[i]);
+  if (ok) printf("Success!\n");
+  else printf("FAILED!\n");
+
+  Hacl_Chacha20_Vec128_chacha20(comp,in,in_len,k,n,1);
+  printf("Master computed:");
+  for (int i = 0; i < 114; i++)
+    printf("%02x",comp[i]);
+  printf("\n");
+  printf("expected:");
+  for (int i = 0; i < 114; i++)
+    printf("%02x",exp[i]);
+  printf("\n");
+  ok = true;
+  for (int i = 0; i < 32; i++)
+    ok = ok & (exp[i] == comp[i]);
+  if (ok) printf("Success!\n");
+  else printf("FAILED!\n");
+
+  ossl_chacha20(comp,in,in_len,k,n,1);
+  printf("OpenSSL computed:");
+  for (int i = 0; i < 114; i++)
+    printf("%02x",comp[i]);
+  printf("\n");
+  printf("expected:");
+  for (int i = 0; i < 114; i++)
+    printf("%02x",exp[i]);
+  printf("\n");
+  ok = true;
+  for (int i = 0; i < 32; i++)
+    ok = ok & (exp[i] == comp[i]);
+  if (ok) printf("Success!\n");
+  else printf("FAILED!\n");
+
   uint64_t len = SIZE;
   uint8_t plain[SIZE];
   uint8_t key[16];
@@ -190,6 +260,60 @@ int main() {
   double diff3 = (double)(t2 - t1)/CLOCKS_PER_SEC;
   uint64_t cyc3 = b - a;
 
+  memset(plain,'P',SIZE);
+  memset(key,'K',16);
+  memset(nonce,'N',12);
+
+  for (int j = 0; j < ROUNDS; j++) {
+    Hacl_Chacha20_chacha20(plain,plain,SIZE,key,nonce,1);
+  }
+
+  t1 = clock();
+  a = cpucycles_begin();
+  for (int j = 0; j < ROUNDS; j++) {
+    Hacl_Chacha20_chacha20(plain,plain,SIZE,key,nonce,1);
+  }
+  b = cpucycles_end();
+  t2 = clock();
+  double diff4 = (double)(t2 - t1)/CLOCKS_PER_SEC;
+  uint64_t cyc4 = b - a;
+
+  memset(plain,'P',SIZE);
+  memset(key,'K',16);
+  memset(nonce,'N',12);
+
+  for (int j = 0; j < ROUNDS; j++) {
+    Hacl_Chacha20_Vec128_chacha20(plain,plain,SIZE,key,nonce,1);
+  }
+
+  t1 = clock();
+  a = cpucycles_begin();
+  for (int j = 0; j < ROUNDS; j++) {
+    Hacl_Chacha20_Vec128_chacha20(plain,plain,SIZE,key,nonce,1);
+  }
+  b = cpucycles_end();
+  t2 = clock();
+  double diff5 = (double)(t2 - t1)/CLOCKS_PER_SEC;
+  uint64_t cyc5 = b - a;
+
+  memset(plain,'P',SIZE);
+  memset(key,'K',16);
+  memset(nonce,'N',12);
+
+  for (int j = 0; j < ROUNDS; j++) {
+    ossl_chacha20(plain,plain,SIZE,key,nonce,1);
+  }
+
+  t1 = clock();
+  a = cpucycles_begin();
+  for (int j = 0; j < ROUNDS; j++) {
+    ossl_chacha20(plain,plain,SIZE,key,nonce,1);
+  }
+  b = cpucycles_end();
+  t2 = clock();
+  double diff6 = (double)(t2 - t1)/CLOCKS_PER_SEC;
+  uint64_t cyc6 = b - a;
+
   uint64_t count = ROUNDS * SIZE;
 
   printf("32-bit Chacha20\n");
@@ -203,5 +327,17 @@ int main() {
   printf("256-bit Chacha20\n");
   printf("cycles for %" PRIu64 " bytes: %" PRIu64 " (%.2fcycles/byte)\n",count,(uint64_t)cyc3,(double)cyc3/count);
   printf("bw %8.2f MB/s\n",(double)count/(diff3 * 1000000.0));
+  
+  printf("Master 32-bit Chacha20\n");
+  printf("cycles for %" PRIu64 " bytes: %" PRIu64 " (%.2fcycles/byte)\n",count,(uint64_t)cyc4,(double)cyc4/count);
+  printf("bw %8.2f MB/s\n",(double)count/(diff4 * 1000000.0));
+  
+  printf("Master 128-bit Chacha20\n");
+  printf("cycles for %" PRIu64 " bytes: %" PRIu64 " (%.2fcycles/byte)\n",count,(uint64_t)cyc5,(double)cyc5/count);
+  printf("bw %8.2f MB/s\n",(double)count/(diff5 * 1000000.0));
+  
+  printf("OpenSSL Chacha20\n");
+  printf("cycles for %" PRIu64 " bytes: %" PRIu64 " (%.2fcycles/byte)\n",count,(uint64_t)cyc6,(double)cyc6/count);
+  printf("bw %8.2f MB/s\n",(double)count/(diff6 * 1000000.0));
   
 }
