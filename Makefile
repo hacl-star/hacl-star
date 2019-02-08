@@ -11,6 +11,10 @@
 #           /   \  /                      |
 #         lib   specs                  specs/old
 
+ifeq (3.81,$(MAKE_VERSION))
+  $(error You seem to be using OSX's antiquated Make version. Hint: brew \
+    install make, then hit invoke gmake instead of make)
+endif
 
 ##########################
 # Top-level entry points #
@@ -32,7 +36,9 @@ test: test-c test-ml
 test-c: $(subst .,_,$(patsubst %.fst,test-c-%,$(notdir $(wildcard code/tests/*.fst))))
 test-ml: $(subst .,_,$(patsubst %.fst,test-ml-%,$(notdir $(wildcard specs/tests/*.fst))))
 
-ci: all test
+ci:
+	$(MAKE) vaf-to-fst
+	$(MAKE) all test
 
 # Backwards-compat target
 .PHONY: secure_api.old
