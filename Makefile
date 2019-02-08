@@ -72,7 +72,8 @@ include Makefile.common
 ifndef NODEPEND
 ifndef MAKE_RESTARTS
 .fstar-depend-%: .FORCE
-	@$(FSTAR_NO_FLAGS) --dep $* $(FSTAR_ROOTS) --extract '* -Prims -LowStar -Lib.Buffer -Hacl -FStar +FStar.Endianness +FStar.Kremlin.Endianness -EverCrypt -MerkleTree -Vale.Tactics -CanonCommMonoid -CanonCommSemiring -FastHybrid_helpers -FastMul_helpers -FastSqr_helpers -FastUtil_helpers' > $@
+	@$(FSTAR_NO_FLAGS) --dep $* $(FSTAR_ROOTS) --extract '* -Prims -LowStar -Lib.Buffer -Hacl -FStar +FStar.Endianness +FStar.Kremlin.Endianness -EverCrypt -MerkleTree -Vale.Tactics -CanonCommMonoid -CanonCommSemiring -FastHybrid_helpers -FastMul_helpers -FastSqr_helpers -FastUtil_helpers -TestLib -Test.Lowstarize' > $@
+
 .vale-depend: .fstar-depend-make .FORCE
 	@$(PYTHON3) tools/valedepend.py \
 	  $(addprefix -include ,$(INCLUDES)) \
@@ -108,7 +109,6 @@ VALE_FLAGS = -include $(HACL_HOME)/vale/code/lib/util/Operator.vaf
 $(HACL_HOME)/vale/code/lib/util/Operator.fst: VALE_FLAGS=
 
 %.fst:
-	@if [ "x$<" = x ]; then echo "Makefile bug: trying to produce an .fst without a .vaf"; false; fi
 	$(MONO) $(VALE_HOME)/bin/vale.exe -fstarText -quickMods \
 	  -typecheck -include $*.types.vaf \
 	  $(VALE_FLAGS) \
@@ -149,7 +149,7 @@ $(HACL_HOME)/vale/code/%.checked: \
 $(HACL_HOME)/vale/code/arch/x64/interop/%.checked: \
   FSTAR_FLAGS=$(shell echo $(VALE_FSTAR_FLAGS_NOSMT | \
     sed 's/--z3cliopt smt.arith.nl=false//; \
-      --z3cliopt smt.QI.EAGER_THRESHOLD=100//'))
+      s/--z3cliopt smt.QI.EAGER_THRESHOLD=100//'))
 
 $(HACL_HOME)/vale/code/arch/x64/Views.fst.checked: \
   FSTAR_FLAGS=$(shell echo $(VALE_FSTAR_FLAGS) | \
@@ -194,6 +194,10 @@ $(HACL_HOME)/vale/code/arch/x64/Interop.fst.checked: \
 $(HACL_HOME)/vale/code/lib/util/BufferViewHelpers.fst.checked: \
   FSTAR_FLAGS=$(shell echo $(VALE_FSTAR_FLAGS_NOSMT) | \
     sed 's/--z3cliopt smt.arith.nl=false//;')
+
+$(patsubst %.fst,%.fst.checked,$(VALE_FSTS)) \
+$(patsubst %.fst,%.fsti.checked,$(VALE_FSTS)): \
+  FSTAR_FLAGS=$(VALE_FSTAR_FLAGS) --use_two_phase_tc false
 
 # The actual invocation.
 %.checked:
