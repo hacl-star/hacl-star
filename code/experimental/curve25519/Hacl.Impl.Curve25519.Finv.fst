@@ -19,9 +19,7 @@ module F64 = Hacl.Impl.Curve25519.Field64
 module S = Hacl.Spec.Curve25519.Finv
 module P = NatPrime
 
-open LowStar.Modifies.Linear
-
-#reset-options "--using_facts_from '* -LowStar.Monotonic.Buffer.modifies_trans -FStar.Seq'"
+#reset-options "--using_facts_from '* -FStar.Seq'"
 
 noextract
 val fsquare_times_inv: #s:field_spec -> h:mem -> f:felem s -> Type0

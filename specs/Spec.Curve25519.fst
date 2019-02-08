@@ -83,7 +83,7 @@ let montgomery_ladder (init:elem) (k:scalar) : Tot proj_point =
   let nq = Proj one zero in
   let nqp1 = Proj init one in
   // bit 255 is 0 and bit 254 is 1
-  let nq,nqp1 = add_and_double q nqp1 nq in
+  let nqp1,nq = add_and_double q nqp1 nq in
   // bits 253-3 depend on scalar
   let nq,nqp1 = repeati 251
     (fun i -> ladder_step q (ith_bit k (253-i))) (nq,nqp1) in
