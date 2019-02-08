@@ -409,6 +409,35 @@ procedure{:instruction Ins(TS.TaintedIns(tuple(S.MOVDQU(Mov128Mem(MReg(get_reg(d
     same_memTaint128(b, old(mem), mem, old(#memTaint_t(memTaint)), #memTaint_t(memTaint));
 }
 
+procedure{:instruction mk_taint_ins2(S.Mov64, dst, TMem(MReg(get_reg(src), offset), t))}{:quick exportOnly}{:public} Store64_128_buffer(
+        dst:reg_opr64,
+        src:reg_opr64,
+        inline offset:int,
+        inline t:taint,
+        ghost b:buffer128,
+        ghost index:int,
+        ghost upper:bool)
+    reads
+        memTaint;
+    modifies
+        mem;
+    requires
+        valid_dst_addr(mem, b, index);
+        valid_taint_buf128(b, mem, memTaint, t);
+        dst + offset == buffer_addr(b, mem) + 16 * index + (if upper then 8 else 0);
+    ensures
+        modifies_mem(loc_buffer(b), old(mem), mem);
+        valid_taint_buf128(b, mem, memTaint, t);
+        mem == old(buffer128_write(b, index, insert_nat64(old(buffer128_read(b, index, mem)), src, if upper then 1 else 0), mem));
+{
+    /////////////// TODO: Make this a proper instruction!
+    assume false; 
+//    low_lemma_valid_mem128(b, #nat(index), old(mem));
+//    low_lemma_store_mem128(b, #nat(index), old(src), old(mem));
+//    lemma_valid_taint128(b, old(#memTaint_t(memTaint)), old(mem), #nat(index), t);
+//    same_memTaint128(b, old(mem), mem, old(#memTaint_t(memTaint)), #memTaint_t(memTaint));
+}
+
 procedure {:quick exportOnly}{:public} PushXmm(
         src:xmm,
     out tmp:reg_opr64,
