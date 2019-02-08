@@ -81,19 +81,19 @@ _aesni_ctr32_ghash_6x:
 
 def print_proc_header(procname):
     print "procedure {:quick} %s ()" % procname
-    print "\t\tlets"
-    print "\t\t\tinp @= rdi; out @= rsi; len @= rdx; key @= rcx; ivp @= r8; Xip @= r9;"
-    print "\t\t\tIi @= xmm0; T1 @= xmm1; T2 @= xmm2; Hkey @= xmm3; Z0 @= xmm4;"
-    print "\t\t\tZ1 @= xmm5; Z2 @= xmm6; Z3 @= xmm7; Xi @= xmm8;"
-    print "\t\t\tinout0 @= xmm9; inout1 @= xmm10; inout2 @= xmm11; inout3 @= xmm12;"
-    print "\t\t\tinout4 @= xmm13; inout5 @= xmm14; rndkey @= xmm15;"
-    print "\t\t\tcounter @= ebx; rounds @= ebp; ret @= r10; const @= r11; in0 @= r14; end0 @= r15;"
-    print "\n\t\treads"
-    print "\t\t\tmemTaint;"
-    print "\n\t\tmodifies"
-    print "\t\t\tmem; efl;"
-    print "\n\t\trequires"
-    print "\n\t\tensures"
+    print "    lets"
+    print "      inp @= rdi; outp @= rsi; len @= rdx; key @= rcx; ivp @= r8; Xip @= r9;"
+    print "      Ii @= xmm0; T1 @= xmm1; T2 @= xmm2; Hkey @= xmm3; Z0 @= xmm4;"
+    print "      Z1 @= xmm5; Z2 @= xmm6; Z3 @= xmm7; Xi @= xmm8;"
+    print "      inout0 @= xmm9; inout1 @= xmm10; inout2 @= xmm11; inout3 @= xmm12;"
+    print "      inout4 @= xmm13; inout5 @= xmm14; rndkey @= xmm15;"
+    print "      counter @= rbx; rounds @= rbp; ret @= r10; constp @= r11; in0 @= r14; end0 @= r15;"
+    print "\n    reads"
+    print "      memTaint;"
+    print "\n    modifies"
+    print "      mem; efl;"
+    print "\n    requires"
+    print "\n    ensures"
     print "{\n}\n"
 
 def parse(filename):
@@ -116,12 +116,43 @@ def test():
     parser = Lark(grammar)
     print(parser.parse(example).pretty())
 
+def is_load(ops):
+    for op in ops[:-1]:
+        if op.data == "mem_op":
+            return True
+    return False
+
+def is_store(ops):
+    return ops[-1].data == "mem_op"
+
+
+def print_op(op):
+    print "Data: %s" % op.data
+    print "Data of children[0]: %s" % op.children[0].data
+    if op.children[0].data == "base":
+        return op.children[0].children[0].children[0]
+    return "<NotImpl>"
+    #return "%s" % op
 
 def print_instr(nodes):
-    print "Intr name: %s" % nodes[0]
-    ops = nodes[1]
+    proc_name = nodes[0]
+    print "Intr name: %s" % proc_name 
+    ops = nodes[1].children
+    comment = None
     if len(nodes) > 2:
-        print "Comment: %s" % nodes[2].children[0]
+        comment = nodes[2].children[0]
+        print "Comment: %s" % comment
+
+    if proc_name == "vmovdqu":
+        if is_load(ops):
+            print "\tLoad128_buffer(" + print_op(ops[0]) + ", " + print_op(ops[1]) + ", " + offset + "Secret, some_buffer, some_index);"
+            pass
+        elif is_store(ops):
+            print "\tStore128_buffer(" + print_op(ops[1]) + ", " + print_op(ops[0]) + ", " + offset + "Secret, some_buffer, some_index);"
+            pass
+        else:
+            print "\tMov128(" + print_op(ops[1]) + ", " + print_op(ops[0]) + ");"
+
 
 def print_procedure(nodes):
     for n in nodes:
@@ -138,7 +169,7 @@ def print_procedure(nodes):
             print "WARNING: Unknown node: %s" % n
 
 def print_vale(ast):
-    print ast.pretty()
+    #print ast.pretty()
     #print ast.children[0]
     #print ast.children[0].children[0]
     for child in ast.children[0].children:  # Skip to the contents of `code`
@@ -157,8 +188,10 @@ def main():
   args = parser.parse_args()
 
   #test()
-  ast = parse(args.open)
-  print_vale(ast)
+  #ast = parse(args.open)
+  #print_vale(ast)
+  print_proc_header("loop6x_preamble")
+  print_proc_header("loop6x_step")
 
 
 if (__name__=="__main__"):
