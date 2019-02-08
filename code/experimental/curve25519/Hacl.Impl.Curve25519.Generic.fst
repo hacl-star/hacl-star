@@ -17,17 +17,33 @@ module F26 = Hacl.Impl.Curve25519.Field26
 module F51 = Hacl.Impl.Curve25519.Field51
 module F64 = Hacl.Impl.Curve25519.Field64
 
+module S = Spec.Curve25519
+module BSeq = Lib.ByteSequence
+module LSeq = Lib.Sequence
+
 #set-options "--z3rlimit 50 --max_fuel 2 --max_ifuel 2"
 //#set-options "--debug Hacl.Impl.Curve25519.Generic --debug_level ExtractNorm"
 
-unfold let scalar = lbuffer uint8 32ul
-unfold let point (s:field_spec) = lbuffer (limb s) (nlimb s +! nlimb s)
+inline_for_extraction
+let scalar = lbuffer uint8 32ul
+inline_for_extraction
+let point (s:field_spec) = lbuffer (limb s) (nlimb s +! nlimb s)
 
 (* NEEDED ONLY FOR WRAPPERS *)
-unfold let point26 = lbuffer uint64 20ul
-unfold let point51 = lbuffer uint64 10ul
-unfold let point64 = lbuffer uint64 8ul
+inline_for_extraction
+let point26 = lbuffer uint64 20ul
+inline_for_extraction
+let point51 = lbuffer uint64 10ul
+inline_for_extraction
+let point64 = lbuffer uint64 8ul
 (* NEEDED ONLY FOR WRAPPERS *)
+
+let get_x #s (p:point s) = gsub p 0ul (nlimb s)
+let get_z #s (p:point s) = gsub p (nlimb s) (nlimb s)
+
+let fget_x (#s:field_spec) (h:mem) (p:point s) = feval h (gsub p 0ul (nlimb s))
+let fget_z (#s:field_spec) (h:mem) (p:point s) = feval h (gsub p (nlimb s) (nlimb s))
+let fget_xz (#s:field_spec) (h:mem) (p:point s) = fget_x h p, fget_z h p
 
 inline_for_extraction
 val scalar_bit:
@@ -35,7 +51,8 @@ val scalar_bit:
   -> n:size_t{v n < 256}
   -> Stack uint64
     (requires fun h0 -> live h0 s)
-    (ensures  fun h0 r h1 -> h0 == h1)
+    (ensures  fun h0 r h1 -> h0 == h1 /\
+      v r == v (S.ith_bit (as_seq h0 s) (v n)))
 let scalar_bit s n = to_u64 ((s.(n /. 8ul) >>. (n %. 8ul)) &. u8 1)
 
 inline_for_extraction
@@ -45,7 +62,9 @@ val decode_point_:
   -> i:lbuffer uint8 32ul
   -> Stack unit
     (requires fun h0 -> live h0 o /\ live h0 i /\ disjoint o i)
-    (ensures fun h0 _ h1 -> modifies (loc o) h0 h1)
+    (ensures fun h0 _ h1 -> modifies (loc o) h0 h1 /\
+      fget_x h1 o == S.decodePoint (as_seq h0 i) /\
+      fget_z h1 o == 1)
 let decode_point_ #s o i =
   push_frame();
   let tmp = create 4ul (u64 0) in
@@ -54,7 +73,7 @@ let decode_point_ #s o i =
   let x : felem s = sub o 0ul (nlimb s) in
   let z : felem s = sub o (nlimb s) (nlimb s) in
   set_one z;
-  load_felem x tmp;
+  load_felem x tmp; admit();
   pop_frame()
 
 (* WRAPPER to Prevent Inlining *)
@@ -72,7 +91,9 @@ val decode_point:
   -> i:lbuffer uint8 32ul
   -> Stack unit
     (requires fun h0 -> live h0 o /\ live h0 i /\ disjoint o i)
-    (ensures  fun h0 _ h1 -> modifies (loc o) h0 h1)
+    (ensures  fun h0 _ h1 -> modifies (loc o) h0 h1 /\
+      fget_x h1 o == S.decodePoint (as_seq h0 i) /\
+      fget_z h1 o == 1)
 let decode_point #s o i =
   match s with
   | M26 -> decode_point_26 o i
@@ -88,7 +109,8 @@ val encode_point_:
   -> i:point s
   -> Stack unit
     (requires fun h0 -> live h0 o /\ live h0 i /\ disjoint o i)
-    (ensures  fun h0 _ h1 -> modifies (loc o) h0 h1)
+    (ensures  fun h0 _ h1 -> modifies (loc o) h0 h1 /\
+      as_seq h1 o == S.encodePoint (fget_x h0 i, fget_z h0 i))
 let encode_point_ #s o i =
   push_frame();
   let x : felem s = sub i 0ul (nlimb s) in
@@ -118,7 +140,8 @@ val encode_point:
   -> i:point s
   -> Stack unit
     (requires fun h0 -> live h0 o /\ live h0 i /\ disjoint o i)
-    (ensures  fun h0 _ h1 -> modifies (loc o) h0 h1)
+    (ensures  fun h0 _ h1 -> modifies (loc o) h0 h1 /\
+      as_seq h1 o == S.encodePoint (fget_x h0 i, fget_z h0 i))
 let encode_point #s o i =
   match s with
   | M26 -> encode_point_26 o i
@@ -137,7 +160,10 @@ val point_add_and_double_:
   -> tmp2:felem_wide2 s
   -> Stack unit
     (requires fun h0 -> live h0 q /\ live h0 nq /\ live h0 nq_p1 /\ live h0 tmp1 /\ live h0 tmp2)
-    (ensures  fun h0 _ h1 -> modifies (loc nq |+| loc nq_p1 |+| loc tmp1 |+| loc tmp2) h0 h1)
+    (ensures  fun h0 _ h1 ->
+      modifies (loc nq |+| loc nq_p1 |+| loc tmp1 |+| loc tmp2) h0 h1 /\
+     (let p2, p3 = S.add_and_double (fget_xz h0 q) (fget_xz h0 nq) (fget_xz h0 nq_p1) in
+      fget_xz h1 nq == p2 /\ fget_xz h1 nq_p1 == p3))
 let point_add_and_double_ #s q nq nq_p1 tmp1 tmp2 =
   let x1 = sub q 0ul (nlimb s) in
   let z1 = sub q (nlimb s) (nlimb s) in
@@ -190,11 +216,11 @@ let point_add_and_double_ #s q nq nq_p1 tmp1 tmp2 =
 
 (* WRAPPER to Prevent Inlining *)
 [@CInline]
-let point_add_and_double_26  (q:point26) (nq:point26) (nq_p1:point26) tmp1 tmp2 = point_add_and_double_ #M26 q nq nq_p1 tmp1 tmp2
+let point_add_and_double_26 (q:point26) (nq:point26) (nq_p1:point26) tmp1 tmp2 = point_add_and_double_ #M26 q nq nq_p1 tmp1 tmp2
 [@CInline]
-let point_add_and_double_51  (q:point51) (nq:point51) (nq_p1:point51) tmp1 tmp2 = point_add_and_double_ #M51 q nq nq_p1 tmp1 tmp2
+let point_add_and_double_51 (q:point51) (nq:point51) (nq_p1:point51) tmp1 tmp2 = point_add_and_double_ #M51 q nq nq_p1 tmp1 tmp2
 [@CInline]
-let point_add_and_double_64  (q:point64) (nq:point64) (nq_p1:point64) tmp1 tmp2 = point_add_and_double_ #M64 q nq nq_p1 tmp1 tmp2
+let point_add_and_double_64 (q:point64) (nq:point64) (nq_p1:point64) tmp1 tmp2 = point_add_and_double_ #M64 q nq nq_p1 tmp1 tmp2
 
 inline_for_extraction
 val point_add_and_double:
@@ -206,7 +232,10 @@ val point_add_and_double:
   -> tmp2:felem_wide2 s
   -> Stack unit
     (requires fun h0 -> live h0 q /\ live h0 nq /\ live h0 nq_p1 /\ live h0 tmp1 /\ live h0 tmp2)
-    (ensures fun h0 _ h1 -> modifies (loc nq |+| loc nq_p1 |+| loc tmp1 |+| loc tmp2) h0 h1)
+    (ensures fun h0 _ h1 ->
+      modifies (loc nq |+| loc nq_p1 |+| loc tmp1 |+| loc tmp2) h0 h1 /\
+     (let p2, p3 = S.add_and_double (fget_xz h0 q) (fget_xz h0 nq) (fget_xz h0 nq_p1) in
+      fget_xz h1 nq == p2 /\ fget_xz h1 nq_p1 == p3))
 let point_add_and_double #s q nq nq_p1 tmp1 tmp2 =
   match s with
   | M26 -> point_add_and_double_26 q nq nq_p1 tmp1 tmp2
@@ -222,7 +251,9 @@ val point_double_:
   -> tmp2:felem_wide2 s
   -> Stack unit
     (requires fun h0 -> live h0 nq /\ live h0 tmp1 /\ live h0 tmp2)
-    (ensures  fun h0 _ h1 -> modifies (loc nq |+| loc tmp1 |+| loc tmp2) h0 h1)
+    (ensures  fun h0 _ h1 ->
+      modifies (loc nq |+| loc tmp1 |+| loc tmp2) h0 h1 /\
+      fget_xz h1 nq == S.double (fget_xz h0 nq))
 let point_double_ #s nq tmp1 tmp2 =
   let x2 = sub nq 0ul (nlimb s) in
   let z2 = sub nq (nlimb s) (nlimb s) in
@@ -267,7 +298,9 @@ val point_double:
   -> tmp2:felem_wide2 s
   -> Stack unit
     (requires fun h0 -> live h0 nq /\ live h0 tmp1 /\ live h0 tmp2)
-    (ensures fun h0 _ h1 -> modifies (loc nq |+| loc tmp1 |+| loc tmp2) h0 h1)
+    (ensures fun h0 _ h1 ->
+      modifies (loc nq |+| loc tmp1 |+| loc tmp2) h0 h1 /\
+      fget_xz h1 nq == S.double (fget_xz h0 nq))
 let point_double #s nq tmp1 tmp2 =
   match s with
   | M26 -> point_double_26 nq tmp1 tmp2
@@ -282,8 +315,12 @@ val montgomery_ladder_:
   -> k:scalar
   -> i:point s
   -> Stack unit
-    (requires fun h0 -> live h0 o /\ live h0 k /\ live h0 i)
-    (ensures  fun h0 _ h1 -> modifies (loc o) h0 h1)
+    (requires fun h0 ->
+      live h0 o /\ live h0 k /\ live h0 i /\
+      fget_z h0 i == 1)
+    (ensures  fun h0 _ h1 ->
+      modifies (loc o) h0 h1 /\
+      fget_xz h1 o == S.montgomery_ladder (fget_x h0 i) (as_seq h0 k))
 let montgomery_ladder_ #s out key init =
   push_frame();
   let p01 = create (4ul *. nlimb s) (limb_zero s) in
@@ -337,8 +374,12 @@ val montgomery_ladder:
   -> k:scalar
   -> i:point s
   -> Stack unit
-    (requires fun h0 -> live h0 o /\ live h0 k /\ live h0 i)
-    (ensures  fun h0 _ h1 -> modifies (loc o) h0 h1)
+    (requires fun h0 ->
+      live h0 o /\ live h0 k /\ live h0 i /\
+      fget_z h0 i == 1)
+    (ensures  fun h0 _ h1 ->
+      modifies (loc o) h0 h1 /\
+      fget_xz h1 o == S.montgomery_ladder (fget_x h0 i) (as_seq h0 k))
 let montgomery_ladder #s out key init =
   match s with
   | M26 -> montgomery_ladder_26 out key init
@@ -353,8 +394,11 @@ val scalarmult:
   -> k:lbuffer uint8 32ul
   -> i:lbuffer uint8 32ul
   -> Stack unit
-    (requires fun h0 -> live h0 o /\ live h0 k /\ live h0 i)
-    (ensures  fun h0 _ h1 -> modifies (loc o) h0 h1)
+    (requires fun h0 ->
+      live h0 o /\ live h0 k /\ live h0 i /\
+      disjoint o i /\ disjoint o k)
+    (ensures  fun h0 _ h1 -> modifies (loc o) h0 h1 /\
+      as_seq h1 o == S.scalarmult (as_seq h0 k) (as_seq h0 i))
 let scalarmult #s out priv pub =
   push_frame ();
   let init = create (2ul *. nlimb s) (limb_zero s) in
@@ -363,35 +407,22 @@ let scalarmult #s out priv pub =
   encode_point #s out init;
   pop_frame()
 
-inline_for_extraction
-let basepoint_list : x:list byte_t{List.Tot.length x == 32} =
-  [@inline_let]
-  let l =
-    [9uy; 0uy; 0uy; 0uy; 0uy; 0uy; 0uy; 0uy;
-    0uy; 0uy; 0uy; 0uy; 0uy; 0uy; 0uy; 0uy;
-    0uy; 0uy; 0uy; 0uy; 0uy; 0uy; 0uy; 0uy;
-    0uy; 0uy; 0uy; 0uy; 0uy; 0uy; 0uy; 0uy] in
-  assert_norm (List.Tot.length l == 32);
-  l
-
-noextract
-let basepoint_lseq : Lib.Sequence.lseq byte_t 32 =
-  Lib.Sequence.of_list basepoint_list
-
-let g25519 : x:ilbuffer byte_t 32ul{witnessed x (Lib.Sequence.of_list basepoint_list) /\ recallable x} =
-  createL_global basepoint_list
+let g25519 : x:ilbuffer byte_t 32ul{witnessed x (Lib.Sequence.of_list S.basepoint_list) /\ recallable x} =
+  createL_global S.basepoint_list
 
 inline_for_extraction
 val secret_to_public:
-  #s:field_spec
+    #s:field_spec
   -> o:lbuffer uint8 32ul
   -> i:lbuffer uint8 32ul
   -> Stack unit
-    (requires fun h0 -> live h0 o /\ live h0 i)
-    (ensures  fun h0 _ h1 -> modifies (loc o) h0 h1)
+    (requires fun h0 ->
+      live h0 o /\ live h0 i /\ disjoint o i)
+    (ensures  fun h0 _ h1 -> modifies (loc o) h0 h1 /\
+      as_seq h1 o == S.secret_to_public (as_seq h0 i))
 let secret_to_public #s pub priv =
   push_frame ();
-  recall_contents g25519 basepoint_lseq;
+  recall_contents g25519 S.basepoint_lseq;
   let basepoint = create 32ul (u8 0) in
   mapT 32ul basepoint secret g25519;
   scalarmult #s pub priv basepoint;
