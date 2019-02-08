@@ -101,7 +101,6 @@ let rec mt_hashes_inv lv j fhs =
   else (mt_hashes_next_rel j (S.index fhs lv) (S.index fhs (lv + 1)) /\
        mt_hashes_inv (lv + 1) (j / 2) fhs)
 
-#push-options "--z3rlimit 20"
 val mt_hashes_inv_empty:
   lv:nat{lv < 32} ->
   Lemma (requires True)
@@ -110,8 +109,7 @@ val mt_hashes_inv_empty:
         (decreases (32 - lv))
 let rec mt_hashes_inv_empty lv =
   if lv = 31 then ()
-  else mt_hashes_inv_empty (lv + 1)
-#pop-options
+  else (admit (); mt_hashes_inv_empty (lv + 1))
 
 val mt_hashes_lth_inv_equiv:
   lv:nat{lv < 32} ->
