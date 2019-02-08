@@ -57,6 +57,7 @@ extern void Hacl_Poly1305_32_poly1305_mac(uint8_t* out, uint8_t* in, int in_len,
 extern void Hacl_Poly1305_128_poly1305_mac(uint8_t* out, uint8_t* in, int in_len, uint8_t* k);
 extern void Hacl_Poly1305_256_poly1305_mac(uint8_t* out, uint8_t* in, int in_len, uint8_t* k);
 
+/*
 extern void
 Hacl_Poly1305_64_crypto_onetimeauth(
   uint8_t *output,
@@ -72,7 +73,7 @@ Hacl_Poly1305_32_crypto_onetimeauth(
   uint64_t len1,
   uint8_t *k1
 				    );
-
+*/
 
 #define ROUNDS 100000
 #define SIZE   16384
@@ -200,7 +201,7 @@ int main() {
   if (ok) printf("Success!\n");
   else printf("**FAILED**\n");
 
-  Hacl_Poly1305_64_poly1305_mac(comp,in2,in_len2,key2);
+  /*Hacl_Poly1305_64_poly1305_mac(comp,in2,in_len2,key2);
   Hacl_Poly1305_64_crypto_onetimeauth(comp,in,in_len,key);
   printf("Master Poly1305 (64-bit) Result:\n");
   printf("computed:");
@@ -215,9 +216,9 @@ int main() {
   for (int i = 0; i < 16; i++)
     ok = ok & (exp[i] == comp[i]);
   if (ok) printf("Success!\n");
-  else printf("**FAILED**\n");
+  else printf("**FAILED**\n"); */
 
-  Hacl_Poly1305_32_crypto_onetimeauth(comp,in,in_len,key);
+/*  Hacl_Poly1305_32_crypto_onetimeauth(comp,in,in_len,key);
   printf("Master Poly1305 (32-bit) Result:\n");
   printf("computed:");
   for (int i = 0; i < 16; i++)
@@ -231,7 +232,7 @@ int main() {
   for (int i = 0; i < 16; i++)
     ok = ok & (exp[i] == comp[i]);
   if (ok) printf("Success!\n");
-  else printf("**FAILED**\n");
+  else printf("**FAILED**\n"); */
 
 /*
   bssl_poly1305(comp,in,in_len,key);
@@ -251,7 +252,7 @@ int main() {
   else printf("**FAILED**\n");
 */
 
-  Hacl_Poly1305_64_poly1305_mac(comp,in2,in_len2,key2);
+  /*Hacl_Poly1305_64_poly1305_mac(comp,in2,in_len2,key2);
   printf("Poly1305 (64-bit) Result:\n");
   printf("computed:");
   for (int i = 0; i < 16; i++)
@@ -452,7 +453,7 @@ int main() {
   cycles cdiff4 = b - a;
 
 
-  memset(plain,'P',SIZE);
+  /*memset(plain,'P',SIZE);
   memset(key,'K',16);
   for (int j = 0; j < ROUNDS; j++) {
     Hacl_Poly1305_64_crypto_onetimeauth(plain,plain,SIZE,key);
@@ -467,7 +468,7 @@ int main() {
   b = cpucycles_end();
   t2 = clock();
   clock_t tdiff5 = t2 - t1;
-  cycles cdiff5 = b - a;
+  cycles cdiff5 = b - a; 
 
 
   memset(plain,'P',SIZE);
@@ -487,7 +488,6 @@ int main() {
   clock_t tdiff6 = t2 - t1;
   cycles cdiff6 = b - a;
 
-/*
   memset(plain,'P',SIZE);
   memset(key,'K',16);
   for (int j = 0; j < ROUNDS; j++) {
@@ -507,7 +507,7 @@ int main() {
 */
 
   
-  printf("Poly1305 (64-bit) PERF:\n");
+  /*printf("Poly1305 (64-bit) PERF:\n");
   printf("cycles for %" PRIu64 " bytes: %" PRIu64 " (%.2fcycles/byte)\n",count,(uint64_t)cdiff1,(double)cdiff1/count);
   printf("time for %" PRIu64 " bytes: %" PRIu64 " (%.2fus/byte)\n",count,(uint64_t)tdiff1,(double)tdiff1/count);
   printf("bw %8.2f MB/s\n",(double)count/(((double)tdiff1 / CLOCKS_PER_SEC) * 1000000.0)); */
@@ -532,10 +532,10 @@ int main() {
   printf("cycles for %" PRIu64 " bytes: %" PRIu64 " (%.2fcycles/byte)\n",count,(uint64_t)cdiff7,(double)cdiff7/count);
   printf("time for %" PRIu64 " bytes: %" PRIu64 " (%.2fus/byte)\n",count,(uint64_t)tdiff7,(double)tdiff7/count);
   printf("bw %8.2f MB/s\n",(double)count/(((double)tdiff7 / CLOCKS_PER_SEC) * 1000000.0));
-*/
+
   printf("Master Poly1305 (32-bit) PERF:\n");
   printf("cycles for %" PRIu64 " bytes: %" PRIu64 " (%.2fcycles/byte)\n",count,(uint64_t)cdiff6,(double)cdiff6/count);
   printf("time for %" PRIu64 " bytes: %" PRIu64 " (%.2fus/byte)\n",count,(uint64_t)tdiff6,(double)tdiff6/count);
-  printf("bw %8.2f MB/s\n",(double)count/(((double)tdiff6 / CLOCKS_PER_SEC) * 1000000.0));
+  printf("bw %8.2f MB/s\n",(double)count/(((double)tdiff6 / CLOCKS_PER_SEC) * 1000000.0)); */
 
 }
