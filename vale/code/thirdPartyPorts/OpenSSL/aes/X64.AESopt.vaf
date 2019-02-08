@@ -224,9 +224,9 @@ procedure {:quick} loop6x_plain(
 }
 
 
-procedure {:quick} {:verify true} loop6x_step(
+procedure {:quick} loop6x_step(
     inline alg:algorithm,  // OpenSSL includes the number of rounds (nr) as a dynamic parameter (stored with the key).  Saves code space but adds extra instructions to the fast path.  Maybe branch predictor is good enough for it not to matter
-    ghost in_b:buffer64,
+    ghost in_b:buffer128,
     ghost stack_b:buffer128,
 
     ghost key_words:seq(nat32),
@@ -259,7 +259,7 @@ procedure {:quick} {:verify true} loop6x_step(
 
     requires
         // Valid ptrs and buffers
-        validSrcAddrs64(mem, in0, in_b, 10, memTaint, Secret);
+        validSrcAddrs128(mem, in0, in_b, 5, memTaint, Secret);
         validDstAddrs128(mem, rsp, stack_b, 4, memTaint, Secret);
 
         // AES reqs
@@ -284,31 +284,31 @@ procedure {:quick} {:verify true} loop6x_step(
         inout4 == rounds_opaque(init4, round_keys, 4);
         inout5 == rounds_opaque(init5, round_keys, 4);
 
-        // TODO:
-//        buffer128_read(stack_b, 3, mem) == reverse_bytes_nat64(old(buffer64_read(in_b, 9, mem)))
-//                                           reverse_bytes_nat64(old(buffer64_read(in_b, 8, mem)))
+        //buffer128_read(stack_b, 3, mem) == old(reverse_bytes_quad32(buffer128_read(in_b, 4, mem)));
 {
     Load128_buffer(rndkey, key, 0x40-0x80, Secret, keys_b, 4);
 
     VAESNI_enc(inout0, inout0, rndkey);
     VAESNI_enc(inout1, inout1, rndkey);
 
-    LoadBe64_buffer(r13, in0, 0x48, Secret, in_b, 9);
+    LoadBe64_buffer128(r13, in0, 0x48, Secret, true,  in_b, 4);
 
     VAESNI_enc(inout2, inout2, rndkey);
 
-    LoadBe64_buffer(r12, in0, 0x40, Secret, in_b, 8);
+    LoadBe64_buffer128(r12, in0, 0x40, Secret, false, in_b, 4);
 
     VAESNI_enc(inout3, inout3, rndkey);
 
-    Store64_128_buffer(rsp, r13, 0x30, Secret, stack_b, 3, false);  // OpenSSL uses 0x30+8
+    Store64_buffer128(rsp, r13, 0x30, Secret, false, stack_b, 3);  // OpenSSL uses 0x30+8
 
     VAESNI_enc(inout4, inout4, rndkey);
 
-    Store64_128_buffer(rsp, r12, 0x38, Secret, stack_b, 3, true);   // OpenSSL uses 0x38+8
+    Store64_buffer128(rsp, r12, 0x38, Secret, true,  stack_b, 3);   // OpenSSL uses 0x38+8
 
     VAESNI_enc(inout5, inout5, rndkey);
 
     reveal rounds;
     commute_sub_bytes_shift_rows_forall();
+    lemma_reverse_bytes64(old(buffer128_read(in_b, 4, mem)), old(buffer128_read(stack_b, 3, mem)), buffer128_read(stack_b, 3, mem));
+
 }

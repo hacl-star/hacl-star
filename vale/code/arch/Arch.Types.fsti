@@ -107,6 +107,12 @@ val lemma_lo64_properties (_:unit) :
 val lemma_hi64_properties (_:unit) :
   Lemma (forall (q0 q1:quad32) . (q0.hi2 == q1.hi2 /\ q0.hi3 == q1.hi3) <==> (hi64 q0 == hi64 q1))
 
+let lemma_reverse_bytes64 (src orig final:quad32) : Lemma
+  (requires final == insert_nat64_opaque (insert_nat64_opaque orig (reverse_bytes_nat64 (hi64 src)) 0) (reverse_bytes_nat64 (lo64 src)) 1)
+  (ensures  final == reverse_bytes_quad32 src)
+  =
+  admit()
+
 val lemma_equality_check_helper (q:quad32) :
   Lemma ((q.lo0 == 0 /\ q.lo1 == 0 ==> lo64 q == 0) /\
          ((not (q.lo0 = 0) \/ not (q.lo1 = 0)) ==> not (lo64 q = 0)) /\
