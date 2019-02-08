@@ -19,6 +19,7 @@ static inline void bssl_poly1305(uint8_t mac[16],const uint8_t* in, size_t in_le
 }
 */
 
+/*
 #include "internal/poly1305.h"
 static inline void bssl_poly1305(uint8_t mac[16],const uint8_t* in, size_t in_len, const uint8_t key[32]) {
   uint8_t st[Poly1305_ctx_size()];
@@ -26,7 +27,7 @@ static inline void bssl_poly1305(uint8_t mac[16],const uint8_t* in, size_t in_le
   Poly1305_Update((POLY1305*)st,in,in_len);
   Poly1305_Final((POLY1305*)st,mac);
 }
-
+*/
 
 
 typedef uint64_t cycles;
@@ -232,6 +233,7 @@ int main() {
   if (ok) printf("Success!\n");
   else printf("**FAILED**\n");
 
+/*
   bssl_poly1305(comp,in,in_len,key);
   printf("BoringSSL Result:\n");
   printf("computed:");
@@ -247,6 +249,7 @@ int main() {
     ok = ok & (exp[i] == comp[i]);
   if (ok) printf("Success!\n");
   else printf("**FAILED**\n");
+*/
 
   Hacl_Poly1305_64_poly1305_mac(comp,in2,in_len2,key2);
   printf("Poly1305 (64-bit) Result:\n");
@@ -484,6 +487,7 @@ int main() {
   clock_t tdiff6 = t2 - t1;
   cycles cdiff6 = b - a;
 
+/*
   memset(plain,'P',SIZE);
   memset(key,'K',16);
   for (int j = 0; j < ROUNDS; j++) {
@@ -500,7 +504,7 @@ int main() {
   t2 = clock();
   clock_t tdiff7 = t2 - t1;
   cycles cdiff7 = b - a;
-
+*/
 
   
   printf("Poly1305 (64-bit) PERF:\n");
@@ -523,11 +527,12 @@ int main() {
   printf("time for %" PRIu64 " bytes: %" PRIu64 " (%.2fus/byte)\n",count,(uint64_t)tdiff4,(double)tdiff4/count);
   printf("bw %8.2f MB/s\n",(double)count/(((double)tdiff4 / CLOCKS_PER_SEC) * 1000000.0));
 
+/*
   printf("BoringSSL Poly1305 (vec) PERF:\n");
   printf("cycles for %" PRIu64 " bytes: %" PRIu64 " (%.2fcycles/byte)\n",count,(uint64_t)cdiff7,(double)cdiff7/count);
   printf("time for %" PRIu64 " bytes: %" PRIu64 " (%.2fus/byte)\n",count,(uint64_t)tdiff7,(double)tdiff7/count);
   printf("bw %8.2f MB/s\n",(double)count/(((double)tdiff7 / CLOCKS_PER_SEC) * 1000000.0));
-
+*/
   printf("Master Poly1305 (32-bit) PERF:\n");
   printf("cycles for %" PRIu64 " bytes: %" PRIu64 " (%.2fcycles/byte)\n",count,(uint64_t)cdiff6,(double)cdiff6/count);
   printf("time for %" PRIu64 " bytes: %" PRIu64 " (%.2fus/byte)\n",count,(uint64_t)tdiff6,(double)tdiff6/count);
