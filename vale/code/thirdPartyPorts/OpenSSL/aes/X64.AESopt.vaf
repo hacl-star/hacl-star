@@ -319,7 +319,124 @@ procedure {:quick} loop6x_step(
 
 }
 
-procedure {:quick} {:verify true} loop6x(
+/*
+procedure {:quick} {:verify true} loop6x_round8(
+    inline alg:algorithm,  // OpenSSL includes the number of rounds (nr) as a dynamic parameter (stored with the key).  Saves code space but adds extra instructions to the fast path.  Maybe branch predictor is good enough for it not to matter
+    ghost in_b:buffer128,
+    ghost stack_b:buffer128,
+
+    ghost key_words:seq(nat32),
+    ghost round_keys:seq(quad32),
+    ghost keys_b:buffer128,
+
+    ghost init0:quad32,
+    ghost init1:quad32,
+    ghost init2:quad32,
+    ghost init3:quad32,
+    ghost init4:quad32,
+    ghost init5:quad32
+    )
+    lets
+//      inp @= rdi; outp @= rsi; len @= rdx; key @= rcx; ivp @= r8; Xip @= r9;
+        key @= rcx; 
+        T1 @= xmm1; T2 @= xmm2; 
+        inout0 @= xmm9; inout1 @= xmm10; inout2 @= xmm11; inout3 @= xmm12;
+        inout4 @= xmm13; inout5 @= xmm14; rndkey @= xmm15;
+//      counter @= rbx; rounds @= rbp; ret @= r10; constp @= r11; in0 @= r14; end0 @= r15;
+        in0 @= r14; 
+
+    reads
+        key; rsp; in0;
+        memTaint;
+
+    modifies
+        r12; r13; 
+        T1; T2; inout0; inout1; inout2; inout3; inout4; inout5; rndkey;
+        mem; efl;
+
+    requires
+        // Valid ptrs and buffers
+        validSrcAddrs128(mem, in0, in_b, in0_offset + 1, memTaint, Secret);
+        validDstAddrs128(mem, rsp, stack_b, stack_offset + 1, memTaint, Secret);
+
+        // AES reqs
+        aes_reqs(alg, key_words, round_keys, keys_b, key, mem, memTaint);
+
+        inout0 == rounds_opaque(init0, round_keys, 7);
+        inout1 == rounds_opaque(init1, round_keys, 7);
+        inout2 == rounds_opaque(init2, round_keys, 7);
+        inout3 == rounds_opaque(init3, round_keys, 7);
+        inout4 == rounds_opaque(init4, round_keys, 7);
+        inout5 == rounds_opaque(init5, round_keys, 7);
+
+    ensures
+//        // Framing
+//        modifies_buffer_specific128(stack_b, old(mem), mem, stack_offset, stack_offset + 1);
+//
+//        // Semantics
+//        inout0 == rounds_opaque(init0, round_keys, 8);
+//        inout1 == rounds_opaque(init1, round_keys, 8);
+//        inout2 == rounds_opaque(init2, round_keys, 8);
+//        inout3 == rounds_opaque(init3, round_keys, 8);
+//        inout4 == rounds_opaque(init4, round_keys, 8);
+//        inout5 == rounds_opaque(init5, round_keys, 8);
+//
+//        buffer128_read(stack_b, stack_offset, mem) == old(reverse_bytes_quad32(buffer128_read(in_b, in0_offset, mem)));
+{
+    Load128_buffer(T1, key, 0x80-0x80, Secret, keys_b, 8); // # borrow $T1 for $rndkey
+
+    VAESNI_enc(inout0, inout0, T1);
+    Load128_buffer(rndkey, key, 0x90-0x80, Secret, keys_b, 9); 
+    VAESNI_enc(inout1, inout1, T1);
+    VAESNI_enc(inout2, inout2, T1);
+    VAESNI_enc(inout3, inout3, T1);
+
+    LoadBe64_buffer128(r13, in0, 0*16+8, Secret, true,  in_b, 0);
+    VAESNI_enc(inout4, inout4, T1);
+    LoadBe64_buffer128(r12, in0, 0*16,   Secret, false, in_b, 0);
+
+    VAESNI_enc(inout5, inout5, T1);
+
+    Load128_buffer(T1, key, 0xa0-0x80, Secret, keys_b, 10); 
+
+    // Would do more rounds here for AES-192 or 256
+
+    VAESNI_enc(inout0, inout0, rndkey);
+    VAESNI_enc(inout1, inout1, rndkey);
+    VPxor(T2, T1, inp+0);
+    VAESNI_enc(inout2, inout2, rndkey);
+    VPxor(Ii, T1, inp+0x10);
+    VAESNI_enc(inout3, inout3, rndkey);
+    VPxor(Z1, T1, inp+0x20);
+    VAESNI_enc(inout4, inout4, rndkey);
+    VPxor(Z2, T1, inp+0x30);
+    VAESNI_enc(inout5, inout5, rndkey);
+    VPxor(Z3, T1, inp+0x40);
+    VPxor(Hkey, T1, inp+0x50);
+
+    Load128_buffer(T1, ivp, 0, Secret, iv_b, 0); // # load next counter value
+
+    // TODO:
+    vaesenclast	$T2,$inout0,$inout0
+    vmovdqu	0x20($const),$T2	# borrow $T2, .Lone_msb
+
+
+
+    Store64_buffer128(rsp, r13, stack_offset*16,   Secret, false, stack_b, stack_offset);  // OpenSSL is further offset by 8 (to account for return addr?)
+
+
+    Store64_buffer128(rsp, r12, stack_offset*16+8, Secret, true,  stack_b, stack_offset);   // OpenSSL is further offset by 8 (to account for return addr?)
+
+
+    reveal rounds;
+    commute_sub_bytes_shift_rows_forall();
+    lemma_reverse_bytes64(old(buffer128_read(in_b, in0_offset, mem)), old(buffer128_read(stack_b, stack_offset, mem)), buffer128_read(stack_b, stack_offset, mem));
+
+}
+*/
+
+
+procedure {:quick} loop6x(
     inline alg:algorithm,  
     ghost iv_b:buffer128,
     ghost in_b:buffer128,
