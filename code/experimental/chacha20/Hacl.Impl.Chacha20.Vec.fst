@@ -43,11 +43,13 @@ val chacha20_core_: #w:lanes -> k:state w -> ctx0:state w -> ctr:size_t{w * v ct
 
 let chacha20_core_ #w k ctx ctr =
     copy_state k ctx;
-    let cv = vec_load (u32 w *! size_to_uint32 ctr) w  in
+    let ctr_u32 = u32 w *! size_to_uint32 ctr in
+    let cv = vec_load ctr_u32 w in
     k.(12ul) <- k.(12ul) +| cv;
     rounds k;
     sum_state k ctx;
     k.(12ul) <- k.(12ul) +| cv
+
 
 [@CInline]
 let chacha20_core1 k ctx0 ctr = chacha20_core_ #1 k ctx0 ctr

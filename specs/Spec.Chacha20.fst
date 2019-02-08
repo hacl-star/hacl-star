@@ -74,7 +74,7 @@ let add_counter (ctr:counter) (s0:state) : Tot state =
 let chacha20_core (ctr:counter) (s0:state) : Tot state =
   let k = add_counter ctr s0 in
   let k = rounds k in
-  let k = sum_state s0 k in
+  let k = sum_state k s0 in
   add_counter ctr k
 
 inline_for_extraction

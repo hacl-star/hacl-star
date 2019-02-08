@@ -52,9 +52,14 @@ let transpose_state (#w:lanes) (st:state w) : lseq (lseq uint32 16) w  =
 
 let line (#w:lanes) (a:idx) (b:idx) (d:idx) 
 		    (s:rotval U32) (m:state w) : state w =
-  let m = m.[ a ] <- m.[ a ] +| m.[ b ] in
-  let m = m.[ d ] <- m.[ d ] ^| m.[ a ] in
-  let m = m.[ d ] <- vec_rotate_left m.[ d ] s in
+  let sta = m.[a] in
+  let stb = m.[b] in
+  let std = m.[d] in
+  let sta = sta +| stb in
+  let std = std ^| sta in
+  let std = std <<<| s in  
+  let m = m.[ a ] <- sta in
+  let m = m.[ d ] <- std in
   m
 
 
@@ -100,7 +105,7 @@ let add_counter (#w:lanes) (ctr:counter{w * ctr <= max_size_t}) (st:state w) : s
 let chacha20_core (#w:lanes) (ctr:counter{w * ctr <= max_size_t}) (s0:state w) : state w =
   let k = add_counter ctr s0 in
   let k = rounds k in
-  let k = sum_state s0 k in
+  let k = sum_state k s0 in
   add_counter ctr k
 
     

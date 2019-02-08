@@ -65,8 +65,8 @@ inline_for_extraction
 val sum_state: st:state -> ost:state -> ST unit
 		  (requires (fun h -> live h st /\ live h ost /\ eq_or_disjoint st ost))
    		  (ensures (fun h0 _ h1 -> 
-		    modifies (loc st) h0 h1 /\
-		    as_seq h1 st == Lib.Sequence.map2 ( +. ) (as_seq h0 st) (as_seq h0 ost)))
+		    modifies (loc st) h0 h1 /\ 
+		    as_seq h1 st == Spec.sum_state (as_seq h0 st) (as_seq h0 ost)))
 let sum_state st ost =  map2T #MUT #uint32 #uint32 #uint32 (size 16) st ( +. ) st ost
       
 

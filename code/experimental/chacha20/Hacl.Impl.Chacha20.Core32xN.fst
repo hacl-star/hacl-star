@@ -85,8 +85,8 @@ val sum_state: #w:lanes -> st:state w -> ost:state w -> ST unit
 		  (requires (fun h -> live h st /\ live h ost /\ eq_or_disjoint st ost))
    		  (ensures (fun h0 _ h1 -> 
 		    modifies (loc st) h0 h1 /\
-		    as_seq h1 st == Spec.sum_state (as_seq h0 ost) (as_seq h0 st)))
-let sum_state #w st ost =  map2T (size 16) st ( +| ) ost st
+		    as_seq h1 st == Spec.sum_state (as_seq h0 st) (as_seq h0 ost)))
+let sum_state #w st ost =  map2T (size 16) st ( +| ) st ost
       
 inline_for_extraction
 val transpose_state1: st:state 1 -> ST unit

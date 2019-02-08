@@ -11,7 +11,7 @@ open Hacl.Impl.Chacha20.Core32
 module Spec = Spec.Chacha20
 module Loop = Lib.LoopCombinators
 
-#set-options "--z3rlimit 100"
+#set-options "--z3rlimit 200 --max_fuel 2"
 #set-options "--debug Hacl.Impl.Curve25519.Generic --debug_level ExtractNorm"
 
 //inline_for_extraction
@@ -52,14 +52,16 @@ val chacha20_core: k:state -> ctx0:state -> ctr:size_t -> ST unit
 			       (let s0 = as_seq h ctx0 in
 				v (Lib.Sequence.index s0 12) + v ctr <= max_size_t)))
 		  (ensures (fun h0 _ h1 -> modifies (loc k) h0 h1 /\
-					as_seq h1 k == Spec.chacha20_core (as_seq h0 ctx0) (v ctr)))
+					as_seq h1 k == Spec.chacha20_core (v ctr) (as_seq h0 ctx0)))
 [@ CInline ]
 let chacha20_core k ctx ctr =
     copy_state k ctx;
-    k.(12ul) <- k.(12ul) +. size_to_uint32 ctr;
+    let ctr_u32 = size_to_uint32 ctr in
+    k.(12ul) <- k.(12ul) +. ctr_u32;
     rounds k;
     sum_state k ctx;
-    k.(12ul) <- k.(12ul) +. size_to_uint32 ctr
+    k.(12ul) <- k.(12ul) +. ctr_u32
+
 
 
 val chacha20_constants: b:ilbuffer size_t 4ul{
@@ -206,5 +208,6 @@ let chacha20_decrypt len out cipher key n ctr =
     chacha20_init ctx key n ctr;
     chacha20_update ctx len out cipher;
     pop_frame()
+
 
 
