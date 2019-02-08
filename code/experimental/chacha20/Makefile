@@ -10,7 +10,7 @@ OUT_DIR	      = chacha20-c
 
 .PHONY: all test stage1 stage2 clean clean-c distclean
 
-all: chacha20.exe
+all: chacha20-vec-perf
 
 verify: test
 
