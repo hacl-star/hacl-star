@@ -152,7 +152,7 @@ $(HACL_HOME)/vale/code/%.checked: \
 $(HACL_HOME)/vale/code/arch/x64/interop/%.checked: \
   FSTAR_FLAGS=$(shell echo $(VALE_FSTAR_FLAGS_NOSMT) | \
     sed 's/--z3cliopt smt.arith.nl=false//; \
-      s/--z3cliopt smt.QI.EAGER_THRESHOLD=100//'))
+      s/--z3cliopt smt.QI.EAGER_THRESHOLD=100//')
 
 # Except for the files coming from vaf files, which also don't work with two
 # phase tc.
