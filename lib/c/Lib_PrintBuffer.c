@@ -4,7 +4,8 @@
 #include "Lib_PrintBuffer.h"
 
 void Lib_PrintBuffer_print_bytes(uint32_t len, uint8_t* buffer) {
-  for (uint32_t i = 0; i < len; i++){
+  uint32_t i;
+  for (i = 0; i < len; i++){
     printf("%02x ", buffer[i]);
   }
   printf("\n");
