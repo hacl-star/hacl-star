@@ -35,7 +35,6 @@ all: compile-compact compile-generic compile-compact-msvc \
 
 # Any file in code/tests is taken to contain a `main` function.
 # Any file in specs/tests is taken to contain a `test` function.
-# TODO: test-merkle-tree, test-evercrypt
 test: test-c test-ml
 test-c: $(subst .,_,$(patsubst %.fst,test-c-%,$(notdir $(wildcard code/tests/*.fst)))) \
   test-c-Test test-c-merkle_tree_test
@@ -192,7 +191,7 @@ $(HACL_HOME)/vale/code/arch/x64/Views.fst.checked: \
 
 $(HACL_HOME)/vale/code/lib/collections/Collections.Lists.fst.checked: \
   FSTAR_FLAGS=$(shell echo $(VALE_FSTAR_FLAGS) | \
-    sed s/--z3cliopt smt.QI.EAGER_THRESHOLD=100//')
+    sed 's/--z3cliopt smt.QI.EAGER_THRESHOLD=100//')
 
 $(HACL_HOME)/vale/code/arch/x64/X64.Bytes_Semantics.fst.checked: \
   FSTAR_FLAGS=$(shell echo $(VALE_FSTAR_FLAGS) | \
@@ -266,7 +265,7 @@ dist/vale/curve25519.exe: vale/code/crypto/ecc/curve25519/Main25519.ml
 dist/vale/%.exe: $(ALL_CMX_FILES) vale/code/lib/util/CmdLineParser.ml
 	mkdir -p $(dir $@)
 	$(OCAMLOPT) $^ -o $@ -I vale/code/lib/util
-	
+
 # The ones in secure_api are legacy and should go.
 VALE_ASMS = $(foreach P,cpuid aesgcm sha256 curve25519,\
   $(addprefix dist/vale/,$P-x86_64-mingw.S $P-x86_64-msvc.S $P-x86_64-linux.S $P-x86_64-darwin.S)) \

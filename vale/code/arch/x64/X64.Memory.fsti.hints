@@ -8,7 +8,7 @@
       0,
       [ "@query", "assumption_X64.Memory.base_typ__uu___haseq" ],
       0,
-      "bb3d0b3ea08aba9f399c13dd100ad921"
+      "62fc0410ba46623933415cc122da2ea4"
     ],
     [
       "X64.Memory.type_of_base_typ",
@@ -27,12 +27,12 @@
         "equation_Words_s.nat64", "equation_Words_s.nat8",
         "equation_Words_s.natN",
         "fuel_guarded_inversion_X64.Memory.base_typ",
-        "function_token_typing_Types_s.twobits",
         "haseqFStar.Seq.Base_Tm_refine_5514fbe9e08dfda40f950a7b9f1b2b98",
-        "refinement_interpretation_Prims_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
+        "refinement_interpretation_Prims_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
+        "typing_Types_s.twobits"
       ],
       0,
-      "9c825654c36f20fab4fac810a2a4d3a9"
+      "00283ab8ff0bc59a872b34926920eb93"
     ],
     [
       "X64.Memory.loc_locs_disjoint_rec",
@@ -47,7 +47,7 @@
         "subterm_ordering_Prims.Cons"
       ],
       0,
-      "79ef23d33e6150a8a1f4952c2866027e"
+      "29a3f4345f66b2175133b41800b48f06"
     ],
     [
       "X64.Memory.locs_disjoint_rec",
@@ -61,7 +61,7 @@
         "fuel_guarded_inversion_Prims.list", "subterm_ordering_Prims.Cons"
       ],
       0,
-      "796a1d1eb794663746a9f078580c40e9"
+      "f89f3432e041a31c8a82a0aee517e496"
     ],
     [
       "X64.Memory.buffer_read",
@@ -70,7 +70,7 @@
       0,
       [ "@query", "lemma_X64.Memory.buffer_length_buffer_as_seq" ],
       0,
-      "f378120e5fac16bc87c8fa7995b64eca"
+      "abf144edfda00de87a7f6483ae04f32a"
     ],
     [
       "X64.Memory.buffer_write",
@@ -79,7 +79,7 @@
       0,
       [ "@query", "lemma_X64.Memory.buffer_length_buffer_as_seq" ],
       0,
-      "2053541e47ab35aeb183b24cff146011"
+      "0421fef7885dad9085e3e3e020ddf912"
     ],
     [
       "X64.Memory.lemma_load_mem64",
@@ -107,7 +107,7 @@
         "refinement_interpretation_Prims_Tm_refine_a4038d5aed1633b5ecbb4e499b1c66ad"
       ],
       0,
-      "5269ca3500288620bedf32e89fd9e22a"
+      "e5f4caf32b0a5cfa83846a1db43f1e79"
     ],
     [
       "X64.Memory.lemma_store_mem64",
@@ -120,7 +120,7 @@
         "refinement_interpretation_Prims_Tm_refine_8d65e998a07dd53ec478e27017d9dba5"
       ],
       0,
-      "2a697c20fe9a6bbbc573c3461b519d0d"
+      "62a091375414580df171a5ce3088fb80"
     ],
     [
       "X64.Memory.lemma_store_mem128",
@@ -133,7 +133,7 @@
         "refinement_interpretation_Prims_Tm_refine_8d65e998a07dd53ec478e27017d9dba5"
       ],
       0,
-      "4132ed93fe08341b7bb5d7ae7529862e"
+      "e75b3898fb3ee090d3005c42ef9d58cd"
     ],
     [
       "X64.Memory.lemma_store_load_mem64",
@@ -141,15 +141,18 @@
       1,
       0,
       [
-        "@MaxIFuel_assumption", "@query", "equation_Prims.eqtype",
-        "equation_Prims.nat", "equation_Types_s.twobits",
+        "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565",
+        "equation_Prims.eqtype", "equation_Prims.nat",
         "equation_Words_s.nat64", "equation_Words_s.natN",
-        "function_token_typing_Types_s.twobits",
+        "function_token_typing_Prims.__cache_version_number__",
+        "function_token_typing_Prims.int",
         "haseqFStar.Seq.Base_Tm_refine_5514fbe9e08dfda40f950a7b9f1b2b98",
+        "haseqPrims_Tm_refine_a4038d5aed1633b5ecbb4e499b1c66ad",
         "refinement_interpretation_Prims_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "12f33373d7b395f00a245a698d6abb0d"
+      "9e6ae64eb0b2b87033943d6d483303db"
     ],
     [
       "X64.Memory.lemma_frame_store_mem64",
@@ -157,15 +160,18 @@
       1,
       0,
       [
-        "@MaxIFuel_assumption", "@query", "equation_Prims.eqtype",
-        "equation_Prims.nat", "equation_Types_s.twobits",
+        "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565",
+        "equation_Prims.eqtype", "equation_Prims.nat",
         "equation_Words_s.nat64", "equation_Words_s.natN",
-        "function_token_typing_Types_s.twobits",
+        "function_token_typing_Prims.__cache_version_number__",
+        "function_token_typing_Prims.int",
         "haseqFStar.Seq.Base_Tm_refine_5514fbe9e08dfda40f950a7b9f1b2b98",
+        "haseqPrims_Tm_refine_a4038d5aed1633b5ecbb4e499b1c66ad",
         "refinement_interpretation_Prims_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "92636bf2cc60bca1226875346cb2cebf"
+      "a5bdc1d91b8f220f2f65210825e0da99"
     ]
   ]
 ]
