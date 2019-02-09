@@ -12,7 +12,7 @@
 #         lib   specs                  specs/old
 
 ifeq (3.81,$(MAKE_VERSION))
-  $(error You seem to be using OSX's antiquated Make version. Hint: brew \
+  $(error You seem to be using the OSX antiquated Make version. Hint: brew \
     install make, then hit invoke gmake instead of make)
 endif
 
@@ -22,12 +22,15 @@ endif
 
 # This is a staged Makefile, because we first need to generate .fst files out of
 # .vaf files in order to get a full dependency graph for the .fst files.
+# This Makefile can be safely re-invoked with a different EVERCRYPT_CONFIG
+# parameter to generate a different static specialization of EverCrypt.
 all_:
+	tools/blast-staticconfig.sh $(EVERCRYPT_CONFIG)
 	$(MAKE) vaf-to-fst
 	$(MAKE) all
 
-# TODO: compile-merkle-tree, compile-evercrypt + variants
 all: compile-compact compile-generic compile-compact-msvc \
+  compile-evercrypt-external-headers compile-compact-c89 compile-coco \
   # secure_api.old
 
 # Any file in code/tests is taken to contain a `main` function.
@@ -242,16 +245,16 @@ OCAMLOPT += -I $(OUTPUT_DIR)
 $(OUTPUT_DIR)/%.ml:
 	$(FSTAR) $(subst .checked,,$<) --codegen OCaml --extract_module $(subst .fst.checked,,$(notdir $<))
 
-dist/vale/%-mingw.S: dist/vale/%.exe
+dist/vale/%-x86_64-mingw.S: dist/vale/%.exe
 	$< GCC Win > $@
 
-dist/vale/%-msvc.S: dist/vale/%.exe
+dist/vale/%-x86_64-msvc.S: dist/vale/%.exe
 	$< MASM Win > $@
 
-dist/vale/%-linux.S: dist/vale/%.exe
+dist/vale/%-x86_64-linux.S: dist/vale/%.exe
 	$< GCC Linux > $@
 
-dist/vale/%-darwin.S: dist/vale/%.exe
+dist/vale/%-x86_64-darwin.S: dist/vale/%.exe
 	$< GCC MacOS > $@
 
 dist/vale/%.exe: $(ALL_CMX_FILES) vale/code/lib/util/CmdLineParser.ml $(ML_MAIN)
@@ -264,7 +267,7 @@ dist/vale/sha256.exe: ML_MAIN=vale/code/crypto/sha/ShaMain.ml
 dist/vale/curve25519.exe: ML_MAIN=vale/code/crypto/ecc/curve25519/Main25519.ml
 	
 VALE_ASMS = $(foreach P,cpuid aesgcm sha256 curve25519,\
-  $(addprefix dist/vale/,$P-mingw.S $P-msvc.S $P-linux.S $P-darwin.S))
+  $(addprefix dist/vale/,$P-x86_64-mingw.S $P-x86_64-msvc.S $P-x86_64-linux.S $P-x86_64-darwin.S))
 
 # A pseudo-target for generating just Vale assemblies
 vale-asm: $(VALE_ASMS)
@@ -282,14 +285,22 @@ $(OUTPUT_DIR)/%.krml:
 	touch $@
 
 HAND_WRITTEN_C		= Lib.PrintBuffer Lib.RandomBuffer
-HAND_WRITTEN_FILES 	= $(wildcard $(LIB_DIR)/c/*.c)
+HAND_WRITTEN_FILES 	= $(wildcard $(LIB_DIR)/c/*.c) \
+  $(addprefix providers/evercrypt/c/evercrypt_,vale_stubs.c)
+# Files in this list are not passed to kremlin, meaning that they don't end up
+# in the Makefile.basic list of C source files. They're added manually in
+# dist/Makefile (see ifneq tests).
+HAND_WRITTEN_OPTIONAL_FILES = \
+  $(addprefix providers/evercrypt/c/evercrypt_,openssl.c bcrypt.c bytes.c)
+
 # TODO: put all the Vale files under a single namespace to avoid this nonsense
 # TODO: actually remove EverCrypt.Bytes rather than disabling it here.
 DEFAULT_FLAGS		=\
   $(addprefix -library ,$(HACL_HAND_WRITTEN_C)) \
-  -bundle Prims \
   -bundle Lib.*[rename=Hacl_Lib] \
   -bundle EverCrypt.Bytes \
+  -bundle EverCrypt.BCrypt \
+  -bundle EverCrypt.OpenSSL \
   -bundle MerkleTree.Spec,MerkleTree.Spec.*,MerkleTree.New.High,MerkleTree.New.High.* \
   -bundle CanonCommMonoid,CanonCommSemiring,CanonCommSwaps[rename=Unused] \
   -bundle FastUtil_helpers,FastHybrid_helpers,FastSqr_helpers,FastMul_helpers[rename=Unused2] \
@@ -297,24 +308,32 @@ DEFAULT_FLAGS		=\
   -bundle X64.*,Arch.*,Words.*,Vale.*,Collections.*,Collections,SHA_helpers[rename=Unused4] \
   -bundle Prop_s,Types_s,Words_s,Views,AES_s,Workarounds,Math.*,Interop,TypesNative_s[rename=Unused5] \
   -bundle GF128_s,GF128,Poly1305.Spec_s,GCTR,GCTR_s,GHash_s,GCM_helpers,GHash[rename=Unused6] \
-  -bundle AES_helpers,AES256_helpers,GCM_s,GCM,Interop_assumptions[rename=Unused6] \
+  -bundle AES_helpers,AES256_helpers,GCM_s,GCM,Interop_assumptions[rename=Unused7] \
   -bundle 'Check_aesni_stdcall,Check_sha_stdcall,Sha_update_bytes_stdcall[rename=Vale]' \
   -library 'Sha_update_bytes_stdcall' \
   -library 'Check_sha_stdcall' \
   -library 'Check_aesni_stdcall' \
+  -no-prefix 'EverCrypt.Vale' \
+  -no-prefix 'Sha_update_bytes_stdcall' \
+  -no-prefix 'Check_sha_stdcall' \
+  -no-prefix 'Check_aesni_stdcall' \
+  -fparentheses -fno-shadow -fcurly-braces
 
 COMPACT_FLAGS	=\
   -bundle Hacl.Hash.MD5+Hacl.Hash.Core.MD5+Hacl.Hash.SHA1+Hacl.Hash.Core.SHA1+Hacl.Hash.SHA2+Hacl.Hash.Core.SHA2+Hacl.Hash.Core.SHA2.Constants=Hacl.Hash.*[rename=Hacl_Hash] \
   -bundle Hacl.Impl.SHA3+Hacl.SHA3=[rename=Hacl_SHA3] \
   -bundle LowStar.* \
-  -bundle C,C.String,C.Loops,Spec.Loops,C.Endianness,FStar.*[rename=Hacl_Kremlib] \
-  -bundle 'Test.*,WindowsHack' \
+  -bundle Prims,C.Failure,C,C.String,C.Loops,Spec.Loops,C.Endianness,FStar.*[rename=Hacl_Kremlib] \
+  -bundle 'EverCrypt.Spec.*' \
+  -bundle 'MerkleTree.*' \
+  -bundle 'Test,Test.*,WindowsHack' \
+  -bundle EverCrypt.Hash+EverCrypt.Hash.Incremental=[rename=EverCrypt_Hash] \
+  -library EverCrypt.Bytes,EverCrypt.AutoConfig,EverCrypt.OpenSSL,EverCrypt.BCrypt \
   -minimal \
   -add-include '"kremlin/internal/types.h"' \
   -add-include '"kremlin/internal/target.h"' \
   -add-include '"kremlin/c_endianness.h"' \
-  -add-include '<string.h>' \
-  -fno-shadow -fcurly-braces
+  -add-include '<string.h>'
 
 # For the time being, we rely on the old extraction to give us self-contained
 # files
@@ -336,16 +355,31 @@ dist/compact/Makefile.basic: KRML_EXTRA=$(COMPACT_FLAGS)
 
 dist/compact-msvc/Makefile.basic: KRML_EXTRA=$(COMPACT_FLAGS) -falloca -ftail-calls
 
-dist/compact-c89/Makefile.basic: KRML_EXTRA=$(COMPACT_FLAGS) -fc89 -ccopt -std=c89
-dist/compact-c89/Makefile.basic: HACL_OLD_FILES:=$(subst -c,-c89,$(HACL_OLD_FILES))
+dist/compact-c89/Makefile.basic: \
+  KRML_EXTRA=$(COMPACT_FLAGS) -fc89 -ccopt -std=c89 -ccopt -Wno-typedef-redefinition
+dist/compact-c89/Makefile.basic: \
+  HACL_OLD_FILES:=$(subst -c,-c89,$(HACL_OLD_FILES))
+
+# The "coco" distribution is only optimized when EVERCRYPT_CONFIG=everest.
+dist/coco/Makefile.basic: \
+  KRML_EXTRA=$(COMPACT_FLAGS) \
+    -bundle EverCrypt.AutoConfig2= \
+    -bundle EverCrypt= \
+    -bundle EverCrypt.Hacl \
+    -bundle EverCrypt.OpenSSL \
+    -bundle EverCrypt.BCrypt \
+    -bundle '\*[rename=EverCrypt_Misc]'
+ifeq ($(EVERCRYPT_CONFIG),everest)
+dist/coco/Makefile.basic: HAND_WRITTEN_OPTIONAL_FILES =
+endif
 
 # When extracting our libraries, we purposely don't distribute tests
 .PRECIOUS: dist/%/Makefile.basic
-dist/%/Makefile.basic: $(ALL_KRML_FILES) dist/hacl-headers/Makefile.basic \
+dist/%/Makefile.basic: $(ALL_KRML_FILES) dist/hacl-internal-headers/Makefile.basic \
   $(HAND_WRITTEN_FILES) $(VALE_ASMS) | old-extract-c
 	mkdir -p $(dir $@)
 	cp $(HACL_OLD_FILES) $(patsubst %.c,%.h,$(HACL_OLD_FILES)) $(dir $@)
-	cp $(HAND_WRITTEN_FILES) dist/hacl-headers/*.h $(dir $@)
+	cp $(HAND_WRITTEN_FILES) $(HAND_WRITTEN_OPTIONAL_FILES) dist/hacl-internal-headers/*.h $(dir $@)
 	cp $(VALE_ASMS) $(dir $@)
 	$(KRML) $(DEFAULT_FLAGS) $(KRML_EXTRA) \
 	  -tmpdir $(dir $@) -skip-compilation \
@@ -356,19 +390,31 @@ dist/%/Makefile.basic: $(ALL_KRML_FILES) dist/hacl-headers/Makefile.basic \
 	  -fparentheses \
 	  $(notdir $(HACL_OLD_FILES)) \
 	  $(notdir $(HAND_WRITTEN_FILES)) \
-	  -o libhacl.a
+	  -o libevercrypt.a
 
 # Auto-generates headers for the hand-written C files. If a signature changes on
 # the F* side, hopefully this will ensure the C file breaks. Note that there is
 # no conflict between the headers because this generates
 # Lib_Foobar while the run above generates a single Hacl_Lib.
-dist/hacl-headers/Makefile.basic: $(ALL_KRML_FILES)
+dist/hacl-internal-headers/Makefile.basic: $(ALL_KRML_FILES)
 	$(KRML) \
 	  -tmpdir $(dir $@) -skip-compilation \
 	  $(patsubst %,-bundle %=,$(HAND_WRITTEN_C)) \
 	  $(patsubst %,-library %,$(HAND_WRITTEN_C)) \
 	  -minimal -add-include '"kremlib.h"' \
 	  -bundle '\*,WindowsBug' $^
+
+dist/evercrypt-external-headers/Makefile.basic: $(ALL_KRML_FILES)
+	$(KRML) \
+	  -minimal \
+	  -bundle EverCrypt+EverCrypt.AutoConfig2+EverCrypt.HKDF+EverCrypt.HMAC+EverCrypt.Hash+EverCrypt.Hash.Incremental=*[rename=EverCrypt] \
+	  -library EverCrypt,EverCrypt.* \
+	  -add-include '<inttypes.h>' \
+	  -add-include '<stdbool.h>' \
+	  -add-include '<kremlin/internal/types.h>' \
+	  -skip-compilation \
+	  -tmpdir $(dir $@) \
+	  $^
 
 # Auto-generates a single C test file.
 .PRECIOUS: dist/test/c/%.c
@@ -386,8 +432,9 @@ dist/test/c/%.c: $(ALL_KRML_FILES)
 # C Compilation (recursive make invocation relying on KreMLin-generated Makefile) #
 ###################################################################################
 
-compile-%: dist/%/Makefile.basic
-	$(MAKE) -C $(dir $<) -f $(notdir $<)
+compile-%: dist/Makefile dist/%/Makefile.basic
+	cp $< dist/$*/
+	$(MAKE) -C dist/$*
 
 
 ###########
