@@ -417,27 +417,28 @@ procedure {:quick} {:verify true} loop6x_round9(
     ghost init5:quad32
     )
     lets
-//      inp @= rdi; outp @= rsi; len @= rdx; key @= rcx; Xip @= r9;
-        key @= rcx; ivp @= r8;
-        T1 @= xmm1; T2 @= xmm2; Hkey @= xmm3;
+//      outp @= rsi; len @= rdx; key @= rcx; Xip @= r9;
+        inp @= rdi; key @= rcx; ivp @= r8;
+        Ii @= xmm0; T1 @= xmm1; T2 @= xmm2; Hkey @= xmm3;
+        Z1 @= xmm5; Z2 @= xmm6; Z3 @= xmm7;
         inout0 @= xmm9; inout1 @= xmm10; inout2 @= xmm11; inout3 @= xmm12;
         inout4 @= xmm13; inout5 @= xmm14; rndkey @= xmm15;
 //      counter @= rbx; rounds @= rbp; ret @= r10; constp @= r11; in0 @= r14; end0 @= r15;
-        in0 @= r14; 
+        //in0 @= r14; 
 
     reads
-        key; ivp; in0;
+        key; ivp; inp;
         mem; memTaint;
 
     modifies
         r12; r13; 
-        T1; T2; Hkey; inout0; inout1; inout2; inout3; inout4; inout5; rndkey;
+        Ii; T1; T2; Hkey; Z1; Z2; Z3; inout0; inout1; inout2; inout3; inout4; inout5; rndkey;
         efl;
 
     requires
         // Valid ptrs and buffers
         validDstAddrs128(mem, ivp, iv_b, 1, memTaint, Secret);
-        validSrcAddrs128(mem, in0, in_b, 1, memTaint, Secret);
+        validSrcAddrs128(mem, inp, in_b, 6, memTaint, Secret);
 
         // AES reqs
         aes_reqs(alg, key_words, round_keys, keys_b, key, mem, memTaint);
@@ -460,13 +461,13 @@ procedure {:quick} {:verify true} loop6x_round9(
         inout4 == rounds_opaque(init4, round_keys, 9);
         inout5 == rounds_opaque(init5, round_keys, 9);
 
-//        let rk := round_keys[10];
-//        T2   == quad32_xor(rk, buffer_read128(in_b, 0, mem));
-//        Ii   == quad32_xor(rk, buffer_read128(in_b, 1, mem));
-//        Z1   == quad32_xor(rk, buffer_read128(in_b, 2, mem));
-//        Z2   == quad32_xor(rk, buffer_read128(in_b, 3, mem));
-//        Z3   == quad32_xor(rk, buffer_read128(in_b, 4, mem));
-//        Hkey == quad32_xor(rk, buffer_read128(in_b, 5, mem));
+        let rk := index(round_keys, 10);
+        T2   == quad32_xor(rk, buffer128_read(in_b, 0, mem));
+        Ii   == quad32_xor(rk, buffer128_read(in_b, 1, mem));
+        Z1   == quad32_xor(rk, buffer128_read(in_b, 2, mem));
+        Z2   == quad32_xor(rk, buffer128_read(in_b, 3, mem));
+        Z3   == quad32_xor(rk, buffer128_read(in_b, 4, mem));
+        Hkey == quad32_xor(rk, buffer128_read(in_b, 5, mem));
 
         T1 == buffer128_read(iv_b, 0, mem);
 {
@@ -476,16 +477,16 @@ procedure {:quick} {:verify true} loop6x_round9(
 
     VAESNI_enc(inout0, inout0, rndkey);
     VAESNI_enc(inout1, inout1, rndkey);
-    //VPxor(T2, T1, inp+0);
+    VPxor_buffer(T2, T1, inp, 0x00, Secret, in_b, 0);
     VAESNI_enc(inout2, inout2, rndkey);
-    //VPxor(Ii, T1, inp+0x10);
+    VPxor_buffer(Ii, T1, inp, 0x10, Secret, in_b, 1);
     VAESNI_enc(inout3, inout3, rndkey);
-    //VPxor(Z1, T1, inp+0x20);
+    VPxor_buffer(Z1, T1, inp, 0x20, Secret, in_b, 2);
     VAESNI_enc(inout4, inout4, rndkey);
-    //VPxor(Z2, T1, inp+0x30);
+    VPxor_buffer(Z2, T1, inp, 0x30, Secret, in_b, 3);
     VAESNI_enc(inout5, inout5, rndkey);
-    //VPxor(Z3, T1, inp+0x40);
-    //VPxor(Hkey, T1, inp+0x50);
+    VPxor_buffer(Z3, T1, inp, 0x40, Secret, in_b, 4);
+    VPxor_buffer(Hkey, T1, inp, 0x50, Secret, in_b, 5);
 
     Load128_buffer(T1, ivp, 0, Secret, iv_b, 0); // # load next counter value
 
