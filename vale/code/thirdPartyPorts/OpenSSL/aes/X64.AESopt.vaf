@@ -501,7 +501,6 @@ procedure {:quick} load_one_msb()
     reveal insert_nat64;
 }
 
-/*
 procedure {:quick} {:verify true} loop6x_final(
     inline alg:algorithm,  
     ghost iv_b:buffer128,
@@ -556,6 +555,7 @@ procedure {:quick} {:verify true} loop6x_final(
         validDstAddrs128(mem, rsp, stack_b, 8, memTaint, Secret);
          inp + 0x60 < pow2_64;
         outp + 0x60 < pow2_64;
+        buffers_disjoint128(stack_b, keys_b);
 
         // AES reqs
         aes_reqs(alg, key_words, round_keys, keys_b, key, mem, memTaint);
@@ -637,10 +637,6 @@ procedure {:quick} {:verify true} loop6x_final(
     finish_cipher_opt(alg, ctr3, plain3, init3, old(inout3), inout3, round_keys);
     finish_cipher_opt(alg, ctr4, plain4, init4, old(inout4), inout4, round_keys);
     finish_cipher_opt(alg, ctr5, plain5, init5, old(inout5), inout5, round_keys);
-//    assert {:quick_type} length(round_keys) == nr(alg) + 1; //11;
-//    //assert old(inout0) == rounds_opaque(quad32_xor(ctr0, index(round_keys,0)), round_keys, 9);
-//    assert length(round_keys) == nr(alg) + 1;
-//    assert inout0 == quad32_xor(plain0, cipher_opaque(alg, ctr0, round_keys));
     finish_aes_encrypt_le(alg, ctr0, key_words);
     finish_aes_encrypt_le(alg, ctr1, key_words);
     finish_aes_encrypt_le(alg, ctr2, key_words);
@@ -648,15 +644,9 @@ procedure {:quick} {:verify true} loop6x_final(
     finish_aes_encrypt_le(alg, ctr4, key_words);
     finish_aes_encrypt_le(alg, ctr5, key_words);
 
-    //assert cipher_opaque(alg, ctr0, round_keys) == aes_encrypt_le(alg, key_words, ctr0);
-//    assert {:quick_type} length(round_keys) == nr(alg) + 1; //11;
-//    assert {:quick_type} is_aes_key_LE(alg, key_words);
-//    assert inout0 == quad32_xor(plain0, aes_encrypt_le(alg, key_words, ctr0));
-
     lemma_reverse_bytes64(inb, old(buffer128_read(stack_b, 7, mem)), buffer128_read(stack_b, 7, mem));
 
 }
-*/
 
 procedure {:quick} loop6x(
     inline alg:algorithm,  
