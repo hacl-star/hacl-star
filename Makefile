@@ -153,10 +153,6 @@ VALE_FSTAR_FLAGS=$(VALE_FSTAR_FLAGS_NOSMT) \
   --smtencoding.elim_box true --smtencoding.l_arith_repr native \
   --smtencoding.nl_arith_repr wrapped
 
-# Non-Vale files get --cmi. Overridden below for vale/*.
-%.checked: \
-  FSTAR_FLAGS=--cmi
-
 # By default Vale files don't use two phase tc
 $(HACL_HOME)/vale/%.checked: \
   FSTAR_FLAGS=$(VALE_FSTAR_FLAGS) --use_two_phase_tc false

@@ -54,7 +54,7 @@ OUTPUT_DIR = .extracted
 FSTAR_INCLUDES = $(addprefix --include ,$(INCLUDES))
 
 FSTAR_NO_FLAGS = $(FSTAR_HOME)/bin/fstar.exe --use_hints --record_hints --use_hint_hashes \
-  --odir $(OUTPUT_DIR) --cache_checked_modules $(FSTAR_INCLUDES) \
+  --odir $(OUTPUT_DIR) --cache_checked_modules $(FSTAR_INCLUDES) --cmi \
   --already_cached 'FStar LowStar C' --warn_error '@247'
 
 FSTAR = $(FSTAR_NO_FLAGS) $(OTHERFLAGS)
