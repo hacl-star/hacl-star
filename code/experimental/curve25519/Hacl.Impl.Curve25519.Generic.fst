@@ -10,6 +10,7 @@ open Lib.ByteBuffer
 open Hacl.Impl.Curve25519.Fields
 
 include Hacl.Impl.Curve25519.Finv
+include Hacl.Impl.Curve25519.AddAndDouble
 
 module ST = FStar.HyperStack.ST
 
@@ -21,36 +22,11 @@ module S = Spec.Curve25519
 module BSeq = Lib.ByteSequence
 module LSeq = Lib.Sequence
 
-#set-options "--z3rlimit 50 --max_fuel 2 --max_ifuel 2"
+#set-options "--z3rlimit 50 --max_fuel 2"
 //#set-options "--debug Hacl.Impl.Curve25519.Generic --debug_level ExtractNorm"
 
 inline_for_extraction
 let scalar = lbuffer uint8 32ul
-inline_for_extraction
-let point (s:field_spec) = lbuffer (limb s) (nlimb s +! nlimb s)
-
-(* NEEDED ONLY FOR WRAPPERS *)
-inline_for_extraction
-let point26 = lbuffer uint64 20ul
-inline_for_extraction
-let point51 = lbuffer uint64 10ul
-inline_for_extraction
-let point64 = lbuffer uint64 8ul
-(* NEEDED ONLY FOR WRAPPERS *)
-
-let get_x #s (p:point s) = gsub p 0ul (nlimb s)
-let get_z #s (p:point s) = gsub p (nlimb s) (nlimb s)
-
-let fget_x (#s:field_spec) (h:mem) (p:point s) = feval h (gsub p 0ul (nlimb s))
-let fget_z (#s:field_spec) (h:mem) (p:point s) = feval h (gsub p (nlimb s) (nlimb s))
-let fget_xz (#s:field_spec) (h:mem) (p:point s) = fget_x h p, fget_z h p
-
-val state_inv_t:#s:field_spec -> h:mem -> f:felem s -> Type0
-let state_inv_t #s h f =
-  match s with
-  | M26 -> True
-  | M51 -> F51.mul_inv_t h f
-  | M64 -> True
 
 inline_for_extraction
 val scalar_bit:
@@ -154,185 +130,6 @@ let encode_point #s o i =
   | M26 -> encode_point_26 o i
   | M51 -> encode_point_51 o i
   | M64 -> encode_point_64 o i
-(* WRAPPER to Prevent Inlining *)
-
-
-inline_for_extraction
-val point_add_and_double_:
-    #s:field_spec
-  -> q:point s
-  -> nq:point s
-  -> nq_p1:point s
-  -> tmp1:lbuffer (limb s) (4ul *. nlimb s)
-  -> tmp2:felem_wide2 s
-  -> Stack unit
-    (requires fun h0 -> live h0 q /\ live h0 nq /\ live h0 nq_p1 /\ live h0 tmp1 /\ live h0 tmp2)
-    (ensures  fun h0 _ h1 ->
-      modifies (loc nq |+| loc nq_p1 |+| loc tmp1 |+| loc tmp2) h0 h1 /\
-     (let p2, p3 = S.add_and_double (fget_xz h0 q) (fget_xz h0 nq) (fget_xz h0 nq_p1) in
-      fget_xz h1 nq == p2 /\ fget_xz h1 nq_p1 == p3))
-let point_add_and_double_ #s q nq nq_p1 tmp1 tmp2 =
-  let x1 = sub q 0ul (nlimb s) in
-  let z1 = sub q (nlimb s) (nlimb s) in
-  let x2 = sub nq 0ul (nlimb s) in
-  let z2 = sub nq (nlimb s) (nlimb s) in
-  let x3 = sub nq_p1 0ul (nlimb s) in
-  let z3 = sub nq_p1 (nlimb s) (nlimb s) in
-  let a : felem s = sub tmp1 0ul (nlimb s) in
-  let b : felem s = sub tmp1 (nlimb s) (nlimb s) in
-  let d : felem s = sub tmp1 (2ul *. nlimb s) (nlimb s) in
-  let c : felem s = sub tmp1 (3ul *. nlimb s) (nlimb s) in
-  let ab : felem2 s = sub tmp1 0ul (2ul *. nlimb s) in
-  let dc : felem2 s = sub tmp1 (2ul *. nlimb s) (2ul *. nlimb s) in
-  admit();
-  fadd a x2 z2; // a = x2 + z2
-  fsub b x2 z2; // b = x2 - z2
-  fadd c x3 z3; // c = x3 + z3
-  fsub d x3 z3; // d = x3 - z3
-
-  (* CAN RUN IN PARALLEL *)
-  //fmul d d a;   // d = da = d * a
-  //fmul c c b;   // c = cb = c * b
-  fmul2 dc dc ab tmp2;   // d|c = d*a|c*b
-
-  fadd x3 d c;  // x3 = da + cb
-  fsub z3 d c;  // z3 = da - cb
-
-  (* CAN RUN IN PARALLEL *)
-  //fsqr d a;     // d = aa = a^2
-  //fsqr c b;     // c = bb = b^2
-  fsqr2 dc ab tmp2;     // d|c = aa | bb
-
-  //moving the following line gave me a 2k speedup.
-  (* CAN RUN IN PARALLEL *)
-  //fsqr x3 x3;   // x3 = (da + cb) ^ 2
-  //fsqr z3 z3;   // z3 = (da - cb) ^ 2
-  fsqr2 nq_p1 nq_p1 tmp2;   // x3|z3 = x3*x3|z3*z3
-
-  copy_felem a c;                           // a = bb
-  fsub c d c;   // c = e = aa - bb
-  fmul1 b c (u64 121665); // b = e * 121665
-  fadd b b d;   // b = (e * 121665) + aa
-
-  (* CAN RUN IN PARALLEL *)
-  //fmul x2 d a;  // x2 = aa * bb
-  //fmul z2 c b;  // z2 = e * (aa + (e * 121665))
-  fmul2 nq dc ab tmp2;  // x2|z2 = aa * bb | e * (aa + (e * 121665))
-  // moving the following line gives a 2k speedup
-  fmul z3 z3 x1 tmp2 // z3 = x1 * (da - cb) ^ 2
-
-(* WRAPPER to Prevent Inlining *)
-[@CInline]
-let point_add_and_double_26 (q:point26) (nq:point26) (nq_p1:point26) tmp1 tmp2 = point_add_and_double_ #M26 q nq nq_p1 tmp1 tmp2
-[@CInline]
-let point_add_and_double_51 (q:point51) (nq:point51) (nq_p1:point51) tmp1 tmp2 = point_add_and_double_ #M51 q nq nq_p1 tmp1 tmp2
-[@CInline]
-let point_add_and_double_64 (q:point64) (nq:point64) (nq_p1:point64) tmp1 tmp2 = point_add_and_double_ #M64 q nq nq_p1 tmp1 tmp2
-
-inline_for_extraction
-val point_add_and_double:
-    #s:field_spec
-  -> q:point s
-  -> nq: point s
-  -> nq_p1:point s
-  -> tmp1:lbuffer (limb s) (4ul *. nlimb s)
-  -> tmp2:felem_wide2 s
-  -> Stack unit
-    (requires fun h0 -> live h0 q /\ live h0 nq /\ live h0 nq_p1 /\ live h0 tmp1 /\ live h0 tmp2)
-    (ensures fun h0 _ h1 ->
-      modifies (loc nq |+| loc nq_p1 |+| loc tmp1 |+| loc tmp2) h0 h1 /\
-     (let p2, p3 = S.add_and_double (fget_xz h0 q) (fget_xz h0 nq) (fget_xz h0 nq_p1) in
-      fget_xz h1 nq == p2 /\ fget_xz h1 nq_p1 == p3))
-let point_add_and_double #s q nq nq_p1 tmp1 tmp2 =
-  match s with
-  | M26 -> point_add_and_double_26 q nq nq_p1 tmp1 tmp2
-  | M51 -> point_add_and_double_51 q nq nq_p1 tmp1 tmp2
-  | M64 -> point_add_and_double_64 q nq nq_p1 tmp1 tmp2
-(* WRAPPER to Prevent Inlining *)
-
-inline_for_extraction
-val point_double_:
-    #s:field_spec{s == M51 \/ s == M64}
-  -> nq:point s
-  -> tmp1:lbuffer (limb s) (4ul *. nlimb s)
-  -> tmp2:felem_wide2 s
-  -> Stack unit
-    (requires fun h0 ->
-      live h0 nq /\ live h0 tmp1 /\ live h0 tmp2 /\
-      disjoint nq tmp1 /\ disjoint nq tmp2 /\ disjoint tmp1 tmp2 /\
-      state_inv_t h0 (get_x nq) /\
-      state_inv_t h0 (get_z nq))
-    (ensures  fun h0 _ h1 ->
-      modifies (loc nq |+| loc tmp1 |+| loc tmp2) h0 h1 /\
-      state_inv_t h0 (get_x nq) /\
-      state_inv_t h0 (get_z nq) /\
-      fget_xz h1 nq == S.double (fget_xz h0 nq))
-let point_double_ #s nq tmp1 tmp2 =
-  let x2 = sub nq 0ul (nlimb s) in
-  let z2 = sub nq (nlimb s) (nlimb s) in
-
-  let a : felem s = sub tmp1 0ul (nlimb s) in
-  let b : felem s = sub tmp1 (nlimb s) (nlimb s) in
-  let d : felem s = sub tmp1 (2ul *. nlimb s) (nlimb s) in
-  let c : felem s = sub tmp1 (3ul *. nlimb s) (nlimb s) in
-
-  let ab : felem2 s = sub tmp1 0ul (2ul *. nlimb s) in
-  let dc : felem2 s = sub tmp1 (2ul *. nlimb s) (2ul *. nlimb s) in
-  let h0 = ST.get () in
-  assert (gsub nq 0ul (nlimb s) == x2);
-  assert (gsub nq (nlimb s) (nlimb s) == z2);
-  assert (gsub ab 0ul (nlimb s) == a);
-  assert (gsub ab (nlimb s) (nlimb s) == b);
-  assert (gsub dc 0ul (nlimb s) == d);
-  assert (gsub dc (nlimb s) (nlimb s) == c);
-
-  fadd a x2 z2; // a = x2 + z2
-  fsub b x2 z2; // b = x2 - z2
-
-  (* CAN RUN IN PARALLEL *)
-  //fsqr d a;     // d = aa = a^2
-  //fsqr c b;     // c = bb = b^2
-  fsqr2 dc ab tmp2;     // d|c = aa | bb
-  copy_felem a c;                           // a = bb
-  fsub c d c;   // c = e = aa - bb
-  fmul1 b c (u64 121665); // b = e * 121665
-  fadd b b d;   // b = (e * 121665) + aa
-
-  (* CAN RUN IN PARALLEL *)
-  //fmul x2 d a;  // x2 = aa * bb
-  //fmul z2 c b;  // z2 = e * (aa + (e * 121665))
-  fmul2 nq dc ab tmp2  // x2|z2 = aa * bb | e * (aa + (e * 121665))
-
-(* WRAPPER to Prevent Inlining *)
-[@CInline]
-let point_double_26 (nq:point26) tmp1 tmp2 = admit(); point_double_ #M26 nq  tmp1 tmp2
-[@CInline]
-let point_double_51 (nq:point51) tmp1 tmp2 = point_double_ #M51 nq tmp1 tmp2
-[@CInline]
-let point_double_64 (nq:point64) tmp1 tmp2 = point_double_ #M64 nq tmp1 tmp2
-
-inline_for_extraction
-val point_double:
-    #s:field_spec
-  -> nq: point s
-  -> tmp1:lbuffer (limb s) (4ul *. nlimb s)
-  -> tmp2:felem_wide2 s
-  -> Stack unit
-    (requires fun h0 ->
-      live h0 nq /\ live h0 tmp1 /\ live h0 tmp2 /\
-      disjoint nq tmp1 /\ disjoint nq tmp2 /\ disjoint tmp1 tmp2 /\
-      state_inv_t h0 (get_x nq) /\
-      state_inv_t h0 (get_z nq))
-    (ensures  fun h0 _ h1 ->
-      modifies (loc nq |+| loc tmp1 |+| loc tmp2) h0 h1 /\
-      state_inv_t h0 (get_x nq) /\
-      state_inv_t h0 (get_z nq) /\
-      fget_xz h1 nq == S.double (fget_xz h0 nq))
-let point_double #s nq tmp1 tmp2 =
-  match s with
-  | M26 -> point_double_26 nq tmp1 tmp2
-  | M51 -> point_double_51 nq tmp1 tmp2
-  | M64 -> point_double_64 nq tmp1 tmp2
 (* WRAPPER to Prevent Inlining *)
 
 inline_for_extraction

@@ -65,10 +65,14 @@ let nwide (s:field_spec) : size_t =
   | M51 -> 5ul
   | M64 -> 8ul
 
-type felem (s:field_spec) = lbuffer (limb s) (nlimb s)
-type felem2 (s:field_spec) = lbuffer (limb s) (nlimb s +. nlimb s)
-type felem_wide (s:field_spec) = lbuffer (wide s) (nwide s)
-type felem_wide2 (s:field_spec) = lbuffer (wide s) (nwide s +. nwide s)
+inline_for_extraction
+let felem (s:field_spec) = lbuffer (limb s) (nlimb s)
+inline_for_extraction
+let felem2 (s:field_spec) = lbuffer (limb s) (nlimb s +. nlimb s)
+inline_for_extraction
+let felem_wide (s:field_spec) = lbuffer (wide s) (nwide s)
+inline_for_extraction
+let felem_wide2 (s:field_spec) = lbuffer (wide s) (nwide s +. nwide s)
 
 noextract
 val as_nat: #s:field_spec -> h:mem -> e:felem s -> GTot nat
