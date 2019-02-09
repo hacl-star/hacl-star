@@ -110,10 +110,33 @@ procedure{:instruction Ins(TS.TaintedIns(tuple(S.Pxor(dst, src)), Public))}{:qui
 {
 }
 
-procedure{:instruction Ins(TS.TaintedIns(tuple(S.VPxor(dst, src1, src2)), Public))}{:quick exportOnly}{:public} VPxor(inout dst:xmm, src1:xmm, src2:xmm)
+procedure{:instruction Ins(TS.TaintedIns(tuple(S.VPxor(dst, src1, Mov128Xmm(src2))), Public))}{:quick exportOnly}{:public} VPxor(inout dst:xmm, src1:xmm, src2:xmm)
   ensures
     dst == old(quad32_xor(src1, src2));
 {
+}
+
+procedure{:instruction Ins(TS.TaintedIns(tuple(S.VPxor(dst, src1, Mov128Mem(MReg(get_reg(src2), offset)))), t))}{:quick exportOnly}{:public} 
+   VPxor_buffer(out dst:xmm, 
+                src1:xmm, 
+                src2:reg_opr64,
+                inline offset:int,
+                inline t:taint,
+                ghost b:buffer128,
+                ghost index:int)
+  reads
+    mem; memTaint;
+  requires
+    valid_src_addr(mem, b, index);
+    valid_taint_buf128(b, mem, memTaint, t);
+    src2 + offset == buffer_addr(b, mem) + 16 * index;
+  ensures
+    dst == old(quad32_xor(src1, buffer128_read(b, index, mem)));
+    valid_taint_buf128(b, mem, memTaint, t);  // REVIEW: Why is this needed?
+{
+    low_lemma_valid_mem128(b, #nat(index), mem);
+    low_lemma_load_mem128(b, #nat(index), mem);
+    lemma_valid_taint128(b, #memTaint_t(memTaint), mem, #nat(index), t);
 }
 
 procedure{:instruction Ins(TS.TaintedIns(tuple(S.Pslld(dst, amt)), Public))}{:quick exportOnly}{:public} Pslld(inout dst:xmm, inline amt:int)
@@ -376,7 +399,7 @@ procedure{:instruction Ins(TS.TaintedIns(tuple(S.MOVDQU(Mov128Xmm(dst), Mov128Me
         src + offset == buffer_addr(b, mem) + 16 * index;
     ensures
         dst == buffer128_read(b, index, mem);
-        valid_taint_buf128(b, mem, memTaint, t);
+        valid_taint_buf128(b, mem, memTaint, t);  // REVIEW: Why is this needed?
 {
     low_lemma_valid_mem128(b, #nat(index), mem);
     low_lemma_load_mem128(b, #nat(index), mem);

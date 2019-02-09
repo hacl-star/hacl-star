@@ -42,7 +42,7 @@ type ins:eqtype =
   | Paddd      : dst:xmm -> src:xmm -> ins
   |VPaddd      : dst:xmm -> src1:xmm -> src2:xmm -> ins
   | Pxor       : dst:xmm -> src:xmm -> ins
-  |VPxor       : dst:xmm -> src1:xmm -> src2:xmm -> ins
+  |VPxor       : dst:xmm -> src1:xmm -> src2:mov128_op -> ins
   | Pslld      : dst:xmm -> amt:int -> ins
   | Psrld      : dst:xmm -> amt:int -> ins
   | Psrldq     : dst:xmm -> amt:int -> ins
@@ -632,7 +632,7 @@ let eval_ins (ins:ins) : st unit =
     update_xmm_preserve_flags dst (quad32_xor (eval_xmm dst s) (eval_xmm src s))
 
   |VPxor dst src1 src2 ->
-    update_xmm_preserve_flags dst (quad32_xor (eval_xmm src1 s) (eval_xmm src2 s))
+    update_xmm_preserve_flags dst (quad32_xor (eval_xmm src1 s) (eval_mov128_op src2 s))
 
   | Pslld dst amt ->
     check_imm (0 <= amt && amt < 32);;

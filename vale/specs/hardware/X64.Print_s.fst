@@ -170,6 +170,9 @@ let print_ins (ins:tainted_ins) (p:printer) =
   let print_xmms_3 (dst src1 src2:xmm) =
     print_pair (print_xmm dst p) (print_xmms src1 src2)
   in
+  let print_vpxor (dst src1:xmm) (src2:mov128_op) =
+    print_pair (print_xmm dst p) (print_pair (print_xmm src1 p) (print_mov128_op src2 p))
+  in
   let ins = ins.i in
   match ins with
   | Cpuid -> "  cpuid"
@@ -204,7 +207,7 @@ let print_ins (ins:tainted_ins) (p:printer) =
   | Paddd dst src                -> "  paddd "      ^ print_xmms dst src
   |VPaddd dst src1 src2          -> "  vpaddd "     ^ print_xmms_3 dst src1 src2
   | Pxor dst src                 -> "  pxor "       ^ print_xmms dst src
-  |VPxor dst src1 src2           -> "  vpxor "      ^ print_xmms_3 dst src1 src2
+  |VPxor dst src1 src2           -> "  vpxor "      ^ print_vpxor dst src1 src2
   | Pslld dst amt                -> "  pslld "      ^ print_pair (print_xmm dst p) (print_imm8 amt p)
   | Psrld dst amt                -> "  psrld "      ^ print_pair (print_xmm dst p) (print_imm8 amt p)
   | Psrldq dst amt               -> "  psrldq "     ^ print_pair (print_xmm dst p) (print_imm8 amt p)
