@@ -37,7 +37,8 @@ all: compile-compact compile-generic compile-compact-msvc \
 # Any file in specs/tests is taken to contain a `test` function.
 # TODO: test-merkle-tree, test-evercrypt
 test: test-c test-ml
-test-c: $(subst .,_,$(patsubst %.fst,test-c-%,$(notdir $(wildcard code/tests/*.fst))))
+test-c: $(subst .,_,$(patsubst %.fst,test-c-%,$(notdir $(wildcard code/tests/*.fst)))) \
+  test-c-Test test-c-merkle_tree_test
 test-ml: $(subst .,_,$(patsubst %.fst,test-ml-%,$(notdir $(wildcard specs/tests/*.fst))))
 
 ci:
@@ -325,6 +326,8 @@ DEFAULT_FLAGS		=\
   -no-prefix 'Sha_update_bytes_stdcall' \
   -no-prefix 'Check_sha_stdcall' \
   -no-prefix 'Check_aesni_stdcall' \
+  -no-prefix 'MerkleTree.New.Low' \
+  -no-prefix 'MerkleTree.New.Low.Serialization' \
   -fparentheses -fno-shadow -fcurly-braces
 
 COMPACT_FLAGS	=\
@@ -429,11 +432,12 @@ dist/test/c/%.c: $(ALL_KRML_FILES)
 	$(KRML) \
 	  -tmpdir $(dir $@) -skip-compilation \
 	  -no-prefix $(subst _,.,$*) \
-	  -library Hacl,Lib \
+	  -library Hacl,Lib,EverCrypt,EverCrypt.* \
 	  -fparentheses -fcurly-braces -fno-shadow \
 	  -minimal -add-include '"kremlib.h"' \
-	  -bundle '*[rename=$*]' $^
+	  -bundle '*[rename=$*]' $(KRML_EXTRA) $^
 
+dist/test/c/Test.c: KRML_EXTRA=-add-include '"kremlin/internal/compat.h"'
 
 ###################################################################################
 # C Compilation (recursive make invocation relying on KreMLin-generated Makefile) #
@@ -448,16 +452,29 @@ compile-%: dist/Makefile dist/%/Makefile.basic
 # C tests #
 ###########
 
+# Backwards-compat, remove
+ifneq (,$(MLCRYPTO_HOME))
+OPENSSL_HOME 	= $(MLCRYPTO_HOME)/openssl
+endif
+
+dist/test/c/merkle_tree_test.c: secure_api/merkle_tree/test/merkle_tree_test.c
+	mkdir -p $(dir $@)
+	cp $< $(patsubst %.c,%.h,$<) $(dir $@)
+
+# FIXME there's a kremlin error that generates a void* -- can't use -Werror
 .PRECIOUS: dist/test/c/%.exe
 dist/test/c/%.exe: dist/test/c/%.c compile-generic
 	# Linking with full kremlib since tests may use TestLib, etc.
-	$(CC) -Wall -Wextra -Werror -Wno-unused-parameter $< -o $@ dist/generic/libevercrypt.a \
-	  -I $(dir $@) -I $(KREMLIN_HOME)/include \
+	$(CC) -Wall -Wextra -Wno-infinite-recursion -Wno-int-conversion -Wno-unused-parameter \
+	  -I $(dir $@) -I $(KREMLIN_HOME)/include -I $(OPENSSL_HOME)/include -I dist/generic \
+	  -L$(OPENSSL_HOME) -lcrypto \
+	  $< -o $@ \
+	  dist/generic/libevercrypt.a \
 	  $(KREMLIN_HOME)/kremlib/dist/generic/libkremlib.a
 
 test-c-%: dist/test/c/%.exe
-	$<
-
+	LD_LIBRARY_PATH=$(OPENSSL_HOME) DYLD_LIBRARY_PATH=$(OPENSSL_HOME) \
+	  PATH=$(OPENSSL_HOME):$(PATH) $<
 
 #######################
 # OCaml tests (specs) #
