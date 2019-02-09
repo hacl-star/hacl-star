@@ -24,7 +24,7 @@
         "typing_FStar.Buffer.as_seq"
       ],
       0,
-      "51c52a63709806205bd7383f2298f568"
+      "8636d2ccbefa911605e9dca82d1224d7"
     ],
     [
       "Hacl.Bignum.AddAndMultiply.add_and_multiply",
@@ -32,8 +32,9 @@
       0,
       1,
       [
-        "@MaxIFuel_assumption", "@query", "assumption_Prims.HasEq_int",
-        "b2t_def", "eq2-interp", "equation_FStar.Buffer.as_seq",
+        "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565", "b2t_def",
+        "eq2-interp", "equation_FStar.Buffer.as_seq",
         "equation_FStar.Buffer.buffer", "equation_FStar.Buffer.equal",
         "equation_FStar.Buffer.live",
         "equation_FStar.Monotonic.HyperStack.contains",
@@ -42,7 +43,7 @@
         "equation_Hacl.Bignum.Constants.limb",
         "equation_Hacl.Bignum.Constants.word_size",
         "equation_Hacl.Bignum.Fsum.red_c", "equation_Hacl.Bignum.Limb.n",
-        "equation_Hacl.Bignum.Limb.v",
+        "equation_Hacl.Bignum.Limb.t", "equation_Hacl.Bignum.Limb.v",
         "equation_Hacl.Bignum.Parameters.felem",
         "equation_Hacl.Bignum.Parameters.len",
         "equation_Hacl.Bignum.Parameters.limb",
@@ -59,16 +60,14 @@
         "equation_Hacl.Spec.Bignum.Fsum.red", "equation_Prims.nat",
         "equation_Prims.pos", "fuel_guarded_inversion_FStar.Buffer._buffer",
         "function_token_typing_FStar.UInt64.t",
-        "function_token_typing_Hacl.Spec.Bignum.AddAndMultiply.p44",
-        "function_token_typing_Hacl.Spec.Bignum.AddAndMultiply.p45",
-        "function_token_typing_Hacl.Spec.Bignum.AddAndMultiply.p46",
+        "function_token_typing_Prims.__cache_version_number__",
         "int_inversion", "int_typing",
         "lemma_FStar.Buffer.lemma_modifies_1_trans",
         "lemma_FStar.Buffer.no_upd_lemma_1",
         "lemma_FStar.HyperStack.ST.lemma_equal_domains_trans",
         "lemma_Hacl.Bignum.Parameters.lemma_limb_injectivity",
         "primitive_Prims.op_Addition", "primitive_Prims.op_AmpAmp",
-        "primitive_Prims.op_Equality", "primitive_Prims.op_Subtraction",
+        "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_FStar.Buffer_Tm_refine_ac61996218e7c5b51c85527152e93166",
@@ -84,10 +83,13 @@
         "refinement_interpretation_Hacl.Spec.Bignum.Fsum_Tm_refine_dc0387dafb22d8c2d6fbfe233dc11940",
         "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
         "typing_FStar.Buffer.as_seq", "typing_FStar.Seq.Base.index",
+        "typing_Hacl.Spec.Bignum.AddAndMultiply.p44",
+        "typing_Hacl.Spec.Bignum.AddAndMultiply.p45",
+        "typing_Hacl.Spec.Bignum.AddAndMultiply.p46",
         "typing_Hacl.Spec.Bignum.Fsum.fsum_spec"
       ],
       0,
-      "64c5bc01da4b5843c603938d286bd9df"
+      "c9c211004f798b3b7b132f0aadc44921"
     ]
   ]
 ]

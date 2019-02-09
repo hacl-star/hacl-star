@@ -44,7 +44,7 @@
         "typing_X64.Vale.StateLemmas.state_to_S"
       ],
       0,
-      "9b9b51695b7d96461428c68c52427bf6"
+      "e6910808c8c6f1760d8296ae217ce1a4"
     ],
     [
       "X64.Vale.Lemmas.ensure_valid_ocmp",
@@ -118,7 +118,7 @@
         "typing_X64.Vale.StateLemmas.state_to_S", "unit_typing"
       ],
       0,
-      "22a551f514e9d5b9ebd1ea6ab997f44c"
+      "8d9e8accfd0daa3a204dc4ad66c4ef7c"
     ],
     [
       "X64.Vale.Lemmas.lemma_cmp_ne",
@@ -126,15 +126,18 @@
       1,
       0,
       [
-        "@MaxIFuel_assumption", "@query", "equation_Prims.eqtype",
-        "equation_Prims.nat", "equation_Types_s.twobits",
+        "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565",
+        "equation_Prims.eqtype", "equation_Prims.nat",
         "equation_Words_s.nat64", "equation_Words_s.natN",
-        "function_token_typing_Types_s.twobits",
+        "function_token_typing_Prims.__cache_version_number__",
+        "function_token_typing_Prims.int",
         "haseqFStar.Seq.Base_Tm_refine_5514fbe9e08dfda40f950a7b9f1b2b98",
+        "haseqPrims_Tm_refine_a4038d5aed1633b5ecbb4e499b1c66ad",
         "refinement_interpretation_Prims_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "bb7f1a8419f35bf6c081e5120b094d93"
+      "0ce28b4b90e8c3453b6ad37ab1e30297"
     ],
     [
       "X64.Vale.Lemmas.lemma_merge_total",
@@ -143,7 +146,7 @@
       0,
       [ "@query" ],
       0,
-      "330181f223e004d8bc67f3f37ee0adc3"
+      "021ced2d556fb2decd2ec02c60e9c8e8"
     ],
     [
       "X64.Vale.Lemmas.lemma_whileMerge_total",
@@ -152,7 +155,7 @@
       0,
       [ "@query" ],
       0,
-      "cf2f7ec2e8a2f3f1954d49c7dfa7b0f7"
+      "a32b44da9d39ca48c30f2502b049e857"
     ]
   ]
 ]

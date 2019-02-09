@@ -8,7 +8,7 @@
       1,
       [ "@query", "assumption_Prims.HasEq_int" ],
       0,
-      "36ececd3a85ad57be724c10b8ae01137"
+      "7cb3588023333d5e2c17217393440975"
     ],
     [
       "Hacl.SecureAPI.Chacha20.chacha20_core",
@@ -35,7 +35,7 @@
         "refinement_interpretation_Hacl.SecureAPI.Chacha20_Tm_refine_e0f4be5bd72b4187a1ad66a3d3f712e3"
       ],
       0,
-      "6ec88cddf1530d7b295fe6118653a0cb"
+      "7bed4f1c4c0fd3a2447518bc6576e746"
     ],
     [
       "Hacl.SecureAPI.Chacha20.chacha20_stream",
@@ -69,18 +69,14 @@
         "equation_FStar.Monotonic.HyperStack.remove_elt",
         "equation_FStar.Monotonic.HyperStack.unused_in",
         "equation_FStar.UInt.fits", "equation_FStar.UInt.size",
-        "equation_FStar.UInt.uint_t", "equation_FStar.UInt32.n",
-        "equation_Hacl.Impl.Chacha20.h32",
+        "equation_FStar.UInt.uint_t", "equation_Hacl.Impl.Chacha20.h32",
         "equation_Hacl.Impl.Chacha20.state",
         "equation_Hacl.Impl.Chacha20.uint8_p",
         "fuel_guarded_inversion_FStar.Buffer._buffer",
-        "function_token_typing_FStar.Monotonic.Heap.emp",
         "function_token_typing_FStar.Monotonic.Heap.heap",
-        "function_token_typing_FStar.Monotonic.HyperHeap.rid",
-        "function_token_typing_FStar.Monotonic.HyperHeap.root",
-        "function_token_typing_FStar.UInt32.n",
         "function_token_typing_FStar.UInt32.t",
         "function_token_typing_FStar.UInt8.t",
+        "function_token_typing_Prims.__cache_version_number__",
         "lemma_FStar.Buffer.lemma_disjoint_symm",
         "lemma_FStar.Buffer.lemma_equal_domains_2",
         "lemma_FStar.Buffer.lemma_fresh_poppable",
@@ -124,6 +120,9 @@
         "typing_FStar.Heap.trivial_preorder", "typing_FStar.Map.contains",
         "typing_FStar.Map.domain", "typing_FStar.Map.restrict",
         "typing_FStar.Map.sel", "typing_FStar.Monotonic.Heap.contains",
+        "typing_FStar.Monotonic.Heap.emp",
+        "typing_FStar.Monotonic.HyperHeap.rid",
+        "typing_FStar.Monotonic.HyperHeap.root",
         "typing_FStar.Monotonic.HyperStack.__proj__MkRef__item__frame",
         "typing_FStar.Monotonic.HyperStack.as_ref",
         "typing_FStar.Monotonic.HyperStack.get_hmap",
@@ -134,7 +133,7 @@
         "typing_FStar.UInt32.v"
       ],
       0,
-      "8b3ca2a01ea42beaa4781a3e7d355b1e"
+      "b1fb88c15c21ecfe366a302660929f6b"
     ],
     [
       "Hacl.SecureAPI.Chacha20.chacha20_stream_finish",
@@ -146,7 +145,7 @@
         "haseqHacl.Spec.Endianness_Tm_refine_7f014d1f670e5d2ecdc0d7946b4a693d"
       ],
       0,
-      "5f362dedae83576f4e614868186719cd"
+      "bd2fd027dbc785140f0af2d59326f63e"
     ],
     [
       "Hacl.SecureAPI.Chacha20.chacha20_stream_finish",
@@ -221,7 +220,7 @@
         "typing_FStar.Monotonic.HyperStack.get_tip", "typing_FStar.UInt32.v"
       ],
       0,
-      "40e649f8efca5f350396fd56e92ed383"
+      "b6cdd11f696a085b7ee7936263350c7f"
     ],
     [
       "Hacl.SecureAPI.Chacha20.chacha20_stream_finish",
@@ -253,18 +252,14 @@
         "equation_FStar.Monotonic.HyperStack.popped",
         "equation_FStar.Monotonic.HyperStack.remove_elt",
         "equation_FStar.UInt.fits", "equation_FStar.UInt.size",
-        "equation_FStar.UInt.uint_t", "equation_FStar.UInt32.n",
-        "equation_Hacl.Impl.Chacha20.h32",
+        "equation_FStar.UInt.uint_t", "equation_Hacl.Impl.Chacha20.h32",
         "equation_Hacl.Impl.Chacha20.state",
         "equation_Hacl.Impl.Chacha20.uint8_p", "equation_Prims.nat",
         "fuel_guarded_inversion_FStar.Buffer._buffer",
-        "function_token_typing_FStar.Monotonic.Heap.emp",
         "function_token_typing_FStar.Monotonic.Heap.heap",
-        "function_token_typing_FStar.Monotonic.HyperHeap.rid",
-        "function_token_typing_FStar.Monotonic.HyperHeap.root",
-        "function_token_typing_FStar.UInt32.n",
         "function_token_typing_FStar.UInt32.t",
         "function_token_typing_FStar.UInt8.t",
+        "function_token_typing_Prims.__cache_version_number__",
         "lemma_FStar.Buffer.lemma_disjoint_symm",
         "lemma_FStar.Buffer.lemma_equal_domains_2",
         "lemma_FStar.Buffer.lemma_fresh_poppable",
@@ -311,6 +306,9 @@
         "typing_FStar.Map.contains", "typing_FStar.Map.domain",
         "typing_FStar.Map.restrict", "typing_FStar.Map.sel",
         "typing_FStar.Monotonic.Heap.contains",
+        "typing_FStar.Monotonic.Heap.emp",
+        "typing_FStar.Monotonic.HyperHeap.rid",
+        "typing_FStar.Monotonic.HyperHeap.root",
         "typing_FStar.Monotonic.HyperStack.__proj__MkRef__item__frame",
         "typing_FStar.Monotonic.HyperStack.as_ref",
         "typing_FStar.Monotonic.HyperStack.get_hmap",
@@ -321,7 +319,7 @@
         "typing_FStar.UInt32.v"
       ],
       0,
-      "985924759bfaaa76b1aaff61a1dfc43d"
+      "e5fbe9c7c38611a858160a6c1171e0f6"
     ]
   ]
 ]
