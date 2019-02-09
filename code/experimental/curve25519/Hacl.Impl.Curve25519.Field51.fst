@@ -137,13 +137,15 @@ val copy_felem:
       live h f1 /\ live h f2 /\ disjoint f1 f2)
     (ensures  fun h0 _ h1 ->
       modifies (loc f1) h0 h1 /\
-      as_nat h1 f1 == as_nat h0 f2)
+      as_seq h1 f1 == as_seq h0 f2)
 let copy_felem f1 f2 =
   f1.(0ul) <- f2.(0ul);
   f1.(1ul) <- f2.(1ul);
   f1.(2ul) <- f2.(2ul);
   f1.(3ul) <- f2.(3ul);
-  f1.(4ul) <- f2.(4ul)
+  f1.(4ul) <- f2.(4ul);
+  let h1 = ST.get () in
+  LSeq.eq_intro (as_seq h1 f1) (as_seq h1 f2)
 
 #set-options "--max_fuel 0 --max_ifuel 0"
 

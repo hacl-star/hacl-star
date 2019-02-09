@@ -172,13 +172,14 @@ val copy_felem:
   -> f:felem s
   -> f':felem s
   -> Stack unit
-    (requires fun h -> live h f /\ live h f' /\ disjoint f f')
+    (requires fun h ->
+      live h f /\ live h f' /\ disjoint f f')
     (ensures  fun h0 _ h1 ->
       modifies (loc f) h0 h1 /\
-      as_nat h1 f == as_nat h0 f')
+      as_seq h1 f == as_seq h0 f')
 let copy_felem #s f f' =
   match s with
-  | M26 -> F26.copy_felem f f'
+  | M26 -> admit(); F26.copy_felem f f'
   | M51 -> F51.copy_felem f f'
   | M64 -> F64.copy_felem f f'
 
@@ -262,7 +263,8 @@ val fmul:
   -> tmp:felem_wide2 s
   -> Stack unit
     (requires fun h ->
-      live h out /\ live h f1 /\ live h f2 /\ live h tmp /\ fmul_pre h f1 f2)
+      live h out /\ live h f1 /\ live h f2 /\ live h tmp /\
+      disjoint out tmp /\ fmul_pre h f1 f2)
     (ensures fun h0 _ h1 ->
       modifies (loc out |+| loc tmp) h0 h1 /\ fmul_fsqr_post h1 out /\
       feval h1 out == P.fmul (feval h0 f1) (feval h0 f2))
@@ -309,7 +311,8 @@ val fmul2:
   -> tmp:felem_wide2 s
   -> Stack unit
     (requires fun h ->
-      live h out /\ live h f1 /\ live h f2 /\ live h tmp /\ fmul2_pre h f1 f2)
+      live h out /\ live h f1 /\ live h f2 /\ live h tmp /\
+      disjoint out tmp /\ fmul2_pre h f1 f2)
     (ensures  fun h0 _ h1 ->
       modifies (loc out |+| loc tmp) h0 h1 /\ fmul2_fsqr2_post h1 out /\
      (let out0 = gsub out 0ul (nlimb s) in
@@ -343,7 +346,8 @@ val fmul1:
     (requires fun h -> live h out /\ live h f1 /\ fmul1_pre h f1 f2)
     (ensures  fun h0 _ h1 ->
       modifies (loc out) h0 h1 /\ fmul_fsqr_post h1 out /\
-      feval h1 out == (feval h0 f1 * v f2) % P.prime)
+      feval h1 out == P.fmul (feval h0 f1) (v f2))
+//     feval h1 out == (feval h0 f1 * v f2) % P.prime)
 let fmul1 #s out f1 f2 =
   match s with
   | M26 -> admit(); F26.fmul1 out f1 f2
@@ -364,7 +368,9 @@ val fsqr:
   -> f1:felem s
   -> tmp:felem_wide2 s
   -> Stack unit
-    (requires fun h -> live h out /\ live h f1 /\ live h tmp /\ fsqr_pre h f1)
+    (requires fun h ->
+      live h out /\ live h f1 /\ live h tmp /\
+      disjoint out tmp /\ fsqr_pre h f1)
     (ensures  fun h0 _ h1 ->
       modifies (loc out |+| loc tmp) h0 h1 /\ fmul_fsqr_post h1 out /\
       feval h1 out == P.fmul (feval h0 f1) (feval h0 f1))
@@ -392,7 +398,9 @@ val fsqr2:
   -> f:felem2 s
   -> tmp:felem_wide2 s
   -> Stack unit
-    (requires fun h -> live h out /\ live h f /\ live h tmp /\ fsqr2_pre h f)
+    (requires fun h ->
+      live h out /\ live h f /\ live h tmp /\
+      disjoint tmp out /\ fsqr2_pre h f)
     (ensures  fun h0 _ h1 ->
       modifies (loc out |+| loc tmp) h0 h1 /\ fmul2_fsqr2_post h1 out /\
      (let out1 = gsub out 0ul (nlimb s) in
