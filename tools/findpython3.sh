@@ -21,7 +21,7 @@ try_windows () {
       PYDIR=$(regtool -q get "/HKCU/Software/Python/PythonCore/$1/InstallPath/" || true)
     fi
     if [[ -d $PYDIR ]] ; then
-      echo "$PYDIR/python.exe"
+      echo "$PYDIR/python.exe" | sed 's!\\!/!g'
     else
       false
     fi
