@@ -488,7 +488,20 @@ procedure {:quick} loop6x_round9(
     commute_sub_bytes_shift_rows_forall();
 }
 
+procedure {:quick} load_one_msb()
+    lets constp @= r11; T2 @= xmm2; 
+    modifies constp; T2; efl;
+    ensures  T2 == Mkfour(0, 0, 0, 0x80000000);
+{
+    ZeroXmm(T2);
+    //assert two_to_nat32(Mktwo(0x0C0D0E0F, 0x08090A0B)) == 0x08090A0B0C0D0E0F; // OBSERVE
+    assert two_to_nat32(Mktwo(0, 0x80000000)) == 0x8000000000000000; // OBSERVE
+    //PinsrqImm(dst, 0x08090A0B0C0D0E0F, 0, tmp);
+    PinsrqImm(T2, 0x8000000000000000, 1, constp);
+    reveal insert_nat64;
+}
 
+/*
 procedure {:quick} {:verify true} loop6x_final(
     inline alg:algorithm,  
     ghost iv_b:buffer128,
@@ -525,22 +538,24 @@ procedure {:quick} {:verify true} loop6x_final(
         Z1 @= xmm5; Z2 @= xmm6; Z3 @= xmm7;
         inout0 @= xmm9; inout1 @= xmm10; inout2 @= xmm11; inout3 @= xmm12;
         inout4 @= xmm13; inout5 @= xmm14; rndkey @= xmm15;
+        constp @= r11; 
 //      counter @= rbx; rounds @= rbp; ret @= r10; constp @= r11; in0 @= r14; end0 @= r15;
 
     reads
         key; rsp; ivp;
-        Ii; T2; Hkey; Z1; Z2; Z3;
         memTaint;
 
     modifies
-        inp; outp; r12; r13; 
-        T1; inout0; inout1; inout2; inout3; inout4; inout5; rndkey;
+        inp; outp; constp; r12; r13; 
+        Ii; T1; T2; Hkey; Z1; Z2; Z3; inout0; inout1; inout2; inout3; inout4; inout5; rndkey;
         mem; efl;
 
     requires
         // Valid ptrs and buffers
         validSrcAddrs128(mem, ivp, iv_b, 1, memTaint, Secret);
         validDstAddrs128(mem, rsp, stack_b, 8, memTaint, Secret);
+         inp + 0x60 < pow2_64;
+        outp + 0x60 < pow2_64;
 
         // AES reqs
         aes_reqs(alg, key_words, round_keys, keys_b, key, mem, memTaint);
@@ -572,34 +587,49 @@ procedure {:quick} {:verify true} loop6x_final(
         Hkey == quad32_xor(rk, plain5);
 
     ensures
-//        // Framing
-//        modifies_buffer_specific128(stack_b, old(mem), mem, stack_offset, stack_offset + 1);
-//
-//        // Semantics
-//        inout0 == rounds_opaque(init0, round_keys, rnd + 1);
-//        inout1 == rounds_opaque(init1, round_keys, rnd + 1);
-//        inout2 == rounds_opaque(init2, round_keys, rnd + 1);
-//        inout3 == rounds_opaque(init3, round_keys, rnd + 1);
-//        inout4 == rounds_opaque(init4, round_keys, rnd + 1);
-//        inout5 == rounds_opaque(init5, round_keys, rnd + 1);
-//
-//        buffer128_read(stack_b, stack_offset, mem) == old(reverse_bytes_quad32(buffer128_read(in_b, in0_offset, mem)));
+        // Framing
+        modifies_buffer_specific128(stack_b, old(mem), mem, 7, 8);
+
+        // Semantics
+        buffer128_read(stack_b, 7, mem) == reverse_bytes_quad32(inb);
+
         inout0 == quad32_xor(plain0, aes_encrypt_le(alg, key_words, ctr0));
         inout1 == quad32_xor(plain1, aes_encrypt_le(alg, key_words, ctr1));
         inout2 == quad32_xor(plain2, aes_encrypt_le(alg, key_words, ctr2));
         inout3 == quad32_xor(plain3, aes_encrypt_le(alg, key_words, ctr3));
         inout4 == quad32_xor(plain4, aes_encrypt_le(alg, key_words, ctr4));
         inout5 == quad32_xor(plain5, aes_encrypt_le(alg, key_words, ctr5));
+
+        rndkey == index(round_keys, 0);
+
+         inp == old( inp) + 0x60;
+        outp == old(outp) + 0x60;
+
+
+        // TODO: Summarize effects of the VPaddd instructions
+        
 {
     lemma_quad32_xor_commutes_forall();
     Load128_buffer(T1, ivp, 0, Secret, iv_b, 0); // # load next counter value
 
     VAESNI_enc_last(inout0, inout0, T2);
+    load_one_msb();                              // # borrow $T2, .Lone_msb
     VAESNI_enc_last(inout1, inout1, Ii);
+    VPaddd(Ii, T1, T2);
+    Store64_buffer128(rsp, r13, 7*16,   Secret, false, stack_b, 7);  // OpenSSL is further offset by 8 (to account for return addr?)
+    AddLea64(inp, inp, 0x60);
     VAESNI_enc_last(inout2, inout2, Z1);
+    VPaddd(Z1, Ii, T2);
+    Store64_buffer128(rsp, r12, 7*16+8, Secret, true,  stack_b, 7);   // OpenSSL is further offset by 8 (to account for return addr?)
+    AddLea64(outp, outp, 0x60);
+    Load128_buffer(rndkey, key, 0x00-0x80, Secret, keys_b, 0); 
+
     VAESNI_enc_last(inout3, inout3, Z2);
+    VPaddd(Z2, Z1, T2);
     VAESNI_enc_last(inout4, inout4, Z3);
+    VPaddd(Z3, Z2, T2);
     VAESNI_enc_last(inout5, inout5, Hkey);
+    VPaddd(Hkey, Z3, T2);
 
     finish_cipher_opt(alg, ctr0, plain0, init0, old(inout0), inout0, round_keys);
     finish_cipher_opt(alg, ctr1, plain1, init1, old(inout1), inout1, round_keys);
@@ -622,25 +652,11 @@ procedure {:quick} {:verify true} loop6x_final(
 //    assert {:quick_type} length(round_keys) == nr(alg) + 1; //11;
 //    assert {:quick_type} is_aes_key_LE(alg, key_words);
 //    assert inout0 == quad32_xor(plain0, aes_encrypt_le(alg, key_words, ctr0));
-/*
-    // TODO:
-    vaesenclast	$T2,$inout0,$inout0
-    vmovdqu	0x20($const),$T2	# borrow $T2, .Lone_msb
 
+    lemma_reverse_bytes64(inb, old(buffer128_read(stack_b, 7, mem)), buffer128_read(stack_b, 7, mem));
 
-
-    Store64_buffer128(rsp, r13, stack_offset*16,   Secret, false, stack_b, stack_offset);  // OpenSSL is further offset by 8 (to account for return addr?)
-
-
-    Store64_buffer128(rsp, r12, stack_offset*16+8, Secret, true,  stack_b, stack_offset);   // OpenSSL is further offset by 8 (to account for return addr?)
-
-
-    reveal rounds;
-    commute_sub_bytes_shift_rows_forall();
-    lemma_reverse_bytes64(old(buffer128_read(in_b, in0_offset, mem)), old(buffer128_read(stack_b, stack_offset, mem)), buffer128_read(stack_b, stack_offset, mem));
-
-*/
 }
+*/
 
 procedure {:quick} loop6x(
     inline alg:algorithm,  
