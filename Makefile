@@ -472,8 +472,8 @@ dist/test/c/%.exe: dist/test/c/%.c compile-generic
 	  $(KREMLIN_HOME)/kremlib/dist/generic/libkremlib.a
 
 test-c-%: dist/test/c/%.exe
-	LD_LIBRARY_PATH=$(OPENSSL_HOME) DYLD_LIBRARY_PATH=$(OPENSSL_HOME) \
-	  PATH=$(OPENSSL_HOME):$(PATH) $<
+	LD_LIBRARY_PATH="$(OPENSSL_HOME)" DYLD_LIBRARY_PATH="$(OPENSSL_HOME)" \
+	  PATH="$(OPENSSL_HOME):$(PATH)" $<
 
 #######################
 # OCaml tests (specs) #
