@@ -399,27 +399,102 @@ procedure {:quick} loop6x_round8(
     commute_sub_bytes_shift_rows_forall();
 }
 
-/*
+procedure {:quick} {:verify true} loop6x_round9(
+    inline alg:algorithm,  // OpenSSL includes the number of rounds (nr) as a dynamic parameter (stored with the key).  Saves code space but adds extra instructions to the fast path.  Maybe branch predictor is good enough for it not to matter
+    ghost iv_b:buffer128,
+    ghost in_b:buffer128,
+    ghost stack_b:buffer128,
 
+    ghost key_words:seq(nat32),
+    ghost round_keys:seq(quad32),
+    ghost keys_b:buffer128,
+
+    ghost init0:quad32,
+    ghost init1:quad32,
+    ghost init2:quad32,
+    ghost init3:quad32,
+    ghost init4:quad32,
+    ghost init5:quad32
+    )
+    lets
+//      inp @= rdi; outp @= rsi; len @= rdx; key @= rcx; Xip @= r9;
+        key @= rcx; ivp @= r8;
+        T1 @= xmm1; T2 @= xmm2; Hkey @= xmm3;
+        inout0 @= xmm9; inout1 @= xmm10; inout2 @= xmm11; inout3 @= xmm12;
+        inout4 @= xmm13; inout5 @= xmm14; rndkey @= xmm15;
+//      counter @= rbx; rounds @= rbp; ret @= r10; constp @= r11; in0 @= r14; end0 @= r15;
+        in0 @= r14; 
+
+    reads
+        key; ivp; in0;
+        mem; memTaint;
+
+    modifies
+        r12; r13; 
+        T1; T2; Hkey; inout0; inout1; inout2; inout3; inout4; inout5; rndkey;
+        efl;
+
+    requires
+        // Valid ptrs and buffers
+        validDstAddrs128(mem, ivp, iv_b, 1, memTaint, Secret);
+        validSrcAddrs128(mem, in0, in_b, 1, memTaint, Secret);
+
+        // AES reqs
+        aes_reqs(alg, key_words, round_keys, keys_b, key, mem, memTaint);
+
+        inout0 == rounds_opaque(init0, round_keys, 8);
+        inout1 == rounds_opaque(init1, round_keys, 8);
+        inout2 == rounds_opaque(init2, round_keys, 8);
+        inout3 == rounds_opaque(init3, round_keys, 8);
+        inout4 == rounds_opaque(init4, round_keys, 8);
+        inout5 == rounds_opaque(init5, round_keys, 8);
+
+        rndkey == index(round_keys, 9);
+
+    ensures
+        // Semantics
+        inout0 == rounds_opaque(init0, round_keys, 9);
+        inout1 == rounds_opaque(init1, round_keys, 9);
+        inout2 == rounds_opaque(init2, round_keys, 9);
+        inout3 == rounds_opaque(init3, round_keys, 9);
+        inout4 == rounds_opaque(init4, round_keys, 9);
+        inout5 == rounds_opaque(init5, round_keys, 9);
+
+//        let rk := round_keys[10];
+//        T2   == quad32_xor(rk, buffer_read128(in_b, 0, mem));
+//        Ii   == quad32_xor(rk, buffer_read128(in_b, 1, mem));
+//        Z1   == quad32_xor(rk, buffer_read128(in_b, 2, mem));
+//        Z2   == quad32_xor(rk, buffer_read128(in_b, 3, mem));
+//        Z3   == quad32_xor(rk, buffer_read128(in_b, 4, mem));
+//        Hkey == quad32_xor(rk, buffer_read128(in_b, 5, mem));
+
+        T1 == buffer128_read(iv_b, 0, mem);
+{
     Load128_buffer(T1, key, 0xa0-0x80, Secret, keys_b, 10); 
 
     // Would do more rounds here for AES-192 or 256
 
     VAESNI_enc(inout0, inout0, rndkey);
     VAESNI_enc(inout1, inout1, rndkey);
-    VPxor(T2, T1, inp+0);
+    //VPxor(T2, T1, inp+0);
     VAESNI_enc(inout2, inout2, rndkey);
-    VPxor(Ii, T1, inp+0x10);
+    //VPxor(Ii, T1, inp+0x10);
     VAESNI_enc(inout3, inout3, rndkey);
-    VPxor(Z1, T1, inp+0x20);
+    //VPxor(Z1, T1, inp+0x20);
     VAESNI_enc(inout4, inout4, rndkey);
-    VPxor(Z2, T1, inp+0x30);
+    //VPxor(Z2, T1, inp+0x30);
     VAESNI_enc(inout5, inout5, rndkey);
-    VPxor(Z3, T1, inp+0x40);
-    VPxor(Hkey, T1, inp+0x50);
+    //VPxor(Z3, T1, inp+0x40);
+    //VPxor(Hkey, T1, inp+0x50);
 
     Load128_buffer(T1, ivp, 0, Secret, iv_b, 0); // # load next counter value
 
+    reveal rounds;
+    commute_sub_bytes_shift_rows_forall();
+}
+
+
+/*
     // TODO:
     vaesenclast	$T2,$inout0,$inout0
     vmovdqu	0x20($const),$T2	# borrow $T2, .Lone_msb
@@ -438,7 +513,6 @@ procedure {:quick} loop6x_round8(
 
 }
 */
-
 
 procedure {:quick} loop6x(
     inline alg:algorithm,  
