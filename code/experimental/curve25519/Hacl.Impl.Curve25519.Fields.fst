@@ -12,7 +12,7 @@ module ST = FStar.HyperStack.ST
 module F26 = Hacl.Impl.Curve25519.Field26
 module F51 = Hacl.Impl.Curve25519.Field51
 module F64 = Hacl.Impl.Curve25519.Field64
-module P = NatPrime
+module P = Spec.Curve25519
 module BSeq = Lib.ByteSequence
 module LSeq = Lib.Sequence
 
@@ -79,7 +79,7 @@ let as_nat #s h e =
   | M64 -> F64.as_nat h e
 
 noextract
-val feval: #s:field_spec -> h:mem -> e:felem s -> GTot P.felem
+val feval: #s:field_spec -> h:mem -> e:felem s -> GTot P.elem
 let feval #s h e = (as_nat h e) % P.prime
 
 inline_for_extraction
@@ -297,6 +297,8 @@ let fmul2_fsqr2_post #s h out =
       F51.mul_inv_t h out0 /\
       F51.mul_inv_t h out1
   | M64 -> True
+
+#reset-options "--z3rlimit 50 --max_fuel 2"
 
 inline_for_extraction
 val fmul2:

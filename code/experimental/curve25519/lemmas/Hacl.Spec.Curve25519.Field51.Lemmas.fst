@@ -3,7 +3,7 @@ module Hacl.Spec.Curve25519.Field51.Lemmas
 open Lib.Sequence
 open Lib.IntTypes
 open FStar.Mul
-open NatPrime
+open Spec.Curve25519
 
 open Hacl.Spec.Curve25519.Field51.Definition
 module BSeq = Lib.ByteSequence

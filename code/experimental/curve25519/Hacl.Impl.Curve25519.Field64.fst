@@ -15,7 +15,7 @@ module S = Hacl.Spec.Curve25519.Field64.Definition
 module Lemmas = Hacl.Spec.Curve25519.Field64.Lemmas
 module LSeq = Lib.Sequence
 module BSeq = Lib.ByteSequence
-module P = NatPrime
+module P = Spec.Curve25519
 
 #reset-options "--z3rlimit 20"
 

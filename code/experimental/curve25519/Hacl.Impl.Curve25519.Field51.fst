@@ -11,7 +11,7 @@ open Lib.Buffer
 include Hacl.Spec.Curve25519.Field51
 include Hacl.Spec.Curve25519.Field51.Definition
 
-module P = NatPrime
+module P = Spec.Curve25519
 module S = Hacl.Spec.Curve25519.Field51.Definition
 module ST = FStar.HyperStack.ST
 module LSeq = Lib.Sequence
@@ -47,11 +47,11 @@ let wide_as_nat h e =
   S.wide_as_nat5 (s0, s1, s2, s3, s4)
 
 noextract
-val fevalh: h:mem -> f:felem -> GTot P.felem
+val fevalh: h:mem -> f:felem -> GTot P.elem
 let fevalh h f = (as_nat h f) % P.prime
 
 noextract
-val feval_wideh: h:mem -> f:felem_wide -> GTot P.felem
+val feval_wideh: h:mem -> f:felem_wide -> GTot P.elem
 let feval_wideh h f = (wide_as_nat h f) % P.prime
 
 noextract
@@ -357,7 +357,7 @@ val fsqr:
     (ensures  fun h0 _ h1 ->
       modifies (loc out) h0 h1 /\
       mul_inv_t h1 out /\
-      fevalh h1 out == P.fsqr (fevalh h0 f))
+      fevalh h1 out == P.fmul (fevalh h0 f) (fevalh h0 f))
 [@ CInline]
 let fsqr out f =
   let f0 = f.(0ul) in
@@ -390,8 +390,8 @@ val fsqr2:
       let f2 = gsub f 5ul 5ul in
       mul_inv_t h1 out1 /\
       mul_inv_t h1 out2 /\
-      fevalh h1 out1 == P.fsqr (fevalh h0 f1) /\
-      fevalh h1 out2 == P.fsqr (fevalh h0 f2)))
+      fevalh h1 out1 == P.fmul (fevalh h0 f1) (fevalh h0 f1) /\
+      fevalh h1 out2 == P.fmul (fevalh h0 f2) (fevalh h0 f2)))
 [@ CInline]
 let fsqr2 out f =
   let f10 = f.(0ul) in

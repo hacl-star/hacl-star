@@ -3,7 +3,7 @@ module Hacl.Spec.Curve25519.Field51
 open Lib.Sequence
 open Lib.IntTypes
 open FStar.Mul
-open NatPrime
+open Spec.Curve25519
 
 open Hacl.Spec.Curve25519.Field51.Definition
 open Hacl.Spec.Curve25519.Field51.Lemmas
@@ -320,7 +320,7 @@ inline_for_extraction
 val fsqr5:
     f:felem5{felem_fits5 f (9, 10, 9, 9, 9)}
   -> out:felem5{mul_inv_t out /\
-    feval out == fsqr (feval f)}
+    feval out == fmul (feval f) (feval f)}
 let fsqr5 (f0, f1, f2, f3, f4) =
   let d0 = u64 2 *. f0 in
   let d1 = u64 2 *. f1 in
@@ -350,8 +350,8 @@ val fsqr25:
     (ensures fun (out1, out2) ->
       mul_inv_t out1 /\
       mul_inv_t out2 /\
-      feval out1 == fsqr (feval f1) /\
-      feval out2 == fsqr (feval f2))
+      feval out1 == fmul (feval f1) (feval f1) /\
+      feval out2 == fmul (feval f2) (feval f2))
 let fsqr25 (f10, f11, f12, f13, f14) (f20, f21, f22, f23, f24) =
   let d10 = u64 2 *. f10 in
   let d11 = u64 2 *. f11 in

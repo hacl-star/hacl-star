@@ -17,7 +17,7 @@ module F51 = Hacl.Impl.Curve25519.Field51
 module F64 = Hacl.Impl.Curve25519.Field64
 
 module S = Hacl.Spec.Curve25519.Finv
-module P = NatPrime
+module P = Spec.Curve25519
 
 #reset-options "--using_facts_from '* -FStar.Seq'"
 
@@ -42,7 +42,7 @@ val fsqr_s:
     (ensures  fun h0 _ h1 ->
       modifies (loc out |+| loc tmp) h0 h1 /\
       fsquare_times_inv h1 out /\
-      feval h1 out == P.fsqr (feval h0 f1))
+      feval h1 out == P.fmul (feval h0 f1) (feval h0 f1))
 let fsqr_s #s out f1 tmp =
   match s with
   | M26 -> admit(); F26.fsqr out f1
