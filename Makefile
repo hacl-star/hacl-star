@@ -257,15 +257,16 @@ dist/vale/%-x86_64-linux.S: dist/vale/%.exe
 dist/vale/%-x86_64-darwin.S: dist/vale/%.exe
 	$< GCC MacOS > $@
 
-dist/vale/cpuid.exe: ML_MAIN=vale/code/lib/util/x64/CpuidMain.ml
-dist/vale/aesgcm.exe: ML_MAIN=vale/code/crypto/aes/x64/Main.ml
-dist/vale/sha256.exe: ML_MAIN=vale/code/crypto/sha/ShaMain.ml
-dist/vale/curve25519.exe: ML_MAIN=vale/code/crypto/ecc/curve25519/Main25519.ml
+dist/vale/cpuid.exe: vale/code/lib/util/x64/CpuidMain.ml
+dist/vale/aesgcm.exe: vale/code/crypto/aes/x64/Main.ml
+dist/vale/sha256.exe: vale/code/crypto/sha/ShaMain.ml
+dist/vale/curve25519.exe: vale/code/crypto/ecc/curve25519/Main25519.ml
 
-dist/vale/%.exe: $(ALL_CMX_FILES) vale/code/lib/util/CmdLineParser.ml $(ML_MAIN)
+dist/vale/%.exe: $(ALL_CMX_FILES) vale/code/lib/util/CmdLineParser.ml
 	mkdir -p $(dir $@)
-	$(OCAMLOPT) $^ $(ML_MAIN) -o $@ -I vale/code/lib/util
+	$(OCAMLOPT) $^ -o $@ -I vale/code/lib/util
 	
+# The ones in secure_api are legacy and should go.
 VALE_ASMS = $(foreach P,cpuid aesgcm sha256 curve25519,\
   $(addprefix dist/vale/,$P-x86_64-mingw.S $P-x86_64-msvc.S $P-x86_64-linux.S $P-x86_64-darwin.S)) \
   $(wildcard \
@@ -298,9 +299,13 @@ HAND_WRITTEN_OPTIONAL_FILES = \
 
 # TODO: put all the Vale files under a single namespace to avoid this nonsense
 # TODO: actually remove EverCrypt.Bytes rather than disabling it here.
+#
+# When extracting our libraries, we purposely don't distribute tests
 DEFAULT_FLAGS		=\
   $(addprefix -library ,$(HACL_HAND_WRITTEN_C)) \
+  -bundle Spec.*[rename=Hacl_Spec] \
   -bundle Lib.*[rename=Hacl_Lib] \
+  -bundle Test,Test.*,Hacl.Test.* \
   -bundle EverCrypt.Bytes \
   -bundle EverCrypt.BCrypt \
   -bundle EverCrypt.OpenSSL \
@@ -363,7 +368,6 @@ dist/compact-c89/Makefile.basic: \
 dist/compact-c89/Makefile.basic: \
   HACL_OLD_FILES:=$(subst -c,-c89,$(HACL_OLD_FILES))
 
-# The "coco" distribution is only optimized when EVERCRYPT_CONFIG=everest.
 dist/coco/Makefile.basic: \
   KRML_EXTRA=$(COMPACT_FLAGS) \
     -bundle EverCrypt.AutoConfig2= \
@@ -372,11 +376,12 @@ dist/coco/Makefile.basic: \
     -bundle EverCrypt.OpenSSL \
     -bundle EverCrypt.BCrypt \
     -bundle '\*[rename=EverCrypt_Misc]'
+
+# The "coco" distribution is only optimized when EVERCRYPT_CONFIG=everest.
 ifeq ($(EVERCRYPT_CONFIG),everest)
 dist/coco/Makefile.basic: HAND_WRITTEN_OPTIONAL_FILES =
 endif
 
-# When extracting our libraries, we purposely don't distribute tests
 .PRECIOUS: dist/%/Makefile.basic
 dist/%/Makefile.basic: $(ALL_KRML_FILES) dist/hacl-internal-headers/Makefile.basic \
   $(HAND_WRITTEN_FILES) $(VALE_ASMS) | old-extract-c
@@ -386,8 +391,7 @@ dist/%/Makefile.basic: $(ALL_KRML_FILES) dist/hacl-internal-headers/Makefile.bas
 	cp $(VALE_ASMS) $(dir $@)
 	$(KRML) $(DEFAULT_FLAGS) $(KRML_EXTRA) \
 	  -tmpdir $(dir $@) -skip-compilation \
-	  -bundle Spec.*[rename=Hacl_Spec] $(filter %.krml,$^) \
-	  -bundle Test,Test.*,Hacl.Test.* \
+	  $(filter %.krml,$^) \
 	  -ccopt -Wno-unused \
 	  -warn-error @4 \
 	  -fparentheses \
@@ -447,7 +451,7 @@ compile-%: dist/Makefile dist/%/Makefile.basic
 .PRECIOUS: dist/test/c/%.exe
 dist/test/c/%.exe: dist/test/c/%.c compile-generic
 	# Linking with full kremlib since tests may use TestLib, etc.
-	$(CC) -Wall -Wextra -Werror -Wno-unused-parameter $< -o $@ dist/generic/libhacl.a \
+	$(CC) -Wall -Wextra -Werror -Wno-unused-parameter $< -o $@ dist/generic/libevercrypt.a \
 	  -I $(dir $@) -I $(KREMLIN_HOME)/include \
 	  $(KREMLIN_HOME)/kremlib/dist/generic/libkremlib.a
 
