@@ -491,16 +491,15 @@ procedure {:quick} loop6x_round9(
 procedure {:quick} load_one_msb()
     lets constp @= r11; T2 @= xmm2; 
     modifies constp; T2; efl;
-    ensures  T2 == Mkfour(0, 0, 0, 0x80000000);
+    ensures  T2 == Mkfour(0, 0, 0, 0x10000000);
 {
     ZeroXmm(T2);
-    //assert two_to_nat32(Mktwo(0x0C0D0E0F, 0x08090A0B)) == 0x08090A0B0C0D0E0F; // OBSERVE
-    assert two_to_nat32(Mktwo(0, 0x80000000)) == 0x8000000000000000; // OBSERVE
-    //PinsrqImm(dst, 0x08090A0B0C0D0E0F, 0, tmp);
-    PinsrqImm(T2, 0x8000000000000000, 1, constp);
+    assert two_to_nat32(Mktwo(0, 0x10000000)) == 0x1000000000000000; // OBSERVE
+    PinsrqImm(T2, 0x1000000000000000, 1, constp);
     reveal insert_nat64;
 }
 
+#reset-options "--z3rlimit 30"
 procedure {:quick} {:verify true} loop6x_final(
     inline alg:algorithm,  
     ghost iv_b:buffer128,
@@ -509,6 +508,8 @@ procedure {:quick} {:verify true} loop6x_final(
     ghost key_words:seq(nat32),
     ghost round_keys:seq(quad32),
     ghost keys_b:buffer128,
+
+    ghost ctr_orig:quad32,
 
     ghost init0:quad32,
     ghost init1:quad32,
@@ -586,6 +587,9 @@ procedure {:quick} {:verify true} loop6x_final(
         Z3   == quad32_xor(rk, plain4);
         Hkey == quad32_xor(rk, plain5);
 
+        buffer128_read(iv_b, 0, mem).hi3 + (5*0x10000000) < pow2_32;     // counter will not wrap
+        buffer128_read(iv_b, 0, mem) == reverse_bytes_quad32(ctr_orig);
+
     ensures
         // Framing
         modifies_buffer_specific128(stack_b, old(mem), mem, 7, 8);
@@ -605,9 +609,12 @@ procedure {:quick} {:verify true} loop6x_final(
          inp == old( inp) + 0x60;
         outp == old(outp) + 0x60;
 
-
-        // TODO: Summarize effects of the VPaddd instructions
-        
+        T1   == old(buffer128_read(iv_b, 0, mem));
+        Ii   == reverse_bytes_quad32(inc32(ctr_orig, 1));
+        Z1   == reverse_bytes_quad32(inc32(ctr_orig, 2));
+        Z2   == reverse_bytes_quad32(inc32(ctr_orig, 3));
+        Z3   == reverse_bytes_quad32(inc32(ctr_orig, 4));
+        Hkey == reverse_bytes_quad32(inc32(ctr_orig, 5));
 {
     lemma_quad32_xor_commutes_forall();
     Load128_buffer(T1, ivp, 0, Secret, iv_b, 0); // # load next counter value
@@ -646,7 +653,14 @@ procedure {:quick} {:verify true} loop6x_final(
 
     lemma_reverse_bytes64(inb, old(buffer128_read(stack_b, 7, mem)), buffer128_read(stack_b, 7, mem));
 
+    lemma_incr_msb(ctr_orig, T1, Ii, 1);
+    lemma_incr_msb(ctr_orig, T1, Z1, 2);
+    lemma_incr_msb(ctr_orig, T1, Z2, 3);
+    lemma_incr_msb(ctr_orig, T1, Z3, 4);
+    lemma_incr_msb(ctr_orig, T1, Hkey, 5);
 }
+
+#reset-options ""
 
 procedure {:quick} loop6x(
     inline alg:algorithm,  
