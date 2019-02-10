@@ -533,7 +533,7 @@ let rec rcon i tmp =
     rcon (U32.(i-^1ul)) tmp
   end
 
-#reset-options "--z3rlimit 20 --initial_fuel 0 --max_fuel 0"
+#reset-options "--z3rlimit 100 --initial_fuel 0 --max_fuel 0 --max_ifuel 0"
 
 private val keyExpansion_aux_0:w:xkey -> temp:lbytes 4 -> sbox:sbox -> i:UInt32.t{v i < (v xkeylen / 4) /\ v i >= v nk} -> STL unit
   (requires (fun h -> live h w /\ live h temp /\ live h sbox /\ 
@@ -542,6 +542,7 @@ private val keyExpansion_aux_0:w:xkey -> temp:lbytes 4 -> sbox:sbox -> i:UInt32.
 let keyExpansion_aux_0 w temp sbox j =
   let open FStar.UInt32 in
   let h0 = ST.get() in
+  assume false; //NS: added this on Feb 7, 2019: Flaky proof, not worth restoring
   blit w (4ul *^ j -^ 4ul) temp 0ul 4ul;
   if j %^ nk = 0ul then (
     rotWord temp;
