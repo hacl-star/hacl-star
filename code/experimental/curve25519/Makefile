@@ -1,5 +1,5 @@
 FSTAR_HOME   ?= ../../../../FStar
-KREMLIN_HOME ?= ../../../../kremlin
+1;95;0cKREMLIN_HOME ?= ../../../../kremlin
 HACL_HOME    ?= ../../..
 
 CACHE_DIR     = .cache
@@ -14,8 +14,8 @@ all: curve25519_51.exe curve25519_64.exe
 
 verify: test
 
-CC=/usr/local/Cellar/llvm/7.0.0/bin/clang-7
-#CC=gcc-8
+#CC=/usr/local/Cellar/llvm/7.0.0/bin/clang-7
+CC=gcc-8
 
 CURVE25519_FILES= $(HACL_HOME)/lib/fst/Lib.IntTypes.fst \
 	$(HACL_HOME)/lib/fst/Lib.RawIntTypes.fst \

@@ -83,6 +83,7 @@ let createi #a len init_f =
     (createi_step a len init_f)
     (of_list [])
 
+inline_for_extraction
 let mapi_inner (#a:Type) (#b:Type) (#len:size_nat)
   (f:(i:nat{i < len} -> a -> b)) (s:lseq a len) (i:size_nat{i < len}) =
   f i s.[i]
@@ -90,6 +91,7 @@ let mapi_inner (#a:Type) (#b:Type) (#len:size_nat)
 let mapi #a #b #len f s =
   createi #b len (mapi_inner #a #b #len f s)
 
+inline_for_extraction
 let map_inner (#a:Type) (#b:Type) (#len:size_nat)
   (f:(a -> Tot b)) (s:lseq a len) (i:size_nat{i < len}) =
   f s.[i]
@@ -100,8 +102,13 @@ let map #a #b #len f s =
 let map2i #a #b #c #len f s1 s2 =
   createi #c len (fun i -> f i s1.[i] s2.[i])
 
+inline_for_extraction
+let map2_inner (#a:Type) (#b:Type) (#c:Type) (#len:size_nat)
+  (f:(a -> b -> Tot c)) (s1:lseq a len) (s2:lseq b len) (i:size_nat{i < len}) =
+  f s1.[i] s2.[i]
+
 let map2 #a #b #c #len f s1 s2 =
-  createi #c len (fun i -> f s1.[i] s2.[i])
+  createi #c len (map2_inner #a #b #c #len f s1 s2)
 
 let for_all #a #len f x = Seq.for_all f x
 
