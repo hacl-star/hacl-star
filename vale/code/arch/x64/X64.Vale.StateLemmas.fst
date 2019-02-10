@@ -48,6 +48,7 @@ let lemma_to_flags s = ()
 
 let lemma_to_reg s r = ()
 let lemma_to_xmm s x = ()
+let lemma_to_mem s = ()
 let lemma_to_trace s = ()
 let lemma_to_memTaint s = ()
 
@@ -77,7 +78,7 @@ let lemma_of_to s =
   assert (state_eq s (state_of_S s (state_to_S s)));
   ()
 
-let lemma_to_of_eval_code c s0 =
+let lemma_to_of_eval_ins c s0 =
   let s0' = state_to_S s0 in
   let Ins ins = c in
   let Some sM = TS.taint_eval_code c 0 s0' in
@@ -90,8 +91,7 @@ let lemma_to_of_eval_code c s0 =
   assert (feq xmms xmms'');
   X64.Bytes_Semantics.eval_ins_same_unspecified ins s0';
   X64.Bytes_Semantics.eval_ins_domains ins s0';
-  MS.get_heap_hs heap s0.mem;
-  ()
+  MS.get_heap_hs heap s0.mem
 
 val lemma_valid_taint64: (b:ME.buffer64) ->
                          (memTaint:ME.memtaint) ->

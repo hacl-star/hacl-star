@@ -1,6 +1,6 @@
 module BufferViewHelpers
 
-module  B = LowStar.Buffer
+module MB = LowStar.Monotonic.Buffer
 module BV = LowStar.BufferView
 module HS = FStar.HyperStack
 module ST = FStar.HyperStack.ST
@@ -10,8 +10,9 @@ open LowStar.Modifies
 open LowStar.ModifiesPat
 
 let lemma_bv_equal
-  (#src:Type) (#dst:Type) (view:BV.view src dst) (b:B.buffer src) (h0 h1:HS.mem)
-  :Lemma (requires (B.length b % BV.View?.n view == 0 /\ B.as_seq h0 b == B.as_seq h1 b))
+  (#src:Type) (#rel #rrel:MB.srel src) (#dst:Type) 
+  (view:BV.view src dst) (b:MB.mbuffer src rel rrel) (h0 h1:HS.mem)
+  :Lemma (requires (MB.length b % BV.View?.n view == 0 /\ MB.as_seq h0 b == MB.as_seq h1 b))
          (ensures  (let bv = BV.mk_buffer_view b view in BV.as_seq h0 bv == BV.as_seq h1 bv))
    [SMTPat (BV.as_seq h0 (BV.mk_buffer_view b view)); SMTPat (BV.as_seq h1 (BV.mk_buffer_view b view))]
   = let bv = BV.mk_buffer_view b view in
@@ -28,10 +29,12 @@ let lemma_bv_equal
     Seq.lemma_eq_intro (BV.as_seq h0 bv) (BV.as_seq h1 bv)
 
 
-let sel_underlying_buffer_unmodified (#src:Type) (#dst:Type) (view:BV.view src dst) (b:B.buffer src) (h0 h1:HS.mem) (i:nat) : Lemma
-  (requires (B.length b % BV.View?.n view == 0 /\
-             B.as_seq h0 b == B.as_seq h1 b /\
-             i < B.length b / BV.View?.n view))
+let sel_underlying_buffer_unmodified 
+  (#src:Type) (#rel #rrel:MB.srel src) (#dst:Type) 
+  (view:BV.view src dst) (b:MB.mbuffer src rel rrel) (h0 h1:HS.mem) (i:nat) : Lemma
+  (requires (MB.length b % BV.View?.n view == 0 /\
+             MB.as_seq h0 b == MB.as_seq h1 b /\
+             i < MB.length b / BV.View?.n view))
   (ensures  (let bv = BV.mk_buffer_view b view in
              i < BV.length bv /\
              BV.sel h0 bv i == BV.sel h1 bv i))
