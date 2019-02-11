@@ -68,10 +68,6 @@ ifneq (,$(wildcard EverCrypt_BCrypt.h))
   SOURCES	+= evercrypt_bcrypt.c
 endif
 
-ifneq (,$(wildcard EverCrypt_Bytes.h))
-  SOURCES	+= evercrypt_bytes.c
-endif
-
 OBJS 		+= $(patsubst %.S,%.o,$(wildcard *-$(MARCH)$(VARIANT).S))
 
 

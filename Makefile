@@ -385,10 +385,9 @@ HAND_WRITTEN_FILES 	= $(wildcard $(LIB_DIR)/c/*.c) \
 # in the Makefile.basic list of C source files. They're added manually in
 # dist/Makefile (see ifneq tests).
 HAND_WRITTEN_OPTIONAL_FILES = \
-  $(addprefix providers/evercrypt/c/evercrypt_,openssl.c bcrypt.c bytes.c)
+  $(addprefix providers/evercrypt/c/evercrypt_,openssl.c bcrypt.c)
 
 # TODO: put all the Vale files under a single namespace to avoid this nonsense
-# TODO: actually remove EverCrypt.Bytes rather than disabling it here.
 #
 # When extracting our libraries, we purposely don't distribute tests
 DEFAULT_FLAGS		=\
@@ -396,7 +395,6 @@ DEFAULT_FLAGS		=\
   -bundle Spec.*[rename=Hacl_Spec] \
   -bundle Lib.*[rename=Hacl_Lib] \
   -bundle Test,Test.*,Hacl.Test.* \
-  -bundle EverCrypt.Bytes \
   -bundle EverCrypt.BCrypt \
   -bundle EverCrypt.OpenSSL \
   -bundle MerkleTree.Spec,MerkleTree.Spec.*,MerkleTree.New.High,MerkleTree.New.High.* \
@@ -430,7 +428,7 @@ COMPACT_FLAGS	=\
   -bundle 'MerkleTree.*' \
   -bundle 'Test,Test.*,WindowsHack' \
   -bundle EverCrypt.Hash+EverCrypt.Hash.Incremental=[rename=EverCrypt_Hash] \
-  -library EverCrypt.Bytes,EverCrypt.AutoConfig,EverCrypt.OpenSSL,EverCrypt.BCrypt \
+  -library EverCrypt.AutoConfig,EverCrypt.OpenSSL,EverCrypt.BCrypt \
   -minimal \
   -add-include '"kremlin/internal/types.h"' \
   -add-include '"kremlin/internal/target.h"' \
