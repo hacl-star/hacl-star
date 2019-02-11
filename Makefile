@@ -278,6 +278,8 @@ dist/vale/aesgcm.exe: vale/code/crypto/aes/x64/Main.ml
 dist/vale/sha256.exe: vale/code/crypto/sha/ShaMain.ml
 dist/vale/curve25519.exe: vale/code/crypto/ecc/curve25519/Main25519.ml
 
+vale/code/lib/util/CmdLineParser.cmx: $(ALL_CMX_FILES)
+
 dist/vale/%.exe: $(ALL_CMX_FILES) vale/code/lib/util/CmdLineParser.cmx
 	mkdir -p $(dir $@)
 	$(OCAMLOPT) $^ -o $@ -I vale/code/lib/util
