@@ -22,11 +22,6 @@ let ( +% ) = fadd
 let ( -% ) = fsub
 let ( *% ) = fmul
 
-val pow: a:elem -> b:nat -> res:elem
-let rec pow a b =
-  if b = 0 then 1
-  else fmul a (pow a (b - 1))
-
 val fpow: a:elem -> b:pos -> Tot (res:elem) (decreases b)
 let rec fpow a b =
   if b = 1 then a

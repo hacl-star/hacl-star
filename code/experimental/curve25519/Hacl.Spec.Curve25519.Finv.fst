@@ -4,7 +4,7 @@ open FStar.Mul
 open Lib.IntTypes
 open Spec.Curve25519
 
-#reset-options "--z3rlimit 50 --max_fuel 2 --max_ifuel 0 --using_facts_from '* -FStar.Seq'"
+#reset-options "--z3rlimit 50 --max_fuel 2 --using_facts_from '* -FStar.Seq'"
 
 let fsqr x = fmul x x
 
@@ -61,6 +61,52 @@ let rec lemma_pow_mul x n m =
     assert (pow (pow x n) m == pow x (n + n * (m - 1)))
   end
 
+val lemma_pow_double: a:elem -> b:nat ->
+  Lemma
+    (requires True)
+    (ensures (pow (a *% a) b == pow a (b + b)))
+  (decreases b)
+let rec lemma_pow_double a b =
+  if b = 0 then ()
+  else begin
+    lemma_pow_double a (b - 1);
+    assert (pow (a *% a) b == fmul (a *% a) (pow (a *% a) (b - 1)));
+    assert (pow (a *% a) b == fmul (a *% a) (pow a (b + b - 2)));
+    lemma_pow_one a;
+    lemma_pow_one a;
+    //assert (pow (a *% a) b == fmul (fmul (pow a 1) (pow a 1)) (pow a (b + b - 2)));
+    lemma_pow_add a 1 1;
+    //assert (pow (a *% a) b == fmul (pow a 2) (pow a (b + b - 2)));
+    lemma_pow_add a 2 (b + b - 2)
+    //assert (pow (a *% a) b == pow a (b + b))
+  end
+
+val lemma_fpow_is_pow:a:elem -> b:pos ->
+  Lemma
+    (requires True)
+    (ensures (fpow a b == pow a b))
+  (decreases b)
+let rec lemma_fpow_is_pow a b =
+  if b = 1 then ()
+  else begin
+    if b % 2 = 0 then begin
+      assert (fpow a b == fpow (a *% a) (b / 2));
+      lemma_fpow_is_pow (a *% a) (b / 2);
+      assert (fpow a b == pow (a *% a) (b / 2));
+      lemma_pow_double a (b / 2) end
+    else begin
+      FStar.Math.Lemmas.euclidean_division_definition b 2;
+      //assert (b == b / 2 * 2 + b % 2);
+      assert (b > 1 /\ b % 2 = 1);
+      assert (fpow a b == fmul a (fpow (a *% a) (b / 2)));
+      lemma_fpow_is_pow (a *% a) (b / 2);
+      //assert (fpow (a *% a) (b / 2) == pow (a *% a) (b / 2));
+      assert (fpow a b == fmul a (pow (a *% a) (b / 2)));
+      lemma_pow_double a (b / 2);
+      //assert (fpow a b == fmul a (pow a (b / 2 * 2)));
+      lemma_pow_one a;
+      lemma_pow_add a 1 (b / 2 * 2) end
+    end
 
 val fsquare_times:
     inp:elem

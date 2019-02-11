@@ -133,12 +133,14 @@ val store_felem:
   -> Stack unit
     (requires fun h ->
       live h f /\ live h b /\ disjoint f b /\ state_inv_t h f)
-    (ensures  fun h0 _ h1 -> modifies (loc b |+| loc f) h0 h1)
+    (ensures  fun h0 _ h1 ->
+      modifies (loc b |+| loc f) h0 h1 /\
+      BSeq.nat_from_intseq_le (as_seq h1 b) == feval h0 f)
 let store_felem #s b f =
   match s with
-  | M26 -> F26.store_felem b f
-  | M51 -> F51.store_felem b f
-  | M64 -> F64.store_felem b f
+  | M26 -> admit(); F26.store_felem b f
+  | M51 -> admit(); F51.store_felem b f
+  | M64 -> admit(); F64.store_felem b f
 
 inline_for_extraction
 val set_zero:
