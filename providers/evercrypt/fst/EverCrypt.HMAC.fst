@@ -156,8 +156,7 @@ val part1:
 let hash0 (#a:alg) (b:bytes_blocks a): GTot (acc a) =
   compress_many (acc0 #a) b
 
-#push-options "--z3rlimit 200 --max_fuel 0 --max_ifuel 0"
-
+#push-options  "--z3rlimit 600 --max_fuel 0 --max_ifuel 0"
 // we use auxiliary functions only for clarity and proof modularity
 inline_for_extraction
 let part1 a (acc: state a) key data len =
@@ -203,7 +202,7 @@ let part1 a (acc: state a) key data len =
   let tag = sub key 0ul (tag_len a) in (* Salvage memory *)
   Hash.finish #(Ghost.hide a) acc tag;
   let h4 = ST.get() in
-  (
+
     let p = block_length a in
     let key1 = as_seq h1 key in
     let blocks1 = as_seq h1 blocks in
@@ -231,7 +230,10 @@ let part1 a (acc: state a) key data len =
     Seq.append_assoc v2 last1 suffix1;
     Seq.append_assoc key1 blocks1 last1;
     assert(acc3 == hash0 #a S.((key1 @| data1) @| suffix1));
-    assert(extract acc3 == EverCrypt.Hash.spec a S.(key1 @| data1)))
+    assert(extract acc3 == EverCrypt.Hash.spec a S.(key1 @| data1));
+    let h1 = h4 in
+    let s2 = key in
+    assert (      modifies (loc_union (footprint acc h0) (loc_buffer s2)) h0 h1)
 
 // the two parts have the same stucture; let's keep their proofs in sync.
 inline_for_extraction
