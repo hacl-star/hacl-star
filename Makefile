@@ -46,8 +46,8 @@ test-c: $(subst .,_,$(patsubst %.fst,test-c-%,$(notdir $(wildcard code/tests/*.f
 test-ml: $(subst .,_,$(patsubst %.fst,test-ml-%,$(notdir $(wildcard specs/tests/*.fst))))
 
 ci:
-	$(MAKE) vaf-to-fst
-	$(MAKE) all test
+	NOSHORTLOG=1 $(MAKE) vaf-to-fst
+	NOSHORTLOG=1 $(MAKE) all test
 
 # Backwards-compat target
 .PHONY: secure_api.old
@@ -96,6 +96,7 @@ SHELL=/bin/bash
 #  TXT: readable text to print out once the command terminates
 #  STEM: path stem for the logs, stdout will be in STEM.out and stderr in STEM.err
 #  OUT: if present, stdout goes in OUT instead of STEM.out
+ifeq (,$(NOSHORTLOG))
 run-with-log = \
   if [[ "$4" == "" ]]; then outfile="$3.out"; else outfile="$4"; fi; \
   $(TIME) -q -f '%E' -o $3.time sh -c "$(subst ",\",$1)" > $$outfile 2> >( tee $3.err 1>&2 ); \
@@ -111,6 +112,9 @@ run-with-log = \
     tail -n 20 $$outfile; \
     echo "<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>"; \
   fi
+else
+run-with-log = $1
+endif
 
 
 ####################################################
