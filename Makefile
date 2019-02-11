@@ -81,8 +81,6 @@ else
   TIME := /usr/bin/time
 endif
 
-MAKEFLAGS += -Otarget
-
 
 ##########################
 # Pretty-printing helper #
@@ -94,14 +92,13 @@ SHELL=/bin/bash
 #   $(call run-with-log,CMD,TXT,STEM[,OUT])
 # 
 # Arguments:
-#  CMD: command to execute
+#  CMD: command to execute (may contain double quotes, but not escaped)
 #  TXT: readable text to print out once the command terminates
 #  STEM: path stem for the logs, stdout will be in STEM.out and stderr in STEM.err
 #  OUT: if present, stdout goes in OUT instead of STEM.out
 run-with-log = \
-  echo "$1" > $3.cmd; \
   if [[ "$4" == "" ]]; then outfile="$3.out"; else outfile="$4"; fi; \
-  $(TIME) -q -f '%E' -o $3.time $1 > $$outfile 2> >( tee $3.err 1>&2 ); \
+  $(TIME) -q -f '%E' -o $3.time sh -c "$(subst ",\",$1)" > $$outfile 2> >( tee $3.err 1>&2 ); \
   ret=$$?; \
   time=$$(cat $3.time); \
   if [ $$ret -eq 0 ]; then \
@@ -110,8 +107,8 @@ run-with-log = \
     echo "<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>"; \
     echo -e "\033[31mFatal error while running\033[0m: $1"; \
     echo -e "\033[31mFailed after\033[0m: $$time"; \
-    echo -e "\033[36mFull log is in $3.{cmd,out,err}, see excerpt below\033[0m:"; \
-    tail -n 20 $3.out; \
+    echo -e "\033[36mFull log is in $3.{out,err}, see excerpt below\033[0m:"; \
+    tail -n 20 $$outfile; \
     echo "<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>"; \
   fi
 
@@ -130,9 +127,6 @@ VALE_FSTS = $(patsubst %.vaf,%.fst,$(VALE_ROOTS))
 FSTAR_ROOTS = $(wildcard $(addsuffix /*.fsti,$(DIRS)) $(addsuffix /*.fst,$(DIRS)))
 
 include Makefile.common
-
-debug:
-	$(call run-with-log,echo hello,BLAH,/tmp/true,/tmp/true)
 
 # We currently force regeneration of three depend files... this is... long...
 ifndef NODEPEND
