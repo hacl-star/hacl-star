@@ -100,6 +100,13 @@ let create_felem s =
   | M51 -> (F51.create_felem ()) <: felem s
   | M64 -> (F64.create_felem ()) <: felem s
 
+val state_inv_t: #s:field_spec -> h:mem -> f:felem s -> Type0
+let state_inv_t #s h f =
+  match s with
+  | M26 -> True
+  | M51 -> F51.mul_inv_t h f
+  | M64 -> True
+
 inline_for_extraction
 val load_felem:
     #s:field_spec
@@ -107,22 +114,16 @@ val load_felem:
   -> u64s:lbuffer uint64 4ul
   -> Stack unit
     (requires fun h ->
-      live h f /\ live h u64s /\ disjoint f u64s)
+      live h f /\ live h u64s /\ disjoint f u64s /\
+      v (LSeq.index (as_seq h u64s) 3) < pow2 63)
     (ensures  fun h0 _ h1 ->
-      modifies (loc f) h0 h1 /\
+      modifies (loc f) h0 h1 /\ state_inv_t h1 f /\
       as_nat h1 f == BSeq.nat_from_intseq_le (as_seq h0 u64s))
 let load_felem #s f b =
   match s with
   | M26 -> admit(); F26.load_felem f b
   | M51 -> F51.load_felem f b
   | M64 -> F64.load_felem f b
-
-val store_felem_pre: #s:field_spec -> h:mem -> f:felem s -> Type0
-let store_felem_pre #s h f =
-  match s with
-  | M26 -> True
-  | M51 -> F51.mul_inv_t h f
-  | M64 -> True
 
 inline_for_extraction
 val store_felem:
@@ -131,8 +132,7 @@ val store_felem:
   -> f:felem s
   -> Stack unit
     (requires fun h ->
-      live h f /\ live h b /\ disjoint f b /\
-      store_felem_pre h f)
+      live h f /\ live h b /\ disjoint f b /\ state_inv_t h f)
     (ensures  fun h0 _ h1 -> modifies (loc b |+| loc f) h0 h1)
 let store_felem #s b f =
   match s with
@@ -251,13 +251,6 @@ let fmul_pre #s h f1 f2 =
   | M51 -> F51.felem_fits h f1 (9, 10, 9, 9, 9) /\ F51.felem_fits h f2 (9, 10, 9, 9, 9)
   | M64 -> True
 
-val fmul_fsqr_post:#s:field_spec -> h:mem -> out:felem s -> Type0
-let fmul_fsqr_post #s h out =
-  match s with
-  | M26 -> True
-  | M51 -> F51.mul_inv_t h out
-  | M64 -> True
-
 inline_for_extraction
 val fmul:
     #s:field_spec
@@ -270,7 +263,7 @@ val fmul:
       live h out /\ live h f1 /\ live h f2 /\ live h tmp /\
       disjoint out tmp /\ fmul_pre h f1 f2)
     (ensures fun h0 _ h1 ->
-      modifies (loc out |+| loc tmp) h0 h1 /\ fmul_fsqr_post h1 out /\
+      modifies (loc out |+| loc tmp) h0 h1 /\ state_inv_t h1 out /\
       feval h1 out == P.fmul (feval h0 f1) (feval h0 f2))
 let fmul #s out f1 f2 tmp =
   match s with
@@ -349,7 +342,7 @@ val fmul1:
   -> Stack unit
     (requires fun h -> live h out /\ live h f1 /\ fmul1_pre h f1 f2)
     (ensures  fun h0 _ h1 ->
-      modifies (loc out) h0 h1 /\ fmul_fsqr_post h1 out /\
+      modifies (loc out) h0 h1 /\ state_inv_t h1 out /\
       feval h1 out == P.fmul (feval h0 f1) (v f2))
 //     feval h1 out == (feval h0 f1 * v f2) % P.prime)
 let fmul1 #s out f1 f2 =
@@ -376,7 +369,7 @@ val fsqr:
       live h out /\ live h f1 /\ live h tmp /\
       disjoint out tmp /\ fsqr_pre h f1)
     (ensures  fun h0 _ h1 ->
-      modifies (loc out |+| loc tmp) h0 h1 /\ fmul_fsqr_post h1 out /\
+      modifies (loc out |+| loc tmp) h0 h1 /\ state_inv_t h1 out /\
       feval h1 out == P.fmul (feval h0 f1) (feval h0 f1))
 let fsqr #s out f1 tmp =
   match s with
@@ -420,12 +413,19 @@ let fsqr2 #s out f tmp =
   | M64 -> F64.fsqr2 out f tmp
 
 inline_for_extraction
-val cswap2: #s:field_spec -> bit:uint64 -> p1:felem2 s -> p2:felem2 s -> Stack unit
-    (requires (fun h0 -> live h0 p1 /\ live h0 p2))
-    (ensures (fun h0 _ h1 -> modifies (loc p1 |+| loc p2) h0 h1))
-[@CInline]
+val cswap2:
+    #s:field_spec
+  -> bit:uint64{v bit <= 1}
+  -> p1:felem2 s
+  -> p2:felem2 s
+  -> Stack unit
+    (requires fun h0 -> live h0 p1 /\ live h0 p2)
+    (ensures  fun h0 _ h1 ->
+      modifies (loc p1 |+| loc p2) h0 h1 /\
+      (v bit == 1 ==> as_seq h1 p1 == as_seq h0 p2 /\ as_seq h1 p2 == as_seq h0 p1) /\
+      (v bit == 0 ==> as_seq h1 p1 == as_seq h0 p1 /\ as_seq h1 p2 == as_seq h0 p2))
 let cswap2 #s bit p0 p1 =
   match s with
   | M26 -> admit()
-  | M51 -> F51.cswap2 bit p0 p1
-  | M64 -> F64.cswap2 bit p0 p1
+  | M51 -> admit(); F51.cswap2 bit p0 p1
+  | M64 -> admit(); F64.cswap2 bit p0 p1

@@ -575,7 +575,58 @@ let lemma_load_felem5 f u64s =
   assert_norm (pow2 64 * pow2 64 = pow2 128);
   assert_norm (pow2 64 * pow2 64 * pow2 64 = pow2 192)
 
-val lemma_load_felem: u64s:LSeq.lseq uint64 4 ->
+val lemma_mul_le:a:nat -> b:nat -> c:nat -> d:nat ->
+  Lemma
+  (requires a <= b /\ c <= d)
+  (ensures  a * c <= b * d)
+let lemma_mul_le a b c d = ()
+
+val lemma_load_felem_fits5:
+    f:felem5
+  -> u64s:LSeq.lseq uint64 4
+  -> Lemma
+    (requires (
+      let open Lib.Sequence in
+      let (f0, f1, f2, f3, f4) = f in
+      let (s0, s1, s2, s3) = (u64s.[0], u64s.[1], u64s.[2], u64s.[3]) in
+      v s3 < pow2 63 /\
+      v f0 == v s0 % pow2 51 /\
+      v f1 == v s0 / pow2 51 + (v s1 % pow2 38) * pow2 13 /\
+      v f2 == v s1 / pow2 38 + (v s2 % pow2 25) * pow2 26 /\
+      v f3 == v s2 / pow2 25 + (v s3 % pow2 12) * pow2 39 /\
+      v f4 == v s3 / pow2 12))
+    (ensures felem_fits5 f (1, 1, 1, 1, 1))
+let lemma_load_felem_fits5 f u64s =
+  let open Lib.Sequence in
+  let (f0, f1, f2, f3, f4) = f in
+  let (s0, s1, s2, s3) = (u64s.[0], u64s.[1], u64s.[2], u64s.[3]) in
+  assert_norm (pow51 = pow2 51);
+  assert (v f0 < pow2 51);
+  FStar.Math.Lemmas.lemma_div_lt (v s3) 63 12;
+  assert (v f4 < pow2 51);
+  FStar.Math.Lemmas.lemma_div_lt (v s0) 64 51;
+  lemma_mul_le (v s1 % pow2 38) (pow2 38 - 1) (pow2 13) (pow2 13);
+  assert ((v s1 % pow2 38) * pow2 13 <= (pow2 38 - 1) * pow2 13);
+  assert (v f1 <= pow2 13 - 1 + (pow2 38 - 1) * pow2 13);
+  assert (v f1 <= pow2 38 * pow2 13 - 1);
+  assert_norm (pow2 38 * pow2 13 = pow2 51);
+  assert (v f1 < pow2 51);
+  FStar.Math.Lemmas.lemma_div_lt (v s1) 64 38;
+  lemma_mul_le (v s2 % pow2 25) (pow2 25 - 1) (pow2 26) (pow2 26);
+  assert ((v s2 % pow2 25) * pow2 26 <= (pow2 25 - 1) * pow2 26);
+  assert (v f2 <= (pow2 26 - 1) + (pow2 25 - 1) * pow2 26);
+  assert (v f2 <= pow2 25 * pow2 26 - 1);
+  assert_norm (pow2 25 * pow2 26 = pow2 51);
+  assert (v f2 < pow2 51);
+  FStar.Math.Lemmas.lemma_div_lt (v s2) 64 25;
+  lemma_mul_le (v s3 % pow2 12) (pow2 12 - 1) (pow2 39) (pow2 39);
+  assert ((v s3 % pow2 12) * pow2 39 <= (pow2 12 - 1) * pow2 39);
+  assert (v f3 <= (pow2 39 - 1) + (pow2 12 - 1) * pow2 39);
+  assert (v f3 <= pow2 12 * pow2 39 - 1);
+  assert_norm (pow2 12 * pow2 39 = pow2 51);
+  assert (v f3 < pow2 51)
+
+val lemma_load_felem: u64s:LSeq.lseq uint64 4{v (u64s.[3]) < pow2 63} ->
   Lemma (
     let open Lib.Sequence in
     let (s0, s1, s2, s3) = (u64s.[0], u64s.[1], u64s.[2], u64s.[3]) in
@@ -584,7 +635,9 @@ val lemma_load_felem: u64s:LSeq.lseq uint64 4 ->
     let f2 = (s1 >>. 38ul) |. ((s2 &. u64 0x1ffffff) <<. 26ul) in
     let f3 = (s2 >>. 25ul) |. ((s3 &. u64 0xfff) <<. 39ul) in
     let f4 = s3 >>. 12ul in
-    as_nat5 (f0, f1, f2, f3, f4) == BSeq.nat_from_intseq_le u64s)
+    let f = (f0, f1, f2, f3, f4) in
+    felem_fits5 f (1, 1, 1, 1, 1) /\
+    as_nat5 f == BSeq.nat_from_intseq_le u64s)
 let lemma_load_felem u64s =
   assert_norm (0x3fffffffff = pow2 38 - 1);
   assert_norm (0x1ffffff = pow2 25 - 1);
@@ -634,4 +687,6 @@ let lemma_load_felem u64s =
   let f3 = f2h |. f3l in
   logor_disjoint64 f2h f3l 39;
   let f4 = f3h in
-  lemma_load_felem5 (f0, f1, f2, f3, f4) u64s
+  let f = (f0, f1, f2, f3, f4) in
+  lemma_load_felem_fits5 f u64s;
+  lemma_load_felem5 f u64s

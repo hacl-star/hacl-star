@@ -428,9 +428,11 @@ val load_felem:
   -> u64s:lbuffer uint64 4ul
   -> Stack unit
     (requires fun h ->
-      live h u64s /\ live h f /\ disjoint u64s f)
+      live h u64s /\ live h f /\ disjoint u64s f /\
+      v (as_seq h u64s).[3] < pow2 63)
     (ensures  fun h0 _ h1 ->
       modifies (loc f) h0 h1 /\
+      felem_fits h1 f (1, 1, 1, 1, 1) /\
       as_nat h1 f == BSeq.nat_from_intseq_le (as_seq h0 u64s))
 let load_felem f u64s =
   let h0 = ST.get () in

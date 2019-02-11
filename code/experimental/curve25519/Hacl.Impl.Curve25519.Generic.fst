@@ -22,7 +22,7 @@ module S = Spec.Curve25519
 module BSeq = Lib.ByteSequence
 module LSeq = Lib.Sequence
 
-#set-options "--z3rlimit 50 --max_fuel 2"
+#reset-options "--z3rlimit 50 --max_fuel 2 --using_facts_from '* -FStar.Seq'"
 //#set-options "--debug Hacl.Impl.Curve25519.Generic --debug_level ExtractNorm"
 
 inline_for_extraction
@@ -46,17 +46,25 @@ val decode_point_:
   -> Stack unit
     (requires fun h0 -> live h0 o /\ live h0 i /\ disjoint o i)
     (ensures fun h0 _ h1 -> modifies (loc o) h0 h1 /\
-      fget_x h1 o == S.decodePoint (as_seq h0 i) /\
-      fget_z h1 o == 1)
+      state_inv_t h1 (get_x o) /\ state_inv_t h1 (get_z o) /\
+      fget_x h1 o == S.decodePoint (as_seq h0 i) /\ fget_z h1 o == 1)
 let decode_point_ #s o i =
   push_frame();
   let tmp = create 4ul (u64 0) in
+  let h0 = ST.get () in
   uints_from_bytes_le #U64 tmp i;
-  tmp.(3ul) <- tmp.(3ul) &. u64 0x7fffffffffffffff;
+  let tmp3 = tmp.(3ul) in
+  tmp.(3ul) <- tmp3 &. u64 0x7fffffffffffffff;
+  mod_mask_lemma tmp3 63ul;
+  assert_norm (0x7fffffffffffffff = pow2 63 - 1);
+  uintv_extensionality (mod_mask #U64 63ul) (u64 0x7fffffffffffffff);
+  let h1 = ST.get () in
+  assert (v (LSeq.index (as_seq h1 tmp) 3) < pow2 63);
+  assume (BSeq.nat_from_intseq_le (as_seq h1 tmp) == BSeq.nat_from_bytes_le (as_seq h0 i) % pow2 255);
   let x : felem s = sub o 0ul (nlimb s) in
   let z : felem s = sub o (nlimb s) (nlimb s) in
   set_one z;
-  load_felem x tmp; admit();
+  load_felem x tmp;
   pop_frame()
 
 (* WRAPPER to Prevent Inlining *)
@@ -75,8 +83,8 @@ val decode_point:
   -> Stack unit
     (requires fun h0 -> live h0 o /\ live h0 i /\ disjoint o i)
     (ensures  fun h0 _ h1 -> modifies (loc o) h0 h1 /\
-      fget_x h1 o == S.decodePoint (as_seq h0 i) /\
-      fget_z h1 o == 1)
+      state_inv_t h1 (get_x o) /\ state_inv_t h1 (get_z o) /\
+      fget_x h1 o == S.decodePoint (as_seq h0 i) /\ fget_z h1 o == 1)
 let decode_point #s o i =
   match s with
   | M26 -> decode_point_26 o i
@@ -91,7 +99,9 @@ val encode_point_:
   -> o:lbuffer uint8 32ul
   -> i:point s
   -> Stack unit
-    (requires fun h0 -> live h0 o /\ live h0 i /\ disjoint o i)
+    (requires fun h0 ->
+      live h0 o /\ live h0 i /\ disjoint o i /\
+      state_inv_t h0 (get_x i) /\ state_inv_t h0 (get_z i))
     (ensures  fun h0 _ h1 -> modifies (loc o) h0 h1 /\
       as_seq h1 o == S.encodePoint (fget_x h0 i, fget_z h0 i))
 let encode_point_ #s o i =
@@ -122,7 +132,9 @@ val encode_point:
   -> o:lbuffer uint8 32ul
   -> i:point s
   -> Stack unit
-    (requires fun h0 -> live h0 o /\ live h0 i /\ disjoint o i)
+    (requires fun h0 ->
+      live h0 o /\ live h0 i /\ disjoint o i /\
+      state_inv_t h0 (get_x i) /\ state_inv_t h0 (get_z i))
     (ensures  fun h0 _ h1 -> modifies (loc o) h0 h1 /\
       as_seq h1 o == S.encodePoint (fget_x h0 i, fget_z h0 i))
 let encode_point #s o i =
@@ -140,10 +152,11 @@ val montgomery_ladder_:
   -> i:point s
   -> Stack unit
     (requires fun h0 ->
-      live h0 o /\ live h0 k /\ live h0 i /\
-      fget_z h0 i == 1)
+      live h0 o /\ live h0 k /\ live h0 i /\ fget_z h0 i == 1 /\
+      state_inv_t h0 (get_x i) /\ state_inv_t h0 (get_z i))
     (ensures  fun h0 _ h1 ->
       modifies (loc o) h0 h1 /\
+      state_inv_t h1 (get_x o) /\ state_inv_t h1 (get_z o) /\
       fget_xz h1 o == S.montgomery_ladder (fget_x h0 i) (as_seq h0 k))
 let montgomery_ladder_ #s out key init =
   push_frame();
@@ -199,10 +212,11 @@ val montgomery_ladder:
   -> i:point s
   -> Stack unit
     (requires fun h0 ->
-      live h0 o /\ live h0 k /\ live h0 i /\
-      fget_z h0 i == 1)
+      live h0 o /\ live h0 k /\ live h0 i /\ fget_z h0 i == 1 /\
+      state_inv_t h0 (get_x i) /\ state_inv_t h0 (get_z i))
     (ensures  fun h0 _ h1 ->
       modifies (loc o) h0 h1 /\
+      state_inv_t h1 (get_x o) /\ state_inv_t h1 (get_z o) /\
       fget_xz h1 o == S.montgomery_ladder (fget_x h0 i) (as_seq h0 k))
 let montgomery_ladder #s out key init =
   match s with
