@@ -130,6 +130,9 @@ VALE_FSTS = $(patsubst %.vaf,%.fst,$(VALE_ROOTS))
 # The complete set of F* files -- only meaningful in the second stage of this build.
 FSTAR_ROOTS = $(wildcard $(addsuffix /*.fsti,$(DIRS)) $(addsuffix /*.fst,$(DIRS)))
 
+# Convenience target
+verify: $(addsuffix .checked,$(FSTAR_ROOTS))
+
 include Makefile.common
 
 # We currently force regeneration of three depend files... this is... long...
@@ -479,15 +482,18 @@ dist/%/Makefile.basic: $(ALL_KRML_FILES) dist/hacl-internal-headers/Makefile.bas
 	cp $(HACL_OLD_FILES) $(patsubst %.c,%.h,$(HACL_OLD_FILES)) $(dir $@)
 	cp $(HAND_WRITTEN_FILES) $(HAND_WRITTEN_OPTIONAL_FILES) dist/hacl-internal-headers/*.h $(dir $@)
 	cp $(VALE_ASMS) $(dir $@)
-	$(KRML) $(DEFAULT_FLAGS) $(KRML_EXTRA) \
-	  -tmpdir $(dir $@) -skip-compilation \
-	  $(filter %.krml,$^) \
-	  -ccopt -Wno-unused \
-	  -warn-error @4 \
-	  -fparentheses \
-	  $(notdir $(HACL_OLD_FILES)) \
-	  $(notdir $(HAND_WRITTEN_FILES)) \
-	  -o libevercrypt.a
+	@$(call run-with-log,\
+	  $(KRML) $(DEFAULT_FLAGS) $(KRML_EXTRA) \
+	    -tmpdir $(dir $@) -skip-compilation \
+	    $(filter %.krml,$^) \
+	    -silent \
+	    -ccopt -Wno-unused \
+	    -warn-error @4-6 \
+	    -fparentheses \
+	    $(notdir $(HACL_OLD_FILES)) \
+	    $(notdir $(HAND_WRITTEN_FILES)) \
+	    -o libevercrypt.a \
+	  ,[KREMLIN $*],dist/$*)
 
 # Auto-generates headers for the hand-written C files. If a signature changes on
 # the F* side, hopefully this will ensure the C file breaks. Note that there is
