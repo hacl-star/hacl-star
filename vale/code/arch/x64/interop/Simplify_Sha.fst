@@ -2,6 +2,7 @@ module Simplify_Sha
 
 friend SHA_helpers
 
+#set-options "--z3rlimit_factor 4"
 
 open Words_s
 

@@ -79,7 +79,7 @@ let sha_post : VSig.vale_post 224 dom =
 
 module VS = X64.Vale.State
 
-#set-options "--z3rlimit 20"
+#set-options "--z3rlimit 20 --max_fuel 0 --max_ifuel 0"
 
 [@__reduce__] unfold
 let sha_lemma'
@@ -110,6 +110,8 @@ let sha_lemma'
 let sha_lemma = as_t #(VSig.vale_sig sha_pre sha_post) sha_lemma'
 
 let code_sha = SH.va_code_sha_update_bytes_stdcall IA.win
+
+#reset-options "--z3rlimit 20"
 
 (* Here's the type expected for the sha wrapper *)
 [@__reduce__]
@@ -160,7 +162,7 @@ let sha_vale
     (let hash_in = le_bytes_to_hash (le_seq_quad32_to_bytes (BV.as_seq h0 (BV.mk_buffer_view ctx_b Views.view128))) in
     let hash_out = le_bytes_to_hash (le_seq_quad32_to_bytes (BV.as_seq h1 (BV.mk_buffer_view ctx_b Views.view128))) in     
     let input_LE = seq_nat8_to_seq_uint8 (le_seq_quad32_to_bytes (BV.as_seq h1 (BV.mk_buffer_view in_b Views.view128))) in
-    Seq.length input_LE % SHA_helpers.size_block = 0 /\
+    Seq.length input_LE % SHA_helpers.block_length = 0 /\
     hash_out == update_multi_transparent hash_in input_LE)
   ) 
   =

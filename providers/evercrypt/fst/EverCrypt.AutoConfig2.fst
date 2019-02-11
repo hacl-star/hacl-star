@@ -1,5 +1,6 @@
 module EverCrypt.AutoConfig2
 
+module ST = FStar.HyperStack.ST
 module HS = FStar.HyperStack
 module B = LowStar.Buffer
 module S = FStar.Seq
@@ -57,14 +58,15 @@ let recall () =
   B.recall user_wants_bcrypt
 
 let init () =
-  if Check_aesni_stdcall.check_aesni_stdcall () <> 0UL then begin
+  if Cpuid_stdcalls.check_aesni () <> 0UL then begin
     B.recall cpu_has_aesni;
     B.upd cpu_has_aesni 0ul true
   end;
-  if Check_sha_stdcall.check_sha_stdcall () <> 0UL then begin
+  if Cpuid_stdcalls.check_sha () <> 0UL then begin
     B.recall cpu_has_shaext;
     B.upd cpu_has_shaext 0ul true
-  end
+  end;
+  admit () // missing modifies clauses everywhere in Cpuid_stdcalls
 
 inline_for_extraction
 let mk_disabler (f: eternal_pointer bool { B.loc_includes (fp ()) (B.loc_buffer f) }): disabler = fun () ->

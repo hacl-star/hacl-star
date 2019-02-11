@@ -17,6 +17,7 @@ let uint8_p = B.buffer UInt8.t
 unfold
 let uint64 = UInt64.t
 
+noextract
 let uint64_to_nat_seq
       (b:Seq.seq UInt64.t)
     : (s:Seq.lseq nat64 (Seq.length b))

@@ -86,7 +86,7 @@ ifndef MAKE_RESTARTS
 # meaning we can eliminate large chunks of the dependency graph, since we only
 # need to run: Vale stuff, and HACL spec tests.
 .fstar-depend-%: .FORCE
-	@$(FSTAR_NO_FLAGS) --dep $* $(FSTAR_ROOTS) --extract '* -Prims -LowStar -Lib.Buffer -Hacl -FStar +FStar.Endianness +FStar.Kremlin.Endianness -EverCrypt -MerkleTree -Vale.Tactics -CanonCommMonoid -CanonCommSemiring -FastHybrid_helpers -FastMul_helpers -FastSqr_helpers -FastUtil_helpers -TestLib -EverCrypt -MerkleTree -Test -Vale_memcpy' > $@
+	@$(FSTAR_NO_FLAGS) --dep $* $(FSTAR_ROOTS) --extract '* -Prims -LowStar -Lib.Buffer -Hacl -FStar +FStar.Endianness +FStar.Kremlin.Endianness -EverCrypt -MerkleTree -Vale.Tactics -CanonCommMonoid -CanonCommSemiring -FastHybrid_helpers -FastMul_helpers -FastSqr_helpers -FastUtil_helpers -TestLib -EverCrypt -MerkleTree -Test -Vale_memcpy -Vale.AsLowStar.Test' > $@
 
 .vale-depend: .fstar-depend-make .FORCE
 	@$(PYTHON3) tools/valedepend.py \
@@ -247,15 +247,19 @@ $(OUTPUT_DIR)/%.ml:
 
 dist/vale/%-x86_64-mingw.S: dist/vale/%.exe
 	$< GCC Win > $@
+	sed -i "" 's/_stdcall//' $@
 
 dist/vale/%-x86_64-msvc.S: dist/vale/%.exe
 	$< MASM Win > $@
+	sed -i "" 's/_stdcall//' $@
 
 dist/vale/%-x86_64-linux.S: dist/vale/%.exe
 	$< GCC Linux > $@
+	sed -i "" 's/_stdcall//' $@
 
 dist/vale/%-x86_64-darwin.S: dist/vale/%.exe
 	$< GCC MacOS > $@
+	sed -i "" 's/_stdcall//' $@
 
 dist/vale/cpuid.exe: vale/code/lib/util/x64/CpuidMain.ml
 dist/vale/aesgcm.exe: vale/code/crypto/aes/x64/Main.ml
@@ -313,18 +317,20 @@ DEFAULT_FLAGS		=\
   -bundle CanonCommMonoid,CanonCommSemiring,CanonCommSwaps[rename=Unused] \
   -bundle FastUtil_helpers,FastHybrid_helpers,FastSqr_helpers,FastMul_helpers[rename=Unused2] \
   -bundle Opaque_s,Map16,Test.Vale_memcpy,Fast_defs,Interop_Printer,Memcpy[rename=Unused3] \
-  -bundle X64.*,Arch.*,Words.*,Vale.*,Collections.*,Collections,SHA_helpers[rename=Unused4] \
+  -bundle X64.*,Arch.*,Words.*,Vale.*,Collections.*,Collections,SHA_helpers,Interop,Interop.*[rename=Unused4] \
   -bundle Prop_s,Types_s,Words_s,Views,AES_s,Workarounds,Math.*,Interop,TypesNative_s[rename=Unused5] \
   -bundle GF128_s,GF128,Poly1305.Spec_s,GCTR,GCTR_s,GHash_s,GCM_helpers,GHash[rename=Unused6] \
   -bundle AES_helpers,AES256_helpers,GCM_s,GCM,Interop_assumptions[rename=Unused7] \
   -bundle 'Check_aesni_stdcall,Check_sha_stdcall,Sha_update_bytes_stdcall[rename=Vale]' \
-  -library 'Sha_update_bytes_stdcall' \
-  -library 'Check_sha_stdcall' \
-  -library 'Check_aesni_stdcall' \
+  -library 'Sha_stdcalls' \
+  -library 'Poly_stdcalls' \
+  -library 'Fast_stdcalls' \
+  -library 'Cpuid_stdcalls' \
+  -no-prefix 'Sha_stdcalls' \
+  -no-prefix 'Poly_stdcalls' \
+  -no-prefix 'Fast_stdcalls' \
+  -no-prefix 'Cpuid_stdcalls' \
   -no-prefix 'EverCrypt.Vale' \
-  -no-prefix 'Sha_update_bytes_stdcall' \
-  -no-prefix 'Check_sha_stdcall' \
-  -no-prefix 'Check_aesni_stdcall' \
   -no-prefix 'MerkleTree.New.Low' \
   -no-prefix 'MerkleTree.New.Low.Serialization' \
   -fparentheses -fno-shadow -fcurly-braces
@@ -375,8 +381,6 @@ dist/coco/Makefile.basic: \
     -bundle EverCrypt.AutoConfig2= \
     -bundle EverCrypt= \
     -bundle EverCrypt.Hacl \
-    -bundle EverCrypt.OpenSSL \
-    -bundle EverCrypt.BCrypt \
     -bundle '\*[rename=EverCrypt_Misc]'
 
 # The "coco" distribution is only optimized when EVERCRYPT_CONFIG=everest.

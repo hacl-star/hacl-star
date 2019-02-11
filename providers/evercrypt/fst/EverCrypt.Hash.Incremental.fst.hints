@@ -25,7 +25,7 @@
         "typing_LowStar.Monotonic.Buffer.loc_buffer", "unit_typing"
       ],
       0,
-      "48cfe8549787ad5488d1ebb048efa75f"
+      "c17aabf92d33f5928c394525a485fb1b"
     ],
     [
       "EverCrypt.Hash.Incremental.split_at_last",
@@ -91,7 +91,7 @@
         "typing_FStar.UInt.fits"
       ],
       0,
-      "5a9c10acb7cd6d57ee6bb2278a692017"
+      "33aedaefca6dfd57855b9cbc0f97b33b"
     ],
     [
       "EverCrypt.Hash.Incremental.hashes",
@@ -147,16 +147,16 @@
         "typing_LowStar.Buffer.trivial_preorder"
       ],
       0,
-      "d6e4f5e452391a7f3bf1f386c203490c"
+      "afb7a00dee875bb6bc3324058debab7f"
     ],
     [
-      "EverCrypt.Hash.Incremental.uu___169",
+      "EverCrypt.Hash.Incremental.uu___170",
       1,
       0,
       0,
       [ "@query" ],
       0,
-      "8923d402d8ab6c5ce8782c289eff0099"
+      "1861511fb5608fa566ad8e9841cc0e2f"
     ],
     [
       "EverCrypt.Hash.Incremental.split_at_last_empty",
@@ -210,7 +210,7 @@
         "typing_FStar.UInt.fits", "typing_FStar.UInt32.n"
       ],
       0,
-      "968d83890a92a8e18575f6e1108ac614"
+      "99deef12e3eb0f03400bef84796d02ca"
     ],
     [
       "EverCrypt.Hash.Incremental.create_in",
@@ -358,7 +358,7 @@
         "typing_Spec.Hash.Definitions.word", "typing_Spec.Hash.update_multi"
       ],
       0,
-      "fb46cf412780187a50d66670bc66f4ed"
+      "3ee0cc3defe94bb0000de1389db14fcd"
     ],
     [
       "EverCrypt.Hash.Incremental.update_pre",
@@ -390,7 +390,7 @@
         "typing_LowStar.Monotonic.Buffer.len"
       ],
       0,
-      "5ebd5bed1e2ad6b32f09307ddefb2b59"
+      "1468dde02da2e36a5f4956896e0c3c23"
     ],
     [
       "EverCrypt.Hash.Incremental.update_post",
@@ -399,7 +399,7 @@
       0,
       [ "@query" ],
       0,
-      "0dcbc23c67cd65a15f9f9485bd359713"
+      "134631f98c86314b178fdda22bcc80d4"
     ],
     [
       "EverCrypt.Hash.Incremental.rest",
@@ -458,7 +458,7 @@
         "typing_Hacl.Hash.Definitions.block_len", "typing_Prims.pow2"
       ],
       0,
-      "be6798219dea2b9108d1b179096f9b57"
+      "f4a7939cfe9486578d6a6a1082395bcb"
     ],
     [
       "EverCrypt.Hash.Incremental.add_len",
@@ -498,7 +498,7 @@
         "typing_FStar.UInt64.add", "typing_FStar.UInt64.v"
       ],
       0,
-      "bbd4c58387b2c1edbf592c4801ad12c9"
+      "553ead33c536c8e36be067e90f45aa85"
     ],
     [
       "EverCrypt.Hash.Incremental.split_at_last_small",
@@ -510,13 +510,18 @@
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
         "Prims_pretyping_ae567c2fb75be05905677af440075565", "b2t_def",
         "bool_inversion", "constructor_distinct_FStar.Integers.Signed",
+        "constructor_distinct_FStar.Integers.Unsigned",
         "constructor_distinct_FStar.Integers.W128",
+        "constructor_distinct_FStar.Integers.W8",
         "constructor_distinct_FStar.Integers.Winfinite",
+        "constructor_distinct_Spec.Hash.Definitions.MD5",
         "equality_tok_FStar.Integers.W128@tok",
+        "equality_tok_FStar.Integers.W8@tok",
         "equality_tok_FStar.Integers.Winfinite@tok",
         "equation_EverCrypt.Hash.Incremental.split_at_last",
         "equation_FStar.Int31.n", "equation_FStar.Integers.int_t",
-        "equation_FStar.Integers.v", "equation_FStar.Integers.width_of_sw",
+        "equation_FStar.Integers.uint_8", "equation_FStar.Integers.v",
+        "equation_FStar.Integers.width_of_sw",
         "equation_FStar.Pervasives.inversion",
         "equation_FStar.Seq.Properties.split", "equation_FStar.UInt.fits",
         "equation_FStar.UInt.max_int", "equation_FStar.UInt.min_int",
@@ -526,21 +531,20 @@
         "equation_Spec.Hash.Definitions.block_word_length",
         "equation_Spec.Hash.Definitions.bytes",
         "equation_Spec.Hash.Definitions.bytes_blocks",
+        "equation_Spec.Hash.Definitions.state_word_length",
         "equation_Spec.Hash.Definitions.word_length",
         "fuel_guarded_inversion_Spec.Hash.Definitions.hash_alg",
+        "function_token_typing_FStar.Integers.uint_8",
         "function_token_typing_FStar.UInt8.t",
         "function_token_typing_Prims.__cache_version_number__",
         "function_token_typing_Prims.int", "int_inversion", "int_typing",
         "inversion-interp", "lemma_FStar.Seq.Base.lemma_eq_elim",
         "lemma_FStar.Seq.Base.lemma_eq_intro",
-        "lemma_FStar.Seq.Base.lemma_eq_refl",
         "lemma_FStar.Seq.Base.lemma_index_app1",
         "lemma_FStar.Seq.Base.lemma_index_app2",
         "lemma_FStar.Seq.Base.lemma_index_slice",
         "lemma_FStar.Seq.Base.lemma_len_append",
         "lemma_FStar.Seq.Base.lemma_len_slice",
-        "lemma_FStar.Seq.Properties.slice_is_empty",
-        "lemma_FStar.Seq.Properties.slice_length",
         "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_Addition",
         "primitive_Prims.op_AmpAmp", "primitive_Prims.op_Division",
         "primitive_Prims.op_LessThanOrEqual", "primitive_Prims.op_Modulus",
@@ -548,6 +552,7 @@
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
         "projection_inverse_FStar.Integers.Signed__0",
+        "projection_inverse_FStar.Integers.Unsigned__0",
         "projection_inverse_FStar.Pervasives.Native.Mktuple2__1",
         "projection_inverse_FStar.Pervasives.Native.Mktuple2__2",
         "refinement_interpretation_FStar.Seq.Base_Tm_refine_03127b5d59ee3055620018693b4264e8",
@@ -555,7 +560,6 @@
         "refinement_interpretation_FStar.Seq.Base_Tm_refine_36f208f2b1019ab7b5d9be73f4c89349",
         "refinement_interpretation_FStar.Seq.Base_Tm_refine_559c261b1c3777929ea329abfe70ab33",
         "refinement_interpretation_FStar.Seq.Base_Tm_refine_aebc5aa9049e78f605051015a3436e68",
-        "refinement_interpretation_FStar.Seq.Base_Tm_refine_cd046bc4a887ee7e1b05946e0bf5772b",
         "refinement_interpretation_Prims_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
         "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
         "refinement_interpretation_Spec.Hash.Definitions_Tm_refine_7ce9bdf3f89bf32d2d3e20761c8dfc87",
@@ -564,7 +568,7 @@
         "typing_FStar.UInt32.n"
       ],
       0,
-      "606b0ee8760b2481a2fc6d13ff5aaacf"
+      "8033dac3275d548783e8e1d53b050088"
     ],
     [
       "EverCrypt.Hash.Incremental.add_len_small",
@@ -572,8 +576,7 @@
       0,
       0,
       [
-        "@MaxIFuel_assumption",
-        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "@MaxIFuel_assumption", "@query",
         "FStar.Pervasives_pretyping_5fc4df0ff1d263535b76c4f1ab202ae9",
         "Prims_pretyping_ae567c2fb75be05905677af440075565",
         "Prims_pretyping_f8666440faa91836cc5a13998af863fc",
@@ -619,10 +622,9 @@
         "function_token_typing_Prims.__cache_version_number__",
         "int_inversion", "int_typing", "inversion-interp", "l_and-interp",
         "lemma_FStar.UInt32.uv_inv", "primitive_Prims.op_Addition",
-        "primitive_Prims.op_AmpAmp", "primitive_Prims.op_Division",
-        "primitive_Prims.op_LessThan", "primitive_Prims.op_LessThanOrEqual",
-        "primitive_Prims.op_Modulus", "primitive_Prims.op_Multiply",
-        "primitive_Prims.op_Subtraction",
+        "primitive_Prims.op_AmpAmp", "primitive_Prims.op_LessThan",
+        "primitive_Prims.op_LessThanOrEqual", "primitive_Prims.op_Modulus",
+        "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
         "projection_inverse_FStar.Integers.Signed__0",
@@ -631,29 +633,22 @@
         "projection_inverse_FStar.Pervasives.Native.Some_v",
         "refinement_interpretation_EverCrypt.Hash.Incremental_Tm_refine_24f136524a6870a041f8853db27f7960",
         "refinement_interpretation_EverCrypt.Hash.Incremental_Tm_refine_3433be2dcd160b2b786ca3793de08dee",
-        "refinement_interpretation_FStar.Int.Cast_Tm_refine_7aa05f464301e3cb4272fba6147da28f",
-        "refinement_interpretation_FStar.Int.Cast_Tm_refine_c43881637fea8b5528f4439c75737f91",
         "refinement_interpretation_FStar.Integers_Tm_refine_3cdcf602fed307cc92181008f4c2ceb4",
         "refinement_interpretation_FStar.Integers_Tm_refine_d12d61266a2f2128b6a00b00566f8446",
         "refinement_interpretation_FStar.UInt32_Tm_refine_8af61d0447e6887060c2411d0a533c0b",
-        "refinement_interpretation_FStar.UInt64_Tm_refine_9f98e4c5a305b81c3cdab3041ec9362f",
-        "refinement_interpretation_FStar.UInt64_Tm_refine_b74a7cc72b60e5ca6bf76621a35790c5",
         "refinement_interpretation_FStar.UInt_Tm_refine_a347709bfeba48709474ad26f4f6be87",
         "refinement_interpretation_Hacl.Hash.Definitions_Tm_refine_40ffb9620b727a8620d61ad69490538f",
         "refinement_interpretation_Prims_Tm_refine_8d65e998a07dd53ec478e27017d9dba5",
         "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
         "typing_EverCrypt.Hash.Incremental.add_len",
-        "typing_EverCrypt.Hash.Incremental.rest",
-        "typing_FStar.Int.Cast.uint32_to_uint64",
-        "typing_FStar.Int.Cast.uint64_to_uint32", "typing_FStar.Integers.v",
+        "typing_EverCrypt.Hash.Incremental.rest", "typing_FStar.Integers.v",
         "typing_FStar.Pervasives.simplify", "typing_FStar.UInt.fits",
         "typing_FStar.UInt32.add", "typing_FStar.UInt32.n",
-        "typing_FStar.UInt32.v", "typing_FStar.UInt64.rem",
-        "typing_Hacl.Hash.Definitions.block_len",
+        "typing_FStar.UInt32.v", "typing_Hacl.Hash.Definitions.block_len",
         "typing_tok_FStar.Integers.W32@tok", "unit_typing"
       ],
       0,
-      "38830c0264af63118cfaa2417baa4bf4"
+      "b57aa3052e3de09b5d28afe697d63585"
     ],
     [
       "EverCrypt.Hash.Incremental.update_small",
@@ -812,7 +807,7 @@
         "typing_LowStar.Monotonic.Buffer.loc_buffer"
       ],
       0,
-      "3e67de922cea4771d57fb29c4aced29f"
+      "c64518453de6c52afbf84bdeb15af95c"
     ],
     [
       "EverCrypt.Hash.Incremental.update_empty_buf",
@@ -821,7 +816,7 @@
       0,
       [ "@query", "assumption_FStar.UInt32.t__uu___haseq" ],
       0,
-      "90ba840fb98f799a47592f479d513fc3"
+      "4cc4c3301ca4896fc3c779e8dd9c46a1"
     ],
     [
       "EverCrypt.Hash.Incremental.split_at_last_blocks",
@@ -880,7 +875,7 @@
         "typing_FStar.UInt.fits", "typing_FStar.UInt32.n"
       ],
       0,
-      "a7de1e1c40fd68a1de7b0aeb373ed5fa"
+      "2c7c494eef34eeb7812de17b65b74456"
     ],
     [
       "EverCrypt.Hash.Incremental.update_empty_buf",
@@ -953,7 +948,6 @@
         "lemma_FStar.Seq.Base.lemma_eq_intro",
         "lemma_FStar.Seq.Base.lemma_index_app1",
         "lemma_FStar.Seq.Base.lemma_index_app2",
-        "lemma_FStar.Seq.Base.lemma_index_slice",
         "lemma_FStar.Seq.Base.lemma_len_append",
         "lemma_FStar.Seq.Base.lemma_len_slice",
         "lemma_FStar.Seq.Properties.slice_is_empty",
@@ -1004,7 +998,6 @@
         "refinement_interpretation_FStar.Seq.Base_Tm_refine_03127b5d59ee3055620018693b4264e8",
         "refinement_interpretation_FStar.Seq.Base_Tm_refine_3321cbe2f573e3c988fd0895bf1f0cf9",
         "refinement_interpretation_FStar.Seq.Base_Tm_refine_36f208f2b1019ab7b5d9be73f4c89349",
-        "refinement_interpretation_FStar.Seq.Base_Tm_refine_559c261b1c3777929ea329abfe70ab33",
         "refinement_interpretation_FStar.Seq.Base_Tm_refine_aebc5aa9049e78f605051015a3436e68",
         "refinement_interpretation_FStar.Seq.Base_Tm_refine_cd046bc4a887ee7e1b05946e0bf5772b",
         "refinement_interpretation_FStar.Seq.Properties_Tm_refine_528d1ac7a4a801fe55aa0f436f85ad2a",
@@ -1044,7 +1037,7 @@
         "typing_Spec.Hash.Definitions.word"
       ],
       0,
-      "5e31cda20ce3e22fc80b31770ae2c99f"
+      "08718e3af53ca345e19f3138df772d3b"
     ],
     [
       "EverCrypt.Hash.Incremental.update_round",
@@ -1084,7 +1077,7 @@
         "typing_LowStar.Monotonic.Buffer.as_seq"
       ],
       0,
-      "1178345de7b2fe0f09b4f770d7d6aebe"
+      "02db6a11b299781c1cfc434c512dd1dc"
     ],
     [
       "EverCrypt.Hash.Incremental.split_at_last_block",
@@ -1143,7 +1136,7 @@
         "typing_FStar.UInt32.n"
       ],
       0,
-      "8309df24008ccc5c470c6e074a5c87e9"
+      "4dcd0dbe3bd7c5596a18e5c70bdb503b"
     ],
     [
       "EverCrypt.Hash.Incremental.update_round",
@@ -1314,7 +1307,7 @@
         "typing_Spec.Hash.Definitions.word"
       ],
       0,
-      "9b2cd797ea8df799984eab8bda91615e"
+      "31a11639fb49ec15bb3f9533469e5462"
     ],
     [
       "EverCrypt.Hash.Incremental.update",
@@ -1455,7 +1448,7 @@
         "typing_Spec.Hash.Definitions.block_length"
       ],
       0,
-      "19c81451d2ab85aabfe0c29fed11a458"
+      "13c1ad7135975387f15de5f5d7a296d7"
     ],
     [
       "EverCrypt.Hash.Incremental.finish_st",
@@ -1474,7 +1467,7 @@
         "typing_Spec.Hash.Definitions.word_length"
       ],
       0,
-      "40f34f57b2b014f7a9c2195ff7b4aba7"
+      "539b95a01899b8bdd307d6c99c46ca5d"
     ],
     [
       "EverCrypt.Hash.Incremental.mk_finish",
@@ -1695,7 +1688,7 @@
         "typing_Spec.Hash.Incremental.hash_incremental"
       ],
       0,
-      "fe62434f03cc219d960ca80d4baa3add"
+      "08ce3a49a02c2bb061319bdc648ea4c5"
     ],
     [
       "EverCrypt.Hash.Incremental.finish",
@@ -1743,7 +1736,7 @@
         "typing_FStar.Monotonic.HyperStack.get_tip"
       ],
       0,
-      "57781c4bff8a24bcf2a1a3cec2e2e3c2"
+      "70975b617067bce02f23af198936dfce"
     ]
   ]
 ]

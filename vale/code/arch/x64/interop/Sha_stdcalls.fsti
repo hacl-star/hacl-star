@@ -32,13 +32,13 @@ val sha256_update
     B.length in_b = 64 * (UInt64.v num_val) /\
     B.disjoint ctx_b in_b /\
     B.disjoint ctx_b k_b /\
-    B.disjoint in_b k_b /\   
+    B.disjoint in_b k_b /\
     Seq.equal (B.as_seq h k_b) (Spec.SHA2.Constants.k224_256)
   )
   (ensures fun h0 _ h1 ->
     B.modifies (B.loc_buffer ctx_b) h0 h1 /\
    (reveal_word();
     Seq.equal 
-      (B.as_seq h1 ctx_b) 
+      (B.as_seq h1 ctx_b)
       (update_multi_transparent (B.as_seq h0 ctx_b) (B.as_seq h0 in_b)))
   )

@@ -334,7 +334,7 @@
         "typing_MerkleTree.New.Low.hash_size"
       ],
       0,
-      "70ddfa717182592f02ae4f7162c673e9"
+      "0b3b59acf18153a8281852fca5f99f2c"
     ],
     [
       "MerkleTree.New.Low.Serialization.serialize_hash",
@@ -461,7 +461,7 @@
         "fuel_guarded_inversion_LowStar.Vector.vector_str",
         "function_token_typing_EverCrypt.Helpers.uint8_p",
         "function_token_typing_FStar.UInt8.t",
-        "function_token_typing_Prims.__cache_version_number__",
+        "function_token_typing_Prims.__cache_version_number__", "int_typing",
         "lemma_FStar.Int.pow2_values", "lemma_FStar.UInt32.vu_inv",
         "primitive_Prims.op_Addition", "primitive_Prims.op_AmpAmp",
         "primitive_Prims.op_LessThanOrEqual", "primitive_Prims.op_Multiply",
@@ -485,7 +485,7 @@
         "typing_MerkleTree.Spec.hash_size"
       ],
       0,
-      "445159d2ff15540ef69e42a805b4f3b3"
+      "00fd1971f0848adb81eb8d1940fc2dd1"
     ],
     [
       "MerkleTree.New.Low.Serialization.serialize_hash_vec_i",
@@ -589,7 +589,7 @@
         "typing_MerkleTree.New.Low.hreg", "typing_MerkleTree.Spec.hash_size"
       ],
       0,
-      "e747cb95c9b9578aa227f7c2c11fbf4a"
+      "22f6d34fd314f2da78c9ffd49f0f8167"
     ],
     [
       "MerkleTree.New.Low.Serialization.serialize_hash_vec",
@@ -686,7 +686,7 @@
         "typing_MerkleTree.New.Low.hreg"
       ],
       0,
-      "dae9dcdda7f344a9ea9102d189ec9be8"
+      "8894a6ace639999a35163a1b86a8e730"
     ],
     [
       "MerkleTree.New.Low.Serialization.hash_vv_bytes_i",
@@ -708,7 +708,6 @@
         "equality_tok_FStar.Integers.W64@tok",
         "equality_tok_Spec.Hash.Definitions.SHA2_256@tok",
         "equation_EverCrypt.Helpers.uint8_p",
-        "equation_EverCrypt.Helpers.uint8_t",
         "equation_FStar.HyperStack.ST.equal_stack_domains",
         "equation_FStar.Int31.n", "equation_FStar.Int64.n",
         "equation_FStar.Integers.int_t",
@@ -731,7 +730,6 @@
         "equation_MerkleTree.New.Low.Serialization.uint32_t",
         "equation_MerkleTree.New.Low.Serialization.uint64_t",
         "equation_MerkleTree.New.Low.hash",
-        "equation_MerkleTree.New.Low.hash_dummy",
         "equation_MerkleTree.New.Low.hash_size",
         "equation_MerkleTree.New.Low.hash_vec",
         "equation_MerkleTree.New.Low.hash_vv",
@@ -746,15 +744,12 @@
         "fuel_guarded_inversion_LowStar.Vector.vector_str",
         "function_token_typing_EverCrypt.Helpers.uint8_p",
         "function_token_typing_FStar.Monotonic.Heap.heap",
-        "function_token_typing_FStar.UInt8.t",
         "function_token_typing_MerkleTree.New.Low.hash_vec",
         "function_token_typing_Prims.__cache_version_number__",
         "int_inversion", "int_typing",
         "lemma_FStar.HyperStack.ST.lemma_same_refs_in_stack_regions_intro",
         "lemma_FStar.Int.pow2_values", "lemma_FStar.Map.lemma_ContainsDom",
-        "lemma_FStar.UInt32.uv_inv", "lemma_FStar.UInt32.vu_inv",
-        "lemma_FStar.UInt64.vu_inv",
-        "lemma_LowStar.Monotonic.Buffer.length_null_2",
+        "lemma_FStar.UInt32.vu_inv", "lemma_FStar.UInt64.vu_inv",
         "primitive_Prims.op_Addition", "primitive_Prims.op_AmpAmp",
         "primitive_Prims.op_GreaterThanOrEqual",
         "primitive_Prims.op_LessThan", "primitive_Prims.op_LessThanOrEqual",
@@ -771,7 +766,6 @@
         "refinement_interpretation_FStar.UInt64_Tm_refine_a47bb8e44b30dd25d67bba7f54d30a2d",
         "refinement_interpretation_FStar.UInt64_Tm_refine_b0d613e63865150efd1f73378fdc77ae",
         "refinement_interpretation_FStar.UInt_Tm_refine_a347709bfeba48709474ad26f4f6be87",
-        "refinement_interpretation_LowStar.Monotonic.Buffer_Tm_refine_3daf37ab3cd19c1e74e63f8f5e0fb16a",
         "refinement_interpretation_LowStar.Vector_Tm_refine_9ff867c004d0e891d59193a1c818b2a7",
         "refinement_interpretation_LowStar.Vector_Tm_refine_cfcaf770db2aa5428feeab314ed64702",
         "refinement_interpretation_MerkleTree.New.Low.Serialization_Tm_refine_0cd778ecaa0b49ff923f2258c0c6aa44",
@@ -790,15 +784,12 @@
         "typing_FStar.UInt64.mul", "typing_FStar.UInt64.sub",
         "typing_FStar.UInt64.uint_to_t", "typing_FStar.UInt64.v",
         "typing_LowStar.Buffer.trivial_preorder",
-        "typing_LowStar.Monotonic.Buffer.g_is_null",
         "typing_LowStar.Monotonic.Buffer.len",
         "typing_LowStar.Monotonic.Buffer.length",
-        "typing_LowStar.Monotonic.Buffer.mnull",
         "typing_LowStar.Vector.__proj__Vec__item__cap",
         "typing_LowStar.Vector.__proj__Vec__item__sz",
         "typing_LowStar.Vector.__proj__Vec__item__vs",
         "typing_LowStar.Vector.size_of",
-        "typing_MerkleTree.New.Low.hash_dummy",
         "typing_MerkleTree.New.Low.merkle_tree_size_lg",
         "typing_MerkleTree.New.Low.uint64_max",
         "typing_MerkleTree.Spec.hash_size",
@@ -806,7 +797,7 @@
         "typing_tok_Spec.Hash.Definitions.SHA2_256@tok"
       ],
       0,
-      "7c0deb3fe3bf56cd619cad91e359913e"
+      "2fd0bfc0a14f61ccd2022c8a2e93daf5"
     ],
     [
       "MerkleTree.New.Low.Serialization.hash_vv_bytes",
@@ -1056,7 +1047,7 @@
         "typing_MerkleTree.New.Low.hvreg"
       ],
       0,
-      "fd634018fdd0041f7f0a819cc8514270"
+      "1c428466dfebd9814ec7961f7895e21d"
     ],
     [
       "MerkleTree.New.Low.Serialization.deserialize_bool",
@@ -1611,7 +1602,7 @@
         "typing_MerkleTree.New.Low.hash_irepr"
       ],
       0,
-      "e8191d7221f1adbaaea52a8c23c425f7"
+      "163b35eb2a1d18014047c73872d9dcce"
     ],
     [
       "MerkleTree.New.Low.Serialization.deserialize_hash_vec_i",
@@ -1808,7 +1799,7 @@
         "typing_MerkleTree.New.Low.hash_vec_dummy"
       ],
       0,
-      "21d0c36bbf19a967a2fd5403a2da904a"
+      "a55eb42bea5dac73cc4c8e75d71dc3e1"
     ],
     [
       "MerkleTree.New.Low.Serialization.deserialize_hash_vv_i",
@@ -2001,7 +1992,7 @@
         "typing_MerkleTree.New.Low.hash_vec_dummy"
       ],
       0,
-      "748a38dc36717067bedec747c91bf59a"
+      "625a26ffed9f2f23f51e600355b7408a"
     ],
     [
       "MerkleTree.New.Low.Serialization.mt_serialize_size",
@@ -2238,7 +2229,7 @@
         "typing_MerkleTree.New.Low.mt_loc"
       ],
       0,
-      "9899691f415975486d1d12e43073bb2f"
+      "95958d4cc9449b503cdc7cbd78b8bc5e"
     ],
     [
       "MerkleTree.New.Low.Serialization.mt_deserialize",
@@ -2334,7 +2325,7 @@
         "typing_LowStar.Monotonic.Buffer.mnull"
       ],
       0,
-      "12b92de2d80cfbfe06b6f359fc432e9e"
+      "46811e4a7af41d365bbe258e7d8156e2"
     ]
   ]
 ]

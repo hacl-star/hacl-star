@@ -1,14 +1,23 @@
 [
-  ",òzwoßª„?ÉèÁs\u0002\u0011Û",
+  "©î]rùË√© \\\u00137\u000fSè\b",
   [
     [
       "FastUtil_helpers.sub_carry",
       1,
       1,
       0,
-      [ "@query" ],
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Fast_defs.bit",
+        "equation_Prims.nat", "equation_Words_s.nat64",
+        "equation_Words_s.natN", "primitive_Prims.op_LessThan",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Fast_defs_Tm_refine_d62476c3a5813525c06af050ff95c3ee",
+        "refinement_interpretation_Prims_Tm_refine_a4038d5aed1633b5ecbb4e499b1c66ad",
+        "refinement_interpretation_Words_s_Tm_refine_5514fbe9e08dfda40f950a7b9f1b2b98"
+      ],
       0,
-      "5494d010c0179777a5b1f998394f9ab9"
+      "789e4855d31e6af7cd47d55a2ea002ce"
     ],
     [
       "FastUtil_helpers.lemma_sub3",
@@ -23,7 +32,7 @@
         "typing_FStar.Reflection.Data.var"
       ],
       0,
-      "91af10f846958f34a8e0c10c7139cd5c"
+      "0a427d8c39b7340c05e58de5a224021b"
     ],
     [
       "FastUtil_helpers.lemma_sub",
@@ -38,7 +47,7 @@
         "typing_FStar.Reflection.Data.var"
       ],
       0,
-      "c3c80dbe1c762967f010dc19745cb57b"
+      "2fd4e8c329705be60bd486ea22c2da8f"
     ]
   ]
 ]
