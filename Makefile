@@ -472,6 +472,10 @@ ifneq (,$(MLCRYPTO_HOME))
 OPENSSL_HOME 	= $(MLCRYPTO_HOME)/openssl
 endif
 
+ifeq ($(OS),Windows_NT)
+OPENSSL_HOME	:= $(cygpath -u $(OPENSSL_HOME))
+endif
+
 dist/test/c/merkle_tree_test.c: secure_api/merkle_tree/test/merkle_tree_test.c
 	mkdir -p $(dir $@)
 	cp $< $(patsubst %.c,%.h,$<) $(dir $@)
