@@ -273,12 +273,12 @@ dist/vale/%-x86_64-darwin.S: dist/vale/%.exe
 	$< GCC MacOS > $@
 	$(SED) 's/_stdcall//' -i $@
 
-dist/vale/cpuid.exe: vale/code/lib/util/x64/CpuidMain.ml
-dist/vale/aesgcm.exe: vale/code/crypto/aes/x64/Main.ml
-dist/vale/sha256.exe: vale/code/crypto/sha/ShaMain.ml
-dist/vale/curve25519.exe: vale/code/crypto/ecc/curve25519/Main25519.ml
+dist/vale/cpuid.exe: vale/code/lib/util/x64/CpuidMain.cmx
+dist/vale/aesgcm.exe: vale/code/crypto/aes/x64/Main.cmx
+dist/vale/sha256.exe: vale/code/crypto/sha/ShaMain.cmx
+dist/vale/curve25519.exe: vale/code/crypto/ecc/curve25519/Main25519.cmx
 
-dist/vale/%.exe: $(ALL_CMX_FILES) vale/code/lib/util/CmdLineParser.ml
+dist/vale/%.exe: $(ALL_CMX_FILES) vale/code/lib/util/CmdLineParser.cmx
 	mkdir -p $(dir $@)
 	$(OCAMLOPT) $^ -o $@ -I vale/code/lib/util
 
@@ -470,6 +470,10 @@ ifneq (,$(MLCRYPTO_HOME))
 OPENSSL_HOME 	= $(MLCRYPTO_HOME)/openssl
 endif
 
+ifeq ($(OS),Windows_NT)
+OPENSSL_HOME	:= $(cygpath -u $(OPENSSL_HOME))
+endif
+
 dist/test/c/merkle_tree_test.c: secure_api/merkle_tree/test/merkle_tree_test.c
 	mkdir -p $(dir $@)
 	cp $< $(patsubst %.c,%.h,$<) $(dir $@)
@@ -481,8 +485,8 @@ dist/test/c/%.exe: dist/test/c/%.c compile-generic
 	$(CC) -Wall -Wextra -Wno-infinite-recursion -Wno-int-conversion -Wno-unused-parameter \
 	  -I $(dir $@) -I $(KREMLIN_HOME)/include -I $(OPENSSL_HOME)/include -I dist/generic \
 	  -L$(OPENSSL_HOME) \
-	  $< -lcrypto -o $@ \
-	  dist/generic/libevercrypt.a \
+	  $< -o $@ \
+	  dist/generic/libevercrypt.a -lcrypto \
 	  $(KREMLIN_HOME)/kremlib/dist/generic/libkremlib.a
 
 test-c-%: dist/test/c/%.exe
