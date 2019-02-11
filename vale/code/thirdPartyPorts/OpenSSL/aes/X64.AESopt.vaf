@@ -89,6 +89,80 @@ ghost procedure finish_aes_encrypt_le(ghost alg:algorithm, ghost input_LE:quad32
     reveal cipher;
 }
 
+procedure {:quick exportOnly} load_two_lsb(inout dst:xmm)
+    lets constp @= r11; 
+    modifies constp; efl;
+    ensures  dst == Mkfour(2, 0, 0, 0);
+{
+    ZeroXmm(dst);
+    assert two_to_nat32(Mktwo(2, 0)) == 0x2; // OBSERVE
+    PinsrqImm(dst, 2, 0, constp);
+    reveal insert_nat64;
+}
+
+procedure {:quick exportOnly} load_one_lsb(inout dst:xmm)
+    lets constp @= r11; 
+    modifies constp; efl;
+    ensures  dst == Mkfour(1, 0, 0, 0);
+{
+    ZeroXmm(dst);
+    assert two_to_nat32(Mktwo(1, 0)) == 0x1; // OBSERVE
+    PinsrqImm(dst, 1, 0, constp);
+    reveal insert_nat64;
+}
+
+#reset-options "--z3rlimit 20"
+procedure {:quick} {:verify true} handle_ctr32(
+    ghost ctr_BE:quad32
+    )
+    lets
+        Ii @= xmm0; T1 @= xmm1; T2 @= xmm2;
+        Z1 @= xmm5; Z2 @= xmm6; 
+        inout0 @= xmm9; inout1 @= xmm10; inout2 @= xmm11; inout3 @= xmm12;
+        inout4 @= xmm13; inout5 @= xmm14; rndkey @= xmm15;
+        constp @= r11;
+    reads
+        rndkey;
+
+    modifies
+        constp;
+        Ii; T1; T2; Z1; Z2; inout0; inout1; inout2; inout3; inout4; inout5; 
+        efl;
+
+    requires
+        T1 == reverse_bytes_quad32(ctr_BE);
+    ensures
+        inout1 == quad32_xor(reverse_bytes_quad32(inc32(ctr_BE, 1)), rndkey);
+        inout2 == quad32_xor(reverse_bytes_quad32(inc32(ctr_BE, 2)), rndkey);
+        inout3 ==            reverse_bytes_quad32(inc32(ctr_BE, 3));
+        inout4 ==            reverse_bytes_quad32(inc32(ctr_BE, 4));
+        inout5 ==            reverse_bytes_quad32(inc32(ctr_BE, 5));
+        T1     ==            reverse_bytes_quad32(inc32(ctr_BE, 6));
+{
+    InitPshufbMask(Ii, constp);  // # borrow $Ii for .Lbswap_mask
+    VPshufb(Z2, T1, Ii);         // # byte-swap counter
+    // OpenSSL uses a memory operand with VPaddd to do the addition with .Lone_lsb.  We avoid that here for now.
+    //load_two_lsb();              // # borrow $Z1, .Ltwo_lsb
+    //load_one_lsb();              // # .Lone_lsb
+    load_one_lsb(Z1);
+    VPaddd(inout1, Z2, Z1);
+    load_two_lsb(Z1);              
+    VPaddd(inout2, Z2, Z1);
+    VPaddd(inout3, inout1, Z1);
+    VPshufb(inout1, inout1, Ii);
+    VPaddd(inout4, inout2, Z1);
+    VPshufb(inout2, inout2, Ii);
+    VPxor(inout1, inout1, rndkey);
+    VPaddd(inout5, inout3, Z1);
+    VPshufb(inout3, inout3, Ii);
+    VPxor(inout2, inout2, rndkey);
+    VPaddd(T1, inout4, Z1);         // # byte-swapped next counter value
+    VPshufb(inout4, inout4, Ii);
+    VPshufb(inout5, inout5, Ii);
+    VPshufb(T1, T1, Ii);            // # next counter value
+}
+
+
 procedure {:quick} loop6x_preamble(
     inline alg:algorithm,  // OpenSSL includes the number of rounds (nr) as a dynamic parameter (stored with the key).  Saves code space but adds extra instructions to the fast path.  Maybe branch predictor is good enough for it not to matter
     ghost iv_b:buffer128,
@@ -726,7 +800,7 @@ procedure {:quick} loop6x_save_output(
 
 
 #reset-options "--z3rlimit 100"
-procedure {:quick} {:verify true} loop6x(
+procedure {:quick} loop6x(
     inline alg:algorithm,  
     ghost iv_b:buffer128,
     ghost in0_b:buffer128,
