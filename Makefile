@@ -111,6 +111,7 @@ run-with-log = \
     echo -e "\033[36mFull log is in $3.{out,err}, see excerpt below\033[0m:"; \
     tail -n 20 $$outfile; \
     echo "<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>"; \
+    false; \
   fi
 else
 run-with-log = $1
