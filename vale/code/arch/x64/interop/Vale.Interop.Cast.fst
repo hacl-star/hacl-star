@@ -13,6 +13,7 @@ module LSig = Vale.AsLowStar.LowStarSig
 open FStar.Mul
 
 
+#set-options "--z3rlimit_factor 4"
 let rec ghost_copy_down (#t:base_typ) (b:b_t t) (b8:b_t TUInt8{B.length b8 == B.length b * view_n t}) 
   (h0:HS.mem{B.live h0 b /\ B.live h0 b8}) 
   (h_accu:HS.mem{B.live h_accu b /\ B.live h_accu b8 /\ 
