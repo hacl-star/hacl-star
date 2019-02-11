@@ -33,9 +33,6 @@ all_:
 	$(MAKE) vaf-to-fst
 	$(MAKE) all
 
-debug:
-	$(MAKE) vaf-to-fst
-	$(MAKE) /home/jonathan/Code/fstar/bin/../ulib/CanonCommMonoid.fst.checked
 
 all: compile-compact compile-generic compile-compact-msvc \
   compile-evercrypt-external-headers compile-compact-c89 compile-coco \
@@ -49,8 +46,8 @@ test-c: $(subst .,_,$(patsubst %.fst,test-c-%,$(notdir $(wildcard code/tests/*.f
 test-ml: $(subst .,_,$(patsubst %.fst,test-ml-%,$(notdir $(wildcard specs/tests/*.fst))))
 
 ci:
-	$(MAKE) vaf-to-fst
-	$(MAKE) all test
+	NOSHORTLOG=1 $(MAKE) vaf-to-fst
+	NOSHORTLOG=1 $(MAKE) all test
 
 # Backwards-compat target
 .PHONY: secure_api.old
@@ -69,7 +66,55 @@ ifeq ($(OS),Windows_NT)
 else
   MONO = mono
 endif
-SED := $(shell which gsed >/dev/null 2>&1 && echo gsed || echo sed)
+
+ifeq ($(shell uname -s),Darwin)
+  ifeq (,$(shell which gsed))
+    $(error gsed not found; try brew install gnu-sed)
+  endif
+  SED := gsed
+  ifeq (,$(shell which gtime))
+    $(error gtime not found; try brew install gnu-time)
+  endif
+  TIME := gtime
+else
+  SED := sed
+  TIME := /usr/bin/time
+endif
+
+
+##########################
+# Pretty-printing helper #
+##########################
+
+SHELL=/bin/bash
+
+# A helper to generate pretty logs, callable as:
+#   $(call run-with-log,CMD,TXT,STEM[,OUT])
+# 
+# Arguments:
+#  CMD: command to execute (may contain double quotes, but not escaped)
+#  TXT: readable text to print out once the command terminates
+#  STEM: path stem for the logs, stdout will be in STEM.out and stderr in STEM.err
+#  OUT: if present, stdout goes in OUT instead of STEM.out
+ifeq (,$(NOSHORTLOG))
+run-with-log = \
+  if [[ "$4" == "" ]]; then outfile="$3.out"; else outfile="$4"; fi; \
+  $(TIME) -q -f '%E' -o $3.time sh -c "$(subst ",\",$1)" > $$outfile 2> >( tee $3.err 1>&2 ); \
+  ret=$$?; \
+  time=$$(cat $3.time); \
+  if [ $$ret -eq 0 ]; then \
+    echo "$2, $$time"; \
+  else \
+    echo "<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>"; \
+    echo -e "\033[31mFatal error while running\033[0m: $1"; \
+    echo -e "\033[31mFailed after\033[0m: $$time"; \
+    echo -e "\033[36mFull log is in $3.{out,err}, see excerpt below\033[0m:"; \
+    tail -n 20 $$outfile; \
+    echo "<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>"; \
+  fi
+else
+run-with-log = $1
+endif
 
 
 ####################################################
@@ -85,6 +130,9 @@ VALE_FSTS = $(patsubst %.vaf,%.fst,$(VALE_ROOTS))
 # The complete set of F* files -- only meaningful in the second stage of this build.
 FSTAR_ROOTS = $(wildcard $(addsuffix /*.fsti,$(DIRS)) $(addsuffix /*.fst,$(DIRS)))
 
+# Convenience target. Remember to run make vaf-to-fst first.
+verify: $(addsuffix .checked,$(FSTAR_ROOTS))
+
 include Makefile.common
 
 # We currently force regeneration of three depend files... this is... long...
@@ -95,14 +143,18 @@ ifndef MAKE_RESTARTS
 # meaning we can eliminate large chunks of the dependency graph, since we only
 # need to run: Vale stuff, and HACL spec tests.
 .fstar-depend-%: .FORCE
-	@$(FSTAR_NO_FLAGS) --dep $* $(FSTAR_ROOTS) --extract '* -Prims -LowStar -Lib.Buffer -Hacl -FStar +FStar.Endianness +FStar.Kremlin.Endianness -EverCrypt -MerkleTree -Vale.Tactics -CanonCommMonoid -CanonCommSemiring -FastHybrid_helpers -FastMul_helpers -FastSqr_helpers -FastUtil_helpers -TestLib -EverCrypt -MerkleTree -Test -Vale_memcpy -Vale.AsLowStar.Test' > $@
+	@$(call run-with-log,\
+	  $(FSTAR_NO_FLAGS) --dep $* $(FSTAR_ROOTS) --extract '* -Prims -LowStar -Lib.Buffer -Hacl -FStar +FStar.Endianness +FStar.Kremlin.Endianness -EverCrypt -MerkleTree -Vale.Tactics -CanonCommMonoid -CanonCommSemiring -FastHybrid_helpers -FastMul_helpers -FastSqr_helpers -FastUtil_helpers -TestLib -EverCrypt -MerkleTree -Test -Vale_memcpy -Vale.AsLowStar.Test' > $@ \
+	  ,[FSTAR-DEPEND ($*)],$@,$@)
 
 .vale-depend: .fstar-depend-make .FORCE
-	@$(PYTHON3) tools/valedepend.py \
-	  $(addprefix -include ,$(INCLUDES)) \
-	  $(addprefix -in ,$(VALE_ROOTS)) \
-	  -dep $< \
-	  > $@
+	@$(call run-with-log,\
+	  $(PYTHON3) tools/valedepend.py \
+	    $(addprefix -include ,$(INCLUDES)) \
+	    $(addprefix -in ,$(VALE_ROOTS)) \
+	    -dep $< \
+	    > $@ \
+	  ,[VALE-DEPEND],$@,$@)
 
 .PHONY: .FORCE
 .FORCE:
@@ -118,13 +170,17 @@ include .vale-depend
 #################################################
 
 %.dump: %.checked
-	$(FSTAR) --dump_module $(subst prims,Prims,$(basename $(notdir $*))) \
-          --print_implicits --print_universes --print_effect_args --print_full_names \
-	  --print_bound_var_types --ugly --admit_smt_queries true \
-	  $* > $@
+	@$(call run-with-log,\
+	  $(FSTAR) --dump_module $(subst prims,Prims,$(basename $(notdir $*))) \
+	    --print_implicits --print_universes --print_effect_args --print_full_names \
+	    --print_bound_var_types --ugly --admit_smt_queries true \
+	    $* > $@ \
+	  ,[DUMP] $(notdir $(patsubst %.fst,%,$*)),$@)
 
 %.types.vaf:
-	$(MONO) $(IMPORT_FSTAR_TYPES) $(addprefix -in ,$^) -out $@
+	@$(call run-with-log,\
+	  $(MONO) $(IMPORT_FSTAR_TYPES) $(addprefix -in ,$^) -out $@ \
+	  ,[VALE-TYPES] $(notdir $*),$@)
 
 # Always pass Operator.vaf as an -include to Vale, except for the file itself.
 VALE_FLAGS = -include $(HACL_HOME)/vale/code/lib/util/Operator.vaf
@@ -132,10 +188,12 @@ VALE_FLAGS = -include $(HACL_HOME)/vale/code/lib/util/Operator.vaf
 $(HACL_HOME)/vale/code/lib/util/Operator.fst: VALE_FLAGS=
 
 %.fst:
-	$(MONO) $(VALE_HOME)/bin/vale.exe -fstarText -quickMods \
-	  -typecheck -include $*.types.vaf \
-	  $(VALE_FLAGS) \
-	  -in $< -out $@ -outi $@i
+	@$(call run-with-log,\
+	  $(MONO) $(VALE_HOME)/bin/vale.exe -fstarText -quickMods \
+	    -typecheck -include $*.types.vaf \
+	    $(VALE_FLAGS) \
+	    -in $< -out $@ -outi $@i \
+	  ,[VALE] $(notdir $*),$@)
 
 # A pseudo-target for the first stage.
 vaf-to-fst: $(VALE_FSTS)
@@ -233,8 +291,10 @@ $(HACL_HOME)/vale/code/arch/x64/X64.Memory_Sems.fst.checked: \
 # the variable assignment of their parent rule.
 %.checked: FSTAR_FLAGS=
 %.checked:
-	$(FSTAR) $(FSTAR_FLAGS) $< && \
-	touch $@
+	@$(call run-with-log,\
+	  $(FSTAR) $(FSTAR_FLAGS) $< && \
+	    touch $@ \
+	  ,[VERIFY] $(notdir $(patsubst %.fst,%,$*)),$@)
 
 
 ###############################################################################
@@ -248,14 +308,25 @@ TAC = $(shell which tac >/dev/null 2>&1 && echo "tac" || echo "tail -r")
 
 ALL_CMX_FILES = $(patsubst %.ml,%.cmx,$(shell echo $(ALL_ML_FILES) | $(TAC)))
 
-OCAMLOPT += -I $(OUTPUT_DIR)
+ifeq ($(OS),Windows_NT)
+  export OCAMLPATH := $(FSTAR_HOME)/bin;$(OCAMLPATH)
+else
+  export OCAMLPATH := $(FSTAR_HOME)/bin:$(OCAMLPATH)
+endif
+
+OCAMLOPT = ocamlfind opt -package fstarlib -linkpkg -g -I $(OUTPUT_DIR)
 
 .PRECIOUS: %.cmx
 %.cmx: %.ml
-	$(OCAMLOPT) -c $< -o $@
+	@$(call run-with-log,\
+	  $(OCAMLOPT) -c $< -o $@ \
+	  ,[OCAMLOPT-CMX] $(notdir $*),$@)
 
 $(OUTPUT_DIR)/%.ml:
-	$(FSTAR) $(subst .checked,,$<) --codegen OCaml --extract_module $(subst .fst.checked,,$(notdir $<))
+	@$(call run-with-log,\
+	  $(FSTAR) $(subst .checked,,$<) --codegen OCaml \
+	    --extract_module $(subst .fst.checked,,$(notdir $<)) \
+	  ,[EXTRACT-ML] $(notdir $*),$@)
 
 dist/vale/%-x86_64-mingw.S: dist/vale/%.exe
 	$< GCC Win > $@
@@ -278,9 +349,13 @@ dist/vale/aesgcm.exe: vale/code/crypto/aes/x64/Main.ml
 dist/vale/sha256.exe: vale/code/crypto/sha/ShaMain.ml
 dist/vale/curve25519.exe: vale/code/crypto/ecc/curve25519/Main25519.ml
 
+vale/code/lib/util/CmdLineParser.cmx: $(ALL_CMX_FILES)
+
 dist/vale/%.exe: $(ALL_CMX_FILES) vale/code/lib/util/CmdLineParser.cmx
 	mkdir -p $(dir $@)
-	$(OCAMLOPT) $^ -o $@ -I vale/code/lib/util
+	@$(call run-with-log,\
+	  $(OCAMLOPT) $^ -o $@ -I vale/code/lib/util \
+	  ,[OCAMLOPT-EXE] $(notdir $*),$@)
 
 # The ones in secure_api are legacy and should go.
 VALE_ASMS = $(foreach P,cpuid aesgcm sha256 curve25519,\
@@ -299,10 +374,12 @@ vale-asm: $(VALE_ASMS)
 .PRECIOUS: %.krml
 
 $(OUTPUT_DIR)/%.krml:
-	$(FSTAR) --codegen Kremlin \
-	  --extract_module $(basename $(notdir $(subst .checked,,$<))) \
-	  $(notdir $(subst .checked,,$<)) && \
-	touch $@
+	@$(call run-with-log,\
+	  $(FSTAR) --codegen Kremlin \
+	    --extract_module $(basename $(notdir $(subst .checked,,$<))) \
+	    $(notdir $(subst .checked,,$<)) && \
+	  touch $@ \
+	  ,[EXTRACT-KRML] $*,$@)
 
 HAND_WRITTEN_C		= Lib.PrintBuffer Lib.RandomBuffer
 HAND_WRITTEN_FILES 	= $(wildcard $(LIB_DIR)/c/*.c) \
@@ -405,15 +482,18 @@ dist/%/Makefile.basic: $(ALL_KRML_FILES) dist/hacl-internal-headers/Makefile.bas
 	cp $(HACL_OLD_FILES) $(patsubst %.c,%.h,$(HACL_OLD_FILES)) $(dir $@)
 	cp $(HAND_WRITTEN_FILES) $(HAND_WRITTEN_OPTIONAL_FILES) dist/hacl-internal-headers/*.h $(dir $@)
 	cp $(VALE_ASMS) $(dir $@)
-	$(KRML) $(DEFAULT_FLAGS) $(KRML_EXTRA) \
-	  -tmpdir $(dir $@) -skip-compilation \
-	  $(filter %.krml,$^) \
-	  -ccopt -Wno-unused \
-	  -warn-error @4 \
-	  -fparentheses \
-	  $(notdir $(HACL_OLD_FILES)) \
-	  $(notdir $(HAND_WRITTEN_FILES)) \
-	  -o libevercrypt.a
+	@$(call run-with-log,\
+	  $(KRML) $(DEFAULT_FLAGS) $(KRML_EXTRA) \
+	    -tmpdir $(dir $@) -skip-compilation \
+	    $(filter %.krml,$^) \
+	    -silent \
+	    -ccopt -Wno-unused \
+	    -warn-error @4-6 \
+	    -fparentheses \
+	    $(notdir $(HACL_OLD_FILES)) \
+	    $(notdir $(HAND_WRITTEN_FILES)) \
+	    -o libevercrypt.a \
+	  ,[KREMLIN $*],dist/$*)
 
 # Auto-generates headers for the hand-written C files. If a signature changes on
 # the F* side, hopefully this will ensure the C file breaks. Note that there is
