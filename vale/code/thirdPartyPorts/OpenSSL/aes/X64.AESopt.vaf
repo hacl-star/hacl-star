@@ -504,7 +504,7 @@ procedure {:quick} load_one_msb()
     reveal insert_nat64;
 }
 
-#reset-options "--z3rlimit 60"
+#reset-options "--z3rlimit 30"
 procedure {:quick} loop6x_final(
     inline alg:algorithm,  
     ghost iv_b:buffer128,
@@ -669,6 +669,7 @@ procedure {:quick} loop6x_final(
 
 // TODO: in0 vs inp
 
+#reset-options "--z3rlimit 100"
 procedure {:quick} {:verify true} loop6x(
     inline alg:algorithm,  
     ghost iv_b:buffer128,
@@ -711,7 +712,9 @@ procedure {:quick} {:verify true} loop6x(
         validDstAddrs128(mem, rsp, stack_b, 8, memTaint, Secret);
         buffers_disjoint128(iv_b, keys_b);
         buffers_disjoint128(iv_b, stack_b);
+        buffers_disjoint128(iv_b, in_b);
         buffers_disjoint128(stack_b, keys_b);
+        buffers_disjoint128(stack_b, in_b);
          inp + 0x60 < pow2_64;
         outp + 0x60 < pow2_64;
 
@@ -747,9 +750,19 @@ procedure {:quick} {:verify true} loop6x(
         Z3   == reverse_bytes_quad32(inc32(ctr_BE,10));
         Hkey == reverse_bytes_quad32(inc32(ctr_BE,11));
 
-        // TODO: Summarize the GCTR encryption that's been happening
+        inout0 == quad32_xor(old(buffer128_read(in_b, 0, mem)), aes_encrypt_BE(alg, key_words, inc32(ctr_BE, 0)));
+        inout1 == quad32_xor(old(buffer128_read(in_b, 1, mem)), aes_encrypt_BE(alg, key_words, inc32(ctr_BE, 1)));
+        inout2 == quad32_xor(old(buffer128_read(in_b, 2, mem)), aes_encrypt_BE(alg, key_words, inc32(ctr_BE, 2)));
+        inout3 == quad32_xor(old(buffer128_read(in_b, 3, mem)), aes_encrypt_BE(alg, key_words, inc32(ctr_BE, 3)));
+        inout4 == quad32_xor(old(buffer128_read(in_b, 4, mem)), aes_encrypt_BE(alg, key_words, inc32(ctr_BE, 4)));
+        inout5 == quad32_xor(old(buffer128_read(in_b, 5, mem)), aes_encrypt_BE(alg, key_words, inc32(ctr_BE, 5)));
 
-        // TODO: Summarize all of the input reversing we've been doing on the stack
+        buffer128_read(stack_b, 2, mem) == old(reverse_bytes_quad32(buffer128_read(in_b, 5, mem)));
+        buffer128_read(stack_b, 3, mem) == old(reverse_bytes_quad32(buffer128_read(in_b, 4, mem)));
+        buffer128_read(stack_b, 4, mem) == old(reverse_bytes_quad32(buffer128_read(in_b, 3, mem)));
+        buffer128_read(stack_b, 5, mem) == old(reverse_bytes_quad32(buffer128_read(in_b, 2, mem)));
+        buffer128_read(stack_b, 6, mem) == old(reverse_bytes_quad32(buffer128_read(in_b, 1, mem)));
+        buffer128_read(stack_b, 7, mem) == old(reverse_bytes_quad32(buffer128_read(in_b, 0, mem)));
 {
     ghost var init0 := inout0;
     ghost var init1 := quad32_xor(inout1, rndkey);
