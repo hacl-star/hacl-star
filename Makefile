@@ -16,6 +16,10 @@ ifeq (3.81,$(MAKE_VERSION))
     install make, then hit invoke gmake instead of make)
 endif
 
+ifeq (,$(VALE_HOME))
+  $(error Please define VALE_HOME)
+endif
+
 ##########################
 # Top-level entry points #
 ##########################
@@ -28,6 +32,10 @@ all_:
 	tools/blast-staticconfig.sh $(EVERCRYPT_CONFIG)
 	$(MAKE) vaf-to-fst
 	$(MAKE) all
+
+debug:
+	$(MAKE) vaf-to-fst
+	$(MAKE) /home/jonathan/Code/fstar/bin/../ulib/CanonCommMonoid.fst.checked
 
 all: compile-compact compile-generic compile-compact-msvc \
   compile-evercrypt-external-headers compile-compact-c89 compile-coco \
@@ -220,7 +228,10 @@ $(HACL_HOME)/vale/code/arch/x64/X64.Memory_Sems.fst.checked: \
       s/--z3cliopt smt.arith.nl=false//') \
       --smtencoding.elim_box true
 
-# The actual default invocation
+# The actual default invocation. Note that the FSTAR_FLAGS= definition allows
+# making sure prerequisites of a given rule (e.g. CanonCommMonoid) don't inherit
+# the variable assignment of their parent rule.
+%.checked: FSTAR_FLAGS=
 %.checked:
 	$(FSTAR) $(FSTAR_FLAGS) $< && \
 	touch $@
