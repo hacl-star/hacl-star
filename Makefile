@@ -483,8 +483,8 @@ dist/test/c/%.exe: dist/test/c/%.c compile-generic
 	$(CC) -Wall -Wextra -Wno-infinite-recursion -Wno-int-conversion -Wno-unused-parameter \
 	  -I $(dir $@) -I $(KREMLIN_HOME)/include -I $(OPENSSL_HOME)/include -I dist/generic \
 	  -L$(OPENSSL_HOME) \
-	  $< -lcrypto -o $@ \
-	  dist/generic/libevercrypt.a \
+	  $< -o $@ \
+	  dist/generic/libevercrypt.a -lcrypto \
 	  $(KREMLIN_HOME)/kremlib/dist/generic/libkremlib.a
 
 test-c-%: dist/test/c/%.exe
