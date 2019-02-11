@@ -54,13 +54,14 @@ secure_api.old:
 # Configuration #
 #################
 
-IMPORT_FSTAR_TYPES = $(VALE_HOME)/bin/importFStarTypes.exe
-PYTHON3 = $(shell tools/findpython3.sh)
+IMPORT_FSTAR_TYPES := $(VALE_HOME)/bin/importFStarTypes.exe
+PYTHON3 := $(shell tools/findpython3.sh)
 ifeq ($(OS),Windows_NT)
   MONO =
 else
   MONO = mono
 endif
+SED := $(shell which gsed >/dev/null 2>&1 && echo gsed || echo sed)
 
 
 ####################################################
@@ -247,19 +248,19 @@ $(OUTPUT_DIR)/%.ml:
 
 dist/vale/%-x86_64-mingw.S: dist/vale/%.exe
 	$< GCC Win > $@
-	sed -i "" 's/_stdcall//' $@
+	$(SED) 's/_stdcall//' -i $@
 
 dist/vale/%-x86_64-msvc.S: dist/vale/%.exe
 	$< MASM Win > $@
-	sed -i "" 's/_stdcall//' $@
+	$(SED) 's/_stdcall//' -i $@
 
 dist/vale/%-x86_64-linux.S: dist/vale/%.exe
 	$< GCC Linux > $@
-	sed -i "" 's/_stdcall//' $@
+	$(SED) 's/_stdcall//' -i $@
 
 dist/vale/%-x86_64-darwin.S: dist/vale/%.exe
 	$< GCC MacOS > $@
-	sed -i "" 's/_stdcall//' $@
+	$(SED) 's/_stdcall//' -i $@
 
 dist/vale/cpuid.exe: vale/code/lib/util/x64/CpuidMain.ml
 dist/vale/aesgcm.exe: vale/code/crypto/aes/x64/Main.ml
