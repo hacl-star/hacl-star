@@ -130,7 +130,7 @@ VALE_FSTS = $(patsubst %.vaf,%.fst,$(VALE_ROOTS))
 # The complete set of F* files -- only meaningful in the second stage of this build.
 FSTAR_ROOTS = $(wildcard $(addsuffix /*.fsti,$(DIRS)) $(addsuffix /*.fst,$(DIRS)))
 
-# Convenience target
+# Convenience target. Remember to run make vaf-to-fst first.
 verify: $(addsuffix .checked,$(FSTAR_ROOTS))
 
 include Makefile.common
