@@ -33,9 +33,6 @@ all_:
 	$(MAKE) vaf-to-fst
 	$(MAKE) all
 
-debug:
-	$(MAKE) vaf-to-fst
-	$(MAKE) /home/jonathan/Code/fstar/bin/../ulib/CanonCommMonoid.fst.checked
 
 all: compile-compact compile-generic compile-compact-msvc \
   compile-evercrypt-external-headers compile-compact-c89 compile-coco \
@@ -69,7 +66,54 @@ ifeq ($(OS),Windows_NT)
 else
   MONO = mono
 endif
-SED := $(shell which gsed >/dev/null 2>&1 && echo gsed || echo sed)
+
+ifeq ($(shell uname -s),Darwin)
+  ifeq (,$(shell which gsed))
+    $(error gsed not found; try brew install gnu-sed)
+  endif
+  SED := gsed
+  ifeq (,$(shell which gtime))
+    $(error gtime not found; try brew install gnu-time)
+  endif
+  TIME := gtime
+else
+  SED := sed
+  TIME := /usr/bin/time
+endif
+
+MAKEFLAGS += -Otarget
+
+
+##########################
+# Pretty-printing helper #
+##########################
+
+SHELL=/bin/bash
+
+# A helper to generate pretty logs, callable as:
+#   $(call run-with-log,CMD,TXT,STEM[,OUT])
+# 
+# Arguments:
+#  CMD: command to execute
+#  TXT: readable text to print out once the command terminates
+#  STEM: path stem for the logs, stdout will be in STEM.out and stderr in STEM.err
+#  OUT: if present, stdout goes in OUT instead of STEM.out
+run-with-log = \
+  echo "$1" > $3.cmd; \
+  if [[ "$4" == "" ]]; then outfile="$3.out"; else outfile="$4"; fi; \
+  $(TIME) -q -f '%E' -o $3.time $1 > $$outfile 2> >( tee $3.err 1>&2 ); \
+  ret=$$?; \
+  time=$$(cat $3.time); \
+  if [ $$ret -eq 0 ]; then \
+    echo "$2, $$time"; \
+  else \
+    echo "<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>"; \
+    echo -e "\033[31mFatal error while running\033[0m: $1"; \
+    echo -e "\033[31mFailed after\033[0m: $$time"; \
+    echo -e "\033[36mFull log is in $3.{cmd,out,err}, see excerpt below\033[0m:"; \
+    tail -n 20 $3.out; \
+    echo "<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>"; \
+  fi
 
 
 ####################################################
@@ -87,6 +131,9 @@ FSTAR_ROOTS = $(wildcard $(addsuffix /*.fsti,$(DIRS)) $(addsuffix /*.fst,$(DIRS)
 
 include Makefile.common
 
+debug:
+	$(call run-with-log,echo hello,BLAH,/tmp/true,/tmp/true)
+
 # We currently force regeneration of three depend files... this is... long...
 ifndef NODEPEND
 ifndef MAKE_RESTARTS
@@ -95,14 +142,18 @@ ifndef MAKE_RESTARTS
 # meaning we can eliminate large chunks of the dependency graph, since we only
 # need to run: Vale stuff, and HACL spec tests.
 .fstar-depend-%: .FORCE
-	@$(FSTAR_NO_FLAGS) --dep $* $(FSTAR_ROOTS) --extract '* -Prims -LowStar -Lib.Buffer -Hacl -FStar +FStar.Endianness +FStar.Kremlin.Endianness -EverCrypt -MerkleTree -Vale.Tactics -CanonCommMonoid -CanonCommSemiring -FastHybrid_helpers -FastMul_helpers -FastSqr_helpers -FastUtil_helpers -TestLib -EverCrypt -MerkleTree -Test -Vale_memcpy -Vale.AsLowStar.Test' > $@
+	@$(call run-with-log,\
+	  $(FSTAR_NO_FLAGS) --dep $* $(FSTAR_ROOTS) --extract '* -Prims -LowStar -Lib.Buffer -Hacl -FStar +FStar.Endianness +FStar.Kremlin.Endianness -EverCrypt -MerkleTree -Vale.Tactics -CanonCommMonoid -CanonCommSemiring -FastHybrid_helpers -FastMul_helpers -FastSqr_helpers -FastUtil_helpers -TestLib -EverCrypt -MerkleTree -Test -Vale_memcpy -Vale.AsLowStar.Test' > $@ \
+	  ,[FSTAR-DEPEND ($*)],$@,$@)
 
 .vale-depend: .fstar-depend-make .FORCE
-	@$(PYTHON3) tools/valedepend.py \
-	  $(addprefix -include ,$(INCLUDES)) \
-	  $(addprefix -in ,$(VALE_ROOTS)) \
-	  -dep $< \
-	  > $@
+	@$(call run-with-log,\
+	  $(PYTHON3) tools/valedepend.py \
+	    $(addprefix -include ,$(INCLUDES)) \
+	    $(addprefix -in ,$(VALE_ROOTS)) \
+	    -dep $< \
+	    > $@ \
+	  ,[VALE-DEPEND],$@,$@)
 
 .PHONY: .FORCE
 .FORCE:
@@ -118,13 +169,17 @@ include .vale-depend
 #################################################
 
 %.dump: %.checked
-	$(FSTAR) --dump_module $(subst prims,Prims,$(basename $(notdir $*))) \
-          --print_implicits --print_universes --print_effect_args --print_full_names \
-	  --print_bound_var_types --ugly --admit_smt_queries true \
-	  $* > $@
+	@$(call run-with-log,\
+	  $(FSTAR) --dump_module $(subst prims,Prims,$(basename $(notdir $*))) \
+	    --print_implicits --print_universes --print_effect_args --print_full_names \
+	    --print_bound_var_types --ugly --admit_smt_queries true \
+	    $* > $@ \
+	  ,[DUMP] $(notdir $(patsubst %.fst,%,$*)),$@)
 
 %.types.vaf:
-	$(MONO) $(IMPORT_FSTAR_TYPES) $(addprefix -in ,$^) -out $@
+	@$(call run-with-log,\
+	  $(MONO) $(IMPORT_FSTAR_TYPES) $(addprefix -in ,$^) -out $@ \
+	  ,[VALE-TYPES] $(notdir $*),$@)
 
 # Always pass Operator.vaf as an -include to Vale, except for the file itself.
 VALE_FLAGS = -include $(HACL_HOME)/vale/code/lib/util/Operator.vaf
@@ -132,10 +187,12 @@ VALE_FLAGS = -include $(HACL_HOME)/vale/code/lib/util/Operator.vaf
 $(HACL_HOME)/vale/code/lib/util/Operator.fst: VALE_FLAGS=
 
 %.fst:
-	$(MONO) $(VALE_HOME)/bin/vale.exe -fstarText -quickMods \
-	  -typecheck -include $*.types.vaf \
-	  $(VALE_FLAGS) \
-	  -in $< -out $@ -outi $@i
+	@$(call run-with-log,\
+	  $(MONO) $(VALE_HOME)/bin/vale.exe -fstarText -quickMods \
+	    -typecheck -include $*.types.vaf \
+	    $(VALE_FLAGS) \
+	    -in $< -out $@ -outi $@i \
+	  ,[VALE] $(notdir $*),$@)
 
 # A pseudo-target for the first stage.
 vaf-to-fst: $(VALE_FSTS)
@@ -233,8 +290,10 @@ $(HACL_HOME)/vale/code/arch/x64/X64.Memory_Sems.fst.checked: \
 # the variable assignment of their parent rule.
 %.checked: FSTAR_FLAGS=
 %.checked:
-	$(FSTAR) $(FSTAR_FLAGS) $< && \
-	touch $@
+	@$(call run-with-log,\
+	  $(FSTAR) $(FSTAR_FLAGS) $< && \
+	    touch $@ \
+	  ,[VERIFY] $(notdir $(patsubst %.fst,%,$*)),$@)
 
 
 ###############################################################################
@@ -248,14 +307,25 @@ TAC = $(shell which tac >/dev/null 2>&1 && echo "tac" || echo "tail -r")
 
 ALL_CMX_FILES = $(patsubst %.ml,%.cmx,$(shell echo $(ALL_ML_FILES) | $(TAC)))
 
-OCAMLOPT += -I $(OUTPUT_DIR)
+ifeq ($(OS),Windows_NT)
+  export OCAMLPATH := $(FSTAR_HOME)/bin;$(OCAMLPATH)
+else
+  export OCAMLPATH := $(FSTAR_HOME)/bin:$(OCAMLPATH)
+endif
+
+OCAMLOPT = ocamlfind opt -package fstarlib -linkpkg -g -I $(OUTPUT_DIR)
 
 .PRECIOUS: %.cmx
 %.cmx: %.ml
-	$(OCAMLOPT) -c $< -o $@
+	@$(call run-with-log,\
+	  $(OCAMLOPT) -c $< -o $@ \
+	  ,[OCAMLOPT-CMX] $(notdir $*),$@)
 
 $(OUTPUT_DIR)/%.ml:
-	$(FSTAR) $(subst .checked,,$<) --codegen OCaml --extract_module $(subst .fst.checked,,$(notdir $<))
+	@$(call run-with-log,\
+	  $(FSTAR) $(subst .checked,,$<) --codegen OCaml \
+	    --extract_module $(subst .fst.checked,,$(notdir $<)) \
+	  ,[EXTRACT-ML] $(notdir $*),$@)
 
 dist/vale/%-x86_64-mingw.S: dist/vale/%.exe
 	$< GCC Win > $@
@@ -273,14 +343,16 @@ dist/vale/%-x86_64-darwin.S: dist/vale/%.exe
 	$< GCC MacOS > $@
 	$(SED) 's/_stdcall//' -i $@
 
-dist/vale/cpuid.exe: vale/code/lib/util/x64/CpuidMain.cmx
-dist/vale/aesgcm.exe: vale/code/crypto/aes/x64/Main.cmx
-dist/vale/sha256.exe: vale/code/crypto/sha/ShaMain.cmx
-dist/vale/curve25519.exe: vale/code/crypto/ecc/curve25519/Main25519.cmx
+dist/vale/cpuid.exe: vale/code/lib/util/x64/CpuidMain.ml
+dist/vale/aesgcm.exe: vale/code/crypto/aes/x64/Main.ml
+dist/vale/sha256.exe: vale/code/crypto/sha/ShaMain.ml
+dist/vale/curve25519.exe: vale/code/crypto/ecc/curve25519/Main25519.ml
 
 dist/vale/%.exe: $(ALL_CMX_FILES) vale/code/lib/util/CmdLineParser.cmx
 	mkdir -p $(dir $@)
-	$(OCAMLOPT) $^ -o $@ -I vale/code/lib/util
+	@$(call run-with-log,\
+	  $(OCAMLOPT) $^ -o $@ -I vale/code/lib/util \
+	  ,[OCAMLOPT-EXE] $(notdir $*),$@)
 
 # The ones in secure_api are legacy and should go.
 VALE_ASMS = $(foreach P,cpuid aesgcm sha256 curve25519,\
@@ -299,10 +371,12 @@ vale-asm: $(VALE_ASMS)
 .PRECIOUS: %.krml
 
 $(OUTPUT_DIR)/%.krml:
-	$(FSTAR) --codegen Kremlin \
-	  --extract_module $(basename $(notdir $(subst .checked,,$<))) \
-	  $(notdir $(subst .checked,,$<)) && \
-	touch $@
+	@$(call run-with-log,\
+	  $(FSTAR) --codegen Kremlin \
+	    --extract_module $(basename $(notdir $(subst .checked,,$<))) \
+	    $(notdir $(subst .checked,,$<)) && \
+	  touch $@ \
+	  ,[EXTRACT-KRML] $*,$@)
 
 HAND_WRITTEN_C		= Lib.PrintBuffer Lib.RandomBuffer
 HAND_WRITTEN_FILES 	= $(wildcard $(LIB_DIR)/c/*.c) \
