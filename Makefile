@@ -471,8 +471,8 @@ dist/test/c/%.exe: dist/test/c/%.c compile-generic
 	# Linking with full kremlib since tests may use TestLib, etc.
 	$(CC) -Wall -Wextra -Wno-infinite-recursion -Wno-int-conversion -Wno-unused-parameter \
 	  -I $(dir $@) -I $(KREMLIN_HOME)/include -I $(OPENSSL_HOME)/include -I dist/generic \
-	  -L$(OPENSSL_HOME) -lcrypto \
-	  $< -o $@ \
+	  -L$(OPENSSL_HOME) \
+	  $< -lcrypto -o $@ \
 	  dist/generic/libevercrypt.a \
 	  $(KREMLIN_HOME)/kremlib/dist/generic/libkremlib.a
 
