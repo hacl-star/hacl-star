@@ -242,8 +242,8 @@ $(call only-for,$(HACL_HOME)/vale/code/arch/x64/interop/%.checked): \
 
 # Except for the files coming from vaf files, which also don't work with two
 # phase tc.
-$(add-suffix .checked,$(VALE_FSTS)) \
-$(add-suffix i.checked,$(VALE_FSTS)): \
+$(addsuffix .checked,$(VALE_FSTS)) \
+$(addsuffix i.checked,$(VALE_FSTS)): \
   FSTAR_FLAGS=$(VALE_FSTAR_FLAGS) --use_two_phase_tc false
 
 # Then a series of individual overrides.
@@ -390,6 +390,7 @@ vale-asm: $(VALE_ASMS)
 
 .PRECIOUS: %.krml
 
+obj/%.krml:
 	$(call run-with-log,\
 	  $(FSTAR) --codegen Kremlin \
 	    --extract_module $(basename $(notdir $(subst .checked,,$<))) \

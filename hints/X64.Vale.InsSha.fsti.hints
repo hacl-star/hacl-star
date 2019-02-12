@@ -4,38 +4,44 @@
     [
       "X64.Vale.InsSha.va_lemma_SHA256_rnds2",
       1,
+      2,
       1,
-      0,
       [
         "@MaxIFuel_assumption", "@query", "bool_inversion",
+        "data_elim_X64.Vale.State.Mkstate", "eq2-interp",
         "equation_Prims.nat", "equation_SHA_helpers.counter",
         "equation_SHA_helpers.hash256", "equation_Words_s.nat32",
         "equation_X64.Machine_s.xmm",
+        "equation_X64.Vale.Decls.va_require_total",
         "fuel_guarded_inversion_X64.Vale.State.state", "int_inversion",
+        "primitive_Prims.op_Addition",
+        "proj_equation_X64.Vale.State.Mkstate_ok",
+        "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Prims_Tm_refine_a4038d5aed1633b5ecbb4e499b1c66ad",
+        "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
         "refinement_interpretation_SHA_helpers_Tm_refine_76eecaa5eb922850bd62c67e1b97491e",
-        "refinement_interpretation_X64.Machine_s_Tm_refine_f0a4eeefab9c63f31c350a802a4d45dd",
-        "refinement_interpretation_X64.Vale.InsSha_Tm_refine_d87ea19ed2efd5ea1d518c459e7dcdd3",
+        "refinement_interpretation_X64.Machine_s_Tm_refine_c336e5fedb0f08b0e9ef4e5a61e72caf",
+        "refinement_interpretation_X64.Vale.InsSha_Tm_refine_ceb82099f0a8f45f3f7dd659c4450520",
         "typing_SHA_helpers.k", "typing_X64.CPU_Features_s.sha_enabled"
       ],
       0,
-      "a0d35d1cc1a03505e76e78d0c50fc7a7"
+      "350d6feba9df59fc1ae7799c9fb69d67"
     ],
     [
       "X64.Vale.InsSha.va_wp_SHA256_rnds2",
       1,
+      2,
       1,
-      0,
       [
         "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
-        "equation_SHA_helpers.counter", "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Prims_Tm_refine_a4038d5aed1633b5ecbb4e499b1c66ad",
+        "equation_SHA_helpers.counter", "int_inversion",
+        "primitive_Prims.op_Addition", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
         "refinement_interpretation_SHA_helpers_Tm_refine_76eecaa5eb922850bd62c67e1b97491e",
         "typing_SHA_helpers.k"
       ],
       0,
-      "b92ddb70bd68c9b1bbb792992033eb08"
+      "bad9c89034dfd16bbf4e73cba9fa8814"
     ],
     [
       "X64.Vale.InsSha.va_wpProof_SHA256_rnds2",
@@ -47,39 +53,41 @@
         "refinement_interpretation_Prims_Tm_refine_8d65e998a07dd53ec478e27017d9dba5"
       ],
       0,
-      "8d67d272253f1ad6642033c1b8e7bede"
+      "654015c735f65fa553dda8490b409477"
     ],
     [
       "X64.Vale.InsSha.va_lemma_SHA256_msg1",
       1,
+      2,
       1,
-      0,
       [
         "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
         "equation_SHA_helpers.counter", "int_inversion",
         "primitive_Prims.op_LessThan", "primitive_Prims.op_LessThanOrEqual",
+        "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Prims_Tm_refine_a4038d5aed1633b5ecbb4e499b1c66ad"
+        "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-      "774651a702726c2f24e529d4b143e81a"
+      "817a1ea6ae33416336d1a661b072621a"
     ],
     [
       "X64.Vale.InsSha.va_wp_SHA256_msg1",
       1,
+      2,
       1,
-      0,
       [
         "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
         "equation_SHA_helpers.counter", "int_inversion",
         "primitive_Prims.op_LessThan", "primitive_Prims.op_LessThanOrEqual",
+        "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Prims_Tm_refine_a4038d5aed1633b5ecbb4e499b1c66ad"
+        "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-      "54403d946b1a9235ccec6cb9ecf7d982"
+      "65117e6f9c56a48d24a231206e5ada1d"
     ],
     [
       "X64.Vale.InsSha.va_wpProof_SHA256_msg1",
@@ -91,39 +99,41 @@
         "refinement_interpretation_Prims_Tm_refine_8d65e998a07dd53ec478e27017d9dba5"
       ],
       0,
-      "db45685eba057ae9388a45fed81cdccd"
+      "433781b48f19135edea4ba009b8a5379"
     ],
     [
       "X64.Vale.InsSha.va_lemma_SHA256_msg2",
       1,
+      2,
       1,
-      0,
       [
         "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
         "equation_SHA_helpers.counter", "int_inversion",
         "primitive_Prims.op_LessThan", "primitive_Prims.op_LessThanOrEqual",
+        "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Prims_Tm_refine_a4038d5aed1633b5ecbb4e499b1c66ad"
+        "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-      "cc0dcaa2a45547b081fc349a3af9a68e"
+      "9b4e1939bfeecfffccd9b5469dc17070"
     ],
     [
       "X64.Vale.InsSha.va_wp_SHA256_msg2",
       1,
+      2,
       1,
-      0,
       [
         "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
         "equation_SHA_helpers.counter", "int_inversion",
         "primitive_Prims.op_LessThan", "primitive_Prims.op_LessThanOrEqual",
+        "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Prims_Tm_refine_a4038d5aed1633b5ecbb4e499b1c66ad"
+        "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-      "e4134674a5b4ea0ef8abdb8978af95ca"
+      "41065755895f2ade186931a5f25a83f3"
     ],
     [
       "X64.Vale.InsSha.va_wpProof_SHA256_msg2",
@@ -135,7 +145,7 @@
         "refinement_interpretation_Prims_Tm_refine_8d65e998a07dd53ec478e27017d9dba5"
       ],
       0,
-      "ca019d6d9423e209d4691e7cb55be573"
+      "5f929acc85514fcecc2ead327ca830eb"
     ]
   ]
 ]
