@@ -32,13 +32,6 @@ try_windows () {
 
 found=false
 
-for c in $candidates; do
-  if try $c; then
-    found=true
-    break
-  fi
-done
-
 if [[ $OS == "Windows_NT" ]]; then
   for v in 3.6 3.7 3.8; do
     if try_windows $v; then
@@ -47,6 +40,13 @@ if [[ $OS == "Windows_NT" ]]; then
     fi
   done
 fi
+
+for c in $candidates; do
+  if try $c; then
+    found=true
+    break
+  fi
+done
 
 if ! $found; then
   echo "None of $candidates was a valid version of python3 (we want: >= 3.6)" 1>&2

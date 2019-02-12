@@ -32,7 +32,7 @@ endif
 all_:
 	tools/blast-staticconfig.sh $(EVERCRYPT_CONFIG)
 	$(MAKE) vaf-to-fst
-	$(MAKE) all
+	FSTAR_DEPEND_FLAGS="--warn_error +285" $(MAKE) all
 
 
 all: compile-compact compile-generic compile-compact-msvc \
@@ -48,7 +48,7 @@ test-ml: $(subst .,_,$(patsubst %.fst,test-ml-%,$(notdir $(wildcard specs/tests/
 
 ci:
 	NOSHORTLOG=1 $(MAKE) vaf-to-fst
-	NOSHORTLOG=1 $(MAKE) all test
+	FSTAR_DEPEND_FLAGS="--warn_error +285" NOSHORTLOG=1 $(MAKE) all test
 
 # Backwards-compat target
 .PHONY: secure_api.old
@@ -147,7 +147,8 @@ ifndef MAKE_RESTARTS
 # need to run: Vale stuff, and HACL spec tests.
 .fstar-depend-%: .FORCE
 	@$(call run-with-log,\
-	  $(FSTAR_NO_FLAGS) --dep $* $(FSTAR_ROOTS) --extract '* -Prims -LowStar -Lib.Buffer -Hacl -FStar +FStar.Endianness +FStar.Kremlin.Endianness -EverCrypt -MerkleTree -Vale.Tactics -CanonCommMonoid -CanonCommSemiring -FastHybrid_helpers -FastMul_helpers -FastSqr_helpers -FastUtil_helpers -TestLib -EverCrypt -MerkleTree -Test -Vale_memcpy -Vale.AsLowStar.Test' > $@ \
+	  $(FSTAR_NO_FLAGS) --dep $* $(FSTAR_ROOTS) --warn_error '-285' $(FSTAR_DEPEND_FLAGS) \
+	    --extract '* -Prims -LowStar -Lib.Buffer -Hacl -FStar +FStar.Endianness +FStar.Kremlin.Endianness -EverCrypt -MerkleTree -Vale.Tactics -CanonCommMonoid -CanonCommSemiring -FastHybrid_helpers -FastMul_helpers -FastSqr_helpers -FastUtil_helpers -TestLib -EverCrypt -MerkleTree -Test -Vale_memcpy -Vale.AsLowStar.Test' > $@ \
 	  ,[FSTAR-DEPEND ($*)],$@,$@)
 
 .vale-depend: .fstar-depend-make .FORCE
