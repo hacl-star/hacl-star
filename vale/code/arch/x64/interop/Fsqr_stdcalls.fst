@@ -1,0 +1,350 @@
+module Fsqr_stdcalls
+
+open FStar.HyperStack.ST
+module HS = FStar.HyperStack
+module B = LowStar.Buffer
+module BV = LowStar.BufferView
+open Types_s
+
+open Interop.Base
+module IX64 = Interop.X64
+module VSig = Vale.AsLowStar.ValeSig
+module LSig = Vale.AsLowStar.LowStarSig
+module ME = X64.Memory
+module V = X64.Vale.Decls
+module IA = Interop.Assumptions
+module W = Vale.AsLowStar.Wrapper
+open X64.MemoryAdapters
+module VS = X64.Vale.State
+module MS = X64.Machine_s
+open Vale.AsLowStar.MemoryHelpers
+open Vale.Interop.Cast
+
+module FU = X64.FastUtil
+module FH = X64.FastHybrid
+module FW = X64.FastWide
+
+let b8 = B.buffer UInt8.t
+let uint64 = UInt64.t
+
+(* A little utility to trigger normalization in types *)
+let as_t (#a:Type) (x:normal a) : a = x
+let as_normal_t (#a:Type) (x:a) : normal a = x
+
+[@__reduce__] unfold
+let b64 = buf_t TUInt64
+[@__reduce__] unfold
+let t64_mod = TD_Buffer TUInt64 default_bq
+[@__reduce__] unfold
+let t64_no_mod = TD_Buffer TUInt64 ({modified=false; strict_disjointness=false; taint=MS.Secret})
+[@__reduce__] unfold
+let tuint64 = TD_Base TUInt64
+
+[@__reduce__] unfold
+let fsqr_dom: IX64.arity_ok_stdcall td =
+  let y = [t64_mod; t64_no_mod; t64_mod] in
+  assert_norm (List.length y = 3);
+  y
+
+(* Need to rearrange the order of arguments *)
+[@__reduce__]
+let fsqr_pre : VSig.vale_pre 56 fsqr_dom =
+  fun (c:V.va_code)
+    (tmp:b64)
+    (f1:b64)
+    (out:b64)
+    (va_s0:V.va_state)
+    (sb:IX64.stack_buffer 56) ->
+      FW.va_req_fsqr_stdcall c va_s0 IA.win (as_vale_buffer sb) 
+        (as_vale_buffer tmp) (as_vale_buffer f1) (as_vale_buffer out)
+
+[@__reduce__]
+let fsqr_post : VSig.vale_post 56 fsqr_dom =
+  fun (c:V.va_code)
+    (tmp:b64)
+    (f1:b64)
+    (out:b64)
+    (va_s0:V.va_state)
+    (sb:IX64.stack_buffer 56)
+    (va_s1:V.va_state)
+    (f:V.va_fuel) ->
+      FW.va_ens_fsqr_stdcall c va_s0 IA.win (as_vale_buffer sb) (as_vale_buffer tmp) (as_vale_buffer f1) (as_vale_buffer out) va_s1 f
+
+#set-options "--z3rlimit 100"
+
+[@__reduce__] unfold
+let fsqr_lemma'
+    (code:V.va_code)
+    (_win:bool)
+    (tmp:b64)
+    (f1:b64)
+    (out:b64)
+    (va_s0:V.va_state)
+    (sb:IX64.stack_buffer 56)
+ : Ghost (V.va_state & V.va_fuel)
+     (requires
+       fsqr_pre code tmp f1 out va_s0 sb)
+     (ensures (fun (va_s1, f) ->
+       V.eval_code code va_s0 f va_s1 /\
+       VSig.vale_calling_conventions_stdcall va_s0 va_s1 /\
+       fsqr_post code tmp f1 out va_s0 sb va_s1 f /\
+       ME.buffer_readable VS.(va_s1.mem) (as_vale_buffer out) /\
+       ME.buffer_readable VS.(va_s1.mem) (as_vale_buffer f1) /\ 
+       ME.buffer_readable VS.(va_s1.mem) (as_vale_buffer tmp) /\ 
+       ME.buffer_writeable (as_vale_buffer out) /\ 
+       ME.buffer_writeable (as_vale_buffer f1) /\
+       ME.buffer_writeable (as_vale_buffer tmp) /\       
+       ME.modifies (ME.loc_union (ME.loc_buffer (as_vale_buffer sb))
+                   (ME.loc_union (ME.loc_buffer (as_vale_buffer out))
+                   (ME.loc_union (ME.loc_buffer (as_vale_buffer tmp))
+                                 ME.loc_none))) va_s0.VS.mem va_s1.VS.mem
+ )) = 
+   let va_s1, f = FW.va_lemma_fsqr_stdcall code va_s0 IA.win (as_vale_buffer sb) (as_vale_buffer tmp) (as_vale_buffer f1) (as_vale_buffer out) in
+   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 out;   
+   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 f1;   
+   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 tmp;   
+   va_s1, f                                   
+
+(* Prove that fsqr_lemma' has the required type *)
+let fsqr_lemma = as_t #(VSig.vale_sig_stdcall fsqr_pre fsqr_post) fsqr_lemma'
+
+let code_fsqr = FW.va_code_fsqr_stdcall IA.win
+
+(* Here's the type expected for the fsqr wrapper *)
+[@__reduce__]
+let lowstar_fsqr_t =
+  IX64.as_lowstar_sig_t_weak_stdcall
+    Interop.down_mem
+    code_fsqr
+    56
+    fsqr_dom
+    []
+    _
+    _
+    (W.mk_prediction code_fsqr fsqr_dom [] (fsqr_lemma code_fsqr IA.win))
+
+(* And here's the fsqr wrapper itself *)
+let lowstar_fsqr : lowstar_fsqr_t  =
+  IX64.wrap_weak_stdcall
+    Interop.down_mem
+    code_fsqr
+    56
+    fsqr_dom
+    (W.mk_prediction code_fsqr fsqr_dom [] (fsqr_lemma code_fsqr IA.win))
+
+let lowstar_fsqr_normal_t //: normal lowstar_fsqr_t
+  = as_normal_t #lowstar_fsqr_t lowstar_fsqr
+
+let fast_fsqr
+  (tmp:b8)
+  (f1:b8)
+  (out:b8) 
+  : Stack unit
+  (requires fun h -> 
+    adx_enabled /\ bmi2_enabled /\
+    B.live h tmp /\
+    B.live h f1 /\ 
+    B.live h out /\ 
+    B.length tmp == 64 /\ 
+    B.length out == 32 /\ 
+    B.length f1 == 32 /\
+    (B.disjoint out f1 \/ out == f1) /\
+    (B.disjoint out tmp \/ out == tmp) /\
+    B.disjoint f1 tmp)
+  (ensures fun h0 c h1 -> 
+    B.live h1 out /\ B.live h1 f1 /\ B.live h1 tmp /\
+    B.modifies (B.loc_union (B.loc_buffer out) (B.loc_buffer tmp)) h0 h1 /\
+    (
+    let a0 = UInt64.v (low_buffer_read TUInt64 h0 f1 0) in
+    let a1 = UInt64.v (low_buffer_read TUInt64 h0 f1 1) in
+    let a2 = UInt64.v (low_buffer_read TUInt64 h0 f1 2) in
+    let a3 = UInt64.v (low_buffer_read TUInt64 h0 f1 3) in
+    let d0 = UInt64.v (low_buffer_read TUInt64 h1 out 0) in
+    let d1 = UInt64.v (low_buffer_read TUInt64 h1 out 1) in
+    let d2 = UInt64.v (low_buffer_read TUInt64 h1 out 2) in
+    let d3 = UInt64.v (low_buffer_read TUInt64 h1 out 3) in
+    let a = pow2_four a0 a1 a2 a3 in
+    let d = pow2_four d0 d1 d2 d3 in
+    d % prime = (a * a) % prime
+    )
+    )
+  = 
+  let x, _ = lowstar_fsqr_normal_t tmp f1 out () in
+  ()
+
+
+#push-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
+
+let fsqr tmp f1 out
+  = push_frame();
+    let out8 = B.alloca (UInt8.uint_to_t 0) (UInt32.uint_to_t 32) in
+    let f18 = B.alloca (UInt8.uint_to_t 0) (UInt32.uint_to_t 32) in
+    let tmp8 = B.alloca (UInt8.uint_to_t 0) (UInt32.uint_to_t 64) in
+    copy_down out out8;
+    copy_down tmp tmp8;
+    copy_down f1 f18;
+    let x = fast_fsqr tmp8 f18 out8 in
+    imm_copy_up f1 f18;
+    copy_up tmp tmp8;
+    copy_up out out8;
+    pop_frame();
+    x
+
+#pop-options
+
+(* Need to rearrange the order of arguments *)
+[@__reduce__]
+let fsqr2_pre : VSig.vale_pre 56 fsqr_dom =
+  fun (c:V.va_code)
+    (tmp:b64)
+    (f1:b64)
+    (out:b64)
+    (va_s0:V.va_state)
+    (sb:IX64.stack_buffer 56) ->
+      FW.va_req_fsqr2_stdcall c va_s0 IA.win (as_vale_buffer sb) 
+        (as_vale_buffer tmp) (as_vale_buffer f1) (as_vale_buffer out)
+
+[@__reduce__]
+let fsqr2_post : VSig.vale_post 56 fsqr_dom =
+  fun (c:V.va_code)
+    (tmp:b64)
+    (f1:b64)
+    (out:b64)
+    (va_s0:V.va_state)
+    (sb:IX64.stack_buffer 56)
+    (va_s1:V.va_state)
+    (f:V.va_fuel) ->
+      FW.va_ens_fsqr2_stdcall c va_s0 IA.win (as_vale_buffer sb) (as_vale_buffer tmp) (as_vale_buffer f1) (as_vale_buffer out) va_s1 f
+
+#set-options "--z3rlimit 100"
+
+[@__reduce__] unfold
+let fsqr2_lemma'
+    (code:V.va_code)
+    (_win:bool)
+    (tmp:b64)
+    (f1:b64)
+    (out:b64)
+    (va_s0:V.va_state)
+    (sb:IX64.stack_buffer 56)
+ : Ghost (V.va_state & V.va_fuel)
+     (requires
+       fsqr2_pre code tmp f1 out va_s0 sb)
+     (ensures (fun (va_s1, f) ->
+       V.eval_code code va_s0 f va_s1 /\
+       VSig.vale_calling_conventions_stdcall va_s0 va_s1 /\
+       fsqr2_post code tmp f1 out va_s0 sb va_s1 f /\
+       ME.buffer_readable VS.(va_s1.mem) (as_vale_buffer out) /\
+       ME.buffer_readable VS.(va_s1.mem) (as_vale_buffer f1) /\ 
+       ME.buffer_readable VS.(va_s1.mem) (as_vale_buffer tmp) /\ 
+       ME.buffer_writeable (as_vale_buffer out) /\ 
+       ME.buffer_writeable (as_vale_buffer f1) /\
+       ME.buffer_writeable (as_vale_buffer tmp) /\       
+       ME.modifies (ME.loc_union (ME.loc_buffer (as_vale_buffer sb))
+                   (ME.loc_union (ME.loc_buffer (as_vale_buffer out))
+                   (ME.loc_union (ME.loc_buffer (as_vale_buffer tmp))
+                                 ME.loc_none))) va_s0.VS.mem va_s1.VS.mem
+ )) = 
+   let va_s1, f = FW.va_lemma_fsqr2_stdcall code va_s0 IA.win (as_vale_buffer sb) (as_vale_buffer tmp) (as_vale_buffer f1) (as_vale_buffer out) in
+   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 out;   
+   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 f1;   
+   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 tmp;   
+   va_s1, f                                   
+
+(* Prove that fsqr2_lemma' has the required type *)
+let fsqr2_lemma = as_t #(VSig.vale_sig_stdcall fsqr2_pre fsqr2_post) fsqr2_lemma'
+
+let code_fsqr2 = FW.va_code_fsqr2_stdcall IA.win
+
+(* Here's the type expected for the fsqr2 wrapper *)
+[@__reduce__]
+let lowstar_fsqr2_t =
+  IX64.as_lowstar_sig_t_weak_stdcall
+    Interop.down_mem
+    code_fsqr2
+    56
+    fsqr_dom
+    []
+    _
+    _
+    (W.mk_prediction code_fsqr2 fsqr_dom [] (fsqr2_lemma code_fsqr2 IA.win))
+
+(* And here's the fsqr2 wrapper itself *)
+let lowstar_fsqr2 : lowstar_fsqr2_t  =
+  IX64.wrap_weak_stdcall
+    Interop.down_mem
+    code_fsqr2
+    56
+    fsqr_dom
+    (W.mk_prediction code_fsqr2 fsqr_dom [] (fsqr2_lemma code_fsqr2 IA.win))
+
+let lowstar_fsqr2_normal_t //: normal lowstar_fsqr2_t
+  = as_normal_t #lowstar_fsqr2_t lowstar_fsqr2
+
+let fast_fsqr2
+  (tmp:b8)
+  (f1:b8)
+  (out:b8) 
+  : Stack unit
+  (requires fun h -> 
+    adx_enabled /\ bmi2_enabled /\
+    B.live h tmp /\
+    B.live h f1 /\ 
+    B.live h out /\ 
+    B.length tmp == 128 /\ 
+    B.length out == 64 /\ 
+    B.length f1 == 64 /\
+    (B.disjoint out f1 \/ out == f1) /\
+    (B.disjoint out tmp \/ out == tmp) /\
+    B.disjoint f1 tmp)
+  (ensures fun h0 c h1 -> 
+    B.live h1 out /\ B.live h1 f1 /\ B.live h1 tmp /\
+    B.modifies (B.loc_union (B.loc_buffer out) (B.loc_buffer tmp)) h0 h1 /\
+    (
+    let a0 = UInt64.v (low_buffer_read TUInt64 h0 f1 0) in
+    let a1 = UInt64.v (low_buffer_read TUInt64 h0 f1 1) in
+    let a2 = UInt64.v (low_buffer_read TUInt64 h0 f1 2) in
+    let a3 = UInt64.v (low_buffer_read TUInt64 h0 f1 3) in
+    let d0 = UInt64.v (low_buffer_read TUInt64 h1 out 0) in
+    let d1 = UInt64.v (low_buffer_read TUInt64 h1 out 1) in
+    let d2 = UInt64.v (low_buffer_read TUInt64 h1 out 2) in
+    let d3 = UInt64.v (low_buffer_read TUInt64 h1 out 3) in
+    let a = pow2_four a0 a1 a2 a3 in
+    let d = pow2_four d0 d1 d2 d3 in
+    let a0' = UInt64.v (low_buffer_read TUInt64 h0 f1 4) in
+    let a1' = UInt64.v (low_buffer_read TUInt64 h0 f1 5) in
+    let a2' = UInt64.v (low_buffer_read TUInt64 h0 f1 6) in
+    let a3' = UInt64.v (low_buffer_read TUInt64 h0 f1 7) in
+    let d0' = UInt64.v (low_buffer_read TUInt64 h1 out 4) in
+    let d1' = UInt64.v (low_buffer_read TUInt64 h1 out 5) in
+    let d2' = UInt64.v (low_buffer_read TUInt64 h1 out 6) in
+    let d3' = UInt64.v (low_buffer_read TUInt64 h1 out 7) in
+    let a' = pow2_four a0' a1' a2' a3' in
+    let d' = pow2_four d0' d1' d2' d3' in    
+    d % prime = (a * a) % prime /\
+    d' % prime = (a' * a') % prime   
+    )
+    )
+  = 
+  let x, _ = lowstar_fsqr2_normal_t tmp f1 out () in
+  ()
+
+
+#push-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
+
+let fsqr2 tmp f1 out
+  = push_frame();
+    let out8 = B.alloca (UInt8.uint_to_t 0) (UInt32.uint_to_t 64) in
+    let f18 = B.alloca (UInt8.uint_to_t 0) (UInt32.uint_to_t 64) in
+    let tmp8 = B.alloca (UInt8.uint_to_t 0) (UInt32.uint_to_t 128) in
+    copy_down out out8;
+    copy_down tmp tmp8;
+    copy_down f1 f18;
+    let x = fast_fsqr2 tmp8 f18 out8 in
+    imm_copy_up f1 f18;
+    copy_up tmp tmp8;
+    copy_up out out8;
+    pop_frame();
+    x
+
+#pop-options
