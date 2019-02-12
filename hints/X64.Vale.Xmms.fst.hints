@@ -4,18 +4,18 @@
     [
       "X64.Vale.Xmms.of_fun",
       1,
-      2,
       1,
+      0,
       [
         "@MaxIFuel_assumption", "@query",
         "Prims_pretyping_ae567c2fb75be05905677af440075565",
         "equation_X64.Machine_s.xmm",
         "function_token_typing_Prims.__cache_version_number__",
-        "int_inversion", "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_X64.Machine_s_Tm_refine_c336e5fedb0f08b0e9ef4e5a61e72caf"
+        "int_inversion",
+        "refinement_interpretation_X64.Machine_s_Tm_refine_f0a4eeefab9c63f31c350a802a4d45dd"
       ],
       0,
-      "5be27037c5fd161041c15752b3db6cc9"
+      "ffd30f06143d991953e9b933a8110928"
     ],
     [
       "X64.Vale.Xmms.lemma_upd_eq",
@@ -35,46 +35,57 @@
         "refinement_interpretation_X64.Machine_s_Tm_refine_f0a4eeefab9c63f31c350a802a4d45dd"
       ],
       0,
-      "9c7d393eec80246b19a56ca4fe687b4d"
+      "35801c36c030ad4bea2a832938e09428"
     ],
     [
       "X64.Vale.Xmms.lemma_upd_ne",
       1,
-      2,
       1,
+      0,
       [
-        "@MaxIFuel_assumption", "@query", "equation_Map16.map2",
-        "equation_Map16.map4", "equation_Map16.map8", "equation_Map16.sel2",
-        "equation_Map16.sel4", "equation_Map16.sel8", "equation_Map16.upd2",
-        "equation_Map16.upd4", "equation_Map16.upd8",
-        "equation_Types_s.quad32", "equation_Words_s.nat32",
-        "equation_X64.Machine_s.xmm", "fuel_guarded_inversion_Words_s.four",
-        "int_inversion", "primitive_Prims.op_LessThan",
-        "primitive_Prims.op_Subtraction",
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented",
+        "@fuel_irrelevance_Prims.pow2.fuel_instrumented", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565", "b2t_def",
+        "bool_inversion", "equation_FStar.UInt.fits",
+        "equation_FStar.UInt.max_int", "equation_FStar.UInt.min_int",
+        "equation_FStar.UInt.size", "equation_FStar.UInt32.n",
+        "equation_Map16.map2", "equation_Map16.map4", "equation_Map16.map8",
+        "equation_Map16.sel2", "equation_Map16.sel4", "equation_Map16.sel8",
+        "equation_Map16.upd2", "equation_Map16.upd4", "equation_Map16.upd8",
+        "equation_Prims.nat", "equation_Types_s.quad32",
+        "equation_Words_s.nat32", "equation_X64.Machine_s.xmm",
+        "fuel_guarded_inversion_Words_s.four",
+        "function_token_typing_Prims.__cache_version_number__",
+        "int_inversion", "int_typing", "lemma_FStar.UInt.pow2_values",
+        "primitive_Prims.op_AmpAmp", "primitive_Prims.op_LessThan",
+        "primitive_Prims.op_LessThanOrEqual",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
         "projection_inverse_FStar.Pervasives.Native.Mktuple2__1",
         "projection_inverse_FStar.Pervasives.Native.Mktuple2__2",
-        "refinement_interpretation_X64.Machine_s_Tm_refine_c336e5fedb0f08b0e9ef4e5a61e72caf"
+        "refinement_interpretation_Prims_Tm_refine_a4038d5aed1633b5ecbb4e499b1c66ad",
+        "refinement_interpretation_X64.Machine_s_Tm_refine_f0a4eeefab9c63f31c350a802a4d45dd",
+        "typing_FStar.UInt.fits", "typing_FStar.UInt32.n"
       ],
       0,
-      "617ae89da7c3e74d4a75ffd6333a950a"
+      "6f027e9176b0fb21d7346a767ea63aa3"
     ],
     [
       "X64.Vale.Xmms.lemma_equal_intro",
       1,
-      2,
       1,
+      0,
       [
         "@MaxIFuel_assumption", "@query",
         "Prims_pretyping_ae567c2fb75be05905677af440075565", "eq2-interp",
         "equation_X64.Machine_s.xmm", "equation_X64.Vale.Xmms.equal",
         "function_token_typing_Prims.__cache_version_number__",
         "int_inversion",
-        "refinement_interpretation_X64.Machine_s_Tm_refine_c336e5fedb0f08b0e9ef4e5a61e72caf"
+        "refinement_interpretation_X64.Machine_s_Tm_refine_f0a4eeefab9c63f31c350a802a4d45dd"
       ],
       0,
-      "9af2ea99f56bc80c0c27b6f12b639064"
+      "71c95f9783747af4a2b2fc5ee4807e24"
     ],
     [
       "X64.Vale.Xmms.lemma_equal_elim",
@@ -83,25 +94,24 @@
       0,
       [ "@query", "eq2-interp", "equation_X64.Vale.Xmms.equal" ],
       0,
-      "03898206176443d9346e5046c59ea7df"
+      "7442c6970b6bbde566c44f7a7bf4577e"
     ],
     [
       "X64.Vale.Xmms.lemma_eta",
       1,
-      2,
       1,
+      0,
       [
         "@MaxIFuel_assumption", "@query",
         "Prims_pretyping_ae567c2fb75be05905677af440075565",
         "equation_X64.Machine_s.xmm",
         "function_token_typing_Prims.__cache_version_number__",
         "int_inversion", "lemma_X64.Vale.Xmms.lemma_equal_elim",
-        "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_X64.Machine_s_Tm_refine_c336e5fedb0f08b0e9ef4e5a61e72caf",
+        "refinement_interpretation_X64.Machine_s_Tm_refine_f0a4eeefab9c63f31c350a802a4d45dd",
         "typing_X64.Vale.Xmms.eta"
       ],
       0,
-      "1e3f0b33e30e8142a8c53951466c7789"
+      "521b67720e5d2ababc9feb3e6f467794"
     ]
   ]
 ]

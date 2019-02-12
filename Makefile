@@ -114,9 +114,7 @@ run-with-log = \
     false; \
   fi
 else
-run-with-log = \
-  echo "$(subst ",\",$1)" ; \
-  $1
+run-with-log = $1
 endif
 
 
@@ -222,11 +220,33 @@ VALE_FSTAR_FLAGS=$(VALE_FSTAR_FLAGS_NOSMT) \
   --smtencoding.elim_box true --smtencoding.l_arith_repr native \
   --smtencoding.nl_arith_repr wrapped
 
-# With this macro, we no longer rely on the shortest-stem rule, meaning that the
-# first match is picked to determine the F* flags.
+# With this macro, we no longer rely on the shortest-stem rule. The rules are
+# thus overriding each other, meaning the last one has precedence.
 only-for = $(call to-obj-dir,$(filter $1,$(addsuffix .checked,$(FSTAR_ROOTS))))
 
-# Starting with individual files.
+# By default Vale files don't use two phase tc
+$(call only-for,$(HACL_HOME)/vale/%.checked): \
+  FSTAR_FLAGS=$(VALE_FSTAR_FLAGS) --use_two_phase_tc false
+
+# Except for the files in specs/ and code/
+$(call only-for,$(HACL_HOME)/vale/specs/%.checked): \
+  FSTAR_FLAGS=$(VALE_FSTAR_FLAGS)
+$(call only-for,$(HACL_HOME)/vale/code/%.checked): \
+  FSTAR_FLAGS=$(VALE_FSTAR_FLAGS)
+
+# Except for the interop files, which apparently are ok with two phase TC.
+$(call only-for,$(HACL_HOME)/vale/code/arch/x64/interop/%.checked): \
+  FSTAR_FLAGS=$(shell echo $(VALE_FSTAR_FLAGS_NOSMT) | \
+    sed 's/--z3cliopt smt.arith.nl=false//; \
+      s/--z3cliopt smt.QI.EAGER_THRESHOLD=100//')
+
+# Except for the files coming from vaf files, which also don't work with two
+# phase tc.
+$(add-suffix .checked,$(VALE_FSTS)) \
+$(add-suffix i.checked,$(VALE_FSTS)): \
+  FSTAR_FLAGS=$(VALE_FSTAR_FLAGS) --use_two_phase_tc false
+
+# Then a series of individual overrides.
 obj/Interop.fst.checked: \
   FSTAR_FLAGS=$(shell echo $(VALE_FSTAR_FLAGS_NOSMT) | \
     sed 's/--use_extracted_interfaces true//; \
@@ -270,28 +290,6 @@ obj/X64.Memory_Sems.fst.checked: \
     sed 's/--use_extracted_interfaces true//; \
       s/--z3cliopt smt.arith.nl=false//') \
       --smtencoding.elim_box true
-
-# Vale-generated files don't want two-phase. VALE_FSTS is already prefixed with
-# obj/.
-$(add-suffix .checked,$(VALE_FSTS)) \
-$(add-suffix i.checked,$(VALE_FSTS)): \
-  FSTAR_FLAGS=$(VALE_FSTAR_FLAGS) --use_two_phase_tc false
-
-# The interop files apparently are ok with two phase TC.
-$(call only-for,$(HACL_HOME)/vale/code/arch/x64/interop/%.checked): \
-  FSTAR_FLAGS=$(shell echo $(VALE_FSTAR_FLAGS_NOSMT) | \
-    sed 's/--z3cliopt smt.arith.nl=false//; \
-      s/--z3cliopt smt.QI.EAGER_THRESHOLD=100//')
-
-# Two-phase is also ok in specs/ and code/
-$(call only-for,$(HACL_HOME)/vale/specs/%.checked): \
-  FSTAR_FLAGS=$(VALE_FSTAR_FLAGS)
-$(call only-for,$(HACL_HOME)/vale/code/%.checked): \
-  FSTAR_FLAGS=$(VALE_FSTAR_FLAGS)
-
-# The rest of the files don't want two-phase.
-$(call only-for,$(HACL_HOME)/vale/%.checked): \
-  FSTAR_FLAGS=$(VALE_FSTAR_FLAGS) --use_two_phase_tc false
 
 hints:
 	mkdir -p $@
@@ -580,7 +578,7 @@ dist/test/c/merkle_tree_test.c: secure_api/merkle_tree/test/merkle_tree_test.c
 .PRECIOUS: dist/test/c/%.exe
 dist/test/c/%.exe: dist/test/c/%.c compile-generic
 	# Linking with full kremlib since tests may use TestLib, etc.
-	@$(call run-with-log,\
+	$(call run-with-log,\
 	  $(CC) -Wall -Wextra -Wno-infinite-recursion -Wno-int-conversion -Wno-unused-parameter \
 	    -I $(dir $@) -I $(KREMLIN_HOME)/include -I $(OPENSSL_HOME)/include -I dist/generic \
 	    -L$(OPENSSL_HOME) \

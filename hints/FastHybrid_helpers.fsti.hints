@@ -2,13 +2,13 @@
   "ôµúÿ?à\rÊê\u0005\u0006¥#û∆h",
   [
     [
-      "FastHybrid_helpers.uu___72",
+      "FastHybrid_helpers.uu___73",
       1,
       1,
       0,
       [ "@query" ],
       0,
-      "0bd0c69532db24931bc1174ab67ef34c"
+      "ea56ce76a91eba060984f2990ea11d3e"
     ],
     [
       "FastHybrid_helpers.lemma_mul_pow256_add",
@@ -21,74 +21,99 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "69e913216699ac5dc3c633177f673702"
+      "113b9c38a7f3089f6fbb02fa90a0cd05"
     ],
     [
       "FastHybrid_helpers.lemma_carry_prime",
       1,
-      2,
       1,
+      0,
       [
         "@MaxIFuel_assumption", "@query", "equation_Fast_defs.bit",
         "equation_Prims.nat", "equation_Words_s.nat64",
-        "equation_Words_s.natN", "primitive_Prims.op_Addition",
-        "primitive_Prims.op_Multiply", "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Fast_defs_Tm_refine_aae5b06406d70274b21081a6603adfb2",
-        "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "equation_Words_s.natN",
+        "refinement_interpretation_Fast_defs_Tm_refine_d62476c3a5813525c06af050ff95c3ee",
+        "refinement_interpretation_Prims_Tm_refine_a4038d5aed1633b5ecbb4e499b1c66ad",
         "refinement_interpretation_Words_s_Tm_refine_5514fbe9e08dfda40f950a7b9f1b2b98"
       ],
       0,
-      "f9d96354ec8d6600375eed446a7fe40c"
+      "530559e5d351bd93ab85cde941a4a519"
     ],
     [
       "FastHybrid_helpers.lemma_fast_mul1",
       1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.eqtype",
+        "equation_Prims.nat", "function_token_typing_Prims.int",
+        "haseqPrims_Tm_refine_a4038d5aed1633b5ecbb4e499b1c66ad",
+        "refinement_interpretation_Prims_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
+      ],
+      0,
+      "b0ea117a442f2458cdd1124d997ad126"
+    ],
+    [
+      "FastHybrid_helpers.lemma_fast_mul1",
       2,
       1,
+      0,
       [
-        "@MaxIFuel_assumption", "@query",
-        "data_elim_FStar.Algebra.CommMonoid.CM",
-        "equation_FStar.Algebra.CommMonoid.int_plus_cm",
-        "equation_FStar.Reflection.Data.var", "equation_Fast_defs.add_carry",
-        "equation_Fast_defs.bit", "equation_Prims.eqtype",
+        "@MaxIFuel_assumption", "@query", "equation_Fast_defs.add_carry",
         "equation_Prims.nat", "equation_Words_s.nat64",
         "equation_Words_s.natN", "int_inversion",
         "projection_inverse_BoxInt_proj_0",
         "projection_inverse_FStar.Pervasives.Native.Mktuple2__2",
-        "refinement_interpretation_Fast_defs_Tm_refine_aae5b06406d70274b21081a6603adfb2",
-        "refinement_interpretation_Prims_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
-        "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
-        "refinement_interpretation_Words_s_Tm_refine_5514fbe9e08dfda40f950a7b9f1b2b98",
-        "typing_FStar.Algebra.CommMonoid.int_plus_cm",
-        "typing_FStar.Reflection.Data.var"
+        "refinement_interpretation_Prims_Tm_refine_a4038d5aed1633b5ecbb4e499b1c66ad",
+        "refinement_interpretation_Words_s_Tm_refine_5514fbe9e08dfda40f950a7b9f1b2b98"
       ],
       0,
-      "c86a1f5c5fa355b52b57aeffdf7ef34d"
+      "6de42774270bdfd326a336cc28e9c3a5"
     ],
     [
       "FastHybrid_helpers.lemma_addition",
       1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.eqtype",
+        "equation_Prims.nat", "function_token_typing_Prims.int",
+        "haseqPrims_Tm_refine_a4038d5aed1633b5ecbb4e499b1c66ad",
+        "refinement_interpretation_Prims_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
+      ],
+      0,
+      "b7f9ba7f260df8445d61df23897c7039"
+    ],
+    [
+      "FastHybrid_helpers.lemma_addition",
       2,
       1,
+      0,
       [
-        "@MaxIFuel_assumption", "@query",
-        "data_elim_FStar.Algebra.CommMonoid.CM",
-        "equation_FStar.Algebra.CommMonoid.int_plus_cm",
-        "equation_FStar.Reflection.Data.var", "equation_Fast_defs.add_carry",
-        "equation_Fast_defs.bit", "equation_Prims.eqtype",
+        "@MaxIFuel_assumption", "@query", "equation_Prims.eqtype",
+        "equation_Prims.nat", "function_token_typing_Prims.int",
+        "haseqPrims_Tm_refine_a4038d5aed1633b5ecbb4e499b1c66ad",
+        "refinement_interpretation_Prims_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
+      ],
+      0,
+      "bc77b945c7231c8c0848114e96e8cc68"
+    ],
+    [
+      "FastHybrid_helpers.lemma_addition",
+      3,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Fast_defs.add_carry",
         "equation_Prims.nat", "equation_Words_s.nat64",
         "equation_Words_s.natN", "int_inversion",
         "projection_inverse_BoxInt_proj_0",
         "projection_inverse_FStar.Pervasives.Native.Mktuple2__2",
-        "refinement_interpretation_Fast_defs_Tm_refine_aae5b06406d70274b21081a6603adfb2",
-        "refinement_interpretation_Prims_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
-        "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
-        "refinement_interpretation_Words_s_Tm_refine_5514fbe9e08dfda40f950a7b9f1b2b98",
-        "typing_FStar.Algebra.CommMonoid.int_plus_cm",
-        "typing_FStar.Reflection.Data.var"
+        "refinement_interpretation_Prims_Tm_refine_a4038d5aed1633b5ecbb4e499b1c66ad",
+        "refinement_interpretation_Words_s_Tm_refine_5514fbe9e08dfda40f950a7b9f1b2b98"
       ],
       0,
-      "f32063d2f0e963cc28db12d371c0292e"
+      "867d1fbf90dc84d77b6ab6f9288cf4f7"
     ]
   ]
 ]
