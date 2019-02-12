@@ -17,8 +17,9 @@ ifeq (3.81,$(MAKE_VERSION))
 endif
 
 ifeq (,$(VALE_HOME))
-  $(error Please define VALE_HOME)
+  $(error Please define VALE_HOME, possibly using cygpath -m)
 endif
+
 
 ##########################
 # Top-level entry points #
@@ -36,7 +37,7 @@ all_:
 
 all: compile-compact compile-generic compile-compact-msvc \
   compile-evercrypt-external-headers compile-compact-c89 compile-coco \
-  # secure_api.old
+  secure_api.old
 
 # Any file in code/tests is taken to contain a `main` function.
 # Any file in specs/tests is taken to contain a `test` function.
@@ -52,7 +53,7 @@ ci:
 # Backwards-compat target
 .PHONY: secure_api.old
 secure_api.old:
-	$(MAKE) -C secure_api
+	@$(call run-with-log,$(MAKE) -C secure_api,[OLD-MAKE secure_api],secure_api/log)
 
 
 #################
@@ -90,7 +91,7 @@ SHELL=/bin/bash
 
 # A helper to generate pretty logs, callable as:
 #   $(call run-with-log,CMD,TXT,STEM[,OUT])
-# 
+#
 # Arguments:
 #  CMD: command to execute (may contain double quotes, but not escaped)
 #  TXT: readable text to print out once the command terminates
@@ -102,6 +103,7 @@ run-with-log = \
   $(TIME) -q -f '%E' -o $3.time sh -c "$(subst ",\",$1)" > $$outfile 2> >( tee $3.err 1>&2 ); \
   ret=$$?; \
   time=$$(cat $3.time); \
+  if [[ "$4" == "" ]]; then echo "Command was:" >> $$outfile; echo "$(subst ",\",$1)" >> $$outfile; fi; \
   if [ $$ret -eq 0 ]; then \
     echo "$2, $$time"; \
   else \
@@ -109,7 +111,7 @@ run-with-log = \
     echo -e "\033[31mFatal error while running\033[0m: $1"; \
     echo -e "\033[31mFailed after\033[0m: $$time"; \
     echo -e "\033[36mFull log is in $3.{out,err}, see excerpt below\033[0m:"; \
-    tail -n 20 $$outfile; \
+    tail -n 20 $3.err; \
     echo "<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>"; \
     false; \
   fi
@@ -303,8 +305,6 @@ $(HACL_HOME)/vale/code/arch/x64/X64.Memory_Sems.fst.checked: \
 # print ASM files                                                             #
 ###############################################################################
 
-include $(FSTAR_HOME)/ulib/ml/Makefile.include
-
 TAC = $(shell which tac >/dev/null 2>&1 && echo "tac" || echo "tail -r")
 
 ALL_CMX_FILES = $(patsubst %.ml,%.cmx,$(shell echo $(ALL_ML_FILES) | $(TAC)))
@@ -315,7 +315,11 @@ else
   export OCAMLPATH := $(FSTAR_HOME)/bin:$(OCAMLPATH)
 endif
 
-OCAMLOPT = ocamlfind opt -package fstarlib -linkpkg -g -I $(OUTPUT_DIR)
+# Warning 8: this pattern-matching is not exhaustive.
+# Warning 20: this argument will not be used by the function.
+# Warning 26: unused variable
+OCAMLOPT = ocamlfind opt -package fstarlib -linkpkg -g -I $(OUTPUT_DIR) \
+  -warn-error -8-20-26
 
 .PRECIOUS: %.cmx
 %.cmx: %.ml
@@ -367,6 +371,7 @@ VALE_ASMS = $(foreach P,cpuid aesgcm sha256 curve25519,\
 
 # A pseudo-target for generating just Vale assemblies
 vale-asm: $(VALE_ASMS)
+
 
 ###########################################################################
 # Extracting (checked files) to krml, then running kremlin to generate C. #
@@ -444,7 +449,9 @@ COMPACT_FLAGS	=\
 
 .PHONY: old-%
 old-%:
-	$(MAKE) -C code/old -f Makefile.old $*
+	@$(call run-with-log,\
+	  $(MAKE) -C code/old -f Makefile.old $* \
+	  ,[OLD-MAKE $*],code/old/$*)
 
 HACL_OLD_FILES=\
   code/old/experimental/aesgcm/aesgcm-c/Hacl_AES.c \
@@ -483,25 +490,23 @@ dist/%/Makefile.basic: $(ALL_KRML_FILES) dist/hacl-internal-headers/Makefile.bas
 	cp $(HACL_OLD_FILES) $(patsubst %.c,%.h,$(HACL_OLD_FILES)) $(dir $@)
 	cp $(HAND_WRITTEN_FILES) $(HAND_WRITTEN_OPTIONAL_FILES) dist/hacl-internal-headers/*.h $(dir $@)
 	cp $(VALE_ASMS) $(dir $@)
-	@$(call run-with-log,\
-	  $(KRML) $(DEFAULT_FLAGS) $(KRML_EXTRA) \
-	    -tmpdir $(dir $@) -skip-compilation \
-	    $(filter %.krml,$^) \
-	    -silent \
-	    -ccopt -Wno-unused \
-	    -warn-error @4-6 \
-	    -fparentheses \
-	    $(notdir $(HACL_OLD_FILES)) \
-	    $(notdir $(HAND_WRITTEN_FILES)) \
-	    -o libevercrypt.a \
-	  ,[KREMLIN $*],dist/$*)
+	$(KRML) $(DEFAULT_FLAGS) $(KRML_EXTRA) \
+	  -tmpdir $(dir $@) -skip-compilation \
+	  $(filter %.krml,$^) \
+	  -silent \
+	  -ccopt -Wno-unused \
+	  -warn-error @4-6 \
+	  -fparentheses \
+	  $(notdir $(HACL_OLD_FILES)) \
+	  $(notdir $(HAND_WRITTEN_FILES)) \
+	  -o libevercrypt.a
 
 # Auto-generates headers for the hand-written C files. If a signature changes on
 # the F* side, hopefully this will ensure the C file breaks. Note that there is
 # no conflict between the headers because this generates
 # Lib_Foobar while the run above generates a single Hacl_Lib.
 dist/hacl-internal-headers/Makefile.basic: $(ALL_KRML_FILES)
-	$(KRML) \
+	$(KRML) -silent \
 	  -tmpdir $(dir $@) -skip-compilation \
 	  $(patsubst %,-bundle %=,$(HAND_WRITTEN_C)) \
 	  $(patsubst %,-library %,$(HAND_WRITTEN_C)) \
@@ -509,7 +514,7 @@ dist/hacl-internal-headers/Makefile.basic: $(ALL_KRML_FILES)
 	  -bundle '\*,WindowsBug' $^
 
 dist/evercrypt-external-headers/Makefile.basic: $(ALL_KRML_FILES)
-	$(KRML) \
+	$(KRML) -silent \
 	  -minimal \
 	  -bundle EverCrypt+EverCrypt.AutoConfig2+EverCrypt.HKDF+EverCrypt.HMAC+EverCrypt.Hash+EverCrypt.Hash.Incremental=*[rename=EverCrypt] \
 	  -library EverCrypt,EverCrypt.* \
@@ -523,7 +528,7 @@ dist/evercrypt-external-headers/Makefile.basic: $(ALL_KRML_FILES)
 # Auto-generates a single C test file.
 .PRECIOUS: dist/test/c/%.c
 dist/test/c/%.c: $(ALL_KRML_FILES)
-	$(KRML) \
+	$(KRML) -silent \
 	  -tmpdir $(dir $@) -skip-compilation \
 	  -no-prefix $(subst _,.,$*) \
 	  -library Hacl,Lib,EverCrypt,EverCrypt.* \
@@ -548,11 +553,11 @@ compile-%: dist/Makefile dist/%/Makefile.basic
 
 # Backwards-compat, remove
 ifneq (,$(MLCRYPTO_HOME))
-OPENSSL_HOME 	= $(MLCRYPTO_HOME)/openssl
+OPENSSL_HOME 	:= $(MLCRYPTO_HOME)/openssl
 endif
 
 ifeq ($(OS),Windows_NT)
-OPENSSL_HOME	:= $(cygpath -u $(OPENSSL_HOME))
+OPENSSL_HOME	:= $(shell cygpath -u $(OPENSSL_HOME))
 endif
 
 dist/test/c/merkle_tree_test.c: secure_api/merkle_tree/test/merkle_tree_test.c
