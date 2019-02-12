@@ -95,11 +95,11 @@ SHELL=/bin/bash
 # Arguments:
 #  CMD: command to execute (may contain double quotes, but not escaped)
 #  TXT: readable text to print out once the command terminates
-#  STEM: path stem for the logs, stdout will be in STEM.out and stderr in STEM.err
+#  STEM: path stem for the logs, stdout will be in STEM.out, stderr in STEM.err, CMD in STEM.cmd
 ifeq (,$(NOSHORTLOG))
 run-with-log = \
-  @echo "Error log for: $(subst ",\",$1)" > $3.err; \
-  $(TIME) -q -f '%E' -o $3.time sh -c "$(subst ",\",$1)" > $3.out 2> >( tee -a $3.err 1>&2 ); \
+  @echo "$(subst ",\",$1)" > $3.cmd; \
+  $(TIME) -q -f '%E' -o $3.time sh -c "$(subst ",\",$1)" > $3.out 2> >( tee $3.err 1>&2 ); \
   ret=$$?; \
   time=$$(cat $3.time); \
   if [ $$ret -eq 0 ]; then \
