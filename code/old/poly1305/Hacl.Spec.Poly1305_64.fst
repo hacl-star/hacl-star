@@ -237,6 +237,7 @@ private
 let lemma_encode_r2 (k:wide) : Lemma (let r2 = Limb.(sint128_to_sint64 Wide.(k >>^ 88ul)) in
    v r2 = (Wide.v k / pow2 88))
   = Math.Lemmas.lemma_div_lt (Wide.v k) 128 88;
+    assume ((Wide.(v (k >>^ 88ul)) < pow2 64));
     Math.Lemmas.modulo_lemma (Wide.(v (k >>^ 88ul))) (pow2 64)
 
 
