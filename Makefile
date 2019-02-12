@@ -513,7 +513,7 @@ dist/hacl-internal-headers/Makefile.basic: $(ALL_KRML_FILES)
 	    $(patsubst %,-bundle %=,$(HAND_WRITTEN_C)) \
 	    $(patsubst %,-library %,$(HAND_WRITTEN_C)) \
 	    -minimal -add-include '"kremlib.h"' \
-	    -bundle '\*,WindowsBug' $^
+	    -bundle '\*,WindowsBug' $^ \
 	  ,[KREMLIN hacl-internal-headers],dist/hacl-internal-headers)
 
 dist/evercrypt-external-headers/Makefile.basic: $(ALL_KRML_FILES)
@@ -527,7 +527,7 @@ dist/evercrypt-external-headers/Makefile.basic: $(ALL_KRML_FILES)
 	    -add-include '<kremlin/internal/types.h>' \
 	    -skip-compilation \
 	    -tmpdir $(dir $@) \
-	    $^
+	    $^ \
 	  ,[KREMLIN evercrypt-external-headers],dist/evercrypt-external-headers)
 
 # Auto-generates a single C test file.
@@ -540,7 +540,7 @@ dist/test/c/%.c: $(ALL_KRML_FILES)
 	    -library Hacl,Lib,EverCrypt,EverCrypt.* \
 	    -fparentheses -fcurly-braces -fno-shadow \
 	    -minimal -add-include '"kremlib.h"' \
-	    -bundle '*[rename=$*]' $(KRML_EXTRA) $^
+	    -bundle '*[rename=$*]' $(KRML_EXTRA) $^ \
 	  ,[KREMLIN test-$*],dist/test-$*)
 
 dist/test/c/Test.c: KRML_EXTRA=-add-include '"kremlin/internal/compat.h"'
