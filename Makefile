@@ -98,10 +98,10 @@ SHELL=/bin/bash
 #  STEM: path stem for the logs, stdout will be in STEM.out and stderr in STEM.err
 ifeq (,$(NOSHORTLOG))
 run-with-log = \
-  $(TIME) -q -f '%E' -o $3.time sh -c "$(subst ",\",$1)" > $3.out 2> >( tee $3.err 1>&2 ); \
+  @$(TIME) -q -f '%E' -o $3.time sh -c "$(subst ",\",$1)" > $3.out 2> >( tee $3.err 1>&2 ); \
   ret=$$?; \
   time=$$(cat $3.time); \
-  echo "Command was:" >> $3.err; \
+  echo "Command was: $(subst ",\",$1)" >> $3.err; \
   if [ $$ret -eq 0 ]; then \
     echo "$2, $$time"; \
   else \
