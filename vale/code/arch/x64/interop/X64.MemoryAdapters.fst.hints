@@ -1,5 +1,5 @@
 [
-  "\u001e’ÛÔô\u001cè!`»˜,Mß0≠",
+  "4‚Ê√zìóPÆË¡*\u000b•ÏÜ",
   [
     [
       "X64.MemoryAdapters.as_vale_buffer",
@@ -85,7 +85,7 @@
         "@fuel_irrelevance_Prims.pow2.fuel_instrumented", "@query",
         "Interop.Base_interpretation_Tm_arrow_ca9987658b75948b17ae64c6e4083ce2",
         "Prims_interpretation_Tm_arrow_9cb3c953faf527c316d427b2ce8bd81b",
-        "equation_FStar.UInt64.n", "equation_Interop.Base.mk_addr_map",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565",
         "equation_Interop.Types.addr_map", "equation_Interop.Types.b8",
         "equation_LowStar.Monotonic.Buffer.length", "equation_Prims.nat",
         "equation_Words_s.nat64", "equation_Words_s.natN",
@@ -95,6 +95,7 @@
         "fuel_guarded_inversion_X64.Vale.State.state",
         "function_token_typing_FStar.UInt8.t",
         "function_token_typing_Interop.Base.__proj__Mem__item__addrs",
+        "function_token_typing_Prims.__cache_version_number__", "int_typing",
         "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_Addition",
         "proj_equation_X64.Vale.State.Mkstate_mem",
         "projection_inverse_BoxInt_proj_0",
@@ -105,7 +106,6 @@
         "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
         "refinement_interpretation_X64.Memory_Tm_refine_55072905896618fd0a39d577acc8f812",
         "token_correspondence_Interop.Base.__proj__Mem__item__addrs",
-        "typing_FStar.UInt64.n", "typing_Interop.Base.global_addrs_map",
         "typing_Interop.Types.__proj__Buffer__item__b",
         "typing_Interop.Types.__proj__Buffer__item__rel",
         "typing_Interop.Types.__proj__Buffer__item__rrel",
@@ -113,7 +113,7 @@
         "typing_X64.Vale.State.__proj__Mkstate__item__mem"
       ],
       0,
-      "5703e36c98b39c699243f4e74a73bcf0"
+      "0a4b6561b8a605faffbe1ddcf7730a2a"
     ],
     [
       "X64.MemoryAdapters.code_equiv",
@@ -126,6 +126,24 @@
       ],
       0,
       "ca4e837bb9a388f0e83538d20eba88bc"
+    ],
+    [
+      "X64.MemoryAdapters.ins_equiv",
+      1,
+      1,
+      0,
+      [ "@query", "equation_X64.Vale.Decls.ins" ],
+      0,
+      "13bd28e554e0452b7fa6dd066b4f2b1a"
+    ],
+    [
+      "X64.MemoryAdapters.ocmp_equiv",
+      1,
+      1,
+      0,
+      [ "@query", "equation_X64.Vale.Decls.ocmp" ],
+      0,
+      "213a05df64be037f02a3159e7b89c5ac"
     ]
   ]
 ]

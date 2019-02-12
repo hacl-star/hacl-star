@@ -13,7 +13,7 @@
         "fuel_guarded_inversion_Prims.list", "subterm_ordering_Prims.Cons"
       ],
       0,
-      "774f90ebc0e7a171a89ed4d4f1f86a79"
+      "ca6786d30879ad6d81f7290ea062bdbe"
     ],
     [
       "X64.Leakage_Ins.check_if_cpuid_consumes_fixed_time",
@@ -2868,9 +2868,9 @@
         "equation_FStar.Pervasives.Native.snd",
         "equation_FStar.UInt.mul_div", "equation_FStar.UInt.mul_mod",
         "equation_Prims.eqtype", "equation_Prims.nat",
-        "equation_Types_s.twobits", "equation_Words_s.nat32",
-        "equation_Words_s.nat64", "equation_Words_s.nat8",
-        "equation_Words_s.natN", "equation_X64.Bytes_Semantics_s.eval_ins",
+        "equation_Words_s.nat32", "equation_Words_s.nat64",
+        "equation_Words_s.nat8", "equation_Words_s.natN",
+        "equation_X64.Bytes_Semantics_s.eval_ins",
         "equation_X64.Bytes_Semantics_s.eval_maddr",
         "equation_X64.Bytes_Semantics_s.eval_operand",
         "equation_X64.Bytes_Semantics_s.get_heap_val64",
@@ -2879,6 +2879,7 @@
         "equation_X64.Bytes_Semantics_s.update_flags",
         "equation_X64.Bytes_Semantics_s.update_reg",
         "equation_X64.Bytes_Semantics_s.update_reg_",
+        "equation_X64.Bytes_Semantics_s.valid_operand",
         "equation_X64.Leakage_Helpers.maddr_does_not_use_secrets",
         "equation_X64.Leakage_Helpers.merge_taint",
         "equation_X64.Leakage_Helpers.operand_does_not_use_secrets",
@@ -3010,11 +3011,6 @@
         "typing_X64.Bytes_Semantics_s.op_String_Access",
         "typing_X64.Bytes_Semantics_s_Tm_abs_5ddf544b15726955644c2e2b7b9e7d8e",
         "typing_X64.Bytes_Semantics_s_Tm_abs_e4bbf0f30784e534db44e144328c14b5",
-        "typing_X64.CPU_Features_s.adx_enabled",
-        "typing_X64.CPU_Features_s.aesni_enabled",
-        "typing_X64.CPU_Features_s.bmi2_enabled",
-        "typing_X64.CPU_Features_s.pclmulqdq_enabled",
-        "typing_X64.CPU_Features_s.sha_enabled",
         "typing_X64.Leakage_Helpers.operand_does_not_use_secrets",
         "typing_X64.Leakage_Helpers.operand_taint",
         "typing_X64.Leakage_Helpers.operands_do_not_use_secrets",
@@ -3041,7 +3037,7 @@
         "typing_tok_X64.Machine_s.Rdx@tok", "unit_inversion", "unit_typing"
       ],
       0,
-      "7f6a13a80494600014a617289499290d"
+      "055c48673488dd9675bdf2e3bc73adb6"
     ],
     [
       "X64.Leakage_Ins.lemma_mul_same_public",

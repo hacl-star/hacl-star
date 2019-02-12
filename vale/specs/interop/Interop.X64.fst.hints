@@ -180,15 +180,16 @@
       1,
       0,
       [
-        "@MaxIFuel_assumption", "@query", "equation_Prims.eqtype",
-        "equation_Prims.nat", "equation_Types_s.twobits",
-        "equation_Words_s.natN",
-        "haseqFStar.Seq.Base_Tm_refine_5514fbe9e08dfda40f950a7b9f1b2b98",
-        "refinement_interpretation_Prims_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
-        "typing_Types_s.twobits"
+        "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565",
+        "equation_Prims.eqtype", "equation_Prims.nat",
+        "function_token_typing_Prims.__cache_version_number__",
+        "function_token_typing_Prims.int",
+        "haseqPrims_Tm_refine_a4038d5aed1633b5ecbb4e499b1c66ad",
+        "refinement_interpretation_Prims_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "1a07c26a890ad2329beaa76b69aad0e8"
+      "942a92040aee470fcdc3bb9c5a16500a"
     ],
     [
       "Interop.X64.register_of_args",
@@ -220,7 +221,7 @@
         "well-founded-ordering-on-nat"
       ],
       0,
-      "68c1246a7a7d106e5a8268dc2062c75d"
+      "8c0e00d684b6bc47fbd479a13c50dfe8"
     ],
     [
       "Interop.X64.register_of_args",
@@ -330,7 +331,7 @@
       0,
       [ "@query" ],
       0,
-      "024fe48b0e41882a9a51f47e3d0c5a4f"
+      "21bfeefe399cccc68f713c476ad94cc6"
     ],
     [
       "Interop.X64.taint_arg_args_b8_mem",
@@ -387,7 +388,7 @@
       0,
       [ "@query" ],
       0,
-      "0a4e037950b308a063a9d9249dc6787a"
+      "abb79b6e0d30a95bbac9f551d62ee679"
     ],
     [
       "Interop.X64.mk_taint_equiv",
@@ -522,17 +523,16 @@
         "Prims_pretyping_ae567c2fb75be05905677af440075565", "b2t_def",
         "equation_FStar.UInt.fits", "equation_FStar.UInt.max_int",
         "equation_FStar.UInt.min_int", "equation_FStar.UInt.size",
-        "equation_FStar.UInt64.n", "equation_Prims.nat",
-        "function_token_typing_Prims.__cache_version_number__",
+        "equation_Prims.nat",
+        "function_token_typing_Prims.__cache_version_number__", "int_typing",
         "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_AmpAmp",
         "primitive_Prims.op_LessThanOrEqual",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Prims_Tm_refine_a4038d5aed1633b5ecbb4e499b1c66ad",
-        "typing_FStar.UInt64.n"
+        "refinement_interpretation_Prims_Tm_refine_a4038d5aed1633b5ecbb4e499b1c66ad"
       ],
       0,
-      "3da1281a72ac46ac5d99d6ee5a27adbd"
+      "1a483fb0119cc2725d7c77f0bee94aa9"
     ],
     [
       "Interop.X64.prediction_post",
@@ -864,7 +864,7 @@
         "typing_Interop.X64.op_Plus_Plus"
       ],
       0,
-      "c75ec60ed3b505a4ce5d34428205b56d"
+      "40d39c93372f346144c91b147b3532e4"
     ],
     [
       "Interop.X64.elim_rel_gen_t_nil",
@@ -975,7 +975,7 @@
         "typing_Interop.X64.op_Plus_Plus"
       ],
       0,
-      "f5cbfc75fa8efb709ec1e779e3a7eb81"
+      "e82027547b7bca416746c98af503771d"
     ],
     [
       "Interop.X64.elim_predict_t_nil",
@@ -1111,7 +1111,7 @@
         "typing_Interop.X64.op_Plus_Plus"
       ],
       0,
-      "56c76af193d2e111493d415abc5afeff"
+      "06ba9cf960f3ba5c98f9b8190fb52e15"
     ],
     [
       "Interop.X64.wrap_aux",
@@ -1126,7 +1126,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "bf20ce4cc5673b4132469303c328e424"
+      "ca3e8b84ae730a0eda670eb67df89242"
     ],
     [
       "Interop.X64.wrap_aux",
@@ -1184,7 +1184,7 @@
         "typing_Interop.X64_Tm_abs_1ac14dc801869db3140ddd29bd56c74b"
       ],
       0,
-      "3ba2aa30a079a114ac2f928bcb2d3caf"
+      "e0391e5406755e2dd14f62eff94e1f99"
     ],
     [
       "Interop.X64.wrap",
@@ -1323,7 +1323,7 @@
         "typing_Interop.X64.op_Plus_Plus"
       ],
       0,
-      "8e7f77a51462b16fd8b4f76d94d7f16e"
+      "041263a261c344286a51c97a080e16c4"
     ],
     [
       "Interop.X64.wrap_aux_weak",
@@ -1338,7 +1338,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "ddacb25e240de29e2dff6aed8362449d"
+      "2e3c1d586dd566d125eb1b2ee245d408"
     ],
     [
       "Interop.X64.wrap_aux_weak",
@@ -1438,7 +1438,7 @@
         "typing_Interop.X64_Tm_abs_da24c3665e6108436cb629a3eb5d5ca1"
       ],
       0,
-      "7976d6b0737cc48488da713d2e88c5ac"
+      "ecf1e046bc71d3f6fbeac64b72566144"
     ],
     [
       "Interop.X64.wrap_weak",

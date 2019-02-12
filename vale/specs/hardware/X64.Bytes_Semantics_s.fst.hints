@@ -1586,21 +1586,24 @@
       1,
       [
         "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565",
         "disc_equation_X64.Bytes_Semantics_s.OEq",
         "disc_equation_X64.Bytes_Semantics_s.OGe",
         "disc_equation_X64.Bytes_Semantics_s.OGt",
         "disc_equation_X64.Bytes_Semantics_s.OLe",
         "disc_equation_X64.Bytes_Semantics_s.OLt",
         "disc_equation_X64.Bytes_Semantics_s.ONe", "equation_Prims.eqtype",
-        "equation_Prims.nat", "equation_Types_s.twobits",
-        "equation_Words_s.nat64", "equation_Words_s.natN",
+        "equation_Prims.nat", "equation_Words_s.nat64",
+        "equation_Words_s.natN",
         "fuel_guarded_inversion_X64.Bytes_Semantics_s.ocmp",
+        "function_token_typing_Prims.__cache_version_number__",
+        "function_token_typing_Prims.int",
         "haseqFStar.Seq.Base_Tm_refine_5514fbe9e08dfda40f950a7b9f1b2b98",
-        "refinement_interpretation_Prims_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
-        "typing_Types_s.twobits"
+        "haseqPrims_Tm_refine_a4038d5aed1633b5ecbb4e499b1c66ad",
+        "refinement_interpretation_Prims_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "8b53b247bc6b5823a3b531b5710eca90"
+      "c764779fab97c0eb91dd70842941c511"
     ],
     [
       "X64.Bytes_Semantics_s.mod_8",
@@ -1812,11 +1815,10 @@
         "equation_FStar.UInt.fits", "equation_FStar.UInt.max_int",
         "equation_FStar.UInt.min_int", "equation_FStar.UInt.mul_mod",
         "equation_FStar.UInt.size", "equation_FStar.UInt.uint_t",
-        "equation_FStar.UInt32.n", "equation_FStar.UInt64.n",
         "equation_Prims.eqtype", "equation_Prims.nat",
-        "equation_Types_s.twobits", "equation_Words_s.nat32",
-        "equation_Words_s.nat64", "equation_Words_s.nat8",
-        "equation_Words_s.natN", "equation_X64.Bytes_Semantics_s.cf",
+        "equation_Words_s.nat32", "equation_Words_s.nat64",
+        "equation_Words_s.nat8", "equation_Words_s.natN",
+        "equation_X64.Bytes_Semantics_s.cf",
         "equation_X64.Bytes_Semantics_s.eval_operand",
         "equation_X64.Bytes_Semantics_s.overflow",
         "equation_X64.Bytes_Semantics_s.regs_t",
@@ -1824,9 +1826,11 @@
         "fuel_guarded_inversion_X64.Bytes_Semantics_s.ins",
         "fuel_guarded_inversion_X64.Bytes_Semantics_s.state",
         "function_token_typing_Prims.__cache_version_number__",
+        "function_token_typing_Prims.int",
         "function_token_typing_Words_s.nat8",
         "haseqFStar.Seq.Base_Tm_refine_5514fbe9e08dfda40f950a7b9f1b2b98",
-        "int_typing",
+        "haseqPrims_Tm_refine_a4038d5aed1633b5ecbb4e499b1c66ad",
+        "int_inversion", "int_typing",
         "interpretation_X64.Bytes_Semantics_s_Tm_abs_5ddf544b15726955644c2e2b7b9e7d8e",
         "lemma_FStar.Seq.Base.lemma_create_len",
         "lemma_FStar.Seq.Base.lemma_len_append",
@@ -1848,14 +1852,13 @@
         "refinement_interpretation_X64.Machine_s_Tm_refine_ed0c82b529ba35f1d88d0cb19afaf666",
         "token_correspondence_X64.Bytes_Semantics_s.__proj__Mkstate__item__regs",
         "typing_FStar.Seq.Base.create", "typing_FStar.Seq.Base.length",
-        "typing_FStar.UInt.fits", "typing_FStar.UInt32.n",
-        "typing_FStar.UInt64.n", "typing_Types_s.twobits",
+        "typing_FStar.UInt.min_int",
         "typing_X64.Bytes_Semantics_s.eval_operand",
         "typing_tok_X64.Machine_s.Rax@tok",
         "typing_tok_X64.Machine_s.Rdx@tok"
       ],
       0,
-      "f004d774ca30de6fafdd41601a14bb70"
+      "5fed015bed087f64c6fb94c00de16632"
     ],
     [
       "X64.Bytes_Semantics_s.eval_code",
@@ -1884,7 +1887,7 @@
         "typing_tok_X64.Bytes_Semantics_s.Cpuid@tok"
       ],
       0,
-      "157678e4519505ac3f5bfeea832841ad"
+      "395e55f7ab97a53618e87a1ab8d41c07"
     ],
     [
       "X64.Bytes_Semantics_s.eval_code",
@@ -1910,7 +1913,7 @@
         "subterm_ordering_Prims.Cons"
       ],
       0,
-      "3deaaae7c164c6bce5795909e881af9a"
+      "d748905f576a1ab91a09dc5a2451bcd4"
     ],
     [
       "X64.Bytes_Semantics_s.eval_code",
@@ -1934,7 +1937,7 @@
         "well-founded-ordering-on-nat"
       ],
       0,
-      "4dd1a0e00ca84c8482bd82938eba419f"
+      "439a6540fd014b9e7cc5e1c95ef31ef3"
     ],
     [
       "X64.Bytes_Semantics_s.uint64",
@@ -3521,21 +3524,24 @@
       1,
       [
         "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565",
         "disc_equation_X64.Bytes_Semantics_s.OEq",
         "disc_equation_X64.Bytes_Semantics_s.OGe",
         "disc_equation_X64.Bytes_Semantics_s.OGt",
         "disc_equation_X64.Bytes_Semantics_s.OLe",
         "disc_equation_X64.Bytes_Semantics_s.OLt",
         "disc_equation_X64.Bytes_Semantics_s.ONe", "equation_Prims.eqtype",
-        "equation_Prims.nat", "equation_Types_s.twobits",
-        "equation_Words_s.nat64", "equation_Words_s.natN",
+        "equation_Prims.nat", "equation_Words_s.nat64",
+        "equation_Words_s.natN",
         "fuel_guarded_inversion_X64.Bytes_Semantics_s.ocmp",
+        "function_token_typing_Prims.__cache_version_number__",
+        "function_token_typing_Prims.int",
         "haseqFStar.Seq.Base_Tm_refine_5514fbe9e08dfda40f950a7b9f1b2b98",
-        "refinement_interpretation_Prims_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
-        "typing_Types_s.twobits"
+        "haseqPrims_Tm_refine_a4038d5aed1633b5ecbb4e499b1c66ad",
+        "refinement_interpretation_Prims_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "de431885ac91b212f8b2f95bbb627a14"
+      "bc7ddfa423a8cbc319c0c92716c49329"
     ],
     [
       "X64.Bytes_Semantics_s.mod_8",
@@ -3747,11 +3753,10 @@
         "equation_FStar.UInt.fits", "equation_FStar.UInt.max_int",
         "equation_FStar.UInt.min_int", "equation_FStar.UInt.mul_mod",
         "equation_FStar.UInt.size", "equation_FStar.UInt.uint_t",
-        "equation_FStar.UInt32.n", "equation_FStar.UInt64.n",
         "equation_Prims.eqtype", "equation_Prims.nat",
-        "equation_Types_s.twobits", "equation_Words_s.nat32",
-        "equation_Words_s.nat64", "equation_Words_s.nat8",
-        "equation_Words_s.natN", "equation_X64.Bytes_Semantics_s.cf",
+        "equation_Words_s.nat32", "equation_Words_s.nat64",
+        "equation_Words_s.nat8", "equation_Words_s.natN",
+        "equation_X64.Bytes_Semantics_s.cf",
         "equation_X64.Bytes_Semantics_s.eval_operand",
         "equation_X64.Bytes_Semantics_s.overflow",
         "equation_X64.Bytes_Semantics_s.regs_t",
@@ -3759,9 +3764,11 @@
         "fuel_guarded_inversion_X64.Bytes_Semantics_s.ins",
         "fuel_guarded_inversion_X64.Bytes_Semantics_s.state",
         "function_token_typing_Prims.__cache_version_number__",
+        "function_token_typing_Prims.int",
         "function_token_typing_Words_s.nat8",
         "haseqFStar.Seq.Base_Tm_refine_5514fbe9e08dfda40f950a7b9f1b2b98",
-        "int_typing",
+        "haseqPrims_Tm_refine_a4038d5aed1633b5ecbb4e499b1c66ad",
+        "int_inversion", "int_typing",
         "interpretation_X64.Bytes_Semantics_s_Tm_abs_5ddf544b15726955644c2e2b7b9e7d8e",
         "lemma_FStar.Seq.Base.lemma_create_len",
         "lemma_FStar.Seq.Base.lemma_len_append",
@@ -3783,14 +3790,13 @@
         "refinement_interpretation_X64.Machine_s_Tm_refine_ed0c82b529ba35f1d88d0cb19afaf666",
         "token_correspondence_X64.Bytes_Semantics_s.__proj__Mkstate__item__regs",
         "typing_FStar.Seq.Base.create", "typing_FStar.Seq.Base.length",
-        "typing_FStar.UInt.fits", "typing_FStar.UInt32.n",
-        "typing_FStar.UInt64.n", "typing_Types_s.twobits",
+        "typing_FStar.UInt.min_int",
         "typing_X64.Bytes_Semantics_s.eval_operand",
         "typing_tok_X64.Machine_s.Rax@tok",
         "typing_tok_X64.Machine_s.Rdx@tok"
       ],
       0,
-      "a079eed318f65c64457a39a523e85ca0"
+      "8283680d180deaacad7fd25e038217f5"
     ],
     [
       "X64.Bytes_Semantics_s.eval_code",
@@ -3819,7 +3825,7 @@
         "typing_tok_X64.Bytes_Semantics_s.Cpuid@tok"
       ],
       0,
-      "ab43dc778a34640f89a589c208978109"
+      "1aaf2fb84a6e5fda644e92f9a7ac7c5d"
     ],
     [
       "X64.Bytes_Semantics_s.eval_code",
@@ -3845,7 +3851,7 @@
         "subterm_ordering_Prims.Cons"
       ],
       0,
-      "34d464e24710fe6aa8bf44892c6c08c9"
+      "d2c4d1d1c0d2b3c7970c233e65cf5dc2"
     ],
     [
       "X64.Bytes_Semantics_s.eval_code",
@@ -3869,7 +3875,7 @@
         "well-founded-ordering-on-nat"
       ],
       0,
-      "1304597e940aaf98dbeba4d204921302"
+      "109aa7179e62c7fa8ea7faa871dec78e"
     ]
   ]
 ]
