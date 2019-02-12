@@ -15,7 +15,7 @@
         "typing_FStar.UInt32.v"
       ],
       0,
-      "92726dba2783d7d4bcc72c3b4051ffe0"
+      "3b34727b084c5283b53898b918d4e412"
     ],
     [
       "Crypto.AEAD.Decrypt.decrypt_modifies",
@@ -32,7 +32,7 @@
         "typing_FStar.UInt32.v"
       ],
       0,
-      "e9c33a6d4d4ae1c45314edf254764c70"
+      "c49ce3777b31116c7c9f5d8f18face16"
     ],
     [
       "Crypto.AEAD.Decrypt.post_pop",
@@ -56,7 +56,7 @@
         "typing_Crypto.Symmetric.MAC.wlen", "typing_FStar.UInt32.v"
       ],
       0,
-      "c59ff3763b29421bd02c26ae0b64e520"
+      "4bfe5a09bbd67b5ece186cfa3b89dcb1"
     ],
     [
       "Crypto.AEAD.Decrypt.post_pop",
@@ -265,7 +265,7 @@
         "typing_Hacl.Bignum.Parameters.v", "unit_typing"
       ],
       0,
-      "83f8d943fd88fcae4817ed5339076d00"
+      "6bf1d110a14606a2b1cb5a8cf572d0a6"
     ],
     [
       "Crypto.AEAD.Decrypt.chain_mods",
@@ -360,7 +360,7 @@
         "typing_tok_Crypto.Indexing.Reader@tok"
       ],
       0,
-      "be7f206a570acaa62f08970df73cf997"
+      "2d8e468f66db04b40b6fff1170116730"
     ],
     [
       "Crypto.AEAD.Decrypt.decrypt",
@@ -421,7 +421,7 @@
         "typing_Crypto.Symmetric.MAC.wlen", "typing_FStar.UInt32.v"
       ],
       0,
-      "22b9e8dd8d246633e0f1e7f82bca18cf"
+      "34aab9c107d2406754f3c944cc95c76b"
     ],
     [
       "Crypto.AEAD.Decrypt.decrypt",
@@ -437,8 +437,6 @@
         "disc_equation_FStar.Pervasives.Native.None",
         "disc_equation_FStar.Pervasives.Native.Some",
         "equality_tok_Crypto.Indexing.Reader@tok",
-        "equation_Crypto.AEAD.BufferUtils.decrypt_modifies",
-        "equation_Crypto.AEAD.Decrypt.decrypt_modifies",
         "equation_Crypto.AEAD.Encoding.aadlen_32",
         "equation_Crypto.AEAD.Encoding.aadmax",
         "equation_Crypto.AEAD.Encoding.alg",
@@ -481,10 +479,10 @@
         "equation_Crypto.Symmetric.MAC.taglen",
         "equation_Crypto.Symmetric.MAC.wlen",
         "equation_Crypto.Symmetric.PRF.region",
-        "equation_FStar.Buffer.buffer", "equation_FStar.Buffer.content",
-        "equation_FStar.Buffer.frameOf", "equation_FStar.Buffer.live",
-        "equation_FStar.Buffer.lseq", "equation_FStar.Buffer.max_length",
-        "equation_FStar.Buffer.sub", "equation_FStar.Heap.trivial_preorder",
+        "equation_FStar.Buffer.buffer", "equation_FStar.Buffer.frameOf",
+        "equation_FStar.Buffer.live", "equation_FStar.Buffer.lseq",
+        "equation_FStar.Buffer.max_length", "equation_FStar.Buffer.sub",
+        "equation_FStar.Heap.trivial_preorder",
         "equation_FStar.HyperStack.ST.equal_domains",
         "equation_FStar.HyperStack.ST.equal_stack_domains",
         "equation_FStar.HyperStack.ST.inline_stack_inv",
@@ -495,7 +493,6 @@
         "equation_FStar.Monotonic.HyperHeap.modifies_just",
         "equation_FStar.Monotonic.HyperHeap.modifies_one",
         "equation_FStar.Monotonic.HyperStack.contains",
-        "equation_FStar.Monotonic.HyperStack.frameOf",
         "equation_FStar.Monotonic.HyperStack.fresh_frame",
         "equation_FStar.Monotonic.HyperStack.is_stack_region",
         "equation_FStar.Monotonic.HyperStack.is_tip",
@@ -531,11 +528,9 @@
         "lemma_FStar.Buffer.lemma_size", "lemma_FStar.Buffer.lemma_sub_spec",
         "lemma_FStar.Buffer.live_fresh",
         "lemma_FStar.HyperStack.ST.lemma_same_refs_in_all_regions_elim",
-        "lemma_FStar.HyperStack.ST.lemma_same_refs_in_non_tip_regions_elim",
         "lemma_FStar.HyperStack.ST.lemma_same_refs_in_stack_regions_elim",
         "lemma_FStar.HyperStack.ST.lemma_same_refs_in_stack_regions_intro",
         "lemma_FStar.Map.lemma_ContainsDom",
-        "lemma_FStar.Map.lemma_InDomConcat",
         "lemma_FStar.Map.lemma_InDomRestrict",
         "lemma_FStar.Map.lemma_InDomUpd2",
         "lemma_FStar.Map.lemma_SelConcat1",
@@ -557,8 +552,6 @@
         "primitive_Prims.op_Subtraction",
         "proj_equation_Crypto.Symmetric.PRF.Mkdomain_ctr",
         "proj_equation_Crypto.Symmetric.PRF.Mkdomain_iv",
-        "proj_equation_FStar.Buffer.MkBuffer_content",
-        "proj_equation_FStar.Monotonic.HyperStack.MkRef_frame",
         "proj_equation_FStar.Pervasives.Native.Mktuple2__1",
         "proj_equation_FStar.Pervasives.Native.Mktuple2__2",
         "projection_inverse_BoxBool_proj_0",
@@ -606,10 +599,9 @@
         "typing_Crypto.Symmetric.MAC.wlen",
         "typing_Crypto.Symmetric.PRF.__proj__State__item__mac_rgn",
         "typing_Crypto.Symmetric.PRF.ctr_0",
-        "typing_Crypto.Symmetric.PRF.maxCtr", "typing_FStar.Buffer.frameOf",
-        "typing_FStar.Map.concat", "typing_FStar.Map.contains",
-        "typing_FStar.Map.domain", "typing_FStar.Map.restrict",
-        "typing_FStar.Monotonic.Heap.emp",
+        "typing_Crypto.Symmetric.PRF.maxCtr", "typing_FStar.Map.concat",
+        "typing_FStar.Map.contains", "typing_FStar.Map.domain",
+        "typing_FStar.Map.restrict", "typing_FStar.Monotonic.Heap.emp",
         "typing_FStar.Monotonic.HyperHeap.mod_set",
         "typing_FStar.Monotonic.HyperHeap.rid",
         "typing_FStar.Monotonic.HyperStack.get_hmap",
@@ -618,12 +610,12 @@
         "typing_FStar.Monotonic.HyperStack.is_stack_region",
         "typing_FStar.Monotonic.HyperStack.remove_elt",
         "typing_FStar.Pervasives.Native.uu___is_Some",
-        "typing_FStar.Set.complement", "typing_FStar.Set.empty",
-        "typing_FStar.Set.mem", "typing_FStar.Set.singleton",
-        "typing_FStar.Set.union", "typing_FStar.UInt.fits",
-        "typing_FStar.UInt32.lte", "typing_FStar.UInt32.mul",
-        "typing_FStar.UInt32.v", "typing_FStar.UInt8.n",
-        "typing_Flag.mac_log", "typing_Hacl.Bignum.Parameters.climb_size",
+        "typing_FStar.Set.complement", "typing_FStar.Set.mem",
+        "typing_FStar.Set.singleton", "typing_FStar.Set.union",
+        "typing_FStar.UInt.fits", "typing_FStar.UInt32.lte",
+        "typing_FStar.UInt32.mul", "typing_FStar.UInt32.v",
+        "typing_FStar.UInt8.n", "typing_Flag.mac_log",
+        "typing_Hacl.Bignum.Parameters.climb_size",
         "typing_Spec.Chacha20.noncelen",
         "typing_tok_Crypto.Indexing.Reader@tok", "unit_inversion"
       ],
