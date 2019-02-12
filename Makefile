@@ -36,7 +36,7 @@ all_:
 
 all: compile-compact compile-generic compile-compact-msvc \
   compile-evercrypt-external-headers compile-compact-c89 compile-coco \
-  # secure_api.old
+  secure_api.old
 
 # Any file in code/tests is taken to contain a `main` function.
 # Any file in specs/tests is taken to contain a `test` function.
@@ -52,7 +52,7 @@ ci:
 # Backwards-compat target
 .PHONY: secure_api.old
 secure_api.old:
-	$(MAKE) -C secure_api
+	@$(call run-with-log,$(MAKE) -C secure_api,[OLD-MAKE secure_api],secure_api/log)
 
 
 #################
@@ -315,7 +315,11 @@ else
   export OCAMLPATH := $(FSTAR_HOME)/bin:$(OCAMLPATH)
 endif
 
-OCAMLOPT = ocamlfind opt -package fstarlib -linkpkg -g -I $(OUTPUT_DIR)
+# Warning 8: this pattern-matching is not exhaustive.
+# Warning 20: this argument will not be used by the function.
+# Warning 26: unused variable
+OCAMLOPT = ocamlfind opt -package fstarlib -linkpkg -g -I $(OUTPUT_DIR) \
+  -warn-error -8-20-26
 
 .PRECIOUS: %.cmx
 %.cmx: %.ml
