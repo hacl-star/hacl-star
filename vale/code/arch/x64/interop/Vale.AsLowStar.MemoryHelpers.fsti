@@ -68,10 +68,11 @@ val readable_imm_live (#t:_) (x:ibuf_t t) (s:ME.mem)
 
 
 val buffer_readable_reveal 
+  (#max_arity:_)
   (#n:_)
   (bt:base_typ)
   (x:buf_t bt)
-  (args:IX64.arity_ok arg)
+  (args:IX64.arity_ok max_arity arg)
   (h0:HS.mem)
   (stack:IX64.stack_buffer n{mem_roots_p h0 (arg_of_sb stack::args)}) : Lemma (
     let mem = mk_mem (arg_of_sb stack::args) h0 in
@@ -79,8 +80,9 @@ val buffer_readable_reveal
       List.memP (Buffer x true) (ptrs_of_mem mem))
 
 val get_heap_mk_mem_reveal
+  (#max_arity:_)
   (#n:_)
-  (args:IX64.arity_ok arg)
+  (args:IX64.arity_ok max_arity arg)
   (h0:HS.mem)
   (stack:IX64.stack_buffer n{mem_roots_p h0 (arg_of_sb stack::args)}) : Lemma
   (let mem = mk_mem (arg_of_sb stack::args) h0 in
@@ -88,10 +90,11 @@ val get_heap_mk_mem_reveal
    MES.get_heap (as_vale_mem mem) == I.down_mem mem)
 
 val buffer_as_seq_reveal
+  (#max_arity:_)
   (#n:_)
   (t:ME.base_typ)
   (x:buf_t t)
-  (args:IX64.arity_ok arg)
+  (args:IX64.arity_ok max_arity arg)
   (h0:HS.mem)
   (stack:IX64.stack_buffer n{mem_roots_p h0 (arg_of_sb stack::args)}) : Lemma
   (let y = as_vale_buffer x in
@@ -101,10 +104,11 @@ val buffer_as_seq_reveal
     (BV.as_seq h0 (BV.mk_buffer_view x (LSig.view_of_base_typ t))))
 
 val immbuffer_as_seq_reveal
+  (#max_arity:_)
   (#n:_)
   (t:ME.base_typ)
   (x:ibuf_t t)
-  (args:IX64.arity_ok arg)
+  (args:IX64.arity_ok max_arity arg)
   (h0:HS.mem)
   (stack:IX64.stack_buffer n{mem_roots_p h0 (arg_of_sb stack::args)}) : Lemma
   (let y = as_vale_immbuffer x in
@@ -188,12 +192,14 @@ val loc_disjoint_sym (x y:ME.loc)
            [SMTPat (ME.loc_disjoint x y)]
 
 val core_create_lemma_taint_hyp
+    (#max_arity:_)
+    (#arg_reg:IX64.arg_reg_relation max_arity)
     (#n:_)
-    (args:IX64.arity_ok arg)
+    (args:IX64.arity_ok max_arity arg)
     (h0:HS.mem)
     (stack:IX64.stack_buffer n{mem_roots_p h0 (arg_of_sb stack::args)})
   : Lemma
-      (ensures (let va_s = LSig.create_initial_vale_state args h0 stack in
+      (ensures (let va_s = LSig.create_initial_vale_state #max_arity #arg_reg args h0 stack in
                 LSig.taint_hyp args va_s /\
                 ME.valid_taint_buf64 (as_vale_buffer stack) va_s.VS.mem va_s.VS.memTaint X64.Machine_s.Public))
 

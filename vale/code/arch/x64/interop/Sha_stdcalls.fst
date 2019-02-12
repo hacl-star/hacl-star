@@ -42,7 +42,7 @@ let t128_imm = TD_ImmBuffer TUInt128 default_bq
 let tuint64 = TD_Base TUInt64
 
 [@__reduce__] unfold
-let dom: IX64.arity_ok td =
+let dom: IX64.arity_ok_stdcall td =
   let y = [t128_mod; t128_no_mod; tuint64; t128_imm] in
   assert_norm (List.length y = 4);
   y
@@ -114,7 +114,7 @@ let code_sha = SH.va_code_sha_update_bytes_stdcall IA.win
 (* Here's the type expected for the sha wrapper *)
 [@__reduce__]
 let lowstar_sha_t =
-  IX64.as_lowstar_sig_t_weak
+  IX64.as_lowstar_sig_t_weak_stdcall
     Interop.down_mem
     code_sha
     224
@@ -126,7 +126,7 @@ let lowstar_sha_t =
 
 (* And here's the sha wrapper itself *)
 let lowstar_sha : lowstar_sha_t  =
-  IX64.wrap
+  IX64.wrap_weak_stdcall
     Interop.down_mem
     code_sha
     224

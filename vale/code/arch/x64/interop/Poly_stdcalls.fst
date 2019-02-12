@@ -38,7 +38,7 @@ let t64_no_mod = TD_Buffer TUInt64 ({modified=false; strict_disjointness=false; 
 let tuint64 = TD_Base TUInt64
 
 [@__reduce__] unfold
-let dom: IX64.arity_ok td =
+let dom: IX64.arity_ok_stdcall td =
   let y = [t64_mod; t64_no_mod; tuint64] in
   assert_norm (List.length y = 3);
   y
@@ -107,7 +107,7 @@ let code_poly = PO.va_code_poly1305 IA.win
 (* Here's the type expected for the poly wrapper *)
 [@__reduce__]
 let lowstar_poly_t =
-  IX64.as_lowstar_sig_t
+  IX64.as_lowstar_sig_t_weak_stdcall
     Interop.down_mem
     code_poly
     8
@@ -119,7 +119,7 @@ let lowstar_poly_t =
 
 (* And here's the poly wrapper itself *)
 let lowstar_poly : lowstar_poly_t  =
-  IX64.wrap
+  IX64.wrap_weak_stdcall
     Interop.down_mem
     code_poly
     8

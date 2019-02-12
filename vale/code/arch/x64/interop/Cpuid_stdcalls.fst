@@ -15,7 +15,7 @@ let as_t (#a:Type) (x:normal a) : a = x
 let as_normal_t (#a:Type) (x:a) : normal a = x
 
 [@__reduce__]
-let dom: IX64.arity_ok td = []
+let dom: IX64.arity_ok_stdcall td = []
 
 (* Need to rearrange the order of arguments *)
 [@__reduce__]
@@ -58,7 +58,7 @@ let code_aesni = VC.va_code_check_aesni_stdcall IA.win
 (* Here's the type expected for the check_aesni wrapper *)
 [@__reduce__]
 let lowstar_aesni_t =
-  IX64.as_lowstar_sig_t_weak
+  IX64.as_lowstar_sig_t_weak_stdcall
     Interop.down_mem
     code_aesni
     8
@@ -70,7 +70,7 @@ let lowstar_aesni_t =
 
 (* And here's the check_aesni wrapper itself *)
 let lowstar_aesni : lowstar_aesni_t  =
-  IX64.wrap_weak
+  IX64.wrap_weak_stdcall
     Interop.down_mem
     code_aesni
     8
@@ -101,6 +101,11 @@ let sha_post : VSig.vale_post 8 dom =
     (f:V.va_fuel) ->
       VC.va_ens_check_sha_stdcall c va_s0 IA.win (as_vale_buffer sb) va_s1 f
 
+open X64.Machine_s
+open X64.Vale.State
+
+#set-options "--z3rlimit 20"
+
 (* The vale lemma doesn't quite suffice to prove the modifies clause
    expected of the interop layer *)
 [@__reduce__] unfold
@@ -117,7 +122,7 @@ let sha_lemma'
        VSig.vale_calling_conventions va_s0 va_s1 /\
        sha_post code va_s0 sb va_s1 f))
  = VC.va_lemma_check_sha_stdcall code va_s0 IA.win (as_vale_buffer sb)
-
+ 
 (* Prove that vm_lemma' has the required type *)
 let sha_lemma = as_t #(VSig.vale_sig sha_pre sha_post) sha_lemma'
 let code_sha = VC.va_code_check_sha_stdcall IA.win
@@ -125,7 +130,7 @@ let code_sha = VC.va_code_check_sha_stdcall IA.win
 (* Here's the type expected for the check_aesni wrapper *)
 [@__reduce__]
 let lowstar_sha_t =
-  IX64.as_lowstar_sig_t_weak
+  IX64.as_lowstar_sig_t_weak_stdcall
     Interop.down_mem
     code_sha
     8
@@ -137,7 +142,7 @@ let lowstar_sha_t =
 
 (* And here's the check_aesni wrapper itself *)
 let lowstar_sha : lowstar_sha_t  =
-  IX64.wrap_weak
+  IX64.wrap_weak_stdcall
     Interop.down_mem
     code_sha
     8
@@ -192,7 +197,7 @@ let code_adx = VC.va_code_check_adx_bmi2_stdcall IA.win
 (* Here's the type expected for the check_adx wrapper *)
 [@__reduce__]
 let lowstar_adx_t =
-  IX64.as_lowstar_sig_t_weak
+  IX64.as_lowstar_sig_t_weak_stdcall
     Interop.down_mem
     code_adx
     8
@@ -204,7 +209,7 @@ let lowstar_adx_t =
 
 (* And here's the check_adx wrapper itself *)
 let lowstar_adx : lowstar_adx_t  =
-  IX64.wrap_weak
+  IX64.wrap_weak_stdcall
     Interop.down_mem
     code_adx
     8

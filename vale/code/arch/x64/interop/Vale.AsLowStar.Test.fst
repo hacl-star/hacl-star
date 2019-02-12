@@ -27,7 +27,7 @@ let t64_no_mod = TD_Buffer TUInt64 ({modified=false; strict_disjointness=false; 
 let t64_imm = TD_ImmBuffer TUInt64 ({modified=false; strict_disjointness=false; taint=MS.Secret})
 
 [@__reduce__] unfold
-let dom : IX64.arity_ok td =
+let dom : IX64.arity_ok_stdcall td =
   let y = [t64_mod;t64_imm] in
   assert_norm (List.length y = 2);
   y
@@ -39,8 +39,8 @@ assume val v: VSig.vale_sig pre post
 assume val c: V.va_code
 
 [@__reduce__]
-let call_c_t = IX64.as_lowstar_sig_t_weak Interop.down_mem c n dom [] _ _ (W.mk_prediction c dom [] (v c IA.win))
-let call_c : call_c_t = IX64.wrap_weak Interop.down_mem c n dom (W.mk_prediction c dom [] (v c IA.win))
+let call_c_t = IX64.as_lowstar_sig_t_weak IX64.max_stdcall IX64.arg_reg_stdcall Interop.down_mem c n dom [] _ _ (W.mk_prediction c dom [] (v c IA.win))
+let call_c : call_c_t = IX64.wrap_weak IX64.max_stdcall IX64.arg_reg_stdcall Interop.down_mem c n dom (W.mk_prediction c dom [] (v c IA.win))
 let call_c_normal_t : normal call_c_t = as_normal_t #call_c_t call_c
 //You can ask emacs to show you the type of call_c_normal_t ...
 
@@ -125,7 +125,7 @@ let code_memcpy = VM.va_code_memcpy IA.win
 (* Here's the type expected for the memcpy wrapper *)
 [@__reduce__]
 let lowstar_memcpy_t =
-  IX64.as_lowstar_sig_t_weak
+  IX64.as_lowstar_sig_t_weak_stdcall
     Interop.down_mem
     code_memcpy
     24
@@ -137,7 +137,7 @@ let lowstar_memcpy_t =
 
 (* And here's the memcpy wrapper itself *)
 let lowstar_memcpy : lowstar_memcpy_t  =
-  IX64.wrap_weak
+  IX64.wrap_weak_stdcall
     Interop.down_mem
     code_memcpy
     24
@@ -210,7 +210,7 @@ let memcpy_test
 module VC = X64.Cpuidstdcall
 
 [@__reduce__] unfold
-let aesni_dom : IX64.arity_ok td = []
+let aesni_dom : IX64.arity_ok_stdcall td = []
 
 (* Need to rearrange the order of arguments *)
 [@__reduce__]
@@ -228,6 +228,8 @@ let aesni_post : VSig.vale_post 8 aesni_dom =
     (va_s1:V.va_state)
     (f:V.va_fuel) ->
       VC.va_ens_check_aesni_stdcall c va_s0 IA.win (as_vale_buffer sb) va_s1 f
+
+#set-options "--z3rlimit 20"
 
 (* The vale lemma doesn't quite suffice to prove the modifies clause
    expected of the interop layer *)
@@ -254,7 +256,7 @@ let code_aesni = VC.va_code_check_aesni_stdcall IA.win
 (* Here's the type expected for the check_aesni wrapper *)
 [@__reduce__]
 let lowstar_aesni_t =
-  IX64.as_lowstar_sig_t_weak
+  IX64.as_lowstar_sig_t_weak_stdcall
     Interop.down_mem
     code_aesni
     8
@@ -266,7 +268,7 @@ let lowstar_aesni_t =
 
 (* And here's the check_aesni wrapper itself *)
 let lowstar_aesni : lowstar_aesni_t  =
-  IX64.wrap_weak
+  IX64.wrap_weak_stdcall
     Interop.down_mem
     code_aesni
     8

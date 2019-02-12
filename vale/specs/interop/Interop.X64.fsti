@@ -58,48 +58,26 @@ let calling_conventions (s0:TS.traceState) (s1:TS.traceState) =
 let reg_nat (n:nat) = i:nat{i < n}
 let arity_ok n 'a = l:list 'a { List.Tot.length l <= n }
 
+unfold
+let injective f = forall x y. f x == f y ==> x == y
+
 noeq
-type arg_reg_relation (n:nat) =  
-  | Rel: of_arg:(reg_nat n -> MS.reg) -> of_reg:(r:MS.reg -> option (i:reg_nat n{of_arg i = r})) -> arg_reg_relation n
+type arg_reg_relation' (n:nat) =  
+  | Rel: of_reg:(MS.reg -> option (reg_nat n)) ->
+         of_arg:(reg_nat n -> MS.reg){
+           // This function should be injective
+           injective of_arg /\ 
+           // Rsp is not a valid register to store paramters
+           (forall (i:reg_nat n). of_arg i <> MS.Rsp) /\
+           // of_reg should always return Some when the register corresponds to an of_arg 
+           (forall (i:reg_nat n).
+              Some? (of_reg (of_arg i)) /\ Some?.v (of_reg (of_arg i)) = i)} ->
+         arg_reg_relation' n
 
-// let register_of_arg_i (i:reg_nat) : MS.reg =
-//   let open MS in
-//   if IA.win then
-//     match i with
-//     | 0 -> Rcx
-//     | 1 -> Rdx
-//     | 2 -> R8
-//     | 3 -> R9
-//   else
-//     match i with
-//     | 0 -> Rdi
-//     | 1 -> Rsi
-//     | 2 -> Rdx
-//     | 3 -> Rcx
-//     | 4 -> R8
-//     | 5 -> R9
-
-// //A partial inverse of the above function
-// [@__reduce__]
-// let arg_of_register (r:MS.reg)
-//   : option (i:reg_nat{register_of_arg_i i = r})
-//   = let open MS in
-//     if IA.win then
-//        match r with
-//        | Rcx -> Some 0
-//        | Rdx -> Some 1
-//        | R8 -> Some 2
-//        | R9 -> Some 3
-//        | _ -> None
-//     else
-//        match r with
-//        | Rdi -> Some 0
-//        | Rsi -> Some 1
-//        | Rdx -> Some 2
-//        | Rcx -> Some 3
-//        | R8 -> Some 4
-//        | R9 -> Some 5
-//        | _ -> None
+unfold
+let arg_reg_relation (n:nat) = (v:arg_reg_relation' n{
+  // of_reg is a partial inverse of of_arg
+  forall (r:MS.reg). Some? (v.of_reg r) ==> v.of_arg (Some?.v (v.of_reg r)) = r})
 
 let registers = MS.reg -> MS.nat64
 
@@ -637,3 +615,53 @@ val wrap_weak
     (#post_rel:rel_gen_t n c dom [] (prediction_post_rel_t n c num_b8_slots))
     (predict:prediction_t n arg_reg down_mem c num_b8_slots dom [] pre_rel post_rel)
   : as_lowstar_sig_t_weak n arg_reg down_mem c num_b8_slots dom [] pre_rel post_rel predict
+
+let register_of_arg_i (i:reg_nat (if IA.win then 4 else 6)) : MS.reg =
+  let open MS in
+  if IA.win then
+    match i with
+    | 0 -> Rcx
+    | 1 -> Rdx
+    | 2 -> R8
+    | 3 -> R9
+  else
+    match i with
+    | 0 -> Rdi
+    | 1 -> Rsi
+    | 2 -> Rdx
+    | 3 -> Rcx
+    | 4 -> R8
+    | 5 -> R9
+
+//A partial inverse of the above function
+[@__reduce__]
+let arg_of_register (r:MS.reg)
+  : option (i:reg_nat (if IA.win then 4 else 6))
+  = let open MS in
+    if IA.win then
+       match r with
+       | Rcx -> Some 0
+       | Rdx -> Some 1
+       | R8 -> Some 2
+       | R9 -> Some 3
+       | _ -> None
+    else
+       match r with
+       | Rdi -> Some 0
+       | Rsi -> Some 1
+       | Rdx -> Some 2
+       | Rcx -> Some 3
+       | R8 -> Some 4
+       | R9 -> Some 5
+       | _ -> None
+
+let max_stdcall : nat = if IA.win then 4 else 6
+let arity_ok_stdcall = arity_ok max_stdcall
+
+let arg_reg_stdcall : arg_reg_relation max_stdcall =
+  Rel arg_of_register register_of_arg_i
+
+[@__reduce__]
+let as_lowstar_sig_t_weak_stdcall = as_lowstar_sig_t_weak max_stdcall arg_reg_stdcall
+
+let wrap_weak_stdcall = wrap_weak max_stdcall arg_reg_stdcall

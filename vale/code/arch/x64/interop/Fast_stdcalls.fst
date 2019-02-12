@@ -39,7 +39,7 @@ let t64_no_mod = TD_Buffer TUInt64 ({modified=false; strict_disjointness=false; 
 let tuint64 = TD_Base TUInt64
 
 [@__reduce__] unfold
-let dom: IX64.arity_ok td =
+let dom: IX64.arity_ok_stdcall td =
   let y = [t64_mod; t64_no_mod; tuint64] in
   assert_norm (List.length y = 3);
   y
@@ -109,7 +109,7 @@ let code_add1 = FU.va_code_fast_add1_stdcall IA.win
 (* Here's the type expected for the add1 wrapper *)
 [@__reduce__]
 let lowstar_add1_t =
-  IX64.as_lowstar_sig_t_weak
+  IX64.as_lowstar_sig_t_weak_stdcall
     Interop.down_mem
     code_add1
     16
@@ -121,7 +121,7 @@ let lowstar_add1_t =
 
 (* And here's the add1 wrapper itself *)
 let lowstar_add1 : lowstar_add1_t  =
-  IX64.wrap
+  IX64.wrap_weak_stdcall
     Interop.down_mem
     code_add1
     16
@@ -132,6 +132,8 @@ let lowstar_add1_normal_t : normal lowstar_add1_t
   = as_normal_t #lowstar_add1_t lowstar_add1
 
 open Vale.AsLowStar.MemoryHelpers
+
+#set-options "--z3rlimit 50"
 
 let fast_add1
   (out:b8)
@@ -182,7 +184,7 @@ let add1 out f1 f2
     
 
 [@__reduce__] unfold
-let fadd_dom: IX64.arity_ok td =
+let fadd_dom: IX64.arity_ok_stdcall td =
   let y = [t64_mod; t64_no_mod; t64_no_mod] in
   assert_norm (List.length y = 3);
   y
@@ -253,7 +255,7 @@ let code_fadd = FH.va_code_fadd_stdcall IA.win
 (* Here's the type expected for the add1 wrapper *)
 [@__reduce__]
 let lowstar_fadd_t =
-  IX64.as_lowstar_sig_t_weak
+  IX64.as_lowstar_sig_t_weak_stdcall
     Interop.down_mem
     code_fadd
     16
@@ -265,7 +267,7 @@ let lowstar_fadd_t =
 
 (* And here's the fadd wrapper itself *)
 let lowstar_fadd : lowstar_fadd_t  =
-  IX64.wrap
+  IX64.wrap_weak_stdcall
     Interop.down_mem
     code_fadd
     16
@@ -401,7 +403,7 @@ let code_fsub = FH.va_code_fsub_stdcall IA.win
 (* Here's the type expected for the fsub wrapper *)
 [@__reduce__]
 let lowstar_fsub_t =
-  IX64.as_lowstar_sig_t_weak
+  IX64.as_lowstar_sig_t_weak_stdcall
     Interop.down_mem
     code_fsub
     16
@@ -413,7 +415,7 @@ let lowstar_fsub_t =
 
 (* And here's the fsub wrapper itself *)
 let lowstar_fsub : lowstar_fsub_t  =
-  IX64.wrap
+  IX64.wrap_weak_stdcall
     Interop.down_mem
     code_fsub
     16
@@ -486,7 +488,7 @@ let fsub out f1 f2
 #pop-options
 
 [@__reduce__] unfold
-let fmul_dom: IX64.arity_ok td =
+let fmul_dom: IX64.arity_ok_stdcall td =
   let y = [t64_mod; t64_no_mod; t64_mod; t64_no_mod] in
   assert_norm (List.length y = 4);
   y
@@ -564,7 +566,7 @@ let code_fmul = FW.va_code_fmul_stdcall IA.win
 (* Here's the type expected for the fmul wrapper *)
 [@__reduce__]
 let lowstar_fmul_t =
-  IX64.as_lowstar_sig_t_weak
+  IX64.as_lowstar_sig_t_weak_stdcall
     Interop.down_mem
     code_fmul
     48
@@ -576,7 +578,7 @@ let lowstar_fmul_t =
 
 (* And here's the fmul wrapper itself *)
 let lowstar_fmul : lowstar_fmul_t  =
-  IX64.wrap
+  IX64.wrap_weak_stdcall
     Interop.down_mem
     code_fmul
     48
@@ -732,7 +734,7 @@ let code_fmul2 = FW.va_code_fmul2_stdcall IA.win
 (* Here's the type expected for the fmul wrapper *)
 [@__reduce__]
 let lowstar_fmul2_t =
-  IX64.as_lowstar_sig_t_weak
+  IX64.as_lowstar_sig_t_weak_stdcall
     Interop.down_mem
     code_fmul2
     48
@@ -744,7 +746,7 @@ let lowstar_fmul2_t =
 
 (* And here's the fmul2 wrapper itself *)
 let lowstar_fmul2 : lowstar_fmul2_t  =
-  IX64.wrap
+  IX64.wrap_weak_stdcall
     Interop.down_mem
     code_fmul2
     48
@@ -842,7 +844,7 @@ let fmul2 tmp f1 out f2
 #pop-options
 
 [@__reduce__] unfold
-let fmul1_dom: IX64.arity_ok td =
+let fmul1_dom: IX64.arity_ok_stdcall td =
   let y = [t64_mod; t64_no_mod; tuint64] in
   assert_norm (List.length y = 3);
   y
@@ -910,7 +912,7 @@ let code_fmul1 = FH.va_code_fmul1_stdcall IA.win
 (* Here's the type expected for the fmul1 wrapper *)
 [@__reduce__]
 let lowstar_fmul1_t =
-  IX64.as_lowstar_sig_t_weak
+  IX64.as_lowstar_sig_t_weak_stdcall
     Interop.down_mem
     code_fmul1
     32
@@ -922,7 +924,7 @@ let lowstar_fmul1_t =
 
 (* And here's the fmul1 wrapper itself *)
 let lowstar_fmul1 : lowstar_fmul1_t  =
-  IX64.wrap
+  IX64.wrap_weak_stdcall
     Interop.down_mem
     code_fmul1
     32
@@ -982,7 +984,7 @@ let fmul1 out f1 f2
 #pop-options
 
 [@__reduce__] unfold
-let fsqr_dom: IX64.arity_ok td =
+let fsqr_dom: IX64.arity_ok_stdcall td =
   let y = [t64_mod; t64_no_mod; t64_mod] in
   assert_norm (List.length y = 3);
   y
@@ -1054,7 +1056,7 @@ let code_fsqr = FW.va_code_fsqr_stdcall IA.win
 (* Here's the type expected for the fsqr wrapper *)
 [@__reduce__]
 let lowstar_fsqr_t =
-  IX64.as_lowstar_sig_t_weak
+  IX64.as_lowstar_sig_t_weak_stdcall
     Interop.down_mem
     code_fsqr
     56
@@ -1066,7 +1068,7 @@ let lowstar_fsqr_t =
 
 (* And here's the fsqr wrapper itself *)
 let lowstar_fsqr : lowstar_fsqr_t  =
-  IX64.wrap
+  IX64.wrap_weak_stdcall
     Interop.down_mem
     code_fsqr
     56
@@ -1200,7 +1202,7 @@ let code_fsqr2 = FW.va_code_fsqr2_stdcall IA.win
 (* Here's the type expected for the fsqr2 wrapper *)
 [@__reduce__]
 let lowstar_fsqr2_t =
-  IX64.as_lowstar_sig_t_weak
+  IX64.as_lowstar_sig_t_weak_stdcall
     Interop.down_mem
     code_fsqr2
     56
@@ -1212,7 +1214,7 @@ let lowstar_fsqr2_t =
 
 (* And here's the fsqr2 wrapper itself *)
 let lowstar_fsqr2 : lowstar_fsqr2_t  =
-  IX64.wrap
+  IX64.wrap_weak_stdcall
     Interop.down_mem
     code_fsqr2
     56
@@ -1291,7 +1293,7 @@ let fsqr2 tmp f1 out
 #pop-options
 
 [@__reduce__] unfold
-let cswap_dom: IX64.arity_ok td =
+let cswap_dom: IX64.arity_ok_stdcall td =
   let y = [t64_mod; t64_mod; tuint64] in
   assert_norm (List.length y = 3);
   y
@@ -1360,7 +1362,7 @@ let code_cswap = FU.va_code_cswap2_stdcall IA.win
 (* Here's the type expected for the cswap wrapper *)
 [@__reduce__]
 let lowstar_cswap_t =
-  IX64.as_lowstar_sig_t_weak
+  IX64.as_lowstar_sig_t_weak_stdcall
     Interop.down_mem
     code_cswap
     16
@@ -1372,7 +1374,7 @@ let lowstar_cswap_t =
 
 (* And here's the cswap wrapper itself *)
 let lowstar_cswap : lowstar_cswap_t  =
-  IX64.wrap
+  IX64.wrap_weak_stdcall
     Interop.down_mem
     code_cswap
     16
