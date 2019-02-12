@@ -32,7 +32,7 @@ endif
 all_:
 	tools/blast-staticconfig.sh $(EVERCRYPT_CONFIG)
 	$(MAKE) vaf-to-fst
-	$(MAKE) all
+	FSTAR_DEPEND_FLAGS="--warn_error +285" $(MAKE) all
 
 
 all: compile-compact compile-generic compile-compact-msvc \
@@ -48,12 +48,12 @@ test-ml: $(subst .,_,$(patsubst %.fst,test-ml-%,$(notdir $(wildcard specs/tests/
 
 ci:
 	NOSHORTLOG=1 $(MAKE) vaf-to-fst
-	NOSHORTLOG=1 $(MAKE) all test
+	FSTAR_DEPEND_FLAGS="--warn_error +285" NOSHORTLOG=1 $(MAKE) all test
 
 # Backwards-compat target
 .PHONY: secure_api.old
 secure_api.old:
-	@$(call run-with-log,$(MAKE) -C secure_api,[OLD-MAKE secure_api],obj/secure_api)
+	$(call run-with-log,$(MAKE) -C secure_api,[OLD-MAKE secure_api],obj/secure_api)
 
 
 #################
@@ -91,7 +91,7 @@ SHELL=/bin/bash
 
 # A helper to generate pretty logs, callable as:
 #   $(call run-with-log,CMD,TXT,STEM[,OUT])
-# 
+#
 # Arguments:
 #  CMD: command to execute (may contain double quotes, but not escaped)
 #  TXT: readable text to print out once the command terminates
@@ -101,6 +101,7 @@ run-with-log = \
   $(TIME) -q -f '%E' -o $3.time sh -c "$(subst ",\",$1)" > $3.out 2> >( tee $3.err 1>&2 ); \
   ret=$$?; \
   time=$$(cat $3.time); \
+  echo "Command was:" >> $3.err; \
   if [ $$ret -eq 0 ]; then \
     echo "$2, $$time"; \
   else \
@@ -148,12 +149,13 @@ ifndef MAKE_RESTARTS
 # meaning we can eliminate large chunks of the dependency graph, since we only
 # need to run: Vale stuff, and HACL spec tests.
 .fstar-depend-%: .FORCE
-	@$(call run-with-log,\
-	  $(FSTAR_NO_FLAGS) --dep $* $(FSTAR_ROOTS) --extract '* -Prims -LowStar -Lib.Buffer -Hacl -FStar +FStar.Endianness +FStar.Kremlin.Endianness -EverCrypt -MerkleTree -Vale.Tactics -CanonCommMonoid -CanonCommSemiring -FastHybrid_helpers -FastMul_helpers -FastSqr_helpers -FastUtil_helpers -TestLib -EverCrypt -MerkleTree -Test -Vale_memcpy -Vale.AsLowStar.Test' > $@ \
+	$(call run-with-log,\
+	  $(FSTAR_NO_FLAGS) --dep $* $(FSTAR_ROOTS) --warn_error '-285' $(FSTAR_DEPEND_FLAGS) \
+	    --extract '* -Prims -LowStar -Lib.Buffer -Hacl -FStar +FStar.Endianness +FStar.Kremlin.Endianness -EverCrypt -MerkleTree -Vale.Tactics -CanonCommMonoid -CanonCommSemiring -FastHybrid_helpers -FastMul_helpers -FastSqr_helpers -FastUtil_helpers -TestLib -EverCrypt -MerkleTree -Test -Vale_memcpy -Vale.AsLowStar.Test' > $@ \
 	  ,[FSTAR-DEPEND ($*)],$(call to-obj-dir,$@))
 
 .vale-depend: .fstar-depend-make .FORCE
-	@$(call run-with-log,\
+	$(call run-with-log,\
 	  $(PYTHON3) tools/valedepend.py \
 	    $(addprefix -include ,$(INCLUDES)) \
 	    $(addprefix -in ,$(VALE_ROOTS)) \
@@ -174,11 +176,8 @@ include .vale-depend
 # First stage: compiling vaf files to fst files #
 #################################################
 
-# Temporary fallback: some of the .dump files are not covered by valedepend.py,
-# so for those that have an empty dependency list, we add ours. This only works
-# for files in obj/, i.e. those we intend to check.
 %.dump:
-	@$(call run-with-log,\
+	$(call run-with-log,\
 	  $(FSTAR) --dump_module $(subst prims,Prims,$(basename $(notdir $*))) \
 	    --print_implicits --print_universes --print_effect_args --print_full_names \
 	    --print_bound_var_types --ugly --admit_smt_queries true \
@@ -187,7 +186,7 @@ include .vale-depend
 	  ,[DUMP] $(notdir $(patsubst %.fst,%,$*)),$(call to-obj-dir,$@))
 
 %.types.vaf:
-	@$(call run-with-log,\
+	$(call run-with-log,\
 	  $(MONO) $(IMPORT_FSTAR_TYPES) $(addprefix -in ,$^) -out $@ \
 	  ,[VALE-TYPES] $(notdir $*),$(call to-obj-dir,$@))
 
@@ -197,7 +196,7 @@ VALE_FLAGS = -include $(HACL_HOME)/vale/code/lib/util/Operator.vaf
 obj/Operator.fst: VALE_FLAGS=
 
 %.fst:
-	@$(call run-with-log,\
+	$(call run-with-log,\
 	  $(MONO) $(VALE_HOME)/bin/vale.exe -fstarText -quickMods \
 	    -typecheck -include $*.types.vaf \
 	    $(VALE_FLAGS) \
@@ -303,7 +302,7 @@ hints:
 
 %.checked: FSTAR_FLAGS=
 %.checked: | hints
-	@$(call run-with-log,\
+	$(call run-with-log,\
 	  $(FSTAR) $< $(FSTAR_FLAGS) \
 	    --hint_file hints/$(notdir $*).hints \
 	    && \
@@ -334,12 +333,12 @@ OCAMLOPT = ocamlfind opt -package fstarlib -linkpkg -g -I obj \
 
 .PRECIOUS: obj/%.cmx
 obj/%.cmx: obj/%.ml
-	@$(call run-with-log,\
+	$(call run-with-log,\
 	  $(OCAMLOPT) -c $< -o $@ \
 	  ,[OCAMLOPT-CMX] $(notdir $*),$(call to-obj-dir,$@))
 
 obj/%.ml:
-	@$(call run-with-log,\
+	$(call run-with-log,\
 	  $(FSTAR) $(subst .checked,,$<) --codegen OCaml \
 	    --extract_module $(subst .fst.checked,,$(notdir $<)) \
 	  ,[EXTRACT-ML] $(notdir $*),$(call to-obj-dir,$@))
@@ -372,7 +371,7 @@ obj/CmdLineParser.cmx: $(ALL_CMX_FILES)
 
 obj/vale-%.exe: $(ALL_CMX_FILES) obj/CmdLineParser.cmx
 	mkdir -p $(dir $@)
-	@$(call run-with-log,\
+	$(call run-with-log,\
 	  $(OCAMLOPT) $^ -o $@ \
 	  ,[OCAMLOPT-EXE] $(notdir $*),$@)
 
@@ -393,8 +392,7 @@ vale-asm: $(VALE_ASMS)
 
 .PRECIOUS: %.krml
 
-obj/%.krml:
-	@$(call run-with-log,\
+	$(call run-with-log,\
 	  $(FSTAR) --codegen Kremlin \
 	    --extract_module $(basename $(notdir $(subst .checked,,$<))) \
 	    $(notdir $(subst .checked,,$<)) && \
@@ -463,7 +461,7 @@ COMPACT_FLAGS	=\
 
 .PHONY: old-%
 old-%:
-	@$(call run-with-log,\
+	$(call run-with-log,\
 	  $(MAKE) -C code/old -f Makefile.old $* \
 	  ,[OLD-MAKE $*],code/old/$*)
 
@@ -504,59 +502,51 @@ dist/%/Makefile.basic: $(ALL_KRML_FILES) dist/hacl-internal-headers/Makefile.bas
 	cp $(HACL_OLD_FILES) $(patsubst %.c,%.h,$(HACL_OLD_FILES)) $(dir $@)
 	cp $(HAND_WRITTEN_FILES) $(HAND_WRITTEN_OPTIONAL_FILES) dist/hacl-internal-headers/*.h $(dir $@)
 	cp $(VALE_ASMS) $(dir $@)
-	@$(call run-with-log,\
-	  $(KRML) $(DEFAULT_FLAGS) $(KRML_EXTRA) \
-	    -tmpdir $(dir $@) -skip-compilation \
-	    $(filter %.krml,$^) \
-	    -silent \
-	    -ccopt -Wno-unused \
-	    -warn-error @4-6 \
-	    -fparentheses \
-	    $(notdir $(HACL_OLD_FILES)) \
-	    $(notdir $(HAND_WRITTEN_FILES)) \
-	    -o libevercrypt.a \
-	  ,[KREMLIN $*],obj/dist-$*)
+	$(KRML) $(DEFAULT_FLAGS) $(KRML_EXTRA) \
+	  -tmpdir $(dir $@) -skip-compilation \
+	  $(filter %.krml,$^) \
+	  -silent \
+	  -ccopt -Wno-unused \
+	  -warn-error @4-6 \
+	  -fparentheses \
+	  $(notdir $(HACL_OLD_FILES)) \
+	  $(notdir $(HAND_WRITTEN_FILES)) \
+	  -o libevercrypt.a
 
 # Auto-generates headers for the hand-written C files. If a signature changes on
 # the F* side, hopefully this will ensure the C file breaks. Note that there is
 # no conflict between the headers because this generates
 # Lib_Foobar while the run above generates a single Hacl_Lib.
 dist/hacl-internal-headers/Makefile.basic: $(ALL_KRML_FILES)
-	@$(call run-with-log,\
-	  $(KRML) -silent \
-	    -tmpdir $(dir $@) -skip-compilation \
-	    $(patsubst %,-bundle %=,$(HAND_WRITTEN_C)) \
-	    $(patsubst %,-library %,$(HAND_WRITTEN_C)) \
-	    -minimal -add-include '"kremlib.h"' \
-	    -bundle '\*,WindowsBug' $^
-	  ,[KREMLIN hacl-internal-headers],obj/dist-hacl-internal-headers)
+	$(KRML) -silent \
+	  -tmpdir $(dir $@) -skip-compilation \
+	  $(patsubst %,-bundle %=,$(HAND_WRITTEN_C)) \
+	  $(patsubst %,-library %,$(HAND_WRITTEN_C)) \
+	  -minimal -add-include '"kremlib.h"' \
+	  -bundle '\*,WindowsBug' $^
 
 dist/evercrypt-external-headers/Makefile.basic: $(ALL_KRML_FILES)
-	@$(call run-with-log,\
-	  $(KRML) -silent \
-	    -minimal \
-	    -bundle EverCrypt+EverCrypt.AutoConfig2+EverCrypt.HKDF+EverCrypt.HMAC+EverCrypt.Hash+EverCrypt.Hash.Incremental=*[rename=EverCrypt] \
-	    -library EverCrypt,EverCrypt.* \
-	    -add-include '<inttypes.h>' \
-	    -add-include '<stdbool.h>' \
-	    -add-include '<kremlin/internal/types.h>' \
-	    -skip-compilation \
-	    -tmpdir $(dir $@) \
-	    $^
-	  ,[KREMLIN evercrypt-external-headers],obj/dist-evercrypt-external-headers)
+	$(KRML) -silent \
+	  -minimal \
+	  -bundle EverCrypt+EverCrypt.AutoConfig2+EverCrypt.HKDF+EverCrypt.HMAC+EverCrypt.Hash+EverCrypt.Hash.Incremental=*[rename=EverCrypt] \
+	  -library EverCrypt,EverCrypt.* \
+	  -add-include '<inttypes.h>' \
+	  -add-include '<stdbool.h>' \
+	  -add-include '<kremlin/internal/types.h>' \
+	  -skip-compilation \
+	  -tmpdir $(dir $@) \
+	  $^
 
 # Auto-generates a single C test file.
 .PRECIOUS: dist/test/c/%.c
 dist/test/c/%.c: $(ALL_KRML_FILES)
-	@$(call run-with-log,\
-	  $(KRML) -silent \
-	    -tmpdir $(dir $@) -skip-compilation \
-	    -no-prefix $(subst _,.,$*) \
-	    -library Hacl,Lib,EverCrypt,EverCrypt.* \
-	    -fparentheses -fcurly-braces -fno-shadow \
-	    -minimal -add-include '"kremlib.h"' \
-	    -bundle '*[rename=$*]' $(KRML_EXTRA) $^
-	  ,[KREMLIN test-$*],obj/dist-test-$*)
+	$(KRML) -silent \
+	  -tmpdir $(dir $@) -skip-compilation \
+	  -no-prefix $(subst _,.,$*) \
+	  -library Hacl,Lib,EverCrypt,EverCrypt.* \
+	  -fparentheses -fcurly-braces -fno-shadow \
+	  -minimal -add-include '"kremlib.h"' \
+	  -bundle '*[rename=$*]' $(KRML_EXTRA) $^
 
 dist/test/c/Test.c: KRML_EXTRA=-add-include '"kremlin/internal/compat.h"'
 
