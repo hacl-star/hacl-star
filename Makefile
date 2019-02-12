@@ -550,11 +550,11 @@ compile-%: dist/Makefile dist/%/Makefile.basic
 
 # Backwards-compat, remove
 ifneq (,$(MLCRYPTO_HOME))
-OPENSSL_HOME 	= $(MLCRYPTO_HOME)/openssl
+OPENSSL_HOME 	:= $(MLCRYPTO_HOME)/openssl
 endif
 
 ifeq ($(OS),Windows_NT)
-OPENSSL_HOME	:= $(cygpath -u $(OPENSSL_HOME))
+OPENSSL_HOME	:= $(shell cygpath -u $(OPENSSL_HOME))
 endif
 
 dist/test/c/merkle_tree_test.c: secure_api/merkle_tree/test/merkle_tree_test.c
