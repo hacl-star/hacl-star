@@ -89,7 +89,7 @@ let poly_lemma'
        poly_pre code ctx_b inp_b len va_s0 sb)
      (ensures (fun (va_s1, f) ->
        V.eval_code code va_s0 f va_s1 /\
-       VSig.vale_calling_conventions va_s0 va_s1 /\
+       VSig.vale_calling_conventions_stdcall va_s0 va_s1 /\
        poly_post code ctx_b inp_b len va_s0 sb va_s1 f /\
        ME.buffer_writeable (as_vale_buffer ctx_b) /\ 
        ME.buffer_writeable (as_vale_buffer inp_b) 
@@ -100,7 +100,7 @@ let poly_lemma'
    va_s1, f                                   
 
 (* Prove that poly_lemma' has the required type *)
-let poly_lemma = as_t #(VSig.vale_sig poly_pre poly_post) poly_lemma'
+let poly_lemma = as_t #(VSig.vale_sig_stdcall poly_pre poly_post) poly_lemma'
 
 let code_poly = PO.va_code_poly1305 IA.win
 

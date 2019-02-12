@@ -96,7 +96,7 @@ let sha_lemma'
        sha_pre code ctx_b in_b num_val k_b va_s0 sb)
      (ensures (fun (va_s1, f) ->
        V.eval_code code va_s0 f va_s1 /\
-       VSig.vale_calling_conventions va_s0 va_s1 /\
+       VSig.vale_calling_conventions_stdcall va_s0 va_s1 /\
        sha_post code ctx_b in_b num_val k_b va_s0 sb va_s1 f /\       
        ME.buffer_writeable (as_vale_buffer ctx_b) /\ 
        ME.buffer_writeable (as_vale_buffer in_b)
@@ -107,7 +107,7 @@ let sha_lemma'
    va_s1, f                                   
 
 (* Prove that sha_lemma' has the required type *)
-let sha_lemma = as_t #(VSig.vale_sig sha_pre sha_post) sha_lemma'
+let sha_lemma = as_t #(VSig.vale_sig_stdcall sha_pre sha_post) sha_lemma'
 
 let code_sha = SH.va_code_sha_update_bytes_stdcall IA.win
 

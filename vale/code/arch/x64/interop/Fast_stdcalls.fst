@@ -86,7 +86,7 @@ let add1_lemma'
        add1_pre code out f1 f2 va_s0 sb)
      (ensures (fun (va_s1, f) ->
        V.eval_code code va_s0 f va_s1 /\
-       VSig.vale_calling_conventions va_s0 va_s1 /\
+       VSig.vale_calling_conventions_stdcall va_s0 va_s1 /\
        add1_post code out f1 f2 va_s0 sb va_s1 f /\
        ME.buffer_readable VS.(va_s1.mem) (as_vale_buffer f1) /\
        ME.buffer_readable VS.(va_s1.mem) (as_vale_buffer out) /\ 
@@ -102,7 +102,7 @@ let add1_lemma'
    va_s1, f                                   
 
 (* Prove that add1_lemma' has the required type *)
-let add1_lemma = as_t #(VSig.vale_sig add1_pre add1_post) add1_lemma'
+let add1_lemma = as_t #(VSig.vale_sig_stdcall add1_pre add1_post) add1_lemma'
 
 let code_add1 = FU.va_code_fast_add1_stdcall IA.win
 
@@ -229,7 +229,7 @@ let fadd_lemma'
        fadd_pre code out f1 f2 va_s0 sb)
      (ensures (fun (va_s1, f) ->
        V.eval_code code va_s0 f va_s1 /\
-       VSig.vale_calling_conventions va_s0 va_s1 /\
+       VSig.vale_calling_conventions_stdcall va_s0 va_s1 /\
        fadd_post code out f1 f2 va_s0 sb va_s1 f /\
        ME.buffer_readable VS.(va_s1.mem) (as_vale_buffer out) /\
        ME.buffer_readable VS.(va_s1.mem) (as_vale_buffer f1) /\ 
@@ -248,7 +248,7 @@ let fadd_lemma'
    va_s1, f                                   
 
 (* Prove that add1_lemma' has the required type *)
-let fadd_lemma = as_t #(VSig.vale_sig fadd_pre fadd_post) fadd_lemma'
+let fadd_lemma = as_t #(VSig.vale_sig_stdcall fadd_pre fadd_post) fadd_lemma'
 
 let code_fadd = FH.va_code_fadd_stdcall IA.win
 
@@ -377,7 +377,7 @@ let fsub_lemma'
        fsub_pre code out f1 f2 va_s0 sb)
      (ensures (fun (va_s1, f) ->
        V.eval_code code va_s0 f va_s1 /\
-       VSig.vale_calling_conventions va_s0 va_s1 /\
+       VSig.vale_calling_conventions_stdcall va_s0 va_s1 /\
        fsub_post code out f1 f2 va_s0 sb va_s1 f /\
        ME.buffer_readable VS.(va_s1.mem) (as_vale_buffer out) /\
        ME.buffer_readable VS.(va_s1.mem) (as_vale_buffer f1) /\ 
@@ -396,7 +396,7 @@ let fsub_lemma'
    va_s1, f                                   
 
 (* Prove that fsub_lemma' has the required type *)
-let fsub_lemma = as_t #(VSig.vale_sig fsub_pre fsub_post) fsub_lemma'
+let fsub_lemma = as_t #(VSig.vale_sig_stdcall fsub_pre fsub_post) fsub_lemma'
 
 let code_fsub = FH.va_code_fsub_stdcall IA.win
 
@@ -536,7 +536,7 @@ let fmul_lemma'
        fmul_pre code tmp f1 out f2 va_s0 sb)
      (ensures (fun (va_s1, f) ->
        V.eval_code code va_s0 f va_s1 /\
-       VSig.vale_calling_conventions va_s0 va_s1 /\
+       VSig.vale_calling_conventions_stdcall va_s0 va_s1 /\
        fmul_post code tmp f1 out f2 va_s0 sb va_s1 f /\
        ME.buffer_readable VS.(va_s1.mem) (as_vale_buffer out) /\
        ME.buffer_readable VS.(va_s1.mem) (as_vale_buffer f1) /\ 
@@ -559,7 +559,7 @@ let fmul_lemma'
    va_s1, f                                   
 
 (* Prove that fmul_lemma' has the required type *)
-let fmul_lemma = as_t #(VSig.vale_sig fmul_pre fmul_post) fmul_lemma'
+let fmul_lemma = as_t #(VSig.vale_sig_stdcall fmul_pre fmul_post) fmul_lemma'
 
 let code_fmul = FW.va_code_fmul_stdcall IA.win
 
@@ -704,7 +704,7 @@ let fmul2_lemma'
        fmul2_pre code tmp f1 out f2 va_s0 sb)
      (ensures (fun (va_s1, f) ->
        V.eval_code code va_s0 f va_s1 /\
-       VSig.vale_calling_conventions va_s0 va_s1 /\
+       VSig.vale_calling_conventions_stdcall va_s0 va_s1 /\
        fmul2_post code tmp f1 out f2 va_s0 sb va_s1 f /\
        ME.buffer_readable VS.(va_s1.mem) (as_vale_buffer out) /\
        ME.buffer_readable VS.(va_s1.mem) (as_vale_buffer f1) /\ 
@@ -727,7 +727,7 @@ let fmul2_lemma'
    va_s1, f                                   
 
 (* Prove that fmul2_lemma' has the required type *)
-let fmul2_lemma = as_t #(VSig.vale_sig fmul2_pre fmul2_post) fmul2_lemma'
+let fmul2_lemma = as_t #(VSig.vale_sig_stdcall fmul2_pre fmul2_post) fmul2_lemma'
 
 let code_fmul2 = FW.va_code_fmul2_stdcall IA.win
 
@@ -889,7 +889,7 @@ let fmul1_lemma'
        fmul1_pre code out f1 f2 va_s0 sb)
      (ensures (fun (va_s1, f) ->
        V.eval_code code va_s0 f va_s1 /\
-       VSig.vale_calling_conventions va_s0 va_s1 /\
+       VSig.vale_calling_conventions_stdcall va_s0 va_s1 /\
        fmul1_post code out f1 f2 va_s0 sb va_s1 f /\
        ME.buffer_readable VS.(va_s1.mem) (as_vale_buffer f1) /\
        ME.buffer_readable VS.(va_s1.mem) (as_vale_buffer out) /\ 
@@ -905,7 +905,7 @@ let fmul1_lemma'
    va_s1, f                                   
 
 (* Prove that fmul1_lemma' has the required type *)
-let fmul1_lemma = as_t #(VSig.vale_sig fmul1_pre fmul1_post) fmul1_lemma'
+let fmul1_lemma = as_t #(VSig.vale_sig_stdcall fmul1_pre fmul1_post) fmul1_lemma'
 
 let code_fmul1 = FH.va_code_fmul1_stdcall IA.win
 
@@ -1029,7 +1029,7 @@ let fsqr_lemma'
        fsqr_pre code tmp f1 out va_s0 sb)
      (ensures (fun (va_s1, f) ->
        V.eval_code code va_s0 f va_s1 /\
-       VSig.vale_calling_conventions va_s0 va_s1 /\
+       VSig.vale_calling_conventions_stdcall va_s0 va_s1 /\
        fsqr_post code tmp f1 out va_s0 sb va_s1 f /\
        ME.buffer_readable VS.(va_s1.mem) (as_vale_buffer out) /\
        ME.buffer_readable VS.(va_s1.mem) (as_vale_buffer f1) /\ 
@@ -1049,7 +1049,7 @@ let fsqr_lemma'
    va_s1, f                                   
 
 (* Prove that fsqr_lemma' has the required type *)
-let fsqr_lemma = as_t #(VSig.vale_sig fsqr_pre fsqr_post) fsqr_lemma'
+let fsqr_lemma = as_t #(VSig.vale_sig_stdcall fsqr_pre fsqr_post) fsqr_lemma'
 
 let code_fsqr = FW.va_code_fsqr_stdcall IA.win
 
@@ -1175,7 +1175,7 @@ let fsqr2_lemma'
        fsqr2_pre code tmp f1 out va_s0 sb)
      (ensures (fun (va_s1, f) ->
        V.eval_code code va_s0 f va_s1 /\
-       VSig.vale_calling_conventions va_s0 va_s1 /\
+       VSig.vale_calling_conventions_stdcall va_s0 va_s1 /\
        fsqr2_post code tmp f1 out va_s0 sb va_s1 f /\
        ME.buffer_readable VS.(va_s1.mem) (as_vale_buffer out) /\
        ME.buffer_readable VS.(va_s1.mem) (as_vale_buffer f1) /\ 
@@ -1195,7 +1195,7 @@ let fsqr2_lemma'
    va_s1, f                                   
 
 (* Prove that fsqr2_lemma' has the required type *)
-let fsqr2_lemma = as_t #(VSig.vale_sig fsqr2_pre fsqr2_post) fsqr2_lemma'
+let fsqr2_lemma = as_t #(VSig.vale_sig_stdcall fsqr2_pre fsqr2_post) fsqr2_lemma'
 
 let code_fsqr2 = FW.va_code_fsqr2_stdcall IA.win
 
@@ -1338,7 +1338,7 @@ let cswap_lemma'
        cswap_pre code p0 p1 bit va_s0 sb)
      (ensures (fun (va_s1, f) ->
        V.eval_code code va_s0 f va_s1 /\
-       VSig.vale_calling_conventions va_s0 va_s1 /\
+       VSig.vale_calling_conventions_stdcall va_s0 va_s1 /\
        cswap_post code p0 p1 bit va_s0 sb va_s1 f /\
        ME.buffer_readable VS.(va_s1.mem) (as_vale_buffer p1) /\
        ME.buffer_readable VS.(va_s1.mem) (as_vale_buffer p0) /\ 
@@ -1355,7 +1355,7 @@ let cswap_lemma'
    va_s1, f                                   
 
 (* Prove that cswap_lemma' has the required type *)
-let cswap_lemma = as_t #(VSig.vale_sig cswap_pre cswap_post) cswap_lemma'
+let cswap_lemma = as_t #(VSig.vale_sig_stdcall cswap_pre cswap_post) cswap_lemma'
 
 let code_cswap = FU.va_code_cswap2_stdcall IA.win
 

@@ -47,12 +47,12 @@ let aesni_lemma'
        aesni_pre code va_s0 sb)
      (ensures (fun (va_s1, f) ->
        V.eval_code code va_s0 f va_s1 /\
-       VSig.vale_calling_conventions va_s0 va_s1 /\
+       VSig.vale_calling_conventions_stdcall va_s0 va_s1 /\
        aesni_post code va_s0 sb va_s1 f))
  = VC.va_lemma_check_aesni_stdcall code va_s0 IA.win (as_vale_buffer sb)
 
 (* Prove that vm_lemma' has the required type *)
-let aesni_lemma = as_t #(VSig.vale_sig aesni_pre aesni_post) aesni_lemma'
+let aesni_lemma = as_t #(VSig.vale_sig_stdcall aesni_pre aesni_post) aesni_lemma'
 let code_aesni = VC.va_code_check_aesni_stdcall IA.win
 
 (* Here's the type expected for the check_aesni wrapper *)
@@ -119,12 +119,12 @@ let sha_lemma'
        sha_pre code va_s0 sb)
      (ensures (fun (va_s1, f) ->
        V.eval_code code va_s0 f va_s1 /\
-       VSig.vale_calling_conventions va_s0 va_s1 /\
+       VSig.vale_calling_conventions_stdcall va_s0 va_s1 /\
        sha_post code va_s0 sb va_s1 f))
  = VC.va_lemma_check_sha_stdcall code va_s0 IA.win (as_vale_buffer sb)
  
 (* Prove that vm_lemma' has the required type *)
-let sha_lemma = as_t #(VSig.vale_sig sha_pre sha_post) sha_lemma'
+let sha_lemma = as_t #(VSig.vale_sig_stdcall sha_pre sha_post) sha_lemma'
 let code_sha = VC.va_code_check_sha_stdcall IA.win
 
 (* Here's the type expected for the check_aesni wrapper *)
@@ -186,12 +186,12 @@ let adx_lemma'
        adx_pre code va_s0 sb)
      (ensures (fun (va_s1, f) ->
        V.eval_code code va_s0 f va_s1 /\
-       VSig.vale_calling_conventions va_s0 va_s1 /\
+       VSig.vale_calling_conventions_stdcall va_s0 va_s1 /\
        adx_post code va_s0 sb va_s1 f))
  = VC.va_lemma_check_adx_bmi2_stdcall code va_s0 IA.win (as_vale_buffer sb)
 
 (* Prove that vm_lemma' has the required type *)
-let adx_lemma = as_t #(VSig.vale_sig adx_pre adx_post) adx_lemma'
+let adx_lemma = as_t #(VSig.vale_sig_stdcall adx_pre adx_post) adx_lemma'
 let code_adx = VC.va_code_check_adx_bmi2_stdcall IA.win
 
 (* Here's the type expected for the check_adx wrapper *)

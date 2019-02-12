@@ -491,15 +491,19 @@ let loc_includes_union (l1 l1' l:B.loc)
 val vale_lemma_as_prediction
           (#max_arity:nat)
           (#arg_reg:IX64.arg_reg_relation max_arity)
+          (#regs_modified:MS.reg -> bool)
+          (#xmms_modified:MS.xmm -> bool)          
           (#n:IX64.max_slots)
           (code:V.va_code)
           (args:IX64.arity_ok max_arity arg)
           (pre:VSig.vale_pre_tl n [])
           (post:VSig.vale_post_tl n [])
-          (v:VSig.vale_sig_tl args (coerce code) pre post)
+          (v:VSig.vale_sig_tl regs_modified xmms_modified args (coerce code) pre post)
    : IX64.prediction
              max_arity
              arg_reg
+             regs_modified
+             xmms_modified
              I.down_mem
              (coerce code)
              n
@@ -510,12 +514,14 @@ val vale_lemma_as_prediction
 let vale_lemma_as_prediction
           (#max_arity:nat)
           (#arg_reg:IX64.arg_reg_relation max_arity)
+          (#regs_modified:MS.reg -> bool)
+          (#xmms_modified:MS.xmm -> bool)
           (#n:IX64.max_slots)
           (code:V.va_code)
           (args:IX64.arity_ok max_arity arg)
           (pre:VSig.vale_pre_tl n [])
           (post:VSig.vale_post_tl n [])
-          (v:VSig.vale_sig_tl args (coerce code) pre post)
+          (v:VSig.vale_sig_tl regs_modified xmms_modified args (coerce code) pre post)
    = fun h0 s0 push_h0 alloc_push_h0 sb ->
        let c_code : TS.tainted_code = coerce code in
        let s_args = arg_of_sb sb :: args in
@@ -535,7 +541,8 @@ let vale_lemma_as_prediction
        eval_code_rel (c_code) va_s0 va_s1 f;
        let Some s1 = TS.taint_eval_code (c_code) (coerce f) s0 in
        assert (VL.state_eq_opt (Some (SL.state_to_S va_s1)) (Some s1));
-       assert (IX64.calling_conventions s0 s1);
+       assert (VSig.vale_calling_conventions va_s0 va_s1 regs_modified xmms_modified);
+       assert (IX64.calling_conventions s0 s1 regs_modified xmms_modified);
        assert (ME.modifies (VSig.mloc_modified_args s_args) va_s0.VS.mem va_s1.VS.mem);
        let final_mem = va_s1.VS.mem in
        let h1_pre_pop = hs_of_mem (as_mem final_mem) in
@@ -611,13 +618,15 @@ private
 let rec __test__wrap 
              (#max_arity:nat)
              (#arg_reg:IX64.arg_reg_relation max_arity)
+             (#regs_modified:MS.reg -> bool)
+             (#xmms_modified:MS.xmm -> bool)
              #n (#dom:list td)
              (code:V.va_code)
              (args:list arg{IX64.arity_ok_2 max_arity dom args})
              (num_stack_slots:nat)
              (pre:VSig.vale_pre_tl n dom)
              (post:VSig.vale_post_tl n dom)
-             (v:VSig.vale_sig_tl args (coerce code) pre post)
+             (v:VSig.vale_sig_tl regs_modified xmms_modified args (coerce code) pre post)
     : lowstar_typ code args pre post =
     match dom with
     | [] ->
@@ -634,7 +643,7 @@ let rec __test__wrap
            let h0 = ST.get () in
            let prediction =
              vale_lemma_as_prediction _ _ _ _ v in
-           let rax, _ = IX64.wrap_variadic (coerce code) max_arity arg_reg I.down_mem n args prediction in
+           let rax, _ = IX64.wrap_variadic (coerce code) max_arity arg_reg regs_modified xmms_modified I.down_mem n args prediction in
            rax
       in
       f <: lowstar_typ #max_arity #arg_reg #n #[] code args pre post
@@ -689,16 +698,20 @@ let rec post_rel_generic
 let rec mk_prediction
        (#max_arity:nat)
        (#arg_reg:IX64.arg_reg_relation max_arity)
+       (#regs_modified:MS.reg -> bool)
+       (#xmms_modified:MS.xmm -> bool)
        #n
        (code:V.va_code)
        (dom:list td)
        (args:list arg{IX64.arity_ok_2 max_arity dom args})
        (#pre:VSig.vale_pre_tl n dom)
        (#post:VSig.vale_post_tl n dom)
-       (v:VSig.vale_sig_tl args (coerce code) pre post)
+       (v:VSig.vale_sig_tl regs_modified xmms_modified args (coerce code) pre post)
    :  IX64.prediction_t
           max_arity
           arg_reg
+          regs_modified
+          xmms_modified
           I.down_mem
           (coerce code)
           n
