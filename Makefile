@@ -91,7 +91,7 @@ SHELL=/bin/bash
 
 # A helper to generate pretty logs, callable as:
 #   $(call run-with-log,CMD,TXT,STEM[,OUT])
-# 
+#
 # Arguments:
 #  CMD: command to execute (may contain double quotes, but not escaped)
 #  TXT: readable text to print out once the command terminates
@@ -103,6 +103,7 @@ run-with-log = \
   $(TIME) -q -f '%E' -o $3.time sh -c "$(subst ",\",$1)" > $$outfile 2> >( tee $3.err 1>&2 ); \
   ret=$$?; \
   time=$$(cat $3.time); \
+  if [[ "$4" == "" ]]; then echo "Command was:" >> $$outfile; echo "$(subst ",\",$1)" >> $$outfile; fi; \
   if [ $$ret -eq 0 ]; then \
     echo "$2, $$time"; \
   else \
@@ -489,59 +490,51 @@ dist/%/Makefile.basic: $(ALL_KRML_FILES) dist/hacl-internal-headers/Makefile.bas
 	cp $(HACL_OLD_FILES) $(patsubst %.c,%.h,$(HACL_OLD_FILES)) $(dir $@)
 	cp $(HAND_WRITTEN_FILES) $(HAND_WRITTEN_OPTIONAL_FILES) dist/hacl-internal-headers/*.h $(dir $@)
 	cp $(VALE_ASMS) $(dir $@)
-	@$(call run-with-log,\
-	  $(KRML) $(DEFAULT_FLAGS) $(KRML_EXTRA) \
-	    -tmpdir $(dir $@) -skip-compilation \
-	    $(filter %.krml,$^) \
-	    -silent \
-	    -ccopt -Wno-unused \
-	    -warn-error @4-6 \
-	    -fparentheses \
-	    $(notdir $(HACL_OLD_FILES)) \
-	    $(notdir $(HAND_WRITTEN_FILES)) \
-	    -o libevercrypt.a \
-	  ,[KREMLIN $*],dist/$*)
+	$(KRML) $(DEFAULT_FLAGS) $(KRML_EXTRA) \
+	  -tmpdir $(dir $@) -skip-compilation \
+	  $(filter %.krml,$^) \
+	  -silent \
+	  -ccopt -Wno-unused \
+	  -warn-error @4-6 \
+	  -fparentheses \
+	  $(notdir $(HACL_OLD_FILES)) \
+	  $(notdir $(HAND_WRITTEN_FILES)) \
+	  -o libevercrypt.a
 
 # Auto-generates headers for the hand-written C files. If a signature changes on
 # the F* side, hopefully this will ensure the C file breaks. Note that there is
 # no conflict between the headers because this generates
 # Lib_Foobar while the run above generates a single Hacl_Lib.
 dist/hacl-internal-headers/Makefile.basic: $(ALL_KRML_FILES)
-	@$(call run-with-log,\
-	  $(KRML) -silent \
-	    -tmpdir $(dir $@) -skip-compilation \
-	    $(patsubst %,-bundle %=,$(HAND_WRITTEN_C)) \
-	    $(patsubst %,-library %,$(HAND_WRITTEN_C)) \
-	    -minimal -add-include '"kremlib.h"' \
-	    -bundle '\*,WindowsBug' $^ \
-	  ,[KREMLIN hacl-internal-headers],dist/hacl-internal-headers)
+	$(KRML) -silent \
+	  -tmpdir $(dir $@) -skip-compilation \
+	  $(patsubst %,-bundle %=,$(HAND_WRITTEN_C)) \
+	  $(patsubst %,-library %,$(HAND_WRITTEN_C)) \
+	  -minimal -add-include '"kremlib.h"' \
+	  -bundle '\*,WindowsBug' $^
 
 dist/evercrypt-external-headers/Makefile.basic: $(ALL_KRML_FILES)
-	@$(call run-with-log,\
-	  $(KRML) -silent \
-	    -minimal \
-	    -bundle EverCrypt+EverCrypt.AutoConfig2+EverCrypt.HKDF+EverCrypt.HMAC+EverCrypt.Hash+EverCrypt.Hash.Incremental=*[rename=EverCrypt] \
-	    -library EverCrypt,EverCrypt.* \
-	    -add-include '<inttypes.h>' \
-	    -add-include '<stdbool.h>' \
-	    -add-include '<kremlin/internal/types.h>' \
-	    -skip-compilation \
-	    -tmpdir $(dir $@) \
-	    $^ \
-	  ,[KREMLIN evercrypt-external-headers],dist/evercrypt-external-headers)
+	$(KRML) -silent \
+	  -minimal \
+	  -bundle EverCrypt+EverCrypt.AutoConfig2+EverCrypt.HKDF+EverCrypt.HMAC+EverCrypt.Hash+EverCrypt.Hash.Incremental=*[rename=EverCrypt] \
+	  -library EverCrypt,EverCrypt.* \
+	  -add-include '<inttypes.h>' \
+	  -add-include '<stdbool.h>' \
+	  -add-include '<kremlin/internal/types.h>' \
+	  -skip-compilation \
+	  -tmpdir $(dir $@) \
+	  $^
 
 # Auto-generates a single C test file.
 .PRECIOUS: dist/test/c/%.c
 dist/test/c/%.c: $(ALL_KRML_FILES)
-	@$(call run-with-log,\
-	  $(KRML) -silent \
-	    -tmpdir $(dir $@) -skip-compilation \
-	    -no-prefix $(subst _,.,$*) \
-	    -library Hacl,Lib,EverCrypt,EverCrypt.* \
-	    -fparentheses -fcurly-braces -fno-shadow \
-	    -minimal -add-include '"kremlib.h"' \
-	    -bundle '*[rename=$*]' $(KRML_EXTRA) $^ \
-	  ,[KREMLIN test-$*],dist/test-$*)
+	$(KRML) -silent \
+	  -tmpdir $(dir $@) -skip-compilation \
+	  -no-prefix $(subst _,.,$*) \
+	  -library Hacl,Lib,EverCrypt,EverCrypt.* \
+	  -fparentheses -fcurly-braces -fno-shadow \
+	  -minimal -add-include '"kremlib.h"' \
+	  -bundle '*[rename=$*]' $(KRML_EXTRA) $^
 
 dist/test/c/Test.c: KRML_EXTRA=-add-include '"kremlin/internal/compat.h"'
 
