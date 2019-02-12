@@ -296,7 +296,7 @@ $(HACL_HOME)/vale/code/arch/x64/X64.Memory_Sems.fst.checked: \
 %.checked: FSTAR_FLAGS=
 %.checked:
 	@$(call run-with-log,\
-	  $(FSTAR) $(FSTAR_FLAGS) $< && \
+	  $(FSTAR) $< $(FSTAR_FLAGS) && \
 	    touch $@ \
 	  ,[VERIFY] $(notdir $*),$@)
 
