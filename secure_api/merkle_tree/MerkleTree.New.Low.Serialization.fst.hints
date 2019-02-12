@@ -485,7 +485,7 @@
         "typing_MerkleTree.Spec.hash_size"
       ],
       0,
-      "bc7df6d813bbbcb6e3531ed26350a545"
+      "fb14f88e1b04fd96e51b83555955ff78"
     ],
     [
       "MerkleTree.New.Low.Serialization.serialize_hash_vec_i",
@@ -800,7 +800,7 @@
         "typing_tok_Spec.Hash.Definitions.SHA2_256@tok"
       ],
       0,
-      "2fd0bfc0a14f61ccd2022c8a2e93daf5"
+      "0c99c2b4f34ceb6a6f93b2a81da1aee2"
     ],
     [
       "MerkleTree.New.Low.Serialization.hash_vv_bytes",
@@ -946,7 +946,7 @@
         "typing_MerkleTree.New.Low.hvreg", "typing_MerkleTree.Spec.hash_size"
       ],
       0,
-      "cd88cf9e1504297008fcdaeef695429f"
+      "7de73800077b082796328cf3b49b9cfe"
     ],
     [
       "MerkleTree.New.Low.Serialization.serialize_hash_vv",
@@ -1931,13 +1931,13 @@
         "@MaxIFuel_assumption", "@query",
         "Prims_pretyping_ae567c2fb75be05905677af440075565",
         "assumption_FStar.UInt32.t__uu___haseq", "b2t_def", "bool_inversion",
+        "constructor_distinct_Spec.Hash.Definitions.SHA2_256",
         "equation_EverCrypt.Helpers.uint8_p",
         "equation_EverCrypt.Helpers.uint8_t",
         "equation_FStar.HyperStack.ST.equal_stack_domains",
         "equation_FStar.Monotonic.Heap.equal_dom",
         "equation_FStar.Monotonic.HyperHeap.disjoint",
-        "equation_FStar.Monotonic.HyperStack.is_tip",
-        "equation_FStar.Monotonic.HyperStack.is_wf_with_ctr_and_tip",
+        "equation_FStar.Monotonic.HyperHeap.hmap",
         "equation_FStar.Monotonic.HyperStack.mem",
         "equation_FStar.UInt.fits", "equation_FStar.UInt.gt",
         "equation_FStar.UInt.lt", "equation_FStar.UInt.min_int",
@@ -1955,23 +1955,26 @@
         "equation_MerkleTree.New.Low.hash_dummy",
         "equation_MerkleTree.New.Low.hash_vec",
         "equation_MerkleTree.New.Low.hash_vec_dummy",
+        "equation_Spec.Hash.Definitions.hash_word_length",
+        "equation_Spec.Hash.Definitions.word_length",
         "fuel_guarded_inversion_LowStar.Vector.vector_str",
         "function_token_typing_EverCrypt.Helpers.uint8_p",
+        "function_token_typing_FStar.Monotonic.Heap.heap",
         "function_token_typing_FStar.UInt8.t",
         "function_token_typing_Prims.__cache_version_number__",
         "int_inversion",
         "lemma_FStar.HyperStack.ST.lemma_same_refs_in_stack_regions_elim",
         "lemma_FStar.HyperStack.ST.lemma_same_refs_in_stack_regions_intro",
-        "lemma_FStar.Monotonic.HyperStack.lemma_map_invariant",
+        "lemma_FStar.Map.lemma_ContainsDom",
         "lemma_FStar.Monotonic.HyperStack.lemma_tip_top_smt",
-        "lemma_FStar.UInt32.uv_inv",
+        "lemma_FStar.Set.lemma_equal_elim", "lemma_FStar.UInt32.uv_inv",
         "lemma_LowStar.Monotonic.Buffer.length_null_2",
         "lemma_LowStar.Monotonic.Buffer.loc_includes_none",
         "lemma_LowStar.Monotonic.Buffer.modifies_liveness_insensitive_buffer_weak",
         "primitive_Prims.op_AmpAmp", "primitive_Prims.op_BarBar",
         "primitive_Prims.op_Equality", "primitive_Prims.op_GreaterThan",
         "primitive_Prims.op_LessThan", "primitive_Prims.op_LessThanOrEqual",
-        "projection_inverse_BoxBool_proj_0",
+        "primitive_Prims.op_Multiply", "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_FStar.Monotonic.HyperStack_Tm_refine_9a74d818566e70513bc032cc3b65a144",
         "refinement_interpretation_FStar.UInt_Tm_refine_a347709bfeba48709474ad26f4f6be87",
@@ -1980,7 +1983,8 @@
         "refinement_interpretation_MerkleTree.New.Low.Serialization_Tm_refine_04a6a764449609e2277e67d1fbe98a1f",
         "refinement_interpretation_MerkleTree.New.Low.Serialization_Tm_refine_104a8d6ecc995776877ae4578f0f2635",
         "refinement_interpretation_MerkleTree.New.Low.Serialization_Tm_refine_e6e3f7c1f800390e5f198e21f3a0bf39",
-        "typing_FStar.Monotonic.HyperStack.get_tip",
+        "typing_FStar.Map.domain", "typing_FStar.Monotonic.HyperHeap.rid",
+        "typing_FStar.Monotonic.HyperStack.get_hmap",
         "typing_FStar.UInt32.gt", "typing_FStar.UInt32.lt",
         "typing_FStar.UInt32.v", "typing_LowStar.Buffer.trivial_preorder",
         "typing_LowStar.Monotonic.Buffer.address_liveness_insensitive_locs",
