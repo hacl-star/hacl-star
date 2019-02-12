@@ -53,7 +53,7 @@ ci:
 # Backwards-compat target
 .PHONY: secure_api.old
 secure_api.old:
-	@$(call run-with-log,$(MAKE) -C secure_api,[OLD-MAKE secure_api],secure_api/log)
+	$(call run-with-log,$(MAKE) -C secure_api,[OLD-MAKE secure_api],secure_api/log)
 
 
 #################
@@ -99,7 +99,7 @@ SHELL=/bin/bash
 #  OUT: if present, stdout goes in OUT instead of STEM.out
 ifeq (,$(NOSHORTLOG))
 run-with-log = \
-  if [[ "$4" == "" ]]; then outfile="$3.out"; else outfile="$4"; fi; \
+  @if [[ "$4" == "" ]]; then outfile="$3.out"; else outfile="$4"; fi; \
   $(TIME) -q -f '%E' -o $3.time sh -c "$(subst ",\",$1)" > $$outfile 2> >( tee $3.err 1>&2 ); \
   ret=$$?; \
   time=$$(cat $3.time); \
@@ -146,13 +146,13 @@ ifndef MAKE_RESTARTS
 # meaning we can eliminate large chunks of the dependency graph, since we only
 # need to run: Vale stuff, and HACL spec tests.
 .fstar-depend-%: .FORCE
-	@$(call run-with-log,\
+	$(call run-with-log,\
 	  $(FSTAR_NO_FLAGS) --dep $* $(FSTAR_ROOTS) --warn_error '-285' $(FSTAR_DEPEND_FLAGS) \
 	    --extract '* -Prims -LowStar -Lib.Buffer -Hacl -FStar +FStar.Endianness +FStar.Kremlin.Endianness -EverCrypt -MerkleTree -Vale.Tactics -CanonCommMonoid -CanonCommSemiring -FastHybrid_helpers -FastMul_helpers -FastSqr_helpers -FastUtil_helpers -TestLib -EverCrypt -MerkleTree -Test -Vale_memcpy -Vale.AsLowStar.Test' > $@ \
 	  ,[FSTAR-DEPEND ($*)],$@,$@)
 
 .vale-depend: .fstar-depend-make .FORCE
-	@$(call run-with-log,\
+	$(call run-with-log,\
 	  $(PYTHON3) tools/valedepend.py \
 	    $(addprefix -include ,$(INCLUDES)) \
 	    $(addprefix -in ,$(VALE_ROOTS)) \
@@ -174,7 +174,7 @@ include .vale-depend
 #################################################
 
 %.dump: %.checked
-	@$(call run-with-log,\
+	$(call run-with-log,\
 	  $(FSTAR) --dump_module $(subst prims,Prims,$(basename $(notdir $*))) \
 	    --print_implicits --print_universes --print_effect_args --print_full_names \
 	    --print_bound_var_types --ugly --admit_smt_queries true \
@@ -182,7 +182,7 @@ include .vale-depend
 	  ,[DUMP] $(notdir $(patsubst %.fst,%,$*)),$@)
 
 %.types.vaf:
-	@$(call run-with-log,\
+	$(call run-with-log,\
 	  $(MONO) $(IMPORT_FSTAR_TYPES) $(addprefix -in ,$^) -out $@ \
 	  ,[VALE-TYPES] $(notdir $*),$@)
 
@@ -192,7 +192,7 @@ VALE_FLAGS = -include $(HACL_HOME)/vale/code/lib/util/Operator.vaf
 $(HACL_HOME)/vale/code/lib/util/Operator.fst: VALE_FLAGS=
 
 %.fst:
-	@$(call run-with-log,\
+	$(call run-with-log,\
 	  $(MONO) $(VALE_HOME)/bin/vale.exe -fstarText -quickMods \
 	    -typecheck -include $*.types.vaf \
 	    $(VALE_FLAGS) \
@@ -295,8 +295,8 @@ $(HACL_HOME)/vale/code/arch/x64/X64.Memory_Sems.fst.checked: \
 # the variable assignment of their parent rule.
 %.checked: FSTAR_FLAGS=
 %.checked:
-	@$(call run-with-log,\
-	  $(FSTAR) $(FSTAR_FLAGS) $< && \
+	$(call run-with-log,\
+	  $(FSTAR) $< $(FSTAR_FLAGS) && \
 	    touch $@ \
 	  ,[VERIFY] $(notdir $*),$@)
 
@@ -324,12 +324,12 @@ OCAMLOPT = ocamlfind opt -package fstarlib -linkpkg -g -I $(OUTPUT_DIR) \
 
 .PRECIOUS: %.cmx
 %.cmx: %.ml
-	@$(call run-with-log,\
+	$(call run-with-log,\
 	  $(OCAMLOPT) -c $< -o $@ \
 	  ,[OCAMLOPT-CMX] $(notdir $*),$@)
 
 $(OUTPUT_DIR)/%.ml:
-	@$(call run-with-log,\
+	$(call run-with-log,\
 	  $(FSTAR) $(subst .checked,,$<) --codegen OCaml \
 	    --extract_module $(subst .fst.checked,,$(notdir $<)) \
 	  ,[EXTRACT-ML] $(notdir $*),$@)
@@ -359,7 +359,7 @@ vale/code/lib/util/CmdLineParser.cmx: $(ALL_CMX_FILES)
 
 dist/vale/%.exe: $(ALL_CMX_FILES) vale/code/lib/util/CmdLineParser.cmx
 	mkdir -p $(dir $@)
-	@$(call run-with-log,\
+	$(call run-with-log,\
 	  $(OCAMLOPT) $^ -o $@ -I vale/code/lib/util \
 	  ,[OCAMLOPT-EXE] $(notdir $*),$@)
 
@@ -381,7 +381,7 @@ vale-asm: $(VALE_ASMS)
 .PRECIOUS: %.krml
 
 $(OUTPUT_DIR)/%.krml:
-	@$(call run-with-log,\
+	$(call run-with-log,\
 	  $(FSTAR) --codegen Kremlin \
 	    --extract_module $(basename $(notdir $(subst .checked,,$<))) \
 	    $(notdir $(subst .checked,,$<)) && \
@@ -450,7 +450,7 @@ COMPACT_FLAGS	=\
 
 .PHONY: old-%
 old-%:
-	@$(call run-with-log,\
+	$(call run-with-log,\
 	  $(MAKE) -C code/old -f Makefile.old $* \
 	  ,[OLD-MAKE $*],code/old/$*)
 
