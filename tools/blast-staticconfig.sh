@@ -3,7 +3,7 @@
 set -e
 
 NEW_CONFIG=$1
-OLD_CONFIG=$(cat .evercrypt_config || echo "")
+OLD_CONFIG=$(test -f .evercrypt_config && cat .evercrypt_config || echo "")
 OLD_CONFIG_FILE=providers/evercrypt/config/$OLD_CONFIG/EverCrypt.StaticConfig.fst.checked
 
 if [[ $NEW_CONFIG != $OLD_CONFIG ]]; then
