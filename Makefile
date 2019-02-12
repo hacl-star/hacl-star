@@ -17,8 +17,9 @@ ifeq (3.81,$(MAKE_VERSION))
 endif
 
 ifeq (,$(VALE_HOME))
-  $(error Please define VALE_HOME)
+  $(error Please define VALE_HOME, possibly using cygpath -m)
 endif
+
 
 ##########################
 # Top-level entry points #
@@ -52,7 +53,7 @@ ci:
 # Backwards-compat target
 .PHONY: secure_api.old
 secure_api.old:
-	$(MAKE) -C secure_api
+	@$(call run-with-log,$(MAKE) -C secure_api,[OLD-MAKE secure_api],secure_api/log)
 
 
 #################
@@ -303,8 +304,6 @@ $(HACL_HOME)/vale/code/arch/x64/X64.Memory_Sems.fst.checked: \
 # print ASM files                                                             #
 ###############################################################################
 
-include $(FSTAR_HOME)/ulib/ml/Makefile.include
-
 TAC = $(shell which tac >/dev/null 2>&1 && echo "tac" || echo "tail -r")
 
 ALL_CMX_FILES = $(patsubst %.ml,%.cmx,$(shell echo $(ALL_ML_FILES) | $(TAC)))
@@ -367,6 +366,7 @@ VALE_ASMS = $(foreach P,cpuid aesgcm sha256 curve25519,\
 
 # A pseudo-target for generating just Vale assemblies
 vale-asm: $(VALE_ASMS)
+
 
 ###########################################################################
 # Extracting (checked files) to krml, then running kremlin to generate C. #
@@ -503,35 +503,41 @@ dist/%/Makefile.basic: $(ALL_KRML_FILES) dist/hacl-internal-headers/Makefile.bas
 # no conflict between the headers because this generates
 # Lib_Foobar while the run above generates a single Hacl_Lib.
 dist/hacl-internal-headers/Makefile.basic: $(ALL_KRML_FILES)
-	$(KRML) \
-	  -tmpdir $(dir $@) -skip-compilation \
-	  $(patsubst %,-bundle %=,$(HAND_WRITTEN_C)) \
-	  $(patsubst %,-library %,$(HAND_WRITTEN_C)) \
-	  -minimal -add-include '"kremlib.h"' \
-	  -bundle '\*,WindowsBug' $^
+	@$(call run-with-log,\
+	  $(KRML) -silent \
+	    -tmpdir $(dir $@) -skip-compilation \
+	    $(patsubst %,-bundle %=,$(HAND_WRITTEN_C)) \
+	    $(patsubst %,-library %,$(HAND_WRITTEN_C)) \
+	    -minimal -add-include '"kremlib.h"' \
+	    -bundle '\*,WindowsBug' $^
+	  ,[KREMLIN hacl-internal-headers],dist/hacl-internal-headers)
 
 dist/evercrypt-external-headers/Makefile.basic: $(ALL_KRML_FILES)
-	$(KRML) \
-	  -minimal \
-	  -bundle EverCrypt+EverCrypt.AutoConfig2+EverCrypt.HKDF+EverCrypt.HMAC+EverCrypt.Hash+EverCrypt.Hash.Incremental=*[rename=EverCrypt] \
-	  -library EverCrypt,EverCrypt.* \
-	  -add-include '<inttypes.h>' \
-	  -add-include '<stdbool.h>' \
-	  -add-include '<kremlin/internal/types.h>' \
-	  -skip-compilation \
-	  -tmpdir $(dir $@) \
-	  $^
+	@$(call run-with-log,\
+	  $(KRML) -silent \
+	    -minimal \
+	    -bundle EverCrypt+EverCrypt.AutoConfig2+EverCrypt.HKDF+EverCrypt.HMAC+EverCrypt.Hash+EverCrypt.Hash.Incremental=*[rename=EverCrypt] \
+	    -library EverCrypt,EverCrypt.* \
+	    -add-include '<inttypes.h>' \
+	    -add-include '<stdbool.h>' \
+	    -add-include '<kremlin/internal/types.h>' \
+	    -skip-compilation \
+	    -tmpdir $(dir $@) \
+	    $^
+	  ,[KREMLIN evercrypt-external-headers],dist/evercrypt-external-headers)
 
 # Auto-generates a single C test file.
 .PRECIOUS: dist/test/c/%.c
 dist/test/c/%.c: $(ALL_KRML_FILES)
-	$(KRML) \
-	  -tmpdir $(dir $@) -skip-compilation \
-	  -no-prefix $(subst _,.,$*) \
-	  -library Hacl,Lib,EverCrypt,EverCrypt.* \
-	  -fparentheses -fcurly-braces -fno-shadow \
-	  -minimal -add-include '"kremlib.h"' \
-	  -bundle '*[rename=$*]' $(KRML_EXTRA) $^
+	@$(call run-with-log,\
+	  $(KRML) -silent \
+	    -tmpdir $(dir $@) -skip-compilation \
+	    -no-prefix $(subst _,.,$*) \
+	    -library Hacl,Lib,EverCrypt,EverCrypt.* \
+	    -fparentheses -fcurly-braces -fno-shadow \
+	    -minimal -add-include '"kremlib.h"' \
+	    -bundle '*[rename=$*]' $(KRML_EXTRA) $^
+	  ,[KREMLIN test-$*],dist/test-$*)
 
 dist/test/c/Test.c: KRML_EXTRA=-add-include '"kremlin/internal/compat.h"'
 

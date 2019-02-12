@@ -7,7 +7,9 @@ candidates="python3 python python3.6 python3.7 python3.8"
 
 # $1: executable to try (in the path)
 function try() {
-  if echo "import sys; sys.exit (not (sys.version_info >= (3, 6)))" | $1; then
+  if which $1 &>/dev/null && \
+    echo "import sys; sys.exit (not (sys.version_info >= (3, 6)))" | $1;
+  then
     echo -n $1
   else
     false
