@@ -4,8 +4,8 @@
     [
       "AES_helpers.expand_key_128_def",
       1,
-      2,
       1,
+      0,
       [
         "@MaxIFuel_assumption", "@query",
         "Prims_pretyping_ae567c2fb75be05905677af440075565",
@@ -16,12 +16,12 @@
         "equation_Types_s.quad32",
         "function_token_typing_Prims.__cache_version_number__",
         "int_inversion", "int_typing", "primitive_Prims.op_Equality",
-        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Prims_Tm_refine_a4038d5aed1633b5ecbb4e499b1c66ad",
         "well-founded-ordering-on-nat"
       ],
       0,
-      "ef54d50765ce3db831098a546293e580"
+      "1fdaae2dd04020b23fd7ca344b3ce43d"
     ],
     [
       "AES_helpers.lemma_expand_key_128_0",
@@ -33,52 +33,49 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "4bfd6043d6d58184e46bdfffbbb2a3f0"
+      "ecf98a1c88bb79ae6e9e63d27ba09bb1"
     ],
     [
       "AES_helpers.lemma_expand_key_128_i",
       1,
-      2,
       1,
+      0,
       [
         "@MaxIFuel_assumption", "@query", "b2t_def", "equation_AES_s.nb",
         "equation_Prims.l_and", "equation_Prims.nat",
         "equation_Prims.squash", "equation_Words_s.nat32", "int_inversion",
-        "l_and-interp", "primitive_Prims.op_Addition",
-        "primitive_Prims.op_LessThan", "primitive_Prims.op_Multiply",
-        "primitive_Prims.op_Subtraction",
+        "l_and-interp", "primitive_Prims.op_LessThan",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_AES_helpers_Tm_refine_071a8e169ec170a91afc03374686d3b1",
-        "refinement_interpretation_AES_helpers_Tm_refine_f8eae4e9138e3cb6d1f00cbeec54bd06",
+        "refinement_interpretation_AES_helpers_Tm_refine_0b4a13f44563398bd21134c879b4f4b7",
+        "refinement_interpretation_AES_helpers_Tm_refine_974ea6f3ebb2d8e5fd635575758d08ab",
         "refinement_interpretation_Prims_Tm_refine_8d65e998a07dd53ec478e27017d9dba5",
-        "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
+        "refinement_interpretation_Prims_Tm_refine_a4038d5aed1633b5ecbb4e499b1c66ad"
       ],
       0,
-      "637c16cb515f900170f4d7289c437835"
+      "8f12ec2d789d75edfcd2cd4b497a85ea"
     ],
     [
       "AES_helpers.lemma_expand_append",
       1,
-      2,
       1,
+      0,
       [
         "@MaxIFuel_assumption", "@query",
         "Prims_pretyping_ae567c2fb75be05905677af440075565", "b2t_def",
-        "bool_inversion", "bool_typing", "equation_AES_s.nb",
-        "equation_Prims.l_and", "equation_Prims.nat",
+        "equation_AES_s.nb", "equation_Prims.l_and", "equation_Prims.nat",
         "equation_Prims.squash", "equation_Words_s.nat32",
         "function_token_typing_Prims.__cache_version_number__",
         "int_inversion", "l_and-interp",
-        "primitive_Prims.op_LessThanOrEqual", "primitive_Prims.op_Multiply",
+        "primitive_Prims.op_LessThanOrEqual",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_FStar.Seq.Properties_Tm_refine_a0cd7d06c5da6444b6b51b319febde8e",
         "refinement_interpretation_Prims_Tm_refine_8d65e998a07dd53ec478e27017d9dba5",
-        "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
+        "refinement_interpretation_Prims_Tm_refine_a4038d5aed1633b5ecbb4e499b1c66ad"
       ],
       0,
-      "5f1d9ad581fd439aafc6d9ba683246b7"
+      "d09339bbc283f61e5922dc11c534239f"
     ],
     [
       "AES_helpers.lemma_expand_key_128",
@@ -99,7 +96,7 @@
         "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-      "87e1adef007ab241a56387861178482c"
+      "f1a517a0eac338d03263f0c08a031a4d"
     ],
     [
       "AES_helpers.init_rounds_opaque",
@@ -108,7 +105,7 @@
       0,
       [ "@query" ],
       0,
-      "83e5d8deb945051b71f3820089b01e06"
+      "8ab7780af41becf3cedafe19e7f4898e"
     ],
     [
       "AES_helpers.finish_cipher",
@@ -120,7 +117,7 @@
         "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "8f82b51527c229a6f6db2b649d435aca"
+      "ab88255b9092c4321fd2ff80410ae6c1"
     ]
   ]
 ]

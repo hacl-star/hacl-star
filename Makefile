@@ -225,7 +225,7 @@ VALE_FSTAR_FLAGS=$(VALE_FSTAR_FLAGS_NOSMT) \
 
 # With this macro, we no longer rely on the shortest-stem rule, meaning that the
 # first match is picked to determine the F* flags.
-only-for = $(to-obj-dir $(filter $1,$(addsuffix .checked,$(FSTAR_ROOTS))))
+only-for = $(call to-obj-dir,$(filter $1,$(addsuffix .checked,$(FSTAR_ROOTS))))
 
 # Starting with individual files.
 obj/Interop.fst.checked: \
