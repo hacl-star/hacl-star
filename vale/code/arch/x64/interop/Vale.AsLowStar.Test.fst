@@ -26,7 +26,7 @@ let t64_no_mod = TD_Buffer TUInt64 ({modified=false; strict_disjointness=false; 
 [@__reduce__] unfold
 let t64_imm = TD_ImmBuffer TUInt64 ({modified=false; strict_disjointness=false; taint=MS.Secret})
 
-[@__reduce__] unfold
+[@__reduce__]
 let dom : IX64.arity_ok td =
   let y = [t64_mod;t64_imm] in
   assert_norm (List.length y = 2);
@@ -39,7 +39,15 @@ assume val v: VSig.vale_sig pre post
 assume val c: V.va_code
 
 [@__reduce__]
-let call_c_t = IX64.as_lowstar_sig_t_weak Interop.down_mem c n dom [] _ _ (W.mk_prediction c dom [] (v c IA.win))
+let call_c_t : Type0 =
+  IX64.as_lowstar_sig_t_weak 
+    Interop.down_mem
+    c
+    n
+    dom
+    [] _ _
+    (W.mk_prediction c dom [] (v c IA.win))
+
 let call_c : call_c_t = IX64.wrap_weak Interop.down_mem c n dom (W.mk_prediction c dom [] (v c IA.win))
 let call_c_normal_t : normal call_c_t = as_normal_t #call_c_t call_c
 //You can ask emacs to show you the type of call_c_normal_t ...
@@ -48,7 +56,7 @@ let call_c_normal_t : normal call_c_t = as_normal_t #call_c_t call_c
 //Now memcpy
 module VM = Test.Vale_memcpy
 
-[@__reduce__] unfold
+[@__reduce__]
 let vm_dom = dom
 open X64.MemoryAdapters
 (* Need to rearrange the order of arguments *)
@@ -209,7 +217,10 @@ let memcpy_test
 
 module VC = X64.Cpuidstdcall
 
-[@__reduce__] unfold
+[@__reduce__]
+let empty_list #a : l:list a {List.length l = 0} = []
+
+[@__reduce__]
 let aesni_dom : IX64.arity_ok td = []
 
 (* Need to rearrange the order of arguments *)
@@ -229,6 +240,14 @@ let aesni_post : VSig.vale_post 8 aesni_dom =
     (f:V.va_fuel) ->
       VC.va_ens_check_aesni_stdcall c va_s0 IA.win (as_vale_buffer sb) va_s1 f
 
+[@__reduce__]
+let with_len (l:list 'a) 
+  : Pure (list 'a) 
+    (requires True)
+    (ensures fun m -> m==l /\ List.length m == normalize_term (List.length l))
+  = l
+
+#set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit_factor 2"
 (* The vale lemma doesn't quite suffice to prove the modifies clause
    expected of the interop layer *)
 [@__reduce__] unfold
@@ -256,10 +275,10 @@ let code_aesni = VC.va_code_check_aesni_stdcall IA.win
 let lowstar_aesni_t =
   IX64.as_lowstar_sig_t_weak
     Interop.down_mem
-    code_aesni
+    (coerce code_aesni)
     8
     aesni_dom
-    []
+    empty_list
     _
     _
     (W.mk_prediction code_aesni aesni_dom [] (aesni_lemma code_aesni IA.win))
@@ -268,7 +287,7 @@ let lowstar_aesni_t =
 let lowstar_aesni : lowstar_aesni_t  =
   IX64.wrap_weak
     Interop.down_mem
-    code_aesni
+    (coerce code_aesni)
     8
     aesni_dom
     (W.mk_prediction code_aesni aesni_dom [] (aesni_lemma code_aesni IA.win))

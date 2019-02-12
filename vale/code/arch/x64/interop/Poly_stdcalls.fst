@@ -37,7 +37,7 @@ let t64_no_mod = TD_Buffer TUInt64 ({modified=false; strict_disjointness=false; 
 [@__reduce__] unfold
 let tuint64 = TD_Base TUInt64
 
-[@__reduce__] unfold
+[@__reduce__]
 let dom: IX64.arity_ok td =
   let y = [t64_mod; t64_no_mod; tuint64] in
   assert_norm (List.length y = 3);

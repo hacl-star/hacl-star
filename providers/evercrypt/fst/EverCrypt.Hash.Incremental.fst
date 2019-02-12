@@ -403,8 +403,8 @@ let mk_finish a s prev dst =
   Hash.frame_invariant_implies_footprint_preservation
     B.(loc_region_only false (HS.get_tip h5)) hash_state h5 h6;
 
-  assert (hashes h6 s (G.reveal prev))
-
+  assert (hashes h6 s (G.reveal prev));
+  assert (B.(modifies (loc_union (loc_buffer dst) (footprint s h0)) h0 h6))
   // So much for automated proofs.
 
 #pop-options

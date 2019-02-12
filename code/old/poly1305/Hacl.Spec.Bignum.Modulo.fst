@@ -16,6 +16,8 @@ open Hacl.Bignum.Limb
 
 #set-options "--initial_fuel 0 --max_fuel 0"
 
+let _ : squash (prime > 0) = assert_norm (pow2 130 - 5 > 0)
+
 inline_for_extraction let mask_2_44 : p:t{v p = pow2 44 - 1} =
   assert_norm (pow2 64 = 0x10000000000000000);
   assert_norm(pow2 44 - 1 = 0xfffffffffff);  uint64_to_limb 0xfffffffffffuL

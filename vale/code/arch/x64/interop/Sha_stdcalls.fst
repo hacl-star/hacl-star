@@ -41,7 +41,7 @@ let t128_imm = TD_ImmBuffer TUInt128 default_bq
 [@__reduce__] unfold
 let tuint64 = TD_Base TUInt64
 
-[@__reduce__] unfold
+[@__reduce__]
 let dom: IX64.arity_ok td =
   let y = [t128_mod; t128_no_mod; tuint64; t128_imm] in
   assert_norm (List.length y = 4);

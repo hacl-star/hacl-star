@@ -38,7 +38,7 @@ let t64_no_mod = TD_Buffer TUInt64 ({modified=false; strict_disjointness=false; 
 [@__reduce__] unfold
 let tuint64 = TD_Base TUInt64
 
-[@__reduce__] unfold
+[@__reduce__]
 let dom: IX64.arity_ok td =
   let y = [t64_mod; t64_no_mod; tuint64] in
   assert_norm (List.length y = 3);
@@ -181,7 +181,7 @@ let add1 out f1 f2
     x
     
 
-[@__reduce__] unfold
+[@__reduce__]
 let fadd_dom: IX64.arity_ok td =
   let y = [t64_mod; t64_no_mod; t64_no_mod] in
   assert_norm (List.length y = 3);
@@ -485,7 +485,7 @@ let fsub out f1 f2
 
 #pop-options
 
-[@__reduce__] unfold
+[@__reduce__]
 let fmul_dom: IX64.arity_ok td =
   let y = [t64_mod; t64_no_mod; t64_mod; t64_no_mod] in
   assert_norm (List.length y = 4);
@@ -841,7 +841,7 @@ let fmul2 tmp f1 out f2
 
 #pop-options
 
-[@__reduce__] unfold
+[@__reduce__]
 let fmul1_dom: IX64.arity_ok td =
   let y = [t64_mod; t64_no_mod; tuint64] in
   assert_norm (List.length y = 3);
@@ -981,7 +981,7 @@ let fmul1 out f1 f2
    
 #pop-options
 
-[@__reduce__] unfold
+[@__reduce__]
 let fsqr_dom: IX64.arity_ok td =
   let y = [t64_mod; t64_no_mod; t64_mod] in
   assert_norm (List.length y = 3);
@@ -1290,7 +1290,7 @@ let fsqr2 tmp f1 out
 
 #pop-options
 
-[@__reduce__] unfold
+[@__reduce__]
 let cswap_dom: IX64.arity_ok td =
   let y = [t64_mod; t64_mod; tuint64] in
   assert_norm (List.length y = 3);
