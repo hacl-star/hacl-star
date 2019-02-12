@@ -109,7 +109,7 @@ run-with-log = \
     echo -e "\033[31mFatal error while running\033[0m: $1"; \
     echo -e "\033[31mFailed after\033[0m: $$time"; \
     echo -e "\033[36mFull log is in $3.{out,err}, see excerpt below\033[0m:"; \
-    tail -n 20 $$outfile; \
+    tail -n 20 $3.err; \
     echo "<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>"; \
     false; \
   fi
@@ -444,7 +444,9 @@ COMPACT_FLAGS	=\
 
 .PHONY: old-%
 old-%:
-	$(MAKE) -C code/old -f Makefile.old $*
+	@$(call run-with-log,\
+	  $(MAKE) -C code/old -f Makefile.old $* \
+	  ,[OLD-MAKE $*],code/old/$*)
 
 HACL_OLD_FILES=\
   code/old/experimental/aesgcm/aesgcm-c/Hacl_AES.c \
