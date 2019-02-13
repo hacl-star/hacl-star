@@ -10,32 +10,55 @@
 #           code   vale                code/old
 #           /   \  /                      |
 #         lib   specs                  specs/old
+#
+# This Makefile honors the following variables:
+# - NOSHORTLOG=1 disables pretty (short) logs
+# - NODEPEND=1 disables .depend re-generation (use for debugging only)
+# - EVERCRYPT_CONFIG allows switching EverCrypt static configurations; when
+#   going through the all target, we properly invalidate the checked file.
+#
+# This is a staged Makefile, because we first need to generate .fst files out of
+# .vaf files in order to get a full dependency graph for the .fst files. So,
+# this Makefile exposes the following targets to the end user:
+# - all: staged target for the entire build (default)
+# - ci: same as all, without short logs
+# - vale-fst: the minimum needed to compile .vaf files to .fst files
+# - vale-verify: properly staged target for re-verifying all the vale files
+# - vale-asm: re-generation of the Vale assemblies in dist/vale
+# - hacl-verify: non-staged target for reverifying HACL* files
+# - verify: UNSTAGED, may only be invoked after a successful run of vale-fst,
+#   verifies all .fst files, both hand-written and generated.
 
+# This was needed once because of the shortest stem rule. I don't think it's
+# needed anymore, but better be safe.
 ifeq (3.81,$(MAKE_VERSION))
   $(error You seem to be using the OSX antiquated Make version. Hint: brew \
     install make, then hit invoke gmake instead of make)
 endif
 
+# Better error early.
 ifeq (,$(VALE_HOME))
   $(error Please define VALE_HOME, possibly using cygpath -m)
 endif
+
+# The default setting of HACL_HOME=. doesn't work because valedepend.py will
+# normalize file paths to trim the leading ./, which results in make being
+# confused between ./foo/bar.fst and foo/bar.fst. It's ok to use absolute paths
+# here.
+export HACL_HOME=$(CURDIR)
 
 
 ##########################
 # Top-level entry points #
 ##########################
 
-# This is a staged Makefile, because we first need to generate .fst files out of
-# .vaf files in order to get a full dependency graph for the .fst files.
-# This Makefile can be safely re-invoked with a different EVERCRYPT_CONFIG
-# parameter to generate a different static specialization of EverCrypt.
-all_:
+all:
 	tools/blast-staticconfig.sh $(EVERCRYPT_CONFIG)
-	$(MAKE) vaf-to-fst
-	FSTAR_DEPEND_FLAGS="--warn_error +285" $(MAKE) all
+	$(MAKE) vale-fst
+	FSTAR_DEPEND_FLAGS="--warn_error +285" $(MAKE) all_
 
 
-all: compile-compact compile-generic compile-compact-msvc \
+all_: compile-compact compile-generic compile-compact-msvc \
   compile-evercrypt-external-headers compile-compact-c89 compile-coco \
   secure_api.old
 
@@ -47,7 +70,7 @@ test-c: $(subst .,_,$(patsubst %.fst,test-c-%,$(notdir $(wildcard code/tests/*.f
 test-ml: $(subst .,_,$(patsubst %.fst,test-ml-%,$(notdir $(wildcard specs/tests/*.fst))))
 
 ci:
-	NOSHORTLOG=1 $(MAKE) vaf-to-fst
+	NOSHORTLOG=1 $(MAKE) vale-fst
 	FSTAR_DEPEND_FLAGS="--warn_error +285" NOSHORTLOG=1 $(MAKE) all test
 
 # Backwards-compat target
@@ -90,7 +113,7 @@ endif
 SHELL=/bin/bash
 
 # A helper to generate pretty logs, callable as:
-#   $(call run-with-log,CMD,TXT,STEM[,OUT])
+#   $(call run-with-log,CMD,TXT,STEM)
 #
 # Arguments:
 #  CMD: command to execute (may contain double quotes, but not escaped)
@@ -122,19 +145,21 @@ endif
 # Dependency graphs for Vale, then F* source files #
 ####################################################
 
+# Transforms any foo/bar/baz.qux into obj/baz.qux
 to-obj-dir = $(addprefix obj/,$(notdir $1))
 
 # The set of .vaf files we want to translate to F*.
 VALE_ROOTS = $(wildcard $(addsuffix /*.vaf,$(VALE_DIRS)))
 
-# F* files stemming from Vale files
+# Target F* files stemming from Vale files
 VALE_FSTS = $(call to-obj-dir,$(patsubst %.vaf,%.fst,$(VALE_ROOTS)))
 
-# The complete set of F* files -- only correct in the second stage of this build.
+# The complete set of F* files, both hand-written and Vale-generated. Note that
+# this is only correct in the second stage of the build.
 FSTAR_ROOTS = $(wildcard $(addsuffix /*.fsti,$(DIRS)) $(addsuffix /*.fst,$(DIRS))) \
   $(wildcard obj/*.fst) $(wildcard obj/*.fsti) # these two empty during the first stage
 
-# Convenience target. Remember to run make vaf-to-fst first.
+# Convenience target. Remember to run make vale-fst first.
 verify: $(addsuffix .checked,$(FSTAR_ROOTS))
 
 include Makefile.common
@@ -202,7 +227,7 @@ obj/Operator.fst: VALE_FLAGS=
 	  ,[VALE] $(notdir $*),$(call to-obj-dir,$@))
 
 # A pseudo-target for the first stage.
-vaf-to-fst: $(VALE_FSTS)
+vale-fst: $(VALE_FSTS)
 
 
 ################################################
@@ -220,8 +245,17 @@ VALE_FSTAR_FLAGS=$(VALE_FSTAR_FLAGS_NOSMT) \
   --smtencoding.elim_box true --smtencoding.l_arith_repr native \
   --smtencoding.nl_arith_repr wrapped
 
-# With this macro, we no longer rely on the shortest-stem rule. The rules are
-# thus overriding each other, meaning the last one has precedence.
+# $(call only-for,<filter>) retains all the *source* checked files that match
+# <filter>, then returns the corresponding set of targets in obj/. For instance,
+# $(call only-for,$(HACL_HOME)/code/%.checked) returns
+# obj/Hacl.Hash.Definitions.fst.checked, and all the other targets that
+# originate from source files in code/.
+#
+# With this macro, we no longer rely on pattern rules for file-specific options,
+# meaning we also no longer rely on the shortest stem rule. Many of the rules
+# below match the same file multiple times (as we the case in the original
+# SConstruct). The last match has precedence and overrides previous variable
+# assignments.
 only-for = $(call to-obj-dir,$(filter $1,$(addsuffix .checked,$(FSTAR_ROOTS))))
 
 # By default Vale files don't use two phase tc
@@ -240,8 +274,8 @@ $(call only-for,$(HACL_HOME)/vale/code/arch/x64/interop/%.checked): \
     sed 's/--z3cliopt smt.arith.nl=false//; \
       s/--z3cliopt smt.QI.EAGER_THRESHOLD=100//')
 
-# Except for the files coming from vaf files, which also don't work with two
-# phase tc.
+# Now the fst files coming from vaf files, which also don't work with two
+# phase tc (VALE_FSTS is of the form obj/foobar.fst).
 $(addsuffix .checked,$(VALE_FSTS)) \
 $(addsuffix i.checked,$(VALE_FSTS)): \
   FSTAR_FLAGS=$(VALE_FSTAR_FLAGS) --use_two_phase_tc false
@@ -307,6 +341,18 @@ hints:
 	    touch -c $@ \
 	  ,[VERIFY] $(notdir $*),$(call to-obj-dir,$@))
 
+# Convenience pseudo-targets
+vale-verify:
+	$(MAKE) vale-fst
+	$(MAKE) vale-verify_
+
+vale-verify_: \
+  $(addsuffix .checked,$(VALE_FSTS)) \
+  $(addsuffix i.checked,$(VALE_FSTS)) \
+  $(call only-for,$(HACL_HOME)/vale/%.checked) \
+
+hacl-verify: $(call only-for,$(HACL_HOME)/code/%.checked)
+
 
 ###############################################################################
 # Extracting (checked files) to OCaml, producing executables, running them to #
@@ -326,8 +372,7 @@ endif
 # Warning 8: this pattern-matching is not exhaustive.
 # Warning 20: this argument will not be used by the function.
 # Warning 26: unused variable
-OCAMLOPT = ocamlfind opt -package fstarlib -linkpkg -g -I obj \
-  -warn-error -8-20-26
+OCAMLOPT = ocamlfind opt -package fstarlib -linkpkg -g -I obj -w -8-20-26
 
 .PRECIOUS: obj/%.cmx
 obj/%.cmx: obj/%.ml
@@ -552,6 +597,7 @@ dist/test/c/%.c: $(ALL_KRML_FILES)
 
 dist/test/c/Test.c: KRML_EXTRA=-add-include '"kremlin/internal/compat.h"'
 
+
 ###################################################################################
 # C Compilation (recursive make invocation relying on KreMLin-generated Makefile) #
 ###################################################################################
@@ -594,6 +640,7 @@ dist/test/c/%.exe: dist/test/c/%.c compile-generic
 test-c-%: dist/test/c/%.exe
 	LD_LIBRARY_PATH="$(OPENSSL_HOME)" DYLD_LIBRARY_PATH="$(OPENSSL_HOME)" \
 	  PATH="$(OPENSSL_HOME):$(PATH)" $<
+
 
 #######################
 # OCaml tests (specs) #
