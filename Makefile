@@ -65,17 +65,9 @@ ifeq (,$(OPENSSL_HOME)/libcrypto.a)
   $(error $$OPENSSL_HOME/libcrypto.a does not exist (OPENSSL_HOME=$(OPENSSL_HOME)))
 endif
 
-
-# The default setting of HACL_HOME=. doesn't work because valedepend.py will
-# normalize file paths to trim the leading ./, which results in make being
-# confused between ./foo/bar.fst and foo/bar.fst. It's ok to use absolute paths
-# here.
-export HACL_HOME=$(CURDIR)
-
 ifeq (Windows_NT,$(OS))
   HACL_HOME := $(shell cygpath -m $(HACL_HOME))
 endif
-
 
 ##########################
 # Top-level entry points #
@@ -189,6 +181,8 @@ VALE_ROOTS = $(wildcard $(addsuffix /*.vaf,$(VALE_DIRS)))
 
 # Target F* files stemming from Vale files
 VALE_FSTS = $(call to-obj-dir,$(patsubst %.vaf,%.fst,$(VALE_ROOTS)))
+
+.PRECIOUS: %.fst %.fsti
 
 # The complete set of F* files, both hand-written and Vale-generated. Note that
 # this is only correct in the second stage of the build.
@@ -604,7 +598,7 @@ endif
 
 .PRECIOUS: dist/%/Makefile.basic
 dist/%/Makefile.basic: $(ALL_KRML_FILES) dist/hacl-internal-headers/Makefile.basic \
-  $(HAND_WRITTEN_FILES) $(VALE_ASMS) | old-extract-c
+  $(HAND_WRITTEN_FILES) $(HAND_WRITTEN_OPTIONAL_FILES) $(VALE_ASMS) | old-extract-c
 	mkdir -p $(dir $@)
 	cp $(HACL_OLD_FILES) $(patsubst %.c,%.h,$(HACL_OLD_FILES)) $(dir $@)
 	cp $(HAND_WRITTEN_FILES) $(HAND_WRITTEN_OPTIONAL_FILES) dist/hacl-internal-headers/*.h $(dir $@)
@@ -673,6 +667,7 @@ compile-%: dist/Makefile dist/%/Makefile.basic
 
 ifeq ($(OS),Windows_NT)
 OPENSSL_HOME	:= $(shell cygpath -u $(OPENSSL_HOME))
+LDFLAGS		+= -lbcrypt
 endif
 
 dist/test/c/merkle_tree_test.c: secure_api/merkle_tree/test/merkle_tree_test.c
@@ -688,7 +683,7 @@ dist/test/c/%.exe: dist/test/c/%.c compile-generic
 	    -I $(dir $@) -I $(KREMLIN_HOME)/include -I $(OPENSSL_HOME)/include -I dist/generic \
 	    -L$(OPENSSL_HOME) \
 	    $< -o $@ \
-	    dist/generic/libevercrypt.a -lcrypto \
+	    dist/generic/libevercrypt.a -lcrypto $(LDFLAGS) \
 	    $(KREMLIN_HOME)/kremlib/dist/generic/libkremlib.a \
 	  ,[LD $*],$(call to-obj-dir,$@))
 
