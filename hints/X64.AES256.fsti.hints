@@ -32,7 +32,7 @@
         "typing_tok_X64.Machine_s.Rsi@tok"
       ],
       0,
-      "c3bbcd4b1aee729b0184840c892ec7db"
+      "d378e9efd1bd231e54720033ecc295f3"
     ],
     [
       "X64.AES256.va_wp_KeyExpansion256Stdcall",
@@ -56,7 +56,7 @@
         "typing_X64.Vale.Decls.va_if", "unit_typing"
       ],
       0,
-      "988d2b42254bcf4b040982612bb6e615"
+      "33d341b6de36cb89af3ea9b4787612a3"
     ],
     [
       "X64.AES256.va_wpProof_KeyExpansion256Stdcall",
@@ -68,24 +68,24 @@
         "refinement_interpretation_Prims_Tm_refine_8d65e998a07dd53ec478e27017d9dba5"
       ],
       0,
-      "57994e4685b026c96856fb8af6f2c888"
+      "aa92349205ecda400bb24b781549c783"
     ],
     [
       "X64.AES256.va_lemma_AES256EncryptBlock",
       1,
-      2,
       1,
+      0,
       [
         "@MaxIFuel_assumption", "@query", "bool_inversion",
         "equation_Prims.nat", "equation_Types_s.quad32",
         "equation_Words_s.nat32", "fuel_guarded_inversion_Words_s.four",
         "fuel_guarded_inversion_X64.Vale.State.state",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_X64.AES256_Tm_refine_b67a2501174356d80506d68398750db5",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_X64.AES256_Tm_refine_0b1aebf0a94c13ccff22f156fbe558b3",
         "typing_X64.CPU_Features_s.aesni_enabled"
       ],
       0,
-      "57c5e6287551b2b79066c58299bbf1e5"
+      "4c8eaed95ac063763151337989bd579f"
     ],
     [
       "X64.AES256.va_wp_AES256EncryptBlock",
@@ -94,7 +94,7 @@
       0,
       [ "@query", "projection_inverse_BoxInt_proj_0" ],
       0,
-      "224f871e463f751f6f0c25a5a96d7356"
+      "4f787862d86212afa53847211195bd51"
     ],
     [
       "X64.AES256.va_wpProof_AES256EncryptBlock",
@@ -106,22 +106,24 @@
         "refinement_interpretation_Prims_Tm_refine_8d65e998a07dd53ec478e27017d9dba5"
       ],
       0,
-      "7420653318a410235df8e1da1142daf9"
+      "65d44965dc389f7fed58e64f9ca42274"
     ],
     [
       "X64.AES256.va_lemma_AES256EncryptBlockStdcall",
       1,
-      2,
       1,
+      0,
       [
-        "@MaxIFuel_assumption", "@query", "bool_inversion", "eq2-interp",
+        "@MaxIFuel_assumption", "@query", "bool_inversion",
         "equality_tok_X64.Machine_s.R8@tok",
         "equality_tok_X64.Machine_s.Rcx@tok",
+        "equality_tok_X64.Machine_s.Rdi@tok",
         "equality_tok_X64.Machine_s.Rdx@tok",
+        "equality_tok_X64.Machine_s.Rsi@tok",
         "equality_tok_X64.Machine_s.Secret@tok", "equation_Prims.nat",
         "equation_Types_s.quad32", "equation_Words_s.nat32",
         "equation_Words_s.nat64", "equation_Words_s.natN",
-        "equation_X64.Vale.Decls.va_require_total",
+        "equation_X64.Vale.Decls.validDstAddrs128",
         "equation_X64.Vale.Decls.validSrcAddrs128",
         "fuel_guarded_inversion_Words_s.four",
         "fuel_guarded_inversion_X64.Vale.State.state",
@@ -129,17 +131,19 @@
         "proj_equation_X64.Vale.State.Mkstate_memTaint",
         "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_FStar.Seq.Base_Tm_refine_5514fbe9e08dfda40f950a7b9f1b2b98",
-        "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
-        "refinement_interpretation_X64.AES256_Tm_refine_c43c934e866329f7ebf6003a42ae16f5",
+        "refinement_interpretation_Prims_Tm_refine_a4038d5aed1633b5ecbb4e499b1c66ad",
+        "refinement_interpretation_X64.AES256_Tm_refine_e35b09fa1c3a7de1c3b022d1fde190bc",
         "typing_X64.CPU_Features_s.aesni_enabled",
         "typing_X64.Vale.Regs.sel",
         "typing_X64.Vale.State.__proj__Mkstate__item__regs",
         "typing_tok_X64.Machine_s.R8@tok",
         "typing_tok_X64.Machine_s.Rcx@tok",
-        "typing_tok_X64.Machine_s.Rdx@tok"
+        "typing_tok_X64.Machine_s.Rdi@tok",
+        "typing_tok_X64.Machine_s.Rdx@tok",
+        "typing_tok_X64.Machine_s.Rsi@tok"
       ],
       0,
-      "9b17af4e7432a4e660bda849413d01f8"
+      "856ed5ae6512a5629e48a60ccac486d8"
     ],
     [
       "X64.AES256.va_wp_AES256EncryptBlockStdcall",
@@ -163,7 +167,7 @@
         "typing_X64.Vale.Decls.va_if", "unit_typing"
       ],
       0,
-      "4c191ae90daf2befbfc32311cd118953"
+      "3c3dc11d186bb8068fa8bd12ea9dc222"
     ],
     [
       "X64.AES256.va_wpProof_AES256EncryptBlockStdcall",
@@ -175,7 +179,7 @@
         "refinement_interpretation_Prims_Tm_refine_8d65e998a07dd53ec478e27017d9dba5"
       ],
       0,
-      "ed671b03b61365f765f8d958dba8f034"
+      "496de516d790519f2bf138d734e3fdb2"
     ]
   ]
 ]
