@@ -171,28 +171,15 @@ verify: $(addsuffix .checked,$(FSTAR_ROOTS))
 
 include Makefile.common
 
-# We currently force regeneration of three depend files. This is long. If
-# debugging, or invoking a staged top-level target, skip. If within a restarting
-# (not recursive) make invocation, we are actually in the process of
-# regenerating the .depend files, so don't enable rules for them, otherwise this
-# would send make into an infinite loop.
-ifdef NODEPEND
-  SKIP=1
-else ifdef MAKE_RESTARTS
-  SKIP=1
-else ifeq ($(MAKECMDGOALS),clean)
-  SKIP=1
-else ifeq ($(MAKECMDGOALS),)
-  SKIP=1
-else ifeq ($(MAKECMDGOALS),all)
-  SKIP=1
-else ifeq ($(MAKECMDGOALS),vale-verify)
-  SKIP=1
-else ifeq ($(MAKECMDGOALS),ci)
-  SKIP=1
-endif
+# We currently force regeneration of three depend files. This is long.
 
-ifneq ($(SKIP),1)
+# If were are debugging (i.e. the files exist already); or within a restarting
+# (NOT recursive) make invocation, meaning we are in the process of
+# re-generating such files; then don't provide recipes for generating .depend
+# files. (In the latter case, this would send make into an infinite loop.)
+
+ifndef NODEPEND
+ifndef MAKE_RESTARTS
 # Note that the --extract argument only controls what is extracted for OCaml,
 # meaning we can eliminate large chunks of the dependency graph, since we only
 # need to run: Vale stuff, and HACL spec tests.
@@ -214,9 +201,27 @@ ifneq ($(SKIP),1)
 .PHONY: .FORCE
 .FORCE:
 endif
+endif
 
+# If invoking a known, staged target, then don't include these files, so as not
+# to trigger their re-generation (will be done later through recursive (NOT
+# restarting)) make invocations.
+ifeq ($(MAKECMDGOALS),clean)
+  SKIP=1
+else ifeq ($(MAKECMDGOALS),)
+  SKIP=1
+else ifeq ($(MAKECMDGOALS),all)
+  SKIP=1
+else ifeq ($(MAKECMDGOALS),vale-verify)
+  SKIP=1
+else ifeq ($(MAKECMDGOALS),ci)
+  SKIP=1
+endif
+
+ifndef SKIP
 include .fstar-depend-full
 include .vale-depend
+endif
 
 
 #################################################
