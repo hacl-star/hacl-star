@@ -2,7 +2,7 @@ module Hacl.Spec.Curve25519.Field51.Definition
 
 open Lib.Sequence
 open Lib.IntTypes
-open NatPrime
+open Spec.Curve25519
 
 #reset-options "--z3rlimit 20"
 
@@ -117,5 +117,5 @@ let wide_as_nat5 f =
   uint_v s0 + (uint_v s1 * pow51) + (uint_v s2 * pow51 * pow51) +
     (uint_v s3 * pow51 * pow51 * pow51) + (uint_v s4 * pow51 * pow51 * pow51 * pow51)
 
-let feval (f:felem5) : GTot felem = (as_nat5 f) % prime
-let feval_wide (f:felem_wide5) : GTot felem = (wide_as_nat5 f) % prime
+let feval (f:felem5) : GTot elem = (as_nat5 f) % prime
+let feval_wide (f:felem_wide5) : GTot elem = (wide_as_nat5 f) % prime

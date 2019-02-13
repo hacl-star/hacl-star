@@ -22,11 +22,6 @@ let ( +% ) = fadd
 let ( -% ) = fsub
 let ( *% ) = fmul
 
-val pow: a:elem -> b:nat -> res:elem
-let rec pow a b =
-  if b = 0 then 1
-  else fmul a (pow a (b - 1))
-
 val fpow: a:elem -> b:pos -> Tot (res:elem) (decreases b)
 let rec fpow a b =
   if b = 1 then a
@@ -65,10 +60,10 @@ let add_and_double q nq nqp1 =
   let cb = c *% b in
   let x_3 = da +% cb in
   let z_3 = da -% cb in
-  let aa = a **% 2 in
-  let bb = b **% 2 in
-  let x_3 = x_3 **% 2 in
-  let z_3 = z_3 **% 2 in
+  let aa = a *% a in
+  let bb = b *% b in
+  let x_3 = x_3 *% x_3 in
+  let z_3 = z_3 *% z_3 in
   let e = aa -% bb in
   let e121665 = e *% 121665 in
   let aa_e121665 = e121665 +% aa in
@@ -81,8 +76,8 @@ let double nq =
   let x_2, z_2 = nq in
   let a  = x_2 +% z_2 in
   let b  = x_2 -% z_2 in
-  let aa = a **% 2 in
-  let bb = b **% 2 in
+  let aa = a *% a in
+  let bb = b *% b in
   let e = aa -% bb in
   let e121665 = e *% 121665 in
   let aa_e121665 = e121665 +% aa in

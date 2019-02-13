@@ -2,20 +2,22 @@ module Hacl.Spec.Curve25519.Finv
 
 open FStar.Mul
 open Lib.IntTypes
-open NatPrime
+open Spec.Curve25519
 
-#reset-options "--z3rlimit 50 --max_fuel 2 --max_ifuel 0 --using_facts_from '* -FStar.Seq'"
+#reset-options "--z3rlimit 50 --max_fuel 2 --using_facts_from '* -FStar.Seq'"
 
-let one:felem =
+let fsqr x = fmul x x
+
+let one:elem =
   assert_norm (1 < prime);
   1
 
-val pow: a:felem -> b:nat -> res:felem
+val pow: a:elem -> b:nat -> res:elem
 let rec pow a b =
   if b = 0 then 1
   else fmul a (pow a (b - 1))
 
-val lemma_pow_one: x:felem
+val lemma_pow_one: x:elem
   -> Lemma
     (requires True)
     (ensures  x == pow x 1)
@@ -23,7 +25,7 @@ let lemma_pow_one x =
   assert (pow x 1 == fmul x 1);
   FStar.Math.Lemmas.modulo_lemma x prime
 
-val lemma_fmul_assoc: a:felem -> b:felem -> c:felem
+val lemma_fmul_assoc: a:elem -> b:elem -> c:elem
   -> Lemma
     (fmul (fmul a b) c == fmul a (fmul b c))
 let lemma_fmul_assoc a b c =
@@ -32,7 +34,7 @@ let lemma_fmul_assoc a b c =
   FStar.Math.Lemmas.paren_mul_right a b c;
   FStar.Math.Lemmas.lemma_mod_mul_distr_r a (b * c) prime
 
-val lemma_pow_add: x:felem -> n:nat -> m:nat
+val lemma_pow_add: x:elem -> n:nat -> m:nat
   -> Lemma
     (requires True)
     (ensures  fmul (pow x n) (pow x m) == pow x (n + m))
@@ -43,7 +45,7 @@ let rec lemma_pow_add x n m =
     lemma_fmul_assoc x (pow x (n - 1)) (pow x m)
   end
 
-val lemma_pow_mul: x:felem -> n:nat -> m:nat
+val lemma_pow_mul: x:elem -> n:nat -> m:nat
   -> Lemma
     (requires True)
     (ensures  pow (pow x n) m == pow x (n * m))
@@ -59,11 +61,57 @@ let rec lemma_pow_mul x n m =
     assert (pow (pow x n) m == pow x (n + n * (m - 1)))
   end
 
+val lemma_pow_double: a:elem -> b:nat ->
+  Lemma
+    (requires True)
+    (ensures (pow (a *% a) b == pow a (b + b)))
+  (decreases b)
+let rec lemma_pow_double a b =
+  if b = 0 then ()
+  else begin
+    lemma_pow_double a (b - 1);
+    assert (pow (a *% a) b == fmul (a *% a) (pow (a *% a) (b - 1)));
+    assert (pow (a *% a) b == fmul (a *% a) (pow a (b + b - 2)));
+    lemma_pow_one a;
+    lemma_pow_one a;
+    //assert (pow (a *% a) b == fmul (fmul (pow a 1) (pow a 1)) (pow a (b + b - 2)));
+    lemma_pow_add a 1 1;
+    //assert (pow (a *% a) b == fmul (pow a 2) (pow a (b + b - 2)));
+    lemma_pow_add a 2 (b + b - 2)
+    //assert (pow (a *% a) b == pow a (b + b))
+  end
+
+val lemma_fpow_is_pow:a:elem -> b:pos ->
+  Lemma
+    (requires True)
+    (ensures (fpow a b == pow a b))
+  (decreases b)
+let rec lemma_fpow_is_pow a b =
+  if b = 1 then ()
+  else begin
+    if b % 2 = 0 then begin
+      assert (fpow a b == fpow (a *% a) (b / 2));
+      lemma_fpow_is_pow (a *% a) (b / 2);
+      assert (fpow a b == pow (a *% a) (b / 2));
+      lemma_pow_double a (b / 2) end
+    else begin
+      FStar.Math.Lemmas.euclidean_division_definition b 2;
+      //assert (b == b / 2 * 2 + b % 2);
+      assert (b > 1 /\ b % 2 = 1);
+      assert (fpow a b == fmul a (fpow (a *% a) (b / 2)));
+      lemma_fpow_is_pow (a *% a) (b / 2);
+      //assert (fpow (a *% a) (b / 2) == pow (a *% a) (b / 2));
+      assert (fpow a b == fmul a (pow (a *% a) (b / 2)));
+      lemma_pow_double a (b / 2);
+      //assert (fpow a b == fmul a (pow a (b / 2 * 2)));
+      lemma_pow_one a;
+      lemma_pow_add a 1 (b / 2 * 2) end
+    end
 
 val fsquare_times:
-    inp:felem
+    inp:elem
   -> n:size_nat{0 < n}
-  -> out:felem{out == pow inp (pow2 n)}
+  -> out:elem{out == pow inp (pow2 n)}
 let fsquare_times inp n =
   let out = fsqr inp in
   lemma_pow_one inp;
@@ -71,7 +119,7 @@ let fsquare_times inp n =
   assert_norm (pow2 1 = 2);
   assert (out == pow inp (pow2 1));
   let out =
-    Lib.LoopCombinators.repeati_inductive #felem (n - 1)
+    Lib.LoopCombinators.repeati_inductive #elem (n - 1)
     (fun i out -> out == pow inp (pow2 (i + 1)))
     (fun i out ->
       assert (out == pow inp (pow2 (i + 1)));
@@ -95,8 +143,8 @@ let pow_t0:nat =
 
 #set-options "--max_fuel 0 --max_ifuel 0"
 
-val finv0: inp:felem ->
-  Pure (tuple2 felem felem)
+val finv0: inp:elem ->
+  Pure (tuple2 elem elem)
   (requires True)
   (ensures fun (a, t0) ->
     a == pow inp 11 /\
@@ -183,7 +231,7 @@ let finv0 i =
   assert (t0 == pow i (pow2 255 - pow2 5));
   a, t0
 
-val finv: inp:felem -> out:felem{out == pow inp (pow2 255 - 21)}
+val finv: inp:elem -> out:elem{out == pow inp (pow2 255 - 21)}
 let finv i =
   let a, t0 = finv0 i in
   (* 2^255 - 21 *) let o = fmul t0 a in
