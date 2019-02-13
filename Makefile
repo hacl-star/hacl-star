@@ -190,6 +190,8 @@ VALE_ROOTS = $(wildcard $(addsuffix /*.vaf,$(VALE_DIRS)))
 # Target F* files stemming from Vale files
 VALE_FSTS = $(call to-obj-dir,$(patsubst %.vaf,%.fst,$(VALE_ROOTS)))
 
+.PRECIOUS: %.fst %.fsti
+
 # The complete set of F* files, both hand-written and Vale-generated. Note that
 # this is only correct in the second stage of the build.
 FSTAR_ROOTS = $(wildcard $(addsuffix /*.fsti,$(DIRS)) $(addsuffix /*.fst,$(DIRS))) \
