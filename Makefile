@@ -30,7 +30,7 @@
 #   verifies all .fst files, both hand-written and generated.
 #
 # To generate a Makefile for the interactive mode, use:
-# - SKIPDEPEND=1 make foo/bar/Makefile
+# - make foo/bar/Makefile
 
 #########################
 # Catching setup errors #
@@ -244,6 +244,8 @@ else ifeq ($(MAKECMDGOALS),all)
 else ifeq ($(MAKECMDGOALS),vale-verify)
   SKIPDEPEND=1
 else ifeq ($(MAKECMDGOALS),ci)
+  SKIPDEPEND=1
+else ifeq (,$(filter-out %/Makefile,$(MAKECMDGOALS)))
   SKIPDEPEND=1
 endif
 
