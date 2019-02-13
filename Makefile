@@ -47,6 +47,10 @@ endif
 # here.
 export HACL_HOME=$(CURDIR)
 
+ifeq (Windows_NT,$(OS))
+  HACL_HOME := $(shell cygpath -m $(HACL_HOME))
+endif
+
 
 ##########################
 # Top-level entry points #
