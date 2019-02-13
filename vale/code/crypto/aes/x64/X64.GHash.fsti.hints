@@ -7,19 +7,23 @@
       1,
       0,
       [
-        "@MaxIFuel_assumption", "@query", "bool_inversion", "bool_typing",
-        "equation_Prims.nat", "equation_Types_s.quad32",
-        "equation_Words_s.nat32", "function_token_typing_Words_s.nat32",
-        "int_inversion", "kinding_Words_s.four@tok",
-        "lemma_FStar.Seq.Base.lemma_len_slice", "primitive_Prims.op_AmpAmp",
-        "primitive_Prims.op_LessThan", "primitive_Prims.op_LessThanOrEqual",
+        "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565", "bool_inversion",
+        "bool_typing", "equation_Prims.nat", "equation_Types_s.quad32",
+        "equation_Words_s.nat32",
+        "function_token_typing_Prims.__cache_version_number__",
+        "function_token_typing_Words_s.nat32", "int_inversion",
+        "kinding_Words_s.four@tok", "lemma_FStar.Seq.Base.lemma_len_slice",
+        "primitive_Prims.op_AmpAmp", "primitive_Prims.op_LessThan",
+        "primitive_Prims.op_LessThanOrEqual",
+        "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_FStar.Seq.Base_Tm_refine_aebc5aa9049e78f605051015a3436e68",
-        "refinement_interpretation_Prims_Tm_refine_a4038d5aed1633b5ecbb4e499b1c66ad"
+        "refinement_interpretation_Tm_refine_aebc5aa9049e78f605051015a3436e68",
+        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-      "2227cd8641e5138b883a4097cbe89ebc"
+      "0265c0619f2ba728ef4ad06379f1b75a"
     ],
     [
       "X64.GHash.va_wpProof_compute_ghash_incremental_register",
@@ -28,10 +32,10 @@
       0,
       [
         "@MaxIFuel_assumption", "@query", "equation_Prims.squash",
-        "refinement_interpretation_Prims_Tm_refine_8d65e998a07dd53ec478e27017d9dba5"
+        "refinement_interpretation_Tm_refine_8d65e998a07dd53ec478e27017d9dba5"
       ],
       0,
-      "ab674d5e0311e8dbc2a4126f20e48a11"
+      "5c66eb0d393c476c115047eebf891890"
     ],
     [
       "X64.GHash.va_lemma_ghash_incremental_bytes_no_extra",
@@ -40,7 +44,7 @@
       0,
       [ "@query" ],
       0,
-      "e604f6c0e41dac5212b677c99b30d33c"
+      "0ee99ac7dcb7b11c4f75ee964434f90b"
     ],
     [
       "X64.GHash.va_wp_ghash_incremental_bytes_no_extra",
@@ -49,7 +53,7 @@
       0,
       [ "@query" ],
       0,
-      "8ea91fda08100197aae581ce63205952"
+      "060882848a3c9b41f2cfd0e39387dc57"
     ],
     [
       "X64.GHash.va_wpProof_ghash_incremental_bytes_no_extra",
@@ -58,10 +62,10 @@
       0,
       [
         "@MaxIFuel_assumption", "@query", "equation_Prims.squash",
-        "refinement_interpretation_Prims_Tm_refine_8d65e998a07dd53ec478e27017d9dba5"
+        "refinement_interpretation_Tm_refine_8d65e998a07dd53ec478e27017d9dba5"
       ],
       0,
-      "40d963aab02437ba26f95e079cc1bfee"
+      "6418bf475556f12f74ea1afe7a64fa1e"
     ],
     [
       "X64.GHash.va_lemma_ghash_incremental_bytes_extra",
@@ -70,7 +74,7 @@
       0,
       [ "@query" ],
       0,
-      "fd1916501e0f75278fc6ae87a0a76d3b"
+      "367f4c45c7235526b7a0f8216fd1049d"
     ],
     [
       "X64.GHash.va_wp_ghash_incremental_bytes_extra",
@@ -79,7 +83,7 @@
       0,
       [ "@query" ],
       0,
-      "f7c512eb45311bb73b3315146778c9b8"
+      "65ddc4d8f67cc2ef96769d46dfb39481"
     ],
     [
       "X64.GHash.va_wpProof_ghash_incremental_bytes_extra",
@@ -88,10 +92,10 @@
       0,
       [
         "@MaxIFuel_assumption", "@query", "equation_Prims.squash",
-        "refinement_interpretation_Prims_Tm_refine_8d65e998a07dd53ec478e27017d9dba5"
+        "refinement_interpretation_Tm_refine_8d65e998a07dd53ec478e27017d9dba5"
       ],
       0,
-      "39e5d9606b56440cab2fae6ed18fad71"
+      "226cf2dbc871ce8e5def7d16de4e3588"
     ],
     [
       "X64.GHash.va_lemma_ghash_incremental_bytes",
@@ -100,7 +104,7 @@
       0,
       [ "@query" ],
       0,
-      "e754ae7d22d4956dc51ea7cbd3f26760"
+      "c8d277d0415fcedea57618121a7f6e78"
     ],
     [
       "X64.GHash.va_wp_ghash_incremental_bytes",
@@ -109,7 +113,7 @@
       0,
       [ "@query" ],
       0,
-      "28af41e3ccde0f25762312f11a766e03"
+      "c0acd024d34cc4262b493b2f6f53dacc"
     ],
     [
       "X64.GHash.va_wpProof_ghash_incremental_bytes",
@@ -118,10 +122,10 @@
       0,
       [
         "@MaxIFuel_assumption", "@query", "equation_Prims.squash",
-        "refinement_interpretation_Prims_Tm_refine_8d65e998a07dd53ec478e27017d9dba5"
+        "refinement_interpretation_Tm_refine_8d65e998a07dd53ec478e27017d9dba5"
       ],
       0,
-      "936b5e4bc588bfe76f3aebea6a5e2b3c"
+      "9df5cdcebe93201826c6a4cf9e184fac"
     ]
   ]
 ]
