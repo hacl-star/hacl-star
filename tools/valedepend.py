@@ -7,8 +7,8 @@ import os, os.path
 import traceback
 
 if sys.version_info < (3, 3):
-  print('Requires Python version >= 3.3, found version ' + sys.version_info)
-  exit(1)
+    print('Requires Python version >= 3.3, found version ' + sys.version_info)
+    exit(1)
 
 ##################################################################################################
 #
@@ -44,13 +44,10 @@ vale_fstar_re = re.compile(r'\{\:\s*fstar\s*\}')
 vale_from_base_re = re.compile(r'\{\:\s*from\s*BASE\s*\}')
 vale_import_re = re.compile(r'module\s+[a-zA-Z0-9_]+\s*[=]\s*([a-zA-Z0-9_.]+)')
 
-cwd = os.path.normpath(os.getcwd()).replace('\\', '/')
-
 def norm(path):
     p = os.path.normpath(path).replace('\\', '/')
-    return p
-    if p.startswith(cwd):
-        p = p[len(cwd) + 1:]
+    if path.startswith('./') and not p.startswith('./'):
+        p = './' + p
     return p
 
 # Drop the '.vaf', '.fst', etc.
@@ -60,10 +57,10 @@ def file_drop_extension(file):
 # Given source file name, return file name in object directory
 def to_obj_dir(file):
     file = norm(file)
-    if file.startswith('obj'):
-        return norm(file)
+    if file.startswith('./obj'):
+        return file
     else:
-        return norm(os.path.join('obj', os.path.basename(file)))
+        return norm(os.path.join('./obj', os.path.basename(file)))
 
 def depends(target, source):
     target = norm(target)

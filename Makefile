@@ -41,16 +41,6 @@ ifeq (,$(VALE_HOME))
   $(error Please define VALE_HOME, possibly using cygpath -m)
 endif
 
-# The default setting of HACL_HOME=. doesn't work because valedepend.py will
-# normalize file paths to trim the leading ./, which results in make being
-# confused between ./foo/bar.fst and foo/bar.fst. It's ok to use absolute paths
-# here.
-export HACL_HOME=$(CURDIR)
-
-ifeq (Windows_NT,$(OS))
-  HACL_HOME := $(shell cygpath -m $(HACL_HOME))
-endif
-
 
 ##########################
 # Top-level entry points #
@@ -195,7 +185,7 @@ ifndef MAKE_RESTARTS
 
 .vale-depend: .fstar-depend-make .FORCE
 	$(call run-with-log,\
-	  $(PYTHON3) tools/valedepend.py \
+	  "$(PYTHON3)" tools/valedepend.py \
 	    $(addprefix -include ,$(INCLUDES)) \
 	    $(addprefix -in ,$(VALE_ROOTS)) \
 	    -dep $< \
