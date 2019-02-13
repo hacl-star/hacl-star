@@ -71,7 +71,7 @@ test-ml: $(subst .,_,$(patsubst %.fst,test-ml-%,$(notdir $(wildcard specs/tests/
 
 ci:
 	NOSHORTLOG=1 $(MAKE) vale-fst
-	FSTAR_DEPEND_FLAGS="--warn_error +285" NOSHORTLOG=1 $(MAKE) all test
+	FSTAR_DEPEND_FLAGS="--warn_error +285" NOSHORTLOG=1 $(MAKE) all_ test
 
 # Backwards-compat target
 .PHONY: secure_api.old
