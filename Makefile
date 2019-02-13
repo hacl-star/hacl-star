@@ -28,6 +28,13 @@
 # - hacl-verify: non-staged target for reverifying HACL* files
 # - verify: UNSTAGED, may only be invoked after a successful run of vale-fst,
 #   verifies all .fst files, both hand-written and generated.
+#
+# To generate a Makefile for the interactive mode, use:
+# - SKIPDEPEND=1 make foo/bar/Makefile
+
+#########################
+# Catching setup errors #
+#########################
 
 # This was needed once because of the shortest stem rule. I don't think it's
 # needed anymore, but better be safe.
@@ -41,6 +48,29 @@ ifeq (,$(VALE_HOME))
   $(error Please define VALE_HOME, possibly using cygpath -m)
 endif
 
+ifeq (,$(wildcard $(VALE_HOME)/bin/vale.exe))
+  $(error $$VALE_HOME/bin/vale.exe does not exist (VALE_HOME=$(VALE_HOME)))
+endif
+
+# Backwards-compat, remove
+ifneq (,$(MLCRYPTO_HOME))
+OPENSSL_HOME 	:= $(MLCRYPTO_HOME)/openssl
+endif
+
+ifeq (,$(OPENSSL_HOME))
+  $(error Please define MLCRYPTO_HOME, possibly using cygpath -m)
+endif
+
+ifeq (,$(OPENSSL_HOME)/libcrypto.a)
+  $(error $$OPENSSL_HOME/libcrypto.a does not exist (OPENSSL_HOME=$(OPENSSL_HOME)))
+endif
+
+
+# The default setting of HACL_HOME=. doesn't work because valedepend.py will
+# normalize file paths to trim the leading ./, which results in make being
+# confused between ./foo/bar.fst and foo/bar.fst. It's ok to use absolute paths
+# here.
+export HACL_HOME=$(CURDIR)
 
 ##########################
 # Top-level entry points #
@@ -201,18 +231,18 @@ endif
 # to trigger their re-generation (will be done later through recursive (NOT
 # restarting)) make invocations.
 ifeq ($(MAKECMDGOALS),clean)
-  SKIP=1
+  SKIPDEPEND=1
 else ifeq ($(MAKECMDGOALS),)
-  SKIP=1
+  SKIPDEPEND=1
 else ifeq ($(MAKECMDGOALS),all)
-  SKIP=1
+  SKIPDEPEND=1
 else ifeq ($(MAKECMDGOALS),vale-verify)
-  SKIP=1
+  SKIPDEPEND=1
 else ifeq ($(MAKECMDGOALS),ci)
-  SKIP=1
+  SKIPDEPEND=1
 endif
 
-ifndef SKIP
+ifndef SKIPDEPEND
 include .fstar-depend-full
 include .vale-depend
 endif
@@ -634,11 +664,6 @@ compile-%: dist/Makefile dist/%/Makefile.basic
 # C tests #
 ###########
 
-# Backwards-compat, remove
-ifneq (,$(MLCRYPTO_HOME))
-OPENSSL_HOME 	:= $(MLCRYPTO_HOME)/openssl
-endif
-
 ifeq ($(OS),Windows_NT)
 OPENSSL_HOME	:= $(shell cygpath -u $(OPENSSL_HOME))
 endif
@@ -681,3 +706,12 @@ dist/test/ml/%.exe: $(ALL_CMX_FILES) dist/test/ml/%_AutoTest.ml
 
 test-ml-%: dist/test/ml/%.exe
 	$<
+
+
+########
+# Misc #
+########
+
+%/Makefile:
+	echo "HACL_HOME=$(shell realpath . --relative-to $(dir $@))" > $@
+	echo "include \$$(HACL_HOME)/Makefile.common" >> $@
