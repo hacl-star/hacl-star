@@ -41,6 +41,10 @@ if [[ $OS == "Windows_NT" ]]; then
   done
 fi
 
+if $found; then
+  exit 0
+fi
+
 for c in $candidates; do
   if try $c; then
     found=true
