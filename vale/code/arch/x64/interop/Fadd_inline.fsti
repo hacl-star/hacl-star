@@ -1,4 +1,4 @@
-module Fast_inline
+module Fadd_inline
 
 open X64.CPU_Features_s
 open FStar.HyperStack.ST
@@ -22,7 +22,6 @@ let as_nat (b:B.buffer UInt64.t{B.length b == 4}) (h:HS.mem) : GTot nat =
   let s3 = UInt64.v (Seq.index s 3) in
   pow2_four s0 s1 s2 s3
 
-[@ (CCConv "stdcall") ]
 val add1
   (out:u256)
   (f1:u256)
