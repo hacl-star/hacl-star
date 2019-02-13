@@ -65,12 +65,9 @@ ifeq (,$(OPENSSL_HOME)/libcrypto.a)
   $(error $$OPENSSL_HOME/libcrypto.a does not exist (OPENSSL_HOME=$(OPENSSL_HOME)))
 endif
 
-
-# The default setting of HACL_HOME=. doesn't work because valedepend.py will
-# normalize file paths to trim the leading ./, which results in make being
-# confused between ./foo/bar.fst and foo/bar.fst. It's ok to use absolute paths
-# here.
-export HACL_HOME=$(CURDIR)
+ifeq (Windows_NT,$(OS))
+  HACL_HOME := $(shell cygpath -m $(HACL_HOME))
+endif
 
 ##########################
 # Top-level entry points #
