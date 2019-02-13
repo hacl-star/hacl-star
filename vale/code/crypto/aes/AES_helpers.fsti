@@ -141,3 +141,12 @@ let lemma_incr_msb (orig ctr ctr':quad32) (increment:nat) : Lemma
   =
   admit()
           
+let lemma_msb_in_bounds (ctr_BE inout5 t1':quad32) (counter:nat) : Lemma
+  (requires inout5 == reverse_bytes_quad32 (GCTR_s.inc32 ctr_BE 5) /\
+            counter == ctr_BE.lo0 % 256 /\
+            counter + 6 < 256 /\
+            t1' == Arch.Types.add_wrap_quad32 inout5 (Mkfour 0 0 0 0x10000000))
+  (ensures  t1' == reverse_bytes_quad32 (GCTR_s.inc32 ctr_BE 6))
+  =
+  admit()
+            

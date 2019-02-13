@@ -162,8 +162,81 @@ procedure {:quick} handle_ctr32(
     VPshufb(T1, T1, Ii);            // # next counter value
 }
 
-#reset-options "--z3rlimit 20"
-procedure {:quick} {:verify true} loop6x_preamble(
+#reset-options ""
+procedure {:quick} loop6x_ctr_update(
+    inline alg:algorithm,  
+    ghost key_words:seq(nat32),
+    ghost round_keys:seq(quad32),
+    ghost keys_b:buffer128,
+
+    ghost ctr_BE:quad32
+    )
+    lets
+//      inp @= rdi; outp @= rsi; len @= rdx; key @= rcx; ivp @= r8; Xip @= r9;
+        key @= rcx; 
+        Ii @= xmm0; T1 @= xmm1; T2 @= xmm2;
+        Z1 @= xmm5; Z2 @= xmm6; 
+        inout0 @= xmm9; inout1 @= xmm10; inout2 @= xmm11; inout3 @= xmm12;
+        inout4 @= xmm13; inout5 @= xmm14; rndkey @= xmm15;
+//      counter @= rbx; rounds @= rbp; ret @= r10; constp @= r11; in0 @= r14; end0 @= r15;
+        counter @= rbx; constp @= r11; 
+    reads
+        key; rndkey;
+
+    modifies
+        counter; constp;
+        Ii; T1; T2; Z1; Z2; inout0; inout1; inout2; inout3; inout4; inout5; 
+        efl;
+
+    requires
+        // AES reqs
+        aes_reqs(alg, key_words, round_keys, keys_b, key, mem, memTaint);
+        //rndkey == index(round_keys, 0);
+
+        // Counter requirements
+        T2 == Mkfour(0, 0, 0, 0x10000000);
+
+        T1 == reverse_bytes_quad32(inc32(ctr_BE, 0));
+        //0 <= counter < 256;  // Implied by next line
+        counter == ctr_BE.lo0 % 256;
+
+        //inout5.hi3 + 0x10000000 < pow2_32;
+
+        inout0 == quad32_xor(reverse_bytes_quad32(inc32(ctr_BE, 0)), rndkey);   
+
+        counter + 6 < 256 ==> inout1 == reverse_bytes_quad32(inc32(ctr_BE, 1));
+        counter + 6 < 256 ==> inout2 == reverse_bytes_quad32(inc32(ctr_BE, 2));
+        counter + 6 < 256 ==> inout3 == reverse_bytes_quad32(inc32(ctr_BE, 3));
+        counter + 6 < 256 ==> inout4 == reverse_bytes_quad32(inc32(ctr_BE, 4));
+        counter + 6 < 256 ==> inout5 == reverse_bytes_quad32(inc32(ctr_BE, 5));
+    ensures
+        T1 == reverse_bytes_quad32(inc32(ctr_BE, 6));
+        0 <= counter < 256;
+        counter == inc32(ctr_BE, 6).lo0 % 256;
+
+        inout0 == quad32_xor(reverse_bytes_quad32(inc32(ctr_BE, 0)), rndkey);
+        inout1 == quad32_xor(reverse_bytes_quad32(inc32(ctr_BE, 1)), rndkey);
+        inout2 == quad32_xor(reverse_bytes_quad32(inc32(ctr_BE, 2)), rndkey);
+
+        inout3 == reverse_bytes_quad32(inc32(ctr_BE, 3));
+        inout4 == reverse_bytes_quad32(inc32(ctr_BE, 4));
+        inout5 == reverse_bytes_quad32(inc32(ctr_BE, 5));
+{
+    // OpenSSL does this with "add `6<<24`,counter", followed by jc, 
+    // which handles wrap and control flow more efficiently
+    Add64(counter, 6);      
+    if (counter >= 256) {
+        handle_ctr32(ctr_BE); //, counter);
+        Sub64(counter, 256);
+    } else {
+        VPaddd(T1, T2, inout5); // OpenSSL uses VPaddb
+        VPxor(inout1, inout1, rndkey); 
+        VPxor(inout2, inout2, rndkey); 
+        lemma_msb_in_bounds(ctr_BE, inout5, T1, old(counter));
+    }
+}
+
+procedure {:quick} loop6x_preamble(
     inline alg:algorithm,  // OpenSSL includes the number of rounds (nr) as a dynamic parameter (stored with the key).  Saves code space but adds extra instructions to the fast path.  Maybe branch predictor is good enough for it not to matter
     ghost iv_b:buffer128,
 
@@ -181,14 +254,14 @@ procedure {:quick} {:verify true} loop6x_preamble(
         inout0 @= xmm9; inout1 @= xmm10; inout2 @= xmm11; inout3 @= xmm12;
         inout4 @= xmm13; inout5 @= xmm14; rndkey @= xmm15;
 //      counter @= rbx; rounds @= rbp; ret @= r10; constp @= r11; in0 @= r14; end0 @= r15;
-        constp @= r11; 
+        counter @= rbx; constp @= r11; 
     reads
         key; ivp;
         rndkey;
         memTaint;
 
     modifies
-        constp;
+        counter; constp;
         Ii; T1; T2; Z1; Z2; inout0; inout1; inout2; inout3; inout4; inout5; 
         mem; efl;
 
@@ -201,10 +274,20 @@ procedure {:quick} {:verify true} loop6x_preamble(
         aes_reqs(alg, key_words, round_keys, keys_b, key, mem, memTaint);
         rndkey == index(round_keys, 0);
 
-        T1 == reverse_bytes_quad32(ctr_BE);
+        // Counter requirements
         T2 == Mkfour(0, 0, 0, 0x10000000);
-        inout5 == reverse_bytes_quad32(inc32(ctr_BE, 5));
-        inout5.hi3 + 0x10000000 < pow2_32;
+
+        T1 == reverse_bytes_quad32(inc32(ctr_BE, 0));
+        counter == ctr_BE.lo0 % 256;
+
+        inout0 == quad32_xor(reverse_bytes_quad32(inc32(ctr_BE, 0)), rndkey);   
+
+        counter + 6 < 256 ==> inout1 == reverse_bytes_quad32(inc32(ctr_BE, 1));
+        counter + 6 < 256 ==> inout2 == reverse_bytes_quad32(inc32(ctr_BE, 2));
+        counter + 6 < 256 ==> inout3 == reverse_bytes_quad32(inc32(ctr_BE, 3));
+        counter + 6 < 256 ==> inout4 == reverse_bytes_quad32(inc32(ctr_BE, 4));
+        counter + 6 < 256 ==> inout5 == reverse_bytes_quad32(inc32(ctr_BE, 5));
+
 
         //inout0 == quad32_xor(reverse_bytes_quad32(inc32(ctr_BE, 0)), rndkey);   
         inout1 ==            reverse_bytes_quad32(inc32(ctr_BE, 1));
@@ -218,6 +301,7 @@ procedure {:quick} {:verify true} loop6x_preamble(
 
         // Semantics
 
+        // IO
         inout0 == rounds_opaque(old(inout0), round_keys, 1);
         inout1 == rounds_opaque(quad32_xor(reverse_bytes_quad32(inc32(ctr_BE, 1)), rndkey), round_keys, 1);
         inout2 == rounds_opaque(quad32_xor(reverse_bytes_quad32(inc32(ctr_BE, 2)), rndkey), round_keys, 1);
@@ -225,8 +309,21 @@ procedure {:quick} {:verify true} loop6x_preamble(
         inout4 == rounds_opaque(quad32_xor(reverse_bytes_quad32(inc32(ctr_BE, 4)), rndkey), round_keys, 1);
         inout5 == rounds_opaque(quad32_xor(reverse_bytes_quad32(inc32(ctr_BE, 5)), rndkey), round_keys, 1);
 
+        // Next counter
         buffer128_read(iv_b, 0, mem) == reverse_bytes_quad32(inc32(ctr_BE, 6));
+
+        // Counter details
+        0 <= counter < 256;
+        //counter == (ctr_BE.lo0 + 6) % 256;
+        counter == inc32(ctr_BE, 6).lo0 % 256;
 {
+    loop6x_ctr_update(alg, key_words, round_keys, keys_b, ctr_BE);
+
+    init_rounds_opaque(inout0, round_keys);
+    init_rounds_opaque(inout1, round_keys);
+    init_rounds_opaque(inout2, round_keys);
+
+    /*
     init_rounds_opaque(inout0, round_keys);
 
     if (key > 72) {         // TODO: FIX!
@@ -239,6 +336,7 @@ procedure {:quick} {:verify true} loop6x_preamble(
     }
     init_rounds_opaque(inout1, round_keys);
     init_rounds_opaque(inout2, round_keys);
+    */
 
     Store128_buffer(ivp, T1, 0, Secret, iv_b, 0);   // # save next counter value
     VPxor(inout3, inout3, rndkey); init_rounds_opaque(inout3, round_keys);
@@ -684,7 +782,7 @@ procedure {:quick} loop6x_final(
         Z3   == quad32_xor(rk, plain4);
         Hkey == quad32_xor(rk, plain5);
 
-        buffer128_read(iv_b, 0, mem).hi3 + (5*0x10000000) < pow2_32;     // counter will not wrap
+        //buffer128_read(iv_b, 0, mem).hi3 + (5*0x10000000) < pow2_32;     // counter will not wrap
         buffer128_read(iv_b, 0, mem) == reverse_bytes_quad32(ctr_orig);
 
     ensures
@@ -709,11 +807,12 @@ procedure {:quick} loop6x_final(
         T2 == Mkfour(0, 0, 0, 0x10000000);
 
         T1   == old(buffer128_read(iv_b, 0, mem));
-        Ii   == reverse_bytes_quad32(inc32(ctr_orig, 1));
-        Z1   == reverse_bytes_quad32(inc32(ctr_orig, 2));
-        Z2   == reverse_bytes_quad32(inc32(ctr_orig, 3));
-        Z3   == reverse_bytes_quad32(inc32(ctr_orig, 4));
-        Hkey == reverse_bytes_quad32(inc32(ctr_orig, 5));
+        let ctr := ctr_orig.lo0 % 256;
+        ctr + 6 < 256 ==> Ii   == reverse_bytes_quad32(inc32(ctr_orig, 1));     // FAILING.  TODO: FIX ME!
+        ctr + 6 < 256 ==> Z1   == reverse_bytes_quad32(inc32(ctr_orig, 2));
+        ctr + 6 < 256 ==> Z2   == reverse_bytes_quad32(inc32(ctr_orig, 3));
+        ctr + 6 < 256 ==> Z3   == reverse_bytes_quad32(inc32(ctr_orig, 4));
+        ctr + 6 < 256 ==> Hkey == reverse_bytes_quad32(inc32(ctr_orig, 5));
 {
     lemma_quad32_xor_commutes_forall();
     Load128_buffer(T1, ivp, 0, Secret, iv_b, 0); // # load next counter value
@@ -752,6 +851,8 @@ procedure {:quick} loop6x_final(
 
     lemma_reverse_bytes64(inb, old(buffer128_read(stack_b, 7, mem)), buffer128_read(stack_b, 7, mem));
 
+
+    // TODO: Adjust precondition for this or add more preconditions to the procedure
     lemma_incr_msb(ctr_orig, T1, Ii, 1);
     lemma_incr_msb(ctr_orig, T1, Z1, 2);
     lemma_incr_msb(ctr_orig, T1, Z2, 3);
@@ -839,14 +940,14 @@ procedure {:quick} loop6x(
         inout0 @= xmm9; inout1 @= xmm10; inout2 @= xmm11; inout3 @= xmm12;
         inout4 @= xmm13; inout5 @= xmm14; rndkey @= xmm15;
 //      counter @= rbx; rounds @= rbp; ret @= r10; constp @= r11; in0 @= r14; end0 @= r15;
-        constp @= r11; in0 @= r14; 
+        counter @= rbx; constp @= r11; in0 @= r14; 
 
     reads
         key; ivp; rsp; in0;
         memTaint;
 
     modifies
-        inp; outp; len; constp; r12; r13; 
+        inp; outp; len; counter; constp; r12; r13; 
         Ii; T1; T2; Hkey; Z1; Z2; Z3; inout0; inout1; inout2; inout3; inout4; inout5; rndkey;
         mem; efl;
 
@@ -875,11 +976,18 @@ procedure {:quick} loop6x(
         aes_reqs(alg, key_words, round_keys, keys_b, key, mem, memTaint);
         rndkey == index(round_keys, 0);
 
+        // Counter requirements
+        /*
         // TODO: Clean this up
         inout5.hi3 + 0x10000000 < pow2_32;
         reverse_bytes_quad32(inc32(ctr_BE, 6)).hi3 + (5*0x10000000) < pow2_32;
 
         T1 == reverse_bytes_quad32(ctr_BE);
+        */
+
+        T2 == Mkfour(0, 0, 0, 0x10000000);
+        T1 == reverse_bytes_quad32(inc32(ctr_BE, 0));
+        counter == ctr_BE.lo0 % 256;
 
         inout0 == quad32_xor(reverse_bytes_quad32(inc32(ctr_BE, 0)), rndkey);   
         inout1 ==            reverse_bytes_quad32(inc32(ctr_BE, 1));
@@ -899,11 +1007,11 @@ procedure {:quick} loop6x(
         rndkey == index(round_keys, 0);
 
         T1   == reverse_bytes_quad32(inc32(ctr_BE, 6));
-        Ii   == reverse_bytes_quad32(inc32(ctr_BE, 7));
-        Z1   == reverse_bytes_quad32(inc32(ctr_BE, 8));
-        Z2   == reverse_bytes_quad32(inc32(ctr_BE, 9));
-        Z3   == reverse_bytes_quad32(inc32(ctr_BE,10));
-        Hkey == reverse_bytes_quad32(inc32(ctr_BE,11));
+        counter + 6 < 256 ==> Ii   == reverse_bytes_quad32(inc32(ctr_BE, 7));
+        counter + 6 < 256 ==> Z1   == reverse_bytes_quad32(inc32(ctr_BE, 8));
+        counter + 6 < 256 ==> Z2   == reverse_bytes_quad32(inc32(ctr_BE, 9));
+        counter + 6 < 256 ==> Z3   == reverse_bytes_quad32(inc32(ctr_BE,10));
+        counter + 6 < 256 ==> Hkey == reverse_bytes_quad32(inc32(ctr_BE,11));
 
         len == 0 ==> inout0 == quad32_xor(old(buffer128_read(in_b, 0, mem)), aes_encrypt_BE(alg, key_words, inc32(ctr_BE, 0)));
         len == 0 ==> inout1 == quad32_xor(old(buffer128_read(in_b, 1, mem)), aes_encrypt_BE(alg, key_words, inc32(ctr_BE, 1)));
@@ -960,8 +1068,6 @@ procedure {:quick} loop6x(
                  buffer128_read(in_b, 4, mem),
                  buffer128_read(in_b, 5, mem),
                  buffer128_read(in0_b, 0, mem));
-
-    // TODO:  Add an output save procedure here
 
     Sub64(len, 6);
 
