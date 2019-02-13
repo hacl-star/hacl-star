@@ -89,6 +89,7 @@ ghost procedure finish_aes_encrypt_le(ghost alg:algorithm, ghost input_LE:quad32
     reveal cipher;
 }
 
+// FAILING.  TODO: FIX ME!
 procedure {:quick exportOnly} load_two_lsb(inout dst:xmm)
     lets constp @= r11; 
     modifies constp; efl;
@@ -100,6 +101,7 @@ procedure {:quick exportOnly} load_two_lsb(inout dst:xmm)
     reveal insert_nat64;
 }
 
+// FAILING.  TODO: FIX ME!
 procedure {:quick exportOnly} load_one_lsb(inout dst:xmm)
     lets constp @= r11; 
     modifies constp; efl;
@@ -290,11 +292,11 @@ procedure {:quick} loop6x_preamble(
 
 
         //inout0 == quad32_xor(reverse_bytes_quad32(inc32(ctr_BE, 0)), rndkey);   
-        inout1 ==            reverse_bytes_quad32(inc32(ctr_BE, 1));
-        inout2 ==            reverse_bytes_quad32(inc32(ctr_BE, 2));
-        inout3 ==            reverse_bytes_quad32(inc32(ctr_BE, 3));
-        inout4 ==            reverse_bytes_quad32(inc32(ctr_BE, 4));
-        inout5 ==            reverse_bytes_quad32(inc32(ctr_BE, 5));
+//        inout1 ==            reverse_bytes_quad32(inc32(ctr_BE, 1));
+//        inout2 ==            reverse_bytes_quad32(inc32(ctr_BE, 2));
+//        inout3 ==            reverse_bytes_quad32(inc32(ctr_BE, 3));
+//        inout4 ==            reverse_bytes_quad32(inc32(ctr_BE, 4));
+//        inout5 ==            reverse_bytes_quad32(inc32(ctr_BE, 5));
     ensures
         // Framing
         modifies_buffer128(iv_b, old(mem), mem);
@@ -782,7 +784,6 @@ procedure {:quick} loop6x_final(
         Z3   == quad32_xor(rk, plain4);
         Hkey == quad32_xor(rk, plain5);
 
-        //buffer128_read(iv_b, 0, mem).hi3 + (5*0x10000000) < pow2_32;     // counter will not wrap
         buffer128_read(iv_b, 0, mem) == reverse_bytes_quad32(ctr_orig);
 
     ensures
@@ -808,7 +809,7 @@ procedure {:quick} loop6x_final(
 
         T1   == old(buffer128_read(iv_b, 0, mem));
         let ctr := ctr_orig.lo0 % 256;
-        ctr + 6 < 256 ==> Ii   == reverse_bytes_quad32(inc32(ctr_orig, 1));     // FAILING.  TODO: FIX ME!
+        ctr + 6 < 256 ==> Ii   == reverse_bytes_quad32(inc32(ctr_orig, 1));
         ctr + 6 < 256 ==> Z1   == reverse_bytes_quad32(inc32(ctr_orig, 2));
         ctr + 6 < 256 ==> Z2   == reverse_bytes_quad32(inc32(ctr_orig, 3));
         ctr + 6 < 256 ==> Z3   == reverse_bytes_quad32(inc32(ctr_orig, 4));
@@ -851,8 +852,6 @@ procedure {:quick} loop6x_final(
 
     lemma_reverse_bytes64(inb, old(buffer128_read(stack_b, 7, mem)), buffer128_read(stack_b, 7, mem));
 
-
-    // TODO: Adjust precondition for this or add more preconditions to the procedure
     lemma_incr_msb(ctr_orig, T1, Ii, 1);
     lemma_incr_msb(ctr_orig, T1, Z1, 2);
     lemma_incr_msb(ctr_orig, T1, Z2, 3);
@@ -990,12 +989,12 @@ procedure {:quick} loop6x(
         counter == ctr_BE.lo0 % 256;
 
         inout0 == quad32_xor(reverse_bytes_quad32(inc32(ctr_BE, 0)), rndkey);   
-        inout1 ==            reverse_bytes_quad32(inc32(ctr_BE, 1));
-        inout2 ==            reverse_bytes_quad32(inc32(ctr_BE, 2));
-        inout3 ==            reverse_bytes_quad32(inc32(ctr_BE, 3));
-        inout4 ==            reverse_bytes_quad32(inc32(ctr_BE, 4));
-        inout5 ==            reverse_bytes_quad32(inc32(ctr_BE, 5));
 
+        counter + 6 < 256 ==> inout1 == reverse_bytes_quad32(inc32(ctr_BE, 1));
+        counter + 6 < 256 ==> inout2 == reverse_bytes_quad32(inc32(ctr_BE, 2));
+        counter + 6 < 256 ==> inout3 == reverse_bytes_quad32(inc32(ctr_BE, 3));
+        counter + 6 < 256 ==> inout4 == reverse_bytes_quad32(inc32(ctr_BE, 4));
+        counter + 6 < 256 ==> inout5 == reverse_bytes_quad32(inc32(ctr_BE, 5));
 
     ensures
         len == old(len) - 6;
@@ -1035,11 +1034,11 @@ procedure {:quick} loop6x(
         buffer128_read(stack_b, 7, mem) == old(reverse_bytes_quad32(buffer128_read(in0_b, 0, mem)));
 {
     ghost var init0 := inout0;
-    ghost var init1 := quad32_xor(inout1, rndkey);
-    ghost var init2 := quad32_xor(inout2, rndkey);
-    ghost var init3 := quad32_xor(inout3, rndkey);
-    ghost var init4 := quad32_xor(inout4, rndkey);
-    ghost var init5 := quad32_xor(inout5, rndkey);
+    ghost var init1 := quad32_xor(reverse_bytes_quad32(inc32(ctr_BE, 1)), rndkey);
+    ghost var init2 := quad32_xor(reverse_bytes_quad32(inc32(ctr_BE, 2)), rndkey);
+    ghost var init3 := quad32_xor(reverse_bytes_quad32(inc32(ctr_BE, 3)), rndkey);
+    ghost var init4 := quad32_xor(reverse_bytes_quad32(inc32(ctr_BE, 4)), rndkey);
+    ghost var init5 := quad32_xor(reverse_bytes_quad32(inc32(ctr_BE, 5)), rndkey);
 
     loop6x_preamble(alg, iv_b, key_words, round_keys, keys_b, ctr_BE);
     loop6x_step(alg, 1, 5, 2, in0_b, stack_b, key_words, round_keys, keys_b, 
@@ -1060,7 +1059,12 @@ procedure {:quick} loop6x(
                   init0, init1, init2, init3, init4, init5);
     loop6x_final(alg, iv_b, stack_b, key_words, round_keys, keys_b, 
                  reverse_bytes_quad32(buffer128_read(iv_b, 0, mem)), init0, init1, init2, init3, init4, init5,
-                 reverse_bytes_quad32(inc32(ctr_BE, 0)), old(inout1), old(inout2), old(inout3), old(inout4), old(inout5),
+                 reverse_bytes_quad32(inc32(ctr_BE, 0)), 
+                 reverse_bytes_quad32(inc32(ctr_BE, 1)), 
+                 reverse_bytes_quad32(inc32(ctr_BE, 2)), 
+                 reverse_bytes_quad32(inc32(ctr_BE, 3)), 
+                 reverse_bytes_quad32(inc32(ctr_BE, 4)), 
+                 reverse_bytes_quad32(inc32(ctr_BE, 5)), 
                  buffer128_read(in_b, 0, mem),
                  buffer128_read(in_b, 1, mem),
                  buffer128_read(in_b, 2, mem),

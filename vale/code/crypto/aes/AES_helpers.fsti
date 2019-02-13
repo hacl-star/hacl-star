@@ -135,9 +135,9 @@ val finish_cipher_opt (alg:algorithm) (input plain:quad32) (round_keys:seq quad3
 let lemma_incr_msb (orig ctr ctr':quad32) (increment:nat) : Lemma
   (requires increment < 6 /\
             ctr == reverse_bytes_quad32 orig /\
-            ctr.hi3 + (increment * 0x10000000) < pow2_32 /\
+            //ctr.hi3 + (increment * 0x10000000) < pow2_32 /\
             ctr' == Arch.Types.add_wrap_quad32 ctr (Mkfour 0 0 0 (increment * 0x10000000)))
-  (ensures  ctr' == reverse_bytes_quad32 (GCTR_s.inc32 orig increment))
+  (ensures  (orig.lo0 % 256) + 6 < 256 ==> ctr' == reverse_bytes_quad32 (GCTR_s.inc32 orig increment))
   =
   admit()
           
