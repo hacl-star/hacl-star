@@ -78,6 +78,13 @@ ci:
 secure_api.old:
 	$(call run-with-log,$(MAKE) -C secure_api,[OLD-MAKE secure_api],obj/secure_api)
 
+# So that this Makefile can also clean the previous directory layout. In the
+# long run, TO_CLEAN should be able to go.
+TO_CLEAN=$(foreach ext,checked checked.lax out cmd err time dump types.vaf krml cmx cmo cmi o d a,-or -iname '*.$(ext)')
+clean:
+	find . -iname '.depend*' $(TO_CLEAN) -delete
+	rm -rf obj/*
+
 
 #################
 # Configuration #
@@ -164,10 +171,28 @@ verify: $(addsuffix .checked,$(FSTAR_ROOTS))
 
 include Makefile.common
 
-# We currently force regeneration of three depend files... this is... long...
-ifndef NODEPEND
-ifndef MAKE_RESTARTS
+# We currently force regeneration of three depend files. This is long. If
+# debugging, or invoking a staged top-level target, skip. If within a restarting
+# (not recursive) make invocation, we are actually in the process of
+# regenerating the .depend files, so don't enable rules for them, otherwise this
+# would send make into an infinite loop.
+ifdef NODEPEND
+  SKIP=1
+else ifdef MAKE_RESTARTS
+  SKIP=1
+else ifeq ($(MAKECMDGOALS),clean)
+  SKIP=1
+else ifeq ($(MAKECMDGOALS),)
+  SKIP=1
+else ifeq ($(MAKECMDGOALS),all)
+  SKIP=1
+else ifeq ($(MAKECMDGOALS),vale-verify)
+  SKIP=1
+else ifeq ($(MAKECMDGOALS),ci)
+  SKIP=1
+endif
 
+ifneq ($(SKIP),1)
 # Note that the --extract argument only controls what is extracted for OCaml,
 # meaning we can eliminate large chunks of the dependency graph, since we only
 # need to run: Vale stuff, and HACL spec tests.
@@ -188,7 +213,6 @@ ifndef MAKE_RESTARTS
 
 .PHONY: .FORCE
 .FORCE:
-endif
 endif
 
 include .fstar-depend-full
