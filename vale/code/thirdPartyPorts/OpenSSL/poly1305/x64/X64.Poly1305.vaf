@@ -216,6 +216,8 @@ procedure{:quick} poly1305_iteration(ghost r1:nat64) returns(ghost hh:int)
     assert hh == (n * n) * h2 + n * h1 + h0 /\ (h * r) % p == hh % p;
 }
 
+#reset-options "--admit_smt_queries true"
+
 procedure{:quick} poly1305_blocks(
     ghost r:int,
     ghost h_in:int,
@@ -371,6 +373,8 @@ procedure{:quick} poly1305_blocks(
     Store64_buffer(ctx, h1, 8, Public, ctx_b, 1);
     Store64_buffer(ctx, h2, 16, Public, ctx_b, 2);
 }
+
+#reset-options "--z3rlimit 5000"
 
 // last 1..15 bytes, in case len is not a multiple of 16
 procedure{:quick} poly1305_last_block()

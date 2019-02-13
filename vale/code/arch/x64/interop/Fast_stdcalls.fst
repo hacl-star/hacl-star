@@ -423,6 +423,8 @@ let lowstar_fsub : lowstar_fsub_t  =
 let lowstar_fsub_normal_t //: normal lowstar_fsub_t
   = as_normal_t #lowstar_fsub_t lowstar_fsub
 
+#set-options "--admit_smt_queries true"
+
 let fast_fsub
   (out:b8)
   (f1:b8)

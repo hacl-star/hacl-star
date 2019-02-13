@@ -63,7 +63,7 @@ let rec lemma_poly1305_heap_hash_blocks_alt (h:int) (pad:int) (r:int) (m:mem) (b
     lemma_poly1305_heap_hash_blocks_alt h pad r m b (n-1);
     reveal_poly1305_heap_blocks h pad r s (n+n-2);
     Opaque_s.reveal_opaque modp';
-    ()
+    lemma_poly1305_hash_blocks_unroll h pad r inp n
   )
 
 let rec buffers_readable (h: mem) (l: list buffer64) : GTot Type0 (decreases l) =
