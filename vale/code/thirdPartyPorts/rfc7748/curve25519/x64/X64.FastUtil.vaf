@@ -111,7 +111,7 @@ procedure{:quick} fast_mul1(
 /*
 #reset-options "--z3rlimit 20"
 
-procedure{:quick}{:public} fast_mul1_stdcall(
+procedure{:quick}{:public}{:exportSpecs} fast_mul1_stdcall(
     inline win:bool,
     ghost dst_b:buffer64,
     ghost inA_b:buffer64,
@@ -252,20 +252,21 @@ procedure{:quick} fast_add1(
 
 #reset-options "--z3rlimit 20"
 
-procedure{:quick}{:public} fast_add1_stdcall(
+procedure{:quick}{:public}{:exportSpecs} fast_add1_stdcall(
     inline win:bool,
+    ghost stack_b:buffer64,
     ghost dst_b:buffer64,
     ghost inA_b:buffer64,
-    ghost stack_b:buffer64)
+    ghost inB_in:nat64
+    )
     lets
         dst_ptr @= rdi; inA_ptr @= rsi; b @= rdx;
         dst_in := (if win then rcx else rdi);
         inA_in := (if win then rdx else rsi);
-        inB_in := (if win then r8  else rdx);
     reads memTaint;
     modifies
-        rax; rbx; rcx; rdx; rdi; rsi; r8; r9; r10; r11; r12; r13; r14; r15;
-        rsp; efl; mem;
+        rax; rbx; rcx; rdx; rsi; rdi; rbp; rsp; r8; r9; r10; r11; r12; r13; r14; r15;    
+        efl; mem;
     requires
         adx_enabled && bmi2_enabled;
         buffers_disjoint(dst_b, inA_b) || inA_b == dst_b;
@@ -273,9 +274,10 @@ procedure{:quick}{:public} fast_add1_stdcall(
         buffers_disjoint(stack_b, dst_b);
         buffers_disjoint(stack_b, inA_b);
 
+        inB_in = (if win then r8 else rdx);
         validDstAddrs64(mem, dst_in, dst_b, 4, memTaint, Secret);
         validSrcAddrs64(mem, inA_in, inA_b, 4, memTaint, Secret);
-        valid_stack_slots(mem, rsp, stack_b, 1, memTaint);
+        valid_stack_slots(mem, rsp, stack_b, 2, memTaint);
     ensures
         let a0 := old(buffer64_read(inA_b, 0, mem));
         let a1 := old(buffer64_read(inA_b, 1, mem));
@@ -296,18 +298,30 @@ procedure{:quick}{:public} fast_add1_stdcall(
         //   Framing
         //////////////////////////////////////
 
-        modifies_buffer_2(dst_b, stack_b, old(mem), mem);
+        modifies_buffer_2(stack_b, dst_b, old(mem), mem);
         validSrcAddrs64(mem, dst_in, dst_b, 4, memTaint, Secret);
 
-        rbx == old(rbx);
-        rsi == old(rsi);
-        r12 == old(r12);
-        r13 == old(r13);
-        r14 == old(r14);
+
+        win ==>  rbx == old(rbx);
+        win ==>  rbp == old(rbp);
+        win ==>  rdi == old(rdi);
+        win ==>  rsi == old(rsi);
+        win ==>  rsp == old(rsp);
+        win ==>  r12 == old(r12);
+        win ==>  r13 == old(r13);
+        win ==>  r14 == old(r14);
+        win ==>  r15 == old(r15);
+        !win ==>  rbx == old(rbx);
+        !win ==>  rbp == old(rbp);
+        !win ==>  r12 == old(r12);
+        !win ==>  r13 == old(r13);
+        !win ==>  r14 == old(r14);
+        !win ==>  r15 == old(r15);
 
         rsp == old(rsp);
 {
     // Store callee-save registers
+    Push(rdi, stack_b, 1);
     Push(rsi, stack_b, 0);
 
     // Line up the rest of the arguments
@@ -321,6 +335,7 @@ procedure{:quick}{:public} fast_add1_stdcall(
     fast_add1(dst_b, inA_b);
 
     Pop(rsi, stack_b, 0);
+    Pop(rdi, stack_b, 1);
 }
 
 #reset-options "--z3rlimit 600"
@@ -393,7 +408,7 @@ procedure{:quick} fast_sub1(
 
 /*
 #reset-options "--z3rlimit 20"
-procedure{:quick}{:public} fast_sub1_stdcall(
+procedure{:quick}{:public}{:exportSpecs} fast_sub1_stdcall(
     inline win:bool,
     ghost dst_b:buffer64,
     ghost inA_b:buffer64,
@@ -538,7 +553,7 @@ procedure{:quick} fast_add(
 }
 
 /*
-procedure{:quick}{:public} fast_add_stdcall(
+procedure{:quick}{:public}{:exportSpecs} fast_add_stdcall(
     inline win:bool,
     ghost dst_b:buffer64,
     ghost inA_b:buffer64,
@@ -672,6 +687,7 @@ procedure{:quick} fast_sub(
         modifies_buffer(dst_b, old(mem), mem);
 {
     xor_lemmas();
+    lemma_sub_carry_equiv_forall();
 
     Xor64(rax, rax);
 
@@ -706,7 +722,7 @@ procedure{:quick} fast_sub(
 }
 
 /*
-procedure{:quick}{:public} fast_sub_stdcall(
+procedure{:quick}{:public}{:exportSpecs} fast_sub_stdcall(
     inline win:bool,
     ghost dst_b:buffer64,
     ghost inA_b:buffer64,
@@ -816,8 +832,8 @@ procedure{:quick} cswap_single(
 
         buffers_disjoint(p1_b, p0_b) || p1_b == p0_b;
 
-        validSrcAddrs64(mem, p0_ptr, p0_b, 8, memTaint, Secret);
-        validSrcAddrs64(mem, p1_ptr, p1_b, 8, memTaint, Secret);
+        validDstAddrs64(mem, p0_ptr, p0_b, 8, memTaint, Secret);
+        validDstAddrs64(mem, p1_ptr, p1_b, 8, memTaint, Secret);
 
     ensures
         validSrcAddrs64(mem, p0_ptr, p0_b, 8, memTaint, Secret);
@@ -886,12 +902,12 @@ procedure{:quick} cswap2(
         bit <= 1;
         buffers_disjoint(p1_b, p0_b) || p1_b == p0_b;
 
-        validSrcAddrs64(mem, p0_ptr, p0_b, 8, memTaint, Secret);
-        validSrcAddrs64(mem, p1_ptr, p1_b, 8, memTaint, Secret);
+        validDstAddrs64(mem, p0_ptr, p0_b, 8, memTaint, Secret);
+        validDstAddrs64(mem, p1_ptr, p1_b, 8, memTaint, Secret);
 
     ensures
-        validSrcAddrs64(mem, p0_ptr, p0_b, 8, memTaint, Secret);
-        validSrcAddrs64(mem, p1_ptr, p1_b, 8, memTaint, Secret);
+        validDstAddrs64(mem, p0_ptr, p0_b, 8, memTaint, Secret);
+        validDstAddrs64(mem, p1_ptr, p1_b, 8, memTaint, Secret);
 
         modifies_buffer_2(p0_b, p1_b, old(mem), mem);
 
@@ -943,16 +959,16 @@ procedure{:quick} cswap2(
     cswap_single(7, p0_b, p1_b);
 }
 
-procedure{:quick}{:public} cswap2_stdcall(
+procedure{:quick}{:public}{:exportSpecs} cswap2_stdcall(
     inline win:bool,
+    ghost stack_b:buffer64,
     ghost p0_b:buffer64,
     ghost p1_b:buffer64,
-    ghost stack_b:buffer64)
+    ghost bit_in:nat64)
     lets
         p0_ptr @= rdi; p1_ptr @= rsi; bit @= rdx;
         p0_in := (if win then rcx else rdi);
         p1_in := (if win then rdx else rsi);
-        bit_in := (if win then r8  else rdx);
 
         old_p0_0 := buffer64_read(p0_b, 0, mem);
         old_p0_1 := buffer64_read(p0_b, 1, mem);
@@ -974,19 +990,20 @@ procedure{:quick}{:public} cswap2_stdcall(
 
     reads memTaint;
     modifies
-        rax; rbx; rcx; rdx; rdi; rsi; r8; r9; r10; r11; r12; r13; r14; r15;
-        rsp; efl; mem;
+        rax; rbx; rcx; rdx; rsi; rdi; rbp; rsp; r8; r9; r10; r11; r12; r13; r14; r15;        
+        efl; mem;
     requires
         bit_in <= 1;
+        bit_in = (if win then r8  else rdx);        
         //adx_enabled && bmi2_enabled;
         buffers_disjoint(p0_b, p1_b) || p1_b == p0_b;
 
         buffers_disjoint(stack_b, p0_b);
         buffers_disjoint(stack_b, p1_b);
 
-        validSrcAddrs64(mem, p0_in, p0_b, 8, memTaint, Secret);
-        validSrcAddrs64(mem, p1_in, p1_b, 8, memTaint, Secret);
-        valid_stack_slots(mem, rsp, stack_b, 1, memTaint);
+        validDstAddrs64(mem, p0_in, p0_b, 8, memTaint, Secret);
+        validDstAddrs64(mem, p1_in, p1_b, 8, memTaint, Secret);
+        valid_stack_slots(mem, rsp, stack_b, 2, memTaint);
     ensures
         let p0_0 := buffer64_read(p0_b, 0, mem);
         let p0_1 := buffer64_read(p0_b, 1, mem);
@@ -1028,20 +1045,31 @@ procedure{:quick}{:public} cswap2_stdcall(
         //////////////////////////////////////
 
         modifies_buffer_3(p0_b, p1_b, stack_b, old(mem), mem);
-        validSrcAddrs64(mem, p0_in, p0_b, 8, memTaint, Secret);
-        validSrcAddrs64(mem, p1_in, p1_b, 8, memTaint, Secret);
+        validDstAddrs64(mem, p0_in, p0_b, 8, memTaint, Secret);
+        validDstAddrs64(mem, p1_in, p1_b, 8, memTaint, Secret);
 
-        rbx == old(rbx);
-        rsi == old(rsi);
-        r12 == old(r12);
-        r13 == old(r13);
-        r14 == old(r14);
+        win ==>  rbx == old(rbx);
+        win ==>  rbp == old(rbp);
+        win ==>  rdi == old(rdi);
+        win ==>  rsi == old(rsi);
+        win ==>  rsp == old(rsp);
+        win ==>  r12 == old(r12);
+        win ==>  r13 == old(r13);
+        win ==>  r14 == old(r14);
+        win ==>  r15 == old(r15);
+        !win ==>  rbx == old(rbx);
+        !win ==>  rbp == old(rbp);
+        !win ==>  r12 == old(r12);
+        !win ==>  r13 == old(r13);
+        !win ==>  r14 == old(r14);
+        !win ==>  r15 == old(r15);
 
         rsp == old(rsp);
 {
     // Line up the rest of the arguments
     inline if (win) {
         // Store callee-save registers
+        Push(rdi, stack_b, 1);
         Push(rsi, stack_b, 0);
         Mov64(p0_ptr, rcx);
         Mov64(p1_ptr, rdx);
@@ -1052,6 +1080,7 @@ procedure{:quick}{:public} cswap2_stdcall(
     
     inline if (win) {
         Pop(rsi, stack_b, 0);
+        Pop(rdi, stack_b, 1);
     }
 
 }

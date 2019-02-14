@@ -7,6 +7,7 @@ open Opaque_s
 open Collections.Seqs_s
 open Words.Seq_s
 open Words.Seq
+open Words.Four_s
 
 module U8 = FStar.UInt8
 
@@ -41,24 +42,12 @@ val inverses16 (u:unit) : Lemma (inverses get16 put16)
 
 let view16 = inverses16 (); View 2 get16 put16
 
-let get32_def (s:Seq.lseq U8.t 4) = UInt32.uint_to_t (
-  U8.v (Seq.index s 0) +
-  U8.v (Seq.index s 1) `op_Multiply` 0x100 +
-  U8.v (Seq.index s 2) `op_Multiply` 0x10000 +
-  U8.v (Seq.index s 3) `op_Multiply` 0x1000000
-  )
-let put32_def (x:UInt32.t) : GTot (Seq.lseq U8.t 4) =
-  let s = Seq.create 4 (U8.uint_to_t 0) in
-  let x = UInt32.v x in
-  let s = Seq.upd s 0 (U8.uint_to_t (x % 0x100)) in
-  let x = x `op_Division` 0x100 in
-  let s = Seq.upd s 1 (U8.uint_to_t (x % 0x100)) in
-  let x = x `op_Division` 0x100 in
-  let s = Seq.upd s 2 (U8.uint_to_t (x % 0x100)) in
-  let x = x `op_Division` 0x100 in
-  let s = Seq.upd s 3 (U8.uint_to_t (x % 0x100)) in
-  s
+let get32_def (s:Seq.lseq U8.t 4) =
+  UInt32.uint_to_t (four_to_nat 8 (seq_to_four_LE  (seq_uint8_to_seq_nat8 s)))
 
+let put32_def (x:UInt32.t) : GTot (Seq.lseq U8.t 4) =
+  seq_nat8_to_seq_uint8 (four_to_seq_LE (nat_to_four 8 (UInt32.v x)))
+  
 let get32 = make_opaque get32_def
 let put32 = make_opaque put32_def
 

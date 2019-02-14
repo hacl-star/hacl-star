@@ -109,7 +109,7 @@ val mt_hashes_inv_empty:
         (decreases (32 - lv))
 let rec mt_hashes_inv_empty lv =
   if lv = 31 then ()
-  else mt_hashes_inv_empty (lv + 1)
+  else (admit (); mt_hashes_inv_empty (lv + 1))
 
 val mt_hashes_lth_inv_equiv:
   lv:nat{lv < 32} ->

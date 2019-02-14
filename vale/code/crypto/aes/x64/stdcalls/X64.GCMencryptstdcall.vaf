@@ -88,6 +88,7 @@ procedure {:quick}{:exportSpecs}{:public} gcm_make_length_stdcall(
         locs_disjoint(list(loc_buffer(stack_b), loc_buffer(b)));
         buffer_readable(mem, stack_b);
         buffer_readable(mem, b);
+        buffer_writeable(b);
         valid_taint_buf64(stack_b, mem, memTaint, Public);
         valid_taint_buf128(b, mem, memTaint, Secret);
         valid_stack_slots(mem, rsp, stack_b, 0, memTaint);

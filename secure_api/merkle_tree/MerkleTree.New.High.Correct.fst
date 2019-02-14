@@ -113,6 +113,7 @@ let mt_get_root_ok mto drt =
 
 // `mt_get_path` is correct.
 
+#set-options "--z3rlimit 20"
 val mt_get_path_ok:
   mto:mt_olds -> 
   idx:nat{MT?.i (MTO?.mt mto) <= idx && idx < MT?.j (MTO?.mt mto)} ->

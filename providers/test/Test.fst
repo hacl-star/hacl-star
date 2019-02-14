@@ -509,7 +509,7 @@ let main (): St C.exit_code =
   test_cipher block_cipher_vectors_low;
   test_chacha20 chacha20_vectors_low;
   Test.Hash.main ();
-  Test.Bytes.main ();
+  //Test.Bytes.main ();
   AC.disable_hacl ();
 
   if EverCrypt.StaticConfig.openssl then begin

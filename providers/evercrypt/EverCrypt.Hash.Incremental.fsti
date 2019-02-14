@@ -89,6 +89,7 @@ let hashes (#a: Hash.alg) (h: HS.mem) (s: state a) (b: bytes) =
   S.equal (Hash.repr hash_state h) (Hash.compress_many (Hash.acc0 #a) blocks) /\
   S.equal (S.slice (B.as_seq h buf_) 0 (v total_len % block_length a)) rest
 
+noextract
 let bytes = S.seq UInt8.t
 
 val create_in (a: Hash.alg) (r: HS.rid): ST (state a)

@@ -1,4 +1,5 @@
 include "../../../arch/x64/X64.Vale.InsBasic.vaf"
+include "../../../arch/x64/X64.Vale.InsMem.vaf"
 include "../../../arch/x64/X64.Vale.InsVector.vaf"
 include "../../../arch/x64/X64.Vale.InsSha.vaf"
 include "../../../lib/util/x64/X64.Stack.vaf"
@@ -35,6 +36,7 @@ open X64.Memory
 open X64.Vale.State
 open X64.Vale.Decls
 open X64.Vale.InsBasic
+open X64.Vale.InsMem
 open X64.Vale.InsVector
 open X64.Vale.InsSha
 open X64.Vale.QuickCode
@@ -641,7 +643,7 @@ procedure {:quick} sha_update(
     requires
         sha_enabled;
         validSrcAddrs128(mem, inp,   in_b,  4*num, memTaint, Secret);
-        validSrcAddrs128(mem, ctx,  ctx_b,  2, memTaint, Secret);
+        validDstAddrs128(mem, ctx,  ctx_b,  2, memTaint, Secret);
         validSrcAddrs128(mem, tbl,    k_b, 16, memTaint, Secret);
         inp + 0x40*num < pow2_64;
         buffers_disjoint128(ctx_b, in_b);
@@ -687,7 +689,7 @@ procedure {:quick} sha_update_bytes(
     requires
         sha_enabled;
         validSrcAddrs128(mem, inp,   in_b,  4*num, memTaint, Secret);
-        validSrcAddrs128(mem, ctx,  ctx_b,  2, memTaint, Secret);
+        validDstAddrs128(mem, ctx,  ctx_b,  2, memTaint, Secret);
         validSrcAddrs128(mem, tbl,    k_b, 16, memTaint, Secret);
         inp + 0x40*num < pow2_64;
         buffers_disjoint128(ctx_b, in_b);
@@ -755,6 +757,7 @@ procedure {:quick}{:exportSpecs}{:public} sha_update_bytes_stdcall(
         locs_disjoint(list(loc_buffer(stack_b), loc_buffer(k_b)));
         buffer_readable(mem, stack_b);
         buffer_readable(mem, ctx_b);
+        buffer_writeable(ctx_b);
         buffer_readable(mem, in_b);
         buffer_readable(mem, k_b);
         valid_taint_buf64(stack_b, mem, memTaint, Public);
@@ -762,7 +765,7 @@ procedure {:quick}{:exportSpecs}{:public} sha_update_bytes_stdcall(
         valid_taint_buf128(in_b, mem, memTaint, Secret);
         valid_taint_buf128(k_b, mem, memTaint, Secret);
         buffer_length(stack_b) >= 4;
-        valid_stack_slots(mem, rsp, stack_b, if win then 28 else 8, memTaint);
+        valid_stack_slots(mem, rsp, stack_b, 28, memTaint);
         valid_taint_buf64(stack_b, mem, memTaint, Public);
         ctx_ptr == buffer_addr(ctx_b, mem);
          in_ptr == buffer_addr(in_b, mem);
@@ -819,16 +822,78 @@ procedure {:quick}{:exportSpecs}{:public} sha_update_bytes_stdcall(
         xmm0; xmm1; xmm2; xmm3; xmm4; xmm5; xmm6; xmm7; xmm8; xmm9; xmm10; xmm11; xmm12; xmm13; xmm14; xmm15;
         efl; mem;
 {
-    callee_save_registers(win, stack_b);
+    // Save registers
+    inline if (win) {
+        PushXmm(xmm15, rax, stack_b, 27);
+        PushXmm(xmm14, rax, stack_b, 25);
+        PushXmm(xmm13, rax, stack_b, 23);
+        PushXmm(xmm12, rax, stack_b, 21);
+        PushXmm(xmm11, rax, stack_b, 19);
+        PushXmm(xmm10, rax, stack_b, 17);
+        PushXmm(xmm9,  rax, stack_b, 15);
+        PushXmm(xmm8,  rax, stack_b, 13);
+        PushXmm(xmm7,  rax, stack_b, 11);
+        PushXmm(xmm6,  rax, stack_b,  9);
+        Push(r15, stack_b, 7);
+        Push(r14, stack_b, 6);
+        Push(r13, stack_b, 5);
+        Push(r12, stack_b, 4);
+        Push(rsi, stack_b, 3);
+        Push(rdi, stack_b, 2);
+        Push(rbp, stack_b, 1);
+        Push(rbx, stack_b, 0);        
+    } else {
+        Push(r15, stack_b, 27);
+        Push(r14, stack_b, 26);
+        Push(r13, stack_b, 25);
+        Push(r12, stack_b, 24);
+        Push(rsi, stack_b, 23);
+        Push(rdi, stack_b, 22);
+        Push(rbp, stack_b, 21);
+        Push(rbx, stack_b, 20);
+    }
+
     inline if (win) {
         Mov64(rdi, rcx);
         Mov64(rsi, rdx);
         Mov64(rdx, r8);
         Mov64(rcx, r9);
     }
+
     sha_update_bytes(ctx_b, in_b, k_b);
-    callee_restore_registers(win, stack_b, old(xmm6), old(xmm7), old(xmm8), old(xmm9), old(xmm10), old(xmm11),
-                             old(xmm12), old(xmm13), old(xmm14), old(xmm15));
+
+    // Restore registers
+    inline if (win) {
+        Pop(rbx, stack_b, 0);
+        Pop(rbp, stack_b, 1);
+        Pop(rdi, stack_b, 2);
+        Pop(rsi, stack_b, 3);
+        Pop(r12, stack_b, 4);
+        Pop(r13, stack_b, 5);
+        Pop(r14, stack_b, 6);
+        Pop(r15, stack_b, 7);    
+
+        PopXmm(xmm6,  rax, stack_b,  8, old(xmm6));
+        PopXmm(xmm7,  rax, stack_b, 10, old(xmm7));
+        PopXmm(xmm8,  rax, stack_b, 12, old(xmm8));
+        PopXmm(xmm9,  rax, stack_b, 14, old(xmm9));
+        PopXmm(xmm10, rax, stack_b, 16, old(xmm10));
+        PopXmm(xmm11, rax, stack_b, 18, old(xmm11));
+        PopXmm(xmm12, rax, stack_b, 20, old(xmm12));
+        PopXmm(xmm13, rax, stack_b, 22, old(xmm13));
+        PopXmm(xmm14, rax, stack_b, 24, old(xmm14));
+        PopXmm(xmm15, rax, stack_b, 26, old(xmm15));
+    } else {
+        Pop(rbx, stack_b, 20);
+        Pop(rbp, stack_b, 21);
+        Pop(rdi, stack_b, 22);
+        Pop(rsi, stack_b, 23);
+        Pop(r12, stack_b, 24);
+        Pop(r13, stack_b, 25);
+        Pop(r14, stack_b, 26);
+        Pop(r15, stack_b, 27);
+    }
+    
     ghost var hash_in  := old(le_bytes_to_hash(le_seq_quad32_to_bytes(buffer128_as_seq(mem, ctx_b))));
     ghost var input_LE := seq_nat8_to_seq_uint8(le_seq_quad32_to_bytes(buffer128_as_seq(mem, in_b)));
     lemma_update_multi_opaque_vale_is_update_multi(hash_in, input_LE);

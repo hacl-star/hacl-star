@@ -69,6 +69,7 @@ procedure {:quick}{:exportSpecs}{:public} AESEncryptBlockStdcall(
         locs_disjoint(list(loc_buffer(stack_b), loc_buffer(keys_b)));
         buffer_readable(mem, stack_b);
         buffer_readable(mem, output_b);
+        buffer_writeable(output_b);
         buffer_readable(mem, input_b);
         buffer_readable(mem, keys_b);
         valid_taint_buf64(stack_b, mem, memTaint, Public);
@@ -155,6 +156,7 @@ procedure {:quick}{:exportSpecs}{:public} aes_EncryptBlockBEStdcall(
         locs_disjoint(list(loc_buffer(stack_b), loc_buffer(keys_b)));
         buffer_readable(mem, stack_b);
         buffer_readable(mem, output_b);
+        buffer_writeable(output_b);
         buffer_readable(mem, input_b);
         buffer_readable(mem, keys_b);
         valid_taint_buf64(stack_b, mem, memTaint, Public);

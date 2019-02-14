@@ -6,10 +6,6 @@ open FStar.Integers
 open Spec.Hash.Definitions
 open Hacl.Hash.Definitions
 
-/// Stating the obvious: TODO remove me
-[@ (CPrologue "#define EverCrypt_Hash_such_a_bad_hack(X) (X)") ]
-let bad_hack (): Stack unit (fun _ -> True) (fun _ _ _ -> True) = ()
-
 #set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
 
 /// Algorithmic agility for hash specifications. We reuse the agile

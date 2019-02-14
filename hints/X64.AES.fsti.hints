@@ -1,0 +1,43 @@
+[
+  "&û‹§\u007fŸœ$b,\u0016[\\Äñ§",
+  [
+    [
+      "X64.AES.va_lemma_AESEncryptBlock",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "bool_inversion",
+        "equation_Prims.nat", "equation_Types_s.quad32",
+        "equation_Words_s.nat32", "fuel_guarded_inversion_Words_s.four",
+        "fuel_guarded_inversion_X64.Vale.State.state",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_X64.AES_Tm_refine_45a78283ebef4f6c1cb3d61ac06ee6b5",
+        "typing_X64.CPU_Features_s.aesni_enabled"
+      ],
+      0,
+      "3fce500a527d8b530f7b5e0d655df25b"
+    ],
+    [
+      "X64.AES.va_wp_AESEncryptBlock",
+      1,
+      1,
+      0,
+      [ "@query", "projection_inverse_BoxInt_proj_0" ],
+      0,
+      "731ba8622335bab63f6951414d829941"
+    ],
+    [
+      "X64.AES.va_wpProof_AESEncryptBlock",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.squash",
+        "refinement_interpretation_Prims_Tm_refine_8d65e998a07dd53ec478e27017d9dba5"
+      ],
+      0,
+      "0c8ceeae2ed35482f763b7a428fb1e10"
+    ]
+  ]
+]
