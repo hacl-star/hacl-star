@@ -1,5 +1,5 @@
 [
-  "\u001bÀõÕ\u0001‘Ëœæ&¸πb\u0003Å\u0002",
+  "õå√⁄€ñp§\fç…gÁöﬁ¶",
   [
     [
       "X64.Poly1305.Util.heapletTo128",
@@ -43,6 +43,29 @@
       "0f84299a16fbb9c19484ee1098a37747"
     ],
     [
+      "X64.Poly1305.Util.lemma_poly1305_heap_blocks_unroll",
+      1,
+      1,
+      0,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_X64.Poly1305.Util.poly1305_heap_blocks_.fuel_instrumented",
+        "@fuel_irrelevance_X64.Poly1305.Util.poly1305_heap_blocks_.fuel_instrumented",
+        "@query", "Prims_pretyping_ae567c2fb75be05905677af440075565",
+        "equation_Words_s.nat64",
+        "equation_with_fuel_X64.Poly1305.Util.poly1305_heap_blocks_.fuel_instrumented",
+        "function_token_typing_Prims.__cache_version_number__",
+        "int_inversion", "int_typing", "primitive_Prims.op_Addition",
+        "primitive_Prims.op_Equality", "primitive_Prims.op_Modulus",
+        "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_5011a4dac0c52d8780abff90f5d6886a"
+      ],
+      0,
+      "6e38e05c31b743ff735d9550e42198f6"
+    ],
+    [
       "X64.Poly1305.Util.reveal_poly1305_heap_blocks",
       1,
       1,
@@ -55,7 +78,7 @@
         "refinement_interpretation_Tm_refine_8d65e998a07dd53ec478e27017d9dba5"
       ],
       0,
-      "29b1014f2039a767db747f0c2a8f9b24"
+      "8f8dafec4b55bc43ab1ca84d54f8e669"
     ],
     [
       "X64.Poly1305.Util.seqTo128",
@@ -77,7 +100,7 @@
         "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-      "88bd0a3d0be8ad42d9d22eb887040c30"
+      "1e61728d9ffc4718ea3dc4b52e4554bf"
     ],
     [
       "X64.Poly1305.Util.lemma_poly1305_heap_hash_blocks_alt",
@@ -92,7 +115,7 @@
         "refinement_interpretation_Tm_refine_8d65e998a07dd53ec478e27017d9dba5"
       ],
       0,
-      "f57be74529f2d47a89dc98f9456b4db9"
+      "96066c2609514c501cd9378a470c35d6"
     ],
     [
       "X64.Poly1305.Util.lemma_poly1305_heap_hash_blocks_alt",
@@ -144,7 +167,7 @@
         "well-founded-ordering-on-nat"
       ],
       0,
-      "d3d5e44536e6d09b4cfc7d7df05ed65f"
+      "d6baaf7298cbf04dd8d1851d04b56ce5"
     ],
     [
       "X64.Poly1305.Util.buffers_readable",
@@ -159,7 +182,7 @@
         "fuel_guarded_inversion_Prims.list", "subterm_ordering_Prims.Cons"
       ],
       0,
-      "0d0ec7ea877ea354c2eee8b586a1a99b"
+      "5c97bbf3d1c2755e41e4122cfb3fe496"
     ]
   ]
 ]
