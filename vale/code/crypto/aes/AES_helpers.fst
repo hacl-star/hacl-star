@@ -65,6 +65,20 @@ let finish_cipher (alg:algorithm) (input:quad32) (round_keys:seq quad32) =
   commute_sub_bytes_shift_rows_forall()
 #pop-options  
 
+let finish_cipher_opt (alg:algorithm) (input plain t0 t1 out:quad32) (round_keys:seq quad32) : Lemma
+  (requires length round_keys == (nr alg) + 1 /\
+            length round_keys > 0 /\ nr alg > 1 /\   // REVIEW: Why are these needed?
+            t0 = quad32_xor input (index round_keys 0) /\
+            t1 = rounds_opaque t0 round_keys (nr alg - 1) /\
+            out = quad32_xor (sub_bytes (shift_rows_LE t1)) (quad32_xor plain (index round_keys (nr alg))))
+  (ensures out == quad32_xor plain (cipher_opaque alg input round_keys))
+  =
+  (*
+  reveal_opaque rounds;
+  reveal_opaque cipher;
+  commute_sub_bytes_shift_rows_forall()
+  *)
+  admit()
 
 #reset-options ""
 let lemma_add_0x1000000_reverse_mult (n:nat32) (increment:nat) : Lemma
