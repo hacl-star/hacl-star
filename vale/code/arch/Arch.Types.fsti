@@ -97,7 +97,9 @@ val lemma_insert_nat64_properties (q:quad32) (n:nat64) :
 
 val lemma_insert_nat64_nat32s (q:quad32) (n0 n1:nat32) :
   Lemma ( insert_nat64_opaque q (two_to_nat32 (Mktwo n0 n1)) 0 ==
-          Mkfour n0 n1 q.hi2 q.hi3 )
+          Mkfour n0 n1 q.hi2 q.hi3 /\
+          insert_nat64_opaque q (two_to_nat32 (Mktwo n0 n1)) 1 ==
+          Mkfour q.lo0 q.lo1 n0 n1 )
 
 let lo64_def (q:quad32) : nat64 = two_to_nat 32 (two_select (four_to_two_two q) 0)
 let hi64_def (q:quad32) : nat64 = two_to_nat 32 (two_select (four_to_two_two q) 1)
@@ -111,11 +113,9 @@ val lemma_lo64_properties (_:unit) :
 val lemma_hi64_properties (_:unit) :
   Lemma (forall (q0 q1:quad32) . (q0.hi2 == q1.hi2 /\ q0.hi3 == q1.hi3) <==> (hi64 q0 == hi64 q1))
 
-let lemma_reverse_bytes64 (src orig final:quad32) : Lemma
+val lemma_reverse_bytes_quad32_64 (src orig final:quad32) : Lemma
   (requires final == insert_nat64_opaque (insert_nat64_opaque orig (reverse_bytes_nat64 (hi64 src)) 0) (reverse_bytes_nat64 (lo64 src)) 1)
   (ensures  final == reverse_bytes_quad32 src)
-  =
-  admit()
 
 val lemma_equality_check_helper (q:quad32) :
   Lemma ((q.lo0 == 0 /\ q.lo1 == 0 ==> lo64 q == 0) /\

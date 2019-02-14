@@ -93,7 +93,7 @@ let finish_cipher_opt (alg:algorithm) (input plain t0 t1 out:quad32) (round_keys
   ()
 #pop-options  
 
-#reset-options ""
+#reset-options "--z3rlimit 20"
 let lemma_add_0x1000000_reverse_mult (n:nat32) (increment:nat) : Lemma
   (requires (n % 256) + increment < 256 /\ increment < 6)
   (ensures (let r = reverse_bytes_nat32 n in
@@ -133,6 +133,7 @@ let lemma_add_0x1000000_reverse_mult (n:nat32) (increment:nat) : Lemma
   };
   ()
 
+#reset-options ""
 let lemma_incr_msb (orig ctr ctr':quad32) (increment:nat) : Lemma
   (requires increment < 6 /\
             ctr == reverse_bytes_quad32 orig /\

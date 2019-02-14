@@ -523,7 +523,7 @@ procedure {:quick} loop6x_step(
 
     reveal rounds;
     commute_sub_bytes_shift_rows_forall();
-    lemma_reverse_bytes64(old(buffer128_read(in0_b, in0_offset, mem)), old(buffer128_read(stack_b, stack_offset, mem)), buffer128_read(stack_b, stack_offset, mem));
+    lemma_reverse_bytes_quad32_64(old(buffer128_read(in0_b, in0_offset, mem)), old(buffer128_read(stack_b, stack_offset, mem)), buffer128_read(stack_b, stack_offset, mem));
 
 }
 
@@ -860,7 +860,7 @@ procedure {:quick} loop6x_final(
     finish_aes_encrypt_le(alg, ctr4, key_words);
     finish_aes_encrypt_le(alg, ctr5, key_words);
 
-    lemma_reverse_bytes64(inb, old(buffer128_read(stack_b, 7, mem)), buffer128_read(stack_b, 7, mem));
+    lemma_reverse_bytes_quad32_64(inb, old(buffer128_read(stack_b, 7, mem)), buffer128_read(stack_b, 7, mem));
 
     lemma_incr_msb(ctr_orig, T1, Ii, 1);
     lemma_incr_msb(ctr_orig, T1, Z1, 2);
