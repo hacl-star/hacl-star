@@ -206,13 +206,13 @@ procedure {:quick} loop6x_ctr_update(
         //rndkey == index(round_keys, 0);
 
         // Counter requirements
-        T2 == Mkfour(0, 0, 0, 0x10000000);
+        T2 == Mkfour(0, 0, 0, 0x1000000);
 
         T1 == reverse_bytes_quad32(inc32(ctr_BE, 0));
         //0 <= counter < 256;  // Implied by next line
         counter == ctr_BE.lo0 % 256;
 
-        //inout5.hi3 + 0x10000000 < pow2_32;
+        //inout5.hi3 + 0x1000000 < pow2_32;
 
         inout0 == quad32_xor(reverse_bytes_quad32(inc32(ctr_BE, 0)), rndkey);   
 
@@ -287,7 +287,7 @@ procedure {:quick} loop6x_preamble(
         rndkey == index(round_keys, 0);
 
         // Counter requirements
-        T2 == Mkfour(0, 0, 0, 0x10000000);
+        T2 == Mkfour(0, 0, 0, 0x1000000);
 
         T1 == reverse_bytes_quad32(inc32(ctr_BE, 0));
         counter == ctr_BE.lo0 % 256;
@@ -698,11 +698,11 @@ procedure {:quick} loop6x_round9(
 procedure {:quick} load_one_msb()
     lets constp @= r11; T2 @= xmm2; 
     modifies constp; T2; efl;
-    ensures  T2 == Mkfour(0, 0, 0, 0x10000000);
+    ensures  T2 == Mkfour(0, 0, 0, 0x1000000);
 {
     ZeroXmm(T2);
-    assert two_to_nat32(Mktwo(0, 0x10000000)) == 0x1000000000000000; // OBSERVE
-    PinsrqImm(T2, 0x1000000000000000, 1, constp);
+    assert two_to_nat32(Mktwo(0, 0x1000000)) == 0x100000000000000; // OBSERVE
+    PinsrqImm(T2, 0x100000000000000, 1, constp);
     reveal insert_nat64;
 }
 
@@ -815,7 +815,7 @@ procedure {:quick} loop6x_final(
          inp == old( inp) + 0x60;
         outp == old(outp) + 0x60;
 
-        T2 == Mkfour(0, 0, 0, 0x10000000);
+        T2 == Mkfour(0, 0, 0, 0x1000000);
 
         T1   == old(buffer128_read(iv_b, 0, mem));
         let ctr := ctr_orig.lo0 % 256;
@@ -962,7 +962,7 @@ procedure {:quick} loop6x(
 
     requires
         len >= 6;
-        T2 == Mkfour(0, 0, 0, 0x10000000);
+        T2 == Mkfour(0, 0, 0, 0x1000000);
 
         // Valid ptrs and buffers
         validDstAddrs128(mem, ivp, iv_b, 1, memTaint, Secret);
@@ -988,13 +988,13 @@ procedure {:quick} loop6x(
         // Counter requirements
         /*
         // TODO: Clean this up
-        inout5.hi3 + 0x10000000 < pow2_32;
-        reverse_bytes_quad32(inc32(ctr_BE, 6)).hi3 + (5*0x10000000) < pow2_32;
+        inout5.hi3 + 0x1000000 < pow2_32;
+        reverse_bytes_quad32(inc32(ctr_BE, 6)).hi3 + (5*0x1000000) < pow2_32;
 
         T1 == reverse_bytes_quad32(ctr_BE);
         */
 
-        T2 == Mkfour(0, 0, 0, 0x10000000);
+        T2 == Mkfour(0, 0, 0, 0x1000000);
         T1 == reverse_bytes_quad32(inc32(ctr_BE, 0));
         counter == ctr_BE.lo0 % 256;
 
@@ -1008,7 +1008,7 @@ procedure {:quick} loop6x(
 
     ensures
         len == old(len) - 6;
-        T2 == Mkfour(0, 0, 0, 0x10000000);
+        T2 == Mkfour(0, 0, 0, 0x1000000);
 
          inp == old( inp) + 0x60;
         outp == old(outp) + 0x60;
