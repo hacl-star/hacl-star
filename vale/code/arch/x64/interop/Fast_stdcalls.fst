@@ -432,6 +432,7 @@ let lowstar_fsub : lowstar_fsub_t  =
 let lowstar_fsub_normal_t //: normal lowstar_fsub_t
   = as_normal_t #lowstar_fsub_t lowstar_fsub
 
+#reset-options "--z3cliopt smt.arith.nl=false --smtencoding.elim_box true --smtencoding.l_arith_repr native --smtencoding.nl_arith_repr wrapped --z3rlimit 100 --max_fuel 0 --max_ifuel 0"
 let fast_fsub
   (out:b8)
   (f1:b8)
@@ -472,8 +473,9 @@ let fast_fsub
     )
   = 
   let x, _ = lowstar_fsub_normal_t out f1 f2 () in
-  admit ()
+  ()
 
+#reset-options "--max_fuel 0 --max_ifuel 0"
 
 #push-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
 
@@ -600,6 +602,7 @@ let lowstar_fmul_normal_t //: normal lowstar_fmul_t
   = as_normal_t #lowstar_fmul_t lowstar_fmul
 
 
+#reset-options "--z3cliopt smt.arith.nl=false --smtencoding.elim_box true --smtencoding.l_arith_repr native --smtencoding.nl_arith_repr wrapped --z3rlimit 100 --max_fuel 0 --max_ifuel 0"
 let fast_fmul
   (tmp:b8)
   (f1:b8)
@@ -646,8 +649,9 @@ let fast_fmul
     )
   = 
   let x, _ = lowstar_fmul_normal_t tmp f1 out f2 () in
-  admit ()
+  ()
 
+#reset-options "--max_fuel 0 --max_ifuel 0"
 
 #push-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 200"
 
@@ -771,6 +775,7 @@ let lowstar_fmul2 : lowstar_fmul2_t  =
 let lowstar_fmul2_normal_t //: normal lowstar_fmul2_t
   = as_normal_t #lowstar_fmul2_t lowstar_fmul2
 
+#reset-options "--z3cliopt smt.arith.nl=false --smtencoding.elim_box true --smtencoding.l_arith_repr native --smtencoding.nl_arith_repr wrapped --z3rlimit 100 --max_fuel 0 --max_ifuel 0"
 let fast_fmul2
   (tmp:b8)
   (f1:b8)
@@ -833,8 +838,9 @@ let fast_fmul2
     )
   = 
   let x, _ = lowstar_fmul2_normal_t tmp f1 out f2 () in
-  admit ()
+  ()
 
+#reset-options "--max_fuel 0 --max_ifuel 0"
 
 #push-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 200"
 
@@ -953,6 +959,7 @@ let lowstar_fmul1 : lowstar_fmul1_t  =
 let lowstar_fmul1_normal_t : normal lowstar_fmul1_t
   = as_normal_t #lowstar_fmul1_t lowstar_fmul1
 
+#reset-options "--z3cliopt smt.arith.nl=false --smtencoding.elim_box true --smtencoding.l_arith_repr native --smtencoding.nl_arith_repr wrapped --z3rlimit 100 --max_fuel 0 --max_ifuel 0"
 let fast_fmul1
   (out:b8)
   (f1:b8)
@@ -984,8 +991,9 @@ let fast_fmul1
     )
   = 
   let x, _ = lowstar_fmul1_normal_t out f1 f2 () in
-  admit ();
   x
+
+#reset-options "--max_fuel 0 --max_ifuel 0"
 
 #push-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
 
@@ -1102,6 +1110,7 @@ let lowstar_fsqr : lowstar_fsqr_t  =
 let lowstar_fsqr_normal_t //: normal lowstar_fsqr_t
   = as_normal_t #lowstar_fsqr_t lowstar_fsqr
 
+#reset-options "--z3cliopt smt.arith.nl=false --smtencoding.elim_box true --smtencoding.l_arith_repr native --smtencoding.nl_arith_repr wrapped --z3rlimit 100 --max_fuel 0 --max_ifuel 0"
 let fast_fsqr
   (tmp:b8)
   (f1:b8)
@@ -1137,8 +1146,9 @@ let fast_fsqr
     )
   = 
   let x, _ = lowstar_fsqr_normal_t tmp f1 out () in
-  admit ()
+  ()
 
+#reset-options "--max_fuel 0 --max_ifuel 0"
 
 #push-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
 
@@ -1252,6 +1262,7 @@ let lowstar_fsqr2 : lowstar_fsqr2_t  =
 let lowstar_fsqr2_normal_t //: normal lowstar_fsqr2_t
   = as_normal_t #lowstar_fsqr2_t lowstar_fsqr2
 
+#reset-options "--z3cliopt smt.arith.nl=false --smtencoding.elim_box true --smtencoding.l_arith_repr native --smtencoding.nl_arith_repr wrapped --z3rlimit 100 --max_fuel 0 --max_ifuel 0"
 let fast_fsqr2
   (tmp:b8)
   (f1:b8)
@@ -1298,8 +1309,9 @@ let fast_fsqr2
     )
   = 
   let x, _ = lowstar_fsqr2_normal_t tmp f1 out () in
-  admit ()
+  ()
 
+#reset-options "--max_fuel 0 --max_ifuel 0"
 
 #push-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
 
@@ -1416,8 +1428,7 @@ let lowstar_cswap : lowstar_cswap_t  =
 let lowstar_cswap_normal_t : normal lowstar_cswap_t
   = as_normal_t #lowstar_cswap_t lowstar_cswap
 
-#set-options "--z3rlimit 100"
-
+#reset-options "--z3cliopt smt.arith.nl=false --smtencoding.elim_box true --smtencoding.l_arith_repr native --smtencoding.nl_arith_repr wrapped --z3rlimit 100 --max_fuel 0 --max_ifuel 0"
 let fast_cswap2
   (p0:b8)
   (p1:b8)
@@ -1475,7 +1486,7 @@ let fast_cswap2
     ))
   = 
   let x, _ = lowstar_cswap_normal_t p0 p1 bit () in
-  admit ()
+  ()
 
 #push-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
 
