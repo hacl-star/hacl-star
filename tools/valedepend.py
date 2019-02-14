@@ -7,8 +7,8 @@ import os, os.path
 import traceback
 
 if sys.version_info < (3, 3):
-  print('Requires Python version >= 3.3, found version ' + sys.version_info)
-  exit(1)
+    print('Requires Python version >= 3.3, found version ' + sys.version_info)
+    exit(1)
 
 ##################################################################################################
 #
@@ -44,13 +44,10 @@ vale_fstar_re = re.compile(r'\{\:\s*fstar\s*\}')
 vale_from_base_re = re.compile(r'\{\:\s*from\s*BASE\s*\}')
 vale_import_re = re.compile(r'module\s+[a-zA-Z0-9_]+\s*[=]\s*([a-zA-Z0-9_.]+)')
 
-cwd = os.path.normpath(os.getcwd()).replace('\\', '/')
-
 def norm(path):
     p = os.path.normpath(path).replace('\\', '/')
-    return p
-    if p.startswith(cwd):
-        p = p[len(cwd) + 1:]
+    if path.startswith('./') and not p.startswith('./'):
+        p = './' + p
     return p
 
 # Drop the '.vaf', '.fst', etc.
@@ -60,13 +57,10 @@ def file_drop_extension(file):
 # Given source file name, return file name in object directory
 def to_obj_dir(file):
     file = norm(file)
-    return file
-    if os.path.isabs(file):
-        file = os.path.join('external', os.path.basename(file))
-    if file.startswith('obj'):
-        return norm(file)
+    if file.startswith('./obj'):
+        return file
     else:
-        return norm(os.path.join('obj', file))
+        return norm(os.path.join('./obj', os.path.basename(file)))
 
 def depends(target, source):
     target = norm(target)
@@ -90,6 +84,14 @@ def find_fsti(module):
             return norm(os.path.join(d, module + '.fst'))
     raise Exception('Could not find fst/fsti for dependency ' + module)
 
+def make_dump(fst_file):
+    dump = to_obj_dir(fst_file + '.dump')
+    checked = fst_file + '.checked'
+    if not os.path.exists(checked):
+        checked = to_obj_dir(checked)
+    depends(dump, checked)
+    return dump
+
 def vale_dependency_scan(vaf):
     with open(vaf) as f:
         contents = f.read()
@@ -108,9 +110,7 @@ def vale_dependency_scan(vaf):
     depends(fsti, types_vaf)
     for (attrs, inc) in vaf_includes:
         if vale_fstar_re.search(attrs):
-            dumpsourcebase = to_obj_dir(find_fsti(inc))
-            dumpsourcefile = dumpsourcebase + '.dump'
-            vaf_dump_deps[vaf].add(dumpsourcefile)
+            vaf_dump_deps[vaf].add(make_dump(find_fsti(inc)))
         else:
             f = norm(os.path.join('code' if vale_from_base_re.search(attrs) else dirname, inc))
             ffsti = to_obj_dir(file_drop_extension(f) + '.fsti')
@@ -156,11 +156,11 @@ def compute_fstar_deps():
             # Computing types from F* files
             # Dump F* types for for each of a1.fst a2.fst ... into a1.fst.dump, a2.fst.dump, ...
             for t in targets:
-                dumptargetfile = to_obj_dir(t + '.dump')
+                dumptargetfile = make_dump(t)
                 if not (dumptargetfile in dump_deps):
                     dump_deps[dumptargetfile] = set()
                 for s in sources:
-                    dump_deps[dumptargetfile].add(to_obj_dir(s + '.dump'))
+                    dump_deps[dumptargetfile].add(make_dump(s))
 
 for vaf in vaf_files:
     try:

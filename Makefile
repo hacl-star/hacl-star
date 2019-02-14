@@ -10,32 +10,78 @@
 #           code   vale                code/old
 #           /   \  /                      |
 #         lib   specs                  specs/old
+#
+# This Makefile honors the following variables:
+# - NOSHORTLOG=1 disables pretty (short) logs
+# - NODEPEND=1 disables .depend re-generation (use for debugging only)
+# - EVERCRYPT_CONFIG allows switching EverCrypt static configurations; when
+#   going through the all target, we properly invalidate the checked file.
+#
+# This is a staged Makefile, because we first need to generate .fst files out of
+# .vaf files in order to get a full dependency graph for the .fst files. So,
+# this Makefile exposes the following targets to the end user:
+# - all: staged target for the entire build (default)
+# - ci: same as all, without short logs
+# - vale-fst: the minimum needed to compile .vaf files to .fst files
+# - vale-verify: properly staged target for re-verifying all the vale files
+# - vale-asm: re-generation of the Vale assemblies in dist/vale
+# - hacl-verify: non-staged target for reverifying HACL* files
+# - verify: UNSTAGED, may only be invoked after a successful run of vale-fst,
+#   verifies all .fst files, both hand-written and generated.
+#
+# To generate a Makefile for the interactive mode, use:
+# - make foo/bar/Makefile
 
+#########################
+# Catching setup errors #
+#########################
+
+# This was needed once because of the shortest stem rule. I don't think it's
+# needed anymore, but better be safe.
 ifeq (3.81,$(MAKE_VERSION))
   $(error You seem to be using the OSX antiquated Make version. Hint: brew \
     install make, then hit invoke gmake instead of make)
 endif
 
+# Better error early.
 ifeq (,$(VALE_HOME))
   $(error Please define VALE_HOME, possibly using cygpath -m)
 endif
 
+ifeq (,$(wildcard $(VALE_HOME)/bin/vale.exe))
+  $(error $$VALE_HOME/bin/vale.exe does not exist (VALE_HOME=$(VALE_HOME)))
+endif
+
+# Backwards-compat, remove
+ifneq (,$(MLCRYPTO_HOME))
+OPENSSL_HOME 	:= $(MLCRYPTO_HOME)/openssl
+endif
+
+ifeq (,$(OPENSSL_HOME))
+  $(error Please define MLCRYPTO_HOME, possibly using cygpath -m)
+endif
+
+ifeq (,$(OPENSSL_HOME)/libcrypto.a)
+  $(error $$OPENSSL_HOME/libcrypto.a does not exist (OPENSSL_HOME=$(OPENSSL_HOME)))
+endif
+
+ifneq (,$(HACL_HOME))
+ifeq (Windows_NT,$(OS))
+  HACL_HOME := $(shell cygpath -m $(HACL_HOME))
+endif
+endif
 
 ##########################
 # Top-level entry points #
 ##########################
 
-# This is a staged Makefile, because we first need to generate .fst files out of
-# .vaf files in order to get a full dependency graph for the .fst files.
-# This Makefile can be safely re-invoked with a different EVERCRYPT_CONFIG
-# parameter to generate a different static specialization of EverCrypt.
-all_:
+all:
 	tools/blast-staticconfig.sh $(EVERCRYPT_CONFIG)
-	$(MAKE) vaf-to-fst
-	FSTAR_DEPEND_FLAGS="--warn_error +285" $(MAKE) all
+	$(MAKE) vale-fst
+	FSTAR_DEPEND_FLAGS="--warn_error +285" $(MAKE) all_
 
 
-all: compile-compact compile-generic compile-compact-msvc \
+all_: compile-compact compile-generic compile-compact-msvc \
   compile-evercrypt-external-headers compile-compact-c89 compile-coco \
   secure_api.old
 
@@ -47,13 +93,20 @@ test-c: $(subst .,_,$(patsubst %.fst,test-c-%,$(notdir $(wildcard code/tests/*.f
 test-ml: $(subst .,_,$(patsubst %.fst,test-ml-%,$(notdir $(wildcard specs/tests/*.fst))))
 
 ci:
-	NOSHORTLOG=1 $(MAKE) vaf-to-fst
-	FSTAR_DEPEND_FLAGS="--warn_error +285" NOSHORTLOG=1 $(MAKE) all test
+	NOSHORTLOG=1 $(MAKE) vale-fst
+	FSTAR_DEPEND_FLAGS="--warn_error +285" NOSHORTLOG=1 $(MAKE) all_ test
 
 # Backwards-compat target
 .PHONY: secure_api.old
 secure_api.old:
-	$(call run-with-log,$(MAKE) -C secure_api,[OLD-MAKE secure_api],secure_api/log)
+	$(call run-with-log,$(MAKE) -C secure_api,[OLD-MAKE secure_api],obj/secure_api)
+
+# So that this Makefile can also clean the previous directory layout. In the
+# long run, TO_CLEAN should be able to go.
+TO_CLEAN=$(foreach ext,checked checked.lax out cmd err time dump types.vaf krml cmx cmo cmi o d a,-or -iname '*.$(ext)')
+clean:
+	find . -iname '.depend*' $(TO_CLEAN) -delete
+	rm -rf obj/*
 
 
 #################
@@ -90,20 +143,18 @@ endif
 SHELL=/bin/bash
 
 # A helper to generate pretty logs, callable as:
-#   $(call run-with-log,CMD,TXT,STEM[,OUT])
+#   $(call run-with-log,CMD,TXT,STEM)
 #
 # Arguments:
 #  CMD: command to execute (may contain double quotes, but not escaped)
 #  TXT: readable text to print out once the command terminates
-#  STEM: path stem for the logs, stdout will be in STEM.out and stderr in STEM.err
-#  OUT: if present, stdout goes in OUT instead of STEM.out
+#  STEM: path stem for the logs, stdout will be in STEM.out, stderr in STEM.err, CMD in STEM.cmd
 ifeq (,$(NOSHORTLOG))
 run-with-log = \
-  @if [[ "$4" == "" ]]; then outfile="$3.out"; else outfile="$4"; fi; \
-  $(TIME) -q -f '%E' -o $3.time sh -c "$(subst ",\",$1)" > $$outfile 2> >( tee $3.err 1>&2 ); \
+  @echo "$(subst ",\",$1)" > $3.cmd; \
+  $(TIME) -q -f '%E' -o $3.time sh -c "$(subst ",\",$1)" > $3.out 2> >( tee $3.err 1>&2 ); \
   ret=$$?; \
   time=$$(cat $3.time); \
-  if [[ "$4" == "" ]]; then echo "Command was:" >> $$outfile; echo "$(subst ",\",$1)" >> $$outfile; fi; \
   if [ $$ret -eq 0 ]; then \
     echo "$2, $$time"; \
   else \
@@ -124,24 +175,36 @@ endif
 # Dependency graphs for Vale, then F* source files #
 ####################################################
 
+# Transforms any foo/bar/baz.qux into obj/baz.qux
+to-obj-dir = $(addprefix obj/,$(notdir $1))
+
 # The set of .vaf files we want to translate to F*.
-VALE_ROOTS = $(filter-out %.types.vaf,$(wildcard $(addsuffix /*.vaf,$(VALE_DIRS))))
+VALE_ROOTS = $(wildcard $(addsuffix /*.vaf,$(VALE_DIRS)))
 
-# F* files stemming from Vale files
-VALE_FSTS = $(patsubst %.vaf,%.fst,$(VALE_ROOTS))
+# Target F* files stemming from Vale files
+VALE_FSTS = $(call to-obj-dir,$(patsubst %.vaf,%.fst,$(VALE_ROOTS)))
 
-# The complete set of F* files -- only meaningful in the second stage of this build.
-FSTAR_ROOTS = $(wildcard $(addsuffix /*.fsti,$(DIRS)) $(addsuffix /*.fst,$(DIRS)))
+.PRECIOUS: %.fst %.fsti
 
-# Convenience target. Remember to run make vaf-to-fst first.
+# The complete set of F* files, both hand-written and Vale-generated. Note that
+# this is only correct in the second stage of the build.
+FSTAR_ROOTS = $(wildcard $(addsuffix /*.fsti,$(DIRS)) $(addsuffix /*.fst,$(DIRS))) \
+  $(wildcard obj/*.fst) $(wildcard obj/*.fsti) # these two empty during the first stage
+
+# Convenience target. Remember to run make vale-fst first.
 verify: $(addsuffix .checked,$(FSTAR_ROOTS))
 
 include Makefile.common
 
-# We currently force regeneration of three depend files... this is... long...
+# We currently force regeneration of three depend files. This is long.
+
+# If were are debugging (i.e. the files exist already); or within a restarting
+# (NOT recursive) make invocation, meaning we are in the process of
+# re-generating such files; then don't provide recipes for generating .depend
+# files. (In the latter case, this would send make into an infinite loop.)
+
 ifndef NODEPEND
 ifndef MAKE_RESTARTS
-
 # Note that the --extract argument only controls what is extracted for OCaml,
 # meaning we can eliminate large chunks of the dependency graph, since we only
 # need to run: Vale stuff, and HACL spec tests.
@@ -149,47 +212,67 @@ ifndef MAKE_RESTARTS
 	$(call run-with-log,\
 	  $(FSTAR_NO_FLAGS) --dep $* $(FSTAR_ROOTS) --warn_error '-285' $(FSTAR_DEPEND_FLAGS) \
 	    --extract '* -Prims -LowStar -Lib.Buffer -Hacl -FStar +FStar.Endianness +FStar.Kremlin.Endianness -EverCrypt -MerkleTree -Vale.Tactics -CanonCommMonoid -CanonCommSemiring -FastHybrid_helpers -FastMul_helpers -FastSqr_helpers -FastUtil_helpers -TestLib -EverCrypt -MerkleTree -Test -Vale_memcpy -Vale.AsLowStar.Test' > $@ \
-	  ,[FSTAR-DEPEND ($*)],$@,$@)
+	  ,[FSTAR-DEPEND ($*)],$(call to-obj-dir,$@))
 
 .vale-depend: .fstar-depend-make .FORCE
 	$(call run-with-log,\
-	  $(PYTHON3) tools/valedepend.py \
+	  "$(PYTHON3)" tools/valedepend.py \
 	    $(addprefix -include ,$(INCLUDES)) \
 	    $(addprefix -in ,$(VALE_ROOTS)) \
 	    -dep $< \
 	    > $@ \
-	  ,[VALE-DEPEND],$@,$@)
+	  ,[VALE-DEPEND],$(call to-obj-dir,$@))
 
 .PHONY: .FORCE
 .FORCE:
 endif
 endif
 
+# If invoking a known, staged target, then don't include these files, so as not
+# to trigger their re-generation (will be done later through recursive (NOT
+# restarting)) make invocations.
+ifeq ($(MAKECMDGOALS),clean)
+  SKIPDEPEND=1
+else ifeq ($(MAKECMDGOALS),)
+  SKIPDEPEND=1
+else ifeq ($(MAKECMDGOALS),all)
+  SKIPDEPEND=1
+else ifeq ($(MAKECMDGOALS),vale-verify)
+  SKIPDEPEND=1
+else ifeq ($(MAKECMDGOALS),ci)
+  SKIPDEPEND=1
+else ifeq (,$(filter-out %/Makefile,$(MAKECMDGOALS)))
+  SKIPDEPEND=1
+endif
+
+ifndef SKIPDEPEND
 include .fstar-depend-full
 include .vale-depend
+endif
 
 
 #################################################
 # First stage: compiling vaf files to fst files #
 #################################################
 
-%.dump: %.checked
+%.dump:
 	$(call run-with-log,\
 	  $(FSTAR) --dump_module $(subst prims,Prims,$(basename $(notdir $*))) \
 	    --print_implicits --print_universes --print_effect_args --print_full_names \
 	    --print_bound_var_types --ugly --admit_smt_queries true \
-	    $* > $@ \
-	  ,[DUMP] $(notdir $(patsubst %.fst,%,$*)),$@)
+	    --hint_file hints/$(notdir $*).hints \
+	    $(notdir $*) > $@ \
+	  ,[DUMP] $(notdir $(patsubst %.fst,%,$*)),$(call to-obj-dir,$@))
 
 %.types.vaf:
 	$(call run-with-log,\
 	  $(MONO) $(IMPORT_FSTAR_TYPES) $(addprefix -in ,$^) -out $@ \
-	  ,[VALE-TYPES] $(notdir $*),$@)
+	  ,[VALE-TYPES] $(notdir $*),$(call to-obj-dir,$@))
 
 # Always pass Operator.vaf as an -include to Vale, except for the file itself.
 VALE_FLAGS = -include $(HACL_HOME)/vale/code/lib/util/Operator.vaf
 
-$(HACL_HOME)/vale/code/lib/util/Operator.fst: VALE_FLAGS=
+obj/Operator.fst: VALE_FLAGS=
 
 %.fst:
 	$(call run-with-log,\
@@ -197,15 +280,10 @@ $(HACL_HOME)/vale/code/lib/util/Operator.fst: VALE_FLAGS=
 	    -typecheck -include $*.types.vaf \
 	    $(VALE_FLAGS) \
 	    -in $< -out $@ -outi $@i \
-	  ,[VALE] $(notdir $*),$@)
+	  ,[VALE] $(notdir $*),$(call to-obj-dir,$@))
 
 # A pseudo-target for the first stage.
-vaf-to-fst: $(VALE_FSTS)
-
-# When refresh is needed
-append-gitignore:
-	echo $(VALE_FSTS) | sed 's!$(HACL_HOME)!\n!g' >> .gitignore
-	echo $(patsubst %.fst,%.fsti,$(VALE_FSTS)) | sed 's!$(HACL_HOME)!\n!g' >> .gitignore
+vale-fst: $(VALE_FSTS)
 
 
 ################################################
@@ -223,82 +301,113 @@ VALE_FSTAR_FLAGS=$(VALE_FSTAR_FLAGS_NOSMT) \
   --smtencoding.elim_box true --smtencoding.l_arith_repr native \
   --smtencoding.nl_arith_repr wrapped
 
+# $(call only-for,<filter>) retains all the *source* checked files that match
+# <filter>, then returns the corresponding set of targets in obj/. For instance,
+# $(call only-for,$(HACL_HOME)/code/%.checked) returns
+# obj/Hacl.Hash.Definitions.fst.checked, and all the other targets that
+# originate from source files in code/.
+#
+# With this macro, we no longer rely on pattern rules for file-specific options,
+# meaning we also no longer rely on the shortest stem rule. Many of the rules
+# below match the same file multiple times (as we the case in the original
+# SConstruct). The last match has precedence and overrides previous variable
+# assignments.
+only-for = $(call to-obj-dir,$(filter $1,$(addsuffix .checked,$(FSTAR_ROOTS))))
+
 # By default Vale files don't use two phase tc
-$(HACL_HOME)/vale/%.checked: \
+$(call only-for,$(HACL_HOME)/vale/%.checked): \
   FSTAR_FLAGS=$(VALE_FSTAR_FLAGS) --use_two_phase_tc false
 
 # Except for the files in specs/ and code/
-$(HACL_HOME)/vale/specs/%.checked: \
+$(call only-for,$(HACL_HOME)/vale/specs/%.checked): \
   FSTAR_FLAGS=$(VALE_FSTAR_FLAGS)
-$(HACL_HOME)/vale/code/%.checked: \
+$(call only-for,$(HACL_HOME)/vale/code/%.checked): \
   FSTAR_FLAGS=$(VALE_FSTAR_FLAGS)
 
 # Except for the interop files, which apparently are ok with two phase TC.
-$(HACL_HOME)/vale/code/arch/x64/interop/%.checked: \
+$(call only-for,$(HACL_HOME)/vale/code/arch/x64/interop/%.checked): \
   FSTAR_FLAGS=$(shell echo $(VALE_FSTAR_FLAGS_NOSMT) | \
     sed 's/--z3cliopt smt.arith.nl=false//; \
       s/--z3cliopt smt.QI.EAGER_THRESHOLD=100//')
 
-# Except for the files coming from vaf files, which also don't work with two
-# phase tc.
-$(patsubst %.fst,%.fst.checked,$(VALE_FSTS)) \
-$(patsubst %.fst,%.fsti.checked,$(VALE_FSTS)): \
+# Now the fst files coming from vaf files, which also don't work with two
+# phase tc (VALE_FSTS is of the form obj/foobar.fst).
+$(addsuffix .checked,$(VALE_FSTS)) \
+$(addsuffix i.checked,$(VALE_FSTS)): \
   FSTAR_FLAGS=$(VALE_FSTAR_FLAGS) --use_two_phase_tc false
 
 # Then a series of individual overrides.
-$(HACL_HOME)/vale/code/arch/x64/Interop.fst.checked: \
+obj/Interop.fst.checked: \
   FSTAR_FLAGS=$(shell echo $(VALE_FSTAR_FLAGS_NOSMT) | \
     sed 's/--use_extracted_interfaces true//; \
       s/--z3cliopt smt.QI.EAGER_THRESHOLD=100//') \
       --smtencoding.elim_box true
 
-$(HACL_HOME)/vale/code/lib/util/BufferViewHelpers.fst.checked: \
+obj/BufferViewHelpers.fst.checked: \
   FSTAR_FLAGS=$(shell echo $(VALE_FSTAR_FLAGS_NOSMT) | \
     sed 's/--z3cliopt smt.arith.nl=false//;')
 
-$(HACL_HOME)/vale/code/arch/x64/Views.fst.checked: \
+obj/Views.fst.checked: \
   FSTAR_FLAGS=$(shell echo $(VALE_FSTAR_FLAGS) | \
     sed 's/--smtencoding.nl_arith_repr wrapped/--smtencoding.nl_arith_repr native/;')
 
-$(HACL_HOME)/vale/code/lib/collections/Collections.Lists.fst.checked: \
+objections/Collections.Lists.fst.checked: \
   FSTAR_FLAGS=$(shell echo $(VALE_FSTAR_FLAGS) | \
     sed 's/--z3cliopt smt.QI.EAGER_THRESHOLD=100//')
 
-$(HACL_HOME)/vale/code/arch/x64/X64.Bytes_Semantics.fst.checked: \
+obj/X64.Bytes_Semantics.fst.checked: \
   FSTAR_FLAGS=$(shell echo $(VALE_FSTAR_FLAGS) | \
     sed 's/--smtencoding.nl_arith_repr wrapped//; \
       s/--smtencoding.nl_arith_repr native//')
 
-$(HACL_HOME)/vale/code/arch/x64/X64.BufferViewStore.fst.checked: \
+obj/X64.BufferViewStore.fst.checked: \
   FSTAR_FLAGS=$(VALE_FSTAR_FLAGS_NOSMT) --smtencoding.elim_box true
 
-$(HACL_HOME)/vale/code/crypto/poly1305/x64/X64.Poly1305.Util.fst.checked: \
+obj/X64.Poly1305.Util.fst.checked: \
   FSTAR_FLAGS=$(VALE_FSTAR_FLAGS_NOSMT)
 
-$(HACL_HOME)/vale/code/crypto/poly1305/x64/X64.Poly1305.Util.fsti.checked: \
+obj/X64.Poly1305.Util.fsti.checked: \
   FSTAR_FLAGS=$(VALE_FSTAR_FLAGS_NOSMT)
 
-$(HACL_HOME)/vale/code/arch/x64/X64.Memory.fst.checked: \
+obj/X64.Memory.fst.checked: \
   FSTAR_FLAGS=$(shell echo $(VALE_FSTAR_FLAGS_NOSMT) | \
     sed 's/--use_extracted_interfaces true//; \
       s/--z3cliopt smt.arith.nl=false//') \
       --smtencoding.elim_box true
 
-$(HACL_HOME)/vale/code/arch/x64/X64.Memory_Sems.fst.checked: \
+obj/X64.Memory_Sems.fst.checked: \
   FSTAR_FLAGS=$(shell echo $(VALE_FSTAR_FLAGS_NOSMT) | \
     sed 's/--use_extracted_interfaces true//; \
       s/--z3cliopt smt.arith.nl=false//') \
       --smtencoding.elim_box true
+
+hints:
+	mkdir -p $@
 
 # The actual default invocation. Note that the FSTAR_FLAGS= definition allows
 # making sure prerequisites of a given rule (e.g. CanonCommMonoid) don't inherit
 # the variable assignment of their parent rule.
+
 %.checked: FSTAR_FLAGS=
-%.checked:
+%.checked: | hints
 	$(call run-with-log,\
-	  $(FSTAR) $< $(FSTAR_FLAGS) && \
-	    touch $@ \
-	  ,[VERIFY] $(notdir $*),$@)
+	  $(FSTAR) $< $(FSTAR_FLAGS) \
+	    --hint_file hints/$(notdir $*).hints \
+	    && \
+	    touch -c $@ \
+	  ,[VERIFY] $(notdir $*),$(call to-obj-dir,$@))
+
+# Convenience pseudo-targets
+vale-verify:
+	$(MAKE) vale-fst
+	$(MAKE) vale-verify_
+
+vale-verify_: \
+  $(addsuffix .checked,$(VALE_FSTS)) \
+  $(addsuffix i.checked,$(VALE_FSTS)) \
+  $(call only-for,$(HACL_HOME)/vale/%.checked) \
+
+hacl-verify: $(call only-for,$(HACL_HOME)/code/%.checked)
 
 
 ###############################################################################
@@ -319,53 +428,58 @@ endif
 # Warning 8: this pattern-matching is not exhaustive.
 # Warning 20: this argument will not be used by the function.
 # Warning 26: unused variable
-OCAMLOPT = ocamlfind opt -package fstarlib -linkpkg -g -I $(OUTPUT_DIR) \
-  -warn-error -8-20-26
+OCAMLOPT = ocamlfind opt -package fstarlib -linkpkg -g -I obj -w -8-20-26
 
-.PRECIOUS: %.cmx
-%.cmx: %.ml
+.PRECIOUS: obj/%.cmx
+obj/%.cmx: obj/%.ml
 	$(call run-with-log,\
 	  $(OCAMLOPT) -c $< -o $@ \
-	  ,[OCAMLOPT-CMX] $(notdir $*),$@)
+	  ,[OCAMLOPT-CMX] $(notdir $*),$(call to-obj-dir,$@))
 
-$(OUTPUT_DIR)/%.ml:
+obj/%.ml:
 	$(call run-with-log,\
-	  $(FSTAR) $(subst .checked,,$<) --codegen OCaml \
+	  $(FSTAR) $(notdir $(subst .checked,,$<)) --codegen OCaml \
 	    --extract_module $(subst .fst.checked,,$(notdir $<)) \
-	  ,[EXTRACT-ML] $(notdir $*),$@)
+	  ,[EXTRACT-ML] $(notdir $*),$(call to-obj-dir,$@))
 
-dist/vale/%-x86_64-mingw.S: dist/vale/%.exe
+dist/vale:
+	mkdir -p $@
+
+dist/vale/%-x86_64-mingw.S: obj/vale-%.exe | dist/vale
 	$< GCC Win > $@
 	$(SED) 's/_stdcall//' -i $@
 
-dist/vale/%-x86_64-msvc.S: dist/vale/%.exe
+dist/vale/%-x86_64-msvc.asm: obj/vale-%.exe | dist/vale
 	$< MASM Win > $@
 	$(SED) 's/_stdcall//' -i $@
 
-dist/vale/%-x86_64-linux.S: dist/vale/%.exe
+dist/vale/%-x86_64-linux.S: obj/vale-%.exe | dist/vale
 	$< GCC Linux > $@
 	$(SED) 's/_stdcall//' -i $@
 
-dist/vale/%-x86_64-darwin.S: dist/vale/%.exe
+dist/vale/%-x86_64-darwin.S: obj/vale-%.exe | dist/vale
 	$< GCC MacOS > $@
 	$(SED) 's/_stdcall//' -i $@
 
-dist/vale/cpuid.exe: vale/code/lib/util/x64/CpuidMain.ml
-dist/vale/aesgcm.exe: vale/code/crypto/aes/x64/Main.ml
-dist/vale/sha256.exe: vale/code/crypto/sha/ShaMain.ml
-dist/vale/curve25519.exe: vale/code/crypto/ecc/curve25519/Main25519.ml
+obj/vale-cpuid.exe: vale/code/lib/util/x64/CpuidMain.ml
+obj/vale-aesgcm.exe: vale/code/crypto/aes/x64/Main.ml
+obj/vale-sha256.exe: vale/code/crypto/sha/ShaMain.ml
+obj/vale-curve25519.exe: vale/code/crypto/ecc/curve25519/Main25519.ml
 
-vale/code/lib/util/CmdLineParser.cmx: $(ALL_CMX_FILES)
+obj/CmdLineParser.ml: vale/code/lib/util/CmdLineParser.ml
+	cp $< $@
 
-dist/vale/%.exe: $(ALL_CMX_FILES) vale/code/lib/util/CmdLineParser.cmx
+obj/CmdLineParser.cmx: $(ALL_CMX_FILES)
+
+obj/vale-%.exe: $(ALL_CMX_FILES) obj/CmdLineParser.cmx
 	mkdir -p $(dir $@)
 	$(call run-with-log,\
-	  $(OCAMLOPT) $^ -o $@ -I vale/code/lib/util \
+	  $(OCAMLOPT) $^ -o $@ \
 	  ,[OCAMLOPT-EXE] $(notdir $*),$@)
 
 # The ones in secure_api are legacy and should go.
 VALE_ASMS = $(foreach P,cpuid aesgcm sha256 curve25519,\
-  $(addprefix dist/vale/,$P-x86_64-mingw.S $P-x86_64-msvc.S $P-x86_64-linux.S $P-x86_64-darwin.S)) \
+  $(addprefix dist/vale/,$P-x86_64-mingw.S $P-x86_64-msvc.asm $P-x86_64-linux.S $P-x86_64-darwin.S)) \
   $(wildcard \
     $(HACL_HOME)/secure_api/vale/asm/aes-*.S \
     $(HACL_HOME)/secure_api/vale/asm/aes-*.asm)
@@ -380,7 +494,7 @@ vale-asm: $(VALE_ASMS)
 
 .PRECIOUS: %.krml
 
-$(OUTPUT_DIR)/%.krml:
+obj/%.krml:
 	$(call run-with-log,\
 	  $(FSTAR) --codegen Kremlin \
 	    --extract_module $(basename $(notdir $(subst .checked,,$<))) \
@@ -451,7 +565,7 @@ COMPACT_FLAGS	=\
 .PHONY: old-%
 old-%:
 	$(call run-with-log,\
-	  $(MAKE) -C code/old -f Makefile.old $* \
+	  KOPTS=-verbose $(MAKE) -C code/old -f Makefile.old $* \
 	  ,[OLD-MAKE $*],code/old/$*)
 
 HACL_OLD_FILES=\
@@ -486,7 +600,7 @@ endif
 
 .PRECIOUS: dist/%/Makefile.basic
 dist/%/Makefile.basic: $(ALL_KRML_FILES) dist/hacl-internal-headers/Makefile.basic \
-  $(HAND_WRITTEN_FILES) $(VALE_ASMS) | old-extract-c
+  $(HAND_WRITTEN_FILES) $(HAND_WRITTEN_OPTIONAL_FILES) $(VALE_ASMS) | old-extract-c
 	mkdir -p $(dir $@)
 	cp $(HACL_OLD_FILES) $(patsubst %.c,%.h,$(HACL_OLD_FILES)) $(dir $@)
 	cp $(HAND_WRITTEN_FILES) $(HAND_WRITTEN_OPTIONAL_FILES) dist/hacl-internal-headers/*.h $(dir $@)
@@ -539,6 +653,7 @@ dist/test/c/%.c: $(ALL_KRML_FILES)
 
 dist/test/c/Test.c: KRML_EXTRA=-add-include '"kremlin/internal/compat.h"'
 
+
 ###################################################################################
 # C Compilation (recursive make invocation relying on KreMLin-generated Makefile) #
 ###################################################################################
@@ -552,13 +667,9 @@ compile-%: dist/Makefile dist/%/Makefile.basic
 # C tests #
 ###########
 
-# Backwards-compat, remove
-ifneq (,$(MLCRYPTO_HOME))
-OPENSSL_HOME 	:= $(MLCRYPTO_HOME)/openssl
-endif
-
 ifeq ($(OS),Windows_NT)
 OPENSSL_HOME	:= $(shell cygpath -u $(OPENSSL_HOME))
+LDFLAGS		+= -lbcrypt
 endif
 
 dist/test/c/merkle_tree_test.c: secure_api/merkle_tree/test/merkle_tree_test.c
@@ -569,16 +680,19 @@ dist/test/c/merkle_tree_test.c: secure_api/merkle_tree/test/merkle_tree_test.c
 .PRECIOUS: dist/test/c/%.exe
 dist/test/c/%.exe: dist/test/c/%.c compile-generic
 	# Linking with full kremlib since tests may use TestLib, etc.
-	$(CC) -Wall -Wextra -Wno-infinite-recursion -Wno-int-conversion -Wno-unused-parameter \
-	  -I $(dir $@) -I $(KREMLIN_HOME)/include -I $(OPENSSL_HOME)/include -I dist/generic \
-	  -L$(OPENSSL_HOME) \
-	  $< -o $@ \
-	  dist/generic/libevercrypt.a -lcrypto \
-	  $(KREMLIN_HOME)/kremlib/dist/generic/libkremlib.a
+	$(call run-with-log,\
+	  $(CC) -Wall -Wextra -Wno-infinite-recursion -Wno-int-conversion -Wno-unused-parameter \
+	    -I $(dir $@) -I $(KREMLIN_HOME)/include -I $(OPENSSL_HOME)/include -I dist/generic \
+	    -L$(OPENSSL_HOME) \
+	    $< -o $@ \
+	    dist/generic/libevercrypt.a -lcrypto $(LDFLAGS) \
+	    $(KREMLIN_HOME)/kremlib/dist/generic/libkremlib.a \
+	  ,[LD $*],$(call to-obj-dir,$@))
 
 test-c-%: dist/test/c/%.exe
 	LD_LIBRARY_PATH="$(OPENSSL_HOME)" DYLD_LIBRARY_PATH="$(OPENSSL_HOME)" \
 	  PATH="$(OPENSSL_HOME):$(PATH)" $<
+
 
 #######################
 # OCaml tests (specs) #
@@ -596,3 +710,12 @@ dist/test/ml/%.exe: $(ALL_CMX_FILES) dist/test/ml/%_AutoTest.ml
 
 test-ml-%: dist/test/ml/%.exe
 	$<
+
+
+########
+# Misc #
+########
+
+%/Makefile:
+	echo "HACL_HOME=$(shell realpath . --relative-to $(dir $@))" > $@
+	echo "include \$$(HACL_HOME)/Makefile.common" >> $@

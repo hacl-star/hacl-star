@@ -6,7 +6,15 @@ KREMLIN_HOME 	?= $(HACL_HOME)/../kremlin
 FSTAR_HOME	?= $(HACL_HOME)/../FStar
 VALE_HOME	?= $(HACL_HOME)/../vale
 
-EVERCRYPT_CONFIG ?= default
+# Other configs are possible, e.g. everest or hacl-vale, by exporting
+# EVERCRYPT_CONFIG manually.
+ifneq (,$(EVEREST_WINDOWS))
+  EVERCRYPT_CONFIG = noopenssl # hacl, vale, bcrypt
+else ifneq (,$(KAIZALA))
+  EVERCRYPT_CONFIG = kaizala # hacl, openssl
+else
+  EVERCRYPT_CONFIG ?= default
+endif
 
 # TODO: no more separate variable definitions?
 LIB_DIR		= $(HACL_HOME)/lib
@@ -41,7 +49,10 @@ VALE_DIRS	= \
   $(HACL_HOME)/vale/specs/hardware \
   $(HACL_HOME)/vale/specs/interop \
   $(HACL_HOME)/vale/specs/math
-DIRS		= $(LIB_DIR) $(SPECS_DIR) $(CODE_DIRS) $(VALE_DIRS) $(EVERCRYPT_DIRS) $(MERKLE_DIRS)
+DIRS		= \
+  $(LIB_DIR) $(SPECS_DIR) $(CODE_DIRS) $(VALE_DIRS) \
+  $(EVERCRYPT_DIRS) $(MERKLE_DIRS) \
+  $(HACL_HOME)/obj
 
 
 INCLUDES = \
@@ -50,15 +61,17 @@ INCLUDES = \
 
 # 1. FStar
 
-OUTPUT_DIR = .extracted
+OUTPUT_DIR = obj
 
 FSTAR_INCLUDES = $(addprefix --include ,$(INCLUDES))
 
 # 272: top-level bindings must be total
 # 247: checked file not written because some of its dependencies...
+# 241: corrupt cache file
 FSTAR_NO_FLAGS = $(FSTAR_HOME)/bin/fstar.exe --use_hints --record_hints --use_hint_hashes \
   --odir $(OUTPUT_DIR) --cache_checked_modules $(FSTAR_INCLUDES) --cmi \
-  --already_cached 'FStar LowStar C' --warn_error '@247-272'
+  --already_cached 'Prims FStar LowStar C' --warn_error '@241@247-272' \
+  --cache_dir obj
 
 FSTAR = $(FSTAR_NO_FLAGS) $(OTHERFLAGS)
 
