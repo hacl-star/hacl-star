@@ -40,13 +40,6 @@ let fget_x (#s:field_spec) (h:mem) (p:point s) = feval h (gsub p 0ul (nlimb s))
 let fget_z (#s:field_spec) (h:mem) (p:point s) = feval h (gsub p (nlimb s) (nlimb s))
 let fget_xz (#s:field_spec) (h:mem) (p:point s) = fget_x h p, fget_z h p
 
-val state_inv_t:#s:field_spec -> h:mem -> f:felem s -> Type0
-let state_inv_t #s h f =
-  match s with
-  | M26 -> True
-  | M51 -> F51.mul_inv_t h f
-  | M64 -> True
-
 val point_tmp_inv_t:#s:field_spec -> h:mem -> f:felem s -> Type0
 let point_tmp_inv_t #s h f =
   match s with
@@ -114,8 +107,6 @@ let point_add_and_double0 #s q nq nq_p1 ab dc tmp2 =
   fadd c x3 z3; // c = x3 + z3
   fsub d x3 z3; // d = x3 - z3
   let h1 = ST.get () in
-  assert (feval h1 a == P.fadd (feval h0 x2) (feval h0 z2));
-  assert (feval h1 b == P.fsub (feval h0 x2) (feval h0 z2));
   assert (feval h1 c == P.fadd (feval h0 x3) (feval h0 z3));
   assert (feval h1 d == P.fsub (feval h0 x3) (feval h0 z3));
 
@@ -206,26 +197,30 @@ inline_for_extraction
 val point_add_and_double_:
     #s:field_spec{s == M51 \/ s == M64}
   -> q:point s
-  -> nq:point s
-  -> nq_p1:point s
-  -> tmp1:lbuffer (limb s) (4ul *. nlimb s)
+  -> p01_tmp1:lbuffer (limb s) (8ul *. nlimb s)
   -> tmp2:felem_wide2 s
   -> Stack unit
-    (requires fun h0 ->
-      live h0 q /\ live h0 nq /\ live h0 nq_p1 /\ live h0 tmp1 /\ live h0 tmp2 /\
-      disjoint q nq /\ disjoint q nq_p1 /\ disjoint q tmp1 /\ disjoint q tmp2 /\
-      disjoint nq q /\ disjoint nq nq_p1 /\ disjoint nq tmp1 /\ disjoint nq tmp2 /\
-      disjoint nq_p1 tmp1 /\ disjoint nq_p1 tmp2 /\ disjoint tmp1 tmp2 /\
+    (requires fun h0 -> (
+      let nq = gsub p01_tmp1 0ul (2ul *. nlimb s) in
+      let nq_p1 = gsub p01_tmp1 (2ul *. nlimb s) (2ul *. nlimb s) in
+      live h0 q /\ live h0 p01_tmp1 /\ live h0 tmp2 /\
+      disjoint q p01_tmp1 /\ disjoint q tmp2 /\ disjoint p01_tmp1 tmp2 /\
       state_inv_t h0 (get_x q) /\ state_inv_t h0 (get_z q) /\
       state_inv_t h0 (get_x nq) /\ state_inv_t h0 (get_z nq) /\
-      state_inv_t h0 (get_x nq_p1) /\ state_inv_t h0 (get_z nq_p1))
-    (ensures  fun h0 _ h1 ->
-      modifies (loc nq |+| loc nq_p1 |+| loc tmp1 |+| loc tmp2) h0 h1 /\
+      state_inv_t h0 (get_x nq_p1) /\ state_inv_t h0 (get_z nq_p1)))
+    (ensures  fun h0 _ h1 -> (
+      let nq = gsub p01_tmp1 0ul (2ul *. nlimb s) in
+      let nq_p1 = gsub p01_tmp1 (2ul *. nlimb s) (2ul *. nlimb s) in
+      modifies (loc p01_tmp1 |+| loc tmp2) h0 h1 /\
       state_inv_t h1 (get_x nq) /\ state_inv_t h1 (get_z nq) /\
       state_inv_t h1 (get_x nq_p1) /\ state_inv_t h1 (get_z nq_p1) /\
      (let p2, p3 = P.add_and_double (fget_xz h0 q) (fget_xz h0 nq) (fget_xz h0 nq_p1) in
-      fget_xz h1 nq == p2 /\ fget_xz h1 nq_p1 == p3))
-let point_add_and_double_ #s q nq nq_p1 tmp1 tmp2 =
+      fget_xz h1 nq == p2 /\ fget_xz h1 nq_p1 == p3)))
+let point_add_and_double_ #s q p01_tmp1 tmp2 =
+  let nq : point s = sub p01_tmp1 0ul (2ul *! nlimb s) in
+  let nq_p1 : point s = sub p01_tmp1 (2ul *! nlimb s) (2ul *! nlimb s) in
+  let tmp1 = sub p01_tmp1 (4ul *! nlimb s) (4ul *! nlimb s) in
+
   let x2 = sub nq 0ul (nlimb s) in
   let z2 = sub nq (nlimb s) (nlimb s) in
 
@@ -234,7 +229,7 @@ let point_add_and_double_ #s q nq nq_p1 tmp1 tmp2 =
   let ab : felem2 s = sub tmp1 0ul (2ul *. nlimb s) in
   let dc : felem2 s = sub tmp1 (2ul *. nlimb s) (2ul *. nlimb s) in
 
-  let h0 = ST.get () in
+  //let h0 = ST.get () in
   assert (gsub nq 0ul (nlimb s) == x2);
   assert (gsub nq (nlimb s) (nlimb s) == z2);
   fadd a x2 z2; // a = x2 + z2
@@ -245,40 +240,40 @@ let point_add_and_double_ #s q nq nq_p1 tmp1 tmp2 =
 
 (* WRAPPER to Prevent Inlining *)
 [@CInline]
-let point_add_and_double_26 (q:point26) (nq:point26) (nq_p1:point26) tmp1 tmp2 = admit(); point_add_and_double_ #M26 q nq nq_p1 tmp1 tmp2
+let point_add_and_double_26 (q:point26) (p01_tmp1:lbuffer uint64 80ul) tmp2 = admit(); point_add_and_double_ #M26 q p01_tmp1 tmp2
 [@CInline]
-let point_add_and_double_51 (q:point51) (nq:point51) (nq_p1:point51) tmp1 tmp2 = point_add_and_double_ #M51 q nq nq_p1 tmp1 tmp2
+let point_add_and_double_51 (q:point51) (p01_tmp1:lbuffer uint64 40ul) tmp2 = point_add_and_double_ #M51 q p01_tmp1 tmp2
 [@CInline]
-let point_add_and_double_64 (q:point64) (nq:point64) (nq_p1:point64) tmp1 tmp2 = point_add_and_double_ #M64 q nq nq_p1 tmp1 tmp2
+let point_add_and_double_64 (q:point64) (p01_tmp1:lbuffer uint64 32ul) tmp2 = point_add_and_double_ #M64 q p01_tmp1 tmp2
 
 inline_for_extraction
 val point_add_and_double:
     #s:field_spec
   -> q:point s
-  -> nq: point s
-  -> nq_p1:point s
-  -> tmp1:lbuffer (limb s) (4ul *. nlimb s)
+  -> p01_tmp1:lbuffer (limb s) (8ul *. nlimb s)
   -> tmp2:felem_wide2 s
   -> Stack unit
-    (requires fun h0 ->
-      live h0 q /\ live h0 nq /\ live h0 nq_p1 /\ live h0 tmp1 /\ live h0 tmp2 /\
-      disjoint q nq /\ disjoint q nq_p1 /\ disjoint q tmp1 /\ disjoint q tmp2 /\
-      disjoint nq q /\ disjoint nq nq_p1 /\ disjoint nq tmp1 /\ disjoint nq tmp2 /\
-      disjoint nq_p1 tmp1 /\ disjoint nq_p1 tmp2 /\ disjoint tmp1 tmp2 /\
+    (requires fun h0 -> (
+      let nq = gsub p01_tmp1 0ul (2ul *. nlimb s) in
+      let nq_p1 = gsub p01_tmp1 (2ul *. nlimb s) (2ul *. nlimb s) in
+      live h0 q /\ live h0 p01_tmp1 /\ live h0 tmp2 /\
+      disjoint q p01_tmp1 /\ disjoint q tmp2 /\ disjoint p01_tmp1 tmp2 /\
       state_inv_t h0 (get_x q) /\ state_inv_t h0 (get_z q) /\
       state_inv_t h0 (get_x nq) /\ state_inv_t h0 (get_z nq) /\
-      state_inv_t h0 (get_x nq_p1) /\ state_inv_t h0 (get_z nq_p1))
-    (ensures  fun h0 _ h1 ->
-      modifies (loc nq |+| loc nq_p1 |+| loc tmp1 |+| loc tmp2) h0 h1 /\
+      state_inv_t h0 (get_x nq_p1) /\ state_inv_t h0 (get_z nq_p1)))
+    (ensures  fun h0 _ h1 -> (
+      let nq = gsub p01_tmp1 0ul (2ul *. nlimb s) in
+      let nq_p1 = gsub p01_tmp1 (2ul *. nlimb s) (2ul *. nlimb s) in
+      modifies (loc p01_tmp1 |+| loc tmp2) h0 h1 /\
       state_inv_t h1 (get_x nq) /\ state_inv_t h1 (get_z nq) /\
       state_inv_t h1 (get_x nq_p1) /\ state_inv_t h1 (get_z nq_p1) /\
      (let p2, p3 = P.add_and_double (fget_xz h0 q) (fget_xz h0 nq) (fget_xz h0 nq_p1) in
-      fget_xz h1 nq == p2 /\ fget_xz h1 nq_p1 == p3))
-let point_add_and_double #s q nq nq_p1 tmp1 tmp2 =
+      fget_xz h1 nq == p2 /\ fget_xz h1 nq_p1 == p3)))
+let point_add_and_double #s q p01_tmp1 tmp2 =
   match s with
-  | M26 -> point_add_and_double_26 q nq nq_p1 tmp1 tmp2
-  | M51 -> point_add_and_double_51 q nq nq_p1 tmp1 tmp2
-  | M64 -> point_add_and_double_64 q nq nq_p1 tmp1 tmp2
+  | M26 -> point_add_and_double_26 q p01_tmp1 tmp2
+  | M51 -> point_add_and_double_51 q p01_tmp1 tmp2
+  | M64 -> point_add_and_double_64 q p01_tmp1 tmp2
 (* WRAPPER to Prevent Inlining *)
 
 

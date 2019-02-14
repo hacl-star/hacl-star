@@ -21,6 +21,9 @@ module F64 = Hacl.Impl.Curve25519.Field64
 module S = Spec.Curve25519
 module BSeq = Lib.ByteSequence
 module LSeq = Lib.Sequence
+module M = Hacl.Spec.Curve25519.AddAndDouble
+
+friend Lib.LoopCombinators
 
 #reset-options "--z3rlimit 50 --max_fuel 2 --using_facts_from '* -FStar.Seq'"
 //#set-options "--debug Hacl.Impl.Curve25519.Generic --debug_level ExtractNorm"
@@ -35,7 +38,7 @@ val scalar_bit:
   -> Stack uint64
     (requires fun h0 -> live h0 s)
     (ensures  fun h0 r h1 -> h0 == h1 /\
-      v r == v (S.ith_bit (as_seq h0 s) (v n)))
+      r == S.ith_bit (as_seq h0 s) (v n))
 let scalar_bit s n = to_u64 ((s.(n /. 8ul) >>. (n %. 8ul)) &. u8 1)
 
 inline_for_extraction
@@ -155,126 +158,310 @@ let encode_point #s o i =
   | M64 -> encode_point_64 o i
 (* WRAPPER to Prevent Inlining *)
 
+#set-options "--z3rlimit 150 --max_fuel 0 --max_ifuel 3"
+
 inline_for_extraction
 val ladder_step:
     #s:field_spec
   -> k:scalar
   -> q:point s
   -> i:size_t{v i < 251}
-  -> nq:point s
-  -> nq_p1:point s
-  -> tmp1:lbuffer (limb s) (4ul *. nlimb s)
+  -> p01_tmp1_swap:lbuffer (limb s) (8ul *. nlimb s +. 1ul)
   -> tmp2:felem_wide2 s
-  -> swap:lbuffer uint64 1ul
   -> Stack unit
     (requires fun h0 ->
-      live h0 k /\ live h0 q /\ live h0 nq /\ live h0 nq_p1 /\
-      live h0 tmp1 /\ live h0 tmp2 /\ live h0 swap /\
-      LowStar.Monotonic.Buffer.all_disjoint [loc k; loc q; loc nq; loc nq_p1; loc tmp1; loc tmp2; loc swap] /\
+      live h0 k /\ live h0 q /\ live h0 p01_tmp1_swap /\ live h0 tmp2 /\
+      LowStar.Monotonic.Buffer.all_disjoint [loc k; loc q; loc p01_tmp1_swap; loc tmp2] /\
+     (let nq = gsub p01_tmp1_swap 0ul (2ul *. nlimb s) in
+      let nq_p1 = gsub p01_tmp1_swap (2ul *. nlimb s) (2ul *. nlimb s) in
       state_inv_t h0 (get_x q) /\ state_inv_t h0 (get_z q) /\
       state_inv_t h0 (get_x nq) /\ state_inv_t h0 (get_z nq) /\
-      state_inv_t h0 (get_x nq_p1) /\ state_inv_t h0 (get_z nq_p1))
+      state_inv_t h0 (get_x nq_p1) /\ state_inv_t h0 (get_z nq_p1)))
     (ensures  fun h0 _ h1 ->
-      modifies (loc swap |+| loc tmp1 |+| loc tmp2 |+| loc nq |+| loc nq_p1) h0 h1 /\
+      modifies (loc p01_tmp1_swap |+| loc tmp2) h0 h1 /\
+     (let nq = gsub p01_tmp1_swap 0ul (2ul *. nlimb s) in
+      let nq_p1 = gsub p01_tmp1_swap (2ul *. nlimb s) (2ul *. nlimb s) in
+      let bit : lbuffer uint64 1ul = gsub p01_tmp1_swap (8ul *. nlimb s) 1ul in
+      let (p0, p1, b) = M.ladder_step1 (as_seq h0 k) (fget_xz h0 q) (v i)
+	(fget_xz h0 nq, fget_xz h0 nq_p1, LSeq.index (as_seq h0 bit) 0) in
+      p0 == fget_xz h1 nq /\ p1 == fget_xz h1 nq_p1 /\
+      b == LSeq.index (as_seq h1 bit) 0 /\
       state_inv_t h1 (get_x q) /\ state_inv_t h1 (get_z q) /\
       state_inv_t h1 (get_x nq) /\ state_inv_t h1 (get_z nq) /\
-      state_inv_t h1 (get_x nq_p1) /\ state_inv_t h1 (get_z nq_p1))
-let ladder_step #s k q i nq nq_p1 tmp1 tmp2 swap =
+      state_inv_t h1 (get_x nq_p1) /\ state_inv_t h1 (get_z nq_p1)))
+let ladder_step #s k q i p01_tmp1_swap tmp2 =
+  let p01_tmp1 = sub p01_tmp1_swap 0ul (8ul *. nlimb s) in
+  let swap : lbuffer uint64 1ul = sub p01_tmp1_swap (8ul *. nlimb s) 1ul in
+  let nq = sub p01_tmp1 0ul (2ul *. nlimb s) in
+  let nq_p1 = sub p01_tmp1 (2ul *. nlimb s) (2ul *. nlimb s) in
+
+  assert (gsub p01_tmp1_swap 0ul (2ul *! nlimb s) == nq);
+  assert (gsub p01_tmp1_swap (2ul *! nlimb s) (2ul *! nlimb s) == nq_p1);
+  assert (gsub p01_tmp1_swap 0ul (8ul *! nlimb s) == p01_tmp1);
+  assert (gsub p01_tmp1_swap (8ul *! nlimb s) 1ul == swap);
+
+  let h0 = ST.get () in
   let bit = scalar_bit k (253ul -. i) in
+  uintv_extensionality bit (S.ith_bit (as_seq h0 k) (253 - v i));
   let sw = swap.(0ul) ^. bit in
   assume (v sw <= 1);
+  let h0 = ST.get () in
   cswap2 #s sw nq nq_p1;
-  point_add_and_double #s q nq nq_p1 tmp1 tmp2;
+  let h1 = ST.get () in
+  assert ((fget_xz h1 nq, fget_xz h1 nq_p1) == S.cswap2 sw (fget_xz h0 nq) (fget_xz h0 nq_p1));
+  point_add_and_double #s q p01_tmp1 tmp2;
   swap.(0ul) <- bit
+
+#set-options "--max_fuel 2"
 
 inline_for_extraction
 val ladder_step_loop:
     #s:field_spec
   -> k:scalar
   -> q:point s
-  -> nq:point s
-  -> nq_p1:point s
-  -> tmp1:lbuffer (limb s) (4ul *. nlimb s)
+  -> p01_tmp1_swap:lbuffer (limb s) (8ul *. nlimb s +. 1ul)
   -> tmp2:felem_wide2 s
-  -> swap:lbuffer uint64 1ul
   -> Stack unit
     (requires fun h0 ->
-      live h0 k /\ live h0 q /\ live h0 nq /\ live h0 nq_p1 /\
-      live h0 tmp1 /\ live h0 tmp2 /\ live h0 swap /\
-      LowStar.Monotonic.Buffer.all_disjoint [loc k; loc q; loc nq; loc nq_p1; loc tmp1; loc tmp2; loc swap] /\
+      live h0 k /\ live h0 q /\ live h0 p01_tmp1_swap /\ live h0 tmp2 /\
+      LowStar.Monotonic.Buffer.all_disjoint [loc k; loc q; loc p01_tmp1_swap; loc tmp2] /\
+     (let nq = gsub p01_tmp1_swap 0ul (2ul *. nlimb s) in
+      let nq_p1 = gsub p01_tmp1_swap (2ul *. nlimb s) (2ul *. nlimb s) in
       state_inv_t h0 (get_x q) /\ state_inv_t h0 (get_z q) /\
       state_inv_t h0 (get_x nq) /\ state_inv_t h0 (get_z nq) /\
-      state_inv_t h0 (get_x nq_p1) /\ state_inv_t h0 (get_z nq_p1))
+      state_inv_t h0 (get_x nq_p1) /\ state_inv_t h0 (get_z nq_p1)))
     (ensures  fun h0 _ h1 ->
-      modifies (loc swap |+| loc tmp1 |+| loc tmp2 |+| loc nq |+| loc nq_p1) h0 h1 /\
-      state_inv_t h1 (get_x q) /\ state_inv_t h1 (get_z q) /\
+      modifies (loc p01_tmp1_swap |+| loc tmp2) h0 h1 /\
+     (let nq = gsub p01_tmp1_swap 0ul (2ul *. nlimb s) in
+      let nq_p1 = gsub p01_tmp1_swap (2ul *. nlimb s) (2ul *. nlimb s) in
+      let bit : lbuffer uint64 1ul = gsub p01_tmp1_swap (8ul *. nlimb s) 1ul in
+      let (p0, p1, b) =
+	Lib.LoopCombinators.repeati 251
+	(M.ladder_step1 (as_seq h0 k) (fget_xz h0 q))
+	(fget_xz h0 nq, fget_xz h0 nq_p1, LSeq.index (as_seq h0 bit) 0) in
+      p0 == fget_xz h1 nq /\ p1 == fget_xz h1 nq_p1 /\ b == LSeq.index (as_seq h1 bit) 0 /\
       state_inv_t h1 (get_x nq) /\ state_inv_t h1 (get_z nq) /\
-      state_inv_t h1 (get_x nq_p1) /\ state_inv_t h1 (get_z nq_p1))
-let ladder_step_loop #s k q nq nq_p1 tmp1 tmp2 swap =
+      state_inv_t h1 (get_x nq_p1) /\ state_inv_t h1 (get_z nq_p1)))
+let ladder_step_loop #s k q p01_tmp1_swap tmp2 =
   let h0 = ST.get () in
+
+  [@ inline_let]
+  let spec_fh h0 =
+    (M.ladder_step1 (as_seq h0 k) (fget_x h0 q, fget_z h0 q)) in
+
+  [@ inline_let]
+  let acc h : GTot (tuple3 S.proj_point S.proj_point uint64) =
+    let nq = gsub p01_tmp1_swap 0ul (2ul *. nlimb s) in
+    let nq_p1 = gsub p01_tmp1_swap (2ul *. nlimb s) (2ul *. nlimb s) in
+    let bit : lbuffer uint64 1ul = gsub p01_tmp1_swap (8ul *. nlimb s) 1ul in
+    (fget_xz h nq, fget_xz h nq_p1, LSeq.index (as_seq h bit) 0) in
+
   [@ inline_let]
   let inv h (i:nat{i <= 251}) =
-    modifies (loc swap |+| loc tmp1 |+| loc tmp2 |+| loc nq |+| loc nq_p1) h0 h /\
-    live h k /\ live h q /\ live h nq /\ live h nq_p1 /\
-    live h tmp1 /\ live h tmp2 /\ live h swap /\
-    LowStar.Monotonic.Buffer.all_disjoint [loc k; loc q; loc nq; loc nq_p1; loc tmp1; loc tmp2; loc swap] /\
+    let nq = gsub p01_tmp1_swap 0ul (2ul *. nlimb s) in
+    let nq_p1 = gsub p01_tmp1_swap (2ul *. nlimb s) (2ul *. nlimb s) in
+    let bit : lbuffer uint64 1ul = gsub p01_tmp1_swap (8ul *. nlimb s) 1ul in
+    modifies (loc p01_tmp1_swap |+| loc tmp2) h0 h /\
     state_inv_t h (get_x q) /\ state_inv_t h (get_z q) /\
     state_inv_t h (get_x nq) /\ state_inv_t h (get_z nq) /\
-    state_inv_t h (get_x nq_p1) /\ state_inv_t h (get_z nq_p1) in
+    state_inv_t h (get_x nq_p1) /\ state_inv_t h (get_z nq_p1) /\
+    acc h == Lib.LoopCombinators.repeati i (spec_fh h0) (acc h0) in
 
   Lib.Loops.for 0ul 251ul inv
     (fun i ->
-      ladder_step #s k q i nq nq_p1 tmp1 tmp2 swap)
+      Lib.LoopCombinators.unfold_repeati 251 (spec_fh h0) (acc h0) (v i);
+      ladder_step #s k q i p01_tmp1_swap tmp2)
 
-#set-options "--z3rlimit 150"
+#set-options "--max_fuel 0 --z3rlimit 150"
 
 inline_for_extraction
-val ladder_:
+val ladder0_:
     #s:field_spec
   -> k:scalar
   -> q:point s
   -> p01_tmp1_swap:lbuffer (limb s) (8ul *! nlimb s +! 1ul)
   -> tmp2:felem_wide2 s
   -> Stack unit
-    (requires fun h0 -> (
-      let nq = gsub p01_tmp1_swap 0ul (2ul *. nlimb s) in
-      let nq_p1 = gsub p01_tmp1_swap (2ul *. nlimb s) (2ul *. nlimb s) in
+    (requires fun h0 ->
       live h0 k /\ live h0 q /\ live h0 p01_tmp1_swap /\ live h0 tmp2 /\
       LowStar.Monotonic.Buffer.all_disjoint [loc k; loc q; loc p01_tmp1_swap; loc tmp2] /\
+     (let nq = gsub p01_tmp1_swap 0ul (2ul *. nlimb s) in
+      let nq_p1 = gsub p01_tmp1_swap (2ul *. nlimb s) (2ul *. nlimb s) in
       state_inv_t h0 (get_x q) /\ state_inv_t h0 (get_z q) /\
       state_inv_t h0 (get_x nq) /\ state_inv_t h0 (get_z nq) /\
       state_inv_t h0 (get_x nq_p1) /\ state_inv_t h0 (get_z nq_p1)))
-    (ensures  fun h0 _ h1 -> (
-      let nq = gsub p01_tmp1_swap 0ul (2ul *. nlimb s) in
-      let nq_p1 = gsub p01_tmp1_swap (2ul *. nlimb s) (2ul *. nlimb s) in
+    (ensures  fun h0 _ h1 ->
       modifies (loc p01_tmp1_swap |+| loc tmp2) h0 h1 /\
-      //state_inv_t h1 (get_x q) /\ state_inv_t h1 (get_z q) /\
+     (let nq = gsub p01_tmp1_swap 0ul (2ul *. nlimb s) in
+      let nq_p1 = gsub p01_tmp1_swap (2ul *. nlimb s) (2ul *. nlimb s) in
       state_inv_t h1 (get_x nq) /\ state_inv_t h1 (get_z nq) /\
-      state_inv_t h1 (get_x nq_p1) /\ state_inv_t h1 (get_z nq_p1)))
-let ladder_ #s k q p01_tmp1_swap tmp2 =
+      fget_xz h1 nq ==
+      M.montgomery_ladder1_0 (as_seq h0 k) (fget_xz h0 q) (fget_xz h0 nq) (fget_xz h0 nq_p1)))
+let ladder0_ #s k q p01_tmp1_swap tmp2 =
+  let p01_tmp1 = sub p01_tmp1_swap 0ul (8ul *. nlimb s) in
   let nq : point s = sub p01_tmp1_swap 0ul (2ul *! nlimb s) in
   let nq_p1 : point s = sub p01_tmp1_swap (2ul *! nlimb s) (2ul *! nlimb s) in
-  let tmp1 = sub p01_tmp1_swap (4ul *! nlimb s) (4ul *! nlimb s) in
   let swap:lbuffer uint64 1ul = sub p01_tmp1_swap (8ul *! nlimb s) 1ul in
+
+  assert (gsub p01_tmp1_swap 0ul (2ul *! nlimb s) == nq);
+  assert (gsub p01_tmp1_swap (2ul *! nlimb s) (2ul *! nlimb s) == nq_p1);
+  assert (gsub p01_tmp1_swap 0ul (8ul *! nlimb s) == p01_tmp1);
+  assert (gsub p01_tmp1_swap (8ul *! nlimb s) 1ul == swap);
 
   // bit 255 is 0 and bit 254 is 1
   cswap2 #s (u64 1) nq nq_p1;
-  point_add_and_double #s q nq nq_p1 tmp1 tmp2;
+  point_add_and_double #s q p01_tmp1 tmp2;
   swap.(0ul) <- u64 1;
 
   //Got about 1K speedup by removing 4 iterations here.
   //First iteration can be skipped because top bit of scalar is 0
-  ladder_step_loop #s k q nq nq_p1 tmp1 tmp2 swap;
-  let h = ST.get () in
-  assume (v (LSeq.index (as_seq h swap) 0) <= 1);
-  cswap2 #s swap.(0ul) nq nq_p1;
+  ladder_step_loop #s k q p01_tmp1_swap tmp2;
+  //let h = ST.get () in
+  //assume (v (LSeq.index (as_seq h swap) 0) <= 1);
+  let h0 = ST.get () in
+  let sw = swap.(0ul) in
+  assume (v sw <= 1);
+  cswap2 #s sw nq nq_p1;
+  let h1 = ST.get () in
+  assert ((fget_xz h1 nq, fget_xz h1 nq_p1) == S.cswap2 sw (fget_xz h0 nq) (fget_xz h0 nq_p1))
+
+inline_for_extraction
+val ladder1_:
+    #s:field_spec
+  -> p01_tmp1:lbuffer (limb s) (8ul *! nlimb s)
+  -> tmp2:felem_wide2 s
+  -> Stack unit
+    (requires fun h0 ->
+      live h0 p01_tmp1 /\ live h0 tmp2 /\ disjoint p01_tmp1 tmp2 /\
+     (let nq = gsub p01_tmp1 0ul (2ul *. nlimb s) in
+      state_inv_t h0 (get_x nq) /\ state_inv_t h0 (get_z nq)))
+    (ensures  fun h0 _ h1 ->
+      modifies (loc p01_tmp1 |+| loc tmp2) h0 h1 /\
+     (let nq = gsub p01_tmp1 0ul (2ul *. nlimb s) in
+      state_inv_t h1 (get_x nq) /\ state_inv_t h1 (get_z nq) /\
+      fget_xz h1 nq == M.montgomery_ladder1_1 (fget_xz h0 nq)))
+let ladder1_ #s p01_tmp1 tmp2 =
+  let nq : point s = sub p01_tmp1 0ul (2ul *! nlimb s) in
+  let tmp1 = sub p01_tmp1 (4ul *! nlimb s) (4ul *! nlimb s) in
+
+  assert (gsub p01_tmp1 0ul (2ul *! nlimb s) == nq);
+  assert (gsub p01_tmp1 (4ul *! nlimb s) (4ul *! nlimb s) == tmp1);
+
   point_double nq tmp1 tmp2;
   point_double nq tmp1 tmp2;
   point_double nq tmp1 tmp2
 
 inline_for_extraction
-val montgomery_ladder_:
+val ladder2_:
     #s:field_spec
+  -> k:scalar
+  -> q:point s
+  -> p01_tmp1_swap:lbuffer (limb s) (8ul *! nlimb s +! 1ul)
+  -> tmp2:felem_wide2 s
+  -> Stack unit
+    (requires fun h0 ->
+      live h0 k /\ live h0 q /\ live h0 p01_tmp1_swap /\ live h0 tmp2 /\
+      LowStar.Monotonic.Buffer.all_disjoint [loc k; loc q; loc p01_tmp1_swap; loc tmp2] /\
+     (let nq = gsub p01_tmp1_swap 0ul (2ul *. nlimb s) in
+      let nq_p1 = gsub p01_tmp1_swap (2ul *. nlimb s) (2ul *. nlimb s) in
+      state_inv_t h0 (get_x q) /\ state_inv_t h0 (get_z q) /\
+      state_inv_t h0 (get_x nq) /\ state_inv_t h0 (get_z nq) /\
+      state_inv_t h0 (get_x nq_p1) /\ state_inv_t h0 (get_z nq_p1)))
+    (ensures  fun h0 _ h1 ->
+      modifies (loc p01_tmp1_swap |+| loc tmp2) h0 h1 /\
+     (let nq = gsub p01_tmp1_swap 0ul (2ul *. nlimb s) in
+      let nq_p1 = gsub p01_tmp1_swap (2ul *. nlimb s) (2ul *. nlimb s) in
+      state_inv_t h1 (get_x nq) /\ state_inv_t h1 (get_z nq) /\
+      fget_xz h1 nq == M.montgomery_ladder1_1
+	(M.montgomery_ladder1_0 (as_seq h0 k) (fget_xz h0 q) (fget_xz h0 nq) (fget_xz h0 nq_p1))))
+let ladder2_ #s k q p01_tmp1_swap tmp2 =
+  let p01_tmp1 = sub p01_tmp1_swap 0ul (8ul *! nlimb s) in
+  let nq : point s = sub p01_tmp1_swap 0ul (2ul *! nlimb s) in
+  let nq_p1 : point s = sub p01_tmp1_swap (2ul *! nlimb s) (2ul *! nlimb s) in
+  assert (gsub p01_tmp1_swap 0ul (8ul *! nlimb s) == p01_tmp1);
+  assert (gsub p01_tmp1_swap 0ul (2ul *! nlimb s) == nq);
+  assert (gsub p01_tmp1_swap (2ul *! nlimb s) (2ul *! nlimb s) == nq_p1);
+  ladder0_ #s k q p01_tmp1_swap tmp2;
+  ladder1_ #s p01_tmp1 tmp2
+
+//#set-options "--max_fuel 0 --z3rlimit 50"
+
+inline_for_extraction
+val ladder3_:
+    #s:field_spec
+  -> q:point s
+  -> p01:lbuffer (limb s) (4ul *! nlimb s)
+  -> Stack unit
+    (requires fun h0 ->
+      live h0 q /\ live h0 p01 /\ disjoint q p01 /\
+      fget_z h0 q == 1 /\ state_inv_t h0 (get_x q) /\ state_inv_t h0 (get_z q))
+    (ensures  fun h0 _ h1 ->
+      modifies (loc p01) h0 h1 /\
+     (let nq = gsub p01 0ul (2ul *. nlimb s) in
+      let nq_p1 = gsub p01 (2ul *. nlimb s) (2ul *. nlimb s) in
+      state_inv_t h1 (get_x q) /\ state_inv_t h1 (get_z q) /\
+      state_inv_t h1 (get_x nq) /\ state_inv_t h1 (get_z nq) /\
+      state_inv_t h1 (get_x nq_p1) /\ state_inv_t h1 (get_z nq_p1) /\
+      (fget_xz h1 q, fget_xz h1 nq, fget_xz h1 nq_p1) == M.montgomery_ladder1_2 (fget_x h0 q)))
+let ladder3_ #s q p01 =
+  let p0 : point s = sub p01 0ul (2ul *! nlimb s) in
+  let p1 : point s = sub p01 (2ul *! nlimb s) (2ul *! nlimb s) in
+  copy p1 q;
+  let x0 : felem s = sub p0 0ul (nlimb s) in
+  let z0 : felem s = sub p0 (nlimb s) (nlimb s) in
+  set_one x0;
+  set_zero z0;
+  let h0 = ST.get () in
+  assert (gsub p01 0ul (2ul *! nlimb s) == p0);
+  assert (gsub p01 (2ul *! nlimb s) (2ul *! nlimb s) == p1);
+  assert (gsub p0 0ul (nlimb s) == x0);
+  assert (gsub p0 (nlimb s) (nlimb s) == z0);
+
+  assert (fget_x h0 p1 == fget_x h0 q);
+  assert (fget_z h0 p1 == 1);
+  assert (fget_x h0 p0 == 1);
+  assert (fget_z h0 p0 == 0);
+
+  assert (
+    state_inv_t h0 (get_x q) /\ state_inv_t h0 (get_z q) /\
+    state_inv_t h0 (get_x p0) /\ state_inv_t h0 (get_z p0) /\
+    state_inv_t h0 (get_x p1) /\ state_inv_t h0 (get_z p1))
+
+inline_for_extraction
+val ladder4_:
+    #s:field_spec{s == M51 \/ s == M64}
+  -> k:scalar
+  -> q:point s
+  -> p01_tmp1_swap:lbuffer (limb s) (8ul *! nlimb s +! 1ul)
+  -> tmp2:felem_wide2 s
+  -> Stack unit
+    (requires fun h0 ->
+      live h0 k /\ live h0 q /\ live h0 p01_tmp1_swap /\ live h0 tmp2 /\
+      LowStar.Monotonic.Buffer.all_disjoint [loc k; loc q; loc p01_tmp1_swap; loc tmp2] /\
+      fget_z h0 q== 1 /\ state_inv_t h0 (get_x q) /\ state_inv_t h0 (get_z q))
+    (ensures  fun h0 _ h1 ->
+      modifies (loc p01_tmp1_swap |+| loc tmp2) h0 h1 /\
+     (let nq = gsub p01_tmp1_swap 0ul (2ul *. nlimb s) in
+      state_inv_t h1 (get_x nq) /\ state_inv_t h1 (get_z nq) /\
+      fget_xz h1 nq == S.montgomery_ladder (fget_x h0 q) (as_seq h0 k)))
+let ladder4_ #s k q p01_tmp1_swap tmp2 =
+  let h0 = ST.get () in
+  let p01 = sub p01_tmp1_swap 0ul (4ul *! nlimb s) in
+  let p0 : point s = sub p01_tmp1_swap 0ul (2ul *! nlimb s) in
+  let p1 : point s = sub p01_tmp1_swap (2ul *! nlimb s) (2ul *! nlimb s) in
+  assert (gsub p01_tmp1_swap 0ul (4ul *! nlimb s) == p01);
+  assert (gsub p01_tmp1_swap 0ul (2ul *! nlimb s) == p0);
+  assert (gsub p01_tmp1_swap (2ul *! nlimb s) (2ul *! nlimb s) == p1);
+
+  ladder3_ #s q p01;
+  ladder2_ #s k q p01_tmp1_swap tmp2;
+  let h1 = ST.get () in
+  assert (fget_xz h1 p0 == M.montgomery_ladder1 (fget_x h0 q) (as_seq h0 k));
+  M.lemma_montgomery_ladder (fget_x h0 q) (as_seq h0 k)
+
+inline_for_extraction
+val montgomery_ladder_:
+    #s:field_spec{s == M51 \/ s == M64}
   -> o:point s
   -> k:scalar
   -> i:point s
@@ -285,36 +472,17 @@ val montgomery_ladder_:
       fget_z h0 i == 1 /\ state_inv_t h0 (get_x i) /\ state_inv_t h0 (get_z i))
     (ensures  fun h0 _ h1 ->
       modifies (loc o) h0 h1 /\
-      state_inv_t h1 (get_x o) /\ state_inv_t h1 (get_z o))
-      //fget_xz h1 o == S.montgomery_ladder (fget_x h0 i) (as_seq h0 k))
+      state_inv_t h1 (get_x o) /\ state_inv_t h1 (get_z o) /\
+      fget_xz h1 o == S.montgomery_ladder (fget_x h0 i) (as_seq h0 k))
 let montgomery_ladder_ #s out key init =
   push_frame();
-  let tmp2 = create (2ul *! nwide s) (wide_zero s) in
-  let p01_tmp1_swap = create (4ul *! nlimb s +! 4ul *! nlimb s +! 1ul) (limb_zero s) in
-  let p0 : point s = sub p01_tmp1_swap 0ul (2ul *! nlimb s) in
-  let p1 : point s = sub p01_tmp1_swap (2ul *! nlimb s) (2ul *! nlimb s) in
-  copy p1 init;
-  let x0 : felem s = sub p0 0ul (nlimb s) in
-  let z0 : felem s = sub p0 (nlimb s) (nlimb s) in
-  set_one x0;
-  set_zero z0;
   let h0 = ST.get () in
+  let tmp2 = create (2ul *! nwide s) (wide_zero s) in
+  let p01_tmp1_swap = create (8ul *! nlimb s +! 1ul) (limb_zero s) in
+
+  let p0 : point s = sub p01_tmp1_swap 0ul (2ul *! nlimb s) in
   assert (gsub p01_tmp1_swap 0ul (2ul *! nlimb s) == p0);
-  assert (gsub p01_tmp1_swap (2ul *! nlimb s) (2ul *! nlimb s) == p1);
-  assert (gsub p0 0ul (nlimb s) == x0);
-  assert (gsub p0 (nlimb s) (nlimb s) == z0);
-
-  assume (fget_x h0 p1 == fget_x h0 init);
-  assume (fget_z h0 p1 == 1);
-  assume (fget_x h0 p0 == 1);
-  assume (fget_z h0 p0 == 0);
-
-  assume (
-    state_inv_t h0 (get_x init) /\ state_inv_t h0 (get_z init) /\
-    state_inv_t h0 (get_x p0) /\ state_inv_t h0 (get_z p0) /\
-    state_inv_t h0 (get_x p1) /\ state_inv_t h0 (get_z p1));
-
-  ladder_ #s key init p01_tmp1_swap tmp2;
+  ladder4_ #s key init p01_tmp1_swap tmp2;
   copy out p0;
   pop_frame ()
 
@@ -341,25 +509,13 @@ val montgomery_ladder:
       modifies (loc o) h0 h1 /\
       state_inv_t h1 (get_x o) /\ state_inv_t h1 (get_z o) /\
       fget_xz h1 o == S.montgomery_ladder (fget_x h0 i) (as_seq h0 k))
-let montgomery_ladder #s out key init = admit();
+let montgomery_ladder #s out key init =
   match s with
-  | M26 -> montgomery_ladder_26 out key init
+  | M26 -> admit(); montgomery_ladder_26 out key init
   | M51 -> montgomery_ladder_51 out key init
   | M64 -> montgomery_ladder_64 out key init
 (* WRAPPER to Prevent Inlining *)
 
-inline_for_extraction
-val scalarmult:
-    #s:field_spec
-  -> o:lbuffer uint8 32ul
-  -> k:lbuffer uint8 32ul
-  -> i:lbuffer uint8 32ul
-  -> Stack unit
-    (requires fun h0 ->
-      live h0 o /\ live h0 k /\ live h0 i /\
-      disjoint o i /\ disjoint o k)
-    (ensures  fun h0 _ h1 -> modifies (loc o) h0 h1 /\
-      as_seq h1 o == S.scalarmult (as_seq h0 k) (as_seq h0 i))
 let scalarmult #s out priv pub =
   push_frame ();
   let init = create (2ul *. nlimb s) (limb_zero s) in
@@ -371,16 +527,6 @@ let scalarmult #s out priv pub =
 let g25519 : x:ilbuffer byte_t 32ul{witnessed x (Lib.Sequence.of_list S.basepoint_list) /\ recallable x} =
   createL_global S.basepoint_list
 
-inline_for_extraction
-val secret_to_public:
-    #s:field_spec
-  -> o:lbuffer uint8 32ul
-  -> i:lbuffer uint8 32ul
-  -> Stack unit
-    (requires fun h0 ->
-      live h0 o /\ live h0 i /\ disjoint o i)
-    (ensures  fun h0 _ h1 -> modifies (loc o) h0 h1 /\
-      as_seq h1 o == S.secret_to_public (as_seq h0 i))
 let secret_to_public #s pub priv =
   push_frame ();
   recall_contents g25519 S.basepoint_lseq;

@@ -36,9 +36,9 @@ type scalar = lbytes 32
 type serialized_point = lbytes 32
 type proj_point = elem & elem
 
-let ith_bit (k:scalar) (i:nat{i < 256}) : uint8 =
+let ith_bit (k:scalar) (i:nat{i < 256}) : uint64 =
   let q = i / 8 in let r = size (i % 8) in
-  (k.[q] >>. r) &. u8 1
+  to_u64 ((k.[q] >>. r) &. u8 1)
 
 let decodePoint (u:serialized_point) =
   (nat_from_bytes_le u % pow2 255) % prime
@@ -85,12 +85,15 @@ let double nq =
   let z_2 = e *% aa_e121665 in
   x_2, z_2
 
-let ladder_step (q:proj_point) (bit:uint8) (nq, nqp1) =
+let cswap2 (sw:uint64) (nq:proj_point) (nqp1:proj_point) =
   let open Lib.RawIntTypes in
-  if uint_to_nat bit = 1 then (
-     let nqp1, nq = add_and_double q nqp1 nq in
-     nq, nqp1)
-  else add_and_double q nq nqp1
+  if uint_to_nat sw = 1 then (nqp1, nq) else (nq, nqp1)
+
+let ladder_step (k:scalar) (q:proj_point) (i:nat{i < 251}) (nq, nqp1) =
+  let bit = ith_bit k (253-i) in
+  let nq, nqp1 = cswap2 bit nq nqp1 in
+  let nq, nqp1 = add_and_double q nq nqp1 in
+  cswap2 bit nq nqp1
 
 let montgomery_ladder (init:elem) (k:scalar) : Tot proj_point =
   let q = (init, one) in
@@ -99,14 +102,12 @@ let montgomery_ladder (init:elem) (k:scalar) : Tot proj_point =
   // bit 255 is 0 and bit 254 is 1
   let nqp1,nq = add_and_double q nqp1 nq in
   // bits 253-3 depend on scalar
-  let nq,nqp1 = Lib.LoopCombinators.repeati 251
-    (fun i -> ladder_step q (ith_bit k (253-i))) (nq, nqp1) in
+  let nq,nqp1 = Lib.LoopCombinators.repeati 251 (ladder_step k q) (nq, nqp1) in
   // bits 2-0 are 0
   let nq = double nq in
   let nq = double nq in
   let nq = double nq in
   nq
-
 
 let scalarmult (k:scalar) (u:serialized_point) : Tot serialized_point =
   let u = decodePoint u in

@@ -50,7 +50,7 @@ let ( ** ) (x:nat5) (y:nat5) : nat5 =
    x4 * y4 ,
    x5 * y5)
 
-#set-options "--z3rlimit 100"
+#reset-options "--z3rlimit 100 --using_facts_from '* -FStar.Seq'"
 
 let ( *^ ) (x:scale64) (y:scale64_5) : scale128_5 =
   assert_norm (8192 * 8192 = 67108864);
@@ -60,8 +60,6 @@ let ( *^ ) (x:scale64) (y:scale64_5) : scale128_5 =
    x * y3 ,
    x * y4 ,
    x * y5)
-
-#reset-options "--z3rlimit 50  --using_facts_from '* -FStar.Seq'"
 
 assume val pow51: nat
 inline_for_extraction
