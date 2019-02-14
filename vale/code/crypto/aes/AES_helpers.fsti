@@ -132,14 +132,6 @@ val finish_cipher_opt (alg:algorithm) (input plain:quad32) (round_keys:seq quad3
             state == quad32_xor plain (cipher_opaque alg input round_keys)))
 *)
 
-let lemma_incr_msb (orig ctr ctr':quad32) (increment:nat) : Lemma
-  (requires increment < 6 /\
-            ctr == reverse_bytes_quad32 orig /\
-            //ctr.hi3 + (increment * 0x10000000) < pow2_32 /\
-            ctr' == Arch.Types.add_wrap_quad32 ctr (Mkfour 0 0 0 (increment * 0x10000000)))
-  (ensures  (orig.lo0 % 256) + 6 < 256 ==> ctr' == reverse_bytes_quad32 (GCTR_s.inc32 orig increment))
-  =
-  admit()
 
 (*
 open FStar.Calc
@@ -159,12 +151,12 @@ let lemma_reverse_bytes_nat32_byte (n:nat32) :
 
   let s = Collections.Seqs_s.reverse_seq (nat32_to_be_bytes n) in
   assert (index s 3 == n / 0x1000000);
-  admit();
+  // TODO
   ()
 *)
 
-
-let lemma_add_0x10000000_reverse (n:nat32) : Lemma
+(*
+let lemma_add_0x1000000_reverse (n:nat32) : Lemma
   (requires n % 256 < 255)
   (ensures (let r = reverse_bytes_nat32 n in
             r + 0x1000000 == reverse_bytes_nat32 (n + 1)))
@@ -202,6 +194,61 @@ let lemma_add_0x10000000_reverse (n:nat32) : Lemma
     be_bytes_to_nat32 (Collections.Seqs_s.reverse_seq (nat32_to_be_bytes (n + 1)));
   };
   ()
+*)
+let lemma_add_0x1000000_reverse_mult (n:nat32) (increment:nat) : Lemma
+  (requires (n % 256) + increment < 256 /\ increment < 6)
+  (ensures (let r = reverse_bytes_nat32 n in
+            r + increment * 0x1000000 == reverse_bytes_nat32 (n + increment)))
+  =
+  let r = reverse_bytes_nat32 n in
+  assert_norm (Words.Four_s.nat_to_four 8 (n+increment) == Mkfour ((n+increment) % 0x100) (((n+increment) / 0x100) % 0x100) (((n+increment) / 0x10000) % 0x100) (((n+increment) / 0x1000000) % 0x100)); 
+  assert ((n+increment) / 0x1000000 == n / 0x1000000);
+  assert ((n+increment) / 0x10000 == n / 0x10000);
+  assert ((n+increment) / 0x100 == n / 0x100);
+  assert      (Words.Four_s.nat_to_four 8 (n+increment) == Mkfour ((n+increment) % 0x100) ((n / 0x100) % 0x100) ((n / 0x10000) % 0x100) ((n / 0x1000000) % 0x100)); 
+  
+  assert_norm (Words.Four_s.nat_to_four 8 n     == Mkfour (n % 0x100)     ((n / 0x100) % 0x100) ((n / 0x10000) % 0x100) ((n / 0x1000000) % 0x100)); 
+  let s = Words.Seq_s.four_to_seq_BE (Words.Four_s.nat_to_four 8 n) in
+  let r_s = Collections.Seqs_s.reverse_seq s in
+  assert_norm (be_bytes_to_nat32 r_s == ((n / 0x1000000) % 0x100) + 
+                                        ((n / 0x10000) % 0x100) * 0x100 +
+                                        ((n / 0x100) % 0x100) * 0x10000 +
+                                        (n % 0x100) * 0x1000000);
+  let s' = Words.Seq_s.four_to_seq_BE (Words.Four_s.nat_to_four 8 (n+increment)) in
+  let r_s' = Collections.Seqs_s.reverse_seq s' in
+  
+  assert_norm (be_bytes_to_nat32 r_s' == (((n) / 0x1000000) % 0x100) + 
+                                        (((n) / 0x10000) % 0x100) * 0x100 +
+                                        (((n) / 0x100) % 0x100) * 0x10000 +
+                                        ((n+increment) % 0x100) * 0x1000000);
+  assert (be_bytes_to_nat32 r_s + increment * 0x1000000 == be_bytes_to_nat32 r_s');
+  calc (==) {
+     r;
+     == { reveal_opaque reverse_bytes_nat32_def }
+     be_bytes_to_nat32 r_s;
+  };
+  calc (==) {
+    reverse_bytes_nat32 (n+increment);
+    ==  { reveal_opaque reverse_bytes_nat32_def }
+    be_bytes_to_nat32 (Collections.Seqs_s.reverse_seq (nat32_to_be_bytes (n+increment)));
+  };
+  ()
+
+let lemma_incr_msb (orig ctr ctr':quad32) (increment:nat) : Lemma
+  (requires increment < 6 /\
+            ctr == reverse_bytes_quad32 orig /\
+            ctr' == Arch.Types.add_wrap_quad32 ctr (Mkfour 0 0 0 (increment * 0x1000000)))
+  (ensures  (orig.lo0 % 256) + 6 < 256 ==> ctr' == reverse_bytes_quad32 (GCTR_s.inc32 orig increment))
+  =
+  let ctr_new = GCTR_s.inc32 orig increment in
+  reveal_reverse_bytes_quad32 orig;
+  reveal_reverse_bytes_quad32 ctr_new;
+  if (orig.lo0 % 256) + 6 < 256 then (
+    lemma_add_0x1000000_reverse_mult orig.lo0 increment;
+    ()
+  ) else ();
+  ()
+
 
 let lemma_msb_in_bounds (ctr_BE inout5 t1':quad32) (counter:nat) : Lemma
   (requires inout5 == reverse_bytes_quad32 (GCTR_s.inc32 ctr_BE 5) /\
@@ -228,7 +275,7 @@ let lemma_msb_in_bounds (ctr_BE inout5 t1':quad32) (counter:nat) : Lemma
     Mkfour (reverse_bytes_nat32 ctr5.hi3) (reverse_bytes_nat32 ctr5.hi2) (reverse_bytes_nat32 ctr5.lo1) (reverse_bytes_nat32 (ctr5.lo0 + 1));
     == {}
     Mkfour inout5.lo0 inout5.lo1 inout5.hi2 (reverse_bytes_nat32 (ctr5.lo0 + 1));
-    == { lemma_add_0x10000000_reverse ctr5.lo0 }
+    == { lemma_add_0x1000000_reverse_mult ctr5.lo0 1 }
     t1';
   };  
   ()
