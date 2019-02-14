@@ -426,11 +426,10 @@ procedure{:instruction mk_taint_ins2(S.MovBe64, dst, TMem(MReg(get_reg(src), off
         dst == reverse_bytes_nat64(if upper then hi64(buffer128_read(b, index, mem)) else lo64(buffer128_read(b, index, mem)));
         valid_taint_buf128(b, mem, memTaint, t);
 {
-    /////////////// TODO: Make this a proper instruction!
-    assume false; 
-//    low_lemma_valid_mem128(b, #nat(index), mem);
-//    low_lemma_load_mem128(b, #nat(index), mem);
-//    lemma_valid_taint128(b, #memTaint_t(memTaint), mem, #nat(index), t);
+    low_lemma_valid_mem128_64(b, #nat(index), mem);
+    low_lemma_load_mem128_lo64(b, #nat(index), mem);
+    low_lemma_load_mem128_hi64(b, #nat(index), mem);
+    lemma_valid_taint128(b, #memTaint_t(memTaint), mem, #nat(index), t);
 }
 
 procedure{:instruction Ins(TS.TaintedIns(tuple(S.MOVDQU(Mov128Mem(MReg(get_reg(dst), offset)), Mov128Xmm(src))), t))}{:quick exportOnly}{:public} Store128_buffer(
@@ -459,7 +458,7 @@ procedure{:instruction Ins(TS.TaintedIns(tuple(S.MOVDQU(Mov128Mem(MReg(get_reg(d
     same_memTaint128(b, old(mem), mem, old(#memTaint_t(memTaint)), #memTaint_t(memTaint));
 }
 
-procedure{:instruction mk_taint_ins2(S.Mov64, dst, TMem(MReg(get_reg(src), offset), t))}{:quick exportOnly}{:public} Store64_buffer128(
+procedure{:instruction mk_taint_ins2(S.Mov64, TMem(MReg(get_reg(dst), offset), t), src)}{:quick exportOnly}{:public} Store64_buffer128(
         dst:reg_opr64,
         src:reg_opr64,
         inline offset:int,
@@ -480,12 +479,11 @@ procedure{:instruction mk_taint_ins2(S.Mov64, dst, TMem(MReg(get_reg(src), offse
         valid_taint_buf128(b, mem, memTaint, t);
         mem == old(buffer128_write(b, index, insert_nat64_opaque(old(buffer128_read(b, index, mem)), src, if upper then 1 else 0), mem));
 {
-    /////////////// TODO: Make this a proper instruction!
-    assume false; 
-//    low_lemma_valid_mem128(b, #nat(index), old(mem));
-//    low_lemma_store_mem128(b, #nat(index), old(src), old(mem));
-//    lemma_valid_taint128(b, old(#memTaint_t(memTaint)), old(mem), #nat(index), t);
-//    same_memTaint128(b, old(mem), mem, old(#memTaint_t(memTaint)), #memTaint_t(memTaint));
+    low_lemma_valid_mem128_64(b, #nat(index), old(mem));
+    low_lemma_store_mem128_lo64(b, #nat(index), old(src), old(mem));
+    low_lemma_store_mem128_hi64(b, #nat(index), old(src), old(mem));
+    lemma_valid_taint128(b, old(#memTaint_t(memTaint)), old(mem), #nat(index), t);
+    same_memTaint128(b, old(mem), mem, old(#memTaint_t(memTaint)), #memTaint_t(memTaint));
 }
 
 procedure {:quick exportOnly}{:public} PushXmm(
