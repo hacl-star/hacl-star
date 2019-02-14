@@ -26,7 +26,7 @@
         "typing_FStar.Monotonic.HyperStack.get_tip"
       ],
       0,
-      "956aa89250169f4adc8fbe8a00b704a2"
+      "e8fa2694487b2ccca44a6efbaac3a8b9"
     ],
     [
       "EverCrypt.AutoConfig2.cpu_has_aesni",
@@ -53,7 +53,7 @@
         "typing_FStar.Monotonic.HyperStack.get_tip"
       ],
       0,
-      "8504a5bc1d68c4eeac7bcb79aa998e2d"
+      "a311473f7b2aa03cf54e1873ffda0e5a"
     ],
     [
       "EverCrypt.AutoConfig2.user_wants_hacl",
@@ -80,7 +80,7 @@
         "typing_FStar.Monotonic.HyperStack.get_tip"
       ],
       0,
-      "58205601569aa47df0dc76c6d58fb9a8"
+      "a02eabd2358f4e165d7b29d582318220"
     ],
     [
       "EverCrypt.AutoConfig2.user_wants_vale",
@@ -107,7 +107,7 @@
         "typing_FStar.Monotonic.HyperStack.get_tip"
       ],
       0,
-      "13f70d94ea501990befbdad5946070fc"
+      "08de707a8b04cecf34f1aa9c89f29bc8"
     ],
     [
       "EverCrypt.AutoConfig2.user_wants_openssl",
@@ -134,7 +134,7 @@
         "typing_FStar.Monotonic.HyperStack.get_tip"
       ],
       0,
-      "2715bace5979ac0a0142172f63ec0d02"
+      "39c79d9b3e059d9575a22ecdd6141049"
     ],
     [
       "EverCrypt.AutoConfig2.user_wants_bcrypt",
@@ -161,7 +161,7 @@
         "typing_FStar.Monotonic.HyperStack.get_tip"
       ],
       0,
-      "8a4196cc894011f81b910719c02230f0"
+      "bdeb6d3901596b2dd3c84d97d18ea0aa"
     ],
     [
       "EverCrypt.AutoConfig2.mk_getter",
@@ -181,7 +181,7 @@
         "typing_LowStar.Monotonic.Buffer.loc_none"
       ],
       0,
-      "4e5f0a0d3685b6474c9c1caf73d24443"
+      "4082b26aac7df413140e1ede3d59c053"
     ],
     [
       "EverCrypt.AutoConfig2.wants_vale",
@@ -198,7 +198,7 @@
         "typing_LowStar.Monotonic.Buffer.loc_none"
       ],
       0,
-      "450afaa616d928b2fb3ac444808e7e45"
+      "0b5bf71d06ce6967849c3be502e82ac5"
     ],
     [
       "EverCrypt.AutoConfig2.wants_hacl",
@@ -215,7 +215,7 @@
         "typing_LowStar.Monotonic.Buffer.loc_none"
       ],
       0,
-      "ae9e9f4ca89aa2f88eee83ea94c19876"
+      "b13e39403f6a3c328857586eb0275bfa"
     ],
     [
       "EverCrypt.AutoConfig2.wants_openssl",
@@ -232,7 +232,7 @@
         "typing_LowStar.Monotonic.Buffer.loc_none"
       ],
       0,
-      "19dbed270694455f40840ab0e7a844fd"
+      "abaf9e05bdbffe09d43247f75cdb4806"
     ],
     [
       "EverCrypt.AutoConfig2.wants_bcrypt",
@@ -249,7 +249,7 @@
         "typing_LowStar.Monotonic.Buffer.loc_none"
       ],
       0,
-      "d7d62bf5aae26a29b638e387523d2b4c"
+      "42c736e34fc34fef3fd009767dce2cf5"
     ],
     [
       "EverCrypt.AutoConfig2.recall",
@@ -258,7 +258,6 @@
       1,
       [
         "@MaxIFuel_assumption", "@query",
-        "Prims_pretyping_ae567c2fb75be05905677af440075565",
         "Prims_pretyping_f537159ed795b314b4e58c260361ae86", "bool_inversion",
         "bool_typing", "equation_EverCrypt.AutoConfig2.eternal_pointer",
         "equation_EverCrypt.AutoConfig2.flag",
@@ -268,12 +267,12 @@
         "equation_FStar.Monotonic.HyperStack.is_wf_with_ctr_and_tip",
         "equation_FStar.Monotonic.HyperStack.mem",
         "equation_LowStar.Buffer.buffer", "equation_Prims.eqtype",
-        "equation_Prims.nat",
+        "equation_Prims.nat", "equation_Types_s.twobits",
+        "equation_Words_s.natN",
         "function_token_typing_FStar.Monotonic.Heap.heap",
-        "function_token_typing_Prims.__cache_version_number__",
         "function_token_typing_Prims.bool",
-        "function_token_typing_Prims.int", "function_token_typing_Prims.nat",
-        "haseqPrims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "function_token_typing_Prims.nat",
+        "haseqFStar.Seq.Base_Tm_refine_5514fbe9e08dfda40f950a7b9f1b2b98",
         "lemma_FStar.Map.lemma_ContainsDom",
         "lemma_LowStar.Monotonic.Buffer.live_loc_not_unused_in",
         "lemma_LowStar.Monotonic.Buffer.loc_includes_addresses_addresses_2",
@@ -302,11 +301,11 @@
         "typing_LowStar.Monotonic.Buffer.loc_buffer",
         "typing_LowStar.Monotonic.Buffer.loc_not_unused_in",
         "typing_LowStar.Monotonic.Buffer.loc_union",
-        "typing_X64.CPU_Features_s.aesni_enabled",
+        "typing_Types_s.twobits", "typing_X64.CPU_Features_s.aesni_enabled",
         "typing_X64.CPU_Features_s.sha_enabled"
       ],
       0,
-      "6d4794795fb177667c361099ff94f0cf"
+      "f8c315347995c456dd3ff94fcf2b06f3"
     ],
     [
       "EverCrypt.AutoConfig2.init",
@@ -382,7 +381,7 @@
         "typing_X64.CPU_Features_s.sha_enabled", "unit_typing"
       ],
       0,
-      "e063b40ec2c78462181c25ff472951a0"
+      "aff3c1146d241813ea9b53cea0428d38"
     ],
     [
       "EverCrypt.AutoConfig2.mk_disabler",
@@ -413,7 +412,7 @@
         "typing_LowStar.Monotonic.Buffer.loc_buffer", "unit_typing"
       ],
       0,
-      "b01e5bf92dcc7aefb8619ef3f5545df3"
+      "85d0fee3768487a2c908bbef05b072cd"
     ],
     [
       "EverCrypt.AutoConfig2.disable_shaext",
@@ -456,7 +455,7 @@
         "typing_X64.CPU_Features_s.sha_enabled", "unit_typing"
       ],
       0,
-      "5f3ca71bca5af82d2e1437b83875d23c"
+      "eacea5cbe927ce0f56a942bd73955433"
     ],
     [
       "EverCrypt.AutoConfig2.disable_aesni",
@@ -499,7 +498,7 @@
         "typing_X64.CPU_Features_s.sha_enabled", "unit_typing"
       ],
       0,
-      "40b8d0403961f299305bda8411ee6564"
+      "64fd05518a5e52529b239e89dc334ef2"
     ],
     [
       "EverCrypt.AutoConfig2.disable_vale",
@@ -534,7 +533,7 @@
         "typing_X64.CPU_Features_s.sha_enabled"
       ],
       0,
-      "d980265703ba796ba5121822235bb437"
+      "b25fa5e7cb80f56f9deb1acb42cff4a8"
     ],
     [
       "EverCrypt.AutoConfig2.disable_hacl",
@@ -569,7 +568,7 @@
         "typing_X64.CPU_Features_s.sha_enabled"
       ],
       0,
-      "1d2a00acf0485bb3043b3988d6faf221"
+      "4db3ce3d8843f9b27550d672f0c1d5b5"
     ],
     [
       "EverCrypt.AutoConfig2.disable_openssl",
@@ -604,7 +603,7 @@
         "typing_X64.CPU_Features_s.sha_enabled"
       ],
       0,
-      "78c784bbc3449c769484e5c10b26e838"
+      "c359b7f259f31f96cef8d686d520feb2"
     ],
     [
       "EverCrypt.AutoConfig2.disable_bcrypt",
@@ -638,7 +637,7 @@
         "typing_X64.CPU_Features_s.sha_enabled"
       ],
       0,
-      "2553342c4050095c65b8129fe7ae31f9"
+      "1c0e895b1d7c2740ade1d4972f73d1ba"
     ]
   ]
 ]
