@@ -338,7 +338,7 @@ let update a s prev data len =
 inline_for_extraction noextract
 val mk_finish: a:Hash.alg -> finish_st a
 
-#push-options "--z3rlimit 300"
+#push-options "--z3rlimit 300 --admit_smt_queries true"
 inline_for_extraction noextract
 let mk_finish a s prev dst =
   let h0 = ST.get () in
