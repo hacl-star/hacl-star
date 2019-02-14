@@ -133,6 +133,7 @@ let lowstar_add1_normal_t : normal lowstar_add1_t
 
 open Vale.AsLowStar.MemoryHelpers
 
+#set-options "--max_fuel 0 --max_ifuel 0"
 let fast_add1
   (out:b8)
   (f1:b8)
@@ -250,6 +251,7 @@ let fadd_lemma = as_t #(VSig.vale_sig fadd_pre fadd_post) fadd_lemma'
 
 let code_fadd = FH.va_code_fadd_stdcall IA.win
 
+#push-options "--max_fuel 1"
 (* Here's the type expected for the add1 wrapper *)
 [@__reduce__]
 let lowstar_fadd_t =
@@ -262,7 +264,9 @@ let lowstar_fadd_t =
     _
     _
     (W.mk_prediction code_fadd fadd_dom [] (fadd_lemma code_fadd IA.win))
+#pop-options
 
+#push-options "--max_fuel 1"
 (* And here's the fadd wrapper itself *)
 let lowstar_fadd : lowstar_fadd_t  =
   IX64.wrap
@@ -271,6 +275,7 @@ let lowstar_fadd : lowstar_fadd_t  =
     16
     fadd_dom
     (W.mk_prediction code_fadd fadd_dom [] (fadd_lemma code_fadd IA.win))
+#pop-options
 
 let lowstar_fadd_normal_t //: normal lowstar_add1_t
   = as_normal_t #lowstar_fadd_t lowstar_fadd
@@ -398,6 +403,7 @@ let fsub_lemma = as_t #(VSig.vale_sig fsub_pre fsub_post) fsub_lemma'
 
 let code_fsub = FH.va_code_fsub_stdcall IA.win
 
+#push-options "--max_fuel 1"
 (* Here's the type expected for the fsub wrapper *)
 [@__reduce__]
 let lowstar_fsub_t =
@@ -410,7 +416,9 @@ let lowstar_fsub_t =
     _
     _
     (W.mk_prediction code_fsub fadd_dom [] (fsub_lemma code_fsub IA.win))
+#pop-options
 
+#push-options "--max_fuel 1"
 (* And here's the fsub wrapper itself *)
 let lowstar_fsub : lowstar_fsub_t  =
   IX64.wrap
@@ -419,11 +427,10 @@ let lowstar_fsub : lowstar_fsub_t  =
     16
     fadd_dom
     (W.mk_prediction code_fsub fadd_dom [] (fsub_lemma code_fsub IA.win))
+#pop-options
 
 let lowstar_fsub_normal_t //: normal lowstar_fsub_t
   = as_normal_t #lowstar_fsub_t lowstar_fsub
-
-#set-options "--admit_smt_queries true"
 
 let fast_fsub
   (out:b8)
@@ -465,7 +472,7 @@ let fast_fsub
     )
   = 
   let x, _ = lowstar_fsub_normal_t out f1 f2 () in
-  ()
+  admit ()
 
 
 #push-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
@@ -563,6 +570,7 @@ let fmul_lemma = as_t #(VSig.vale_sig fmul_pre fmul_post) fmul_lemma'
 
 let code_fmul = FW.va_code_fmul_stdcall IA.win
 
+#push-options "--max_fuel 1"
 (* Here's the type expected for the fmul wrapper *)
 [@__reduce__]
 let lowstar_fmul_t =
@@ -575,7 +583,9 @@ let lowstar_fmul_t =
     _
     _
     (W.mk_prediction code_fmul fmul_dom [] (fmul_lemma code_fmul IA.win))
+#pop-options
 
+#push-options "--max_fuel 1"
 (* And here's the fmul wrapper itself *)
 let lowstar_fmul : lowstar_fmul_t  =
   IX64.wrap
@@ -584,6 +594,7 @@ let lowstar_fmul : lowstar_fmul_t  =
     48
     fmul_dom
     (W.mk_prediction code_fmul fmul_dom [] (fmul_lemma code_fmul IA.win))
+#pop-options
 
 let lowstar_fmul_normal_t //: normal lowstar_fmul_t
   = as_normal_t #lowstar_fmul_t lowstar_fmul
@@ -635,7 +646,7 @@ let fast_fmul
     )
   = 
   let x, _ = lowstar_fmul_normal_t tmp f1 out f2 () in
-  ()
+  admit ()
 
 
 #push-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 200"
@@ -731,6 +742,7 @@ let fmul2_lemma = as_t #(VSig.vale_sig fmul2_pre fmul2_post) fmul2_lemma'
 
 let code_fmul2 = FW.va_code_fmul2_stdcall IA.win
 
+#push-options "--max_fuel 1"
 (* Here's the type expected for the fmul wrapper *)
 [@__reduce__]
 let lowstar_fmul2_t =
@@ -743,7 +755,9 @@ let lowstar_fmul2_t =
     _
     _
     (W.mk_prediction code_fmul2 fmul_dom [] (fmul2_lemma code_fmul2 IA.win))
+#pop-options
 
+#push-options "--max_fuel 1"
 (* And here's the fmul2 wrapper itself *)
 let lowstar_fmul2 : lowstar_fmul2_t  =
   IX64.wrap
@@ -752,6 +766,7 @@ let lowstar_fmul2 : lowstar_fmul2_t  =
     48
     fmul_dom
     (W.mk_prediction code_fmul2 fmul_dom [] (fmul2_lemma code_fmul2 IA.win))
+#pop-options
 
 let lowstar_fmul2_normal_t //: normal lowstar_fmul2_t
   = as_normal_t #lowstar_fmul2_t lowstar_fmul2
@@ -818,7 +833,7 @@ let fast_fmul2
     )
   = 
   let x, _ = lowstar_fmul2_normal_t tmp f1 out f2 () in
-  ()
+  admit ()
 
 
 #push-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 200"
@@ -909,6 +924,7 @@ let fmul1_lemma = as_t #(VSig.vale_sig fmul1_pre fmul1_post) fmul1_lemma'
 
 let code_fmul1 = FH.va_code_fmul1_stdcall IA.win
 
+#push-options "--max_fuel 1"
 (* Here's the type expected for the fmul1 wrapper *)
 [@__reduce__]
 let lowstar_fmul1_t =
@@ -921,7 +937,9 @@ let lowstar_fmul1_t =
     _
     _
     (W.mk_prediction code_fmul1 dom [] (fmul1_lemma code_fmul1 IA.win))
+#pop-options
 
+#push-options "--max_fuel 1"
 (* And here's the fmul1 wrapper itself *)
 let lowstar_fmul1 : lowstar_fmul1_t  =
   IX64.wrap
@@ -930,6 +948,7 @@ let lowstar_fmul1 : lowstar_fmul1_t  =
     32
     fmul1_dom
     (W.mk_prediction code_fmul1 fmul1_dom [] (fmul1_lemma code_fmul1 IA.win))
+#pop-options
 
 let lowstar_fmul1_normal_t : normal lowstar_fmul1_t
   = as_normal_t #lowstar_fmul1_t lowstar_fmul1
@@ -965,6 +984,7 @@ let fast_fmul1
     )
   = 
   let x, _ = lowstar_fmul1_normal_t out f1 f2 () in
+  admit ();
   x
 
 #push-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
@@ -1053,6 +1073,7 @@ let fsqr_lemma = as_t #(VSig.vale_sig fsqr_pre fsqr_post) fsqr_lemma'
 
 let code_fsqr = FW.va_code_fsqr_stdcall IA.win
 
+#push-options "--max_fuel 1"
 (* Here's the type expected for the fsqr wrapper *)
 [@__reduce__]
 let lowstar_fsqr_t =
@@ -1065,7 +1086,9 @@ let lowstar_fsqr_t =
     _
     _
     (W.mk_prediction code_fsqr fsqr_dom [] (fsqr_lemma code_fsqr IA.win))
+#pop-options
 
+#push-options "--max_fuel 1"
 (* And here's the fsqr wrapper itself *)
 let lowstar_fsqr : lowstar_fsqr_t  =
   IX64.wrap
@@ -1074,6 +1097,7 @@ let lowstar_fsqr : lowstar_fsqr_t  =
     56
     fsqr_dom
     (W.mk_prediction code_fsqr fsqr_dom [] (fsqr_lemma code_fsqr IA.win))
+#pop-options
 
 let lowstar_fsqr_normal_t //: normal lowstar_fsqr_t
   = as_normal_t #lowstar_fsqr_t lowstar_fsqr
@@ -1113,7 +1137,7 @@ let fast_fsqr
     )
   = 
   let x, _ = lowstar_fsqr_normal_t tmp f1 out () in
-  ()
+  admit ()
 
 
 #push-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
@@ -1199,6 +1223,7 @@ let fsqr2_lemma = as_t #(VSig.vale_sig fsqr2_pre fsqr2_post) fsqr2_lemma'
 
 let code_fsqr2 = FW.va_code_fsqr2_stdcall IA.win
 
+#push-options "--max_fuel 1"
 (* Here's the type expected for the fsqr2 wrapper *)
 [@__reduce__]
 let lowstar_fsqr2_t =
@@ -1211,7 +1236,9 @@ let lowstar_fsqr2_t =
     _
     _
     (W.mk_prediction code_fsqr2 fsqr_dom [] (fsqr2_lemma code_fsqr2 IA.win))
+#pop-options
 
+#push-options "--max_fuel 1"
 (* And here's the fsqr2 wrapper itself *)
 let lowstar_fsqr2 : lowstar_fsqr2_t  =
   IX64.wrap
@@ -1220,6 +1247,7 @@ let lowstar_fsqr2 : lowstar_fsqr2_t  =
     56
     fsqr_dom
     (W.mk_prediction code_fsqr2 fsqr_dom [] (fsqr2_lemma code_fsqr2 IA.win))
+#pop-options
 
 let lowstar_fsqr2_normal_t //: normal lowstar_fsqr2_t
   = as_normal_t #lowstar_fsqr2_t lowstar_fsqr2
@@ -1270,7 +1298,7 @@ let fast_fsqr2
     )
   = 
   let x, _ = lowstar_fsqr2_normal_t tmp f1 out () in
-  ()
+  admit ()
 
 
 #push-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
@@ -1359,6 +1387,7 @@ let cswap_lemma = as_t #(VSig.vale_sig cswap_pre cswap_post) cswap_lemma'
 
 let code_cswap = FU.va_code_cswap2_stdcall IA.win
 
+#push-options "--max_fuel 1"
 (* Here's the type expected for the cswap wrapper *)
 [@__reduce__]
 let lowstar_cswap_t =
@@ -1371,7 +1400,9 @@ let lowstar_cswap_t =
     _
     _
     (W.mk_prediction code_cswap cswap_dom [] (cswap_lemma code_cswap IA.win))
+#pop-options
 
+#push-options "--max_fuel 1"
 (* And here's the cswap wrapper itself *)
 let lowstar_cswap : lowstar_cswap_t  =
   IX64.wrap
@@ -1380,6 +1411,7 @@ let lowstar_cswap : lowstar_cswap_t  =
     16
     cswap_dom
     (W.mk_prediction code_cswap cswap_dom [] (cswap_lemma code_cswap IA.win))
+#pop-options
 
 let lowstar_cswap_normal_t : normal lowstar_cswap_t
   = as_normal_t #lowstar_cswap_t lowstar_cswap
@@ -1443,7 +1475,7 @@ let fast_cswap2
     ))
   = 
   let x, _ = lowstar_cswap_normal_t p0 p1 bit () in
-  ()
+  admit ()
 
 #push-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
 
