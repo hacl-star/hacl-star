@@ -563,8 +563,8 @@ COMPACT_FLAGS	=\
 .PHONY: old-%
 old-%:
 	$(call run-with-log,\
-	  $(MAKE) -C code/old -f Makefile.old $* \
-	  ,[OLD-MAKE $*],code/old/$*)
+	  KOPTS=-verbose $(MAKE) -C code/old -f Makefile.old $* \
+	  ,[OLD-MAKE $*],obj/old-$*)
 
 HACL_OLD_FILES=\
   code/old/experimental/aesgcm/aesgcm-c/Hacl_AES.c \
