@@ -472,7 +472,6 @@ obj/CmdLineParser.ml: vale/code/lib/util/CmdLineParser.ml
 obj/CmdLineParser.cmx: $(ALL_CMX_FILES)
 
 obj/vale-%.exe: $(ALL_CMX_FILES) obj/CmdLineParser.cmx
-	mkdir -p $(dir $@)
 	$(call run-with-log,\
 	  $(OCAMLOPT) $^ -o $@ \
 	  ,[OCAMLOPT-EXE] $(notdir $*),$@)
