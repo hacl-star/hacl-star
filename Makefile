@@ -65,8 +65,10 @@ ifeq (,$(OPENSSL_HOME)/libcrypto.a)
   $(error $$OPENSSL_HOME/libcrypto.a does not exist (OPENSSL_HOME=$(OPENSSL_HOME)))
 endif
 
+ifneq (,$(HACL_HOME))
 ifeq (Windows_NT,$(OS))
   HACL_HOME := $(shell cygpath -m $(HACL_HOME))
+endif
 endif
 
 ##########################
@@ -447,7 +449,7 @@ dist/vale/%-x86_64-mingw.S: obj/vale-%.exe | dist/vale
 	$< GCC Win > $@
 	$(SED) 's/_stdcall//' -i $@
 
-dist/vale/%-x86_64-msvc.S: obj/vale-%.exe | dist/vale
+dist/vale/%-x86_64-msvc.asm: obj/vale-%.exe | dist/vale
 	$< MASM Win > $@
 	$(SED) 's/_stdcall//' -i $@
 
@@ -477,7 +479,7 @@ obj/vale-%.exe: $(ALL_CMX_FILES) obj/CmdLineParser.cmx
 
 # The ones in secure_api are legacy and should go.
 VALE_ASMS = $(foreach P,cpuid aesgcm sha256 curve25519,\
-  $(addprefix dist/vale/,$P-x86_64-mingw.S $P-x86_64-msvc.S $P-x86_64-linux.S $P-x86_64-darwin.S)) \
+  $(addprefix dist/vale/,$P-x86_64-mingw.S $P-x86_64-msvc.asm $P-x86_64-linux.S $P-x86_64-darwin.S)) \
   $(wildcard \
     $(HACL_HOME)/secure_api/vale/asm/aes-*.S \
     $(HACL_HOME)/secure_api/vale/asm/aes-*.asm)
