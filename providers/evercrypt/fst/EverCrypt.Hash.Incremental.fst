@@ -338,7 +338,7 @@ let update a s prev data len =
 inline_for_extraction noextract
 val mk_finish: a:Hash.alg -> finish_st a
 
-#push-options "--z3rlimit 300 --admit_smt_queries true"
+#reset-options "--z3rlimit 300 --max_fuel 0 --max_ifuel 0"
 inline_for_extraction noextract
 let mk_finish a s prev dst =
   let h0 = ST.get () in
@@ -376,7 +376,6 @@ let mk_finish a s prev dst =
   Hash.frame_invariant_implies_footprint_preservation
     (Hash.footprint tmp_hash_state h2) hash_state h2 h3;
   assert (Hash.invariant hash_state h3);
-
   EverCrypt.Hash.update_last #(G.hide a) tmp_hash_state buf_ total_len;
 
   let h4 = ST.get () in
@@ -390,24 +389,32 @@ let mk_finish a s prev dst =
   let h5 = ST.get () in
   Spec.Hash.Lemmas.hash_is_hash_incremental a (G.reveal prev);
   assert (S.equal (B.as_seq h5 dst) (Spec.Hash.hash a (G.reveal prev)));
-
   Hash.frame_invariant (B.loc_buffer dst) hash_state h4 h5;
   Hash.frame_invariant_implies_footprint_preservation
     (B.loc_buffer dst) hash_state h4 h5;
   assert (Hash.invariant hash_state h5);
 
   pop_frame ();
-
   let h6 = ST.get () in
   Hash.frame_invariant B.(loc_region_only false (HS.get_tip h5)) hash_state h5 h6;
   Hash.frame_invariant_implies_footprint_preservation
     B.(loc_region_only false (HS.get_tip h5)) hash_state h5 h6;
-
   assert (hashes h6 s (G.reveal prev));
-  assert (B.(modifies (loc_union (loc_buffer dst) (footprint s h0)) h0 h6))
-  // So much for automated proofs.
 
-#pop-options
+  (*
+   * AR: 02/14: This is hard. In emacs, the lemma calls are not needed
+   *            Whereas on the command line, proof doesn't work without
+   *            With log_queries, the differences between the two are:
+   *            -- Comments
+   *            -- More push calls in emacs
+   *            -- The name of one non total arrow symbol (_288 vs _327)
+   *            Can't do much about it, may be can investigate the gensym difference
+   *)
+  let mloc = B.loc_union (B.loc_buffer dst) (footprint s h0) in
+  B.modifies_remove_fresh_frame h0 h1 h6 mloc;
+  B.popped_modifies h5 h6;
+  assert (B.(modifies mloc h0 h6))
+  // So much for automated proofs.
 
 /// The wrapper pattern, to ensure that the stack-allocated state is properly
 /// monomorphized.
