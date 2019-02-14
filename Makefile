@@ -472,7 +472,6 @@ obj/CmdLineParser.ml: vale/code/lib/util/CmdLineParser.ml
 obj/CmdLineParser.cmx: $(ALL_CMX_FILES)
 
 obj/vale-%.exe: $(ALL_CMX_FILES) obj/CmdLineParser.cmx
-	mkdir -p $(dir $@)
 	$(call run-with-log,\
 	  $(OCAMLOPT) $^ -o $@ \
 	  ,[OCAMLOPT-EXE] $(notdir $*),$@)
@@ -566,7 +565,7 @@ COMPACT_FLAGS	=\
 old-%:
 	$(call run-with-log,\
 	  KOPTS=-verbose $(MAKE) -C code/old -f Makefile.old $* \
-	  ,[OLD-MAKE $*],code/old/$*)
+	  ,[OLD-MAKE $*],obj/old-$*)
 
 HACL_OLD_FILES=\
   code/old/experimental/aesgcm/aesgcm-c/Hacl_AES.c \
