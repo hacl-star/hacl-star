@@ -216,8 +216,6 @@ procedure{:quick} poly1305_iteration(ghost r1:nat64) returns(ghost hh:int)
     assert hh == (n * n) * h2 + n * h1 + h0 /\ (h * r) % p == hh % p;
 }
 
-#reset-options "--admit_smt_queries true"
-
 procedure{:quick} poly1305_blocks(
     ghost r:int,
     ghost h_in:int,
@@ -367,6 +365,8 @@ procedure{:quick} poly1305_blocks(
             reveal_poly1305_heap_blocks(modp(h_in), padbit * (nn * nn), r, buffer64_as_seq(mem, inp_b), word_index - 2);
             reveal modp';
             lemma_poly_demod(p, hp, hq - hp, r);
+            lemma_poly1305_heap_blocks_unroll(modp(h_in), padbit * (nn * nn), r, buffer64_as_seq(mem, inp_b), word_index);
+            lemma_poly1305_heap_blocks_unroll(modp(h_in), padbit * (nn * nn), r, buffer64_as_seq(mem, inp_b), word_index - 2);
         }
     }
     Store64_buffer(ctx, h0, 0, Public, ctx_b, 0);
