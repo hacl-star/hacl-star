@@ -115,7 +115,7 @@ procedure {:quick exportOnly} load_two_lsb(inout dst:xmm)
 procedure {:quick exportOnly} load_one_lsb(inout dst:xmm)
     lets constp @= r11; 
     modifies constp; efl;
-    //ensures  dst == Mkfour(1, 0, 0, 0);
+    ensures  dst == Mkfour(1, 0, 0, 0);
 {
     ZeroXmm(dst);
     lemma_insert_nat64_nat32s(dst, 1, 0);
@@ -174,7 +174,7 @@ procedure {:quick} handle_ctr32(
     VPshufb(T1, T1, Ii);            // # next counter value
 }
 
-#reset-options ""
+#reset-options "--z3rlimit 20"
 procedure {:quick} loop6x_ctr_update(
     inline alg:algorithm,  
     ghost key_words:seq(nat32),
@@ -248,6 +248,7 @@ procedure {:quick} loop6x_ctr_update(
     }
 }
 
+#reset-options ""
 procedure {:quick} loop6x_preamble(
     inline alg:algorithm,  // OpenSSL includes the number of rounds (nr) as a dynamic parameter (stored with the key).  Saves code space but adds extra instructions to the fast path.  Maybe branch predictor is good enough for it not to matter
     ghost iv_b:buffer128,
