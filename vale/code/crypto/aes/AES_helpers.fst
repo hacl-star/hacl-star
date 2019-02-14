@@ -63,7 +63,7 @@ let finish_cipher (alg:algorithm) (input:quad32) (round_keys:seq quad32) =
   reveal_opaque rounds;
   reveal_opaque cipher;
   commute_sub_bytes_shift_rows_forall()
-#pop-options  
+
 
 let finish_cipher_opt (alg:algorithm) (input plain t0 t1 out:quad32) (round_keys:seq quad32) : Lemma
   (requires length round_keys == (nr alg) + 1 /\
@@ -73,12 +73,25 @@ let finish_cipher_opt (alg:algorithm) (input plain t0 t1 out:quad32) (round_keys
             out = quad32_xor (sub_bytes (shift_rows_LE t1)) (quad32_xor plain (index round_keys (nr alg))))
   (ensures out == quad32_xor plain (cipher_opaque alg input round_keys))
   =
-  (*
-  reveal_opaque rounds;
-  reveal_opaque cipher;
-  commute_sub_bytes_shift_rows_forall()
-  *)
-  admit()
+  calc (==) {
+    out;
+    == {} // From requires
+    quad32_xor (sub_bytes (shift_rows_LE t1)) (quad32_xor plain (index round_keys (nr alg)));
+    == { Arch.TypesNative.lemma_quad32_xor_commutes plain (index round_keys (nr alg)) }
+    quad32_xor (sub_bytes (shift_rows_LE t1)) (quad32_xor (index round_keys (nr alg)) plain);
+    == { Arch.TypesNative.lemma_quad32_xor_associates (sub_bytes (shift_rows_LE t1)) (index round_keys (nr alg)) plain }
+    quad32_xor (quad32_xor (sub_bytes (shift_rows_LE t1)) (index round_keys (nr alg))) plain;
+    == { reveal_opaque rounds;
+         reveal_opaque cipher;
+         commute_sub_bytes_shift_rows_forall();
+         reveal_opaque quad32_xor_def
+       }
+    quad32_xor (cipher_opaque alg input round_keys) plain;
+    == { Arch.TypesNative.lemma_quad32_xor_commutes plain (cipher_opaque alg input round_keys) }
+    quad32_xor plain (cipher_opaque alg input round_keys);
+  };
+  ()
+#pop-options  
 
 #reset-options ""
 let lemma_add_0x1000000_reverse_mult (n:nat32) (increment:nat) : Lemma
