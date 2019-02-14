@@ -128,6 +128,14 @@ let lemma_insert_nat64_properties (q:quad32) (n:nat64) :
   Opaque_s.reveal_opaque insert_nat64;
   ()
 
+let lemma_insert_nat64_nat32s (q:quad32) (n0 n1:nat32) :
+  Lemma ( insert_nat64_opaque q (two_to_nat32 (Mktwo n0 n1)) 0 ==
+          Mkfour n0 n1 q.hi2 q.hi3 )
+  =
+  let open Words.Two in
+  Opaque_s.reveal_opaque insert_nat64;
+  ()  
+
 let lemma_lo64_properties (_:unit) :
   Lemma (forall (q0 q1:quad32) . (q0.lo0 == q1.lo0 /\ q0.lo1 == q1.lo1) <==> (lo64 q0 == lo64 q1))
   =

@@ -94,7 +94,11 @@ val lemma_insert_nat64_properties (q:quad32) (n:nat64) :
             q'.lo0 == q.lo0 /\
             q'.lo1 == q.lo1))
   [SMTPat (insert_nat64_opaque q n)]            
-         
+
+val lemma_insert_nat64_nat32s (q:quad32) (n0 n1:nat32) :
+  Lemma ( insert_nat64_opaque q (two_to_nat32 (Mktwo n0 n1)) 0 ==
+          Mkfour n0 n1 q.hi2 q.hi3 )
+
 let lo64_def (q:quad32) : nat64 = two_to_nat 32 (two_select (four_to_two_two q) 0)
 let hi64_def (q:quad32) : nat64 = two_to_nat 32 (two_select (four_to_two_two q) 1)
 
