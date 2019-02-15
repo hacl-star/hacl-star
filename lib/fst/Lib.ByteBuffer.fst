@@ -10,16 +10,21 @@ open Lib.Buffer
 
 module ST = FStar.HyperStack.ST
 
-friend Lib.IntTypes
+module Loops = Lib.LoopCombinators
+
 friend Lib.ByteSequence
 
+#set-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 1"
+
 let uint_to_be #t #l u =
-  match t with
-  | U1 -> u
-  | U8 -> u
-  | U16 -> C.Endianness.htobe16 u
-  | U32 -> C.Endianness.htobe32 u
-  | U64 -> C.Endianness.htobe64 u
+  match t, l with
+  | U1, _ -> u
+  | U8, _ -> u
+  | U16, SEC -> 
+    RawIntTypes.u16_from_UInt16 (C.Endianness.htobe16 (RawIntTypes.u16_to_UInt16 u))
+  | U16, PUB -> C.Endianness.htobe16 u
+  | U32, SEC -> C.Endianness.htobe32 u
+  | U64,_ -> C.Endianness.htobe64 u
 
 let uint_to_le #t #l u =
   match t with
@@ -45,28 +50,77 @@ let uint_from_le #t #l u =
   | U32 -> C.Endianness.le32toh u
   | U64 -> C.Endianness.le64toh u
 
-#set-options "--z3rlimit 50 --max_fuel 1 --max_ifuel 0"
+/// BEGIN Constant-time buffer equality
 
-let lbytes_eq #len a b =
-  push_frame();
-  let res = create 1ul true in
-  [@ inline_let]
-  let refl h _ = bget h res 0 in
-  [@ inline_let]
-  let spec h0 = ByteSeq.lbytes_eq_inner (as_seq h0 a) (as_seq h0 b) in
-  let h0 = ST.get () in
-  loop h0 len (ByteSeq.lbytes_eq_state (v len)) refl
-    (fun i -> loc res) spec
+inline_for_extraction noextract
+val cmp_bytes: 
+    #len1:size_t 
+  -> #len2:size_t 
+  -> b1:lbuffer uint8 len1 
+  -> b2:lbuffer uint8 len2 
+  -> len:size_t{v len <= v len1 /\ v len <= v len2} 
+  -> res:lbuffer uint8 (size 1) ->
+  Stack uint8
+    (requires fun h -> 
+      live h b1 /\ live h b2 /\ live h res /\ disjoint res b1 /\ disjoint res b2 /\
+      v (bget h res 0) == 255)    
+    (ensures fun h0 z h1 -> 
+      modifies1 res h0 h1 /\
+      (as_seq h0 (gsub b1 0ul len) == as_seq h0 (gsub b2 0ul len)  ==> v z == 255) /\
+      (as_seq h0 (gsub b1 0ul len) =!= as_seq h0 (gsub b2 0ul len) ==> v z == 0))
+let rec cmp_bytes #len1 #len2 b1 b2 len res =
+  let a_spec i = uint8 in
+  let refl h = bget h res 0 in
+  let footprint i = loc res in
+  let spec h = 
+  let h0 = ST.get() in
+  loop h0 len a_spec refl footprint
     (fun i ->
-      //Seq.unfold_repeat (v len) (fun _ -> bool) (spec h0) true (v i);
-      let ai = a.(i) in
-      let bi = b.(i) in
-      let res0 = res.(0ul) in
-      res.(0ul) <- res0 && FStar.UInt8.(u8_to_UInt8 ai =^ u8_to_UInt8 bi)
-    );
-  let res = res.(0ul) in
+      Loops.unfold_repeat_gen len a_spec (spec h0) (refl h0 0);
+      let z0 = res.(0ul) in
+      res.(0ul) <- eq_mask b1.(i) b2.(i) &. z0
+    )
+
+
+(*
+  UInt.logand_lemma_1 #8 255;
+  UInt.logand_lemma_2 #8 255;
+  UInt.logand_lemma_1 #8 0;
+  UInt.logand_lemma_2 #8 0;
+  let h0 = ST.get() in
+  let inv h (i:nat{i <= v len}) =
+    let z = bget h res 0 in
+    modifies1 res h0 h /\
+    (as_seq h0 (gsub b1 0ul (size i)) == as_seq h0 (gsub b2 0ul (size i))  ==> v z == 255) /\
+    (as_seq h0 (gsub b1 0ul (size i)) =!= as_seq h0 (gsub b2 0ul (size i)) ==> v z == 0)
+  in
+  Loops.for 0ul len inv 
+    (fun i ->
+      let z0 = res.(0ul) in
+      res.(0ul) <- eq_mask b1.(i) b2.(i) &. z0;
+      let h = ST.get() in
+      if v (bget h res 0) = 255 then
+        begin
+        let s1 = as_seq h0 (gsub b1 0ul (i +! 1ul)) in
+        let s2 = as_seq h0 (gsub b2 0ul (i +! 1ul)) in
+        FStar.Seq.lemma_split s1 (v i);
+        FStar.Seq.lemma_split s2 (v i);       
+        Seq.lemma_eq_intro s1 s2
+        end
+      else if v z0 = 0 then
+        lemma_not_equal_slice (as_seq h0 b1) (as_seq h0 b2) 0 (v i) (v i + 1)
+      else
+        lemma_not_equal_last (as_seq h0 b1) (as_seq h0 b2) 0 (v i + 1));
+  res.(0ul)
+
+let lbytes_eq #len b1 b2 =
+  push_frame();
+  let res = create 1ul (u8 255) in
+  let z = cmp_bytes b1 b2 len res in
   pop_frame();
-  res
+  z = u8 255
+
+/// END Constant-time buffer equality
 
 #set-options "--initial_fuel 1 --max_fuel 1 --max_ifuel 1"
 
@@ -250,3 +304,4 @@ let uints_to_bytes_be #t #l len o i =
       uint_to_bytes_be b_i u_i in
   admit();
   Lib.Loops.for 0ul len inv f'
+*)

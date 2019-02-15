@@ -7,26 +7,75 @@ open Lib.Sequence
 open Lib.RawIntTypes
 open Lib.LoopCombinators
 
-#reset-options "--z3rlimit 50 --max_fuel 1 --max_ifuel 1"
+#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 1"
 
-val lbytes_eq_inner:
-    #l:secrecy_level
-  -> #len:size_nat
-  -> a:lbytes_l l len
-  -> b:lbytes_l l len
+val lemma_not_equal_slice: #a:Type -> b1:Seq.seq a -> b2:Seq.seq a -> i:nat -> j:nat ->
+  k:nat{i <= j /\ i <= k /\ j <= k /\ k <= Seq.length b1 /\ k <= Seq.length b2 } ->
+  Lemma
+    (requires ~(Seq.equal (Seq.slice b1 i j) (Seq.slice b2 i j)))
+    (ensures  ~(Seq.equal (Seq.slice b1 i k) (Seq.slice b2 i k)))
+let lemma_not_equal_slice #a b1 b2 i j k =
+  assert (forall (n:nat{n < k - i}). Seq.index (Seq.slice b1 i k) n == Seq.index b1 (n + i))
+
+val lemma_not_equal_last: #a:Type -> b1:Seq.seq a -> b2:Seq.seq a -> i:nat ->
+  j:nat{i < j /\ j <= Seq.length b1 /\ j <= Seq.length b2} ->
+  Lemma
+    (requires ~(Seq.index b1 (j - 1) == Seq.index b2 (j - 1)))
+    (ensures  ~(Seq.equal (Seq.slice b1 i j) (Seq.slice b2 i j)))
+let lemma_not_equal_last #a b1 b2 i j =
+  Seq.lemma_index_slice b1 i j (j - i - 1);
+  Seq.lemma_index_slice b2 i j (j - i - 1)
+
+val cmp_bytes_inner: #len1:size_nat -> #len2:size_nat 
+  -> b1:lbytes len1 
+  -> b2:lbytes len2 
+  -> len:size_nat{len <= len1 /\ len <= len2}
   -> i:size_nat{i < len}
-  -> r:bool
-  -> bool
-let lbytes_eq_inner #l #len a b i r =
-  let open Lib.RawIntTypes in
-  let open FStar.UInt8 in
-  r && (u8_to_UInt8 (to_u8 (index a i)) =^ u8_to_UInt8 (to_u8 (index b i)))
+  -> res:uint8{(sub b1 0 i == sub b2 0 i  ==> v res == 255) /\ 
+              (sub b1 0 i =!= sub b2 0 i ==> v res == 0)}
+  -> res':uint8{(sub b1 0 (i + 1) == sub b2 0 (i + 1)  ==> v res' == 255) /\ 
+               (sub b1 0 (i + 1) =!= sub b2 0 (i + 1) ==> v res' == 0)}
+let cmp_bytes_inner #len1 #len2 b1 b2 len i res =
+  UInt.logand_lemma_1 #8 255;
+  UInt.logand_lemma_2 #8 255;
+  UInt.logand_lemma_1 #8 0;
+  UInt.logand_lemma_2 #8 0;
+  let z0 = res in
+  let res = eq_mask b1.[i] b2.[i] &. z0 in
+  // TODO: This should be known from Lib.IntTypes.fsti
+  assume (v res == v (eq_mask b1.[i] b2.[i]) `UInt.logand #8` v z0);
+  if v res = 255 then 
+    begin
+    let s1 = sub b1 0 (i + 1) in
+    let s2 = sub b2 0 (i + 1) in
+    FStar.Seq.lemma_split s1 i;
+    FStar.Seq.lemma_split s2 i;
+    uintv_extensionality b1.[i] b2.[i];
+    Seq.lemma_eq_intro s1 s2
+    end
+  else if v z0 = 0 then
+    lemma_not_equal_slice b1 b2 0 i (i + 1)
+  else
+    lemma_not_equal_last b1 b2 0 (i + 1);
+  res
 
-val lbytes_eq_state: len:size_nat -> i:size_nat{i <= len} -> Type0
-let lbytes_eq_state len i = bool
+val cmp_bytes: #len1:size_nat -> #len2:size_nat 
+  -> b1:lbytes len1 
+  -> b2:lbytes len2 
+  -> len:size_nat{len <= len1 /\ len <= len2}
+  -> res:uint8{(sub b1 0 len == sub b2 0 len  ==> v res == 255) /\ 
+              (sub b1 0 len =!= sub b2 0 len ==> v res == 0)}
+let cmp_bytes #len1 #len2 b1 b2 len =
+  repeati_inductive len 
+    (fun (i:nat{i <= len}) res ->
+      (sub b1 0 i == sub b2 0 i  ==> v res == 255) /\ 
+      (sub b1 0 i =!= sub b2 0 i ==> v res == 0))
+    (cmp_bytes_inner b1 b2 len)
+    (u8 255)
 
-let lbytes_eq #l #len a b =
-  repeat_gen len (lbytes_eq_state len) (lbytes_eq_inner #l #len a b) true
+let lbytes_eq #len b1 b2 =
+  let res = cmp_bytes b1 b2 len in
+  RawIntTypes.u8_to_UInt8 res = 255uy
 
 
 val nat_from_intseq_be_:

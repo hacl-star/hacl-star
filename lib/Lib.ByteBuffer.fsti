@@ -2,6 +2,8 @@ module Lib.ByteBuffer
 
 open FStar.HyperStack
 open FStar.HyperStack.ST
+open FStar.Mul
+
 open LowStar.Buffer
 
 open Lib.IntTypes
@@ -11,36 +13,31 @@ open Lib.Buffer
 module B = LowStar.Buffer
 module BS = Lib.ByteSequence
 
-open FStar.Mul
-
-
-inline_for_extraction
-val uint_to_be: #t:inttype{t<>U128} -> #l:secrecy_level -> u:uint_t t l -> uint_t t l
+/// Host to {little,big}-endian conversions
+/// TODO: missing specifications
 
 inline_for_extraction
-val uint_to_le: #t:inttype{t<>U128} -> #l:secrecy_level -> u:uint_t t l -> uint_t t l
+val uint_to_be: #t:inttype{~(U128? t)} -> #l:secrecy_level -> uint_t t l -> uint_t t l
 
 inline_for_extraction
-val uint_from_be: #t:inttype{t<>U128} -> #l:secrecy_level -> u:uint_t t l -> uint_t t l
+val uint_to_le: #t:inttype{~(U128? t)} -> #l:secrecy_level -> uint_t t l -> uint_t t l
 
 inline_for_extraction
-val uint_from_le: #t:inttype{t<>U128} -> #l:secrecy_level -> u:uint_t t l -> uint_t t l
+val uint_from_be: #t:inttype{~(U128? t)} -> #l:secrecy_level -> uint_t t l -> uint_t t l
 
-(** Compares two byte buffers of equal length returning a bool *)
 inline_for_extraction
-val lbytes_eq:
-    #len:size_t
-  -> a:lbuffer uint8 len
-  -> b:lbuffer uint8 len ->
-  Stack bool
-    (requires fun h -> live h a /\ live h b)
-    (ensures  fun h0 r h1 ->
-      B.modifies B.loc_none h0 h1 /\
-      r == BS.lbytes_eq (as_seq h0 a) (as_seq h0 b))
+val uint_from_le: #t:inttype{~(U128? t)} -> #l:secrecy_level -> uint_t t l -> uint_t t l
+
+(** Compares two buffers of secret bytes of equal length in constant-time, 
+    declassifying the result *)
+inline_for_extraction
+val lbytes_eq: #len:size_t -> b1:lbuffer uint8 len -> b2:lbuffer uint8 len -> Stack bool
+  (requires fun h -> live h b1 /\ live h b2)
+  (ensures  fun h0 r h1 -> modifies0 h0 h1 /\ r <==> (as_seq h0 b1 == as_seq h0 b2))
 
 inline_for_extraction
 val uint_from_bytes_le:
-    #t:inttype{~(t == U1)}
+    #t:inttype{~(U1? t)}
   -> #l:secrecy_level
   -> i:lbuffer (uint_t U8 l) (size (numbytes t)) ->
   Stack (uint_t t l)
@@ -51,7 +48,7 @@ val uint_from_bytes_le:
 
 inline_for_extraction
 val uint_from_bytes_be:
-    #t:inttype{~(t == U1)}
+    #t:inttype{~(U1? t)}
   -> #l:secrecy_level
   -> i:lbuffer (uint_t U8 l) (size (numbytes t)) ->
   Stack (uint_t t l)
