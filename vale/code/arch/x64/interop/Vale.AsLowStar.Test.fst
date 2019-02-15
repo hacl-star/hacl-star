@@ -200,7 +200,7 @@ let memcpy_test
       B.live h1 dst /\
       B.as_seq h1 dst == B.as_seq h1 src)
 //  by (T.dump "A") (* in case you want to look at the VC *)
-  = Vale.LowStarHelpers.lemma_different_preorders_different_buffers dst src; 
+  = IB.inhabited_immutable_buffer_is_distinct_from_buffer (UInt8.uint_to_t 0) src dst;
     let x, _ = lowstar_memcpy_normal_t dst src () in //This is a call to the interop wrapper
     let h1 = get () in
     lbv_as_seq_eq dst src Views.view64 h1; //And a lemma to rephrase the Vale postcondition 

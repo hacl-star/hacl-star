@@ -386,6 +386,12 @@ obj/X64.Memory_Sems.fst.checked: \
 obj/Vale.AsLowStar.Wrapper.fst.checked: \
   FSTAR_FLAGS=$(VALE_FSTAR_FLAGS)
 
+obj/Vale.AsLowStar.Test.fst.checked: \
+  FSTAR_FLAGS=$(VALE_FSTAR_FLAGS)
+
+obj/Sha_stdcalls.fst.checked: \
+  FSTAR_FLAGS=$(VALE_FSTAR_FLAGS)
+
 hints:
 	mkdir -p $@
 

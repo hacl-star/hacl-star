@@ -168,8 +168,8 @@ let sha_vale
   =
   let h0 = get() in
   Classical.forall_intro (bounded_buffer_addrs TUInt128 h0 in_b);
-  Vale.LowStarHelpers.lemma_different_preorders_different_buffers ctx_b k_b;
-  Vale.LowStarHelpers.lemma_different_preorders_different_buffers in_b k_b;
+  IB.inhabited_immutable_buffer_is_distinct_from_buffer (UInt8.uint_to_t 0) k_b ctx_b;
+  IB.inhabited_immutable_buffer_is_distinct_from_buffer (UInt8.uint_to_t 0) k_b in_b;
   let x, _ = lowstar_sha_normal_t ctx_b in_b num_val k_b () in
   let h1 = get() in
   x

@@ -4,8 +4,8 @@
     [
       "Poly_stdcalls.uint64_to_nat_seq",
       1,
+      2,
       1,
-      0,
       [
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented",
@@ -29,13 +29,13 @@
         "typing_FStar.Seq.Base.length", "typing_FStar.UInt64.n"
       ],
       0,
-      "8dc5b301c18a34336d2d78dad26cee36"
+      "f5db7c12e04196008532d2a2dc90244a"
     ],
     [
       "Poly_stdcalls.poly1305",
       1,
+      2,
       1,
-      0,
       [
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented",
@@ -48,6 +48,7 @@
         "equation_FStar.UInt.uint_t", "equation_FStar.UInt64.n",
         "equation_Interop.Types.view_n", "equation_LowStar.Buffer.buffer",
         "equation_Prims.nat", "equation_Views.view64",
+        "equation_X64.Poly1305.Util.readable_words",
         "function_token_typing_FStar.UInt8.t", "int_inversion",
         "lemma_FStar.UInt.pow2_values",
         "lemma_LowStar.Monotonic.Buffer.address_liveness_insensitive_buffer",
@@ -67,7 +68,7 @@
         "typing_LowStar.Monotonic.Buffer.loc_buffer"
       ],
       0,
-      "d571c940ed748efbbbcd4bc975541284"
+      "314d0e9a4620e9700d6d5b6aa98f98ec"
     ]
   ]
 ]
