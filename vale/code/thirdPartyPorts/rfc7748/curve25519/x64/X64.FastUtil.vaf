@@ -189,13 +189,15 @@ procedure{:quick}{:public}{:exportSpecs} fast_mul1_stdcall(
 */
 
 #reset-options "--z3rlimit 300"
-procedure{:quick} fast_add1(
+procedure{:quick}{:public}{:exportSpecs} fast_add1(
+    ghost stack_b:buffer64,                                        
     ghost dst_b:buffer64,
-    ghost inA_b:buffer64)
+    ghost inA_b:buffer64,
+    ghost inB:nat64)
     lets
         dst_ptr @= rdi;
         inA_ptr @= rsi;
-        b @= rcx;
+        b @= rdx;
 
         a0 := buffer64_read(inA_b, 0, mem);
         a1 := buffer64_read(inA_b, 1, mem);
@@ -216,6 +218,7 @@ procedure{:quick} fast_add1(
 
         validDstAddrs64(mem, dst_ptr, dst_b, 4, memTaint, Secret);
         validSrcAddrs64(mem, inA_ptr, inA_b, 4, memTaint, Secret);
+        inB == b;
 
     ensures
         let d0 := buffer64_read(dst_b, 0, mem);
@@ -330,9 +333,8 @@ procedure{:quick}{:public}{:exportSpecs} fast_add1_stdcall(
         Mov64(inA_ptr, rdx);
         Mov64(b, r8);
     } 
-    Mov64(rcx, rdx);
 
-    fast_add1(dst_b, inA_b);
+    fast_add1(stack_b, dst_b, inA_b, inB_in);
 
     Pop(rsi, stack_b, 0);
     Pop(rdi, stack_b, 1);

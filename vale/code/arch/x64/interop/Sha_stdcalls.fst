@@ -42,7 +42,7 @@ let t128_imm = TD_ImmBuffer TUInt128 default_bq
 let tuint64 = TD_Base TUInt64
 
 [@__reduce__]
-let dom: IX64.arity_ok td =
+let dom: IX64.arity_ok_stdcall td =
   let y = [t128_mod; t128_no_mod; tuint64; t128_imm] in
   assert_norm (List.length y = 4);
   y
@@ -96,7 +96,7 @@ let sha_lemma'
        sha_pre code ctx_b in_b num_val k_b va_s0 sb)
      (ensures (fun (va_s1, f) ->
        V.eval_code code va_s0 f va_s1 /\
-       VSig.vale_calling_conventions va_s0 va_s1 /\
+       VSig.vale_calling_conventions_stdcall va_s0 va_s1 /\
        sha_post code ctx_b in_b num_val k_b va_s0 sb va_s1 f /\       
        ME.buffer_writeable (as_vale_buffer ctx_b) /\ 
        ME.buffer_writeable (as_vale_buffer in_b)
@@ -107,7 +107,7 @@ let sha_lemma'
    va_s1, f                                   
 
 (* Prove that sha_lemma' has the required type *)
-let sha_lemma = as_t #(VSig.vale_sig sha_pre sha_post) sha_lemma'
+let sha_lemma = as_t #(VSig.vale_sig_stdcall sha_pre sha_post) sha_lemma'
 
 let code_sha = SH.va_code_sha_update_bytes_stdcall IA.win
 
@@ -116,7 +116,7 @@ let code_sha = SH.va_code_sha_update_bytes_stdcall IA.win
 (* Here's the type expected for the sha wrapper *)
 [@__reduce__]
 let lowstar_sha_t =
-  IX64.as_lowstar_sig_t_weak
+  IX64.as_lowstar_sig_t_weak_stdcall
     Interop.down_mem
     code_sha
     224
@@ -128,7 +128,7 @@ let lowstar_sha_t =
 
 (* And here's the sha wrapper itself *)
 let lowstar_sha : lowstar_sha_t  =
-  IX64.wrap
+  IX64.wrap_weak_stdcall
     Interop.down_mem
     code_sha
     224

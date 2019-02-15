@@ -27,7 +27,7 @@ let t64_no_mod = TD_Buffer TUInt64 ({modified=false; strict_disjointness=false; 
 let t64_imm = TD_ImmBuffer TUInt64 ({modified=false; strict_disjointness=false; taint=MS.Secret})
 
 [@__reduce__]
-let dom : IX64.arity_ok td =
+let dom : IX64.arity_ok_stdcall td =
   let y = [t64_mod;t64_imm] in
   assert_norm (List.length y = 2);
   y
@@ -35,20 +35,12 @@ let dom : IX64.arity_ok td =
 assume val n : IX64.max_slots
 assume val pre : VSig.vale_pre n dom
 assume val post : VSig.vale_post n dom
-assume val v: VSig.vale_sig pre post
+assume val v: VSig.vale_sig_stdcall pre post
 assume val c: V.va_code
 
 [@__reduce__]
-let call_c_t : Type0 =
-  IX64.as_lowstar_sig_t_weak 
-    Interop.down_mem
-    c
-    n
-    dom
-    [] _ _
-    (W.mk_prediction c dom [] (v c IA.win))
-
-let call_c : call_c_t = IX64.wrap_weak Interop.down_mem c n dom (W.mk_prediction c dom [] (v c IA.win))
+let call_c_t = IX64.as_lowstar_sig_t_weak IX64.max_stdcall IX64.arg_reg_stdcall IX64.regs_modified_stdcall IX64.xmms_modified_stdcall Interop.down_mem c n dom [] _ _ (W.mk_prediction c dom [] (v c IA.win))
+let call_c : call_c_t = IX64.wrap_weak IX64.max_stdcall IX64.arg_reg_stdcall IX64.regs_modified_stdcall IX64.xmms_modified_stdcall Interop.down_mem c n dom (W.mk_prediction c dom [] (v c IA.win))
 let call_c_normal_t : normal call_c_t = as_normal_t #call_c_t call_c
 //You can ask emacs to show you the type of call_c_normal_t ...
 
@@ -98,7 +90,7 @@ let vm_lemma'
        vm_pre code dst src va_s0 sb)
      (ensures (fun (va_s1, f) ->
        V.eval_code code va_s0 f va_s1 /\
-       VSig.vale_calling_conventions va_s0 va_s1 /\
+       VSig.vale_calling_conventions_stdcall va_s0 va_s1 /\
        vm_post code dst src va_s0 sb va_s1 f /\
        ME.buffer_readable VS.(va_s1.mem) (as_vale_immbuffer src) /\
        ME.buffer_readable VS.(va_s1.mem) (as_vale_buffer dst) /\ 
@@ -125,7 +117,7 @@ let vm_lemma'
     va_s1, f
 
 (* Prove that vm_lemma' has the required type *)
-let vm_lemma = as_t #(VSig.vale_sig vm_pre vm_post) vm_lemma'
+let vm_lemma = as_t #(VSig.vale_sig_stdcall vm_pre vm_post) vm_lemma'
 
 let code_memcpy = VM.va_code_memcpy IA.win
 
@@ -133,7 +125,7 @@ let code_memcpy = VM.va_code_memcpy IA.win
 (* Here's the type expected for the memcpy wrapper *)
 [@__reduce__]
 let lowstar_memcpy_t =
-  IX64.as_lowstar_sig_t_weak
+  IX64.as_lowstar_sig_t_weak_stdcall
     Interop.down_mem
     code_memcpy
     24
@@ -145,7 +137,7 @@ let lowstar_memcpy_t =
 
 (* And here's the memcpy wrapper itself *)
 let lowstar_memcpy : lowstar_memcpy_t  =
-  IX64.wrap_weak
+  IX64.wrap_weak_stdcall
     Interop.down_mem
     code_memcpy
     24
@@ -221,7 +213,7 @@ module VC = X64.Cpuidstdcall
 let empty_list #a : l:list a {List.length l = 0} = []
 
 [@__reduce__]
-let aesni_dom : IX64.arity_ok td = []
+let aesni_dom : IX64.arity_ok_stdcall td = []
 
 (* Need to rearrange the order of arguments *)
 [@__reduce__]
@@ -261,19 +253,19 @@ let aesni_lemma'
        aesni_pre code va_s0 sb)
      (ensures (fun (va_s1, f) ->
        V.eval_code code va_s0 f va_s1 /\
-       VSig.vale_calling_conventions va_s0 va_s1 /\
+       VSig.vale_calling_conventions_stdcall va_s0 va_s1 /\
        aesni_post code va_s0 sb va_s1 f))
  = VC.va_lemma_check_aesni_stdcall code va_s0 IA.win (as_vale_buffer sb)
 
 (* Prove that vm_lemma' has the required type *)
-let aesni_lemma = as_t #(VSig.vale_sig aesni_pre aesni_post) aesni_lemma'
+let aesni_lemma = as_t #(VSig.vale_sig_stdcall aesni_pre aesni_post) aesni_lemma'
 
 let code_aesni = VC.va_code_check_aesni_stdcall IA.win
 
 (* Here's the type expected for the check_aesni wrapper *)
 [@__reduce__]
 let lowstar_aesni_t =
-  IX64.as_lowstar_sig_t_weak
+  IX64.as_lowstar_sig_t_weak_stdcall
     Interop.down_mem
     (coerce code_aesni)
     8
@@ -285,7 +277,7 @@ let lowstar_aesni_t =
 
 (* And here's the check_aesni wrapper itself *)
 let lowstar_aesni : lowstar_aesni_t  =
-  IX64.wrap_weak
+  IX64.wrap_weak_stdcall
     Interop.down_mem
     (coerce code_aesni)
     8

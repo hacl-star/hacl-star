@@ -131,14 +131,16 @@ let arg_as_nat64 (a:arg) (s:VS.state) : GTot ME.nat64 =
     
 
 [@__reduce__]
-let rec register_args (n:nat)
-                      (args:IX64.arity_ok arg{List.length args = n}) : VSig.sprop =
+let rec register_args (max_arity:nat)
+                      (arg_reg:IX64.arg_reg_relation max_arity)
+                      (n:nat)
+                      (args:IX64.arity_ok max_arity arg{List.length args = n}) : VSig.sprop =
     match args with
     | [] -> (fun s -> True)
     | hd::tl ->
       fun s ->
-        register_args (n - 1) tl s /\
-        VS.eval_reg (IX64.register_of_arg_i (n - 1)) s == arg_as_nat64 hd s
+        register_args max_arity arg_reg (n - 1) tl s /\
+        VS.eval_reg (arg_reg.IX64.of_arg (n - 1)) s == arg_as_nat64 hd s
 
 [@__reduce__]
 let taint_hyp_arg (m:ME.mem) (tm:MS.memTaint_t) (a:arg) =
@@ -176,25 +178,27 @@ let taint_hyp (args:list arg) : VSig.sprop =
   fun s0 -> BigOps.big_and' (taint_hyp_arg s0.VS.mem s0.VS.memTaint) args
 
 [@__reduce__]
-let vale_pre_hyp #n (sb:IX64.stack_buffer n) (args:IX64.arity_ok arg) : VSig.sprop =
+let vale_pre_hyp (#max_arity:nat) (#arg_reg:IX64.arg_reg_relation max_arity) #n (sb:IX64.stack_buffer n) (args:IX64.arity_ok max_arity arg) : VSig.sprop =
     fun s0 ->
       let s_args = arg_of_sb sb :: args in
       VSig.disjoint_or_eq s_args /\
       VSig.readable s_args VS.(s0.mem) /\
-      register_args (List.length args) args s0 /\
+      register_args max_arity arg_reg (List.length args) args s0 /\
       taint_hyp args s0
 
 [@__reduce__]
 let to_low_pre
+    (#max_arity:nat)
+    (#arg_reg:IX64.arg_reg_relation max_arity)
     (#n:IX64.max_slots)
     (pre:VSig.vale_pre_tl n [])
-    (args:IX64.arity_ok arg)
+    (args:IX64.arity_ok max_arity arg)
     (hs_mem:mem_roots args)
   : prop =
   (forall (s0:V.va_state)
      (sb:IX64.stack_buffer n).
     V.va_get_ok s0 /\
-    vale_pre_hyp sb args s0 /\
+    vale_pre_hyp #max_arity #arg_reg #n sb args s0 /\
     mem_correspondence args hs_mem s0 /\
     V.valid_stack_slots s0.VS.mem (VS.eval_reg MS.Rsp s0) (as_vale_buffer sb) (n / 8) s0.VS.memTaint ==>
     elim_nil pre s0 sb)
@@ -222,11 +226,13 @@ let to_low_post
 
 [@__reduce__]
 let create_initial_vale_state
+       (#max_arity:nat)
+       (#arg_reg:IX64.arg_reg_relation max_arity)
        (#n:IX64.max_slots)
-       (args:IX64.arity_ok arg)
+       (args:IX64.arity_ok max_arity arg)
   : IX64.state_builder_t n args V.va_state =
   fun h0 stack ->
-    let t_state, mem = IX64.create_initial_trusted_state n args Interop.down_mem h0 stack in
+    let t_state, mem = IX64.create_initial_trusted_state max_arity arg_reg n args Interop.down_mem h0 stack in
     let open VS in
     { ok = true;
       regs = X64.Vale.Regs.of_fun t_state.TS.state.BS.regs;

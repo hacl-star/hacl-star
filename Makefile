@@ -383,6 +383,9 @@ obj/X64.Memory_Sems.fst.checked: \
       s/--z3cliopt smt.arith.nl=false//') \
       --smtencoding.elim_box true
 
+obj/Vale.AsLowStar.Wrapper.fst.checked: \
+  FSTAR_FLAGS=$(VALE_FSTAR_FLAGS)
+
 hints:
 	mkdir -p $@
 
@@ -533,11 +536,21 @@ DEFAULT_FLAGS		=\
   -bundle 'Check_aesni_stdcall,Check_sha_stdcall,Sha_update_bytes_stdcall[rename=Vale]' \
   -library 'Sha_stdcalls' \
   -library 'Poly_stdcalls' \
-  -library 'Fast_stdcalls' \
+  -library 'Fadd_stdcalls' \
+  -library 'Fadd_inline' \
+  -library 'Fmul_stdcalls' \
+  -library 'Fsqr_stdcalls' \
+  -library 'Fsub_stdcalls' \
+  -library 'Fswap_stdcalls' \
   -library 'Cpuid_stdcalls' \
   -no-prefix 'Sha_stdcalls' \
   -no-prefix 'Poly_stdcalls' \
-  -no-prefix 'Fast_stdcalls' \
+  -no-prefix 'Fadd_stdcalls' \
+  -no-prefix 'Fadd_inline' \
+  -no-prefix 'Fmul_stdcalls' \
+  -no-prefix 'Fsqr_stdcalls' \
+  -no-prefix 'Fsub_stdcalls' \
+  -no-prefix 'Fswap_stdcalls' \
   -no-prefix 'Cpuid_stdcalls' \
   -no-prefix 'EverCrypt.Vale' \
   -no-prefix 'MerkleTree.New.Low' \

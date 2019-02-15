@@ -6,6 +6,8 @@ friend SHA_helpers
 
 open Words_s
 
+#set-options "--z3rlimit 20"
+
 let reveal_get128 (s:Seq.lseq UInt8.t 16) (v0 v1 v2 v3:UInt32.t) : Lemma
   (requires 
     Views.get32 (Seq.slice s 0 4) == v0 /\
