@@ -2,7 +2,6 @@ module Lib.ByteBuffer
 
 open FStar.HyperStack
 open FStar.HyperStack.ST
-
 open LowStar.Buffer
 
 open Lib.IntTypes
@@ -10,12 +9,9 @@ open Lib.RawIntTypes
 open Lib.Buffer
 
 module ST = FStar.HyperStack.ST
-module B = LowStar.Buffer
-module ByteSeq = Lib.ByteSequence
 
 friend Lib.IntTypes
 friend Lib.ByteSequence
-friend Lib.Buffer
 
 let uint_to_be #t #l u =
   match t with
@@ -24,7 +20,6 @@ let uint_to_be #t #l u =
   | U16 -> C.Endianness.htobe16 u
   | U32 -> C.Endianness.htobe32 u
   | U64 -> C.Endianness.htobe64 u
-
 
 let uint_to_le #t #l u =
   match t with
@@ -73,28 +68,44 @@ let lbytes_eq #len a b =
   pop_frame();
   res
 
-// TODO: Fix this
-//#set-options "--admit_smt_queries true"
+#set-options "--initial_fuel 1 --max_fuel 1 --max_ifuel 1"
+
+val foo: l:secrecy_level -> b:Seq.seq UInt8.t ->
+  Lemma (ensures (BS.nat_from_bytes_le #l b == Kremlin.Endianness.le_to_n b)) 
+  (decreases (Seq.length b))
+let rec foo l b = 
+  if Seq.length b = 0 then () else foo l (Seq.tail b)
+
+val bar: l:secrecy_level -> b:Seq.seq UInt8.t ->
+  Lemma (ensures (BS.nat_from_bytes_be #l b == Kremlin.Endianness.be_to_n b)) 
+  (decreases (Seq.length b))
+let rec bar l b = 
+  if Seq.length b = 0 then () else bar l (Seq.slice b 0 (Seq.length b - 1))
 
 let uint_from_bytes_le #t #l i =
+  let h0 = ST.get () in
+  foo l (as_seq h0 i);
   match t with
-  | U8 -> i.(0ul)
-  | U16 -> let u = C.load16_le i in to_u16 u
-  | U32 -> let u = C.load32_le i in to_u32 u
-  | U64 -> let u = C.load64_le i in to_u64 u
-  | U128 -> let u = C.load128_le i in to_u128 u
+  | U8 -> i.(0ul) 
+  | U16 -> let u = C.load16_le i in cast #t #l U16 l u
+  | U32 -> let u = C.load32_le i in cast #t #l U32 l u
+  | U64 -> let u = C.load64_le i in cast #t #l U64 l u
+  | U128 -> let u = C.load128_le i in cast #t #l U128 l u
 
 let uint_from_bytes_be #t #l i =
+  let h0 = ST.get () in
+  bar l (as_seq h0 i);
   match t with
   | U8 -> i.(0ul)
-  | U16 -> let u = C.load16_be i in u16_from_UInt16 u
-  | U32 -> let u = C.load32_be i in u32_from_UInt32 u
-  | U64 -> let u = C.load64_be i in u64_from_UInt64 u
-  | U128 -> let u = C.load128_be i in u128_from_UInt128 u
+  | U16 -> let u = C.load16_be i in cast #t #l U16 l u
+  | U32 -> let u = C.load32_be i in cast #t #l U32 l u
+  | U64 -> let u = C.load64_be i in cast #t #l U64 l u
+  | U128 -> let u = C.load128_be i in cast #t #l U128 l u
 
-let uint_to_bytes_le #t #l o i =
+let uint_to_bytes_le #t #l o i = 
   match t with
   | U8 -> o.(0ul) <- i
+  | _ -> admit() 
   | U16 -> C.store16_le o (u16_to_UInt16 i)
   | U32 -> C.store32_le o (u32_to_UInt32 i)
   | U64 -> C.store64_le o (u64_to_UInt64 i)
@@ -109,10 +120,88 @@ let uint_to_bytes_be #t #l o i =
   | U128 -> C.store128_be o (u128_to_UInt128 i)
 
 inline_for_extraction
-let uints_from_bytes_le #t #l #len o i =
+val uints_from_bytes_le':
+    #t:inttype{~(t == U1)}
+  -> #l:secrecy_level
+  -> #len:size_t{v len * numbytes t <= max_size_t}
+  -> o:lbuffer (uint_t t l) len
+  -> i:lbuffer (uint_t U8 l) (len *! size (numbytes t)) ->
+  Stack unit
+        (requires fun h0 -> live h0 o /\ live h0 i /\ disjoint o i)
+        (ensures  fun h0 _ h1 -> 
+          modifies1 o h0 h1)
+         // /\ as_seq h1 o == BS.uints_from_bytes_le #t #l #(v len) (as_seq h0 i))
+let uints_from_bytes_le' #t #l #len o i =
   let h0 = ST.get() in
-  let inv (h1:mem) (j:nat) =  True in
-  let f' (j:size_t{0 <= v j /\ v j <= len}) : Stack unit
+  [@ inline_let]
+  let spec h : GTot (j:size_nat{j < v len} -> uint_t t l) =    
+    let i0 = B.as_seq h0 i in
+    fun j ->
+    BS.uint_from_bytes_le (Sequence.sub i0 (j * numbytes t) (numbytes t)) 
+  in
+  let impl (j:size_t{v j < v len}) : Stack (uint_t t l)
+          (requires fun h -> modifies1 (gsub o 0ul j) h0 h)
+          (ensures  fun h r h' -> h == h' /\ r == spec h0 (v j)) 
+  = 
+    let h = ST.get() in
+    let bj = B.sub #(uint_t U8 l) i (mul_mod j (size (numbytes t))) (size (numbytes t)) in
+    let r = uint_from_bytes_le bj in
+//    assume (B.as_seq h bj = 
+    assert (uint_v r == uint_v (BS.uint_from_bytes_le #t #l (B.as_seq h bj)));
+    r
+  in
+  fill #(uint_t t l) h0 len o spec impl
+
+(*
+(*
+let uints_from_bytes_le #t #l #len b =
+  let l = create #(uint_t t l) len (nat_to_uint 0) in
+  repeati len
+    (fun i l -> l.[i] <- uint_from_bytes_le (sub b (i * numbytes t) (numbytes t))) l
+*)
+
+inline_for_extraction
+let uints_from_bytes_le #t #l #len o i =
+  assume (l == PUB);
+  let h0 = ST.get() in
+  let open Lib.Sequence in
+  [@ inline_let]
+  let spec (h0:mem) : GTot (j:size_nat{j < v len} -> lseq (uint_t t l) (v len) ->
+    lseq (uint_t t l) (v len))
+    = 
+    let s0 = as_seq h0 i in
+    fun j s -> s.[j] <- (BS.uint_from_bytes_le (sub s0 (j * numbytes t) (numbytes t)))
+  in
+  let impl (j:size_t{v j < v len}) : Stack unit
+     (requires loop1_inv h0 len (uint_t t l) len o spec (v j))
+     (ensures  fun _ _ -> loop1_inv h0 len (uint_t t l) len o spec (v j + 1))
+  =
+    let b_i = B.sub #(uint_t U8 l) i (mul_mod j (size (numbytes t))) (size (numbytes t)) in
+    let u_i = uint_from_bytes_le b_i in
+    o.(j) <- u_i; //upd #_ #len o j u_i 
+    let h1 = ST.get() in
+    assume (as_seq h1 o == LoopCombinators.repeati (v j + 1) (spec h0) (as_seq h0 o))
+  in
+  loop1 h0 len o spec impl;
+  let h1 = ST.get() in  
+  assert (loop1_inv h0 len (uint_t t l) len o spec (v len) h1);
+  assume (as_seq h1 o == LoopCombinators.repeati (v len) (spec h0) (as_seq h0 o))
+  
+  admit()
+  
+
+
+  let inv (h1:mem) (j:nat{j <= v len}) = 
+    modifies1 o h0 h1 /\
+    Seq.slice (as_seq h1 o) 0 j == 
+    BS.uints_from_bytes_le #t #l #j (Seq.slice (as_seq h0 i) 0 (j * numbytes t)) 
+  in
+  assert (Seq.slice (as_seq h0 o) 0 0 == Seq.empty);
+  assert (inv h0 0);
+  admit()
+  
+  
+  let f' (j:size_t{0 <= v j /\ v j < v len}) : Stack unit
       (requires (fun h -> inv h (v j)))
       (ensures (fun h1 _ h2 -> inv h2 (v j + 1))) =
       let b_i = sub i (mul_mod j (size (numbytes t))) (size (numbytes t)) in
@@ -120,38 +209,44 @@ let uints_from_bytes_le #t #l #len o i =
       upd #_ #len o j u_i in
   Lib.Loops.for 0ul len inv f'
 
+*)
+
+
 inline_for_extraction
 let uints_from_bytes_be #t #l #len o i =
   let h0 = ST.get() in
-  let inv (h1:mem) (j:nat) =  True in
-  let f' (j:size_t{0 <= v j /\ v j <= len}) : Stack unit
+  let inv (h1:mem) (j:nat) = live h1 i /\ live h1 o in
+  let f' (j:size_t{0 <= v j /\ v j < v len}) : Stack unit
       (requires (fun h -> inv h (v j)))
       (ensures (fun h1 _ h2 -> inv h2 (v j + 1))) =
       let b_i = sub i (mul_mod j (size (numbytes t))) (size (numbytes t)) in
       let u_i = uint_from_bytes_be b_i in
       upd #_ #len o j u_i in
+  admit();
   Lib.Loops.for 0ul len inv f'
 
 inline_for_extraction
 let uints_to_bytes_le #t #l len o i =
   let h0 = ST.get () in
-  let inv (h1:mem) (j:nat) = True in
-  let f' (j:size_t{0 <= v j /\ v j <= len}) : Stack unit
+  let inv (h1:mem) (j:nat) = live h1 i /\ live h1 o in
+  let f' (j:size_t{0 <= v j /\ v j < v len}) : Stack unit
     (requires (fun h -> inv h (v j)))
     (ensures  (fun h1 _ h2 -> inv h2 (v j + 1))) =
       let u_i = i.(j) in
       let b_i = sub o (mul_mod j (size (numbytes t))) (size (numbytes t)) in
       uint_to_bytes_le b_i u_i in
+  admit();
   Lib.Loops.for 0ul len inv f'
 
 inline_for_extraction
 let uints_to_bytes_be #t #l len o i =
   let h0 = ST.get () in
-  let inv (h1:mem) (j:nat) = True in
-  let f' (j:size_t{0 <= v j /\ v j <= len}) : Stack unit
+  let inv (h1:mem) (j:nat) = live h1 i /\ live h1 o in
+  let f' (j:size_t{0 <= v j /\ v j < v len}) : Stack unit
     (requires (fun h -> inv h (v j)))
     (ensures  (fun h1 _ h2 -> inv h2 (v j + 1))) =
       let u_i = i.(j) in
       let b_i = sub o (mul_mod j (size (numbytes t))) (size (numbytes t)) in
       uint_to_bytes_be b_i u_i in
+  admit();
   Lib.Loops.for 0ul len inv f'

@@ -26,8 +26,6 @@ val uint_from_be: #t:inttype{t<>U128} -> #l:secrecy_level -> u:uint_t t l -> uin
 inline_for_extraction
 val uint_from_le: #t:inttype{t<>U128} -> #l:secrecy_level -> u:uint_t t l -> uint_t t l
 
-
-
 (** Compares two byte buffers of equal length returning a bool *)
 inline_for_extraction
 val lbytes_eq:
@@ -60,7 +58,7 @@ val uint_from_bytes_be:
     (requires fun h0 -> live h0 i)
     (ensures  fun h0 o h1 ->
       h0 == h1 /\ live h1 i /\
-      o == BS.uint_from_bytes_be #t (as_seq h0 i))
+      uint_v o == uint_v (BS.uint_from_bytes_be #t (as_seq h0 i)))
 
 inline_for_extraction
 val uint_to_bytes_le:
@@ -94,10 +92,10 @@ val uints_from_bytes_le:
   -> o:lbuffer (uint_t t l) len
   -> i:lbuffer (uint_t U8 l) (len *! size (numbytes t)) ->
   Stack unit
-        (requires (fun h0 -> live h0 o /\ live h0 i))
-        (ensures (fun h0 _ h1 -> modifies (loc o) h0 h1 /\
-                              as_seq h1 o ==
-                              (BS.uints_from_bytes_le #t #l #(v len) (as_seq h0 i) )))
+        (requires fun h0 -> live h0 o /\ live h0 i)
+        (ensures  fun h0 _ h1 ->
+          modifies1 o h0 h1 /\
+          as_seq h1 o == BS.uints_from_bytes_le #t #l #(v len) (as_seq h0 i))
 
 inline_for_extraction
 val uints_from_bytes_be:
@@ -107,10 +105,10 @@ val uints_from_bytes_be:
   -> o:lbuffer (uint_t t l) len
   -> i:lbuffer (uint_t U8 l) (len *! size (numbytes t)) ->
   Stack unit
-        (requires (fun h0 -> live h0 o /\ live h0 i))
-        (ensures (fun h0 _ h1 -> modifies (loc o) h0 h1 /\
-                              as_seq h1 o ==
-                              (BS.uints_from_bytes_be #t #l #(v len) (as_seq h0 i) )))
+        (requires fun h0 -> live h0 o /\ live h0 i)
+        (ensures  fun h0 _ h1 ->
+          modifies1 o h0 h1 /\
+          as_seq h1 o == BS.uints_from_bytes_be #t #l #(v len) (as_seq h0 i))
 
 inline_for_extraction
 val uints_to_bytes_le:
@@ -120,10 +118,10 @@ val uints_to_bytes_le:
   -> o:lbuffer (uint_t U8 l) (len *! size (numbytes t))
   -> i:lbuffer (uint_t t l) len ->
   Stack unit
-        (requires (fun h0 -> live h0 o /\ live h0 i))
-        (ensures (fun h0 _ h1 -> modifies (loc o) h0 h1 /\
-                              as_seq h1 o ==
-                              (BS.uints_to_bytes_le #t #l #(v len) (as_seq h0 i) )))
+        (requires fun h0 -> live h0 o /\ live h0 i)
+        (ensures  fun h0 _ h1 ->
+          modifies1 o h0 h1 /\
+          as_seq h1 o == BS.uints_to_bytes_le #t #l #(v len) (as_seq h0 i))
 
 inline_for_extraction
 val uints_to_bytes_be:
@@ -133,10 +131,10 @@ val uints_to_bytes_be:
   -> o:lbuffer (uint_t U8 l) (len *! size (numbytes t))
   -> i:lbuffer (uint_t t l) len ->
   Stack unit
-        (requires (fun h0 -> live h0 o /\ live h0 i /\ disjoint o i))
-        (ensures (fun h0 _ h1 -> modifies (loc o) h0 h1 /\
-                              as_seq h1 o ==
-                              (BS.uints_to_bytes_be #t #l #(v len) (as_seq h0 i) )))
+        (requires fun h0 -> live h0 o /\ live h0 i /\ disjoint o i)
+        (ensures  fun h0 _ h1 ->
+          modifies1 o h0 h1 /\
+          as_seq h1 o == BS.uints_to_bytes_be #t #l #(v len) (as_seq h0 i))
 
 inline_for_extraction
 let uint32s_to_bytes_le len = uints_to_bytes_le #U32 #SEC len
