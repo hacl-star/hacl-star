@@ -282,8 +282,6 @@ obj/Operator.fst: VALE_FLAGS=
 	    -in $< -out $@ -outi $@i \
 	  ,[VALE] $(notdir $*),$(call to-obj-dir,$@))
 
-obj/%.fsti: obj/%.fst
-
 # A pseudo-target for the first stage.
 vale-fst: $(VALE_FSTS)
 
