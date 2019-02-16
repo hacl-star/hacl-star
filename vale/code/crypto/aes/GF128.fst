@@ -2,43 +2,6 @@ module GF128
 open Arch.TypesNative
 open Math.Poly2.Bits
 
-let lemma_of_double32_degree (d:double32) =
-  reveal_of_double32 d
-
-let lemma_of_quad32_degree (q:quad32) =
-  reveal_of_quad32 q
-
-#reset-options "--z3rlimit 30"
-let lemma_to_of_quad32 q =
-  reveal_of_quad32 q;
-  reveal_to_quad32 (of_quad32 q);
-  let a = of_quad32 q in
-  let Mkfour q0 q1 q2 q3 = q in
-  let Mkfour q0' q1' q2' q3' = to_quad32 a in
-  lemma_index a;
-  lemma_reverse_define_all ();
-  let s0 = UInt.to_vec #32 q0 in
-  let s1 = UInt.to_vec #32 q1 in
-  let s2 = UInt.to_vec #32 q2 in
-  let s3 = UInt.to_vec #32 q3 in
-  let s0' = UInt.to_vec #32 q0' in
-  let s1' = UInt.to_vec #32 q1' in
-  let s2' = UInt.to_vec #32 q2' in
-  let s3' = UInt.to_vec #32 q3' in
-  assert (equal s0 s0');
-  assert (equal s1 s1');
-  assert (equal s2 s2');
-  assert (equal s3 s3');
-  ()
-#reset-options
-
-let lemma_of_to_quad32 a =
-  reveal_to_quad32 a;
-  reveal_of_quad32 (to_quad32 a);
-  lemma_index_all ();
-  lemma_reverse_define_all ();
-  lemma_equal a (of_quad32 (to_quad32 a))
-
 let lemma_shift_left_1 a =
   reveal_to_quad32 a;
   reveal_to_quad32 (shift a 1);
@@ -262,3 +225,350 @@ let lemma_gf128_reduce_rev a b h n =
   lemma_equal (r ((a *. b) %. g)) (r ((dh /. m) *. h) +. r (dh %. m) +. r ((a *. b) %. m));
   ()
 
+val lemma_odd_reverse_shift_right (a:poly) (n:pos) : Lemma
+  (requires degree a < n /\ a.[0])
+  (ensures shift (reverse a (n - 1)) 1 == monomial n +. reverse (shift a (-1)) (n - 1))
+
+let lemma_odd_reverse_shift_right a n =
+  lemma_bitwise_all ();
+  lemma_equal (shift (reverse a (n - 1)) 1) (monomial n +. reverse (shift a (-1)) (n - 1))
+
+val lemma_mul_odd_reverse_shift_right (a h:poly) (n:pos) : Lemma
+  (requires degree h < n /\ degree a < n /\ h.[0])
+  (ensures (
+    let n1 = n - 1 in
+    let m = monomial n in
+    reverse (a *. h) (n + n - 1) == reverse a n1 *. m +. reverse a n1 *. reverse (shift h (-1)) n1
+  ))
+
+let lemma_mul_odd_reverse_shift_right a h n =
+  let n1 = n - 1 in
+  let nn1 = n + n - 1 in
+  let m = monomial n in
+  calc (==) {
+    reverse (a *. h) nn1;
+    == {lemma_mul_reverse_shift_1 a h n1}
+    shift (reverse a n1 *. reverse h n1) 1;
+    == {lemma_shift_is_mul_left (reverse a n1 *. reverse h n1) 1}
+    monomial 1 *. (reverse a n1 *. reverse h n1);
+    == {lemma_mul_all ()}
+    reverse a n1 *. (monomial 1 *. reverse h n1);
+    == {lemma_shift_is_mul_left (reverse h n1) 1}
+    reverse a n1 *. shift (reverse h n1) 1;
+    == {lemma_odd_reverse_shift_right h n}
+    reverse a n1 *. (m +. reverse (shift h (-1)) n1);
+    == {lemma_mul_distribute_right (reverse a n1) m (reverse (shift h (-1)) n1)}
+    reverse a n1 *. m +. reverse a n1 *. reverse (shift h (-1)) n1;
+  }
+
+val lemma_mul_odd_reverse_shift_right_hi (a h:poly) (n:pos) : Lemma
+  (requires degree h < n /\ degree a < n /\ h.[0])
+  (ensures (
+    let n1 = n - 1 in
+    let m = monomial n in
+    reverse ((a *. h) /. m) n1 == (reverse a n1 *. reverse (shift h (-1)) n1) %. m
+  ))
+
+let lemma_mul_odd_reverse_shift_right_hi a h n =
+  let n1 = n - 1 in
+  let nn1 = n + n - 1 in
+  let m = monomial n in
+  let ah = a *. h in
+  calc (==) {
+    reverse (ah /. m) n1;
+    == {lemma_shift_is_div ah n}
+    reverse (shift ah (-n)) n1;
+    == {lemma_bitwise_all (); lemma_equal (reverse (shift ah (-n)) n1) (mask (reverse ah nn1) n)}
+    mask (reverse ah nn1) n;
+    == {lemma_mask_is_mod (reverse ah nn1) n}
+    reverse ah nn1 %. m;
+    == {lemma_mul_odd_reverse_shift_right a h n}
+    (reverse a n1 *. m +. reverse a n1 *. reverse (shift h (-1)) n1) %. m;
+    == {lemma_mod_distribute (reverse a n1 *. m) (reverse a n1 *. reverse (shift h (-1)) n1) m}
+    (reverse a n1 *. m) %. m +. (reverse a n1 *. reverse (shift h (-1)) n1) %. m;
+    == {lemma_div_mod_exact (reverse a n1) m}
+    zero +. (reverse a n1 *. reverse (shift h (-1)) n1) %. m;
+    == {lemma_add_all ()}
+    (reverse a n1 *. reverse (shift h (-1)) n1) %. m;
+  }
+
+val lemma_mul_odd_reverse_shift_right_lo_shift (a h:poly) (n:pos) : Lemma
+  (requires degree h < n /\ degree a < n /\ h.[0])
+  (ensures (
+    let n1 = n - 1 in
+    let m = monomial n in
+    reverse (((a *. h) %. m) *. m) (n + n - 1) == reverse a n1 +. (reverse a n1 *. reverse (shift h (-1)) n1) /. m
+  ))
+
+let lemma_mul_odd_reverse_shift_right_lo_shift a h n =
+  let n1 = n - 1 in
+  let nn1 = n + n - 1 in
+  let m = monomial n in
+  let ah = a *. h in
+  calc (==) {
+    reverse ((ah %. m) *. m) nn1;
+    == {lemma_shift_is_mul (ah %. m) n; lemma_mask_is_mod ah n}
+    reverse (shift (mask ah n) n) nn1;
+    == {
+      lemma_bitwise_all ();
+      lemma_equal (reverse (shift (mask ah n) n) nn1) (shift (reverse ah nn1) (-n))
+    }
+    shift (reverse ah nn1) (-n);
+    == {lemma_mul_odd_reverse_shift_right a h n}
+    shift (reverse a n1 *. m +. reverse a n1 *. reverse (shift h (-1)) n1) (-n);
+    == {lemma_shift_is_mul (reverse a n1) n}
+    shift (shift (reverse a n1) n +. reverse a n1 *. reverse (shift h (-1)) n1) (-n);
+    == {
+      lemma_bitwise_all ();
+      lemma_equal (shift (shift (reverse a n1) n +. reverse a n1 *. reverse (shift h (-1)) n1) (-n))
+        (reverse a n1 +. shift (reverse a n1 *. reverse (shift h (-1)) n1) (-n))
+    }
+    reverse a n1 +. shift (reverse a n1 *. reverse (shift h (-1)) n1) (-n);
+    == {lemma_shift_is_div (reverse a n1 *. reverse (shift h (-1)) n1) n}
+    reverse a n1 +. (reverse a n1 *. reverse (shift h (-1)) n1) /. m;
+  }
+
+val lemma_reduce_rev_hi (x3 x2 h:poly) (n:pos) : Lemma
+  (requires
+    degree x3 < n /\
+    degree x2 < n /\
+    degree (monomial (n + n) +. h) == n + n /\
+    degree h < n /\
+    h.[0]
+  )
+  (ensures (
+    let nn = n + n in
+    let mm = monomial nn in
+    let m = monomial n in
+    let g = mm +. h in
+    let c = reverse (shift h (-1)) (n - 1) in
+    let x32 = (x3 *. m +. x2) *. mm in
+    let y0 = reverse x3 (n - 1) in
+    let y1 = reverse x2 (n - 1) in
+    reverse (x32 %. g) (nn - 1) == (y1 +. mask (y0 *. c) n) *. c +. (shift y1 n +. y0 +. swap (y0 *. c) n)
+  ))
+
+let lemma_reduce_rev_hi x3 x2 h n =
+  let n1 = n - 1 in
+  let nn = n + n in
+  let nn1 = n + n - 1 in
+  let mm = monomial nn in
+  let m = monomial n in
+  let g = mm +. h in
+  let c = reverse (shift h (-1)) n1 in
+  let x32 = (x3 *. m +. x2) *. mm in
+  let y0 = reverse x3 n1 in
+  let y1 = reverse x2 n1 in
+  let x3h = x3 *. h in
+  let x3hl = x3h %. m in
+  let x3hh = x3h /. m in
+  lemma_index_i h 0;
+  calc (==) {
+    ((x3 *. m +. x2) *. mm) %. (mm +. h);
+    == {lemma_mod_reduce (x3 *. m +. x2) mm h}
+    ((x3 *. m +. x2) *. h) %. (mm +. h);
+    == {lemma_mul_distribute_left (x3 *. m) x2 h}
+    (x3 *. m *. h +. x2 *. h) %. (mm +. h);
+    == {lemma_mod_distribute (x3 *. m *. h) (x2 *. h) (mm +. h)}
+    (x3 *. m *. h) %. (mm +. h) +. (x2 *. h) %. (mm +. h);
+    == {lemma_mod_small (x2 *. h) (mm +. h)}
+    (x3 *. m *. h) %. (mm +. h) +. x2 *. h;
+    == {lemma_mul_all ()}
+    (x3h *. m) %. (mm +. h) +. x2 *. h;
+    == {lemma_div_mod x3h m}
+    ((x3hh *. m +. x3hl) *. m) %. (mm +. h) +. x2 *. h;
+    == {lemma_mul_distribute_left (x3hh *. m) x3hl m}
+    (x3hh *. m *. m +. x3hl *. m) %. (mm +. h) +. x2 *. h;
+    == {lemma_mod_distribute (x3hh *. m *. m) (x3hl *. m) (mm +. h)}
+    (x3hh *. m *. m) %. (mm +. h) +. (x3hl *. m) %. (mm +. h) +. x2 *. h;
+    == {lemma_mod_small (x3hl *. m) (mm +. h)}
+    (x3hh *. m *. m) %. (mm +. h) +. (x3hl *. m) +. x2 *. h;
+    == {lemma_mul_associate x3hh m m}
+    (x3hh *. (m *. m)) %. (mm +. h) +. (x3hl *. m) +. x2 *. h;
+    == {lemma_mul_monomials n n}
+    (x3hh *. mm) %. (mm +. h) +. (x3hl *. m) +. x2 *. h;
+    == {lemma_mod_reduce x3hh mm h}
+    (x3hh *. h) %. (mm +. h) +. (x3hl *. m) +. x2 *. h;
+    == {lemma_mod_small (x3hh *. h) (mm +. h)}
+    x3hh *. h +. (x3hl *. m) +. x2 *. h;
+    == {lemma_add_all ()}
+    x3hh *. h +. x2 *. h +. (x3hl *. m);
+    == {lemma_mul_distribute_left x3hh x2 h}
+    (x3hh +. x2) *. h +. x3hl *. m;
+  };
+  calc (==) {
+    reverse (x32 %. g) nn1;
+    == {
+      // use the calc result from above (could put nested calc here, but it's slower)
+    }
+    reverse ((x3hh +. x2) *. h +. x3hl *. m) nn1;
+    == {lemma_add_reverse ((x3hh +. x2) *. h) (x3hl *. m) nn1}
+    reverse ((x3hh +. x2) *. h) nn1 +. reverse (x3hl *. m) nn1;
+    == {lemma_mul_odd_reverse_shift_right_lo_shift x3 h n}
+    reverse ((x3hh +. x2) *. h) nn1 +. (y0 +. (y0 *. c) /. m);
+    == {lemma_mul_odd_reverse_shift_right (x3hh +. x2) h n}
+    reverse (x3hh +. x2) n1 *. m +. reverse (x3hh +. x2) n1 *. c +. (y0 +. (y0 *. c) /. m);
+    == {lemma_add_reverse x3hh x2 n1}
+    (reverse x3hh n1 +. y1) *. m +. (reverse x3hh n1 +. y1) *. c +. (y0 +. (y0 *. c) /. m);
+    == {lemma_mul_distribute_left (reverse x3hh n1) y1 c}
+    (reverse x3hh n1 +. y1) *. m +. (reverse x3hh n1 *. c +. y1 *. c) +. (y0 +. (y0 *. c) /. m);
+    == {lemma_mul_odd_reverse_shift_right_hi x3 h n}
+    ((y0 *. c) %. m +. y1) *. m +. (((y0 *. c) %. m) *. c +. y1 *. c) +. (y0 +. (y0 *. c) /. m);
+    == {lemma_mul_distribute_left ((y0 *. c) %. m) y1 c}
+    ((y0 *. c) %. m +. y1) *. m +. ((y0 *. c) %. m +. y1) *. c +. (y0 +. (y0 *. c) /. m);
+    == {
+      lemma_shift_is_div (y0 *. c) n;
+      lemma_mask_is_mod (y0 *. c) n;
+      lemma_shift_is_mul ((y0 *. c) %. m +. y1) n
+    }
+    shift (mask (y0 *. c) n +. y1) n +. (mask (y0 *. c) n +. y1) *. c +. (y0 +. shift (y0 *. c) (-n));
+    == {lemma_add_all ()}
+    (y1 +. mask (y0 *. c) n) *. c +. (shift (mask (y0 *. c) n +. y1) n +. (y0 +. shift (y0 *. c) (-n)));
+    == {
+      lemma_bitwise_all ();
+      lemma_equal (shift (mask (y0 *. c) n +. y1) n +. (y0 +. shift (y0 *. c) (-n)))
+        (shift y1 n +. y0 +. swap (y0 *. c) n)
+    }
+    (y1 +. mask (y0 *. c) n) *. c +. (shift y1 n +. y0 +. swap (y0 *. c) n);
+  }
+
+#reset-options "--z3rlimit 20 --max_fuel 0 --max_ifuel 0"
+let lemma_swap_right (a b:poly) (n:nat) : Lemma
+  (requires n == 64 /\ degree a < n + n /\ degree b < n + n)
+  (ensures swap (swap a n +. b) n == a +. swap b n)
+  =
+  lemma_bitwise_all ();
+  lemma_equal (swap (swap a n +. b) n) (a +. swap b n)
+
+#reset-options "--z3rlimit 20 --max_fuel 0 --max_ifuel 0"
+let lemma_reduce_rev_bits (a0 a1 a2 c:poly) (n:pos) : Lemma
+  (requires
+    n == 64 /\ // verification times out unless n is known
+    degree a0 < n + n /\
+    degree a1 < n + n /\
+    degree a2 < n + n /\
+    degree c < n
+  )
+  (ensures (
+    let n1 = n - 1 in
+    let nn = n + n in
+    let nnn = nn + n in
+    let rev a = reverse a (nn - 1) in
+    let y_10 = a0 +. shift (mask a1 n) n in
+    let y_0 = mask y_10 n in
+    let y_10c = swap y_10 n +. y_0 *. c in
+    let a = a0 +. shift a1 n +. shift a2 nn in
+    let x = reverse a (nn + nn - 1) in
+    let x0 = mask x n in
+    let x1 = mask (shift x (-n)) n in
+    let x2 = mask (shift x (-nn)) n in
+    let x3 = shift x (-nnn) in
+    let y0 = reverse x3 n1 in
+    let y1 = reverse x2 n1 in
+    (rev (x0 +. shift x1 n) +. ((y1 +. mask (y0 *. c) n) *. c +. (shift y1 n +. y0 +. swap (y0 *. c) n))) ==
+      (swap y_10c n +. (a2 +. shift a1 (-n)) +. mask y_10c n *. c)
+  ))
+=
+  let n1 = n - 1 in
+  let nn = n + n in
+  let nnn = nn + n in
+  let rev a = reverse a (nn - 1) in
+  let y_10 = a0 +. shift (mask a1 n) n in
+  let y_0 = mask y_10 n in
+  let y_10c = swap y_10 n +. y_0 *. c in
+  let a = a0 +. shift a1 n +. shift a2 nn in
+  let x = reverse a (nn + nn - 1) in
+  let x0 = mask x n in
+  let x1 = mask (shift x (-n)) n in
+  let x2 = mask (shift x (-nn)) n in
+  let x3 = shift x (-nnn) in
+  let y0 = reverse x3 n1 in
+  let y1 = reverse x2 n1 in
+  calc (==) {
+    y0;
+    == {lemma_bitwise_all (); lemma_equal y0 y_0}
+    y_0;
+  };
+  calc (==) {
+    shift y1 n +. y0;
+    == {lemma_bitwise_all (); lemma_equal (shift y1 n +. y0) y_10}
+    y_10;
+  };
+  calc (==) {
+    (shift y1 n +. y0 +. swap (y0 *. c) n);
+    == {lemma_swap_right (shift y1 n +. y0) (y0 *. c) 64}
+    swap (swap y_10 n +. y_0 *. c) n;
+  };
+  calc (==) {
+    rev (x0 +. shift x1 n);
+    == {lemma_bitwise_all (); lemma_equal (rev (x0 +. shift x1 n)) (a2 +. shift a1 (-n))}
+    a2 +. shift a1 (-n);
+  };
+  calc (==) {
+    y1 +. mask (y0 *. c) n;
+    == {lemma_bitwise_all (); lemma_equal (y1 +. mask (y0 *. c) n) (mask y_10c n)}
+    mask y_10c n;
+  };
+  calc (==) {
+    (rev (x0 +. shift x1 n) +. ((y1 +. mask (y0 *. c) n) *. c +. (shift y1 n +. y0 +. swap (y0 *. c) n)));
+    == {lemma_add_all ()}
+    (shift y1 n +. y0 +. swap (y0 *. c) n) +. rev (x0 +. shift x1 n) +. (y1 +. mask (y0 *. c) n) *. c;
+  }
+
+#reset-options "--z3rlimit 20 --max_fuel 0 --max_ifuel 0"
+let lemma_reduce_rev a0 a1 a2 h n =
+  (*
+    <-----256 bits------>
+    |   a2    |
+  +      |   a1    |
+  +           |    a0   |
+  -----------------------
+  = | y3 | y2 | y1 | y0 |
+    |         |   y_10  |
+  *)
+  let n1 = n - 1 in
+  let nn = n + n in
+  let nnn = nn + n in
+  let rev a = reverse a (nn - 1) in
+  let mm = monomial nn in
+  let m = monomial n in
+  let g = mm +. h in
+  let c = reverse (shift h (-1)) (n - 1) in
+  let y_10 = a0 +. shift (mask a1 n) n in
+  let y_0 = mask y_10 n in
+  let y_10c = swap y_10 n +. y_0 *. c in
+  let a = a0 +. shift a1 n +. shift a2 nn in
+  let x = reverse a (nn + nn - 1) in
+  let x0 = mask x n in
+  let x1 = mask (shift x (-n)) n in
+  let x2 = mask (shift x (-nn)) n in
+  let x3 = shift x (-nnn) in
+  let x32 = (x3 *. m +. x2) *. mm in
+  let y0 = reverse x3 n1 in
+  let y1 = reverse x2 n1 in
+  calc (==) {
+    x %. g;
+    == {
+      lemma_bitwise_all ();
+      lemma_equal x ((x0 +. shift x1 n) +. shift (x2 +. shift x3 n) nn)
+    }
+    ((x0 +. shift x1 n) +. shift (x2 +. shift x3 n) nn) %. g;
+    == {lemma_mod_distribute (x0 +. shift x1 n) (shift (x2 +. shift x3 n) nn) g}
+    (x0 +. shift x1 n) %. g +. shift (x2 +. shift x3 n) nn %. g;
+    == {lemma_mod_small (x0 +. shift x1 n) g}
+    x0 +. shift x1 n +. shift (x2 +. shift x3 n) nn %. g;
+  };
+  calc (==) {
+    rev (x %. g);
+    == {
+      lemma_bitwise_all ();
+      lemma_equal (rev (x %. g)) (rev (x0 +. shift x1 n) +. rev (shift (x2 +. shift x3 n) nn %. g))
+    }
+    rev (x0 +. shift x1 n) +. rev (shift (x2 +. shift x3 n) nn %. g);
+    == {lemma_add_commute x2 (shift x3 n); lemma_shift_is_mul (x2 +. shift x3 n) nn; lemma_shift_is_mul x3 n}
+    rev (x0 +. shift x1 n) +. rev (x32 %. g);
+    == {lemma_reduce_rev_hi x3 x2 h n}
+    rev (x0 +. shift x1 n) +. ((y1 +. mask (y0 *. c) n) *. c +. (shift y1 n +. y0 +. swap (y0 *. c) n));
+    == {lemma_reduce_rev_bits a0 a1 a2 c n}
+    swap y_10c n +. (a2 +. shift a1 (-n)) +. mask y_10c n *. c;
+  }

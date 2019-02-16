@@ -10,6 +10,12 @@ unfold let ( *. ) = mul
 unfold let ( /. ) = div
 unfold let ( %. ) = mod
 
+// Keep terms up to degree < n, drop terms of degree >= n
+val mask (a:poly) (n:nat) : poly
+
+let swap (a:poly) (n:nat) : poly =
+  shift (mask a n) n +. shift a (-n)
+
 val lemma_equal (a b:poly) : Lemma (requires (forall (i:int). a.[i] == b.[i])) (ensures a == b)
 val lemma_index_i (a:poly) (i:int) : Lemma (a.[i] ==> 0 <= i /\ i <= degree a)
 val lemma_degree (a:poly) : Lemma (degree a == (-1) \/ a.[degree a])
@@ -18,6 +24,7 @@ val lemma_zero_define_i (i:int) : Lemma (not zero.[i])
 val lemma_one_define_i (i:int) : Lemma (one.[i] == (i = 0))
 val lemma_monomial_define_i (n:nat) (i:int) : Lemma ((monomial n).[i] == (i = n))
 val lemma_shift_define_i (p:poly) (n:int) (i:int) : Lemma ((shift p n).[i] == (p.[i - n] && i >= 0))
+val lemma_mask_define_i (p:poly) (n:nat) (i:int) : Lemma ((mask p n).[i] == (p.[i] && i < n))
 val lemma_reverse_define_i (p:poly) (n:nat) (i:int) : Lemma ((reverse p n).[i] == (p.[n - i] && i >= 0))
 
 val lemma_add_zero (a:poly) : Lemma ((a +. zero) == a)

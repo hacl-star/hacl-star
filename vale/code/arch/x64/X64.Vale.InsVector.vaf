@@ -97,7 +97,7 @@ procedure{:instruction Ins(TS.TaintedIns(tuple(S.Paddd(dst, src)), Public))}{:qu
 }
 
 procedure{:instruction Ins(TS.TaintedIns(tuple(S.VPaddd(dst, src1, src2)), Public))}{:quick exportOnly}{:public}
-          VPaddd(inout dst:xmm, src1:xmm, src2:xmm)
+          VPaddd(out dst:xmm, src1:xmm, src2:xmm)
     modifies efl;
     ensures
         dst == old(add_wrap_quad32(src1, src2));
@@ -110,7 +110,7 @@ procedure{:instruction Ins(TS.TaintedIns(tuple(S.Pxor(dst, src)), Public))}{:qui
 {
 }
 
-procedure{:instruction Ins(TS.TaintedIns(tuple(S.VPxor(dst, src1, Mov128Xmm(src2))), Public))}{:quick exportOnly}{:public} VPxor(inout dst:xmm, src1:xmm, src2:xmm)
+procedure{:instruction Ins(TS.TaintedIns(tuple(S.VPxor(dst, src1, Mov128Xmm(src2))), Public))}{:quick exportOnly}{:public} VPxor(out dst:xmm, src1:xmm, src2:xmm)
   ensures
     dst == old(quad32_xor(src1, src2));
 {
@@ -184,7 +184,7 @@ procedure{:instruction Ins(TS.TaintedIns(tuple(S.Palignr(dst, src, 8)), Public))
 }
 
 procedure{:instruction Ins(TS.TaintedIns(tuple(S.VPalignr(dst, src1, src2, 8)), Public))}{:quick exportOnly}{:public}
-          VPalignr8(inout dst:xmm, src1:xmm, src2:xmm)
+          VPalignr8(out dst:xmm, src1:xmm, src2:xmm)
     modifies efl;
     ensures
         dst == old(Mkfour(src2.hi2, src2.hi3, src1.lo0, src1.lo1));
@@ -205,7 +205,7 @@ procedure{:instruction Ins(TS.TaintedIns(tuple(S.Shufpd(dst, src, permutation)),
 }
 
 procedure{:instruction Ins(TS.TaintedIns(tuple(S.VShufpd(dst, src1, src2, permutation)), Public))}{:quick exportOnly}{:public}
-          VShufpd(inout dst:xmm, src1:xmm, src2:xmm, inline permutation:imm8)
+          VShufpd(out dst:xmm, src1:xmm, src2:xmm, inline permutation:imm8)
     requires permutation < 4;
     modifies efl;
     ensures
@@ -228,7 +228,7 @@ procedure{:instruction Ins(TS.TaintedIns(tuple(S.Pshufb(dst, src)), Public))}{:q
 }
 
 procedure{:instruction Ins(TS.TaintedIns(tuple(S.VPshufb(dst, src1, src2)), Public))}{:quick exportOnly}{:public}
-          VPshufb(inout dst:xmm, src1:xmm, src2:xmm)
+          VPshufb(out dst:xmm, src1:xmm, src2:xmm)
     requires
         src2 == Mkfour(0x0C0D0E0F, 0x08090A0B, 0x04050607, 0x00010203);
     modifies efl;
@@ -364,13 +364,19 @@ procedure {:quick exportOnly}{:public}
     Pinsrq(dst, tmp, index);
 }
 
-procedure{:instruction Ins(TS.TaintedIns(tuple(S.VPSLLDQ(dst, src, 4)), Public))}{:quick exportOnly}{:public} VPSLLDQ4(inout dst:xmm, src:xmm)
+procedure{:instruction Ins(TS.TaintedIns(tuple(S.VPSLLDQ(dst, src, 4)), Public))}{:quick exportOnly}{:public} VPSLLDQ4(out dst:xmm, src:xmm)
     ensures
         dst == old(Mkfour(0, src.lo0, src.lo1, src.hi2));
 {
 }
 
-procedure{:instruction Ins(TS.TaintedIns(tuple(S.Vpsrldq(dst, src, 8)), Public))}{:quick exportOnly}{:public} Vpsrldq8(inout dst:xmm, src:xmm)
+procedure{:instruction Ins(TS.TaintedIns(tuple(S.VPSLLDQ(dst, src, 8)), Public))}{:quick exportOnly}{:public} Vpslldq8(out dst:xmm, src:xmm)
+    ensures
+        dst == old(Mkfour(0, 0, src.lo0, src.lo1));
+{
+}
+
+procedure{:instruction Ins(TS.TaintedIns(tuple(S.Vpsrldq(dst, src, 8)), Public))}{:quick exportOnly}{:public} Vpsrldq8(out dst:xmm, src:xmm)
     ensures
         dst == old(Mkfour(src.hi2, src.hi3, 0, 0));
 {

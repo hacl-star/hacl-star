@@ -1,0 +1,204 @@
+include "../../../arch/x64/X64.Vale.InsBasic.vaf"
+include "../../../arch/x64/X64.Vale.InsMem.vaf"
+include "../../../arch/x64/X64.Vale.InsVector.vaf"
+include "../../../arch/x64/X64.Vale.InsAes.vaf"
+include{:fstar}{:open} "Prop_s"
+include{:fstar}{:open} "Opaque_s"
+include{:fstar}{:open} "Words_s"
+include{:fstar}{:open} "Types_s"
+include{:/*TODO*/fstar}{:open} "FStar.Seq.Base"
+include{:fstar}{:open} "AES_s"
+include{:fstar}{:open} "X64.Machine_s"
+include{:fstar}{:open} "X64.Memory"
+include{:fstar}{:open} "X64.Vale.State"
+include{:fstar}{:open} "X64.Vale.Decls"
+include{:fstar}{:open} "X64.Vale.QuickCode"
+include{:fstar}{:open} "X64.Vale.QuickCodes"
+include{:fstar}{:open} "Arch.Types"
+include{:fstar}{:open} "AES_helpers"
+include{:fstar}{:open} "X64.Poly1305.Math"
+include{:fstar}{:open} "GCM_helpers"
+include{:fstar}{:open} "Workarounds"
+include{:fstar}{:open} "GCTR_s"
+include{:fstar}{:open} "GCTR"
+include{:fstar}{:open} "Arch.TypesNative"
+include{:fstar}{:open} "X64.CPU_Features_s"
+
+include{:fstar}{:open} "Math.Poly2_s"
+include{:fstar}{:open} "Math.Poly2"
+include{:fstar}{:open} "Math.Poly2.Bits_s"
+include{:fstar}{:open} "Math.Poly2.Bits"
+include{:fstar}{:open} "Math.Poly2.Words"
+include{:fstar}{:open} "Math.Poly2.Lemmas"
+include{:fstar}{:open} "GF128_s"
+include{:fstar}{:open} "GF128"
+module X64.AESopt2
+
+#verbatim{:interface}{:implementation}
+open Prop_s
+open Opaque_s
+open Words_s
+open Types_s
+open FStar.Seq
+open AES_s
+open X64.Machine_s
+open X64.Memory
+open X64.Vale.State
+open X64.Vale.Decls
+open X64.Vale.InsBasic
+open X64.Vale.InsMem
+open X64.Vale.InsVector
+open X64.Vale.InsAes
+open X64.Vale.QuickCode
+open X64.Vale.QuickCodes
+open Arch.Types
+open AES_helpers
+open X64.Poly1305.Math    // For lemma_poly_bits64()
+open GCM_helpers
+open Workarounds
+open GCTR_s
+open GCTR
+open Arch.TypesNative
+open X64.CPU_Features_s
+
+open Math.Poly2_s
+open Math.Poly2
+open Math.Poly2.Bits_s
+open Math.Poly2.Bits
+open Math.Poly2.Lemmas
+open GF128_s
+open GF128
+#endverbatim
+
+procedure{:quick exportOnly} VPolyAdd(out dst:xmm, src1:xmm, src2:xmm)
+    lets
+        a1 := of_quad32(src1);
+        a2 := of_quad32(src2);
+    modifies
+        efl;
+    ensures
+        of_quad32(dst) == add(a1, a2);
+{
+    lemma_to_of_quad32(src1);
+    lemma_to_of_quad32(src2);
+    VPxor(dst, src1, src2);
+    lemma_add128(a1, a2);
+    lemma_of_to_quad32(add(a1, a2));
+}
+
+procedure{:quick exportOnly} VHigh64ToLow(out dst:xmm, src:xmm)
+    lets
+        a := of_quad32(src);
+    modifies
+        efl;
+    ensures
+        of_quad32(dst) == shift(a, (-64));
+{
+    lemma_to_of_quad32(src);
+    Vpsrldq8(dst, src);
+    lemma_quad32_double_shift(a);
+    lemma_shift_is_div(a, 64);
+    lemma_of_to_quad32(shift(a, (-64)));
+}
+
+procedure{:quick exportOnly} VLow64ToHigh(out dst:xmm, src:xmm)
+    lets
+        a := of_quad32(src);
+    modifies
+        efl;
+    ensures
+        of_quad32(dst) == shift(mask(a, 64), 64);
+{
+    lemma_to_of_quad32(src);
+    Vpslldq8(dst, src);
+    lemma_quad32_double_shift(a);
+    lemma_mask_is_mod(a, 64);
+    lemma_shift_is_mul(mask(a, 64), 64);
+    lemma_of_to_quad32(shift(mask(a, 64), 64));
+}
+
+procedure{:quick exportOnly} VSwap(out dst:xmm, src:xmm)
+    lets
+        a := of_quad32(src);
+    modifies
+        efl;
+    ensures
+        of_quad32(dst) == swap(a, 64);
+{
+    lemma_to_of_quad32(src);
+    VPalignr8(dst, src, src);
+    lemma_quad32_double_swap(a);
+    lemma_of_to_quad32(swap(a, 64));
+}
+
+procedure{:quick exportOnly} VPolyMul(out dst:xmm, src1:xmm, src2:xmm, inline src1Hi:bool, inline src2Hi:bool)
+    lets
+        a1 := of_quad32(src1);
+        a2 := of_quad32(src2);
+    modifies
+        efl;
+    requires
+        pclmulqdq_enabled;
+    ensures
+        of_quad32(dst) == mul(
+            if src1Hi then shift(a1, (-64)) else mask(a1, 64),
+            if src2Hi then shift(a2, (-64)) else mask(a2, 64));
+{
+    lemma_to_of_quad32(src1);
+    lemma_to_of_quad32(src2);
+    VPclmulqdq(dst, src1, src2, src1Hi, src2Hi);
+    lemma_quad32_double(a1);
+    lemma_quad32_double(a2);
+    lemma_shift_is_div(a1, 64);
+    lemma_shift_is_div(a2, 64);
+    lemma_mask_is_mod(a1, 64);
+    lemma_mask_is_mod(a2, 64);
+    lemma_of_to_quad32(mul(
+        if src1Hi then shift(a1, (-64)) else mask(a1, 64),
+        if src2Hi then shift(a2, (-64)) else mask(a2, 64)));
+}
+
+#token +. precedence +
+#token *. precedence *
+#token %. precedence *
+function operator( +. ) (a:poly, b:poly):poly := add;
+function operator( *. ) (a:poly, b:poly):poly := mul;
+function operator( %. ) (a:poly, b:poly):poly := mod;
+
+procedure{:quick} Reduce(ghost h:poly)
+    lets
+        Ii @= xmm0; Hkey @= xmm3;
+        Z0 @= xmm4; Z1 @= xmm5; Z2 @= xmm6; Z3 @= xmm7;
+        Xi @= xmm8;
+        g := monomial(128) +. h;
+        c := reverse(shift(h, (-1)), 63);
+        a0 := of_quad32(Z0);
+        a1 := of_quad32(Z2);
+        a2 := of_quad32(Z3);
+        a := a0 +. shift(a1, 64) +. shift(a2, 128);
+    modifies
+        efl;
+        Ii; Hkey; Z0; Z1; Z2; Z3; Xi;
+    requires
+        pclmulqdq_enabled;
+        shift(of_quad32(Hkey), (-64)) == c;
+        degree(h) < 64;
+        degree(g) == 128;
+        poly_index(h, 0);
+    ensures
+        of_quad32(Xi) == reverse(reverse(a, 255) %. g, 127);
+{
+    VLow64ToHigh(Z1, Z2);
+    VPolyAdd(Z0, Z0, Z1);
+    VSwap(Ii, Z0);
+    VPolyMul(Z0, Z0, Hkey, false, true);
+    VHigh64ToLow(Z2, Z2);
+    VPolyAdd(Z3, Z3, Z2);
+    VPolyAdd(Z0, Ii, Z0);
+    // TODO: save Z3 in memory
+    VSwap(Xi, Z0);
+    VPolyMul(Z0, Z0, Hkey, false, true);
+    VPolyAdd(Xi, Xi, Z3);
+    VPolyAdd(Xi, Xi, Z0);
+    lemma_reduce_rev(a0, a1, a2, h, 64);
+}

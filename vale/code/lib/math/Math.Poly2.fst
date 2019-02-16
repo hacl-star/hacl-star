@@ -4,6 +4,8 @@ module I = Math.Poly2.Defs
 open FStar.Seq
 unfold let max = FStar.Math.Lib.max
 
+let mask (a:poly) (n:nat) : poly = of_fun n (fun (i:nat) -> a.[i])
+
 let all_defs =
   poly == D.poly /\
   (forall (p:poly).{:pattern (degree p)} degree p == D.degree (to_poly p)) /\
@@ -28,6 +30,7 @@ let lemma_zero_define_i i = ()
 let lemma_one_define_i i = ()
 let lemma_monomial_define_i n i = ()
 let lemma_shift_define_i p n i = ()
+let lemma_mask_define_i p n i = ()
 let lemma_reverse_define_i p n i = ()
 
 let lemma_add_zero a = I.lemma_add_zero (to_poly a)

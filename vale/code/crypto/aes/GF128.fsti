@@ -1,4 +1,6 @@
 module GF128
+open FStar.Seq
+open FStar.Mul
 open Words_s
 open Words.Four_s
 open Types_s
@@ -8,22 +10,6 @@ open Math.Poly2_s
 open Math.Poly2.Bits_s
 open Math.Poly2
 open Math.Poly2.Lemmas
-open FStar.Seq
-open FStar.Mul
-
-val lemma_of_double32_degree (d:double32) : Lemma
-  (degree (of_double32 d) < 64)
-  [SMTPat (degree (of_double32 d))]
-
-val lemma_of_quad32_degree (q:quad32) : Lemma
-  (degree (of_quad32 q) < 128)
-  [SMTPat (degree (of_quad32 q))]
-
-val lemma_to_of_quad32 (q:quad32) : Lemma (to_quad32 (of_quad32 q) == q)
-
-val lemma_of_to_quad32 (a:poly) : Lemma
-  (requires degree a < 128)
-  (ensures of_quad32 (to_quad32 a) == a)
 
 let quad32_shift_left_1 (q:quad32) : quad32 =
   let l = four_map (fun (i:nat32) -> ishl i 1) q in
@@ -133,3 +119,34 @@ val lemma_gf128_reduce_rev (a b h:poly) (n:pos) : Lemma
     degree (r rdhLh) <= 2 * degree h /\
     r ((a *. b) %. g) == rdhLh +. rdh /. m +. rab /. m
   ))
+
+val lemma_reduce_rev (a0 a1 a2 h:poly) (n:pos) : Lemma
+  (requires
+    n == 64 /\ // verification times out unless n is known
+    degree a0 < n + n /\
+    degree a1 < n + n /\
+    degree a2 < n + n /\
+    degree (monomial (n + n) +. h) == n + n /\
+    degree h < n /\
+    h.[0]
+  )
+  (ensures (
+    let nn = n + n in
+    let mm = monomial nn in
+    let m = monomial n in
+    let g = mm +. h in
+    let c = reverse (shift h (-1)) (n - 1) in
+    let y_10 = a0 +. shift (mask a1 64) 64 in
+    let y_0 = mask y_10 64 in
+    let y_10c = swap y_10 64 +. y_0 *. c in
+    let a = a0 +. shift a1 64 +. shift a2 128 in
+    let x = reverse a (nn + nn - 1) in
+    reverse (x %. g) (nn - 1) == swap y_10c 64 +. (a2 +. shift a1 (-64)) +. mask y_10c 64 *. c
+  ))
+
+// of_fun 8 (fun (i:nat) -> i = 0 || i = 1 || i = 6)
+let gf128_low_shift : poly = shift gf128_modulus_low_terms (-1)
+
+// of_fun 8 (fun (i:nat) -> i = 127 || i = 126 || i = 121)
+let gf128_rev_shift : poly = reverse gf128_low_shift 127
+
