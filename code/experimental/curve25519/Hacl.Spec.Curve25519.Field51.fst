@@ -4,6 +4,7 @@ open Lib.Sequence
 open Lib.IntTypes
 open FStar.Mul
 open Spec.Curve25519
+open Hacl.Helpers
 
 open Hacl.Spec.Curve25519.Field51.Definition
 open Hacl.Spec.Curve25519.Field51.Lemmas
@@ -393,31 +394,14 @@ let fsqr25 (f10, f11, f12, f13, f14) (f20, f21, f22, f23, f24) =
   let (o20,o21,o22,o23,o24) = carry_wide5 (s20, s21, s22, s23, s24) in
   ((o10,o11,o12,o13,o14), (o20,o21,o22,o23,o24))
 
-let uint64_eq_mask (a:uint64) (b:uint64) : uint64 =
-  let x = a ^. b in
-  let minus_x = (lognot x) +. (u64 1) in
-  let x_or_minus_x = x |. minus_x in
-  let xnx = x_or_minus_x >>. 63ul in
-  let c = xnx -. (u64 1) in
-  c
-
-let uint64_gte_mask (a:uint64) (b:uint64) : uint64 =
-  let x = a in
-  let y = b in
-  let x_xor_y = logxor x y in
-  let x_sub_y = x -. y in
-  let x_sub_y_xor_y = x_sub_y ^. y in
-  let q = logor x_xor_y x_sub_y_xor_y in
-  let x_xor_q = logxor x q in
-  let x_xor_q_ = shift_right x_xor_q 63ul in
-  let c = sub_mod x_xor_q_ (u64 1) in
-  c
+#set-options "--z3rlimit 100 --max_fuel 2"
 
 inline_for_extraction
 val carry_felem5_full:
     inp:felem5{mul_inv_t inp}
   -> out:felem5{feval out == feval inp /\ felem_fits5 out (1, 1, 1, 1, 1)}
 let carry_felem5_full (f0, f1, f2, f3, f4) =
+  assert_norm (pow51 = pow2 51);
   let tmp0, c0 = carry51 f0 (u64 0) in
   let tmp1, c1 = carry51 f1 c0 in
   assert (if v f1 < pow2 51 then v tmp1 < pow2 51 else v tmp1 < 8192);
@@ -426,7 +410,7 @@ let carry_felem5_full (f0, f1, f2, f3, f4) =
   let tmp4, c4 = carry51 f4 c3 in
   lemma_carry5_simplify c0 c1 c2 c3 c4 tmp0 tmp1 tmp2 tmp3 tmp4;
   [@inline_let]
-  let tmp0', c5 = carry51 tmp0 (c4 *. u64 19) in
+  let tmp0', c5 = carry51 tmp0 (c4 *! u64 19) in
   [@inline_let]
   let tmp1' = tmp1 +! c5 in
   (tmp0', tmp1', tmp2, tmp3, tmp4)
@@ -434,23 +418,74 @@ let carry_felem5_full (f0, f1, f2, f3, f4) =
 inline_for_extraction
 val subtract_p5:
     f:felem5{felem_fits5 f (1, 1, 1, 1, 1)}
-  -> out:felem5{as_nat5 out == feval f}
-let subtract_p5 (f0, f1, f2, f3, f4) = admit();
+  -> Pure felem5
+    (requires True)
+    (ensures fun out ->
+      as_nat5 out == feval f /\
+      felem_fits5 out (1, 1, 1, 1, 1) /\
+      as_nat5 out < prime)
+let subtract_p5 (f0, f1, f2, f3, f4) =
   let m0 = uint64_gte_mask f0 (u64 0x7ffffffffffed) in
   let m1 = uint64_eq_mask f1 (u64 0x7ffffffffffff) in
   let m2 = uint64_eq_mask f2 (u64 0x7ffffffffffff) in
   let m3 = uint64_eq_mask f3 (u64 0x7ffffffffffff) in
   let m4 = uint64_eq_mask f4 (u64 0x7ffffffffffff) in
   let mask = m0 &. m1 &. m2 &. m3 &. m4 in
-  let f0 = f0 -. (mask &. u64 0x7ffffffffffed) in
-  let f1 = f1 -. (mask &. u64 0x7ffffffffffff) in
-  let f2 = f2 -. (mask &. u64 0x7ffffffffffff) in
-  let f3 = f3 -. (mask &. u64 0x7ffffffffffff) in
-  let f4 = f4 -. (mask &. u64 0x7ffffffffffff) in
-  (f0, f1, f2, f3, f4)
+  let f0' = f0 -. (mask &. u64 0x7ffffffffffed) in
+  let f1' = f1 -. (mask &. u64 0x7ffffffffffff) in
+  let f2' = f2 -. (mask &. u64 0x7ffffffffffff) in
+  let f3' = f3 -. (mask &. u64 0x7ffffffffffff) in
+  let f4' = f4 -. (mask &. u64 0x7ffffffffffff) in
+  lemma_subtract_p (f0, f1, f2, f3, f4) (f0', f1', f2', f3', f4');
+  (f0', f1', f2', f3', f4')
 
 inline_for_extraction
-val reduce_felem5: f:felem5{mul_inv_t f} -> out:felem5{as_nat5 out == feval f}
+val reduce_felem5:
+    f:felem5{mul_inv_t f}
+  -> Pure felem5
+    (requires True)
+    (ensures fun out ->
+      as_nat5 out == feval f /\
+      felem_fits5 out (1, 1, 1, 1, 1) /\
+      as_nat5 out < prime)
 let reduce_felem5 (f0, f1, f2, f3, f4) =
   let (f0, f1, f2, f3, f4) = carry_felem5_full (f0, f1, f2, f3, f4) in
   subtract_p5 (f0, f1, f2, f3, f4)
+
+inline_for_extraction
+val store_felem5:
+    f:felem5{mul_inv_t f}
+  -> Pure (uint64 & uint64 & uint64 & uint64)
+    (requires True)
+    (ensures fun (o0, o1, o2, o3) ->
+      feval f == v o0 + v o1 * pow2 64 +
+      v o2 * pow2 64 * pow2 64 + v o3 * pow2 64 * pow2 64 * pow2 64)
+let store_felem5 (f0, f1, f2, f3, f4) =
+  let (f0, f1, f2, f3, f4) = carry_felem5_full (f0, f1, f2, f3, f4) in
+  let (f0, f1, f2, f3, f4) = subtract_p5 (f0, f1, f2, f3, f4) in
+
+  let o0 = f0 |. (f1 <<. 51ul) in
+  let o1 = (f1 >>. 13ul) |. (f2 <<. 38ul) in
+  let o2 = (f2 >>. 26ul) |. (f3 <<. 25ul) in
+  let o3 = (f3 >>. 39ul) |. (f4 <<. 12ul) in
+  lemma_store_felem (f0, f1, f2, f3, f4);
+  (o0, o1, o2, o3)
+
+
+// inline_for_extraction
+// val store_felem5:
+//   f:felem5
+//   -> Pure (uint64 & uint64 & uint64 & uint64)
+//     (requires
+//       felem_fits5 f (1, 1, 1, 1, 1) /\
+//       as_nat5 f < prime)
+//     (ensures fun (o0, o1, o2, o3) ->
+//       as_nat5 f == v o0 + v o1 * pow2 64 +
+//       v o2 * pow2 64 * pow2 64 + v o3 * pow2 64 * pow2 64 * pow2 64)
+// let store_felem5 (f0, f1, f2, f3, f4) =
+//   let o0 = f0 |. (f1 <<. 51ul) in
+//   let o1 = (f1 >>. 13ul) |. (f2 <<. 38ul) in
+//   let o2 = (f2 >>. 26ul) |. (f3 <<. 25ul) in
+//   let o3 = (f3 >>. 39ul) |. (f4 <<. 12ul) in
+//   lemma_store_felem (f0, f1, f2, f3, f4);
+//   (o0, o1, o2, o3)

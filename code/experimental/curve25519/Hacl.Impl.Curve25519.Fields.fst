@@ -139,8 +139,8 @@ val store_felem:
 let store_felem #s b f =
   match s with
   | M26 -> admit(); F26.store_felem b f
-  | M51 -> admit(); F51.store_felem b f
-  | M64 -> admit(); F64.store_felem b f
+  | M51 -> F51.store_felem b f
+  | M64 -> F64.store_felem b f
 
 inline_for_extraction
 val set_zero:

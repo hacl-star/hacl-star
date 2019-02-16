@@ -457,22 +457,22 @@ val store_felem:
   -> Stack unit
     (requires fun h ->
       live h f /\ live h u64s /\ mul_inv_t h f)
-    (ensures  fun h0 _ h1 -> modifies (loc u64s) h0 h1)
+    (ensures  fun h0 _ h1 ->
+      modifies (loc u64s) h0 h1 /\
+      BSeq.nat_from_intseq_le (as_seq h1 u64s) == (as_nat h0 f) % P.prime)
 let store_felem u64s f =
   let f0 = f.(0ul) in
   let f1 = f.(1ul) in
   let f2 = f.(2ul) in
   let f3 = f.(3ul) in
   let f4 = f.(4ul) in
-  let (f0, f1, f2, f3, f4) = reduce_felem5 (f0, f1, f2, f3, f4) in
-  let f0 = f0 ^. (f1 <<. 51ul) in
-  let f1 = (f1 >>. 13ul) ^. (f2 <<. 38ul) in
-  let f2 = (f2 >>. 26ul) ^. (f3 <<. 25ul) in
-  let f3 = (f3 >>. 39ul) ^. (f4 <<. 12ul) in
-  u64s.(0ul) <- f0;
-  u64s.(1ul) <- f1;
-  u64s.(2ul) <- f2;
-  u64s.(3ul) <- f3
+  let (o0, o1, o2, o3) = store_felem5 (f0, f1, f2, f3, f4) in
+  u64s.(0ul) <- o0;
+  u64s.(1ul) <- o1;
+  u64s.(2ul) <- o2;
+  u64s.(3ul) <- o3;
+  let h1 = ST.get () in
+  Lemmas.lemma_nat_from_uints64_le_4 (as_seq h1 u64s)
 
 [@CInline]
 val cswap2: bit:uint64 -> p1:felem2 -> p2:felem2 -> Stack unit
