@@ -4247,7 +4247,7 @@
         "typing_tok_Interop.Types.TUInt64@tok"
       ],
       0,
-      "253b2884c77d2ad673b00ae2075ee8a7"
+      "b739f67ac986db74e3bd09cc79f110f2"
     ],
     [
       "Fast_stdcalls.fmul1",
@@ -4397,7 +4397,7 @@
         "typing_X64.CPU_Features_s.bmi2_enabled"
       ],
       0,
-      "b07e1d0eff749f296b30fd0d4bc7e25c"
+      "7d4fb1461fdc96bb8edc8b4965e06712"
     ],
     [
       "Fast_stdcalls.fsqr_dom",
@@ -4744,7 +4744,7 @@
         "typing_Fast_stdcalls.fsqr_dom"
       ],
       0,
-      "712fe46ac520ebc609b998cc56d9d920"
+      "60cdebc868f4979168a5fc260b46ea5f"
     ],
     [
       "Fast_stdcalls.lowstar_fsqr",
@@ -4826,7 +4826,7 @@
         "typing_Interop.X64_Tm_abs_da24c3665e6108436cb629a3eb5d5ca1"
       ],
       0,
-      "97a08f973a23e0b1f772697bdff6e407"
+      "3580fdadcba29e536d564a5bd071efec"
     ],
     [
       "Fast_stdcalls.fast_fsqr",
@@ -5109,7 +5109,7 @@
         "typing_X64.CPU_Features_s.bmi2_enabled"
       ],
       0,
-      "af0dbb2648424647dce77190452e1c45"
+      "c4fecd4bb233dbfd8d5712bbd1ddb049"
     ],
     [
       "Fast_stdcalls.fsqr2_pre",
@@ -5445,7 +5445,7 @@
         "typing_Fast_stdcalls.fsqr_dom"
       ],
       0,
-      "7577b7b7571a72e2514b3caea0c22105"
+      "d0dade4b1f0e92f9f5a10b4ba153046b"
     ],
     [
       "Fast_stdcalls.lowstar_fsqr2",
@@ -5527,7 +5527,7 @@
         "typing_Interop.X64_Tm_abs_da24c3665e6108436cb629a3eb5d5ca1"
       ],
       0,
-      "c84b3eb6a2cb55e787759cf7517e9a73"
+      "68de6e796f31b2cb9d826be60a529152"
     ],
     [
       "Fast_stdcalls.fast_fsqr2",
@@ -5717,6 +5717,7 @@
         "equation_FStar.Monotonic.HyperStack.is_stack_region",
         "equation_FStar.Monotonic.HyperStack.is_tip",
         "equation_FStar.Monotonic.HyperStack.is_wf_with_ctr_and_tip",
+        "equation_FStar.Monotonic.HyperStack.live_region",
         "equation_FStar.Monotonic.HyperStack.mem",
         "equation_FStar.Monotonic.HyperStack.pop",
         "equation_FStar.Monotonic.HyperStack.poppable",
@@ -5772,8 +5773,10 @@
         "lemma_LowStar.Monotonic.Buffer.length_null_1",
         "lemma_LowStar.Monotonic.Buffer.length_null_2",
         "lemma_LowStar.Monotonic.Buffer.live_loc_not_unused_in",
+        "lemma_LowStar.Monotonic.Buffer.live_region_frameOf",
         "lemma_LowStar.Monotonic.Buffer.loc_disjoint_includes_r",
         "lemma_LowStar.Monotonic.Buffer.loc_disjoint_none_r",
+        "lemma_LowStar.Monotonic.Buffer.loc_disjoint_regions",
         "lemma_LowStar.Monotonic.Buffer.loc_disjoint_sym_",
         "lemma_LowStar.Monotonic.Buffer.loc_disjoint_union_r_",
         "lemma_LowStar.Monotonic.Buffer.loc_includes_addresses_addresses_2",
@@ -5840,8 +5843,10 @@
         "typing_FStar.Monotonic.HyperStack.get_rid_ctr",
         "typing_FStar.Monotonic.HyperStack.get_tip",
         "typing_FStar.Monotonic.HyperStack.is_stack_region",
+        "typing_FStar.Monotonic.HyperStack.live_region",
         "typing_FStar.Monotonic.HyperStack.remove_elt",
-        "typing_FStar.Set.complement", "typing_FStar.Set.mem",
+        "typing_FStar.Set.complement", "typing_FStar.Set.empty",
+        "typing_FStar.Set.intersect", "typing_FStar.Set.mem",
         "typing_FStar.Set.singleton", "typing_FStar.UInt.fits",
         "typing_FStar.UInt32.uint_to_t", "typing_FStar.UInt32.v",
         "typing_LowStar.Buffer.trivial_preorder",
@@ -5862,7 +5867,7 @@
         "typing_X64.CPU_Features_s.bmi2_enabled"
       ],
       0,
-      "54a2ac4e8de2742512800177b93f755b"
+      "fae84aff9f4b89e1b71dfb53c0a3dde2"
     ],
     [
       "Fast_stdcalls.cswap_dom",
@@ -6212,7 +6217,7 @@
         "typing_Fast_stdcalls.cswap_dom"
       ],
       0,
-      "13d603a1bfa7df2e6326f23e72b0807a"
+      "1cf2853262bbabc7d3526da1616a71cd"
     ],
     [
       "Fast_stdcalls.lowstar_cswap",
@@ -6294,7 +6299,7 @@
         "typing_Interop.X64_Tm_abs_da24c3665e6108436cb629a3eb5d5ca1"
       ],
       0,
-      "44d97e71bccbbd93d1cd6591d1a34c94"
+      "f3d0e25d3c44eb17b87cb3bc104a7cd5"
     ],
     [
       "Fast_stdcalls.fast_cswap2",
@@ -6448,6 +6453,7 @@
         "lemma_FStar.Monotonic.HyperHeap.lemma_includes_refl",
         "lemma_FStar.Monotonic.HyperStack.lemma_mk_mem__projectors",
         "lemma_FStar.Monotonic.HyperStack.lemma_tip_top_smt",
+        "lemma_FStar.Seq.Base.lemma_eq_elim",
         "lemma_FStar.Seq.Base.lemma_eq_intro",
         "lemma_FStar.Set.lemma_equal_elim",
         "lemma_FStar.Set.lemma_equal_intro",
@@ -6544,7 +6550,7 @@
         "typing_Types_s.twobits", "typing_Views.view64"
       ],
       0,
-      "db124f317e9dd121fc3b8924b6eb134f"
+      "cf03e2b936e3d3eb711ec871ccbc4625"
     ]
   ]
 ]
