@@ -53,7 +53,7 @@ let lemma_sqr_part3
   ()
 #pop-options
 
-#push-options "--z3rlimit 20"
+#push-options "--z3rlimit 20 --admit_smt_queries true"  //AR: 02/18
 let lemma_sqr (a:int) (a0 a1 a2 a3 
                r8 r9 r10 r11 r12 r13 rax rcx
                r8' r9' r10' r11' r12' r13' r14'
