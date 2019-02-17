@@ -89,7 +89,7 @@ ghost procedure finish_aes_encrypt_le(ghost alg:algorithm, ghost input_LE:quad32
     reveal cipher;
 }
 
-procedure {:quick exportOnly} load_two_lsb(inout dst:xmm)
+procedure {:quick exportOnly} Load_two_lsb(inout dst:xmm)
     lets constp @= r11; 
     modifies constp; efl;
     ensures  dst == Mkfour(2, 0, 0, 0);
@@ -101,7 +101,7 @@ procedure {:quick exportOnly} load_two_lsb(inout dst:xmm)
 }
 
 // Version with concrete values succeeds.
-//procedure {:quick} load_one_lsb()
+//procedure {:quick} Load_one_lsb()
 //    lets constp @= r11; dst @= xmm1;
 //    modifies constp; dst; efl;
 //    ensures  dst == Mkfour(1, 0, 0, 0);
@@ -112,7 +112,7 @@ procedure {:quick exportOnly} load_two_lsb(inout dst:xmm)
 //    reveal insert_nat64;
 //}
 
-procedure {:quick exportOnly} load_one_lsb(inout dst:xmm)
+procedure {:quick exportOnly} Load_one_lsb(inout dst:xmm)
     lets constp @= r11; 
     modifies constp; efl;
     ensures  dst == Mkfour(1, 0, 0, 0);
@@ -124,7 +124,7 @@ procedure {:quick exportOnly} load_one_lsb(inout dst:xmm)
 }
 
 #reset-options "--z3rlimit 20"
-procedure {:quick} handle_ctr32(
+procedure {:quick} Handle_ctr32(
     ghost ctr_BE:quad32
     )
     lets
@@ -154,11 +154,11 @@ procedure {:quick} handle_ctr32(
     InitPshufbMask(Ii, constp);  // # borrow $Ii for .Lbswap_mask
     VPshufb(Z2, T1, Ii);         // # byte-swap counter
     // OpenSSL uses a memory operand with VPaddd to do the addition with .Lone_lsb.  We avoid that here for now.
-    //load_two_lsb();              // # borrow $Z1, .Ltwo_lsb
-    //load_one_lsb();              // # .Lone_lsb
-    load_one_lsb(Z1);
+    //Load_two_lsb();              // # borrow $Z1, .Ltwo_lsb
+    //Load_one_lsb();              // # .Lone_lsb
+    Load_one_lsb(Z1);
     VPaddd(inout1, Z2, Z1);
-    load_two_lsb(Z1);              
+    Load_two_lsb(Z1);              
     VPaddd(inout2, Z2, Z1);
     VPaddd(inout3, inout1, Z1);
     VPshufb(inout1, inout1, Ii);
@@ -175,7 +175,7 @@ procedure {:quick} handle_ctr32(
 }
 
 #reset-options "--z3rlimit 20"
-procedure {:quick} loop6x_ctr_update(
+procedure {:quick} Loop6x_ctr_update(
     inline alg:algorithm,  
     ghost key_words:seq(nat32),
     ghost round_keys:seq(quad32),
@@ -238,7 +238,7 @@ procedure {:quick} loop6x_ctr_update(
     // which handles wrap and control flow more efficiently
     Add64(counter, 6);      
     if (counter >= 256) {
-        handle_ctr32(ctr_BE); //, counter);
+        Handle_ctr32(ctr_BE); //, counter);
         Sub64(counter, 256);
     } else {
         VPaddd(T1, T2, inout5); // OpenSSL uses VPaddb
@@ -249,7 +249,7 @@ procedure {:quick} loop6x_ctr_update(
 }
 
 #reset-options ""
-procedure {:quick} loop6x_preamble(
+procedure {:quick} Loop6x_preamble(
     inline alg:algorithm,  // OpenSSL includes the number of rounds (nr) as a dynamic parameter (stored with the key).  Saves code space but adds extra instructions to the fast path.  Maybe branch predictor is good enough for it not to matter
     ghost iv_b:buffer128,
 
@@ -330,7 +330,7 @@ procedure {:quick} loop6x_preamble(
         //counter == (ctr_BE.lo0 + 6) % 256;
         counter == inc32(ctr_BE, 6).lo0 % 256;
 {
-    loop6x_ctr_update(alg, key_words, round_keys, keys_b, ctr_BE);
+    Loop6x_ctr_update(alg, key_words, round_keys, keys_b, ctr_BE);
 
     init_rounds_opaque(inout0, round_keys);
     init_rounds_opaque(inout1, round_keys);
@@ -340,7 +340,7 @@ procedure {:quick} loop6x_preamble(
     init_rounds_opaque(inout0, round_keys);
 
     if (key > 72) {         // TODO: FIX!
-        handle_ctr32(ctr_BE);
+        Handle_ctr32(ctr_BE);
     } else {
         VPaddd(T1, T2, inout5); // OpenSSL uses VPaddb
         VPxor(inout1, inout1, rndkey); 
@@ -362,7 +362,7 @@ procedure {:quick} loop6x_preamble(
     VAESNI_enc(inout2, inout2, T2);
     VAESNI_enc(inout3, inout3, T2);
     VAESNI_enc(inout4, inout4, T2);
-    //Load128_buffer(rndkey, key, 0x20-0x80, Secret, keys_b, 2);      // OpenSSL had this here.  I moved it to one of the loop6x_step calls
+    //Load128_buffer(rndkey, key, 0x20-0x80, Secret, keys_b, 2);      // OpenSSL had this here.  I moved it to one of the Loop6x_step calls
     VAESNI_enc(inout5, inout5, T2);
 
     reveal rounds;
@@ -372,7 +372,7 @@ procedure {:quick} loop6x_preamble(
 
 #reset-options ""
 
-procedure {:quick} loop6x_plain(
+procedure {:quick} Loop6x_plain(
     inline alg:algorithm,  // OpenSSL includes the number of rounds (nr) as a dynamic parameter (stored with the key).  Saves code space but adds extra instructions to the fast path.  Maybe branch predictor is good enough for it not to matter
     inline rnd:nat,
     ghost key_words:seq(nat32),
@@ -435,7 +435,7 @@ procedure {:quick} loop6x_plain(
 }
 
 
-procedure {:quick} loop6x_step(
+procedure {:quick} Loop6x_step(
     inline alg:algorithm,  // OpenSSL includes the number of rounds (nr) as a dynamic parameter (stored with the key).  Saves code space but adds extra instructions to the fast path.  Maybe branch predictor is good enough for it not to matter
     inline rnd:nat,
     inline in0_offset:nat,
@@ -529,7 +529,7 @@ procedure {:quick} loop6x_step(
 }
 
 
-procedure {:quick} loop6x_round8(
+procedure {:quick} Loop6x_round8(
     inline alg:algorithm,  // OpenSSL includes the number of rounds (nr) as a dynamic parameter (stored with the key).  Saves code space but adds extra instructions to the fast path.  Maybe branch predictor is good enough for it not to matter
     ghost in0_b:buffer128,
     ghost stack_b:buffer128,
@@ -608,7 +608,7 @@ procedure {:quick} loop6x_round8(
     commute_sub_bytes_shift_rows_forall();
 }
 
-procedure {:quick} loop6x_round9(
+procedure {:quick} Loop6x_round9(
     inline alg:algorithm,  // OpenSSL includes the number of rounds (nr) as a dynamic parameter (stored with the key).  Saves code space but adds extra instructions to the fast path.  Maybe branch predictor is good enough for it not to matter
     ghost in_b:buffer128,
     ghost stack_b:buffer128,
@@ -708,7 +708,7 @@ procedure {:quick} load_one_msb()
 }
 
 #reset-options "--z3rlimit 30"
-procedure {:quick} loop6x_final(
+procedure {:quick} Loop6x_final(
     inline alg:algorithm,  
     ghost iv_b:buffer128,
     ghost stack_b:buffer128,
@@ -871,7 +871,7 @@ procedure {:quick} loop6x_final(
 }
 
 #reset-options ""
-procedure {:quick} loop6x_save_output(
+procedure {:quick} Loop6x_save_output(
     ghost out_b:buffer128
     )
     lets
@@ -928,7 +928,7 @@ procedure {:quick} loop6x_save_output(
 
 
 #reset-options "--z3rlimit 100"
-procedure {:quick} loop6x(
+procedure {:quick} Loop6x(
     inline alg:algorithm,  
     ghost iv_b:buffer128,
     ghost in0_b:buffer128,
@@ -1051,24 +1051,24 @@ procedure {:quick} loop6x(
     ghost var init4 := quad32_xor(reverse_bytes_quad32(inc32(ctr_BE, 4)), rndkey);
     ghost var init5 := quad32_xor(reverse_bytes_quad32(inc32(ctr_BE, 5)), rndkey);
 
-    loop6x_preamble(alg, iv_b, key_words, round_keys, keys_b, ctr_BE);
-    loop6x_step(alg, 1, 5, 2, in0_b, stack_b, key_words, round_keys, keys_b, 
+    Loop6x_preamble(alg, iv_b, key_words, round_keys, keys_b, ctr_BE);
+    Loop6x_step(alg, 1, 5, 2, in0_b, stack_b, key_words, round_keys, keys_b, 
                 init0, init1, init2, init3, init4, init5);
-    loop6x_plain(alg, 2, key_words, round_keys, keys_b, 
+    Loop6x_plain(alg, 2, key_words, round_keys, keys_b, 
                  init0, init1, init2, init3, init4, init5);
-    loop6x_step(alg, 3, 4, 3, in0_b, stack_b, key_words, round_keys, keys_b, 
+    Loop6x_step(alg, 3, 4, 3, in0_b, stack_b, key_words, round_keys, keys_b, 
                 init0, init1, init2, init3, init4, init5);
-    loop6x_step(alg, 4, 3, 4, in0_b, stack_b, key_words, round_keys, keys_b, 
+    Loop6x_step(alg, 4, 3, 4, in0_b, stack_b, key_words, round_keys, keys_b, 
                 init0, init1, init2, init3, init4, init5);
-    loop6x_step(alg, 5, 2, 5, in0_b, stack_b, key_words, round_keys, keys_b, 
+    Loop6x_step(alg, 5, 2, 5, in0_b, stack_b, key_words, round_keys, keys_b, 
                 init0, init1, init2, init3, init4, init5);
-    loop6x_step(alg, 6, 1, 6, in0_b, stack_b, key_words, round_keys, keys_b, 
+    Loop6x_step(alg, 6, 1, 6, in0_b, stack_b, key_words, round_keys, keys_b, 
                 init0, init1, init2, init3, init4, init5);
-    loop6x_round8(alg, in0_b, stack_b, key_words, round_keys, keys_b, 
+    Loop6x_round8(alg, in0_b, stack_b, key_words, round_keys, keys_b, 
                   init0, init1, init2, init3, init4, init5);
-    loop6x_round9(alg, in_b, stack_b, key_words, round_keys, keys_b, 
+    Loop6x_round9(alg, in_b, stack_b, key_words, round_keys, keys_b, 
                   init0, init1, init2, init3, init4, init5);
-    loop6x_final(alg, iv_b, stack_b, key_words, round_keys, keys_b, 
+    Loop6x_final(alg, iv_b, stack_b, key_words, round_keys, keys_b, 
                  reverse_bytes_quad32(buffer128_read(iv_b, 0, mem)), init0, init1, init2, init3, init4, init5,
                  reverse_bytes_quad32(inc32(ctr_BE, 0)), 
                  reverse_bytes_quad32(inc32(ctr_BE, 1)), 
@@ -1087,6 +1087,6 @@ procedure {:quick} loop6x(
     Sub64(len, 6);
 
     if (len > 0) {
-        loop6x_save_output(out_b);
+        Loop6x_save_output(out_b);
     }
 }
