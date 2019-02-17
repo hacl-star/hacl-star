@@ -349,6 +349,7 @@ unfold let modifies_buffer_2 (b1 b2:M.buffer64) (h1 h2:M.mem) =modifies_mem (M.l
 unfold let modifies_buffer_3 (b1 b2 b3:M.buffer64) (h1 h2:M.mem) =modifies_mem (M.loc_union (M.loc_union (loc_buffer b1) (loc_buffer b2)) (loc_buffer b3)) h1 h2
 unfold let modifies_buffer128 (b:M.buffer128) (h1 h2:M.mem) = modifies_mem (loc_buffer b) h1 h2
 unfold let modifies_buffer128_2 (b1 b2:M.buffer128) (h1 h2:M.mem) = modifies_mem (M.loc_union (loc_buffer b1) (loc_buffer b2)) h1 h2
+unfold let modifies_buffer128_3 (b1 b2 b3:M.buffer128) (h1 h2:M.mem) = modifies_mem (M.loc_union (M.loc_union (loc_buffer b1) (loc_buffer b2)) (loc_buffer b3)) h1 h2
 
 let validSrcAddrs64 (m:M.mem) (addr:int) (b:M.buffer64) (len:int) (memTaint:M.memtaint) (t:taint) =
     buffer_readable m b /\
@@ -401,6 +402,14 @@ let valid_stack_slots (m:M.mem) (rsp:int) (b:M.buffer64) (num_slots:int) (memTai
 
 let modifies_buffer_specific128 (b:M.buffer128) (h1 h2:M.mem) (start last:nat) : GTot prop0 =
     modifies_buffer128 b h1 h2 /\
+    // TODO: Consider replacing this with: modifies (loc_buffer (gsub_buffer b i len)) h1 h2
+    (forall (i:nat) . {:pattern (Seq.index (M.buffer_as_seq h2 b) i)}
+                        0 <= i /\ i < buffer_length b
+                     /\ (i < start || i > last)
+                    ==> buffer128_read b i h1
+                     == buffer128_read b i h2)
+
+let buffer_modifies_specific128 (b:M.buffer128) (h1 h2:M.mem) (start last:nat) : GTot prop0 =
     // TODO: Consider replacing this with: modifies (loc_buffer (gsub_buffer b i len)) h1 h2
     (forall (i:nat) . {:pattern (Seq.index (M.buffer_as_seq h2 b) i)}
                         0 <= i /\ i < buffer_length b

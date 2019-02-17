@@ -303,7 +303,7 @@ procedure {:quick} Loop6x_preamble(
 
     ensures
         // Framing
-        modifies_buffer128(iv_b, old(mem), mem);
+        modifies_buffer_specific128(iv_b, old(mem), mem, 0, 0);
 
         // Semantics
 
@@ -483,7 +483,7 @@ procedure {:quick} Loop6x_step(
 
     ensures
         // Framing
-        modifies_buffer_specific128(stack_b, old(mem), mem, stack_offset, stack_offset + 1);
+        modifies_buffer_specific128(stack_b, old(mem), mem, stack_offset, stack_offset);
 
         // Semantics
         inout0 == rounds_opaque(init0, round_keys, rnd + 1);
@@ -795,7 +795,7 @@ procedure {:quick} Loop6x_final(
 
     ensures
         // Framing
-        modifies_buffer_specific128(stack_b, old(mem), mem, 7, 8);
+        modifies_buffer_specific128(stack_b, old(mem), mem, 7, 7);
 
         // Semantics
         buffer128_read(stack_b, 7, mem) == reverse_bytes_quad32(inb);
@@ -892,7 +892,7 @@ procedure {:quick} Loop6x_save_output(
         validDstAddrsOffset128(mem, outp - 0x60, out_b, count*6, 6, memTaint, Secret);
 
     ensures
-        modifies_buffer128(out_b, old(mem), mem);
+        modifies_buffer_specific128(out_b, old(mem), mem, count*6+0, count*6+5);
 
         buffer128_read(out_b, count*6 + 0, mem) == old(inout0);
         buffer128_read(out_b, count*6 + 1, mem) == old(inout1);
@@ -925,7 +925,7 @@ procedure {:quick} Loop6x_save_output(
 
 
 #reset-options "--z3rlimit 100"
-procedure {:quick} Loop6x(
+procedure {:quick} {:verify true} Loop6x(
     inline alg:algorithm,  
     ghost count:nat,        // Number of 128-bit blocks processed so far
     ghost iv_b:buffer128,
@@ -973,6 +973,7 @@ procedure {:quick} Loop6x(
         buffers_disjoint128(iv_b, stack_b);
         buffers_disjoint128(iv_b, in0_b);
         buffers_disjoint128(iv_b, in_b);
+        buffers_disjoint128(iv_b, out_b);
         buffers_disjoint128(stack_b, keys_b);
         buffers_disjoint128(stack_b, in0_b);
         buffers_disjoint128(stack_b, in_b);
@@ -997,9 +998,17 @@ procedure {:quick} Loop6x(
         counter + 6 < 256 ==> inout4 == reverse_bytes_quad32(inc32(ctr_BE, 4));
         counter + 6 < 256 ==> inout5 == reverse_bytes_quad32(inc32(ctr_BE, 5));
 
+        // GCTR progress
+        gctr_partial(alg, 6*count, old(buffer128_as_seq(mem, in_b)), buffer128_as_seq(mem, out_b), key_words, ctr_BE_orig);
+
     ensures
 
-        // TODO: Add memory framing!
+        // Framing
+        len  > 0 ==> modifies_buffer128_3(stack_b, out_b, iv_b, old(mem), mem);
+        len == 0 ==> modifies_buffer128_2(stack_b,        iv_b, old(mem), mem);
+        buffer_modifies_specific128(stack_b, old(mem), mem, 2, 7);
+        buffer_modifies_specific128(out_b,   old(mem), mem, count*6+0, count*6+5);
+        buffer_modifies_specific128(iv_b,    old(mem), mem, 0, 0);
 
         // Semantics
 
