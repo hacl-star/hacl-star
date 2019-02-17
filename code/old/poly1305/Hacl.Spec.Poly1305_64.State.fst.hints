@@ -8,7 +8,7 @@
       1,
       [ "@query", "assumption_Prims.HasEq_int" ],
       0,
-      "ac7dea147036347ea3f30714b4d5e0a8"
+      "8ab0af23728852c8d499e6752f84c2b7"
     ],
     [
       "Hacl.Spec.Poly1305_64.State.p44",
@@ -17,7 +17,7 @@
       1,
       [ "@query", "assumption_Prims.HasEq_int" ],
       0,
-      "ec0f9935f6ae7cb27f4d9e8be9389318"
+      "6a82eba1aef34bf37dac6083a803b42f"
     ],
     [
       "Hacl.Spec.Poly1305_64.State.p45",
@@ -26,7 +26,7 @@
       1,
       [ "@query", "assumption_Prims.HasEq_int" ],
       0,
-      "92b5b67f4a86e4fd44a5c6266535c4f3"
+      "b85cfdc0c6c2f2ed368f6fb8018eba41"
     ],
     [
       "Hacl.Spec.Poly1305_64.State.red_44",
@@ -35,12 +35,13 @@
       1,
       [
         "@MaxIFuel_assumption", "@query",
+        "equation_Hacl.Bignum.Constants.len",
         "equation_Hacl.Spec.Poly1305_64.State.seqelem",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Hacl.Spec.Poly1305_64.State_Tm_refine_37f78dd5c2b6645ed5e1722c60c235e6"
+        "refinement_interpretation_Tm_refine_37f78dd5c2b6645ed5e1722c60c235e6"
       ],
       0,
-      "73b93dcb70bc957cae45b97319005122"
+      "0d1c756e0e2ddb74bfd8f2f7aa117f6d"
     ],
     [
       "Hacl.Spec.Poly1305_64.State.red_45",
@@ -49,12 +50,13 @@
       1,
       [
         "@MaxIFuel_assumption", "@query",
+        "equation_Hacl.Bignum.Constants.len",
         "equation_Hacl.Spec.Poly1305_64.State.seqelem",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Hacl.Spec.Poly1305_64.State_Tm_refine_37f78dd5c2b6645ed5e1722c60c235e6"
+        "refinement_interpretation_Tm_refine_37f78dd5c2b6645ed5e1722c60c235e6"
       ],
       0,
-      "43daeec1e5ae6dc05cc833c1bfbe459b"
+      "0b9c696f72beb4b4db81ae0eb6906522"
     ],
     [
       "Hacl.Spec.Poly1305_64.State.selem",
@@ -70,17 +72,15 @@
         "equation_Hacl.Bignum.Parameters.len",
         "equation_Hacl.Bignum.Parameters.limb",
         "equation_Hacl.Spec.Poly1305_64.State.seqelem", "equation_Prims.nat",
-        "equation_Spec.Poly1305.elem", "equation_Spec.Poly1305.one",
         "equation_Spec.Poly1305.prime",
-        "function_token_typing_Spec.Poly1305.one", "int_typing",
+        "function_token_typing_Prims.__cache_version_number__", "int_typing",
         "lemma_Spec.Poly1305.Lemmas.lemma_prime_value",
         "primitive_Prims.op_Modulus", "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Hacl.Spec.Poly1305_64.State_Tm_refine_37f78dd5c2b6645ed5e1722c60c235e6",
-        "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
-        "refinement_interpretation_Spec.Poly1305_Tm_refine_64fde586cd61a9af199b0a72fdba45d1"
+        "refinement_interpretation_Tm_refine_37f78dd5c2b6645ed5e1722c60c235e6",
+        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-      "c04071dd444017549d2c435553a951f6"
+      "cd48a461e1ef3344d1cf50b99a1745e3"
     ],
     [
       "Hacl.Spec.Poly1305_64.State.invariant",
@@ -99,14 +99,15 @@
         "equation_Prims.eqtype", "equation_Spec.Poly1305.elem",
         "equation_Spec.Poly1305.prime",
         "fuel_guarded_inversion_Hacl.Spec.Poly1305_64.State.poly1305_state_",
+        "function_token_typing_Prims.__cache_version_number__",
         "function_token_typing_Prims.int",
-        "haseqSpec.Poly1305_Tm_refine_64fde586cd61a9af199b0a72fdba45d1",
-        "int_typing", "proj_equation_Hacl.Spec.Poly1305_64.State.MkState_r",
-        "refinement_interpretation_Hacl.Spec.Poly1305_64.State_Tm_refine_37f78dd5c2b6645ed5e1722c60c235e6",
-        "refinement_interpretation_Prims_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
+        "haseqTm_refine_64fde586cd61a9af199b0a72fdba45d1",
+        "proj_equation_Hacl.Spec.Poly1305_64.State.MkState_r",
+        "refinement_interpretation_Tm_refine_37f78dd5c2b6645ed5e1722c60c235e6",
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "f55fa3102751714215de82d4c5a9f06e"
+      "62c3354c9e12bb8f4bd4ab70a7a9997d"
     ]
   ]
 ]
