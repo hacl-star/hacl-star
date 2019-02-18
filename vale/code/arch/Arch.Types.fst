@@ -240,8 +240,8 @@ let le_bytes_to_seq_quad32_to_bytes_one_quad (b:quad32) :
    create 1 b
  *)
   =
-  reveal_opaque le_bytes_to_seq_quad32_def;
-  reveal_opaque le_quad32_to_bytes_def;
+  FStar.Pervasives.reveal_opaque (`%le_bytes_to_seq_quad32) le_bytes_to_seq_quad32;
+  FStar.Pervasives.reveal_opaque (`%le_quad32_to_bytes) le_quad32_to_bytes;
   seq_to_seq_four_to_seq_LE (seq_map (nat_to_four 8) (four_to_seq_LE b));
   seq_map_inverses (nat_to_four 8) (four_to_nat 8) (four_to_seq_LE b);
   four_to_seq_LE_is_seq_four_to_seq_LE b;
@@ -312,7 +312,7 @@ let le_bytes_to_seq_quad32_to_bytes (s:seq quad32) :
     seq_to_seq_four_LE (seq_map (four_to_nat 8) (seq_to_seq_four_LE (seq_four_to_seq_LE (seq_map (nat_to_four 8) (seq_four_to_seq_LE s)))))
  *)
   =
-  reveal_opaque le_bytes_to_seq_quad32_def;
+  FStar.Pervasives.reveal_opaque (`%le_bytes_to_seq_quad32) le_bytes_to_seq_quad32;
   reveal_opaque le_seq_quad32_to_bytes_def;
   seq_to_seq_four_to_seq_LE (seq_map (nat_to_four 8) (seq_four_to_seq_LE s));
   seq_map_inverses (nat_to_four 8) (four_to_nat 8) (seq_four_to_seq_LE s);
@@ -331,7 +331,7 @@ let le_quad32_to_bytes_to_quad32 (s:seq nat8 { length s == 16 }) :
   Lemma(le_quad32_to_bytes (le_bytes_to_quad32 s) == s)
   =
   reveal_opaque le_bytes_to_quad32_def;
-  reveal_opaque le_quad32_to_bytes_def;
+  FStar.Pervasives.reveal_opaque (`%le_quad32_to_bytes) le_quad32_to_bytes;
   let q = le_bytes_to_quad32 s in
   let s' = le_quad32_to_bytes q in
   if not (s = s') then (
@@ -351,14 +351,14 @@ let le_seq_quad32_to_bytes_of_singleton (q:quad32) :
   Lemma (le_quad32_to_bytes q == le_seq_quad32_to_bytes (create 1 q))
   =
   reveal_opaque le_seq_quad32_to_bytes_def;
-  reveal_opaque le_quad32_to_bytes_def;
+  FStar.Pervasives.reveal_opaque (`%le_quad32_to_bytes) le_quad32_to_bytes;
   four_to_seq_LE_is_seq_four_to_seq_LE q;
   ()
 
 let le_quad32_to_bytes_injective ():
   Lemma (forall b b' . le_quad32_to_bytes b == le_quad32_to_bytes b' ==> b == b')
   =
-  reveal_opaque le_quad32_to_bytes_def;
+  FStar.Pervasives.reveal_opaque (`%le_quad32_to_bytes) le_quad32_to_bytes;
   let helper (b b':quad32) : Lemma (le_quad32_to_bytes b == le_quad32_to_bytes b' ==> b == b') =
     if le_quad32_to_bytes b = le_quad32_to_bytes b' then (
       let b1  = seq_map (nat_to_four 8) (four_to_seq_LE b) in
@@ -407,7 +407,7 @@ let le_bytes_to_seq_quad_of_singleton (q:quad32) (b:seq nat8 { length b == 16 })
   (requires q == le_bytes_to_quad32 b)
   (ensures create 1 q == le_bytes_to_seq_quad32 b)
   =
-  reveal_opaque le_bytes_to_seq_quad32_def;
+  FStar.Pervasives.reveal_opaque (`%le_bytes_to_seq_quad32) le_bytes_to_seq_quad32;
   reveal_opaque le_bytes_to_quad32_def;
   seq_to_four_LE_is_seq_to_seq_four_LE (seq_map (four_to_nat 8) (seq_to_seq_four_LE b));
   // q == le_bytes_to_quad32 b
@@ -519,7 +519,7 @@ let seq_nat8_to_seq_nat32_LE (x:seq nat8{length x % 4 == 0}) : seq nat32 =
 let rec append_distributes_le_bytes_to_seq_quad32 (s1:seq nat8 { length s1 % 16 == 0 }) (s2:seq nat8 { length s2 % 16 == 0 }) :
   Lemma(le_bytes_to_seq_quad32 (s1 @| s2) == (le_bytes_to_seq_quad32 s1) @| (le_bytes_to_seq_quad32 s2))
   =
-  reveal_opaque le_bytes_to_seq_quad32_def;
+  FStar.Pervasives.reveal_opaque (`%le_bytes_to_seq_quad32) le_bytes_to_seq_quad32;
   let s1' = seq_nat8_to_seq_nat32_LE s1 in
   let s2' = seq_nat8_to_seq_nat32_LE s2 in
   // (le_bytes_to_seq_quad32 s1) @| (le_bytes_to_seq_quad32 s2))

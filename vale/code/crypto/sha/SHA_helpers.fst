@@ -655,14 +655,14 @@ let lemma_le_bytes_to_seq_quad32_empty (b:seq nat8) : Lemma
   (requires b == empty) 
   (ensures le_bytes_to_seq_quad32 b == empty)
   =
-  reveal_opaque le_bytes_to_seq_quad32_def;
+  FStar.Pervasives.reveal_opaque (`%le_bytes_to_seq_quad32) le_bytes_to_seq_quad32;
   assert (equal (le_bytes_to_seq_quad32 b) empty)
 
 let lemma_le_bytes_to_seq_quad32_length (b:seq nat8) : Lemma 
   (requires length b % 16 == 0)
   (ensures length (le_bytes_to_seq_quad32 b) == length b / 16)
   =
-  reveal_opaque le_bytes_to_seq_quad32_def;
+  FStar.Pervasives.reveal_opaque (`%le_bytes_to_seq_quad32) le_bytes_to_seq_quad32;
   ()
 
 #push-options "--max_fuel 1" // Without this, F* refuses to do even one unfolding of recursive functions :(
