@@ -431,7 +431,11 @@ hacl-verify: $(call only-for,$(HACL_HOME)/code/%.checked)
 # min-test #
 ############
 
-min-test_: $(filter-out obj/X64.Vale.InsSha.%,$(call only-for, $(addprefix $(HACL_HOME)/vale/,\
+min-test_: $(filter-out \
+  obj/X64.Vale.InsSha.% \
+  $(call only-for,$(HACL_HOME)/vale/code/arch/x64/interop/%)\
+  ,\
+  $(call only-for, $(addprefix $(HACL_HOME)/vale/,\
   code/arch/% code/lib/% code/crypto/poly1305/% \
   code/thirdPartyPorts/OpenSSL/poly1305/% specs/%))) \
   obj/Hacl.Hash.MD.fst.checked
