@@ -16,7 +16,6 @@ module F51 = Hacl.Impl.Curve25519.Field51
 module F64 = Hacl.Impl.Curve25519.Field64
 
 module P = Spec.Curve25519
-module S = Hacl.Spec.Curve25519.AddAndDouble
 
 #reset-options "--z3rlimit 150 --max_fuel 0 --using_facts_from '* -FStar.Seq'"
 
@@ -69,7 +68,7 @@ val point_add_and_double0:
     (ensures  fun h0 _ h1 ->
       modifies (loc nq_p1 |+| loc dc |+| loc tmp2) h0 h1 /\
       state_inv_t h1 (get_x nq_p1) /\ state_inv_t h1 (get_z nq_p1) /\
-      fget_xz h1 nq_p1 == S.add (fget_xz h0 q) (fget_xz h0 nq) (fget_xz h0 nq_p1))
+      fget_xz h1 nq_p1 == P.add (fget_xz h0 q) (fget_xz h0 nq) (fget_xz h0 nq_p1))
 let point_add_and_double0 #s q nq nq_p1 ab dc tmp2 =
   let x1 = sub q 0ul (nlimb s) in
   let z1 = sub q (nlimb s) (nlimb s) in

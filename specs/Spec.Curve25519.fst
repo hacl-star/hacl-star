@@ -52,8 +52,8 @@ let add_and_double q nq nqp1 =
   let x_1, z_1 = q in
   let x_2, z_2 = nq in
   let x_3, z_3 = nqp1 in
-  let a  = x_2 +% z_2 in
-  let b  = x_2 -% z_2 in
+  let a = x_2 +% z_2 in
+  let b = x_2 -% z_2 in
   let c = x_3 +% z_3 in
   let d = x_3 -% z_3 in
   let da = d *% a in
@@ -74,8 +74,8 @@ let add_and_double q nq nqp1 =
 
 let double nq =
   let x_2, z_2 = nq in
-  let a  = x_2 +% z_2 in
-  let b  = x_2 -% z_2 in
+  let a = x_2 +% z_2 in
+  let b = x_2 -% z_2 in
   let aa = a *% a in
   let bb = b *% b in
   let e = aa -% bb in
@@ -85,24 +85,45 @@ let double nq =
   let z_2 = e *% aa_e121665 in
   x_2, z_2
 
+let add q nq nqp1 =
+  let x_1, z_1 = q in
+  let x_2, z_2 = nq in
+  let x_3, z_3 = nqp1 in
+  let a = x_2 +% z_2 in
+  let b = x_2 -% z_2 in
+  let c = x_3 +% z_3 in
+  let d = x_3 -% z_3 in
+  let da = d *% a in
+  let cb = c *% b in
+  let x_3 = da +% cb in
+  let z_3 = da -% cb in
+  let x_3 = x_3 *% x_3 in
+  let z_3 = z_3 *% z_3 in
+  let z_3 = z_3 *% x_1 in
+  x_3, z_3
+
 let cswap2 (sw:uint64) (nq:proj_point) (nqp1:proj_point) =
   let open Lib.RawIntTypes in
   if uint_to_nat sw = 1 then (nqp1, nq) else (nq, nqp1)
 
-let ladder_step (k:scalar) (q:proj_point) (i:nat{i < 251}) (nq, nqp1) =
+let ladder_step (k:scalar) (q:proj_point) (i:nat{i < 251}) (nq, nqp1, swap) =
   let bit = ith_bit k (253-i) in
-  let nq, nqp1 = cswap2 bit nq nqp1 in
+  let sw = swap ^. bit in
+  let nq, nqp1 = cswap2 sw nq nqp1 in
   let nq, nqp1 = add_and_double q nq nqp1 in
-  cswap2 bit nq nqp1
+  (nq, nqp1, bit)
 
 let montgomery_ladder (init:elem) (k:scalar) : Tot proj_point =
   let q = (init, one) in
   let nq = (one, zero) in
   let nqp1 = (init, one) in
   // bit 255 is 0 and bit 254 is 1
-  let nqp1,nq = add_and_double q nqp1 nq in
+  let nq,nqp1 = cswap2 (u64 1) nq nqp1 in
+  let nq,nqp1 = add_and_double q nq nqp1 in
+  let swap = u64 1 in
   // bits 253-3 depend on scalar
-  let nq,nqp1 = Lib.LoopCombinators.repeati 251 (ladder_step k q) (nq, nqp1) in
+  let nq,nqp1,swap = Lib.LoopCombinators.repeati 251 (ladder_step k q) (nq, nqp1, swap) in
+  let nq,nqp1 = cswap2 swap nq nqp1 in
   // bits 2-0 are 0
   let nq = double nq in
   let nq = double nq in

@@ -175,7 +175,7 @@ val ladder_step:
      (let nq = gsub p01_tmp1_swap 0ul (2ul *. nlimb s) in
       let nq_p1 = gsub p01_tmp1_swap (2ul *. nlimb s) (2ul *. nlimb s) in
       let bit : lbuffer uint64 1ul = gsub p01_tmp1_swap (8ul *. nlimb s) 1ul in
-      let (p0, p1, b) = M.ladder_step1 (as_seq h0 k) (fget_xz h0 q) (v i)
+      let (p0, p1, b) = S.ladder_step (as_seq h0 k) (fget_xz h0 q) (v i)
 	(fget_xz h0 nq, fget_xz h0 nq_p1, LSeq.index (as_seq h0 bit) 0) in
       p0 == fget_xz h1 nq /\ p1 == fget_xz h1 nq_p1 /\
       b == LSeq.index (as_seq h1 bit) 0 /\
@@ -230,7 +230,7 @@ val ladder_step_loop:
       let bit : lbuffer uint64 1ul = gsub p01_tmp1_swap (8ul *. nlimb s) 1ul in
       let (p0, p1, b) =
 	Lib.LoopCombinators.repeati 251
-	(M.ladder_step1 (as_seq h0 k) (fget_xz h0 q))
+	(S.ladder_step (as_seq h0 k) (fget_xz h0 q))
 	(fget_xz h0 nq, fget_xz h0 nq_p1, LSeq.index (as_seq h0 bit) 0) in
       p0 == fget_xz h1 nq /\ p1 == fget_xz h1 nq_p1 /\ b == LSeq.index (as_seq h1 bit) 0 /\
       state_inv_t h1 (get_x nq) /\ state_inv_t h1 (get_z nq) /\
@@ -240,7 +240,7 @@ let ladder_step_loop #s k q p01_tmp1_swap tmp2 =
 
   [@ inline_let]
   let spec_fh h0 =
-    (M.ladder_step1 (as_seq h0 k) (fget_x h0 q, fget_z h0 q)) in
+    S.ladder_step (as_seq h0 k) (fget_x h0 q, fget_z h0 q) in
 
   [@ inline_let]
   let acc h : GTot (tuple3 S.proj_point S.proj_point uint64) =
