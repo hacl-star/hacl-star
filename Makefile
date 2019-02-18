@@ -23,7 +23,7 @@
 # .vaf files in order to get a full dependency graph for the .fst files. So,
 # this Makefile exposes the following targets to the end user:
 # - all: staged target for the entire build (default)
-# - ci: same as all, without short logs
+# - test: staged
 # - vale-fst: the minimum needed to compile .vaf files to .fst files
 # - vale-verify: properly staged target for re-verifying all the vale files
 # - vale-asm: re-generation of the Vale assemblies in dist/vale
@@ -33,6 +33,11 @@
 #
 # To generate a Makefile for the interactive mode, use:
 # - make foo/bar/Makefile
+#
+# CI targets:
+# - ci: staged, runs all + test, without short logs (this repository's CI)
+# - min-test: staged, runs only a subset of verification for the purposes of
+#   F*'s extended CI
 
 #########################
 # Catching setup errors #
@@ -42,12 +47,12 @@
 # needed anymore, but better be safe.
 ifeq (3.81,$(MAKE_VERSION))
   $(error You seem to be using the OSX antiquated Make version. Hint: brew \
-    install make, then hit invoke gmake instead of make)
+    install make, then invoke gmake instead of make)
 endif
 
 # Better error early.
 ifeq (,$(VALE_HOME))
-  $(error Please define VALE_HOME, possibly using cygpath -m)
+  $(error Please define VALE_HOME, possibly using cygpath -m on Windows)
 endif
 
 ifeq (,$(wildcard $(VALE_HOME)/bin/vale.exe))
@@ -61,7 +66,7 @@ endif
 
 ifeq (,$(NOOPENSSLCHECK))
 ifeq (,$(OPENSSL_HOME))
-  $(error Please define MLCRYPTO_HOME, possibly using cygpath -m)
+  $(error Please define MLCRYPTO_HOME, possibly using cygpath -m on Windows)
 endif
 
 ifeq (,$(OPENSSL_HOME)/libcrypto.a)
@@ -91,14 +96,23 @@ all_: compile-compact compile-generic compile-compact-msvc \
 
 # Any file in code/tests is taken to contain a `main` function.
 # Any file in specs/tests is taken to contain a `test` function.
-test: test-c test-ml
+test:
+	$(MAKE) vale-fst
+	FSTAR_DEPEND_FLAGS="--warn_error +285" $(MAKE) test_
+
+test_: test-c test-ml
 test-c: $(subst .,_,$(patsubst %.fst,test-c-%,$(notdir $(wildcard code/tests/*.fst)))) \
   test-c-Test test-c-merkle_tree_test
 test-ml: $(subst .,_,$(patsubst %.fst,test-ml-%,$(notdir $(wildcard specs/tests/*.fst))))
 
 ci:
 	NOSHORTLOG=1 $(MAKE) vale-fst
-	FSTAR_DEPEND_FLAGS="--warn_error +285" NOSHORTLOG=1 $(MAKE) all_ test
+	FSTAR_DEPEND_FLAGS="--warn_error +285" NOSHORTLOG=1 $(MAKE) all_ test_
+
+min-test:
+	MIN_TEST=1 NOSHORTLOG=1 $(MAKE) vale-fst
+	MIN_TEST=1 FSTAR_DEPEND_FLAGS="--warn_error +285" NOSHORTLOG=1 \
+	  $(MAKE) min-test_
 
 # Backwards-compat target
 .PHONY: secure_api.old
@@ -412,6 +426,22 @@ vale-verify_: \
   $(call only-for,$(HACL_HOME)/vale/%.checked) \
 
 hacl-verify: $(call only-for,$(HACL_HOME)/code/%.checked)
+
+
+############
+# min-test #
+############
+
+ifneq (,$(MIN_TEST))
+min-test_: $(call only-for, $(addprefix $(HACL_HOME)/vale/, \
+  code/arch/% code/lib/% code/crypto/poly1305/% \
+  code/thirdPartyPorts/OpenSSL/poly1305/% specs/%)) \
+  obj/Hacl.Hash.MD.fst.checked
+
+$(call only-for,$(HACL_HOME)/vale/code/arch/x64/interop/%) \
+code/arch/x64/X64.Vale.InsSha.vaf: \
+  FSTAR_FLAGS=--admit_smt_queries true
+endif
 
 
 ###############################################################################
