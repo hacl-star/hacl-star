@@ -29,7 +29,7 @@ val uint_from_le: #t:inttype{~(U128? t)} -> #l:secrecy_level -> uint_t t l -> ui
 
 (** Constructs the equality mask for two buffers of secret integers in constant-time *)
 inline_for_extraction noextract
-val eq_mask:
+val buf_eq_mask:
     #t:inttype{~(U1? t)}
   -> #len1:size_t
   -> #len2:size_t
@@ -43,7 +43,7 @@ val eq_mask:
       v (bget h res 0) == v (ones t SEC))
     (ensures fun h0 z h1 ->
       modifies1 res h0 h1 /\
-      v z == v (BS.eq_mask (as_seq h0 b1) (as_seq h0 b2) (v len)))
+      v z == v (BS.seq_eq_mask (as_seq h0 b1) (as_seq h0 b2) (v len)))
 
 (** Compares two buffers of secret bytes of equal length in constant-time,
     declassifying the result *)

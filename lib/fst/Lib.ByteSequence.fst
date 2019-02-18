@@ -28,7 +28,7 @@ let lemma_not_equal_last #a b1 b2 i j =
   Seq.lemma_index_slice b1 i j (j - i - 1);
   Seq.lemma_index_slice b2 i j (j - i - 1)
 
-val eq_mask_inner: #t:inttype{~(U1? t)} -> #len1:size_nat -> #len2:size_nat
+val seq_eq_mask_inner: #t:inttype{~(U1? t)} -> #len1:size_nat -> #len2:size_nat
   -> b1:lseq (uint_t t SEC) len1
   -> b2:lseq (uint_t t SEC) len2
   -> len:size_nat{len <= len1 /\ len <= len2}
@@ -39,7 +39,7 @@ val eq_mask_inner: #t:inttype{~(U1? t)} -> #len1:size_nat -> #len2:size_nat
   -> res':uint_t t SEC{
       (sub b1 0 (i + 1) == sub b2 0 (i + 1)  ==> v res' == v (ones t SEC)) /\
       (sub b1 0 (i + 1) =!= sub b2 0 (i + 1) ==> v res' == v (zeroes t SEC))}
-let eq_mask_inner #t #len1 #len2 b1 b2 len i res =
+let seq_eq_mask_inner #t #len1 #len2 b1 b2 len i res =
   UInt.logand_lemma_1 #(8 * numbytes t) (maxint t);
   UInt.logand_lemma_2 #(8 * numbytes t) (maxint t);
   UInt.logand_lemma_1 #(8 * numbytes t) 0;
@@ -62,16 +62,16 @@ let eq_mask_inner #t #len1 #len2 b1 b2 len i res =
     lemma_not_equal_last b1 b2 0 (i + 1);
   res
 
-let eq_mask #t #len1 #len2 b1 b2 len =
+let seq_eq_mask #t #len1 #len2 b1 b2 len =
   repeati_inductive len
     (fun (i:nat{i <= len}) res ->
       (sub b1 0 i == sub b2 0 i  ==> v res == v (ones t SEC)) /\
       (sub b1 0 i =!= sub b2 0 i ==> v res == v (zeroes t SEC)))
-    (eq_mask_inner b1 b2 len)
+    (seq_eq_mask_inner b1 b2 len)
     (ones t SEC)
 
 let lbytes_eq #len b1 b2 =
-  let res = eq_mask b1 b2 len in
+  let res = seq_eq_mask b1 b2 len in
   RawIntTypes.u8_to_UInt8 res = 255uy
 
 /// END constant-time sequence equality

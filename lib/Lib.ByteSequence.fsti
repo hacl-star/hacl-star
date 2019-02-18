@@ -19,7 +19,7 @@ unfold inline_for_extraction let pub_bytes = bytes_l PUB
 unfold inline_for_extraction let pub_lbytes (len:size_nat) = lbytes_l PUB len
 
 (** Construct the equality mask for a pair of secret integer sequences *)
-val eq_mask: #t:inttype{~(U1? t)} -> #len1:size_nat -> #len2:size_nat
+val seq_eq_mask: #t:inttype{~(U1? t)} -> #len1:size_nat -> #len2:size_nat
   -> b1:lseq (uint_t t SEC) len1
   -> b2:lseq (uint_t t SEC) len2
   -> len:size_nat{len <= len1 /\ len <= len2}

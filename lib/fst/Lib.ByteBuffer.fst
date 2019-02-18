@@ -78,24 +78,24 @@ let uint_from_le #t #l u =
   | U64, PUB -> C.Endianness.le64toh u
   | U64, SEC -> Raw.u64_from_UInt64 (C.Endianness.le64toh (Raw.u64_to_UInt64 u))
 
-let rec eq_mask #t #len1 #len2 b1 b2 len res =
+let buf_eq_mask #t #len1 #len2 b1 b2 len res =
   let h0 = ST.get() in
   let inv h (i:nat{i <= v len}) =
     modifies1 res h0 h /\
-    v (bget h res 0) == v (BS.eq_mask (as_seq h0 b1) (as_seq h0 b2) i)
+    v (bget h res 0) == v (BS.seq_eq_mask (as_seq h0 b1) (as_seq h0 b2) i)
   in
   Lib.Loops.for 0ul len inv
     (fun i ->
       let z0 = res.(0ul) in
       res.(0ul) <- IntTypes.eq_mask b1.(i) b2.(i) &. res.(0ul);
       let z = res.(0ul) in
-      assert (z == BS.eq_mask_inner (as_seq h0 b1) (as_seq h0 b2) (v len) (v i) z0));
+      assert (z == BS.seq_eq_mask_inner (as_seq h0 b1) (as_seq h0 b2) (v len) (v i) z0));
   res.(0ul)
 
 let lbytes_eq #len b1 b2 =
   push_frame();
   let res = create 1ul (u8 255) in
-  let z = eq_mask b1 b2 len res in
+  let z = buf_eq_mask b1 b2 len res in
   pop_frame();
   Raw.u8_to_UInt8 z = 255uy
 
