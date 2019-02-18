@@ -9,6 +9,8 @@ open Lib.LoopCombinators
 
 #reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 1"
 
+/// BEGIN constant-time sequence equality
+
 val lemma_not_equal_slice: #a:Type -> b1:Seq.seq a -> b2:Seq.seq a -> i:nat -> j:nat ->
   k:nat{i <= j /\ i <= k /\ j <= k /\ k <= Seq.length b1 /\ k <= Seq.length b2 } ->
   Lemma
@@ -26,32 +28,33 @@ let lemma_not_equal_last #a b1 b2 i j =
   Seq.lemma_index_slice b1 i j (j - i - 1);
   Seq.lemma_index_slice b2 i j (j - i - 1)
 
-val cmp_bytes_inner: #len1:size_nat -> #len2:size_nat 
-  -> b1:lbytes len1 
-  -> b2:lbytes len2 
+val eq_mask_inner: #t:inttype{~(U1? t)} -> #len1:size_nat -> #len2:size_nat
+  -> b1:lseq (uint_t t SEC) len1
+  -> b2:lseq (uint_t t SEC) len2
   -> len:size_nat{len <= len1 /\ len <= len2}
   -> i:size_nat{i < len}
-  -> res:uint8{(sub b1 0 i == sub b2 0 i  ==> v res == 255) /\ 
-              (sub b1 0 i =!= sub b2 0 i ==> v res == 0)}
-  -> res':uint8{(sub b1 0 (i + 1) == sub b2 0 (i + 1)  ==> v res' == 255) /\ 
-               (sub b1 0 (i + 1) =!= sub b2 0 (i + 1) ==> v res' == 0)}
-let cmp_bytes_inner #len1 #len2 b1 b2 len i res =
-  UInt.logand_lemma_1 #8 255;
-  UInt.logand_lemma_2 #8 255;
-  UInt.logand_lemma_1 #8 0;
-  UInt.logand_lemma_2 #8 0;
+  -> res:uint_t t SEC{
+      (sub b1 0 i == sub b2 0 i  ==> v res == v (ones t SEC)) /\
+      (sub b1 0 i =!= sub b2 0 i ==> v res == v (zeroes t SEC))}
+  -> res':uint_t t SEC{
+      (sub b1 0 (i + 1) == sub b2 0 (i + 1)  ==> v res' == v (ones t SEC)) /\
+      (sub b1 0 (i + 1) =!= sub b2 0 (i + 1) ==> v res' == v (zeroes t SEC))}
+let eq_mask_inner #t #len1 #len2 b1 b2 len i res =
+  UInt.logand_lemma_1 #(8 * numbytes t) (maxint t);
+  UInt.logand_lemma_2 #(8 * numbytes t) (maxint t);
+  UInt.logand_lemma_1 #(8 * numbytes t) 0;
+  UInt.logand_lemma_2 #(8 * numbytes t) 0;
   let z0 = res in
   let res = eq_mask b1.[i] b2.[i] &. z0 in
-  // TODO: This should be known from Lib.IntTypes.fsti
-  assume (v res == v (eq_mask b1.[i] b2.[i]) `UInt.logand #8` v z0);
-  if v res = 255 then 
+  logand_spec (eq_mask b1.[i] b2.[i]) z0;
+  if v res = maxint t then
     begin
     let s1 = sub b1 0 (i + 1) in
     let s2 = sub b2 0 (i + 1) in
-    FStar.Seq.lemma_split s1 i;
-    FStar.Seq.lemma_split s2 i;
+    Seq.lemma_split s1 i;
+    Seq.lemma_split s2 i;
     uintv_extensionality b1.[i] b2.[i];
-    Seq.lemma_eq_intro s1 s2
+    assert (equal s1 s2)
     end
   else if v z0 = 0 then
     lemma_not_equal_slice b1 b2 0 i (i + 1)
@@ -59,24 +62,19 @@ let cmp_bytes_inner #len1 #len2 b1 b2 len i res =
     lemma_not_equal_last b1 b2 0 (i + 1);
   res
 
-val cmp_bytes: #len1:size_nat -> #len2:size_nat 
-  -> b1:lbytes len1 
-  -> b2:lbytes len2 
-  -> len:size_nat{len <= len1 /\ len <= len2}
-  -> res:uint8{(sub b1 0 len == sub b2 0 len  ==> v res == 255) /\ 
-              (sub b1 0 len =!= sub b2 0 len ==> v res == 0)}
-let cmp_bytes #len1 #len2 b1 b2 len =
-  repeati_inductive len 
+let eq_mask #t #len1 #len2 b1 b2 len =
+  repeati_inductive len
     (fun (i:nat{i <= len}) res ->
-      (sub b1 0 i == sub b2 0 i  ==> v res == 255) /\ 
-      (sub b1 0 i =!= sub b2 0 i ==> v res == 0))
-    (cmp_bytes_inner b1 b2 len)
-    (u8 255)
+      (sub b1 0 i == sub b2 0 i  ==> v res == v (ones t SEC)) /\
+      (sub b1 0 i =!= sub b2 0 i ==> v res == v (zeroes t SEC)))
+    (eq_mask_inner b1 b2 len)
+    (ones t SEC)
 
 let lbytes_eq #len b1 b2 =
-  let res = cmp_bytes b1 b2 len in
+  let res = eq_mask b1 b2 len in
   RawIntTypes.u8_to_UInt8 res = 255uy
 
+/// END constant-time sequence equality
 
 val nat_from_intseq_be_:
     #t:inttype -> #l:secrecy_level
@@ -115,6 +113,8 @@ let rec nat_from_intseq_le_ #t #l b =
 let nat_from_intseq_le = nat_from_intseq_le_
 let nat_from_bytes_be = nat_from_intseq_be #U8
 let nat_from_bytes_le = nat_from_intseq_le #U8
+
+#set-options "--max_fuel 1"
 
 val nat_to_bytes_be_:
     #l:secrecy_level
@@ -190,22 +190,38 @@ let uint_from_bytes_be #t #l b =
   let n = nat_from_intseq_be #U8 b in
   nat_to_uint #t #l n
 
+val uints_to_bytes_le_inner: #t:inttype -> #l:secrecy_level
+  -> #len:size_nat{len * numbytes t < pow2 32}
+  -> lseq (uint_t t l) len
+  -> i:nat{i < len} -> unit -> unit & (lseq (uint_t U8 l) (numbytes t))
+let uints_to_bytes_le_inner #t #l #len b i () =
+  let open Lib.Sequence in
+  (), uint_to_bytes_le #t #l b.[i]
+
 let uints_to_bytes_le #t #l #len ul =
-  let b = create (len * numbytes t) (uint #U8 #l 0) in
-  repeati len
-    (fun i b -> update_sub b (i * numbytes t) (numbytes t) (uint_to_bytes_le #t #l ul.[i])) b
+  let a_spec (i:size_nat{i <= len}) = unit in
+  let _, o = generate_blocks (numbytes t) len a_spec
+    (uints_to_bytes_le_inner #t #l #len ul) () in
+  o
+
+val uints_to_bytes_be_inner: #t:inttype -> #l:secrecy_level
+  -> #len:size_nat{len * numbytes t < pow2 32}
+  -> lseq (uint_t t l) len
+  -> i:nat{i < len} -> unit -> unit & (lseq (uint_t U8 l) (numbytes t))
+let uints_to_bytes_be_inner #t #l #len b i () =
+  let open Lib.Sequence in
+  (), uint_to_bytes_be #t #l b.[i]
 
 let uints_to_bytes_be #t #l #len ul =
-  let b = create (len * numbytes t) (uint #U8 #l 0) in
-  repeati len
-    (fun i b -> update_sub b (i * numbytes t) (numbytes t) (uint_to_bytes_be ul.[i])) b
+  let a_spec (i:size_nat{i <= len}) = unit in
+  let _, o = generate_blocks (numbytes t) len a_spec
+    (uints_to_bytes_be_inner #t #l #len ul) () in
+  o
 
 let uints_from_bytes_le #t #l #len b =
-  let l = create #(uint_t t l) len (nat_to_uint 0) in
-  repeati len
-    (fun i l -> l.[i] <- uint_from_bytes_le (sub b (i * numbytes t) (numbytes t))) l
+  Lib.Sequence.createi #(uint_t t l) len
+    (fun i -> uint_from_bytes_le (sub b (i * numbytes t) (numbytes t)))
 
 let uints_from_bytes_be #t #l #len b =
-  let l = create #(uint_t t l) len (nat_to_uint 0) in
-  repeati len
-    (fun i l -> l.[i] <- uint_from_bytes_be (sub b (i * numbytes t) (numbytes t))) l
+  Lib.Sequence.createi #(uint_t t l) len
+    (fun i -> uint_from_bytes_be (sub b (i * numbytes t) (numbytes t)))

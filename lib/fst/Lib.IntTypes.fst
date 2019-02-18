@@ -1,7 +1,7 @@
 module Lib.IntTypes
 
 (* Declared in .fsti : intsize, bits, maxint *)
-#set-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
+#set-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 1"
 
 let pow2_values n =
     assert_norm (pow2 0 = 1);
@@ -64,8 +64,6 @@ let nat_to_uint #t #l x =
   | U64 -> u64 x
   | U128 -> UInt128.uint_to_t x
 
-#reset-options "--z3rlimit 1000 --max_fuel 0"
-#set-options "--lax" // TODO: remove this
 let cast #t #l t' l' u  =
   match t, t' with
   | U1, U1 -> u
@@ -74,38 +72,60 @@ let cast #t #l t' l' u  =
   | U1, U32 -> FStar.Int.Cast.uint8_to_uint32 u
   | U1, U64 -> FStar.Int.Cast.uint8_to_uint64 u
   | U1, U128 -> FStar.UInt128.uint64_to_uint128 (FStar.Int.Cast.uint8_to_uint64 u)
-  | U8, U1 -> FStar.UInt8.logand u (0x1uy)
+  | U8, U1 -> FStar.UInt8.rem u 2uy
   | U8, U8 -> u
   | U8, U16 -> FStar.Int.Cast.uint8_to_uint16 u
   | U8, U32 -> FStar.Int.Cast.uint8_to_uint32 u
   | U8, U64 -> FStar.Int.Cast.uint8_to_uint64 u
   | U8, U128 -> FStar.UInt128.uint64_to_uint128 (FStar.Int.Cast.uint8_to_uint64 u)
-  | U16, U1 -> FStar.UInt8.logand (FStar.Int.Cast.uint16_to_uint8 u) (0x1uy)
+  | U16, U1 -> FStar.Int.Cast.uint16_to_uint8 (FStar.UInt16.rem u 2us)
   | U16, U8 -> FStar.Int.Cast.uint16_to_uint8 u
   | U16, U16 -> u
   | U16, U32 -> FStar.Int.Cast.uint16_to_uint32 u
   | U16, U64 -> FStar.Int.Cast.uint16_to_uint64 u
   | U16, U128 -> FStar.UInt128.uint64_to_uint128 (FStar.Int.Cast.uint16_to_uint64 u)
-  | U32, U1 -> FStar.UInt8.logand (FStar.Int.Cast.uint32_to_uint8 u) (0x1uy)
+  | U32, U1 -> FStar.Int.Cast.uint32_to_uint8 (FStar.UInt32.rem u 2ul)
   | U32, U8 -> FStar.Int.Cast.uint32_to_uint8 u
   | U32, U16 -> FStar.Int.Cast.uint32_to_uint16 u
   | U32, U32 -> u
   | U32, U64 -> FStar.Int.Cast.uint32_to_uint64 u
   | U32, U128 -> FStar.UInt128.uint64_to_uint128 (FStar.Int.Cast.uint32_to_uint64 u)
-  | U64, U1 -> FStar.UInt8.logand (FStar.Int.Cast.uint64_to_uint8 u) (0x1uy)
+  | U64, U1 -> FStar.Int.Cast.uint64_to_uint8 (FStar.UInt64.rem u 2uL)
   | U64, U8 -> FStar.Int.Cast.uint64_to_uint8 u
   | U64, U16 -> FStar.Int.Cast.uint64_to_uint16 u
   | U64, U32 -> FStar.Int.Cast.uint64_to_uint32 u
   | U64, U64 -> u
   | U64, U128 -> FStar.UInt128.uint64_to_uint128 u
-  | U128, U1 -> FStar.UInt8.logand (FStar.Int.Cast.uint64_to_uint8 (FStar.UInt128.uint128_to_uint64 u)) (0x1uy)
-  | U128, U8 -> FStar.Int.Cast.uint64_to_uint8 (FStar.UInt128.uint128_to_uint64 u)
-  | U128, U16 -> FStar.Int.Cast.uint64_to_uint16 (FStar.UInt128.uint128_to_uint64 u)
-  | U128, U32 -> FStar.Int.Cast.uint64_to_uint32 (FStar.UInt128.uint128_to_uint64 u)
-  | U128, U64 -> FStar.UInt128.uint128_to_uint64 u
+  | U128, U1 ->
+    assert_norm (pow2 64 * pow2 64 = pow2 128);
+    assert_norm (pow2 8 * pow2 56 = pow2 64);
+    FStar.Math.Lemmas.modulo_modulo_lemma (uint_v u) (pow2 64) (pow2 64);
+    FStar.Math.Lemmas.modulo_modulo_lemma (uint_v u) (pow2 8) (pow2 56);
+    FStar.UInt8.rem (FStar.Int.Cast.uint64_to_uint8
+      (FStar.Int.Cast.Full.uint128_to_uint64 u)) 0x2uy
+  | U128, U8 ->
+    assert_norm (pow2 64 * pow2 64 = pow2 128);
+    assert_norm (pow2 8 * pow2 56 = pow2 64);
+    FStar.Math.Lemmas.modulo_modulo_lemma (uint_v u) (pow2 64) (pow2 64);
+    FStar.Math.Lemmas.modulo_modulo_lemma (uint_v u) (pow2 8) (pow2 56);
+    FStar.Int.Cast.uint64_to_uint8 (FStar.UInt128.uint128_to_uint64 u)
+  | U128, U16 ->
+    assert_norm (pow2 64 * pow2 64 = pow2 128);
+    assert_norm (pow2 16 * pow2 48 = pow2 64);
+    FStar.Math.Lemmas.modulo_modulo_lemma (uint_v u) (pow2 64) (pow2 64);
+    FStar.Math.Lemmas.modulo_modulo_lemma (uint_v u) (pow2 16) (pow2 48);
+    FStar.Int.Cast.uint64_to_uint16 (FStar.UInt128.uint128_to_uint64 u)
+  | U128, U32 ->
+    assert_norm (pow2 64 * pow2 64 = pow2 128);
+    assert_norm (pow2 32 * pow2 32 = pow2 64);
+    FStar.Math.Lemmas.modulo_modulo_lemma (uint_v u) (pow2 64) (pow2 64);
+    FStar.Math.Lemmas.modulo_modulo_lemma (uint_v u) (pow2 32) (pow2 32);
+    FStar.Int.Cast.uint64_to_uint32 (FStar.UInt128.uint128_to_uint64 u)
+  | U128, U64 ->
+    assert_norm (pow2 64 * pow2 64 = pow2 128);
+    FStar.Math.Lemmas.modulo_modulo_lemma (uint_v u) (pow2 64) (pow2 64);
+    FStar.UInt128.uint128_to_uint64 u
   | U128, U128 -> u
-
-#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
 
 let add_mod #t #l a b =
   match t with
@@ -115,7 +135,7 @@ let add_mod #t #l a b =
   | U32  -> UInt32.add_mod a b
   | U64  -> UInt64.add_mod a b
   | U128 -> UInt128.add_mod a b
-  
+
 let add_mod_lemma #t #l a b = ()
 
 let add #t #l a b =
@@ -177,7 +197,7 @@ let sub_mod_lemma #t #l a b = ()
 
 let sub #t #l a b =
   match t with
-  | U1   -> UInt8.sub a b 
+  | U1   -> UInt8.sub a b
   | U8   -> UInt8.sub a b
   | U16  -> UInt16.sub a b
   | U32  -> UInt32.sub a b
@@ -199,7 +219,12 @@ let decr_lemma #t #l a = ()
 
 let logxor #t #l a b =
   match t with
-  | U1   -> UInt8.logxor a b 
+  | U1   ->
+    assert_norm (UInt8.logxor 0uy 0uy == 0uy);
+    assert_norm (UInt8.logxor 0uy 1uy == 1uy);
+    assert_norm (UInt8.logxor 1uy 0uy == 1uy);
+    assert_norm (UInt8.logxor 1uy 1uy == 0uy);
+    UInt8.logxor a b
   | U8   -> UInt8.logxor a b
   | U16  -> UInt16.logxor a b
   | U32  -> UInt32.logxor a b
@@ -208,16 +233,28 @@ let logxor #t #l a b =
 
 let logand #t #l a b =
   match t with
-  | U1   -> UInt8.logand a b
+  | U1   ->
+    assert_norm (UInt8.logand 0uy 0uy == 0uy);
+    assert_norm (UInt8.logand 0uy 1uy == 0uy);
+    assert_norm (UInt8.logand 1uy 0uy == 0uy);
+    assert_norm (UInt8.logand 1uy 1uy == 1uy);
+    UInt8.logand a b
   | U8   -> UInt8.logand a b
   | U16  -> UInt16.logand a b
   | U32  -> UInt32.logand a b
   | U64  -> UInt64.logand a b
   | U128 -> UInt128.logand a b
 
+let logand_spec #t #l a b = ()
+
 let logor #t #l a b =
   match t with
-  | U1   -> UInt8.logor a b
+  | U1   ->
+    assert_norm (UInt8.logor 0uy 0uy == 0uy);
+    assert_norm (UInt8.logor 0uy 1uy == 1uy);
+    assert_norm (UInt8.logor 1uy 0uy == 1uy);
+    assert_norm (UInt8.logor 1uy 1uy == 1uy);
+    UInt8.logor a b
   | U8   -> UInt8.logor a b
   | U16  -> UInt16.logor a b
   | U32  -> UInt32.logor a b
