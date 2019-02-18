@@ -13,14 +13,13 @@ include Hacl.Impl.Curve25519.Finv
 include Hacl.Impl.Curve25519.AddAndDouble
 
 module ST = FStar.HyperStack.ST
+module BSeq = Lib.ByteSequence
+module LSeq = Lib.Sequence
 
-module F26 = Hacl.Impl.Curve25519.Field26
 module F51 = Hacl.Impl.Curve25519.Field51
 module F64 = Hacl.Impl.Curve25519.Field64
 
 module S = Spec.Curve25519
-module BSeq = Lib.ByteSequence
-module LSeq = Lib.Sequence
 module M = Hacl.Spec.Curve25519.AddAndDouble
 
 friend Lib.LoopCombinators
@@ -72,8 +71,6 @@ let decode_point_ #s o i =
 
 (* WRAPPER to Prevent Inlining *)
 inline_for_extraction
-let decode_point_26 (o:point26) i = decode_point_ #M26 o i
-inline_for_extraction
 let decode_point_51 (o:point51) i = decode_point_ #M51 o i
 inline_for_extraction
 let decode_point_64 (o:point64) i = decode_point_ #M64 o i
@@ -90,7 +87,6 @@ val decode_point:
       fget_x h1 o == S.decodePoint (as_seq h0 i) /\ fget_z h1 o == 1)
 let decode_point #s o i =
   match s with
-  | M26 -> decode_point_26 o i
   | M51 -> decode_point_51 o i
   | M64 -> decode_point_64 o i
 (* WRAPPER to Prevent Inlining *)
@@ -134,8 +130,6 @@ let encode_point_ #s o i =
 
 (* WRAPPER to Prevent Inlining *)
 inline_for_extraction
-let encode_point_26 o (i:point26) = encode_point_ #M26 o i
-inline_for_extraction
 let encode_point_51 o (i:point51) = encode_point_ #M51 o i
 inline_for_extraction
 let encode_point_64 o (i:point64) = encode_point_ #M64 o i
@@ -153,7 +147,6 @@ val encode_point:
       as_seq h1 o == S.encodePoint (fget_x h0 i, fget_z h0 i))
 let encode_point #s o i =
   match s with
-  | M26 -> encode_point_26 o i
   | M51 -> encode_point_51 o i
   | M64 -> encode_point_64 o i
 (* WRAPPER to Prevent Inlining *)
@@ -316,8 +309,6 @@ let ladder0_ #s k q p01_tmp1_swap tmp2 =
   //Got about 1K speedup by removing 4 iterations here.
   //First iteration can be skipped because top bit of scalar is 0
   ladder_step_loop #s k q p01_tmp1_swap tmp2;
-  //let h = ST.get () in
-  //assume (v (LSeq.index (as_seq h swap) 0) <= 1);
   let h0 = ST.get () in
   let sw = swap.(0ul) in
   assume (v sw <= 1);
@@ -384,8 +375,6 @@ let ladder2_ #s k q p01_tmp1_swap tmp2 =
   ladder0_ #s k q p01_tmp1_swap tmp2;
   ladder1_ #s p01_tmp1 tmp2
 
-//#set-options "--max_fuel 0 --z3rlimit 50"
-
 inline_for_extraction
 val ladder3_:
     #s:field_spec
@@ -429,7 +418,7 @@ let ladder3_ #s q p01 =
 
 inline_for_extraction
 val ladder4_:
-    #s:field_spec{s == M51 \/ s == M64}
+    #s:field_spec
   -> k:scalar
   -> q:point s
   -> p01_tmp1_swap:lbuffer (limb s) (8ul *! nlimb s +! 1ul)
@@ -461,7 +450,7 @@ let ladder4_ #s k q p01_tmp1_swap tmp2 =
 
 inline_for_extraction
 val montgomery_ladder_:
-    #s:field_spec{s == M51 \/ s == M64}
+    #s:field_spec
   -> o:point s
   -> k:scalar
   -> i:point s
@@ -488,8 +477,6 @@ let montgomery_ladder_ #s out key init =
 
 (* WRAPPER to Prevent Inlining *)
 [@CInline]
-let montgomery_ladder_26 (out:point26) key (init:point26) = montgomery_ladder_ #M26 out key init
-[@CInline]
 let montgomery_ladder_51 (out:point51) key (init:point51) = montgomery_ladder_ #M51 out key init
 [@CInline]
 let montgomery_ladder_64 (out:point64) key (init:point64) = montgomery_ladder_ #M64 out key init
@@ -511,7 +498,6 @@ val montgomery_ladder:
       fget_xz h1 o == S.montgomery_ladder (fget_x h0 i) (as_seq h0 k))
 let montgomery_ladder #s out key init =
   match s with
-  | M26 -> admit(); montgomery_ladder_26 out key init
   | M51 -> montgomery_ladder_51 out key init
   | M64 -> montgomery_ladder_64 out key init
 (* WRAPPER to Prevent Inlining *)

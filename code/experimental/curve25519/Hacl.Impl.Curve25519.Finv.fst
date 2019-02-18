@@ -12,7 +12,6 @@ open Hacl.Impl.Curve25519.Fields
 
 module ST = FStar.HyperStack.ST
 
-module F26 = Hacl.Impl.Curve25519.Field26
 module F51 = Hacl.Impl.Curve25519.Field51
 module F64 = Hacl.Impl.Curve25519.Field64
 
@@ -25,7 +24,6 @@ noextract
 val fsquare_times_inv: #s:field_spec -> h:mem -> f:felem s -> Type0
 let fsquare_times_inv #s h f =
   match s with
-  | M26 -> True
   | M51 -> F51.felem_fits h f (1, 2, 1, 1, 1)
   | M64 -> True
 
@@ -45,7 +43,6 @@ val fsqr_s:
       feval h1 out == P.fmul (feval h0 f1) (feval h0 f1))
 let fsqr_s #s out f1 tmp =
   match s with
-  | M26 -> admit(); F26.fsqr out f1
   | M51 -> F51.fsqr out f1
   | M64 -> F64.fsqr out f1 tmp
 
@@ -53,7 +50,6 @@ noextract
 val fmuls_pre: #s:field_spec -> h:mem -> f1:felem s -> f2:felem s -> Type0
 let fmuls_pre #s h f1 f2 =
   match s with
-  | M26 -> True
   | M51 -> F51.felem_fits h f1 (1, 2, 1, 1, 1) /\ F51.felem_fits h f2 (1, 2, 1, 1, 1)
   | M64 -> True
 
@@ -73,7 +69,6 @@ val fmul_s:
       feval h1 out == P.fmul (feval h0 f1) (feval h0 f2))
 let fmul_s #s out f1 f2 tmp =
   match s with
-  | M26 -> admit(); F26.fmul out f1 f2
   | M51 -> F51.fmul out f1 f2
   | M64 -> F64.fmul out f1 f2 tmp
 
@@ -114,8 +109,6 @@ let fsquare_times_ #s o inp tmp n =
 
 (* WRAPPER to Prevent Inlining *)
 [@CInline]
-let fsquare_times_26 (o:F26.felem) (i:F26.felem) (tmp:felem_wide2 M26) (n:size_t{v n > 0}) = fsquare_times_ #M26 o i tmp n
-[@CInline]
 let fsquare_times_51 (o:F51.felem) (i:F51.felem) (tmp:felem_wide2 M51) (n:size_t{v n > 0}) = fsquare_times_ #M51 o i tmp n
 [@CInline]
 let fsquare_times_64 (o:F64.felem) (i:F64.felem) (tmp:felem_wide2 M64) (n:size_t{v n > 0}) = fsquare_times_ #M64 o i tmp n
@@ -137,7 +130,6 @@ val fsquare_times:
       feval h1 o == S.pow (feval #s h0 i) (pow2 (v n)))
 let fsquare_times #s o i tmp n =
   match s with
-  | M26 -> fsquare_times_26 o i tmp n
   | M51 -> fsquare_times_51 o i tmp n
   | M64 -> fsquare_times_64 o i tmp n
 (* WRAPPER to Prevent Inlining *)
@@ -169,10 +161,6 @@ let finv0 #s i t1 tmp =
   let b : felem s = sub t1 (nlimb s) (nlimb s) in
   let c : felem s = sub t1 (2ul *! nlimb s) (nlimb s) in
   let t0 : felem s = sub t1 (3ul *! nlimb s) (nlimb s) in
-  //assert (
-  //disjoint i a /\ disjoint i b /\ disjoint i c /\ disjoint i t0 /\
-  //disjoint a b /\ disjoint a c /\ disjoint a t0 /\
-  //disjoint b c /\ disjoint b t0 /\ disjoint c t0);
   (* 2 *) fsquare_times #s a i tmp 1ul;
   (* 8 *) fsquare_times #s t0 a tmp 2ul;
   (* 9 *) fmul_s #s b t0 i tmp;
@@ -232,8 +220,6 @@ let finv_ #s o i tmp =
 
 (* WRAPPER to Prevent Inlining *)
 [@CInline]
-let finv_26 (o:F26.felem) (i:F26.felem) (tmp:felem_wide2 M26) = finv_ #M26 o i tmp
-[@CInline]
 let finv_51 (o:F51.felem) (i:F51.felem) (tmp:felem_wide2 M51) = finv_ #M51 o i tmp
 [@CInline]
 let finv_64 (o:F64.felem) (i:F64.felem) (tmp:felem_wide2 M64) = finv_ #M64 o i tmp
@@ -254,7 +240,6 @@ val finv:
       feval h1 o == S.pow (feval #s h0 i) (pow2 255 - 21))
 let finv #s o i tmp =
   match s with
-  | M26 -> finv_26 o i tmp
   | M51 -> finv_51 o i tmp
   | M64 -> finv_64 o i tmp
  (* WRAPPER to Prevent Inlining *)
