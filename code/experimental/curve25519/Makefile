@@ -35,54 +35,54 @@ curve51-c/out.krml: $(CURVE25519_FILES) Hacl.Curve25519_51.fst
 
 curve51-c/Hacl_Curve25519_51.c: curve51-c/out.krml
 	 $(KREMLIN) $(KREMLIN_ARGS) -tmpdir curve51-c  $^ -skip-compilation \
-	   -minimal -add-include '"kremlib.h"' -bundle 'Hacl.Curve25519_51=*'
+	   -minimal -add-include '"kremlib.h"' -add-include '"FStar_UInt_8_16_32_64.h"' -bundle 'Hacl.Curve25519_51=*'
 
 curve26-c/out.krml: $(CURVE25519_FILES) Hacl.Curve25519_26.fst
 	 $(KREMLIN) $(KREMLIN_ARGS) -tmpdir curve26-c $(CURVE25519_FILES) Hacl.Curve25519_26.fst -skip-translation 
 
 curve26-c/Hacl_Curve25519_26.c: curve26-c/out.krml
 	 $(KREMLIN) $(KREMLIN_ARGS) -tmpdir curve26-c  $^ -skip-compilation \
-	   -minimal -add-include '"kremlib.h"' -bundle 'Hacl.Curve25519_26=*'
+	   -minimal -add-include '"kremlib.h"' -add-include '"FStar_UInt_8_16_32_64.h"' -bundle 'Hacl.Curve25519_26=*'
 
 curve64-c/out.krml: $(CURVE25519_FILES) Hacl.Curve25519_64.fst
 	 $(KREMLIN) $(KREMLIN_ARGS) -tmpdir curve64-c $(CURVE25519_FILES) Hacl.Curve25519_64.fst -drop Hacl.Impl.Curve25519.Field64.Core -no-prefix  Hacl.Impl.Curve25519.Field64.Core -skip-translation 
 
 curve64-c/Hacl_Curve25519_64.c: curve64-c/out.krml
 	 $(KREMLIN) $(KREMLIN_ARGS) -tmpdir curve64-c  $^ -skip-compilation \
-	   -minimal -add-include '"kremlib.h"' -bundle 'Hacl.Curve25519_64=*' -drop Hacl.Impl.Curve25519.Field64.Core -no-prefix  Hacl.Impl.Curve25519.Field64.Core -add-include '"vale_25519.h"'
+	   -minimal -add-include '"kremlib.h"' -add-include '"FStar_UInt_8_16_32_64.h"' -bundle 'Hacl.Curve25519_64=*' -drop Hacl.Impl.Curve25519.Field64.Core -no-prefix  Hacl.Impl.Curve25519.Field64.Core -add-include '"vale_25519.h"'
 
 curve25519_51.exe: curve51-c/Hacl_Curve25519_51.c
-	$(CC) -march=native -mtune=native -O3 -I $(KREMLIN_HOME)/kremlib/c -I $(KREMLIN_HOME)/include -I . curve51-c/Hacl_Curve25519_51.c $(KREMLIN_HOME)/kremlib/dist/generic/testlib.o curve51-test.c -o curve25519_51.exe
+	$(CC) -march=native -mtune=native -O3 -I $(KREMLIN_HOME)/kremlib/dist/minimal -I $(KREMLIN_HOME)/kremlib/c -I $(KREMLIN_HOME)/include -I . curve51-c/Hacl_Curve25519_51.c $(KREMLIN_HOME)/kremlib/dist/generic/testlib.o $(KREMLIN_HOME)/kremlib/dist/minimal/FStar_UInt_8_16_32_64.o curve51-test.c -o curve25519_51.exe
 	./curve25519_51.exe
 
 curve25519_26.exe: curve26-c/Hacl_Curve25519_26.c
-	$(CC) -march=native -mtune=native -O3 -I $(KREMLIN_HOME)/kremlib/c -I $(KREMLIN_HOME)/include -I . curve26-c/Hacl_Curve25519_26.c $(KREMLIN_HOME)/kremlib/dist/generic/testlib.o curve26-test.c -o curve25519_26.exe
+	$(CC) -march=native -mtune=native -O3  -I $(KREMLIN_HOME)/kremlib/dist/minimal -I $(KREMLIN_HOME)/kremlib/c -I $(KREMLIN_HOME)/include -I . curve26-c/Hacl_Curve25519_26.c $(KREMLIN_HOME)/kremlib/dist/generic/testlib.o $(KREMLIN_HOME)/kremlib/dist/minimal/FStar_UInt_8_16_32_64.o curve26-test.c -o curve25519_26.exe
 	./curve25519_26.exe
 
 
 curve25519_64_vale.exe: curve64-c/Hacl_Curve25519_64.c vale_25519.h vale/obj/curve25519-x86_64-darwin.S
 	$(CC) -march=native -mtune=native -flto -O3 vale/obj/curve25519-x86_64-darwin.S -c -o vale25519.o 
-	$(CC) -march=native -mtune=native -flto -O3 -I $(KREMLIN_HOME)/kremlib/c -I $(KREMLIN_HOME)/include -I . curve64-c/Hacl_Curve25519_64.c $(KREMLIN_HOME)/kremlib/dist/generic/testlib.o curve64-test.c -o curve25519_64_vale.exe vale25519.o 
+	$(CC) -march=native -mtune=native -flto -O3 -I $(KREMLIN_HOME)/kremlib/dist/minimal -I $(KREMLIN_HOME)/kremlib/c -I $(KREMLIN_HOME)/include -I . curve64-c/Hacl_Curve25519_64.c $(KREMLIN_HOME)/kremlib/dist/generic/testlib.o $(KREMLIN_HOME)/kremlib/dist/minimal/FStar_UInt_8_16_32_64.o curve64-test.c -o curve25519_64_vale.exe vale25519.o 
 	./curve25519_64_vale.exe
 
 curve25519_64_v_inline.exe: curve64-c/Hacl_Curve25519_64.c rfc7748_25519.h
 	cp -f vale_25519.h tmp_25519.h
 	cp -f vale-inline.h vale_25519.h
-	$(CC) -march=native -mtune=native -O3 -I $(KREMLIN_HOME)/kremlib/c -I $(KREMLIN_HOME)/include -I . curve64-c/Hacl_Curve25519_64.c $(KREMLIN_HOME)/kremlib/dist/generic/testlib.o curve64-test.c -o curve25519_64_v_inline.exe 
+	$(CC) -march=native -mtune=native -O3 -I $(KREMLIN_HOME)/kremlib/dist/minimal -I $(KREMLIN_HOME)/kremlib/c -I $(KREMLIN_HOME)/include -I . curve64-c/Hacl_Curve25519_64.c $(KREMLIN_HOME)/kremlib/dist/generic/testlib.o $(KREMLIN_HOME)/kremlib/dist/minimal/FStar_UInt_8_16_32_64.o curve64-test.c -o curve25519_64_v_inline.exe 
 	cp -f tmp_25519.h vale_25519.h
 	./curve25519_64_v_inline.exe
 
 curve25519_64_mixed.exe: curve64-c/Hacl_Curve25519_64.c rfc7748_25519.h
 	cp -f vale_25519.h tmp_25519.h
 	cp -f rfc7748_25519.h vale_25519.h
-	$(CC) -march=native -mtune=native -O3 -I $(KREMLIN_HOME)/kremlib/c -I $(KREMLIN_HOME)/include -I . curve64-c/Hacl_Curve25519_64.c $(KREMLIN_HOME)/kremlib/dist/generic/testlib.o curve64-test.c -o curve25519_64_mixed.exe 
+	$(CC) -march=native -mtune=native -O3 -I $(KREMLIN_HOME)/kremlib/dist/minimal -I $(KREMLIN_HOME)/kremlib/c -I $(KREMLIN_HOME)/include -I . curve64-c/Hacl_Curve25519_64.c $(KREMLIN_HOME)/kremlib/dist/generic/testlib.o $(KREMLIN_HOME)/kremlib/dist/minimal/FStar_UInt_8_16_32_64.o curve64-test.c -o curve25519_64_mixed.exe 
 	cp -f tmp_25519.h vale_25519.h
 	./curve25519_64_mixed.exe
 
 curve25519_64_rfc.exe: curve64-c/Hacl_Curve25519_64.c
 	$(CC) -march=native -mtune=native -O3 -I rfc7748_src/ rfc7748_src/fp25519_x64.c -c -o fp25519.o 
 	$(CC) -march=native -mtune=native -O3 -I rfc7748_src/ rfc7748_src/x25519_x64.c -c -o x25519.o 
-	$(CC) -march=native -mtune=native -O3 -I $(KREMLIN_HOME)/kremlib/c -I $(KREMLIN_HOME)/include -I . $(KREMLIN_HOME)/kremlib/dist/generic/testlib.o curve64-rfc-test.c -o curve25519_64_rfc.exe fp25519.o x25519.o
+	$(CC) -march=native -mtune=native -O3 -I $(KREMLIN_HOME)/kremlib/dist/minimal -I $(KREMLIN_HOME)/kremlib/c -I $(KREMLIN_HOME)/include -I . $(KREMLIN_HOME)/kremlib/dist/generic/testlib.o $(KREMLIN_HOME)/kremlib/dist/minimal/FStar_UInt_8_16_32_64.o curve64-rfc-test.c -o curve25519_64_rfc.exe fp25519.o x25519.o
 	./curve25519_64_rfc.exe
 
 curve25519_64.exe: curve25519_64_vale.exe curve25519_64_mixed.exe curve25519_64_rfc.exe

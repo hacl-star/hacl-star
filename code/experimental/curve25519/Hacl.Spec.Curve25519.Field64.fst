@@ -4,7 +4,7 @@ open FStar.Mul
 open Lib.Sequence
 open Lib.IntTypes
 open Spec.Curve25519
-open Hacl.Helpers
+open Lib.Lemmas
 
 open Hacl.Spec.Curve25519.Field64.Definition
 open Hacl.Spec.Curve25519.Field64.Lemmas
@@ -264,10 +264,10 @@ let subtract_p4 (f0, f1, f2, f3) =
   // assert_norm (0xffffffffffffffff = pow2 64 - 1);
   // assert_norm (0xffffffffffffffed = pow2 64 - 19);
 
-  let m0 = uint64_gte_mask f0 (u64 0xffffffffffffffed) in
-  let m1 = uint64_eq_mask f1 (u64 0xffffffffffffffff) in
-  let m2 = uint64_eq_mask f2 (u64 0xffffffffffffffff) in
-  let m3 = uint64_eq_mask f3 (u64 0x7fffffffffffffff) in
+  let m0 = gte_mask f0 (u64 0xffffffffffffffed) in
+  let m1 = eq_mask f1 (u64 0xffffffffffffffff) in
+  let m2 = eq_mask f2 (u64 0xffffffffffffffff) in
+  let m3 = eq_mask f3 (u64 0x7fffffffffffffff) in
   let mask = m0 &. m1 &. m2 &. m3 in
   let f0' = f0 -. (mask &. u64 0xffffffffffffffed) in
   let f1' = f1 -. (mask &. u64 0xffffffffffffffff) in

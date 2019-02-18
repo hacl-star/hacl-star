@@ -4,7 +4,7 @@ open Lib.Sequence
 open Lib.IntTypes
 open FStar.Mul
 open Spec.Curve25519
-open Hacl.Helpers
+open Lib.Lemmas
 
 open Hacl.Spec.Curve25519.Field51.Definition
 open Hacl.Spec.Curve25519.Field51.Lemmas
@@ -425,11 +425,11 @@ val subtract_p5:
       felem_fits5 out (1, 1, 1, 1, 1) /\
       as_nat5 out < prime)
 let subtract_p5 (f0, f1, f2, f3, f4) =
-  let m0 = uint64_gte_mask f0 (u64 0x7ffffffffffed) in
-  let m1 = uint64_eq_mask f1 (u64 0x7ffffffffffff) in
-  let m2 = uint64_eq_mask f2 (u64 0x7ffffffffffff) in
-  let m3 = uint64_eq_mask f3 (u64 0x7ffffffffffff) in
-  let m4 = uint64_eq_mask f4 (u64 0x7ffffffffffff) in
+  let m0 = gte_mask f0 (u64 0x7ffffffffffed) in
+  let m1 = eq_mask f1 (u64 0x7ffffffffffff) in
+  let m2 = eq_mask f2 (u64 0x7ffffffffffff) in
+  let m3 = eq_mask f3 (u64 0x7ffffffffffff) in
+  let m4 = eq_mask f4 (u64 0x7ffffffffffff) in
   let mask = m0 &. m1 &. m2 &. m3 &. m4 in
   let f0' = f0 -. (mask &. u64 0x7ffffffffffed) in
   let f1' = f1 -. (mask &. u64 0x7ffffffffffff) in
