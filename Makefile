@@ -369,7 +369,7 @@ obj/Views.fst.checked: \
   FSTAR_FLAGS=$(shell echo $(VALE_FSTAR_FLAGS) | \
     sed 's/--smtencoding.nl_arith_repr wrapped/--smtencoding.nl_arith_repr native/;')
 
-objections/Collections.Lists.fst.checked: \
+obj/Collections.Lists.fst.checked: \
   FSTAR_FLAGS=$(shell echo $(VALE_FSTAR_FLAGS) | \
     sed 's/--z3cliopt smt.QI.EAGER_THRESHOLD=100//')
 
