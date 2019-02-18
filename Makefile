@@ -431,26 +431,14 @@ hacl-verify: $(call only-for,$(HACL_HOME)/code/%.checked)
 # min-test #
 ############
 
-ifneq (,$(MIN_TEST))
-min-test_: $(call only-for, $(addprefix $(HACL_HOME)/vale/,\
+min-test_: $(filter-out obj/X64.Vale.InsSha.%,$(call only-for, $(addprefix $(HACL_HOME)/vale/,\
   code/arch/% code/lib/% code/crypto/poly1305/% \
-  code/thirdPartyPorts/OpenSSL/poly1305/% specs/%)) \
+  code/thirdPartyPorts/OpenSSL/poly1305/% specs/%))) \
   obj/Hacl.Hash.MD.fst.checked
-	@echo $(FSTAR_ROOTS)
-	@echo "<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>"
-	@echo $(filter $(addprefix $(HACL_HOME)/vale/,\
-  code/arch/% code/lib/% code/crypto/poly1305/% \
-  code/thirdPartyPorts/OpenSSL/poly1305/% specs/%),$(FSTAR_ROOTS))
 	@echo "<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>"
 	@echo MIN_TEST summary: verified the following modules
 	@echo $^
 	@echo "<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>"
-
-$(call only-for,$(HACL_HOME)/vale/code/arch/x64/interop/%) \
-obj/X64.Vale.InsSha.fst.checked: \
-  FSTAR_FLAGS=--admit_smt_queries true
-endif
-
 
 ###############################################################################
 # Extracting (checked files) to OCaml, producing executables, running them to #
