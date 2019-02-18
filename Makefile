@@ -14,6 +14,8 @@
 # This Makefile honors the following variables:
 # - NOSHORTLOG=1 disables pretty (short) logs
 # - NODEPEND=1 disables .depend re-generation (use for debugging only)
+# - NOOPENSSLCHECK=1 disables OpenSSL libcrypto.a checks (useful for verifying files
+#   only, or for non-OpenSSL configurations)
 # - EVERCRYPT_CONFIG allows switching EverCrypt static configurations; when
 #   going through the all target, we properly invalidate the checked file.
 #
@@ -57,12 +59,14 @@ ifneq (,$(MLCRYPTO_HOME))
 OPENSSL_HOME 	:= $(MLCRYPTO_HOME)/openssl
 endif
 
+ifeq (,$(NOOPENSSLCHECK))
 ifeq (,$(OPENSSL_HOME))
   $(error Please define MLCRYPTO_HOME, possibly using cygpath -m)
 endif
 
 ifeq (,$(OPENSSL_HOME)/libcrypto.a)
   $(error $$OPENSSL_HOME/libcrypto.a does not exist (OPENSSL_HOME=$(OPENSSL_HOME)))
+endif
 endif
 
 ifneq (,$(HACL_HOME))
