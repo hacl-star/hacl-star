@@ -113,7 +113,7 @@ let smul_felem5 #m1 #m2 u1 (f20, f21, f22, f23, f24) =
   let o4 = mul_wide64 #m1 #m24 u1 f24 in
   [@inline_let]
   let out = (o0, o1, o2, o3, o4) in
-  lemma_smul_felem5 #m1 #m2 u1 (f20, f21, f22, f23, f24);
+  lemma_smul_felem5 u1 (f20, f21, f22, f23, f24);
   out
 
 inline_for_extraction
@@ -154,7 +154,7 @@ let smul_add_felem5 #m1 #m2 #m3 u1 (f20, f21, f22, f23, f24) (o0, o1, o2, o3, o4
   let o4' = mul_add_wide128 #m1 #m24 #m34 u1 f24 o4 in
   [@inline_let]
   let out = (o0', o1', o2', o3', o4') in
-  lemma_smul_add_felem5 #m1 #m2 #m3 u1 (f20, f21, f22, f23, f24) (o0, o1, o2, o3, o4);
+  lemma_smul_add_felem5 u1 (f20, f21, f22, f23, f24) (o0, o1, o2, o3, o4);
   out
 
 inline_for_extraction
@@ -440,19 +440,6 @@ let subtract_p5 (f0, f1, f2, f3, f4) =
   (f0', f1', f2', f3', f4')
 
 inline_for_extraction
-val reduce_felem5:
-    f:felem5{mul_inv_t f}
-  -> Pure felem5
-    (requires True)
-    (ensures fun out ->
-      as_nat5 out == feval f /\
-      felem_fits5 out (1, 1, 1, 1, 1) /\
-      as_nat5 out < prime)
-let reduce_felem5 (f0, f1, f2, f3, f4) =
-  let (f0, f1, f2, f3, f4) = carry_felem5_full (f0, f1, f2, f3, f4) in
-  subtract_p5 (f0, f1, f2, f3, f4)
-
-inline_for_extraction
 val store_felem5:
     f:felem5{mul_inv_t f}
   -> Pure (uint64 & uint64 & uint64 & uint64)
@@ -470,22 +457,3 @@ let store_felem5 (f0, f1, f2, f3, f4) =
   let o3 = (f3 >>. 39ul) |. (f4 <<. 12ul) in
   lemma_store_felem (f0, f1, f2, f3, f4);
   (o0, o1, o2, o3)
-
-
-// inline_for_extraction
-// val store_felem5:
-//   f:felem5
-//   -> Pure (uint64 & uint64 & uint64 & uint64)
-//     (requires
-//       felem_fits5 f (1, 1, 1, 1, 1) /\
-//       as_nat5 f < prime)
-//     (ensures fun (o0, o1, o2, o3) ->
-//       as_nat5 f == v o0 + v o1 * pow2 64 +
-//       v o2 * pow2 64 * pow2 64 + v o3 * pow2 64 * pow2 64 * pow2 64)
-// let store_felem5 (f0, f1, f2, f3, f4) =
-//   let o0 = f0 |. (f1 <<. 51ul) in
-//   let o1 = (f1 >>. 13ul) |. (f2 <<. 38ul) in
-//   let o2 = (f2 >>. 26ul) |. (f3 <<. 25ul) in
-//   let o3 = (f3 >>. 39ul) |. (f4 <<. 12ul) in
-//   lemma_store_felem (f0, f1, f2, f3, f4);
-//   (o0, o1, o2, o3)

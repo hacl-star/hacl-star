@@ -1,6 +1,10 @@
 module Lib.Lemmas
 
+open FStar.Mul
 open Lib.IntTypes
+open Lib.Sequence
+
+module BSeq = Lib.ByteSequence
 
 val eq_mask_logand_lemma: a:uint64 -> b:uint64 -> c:uint64 ->
   Lemma
@@ -56,3 +60,15 @@ val logand_lemma: a:uint64 -> b:uint64 ->
       v (a `logand` b) == v b))
   [SMTPat (a `logand` b)]
 let logand_lemma a b = admit()
+
+val logor_disjoint64: a:uint64 -> b:uint64 -> m:pos{m < 64}
+  -> Lemma
+    (requires v a < pow2 m /\ v b % pow2 m == 0)
+    (ensures v (a `logor` b) == v a + v b)
+let logor_disjoint64 a b m = admit()
+
+val lemma_nat_from_uints64_le_4: b:lseq uint64 4 ->
+  Lemma (BSeq.nat_from_intseq_le b ==
+    v b.[0] + v b.[1] * pow2 64 +
+    v b.[2] * pow2 64 * pow2 64 + v b.[3] * pow2 64 * pow2 64 * pow2 64)
+let lemma_nat_from_uints64_le_4 b = admit()

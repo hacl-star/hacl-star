@@ -1,10 +1,10 @@
 module Hacl.Spec.Curve25519.Field64.Lemmas
 
+open FStar.Mul
 open Lib.Sequence
 open Lib.IntTypes
-open FStar.Mul
-open Spec.Curve25519
 
+open Spec.Curve25519
 open Hacl.Spec.Curve25519.Field64.Definition
 
 #reset-options "--z3rlimit 30 --using_facts_from '* -FStar.Seq'"
@@ -16,12 +16,6 @@ val lemma_add_mul_le:
     (requires a <= a0 /\ b <= b0 /\ c <= c0)
     (ensures a + b * c <= a0 + b0 * c0)
 let lemma_add_mul_le a b c a0 b0 c0 = ()
-
-val lemma_nat_from_uints64_le_4: b:lseq uint64 4 ->
-  Lemma (Lib.ByteSequence.nat_from_intseq_le b ==
-    v b.[0] + v b.[1] * pow2 64 +
-    v b.[2] * pow2 64 * pow2 64 + v b.[3] * pow2 64 * pow2 64 * pow2 64)
-let lemma_nat_from_uints64_le_4 b = admit()
 
 val lemma_mul_lt: a:nat -> b:nat -> c:pos -> d:pos
   -> Lemma

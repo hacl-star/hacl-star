@@ -472,7 +472,7 @@ let store_felem u64s f =
   u64s.(2ul) <- o2;
   u64s.(3ul) <- o3;
   let h1 = ST.get () in
-  Lemmas.lemma_nat_from_uints64_le_4 (as_seq h1 u64s)
+  Lib.Lemmas.lemma_nat_from_uints64_le_4 (as_seq h1 u64s)
 
 [@CInline]
 val cswap2: bit:uint64 -> p1:felem2 -> p2:felem2 -> Stack unit
