@@ -200,7 +200,8 @@ to-obj-dir = $(addprefix obj/,$(notdir $1))
 VALE_ROOTS = $(wildcard $(addsuffix /*.vaf,$(VALE_DIRS)))
 
 # Target F* files stemming from Vale files
-VALE_FSTS = $(call to-obj-dir,$(patsubst %.vaf,%.fst,$(VALE_ROOTS)))
+VAF_AS_FSTS = $(patsubst %.vaf,%.fsti,$(VALE_ROOTS)) $(patsubst %.vaf,%.fst,$(VALE_ROOTS))
+VALE_FSTS = $(call to-obj-dir,$(VAF_AS_FSTS))
 
 .PRECIOUS: %.fst %.fsti
 
@@ -319,10 +320,10 @@ VALE_FSTAR_FLAGS=$(VALE_FSTAR_FLAGS_NOSMT) \
   --smtencoding.elim_box true --smtencoding.l_arith_repr native \
   --smtencoding.nl_arith_repr wrapped
 
-# $(call only-for,<filter>) retains all the *source* checked files that match
-# <filter>, then returns the corresponding set of targets in obj/. For instance,
-# $(call only-for,$(HACL_HOME)/code/%.checked) returns
-# obj/Hacl.Hash.Definitions.fst.checked, and all the other targets that
+# $(call only-for,<filter>) retains all the checked files that match <filter>,
+# taken from the source directories, then returns the corresponding set of
+# targets in obj/. For instance, $(call only-for,$(HACL_HOME)/code/%.checked)
+# returns obj/Hacl.Hash.Definitions.fst.checked, and all the other targets that
 # originate from source files in code/.
 #
 # With this macro, we no longer rely on pattern rules for file-specific options,
@@ -330,7 +331,7 @@ VALE_FSTAR_FLAGS=$(VALE_FSTAR_FLAGS_NOSMT) \
 # below match the same file multiple times (as we the case in the original
 # SConstruct). The last match has precedence and overrides previous variable
 # assignments.
-only-for = $(call to-obj-dir,$(filter $1,$(addsuffix .checked,$(FSTAR_ROOTS))))
+only-for = $(call to-obj-dir,$(filter $1,$(addsuffix .checked,$(FSTAR_ROOTS) $(VAF_AS_FSTS))))
 
 # By default Vale files don't use two phase tc
 $(call only-for,$(HACL_HOME)/vale/%.checked): \
@@ -350,8 +351,7 @@ $(call only-for,$(HACL_HOME)/vale/code/arch/x64/interop/%.checked): \
 
 # Now the fst files coming from vaf files, which also don't work with two
 # phase tc (VALE_FSTS is of the form obj/foobar.fst).
-$(addsuffix .checked,$(VALE_FSTS)) \
-$(addsuffix i.checked,$(VALE_FSTS)): \
+$(addsuffix .checked,$(VALE_FSTS)): \
   FSTAR_FLAGS=$(VALE_FSTAR_FLAGS) --use_two_phase_tc false
 
 # Then a series of individual overrides.
@@ -422,7 +422,6 @@ vale-verify:
 
 vale-verify_: \
   $(addsuffix .checked,$(VALE_FSTS)) \
-  $(addsuffix i.checked,$(VALE_FSTS)) \
   $(call only-for,$(HACL_HOME)/vale/%.checked) \
 
 hacl-verify: $(call only-for,$(HACL_HOME)/code/%.checked)
@@ -437,10 +436,18 @@ min-test_: $(call only-for, $(addprefix $(HACL_HOME)/vale/,\
   code/arch/% code/lib/% code/crypto/poly1305/% \
   code/thirdPartyPorts/OpenSSL/poly1305/% specs/%)) \
   obj/Hacl.Hash.MD.fst.checked
-	echo MIN_TEST summary: verified $<
+	@echo $(FSTAR_ROOTS)
+	@echo "<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>"
+	@echo $(filter $(addprefix $(HACL_HOME)/vale/,\
+  code/arch/% code/lib/% code/crypto/poly1305/% \
+  code/thirdPartyPorts/OpenSSL/poly1305/% specs/%),$(FSTAR_ROOTS))
+	@echo "<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>"
+	@echo MIN_TEST summary: verified the following modules
+	@echo $^
+	@echo "<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>"
 
 $(call only-for,$(HACL_HOME)/vale/code/arch/x64/interop/%) \
-code/arch/x64/X64.Vale.InsSha.vaf: \
+obj/X64.Vale.InsSha.fst.checked: \
   FSTAR_FLAGS=--admit_smt_queries true
 endif
 
