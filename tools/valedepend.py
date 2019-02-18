@@ -57,10 +57,7 @@ def file_drop_extension(file):
 # Given source file name, return file name in object directory
 def to_obj_dir(file):
     file = norm(file)
-    if file.startswith('./obj'):
-        return file
-    else:
-        return norm(os.path.join('./obj', os.path.basename(file)))
+    return norm(os.path.join('./obj', os.path.basename(file)))
 
 def depends(target, source):
     target = norm(target)
