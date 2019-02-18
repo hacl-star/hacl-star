@@ -74,8 +74,11 @@ let lemma_bignum_to_128_ h0 h1 h2 =
 private val lemma_aux: a:nat -> b:nat -> c:nat -> Lemma
   (requires (a < pow2 44 /\ b < pow2 44 /\ c < pow2 40))
   (ensures (a + pow2 44 * b + pow2 88 * c < pow2 128))
+#reset-options "--max_fuel 0 --max_ifuel 0 --using_facts_from 'Prims FStar.Math.Lemmas'"
 let lemma_aux a b c =
   assert_norm((pow2 44 - 1) + pow2 44 * (pow2 44 - 1) + (pow2 40 - 1) * pow2 88 < pow2 128)
+
+#reset-options "--max_fuel 0 --z3rlimit 200"
 
 // don't ask, don't tell
 val lemma_mod_plus_distr_l': a:nat -> b:nat -> p:pos -> Lemma
