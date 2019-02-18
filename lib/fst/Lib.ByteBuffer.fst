@@ -15,7 +15,8 @@ friend Lib.ByteSequence
 friend Lib.IntTypes
 
 (*
- * Despite befriending IntTypes this module enforces secrecy.
+ * Despite befriending IntTypes this module enforces secrecy. The only exception,
+ * for backwards compatibility, is `lbytes_eq`, which declassifies its result.
  *
  * We befriend IntTypes (or use RawIntTypes) to call into KreMLin C library 
  * for endianness conversions, which uses public machine integers.
