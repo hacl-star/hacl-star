@@ -474,18 +474,38 @@ let store_felem u64s f =
   let h1 = ST.get () in
   Lib.Lemmas.lemma_nat_from_uints64_le_4 (as_seq h1 u64s)
 
-[@CInline]
-val cswap2: bit:uint64 -> p1:felem2 -> p2:felem2 -> Stack unit
-    (requires (fun h0 -> live h0 p1 /\ live h0 p2))
-    (ensures (fun h0 _ h1 -> modifies (loc p1 |+| loc p2) h0 h1))
-[@CInline]
-let cswap2 bit p0 p1 =
-    let mask = u64 0 -. bit in
-    let h0 = ST.get() in
-    loop2 h0 10ul p0 p1
-    (fun h -> (fun i s -> s))
+val cswap2:
+    bit:uint64{v bit <= 1}
+  -> p1:felem2
+  -> p2:felem2
+  -> Stack unit
+    (requires fun h -> live h p1 /\ live h p2 /\ disjoint p1 p2)
+    (ensures  fun h0 _ h1 ->
+      modifies (loc p1 |+| loc p2) h0 h1 /\
+      (v bit == 1 ==> as_seq h1 p1 == as_seq h0 p2 /\ as_seq h1 p2 == as_seq h0 p1) /\
+      (v bit == 0 ==> as_seq h1 p1 == as_seq h0 p1 /\ as_seq h1 p2 == as_seq h0 p2))
+[@ CInline]      
+let cswap2 bit p1 p2 =
+  let h0 = ST.get () in
+  let mask = u64 0 -. bit in
+
+  [@ inline_let]
+  let inv h1 (i:nat{i <= 10}) =
+    (forall (k:nat{k < i}).
+      if v bit = 1
+      then (as_seq h1 p1).[k] == (as_seq h0 p2).[k] /\ (as_seq h1 p2).[k] == (as_seq h0 p1).[k]
+      else (as_seq h1 p1).[k] == (as_seq h0 p1).[k] /\ (as_seq h1 p2).[k] == (as_seq h0 p2).[k]) /\
+    (forall (k:nat{i <= k /\ k < 10}).
+      (as_seq h1 p1).[k] == (as_seq h0 p1).[k] /\ (as_seq h1 p2).[k] == (as_seq h0 p2).[k]) /\
+    modifies (loc p1 |+| loc p2) h0 h1 in
+
+  Lib.Loops.for 0ul 10ul inv
     (fun i ->
-         let dummy = mask &. (p0.(i) ^. p1.(i)) in
-         p0.(i) <- p0.(i) ^. dummy;
-         p1.(i) <- p1.(i) ^. dummy;
-	 admit())
+      let dummy = mask &. (p1.(i) ^. p2.(i)) in
+      p1.(i) <- p1.(i) ^. dummy;
+      p2.(i) <- p2.(i) ^. dummy;
+      Lemmas.lemma_cswap2_step bit ((as_seq h0 p1).[v i]) ((as_seq h0 p2).[v i])
+    );
+  let h1 = ST.get () in
+  Lib.Sequence.eq_intro (as_seq h1 p1) (if v bit = 1 then as_seq h0 p2 else as_seq h0 p1);
+  Lib.Sequence.eq_intro (as_seq h1 p2) (if v bit = 1 then as_seq h0 p1 else as_seq h0 p2)

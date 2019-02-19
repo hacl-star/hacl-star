@@ -72,3 +72,7 @@ val lemma_nat_from_uints64_le_4: b:lseq uint64 4 ->
     v b.[0] + v b.[1] * pow2 64 +
     v b.[2] * pow2 64 * pow2 64 + v b.[3] * pow2 64 * pow2 64 * pow2 64)
 let lemma_nat_from_uints64_le_4 b = admit()
+
+val logxor_lemma: a:uint64 -> b:uint64 ->
+  Lemma (a ^. (a ^. b) == b /\ a ^. (b ^. a) == b /\ a ^. u64 0 == a)
+let logxor_lemma a b = admit()

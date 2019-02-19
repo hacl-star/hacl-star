@@ -122,8 +122,10 @@ val fsqr2: out:u512 -> f:u512 -> tmp:u1024
       fevalh h1 out2 == P.fmul (fevalh h0 f2) (fevalh h0 f2)))
 
 [@ CInline]
-val cswap2: bit:uint64 -> p0:u512 -> p1:u512
+val cswap2: bit:uint64{v bit <= 1} -> p1:u512 -> p2:u512
   -> Stack unit
-    (requires fun h -> live h p0 /\ live h p1)
+    (requires fun h -> live h p1 /\ live h p2 /\ disjoint p1 p2)
     (ensures  fun h0 _ h1 ->
-      modifies (loc p0 |+| loc p1) h0 h1)
+      modifies (loc p1 |+| loc p2) h0 h1 /\
+      (v bit == 1 ==> as_seq h1 p1 == as_seq h0 p2 /\ as_seq h1 p2 == as_seq h0 p1) /\
+      (v bit == 0 ==> as_seq h1 p1 == as_seq h0 p1 /\ as_seq h1 p2 == as_seq h0 p2))

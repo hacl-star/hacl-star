@@ -392,12 +392,12 @@ val cswap2:
   -> p1:felem2 s
   -> p2:felem2 s
   -> Stack unit
-    (requires fun h0 -> live h0 p1 /\ live h0 p2)
+    (requires fun h0 -> live h0 p1 /\ live h0 p2 /\ disjoint p1 p2)
     (ensures  fun h0 _ h1 ->
       modifies (loc p1 |+| loc p2) h0 h1 /\
       (v bit == 1 ==> as_seq h1 p1 == as_seq h0 p2 /\ as_seq h1 p2 == as_seq h0 p1) /\
       (v bit == 0 ==> as_seq h1 p1 == as_seq h0 p1 /\ as_seq h1 p2 == as_seq h0 p2))
-let cswap2 #s bit p0 p1 = admit();
+let cswap2 #s bit p0 p1 =
   match s with
   | M51 -> F51.cswap2 bit p0 p1
   | M64 -> F64.cswap2 bit p0 p1
