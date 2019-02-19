@@ -76,3 +76,9 @@ let lemma_nat_from_uints64_le_4 b = admit()
 val logxor_lemma: a:uint64 -> b:uint64 ->
   Lemma (a ^. (a ^. b) == b /\ a ^. (b ^. a) == b /\ a ^. u64 0 == a)
 let logxor_lemma a b = admit()
+
+val logxor_lemma1: a:uint64 -> b:uint64
+  -> Lemma
+    (requires v a <= 1 /\ v b <= 1)
+    (ensures v (a ^. b) <= 1)
+let logxor_lemma1 a b = admit()
