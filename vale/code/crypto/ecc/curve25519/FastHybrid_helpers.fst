@@ -4,11 +4,11 @@ open Words_s
 open Types_s
 open FStar.Mul
 open FStar.Tactics
-open CanonCommSemiring
+open FStar.Tactics.CanonCommSemiring
 open Fast_defs
 open Fast_lemmas_internal
 
-#reset-options "--max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Tactics -FStar.Reflection -CanonCommSemiring'"
+#reset-options "--max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Tactics -FStar.Reflection'"
 
 let lemma_carry_prime (a0 a1 a2 a3 a0' a1' a2' a3' carry_in:nat64) (carry:bit) : Lemma
   (requires pow2_five a0' a1' a2' a3' carry == pow2_four a0 a1 a2 a3 + carry_in * 38 /\
@@ -38,7 +38,7 @@ let lemma_carry_prime (a0 a1 a2 a3 a0' a1' a2' a3' carry_in:nat64) (carry:bit) :
   };
   ()
 
-#reset-options "--z3rlimit 30 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Tactics -FStar.Reflection -CanonCommsemiring'"
+#reset-options "--z3rlimit 30 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Tactics -FStar.Reflection'"
 let lemma_fast_mul1 (a:nat) 
                (b a0 a1 a2 a3 
                 ba0_hi ba0_lo 
@@ -126,7 +126,7 @@ let lemma_mul_pow256_sub (x y:nat) :
   assert_norm (pow2_256 % prime == 38);
   ()
 
-#reset-options "--z3rlimit 30 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Tactics -FStar.Reflection -CanonCommsemiring'"
+#reset-options "--z3rlimit 30 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Tactics -FStar.Reflection'"
 let lemma_carry_sub_prime (a0 a1 a2 a3 a0' a1' a2' a3' carry_in:nat64) (carry:bit) : Lemma
   (requires pow2_four a0' a1' a2' a3' - carry * pow2_256 == pow2_four a0 a1 a2 a3 - carry_in * 38 /\
             carry_in * 38 - 1 + 38 < pow2_64)

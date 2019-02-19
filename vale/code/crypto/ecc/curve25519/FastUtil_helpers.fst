@@ -4,7 +4,7 @@ open Words_s
 open Types_s
 open FStar.Mul
 open FStar.Tactics
-open CanonCommSemiring
+open FStar.Tactics.CanonCommSemiring
 open Fast_defs
 open Fast_lemmas_internal
 
@@ -24,8 +24,8 @@ let lemma_sub_carry_equiv_forall () :
   =
   ()
 
-#reset-options "--using_facts_from '* -FStar.Tactics -FStar.Reflection \
-  -CanonCommMonoid -CanonCommSwaps -CanonCommSemiring' --max_fuel 0 --max_ifuel 0 --z3rlimit 50"
+#reset-options "--using_facts_from '* -FStar.Tactics -FStar.Reflection' \
+  --max_fuel 0 --max_ifuel 0 --z3rlimit 50"
 let lemma_sub2
       (a:nat) (a0 a1:nat64)      
       (b:nat) (b0 b1:nat64)
