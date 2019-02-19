@@ -205,7 +205,7 @@ val finv_:
     (ensures  fun h0 _ h1 ->
       modifies (loc o |+| loc tmp) h0 h1 /\
       fsquare_times_inv h1 o /\
-      feval h1 o == S.pow (feval #s h0 i) (pow2 255 - 21))
+      feval h1 o == P.fpow (feval #s h0 i) (pow2 255 - 21))
 let finv_ #s o i tmp =
   push_frame();
   let t1 = create (4ul *! nlimb s) (limb_zero s) in
@@ -237,7 +237,7 @@ val finv:
     (ensures  fun h0 _ h1 ->
       modifies (loc o |+| loc tmp) h0 h1 /\
       fsquare_times_inv h1 o /\
-      feval h1 o == S.pow (feval #s h0 i) (pow2 255 - 21))
+      feval h1 o == P.fpow (feval #s h0 i) (pow2 255 - 21))
 let finv #s o i tmp =
   match s with
   | M51 -> finv_51 o i tmp

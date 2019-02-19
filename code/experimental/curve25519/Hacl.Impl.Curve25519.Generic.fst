@@ -26,7 +26,7 @@ module Lemmas = Hacl.Spec.Curve25519.Field64.Lemmas
 
 friend Lib.LoopCombinators
 
-#reset-options "--z3rlimit 50 --max_fuel 2 --using_facts_from '* -FStar.Seq'"
+#reset-options "--z3rlimit 50 --max_fuel 2 --using_facts_from '* -FStar.Seq -Hacl.Spec.*'"
 //#set-options "--debug Hacl.Impl.Curve25519.Generic --debug_level ExtractNorm"
 
 inline_for_extraction
@@ -122,19 +122,14 @@ let encode_point_ #s o i =
   let tmp_w = create (2ul *. nwide s) (wide_zero s) in
   let h0 = ST.get () in
   finv tmp z tmp_w;
-  let h1 = ST.get () in
-  assert (feval h1 tmp == Hacl.Spec.Curve25519.Finv.pow (feval h0 z) (pow2 255 - 21));
-  Hacl.Spec.Curve25519.Finv.lemma_fpow_is_pow (feval h0 z) (pow2 255 - 21);
   fmul tmp tmp x tmp_w;
-  let h2 = ST.get () in
-  assert (feval h2 tmp == S.fmul (S.fpow (feval h0 z) (pow2 255 - 21)) (feval h0 x));
-  assert (feval h2 tmp == S.fmul (feval h0 x) (S.fpow (feval h0 z) (pow2 255 - 21)));
+  let h1 = ST.get () in
+  assert (feval h1 tmp == S.fmul (S.fpow (feval h0 z) (pow2 255 - 21)) (feval h0 x));
+  assert (feval h1 tmp == S.fmul (feval h0 x) (S.fpow (feval h0 z) (pow2 255 - 21)));
   store_felem u64s tmp;
-  let h3 = ST.get () in
-  //assert (BSeq.nat_from_intseq_le (as_seq h3 u64s) == feval h2 tmp);
   uints_to_bytes_le #U64 4ul o u64s;
-  let h4 = ST.get () in
-  assume (as_seq h4 o == BSeq.nat_to_bytes_le 32 (feval h2 tmp));
+  let h2 = ST.get () in
+  assume (as_seq h2 o == BSeq.nat_to_bytes_le 32 (feval h1 tmp));
   pop_frame()
 
 (* WRAPPER to Prevent Inlining *)

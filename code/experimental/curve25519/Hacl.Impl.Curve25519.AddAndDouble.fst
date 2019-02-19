@@ -48,8 +48,8 @@ val point_add_and_double0:
   -> q:point s
   -> nq:point s
   -> nq_p1:point s
-  -> ab:lbuffer (limb s) (2ul *. nlimb s)
-  -> dc:lbuffer (limb s) (2ul *. nlimb s)
+  -> ab:lbuffer (limb s) (2ul *! nlimb s)
+  -> dc:lbuffer (limb s) (2ul *! nlimb s)
   -> tmp2:felem_wide2 s
   -> Stack unit
     (requires fun h0 ->
@@ -119,7 +119,7 @@ inline_for_extraction
 val point_add_and_double1:
     #s:field_spec
   -> nq:point s
-  -> tmp1:lbuffer (limb s) (4ul *. nlimb s)
+  -> tmp1:lbuffer (limb s) (4ul *! nlimb s)
   -> tmp2:felem_wide2 s
   -> Stack unit
     (requires fun h0 ->
@@ -140,11 +140,11 @@ let point_add_and_double1 #s nq tmp1 tmp2 =
 
   let a : felem s = sub tmp1 0ul (nlimb s) in
   let b : felem s = sub tmp1 (nlimb s) (nlimb s) in
-  let d : felem s = sub tmp1 (2ul *. nlimb s) (nlimb s) in
-  let c : felem s = sub tmp1 (3ul *. nlimb s) (nlimb s) in
+  let d : felem s = sub tmp1 (2ul *! nlimb s) (nlimb s) in
+  let c : felem s = sub tmp1 (3ul *! nlimb s) (nlimb s) in
 
-  let ab : felem2 s = sub tmp1 0ul (2ul *. nlimb s) in
-  let dc : felem2 s = sub tmp1 (2ul *. nlimb s) (2ul *. nlimb s) in
+  let ab : felem2 s = sub tmp1 0ul (2ul *! nlimb s) in
+  let dc : felem2 s = sub tmp1 (2ul *! nlimb s) (2ul *! nlimb s) in
   let h0 = ST.get () in
   assert (gsub nq 0ul (nlimb s) == x2);
   assert (gsub nq (nlimb s) (nlimb s) == z2);
@@ -177,20 +177,20 @@ inline_for_extraction
 val point_add_and_double_:
     #s:field_spec
   -> q:point s
-  -> p01_tmp1:lbuffer (limb s) (8ul *. nlimb s)
+  -> p01_tmp1:lbuffer (limb s) (8ul *! nlimb s)
   -> tmp2:felem_wide2 s
   -> Stack unit
     (requires fun h0 -> (
-      let nq = gsub p01_tmp1 0ul (2ul *. nlimb s) in
-      let nq_p1 = gsub p01_tmp1 (2ul *. nlimb s) (2ul *. nlimb s) in
+      let nq = gsub p01_tmp1 0ul (2ul *! nlimb s) in
+      let nq_p1 = gsub p01_tmp1 (2ul *! nlimb s) (2ul *! nlimb s) in
       live h0 q /\ live h0 p01_tmp1 /\ live h0 tmp2 /\
       disjoint q p01_tmp1 /\ disjoint q tmp2 /\ disjoint p01_tmp1 tmp2 /\
       state_inv_t h0 (get_x q) /\ state_inv_t h0 (get_z q) /\
       state_inv_t h0 (get_x nq) /\ state_inv_t h0 (get_z nq) /\
       state_inv_t h0 (get_x nq_p1) /\ state_inv_t h0 (get_z nq_p1)))
     (ensures  fun h0 _ h1 -> (
-      let nq = gsub p01_tmp1 0ul (2ul *. nlimb s) in
-      let nq_p1 = gsub p01_tmp1 (2ul *. nlimb s) (2ul *. nlimb s) in
+      let nq = gsub p01_tmp1 0ul (2ul *! nlimb s) in
+      let nq_p1 = gsub p01_tmp1 (2ul *! nlimb s) (2ul *! nlimb s) in
       modifies (loc p01_tmp1 |+| loc tmp2) h0 h1 /\
       state_inv_t h1 (get_x nq) /\ state_inv_t h1 (get_z nq) /\
       state_inv_t h1 (get_x nq_p1) /\ state_inv_t h1 (get_z nq_p1) /\
@@ -206,8 +206,8 @@ let point_add_and_double_ #s q p01_tmp1 tmp2 =
 
   let a : felem s = sub tmp1 0ul (nlimb s) in
   let b : felem s = sub tmp1 (nlimb s) (nlimb s) in
-  let ab : felem2 s = sub tmp1 0ul (2ul *. nlimb s) in
-  let dc : felem2 s = sub tmp1 (2ul *. nlimb s) (2ul *. nlimb s) in
+  let ab : felem2 s = sub tmp1 0ul (2ul *! nlimb s) in
+  let dc : felem2 s = sub tmp1 (2ul *! nlimb s) (2ul *! nlimb s) in
 
   assert (gsub p01_tmp1 0ul (2ul *! nlimb s) == nq);
   assert (gsub p01_tmp1 (2ul *! nlimb s) (2ul *! nlimb s) == nq_p1);
@@ -216,8 +216,8 @@ let point_add_and_double_ #s q p01_tmp1 tmp2 =
   assert (gsub nq (nlimb s) (nlimb s) == z2);
   assert (gsub ab 0ul (nlimb s) == a);
   assert (gsub ab (nlimb s) (nlimb s) == b);
-  assert (gsub tmp1 0ul (2ul *. nlimb s) == ab);
-  assert (gsub tmp1 (2ul *. nlimb s) (2ul *. nlimb s) == dc);
+  assert (gsub tmp1 0ul (2ul *! nlimb s) == ab);
+  assert (gsub tmp1 (2ul *! nlimb s) (2ul *! nlimb s) == dc);
 
   fadd a x2 z2; // a = x2 + z2
   fsub b x2 z2; // b = x2 - z2
@@ -235,20 +235,20 @@ inline_for_extraction
 val point_add_and_double:
     #s:field_spec
   -> q:point s
-  -> p01_tmp1:lbuffer (limb s) (8ul *. nlimb s)
+  -> p01_tmp1:lbuffer (limb s) (8ul *! nlimb s)
   -> tmp2:felem_wide2 s
   -> Stack unit
     (requires fun h0 -> (
-      let nq = gsub p01_tmp1 0ul (2ul *. nlimb s) in
-      let nq_p1 = gsub p01_tmp1 (2ul *. nlimb s) (2ul *. nlimb s) in
+      let nq = gsub p01_tmp1 0ul (2ul *! nlimb s) in
+      let nq_p1 = gsub p01_tmp1 (2ul *! nlimb s) (2ul *! nlimb s) in
       live h0 q /\ live h0 p01_tmp1 /\ live h0 tmp2 /\
       disjoint q p01_tmp1 /\ disjoint q tmp2 /\ disjoint p01_tmp1 tmp2 /\
       state_inv_t h0 (get_x q) /\ state_inv_t h0 (get_z q) /\
       state_inv_t h0 (get_x nq) /\ state_inv_t h0 (get_z nq) /\
       state_inv_t h0 (get_x nq_p1) /\ state_inv_t h0 (get_z nq_p1)))
     (ensures  fun h0 _ h1 -> (
-      let nq = gsub p01_tmp1 0ul (2ul *. nlimb s) in
-      let nq_p1 = gsub p01_tmp1 (2ul *. nlimb s) (2ul *. nlimb s) in
+      let nq = gsub p01_tmp1 0ul (2ul *! nlimb s) in
+      let nq_p1 = gsub p01_tmp1 (2ul *! nlimb s) (2ul *! nlimb s) in
       modifies (loc p01_tmp1 |+| loc tmp2) h0 h1 /\
       state_inv_t h1 (get_x nq) /\ state_inv_t h1 (get_z nq) /\
       state_inv_t h1 (get_x nq_p1) /\ state_inv_t h1 (get_z nq_p1) /\
@@ -265,7 +265,7 @@ inline_for_extraction
 val point_double_:
     #s:field_spec
   -> nq:point s
-  -> tmp1:lbuffer (limb s) (4ul *. nlimb s)
+  -> tmp1:lbuffer (limb s) (4ul *! nlimb s)
   -> tmp2:felem_wide2 s
   -> Stack unit
     (requires fun h0 ->
@@ -282,11 +282,11 @@ let point_double_ #s nq tmp1 tmp2 =
 
   let a : felem s = sub tmp1 0ul (nlimb s) in
   let b : felem s = sub tmp1 (nlimb s) (nlimb s) in
-  let d : felem s = sub tmp1 (2ul *. nlimb s) (nlimb s) in
-  let c : felem s = sub tmp1 (3ul *. nlimb s) (nlimb s) in
+  let d : felem s = sub tmp1 (2ul *! nlimb s) (nlimb s) in
+  let c : felem s = sub tmp1 (3ul *! nlimb s) (nlimb s) in
 
-  let ab : felem2 s = sub tmp1 0ul (2ul *. nlimb s) in
-  let dc : felem2 s = sub tmp1 (2ul *. nlimb s) (2ul *. nlimb s) in
+  let ab : felem2 s = sub tmp1 0ul (2ul *! nlimb s) in
+  let dc : felem2 s = sub tmp1 (2ul *! nlimb s) (2ul *! nlimb s) in
   let h0 = ST.get () in
   assert (gsub nq 0ul (nlimb s) == x2);
   assert (gsub nq (nlimb s) (nlimb s) == z2);
@@ -323,7 +323,7 @@ inline_for_extraction
 val point_double:
     #s:field_spec
   -> nq: point s
-  -> tmp1:lbuffer (limb s) (4ul *. nlimb s)
+  -> tmp1:lbuffer (limb s) (4ul *! nlimb s)
   -> tmp2:felem_wide2 s
   -> Stack unit
     (requires fun h0 ->

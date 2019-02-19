@@ -231,11 +231,12 @@ let finv0 i =
   assert (t0 == pow i (pow2 255 - pow2 5));
   a, t0
 
-val finv: inp:elem -> out:elem{out == pow inp (pow2 255 - 21)}
+val finv: inp:elem -> out:elem{out == fpow inp (pow2 255 - 21)}
 let finv i =
   let a, t0 = finv0 i in
   (* 2^255 - 21 *) let o = fmul t0 a in
   lemma_pow_add i (pow2 255 - pow2 5) 11;
   assert_norm (pow2 255 - pow2 5 + 11 = pow2 255 - 21);
   assert (o == pow i (pow2 255 - 21));
+  lemma_fpow_is_pow i (pow2 255 - 21);
   o
