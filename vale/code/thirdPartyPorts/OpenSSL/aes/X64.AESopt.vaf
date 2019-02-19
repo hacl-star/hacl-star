@@ -1240,7 +1240,7 @@ procedure {:quick} Loop6x(
 }
 
 #reset-options "--z3rlimit 500"
-procedure {:quick exportOnly} {:verify true} Loop6x_gctr(
+procedure {:quick exportOnly} Loop6x_gctr(
     inline alg:algorithm,  
     ghost count:nat,        // Number of 128-bit blocks processed so far
     ghost iv_b:buffer128,
@@ -1433,4 +1433,337 @@ procedure {:quick exportOnly} {:verify true} Loop6x_gctr(
     }
         assume false;
 
+}
+
+
+
+#reset-options ""
+
+procedure {:quick} AESNI_ctr32_6x_preamble(
+    inline alg:algorithm,  // OpenSSL includes the number of rounds (nr) as a dynamic parameter (stored with the key).  Saves code space but adds extra instructions to the fast path.  Maybe branch predictor is good enough for it not to matter
+    ghost key_words:seq(nat32),
+    ghost round_keys:seq(quad32),
+    ghost keys_b:buffer128
+    )
+    lets
+//      inp @= rdi; outp @= rsi; len @= rdx; key @= rcx; ivp @= r8; Xip @= r9;
+        key @= rcx; 
+        T1 @= xmm1; T2 @= xmm2; Z0 @= xmm4;
+    
+        inout0 @= xmm9; inout1 @= xmm10; inout2 @= xmm11; inout3 @= xmm12;
+        inout4 @= xmm13; inout5 @= xmm14; rndkey @= xmm15;
+//      counter @= rbx; rounds @= rbp; ret @= r10; constp @= r11; in0 @= r14; end0 @= r15;
+        constp @= r11; 
+
+    reads
+        key; 
+        mem; memTaint;
+
+    modifies
+        constp; r12;
+        T1; T2; Z0; inout0; inout1; inout2; inout3; inout4; inout5; rndkey;
+        efl;
+
+    requires
+        // AES reqs
+        aes_reqs(alg, key_words, round_keys, keys_b, key, mem, memTaint);
+        key - 0x60 >= 0;
+
+    ensures
+{
+    Load128_buffer(Z0,     key, 0x00-0x80, Secret, keys_b, 0);  // # borrow $Z0 for $rndkey
+    load_one_msb();                                             // # borrow $T2, .Lone_msb
+    Load128_buffer(rndkey, key, 0x10-0x80, Secret, keys_b, 1);  
+    
+    //OpenSSL uses AddLea64(r12, key, 0x20-0x80) instead of the next two instructions
+    Mov64(r12, key);
+    Sub64(r12, 0x60);
+
+    VPxor(inout0, T1, Z0);
+    VPaddd(inout1, T1, T2);
+    VPaddd(inout2, inout1, T2);
+    VPxor(inout1, inout1, Z0);
+    VPaddd(inout3, inout2, T2);
+    VPxor(inout2, inout2, Z0);
+    VPaddd(inout4, inout3, T2);
+    VPxor(inout3, inout3, Z0);
+    VPaddd(inout5, inout4, T2);
+    VPxor(inout4, inout4, Z0);
+    VPaddd(T1, inout5, T2);
+    VPxor(inout5, inout5, Z0);
+}
+
+procedure {:quick} AESNI_ctr32_6x_loop_body(
+    inline alg:algorithm,
+    inline rnd:nat,
+    ghost key_words:seq(nat32),
+    ghost round_keys:seq(quad32),
+    ghost keys_b:buffer128,
+
+    ghost init0:quad32,
+    ghost init1:quad32,
+    ghost init2:quad32,
+    ghost init3:quad32,
+    ghost init4:quad32,
+    ghost init5:quad32
+    )
+    lets
+        key @= rcx; 
+        inout0 @= xmm9; inout1 @= xmm10; inout2 @= xmm11; inout3 @= xmm12;
+        inout4 @= xmm13; inout5 @= xmm14; rndkey @= xmm15;
+
+    reads
+        key; 
+        mem; memTaint;
+
+    modifies
+        inout0; inout1; inout2; inout3; inout4; inout5; rndkey;
+        efl;
+
+    requires
+        // AES reqs
+        aes_reqs(alg, key_words, round_keys, keys_b, key, mem, memTaint);
+        rnd + 2 < length(round_keys);
+        rndkey == index(round_keys, rnd+1);
+
+        inout0 == rounds_opaque(init0, round_keys, rnd);
+        inout1 == rounds_opaque(init1, round_keys, rnd);
+        inout2 == rounds_opaque(init2, round_keys, rnd);
+        inout3 == rounds_opaque(init3, round_keys, rnd);
+        inout4 == rounds_opaque(init4, round_keys, rnd);
+        inout5 == rounds_opaque(init5, round_keys, rnd);
+
+    ensures
+        inout0 == rounds_opaque(init0, round_keys, rnd + 1);
+        inout1 == rounds_opaque(init1, round_keys, rnd + 1);
+        inout2 == rounds_opaque(init2, round_keys, rnd + 1);
+        inout3 == rounds_opaque(init3, round_keys, rnd + 1);
+        inout4 == rounds_opaque(init4, round_keys, rnd + 1);
+        inout5 == rounds_opaque(init5, round_keys, rnd + 1);
+        
+        rndkey == index(round_keys, rnd+2);
+{
+    VAESNI_enc(inout0, inout0, rndkey);
+    VAESNI_enc(inout1, inout1, rndkey);
+    VAESNI_enc(inout2, inout2, rndkey);
+    VAESNI_enc(inout3, inout3, rndkey);
+    VAESNI_enc(inout4, inout4, rndkey);
+    VAESNI_enc(inout5, inout5, rndkey);
+
+    reveal rounds;
+    commute_sub_bytes_shift_rows_forall();
+    Load128_buffer(rndkey, key, 16*(rnd+2)-0x80, Secret, keys_b, rnd+2);
+}
+
+
+procedure {:quick} AESNI_ctr32_6x_round9(
+    inline alg:algorithm,
+    ghost count:nat,
+    ghost in_b:buffer128,
+
+    ghost key_words:seq(nat32),
+    ghost round_keys:seq(quad32),
+    ghost keys_b:buffer128,
+
+    ghost init0:quad32,
+    ghost init1:quad32,
+    ghost init2:quad32,
+    ghost init3:quad32,
+    ghost init4:quad32,
+    ghost init5:quad32
+    )
+    lets
+        inp @= rdi; key @= rcx; 
+        Ii @= xmm0; T1 @= xmm1; T2 @= xmm2; Hkey @= xmm3;
+        Z0 @= xmm4; Z1 @= xmm5; Z2 @= xmm6; Xi @= xmm8;
+        inout0 @= xmm9; inout1 @= xmm10; inout2 @= xmm11; inout3 @= xmm12;
+        inout4 @= xmm13; inout5 @= xmm14; rndkey @= xmm15;
+
+    reads
+        key; 
+        mem; memTaint;
+
+    modifies
+        inp;
+        Ii; T1; T2; Hkey; Z0; Z1; Z2; Xi;
+        inout0; inout1; inout2; inout3; inout4; inout5; rndkey;
+        efl;
+
+    requires
+        validSrcAddrsOffset128(mem, inp, in_b, count*6, 6, memTaint, Secret);
+        inp + 0x60 < pow2_64;
+
+        // AES reqs
+        aes_reqs(alg, key_words, round_keys, keys_b, key, mem, memTaint);
+        rndkey == index(round_keys, #nat(nr(alg)-1));
+
+        inout0 == rounds_opaque(init0, round_keys, #nat(nr(alg)-2));
+        inout1 == rounds_opaque(init1, round_keys, #nat(nr(alg)-2));
+        inout2 == rounds_opaque(init2, round_keys, #nat(nr(alg)-2));
+        inout3 == rounds_opaque(init3, round_keys, #nat(nr(alg)-2));
+        inout4 == rounds_opaque(init4, round_keys, #nat(nr(alg)-2));
+        inout5 == rounds_opaque(init5, round_keys, #nat(nr(alg)-2));
+
+    ensures
+        inout0 == rounds_opaque(init0, round_keys, #nat(nr(alg)-1));
+        inout1 == rounds_opaque(init1, round_keys, #nat(nr(alg)-1));
+        inout2 == rounds_opaque(init2, round_keys, #nat(nr(alg)-1));
+        inout3 == rounds_opaque(init3, round_keys, #nat(nr(alg)-1));
+        inout4 == rounds_opaque(init4, round_keys, #nat(nr(alg)-1));
+        inout5 == rounds_opaque(init5, round_keys, #nat(nr(alg)-1));
+        
+        let rk := index(round_keys, #nat(nr(alg)));
+        Z0   == quad32_xor(rk, buffer128_read(in_b, count*6 + 0, mem));
+        Z1   == quad32_xor(rk, buffer128_read(in_b, count*6 + 1, mem));
+        Z2   == quad32_xor(rk, buffer128_read(in_b, count*6 + 2, mem));
+        Xi   == quad32_xor(rk, buffer128_read(in_b, count*6 + 3, mem));
+        T2   == quad32_xor(rk, buffer128_read(in_b, count*6 + 4, mem));
+        Hkey == quad32_xor(rk, buffer128_read(in_b, count*6 + 5, mem));
+        
+        inp == old(inp) + 0x60; 
+{
+    Load128_buffer(Hkey, key, 0xa0-0x80, Secret, keys_b, 10);  // # last round key
+    
+    VAESNI_enc(inout0, inout0, rndkey);
+    VPxor_buffer(Z0, Hkey, inp, 0x00, Secret, in_b, count*6 + 0);
+    VAESNI_enc(inout1, inout1, rndkey);
+    VPxor_buffer(Z1, Hkey, inp, 0x10, Secret, in_b, count*6 + 1);
+    VAESNI_enc(inout2, inout2, rndkey);
+    VPxor_buffer(Z2, Hkey, inp, 0x20, Secret, in_b, count*6 + 2);
+    VAESNI_enc(inout3, inout3, rndkey);
+    VPxor_buffer(Xi, Hkey, inp, 0x30, Secret, in_b, count*6 + 3);
+    VAESNI_enc(inout4, inout4, rndkey);
+    VPxor_buffer(T2, Hkey, inp, 0x40, Secret, in_b, count*6 + 4);
+    VAESNI_enc(inout5, inout5, rndkey);
+    VPxor_buffer(Hkey, Hkey, inp, 0x50, Secret, in_b, count*6 + 5);
+
+    reveal rounds;
+    commute_sub_bytes_shift_rows_forall();
+
+    AddLea64(inp, inp, 0x60);
+}
+
+procedure {:quick} AESNI_ctr32_6x_final(
+    inline alg:algorithm,
+    ghost count:nat,
+    ghost out_b:buffer128,
+
+    ghost key_words:seq(nat32),
+    ghost round_keys:seq(quad32),
+    ghost keys_b:buffer128,
+
+    ghost init0:quad32,
+    ghost init1:quad32,
+    ghost init2:quad32,
+    ghost init3:quad32,
+    ghost init4:quad32,
+    ghost init5:quad32,
+    ghost ctr0:quad32,
+    ghost ctr1:quad32,
+    ghost ctr2:quad32,
+    ghost ctr3:quad32,
+    ghost ctr4:quad32,
+    ghost ctr5:quad32,
+    ghost plain0:quad32,
+    ghost plain1:quad32,
+    ghost plain2:quad32,
+    ghost plain3:quad32,
+    ghost plain4:quad32,
+    ghost plain5:quad32
+    )
+    lets
+        outp @= rsi; key @= rcx; 
+        Ii @= xmm0; T1 @= xmm1; T2 @= xmm2; Hkey @= xmm3;
+        Z0 @= xmm4; Z1 @= xmm5; Z2 @= xmm6; Xi @= xmm8;
+        inout0 @= xmm9; inout1 @= xmm10; inout2 @= xmm11; inout3 @= xmm12;
+        inout4 @= xmm13; inout5 @= xmm14; rndkey @= xmm15;
+
+    reads
+        key; 
+        memTaint;
+
+    modifies
+        outp;
+        Ii; T1; T2; Hkey; Z0; Z1; Z2; Xi;
+        inout0; inout1; inout2; inout3; inout4; inout5; rndkey;
+        mem; efl;
+
+    requires
+        validDstAddrsOffset128(mem, outp, out_b, count*6, 6, memTaint, Secret);
+        outp + 0x60 < pow2_64;
+
+        // AES reqs
+        aes_reqs(alg, key_words, round_keys, keys_b, key, mem, memTaint);
+
+        init0 == quad32_xor(ctr0, index(round_keys, 0));
+        init1 == quad32_xor(ctr1, index(round_keys, 0));
+        init2 == quad32_xor(ctr2, index(round_keys, 0));
+        init3 == quad32_xor(ctr3, index(round_keys, 0));
+        init4 == quad32_xor(ctr4, index(round_keys, 0));
+        init5 == quad32_xor(ctr5, index(round_keys, 0));
+
+        inout0 == rounds_opaque(init0, round_keys, #nat(nr(alg)-1));
+        inout1 == rounds_opaque(init1, round_keys, #nat(nr(alg)-1));
+        inout2 == rounds_opaque(init2, round_keys, #nat(nr(alg)-1));
+        inout3 == rounds_opaque(init3, round_keys, #nat(nr(alg)-1));
+        inout4 == rounds_opaque(init4, round_keys, #nat(nr(alg)-1));
+        inout5 == rounds_opaque(init5, round_keys, #nat(nr(alg)-1));
+
+        let rk := index(round_keys, #nat(nr(alg)));
+        Z0   == quad32_xor(rk, plain0);
+        Z1   == quad32_xor(rk, plain1);
+        Z2   == quad32_xor(rk, plain2);
+        Xi   == quad32_xor(rk, plain3);
+        T2   == quad32_xor(rk, plain4);
+        Hkey == quad32_xor(rk, plain5);
+        
+    ensures
+        modifies_buffer_specific128(out_b, old(mem), mem, count*6+0, count*6+5);
+        slice_work_around(buffer128_as_seq(mem, out_b), 6*count) == old(slice_work_around(buffer128_as_seq(mem, out_b), 6*count));   
+        outp == old(outp) + 0x60; 
+
+        buffer128_read(out_b, count*6 + 0, mem) == inout0;
+        buffer128_read(out_b, count*6 + 1, mem) == inout1;
+        buffer128_read(out_b, count*6 + 2, mem) == inout2;
+        buffer128_read(out_b, count*6 + 3, mem) == inout3;
+        buffer128_read(out_b, count*6 + 4, mem) == inout4;
+        buffer128_read(out_b, count*6 + 5, mem) == inout5;
+
+        inout0 == quad32_xor(plain0, aes_encrypt_le(alg, key_words, ctr0));
+        inout1 == quad32_xor(plain1, aes_encrypt_le(alg, key_words, ctr1));
+        inout2 == quad32_xor(plain2, aes_encrypt_le(alg, key_words, ctr2));
+        inout3 == quad32_xor(plain3, aes_encrypt_le(alg, key_words, ctr3));
+        inout4 == quad32_xor(plain4, aes_encrypt_le(alg, key_words, ctr4));
+        inout5 == quad32_xor(plain5, aes_encrypt_le(alg, key_words, ctr5));
+       
+{
+    VAESNI_enc_last(inout0, inout0, Z0);
+    VAESNI_enc_last(inout1, inout1, Z1);
+    VAESNI_enc_last(inout2, inout2, Z2);
+    VAESNI_enc_last(inout3, inout3, Xi);
+    VAESNI_enc_last(inout4, inout4, T2);
+    VAESNI_enc_last(inout5, inout5, Hkey);
+
+    Store128_buffer(outp, inout0, 0x00, Secret, out_b, count*6 + 0);
+    Store128_buffer(outp, inout1, 0x10, Secret, out_b, count*6 + 1);
+    Store128_buffer(outp, inout2, 0x20, Secret, out_b, count*6 + 2);
+    Store128_buffer(outp, inout3, 0x30, Secret, out_b, count*6 + 3);
+    Store128_buffer(outp, inout4, 0x40, Secret, out_b, count*6 + 4);
+    Store128_buffer(outp, inout5, 0x50, Secret, out_b, count*6 + 5);
+
+    AddLea64(outp, outp, 0x60);
+    
+    lemma_quad32_xor_commutes_forall();
+    finish_cipher_opt(alg, ctr0, plain0, init0, old(inout0), inout0, round_keys);
+    finish_cipher_opt(alg, ctr1, plain1, init1, old(inout1), inout1, round_keys);
+    finish_cipher_opt(alg, ctr2, plain2, init2, old(inout2), inout2, round_keys);
+    finish_cipher_opt(alg, ctr3, plain3, init3, old(inout3), inout3, round_keys);
+    finish_cipher_opt(alg, ctr4, plain4, init4, old(inout4), inout4, round_keys);
+    finish_cipher_opt(alg, ctr5, plain5, init5, old(inout5), inout5, round_keys);
+    finish_aes_encrypt_le(alg, ctr0, key_words);
+    finish_aes_encrypt_le(alg, ctr1, key_words);
+    finish_aes_encrypt_le(alg, ctr2, key_words);
+    finish_aes_encrypt_le(alg, ctr3, key_words);
+    finish_aes_encrypt_le(alg, ctr4, key_words);
+    finish_aes_encrypt_le(alg, ctr5, key_words);
 }
