@@ -3,9 +3,12 @@ module Hacl.Spec.Curve25519.Field64.Lemmas
 open FStar.Mul
 open Lib.Sequence
 open Lib.IntTypes
+open Lib.Lemmas
 
 open Spec.Curve25519
 open Hacl.Spec.Curve25519.Field64.Definition
+
+module BSeq = Lib.ByteSequence
 
 #reset-options "--z3rlimit 30 --using_facts_from '* -FStar.Seq'"
 
@@ -327,3 +330,39 @@ val lemma_mul4_expand:
       as_nat4 r * v f2 * pow2 64 * pow2 64 + as_nat4 r * v f3 * pow2 64 * pow2 64 * pow2 64 ==
       as_nat4 f * as_nat4 r)
 let lemma_mul4_expand f r = ()
+
+val lemma_felem64_mod255: a:lseq uint64 4 ->
+  Lemma (
+    let r = a.[3] <- (a.[3] &. u64 0x7fffffffffffffff) in
+    BSeq.nat_from_intseq_le r == BSeq.nat_from_intseq_le a % pow2 255)
+let lemma_felem64_mod255 a =
+  let (a0, a1, a2, a3) = (a.[0], a.[1], a.[2], a.[3]) in
+  Lib.Lemmas.lemma_nat_from_uints64_le_4 a;
+  assert (BSeq.nat_from_intseq_le a == v a0 + v a1 * pow2 64 +
+    v a2 * pow2 64 * pow2 64 + v a3 * pow2 64 * pow2 64 * pow2 64);
+  FStar.Math.Lemmas.lemma_mod_plus_distr_r (v a0 + v a1 * pow2 64 +
+    v a2 * pow2 64 * pow2 64) (v a3 * pow2 64 * pow2 64 * pow2 64) (pow2 255);
+  assert_norm (pow2 64 * pow2 64 * pow2 64 = pow2 192);
+  FStar.Math.Lemmas.pow2_multiplication_modulo_lemma_2 (v a3) 255 192;
+  assert ((v a3 * pow2 192) % pow2 255 = (v a3 % pow2 63) * pow2 192);
+  assert_norm (BSeq.nat_from_intseq_le a % pow2 255 ==
+    (v a0 + v a1 * pow2 64 + v a2 * pow2 64 * pow2 64 +
+    (v a3 % pow2 63) * pow2 64 * pow2 64 * pow2 64) % pow2 255);
+  assert (v a0 + v a1 * pow2 64 + v a2 * pow2 64 * pow2 64 +
+    (v a3 % pow2 63) * pow2 64 * pow2 64 * pow2 64 <=
+    (pow2 64 - 1) + (pow2 64 - 1) * pow2 64 + (pow2 64 - 1) * pow2 64 * pow2 64 +
+    (pow2 63 - 1) * pow2 64 * pow2 64 * pow2 64);
+  assert (v a0 + v a1 * pow2 64 + v a2 * pow2 64 * pow2 64 +
+    (v a3 % pow2 63) * pow2 64 * pow2 64 * pow2 64 <=
+    pow2 63 * pow2 64 * pow2 64 * pow2 64 - 1);
+  assert_norm (pow2 63 * pow2 64 * pow2 64 * pow2 64 = pow2 255);
+  FStar.Math.Lemmas.modulo_lemma (v a0 + v a1 * pow2 64 + v a2 * pow2 64 * pow2 64 +
+    (v a3 % pow2 63) * pow2 64 * pow2 64 * pow2 64) (pow2 255);
+  assert_norm (BSeq.nat_from_intseq_le a % pow2 255 ==
+    v a0 + v a1 * pow2 64 + v a2 * pow2 64 * pow2 64 +
+    (v a3 % pow2 63) * pow2 64 * pow2 64 * pow2 64);
+  let a3' = a3 &. u64 0x7fffffffffffffff in
+  assert_norm (0x7fffffffffffffff = pow2 63 - 1);
+  uintv_extensionality (mod_mask #U64 63ul) (u64 0x7fffffffffffffff);
+  let r = a.[3] <- a3' in
+  Lib.Lemmas.lemma_nat_from_uints64_le_4 r

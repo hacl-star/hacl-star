@@ -2,6 +2,7 @@ module Hacl.Impl.Curve25519.Generic
 
 open FStar.HyperStack
 open FStar.HyperStack.All
+open FStar.Mul
 
 open Lib.IntTypes
 open Lib.Buffer
@@ -21,6 +22,7 @@ module F64 = Hacl.Impl.Curve25519.Field64
 
 module S = Spec.Curve25519
 module M = Hacl.Spec.Curve25519.AddAndDouble
+module Lemmas = Hacl.Spec.Curve25519.Field64.Lemmas
 
 friend Lib.LoopCombinators
 
@@ -37,8 +39,13 @@ val scalar_bit:
   -> Stack uint64
     (requires fun h0 -> live h0 s)
     (ensures  fun h0 r h1 -> h0 == h1 /\
-      r == S.ith_bit (as_seq h0 s) (v n))
-let scalar_bit s n = to_u64 ((s.(n /. 8ul) >>. (n %. 8ul)) &. u8 1)
+      r == S.ith_bit (as_seq h0 s) (v n) /\ v r <= 1)
+let scalar_bit s n =
+  let h0 = ST.get () in
+  mod_mask_lemma ((LSeq.index (as_seq h0 s) (v n / 8)) >>. (n %. 8ul)) 1ul;
+  assert_norm (1 = pow2 1 - 1);
+  uintv_extensionality (mod_mask #U8 1ul) (u8 1);
+  to_u64 ((s.(n /. 8ul) >>. (n %. 8ul)) &. u8 1)
 
 inline_for_extraction
 val decode_point_:
@@ -55,14 +62,17 @@ let decode_point_ #s o i =
   let tmp = create 4ul (u64 0) in
   let h0 = ST.get () in
   uints_from_bytes_le #U64 tmp i;
+  let h1 = ST.get () in
+  assume (BSeq.nat_from_intseq_le (as_seq h1 tmp) == BSeq.nat_from_bytes_le (as_seq h0 i));
   let tmp3 = tmp.(3ul) in
   tmp.(3ul) <- tmp3 &. u64 0x7fffffffffffffff;
   mod_mask_lemma tmp3 63ul;
   assert_norm (0x7fffffffffffffff = pow2 63 - 1);
   uintv_extensionality (mod_mask #U64 63ul) (u64 0x7fffffffffffffff);
-  let h1 = ST.get () in
-  assert (v (LSeq.index (as_seq h1 tmp) 3) < pow2 63);
-  assume (BSeq.nat_from_intseq_le (as_seq h1 tmp) == BSeq.nat_from_bytes_le (as_seq h0 i) % pow2 255);
+  let h2 = ST.get () in
+  assert (v (LSeq.index (as_seq h2 tmp) 3) < pow2 63);
+  Lemmas.lemma_felem64_mod255 (as_seq h1 tmp);
+  assert (BSeq.nat_from_intseq_le (as_seq h2 tmp) == BSeq.nat_from_bytes_le (as_seq h0 i) % pow2 255);
   let x : felem s = sub o 0ul (nlimb s) in
   let z : felem s = sub o (nlimb s) (nlimb s) in
   set_one z;
