@@ -69,13 +69,13 @@ val up_down_identity (mem:mem)
       (requires (forall x. not (Map.contains heap x) ==> Map.sel heap x == Map.sel (down_mem mem) x))
       (ensures (down_mem (up_mem heap mem) == heap))
 
-// val update_buffer_up_mem
-//       (mem:mem)
-//       (b:b8{List.memP b (ptrs_of_mem mem)})
-//       (heap1:heap{correct_down mem heap1})
-//       (heap2:heap{Set.equal (Map.domain heap1) (Map.domain heap2)})
-//  : Lemma
-//       (requires (forall x. x < addrs_of_mem mem b \/ x >= addrs_of_mem mem b + DV.length (get_downview b.bsrc)
-//         ==> heap1.[x] == heap2.[x]))
-//       (ensures hs_of_mem (up_mem heap2 mem) ==
-//                DV.upd_seq (hs_of_mem mem) (get_downview b.bsrc) (get_seq_heap heap2 (addrs_of_mem mem) b))
+val update_buffer_up_mem
+      (mem:mem)
+      (b:b8{List.memP b (ptrs_of_mem mem)})
+      (heap1:heap{correct_down mem heap1})
+      (heap2:heap{Set.equal (Map.domain heap1) (Map.domain heap2)})
+ : Lemma
+      (requires (forall x. x < addrs_of_mem mem b \/ x >= addrs_of_mem mem b + DV.length (get_downview b.bsrc)
+        ==> heap1.[x] == heap2.[x]))
+      (ensures hs_of_mem (up_mem heap2 mem) ==
+               DV.upd_seq (hs_of_mem mem) (get_downview b.bsrc) (get_seq_heap heap2 (addrs_of_mem mem) b))
