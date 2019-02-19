@@ -131,6 +131,8 @@ clean:
 # Configuration #
 #################
 
+include Makefile.common
+
 IMPORT_FSTAR_TYPES := $(VALE_HOME)/bin/importFStarTypes.exe
 PYTHON3 := $(shell tools/findpython3.sh)
 ifeq ($(OS),Windows_NT)
@@ -151,6 +153,10 @@ ifeq ($(shell uname -s),Darwin)
 else
   SED := sed
   TIME := /usr/bin/time
+endif
+
+ifneq ($(shell realpath $$(pwd)),$(shell realpath $$HACL_HOME))
+  $(error HACL_HOME, currently set to $(HACL_HOME), does not seem to point to the current directory)
 endif
 
 
@@ -212,8 +218,6 @@ FSTAR_ROOTS = $(wildcard $(addsuffix /*.fsti,$(DIRS)) $(addsuffix /*.fst,$(DIRS)
 
 # Convenience target. Remember to run make vale-fst first.
 verify: $(addsuffix .checked,$(FSTAR_ROOTS))
-
-include Makefile.common
 
 # We currently force regeneration of three depend files. This is long.
 
@@ -293,12 +297,15 @@ VALE_FLAGS = -include $(HACL_HOME)/vale/code/lib/util/Operator.vaf
 
 obj/Operator.fst: VALE_FLAGS=
 
+# Since valedepend generates "foo.fsti: foo.fst", ensure that the fsti is
+# more recent than the fst (we don't know in what order vale.exe writes
+# the files). (Actually, we know, hence this extra touch.)
 %.fst:
 	$(call run-with-log,\
 	  $(MONO) $(VALE_HOME)/bin/vale.exe -fstarText -quickMods \
 	    -typecheck -include $*.types.vaf \
 	    $(VALE_FLAGS) \
-	    -in $< -out $@ -outi $@i \
+	    -in $< -out $@ -outi $@i && touch -c $@i \
 	  ,[VALE] $(notdir $*),$(call to-obj-dir,$@))
 
 # A pseudo-target for the first stage.
