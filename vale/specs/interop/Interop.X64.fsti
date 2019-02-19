@@ -3,7 +3,8 @@ open FStar.Mul
 open Interop.Base
 module B = LowStar.Buffer
 module BS = X64.Bytes_Semantics_s
-module BV = LowStar.BufferView
+module BV = LowStar.BufferView.Up
+module DV = LowStar.BufferView.Down
 module HS = FStar.HyperStack
 module TS = X64.Taint_Semantics_s
 module MS = X64.Machine_s
@@ -72,10 +73,10 @@ let arg_as_nat64 (a:arg) : GTot MS.nat64 =
      UInt32.v x
   | TD_Base TUInt64 ->
      UInt64.v x
-  | TD_Buffer _ _ ->
-    let b:b8 = Buffer (x <: B.buffer UInt8.t) true in
+  | TD_Buffer src _ _ ->
+    let b:b8 = Buffer (x <: B.buffer (base_typ_as_type src)) true in
     global_addrs_map b
-  | TD_ImmBuffer _ _ -> global_addrs_map (imm_to_b8 x)
+  | TD_ImmBuffer src _ _ -> global_addrs_map (imm_to_b8 src x)
 
 [@__reduce__]
 let update_regs (n:nat)
@@ -89,8 +90,8 @@ let update_regs (n:nat)
 let max_slots = n:pos{UInt.size n UInt32.n /\ n % 8 == 0}
 
 let stack_buffer (num_b8_slots:max_slots) =
-  b:buf_t TUInt64{
-    B.length b == num_b8_slots
+  b:buf_t TUInt8 TUInt64{
+    DV.length (get_downview b) == num_b8_slots
   }
 
 let regs_with_stack (regs:registers) (#num_b8_slots:_) (stack_b:stack_buffer num_b8_slots)
@@ -122,12 +123,12 @@ let upd_taint_map_b8 (taint:taint_map) (x:b8) (tnt:MS.taint)  : taint_map =
      else taint y
 
 [@__reduce__]
-let upd_taint_map_arg (a:arg) (tm:taint_map) : taint_map =
+let upd_taint_map_arg (a:arg) (tm:taint_map) : GTot taint_map =
     match a with
-    | (| TD_Buffer t {taint=tnt}, x |) ->
+    | (| TD_Buffer _ _ {taint=tnt}, x |) ->
       upd_taint_map_b8 tm (Buffer x true) tnt
-    | (| TD_ImmBuffer t {taint=tnt}, x |) ->
-      upd_taint_map_b8 tm (imm_to_b8 x) tnt
+    | (| TD_ImmBuffer src _ {taint=tnt}, x |) ->
+      upd_taint_map_b8 tm (imm_to_b8 src x) tnt
     | (| TD_Base _, _ |) ->
       tm
 
@@ -140,17 +141,17 @@ let mk_taint (as:list arg) (tm:taint_map) : GTot taint_map =
 let taint_of_arg (a:arg) =
   let (| tag, x |) = a in
   match tag with
-  | TD_ImmBuffer TUInt64 {taint=tnt}
-  | TD_ImmBuffer TUInt128 {taint=tnt}
-  | TD_Buffer TUInt64 {taint=tnt}
-  | TD_Buffer TUInt128 {taint=tnt} -> Some tnt
+  | TD_ImmBuffer _ TUInt64 {taint=tnt}
+  | TD_ImmBuffer _ TUInt128 {taint=tnt}
+  | TD_Buffer _ TUInt64 {taint=tnt}
+  | TD_Buffer _ TUInt128 {taint=tnt} -> Some tnt
   | _ -> None
 
-let taint_arg_b8 (a:arg{Some? (taint_of_arg a)}) : b8 =
+let taint_arg_b8 (a:arg{Some? (taint_of_arg a)}) : GTot b8 =
   let (| tag, x |) = a in
   match tag with
-  | TD_Buffer _ _ -> Buffer (x <: B.buffer UInt8.t) true
-  | TD_ImmBuffer _ _ -> imm_to_b8 x
+  | TD_Buffer src _ _ -> Buffer (x <: B.buffer (base_typ_as_type src)) true
+  | TD_ImmBuffer src _ _ -> imm_to_b8 src x
 
 let rec taint_arg_args_b8_mem (args:list arg) (a:arg)
   : Lemma (List.memP a args /\ Some? (taint_of_arg a) ==>
@@ -172,7 +173,7 @@ let rec mk_taint_equiv
        let (| tag, x |) = hd in
        match tag with
        | TD_Base _ -> ()
-       | TD_Buffer _ _ | TD_ImmBuffer _ _ ->
+       | TD_Buffer _ _ _ | TD_ImmBuffer _ _ _ ->
          disjoint_or_eq_cons hd tl;
          BigOps.big_and'_forall (disjoint_or_eq_1 hd) tl
 
