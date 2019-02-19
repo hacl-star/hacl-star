@@ -2,12 +2,34 @@ module BufferViewHelpers
 
 module MB = LowStar.Monotonic.Buffer
 module BV = LowStar.BufferView
+module DV = LowStar.BufferView.Down
 module HS = FStar.HyperStack
 module ST = FStar.HyperStack.ST
 open FStar.HyperStack.ST
 
 open LowStar.Modifies
 open LowStar.ModifiesPat
+
+let lemma_dv_equal
+  (#src:Type)
+  (#rel #rrel:MB.srel src)
+  (#dst:Type)
+  (view:DV.view src dst)
+  (b:MB.mbuffer src rel rrel)
+  (h0 h1:HS.mem) : Lemma
+  (requires MB.as_seq h0 b == MB.as_seq h1 b)
+  (ensures (let dv = DV.mk_buffer_view b view in
+    DV.as_seq h0 dv == DV.as_seq h1 dv)) =
+    let dv = DV.mk_buffer_view b view in
+    let s0 = DV.as_seq h0 dv in
+    let s1 = DV.as_seq h1 dv in
+    let aux (i:nat{i < DV.length dv}) : Lemma (Seq.index s0 i == Seq.index s1 i) =
+      DV.as_seq_sel h0 dv i;
+      DV.as_seq_sel h1 dv i;
+      DV.get_sel h0 dv i;
+      DV.get_sel h1 dv i
+    in Classical.forall_intro aux;
+    Seq.lemma_eq_intro s0 s1
 
 let lemma_bv_equal
   (#src:Type) (#rel #rrel:MB.srel src) (#dst:Type) 
