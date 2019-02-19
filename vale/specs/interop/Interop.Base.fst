@@ -1,6 +1,7 @@
 module Interop.Base
 include Interop.Types
 module MB = LowStar.Monotonic.Buffer
+module DV = LowStar.BufferView.Down
 module B = LowStar.Buffer
 module IB = LowStar.ImmutableBuffer
 module BS = X64.Bytes_Semantics_s
@@ -13,38 +14,39 @@ module HS = FStar.HyperStack
 module W = Words_s
 module L = FStar.List.Tot
 
-let base_typ_as_type (t:base_typ) : Tot eqtype =
-  let open W in
-  let open Types_s in
-  match t with
-  | TUInt8 -> UInt8.t
-  | TUInt16 -> UInt16.t
-  | TUInt32 -> UInt32.t
-  | TUInt64 -> UInt64.t
-  | TUInt128 -> quad32
 
 [@__reduce__]
-let buf_t t = b:B.buffer UInt8.t{B.length b % view_n t == 0}
+let buf_t src = b:B.buffer (base_typ_as_type src)
 
 [@__reduce__]
-let ibuf_t t = b:IB.ibuffer UInt8.t{B.length b % view_n t == 0}
+let ibuf_t src = b:IB.ibuffer (base_typ_as_type src)
 
 let lemma_seq_neq_intro (#a:Type) (s1:Seq.seq a) (s2:Seq.seq a)
  : Lemma (requires (Seq.length s1 =!= Seq.length s2))
          (ensures  (~ (Seq.equal s1 s2)))
  = ()
 
-let imm_to_b8 (b:IB.ibuffer UInt8.t) : b8 = 
+let default_v_of_typ (t:base_typ) : (base_typ_as_type t) = match t with
+  | TUInt8 -> UInt8.uint_to_t 0
+  | TUInt16 -> UInt16.uint_to_t 0
+  | TUInt32 -> UInt32.uint_to_t 0
+  | TUInt64 -> UInt64.uint_to_t 0
+  | TUInt128 -> Words_s.Mkfour #W.nat32 0 0 0 0
+
+
+let imm_to_b8 (src:base_typ) (b:IB.ibuffer (base_typ_as_type src)) : GTot b8 = 
   let x:b8' = Buffer b false in
-  let s1 = Seq.create 1 (UInt8.uint_to_t 0) in
+  let s1 = Seq.create 1 (default_v_of_typ src) in
   lemma_seq_neq_intro s1 Seq.empty;
   Classical.exists_intro (fun s -> ~ (x.rel s Seq.empty)) s1;
   x
 
+let mut_to_b8 (src:base_typ) (b:B.buffer (base_typ_as_type src)) : GTot b8 = 
+  Buffer b true
 
 [@__reduce__]
 let disjoint_or_eq_b8 (ptr1 ptr2:b8) =
-  B.loc_disjoint (B.loc_buffer ptr1.b) (B.loc_buffer ptr2.b) \/
+  B.loc_disjoint (B.loc_buffer ptr1.bsrc) (B.loc_buffer ptr2.bsrc) \/
   ptr1 == ptr2
 
 let list_disjoint_or_eq (ptrs:list b8) =
@@ -54,7 +56,7 @@ let list_disjoint_or_eq (ptrs:list b8) =
 
 unfold
 let list_live mem (ptrs:list b8) =
-  forall p . {:pattern (L.memP p ptrs)} L.memP p ptrs ==> B.live mem p.b
+  forall p . {:pattern (L.memP p ptrs)} L.memP p ptrs ==> B.live mem p.bsrc
 
 assume val global_addrs_map : addr_map
 
@@ -233,11 +235,13 @@ let __test : n_dep_arrow [TD_Base TUInt8] (fun (x:UInt8.t) -> y:UInt8.t{x == y})
 
 [@__reduce__]
 let disjoint_not_eq 
-  (#rel1 #rel2 #rrel1 #rrel2:MB.srel UInt8.t) 
-  (x:MB.mbuffer UInt8.t rel1 rrel1) 
-  (y:MB.mbuffer UInt8.t rel2 rrel2) =
-    B.disjoint #UInt8.t x y /\
-    ~ (eq3 #(MB.mbuffer UInt8.t rel1 rrel1) #(MB.mbuffer UInt8.t rel2 rrel2) x y)
+  (#src1 #src2:Type0)
+  (#rel1 #rrel1:MB.srel src1) 
+  (#rel2 #rrel2:MB.srel src2) 
+  (x:MB.mbuffer src1 rel1 rrel1) 
+  (y:MB.mbuffer src2 rel2 rrel2) =
+    B.loc_disjoint (B.loc_buffer x) (B.loc_buffer y) // /\
+    // ~ (eq3 #(MB.mbuffer src1 rel1 rrel1) #(MB.mbuffer src2 rel2 rrel2) x y)
 
 [@__reduce__]
 let disjoint_or_eq_1 (a:arg) (b:arg) =
@@ -249,10 +253,11 @@ let disjoint_or_eq_1 (a:arg) (b:arg) =
     // An immutable buffer and a trivial buffer should not be equal
     | (| TD_ImmBuffer tx _, xb |), (| TD_Buffer ty _, yb |)
     | (| TD_Buffer tx _, xb |), (| TD_ImmBuffer ty _, yb |) ->
+//     B.disjoint xb yb
       disjoint_not_eq xb yb
     | (| TD_Buffer tx {taint=tntx}, xb |), (| TD_Buffer ty {taint=tnty}, yb |)
     | (| TD_ImmBuffer tx {taint=tntx}, xb |), (| TD_ImmBuffer ty {taint=tnty}, yb |) ->
-      disjoint_not_eq xb yb \/ (eq3 xb yb /\ tntx == tnty)
+      disjoint_not_eq xb yb \/ (eq3 xb yb /\ tntx == tnty /\ tx == ty)
     | _ -> True
 
 [@__reduce__]
@@ -281,10 +286,10 @@ let mem_roots (args:list arg) =
 
 [@__reduce__]
 let args_b8 (args:list arg) : GTot (list b8) =
-  let maybe_cons_buffer (x:arg) (args:list b8) : list b8 =
+  let maybe_cons_buffer (x:arg) (args:list b8) : GTot (list b8) =
       match x with
-      | (|TD_Buffer _ _, x|) -> (Buffer x true) :: args
-      | (|TD_ImmBuffer _ _, x|) -> imm_to_b8 x :: args
+      | (|TD_Buffer src _, x|) -> mut_to_b8 src x :: args
+      | (|TD_ImmBuffer src _, x|) -> imm_to_b8 src x :: args
       | (|TD_Base _, _ |) -> args
   in
   List.Tot.fold_right_gtot args maybe_cons_buffer []
@@ -337,14 +342,14 @@ let rec args_b8_mem (l:list arg) (y:b8)
              L.memP a l /\
              (match a with
               | (| TD_Base _, _|) -> False
-              | (| TD_Buffer _ _, x|) -> Buffer x true == y
-              | (| TD_ImmBuffer _ _, x|) -> imm_to_b8 x == y)))
+              | (| TD_Buffer src _, x|) -> mut_to_b8 src x == y
+              | (| TD_ImmBuffer src _, x|) -> imm_to_b8 src x == y)))
   = let goal (l:list arg) (a:arg) =
         L.memP a l /\
         (match a with
          | (| TD_Base _, _|) -> False
-         | (| TD_Buffer _ _, x|) -> Buffer x true == y
-         | (| TD_ImmBuffer _ _, x|) -> imm_to_b8 x == y)
+         | (| TD_Buffer src _, x|) -> mut_to_b8 src x == y
+         | (| TD_ImmBuffer src _, x|) -> imm_to_b8 src x == y)
     in
     match l with
     | [] -> ()
@@ -355,12 +360,12 @@ let rec args_b8_mem (l:list arg) (y:b8)
         assert ((exists a. goal tl a) ==> (exists a. goal l a))
       | (| TD_Buffer bt q, x |) ->  
         let aux_1 ()
-          : Lemma (requires (y == Buffer x true))
+          : Lemma (requires (y == mut_to_b8 bt x))
                   (ensures (exists a. goal l a)) =
           FStar.Classical.exists_intro (goal l) hd
         in
         let aux_2 ()
-          : Lemma (requires (Buffer x true =!= y))
+          : Lemma (requires (mut_to_b8 bt x =!= y))
                   (ensures (L.memP y (args_b8 l) <==> (exists a. goal l a))) =
           args_b8_mem tl y
         in            
@@ -368,12 +373,12 @@ let rec args_b8_mem (l:list arg) (y:b8)
         FStar.Classical.move_requires aux_2 ()
       | (| TD_ImmBuffer bt q, x |) ->  
         let aux_1 ()
-          : Lemma (requires (y == imm_to_b8 x))
+          : Lemma (requires (y == imm_to_b8 bt x))
                   (ensures (exists a. goal l a)) =
           FStar.Classical.exists_intro (goal l) hd
         in
         let aux_2 ()
-          : Lemma (requires (imm_to_b8 x =!= y))
+          : Lemma (requires (imm_to_b8 bt x =!= y))
                   (ensures (L.memP y (args_b8 l) <==> (exists a. goal l a))) =
           args_b8_mem tl y
         in            
@@ -409,7 +414,7 @@ let rec args_b8_live (hs:HS.mem) (args:list arg{all_live hs args})
         assert (args_b8 args == Buffer x true :: args_b8 tl)
       | (| TD_ImmBuffer t _, x |) ->
         assert (B.live hs x);
-        assert (args_b8 args == imm_to_b8 x :: args_b8 tl)        
+        assert (args_b8 args == imm_to_b8 t x :: args_b8 tl)        
 
 let liveness_disjointness (args:list arg) (h:mem_roots args)
   : Lemma (list_disjoint_or_eq (args_b8 args) /\
@@ -449,7 +454,11 @@ let rec mem_roots_p_modifies_none (args:list arg) (h0:HS.mem) (h1:HS.mem)
     | [] -> ()
     | hd::tl ->
       all_live_cons hd tl h0;
-      mem_roots_p_modifies_none tl h0 h1
+      mem_roots_p_modifies_none tl h0 h1;
+      match hd with
+      | (| TD_Base _, _ |) -> ()
+      | (| TD_Buffer _ _, x |)
+      | (| TD_ImmBuffer _ _, x |) -> assert (B.live h1 x)
 
 [@__reduce__]
 let arg_of_lb #t (x:buf_t t) : arg = (| TD_Buffer t default_bq, x |)
@@ -474,19 +483,19 @@ let rec disjoint_or_eq_fresh
       all_live_cons hd tl h0;
       disjoint_or_eq_fresh x tl h0;
       match hd with
-      | (|TD_ImmBuffer _ _, y|) ->
-      IB.inhabited_immutable_buffer_is_distinct_from_buffer (UInt8.uint_to_t 0) y x    
+      | (|TD_ImmBuffer t _, y|) -> ()
+//      IB.inhabited_immutable_buffer_is_distinct_from_buffer (default_v_of_typ t) y x    
       | _ -> ()
 
 let rec write_taint
     (i:nat)
     (mem:mem)
     (ts:b8 -> GTot MS.taint)
-    (b:b8{i <= B.length b.b})
+    (b:b8{i <= DV.length (get_downview b.bsrc)})
     (accu:MS.memTaint_t)
   : GTot MS.memTaint_t
-        (decreases %[B.length b.b - i]) =
-  if i = B.length b.b then accu
+        (decreases %[DV.length (get_downview b.bsrc) - i]) =
+  if i = DV.length (get_downview b.bsrc) then accu
   else write_taint (i + 1) mem ts b (Map.upd accu (Mem?.addrs mem b + i) (ts b))
 
 let create_memtaint
@@ -497,16 +506,17 @@ let create_memtaint
   = List.Tot.fold_right_gtot ps (write_taint 0 mem ts) (FStar.Map.const MS.Public)
 
 let correct_down_p (mem:mem) (h:BS.heap) (p:b8) =
-  let length = B.length p.b in
-  let contents = B.as_seq (hs_of_mem mem) p.b in
+  let b = get_downview p.bsrc in
+  let length = DV.length b in
+  let contents = DV.as_seq (hs_of_mem mem) b in
   let addr = addrs_of_mem mem p in
   let open BS in
   (forall i.{:pattern (Seq.index contents i)}  0 <= i /\ i < length ==> h.[addr + i] == UInt8.v (FStar.Seq.index contents i))
 
-let rec addrs_ptr (i:nat) (addrs:addr_map) (ptr:b8{i <= B.length ptr.b}) (acc:Set.set int)
+let rec addrs_ptr (i:nat) (addrs:addr_map) (ptr:b8{i <= DV.length (get_downview ptr.bsrc)}) (acc:Set.set int)
   : GTot (Set.set int)
-         (decreases (B.length ptr.b - i))
-  = if i = B.length ptr.b then acc
+         (decreases (DV.length (get_downview ptr.bsrc) - i))
+  = if i = DV.length (get_downview ptr.bsrc) then acc
     else addrs_ptr (i + 1) addrs ptr (Set.union (Set.singleton (addrs ptr + i)) acc)
 
 let addrs_set (mem:mem) : GTot (Set.set int) =
