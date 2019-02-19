@@ -47,6 +47,40 @@ let gctr_partial (alg:algorithm) (bound:nat) (plain cipher:seq quad32) (key:seq 
     forall j . {:pattern (index cipher j)} 0 <= j /\ j < bound ==>
       index cipher j == quad32_xor (index plain j) (aes_encrypt_BE alg key (inc32 icb j)))
 
+let gctr_partial_opaque = make_opaque gctr_partial
+
+let gctr_partial_opaque_ignores_postfix (alg:algorithm) (bound:nat) (plain plain' cipher cipher':seq quad32) (key:seq nat32) (icb:quad32) : Lemma
+  (requires is_aes_key_LE alg key /\
+            length plain >= bound /\
+            length cipher >= bound /\
+            length plain' >= bound /\
+            length cipher' >= bound /\
+            slice plain  0 bound == slice plain'  0 bound /\
+            slice cipher 0 bound == slice cipher' 0 bound)
+  (ensures gctr_partial_opaque alg bound plain cipher key icb == gctr_partial_opaque alg bound plain' cipher' key icb)
+  =
+  reveal_opaque gctr_partial;
+  admit();
+  ()
+
+let gctr_partial_extend6 (alg:algorithm) (bound:nat) (plain cipher:seq quad32) (key:seq nat32) (icb:quad32) : Lemma
+  (requires length plain >= bound + 6 /\
+            length cipher >= bound + 6 /\
+            is_aes_key_LE alg key /\
+            gctr_partial_opaque alg bound plain cipher key icb /\
+            index cipher (bound + 0) == quad32_xor (index plain (bound + 0)) (aes_encrypt_BE alg key (inc32 icb (bound + 0))) /\
+            index cipher (bound + 1) == quad32_xor (index plain (bound + 1)) (aes_encrypt_BE alg key (inc32 icb (bound + 1))) /\
+            index cipher (bound + 2) == quad32_xor (index plain (bound + 2)) (aes_encrypt_BE alg key (inc32 icb (bound + 2))) /\
+            index cipher (bound + 3) == quad32_xor (index plain (bound + 3)) (aes_encrypt_BE alg key (inc32 icb (bound + 3))) /\
+            index cipher (bound + 4) == quad32_xor (index plain (bound + 4)) (aes_encrypt_BE alg key (inc32 icb (bound + 4))) /\
+            index cipher (bound + 5) == quad32_xor (index plain (bound + 5)) (aes_encrypt_BE alg key (inc32 icb (bound + 5)))  
+  )
+  (ensures gctr_partial_opaque alg (bound + 6) plain cipher key icb)
+  =
+  reveal_opaque gctr_partial;
+  ()
+  
+
 let test (alg:algorithm) (plain cipher:seq quad32) (key:aes_key_LE alg) (icb:quad32) (count:nat32) : Lemma
   (requires length plain >= 4 /\ length cipher >= 4 /\
             index_work_around_quad32 cipher 0 == quad32_xor (index_work_around_quad32 plain 0) (aes_encrypt_BE alg key (inc32 icb count)))

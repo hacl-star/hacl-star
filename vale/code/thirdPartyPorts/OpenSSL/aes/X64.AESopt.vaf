@@ -989,7 +989,6 @@ procedure {:quick} Loop6x_partial(
         rndkey == index(round_keys, 0);
 
         // Counter requirements
-        //ctr_BE == inc32(ctr_BE_orig, count*6);
         T2 == Mkfour(0, 0, 0, 0x1000000);
         T1 == reverse_bytes_quad32(inc32(ctr_BE, 0));
         counter == ctr_BE.lo0 % 256;
@@ -1077,7 +1076,7 @@ procedure {:quick} Loop6x_partial(
                   init0, init1, init2, init3, init4, init5);
 }
 
-#reset-options "--z3rlimit 45"
+#reset-options "--z3rlimit 400"
 procedure {:quick} {:verify true} Loop6x(
     inline alg:algorithm,  
     ghost count:nat,        // Number of 128-bit blocks processed so far
@@ -1199,7 +1198,7 @@ procedure {:quick} {:verify true} Loop6x(
         len > 0 ==> inout5 == Hkey;
         
         // GCTR progress
-        //len > 0 ==> gctr_partial(alg, 6*(count+1), old(buffer128_as_seq(mem, in_b)), buffer128_as_seq(mem, out_b), key_words, ctr_BE_orig);
+        len > 0 ==> gctr_partial_opaque(alg, 6*(count+1), old(buffer128_as_seq(mem, in_b)), buffer128_as_seq(mem, out_b), key_words, ctr_BE_orig);
 
         // Byte reversals for use by GCM
         buffer128_read(stack_b, 2, mem) == old(reverse_bytes_quad32(buffer128_read(in0_b, count*6 + 5, mem)));
@@ -1234,16 +1233,38 @@ procedure {:quick} {:verify true} Loop6x(
     if (len > 0) {
         Loop6x_save_output(count, out_b);
 
-//        gctr_partial_opaque_ignores_postfix(alg, count*6, 
-//                                            old(buffer128_as_seq(mem, in_b)), old(buffer128_as_seq(mem, in_b)), 
-//                                            old(buffer128_as_seq(mem, out_b)), buffer128_as_seq(mem, out_b), 
-//                                            key_words, ctr_BE_orig);
-//        ghost var plain := old(buffer128_as_seq(mem, in_b));
-//        ghost var cipher := buffer128_as_seq(mem, out_b);
-//        ghost var bound := count*6;
+        gctr_partial_opaque_ignores_postfix(alg, count*6, 
+                                            old(buffer128_as_seq(mem, in_b)), old(buffer128_as_seq(mem, in_b)), 
+                                            old(buffer128_as_seq(mem, out_b)), buffer128_as_seq(mem, out_b), 
+                                            key_words, ctr_BE_orig);
+
+        // Some subset of these are OBSERVE to be able to call the lemma below.  Sigh.
+        ghost var plain := old(buffer128_as_seq(mem, in_b));
+        ghost var cipher := buffer128_as_seq(mem, out_b);
+        ghost var bound := count*6;
+        assert index_work_around_quad32(cipher, bound + 0) == buffer128_read(out_b, bound + 0, mem);
+        assert index_work_around_quad32(cipher, bound + 1) == buffer128_read(out_b, bound + 1, mem);
+        assert index_work_around_quad32(cipher, bound + 2) == buffer128_read(out_b, bound + 2, mem);
+        assert index_work_around_quad32(cipher, bound + 3) == buffer128_read(out_b, bound + 3, mem);
+        assert index_work_around_quad32(cipher, bound + 4) == buffer128_read(out_b, bound + 4, mem);
+        assert index_work_around_quad32(cipher, bound + 5) == buffer128_read(out_b, bound + 5, mem);
+
+        assert index_work_around_quad32(plain, bound + 0) == old(buffer128_read(in_b, bound + 0, mem));
+        assert index_work_around_quad32(plain, bound + 1) == old(buffer128_read(in_b, bound + 1, mem));
+        assert index_work_around_quad32(plain, bound + 2) == old(buffer128_read(in_b, bound + 2, mem));
+        assert index_work_around_quad32(plain, bound + 3) == old(buffer128_read(in_b, bound + 3, mem));
+        assert index_work_around_quad32(plain, bound + 4) == old(buffer128_read(in_b, bound + 4, mem));
+        assert index_work_around_quad32(plain, bound + 5) == old(buffer128_read(in_b, bound + 5, mem));
+
 //        assert {:quick_type} is_aes_key_LE(alg, key_words);
+//        assert buffer128_read(out_b, bound + 5, mem) == quad32_xor(index_work_around_quad32(plain, bound + 5), aes_encrypt_BE(alg, key_words, (inc32(ctr_BE_orig, bound + 5))));
+
+        //assert {:quick_type} is_aes_key_LE(alg, key_words);
 //        assert index_work_around_quad32(cipher, bound) == quad32_xor(index_work_around_quad32(plain, bound), aes_encrypt_BE(alg, key_words, (inc32(ctr_BE_orig, bound))));
-//        gctr_partial_extend6(alg, count*6, old(buffer128_as_seq(mem, in_b)), buffer128_as_seq(mem, out_b), key_words, ctr_BE_orig);
+//        assert {:quick_type} is_aes_key_LE(alg, key_words);
+//        assert index_work_around_quad32(cipher, bound + 1) == quad32_xor(index_work_around_quad32(plain, bound + 1), aes_encrypt_BE(alg, key_words, (inc32(ctr_BE_orig, bound + 1))));
+        assert {:quick_type} is_aes_key_LE(alg, key_words);
+        gctr_partial_extend6(alg, count*6, old(buffer128_as_seq(mem, in_b)), buffer128_as_seq(mem, out_b), key_words, ctr_BE_orig);
 
     }
 
