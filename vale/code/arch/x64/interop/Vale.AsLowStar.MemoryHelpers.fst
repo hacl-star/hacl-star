@@ -2,7 +2,8 @@ module Vale.AsLowStar.MemoryHelpers
 open X64.MemoryAdapters
 open Interop.Base
 module B = LowStar.Buffer
-module BV = LowStar.BufferView
+module UV = LowStar.BufferView.Up
+module DV = LowStar.BufferView.Down
 module ME = X64.Memory
 module VSig = Vale.AsLowStar.ValeSig
 
@@ -12,12 +13,16 @@ friend X64.Vale.Decls
 friend X64.Vale.StateLemmas
 friend X64.MemoryAdapters
 
-let as_vale_buffer_len (#t:base_typ) (x:buf_t t)
-   = BV.length_eq (BV.mk_buffer_view x (ME.uint_view t))
-   
-let as_vale_immbuffer_len (#t:base_typ) (x:ibuf_t t)
-   = BV.length_eq (BV.mk_buffer_view x (ME.uint_view t))
+let as_vale_buffer_len (#src #t:base_typ) (x:buf_t src t)
+   = let db = get_downview x in
+   DV.length_eq db;
+   UV.length_eq (UV.mk_buffer db (ME.uint_view t))
 
+let as_vale_immbuffer_len (#src #t:base_typ) (x:ibuf_t src t)
+   = let db = get_downview x in
+   DV.length_eq db;
+   UV.length_eq (UV.mk_buffer db (ME.uint_view t))
+   
 let state_eq_down_mem (va_s1:V.va_state) (s1:_) = ()
 
 let rec loc_eq (args:list arg)
@@ -27,23 +32,23 @@ let rec loc_eq (args:list arg)
     | hd :: tl -> loc_eq tl
 
 let relate_modifies (args:list arg) (m0 m1 : ME.mem) = loc_eq args
-let reveal_readable (#t:_) (x:buf_t t) (s:ME.mem) = ()
-let reveal_imm_readable (#t:_) (x:ibuf_t t) (s:ME.mem) = ()
-let readable_live (#t:_) (x:buf_t t) (s:ME.mem) = ()
-let readable_imm_live (#t:_) (x:ibuf_t t) (s:ME.mem) = ()
-let buffer_readable_reveal #max_arity #n bt x args h0 stack = ()
+let reveal_readable (#src #t:_) (x:buf_t src t) (s:ME.mem) = ()
+let reveal_imm_readable (#src #t:_) (x:ibuf_t src t) (s:ME.mem) = ()
+let readable_live (#src #t:_) (x:buf_t src t) (s:ME.mem) = ()
+let readable_imm_live (#src #t:_) (x:ibuf_t src t) (s:ME.mem) = ()
+let buffer_readable_reveal #max_arity #n src bt x args h0 stack = ()
 let get_heap_mk_mem_reveal #max_arity #n args h0 stack = ()
-let buffer_as_seq_reveal #max_arity #n t x args h0 stack = ()
-let immbuffer_as_seq_reveal #max_arity #n t x args h0 stack = ()
-let buffer_as_seq_reveal2 t x va_s = ()
-let immbuffer_as_seq_reveal2 t x va_s = ()
-let buffer_addr_reveal t x args h0 = ()
-let immbuffer_addr_reveal t x args h0 = ()
+let buffer_as_seq_reveal #max_arity #n src t x args h0 stack = ()
+let immbuffer_as_seq_reveal #max_arity #n src t x args h0 stack = ()
+let buffer_as_seq_reveal2 src t x va_s = ()
+let immbuffer_as_seq_reveal2 src t x va_s = ()
+let buffer_addr_reveal src t x args h0 = ()
+let immbuffer_addr_reveal src t x args h0 = ()
 let fuel_eq = ()
 let decls_eval_code_reveal c va_s0 va_s1 f = ()
-let as_vale_buffer_disjoint (#t1 #t2:base_typ) (x:buf_t t1) (y:buf_t t2) = ()
-let as_vale_buffer_imm_disjoint (#t1 #t2:base_typ) (x:ibuf_t t1) (y:buf_t t2) = ()
-let as_vale_immbuffer_imm_disjoint (#t1 #t2:base_typ) (x:ibuf_t t1) (y:ibuf_t t2) = ()
+let as_vale_buffer_disjoint (#src1 #src2 #t1 #t2:base_typ) (x:buf_t src1 t1) (y:buf_t src2 t2) = ()
+let as_vale_buffer_imm_disjoint (#src1 #src2 #t1 #t2:base_typ) (x:ibuf_t src1 t1) (y:buf_t src2 t2) = ()
+let as_vale_immbuffer_imm_disjoint (#src1 #src2 #t1 #t2:base_typ) (x:ibuf_t src1 t1) (y:ibuf_t src2 t2) = ()
 let modifies_same_roots s h0 h1 = ()
 let modifies_equal_domains s h0 h1 = ()
 let loc_disjoint_sym (x y:ME.loc)  = ()
@@ -77,23 +82,29 @@ let core_create_lemma_taint_hyp
                  LSig.taint_hyp_arg mem taint_map x);
     BigOps.big_and'_forall (LSig.taint_hyp_arg mem taint_map) args
 
-let buffer_writeable_reveal t x = ()
+let buffer_writeable_reveal src t x = ()
 
-let buffer_read_reveal t h s b i =
-  let b_v = BV.mk_buffer_view b (LSig.view_of_base_typ t) in
-  BV.as_seq_sel h b_v i
+let buffer_read_reveal src t h s b i =
+  let db = get_downview b in
+  DV.length_eq db;
+  let b_v = UV.mk_buffer db (LSig.view_of_base_typ t) in
+  UV.as_seq_sel h b_v i
 
-let imm_buffer_read_reveal t h s b i =
-  let b_v = BV.mk_buffer_view b (LSig.view_of_base_typ t) in
-  BV.as_seq_sel h b_v i
+let imm_buffer_read_reveal src t h s b i =
+  let db = get_downview b in
+  DV.length_eq db;
+  let b_v = UV.mk_buffer db (LSig.view_of_base_typ t) in
+  UV.as_seq_sel h b_v i
 
-let buffer_as_seq_invert t h s b =
+let buffer_as_seq_invert src t h s b =
+  let db = get_downview b in
+  DV.length_eq db;
   assert (Seq.equal 
     (ME.buffer_as_seq s (as_vale_buffer b))
-    (LSig.uint_to_nat_seq_t t (BV.as_seq h (BV.mk_buffer_view b (LSig.view_of_base_typ t)))))
+    (LSig.uint_to_nat_seq_t t (UV.as_seq h (UV.mk_buffer db (LSig.view_of_base_typ t)))))
     
-let buffer_as_seq_reveal_tuint128 x va_s = ()
+let buffer_as_seq_reveal_tuint128 src x va_s = ()
 
-let immbuffer_as_seq_reveal_tuint128 x va_s = ()
+let immbuffer_as_seq_reveal_tuint128 src x va_s = ()
 
-let bounded_buffer_addrs t h b s = ()
+let bounded_buffer_addrs src t h b s = ()

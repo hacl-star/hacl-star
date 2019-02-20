@@ -420,7 +420,7 @@ let get_addr_ptr (t:base_typ) (ptr:int) (h:mem{valid_mem t ptr h})
   : GTot (b:buffer t{List.memP b h.ptrs /\ valid_buffer t ptr b h})
   = Some?.v (find_valid_buffer t ptr h)
 
-#reset-options "--max_fuel 0 --max_ifuel 0 --initial_fuel 0 --initial_ifuel 0"
+#reset-options "--max_fuel 0 --max_ifuel 0 --initial_fuel 0 --initial_ifuel 0 --z3rlimit 20"
 val load_buffer_read
           (t:base_typ)
           (ptr:int)
@@ -466,28 +466,6 @@ let store_mem128 ptr v h =
 let lemma_valid_mem64 b i h = ()
 let lemma_writeable_mem64 b i h = ()
 
-val lemma_load_mem : t:base_typ -> b:buffer t -> i:nat-> h:mem -> Lemma
-  (requires
-    i < Seq.length (buffer_as_seq h b) /\
-    buffer_readable h b
-  )
-  (ensures
-    load_mem t (buffer_addr b h + view_n t `op_Multiply` i) h == buffer_read b i h
-  )
-
-let lemma_load_mem t b i h =
-  let addr = buffer_addr b h + view_n t * i in
-  let view = uint_view t in
-  match find_valid_buffer t addr h with
-  | None -> ()
-  | Some a ->
-    let da = get_downview a.bsrc in
-    let db = get_downview b.bsrc in
-    UV.length_eq (UV.mk_buffer da view);
-    UV.length_eq (UV.mk_buffer db view);
-    assert (IB.disjoint_or_eq_b8 a b);
-    assert (a == b)
-
 val lemma_store_mem : t:base_typ -> b:buffer t -> i:nat-> v:base_typ_as_vale_type t -> h:mem -> Lemma
   (requires
     i < Seq.length (buffer_as_seq h b) /\
@@ -511,11 +489,37 @@ let lemma_store_mem t b i v h =
     assert (IB.disjoint_or_eq_b8 a b);
     assert (a == b)  
 
-let lemma_load_mem64 b i h = lemma_load_mem TUInt64 b i h
+let lemma_load_mem64 b i h =
+  let addr = buffer_addr b h + 8 * i in
+  let view = uint64_view in
+  match find_valid_buffer TUInt64 addr h with
+  | None -> ()
+  | Some a ->
+    let da = get_downview a.bsrc in
+    let db = get_downview b.bsrc in
+    UV.length_eq (UV.mk_buffer da view);
+    UV.length_eq (UV.mk_buffer db view);
+    assert (IB.disjoint_or_eq_b8 a b);
+    assert (a == b)
+
+
 let lemma_store_mem64 b i v h = lemma_store_mem TUInt64 b i v h
 let lemma_valid_mem128 b i h = ()
 let lemma_writeable_mem128 b i h = ()
-let lemma_load_mem128 b i h = lemma_load_mem TUInt128 b i h
+
+let lemma_load_mem128 b i h =
+  let addr = buffer_addr b h + 16 * i in
+  let view = uint128_view in
+  match find_valid_buffer TUInt128 addr h with
+  | None -> ()
+  | Some a ->
+    let da = get_downview a.bsrc in
+    let db = get_downview b.bsrc in
+    UV.length_eq (UV.mk_buffer da view);
+    UV.length_eq (UV.mk_buffer db view);
+    assert (IB.disjoint_or_eq_b8 a b);
+    assert (a == b)
+    
 let lemma_store_mem128 b i v h = lemma_store_mem TUInt128 b i v h
 
 open X64.Machine_s

@@ -16,15 +16,15 @@ let as_normal_t (#a:Type) (x:a) : normal a = x
 ////////////////////////////////////////////////////////////////////////////////
 //First a little standalone, toy experiment
 [@__reduce__] unfold
-let b64 = buf_t TUInt64
+let b64 = buf_t TUInt8 TUInt64
 [@__reduce__] unfold
-let ib64 = ibuf_t TUInt64
+let ib64 = ibuf_t TUInt8 TUInt64
 [@__reduce__] unfold
-let t64_mod = TD_Buffer TUInt64 default_bq
+let t64_mod = TD_Buffer TUInt8 TUInt64 default_bq
 [@__reduce__] unfold
-let t64_no_mod = TD_Buffer TUInt64 ({modified=false; strict_disjointness=false; taint=MS.Secret})
+let t64_no_mod = TD_Buffer TUInt8 TUInt64 ({modified=false; strict_disjointness=false; taint=MS.Secret})
 [@__reduce__] unfold
-let t64_imm = TD_ImmBuffer TUInt64 ({modified=false; strict_disjointness=false; taint=MS.Secret})
+let t64_imm = TD_ImmBuffer TUInt8 TUInt64 ({modified=false; strict_disjointness=false; taint=MS.Secret})
 
 [@__reduce__]
 let dom : IX64.arity_ok_stdcall td =
@@ -113,14 +113,13 @@ let vm_lemma'
                         va_s0.VS.mem va_s1.VS.mem);
     assert (ME.buffer_readable VS.(va_s1.mem) (as_vale_buffer dst));
     assert (ME.buffer_readable VS.(va_s1.mem) (as_vale_immbuffer src));    
-    Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 dst;
+    Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt8 ME.TUInt64 dst;
     va_s1, f
 
 (* Prove that vm_lemma' has the required type *)
 let vm_lemma = as_t #(VSig.vale_sig_stdcall vm_pre vm_post) vm_lemma'
 
 let code_memcpy = VM.va_code_memcpy IA.win
-
 
 (* Here's the type expected for the memcpy wrapper *)
 [@__reduce__]
@@ -159,29 +158,35 @@ let itest (x:ib64) = assert (V.buffer_length (as_vale_immbuffer x) == B.length x
 
 module T = FStar.Tactics
 #reset-options "--using_facts_from '* -FStar.Tactics -FStar.Reflection'"
-module LBV = LowStar.BufferView
-val lbv_as_seq_eq (#a #b:Type) (#rrelx #relx #rrely #rely:MB.srel a) 
-  (x: MB.mbuffer a rrelx relx) 
-  (y: MB.mbuffer a rrely rely) 
-  (v:LBV.view a b) (h:_)
+module LBV = LowStar.BufferView.Up
+module DV = LowStar.BufferView.Down
+val lbv_as_seq_eq
+  (x: b64) 
+  (y: ib64)
+  (v:LBV.view UInt8.t UInt64.t) (h:_)
   : Lemma
     (requires (B.length x == B.length y /\
                B.length x % LBV.View?.n v == 0 /\
-               Seq.equal (LBV.as_seq h (LBV.mk_buffer_view x v))
-                         (LBV.as_seq h (LBV.mk_buffer_view y v))))
+               (
+               DV.length_eq (get_downview x);
+               DV.length_eq (get_downview y);
+               Seq.equal (LBV.as_seq h (LBV.mk_buffer (get_downview x) v))
+                         (LBV.as_seq h (LBV.mk_buffer (get_downview y) v)))))
     (ensures (Seq.equal (B.as_seq h x) (B.as_seq h y)))
-let lbv_as_seq_eq #a #b #rrelx #relx #rrely #rely x y v h =
-  let vx = LBV.mk_buffer_view x v in 
-  let vy = LBV.mk_buffer_view y v in
-  LBV.as_buffer_mk_buffer_view x v;
-  LBV.as_buffer_mk_buffer_view y v;  
-  assert (LBV.as_buffer vx === x);
-  assert (LBV.as_buffer vy === y);
-  let aux (i:nat{i < B.length x})
-    : Lemma (Seq.index (B.as_seq h x) i == Seq.index (B.as_seq h y) i)
-    = admit()
-  in
-  FStar.Classical.forall_intro aux
+
+let lbv_as_seq_eq x y v h =
+  admit()
+  // let vx = LBV.mk_buffer_view x v in 
+  // let vy = LBV.mk_buffer_view y v in
+  // LBV.as_buffer_mk_buffer_view x v;
+  // LBV.as_buffer_mk_buffer_view y v;  
+  // assert (LBV.as_buffer vx === x);
+  // assert (LBV.as_buffer vy === y);
+  // let aux (i:nat{i < B.length x})
+  //   : Lemma (Seq.index (B.as_seq h x) i == Seq.index (B.as_seq h y) i)
+  //   = admit()
+  // in
+  // FStar.Classical.forall_intro aux
 
 //#reset-options "--print_implicits"
 let memcpy_test 
@@ -203,7 +208,12 @@ let memcpy_test
   = IB.inhabited_immutable_buffer_is_distinct_from_buffer (UInt8.uint_to_t 0) src dst;
     let x, _ = lowstar_memcpy_normal_t dst src () in //This is a call to the interop wrapper
     let h1 = get () in
-    lbv_as_seq_eq dst src Views.view64 h1; //And a lemma to rephrase the Vale postcondition 
+    let v = Views.up_view64 in
+    assert (DV.length_eq (get_downview dst);
+            DV.length_eq (get_downview src);
+            Seq.equal (LBV.as_seq h1 (LBV.mk_buffer (get_downview dst) v))
+                      (LBV.as_seq h1 (LBV.mk_buffer (get_downview src) v)));
+    lbv_as_seq_eq dst src Views.up_view64 h1; //And a lemma to rephrase the Vale postcondition 
     x                                      //with equalities of buffer views
                                            //back to equalities of buffers
 

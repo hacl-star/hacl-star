@@ -53,7 +53,7 @@ let vale_calling_conventions
 [@__reduce__]
 let modified_arg_mloc (x:arg) : GTot ME.loc =
     match x with
-    | (|TD_Buffer t {modified=true}, x|) -> ME.loc_buffer (as_vale_buffer #t x)
+    | (|TD_Buffer src t {modified=true}, x|) -> ME.loc_buffer (as_vale_buffer #src #t x)
     | _ -> ME.loc_none
 
 [@__reduce__]
@@ -68,12 +68,12 @@ let sprop = VS.state -> prop
 [@__reduce__]
 let readable_one (s:ME.mem) (arg:arg) : prop =
   match arg with
-  | (|TD_Buffer bt _, x |) ->
-    ME.buffer_readable s (as_vale_buffer #bt x) /\
-    ME.buffer_writeable (as_vale_buffer #bt x)
+  | (|TD_Buffer src bt _, x |) ->
+    ME.buffer_readable s (as_vale_buffer #src #bt x) /\
+    ME.buffer_writeable (as_vale_buffer #src #bt x)
     /\ True //promote to prop
-  | (|TD_ImmBuffer bt _, x |) ->
-    ME.buffer_readable s (as_vale_immbuffer #bt x) /\
+  | (|TD_ImmBuffer src bt _, x |) ->
+    ME.buffer_readable s (as_vale_immbuffer #src #bt x) /\
     True
   | _ -> True
 
@@ -85,22 +85,22 @@ let readable (args:list arg) (s:ME.mem) : prop =
 [@__reduce__]
 let disjoint_or_eq_1 (a:arg) (b:arg) =
     match a, b with
-    | (| TD_Buffer tx {strict_disjointness=true}, xb |), (| TD_Buffer ty _, yb |)
-    | (| TD_Buffer tx _, xb |), (| TD_Buffer ty {strict_disjointness=true}, yb |) ->
-      ME.loc_disjoint (ME.loc_buffer (as_vale_buffer #tx xb)) (ME.loc_buffer (as_vale_buffer #ty yb))
-    | (| TD_ImmBuffer tx {strict_disjointness=true}, xb |), (| TD_ImmBuffer ty _, yb |) 
-    | (| TD_ImmBuffer tx _, xb |), (| TD_ImmBuffer ty {strict_disjointness=true}, yb |) ->
-      ME.loc_disjoint (ME.loc_buffer (as_vale_immbuffer #tx xb)) (ME.loc_buffer (as_vale_immbuffer #ty yb))
+    | (| TD_Buffer srcx tx {strict_disjointness=true}, xb |), (| TD_Buffer srcy ty _, yb |)
+    | (| TD_Buffer srcx tx _, xb |), (| TD_Buffer srcy ty {strict_disjointness=true}, yb |) ->
+      ME.loc_disjoint (ME.loc_buffer (as_vale_buffer #srcx #tx xb)) (ME.loc_buffer (as_vale_buffer #srcy #ty yb))
+    | (| TD_ImmBuffer srcx tx {strict_disjointness=true}, xb |), (| TD_ImmBuffer srcy ty _, yb |) 
+    | (| TD_ImmBuffer srcx tx _, xb |), (| TD_ImmBuffer srcy ty {strict_disjointness=true}, yb |) ->
+      ME.loc_disjoint (ME.loc_buffer (as_vale_immbuffer #srcx #tx xb)) (ME.loc_buffer (as_vale_immbuffer #srcy #ty yb))
     // An immutable buffer and a trivial buffer should not be equal
-    | (| TD_ImmBuffer tx _, xb |), (| TD_Buffer ty _, yb |) ->
-      ME.loc_disjoint (ME.loc_buffer (as_vale_immbuffer #tx xb)) (ME.loc_buffer (as_vale_buffer #ty yb))
-    | (| TD_Buffer tx _, xb |), (| TD_ImmBuffer ty _, yb |) ->
-      ME.loc_disjoint (ME.loc_buffer (as_vale_buffer #tx xb)) (ME.loc_buffer (as_vale_immbuffer #ty yb))
-    | (| TD_Buffer tx _, xb |), (| TD_Buffer ty _, yb |) ->
-      ME.loc_disjoint (ME.loc_buffer (as_vale_buffer #tx xb)) (ME.loc_buffer (as_vale_buffer #ty yb)) \/
+    | (| TD_ImmBuffer srcx tx _, xb |), (| TD_Buffer srcy ty _, yb |) ->
+      ME.loc_disjoint (ME.loc_buffer (as_vale_immbuffer #srcx #tx xb)) (ME.loc_buffer (as_vale_buffer #srcy #ty yb))
+    | (| TD_Buffer srcx tx _, xb |), (| TD_ImmBuffer srcy ty _, yb |) ->
+      ME.loc_disjoint (ME.loc_buffer (as_vale_buffer #srcx #tx xb)) (ME.loc_buffer (as_vale_immbuffer #srcy #ty yb))
+    | (| TD_Buffer srcx tx _, xb |), (| TD_Buffer srcy ty _, yb |) ->
+      ME.loc_disjoint (ME.loc_buffer (as_vale_buffer #srcx #tx xb)) (ME.loc_buffer (as_vale_buffer #srcy #ty yb)) \/
       eq3 xb yb
-    | (| TD_ImmBuffer tx _, xb |), (| TD_ImmBuffer ty _, yb |) ->
-      ME.loc_disjoint (ME.loc_buffer (as_vale_immbuffer #tx xb)) (ME.loc_buffer (as_vale_immbuffer #ty yb)) \/
+    | (| TD_ImmBuffer srcx tx _, xb |), (| TD_ImmBuffer srcy ty _, yb |) ->
+      ME.loc_disjoint (ME.loc_buffer (as_vale_immbuffer #srcx #tx xb)) (ME.loc_buffer (as_vale_immbuffer #srcy #ty yb)) \/
       eq3 xb yb
     | _ -> True
 

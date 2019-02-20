@@ -4,7 +4,7 @@
     [
       "X64.Memory.base_typ_as_vale_type",
       1,
-      2,
+      1,
       1,
       [
         "@MaxIFuel_assumption", "@query",
@@ -23,7 +23,7 @@
         "typing_Types_s.twobits"
       ],
       0,
-      "2033c059f83b174617e242b76b80c566"
+      "0e418043fcbcdeea5c0c15d6ce2797a3"
     ],
     [
       "X64.Memory.buffer_read",
@@ -32,7 +32,7 @@
       0,
       [ "@query", "lemma_X64.Memory.buffer_length_buffer_as_seq" ],
       0,
-      "17700c72a106f6a28e85a661a252b1ae"
+      "6e1327247f98b6d364950e8791e7314a"
     ],
     [
       "X64.Memory.buffer_write",
@@ -41,13 +41,13 @@
       0,
       [ "@query", "lemma_X64.Memory.buffer_length_buffer_as_seq" ],
       0,
-      "5961a9b2fb116b1cbc80d2a9e6c3aa35"
+      "93d5c5e0a592e38b5bcc56eb8adee3bd"
     ],
     [
       "X64.Memory.lemma_load_mem64",
       1,
-      2,
       1,
+      0,
       [
         "@MaxIFuel_assumption", "@query",
         "Prims_pretyping_ae567c2fb75be05905677af440075565",
@@ -56,11 +56,12 @@
         "equation_Words_s.nat64", "equation_Words_s.natN",
         "equation_X64.Memory.base_typ_as_vale_type",
         "function_token_typing_Prims.__cache_version_number__",
+        "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_FStar.Seq.Base_Tm_refine_5514fbe9e08dfda40f950a7b9f1b2b98",
-        "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
+        "refinement_interpretation_Prims_Tm_refine_a4038d5aed1633b5ecbb4e499b1c66ad"
       ],
       0,
-      "9142bd3cdba7ea24b4f5c12b2ed49e9c"
+      "51bb33c555a36c9234cd0010336b8eeb"
     ],
     [
       "X64.Memory.lemma_store_mem64",
@@ -73,7 +74,7 @@
         "refinement_interpretation_Prims_Tm_refine_8d65e998a07dd53ec478e27017d9dba5"
       ],
       0,
-      "98b0a9d610bb8612f3f577a775577dfe"
+      "17c38ae9fa49249292c844d1a027963f"
     ],
     [
       "X64.Memory.lemma_store_mem128",
@@ -86,7 +87,7 @@
         "refinement_interpretation_Prims_Tm_refine_8d65e998a07dd53ec478e27017d9dba5"
       ],
       0,
-      "764be15b6a4f87a99c9c2d402687d354"
+      "04be0c49f8664560655c835c6245d780"
     ]
   ]
 ]

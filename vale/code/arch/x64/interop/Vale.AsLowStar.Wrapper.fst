@@ -3,7 +3,8 @@ open X64.MemoryAdapters
 open Interop.Base
 module B = LowStar.Buffer
 module BS = X64.Bytes_Semantics_s
-module BV = LowStar.BufferView
+module UV = LowStar.BufferView.Up
+module DV = LowStar.BufferView.Down
 module HS = FStar.HyperStack
 module ME = X64.Memory
 module TS = X64.Taint_Semantics_s
@@ -62,12 +63,13 @@ let rec args_b8_lemma (args:list arg) (x:arg)
   : Lemma
       (List.memP x args ==>
         (match x with
-         | (| TD_Buffer bt _, x |) -> List.memP (Buffer x true) (args_b8 args)
-         | (| TD_ImmBuffer bt _, x |) -> List.memP (imm_to_b8 x) (args_b8 args)
+         | (| TD_Buffer src bt _, x |) -> List.memP (mut_to_b8 src x) (args_b8 args)
+         | (| TD_ImmBuffer src bt _, x |) -> List.memP (imm_to_b8 src x) (args_b8 args)
          | _ -> True))
   = match args with
     | [] -> ()
     | a::q ->
+      assert (List.memP x q ==> List.memP x args);
       args_b8_lemma q x
 
 let readable_cons (hd:arg) (tl:list arg) (s:ME.mem)
@@ -76,10 +78,10 @@ let readable_cons (hd:arg) (tl:list arg) (s:ME.mem)
 
 let arg_is_registered_root (s:ME.mem) (a:arg) =
   match a with
-  | (| TD_Buffer bt _, x |) ->
-    List.memP (Buffer x true) (ptrs_of_mem (as_mem s))
-  | (| TD_ImmBuffer bt _, x |) ->
-    List.memP (imm_to_b8 x) (ptrs_of_mem (as_mem s))    
+  | (| TD_Buffer src bt _, x |) ->
+    List.memP (mut_to_b8 src x) (ptrs_of_mem (as_mem s))
+  | (| TD_ImmBuffer src bt _, x |) ->
+    List.memP (imm_to_b8 src x) (ptrs_of_mem (as_mem s))    
   | _ -> true
 
 let core_create_lemma_readable
@@ -98,11 +100,11 @@ let core_create_lemma_readable
       : Lemma
           VSig.(arg_is_registered_root s a <==> readable_one s a)
       = match a with
-        | (| TD_Buffer bt _, x |) ->
-          Vale.AsLowStar.MemoryHelpers.reveal_readable #bt x s;
-          Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal bt x
-        | (| TD_ImmBuffer bt _, x |) ->
-          Vale.AsLowStar.MemoryHelpers.reveal_imm_readable #bt x s
+        | (| TD_Buffer src bt _, x |) ->
+          Vale.AsLowStar.MemoryHelpers.reveal_readable #src #bt x s;
+          Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal src bt x
+        | (| TD_ImmBuffer src bt _, x |) ->
+          Vale.AsLowStar.MemoryHelpers.reveal_imm_readable #src #bt x s
         | (| TD_Base _, _ |) -> ()
     in
     let rec readable_registered_all
@@ -132,10 +134,10 @@ let readable_live_one (m:ME.mem) (a:arg)
   : Lemma (VSig.readable_one m a ==>
            live_arg (hs_of_mem (as_mem m)) a)
   = match a with
-    | (| TD_Buffer bt _, x |) ->
-      Vale.AsLowStar.MemoryHelpers.readable_live #bt x m
-    | (| TD_ImmBuffer bt _, x |) ->
-      Vale.AsLowStar.MemoryHelpers.readable_imm_live #bt x m
+    | (| TD_Buffer src bt _, x |) ->
+      Vale.AsLowStar.MemoryHelpers.readable_live #src #bt x m
+    | (| TD_ImmBuffer src bt _, x |) ->
+      Vale.AsLowStar.MemoryHelpers.readable_imm_live #src #bt x m
     | (| TD_Base _, _ |) -> ()
 
 let rec readable_all_live (m:ME.mem) (args:list arg)
@@ -183,10 +185,10 @@ let core_create_lemma_mem_correspondance
     | [] -> ()
     | hd::tl -> aux tl;
       match hd with
-      | (| TD_Buffer bt _, x |) ->
-        Vale.AsLowStar.MemoryHelpers.buffer_as_seq_reveal bt x args h0 stack
-      | (| TD_ImmBuffer bt _, x |) ->
-        Vale.AsLowStar.MemoryHelpers.immbuffer_as_seq_reveal bt x args h0 stack      
+      | (| TD_Buffer src bt _, x |) ->
+        Vale.AsLowStar.MemoryHelpers.buffer_as_seq_reveal src bt x args h0 stack
+      | (| TD_ImmBuffer src bt _, x |) ->
+        Vale.AsLowStar.MemoryHelpers.immbuffer_as_seq_reveal src bt x args h0 stack      
       | (| TD_Base _, _ |) -> ()
     in
     aux args
@@ -278,8 +280,8 @@ let core_create_lemma_register_args
       | hd::tl -> aux tl s args' h0;
         let (| tag, x |) = hd in
         match tag with
-        | TD_Buffer bt _ -> Vale.AsLowStar.MemoryHelpers.buffer_addr_reveal bt x args' h0
-        | TD_ImmBuffer bt _ -> Vale.AsLowStar.MemoryHelpers.immbuffer_addr_reveal bt x args' h0
+        | TD_Buffer src bt _ -> Vale.AsLowStar.MemoryHelpers.buffer_addr_reveal src bt x args' h0
+        | TD_ImmBuffer src bt _ -> Vale.AsLowStar.MemoryHelpers.immbuffer_addr_reveal src bt x args' h0
         | TD_Base _ -> ()
       in
       aux args va_s (arg_of_sb stack::args) h0
@@ -346,9 +348,10 @@ let core_create_lemma
     core_create_lemma_register_args #max_arity #arg_reg args h0 stack;
     Vale.AsLowStar.MemoryHelpers.core_create_lemma_taint_hyp #max_arity #arg_reg args h0 stack;
     core_create_lemma_state #max_arity #arg_reg args h0 stack;
-    Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 stack;
+    Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt8 ME.TUInt64 stack;
     let s_args = arg_of_sb stack :: args in
-    Vale.AsLowStar.MemoryHelpers.buffer_addr_reveal _ stack (arg_of_sb stack :: args) h0
+    Vale.AsLowStar.MemoryHelpers.buffer_addr_reveal _ _ stack (arg_of_sb stack :: args) h0;
+    DV.length_eq (get_downview stack)
 
 let rec frame_mem_correspondence_back
        (args:list arg)
@@ -368,8 +371,10 @@ let rec frame_mem_correspondence_back
    | hd::tl ->
      frame_mem_correspondence_back tl h0 h1 va_s l;
      match hd with
-     | (| TD_Buffer bt _, x |) | (| TD_ImmBuffer bt _, x |) ->
-       BufferViewHelpers.lemma_bv_equal (LSig.view_of_base_typ bt) x h0 h1
+     | (| TD_Buffer src bt _, x |) | (| TD_ImmBuffer src bt _, x |) ->
+       BufferViewHelpers.lemma_dv_equal (down_view src) x h0 h1;
+       DV.length_eq (get_downview x);
+       BufferViewHelpers.lemma_uv_equal (LSig.view_of_base_typ bt) (get_downview x) h0 h1
      | (| TD_Base _, _ |) -> ()
 
 let rec frame_mem_correspondence
@@ -391,8 +396,10 @@ let rec frame_mem_correspondence
    | hd::tl ->
      frame_mem_correspondence tl h0 h1 va_s l;
      match hd with
-     | (| TD_Buffer bt _, x |) | (| TD_ImmBuffer bt _, x |) ->
-       BufferViewHelpers.lemma_bv_equal (LSig.view_of_base_typ bt) x h0 h1
+     | (| TD_Buffer src bt _, x |) | (| TD_ImmBuffer src bt _, x |) ->
+       BufferViewHelpers.lemma_dv_equal (down_view src) x h0 h1;
+       DV.length_eq (get_downview x);
+       BufferViewHelpers.lemma_uv_equal (LSig.view_of_base_typ bt) (get_downview x) h0 h1     
      | (| TD_Base _, _ |) -> ()
 
 let rec args_fp (args:list arg)
@@ -404,8 +411,8 @@ let rec args_fp (args:list arg)
     | [] -> ()
     | hd::tl -> args_fp tl h0 h1; 
       match hd with
-      | (| TD_Buffer _ _, _ |) | (| TD_Base _, _ |) -> ()
-      | (| TD_ImmBuffer _ _, x |) -> 
+      | (| TD_Buffer _ _ _, _ |) | (| TD_Base _, _ |) -> ()
+      | (| TD_ImmBuffer _ _ _, x |) -> 
         assert (B.loc_includes (B.loc_not_unused_in h0) (B.loc_buffer x))
 
 let eval_code_ts (c:TS.tainted_code)
@@ -432,10 +439,10 @@ let rec mem_correspondence_refl (args:list arg)
    | hd::tl ->
      mem_correspondence_refl tl va_s;
      match hd with
-     | (| TD_Buffer bt _, x |) ->
-       Vale.AsLowStar.MemoryHelpers.buffer_as_seq_reveal2 bt x va_s
-     | (| TD_ImmBuffer bt _, x |) ->
-       Vale.AsLowStar.MemoryHelpers.immbuffer_as_seq_reveal2 bt x va_s
+     | (| TD_Buffer src bt _, x |) ->
+       Vale.AsLowStar.MemoryHelpers.buffer_as_seq_reveal2 src bt x va_s
+     | (| TD_ImmBuffer src bt _, x |) ->
+       Vale.AsLowStar.MemoryHelpers.immbuffer_as_seq_reveal2 src bt x va_s
      | _ -> ()
 
 ////////////////////////////////////////////////////////////////////////////////

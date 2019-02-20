@@ -9,6 +9,7 @@ module S = X64.Bytes_Semantics_s
 module MB = LowStar.Monotonic.Buffer
 module UV = LowStar.BufferView.Up
 module DV = LowStar.BufferView.Down
+open BufferViewHelpers
 
 friend X64.Memory
 module IB = Interop.Base
@@ -201,6 +202,7 @@ let unwritten_buffer_down (t:base_typ) (b:buffer t{buffer_writeable b})
           let s0 = DV.as_seq (IB.hs_of_mem h) db in
           let s1 = DV.as_seq (IB.hs_of_mem h1) db in
           assert (MB.disjoint a.bsrc b.bsrc);
+          lemma_dv_equal (IB.down_view a.src) a.bsrc (IB.hs_of_mem h) (IB.hs_of_mem h1);
           assert (Seq.equal s0 s1);
           assert (forall (i:nat). {:pattern (mem1.[base + i])}
                     i < Seq.length s0 ==> v_to_typ TUInt8 (Seq.index s0 i) == mem1.[base + i]);
