@@ -97,7 +97,7 @@ val eq_elim: #a:Type -> #len:size_nat -> s1:lseq a len -> s2:lseq a len ->
   [SMTPat (equal s1 s2)]
 
 (* Alias for creation from a list *)
-let createL #a l = of_list #a l
+unfold let createL #a l = of_list #a l
 
 (** Updating an element of a fixed-length Sequence *)
 val upd:
@@ -257,15 +257,6 @@ val for_all2:#a:Type -> #b:Type -> #len:size_nat
   -> s2:lseq b len ->
   Tot bool
 
-(* The following functions allow us to bridge between unbounded and bounded sequences *)
-val map_blocks:
-    #a:Type0
-  -> blocksize:size_nat{blocksize > 0}
-  -> inp:seq a
-  -> f:(i:nat{i < length inp / blocksize} -> lseq a blocksize -> lseq a blocksize)
-  -> g:(i:nat{i <= length inp / blocksize} -> len:size_nat{len < blocksize} -> s:lseq a len -> lseq a len) ->
-  Tot (out:seq a {length out == length inp})
-
 val repeati_blocks:
     #a:Type0
   -> #b:Type0
@@ -275,6 +266,20 @@ val repeati_blocks:
   -> l:(i:nat{i == length inp / blocksize} -> len:size_nat{len == length inp % blocksize} -> s:lseq a len -> b -> b)
   -> init:b ->
   Tot b
+
+let repeat_blocks_f
+  (#a:Type0)
+  (#b:Type0)
+  (bs:size_nat{bs > 0})
+  (inp:seq a)
+  (f:(lseq a bs -> b -> b))
+  (nb:nat{nb == length inp / bs})
+  (i:nat{i < nb})
+  (acc:b) : b
+ =
+  assert ((i+1) * bs <= nb * bs);
+  let block = Seq.slice inp (i * bs) (i * bs + bs) in
+  f block acc
 
 val repeat_blocks:
     #a:Type0
@@ -286,12 +291,204 @@ val repeat_blocks:
   -> init:b ->
   Tot b
 
+val lemma_repeat_blocks:
+    #a:Type0
+  -> #b:Type0
+  -> bs:size_nat{bs > 0}
+  -> inp:seq a
+  -> f:(lseq a bs -> b -> b)
+  -> l:(len:size_nat{len == length inp % bs} -> s:lseq a len -> b -> b)
+  -> init:b ->
+  Lemma (
+    let len = length inp in
+    let nb = len / bs in
+    let rem = len % bs in
+    let acc = Lib.LoopCombinators.repeati nb (repeat_blocks_f bs inp f nb) init in
+    let last = Seq.slice inp (nb * bs) len in
+    let acc = l rem last acc in
+    repeat_blocks #a #b bs inp f l init == acc)
+
+val repeat_blocks_multi:
+    #a:Type0
+  -> #b:Type0
+  -> blocksize:size_nat{blocksize > 0}
+  -> inp:seq a{length inp % blocksize = 0}
+  -> f:(lseq a blocksize -> b -> b)
+  -> init:b ->
+  Tot b
+
+val lemma_repeat_blocks_multi:
+    #a:Type0
+  -> #b:Type0
+  -> bs:size_nat{bs > 0}
+  -> inp:seq a{length inp % bs = 0}
+  -> f:(lseq a bs -> b -> b)
+  -> init:b ->
+  Lemma (
+    let len = length inp in
+    let nb = len / bs in
+    repeat_blocks_multi #a #b bs inp f init ==
+    Lib.LoopCombinators.repeati nb (repeat_blocks_f bs inp f nb) init)
+
 (** Generates `n` blocks of length `len` by iteratively applying a function with an accumulator *)
 val generate_blocks:
     #t:Type0
   -> len:size_nat
-  -> n:nat{n * len <= max_size_t}
+  -> n:nat
   -> a:(i:nat{i <= n} -> Type)
-  -> f:(i:nat{i < n} -> a i -> a (i + 1) & lseq t len)
+  -> f:(i:nat{i < n} -> a i -> a (i + 1) & s:seq t{length s == len})
   -> init:a 0 ->
-  Tot (a n & lseq t (n * len))
+  Tot (a n & s:seq t{ length s == n * len})
+
+val eq_generate_blocks0:
+    #t:Type0
+  -> len:size_nat
+  -> n:nat
+  -> a:(i:nat{i <= n} -> Type)
+  -> f:(i:nat{i < n} -> a i -> a (i + 1) & s:seq t{length s == len})
+  -> init:a 0 ->
+  Lemma (generate_blocks #t len 0 a f init == 
+	 (init,Seq.empty))
+	 
+
+val unfold_generate_blocks:
+    #t:Type0
+  -> len:size_nat
+  -> n:nat
+  -> a:(i:nat{i <= n} -> Type)
+  -> f:(i:nat{i < n} -> a i -> a (i + 1) & s:seq t{length s == len})
+  -> init:a 0 
+  -> i:nat{i < n} ->
+  Lemma (generate_blocks #t len (i+1) a f init == 
+	   (let (acc,s) = generate_blocks #t len i a f init in
+	    let (acc',s') = f i acc in
+	    (acc',Seq.append s s')))
+
+
+
+(* The following functions allow us to bridge between unbounded and bounded sequences *)
+val map_blocks_multi:
+    #a:Type0
+  -> blocksize:size_nat{blocksize > 0}
+  -> n:size_nat{n > 0}
+  -> inp:seq a{length inp == n * blocksize}
+  -> f:(i:nat{i < length inp / blocksize} -> lseq a blocksize -> lseq a blocksize) ->
+  Tot (out:seq a {length out == length inp})
+
+
+(* The following functions allow us to bridge between unbounded and bounded sequences *)
+val map_blocks:
+    #a:Type0
+  -> blocksize:size_nat{blocksize > 0}
+  -> inp:seq a
+  -> f:(i:nat{i < length inp / blocksize} -> lseq a blocksize -> lseq a blocksize)
+  -> g:(i:nat{i == length inp / blocksize} -> len:size_nat{len < blocksize} -> s:lseq a len -> lseq a len) ->
+  Tot (out:seq a {length out == length inp})
+
+(*
+#set-options "--z3rlimit 400 --max_ifuel 1"
+
+val map_blocks_multi_lemma:
+    #a:Type0
+  -> blocksize:size_nat{blocksize > 0}
+  -> n:size_nat
+  -> inp:seq a{length inp == n * blocksize}
+  -> f:(i:nat{i < length inp / blocksize} -> lseq a blocksize -> lseq a blocksize) 
+  -> j:nat{j < length inp} ->
+  Lemma (
+    Seq.index (map_blocks_multi blocksize n inp f) j ==
+    Seq.index (f (j/blocksize) (Seq.slice inp ((j/blocksize) * blocksize) ((j/blocksize+1)*blocksize))) (j % blocksize))
+    [SMTPat (Seq.index (map_blocks_multi #a blocksize n inp f) j)]
+
+val map_blocks_lemma:
+    #a:Type0
+  -> blocksize:size_nat{blocksize > 0}
+  -> inp:seq a{length inp % blocksize == 0}
+  -> f:(i:nat{i < length inp / blocksize} -> lseq a blocksize -> lseq a blocksize) 
+  -> g:(i:nat{i == length inp / blocksize} -> len:size_nat{len < blocksize} -> s:lseq a len -> lseq a len) 
+  -> i:nat{i < length inp} ->
+  Lemma (
+    let blocks = length inp / blocksize in
+    let rem = length inp % blocksize in
+    (if i < blocksize * blocks then
+      Seq.index (map_blocks blocksize inp f g) i ==
+      Seq.index (f (i/blocksize) (Seq.slice inp ((i/blocksize) * blocksize) ((i/blocksize+1)*blocksize))) (i % blocksize)
+     else
+      Seq.index (map_blocks blocksize inp f g) i ==
+      Seq.index (g blocks rem (Seq.slice inp (blocks * blocksize) (length inp))) (i % blocksize)))
+    [SMTPat (Seq.index (map_blocks #a blocksize inp f g) i)]
+*)
+
+val map_blocks_n_fits_lemma:
+    len:nat ->
+    blocksize:nat -> 
+    n:nat{n * blocksize > 0} ->
+    i:nat{i < len / (n * blocksize)} ->
+    j:nat{j < n} ->
+    Lemma (n * i + j < len / blocksize)
+	  [SMTPat (n * i + j < len / blocksize)]
+
+(*
+val map_blocks_n_lemma:
+    #a:Type0
+  -> blocksize:size_nat{blocksize > 0}
+  -> n:size_nat{n * blocksize <= max_size_t /\ n * blocksize > 0}
+  -> inp:seq a
+  -> f:(i:nat{i < length inp / blocksize} -> lseq a blocksize -> lseq a blocksize) 
+  -> g:(i:nat{i == length inp / blocksize} -> len:size_nat{len < blocksize} -> s:lseq a len -> lseq a len) ->
+  Lemma (
+	map_blocks #a blocksize inp f g ==
+	map_blocks #a (n * blocksize) inp
+	  (fun i nb -> 
+	    map_blocks_multi #a blocksize n nb
+	      (fun j b -> f (n * i + j) b))
+	  (fun i len l -> 
+	    map_blocks #a blocksize l
+	      (fun j b -> f (n * i + j) b)
+	      (fun j l b -> g (n * i + j) l b)))
+
+
+val repeat_blocks_n_fits_lemma:
+    blocksize:size_nat{blocksize > 0}
+  -> n:size_nat{n > 0 /\ n*blocksize <= max_size_t}
+  -> len:nat ->
+    Lemma ((len % (n * blocksize)) % blocksize == len % blocksize)
+    [SMTPat (len % (n * blocksize) % blocksize)]
+    
+val repeat_blocks_n_lemma:
+    #a:Type0
+  -> #b:Type0
+  -> blocksize:size_nat{blocksize > 0}
+  -> n:size_nat{n > 0 /\ n*blocksize <= max_size_t}
+  -> inp:seq a
+  -> f:(lseq a blocksize -> b -> b)
+  -> l:(len:size_nat{len == length inp % blocksize} -> s:lseq a len -> b -> b)
+  -> init:b ->
+  Lemma (repeat_blocks blocksize inp f l init ==
+	 repeat_blocks (n * blocksize) inp
+	   (fun bl a -> 
+	     repeat_blocks blocksize bl f (fun len bl a -> a) a)
+	   (fun len bl a ->
+	     repeat_blocks blocksize bl f l a) init)
+
+
+val generate_blocks1_lemma:
+    #t:Type0
+  -> len:size_nat
+  -> a:(i:nat{i <= 1} -> Type)
+  -> f:(i:nat{i < 1} -> a i -> a (i + 1) & s:seq t{length s == len})
+  -> init:a 0 ->
+  Lemma (ensures (let (a,s) = generate_blocks #t len 1 a f init in
+		  (a,s) == f 0 init))
+
+val map_blocks_multi1_lemma:
+    #a:Type0
+  -> blocksize:size_nat{blocksize > 0}
+  -> inp:seq a{length inp == blocksize}
+  -> f:(i:nat{i < length inp / blocksize} -> lseq a blocksize -> lseq a blocksize) ->
+  Lemma (ensures (map_blocks_multi blocksize 1 inp f ==
+		  f 0 inp))
+
+
+
+*)

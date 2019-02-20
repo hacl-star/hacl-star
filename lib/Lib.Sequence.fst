@@ -61,7 +61,7 @@ let lemma_concat3 #a len0 s0 len1 s1 len2 s2 s =
   FStar.Seq.Properties.lemma_split s (len0 + len1);
   FStar.Seq.Properties.lemma_split s' (len0 + len1)
 
-let createi_a (a:Type) (len:size_nat) (init:(i:nat{i < len} -> a)) (k:nat{k <= len}) = 
+let createi_a (a:Type) (len:size_nat) (init:(i:nat{i < len} -> a)) (k:nat{k <= len}) =
   lseq a k
 
 let createi_pred (a:Type) (len:size_nat) (init:(i:nat{i < len} -> a)) (k:nat{k <= len})
@@ -83,6 +83,7 @@ let createi #a len init_f =
     (createi_step a len init_f)
     (of_list [])
 
+inline_for_extraction
 let mapi_inner (#a:Type) (#b:Type) (#len:size_nat)
   (f:(i:nat{i < len} -> a -> b)) (s:lseq a len) (i:size_nat{i < len}) =
   f i s.[i]
@@ -90,6 +91,7 @@ let mapi_inner (#a:Type) (#b:Type) (#len:size_nat)
 let mapi #a #b #len f s =
   createi #b len (mapi_inner #a #b #len f s)
 
+inline_for_extraction
 let map_inner (#a:Type) (#b:Type) (#len:size_nat)
   (f:(a -> Tot b)) (s:lseq a len) (i:size_nat{i < len}) =
   f s.[i]
@@ -100,8 +102,13 @@ let map #a #b #len f s =
 let map2i #a #b #c #len f s1 s2 =
   createi #c len (fun i -> f i s1.[i] s2.[i])
 
+inline_for_extraction
+let map2_inner (#a:Type) (#b:Type) (#c:Type) (#len:size_nat)
+  (f:(a -> b -> Tot c)) (s1:lseq a len) (s2:lseq b len) (i:size_nat{i < len}) =
+  f s1.[i] s2.[i]
+
 let map2 #a #b #c #len f s1 s2 =
-  createi #c len (fun i -> f s1.[i] s2.[i])
+  createi #c len (map2_inner #a #b #c #len f s1 s2)
 
 let for_all #a #len f x = Seq.for_all f x
 
@@ -138,6 +145,7 @@ let seq_update_sub #a s start n x =
   Seq.lemma_eq_intro (Seq.slice o start (start + n)) x;
   o
 
+(*
 let map_blocks #a bs inp f g =
   let len = length inp in
   let nb = len / bs in
@@ -152,6 +160,8 @@ let map_blocks #a bs inp f g =
   if rem > 0 then
     seq_update_sub out (nb * bs) rem (g nb rem (seq_sub inp (nb * bs) rem))
   else out
+
+*)
 
 val repeati_blocks_f:
     #a:Type0
@@ -176,21 +186,6 @@ let repeati_blocks #a #b bs inp f g init =
   let last = seq_sub inp (nb * bs) rem in
   g nb rem last acc
 
-val repeat_blocks_f:
-    #a:Type0
-  -> #b:Type0
-  -> bs:size_nat{bs > 0}
-  -> inp:seq a
-  -> f:(lseq a bs -> b -> b)
-  -> nb:nat{nb == length inp / bs}
-  -> i:nat{i < nb}
-  -> acc:b
-  -> b
-let repeat_blocks_f #a #b bs inp f nb i acc =
-  assert ((i+1) * bs <= nb * bs);
-  let block = seq_sub inp (i * bs) bs in
-  f block acc
-
 let repeat_blocks #a #b bs inp f l init =
   let len = length inp in
   let nb = len / bs in
@@ -199,13 +194,118 @@ let repeat_blocks #a #b bs inp f l init =
   let last = seq_sub inp (nb * bs) rem in
   l rem last acc
 
-let generate_blocks #t len n a f acc0 =
-  let a' (i:nat{i <= n}) = a i & lseq t (i * len) in
-  let f' (i:nat{i < n}) (ao:a' i) =
-    let acc, o = ao <: a i & lseq t (i * len) in
+let lemma_repeat_blocks #a #b bs inp f l init = ()
+
+let repeat_blocks_multi #a #b bs inp f init =
+  let len = length inp in
+  let nb = len / bs in
+  repeati nb (repeat_blocks_f bs inp f nb) init
+
+let lemma_repeat_blocks_multi #a #b bs inp f init = ()
+
+let generate_blocks_a (t:Type) (blocklen:size_nat) (n:nat) (a:(i:nat{i <= n} -> Type)) (i:nat{i <= n}) = a i & s:seq t{length s == i * blocklen}
+
+let generate_blocks_inner (t:Type) (blocklen:size_nat) (n:nat) (a:(i:nat{i <= n} -> Type)) (f:(i:nat{i < n} -> a i -> a (i + 1) & s:seq t{length s == blocklen})) (i:nat{i < n}) (acc:generate_blocks_a t blocklen n a i) : generate_blocks_a t blocklen n a (i + 1) =
+    let acc, o = acc in
     let acc', block = f i acc in
-    let o' : lseq t ((i + 1) * len) = o @| block in
+    let o' : s:seq t{length s == ((i + 1) * blocklen)} = Seq.append o block in
     acc', o'
-  in
-  let acc0' : a 0 & lseq t (0 * len) = acc0, Seq.empty in
-  repeat_gen n a' f' acc0'
+
+let generate_blocks #t len n a f acc0 =
+  let a0  = (acc0, (Seq.empty <: s:seq t{length s == 0 * len}))  in
+  repeat_gen n (generate_blocks_a t len n a) (generate_blocks_inner t len n a f) a0
+
+#set-options "--z3rlimit 50 --max_ifuel 2"
+let eq_generate_blocks0 #t len n a f acc0 = 
+  let a0  = (acc0, (Seq.empty <: s:seq t{length s == 0 * len}))  in
+  eq_repeat_gen0 n (generate_blocks_a t len n a) (generate_blocks_inner t len n a f) a0;
+  admit()
+  
+
+let unfold_generate_blocks #t len n a f acc0 i = 
+  let a0  = (acc0, (Seq.empty <: s:seq t{length s == 0 * len}))  in
+  unfold_repeat_gen (i+1) (generate_blocks_a t len (i+1) a) (generate_blocks_inner t len (i+1) a f) a0 i;
+  assert (generate_blocks #t len (i+1) a f acc0 == 
+	  repeat_gen (i+1) (generate_blocks_a t len (i+1) a) (generate_blocks_inner t len (i+1) a f) a0);
+  assert (generate_blocks #t len (i+1) a f acc0 == 
+	  generate_blocks_inner t len (i+1) a f i (repeat_gen i (generate_blocks_a t len (i+1) a) (generate_blocks_inner t len (i+1) a f) a0));
+  assert (forall j. generate_blocks_a t len i a j == generate_blocks_a t len (i+1) a j);
+  assert (forall j b. generate_blocks_inner t len i a f j b == generate_blocks_inner t len (i+1) a f j b);
+  assert (generate_blocks #t len i a f acc0 == 
+	  repeat_gen i (generate_blocks_a t len i a) (generate_blocks_inner t len i a f) a0);
+  assume (generate_blocks #t len i a f acc0 == 
+	  repeat_gen i (generate_blocks_a t len (i+1) a) (generate_blocks_inner t len (i+1) a f) a0)
+          			  
+  
+let fixed_a a i = a
+let map_blocks_inner #a (bs:size_nat{bs > 0}) (inp:seq a) (f:(i:nat{i < length inp / bs} -> lseq a bs -> lseq a bs)) (i:nat{i < length inp / bs}) () =
+  (), f i (Seq.slice inp (i*bs) ((i+1)*bs))
+
+#set-options "--z3rlimit 200 --max_ifuel 2"
+
+let map_blocks_multi #a blocksize nb inp f =
+  assert (length inp == nb * blocksize);
+  assert (length inp / blocksize == nb * blocksize / blocksize);
+  Math.Lemmas.multiple_division_lemma nb blocksize;
+  assert (length inp / blocksize == nb);
+  snd (generate_blocks #a blocksize nb (fixed_a unit) (map_blocks_inner blocksize inp f) ())
+
+    
+let map_blocks #a blocksize inp f g =
+  let len = length inp in
+  let nb = len / blocksize in
+  let rem = len % blocksize in
+  let _,bs = generate_blocks #a blocksize nb (fixed_a unit) (map_blocks_inner blocksize inp f) () in
+  if (rem > 0) then
+    Seq.append bs (g nb rem (Seq.slice inp (nb * blocksize) len))
+  else bs
+
+let map_blocks_multi_lemma #a blocksize n inp f i = admit()
+let map_blocks_lemma #a blocksize inp f g i = admit()
+
+let map_blocks_n_fits_lemma len blocksize n i j =
+  assert (i < len / (n * blocksize));
+  assert (i+1 <= len / (n*blocksize));
+  assert ((i + 1) * n * blocksize <= len);
+  assert (((i + 1) * n) * blocksize <= len);
+  Math.Lemmas.lemma_div_le (((i+1) * n)*blocksize) len blocksize;
+  assert ((((i + 1) * n) * blocksize) / blocksize <= len / blocksize);
+  Math.Lemmas.multiple_division_lemma ((i + 1) * n) blocksize;
+  assert ((i + 1) * n <= len / blocksize);
+  assert (i * n + n - 1 < len / blocksize);
+  assert (n * i + j < len / blocksize)
+
+let map_blocks_n_lemma #a blocksize n inp f g = admit()
+
+let repeat_blocks_n_fits_lemma blocksize n len = admit()
+
+let repeat_blocks_n_lemma #a #b blocksize n inp f l init = admit()
+
+let generate_blocks1_lemma #t len a f acc0 = 
+  let a0 : generate_blocks_a t len 1 a 0 = (acc0, (Seq.empty <: s:seq t{length s == 0 * len}))  in
+  unfold_repeat_gen 1 (generate_blocks_a t len 1 a) (generate_blocks_inner t len 1 a f) a0 0;
+  eq_repeat_gen0 1 (generate_blocks_a t len 1 a) (generate_blocks_inner t len 1 a f) a0;
+  let a',b = f 0 acc0 in
+  assert (Seq.equal (Seq.append Seq.empty b) b)
+
+
+let map_blocks_multi1_lemma #a blocksize inp f =  admit()
+
+
+
+(*
+let map_blocks #a bs inp f g =
+  let len = length inp in
+  let nb = len / bs in
+  let rem = len % bs in
+  let out = inp in
+  let out =
+    repeati #(s:seq a{length s == len}) nb
+    (fun i out ->
+      assert ((i+1) * bs <= nb * bs);
+      seq_update_sub out (i * bs) bs (f i (seq_sub inp (i * bs) bs))
+    ) out in
+  if rem > 0 then
+    seq_update_sub out (nb * bs) rem (g nb rem (seq_sub inp (nb * bs) rem))
+  else out
+*)
