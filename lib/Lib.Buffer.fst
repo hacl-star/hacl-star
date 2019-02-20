@@ -311,6 +311,7 @@ let loop_blocks #a #b #blen bs inpLen inp spec_f spec_l f l w =
 #set-options "--max_fuel 1"
 
 let fill_blocks #t h0 len n output a_spec refl footprint spec impl =
+  admit ();
   [@inline_let]
   let a_spec' (i:nat{i <= v n}) =
     Math.Lemmas.lemma_mult_le_right (v len) i (v n);
