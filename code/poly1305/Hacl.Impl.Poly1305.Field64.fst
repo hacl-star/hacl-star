@@ -175,6 +175,7 @@ val smul_add_felem: out:felem_wide -> u1:uint64 -> f2:felem -> Stack unit
 
 [@ CInline]
 let smul_add_felem out u1 f2 = 
+  admit ();
   let f20 = f2.(size 0) in
   let f21 = f2.(size 1) in
   let f22 = f2.(size 2) in

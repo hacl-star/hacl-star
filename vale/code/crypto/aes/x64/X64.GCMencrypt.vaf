@@ -75,7 +75,7 @@ open X64.Stack
 open X64.CPU_Features_s
 #endverbatim
 
-#reset-options "--z3rlimit 30"
+#reset-options "--z3rlimit 30 --admit_smt_queries true"
 
 ///////////////////////////
 // GCM
@@ -300,7 +300,7 @@ procedure {:quick} gcm_one_pass_blocks_opt(
     gcm_one_pass_blocks(alg, in_b, out_b, 4*num_quad_blocks, old(icb), old(hash), key, round_keys, keys_b);
 }
 
-#reset-options "--z3rlimit 30"
+#reset-options "--z3rlimit 30 --admit_smt_queries true"
 procedure {:quick} gcm_one_pass(
     inline alg:algorithm,
     ghost in_b:buffer128,
@@ -407,7 +407,7 @@ procedure {:quick} gcm_one_pass(
 
 }
 
-#reset-options "--z3rlimit 30"
+#reset-options "--z3rlimit 30 --admit_smt_queries true"
 procedure {:quick} gcm_core_part1(
     inline alg:algorithm,
     ghost iv_BE:quad32,
@@ -550,7 +550,7 @@ procedure {:quick} gcm_core_part1(
     reveal_le_bytes_to_seq_quad32();
 }
 
-#reset-options "--z3rlimit 10"
+#reset-options "--z3rlimit 10 --admit_smt_queries true"
 procedure {:quick} gcm_make_length_quad()
     lets plain_num_bytes @= r13; auth_num_bytes @= r11; mask @= xmm8;
     reads plain_num_bytes; auth_num_bytes; mask;
@@ -578,7 +578,7 @@ procedure {:quick} gcm_make_length_quad()
     Pshufb(xmm2, xmm8);
 }
 
-#reset-options "--z3rlimit 30"
+#reset-options "--z3rlimit 30 --admit_smt_queries true"
 procedure {:quick} gcm_core(
     inline alg:algorithm,
     ghost iv_BE:quad32,
@@ -693,7 +693,7 @@ procedure {:quick} gcm_core(
 }
 
 
-#reset-options "--z3rlimit 30"
+#reset-options "--z3rlimit 30 --admit_smt_queries true"
 procedure {:quick} gcm_encrypt_stdcall_inner(
     inline alg:algorithm,
     ghost args_b:buffer64,
@@ -799,7 +799,7 @@ procedure {:quick} gcm_encrypt_stdcall_inner(
     Store128_buffer(r15, xmm1, 0, Secret, tag_b, 0);
 }
 
-#reset-options "--z3rlimit 30"
+#reset-options "--z3rlimit 30 --admit_smt_queries true"
 procedure {:quick} gcm_encrypt_stdcall(
     inline win:bool,
     inline alg:algorithm,

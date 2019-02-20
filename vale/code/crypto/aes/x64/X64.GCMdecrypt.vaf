@@ -79,7 +79,7 @@ open X64.CPU_Features_s
 // GCM
 ///////////////////////////
 
-#reset-options "--z3rlimit 30"
+#reset-options "--z3rlimit 30 --admit_smt_queries true"
 procedure {:quick} gcm_one_pass_blocks(
     inline alg:algorithm,
     ghost in_b:buffer128,
@@ -214,7 +214,7 @@ procedure {:quick} gcm_one_pass_blocks(
 }
 
 
-#reset-options "--z3rlimit 30"
+#reset-options "--z3rlimit 30 --admit_smt_queries true"
 procedure {:quick} gcm_one_pass(
     inline alg:algorithm,
     ghost in_b:buffer128,
@@ -323,7 +323,7 @@ procedure {:quick} gcm_one_pass(
 
 }
 
-#reset-options "--z3rlimit 30"
+#reset-options "--z3rlimit 30 --admit_smt_queries true"
 procedure {:quick} gcm_core_part1(
     inline alg:algorithm,
     ghost iv_BE:quad32,
@@ -467,7 +467,7 @@ procedure {:quick} gcm_core_part1(
 }
 
 
-#reset-options "--z3rlimit 10"
+#reset-options "--z3rlimit 10 --admit_smt_queries true"
 procedure {:quick} gcm_make_length_quad()
     lets cipher_num_bytes @= r13; auth_num_bytes @= r11; mask @= xmm8;
     reads cipher_num_bytes; auth_num_bytes; mask;
@@ -495,7 +495,7 @@ procedure {:quick} gcm_make_length_quad()
 }
 
 
-#reset-options "--z3rlimit 30"
+#reset-options "--z3rlimit 30 --admit_smt_queries true"
 procedure {:quick} gcm_core(
     inline alg:algorithm,
     ghost iv_BE:quad32,
@@ -711,7 +711,7 @@ procedure {:quick} gcm_decrypt_stdcall_inner_inner(
 
 
 
-#reset-options "--z3rlimit 20"
+#reset-options "--z3rlimit 20 --admit_smt_queries true"
 procedure {:quick} gcm_decrypt_stdcall_inner(
     inline alg:algorithm,
     ghost args_b:buffer64,
@@ -815,7 +815,7 @@ procedure {:quick} gcm_decrypt_stdcall_inner(
     decrypt_helper(alg, seq_nat32_to_seq_nat8_LE(key), be_quad32_to_bytes(iv_BE), cipher, auth, rax, alleged_tag_quad, computed_tag);
 }
 
-#reset-options "--z3rlimit 30"
+#reset-options "--z3rlimit 30 --admit_smt_queries true"
 procedure {:quick} gcm_decrypt_stdcall(
     inline win:bool,
     inline alg:algorithm,
