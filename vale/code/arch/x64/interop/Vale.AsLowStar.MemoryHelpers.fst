@@ -53,6 +53,8 @@ let modifies_same_roots s h0 h1 = ()
 let modifies_equal_domains s h0 h1 = ()
 let loc_disjoint_sym (x y:ME.loc)  = ()
 
+#set-options "--z3rlimit 20"
+
 let core_create_lemma_taint_hyp
     #max_arity
     #arg_reg
@@ -108,3 +110,22 @@ let buffer_as_seq_reveal_tuint128 src x va_s = ()
 let immbuffer_as_seq_reveal_tuint128 src x va_s = ()
 
 let bounded_buffer_addrs src t h b s = ()
+
+let same_down_up_buffer_length src b =
+  let db = get_downview b in
+  DV.length_eq db;
+  FStar.Math.Lemmas.cancel_mul_div (B.length b) (view_n src)
+
+let down_up_buffer_read_reveal src h s b i =
+  let db = get_downview b in
+  let n = view_n src in
+  let up_view = (LSig.view_of_base_typ src) in
+  let ub = UV.mk_buffer db up_view in
+  same_down_up_buffer_length src b;
+  UV.get_sel h ub i;
+  assert (low_buffer_read src src h b i == 
+    UV.View?.get up_view (Seq.slice (DV.as_seq h db) (i*n) (i*n + n)));
+  DV.put_sel h db (i*n);
+  let aux () : Lemma (n * ((i*n)/n) == i*n) =
+    FStar.Math.Lemmas.cancel_mul_div i n
+  in aux()

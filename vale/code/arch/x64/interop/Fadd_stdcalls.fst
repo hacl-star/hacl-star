@@ -3,7 +3,8 @@ module Fadd_stdcalls
 open FStar.HyperStack.ST
 module HS = FStar.HyperStack
 module B = LowStar.Buffer
-module BV = LowStar.BufferView
+module DV = LowStar.BufferView.Down
+module UV = LowStar.BufferView.Up
 open Types_s
 
 open Interop.Base
@@ -30,11 +31,11 @@ let as_t (#a:Type) (x:normal a) : a = x
 let as_normal_t (#a:Type) (x:a) : normal a = x
 
 [@__reduce__] unfold
-let b64 = buf_t TUInt64
+let b64 = buf_t TUInt64 TUInt64
 [@__reduce__] unfold
-let t64_mod = TD_Buffer TUInt64 default_bq
+let t64_mod = TD_Buffer TUInt64 TUInt64 default_bq
 [@__reduce__] unfold
-let t64_no_mod = TD_Buffer TUInt64 ({modified=false; strict_disjointness=false; taint=MS.Secret})
+let t64_no_mod = TD_Buffer TUInt64 TUInt64 ({modified=false; strict_disjointness=false; taint=MS.Secret})
 [@__reduce__] unfold
 let tuint64 = TD_Base TUInt64
 
@@ -97,8 +98,8 @@ let add1_lemma'
                                  ME.loc_none)) va_s0.VS.mem va_s1.VS.mem
  )) = 
    let va_s1, f = FU.va_lemma_fast_add1_stdcall code va_s0 IA.win (as_vale_buffer sb) (as_vale_buffer out) (as_vale_buffer f1) (UInt64.v f2) in
-   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 out;   
-   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 f1;   
+   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 out;   
+   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 f1;   
    va_s1, f                                   
 
 (* Prove that add1_lemma' has the required type *)
@@ -135,53 +136,12 @@ open Vale.AsLowStar.MemoryHelpers
 
 #set-options "--z3rlimit 50"
 
-let fast_add1
-  (out:b8)
-  (f1:b8)
-  (f2:uint64) 
-  : Stack uint64
-  (requires fun h -> 
-    adx_enabled /\ bmi2_enabled /\
-    B.live h f1 /\ 
-    B.live h out /\ 
-    B.length out == 32 /\ 
-    B.length f1 == 32 /\
-    (B.disjoint out f1 \/ out == f1))
-  (ensures fun h0 c h1 -> 
-    B.live h1 out /\ B.live h1 f1 /\
-    B.modifies (B.loc_buffer out) h0 h1 /\
-    (
-    let a0 = UInt64.v (low_buffer_read TUInt64 h0 f1 0) in
-    let a1 = UInt64.v (low_buffer_read TUInt64 h0 f1 1) in
-    let a2 = UInt64.v (low_buffer_read TUInt64 h0 f1 2) in
-    let a3 = UInt64.v (low_buffer_read TUInt64 h0 f1 3) in    
-    let d0 = UInt64.v (low_buffer_read TUInt64 h1 out 0) in
-    let d1 = UInt64.v (low_buffer_read TUInt64 h1 out 1) in
-    let d2 = UInt64.v (low_buffer_read TUInt64 h1 out 2) in
-    let d3 = UInt64.v (low_buffer_read TUInt64 h1 out 3) in
-    let a = pow2_four a0 a1 a2 a3 in
-    let d = pow2_five d0 d1 d2 d3 (UInt64.v c) in
-    d = a + UInt64.v f2
-    )
-    )
-  = 
+let add1 out f1 f2 =
+  DV.length_eq (get_downview f1);
+  DV.length_eq (get_downview out);
   let x, _ = lowstar_add1_normal_t out f1 f2 () in
   x
-  
-open Vale.Interop.Cast
 
-let add1 out f1 f2
-  = push_frame();
-    let out8 = B.alloca (UInt8.uint_to_t 0) (UInt32.uint_to_t 32) in
-    let f18 = B.alloca (UInt8.uint_to_t 0) (UInt32.uint_to_t 32) in
-    copy_down out out8;
-    copy_down f1 f18;
-    let x = fast_add1 out8 f18 f2 in
-    imm_copy_up f1 f18;
-    copy_up out out8;
-    pop_frame();
-    x
-    
 
 [@__reduce__] unfold
 let fadd_dom: IX64.arity_ok_stdcall td =
@@ -242,9 +202,9 @@ let fadd_lemma'
                                  ME.loc_none)) va_s0.VS.mem va_s1.VS.mem
  )) = 
    let va_s1, f = FH.va_lemma_fadd_stdcall code va_s0 IA.win (as_vale_buffer sb) (as_vale_buffer out) (as_vale_buffer f1) (as_vale_buffer f2) in
-   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 out;   
-   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 f1;   
-   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 f2;   
+   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 out;   
+   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 f1;   
+   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 f2;   
    va_s1, f                                   
 
 (* Prove that add1_lemma' has the required type *)
@@ -277,64 +237,13 @@ let lowstar_fadd : lowstar_fadd_t  =
 let lowstar_fadd_normal_t //: normal lowstar_add1_t
   = as_normal_t #lowstar_fadd_t lowstar_fadd
 
-let fast_fadd
-  (out:b8)
-  (f1:b8)
-  (f2:b8) 
-  : Stack unit
-  (requires fun h -> 
-    adx_enabled /\ bmi2_enabled /\
-    B.live h f2 /\
-    B.live h f1 /\ 
-    B.live h out /\ 
-    B.length f2 == 32 /\ 
-    B.length out == 32 /\ 
-    B.length f1 == 32 /\
-    (B.disjoint out f1 \/ out == f1) /\
-    (B.disjoint out f2 \/ out == f2) /\
-    (B.disjoint f1 f2 \/ f1 == f2))
-  (ensures fun h0 c h1 -> 
-    B.live h1 out /\ B.live h1 f1 /\ B.live h1 f2 /\
-    B.modifies (B.loc_buffer out) h0 h1 /\
-    (
-    let a0 = UInt64.v (low_buffer_read TUInt64 h0 f1 0) in
-    let a1 = UInt64.v (low_buffer_read TUInt64 h0 f1 1) in
-    let a2 = UInt64.v (low_buffer_read TUInt64 h0 f1 2) in
-    let a3 = UInt64.v (low_buffer_read TUInt64 h0 f1 3) in
-    let b0 = UInt64.v (low_buffer_read TUInt64 h0 f2 0) in
-    let b1 = UInt64.v (low_buffer_read TUInt64 h0 f2 1) in
-    let b2 = UInt64.v (low_buffer_read TUInt64 h0 f2 2) in
-    let b3 = UInt64.v (low_buffer_read TUInt64 h0 f2 3) in     
-    let d0 = UInt64.v (low_buffer_read TUInt64 h1 out 0) in
-    let d1 = UInt64.v (low_buffer_read TUInt64 h1 out 1) in
-    let d2 = UInt64.v (low_buffer_read TUInt64 h1 out 2) in
-    let d3 = UInt64.v (low_buffer_read TUInt64 h1 out 3) in
-    let a = pow2_four a0 a1 a2 a3 in
-    let b = pow2_four b0 b1 b2 b3 in
-    let d = pow2_four d0 d1 d2 d3 in
-    d % prime = (a + b) % prime
-    )
-    )
-  = 
-  let x, _ = lowstar_fadd_normal_t out f1 f2 () in
-  ()
-
-
 #push-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
 
-let fadd out f1 f2
-  = push_frame();
-    let out8 = B.alloca (UInt8.uint_to_t 0) (UInt32.uint_to_t 32) in
-    let f18 = B.alloca (UInt8.uint_to_t 0) (UInt32.uint_to_t 32) in
-    let f28 = B.alloca (UInt8.uint_to_t 0) (UInt32.uint_to_t 32) in
-    copy_down out out8;
-    copy_down f2 f28;
-    copy_down f1 f18;
-    let x = fast_fadd out8 f18 f28 in
-    imm_copy_up f1 f18;
-    imm_copy_up f2 f28;
-    copy_up out out8;
-    pop_frame();
-    x
-
+let fadd out f1 f2 =
+  DV.length_eq (get_downview out);
+  DV.length_eq (get_downview f1);
+  DV.length_eq (get_downview f2);
+  let x, _ = lowstar_fadd_normal_t out f1 f2 () in
+  ()
+  
 #pop-options

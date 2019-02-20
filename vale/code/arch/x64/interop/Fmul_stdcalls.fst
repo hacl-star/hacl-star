@@ -3,7 +3,7 @@ module Fmul_stdcalls
 open FStar.HyperStack.ST
 module HS = FStar.HyperStack
 module B = LowStar.Buffer
-module BV = LowStar.BufferView
+module DV = LowStar.BufferView.Down
 open Types_s
 
 open Interop.Base
@@ -18,13 +18,11 @@ open X64.MemoryAdapters
 module VS = X64.Vale.State
 module MS = X64.Machine_s
 open Vale.AsLowStar.MemoryHelpers
-open Vale.Interop.Cast
 
 module FU = X64.FastUtil
 module FH = X64.FastHybrid
 module FW = X64.FastWide
 
-let b8 = B.buffer UInt8.t
 let uint64 = UInt64.t
 
 (* A little utility to trigger normalization in types *)
@@ -32,11 +30,11 @@ let as_t (#a:Type) (x:normal a) : a = x
 let as_normal_t (#a:Type) (x:a) : normal a = x
 
 [@__reduce__] unfold
-let b64 = buf_t TUInt64
+let b64 = buf_t TUInt64 TUInt64
 [@__reduce__] unfold
-let t64_mod = TD_Buffer TUInt64 default_bq
+let t64_mod = TD_Buffer TUInt64 TUInt64 default_bq
 [@__reduce__] unfold
-let t64_no_mod = TD_Buffer TUInt64 ({modified=false; strict_disjointness=false; taint=MS.Secret})
+let t64_no_mod = TD_Buffer TUInt64 TUInt64 ({modified=false; strict_disjointness=false; taint=MS.Secret})
 [@__reduce__] unfold
 let tuint64 = TD_Base TUInt64
 
@@ -105,10 +103,10 @@ let fmul_lemma'
                                  ME.loc_none))) va_s0.VS.mem va_s1.VS.mem
  )) = 
    let va_s1, f = FW.va_lemma_fmul_stdcall code va_s0 IA.win (as_vale_buffer sb) (as_vale_buffer tmp) (as_vale_buffer f1) (as_vale_buffer out) (as_vale_buffer f2) in
-   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 out;   
-   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 f1;   
-   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 f2;   
-   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 tmp;      
+   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 out;   
+   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 f1;   
+   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 f2;   
+   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 tmp;       
    va_s1, f                                   
 
 (* Prove that fmul_lemma' has the required type *)
@@ -141,75 +139,15 @@ let lowstar_fmul : lowstar_fmul_t  =
 let lowstar_fmul_normal_t //: normal lowstar_fmul_t
   = as_normal_t #lowstar_fmul_t lowstar_fmul
 
-
-let fast_fmul
-  (tmp:b8)
-  (f1:b8)
-  (out:b8) 
-  (f2:b8)
-  : Stack unit
-  (requires fun h -> 
-    adx_enabled /\ bmi2_enabled /\
-    B.live h f2 /\
-    B.live h f1 /\ 
-    B.live h out /\ 
-    B.live h tmp /\
-    B.length f2 == 32 /\ 
-    B.length out == 32 /\ 
-    B.length f1 == 32 /\
-    B.length tmp == 64 /\
-    (B.disjoint out f1 \/ out == f1) /\
-    (B.disjoint out f2 \/ out == f2) /\
-    (B.disjoint out tmp \/ out == tmp) /\
-    (B.disjoint f1 f2 \/ f1 == f2) /\
-    B.disjoint f1 tmp /\
-    B.disjoint f2 tmp)
-  (ensures fun h0 c h1 ->
-    B.live h1 out /\ B.live h1 f1 /\ B.live h1 f2 /\ B.live h1 tmp /\
-    B.modifies (B.loc_union (B.loc_buffer out) (B.loc_buffer tmp)) h0 h1 /\
-    (
-    let a0 = UInt64.v (low_buffer_read TUInt64 h0 f1 0) in
-    let a1 = UInt64.v (low_buffer_read TUInt64 h0 f1 1) in
-    let a2 = UInt64.v (low_buffer_read TUInt64 h0 f1 2) in
-    let a3 = UInt64.v (low_buffer_read TUInt64 h0 f1 3) in
-    let b0 = UInt64.v (low_buffer_read TUInt64 h0 f2 0) in
-    let b1 = UInt64.v (low_buffer_read TUInt64 h0 f2 1) in
-    let b2 = UInt64.v (low_buffer_read TUInt64 h0 f2 2) in
-    let b3 = UInt64.v (low_buffer_read TUInt64 h0 f2 3) in     
-    let d0 = UInt64.v (low_buffer_read TUInt64 h1 out 0) in
-    let d1 = UInt64.v (low_buffer_read TUInt64 h1 out 1) in
-    let d2 = UInt64.v (low_buffer_read TUInt64 h1 out 2) in
-    let d3 = UInt64.v (low_buffer_read TUInt64 h1 out 3) in
-    let a = pow2_four a0 a1 a2 a3 in
-    let b = pow2_four b0 b1 b2 b3 in
-    let d = pow2_four d0 d1 d2 d3 in
-    d % prime = (a * b) % prime
-    )
-    )
-  = 
-  let x, _ = lowstar_fmul_normal_t tmp f1 out f2 () in
-  ()
-
-
 #push-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 200"
 
-let fmul tmp f1 out f2
-  = push_frame();
-    let out8 = B.alloca (UInt8.uint_to_t 0) (UInt32.uint_to_t 32) in
-    let f18 = B.alloca (UInt8.uint_to_t 0) (UInt32.uint_to_t 32) in
-    let f28 = B.alloca (UInt8.uint_to_t 0) (UInt32.uint_to_t 32) in
-    let tmp8 = B.alloca (UInt8.uint_to_t 0) (UInt32.uint_to_t 64) in
-    copy_down out out8;
-    copy_down f2 f28;
-    copy_down f1 f18;
-    copy_down tmp tmp8;
-    let x = fast_fmul tmp8 f18 out8 f28 in
-    imm_copy_up f1 f18;
-    imm_copy_up f2 f28;
-    copy_up tmp tmp8;
-    copy_up out out8;
-    pop_frame();
-    x
+let fmul tmp f1 out f2 =
+  DV.length_eq (get_downview tmp);
+  DV.length_eq (get_downview out);
+  DV.length_eq (get_downview f1);
+  DV.length_eq (get_downview f2);
+  let x, _ = lowstar_fmul_normal_t tmp f1 out f2 () in
+  ()
 
 #pop-options
 
@@ -273,10 +211,10 @@ let fmul2_lemma'
                                  ME.loc_none))) va_s0.VS.mem va_s1.VS.mem
  )) = 
    let va_s1, f = FW.va_lemma_fmul2_stdcall code va_s0 IA.win (as_vale_buffer sb) (as_vale_buffer tmp) (as_vale_buffer f1) (as_vale_buffer out) (as_vale_buffer f2) in
-   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 out;   
-   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 f1;   
-   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 f2;   
-   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 tmp;      
+   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 out;   
+   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 f1;   
+   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 f2;   
+   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 tmp;      
    va_s1, f                                   
 
 (* Prove that fmul2_lemma' has the required type *)
@@ -309,90 +247,15 @@ let lowstar_fmul2 : lowstar_fmul2_t  =
 let lowstar_fmul2_normal_t //: normal lowstar_fmul2_t
   = as_normal_t #lowstar_fmul2_t lowstar_fmul2
 
-let fast_fmul2
-  (tmp:b8)
-  (f1:b8)
-  (out:b8) 
-  (f2:b8)
-  : Stack unit
-  (requires fun h -> 
-    adx_enabled /\ bmi2_enabled /\
-    B.live h f2 /\
-    B.live h f1 /\ 
-    B.live h out /\ 
-    B.live h tmp /\
-    B.length f2 == 64 /\ 
-    B.length out == 64 /\ 
-    B.length f1 == 64 /\
-    B.length tmp == 128 /\
-    (B.disjoint out f1 \/ out == f1) /\
-    (B.disjoint out f2 \/ out == f2) /\
-    (B.disjoint out tmp \/ out == tmp) /\
-    (B.disjoint f1 f2 \/ f1 == f2) /\
-    B.disjoint f1 tmp /\
-    B.disjoint f2 tmp)
-  (ensures fun h0 c h1 ->
-    B.live h1 out /\ B.live h1 f1 /\ B.live h1 f2 /\ B.live h1 tmp /\
-    B.modifies (B.loc_union (B.loc_buffer out) (B.loc_buffer tmp)) h0 h1 /\
-    (
-    let a0 = UInt64.v (low_buffer_read TUInt64 h0 f1 0) in
-    let a1 = UInt64.v (low_buffer_read TUInt64 h0 f1 1) in
-    let a2 = UInt64.v (low_buffer_read TUInt64 h0 f1 2) in
-    let a3 = UInt64.v (low_buffer_read TUInt64 h0 f1 3) in
-    let b0 = UInt64.v (low_buffer_read TUInt64 h0 f2 0) in
-    let b1 = UInt64.v (low_buffer_read TUInt64 h0 f2 1) in
-    let b2 = UInt64.v (low_buffer_read TUInt64 h0 f2 2) in
-    let b3 = UInt64.v (low_buffer_read TUInt64 h0 f2 3) in     
-    let d0 = UInt64.v (low_buffer_read TUInt64 h1 out 0) in
-    let d1 = UInt64.v (low_buffer_read TUInt64 h1 out 1) in
-    let d2 = UInt64.v (low_buffer_read TUInt64 h1 out 2) in
-    let d3 = UInt64.v (low_buffer_read TUInt64 h1 out 3) in
-    let a = pow2_four a0 a1 a2 a3 in
-    let b = pow2_four b0 b1 b2 b3 in
-    let d = pow2_four d0 d1 d2 d3 in
-    let a0' = UInt64.v (low_buffer_read TUInt64 h0 f1 4) in
-    let a1' = UInt64.v (low_buffer_read TUInt64 h0 f1 5) in
-    let a2' = UInt64.v (low_buffer_read TUInt64 h0 f1 6) in
-    let a3' = UInt64.v (low_buffer_read TUInt64 h0 f1 7) in
-    let b0' = UInt64.v (low_buffer_read TUInt64 h0 f2 4) in
-    let b1' = UInt64.v (low_buffer_read TUInt64 h0 f2 5) in
-    let b2' = UInt64.v (low_buffer_read TUInt64 h0 f2 6) in
-    let b3' = UInt64.v (low_buffer_read TUInt64 h0 f2 7) in     
-    let d0' = UInt64.v (low_buffer_read TUInt64 h1 out 4) in
-    let d1' = UInt64.v (low_buffer_read TUInt64 h1 out 5) in
-    let d2' = UInt64.v (low_buffer_read TUInt64 h1 out 6) in
-    let d3' = UInt64.v (low_buffer_read TUInt64 h1 out 7) in
-    let a' = pow2_four a0' a1' a2' a3' in
-    let b' = pow2_four b0' b1' b2' b3' in
-    let d' = pow2_four d0' d1' d2' d3' in    
-    d % prime = (a * b) % prime /\
-    d' % prime = (a' * b') % prime    
-    )
-    )
-  = 
-  let x, _ = lowstar_fmul2_normal_t tmp f1 out f2 () in
-  ()
-
-
 #push-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 400 --using_facts_from '* -Interop.*'"
 
-let fmul2 tmp f1 out f2
-  = push_frame();
-    let out8 = B.alloca (UInt8.uint_to_t 0) (UInt32.uint_to_t 64) in
-    let f18 = B.alloca (UInt8.uint_to_t 0) (UInt32.uint_to_t 64) in
-    let f28 = B.alloca (UInt8.uint_to_t 0) (UInt32.uint_to_t 64) in
-    let tmp8 = B.alloca (UInt8.uint_to_t 0) (UInt32.uint_to_t 128) in
-    copy_down out out8;
-    copy_down f2 f28;
-    copy_down f1 f18;
-    copy_down tmp tmp8;
-    let x = fast_fmul2 tmp8 f18 out8 f28 in
-    imm_copy_up f1 f18;
-    imm_copy_up f2 f28;
-    copy_up tmp tmp8;
-    copy_up out out8;
-    pop_frame();
-    x
+let fmul2 tmp f1 out f2 =
+  DV.length_eq (get_downview tmp);
+  DV.length_eq (get_downview out);
+  DV.length_eq (get_downview f1);
+  DV.length_eq (get_downview f2);  
+  let x, _ = lowstar_fmul2_normal_t tmp f1 out f2 () in
+  ()
 
 #pop-options
 
@@ -453,8 +316,8 @@ let fmul1_lemma'
                                  ME.loc_none)) va_s0.VS.mem va_s1.VS.mem
  )) = 
    let va_s1, f = FH.va_lemma_fmul1_stdcall code va_s0 IA.win (as_vale_buffer sb) (as_vale_buffer out) (as_vale_buffer f1) (UInt64.v f2) in
-   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 out;   
-   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 f1;   
+   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 out;   
+   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 f1;   
    va_s1, f                                   
 
 (* Prove that fmul1_lemma' has the required type *)
@@ -487,51 +350,12 @@ let lowstar_fmul1 : lowstar_fmul1_t  =
 let lowstar_fmul1_normal_t : normal lowstar_fmul1_t
   = as_normal_t #lowstar_fmul1_t lowstar_fmul1
 
-let fast_fmul1
-  (out:b8)
-  (f1:b8)
-  (f2:uint64{UInt64.v f2 < 121665}) 
-  : Stack uint64
-  (requires fun h -> 
-    adx_enabled /\ bmi2_enabled /\
-    B.live h f1 /\ 
-    B.live h out /\ 
-    B.length out == 32 /\ 
-    B.length f1 == 32 /\
-    (B.disjoint out f1 \/ out == f1))
-  (ensures fun h0 c h1 -> 
-    B.live h1 out /\ B.live h1 f1 /\
-    B.modifies (B.loc_buffer out) h0 h1 /\
-    (
-    let a0 = UInt64.v (low_buffer_read TUInt64 h0 f1 0) in
-    let a1 = UInt64.v (low_buffer_read TUInt64 h0 f1 1) in
-    let a2 = UInt64.v (low_buffer_read TUInt64 h0 f1 2) in
-    let a3 = UInt64.v (low_buffer_read TUInt64 h0 f1 3) in    
-    let d0 = UInt64.v (low_buffer_read TUInt64 h1 out 0) in
-    let d1 = UInt64.v (low_buffer_read TUInt64 h1 out 1) in
-    let d2 = UInt64.v (low_buffer_read TUInt64 h1 out 2) in
-    let d3 = UInt64.v (low_buffer_read TUInt64 h1 out 3) in
-    let a = pow2_four a0 a1 a2 a3 in
-    let d = pow2_four d0 d1 d2 d3 in
-    d % prime = (a * UInt64.v f2) % prime
-    )
-    )
-  = 
-  let x, _ = lowstar_fmul1_normal_t out f1 f2 () in
-  x
-
 #push-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
 
-let fmul1 out f1 f2
-  = push_frame();
-    let out8 = B.alloca (UInt8.uint_to_t 0) (UInt32.uint_to_t 32) in
-    let f18 = B.alloca (UInt8.uint_to_t 0) (UInt32.uint_to_t 32) in
-    copy_down out out8;
-    copy_down f1 f18;
-    let x = fast_fmul1 out8 f18 f2 in
-    imm_copy_up f1 f18;
-    copy_up out out8;
-    pop_frame();
-    ()
-   
+let fmul1 out f1 f2 =
+  DV.length_eq (get_downview out);
+  DV.length_eq (get_downview f1);
+  let x, _ = lowstar_fmul1_normal_t out f1 f2 () in
+  ()
+
 #pop-options

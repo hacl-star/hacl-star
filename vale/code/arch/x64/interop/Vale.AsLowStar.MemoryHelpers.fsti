@@ -285,3 +285,16 @@ val immbuffer_as_seq_reveal_tuint128
 val bounded_buffer_addrs (src t:base_typ) (h:HS.mem) (b:buf_t src t{B.live h b}) (s:ME.mem) : Lemma
   (ME.buffer_addr #t (as_vale_buffer b) s + DV.length (get_downview b) < Words_s.pow2_64)
 
+val same_down_up_buffer_length (src:base_typ) (b:buf_t src src) : Lemma
+  (B.length b == DV.length (get_downview b) / view_n src)
+
+val down_up_buffer_read_reveal (src:base_typ) (h:HS.mem) (s:ME.mem) (b:(buf_t src src){B.live h b}) (i:nat{i < DV.length (get_downview b) / view_n src}) : Lemma
+  (requires (
+   DV.length_eq (get_downview b);
+   same_down_up_buffer_length src b;
+   Seq.equal 
+    (LSig.nat_to_uint_seq_t src (ME.buffer_as_seq s (as_vale_buffer b)))
+    (UV.as_seq h (UV.mk_buffer (get_downview b) (LSig.view_of_base_typ src)))))
+  (ensures LSig.nat_to_uint src (ME.buffer_read (as_vale_buffer b) i s) == 
+    Seq.index (B.as_seq h b) i)
+  [SMTPat (ME.buffer_read (as_vale_buffer b) i s); SMTPat (Seq.index (B.as_seq h b) i)]

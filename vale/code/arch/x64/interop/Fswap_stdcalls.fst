@@ -3,7 +3,7 @@ module Fswap_stdcalls
 open FStar.HyperStack.ST
 module HS = FStar.HyperStack
 module B = LowStar.Buffer
-module BV = LowStar.BufferView
+module DV = LowStar.BufferView.Down
 open Types_s
 
 open Interop.Base
@@ -18,7 +18,6 @@ open X64.MemoryAdapters
 module VS = X64.Vale.State
 module MS = X64.Machine_s
 open Vale.AsLowStar.MemoryHelpers
-open Vale.Interop.Cast
 
 module FU = X64.FastUtil
 module FH = X64.FastHybrid
@@ -32,11 +31,11 @@ let as_t (#a:Type) (x:normal a) : a = x
 let as_normal_t (#a:Type) (x:a) : normal a = x
 
 [@__reduce__] unfold
-let b64 = buf_t TUInt64
+let b64 = buf_t TUInt64 TUInt64
 [@__reduce__] unfold
-let t64_mod = TD_Buffer TUInt64 default_bq
+let t64_mod = TD_Buffer TUInt64 TUInt64 default_bq
 [@__reduce__] unfold
-let t64_no_mod = TD_Buffer TUInt64 ({modified=false; strict_disjointness=false; taint=MS.Secret})
+let t64_no_mod = TD_Buffer TUInt64 TUInt64 ({modified=false; strict_disjointness=false; taint=MS.Secret})
 [@__reduce__] unfold
 let tuint64 = TD_Base TUInt64
 
@@ -98,8 +97,8 @@ let cswap_lemma'
                                  ME.loc_none))) va_s0.VS.mem va_s1.VS.mem
  )) = 
    let va_s1, f = FU.va_lemma_cswap2_stdcall code va_s0 IA.win (as_vale_buffer sb) (as_vale_buffer p0) (as_vale_buffer p1) (UInt64.v bit) in
-   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 p0;   
-   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 p1;   
+   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 p0;   
+   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 p1;   
    va_s1, f                                   
 
 (* Prove that cswap_lemma' has the required type *)
@@ -132,79 +131,12 @@ let lowstar_cswap : lowstar_cswap_t  =
 let lowstar_cswap_normal_t : normal lowstar_cswap_t
   = as_normal_t #lowstar_cswap_t lowstar_cswap
 
-#set-options "--z3rlimit 100"
+#push-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
 
-let fast_cswap2
-  (p0:b8)
-  (p1:b8)
-  (bit:uint64) 
-  : Stack unit
-  (requires fun h -> 
-    UInt64.v bit <= 1 /\
-    B.live h p0 /\ 
-    B.live h p1 /\ 
-    B.length p0 == 64 /\ 
-    B.length p1 == 64 /\
-    (B.disjoint p0 p1 \/ p0 == p1))
-  (ensures fun h0 _ h1 -> 
-    B.live h1 p0 /\ B.live h1 p1 /\
-    B.modifies (B.loc_union (B.loc_buffer p0) (B.loc_buffer p1)) h0 h1 /\
-    (
-      (UInt64.v bit = 1 ==>
-        low_buffer_read TUInt64 h0 p0 0 == low_buffer_read TUInt64 h1 p1 0 /\
-        low_buffer_read TUInt64 h0 p0 1 == low_buffer_read TUInt64 h1 p1 1 /\
-        low_buffer_read TUInt64 h0 p0 2 == low_buffer_read TUInt64 h1 p1 2 /\
-        low_buffer_read TUInt64 h0 p0 3 == low_buffer_read TUInt64 h1 p1 3 /\
-        low_buffer_read TUInt64 h0 p0 4 == low_buffer_read TUInt64 h1 p1 4 /\
-        low_buffer_read TUInt64 h0 p0 5 == low_buffer_read TUInt64 h1 p1 5 /\
-        low_buffer_read TUInt64 h0 p0 6 == low_buffer_read TUInt64 h1 p1 6 /\
-        low_buffer_read TUInt64 h0 p0 7 == low_buffer_read TUInt64 h1 p1 7 /\        
-        
-        low_buffer_read TUInt64 h0 p1 0 == low_buffer_read TUInt64 h1 p0 0 /\
-        low_buffer_read TUInt64 h0 p1 1 == low_buffer_read TUInt64 h1 p0 1 /\
-        low_buffer_read TUInt64 h0 p1 2 == low_buffer_read TUInt64 h1 p0 2 /\
-        low_buffer_read TUInt64 h0 p1 3 == low_buffer_read TUInt64 h1 p0 3 /\
-        low_buffer_read TUInt64 h0 p1 4 == low_buffer_read TUInt64 h1 p0 4 /\
-        low_buffer_read TUInt64 h0 p1 5 == low_buffer_read TUInt64 h1 p0 5 /\
-        low_buffer_read TUInt64 h0 p1 6 == low_buffer_read TUInt64 h1 p0 6 /\
-        low_buffer_read TUInt64 h0 p1 7 == low_buffer_read TUInt64 h1 p0 7
-      ) /\
-      (UInt64.v bit = 0 ==>
-        low_buffer_read TUInt64 h0 p0 0 == low_buffer_read TUInt64 h1 p0 0 /\
-        low_buffer_read TUInt64 h0 p0 1 == low_buffer_read TUInt64 h1 p0 1 /\
-        low_buffer_read TUInt64 h0 p0 2 == low_buffer_read TUInt64 h1 p0 2 /\
-        low_buffer_read TUInt64 h0 p0 3 == low_buffer_read TUInt64 h1 p0 3 /\
-        low_buffer_read TUInt64 h0 p0 4 == low_buffer_read TUInt64 h1 p0 4 /\
-        low_buffer_read TUInt64 h0 p0 5 == low_buffer_read TUInt64 h1 p0 5 /\
-        low_buffer_read TUInt64 h0 p0 6 == low_buffer_read TUInt64 h1 p0 6 /\
-        low_buffer_read TUInt64 h0 p0 7 == low_buffer_read TUInt64 h1 p0 7 /\        
-        
-        low_buffer_read TUInt64 h0 p1 0 == low_buffer_read TUInt64 h1 p1 0 /\
-        low_buffer_read TUInt64 h0 p1 1 == low_buffer_read TUInt64 h1 p1 1 /\
-        low_buffer_read TUInt64 h0 p1 2 == low_buffer_read TUInt64 h1 p1 2 /\
-        low_buffer_read TUInt64 h0 p1 3 == low_buffer_read TUInt64 h1 p1 3 /\
-        low_buffer_read TUInt64 h0 p1 4 == low_buffer_read TUInt64 h1 p1 4 /\
-        low_buffer_read TUInt64 h0 p1 5 == low_buffer_read TUInt64 h1 p1 5 /\
-        low_buffer_read TUInt64 h0 p1 6 == low_buffer_read TUInt64 h1 p1 6 /\
-        low_buffer_read TUInt64 h0 p1 7 == low_buffer_read TUInt64 h1 p1 7
-      )
-    ))
-  = 
+let cswap2 p0 p1 bit =
+  DV.length_eq (get_downview p0);
+  DV.length_eq (get_downview p1);
   let x, _ = lowstar_cswap_normal_t p0 p1 bit () in
   ()
 
-#push-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
-
-let cswap2 p0 p1 bit
-  = push_frame();
-    let p08 = B.alloca (UInt8.uint_to_t 0) (UInt32.uint_to_t 64) in
-    let p18 = B.alloca (UInt8.uint_to_t 0) (UInt32.uint_to_t 64) in
-    copy_down p0 p08;
-    copy_down p1 p18;
-    let x = fast_cswap2 p08 p18 bit in
-    copy_up p1 p18;
-    copy_up p0 p08;
-    pop_frame();
-    x
-    
 #pop-options
