@@ -218,8 +218,6 @@ procedure{:quick}{:public} KeyExpansion256Stdcall(
     Pxor(xmm2, xmm2);
     Pxor(xmm3, xmm3);
     Pxor(xmm4, xmm4);
-
-    assume(false);
 }
 
 ///////////////////////////
