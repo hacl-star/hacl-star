@@ -155,8 +155,10 @@ else
   TIME := /usr/bin/time
 endif
 
+ifneq ($(OS),Windows_NT)
 ifneq ($(shell realpath $$(pwd)),$(shell realpath $$HACL_HOME))
   $(error HACL_HOME, currently set to $(HACL_HOME), does not seem to point to the current directory)
+endif
 endif
 
 
