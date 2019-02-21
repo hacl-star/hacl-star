@@ -230,9 +230,8 @@ let rec mt_get_path_acc_inv_ok j fhs rhs k acc actd =
       hash_seq_spec_full_index_raw (S.head fhs) acc actd (k - 1)
     end
   end
-#reset-options "--z3rlimit 20"
 
-#reset-options "--max_fuel 1"
+#reset-options "--max_fuel 1 --initial_fuel 1 --max_ifuel 0 --z3rlimit 60"
 val mt_get_path_inv_ok_:
   lv:nat{lv < 32} ->
   i:nat -> 
@@ -247,9 +246,9 @@ val mt_get_path_inv_ok_:
                   mt_olds_hs_lth_inv_ok lv i j olds hs;
                   (j > 0 /\
                   mt_hashes_inv lv j (merge_hs olds hs) /\
-                  mt_rhs_inv j 
-                    (hash_seq_spec_full (S.index (merge_hs olds hs) lv) acc actd)
-                    (S.slice rhs lv (lv + log2c j)) actd)))
+		  (let t1 = hash_seq_spec_full (S.index (merge_hs olds hs) lv) acc actd in
+		   let t2 = S.slice rhs lv (lv + log2c j) in
+                   mt_rhs_inv j t1 t2 actd))))
         (ensures (S.equal (path_spec k j actd 
                             (S.slice (mt_get_path_ lv hs rhs i j k p actd)
                               (S.length p) (S.length p + mt_path_length k j actd)))

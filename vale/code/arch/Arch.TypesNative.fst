@@ -46,8 +46,10 @@ let lemma_ior_nth n x y =
 let lemma_inot_nth n x =
   FStar.Classical.forall_intro (lemma_inot_nth_i n x)
 
+#push-options "--z3rlimit 20"
 let lemma_ishl_nth n x y =
   FStar.Classical.forall_intro (lemma_ishl_nth_i n x y)
+#pop-options
 
 let lemma_ishr_nth n x y =
   FStar.Classical.forall_intro (lemma_ishr_nth_i n x y)

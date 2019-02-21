@@ -109,6 +109,7 @@ let code_add1 = FU.va_code_fast_add1_stdcall IA.win
 (* Here's the type expected for the add1 wrapper *)
 [@__reduce__]
 let lowstar_add1_t =
+  assert_norm (List.length dom + List.length ([]<:list arg) <= 4);
   IX64.as_lowstar_sig_t_weak_stdcall
     Interop.down_mem
     code_add1
@@ -121,6 +122,7 @@ let lowstar_add1_t =
 
 (* And here's the add1 wrapper itself *)
 let lowstar_add1 : lowstar_add1_t  =
+  assert_norm (List.length dom + List.length ([]<:list arg) <= 4);
   IX64.wrap_weak_stdcall
     Interop.down_mem
     code_add1
@@ -255,6 +257,7 @@ let code_fadd = FH.va_code_fadd_stdcall IA.win
 (* Here's the type expected for the add1 wrapper *)
 [@__reduce__]
 let lowstar_fadd_t =
+  assert_norm (List.length fadd_dom + List.length ([]<:list arg) <= 4);
   IX64.as_lowstar_sig_t_weak_stdcall
     Interop.down_mem
     code_fadd
@@ -267,6 +270,7 @@ let lowstar_fadd_t =
 
 (* And here's the fadd wrapper itself *)
 let lowstar_fadd : lowstar_fadd_t  =
+  assert_norm (List.length fadd_dom + List.length ([]<:list arg) <= 4);
   IX64.wrap_weak_stdcall
     Interop.down_mem
     code_fadd

@@ -113,6 +113,7 @@ let code_fsub = FH.va_code_fsub_stdcall IA.win
 (* Here's the type expected for the fsub wrapper *)
 [@__reduce__]
 let lowstar_fsub_t =
+  assert_norm (List.length dom + List.length ([]<:list arg) <= 4);
   IX64.as_lowstar_sig_t_weak_stdcall
     Interop.down_mem
     code_fsub
@@ -125,6 +126,7 @@ let lowstar_fsub_t =
 
 (* And here's the fsub wrapper itself *)
 let lowstar_fsub : lowstar_fsub_t  =
+  assert_norm (List.length dom + List.length ([]<:list arg) <= 4);
   IX64.wrap_weak_stdcall
     Interop.down_mem
     code_fsub

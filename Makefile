@@ -14,6 +14,8 @@
 # This Makefile honors the following variables:
 # - NOSHORTLOG=1 disables pretty (short) logs
 # - NODEPEND=1 disables .depend re-generation (use for debugging only)
+# - NOOPENSSLCHECK=1 disables OpenSSL libcrypto.a checks (useful for verifying files
+#   only, or for non-OpenSSL configurations)
 # - EVERCRYPT_CONFIG allows switching EverCrypt static configurations; when
 #   going through the all target, we properly invalidate the checked file.
 #
@@ -21,7 +23,7 @@
 # .vaf files in order to get a full dependency graph for the .fst files. So,
 # this Makefile exposes the following targets to the end user:
 # - all: staged target for the entire build (default)
-# - ci: same as all, without short logs
+# - test: staged
 # - vale-fst: the minimum needed to compile .vaf files to .fst files
 # - vale-verify: properly staged target for re-verifying all the vale files
 # - vale-asm: re-generation of the Vale assemblies in dist/vale
@@ -31,6 +33,11 @@
 #
 # To generate a Makefile for the interactive mode, use:
 # - make foo/bar/Makefile
+#
+# CI targets:
+# - ci: staged, runs all + test, without short logs (this repository's CI)
+# - min-test: staged, runs only a subset of verification for the purposes of
+#   F*'s extended CI
 
 #########################
 # Catching setup errors #
@@ -40,12 +47,12 @@
 # needed anymore, but better be safe.
 ifeq (3.81,$(MAKE_VERSION))
   $(error You seem to be using the OSX antiquated Make version. Hint: brew \
-    install make, then hit invoke gmake instead of make)
+    install make, then invoke gmake instead of make)
 endif
 
 # Better error early.
 ifeq (,$(VALE_HOME))
-  $(error Please define VALE_HOME, possibly using cygpath -m)
+  $(error Please define VALE_HOME, possibly using cygpath -m on Windows)
 endif
 
 ifeq (,$(wildcard $(VALE_HOME)/bin/vale.exe))
@@ -57,12 +64,14 @@ ifneq (,$(MLCRYPTO_HOME))
 OPENSSL_HOME 	:= $(MLCRYPTO_HOME)/openssl
 endif
 
+ifeq (,$(NOOPENSSLCHECK))
 ifeq (,$(OPENSSL_HOME))
-  $(error Please define MLCRYPTO_HOME, possibly using cygpath -m)
+  $(error Please define MLCRYPTO_HOME, possibly using cygpath -m on Windows)
 endif
 
 ifeq (,$(OPENSSL_HOME)/libcrypto.a)
   $(error $$OPENSSL_HOME/libcrypto.a does not exist (OPENSSL_HOME=$(OPENSSL_HOME)))
+endif
 endif
 
 ifneq (,$(HACL_HOME))
@@ -87,14 +96,23 @@ all_: compile-compact compile-generic compile-compact-msvc \
 
 # Any file in code/tests is taken to contain a `main` function.
 # Any file in specs/tests is taken to contain a `test` function.
-test: test-c test-ml
+test:
+	$(MAKE) vale-fst
+	FSTAR_DEPEND_FLAGS="--warn_error +285" $(MAKE) test_
+
+test_: test-c test-ml
 test-c: $(subst .,_,$(patsubst %.fst,test-c-%,$(notdir $(wildcard code/tests/*.fst)))) \
   test-c-Test test-c-merkle_tree_test
 test-ml: $(subst .,_,$(patsubst %.fst,test-ml-%,$(notdir $(wildcard specs/tests/*.fst))))
 
 ci:
 	NOSHORTLOG=1 $(MAKE) vale-fst
-	FSTAR_DEPEND_FLAGS="--warn_error +285" NOSHORTLOG=1 $(MAKE) all_ test
+	FSTAR_DEPEND_FLAGS="--warn_error +285" NOSHORTLOG=1 $(MAKE) all_ test_
+
+min-test:
+	MIN_TEST=1 NOSHORTLOG=1 $(MAKE) vale-fst
+	MIN_TEST=1 FSTAR_DEPEND_FLAGS="--warn_error +285" NOSHORTLOG=1 \
+	  $(MAKE) min-test_
 
 # Backwards-compat target
 .PHONY: secure_api.old
@@ -112,6 +130,8 @@ clean:
 #################
 # Configuration #
 #################
+
+include Makefile.common
 
 IMPORT_FSTAR_TYPES := $(VALE_HOME)/bin/importFStarTypes.exe
 PYTHON3 := $(shell tools/findpython3.sh)
@@ -133,6 +153,12 @@ ifeq ($(shell uname -s),Darwin)
 else
   SED := sed
   TIME := /usr/bin/time
+endif
+
+ifneq ($(OS),Windows_NT)
+ifneq ($(shell realpath $$(pwd)),$(shell realpath $$HACL_HOME))
+  $(error HACL_HOME, currently set to $(HACL_HOME), does not seem to point to the current directory)
+endif
 endif
 
 
@@ -182,7 +208,8 @@ to-obj-dir = $(addprefix obj/,$(notdir $1))
 VALE_ROOTS = $(wildcard $(addsuffix /*.vaf,$(VALE_DIRS)))
 
 # Target F* files stemming from Vale files
-VALE_FSTS = $(call to-obj-dir,$(patsubst %.vaf,%.fst,$(VALE_ROOTS)))
+VAF_AS_FSTS = $(patsubst %.vaf,%.fsti,$(VALE_ROOTS)) $(patsubst %.vaf,%.fst,$(VALE_ROOTS))
+VALE_FSTS = $(call to-obj-dir,$(VAF_AS_FSTS))
 
 .PRECIOUS: %.fst %.fsti
 
@@ -193,8 +220,6 @@ FSTAR_ROOTS = $(wildcard $(addsuffix /*.fsti,$(DIRS)) $(addsuffix /*.fst,$(DIRS)
 
 # Convenience target. Remember to run make vale-fst first.
 verify: $(addsuffix .checked,$(FSTAR_ROOTS))
-
-include Makefile.common
 
 # We currently force regeneration of three depend files. This is long.
 
@@ -211,7 +236,8 @@ ifndef MAKE_RESTARTS
 .fstar-depend-%: .FORCE
 	$(call run-with-log,\
 	  $(FSTAR_NO_FLAGS) --dep $* $(FSTAR_ROOTS) --warn_error '-285' $(FSTAR_DEPEND_FLAGS) \
-	    --extract '* -Prims -LowStar -Lib.Buffer -Hacl -FStar +FStar.Endianness +FStar.Kremlin.Endianness -EverCrypt -MerkleTree -Vale.Tactics -CanonCommMonoid -CanonCommSemiring -FastHybrid_helpers -FastMul_helpers -FastSqr_helpers -FastUtil_helpers -TestLib -EverCrypt -MerkleTree -Test -Vale_memcpy -Vale.AsLowStar.Test' > $@ \
+	    --extract '* -Prims -LowStar -Lib.Buffer -Hacl -FStar +FStar.Endianness +FStar.Kremlin.Endianness -EverCrypt -MerkleTree -Vale.Tactics -FastHybrid_helpers -FastMul_helpers -FastSqr_helpers -FastUtil_helpers -TestLib -EverCrypt -MerkleTree -Test -Vale_memcpy -Vale.AsLowStar.Test -Lib.IntVector' > $@ && \
+	  $(SED) -i 's!$(HACL_HOME)/obj/\(.*.checked\)!obj/\1!' $@ \
 	  ,[FSTAR-DEPEND ($*)],$(call to-obj-dir,$@))
 
 .vale-depend: .fstar-depend-make .FORCE
@@ -274,15 +300,16 @@ VALE_FLAGS = -include $(HACL_HOME)/vale/code/lib/util/Operator.vaf
 
 obj/Operator.fst: VALE_FLAGS=
 
+# Since valedepend generates "foo.fsti: foo.fst", ensure that the fsti is
+# more recent than the fst (we don't know in what order vale.exe writes
+# the files). (Actually, we know, hence this extra touch.)
 %.fst:
 	$(call run-with-log,\
 	  $(MONO) $(VALE_HOME)/bin/vale.exe -fstarText -quickMods \
 	    -typecheck -include $*.types.vaf \
 	    $(VALE_FLAGS) \
-	    -in $< -out $@ -outi $@i \
+	    -in $< -out $@ -outi $@i && touch -c $@i \
 	  ,[VALE] $(notdir $*),$(call to-obj-dir,$@))
-
-obj/%.fsti: obj/%.fst
 
 # A pseudo-target for the first stage.
 vale-fst: $(VALE_FSTS)
@@ -303,10 +330,10 @@ VALE_FSTAR_FLAGS=$(VALE_FSTAR_FLAGS_NOSMT) \
   --smtencoding.elim_box true --smtencoding.l_arith_repr native \
   --smtencoding.nl_arith_repr wrapped
 
-# $(call only-for,<filter>) retains all the *source* checked files that match
-# <filter>, then returns the corresponding set of targets in obj/. For instance,
-# $(call only-for,$(HACL_HOME)/code/%.checked) returns
-# obj/Hacl.Hash.Definitions.fst.checked, and all the other targets that
+# $(call only-for,<filter>) retains all the checked files that match <filter>,
+# taken from the source directories, then returns the corresponding set of
+# targets in obj/. For instance, $(call only-for,$(HACL_HOME)/code/%.checked)
+# returns obj/Hacl.Hash.Definitions.fst.checked, and all the other targets that
 # originate from source files in code/.
 #
 # With this macro, we no longer rely on pattern rules for file-specific options,
@@ -314,7 +341,7 @@ VALE_FSTAR_FLAGS=$(VALE_FSTAR_FLAGS_NOSMT) \
 # below match the same file multiple times (as we the case in the original
 # SConstruct). The last match has precedence and overrides previous variable
 # assignments.
-only-for = $(call to-obj-dir,$(filter $1,$(addsuffix .checked,$(FSTAR_ROOTS))))
+only-for = $(call to-obj-dir,$(filter $1,$(addsuffix .checked,$(FSTAR_ROOTS) $(VAF_AS_FSTS))))
 
 # By default Vale files don't use two phase tc
 $(call only-for,$(HACL_HOME)/vale/%.checked): \
@@ -334,8 +361,7 @@ $(call only-for,$(HACL_HOME)/vale/code/arch/x64/interop/%.checked): \
 
 # Now the fst files coming from vaf files, which also don't work with two
 # phase tc (VALE_FSTS is of the form obj/foobar.fst).
-$(addsuffix .checked,$(VALE_FSTS)) \
-$(addsuffix i.checked,$(VALE_FSTS)): \
+$(addsuffix .checked,$(VALE_FSTS)): \
   FSTAR_FLAGS=$(VALE_FSTAR_FLAGS) --use_two_phase_tc false
 
 # Then a series of individual overrides.
@@ -353,7 +379,7 @@ obj/Views.fst.checked: \
   FSTAR_FLAGS=$(shell echo $(VALE_FSTAR_FLAGS) | \
     sed 's/--smtencoding.nl_arith_repr wrapped/--smtencoding.nl_arith_repr native/;')
 
-objections/Collections.Lists.fst.checked: \
+obj/Collections.Lists.fst.checked: \
   FSTAR_FLAGS=$(shell echo $(VALE_FSTAR_FLAGS) | \
     sed 's/--z3cliopt smt.QI.EAGER_THRESHOLD=100//')
 
@@ -386,6 +412,12 @@ obj/X64.Memory_Sems.fst.checked: \
 obj/Vale.AsLowStar.Wrapper.fst.checked: \
   FSTAR_FLAGS=$(VALE_FSTAR_FLAGS)
 
+obj/Fsqr_stdcalls.fst.checked: \
+  FSTAR_FLAGS=$(VALE_FSTAR_FLAGS)
+
+obj/Fmul_stdcalls.fst.checked: \
+  FSTAR_FLAGS=$(VALE_FSTAR_FLAGS)
+
 hints:
 	mkdir -p $@
 
@@ -409,11 +441,27 @@ vale-verify:
 
 vale-verify_: \
   $(addsuffix .checked,$(VALE_FSTS)) \
-  $(addsuffix i.checked,$(VALE_FSTS)) \
   $(call only-for,$(HACL_HOME)/vale/%.checked) \
 
 hacl-verify: $(call only-for,$(HACL_HOME)/code/%.checked)
 
+
+############
+# min-test #
+############
+
+min-test_: $(filter-out \
+  obj/X64.Vale.InsSha.% \
+  $(call only-for,$(HACL_HOME)/vale/code/arch/x64/interop/%)\
+  ,\
+  $(call only-for, $(addprefix $(HACL_HOME)/vale/,\
+  code/arch/% code/lib/% code/crypto/poly1305/% \
+  code/thirdPartyPorts/OpenSSL/poly1305/% specs/%))) \
+  obj/Hacl.Hash.MD.fst.checked
+	@echo "<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>"
+	@echo MIN_TEST summary: verified the following modules
+	@echo $^
+	@echo "<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>"
 
 ###############################################################################
 # Extracting (checked files) to OCaml, producing executables, running them to #
@@ -526,7 +574,7 @@ DEFAULT_FLAGS		=\
   -bundle EverCrypt.BCrypt \
   -bundle EverCrypt.OpenSSL \
   -bundle MerkleTree.Spec,MerkleTree.Spec.*,MerkleTree.New.High,MerkleTree.New.High.* \
-  -bundle CanonCommMonoid,CanonCommSemiring,CanonCommSwaps[rename=Unused] \
+  -bundle FStar.Tactics.CanonCommMonoid,FStar.Tactics.CanonCommSemiring,FStar.Tactics.CanonCommSwaps[rename=Unused] \
   -bundle FastUtil_helpers,FastHybrid_helpers,FastSqr_helpers,FastMul_helpers[rename=Unused2] \
   -bundle Opaque_s,Map16,Test.Vale_memcpy,Fast_defs,Interop_Printer,Memcpy[rename=Unused3] \
   -bundle X64.*,Arch.*,Words.*,Vale.*,Collections.*,Collections,SHA_helpers,Interop,Interop.*[rename=Unused4] \

@@ -8,7 +8,7 @@
       0,
       [ "@query", "primitive_Prims.op_LessThan" ],
       0,
-      "2cfd43ae05fb8185b3b898c48e1b80af"
+      "5f6400aeae40f98039e38880db0c39e0"
     ],
     [
       "Map16.sel4",
@@ -17,7 +17,7 @@
       0,
       [ "@query", "primitive_Prims.op_LessThan" ],
       0,
-      "64afe522387647a92d7ab0d5dc7376c8"
+      "58a8a8d5ee0e99b77df5a668da9c281a"
     ],
     [
       "Map16.sel8",
@@ -26,7 +26,7 @@
       0,
       [ "@query", "primitive_Prims.op_LessThan" ],
       0,
-      "a35c7c68faa7a6c4198d1f16c3b1e652"
+      "043a81bad107f1219d2add309330b403"
     ],
     [
       "Map16.sel16",
@@ -35,7 +35,7 @@
       0,
       [ "@query", "primitive_Prims.op_LessThan" ],
       0,
-      "1e243baf0c97e45e0164e89add553557"
+      "b6d6170768dcd8f4c155f15f3a08a634"
     ],
     [
       "Map16.upd2",
@@ -44,7 +44,7 @@
       0,
       [ "@query", "primitive_Prims.op_LessThan" ],
       0,
-      "19fc51f8a7e331174c9c01d0e814261f"
+      "583406d877b18e83014990a493c008ab"
     ],
     [
       "Map16.upd4",
@@ -53,7 +53,7 @@
       0,
       [ "@query", "primitive_Prims.op_LessThan" ],
       0,
-      "7663ab28a090213640468ac42fa7767c"
+      "d8fa529b2e4df428c1a460c948c2f1cd"
     ],
     [
       "Map16.upd8",
@@ -62,7 +62,7 @@
       0,
       [ "@query", "primitive_Prims.op_LessThan" ],
       0,
-      "40ac3e03a21daf5f3cb9ae84cb69e201"
+      "6ca7430183028b73fdc9b4ba4c47b1ea"
     ],
     [
       "Map16.upd16",
@@ -71,7 +71,7 @@
       0,
       [ "@query", "primitive_Prims.op_LessThan" ],
       0,
-      "8c55f83d85f1027a1ed261122bcfa8e6"
+      "10a2eab2910e9fc4a6297cfd0d001e3f"
     ],
     [
       "Map16.lemma_self16",
@@ -91,64 +91,47 @@
         "typing_Map16.upd16"
       ],
       0,
-      "639a83e549ea6cc6a1bc7a691f57e096"
+      "b5c5e38cb76d394530109f74c5b79c4f"
     ],
     [
       "Map16.lemma_other16",
       1,
-      2,
       1,
+      0,
       [
-        "@MaxFuel_assumption", "@MaxIFuel_assumption",
-        "@fuel_correspondence_Prims.pow2.fuel_instrumented",
-        "@fuel_irrelevance_Prims.pow2.fuel_instrumented", "@query",
-        "Prims_pretyping_ae567c2fb75be05905677af440075565", "b2t_def",
-        "bool_inversion", "constructor_distinct_Tm_unit",
-        "data_elim_FStar.Pervasives.Native.Mktuple2",
-        "equation_FStar.UInt.fits", "equation_FStar.UInt.max_int",
-        "equation_FStar.UInt.min_int", "equation_FStar.UInt.size",
-        "equation_FStar.UInt32.n", "equation_Map16.map16",
-        "equation_Map16.map2", "equation_Map16.map4", "equation_Map16.map8",
-        "equation_Map16.sel16", "equation_Map16.sel2", "equation_Map16.sel4",
-        "equation_Map16.sel8", "equation_Map16.upd16", "equation_Map16.upd2",
-        "equation_Map16.upd4", "equation_Map16.upd8", "equation_Prims.nat",
-        "fuel_guarded_inversion_FStar.Pervasives.Native.tuple2",
-        "function_token_typing_Prims.__cache_version_number__",
-        "int_inversion", "int_typing", "lemma_FStar.UInt.pow2_values",
-        "primitive_Prims.op_AmpAmp", "primitive_Prims.op_LessThan",
-        "primitive_Prims.op_LessThanOrEqual",
-        "primitive_Prims.op_Subtraction",
-        "projection_inverse_BoxBool_proj_0",
+        "@MaxIFuel_assumption", "@query", "equation_Map16.map2",
+        "equation_Map16.map4", "equation_Map16.map8", "equation_Map16.sel16",
+        "equation_Map16.sel2", "equation_Map16.sel4", "equation_Map16.sel8",
+        "equation_Map16.upd16", "equation_Map16.upd2", "equation_Map16.upd4",
+        "equation_Map16.upd8", "int_inversion", "int_typing",
+        "primitive_Prims.op_LessThan", "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
         "projection_inverse_FStar.Pervasives.Native.Mktuple2__1",
-        "projection_inverse_FStar.Pervasives.Native.Mktuple2__2",
-        "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
-        "typing_FStar.UInt.fits", "typing_FStar.UInt32.n",
-        "typing_Map16.upd16", "typing_Map16.upd2", "typing_Map16.upd4",
-        "typing_Map16.upd8"
+        "projection_inverse_FStar.Pervasives.Native.Mktuple2__2"
       ],
       0,
-      "cecbc1009b48f2c1abc043872cceb928"
+      "7e4fdfa4e8f2955cde0359440628edae"
     ],
     [
       "Map16.lemma_equal16",
       1,
-      2,
+      1,
       5,
       [
         "@MaxIFuel_assumption", "@query",
         "data_elim_FStar.Pervasives.Native.Mktuple2", "equation_Map16.map16",
         "equation_Map16.map2", "equation_Map16.map4", "equation_Map16.map8",
         "equation_Map16.sel16", "equation_Map16.sel2", "equation_Map16.sel4",
-        "equation_Map16.sel8",
+        "equation_Map16.sel8", "equation_Words_s.pow2_1",
+        "equation_Words_s.pow2_2",
         "fuel_guarded_inversion_FStar.Pervasives.Native.tuple2",
-        "int_typing", "primitive_Prims.op_LessThan",
-        "primitive_Prims.op_Subtraction",
-        "projection_inverse_BoxBool_proj_0",
+        "function_token_typing_Words_s.pow2_1",
+        "function_token_typing_Words_s.pow2_2", "int_typing",
+        "primitive_Prims.op_LessThan", "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "e5665c84c833b6623adb17347c516d55"
+      "8d7350035555a09f77890f4a4c282b19"
     ],
     [
       "Map16.lemma_self",
@@ -157,7 +140,7 @@
       0,
       [ "@query" ],
       0,
-      "e7eeb125b8e7c4766961b187493d36af"
+      "f222b2984620eca7eabfe6641a18693b"
     ],
     [
       "Map16.lemma_other",
@@ -166,7 +149,7 @@
       0,
       [ "@query" ],
       0,
-      "1a8f7966309112a6a0e4815eed93b260"
+      "0c7250539b329a1d3b8b94022fe5896a"
     ],
     [
       "Map16.lemma_equal",
@@ -175,7 +158,7 @@
       0,
       [ "@query" ],
       0,
-      "af7a21ee36d8b575a83e7f66b2222cbe"
+      "23c1a8306c71d60e8316c7858dd46311"
     ],
     [
       "Map16.lemma_eta16",
@@ -187,7 +170,7 @@
         "int_inversion"
       ],
       0,
-      "7088e5d9e2d4562146c94cb3f63f56d3"
+      "3600d0e0e471bca890b679defdd2797e"
     ],
     [
       "Map16.lemma_eta",
@@ -196,7 +179,7 @@
       0,
       [ "@query" ],
       0,
-      "9a5ee41d6d7cf380a26d96163195223d"
+      "a3e69286e4e6fab7863a372785b5db03"
     ]
   ]
 ]

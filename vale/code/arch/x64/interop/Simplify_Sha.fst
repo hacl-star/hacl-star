@@ -260,13 +260,17 @@ let simplify_quad_aux (b:B.buffer UInt8.t) (h:HS.mem) : Lemma
 open Words.Four_s
 open Collections.Seqs_s
 
-#reset-options "--z3rlimit 60"
+#reset-options "--z3rlimit 60 --max_fuel 0 --max_ifuel 2 --initial_ifuel 2"
 let lemma_seq_nat8_le_seq_quad32_to_bytes_uint32 b h =
   let s_init = B.as_seq h b in
+  //view of b as buffer of UInt128
   let b128 = BV.mk_buffer_view b Views.view128 in
+  //length s == length s_init / 16
   let s = BV.as_seq h b128 in
+  //s' sequence of nat8 with length that of s_init (== length s * 16)
   let s' = le_seq_quad32_to_bytes s in
   Opaque_s.reveal_opaque le_seq_quad32_to_bytes_def;
+  //definition given by reveal_opaque
   assert (s' == seq_four_to_seq_LE (seq_map (nat_to_four 8) (seq_four_to_seq_LE s)));
   let s_f = seq_nat8_to_seq_uint8 s' in
   simplify_quad_aux b h;
@@ -277,7 +281,9 @@ let lemma_seq_nat8_le_seq_quad32_to_bytes_uint32 b h =
     assert (Seq.index s i' == Views.get128 (Seq.slice s_init (i' `op_Multiply` 16) (i' `op_Multiply` 16 + 16)));
     Opaque_s.reveal_opaque Views.get128_def;
     let s_slice = seq_uint8_to_seq_nat8 (Seq.slice s_init (i' `op_Multiply` 16) (i' `op_Multiply` 16 +16)) in
-    Opaque_s.reveal_opaque le_bytes_to_quad32_def
+    Opaque_s.reveal_opaque le_bytes_to_quad32_def;
+    assert (seq_to_four_LE (seq_map (four_to_nat 8) (seq_to_seq_four_LE s_slice)) ==
+            Seq.index s i')
   in Classical.forall_intro aux;
   assert (Seq.equal s_f s_init)
 

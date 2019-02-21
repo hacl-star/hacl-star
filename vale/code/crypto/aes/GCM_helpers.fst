@@ -15,6 +15,9 @@ open GCTR_s
 open FStar.Math.Lemmas
 open Collections.Seqs
 
+let reveal_le_bytes_to_seq_quad32 () =
+  FStar.Pervasives.reveal_opaque (`%le_bytes_to_seq_quad32) le_bytes_to_seq_quad32
+
 let extra_bytes_helper (n:nat) : Lemma
   (requires n % 16 <> 0)
   (ensures bytes_to_quad_size n == n / 16 + 1)
@@ -149,7 +152,7 @@ let insert_0_is_padding (q:quad32) :
 
 #reset-options "--z3cliopt smt.QI.EAGER_THRESHOLD=100 --z3cliopt smt.CASE_SPLIT=3 --z3cliopt smt.arith.nl=true --max_fuel 2 --initial_fuel 2 --max_ifuel 0 --smtencoding.elim_box true --smtencoding.nl_arith_repr native --z3rlimit 10"
 let le_quad32_to_bytes_sel (q : quad32) (i:nat{i < 16}) =
-  reveal_opaque (le_quad32_to_bytes_def);
+  FStar.Pervasives.reveal_opaque (`%le_quad32_to_bytes) le_quad32_to_bytes;
   let Mkfour q0 q1 q2 q3 = q in
   assert (index (Words.Seq_s.four_to_seq_LE q) 0 == q0);
   assert (index (Words.Seq_s.four_to_seq_LE q) 1 == q1);
@@ -215,7 +218,7 @@ let le_quad32_to_bytes_sel (q : quad32) (i:nat{i < 16}) =
                 (fun x -> nat_to_four 8 (index (four_to_seq_LE q) x)))
                 (n / 4))
                    (n % 4)) i == four_select (nat_to_four 8 q3) (i % 4));
-  assert_by_tactic (i < 16 ==> index (le_quad32_to_bytes_def q) i =
+  assert_by_tactic (i < 16 ==> index (le_quad32_to_bytes q) i =
                    (index (init (length (init (length (four_to_seq_LE q))
                           (fun x -> nat_to_four 8 (index (four_to_seq_LE q) x))) *
                                                                       4)
@@ -224,13 +227,13 @@ let le_quad32_to_bytes_sel (q : quad32) (i:nat{i < 16}) =
                                         (fun x -> nat_to_four 8 (index (four_to_seq_LE q) x)))
                             (n / 4))
                           (n % 4))) i))
-                       (fun () -> norm[primops; delta_only ["Types_s.le_quad32_to_bytes_def";
+                       (fun () -> norm[primops; delta_only ["Types_s.le_quad32_to_bytes";
                           "Collections.Seqs_s.seq_map"; "Collections.Seqs_s.compose";
                             "Words.Seq_s.seq_four_to_seq_LE"]]; dump " after norm2");
-  assert(i < 4 ==> index (le_quad32_to_bytes_def q) i == four_select (nat_to_four 8 q0) i);
-  assert(4 <= i /\ i < 8 ==> index (le_quad32_to_bytes_def q) i == four_select (nat_to_four 8 q1) (i % 4));
-  assert(8 <= i /\ i < 12 ==> index (le_quad32_to_bytes_def q) i == four_select (nat_to_four 8 q2) (i % 4));
-  assert(12 <= i /\ i < 16 ==> index (le_quad32_to_bytes_def q) i == four_select (nat_to_four 8 q3) (i % 4))
+  assert(i < 4 ==> index (le_quad32_to_bytes q) i == four_select (nat_to_four 8 q0) i);
+  assert(4 <= i /\ i < 8 ==> index (le_quad32_to_bytes q) i == four_select (nat_to_four 8 q1) (i % 4));
+  assert(8 <= i /\ i < 12 ==> index (le_quad32_to_bytes q) i == four_select (nat_to_four 8 q2) (i % 4));
+  assert(12 <= i /\ i < 16 ==> index (le_quad32_to_bytes q) i == four_select (nat_to_four 8 q3) (i % 4))
 
 
 #reset-options "--smtencoding.elim_box true --z3rlimit 60 --z3refresh --initial_ifuel 0 --max_ifuel 1 --initial_fuel 1 --max_fuel 1"
@@ -409,7 +412,7 @@ let lemma_slices_le_quad32_to_bytes (q:quad32) : Lemma
     q.hi3 == four_to_nat 8 (seq_to_four_LE (slice s 12 16))
   ))
   =
-  reveal_opaque le_quad32_to_bytes_def;
+  FStar.Pervasives.reveal_opaque (`%le_quad32_to_bytes) le_quad32_to_bytes;
   ()
 
 let lemma_slices_le_bytes_to_quad32 (s:seq16 nat8) : Lemma

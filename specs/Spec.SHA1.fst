@@ -243,9 +243,11 @@ let words_of_bytes_block
 
 (* Section 6.1.2: outer loop body *)
 
-let update h l =
+let update_aux h l =
   let mi = words_of_bytes_block l in
   step4 mi h
+
+let update = update_aux
 
 (* Section 5.1.1: padding *)
 

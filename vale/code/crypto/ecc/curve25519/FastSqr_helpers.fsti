@@ -4,7 +4,7 @@ open Words_s
 open Types_s
 open FStar.Mul
 open FStar.Tactics
-open CanonCommSemiring
+open FStar.Tactics.CanonCommSemiring
 
 open Fast_defs
 
