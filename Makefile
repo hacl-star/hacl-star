@@ -412,6 +412,9 @@ obj/X64.Memory_Sems.fst.checked: \
 obj/Vale.AsLowStar.Wrapper.fst.checked: \
   FSTAR_FLAGS=$(VALE_FSTAR_FLAGS)
 
+obj/Fsub_stdcalls.fst.checked: \
+  FSTAR_FLAGS=$(VALE_FSTAR_FLAGS)
+
 obj/Fsqr_stdcalls.fst.checked: \
   FSTAR_FLAGS=$(VALE_FSTAR_FLAGS)
 
