@@ -109,7 +109,7 @@ val mt_hashes_inv_empty:
         (decreases (32 - lv))
 let rec mt_hashes_inv_empty lv =
   if lv = 31 then ()
-  else mt_hashes_inv_empty (lv + 1)
+  else (admit (); mt_hashes_inv_empty (lv + 1))
 
 val mt_hashes_lth_inv_equiv:
   lv:nat{lv < 32} ->
@@ -237,6 +237,7 @@ let rec mt_olds_inv_equiv lv i olds1 olds2 =
   else (assert (S.index olds1 lv == S.index olds2 lv);
        mt_olds_inv_equiv (lv + 1) (i / 2) olds1 olds2)
 
+#push-options "--z3rlimit 40"
 val mt_olds_hs_lth_inv_ok:
   lv:nat{lv <= 32} ->
   i:nat ->
@@ -249,6 +250,7 @@ val mt_olds_hs_lth_inv_ok:
 let rec mt_olds_hs_lth_inv_ok lv i j olds hs =
   if lv = 32 then ()
   else (mt_olds_hs_lth_inv_ok (lv + 1) (i / 2) (j / 2) olds hs)
+#pop-options
 
 val mt_olds_hs_inv:
   lv:nat{lv < 32} ->
@@ -363,10 +365,12 @@ val mt_hashes_inv_log_converted_:
         (ensures (mt_hashes_lth_inv_log_converted_ lv j fhs;
                  mt_hashes_inv_log j (S.slice fhs lv (lv + log2c j))))
         (decreases j)
+#push-options "--z3rlimit 40"
 let rec mt_hashes_inv_log_converted_ lv j fhs =
   if j = 1 then ()
   else (mt_hashes_lth_inv_log_converted_ (lv + 1) (j / 2) fhs;
        mt_hashes_inv_log_converted_ (lv + 1) (j / 2) fhs)
+#pop-options
 
 val mt_hashes_inv_log_converted:
   j:nat{j > 0 && j < pow2 32} ->

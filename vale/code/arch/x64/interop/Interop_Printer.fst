@@ -475,7 +475,7 @@ let translate_lowstar target (func:func_ty) =
   else
   "(ensures (fun h0 _ h1 -> full_post_cond h0 h1 " ^ (print_args_names args) ^ "))\n\n") ^ 
   "module " ^ name ^
-  "\n\nopen LowStar.Buffer\nmodule B = LowStar.Buffer\nmodule BV = LowStar.BufferView\nopen LowStar.Modifies\nmodule M = LowStar.Modifies\nopen LowStar.ModifiesPat\nopen FStar.HyperStack.ST\nmodule HS = FStar.HyperStack\nopen Interop\nopen Words_s\nopen Types_s\nopen X64.Machine_s\nopen X64.Memory_s\nopen X64.Vale.State\nopen X64.Vale.Decls\nopen BufferViewHelpers\nopen Interop_assumptions\nopen X64.Vale.StateLemmas\nopen X64.Vale.Lemmas\nmodule TS = X64.Taint_Semantics_s\nmodule ME = X64.Memory_s\nmodule BS = X64.Bytes_Semantics_s\n\nfriend X64.Memory_s\nfriend X64.Memory\nfriend X64.Vale.Decls\nfriend X64.Vale.StateLemmas\n#set-options \"--z3rlimit 60\"\n\n" ^
+  "\n\nopen LowStar.Buffer\nmodule B = LowStar.Buffer\nmodule BV = LowStar.BufferView\nopen LowStar.Modifies\nmodule M = LowStar.Modifies\nopen LowStar.ModifiesPat\nopen FStar.HyperStack.ST\nmodule HS = FStar.HyperStack\nopen Interop\nopen Words_s\nopen Types_s\nopen X64.Machine_s\nopen X64.Memory\nopen X64.Vale.State\nopen X64.Vale.Decls\nopen BufferViewHelpers\nopen Interop_assumptions\nopen X64.Vale.StateLemmas\nopen X64.Vale.Lemmas\nmodule TS = X64.Taint_Semantics_s\nmodule ME = X64.Memory\nmodule BS = X64.Bytes_Semantics_s\n\nfriend X64.Memory\nfriend X64.Vale.Decls\nfriend X64.Vale.StateLemmas\n#set-options \"--z3rlimit 60\"\n\n" ^
   "open Vale_" ^ name ^ "\n\n" ^
 
   "#set-options \"--initial_fuel " ^ fuel_value ^ " --max_fuel " ^ fuel_value ^ " --initial_ifuel 0 --max_ifuel 0\"\n" ^

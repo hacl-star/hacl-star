@@ -18,7 +18,7 @@ let gctr_encrypt_block_offset (icb_BE:quad32) (plain_LE:quad32) (alg:algorithm) 
   ()
 
 let gctr_encrypt_empty (icb_BE:quad32) (plain_LE cipher_LE:seq quad32) (alg:algorithm) (key:seq nat32) =
-  reveal_opaque le_bytes_to_seq_quad32_def;
+  FStar.Pervasives.reveal_opaque (`%le_bytes_to_seq_quad32) le_bytes_to_seq_quad32;
   reveal_opaque gctr_encrypt_LE_def;
   let plain = slice_work_around (le_seq_quad32_to_bytes plain_LE) 0 in
   let cipher = slice_work_around (le_seq_quad32_to_bytes cipher_LE) 0 in
@@ -82,7 +82,7 @@ let rec gctr_encrypt_length (icb_BE:quad32) (plain:gctr_plain_LE)
   Lemma(length (gctr_encrypt_LE icb_BE plain alg key) == length plain)
   [SMTPat (length (gctr_encrypt_LE icb_BE plain alg key))]
   =
-  reveal_opaque le_bytes_to_seq_quad32_def;
+  FStar.Pervasives.reveal_opaque (`%le_bytes_to_seq_quad32) le_bytes_to_seq_quad32;
   reveal_opaque gctr_encrypt_LE_def;
   let num_extra = (length plain) % 16 in
   let result = gctr_encrypt_LE icb_BE plain alg key in
@@ -519,7 +519,7 @@ let lemma_slices_le_quad32_to_bytes (q:quad32) : Lemma
     q.hi3 == four_to_nat 8 (seq_to_four_LE (slice s 12 16))
   ))
   =
-  reveal_opaque le_quad32_to_bytes_def;
+  FStar.Pervasives.reveal_opaque (`%le_quad32_to_bytes) le_quad32_to_bytes;
   ()
 
 let quad32_xor_bytewise (q q' r:quad32) (n:nat{ n <= 16 }) : Lemma

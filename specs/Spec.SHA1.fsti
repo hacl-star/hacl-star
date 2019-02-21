@@ -1,6 +1,6 @@
 module Spec.SHA1
 
-open Spec.Hash.Helpers
+open Spec.Hash.Definitions
 
 val init: init_t SHA1
 

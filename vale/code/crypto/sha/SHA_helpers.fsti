@@ -20,9 +20,9 @@ val word:Type0
 (* Number of words for a block size *)
 let size_block_w_256 = 16
 (* Define the size block in bytes *)
-let size_block =
+let block_length =
   let open FStar.Mul in
-  4 (*size_word a*) * size_block_w_256
+  4 (*word_length a*) * size_block_w_256
 let block_w  = m:seq word {length m = size_block_w_256}
 let counter = nat
 val k : (s:seq word {length s = size_k_w_256})
@@ -36,7 +36,7 @@ type bytes =  m:Seq.seq byte
 
 (* Input data, multiple of a block length. *)
 let bytes_blocks =
-  l:bytes { Seq.length l % size_block = 0 }
+  l:bytes { Seq.length l % block_length = 0 }
 
 // Hide various SHA2 definitions
 val ws_opaque (b:block_w) (t:counter{t < size_k_w_256}):nat32

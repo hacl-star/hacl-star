@@ -4,7 +4,7 @@ open Opaque_s
 open Types_s
 open Words_s
 open Words.Four_s
-open Spec.Hash.Helpers
+open Spec.Hash.Definitions
 open Spec.SHA2
 
 friend Spec.SHA2

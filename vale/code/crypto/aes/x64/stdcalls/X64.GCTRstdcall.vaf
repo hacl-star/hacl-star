@@ -200,6 +200,7 @@ procedure {:quick}{:exportSpecs}{:public} inc32_stdcall(
         locs_disjoint(list(loc_buffer(stack_b), loc_buffer(iv_b)));
         buffer_readable(mem, stack_b);
         buffer_readable(mem, iv_b);
+        buffer_writeable(iv_b);
         valid_taint_buf64(stack_b, mem, memTaint, Public);
         valid_taint_buf128(iv_b, mem, memTaint, Secret);
         valid_stack_slots(mem, rsp, stack_b, 0, memTaint);
@@ -285,6 +286,7 @@ procedure {:quick}{:exportSpecs}{:public} gctr_bytes_extra_stdcall(
         buffer_readable(mem, iv_b);
         buffer_readable(mem, keys_b);
         buffer_readable(mem, cipher_b);
+        buffer_writeable(cipher_b);
         valid_taint_buf64(stack_b, mem, memTaint, Public);
         valid_taint_buf128(plain_b, mem, memTaint, Secret);
         valid_taint_buf128(iv_b, mem, memTaint, Secret);

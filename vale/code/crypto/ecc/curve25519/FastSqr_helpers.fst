@@ -4,7 +4,7 @@ open Words_s
 open Types_s
 open FStar.Mul
 open FStar.Tactics
-open CanonCommSemiring
+open FStar.Tactics.CanonCommSemiring
 
 open Fast_defs
 open Fast_lemmas_internal
@@ -53,7 +53,7 @@ let lemma_sqr_part3
   ()
 #pop-options
 
-#push-options "--z3rlimit 20"
+#reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0 --using_facts_from 'FastSqr_helpers FStar.Pervasives Prims Words_s Fast_defs'"
 let lemma_sqr (a:int) (a0 a1 a2 a3 
                r8 r9 r10 r11 r12 r13 rax rcx
                r8' r9' r10' r11' r12' r13' r14'
@@ -149,5 +149,3 @@ let lemma_sqr (a:int) (a0 a1 a2 a3
 }
 *)
   ()
-#pop-options  
-

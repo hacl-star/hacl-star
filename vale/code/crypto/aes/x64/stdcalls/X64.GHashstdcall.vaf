@@ -81,6 +81,7 @@ procedure {:quick}{:exportSpecs}{:public} ghash_incremental_bytes_stdcall(
         buffer_readable(mem, stack_b);
         buffer_readable(mem, h_b);
         buffer_readable(mem, hash_b);
+        buffer_writeable(hash_b);
         buffer_readable(mem, input_b);
         valid_taint_buf64(stack_b, mem, memTaint, Public);
         valid_taint_buf128(h_b, mem, memTaint, Secret);
@@ -148,29 +149,28 @@ procedure {:quick}{:exportSpecs}{:public} ghash_incremental_bytes_stdcall(
         callee_save_registers(win, stack_b);        
 
         inline if (win) {
-
-        Mov64(rbx, rdx);
-        InitPshufbMask(xmm8, r11);
-        Mov64(r11, r9);
-        Load128_buffer(xmm1, rdx, 0, Secret, hash_b, 0);
-        Load128_buffer(xmm11, rcx, 0, Secret, h_b, 0);
-        Mov64(rax, r8);
-        Pshufb(xmm11, xmm8);
-        ghash_incremental_bytes(input_b);
-        Mov64(rdx, rbx);
-        Store128_buffer(rdx, xmm1, 0, Secret, hash_b, 0);
+          Mov64(rbx, rdx);
+          InitPshufbMask(xmm8, r11);
+          Mov64(r11, r9);
+          Load128_buffer(xmm1, rdx, 0, Secret, hash_b, 0);
+          Load128_buffer(xmm11, rcx, 0, Secret, h_b, 0);
+          Mov64(rax, r8);
+          Pshufb(xmm11, xmm8);
+          ghash_incremental_bytes(input_b);
+          Mov64(rdx, rbx);
+          Store128_buffer(rdx, xmm1, 0, Secret, hash_b, 0);
         }
         else
         {
-           InitPshufbMask(xmm8, r11);
-           Mov64(r11, rcx);
-           Load128_buffer(xmm1, rsi, 0, Secret, hash_b, 0);
-           Load128_buffer(xmm11, rdi, 0, Secret, h_b, 0);
-           Mov64(rax, rdx);
-           ghost var oldio := xmm1;
-           Pshufb(xmm11, xmm8);
-           ghash_incremental_bytes(input_b);
-           Store128_buffer(rsi, xmm1, 0, Secret, hash_b, 0);
+          InitPshufbMask(xmm8, r11);
+          Mov64(r11, rcx);
+          Load128_buffer(xmm1, rsi, 0, Secret, hash_b, 0);
+          Load128_buffer(xmm11, rdi, 0, Secret, h_b, 0);
+          Mov64(rax, rdx);
+          ghost var oldio := xmm1;
+          Pshufb(xmm11, xmm8);
+          ghash_incremental_bytes(input_b);
+          Store128_buffer(rsi, xmm1, 0, Secret, hash_b, 0);
         }
 
 
@@ -197,6 +197,7 @@ procedure {:quick}{:exportSpecs}{:public} ghash_extra_stdcall(
         buffer_readable(mem, stack_b);
         buffer_readable(mem, in_b);
         buffer_readable(mem, hash_b);
+        buffer_writeable(hash_b);
         buffer_readable(mem, h_b);
         valid_taint_buf64(stack_b, mem, memTaint, Public);
         valid_taint_buf128(in_b, mem, memTaint, Secret);
@@ -349,6 +350,7 @@ procedure {:quick}{:exportSpecs}{:public} ghash_one_block(
         buffer_readable(mem, stack_b);
         buffer_readable(mem, h_b);
         buffer_readable(mem, hash_b);
+        buffer_writeable(hash_b);
         buffer_readable(mem, input_b);
         valid_taint_buf64(stack_b, mem, memTaint, Public);
         valid_taint_buf128(h_b, mem, memTaint, Secret);

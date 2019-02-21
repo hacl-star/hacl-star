@@ -10,12 +10,20 @@ let modp'(x:int):int =
 let and128 (x:nat128) (y:nat128) : nat128 =
   iand x y
 
+(*
+ * AR: 02/13: Consider making it opaque and use lemmas?
+ *)
 let rec poly1305_hash_blocks (h:int) (pad:int) (r:int) (inp:int->nat128) (k:nat) : Tot int =
   if k = 0 then h
   else
     let kk = k - 1 in
     let hh = poly1305_hash_blocks h pad r inp kk in
     modp' ((hh + pad + inp kk) * r)
+
+let lemma_poly1305_hash_blocks_unroll (h pad r:int) (inp:int -> nat128) (k:nat{k =!= 0})
+  : Lemma (poly1305_hash_blocks h pad r inp k ==
+           modp' (((poly1305_hash_blocks h pad r inp (k - 1)) + pad + inp (k - 1)) * r))
+  = ()
 
 let poly1305_hash (key_r:nat128) (key_s:nat128) (inp:int->nat128) (len:nat) :int =
   let r = iand key_r 0x0ffffffc0ffffffc0ffffffc0fffffff in
