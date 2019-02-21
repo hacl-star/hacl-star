@@ -17,6 +17,11 @@ open Collections.Seqs
 let make_gctr_plain_LE (p:seq nat8) : seq nat8 =
   if 4096 * length p < pow2_32 then p else empty
 
+let inc32lite (cb:quad32) (i:nat32) : quad32 =
+  let sum = cb.lo0 + i in
+  let lo0 = if sum >= pow2_32 then sum - pow2_32 else sum in
+  Mkfour lo0 cb.lo1 cb.hi2 cb.hi3
+
 val gctr_encrypt_block_offset (icb_BE:quad32) (plain_LE:quad32) (alg:algorithm) (key:seq nat32) (i:int) : Lemma
   (requires is_aes_key_LE alg key)
   (ensures
@@ -49,7 +54,7 @@ let gctr_partial (alg:algorithm) (bound:nat) (plain cipher:seq quad32) (key:seq 
 
 let gctr_partial_opaque = make_opaque gctr_partial
 
-let gctr_partial_opaque_ignores_postfix (alg:algorithm) (bound:nat) (plain plain' cipher cipher':seq quad32) (key:seq nat32) (icb:quad32) : Lemma
+let gctr_partial_opaque_ignores_postfix (alg:algorithm) (bound:nat32) (plain plain' cipher cipher':seq quad32) (key:seq nat32) (icb:quad32) : Lemma
   (requires is_aes_key_LE alg key /\
             length plain >= bound /\
             length cipher >= bound /\
@@ -61,8 +66,8 @@ let gctr_partial_opaque_ignores_postfix (alg:algorithm) (bound:nat) (plain plain
   =
   reveal_opaque gctr_partial;
   let helper i : Lemma (0 <= i /\ i < bound ==> 
-                          (index cipher  i == quad32_xor (index plain  i) (aes_encrypt_BE alg key (inc32 icb i))) ==
-                          (index cipher' i == quad32_xor (index plain' i) (aes_encrypt_BE alg key (inc32 icb i))))
+                          (index cipher  i == quad32_xor (index plain  i) (aes_encrypt_BE alg key (inc32lite icb i))) ==
+                          (index cipher' i == quad32_xor (index plain' i) (aes_encrypt_BE alg key (inc32lite icb i))))
     =
     if 0 <= i && i < bound then (      
       assert (index plain i == index (slice plain 0 bound) i);  // OBSERVE
@@ -83,7 +88,7 @@ let gctr_partial_opaque_ignores_postfix (alg:algorithm) (bound:nat) (plain plain
   (*
   let helper1 i : Lemma (gctr_partial_opaque alg bound plain cipher key icb ==>
                          (0 <= i /\ i < bound ==> 
-                         (index cipher' i == quad32_xor (index plain' i) (aes_encrypt_BE alg key (inc32 icb i))))) =
+                         (index cipher' i == quad32_xor (index plain' i) (aes_encrypt_BE alg key (inc32lite icb i))))) =
      if gctr_partial_opaque alg bound plain cipher key icb then (
        admit()
      ) else (())
@@ -102,13 +107,14 @@ let gctr_partial_extend6 (alg:algorithm) (bound:nat) (plain cipher:seq quad32) (
   (requires length plain >= bound + 6 /\
             length cipher >= bound + 6 /\
             is_aes_key_LE alg key /\
+            bound + 6 < pow2_32 /\
             gctr_partial_opaque alg bound plain cipher key icb /\
-            index cipher (bound + 0) == quad32_xor (index plain (bound + 0)) (aes_encrypt_BE alg key (inc32 icb (bound + 0))) /\
-            index cipher (bound + 1) == quad32_xor (index plain (bound + 1)) (aes_encrypt_BE alg key (inc32 icb (bound + 1))) /\
-            index cipher (bound + 2) == quad32_xor (index plain (bound + 2)) (aes_encrypt_BE alg key (inc32 icb (bound + 2))) /\
-            index cipher (bound + 3) == quad32_xor (index plain (bound + 3)) (aes_encrypt_BE alg key (inc32 icb (bound + 3))) /\
-            index cipher (bound + 4) == quad32_xor (index plain (bound + 4)) (aes_encrypt_BE alg key (inc32 icb (bound + 4))) /\
-            index cipher (bound + 5) == quad32_xor (index plain (bound + 5)) (aes_encrypt_BE alg key (inc32 icb (bound + 5)))  
+            index cipher (bound + 0) == quad32_xor (index plain (bound + 0)) (aes_encrypt_BE alg key (inc32lite icb (bound + 0))) /\
+            index cipher (bound + 1) == quad32_xor (index plain (bound + 1)) (aes_encrypt_BE alg key (inc32lite icb (bound + 1))) /\
+            index cipher (bound + 2) == quad32_xor (index plain (bound + 2)) (aes_encrypt_BE alg key (inc32lite icb (bound + 2))) /\
+            index cipher (bound + 3) == quad32_xor (index plain (bound + 3)) (aes_encrypt_BE alg key (inc32lite icb (bound + 3))) /\
+            index cipher (bound + 4) == quad32_xor (index plain (bound + 4)) (aes_encrypt_BE alg key (inc32lite icb (bound + 4))) /\
+            index cipher (bound + 5) == quad32_xor (index plain (bound + 5)) (aes_encrypt_BE alg key (inc32lite icb (bound + 5)))  
   )
   (ensures gctr_partial_opaque alg (bound + 6) plain cipher key icb)
   =
