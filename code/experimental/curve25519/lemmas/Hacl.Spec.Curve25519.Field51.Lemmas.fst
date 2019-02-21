@@ -897,3 +897,112 @@ let lemma_cswap2_step bit p1 p2 =
   logxor_lemma p1 p2;
   let p2' = p2 ^. dummy in
   logxor_lemma p2 p1
+
+val lemma_add_le:a:nat -> b:nat -> c:nat -> d:nat ->
+  Lemma
+  (requires a <= b /\ c <= d)
+  (ensures  a + c <= b + d)
+let lemma_add_le a b c d = ()
+
+val mul64_wide_add3_lemma:
+  #m0:scale64 -> #m1:scale64 -> #m2:scale64
+ -> #m3:scale64 -> #m4:scale64 -> #m5:scale64
+ -> a0:uint64{felem_fits1 a0 m0}
+ -> a1:uint64{felem_fits1 a1 m1}
+ -> b0:uint64{felem_fits1 b0 m2}
+ -> b1:uint64{felem_fits1 b1 m3}
+ -> c0:uint64{felem_fits1 c0 m4}
+ -> c1:uint64{felem_fits1 c1 m5}
+ -> Lemma
+   (requires m0 * m1 + m2 * m3 + m4 * m5 < pow2 13)
+   (ensures
+     v a0 * v a1 + v b0 * v b1 + v c0 * v c1 < pow2 128 /\
+     (v a0 * v a1 + v b0 * v b1 + v c0 * v c1) <=
+      (m0 * m1 + m2 * m3 + m4 * m5) * max51 * max51)
+let mul64_wide_add3_lemma #m0 #m1 #m2 #m3 #m4 #m5 a0 a1 b0 b1 c0 c1 =
+  lemma_mul_le (v a0) (m0 * max51) (v a1) (m1 * max51);
+  lemma_mul_le (v b0) (m2 * max51) (v b1) (m3 * max51);
+  lemma_mul_le (v c0) (m4 * max51) (v c1) (m5 * max51);
+  lemma_add_le (v a0 * v a1) (m0 * max51 * m1 * max51) (v b0 * v b1) (m2 * max51 * m3 * max51);
+  lemma_add_le (v a0 * v a1 + v b0 * v b1) (m0 * max51 * m1 * max51 + m2 * max51 * m3 * max51)
+    (v c0 * v c1) (m4 * max51 * m5 * max51);
+
+  assert (v a0 * v a1 + v b0 * v b1 + v c0 * v c1 <=
+    m0 * max51 * m1 * max51 + m2 * max51 * m3 * max51 + m4 * max51 * m5 * max51);
+  assert (m0 * max51 * m1 * max51 + m2 * max51 * m3 * max51 + m4 * max51 * m5 * max51 ==
+    (m0 * m1 + m2 * m3 + m4 * m5) * max51 * max51);
+  assert ((m0 * m1 + m2 * m3 + m4 * m5) * max51 * max51 < pow2 13 * max51 * max51);
+  assert (v a0 * v a1 + v b0 * v b1 + v c0 * v c1 < pow2 13 * max51 * max51);
+  assert_norm (pow2 13 * pow2 51 * pow2 51 = pow2 115);
+  assert_norm (pow2 115 < pow2 128)
+
+val lemma_fmul_fsqr50: f0:nat -> f1:nat -> f2:nat -> f3:nat -> f4:nat ->
+  Lemma
+   (f0 * f0 + f1 * f4 * 19 + f2 * f3 * 19 + f3 * f2 * 19 + f4 * f1 * 19 ==
+    f0 * f0 + 38 * f4 * f1 + 38 * f2 * f3)
+let lemma_fmul_fsqr50 f0 f1 f2 f3 f4 = ()
+
+val lemma_fmul_fsqr51: f0:nat -> f1:nat -> f2:nat -> f3:nat -> f4:nat ->
+  Lemma
+   (f0 * f1 * pow51 + f1 * f0 * pow51 + f2 * f4 * 19 * pow51 +
+   f3 * f3 * 19 * pow51 + f4 * f2 * 19 * pow51 ==
+   (2 * f0 * f1 + 38 * f4 * f2 + 19 * f3 * f3) * pow51)
+let lemma_fmul_fsqr51 f0 f1 f2 f3 f4 = ()
+
+val lemma_fmul_fsqr52: f0:nat -> f1:nat -> f2:nat -> f3:nat -> f4:nat ->
+  Lemma
+   (f0 * f2 * pow51 * pow51 + f1 * f1 * pow51 * pow51 + f2 * f0 * pow51 * pow51 +
+   f3 * f4 * 19 * pow51 * pow51 + f4 * f3 * 19 * pow51 * pow51 ==
+   (2 * f0 * f2 + f1 * f1 + 38 * f4 * f3) * pow51 * pow51)
+let lemma_fmul_fsqr52 f0 f1 f2 f3 f4 = ()
+
+val lemma_fmul_fsqr53: f0:nat -> f1:nat -> f2:nat -> f3:nat -> f4:nat ->
+  Lemma
+   (f0 * f3 * pow51 * pow51 * pow51 + f1 * f2 * pow51 * pow51 * pow51 +
+   f2 * f1 * pow51 * pow51 * pow51 + f3 * f0 * pow51 * pow51 * pow51 +
+   f4 * f4 * 19 * pow51 * pow51 * pow51 ==
+   (2 * f0 * f3 + 2 * f1 * f2 + 19 * f4 * f4) * pow51 * pow51 * pow51)
+let lemma_fmul_fsqr53 f0 f1 f2 f3 f4 = ()
+
+val lemma_fmul_fsqr54: f0:nat -> f1:nat -> f2:nat -> f3:nat -> f4:nat ->
+  Lemma
+   (f0 * f4 * pow51 * pow51 * pow51 * pow51 + f1 * f3 * pow51 * pow51 * pow51 * pow51 +
+   f2 * f2 * pow51 * pow51 * pow51 * pow51 + f3 * f1 * pow51 * pow51 * pow51 * pow51 +
+   f4 * f0 * pow51 * pow51 * pow51 * pow51 ==
+   (2 * f0 * f4 + 2 * f1 * f3 + f2 * f2) * pow51 * pow51 * pow51 * pow51)
+let lemma_fmul_fsqr54 f0 f1 f2 f3 f4 = ()
+
+val lemma_fmul_fsqr5: f:felem5{felem_fits5 f (9, 10, 9, 9, 9)} ->
+  Lemma (
+    let (f0, f1, f2, f3, f4) = f in
+    let s0 = v f0 * v f0 + 38 * v f4 * v f1 + 38 * v f2 * v f3 in
+    let s1 = 2 * v f0 * v f1 + 38 * v f4 * v f2 + 19 * v f3 * v f3 in
+    let s2 = 2 * v f0 * v f2 + v f1 * v f1 + 38 * v f4 * v f3 in
+    let s3 = 2 * v f0 * v f3 + 2 * v f1 * v f2 + 19 * v f4 * v f4 in
+    let s4 = 2 * v f0 * v f4 + 2 * v f1 * v f3 + v f2 * v f2 in
+    fmul (feval f) (feval f) == (s0 + s1 * pow51 + s2 * pow51 * pow51 +
+      s3 * pow51 * pow51 * pow51 + s4 * pow51 * pow51 * pow51 * pow51) % prime)
+let lemma_fmul_fsqr5 f =
+  let (f0, f1, f2, f3, f4) = f in
+  lemma_fmul5 f f;
+  lemma_smul_felem5 f0 (f0, f1, f2, f3, f4);
+  lemma_smul_felem5 f1 (f4 *! u64 19, f0, f1, f2, f3);
+  lemma_mul_assos_3 (v f1) (v f4) 19;
+  lemma_smul_felem5 f2 (f3 *! u64 19, f4 *! u64 19, f0, f1, f2);
+  lemma_mul_assos_3 (v f2) (v f3) 19;
+  lemma_mul_assos_3 (v f2) (v f4) 19;
+  lemma_smul_felem5 f3 (f2 *! u64 19, f3 *! u64 19, f4 *! u64 19, f0, f1);
+  lemma_mul_assos_3 (v f3) (v f2) 19;
+  lemma_mul_assos_3 (v f3) (v f3) 19;
+  lemma_mul_assos_3 (v f3) (v f4) 19;
+  lemma_smul_felem5 f4 (f1 *! u64 19, f2 *! u64 19, f3 *! u64 19, f4 *! u64 19, f0);
+  lemma_mul_assos_3 (v f4) (v f1) 19;
+  lemma_mul_assos_3 (v f4) (v f2) 19;
+  lemma_mul_assos_3 (v f4) (v f3) 19;
+  lemma_mul_assos_3 (v f4) (v f4) 19;
+
+  lemma_fmul_fsqr50 (v f0) (v f1) (v f2) (v f3) (v f4);
+  lemma_fmul_fsqr51 (v f0) (v f1) (v f2) (v f3) (v f4);
+  lemma_fmul_fsqr52 (v f0) (v f1) (v f2) (v f3) (v f4);
+  lemma_fmul_fsqr53 (v f0) (v f1) (v f2) (v f3) (v f4);
+  lemma_fmul_fsqr54 (v f0) (v f1) (v f2) (v f3) (v f4)

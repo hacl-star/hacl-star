@@ -317,30 +317,60 @@ let fmul15 (f10, f11, f12, f13, f14) f2 =
   FStar.Math.Lemmas.lemma_mod_mul_distr_l (as_nat5 (f10, f11, f12, f13, f14)) (uint_v f2) prime;
   res
 
+// inline_for_extraction
+// val fsqr_felem5:
+//     f:felem5{felem_fits5 f (9, 10, 9, 9, 9)}
+//   -> out:felem_wide5{felem_wide_fits5 out (6579, 4797, 3340, 1881, 423)}
+// let fsqr_felem5 (f0, f1, f2, f3, f4) =
+//   let (o0, o1, o2, o3, o4) = smul_felem5 #9 #(9, 20, 18, 18, 18) f0 (f0, u64 2 *! f1, u64 2 *! f2, u64 2 *! f3, u64 2 *! f4) in
+//   let (o0, o1, o2, o3, o4) = smul_add_felem5 #10 #(342, 0, 10, 18, 18) #(81, 180, 162, 162, 162)
+//     f1 (u64 38 *! f4, u64 0, f1, u64 2 *! f2, u64 2 *! f3) (o0, o1, o2, o3, o4) in
+//   let (o0, o1, o2, o3, o4) = smul_add_felem5 #9 #(342, 342, 0, 0, 9) #(3501, 180, 262, 342, 342)
+//     f2 (u64 38 *! f3, u64 38 *! f4, u64 0, u64 0, f2) (o0, o1, o2, o3, o4) in
+//   let (o0, o1, o2, o3, o4) = smul_add_felem5 #9 #(0, 171, 342, 0, 0) #(6579, 3258, 262, 342, 423)
+//     f3 (u64 0, u64 19 *. f3, u64 38 *. f4, u64 0, u64 0) (o0, o1, o2, o3, o4) in
+//   let (o0, o1, o2, o3, o4) = smul_add_felem5 #9 #(0, 0, 0, 171, 0) #(6579, 4797, 3340, 342, 423)
+//     f4 (u64 0, u64 0, u64 0, u64 19 *. f4, u64 0) (o0, o1, o2, o3, o4) in
+//   (o0, o1, o2, o3, o4)
+
+#set-options "--z3rlimit 150 --max_fuel 0"
+
+inline_for_extraction
+val fsqr_felem5:
+    f:felem5{felem_fits5 f (9, 10, 9, 9, 9)}
+  -> Pure felem_wide5
+    (requires True)
+    (ensures fun out ->
+      felem_wide_fits5 out (6579, 4797, 3340, 1881, 423) /\
+      feval_wide out == fmul (feval f) (feval f))
+let fsqr_felem5 (f0, f1, f2, f3, f4) =
+  let d0 = u64 2 *! f0 in
+  let d1 = u64 2 *! f1 in
+  let d2 = u64 38 *! f2 in
+  let d3 = u64 19 *! f3 in
+  let d419 = u64 19 *! f4 in
+  let d4 = u64 2 *! d419 in
+  assert_norm (6579 < pow2 13);
+  mul64_wide_add3_lemma #9 #9 #342 #10 #342 #9 f0 f0 d4 f1 d2 f3;
+  let s0 = mul64_wide f0 f0 +! mul64_wide d4 f1 +! mul64_wide d2 f3 in
+  mul64_wide_add3_lemma #18 #10 #342 #9 #171 #9 d0 f1 d4 f2 d3 f3;
+  let s1 = mul64_wide d0 f1 +! mul64_wide d4 f2 +! mul64_wide d3 f3 in
+  mul64_wide_add3_lemma #18 #9 #10 #10 #342 #9 d0 f2 f1 f1 d4 f3;
+  let s2 = mul64_wide d0 f2 +! mul64_wide f1 f1 +! mul64_wide d4 f3 in
+  mul64_wide_add3_lemma #18 #9 #20 #9 #9 #171 d0 f3 d1 f2 f4 d419;
+  let s3 = mul64_wide d0 f3 +! mul64_wide d1 f2 +! mul64_wide f4 d419 in
+  mul64_wide_add3_lemma #18 #9 #20 #9 #9 #9 d0 f4 d1 f3 f2 f2;
+  let s4 = mul64_wide d0 f4 +! mul64_wide d1 f3 +! mul64_wide f2 f2 in
+  lemma_fmul_fsqr5 (f0, f1, f2, f3, f4);
+  (s0, s1, s2, s3, s4)
+
 inline_for_extraction
 val fsqr5:
     f:felem5{felem_fits5 f (9, 10, 9, 9, 9)}
-  -> out:felem5{mul_inv_t out /\
-    feval out == fmul (feval f) (feval f)}
+  -> out:felem5{mul_inv_t out /\ feval out == fmul (feval f) (feval f)}
 let fsqr5 (f0, f1, f2, f3, f4) =
-  let d0 = u64 2 *. f0 in
-  let d1 = u64 2 *. f1 in
-  let d2 = u64 38 *. f2 in
-  let d3 = u64 19 *. f3 in
-  let d419 = u64 19 *. f4 in
-  let d4 = u64 2 *. d419 in
-  [@inline_let]
-  let s0 = mul64_wide f0 f0 +. mul64_wide d4 f1 +. mul64_wide d2 f3 in
-  [@inline_let]
-  let s1 = mul64_wide d0 f1 +. mul64_wide d4 f2 +. mul64_wide d3 f3 in
-  [@inline_let]
-  let s2 = mul64_wide d0 f2 +. mul64_wide f1 f1 +. mul64_wide d4 f3 in
-  [@inline_let]
-  let s3 = mul64_wide d0 f3 +. mul64_wide d1 f2 +. mul64_wide f4 d419 in
-  [@inline_let]
-  let s4 = mul64_wide d0 f4 +. mul64_wide d1 f3 +. mul64_wide f2 f2 in
-  admit();
-  carry_wide5 (s0, s1, s2, s3, s4)
+  let (o0, o1, o2, o3, o4) = fsqr_felem5 (f0, f1, f2, f3, f4) in
+  carry_wide5 (o0, o1, o2, o3, o4)
 
 inline_for_extraction
 val fsqr25:
@@ -354,45 +384,11 @@ val fsqr25:
       feval out1 == fmul (feval f1) (feval f1) /\
       feval out2 == fmul (feval f2) (feval f2))
 let fsqr25 (f10, f11, f12, f13, f14) (f20, f21, f22, f23, f24) =
-  let d10 = u64 2 *. f10 in
-  let d11 = u64 2 *. f11 in
-  let d12 = u64 38 *. f12 in
-  let d13 = u64 19 *. f13 in
-  let d1419 = u64 19 *. f14 in
-  let d14 = u64 2 *. d1419 in
-
-  let d20 = u64 2 *. f20 in
-  let d21 = u64 2 *. f21 in
-  let d22 = u64 38 *. f22 in
-  let d23 = u64 19 *. f23 in
-  let d2419 = u64 19 *. f24 in
-  let d24 = u64 2 *. d2419 in
-
-  [@inline_let]
-  let s10 = mul64_wide f10 f10 +. mul64_wide d14 f11 +. mul64_wide d12 f13 in
-  [@inline_let]
-  let s11 = mul64_wide d10 f11 +. mul64_wide d14 f12 +. mul64_wide d13 f13 in
-  [@inline_let]
-  let s12 = mul64_wide d10 f12 +. mul64_wide f11 f11 +. mul64_wide d14 f13 in
-  [@inline_let]
-  let s13 = mul64_wide d10 f13 +. mul64_wide d11 f12 +. mul64_wide f14 d1419 in
-  [@inline_let]
-  let s14 = mul64_wide d10 f14 +. mul64_wide d11 f13 +. mul64_wide f12 f12 in
-
-  [@inline_let]
-  let s20 = mul64_wide f20 f20 +. mul64_wide d24 f21 +. mul64_wide d22 f23 in
-  [@inline_let]
-  let s21 = mul64_wide d20 f21 +. mul64_wide d24 f22 +. mul64_wide d23 f23 in
-  [@inline_let]
-  let s22 = mul64_wide d20 f22 +. mul64_wide f21 f21 +. mul64_wide d24 f23 in
-  [@inline_let]
-  let s23 = mul64_wide d20 f23 +. mul64_wide d21 f22 +. mul64_wide f24 d2419 in
-  [@inline_let]
-  let s24 = mul64_wide d20 f24 +. mul64_wide d21 f23 +. mul64_wide f22 f22 in
-  admit();
-  let (o10,o11,o12,o13,o14) = carry_wide5 (s10, s11, s12, s13, s14) in
-  let (o20,o21,o22,o23,o24) = carry_wide5 (s20, s21, s22, s23, s24) in
-  ((o10,o11,o12,o13,o14), (o20,o21,o22,o23,o24))
+  let (o10, o11, o12, o13, o14) = fsqr_felem5 (f10, f11, f12, f13, f14) in
+  let (o20, o21, o22, o23, o24) = fsqr_felem5 (f20, f21, f22, f23, f24) in
+  let (o10, o11, o12, o13, o14) = carry_wide5 (o10, o11, o12, o13, o14) in
+  let (o20, o21, o22, o23, o24) = carry_wide5 (o20, o21, o22, o23, o24) in
+  ((o10, o11, o12, o13, o14), (o20, o21, o22, o23, o24))
 
 #set-options "--z3rlimit 100 --max_fuel 2"
 
