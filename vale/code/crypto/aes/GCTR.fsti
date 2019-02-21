@@ -62,45 +62,14 @@ let gctr_partial_opaque_ignores_postfix (alg:algorithm) (bound:nat32) (plain pla
             length cipher' >= bound /\
             slice plain  0 bound == slice plain'  0 bound /\
             slice cipher 0 bound == slice cipher' 0 bound)
-  (ensures gctr_partial_opaque alg bound plain cipher key icb == gctr_partial_opaque alg bound plain' cipher' key icb)
+  (ensures gctr_partial_opaque alg bound plain cipher key icb <==> gctr_partial_opaque alg bound plain' cipher' key icb)
   =
   reveal_opaque gctr_partial;
-  let helper i : Lemma (0 <= i /\ i < bound ==> 
-                          (index cipher  i == quad32_xor (index plain  i) (aes_encrypt_BE alg key (inc32lite icb i))) ==
-                          (index cipher' i == quad32_xor (index plain' i) (aes_encrypt_BE alg key (inc32lite icb i))))
-    =
-    if 0 <= i && i < bound then (      
-      assert (index plain i == index (slice plain 0 bound) i);  // OBSERVE
-      assert (index cipher i == index (slice cipher 0 bound) i);  // OBSERVE
-      assert (index cipher i == index cipher' i);
-      assert (index plain i  == index plain'  i);
-      ()
-    ) else ();
-    ()
-  in
-  FStar.Classical.forall_intro helper;
+  // OBSERVE: 
   assert (forall i . 0 <= i /\ i < bound ==> index plain i == index (slice plain 0 bound) i);
   assert (forall i . 0 <= i /\ i < bound ==> index plain' i == index (slice plain' 0 bound) i);
   assert (forall i . 0 <= i /\ i < bound ==> index cipher i == index (slice cipher 0 bound) i);
   assert (forall i . 0 <= i /\ i < bound ==> index cipher' i == index (slice cipher' 0 bound) i);
-  assert (gctr_partial_opaque alg bound plain cipher key icb == gctr_partial alg bound plain cipher key icb);
-  assert (gctr_partial_opaque alg bound plain' cipher' key icb == gctr_partial alg bound plain' cipher' key icb);  
-  (*
-  let helper1 i : Lemma (gctr_partial_opaque alg bound plain cipher key icb ==>
-                         (0 <= i /\ i < bound ==> 
-                         (index cipher' i == quad32_xor (index plain' i) (aes_encrypt_BE alg key (inc32lite icb i))))) =
-     if gctr_partial_opaque alg bound plain cipher key icb then (
-       admit()
-     ) else (())
-  in    
-  *)
-  assert (gctr_partial_opaque alg bound plain cipher key icb ==> gctr_partial_opaque alg bound plain' cipher' key icb);
-  assert (gctr_partial_opaque alg bound plain' cipher' key icb ==> gctr_partial_opaque alg bound plain cipher key icb);
-  assert (gctr_partial_opaque alg bound plain' cipher' key icb <==> gctr_partial_opaque alg bound plain cipher key icb);
-  //FStar.PredicateExtensionality.peq (gctr_partial_opaque alg bound plain' cipher' key icb) (gctr_partial_opaque alg bound plain cipher key icb);
-  //FStar.PropositionalExtensionality.apply (gctr_partial_opaque alg bound plain' cipher' key icb) (gctr_partial_opaque alg bound plain cipher key icb);
-  //assert (gctr_partial_opaque alg bound plain' cipher' key icb == gctr_partial_opaque alg bound plain cipher key icb);
-  admit(); 
   ()
 
 let gctr_partial_extend6 (alg:algorithm) (bound:nat) (plain cipher:seq quad32) (key:seq nat32) (icb:quad32) : Lemma
