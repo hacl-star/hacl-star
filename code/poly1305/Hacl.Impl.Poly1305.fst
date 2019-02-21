@@ -38,7 +38,7 @@ let state_inv_t #s h ctx =
   F32xN.acc_inv_t #(width s) (F32xN.as_tup5 h (get_acc_ ctx)) /\
   F32xN.load_precompute_r_post #(width s) h (get_precomp_r_ ctx)
 
-inline_for_extraction
+inline_for_extraction noextract
 val poly1305_encode_block:
     #s:field_spec
   -> f:felem s
@@ -55,7 +55,7 @@ let poly1305_encode_block #s f b =
   load_felem_le f b;
   set_bit128 f
 
-inline_for_extraction
+inline_for_extraction noextract
 val poly1305_encode_blocks:
     #s:field_spec
   -> f:felem s
@@ -72,7 +72,7 @@ let poly1305_encode_blocks #s f b =
   load_felems_le f b;
   set_bit128 f
 
-inline_for_extraction
+inline_for_extraction noextract
 val poly1305_encode_last:
     #s:field_spec
   -> f:felem s
@@ -110,7 +110,7 @@ let poly1305_encode_last #s f len b =
   pop_frame();
   admit ()
 
-inline_for_extraction
+inline_for_extraction noextract
 val poly1305_encode_r:
     #s:field_spec
   -> p:precomp_r s
@@ -136,7 +136,7 @@ let poly1305_encode_r #s p b =
   let h1 = ST.get () in
   LSeq.eq_intro (feval h1 (gsub p 0ul 5ul)) (S.encode_r (as_seq h0 b))
 
-inline_for_extraction
+inline_for_extraction noextract
 val poly1305_init_:
     #s:field_spec
   -> ctx:poly1305_ctx s
@@ -175,7 +175,7 @@ let poly1305_init #s ctx key =
   | M256 -> poly1305_init_256 ctx key
 (* WRAPPER to Prevent Inlining *)
 
-inline_for_extraction
+inline_for_extraction noextract
 val update1:
     #s:field_spec
   -> p:precomp_r s
@@ -199,7 +199,7 @@ let update1 #s pre b acc =
   fadd_mul_r acc e pre;
   pop_frame ()
 
-inline_for_extraction
+inline_for_extraction noextract
 val update1_last:
     #s:field_spec
   -> p:precomp_r s
@@ -224,7 +224,7 @@ let update1_last #s pre len b acc =
   fadd_mul_r acc e pre;
   pop_frame ()
 
-inline_for_extraction
+inline_for_extraction noextract
 val updaten:
     #s:field_spec
   -> p:precomp_r s
@@ -280,7 +280,7 @@ let poly1305_update_multi_f #s pre bs nb len text i acc=
   as_seq_gsub h1 text (i *! bs) bs;
   updaten #s pre block acc
 
-inline_for_extraction
+inline_for_extraction noextract
 val poly1305_update_multi:
     #s:field_spec
   -> len:size_t{v len % v (blocklen s) == 0}
@@ -373,7 +373,7 @@ val poly1305_update1_rem:
 let poly1305_update1_rem #s pre rem b acc =
   if (rem >. 0ul) then update1_last #s pre rem b acc
 
-inline_for_extraction
+inline_for_extraction noextract
 val poly1305_update1:
     #s:field_spec
   -> len:size_t
@@ -429,7 +429,7 @@ let poly1305_update1 #s len text pre acc =
 
 #set-options "--z3rlimit 150 --max_fuel 1"
 
-inline_for_extraction
+inline_for_extraction noextract
 val poly1305_update_:
     #s:field_spec
   -> len:size_t
@@ -460,7 +460,7 @@ let poly1305_update_ #s len text pre acc =
   let text = sub text len0 len in
   poly1305_update1 #s len text pre acc
 
-inline_for_extraction
+inline_for_extraction noextract
 val poly1305_update1_:
     #s:field_spec
   -> ctx:poly1305_ctx s
@@ -479,7 +479,7 @@ let poly1305_update1_ #s ctx len text =
   let acc = get_acc ctx in
   poly1305_update1 #s len text pre acc
 
-inline_for_extraction
+inline_for_extraction noextract
 val poly1305_update__:
     #s:field_spec
   -> ctx:poly1305_ctx s
@@ -512,7 +512,7 @@ let poly1305_update #s ctx len text = admit();
   | M256 -> poly1305_update_256 ctx len text
 (* WRAPPER to Prevent Inlining *)
 
-inline_for_extraction
+inline_for_extraction noextract
 val poly1305_finish_:
     #s:field_spec
   -> tag:lbuffer uint8 16ul

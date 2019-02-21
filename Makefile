@@ -219,7 +219,7 @@ FSTAR_ROOTS = $(wildcard $(addsuffix /*.fsti,$(DIRS)) $(addsuffix /*.fst,$(DIRS)
   $(wildcard obj/*.fst) $(wildcard obj/*.fsti) # these two empty during the first stage
 
 # Convenience target. Remember to run make vale-fst first.
-verify: $(addsuffix .checked,$(FSTAR_ROOTS))
+verify: $(call to-obj-dir,$(addsuffix .checked,$(FSTAR_ROOTS)))
 
 # We currently force regeneration of three depend files. This is long.
 
@@ -546,9 +546,15 @@ obj/%.krml:
 	  ,[EXTRACT-KRML] $*,$@)
 
 HAND_WRITTEN_C		= Lib.PrintBuffer Lib.RandomBuffer
+
+# Always copied into the destination directory, always passed to kremlin.
 HAND_WRITTEN_FILES 	= $(wildcard $(LIB_DIR)/c/*.c) \
   $(addprefix providers/evercrypt/c/evercrypt_,vale_stubs.c)
-# Files in this list are not passed to kremlin, meaning that they don't end up
+
+# Always copied into the destination directory, not passed to kremlin.
+HAND_WRITTEN_H_FILES	= $(wildcard $(LIB_DIR)/c/*.h)
+
+# Possibly overridden, and not passed to kremlin, meaning that they don't end up
 # in the Makefile.basic list of C source files. They're added manually in
 # dist/Makefile (see ifneq tests).
 HAND_WRITTEN_OPTIONAL_FILES = \
@@ -556,11 +562,19 @@ HAND_WRITTEN_OPTIONAL_FILES = \
 
 # TODO: put all the Vale files under a single namespace to avoid this nonsense
 #
+# Note: I am using the deprecated -drop option, but it's ok because the dropped
+# module ends up in another bundle. Maybe the semantics of -drop should be
+# changed to just drop the declarations from a given module and then rely on
+# kremlin's empty-module removal.
+#
 # When extracting our libraries, we purposely don't distribute tests
 DEFAULT_FLAGS		=\
   $(addprefix -library ,$(HACL_HAND_WRITTEN_C)) \
-  -bundle Spec.*[rename=Hacl_Spec] \
+  -bundle Hacl.Spec.*,Spec.*[rename=Hacl_Spec] \
+  -bundle Hacl.Poly1305.Field32xN.Lemmas[rename=Hacl_Lemmas] \
   -bundle Lib.*[rename=Hacl_Lib] \
+  -drop Lib.IntVector.Intrinsics \
+  -add-include '"libintvector.h"' \
   -bundle Test,Test.*,Hacl.Test.* \
   -bundle EverCrypt.BCrypt \
   -bundle EverCrypt.OpenSSL \
@@ -589,6 +603,7 @@ DEFAULT_FLAGS		=\
 COMPACT_FLAGS	=\
   -bundle Hacl.Hash.MD5+Hacl.Hash.Core.MD5+Hacl.Hash.SHA1+Hacl.Hash.Core.SHA1+Hacl.Hash.SHA2+Hacl.Hash.Core.SHA2+Hacl.Hash.Core.SHA2.Constants=Hacl.Hash.*[rename=Hacl_Hash] \
   -bundle Hacl.Impl.SHA3+Hacl.SHA3=[rename=Hacl_SHA3] \
+  -bundle Hacl.Poly1305_32+Hacl.Poly1305_128+Hacl.Poly1305_256=Hacl.Poly1305.*,Hacl.Impl.Poly1305,Hacl.Impl.Poly1305.*[rename=Hacl_Poly1305] \
   -bundle LowStar.* \
   -bundle Prims,C.Failure,C,C.String,C.Loops,Spec.Loops,C.Endianness,FStar.*[rename=Hacl_Kremlib] \
   -bundle 'EverCrypt.Spec.*' \
@@ -643,10 +658,10 @@ endif
 
 .PRECIOUS: dist/%/Makefile.basic
 dist/%/Makefile.basic: $(ALL_KRML_FILES) dist/hacl-internal-headers/Makefile.basic \
-  $(HAND_WRITTEN_FILES) $(HAND_WRITTEN_OPTIONAL_FILES) $(VALE_ASMS) | old-extract-c
+  $(HAND_WRITTEN_FILES) $(HAND_WRITTEN_H_FILES) $(HAND_WRITTEN_OPTIONAL_FILES) $(VALE_ASMS) | old-extract-c
 	mkdir -p $(dir $@)
 	cp $(HACL_OLD_FILES) $(patsubst %.c,%.h,$(HACL_OLD_FILES)) $(dir $@)
-	cp $(HAND_WRITTEN_FILES) $(HAND_WRITTEN_OPTIONAL_FILES) dist/hacl-internal-headers/*.h $(dir $@)
+	cp $(HAND_WRITTEN_FILES) $(HAND_WRITTEN_H_FILES) $(HAND_WRITTEN_OPTIONAL_FILES) dist/hacl-internal-headers/*.h $(dir $@)
 	cp $(VALE_ASMS) $(dir $@)
 	$(KRML) $(DEFAULT_FLAGS) $(KRML_EXTRA) \
 	  -tmpdir $(dir $@) -skip-compilation \

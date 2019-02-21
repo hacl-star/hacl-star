@@ -41,7 +41,7 @@ endif
 
 # 2. Parameters we want to compile with, for the generated Makefile
 
-CFLAGS		+= -Wno-parentheses -g
+CFLAGS		+= -Wno-parentheses -g -mavx -mavx2
 
 # 3. Honor configurations
 

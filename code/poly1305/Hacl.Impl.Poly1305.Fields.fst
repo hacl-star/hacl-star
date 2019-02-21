@@ -22,66 +22,66 @@ type field_spec =
   | M128
   | M256
 
-unfold
+unfold noextract
 let width (s:field_spec) : lanes =
   match s with
   | M32  -> 1
   | M128 -> 2
   | M256 -> 4
 
-unfold
+unfold noextract
 let limb (s:field_spec) =
   match s with
   | M32  -> F32xN.uint64xN 1
   | M128 -> F32xN.uint64xN 2
   | M256 -> F32xN.uint64xN 4
 
-unfold
+unfold noextract
 let limb_zero (s:field_spec) : limb s=
   match s with
   | M32  -> F32xN.zero 1
   | M128 -> F32xN.zero 2
   | M256 -> F32xN.zero 4
 
-unfold
+unfold noextract
 let wide (s:field_spec) =
   match s with
   | M32  -> F32xN.uint64xN 1
   | M128 -> F32xN.uint64xN 2
   | M256 -> F32xN.uint64xN 4
 
-unfold
+unfold noextract
 let nlimb (s:field_spec) : size_t =
   match s with
   | M32  -> 5ul
   | M128 -> 5ul
   | M256 -> 5ul
 
-unfold
+unfold noextract
 let blocklen (s:field_spec) : size_t =
   match s with
   | M32  -> 16ul
   | M128 -> 32ul
   | M256 -> 64ul
 
-unfold
+unfold noextract
 let nelem (s:field_spec) : size_t =
   match s with
   | M32  -> 1ul
   | M128 -> 2ul
   | M256 -> 4ul
 
-unfold
+unfold noextract
 let precomplen (s:field_spec) : size_t =
   match s with
   | M32  -> 20ul
   | M128 -> 20ul
   | M256 -> 20ul
 
-inline_for_extraction
+inline_for_extraction noextract
 type felem (s:field_spec) = lbuffer (limb s) (nlimb s)
 type felem_wide (s:field_spec) = lbuffer (wide s) (nlimb s)
-inline_for_extraction
+inline_for_extraction noextract
 type precomp_r (s:field_spec) = lbuffer (limb s) (precomplen s)
 
 noextract
@@ -123,7 +123,7 @@ val lemma_feval_is_fas_nat: #s:field_spec -> h:mem -> f:felem s ->
 let lemma_feval_is_fas_nat #s h f =
   lemma_feval_is_fas_nat #(width s) h f
 
-inline_for_extraction
+inline_for_extraction noextract
 val create_felem:
     s:field_spec
   -> StackInline (felem s)
@@ -137,7 +137,7 @@ let create_felem s =
   | M128 -> (F32xN.create_felem 2) <: felem s
   | M256 -> (F32xN.create_felem 4) <: felem s
 
-inline_for_extraction
+inline_for_extraction noextract
 val load_felem_le:
     #s:field_spec
   -> f:felem s
@@ -156,7 +156,7 @@ let load_felem_le #s f b =
   | M128 -> F32xN.load_felem_le #2 f b
   | M256 -> F32xN.load_felem_le #4 f b
 
-inline_for_extraction
+inline_for_extraction noextract
 val load_felems_le:
     #s:field_spec
   -> f:felem s
@@ -176,7 +176,7 @@ let load_felems_le #s f b =
 
 #set-options "--z3rlimit 50"
 
-inline_for_extraction
+inline_for_extraction noextract
 val set_bit:
     #s:field_spec
   -> f:felem s
@@ -197,7 +197,7 @@ let set_bit #s f i =
   | M128 -> F32xN.set_bit #2 f i
   | M256 -> F32xN.set_bit #4 f i
 
-inline_for_extraction
+inline_for_extraction noextract
 val set_bit128:
     #s:field_spec
   -> f:felem s
@@ -216,7 +216,7 @@ let set_bit128 #s f =
   | M128 -> F32xN.set_bit128 #2 f
   | M256 -> F32xN.set_bit128 #4 f
 
-inline_for_extraction
+inline_for_extraction noextract
 val set_zero:
     #s:field_spec
   -> f:felem s
@@ -232,7 +232,7 @@ let set_zero #s f =
   | M128 -> F32xN.set_zero #2 f
   | M256 -> F32xN.set_zero #4 f
 
-inline_for_extraction
+inline_for_extraction noextract
 val copy_felem:
     #s:field_spec
   -> #m:scale32_5
@@ -252,7 +252,7 @@ let copy_felem #s #m f f' =
   | M128 -> F32xN.copy_felem #2 #m f f'
   | M256 -> F32xN.copy_felem #4 #m f f'
 
-inline_for_extraction
+inline_for_extraction noextract
 val reduce_felem:
     #s:field_spec
   -> f:felem s
@@ -269,7 +269,7 @@ let reduce_felem #s f =
   | M128 -> F32xN.reduce_felem #2 f
   | M256 -> F32xN.reduce_felem #4 f
 
-inline_for_extraction
+inline_for_extraction noextract
 val load_precompute_r:
     #s:field_spec
   -> p:precomp_r s
@@ -288,7 +288,7 @@ let load_precompute_r #s p r0 r1 =
   | M128 -> F32xN.load_precompute_r #2 p r0 r1
   | M256 -> F32xN.load_precompute_r #4 p r0 r1
 
-inline_for_extraction
+inline_for_extraction noextract
 val fadd_mul_r:
     #s:field_spec
   -> out:felem s
@@ -311,7 +311,7 @@ let fadd_mul_r #s out f1 precomp =
   | M128 -> F32xN.fadd_mul_r #2 out f1 precomp
   | M256 -> F32xN.fadd_mul_r #4 out f1 precomp
 
-inline_for_extraction
+inline_for_extraction noextract
 val fmul_rn:
     #s:field_spec
   -> out:felem s
@@ -336,7 +336,7 @@ let fmul_rn #s out f1 precomp =
   | M128 -> F32xN.fmul_rn #2 out f1 precomp
   | M256 -> F32xN.fmul_rn #4 out f1 precomp
 
-inline_for_extraction
+inline_for_extraction noextract
 val fmul_rn_normalize:
     #s:field_spec
   -> out:felem s
@@ -357,7 +357,7 @@ let fmul_rn_normalize #s out precomp =
   | M128 -> F32xN.fmul_rn_normalize #2 out precomp
   | M256 -> F32xN.fmul_rn_normalize #4 out precomp
 
-inline_for_extraction
+inline_for_extraction noextract
 val fadd:
     #s:field_spec
   -> out:felem s
@@ -378,7 +378,7 @@ let fadd #s out f1 f2 =
   | M128 -> F32xN.fadd #2 out f1 f2
   | M256 -> F32xN.fadd #4 out f1 f2
 
-inline_for_extraction
+inline_for_extraction noextract
 val felem_to_limbs:
     #s:field_spec
   -> f:felem s
@@ -393,7 +393,7 @@ let felem_to_limbs #s f =
   | M128 -> F32xN.store_felem #2 f
   | M256 -> F32xN.store_felem #4 f
 
-inline_for_extraction
+inline_for_extraction noextract
 val bytes_to_limbs:
     #s:field_spec
   -> b:lbuffer uint8 16ul
@@ -407,7 +407,7 @@ let bytes_to_limbs #s b =
   | M128 -> F32xN.bytes_to_limbs #2 b
   | M256 -> F32xN.bytes_to_limbs #4 b
 
-inline_for_extraction
+inline_for_extraction noextract
 val mod_add128:
     #s:field_spec
   -> a:(limb s & limb s)
@@ -425,7 +425,7 @@ let mod_add128 #s a b =
   | M128 -> F32xN.mod_add128 #2 a b
   | M256 -> F32xN.mod_add128 #4 a b
 
-inline_for_extraction
+inline_for_extraction noextract
 val store_felem_le:
     #s:field_spec
   -> b:lbuffer uint8 16ul
