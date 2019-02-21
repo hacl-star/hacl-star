@@ -58,19 +58,6 @@ let a0b_helper (a0 b0 b1 b2 b3
 *)
 open FStar.Math.Lemmas
 
-let lemma_mul_bounds_le (x b_x y b_y:nat) : Lemma 
-  (requires x <= b_x /\ y <= b_y)
-  (ensures x * y <= b_x * b_y)
-  =
-  lemma_mult_le_right b_x y b_y;
-  lemma_mult_le_right y x b_x;
-  ()
-
-let mul_nats (x y:nat) : nat = 
-  let prod = x * y in
-  lemma_mul_bounds_le 0 x 0 y;
-  prod
-
 #push-options "--z3rlimit 10"
 let lemma_mul_pow2_bound (b:nat{b > 1}) (x y:natN (pow2 b)) :
   Lemma (x * y < pow2 (2*b) - 1 /\
