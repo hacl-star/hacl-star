@@ -6,6 +6,7 @@ open FStar.Mul
 open FStar.Tactics
 open FStar.Tactics.CanonCommSemiring
 open Fast_defs
+open Fast_lemmas_internal
 
 #reset-options "--using_facts_from '* -FStar.Tactics -FStar.Reflection'"
 
