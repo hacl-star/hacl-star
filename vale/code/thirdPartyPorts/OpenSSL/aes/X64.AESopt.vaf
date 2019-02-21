@@ -1855,7 +1855,7 @@ procedure {:quick} AESNI_ctr32_6x_final(
     finish_aes_encrypt_le(alg, ctr5, key_words);
 }
 
-procedure {:quick}  AESNI_ctr32_6x(
+procedure {:quick} {:verify true} AESNI_ctr32_6x(
     inline alg:algorithm,  
     ghost count:nat,
     ghost in_b:buffer128,
@@ -1903,6 +1903,25 @@ procedure {:quick}  AESNI_ctr32_6x(
         T1 == reverse_bytes_quad32(inc32(ctr_orig, 0));
 
     ensures
+        modifies_buffer_specific128(out_b, old(mem), mem, count*6+0, count*6+5);
+        slice_work_around(buffer128_as_seq(mem, out_b), 6*count) == old(slice_work_around(buffer128_as_seq(mem, out_b), 6*count));   
+         inp == old( inp) + 0x60; 
+        outp == old(outp) + 0x60; 
+
+        
+        buffer128_read(out_b, count*6 + 0, mem) == inout0;
+        buffer128_read(out_b, count*6 + 1, mem) == inout1;
+        buffer128_read(out_b, count*6 + 2, mem) == inout2;
+        buffer128_read(out_b, count*6 + 3, mem) == inout3;
+        buffer128_read(out_b, count*6 + 4, mem) == inout4;
+        buffer128_read(out_b, count*6 + 5, mem) == inout5;
+
+        inout0 == quad32_xor(old(buffer128_read(in_b, count*6 + 0, mem)), aes_encrypt_le(alg, key_words, reverse_bytes_quad32(inc32(ctr_orig, 0))));
+        inout1 == quad32_xor(old(buffer128_read(in_b, count*6 + 1, mem)), aes_encrypt_le(alg, key_words, reverse_bytes_quad32(inc32(ctr_orig, 1))));
+        inout2 == quad32_xor(old(buffer128_read(in_b, count*6 + 2, mem)), aes_encrypt_le(alg, key_words, reverse_bytes_quad32(inc32(ctr_orig, 2))));
+        inout3 == quad32_xor(old(buffer128_read(in_b, count*6 + 3, mem)), aes_encrypt_le(alg, key_words, reverse_bytes_quad32(inc32(ctr_orig, 3))));
+        inout4 == quad32_xor(old(buffer128_read(in_b, count*6 + 4, mem)), aes_encrypt_le(alg, key_words, reverse_bytes_quad32(inc32(ctr_orig, 4))));
+        inout5 == quad32_xor(old(buffer128_read(in_b, count*6 + 5, mem)), aes_encrypt_le(alg, key_words, reverse_bytes_quad32(inc32(ctr_orig, 5))));
 
 {
     assert {:quick_type} length(round_keys) == nr(alg)+1;
