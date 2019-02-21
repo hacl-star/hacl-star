@@ -1439,7 +1439,7 @@ procedure {:quick exportOnly} Loop6x_gctr(
 
 #reset-options "--z3rlimit 20"
 
-procedure {:quick} {:verify true} AESNI_ctr32_6x_preamble(
+procedure {:quick} AESNI_ctr32_6x_preamble(
     inline alg:algorithm,  // OpenSSL includes the number of rounds (nr) as a dynamic parameter (stored with the key).  Saves code space but adds extra instructions to the fast path.  Maybe branch predictor is good enough for it not to matter
     ghost key_words:seq(nat32),
     ghost round_keys:seq(quad32),
@@ -1853,4 +1853,80 @@ procedure {:quick} AESNI_ctr32_6x_final(
     finish_aes_encrypt_le(alg, ctr3, key_words);
     finish_aes_encrypt_le(alg, ctr4, key_words);
     finish_aes_encrypt_le(alg, ctr5, key_words);
+}
+
+procedure {:quick}  AESNI_ctr32_6x(
+    inline alg:algorithm,  
+    ghost count:nat,
+    ghost in_b:buffer128,
+    ghost out_b:buffer128,
+
+    ghost key_words:seq(nat32),
+    ghost round_keys:seq(quad32),
+    ghost keys_b:buffer128,
+
+    ghost ctr_orig:quad32
+    )
+    lets
+//      inp @= rdi; outp @= rsi; len @= rdx; key @= rcx; ivp @= r8; Xip @= r9;
+        inp @= rdi; outp @= rsi; key @= rcx; 
+        Ii @= xmm0; T1 @= xmm1; T2 @= xmm2; Hkey @= xmm3;
+        Z0 @= xmm4; Z1 @= xmm5; Z2 @= xmm6; Xi @= xmm8;
+    
+        inout0 @= xmm9; inout1 @= xmm10; inout2 @= xmm11; inout3 @= xmm12;
+        inout4 @= xmm13; inout5 @= xmm14; rndkey @= xmm15;
+//      counter @= rbx; rounds @= rbp; ret @= r10; constp @= r11; in0 @= r14; end0 @= r15;
+        constp @= r11; 
+
+    reads
+        key; 
+        memTaint;
+
+    modifies
+        inp; outp; constp; r12;
+        Ii; T1; T2; Hkey; Z0; Z1; Z2; Xi;
+        inout0; inout1; inout2; inout3; inout4; inout5; rndkey;
+        mem; efl;
+
+    requires
+        // Valid buffers and pointers
+        validSrcAddrsOffset128(mem, inp, in_b, count*6, 6, memTaint, Secret);
+        validDstAddrsOffset128(mem, outp, out_b, count*6, 6, memTaint, Secret);
+        inp  + 0x60 < pow2_64;
+        outp + 0x60 < pow2_64;
+
+        // AES reqs
+        aes_reqs(alg, key_words, round_keys, keys_b, key, mem, memTaint);
+        key - 0x60 >= 0;
+
+        ctr_orig.lo0 % 256 + 6 < 256;
+        T1 == reverse_bytes_quad32(inc32(ctr_orig, 0));
+
+    ensures
+
+{
+    assert {:quick_type} length(round_keys) == nr(alg)+1;
+    ghost var init0 := quad32_xor(reverse_bytes_quad32(inc32(ctr_orig, 0)), index(round_keys, 0));
+    ghost var init1 := quad32_xor(reverse_bytes_quad32(inc32(ctr_orig, 1)), index(round_keys, 0));
+    ghost var init2 := quad32_xor(reverse_bytes_quad32(inc32(ctr_orig, 2)), index(round_keys, 0));
+    ghost var init3 := quad32_xor(reverse_bytes_quad32(inc32(ctr_orig, 3)), index(round_keys, 0));
+    ghost var init4 := quad32_xor(reverse_bytes_quad32(inc32(ctr_orig, 4)), index(round_keys, 0));
+    ghost var init5 := quad32_xor(reverse_bytes_quad32(inc32(ctr_orig, 5)), index(round_keys, 0));
+
+    AESNI_ctr32_6x_preamble(alg, key_words, round_keys, keys_b, ctr_orig);
+    AESNI_ctr32_6x_loop_recursive(alg, 7, key_words, round_keys, keys_b, init0, init1, init2, init3, init4, init5); 
+    AESNI_ctr32_6x_round9(alg, count, in_b, key_words, round_keys, keys_b, init0, init1, init2, init3, init4, init5);
+    AESNI_ctr32_6x_final(alg, count, out_b, key_words, round_keys, keys_b, init0, init1, init2, init3, init4, init5,
+                        reverse_bytes_quad32(inc32(ctr_orig, 0)),
+                        reverse_bytes_quad32(inc32(ctr_orig, 1)),
+                        reverse_bytes_quad32(inc32(ctr_orig, 2)),
+                        reverse_bytes_quad32(inc32(ctr_orig, 3)),
+                        reverse_bytes_quad32(inc32(ctr_orig, 4)),
+                        reverse_bytes_quad32(inc32(ctr_orig, 5)),
+                        buffer128_read(in_b, count*6 + 0, mem),
+                        buffer128_read(in_b, count*6 + 1, mem),
+                        buffer128_read(in_b, count*6 + 2, mem),
+                        buffer128_read(in_b, count*6 + 3, mem),
+                        buffer128_read(in_b, count*6 + 4, mem),
+                        buffer128_read(in_b, count*6 + 5, mem));
 }
