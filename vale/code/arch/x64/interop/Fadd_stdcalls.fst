@@ -129,12 +129,16 @@ let lowstar_add1 : lowstar_add1_t  =
     dom
     (W.mk_prediction code_add1 dom [] (add1_lemma code_add1 IA.win))
 
+// TODO: This as  separate module extracted by KreMLin
+
 let lowstar_add1_normal_t : normal lowstar_add1_t
   = as_normal_t #lowstar_add1_t lowstar_add1
 
 open Vale.AsLowStar.MemoryHelpers
 
 #set-options "--z3rlimit 50"
+
+// TODO: This inlined, and just extracted regularly (no -library)
 
 let add1 out f1 f2 =
   DV.length_eq (get_downview f1);
