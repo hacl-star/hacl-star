@@ -392,6 +392,9 @@ obj/Vale.AsLowStar.Test.fst.checked: \
 obj/Sha_stdcalls.fst.checked: \
   FSTAR_FLAGS=$(VALE_FSTAR_FLAGS)
 
+obj/Simplify_Sha.fst.checked: \
+  FSTAR_FLAGS=$(VALE_FSTAR_FLAGS)
+
 hints:
 	mkdir -p $@
 

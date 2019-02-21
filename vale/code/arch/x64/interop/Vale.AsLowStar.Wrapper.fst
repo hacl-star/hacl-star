@@ -193,6 +193,8 @@ let core_create_lemma_mem_correspondance
     in
     aux args
 
+#set-options "--z3rlimit 20"
+
 let rec register_args'
     (max_arity:nat)
     (arg_reg:IX64.arg_reg_relation max_arity)
@@ -241,8 +243,6 @@ let rec lemma_register_args'
       let regs' = (IX64.register_of_args max_arity arg_reg (n-1) tl regs) in
       lemma_register_args' max_arity arg_reg tl regs;
       lemma_register_args'_aux max_arity arg_reg (n-1) tl regs' final_regs
-
-#set-options "--z3rlimit 20"
 
 let core_create_lemma_register_args
     (#max_arity:nat)

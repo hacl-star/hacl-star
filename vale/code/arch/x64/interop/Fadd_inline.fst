@@ -3,7 +3,7 @@ module Fadd_inline
 open FStar.HyperStack.ST
 module HS = FStar.HyperStack
 module B = LowStar.Buffer
-module BV = LowStar.BufferView
+module DV = LowStar.BufferView.Down
 open Types_s
 
 open Interop.Base
@@ -30,18 +30,18 @@ let as_t (#a:Type) (x:normal a) : a = x
 let as_normal_t (#a:Type) (x:a) : normal a = x
 
 [@__reduce__] unfold
-let b64 = buf_t TUInt64
+let b64 = buf_t TUInt64 TUInt64
 [@__reduce__] unfold
-let t64_mod = TD_Buffer TUInt64 default_bq
+let t64_mod = TD_Buffer TUInt64 TUInt64 default_bq
 [@__reduce__] unfold
-let t64_no_mod = TD_Buffer TUInt64 ({modified=false; strict_disjointness=false; taint=MS.Secret})
+let t64_no_mod = TD_Buffer TUInt64 TUInt64 ({modified=false; strict_disjointness=false; taint=MS.Secret})
 [@__reduce__] unfold
 let tuint64 = TD_Base TUInt64
 
 // static inline uint64_t add1(const uint64_t* dst, const uint64_t* in_a, uint64_t b) {
 //   register uint64_t* dst_r asm("rdi") = dst;
 //   register uint64_t* in_a_r asm("rsi") = in_a;
-//   register uint64_t* b_r asm("rcx") = b;
+//   register uint64_t* b_r asm("rdx") = b;
 //   register uint64_t* carry_r asm("rax");
 
 //   __asm__ __volatile__(
@@ -95,7 +95,7 @@ let add1_post : VSig.vale_post 16 dom =
     (f:V.va_fuel) ->
       FU.va_ens_fast_add1 c va_s0 (as_vale_buffer sb) (as_vale_buffer out) (as_vale_buffer f1) (UInt64.v f2) va_s1 f
 
-#set-options "--z3rlimit 20"
+#set-options "--z3rlimit 40"
 
 let regs_modified: MS.reg -> bool = fun (r:MS.reg) ->
   let open MS in
@@ -129,8 +129,8 @@ let add1_lemma'
                                  ME.loc_none)) va_s0.VS.mem va_s1.VS.mem
  )) = 
    let va_s1, f = FU.va_lemma_fast_add1 code va_s0 (as_vale_buffer sb) (as_vale_buffer out) (as_vale_buffer f1) (UInt64.v f2) in
-   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 out;   
-   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 f1;   
+   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 out;   
+   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 f1;   
    va_s1, f                                   
 
 (* Prove that add1_lemma' has the required type *)
@@ -187,49 +187,8 @@ let lowstar_add1_normal_t : normal lowstar_add1_t
 
 open Vale.AsLowStar.MemoryHelpers
 
-let fast_add1
-  (out:b8)
-  (f1:b8)
-  (f2:uint64) 
-  : Stack uint64
-  (requires fun h -> 
-    adx_enabled /\ bmi2_enabled /\
-    B.live h f1 /\ 
-    B.live h out /\ 
-    B.length out == 32 /\ 
-    B.length f1 == 32 /\
-    (B.disjoint out f1 \/ out == f1))
-  (ensures fun h0 c h1 -> 
-    B.live h1 out /\ B.live h1 f1 /\
-    B.modifies (B.loc_buffer out) h0 h1 /\
-    (
-    let a0 = UInt64.v (low_buffer_read TUInt64 h0 f1 0) in
-    let a1 = UInt64.v (low_buffer_read TUInt64 h0 f1 1) in
-    let a2 = UInt64.v (low_buffer_read TUInt64 h0 f1 2) in
-    let a3 = UInt64.v (low_buffer_read TUInt64 h0 f1 3) in    
-    let d0 = UInt64.v (low_buffer_read TUInt64 h1 out 0) in
-    let d1 = UInt64.v (low_buffer_read TUInt64 h1 out 1) in
-    let d2 = UInt64.v (low_buffer_read TUInt64 h1 out 2) in
-    let d3 = UInt64.v (low_buffer_read TUInt64 h1 out 3) in
-    let a = pow2_four a0 a1 a2 a3 in
-    let d = pow2_five d0 d1 d2 d3 (UInt64.v c) in
-    d = a + UInt64.v f2
-    )
-    )
-  = 
-  let x, _ = lowstar_add1_normal_t out f1 f2 () in
-  x
-
-open Vale.Interop.Cast
-
 let add1_inline out f1 f2
-  = push_frame();
-    let out8 = B.alloca (UInt8.uint_to_t 0) (UInt32.uint_to_t 32) in
-    let f18 = B.alloca (UInt8.uint_to_t 0) (UInt32.uint_to_t 32) in
-    copy_down out out8;
-    copy_down f1 f18;
-    let x = fast_add1 out8 f18 f2 in
-    imm_copy_up f1 f18;
-    copy_up out out8;
-    pop_frame();
+  = DV.length_eq (get_downview out);
+    DV.length_eq (get_downview f1);
+    let x, _ = lowstar_add1_normal_t out f1 f2 () in
     x
