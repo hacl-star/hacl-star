@@ -82,7 +82,6 @@ ghost procedure finish_aes_encrypt_le(ghost alg:algorithm, ghost input_LE:quad32
     ensures
         aes_encrypt_le(alg, key, input_LE) == cipher_opaque(alg, input_LE, key_to_round_keys_LE(alg, key));
 {
-    assume (false);
     reveal aes_encrypt_LE_def;
     reveal cipher;
 }
