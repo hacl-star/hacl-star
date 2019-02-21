@@ -1437,13 +1437,15 @@ procedure {:quick exportOnly} Loop6x_gctr(
 
 
 
-#reset-options ""
+#reset-options "--z3rlimit 20"
 
-procedure {:quick} AESNI_ctr32_6x_preamble(
+procedure {:quick} {:verify true} AESNI_ctr32_6x_preamble(
     inline alg:algorithm,  // OpenSSL includes the number of rounds (nr) as a dynamic parameter (stored with the key).  Saves code space but adds extra instructions to the fast path.  Maybe branch predictor is good enough for it not to matter
     ghost key_words:seq(nat32),
     ghost round_keys:seq(quad32),
-    ghost keys_b:buffer128
+    ghost keys_b:buffer128,
+
+    ghost ctr_orig:quad32
     )
     lets
 //      inp @= rdi; outp @= rsi; len @= rdx; key @= rcx; ivp @= r8; Xip @= r9;
@@ -1469,7 +1471,20 @@ procedure {:quick} AESNI_ctr32_6x_preamble(
         aes_reqs(alg, key_words, round_keys, keys_b, key, mem, memTaint);
         key - 0x60 >= 0;
 
+        ctr_orig.lo0 % 256 + 6 < 256;
+        T1 == reverse_bytes_quad32(inc32(ctr_orig, 0));
+
     ensures
+        inout0 == rounds_opaque(quad32_xor(reverse_bytes_quad32(inc32(ctr_orig, 0)), index(round_keys, 0)), round_keys, 0);
+        inout1 == rounds_opaque(quad32_xor(reverse_bytes_quad32(inc32(ctr_orig, 1)), index(round_keys, 0)), round_keys, 0);
+        inout2 == rounds_opaque(quad32_xor(reverse_bytes_quad32(inc32(ctr_orig, 2)), index(round_keys, 0)), round_keys, 0);
+        inout3 == rounds_opaque(quad32_xor(reverse_bytes_quad32(inc32(ctr_orig, 3)), index(round_keys, 0)), round_keys, 0);
+        inout4 == rounds_opaque(quad32_xor(reverse_bytes_quad32(inc32(ctr_orig, 4)), index(round_keys, 0)), round_keys, 0);
+        inout5 == rounds_opaque(quad32_xor(reverse_bytes_quad32(inc32(ctr_orig, 5)), index(round_keys, 0)), round_keys, 0);
+
+        T1 == reverse_bytes_quad32(inc32(ctr_orig, 6));
+
+        rndkey == index(round_keys, 1);
 {
     Load128_buffer(Z0,     key, 0x00-0x80, Secret, keys_b, 0);  // # borrow $Z0 for $rndkey
     load_one_msb();                                             // # borrow $T2, .Lone_msb
@@ -1481,18 +1496,33 @@ procedure {:quick} AESNI_ctr32_6x_preamble(
 
     VPxor(inout0, T1, Z0);
     VPaddd(inout1, T1, T2);
+    lemma_incr_msb(inc32(ctr_orig, 0), old(T1), inout1, 1);
     VPaddd(inout2, inout1, T2);
+    lemma_incr_msb(inc32(ctr_orig, 0), old(T1), inout2, 2);
     VPxor(inout1, inout1, Z0);
     VPaddd(inout3, inout2, T2);
+    lemma_incr_msb(inc32(ctr_orig, 0), old(T1), inout3, 3);
     VPxor(inout2, inout2, Z0);
     VPaddd(inout4, inout3, T2);
+    lemma_incr_msb(inc32(ctr_orig, 0), old(T1), inout4, 4);
     VPxor(inout3, inout3, Z0);
     VPaddd(inout5, inout4, T2);
+    lemma_incr_msb(inc32(ctr_orig, 0), old(T1), inout5, 5);
     VPxor(inout4, inout4, Z0);
     VPaddd(T1, inout5, T2);
+    lemma_incr_msb(inc32(ctr_orig, 0), old(T1), T1, 6);
     VPxor(inout5, inout5, Z0);
+
+    init_rounds_opaque(inout0, round_keys);
+    init_rounds_opaque(inout1, round_keys);
+    init_rounds_opaque(inout2, round_keys);
+    init_rounds_opaque(inout3, round_keys);
+    init_rounds_opaque(inout4, round_keys);
+    init_rounds_opaque(inout5, round_keys);
+
 }
 
+#reset-options ""
 procedure {:quick} AESNI_ctr32_6x_loop_body(
     inline alg:algorithm,
     inline rnd:nat,
@@ -1555,6 +1585,63 @@ procedure {:quick} AESNI_ctr32_6x_loop_body(
     Load128_buffer(rndkey, key, 16*(rnd+2)-0x80, Secret, keys_b, rnd+2);
 }
 
+procedure {:recursive} {:quick exportOnly} AESNI_ctr32_6x_loop_recursive(
+    inline alg:algorithm,
+    inline rnd:nat,
+    ghost key_words:seq(nat32),
+    ghost round_keys:seq(quad32),
+    ghost keys_b:buffer128,
+
+    ghost init0:quad32,
+    ghost init1:quad32,
+    ghost init2:quad32,
+    ghost init3:quad32,
+    ghost init4:quad32,
+    ghost init5:quad32
+    )
+    lets
+        key @= rcx; 
+        inout0 @= xmm9; inout1 @= xmm10; inout2 @= xmm11; inout3 @= xmm12;
+        inout4 @= xmm13; inout5 @= xmm14; rndkey @= xmm15;
+
+    reads
+        key; 
+        mem; memTaint;
+
+    modifies
+        inout0; inout1; inout2; inout3; inout4; inout5; rndkey;
+        efl;
+
+    requires
+        // AES reqs
+        aes_reqs(alg, key_words, round_keys, keys_b, key, mem, memTaint);
+        rnd + 2 < length(round_keys);
+        rndkey == index(round_keys, 1);
+
+        inout0 == rounds_opaque(init0, round_keys, 0);
+        inout1 == rounds_opaque(init1, round_keys, 0);
+        inout2 == rounds_opaque(init2, round_keys, 0);
+        inout3 == rounds_opaque(init3, round_keys, 0);
+        inout4 == rounds_opaque(init4, round_keys, 0);
+        inout5 == rounds_opaque(init5, round_keys, 0);
+
+    ensures
+        inout0 == rounds_opaque(init0, round_keys, rnd + 1);
+        inout1 == rounds_opaque(init1, round_keys, rnd + 1);
+        inout2 == rounds_opaque(init2, round_keys, rnd + 1);
+        inout3 == rounds_opaque(init3, round_keys, rnd + 1);
+        inout4 == rounds_opaque(init4, round_keys, rnd + 1);
+        inout5 == rounds_opaque(init5, round_keys, rnd + 1);
+        
+        rndkey == index(round_keys, rnd+2);
+{
+    inline if (rnd > 0) {
+        AESNI_ctr32_6x_loop_recursive(alg, #nat(rnd-1), key_words, round_keys, keys_b, 
+                                      init0, init1, init2, init3, init4, init5);
+    }
+    AESNI_ctr32_6x_loop_body(alg, rnd, key_words, round_keys, keys_b, 
+                             init0, init1, init2, init3, init4, init5);
+}
 
 procedure {:quick} AESNI_ctr32_6x_round9(
     inline alg:algorithm,

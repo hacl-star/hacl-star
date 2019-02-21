@@ -121,10 +121,10 @@ val finish_cipher_opt (alg:algorithm) (input plain t0 t1 out:quad32) (round_keys
 
 
 val lemma_incr_msb (orig ctr ctr':quad32) (increment:nat) : Lemma
-  (requires increment < 6 /\
+  (requires increment < 256 /\
             ctr == reverse_bytes_quad32 orig /\
             ctr' == Arch.Types.add_wrap_quad32 ctr (Mkfour 0 0 0 (increment * 0x1000000)))
-  (ensures  (orig.lo0 % 256) + 6 < 256 ==> ctr' == reverse_bytes_quad32 (GCTR_s.inc32 orig increment))
+  (ensures  (orig.lo0 % 256) + increment < 256 ==> ctr' == reverse_bytes_quad32 (GCTR_s.inc32 orig increment))
 
 val lemma_msb_in_bounds (ctr_BE inout5 t1':quad32) (counter:nat) : Lemma
   (requires inout5 == reverse_bytes_quad32 (GCTR_s.inc32 ctr_BE 5) /\

@@ -95,7 +95,7 @@ let finish_cipher_opt (alg:algorithm) (input plain t0 t1 out:quad32) (round_keys
 
 #reset-options "--z3rlimit 20"
 let lemma_add_0x1000000_reverse_mult (n:nat32) (increment:nat) : Lemma
-  (requires (n % 256) + increment < 256 /\ increment < 6)
+  (requires (n % 256) + increment < 256)
   (ensures (let r = reverse_bytes_nat32 n in
             r + increment * 0x1000000 == reverse_bytes_nat32 (n + increment)))
   =
@@ -135,15 +135,15 @@ let lemma_add_0x1000000_reverse_mult (n:nat32) (increment:nat) : Lemma
 
 #reset-options ""
 let lemma_incr_msb (orig ctr ctr':quad32) (increment:nat) : Lemma
-  (requires increment < 6 /\
+  (requires increment < 256 /\
             ctr == reverse_bytes_quad32 orig /\
             ctr' == Arch.Types.add_wrap_quad32 ctr (Mkfour 0 0 0 (increment * 0x1000000)))
-  (ensures  (orig.lo0 % 256) + 6 < 256 ==> ctr' == reverse_bytes_quad32 (GCTR_s.inc32 orig increment))
+  (ensures  (orig.lo0 % 256) + increment < 256 ==> ctr' == reverse_bytes_quad32 (GCTR_s.inc32 orig increment))
   =
   let ctr_new = GCTR_s.inc32 orig increment in
   reveal_reverse_bytes_quad32 orig;
   reveal_reverse_bytes_quad32 ctr_new;
-  if (orig.lo0 % 256) + 6 < 256 then (
+  if (orig.lo0 % 256) + increment < 256 then (
     lemma_add_0x1000000_reverse_mult orig.lo0 increment;
     ()
   ) else ();

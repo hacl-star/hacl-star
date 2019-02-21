@@ -80,6 +80,21 @@ let gctr_partial_opaque_ignores_postfix (alg:algorithm) (bound:nat) (plain plain
   assert (forall i . 0 <= i /\ i < bound ==> index cipher' i == index (slice cipher' 0 bound) i);
   assert (gctr_partial_opaque alg bound plain cipher key icb == gctr_partial alg bound plain cipher key icb);
   assert (gctr_partial_opaque alg bound plain' cipher' key icb == gctr_partial alg bound plain' cipher' key icb);  
+  (*
+  let helper1 i : Lemma (gctr_partial_opaque alg bound plain cipher key icb ==>
+                         (0 <= i /\ i < bound ==> 
+                         (index cipher' i == quad32_xor (index plain' i) (aes_encrypt_BE alg key (inc32 icb i))))) =
+     if gctr_partial_opaque alg bound plain cipher key icb then (
+       admit()
+     ) else (())
+  in    
+  *)
+  assert (gctr_partial_opaque alg bound plain cipher key icb ==> gctr_partial_opaque alg bound plain' cipher' key icb);
+  assert (gctr_partial_opaque alg bound plain' cipher' key icb ==> gctr_partial_opaque alg bound plain cipher key icb);
+  assert (gctr_partial_opaque alg bound plain' cipher' key icb <==> gctr_partial_opaque alg bound plain cipher key icb);
+  //FStar.PredicateExtensionality.peq (gctr_partial_opaque alg bound plain' cipher' key icb) (gctr_partial_opaque alg bound plain cipher key icb);
+  //FStar.PropositionalExtensionality.apply (gctr_partial_opaque alg bound plain' cipher' key icb) (gctr_partial_opaque alg bound plain cipher key icb);
+  //assert (gctr_partial_opaque alg bound plain' cipher' key icb == gctr_partial_opaque alg bound plain cipher key icb);
   admit(); 
   ()
 
