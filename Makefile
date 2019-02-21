@@ -618,7 +618,7 @@ COMPACT_FLAGS	=\
   -add-include '<string.h>'
 
 # For the time being, we rely on the old extraction to give us self-contained
-# files
+# files for algorithms that haven't been rewritten for HACLv2.
 
 .PHONY: old-%
 old-%:
@@ -632,7 +632,6 @@ HACL_OLD_FILES=\
   code/old/ed25519/ed25519-c/Hacl_Ed25519.c \
   code/old/salsa-family/chacha-c/Hacl_Chacha20.c \
   code/old/poly1305/poly-c/AEAD_Poly1305_64.c \
-  code/old/poly1305/poly-c/Hacl_Poly1305_64.c \
   code/old/api/aead-c/Hacl_Chacha20Poly1305.c
 
 dist/compact/Makefile.basic: KRML_EXTRA=$(COMPACT_FLAGS)
