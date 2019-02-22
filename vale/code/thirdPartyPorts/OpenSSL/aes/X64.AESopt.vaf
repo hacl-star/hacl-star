@@ -1259,6 +1259,7 @@ procedure {:quick} Loop6x(
 
 
 #reset-options "--z3rlimit 1600"
+//#reset-options "--z3rlimit 30"
 procedure {:quick exportOnly} {:verify true} Loop6x_loop(
     inline alg:algorithm,  
     ghost count:nat,        // Number of 128-bit blocks processed so far
@@ -1344,7 +1345,27 @@ procedure {:quick exportOnly} {:verify true} Loop6x_loop(
         // GCTR progress
         gctr_partial_opaque(alg, 6*count, old(buffer128_as_seq(mem, in_b)), buffer128_as_seq(mem, out_b), key_words, ctr_BE_orig);
     ensures
+        // Framing
+        modifies_buffer128_3(stack_b, out_b, iv_b, old(mem), mem);
+        buffer_modifies_specific128(stack_b, old(mem), mem, 2, 7);
+        buffer_modifies_specific128(out_b, old(mem), mem, count*6, #nat(count*6+old(len)-1));
+        buffer_modifies_specific128(iv_b,    old(mem), mem, 0, 0);
+
+        // Semantics
+
+        // Pointers
+         in0 == old( in0) + 0x10*old(len);
+         inp == old( inp) + 0x10*old(len);
+        outp == old(outp) + 0x10*old(len);
+
         
+        gctr_partial_opaque(alg, #nat(6*count + old(len) - 6), old(buffer128_as_seq(mem, in_b)), buffer128_as_seq(mem, out_b), key_words, ctr_BE_orig);
+        inout0 == quad32_xor(old(buffer128_read(in_b, 6*count+old(len)-6 + 0, mem)), aes_encrypt_BE(alg, key_words, inc32lite(ctr_BE_orig, #nat32(6*count + old(len) - 6))));
+        inout1 == quad32_xor(old(buffer128_read(in_b, 6*count+old(len)-6 + 1, mem)), aes_encrypt_BE(alg, key_words, inc32lite(ctr_BE_orig, #nat32(6*count + old(len) - 6 + 1))));
+        inout2 == quad32_xor(old(buffer128_read(in_b, 6*count+old(len)-6 + 2, mem)), aes_encrypt_BE(alg, key_words, inc32lite(ctr_BE_orig, #nat32(6*count + old(len) - 6 + 2))));
+        inout3 == quad32_xor(old(buffer128_read(in_b, 6*count+old(len)-6 + 3, mem)), aes_encrypt_BE(alg, key_words, inc32lite(ctr_BE_orig, #nat32(6*count + old(len) - 6 + 3))));
+        inout4 == quad32_xor(old(buffer128_read(in_b, 6*count+old(len)-6 + 4, mem)), aes_encrypt_BE(alg, key_words, inc32lite(ctr_BE_orig, #nat32(6*count + old(len) - 6 + 4))));
+        inout5 == quad32_xor(old(buffer128_read(in_b, 6*count+old(len)-6 + 5, mem)), aes_encrypt_BE(alg, key_words, inc32lite(ctr_BE_orig, #nat32(6*count + old(len) - 6 + 5))));
 {
     ghost var iter:nat := 0;
     ghost var ctr := ctr_BE;
@@ -1383,6 +1404,13 @@ procedure {:quick exportOnly} {:verify true} Loop6x_loop(
             len > 0 ==>  inp + 0x10*len < pow2_64;
             len > 0 ==>  in0 + 0x10*len < pow2_64;
             len > 0 ==> outp + 0x10*len < pow2_64;
+        
+            modifies_buffer128_3(stack_b, out_b, iv_b, old(mem), mem);
+            buffer_modifies_specific128(stack_b, old(mem), mem, 2, 7);
+            buffer_modifies_specific128(out_b,   old(mem), mem, count*6, count*6+iter*6+5);
+            len == 0 ==> old(len) >= 6 && buffer_modifies_specific128(out_b, old(mem), mem, count*6, #nat(count*6+old(len)-1));
+            buffer_modifies_specific128(iv_b,    old(mem), mem, 0, 0);
+
 
             // AES reqs
             aes_reqs(alg, key_words, round_keys, keys_b, key, mem, memTaint);
