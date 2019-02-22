@@ -1243,7 +1243,7 @@ procedure {:quick} Loop6x(
                  buffer128_read(in0_b, count*6 + 0, mem));
 
     Sub64(len, 6);
-    Add64(in0, 6);
+    Add64(in0, 0x60);
 
     if (len > 0) {
         Loop6x_save_output(count, out_b);
@@ -1251,16 +1251,16 @@ procedure {:quick} Loop6x(
         ghost var plain := old(buffer128_as_seq(mem, in_b));
         ghost var cipher := buffer128_as_seq(mem, out_b);
         ghost var bound := count*6;
-        gctr_partial_opaque_ignores_postfix(alg, #nat32(bound), plain, plain, old(buffer128_as_seq(mem, out_b)), 
+        gctr_partial_opaque_ignores_postfix(alg, #nat32(bound), plain_quads, plain_quads, old(buffer128_as_seq(mem, out_b)), 
                                             cipher, key_words, ctr_BE_orig);
-        gctr_partial_extend6(alg, bound, plain, cipher, key_words, ctr_BE_orig);
+        gctr_partial_extend6(alg, bound, plain_quads, cipher, key_words, ctr_BE_orig);
     }
 }
 
 
 #reset-options "--z3rlimit 1600"
 //#reset-options "--z3rlimit 30"
-procedure {:quick exportOnly} {:verify true} Loop6x_loop(
+procedure {:quick exportOnly} Loop6x_loop(
     inline alg:algorithm,  
     ghost count:nat,        // Number of 128-bit blocks processed so far
     ghost iv_b:buffer128,
@@ -1459,8 +1459,7 @@ procedure {:quick exportOnly} {:verify true} Loop6x_loop(
 
 
         
-#reset-options "--z3rlimit 20"
-
+#reset-options "--z3rlimit 40"
 procedure {:quick} AESNI_ctr32_6x_preamble(
     inline alg:algorithm,  // OpenSSL includes the number of rounds (nr) as a dynamic parameter (stored with the key).  Saves code space but adds extra instructions to the fast path.  Maybe branch predictor is good enough for it not to matter
     ghost key_words:seq(nat32),
@@ -1541,7 +1540,6 @@ procedure {:quick} AESNI_ctr32_6x_preamble(
     init_rounds_opaque(inout3, round_keys);
     init_rounds_opaque(inout4, round_keys);
     init_rounds_opaque(inout5, round_keys);
-
 }
 
 #reset-options ""
