@@ -32,10 +32,13 @@ val fsqr_s:
     #s:field_spec
   -> out:felem s
   -> f1:felem s
-  -> tmp:felem_wide2 s
+  -> tmp:felem_wide s
   -> Stack unit
     (requires fun h ->
       live h out /\ live h f1 /\ live h tmp /\
+      (disjoint out f1 \/ out == f1) /\
+      (disjoint out tmp \/ out == tmp) /\
+      disjoint tmp f1 /\
       fsquare_times_inv h f1)
     (ensures  fun h0 _ h1 ->
       modifies (loc out |+| loc tmp) h0 h1 /\
@@ -63,6 +66,12 @@ val fmul_s:
   -> Stack unit
     (requires fun h ->
       live h out /\ live h f1 /\ live h f2 /\ live h tmp /\
+      (disjoint out f1 \/ out == f1) /\
+      (disjoint out f2 \/ out == f2) /\
+      (disjoint out tmp \/ out == tmp) /\
+      (disjoint f1 f2 \/ f1 == f2) /\
+      disjoint f1 tmp /\
+      disjoint f2 tmp /\
       fmuls_pre h f1 f2)
     (ensures  fun h0 _ h1 ->
       modifies (loc out |+| loc tmp) h0 h1 /\ fsquare_times_inv h1 out /\
@@ -77,11 +86,14 @@ val fsquare_times_:
     #s:field_spec
   -> o:felem s
   -> i:felem s
-  -> tmp:felem_wide2 s
+  -> tmp:felem_wide s
   -> n:size_t{v n > 0}
   -> Stack unit
     (requires fun h0 ->
       live h0 o /\ live h0 i /\ live h0 tmp /\
+      (disjoint o i \/ o == i) /\
+      disjoint o tmp /\
+      disjoint tmp i /\
       fsquare_times_inv h0 i)
     (ensures  fun h0 _ h1 ->
       modifies (loc o |+| loc tmp) h0 h1 /\
@@ -109,20 +121,23 @@ let fsquare_times_ #s o inp tmp n =
 
 (* WRAPPER to Prevent Inlining *)
 [@CInline]
-let fsquare_times_51 (o:F51.felem) (i:F51.felem) (tmp:felem_wide2 M51) (n:size_t{v n > 0}) = fsquare_times_ #M51 o i tmp n
+let fsquare_times_51 (o:F51.felem) (i:F51.felem) (tmp:felem_wide M51) (n:size_t{v n > 0}) = fsquare_times_ #M51 o i tmp n
 [@CInline]
-let fsquare_times_64 (o:F64.felem) (i:F64.felem) (tmp:felem_wide2 M64) (n:size_t{v n > 0}) = fsquare_times_ #M64 o i tmp n
+let fsquare_times_64 (o:F64.felem) (i:F64.felem) (tmp:felem_wide M64) (n:size_t{v n > 0}) = fsquare_times_ #M64 o i tmp n
 
 inline_for_extraction noextract
 val fsquare_times:
     #s:field_spec
   -> o:felem s
   -> i:felem s
-  -> tmp:felem_wide2 s
+  -> tmp:felem_wide s
   -> n:size_t{v n > 0}
   -> Stack unit
     (requires fun h0 ->
       live h0 o /\ live h0 i /\ live h0 tmp /\
+      (disjoint o i \/ o == i) /\
+      disjoint o tmp /\
+      disjoint tmp i /\
       fsquare_times_inv h0 i)
     (ensures  fun h0 _ h1 ->
       modifies (loc o |+| loc tmp) h0 h1 /\ live h1 o /\ live h1 i /\
@@ -161,31 +176,32 @@ let finv0 #s i t1 tmp =
   let b : felem s = sub t1 (nlimb s) (nlimb s) in
   let c : felem s = sub t1 (2ul *! nlimb s) (nlimb s) in
   let t0 : felem s = sub t1 (3ul *! nlimb s) (nlimb s) in
-  (* 2 *) fsquare_times #s a i tmp 1ul;
-  (* 8 *) fsquare_times #s t0 a tmp 2ul;
+  let tmp1 : felem_wide s = sub tmp 0ul (nwide s) in
+  (* 2 *) fsquare_times #s a i tmp1 1ul;
+  (* 8 *) fsquare_times #s t0 a tmp1 2ul;
   (* 9 *) fmul_s #s b t0 i tmp;
   (* 11 *) fmul_s #s a b a tmp;
-  (* 22 *) fsquare_times #s t0 a tmp 1ul;
+  (* 22 *) fsquare_times #s t0 a tmp1 1ul;
   (* 2^5 - 2^0 = 31 *) fmul_s #s b t0 b tmp;
-  (* 2^10 - 2^5 *) fsquare_times #s t0 b tmp 5ul;
+  (* 2^10 - 2^5 *) fsquare_times #s t0 b tmp1 5ul;
   (* 2^10 - 2^0 *) fmul_s #s b t0 b tmp;
-  (* 2^20 - 2^10 *) fsquare_times #s t0 b tmp 10ul;
+  (* 2^20 - 2^10 *) fsquare_times #s t0 b tmp1 10ul;
   (* 2^20 - 2^0 *) fmul_s #s c t0 b tmp;
-  (* 2^40 - 2^20 *) fsquare_times #s t0 c tmp 20ul;
+  (* 2^40 - 2^20 *) fsquare_times #s t0 c tmp1 20ul;
   (* 2^40 - 2^0 *) fmul_s #s t0 t0 c tmp;
-  (* 2^50 - 2^10 *) fsquare_times #s t0 t0 tmp 10ul;
+  (* 2^50 - 2^10 *) fsquare_times #s t0 t0 tmp1 10ul;
   (* 2^50 - 2^0 *) fmul_s #s b t0 b tmp;
-  (* 2^100 - 2^50 *) fsquare_times #s t0 b tmp 50ul;
+  (* 2^100 - 2^50 *) fsquare_times #s t0 b tmp1 50ul;
   (* 2^100 - 2^0 *) fmul_s #s c t0 b tmp;
-  (* 2^200 - 2^100 *) fsquare_times #s t0 c tmp 100ul;
+  (* 2^200 - 2^100 *) fsquare_times #s t0 c tmp1 100ul;
   (* 2^200 - 2^0 *) fmul_s #s t0 t0 c tmp;
-  (* 2^250 - 2^50 *) fsquare_times #s t0 t0 tmp 50ul;
+  (* 2^250 - 2^50 *) fsquare_times #s t0 t0 tmp1 50ul;
   let h0' = ST.get () in
   (* 2^250 - 2^0 *) fmul_s #s t0 t0 b tmp;
   let h1' = ST.get () in
   assert (modifies (loc t1 |+| loc tmp) h0' h1');
   assert (modifies (loc t1 |+| loc tmp) h0 h1');
-  (* 2^255 - 2^5 *) fsquare_times #s t0 t0 tmp 5ul;
+  (* 2^255 - 2^5 *) fsquare_times #s t0 t0 tmp1 5ul;
   let h1 = ST.get () in
   assert (fsquare_times_inv h1 t0);
   assert (fsquare_times_inv h1 a);
@@ -201,7 +217,9 @@ val finv_:
   -> Stack unit
     (requires fun h0 ->
       live h0 o /\ live h0 i /\ live h0 tmp /\
-      disjoint o i /\ disjoint i tmp /\ fsquare_times_inv h0 i)
+      disjoint o i /\ disjoint i tmp /\
+      (disjoint o tmp \/ o == tmp) /\
+      fsquare_times_inv h0 i)
     (ensures  fun h0 _ h1 ->
       modifies (loc o |+| loc tmp) h0 h1 /\
       fsquare_times_inv h1 o /\
@@ -233,7 +251,9 @@ val finv:
   -> Stack unit
     (requires fun h0 ->
       live h0 o /\ live h0 i /\ live h0 tmp /\
-      disjoint i tmp /\ disjoint i o /\ fsquare_times_inv h0 i)
+      disjoint i tmp /\ disjoint i o /\
+      (disjoint o tmp \/ o == tmp) /\
+      fsquare_times_inv h0 i)
     (ensures  fun h0 _ h1 ->
       modifies (loc o |+| loc tmp) h0 h1 /\
       fsquare_times_inv h1 o /\

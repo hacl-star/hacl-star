@@ -479,12 +479,14 @@ val cswap2:
   -> p1:felem2
   -> p2:felem2
   -> Stack unit
-    (requires fun h -> live h p1 /\ live h p2 /\ disjoint p1 p2)
+    (requires fun h ->
+      live h p1 /\ live h p2 /\
+      (disjoint p1 p2 \/ p1 == p2))
     (ensures  fun h0 _ h1 ->
       modifies (loc p1 |+| loc p2) h0 h1 /\
       (v bit == 1 ==> as_seq h1 p1 == as_seq h0 p2 /\ as_seq h1 p2 == as_seq h0 p1) /\
       (v bit == 0 ==> as_seq h1 p1 == as_seq h0 p1 /\ as_seq h1 p2 == as_seq h0 p2))
-[@ CInline]      
+[@ CInline]
 let cswap2 bit p1 p2 =
   let h0 = ST.get () in
   let mask = u64 0 -. bit in
