@@ -25,3 +25,9 @@ val check_adx_bmi2: unit -> Stack UInt64.t
       ((UInt64.v ret_val) =!= 0 ==> adx_enabled /\ bmi2_enabled) /\ 
       B.modifies B.loc_none h0 h1)
 
+[@ (CCConv "stdcall") ]
+val check_avx2: unit -> Stack UInt64.t
+    (requires fun h0 -> True)
+    (ensures fun h0 ret_val h1 -> 
+      ((UInt64.v ret_val) =!= 0 ==> avx2_enabled) /\ 
+      B.modifies B.loc_none h0 h1)

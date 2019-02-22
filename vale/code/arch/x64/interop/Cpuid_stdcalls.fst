@@ -222,3 +222,70 @@ let lowstar_adx_normal_t //: normal lowstar_adx_t
 let check_adx_bmi2 () =  
   let x, _ = lowstar_adx_normal_t () in //This is a call to the interop wrapper
   x
+
+(* Need to rearrange the order of arguments *)
+[@__reduce__]
+let avx_pre : VSig.vale_pre 8 dom =
+  fun (c:V.va_code)
+    (va_s0:V.va_state)
+    (sb:IX64.stack_buffer 8) ->
+      VC.va_req_check_avx2_stdcall c va_s0 IA.win (as_vale_buffer sb)
+
+[@__reduce__]
+let avx_post : VSig.vale_post 8 dom =
+  fun (c:V.va_code)
+    (va_s0:V.va_state)
+    (sb:IX64.stack_buffer 8)
+    (va_s1:V.va_state)
+    (f:V.va_fuel) ->
+      VC.va_ens_check_avx2_stdcall c va_s0 IA.win (as_vale_buffer sb) va_s1 f
+
+(* The vale lemma doesn't quite suffice to prove the modifies clause
+   expected of the interop layer *)
+[@__reduce__] unfold
+let avx_lemma'
+    (code:V.va_code)
+    (_win:bool)
+    (va_s0:V.va_state)
+    (sb:IX64.stack_buffer 8)
+ : Ghost (V.va_state & V.va_fuel)
+     (requires
+       avx_pre code va_s0 sb)
+     (ensures (fun (va_s1, f) ->
+       V.eval_code code va_s0 f va_s1 /\
+       VSig.vale_calling_conventions_stdcall va_s0 va_s1 /\
+       avx_post code va_s0 sb va_s1 f))
+ = VC.va_lemma_check_avx2_stdcall code va_s0 IA.win (as_vale_buffer sb)
+
+(* Prove that vm_lemma' has the required type *)
+let avx_lemma = as_t #(VSig.vale_sig_stdcall avx_pre avx_post) avx_lemma'
+let code_avx = VC.va_code_check_avx2_stdcall IA.win
+
+(* Here's the type expected for the check_avx wrapper *)
+[@__reduce__]
+let lowstar_avx_t =
+  IX64.as_lowstar_sig_t_weak_stdcall
+    Interop.down_mem
+    code_avx
+    8
+    dom
+    []
+    _
+    _
+    (W.mk_prediction code_avx dom [] (avx_lemma code_avx IA.win))
+
+(* And here's the check_avx wrapper itself *)
+let lowstar_avx : lowstar_avx_t  =
+  IX64.wrap_weak_stdcall
+    Interop.down_mem
+    code_avx
+    8
+    dom
+    (W.mk_prediction code_avx dom [] (avx_lemma code_avx IA.win))
+
+let lowstar_avx_normal_t //: normal lowstar_avx_t
+  = as_normal_t #lowstar_avx_t lowstar_avx
+
+let check_avx2 () =  
+  let x, _ = lowstar_avx_normal_t () in //This is a call to the interop wrapper
+  x
