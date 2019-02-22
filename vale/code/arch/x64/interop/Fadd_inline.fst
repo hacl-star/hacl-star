@@ -95,7 +95,7 @@ let add1_post : VSig.vale_post 16 dom =
     (f:V.va_fuel) ->
       FU.va_ens_fast_add1 c va_s0 (as_vale_buffer sb) (as_vale_buffer out) (as_vale_buffer f1) (UInt64.v f2) va_s1 f
 
-#set-options "--z3rlimit 40"
+#set-options "--z3rlimit 50"
 
 let regs_modified: MS.reg -> bool = fun (r:MS.reg) ->
   let open MS in
@@ -154,6 +154,7 @@ let arg_reg : IX64.arg_reg_relation 3 = IX64.Rel of_reg of_arg
 (* Here's the type expected for the add1 wrapper *)
 [@__reduce__]
 let lowstar_add1_t =
+  assert_norm (List.length dom + List.length ([]<:list arg) <= 3);
   IX64.as_lowstar_sig_t_weak
     3
     arg_reg
@@ -171,6 +172,7 @@ let lowstar_add1_t =
 
 (* And here's the add1 wrapper itself *)
 let lowstar_add1 : lowstar_add1_t  =
+  assert_norm (List.length dom + List.length ([]<:list arg) <= 3);
   IX64.wrap_weak
     3
     arg_reg

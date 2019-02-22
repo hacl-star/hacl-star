@@ -137,10 +137,12 @@ let aes_encrypt_LE_def (alg:algorithm) (key:seq nat32) (input_LE:quad32) : Pure 
 //let aes_encrypt_LE = make_opaque aes_encrypt_LE_def
 unfold let aes_encrypt_LE = aes_encrypt_LE_def
 
+#push-options "--z3rlimit 20"
 let key_to_round_keys (alg:algorithm) (key:aes_key alg)
   : (round_keys:seq nat8 {length round_keys == 16 * (nr alg + 1)}) =
   let key_LE = seq_nat8_to_seq_nat32_LE key in
   le_seq_quad32_to_bytes (key_to_round_keys_LE alg key_LE)
+#pop-options
 
 let aes_encrypt (alg:algorithm) (key:aes_key alg) (input:seq16 nat8) : seq16 nat8 =
   let key_LE = seq_nat8_to_seq_nat32_LE key in

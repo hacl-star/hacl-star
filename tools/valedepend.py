@@ -57,10 +57,7 @@ def file_drop_extension(file):
 # Given source file name, return file name in object directory
 def to_obj_dir(file):
     file = norm(file)
-    if file.startswith('./obj'):
-        return file
-    else:
-        return norm(os.path.join('./obj', os.path.basename(file)))
+    return norm(os.path.join('obj', os.path.basename(file)))
 
 def depends(target, source):
     target = norm(target)
@@ -105,9 +102,8 @@ def vale_dependency_scan(vaf):
     vaf_dump_deps[vaf] = set()
     vaf_vaf_deps[vaf] = set()
     depends(fst, vaf)
-    depends(fsti, vaf)
     depends(fst, types_vaf)
-    depends(fsti, types_vaf)
+    depends(fsti, fst)
     for (attrs, inc) in vaf_includes:
         if vale_fstar_re.search(attrs):
             vaf_dump_deps[vaf].add(make_dump(find_fsti(inc)))
@@ -115,7 +111,6 @@ def vale_dependency_scan(vaf):
             f = norm(os.path.join('code' if vale_from_base_re.search(attrs) else dirname, inc))
             ffsti = to_obj_dir(file_drop_extension(f) + '.fsti')
             depends(fst, ffsti)
-            depends(fsti, ffsti)
             vaf_vaf_deps[vaf].add(f)
 
 def vale_types_command(source_vaf):

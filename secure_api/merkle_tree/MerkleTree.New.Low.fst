@@ -2050,7 +2050,7 @@ private val mt_get_path_:
              (High.mt_get_path_ (U32.v lv) (RV.as_seq h0 hs) (RV.as_seq h0 rhs)
                (U32.v i) (U32.v j) (U32.v k) (lift_path h0 mtr p) actd))))
    (decreases (32 - U32.v lv))
-#reset-options "--z3rlimit 300 --max_fuel 1"
+#reset-options "--z3rlimit 300 --max_fuel 1 --initial_fuel 1 --max_ifuel 2 --initial_ifuel 2"
 private let rec mt_get_path_ lv mtr hs rhs i j k p actd =
   let hh0 = HST.get () in
   mt_safe_elts_spec hh0 lv hs i j;

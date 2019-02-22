@@ -236,11 +236,11 @@ let __test : n_dep_arrow [TD_Base TUInt8] (fun (x:UInt8.t) -> y:UInt8.t{x == y})
 
 [@__reduce__]
 let disjoint_not_eq 
-  (#src1 #src2:Type0)
-  (#rel1 #rrel1:MB.srel src1) 
-  (#rel2 #rrel2:MB.srel src2) 
-  (x:MB.mbuffer src1 rel1 rrel1) 
-  (y:MB.mbuffer src2 rel2 rrel2) =
+  (#src1 #src2:base_typ)
+  (#rel1 #rrel1:MB.srel (base_typ_as_type src1)) 
+  (#rel2 #rrel2:MB.srel (base_typ_as_type src2)) 
+  (x:MB.mbuffer (base_typ_as_type src1) rel1 rrel1) 
+  (y:MB.mbuffer (base_typ_as_type src2) rel2 rrel2) =
     B.loc_disjoint (B.loc_buffer x) (B.loc_buffer y) /\
     ~ (src1 == src2 /\ rel1 == rel2 /\ rrel1 == rrel2 /\ x == y)
 

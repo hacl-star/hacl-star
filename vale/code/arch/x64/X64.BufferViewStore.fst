@@ -39,7 +39,7 @@ let get128_aux (ptr:int) (heap:heap) (v:quad32) (k:nat{k < 16}) : Lemma
   Opaque_s.reveal_opaque get_heap_val128_def;
   Opaque_s.reveal_opaque get_heap_val32_def;
   Opaque_s.reveal_opaque put128_def;
-  Opaque_s.reveal_opaque le_quad32_to_bytes_def;
+  FStar.Pervasives.reveal_opaque (`%le_quad32_to_bytes) le_quad32_to_bytes;
   four_to_nat_8_injective ()
 
 #set-options "--z3refresh --max_fuel 1 --initial_fuel 1 --z3rlimit 200"

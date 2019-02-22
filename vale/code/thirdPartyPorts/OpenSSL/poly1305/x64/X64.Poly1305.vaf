@@ -365,12 +365,16 @@ procedure{:quick} poly1305_blocks(
             reveal_poly1305_heap_blocks(modp(h_in), padbit * (nn * nn), r, buffer64_as_seq(mem, inp_b), word_index - 2);
             reveal modp';
             lemma_poly_demod(p, hp, hq - hp, r);
+            lemma_poly1305_heap_blocks_unroll(modp(h_in), padbit * (nn * nn), r, buffer64_as_seq(mem, inp_b), word_index);
+            lemma_poly1305_heap_blocks_unroll(modp(h_in), padbit * (nn * nn), r, buffer64_as_seq(mem, inp_b), word_index - 2);
         }
     }
     Store64_buffer(ctx, h0, 0, Public, ctx_b, 0);
     Store64_buffer(ctx, h1, 8, Public, ctx_b, 1);
     Store64_buffer(ctx, h2, 16, Public, ctx_b, 2);
 }
+
+#reset-options "--z3rlimit 5000"
 
 // last 1..15 bytes, in case len is not a multiple of 16
 procedure{:quick} poly1305_last_block()

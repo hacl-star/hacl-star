@@ -9,7 +9,7 @@
       [
         "@MaxIFuel_assumption", "@query",
         "constructor_distinct_Interop.Types.TUInt128",
-        "constructor_distinct_Interop.Types.TUInt32",
+        "constructor_distinct_Interop.Types.TUInt32", "eq2-interp",
         "equality_tok_Interop.Types.TUInt128@tok",
         "equality_tok_Interop.Types.TUInt32@tok",
         "equation_Interop.Base.ibuf_t",
@@ -19,24 +19,30 @@
         "equation_Interop.Types.view_n",
         "equation_LowStar.ImmutableBuffer.ibuffer",
         "equation_LowStar.ImmutableBuffer.immutable_preorder",
-        "equation_Prims.eqtype", "equation_Types_s.quad32",
-        "equation_Views.down_view32", "equation_Views.up_view128",
-        "function_token_typing_FStar.UInt8.t",
+        "equation_Prims.eqtype", "equation_Prims.l_and",
+        "equation_Prims.squash", "equation_SHA_helpers.size_block_w_256",
+        "equation_Types_s.quad32", "equation_Views.down_view32",
+        "equation_Views.up_view128", "function_token_typing_FStar.UInt8.t",
+        "l_and-interp",
         "lemma_LowStar.BufferView.Down.as_buffer_mk_buffer_view",
         "lemma_LowStar.BufferView.Down.get_view_mk_buffer_view",
+        "primitive_Prims.op_Modulus", "primitive_Prims.op_Multiply",
+        "proj_equation_FStar.Pervasives.Mkdtuple4__1",
         "proj_equation_LowStar.BufferView.Down.View_n",
         "proj_equation_LowStar.BufferView.Up.View_n",
+        "projection_inverse_BoxInt_proj_0",
         "projection_inverse_LowStar.BufferView.Down.View_n",
         "projection_inverse_LowStar.BufferView.Up.View_n",
-        "refinement_interpretation_Interop.Base_Tm_refine_7ace2ae4f6744471f3da5dd81fe45443",
-        "refinement_interpretation_Prims_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
+        "refinement_interpretation_Tm_refine_3582eef450aaaffb0c83a6c763b74d55",
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
+        "refinement_interpretation_Tm_refine_8d65e998a07dd53ec478e27017d9dba5",
         "typing_Interop.Types.base_typ_as_type",
         "typing_Interop.Types.down_view",
         "typing_LowStar.ImmutableBuffer.immutable_preorder",
         "typing_tok_Interop.Types.TUInt32@tok"
       ],
       0,
-      "776084a3438c077c1563b64c90ef45eb"
+      "d3c3a8f52738aa12f76b7d9290b35e55"
     ],
     [
       "Simplify_Sha.lemma_seq_nat8_le_seq_quad32_to_bytes_uint32",
@@ -60,15 +66,19 @@
         "function_token_typing_FStar.UInt8.t",
         "lemma_LowStar.BufferView.Down.as_buffer_mk_buffer_view",
         "lemma_LowStar.BufferView.Down.get_view_mk_buffer_view",
+        "primitive_Prims.op_Modulus", "primitive_Prims.op_Multiply",
         "proj_equation_LowStar.BufferView.Down.View_n",
         "proj_equation_LowStar.BufferView.Up.View_n",
+        "projection_inverse_BoxInt_proj_0",
         "projection_inverse_LowStar.BufferView.Down.View_n",
         "projection_inverse_LowStar.BufferView.Up.View_n",
-        "refinement_interpretation_Interop.Base_Tm_refine_a157f0f393839b77e0473f5890846b2a",
-        "typing_LowStar.Buffer.trivial_preorder", "typing_Views.down_view8"
+        "refinement_interpretation_Tm_refine_2388c0ec6f8142a056d41e3aa999c073",
+        "typing_Interop.Types.down_view",
+        "typing_LowStar.Buffer.trivial_preorder",
+        "typing_tok_Interop.Types.TUInt8@tok"
       ],
       0,
-      "d1f6d89166c7b581346601a1a39ed104"
+      "c69c6ae09c6e5d0d2d73d8d5f0033a3a"
     ],
     [
       "Simplify_Sha.simplify_le_bytes_to_hash_uint32",
@@ -78,7 +88,7 @@
       [
         "@MaxIFuel_assumption", "@query",
         "constructor_distinct_Interop.Types.TUInt128",
-        "constructor_distinct_Interop.Types.TUInt32",
+        "constructor_distinct_Interop.Types.TUInt32", "eq2-interp",
         "equality_tok_Interop.Types.TUInt128@tok",
         "equality_tok_Interop.Types.TUInt32@tok",
         "equation_Interop.Base.buf_t",
@@ -87,23 +97,29 @@
         "equation_Interop.Types.get_downview",
         "equation_Interop.Types.view_n", "equation_LowStar.Buffer.buffer",
         "equation_LowStar.Buffer.trivial_preorder", "equation_Prims.eqtype",
+        "equation_Prims.l_and", "equation_Prims.squash",
         "equation_Types_s.quad32", "equation_Views.down_view32",
         "equation_Views.up_view128", "function_token_typing_FStar.UInt8.t",
+        "l_and-interp",
         "lemma_LowStar.BufferView.Down.as_buffer_mk_buffer_view",
         "lemma_LowStar.BufferView.Down.get_view_mk_buffer_view",
+        "primitive_Prims.op_Modulus", "primitive_Prims.op_Multiply",
+        "proj_equation_FStar.Pervasives.Mkdtuple4__1",
         "proj_equation_LowStar.BufferView.Down.View_n",
         "proj_equation_LowStar.BufferView.Up.View_n",
+        "projection_inverse_BoxInt_proj_0",
         "projection_inverse_LowStar.BufferView.Down.View_n",
         "projection_inverse_LowStar.BufferView.Up.View_n",
-        "refinement_interpretation_Interop.Base_Tm_refine_a157f0f393839b77e0473f5890846b2a",
-        "refinement_interpretation_Prims_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
+        "refinement_interpretation_Tm_refine_2388c0ec6f8142a056d41e3aa999c073",
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
+        "refinement_interpretation_Tm_refine_8d65e998a07dd53ec478e27017d9dba5",
         "typing_Interop.Types.base_typ_as_type",
         "typing_Interop.Types.down_view",
         "typing_LowStar.Buffer.trivial_preorder",
         "typing_tok_Interop.Types.TUInt32@tok"
       ],
       0,
-      "e0d6b3bf753a1e460a3cef704b2e0a6f"
+      "b1ac28009196b0cf0df74e373e263245"
     ]
   ]
 ]

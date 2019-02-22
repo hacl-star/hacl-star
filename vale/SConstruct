@@ -278,7 +278,7 @@ def fstar_default_args(relative=True):
 fstar_record_hints = ' --record_hints' if record_hints else ''
 
 vale_scons_args = '-disableVerify -omitUnverified' if is_single_vaf else ''
-vale_includes = f'-include {File("code/lib/util/operator.vaf")}'
+vale_includes = f'-include {File("code/lib/util/Operator.vaf")}'
 
 if min_test:
   verify_paths = [
@@ -349,7 +349,7 @@ manual_dependencies = {
 # Table of special-case sources which requires non-default arguments
 #
 verify_options = [
-  ('code/lib/util/operator.vaf', BuildOptions(fstar_default_args(), vale_includes = '')),
+  ('code/lib/util/Operator.vaf', BuildOptions(fstar_default_args(), vale_includes = '')),
 
   # Special treatment for sensitive modules
 
@@ -363,6 +363,7 @@ verify_options = [
 
   #'src/thirdPartyPorts/OpenSSL/poly1305/x64/X64.Poly1305.vaf': None,
   #('code/thirdPartyPorts/OpenSSL/sha/X64.SHA.vaf', None),
+  ('code/arch/x64/interop/*.fst*', BuildOptions(fstar_default_args_nosmtencoding().replace('--use_extracted_interfaces true', '').replace('--z3cliopt smt.QI.EAGER_THRESHOLD=100', '').replace('--z3cliopt smt.arith.nl=false', ''))),
 
   ('code/*/*.fst', BuildOptions(fstar_default_args())),
   ('code/*/*.fsti', BuildOptions(fstar_default_args())),
@@ -509,7 +510,7 @@ def to_obj_dir(file):
     return File(f'obj/{file}')
 
 def to_hint_file(file):
-  return File(f'hints/{file.name}.hints')
+  return File(f'../hints/{file.name}.hints')
 
 def ml_out_file(sourcefile, suffix):
   module_name = file_module_name(sourcefile).replace('.', '_')
@@ -1174,11 +1175,6 @@ if not is_help:
     source = f.filename
     target = f.obj_name()
     shutil.copy(source, target)
-    checked_source = f'{source}.checked'
-    if os.path.isfile(checked_source):
-      shutil.copy(str(checked_source), f'{target}.checked')
-    else:
-      print(f'External file {source}.checked does not exist -- please make F*, KreMLin, and hacl-star/specs first')
 
   if not dump_args:
     print('Processing source files')

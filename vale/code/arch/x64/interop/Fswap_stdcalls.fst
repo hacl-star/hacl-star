@@ -109,6 +109,7 @@ let code_cswap = FU.va_code_cswap2_stdcall IA.win
 (* Here's the type expected for the cswap wrapper *)
 [@__reduce__]
 let lowstar_cswap_t =
+  assert_norm (List.length cswap_dom + List.length ([]<:list arg) <= 4);
   IX64.as_lowstar_sig_t_weak_stdcall
     Interop.down_mem
     code_cswap
@@ -121,6 +122,7 @@ let lowstar_cswap_t =
 
 (* And here's the cswap wrapper itself *)
 let lowstar_cswap : lowstar_cswap_t  =
+  assert_norm (List.length cswap_dom + List.length ([]<:list arg) <= 4);
   IX64.wrap_weak_stdcall
     Interop.down_mem
     code_cswap

@@ -19,6 +19,7 @@ module LSig = Vale.AsLowStar.LowStarSig
 module SL = X64.Vale.StateLemmas
 module VL = X64.Vale.Lemmas
 module ST = FStar.HyperStack.ST
+open FStar.Mul
 
 let lemma_create_initial_vale_state_core
     (#max_arity:nat)
@@ -351,7 +352,8 @@ let core_create_lemma
     Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt8 ME.TUInt64 stack;
     let s_args = arg_of_sb stack :: args in
     Vale.AsLowStar.MemoryHelpers.buffer_addr_reveal _ _ stack (arg_of_sb stack :: args) h0;
-    DV.length_eq (get_downview stack)
+    DV.length_eq (get_downview stack);
+    Vale.AsLowStar.MemoryHelpers.as_vale_buffer_len stack
 
 let rec frame_mem_correspondence_back
        (args:list arg)

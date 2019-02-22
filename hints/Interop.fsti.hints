@@ -15,11 +15,11 @@
         "fuel_guarded_inversion_Interop.Types.b8_", "int_inversion",
         "lemma_Interop.addrs_set_lemma",
         "proj_equation_Interop.Base.Mem_ptrs",
-        "refinement_interpretation_Interop.Types_Tm_refine_8d1554111de9e242dacbc8e0b0501a46",
-        "refinement_interpretation_Interop_Tm_refine_7a9fc8dc5d6ca84cc7433ab95a7e2d67"
+        "refinement_interpretation_Tm_refine_7a9fc8dc5d6ca84cc7433ab95a7e2d67",
+        "refinement_interpretation_Tm_refine_8d1554111de9e242dacbc8e0b0501a46"
       ],
       0,
-      "83674211891fc7bfa8cd6aa3aa244af0"
+      "1fb8b17243938f8fb68c92cff9ec9c0d"
     ],
     [
       "Interop.same_unspecified_down",
@@ -28,10 +28,10 @@
       0,
       [
         "@MaxIFuel_assumption", "@query", "equation_Interop.Types.b8",
-        "refinement_interpretation_Interop_Tm_refine_8a2d3f40fe27d14861364f1052e4aa2e"
+        "refinement_interpretation_Tm_refine_124d4ff0c96fc363a6f081339e724638"
       ],
       0,
-      "f2aa0557f385dd471ccd66ae3438cc27"
+      "3cbcc8df9b04b9f352d28c0cab07f2c6"
     ],
     [
       "Interop.get_seq_heap",
@@ -42,8 +42,8 @@
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented",
         "@fuel_irrelevance_Prims.pow2.fuel_instrumented", "@query",
-        "FStar.Seq.Base_interpretation_Tm_arrow_015e5d64a12964940b96ac2bc090f517",
-        "Interop_interpretation_Tm_arrow_ba76111486eeea2951eee2dbdeabdee2",
+        "FStar.Seq.Base_interpretation_Tm_arrow_320365ceb6468c29e8eba757f3baa574",
+        "Interop_interpretation_Tm_arrow_2a41ca20bb692400b4f9a5a0dba2cff8",
         "Prims_pretyping_ae567c2fb75be05905677af440075565", "b2t_def",
         "equation_FStar.UInt.fits", "equation_FStar.UInt.max_int",
         "equation_FStar.UInt.min_int", "equation_FStar.UInt.size",
@@ -54,15 +54,16 @@
         "lemma_FStar.Seq.Base.lemma_init_len",
         "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_AmpAmp",
         "primitive_Prims.op_LessThanOrEqual",
+        "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_FStar.Seq.Base_Tm_refine_5514fbe9e08dfda40f950a7b9f1b2b98",
-        "refinement_interpretation_Interop.Types_Tm_refine_8d1554111de9e242dacbc8e0b0501a46",
-        "refinement_interpretation_Interop_Tm_refine_50ce7e805ca9f0637ebceb4f9ae259eb",
-        "refinement_interpretation_Prims_Tm_refine_a4038d5aed1633b5ecbb4e499b1c66ad"
+        "refinement_interpretation_Tm_refine_50ce7e805ca9f0637ebceb4f9ae259eb",
+        "refinement_interpretation_Tm_refine_5514fbe9e08dfda40f950a7b9f1b2b98",
+        "refinement_interpretation_Tm_refine_8d1554111de9e242dacbc8e0b0501a46",
+        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-      "9aa43b26bbc388e9bb31f349d583b33c"
+      "eda506f7905077bb58d43d98cb7bc589"
     ],
     [
       "Interop.up_mem",
@@ -71,7 +72,7 @@
       0,
       [ "@query" ],
       0,
-      "1abff423724480a9eca7423fe4d8412e"
+      "722fdcb7387574c94ac215a366138f56"
     ],
     [
       "Interop.down_up_identity",
@@ -80,16 +81,16 @@
       0,
       [
         "@MaxIFuel_assumption", "@query",
-        "Interop.Base_interpretation_Tm_arrow_f91df5ad91ac20fca9c6f074d17d8e6f",
+        "Interop.Base_interpretation_Tm_arrow_c0a55f2681340fca75becc53b8e74255",
         "equation_Interop.Base.correct_down",
         "equation_Interop.Base.down_mem_t",
         "equation_X64.Bytes_Semantics_s.heap",
         "fuel_guarded_inversion_Interop.Base.mem",
-        "refinement_interpretation_Interop.Base_Tm_refine_c1d896d5d8078d5b0d0be764c05436bb",
+        "refinement_interpretation_Tm_refine_c1d896d5d8078d5b0d0be764c05436bb",
         "typing_Interop.down_mem"
       ],
       0,
-      "4c39f1b94f5d3380634f11f856252f9c"
+      "e3cdfd756aa8c1437b2e21bb9b294df1"
     ],
     [
       "Interop.up_down_identity",
@@ -99,10 +100,10 @@
       [
         "@MaxIFuel_assumption", "@query", "equation_Words_s.nat8",
         "equation_X64.Bytes_Semantics_s.heap",
-        "refinement_interpretation_Interop_Tm_refine_279c6610f9d167570ea5dfb53c0ad244"
+        "refinement_interpretation_Tm_refine_279c6610f9d167570ea5dfb53c0ad244"
       ],
       0,
-      "c422b812b0c4c46818125e097e9e44d4"
+      "dc39ead0e695de926a599b7e30a22dad"
     ],
     [
       "Interop.update_buffer_up_mem",
@@ -126,13 +127,13 @@
         "function_token_typing_Words_s.nat8",
         "lemma_FStar.Set.lemma_equal_elim",
         "lemma_LowStar.BufferView.Down.as_buffer_mk_buffer_view",
-        "refinement_interpretation_FStar.Seq.Properties_Tm_refine_a0cd7d06c5da6444b6b51b319febde8e",
-        "refinement_interpretation_Interop.Base_Tm_refine_c1d896d5d8078d5b0d0be764c05436bb",
-        "refinement_interpretation_Interop.Base_Tm_refine_e260c1e9a8ee91e7c78a3c0e0db2f800",
-        "refinement_interpretation_Interop.Types_Tm_refine_8d1554111de9e242dacbc8e0b0501a46",
-        "refinement_interpretation_Interop_Tm_refine_2322af032f121bab690c3ed48fc33544",
-        "refinement_interpretation_Interop_Tm_refine_a05284f4bf4796a91f3cca969c9114af",
-        "refinement_interpretation_Prims_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
+        "refinement_interpretation_Tm_refine_2322af032f121bab690c3ed48fc33544",
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
+        "refinement_interpretation_Tm_refine_8d1554111de9e242dacbc8e0b0501a46",
+        "refinement_interpretation_Tm_refine_a05284f4bf4796a91f3cca969c9114af",
+        "refinement_interpretation_Tm_refine_a0cd7d06c5da6444b6b51b319febde8e",
+        "refinement_interpretation_Tm_refine_b4c911b661c6d9fd533ca34851387d9e",
+        "refinement_interpretation_Tm_refine_c1d896d5d8078d5b0d0be764c05436bb",
         "typing_FStar.Map.domain",
         "typing_Interop.Base.__proj__Mem__item__hs",
         "typing_Interop.Types.__proj__Buffer__item__bsrc",
@@ -143,7 +144,7 @@
         "typing_Interop.Types.down_view"
       ],
       0,
-      "f604092715d02d36c487a1b308425237"
+      "da10a148878909245b5ccbb3eaad646e"
     ]
   ]
 ]

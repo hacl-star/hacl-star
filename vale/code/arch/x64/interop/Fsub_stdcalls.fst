@@ -68,7 +68,7 @@ let fsub_post : VSig.vale_post 16 dom =
     (f:V.va_fuel) ->
       FH.va_ens_fsub_stdcall c va_s0 IA.win (as_vale_buffer sb) (as_vale_buffer out) (as_vale_buffer f1) (as_vale_buffer f2) va_s1 f
 
-#set-options "--z3rlimit 50"
+#set-options "--z3rlimit 100"
 
 [@__reduce__] unfold
 let fsub_lemma'
@@ -110,6 +110,7 @@ let code_fsub = FH.va_code_fsub_stdcall IA.win
 (* Here's the type expected for the fsub wrapper *)
 [@__reduce__]
 let lowstar_fsub_t =
+  assert_norm (List.length dom + List.length ([]<:list arg) <= 4);
   IX64.as_lowstar_sig_t_weak_stdcall
     Interop.down_mem
     code_fsub
@@ -122,6 +123,7 @@ let lowstar_fsub_t =
 
 (* And here's the fsub wrapper itself *)
 let lowstar_fsub : lowstar_fsub_t  =
+  assert_norm (List.length dom + List.length ([]<:list arg) <= 4);
   IX64.wrap_weak_stdcall
     Interop.down_mem
     code_fsub

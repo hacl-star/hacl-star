@@ -68,7 +68,7 @@ let fsqr_post : VSig.vale_post 56 fsqr_dom =
     (f:V.va_fuel) ->
       FW.va_ens_fsqr_stdcall c va_s0 IA.win (as_vale_buffer sb) (as_vale_buffer tmp) (as_vale_buffer f1) (as_vale_buffer out) va_s1 f
 
-#set-options "--z3rlimit 100"
+#set-options "--z3rlimit 200"
 
 [@__reduce__] unfold
 let fsqr_lemma'
@@ -111,6 +111,7 @@ let code_fsqr = FW.va_code_fsqr_stdcall IA.win
 (* Here's the type expected for the fsqr wrapper *)
 [@__reduce__]
 let lowstar_fsqr_t =
+  assert_norm (List.length fsqr_dom + List.length ([]<:list arg) <= 4);
   IX64.as_lowstar_sig_t_weak_stdcall
     Interop.down_mem
     code_fsqr
@@ -123,6 +124,7 @@ let lowstar_fsqr_t =
 
 (* And here's the fsqr wrapper itself *)
 let lowstar_fsqr : lowstar_fsqr_t  =
+  assert_norm (List.length fsqr_dom + List.length ([]<:list arg) <= 4);
   IX64.wrap_weak_stdcall
     Interop.down_mem
     code_fsqr
@@ -168,7 +170,7 @@ let fsqr2_post : VSig.vale_post 56 fsqr_dom =
     (f:V.va_fuel) ->
       FW.va_ens_fsqr2_stdcall c va_s0 IA.win (as_vale_buffer sb) (as_vale_buffer tmp) (as_vale_buffer f1) (as_vale_buffer out) va_s1 f
 
-#set-options "--z3rlimit 100"
+#set-options "--z3rlimit 200"
 
 [@__reduce__] unfold
 let fsqr2_lemma'
@@ -211,6 +213,7 @@ let code_fsqr2 = FW.va_code_fsqr2_stdcall IA.win
 (* Here's the type expected for the fsqr2 wrapper *)
 [@__reduce__]
 let lowstar_fsqr2_t =
+  assert_norm (List.length fsqr_dom + List.length ([]<:list arg) <= 4);
   IX64.as_lowstar_sig_t_weak_stdcall
     Interop.down_mem
     code_fsqr2
@@ -223,6 +226,7 @@ let lowstar_fsqr2_t =
 
 (* And here's the fsqr2 wrapper itself *)
 let lowstar_fsqr2 : lowstar_fsqr2_t  =
+  assert_norm (List.length fsqr_dom + List.length ([]<:list arg) <= 4);
   IX64.wrap_weak_stdcall
     Interop.down_mem
     code_fsqr2

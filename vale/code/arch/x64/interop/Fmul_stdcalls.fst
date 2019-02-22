@@ -70,7 +70,7 @@ let fmul_post : VSig.vale_post 48 fmul_dom =
     (f:V.va_fuel) ->
       FW.va_ens_fmul_stdcall c va_s0 IA.win (as_vale_buffer sb) (as_vale_buffer tmp) (as_vale_buffer f1) (as_vale_buffer out) (as_vale_buffer f2) va_s1 f
 
-#set-options "--z3rlimit 100"
+#set-options "--z3rlimit 200"
 
 [@__reduce__] unfold
 let fmul_lemma'
@@ -117,6 +117,7 @@ let code_fmul = FW.va_code_fmul_stdcall IA.win
 (* Here's the type expected for the fmul wrapper *)
 [@__reduce__]
 let lowstar_fmul_t =
+  assert_norm (List.length fmul_dom + List.length ([]<:list arg) <= 4);
   IX64.as_lowstar_sig_t_weak_stdcall
     Interop.down_mem
     code_fmul
@@ -129,6 +130,7 @@ let lowstar_fmul_t =
 
 (* And here's the fmul wrapper itself *)
 let lowstar_fmul : lowstar_fmul_t  =
+  assert_norm (List.length fmul_dom + List.length ([]<:list arg) <= 4);
   IX64.wrap_weak_stdcall
     Interop.down_mem
     code_fmul
@@ -146,11 +148,14 @@ let fmul tmp f1 out f2 =
   DV.length_eq (get_downview out);
   DV.length_eq (get_downview f1);
   DV.length_eq (get_downview f2);
+  Vale.AsLowStar.MemoryHelpers.as_vale_buffer_len #TUInt64 #TUInt64 tmp;
+  Vale.AsLowStar.MemoryHelpers.as_vale_buffer_len #TUInt64 #TUInt64 out;
   let x, _ = lowstar_fmul_normal_t tmp f1 out f2 () in
   ()
 
 #pop-options
 
+let stop = ()
 
 (* Need to rearrange the order of arguments *)
 [@__reduce__]
@@ -178,7 +183,7 @@ let fmul2_post : VSig.vale_post 48 fmul_dom =
     (f:V.va_fuel) ->
       FW.va_ens_fmul2_stdcall c va_s0 IA.win (as_vale_buffer sb) (as_vale_buffer tmp) (as_vale_buffer f1) (as_vale_buffer out) (as_vale_buffer f2) va_s1 f
 
-#set-options "--z3rlimit 100"
+#set-options "--z3rlimit 200"
 
 [@__reduce__] unfold
 let fmul2_lemma'
@@ -225,6 +230,7 @@ let code_fmul2 = FW.va_code_fmul2_stdcall IA.win
 (* Here's the type expected for the fmul wrapper *)
 [@__reduce__]
 let lowstar_fmul2_t =
+  assert_norm (List.length fmul_dom + List.length ([]<:list arg) <= 4);
   IX64.as_lowstar_sig_t_weak_stdcall
     Interop.down_mem
     code_fmul2
@@ -237,6 +243,7 @@ let lowstar_fmul2_t =
 
 (* And here's the fmul2 wrapper itself *)
 let lowstar_fmul2 : lowstar_fmul2_t  =
+  assert_norm (List.length fmul_dom + List.length ([]<:list arg) <= 4); 
   IX64.wrap_weak_stdcall
     Interop.down_mem
     code_fmul2
@@ -328,6 +335,7 @@ let code_fmul1 = FH.va_code_fmul1_stdcall IA.win
 (* Here's the type expected for the fmul1 wrapper *)
 [@__reduce__]
 let lowstar_fmul1_t =
+  assert_norm (List.length fmul1_dom + List.length ([]<:list arg) <= 4);
   IX64.as_lowstar_sig_t_weak_stdcall
     Interop.down_mem
     code_fmul1
@@ -340,6 +348,7 @@ let lowstar_fmul1_t =
 
 (* And here's the fmul1 wrapper itself *)
 let lowstar_fmul1 : lowstar_fmul1_t  =
+  assert_norm (List.length fmul1_dom + List.length ([]<:list arg) <= 4);
   IX64.wrap_weak_stdcall
     Interop.down_mem
     code_fmul1

@@ -63,10 +63,3 @@ let parse_cmdline :
                                                        label_count printer)
                            (Prims.parse_int "0") l in
     X64_Vale_Decls.print_footer printer
-
-let parse_cmdline_inline :
-  (string *                                                          (* name of the procedure *)
-   (X64_Vale_Decls.ins, X64_vale_Decls.ocmp) X64_Machine_s.precode * (* Assembly code *)
-   Interop_Base.td list *                                            (* List of args with their types *)
-   
-  ) list -> unit

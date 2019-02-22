@@ -7,20 +7,20 @@
       1,
       0,
       [
-        "@MaxIFuel_assumption", "@query", "bool_inversion",
-        "equation_Prims.nat", "equation_SHA_helpers.counter",
-        "equation_SHA_helpers.hash256", "equation_Words_s.nat32",
+        "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
+        "equation_SHA_helpers.counter", "equation_SHA_helpers.hash256",
+        "equation_SHA_helpers.size_block_w_256", "equation_Words_s.nat32",
         "equation_X64.Machine_s.xmm",
         "fuel_guarded_inversion_X64.Vale.State.state", "int_inversion",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Prims_Tm_refine_a4038d5aed1633b5ecbb4e499b1c66ad",
-        "refinement_interpretation_SHA_helpers_Tm_refine_76eecaa5eb922850bd62c67e1b97491e",
-        "refinement_interpretation_X64.Machine_s_Tm_refine_f0a4eeefab9c63f31c350a802a4d45dd",
-        "refinement_interpretation_X64.Vale.InsSha_Tm_refine_d87ea19ed2efd5ea1d518c459e7dcdd3",
-        "typing_SHA_helpers.k", "typing_X64.CPU_Features_s.sha_enabled"
+        "refinement_interpretation_Tm_refine_76eecaa5eb922850bd62c67e1b97491e",
+        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "refinement_interpretation_Tm_refine_d87ea19ed2efd5ea1d518c459e7dcdd3",
+        "refinement_interpretation_Tm_refine_f0a4eeefab9c63f31c350a802a4d45dd",
+        "typing_SHA_helpers.k"
       ],
       0,
-      "b2ac3ce00a43ed44253f18a98b3df21b"
+      "7873d15cc8ad8a3b1e071b04356eb379"
     ],
     [
       "X64.Vale.InsSha.va_wp_SHA256_rnds2",
@@ -29,13 +29,15 @@
       0,
       [
         "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
-        "equation_SHA_helpers.counter", "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Prims_Tm_refine_a4038d5aed1633b5ecbb4e499b1c66ad",
-        "refinement_interpretation_SHA_helpers_Tm_refine_76eecaa5eb922850bd62c67e1b97491e",
+        "equation_SHA_helpers.counter",
+        "equation_SHA_helpers.size_block_w_256",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_76eecaa5eb922850bd62c67e1b97491e",
+        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
         "typing_SHA_helpers.k"
       ],
       0,
-      "f159d55ebc3db81727ab7ff4dc8d77e1"
+      "c3bde2ee682b9bceec4b97b9e2840f79"
     ],
     [
       "X64.Vale.InsSha.va_wpProof_SHA256_rnds2",
@@ -44,44 +46,42 @@
       0,
       [
         "@MaxIFuel_assumption", "@query", "equation_Prims.squash",
-        "refinement_interpretation_Prims_Tm_refine_8d65e998a07dd53ec478e27017d9dba5"
+        "refinement_interpretation_Tm_refine_8d65e998a07dd53ec478e27017d9dba5"
       ],
       0,
-      "bfcc56e2f35799fe64bae2f18a351f55"
+      "684369fc13429a1a2706e59def352819"
     ],
     [
       "X64.Vale.InsSha.va_lemma_SHA256_msg1",
       1,
-      2,
       1,
+      0,
       [
         "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
         "equation_SHA_helpers.counter", "int_inversion",
         "primitive_Prims.op_LessThan", "primitive_Prims.op_LessThanOrEqual",
-        "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
+        "refinement_interpretation_Prims_Tm_refine_a4038d5aed1633b5ecbb4e499b1c66ad"
       ],
       0,
-      "b3dde60d6308896337afc93ea93635e5"
+      "fb00b0e5a293845f6fd55a1d9126d1d6"
     ],
     [
       "X64.Vale.InsSha.va_wp_SHA256_msg1",
       1,
-      2,
       1,
+      0,
       [
         "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
         "equation_SHA_helpers.counter", "int_inversion",
         "primitive_Prims.op_LessThan", "primitive_Prims.op_LessThanOrEqual",
-        "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
+        "refinement_interpretation_Prims_Tm_refine_a4038d5aed1633b5ecbb4e499b1c66ad"
       ],
       0,
-      "0ef46823e6a768e102e74542f2d46bcc"
+      "164a67f7abbf487e462bb1363e4cfd8a"
     ],
     [
       "X64.Vale.InsSha.va_wpProof_SHA256_msg1",
@@ -90,44 +90,42 @@
       0,
       [
         "@MaxIFuel_assumption", "@query", "equation_Prims.squash",
-        "refinement_interpretation_Prims_Tm_refine_8d65e998a07dd53ec478e27017d9dba5"
+        "refinement_interpretation_Tm_refine_8d65e998a07dd53ec478e27017d9dba5"
       ],
       0,
-      "61fdbc5be743cf39e271e59b2d7383fd"
+      "92939b534babe09dea0c4c03a4bf47e8"
     ],
     [
       "X64.Vale.InsSha.va_lemma_SHA256_msg2",
       1,
-      2,
       1,
+      0,
       [
         "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
         "equation_SHA_helpers.counter", "int_inversion",
         "primitive_Prims.op_LessThan", "primitive_Prims.op_LessThanOrEqual",
-        "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
+        "refinement_interpretation_Prims_Tm_refine_a4038d5aed1633b5ecbb4e499b1c66ad"
       ],
       0,
-      "2818e2afc1c4a0479bd5b235de7a079e"
+      "82c5c77a88b7fa00884367d1d3b560b3"
     ],
     [
       "X64.Vale.InsSha.va_wp_SHA256_msg2",
       1,
-      2,
       1,
+      0,
       [
         "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
         "equation_SHA_helpers.counter", "int_inversion",
         "primitive_Prims.op_LessThan", "primitive_Prims.op_LessThanOrEqual",
-        "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
+        "refinement_interpretation_Prims_Tm_refine_a4038d5aed1633b5ecbb4e499b1c66ad"
       ],
       0,
-      "fb9baa3e68c80e8bfd861681f420f4e4"
+      "bce8b3d62750c8e6d5eaefabb4b58d23"
     ],
     [
       "X64.Vale.InsSha.va_wpProof_SHA256_msg2",
@@ -136,10 +134,10 @@
       0,
       [
         "@MaxIFuel_assumption", "@query", "equation_Prims.squash",
-        "refinement_interpretation_Prims_Tm_refine_8d65e998a07dd53ec478e27017d9dba5"
+        "refinement_interpretation_Tm_refine_8d65e998a07dd53ec478e27017d9dba5"
       ],
       0,
-      "bf88ee57c0d194231ea4bb75e05076cc"
+      "a21bbeab0d1802cb0959c146fd2587fd"
     ]
   ]
 ]

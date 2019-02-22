@@ -11,7 +11,7 @@
         "assumption_X64.Machine_s.taint__uu___haseq"
       ],
       0,
-      "7c297ab81b2c237417070b77fd55c5f8"
+      "aef9de5d10403daa4791bd157973c728"
     ],
     [
       "X64.Taint_Semantics_s.operand_obs",
@@ -30,7 +30,7 @@
         "fuel_guarded_inversion_X64.Machine_s.operand"
       ],
       0,
-      "445adae7a37a93b7392fc5d2bbe23568"
+      "0e59b3f7e88a5939a0db53665bc4d3e3"
     ],
     [
       "X64.Taint_Semantics_s.operand_obs_list",
@@ -48,7 +48,7 @@
         "subterm_ordering_Prims.Cons"
       ],
       0,
-      "bc824e6e8f03149b770b7da577bafbaa"
+      "d000dcc00022d4a70130a7969979e2d4"
     ],
     [
       "X64.Taint_Semantics_s.match_n",
@@ -56,31 +56,23 @@
       1,
       0,
       [
-        "@MaxFuel_assumption", "@MaxIFuel_assumption",
-        "@fuel_correspondence_Prims.pow2.fuel_instrumented",
-        "@fuel_irrelevance_Prims.pow2.fuel_instrumented", "@query",
+        "@MaxIFuel_assumption", "@query",
         "Prims_pretyping_ae567c2fb75be05905677af440075565",
         "X64.Machine_s_pretyping_e51d9612683cb053e6b8236fad2673ca",
-        "b2t_def", "binder_x_6d0180d4fcd10237cf0d87dd345d77cc_0",
-        "binder_x_e22ba7a032a73f6d0678d3d186686631_1", "bool_inversion",
+        "binder_x_6d0180d4fcd10237cf0d87dd345d77cc_0",
+        "binder_x_e22ba7a032a73f6d0678d3d186686631_1",
         "equality_tok_Prims.LexTop@tok",
-        "equality_tok_X64.Machine_s.Public@tok", "equation_FStar.UInt.fits",
-        "equation_FStar.UInt.max_int", "equation_FStar.UInt.min_int",
-        "equation_FStar.UInt.size", "equation_FStar.UInt32.n",
-        "equation_Prims.nat",
+        "equality_tok_X64.Machine_s.Public@tok", "equation_Prims.nat",
         "function_token_typing_Prims.__cache_version_number__",
-        "int_inversion", "int_typing", "lemma_FStar.UInt.pow2_values",
-        "primitive_Prims.op_AmpAmp", "primitive_Prims.op_Equality",
-        "primitive_Prims.op_LessThanOrEqual",
+        "int_inversion", "int_typing", "primitive_Prims.op_Equality",
         "primitive_Prims.op_disEquality",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Prims_Tm_refine_a4038d5aed1633b5ecbb4e499b1c66ad",
-        "typing_FStar.UInt.fits", "typing_FStar.UInt32.n",
+        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
         "typing_tok_X64.Machine_s.Public@tok", "well-founded-ordering-on-nat"
       ],
       0,
-      "0cbcf28b0c042a3fb52306efc5f17f56"
+      "1d4acc87a23262a9b8827c76915deb3a"
     ],
     [
       "X64.Taint_Semantics_s.update_n",
@@ -109,18 +101,18 @@
         "primitive_Prims.op_BarBar", "primitive_Prims.op_Equality",
         "primitive_Prims.op_Negation", "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Prims_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
-        "refinement_interpretation_Prims_Tm_refine_a4038d5aed1633b5ecbb4e499b1c66ad",
-        "refinement_interpretation_X64.Machine_s_Tm_refine_8e3aff34e2b01c410f661e3b9d75037a",
-        "refinement_interpretation_X64.Taint_Semantics_s_Tm_refine_55c0b335f5121f8337daf6aff9df4280",
-        "refinement_interpretation_X64.Taint_Semantics_s_Tm_refine_70d38d88e467560c8aeb693975f06b57",
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
+        "refinement_interpretation_Tm_refine_55c0b335f5121f8337daf6aff9df4280",
+        "refinement_interpretation_Tm_refine_7e6d975ffc1af8fd0b46020127729f64",
+        "refinement_interpretation_Tm_refine_8e3aff34e2b01c410f661e3b9d75037a",
+        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
         "typing_FStar.Map.domain", "typing_FStar.Map.upd",
         "typing_FStar.Set.complement", "typing_FStar.Set.empty",
         "typing_X64.Taint_Semantics_s.update_n",
         "typing_tok_X64.Machine_s.Public@tok", "well-founded-ordering-on-nat"
       ],
       0,
-      "8bd3c63542834253151d8e8b9eea4044"
+      "99c921fca931114d6e2e05b34dd79ad9"
     ],
     [
       "X64.Taint_Semantics_s.taint_match",
@@ -135,7 +127,7 @@
         "fuel_guarded_inversion_X64.Machine_s.operand"
       ],
       0,
-      "90224a5c31a528c55086d59970ab9d5a"
+      "58ad489c10697bd8fe3f4e00d7a8fdc4"
     ],
     [
       "X64.Taint_Semantics_s.taint_match_list",
@@ -149,7 +141,7 @@
         "fuel_guarded_inversion_Prims.list", "subterm_ordering_Prims.Cons"
       ],
       0,
-      "ee47c44448524f84a686841a06bee239"
+      "df5f1ee4ade556c079d41dde00f6aa8e"
     ],
     [
       "X64.Taint_Semantics_s.update_taint",
@@ -164,7 +156,7 @@
         "fuel_guarded_inversion_X64.Machine_s.operand"
       ],
       0,
-      "ac65e40287f2385f6e638523cc6fd564"
+      "8aeb1393a8bc83c532e8e3724b84d01a"
     ],
     [
       "X64.Taint_Semantics_s.update_taint_list",
@@ -179,7 +171,7 @@
         "subterm_ordering_Prims.Cons"
       ],
       0,
-      "76a0a8b9b629913c7d22d186cd0920b9"
+      "96f8733c0af78e252033fe75f8f48d98"
     ],
     [
       "X64.Taint_Semantics_s.taint_match128",
@@ -193,7 +185,7 @@
         "fuel_guarded_inversion_X64.Machine_s.mov128_op"
       ],
       0,
-      "8b2a3af4549d1dc5e89c60b6fba19568"
+      "30d4090704586752cf8cf1e55a6a098d"
     ],
     [
       "X64.Taint_Semantics_s.update_taint128",
@@ -207,7 +199,7 @@
         "fuel_guarded_inversion_X64.Machine_s.mov128_op"
       ],
       0,
-      "e4fc3bfd4357694d05d3b4de513e0700"
+      "6e67f139f5c61f11c3333ba795c42082"
     ],
     [
       "X64.Taint_Semantics_s.taint_eval_movdqu",
@@ -218,10 +210,10 @@
         "@MaxIFuel_assumption", "@query",
         "disc_equation_X64.Bytes_Semantics_s.MOVDQU",
         "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_X64.Taint_Semantics_s_Tm_refine_69a34f712728736367447fdb81c0edd0"
+        "refinement_interpretation_Tm_refine_69a34f712728736367447fdb81c0edd0"
       ],
       0,
-      "06948b5d77cc904fa73e4c7945d70401"
+      "3bafabb62002068cba899ad18da0b16a"
     ],
     [
       "X64.Taint_Semantics_s.taint_eval_ins",
@@ -234,22 +226,24 @@
         "@fuel_irrelevance_Prims.pow2.fuel_instrumented", "@query",
         "Prims_pretyping_ae567c2fb75be05905677af440075565",
         "Prims_pretyping_f8666440faa91836cc5a13998af863fc", "b2t_def",
+        "bool_inversion", "bool_typing",
         "equation_FStar.Pervasives.Native.snd", "equation_FStar.UInt.fits",
         "equation_FStar.UInt.max_int", "equation_FStar.UInt.min_int",
-        "equation_FStar.UInt.mul_mod", "equation_FStar.UInt.size",
-        "equation_FStar.UInt64.n", "equation_Prims.nat",
-        "equation_X64.Bytes_Semantics_s.eval_operand",
-        "function_token_typing_Prims.__cache_version_number__",
+        "equation_FStar.UInt.size", "equation_FStar.UInt.uint_t",
+        "equation_Prims.nat", "equation_X64.Bytes_Semantics_s.eval_operand",
+        "function_token_typing_Prims.__cache_version_number__", "int_typing",
         "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_AmpAmp",
         "primitive_Prims.op_LessThanOrEqual",
+        "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
         "projection_inverse_X64.Bytes_Semantics_s.Mulx64_src",
-        "refinement_interpretation_Prims_Tm_refine_a4038d5aed1633b5ecbb4e499b1c66ad",
-        "typing_FStar.UInt64.n", "unit_typing"
+        "refinement_interpretation_Tm_refine_a347709bfeba48709474ad26f4f6be87",
+        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "unit_typing"
       ],
       0,
-      "3c1f8abd33a86f4760b5a7274579f074"
+      "1fe065d995786bc37e0a32385817140f"
     ],
     [
       "X64.Taint_Semantics_s.tainted_ocmp",
@@ -261,7 +255,7 @@
         "assumption_X64.Machine_s.taint__uu___haseq"
       ],
       0,
-      "88ff05edf7dedecc2c466cb21b657a5c"
+      "1fb2d4586c392d4c8759e5ff01d0ae74"
     ],
     [
       "X64.Taint_Semantics_s.get_fst_ocmp",
@@ -279,7 +273,7 @@
         "fuel_guarded_inversion_X64.Bytes_Semantics_s.ocmp"
       ],
       0,
-      "a59ee455dd5225573583b155006761b1"
+      "e688343862bee98964fe1f56d2b76b74"
     ],
     [
       "X64.Taint_Semantics_s.get_snd_ocmp",
@@ -297,7 +291,7 @@
         "fuel_guarded_inversion_X64.Bytes_Semantics_s.ocmp"
       ],
       0,
-      "861be711c9627343bb5da9852381bcd8"
+      "e8f25a8ef96d129dd5a0b65721a44a0f"
     ],
     [
       "X64.Taint_Semantics_s.tainted_codes",
@@ -308,11 +302,11 @@
         "@MaxIFuel_assumption", "@query",
         "assumption_Prims.list__uu___haseq", "equation_Prims.eqtype",
         "equation_X64.Taint_Semantics_s.tainted_code",
-        "refinement_interpretation_Prims_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
         "typing_X64.Taint_Semantics_s.tainted_code"
       ],
       0,
-      "0e0824ee5cdaf869ae599366168dd193"
+      "645c8a0f7319c308336650a9bdc7bbf1"
     ],
     [
       "X64.Taint_Semantics_s.taint_eval_code",
@@ -341,7 +335,7 @@
         "well-founded-ordering-on-nat"
       ],
       0,
-      "3346c19149cb559e6c03a4e415f3d358"
+      "58fe3f05e608b14fbe8e2878d1de161f"
     ],
     [
       "X64.Taint_Semantics_s.taint_eval_code",
@@ -367,7 +361,7 @@
         "subterm_ordering_Prims.Cons"
       ],
       0,
-      "7799ddf60cf8e42686d8e24a998cb67f"
+      "525bc044bae4868b43cda14c1b3f7bcf"
     ],
     [
       "X64.Taint_Semantics_s.taint_eval_code",
@@ -378,7 +372,7 @@
         "@MaxIFuel_assumption", "@query",
         "Prims_pretyping_ae567c2fb75be05905677af440075565",
         "X64.Taint_Semantics_s_pretyping_e5512f1f3d006584f1f8889e0827cf63",
-        "binder_x_1097b5de099642495bc9744c323b9391_0",
+        "binder_x_67f8cce47e44d6be4dd6bb0e02eec2c3_0",
         "binder_x_e22ba7a032a73f6d0678d3d186686631_1",
         "binder_x_e5512f1f3d006584f1f8889e0827cf63_2", "bool_inversion",
         "disc_equation_FStar.Pervasives.Native.None",
@@ -389,14 +383,14 @@
         "lemma_FStar.Pervasives.invertOption", "primitive_Prims.op_Equality",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Prims_Tm_refine_a4038d5aed1633b5ecbb4e499b1c66ad",
-        "refinement_interpretation_X64.Taint_Semantics_s_Tm_refine_30593c0a9d33af2a140f51928f74f30c",
+        "refinement_interpretation_Tm_refine_30593c0a9d33af2a140f51928f74f30c",
+        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
         "typing_FStar.Pervasives.Native.uu___is_None",
         "typing_FStar.Pervasives.Native.uu___is_Some",
         "well-founded-ordering-on-nat"
       ],
       0,
-      "07c5717eb76fee6040ed0f071d16626f"
+      "c7ad6c3a2a059042fce1d8e9da70d6e4"
     ],
     [
       "X64.Taint_Semantics_s.tainted_ins",
@@ -408,7 +402,7 @@
         "assumption_X64.Machine_s.taint__uu___haseq"
       ],
       0,
-      "8c4a4838b11d7a4059cfe05e79bed1a8"
+      "1d454f7359a95c41bd783e49aaaedb35"
     ],
     [
       "X64.Taint_Semantics_s.operand_obs",
@@ -427,7 +421,7 @@
         "fuel_guarded_inversion_X64.Machine_s.operand"
       ],
       0,
-      "92e1c1d39a4e33aab4bf9132f5f317fd"
+      "142c69c4dbee75e9b1b1147098303864"
     ],
     [
       "X64.Taint_Semantics_s.operand_obs_list",
@@ -445,7 +439,7 @@
         "subterm_ordering_Prims.Cons"
       ],
       0,
-      "ac73deb1d4319947cdbbca984428d81c"
+      "95994f118a88657cccef47c2d4f3b864"
     ],
     [
       "X64.Taint_Semantics_s.match_n",
@@ -453,31 +447,23 @@
       1,
       0,
       [
-        "@MaxFuel_assumption", "@MaxIFuel_assumption",
-        "@fuel_correspondence_Prims.pow2.fuel_instrumented",
-        "@fuel_irrelevance_Prims.pow2.fuel_instrumented", "@query",
+        "@MaxIFuel_assumption", "@query",
         "Prims_pretyping_ae567c2fb75be05905677af440075565",
         "X64.Machine_s_pretyping_e51d9612683cb053e6b8236fad2673ca",
-        "b2t_def", "binder_x_6d0180d4fcd10237cf0d87dd345d77cc_0",
-        "binder_x_e22ba7a032a73f6d0678d3d186686631_1", "bool_inversion",
+        "binder_x_6d0180d4fcd10237cf0d87dd345d77cc_0",
+        "binder_x_e22ba7a032a73f6d0678d3d186686631_1",
         "equality_tok_Prims.LexTop@tok",
-        "equality_tok_X64.Machine_s.Public@tok", "equation_FStar.UInt.fits",
-        "equation_FStar.UInt.max_int", "equation_FStar.UInt.min_int",
-        "equation_FStar.UInt.size", "equation_FStar.UInt32.n",
-        "equation_Prims.nat",
+        "equality_tok_X64.Machine_s.Public@tok", "equation_Prims.nat",
         "function_token_typing_Prims.__cache_version_number__",
-        "int_inversion", "int_typing", "lemma_FStar.UInt.pow2_values",
-        "primitive_Prims.op_AmpAmp", "primitive_Prims.op_Equality",
-        "primitive_Prims.op_LessThanOrEqual",
+        "int_inversion", "int_typing", "primitive_Prims.op_Equality",
         "primitive_Prims.op_disEquality",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Prims_Tm_refine_a4038d5aed1633b5ecbb4e499b1c66ad",
-        "typing_FStar.UInt.fits", "typing_FStar.UInt32.n",
+        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
         "typing_tok_X64.Machine_s.Public@tok", "well-founded-ordering-on-nat"
       ],
       0,
-      "0d7563df670899618e24e70659e15b3c"
+      "5b160730a7e17f4671f903a655dec39c"
     ],
     [
       "X64.Taint_Semantics_s.update_n",
@@ -506,18 +492,18 @@
         "primitive_Prims.op_BarBar", "primitive_Prims.op_Equality",
         "primitive_Prims.op_Negation", "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Prims_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
-        "refinement_interpretation_Prims_Tm_refine_a4038d5aed1633b5ecbb4e499b1c66ad",
-        "refinement_interpretation_X64.Machine_s_Tm_refine_8e3aff34e2b01c410f661e3b9d75037a",
-        "refinement_interpretation_X64.Taint_Semantics_s_Tm_refine_55c0b335f5121f8337daf6aff9df4280",
-        "refinement_interpretation_X64.Taint_Semantics_s_Tm_refine_70d38d88e467560c8aeb693975f06b57",
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
+        "refinement_interpretation_Tm_refine_55c0b335f5121f8337daf6aff9df4280",
+        "refinement_interpretation_Tm_refine_7e6d975ffc1af8fd0b46020127729f64",
+        "refinement_interpretation_Tm_refine_8e3aff34e2b01c410f661e3b9d75037a",
+        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
         "typing_FStar.Map.domain", "typing_FStar.Map.upd",
         "typing_FStar.Set.complement", "typing_FStar.Set.empty",
         "typing_X64.Taint_Semantics_s.update_n",
         "typing_tok_X64.Machine_s.Public@tok", "well-founded-ordering-on-nat"
       ],
       0,
-      "3791b49a9f577d72ffcb7a765b215b9d"
+      "025f8e3239958f02ef6f38cb97431479"
     ],
     [
       "X64.Taint_Semantics_s.taint_match",
@@ -532,7 +518,7 @@
         "fuel_guarded_inversion_X64.Machine_s.operand"
       ],
       0,
-      "427c8c2082f147d135c5466848599a69"
+      "8958c02a301c3b8320bfe05e4d998ab3"
     ],
     [
       "X64.Taint_Semantics_s.taint_match_list",
@@ -546,7 +532,7 @@
         "fuel_guarded_inversion_Prims.list", "subterm_ordering_Prims.Cons"
       ],
       0,
-      "db50a823c937a696e4720334deca8d2d"
+      "aa950c2212abaeb7489ed981316deb1d"
     ],
     [
       "X64.Taint_Semantics_s.update_taint",
@@ -561,7 +547,7 @@
         "fuel_guarded_inversion_X64.Machine_s.operand"
       ],
       0,
-      "1045682f7a000478487dcacc0761d9e4"
+      "f21457e5e9c4363826643e70bc224903"
     ],
     [
       "X64.Taint_Semantics_s.update_taint_list",
@@ -576,7 +562,7 @@
         "subterm_ordering_Prims.Cons"
       ],
       0,
-      "3f61072c8ac4f5ae9636af983d938a8f"
+      "e639f17b7461a255ce838ebc12a12ac0"
     ],
     [
       "X64.Taint_Semantics_s.taint_match128",
@@ -590,7 +576,7 @@
         "fuel_guarded_inversion_X64.Machine_s.mov128_op"
       ],
       0,
-      "cc98c0d1f2e59b1b537e41e08316175e"
+      "7b68ca0412e0b9c7de4f81396093f323"
     ],
     [
       "X64.Taint_Semantics_s.update_taint128",
@@ -604,7 +590,7 @@
         "fuel_guarded_inversion_X64.Machine_s.mov128_op"
       ],
       0,
-      "44aa0e4a5e632294d92f910c764b6fd9"
+      "193d701d7c4c3011e302c77d64090301"
     ],
     [
       "X64.Taint_Semantics_s.taint_eval_movdqu",
@@ -615,10 +601,10 @@
         "@MaxIFuel_assumption", "@query",
         "disc_equation_X64.Bytes_Semantics_s.MOVDQU",
         "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_X64.Taint_Semantics_s_Tm_refine_69a34f712728736367447fdb81c0edd0"
+        "refinement_interpretation_Tm_refine_69a34f712728736367447fdb81c0edd0"
       ],
       0,
-      "42feb8634a2008bcde88cd1efc9ef0c2"
+      "72c4cfd1d6ffe59e88c81208cef51e2a"
     ],
     [
       "X64.Taint_Semantics_s.taint_eval_ins",
@@ -631,22 +617,24 @@
         "@fuel_irrelevance_Prims.pow2.fuel_instrumented", "@query",
         "Prims_pretyping_ae567c2fb75be05905677af440075565",
         "Prims_pretyping_f8666440faa91836cc5a13998af863fc", "b2t_def",
+        "bool_inversion", "bool_typing",
         "equation_FStar.Pervasives.Native.snd", "equation_FStar.UInt.fits",
         "equation_FStar.UInt.max_int", "equation_FStar.UInt.min_int",
-        "equation_FStar.UInt.mul_mod", "equation_FStar.UInt.size",
-        "equation_FStar.UInt64.n", "equation_Prims.nat",
-        "equation_X64.Bytes_Semantics_s.eval_operand",
-        "function_token_typing_Prims.__cache_version_number__",
+        "equation_FStar.UInt.size", "equation_FStar.UInt.uint_t",
+        "equation_Prims.nat", "equation_X64.Bytes_Semantics_s.eval_operand",
+        "function_token_typing_Prims.__cache_version_number__", "int_typing",
         "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_AmpAmp",
         "primitive_Prims.op_LessThanOrEqual",
+        "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
         "projection_inverse_X64.Bytes_Semantics_s.Mulx64_src",
-        "refinement_interpretation_Prims_Tm_refine_a4038d5aed1633b5ecbb4e499b1c66ad",
-        "typing_FStar.UInt64.n", "unit_typing"
+        "refinement_interpretation_Tm_refine_a347709bfeba48709474ad26f4f6be87",
+        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "unit_typing"
       ],
       0,
-      "469b4397e6d19afad787e1cfb74eeabb"
+      "67c24fbbccbd4446b82a7e92e02109c0"
     ],
     [
       "X64.Taint_Semantics_s.tainted_ocmp",
@@ -658,7 +646,7 @@
         "assumption_X64.Machine_s.taint__uu___haseq"
       ],
       0,
-      "3d82a3e75cb31692c54bbdc19aff5e88"
+      "18fd8f389ac9129a14bc5bf3b89fcdc2"
     ],
     [
       "X64.Taint_Semantics_s.get_fst_ocmp",
@@ -676,7 +664,7 @@
         "fuel_guarded_inversion_X64.Bytes_Semantics_s.ocmp"
       ],
       0,
-      "81d61bbc04638b62832d8289420b4597"
+      "4144f54511c5cafe576f4d4bab835c43"
     ],
     [
       "X64.Taint_Semantics_s.get_snd_ocmp",
@@ -694,7 +682,7 @@
         "fuel_guarded_inversion_X64.Bytes_Semantics_s.ocmp"
       ],
       0,
-      "91ea598011f1e66abd55f9a331270265"
+      "2620c3591b9a4173b56dfd1c32a5e100"
     ],
     [
       "X64.Taint_Semantics_s.tainted_codes",
@@ -705,11 +693,11 @@
         "@MaxIFuel_assumption", "@query",
         "assumption_Prims.list__uu___haseq", "equation_Prims.eqtype",
         "equation_X64.Taint_Semantics_s.tainted_code",
-        "refinement_interpretation_Prims_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
         "typing_X64.Taint_Semantics_s.tainted_code"
       ],
       0,
-      "539f34818c47d4077caca9a5c2ff58f2"
+      "e0191bb148f3fc19f0bd1f640228eae0"
     ],
     [
       "X64.Taint_Semantics_s.taint_eval_code",
@@ -725,11 +713,12 @@
         "disc_equation_X64.Machine_s.IfElse",
         "disc_equation_X64.Machine_s.Ins",
         "disc_equation_X64.Machine_s.While", "equality_tok_Prims.LexTop@tok",
-        "equation_Prims.nat", "equation_X64.Taint_Semantics_s.tainted_code",
+        "equation_Prims.nat", "equation_Words_s.pow2_1",
+        "equation_X64.Taint_Semantics_s.tainted_code",
         "equation_X64.Taint_Semantics_s.tainted_codes",
         "fuel_guarded_inversion_X64.Machine_s.precode",
-        "function_token_typing_Prims.__cache_version_number__",
-        "int_inversion", "int_typing", "projection_inverse_BoxBool_proj_0",
+        "function_token_typing_Words_s.pow2_1", "int_inversion",
+        "int_typing", "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Prims_Tm_refine_a4038d5aed1633b5ecbb4e499b1c66ad",
         "subterm_ordering_X64.Machine_s.Block",
@@ -737,7 +726,7 @@
         "well-founded-ordering-on-nat"
       ],
       0,
-      "3af27b827747f3cb4d3eb699d2fd09a9"
+      "b893321b33a2f5579ff7c6581841781a"
     ],
     [
       "X64.Taint_Semantics_s.taint_eval_code",
@@ -763,7 +752,7 @@
         "subterm_ordering_Prims.Cons"
       ],
       0,
-      "0aa356fb581601311194dcbb88385b7e"
+      "ea0c2d7705f3831d70452076507c6835"
     ],
     [
       "X64.Taint_Semantics_s.taint_eval_code",
@@ -774,7 +763,7 @@
         "@MaxIFuel_assumption", "@query",
         "Prims_pretyping_ae567c2fb75be05905677af440075565",
         "X64.Taint_Semantics_s_pretyping_e5512f1f3d006584f1f8889e0827cf63",
-        "binder_x_1097b5de099642495bc9744c323b9391_0",
+        "binder_x_67f8cce47e44d6be4dd6bb0e02eec2c3_0",
         "binder_x_e22ba7a032a73f6d0678d3d186686631_1",
         "binder_x_e5512f1f3d006584f1f8889e0827cf63_2", "bool_inversion",
         "disc_equation_FStar.Pervasives.Native.None",
@@ -785,14 +774,14 @@
         "lemma_FStar.Pervasives.invertOption", "primitive_Prims.op_Equality",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Prims_Tm_refine_a4038d5aed1633b5ecbb4e499b1c66ad",
-        "refinement_interpretation_X64.Taint_Semantics_s_Tm_refine_30593c0a9d33af2a140f51928f74f30c",
+        "refinement_interpretation_Tm_refine_30593c0a9d33af2a140f51928f74f30c",
+        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
         "typing_FStar.Pervasives.Native.uu___is_None",
         "typing_FStar.Pervasives.Native.uu___is_Some",
         "well-founded-ordering-on-nat"
       ],
       0,
-      "b00011327d0677c0f62d890b14938fc8"
+      "8491ec36adb5e93a8911c3d2868db496"
     ]
   ]
 ]
