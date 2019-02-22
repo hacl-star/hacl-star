@@ -337,6 +337,7 @@ procedure {:quick exportOnly}{:public}
         index < 4;
     ensures
         dst == insert_nat32(old(dst), immediate, #nat2(index));
+        tmp == immediate;
 {
     Mov64(tmp, immediate);
     Pinsrd(dst, tmp, index);

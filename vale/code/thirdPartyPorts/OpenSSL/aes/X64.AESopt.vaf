@@ -59,7 +59,7 @@ module GCTR = GCTR
 #verbatim{:interface}
 let aes_reqs
   (alg:algorithm) (key:seq nat32) (round_keys:seq quad32) (keys_b:buffer128)
-  (key_ptr:nat64) (mem:memory) (memTaint:memtaint) : prop0
+  (key_ptr:int) (mem:memory) (memTaint:memtaint) : prop0
   =
   aesni_enabled /\
   alg = AES_128 /\
@@ -79,7 +79,7 @@ let aes_reqs
   buffer128_as_seq mem keys_b == round_keys
 #endverbatim
 function aes_reqs(alg:algorithm, key:seq(nat32), round_keys:seq(quad32), keys_b:buffer128,
-    key_ptr:nat64, mem:memory, memTaint:memtaint) : prop extern;
+    key_ptr:int, mem:memory, memTaint:memtaint) : prop extern;
 
 ghost procedure finish_aes_encrypt_le(ghost alg:algorithm, ghost input_LE:quad32, ghost key:seq(nat32))
     requires
@@ -1681,7 +1681,7 @@ procedure {:quick} AESNI_ctr32_6x_round9(
     )
     lets
         inp @= rdi; key @= rcx; 
-        Ii @= xmm0; T1 @= xmm1; T2 @= xmm2; Hkey @= xmm3;
+        T1 @= xmm1; T2 @= xmm2; Hkey @= xmm3;
         Z0 @= xmm4; Z1 @= xmm5; Z2 @= xmm6; Xi @= xmm8;
         inout0 @= xmm9; inout1 @= xmm10; inout2 @= xmm11; inout3 @= xmm12;
         inout4 @= xmm13; inout5 @= xmm14; rndkey @= xmm15;
@@ -1692,7 +1692,7 @@ procedure {:quick} AESNI_ctr32_6x_round9(
 
     modifies
         inp;
-        Ii; T1; T2; Hkey; Z0; Z1; Z2; Xi;
+        T1; T2; Hkey; Z0; Z1; Z2; Xi;
         inout0; inout1; inout2; inout3; inout4; inout5; rndkey;
         efl;
 
@@ -1780,7 +1780,7 @@ procedure {:quick} AESNI_ctr32_6x_final(
     )
     lets
         outp @= rsi; key @= rcx; 
-        Ii @= xmm0; T1 @= xmm1; T2 @= xmm2; Hkey @= xmm3;
+        T1 @= xmm1; T2 @= xmm2; Hkey @= xmm3;
         Z0 @= xmm4; Z1 @= xmm5; Z2 @= xmm6; Xi @= xmm8;
         inout0 @= xmm9; inout1 @= xmm10; inout2 @= xmm11; inout3 @= xmm12;
         inout4 @= xmm13; inout5 @= xmm14; rndkey @= xmm15;
@@ -1791,7 +1791,7 @@ procedure {:quick} AESNI_ctr32_6x_final(
 
     modifies
         outp;
-        Ii; T1; T2; Hkey; Z0; Z1; Z2; Xi;
+        T1; T2; Hkey; Z0; Z1; Z2; Xi;
         inout0; inout1; inout2; inout3; inout4; inout5; rndkey;
         mem; efl;
 
@@ -1881,6 +1881,8 @@ procedure {:quick} AESNI_ctr32_6x(
     ghost count:nat,
     ghost in_b:buffer128,
     ghost out_b:buffer128,
+    
+    ghost plain_quads:seq(quad32),
 
     ghost key_words:seq(nat32),
     ghost round_keys:seq(quad32),
@@ -1892,7 +1894,7 @@ procedure {:quick} AESNI_ctr32_6x(
     lets
 //      inp @= rdi; outp @= rsi; len @= rdx; key @= rcx; ivp @= r8; Xip @= r9;
         inp @= rdi; outp @= rsi; key @= rcx; 
-        Ii @= xmm0; T1 @= xmm1; T2 @= xmm2; Hkey @= xmm3;
+        T1 @= xmm1; T2 @= xmm2; Hkey @= xmm3;
         Z0 @= xmm4; Z1 @= xmm5; Z2 @= xmm6; Xi @= xmm8;
     
         inout0 @= xmm9; inout1 @= xmm10; inout2 @= xmm11; inout3 @= xmm12;
@@ -1906,7 +1908,7 @@ procedure {:quick} AESNI_ctr32_6x(
 
     modifies
         inp; outp; constp; r12;
-        Ii; T1; T2; Hkey; Z0; Z1; Z2; Xi;
+        T1; T2; Hkey; Z0; Z1; Z2; Xi;
         inout0; inout1; inout2; inout3; inout4; inout5; rndkey;
         mem; efl;
 
@@ -1914,6 +1916,7 @@ procedure {:quick} AESNI_ctr32_6x(
         // Valid buffers and pointers
         validSrcAddrsOffset128(mem, inp, in_b, count*6, 6, memTaint, Secret);
         validDstAddrsOffset128(mem, outp, out_b, count*6, 6, memTaint, Secret);
+        partial_seq_agreement(plain_quads, buffer128_as_seq(mem, in_b), count*6, count*6+6);
         inp  + 0x60 < pow2_64;
         outp + 0x60 < pow2_64;
 
@@ -1928,13 +1931,14 @@ procedure {:quick} AESNI_ctr32_6x(
         T1 == reverse_bytes_quad32(inc32lite(ctr_BE, 0));
 
         // GCTR progress
-        gctr_partial_opaque(alg, 6*count, old(buffer128_as_seq(mem, in_b)), buffer128_as_seq(mem, out_b), key_words, ctr_BE_orig);
+        gctr_partial_opaque(alg, 6*count, plain_quads, buffer128_as_seq(mem, out_b), key_words, ctr_BE_orig);
     ensures
         modifies_buffer_specific128(out_b, old(mem), mem, count*6+0, count*6+5);
         slice_work_around(buffer128_as_seq(mem, out_b), 6*count) == old(slice_work_around(buffer128_as_seq(mem, out_b), 6*count));   
          inp == old( inp) + 0x60; 
         outp == old(outp) + 0x60; 
 
+        T1 == reverse_bytes_quad32(inc32lite(ctr_BE, 6));
         
         buffer128_read(out_b, count*6 + 0, mem) == inout0;
         buffer128_read(out_b, count*6 + 1, mem) == inout1;
@@ -1944,14 +1948,7 @@ procedure {:quick} AESNI_ctr32_6x(
         buffer128_read(out_b, count*6 + 5, mem) == inout5;
         
         // GCTR progress
-        gctr_partial_opaque(alg, 6*(count+1), old(buffer128_as_seq(mem, in_b)), buffer128_as_seq(mem, out_b), key_words, ctr_BE_orig);
-
-        inout0 == buffer128_read(out_b, count*6 + 0, mem);
-        inout1 == buffer128_read(out_b, count*6 + 1, mem);
-        inout2 == buffer128_read(out_b, count*6 + 2, mem);
-        inout3 == buffer128_read(out_b, count*6 + 3, mem);
-        inout4 == buffer128_read(out_b, count*6 + 4, mem);
-        inout5 == buffer128_read(out_b, count*6 + 5, mem);
+        gctr_partial_opaque(alg, 6*(count+1), plain_quads, buffer128_as_seq(mem, out_b), key_words, ctr_BE_orig);
 {
     assert {:quick_type} length(round_keys) == nr(alg)+1;
     ghost var init0 := quad32_xor(reverse_bytes_quad32(inc32lite(ctr_BE, 0)), index(round_keys, 0));
@@ -1981,8 +1978,109 @@ procedure {:quick} AESNI_ctr32_6x(
     ghost var plain := old(buffer128_as_seq(mem, in_b));
     ghost var cipher := buffer128_as_seq(mem, out_b);
     ghost var bound := count*6;
-    gctr_partial_opaque_ignores_postfix(alg, #nat32(bound), plain, plain, old(buffer128_as_seq(mem, out_b)), 
+    gctr_partial_opaque_ignores_postfix(alg, #nat32(bound), plain_quads, plain_quads, old(buffer128_as_seq(mem, out_b)), 
                                         cipher, key_words, ctr_BE_orig);
-    gctr_partial_extend6(alg, bound, plain, cipher, key_words, ctr_BE_orig);
+    gctr_partial_extend6(alg, bound, plain_quads, cipher, key_words, ctr_BE_orig);
 
 }
+
+#reset-options ""
+procedure {:quick} {:verify true} AES_GCM_encrypt(
+    inline alg:algorithm,  
+    ghost iv_b:buffer128,
+    ghost in_b:buffer128,
+    ghost out_b:buffer128,
+    ghost stack_b:buffer128,
+
+    ghost key_words:seq(nat32),
+    ghost round_keys:seq(quad32),
+    ghost keys_b:buffer128
+    )
+    lets
+//      inp @= rdi; outp @= rsi; len @= rdx; key @= rcx; ivp @= r8; Xip @= r9;
+        inp @= rdi; outp @= rsi; len @= rdx; key @= rcx; ivp @= r8; 
+        Ii @= xmm0; T1 @= xmm1; T2 @= xmm2; Hkey @= xmm3;
+        Z0 @= xmm4; Z1 @= xmm5; Z2 @= xmm6; Z3 @= xmm7; Xi @= xmm8;
+    
+        inout0 @= xmm9; inout1 @= xmm10; inout2 @= xmm11; inout3 @= xmm12;
+        inout4 @= xmm13; inout5 @= xmm14; rndkey @= xmm15;
+//      counter @= rbx; rounds @= rbp; ret @= r10; constp @= r11; in0 @= r14; end0 @= r15;
+        counter @= rbx; constp @= r11; in0 @= r14;
+
+    reads
+        ivp; rsp;
+        memTaint;
+
+    modifies
+        inp; outp; len; key; counter; constp; r12; in0;
+        Ii; T1; T2; Hkey; Z0; Z1; Z2; Z3; Xi;
+        inout0; inout1; inout2; inout3; inout4; inout5; rndkey;
+        mem; efl;
+
+    requires
+        // Valid buffers and pointers
+        validDstAddrs128(mem,  ivp,  iv_b,   1, memTaint, Secret);
+        validSrcAddrs128(mem,  inp,  in_b, len, memTaint, Secret);
+        validDstAddrs128(mem, outp, out_b, len, memTaint, Secret);
+        validDstAddrs128(mem, rsp, stack_b, 8, memTaint, Secret);
+
+        buffers_disjoint128(iv_b, keys_b);
+        buffers_disjoint128(iv_b, stack_b);
+        buffers_disjoint128(iv_b, in_b);
+        buffers_disjoint128(iv_b, out_b);
+        buffers_disjoint128(stack_b, keys_b);
+        buffers_disjoint128(stack_b, in_b);
+        buffers_disjoint128(stack_b, out_b);
+        buffers_disjoint128(out_b, keys_b);
+        buffers_disjoint128(in_b, out_b) || in_b == out_b;
+
+        inp  + 0x10*len < pow2_64;
+        outp + 0x10*len < pow2_64;
+
+        // AES reqs
+        buffer_addr(keys_b, mem) + 0x80 < pow2_64;
+        aes_reqs(alg, key_words, round_keys, keys_b, key + 0x80, mem, memTaint);
+
+
+        len % 6 == 0;
+        len >= 12;
+{
+    ghost var plain_quads := buffer128_as_seq(mem, in_b);
+    Load128_buffer(T1, ivp, 0, Secret, iv_b, 0);    // # input counter value
+    ghost var iv_LE := T1;
+
+    Add64(key, 0x80);           // # size optimization 
+
+    // TODO: Replace all of this with a single PinsrdImm(T1, 0x02000000, 3, counter)
+    InitPshufbMask(Ii, r12);    // # borrow $Ii for .Lbswap_mask
+    VPshufb(T1, T1, Ii);
+    ghost var iv_BE := T1;
+    PinsrdImm(T1, 2, 0, counter);       // Directly set the counter in T1.lo0 (and counter) to 2, rather than read the existing value as OpenSSL does
+    ghost var ctr_BE := T1;
+    VPshufb(T1, T1, Ii);
+
+    Mov64(in0, outp);
+
+    gctr_partial_opaque_init(alg, buffer128_as_seq(mem, in_b), buffer128_as_seq(mem, out_b), key_words, ctr_BE);
+    AESNI_ctr32_6x(alg, 0, in_b, out_b, plain_quads, key_words, round_keys, keys_b, ctr_BE, ctr_BE);
+
+    // # save bswapped output on stack
+    VPshufb(Xi, inout0, Ii);
+    VPshufb(T2, inout1, Ii);
+    Store128_buffer(rsp, Xi, 0x70, Secret, stack_b, 7);
+    VPshufb(Z0, inout2, Ii);
+    Store128_buffer(rsp, T2, 0x60, Secret, stack_b, 6);
+    VPshufb(Z1, inout3, Ii);
+    Store128_buffer(rsp, Z0, 0x50, Secret, stack_b, 5);
+    VPshufb(Z2, inout4, Ii);
+    Store128_buffer(rsp, Z1, 0x40, Secret, stack_b, 4);
+    VPshufb(Z3, inout5, Ii);
+    Store128_buffer(rsp, Z2, 0x30, Secret, stack_b, 3);
+    
+    AESNI_ctr32_6x(alg, 1, in_b, out_b, plain_quads, key_words, round_keys, keys_b, inc32(ctr_BE, 6), ctr_BE);
+
+    //Sub64(len, 12);
+
+
+}
+

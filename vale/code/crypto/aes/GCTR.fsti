@@ -78,6 +78,13 @@ let gctr_partial (alg:algorithm) (bound:nat) (plain cipher:seq quad32) (key:seq 
 
 let gctr_partial_opaque = make_opaque gctr_partial
 
+let gctr_partial_opaque_init (alg:algorithm) (plain cipher:seq quad32) (key:seq nat32) (icb:quad32) : Lemma
+  (requires is_aes_key_LE alg key)
+  (ensures gctr_partial_opaque alg 0 plain cipher key icb)
+  =
+  reveal_opaque gctr_partial;
+  ()
+
 let gctr_partial_opaque_ignores_postfix (alg:algorithm) (bound:nat32) (plain plain' cipher cipher':seq quad32) (key:seq nat32) (icb:quad32) : Lemma
   (requires is_aes_key_LE alg key /\
             length plain >= bound /\
