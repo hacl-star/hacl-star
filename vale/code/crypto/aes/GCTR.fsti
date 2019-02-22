@@ -22,6 +22,29 @@ let inc32lite (cb:quad32) (i:nat32) : quad32 =
   let lo0 = if sum >= pow2_32 then sum - pow2_32 else sum in
   Mkfour lo0 cb.lo1 cb.hi2 cb.hi3
 
+let partial_seq_agreement (x y:seq quad32) (lo hi:nat) =
+  lo <= hi /\ hi <= length x /\ hi <= length y /\
+  (forall i . {:pattern (index x i) \/ (index y i)} lo <= i /\ i < hi ==> index x i == index y i)
+
+(*
+let lemma_partial_seq_agreement_subset (x y:seq quad32) (lo hi hi':nat) : Lemma
+  (requires lo <= hi /\ hi <= hi' /\ hi' <= length x /\ hi' <= length y /\
+            partial_seq_agreement x y lo hi')
+  (ensures partial_seq_agreement x y lo hi)
+  =
+  ()
+*)
+
+let lemma_partial_seq_agreement_step (x y z:seq quad32) (lo mid hi:nat) : Lemma
+  (requires partial_seq_agreement x y lo hi /\
+            length z >= hi /\
+            lo <= mid /\ mid < hi /\
+            (forall i . 0 <= i /\ i < length z /\ (i < lo || i > mid) ==> 
+                   index y i == index z i))
+  (ensures partial_seq_agreement x z (mid+1) hi)
+  =
+  ()
+
 val gctr_encrypt_block_offset (icb_BE:quad32) (plain_LE:quad32) (alg:algorithm) (key:seq nat32) (i:int) : Lemma
   (requires is_aes_key_LE alg key)
   (ensures
