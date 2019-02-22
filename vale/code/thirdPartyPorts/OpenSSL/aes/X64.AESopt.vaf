@@ -1422,30 +1422,10 @@ procedure {:quick exportOnly} {:verify true} Loop6x_loop(
             len;
 
     {
-//        lemma_partial_seq_agreement_subset(old(buffer128_as_seq(mem, in_b)), buffer128_as_seq(mem, in_b), 
-//                                           6*(count+iter), 6*(count+iter) + 6, old(length(buffer128_as_seq(mem, in_b)))); 
-//        assert partial_seq_agreement(old(buffer128_as_seq(mem, in_b)), buffer128_as_seq(mem, in_b), (count+iter)*6, 6*(count+iter)  + 6);
-//        assert old(length(buffer128_as_seq(mem, in_b))) > 6*count + 6*iter;
-//        ghost var in_snapshot := buffer128_as_seq(mem, in_b);
-//        assert len > 0;
-//        assert partial_seq_agreement(old(buffer128_as_seq(mem, in_b)), in_snapshot, 6*count + 6*iter, old(length(buffer128_as_seq(mem, in_b))));
-//        assert 6*count + 6*iter <= (count+iter)*6 + 0 < old(length(buffer128_as_seq(mem, in_b)));
-//        assert index_work_around_quad32(in_snapshot, (count+iter)*6 + 0) == index_work_around_quad32(old(buffer128_as_seq(mem, in_b)), (count+iter)*6 + 0);
-//        assert (count+iter)*6  < length(old(buffer128_as_seq(mem, in_b)));
-//        assert (count+iter)*6  < buffer_length(in_b);
-//        assert old(buffer128_read(in_b, (count+iter)*6 + 0, mem)) == index_work_around_quad32(old(buffer128_as_seq(mem, in_b)), (count+iter)*6 + 0);
-//        //assert old(buffer128_read(in_b, (count+iter)*6 + 0, mem)) == index(in_snapshot, (count+iter)*6 + 0);
-//        assume false;
         Loop6x(alg, count+iter, iv_b, in0_b, in_b, out_b, stack_b, old(buffer128_as_seq(mem, in_b)),
                key_words, round_keys, keys_b, ctr_BE_orig, ctr);
-//        assert len == 0 ==> inout0 == quad32_xor(old(buffer128_read(in_b, (count+iter)*6 + 0, mem)), aes_encrypt_BE(alg, key_words, inc32lite(ctr, 0)));
-//                    //inc32lite(ctr_BE_orig, #nat32(6*count + 6*(iter-1)))));
-//        ghost var c := count+iter;
-//        //lemma_partial_seq_agreement_step(old(buffer128_as_seq(mem, in_b)), in_snapshot, buffer128_as_seq(mem, in_b), 6*count + 6*iter, 6*count + 6*(iter+1), old(length(buffer128_as_seq(mem, in_b))));
         iter := #nat(iter + 1);
         ctr := inc32(ctr, 6);
-//        assert len == 0 ==> inout0 == quad32_xor(old(buffer128_read(in_b, (count+iter - 1)*6 + 0, mem)), aes_encrypt_BE(alg, key_words, inc32lite(ctr_BE_orig, #nat32(6*count + 6*(iter-1)))));
-//        assume false;
     }
 }
 

@@ -34,7 +34,7 @@ let lemma_partial_seq_agreement_subset (x y:seq quad32) (lo hi hi':nat) : Lemma
   =
   ()
 *)
-
+(*
 let lemma_partial_seq_agreement_step (x y z:seq quad32) (lo mid hi:nat) : Lemma
   (requires partial_seq_agreement x y lo hi /\
             length z >= hi /\
@@ -44,6 +44,7 @@ let lemma_partial_seq_agreement_step (x y z:seq quad32) (lo mid hi:nat) : Lemma
   (ensures partial_seq_agreement x z (mid+1) hi)
   =
   ()
+*)
 
 val gctr_encrypt_block_offset (icb_BE:quad32) (plain_LE:quad32) (alg:algorithm) (key:seq nat32) (i:int) : Lemma
   (requires is_aes_key_LE alg key)
