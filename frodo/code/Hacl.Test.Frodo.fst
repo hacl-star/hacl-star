@@ -54,6 +54,7 @@ let test_frodo seed ss_expected pk_expected ct_expected sk_expected =
 
 /// Test1. FrodoKEM-64. CSHAKE128
 
+inline_for_extraction noextract
 val u8: n: nat{n < 0x100} -> uint8
 let u8 n = u8 n
 

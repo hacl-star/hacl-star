@@ -87,7 +87,7 @@ let buf_eq_mask #t #len1 #len2 b1 b2 len res =
   Lib.Loops.for 0ul len inv
     (fun i ->
       let z0 = res.(0ul) in
-      res.(0ul) <- IntTypes.eq_mask b1.(i) b2.(i) &. res.(0ul);
+      res.(0ul) <- eq_mask b1.(i) b2.(i) &. res.(0ul);
       let z = res.(0ul) in
       assert (z == BS.seq_eq_mask_inner (as_seq h0 b1) (as_seq h0 b2) (v len) (v i) z0));
   res.(0ul)
