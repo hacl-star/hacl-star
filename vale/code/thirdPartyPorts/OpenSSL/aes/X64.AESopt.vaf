@@ -16,7 +16,7 @@ include{:fstar}{:open} "X64.Vale.QuickCode"
 include{:fstar}{:open} "X64.Vale.QuickCodes"
 include{:fstar}{:open} "Arch.Types"
 include{:fstar}{:open} "AES_helpers"
-include{:fstar}{:open} "X64.Poly1305.Math"
+//include{:fstar}{:open} "X64.Poly1305.Math"
 include{:fstar}{:open} "GCM_helpers"
 include{:fstar}{:open} "Workarounds"
 include{:fstar}{:open} "GCTR_s"
@@ -45,7 +45,7 @@ open X64.Vale.QuickCode
 open X64.Vale.QuickCodes
 open Arch.Types
 open AES_helpers
-open X64.Poly1305.Math    // For lemma_poly_bits64()
+//open X64.Poly1305.Math    // For lemma_poly_bits64()
 open GCM_helpers
 open Workarounds
 open GCTR_s
@@ -1984,6 +1984,78 @@ procedure {:quick} AESNI_ctr32_6x(
 
 }
 
+#reset-options "--z3rlimit 20"
+procedure {:quick} Ctr32_ghash_6_prelude(
+    inline alg:algorithm,  
+    ghost stack_b:buffer128,
+
+    ghost key_words:seq(nat32),
+    ghost round_keys:seq(quad32),
+    ghost keys_b:buffer128,
+    ghost ctr_orig:quad32
+    )
+    lets
+//      inp @= rdi; outp @= rsi; len @= rdx; key @= rcx; ivp @= r8; Xip @= r9;
+        len @= rdx; key @= rcx; 
+        T1 @= xmm1; T2 @= xmm2;
+        Z0 @= xmm4; 
+    
+        inout0 @= xmm9; inout1 @= xmm10; inout2 @= xmm11; inout3 @= xmm12;
+        inout4 @= xmm13; inout5 @= xmm14; rndkey @= xmm15;
+//      counter @= rbx; rounds @= rbp; ret @= r10; constp @= r11; in0 @= r14; end0 @= r15;
+        constp @= r11;
+
+    reads
+        key; rsp;
+        memTaint;
+
+    modifies
+        len; 
+        T1; T2; Z0; 
+        inout0; inout1; inout2; inout3; inout4; inout5; rndkey;
+        constp; mem; efl;
+
+    requires
+        // Valid buffers and pointers
+        validDstAddrs128(mem, rsp, stack_b, 8, memTaint, Secret);
+
+        // AES reqs
+        aes_reqs(alg, key_words, round_keys, keys_b, key, mem, memTaint);
+
+        len >= 6;
+
+        // Counters
+        ctr_orig.lo0 % 256 + 6 < 256;
+        T1 == reverse_bytes_quad32(inc32lite(ctr_orig, 0));
+    ensures
+        len == old(len) - 6;
+        
+        T2 == Mkfour(0, 0, 0, 0x1000000);
+        rndkey == index(round_keys, 0);
+
+        inout0 == quad32_xor(reverse_bytes_quad32(inc32lite(ctr_orig, 0)), rndkey);   
+        inout1 == reverse_bytes_quad32(inc32lite(ctr_orig, 1));
+        inout2 == reverse_bytes_quad32(inc32lite(ctr_orig, 2));
+        inout3 == reverse_bytes_quad32(inc32lite(ctr_orig, 3));
+        inout4 == reverse_bytes_quad32(inc32lite(ctr_orig, 4));
+        inout5 == reverse_bytes_quad32(inc32lite(ctr_orig, 5));
+
+        buffer128_read(stack_b, 1, mem) == Mkfour(0, 0, 0, 0);
+{
+    load_one_msb();   // # borrow $T2, .Lone_msb
+    Sub64(len, 6);
+    VPxor(Z0, Z0, Z0);  // # $Z0   = 0
+    lemma_quad32_xor();
+    Load128_buffer(rndkey, key, 0x00-0x80, Secret, keys_b, 0);
+    VPaddd(inout1, T1, T2);      lemma_incr_msb(inc32lite(ctr_orig, 0), old(T1), inout1, 1);
+    VPaddd(inout2, inout1, T2);  lemma_incr_msb(inc32lite(ctr_orig, 0), old(T1), inout2, 2);
+    VPaddd(inout3, inout2, T2);  lemma_incr_msb(inc32lite(ctr_orig, 0), old(T1), inout3, 3);
+    VPaddd(inout4, inout3, T2);  lemma_incr_msb(inc32lite(ctr_orig, 0), old(T1), inout4, 4);
+    VPaddd(inout5, inout4, T2);  lemma_incr_msb(inc32lite(ctr_orig, 0), old(T1), inout5, 5);
+    VPxor(inout0, T1, rndkey);
+    Store128_buffer(rsp, Z0, 0x10, Secret, stack_b, 1);     // # "$Z3" = 0
+}
+
 #reset-options ""
 procedure {:quick} {:verify true} AES_GCM_encrypt(
     inline alg:algorithm,  
@@ -2012,7 +2084,7 @@ procedure {:quick} {:verify true} AES_GCM_encrypt(
         memTaint;
 
     modifies
-        inp; outp; len; key; counter; constp; r12; in0;
+        inp; outp; len; key; counter; constp; r12; r13; in0;
         Ii; T1; T2; Hkey; Z0; Z1; Z2; Z3; Xi;
         inout0; inout1; inout2; inout3; inout4; inout5; rndkey;
         mem; efl;
@@ -2041,9 +2113,10 @@ procedure {:quick} {:verify true} AES_GCM_encrypt(
         buffer_addr(keys_b, mem) + 0x80 < pow2_64;
         aes_reqs(alg, key_words, round_keys, keys_b, key + 0x80, mem, memTaint);
 
-
+        // Len is # of 128-bit blocks
         len % 6 == 0;
-        len >= 12;
+        len >= 16;
+        12 + len + 6 < pow2_32;
 {
     ghost var plain_quads := buffer128_as_seq(mem, in_b);
     Load128_buffer(T1, ivp, 0, Secret, iv_b, 0);    // # input counter value
@@ -2074,13 +2147,14 @@ procedure {:quick} {:verify true} AES_GCM_encrypt(
     Store128_buffer(rsp, Z0, 0x50, Secret, stack_b, 5);
     VPshufb(Z2, inout4, Ii);
     Store128_buffer(rsp, Z1, 0x40, Secret, stack_b, 4);
-    VPshufb(Z3, inout5, Ii);
+    VPshufb(Z3, inout5, Ii);                // # passed to _aesni_ctr32_ghash_6x
     Store128_buffer(rsp, Z2, 0x30, Secret, stack_b, 3);
     
     AESNI_ctr32_6x(alg, 1, in_b, out_b, plain_quads, key_words, round_keys, keys_b, inc32(ctr_BE, 6), ctr_BE);
 
-    //Sub64(len, 12);
+    Sub64(len, 12);
 
-
+    Ctr32_ghash_6_prelude(alg, stack_b, key_words, round_keys, keys_b, inc32(ctr_BE, 12));
+    //Loop6x_loop(alg, 2, iv_b, out_b, in_b, out_b, stack_b, key_words, round_keys, keys_b, ctr_BE, inc32(ctr_BE, 12)); 
 }
 
