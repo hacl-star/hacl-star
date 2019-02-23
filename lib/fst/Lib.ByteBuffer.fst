@@ -125,8 +125,12 @@ let uint_from_bytes_le #t #l i =
   | U16 -> let u = C.load16_le i in cast #t #l U16 l u
   | U32 -> let u = C.load32_le i in cast #t #l U32 l u
   | U64 -> let u = C.load64_le i in cast #t #l U64 l u
-  | U128 -> let u = C.load128_le i in cast #t #l U128 l u
-
+  | U128 -> 
+    let u = C.load128_le i in 
+    let o = cast #t #l U128 l u in
+    uintv_extensionality o (BS.uint_from_bytes_le (as_seq h0 i));
+    o
+  
 let uint_from_bytes_be #t #l i =
   let h0 = ST.get () in
   nat_from_bytes_be_to_n l (as_seq h0 i);
@@ -135,7 +139,11 @@ let uint_from_bytes_be #t #l i =
   | U16 -> let u = C.load16_be i in cast #t #l U16 l u
   | U32 -> let u = C.load32_be i in cast #t #l U32 l u
   | U64 -> let u = C.load64_be i in cast #t #l U64 l u
-  | U128 -> let u = C.load128_be i in cast #t #l U128 l u
+  | U128 -> 
+    let u = C.load128_be i in 
+    let o = cast #t #l U128 l u in
+    uintv_extensionality o (BS.uint_from_bytes_be (as_seq h0 i));
+    o
 
 val nat_to_bytes_n_to_le: len:size_nat -> l:secrecy_level -> n:nat{n < pow2 (8 * len)} ->
   Lemma (ensures (Seq.equal (Kremlin.Endianness.n_to_le (size len) n)
