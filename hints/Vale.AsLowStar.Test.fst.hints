@@ -8,7 +8,7 @@
       0,
       [ "@query" ],
       0,
-      "299c32b848d133a5e11455b9cf928f8b"
+      "3a7666f9f7c7eb9f74b06275dda0005d"
     ],
     [
       "Vale.AsLowStar.Test.as_normal_t",
@@ -17,7 +17,7 @@
       0,
       [ "@query" ],
       0,
-      "962a0510d3a9b5fe300f753c7902cfb9"
+      "539afcdefb1ee4c486e40e1237fe2bc9"
     ],
     [
       "Vale.AsLowStar.Test.dom",
@@ -29,7 +29,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "82e1eb3027be9a27821adb20274ab146"
+      "fd22e891c8e1a1eb0ddf4ab210bde447"
     ],
     [
       "Vale.AsLowStar.Test.call_c_t",
@@ -59,7 +59,7 @@
         "typing_Vale.AsLowStar.Test.dom"
       ],
       0,
-      "4d9526fa36e7b07b70cd8ec044ea97f3"
+      "00b3f6ebc7918b14ff5a2eb3b1d0272d"
     ],
     [
       "Vale.AsLowStar.Test.call_c",
@@ -89,7 +89,7 @@
         "typing_Vale.AsLowStar.Test.dom"
       ],
       0,
-      "0583a085c9857e0e19cbf0c36d739f2f"
+      "321ec51a891c2c2c7e08fc3e93c9fdb6"
     ],
     [
       "Vale.AsLowStar.Test.vm_pre",
@@ -121,7 +121,7 @@
         "token_correspondence_Prims.pow2.fuel_instrumented"
       ],
       0,
-      "4e2925c2fbba5f7dfa6f9a4692cd7cba"
+      "e33011e7c01d388d14c53617b74f1f74"
     ],
     [
       "Vale.AsLowStar.Test.vm_pre",
@@ -152,7 +152,7 @@
         "token_correspondence_Prims.pow2.fuel_instrumented"
       ],
       0,
-      "91e32b05b0d1a72aa6d1bb4762c455a6"
+      "63976b357d3fe9ba97b3d53341157138"
     ],
     [
       "Vale.AsLowStar.Test.vm_post",
@@ -184,7 +184,7 @@
         "token_correspondence_Prims.pow2.fuel_instrumented"
       ],
       0,
-      "a3a2652eeb0d7e1710801bb6a43b7740"
+      "2bc49555df16154315bb23fdbf02dcd1"
     ],
     [
       "Vale.AsLowStar.Test.vm_post",
@@ -215,7 +215,7 @@
         "token_correspondence_Prims.pow2.fuel_instrumented"
       ],
       0,
-      "8c79bc0505c3e57ab2f0cd99dc4fa57d"
+      "2f009a271a153bc69e0d943da09c7650"
     ],
     [
       "Vale.AsLowStar.Test.vm_lemma'",
@@ -247,7 +247,7 @@
         "token_correspondence_Prims.pow2.fuel_instrumented"
       ],
       0,
-      "48951a26b63fef819cca152680b021ad"
+      "4f8945b7808ffd70284c546c0d9e93d6"
     ],
     [
       "Vale.AsLowStar.Test.vm_lemma'",
@@ -354,7 +354,7 @@
         "typing_tok_X64.Machine_s.Rax@tok"
       ],
       0,
-      "118f86d3947eabc9cac49c7e641253a9"
+      "8154f967bf1d5723aa1b2f4645dcfd9c"
     ],
     [
       "Vale.AsLowStar.Test.vm_lemma",
@@ -449,7 +449,7 @@
         "typing_tok_Interop.Types.TUInt8@tok"
       ],
       0,
-      "5fe89fb6263267900e525dbf2745d5c5"
+      "ccfa3d0a97574a7cfbb2b6f9db1abfd1"
     ],
     [
       "Vale.AsLowStar.Test.lowstar_memcpy_t",
@@ -488,7 +488,7 @@
         "typing_Vale.AsLowStar.Test.dom"
       ],
       0,
-      "4622fe1561b8b938dd2c66ba921af5bf"
+      "d7ed1bf4669b892683f362e08fabc0cb"
     ],
     [
       "Vale.AsLowStar.Test.lowstar_memcpy",
@@ -530,7 +530,7 @@
         "typing_Vale.AsLowStar.Test.dom", "typing_Vale.AsLowStar.Test.n"
       ],
       0,
-      "f84b9e3f7d8d85e8a29e1dfee35bd3ac"
+      "ff781dde52226320f619222ddc3a919c"
     ],
     [
       "Vale.AsLowStar.Test.test",
@@ -551,7 +551,7 @@
         "typing_tok_Interop.Types.TUInt8@tok"
       ],
       0,
-      "d587cf118774e7d593ed6331c41f902f"
+      "5d93855e721e1aba5ef53425387cec48"
     ],
     [
       "Vale.AsLowStar.Test.itest",
@@ -566,13 +566,26 @@
         "equation_Interop.Types.view_n",
         "equation_LowStar.Monotonic.Buffer.length",
         "lemma_Vale.AsLowStar.MemoryHelpers.as_vale_immbuffer_len",
-        "primitive_Prims.op_Division", "primitive_Prims.op_Multiply",
+        "typing_tok_Interop.Types.TUInt64@tok"
+      ],
+      0,
+      "a64c74e8207a2131a56a1937ce96d37b"
+    ],
+    [
+      "Vale.AsLowStar.Test.lbv_as_seq_eq",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.pos",
+        "fuel_guarded_inversion_LowStar.BufferView.view",
+        "proj_equation_LowStar.BufferView.View_n",
         "projection_inverse_BoxInt_proj_0",
         "typing_tok_Interop.Types.TUInt64@tok",
         "typing_tok_Interop.Types.TUInt8@tok"
       ],
       0,
-      "50f6b6dcfead1b40ea5d8c0b0fc956b2"
+      "6206e4279393d9193f4cdb4449ea5128"
     ],
     [
       "Vale.AsLowStar.Test.lbv_as_seq_eq",
@@ -612,7 +625,7 @@
         "typing_tok_Interop.Types.TUInt8@tok"
       ],
       0,
-      "ea5e6c94aac3663b29db458cb260e33a"
+      "abac044f4280f69d5ea28e34bc3e8d9e"
     ],
     [
       "Vale.AsLowStar.Test.memcpy_test",
@@ -710,7 +723,7 @@
         "typing_tok_Interop.Types.TUInt8@tok"
       ],
       0,
-      "85e560eb68e4e3b5ad33a819bb2fb33e"
+      "98ce44b6f4275ccf35eebb6c816fea44"
     ],
     [
       "Vale.AsLowStar.Test.empty_list",
@@ -726,7 +739,7 @@
         "projection_inverse_Prims.Nil_a"
       ],
       0,
-      "eb42c21e6e3a3db0bc8099fd0ab7e5ca"
+      "05aee997dbfc7117b700e389004b7606"
     ],
     [
       "Vale.AsLowStar.Test.aesni_dom",
@@ -745,7 +758,7 @@
         "typing_Interop.X64.max_stdcall"
       ],
       0,
-      "55e7335f0ee5ad2c529065c74655861e"
+      "e4bb6abb64b491f35f7bbd86e54ca160"
     ],
     [
       "Vale.AsLowStar.Test.aesni_pre",
@@ -776,7 +789,7 @@
         "token_correspondence_Prims.pow2.fuel_instrumented"
       ],
       0,
-      "eff15284c5cdcdf52ad88e51b58d8dc8"
+      "7353ae14696883c046ee379684a7ea1e"
     ],
     [
       "Vale.AsLowStar.Test.aesni_pre",
@@ -807,7 +820,7 @@
         "token_correspondence_Prims.pow2.fuel_instrumented"
       ],
       0,
-      "83abbaa8f815dde6c43cbcc21db95720"
+      "f2e734e6726d63ac9481d77d0bbc0ba6"
     ],
     [
       "Vale.AsLowStar.Test.aesni_post",
@@ -838,7 +851,7 @@
         "token_correspondence_Prims.pow2.fuel_instrumented"
       ],
       0,
-      "e28147fb7273fd37108e5b6dfb5e7d44"
+      "a0f08ac45e8daaad82ad0cfcd7d1ff1f"
     ],
     [
       "Vale.AsLowStar.Test.aesni_post",
@@ -869,7 +882,7 @@
         "token_correspondence_Prims.pow2.fuel_instrumented"
       ],
       0,
-      "56bca1a17178de7ebdc24ad57ff845b3"
+      "b3e116b629a3a29ac207b69a53907ebe"
     ],
     [
       "Vale.AsLowStar.Test.with_len",
@@ -890,7 +903,7 @@
         "typing_FStar.List.Tot.Base.length"
       ],
       0,
-      "ed2de26f578d9336f6880f6baf161484"
+      "2507d0ecb92c57fd2bb29eba454a3c43"
     ],
     [
       "Vale.AsLowStar.Test.aesni_lemma'",
@@ -913,7 +926,7 @@
         "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-      "456be141a001301df2fb2bf83d21f42b"
+      "e2de8ae79130841966bdf1dd7b6b33c9"
     ],
     [
       "Vale.AsLowStar.Test.aesni_lemma'",
@@ -973,7 +986,7 @@
         "typing_tok_X64.Machine_s.Rax@tok"
       ],
       0,
-      "bd48d3db676d9aca7db64cc80600057b"
+      "ed3cf2e535d2531372cff1f44bfbcc39"
     ],
     [
       "Vale.AsLowStar.Test.aesni_lemma",
@@ -1071,7 +1084,7 @@
         "typing_tok_Interop.Types.TUInt8@tok"
       ],
       0,
-      "9c65c7480cf80c1350c02797b5f3f659"
+      "53e03b62394d46827c526adc4c4b44b0"
     ],
     [
       "Vale.AsLowStar.Test.lowstar_aesni_t",
@@ -1118,7 +1131,7 @@
         "typing_Vale.AsLowStar.Test.n"
       ],
       0,
-      "3a57cb22bc94402934cba6c1050184c9"
+      "e6d7db79dfb01e79fd0e60c5002e2d71"
     ],
     [
       "Vale.AsLowStar.Test.lowstar_aesni",
@@ -1158,7 +1171,7 @@
         "typing_Vale.AsLowStar.Test.n"
       ],
       0,
-      "a1d4b95e88888758c3ab996cdf8b654b"
+      "da6cae3425e7ac9114036456bfc91b1a"
     ],
     [
       "Vale.AsLowStar.Test.aesni_test",
@@ -1179,7 +1192,7 @@
         "typing_Interop.Assumptions.win"
       ],
       0,
-      "5c7f1cd9e1203e05a06b31cedcb2e3a5"
+      "9e223b4a4c629cb2b069408d8bbcb2cc"
     ],
     [
       "Vale.AsLowStar.Test.as_t",
@@ -1188,7 +1201,7 @@
       0,
       [ "@query" ],
       0,
-      "7fe6ef82041ea7d1d3fec7fc5f02a8d1"
+      "619b7bf88f65b7ce96d0300cfaeeaeff"
     ],
     [
       "Vale.AsLowStar.Test.as_normal_t",
@@ -1197,7 +1210,7 @@
       0,
       [ "@query" ],
       0,
-      "05713eede8f3c2540ff4b00a1836e5e3"
+      "0a91f072da0fcba96a2f8c07529cad81"
     ],
     [
       "Vale.AsLowStar.Test.dom",
@@ -1209,7 +1222,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "d9993fdf2c28d776eaa093166eaa5c4d"
+      "c1df4808cecdfaf346ef4b9ea364696d"
     ],
     [
       "Vale.AsLowStar.Test.call_c_t",
@@ -1239,7 +1252,7 @@
         "typing_Vale.AsLowStar.Test.dom"
       ],
       0,
-      "90c5889e714feffa4c77b5da3173344b"
+      "dfdaa3315fe9bf8977bc2ac4c1a2447a"
     ],
     [
       "Vale.AsLowStar.Test.call_c",
@@ -1269,7 +1282,7 @@
         "typing_Vale.AsLowStar.Test.dom"
       ],
       0,
-      "95b2a7e304d07b91a4e1c5362a0ade5c"
+      "5533f9d76533237687310fbf169c45d0"
     ],
     [
       "Vale.AsLowStar.Test.vm_pre",
@@ -1301,7 +1314,7 @@
         "token_correspondence_Prims.pow2.fuel_instrumented"
       ],
       0,
-      "22c6d07462fd3272a8d22abc27216dce"
+      "95a3b5bd210d4b984769026003b60064"
     ],
     [
       "Vale.AsLowStar.Test.vm_pre",
@@ -1332,7 +1345,7 @@
         "token_correspondence_Prims.pow2.fuel_instrumented"
       ],
       0,
-      "c8b55039aa01ba81aedfdf93ba806fc2"
+      "61f82108b6ee3084ded4c861b584b2a7"
     ],
     [
       "Vale.AsLowStar.Test.vm_post",
@@ -1364,7 +1377,7 @@
         "token_correspondence_Prims.pow2.fuel_instrumented"
       ],
       0,
-      "18fdbb2d3cc59ee46308e46bf1152000"
+      "f3bf4cb6c4769d1ab6b69d97e0882940"
     ],
     [
       "Vale.AsLowStar.Test.vm_post",
@@ -1395,7 +1408,7 @@
         "token_correspondence_Prims.pow2.fuel_instrumented"
       ],
       0,
-      "cc85e47442c6d2909928016a56aeb7e2"
+      "b0fd445a869dd23826a1c0051fc407eb"
     ],
     [
       "Vale.AsLowStar.Test.vm_lemma'",
@@ -1427,7 +1440,7 @@
         "token_correspondence_Prims.pow2.fuel_instrumented"
       ],
       0,
-      "e27052e9677aac0fa8b5740865594f5f"
+      "f5fbcc80064c87a9c13e8bfd48be4dc1"
     ],
     [
       "Vale.AsLowStar.Test.vm_lemma'",
@@ -1543,7 +1556,7 @@
         "typing_tok_X64.Machine_s.Rax@tok"
       ],
       0,
-      "2d5530fa32b6bb14a3a1c1bceab2e1eb"
+      "cf08c7c964662d8f576e5d0993f808d1"
     ],
     [
       "Vale.AsLowStar.Test.vm_lemma'",
@@ -1575,7 +1588,7 @@
         "token_correspondence_Prims.pow2.fuel_instrumented"
       ],
       0,
-      "8a3fb9906ea62050ff33de46901f43d8"
+      "0ec998458e3ce29df330ae29e88b2667"
     ],
     [
       "Vale.AsLowStar.Test.vm_lemma",
@@ -1670,7 +1683,7 @@
         "typing_tok_Interop.Types.TUInt8@tok"
       ],
       0,
-      "30e74c17cd4f0afff586ad110bd9190f"
+      "3ca9c787f4bd7eb2700a2bd0e53828ba"
     ],
     [
       "Vale.AsLowStar.Test.lowstar_memcpy_t",
@@ -1709,7 +1722,7 @@
         "typing_Vale.AsLowStar.Test.dom"
       ],
       0,
-      "7ad48048d451ff1c6e351e5829ed184a"
+      "37c77d3223b264b35433f750652cbdb0"
     ],
     [
       "Vale.AsLowStar.Test.lowstar_memcpy",
@@ -1751,7 +1764,7 @@
         "typing_Vale.AsLowStar.Test.dom", "typing_Vale.AsLowStar.Test.n"
       ],
       0,
-      "73de5a3a86d701f3eb2279acf981cf9a"
+      "9b2aa5b7a63dd0fe2f4635c304eab61c"
     ],
     [
       "Vale.AsLowStar.Test.test",
@@ -1772,7 +1785,7 @@
         "typing_tok_Interop.Types.TUInt8@tok"
       ],
       0,
-      "8516dbcd86b98f1037a48904699e1213"
+      "86cddb2139565272d3d453aa7746103a"
     ],
     [
       "Vale.AsLowStar.Test.itest",
@@ -1793,7 +1806,7 @@
         "typing_tok_Interop.Types.TUInt8@tok"
       ],
       0,
-      "29fbeb48747176e6d618f4c99ac269eb"
+      "aede3bed4f3947d8f08b8c121da1fa00"
     ],
     [
       "Vale.AsLowStar.Test.lbv_as_seq_eq",
@@ -1833,7 +1846,7 @@
         "typing_tok_Interop.Types.TUInt8@tok"
       ],
       0,
-      "368416fd2d9d5d993f4694b9620807f5"
+      "5a9d9a34280567bde5d15103859f6598"
     ],
     [
       "Vale.AsLowStar.Test.empty_list",
@@ -1849,7 +1862,7 @@
         "projection_inverse_Prims.Nil_a"
       ],
       0,
-      "a18a8a3573bafb9237a42df23dffdd5e"
+      "d757fbcce4e4a9dc510247a8b2342dfb"
     ],
     [
       "Vale.AsLowStar.Test.aesni_dom",
@@ -1868,7 +1881,7 @@
         "typing_Interop.X64.max_stdcall"
       ],
       0,
-      "feb34064512935b09ef2a63d7144e25d"
+      "336edafebefc21d6b6d8cf164ff08655"
     ],
     [
       "Vale.AsLowStar.Test.aesni_pre",
@@ -1899,7 +1912,7 @@
         "token_correspondence_Prims.pow2.fuel_instrumented"
       ],
       0,
-      "8436f9e9dd7b1d6f617adffe3f02e608"
+      "58632e1bb8592df48cbd13d8535d0232"
     ],
     [
       "Vale.AsLowStar.Test.aesni_pre",
@@ -1930,7 +1943,7 @@
         "token_correspondence_Prims.pow2.fuel_instrumented"
       ],
       0,
-      "83a97b36b8848ee3cb0c18fec893f44c"
+      "46e4501fef5d006112fe3dd580f48e87"
     ],
     [
       "Vale.AsLowStar.Test.aesni_post",
@@ -1961,7 +1974,7 @@
         "token_correspondence_Prims.pow2.fuel_instrumented"
       ],
       0,
-      "b6d25f8cabb43b139b90e90d39e4d827"
+      "5f67d8b9a48e4b46790227e6a98c832e"
     ],
     [
       "Vale.AsLowStar.Test.aesni_post",
@@ -1992,7 +2005,7 @@
         "token_correspondence_Prims.pow2.fuel_instrumented"
       ],
       0,
-      "1b8d65dfc32bda5fbe7986bba3cb5c8c"
+      "762665ae9db9cf27ce40f6a609108f0b"
     ],
     [
       "Vale.AsLowStar.Test.with_len",
@@ -2013,7 +2026,7 @@
         "typing_FStar.List.Tot.Base.length"
       ],
       0,
-      "8a4bc61e880ce6a176db45be7173585c"
+      "6d8102b2c745a43141be442da66dfe84"
     ],
     [
       "Vale.AsLowStar.Test.aesni_lemma'",
@@ -2036,7 +2049,7 @@
         "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-      "0ebe2726fc0713f325b6d17aee40f023"
+      "833190f43c4db8fbbfb8e5ad32a0053b"
     ],
     [
       "Vale.AsLowStar.Test.aesni_lemma'",
@@ -2095,7 +2108,7 @@
         "typing_tok_X64.Machine_s.Rax@tok"
       ],
       0,
-      "719d2abdcef4b1e3a1c3b529b2c17e97"
+      "7e9af7ff3c30f9eae4b058d6b1c279b5"
     ],
     [
       "Vale.AsLowStar.Test.aesni_lemma'",
@@ -2118,7 +2131,7 @@
         "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-      "625d8dc98aa9dd298718d0f33657f776"
+      "5d5cf13aa21d0c204327d031ba35db2b"
     ],
     [
       "Vale.AsLowStar.Test.aesni_lemma",
@@ -2216,7 +2229,7 @@
         "typing_tok_Interop.Types.TUInt8@tok"
       ],
       0,
-      "1e47c70a38c8ea6f6e90632cbed37e43"
+      "0bc502e05a5a915b1dad222e0d60f59e"
     ],
     [
       "Vale.AsLowStar.Test.lowstar_aesni_t",
@@ -2263,7 +2276,7 @@
         "typing_Vale.AsLowStar.Test.n"
       ],
       0,
-      "c690ef08a6982dd84d055a7dc4c19c7e"
+      "55608293b38f2deccb7171e806fb0d40"
     ],
     [
       "Vale.AsLowStar.Test.lowstar_aesni",
@@ -2303,7 +2316,7 @@
         "typing_Vale.AsLowStar.Test.n"
       ],
       0,
-      "f7a73e75724e3fd2a4161ae670cb0e73"
+      "b728a9e97723ba61ca29a7f8206f1304"
     ]
   ]
 ]
