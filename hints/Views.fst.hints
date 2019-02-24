@@ -13,7 +13,7 @@
         "refinement_interpretation_Tm_refine_a0cd7d06c5da6444b6b51b319febde8e"
       ],
       0,
-      "4015681cdce06c8dd0e8c19320cbf9aa"
+      "c2928907d32c398f235644aecaa9cc6c"
     ],
     [
       "Views.put8_def",
@@ -32,7 +32,7 @@
         "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-      "02cfcb2a944348c5c5e8fa0ec9eb2fe3"
+      "d67a33af85cac548f927c913befe4828"
     ],
     [
       "Views.inverses8",
@@ -46,7 +46,7 @@
         "Prims_pretyping_ae567c2fb75be05905677af440075565",
         "Views_interpretation_Tm_arrow_3840c8979be1cac39f9ce95a0038d037",
         "equation_FStar.Seq.Properties.lseq",
-        "equation_LowStar.BufferView.inverses", "equation_Prims.nat",
+        "equation_LowStar.BufferView.Down.inverses", "equation_Prims.nat",
         "equation_Views.get8", "equation_Views.get8_def",
         "equation_Views.put8", "equation_Views.put8_def",
         "function_token_typing_FStar.UInt8.t",
@@ -69,16 +69,30 @@
         "typing_Views.put8"
       ],
       0,
-      "79a5dec882e24b651d4427dc2ac3846a"
+      "f271f1cdc8f729e03e8804f40184fe03"
     ],
     [
-      "Views.view8",
+      "Views.up_view8",
       1,
       1,
       0,
-      [ "@query" ],
+      [
+        "@query", "equation_FStar.Seq.Properties.lseq",
+        "equation_LowStar.BufferView.Up.inverses",
+        "function_token_typing_LowStar.BufferView.Down.inverses",
+        "token_correspondence_LowStar.BufferView.Up.inverses"
+      ],
       0,
-      "ae180f3ecaa81c6ba3dcb8ffda49df8f"
+      "d42c09286161edc59c93c1aeb5b8984e"
+    ],
+    [
+      "Views.down_view8",
+      1,
+      1,
+      0,
+      [ "@query", "equation_LowStar.BufferView.Down.inverses" ],
+      0,
+      "81f2c43d14fbaddf9d7f2932e8ab8bf5"
     ],
     [
       "Views.get16_def",
@@ -105,7 +119,7 @@
         "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-      "22f89f357412bd442cbde510b53071c7"
+      "0f6425262d889772cc878801af28e175"
     ],
     [
       "Views.put16_def",
@@ -134,7 +148,7 @@
         "typing_Prims.pow2"
       ],
       0,
-      "c077a752aa126c7916970798571365b1"
+      "a893b8cc644a5e493710f35bca8571f6"
     ],
     [
       "Views.inverses16",
@@ -153,7 +167,7 @@
         "equation_FStar.Seq.Properties.lseq", "equation_FStar.UInt.fits",
         "equation_FStar.UInt.max_int", "equation_FStar.UInt.min_int",
         "equation_FStar.UInt.size", "equation_FStar.UInt.uint_t",
-        "equation_LowStar.BufferView.inverses", "equation_Prims.nat",
+        "equation_LowStar.BufferView.Down.inverses", "equation_Prims.nat",
         "equation_Views.get16", "equation_Views.get16_def",
         "equation_Views.put16", "equation_Views.put16_def",
         "function_token_typing_FStar.UInt8.t",
@@ -190,16 +204,30 @@
         "typing_FStar.UInt8.v", "typing_Views.get16", "typing_Views.put16"
       ],
       0,
-      "1567213462b8cc2117dbe6bf3b62df38"
+      "a413d01fe728ec2332e0d5328ee0e336"
     ],
     [
-      "Views.view16",
+      "Views.up_view16",
       1,
       1,
       0,
-      [ "@query" ],
+      [
+        "@query", "equation_FStar.Seq.Properties.lseq",
+        "equation_LowStar.BufferView.Up.inverses",
+        "function_token_typing_LowStar.BufferView.Down.inverses",
+        "token_correspondence_LowStar.BufferView.Up.inverses"
+      ],
       0,
-      "0eb3862a84226dd244aa345121977072"
+      "1f64a7b0ef6b6e8e7179f808c7c8df99"
+    ],
+    [
+      "Views.down_view16",
+      1,
+      1,
+      0,
+      [ "@query", "equation_LowStar.BufferView.Down.inverses" ],
+      0,
+      "288e2346c287d0881f235b31f7daff4a"
     ],
     [
       "Views.get32_def",
@@ -241,7 +269,7 @@
         "typing_Words_s.int_to_natN"
       ],
       0,
-      "8dfe9b92b48d4d5af3c3d2175dcd2299"
+      "5c55e8d956416acba5935e577b39bd03"
     ],
     [
       "Views.put32_def",
@@ -280,7 +308,7 @@
         "typing_Tm_abs_45bc106d66ff9e2c3c9f4100524b39b3"
       ],
       0,
-      "d49c4717da97a46ca99eb46bcca8d91b"
+      "991ebb2b4549ca5987187b764d65e317"
     ],
     [
       "Views.inverses32",
@@ -303,7 +331,7 @@
         "equation_FStar.Seq.Properties.lseq", "equation_FStar.UInt.fits",
         "equation_FStar.UInt.max_int", "equation_FStar.UInt.min_int",
         "equation_FStar.UInt.size", "equation_FStar.UInt.uint_t",
-        "equation_LowStar.BufferView.inverses", "equation_Prims.nat",
+        "equation_LowStar.BufferView.Down.inverses", "equation_Prims.nat",
         "equation_Prims.pos", "equation_Views.get32",
         "equation_Views.get32_def", "equation_Views.put32",
         "equation_Views.put32_def", "equation_Words.Four_s.nat_to_four",
@@ -353,16 +381,30 @@
         "typing_Words.Seq_s.seq_uint8_to_seq_nat8"
       ],
       0,
-      "f6c523a2158d10ea8638673d34943481"
+      "b9af0902f09f2dcec17210959349f54d"
     ],
     [
-      "Views.view32",
+      "Views.up_view32",
       1,
       1,
       0,
-      [ "@query" ],
+      [
+        "@query", "equation_FStar.Seq.Properties.lseq",
+        "equation_LowStar.BufferView.Up.inverses",
+        "function_token_typing_LowStar.BufferView.Down.inverses",
+        "token_correspondence_LowStar.BufferView.Up.inverses"
+      ],
       0,
-      "16bfb43753ded18c3f24778dcce6f127"
+      "02494ae7f797b7c163acace487f7c3a4"
+    ],
+    [
+      "Views.down_view32",
+      1,
+      1,
+      0,
+      [ "@query", "equation_LowStar.BufferView.Down.inverses" ],
+      0,
+      "97016439a76062b553b3bdcec9ad5f7e"
     ],
     [
       "Views.get64_def",
@@ -399,7 +441,7 @@
         "typing_Tm_abs_45bc106d66ff9e2c3c9f4100524b39b3"
       ],
       0,
-      "7bdd1701aed892329f156fb1358a2b69"
+      "22cde56ca215f887f2401256b14a09b1"
     ],
     [
       "Views.put64_def",
@@ -437,7 +479,7 @@
         "typing_Tm_abs_45bc106d66ff9e2c3c9f4100524b39b3"
       ],
       0,
-      "4c3b7bc8f09b920781259095980ab996"
+      "40318749e1d33440aaffbf9e6ac38e8e"
     ],
     [
       "Views.inverses64",
@@ -458,7 +500,7 @@
         "equation_FStar.Seq.Properties.lseq", "equation_FStar.UInt.fits",
         "equation_FStar.UInt.max_int", "equation_FStar.UInt.min_int",
         "equation_FStar.UInt.size", "equation_FStar.UInt.uint_t",
-        "equation_LowStar.BufferView.inverses", "equation_Prims.nat",
+        "equation_LowStar.BufferView.Down.inverses", "equation_Prims.nat",
         "equation_Types_s.le_bytes_to_nat64",
         "equation_Types_s.le_nat64_to_bytes", "equation_Views.get64",
         "equation_Views.get64_def", "equation_Views.put64",
@@ -497,16 +539,30 @@
         "typing_Words.Seq_s.seq_uint8_to_seq_nat8"
       ],
       0,
-      "3715fcb33e0dbe678caf39a0f438088d"
+      "a4b60849d51ffb0250cea0b08646c9b6"
     ],
     [
-      "Views.view64",
+      "Views.up_view64",
       1,
       1,
       0,
-      [ "@query" ],
+      [
+        "@query", "equation_FStar.Seq.Properties.lseq",
+        "equation_LowStar.BufferView.Up.inverses",
+        "function_token_typing_LowStar.BufferView.Down.inverses",
+        "token_correspondence_LowStar.BufferView.Up.inverses"
+      ],
       0,
-      "16e3c26466767d2aaa9a8cbcce10ae98"
+      "9ad8c846c67f846e523c9f78773e39c9"
+    ],
+    [
+      "Views.down_view64",
+      1,
+      1,
+      0,
+      [ "@query", "equation_LowStar.BufferView.Down.inverses" ],
+      0,
+      "27d6df587f66524d7355b6c6c044d678"
     ],
     [
       "Views.get128_def",
@@ -531,7 +587,7 @@
         "typing_Tm_abs_45bc106d66ff9e2c3c9f4100524b39b3"
       ],
       0,
-      "cc05f5a14ae35a57d93eb1e011b208dc"
+      "fdeed910d4f85d1ad026eae896082027"
     ],
     [
       "Views.put128_def",
@@ -554,7 +610,7 @@
         "typing_Tm_abs_45bc106d66ff9e2c3c9f4100524b39b3"
       ],
       0,
-      "f1a14460298c10bc2c973451a5a249fb"
+      "de084873caecb9383b374fe73da313a5"
     ],
     [
       "Views.inverses128",
@@ -568,10 +624,10 @@
         "equation_Collections.Seqs_s.compose",
         "equation_Collections.Seqs_s.seq_map",
         "equation_FStar.Seq.Properties.lseq",
-        "equation_LowStar.BufferView.inverses", "equation_Prims.nat",
-        "equation_Types_s.le_quad32_to_bytes", "equation_Types_s.quad32",
-        "equation_Views.get128", "equation_Views.get128_def",
-        "equation_Views.put128", "equation_Views.put128_def",
+        "equation_LowStar.BufferView.Down.inverses", "equation_Prims.nat",
+        "equation_Types_s.quad32", "equation_Views.get128",
+        "equation_Views.get128_def", "equation_Views.put128",
+        "equation_Views.put128_def",
         "equation_Words.Seq_s.seq_uint8_to_seq_nat8",
         "equation_Words_s.nat8", "function_token_typing_FStar.UInt8.t",
         "function_token_typing_Opaque_s.make_opaque",
@@ -593,16 +649,30 @@
         "typing_Words.Seq_s.seq_uint8_to_seq_nat8"
       ],
       0,
-      "f0a6136bd3218215157897a6dd7eb2d2"
+      "0e6ccb15aa432ea8f45bbf627f3ea6e8"
     ],
     [
-      "Views.view128",
+      "Views.up_view128",
       1,
       1,
       0,
-      [ "@query" ],
+      [
+        "@query", "equation_FStar.Seq.Properties.lseq",
+        "equation_LowStar.BufferView.Up.inverses", "equation_Types_s.quad32",
+        "function_token_typing_LowStar.BufferView.Down.inverses",
+        "token_correspondence_LowStar.BufferView.Up.inverses"
+      ],
       0,
-      "2ca42632fb0a0cb13383b572d02def03"
+      "42b305f35105a94709854a696d951c77"
+    ],
+    [
+      "Views.down_view128",
+      1,
+      1,
+      0,
+      [ "@query", "equation_LowStar.BufferView.Down.inverses" ],
+      0,
+      "c474937acc3f592a0627d5b2768ce66b"
     ],
     [
       "Views.nat32s_to_nat128",
@@ -620,7 +690,7 @@
         "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-      "7b5db00032387fcaca2fbb983b6bb616"
+      "1c4ff555d73ae10633cf08a5646c6811"
     ],
     [
       "Views.get32_128_def",
@@ -659,7 +729,7 @@
         "typing_Tm_abs_45bc106d66ff9e2c3c9f4100524b39b3"
       ],
       0,
-      "42b5525217d6c3efe02baae0d0f50a20"
+      "98bd40b612388627eefd13eba86136d8"
     ],
     [
       "Views.put32_128_def",
@@ -699,7 +769,7 @@
         "typing_Words.Seq_s.four_to_seq_LE"
       ],
       0,
-      "cb8258cd2b01da67efd861b46215cd15"
+      "5b65a1d2b9ca5eadf09d8d26892eb7e6"
     ],
     [
       "Views.get32_128_aux1",
@@ -754,7 +824,7 @@
         "typing_Views.get32_128", "typing_Words.Seq_s.four_to_seq_LE"
       ],
       0,
-      "b1284e159374b51296cb2a2962f62137"
+      "0af5b7a9990c80867c93b436ebd7193e"
     ],
     [
       "Views.put32_128_aux1",
@@ -817,7 +887,7 @@
         "typing_Words_s.__proj__Mkfour__item__lo1"
       ],
       0,
-      "d9003a315e2f2227202ed7c8e20e924f"
+      "52453937dbff9fbe3e6bc9a1933e2124"
     ],
     [
       "Views.inverses32_128",
@@ -825,21 +895,26 @@
       1,
       0,
       [
-        "@query", "equation_LowStar.BufferView.inverses",
+        "@query", "equation_LowStar.BufferView.Down.inverses",
         "equation_Types_s.quad32", "token_correspondence_Views.get32_128",
         "token_correspondence_Views.put32_128"
       ],
       0,
-      "5090d5127155d18a84597662194fa08e"
+      "603e5f26bfb28292a7459ead51068b10"
     ],
     [
       "Views.view32_128",
       1,
       1,
       0,
-      [ "@query" ],
+      [
+        "@query", "equation_FStar.Seq.Properties.lseq",
+        "equation_LowStar.BufferView.Up.inverses", "equation_Types_s.quad32",
+        "function_token_typing_LowStar.BufferView.Down.inverses",
+        "token_correspondence_LowStar.BufferView.Up.inverses"
+      ],
       0,
-      "514363ec7a29a20b5f1260fca654d053"
+      "c6d8987c89603914b51795057e75aa14"
     ]
   ]
 ]
