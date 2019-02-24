@@ -11,7 +11,7 @@ include{:fstar}{:open} "X64.CPU_Features_s"
 
 module X64.FastWide
 
-#reset-options "--z3rlimit 30"
+#reset-options "--z3rlimit 60"
 
 #verbatim{:interface}
 open Types_s
@@ -51,7 +51,7 @@ open X64.FastSqr
 open X64.FastHybrid
 #endverbatim
 
-#reset-options "--z3rlimit 30"
+#reset-options "--z3rlimit 60"
 
 procedure{:quick}{:public}{:exportSpecs} fmul_stdcall(
     inline win:bool,
@@ -174,7 +174,7 @@ procedure{:quick}{:public}{:exportSpecs} fmul_stdcall(
     Pop(r12, stack_b, 5);
 }
 
-#reset-options "--z3rlimit 30"
+#reset-options "--z3rlimit 60"
 procedure{:quick}{:public}{:exportSpecs} fmul2_stdcall(
     inline win:bool,
     ghost stack_b:buffer64,
