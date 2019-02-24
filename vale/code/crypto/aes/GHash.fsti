@@ -12,8 +12,34 @@ open Workarounds
 open Collections.Seqs_s
 open Collections.Seqs
 open FStar.Seq
+open Math.Poly2_s
+open Math.Poly2
+open GF128
 
 #reset-options "--use_two_phase_tc true"
+
+let poly128 = p:poly{degree p < 128}
+
+let rec ghash_poly (h:poly) (init:poly) (data:int -> poly128) (j:int) (k:int) : Tot poly (decreases (k - j)) =
+  if k <= j then init else
+  gf128_mul_rev (ghash_poly h init data j (k - 1) +. data (k - 1)) h
+
+val lemma_ghash_poly_degree (h:poly) (init:poly) (data:int -> poly128) (j:int) (k:int) : Lemma
+  (requires degree h < 128 /\ degree init < 128)
+  (ensures degree (ghash_poly h init data j k) < 128)
+  (decreases (k - j))
+  [SMTPat (ghash_poly h init data j k)]
+
+val shift_gf128_key_1 (h:poly) : poly
+
+val lemma_ghash_rev (h:poly) (init:poly) (data:int -> poly128) (j:int) (k:int) : Lemma
+  (requires k > j /\ degree h < 128 /\ degree init < 128 /\ degree (data (k - 1)) < 128)
+  (ensures (
+    let h1 = shift_gf128_key_1 h in
+    let a = ghash_poly h init data j (k - 1) +. data (k - 1) in
+    ghash_poly h init data j k == mod_rev 128 (a *. h1) gf128_modulus
+  ))
+
 let rec ghash_incremental_def (h_LE:quad32) (y_prev:quad32) (x:seq quad32) : Tot quad32 (decreases %[length x]) =
   if length x = 0 then y_prev else
   let y_i_minus_1 = ghash_incremental_def h_LE y_prev (all_but_last x) in

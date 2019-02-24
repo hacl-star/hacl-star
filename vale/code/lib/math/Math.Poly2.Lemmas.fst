@@ -121,6 +121,12 @@ let lemma_bitwise_all () =
   lemma_add_define_all ();
   ()
 
+let lemma_monomial_add_degree n a =
+  lemma_bitwise_all ();
+  lemma_degree_is (monomial n +. a) n;
+  lemma_degree_is (a +. monomial n) n;
+  ()
+
 let lemma_mul_distribute_left a b c =
   lemma_mul_commute (a +. b) c;
   lemma_mul_commute a c;
@@ -268,6 +274,10 @@ let lemma_mod_mul_mod a b c =
   lemma_mul_smaller_is_zero (z *. c +. x +. x') b;
   lemma_add_cancel_eq y y';
   ()
+
+let lemma_mod_mul_mod_right a b c =
+  lemma_mul_all ();
+  lemma_mod_mul_mod b c a
 
 let lemma_mod_reduce a b c =
   calc (==) {

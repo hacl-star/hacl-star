@@ -1,21 +1,46 @@
 module GHash
-
-open Opaque_s
-open Words_s
-open Types_s
-open Arch.Types
-open GHash_s
-open GF128_s
-open GCTR_s
-open GCM_helpers
-open Workarounds
-open Collections.Seqs_s
-open Collections.Seqs
-open FStar.Seq
+open Math.Poly2.Lemmas
 
 #reset-options "--use_two_phase_tc true"
 
-// avoids need for extra fuel
+let rec lemma_ghash_poly_degree h init data j k =
+  if k > j then lemma_ghash_poly_degree h init data j (k - 1)
+
+let shift_gf128_key_1 h =
+  shift_key_1 128 gf128_modulus_low_terms h
+
+let lemma_ghash_rev (h:poly) (init:poly) (data:int -> poly128) (j:int) (k:int) : Lemma
+  (requires k > j /\ degree h < 128 /\ degree init < 128 /\ degree (data (k - 1)) < 128)
+  (ensures (
+    let h1 = shift_gf128_key_1 h in
+    let a = ghash_poly h init data j (k - 1) +. data (k - 1) in
+    ghash_poly h init data j k == mod_rev 128 (a *. h1) gf128_modulus
+  ))
+  =
+  let h1 = shift_gf128_key_1 h in
+  let a = ghash_poly h init data j (k - 1) +. data (k - 1) in
+  let rev x = reverse x 127 in
+  let g = gf128_modulus in
+  lemma_gf128_degree ();
+  calc (==) {
+    // ghash_poly h init data j k
+    rev ((rev a *. rev h) %. g);
+    == {lemma_mod_mul_mod_right (rev a) (rev h) g}
+    rev ((rev a *. (rev h %. g)) %. g);
+    == {lemma_shift_key_1 128 gf128_modulus_low_terms h}
+    rev ((rev a *. (shift (rev h1) 1 %. g)) %. g);
+    == {lemma_mod_mul_mod_right (rev a) (shift (rev h1) 1) g}
+    rev ((rev a *. (shift (rev h1) 1)) %. g);
+    == {lemma_shift_is_mul (rev h1) 1}
+    rev ((rev a *. (rev h1 *. monomial 1)) %. g);
+    == {lemma_mul_all ()}
+    rev (((rev a *. rev h1) *. monomial 1) %. g);
+    == {lemma_shift_is_mul (rev a *. rev h1) 1}
+    rev (shift (rev a *. rev h1) 1 %. g);
+    == {lemma_mul_reverse_shift_1 a h1 127}
+    rev (reverse (a *. h1) 255 %. g);
+  }
+
 let lemma_ghash_incremental_def_0 (h_LE:quad32) (y_prev:quad32) (x:seq quad32)
   =
   ()

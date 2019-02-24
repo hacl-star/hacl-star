@@ -150,3 +150,43 @@ let gf128_low_shift : poly = shift gf128_modulus_low_terms (-1)
 // of_fun 8 (fun (i:nat) -> i = 127 || i = 126 || i = 121)
 let gf128_rev_shift : poly = reverse gf128_low_shift 127
 
+let gf128_mul_rev (a b:poly) : poly =
+  reverse (gf128_mul (reverse a 127) (reverse b 127)) 127
+
+// TODO: change definition of reverse from (reverse a 127) to (reverse 128 a)
+let mod_rev (n:pos) (a b:poly) : poly =
+  reverse (reverse a (n + n - 1) %. b) (n - 1)
+
+let shift_key_1 (n:pos) (f h:poly) : poly =
+  let g = monomial n +. f in
+  let h1 = shift h 1 in
+  let offset = reverse (shift g (-1)) (n - 1) in
+  mask h1 n +. (if h1.[n] then offset else zero)
+
+val lemma_shift_key_1 (n:pos) (f h:poly) : Lemma
+  (requires f.[0] /\ degree f < n /\ degree h < n)
+  (ensures (
+    let g = monomial n +. f in
+    shift (reverse (shift_key_1 n f h) (n - 1)) 1 %. g == reverse h (n - 1) %. g
+  ))
+
+val lemma_Mul128 (a b:poly) : Lemma
+  (requires degree a < 128 /\ degree b < 128)
+  (ensures (
+    let aL = mask a 64 in
+    let bL = mask b 64 in
+    let aH = shift a (-64) in
+    let bH = shift b (-64) in
+    a *. b == aL *. bL +. shift (aL *. bH +. aH *. bL) 64 +. shift (aH *. bH) 128
+  ))
+
+val lemma_Mul128_accum (z0 z1 z2 a b:poly) : Lemma
+  (requires degree a < 128 /\ degree b < 128)
+  (ensures (
+    let z = z0 +. shift z1 64 +. shift z2 128 in
+    let aL = mask a 64 in
+    let bL = mask b 64 in
+    let aH = shift a (-64) in
+    let bH = shift b (-64) in
+    z +. a *. b == (z0 +. aL *. bL) +. shift (z1 +. aL *. bH +. aH *. bL) 64 +. shift (z2 +. aH *. bH) 128
+  ))

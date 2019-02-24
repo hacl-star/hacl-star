@@ -98,6 +98,10 @@ val lemma_bitwise_all (_:unit) : Lemma
     (forall (a b:poly) (i:int).{:pattern (a +. b).[i]} (a +. b).[i] == (a.[i] <> b.[i]))
   )
 
+val lemma_monomial_add_degree (n:nat) (a:poly) : Lemma
+  (requires degree a < n)
+  (ensures degree (monomial n +. a) == n /\ degree (a +. monomial n) == n)
+
 val lemma_mul_distribute_left (a b c:poly) : Lemma ((a +. b) *. c == (a *. c) +. (b *. c))
 val lemma_mul_distribute_right (a b c:poly) : Lemma (a *. (b +. c) == (a *. b) +. (a *. c))
 
@@ -158,9 +162,14 @@ val lemma_mod_cancel (a:poly) : Lemma
   (requires degree a >= 0)
   (ensures a %. a == zero)
 
+// TODO: rename to lemma_mod_mul_mod_left and switch b and c
 val lemma_mod_mul_mod (a b c:poly) : Lemma
   (requires degree b >= 0)
   (ensures ((a %. b) *. c) %. b == (a *. c) %. b)
+
+val lemma_mod_mul_mod_right (a b c:poly) : Lemma
+  (requires degree c >= 0)
+  (ensures (a *. (b %. c)) %. c == (a *. b) %. c)
 
 val lemma_mod_reduce (a b c:poly) : Lemma
   (requires degree (b +. c) >= 0)

@@ -572,3 +572,92 @@ let lemma_reduce_rev a0 a1 a2 h n =
     == {lemma_reduce_rev_bits a0 a1 a2 c n}
     swap y_10c n +. (a2 +. shift a1 (-n)) +. mask y_10c n *. c;
   }
+
+let lemma_shift_key_1 n f h =
+  let g = monomial n +. f in
+  lemma_monomial_add_degree n f;
+  let rev x = reverse x (n - 1) in
+  let h1 = shift h 1 in
+  let offset = reverse (shift g (-1)) (n - 1) in
+  if h1.[n] then
+    calc (==) {
+      shift (rev (mask h1 n +. offset)) 1 %. g;
+      == {
+        lemma_bitwise_all ();
+        lemma_equal (shift (rev (mask h1 n +. offset)) 1) (rev h +. g)
+      }
+      (rev h +. g) %. g;
+      == {lemma_mod_distribute (rev h) g g; lemma_mod_cancel g; lemma_add_all ()}
+      rev h %. g;
+    }
+  else
+    calc (==) {
+      shift (rev (mask h1 n +. zero)) 1 %. g;
+      == {
+        lemma_bitwise_all ();
+        lemma_equal (shift (rev (mask h1 n +. zero)) 1) (rev h)
+      }
+      rev h %. g;
+    }
+
+let lemma_Mul128 a b =
+  let aL = mask a 64 in
+  let bL = mask b 64 in
+  let aH = shift a (-64) in
+  let bH = shift b (-64) in
+  calc (==) {
+    a *. b;
+    == {
+      lemma_bitwise_all ();
+      lemma_equal a (aL +. shift aH 64);
+      lemma_equal b (bL +. shift bH 64)
+    }
+    (aL +. shift aH 64) *. (bL +. shift bH 64);
+    == {lemma_mul_distribute_left aL (shift aH 64) (bL +. shift bH 64)}
+    aL *. (bL +. shift bH 64) +. shift aH 64 *. (bL +. shift bH 64);
+    == {lemma_mul_distribute_right aL bL (shift bH 64)}
+    aL *. bL +. aL *. shift bH 64 +. shift aH 64 *. (bL +. shift bH 64);
+    == {lemma_mul_distribute_right (shift aH 64) bL (shift bH 64)}
+    aL *. bL +. aL *. shift bH 64 +. (shift aH 64 *. bL +. shift aH 64 *. shift bH 64);
+    == {lemma_add_all ()}
+    aL *. bL +. (aL *. shift bH 64 +. shift aH 64 *. bL) +. shift aH 64 *. shift bH 64;
+    == {lemma_shift_is_mul aH 64; lemma_shift_is_mul bH 64}
+    aL *. bL +. (aL *. (bH *. monomial 64) +. aH *. monomial 64 *. bL) +. aH *. monomial 64 *. (bH *. monomial 64);
+    == {lemma_mul_all ()}
+    aL *. bL +. (aL *. bH *. monomial 64 +. aH *. bL *. monomial 64) +. aH *. bH *. (monomial 64 *. monomial 64);
+    == {lemma_mul_monomials 64 64}
+    aL *. bL +. (aL *. bH *. monomial 64 +. aH *. bL *. monomial 64) +. aH *. bH *. monomial 128;
+    == {lemma_mul_distribute_left (aL *. bH) (aH *. bL) (monomial 64)}
+    aL *. bL +. (aL *. bH +. aH *. bL) *. monomial 64 +. aH *. bH *. monomial 128;
+    == {lemma_shift_is_mul (aL *. bH +. aH *. bL) 64; lemma_shift_is_mul (aH *. bH) 128}
+    aL *. bL +. shift (aL *. bH +. aH *. bL) 64 +. shift (aH *. bH) 128;
+  }
+
+let lemma_Mul128_accum z0 z1 z2 a b =
+  let z = z0 +. shift z1 64 +. shift z2 128 in
+  let aL = mask a 64 in
+  let bL = mask b 64 in
+  let aH = shift a (-64) in
+  let bH = shift b (-64) in
+  calc (==) {
+    z +. a *. b;
+    == {lemma_Mul128 a b}
+    z +. (aL *. bL +. shift (aL *. bH +. aH *. bL) 64 +. shift (aH *. bH) 128);
+    == {lemma_shift_is_mul (aL *. bH +. aH *. bL) 64; lemma_shift_is_mul (aH *. bH) 128}
+    z +. (aL *. bL +. (aL *. bH +. aH *. bL) *. monomial 64 +. aH *. bH *. monomial 128);
+    == {lemma_mul_distribute_left (aL *. bH) (aH *. bL) (monomial 64)}
+    z +. (aL *. bL +. (aL *. bH *. monomial 64 +. aH *. bL *. monomial 64) +. aH *. bH *. monomial 128);
+    == {lemma_add_all ()}
+    z0 +. aL *. bL +. (shift z1 64 +. aL *. bH *. monomial 64 +. aH *. bL *. monomial 64) +. (shift z2 128 +. aH *. bH *. monomial 128);
+    == {lemma_shift_is_mul z1 64; lemma_shift_is_mul z2 128}
+    z0 +. aL *. bL +. (z1 *. monomial 64 +. aL *. bH *. monomial 64 +. aH *. bL *. monomial 64) +. (z2 *. monomial 128 +. aH *. bH *. monomial 128);
+    == {lemma_mul_distribute_left z1 (aL *. bH) (monomial 64)}
+    z0 +. aL *. bL +. ((z1 +. aL *. bH) *. monomial 64 +. aH *. bL *. monomial 64) +. (z2 *. monomial 128 +. aH *. bH *. monomial 128);
+    == {lemma_mul_distribute_left (z1 +. aL *. bH) (aH *. bL) (monomial 64)}
+    z0 +. aL *. bL +. (z1 +. aL *. bH +. aH *. bL) *. monomial 64 +. (z2 *. monomial 128 +. aH *. bH *. monomial 128);
+    == {lemma_mul_distribute_left z2 (aH *. bH) (monomial 128)}
+    z0 +. aL *. bL +. (z1 +. aL *. bH +. aH *. bL) *. monomial 64 +. (z2 +. aH *. bH) *. monomial 128;
+    == {lemma_shift_is_mul (z1 +. aL *. bH +. aH *. bL) 64; lemma_shift_is_mul (z2 +. aH *. bH) 128}
+    (z0 +. aL *. bL) +. shift (z1 +. aL *. bH +. aH *. bL) 64 +. shift (z2 +. aH *. bH) 128;
+  }
+
