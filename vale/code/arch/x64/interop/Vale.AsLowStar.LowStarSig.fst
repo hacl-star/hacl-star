@@ -3,7 +3,8 @@ open X64.MemoryAdapters
 open Interop.Base
 module B = LowStar.Buffer
 module BS = X64.Bytes_Semantics_s
-module BV = LowStar.BufferView
+module UV = LowStar.BufferView.Up
+module DV = LowStar.BufferView.Down
 module HS = FStar.HyperStack
 module ME = X64.Memory
 module TS = X64.Taint_Semantics_s
@@ -52,14 +53,14 @@ let uint_to_nat_seq_t
 
 [@__reduce__]
 let view_of_base_typ (t:ME.base_typ)
-  : BV.view UInt8.t (base_typ_as_type t)
+  : UV.view UInt8.t (base_typ_as_type t)
   = let open ME in
     match t with
-    | TUInt8 -> Views.view8
-    | TUInt16 -> Views.view16
-    | TUInt32 -> Views.view32
-    | TUInt64 -> Views.view64
-    | TUInt128 -> Views.view128
+    | TUInt8 -> Views.up_view8
+    | TUInt16 -> Views.up_view16
+    | TUInt32 -> Views.up_view32
+    | TUInt64 -> Views.up_view64
+    | TUInt128 -> Views.up_view128
 
 //////////////////////////////////////////////////////////////////////////////////////////
 //lowstar_sig pre post:
@@ -71,25 +72,29 @@ module IB = Interop.Base
 
 [@__reduce__]
 let mem_correspondence_1
-      (t:ME.base_typ)
-      (x:IB.buf_t t)
+      (src t:ME.base_typ)
+      (x:IB.buf_t src t)
       (h:HS.mem)
       (s:VS.state) =
   let y = as_vale_buffer x in
+  let db = get_downview x in
+  DV.length_eq db;
   Seq.equal
     (nat_to_uint_seq_t t (ME.buffer_as_seq s.VS.mem y))
-    (BV.as_seq h (BV.mk_buffer_view x (view_of_base_typ t)))
+    (UV.as_seq h (UV.mk_buffer db (view_of_base_typ t)))
 
 [@__reduce__]
 let mem_imm_correspondence_1
-      (t:ME.base_typ)
-      (x:IB.ibuf_t t)
+      (src t:ME.base_typ)
+      (x:IB.ibuf_t src t)
       (h:HS.mem)
       (s:VS.state) =
   let y = as_vale_immbuffer x in
+  let db = get_downview x in
+  DV.length_eq db;
   Seq.equal
     (nat_to_uint_seq_t t (ME.buffer_as_seq s.VS.mem y))
-    (BV.as_seq h (BV.mk_buffer_view x (view_of_base_typ t)))
+    (UV.as_seq h (UV.mk_buffer db (view_of_base_typ t)))
 
 [@__reduce__]
 let rec mem_correspondence (args:list arg) : hsprop =
@@ -98,13 +103,13 @@ let rec mem_correspondence (args:list arg) : hsprop =
   | hd :: tl ->
     let (| tag, x |) = hd in
     match tag with
-    | TD_Buffer bt _ ->
+    | TD_Buffer src bt _ ->
       fun h s ->
-        mem_correspondence_1 bt x h s /\
+        mem_correspondence_1 src bt x h s /\
         mem_correspondence tl h s
-    | TD_ImmBuffer bt _ ->
+    | TD_ImmBuffer src bt _ ->
       fun h s ->
-        mem_imm_correspondence_1 bt x h s /\
+        mem_imm_correspondence_1 src bt x h s /\
         mem_correspondence tl h s        
     | TD_Base _ ->
       mem_correspondence tl
@@ -122,49 +127,51 @@ let arg_as_nat64 (a:arg) (s:VS.state) : GTot ME.nat64 =
      UInt32.v x
   | TD_Base TUInt64 ->
      UInt64.v x
-  | TD_Buffer bt _ ->
-     buffer_addr_is_nat64 (as_vale_buffer #bt x) s;
-     ME.buffer_addr (as_vale_buffer #bt x) VS.(s.mem)
-  | TD_ImmBuffer bt _ ->
-     buffer_addr_is_nat64 (as_vale_immbuffer #bt x) s;
-     ME.buffer_addr (as_vale_immbuffer #bt x) VS.(s.mem)
+  | TD_Buffer src bt _ ->
+     buffer_addr_is_nat64 (as_vale_buffer #src #bt x) s;
+     ME.buffer_addr (as_vale_buffer #src #bt x) VS.(s.mem)
+  | TD_ImmBuffer src bt _ ->
+     buffer_addr_is_nat64 (as_vale_immbuffer #src #bt x) s;
+     ME.buffer_addr (as_vale_immbuffer #src #bt x) VS.(s.mem)
     
 
 [@__reduce__]
-let rec register_args (n:nat)
-                      (args:IX64.arity_ok arg{List.length args = n}) : VSig.sprop =
+let rec register_args (max_arity:nat)
+                      (arg_reg:IX64.arg_reg_relation max_arity)
+                      (n:nat)
+                      (args:IX64.arity_ok max_arity arg{List.length args = n}) : VSig.sprop =
     match args with
     | [] -> (fun s -> True)
     | hd::tl ->
       fun s ->
-        register_args (n - 1) tl s /\
-        VS.eval_reg (IX64.register_of_arg_i (n - 1)) s == arg_as_nat64 hd s
+        register_args max_arity arg_reg (n - 1) tl s /\
+        VS.eval_reg (arg_reg.IX64.of_arg (n - 1)) s == arg_as_nat64 hd s
 
 [@__reduce__]
 let taint_hyp_arg (m:ME.mem) (tm:MS.memTaint_t) (a:arg) =
    let (| tag, x |) = a in
     match tag with
-    | TD_Buffer TUInt64 {taint=tnt} ->
+    | TD_Buffer src TUInt64 {taint=tnt} ->
       ME.valid_taint_buf64
-         (as_vale_buffer #TUInt64 x)
+         (as_vale_buffer #src #TUInt64 x)
          m
          tm
          tnt
-    | TD_Buffer TUInt128 {taint=tnt} ->
+    | TD_Buffer src TUInt128 {taint=tnt} ->
       ME.valid_taint_buf128
-         (as_vale_buffer #TUInt128 x)
+         (as_vale_buffer #src #TUInt128 x)
          m
          tm
          tnt
-    | TD_ImmBuffer TUInt64 {taint=tnt} ->
+    | TD_ImmBuffer src TUInt64 {taint=tnt} ->
       ME.valid_taint_buf64
-         (as_vale_immbuffer #TUInt64 x)
+         (as_vale_immbuffer #src #TUInt64 x)
          m
          tm
          tnt
-    | TD_ImmBuffer TUInt128 {taint=tnt} ->
+    | TD_ImmBuffer src TUInt128 {taint=tnt} ->
       ME.valid_taint_buf128
-         (as_vale_immbuffer #TUInt128 x)
+         (as_vale_immbuffer #src #TUInt128 x)
          m
          tm
          tnt         
@@ -176,25 +183,27 @@ let taint_hyp (args:list arg) : VSig.sprop =
   fun s0 -> BigOps.big_and' (taint_hyp_arg s0.VS.mem s0.VS.memTaint) args
 
 [@__reduce__]
-let vale_pre_hyp #n (sb:IX64.stack_buffer n) (args:IX64.arity_ok arg) : VSig.sprop =
+let vale_pre_hyp (#max_arity:nat) (#arg_reg:IX64.arg_reg_relation max_arity) #n (sb:IX64.stack_buffer n) (args:IX64.arity_ok max_arity arg) : VSig.sprop =
     fun s0 ->
       let s_args = arg_of_sb sb :: args in
       VSig.disjoint_or_eq s_args /\
       VSig.readable s_args VS.(s0.mem) /\
-      register_args (List.length args) args s0 /\
+      register_args max_arity arg_reg (List.length args) args s0 /\
       taint_hyp args s0
 
 [@__reduce__]
 let to_low_pre
+    (#max_arity:nat)
+    (#arg_reg:IX64.arg_reg_relation max_arity)
     (#n:IX64.max_slots)
     (pre:VSig.vale_pre_tl n [])
-    (args:IX64.arity_ok arg)
+    (args:IX64.arity_ok max_arity arg)
     (hs_mem:mem_roots args)
   : prop =
   (forall (s0:V.va_state)
      (sb:IX64.stack_buffer n).
     V.va_get_ok s0 /\
-    vale_pre_hyp sb args s0 /\
+    vale_pre_hyp #max_arity #arg_reg #n sb args s0 /\
     mem_correspondence args hs_mem s0 /\
     V.valid_stack_slots s0.VS.mem (VS.eval_reg MS.Rsp s0) (as_vale_buffer sb) (n / 8) s0.VS.memTaint ==>
     elim_nil pre s0 sb)
@@ -222,11 +231,13 @@ let to_low_post
 
 [@__reduce__]
 let create_initial_vale_state
+       (#max_arity:nat)
+       (#arg_reg:IX64.arg_reg_relation max_arity)
        (#n:IX64.max_slots)
-       (args:IX64.arity_ok arg)
+       (args:IX64.arity_ok max_arity arg)
   : IX64.state_builder_t n args V.va_state =
   fun h0 stack ->
-    let t_state, mem = IX64.create_initial_trusted_state n args Interop.down_mem h0 stack in
+    let t_state, mem = IX64.create_initial_trusted_state max_arity arg_reg n args Interop.down_mem h0 stack in
     let open VS in
     { ok = true;
       regs = X64.Vale.Regs.of_fun t_state.TS.state.BS.regs;
