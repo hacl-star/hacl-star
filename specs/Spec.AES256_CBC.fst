@@ -8,7 +8,7 @@ open Lib.ByteSequence
 open Lib.LoopCombinators
 open Spec.AES256
 
-#set-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 10"
+#set-options "--initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0 --z3rlimit 10"
 
 val xor_block:
   out:block ->
@@ -81,14 +81,14 @@ let concat_with_last_block first_part_length first_part last_block =
 
 #set-options "--z3rlimit 70"
 
+let cipherlen plen = ((plen + blocklen) / blocklen) `op_Multiply` blocklen
+
 val aes256_cbc_encrypt:
   key:skey ->
   iv:block ->
   msg:seq uint8{length msg + blocklen <= max_size_t} ->
   msglen:size_nat{msglen == length msg} ->
-  Tot (out:seq uint8{
-    length out <> 0 /\ length out % blocklen == 0 /\ length out <= length msg + blocklen
-  })
+  Tot (out:seq uint8{length out == cipherlen msglen})
 let aes256_cbc_encrypt key iv msg msglen =
   let fullblocks = (msglen / blocklen) * blocklen in
   let final = msglen % blocklen in
@@ -136,13 +136,13 @@ val aes256_cbc_decrypt:
     length cip <= max_size_t
   } ->
   ciplen:size_nat{ciplen == length cip} ->
-  Tot (out:option (out':seq uint8{length out' <= length cip}))
+  Tot (out:option (out':seq uint8{cipherlen (length out') = length cip}))
 let aes256_cbc_decrypt key iv cip ciplen =
   let kex = keyExpansion key in
   let out : lseq uint8 ciplen = create ciplen (u8 0) in
   let out = cbc_decrypt_blocks out kex iv cip ciplen 0 in
   let pad : uint8 = index #uint8 #ciplen out (ciplen - 1) in
   let pad = uint_to_nat pad in
-  if pad >= 0 && pad <= blocklen then
-    Some (sub #uint8 #ciplen out 0 (ciplen - pad))
-  else None
+  if pad > 0 && pad <= blocklen then begin
+    Some(sub #uint8 #ciplen out 0 (ciplen - pad))
+  end else None
