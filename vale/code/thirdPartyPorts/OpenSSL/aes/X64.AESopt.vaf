@@ -2028,6 +2028,8 @@ procedure {:quick} Ctr32_ghash_6_prelude(
         ctr_orig.lo0 % 256 + 6 < 256;
         T1 == reverse_bytes_quad32(inc32lite(ctr_orig, 0));
     ensures
+        modifies_buffer_specific128(stack_b, old(mem), mem, 1, 1);
+
         len == old(len) - 6;
         
         T2 == Mkfour(0, 0, 0, 0x1000000);
@@ -2115,7 +2117,7 @@ procedure {:quick} {:verify true} AES_GCM_encrypt(
 
         // Len is # of 128-bit blocks
         len % 6 == 0;
-        len >= 16;
+        len >= 0x10*3;
         12 + len + 6 < pow2_32;
 {
     ghost var plain_quads := buffer128_as_seq(mem, in_b);
@@ -2136,7 +2138,6 @@ procedure {:quick} {:verify true} AES_GCM_encrypt(
 
     gctr_partial_opaque_init(alg, buffer128_as_seq(mem, in_b), buffer128_as_seq(mem, out_b), key_words, ctr_BE);
     AESNI_ctr32_6x(alg, 0, in_b, out_b, plain_quads, key_words, round_keys, keys_b, ctr_BE, ctr_BE);
-
     // # save bswapped output on stack
     VPshufb(Xi, inout0, Ii);
     VPshufb(T2, inout1, Ii);
@@ -2151,10 +2152,9 @@ procedure {:quick} {:verify true} AES_GCM_encrypt(
     Store128_buffer(rsp, Z2, 0x30, Secret, stack_b, 3);
     
     AESNI_ctr32_6x(alg, 1, in_b, out_b, plain_quads, key_words, round_keys, keys_b, inc32(ctr_BE, 6), ctr_BE);
-
     Sub64(len, 12);
 
     Ctr32_ghash_6_prelude(alg, stack_b, key_words, round_keys, keys_b, inc32(ctr_BE, 12));
-    //Loop6x_loop(alg, 2, iv_b, out_b, in_b, out_b, stack_b, key_words, round_keys, keys_b, ctr_BE, inc32(ctr_BE, 12)); 
+    Loop6x_loop(alg, 2, iv_b, out_b, in_b, out_b, stack_b, key_words, round_keys, keys_b, ctr_BE, inc32(ctr_BE, 12)); 
 }
 
