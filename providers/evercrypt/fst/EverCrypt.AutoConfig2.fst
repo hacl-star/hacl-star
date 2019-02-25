@@ -65,8 +65,8 @@ let init () =
   if Cpuid_stdcalls.check_sha () <> 0UL then begin
     B.recall cpu_has_shaext;
     B.upd cpu_has_shaext 0ul true
-  end;
-  admit () // missing modifies clauses everywhere in Cpuid_stdcalls
+  end
+
 
 inline_for_extraction
 let mk_disabler (f: eternal_pointer bool { B.loc_includes (fp ()) (B.loc_buffer f) }): disabler = fun () ->

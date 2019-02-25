@@ -1592,16 +1592,13 @@ private val construct_rhs:
        (Rgl?.r_repr hreg h0 acc) actd ==
      (Rgl?.r_repr hvreg h1 rhs, Rgl?.r_repr hreg h1 acc))))
    (decreases (U32.v j))
-//#reset-options "--z3rlimit 400 --max_fuel 1"
-#push-options "--admit_smt_queries true"
-//#reset-options "--z3rlimit 1000 --initial_fuel 1 --max_fuel 1 --initial_ifuel 0 --max_ifuel 0"
-// cwinter: this verifies in interactive mode, but not always in unattended mode.
+#reset-options "--z3rlimit 400 --max_fuel 1"
 private let rec construct_rhs lv hs rhs i j acc actd =
   let hh0 = HST.get () in
   let ofs = offset_of i in
   let copy = Cpy?.copy hcpy in
 
-  if j = 0ul then ()
+  if j = 0ul then mt_safe_elts_spec hh0 lv hs i j
   else
     (if j % 2ul = 0ul
     then begin
@@ -1623,7 +1620,6 @@ private let rec construct_rhs lv hs rhs i j acc actd =
                actd ==
              (Rgl?.r_repr hvreg hh1 rhs, Rgl?.r_repr hreg hh1 acc))
     end
-
     else begin
       if actd
       then begin
@@ -2303,7 +2299,7 @@ private val mt_flush_to_:
                (U32.v lv) (RV.as_seq h0 hs) (U32.v pi)
                (U32.v i) (U32.v (Ghost.reveal j))))))
    (decreases (U32.v i))
-#reset-options "--z3rlimit 800 --max_fuel 1 --admit_smt_queries true"
+#reset-options "--z3rlimit 800 --max_fuel 1" 
 private let rec mt_flush_to_ lv hs pi i j =
   let hh0 = HST.get () in
 
@@ -2316,7 +2312,7 @@ private let rec mt_flush_to_ lv hs pi i j =
 
   let oi = offset_of i in
   let opi = offset_of pi in
-  if oi = opi then ()
+  if oi = opi then mt_safe_elts_spec hh0 lv hs pi (Ghost.reveal j)
   else begin
 
     /// 1) Flush hashes at the level `lv`, where the new vector is
