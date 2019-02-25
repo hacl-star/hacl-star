@@ -526,15 +526,25 @@ dist/vale/%-x86_64-darwin.S: obj/vale-%.exe | dist/vale
 	$< GCC MacOS > $@
 	$(SED) 's/_stdcall//' -i $@
 
+dist/vale/%-inline.c: obj/inline-vale-%.exe | dist/vale
+	$< > $@
+
 obj/vale-cpuid.exe: vale/code/lib/util/x64/CpuidMain.ml
 obj/vale-aesgcm.exe: vale/code/crypto/aes/x64/Main.ml
 obj/vale-sha256.exe: vale/code/crypto/sha/ShaMain.ml
 obj/vale-curve25519.exe: vale/code/crypto/ecc/curve25519/Main25519.ml
 
+obj/inline-vale-curve25519.exe: vale/code/crypto/ecc/curve25519/Inline25519.ml
+
 obj/CmdLineParser.ml: vale/code/lib/util/CmdLineParser.ml
 	cp $< $@
 
 obj/CmdLineParser.cmx: $(ALL_CMX_FILES)
+
+obj/inline-vale-%.exe: $(ALL_CMX_FILES)
+	$(call run-with-log,\
+	  $(OCAMLOPT) $^ -o $@ \
+	  ,[OCAMLOPT-EXE] $(notdir $*),$@)
 
 obj/vale-%.exe: $(ALL_CMX_FILES) obj/CmdLineParser.cmx
 	$(call run-with-log,\
@@ -546,7 +556,8 @@ VALE_ASMS = $(foreach P,cpuid aesgcm sha256 curve25519,\
   $(addprefix dist/vale/,$P-x86_64-mingw.S $P-x86_64-msvc.asm $P-x86_64-linux.S $P-x86_64-darwin.S)) \
   $(wildcard \
     $(HACL_HOME)/secure_api/vale/asm/aes-*.S \
-    $(HACL_HOME)/secure_api/vale/asm/aes-*.asm)
+    $(HACL_HOME)/secure_api/vale/asm/aes-*.asm) \
+  dist/vale/curve25519-inline.c
 
 # A pseudo-target for generating just Vale assemblies
 vale-asm: $(VALE_ASMS)
