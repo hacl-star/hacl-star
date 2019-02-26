@@ -18,7 +18,7 @@ let uint8_p = B.buffer UInt8.t
 unfold
 let uint64 = UInt64.t
 
-[@ (CCConv "stdcall") ]
+inline_for_extraction
 val sha256_update
   (ctx_b:uint32_p)
   (in_b:uint8_p)
