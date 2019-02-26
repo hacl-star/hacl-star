@@ -7,7 +7,31 @@ open Lib.ByteSequence
 open Lib.LoopCombinators
 
 
+#set-options "--z3rlimit 15 --max_fuel 0"
+
+
+let size_word: size_nat = 4
+
+
+inline_for_extraction
+let vsize_rcon: size_nat = 8
+
+inline_for_extraction
+let rcon_list: l:List.Tot.llist uint32 vsize_rcon =
+  [@inline_let]
+  let l = List.Tot.map u32 [0; 0; 0; 0; 0; 0; 0; 0] in
+  assert_norm(List.Tot.length l == vsize_rcon);
+  l
+
+let rcon: lseq uint32 vsize_rcon  = createL rcon_list
+
+
 type branch = (uint32 & uint32)
+type branch2 = (branch & branch)
+type branch3 = (branch & branch & branch)
+type branch4 = (branch & branch & branch & branch)
+type branch6 = (branch & branch & branch & branch & branch & branch)
+type branch8 = (branch & branch & branch & branch & branch & branch & branch & branch)
 
 val arx: c:uint32 -> branch -> Tot branch
 let arx c b =
@@ -36,10 +60,11 @@ val l1: x:uint32 -> Tot uint32
 let l1 x = (x <<<. size 16)  ^. (x &. (u32 0xffff))
 
 
-val m2: branch -> branch -> Tot (branch & branch)
-let m2 x y =
-  let x0, y0 = x in
-  let x1, y1 = y in
+val m2: branch2 -> Tot branch2
+let m2 b =
+  let x,y = b in
+  let x0,y0 = x in
+  let x1,y1 = y in
   let u = y0 ^. y1 in
   let v = x0 ^. x1 in
   let lu = l1 u in
@@ -48,13 +73,15 @@ let m2 x y =
   let t1 = x1 ^. lu in
   let w0 = y0 ^. lv in
   let w1 = y1 ^. lv in
-  (t0, w0), (t1, w1)
+  (t0,w0), (t1,w1)
 
-val m3: branch -> branch -> branch -> Tot (branch & branch & branch)
-let m3 x y z =
-  let x0, y0 = x in
-  let x1, y1 = y in
-  let x2, y2 = z in
+
+val m3: branch3 -> Tot branch3
+let m3 b =
+  let b0,b1,b2 = b in
+  let x0,y0 = b0 in
+  let x1,y1 = b1 in
+  let x2,y2 = b2 in
   let u = y0 ^. y1 ^. y2 in
   let v = x0 ^. x1 ^. x2 in
   let lu = l1 u in
@@ -65,14 +92,16 @@ let m3 x y z =
   let w0 = y0 ^. lv in
   let w1 = y1 ^. lv in
   let w2 = y2 ^. lv in
-  (t0, w0), (t1, w1), (t2, w2)
+  (t0,w0), (t1,w1), (t2,w2)
 
-val m4: branch -> branch -> branch -> branch -> Tot (branch & branch & branch & branch)
-let m4 x y z z2 =
-  let x0, y0 = x in
-  let x1, y1 = y in
-  let x2, y2 = z in
-  let x3, y3 = z2 in
+
+val m4: branch4 -> Tot branch4
+let m4 b =
+  let b0,b1,b2,b3 = b in
+  let x0,y0 = b0 in
+  let x1,y1 = b1 in
+  let x2,y2 = b2 in
+  let x3,y3 = b3 in
   let u = y0 ^. y1 ^. y2 ^. y3 in
   let v = x0 ^. x1 ^. x2 ^. x3 in
   let lu = l1 u in
@@ -85,55 +114,45 @@ let m4 x y z z2 =
   let w1 = y1 ^. lv in
   let w2 = y2 ^. lv in
   let w3 = y3 ^. lv in
-  (t0, w0), (t1, w1), (t2, w2), (t3, w3)
+  (t0,w0), (t1,w1), (t2,w2), (t3,w3)
 
-val l4: branch -> branch -> branch -> branch -> Tot (branch & branch & branch & branch)
-let l4 b0 b1 b2 b3 =
-  let (p0, p1) = m2 b0 b1 in
+
+val l4: branch4 -> Tot branch4
+let l4 b =
+  let (b0,b1,b2,b3) = b in
+  let (p0,p1) = m2 (b0,b1) in
   let o0 = (fst b3 ^. fst p1), (snd b3 ^. snd p1) in
   let o1 = (fst b2 ^. fst p0), (snd b2 ^. snd p0) in
-  (o0, o1, b0, b1)
+  (o0,o1,b0,b1)
 
-val l6: branch -> branch -> branch -> branch -> branch -> branch -> Tot (branch & branch & branch & branch & branch & branch)
-let l6 b0 b1 b2 b3 b4 b5 =
-  let (p0, p1, p2) = m3 b0 b1 b2 in
+
+val l6: branch6 -> Tot branch6
+let l6 b =
+  let (b0,b1,b2,b3,b4,b5) = b in
+  let (p0,p1,p2) = m3 (b0,b1,b2) in
   let o0 = (fst b4 ^. fst p1), (snd b4 ^. snd p1) in
   let o1 = (fst b5 ^. fst p2), (snd b5 ^. snd p2) in
   let o2 = (fst b3 ^. fst p0), (snd b3 ^. snd p0) in
-  (o0, o1, o2, b0, b1, b2)
+  (o0,o1,o2,b0,b1,b2)
 
-val l8: branch -> branch -> branch -> branch -> branch -> branch -> branch -> branch -> Tot (branch & branch & branch & branch & branch & branch & branch & branch)
-let l8 b0 b1 b2 b3 b4 b5 b6 b7 =
-  let (p0, p1, p2, p3) = m4 b0 b1 b2 b3 in
+
+val l8: branch8 -> Tot branch8
+let l8 b =
+  let (b0,b1,b2,b3,b4,b5,b6,b7) = b in
+  let (p0,p1,p2,p3) = m4 (b0,b1,b2,b3) in
   let o0 = (fst b5 ^. fst p1), (snd b5 ^. snd p1) in
   let o1 = (fst b6 ^. fst p2), (snd b6 ^. snd p2) in
   let o2 = (fst b7 ^. fst p3), (snd b7 ^. snd p3) in
   let o3 = (fst b4 ^. fst p0), (snd b4 ^. snd p0) in
-  (o0, o1, o2, o3, b0, b1, b2, b3)
+  (o0,o1,o2,o3,b0,b1,b2,b3)
 
 
-let size_word: size_nat = 4
-
-
-inline_for_extraction
-let vsize_rcon: size_nat = 8
-
-inline_for_extraction
-let rcon_list: l:List.Tot.llist uint32 vsize_rcon =
-  [@inline_let]
-  let l = List.Tot.map u32 [0; 0; 0; 0; 0; 0; 0; 0] in
-  assert_norm(List.Tot.length l == vsize_rcon);
-  l
-
-let rcon: lseq uint32 vsize_rcon  = createL rcon_list
-
-val add: i:size_nat -> branch -> branch -> Tot (branch & branch)
-let add i b0 b1 =
-  let y0 = snd b0 in
-  let y1 = snd b1 in
+val add2: i:size_nat -> branch2 -> Tot branch2
+let add2 i b =
+  let ((x0,y0),(x1,y1)) = b in
   let y0 = y0 ^. rcon.[(i % vsize_rcon)] in
   let y1 = y1 ^. (u32 i) in
-  (b0, b1)
+  (x0,y0),(x1,y1)
 
 
 val sparkle256: steps:size_nat -> lbytes 32 -> Tot (lbytes 32)
@@ -160,15 +179,14 @@ let sparkle256 steps input =
   let b2 = x2, y2 in
   let b3 = x3, y3 in
 
-  let (b0, b1, b2, b3) =
+  let (b0,b1,b2,b3) =
     repeati steps (fun i (b0,b1,b2,b3) ->
-    let (b0,b1) = add i b0 b1 in
-    let b0 = arx rcon.[0] b0 in
-    let b1 = arx rcon.[1] b1 in
-    let b2 = arx rcon.[2] b2 in
-    let b3 = arx rcon.[3] b3 in
-    let b0, b1, b2, b3 = l4 b0 b1 b2 b3 in
-    (b0, b1, b2, b3)
+      let (b0,b1) = add2 i (b0,b1) in
+      let b0 = arx rcon.[0] b0 in
+      let b1 = arx rcon.[1] b1 in
+      let b2 = arx rcon.[2] b2 in
+      let b3 = arx rcon.[3] b3 in
+      l4 (b0,b1,b2,b3)
   ) (b0,b1,b2,b3)
   in
 
@@ -195,7 +213,6 @@ let sparkle256 steps input =
   let input = update_sub input (7 * size_word) size_word by3 in
   input
 
-#set-options "--z3rlimit 10"
 
 val sparkle384: steps:size_nat -> lbytes 48 -> Tot (lbytes 48)
 let sparkle384 steps input =
@@ -233,15 +250,14 @@ let sparkle384 steps input =
 
   let (b0,b1,b2,b3,b4,b5) =
     repeati steps (fun i (b0,b1,b2,b3,b4,b5) ->
-    let (b0,b1) = add i b0 b1 in
-    let b0 = arx rcon.[0] b0 in
-    let b1 = arx rcon.[1] b1 in
-    let b2 = arx rcon.[2] b2 in
-    let b3 = arx rcon.[3] b3 in
-    let b4 = arx rcon.[4] b4 in
-    let b5 = arx rcon.[5] b5 in
-    let b0,b1,b2,b3,b4,b5 = l6 b0 b1 b2 b3 b4 b5 in
-    (b0,b1,b2,b3,b4,b5)
+      let (b0,b1) = add2 i (b0,b1) in
+      let b0 = arx rcon.[0] b0 in
+      let b1 = arx rcon.[1] b1 in
+      let b2 = arx rcon.[2] b2 in
+      let b3 = arx rcon.[3] b3 in
+      let b4 = arx rcon.[4] b4 in
+      let b5 = arx rcon.[5] b5 in
+      l6 (b0,b1,b2,b3,b4,b5)
   ) (b0,b1,b2,b3,b4,b5)
   in
 
@@ -277,6 +293,7 @@ let sparkle384 steps input =
   let input = update_sub input (10 * size_word) size_word bx5 in
   let input = update_sub input (11 * size_word) size_word by5 in
   input
+
 
 val sparkle512: steps:size_nat -> lbytes 64 -> Tot (lbytes 64)
 let sparkle512 steps input =
@@ -326,17 +343,16 @@ let sparkle512 steps input =
 
   let (b0,b1,b2,b3,b4,b5,b6,b7) =
     repeati steps (fun i (b0,b1,b2,b3,b4,b5,b6,b7) ->
-    let (b0,b1) = add i b0 b1 in
-    let b0 = arx rcon.[0] b0 in
-    let b1 = arx rcon.[1] b1 in
-    let b2 = arx rcon.[2] b2 in
-    let b3 = arx rcon.[3] b3 in
-    let b4 = arx rcon.[4] b4 in
-    let b5 = arx rcon.[5] b5 in
-    let b6 = arx rcon.[6] b6 in
-    let b7 = arx rcon.[7] b7 in
-    let b0,b1,b2,b3,b4,b5,b7,b8 = l8 b0 b1 b2 b3 b4 b5 b6 b7 in
-    (b0,b1,b2,b3,b4,b5,b6,b7)
+      let (b0,b1) = add2 i (b0,b1) in
+      let b0 = arx rcon.[0] b0 in
+      let b1 = arx rcon.[1] b1 in
+      let b2 = arx rcon.[2] b2 in
+      let b3 = arx rcon.[3] b3 in
+      let b4 = arx rcon.[4] b4 in
+      let b5 = arx rcon.[5] b5 in
+      let b6 = arx rcon.[6] b6 in
+      let b7 = arx rcon.[7] b7 in
+      l8 (b0,b1,b2,b3,b4,b5,b6,b7)
   ) (b0,b1,b2,b3,b4,b5,b7,b7)
   in
 
