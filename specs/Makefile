@@ -29,6 +29,7 @@ SPEC_FILES=	Spec.Chacha20.fst \
 		Spec.HMAC.fst \
 		Spec.HKDF.fst \
 		Spec.HPKE.fst \
+		Spec.HPKE.CFRG.fst \
 		Spec.HSalsa20.fst
 
 LIBS = Lib.IntTypes.fst Lib.RawIntTypes.fst Lib.NatMod.fst Lib.LoopCombinators.fst Lib.Sequence.fst Lib.ByteSequence.fst Lib.PrintSequence.fst
@@ -173,6 +174,14 @@ hpke.exe: $(LIBS_FILES) Spec.SHA2.fst Spec.Hash.fst Spec.HMAC.fst Spec.HKDF.fst 
 	@echo 'let _ = test()' >> hpke-ml/Spec_HPKE_Test.ml
 	$(OCAMLOPT) -package cryptokit -I hpke-ml $(OCAML_INCLUDES) $(addprefix hpke-ml/, $(LIBS_ML)) hpke-ml/Lib_RandomSequence.ml hpke-ml/Spec_SHA2.ml hpke-ml/Spec_Hash.ml hpke-ml/Spec_HMAC.ml hpke-ml/Spec_HKDF.ml hpke-ml/Spec_Curve25519.ml hpke-ml/Spec_Curve448.ml hpke-ml/Spec_DH.ml hpke-ml/Spec_GaloisField.ml hpke-ml/Spec_AES.ml hpke-ml/Spec_GF128.ml hpke-ml/Spec_AES128_GCM.ml hpke-ml/Spec_Chacha20.ml hpke-ml/Spec_Poly1305.ml hpke-ml/Spec_Chacha20Poly1305.ml hpke-ml/Spec_AEAD.ml hpke-ml/Spec_HPKE.ml hpke-ml/Spec_HPKE_Test.ml -o hpke.exe
 	./hpke.exe
+
+hpkecfrg.exe: $(LIBS_FILES) Spec.SHA2.fst Spec.Hash.fst Spec.HMAC.fst Spec.HKDF.fst Spec.Curve25519.fst Spec.Curve448.fst Spec.DH.fst Spec.GaloisField.fst Spec.AES.fst Spec.GF128.fst Spec.AES128_GCM.fst Spec.Chacha20.fst Spec.Poly1305.fst Spec.Chacha20Poly1305.fst Spec.AEAD.fst Spec.HPKE.CFRG.fst tests/Spec.HPKE.CFRG.Test.fst
+	mkdir -p hpkecfrg-ml
+	cp $(HACL_HOME)/lib/ml/Lib_RandomSequence.ml hpkecfrg-ml
+	$(FSTAR) --codegen OCaml --lax $(LIBS_EX) --extract_module Spec.SHA2 --extract_module Spec.Hash --extract_module Spec.HMAC --extract_module Spec.HKDF --extract_module Spec.Curve25519 --extract_module Spec.Curve448 --extract_module Spec.DH --extract_module Spec.GaloisField --extract_module Spec.AES --extract_module Spec.GF128 --extract_module Spec.AES128_GCM --extract_module Spec.Chacha20 --extract_module Spec.Poly1305 --extract_module Spec.Chacha20Poly1305 --extract_module Spec.AEAD --extract_module Spec.HPKE.CFRG --extract_module Spec.HPKE.CFRG.Test --odir hpkecfrg-ml $^
+	@echo 'let _ = test()' >> hpkecfrg-ml/Spec_HPKE_CFRG_Test.ml
+	$(OCAMLOPT) -package cryptokit -I hpkecfrg-ml $(OCAML_INCLUDES) $(addprefix hpkecfrg-ml/, $(LIBS_ML)) hpkecfrg-ml/Lib_RandomSequence.ml hpkecfrg-ml/Spec_SHA2.ml hpkecfrg-ml/Spec_Hash.ml hpkecfrg-ml/Spec_HMAC.ml hpkecfrg-ml/Spec_HKDF.ml hpkecfrg-ml/Spec_Curve25519.ml hpkecfrg-ml/Spec_Curve448.ml hpkecfrg-ml/Spec_DH.ml hpkecfrg-ml/Spec_GaloisField.ml hpkecfrg-ml/Spec_AES.ml hpkecfrg-ml/Spec_GF128.ml hpkecfrg-ml/Spec_AES128_GCM.ml hpkecfrg-ml/Spec_Chacha20.ml hpkecfrg-ml/Spec_Poly1305.ml hpkecfrg-ml/Spec_Chacha20Poly1305.ml hpkecfrg-ml/Spec_AEAD.ml hpkecfrg-ml/Spec_HPKE_CFRG.ml hpkecfrg-ml/Spec_HPKE_CFRG_Test.ml -o hpkecfrg.exe
+	./hpkecfrg.exe
 
 # Under CI
 sha3.exe: $(LIBS_FILES) Spec.SHA3.Constants.fst Spec.SHA3.fst tests/Spec.SHA3.Test.fst
