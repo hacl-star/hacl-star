@@ -813,7 +813,7 @@ val fill:
   -> impl:(i:size_t{v i < v clen} -> Stack a
           (requires fun h -> modifies1 (gsub o 0ul i) h0 h)
           (ensures  fun h r h' -> h == h' /\ 
-			       r == spec h0 (v i ))) 
+			       r == spec h0 (v i)))
   -> Stack unit
     (requires fun h -> h == h0 /\ live h0 o)
     (ensures  fun h _ h' ->

@@ -233,12 +233,16 @@ val set_def2 (#a:numeric 0) (m:matrix a) (i:_) (j:_) (v:_) :
 let set_def2 #a m i j v = ()
 
 val set_def3 (#a:numeric 0) (m:matrix a) (i:size_nat{i < rows m}) (j:size_nat{j < cols m}) (v:_) :
-  Lemma (get (set m i j v) i j == v)
-let set_def3 #a m i j v = ()
+  Lemma ((m.(i,j) <- v).(i,j) == v)
+let set_def3 #a m i j v =
+  let m' = M?.m m in
+  assert (let r = (m'.[j]).[i] <- v in (upd m' j r).[j] == r)
 
 val set_def4 (#a:numeric 0) (m:matrix a) (i:size_nat{i < rows m}) (j:size_nat{j < cols m}) (v:_) :
-  Lemma (forall i' j'. (i <> i' \/ j <> j') ==> get (set m i j v) i' j' == get m i' j')
-let set_def4 #a m i j v = ()
+  Lemma (forall i' j'. (i <> i' \/ j <> j') ==> (m.(i,j) <- v).(i',j') == m.(i',j'))
+let set_def4 #a m i j v =
+  let m' = M?.m m in
+  assert (let r = (m'.[j]).[i] <- v in (upd m' j r).[j] == r)
 
 (*
 val matrix_create: #a:numeric 0 -> r:size_nat -> c:size_nat
