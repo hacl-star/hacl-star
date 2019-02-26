@@ -7,7 +7,7 @@ include{:fstar}{:open} "X64.CPU_Features_s"
 
 module X64.FastUtil
 
-#reset-options "--z3rlimit 30"
+#reset-options "--z3rlimit 60"
 
 #verbatim{:interface}
 open Types_s
@@ -46,7 +46,7 @@ type tactic:Type(0) extern;
 const int_canon:tactic extern;
 ghost procedure assert_by_tactic(ghost p:prop, ghost t:tactic) extern;
 
-#reset-options "--z3rlimit 300"
+#reset-options "--z3rlimit 600"
 
 procedure{:quick} fast_mul1(
     ghost dst_b:buffer64,
@@ -109,7 +109,7 @@ procedure{:quick} fast_mul1(
 }
 
 /*
-#reset-options "--z3rlimit 20"
+#reset-options "--z3rlimit 40"
 
 procedure{:quick}{:public}{:exportSpecs} fast_mul1_stdcall(
     inline win:bool,
@@ -188,7 +188,7 @@ procedure{:quick}{:public}{:exportSpecs} fast_mul1_stdcall(
 }
 */
 
-#reset-options "--z3rlimit 300"
+#reset-options "--z3rlimit 600"
 procedure{:quick}{:public}{:exportSpecs} fast_add1(
     ghost stack_b:buffer64,                                        
     ghost dst_b:buffer64,
@@ -253,7 +253,7 @@ procedure{:quick}{:public}{:exportSpecs} fast_add1(
     Adcx64Wrap(rax, r11);
 }
 
-#reset-options "--z3rlimit 20"
+#reset-options "--z3rlimit 40"
 
 procedure{:quick}{:public}{:exportSpecs} fast_add1_stdcall(
     inline win:bool,
@@ -340,7 +340,7 @@ procedure{:quick}{:public}{:exportSpecs} fast_add1_stdcall(
     Pop(rdi, stack_b, 1);
 }
 
-#reset-options "--z3rlimit 600"
+#reset-options "--z3rlimit 1200"
 procedure{:quick} fast_sub1(
     ghost dst_b:buffer64,
     ghost inA_b:buffer64)
@@ -409,7 +409,7 @@ procedure{:quick} fast_sub1(
 }
 
 /*
-#reset-options "--z3rlimit 20"
+#reset-options "--z3rlimit 40"
 procedure{:quick}{:public}{:exportSpecs} fast_sub1_stdcall(
     inline win:bool,
     ghost dst_b:buffer64,
@@ -482,7 +482,7 @@ procedure{:quick}{:public}{:exportSpecs} fast_sub1_stdcall(
 }
 */
 
-#reset-options "--z3rlimit 300"
+#reset-options "--z3rlimit 600"
 procedure{:quick} fast_add(
     ghost dst_b:buffer64,
     ghost inA_b:buffer64,
@@ -639,7 +639,7 @@ procedure{:quick}{:public}{:exportSpecs} fast_add_stdcall(
 }
 */
 
-#reset-options "--z3rlimit 300"
+#reset-options "--z3rlimit 600"
 procedure{:quick} fast_sub(
     ghost dst_b:buffer64,
     ghost inA_b:buffer64,
@@ -808,7 +808,7 @@ procedure{:quick}{:public}{:exportSpecs} fast_sub_stdcall(
 }
 */
 
-#reset-options "--z3rlimit 20"
+#reset-options "--z3rlimit 40"
 procedure{:quick} cswap_single(
     inline offset:nat,
     ghost p0_b:buffer64,

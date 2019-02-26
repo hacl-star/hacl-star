@@ -8,7 +8,7 @@ include{:fstar}{:open} "X64.CPU_Features_s"
 //include{:fstar}{:open} "Prop_s"
 module X64.FastMul
 
-#reset-options "--z3rlimit 30"
+#reset-options "--z3rlimit 60"
 
 #verbatim{:interface}
 open Types_s
@@ -48,7 +48,7 @@ const int_canon:tactic extern;
 ghost procedure assert_by_tactic(ghost p:prop, ghost t:tactic) extern;
 
 
-#reset-options "--z3rlimit 100"
+#reset-options "--z3rlimit 200"
 procedure{:quick} fast_multiply_a0b(
     inline offset:nat,
     ghost dst_b:buffer64,
@@ -157,7 +157,7 @@ procedure{:quick} fast_multiply_a0b(
 }
 
 
-#reset-options "--z3rlimit 300"
+#reset-options "--z3rlimit 600"
 procedure{:quick} fast_multiply_a1b(
     inline offset:nat,
     ghost dst_b:buffer64,
@@ -279,7 +279,7 @@ procedure{:quick} fast_multiply_a1b(
     assert pow2_two(a0, a1) * b == a0a1b;   // Conclusion from the lemma
 }
 
-#reset-options "--z3rlimit 400"
+#reset-options "--z3rlimit 800"
 procedure{:quick} fast_multiply_a2b(
     inline offset:nat,
     ghost dst_b:buffer64,
@@ -406,7 +406,7 @@ procedure{:quick} fast_multiply_a2b(
 
 
 
-#reset-options "--z3rlimit 400"
+#reset-options "--z3rlimit 800"
 procedure{:quick} fast_multiply_a3b(
     inline offset:nat,
     ghost dst_b:buffer64,
@@ -542,7 +542,7 @@ procedure{:quick} fast_multiply_a3b(
 }
 
 
-#reset-options "--z3rlimit 20"
+#reset-options "--z3rlimit 40"
 
 procedure{:quick}{:public} fast_multiply(
     inline offset:nat,
