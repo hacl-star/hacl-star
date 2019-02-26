@@ -1,5 +1,5 @@
 [
-  "r3\u0005Âœ•³«†x)0\u000fÂŽ¼",
+  "\fä½É?pFF™¯ÀÐ\f9õ~",
   [
     [
       "X64.Cpuidstdcall.va_req_check_aesni_stdcall",
@@ -16,7 +16,7 @@
         "unit_typing"
       ],
       0,
-      "191172c4ad39a6456390d267dee1f00a"
+      "a7b6ab53ab6b6f49871704269ab7c9e1"
     ],
     [
       "X64.Cpuidstdcall.va_ens_check_aesni_stdcall",
@@ -33,7 +33,7 @@
         "unit_typing"
       ],
       0,
-      "cea97e5f169ce23abef641f0844d3969"
+      "17b25c4c5544a4cb4a9c57f8558dbc5c"
     ],
     [
       "X64.Cpuidstdcall.va_wpProof_check_aesni_stdcall",
@@ -45,7 +45,7 @@
         "refinement_interpretation_Tm_refine_8d65e998a07dd53ec478e27017d9dba5"
       ],
       0,
-      "eb1807837aa5d64a6739d7fe4b6c8c4a"
+      "0ce2710b4c48020c8125a79d0eed9df3"
     ],
     [
       "X64.Cpuidstdcall.va_req_check_sha_stdcall",
@@ -62,7 +62,7 @@
         "unit_typing"
       ],
       0,
-      "7984dd4f464a06fc0140c1f65482c424"
+      "81520e604b5684114e891d96abc73e01"
     ],
     [
       "X64.Cpuidstdcall.va_ens_check_sha_stdcall",
@@ -79,7 +79,7 @@
         "unit_typing"
       ],
       0,
-      "dea23acb301e8f8d58c647335c1e34a6"
+      "97daf830fd584885bb36a480faf2501c"
     ],
     [
       "X64.Cpuidstdcall.va_wpProof_check_sha_stdcall",
@@ -91,7 +91,7 @@
         "refinement_interpretation_Tm_refine_8d65e998a07dd53ec478e27017d9dba5"
       ],
       0,
-      "5546ad532383ebc366de8542c2d96cf1"
+      "a6e2dd167e97090cf98cc733702f2348"
     ],
     [
       "X64.Cpuidstdcall.va_req_check_adx_bmi2_stdcall",
@@ -108,7 +108,7 @@
         "unit_typing"
       ],
       0,
-      "75d4812f4a9403bc72a69f1453e02a7c"
+      "6aa893ecf678f8ef67fc6ac4e930253f"
     ],
     [
       "X64.Cpuidstdcall.va_ens_check_adx_bmi2_stdcall",
@@ -125,7 +125,7 @@
         "unit_typing"
       ],
       0,
-      "38de1d31444675e912ad523f9c00cd06"
+      "73479bb6704e4b59595aa4b4762b238e"
     ],
     [
       "X64.Cpuidstdcall.va_wpProof_check_adx_bmi2_stdcall",
@@ -137,7 +137,53 @@
         "refinement_interpretation_Tm_refine_8d65e998a07dd53ec478e27017d9dba5"
       ],
       0,
-      "3c531f7a97d4b2d0704d11d36460ba48"
+      "43e45b2a5fd42f66413d8a13d2561010"
+    ],
+    [
+      "X64.Cpuidstdcall.va_req_check_avx_stdcall",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_f8666440faa91836cc5a13998af863fc",
+        "equation_Prims.l_and", "equation_Prims.squash",
+        "equation_Prims.subtype_of",
+        "l_quant_interp_0235708612358a0dd8d2d21a7f9984d9",
+        "refinement_interpretation_Tm_refine_8d65e998a07dd53ec478e27017d9dba5",
+        "unit_typing"
+      ],
+      0,
+      "bd9af16139cb8817120fd8a76a1e3e1a"
+    ],
+    [
+      "X64.Cpuidstdcall.va_ens_check_avx_stdcall",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_f8666440faa91836cc5a13998af863fc",
+        "equation_Prims.l_and", "equation_Prims.squash",
+        "equation_Prims.subtype_of", "equation_X64.Vale.Decls.va_state_eq",
+        "l_quant_interp_0235708612358a0dd8d2d21a7f9984d9",
+        "refinement_interpretation_Tm_refine_8d65e998a07dd53ec478e27017d9dba5",
+        "unit_typing"
+      ],
+      0,
+      "6ea784675dbc46f13b4edcdcbc34e998"
+    ],
+    [
+      "X64.Cpuidstdcall.va_wpProof_check_avx_stdcall",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.squash",
+        "refinement_interpretation_Tm_refine_8d65e998a07dd53ec478e27017d9dba5"
+      ],
+      0,
+      "99b5deb16bdf45ba9dd7b54b8ff2992e"
     ],
     [
       "X64.Cpuidstdcall.va_req_check_avx2_stdcall",
@@ -154,7 +200,7 @@
         "unit_typing"
       ],
       0,
-      "0702af5020294f74ca3892b2eb949a52"
+      "61e93794e9512cdef32537392f9e0479"
     ],
     [
       "X64.Cpuidstdcall.va_ens_check_avx2_stdcall",
@@ -171,7 +217,7 @@
         "unit_typing"
       ],
       0,
-      "c6fdad05bfa591b3cf8e188c4702691f"
+      "cc1e7d2df4aab94a551e66022596a35d"
     ],
     [
       "X64.Cpuidstdcall.va_wpProof_check_avx2_stdcall",
@@ -183,7 +229,7 @@
         "refinement_interpretation_Tm_refine_8d65e998a07dd53ec478e27017d9dba5"
       ],
       0,
-      "8fcce9e01c0dc863bb1c68c531eade73"
+      "29c1e688115a4dda37d6376003931bb6"
     ]
   ]
 ]

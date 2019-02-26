@@ -1,5 +1,5 @@
 [
-  "∆xj^|\"=\u001dÙ\u0006•∫\u0017ö6X",
+  "Ûö\u001eäHÚõñ\u0007\u0014©¶)D®ù",
   [
     [
       "Cpuid_stdcalls.check_aesni",
@@ -20,7 +20,7 @@
         "typing_Interop.Assumptions.win"
       ],
       0,
-      "da755e8b50997edead52ddbda7cb2a6e"
+      "34eaec65013b216e8adfd2ee6e038f29"
     ],
     [
       "Cpuid_stdcalls.check_sha",
@@ -41,7 +41,7 @@
         "typing_Interop.Assumptions.win"
       ],
       0,
-      "64167236b6491aa27cf6d406ad239a33"
+      "b11f998774d52a346d05338b00d7ab22"
     ],
     [
       "Cpuid_stdcalls.check_adx_bmi2",
@@ -62,7 +62,28 @@
         "typing_Interop.Assumptions.win"
       ],
       0,
-      "a290ebcf29c5bc24fbb578accc5150c4"
+      "2541bfbd20f1c39a15f121aa992c079a"
+    ],
+    [
+      "Cpuid_stdcalls.check_avx",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "bool_inversion", "eq2-interp",
+        "equation_Interop.Base.coerce", "equation_Prims.eq2",
+        "equation_Prims.squash", "equation_Vale.Stdcalls.Cpuid.code_avx",
+        "equation_X64.Cpuidstdcall.va_ens_check_avx_stdcall",
+        "equation_X64.Cpuidstdcall.va_req_check_avx_stdcall",
+        "equation_X64.Vale.Decls.va_require_total",
+        "equation_X64.Vale.Decls.valid_stack_slots",
+        "fuel_guarded_inversion_X64.Vale.State.state",
+        "function_token_typing_X64.MemoryAdapters.mem_eq",
+        "refinement_interpretation_Tm_refine_8d65e998a07dd53ec478e27017d9dba5",
+        "typing_Interop.Assumptions.win"
+      ],
+      0,
+      "13b8ea79046a8268f6834bb4da0da163"
     ],
     [
       "Cpuid_stdcalls.check_avx2",
@@ -72,7 +93,7 @@
       [
         "@MaxIFuel_assumption", "@query", "bool_inversion", "eq2-interp",
         "equation_Interop.Base.coerce", "equation_Prims.eq2",
-        "equation_Prims.squash", "equation_Vale.Stdcalls.Cpuid.code_avx",
+        "equation_Prims.squash", "equation_Vale.Stdcalls.Cpuid.code_avx2",
         "equation_X64.Cpuidstdcall.va_ens_check_avx2_stdcall",
         "equation_X64.Cpuidstdcall.va_req_check_avx2_stdcall",
         "equation_X64.Vale.Decls.va_require_total",
@@ -83,7 +104,7 @@
         "typing_Interop.Assumptions.win"
       ],
       0,
-      "52016195e965c1d3c93b01568aac3e25"
+      "009408c65543b4451264611a5de2b541"
     ]
   ]
 ]
