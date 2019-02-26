@@ -42,4 +42,15 @@ let lowstar_avx : lowstar_avx_t  =
     dom
     (W.mk_prediction code_avx dom [] (avx_lemma code_avx IA.win))
 
-let check_avx2 = as_normal_t #lowstar_avx_t lowstar_avx
+let check_avx = as_normal_t #lowstar_avx_t lowstar_avx
+
+(* And here's the check_avx wrapper itself *)
+let lowstar_avx2 : lowstar_avx2_t  =
+  IX64.wrap_weak_stdcall
+    Interop.down_mem
+    code_avx2
+    8
+    dom
+    (W.mk_prediction code_avx2 dom [] (avx2_lemma code_avx2 IA.win))
+
+let check_avx2 = as_normal_t #lowstar_avx2_t lowstar_avx2
