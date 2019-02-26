@@ -6,15 +6,49 @@ open Lib.Sequence
 open Lib.ByteSequence
 open Lib.LoopCombinators
 
+#set-options "--z3rlimit 15 --max_fuel 0"
+
+
+type algorithm =
+  | ESCH_256
+  | ESCH_384
 
 inline_for_extraction
 let vsize_block = 16
 
-inline_for_extraction
-let pos_constM256: size_nat = 23
 
 inline_for_extraction
-let pos_constM384: size_nat = 31
+let vsize_state (a:algorithm) =
+  match a with
+  | ESCH_256 -> 48
+  | ESCH_384 -> 64
+
+inline_for_extraction
+let vsize_hash (a:algorithm) =
+  match a with
+  | ESCH_256 -> 32
+  | ESCH_384 -> 48
+
+inline_for_extraction
+let pos_constM (a:algorithm) =
+  match a with
+  | ESCH_256 -> 23
+  | ESCH_384 -> 31
+
+inline_for_extraction
+let rounds_absorb (a:algorithm) =
+  match a with
+  | ESCH_256 -> 7
+  | ESCH_384 -> 8
+
+inline_for_extraction
+let rounds_absorb_last (a:algorithm) =
+  match a with
+  | ESCH_256 -> 11
+  | ESCH_384 -> 12
+
+
+type state_s (a:algorithm) = lbytes (vsize_state a)
 
 
 val pad: b:bytes{length b <= vsize_block} -> Tot (uint8 & lbytes vsize_block)
@@ -29,36 +63,27 @@ let pad b =
     ((u8 1), output) end
 
 
-val absorb256: block: lbytes 16 -> state: lbytes 48 -> Tot (lbytes 48)
-let absorb256 block state =
+val permute: a:algorithm -> Tot (steps: size_nat -> state:lbytes (vsize_state a) -> Tot (state:lbytes (vsize_state a)))
+let permute a =
+  match a with
+  | ESCH_256 -> Spec.SPARKLE.sparkle384
+  | ESCH_384 -> Spec.SPARKLE.sparkle512
+
+
+val absorb: a:algorithm -> block: lbytes 16 -> state: state_s a -> Tot (state_s a)
+let absorb a block state =
   let rate = sub state 0 vsize_block in
   let merge: lbytes 16 = map2 (fun a b -> a ^. b) block rate in
   let state = update_sub state 0 vsize_block merge in
-  Spec.SPARKLE.sparkle384 7 state
+  permute a (rounds_absorb a) state
 
 
-val absorb_last256: input: bytes{length input <= vsize_block} -> state: lbytes 48 -> Tot (lbytes 48)
-let absorb_last256 input state =
+val absorb_last: a:algorithm -> input: bytes{length input <= vsize_block} -> state: state_s a -> Tot (state_s a)
+let absorb_last a input state =
   let c, block = pad input in
-  let cm = c ^. state.[pos_constM256] in
-  let state = state.[pos_constM256] <- cm in
-  Spec.SPARKLE.sparkle384 11 state
-
-
-val absorb384: block: lbytes 16 -> state: lbytes 64 -> Tot (lbytes 64)
-let absorb384 block state =
-  let rate = sub state 0 vsize_block in
-  let merge: lbytes 16 = map2 (fun a b -> a ^. b) block rate in
-  let state = update_sub state 0 vsize_block merge in
-  Spec.SPARKLE.sparkle512 8 state
-
-
-val absorb_last384: input: bytes{length input <= vsize_block} -> state: lbytes 64 -> Tot (lbytes 64)
-let absorb_last384 input state =
-  let c, block = pad input in
-  let cm = c ^. state.[pos_constM384] in
-  let state = state.[pos_constM384] <- cm in
-  Spec.SPARKLE.sparkle512 12 state
+  let cm = c ^. state.[(pos_constM a)] in
+  let state = state.[(pos_constM a)] <- cm in
+  permute a (rounds_absorb_last a) state
 
 
 val squeeze256: state: lbytes 48 -> Tot (lbytes 32)
@@ -79,25 +104,20 @@ let squeeze384 state =
   a @| b @| c
 
 
-val esch256: input:bytes -> Tot (lbytes 32)
-let esch256 input =
-  let state = create 48 (u8 0) in
-  let len = length input in
-  let state: lbytes 48 =
-    repeati_blocks vsize_block input
-      (fun _ b s -> absorb256 b s)
-      (fun _ _ l s -> absorb_last256 l s)
-    state in
-  squeeze256 state
+val squeeze: a:algorithm -> state_s a -> Tot (lbytes (vsize_hash a))
+let squeeze a state =
+  match a with
+  | ESCH_256 -> squeeze256 state
+  | ESCH_384 -> squeeze384 state
 
 
-val esch384: input:bytes -> Tot (lbytes 48)
-let esch384 input =
-  let state = create 64 (u8 0) in
+val esch: a:algorithm -> input:bytes -> Tot (lbytes (vsize_hash a))
+let esch a input =
+  let state = create (vsize_state a) (u8 0) in
   let len = length input in
-  let state: lbytes 64 =
+  let state =
     repeati_blocks vsize_block input
-      (fun _ b s -> absorb384 b s)
-      (fun _ _ l s -> absorb_last384 l s)
+      (fun _ b s -> absorb a b s)
+      (fun _ _ l s -> absorb_last a l s)
     state in
-  squeeze384 state
+  squeeze a state
