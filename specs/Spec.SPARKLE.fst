@@ -38,10 +38,8 @@ let l1 x = (x <<<. size 16)  ^. (x &. (u32 0xffff))
 
 val m2: branch -> branch -> Tot (branch & branch)
 let m2 x y =
-  let x0 = fst x in
-  let y0 = snd x in
-  let x1 = fst y in
-  let y1 = snd y in
+  let x0, y0 = x in
+  let x1, y1 = y in
   let u = y0 ^. y1 in
   let v = x0 ^. x1 in
   let lu = l1 u in
@@ -54,12 +52,9 @@ let m2 x y =
 
 val m3: branch -> branch -> branch -> Tot (branch & branch & branch)
 let m3 x y z =
-  let x0 = fst x in
-  let y0 = snd x in
-  let x1 = fst y in
-  let y1 = snd y in
-  let x2 = fst z in
-  let y2 = snd z in
+  let x0, y0 = x in
+  let x1, y1 = y in
+  let x2, y2 = z in
   let u = y0 ^. y1 ^. y2 in
   let v = x0 ^. x1 ^. x2 in
   let lu = l1 u in
@@ -74,14 +69,10 @@ let m3 x y z =
 
 val m4: branch -> branch -> branch -> branch -> Tot (branch & branch & branch & branch)
 let m4 x y z z2 =
-  let x0 = fst x in
-  let y0 = snd x in
-  let x1 = fst y in
-  let y1 = snd y in
-  let x2 = fst z in
-  let y2 = snd z in
-  let x3 = fst z2 in
-  let y3 = snd z2 in
+  let x0, y0 = x in
+  let x1, y1 = y in
+  let x2, y2 = z in
+  let x3, y3 = z2 in
   let u = y0 ^. y1 ^. y2 ^. y3 in
   let v = x0 ^. x1 ^. x2 ^. x3 in
   let lu = l1 u in

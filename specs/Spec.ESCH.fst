@@ -114,10 +114,9 @@ let squeeze a state =
 val esch: a:algorithm -> input:bytes -> Tot (lbytes (vsize_hash a))
 let esch a input =
   let state = create (vsize_state a) (u8 0) in
-  let len = length input in
   let state =
-    repeati_blocks vsize_block input
-      (fun _ b s -> absorb a b s)
-      (fun _ _ l s -> absorb_last a l s)
+    repeat_blocks vsize_block input
+      (absorb a)
+      (fun _ -> absorb_last a)
     state in
   squeeze a state
