@@ -26,6 +26,13 @@ val check_adx_bmi2: unit -> Stack UInt64.t
       B.modifies B.loc_none h0 h1)
 
 inline_for_extraction
+val check_avx: unit -> Stack UInt64.t
+    (requires fun h0 -> True)
+    (ensures fun h0 ret_val h1 -> 
+      ((UInt64.v ret_val) =!= 0 ==> avx_enabled) /\ 
+      B.modifies B.loc_none h0 h1)
+
+inline_for_extraction
 val check_avx2: unit -> Stack UInt64.t
     (requires fun h0 -> True)
     (ensures fun h0 ret_val h1 -> 
