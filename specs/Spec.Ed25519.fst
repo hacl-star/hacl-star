@@ -11,6 +11,10 @@ open Lib.NatMod
 
 #reset-options "--max_fuel 0 --z3rlimit 20"
 
+inline_for_extraction
+let size_signature: size_nat = 64
+
+
 (* Point addition *)
 type aff_point = tuple2 elem elem           // Affine point
 type ext_point = tuple4 elem elem elem elem // Homogeneous extended coordinates
