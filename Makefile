@@ -515,19 +515,15 @@ dist/vale:
 
 dist/vale/%-x86_64-mingw.S: obj/vale-%.exe | dist/vale
 	$< GCC Win > $@
-	$(SED) 's/_stdcall//' -i $@
 
 dist/vale/%-x86_64-msvc.asm: obj/vale-%.exe | dist/vale
 	$< MASM Win > $@
-	$(SED) 's/_stdcall//' -i $@
 
 dist/vale/%-x86_64-linux.S: obj/vale-%.exe | dist/vale
 	$< GCC Linux > $@
-	$(SED) 's/_stdcall//' -i $@
 
 dist/vale/%-x86_64-darwin.S: obj/vale-%.exe | dist/vale
 	$< GCC MacOS > $@
-	$(SED) 's/_stdcall//' -i $@
 
 dist/vale/%-inline.c: obj/inline-vale-%.exe | dist/vale
 	$< > $@
