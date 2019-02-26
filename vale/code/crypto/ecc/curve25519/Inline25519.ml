@@ -1,1 +1,5 @@
 let _ = Fadd_inline.add1_code_inline ()
+let _ = Fadd_inline.fadd_code_inline ()
+let _ = Fadd_inline.fsub_code_inline ()
+let _ = Fmul_inline.fmul1_code_inline ()
+let _ = Fswap_inline.cswap2_code_inline ()

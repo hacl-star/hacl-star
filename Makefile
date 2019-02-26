@@ -430,6 +430,12 @@ obj/Fmul_stdcalls.fst.checked: \
 obj/Fsqr_stdcalls.fst.checked: \
   FSTAR_FLAGS=$(VALE_FSTAR_FLAGS)
 
+obj/Fadd_inline.fst.checked: \
+  FSTAR_FLAGS=$(VALE_FSTAR_FLAGS)
+
+obj/Fmul_inline.fst.checked: \
+  FSTAR_FLAGS=$(VALE_FSTAR_FLAGS)
+
 obj/Vale.Stdcalls.%.checked: \
   FSTAR_FLAGS=$(VALE_FSTAR_FLAGS)
 
@@ -614,6 +620,8 @@ DEFAULT_FLAGS		=\
   -library 'Vale.Stdcalls.Poly' \
   -library 'Vale.Stdcalls.Sha' \
   -library 'Fadd_inline' \
+  -library 'Fmul_inline' \
+  -library 'Fswap_inline' \
   -no-prefix 'Vale.Stdcalls.Cpuid' \
   -no-prefix 'Vale.Stdcalls.Fadd' \
   -no-prefix 'Vale.Stdcalls.Fmul' \
@@ -623,6 +631,8 @@ DEFAULT_FLAGS		=\
   -no-prefix 'Vale.Stdcalls.Poly' \
   -no-prefix 'Vale.Stdcalls.Sha' \
   -no-prefix 'Fadd_inline' \
+  -no-prefix 'Fmul_inline' \
+  -no-prefix 'Fswap_inline' \
   -no-prefix 'EverCrypt.Vale' \
   -no-prefix 'MerkleTree.New.Low' \
   -no-prefix 'MerkleTree.New.Low.Serialization' \

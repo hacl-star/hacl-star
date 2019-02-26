@@ -194,7 +194,7 @@ let print_inline
   // Every modified register that wasn't used for the inputs/outputs should be specified in the modified line
   let modified_str = "  : " ^ print_modified_registers n ret_val of_arg regs_mod args in
 
-  let close_code = "  );\n}\n" in
+  let close_code = "  );\n}\n\n" in
 
   print_string (header ^ arg_regs ^ ret_reg ^ start_code ^ code_str ^ output_str ^ input_str ^ modified_str ^ close_code);
   final_label

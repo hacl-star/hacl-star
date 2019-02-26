@@ -761,7 +761,8 @@ procedure{:quick} fast_sub(
 
 
 #reset-options "--z3rlimit 60"
-procedure{:quick} fadd(
+procedure{:quick}{:public}{:exportSpecs} fadd(
+    ghost stack_b:buffer64,
     ghost dst_b:buffer64,
     ghost inA_b:buffer64,
     ghost inB_b:buffer64)
@@ -909,7 +910,7 @@ procedure{:quick}{:public}{:exportSpecs} fadd_stdcall(
         Mov64(inB_ptr, r8);
     } 
 
-    fadd(dst_b, inA_b, inB_b);
+    fadd(stack_b, dst_b, inA_b, inB_b);
 
     inline if (win) {
         Pop(rsi, stack_b, 0);
@@ -918,7 +919,8 @@ procedure{:quick}{:public}{:exportSpecs} fadd_stdcall(
 }
 
 #reset-options "--z3rlimit 60"
-procedure{:quick} fsub(
+procedure{:quick}{:public}{:exportSpecs} fsub(
+    ghost stack_b:buffer64,                                        
     ghost dst_b:buffer64,
     ghost inA_b:buffer64,
     ghost inB_b:buffer64)
@@ -1064,7 +1066,7 @@ procedure{:quick}{:public}{:exportSpecs} fsub_stdcall(
         Mov64(inB_ptr, r8);
     } 
 
-    fsub(dst_b, inA_b, inB_b);
+    fsub(stack_b, dst_b, inA_b, inB_b);
 
     inline if (win) {
         Pop(rsi, stack_b, 0);
@@ -1073,9 +1075,11 @@ procedure{:quick}{:public}{:exportSpecs} fsub_stdcall(
 }
 
 #reset-options "--z3rlimit 600"
-procedure{:quick}fmul1(
+procedure{:quick}{:public}{:exportSpecs} fmul1(
+    ghost stack_b:buffer64,
     ghost dst_b:buffer64,
-    ghost inA_b:buffer64)
+    ghost inA_b:buffer64,
+    ghost inB:nat64)
     lets
         dst_ptr @= rdi;
         inA_ptr @= rsi;
@@ -1102,6 +1106,7 @@ procedure{:quick}fmul1(
         mem; efl;
 
     requires
+        b == inB;
         adx_enabled && bmi2_enabled;
         buffers_disjoint(dst_b, inA_b) || dst_b == inA_b;
 
@@ -1210,7 +1215,7 @@ procedure{:quick}{:public}{:exportSpecs} fmul1_stdcall(
         Mov64(b, r8);
     } 
 
-    fmul1(dst_b, inA_b);
+    fmul1(stack_b, dst_b, inA_b, inB_in);
 
     inline if (win) {
         Pop(rsi, stack_b, 0);
