@@ -23,6 +23,7 @@ let getter (flag: bool) = unit -> Stack bool
 
 val has_shaext: getter X64.CPU_Features_s.sha_enabled
 val has_aesni: getter X64.CPU_Features_s.aesni_enabled
+val has_avx2: getter X64.CPU_Features_s.avx2_enabled
 
 val wants_vale: unit ->
   Stack bool (requires fun _ -> True) (ensures fun h0 _ h1 -> B.(modifies loc_none h0 h1))
