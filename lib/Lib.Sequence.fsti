@@ -199,6 +199,47 @@ val lemma_concat3:
       sub s (len0 + len1) len2 == s2)
     (ensures s == concat (concat s0 s1) s2)
 
+val lemma_concat4:
+    #a:Type0
+  -> len0:size_nat
+  -> s0:lseq a len0
+  -> len1:size_nat{len0 + len1 <= max_size_t}
+  -> s1:lseq a len1
+  -> len2:size_nat{len0 + len1 + len2 <= max_size_t}
+  -> s2:lseq a len2
+  -> len3:size_nat{len0 + len1 + len2 + len3 <= max_size_t}
+  -> s3:lseq a len3
+  -> s:lseq a (len0 + len1 + len2 + len3) ->
+  Lemma
+    (requires
+      sub s 0 len0 == s0 /\
+      sub s len0 len1 == s1 /\
+      sub s (len0 + len1) len2 == s2 /\
+      sub s (len0 + len1 + len2) len3 == s3)
+    (ensures s == concat s0 (concat s1 (concat s2 s3)))
+
+val lemma_concat5:
+    #a:Type0
+  -> len0:size_nat
+  -> s0:lseq a len0
+  -> len1:size_nat{len0 + len1 <= max_size_t}
+  -> s1:lseq a len1
+  -> len2:size_nat{len0 + len1 + len2 <= max_size_t}
+  -> s2:lseq a len2
+  -> len3:size_nat{len0 + len1 + len2 + len3 <= max_size_t}
+  -> s3:lseq a len3
+  -> len4:size_nat{len0 + len1 + len2 + len3 + len4 <= max_size_t}
+  -> s4:lseq a len4
+  -> s:lseq a (len0 + len1 + len2 + len3 + len4) ->
+  Lemma
+    (requires
+      sub s 0 len0 == s0 /\
+      sub s len0 len1 == s1 /\
+      sub s (len0 + len1) len2 == s2 /\
+      sub s (len0 + len1 + len2) len3 == s3 /\
+      sub s (len0 + len1 + len2 + len3) len4 == s4)
+    (ensures s == concat s0 (concat s1 (concat s2 (concat s3 s4))))
+
 (** Updating a sub-Sequence from another fixed-length Sequence *)
 let update_slice
     (#a:Type)

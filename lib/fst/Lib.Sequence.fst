@@ -61,7 +61,27 @@ let lemma_concat3 #a len0 s0 len1 s1 len2 s2 s =
   FStar.Seq.Properties.lemma_split s (len0 + len1);
   FStar.Seq.Properties.lemma_split s' (len0 + len1)
 
-let createi_a (a:Type) (len:size_nat) (init:(i:nat{i < len} -> a)) (k:nat{k <= len}) = 
+let lemma_concat4 #a len0 s0 len1 s1 len2 s2 len3 s3 s =
+  let s' = concat s0 (concat s1 (concat s2 s3)) in
+  FStar.Seq.Properties.lemma_split (sub s (len0 + len1) (len2 + len3)) len2;
+  FStar.Seq.Properties.lemma_split (sub s' (len0 + len1) (len2 + len3)) len2;
+  FStar.Seq.Properties.lemma_split (sub s len0 (len1 + len2 + len3)) len1;
+  FStar.Seq.Properties.lemma_split (sub s' len0 (len1 + len2 + len3)) len1;
+  FStar.Seq.Properties.lemma_split s len0;
+  FStar.Seq.Properties.lemma_split s' len0
+
+let lemma_concat5 #a len0 s0 len1 s1 len2 s2 len3 s3 len4 s4 s =
+  let s' = concat s0 (concat s1 (concat s2 (concat s3 s4))) in
+  FStar.Seq.Properties.lemma_split (sub s (len0 + len1 + len2) (len3 + len4)) len3;
+  FStar.Seq.Properties.lemma_split (sub s' (len0 + len1 + len2) (len3 + len4)) len3;
+  FStar.Seq.Properties.lemma_split (sub s (len0 + len1) (len2 + len3 + len4)) len2;
+  FStar.Seq.Properties.lemma_split (sub s' (len0 + len1) (len2 + len3 + len4)) len2;
+  FStar.Seq.Properties.lemma_split (sub s len0 (len1 + len2 + len3 + len4)) len1;
+  FStar.Seq.Properties.lemma_split (sub s' len0 (len1 + len2 + len3 + len4)) len1;
+  FStar.Seq.Properties.lemma_split s len0;
+  FStar.Seq.Properties.lemma_split s' len0
+
+let createi_a (a:Type) (len:size_nat) (init:(i:nat{i < len} -> a)) (k:nat{k <= len}) =
   lseq a k
 
 let createi_pred (a:Type) (len:size_nat) (init:(i:nat{i < len} -> a)) (k:nat{k <= len})
