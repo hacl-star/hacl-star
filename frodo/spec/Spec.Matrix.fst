@@ -47,13 +47,15 @@ let index_neq #n1 #n2 i j i' j' =
   if i' < i then
     begin
     assert (i' * n2 + j' < n2 * (i' + 1));
-    assert (i' * n2 + j' < n2 * i + j)
+    assert (i' * n2 + j' < n2 * i + j);
+    assert ((i' * n2 + j' <> i * n2 + j) /\ i' * n2 + j' < n1 * n2)
     end
   else if i = i' then ()
   else
     begin
     assert (i * n2 + j < n2 * (i + 1));
-    assert (i * n2 + j < n2 * i' + j')
+    assert (i * n2 + j < n2 * i' + j');
+    assert ((i' * n2 + j' <> i * n2 + j) /\ i' * n2 + j' < n1 * n2)
     end
 
 /// Matrices as flat sequences

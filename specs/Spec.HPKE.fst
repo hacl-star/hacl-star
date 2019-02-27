@@ -1,4 +1,4 @@
-module Spec.ECIES
+module Spec.HPKE
 
 open FStar.Mul
 open Lib.IntTypes
@@ -53,7 +53,7 @@ let size_label_nonce: size_nat = 11
 inline_for_extraction
 let size_label_key: size_nat = 9
 
-(** Constants for ECIES labels *)
+(** Constants for HPKE labels *)
 let label_nonce_list : l:list uint8{List.Tot.length l == size_label_nonce} =
   [@inline_let]
   let l = [u8 0x65; u8 0x63; u8 0x69; u8 0x65; u8 0x73; u8 0x20; u8 0x6e; u8 0x6f; u8 0x6e; u8 0x63; u8 0x65] in

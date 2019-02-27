@@ -11,6 +11,10 @@ open Lib.NatMod
 
 #reset-options "--max_fuel 0 --z3rlimit 20"
 
+inline_for_extraction
+let size_signature: size_nat = 64
+
+
 (* Point addition *)
 type aff_point = tuple2 elem elem           // Affine point
 type ext_point = tuple4 elem elem elem elem // Homogeneous extended coordinates
@@ -139,7 +143,8 @@ let secret_to_public (secret:lbytes 32) =
 
 #reset-options "--max_fuel 0 --z3rlimit 50"
 
-let sign (secret:lbytes 32) (len:size_nat{ 8 * len < max_size_t}) (msg:lbytes len) =
+let sign (secret:lbytes 32) (msg:bytes{8 * length msg < max_size_t}) =
+  let len = length msg in
   let a, prefix = secret_expand secret in
   let a' = point_compress (point_mul 32 a g) in
   let tmp = create (len + 64) (u8 0) in
@@ -164,7 +169,8 @@ let point_equal (p:ext_point) (q:ext_point) =
   else if ((py *% qz) <>% (qy *% pz)) then false
   else true
 
-let verify (public:lbytes 32) (len:size_nat{ 8 * len < max_size_t}) (msg:lbytes len) (signature:lbytes 64) =
+let verify (public:lbytes 32) (msg:bytes{8 * length msg < max_size_t}) (signature:lbytes 64) =
+  let len = length msg in
   let a' = point_decompress public in
   match a' with
   | None -> false

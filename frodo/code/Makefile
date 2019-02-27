@@ -159,7 +159,7 @@ $(OUTPUT_DIR)/%.krml: | .depend
 
 # 2. Generation of .c files
 
-KREMLIN_TESTLIB = -add-include '"extracted/TestLib.h"' $(KREMLIB)/c/testlib.c
+KREMLIN_TESTLIB = $(KREMLIB)/c/testlib.c
 
 KREMLIN = $(KREMLIN_HOME)/krml
 
