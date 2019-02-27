@@ -19,7 +19,9 @@ let vsize_rcon: size_nat = 8
 inline_for_extraction
 let rcon_list: l:List.Tot.llist uint32 vsize_rcon =
   [@inline_let]
-  let l = List.Tot.map u32 [0; 0; 0; 0; 0; 0; 0; 0] in
+  let l = List.Tot.map u32 [
+    0xB7E15162; 0xBF715880; 0x38B4DA56; 0x324E7738;
+    0xBB1185EB; 0x4F7C7B57; 0xCFBFA1C8; 0xC2B3293D] in
   assert_norm(List.Tot.length l == vsize_rcon);
   l
 
