@@ -2069,6 +2069,68 @@ procedure {:quick} Ctr32_ghash_6_prelude(
 }
 
 #reset-options ""
+procedure {:quick} Encrypt_save_and_shuffle_output(
+    ghost count:nat,
+    ghost out_b:buffer128
+    )
+    lets
+        outp @= rsi;  
+        Ii @= xmm0; T1 @= xmm1; 
+        Z3 @= xmm7;
+        inout0 @= xmm9; inout1 @= xmm10; inout2 @= xmm11; inout3 @= xmm12;
+        inout4 @= xmm13; inout5 @= xmm14;
+
+    reads
+        outp;
+        Ii; Z3;
+        memTaint;
+
+    modifies
+        T1; inout0; inout1; inout2; inout3; inout4; inout5; 
+        mem; efl;
+
+    requires
+        // Valid ptrs and buffers
+        validDstAddrsOffset128(mem, outp - 0x60, out_b, count*6, 6, memTaint, Secret);
+
+        Ii == Mkfour(0x0C0D0E0F, 0x08090A0B, 0x04050607, 0x00010203);
+
+    ensures
+        modifies_buffer_specific128(out_b, old(mem), mem, count*6+0, count*6+5);
+        slice_work_around(buffer128_as_seq(mem, out_b), 6*count) == old(slice_work_around(buffer128_as_seq(mem, out_b), 6*count));   
+
+        buffer128_read(out_b, count*6 + 0, mem) == old(inout0);
+        buffer128_read(out_b, count*6 + 1, mem) == old(inout1);
+        buffer128_read(out_b, count*6 + 2, mem) == old(inout2);
+        buffer128_read(out_b, count*6 + 3, mem) == old(inout3);
+        buffer128_read(out_b, count*6 + 4, mem) == old(inout4);
+        buffer128_read(out_b, count*6 + 5, mem) == old(inout5);
+
+        T1 == quad32_xor(old(T1), Z3);
+        inout0 == reverse_bytes_quad32(old(inout0));
+        inout1 == reverse_bytes_quad32(old(inout1));
+        inout2 == reverse_bytes_quad32(old(inout2));
+        inout3 == reverse_bytes_quad32(old(inout3));
+        inout4 == reverse_bytes_quad32(old(inout4));
+        inout5 == reverse_bytes_quad32(old(inout5));
+        
+{
+    Store128_buffer(outp, inout0, 0-0x60, Secret, out_b, count*6 + 0);
+    VPshufb(inout0, inout0, Ii);
+    VPxor(T1, T1, Z3);
+    Store128_buffer(outp, inout1, 0-0x50, Secret, out_b, count*6 + 1);
+    VPshufb(inout1, inout1, Ii);
+    Store128_buffer(outp, inout2, 0-0x40, Secret, out_b, count*6 + 2);
+    VPshufb(inout2, inout2, Ii);
+    Store128_buffer(outp, inout3, 0-0x30, Secret, out_b, count*6 + 3);
+    VPshufb(inout3, inout3, Ii);
+    Store128_buffer(outp, inout4, 0-0x20, Secret, out_b, count*6 + 4);
+    VPshufb(inout4, inout4, Ii);
+    Store128_buffer(outp, inout5, 0-0x10, Secret, out_b, count*6 + 5);
+    VPshufb(inout5, inout5, Ii);
+}
+
+#reset-options "--z3rlimit 20"
 procedure {:quick} {:verify true} AES_GCM_encrypt(
     inline alg:algorithm,  
     ghost iv_b:buffer128,
@@ -2128,6 +2190,7 @@ procedure {:quick} {:verify true} AES_GCM_encrypt(
         // Len is # of 128-bit blocks
         len % 6 == 0;
         len >= 0x10*3;
+        len / 6 >= 3;   // Should be implied by above... :(
         12 + len + 6 < pow2_32;
 {
     ghost var plain_quads := buffer128_as_seq(mem, in_b);
@@ -2166,6 +2229,18 @@ procedure {:quick} {:verify true} AES_GCM_encrypt(
 
     Ctr32_ghash_6_prelude(alg, stack_b, key_words, round_keys, keys_b, inc32(ctr_BE, 12));
     Mov64(counter, 14);
+    ghost var mid_len := len;
+    assert mid_len == old(len) - 18;
     Loop6x_loop(alg, 2, iv_b, out_b, in_b, out_b, stack_b, old(buffer128_as_seq(mem, in_b)), key_words, round_keys, keys_b, ctr_BE, inc32(ctr_BE, 12)); 
+    ghost var out_snapshot := buffer128_as_seq(mem, out_b);
+
+    InitPshufbMask(Ii, r12);    // # borrow $Ii for .Lbswap_mask
+    assert {:quick_type} old(len) / 6 >= 3;
+    ghost var offset_in := #nat((old(len) / 6) - 2);
+    Encrypt_save_and_shuffle_output(offset_in, out_b); 
+
+    gctr_partial_opaque_ignores_postfix(alg, #nat32(12+mid_len - 6), old(buffer128_as_seq(mem, in_b)), old(buffer128_as_seq(mem, in_b)), out_snapshot, buffer128_as_seq(mem, out_b),key_words, ctr_BE);
+    gctr_partial_extend6(alg, 12+mid_len - 6, old(buffer128_as_seq(mem, in_b)), buffer128_as_seq(mem, out_b), key_words, ctr_BE);
+    assert gctr_partial_opaque(alg, #nat(old(len) - 6), old(buffer128_as_seq(mem, in_b)), buffer128_as_seq(mem, out_b), key_words, ctr_BE);
 }
 
