@@ -89,7 +89,7 @@ val poly1305_encode_last:
       feval h1 f == LSeq.map (S.pfadd (pow2 (8 * v len)))
         (LSeq.create (width s) (BSeq.nat_from_bytes_le (as_seq h0 b)))))
 let poly1305_encode_last #s f len b =
-  Math.Lemmas.pow2_le_compat 128 (v len * 8);
+  Math.Lemmas.pow2_le_compat 128 (8 * v len);
   assert_norm (pow2 128 < S.prime);
   push_frame();
   let tmp = create 16ul (u8 0) in
@@ -107,6 +107,8 @@ let poly1305_encode_last #s f len b =
   assert (BSeq.nat_from_bytes_le (as_seq h0 b) < pow2 (v len * 8));
   assert (F32xN.felem_less #(width s) h1 f (pow2 (v len * 8)));
   set_bit f (len *! 8ul);
+  let h2 = ST.get () in
+  assert (pow2 (v len * 8) == pow2 (8 * v len));
   pop_frame()
 
 inline_for_extraction
@@ -135,6 +137,8 @@ let poly1305_encode_r #s p b =
   let h1 = ST.get () in
   LSeq.eq_intro (feval h1 (gsub p 0ul 5ul)) (S.encode_r (as_seq h0 b))
 
+#set-options "--z3rlimit 150"
+
 inline_for_extraction
 val poly1305_init_:
     #s:field_spec
@@ -150,13 +154,18 @@ val poly1305_init_:
 let poly1305_init_ #s ctx key =
   let acc = get_acc ctx in
   let pre = get_precomp_r ctx in
-
+  assert (acc == gsub ctx 0ul (nlimb s));
+  assert (pre == gsub ctx (nlimb s) (precomplen s));
   let kr = sub key 0ul 16ul in
   let h0 = ST.get () in
   set_zero acc;
   let h1 = ST.get () in
+  assert (F32xN.acc_inv_t #(width s) (F32xN.as_tup5 h1 acc));
   LSeq.eq_intro (feval h1 acc) (fst (S.poly1305_init (as_seq h0 key)));
-  poly1305_encode_r #s pre kr
+  poly1305_encode_r #s pre kr;
+  let h2 = ST.get () in
+  assert (F32xN.load_precompute_r_post #(width s) h2 pre); 
+  assert (F32xN.acc_inv_t #(width s) (F32xN.as_tup5 h2 acc))
 
 (* WRAPPER TO PREVENT INLINING *)
 [@CInline]
