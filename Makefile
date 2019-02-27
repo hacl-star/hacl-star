@@ -246,7 +246,8 @@ ifndef MAKE_RESTARTS
 	    $(addprefix -include ,$(INCLUDES)) \
 	    $(addprefix -in ,$(VALE_ROOTS)) \
 	    -dep $< \
-	    > $@ \
+	    > $@ && \
+	  $(SED) -i 's!$(HACL_HOME)/obj/\(.*.checked\)!obj/\1!g' $@ \
 	  ,[VALE-DEPEND],$(call to-obj-dir,$@))
 
 .PHONY: .FORCE
