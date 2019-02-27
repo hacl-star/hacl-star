@@ -792,8 +792,8 @@
         "refinement_interpretation_Tm_refine_9a74d818566e70513bc032cc3b65a144",
         "refinement_interpretation_Tm_refine_a0cd7d06c5da6444b6b51b319febde8e",
         "refinement_interpretation_Tm_refine_b4c911b661c6d9fd533ca34851387d9e",
-        "refinement_interpretation_Tm_refine_b7eaa8451ba896691e51fd0e193ea360",
         "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "refinement_interpretation_Tm_refine_cc8c5a1b9deaca387391fc1dc3c17c3c",
         "refinement_interpretation_Tm_refine_d470a0dc8199b9991a942925f019a521",
         "refinement_interpretation_Tm_refine_de7e3b86947dc1082070e76f0a739920",
         "typing_FStar.Map.contains", "typing_FStar.Monotonic.HyperHeap.rid",
@@ -815,7 +815,7 @@
         "typing_X64.Memory.uint_view", "well-founded-ordering-on-nat"
       ],
       0,
-      "4fe8327cda77972865279e44093cb50d"
+      "4b03d5653c346441f2f0057d683abb37"
     ],
     [
       "X64.Memory.modifies_buffer_elim",
@@ -1189,7 +1189,7 @@
         "well-founded-ordering-on-nat"
       ],
       0,
-      "9f30dcadeb61826955605194841c4e91"
+      "4e4f68ec82565ff2d486660236ba03e9"
     ],
     [
       "X64.Memory.buffer_write",
@@ -1324,7 +1324,7 @@
         "typing_LowStar.Monotonic.Buffer.len", "well-founded-ordering-on-nat"
       ],
       0,
-      "076592feef5edbb581fdd353f9b42133"
+      "9fe3a0abe21b4ab8c6c6565842bd0d98"
     ],
     [
       "X64.Memory.get_addr_in_ptr",
@@ -1350,7 +1350,7 @@
         "well-founded-ordering-on-nat"
       ],
       0,
-      "cf9ec9c168e7f9aaa2e79a760ccdb39a"
+      "db0d96e6e70afdbc847bd75cb5d97f56"
     ],
     [
       "X64.Memory.valid_buffer",
@@ -1400,8 +1400,8 @@
         "projection_inverse_Prims.Cons_hd",
         "projection_inverse_Prims.Cons_tl", "projection_inverse_Prims.Nil_a",
         "refinement_interpretation_Tm_refine_22e79939c6a87956c827c63729f6a729",
-        "refinement_interpretation_Tm_refine_3de82fc5bcc4f579f4bc606e387294a9",
         "refinement_interpretation_Tm_refine_42a100bb7a1743d61cd476383079190f",
+        "refinement_interpretation_Tm_refine_467c7b368354b1a56df63217766327d3",
         "refinement_interpretation_Tm_refine_8d1554111de9e242dacbc8e0b0501a46",
         "refinement_interpretation_Tm_refine_ab5d30082b96ec85b12f510765d8647c",
         "refinement_kinding_Tm_refine_8d1554111de9e242dacbc8e0b0501a46",
@@ -1409,7 +1409,7 @@
         "typing_X64.Memory.valid_mem_aux"
       ],
       0,
-      "9724421cfa5e88f709a127bd1f7e8623"
+      "c4dda079f4379358f968249c080ddae5"
     ],
     [
       "X64.Memory.valid_mem",
@@ -1438,7 +1438,7 @@
         "typing_X64.Memory.buffer"
       ],
       0,
-      "f0f94ba01b051a2fa0f6c383517abf69"
+      "5a5645345821942db33aef4d67de246d"
     ],
     [
       "X64.Memory.find_valid_buffer_aux",
@@ -1502,7 +1502,7 @@
         "typing_X64.Memory.buffer"
       ],
       0,
-      "ea1925eb86410373806953456e381dbb"
+      "87f93ba3241a656dbc5bcec76c041063"
     ],
     [
       "X64.Memory.find_valid_buffer",
@@ -1529,12 +1529,12 @@
         "equation_X64.Memory.buffer", "equation_X64.Memory.mem",
         "lemma_FStar.Pervasives.invertOption",
         "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_9419ba968680092bbeff8368d851f6f8",
+        "refinement_interpretation_Tm_refine_7b5c7084bf21e5e8b16818097e39d4d7",
         "typing_FStar.Pervasives.Native.uu___is_Some",
         "typing_X64.Memory.buffer"
       ],
       0,
-      "dfefd2cad54db551fc1c538a1ed323a6"
+      "44294fa1abd60c2d17648e2865693c2a"
     ],
     [
       "X64.Memory.find_valid_buffer_aux_ps",
@@ -1743,6 +1743,11 @@
         "data_elim_Interop.Types.Buffer",
         "data_typing_intro_Interop.Types.TUInt16@tok",
         "disc_equation_Prims.Cons", "disc_equation_Prims.Nil", "eq2-interp",
+        "equality_tok_Interop.Types.TUInt128@tok",
+        "equality_tok_Interop.Types.TUInt16@tok",
+        "equality_tok_Interop.Types.TUInt32@tok",
+        "equality_tok_Interop.Types.TUInt64@tok",
+        "equality_tok_Interop.Types.TUInt8@tok",
         "equation_FStar.Monotonic.HyperHeap.hmap",
         "equation_FStar.Monotonic.HyperStack.is_wf_with_ctr_and_tip",
         "equation_FStar.Monotonic.HyperStack.mem",
@@ -1754,6 +1759,7 @@
         "equation_with_fuel_FStar.List.Tot.Base.memP.fuel_instrumented",
         "false_interp", "fuel_guarded_inversion_Interop.Base.mem",
         "fuel_guarded_inversion_Interop.Types.b8_",
+        "fuel_guarded_inversion_Interop.Types.base_typ",
         "fuel_guarded_inversion_Prims.list",
         "function_token_typing_FStar.Monotonic.Heap.heap",
         "function_token_typing_Prims.__cache_version_number__",
@@ -1767,11 +1773,11 @@
         "projection_inverse_Prims.Cons_tl", "projection_inverse_Prims.Nil_a",
         "refinement_interpretation_Tm_refine_2a1fb4921198dd5f2d4355a00c974913",
         "refinement_interpretation_Tm_refine_42a100bb7a1743d61cd476383079190f",
+        "refinement_interpretation_Tm_refine_89627481d3edc396cd726a10a6e6cb20",
         "refinement_interpretation_Tm_refine_8d1554111de9e242dacbc8e0b0501a46",
         "refinement_interpretation_Tm_refine_97ae021fcc3792deeef0419e3387e60f",
         "refinement_interpretation_Tm_refine_9a74d818566e70513bc032cc3b65a144",
         "refinement_interpretation_Tm_refine_ab5d30082b96ec85b12f510765d8647c",
-        "refinement_interpretation_Tm_refine_fac7caaa1f069c52a0bcc610b2162119",
         "refinement_kinding_Tm_refine_8d1554111de9e242dacbc8e0b0501a46",
         "subterm_ordering_Prims.Cons", "typing_FStar.Map.contains",
         "typing_FStar.Monotonic.HyperHeap.rid",
@@ -1780,7 +1786,7 @@
         "typing_X64.Memory.writeable_mem_aux"
       ],
       0,
-      "3d28c76bcc3a1c97bb1f7cad6c2b921c"
+      "deda9da22468ad69eaf62d5e3f167794"
     ],
     [
       "X64.Memory.writeable_mem",
@@ -1809,7 +1815,7 @@
         "typing_X64.Memory.buffer"
       ],
       0,
-      "50868e1f59164c1c115ce4ae60296566"
+      "1c7e3df99266528bc6a9799068fa3512"
     ],
     [
       "X64.Memory.find_writeable_buffer_aux",
@@ -1874,7 +1880,7 @@
         "typing_X64.Memory.buffer"
       ],
       0,
-      "b46cbe4f696febbc515bc80c47fb78e1"
+      "b393e29862358e79f9d9a81a0fc1a9a1"
     ],
     [
       "X64.Memory.find_writeable_buffer",
