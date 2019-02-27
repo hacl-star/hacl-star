@@ -608,9 +608,12 @@ DEFAULT_FLAGS		=\
   -bundle Lib.*[rename=Hacl_Lib] \
   -drop Lib.IntVector.Intrinsics \
   -add-include '"libintvector.h"' \
+  -add-include '"evercrypt_targetconfig.h"' \
+  -drop EverCrypt.TargetConfig \
   -bundle Test,Test.*,Hacl.Test.* \
   -bundle EverCrypt.BCrypt \
   -bundle EverCrypt.OpenSSL \
+  -bundle 'Vale.Stdcalls.*[rename=Vale]' \
   -bundle MerkleTree.Spec,MerkleTree.Spec.*,MerkleTree.New.High,MerkleTree.New.High.* \
   -bundle FStar.Tactics.CanonCommMonoid,FStar.Tactics.CanonCommSemiring,FStar.Tactics.CanonCommSwaps[rename=Unused] \
   -bundle FastUtil_helpers,FastHybrid_helpers,FastSqr_helpers,FastMul_helpers[rename=Unused2] \
@@ -619,25 +622,9 @@ DEFAULT_FLAGS		=\
   -bundle Prop_s,Types_s,Words_s,Views,AES_s,Workarounds,Math.*,Interop,TypesNative_s[rename=Unused5] \
   -bundle GF128_s,GF128,Poly1305.Spec_s,GCTR,GCTR_s,GHash_s,GCM_helpers,GHash[rename=Unused6] \
   -bundle AES_helpers,AES256_helpers,GCM_s,GCM,Interop_assumptions[rename=Unused7] \
-  -bundle 'Check_aesni_stdcall,Check_sha_stdcall,Sha_update_bytes_stdcall[rename=Vale]' \
-  -library 'Vale.Stdcalls.Cpuid' \
-  -library 'Vale.Stdcalls.Fadd' \
-  -library 'Vale.Stdcalls.Fmul' \
-  -library 'Vale.Stdcalls.Fsqr' \
-  -library 'Vale.Stdcalls.Fsub' \
-  -library 'Vale.Stdcalls.Fswap' \
-  -library 'Vale.Stdcalls.Poly' \
-  -library 'Vale.Stdcalls.Sha' \
+  -library 'Vale.Stdcalls.*' \
   -library 'Fadd_inline' \
-  -no-prefix 'Vale.Stdcalls.Cpuid' \
-  -no-prefix 'Vale.Stdcalls.Fadd' \
-  -no-prefix 'Vale.Stdcalls.Fmul' \
-  -no-prefix 'Vale.Stdcalls.Fsqr' \
-  -no-prefix 'Vale.Stdcalls.Fsub' \
-  -no-prefix 'Vale.Stdcalls.Fswap' \
-  -no-prefix 'Vale.Stdcalls.Poly' \
-  -no-prefix 'Vale.Stdcalls.Sha' \
-  -no-prefix 'Fadd_inline' \
+  -no-prefix 'Vale.Stdcalls.*' \
   -no-prefix 'EverCrypt.Vale' \
   -no-prefix 'MerkleTree.New.Low' \
   -no-prefix 'MerkleTree.New.Low.Serialization' \
