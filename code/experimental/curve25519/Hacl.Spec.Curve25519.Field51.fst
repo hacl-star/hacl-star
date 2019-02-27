@@ -234,13 +234,15 @@ val lemma_mul_inv:
   -> cin:uint64{v cin < pow2 51}
   -> Lemma
     (let (i0, i1, i2, i3, i4) = f in
+    assert_norm (pow51 = pow2 51);
      let i1' = i1 +! cin in
      let out = (i0, i1', i2, i3, i4) in
      if (v i1 + v cin) / pow2 51 > 0 then
        felem_fits5 out (1, 2, 1, 1, 1) /\
        (v i1 + v cin) % pow2 51 < v cin
      else felem_fits5 out (1, 1, 1, 1, 1))
-let lemma_mul_inv f cin = ()
+let lemma_mul_inv f cin =
+  assert_norm (pow51 = pow2 51)
 
 inline_for_extraction
 val carry_wide5:

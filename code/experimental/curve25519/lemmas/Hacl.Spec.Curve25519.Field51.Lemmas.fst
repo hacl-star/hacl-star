@@ -11,7 +11,7 @@ open Hacl.Spec.Curve25519.Field51.Definition
 module BSeq = Lib.ByteSequence
 module LSeq = Lib.Sequence
 
-#reset-options "--z3rlimit 20 --using_facts_from '* -FStar.Seq'"
+#reset-options "--z3rlimit 50 --using_facts_from '* -FStar.Seq'"
 
 val lemma_mod_sub_distr: a:int -> b:int -> n:pos ->
   Lemma ((a - b % n) % n = (a - b) % n)
@@ -51,14 +51,24 @@ val lemma_mul_assos_6:
   Lemma (a * b * c * d * e * f == a * (b * c * d * e * f))
 let lemma_mul_assos_6 a b c d e f = ()
 
+val lemma_add_le:a:nat -> b:nat -> c:nat -> d:nat ->
+  Lemma
+  (requires a <= b /\ c <= d)
+  (ensures  a + c <= b + d)
+let lemma_add_le a b c d = ()
+
+val lemma_mul_le:a:nat -> b:nat -> c:nat -> d:nat ->
+  Lemma
+  (requires a <= b /\ c <= d)
+  (ensures  a * c <= b * d)
+let lemma_mul_le a b c d = ()
+
 val lemma_prime: unit ->
   Lemma (pow2 255 % prime = 19)
 let lemma_prime () =
   assert_norm (pow2 255 % prime = 19 % prime);
   assert_norm (19 < prime);
   FStar.Math.Lemmas.modulo_lemma 19 prime
-
-#set-options "--z3rlimit 150 --max_fuel 1"
 
 val lemma_add_zero:
   f1:felem5{felem_fits5 f1 (1, 2, 1, 1, 1)}
@@ -98,16 +108,10 @@ let lemma_add_zero f1 =
   assert (feval out == (v f10 + v f11 * pow51 +
     v f12 * pow51 * pow51 + v f13 * pow51 * pow51 * pow51 +
     v f14 * pow51 * pow51 * pow51 * pow51 + 8 * prime) % prime);
-  FStar.Math.Lemmas.lemma_mod_plus (feval f1) 8 prime;
+  FStar.Math.Lemmas.lemma_mod_plus (as_nat5 f1) 8 prime;
   assert (feval out == (v f10 + v f11 * pow51 +
     v f12 * pow51 * pow51 + v f13 * pow51 * pow51 * pow51 +
-    v f14 * pow51 * pow51 * pow51 * pow51) % prime);
-  // assert_spinoff ((v f10 + v f11 * pow51 +
-  //   v f12 * pow51 * pow51 + v f13 * pow51 * pow51 * pow51 +
-  //   v f14 * pow51 * pow51 * pow51 * pow51) % prime == feval f1);
-  assert_spinoff (feval out == feval f1)
-
-#set-options "--z3rlimit 300 --max_fuel 0"
+    v f14 * pow51 * pow51 * pow51 * pow51) % prime)
 
 val lemma_fmul5_pow51: r:felem5
   -> Lemma
@@ -133,8 +137,6 @@ let lemma_fmul5_pow51 r =
   lemma_prime ();
   assert_norm ((v r4 * pow2 255) % prime == (v r4 * 19) % prime);
   FStar.Math.Lemmas.lemma_mod_plus_distr_r p51r0123 (v r4 * 19) prime
-
-#set-options "--z3rlimit 150"
 
 val lemma_fmul5_pow51_pow51:r:felem5
   -> Lemma
@@ -493,6 +495,7 @@ val lemma_carry5_simplify:
     (v t0 + v c4 * 19 + v t1 * pow51 + v t2 * pow51 * pow51 +
      v t3 * pow51 * pow51 * pow51 + v t4 * pow51 * pow51 * pow51 * pow51) % prime)
 let lemma_carry5_simplify c0 c1 c2 c3 c4 t0 t1 t2 t3 t4 =
+  assert_norm (pow51 = pow2 51);
   assert (
     v c0 * pow2 51 + v t0 +
     (v c1 * pow2 51 + v t1 - v c0) * pow51 +
@@ -552,12 +555,6 @@ let lemma_load_felem5 f u64s =
   lemma_nat_from_uints64_le_4 u64s;
   assert_norm (pow2 64 * pow2 64 = pow2 128);
   assert_norm (pow2 64 * pow2 64 * pow2 64 = pow2 192)
-
-val lemma_mul_le:a:nat -> b:nat -> c:nat -> d:nat ->
-  Lemma
-  (requires a <= b /\ c <= d)
-  (ensures  a * c <= b * d)
-let lemma_mul_le a b c d = ()
 
 val lemma_load_felem_fits5:
     f:felem5
@@ -780,10 +777,13 @@ let lemma_store_felem1 f =
     v f1 / pow2 13 * pow2 64 + (v f2 % pow2 26) * pow2 38 * pow2 64 +
     v f2 / pow2 26 * pow2 128 + (v f3 % pow2 39) * pow2 25 * pow2 128 +
     v f3 / pow2 39 * pow2 192 + v f4 * pow2 12 * pow2 192);
+  lemma_mul_assos_3 (v f2 % pow2 26) (pow2 38) (pow2 64);
   assert_norm (pow2 38 * pow2 64 = pow2 102);
   assert ((v f2 % pow2 26) * pow2 38 * pow2 64 == (v f2 % pow2 26) * pow2 102);
+  lemma_mul_assos_3 (v f3 % pow2 39) (pow2 25) (pow2 128);
   assert_norm (pow2 25 * pow2 128 = pow2 153);
   assert ((v f3 % pow2 39) * pow2 25 * pow2 128 == (v f3 % pow2 39) * pow2 153);
+  lemma_mul_assos_3 (v f4) (pow2 12) (pow2 192);
   assert_norm (pow2 12 * pow2 192 = pow2 204);
   assert (v f4 * pow2 12 * pow2 192 == v f4 * pow2 204);
   assert (
@@ -898,12 +898,6 @@ let lemma_cswap2_step bit p1 p2 =
   let p2' = p2 ^. dummy in
   logxor_lemma p2 p1
 
-val lemma_add_le:a:nat -> b:nat -> c:nat -> d:nat ->
-  Lemma
-  (requires a <= b /\ c <= d)
-  (ensures  a + c <= b + d)
-let lemma_add_le a b c d = ()
-
 val mul64_wide_add3_lemma:
   #m0:scale64 -> #m1:scale64 -> #m2:scale64
  -> #m3:scale64 -> #m4:scale64 -> #m5:scale64
@@ -920,6 +914,7 @@ val mul64_wide_add3_lemma:
      (v a0 * v a1 + v b0 * v b1 + v c0 * v c1) <=
       (m0 * m1 + m2 * m3 + m4 * m5) * max51 * max51)
 let mul64_wide_add3_lemma #m0 #m1 #m2 #m3 #m4 #m5 a0 a1 b0 b1 c0 c1 =
+  assert_norm (pow51 = pow2 51);
   lemma_mul_le (v a0) (m0 * max51) (v a1) (m1 * max51);
   lemma_mul_le (v b0) (m2 * max51) (v b1) (m3 * max51);
   lemma_mul_le (v c0) (m4 * max51) (v c1) (m5 * max51);
@@ -931,6 +926,8 @@ let mul64_wide_add3_lemma #m0 #m1 #m2 #m3 #m4 #m5 a0 a1 b0 b1 c0 c1 =
     m0 * max51 * m1 * max51 + m2 * max51 * m3 * max51 + m4 * max51 * m5 * max51);
   assert (m0 * max51 * m1 * max51 + m2 * max51 * m3 * max51 + m4 * max51 * m5 * max51 ==
     (m0 * m1 + m2 * m3 + m4 * m5) * max51 * max51);
+  assert_norm (pow2 13 > 0);
+  lemma_mul_le (m0 * m1 + m2 * m3 + m4 * m5) (pow2 13 - 1) (max51 * max51) (max51 * max51);
   assert ((m0 * m1 + m2 * m3 + m4 * m5) * max51 * max51 < pow2 13 * max51 * max51);
   assert (v a0 * v a1 + v b0 * v b1 + v c0 * v c1 < pow2 13 * max51 * max51);
   assert_norm (pow2 13 * pow2 51 * pow2 51 = pow2 115);

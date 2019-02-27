@@ -148,7 +148,7 @@ val finv0: inp:elem ->
   (requires True)
   (ensures fun (a, t0) ->
     a == pow inp 11 /\
-    t0 == pow inp (pow2 255 - pow2 5))
+    t0 == pow inp pow_t0)
 let finv0 i =
   (* 2 *)  let a  = fsquare_times i 1 in
   assert (a == pow i 2);

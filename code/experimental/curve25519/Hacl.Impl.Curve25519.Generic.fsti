@@ -9,7 +9,7 @@ open Lib.Buffer
 open Hacl.Impl.Curve25519.Fields
 module S = Spec.Curve25519
 
-inline_for_extraction
+inline_for_extraction noextract
 val scalarmult:
     #s:field_spec
   -> o:lbuffer uint8 32ul
@@ -22,7 +22,7 @@ val scalarmult:
     (ensures  fun h0 _ h1 -> modifies (loc o) h0 h1 /\
       as_seq h1 o == S.scalarmult (as_seq h0 k) (as_seq h0 i))
 
-inline_for_extraction
+inline_for_extraction noextract
 val secret_to_public:
     #s:field_spec
   -> o:lbuffer uint8 32ul

@@ -846,7 +846,7 @@ val fill:
   -> spec:(mem -> GTot(i:size_nat{i < v clen} -> a))
   -> impl:(i:size_t{v i < v clen} -> Stack a
           (requires fun h -> modifies1 (gsub o 0ul i) h0 h)
-          (ensures  fun h r h' -> h == h' /\ 
+          (ensures  fun h r h' -> h == h' /\
 			       r == spec h0 (v i)))
   -> Stack unit
     (requires fun h -> h == h0 /\ live h0 o)
@@ -944,15 +944,15 @@ val map_blocks_multi:
     #t:buftype
   -> #a:Type0
   -> h0: mem
-  -> len:size_t
+  -> len:size_t{v len > 0}
   -> blocksize:size_t{v blocksize > 0 /\ v len % v blocksize == 0}
-  -> inp:lbuffer_t t a len 
+  -> inp:lbuffer_t t a len
   -> output:lbuffer a len
   -> spec_f:(mem -> GTot (i:nat{i < v len / v blocksize} -> Seq.lseq a (v blocksize) -> Seq.lseq a (v blocksize)))
   -> impl_f:(i:size_t{v i < v len / v blocksize} -> Stack unit
-      (requires fun h1 -> 
+      (requires fun h1 ->
 	(v i + 1) * v blocksize <= max_size_t /\
-        modifies (loc (gsub output 0ul (i *! blocksize))) h0 h1) 
+        modifies (loc (gsub output 0ul (i *! blocksize))) h0 h1)
       (ensures  fun h1 _ h2 ->
 	let iblock = gsub inp (i *! blocksize) blocksize in
 	let oblock = gsub output (i *! blocksize) blocksize in
