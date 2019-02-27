@@ -430,6 +430,9 @@ obj/Fmul_stdcalls.fst.checked: \
 obj/Fsqr_stdcalls.fst.checked: \
   FSTAR_FLAGS=$(VALE_FSTAR_FLAGS)
 
+obj/Vale.Stdcalls.%.checked: \
+  FSTAR_FLAGS=$(VALE_FSTAR_FLAGS)
+
 hints:
 	mkdir -p $@
 
@@ -512,29 +515,36 @@ dist/vale:
 
 dist/vale/%-x86_64-mingw.S: obj/vale-%.exe | dist/vale
 	$< GCC Win > $@
-	$(SED) 's/_stdcall//' -i $@
 
 dist/vale/%-x86_64-msvc.asm: obj/vale-%.exe | dist/vale
 	$< MASM Win > $@
-	$(SED) 's/_stdcall//' -i $@
 
 dist/vale/%-x86_64-linux.S: obj/vale-%.exe | dist/vale
 	$< GCC Linux > $@
-	$(SED) 's/_stdcall//' -i $@
 
 dist/vale/%-x86_64-darwin.S: obj/vale-%.exe | dist/vale
 	$< GCC MacOS > $@
-	$(SED) 's/_stdcall//' -i $@
+
+dist/vale/%-inline.c: obj/inline-vale-%.exe | dist/vale
+	$< > $@
 
 obj/vale-cpuid.exe: vale/code/lib/util/x64/CpuidMain.ml
 obj/vale-aesgcm.exe: vale/code/crypto/aes/x64/Main.ml
 obj/vale-sha256.exe: vale/code/crypto/sha/ShaMain.ml
 obj/vale-curve25519.exe: vale/code/crypto/ecc/curve25519/Main25519.ml
+obj/vale-poly1305.exe: vale/code/crypto/poly1305/x64/PolyMain.ml
+
+obj/inline-vale-curve25519.exe: vale/code/crypto/ecc/curve25519/Inline25519.ml
 
 obj/CmdLineParser.ml: vale/code/lib/util/CmdLineParser.ml
 	cp $< $@
 
 obj/CmdLineParser.cmx: $(ALL_CMX_FILES)
+
+obj/inline-vale-%.exe: $(ALL_CMX_FILES)
+	$(call run-with-log,\
+	  $(OCAMLOPT) $^ -o $@ \
+	  ,[OCAMLOPT-EXE] $(notdir $*),$@)
 
 obj/vale-%.exe: $(ALL_CMX_FILES) obj/CmdLineParser.cmx
 	$(call run-with-log,\
@@ -542,11 +552,12 @@ obj/vale-%.exe: $(ALL_CMX_FILES) obj/CmdLineParser.cmx
 	  ,[OCAMLOPT-EXE] $(notdir $*),$@)
 
 # The ones in secure_api are legacy and should go.
-VALE_ASMS = $(foreach P,cpuid aesgcm sha256 curve25519,\
+VALE_ASMS = $(foreach P,cpuid aesgcm sha256 curve25519 poly1305,\
   $(addprefix dist/vale/,$P-x86_64-mingw.S $P-x86_64-msvc.asm $P-x86_64-linux.S $P-x86_64-darwin.S)) \
   $(wildcard \
     $(HACL_HOME)/secure_api/vale/asm/aes-*.S \
-    $(HACL_HOME)/secure_api/vale/asm/aes-*.asm)
+    $(HACL_HOME)/secure_api/vale/asm/aes-*.asm) \
+  dist/vale/curve25519-inline.c
 
 # A pseudo-target for generating just Vale assemblies
 vale-asm: $(VALE_ASMS)
@@ -608,24 +619,24 @@ DEFAULT_FLAGS		=\
   -bundle GF128_s,GF128,Poly1305.Spec_s,GCTR,GCTR_s,GHash_s,GCM_helpers,GHash[rename=Unused6] \
   -bundle AES_helpers,AES256_helpers,GCM_s,GCM,Interop_assumptions[rename=Unused7] \
   -bundle 'Check_aesni_stdcall,Check_sha_stdcall,Sha_update_bytes_stdcall[rename=Vale]' \
-  -library 'Sha_stdcalls' \
-  -library 'Poly_stdcalls' \
-  -library 'Fadd_stdcalls' \
+  -library 'Vale.Stdcalls.Cpuid' \
+  -library 'Vale.Stdcalls.Fadd' \
+  -library 'Vale.Stdcalls.Fmul' \
+  -library 'Vale.Stdcalls.Fsqr' \
+  -library 'Vale.Stdcalls.Fsub' \
+  -library 'Vale.Stdcalls.Fswap' \
+  -library 'Vale.Stdcalls.Poly' \
+  -library 'Vale.Stdcalls.Sha' \
   -library 'Fadd_inline' \
-  -library 'Fmul_stdcalls' \
-  -library 'Fsqr_stdcalls' \
-  -library 'Fsub_stdcalls' \
-  -library 'Fswap_stdcalls' \
-  -library 'Cpuid_stdcalls' \
-  -no-prefix 'Sha_stdcalls' \
-  -no-prefix 'Poly_stdcalls' \
-  -no-prefix 'Fadd_stdcalls' \
+  -no-prefix 'Vale.Stdcalls.Cpuid' \
+  -no-prefix 'Vale.Stdcalls.Fadd' \
+  -no-prefix 'Vale.Stdcalls.Fmul' \
+  -no-prefix 'Vale.Stdcalls.Fsqr' \
+  -no-prefix 'Vale.Stdcalls.Fsub' \
+  -no-prefix 'Vale.Stdcalls.Fswap' \
+  -no-prefix 'Vale.Stdcalls.Poly' \
+  -no-prefix 'Vale.Stdcalls.Sha' \
   -no-prefix 'Fadd_inline' \
-  -no-prefix 'Fmul_stdcalls' \
-  -no-prefix 'Fsqr_stdcalls' \
-  -no-prefix 'Fsub_stdcalls' \
-  -no-prefix 'Fswap_stdcalls' \
-  -no-prefix 'Cpuid_stdcalls' \
   -no-prefix 'EverCrypt.Vale' \
   -no-prefix 'MerkleTree.New.Low' \
   -no-prefix 'MerkleTree.New.Low.Serialization' \

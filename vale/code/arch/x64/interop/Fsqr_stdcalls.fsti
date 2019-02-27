@@ -8,7 +8,7 @@ open Fast_defs
 open FStar.Mul
 open Fadd_stdcalls
 
-[@ (CCConv "stdcall") ]
+inline_for_extraction
 val fsqr
   (tmp:u512)
   (f1:u256)
@@ -25,7 +25,7 @@ val fsqr
       B.modifies (B.loc_union (B.loc_buffer out) (B.loc_buffer tmp)) h0 h1 /\
       (as_nat out h1) % prime == (as_nat f1 h0 * as_nat f1 h0) % prime)
 
-[@ (CCConv "stdcall") ]
+inline_for_extraction
 val fsqr2
   (tmp:u1024)
   (f1:u512)

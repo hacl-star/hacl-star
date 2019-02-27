@@ -17,12 +17,12 @@ module W = Vale.AsLowStar.Wrapper
 open X64.MemoryAdapters
 module VS = X64.Vale.State
 module MS = X64.Machine_s
+module PR = X64.Print_Inline_s
 
 module FU = X64.FastUtil
 module FH = X64.FastHybrid
 module FW = X64.FastWide
 
-let b8 = B.buffer UInt8.t
 let uint64 = UInt64.t
 
 (* A little utility to trigger normalization in types *)
@@ -194,3 +194,6 @@ let add1_inline out f1 f2
     DV.length_eq (get_downview f1);
     let x, _ = lowstar_add1_normal_t out f1 f2 () in
     x
+
+let add1_code_inline () : FStar.All.ML int =
+  PR.print_inline "add1" 0 (Some "carry_r") (List.length dom) dom code_add1 of_arg regs_modified

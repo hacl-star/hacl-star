@@ -123,6 +123,14 @@ procedure {:instruction mk_taint_ins0(S.Cpuid)}{:fast_instruction}{:quick export
     cpuid_features();
 }
 
+procedure {:instruction mk_taint_ins0(S.Cpuid)}{:fast_instruction}{:quick exportOnly}{:public} Cpuid_Avx()
+    requires rax = 1;
+    modifies rax; rbx; rcx; rdx;
+    ensures  (iand64(rcx, 0x10000000) > 0) = avx_enabled;
+{
+    cpuid_features();
+}
+
 procedure {:instruction mk_taint_ins0(S.Cpuid)}{:fast_instruction}{:quick exportOnly}{:public} Cpuid_Avx2()
     requires rax = 7;
              rcx = 0;

@@ -30,7 +30,7 @@ let math_aux (b:uint8_p) (n:nat) : Lemma
   DV.length_eq (get_downview b)
 
 
-[@ (CCConv "stdcall") ]
+inline_for_extraction
 val poly1305
   (ctx_b:uint8_p)
   (inp_b:uint8_p)

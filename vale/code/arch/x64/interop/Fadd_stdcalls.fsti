@@ -22,7 +22,7 @@ let as_nat (b:B.buffer UInt64.t{B.length b == 4}) (h:HS.mem) : GTot nat =
   let s3 = UInt64.v (Seq.index s 3) in
   pow2_four s0 s1 s2 s3
 
-[@ (CCConv "stdcall") ]
+inline_for_extraction
 val add1
   (out:u256)
   (f1:u256)
@@ -37,7 +37,7 @@ val add1
     B.modifies (B.loc_buffer out) h0 h1 /\
     as_nat out h1 + pow2_256 * UInt64.v c == as_nat f1 h0 + UInt64.v f2)  
 
-[@ (CCConv "stdcall") ]
+inline_for_extraction
 val fadd
   (out:u256)
   (f1:u256)

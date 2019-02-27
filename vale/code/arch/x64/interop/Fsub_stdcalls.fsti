@@ -8,7 +8,7 @@ open Fast_defs
 open FStar.Mul
 open Fadd_stdcalls
 
-[@ (CCConv "stdcall") ]
+inline_for_extraction
 val fsub
   (out:u256)
   (f1:u256)
