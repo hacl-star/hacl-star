@@ -139,13 +139,14 @@ let arg_as_nat64 (a:arg) (s:VS.state) : GTot ME.nat64 =
 let rec register_args (max_arity:nat)
                       (arg_reg:IX64.arg_reg_relation max_arity)
                       (n:nat)
-                      (args:IX64.arity_ok max_arity arg{List.length args = n}) : VSig.sprop =
+                      (args:list arg{List.Tot.length args = n}) : VSig.sprop =
     match args with
     | [] -> (fun s -> True)
     | hd::tl ->
       fun s ->
-        register_args max_arity arg_reg (n - 1) tl s /\
-        VS.eval_reg (arg_reg.IX64.of_arg (n - 1)) s == arg_as_nat64 hd s
+         register_args max_arity arg_reg (n - 1) tl s /\
+        (if n > max_arity then True // This arg is passed on the stack
+         else VS.eval_reg (arg_reg.IX64.of_arg (n - 1)) s == arg_as_nat64 hd s)
 
 [@__reduce__]
 let taint_hyp_arg (m:ME.mem) (tm:MS.memTaint_t) (a:arg) =

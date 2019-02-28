@@ -3,7 +3,7 @@ open FStar.Mul
 open Interop.Base
 module B = LowStar.Buffer
 module BS = X64.Bytes_Semantics_s
-module BV = LowStar.BufferView.Up
+module UV = LowStar.BufferView.Up
 module DV = LowStar.BufferView.Down
 module HS = FStar.HyperStack
 module TS = X64.Taint_Semantics_s
@@ -91,7 +91,7 @@ let max_slots = n:pos{UInt.size n UInt32.n /\ n % 8 == 0}
 
 let stack_buffer (num_b8_slots:max_slots) =
   b:buf_t TUInt64 TUInt64{
-    DV.length (get_downview b) == num_b8_slots
+    DV.length (get_downview b) >= num_b8_slots
   }
 
 let regs_with_stack (regs:registers) (#num_b8_slots:_) (stack_b:stack_buffer num_b8_slots)
@@ -105,13 +105,17 @@ let regs_with_stack (regs:registers) (#num_b8_slots:_) (stack_b:stack_buffer num
 [@__reduce__]
 let rec register_of_args (max_arity:nat)
                          (arg_reg:arg_reg_relation max_arity)
-                         (n:nat{n <= max_arity})
+                         (n:nat)
                          (args:list arg{List.Tot.length args = n})
                          (regs:registers) : GTot registers =
     match args with
     | [] -> regs
     | hd::tl ->
-      update_regs max_arity arg_reg hd (n - 1) (register_of_args max_arity arg_reg (n - 1) tl regs)
+      if n > max_arity then 
+        // This arguments will be passed on the stack
+        register_of_args max_arity arg_reg (n-1) tl regs
+      else
+        update_regs max_arity arg_reg hd (n - 1) (register_of_args max_arity arg_reg (n - 1) tl regs)
 
 ////////////////////////////////////////////////////////////////////////////////
 let taint_map = b8 -> GTot MS.taint
