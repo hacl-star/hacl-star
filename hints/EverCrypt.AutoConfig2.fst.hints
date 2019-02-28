@@ -261,7 +261,7 @@
         "typing_LowStar.Monotonic.Buffer.loc_none"
       ],
       0,
-      "dcb844b405278b56bf5cc4dd34260721"
+      "587a8d1abf1683e8bd9186c826694c50"
     ],
     [
       "EverCrypt.AutoConfig2.wants_hacl",
@@ -287,7 +287,7 @@
         "typing_LowStar.Monotonic.Buffer.loc_none"
       ],
       0,
-      "340abcdb3590abb9f3c0a92645ca90a7"
+      "b9a912493aa5a641cf1319c2c2cbb01f"
     ],
     [
       "EverCrypt.AutoConfig2.wants_openssl",
@@ -313,7 +313,7 @@
         "typing_LowStar.Monotonic.Buffer.loc_none"
       ],
       0,
-      "a3e52cdb57f1cb2f4448790b73be963f"
+      "c1a6fbf2641b432e436bd5a93eead9a4"
     ],
     [
       "EverCrypt.AutoConfig2.wants_bcrypt",
@@ -339,7 +339,7 @@
         "typing_LowStar.Monotonic.Buffer.loc_none"
       ],
       0,
-      "9b490ee15fa53e6f7302dc5dc903973f"
+      "83c448740ec139febf92d57d2f0a5980"
     ],
     [
       "EverCrypt.AutoConfig2.recall",
@@ -400,7 +400,7 @@
         "typing_X64.CPU_Features_s.sha_enabled"
       ],
       0,
-      "ff2149ae7775b6bcf461b0ec7d2427df"
+      "d8f366f609bb5ed8826945b7d143fd43"
     ],
     [
       "EverCrypt.AutoConfig2.init",
@@ -483,7 +483,7 @@
         "unit_typing"
       ],
       0,
-      "4dd6ecc13dd8c25b744b60da60fb36d0"
+      "938116f778088259c2bc1304dd7db844"
     ],
     [
       "EverCrypt.AutoConfig2.mk_disabler",
@@ -514,7 +514,115 @@
         "typing_X64.CPU_Features_s.aesni_enabled", "unit_typing"
       ],
       0,
-      "f74826c28a8d5302a5151b61b447dc85"
+      "da4f78c95031e312acdad9b67615636f"
+    ],
+    [
+      "EverCrypt.AutoConfig2.disable_avx2",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_f537159ed795b314b4e58c260361ae86", "bool_inversion",
+        "equation_EverCrypt.AutoConfig2.eternal_pointer",
+        "equation_EverCrypt.AutoConfig2.flag",
+        "equation_EverCrypt.AutoConfig2.fp",
+        "equation_FStar.Monotonic.HyperHeap.hmap",
+        "equation_FStar.Monotonic.HyperStack.mem",
+        "equation_LowStar.Buffer.buffer",
+        "equation_LowStar.Buffer.trivial_preorder", "equation_Prims.eqtype",
+        "equation_Prims.l_True", "equation_Prims.logical",
+        "function_token_typing_FStar.Monotonic.Heap.heap",
+        "function_token_typing_LowStar.Buffer.trivial_preorder",
+        "function_token_typing_Prims.bool",
+        "interpretation_Tm_abs_2d4a1d05236e82a428a71813e1ca9661",
+        "lemma_FStar.Map.lemma_ContainsDom",
+        "lemma_LowStar.Monotonic.Buffer.loc_includes_refl",
+        "lemma_LowStar.Monotonic.Buffer.loc_includes_union_l_",
+        "lemma_LowStar.Monotonic.Buffer.loc_union_comm",
+        "lemma_LowStar.Monotonic.Buffer.modifies_loc_includes",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_393f16037203a2d33a5ae6636b5c33ff",
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
+        "refinement_interpretation_Tm_refine_9a74d818566e70513bc032cc3b65a144",
+        "refinement_interpretation_Tm_refine_dc41e51f76cb59e141cd14455f5dadc1",
+        "true_interp", "typing_EverCrypt.AutoConfig2.cpu_has_aesni",
+        "typing_EverCrypt.AutoConfig2.cpu_has_avx",
+        "typing_EverCrypt.AutoConfig2.cpu_has_avx2",
+        "typing_EverCrypt.AutoConfig2.cpu_has_shaext",
+        "typing_EverCrypt.AutoConfig2.flag",
+        "typing_EverCrypt.AutoConfig2.fp",
+        "typing_EverCrypt.AutoConfig2.user_wants_bcrypt",
+        "typing_EverCrypt.AutoConfig2.user_wants_hacl",
+        "typing_EverCrypt.AutoConfig2.user_wants_openssl",
+        "typing_EverCrypt.AutoConfig2.user_wants_vale",
+        "typing_FStar.Map.contains", "typing_FStar.Monotonic.HyperHeap.rid",
+        "typing_FStar.Monotonic.HyperStack.get_hmap",
+        "typing_FStar.Monotonic.HyperStack.get_tip",
+        "typing_LowStar.Buffer.trivial_preorder",
+        "typing_LowStar.Monotonic.Buffer.loc_buffer",
+        "typing_LowStar.Monotonic.Buffer.loc_union",
+        "typing_X64.CPU_Features_s.aesni_enabled",
+        "typing_X64.CPU_Features_s.avx2_enabled",
+        "typing_X64.CPU_Features_s.avx_enabled",
+        "typing_X64.CPU_Features_s.sha_enabled", "unit_typing"
+      ],
+      0,
+      "4a22e931943d92be8384b055c75c16c9"
+    ],
+    [
+      "EverCrypt.AutoConfig2.disable_avx",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_f537159ed795b314b4e58c260361ae86", "bool_inversion",
+        "equation_EverCrypt.AutoConfig2.eternal_pointer",
+        "equation_EverCrypt.AutoConfig2.flag",
+        "equation_EverCrypt.AutoConfig2.fp",
+        "equation_FStar.Monotonic.HyperHeap.hmap",
+        "equation_FStar.Monotonic.HyperStack.mem",
+        "equation_LowStar.Buffer.buffer",
+        "equation_LowStar.Buffer.trivial_preorder", "equation_Prims.eqtype",
+        "equation_Prims.l_True", "equation_Prims.logical",
+        "function_token_typing_FStar.Monotonic.Heap.heap",
+        "function_token_typing_LowStar.Buffer.trivial_preorder",
+        "function_token_typing_Prims.bool",
+        "interpretation_Tm_abs_2d4a1d05236e82a428a71813e1ca9661",
+        "lemma_FStar.Map.lemma_ContainsDom",
+        "lemma_LowStar.Monotonic.Buffer.loc_includes_refl",
+        "lemma_LowStar.Monotonic.Buffer.loc_includes_union_l_",
+        "lemma_LowStar.Monotonic.Buffer.loc_union_comm",
+        "lemma_LowStar.Monotonic.Buffer.modifies_loc_includes",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_393f16037203a2d33a5ae6636b5c33ff",
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
+        "refinement_interpretation_Tm_refine_9a74d818566e70513bc032cc3b65a144",
+        "refinement_interpretation_Tm_refine_dc41e51f76cb59e141cd14455f5dadc1",
+        "true_interp", "typing_EverCrypt.AutoConfig2.cpu_has_aesni",
+        "typing_EverCrypt.AutoConfig2.cpu_has_avx",
+        "typing_EverCrypt.AutoConfig2.cpu_has_avx2",
+        "typing_EverCrypt.AutoConfig2.cpu_has_shaext",
+        "typing_EverCrypt.AutoConfig2.flag",
+        "typing_EverCrypt.AutoConfig2.fp",
+        "typing_EverCrypt.AutoConfig2.user_wants_bcrypt",
+        "typing_EverCrypt.AutoConfig2.user_wants_hacl",
+        "typing_EverCrypt.AutoConfig2.user_wants_openssl",
+        "typing_EverCrypt.AutoConfig2.user_wants_vale",
+        "typing_FStar.Map.contains", "typing_FStar.Monotonic.HyperHeap.rid",
+        "typing_FStar.Monotonic.HyperStack.get_hmap",
+        "typing_FStar.Monotonic.HyperStack.get_tip",
+        "typing_LowStar.Buffer.trivial_preorder",
+        "typing_LowStar.Monotonic.Buffer.loc_buffer",
+        "typing_LowStar.Monotonic.Buffer.loc_union",
+        "typing_X64.CPU_Features_s.aesni_enabled",
+        "typing_X64.CPU_Features_s.avx2_enabled",
+        "typing_X64.CPU_Features_s.avx_enabled",
+        "typing_X64.CPU_Features_s.sha_enabled", "unit_typing"
+      ],
+      0,
+      "004c86b9d2c9b77c9a2aaa81e107d609"
     ],
     [
       "EverCrypt.AutoConfig2.disable_shaext",
@@ -568,7 +676,7 @@
         "typing_X64.CPU_Features_s.sha_enabled", "unit_typing"
       ],
       0,
-      "8dac572d205c07591da9c411196db2af"
+      "7ea1bc28367492e746ad988648f7f2e4"
     ],
     [
       "EverCrypt.AutoConfig2.disable_aesni",
@@ -622,7 +730,7 @@
         "typing_X64.CPU_Features_s.sha_enabled", "unit_typing"
       ],
       0,
-      "da521858d670c33e8659fc9788bb3e21"
+      "a7926089a113b2cc32a326a4fc028025"
     ],
     [
       "EverCrypt.AutoConfig2.disable_vale",
@@ -661,7 +769,7 @@
         "typing_X64.CPU_Features_s.sha_enabled"
       ],
       0,
-      "4fce1cac38b0573175c3dc90500dc6db"
+      "135529e488c272ca182f4c0c3e4f5cc1"
     ],
     [
       "EverCrypt.AutoConfig2.disable_hacl",
@@ -700,7 +808,7 @@
         "typing_X64.CPU_Features_s.sha_enabled"
       ],
       0,
-      "6d43f2f0c2f23e8f93d386f4c35ceca3"
+      "6696f56a2c473c873753b95d62506745"
     ],
     [
       "EverCrypt.AutoConfig2.disable_openssl",
@@ -739,7 +847,7 @@
         "typing_X64.CPU_Features_s.sha_enabled"
       ],
       0,
-      "c68eb2589cfe655a046f505d1b65148e"
+      "21004a1c1b42540e8f0e6f6d1961e513"
     ],
     [
       "EverCrypt.AutoConfig2.disable_bcrypt",
@@ -777,7 +885,7 @@
         "typing_X64.CPU_Features_s.sha_enabled"
       ],
       0,
-      "e0b7ca1f1cdd54732e9db5dae7929787"
+      "e3a8514122847ed6a52212226dce5626"
     ]
   ]
 ]
