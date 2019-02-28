@@ -275,6 +275,7 @@ val lemma_fmul14:
   a:nat{a < pow2 256} -> b:nat{b < pow2 17}
   -> Lemma (a * b < pow2 273)
 let lemma_fmul14 a b =
+  lemma_mul_lt a b (pow2 256) (pow2 17);
   assert_norm (pow2 256 * pow2 17 = pow2 273)
 
 val lemma_fmul14_no_carry0:
