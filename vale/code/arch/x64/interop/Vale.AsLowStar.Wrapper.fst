@@ -349,7 +349,7 @@ let core_create_lemma
     core_create_lemma_register_args #max_arity #arg_reg args h0 stack;
     Vale.AsLowStar.MemoryHelpers.core_create_lemma_taint_hyp #max_arity #arg_reg args h0 stack;
     core_create_lemma_state #max_arity #arg_reg args h0 stack;
-    Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt8 ME.TUInt64 stack;
+    Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 stack;
     let s_args = arg_of_sb stack :: args in
     Vale.AsLowStar.MemoryHelpers.buffer_addr_reveal _ _ stack (arg_of_sb stack :: args) h0;
     DV.length_eq (get_downview stack);

@@ -90,7 +90,7 @@ let update_regs (n:nat)
 let max_slots = n:pos{UInt.size n UInt32.n /\ n % 8 == 0}
 
 let stack_buffer (num_b8_slots:max_slots) =
-  b:buf_t TUInt8 TUInt64{
+  b:buf_t TUInt64 TUInt64{
     DV.length (get_downview b) == num_b8_slots
   }
 

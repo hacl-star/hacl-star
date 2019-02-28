@@ -16,9 +16,9 @@ let wrap_variadic c n arg_reg regs_modified xmms_modified down_mem num_b8_slots 
   let push_h0 = ST.get () in
   B.fresh_frame_modifies h0' push_h0;
   mem_roots_p_modifies_none args h0' push_h0;
-  let stack_b = B.alloca (UInt8.uint_to_t 0) (UInt32.uint_to_t num_b8_slots) in
+  let stack_b = B.alloca (UInt64.uint_to_t 0) (UInt32.uint_to_t (num_b8_slots/8)) in
   DV.length_eq (get_downview stack_b);
-  assert_norm (num_b8_slots * 1 == num_b8_slots);
+  assert_norm ((num_b8_slots / 8) * 8 == num_b8_slots);
   let stack_b : stack_buffer num_b8_slots = stack_b in
   let alloc_push_h0 = ST.get () in
   assert (HS.fresh_frame h0 push_h0);
