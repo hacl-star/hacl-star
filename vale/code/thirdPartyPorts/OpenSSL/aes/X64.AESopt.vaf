@@ -496,7 +496,7 @@ procedure {:quick} Loop6x_step(
         inout4 == rounds_opaque(init4, round_keys, rnd + 1);
         inout5 == rounds_opaque(init5, round_keys, rnd + 1);
 
-        buffer128_read(stack_b, stack_offset, mem) == old(reverse_bytes_quad32(buffer128_read(in0_b, count*6+in0_offset, mem)));
+        buffer128_read(stack_b, stack_offset, mem) == old(reverse_bytes_quad32(buffer128_read(in0_b, (count-2)*6+in0_offset, mem)));
 {
     Load128_buffer(rndkey, key, (0x10 * (rnd + 1))-0x80, Secret, keys_b, rnd + 1);
 
@@ -586,8 +586,8 @@ procedure {:quick} Loop6x_round8(
         inout4 == rounds_opaque(init4, round_keys, 8);
         inout5 == rounds_opaque(init5, round_keys, 8);
 
-        r13 == reverse_bytes_nat64(hi64(buffer128_read(in0_b, count*6+0, mem))); 
-        r12 == reverse_bytes_nat64(lo64(buffer128_read(in0_b, count*6+0, mem))); 
+        r13 == reverse_bytes_nat64(hi64(buffer128_read(in0_b, (count-2)*6+0, mem))); 
+        r12 == reverse_bytes_nat64(lo64(buffer128_read(in0_b, (count-2)*6+0, mem))); 
         rndkey == index(round_keys, 9);
 {
     Load128_buffer(T1, key, 0x80-0x80, Secret, keys_b, 8); // # borrow $T1 for $rndkey
@@ -600,7 +600,7 @@ procedure {:quick} Loop6x_round8(
 
     LoadBe64_buffer128(r13, in0, 0*16+8, Secret, true,  in0_b, (count-2)*6 + 0);
     VAESNI_enc(inout4, inout4, T1);
-    LoadBe64_buffer128(r12, in0, 0*16,   Secret, false, in0_b, (count_2)*6 + 0);
+    LoadBe64_buffer128(r12, in0, 0*16,   Secret, false, in0_b, (count-2)*6 + 0);
 
     VAESNI_enc(inout5, inout5, T1);
 
@@ -1026,8 +1026,8 @@ procedure {:quick} Loop6x_partial(
         inout4 == rounds_opaque(init4, round_keys, 9);
         inout5 == rounds_opaque(init5, round_keys, 9);
 
-        r13 == reverse_bytes_nat64(hi64(buffer128_read(in0_b, count*6 + 0, mem))); 
-        r12 == reverse_bytes_nat64(lo64(buffer128_read(in0_b, count*6 + 0, mem))); 
+        r13 == reverse_bytes_nat64(hi64(buffer128_read(in0_b, (count-2)*6 + 0, mem))); 
+        r12 == reverse_bytes_nat64(lo64(buffer128_read(in0_b, (count-2)*6 + 0, mem))); 
 
 
         let rk := index(round_keys, 10);
@@ -1041,11 +1041,11 @@ procedure {:quick} Loop6x_partial(
         buffer128_read(iv_b, 0, mem) == reverse_bytes_quad32(inc32lite(ctr_BE, 6));
 
         // Byte reversals for use by GCM
-        buffer128_read(stack_b, 2, mem) == old(reverse_bytes_quad32(buffer128_read(in0_b, count*6 + 5, mem)));
-        buffer128_read(stack_b, 3, mem) == old(reverse_bytes_quad32(buffer128_read(in0_b, count*6 + 4, mem)));
-        buffer128_read(stack_b, 4, mem) == old(reverse_bytes_quad32(buffer128_read(in0_b, count*6 + 3, mem)));
-        buffer128_read(stack_b, 5, mem) == old(reverse_bytes_quad32(buffer128_read(in0_b, count*6 + 2, mem)));
-        buffer128_read(stack_b, 6, mem) == old(reverse_bytes_quad32(buffer128_read(in0_b, count*6 + 1, mem)));
+        buffer128_read(stack_b, 2, mem) == old(reverse_bytes_quad32(buffer128_read(in0_b, (count-2)*6 + 5, mem)));
+        buffer128_read(stack_b, 3, mem) == old(reverse_bytes_quad32(buffer128_read(in0_b, (count-2)*6 + 4, mem)));
+        buffer128_read(stack_b, 4, mem) == old(reverse_bytes_quad32(buffer128_read(in0_b, (count-2)*6 + 3, mem)));
+        buffer128_read(stack_b, 5, mem) == old(reverse_bytes_quad32(buffer128_read(in0_b, (count-2)*6 + 2, mem)));
+        buffer128_read(stack_b, 6, mem) == old(reverse_bytes_quad32(buffer128_read(in0_b, (count-2)*6 + 1, mem)));
 
         init0 == quad32_xor(reverse_bytes_quad32(inc32lite(ctr_BE, 0)), index(round_keys, 0));
         init1 == quad32_xor(reverse_bytes_quad32(inc32lite(ctr_BE, 1)), index(round_keys, 0));
@@ -1690,7 +1690,7 @@ procedure {:quick} AESNI_ctr32_6x_round9(
     )
     lets
         inp @= rdi; key @= rcx; 
-        T1 @= xmm1; T2 @= xmm2; Hkey @= xmm3;
+        T2 @= xmm2; Hkey @= xmm3;
         Z0 @= xmm4; Z1 @= xmm5; Z2 @= xmm6; Xi @= xmm8;
         inout0 @= xmm9; inout1 @= xmm10; inout2 @= xmm11; inout3 @= xmm12;
         inout4 @= xmm13; inout5 @= xmm14; rndkey @= xmm15;
@@ -1701,7 +1701,7 @@ procedure {:quick} AESNI_ctr32_6x_round9(
 
     modifies
         inp;
-        T1; T2; Hkey; Z0; Z1; Z2; Xi;
+        T2; Hkey; Z0; Z1; Z2; Xi;
         inout0; inout1; inout2; inout3; inout4; inout5; rndkey;
         efl;
 
@@ -1789,7 +1789,7 @@ procedure {:quick} AESNI_ctr32_6x_final(
     )
     lets
         outp @= rsi; key @= rcx; 
-        T1 @= xmm1; T2 @= xmm2; Hkey @= xmm3;
+        T2 @= xmm2; Hkey @= xmm3;
         Z0 @= xmm4; Z1 @= xmm5; Z2 @= xmm6; Xi @= xmm8;
         inout0 @= xmm9; inout1 @= xmm10; inout2 @= xmm11; inout3 @= xmm12;
         inout4 @= xmm13; inout5 @= xmm14; rndkey @= xmm15;
@@ -1800,7 +1800,7 @@ procedure {:quick} AESNI_ctr32_6x_final(
 
     modifies
         outp;
-        T1; T2; Hkey; Z0; Z1; Z2; Xi;
+        T2; Hkey; Z0; Z1; Z2; Xi;
         inout0; inout1; inout2; inout3; inout4; inout5; rndkey;
         mem; efl;
 
@@ -2131,7 +2131,7 @@ procedure {:quick} Encrypt_save_and_shuffle_output(
 }
 
 #reset-options "--z3rlimit 20"
-procedure {:quick} {:verify true} AES_GCM_encrypt(
+procedure {:quick} AES_GCM_encrypt(
     inline alg:algorithm,  
     ghost iv_b:buffer128,
     ghost in_b:buffer128,
