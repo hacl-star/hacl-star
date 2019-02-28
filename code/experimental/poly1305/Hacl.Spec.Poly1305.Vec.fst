@@ -72,13 +72,13 @@ let load_elem (#w:lanes) (b:lbytes (w * size_block)) : elem w =
 
 /// Specification
 
-let update1 (#w:lanes) (r:elem w) (len:size_nat{len <= size_block}) (b:lbytes len) (acc:elem w) : Tot (elem w) =
+let update1 (r:pfelem) (len:size_nat{len <= size_block}) (b:lbytes len) (acc:pfelem) : Tot pfelem =
   Math.Lemmas.pow2_le_compat 128 (8 * len);
   assert (pow2 (8 * len) <= pow2 128);
   assert_norm (pow2 128 + pow2 128 < prime);
-  let e = to_elem w (nat_from_bytes_le b) in
-  let e = map (pfadd (pow2 (8 * len))) e in
-  let acc : elem w = fmul (fadd acc e) r in
+  let e = nat_from_bytes_le b in
+  let e = pfadd (pow2 (8 * len)) e in
+  let acc = pfmul (pfadd acc e) r in
   acc
 
 let updaten (#w:lanes) (r_w:elem w) (b:lbytes (w * size_block)) (acc:elem w) : Tot (elem w) =
@@ -124,35 +124,39 @@ let compute_rw (#w:lanes) (r:elem w) : elem w =
   | 2 -> compute_r2 r
   | 4 -> compute_r4 r
 
-let poly_update_multi (#w:lanes) (text:bytes{length text % (w * size_block) = 0}) (acc:elem w) (r:elem w) : Tot (elem w) =
+let poly_update_multi (#w:lanes) (text:bytes{length text % (w * size_block) = 0}) (acc:elem w) (r:elem w) : Tot pfelem =
   let rw = compute_rw r in
   let acc = repeat_blocks_multi #uint8 #(elem w) (w * size_block) text (updaten rw) acc in
-  to_elem w (normalize_n acc r)
+  normalize_n acc r
 
-let poly_update1_rem (#w:lanes) (r:elem w) (l:size_nat{l < 16}) (block:lbytes l) (acc:elem w) : Tot (elem w) =
+let poly_update1_rem (r:pfelem) (l:size_nat{l < 16}) (block:lbytes l) (acc:pfelem) : Tot pfelem =
   if l = 0 then acc else update1 r l block acc
 
-let poly_update1 (#w:lanes) (text:bytes) (acc:elem w) (r:elem w) : Tot (elem w) =
-  repeat_blocks #uint8 #(elem w) size_block text
+let poly_update1 (text:bytes) (acc:pfelem) (r:pfelem) : Tot pfelem =
+  repeat_blocks #uint8 #pfelem size_block text
   (update1 r size_block)
   (poly_update1_rem r)
   acc
 
-let poly (#w:lanes) (text:bytes) (acc:elem w) (r:elem w) : Tot (elem w) =
-  let rw = compute_rw r in
-  repeat_blocks #uint8 #(elem w) (w * size_block) text
-    (fun b -> updaten rw b)
-    (fun l b res ->
-      let ne = to_elem w (normalize_n res r) in
-      repeat_blocks #uint8 #(elem w) size_block b
-      (fun bl -> update1 r size_block bl)
-      (fun l b res -> if l = 0 then res else update1 r l b res)
-      ne)
-  acc
+let poly (#w:lanes) (text:bytes) (acc:elem w) (r:elem w) : Tot pfelem =
+  let len = length text in
+  let sz_block = w * size_block in
+  let len0 = len / sz_block * sz_block in
+  let t0 = Seq.slice text 0 len0 in
+  let acc = poly_update_multi t0 acc r in
 
-let finish (#w:lanes) (k:key) (acc:elem w) : Tot tag =
+  let t1 = Seq.slice text len0 len in
+  poly_update1 t1 acc (from_elem r)
+
+let poly_update (#w:lanes) (text:bytes) (acc:elem w) (r:elem w) : Tot pfelem =
+  match w with
+  | 1 -> poly_update1 text (from_elem acc) (from_elem r)
+  | 2 -> poly text acc r
+  | 4 -> poly text acc r
+
+let finish (k:key) (acc:pfelem) : Tot tag =
   let s = nat_from_bytes_le (sub k 16 16) in
-  let n = (from_elem acc + s) % pow2 128 in
+  let n = (acc + s) % pow2 128 in
   nat_to_bytes_le 16 n
 
 let encode_r (#w:lanes) (rb:block) : Tot (elem w) =
@@ -171,5 +175,5 @@ let poly1305_init (#w:lanes) (k:key) : Tot (elem w & elem w) =
 
 let poly1305 (#w:lanes) (msg:bytes) (k:key) : Tot tag =
   let acc, r = poly1305_init #w k in
-  let acc = poly #w msg acc r in
+  let acc = poly_update #w msg acc r in
   finish k acc
