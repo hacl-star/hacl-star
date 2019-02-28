@@ -10,7 +10,7 @@
 #define EVERCRYPT_TARGETCONFIG_X64 1
 #elif defined(__i386__) || defined(_M_IX86)
 #define EVERCRYPT_TARGETCONFIG_X86 1
-#elif defined(__aarch64__) || defined(_M_ARM64)
+#elif defined(__aarch64__) || defined(_M_ARM64)
 #define EVERCRYPT_TARGETCONFIG_AARCH64 1
 #elif defined(__arm__) || defined(_M_ARM)
 #define EVERCRYPT_TARGETCONFIG_AARCH32 1
