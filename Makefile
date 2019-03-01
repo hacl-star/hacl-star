@@ -534,7 +534,7 @@ dist/vale/%-x86_64-linux.S: obj/vale-%.exe | dist/vale
 dist/vale/%-x86_64-darwin.S: obj/vale-%.exe | dist/vale
 	$< GCC MacOS > $@
 
-dist/vale/%-inline.c: obj/inline-vale-%.exe | dist/vale
+dist/vale/%-inline.h: obj/inline-vale-%.exe | dist/vale
 	$< > $@
 
 obj/vale-cpuid.exe: vale/code/lib/util/x64/CpuidMain.ml
@@ -566,7 +566,7 @@ VALE_ASMS = $(foreach P,cpuid aesgcm sha256 curve25519 poly1305,\
   $(wildcard \
     $(HACL_HOME)/secure_api/vale/asm/aes-*.S \
     $(HACL_HOME)/secure_api/vale/asm/aes-*.asm) \
-  dist/vale/curve25519-inline.c
+  dist/vale/curve25519-inline.h
 
 # A pseudo-target for generating just Vale assemblies
 vale-asm: $(VALE_ASMS)
