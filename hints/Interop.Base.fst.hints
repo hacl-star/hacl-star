@@ -1,5 +1,5 @@
 [
-  "\u0002-ÇbR@ÖbN¿D\u0019&!öz",
+  "œ!°Š\\Z\u007fûíb‚æÖh:R",
   [
     [
       "Interop.Base.buf_t",
@@ -941,17 +941,16 @@
         "@query", "Interop.Types_pretyping_82be67653007af58de42a56b92d4cc1d",
         "Prims_pretyping_ae567c2fb75be05905677af440075565",
         "binder_x_0c8c560ea1f64597ac6752d770b1c7b5_3",
-        "binder_x_892a4f9f39d68729bb9cd233478ef31e_1",
+        "binder_x_ddc306475de11b596246c12d876798ea_1",
         "binder_x_e84112909618fe21632aa60cc6509043_2", "bool_inversion",
         "bool_typing", "constructor_distinct_Interop.Base.TD_Buffer",
         "constructor_distinct_Interop.Base.TD_ImmBuffer",
-        "constructor_distinct_Interop.Types.TUInt8",
         "constructor_distinct_Prims.Cons", "constructor_distinct_Prims.Nil",
         "data_elim_Interop.Base.TD_Buffer", "data_elim_Prims.Mkdtuple2",
         "data_typing_intro_Interop.Types.TUInt16@tok",
         "disc_equation_Interop.Base.TD_ImmBuffer",
         "disc_equation_Prims.Cons", "disc_equation_Prims.Nil",
-        "equality_tok_Interop.Types.TUInt8@tok",
+        "equality_tok_Interop.Types.TUInt64@tok",
         "equality_tok_X64.Machine_s.Public@tok",
         "equation_FStar.BigOps.big_and_", "equation_FStar.BigOps.map_op_",
         "equation_FStar.Monotonic.HyperHeap.hmap",
@@ -975,7 +974,6 @@
         "fuel_guarded_inversion_Prims.dtuple2",
         "fuel_guarded_inversion_Prims.list",
         "function_token_typing_FStar.Monotonic.Heap.heap",
-        "function_token_typing_FStar.UInt8.t",
         "function_token_typing_Interop.Base.arg",
         "function_token_typing_Prims.__cache_version_number__",
         "function_token_typing_Prims.int",
@@ -1028,11 +1026,12 @@
         "typing_LowStar.Monotonic.Buffer.loc_addresses",
         "typing_LowStar.Monotonic.Buffer.loc_buffer",
         "typing_Prims.uu___is_Nil",
-        "typing_Tm_abs_18f611049baa5958dd71971dc9839fee", "unit_inversion",
+        "typing_Tm_abs_18f611049baa5958dd71971dc9839fee",
+        "typing_tok_Interop.Types.TUInt64@tok", "unit_inversion",
         "unit_typing"
       ],
       0,
-      "ceeac8e95087b061845eeb64a432b6bd"
+      "367cc73ed053ca5644ca988a1ec59316"
     ],
     [
       "Interop.Base.write_taint",
@@ -1082,7 +1081,7 @@
         "well-founded-ordering-on-nat"
       ],
       0,
-      "7d2241d4b5834d6e4f8365c1bead19e3"
+      "a119133846979a3f71a6be07c0765b4e"
     ],
     [
       "Interop.Base.create_memtaint",
@@ -1119,7 +1118,7 @@
         "typing_tok_X64.Machine_s.Public@tok"
       ],
       0,
-      "7336146d07be9845b555a2bb57deaec3"
+      "9f31392a836caba4f44b7a217e9cbcd5"
     ],
     [
       "Interop.Base.correct_down_p",
@@ -1128,7 +1127,7 @@
       1,
       [ "@query" ],
       0,
-      "3c9e8d58f08e8216565300e498319924"
+      "786d63a87a252bd751358b9fb4d18f58"
     ],
     [
       "Interop.Base.addrs_ptr",
@@ -1161,7 +1160,7 @@
         "well-founded-ordering-on-nat"
       ],
       0,
-      "bc9a26eddee68f333766a4bab57644c4"
+      "c803f5e88bbcdc6c90fe6cd42544dbe2"
     ],
     [
       "Interop.Base.addrs_set",
@@ -1185,7 +1184,7 @@
         "typing_LowStar.BufferView.Down.length"
       ],
       0,
-      "f5b6e057300766eab19d55fd93934577"
+      "3c00ac17a331daf16b9466b921bbfc95"
     ],
     [
       "Interop.Base.buf_t",
@@ -1754,7 +1753,7 @@
         "well-founded-ordering-on-nat"
       ],
       0,
-      "a71e1c5b6eb88151c0f43945480f3b1d"
+      "7ed7a23ed50c633880258d62c69d4c5f"
     ],
     [
       "Interop.Base.create_memtaint",
@@ -1791,7 +1790,7 @@
         "typing_tok_X64.Machine_s.Public@tok"
       ],
       0,
-      "40da3cdefdfdaca373c1dea55f6fdfc4"
+      "b763c8eaf688c691ab7fea26ac4bbb7a"
     ],
     [
       "Interop.Base.correct_down_p",
@@ -1800,7 +1799,7 @@
       1,
       [ "@query" ],
       0,
-      "2a0d6dbaf1870a87d8606d0d07dee888"
+      "059d9878b6bdb788e2f8b678d8d3a6b5"
     ],
     [
       "Interop.Base.addrs_ptr",
@@ -1833,7 +1832,7 @@
         "well-founded-ordering-on-nat"
       ],
       0,
-      "4241c39782dd0397825c0fb29096c556"
+      "44965d28b770f2859c20b72178b72c83"
     ],
     [
       "Interop.Base.addrs_set",
@@ -1857,7 +1856,7 @@
         "typing_LowStar.BufferView.Down.length"
       ],
       0,
-      "ceef3983f7b7e4687c7988bc079114ed"
+      "9db587ba3d78c68e80c65975b77704e2"
     ]
   ]
 ]
