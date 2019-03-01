@@ -107,7 +107,7 @@ let print_modified_registers
     // This register is not modified, or was already specified as input or output: we skip it
     if not (regs_mod a) || input_register 0 a || output_register a then aux q
     // Register not modified or already specified in inputs, we add it
-    else "%" ^ P.print_reg_name a ^ ", " ^ aux q
+    else "\"%" ^ P.print_reg_name a ^ "\", " ^ aux q
   in aux [Rax; Rbx; Rcx; Rdx; Rsi; Rdi; Rbp; Rsp; R8; R9; R10; R11; R12; R13; R14; R15]
 
 (* This is a copy from X64.Print_s, and should remain in sync. The difference is that
