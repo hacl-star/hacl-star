@@ -1167,6 +1167,7 @@ procedure {:quick} {:frame false} Loop6x(
         // GCTR progress
         gctr_partial_opaque(alg, 6*count, plain_quads, buffer128_as_seq(mem, out_b), key_words, ctr_BE_orig);
     ensures
+        // Framing
         this.ok;
         rax == old(rax);
         rcx == old(rcx);
@@ -1178,10 +1179,8 @@ procedure {:quick} {:frame false} Loop6x(
         r15 == old(r15);
         xmm4 == old(xmm4);
         xmm8 == old(xmm8);
-
         memTaint == old(memTaint);
 
-        // Framing
         len  > 0 ==> modifies_buffer128_3(stack_b, out_b, iv_b, old(mem), mem);
         len == 0 ==> modifies_buffer128_2(stack_b,        iv_b, old(mem), mem);
         buffer_modifies_specific128(stack_b, old(mem), mem, 2, 7);
@@ -1243,7 +1242,6 @@ procedure {:quick} {:frame false} Loop6x(
         buffer128_read(stack_b, 6, mem) == old(reverse_bytes_quad32(buffer128_read(in0_b, (count-2)*6 + 1, mem)));
         buffer128_read(stack_b, 7, mem) == old(reverse_bytes_quad32(buffer128_read(in0_b, (count-2)*6 + 0, mem)));
 {
-    assume false;
     (ghost var init0), (ghost var init1), (ghost var init2), 
     (ghost var init3), (ghost var init4), (ghost var init5) := 
         Loop6x_partial(alg, count, iv_b, in0_b, in_b, stack_b, key_words, round_keys, keys_b, ctr_BE);
@@ -1282,7 +1280,7 @@ procedure {:quick} {:frame false} Loop6x(
 
 #reset-options "--z3rlimit 1600"
 //#reset-options "--z3rlimit 30"
-procedure {:quick exportOnly} {:verify true} {:frame false} Loop6x_loop(
+procedure {:quick exportOnly} {:frame false} Loop6x_loop(
     inline alg:algorithm,  
     ghost count:nat,        // Number of 6x128-bit blocks processed so far
     ghost iv_b:buffer128,
@@ -1344,7 +1342,7 @@ procedure {:quick exportOnly} {:verify true} {:frame false} Loop6x_loop(
         buffers_disjoint128(stack_b, out_b);
         buffers_disjoint128(out_b, keys_b);
         buffers_disjoint128(in_b, out_b) || in_b == out_b;
-        partial_seq_agreement(plain_quads, buffer128_as_seq(mem, in_b), count*6, count*6+6);
+        partial_seq_agreement(plain_quads, buffer128_as_seq(mem, in_b), count*6, length(buffer128_as_seq(mem, in_b)));
          inp + 0x10*len < pow2_64;
          in0 + 0x10*len < pow2_64;
         outp + 0x10*len < pow2_64;
