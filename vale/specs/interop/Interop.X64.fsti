@@ -30,6 +30,14 @@ let calling_conventions
 let reg_nat (n:nat) = i:nat{i < n}
 let arity_ok n 'a = l:list 'a { List.Tot.length l <= n }
 
+(* We limit the number of args we can pass through the interop wrappers to an arbitrary 20.
+   This ensures first that the addr_map axiom is sound: Since the length of buffers is limited to 2^32, we can prove that addr_map is inhabited.
+   This also ensures that the size of the stack buffer fits in a UInt32, while being big enough
+   for extra arguments + the extra slots needed.
+   Note that this number can be increased if needed*)
+let arg_list = l:list arg{List.Tot.length l <= 20}
+let arg_list_sb = l:list arg{List.Tot.length l <= 21}
+
 unfold
 let injective f = forall x y. f x == f y ==> x == y
 
@@ -106,7 +114,7 @@ let regs_with_stack (regs:registers) (#num_b8_slots:_) (stack_b:stack_buffer num
 let rec register_of_args (max_arity:nat)
                          (arg_reg:arg_reg_relation max_arity)
                          (n:nat)
-                         (args:list arg{List.Tot.length args = n})
+                         (args:arg_list{List.Tot.length args = n})
                          (regs:registers) : GTot registers =
     match args with
     | [] -> regs
@@ -116,6 +124,32 @@ let rec register_of_args (max_arity:nat)
         register_of_args max_arity arg_reg (n-1) tl regs
       else
         update_regs max_arity arg_reg hd (n - 1) (register_of_args max_arity arg_reg (n - 1) tl regs)
+
+// Pass extra arguments on the stack. The arity_ok condition on inline wrappers ensures that
+// this only happens for stdcalls
+[@__reduce__]
+let rec stack_of_args (#num_b8_slots:_)
+                      (max_arity:nat)
+                      (n:nat)
+                      (args:arg_list{List.Tot.length args = n})
+                      (stack_b:stack_buffer num_b8_slots
+                        {B.length stack_b >= num_b8_slots/8 + (List.Tot.length args - max_arity) + 5 })
+                      (h:HS.mem{B.live h stack_b})
+                      : GTot (h1:HS.mem{B.modifies (B.loc_buffer stack_b) h h1}) =
+  match args with
+  | [] -> h
+  | hd::tl ->
+    if n <= max_arity then h // We can pass the remaining args in registers
+    else
+      let i = (n - max_arity) - 1 // Arguments on the stack are pushed from right to left
+        + (if IA.win then 4 else 0) // The shadow space on Windows comes next
+        + 1 // The return address is then pushed on the stack
+        + num_b8_slots / 8 // And we then have all the extra slots required for the Vale procedure
+      in
+      let v = UInt64.uint_to_t (arg_as_nat64 hd) in // We will store the arg hd
+      B.g_upd_seq_as_seq stack_b (Seq.upd (B.as_seq h stack_b) i v) h;
+      let h1 = B.g_upd stack_b i v h in
+      stack_of_args max_arity (n-1) tl stack_b h1
 
 ////////////////////////////////////////////////////////////////////////////////
 let taint_map = b8 -> GTot MS.taint
@@ -139,7 +173,7 @@ let upd_taint_map_arg (a:arg) (tm:taint_map) : GTot taint_map =
 let init_taint : taint_map = fun r -> MS.Public
 
 [@__reduce__]
-let mk_taint (as:list arg) (tm:taint_map) : GTot taint_map =
+let mk_taint (as:arg_list_sb) (tm:taint_map) : GTot taint_map =
   List.fold_right_gtot as upd_taint_map_arg init_taint
 
 let taint_of_arg (a:arg) =
@@ -157,7 +191,7 @@ let taint_arg_b8 (a:arg{Some? (taint_of_arg a)}) : GTot b8 =
   | TD_Buffer src _ _ -> Buffer (x <: B.buffer (base_typ_as_type src)) true
   | TD_ImmBuffer src _ _ -> imm_to_b8 src x
 
-let rec taint_arg_args_b8_mem (args:list arg) (a:arg)
+let rec taint_arg_args_b8_mem (args:arg_list) (a:arg)
   : Lemma (List.memP a args /\ Some? (taint_of_arg a) ==>
            List.memP (taint_arg_b8 a) (args_b8 args))
   = match args with
@@ -166,7 +200,7 @@ let rec taint_arg_args_b8_mem (args:list arg) (a:arg)
       taint_arg_args_b8_mem tl a
 
 let rec mk_taint_equiv
-     (args:list arg{disjoint_or_eq args})
+     (args:arg_list{disjoint_or_eq args})
      (a:arg)
    : Lemma (List.memP a args /\ Some? (taint_of_arg a) ==>
             Some?.v (taint_of_arg a) == (mk_taint args init_taint) (taint_arg_b8 a))
@@ -183,29 +217,52 @@ let rec mk_taint_equiv
 
 ////////////////////////////////////////////////////////////////////////////////
 
-let state_builder_t (num_b8_slots:max_slots) (args:list arg) (codom:Type) =
+let state_builder_t (max_arity:nat) (num_b8_slots:max_slots) (args:arg_list) (codom:Type) =
     h0:HS.mem ->
-    stack:stack_buffer num_b8_slots{mem_roots_p h0 (arg_of_sb stack::args)} ->
+    stack:stack_buffer num_b8_slots{
+      B.length stack >= num_b8_slots/8 + (List.Tot.length args - max_arity) + 5 /\
+      mem_roots_p h0 (arg_of_sb stack::args)} ->
     GTot codom
+
+let live_arg_modifies (#n:_) (h0 h1:HS.mem) (args:arg_list) (b:stack_buffer n) : Lemma
+  (requires 
+    B.live h0 b /\ all_live h0 args /\ 
+    BigOps.big_and' (disjoint_or_eq_1 (arg_of_sb b)) args /\  
+    B.modifies (B.loc_buffer b) h0 h1)
+  (ensures all_live h1 args /\ B.live h1 b) =
+  BigOps.big_and'_forall (live_arg h0) args;
+  BigOps.big_and'_forall (live_arg h1) args;
+  BigOps.big_and'_forall (disjoint_or_eq_1 (arg_of_sb b)) args;
+  let aux (a:arg) : Lemma
+    (requires live_arg h0 a /\ disjoint_or_eq_1 (arg_of_sb b) a)
+    (ensures live_arg h1 a) =
+    match a with
+    | (| TD_Base _, _ |) -> ()
+    | (| TD_Buffer _ _ _, x |) -> ()
+    | (| TD_ImmBuffer _ _ _, x |) -> ()
+  in 
+  Classical.forall_intro (Classical.move_requires aux)
 
 // Splitting the construction of the initial state into two functions
 // one that creates the initial trusted state (i.e., part of our TCB)
 // and another that just creates the vale state, a view upon the trusted one
 let create_initial_trusted_state
-      (n:nat)
-      (arg_reg:arg_reg_relation n)
+      (max_arity:nat)
+      (arg_reg:arg_reg_relation max_arity)
       (num_b8_slots:max_slots)
-      (args:arity_ok n arg)
+      (args:arg_list)
       (down_mem: down_mem_t)
-  : state_builder_t num_b8_slots args (TS.traceState & mem) =
+  : state_builder_t max_arity num_b8_slots args (TS.traceState & mem) =
   fun h0 stack ->
     let open MS in
-    let regs = register_of_args n arg_reg (List.Tot.length args) args IA.init_regs in
+    let regs = register_of_args max_arity arg_reg (List.Tot.length args) args IA.init_regs in
     let regs = FunctionalExtensionality.on reg (regs_with_stack regs stack) in
     let xmms = FunctionalExtensionality.on xmm IA.init_xmms in
+    let h1 = stack_of_args max_arity (List.Tot.length args) args stack h0 in
+    live_arg_modifies h0 h1 args stack;
     let args = arg_of_sb stack::args in
-    liveness_disjointness args h0;
-    let mem:mem = mk_mem args h0 in
+    liveness_disjointness args h1;
+    let mem:mem = mk_mem args h1 in
     let (s0:BS.state) = {
       BS.ok = true;
       BS.regs = regs;
@@ -221,7 +278,7 @@ let create_initial_trusted_state
     mem
 
 ////////////////////////////////////////////////////////////////////////////////
-let prediction_pre_rel_t (n:nat) (c:TS.tainted_code) (args:arity_ok n arg) =
+let prediction_pre_rel_t (c:TS.tainted_code) (args:arg_list) =
     h0:mem_roots args ->
     prop
 
@@ -229,7 +286,7 @@ let return_val_t (sn:TS.traceState) = r:UInt64.t{UInt64.v r == BS.eval_reg MS.Ra
 let return_val (sn:TS.traceState) : return_val_t sn =
   UInt64.uint_to_t (BS.eval_reg MS.Rax sn.TS.state)
 
-let prediction_post_rel_t (n:nat) (c:TS.tainted_code) (num_b8_slots:max_slots) (args:arity_ok n arg) =
+let prediction_post_rel_t (c:TS.tainted_code) (num_b8_slots:max_slots) (args:arg_list) =
     h0:mem_roots args ->
     s0:TS.traceState ->
     push_h0:mem_roots args ->
@@ -246,13 +303,15 @@ let prediction_pre
     (down_mem:down_mem_t)
     (c:TS.tainted_code)
     (num_b8_slots:max_slots)
-    (args:arity_ok n arg)
-    (pre_rel: prediction_pre_rel_t n c args)
+    (args:arg_list)
+    (pre_rel: prediction_pre_rel_t c args)
     (h0:mem_roots args)
     (s0:TS.traceState)
     (push_h0:mem_roots args)
     (alloc_push_h0:mem_roots args)
-    (b:stack_buffer num_b8_slots{mem_roots_p alloc_push_h0 (arg_of_sb b::args)})
+    (b:stack_buffer num_b8_slots{
+      B.length b >= num_b8_slots/8 + (List.Tot.length args - n) + 5 /\ 
+      mem_roots_p alloc_push_h0 (arg_of_sb b::args)})
     =
   pre_rel h0 /\
   HS.fresh_frame h0 push_h0 /\
@@ -270,8 +329,8 @@ let prediction_post
     (down_mem:down_mem_t)
     (c:TS.tainted_code)
     (num_b8_slots:max_slots)
-    (args:arity_ok n arg)
-    (post_rel: prediction_post_rel_t n c num_b8_slots args)
+    (args:arg_list)
+    (post_rel: prediction_post_rel_t c num_b8_slots args)
     (h0:mem_roots args)
     (s0:TS.traceState)
     (push_h0:mem_roots args)
@@ -300,14 +359,16 @@ let prediction
     (down_mem:down_mem_t)
     (c:TS.tainted_code)
     (num_b8_slots:max_slots)
-    (args:arity_ok n arg)
-    (pre_rel:prediction_pre_rel_t n c args)
-    (post_rel:prediction_post_rel_t n c num_b8_slots args) =
+    (args:arg_list)
+    (pre_rel:prediction_pre_rel_t c args)
+    (post_rel:prediction_post_rel_t c num_b8_slots args) =
   h0:mem_roots args{pre_rel h0} ->
   s0:TS.traceState ->
   push_h0:mem_roots args ->
   alloc_push_h0:mem_roots args ->
-  b:stack_buffer num_b8_slots{mem_roots_p h0 args /\ mem_roots_p alloc_push_h0 (arg_of_sb b::args)} ->
+  b:stack_buffer num_b8_slots{
+    B.length b >= num_b8_slots/8 + (List.Tot.length args - n) + 5 /\
+    mem_roots_p h0 args /\ mem_roots_p alloc_push_h0 (arg_of_sb b::args)} ->
   Ghost (UInt64.t & nat & mem)
     (requires prediction_pre n arg_reg down_mem c num_b8_slots args pre_rel h0 s0 push_h0 alloc_push_h0 b)
     (ensures prediction_post n regs_modified xmms_modified down_mem c num_b8_slots args post_rel h0 s0 push_h0 alloc_push_h0 b)
@@ -317,10 +378,12 @@ type as_lowstar_sig_ret =
   | As_lowstar_sig_ret :
       n:nat ->                 
       num_b8_slots:max_slots ->
-      args:arity_ok n arg ->
+      args:arg_list ->
       push_h0:mem_roots args ->
       alloc_push_h0:mem_roots args ->
-      b:stack_buffer num_b8_slots{mem_roots_p alloc_push_h0 (arg_of_sb b::args)} ->
+      b:stack_buffer num_b8_slots{
+        B.length b >= num_b8_slots/8 + (List.Tot.length args - n) + 5 /\
+        mem_roots_p alloc_push_h0 (arg_of_sb b::args)} ->
       fuel:nat ->
       final_mem:mem ->
       as_lowstar_sig_ret
@@ -336,7 +399,7 @@ let as_lowstar_sig_post
     (down_mem:down_mem_t)
     (c:TS.tainted_code)
     (num_b8_slots:max_slots)
-    (args:arity_ok n arg)
+    (args:arg_list)
     (h0:mem_roots args)
     (#pre_rel:_)
     (#post_rel: _)
@@ -348,6 +411,7 @@ let as_lowstar_sig_post
   let ret = Ghost.reveal (snd ret) in
   num_b8_slots == As_lowstar_sig_ret?.num_b8_slots ret /\
   args == As_lowstar_sig_ret?.args ret /\
+  n == As_lowstar_sig_ret?.n ret /\
  (let push_h0 = As_lowstar_sig_ret?.push_h0 ret in
   let alloc_push_h0 = As_lowstar_sig_ret?.alloc_push_h0 ret in
   let b = As_lowstar_sig_ret?.b ret in
@@ -371,7 +435,7 @@ let as_lowstar_sig_post_weak
     (down_mem:down_mem_t)
     (c:TS.tainted_code)
     (num_b8_slots:max_slots)
-    (args:arity_ok n arg)
+    (args:arg_list)
     (h0:mem_roots args)
     (#pre_rel:_)
     (#post_rel: _)
@@ -383,6 +447,7 @@ let as_lowstar_sig_post_weak
   let ret = Ghost.reveal (snd ret) in
   num_b8_slots == As_lowstar_sig_ret?.num_b8_slots ret /\
   args == As_lowstar_sig_ret?.args ret /\
+  n == As_lowstar_sig_ret?.n ret /\
  (let push_h0 = As_lowstar_sig_ret?.push_h0 ret in
   let alloc_push_h0 = As_lowstar_sig_ret?.alloc_push_h0 ret in
   let b = As_lowstar_sig_ret?.b ret in
@@ -407,7 +472,7 @@ let as_lowstar_sig (c:TS.tainted_code) =
     xmms_modified:(MS.xmm -> bool) ->    
     down_mem:down_mem_t ->
     num_b8_slots:max_slots ->
-    args:arity_ok n arg ->
+    args:arg_list ->
     #pre_rel:_ ->
     #post_rel:_ ->
     predict:prediction n arg_reg regs_modified xmms_modified down_mem c num_b8_slots args pre_rel post_rel ->
@@ -420,30 +485,28 @@ val wrap_variadic (c:TS.tainted_code) : as_lowstar_sig c
 [@__reduce__]
 let (++) (#t:td) (x:td_as_type t) (args:list arg) = (| t, x |) :: args
 
-let arity_ok_2 (n:nat) (l:list 'a) (m:list 'b) = List.length l + List.length m <= n
 
 [@__reduce__]
 let rec rel_gen_t
-      (n:nat)
       (c:TS.tainted_code)
       (td:list td)
-      (args:list arg{arity_ok_2 n td args})
-      (f: arity_ok n arg -> Type) =
+      (args:arg_list{List.length args + List.length td <= 20})
+      (f: arg_list -> Type) =
     match td with
     | [] -> f args
     | hd::tl ->
       x:td_as_type hd ->
-      rel_gen_t n c tl (x++args) f
+      rel_gen_t c tl (x++args) f
 
 [@__reduce__]
-let elim_rel_gen_t_nil #n #c #args #f (x:rel_gen_t n c [] args f)
+let elim_rel_gen_t_nil #c #args #f (x:rel_gen_t c [] args f)
   : f args
   = x
 
 [@__reduce__]
-let elim_rel_gen_t_cons #n #c hd tl #args #f (p:rel_gen_t n c (hd::tl) args f)
+let elim_rel_gen_t_cons #c hd tl #args #f (p:rel_gen_t c (hd::tl) args f)
   : (x:td_as_type hd ->
-      rel_gen_t n c tl (x++args) f)
+      rel_gen_t c tl (x++args) f)
   = p
 
 let rec prediction_t
@@ -455,10 +518,11 @@ let rec prediction_t
       (c:TS.tainted_code)
       (num_b8_slots:max_slots)
       (dom:list td)
-      (args:list arg{List.length dom + List.length args <= n})
-      (pre_rel:rel_gen_t n c dom args (prediction_pre_rel_t n c))
-      (post_rel:rel_gen_t n c dom args (prediction_post_rel_t n c num_b8_slots))
-    = match dom with
+      (args:arg_list{List.length dom + List.length args <= 20})
+      (pre_rel:rel_gen_t c dom args (prediction_pre_rel_t c))
+      (post_rel:rel_gen_t c dom args (prediction_post_rel_t c num_b8_slots))
+    =
+    match dom with
       | [] ->
         prediction n arg_reg regs_modified xmms_modified down_mem c num_b8_slots args pre_rel post_rel
 
@@ -486,7 +550,7 @@ let elim_predict_t_nil
       (#down_mem:down_mem_t)
       (#c:TS.tainted_code)
       (#num_b8_slots:max_slots)
-      (#args:arity_ok n arg)
+      (#args:arg_list)
       (#pre_rel:_)
       (#post_rel:_)
       (p:prediction_t n arg_reg regs_modified xmms_modified down_mem c num_b8_slots [] args pre_rel post_rel)
@@ -504,7 +568,7 @@ let elim_predict_t_cons
       (#num_b8_slots:max_slots)
       (hd:td)
       (tl:list td)
-      (#args:list arg{arity_ok_2 n (hd::tl) args})
+      (#args:arg_list{List.length args + List.length tl <= 19})
       (#pre_rel:_)
       (#post_rel:_)
       (p:prediction_t n arg_reg regs_modified xmms_modified down_mem c num_b8_slots (hd::tl) args pre_rel post_rel)
@@ -524,9 +588,9 @@ let rec as_lowstar_sig_t
       (c:TS.tainted_code)
       (num_b8_slots:max_slots)
       (dom:list td)
-      (args:list arg{List.length dom + List.length args <= n})
-      (pre_rel:rel_gen_t n c dom args (prediction_pre_rel_t n c))
-      (post_rel:rel_gen_t n c dom args (prediction_post_rel_t n c num_b8_slots))
+      (args:arg_list{List.length args + List.length dom <= 20})
+      (pre_rel:rel_gen_t c dom args (prediction_pre_rel_t c))
+      (post_rel:rel_gen_t c dom args (prediction_post_rel_t c num_b8_slots))
       (predict:prediction_t n arg_reg regs_modified xmms_modified down_mem c num_b8_slots dom args pre_rel post_rel) =
       match dom with
       | [] ->
@@ -554,7 +618,8 @@ let rec as_lowstar_sig_t
           (elim_rel_gen_t_cons hd tl post_rel x)
           (elim_predict_t_cons hd tl predict x)
 
-val wrap
+private
+val wrap'
     (n:nat)
     (arg_reg:arg_reg_relation n)
     (regs_modified:MS.reg -> bool)
@@ -562,14 +627,15 @@ val wrap
     (down_mem:down_mem_t)
     (c:TS.tainted_code)
     (num_b8_slots:max_slots)
-    (dom:arity_ok n td)
-    (#pre_rel:rel_gen_t n c dom [] (prediction_pre_rel_t n c))
-    (#post_rel:rel_gen_t n c dom [] (prediction_post_rel_t n c num_b8_slots))
+    (dom:list td{List.length dom <= 20})
+    (#pre_rel:rel_gen_t c dom [] (prediction_pre_rel_t c))
+    (#post_rel:rel_gen_t c dom [] (prediction_post_rel_t c num_b8_slots))
     (predict:prediction_t n arg_reg regs_modified xmms_modified down_mem c num_b8_slots dom [] pre_rel post_rel)
   : as_lowstar_sig_t n arg_reg regs_modified xmms_modified down_mem c num_b8_slots dom [] pre_rel post_rel predict
 
 [@__reduce__]
-let rec as_lowstar_sig_t_weak
+private
+let rec as_lowstar_sig_t_weak'
       (n:nat)
       (arg_reg:arg_reg_relation n)
       (regs_modified:MS.reg -> bool)
@@ -578,9 +644,9 @@ let rec as_lowstar_sig_t_weak
       (c:TS.tainted_code)
       (num_b8_slots:max_slots)
       (dom:list td)
-      (args:list arg{List.length dom + List.length args <= n})
-      (pre_rel:rel_gen_t n c dom args (prediction_pre_rel_t n c))
-      (post_rel:rel_gen_t n c dom args (prediction_post_rel_t n c num_b8_slots))
+      (args:list arg{List.length args + List.length dom <= 20})
+      (pre_rel:rel_gen_t c dom args (prediction_pre_rel_t c))
+      (post_rel:rel_gen_t c dom args (prediction_post_rel_t c num_b8_slots))
       (predict:prediction_t n arg_reg regs_modified xmms_modified down_mem c num_b8_slots dom args pre_rel post_rel) =
       match dom with
       | [] ->
@@ -594,7 +660,7 @@ let rec as_lowstar_sig_t_weak
                 #pre_rel #post_rel (elim_predict_t_nil predict) ret h1))
       | hd::tl ->
         x:td_as_type hd ->
-        as_lowstar_sig_t_weak
+        as_lowstar_sig_t_weak'
           n
           arg_reg
           regs_modified
@@ -608,7 +674,8 @@ let rec as_lowstar_sig_t_weak
           (elim_rel_gen_t_cons hd tl post_rel x)
           (elim_predict_t_cons hd tl predict x)
 
-val wrap_weak
+private
+val wrap_weak'
     (n:nat)
     (arg_reg:arg_reg_relation n)
     (regs_modified:MS.reg -> bool)
@@ -616,9 +683,40 @@ val wrap_weak
     (down_mem:down_mem_t)
     (c:TS.tainted_code)
     (num_b8_slots:max_slots)
+    (dom:list td{List.length dom <= 20})
+    (#pre_rel:rel_gen_t c dom [] (prediction_pre_rel_t c))
+    (#post_rel:rel_gen_t c dom [] (prediction_post_rel_t c num_b8_slots))
+    (predict:prediction_t n arg_reg regs_modified xmms_modified down_mem c num_b8_slots dom [] pre_rel post_rel)
+  : as_lowstar_sig_t_weak' n arg_reg regs_modified xmms_modified down_mem c num_b8_slots dom [] pre_rel post_rel predict
+  
+(* These two functions are the ones that are available from outside the module. The arity_ok restriction ensures that all arguments are passed in registers for inline assembly *)
+[@__reduce__]
+let as_lowstar_sig_t_weak
+      (n:nat{n <= 20})
+      (arg_reg:arg_reg_relation n)
+      (regs_modified:MS.reg -> bool)
+      (xmms_modified:MS.xmm -> bool)
+      (down_mem:down_mem_t)
+      (c:TS.tainted_code)
+      (num_b8_slots:max_slots)
+      (dom:list td)
+      (args:list arg{List.length args + List.length dom <= n})
+      (pre_rel:rel_gen_t c dom args (prediction_pre_rel_t c))
+      (post_rel:rel_gen_t c dom args (prediction_post_rel_t c num_b8_slots))
+      (predict:prediction_t n arg_reg regs_modified xmms_modified down_mem c num_b8_slots dom args pre_rel post_rel) =
+      as_lowstar_sig_t_weak' n arg_reg regs_modified xmms_modified down_mem c num_b8_slots dom args pre_rel post_rel predict
+
+val wrap_weak
+    (n:nat{n <= 20})
+    (arg_reg:arg_reg_relation n)
+    (regs_modified:MS.reg -> bool)
+    (xmms_modified:MS.xmm -> bool)
+    (down_mem:down_mem_t)
+    (c:TS.tainted_code)
+    (num_b8_slots:max_slots)
     (dom:arity_ok n td)
-    (#pre_rel:rel_gen_t n c dom [] (prediction_pre_rel_t n c))
-    (#post_rel:rel_gen_t n c dom [] (prediction_post_rel_t n c num_b8_slots))
+    (#pre_rel:rel_gen_t c dom [] (prediction_pre_rel_t c))
+    (#post_rel:rel_gen_t c dom [] (prediction_post_rel_t c num_b8_slots))
     (predict:prediction_t n arg_reg regs_modified xmms_modified down_mem c num_b8_slots dom [] pre_rel post_rel)
   : as_lowstar_sig_t_weak n arg_reg regs_modified xmms_modified down_mem c num_b8_slots dom [] pre_rel post_rel predict
 
@@ -690,8 +788,9 @@ let xmms_modified_stdcall:MS.xmm -> bool = fun (x:MS.xmm) ->
   ) else
     // No xmm needs to be callee-saved on Linux
     true
-  
-[@__reduce__]
-let as_lowstar_sig_t_weak_stdcall = as_lowstar_sig_t_weak max_stdcall arg_reg_stdcall regs_modified_stdcall xmms_modified_stdcall
 
-let wrap_weak_stdcall = wrap_weak max_stdcall arg_reg_stdcall regs_modified_stdcall xmms_modified_stdcall
+(* For stdcalls, we do not have the arity_ok restriction: We can pass as many arguments as we want, the extra arguments will be passed on the stack *)
+[@__reduce__]
+let as_lowstar_sig_t_weak_stdcall = as_lowstar_sig_t_weak' max_stdcall arg_reg_stdcall regs_modified_stdcall xmms_modified_stdcall
+
+let wrap_weak_stdcall = wrap_weak' max_stdcall arg_reg_stdcall regs_modified_stdcall xmms_modified_stdcall

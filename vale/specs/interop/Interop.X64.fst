@@ -16,9 +16,11 @@ let wrap_variadic c n arg_reg regs_modified xmms_modified down_mem num_b8_slots 
   let push_h0 = ST.get () in
   B.fresh_frame_modifies h0' push_h0;
   mem_roots_p_modifies_none args h0' push_h0;
-  let stack_b = B.alloca (UInt64.uint_to_t 0) (UInt32.uint_to_t (num_b8_slots/8)) in
+  (* The 150 is an arbitrary number, that ensures that the length is still a UInt32 while ensuring we have enough room for all extra args *)
+  let stack_b = B.alloca (UInt64.uint_to_t 0) (UInt32.uint_to_t (num_b8_slots/8 + 150)) in
   DV.length_eq (get_downview stack_b);
-  assert_norm ((num_b8_slots / 8) * 8 == num_b8_slots);
+  assert_norm ((num_b8_slots / 8 + 150) * 8 >= num_b8_slots);
+  assert ((B.length stack_b * 8) % 8 = 0);
   let stack_b : stack_buffer num_b8_slots = stack_b in
   let alloc_push_h0 = ST.get () in
   assert (HS.fresh_frame h0 push_h0);
@@ -56,9 +58,9 @@ let rec wrap_aux
     (c:TS.tainted_code)
     (num_b8_slots:max_slots)
     (dom:list td)
-    (args:list arg{arity_ok_2 n dom args})
-    (pre_rel:rel_gen_t n c dom args (prediction_pre_rel_t n c))
-    (post_rel:rel_gen_t n c dom args (prediction_post_rel_t n c num_b8_slots))
+    (args:list arg{List.length args + List.length dom <= 20})
+    (pre_rel:rel_gen_t c dom args (prediction_pre_rel_t c))
+    (post_rel:rel_gen_t c dom args (prediction_post_rel_t c num_b8_slots))
     (predict:prediction_t n arg_reg regs_modified xmms_modified down_mem c num_b8_slots dom args pre_rel post_rel)
   : as_lowstar_sig_t n arg_reg regs_modified xmms_modified down_mem c num_b8_slots dom args pre_rel post_rel predict
   = match dom with
@@ -81,7 +83,7 @@ let rec wrap_aux
         (elim_rel_gen_t_cons hd tl post_rel x)
         (elim_predict_t_cons hd tl predict x)
 
-let wrap n arg_reg regs_modified xmms_modified down_mem c num_b8_slots dom #pre_rel #post_rel predict =
+let wrap' n arg_reg regs_modified xmms_modified down_mem c num_b8_slots dom #pre_rel #post_rel predict =
   wrap_aux n arg_reg regs_modified xmms_modified down_mem c num_b8_slots dom [] pre_rel post_rel predict
 
 let rec wrap_aux_weak
@@ -93,11 +95,11 @@ let rec wrap_aux_weak
     (c:TS.tainted_code)
     (num_b8_slots:max_slots)
     (dom:list td)
-    (args:list arg{arity_ok_2 n dom args})
-    (pre_rel:rel_gen_t n c dom args (prediction_pre_rel_t n c))
-    (post_rel:rel_gen_t n c dom args (prediction_post_rel_t n c num_b8_slots))
+    (args:list arg{List.length args + List.length dom <= 20})
+    (pre_rel:rel_gen_t c dom args (prediction_pre_rel_t c))
+    (post_rel:rel_gen_t c dom args (prediction_post_rel_t c num_b8_slots))
     (predict:prediction_t n arg_reg regs_modified xmms_modified down_mem c num_b8_slots dom args pre_rel post_rel)
-  : as_lowstar_sig_t_weak n arg_reg regs_modified xmms_modified down_mem c num_b8_slots dom args pre_rel post_rel predict
+  : as_lowstar_sig_t_weak' n arg_reg regs_modified xmms_modified down_mem c num_b8_slots dom args pre_rel post_rel predict
   = match dom with
     | [] ->
       let f () 
@@ -111,7 +113,7 @@ let rec wrap_aux_weak
                #pre_rel #post_rel (elim_predict_t_nil predict) ret h1)
         = wrap_variadic c n arg_reg regs_modified xmms_modified down_mem num_b8_slots args (elim_predict_t_nil predict)
       in
-      f <: as_lowstar_sig_t_weak n arg_reg regs_modified xmms_modified down_mem c num_b8_slots [] args pre_rel post_rel predict
+      f <: as_lowstar_sig_t_weak' n arg_reg regs_modified xmms_modified down_mem c num_b8_slots [] args pre_rel post_rel predict
 
     | hd::tl ->
       fun (x:td_as_type hd) ->
@@ -121,5 +123,7 @@ let rec wrap_aux_weak
         (elim_rel_gen_t_cons hd tl post_rel x)
         (elim_predict_t_cons hd tl predict x)
 
-let wrap_weak n arg_reg regs_modified xmms_modified down_mem c num_b8_slots dom #pre_rel #post_rel predict =
+let wrap_weak' n arg_reg regs_modified xmms_modified down_mem c num_b8_slots dom #pre_rel #post_rel predict =
   wrap_aux_weak n arg_reg regs_modified xmms_modified down_mem c num_b8_slots dom [] pre_rel post_rel predict
+
+let wrap_weak n = wrap_weak' n
