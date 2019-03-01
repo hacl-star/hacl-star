@@ -1,7 +1,7 @@
 include ../../Makefile.include
 
 ALL= \
-	FStar.Endianness.fst \
+	FStar.Old.Endianness.fst \
 	Hacl.Cast.fst \
 	Hacl.Endianness.fst \
 	Hacl.Policies.fst \
