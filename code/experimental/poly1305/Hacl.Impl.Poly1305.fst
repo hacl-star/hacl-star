@@ -22,10 +22,6 @@ friend Lib.LoopCombinators
 unfold
 let op_String_Access #a #len = LSeq.index #a #len
 
-let get_acc_ #s (ctx:poly1305_ctx s) = gsub ctx 0ul (nlimb s)
-let get_precomp_r_ #s (ctx:poly1305_ctx s) = gsub ctx (nlimb s) (precomplen s)
-let get_r_ #s (ctx:poly1305_ctx s) = gsub ctx (nlimb s) (nlimb s)
-
 inline_for_extraction
 let get_acc #s (ctx:poly1305_ctx s) = sub ctx 0ul (nlimb s)
 
@@ -35,18 +31,36 @@ let get_precomp_r #s (ctx:poly1305_ctx s) = sub ctx (nlimb s) (precomplen s)
 let as_get_acc #s h ctx = feval h (gsub ctx 0ul (nlimb s))
 let as_get_r #s h ctx = feval h (gsub ctx (nlimb s) (nlimb s))
 let state_inv_t #s h ctx =
-  F32xN.acc_inv_t #(width s) (F32xN.as_tup5 h (get_acc_ ctx)) /\
-  F32xN.load_precompute_r_post #(width s) h (get_precomp_r_ ctx)
+  F32xN.acc_inv_t #(width s) (F32xN.as_tup5 h (gsub ctx 0ul (nlimb s))) /\
+  F32xN.load_precompute_r_post #(width s) h (gsub ctx (nlimb s) (precomplen s))
 
-val lemma_pow2_128: n:nat
-  -> Lemma
-    (requires n <= 128)
-    (ensures pow2 n < S.prime)
+val lemma_pow2_128: n:nat ->
+  Lemma
+  (requires n <= 128)
+  (ensures pow2 n < S.prime)
   [SMTPat (pow2 n)]
 let lemma_pow2_128 n =
   Math.Lemmas.pow2_le_compat 128 n;
   assert (pow2 n <= pow2 128);
   assert_norm (pow2 128 < S.prime)
+
+val lemma_felem_fits_init_post:
+    #s:field_spec
+  -> h:mem
+  -> f:felem s
+  -> Lemma
+    (requires felem_fits h f (0, 0, 0, 0, 0))
+    (ensures F32xN.acc_inv_t #(width s) (F32xN.as_tup5 h f))
+let lemma_felem_fits_init_post #s h f = ()
+
+val lemma_felem_fits_update_pre:
+    #s:field_spec
+  -> h:mem
+  -> f:felem s
+  -> Lemma
+    (requires F32xN.acc_inv_t #(width s) (F32xN.as_tup5 h f))
+    (ensures felem_fits h f (2, 3, 2, 2, 2))
+let lemma_felem_fits_update_pre #s h f = ()
 
 inline_for_extraction
 val poly1305_encode_block:
@@ -128,27 +142,13 @@ val poly1305_encode_r:
       F32xN.load_precompute_r_post #(width s) h1 p /\
       feval h1 (gsub p 0ul 5ul) == S.encode_r (as_seq h0 b))
 let poly1305_encode_r #s p b =
-  let h0 = ST.get () in
   let lo = uint_from_bytes_le (sub b 0ul 8ul) in
-  uintv_extensionality lo (BSeq.uint_from_bytes_le (LSeq.sub (as_seq h0 b) 0 8));
   let hi = uint_from_bytes_le (sub b 8ul 8ul) in
-  uintv_extensionality hi (BSeq.uint_from_bytes_le (LSeq.sub (as_seq h0 b) 8 8));
   let mask0 = u64 0x0ffffffc0fffffff in
   let mask1 = u64 0x0ffffffc0ffffffc in
   let lo = lo &. mask0 in
   let hi = hi &. mask1 in
-  load_precompute_r p lo hi;
-  let h1 = ST.get () in
-  LSeq.eq_intro (feval h1 (gsub p 0ul 5ul)) (S.encode_r (as_seq h0 b))
-
-val lemma_felem_fits_init_post:
-    #s:field_spec
-  -> h:mem
-  -> f:felem s
-  -> Lemma
-    (requires felem_fits h f (0, 0, 0, 0, 0))
-    (ensures F32xN.acc_inv_t #(width s) (F32xN.as_tup5 h f))
-let lemma_felem_fits_init_post #s h f = ()
+  load_precompute_r p lo hi
 
 inline_for_extraction
 val poly1305_init_:
@@ -443,15 +443,6 @@ let poly1305_update1 #s len text pre acc =
   assert (disjoint b acc);
   poly1305_update1_rem #s pre rem b acc
 
-val lemma_felem_fits_update_pre:
-    #s:field_spec
-  -> h:mem
-  -> f:felem s
-  -> Lemma
-    (requires F32xN.acc_inv_t #(width s) (F32xN.as_tup5 h f))
-    (ensures felem_fits h f (2, 3, 2, 2, 2))
-let lemma_felem_fits_update_pre #s h f = ()
-
 inline_for_extraction
 val poly1305_update_:
     #s:field_spec
@@ -500,7 +491,7 @@ val poly1305_update1_:
     (ensures  fun h0 _ h1 ->
       modifies (loc ctx) h0 h1 /\
       state_inv_t #s h1 ctx /\
-      (as_get_acc h1 ctx).[0] == 
+      (as_get_acc h1 ctx).[0] ==
       S.poly_update1 (as_seq h0 text) (as_get_acc h0 ctx).[0] (as_get_r h0 ctx).[0])
 let poly1305_update1_ #s ctx len text =
   let pre = get_precomp_r ctx in
