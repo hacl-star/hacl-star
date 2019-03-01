@@ -6,7 +6,7 @@ module ST = FStar.HyperStack.ST
 
 open FStar.Seq
 open FStar.UInt32
-open FStar.Endianness
+open FStar.Old.Endianness
 open Spec.Lib
 
 #reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 20"

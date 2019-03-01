@@ -46,7 +46,7 @@ let alloc_point () =
   x, z
 
 
-open FStar.Endianness
+open FStar.Old.Endianness
 open Hacl.Spec.Endianness
 open Hacl.Endianness
 

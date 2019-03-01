@@ -43,7 +43,7 @@ val store128_be: b:buffer H8.t{length b = 16} -> n:H128.t -> Stack unit
 let store128_be b n =
   hstore128_be b n;
   let h1 = ST.get() in
-  FStar.Endianness.lemma_big_endian_inj (decode (to_felem #gf128 (H128.v n))) (as_seq h1 b)
+  FStar.Old.Endianness.lemma_big_endian_inj (decode (to_felem #gf128 (H128.v n))) (as_seq h1 b)
 
 (* * Every block of message is regarded as an element in Galois field GF(2^128), **)
 (* * The following several functions are basic operations in this field.         **)

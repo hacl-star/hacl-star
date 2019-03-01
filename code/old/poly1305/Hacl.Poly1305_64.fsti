@@ -2,7 +2,7 @@ module Hacl.Poly1305_64
 
 open FStar.HyperStack.All
 open FStar.Mul
-open FStar.Endianness
+open FStar.Old.Endianness
 open FStar.Buffer
 open FStar.UInt64
 

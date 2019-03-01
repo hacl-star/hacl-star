@@ -56,7 +56,7 @@ val verify_step_2:
     (ensures (fun h0 _ h1 -> live h0 r /\ live h0 msg /\ live h0 rs /\ live h0 public /\
       live h1 r /\ live h1 msg /\ live h1 rs /\ live h1 public /\ modifies_1 r h0 h1 /\
       as_seq h1 r ==
-        FStar.Endianness.(little_bytes 32ul (Spec.Ed25519.sha512_modq FStar.Seq.(as_seq h0 rs @| as_seq h0 public @| as_seq h0 msg))) ))
+        FStar.Old.Endianness.(little_bytes 32ul (Spec.Ed25519.sha512_modq FStar.Seq.(as_seq h0 rs @| as_seq h0 public @| as_seq h0 msg))) ))
 
 let verify_step_2 r msg len rs public =
   assert_norm(pow2 56 = 0x100000000000000);

@@ -8,7 +8,7 @@ module ST = FStar.HyperStack.ST
 open FStar.Mul
 open FStar.Ghost
 open FStar.Seq
-open FStar.Endianness
+open FStar.Old.Endianness
 
 open Spec.Poly1305
 open Spec.Chacha20Poly1305

@@ -11,7 +11,7 @@ open FStar.Ghost
 open FStar.Seq
 open FStar.HyperStack
 let reveal = FStar.Ghost.reveal
-open FStar.Endianness
+open FStar.Old.Endianness
 open FStar.Buffer
 
 open Hacl.Endianness

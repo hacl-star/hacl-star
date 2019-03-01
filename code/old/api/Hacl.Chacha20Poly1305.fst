@@ -9,7 +9,7 @@ open Hacl.Constants
 open Hacl.Policies
 open Hacl.Cast
 open Hacl.Spec.Endianness
-open FStar.Endianness
+open FStar.Old.Endianness
 open Hacl.Endianness
 
 open Spec.Chacha20Poly1305
@@ -49,7 +49,7 @@ private let lemma_aead_encrypt_poly h0 h1 h2 h3 h4 r acc mac =
 
 
 open FStar.Mul
-open FStar.Endianness 
+open FStar.Old.Endianness 
 
 private val lemma_aead_encrypt_poly_2:
   k:Spec.Poly1305.key ->

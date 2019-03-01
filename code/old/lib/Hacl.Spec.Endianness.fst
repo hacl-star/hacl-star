@@ -4,7 +4,7 @@ module ST = FStar.HyperStack.ST
 
 open FStar.HyperStack.All
 
-open FStar.Endianness
+open FStar.Old.Endianness
 
 module U8   = FStar.UInt8
 module U16  = FStar.UInt16
