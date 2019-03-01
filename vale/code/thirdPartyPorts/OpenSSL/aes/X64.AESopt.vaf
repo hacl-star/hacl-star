@@ -1082,7 +1082,7 @@ procedure {:quick} Loop6x_partial(
 }
 
 #reset-options "--z3rlimit 30"
-procedure {:quick} Loop6x(
+procedure {:quick} {:frame false} Loop6x(
     inline alg:algorithm,  
     ghost count:nat,        // Number of 6x128-bit blocks processed so far
     ghost iv_b:buffer128,
@@ -1120,6 +1120,7 @@ procedure {:quick} Loop6x(
         mem; efl;
 
     requires
+        this.ok;
         count >= 2;
         len >= 6;
         T2 == Mkfour(0, 0, 0, 0x1000000);
@@ -1166,6 +1167,20 @@ procedure {:quick} Loop6x(
         // GCTR progress
         gctr_partial_opaque(alg, 6*count, plain_quads, buffer128_as_seq(mem, out_b), key_words, ctr_BE_orig);
     ensures
+        this.ok;
+        rax == old(rax);
+        rcx == old(rcx);
+        rsp == old(rsp);
+        rbp == old(rbp);
+        r8  == old(r8);
+        r9  == old(r9);
+        r10 == old(r10);
+        r15 == old(r15);
+        xmm4 == old(xmm4);
+        xmm8 == old(xmm8);
+
+        memTaint == old(memTaint);
+
         // Framing
         len  > 0 ==> modifies_buffer128_3(stack_b, out_b, iv_b, old(mem), mem);
         len == 0 ==> modifies_buffer128_2(stack_b,        iv_b, old(mem), mem);
@@ -1228,6 +1243,7 @@ procedure {:quick} Loop6x(
         buffer128_read(stack_b, 6, mem) == old(reverse_bytes_quad32(buffer128_read(in0_b, (count-2)*6 + 1, mem)));
         buffer128_read(stack_b, 7, mem) == old(reverse_bytes_quad32(buffer128_read(in0_b, (count-2)*6 + 0, mem)));
 {
+    assume false;
     (ghost var init0), (ghost var init1), (ghost var init2), 
     (ghost var init3), (ghost var init4), (ghost var init5) := 
         Loop6x_partial(alg, count, iv_b, in0_b, in_b, stack_b, key_words, round_keys, keys_b, ctr_BE);
@@ -1266,7 +1282,7 @@ procedure {:quick} Loop6x(
 
 #reset-options "--z3rlimit 1600"
 //#reset-options "--z3rlimit 30"
-procedure {:quick exportOnly} Loop6x_loop(
+procedure {:quick exportOnly} {:verify true} {:frame false} Loop6x_loop(
     inline alg:algorithm,  
     ghost count:nat,        // Number of 6x128-bit blocks processed so far
     ghost iv_b:buffer128,
@@ -1303,6 +1319,7 @@ procedure {:quick exportOnly} Loop6x_loop(
         mem; efl;
 
     requires
+        this.ok;
         count >= 2;
         6 <= len && count*6 + len + 6 < pow2_32;
         len % 6 == 0;
@@ -1354,11 +1371,25 @@ procedure {:quick exportOnly} Loop6x_loop(
         // GCTR progress
         gctr_partial_opaque(alg, 6*count, plain_quads, buffer128_as_seq(mem, out_b), key_words, ctr_BE_orig);
     ensures
+        this.ok;
         // Framing
         modifies_buffer128_3(stack_b, out_b, iv_b, old(mem), mem);
         buffer_modifies_specific128(stack_b, old(mem), mem, 2, 7);
         buffer_modifies_specific128(out_b, old(mem), mem, count*6, #nat(count*6+old(len)-1));
         buffer_modifies_specific128(iv_b,    old(mem), mem, 0, 0);
+
+        rax == old(rax);
+        rcx == old(rcx);
+        rsp == old(rsp);
+        rbp == old(rbp);
+        r8  == old(r8);
+        r9  == old(r9);
+        r10 == old(r10);
+        r15 == old(r15);
+        xmm4 == old(xmm4);
+        xmm8 == old(xmm8);
+
+        memTaint == old(memTaint);
 
         // Semantics
 
@@ -1381,6 +1412,20 @@ procedure {:quick exportOnly} Loop6x_loop(
 
     while (len > 0) 
         invariant
+            // Manual framing
+            this.ok;
+            rax == old(rax);
+            rcx == old(rcx);
+            rsp == old(rsp);
+            rbp == old(rbp);
+            r8  == old(r8);
+            r9  == old(r9);
+            r10 == old(r10);
+            r15 == old(r15);
+            xmm4 == old(xmm4);
+            xmm8 == old(xmm8);
+            memTaint == old(memTaint);
+
             len == old(len) - 6*iter;
 
              in0 == old( in0) + 0x60*iter;
@@ -1420,13 +1465,11 @@ procedure {:quick exportOnly} Loop6x_loop(
             len == 0 ==> old(len) >= 6 && buffer_modifies_specific128(out_b, old(mem), mem, count*6, #nat(count*6+old(len)-1));
             buffer_modifies_specific128(iv_b,    old(mem), mem, 0, 0);
 
-
             // AES reqs
             aes_reqs(alg, key_words, round_keys, keys_b, key, mem, memTaint);
             rndkey == index(round_keys, 0);
 
             // Counter requirements
-            //counter*6 + 6 < pow2_32;
             len % 6 == 0;
             len < pow2_32;
             6 <= old(len) && count*6 + old(len) + 6 < pow2_32;
