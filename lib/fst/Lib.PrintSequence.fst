@@ -147,3 +147,14 @@ let print_compare len expected result =
   IO.print_string "\nExpected: ";
   List.iter (fun a -> print_uint8_hex_pad a) (to_list expected);
   for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) expected result
+
+let print_compare_display len expected result =
+  let r = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) expected result in
+  if r then IO.print_string "\nSuccess !"
+  else begin
+    IO.print_string "\nResult:   ";
+    List.iter (fun a -> print_uint8_hex_pad a) (to_list result);
+    IO.print_string "\nExpected: ";
+    List.iter (fun a -> print_uint8_hex_pad a) (to_list expected);
+    IO.print_string "\nFailure !"
+  end
