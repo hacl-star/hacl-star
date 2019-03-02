@@ -121,8 +121,8 @@ let verify__ public msg len signature tmp tmp' =
       else (      
         verify_step_2 h' msg len rs public;
         let h4 = ST.get() in
-        Endianness.lemma_little_endian_inj (as_seq h4 h') Spec.Ed25519.(Endianness.little_bytes 32ul (sha512_modq FStar.Seq.(as_seq h2 rs @| as_seq h0 public @| as_seq h0 msg)));
-        Endianness.lemma_little_endian_inj (as_seq h4 (Buffer.sub signature 32ul 32ul)) Spec.Ed25519.(Endianness.little_bytes 32ul (Endianness.little_endian (Seq.slice (as_seq h0 signature) 32 64)));
+        FStar.Old.Endianness.lemma_little_endian_inj (as_seq h4 h') Spec.Ed25519.(Endianness.little_bytes 32ul (sha512_modq FStar.Seq.(as_seq h2 rs @| as_seq h0 public @| as_seq h0 msg)));
+        FStar.Old.Endianness.lemma_little_endian_inj (as_seq h4 (Buffer.sub signature 32ul 32ul)) Spec.Ed25519.(Endianness.little_bytes 32ul (Endianness.little_endian (Seq.slice (as_seq h0 signature) 32 64)));
         no_upd_lemma_1 h3 h4 h' a';
         no_upd_lemma_1 h3 h4 h' r';
         no_upd_lemma_1 h3 h4 h' msg;

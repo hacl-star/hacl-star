@@ -82,11 +82,11 @@ let add_sign_spec out x =
   let xbyte = Hacl.Cast.sint64_to_sint8 x in
   Math.Lemmas.modulo_lemma (v x) (pow2 8);
   Seq.lemma_eq_intro out (Seq.append (Seq.slice out 0 31) (Seq.slice out 31 32));
-  Endianness.lemma_little_endian_is_bounded (Hacl.Spec.Endianness.reveal_sbytes (Seq.slice (out) 0 31));
-  Endianness.little_endian_append (Hacl.Spec.Endianness.reveal_sbytes (Seq.slice (out) 0 31)) (Hacl.Spec.Endianness.reveal_sbytes (Seq.slice (out) 31 32));
+  FStar.Old.Endianness.lemma_little_endian_is_bounded (Hacl.Spec.Endianness.reveal_sbytes (Seq.slice (out) 0 31));
+  FStar.Old.Endianness.little_endian_append (Hacl.Spec.Endianness.reveal_sbytes (Seq.slice (out) 0 31)) (Hacl.Spec.Endianness.reveal_sbytes (Seq.slice (out) 31 32));
   let o31 = Seq.index out (31) in
   Seq.lemma_eq_intro (Seq.slice out 31 32) (Seq.create 1 o31);
-  Endianness.little_endian_singleton (Hacl.Spec.Endianness.h8_to_u8 o31);
+  FStar.Old.Endianness.little_endian_singleton (Hacl.Spec.Endianness.h8_to_u8 o31);
   assert(Hacl.Spec.Endianness.hlittle_endian (out) == Hacl.Spec.Endianness.hlittle_endian (Seq.slice (out) 0 31)  + pow2 248 * (Hacl.UInt8.v (Seq.index (out) 31)));
   let o31' = Hacl.UInt8.(o31 +%^ (xbyte <<^ 7ul)) in
   Math.Lemmas.modulo_lemma (Hacl.UInt8.v xbyte * pow2 7) (pow2 8);
@@ -96,8 +96,8 @@ let add_sign_spec out x =
   Seq.lemma_eq_intro (Seq.slice (out) 0 31) (Seq.slice (out') 0 31);
   Seq.lemma_eq_intro out' (Seq.append (Seq.slice out 0 31) (Seq.slice out' 31 32));
   Seq.lemma_eq_intro (Seq.slice out' 31 32) (Seq.create 1 o31');
-  Endianness.little_endian_singleton (Hacl.Spec.Endianness.h8_to_u8 o31');
-  Endianness.little_endian_append (Hacl.Spec.Endianness.reveal_sbytes (Seq.slice (out') 0 31)) (Hacl.Spec.Endianness.reveal_sbytes (Seq.slice (out') 31 32));
+  FStar.Old.Endianness.little_endian_singleton (Hacl.Spec.Endianness.h8_to_u8 o31');
+  FStar.Old.Endianness.little_endian_append (Hacl.Spec.Endianness.reveal_sbytes (Seq.slice (out') 0 31)) (Hacl.Spec.Endianness.reveal_sbytes (Seq.slice (out') 31 32));
   out'
 
 
@@ -216,7 +216,7 @@ let point_compress z p =
   let h5 = ST.get() in
   (**) lemma_modifies_1_trans z h3 h4 h5;
   (**) lemma_modifies_0_1 z h1 h3 h5;
-  (**) Endianness.lemma_little_endian_inj
+  (**) FStar.Old.Endianness.lemma_little_endian_inj
     (Hacl.Spec.Endianness.reveal_sbytes (as_seq h5 z))
     (Spec.Ed25519.point_compress (Hacl.Impl.Ed25519.ExtPoint.as_point h0 p));
   pop_frame();

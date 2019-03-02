@@ -409,7 +409,7 @@ let sign_step_3 tmp_bytes tmp_ints =
   let rs'  = Buffer.sub tmp_bytes 160ul 32ul in
   Hacl.Impl.Store56.store_56 rb r;
   let h2 = ST.get() in
-  Endianness.lemma_little_endian_inj (reveal_sbytes (as_seq h2 rb))
+  FStar.Old.Endianness.lemma_little_endian_inj (reveal_sbytes (as_seq h2 rb))
                                      (Endianness.little_bytes 32ul (Hacl.Spec.BignumQ.Eval.eval_q (reveal_h64s (as_seq h0 r))));
   no_upd_lemma_0 h0 h2 r;
   no_upd_lemma_0 h0 h2 a;
@@ -453,7 +453,7 @@ val sign_step_5:
         let a      = Buffer.sub apre 0ul 32ul in
         let prefix = Buffer.sub apre 32ul 32ul in
         reveal_sbytes (as_seq h1 s') ==
-          Endianness.little_bytes 32ul (Spec.Ed25519.((Hacl.Spec.BignumQ.Eval.eval_q (reveal_h64s (as_seq h0 r)) +
+          FStar.Old.Endianness.little_bytes 32ul (Spec.Ed25519.((Hacl.Spec.BignumQ.Eval.eval_q (reveal_h64s (as_seq h0 r)) +
                           ((Hacl.Spec.BignumQ.Eval.eval_q (reveal_h64s (as_seq h0 h)) * (hlittle_endian (as_seq h0 a))) % q)) % q)) /\
         as_seq h1 rs' == as_seq h0 rs'
         )
@@ -475,7 +475,7 @@ let sign_step_5 tmp_bytes tmp_ints =
   let rs'  = Buffer.sub tmp_bytes 160ul 32ul in
   let a = Buffer.sub tmp_bytes 224ul 32ul in
   let h0 = ST.get() in
-  Endianness.lemma_little_endian_is_bounded (reveal_sbytes (as_seq h0 a));
+  FStar.Old.Endianness.lemma_little_endian_is_bounded (reveal_sbytes (as_seq h0 a));
   Hacl.Impl.Load56.load_32_bytes aq a;
   let h1 = ST.get() in
   assert(Hacl.Spec.BignumQ.Eval.eval_q (reveal_h64s (as_seq h1 aq)) < pow2 256);
@@ -493,6 +493,6 @@ let sign_step_5 tmp_bytes tmp_ints =
   Hacl.Impl.Store56.store_56 s' s;
   let h4 = ST.get() in
   no_upd_lemma_1 h3 h4 s' rs';
-  Endianness.lemma_little_endian_inj (reveal_sbytes (as_seq h4 s')) (Endianness.little_bytes 32ul (Spec.Ed25519.((Hacl.Spec.BignumQ.Eval.eval_q (reveal_h64s (as_seq h0 r)) +
+  FStar.Old.Endianness.lemma_little_endian_inj (reveal_sbytes (as_seq h4 s')) (Endianness.little_bytes 32ul (Spec.Ed25519.((Hacl.Spec.BignumQ.Eval.eval_q (reveal_h64s (as_seq h0 r)) +
                           ((Hacl.Spec.BignumQ.Eval.eval_q (reveal_h64s (as_seq h0 h)) * (hlittle_endian (as_seq h0 a))) % q)) % q)));
   ()

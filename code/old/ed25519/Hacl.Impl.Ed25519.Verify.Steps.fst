@@ -69,7 +69,7 @@ let verify_step_2 r msg len rs public =
   Hacl.Impl.Store56.store_56 r r';
   let h3 = ST.get() in
   lemma_modifies_0_2 r r' h0 h1 h3;
-  Endianness.lemma_little_endian_inj (as_seq h3 r)
+  FStar.Old.Endianness.lemma_little_endian_inj (as_seq h3 r)
                                      (Endianness.little_bytes 32ul (Spec.Ed25519.sha512_modq FStar.Seq.(as_seq h0 rs @| as_seq h0 public @| as_seq h0 msg)));
   pop_frame()
 
