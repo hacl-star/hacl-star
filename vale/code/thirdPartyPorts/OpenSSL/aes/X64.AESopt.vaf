@@ -2045,7 +2045,7 @@ procedure {:quick} Ctr32_ghash_6_prelude(
     )
     lets
 //      inp @= rdi; outp @= rsi; len @= rdx; key @= rcx; ivp @= r8; Xip @= r9;
-        len @= rdx; key @= rcx; 
+        key @= rcx; 
         T1 @= xmm1; T2 @= xmm2;
         Z0 @= xmm4; 
     
@@ -2060,7 +2060,6 @@ procedure {:quick} Ctr32_ghash_6_prelude(
         memTaint;
 
     modifies
-        len; 
         T2; Z0; 
         inout0; inout1; inout2; inout3; inout4; inout5; rndkey;
         constp; mem; efl;
@@ -2072,16 +2071,12 @@ procedure {:quick} Ctr32_ghash_6_prelude(
         // AES reqs
         aes_reqs(alg, key_words, round_keys, keys_b, key, mem, memTaint);
 
-        len >= 6;
-
         // Counters
         ctr_orig.lo0 % 256 + 6 < 256;
         T1 == reverse_bytes_quad32(inc32lite(ctr_orig, 0));
     ensures
         modifies_buffer_specific128(stack_b, old(mem), mem, 1, 1);
 
-        len == old(len) - 6;
-        
         T2 == Mkfour(0, 0, 0, 0x1000000);
         rndkey == index(round_keys, 0);
 
@@ -2095,7 +2090,6 @@ procedure {:quick} Ctr32_ghash_6_prelude(
         buffer128_read(stack_b, 1, mem) == Mkfour(0, 0, 0, 0);
 {
     load_one_msb();   // # borrow $T2, .Lone_msb
-    Sub64(len, 6);
     VPxor(Z0, Z0, Z0);  // # $Z0   = 0
     lemma_quad32_xor();
     Load128_buffer(rndkey, key, 0x00-0x80, Secret, keys_b, 0);
@@ -2270,17 +2264,17 @@ procedure {:quick} AES_GCM_encrypt(
     Ctr32_ghash_6_prelude(alg, stack_b, key_words, round_keys, keys_b, inc32(ctr_BE, 12));
     Mov64(counter, 14);
     ghost var mid_len := len;
-    assert mid_len == old(len) - 18;
+    assert mid_len == old(len) - 12;
     Loop6x_loop(alg, 2, iv_b, out_b, in_b, out_b, stack_b, old(buffer128_as_seq(mem, in_b)), key_words, round_keys, keys_b, ctr_BE, inc32(ctr_BE, 12)); 
     ghost var out_snapshot := buffer128_as_seq(mem, out_b);
 
     InitPshufbMask(Ii, r12);    // # borrow $Ii for .Lbswap_mask
     assert {:quick_type} old(len) / 6 >= 3;
-    ghost var offset_in := #nat((old(len) / 6) - 2);
+    ghost var offset_in := #nat((old(len) / 6) - 1);
     Encrypt_save_and_shuffle_output(offset_in, out_b); 
 
     gctr_partial_opaque_ignores_postfix(alg, #nat32(12+mid_len - 6), old(buffer128_as_seq(mem, in_b)), old(buffer128_as_seq(mem, in_b)), out_snapshot, buffer128_as_seq(mem, out_b),key_words, ctr_BE);
     gctr_partial_extend6(alg, 12+mid_len - 6, old(buffer128_as_seq(mem, in_b)), buffer128_as_seq(mem, out_b), key_words, ctr_BE);
-    assert gctr_partial_opaque(alg, #nat(old(len) - 6), old(buffer128_as_seq(mem, in_b)), buffer128_as_seq(mem, out_b), key_words, ctr_BE);
+    assert gctr_partial_opaque(alg, old(len), old(buffer128_as_seq(mem, in_b)), buffer128_as_seq(mem, out_b), key_words, ctr_BE);
 }
 
