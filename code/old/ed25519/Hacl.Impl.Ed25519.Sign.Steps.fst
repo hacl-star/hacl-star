@@ -384,7 +384,7 @@ val sign_step_3:
         Hacl.Spec.BignumQ.Eval.eval_q (reveal_h64s (as_seq h0 r)) < pow2 256 /\
         reveal_sbytes (as_seq h1 rs') == Spec.Ed25519.(
             let r = Hacl.Spec.BignumQ.Eval.eval_q (reveal_h64s (as_seq h0 r)) in
-            let x = point_mul (Endianness.little_bytes 32ul r) g in
+            let x = point_mul (FStar.Old.Endianness.little_bytes 32ul r) g in
             point_compress x) /\
         as_seq h1 r == as_seq h0 r /\
         as_seq h1 a'' == as_seq h0 a'' /\
@@ -410,7 +410,7 @@ let sign_step_3 tmp_bytes tmp_ints =
   Hacl.Impl.Store56.store_56 rb r;
   let h2 = ST.get() in
   FStar.Old.Endianness.lemma_little_endian_inj (reveal_sbytes (as_seq h2 rb))
-                                     (Endianness.little_bytes 32ul (Hacl.Spec.BignumQ.Eval.eval_q (reveal_h64s (as_seq h0 r))));
+                                     (FStar.Old.Endianness.little_bytes 32ul (Hacl.Spec.BignumQ.Eval.eval_q (reveal_h64s (as_seq h0 r))));
   no_upd_lemma_0 h0 h2 r;
   no_upd_lemma_0 h0 h2 a;
   no_upd_lemma_0 h0 h2 a'';
@@ -493,6 +493,6 @@ let sign_step_5 tmp_bytes tmp_ints =
   Hacl.Impl.Store56.store_56 s' s;
   let h4 = ST.get() in
   no_upd_lemma_1 h3 h4 s' rs';
-  FStar.Old.Endianness.lemma_little_endian_inj (reveal_sbytes (as_seq h4 s')) (Endianness.little_bytes 32ul (Spec.Ed25519.((Hacl.Spec.BignumQ.Eval.eval_q (reveal_h64s (as_seq h0 r)) +
+  FStar.Old.Endianness.lemma_little_endian_inj (reveal_sbytes (as_seq h4 s')) (FStar.Old.Endianness.little_bytes 32ul (Spec.Ed25519.((Hacl.Spec.BignumQ.Eval.eval_q (reveal_h64s (as_seq h0 r)) +
                           ((Hacl.Spec.BignumQ.Eval.eval_q (reveal_h64s (as_seq h0 h)) * (hlittle_endian (as_seq h0 a))) % q)) % q)));
   ()

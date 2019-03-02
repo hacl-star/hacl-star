@@ -25,12 +25,12 @@ let lemma_most_significant_bit s =
   lemma_eq_intro (slice s 31 32) (create 1 s31);
   FStar.Old.Endianness.little_endian_append (slice s 0 31) (slice s 31 32);
   FStar.Old.Endianness.little_endian_singleton s31;
-  Math.Lemmas.lemma_div_mod (Endianness.little_endian s) (pow2 248);
-  assert(Endianness.little_endian s ==
+  Math.Lemmas.lemma_div_mod (FStar.Old.Endianness.little_endian s) (pow2 248);
+  assert(FStar.Old.Endianness.little_endian s ==
     FStar.Old.Endianness.little_endian (slice s 0 31) + pow2 248 * FStar.Old.Endianness.little_endian (slice s 31 32));
   FStar.Old.Endianness.lemma_little_endian_is_bounded (slice s 0 31);
-  Math.Lemmas.division_addition_lemma (Endianness.little_endian (slice s 0 31)) (pow2 248) (UInt8.v s31);
-  Math.Lemmas.small_division_lemma_1 (Endianness.little_endian (slice s 0 31)) (pow2 248)
+  Math.Lemmas.division_addition_lemma (FStar.Old.Endianness.little_endian (slice s 0 31)) (pow2 248) (UInt8.v s31);
+  Math.Lemmas.small_division_lemma_1 (FStar.Old.Endianness.little_endian (slice s 0 31)) (pow2 248)
 
 
 inline_for_extraction
@@ -40,18 +40,18 @@ val most_significant_bit:
   Stack UInt64.t
     (requires (fun h -> live h s))
     (ensures (fun h0 z h1 -> live h0 s /\ h1 == h0 /\
-      v z == (Endianness.little_endian (as_seq h0 s) / pow2 255) % 2))
+      v z == (FStar.Old.Endianness.little_endian (as_seq h0 s) / pow2 255) % 2))
 let most_significant_bit s =
   let h = ST.get() in
   let s31 = s.(31ul) in
   lemma_most_significant_bit (as_seq h s);
   assert(UInt8.v s31 = FStar.Old.Endianness.little_endian (as_seq h s) / pow2 248);
   let z   = FStar.UInt8.(s31 >>^ 7ul) in
-  Math.Lemmas.division_multiplication_lemma (Endianness.little_endian (as_seq h s)) (pow2 248) (pow2 7);
+  Math.Lemmas.division_multiplication_lemma (FStar.Old.Endianness.little_endian (as_seq h s)) (pow2 248) (pow2 7);
   Math.Lemmas.pow2_plus 248 7;
-  assert(UInt8.v z = (Endianness.little_endian (as_seq h s) / pow2 255));
+  assert(UInt8.v z = (FStar.Old.Endianness.little_endian (as_seq h s) / pow2 255));
   FStar.Old.Endianness.lemma_little_endian_is_bounded (as_seq h s);
-  Math.Lemmas.lemma_div_lt (Endianness.little_endian (as_seq h s)) 256 255;
+  Math.Lemmas.lemma_div_lt (FStar.Old.Endianness.little_endian (as_seq h s)) 256 255;
   assert_norm(pow2 1 = 2);
   Math.Lemmas.modulo_lemma (UInt8.v z) 2;
   Int.Cast.uint8_to_uint64 z

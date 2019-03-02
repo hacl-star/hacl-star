@@ -104,7 +104,7 @@ let store_56 out b =
   let h0 = ST.get() in
   hstore56_le out 0ul b0;
   let h1 = ST.get() in
-  (* assert(Endianness.little_endian (as_seq h1 (Buffer.sub out 0ul 7ul)) = v b0); *)
+  (* assert(FStar.Old.Endianness.little_endian (as_seq h1 (Buffer.sub out 0ul 7ul)) = v b0); *)
   hstore56_le out 7ul b1;
   let h2 = ST.get() in
   no_upd_lemma_1 h1 h2 (Buffer.sub out 7ul 8ul) (Buffer.sub out 0ul 7ul);
