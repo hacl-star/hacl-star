@@ -132,7 +132,7 @@ let gsub (#t:buftype) (#a:Type0) (#len:size_t) (b:lbuffer_t t a len)
 val live_sub: #t:buftype -> #a:Type0 -> #len:size_t -> b:lbuffer_t t a len
   -> start:size_t -> n:size_t{v start + v n <= v len} -> h:mem
   -> Lemma
-    (ensures live h b <==> live h (gsub b start n))
+    (ensures live h b ==> live h (gsub b start n))
     [SMTPat (live h (gsub b start n))]
 
 val modifies_sub: #t:buftype -> #a:Type0 -> #len:size_t -> b:lbuffer_t t a len
