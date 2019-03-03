@@ -475,3 +475,31 @@ let mapi #a #b h0 clen out spec_f f inp =
       let h1 = ST.get () in
       lemma_eq_disjoint clen clen out inp i h0 h1;
       let xi = inp.(i) in f i xi)
+
+#set-options "--z3rlimit 300"
+
+let map_blocks #t #a h0 len blocksize inp output spec_f spec_l impl_f impl_l =
+  let nb = len /. blocksize in
+  let rem = len %. blocksize in
+  let ob = sub output 0ul (nb *! blocksize) in
+  let h0 = ST.get() in
+  assert(Sequence.length (as_seq h0 inp) == v len);
+  assert(v len == v nb * v blocksize + v rem);
+  [@inline_let]
+  let a_spec = Sequence.fixed_a unit in
+  [@inline_let]
+  let refl h i = () in
+  [@inline_let]
+  let footprint (i:size_nat {i <= v nb}) : GTot (l:B.loc{B.loc_disjoint l (loc ob) /\
+			       B.address_liveness_insensitive_locs `B.loc_includes` l}) = B.loc_none in
+  [@inline_let]
+  let spec h : GTot (i:size_nat{i < v nb} -> unit -> unit & Seq.lseq a (v blocksize)) =
+    let iseq = as_seq h inp in
+    Sequence.map_blocks_inner (v blocksize) iseq (spec_f h) in
+  fill_blocks #a h0 blocksize nb ob a_spec refl footprint spec impl_f;
+  let h1 = ST.get() in
+  assert (
+    let s, o = Sequence.generate_blocks (v blocksize) (v nb) a_spec (spec h0) (refl h0 0) in
+    as_seq h1 (gsub output (size 0) (nb *! blocksize)) == o);
+  if (rem >. 0ul) then impl_l nb;
+  admit()

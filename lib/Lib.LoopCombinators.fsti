@@ -124,6 +124,20 @@ val repeat:
   -> acc0:a
   -> a
 
+val eq_repeat0:
+    #a:Type
+  -> f:(a -> a)
+  -> acc0:a
+  -> Lemma (repeat #a 0 f acc0 == acc0)
+
+val unfold_repeat:
+    #a:Type
+  -> n:nat
+  -> f:(a -> a)
+  -> acc0:a
+  -> i:nat{i < n}
+  -> Lemma (repeat #a (i + 1) f acc0 == f  (repeat #a i f acc0))
+
 val repeat_range:
   #a:Type
   -> min:nat

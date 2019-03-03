@@ -339,3 +339,12 @@ val generate_blocks:
   -> f:(i:nat{i < n} -> a i -> a (i + 1) & s:seq t{length s == len})
   -> init:a 0 ->
   Tot (a n & s:seq t{ length s == n * len})
+
+(** The following functions allow us to bridge between unbounded and bounded sequences *)
+val map_blocks:
+    #a:Type0
+  -> blocksize:size_nat{blocksize > 0}
+  -> inp:seq a
+  -> f:(i:nat{i < length inp / blocksize} -> lseq a blocksize -> lseq a blocksize)
+  -> g:(i:nat{i == length inp / blocksize} -> len:size_nat{len < blocksize} -> s:lseq a len -> lseq a len) ->
+  Tot (out:seq a {length out == length inp})

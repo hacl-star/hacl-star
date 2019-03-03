@@ -214,3 +214,16 @@ let generate_blocks_inner (t:Type) (blocklen:size_nat) (n:nat) (a:(i:nat{i <= n}
 let generate_blocks #t len n a f acc0 =
   let a0  = (acc0, (Seq.empty <: s:seq t{length s == 0 * len}))  in
   repeat_gen n (generate_blocks_a t len n a) (generate_blocks_inner t len n a f) a0
+
+let fixed_a a i = a
+let map_blocks_inner #a (bs:size_nat{bs > 0}) (inp:seq a) (f:(i:nat{i < length inp / bs} -> lseq a bs -> lseq a bs)) (i:nat{i < length inp / bs}) () =
+  (), f i (Seq.slice inp (i*bs) ((i+1)*bs))
+
+let map_blocks #a blocksize inp f g =
+  let len = length inp in
+  let nb = len / blocksize in
+  let rem = len % blocksize in
+  let _,bs = generate_blocks #a blocksize nb (fixed_a unit) (map_blocks_inner blocksize inp f) () in
+  if (rem > 0) then
+    Seq.append bs (g nb rem (Seq.slice inp (nb * blocksize) len))
+  else bs

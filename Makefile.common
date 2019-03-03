@@ -19,7 +19,7 @@ endif
 # TODO: no more separate variable definitions?
 LIB_DIR		= $(HACL_HOME)/lib
 SPECS_DIR 	= $(HACL_HOME)/specs $(HACL_HOME)/specs/derived $(HACL_HOME)/specs/tests
-CODE_DIRS	= $(addprefix $(HACL_HOME)/code/,hash sha3 poly1305 tests)
+CODE_DIRS	= $(addprefix $(HACL_HOME)/code/,hash sha3 poly1305 chacha20 tests)
 EVERCRYPT_DIRS  = $(addprefix $(HACL_HOME)/providers/,evercrypt evercrypt/fst test evercrypt/config/$(EVERCRYPT_CONFIG))
 MERKLE_DIRS	= $(HACL_HOME)/secure_api/merkle_tree
 # Vale dirs also include directories that only contain .vaf files
