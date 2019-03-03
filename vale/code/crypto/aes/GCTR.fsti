@@ -138,6 +138,15 @@ val gctr_partial_completed (alg:algorithm) (plain cipher:seq quad32) (key:seq na
   )
   (ensures cipher == gctr_encrypt_recursive icb plain alg key 0)
 
+val gctr_partial_opaque_completed (alg:algorithm) (plain cipher:seq quad32) (key:seq nat32) (icb:quad32) : Lemma
+  (requires
+    is_aes_key_LE alg key /\
+    length plain == length cipher /\
+    256 * (length plain) < pow2_32 /\
+    gctr_partial_opaque alg (length cipher) plain cipher key icb
+  )
+  (ensures cipher == gctr_encrypt_recursive icb plain alg key 0)
+
 val gctr_partial_to_full_basic (icb_BE:quad32) (plain:seq quad32) (alg:algorithm) (key:seq nat32) (cipher:seq quad32) : Lemma
   (requires
     is_aes_key_LE alg key /\

@@ -154,6 +154,18 @@ let gctr_partial_completed (alg:algorithm) (plain cipher:seq quad32) (key:seq na
   gctr_indexed icb plain alg key cipher;
   ()
 
+let gctr_partial_opaque_completed (alg:algorithm) (plain cipher:seq quad32) (key:seq nat32) (icb:quad32) : Lemma
+  (requires
+    is_aes_key_LE alg key /\
+    length plain == length cipher /\
+    256 * (length plain) < pow2_32 /\
+    gctr_partial_opaque alg (length cipher) plain cipher key icb
+  )
+  (ensures cipher == gctr_encrypt_recursive icb plain alg key 0)
+  =
+  reveal_opaque gctr_partial;
+  gctr_partial_completed alg plain cipher key icb
+
 let gctr_partial_to_full_basic (icb_BE:quad32) (plain:seq quad32) (alg:algorithm) (key:seq nat32) (cipher:seq quad32) =
   reveal_opaque gctr_encrypt_LE_def;
   let p = le_seq_quad32_to_bytes plain in
