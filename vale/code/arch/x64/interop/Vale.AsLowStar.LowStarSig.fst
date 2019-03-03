@@ -184,7 +184,12 @@ let taint_hyp (args:list arg) : VSig.sprop =
   fun s0 -> BigOps.big_and' (taint_hyp_arg s0.VS.mem s0.VS.memTaint) args
 
 [@__reduce__]
-let vale_pre_hyp (#max_arity:nat) (#arg_reg:IX64.arg_reg_relation max_arity) #n (sb:IX64.stack_buffer n) (args:IX64.arity_ok max_arity arg) : VSig.sprop =
+let vale_pre_hyp
+  (#max_arity:nat)
+  (#arg_reg:IX64.arg_reg_relation max_arity)
+  #n 
+  (sb:IX64.stack_buffer n) 
+  (args:IX64.arg_list) : VSig.sprop =
     fun s0 ->
       let s_args = arg_of_sb sb :: args in
       VSig.disjoint_or_eq s_args /\
@@ -198,7 +203,7 @@ let to_low_pre
     (#arg_reg:IX64.arg_reg_relation max_arity)
     (#n:IX64.max_slots)
     (pre:VSig.vale_pre_tl n [])
-    (args:IX64.arity_ok max_arity arg)
+    (args:IX64.arg_list)
     (hs_mem:mem_roots args)
   : prop =
   (forall (s0:V.va_state)
@@ -235,8 +240,8 @@ let create_initial_vale_state
        (#max_arity:nat)
        (#arg_reg:IX64.arg_reg_relation max_arity)
        (#n:IX64.max_slots)
-       (args:IX64.arity_ok max_arity arg)
-  : IX64.state_builder_t n args V.va_state =
+       (args:IX64.arg_list)
+  : IX64.state_builder_t max_arity n args V.va_state =
   fun h0 stack ->
     let t_state, mem = IX64.create_initial_trusted_state max_arity arg_reg n args Interop.down_mem h0 stack in
     let open VS in

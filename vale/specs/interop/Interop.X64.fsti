@@ -200,7 +200,7 @@ let rec taint_arg_args_b8_mem (args:arg_list) (a:arg)
       taint_arg_args_b8_mem tl a
 
 let rec mk_taint_equiv
-     (args:arg_list{disjoint_or_eq args})
+     (args:arg_list_sb{disjoint_or_eq args})
      (a:arg)
    : Lemma (List.memP a args /\ Some? (taint_of_arg a) ==>
             Some?.v (taint_of_arg a) == (mk_taint args init_taint) (taint_arg_b8 a))
