@@ -149,6 +149,28 @@ let rec register_args (max_arity:nat)
          else VS.eval_reg (arg_reg.IX64.of_arg (n - 1)) s == arg_as_nat64 hd s)
 
 [@__reduce__]
+let rec stack_args (max_arity:nat)
+                   (num_b8_slots:IX64.max_slots)
+                   (n:nat)
+                   (args:list arg{List.Tot.length args = n})
+                   (stack_b:IX64.stack_buffer num_b8_slots
+                      {B.length stack_b >= num_b8_slots/8 + (List.Tot.length args - max_arity) + 5 })
+                   : VSig.sprop =
+    match args with
+    | [] -> (fun s -> True)
+    | hd::tl ->
+      fun s ->
+        stack_args max_arity num_b8_slots (n - 1) tl stack_b s /\
+        (if n <= max_arity then True // This arg is passed in registers
+         else 
+           let i = (n - max_arity) - 1
+             + (if IA.win then 4 else 0)
+             + 1
+             + num_b8_slots/8
+           in
+           ME.buffer_read (as_vale_buffer stack_b) i s.VS.mem == arg_as_nat64 hd s)
+
+[@__reduce__]
 let taint_hyp_arg (m:ME.mem) (tm:MS.memTaint_t) (a:arg) =
    let (| tag, x |) = a in
     match tag with
@@ -188,13 +210,16 @@ let vale_pre_hyp
   (#max_arity:nat)
   (#arg_reg:IX64.arg_reg_relation max_arity)
   #n 
-  (sb:IX64.stack_buffer n) 
-  (args:IX64.arg_list) : VSig.sprop =
+  (args:IX64.arg_list)
+  (sb:IX64.stack_buffer n
+    {B.length sb >= n/8 + (List.Tot.length args - max_arity) + 5 })  
+  : VSig.sprop =
     fun s0 ->
       let s_args = arg_of_sb sb :: args in
       VSig.disjoint_or_eq s_args /\
       VSig.readable s_args VS.(s0.mem) /\
       register_args max_arity arg_reg (List.length args) args s0 /\
+      stack_args max_arity n (List.length args) args sb s0 /\
       taint_hyp args s0
 
 [@__reduce__]
@@ -207,9 +232,10 @@ let to_low_pre
     (hs_mem:mem_roots args)
   : prop =
   (forall (s0:V.va_state)
-     (sb:IX64.stack_buffer n).
+     (sb:IX64.stack_buffer n
+       {B.length sb >= n/8 + (List.Tot.length args - max_arity) + 5 }).
     V.va_get_ok s0 /\
-    vale_pre_hyp #max_arity #arg_reg #n sb args s0 /\
+    vale_pre_hyp #max_arity #arg_reg #n args sb s0 /\
     mem_correspondence args hs_mem s0 /\
     V.valid_stack_slots s0.VS.mem (VS.eval_reg MS.Rsp s0) (as_vale_buffer sb) (n / 8) s0.VS.memTaint ==>
     elim_nil pre s0 sb)

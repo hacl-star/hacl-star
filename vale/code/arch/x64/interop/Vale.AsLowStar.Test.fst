@@ -27,7 +27,7 @@ let t64_no_mod = TD_Buffer TUInt8 TUInt64 ({modified=false; strict_disjointness=
 let t64_imm = TD_ImmBuffer TUInt8 TUInt64 ({modified=false; strict_disjointness=false; taint=MS.Secret})
 
 [@__reduce__]
-let dom : IX64.arity_ok_stdcall td =
+let (dom : list td{List.length dom <= 20}) =
   let y = [t64_mod;t64_imm] in
   assert_norm (List.length y = 2);
   y
@@ -39,8 +39,12 @@ assume val v: VSig.vale_sig_stdcall pre post
 assume val c: V.va_code
 
 [@__reduce__]
-let call_c_t = IX64.as_lowstar_sig_t_weak IX64.max_stdcall IX64.arg_reg_stdcall IX64.regs_modified_stdcall IX64.xmms_modified_stdcall Interop.down_mem c n dom [] _ _ (W.mk_prediction c dom [] (v c IA.win))
-let call_c : call_c_t = IX64.wrap_weak IX64.max_stdcall IX64.arg_reg_stdcall IX64.regs_modified_stdcall IX64.xmms_modified_stdcall Interop.down_mem c n dom (W.mk_prediction c dom [] (v c IA.win))
+let call_c_t = IX64.as_lowstar_sig_t_weak_stdcall Interop.down_mem c n dom [] _ _ (W.mk_prediction c dom [] (v c IA.win))
+
+
+let call_c : call_c_t = IX64.wrap_weak_stdcall
+  Interop.down_mem c n dom (W.mk_prediction c dom [] (v c IA.win))
+
 let call_c_normal_t : normal call_c_t = as_normal_t #call_c_t call_c
 //You can ask emacs to show you the type of call_c_normal_t ...
 
@@ -49,7 +53,7 @@ let call_c_normal_t : normal call_c_t = as_normal_t #call_c_t call_c
 module VM = Test.Vale_memcpy
 
 [@__reduce__]
-let vm_dom = dom
+let vm_dom = [t64_mod; t64_imm]
 open X64.MemoryAdapters
 (* Need to rearrange the order of arguments *)
 [@__reduce__]
@@ -311,3 +315,137 @@ let aesni_test ()
   x
    
 
+module TA = Test.Args
+
+[@__reduce__]
+let (ta_dom:list td{List.length ta_dom <= 20}) =
+  let y = [t64_imm; t64_imm; t64_imm; t64_imm; t64_imm; t64_imm; t64_imm; t64_imm] in
+  assert_norm (List.length y = 8);
+  y
+
+(* Need to rearrange the order of arguments *)
+[@__reduce__]
+let ta_pre : VSig.vale_pre 8 ta_dom =
+  fun (c:V.va_code)
+    (arg0:ib64)
+    (arg1:ib64)
+    (arg2:ib64)
+    (arg3:ib64)
+    (arg4:ib64)
+    (arg5:ib64)
+    (arg6:ib64)
+    (arg7:ib64)
+    (va_s0:V.va_state)    
+    (sb:IX64.stack_buffer 8) ->
+      TA.va_req_test c va_s0 IA.win (as_vale_buffer sb) 
+      (as_vale_immbuffer arg0)
+      (as_vale_immbuffer arg1)
+      (as_vale_immbuffer arg2)
+      (as_vale_immbuffer arg3)
+      (as_vale_immbuffer arg4)
+      (as_vale_immbuffer arg5)
+      (as_vale_immbuffer arg6)
+      (as_vale_immbuffer arg7)      
+
+[@__reduce__]
+let ta_post : VSig.vale_post 8 ta_dom =
+  fun (c:V.va_code)
+    (arg0:ib64)
+    (arg1:ib64)
+    (arg2:ib64)
+    (arg3:ib64)
+    (arg4:ib64)
+    (arg5:ib64)
+    (arg6:ib64)
+    (arg7:ib64)  
+    (va_s0:V.va_state)
+    (sb:IX64.stack_buffer 8)
+    (va_s1:V.va_state)
+    (f:V.va_fuel) ->
+      TA.va_ens_test c va_s0 IA.win (as_vale_buffer sb) 
+      (as_vale_immbuffer arg0)
+      (as_vale_immbuffer arg1)
+      (as_vale_immbuffer arg2)
+      (as_vale_immbuffer arg3)
+      (as_vale_immbuffer arg4)
+      (as_vale_immbuffer arg5)
+      (as_vale_immbuffer arg6)
+      (as_vale_immbuffer arg7)      
+      va_s1 f
+    
+#set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit_factor 4"
+(* The vale lemma doesn't quite suffice to prove the modifies clause
+   expected of the interop layer *)
+[@__reduce__] unfold
+let ta_lemma'
+    (code:V.va_code)
+    (_win:bool)
+    (arg0:ib64)
+    (arg1:ib64)
+    (arg2:ib64)
+    (arg3:ib64)
+    (arg4:ib64)
+    (arg5:ib64)
+    (arg6:ib64)
+    (arg7:ib64)     
+    (va_s0:V.va_state)
+    (sb:IX64.stack_buffer 8)
+ : Ghost (V.va_state & V.va_fuel)
+     (requires
+       ta_pre code arg0 arg1 arg2 arg3 arg4 arg5 arg6 arg7 va_s0 sb)
+     (ensures (fun (va_s1, f) ->
+       V.eval_code code va_s0 f va_s1 /\
+       VSig.vale_calling_conventions_stdcall va_s0 va_s1 /\
+       ta_post code arg0 arg1 arg2 arg3 arg4 arg5 arg6 arg7 va_s0 sb va_s1 f /\
+       ME.buffer_readable VS.(va_s1.mem) (as_vale_immbuffer arg0) /\
+       ME.buffer_readable VS.(va_s1.mem) (as_vale_immbuffer arg1) /\
+       ME.buffer_readable VS.(va_s1.mem) (as_vale_immbuffer arg2) /\
+       ME.buffer_readable VS.(va_s1.mem) (as_vale_immbuffer arg3) /\
+       ME.buffer_readable VS.(va_s1.mem) (as_vale_immbuffer arg4) /\
+       ME.buffer_readable VS.(va_s1.mem) (as_vale_immbuffer arg5) /\
+       ME.buffer_readable VS.(va_s1.mem) (as_vale_immbuffer arg6) /\
+       ME.buffer_readable VS.(va_s1.mem) (as_vale_immbuffer arg7) /\       
+       ME.modifies (ME.loc_buffer (as_vale_buffer sb)) va_s0.VS.mem va_s1.VS.mem))
+ = 
+ let va_s1, f = TA.va_lemma_test code va_s0 IA.win (as_vale_buffer sb)
+      (as_vale_immbuffer arg0)
+      (as_vale_immbuffer arg1)
+      (as_vale_immbuffer arg2)
+      (as_vale_immbuffer arg3)
+      (as_vale_immbuffer arg4)
+      (as_vale_immbuffer arg5)
+      (as_vale_immbuffer arg6)
+      (as_vale_immbuffer arg7)
+    in
+    va_s1, f
+
+(* Prove that vm_lemma' has the required type *)
+let ta_lemma = as_t #(VSig.vale_sig_stdcall ta_pre ta_post) ta_lemma'
+
+let code_ta = TA.va_code_test IA.win
+
+(* Here's the type expected for the check_aesni wrapper *)
+[@__reduce__]
+let lowstar_ta_t =
+  IX64.as_lowstar_sig_t_weak_stdcall
+    Interop.down_mem
+    (coerce code_ta)
+    8
+    ta_dom
+    []
+    _
+    _
+    (W.mk_prediction code_ta ta_dom [] (ta_lemma code_ta IA.win))
+
+(* And here's the check_aesni wrapper itself *)
+let lowstar_ta : lowstar_ta_t  =
+  IX64.wrap_weak_stdcall
+    Interop.down_mem
+    (coerce code_ta)
+    8
+    ta_dom
+    (W.mk_prediction code_ta ta_dom [] (ta_lemma code_ta IA.win))
+
+let lowstar_ta_normal_t //: normal lowstar_aesni_t
+  = as_normal_t #lowstar_ta_t lowstar_ta
+  

@@ -378,7 +378,24 @@ let rec stack_of_args_equal_domains
       B.g_upd_seq_as_seq stack_b (Seq.upd (B.as_seq h stack_b) i v) h;
       let h1 = B.g_upd stack_b i v h in
       stack_of_args_equal_domains max_arity (n-1) tl stack_b h1
-      
+
+let core_create_lemma_stack_args
+    (#max_arity:nat)
+    (#arg_reg:IX64.arg_reg_relation max_arity)
+    #n
+    (args:IX64.arg_list)
+    (h0:HS.mem)
+    (stack:IX64.stack_buffer n{
+      B.length stack >= n/8 + (List.Tot.length args - max_arity) + 5 /\    
+      mem_roots_p h0 (arg_of_sb stack::args)})
+  : Lemma
+      (ensures (let va_s = LSig.create_initial_vale_state #max_arity #arg_reg args h0 stack in
+                LSig.stack_args max_arity n (List.length args) args stack va_s))
+  =
+    let va_s = LSig.create_initial_vale_state #max_arity #arg_reg args h0 stack in
+    admit()
+
+
 let core_create_lemma
     (#max_arity:nat)
     (#arg_reg:IX64.arg_reg_relation max_arity)
@@ -395,7 +412,7 @@ let core_create_lemma
          LSig.mem_correspondence args h0 va_s /\
          VSig.disjoint_or_eq (arg_of_sb stack :: args) /\
          VSig.readable args VS.(va_s.mem) /\
-         LSig.vale_pre_hyp #max_arity #arg_reg stack args va_s /\
+         LSig.vale_pre_hyp #max_arity #arg_reg args stack va_s /\
          ST.equal_domains h0 (hs_of_mem (as_mem va_s.VS.mem)) /\
          V.valid_stack_slots
                 va_s.VS.mem
@@ -404,13 +421,14 @@ let core_create_lemma
                 (n / 8)
                 va_s.VS.memTaint
   ))
-  =
+  =  
   let va_s = LSig.create_initial_vale_state #max_arity #arg_reg args h0 stack in
     core_create_lemma_mem_correspondance #max_arity #arg_reg args h0 stack;
     core_create_lemma_disjointness (arg_of_sb stack :: args);
     core_create_lemma_readable #max_arity #arg_reg args h0 stack;
     core_create_lemma_readable2 #max_arity #arg_reg args h0 stack;
     core_create_lemma_register_args #max_arity #arg_reg args h0 stack;
+    core_create_lemma_stack_args #max_arity #arg_reg args h0 stack;
     Vale.AsLowStar.MemoryHelpers.core_create_lemma_taint_hyp #max_arity #arg_reg args h0 stack;
     core_create_lemma_state #max_arity #arg_reg args h0 stack;
     Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 stack;
@@ -420,7 +438,8 @@ let core_create_lemma
     IX64.live_arg_modifies h0 h1 args stack;           
     Vale.AsLowStar.MemoryHelpers.buffer_addr_reveal _ _ stack (arg_of_sb stack :: args) h1;
     DV.length_eq (get_downview stack);
-    Vale.AsLowStar.MemoryHelpers.as_vale_buffer_len stack
+    Vale.AsLowStar.MemoryHelpers.as_vale_buffer_len stack;
+    FStar.Math.Lemmas.lemma_div_le n (B.length stack * 8) 8
 
 let rec frame_mem_correspondence_back
        (args:list arg)
@@ -610,7 +629,7 @@ let vale_lemma_as_prediction
        frame_mem_correspondence_back args h0 alloc_push_h0 va_s0 B.loc_none;
        assert (LSig.mem_correspondence args h0 va_s0);
        assert (va_s0.VS.ok);
-       assert (LSig.vale_pre_hyp #max_arity #arg_reg sb args va_s0);
+       assert (LSig.vale_pre_hyp #max_arity #arg_reg args sb va_s0);
        assert (elim_nil pre va_s0 sb);
        let va_s1, f = VSig.elim_vale_sig_nil v va_s0 sb in
        assert (V.eval_code code va_s0 f va_s1);
