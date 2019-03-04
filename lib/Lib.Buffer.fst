@@ -99,7 +99,7 @@ let update_sub #t #a #len dst start n src =
 let update_sub_f #a #len h0 buf start n spec f =
   let tmp = sub buf start n in
   let h0 = ST.get () in
-  f tmp;
+  f ();
   let h1 = ST.get () in
   assert (v (len -! (start +! n)) == v len - v (start +! n));
   B.modifies_buffer_elim (B.gsub #a buf 0ul start) (loc tmp) h0 h1;

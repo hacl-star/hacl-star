@@ -351,15 +351,9 @@ val storeState_inner:
 let storeState_inner s j block =
   let sj = s.(j) in
   let h0 = ST.get () in
-  [@ inline_let]
-  let spec h0 = Lib.ByteSequence.uint_to_bytes_le sj in
-  let impl (b:lbuffer uint8 8ul) : Stack unit
-    (requires fun h -> h0 == h /\ live h b)
-    (ensures  fun h0 _ h1 ->
-      modifies (loc b) h0 h1 /\
-      as_seq h1 b == spec h0)
-    = uint_to_bytes_le #U64 b sj in
-  update_sub_f h0 block (j *! 8ul) 8ul spec impl
+  update_sub_f h0 block (j *! 8ul) 8ul
+    (fun h -> Lib.ByteSequence.uint_to_bytes_le sj)
+    (fun _ -> uint_to_bytes_le #U64 (sub block (j *! 8ul) 8ul) sj)
 
 val storeState:
     rateInBytes:size_t{v rateInBytes <= 200}
@@ -490,7 +484,7 @@ let squeeze_inner rateInBytes outputByteLen s output i =
   storeState rateInBytes s output;
   state_permute s
 
-#reset-options "--z3rlimit 150 --max_fuel 1 --max_ifuel 1"
+#reset-options "--z3rlimit 300 --max_fuel 1 --max_ifuel 1"
 
 val squeeze:
     s:state

@@ -79,25 +79,23 @@ val chacha20_init: ctx:state -> k:lbuffer uint8 32ul -> n:lbuffer uint8 12ul -> 
 		  (requires (fun h -> live h ctx /\ live h k /\ live h n /\ disjoint ctx k /\ disjoint ctx n /\ as_seq h ctx == Lib.Sequence.create 16 (u32 0)))
 		  (ensures (fun h0 _ h1 -> modifies (loc ctx) h0 h1 /\
 			   as_seq h1 ctx == Spec.chacha20_init (as_seq h0 k) (as_seq h0 n) (v ctr0)))
-
-#set-options "--z3rlimit 300"
 [@ CInline]
 let chacha20_init ctx k n ctr =
     let h0 = ST.get() in
     recall_contents chacha20_constants Spec.chacha20_constants;
     update_sub_f h0 ctx 0ul 4ul
       (fun h -> Lib.Sequence.map secret Spec.chacha20_constants)
-      (fun b -> mapT 4ul b secret chacha20_constants);
+      (fun _ -> mapT 4ul (sub ctx 0ul 4ul) secret chacha20_constants);
     let h1 = ST.get() in
     update_sub_f h1 ctx 4ul 8ul
       (fun h -> Lib.ByteSequence.uints_from_bytes_le (as_seq h k))
-      (fun b -> admit(); uints_from_bytes_le b k);
+      (fun _ -> uints_from_bytes_le (sub ctx 4ul 8ul) k);
     let h2 = ST.get() in
     ctx.(12ul) <- size_to_uint32 ctr;
     let h3 = ST.get() in
     update_sub_f h3 ctx 13ul 3ul
       (fun h -> Lib.ByteSequence.uints_from_bytes_le (as_seq h n))
-      (fun b -> admit (); uints_from_bytes_le b n);
+      (fun _ -> uints_from_bytes_le (sub ctx 13ul 3ul) n);
     let h4 = ST.get() in
     assert (as_seq h4 ctx == Spec.setup (as_seq h0 k) (as_seq h0 n) (v ctr) (as_seq h0 ctx));
     ()
