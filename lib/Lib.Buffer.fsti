@@ -363,13 +363,16 @@ val update_sub_f:
   -> start:size_t
   -> n:size_t{v start + v n <= v len}
   -> spec:(mem -> GTot (Seq.lseq a (v n)))
-  -> f:(b:lbuffer a n -> Stack unit
-      (requires fun h -> h0 == h /\ live h b)
-      (ensures  fun h0 _ h1 -> modifies1 b h0 h1 /\ as_seq h1 b == spec h0)) ->
+  -> f:(unit -> Stack unit
+      (requires fun h -> h0 == h)
+      (ensures  fun h0 _ h1 ->
+       (let b = gsub buf start n in
+       modifies (loc b) h0 h1 /\
+       as_seq h1 b == spec h0))) ->
   Stack unit
     (requires fun h -> h0 == h /\ live h buf)
     (ensures  fun h0 _ h1 ->
-      modifies1 buf h0 h1 /\
+      modifies (loc buf) h0 h1 /\
       as_seq h1 buf == Seq.update_sub #a #(v len) (as_seq h0 buf) (v start) (v n) (spec h0))
 
 (** Copy two buffers one after the other into a mutable buffer *)

@@ -10,9 +10,9 @@ open Lib.IntVector
 module Spec = Hacl.Spec.Chacha20.Vec
 open FStar.Mul
 
-open LowStar.Modifies.Linear
 
-#reset-options "--using_facts_from '* -LowStar.Monotonic.Buffer.modifies_trans -FStar.Seq'"
+
+#reset-options "--using_facts_from '* -FStar.Seq'"
 
 let lanes = Spec.lanes
 

@@ -22,7 +22,7 @@ let create_state () = create (size 16) (u32 0)
 
 inline_for_extraction
 val load_state: st:state -> b:lbuffer uint8 64ul -> ST unit
-		  (requires (fun h -> live h st /\ live h b))
+		  (requires (fun h -> live h st /\ live h b /\ disjoint st b))
    		  (ensures (fun h0 _ h1 -> modifies (loc st) h0 h1 /\
 			   as_seq h1 st == Lib.ByteSequence.uints_from_bytes_le (as_seq h0 b)))
 let load_state st b =
@@ -30,7 +30,7 @@ let load_state st b =
 
 inline_for_extraction
 val store_state: b:lbuffer uint8 64ul -> st:state -> ST unit
-		  (requires (fun h -> live h st /\ live h b))
+		  (requires (fun h -> live h st /\ live h b /\ disjoint st b))
    		  (ensures (fun h0 _ h1 -> modifies (loc b) h0 h1 /\
 		    as_seq h1 b == Lib.ByteSequence.uints_to_bytes_le (as_seq h0 st)))
 let store_state st b =

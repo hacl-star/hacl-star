@@ -99,7 +99,7 @@ let update_sub #t #a #len dst start n src =
 let update_sub_f #a #len h0 buf start n spec f =
   let tmp = sub buf start n in
   let h0 = ST.get () in
-  f tmp;
+  f ();
   let h1 = ST.get () in
   assert (v (len -! (start +! n)) == v len - v (start +! n));
   B.modifies_buffer_elim (B.gsub #a buf 0ul start) (loc tmp) h0 h1;
@@ -437,7 +437,7 @@ let lemma_eq_disjoint #t2 #a1 #a2 clen1 clen2 b1 b2 n h0 h1 =
   assert (disjoint b1 b2 ==> Seq.equal (as_seq h0 b2) (as_seq h1 b2));
   assert (disjoint b1 b2 ==> Seq.equal (as_seq h0 b2s) (as_seq h1 b2s));
   assert (Seq.index (as_seq h1 b2) (v n) == Seq.index (as_seq h1 (gsub b2 n (clen2 -! n))) 0)
-         
+
 
 #set-options "--z3rlimit 50 --max_fuel 0"
 
@@ -483,9 +483,9 @@ let mapi #a #b h0 clen out spec_f f inp =
       let xi = inp.(i) in f i xi)
 
 #set-options "--z3rlimit 1000 --max_fuel 3"
-let map_blocks_multi #t #a h0 len blocksize inp output spec_f impl_f = 
+let map_blocks_multi #t #a h0 len blocksize inp output spec_f impl_f =
   let nb = len /. blocksize in
-  let h0 = ST.get() in 			
+  let h0 = ST.get() in
   assert(Sequence.length (as_seq h0 inp) == v len);
   assert(v len == v nb * v blocksize);
   [@inline_let]
@@ -494,9 +494,9 @@ let map_blocks_multi #t #a h0 len blocksize inp output spec_f impl_f =
   let refl h i = () in
   [@inline_let]
   let footprint (i:size_nat {i <= v  nb}) : GTot (l:B.loc{B.loc_disjoint l (loc output) /\
-			       B.address_liveness_insensitive_locs `B.loc_includes` l}) = B.loc_none in			
+			       B.address_liveness_insensitive_locs `B.loc_includes` l}) = B.loc_none in
   [@inline_let]
-  let spec h : GTot (i:size_nat{i < v nb} -> unit -> unit & Seq.lseq a (v blocksize)) = 
+  let spec h : GTot (i:size_nat{i < v nb} -> unit -> unit & Seq.lseq a (v blocksize)) =
     let iseq = as_seq h inp in
     Sequence.map_blocks_inner (v blocksize) iseq (spec_f h) in
   fill_blocks #a h0 blocksize nb output a_spec refl footprint spec impl_f;
