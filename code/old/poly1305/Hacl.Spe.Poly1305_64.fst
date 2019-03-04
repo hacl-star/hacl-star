@@ -8,7 +8,7 @@ open FStar.Mul
 open FStar.Ghost
 open FStar.Seq
 open FStar.Seq
-open FStar.Endianness
+open FStar.Old.Endianness
 open FStar.Int.Cast
 
 open Hacl.Cast
@@ -469,5 +469,5 @@ val crypto_onetimeauth_spec:
 let crypto_onetimeauth_spec input len k =
   let acc = poly1305_complete input len k in
   let mac = poly1305_finish_spec' acc (slice k 16 32) in
-  FStar.Endianness.lemma_little_endian_inj (reveal_sbytes mac) (poly1305 (reveal_sbytes input) (reveal_sbytes k));
+  FStar.Old.Endianness.lemma_little_endian_inj (reveal_sbytes mac) (poly1305 (reveal_sbytes input) (reveal_sbytes k));
   mac

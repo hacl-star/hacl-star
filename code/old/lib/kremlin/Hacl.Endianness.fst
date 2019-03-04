@@ -4,7 +4,7 @@ module ST = FStar.HyperStack.ST
 
 open FStar.HyperStack.All
 
-open FStar.Endianness
+open FStar.Old.Endianness
 open Hacl.Spec.Endianness
 open FStar.Buffer
 

@@ -1,4 +1,4 @@
-module FStar.Endianness
+module FStar.Old.Endianness
 
 module ST = FStar.HyperStack.ST
 

@@ -185,7 +185,7 @@ let pad (prevlen:nat{prevlen % block_length = 0}) (len:nat{prevlen + len < max_i
   let tlen = prevlen + len in
   let firstbyte = Seq.create 1 0x80uy in
   let zeros = Seq.create (pad0_length len) 0uy in
-  let encodedlen = Endianness.big_bytes len_len (tlen * 8) in
+  let encodedlen = FStar.Old.Endianness.big_bytes len_len (tlen * 8) in
   firstbyte @| zeros @| encodedlen
 
 

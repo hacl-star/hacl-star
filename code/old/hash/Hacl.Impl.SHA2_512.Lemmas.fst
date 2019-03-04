@@ -192,9 +192,9 @@ let lemma_eq_endianness (h:HyperStack.mem) (buf:uint8_p{length buf = 16}) (n:uin
              Hacl.Spec.Endianness.hbig_endian seq_buf = (H128.v n))))
   (ensures  (live h buf /\
             (let seq_buf = reveal_sbytes (as_seq h buf) in
-            seq_buf == Endianness.big_bytes 16ul (H128.v n)))) =
-  Endianness.lemma_big_endian_inj (Endianness.big_bytes 16ul (H128.v n)) (reveal_sbytes (as_seq h buf));
-  Seq.lemma_eq_intro (reveal_sbytes (as_seq h buf)) (Endianness.big_bytes 16ul (H128.v n))
+            seq_buf == FStar.Old.Endianness.big_bytes 16ul (H128.v n)))) =
+  FStar.Old.Endianness.lemma_big_endian_inj (FStar.Old.Endianness.big_bytes 16ul (H128.v n)) (reveal_sbytes (as_seq h buf));
+  Seq.lemma_eq_intro (reveal_sbytes (as_seq h buf)) (FStar.Old.Endianness.big_bytes 16ul (H128.v n))
 
 
 #reset-options "--max_fuel 0  --z3rlimit 100"
@@ -246,7 +246,7 @@ Seq.lemma_eq_intro (as_seq h g) (Seq.append (Seq.append seq_a seq_b) seq_c)
 let lemma_pad_aux_seq (n:uint64_ht) (len:uint64_t {(U64.v len + v len_length + 1) <= (2 * v block_length) /\ H64.v n * v block_length + U64.v len < Spec.max_input_len_8}) (a:Seq.seq UInt8.t) (b:Seq.seq UInt8.t) (c:Seq.seq UInt8.t) : Lemma
   (requires (a == Seq.create 1 0x80uy
             /\ (b == Seq.create (Spec.pad0_length (U64.v len)) 0uy)
-            /\ (c == Endianness.big_bytes len_length ((H64.v n * v block_length + U64.v len) * 8))))
+            /\ (c == FStar.Old.Endianness.big_bytes len_length ((H64.v n * v block_length + U64.v len) * 8))))
   (ensures  (Seq.append (Seq.append a b) c == Spec.pad (H64.v n * v block_length) (U64.v len))) =
 Seq.lemma_eq_intro (Seq.append (Seq.append a b) c) (Seq.append a (Seq.append b c))
 
@@ -260,7 +260,7 @@ let lemma_pad_aux (h:HyperStack.mem) (n:uint64_ht) (len:uint64_t {(U64.v len + v
             let seq_c = reveal_sbytes (as_seq h c) in
             seq_a == Seq.create 1 0x80uy
             /\ (seq_b == Seq.create (Spec.pad0_length (U64.v len)) 0uy)
-            /\ (seq_c == Endianness.big_bytes len_length ((H64.v n * v block_length + U64.v len) * 8)))))
+            /\ (seq_c == FStar.Old.Endianness.big_bytes len_length ((H64.v n * v block_length + U64.v len) * 8)))))
   (ensures  (live h a /\ live h b /\ live h c
             /\ (let seq_a = reveal_sbytes (as_seq h a) in
             let seq_b = reveal_sbytes (as_seq h b) in

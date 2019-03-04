@@ -508,9 +508,9 @@ let finish #i s a t =
     pop_frame();
     let h1 = ST.get() in
     Buffer.modifies_popped_3_2 a t h0 h h'' h1;
-    cut (FStar.Endianness.little_endian (as_seq h1 t) = ((PS_.selem (as_seq h0 a)) + FStar.Endianness.little_endian (as_seq h0 s)) % pow2 128);
-    cut (FStar.Endianness.little_endian (as_seq h1 t) = ((PS_.selem (as_seq h0 a)) + FStar.Endianness.little_endian (as_seq h0 s)) % pow2 128);
-    FStar.Endianness.lemma_little_endian_inj (Buffer.as_seq h1 t) (Spec.Poly1305.finish (PS_.selem (as_seq h0 a)) (as_seq h0 s))
+    cut (FStar.Old.Endianness.little_endian (as_seq h1 t) = ((PS_.selem (as_seq h0 a)) + FStar.Old.Endianness.little_endian (as_seq h0 s)) % pow2 128);
+    cut (FStar.Old.Endianness.little_endian (as_seq h1 t) = ((PS_.selem (as_seq h0 a)) + FStar.Old.Endianness.little_endian (as_seq h0 s)) % pow2 128);
+    FStar.Old.Endianness.lemma_little_endian_inj (Buffer.as_seq h1 t) (Spec.Poly1305.finish (PS_.selem (as_seq h0 a)) (as_seq h0 s))
   | GHASH ->
     let a' : Buffer.buffer UInt128.t = a in
     assume (Buffer.disjoint a' s);

@@ -111,7 +111,7 @@ let rec uint32s_to_le_bytes output input len =
     Spec.Lib.lemma_uint32s_to_le_def_1 (UInt32.v i + 1) (reveal_h32s (Seq.slice (as_seq h0 input) 0 (v i + 1)));
     Seq.lemma_eq_intro (Seq.slice (as_seq h0 input) 0 (v i))
                        (Seq.slice (Seq.slice (as_seq h0 input) 0 (v i + 1)) 0 (v i));
-    FStar.Endianness.lemma_little_endian_inj (Seq.slice (reveal_sbytes (as_seq h' output)) (4 * v i) (4 * v i + 4))
+    FStar.Old.Endianness.lemma_little_endian_inj (Seq.slice (reveal_sbytes (as_seq h' output)) (4 * v i) (4 * v i + 4))
                                              (Spec.Lib.uint32_to_le (h32_to_u32 hd));
     Seq.lemma_eq_intro (reveal_sbytes (Seq.slice (as_seq h' output) 0 (4 * v i + 4)))
                        (Spec.Lib.uint32s_to_le (v i + 1) (reveal_h32s (Seq.slice (as_seq h0 input) 0 (v i + 1))))
