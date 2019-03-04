@@ -146,10 +146,10 @@ let rec stack_of_args (#num_b8_slots:_)
         + 1 // The return address is then pushed on the stack
         + num_b8_slots / 8 // And we then have all the extra slots required for the Vale procedure
       in
+      let h1 = stack_of_args max_arity (n-1) tl stack_b h in
       let v = UInt64.uint_to_t (arg_as_nat64 hd) in // We will store the arg hd
-      B.g_upd_seq_as_seq stack_b (Seq.upd (B.as_seq h stack_b) i v) h;
-      let h1 = B.g_upd stack_b i v h in
-      stack_of_args max_arity (n-1) tl stack_b h1
+      B.g_upd_seq_as_seq stack_b (Seq.upd (B.as_seq h1 stack_b) i v) h1;
+      B.g_upd stack_b i v h1
 
 ////////////////////////////////////////////////////////////////////////////////
 let taint_map = b8 -> GTot MS.taint
