@@ -15,7 +15,7 @@ include EverCrypt.Hash
 include EverCrypt.HMAC
 include EverCrypt.HKDF
 include EverCrypt.Poly1305
-include EverCrypt.Ciphers
+include EverCrypt.Cipher
 
 /// Legacy, deprecated
 /// ------------------
