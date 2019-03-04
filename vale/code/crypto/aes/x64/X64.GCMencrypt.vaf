@@ -944,11 +944,11 @@ procedure {:quick} gcm_encrypt_stdcall(
 
 
 // Take arguments in registers and the stack, instead of via an in-memory struct
-procedure {:quick} gcm_encrypt2_stdcall(
+procedure {:quick}{:public}{:exportSpecs} gcm_encrypt2_stdcall(
     inline win:bool,
-    ghost stack_b:buffer64,
-
     inline alg:algorithm,
+
+    ghost stack_b:buffer64,
 
     ghost plain_b:buffer128,
     ghost plain_num_bytes:nat64,

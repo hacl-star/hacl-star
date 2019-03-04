@@ -439,7 +439,7 @@ obj/Fmul_inline.fst.checked: \
 obj/Fsqr_inline.fst.checked: \
   FSTAR_FLAGS=$(VALE_FSTAR_FLAGS)
 
-obj/Vale.Stdcalls.%.checked: \
+obj/Vale.Stdcalls.GCMencrypt.fst.checked: \
   FSTAR_FLAGS=$(VALE_FSTAR_FLAGS)
 
 hints:
@@ -620,6 +620,7 @@ DEFAULT_FLAGS		=\
   -library 'Vale.Stdcalls.Fsqr' \
   -library 'Vale.Stdcalls.Fsub' \
   -library 'Vale.Stdcalls.Fswap' \
+  -library 'Vale.Stdcalls.GCMencrypt' \
   -library 'Vale.Stdcalls.Poly' \
   -library 'Vale.Stdcalls.Sha' \
   -library 'Fadd_inline' \
@@ -632,6 +633,7 @@ DEFAULT_FLAGS		=\
   -no-prefix 'Vale.Stdcalls.Fsqr' \
   -no-prefix 'Vale.Stdcalls.Fsub' \
   -no-prefix 'Vale.Stdcalls.Fswap' \
+  -no-prefix 'Vale.Stdcalls.GCMencrypt' \
   -no-prefix 'Vale.Stdcalls.Poly' \
   -no-prefix 'Vale.Stdcalls.Sha' \
   -no-prefix 'Fadd_inline' \
