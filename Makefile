@@ -14,6 +14,7 @@
 # This Makefile honors the following variables:
 # - NOSHORTLOG=1 disables pretty (short) logs
 # - NODEPEND=1 disables .depend re-generation (use for debugging only)
+# - SKIPDEPEND=1 disables even *including* .depend files (use for debugging only)
 # - NOOPENSSLCHECK=1 disables OpenSSL libcrypto.a checks (useful for verifying files
 #   only, or for non-OpenSSL configurations)
 # - EVERCRYPT_CONFIG allows switching EverCrypt static configurations; when
@@ -630,10 +631,13 @@ DEFAULT_FLAGS		=\
   -no-prefix 'MerkleTree.New.Low.Serialization' \
   -fparentheses -fno-shadow -fcurly-braces
 
+# No API for the Chacha20 bundle (yet). This would cause a name conflict with
+# old Chacha20.
 COMPACT_FLAGS	=\
   -bundle Hacl.Hash.MD5+Hacl.Hash.Core.MD5+Hacl.Hash.SHA1+Hacl.Hash.Core.SHA1+Hacl.Hash.SHA2+Hacl.Hash.Core.SHA2+Hacl.Hash.Core.SHA2.Constants=Hacl.Hash.*[rename=Hacl_Hash] \
   -bundle Hacl.Impl.SHA3+Hacl.SHA3=[rename=Hacl_SHA3] \
   -bundle Hacl.Poly1305_32+Hacl.Poly1305_128+Hacl.Poly1305_256=Hacl.Poly1305.*,Hacl.Impl.Poly1305,Hacl.Impl.Poly1305.*[rename=Hacl_Poly1305] \
+  -bundle Hacl.Impl.Chacha20,Hacl.Impl.Chacha20.*[rename=Hacl_Chacha20_new] \
   -bundle LowStar.* \
   -bundle Prims,C.Failure,C,C.String,C.Loops,Spec.Loops,C.Endianness,FStar.*[rename=Hacl_Kremlib] \
   -bundle 'EverCrypt.Spec.*' \
@@ -656,6 +660,11 @@ old-%:
 	  KOPTS=-verbose $(MAKE) -C code/old -f Makefile.old $* \
 	  ,[OLD-MAKE $*],obj/old-$*)
 
+# This is all legacy. Some notes:
+# - Hacl_Chacha20 / AEAD_Poly1305_64 / Hacl_Chacha20Poly1305 go together for
+#   AEAD. Remove all three once we have a new-style AEAD-ChachaPoly.
+# - No symbol collision between Hacl_Chacha20 (old) and the new Hacl
+#   Chacha20 because prefixes.
 HACL_OLD_FILES=\
   code/old/experimental/aesgcm/aesgcm-c/Hacl_AES.c \
   code/old/curve25519/x25519-c/Hacl_Curve25519.c \

@@ -6,9 +6,22 @@ open EverCrypt.Specs
 
 module B = LowStar.Buffer
 
-/// Hash algorithms
+/// The EverCrypt verified cryptographic library
+/// --------------------------------------------
+///
+/// This top-level module brings into scope all the components of EverCrypt.
 
 include EverCrypt.Hash
+include EverCrypt.HMAC
+include EverCrypt.HKDF
+include EverCrypt.Poly1305
+include EverCrypt.Ciphers
+
+/// Legacy, deprecated
+/// ------------------
+///
+/// Unverified, legacy wrappers calling into old HACL* code. Clients should
+/// abandon these in favor of the verified, properly-specified modules above.
 
 /// Curve25519
 
