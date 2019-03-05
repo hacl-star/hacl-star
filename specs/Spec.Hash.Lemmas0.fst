@@ -13,11 +13,10 @@ let max_input_size_len (a: hash_alg): Lemma
   | SHA2_384 | SHA2_512 ->
       assert_norm (max_input_length a * 8 = pow2 (len_length a * 8))
 
-#push-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 200"
+#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 400"
 let pad_invariant_block (a: hash_alg) (blocks: nat) (rest: nat): Lemma
   (requires blocks % block_length a = 0)
   (ensures (pad_length a rest = pad_length a (blocks + rest)))
   [ SMTPat (pad_length a (blocks + rest)) ]
 =
   ()
-#pop-options
