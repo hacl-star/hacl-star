@@ -169,6 +169,33 @@ procedure{:quick exportOnly} VSwap(out dst:xmm, src:xmm)
     lemma_of_to_quad32(swap(a, 64));
 }
 
+procedure{:quick exportOnly} VPolyMul(out dst:xmm, src1:xmm, src2:xmm, inline src1Hi:bool, inline src2Hi:bool)
+    lets
+        a1 := of_quad32(src1);
+        a2 := of_quad32(src2);
+    modifies
+        efl;
+    requires
+        pclmulqdq_enabled;
+    ensures
+        of_quad32(dst) == mul(
+            if src1Hi then shift(a1, (-64)) else mask(a1, 64),
+            if src2Hi then shift(a2, (-64)) else mask(a2, 64));
+{
+    lemma_to_of_quad32(src1);
+    lemma_to_of_quad32(src2);
+    VPclmulqdq(dst, src1, src2, src1Hi, src2Hi);
+    lemma_quad32_double(a1);
+    lemma_quad32_double(a2);
+    lemma_shift_is_div(a1, 64);
+    lemma_shift_is_div(a2, 64);
+    lemma_mask_is_mod(a1, 64);
+    lemma_mask_is_mod(a2, 64);
+    lemma_of_to_quad32(mul(
+        if src1Hi then shift(a1, (-64)) else mask(a1, 64),
+        if src2Hi then shift(a2, (-64)) else mask(a2, 64)));
+}
+
 procedure {:quick} Load_one_msb()
     lets constp @= r11; T2 @= xmm2; 
     modifies constp; T2; efl;
@@ -413,45 +440,52 @@ procedure {:quick} Loop6x_ctr_update(
         lemma_msb_in_bounds(ctr_BE, inout5, T1, old(counter));
     }
 }
-/*
+
 #reset-options ""
-procedure {:quick} Loop6x_preamble(
+procedure {:quick} {:verify true} Loop6x_preamble(
     inline alg:algorithm,  // OpenSSL includes the number of rounds (nr) as a dynamic parameter (stored with the key).  Saves code space but adds extra instructions to the fast path.  Maybe branch predictor is good enough for it not to matter
     ghost iv_b:buffer128,
 
+    ghost stack_b:buffer128,
     ghost key_words:seq(nat32),
     ghost round_keys:seq(quad32),
     ghost keys_b:buffer128,
+    ghost hkeys_b:buffer128,
 
     ghost ctr_BE:quad32
     )
     lets
 //      inp @= rdi; outp @= rsi; len @= rdx; key @= rcx; ivp @= r8; Xip @= r9;
-        key @= rcx; ivp @= r8; 
-        Ii @= xmm0; T1 @= xmm1; T2 @= xmm2;
-        Z1 @= xmm5; Z2 @= xmm6; 
+        key @= rcx; ivp @= r8; Xip @= r9;
+        Ii @= xmm0; T1 @= xmm1; T2 @= xmm2; Hkey @= xmm3;
+        Z0 @= xmm4; Z1 @= xmm5; Z2 @= xmm6; Z3 @= xmm7; Xi @= xmm8;
         inout0 @= xmm9; inout1 @= xmm10; inout2 @= xmm11; inout3 @= xmm12;
         inout4 @= xmm13; inout5 @= xmm14; rndkey @= xmm15;
 //      counter @= rbx; rounds @= rbp; ret @= r10; constp @= r11; in0 @= r14; end0 @= r15;
         counter @= rbx; constp @= r11; 
     reads
-        key; ivp;
+        key; ivp; Xip; rsp;
         rndkey;
         memTaint;
 
     modifies
         counter; constp;
-        Ii; T1; T2; Z1; Z2; inout0; inout1; inout2; inout3; inout4; inout5; 
+        Ii; T1; T2; Hkey; Z0; Z1; Z2; Z3; Xi; inout0; inout1; inout2; inout3; inout4; inout5; 
         mem; efl;
 
     requires
         // Valid ptrs and buffers
         validDstAddrs128(mem, ivp, iv_b, 1, memTaint, Secret);
+        validDstAddrs128(mem, Xip - 0x20, hkeys_b, 8, memTaint, Secret);
+        validDstAddrs128(mem, rsp, stack_b, 8, memTaint, Secret);
         buffers_disjoint128(iv_b, keys_b);
 
         // AES reqs
         aes_reqs(alg, key_words, round_keys, keys_b, key, mem, memTaint);
         rndkey == index(round_keys, 0);
+
+        // GCM reqs
+        pclmulqdq_enabled;
 
         // Counter requirements
         T2 == Mkfour(0, 0, 0, 0x1000000);
@@ -487,47 +521,50 @@ procedure {:quick} Loop6x_preamble(
         // Counter details
         0 <= counter < 256;
         counter == inc32lite(ctr_BE, 6).lo0 % 256;
+
+        // GCM
+        $$Z1 == mul(mask($$buffer128_read(hkeys_b, 3, mem), 64), mask($$buffer128_read(hkeys_b, 1, mem), 64));
+        Z2 == 
+        Z3 == 
+        T1 == 
+        
 {
-    Loop6x_ctr_update(alg, key_words, round_keys, keys_b, ctr_BE);
+    Loop6x_ctr_update(alg, key_words, round_keys, keys_b, hkeys_b, ctr_BE);
 
     init_rounds_opaque(inout0, round_keys);
     init_rounds_opaque(inout1, round_keys);
     init_rounds_opaque(inout2, round_keys);
-
-    /*
-    init_rounds_opaque(inout0, round_keys);
-
-    if (key > 72) {         // TODO: FIX!
-        Handle_ctr32(ctr_BE);
-    } else {
-        VPaddd(T1, T2, inout5); // OpenSSL uses VPaddb
-        VPxor(inout1, inout1, rndkey); 
-        VPxor(inout2, inout2, rndkey); 
-        lemma_incr_msb(inc32lite(ctr_BE, 5), old(inout5), T1, 1);
-    }
-    init_rounds_opaque(inout1, round_keys);
-    init_rounds_opaque(inout2, round_keys);
-    */
 
     Store128_buffer(ivp, T1, 0, Secret, iv_b, 0);   // # save next counter value
+    VPolyMul(Z1, Z3, Hkey, false, true);
     VPxor(inout3, inout3, rndkey); init_rounds_opaque(inout3, round_keys);
     Load128_buffer(T2, key, 0x10-0x80, Secret, keys_b, 1); // # borrow $T2 for $rndkey
+    VPolyMul(Z2, Z3, Hkey, true, false);
 
     VAESNI_enc(inout0, inout0, T2);
+    Load128_buffer(Ii, rsp, 0x30, Secret, stack_b, 3);     // # I[4]
     VPxor(inout4, inout4, rndkey); init_rounds_opaque(inout4, round_keys);
+    VPolyMul(T1, Z3, Hkey, false, false);
     VAESNI_enc(inout1, inout1, T2);
     VPxor(inout5, inout5, rndkey); init_rounds_opaque(inout5, round_keys);
+    VPolyMul(Z3, Z3, Hkey, true, true);
     VAESNI_enc(inout2, inout2, T2);
+    Load128_buffer(Hkey, Xip, 0x10-0x20, Secret, hkeys_b, 1);   // # $Hkey^2
     VAESNI_enc(inout3, inout3, T2);
+    VPolyAdd(Z2, Z2, Z1);
+    VPolyMul(Z1, Ii, Hkey, false, false);
+    VPolyAdd(Xi, Xi, Z0);      // # modulo-scheduled
     VAESNI_enc(inout4, inout4, T2);
+    VPolyAdd(Z0, T1, Z1);
     //Load128_buffer(rndkey, key, 0x20-0x80, Secret, keys_b, 2);      // OpenSSL had this here.  I moved it to one of the Loop6x_step calls
+    VPolyMul(T1, Ii, Hkey, false, true);
     VAESNI_enc(inout5, inout5, T2);
 
     reveal rounds;
     commute_sub_bytes_shift_rows_forall();
-
 }
 
+/*
 #reset-options ""
 
 procedure {:quick} Loop6x_plain(
@@ -776,7 +813,6 @@ procedure {:quick} Loop6x_round9(
     inline alg:algorithm,  // OpenSSL includes the number of rounds (nr) as a dynamic parameter (stored with the key).  Saves code space but adds extra instructions to the fast path.  Maybe branch predictor is good enough for it not to matter
     ghost count:nat,
     ghost in_b:buffer128,
-    ghost stack_b:buffer128,
 
     ghost key_words:seq(nat32),
     ghost round_keys:seq(quad32),
@@ -1230,7 +1266,7 @@ procedure {:quick} Loop6x_partial(
                 init0, init1, init2, init3, init4, init5);
     Loop6x_round8(alg, count, in0_b, stack_b, key_words, round_keys, keys_b, 
                   init0, init1, init2, init3, init4, init5);
-    Loop6x_round9(alg, count, in_b, stack_b, key_words, round_keys, keys_b, 
+    Loop6x_round9(alg, count, in_b, key_words, round_keys, keys_b, 
                   init0, init1, init2, init3, init4, init5);
 }
 
