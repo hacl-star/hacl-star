@@ -642,7 +642,7 @@ COMPACT_FLAGS	=\
   -minimal \
   -add-include '"kremlin/internal/types.h"' \
   -add-include '"kremlin/internal/target.h"' \
-  -add-include '"kremlin/c_endianness.h"' \
+  -add-include '"kremlin/lowstar_endianness.h"' \
   -add-include '<string.h>'
 
 # For the time being, we rely on the old extraction to give us self-contained
