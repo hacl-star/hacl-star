@@ -4,6 +4,7 @@ module ST = FStar.HyperStack.ST
 module HS = FStar.HyperStack
 module B = LowStar.Buffer
 module S = FStar.Seq
+module SC = EverCrypt.StaticConfig
 
 open FStar.HyperStack.ST
 
@@ -58,13 +59,15 @@ let recall () =
   B.recall user_wants_bcrypt
 
 let init () =
-  if Cpuid_stdcalls.check_aesni () <> 0UL then begin
-    B.recall cpu_has_aesni;
-    B.upd cpu_has_aesni 0ul true
-  end;
-  if Cpuid_stdcalls.check_sha () <> 0UL then begin
-    B.recall cpu_has_shaext;
-    B.upd cpu_has_shaext 0ul true
+  if SC.vale then begin
+    if Cpuid_stdcalls.check_aesni () <> 0UL then begin
+      B.recall cpu_has_aesni;
+      B.upd cpu_has_aesni 0ul true
+    end;
+    if Cpuid_stdcalls.check_sha () <> 0UL then begin
+      B.recall cpu_has_shaext;
+      B.upd cpu_has_shaext 0ul true
+    end
   end
 
 

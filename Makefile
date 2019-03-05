@@ -235,9 +235,9 @@ ifndef MAKE_RESTARTS
 # need to run: Vale stuff, and HACL spec tests.
 .fstar-depend-%: .FORCE
 	$(call run-with-log,\
-	  $(FSTAR_NO_FLAGS) --dep $* $(FSTAR_ROOTS) --warn_error '-285' $(FSTAR_DEPEND_FLAGS) \
+	  $(FSTAR_NO_FLAGS) --dep $* $(notdir $(FSTAR_ROOTS)) --warn_error '-285' $(FSTAR_DEPEND_FLAGS) \
 	    --extract '* -Prims -LowStar -Lib.Buffer -Hacl -FStar +FStar.Endianness +FStar.Kremlin.Endianness -EverCrypt -MerkleTree -Vale.Tactics -FastHybrid_helpers -FastMul_helpers -FastSqr_helpers -FastUtil_helpers -TestLib -EverCrypt -MerkleTree -Test -Vale_memcpy -Vale.AsLowStar.Test -Lib.IntVector' > $@ && \
-	  $(SED) -i 's!$(HACL_HOME)/obj/\(.*.checked\)!obj/\1!' $@ \
+	  $(SED) -i 's!$(HACL_HOME)/obj/\(.*.checked\)!obj/\1!;s!/bin/../ulib/!/ulib/!g' $@ \
 	  ,[FSTAR-DEPEND ($*)],$(call to-obj-dir,$@))
 
 .vale-depend: .fstar-depend-make .FORCE
@@ -246,7 +246,8 @@ ifndef MAKE_RESTARTS
 	    $(addprefix -include ,$(INCLUDES)) \
 	    $(addprefix -in ,$(VALE_ROOTS)) \
 	    -dep $< \
-	    > $@ \
+	    > $@ && \
+	  $(SED) -i 's!$(HACL_HOME)/obj/\(.*.checked\)!obj/\1!g' $@ \
 	  ,[VALE-DEPEND],$(call to-obj-dir,$@))
 
 .PHONY: .FORCE
@@ -609,11 +610,11 @@ DEFAULT_FLAGS		=\
   -bundle FStar.Tactics.CanonCommMonoid,FStar.Tactics.CanonCommSemiring,FStar.Tactics.CanonCommSwaps[rename=Unused] \
   -bundle FastUtil_helpers,FastHybrid_helpers,FastSqr_helpers,FastMul_helpers[rename=Unused2] \
   -bundle Opaque_s,Map16,Test.Vale_memcpy,Fast_defs,Interop_Printer,Memcpy[rename=Unused3] \
-  -bundle X64.*,Arch.*,Words.*,Vale.*,Collections.*,Collections,SHA_helpers,Interop,Interop.*[rename=Unused4] \
+  -bundle X64.*,Arch.*,Words.*,Vale.*,Collections.*,Collections,SHA_helpers[rename=Unused4] \
   -bundle Prop_s,Types_s,Words_s,Views,AES_s,Workarounds,Math.*,Interop,TypesNative_s[rename=Unused5] \
   -bundle GF128_s,GF128,Poly1305.Spec_s,GCTR,GCTR_s,GHash_s,GCM_helpers,GHash[rename=Unused6] \
   -bundle AES_helpers,AES256_helpers,GCM_s,GCM,Interop_assumptions[rename=Unused7] \
-  -bundle 'Check_aesni_stdcall,Check_sha_stdcall,Sha_update_bytes_stdcall[rename=Vale]' \
+  -bundle 'Interop,Interop.*,Fadd_inline,Fadd_stdcalls,Cpuid_stdcalls,Fswap_stdcalls,Fmul_stdcalls,Fsqr_stdcalls,Fsub_stdcalls,Poly_stdcalls,Sha_stdcalls[rename=Vale]' \
   -library 'Vale.Stdcalls.Cpuid' \
   -library 'Vale.Stdcalls.Fadd' \
   -library 'Vale.Stdcalls.Fmul' \
@@ -656,7 +657,7 @@ COMPACT_FLAGS	=\
   -minimal \
   -add-include '"kremlin/internal/types.h"' \
   -add-include '"kremlin/internal/target.h"' \
-  -add-include '"kremlin/c_endianness.h"' \
+  -add-include '"kremlin/lowstar_endianness.h"' \
   -add-include '<string.h>'
 
 # For the time being, we rely on the old extraction to give us self-contained
@@ -694,8 +695,19 @@ dist/coco/Makefile.basic: \
     -bundle '\*[rename=EverCrypt_Misc]'
 
 # The "coco" distribution is only optimized when EVERCRYPT_CONFIG=everest.
+# Everest means: no openssl, no bcrypt
 ifeq ($(EVERCRYPT_CONFIG),everest)
 dist/coco/Makefile.basic: HAND_WRITTEN_OPTIONAL_FILES =
+endif
+
+# For Kaizala, no BCrypt, no Vale.
+ifeq ($(EVERCRYPT_CONFIG),kaizala)
+dist/compact/Makefile.basic: \
+  HAND_WRITTEN_OPTIONAL_FILES := $(filter-out %_bcrypt.c,$(HAND_WRITTEN_OPTIONAL_FILES))
+dist/compact/Makefile.basic: \
+  HAND_WRITTEN_FILES := $(filter-out %_vale_stubs.c,$(HAND_WRITTEN_FILES))
+dist/compact/Makefile.basic: \
+  VALE_ASMS :=
 endif
 
 .PRECIOUS: dist/%/Makefile.basic
@@ -704,7 +716,7 @@ dist/%/Makefile.basic: $(ALL_KRML_FILES) dist/hacl-internal-headers/Makefile.bas
 	mkdir -p $(dir $@)
 	cp $(HACL_OLD_FILES) $(patsubst %.c,%.h,$(HACL_OLD_FILES)) $(dir $@)
 	cp $(HAND_WRITTEN_FILES) $(HAND_WRITTEN_OPTIONAL_FILES) dist/hacl-internal-headers/*.h $(dir $@)
-	cp $(VALE_ASMS) $(dir $@)
+	[ x"$(VALE_ASMS)" != x ] && cp $(VALE_ASMS) $(dir $@) || true
 	$(KRML) $(DEFAULT_FLAGS) $(KRML_EXTRA) \
 	  -tmpdir $(dir $@) -skip-compilation \
 	  $(filter %.krml,$^) \

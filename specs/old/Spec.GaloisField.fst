@@ -3,7 +3,7 @@ module Spec.GaloisField
 module ST = FStar.HyperStack.ST
 
 module UInt = FStar.UInt
-open FStar.Endianness
+open FStar.Old.Endianness
 open FStar.BitVector 
 open FStar.Seq
 

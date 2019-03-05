@@ -146,6 +146,7 @@ let count_publics (ts:taintState) : nat =
 
 #set-options "--z3rlimit 50"
 
+#push-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 1 --initial_ifuel 1"
 let monotone_decreases_count (ts ts':taintState) : Lemma
   (requires taintstate_monotone ts ts' /\ not (eq_taintStates ts ts'))
   (ensures count_publics ts' < count_publics ts)  
@@ -154,6 +155,7 @@ let monotone_decreases_count (ts ts':taintState) : Lemma
   assert (forall r. count_public_xmm ts'.xmmTaint r <= count_public_xmm ts.xmmTaint r);
   assert (count_cfFlagTaint ts' <= count_cfFlagTaint ts);
   assert (count_flagTaint ts' <= count_flagTaint ts)
+#pop-options
 
 val check_if_block_consumes_fixed_time: (block:tainted_codes) -> (ts:taintState) -> Tot (bool * taintState)
 (decreases %[block])

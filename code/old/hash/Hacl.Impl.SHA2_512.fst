@@ -895,7 +895,7 @@ val set_pad_part2:
         (requires (fun h0 -> live h0 buf2))
         (ensures  (fun h0 _ h1 -> live h0 buf2 /\ live h1 buf2 /\ modifies_1 buf2 h0 h1
                   /\ (let seq_buf2 = reveal_sbytes (as_seq h1 buf2) in
-                  seq_buf2 == Endianness.big_bytes len_length (H128.v encodedlen))))
+                  seq_buf2 == FStar.Old.Endianness.big_bytes len_length (H128.v encodedlen))))
 
 #reset-options "--z3refresh --max_fuel 0  --z3rlimit 30"
 
@@ -1004,7 +1004,7 @@ let pad padding n len =
   (**) Seq.lemma_eq_intro (reveal_sbytes (as_seq h3 zeros)) (Seq.create (v pad0len) 0uy);
   (**) assert(reveal_sbytes (as_seq h3 zeros) == Seq.create (v pad0len) 0uy);
   (**) assert(reveal_sbytes (as_seq h3 buf1) == Seq.create 1 0x80uy);
-  (**) assert(reveal_sbytes (as_seq h3 buf2) == Endianness.big_bytes len_length (H128.v encodedlen));
+  (**) assert(reveal_sbytes (as_seq h3 buf2) == FStar.Old.Endianness.big_bytes len_length (H128.v encodedlen));
   (**) Lemmas.lemma_sub_append_3 h3 padding 0ul buf1 1ul zeros (1ul +^ pad0len) buf2 (1ul +^ pad0len +^ len_length);
   (**) Lemmas.lemma_pad_aux h3 (Cast.sint32_to_sint64 n) (Cast.sint32_to_sint64 len) buf1 zeros buf2
 
