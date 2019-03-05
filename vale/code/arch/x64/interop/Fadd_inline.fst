@@ -38,33 +38,6 @@ let t64_no_mod = TD_Buffer TUInt64 TUInt64 ({modified=false; strict_disjointness
 [@__reduce__] unfold
 let tuint64 = TD_Base TUInt64
 
-// static inline uint64_t add1(const uint64_t* dst, const uint64_t* in_a, uint64_t b) {
-//   register uint64_t* dst_r asm("rdi") = dst;
-//   register uint64_t* in_a_r asm("rsi") = in_a;
-//   register uint64_t* b_r asm("rdx") = b;
-//   register uint64_t* carry_r asm("rax");
-
-//   __asm__ __volatile__(
-//     "  xor %%r8, %%r8;"
-//     "  xor %%r9, %%r9;"
-//     "  xor %%r10, %%r10;"
-//     "  xor %%r11, %%r11;"
-//     "  xor %%rax, %%rax;"
-//     "  addq 0(%%rsi), %%rcx;"
-//     "  movq %%rcx, 0(%%rdi);"
-//     "  adcxq 8(%%rsi), %%r8;"
-//     "  movq %%r8, 8(%%rdi);"
-//     "  adcxq 16(%%rsi), %%r9;"
-//     "  movq %%r9, 16(%%rdi);"
-//     "  adcxq 24(%%rsi), %%r10;"
-//     "  movq %%r10, 24(%%rdi);"
-//     "  adcx %%r11, %%rax;"
-//   : "=r" (carry_r), "+r" (b_r)
-//   : "r" (dst_r), "r" (in_a_r)
-//   : "memory", "cc", "%r8", "%r9", "%r10", "%r11"
-//   );
-// }
-
 [@__reduce__] unfold
 let dom: IX64.arity_ok 3 td =
   let y = [t64_mod; t64_no_mod; tuint64] in
@@ -97,12 +70,12 @@ let add1_post : VSig.vale_post 16 dom =
 
 #set-options "--z3rlimit 50"
 
-let regs_modified: MS.reg -> bool = fun (r:MS.reg) ->
+let add1_regs_modified: MS.reg -> bool = fun (r:MS.reg) ->
   let open MS in
   if r = Rax || r = Rdx || r = R8 || r = R9 || r = R10 || r = R11 then true
   else false
 
-let xmms_modified = fun _ -> false
+let add1_xmms_modified = fun _ -> false
 
 [@__reduce__] unfold
 let add1_lemma'
@@ -118,7 +91,7 @@ let add1_lemma'
        add1_pre code out f1 f2 va_s0 sb)
      (ensures (fun (va_s1, f) ->
        V.eval_code code va_s0 f va_s1 /\
-       VSig.vale_calling_conventions va_s0 va_s1 regs_modified xmms_modified /\
+       VSig.vale_calling_conventions va_s0 va_s1 add1_regs_modified add1_xmms_modified /\
        add1_post code out f1 f2 va_s0 sb va_s1 f /\
        ME.buffer_readable VS.(va_s1.mem) (as_vale_buffer f1) /\
        ME.buffer_readable VS.(va_s1.mem) (as_vale_buffer out) /\ 
@@ -134,7 +107,7 @@ let add1_lemma'
    va_s1, f                                   
 
 (* Prove that add1_lemma' has the required type *)
-let add1_lemma = as_t #(VSig.vale_sig regs_modified xmms_modified add1_pre add1_post) add1_lemma'
+let add1_lemma = as_t #(VSig.vale_sig add1_regs_modified add1_xmms_modified add1_pre add1_post) add1_lemma'
 
 let code_add1 = FU.va_code_fast_add1 ()
 
@@ -158,8 +131,8 @@ let lowstar_add1_t =
   IX64.as_lowstar_sig_t_weak
     3
     arg_reg
-    regs_modified
-    xmms_modified
+    add1_regs_modified
+    add1_xmms_modified
     Interop.down_mem
     code_add1
     16
@@ -176,8 +149,8 @@ let lowstar_add1 : lowstar_add1_t  =
   IX64.wrap_weak
     3
     arg_reg
-    regs_modified
-    xmms_modified
+    add1_regs_modified
+    add1_xmms_modified
     Interop.down_mem
     code_add1
     16
@@ -196,4 +169,249 @@ let add1_inline out f1 f2
     x
 
 let add1_code_inline () : FStar.All.ML int =
-  PR.print_inline "add1" 0 (Some "carry_r") (List.length dom) dom code_add1 of_arg regs_modified
+  PR.print_inline "add1" 0 (Some "carry_r") (List.length dom) dom code_add1 of_arg add1_regs_modified
+
+
+[@__reduce__] unfold
+let fadd_dom: IX64.arity_ok_stdcall td =
+  let y = [t64_mod; t64_no_mod; t64_no_mod] in
+  assert_norm (List.length y = 3);
+  y
+
+(* Need to rearrange the order of arguments *)
+[@__reduce__]
+let fadd_pre : VSig.vale_pre 16 fadd_dom =
+  fun (c:V.va_code)
+    (out:b64)
+    (f1:b64)
+    (f2:b64)
+    (va_s0:V.va_state)
+    (sb:IX64.stack_buffer 16) ->
+      FH.va_req_fadd c va_s0 (as_vale_buffer sb) 
+        (as_vale_buffer out) (as_vale_buffer f1) (as_vale_buffer f2)
+
+[@__reduce__]
+let fadd_post : VSig.vale_post 16 fadd_dom =
+  fun (c:V.va_code)
+    (out:b64)
+    (f1:b64)
+    (f2:b64)
+    (va_s0:V.va_state)
+    (sb:IX64.stack_buffer 16)
+    (va_s1:V.va_state)
+    (f:V.va_fuel) ->
+      FH.va_ens_fadd c va_s0 (as_vale_buffer sb) (as_vale_buffer out) (as_vale_buffer f1) (as_vale_buffer f2) va_s1 f
+
+#set-options "--z3rlimit 50"
+
+let fadd_regs_modified: MS.reg -> bool = fun (r:MS.reg) ->
+  let open MS in
+  if r = Rax || r = Rcx || r = Rdx || r = R8 || r = R9 || r = R10 || r = R11 then true
+  else false
+
+let fadd_xmms_modified = fun _ -> false
+
+[@__reduce__] unfold
+let fadd_lemma'
+    (code:V.va_code)
+    (_win:bool)
+    (out:b64)
+    (f1:b64)
+    (f2:b64)
+    (va_s0:V.va_state)
+    (sb:IX64.stack_buffer 16)
+ : Ghost (V.va_state & V.va_fuel)
+     (requires
+       fadd_pre code out f1 f2 va_s0 sb)
+     (ensures (fun (va_s1, f) ->
+       V.eval_code code va_s0 f va_s1 /\
+       VSig.vale_calling_conventions va_s0 va_s1 fadd_regs_modified fadd_xmms_modified /\
+       fadd_post code out f1 f2 va_s0 sb va_s1 f /\
+       ME.buffer_readable VS.(va_s1.mem) (as_vale_buffer out) /\
+       ME.buffer_readable VS.(va_s1.mem) (as_vale_buffer f1) /\ 
+       ME.buffer_readable VS.(va_s1.mem) (as_vale_buffer f2) /\ 
+       ME.buffer_writeable (as_vale_buffer out) /\ 
+       ME.buffer_writeable (as_vale_buffer f1) /\
+       ME.buffer_writeable (as_vale_buffer f2) /\       
+       ME.modifies (ME.loc_union (ME.loc_buffer (as_vale_buffer sb))
+                   (ME.loc_union (ME.loc_buffer (as_vale_buffer out))
+                                 ME.loc_none)) va_s0.VS.mem va_s1.VS.mem
+ )) = 
+   let va_s1, f = FH.va_lemma_fadd code va_s0 (as_vale_buffer sb) (as_vale_buffer out) (as_vale_buffer f1) (as_vale_buffer f2) in
+   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 out;   
+   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 f1;   
+   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 f2;   
+   va_s1, f                                   
+
+(* Prove that add1_lemma' has the required type *)
+let fadd_lemma = as_t #(VSig.vale_sig fadd_regs_modified fadd_xmms_modified fadd_pre fadd_post) fadd_lemma'
+
+let code_fadd = FH.va_code_fadd ()
+
+(* Here's the type expected for the fadd wrapper *)
+[@__reduce__]
+let lowstar_fadd_t =
+  assert_norm (List.length fadd_dom + List.length ([]<:list arg) <= 3);
+  IX64.as_lowstar_sig_t_weak
+    3
+    arg_reg
+    fadd_regs_modified
+    fadd_xmms_modified
+    Interop.down_mem
+    code_fadd
+    16
+    fadd_dom
+    []
+    _
+    _
+    // The boolean here doesn't matter
+    (W.mk_prediction code_fadd fadd_dom [] (fadd_lemma code_fadd IA.win))
+
+(* And here's the fadd wrapper itself *)
+let lowstar_fadd : lowstar_fadd_t  =
+  assert_norm (List.length fadd_dom + List.length ([]<:list arg) <= 3);
+  IX64.wrap_weak
+    3
+    arg_reg
+    fadd_regs_modified
+    fadd_xmms_modified
+    Interop.down_mem
+    code_fadd
+    16
+    fadd_dom
+    (W.mk_prediction code_fadd fadd_dom [] (fadd_lemma code_fadd IA.win))
+
+let lowstar_fadd_normal_t : normal lowstar_fadd_t
+  = as_normal_t #lowstar_fadd_t lowstar_fadd
+
+let fadd_inline out f1 f2
+  = DV.length_eq (get_downview out);
+    DV.length_eq (get_downview f1);
+    DV.length_eq (get_downview f2);
+    let x, _ = lowstar_fadd_normal_t out f1 f2 () in
+    ()
+
+let fadd_code_inline () : FStar.All.ML int =
+  PR.print_inline "fadd" 0 None (List.length fadd_dom) fadd_dom code_fadd of_arg fadd_regs_modified
+
+[@__reduce__] unfold
+let fsub_dom: IX64.arity_ok_stdcall td =
+  let y = [t64_mod; t64_no_mod; t64_no_mod] in
+  assert_norm (List.length y = 3);
+  y
+
+(* Need to rearrange the order of arguments *)
+[@__reduce__]
+let fsub_pre : VSig.vale_pre 16 fsub_dom =
+  fun (c:V.va_code)
+    (out:b64)
+    (f1:b64)
+    (f2:b64)
+    (va_s0:V.va_state)
+    (sb:IX64.stack_buffer 16) ->
+      FH.va_req_fsub c va_s0 (as_vale_buffer sb) 
+        (as_vale_buffer out) (as_vale_buffer f1) (as_vale_buffer f2)
+
+[@__reduce__]
+let fsub_post : VSig.vale_post 16 fsub_dom =
+  fun (c:V.va_code)
+    (out:b64)
+    (f1:b64)
+    (f2:b64)
+    (va_s0:V.va_state)
+    (sb:IX64.stack_buffer 16)
+    (va_s1:V.va_state)
+    (f:V.va_fuel) ->
+      FH.va_ens_fsub c va_s0 (as_vale_buffer sb) (as_vale_buffer out) (as_vale_buffer f1) (as_vale_buffer f2) va_s1 f
+
+#set-options "--z3rlimit 50"
+
+let fsub_regs_modified: MS.reg -> bool = fun (r:MS.reg) ->
+  let open MS in
+  if r = Rax || r = Rcx || r = R8 || r = R9 || r = R10 || r = R11 then true
+  else false
+
+let fsub_xmms_modified = fun _ -> false
+
+[@__reduce__] unfold
+let fsub_lemma'
+    (code:V.va_code)
+    (_win:bool)
+    (out:b64)
+    (f1:b64)
+    (f2:b64)
+    (va_s0:V.va_state)
+    (sb:IX64.stack_buffer 16)
+ : Ghost (V.va_state & V.va_fuel)
+     (requires
+       fsub_pre code out f1 f2 va_s0 sb)
+     (ensures (fun (va_s1, f) ->
+       V.eval_code code va_s0 f va_s1 /\
+       VSig.vale_calling_conventions va_s0 va_s1 fsub_regs_modified fsub_xmms_modified /\
+       fsub_post code out f1 f2 va_s0 sb va_s1 f /\
+       ME.buffer_readable VS.(va_s1.mem) (as_vale_buffer out) /\
+       ME.buffer_readable VS.(va_s1.mem) (as_vale_buffer f1) /\ 
+       ME.buffer_readable VS.(va_s1.mem) (as_vale_buffer f2) /\ 
+       ME.buffer_writeable (as_vale_buffer out) /\ 
+       ME.buffer_writeable (as_vale_buffer f1) /\
+       ME.buffer_writeable (as_vale_buffer f2) /\       
+       ME.modifies (ME.loc_union (ME.loc_buffer (as_vale_buffer sb))
+                   (ME.loc_union (ME.loc_buffer (as_vale_buffer out))
+                                 ME.loc_none)) va_s0.VS.mem va_s1.VS.mem
+ )) = 
+   let va_s1, f = FH.va_lemma_fsub code va_s0 (as_vale_buffer sb) (as_vale_buffer out) (as_vale_buffer f1) (as_vale_buffer f2) in
+   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 out;   
+   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 f1;   
+   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 f2;   
+   va_s1, f                                   
+
+(* Prove that fsub_lemma' has the required type *)
+let fsub_lemma = as_t #(VSig.vale_sig fsub_regs_modified fsub_xmms_modified fsub_pre fsub_post) fsub_lemma'
+
+let code_fsub = FH.va_code_fsub ()
+
+(* Here's the type expected for the fsub wrapper *)
+[@__reduce__]
+let lowstar_fsub_t =
+  assert_norm (List.length fsub_dom + List.length ([]<:list arg) <= 3);
+  IX64.as_lowstar_sig_t_weak
+    3
+    arg_reg
+    fsub_regs_modified
+    fsub_xmms_modified
+    Interop.down_mem
+    code_fsub
+    16
+    fsub_dom
+    []
+    _
+    _
+    // The boolean here doesn't matter
+    (W.mk_prediction code_fsub fsub_dom [] (fsub_lemma code_fsub IA.win))
+
+(* And here's the fsub wrapper itself *)
+let lowstar_fsub : lowstar_fsub_t  =
+  assert_norm (List.length fsub_dom + List.length ([]<:list arg) <= 3);
+  IX64.wrap_weak
+    3
+    arg_reg
+    fsub_regs_modified
+    fsub_xmms_modified
+    Interop.down_mem
+    code_fsub
+    16
+    fsub_dom
+    (W.mk_prediction code_fsub fsub_dom [] (fsub_lemma code_fsub IA.win))
+
+let lowstar_fsub_normal_t : normal lowstar_fsub_t
+  = as_normal_t #lowstar_fsub_t lowstar_fsub
+
+let fsub_inline out f1 f2
+  = DV.length_eq (get_downview out);
+    DV.length_eq (get_downview f1);
+    DV.length_eq (get_downview f2);
+    let x, _ = lowstar_fsub_normal_t out f1 f2 () in
+    ()
+
+let fsub_code_inline () : FStar.All.ML int =
+  PR.print_inline "fsub" 0 None (List.length fsub_dom) fsub_dom code_fsub of_arg fsub_regs_modified

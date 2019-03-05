@@ -865,9 +865,11 @@ procedure{:quick} cswap_single(
     Store64_buffer(p1_ptr, tmp1,  0 + offset * 8, Secret, p1_b, 0 + offset);
 }
 
-procedure{:quick} cswap2(
+procedure{:quick}{:public}{:exportSpecs} cswap2(
+    ghost stack_b:buffer64,
     ghost p0_b:buffer64,
-    ghost p1_b:buffer64)
+    ghost p1_b:buffer64,
+    ghost bit_in:nat64)
     lets
         p0_ptr @= rdi;
         p1_ptr @= rsi;
@@ -901,6 +903,7 @@ procedure{:quick} cswap2(
         efl; mem; 
 
     requires
+        bit_in == bit;
         bit <= 1;
         buffers_disjoint(p1_b, p0_b) || p1_b == p0_b;
 
@@ -1078,7 +1081,7 @@ procedure{:quick}{:public}{:exportSpecs} cswap2_stdcall(
         Mov64(bit, r8);
     } 
 
-    cswap2(p0_b, p1_b);
+    cswap2(stack_b, p0_b, p1_b, bit_in);
     
     inline if (win) {
         Pop(rsi, stack_b, 0);
