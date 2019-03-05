@@ -72,7 +72,7 @@ let ec1 b x k =
   assert (uint_v (x >>. size (b * k)) == uint_v x / pow2 (b * k));
   assert (uint_v rk == uint_v x / pow2 (b * k) % pow2 b);
   pow2_lt_compat 16 b;
-  uintv_extensionality (to_u16 rk) (u16 (uint_v x / pow2 (b * k) % pow2 b));
+  //uintv_extensionality (to_u16 rk) (u16 (uint_v x / pow2 (b * k) % pow2 b));
   ec b (to_u16 rk)
 
 val frodo_key_encode0:
