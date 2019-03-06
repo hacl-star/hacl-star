@@ -1,22 +1,23 @@
 module Hacl.Impl.Chacha20Poly1305.Poly
 
 module ST = FStar.HyperStack.ST
+module B = LowStar.Buffer
 open FStar.HyperStack
 open FStar.HyperStack.All
 open Lib.IntTypes
 open Lib.Buffer
-open Lib.ByteBuffer
 open Lib.ByteSequence
+open Lib.ByteBuffer
 module Seq = Lib.Sequence
 open FStar.Mul
 
 module Spec = Spec.Chacha20Poly1305
 module Poly = Hacl.Impl.Poly1305
+module SpecPoly = Spec.Poly1305
+open Hacl.Impl.Chacha20Poly1305.PolyCore
 open Hacl.Impl.Poly1305.Fields
 module ChachaCore = Hacl.Impl.Chacha20.Core32
 module Chacha = Hacl.Impl.Chacha20
-
-#set-options "--z3rlimit 20 --max_fuel 0 --max_ifuel 1"
 
 val derive_key:
   k:lbuffer uint8 32ul ->
@@ -37,7 +38,150 @@ let derive_key k n out =
   Chacha.chacha20_init ctx k n 0ul;
   ChachaCore.store_state out ctx;
   pop_frame()
-  
+
+val poly1305_do_core_padded:
+  s:field_spec ->         // Needed for the vectorized operation
+  aadlen:size_t ->
+  aad:lbuffer uint8 aadlen -> // authenticated additional data  
+  (mlen:size_t{v mlen + 16 <= max_size_t /\ v aadlen + v mlen / 64 <= max_size_t}) ->
+  m:lbuffer uint8 mlen -> // plaintext
+  ctx:Poly.poly1305_ctx s ->
+  Stack unit
+    (requires fun h ->
+      live h aad /\ live h m /\ live h ctx /\
+      disjoint ctx aad /\ disjoint ctx m)
+    (ensures (fun h0 _ h1 -> modifies (loc ctx) h0 h1 /\
+      // Additional framing for r_elem
+      Seq.index (Poly.as_get_r h0 ctx) 0 == Seq.index (Poly.as_get_r h1 ctx) 0 /\
+      (let r = Seq.index (Poly.as_get_r h0 ctx) 0 in
+      let acc = Seq.index (Poly.as_get_acc h0 ctx) 0 in
+      let acc = Spec.poly1305_padded r (v aadlen) (as_seq h0 aad) (Seq.create 16 (u8 0)) acc in
+      let acc = Spec.poly1305_padded r (v mlen) (as_seq h0 m) (Seq.create 16 (u8 0)) acc in
+      Seq.index (Poly.as_get_acc h1 ctx) 0 == acc)))
+
+#set-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0"
+
+let poly1305_do_core_padded s aadlen aad mlen m ctx =
+  let h_pre = ST.get() in
+  push_frame();
+  let h0 = ST.get() in
+  // TODO: This should verify, but the previous assertion fails
+  assume (Seq.equal (as_seq h_pre ctx) (as_seq h0 ctx));
+  same_ctx_same_r_acc #s ctx h_pre h0;
+  // TODO: This should use the temporary buffer from the main function, but adding it to the modifies clause blows up verification
+  let block = create 16ul (u8 0) in
+  let h1 = get() in
+  same_ctx_same_r_acc ctx h_pre h1;  
+  poly1305_padded ctx aadlen aad block;
+  let h2 = ST.get() in
+  // Reset block, as it is modified in stateful code but not in the spec
+  mapT 16ul block (fun _ -> u8 0) block;
+  let h3 = ST.get() in
+  assert (Seq.equal (as_seq h3 block) (Seq.create 16 (u8 0)));
+  same_ctx_same_r_acc ctx h2 h3;
+  poly1305_padded ctx mlen m block;
+  let h4 = ST.get() in
+  pop_frame();
+  let h_pop = ST.get() in
+  same_ctx_same_r_acc ctx h4 h_pop
+
+val poly1305_do_core_to_bytes:
+  s:field_spec ->         // Needed for the vectorized operation
+  aadlen:size_t ->
+  (mlen:size_t{v mlen + 16 <= max_size_t /\ v aadlen + v mlen / 64 <= max_size_t}) ->
+  block:lbuffer uint8 16ul ->
+  Stack unit
+    (requires fun h -> live h block)
+    (ensures (fun h0 _ h1 -> modifies (loc block) h0 h1 /\
+      (let gaad_len8 = Lib.ByteSequence.uint_to_bytes_le #U64 (u64 (v aadlen)) in
+      let gciphertext_len8 = Lib.ByteSequence.uint_to_bytes_le #U64 (u64 (v mlen)) in
+      let gblock = Seq.update_sub (as_seq h0 block) 0 8 gaad_len8 in
+      let gblock = Seq.update_sub gblock 8 8 gciphertext_len8 in
+      Seq.equal (as_seq h1 block) gblock)))
+
+let poly1305_do_core_to_bytes s aadlen mlen block =
+  // Encode the length of the aad into bytes, 
+  // and store it in the first eight bytes of the temporary block
+  let h0 = ST.get() in
+  let aad_len8 = sub block 0ul 8ul in
+  uint_to_bytes_le #U64 aad_len8 (u64 (v aadlen));
+
+  // Repeat with the length of the input, and store it in the second eight bytes
+  let cipher_len8 = sub block 8ul 8ul in
+  uint_to_bytes_le #U64 cipher_len8 (u64 (v mlen));
+  let h2 = ST.get() in
+  let aux (i:nat{i < 16}) : Lemma 
+    (let gaad_len8 = Lib.ByteSequence.uint_to_bytes_le #U64 (u64 (v aadlen)) in
+     let gciphertext_len8 = Lib.ByteSequence.uint_to_bytes_le #U64 (u64 (v mlen)) in
+     let gblock = Seq.update_sub (as_seq h0 block) 0 8 gaad_len8 in
+     let gblock = Seq.update_sub gblock 8 8 gciphertext_len8 in 
+     Seq.index (as_seq h2 block) i == Seq.index gblock i)
+  = let gaad_len8 = Lib.ByteSequence.uint_to_bytes_le #U64 (u64 (v aadlen)) in
+    let gciphertext_len8 = Lib.ByteSequence.uint_to_bytes_le #U64 (u64 (v mlen)) in
+    let s1 = Seq.update_sub (as_seq h0 block) 0 8 gaad_len8 in
+    let s2 = Seq.update_sub s1 8 8 gciphertext_len8 in 
+    let s_final = Seq.index (as_seq h2 block) in
+    if i < 8 then
+       assert (Seq.index s2 i == Seq.index gaad_len8 i)
+    else
+      assert (Seq.index s2 i == Seq.index gciphertext_len8 (i-8))
+  in
+  Classical.forall_intro aux
+
+val poly1305_do_core_finish:
+  s:field_spec ->         // Needed for the vectorized operation
+  k:lbuffer uint8 32ul -> // key
+  out:lbuffer uint8 16ul -> // output: tag
+  ctx:Poly.poly1305_ctx s ->
+  block:lbuffer uint8 16ul ->
+  Stack unit
+    (requires fun h ->
+      live h k /\ live h out /\ live h ctx /\ live h block /\
+      disjoint ctx k /\ disjoint ctx out /\ disjoint ctx block /\
+      disjoint block k /\ disjoint block out)
+    (ensures (fun h0 _ h1 -> modifies (loc out |+| loc ctx) h0 h1 /\
+      (let r = Seq.index (Poly.as_get_r h0 ctx) 0 in
+       let acc = Seq.index (Poly.as_get_acc h0 ctx) 0 in      
+       let acc = SpecPoly.update1 r 16 (as_seq h0 block) acc in
+       let tag = SpecPoly.finish (as_seq h0 k) acc in
+       Seq.equal (as_seq h1 out) tag)))
+
+let poly1305_do_core_finish s k out ctx block =
+  update1 ctx 16ul block;
+  finish ctx k out
+
+val poly1305_do_core_:
+  s:field_spec ->         // Needed for the vectorized operation
+  k:lbuffer uint8 32ul -> // key
+  aadlen:size_t ->
+  aad:lbuffer uint8 aadlen -> // authenticated additional data  
+  (mlen:size_t{v mlen + 16 <= max_size_t /\ v aadlen + v mlen / 64 <= max_size_t}) ->
+  m:lbuffer uint8 mlen -> // plaintext
+  out:lbuffer uint8 16ul -> // output: tag
+  ctx:Poly.poly1305_ctx s ->
+  block:lbuffer uint8 16ul ->
+  Stack unit
+    (requires fun h ->
+      Seq.equal (as_seq h block) (Seq.create 16 (u8 0)) /\
+      live h k /\ live h aad /\ live h m /\ live h out /\ live h ctx /\ live h block /\
+      disjoint ctx k /\ disjoint ctx aad /\ disjoint ctx m /\ disjoint ctx out /\ disjoint ctx block /\
+      disjoint block k /\ disjoint block aad /\ disjoint block m /\ disjoint block out)
+    (ensures (fun h0 _ h1 -> modifies (loc out |+| loc ctx |+| loc block) h0 h1 /\
+      Seq.equal (as_seq h1 out) 
+        (Spec.poly1305_do (as_seq h0 k) (v mlen) (as_seq h0 m) (v aadlen) (as_seq h0 aad))))
+
+let poly1305_do_core_ s k aadlen aad mlen m out ctx block =
+  poly1305_init ctx k;
+
+  poly1305_do_core_padded s aadlen aad mlen m ctx;
+
+  let h3 = ST.get() in
+  poly1305_do_core_to_bytes s aadlen mlen block;
+  let h4 = ST.get () in
+  same_ctx_same_r_acc ctx h3 h4;
+ 
+  poly1305_do_core_finish s k out ctx block
+
 // Implements the actual poly1305_do operation
 val poly1305_do_core:
   s:field_spec ->         // Needed for the vectorized operation
@@ -51,15 +195,16 @@ val poly1305_do_core:
     (requires fun h ->
       live h k /\ live h aad /\ live h m /\ live h out)
     (ensures (fun h0 _ h1 -> modifies (loc out) h0 h1 /\
-      as_seq h1 out == Spec.poly1305_do (as_seq h0 k) (v mlen) (as_seq h0 m) (v aadlen) (as_seq h0 aad)))
+      Seq.equal (as_seq h1 out) 
+        (Spec.poly1305_do (as_seq h0 k) (v mlen) (as_seq h0 m) (v aadlen) (as_seq h0 aad))))
+
+#set-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 1"
 
 let poly1305_do_core s k aadlen aad mlen m out =
   push_frame();
   let ctx = create (nlimb s +. precomplen s) (limb_zero s) in
-  Poly.poly1305_init ctx k;
   let block = create 16ul (u8 0) in
-  // TODO: Padding should go here
-  admit();
+  poly1305_do_core_ s k aadlen aad mlen m out ctx block;
   pop_frame()
 
 // Derives the key, and then perform poly1305
