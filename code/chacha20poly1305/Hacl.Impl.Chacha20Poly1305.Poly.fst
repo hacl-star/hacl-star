@@ -103,11 +103,11 @@ let poly1305_do_core_to_bytes aadlen mlen block =
   // and store it in the first eight bytes of the temporary block
   let h0 = ST.get() in
   let aad_len8 = sub block 0ul 8ul in
-  uint_to_bytes_le #U64 aad_len8 (u64 (v aadlen));
+  uint_to_bytes_le #U64 aad_len8 (to_u64 aadlen);
 
   // Repeat with the length of the input, and store it in the second eight bytes
   let cipher_len8 = sub block 8ul 8ul in
-  uint_to_bytes_le #U64 cipher_len8 (u64 (v mlen));
+  uint_to_bytes_le #U64 cipher_len8 (to_u64 mlen);
   let h2 = ST.get() in
   let aux (i:nat{i < 16}) : Lemma 
     (let gaad_len8 = Lib.ByteSequence.uint_to_bytes_le #U64 (u64 (v aadlen)) in
@@ -115,8 +115,10 @@ let poly1305_do_core_to_bytes aadlen mlen block =
      let gblock = Seq.update_sub (as_seq h0 block) 0 8 gaad_len8 in
      let gblock = Seq.update_sub gblock 8 8 gciphertext_len8 in 
      Seq.index (as_seq h2 block) i == Seq.index gblock i)
-  = let gaad_len8 = Lib.ByteSequence.uint_to_bytes_le #U64 (u64 (v aadlen)) in
-    let gciphertext_len8 = Lib.ByteSequence.uint_to_bytes_le #U64 (u64 (v mlen)) in
+  = uintv_extensionality (to_u64 aadlen) (u64 (v aadlen));
+    uintv_extensionality (to_u64 mlen) (u64 (v mlen));
+    let gaad_len8 = Lib.ByteSequence.uint_to_bytes_le #U64 (to_u64 aadlen) in
+    let gciphertext_len8 = Lib.ByteSequence.uint_to_bytes_le #U64 (to_u64 mlen) in
     let s1 = Seq.update_sub (as_seq h0 block) 0 8 gaad_len8 in
     let s2 = Seq.update_sub s1 8 8 gciphertext_len8 in 
     let s_final = Seq.index (as_seq h2 block) in
