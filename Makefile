@@ -417,28 +417,13 @@ obj/Vale.AsLowStar.Wrapper.fst.checked: \
 obj/Vale.AsLowStar.Test.fst.checked: \
   FSTAR_FLAGS=$(VALE_FSTAR_FLAGS)
 
-obj/Sha_stdcalls.fst.checked: \
-  FSTAR_FLAGS=$(VALE_FSTAR_FLAGS)
-
 obj/Simplify_Sha.fst.checked: \
   FSTAR_FLAGS=$(VALE_FSTAR_FLAGS)
 
-obj/Fsub_stdcalls.fst.checked: \
+obj/%_stdcalls.fst.checked: \
   FSTAR_FLAGS=$(VALE_FSTAR_FLAGS)
 
-obj/Fmul_stdcalls.fst.checked: \
-  FSTAR_FLAGS=$(VALE_FSTAR_FLAGS)
-
-obj/Fsqr_stdcalls.fst.checked: \
-  FSTAR_FLAGS=$(VALE_FSTAR_FLAGS)
-
-obj/Fadd_inline.fst.checked: \
-  FSTAR_FLAGS=$(VALE_FSTAR_FLAGS)
-
-obj/Fmul_inline.fst.checked: \
-  FSTAR_FLAGS=$(VALE_FSTAR_FLAGS)
-
-obj/Fsqr_inline.fst.checked: \
+obj/%_inline.fst.checked: \
   FSTAR_FLAGS=$(VALE_FSTAR_FLAGS)
 
 obj/Vale.Stdcalls.%.checked: \
@@ -537,7 +522,10 @@ dist/vale/%-x86_64-darwin.S: obj/vale-%.exe | dist/vale
 	$< GCC MacOS > $@
 
 dist/vale/%-inline.h: obj/inline-vale-%.exe | dist/vale
-	$< > $@
+	echo "#pragma once" > $@
+	echo "#include <inttypes.h>" >> $@
+	$< >> $@
+	$(SED) -i 's/const//g' $@
 
 obj/vale-cpuid.exe: vale/code/lib/util/x64/CpuidMain.ml
 obj/vale-aesgcm.exe: vale/code/crypto/aes/x64/Main.ml
@@ -624,6 +612,8 @@ DEFAULT_FLAGS		=\
   -bundle EverCrypt.BCrypt \
   -bundle EverCrypt.OpenSSL \
   -bundle MerkleTree.Spec,MerkleTree.Spec.*,MerkleTree.New.High,MerkleTree.New.High.* \
+  -bundle 'Vale.Stdcalls.*,Interop,Interop.*,Fadd_inline,Fadd_stdcalls,Cpuid_stdcalls,Fswap_stdcalls,Fmul_stdcalls,Fsqr_stdcalls,Fsub_stdcalls,Poly_stdcalls,Sha_stdcalls[rename=Vale]' \
+  -bundle 'Fmul_inline,Fsqr_inline,Fswap_inline[rename=Vale_Inline]' \
   -bundle FStar.Tactics.CanonCommMonoid,FStar.Tactics.CanonCommSemiring,FStar.Tactics.CanonCommSwaps[rename=Unused] \
   -bundle FastUtil_helpers,FastHybrid_helpers,FastSqr_helpers,FastMul_helpers[rename=Unused2] \
   -bundle Opaque_s,Map16,Test.Vale_memcpy,Fast_defs,Interop_Printer,Memcpy[rename=Unused3] \
@@ -631,12 +621,13 @@ DEFAULT_FLAGS		=\
   -bundle Prop_s,Types_s,Words_s,Views,AES_s,Workarounds,Math.*,Interop,TypesNative_s[rename=Unused5] \
   -bundle GF128_s,GF128,Poly1305.Spec_s,GCTR,GCTR_s,GHash_s,GCM_helpers,GHash[rename=Unused6] \
   -bundle AES_helpers,AES256_helpers,GCM_s,GCM,Interop_assumptions[rename=Unused7] \
-  -bundle 'Vale.Stdcalls.*,Interop,Interop.*,Fadd_inline,Fadd_stdcalls,Cpuid_stdcalls,Fswap_stdcalls,Fmul_stdcalls,Fsqr_stdcalls,Fsub_stdcalls,Poly_stdcalls,Sha_stdcalls[rename=Vale]' \
   -library 'Vale.Stdcalls.*' \
+  -static-header 'Vale_Inline' \
   -library 'Fadd_inline' \
   -library 'Fmul_inline' \
   -library 'Fswap_inline' \
   -library 'Fsqr_inline' \
+  -add-include '"curve25519-inline.h"' \
   -no-prefix 'Vale.Stdcalls.*' \
   -no-prefix 'Fadd_inline' \
   -no-prefix 'Fmul_inline' \

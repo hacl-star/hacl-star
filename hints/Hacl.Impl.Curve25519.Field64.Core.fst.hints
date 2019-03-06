@@ -1,5 +1,5 @@
 [
-  "uB†‘\u001d”‚Û\u0017\u001e:⁄èXUr",
+  "~ÑMrÈ\u001d(C*@ªî[üΩŒ",
   [
     [
       "Hacl.Impl.Curve25519.Field64.Core.as_nat",
@@ -62,7 +62,7 @@
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "db39bfa394701055abe06ececfefb4ed"
+      "bfa8727031ae7189508470718a41325f"
     ],
     [
       "Hacl.Impl.Curve25519.Field64.Core.wide_as_nat",
@@ -125,7 +125,7 @@
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "1ff867938d98d4a0820761d4c0518bf4"
+      "dd3fea7389d6ae1ae4559fad96352c1a"
     ],
     [
       "Hacl.Impl.Curve25519.Field64.Core.fevalh",
@@ -147,7 +147,7 @@
         "typing_Spec.Curve25519.prime"
       ],
       0,
-      "ae5e3f2ae8dafad4dba5262229709408"
+      "1d943200fffdeefeb68398870b90f030"
     ],
     [
       "Hacl.Impl.Curve25519.Field64.Core.feval_wideh",
@@ -169,7 +169,7 @@
         "typing_Spec.Curve25519.prime"
       ],
       0,
-      "b1930da0fde4aefc2b9f2ed2b454b96c"
+      "33ed8ec1bef21ab688ac007e0cd6d27e"
     ],
     [
       "Hacl.Impl.Curve25519.Field64.Core.buffer_is_buffer",
@@ -178,7 +178,7 @@
       0,
       [ "@query" ],
       0,
-      "0f9f6d198eda6c9855a38c8d78e86202"
+      "dcd85fccc82cad669c2764124706474b"
     ],
     [
       "Hacl.Impl.Curve25519.Field64.Core.as_nat_is_as_nat",
@@ -242,7 +242,7 @@
         "typing_X64.CPU_Features_s.adx_enabled"
       ],
       0,
-      "1eab5f8da506933cbe4a3e52cb5357bf"
+      "62cc9e5fb617ab3b8e99b9348cf4889f"
     ],
     [
       "Hacl.Impl.Curve25519.Field64.Core.uu___328",
@@ -251,7 +251,7 @@
       0,
       [ "@query" ],
       0,
-      "c8947123ae27f22319436ee316b8ecf2"
+      "2b7be984999d56cb429fcc3cbc09758a"
     ],
     [
       "Hacl.Impl.Curve25519.Field64.Core.add1",
@@ -277,12 +277,13 @@
         "equation_FStar.Monotonic.HyperStack.mem",
         "equation_FStar.UInt.fits", "equation_FStar.UInt.max_int",
         "equation_FStar.UInt.min_int", "equation_FStar.UInt.size",
-        "equation_FStar.UInt.uint_t", "equation_Fadd_stdcalls.as_nat",
-        "equation_Fast_defs.pow2_four", "equation_Fast_defs.pow2_three",
-        "equation_Fast_defs.pow2_two",
+        "equation_FStar.UInt.uint_t", "equation_Fadd_inline.as_nat",
+        "equation_Fadd_stdcalls.as_nat", "equation_Fast_defs.pow2_four",
+        "equation_Fast_defs.pow2_three", "equation_Fast_defs.pow2_two",
         "equation_Hacl.Impl.Curve25519.Field64.Core.as_nat",
         "equation_Hacl.Impl.Curve25519.Field64.Core.u256",
         "equation_Hacl.Impl.Curve25519.Field64.Core.uu___328",
+        "equation_Hacl.Spec.Curve25519.Field64.Definition.as_nat4",
         "equation_Lib.Buffer.as_seq", "equation_Lib.Buffer.buffer_t",
         "equation_Lib.Buffer.disjoint", "equation_Lib.Buffer.lbuffer_t",
         "equation_Lib.Buffer.length", "equation_Lib.Buffer.live",
@@ -330,10 +331,10 @@
         "refinement_interpretation_Tm_refine_e3e8ea1e9949642ff56ce81b8d1c6463",
         "refinement_interpretation_Tm_refine_f048236b5f8051f83b495ea5eaa6127b",
         "token_correspondence_Prims.pow2.fuel_instrumented",
-        "typing_FStar.UInt64.v", "typing_Fadd_stdcalls.as_nat",
-        "typing_Hacl.Impl.Curve25519.Field64.Core.as_nat",
-        "typing_Lib.Buffer.as_seq", "typing_Lib.Buffer.length",
-        "typing_Lib.IntTypes.uint_v", "typing_Lib.Sequence.index",
+        "typing_FStar.UInt64.v", "typing_Fadd_inline.as_nat",
+        "typing_Fadd_stdcalls.as_nat", "typing_Lib.Buffer.as_seq",
+        "typing_Lib.Buffer.length", "typing_Lib.IntTypes.uint_v",
+        "typing_Lib.Sequence.index",
         "typing_LowStar.Buffer.trivial_preorder",
         "typing_LowStar.Monotonic.Buffer.len",
         "typing_X64.CPU_Features_s.adx_enabled",
@@ -342,7 +343,7 @@
         "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "61163181e3a70c3de250dec325bea88b"
+      "3b2292a7c7817847ac46da5fc3a519e6"
     ],
     [
       "Hacl.Impl.Curve25519.Field64.Core.fadd",
@@ -368,7 +369,8 @@
         "equation_FStar.Monotonic.HyperStack.mem",
         "equation_FStar.UInt.fits", "equation_FStar.UInt.max_int",
         "equation_FStar.UInt.min_int", "equation_FStar.UInt.size",
-        "equation_FStar.UInt.uint_t",
+        "equation_FStar.UInt.uint_t", "equation_Fadd_inline.as_nat",
+        "equation_Fadd_stdcalls.as_nat",
         "equation_Hacl.Impl.Curve25519.Field64.Core.fevalh",
         "equation_Hacl.Impl.Curve25519.Field64.Core.u256",
         "equation_Hacl.Impl.Curve25519.Field64.Core.uu___328",
@@ -398,16 +400,19 @@
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_0773a299ec43f8fb537ec511f9cd85af",
+        "refinement_interpretation_Tm_refine_813824aa2bfc82ae95040b95e4e10913",
         "refinement_interpretation_Tm_refine_8d65e998a07dd53ec478e27017d9dba5",
         "refinement_interpretation_Tm_refine_9a12b456b9635a5da0bf8500f48083b6",
         "refinement_interpretation_Tm_refine_a347709bfeba48709474ad26f4f6be87",
         "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
         "refinement_interpretation_Tm_refine_c2215b703b2340e9e4551c4e8820d7c8",
         "refinement_interpretation_Tm_refine_e3e8ea1e9949642ff56ce81b8d1c6463",
-        "typing_Lib.Buffer.loc", "typing_tok_Lib.Buffer.MUT@tok"
+        "typing_Lib.Buffer.loc", "typing_X64.CPU_Features_s.adx_enabled",
+        "typing_X64.CPU_Features_s.bmi2_enabled",
+        "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "4a1cb01d9d5b87dc48b8739b14a36670"
+      "161f60c27b3f961fe928c7f25d3b6e49"
     ],
     [
       "Hacl.Impl.Curve25519.Field64.Core.fmul",
@@ -416,7 +421,7 @@
       0,
       [ "@query" ],
       0,
-      "9915f517d690f1762b0b23b2412f17f1"
+      "4774db185daad362648c6f0f06af3928"
     ],
     [
       "Hacl.Impl.Curve25519.Field64.Core.fmul2",
@@ -473,7 +478,7 @@
         "typing_LowStar.Monotonic.Buffer.len"
       ],
       0,
-      "669e921f3ca75ca94f2896621ecb1b96"
+      "1cddb5ee0926cd5e2f991c3fb4a92bc9"
     ],
     [
       "Hacl.Impl.Curve25519.Field64.Core.fmul1",
@@ -482,7 +487,7 @@
       0,
       [ "@query" ],
       0,
-      "8461df3f80a955d2fbc8db24cf517750"
+      "0ed51c5b48b4c407100c373f2a248470"
     ],
     [
       "Hacl.Impl.Curve25519.Field64.Core.fsqr",
@@ -491,7 +496,7 @@
       0,
       [ "@query" ],
       0,
-      "2c2b2c97c4e57eb247b7cc6ef4b882a5"
+      "9a17f9e985eba31de80af85759cb0ea1"
     ],
     [
       "Hacl.Impl.Curve25519.Field64.Core.fsqr2",
@@ -548,7 +553,7 @@
         "typing_LowStar.Monotonic.Buffer.len"
       ],
       0,
-      "8b7540131bf344fcb392b7665f2a27cd"
+      "23bdb9acd85f98317f42efaa172abc39"
     ]
   ]
 ]

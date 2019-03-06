@@ -17,3 +17,6 @@ val aarch32: bool
 
 [@ CIfDef ]
 val aarch64: bool
+
+[@ CIfDef ]
+val gcc: bool
