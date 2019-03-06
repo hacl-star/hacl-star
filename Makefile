@@ -432,6 +432,15 @@ obj/Fmul_stdcalls.fst.checked: \
 obj/Fsqr_stdcalls.fst.checked: \
   FSTAR_FLAGS=$(VALE_FSTAR_FLAGS)
 
+obj/Fadd_inline.fst.checked: \
+  FSTAR_FLAGS=$(VALE_FSTAR_FLAGS)
+
+obj/Fmul_inline.fst.checked: \
+  FSTAR_FLAGS=$(VALE_FSTAR_FLAGS)
+
+obj/Fsqr_inline.fst.checked: \
+  FSTAR_FLAGS=$(VALE_FSTAR_FLAGS)
+
 obj/Vale.Stdcalls.%.checked: \
   FSTAR_FLAGS=$(VALE_FSTAR_FLAGS)
 
@@ -527,7 +536,7 @@ dist/vale/%-x86_64-linux.S: obj/vale-%.exe | dist/vale
 dist/vale/%-x86_64-darwin.S: obj/vale-%.exe | dist/vale
 	$< GCC MacOS > $@
 
-dist/vale/%-inline.c: obj/inline-vale-%.exe | dist/vale
+dist/vale/%-inline.h: obj/inline-vale-%.exe | dist/vale
 	$< > $@
 
 obj/vale-cpuid.exe: vale/code/lib/util/x64/CpuidMain.ml
@@ -559,7 +568,7 @@ VALE_ASMS = $(foreach P,cpuid aesgcm sha256 curve25519 poly1305,\
   $(wildcard \
     $(HACL_HOME)/secure_api/vale/asm/aes-*.S \
     $(HACL_HOME)/secure_api/vale/asm/aes-*.asm) \
-  dist/vale/curve25519-inline.c
+  dist/vale/curve25519-inline.h
 
 # A pseudo-target for generating just Vale assemblies
 vale-asm: $(VALE_ASMS)
@@ -614,18 +623,25 @@ DEFAULT_FLAGS		=\
   -bundle Test,Test.*,Hacl.Test.* \
   -bundle EverCrypt.BCrypt \
   -bundle EverCrypt.OpenSSL \
-  -bundle 'Vale.Stdcalls.*[rename=Vale]' \
   -bundle MerkleTree.Spec,MerkleTree.Spec.*,MerkleTree.New.High,MerkleTree.New.High.* \
   -bundle FStar.Tactics.CanonCommMonoid,FStar.Tactics.CanonCommSemiring,FStar.Tactics.CanonCommSwaps[rename=Unused] \
   -bundle FastUtil_helpers,FastHybrid_helpers,FastSqr_helpers,FastMul_helpers[rename=Unused2] \
   -bundle Opaque_s,Map16,Test.Vale_memcpy,Fast_defs,Interop_Printer,Memcpy[rename=Unused3] \
-  -bundle X64.*,Arch.*,Words.*,Vale.*,Collections.*,Collections,SHA_helpers,Interop,Interop.*[rename=Unused4] \
+  -bundle X64.*,Arch.*,Words.*,Vale.*,Collections.*,Collections,SHA_helpers[rename=Unused4] \
   -bundle Prop_s,Types_s,Words_s,Views,AES_s,Workarounds,Math.*,Interop,TypesNative_s[rename=Unused5] \
   -bundle GF128_s,GF128,Poly1305.Spec_s,GCTR,GCTR_s,GHash_s,GCM_helpers,GHash[rename=Unused6] \
   -bundle AES_helpers,AES256_helpers,GCM_s,GCM,Interop_assumptions[rename=Unused7] \
+  -bundle 'Vale.Stdcalls.*,Interop,Interop.*,Fadd_inline,Fadd_stdcalls,Cpuid_stdcalls,Fswap_stdcalls,Fmul_stdcalls,Fsqr_stdcalls,Fsub_stdcalls,Poly_stdcalls,Sha_stdcalls[rename=Vale]' \
   -library 'Vale.Stdcalls.*' \
   -library 'Fadd_inline' \
+  -library 'Fmul_inline' \
+  -library 'Fswap_inline' \
+  -library 'Fsqr_inline' \
   -no-prefix 'Vale.Stdcalls.*' \
+  -no-prefix 'Fadd_inline' \
+  -no-prefix 'Fmul_inline' \
+  -no-prefix 'Fswap_inline' \
+  -no-prefix 'Fsqr_inline' \
   -no-prefix 'EverCrypt.Vale' \
   -no-prefix 'MerkleTree.New.Low' \
   -no-prefix 'MerkleTree.New.Low.Serialization' \
@@ -638,17 +654,18 @@ COMPACT_FLAGS	=\
   -bundle Hacl.Impl.SHA3+Hacl.SHA3=[rename=Hacl_SHA3] \
   -bundle Hacl.Poly1305_32+Hacl.Poly1305_128+Hacl.Poly1305_256=Hacl.Poly1305.*,Hacl.Impl.Poly1305,Hacl.Impl.Poly1305.*[rename=Hacl_Poly1305] \
   -bundle Hacl.Impl.Chacha20,Hacl.Impl.Chacha20.*[rename=Hacl_Chacha20_new] \
+  -bundle Hacl.Curve25519_51+Hacl.Curve25519_64=Hacl.Impl.Curve25519.*[rename=Hacl_Curve25519_new] \
   -bundle LowStar.* \
   -bundle Prims,C.Failure,C,C.String,C.Loops,Spec.Loops,C.Endianness,FStar.*[rename=Hacl_Kremlib] \
   -bundle 'EverCrypt.Spec.*' \
-  -bundle 'MerkleTree.*' \
+  -bundle 'MerkleTree.New.Low+MerkleTree.New.Low.Serialization=[rename=MerkleTree]' \
   -bundle 'Test,Test.*,WindowsHack' \
   -bundle EverCrypt.Hash+EverCrypt.Hash.Incremental=[rename=EverCrypt_Hash] \
   -library EverCrypt.AutoConfig,EverCrypt.OpenSSL,EverCrypt.BCrypt \
   -minimal \
   -add-include '"kremlin/internal/types.h"' \
   -add-include '"kremlin/internal/target.h"' \
-  -add-include '"kremlin/c_endianness.h"' \
+  -add-include '"kremlin/lowstar_endianness.h"' \
   -add-include '<string.h>'
 
 # For the time being, we rely on the old extraction to give us self-contained
@@ -677,8 +694,10 @@ dist/compact/Makefile.basic: KRML_EXTRA=$(COMPACT_FLAGS)
 
 dist/compact-msvc/Makefile.basic: KRML_EXTRA=$(COMPACT_FLAGS) -falloca -ftail-calls
 
+# MerkleTree doesn't compile in C89 mode
 dist/compact-c89/Makefile.basic: \
-  KRML_EXTRA=$(COMPACT_FLAGS) -fc89 -ccopt -std=c89 -ccopt -Wno-typedef-redefinition
+  KRML_EXTRA=$(patsubst 'Merkle%[rename=MerkleTree]','MerkleTree.*',$(COMPACT_FLAGS)) \
+    -fc89 -ccopt -std=c89 -ccopt -Wno-typedef-redefinition
 dist/compact-c89/Makefile.basic: \
   HACL_OLD_FILES:=$(subst -c,-c89,$(HACL_OLD_FILES))
 
@@ -690,8 +709,19 @@ dist/coco/Makefile.basic: \
     -bundle '\*[rename=EverCrypt_Misc]'
 
 # The "coco" distribution is only optimized when EVERCRYPT_CONFIG=everest.
+# Everest means: no openssl, no bcrypt
 ifeq ($(EVERCRYPT_CONFIG),everest)
 dist/coco/Makefile.basic: HAND_WRITTEN_OPTIONAL_FILES =
+endif
+
+# For Kaizala, no BCrypt, no Vale.
+ifeq ($(EVERCRYPT_CONFIG),kaizala)
+dist/compact/Makefile.basic: \
+  HAND_WRITTEN_OPTIONAL_FILES := $(filter-out %_bcrypt.c,$(HAND_WRITTEN_OPTIONAL_FILES))
+dist/compact/Makefile.basic: \
+  HAND_WRITTEN_FILES := $(filter-out %_vale_stubs.c,$(HAND_WRITTEN_FILES))
+dist/compact/Makefile.basic: \
+  VALE_ASMS :=
 endif
 
 .PRECIOUS: dist/%/Makefile.basic
@@ -700,7 +730,7 @@ dist/%/Makefile.basic: $(ALL_KRML_FILES) dist/hacl-internal-headers/Makefile.bas
 	mkdir -p $(dir $@)
 	cp $(HACL_OLD_FILES) $(patsubst %.c,%.h,$(HACL_OLD_FILES)) $(dir $@)
 	cp $(HAND_WRITTEN_FILES) $(HAND_WRITTEN_H_FILES) $(HAND_WRITTEN_OPTIONAL_FILES) dist/hacl-internal-headers/*.h $(dir $@)
-	cp $(VALE_ASMS) $(dir $@)
+	[ x"$(VALE_ASMS)" != x ] && cp $(VALE_ASMS) $(dir $@) || true
 	$(KRML) $(DEFAULT_FLAGS) $(KRML_EXTRA) \
 	  -tmpdir $(dir $@) -skip-compilation \
 	  $(filter %.krml,$^) \

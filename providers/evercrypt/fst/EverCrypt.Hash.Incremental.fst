@@ -124,7 +124,7 @@ let add_len_small a (total_len: UInt64.t) (len: UInt32.t): Lemma
   FStar.Math.Lemmas.modulo_distributivity (v total_len) (v len) (block_length a)
 #pop-options
 
-#push-options "--z3rlimit 50"
+#push-options "--z3rlimit 100"
 let update_small a s prev data len =
   let State hash_state buf total_len = s in
   let sz = rest a total_len in
@@ -158,7 +158,7 @@ val update_empty_buf:
     (ensures fun h0 s' h1 ->
       update_post a s s' prev data len h0 h1)
 
-#push-options "--z3rlimit 100"
+#push-options "--z3rlimit 150"
 let split_at_last_blocks (a: Hash.alg) (b: bytes) (d: bytes): Lemma
   (requires (
     let blocks, rest = split_at_last a b in

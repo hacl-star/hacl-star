@@ -36,40 +36,37 @@ val add1_inline
     B.modifies (B.loc_buffer out) h0 h1 /\
     as_nat out h1 + pow2_256 * UInt64.v c == as_nat f1 h0 + UInt64.v f2)  
 
-// [@ (CCConv "stdcall") ]
-// val fadd
-//   (out:u256)
-//   (f1:u256)
-//   (f2:u256)
-//   : Stack unit
-//     (requires fun h -> 
-//       adx_enabled /\ bmi2_enabled /\
-//       B.live h f1 /\ B.live h f2 /\ B.live h out /\
-//       (B.disjoint out f1 \/ out == f1) /\ 
-//       (B.disjoint out f2 \/ out == f2) /\ 
-//       (B.disjoint f1 f2 \/ f1 == f2))
-//     (ensures  fun h0 _ h1 ->
-//       B.modifies (B.loc_buffer out) h0 h1 /\
-//       (as_nat out h1) % prime == (as_nat f1 h0 + as_nat f2 h0) % prime)
+val fadd_inline
+  (out:u256)
+  (f1:u256)
+  (f2:u256)
+  : Stack unit
+    (requires fun h -> 
+      adx_enabled /\ bmi2_enabled /\
+      B.live h f1 /\ B.live h f2 /\ B.live h out /\
+      (B.disjoint out f1 \/ out == f1) /\ 
+      (B.disjoint out f2 \/ out == f2) /\ 
+      (B.disjoint f1 f2 \/ f1 == f2))
+    (ensures  fun h0 _ h1 ->
+      B.modifies (B.loc_buffer out) h0 h1 /\
+      (as_nat out h1) % prime == (as_nat f1 h0 + as_nat f2 h0) % prime)
 
-// [@ (CCConv "stdcall") ]
-// val fsub
-//   (out:u256)
-//   (f1:u256)
-//   (f2:u256)
-//   : Stack unit
-//     (requires fun h -> 
-//       adx_enabled /\ bmi2_enabled /\
-//       B.live h f1 /\ B.live h f2 /\ B.live h out /\
-//       (B.disjoint out f1 \/ out == f1) /\ 
-//       (B.disjoint out f2 \/ out == f2) /\ 
-//       (B.disjoint f1 f2 \/ f1 == f2))
-//     (ensures  fun h0 _ h1 ->
-//       B.modifies (B.loc_buffer out) h0 h1 /\
-//       (as_nat out h1) % prime == (as_nat f1 h0 - as_nat f2 h0) % prime)
+val fsub_inline
+  (out:u256)
+  (f1:u256)
+  (f2:u256)
+  : Stack unit
+    (requires fun h -> 
+      adx_enabled /\ bmi2_enabled /\
+      B.live h f1 /\ B.live h f2 /\ B.live h out /\
+      (B.disjoint out f1 \/ out == f1) /\ 
+      (B.disjoint out f2 \/ out == f2) /\ 
+      (B.disjoint f1 f2 \/ f1 == f2))
+    (ensures  fun h0 _ h1 ->
+      B.modifies (B.loc_buffer out) h0 h1 /\
+      (as_nat out h1) % prime == (as_nat f1 h0 - as_nat f2 h0) % prime)
 
-// [@ (CCConv "stdcall") ]
-// val fmul 
+// val fmul_inline
 //   (tmp:u512)
 //   (f1:u256)
 //   (out:u256) 
@@ -89,8 +86,7 @@ val add1_inline
 //       B.modifies (B.loc_union (B.loc_buffer out) (B.loc_buffer tmp)) h0 h1 /\
 //       (as_nat out h1) % prime == (as_nat f1 h0 * as_nat f2 h0) % prime)
 
-// [@ (CCConv "stdcall") ]
-// val fmul2
+// val fmul2_inline
 //   (tmp:u1024)
 //   (f1:u512)
 //   (out:u512) 
@@ -117,8 +113,7 @@ val add1_inline
 //       (as_nat out0 h1) % prime == (as_nat f10 h0 * as_nat f20 h0) % prime /\
 //       (as_nat out1 h1) % prime == (as_nat f11 h0 * as_nat f21 h0) % prime))
 
-// [@ (CCConv "stdcall") ]
-// val fmul1
+// val fmul1_inline
 //   (out:u256)
 //   (f1:u256) 
 //   (f2:UInt64.t{UInt64.v f2 < 121665})
@@ -131,8 +126,7 @@ val add1_inline
 //       B.modifies (B.loc_buffer out) h0 h1 /\
 //       as_nat out h1 % prime == (as_nat f1 h0 * UInt64.v f2) % prime)
 
-// [@ (CCConv "stdcall") ]
-// val fsqr
+// val fsqr_inline
 //   (tmp:u512)
 //   (f1:u256)
 //   (out:u256)
@@ -148,8 +142,7 @@ val add1_inline
 //       B.modifies (B.loc_union (B.loc_buffer out) (B.loc_buffer tmp)) h0 h1 /\
 //       (as_nat out h1) % prime == (as_nat f1 h0 * as_nat f1 h0) % prime)
 
-// [@ (CCConv "stdcall") ]
-// val fsqr2
+// val fsqr2_inline
 //   (tmp:u1024)
 //   (f1:u512)
 //   (out:u512) 
@@ -170,8 +163,7 @@ val add1_inline
 //       (as_nat out0 h1) % prime == (as_nat f10 h0 * as_nat f10 h0) % prime /\
 //       (as_nat out1 h1) % prime == (as_nat f11 h0 * as_nat f11 h0) % prime))
 
-// [@ (CCConv "stdcall") ]
-// val cswap2
+// val cswap2_inline
 //   (p0:u512)
 //   (p1:u512)
 //   (bit:UInt64.t{UInt64.v bit <= 1})
