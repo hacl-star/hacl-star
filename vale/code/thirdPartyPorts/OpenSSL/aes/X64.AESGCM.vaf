@@ -301,7 +301,7 @@ procedure {:quick} Ctr32_ghash_6_prelude(
     )
     lets
 //      inp @= rdi; outp @= rsi; len @= rdx; key @= rcx; ivp @= r8; Xip @= r9;
-        len @= rdx; key @= rcx; 
+        key @= rcx; 
         T1 @= xmm1; T2 @= xmm2;
         Z0 @= xmm4; 
     
@@ -316,7 +316,6 @@ procedure {:quick} Ctr32_ghash_6_prelude(
         memTaint;
 
     modifies
-        len; 
         T2; Z0; 
         inout0; inout1; inout2; inout3; inout4; inout5; rndkey;
         constp; mem; efl;
@@ -328,16 +327,12 @@ procedure {:quick} Ctr32_ghash_6_prelude(
         // AES reqs
         aes_reqs(alg, key_words, round_keys, keys_b, key, mem, memTaint);
 
-        len >= 6;
-
         // Counters
         ctr_orig.lo0 % 256 + 6 < 256;
         T1 == reverse_bytes_quad32(inc32lite(ctr_orig, 0));
     ensures
         modifies_buffer_specific128(stack_b, old(mem), mem, 1, 1);
 
-        len == old(len) - 6;
-        
         T2 == Mkfour(0, 0, 0, 0x1000000);
         rndkey == index(round_keys, 0);
 
@@ -352,7 +347,6 @@ procedure {:quick} Ctr32_ghash_6_prelude(
         //stack_b[1](mem) == Mkfour(0, 0, 0, 0);
 {
     Load_one_msb();   // # borrow $T2, .Lone_msb
-    Sub64(len, 6);
     VPxor(Z0, Z0, Z0);  // # $Z0   = 0
     lemma_quad32_xor();
     Load128_buffer(rndkey, key, 0x00-0x80, Secret, keys_b, 0);
@@ -2004,7 +1998,7 @@ procedure {:quick} Loop6x_partial(
 }
 
 #reset-options "--z3rlimit 30"
-procedure {:quick} {:frame false} {:verify true} Loop6x(
+procedure {:quick} {:frame false} Loop6x(
     inline alg:algorithm,  
     ghost count:nat,        // Number of 6x128-bit blocks processed so far
     ghost iv_b:buffer128,
@@ -2207,7 +2201,7 @@ procedure {:quick} {:frame false} {:verify true} Loop6x(
     }
 }
 
-/*
+
 #reset-options "--z3rlimit 300"
 procedure {:quick exportOnly} {:frame false} Loop6x_loop(
     inline alg:algorithm,  
@@ -2222,6 +2216,7 @@ procedure {:quick exportOnly} {:frame false} Loop6x_loop(
     ghost key_words:seq(nat32),
     ghost round_keys:seq(quad32),
     ghost keys_b:buffer128,
+    ghost hkeys_b:buffer128,
 
     ghost ctr_BE_orig:quad32,
     ghost ctr_BE:quad32
@@ -2260,16 +2255,20 @@ procedure {:quick exportOnly} {:frame false} Loop6x_loop(
         validDstAddrsOffset128(mem, outp, out_b, count*6, len, memTaint, Secret);
 
         validDstAddrs128(mem, rsp, stack_b, 8, memTaint, Secret);
+        validSrcAddrs128(mem, Xip - 0x20, hkeys_b, 8, memTaint, Secret);
         buffers_disjoint128(iv_b, keys_b);
         buffers_disjoint128(iv_b, stack_b);
         buffers_disjoint128(iv_b, in0_b);
         buffers_disjoint128(iv_b, in_b);
         buffers_disjoint128(iv_b, out_b);
+        buffers_disjoint128(iv_b, hkeys_b);
         buffers_disjoint128(stack_b, keys_b);
         buffers_disjoint128(stack_b, in0_b);
         buffers_disjoint128(stack_b, in_b);
         buffers_disjoint128(stack_b, out_b);
+        buffers_disjoint128(stack_b, hkeys_b);
         buffers_disjoint128(out_b, keys_b);
+        buffers_disjoint128(out_b, hkeys_b);
         buffers_disjoint128(in_b, out_b) || in_b == out_b;
         partial_seq_agreement(plain_quads, buffer128_as_seq(mem, in_b), count*6, length(buffer128_as_seq(mem, in_b)));
          inp + 0x10*len < pow2_64;
@@ -2316,8 +2315,6 @@ procedure {:quick exportOnly} {:frame false} Loop6x_loop(
         r9  == old(r9);
         r10 == old(r10);
         r15 == old(r15);
-        xmm4 == old(xmm4);
-        xmm8 == old(xmm8);
 
         memTaint == old(memTaint);
 
@@ -2352,8 +2349,6 @@ procedure {:quick exportOnly} {:frame false} Loop6x_loop(
             r9  == old(r9);
             r10 == old(r10);
             r15 == old(r15);
-            xmm4 == old(xmm4);
-            xmm8 == old(xmm8);
             memTaint == old(memTaint);
 
             len == old(len) - 6*iter;
@@ -2372,16 +2367,20 @@ procedure {:quick exportOnly} {:frame false} Loop6x_loop(
             len > 0 ==> validDstAddrsOffset128(mem, outp, out_b, count*6 + iter*6, old(len) - iter*6, memTaint, Secret);
 
             validDstAddrs128(mem, rsp, stack_b, 8, memTaint, Secret);
+            validSrcAddrs128(mem, Xip - 0x20, hkeys_b, 8, memTaint, Secret);
             buffers_disjoint128(iv_b, keys_b);
             buffers_disjoint128(iv_b, stack_b);
             buffers_disjoint128(iv_b, in0_b);
             buffers_disjoint128(iv_b, in_b);
             buffers_disjoint128(iv_b, out_b);
+            buffers_disjoint128(iv_b, hkeys_b);
             buffers_disjoint128(stack_b, keys_b);
             buffers_disjoint128(stack_b, in0_b);
             buffers_disjoint128(stack_b, in_b);
             buffers_disjoint128(stack_b, out_b);
+            buffers_disjoint128(stack_b, hkeys_b);
             buffers_disjoint128(out_b, keys_b);
+            buffers_disjoint128(out_b, hkeys_b);
             buffers_disjoint128(in_b, out_b) || in_b == out_b;
             old(length(buffer128_as_seq(mem, in_b))) >= 6;
             len > 0 ==> partial_seq_agreement(plain_quads, buffer128_as_seq(mem, in_b), 6*count + 6*iter, old(length(buffer128_as_seq(mem, in_b))));
@@ -2433,14 +2432,26 @@ procedure {:quick exportOnly} {:frame false} Loop6x_loop(
 
     {
         Loop6x(alg, count+iter, iv_b, in0_b, in_b, out_b, stack_b, plain_quads,
-               key_words, round_keys, keys_b, ctr_BE_orig, ctr);
+               key_words, round_keys, keys_b, hkeys_b, ctr_BE_orig, ctr);
         iter := #nat(iter + 1);
         ctr := inc32(ctr, 6);
+////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
+//
+//
+//             TODO!
+//
+////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
+    assume false;
     }
 }
 
 
-        
 #reset-options "--z3rlimit 40"
 procedure {:quick} AESNI_ctr32_6x_preamble(
     inline alg:algorithm,  // OpenSSL includes the number of rounds (nr) as a dynamic parameter (stored with the key).  Saves code space but adds extra instructions to the fast path.  Maybe branch predictor is good enough for it not to matter
@@ -3030,7 +3041,7 @@ procedure {:quick} Encrypt_save_and_shuffle_output(
 }
 
 #reset-options "--z3rlimit 30"
-procedure {:quick} AES_GCM_encrypt(
+procedure {:quick} {:verify true} AES_GCM_encrypt(
     inline alg:algorithm,  
     ghost iv_b:buffer128,
     ghost in_b:buffer128,
@@ -3039,7 +3050,8 @@ procedure {:quick} AES_GCM_encrypt(
 
     ghost key_words:seq(nat32),
     ghost round_keys:seq(quad32),
-    ghost keys_b:buffer128
+    ghost keys_b:buffer128,
+    ghost hkeys_b:buffer128
     ) returns (
     ghost ctr_BE:quad32
     )
@@ -3054,11 +3066,11 @@ procedure {:quick} AES_GCM_encrypt(
         counter @= rbx; constp @= r11; in0 @= r14;
 
     reads
-        ivp; Xip; rsp;
+        ivp; rsp;
         memTaint;
 
     modifies
-        inp; outp; len; key; counter; constp; r12; r13; in0;
+        inp; outp; len; key; Xip; counter; constp; r12; r13; in0;
         Ii; T1; T2; Hkey; Z0; Z1; Z2; Z3; Xi;
         inout0; inout1; inout2; inout3; inout4; inout5; rndkey;
         mem; efl;
@@ -3069,6 +3081,7 @@ procedure {:quick} AES_GCM_encrypt(
         validSrcAddrs128(mem,  inp,  in_b, len, memTaint, Secret);
         validDstAddrs128(mem, outp, out_b, len, memTaint, Secret);
         validDstAddrs128(mem, rsp, stack_b, 8, memTaint, Secret);
+        validSrcAddrs128(mem, Xip, hkeys_b, 10, memTaint, Secret);
 
         buffers_disjoint128(iv_b, keys_b);
         buffers_disjoint128(iv_b, stack_b);
@@ -3086,6 +3099,7 @@ procedure {:quick} AES_GCM_encrypt(
         buffer_length(in_b) == buffer_length(out_b);
         buffer_length(in_b) == len;
         4096 * (buffer_length(in_b)) * 16 < pow2_32;
+        Xip + 0x40 < pow2_64;
 
         // AES reqs
         buffer_addr(keys_b, mem) + 0x80 < pow2_64;
@@ -3097,12 +3111,12 @@ procedure {:quick} AES_GCM_encrypt(
         len / 6 >= 3;   // Should be implied by above... :(
         12 + len + 6 < pow2_32;
     ensures
-        let iv_LE := old(buffer128_read(iv_b, 0, mem));
-        let iv_BE := reverse_bytes_quad32(iv_LE);
-        ctr_BE == Mkfour(2, iv_BE.lo1, iv_BE.hi2, iv_BE.hi3);
-        //is_gctr_plain_LE(le_seq_quad32_to_bytes(old(buffer128_as_seq(mem, in_b)))) && is_aes_key_LE(alg, key_words);
-        
-        le_seq_quad32_to_bytes(buffer128_as_seq(mem, out_b)) == gctr_encrypt_LE(ctr_BE, le_seq_quad32_to_bytes(old(buffer128_as_seq(mem, in_b))), alg, key_words);
+//        let iv_LE := old(buffer128_read(iv_b, 0, mem));
+//        let iv_BE := reverse_bytes_quad32(iv_LE);
+//        ctr_BE == Mkfour(2, iv_BE.lo1, iv_BE.hi2, iv_BE.hi3);
+//        //is_gctr_plain_LE(le_seq_quad32_to_bytes(old(buffer128_as_seq(mem, in_b)))) && is_aes_key_LE(alg, key_words);
+//        
+//        le_seq_quad32_to_bytes(buffer128_as_seq(mem, out_b)) == gctr_encrypt_LE(ctr_BE, le_seq_quad32_to_bytes(old(buffer128_as_seq(mem, in_b))), alg, key_words);
 {
     ghost var plain_quads := buffer128_as_seq(mem, in_b);
     Load128_buffer(T1, ivp, 0, Secret, iv_b, 0);    // # input counter value
@@ -3141,15 +3155,23 @@ procedure {:quick} AES_GCM_encrypt(
     
     AESNI_ctr32_6x(alg, 1, in_b, out_b, plain_quads, key_words, round_keys, keys_b, inc32(ctr_BE, 6), ctr_BE);
     Sub64(len, 12);
+    Load128_buffer(Xi, Xip, 0, Secret, hkeys_b, 0); // # load Xi
+    AddLea64(Xip, Xip, 0x40);   // # size optimization
 
     Ctr32_ghash_6_prelude(alg, stack_b, key_words, round_keys, keys_b, inc32(ctr_BE, 12));
     Mov64(counter, 14);
     ghost var mid_len := len;
     assert mid_len == old(len) - 12;
-    Loop6x_loop(alg, 2, iv_b, out_b, in_b, out_b, stack_b, old(buffer128_as_seq(mem, in_b)), key_words, round_keys, keys_b, ctr_BE, inc32(ctr_BE, 12)); 
+    Loop6x_loop(alg, 2, iv_b, out_b, in_b, out_b, stack_b, old(buffer128_as_seq(mem, in_b)), key_words, round_keys, keys_b, hkeys_b, ctr_BE, inc32(ctr_BE, 12)); 
+/*
     ghost var out_snapshot := buffer128_as_seq(mem, out_b);
-
+    Load128_buffer(Z3, rsp, 0x20, Secret, hkeys_b, 2); // # I[5]
     InitPshufbMask(Ii, r12);    // # borrow $Ii for .Lbswap_mask
+    Load128_buffer(Hkey, Xip, 0x00-0x20, Secret, hkeys_b, 0);   // # $Hkey^1
+    VShufpd(T1, Z3, Z3, 0);     // =?= vpunpckhqdq	$Z3,$Z3,$T1
+    Load128_buffer(rndkey, Xip, 0x20-0x20, Secret, hkeys_b, 2);   // # borrow $rndkey for $HK
+    VpolyAdd(T1, T1, Z3);   // Moved up two instructions compared to OpenSSL, to avoid mixing with Encrypt_save_and_shuffle_output
+
     assert {:quick_type} old(len) / 6 >= 3;
     ghost var offset_in := #nat((old(len) / 6) - 1);
     Encrypt_save_and_shuffle_output(offset_in, out_b); 
@@ -3162,5 +3184,5 @@ procedure {:quick} AES_GCM_encrypt(
     gctr_partial_to_full_basic(ctr_BE, old(buffer128_as_seq(mem, in_b)), alg, key_words, buffer128_as_seq(mem, out_b));
     //assert {:quick_type} is_gctr_plain_LE(le_seq_quad32_to_bytes(old(buffer128_as_seq(mem, in_b)))) && is_aes_key_LE(alg, key_words);
     //assert le_seq_quad32_to_bytes(buffer128_as_seq(mem, out_b)) == gctr_encrypt_LE(ctr_BE, le_seq_quad32_to_bytes(old(buffer128_as_seq(mem, in_b))), alg, key_words);
+    */
 }
-*/
