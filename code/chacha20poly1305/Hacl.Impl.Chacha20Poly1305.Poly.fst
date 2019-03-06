@@ -65,9 +65,7 @@ let poly1305_do_core_padded s aadlen aad mlen m ctx =
   let h_pre = ST.get() in
   push_frame();
   let h0 = ST.get() in
-  // TODO: This should verify, but the previous assertion fails
-  assume (Seq.equal (as_seq h_pre ctx) (as_seq h0 ctx));
-  same_ctx_same_r_acc #s ctx h_pre h0;
+  same_ctx_same_r_acc ctx h_pre h0;
   // TODO: This should use the temporary buffer from the main function, but adding it to the modifies clause blows up verification
   let block = create 16ul (u8 0) in
   let h1 = get() in

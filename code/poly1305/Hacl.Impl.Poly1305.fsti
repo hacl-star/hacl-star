@@ -18,7 +18,7 @@ module F32xN = Hacl.Impl.Poly1305.Field32xN
 // The absence of inline_for_extraction / noextract is totally intentional. This relies on the
 // unsupported KreMLin feature that whenever an indexed type cannot be expressed in Low*, it gets
 // erased as "any", i.e. void*. In this case, this becomes "buffer any", i.e. void **.
-type poly1305_ctx (s:field_spec) = lbuffer (limb s) (nlimb s +. precomplen s)
+let poly1305_ctx (s:field_spec) = lbuffer (limb s) (nlimb s +. precomplen s)
 
 noextract
 val as_get_acc: #s:field_spec -> h:mem -> ctx:poly1305_ctx s -> GTot (S.elem (width s))

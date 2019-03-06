@@ -54,7 +54,7 @@ val poly1305_init:
   ctx:Poly.poly1305_ctx s ->
   k:lbuffer uint8 32ul ->
   Stack unit
-    (requires fun h -> live h ctx /\ live h k)
+    (requires fun h -> live h ctx /\ live h k /\ disjoint ctx k)
     (ensures fun h0 _ h1 -> modifies (loc ctx) h0 h1 /\
       (let acc, r = SpecPoly.poly1305_init (as_seq h0 k) in
       acc == Seq.index (Poly.as_get_acc h1 ctx) 0 /\
@@ -66,7 +66,7 @@ val update1:
   len:size_t{v len <= 16} ->
   text:lbuffer uint8 len ->
   Stack unit
-    (requires fun h -> live h ctx /\ live h text)
+    (requires fun h -> live h ctx /\ live h text /\ disjoint ctx text)
     (ensures fun h0 _ h1 -> 
       modifies (loc ctx) h0 h1 /\
       // Additional framing for r_elem
