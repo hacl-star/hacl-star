@@ -95,6 +95,6 @@ let aead_decrypt k n cipher mac aad =
   let poly_k = sub key0 0 32 in
   let computed_mac = poly1305_do poly_k clen cipher len_aad aad in
   if lbytes_eq computed_mac mac then
-    let plain = Spec.Chacha20.chacha20_decrypt_bytes k n 1 cipher in
+    let plain = Spec.Chacha20.chacha20_encrypt_bytes k n 1 cipher in
     Some plain
   else None

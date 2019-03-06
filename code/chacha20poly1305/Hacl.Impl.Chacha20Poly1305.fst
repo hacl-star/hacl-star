@@ -37,7 +37,7 @@ val aead_encrypt_chacha_poly_:
       (Seq.concat (as_seq h1 cipher) (as_seq h1 mac))
       (Spec.aead_encrypt (as_seq h0 k) (as_seq h0 n) (as_seq h0 m) (as_seq h0 aad))))
 
-#set-options "--z3rlimit 50"
+#set-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
 
 let aead_encrypt_chacha_poly_ k n aadlen aad mlen m cipher mac =
   let h0 = ST.get() in
@@ -75,7 +75,7 @@ let aead_decrypt_chacha_poly k n aadlen aad mlen m cipher mac =
     if lbytes_eq computed_mac mac then (
       assert (Lib.ByteSequence.lbytes_eq (as_seq h1 computed_mac) (as_seq h1 mac));
       // If the computed mac matches the mac given, decrypt the ciphertext and return 0
-      Chacha.chacha20_decrypt mlen m cipher k n 1ul;
+      Chacha.chacha20_encrypt mlen m cipher k n 1ul;
       0ul
     ) else 1ul // Macs do not agree, do not decrypt
   in

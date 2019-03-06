@@ -15,6 +15,7 @@ module Spec = Spec.Chacha20Poly1305
 module Poly = Hacl.Impl.Poly1305
 module SpecPoly = Spec.Poly1305
 open Hacl.Impl.Chacha20Poly1305.PolyCore
+open Hacl.Impl.Chacha20Poly1305.PolyLemmas
 open Hacl.Impl.Poly1305.Fields
 module ChachaCore = Hacl.Impl.Chacha20.Core32
 module Chacha = Hacl.Impl.Chacha20
@@ -40,17 +41,18 @@ let derive_key k n out =
   pop_frame()
 
 val poly1305_do_core_padded:
-  s:field_spec ->         // Needed for the vectorized operation
   aadlen:size_t ->
   aad:lbuffer uint8 aadlen -> // authenticated additional data  
   (mlen:size_t{v mlen + 16 <= max_size_t /\ v aadlen + v mlen / 64 <= max_size_t}) ->
   m:lbuffer uint8 mlen -> // plaintext
-  ctx:Poly.poly1305_ctx s ->
+  ctx:Poly.poly1305_ctx M32 ->
   Stack unit
     (requires fun h ->
+      Poly.state_inv_t h ctx /\
       live h aad /\ live h m /\ live h ctx /\
       disjoint ctx aad /\ disjoint ctx m)
     (ensures (fun h0 _ h1 -> modifies (loc ctx) h0 h1 /\
+      Poly.state_inv_t h1 ctx /\
       // Additional framing for r_elem
       Seq.index (Poly.as_get_r h0 ctx) 0 == Seq.index (Poly.as_get_r h1 ctx) 0 /\
       (let r = Seq.index (Poly.as_get_r h0 ctx) 0 in
@@ -61,7 +63,7 @@ val poly1305_do_core_padded:
 
 #set-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0"
 
-let poly1305_do_core_padded s aadlen aad mlen m ctx =
+let poly1305_do_core_padded aadlen aad mlen m ctx =
   let h_pre = ST.get() in
   push_frame();
   let h0 = ST.get() in
@@ -84,7 +86,6 @@ let poly1305_do_core_padded s aadlen aad mlen m ctx =
   same_ctx_same_r_acc ctx h4 h_pop
 
 val poly1305_do_core_to_bytes:
-  s:field_spec ->         // Needed for the vectorized operation
   aadlen:size_t ->
   (mlen:size_t{v mlen + 16 <= max_size_t /\ v aadlen + v mlen / 64 <= max_size_t}) ->
   block:lbuffer uint8 16ul ->
@@ -97,7 +98,7 @@ val poly1305_do_core_to_bytes:
       let gblock = Seq.update_sub gblock 8 8 gciphertext_len8 in
       Seq.equal (as_seq h1 block) gblock)))
 
-let poly1305_do_core_to_bytes s aadlen mlen block =
+let poly1305_do_core_to_bytes aadlen mlen block =
   // Encode the length of the aad into bytes, 
   // and store it in the first eight bytes of the temporary block
   let h0 = ST.get() in
@@ -127,14 +128,15 @@ let poly1305_do_core_to_bytes s aadlen mlen block =
   Classical.forall_intro aux
 
 val poly1305_do_core_finish:
-  s:field_spec ->         // Needed for the vectorized operation
   k:lbuffer uint8 32ul -> // key
   out:lbuffer uint8 16ul -> // output: tag
-  ctx:Poly.poly1305_ctx s ->
+  ctx:Poly.poly1305_ctx M32 ->
   block:lbuffer uint8 16ul ->
   Stack unit
     (requires fun h ->
+      Poly.state_inv_t h ctx /\
       live h k /\ live h out /\ live h ctx /\ live h block /\
+      disjoint out k /\
       disjoint ctx k /\ disjoint ctx out /\ disjoint ctx block /\
       disjoint block k /\ disjoint block out)
     (ensures (fun h0 _ h1 -> modifies (loc out |+| loc ctx) h0 h1 /\
@@ -144,45 +146,44 @@ val poly1305_do_core_finish:
        let tag = SpecPoly.finish (as_seq h0 k) acc in
        Seq.equal (as_seq h1 out) tag)))
 
-let poly1305_do_core_finish s k out ctx block =
+let poly1305_do_core_finish k out ctx block =
   update1 ctx 16ul block;
   finish ctx k out
 
 val poly1305_do_core_:
-  s:field_spec ->         // Needed for the vectorized operation
   k:lbuffer uint8 32ul -> // key
   aadlen:size_t ->
   aad:lbuffer uint8 aadlen -> // authenticated additional data  
   (mlen:size_t{v mlen + 16 <= max_size_t /\ v aadlen + v mlen / 64 <= max_size_t}) ->
   m:lbuffer uint8 mlen -> // plaintext
   out:lbuffer uint8 16ul -> // output: tag
-  ctx:Poly.poly1305_ctx s ->
+  ctx:Poly.poly1305_ctx M32 ->
   block:lbuffer uint8 16ul ->
   Stack unit
     (requires fun h ->
       Seq.equal (as_seq h block) (Seq.create 16 (u8 0)) /\
       live h k /\ live h aad /\ live h m /\ live h out /\ live h ctx /\ live h block /\
+      disjoint k out /\
       disjoint ctx k /\ disjoint ctx aad /\ disjoint ctx m /\ disjoint ctx out /\ disjoint ctx block /\
       disjoint block k /\ disjoint block aad /\ disjoint block m /\ disjoint block out)
     (ensures (fun h0 _ h1 -> modifies (loc out |+| loc ctx |+| loc block) h0 h1 /\
       Seq.equal (as_seq h1 out) 
         (Spec.poly1305_do (as_seq h0 k) (v mlen) (as_seq h0 m) (v aadlen) (as_seq h0 aad))))
 
-let poly1305_do_core_ s k aadlen aad mlen m out ctx block =
+let poly1305_do_core_ k aadlen aad mlen m out ctx block =
   poly1305_init ctx k;
 
-  poly1305_do_core_padded s aadlen aad mlen m ctx;
+  poly1305_do_core_padded aadlen aad mlen m ctx;
 
   let h3 = ST.get() in
-  poly1305_do_core_to_bytes s aadlen mlen block;
+  poly1305_do_core_to_bytes aadlen mlen block;
   let h4 = ST.get () in
   same_ctx_same_r_acc ctx h3 h4;
  
-  poly1305_do_core_finish s k out ctx block
+  poly1305_do_core_finish k out ctx block
 
 // Implements the actual poly1305_do operation
 val poly1305_do_core:
-  s:field_spec ->         // Needed for the vectorized operation
   k:lbuffer uint8 32ul -> // key
   aadlen:size_t ->
   aad:lbuffer uint8 aadlen -> // authenticated additional data  
@@ -191,6 +192,7 @@ val poly1305_do_core:
   out:lbuffer uint8 16ul -> // output: tag
   Stack unit
     (requires fun h ->
+      disjoint k out /\
       live h k /\ live h aad /\ live h m /\ live h out)
     (ensures (fun h0 _ h1 -> modifies (loc out) h0 h1 /\
       Seq.equal (as_seq h1 out) 
@@ -198,11 +200,11 @@ val poly1305_do_core:
 
 #set-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 1"
 
-let poly1305_do_core s k aadlen aad mlen m out =
+let poly1305_do_core k aadlen aad mlen m out =
   push_frame();
-  let ctx = create (nlimb s +. precomplen s) (limb_zero s) in
+  let ctx = create (nlimb M32 +. precomplen M32) (limb_zero M32) in
   let block = create 16ul (u8 0) in
-  poly1305_do_core_ s k aadlen aad mlen m out ctx block;
+  poly1305_do_core_ k aadlen aad mlen m out ctx block;
   pop_frame()
 
 // Derives the key, and then perform poly1305
@@ -229,6 +231,6 @@ let poly1305_do k n aadlen aad mlen m out =
   // The derived key should only be the first 32 bytes
   let key = sub tmp 0ul 32ul in
   // M32 can be abstracted away for a vectorized AEAD
-  poly1305_do_core M32 key aadlen aad mlen m out;
+  poly1305_do_core key aadlen aad mlen m out;
   pop_frame()
 

@@ -15,28 +15,17 @@ module Spec = Spec.Chacha20Poly1305
 module Poly = Hacl.Impl.Poly1305
 open Hacl.Impl.Poly1305.Fields
 
-val same_ctx_same_r_acc:
-  #s:field_spec ->
-  ctx:Poly.poly1305_ctx s ->
-  h0:mem ->
-  h1:mem ->
-  Lemma
-    (requires Seq.equal (as_seq h0 ctx) (as_seq h1 ctx))
-    (ensures 
-      Seq.index (Poly.as_get_acc h0 ctx) 0 == Seq.index (Poly.as_get_acc h1 ctx) 0 /\
-      Seq.index (Poly.as_get_r h0 ctx) 0 == Seq.index (Poly.as_get_r h1 ctx) 0
-    )
-
 val poly1305_padded:
-  #s:field_spec ->
-  ctx:Poly.poly1305_ctx s ->
+  ctx:Poly.poly1305_ctx M32 ->
   len:size_t ->
   text:lbuffer uint8 len ->
   tmp:lbuffer uint8 16ul ->
   Stack unit
-    (requires fun h -> live h ctx /\ live h text /\ live h tmp)
+    (requires fun h -> live h ctx /\ live h text /\ live h tmp /\
+      Poly.state_inv_t h ctx)
     (ensures fun h0 _ h1 -> 
       modifies (loc tmp |+| loc ctx) h0 h1 /\
+      Poly.state_inv_t h1 ctx /\
       // Additional framing for r_elem
       Seq.index (Poly.as_get_r h0 ctx) 0 == Seq.index (Poly.as_get_r h1 ctx) 0 /\
       // Functional spec
@@ -50,25 +39,26 @@ val poly1305_padded:
         )
 
 val poly1305_init:
-  #s:field_spec ->
-  ctx:Poly.poly1305_ctx s ->
+  ctx:Poly.poly1305_ctx M32 ->
   k:lbuffer uint8 32ul ->
   Stack unit
     (requires fun h -> live h ctx /\ live h k /\ disjoint ctx k)
     (ensures fun h0 _ h1 -> modifies (loc ctx) h0 h1 /\
+      Poly.state_inv_t h1 ctx /\
       (let acc, r = SpecPoly.poly1305_init (as_seq h0 k) in
       acc == Seq.index (Poly.as_get_acc h1 ctx) 0 /\
       r == Seq.index (Poly.as_get_r h1 ctx) 0))
 
 val update1:
-  #s:field_spec ->
-  ctx:Poly.poly1305_ctx s ->
+  ctx:Poly.poly1305_ctx M32 ->
   len:size_t{v len <= 16} ->
   text:lbuffer uint8 len ->
   Stack unit
-    (requires fun h -> live h ctx /\ live h text /\ disjoint ctx text)
+    (requires fun h -> live h ctx /\ live h text /\ disjoint ctx text /\
+      Poly.state_inv_t h ctx)
     (ensures fun h0 _ h1 -> 
       modifies (loc ctx) h0 h1 /\
+      Poly.state_inv_t h1 ctx /\
       // Additional framing for r_elem
       Seq.index (Poly.as_get_r h0 ctx) 0 == Seq.index (Poly.as_get_r h1 ctx) 0 /\    
       // Functional spec
@@ -81,11 +71,12 @@ val update1:
         )
 
 val finish:
-  #s:field_spec ->
-  ctx:Poly.poly1305_ctx s ->
+  ctx:Poly.poly1305_ctx M32 ->
   k:lbuffer uint8 32ul -> // key
   out:lbuffer uint8 16ul -> // output: tag
   Stack unit
-    (requires fun h -> live h ctx /\ live h k /\ live h out)
-    (ensures fun h0 _ h1 -> modifies (loc out) h0 h1 /\
+    (requires fun h -> live h ctx /\ live h k /\ live h out /\
+      disjoint out k /\ disjoint out ctx /\ disjoint k ctx /\
+      Poly.state_inv_t h ctx)
+    (ensures fun h0 _ h1 -> modifies (loc out |+| loc ctx) h0 h1 /\
       as_seq h1 out == SpecPoly.finish (as_seq h0 k) (Seq.index (Poly.as_get_acc h0 ctx) 0))
