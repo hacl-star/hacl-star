@@ -22,6 +22,7 @@ let size_tag : size_nat = size_block
 
 type key = lbytes size_key
 type nonce = lbytes size_nonce
+type tag = lbytes size_tag
 
 /// Specification
 
@@ -82,22 +83,18 @@ let aead_encrypt k n m aad =
 val aead_decrypt:
     k: key
   -> n: nonce
-  -> c: bytes{size_tag <= length c /\ length c <= max_size_t}
+  -> c: bytes{length c + size_block <= max_size_t}
+  -> mac: tag
   -> aad: bytes{length aad <= max_size_t /\ (length c + length aad) / 64 <= max_size_t} ->
-  Tot (option (lbytes (length c - size_block)))
+  Tot (option (lbytes (length c)))
 
-let aead_decrypt k n c aad =
-  let clen = length c in
+let aead_decrypt k n cipher mac aad =
   let len_aad = length aad in
-  let nonce = create size_nonce (u8 0) in
-  let nonce = update_sub nonce 0 size_nonce n in
-  let encrypted_plaintext = sub #uint8 #clen c 0 (clen - size_block) in
-  let provided_mac = sub #uint8 #clen c (clen - size_block) size_block in
+  let clen = length cipher in
   let key0 = Spec.Chacha20.chacha20_key_block0 k n in
   let poly_k = sub key0 0 32 in
-  let computed_mac = poly1305_do poly_k (clen - size_block) encrypted_plaintext len_aad aad in
-  let result = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) computed_mac provided_mac in
-  if result then
-    let plain = Spec.Chacha20.chacha20_encrypt_bytes k n 1 encrypted_plaintext in
+  let computed_mac = poly1305_do poly_k clen cipher len_aad aad in
+  if lbytes_eq computed_mac mac then
+    let plain = Spec.Chacha20.chacha20_decrypt_bytes k n 1 cipher in
     Some plain
   else None
