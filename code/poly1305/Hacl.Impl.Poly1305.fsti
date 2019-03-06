@@ -53,6 +53,7 @@ val poly1305_update:
     (ensures  fun h0 _ h1 ->
       modifies (loc ctx) h0 h1 /\
       state_inv_t #s h1 ctx /\
+      as_get_r h0 ctx == as_get_r h1 ctx /\
       Lib.Sequence.index (as_get_acc h1 ctx) 0 ==
       S.poly_update #(width s) (as_seq h0 text) (as_get_acc h0 ctx) (as_get_r h0 ctx))
 

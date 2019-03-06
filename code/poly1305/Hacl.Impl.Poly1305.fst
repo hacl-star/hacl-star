@@ -491,6 +491,7 @@ val poly1305_update1_:
     (ensures  fun h0 _ h1 ->
       modifies (loc ctx) h0 h1 /\
       state_inv_t #s h1 ctx /\
+      as_get_r h1 ctx == as_get_r h0 ctx /\
       (as_get_acc h1 ctx).[0] ==
       S.poly_update1 (as_seq h0 text) (as_get_acc h0 ctx).[0] (as_get_r h0 ctx).[0])
 let poly1305_update1_ #s ctx len text =
@@ -511,6 +512,7 @@ val poly1305_update__:
     (ensures  fun h0 _ h1 ->
       modifies (loc ctx) h0 h1 /\
       state_inv_t #s h1 ctx /\
+      as_get_r h1 ctx == as_get_r h0 ctx /\
       (as_get_acc h1 ctx).[0] ==
       S.poly #(width s) (as_seq h0 text) (as_get_acc h0 ctx) (as_get_r h0 ctx))
 let poly1305_update__ #s ctx len text =
@@ -546,6 +548,7 @@ val poly1305_finish_:
       state_inv_t #s h ctx)
     (ensures  fun h0 _ h1 ->
       modifies (loc tag |+| loc ctx) h0 h1 /\
+      as_get_r h1 ctx == as_get_r h0 ctx /\
       as_seq h1 tag == S.finish (as_seq h0 key) (as_get_acc h0 ctx).[0])
 let poly1305_finish_ #s tag key ctx =
   let acc = get_acc ctx in

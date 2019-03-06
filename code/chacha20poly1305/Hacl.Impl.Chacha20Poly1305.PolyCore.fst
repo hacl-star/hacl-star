@@ -24,8 +24,6 @@ let poly1305_init ctx k = Poly.poly1305_init ctx k
 let update1 ctx len text = 
   let h0 = ST.get() in
   update1_equiv (Poly.as_get_r h0 ctx) (v len) (as_seq h0 text) (Poly.as_get_acc h0 ctx);
-  Poly.poly1305_update ctx len text;
-  let h1 = ST.get() in
-  assume (Seq.equal (Poly.as_get_r h0 ctx) (Poly.as_get_r h1 ctx))
+  Poly.poly1305_update ctx len text
 
 let finish ctx k out = Poly.poly1305_finish out k ctx
