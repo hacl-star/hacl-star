@@ -52,11 +52,9 @@ let aead_encrypt_chacha_poly_ k n aadlen aad mlen m cipher mac =
     )
 
 let aead_encrypt_chacha_poly k n aadlen aad mlen m out =
-  push_frame();
   let cipher = sub out 0ul mlen in
   let mac = sub out mlen 16ul in
-  aead_encrypt_chacha_poly_ k n aadlen aad mlen m cipher mac;
-  pop_frame()
+  aead_encrypt_chacha_poly_ k n aadlen aad mlen m cipher mac
 
 #set-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
 
