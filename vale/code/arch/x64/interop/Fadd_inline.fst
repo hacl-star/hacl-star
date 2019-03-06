@@ -169,7 +169,7 @@ let add1_inline out f1 f2
     x
 
 let add1_code_inline () : FStar.All.ML int =
-  PR.print_inline "add1" 0 (Some "carry_r") (List.length dom) dom code_add1 of_arg add1_regs_modified
+  PR.print_inline "add1_inline" 0 (Some "carry_r") (List.length dom) dom code_add1 of_arg add1_regs_modified
 
 
 [@__reduce__] unfold
@@ -292,7 +292,7 @@ let fadd_inline out f1 f2
     ()
 
 let fadd_code_inline () : FStar.All.ML int =
-  PR.print_inline "fadd" 0 None (List.length fadd_dom) fadd_dom code_fadd of_arg fadd_regs_modified
+  PR.print_inline "fadd_inline" 0 None (List.length fadd_dom) fadd_dom code_fadd of_arg fadd_regs_modified
 
 [@__reduce__] unfold
 let fsub_dom: IX64.arity_ok_stdcall td =
@@ -414,4 +414,4 @@ let fsub_inline out f1 f2
     ()
 
 let fsub_code_inline () : FStar.All.ML int =
-  PR.print_inline "fsub" 0 None (List.length fsub_dom) fsub_dom code_fsub of_arg fsub_regs_modified
+  PR.print_inline "fsub_inline" 0 None (List.length fsub_dom) fsub_dom code_fsub of_arg fsub_regs_modified
