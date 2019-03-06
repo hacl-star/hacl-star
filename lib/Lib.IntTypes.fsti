@@ -382,6 +382,10 @@ val logand: #t:inttype -> #l:secrecy_level
   -> b:uint_t t l
   -> uint_t t l
 
+val logand_lemma: #t:inttype{~(U1? t)} -> a:uint_t t SEC -> b:uint_t t SEC -> Lemma
+  (requires v a = 0 \/ v a = maxint t)
+  (ensures (if v a = 0 then v (a `logand` b) == 0 else v (a `logand` b) == v b))
+
 val logand_spec: #t:inttype{~(U1? t)} -> #l:secrecy_level
   -> a:uint_t t l -> b:uint_t t l
   -> Lemma (ensures (v (a `logand` b) == v a `UInt.logand #(8 * numbytes t)` v b))
@@ -392,6 +396,10 @@ val logor: #t:inttype -> #l:secrecy_level
   -> a:uint_t t l
   -> b:uint_t t l
   -> uint_t t l
+
+val logor_disjoint: #t:inttype -> a:uint_t t SEC -> b:uint_t t SEC -> m:pos{m < bits t} -> Lemma
+  (requires v a < pow2 m /\ v b % pow2 m == 0)
+  (ensures v (a `logor` b) == v a + v b)
 
 inline_for_extraction
 val lognot: #t:inttype -> #l:secrecy_level
@@ -461,6 +469,10 @@ val eq_mask_lemma: #t:inttype -> a:uint_t t SEC -> b:uint_t t SEC -> Lemma
             (v a <> v b ==> v (eq_mask a b) == 0))
   [SMTPat (eq_mask #t a b)]
 
+val eq_mask_logand_lemma: #t:inttype{~(U1? t)} -> a:uint_t t SEC -> b:uint_t t SEC -> c:uint_t t SEC -> Lemma
+  (ensures (if v a = v b then v (c `logand` (eq_mask a b)) == v c else v (c `logand` (eq_mask a b)) == 0))
+  [SMTPat (c `logand` (eq_mask a b))]
+
 inline_for_extraction
 val neq_mask: #t:inttype -> a:uint_t t SEC -> b:uint_t t SEC -> uint_t t SEC
 
@@ -472,6 +484,10 @@ val gte_mask_lemma: #t:inttype -> a:uint_t t SEC -> b:uint_t t SEC -> Lemma
   (ensures  (v a >= v b ==> v (gte_mask a b) == maxint t) /\
             (v a < v b ==> v (gte_mask a b) == 0))
   [SMTPat (gte_mask #t a b)]
+
+val gte_mask_logand_lemma: #t:inttype{~(U1? t)} -> a:uint_t t SEC -> b:uint_t t SEC -> c:uint_t t SEC -> Lemma
+  (ensures (if v a >= v b then v (c `logand` (gte_mask a b)) == v c else v (c `logand` (gte_mask a b)) == 0))
+  [SMTPat (c `logand` (gte_mask a b))]
 
 inline_for_extraction
 val lt_mask: #t:inttype -> uint_t t SEC -> uint_t t SEC -> uint_t t SEC

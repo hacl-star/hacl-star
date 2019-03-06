@@ -245,6 +245,14 @@ let logand #t #l a b =
   | U64  -> UInt64.logand a b
   | U128 -> UInt128.logand a b
 
+let logand_lemma #t a b =
+  if (uint_v a = 0) then begin
+    UInt.logand_commutative #(bits t) (uint_v a) (uint_v b);
+    UInt.logand_lemma_1 #(bits t) (uint_v b) end
+  else begin
+    UInt.logand_commutative #(bits t) (uint_v a) (uint_v b);
+    UInt.logand_lemma_2 #(bits t) (uint_v b) end
+
 let logand_spec #t #l a b = ()
 
 let logor #t #l a b =
@@ -260,6 +268,12 @@ let logor #t #l a b =
   | U32  -> UInt32.logor a b
   | U64  -> UInt64.logor a b
   | U128 -> UInt128.logor a b
+
+let logor_spec #t #l a b = ()
+
+let logor_disjoint #t a b m =
+  UInt.logor_disjoint #(bits t) (uint_v b) (uint_v a) m;
+  UInt.logor_commutative #(bits t) (uint_v b) (uint_v a)
 
 let lognot #t #l a =
   match t with
@@ -333,6 +347,11 @@ let eq_mask_lemma #t a b =
     end
   | _ -> ()
 
+let eq_mask_logand_lemma #t a b c =
+  eq_mask_lemma a b;
+  logand_lemma (eq_mask a b) c;
+  UInt.logand_commutative #(bits t) (uint_v (eq_mask a b)) (uint_v c)
+
 let neq_mask #t a b = lognot (eq_mask #t a b)
 
 let gte_mask #t a b =
@@ -354,6 +373,11 @@ let gte_mask_lemma #t a b =
       lognot (u1 1) == u1 0 /\ lognot (u1 0) == u1 1)
     end
   | _ -> ()
+
+let gte_mask_logand_lemma #t a b c =
+  gte_mask_lemma a b;
+  logand_lemma (gte_mask a b) c;
+  UInt.logand_commutative #(bits t) (uint_v (gte_mask a b)) (uint_v c)
 
 let lt_mask #t a b = lognot (gte_mask a b)
 
