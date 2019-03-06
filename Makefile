@@ -417,13 +417,28 @@ obj/Vale.AsLowStar.Wrapper.fst.checked: \
 obj/Vale.AsLowStar.Test.fst.checked: \
   FSTAR_FLAGS=$(VALE_FSTAR_FLAGS)
 
+obj/Sha_stdcalls.fst.checked: \
+  FSTAR_FLAGS=$(VALE_FSTAR_FLAGS)
+
 obj/Simplify_Sha.fst.checked: \
   FSTAR_FLAGS=$(VALE_FSTAR_FLAGS)
 
-obj/%_stdcalls.fst.checked: \
+obj/Fsub_stdcalls.fst.checked: \
   FSTAR_FLAGS=$(VALE_FSTAR_FLAGS)
 
-obj/%_inline.fst.checked: \
+obj/Fmul_stdcalls.fst.checked: \
+  FSTAR_FLAGS=$(VALE_FSTAR_FLAGS)
+
+obj/Fsqr_stdcalls.fst.checked: \
+  FSTAR_FLAGS=$(VALE_FSTAR_FLAGS)
+
+obj/Fadd_inline.fst.checked: \
+  FSTAR_FLAGS=$(VALE_FSTAR_FLAGS)
+
+obj/Fmul_inline.fst.checked: \
+  FSTAR_FLAGS=$(VALE_FSTAR_FLAGS)
+
+obj/Fsqr_inline.fst.checked: \
   FSTAR_FLAGS=$(VALE_FSTAR_FLAGS)
 
 obj/Vale.Stdcalls.%.checked: \
