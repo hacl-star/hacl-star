@@ -94,9 +94,19 @@ let aes_reqs
   valid_taint_buf128 keys_b mem memTaint Secret /\
 
   buffer128_as_seq mem keys_b == round_keys
+
 #endverbatim
+
+#verbatim{:implementation}
+unfold let lo(x:poly):poly = mask x 64
+unfold let hi(x:poly):poly = shift x (-64)
+#endverbatim
+
 function aes_reqs(alg:algorithm, key:seq(nat32), round_keys:seq(quad32), keys_b:buffer128,
     key_ptr:int, mem:memory, memTaint:memtaint) : prop extern;
+
+function lo(x:poly) : poly extern;
+function hi(x:poly) : poly extern;
 
 ghost procedure finish_aes_encrypt_le(ghost alg:algorithm, ghost input_LE:quad32, ghost key:seq(nat32))
     requires
@@ -107,6 +117,17 @@ ghost procedure finish_aes_encrypt_le(ghost alg:algorithm, ghost input_LE:quad32
     reveal aes_encrypt_LE_def;
     reveal cipher;
 }
+
+#token +. precedence +
+#token *. precedence *
+#token %. precedence *
+#token $$ precedence !
+function operator( +. ) (a:poly, b:poly):poly := add;
+function operator( *. ) (a:poly, b:poly):poly := mul;
+function operator( %. ) (a:poly, b:poly):poly := mod;
+function operator( $$ ) (a:quad32):poly := of_quad32;
+
+//function operator( [] ) (b:buffer128, i:int):fun(mem)->quad32:= buffer128_read;
 
 procedure{:quick exportOnly} VPolyAdd(out dst:xmm, src1:xmm, src2:xmm)
     lets
@@ -179,8 +200,8 @@ procedure{:quick exportOnly} VPolyMul(out dst:xmm, src1:xmm, src2:xmm, inline sr
         pclmulqdq_enabled;
     ensures
         of_quad32(dst) == mul(
-            if src1Hi then shift(a1, (-64)) else mask(a1, 64),
-            if src2Hi then shift(a2, (-64)) else mask(a2, 64));
+            if src1Hi then hi(a1) else lo(a1),
+            if src2Hi then hi(a2) else lo(a2));
 {
     lemma_to_of_quad32(src1);
     lemma_to_of_quad32(src2);
@@ -290,6 +311,7 @@ procedure {:quick} Ctr32_ghash_6_prelude(
         inout5 == reverse_bytes_quad32(inc32lite(ctr_orig, 5));
 
         buffer128_read(stack_b, 1, mem) == Mkfour(0, 0, 0, 0);
+        //stack_b[1](mem) == Mkfour(0, 0, 0, 0);
 {
     Load_one_msb();   // # borrow $T2, .Lone_msb
     Sub64(len, 6);
@@ -327,7 +349,7 @@ procedure {:quick} Handle_ctr32(
 
     requires
         T1 == reverse_bytes_quad32(ctr_BE);
-        validDstAddrs128(mem, Xip - 0x20, hkeys_b, 8, memTaint, Secret);
+        validSrcAddrs128(mem, Xip - 0x20, hkeys_b, 8, memTaint, Secret);
     ensures
         inout1 == quad32_xor(reverse_bytes_quad32(inc32lite(ctr_BE, 1)), rndkey);
         inout2 == quad32_xor(reverse_bytes_quad32(inc32lite(ctr_BE, 2)), rndkey);
@@ -389,7 +411,7 @@ procedure {:quick} Loop6x_ctr_update(
         efl;
 
     requires
-        validDstAddrs128(mem, Xip - 0x20, hkeys_b, 8, memTaint, Secret);
+        validSrcAddrs128(mem, Xip - 0x20, hkeys_b, 8, memTaint, Secret);
 
         // AES reqs
         aes_reqs(alg, key_words, round_keys, keys_b, key, mem, memTaint);
@@ -476,9 +498,10 @@ procedure {:quick} {:verify true} Loop6x_preamble(
     requires
         // Valid ptrs and buffers
         validDstAddrs128(mem, ivp, iv_b, 1, memTaint, Secret);
-        validDstAddrs128(mem, Xip - 0x20, hkeys_b, 8, memTaint, Secret);
+        validSrcAddrs128(mem, Xip - 0x20, hkeys_b, 8, memTaint, Secret);
         validDstAddrs128(mem, rsp, stack_b, 8, memTaint, Secret);
         buffers_disjoint128(iv_b, keys_b);
+        buffers_disjoint128(iv_b, hkeys_b);
 
         // AES reqs
         aes_reqs(alg, key_words, round_keys, keys_b, key, mem, memTaint);
@@ -523,10 +546,15 @@ procedure {:quick} {:verify true} Loop6x_preamble(
         counter == inc32lite(ctr_BE, 6).lo0 % 256;
 
         // GCM
-        $$Z1 == mul(mask($$buffer128_read(hkeys_b, 3, mem), 64), mask($$buffer128_read(hkeys_b, 1, mem), 64));
-        Z2 == 
-        Z3 == 
-        T1 == 
+        let h0 := $$buffer128_read(hkeys_b, 0, mem);
+        let h1 := $$buffer128_read(hkeys_b, 1, mem);
+        let s3 := $$buffer128_read(stack_b, 3, mem);
+        $$Z0 == lo(old($$Z3)) *. lo(h0)  +. $$Z1;
+        $$Z1 == lo(s3) *. lo(h1);
+        $$Z2 == hi(old($$Z3)) *. lo(h0) +. lo(old($$Z3)) *. hi(h0);
+        $$Z3 == hi(old($$Z3)) *. hi(h0);
+        $$T1 == lo(s3) *. hi(h1);
+        $$Xi == old($$Xi) +. old($$Z0);
         
 {
     Loop6x_ctr_update(alg, key_words, round_keys, keys_b, hkeys_b, ctr_BE);
@@ -540,7 +568,8 @@ procedure {:quick} {:verify true} Loop6x_preamble(
     VPxor(inout3, inout3, rndkey); init_rounds_opaque(inout3, round_keys);
     Load128_buffer(T2, key, 0x10-0x80, Secret, keys_b, 1); // # borrow $T2 for $rndkey
     VPolyMul(Z2, Z3, Hkey, true, false);
-
+    //assert Hkey == buffer128_read(hkeys_b, 0, mem);
+    //assert $$Z2 == shift(old($$Z3), (-64)) *. mask($$buffer128_read(hkeys_b, 0, mem), 64) ;
     VAESNI_enc(inout0, inout0, T2);
     Load128_buffer(Ii, rsp, 0x30, Secret, stack_b, 3);     // # I[4]
     VPxor(inout4, inout4, rndkey); init_rounds_opaque(inout4, round_keys);
@@ -2286,7 +2315,7 @@ procedure {:quick} Encrypt_save_and_shuffle_output(
 }
 
 #reset-options "--z3rlimit 30"
-procedure {:quick} {:verify true} AES_GCM_encrypt(
+procedure {:quick} AES_GCM_encrypt(
     inline alg:algorithm,  
     ghost iv_b:buffer128,
     ghost in_b:buffer128,
