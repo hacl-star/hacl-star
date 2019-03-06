@@ -145,6 +145,33 @@ procedure{:quick exportOnly} VPolyAdd(out dst:xmm, src1:xmm, src2:xmm)
     lemma_of_to_quad32(add(a1, a2));
 }
 
+procedure{:quick exportOnly} VPolyAdd_buffer(
+        out dst:xmm, 
+        src1:xmm, 
+        src2:reg_opr64,
+        inline offset:int,
+        inline t:taint,
+        ghost b:buffer128,
+        ghost index:int)
+    reads 
+        mem; memTaint;
+    modifies
+        efl;
+    requires
+       valid_src_addr(mem, b, index);
+       valid_taint_buf128(b, mem, memTaint, t);
+       src2 + offset == buffer_addr(b, mem) + 16 * index;
+    ensures
+        $$dst == old($$src1) +. $$buffer128_read(b, index, mem);
+        valid_taint_buf128(b, mem, memTaint, t);  // REVIEW: Why is this needed?
+{
+    lemma_to_of_quad32(src1);
+    lemma_to_of_quad32(buffer128_read(b, index, mem));
+    VPxor_buffer(dst, src1, src2, offset, t, b, index);
+    lemma_add128(old($$src1), $$buffer128_read(b, index, mem));
+    lemma_of_to_quad32(add(old($$src1), $$buffer128_read(b, index, mem)));
+}
+
 procedure{:quick exportOnly} VHigh64ToLow(out dst:xmm, src:xmm)
     lets
         a := of_quad32(src);
@@ -464,7 +491,7 @@ procedure {:quick} Loop6x_ctr_update(
 }
 
 #reset-options ""
-procedure {:quick} {:verify true} Loop6x_preamble(
+procedure {:quick} Loop6x_preamble(
     inline alg:algorithm,  // OpenSSL includes the number of rounds (nr) as a dynamic parameter (stored with the key).  Saves code space but adds extra instructions to the fast path.  Maybe branch predictor is good enough for it not to matter
     ghost iv_b:buffer128,
 
@@ -593,6 +620,138 @@ procedure {:quick} {:verify true} Loop6x_preamble(
     commute_sub_bytes_shift_rows_forall();
 }
 
+procedure {:quick} {:verify true} Loop6x_step1(
+    inline alg:algorithm,  // OpenSSL includes the number of rounds (nr) as a dynamic parameter (stored with the key).  Saves code space but adds extra instructions to the fast path.  Maybe branch predictor is good enough for it not to matter
+    inline rnd:nat,
+    inline in0_offset:nat,
+    inline stack_offset:nat,
+    ghost count:nat,
+    ghost in0_b:buffer128,
+    ghost stack_b:buffer128,
+
+    ghost key_words:seq(nat32),
+    ghost round_keys:seq(quad32),
+    ghost keys_b:buffer128,
+    ghost hkeys_b:buffer128,
+
+    ghost init0:quad32,
+    ghost init1:quad32,
+    ghost init2:quad32,
+    ghost init3:quad32,
+    ghost init4:quad32,
+    ghost init5:quad32
+    )
+    lets
+//      inp @= rdi; outp @= rsi; len @= rdx; key @= rcx; ivp @= r8; 
+        key @= rcx; Xip @= r9;
+        Ii @= xmm0; T2 @= xmm2; Hkey @= xmm3;
+        Z1 @= xmm5; Xi @= xmm8;
+        inout0 @= xmm9; inout1 @= xmm10; inout2 @= xmm11; inout3 @= xmm12;
+        inout4 @= xmm13; inout5 @= xmm14; rndkey @= xmm15;
+//      counter @= rbx; rounds @= rbp; ret @= r10; constp @= r11; in0 @= r14; end0 @= r15;
+        in0 @= r14; 
+
+    reads
+        key; rsp; in0; Xip;
+        memTaint;
+
+    modifies
+        r12; r13; 
+        Ii; T2; Hkey; Z1; Xi;
+        inout0; inout1; inout2; inout3; inout4; inout5; rndkey;
+        mem; efl;
+
+    requires
+        count >= 2;
+
+        // Valid ptrs and buffers
+        validSrcAddrsOffset128(mem, in0, in0_b, (count-2)*6, in0_offset + 1, memTaint, Secret);
+        validDstAddrs128(mem, rsp, stack_b, stack_offset + 1, memTaint, Secret);
+        validDstAddrs128(mem, rsp, stack_b, 8, memTaint, Secret);
+        validDstAddrs128(mem, Xip - 0x20, hkeys_b, 8, memTaint, Secret);
+
+        // AES reqs
+        aes_reqs(alg, key_words, round_keys, keys_b, key, mem, memTaint);
+        rnd + 1 < length(round_keys);
+
+        // GCM reqs
+        pclmulqdq_enabled;
+
+        inout0 == rounds_opaque(init0, round_keys, rnd);
+        inout1 == rounds_opaque(init1, round_keys, rnd);
+        inout2 == rounds_opaque(init2, round_keys, rnd);
+        inout3 == rounds_opaque(init3, round_keys, rnd);
+        inout4 == rounds_opaque(init4, round_keys, rnd);
+        inout5 == rounds_opaque(init5, round_keys, rnd);
+
+    ensures
+        // Framing
+        modifies_buffer_specific128(stack_b, old(mem), mem, stack_offset, stack_offset);
+
+        // Semantics
+        inout0 == rounds_opaque(init0, round_keys, rnd + 1);
+        inout1 == rounds_opaque(init1, round_keys, rnd + 1);
+        inout2 == rounds_opaque(init2, round_keys, rnd + 1);
+        inout3 == rounds_opaque(init3, round_keys, rnd + 1);
+        inout4 == rounds_opaque(init4, round_keys, rnd + 1);
+        inout5 == rounds_opaque(init5, round_keys, rnd + 1);
+
+        buffer128_read(stack_b, stack_offset, mem) == old(reverse_bytes_quad32(buffer128_read(in0_b, (count-2)*6+in0_offset, mem)));
+
+        // GCM
+        let h3 := buffer128_read(hkeys_b, 3, mem);
+        let s1 := $$old(buffer128_read(stack_b, 1, mem));
+        let s4 := old(buffer128_read(stack_b, 4, mem));
+        Ii == s4;
+        $$T2 == hi(old($$Ii)) *. lo(old($$Hkey));
+        $$Hkey == hi(old($$Ii)) *. hi(old($$Hkey));
+        Z1 == h3;
+        $$Xi == old($$Xi) +. s1;
+{
+    Load128_buffer(rndkey, key, (0x10 * (rnd + 1))-0x80, Secret, keys_b, rnd + 1);
+
+//	vpclmulqdq	\$0x01,$Hkey,$Ii,$T2
+    VPolyMul(T2, Ii, Hkey, true, false);
+    
+//	  vaesenc	$rndkey,$inout0,$inout0
+    VAESNI_enc(inout0, inout0, rndkey);
+//	 vpxor		16+8(%rsp),$Xi,$Xi	# modulo-scheduled [vpxor $Z3,$Xi,$Xi]
+    VPolyAdd_buffer(Xi, Xi, rsp, 0x10, Secret, stack_b, 1);  // # modulo-scheduled [vpxor $Z3,$Xi,$Xi]
+//	vpclmulqdq	\$0x11,$Hkey,$Ii,$Hkey
+    VPolyMul(Hkey, Ii, Hkey, true, true);
+//	 vmovdqu	0x40+8(%rsp),$Ii	# I[3]
+    Load128_buffer(Ii, rsp, 0x40, Secret, stack_b, 4);
+//	  vaesenc	$rndkey,$inout1,$inout1
+    VAESNI_enc(inout1, inout1, rndkey);
+
+
+
+//	movbe		0x58($in0),%r13
+//	  vaesenc	$rndkey,$inout2,$inout2
+//	movbe		0x50($in0),%r12
+//	  vaesenc	$rndkey,$inout3,$inout3
+    LoadBe64_buffer128(r13, in0, in0_offset*16+8, Secret, true,  in0_b, (count-2)*6 + in0_offset);
+    VAESNI_enc(inout2, inout2, rndkey);
+    LoadBe64_buffer128(r12, in0, in0_offset*16,   Secret, false, in0_b, (count-2)*6 + in0_offset);
+    VAESNI_enc(inout3, inout3, rndkey);
+
+//	mov		%r13,0x20+8(%rsp)
+//	  vaesenc	$rndkey,$inout4,$inout4
+//	mov		%r12,0x28+8(%rsp)
+    Store64_buffer128(rsp, r13, stack_offset*16,   Secret, false, stack_b, stack_offset);  // OpenSSL is further offset by 8 (to account for return addr?)
+    VAESNI_enc(inout4, inout4, rndkey);
+    Store64_buffer128(rsp, r12, stack_offset*16+8, Secret, true,  stack_b, stack_offset);   // OpenSSL is further offset by 8 (to account for return addr?)
+
+//	vmovdqu		0x30-0x20($Xip),$Z1	# borrow $Z1 for $Hkey^3
+    Load128_buffer(Z1, Xip, 0x30-0x20, Secret, hkeys_b, 3);  // # borrow $Z1 for $Hkey^3
+//	  vaesenc	$rndkey,$inout5,$inout5
+    VAESNI_enc(inout5, inout5, rndkey);
+
+    reveal rounds;
+    commute_sub_bytes_shift_rows_forall();
+    lemma_reverse_bytes_quad32_64(old(buffer128_read(in0_b, (count-2)*6+in0_offset, mem)), old(buffer128_read(stack_b, stack_offset, mem)), buffer128_read(stack_b, stack_offset, mem));
+
+}
 /*
 #reset-options ""
 
