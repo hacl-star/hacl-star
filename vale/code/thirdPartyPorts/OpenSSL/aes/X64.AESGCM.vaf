@@ -1176,7 +1176,6 @@ procedure {:quick} Loop6x_step4(
     ghost key_words:seq(nat32),
     ghost round_keys:seq(quad32),
     ghost keys_b:buffer128,
-    ghost hkeys_b:buffer128,
 
     ghost init0:quad32,
     ghost init1:quad32,
@@ -1187,7 +1186,7 @@ procedure {:quick} Loop6x_step4(
     )
     lets
 //      inp @= rdi; outp @= rsi; len @= rdx; key @= rcx; ivp @= r8; 
-        key @= rcx; Xip @= r9;
+        key @= rcx; 
         T1 @= xmm1; T2 @= xmm2; Hkey @= xmm3;
         Z1 @= xmm5; Z2 @= xmm6; Z3 @= xmm7; Xi @= xmm8;
         inout0 @= xmm9; inout1 @= xmm10; inout2 @= xmm11; inout3 @= xmm12;
@@ -1196,7 +1195,7 @@ procedure {:quick} Loop6x_step4(
         in0 @= r14; 
 
     reads
-        key; rsp; in0; Xip;
+        key; rsp; in0;
         Hkey; 
         memTaint;
 
@@ -1213,7 +1212,6 @@ procedure {:quick} Loop6x_step4(
         validSrcAddrsOffset128(mem, in0, in0_b, (count-2)*6, in0_offset + 1, memTaint, Secret);
         validDstAddrs128(mem, rsp, stack_b, stack_offset + 1, memTaint, Secret);
         validDstAddrs128(mem, rsp, stack_b, 8, memTaint, Secret);
-        validDstAddrs128(mem, Xip - 0x20, hkeys_b, 8, memTaint, Secret);
 
         // AES reqs
         aes_reqs(alg, key_words, round_keys, keys_b, key, mem, memTaint);
@@ -1312,7 +1310,6 @@ procedure {:quick} {:verify true} Loop6x_step5(
     ghost key_words:seq(nat32),
     ghost round_keys:seq(quad32),
     ghost keys_b:buffer128,
-    ghost hkeys_b:buffer128,
 
     ghost init0:quad32,
     ghost init1:quad32,
@@ -1323,7 +1320,7 @@ procedure {:quick} {:verify true} Loop6x_step5(
     )
     lets
 //      inp @= rdi; outp @= rsi; len @= rdx; key @= rcx; ivp @= r8; 
-        key @= rcx; Xip @= r9;
+        key @= rcx; 
         Ii @= xmm0; T2 @= xmm2; Hkey @= xmm3;
         Z0 @= xmm4; Z1 @= xmm5; Z2 @= xmm6; Z3 @= xmm7; Xi @= xmm8;
         inout0 @= xmm9; inout1 @= xmm10; inout2 @= xmm11; inout3 @= xmm12;
@@ -1332,7 +1329,7 @@ procedure {:quick} {:verify true} Loop6x_step5(
         constp @= r11; in0 @= r14; 
 
     reads
-        key; rsp; in0; Xip;
+        key; rsp; in0;
         T2; Z2; Xi; memTaint;
 
     modifies
@@ -1348,7 +1345,6 @@ procedure {:quick} {:verify true} Loop6x_step5(
         validSrcAddrsOffset128(mem, in0, in0_b, (count-2)*6, in0_offset + 1, memTaint, Secret);
         validDstAddrs128(mem, rsp, stack_b, stack_offset + 1, memTaint, Secret);
         validDstAddrs128(mem, rsp, stack_b, 8, memTaint, Secret);
-        validDstAddrs128(mem, Xip - 0x20, hkeys_b, 8, memTaint, Secret);
 
         // AES reqs
         aes_reqs(alg, key_words, round_keys, keys_b, key, mem, memTaint);
