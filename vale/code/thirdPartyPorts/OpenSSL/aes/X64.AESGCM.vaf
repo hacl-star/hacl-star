@@ -496,7 +496,7 @@ procedure {:quick} Loop6x_ctr_update(
 }
 
 #reset-options ""
-procedure {:quick} Loop6x_preamble(
+procedure {:quick} {:verify true} Loop6x_preamble(
     inline alg:algorithm,  // OpenSSL includes the number of rounds (nr) as a dynamic parameter (stored with the key).  Saves code space but adds extra instructions to the fast path.  Maybe branch predictor is good enough for it not to matter
     ghost iv_b:buffer128,
 
@@ -3087,10 +3087,13 @@ procedure {:quick} {:verify true} AES_GCM_encrypt(
         buffers_disjoint128(iv_b, stack_b);
         buffers_disjoint128(iv_b, in_b);
         buffers_disjoint128(iv_b, out_b);
+        buffers_disjoint128(iv_b, hkeys_b);
         buffers_disjoint128(stack_b, keys_b);
         buffers_disjoint128(stack_b, in_b);
         buffers_disjoint128(stack_b, out_b);
+        buffers_disjoint128(stack_b, hkeys_b);
         buffers_disjoint128(out_b, keys_b);
+        buffers_disjoint128(out_b, hkeys_b);
         buffers_disjoint128(in_b, out_b) || in_b == out_b;
 
         inp  + 0x10*len < pow2_64;
@@ -3099,7 +3102,7 @@ procedure {:quick} {:verify true} AES_GCM_encrypt(
         buffer_length(in_b) == buffer_length(out_b);
         buffer_length(in_b) == len;
         4096 * (buffer_length(in_b)) * 16 < pow2_32;
-        Xip + 0x40 < pow2_64;
+        Xip + 0x20 < pow2_64;
 
         // AES reqs
         buffer_addr(keys_b, mem) + 0x80 < pow2_64;
@@ -3155,8 +3158,10 @@ procedure {:quick} {:verify true} AES_GCM_encrypt(
     
     AESNI_ctr32_6x(alg, 1, in_b, out_b, plain_quads, key_words, round_keys, keys_b, inc32(ctr_BE, 6), ctr_BE);
     Sub64(len, 12);
-    Load128_buffer(Xi, Xip, 0, Secret, hkeys_b, 0); // # load Xi
-    AddLea64(Xip, Xip, 0x40);   // # size optimization
+    // TODO: OpenSSL does this to enable multiple incremental calls.  For now, we only handle one, so Xi = X0 = Mkfour 0 0 0 0
+    ZeroXmm(Xi);
+    //Load128_buffer(Xi, Xip, 0, Secret, hkeys_b, 0); // # load Xi
+    AddLea64(Xip, Xip, 0x20);   // # size optimization
 
     Ctr32_ghash_6_prelude(alg, stack_b, key_words, round_keys, keys_b, inc32(ctr_BE, 12));
     Mov64(counter, 14);
