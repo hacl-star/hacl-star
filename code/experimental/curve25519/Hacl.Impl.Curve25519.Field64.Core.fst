@@ -7,7 +7,6 @@ open FStar.Mul
 open Lib.Sequence
 open Lib.IntTypes
 open Lib.Buffer
-open Lib.Lemmas
 
 module B = Lib.Buffer
 module ST = FStar.HyperStack.ST
@@ -392,6 +391,7 @@ let lemma_cswap2_step bit p1 p2 =
   assert (v bit == 0 ==> v mask == 0);
   assert (v bit == 1 ==> v mask == pow2 64 - 1);
   let dummy = mask &. (p1 ^. p2) in
+  logand_lemma mask (p1 ^. p2);
   assert (v bit == 1 ==> v dummy == v (p1 ^. p2));
   assert (v bit == 0 ==> v dummy == 0);
   let p1' = p1 ^. dummy in

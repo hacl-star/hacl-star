@@ -224,7 +224,7 @@ let ladder_step #s k q i p01_tmp1_swap tmp2 =
   let bit = scalar_bit k (253ul -. i) in
   uintv_extensionality bit (S.ith_bit (as_seq h0 k) (253 - v i));
   let sw = swap.(0ul) ^. bit in
-  Lib.Lemmas.logxor_lemma1 (LSeq.index (as_seq h0 swap) 0) bit;
+  logxor_lemma1 (LSeq.index (as_seq h0 swap) 0) bit;
   cswap2 #s sw nq nq_p1;
   point_add_and_double #s q p01_tmp1 tmp2;
   swap.(0ul) <- bit

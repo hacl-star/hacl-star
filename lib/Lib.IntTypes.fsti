@@ -376,6 +376,15 @@ val logxor: #t:inttype -> #l:secrecy_level
   -> b:uint_t t l
   -> uint_t t l
 
+val logxor_lemma: #t:inttype -> a:uint_t t SEC -> b:uint_t t SEC -> Lemma
+  (a `logxor` (a `logxor` b) == b /\
+   a `logxor` (b `logxor` a) == b /\
+   a `logxor` (uint #t #SEC 0) == a)
+
+val logxor_lemma1: #t:inttype -> a:uint_t t SEC -> b:uint_t t SEC -> Lemma
+  (requires v a <= 1 /\ v b <= 1)
+  (ensures v (a `logxor` b) <= 1)
+
 inline_for_extraction
 val logand: #t:inttype -> #l:secrecy_level
   -> a:uint_t t l

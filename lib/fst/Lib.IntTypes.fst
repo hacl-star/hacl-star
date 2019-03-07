@@ -231,6 +231,40 @@ let logxor #t #l a b =
   | U64  -> UInt64.logxor a b
   | U128 -> UInt128.logxor a b
 
+#set-options "--max_fuel 1"
+
+val logxor_lemma_: #t:inttype -> a:uint_t t SEC -> b:uint_t t SEC -> Lemma
+  (uint_v (a `logxor` (a `logxor` b)) == uint_v b)
+let logxor_lemma_ #t a b =
+  UInt.logxor_associative #(bits t) (uint_v a) (uint_v a) (uint_v b);
+  UInt.logxor_self #(bits t) (uint_v a);
+  UInt.logxor_commutative #(bits t) 0 (uint_v b);
+  UInt.logxor_lemma_1 #(bits t) (uint_v b)
+
+let logxor_lemma #t a b =
+  logxor_lemma_ #t a b;
+  uintv_extensionality (logxor a (logxor a b)) b;
+  assert (a `logxor` (a `logxor` b) == b);
+  UInt.logxor_commutative #(bits t) (uint_v a) (uint_v b);
+  logxor_lemma_ #t a b;
+  uintv_extensionality (logxor a (logxor b a)) b;
+  assert ((a `logxor` (b `logxor` a)) == b);
+  UInt.logxor_lemma_1 #(bits t) (uint_v a);
+  uintv_extensionality (logxor a (uint #t #SEC 0)) a
+
+let logxor_lemma1 #t a b =
+  match (v a, v b) with
+  | _, 0 ->
+    UInt.logxor_lemma_1 #(bits t) (uint_v a)
+  | 0, _ ->
+    UInt.logxor_commutative #(bits t) (uint_v a) (uint_v b);
+    UInt.logxor_lemma_1 #(bits t) (uint_v b)
+  | 1, 1 ->
+    uintv_extensionality a b;
+    UInt.logxor_self #(bits t) (uint_v a)
+
+#set-options "--max_fuel 0"
+
 let logand #t #l a b =
   match t with
   | U1   ->

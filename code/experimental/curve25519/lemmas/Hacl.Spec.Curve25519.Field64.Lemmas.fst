@@ -3,7 +3,6 @@ module Hacl.Spec.Curve25519.Field64.Lemmas
 open FStar.Mul
 open Lib.Sequence
 open Lib.IntTypes
-open Lib.Lemmas
 
 open Spec.Curve25519
 open Hacl.Spec.Curve25519.Field64.Definition
