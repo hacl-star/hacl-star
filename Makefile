@@ -814,10 +814,6 @@ CFLAGS += $(addprefix -I,$(TEST_INCLUDES)) -Wall -Wextra \
   -Wno-infinite-recursion -Wno-int-conversion -Wno-unused-parameter \
   -O3 -march=native -mtune=native
 
-# Because a test file might be hand-written but still include a generated
-# header.
-%.o: | compile-generic
-
 # FIXME there's a kremlin error that generates a void* -- can't use -Werror
 # Need the libraries to be present and compiled.
 .PRECIOUS: %.exe
@@ -852,6 +848,8 @@ HAND_WRITTEN_C_TESTS=$(wildcard tests/*.c) secure_api/merkle_tree/test/merkle_tr
 # Not including merkle_tree_test because it #includes a generated header and
 # this makefile doesn't have a third stage.
 include $(patsubst %.c,%.d,$(wildcard test/*.c))
+
+secure_api/merkle_tree/test/merkle_tree_test.o: | compile-generic
 
 test-handwritten: $(patsubst %.c,%.test,$(HAND_WRITTEN_C_TESTS))
 
