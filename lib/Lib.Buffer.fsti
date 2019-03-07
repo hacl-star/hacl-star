@@ -24,6 +24,7 @@ type buftype =
   | MUT
   | IMMUT
 
+inline_for_extraction
 let buffer_t (ty:buftype) (a:Type0) =
   match ty with
   | IMMUT -> ib:IB.ibuffer a{B.frameOf ib == HyperStack.root}
@@ -40,6 +41,7 @@ let length (#t:buftype) (#a:Type0) (b:buffer_t t a) =
   | MUT -> B.length (b <: buffer a)
   | IMMUT -> IB.length (b <: ibuffer a)
 
+inline_for_extraction
 let lbuffer_t (ty:buftype) (a:Type0) (len:size_t) =
   b:buffer_t ty a{length #ty #a b == v len}
 
