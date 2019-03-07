@@ -812,11 +812,14 @@ TEST_INCLUDES=test test/rfc7748_src secure_api/merkle_tree/test $(KREMLIN_HOME)/
 
 CFLAGS += $(addprefix -I,$(TEST_INCLUDES)) -Wall -Wextra \
   -Wno-infinite-recursion -Wno-int-conversion -Wno-unused-parameter \
-  -O3 -march=native -mtune=native -flto
+  -O3 -march=native -mtune=native
 
+# Because a test file might be hand-written but still include a generated
+# header.
 %.o: | compile-generic
 
 # FIXME there's a kremlin error that generates a void* -- can't use -Werror
+# Need the libraries to be present and compiled.
 .PRECIOUS: %.exe
 %.exe: %.o | compile-generic
 	# Linking with full kremlib since tests may use TestLib, etc.
