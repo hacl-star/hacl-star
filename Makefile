@@ -818,7 +818,7 @@ CFLAGS += $(addprefix -I,$(TEST_INCLUDES)) -Wall -Wextra \
 
 # FIXME there's a kremlin error that generates a void* -- can't use -Werror
 .PRECIOUS: %.exe
-%.exe: %.o
+%.exe: %.o | compile-generic
 	# Linking with full kremlib since tests may use TestLib, etc.
 	$(call run-with-log,\
 	  $(CC) $(CFLAGS) -L$(OPENSSL_HOME) $^ -o $@ \
