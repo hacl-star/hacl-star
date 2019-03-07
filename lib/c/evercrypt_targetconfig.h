@@ -16,4 +16,8 @@
 #define EVERCRYPT_TARGETCONFIG_AARCH32 1
 #endif
 
+#if defined(__GNUC__)
+#define EVERCRYPT_TARGETCONFIG_GCC 1
+#endif
+
 #endif

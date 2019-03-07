@@ -192,7 +192,7 @@ let fmul_inline tmp f1 out f2 =
 #pop-options
 
 let fmul_code_inline () : FStar.All.ML int =
-  PR.print_inline "fmul" 0 None (List.length fmul_dom) fmul_dom code_fmul fmul_of_arg fmul_regs_modified
+  PR.print_inline "fmul_inline" 0 None (List.length fmul_dom) fmul_dom code_fmul fmul_of_arg fmul_regs_modified
 
 (* Need to rearrange the order of arguments *)
 [@__reduce__]
@@ -311,7 +311,7 @@ let fmul2_inline tmp f1 out f2 =
 #pop-options
 
 let fmul2_code_inline () : FStar.All.ML int =
-  PR.print_inline "fmul2" 0 None (List.length fmul_dom) fmul_dom code_fmul2 fmul_of_arg fmul_regs_modified
+  PR.print_inline "fmul2_inline" 0 None (List.length fmul_dom) fmul_dom code_fmul2 fmul_of_arg fmul_regs_modified
 
 [@__reduce__] unfold
 let fmul1_dom: IX64.arity_ok 3 td =
@@ -444,4 +444,4 @@ let fmul1_inline out f1 f2
     ()
 
 let fmul1_code_inline () : FStar.All.ML int =
-  PR.print_inline "fmul1" 0 None (List.length fmul1_dom) fmul1_dom code_fmul1 of_arg fmul1_regs_modified
+  PR.print_inline "fmul1_inline" 0 None (List.length fmul1_dom) fmul1_dom code_fmul1 of_arg fmul1_regs_modified

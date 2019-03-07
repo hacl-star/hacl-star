@@ -1,2 +1,0 @@
-#define crypto_stream_chacha20_e_regs_KEYBYTES 32
-#define crypto_stream_chacha20_e_regs_NONCEBYTES 8
