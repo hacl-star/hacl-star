@@ -95,15 +95,18 @@ all_: compile-compact compile-generic compile-compact-msvc \
   compile-evercrypt-external-headers compile-compact-c89 compile-coco \
   secure_api.old
 
-# Any file in code/tests is taken to contain a `main` function.
-# Any file in specs/tests is taken to contain a `test` function.
 test:
 	$(MAKE) vale-fst
 	FSTAR_DEPEND_FLAGS="--warn_error +285" $(MAKE) test_
 
-test_: test-c test-ml
+test_: test-handwritten test-c test-ml
+
+# Any file in code/tests is taken to contain an `int main()` function.
+# Test should be renamed into Test.EverCrypt
 test-c: $(subst .,_,$(patsubst %.fst,test-c-%,$(notdir $(wildcard code/tests/*.fst)))) \
-  test-c-Test test-c-merkle_tree_test
+  test-c-Test
+
+# Any file in specs/tests is taken to contain a `val test: unit -> bool` function.
 test-ml: $(subst .,_,$(patsubst %.fst,test-ml-%,$(notdir $(wildcard specs/tests/*.fst))))
 
 ci:
@@ -795,35 +798,59 @@ compile-%: dist/Makefile dist/%/Makefile.basic
 	$(MAKE) -C dist/$*
 
 
-###########
-# C tests #
-###########
+###########################
+# C tests (from F* files) #
+###########################
 
 ifeq ($(OS),Windows_NT)
 OPENSSL_HOME	:= $(shell cygpath -u $(OPENSSL_HOME))
 LDFLAGS		+= -lbcrypt
 endif
 
-dist/test/c/merkle_tree_test.c: secure_api/merkle_tree/test/merkle_tree_test.c
-	mkdir -p $(dir $@)
-	cp $< $(patsubst %.c,%.h,$<) $(dir $@)
+TEST_INCLUDES=test test/rfc7748_src secure_api/merkle_tree/test $(KREMLIN_HOME)/include \
+  dist/generic $(OPENSSL_HOME)/include
+
+CFLAGS += $(addprefix -I,$(TEST_INCLUDES)) -Wall -Wextra \
+  -Wno-infinite-recursion -Wno-int-conversion -Wno-unused-parameter \
+  -O3 -march=native -mtune=native -flto
 
 # FIXME there's a kremlin error that generates a void* -- can't use -Werror
-.PRECIOUS: dist/test/c/%.exe
-dist/test/c/%.exe: dist/test/c/%.c compile-generic
+.PRECIOUS: %.exe
+%.exe: %.o compile-generic
 	# Linking with full kremlib since tests may use TestLib, etc.
 	$(call run-with-log,\
-	  $(CC) -Wall -Wextra -Wno-infinite-recursion -Wno-int-conversion -Wno-unused-parameter \
-	    -I $(dir $@) -I $(KREMLIN_HOME)/include -I $(OPENSSL_HOME)/include -I dist/generic \
-	    -L$(OPENSSL_HOME) \
-	    $< -o $@ \
+	  $(CC) $(CFLAGS) -L$(OPENSSL_HOME) $(filter-out compile-generic,$^) -o $@ \
 	    dist/generic/libevercrypt.a -lcrypto $(LDFLAGS) \
 	    $(KREMLIN_HOME)/kremlib/dist/generic/libkremlib.a \
 	  ,[LD $*],$(call to-obj-dir,$@))
 
-test-c-%: dist/test/c/%.exe
+.PHONY: %.test
+%.test: %.exe
 	LD_LIBRARY_PATH="$(OPENSSL_HOME)" DYLD_LIBRARY_PATH="$(OPENSSL_HOME)" \
 	  PATH="$(OPENSSL_HOME):$(PATH)" $<
+
+test-c-%: dist/test/c/%.test
+	@
+
+###########################
+# C tests (from C* files) #
+###########################
+
+HAND_WRITTEN_C_TESTS=$(wildcard tests/*.c) secure_api/merkle_tree/test/merkle_tree_test.c
+
+%.d: %.c
+	@set -e; rm -f $@; \
+	  $(CC) -MM $(CFLAGS) $< > $@.$$$$; \
+	  sed 's,\($(notdir $*)\)\.o[ :]*,$(dir $@)\1.o $@ : ,g' < $@.$$$$ > $@; \
+	  rm -f $@.$$$$
+
+# Not including merkle_tree_test because it #includes a generated header and
+# this makefile doesn't have a third stage.
+include $(patsubst %.c,%.d,$(wildcard test/*.c))
+
+test-handwritten: $(patsubst %.c,%.test,$(HAND_WRITTEN_C_TESTS))
+
+tests/curve64-rfc.exe: $(patsubst %.c,%.o,$(wildcard tests/rfc7748_src/*.c))
 
 
 #######################
