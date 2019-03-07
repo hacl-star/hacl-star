@@ -814,12 +814,14 @@ CFLAGS += $(addprefix -I,$(TEST_INCLUDES)) -Wall -Wextra \
   -Wno-infinite-recursion -Wno-int-conversion -Wno-unused-parameter \
   -O3 -march=native -mtune=native -flto
 
+%.o: | compile-generic
+
 # FIXME there's a kremlin error that generates a void* -- can't use -Werror
 .PRECIOUS: %.exe
-%.exe: %.o compile-generic
+%.exe: %.o
 	# Linking with full kremlib since tests may use TestLib, etc.
 	$(call run-with-log,\
-	  $(CC) $(CFLAGS) -L$(OPENSSL_HOME) $(filter-out compile-generic,$^) -o $@ \
+	  $(CC) $(CFLAGS) -L$(OPENSSL_HOME) $^ -o $@ \
 	    dist/generic/libevercrypt.a -lcrypto $(LDFLAGS) \
 	    $(KREMLIN_HOME)/kremlib/dist/generic/libkremlib.a \
 	  ,[LD $*],$(call to-obj-dir,$@))
