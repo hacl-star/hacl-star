@@ -34,6 +34,24 @@ let state_inv_t #s h ctx =
   F32xN.acc_inv_t #(width s) (F32xN.as_tup5 h (gsub ctx 0ul (nlimb s))) /\
   F32xN.load_precompute_r_post #(width s) h (gsub ctx (nlimb s) (precomplen s))
 
+#reset-options "--z3rlimit 100 --max_fuel 0"
+
+let reveal_ctx_inv #s ctx h0 h1 =
+  let acc_b = gsub ctx 0ul (nlimb s) in
+  let r_b = gsub ctx (nlimb s) (nlimb s) in
+  let precom_b = gsub ctx (nlimb s) (precomplen s) in
+  as_seq_gsub h0 ctx 0ul (nlimb s);
+  as_seq_gsub h1 ctx 0ul (nlimb s);
+  as_seq_gsub h0 ctx (nlimb s) (nlimb s);
+  as_seq_gsub h1 ctx (nlimb s) (nlimb s);
+  as_seq_gsub h0 ctx (nlimb s) (precomplen s);
+  as_seq_gsub h1 ctx (nlimb s) (precomplen s);  
+  assert (as_seq h0 acc_b == as_seq h1 acc_b);
+  assert (as_seq h0 r_b == as_seq h1 r_b);
+  assert (as_seq h0 precom_b == as_seq h1 precom_b) 
+
+#reset-options "--z3rlimit 50 --max_fuel 0 --using_facts_from '* -FStar.Seq'"
+
 val lemma_pow2_128: n:nat ->
   Lemma
   (requires n <= 128)

@@ -15,7 +15,6 @@ module Spec = Spec.Chacha20Poly1305
 module Poly = Hacl.Impl.Poly1305
 module SpecPoly = Spec.Poly1305
 open Hacl.Impl.Chacha20Poly1305.PolyCore
-open Hacl.Impl.Chacha20Poly1305.PolyLemmas
 open Hacl.Impl.Poly1305.Fields
 module ChachaCore = Hacl.Impl.Chacha20.Core32
 module Chacha = Hacl.Impl.Chacha20
@@ -67,23 +66,23 @@ let poly1305_do_core_padded aadlen aad mlen m ctx =
   let h_pre = ST.get() in
   push_frame();
   let h0 = ST.get() in
-  same_ctx_same_r_acc ctx h_pre h0;
+  Poly.reveal_ctx_inv ctx h_pre h0;
   // TODO: This should use the temporary buffer from the main function, but adding it to the modifies clause blows up verification
   let block = create 16ul (u8 0) in
   let h1 = get() in
-  same_ctx_same_r_acc ctx h_pre h1;  
+  Poly.reveal_ctx_inv ctx h_pre h1;
   poly1305_padded ctx aadlen aad block;
   let h2 = ST.get() in
   // Reset block, as it is modified in stateful code but not in the spec
   mapT 16ul block (fun _ -> u8 0) block;
   let h3 = ST.get() in
   assert (Seq.equal (as_seq h3 block) (Seq.create 16 (u8 0)));
-  same_ctx_same_r_acc ctx h2 h3;
+  Poly.reveal_ctx_inv ctx h2 h3;
   poly1305_padded ctx mlen m block;
   let h4 = ST.get() in
   pop_frame();
   let h_pop = ST.get() in
-  same_ctx_same_r_acc ctx h4 h_pop
+  Poly.reveal_ctx_inv ctx h4 h_pop
 
 val poly1305_do_core_to_bytes:
   aadlen:size_t ->
@@ -180,8 +179,8 @@ let poly1305_do_core_ k aadlen aad mlen m out ctx block =
   let h3 = ST.get() in
   poly1305_do_core_to_bytes aadlen mlen block;
   let h4 = ST.get () in
-  same_ctx_same_r_acc ctx h3 h4;
- 
+  Poly.reveal_ctx_inv ctx h3 h4;
+  
   poly1305_do_core_finish k out ctx block
 
 // Implements the actual poly1305_do operation

@@ -27,6 +27,16 @@ val as_get_r: #s:field_spec -> h:mem -> ctx:poly1305_ctx s -> GTot (S.elem (widt
 noextract
 val state_inv_t: #s:field_spec -> h:mem -> ctx:poly1305_ctx s -> Type0
 
+// If the ctx is not modified, all the components and invariants are preserved
+val reveal_ctx_inv: #s:field_spec -> ctx:poly1305_ctx s -> h0:mem -> h1:mem ->
+  Lemma
+    (requires Seq.equal (as_seq h0 ctx) (as_seq h1 ctx) /\ state_inv_t h0 ctx)
+    (ensures 
+      as_get_r h0 ctx == as_get_r h1 ctx /\
+      as_get_acc h0 ctx == as_get_acc h1 ctx /\
+      state_inv_t h1 ctx
+    )
+
 inline_for_extraction noextract
 val poly1305_init:
     #s:field_spec
