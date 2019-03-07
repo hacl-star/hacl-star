@@ -15,16 +15,6 @@ module Spec = Spec.Chacha20Poly1305
 module Poly = Hacl.Impl.Poly1305
 open Hacl.Impl.Poly1305.Fields
 
-val same_ctx_same_r_acc:
-  ctx:Poly.poly1305_ctx M32 ->
-  h0:mem ->
-  h1:mem ->
-  Lemma
-    (requires Seq.equal (as_seq h0 ctx) (as_seq h1 ctx) /\ Poly.state_inv_t h0 ctx)
-    (ensures 
-      Seq.index (Poly.as_get_acc h0 ctx) 0 == Seq.index (Poly.as_get_acc h1 ctx) 0 /\
-      Seq.index (Poly.as_get_r h0 ctx) 0 == Seq.index (Poly.as_get_r h1 ctx) 0 /\
-      Poly.state_inv_t h1 ctx
-    )
+friend Hacl.Impl.Poly1305
 
 let same_ctx_same_r_acc ctx h0 h1 = admit()

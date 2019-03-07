@@ -52,7 +52,7 @@ val poly1305_init:
 
 val update1:
   ctx:Poly.poly1305_ctx M32 ->
-  len:size_t{v len <= 16} ->
+  len:size_t{0 < v len /\ v len <= 16} ->
   text:lbuffer uint8 len ->
   Stack unit
     (requires fun h -> live h ctx /\ live h text /\ disjoint ctx text /\
