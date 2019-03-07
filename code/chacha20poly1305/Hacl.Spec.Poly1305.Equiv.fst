@@ -10,7 +10,7 @@ module Poly = Spec.Poly1305
 module PolyVec = Hacl.Spec.Poly1305.Vec
 open Hacl.Impl.Poly1305.Fields
 
-#set-options "--z3rlimit 50 --max_fuel 1 --max_ifuel 1"
+#set-options "--z3rlimit 80 --max_fuel 1 --max_ifuel 1 --initial_ifuel 0"
 
 let update1_aux_equiv
   (r:Poly.felem)
@@ -19,7 +19,7 @@ let update1_aux_equiv
   (acc:Poly.felem)
   : Lemma (Poly.update1 r len b acc == PolyVec.update1 r len b acc)
   =
-  let e = nat_from_bytes_le b in
+  let e:nat = nat_from_bytes_le b in
   Math.Lemmas.pow2_le_compat 128 (8 * len);
   assert (pow2 (8 * len) <= pow2 128);
   assert_norm (pow2 128 + pow2 128 < Poly.prime);
