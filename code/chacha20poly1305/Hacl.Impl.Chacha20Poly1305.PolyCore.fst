@@ -17,7 +17,26 @@ open Hacl.Impl.Poly1305.Fields
 open Hacl.Spec.Poly1305.Equiv
 open Hacl.Impl.Chacha20Poly1305.PolyLemmas
 
-let poly1305_padded ctx len text tmp = admit()
+#set-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
+
+let poly1305_padded ctx len text tmp =
+  let h_init = ST.get() in
+  let n = div len 16ul in
+  div_lemma len 16ul;
+  let r = mod len 16ul in
+  mod_lemma len 16ul;
+  let blocks = sub text 0ul (mul n 16ul) in
+  mul_lemma n 16ul;
+  let rem = sub text (mul n 16ul) r in // the extra part of the input data
+  let h0 = ST.get() in
+  poly_equiv (v (mul n 16ul)) (as_seq h0 blocks) (Poly.as_get_acc h0 ctx) (Poly.as_get_r h0 ctx);
+  Poly.poly1305_update ctx (mul n 16ul) blocks;
+  let h1 = ST.get() in
+  update_sub tmp 0ul r rem;
+  let h2 = ST.get() in
+  same_ctx_same_r_acc ctx h1 h2;
+  update1_equiv (Poly.as_get_r h2 ctx) 16 (as_seq h2 tmp) (Poly.as_get_acc h2 ctx);  
+  Poly.poly1305_update ctx 16ul tmp
 
 let poly1305_init ctx k = Poly.poly1305_init ctx k
   

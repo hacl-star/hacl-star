@@ -22,6 +22,7 @@ val poly1305_padded:
   tmp:lbuffer uint8 16ul ->
   Stack unit
     (requires fun h -> live h ctx /\ live h text /\ live h tmp /\
+      disjoint ctx text /\ disjoint ctx tmp /\ disjoint text tmp /\
       Poly.state_inv_t h ctx)
     (ensures fun h0 _ h1 -> 
       modifies (loc tmp |+| loc ctx) h0 h1 /\

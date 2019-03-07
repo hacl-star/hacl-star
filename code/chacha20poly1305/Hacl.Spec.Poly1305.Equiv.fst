@@ -20,8 +20,13 @@ let update1_equiv
     Poly.update1 (Seq.index r 0) len b (Seq.index acc 0) = PolyVec.poly_update b acc r)
   = admit()
 
-// let poly_equiv (text:bytes) (acc:Poly.felem) (r:Poly.felem)
-//   : Lemma (Poly.poly text acc r == PolyVec.poly #1 text (PolyVec.from_elem acc) (PolyVec.from_elem r)
-//   = admit()
+let poly_equiv
+  (len:size_nat)
+  (text:lbytes len)
+  (acc:PolyVec.elem (width M32))
+  (r:PolyVec.elem (width M32))
+  : Lemma (Poly.poly text (Seq.index acc 0) (Seq.index r 0) == 
+    PolyVec.poly_update #1 text acc r)
+  = admit()
 
 
