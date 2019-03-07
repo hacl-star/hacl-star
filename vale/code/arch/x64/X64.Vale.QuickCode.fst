@@ -4,6 +4,8 @@ open X64.Machine_s
 open X64.Vale.State
 open X64.Vale.Decls
 
+irreducible let qmodattr = ()
+
 type mod_t =
 | Mod_None : mod_t
 | Mod_ok: mod_t
@@ -44,25 +46,25 @@ let rec update_state_mods (mods:mods_t) (sM sK:state) : state =
 
 [@va_qattr]
 unfold let update_state_mods_norm (mods:mods_t) (sM sK:state) : state =
-  norm [iota; zeta; delta_only [`%update_state_mods; `%update_state_mod]] (update_state_mods mods sM sK)
+  norm [iota; zeta; delta_attr [`%qmodattr]; delta_only [`%update_state_mods; `%update_state_mod]] (update_state_mods mods sM sK)
 
 let lemma_norm_mods (mods:mods_t) (sM sK:state) : Lemma
   (ensures update_state_mods mods sM sK == update_state_mods_norm mods sM sK)
   = ()
 
-[@va_qattr]
+[@va_qattr qmodattr]
 let va_mod_dst_opr64 (o:va_operand) : mod_t =
   match o with
   | TConst n -> Mod_None
   | TReg r -> Mod_reg r
   | TMem _ _ -> Mod_None // TODO: support destination memory operands
 
-[@va_qattr]
+[@va_qattr qmodattr]
 let va_mod_reg_opr64 (o:va_reg_operand) : mod_t =
   match o with
   | TReg r -> Mod_reg r
 
-[@va_qattr] let va_mod_xmm (x:xmm) : mod_t = Mod_xmm x
+[@va_qattr qmodattr] let va_mod_xmm (x:xmm) : mod_t = Mod_xmm x
 
 let quickProc_wp (a:Type0) : Type u#1 = (s0:state) -> (wp_continue:state -> a -> Type0) -> Type0
 
