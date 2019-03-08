@@ -2245,6 +2245,7 @@ procedure {:quick exportOnly} {:frame false} Loop6x_loop(
         this.ok;
         count >= 2;
         6 <= len && count*6 + len + 6 < pow2_32;
+        len % 6 == 0;
         T2 == Mkfour(0, 0, 0, 0x1000000);
 
         // Valid ptrs and buffers
@@ -2301,13 +2302,10 @@ procedure {:quick exportOnly} {:frame false} Loop6x_loop(
         gctr_partial_opaque(alg, 6*count, plain_quads, buffer128_as_seq(mem, out_b), key_words, ctr_BE_orig);
     ensures
         this.ok;
-
-        let completed_blocks := 6*(old(len)/6);
-
         // Framing
         modifies_buffer128_3(stack_b, out_b, iv_b, old(mem), mem);
         buffer_modifies_specific128(stack_b, old(mem), mem, 1, 7);
-        buffer_modifies_specific128(out_b, old(mem), mem, count*6, #nat(count*6+completed_blocks-1));
+        buffer_modifies_specific128(out_b, old(mem), mem, count*6, #nat(count*6+old(len)-1));
         buffer_modifies_specific128(iv_b,    old(mem), mem, 0, 0);
 
         rax == old(rax);
@@ -2324,24 +2322,23 @@ procedure {:quick exportOnly} {:frame false} Loop6x_loop(
         // Semantics
 
         // Pointers
-
-         in0 == old( in0) + 0x10*completed_blocks;
-         inp == old( inp) + 0x10*completed_blocks;
-        outp == old(outp) + 0x10*completed_blocks;
+         in0 == old( in0) + 0x10*old(len);
+         inp == old( inp) + 0x10*old(len);
+        outp == old(outp) + 0x10*old(len);
 
         
-        gctr_partial_opaque(alg, #nat(6*count + completed_blocks - 6), plain_quads, buffer128_as_seq(mem, out_b), key_words, ctr_BE_orig);
-        inout0 == quad32_xor(old(buffer128_read(in_b, 6*count+completed_blocks-6 + 0, mem)), aes_encrypt_BE(alg, key_words, inc32lite(ctr_BE_orig, #nat32(6*count + completed_blocks - 6))));
-        inout1 == quad32_xor(old(buffer128_read(in_b, 6*count+completed_blocks-6 + 1, mem)), aes_encrypt_BE(alg, key_words, inc32lite(ctr_BE_orig, #nat32(6*count + completed_blocks - 6 + 1))));
-        inout2 == quad32_xor(old(buffer128_read(in_b, 6*count+completed_blocks-6 + 2, mem)), aes_encrypt_BE(alg, key_words, inc32lite(ctr_BE_orig, #nat32(6*count + completed_blocks - 6 + 2))));
-        inout3 == quad32_xor(old(buffer128_read(in_b, 6*count+completed_blocks-6 + 3, mem)), aes_encrypt_BE(alg, key_words, inc32lite(ctr_BE_orig, #nat32(6*count + completed_blocks - 6 + 3))));
-        inout4 == quad32_xor(old(buffer128_read(in_b, 6*count+completed_blocks-6 + 4, mem)), aes_encrypt_BE(alg, key_words, inc32lite(ctr_BE_orig, #nat32(6*count + completed_blocks - 6 + 4))));
-        inout5 == quad32_xor(old(buffer128_read(in_b, 6*count+completed_blocks-6 + 5, mem)), aes_encrypt_BE(alg, key_words, inc32lite(ctr_BE_orig, #nat32(6*count + completed_blocks - 6 + 5))));
+        gctr_partial_opaque(alg, #nat(6*count + old(len) - 6), plain_quads, buffer128_as_seq(mem, out_b), key_words, ctr_BE_orig);
+        inout0 == quad32_xor(old(buffer128_read(in_b, 6*count+old(len)-6 + 0, mem)), aes_encrypt_BE(alg, key_words, inc32lite(ctr_BE_orig, #nat32(6*count + old(len) - 6))));
+        inout1 == quad32_xor(old(buffer128_read(in_b, 6*count+old(len)-6 + 1, mem)), aes_encrypt_BE(alg, key_words, inc32lite(ctr_BE_orig, #nat32(6*count + old(len) - 6 + 1))));
+        inout2 == quad32_xor(old(buffer128_read(in_b, 6*count+old(len)-6 + 2, mem)), aes_encrypt_BE(alg, key_words, inc32lite(ctr_BE_orig, #nat32(6*count + old(len) - 6 + 2))));
+        inout3 == quad32_xor(old(buffer128_read(in_b, 6*count+old(len)-6 + 3, mem)), aes_encrypt_BE(alg, key_words, inc32lite(ctr_BE_orig, #nat32(6*count + old(len) - 6 + 3))));
+        inout4 == quad32_xor(old(buffer128_read(in_b, 6*count+old(len)-6 + 4, mem)), aes_encrypt_BE(alg, key_words, inc32lite(ctr_BE_orig, #nat32(6*count + old(len) - 6 + 4))));
+        inout5 == quad32_xor(old(buffer128_read(in_b, 6*count+old(len)-6 + 5, mem)), aes_encrypt_BE(alg, key_words, inc32lite(ctr_BE_orig, #nat32(6*count + old(len) - 6 + 5))));
 {
     ghost var iter:nat := 0;
     ghost var ctr := ctr_BE;
 
-    while (len >= 6) 
+    while (len > 0) 
         invariant
             // Manual framing
             this.ok;
@@ -2366,9 +2363,9 @@ procedure {:quick exportOnly} {:frame false} Loop6x_loop(
             // Valid ptrs and buffers
             validDstAddrs128(mem, ivp, iv_b, 1, memTaint, Secret);
 
-            len >= 6 ==> validSrcAddrsOffset128(mem,  in0, in0_b, (count-2)*6 + iter*6, old(len) - iter*6, memTaint, Secret);
-            len >= 6 ==> validSrcAddrsOffset128(mem,  inp,  in_b, count*6 + iter*6, old(len) - iter*6, memTaint, Secret);
-            len >= 6 ==> validDstAddrsOffset128(mem, outp, out_b, count*6 + iter*6, old(len) - iter*6, memTaint, Secret);
+            len > 0 ==> validSrcAddrsOffset128(mem,  in0, in0_b, (count-2)*6 + iter*6, old(len) - iter*6, memTaint, Secret);
+            len > 0 ==> validSrcAddrsOffset128(mem,  inp,  in_b, count*6 + iter*6, old(len) - iter*6, memTaint, Secret);
+            len > 0 ==> validDstAddrsOffset128(mem, outp, out_b, count*6 + iter*6, old(len) - iter*6, memTaint, Secret);
 
             validDstAddrs128(mem, rsp, stack_b, 8, memTaint, Secret);
             validSrcAddrs128(mem, Xip - 0x20, hkeys_b, 8, memTaint, Secret);
@@ -2387,15 +2384,15 @@ procedure {:quick exportOnly} {:frame false} Loop6x_loop(
             buffers_disjoint128(out_b, hkeys_b);
             buffers_disjoint128(in_b, out_b) || in_b == out_b;
             old(length(buffer128_as_seq(mem, in_b))) >= 6;
-            len >= 6 ==> partial_seq_agreement(plain_quads, buffer128_as_seq(mem, in_b), 6*count + 6*iter, old(length(buffer128_as_seq(mem, in_b))));
-            len >= 6 ==>  inp + 0x10*len < pow2_64;
-            len >= 6 ==>  in0 + 0x10*len < pow2_64;
-            len >= 6 ==> outp + 0x10*len < pow2_64;
+            len > 0 ==> partial_seq_agreement(plain_quads, buffer128_as_seq(mem, in_b), 6*count + 6*iter, old(length(buffer128_as_seq(mem, in_b))));
+            len > 0 ==>  inp + 0x10*len < pow2_64;
+            len > 0 ==>  in0 + 0x10*len < pow2_64;
+            len > 0 ==> outp + 0x10*len < pow2_64;
         
             modifies_buffer128_3(stack_b, out_b, iv_b, old(mem), mem);
             buffer_modifies_specific128(stack_b, old(mem), mem, 1, 7);
             buffer_modifies_specific128(out_b,   old(mem), mem, count*6, count*6+iter*6+5);
-            len < 6 ==> old(len) >= 6 && buffer_modifies_specific128(out_b, old(mem), mem, count*6, #nat(count*6+old(len)-1));
+            len == 0 ==> old(len) >= 6 && buffer_modifies_specific128(out_b, old(mem), mem, count*6, #nat(count*6+old(len)-1));
             buffer_modifies_specific128(iv_b,    old(mem), mem, 0, 0);
 
             // AES reqs
@@ -2406,33 +2403,34 @@ procedure {:quick exportOnly} {:frame false} Loop6x_loop(
             pclmulqdq_enabled;
 
             // Counter requirements
+            len % 6 == 0;
             len < pow2_32;
             6 <= old(len) && count*6 + old(len) + 6 < pow2_32;
             count*6 + iter*6 + 6 < pow2_32;
-            len >= 6 ==> len >= 6;
+            len > 0 ==> len >= 6;
             ctr == inc32lite(ctr_BE_orig, #nat32(6*count + iter*6));
             T2 == Mkfour(0, 0, 0, 0x1000000);
             T1 == reverse_bytes_quad32(inc32lite(ctr, 0));
             counter == ctr.lo0 % 256;
 
-            len >= 6 ==> inout0 == quad32_xor(reverse_bytes_quad32(inc32lite(ctr, 0)), rndkey);   
+            len > 0 ==> inout0 == quad32_xor(reverse_bytes_quad32(inc32lite(ctr, 0)), rndkey);   
 
-            len >= 6 ==> counter + 6 < 256 ==> inout1 == reverse_bytes_quad32(inc32lite(ctr, 1));
-            len >= 6 ==> counter + 6 < 256 ==> inout2 == reverse_bytes_quad32(inc32lite(ctr, 2));
-            len >= 6 ==> counter + 6 < 256 ==> inout3 == reverse_bytes_quad32(inc32lite(ctr, 3));
-            len >= 6 ==> counter + 6 < 256 ==> inout4 == reverse_bytes_quad32(inc32lite(ctr, 4));
-            len >= 6 ==> counter + 6 < 256 ==> inout5 == reverse_bytes_quad32(inc32lite(ctr, 5));
+            len > 0 ==> counter + 6 < 256 ==> inout1 == reverse_bytes_quad32(inc32lite(ctr, 1));
+            len > 0 ==> counter + 6 < 256 ==> inout2 == reverse_bytes_quad32(inc32lite(ctr, 2));
+            len > 0 ==> counter + 6 < 256 ==> inout3 == reverse_bytes_quad32(inc32lite(ctr, 3));
+            len > 0 ==> counter + 6 < 256 ==> inout4 == reverse_bytes_quad32(inc32lite(ctr, 4));
+            len > 0 ==> counter + 6 < 256 ==> inout5 == reverse_bytes_quad32(inc32lite(ctr, 5));
 
-            len < 6 ==> inout0 == quad32_xor(old(buffer128_read(in_b, (count+iter-1)*6 + 0, mem)), aes_encrypt_BE(alg, key_words, inc32lite(ctr_BE_orig, #nat32(6*count + 6*(iter-1)))));
-            len < 6 ==> inout1 == quad32_xor(old(buffer128_read(in_b, (count+iter-1)*6 + 1, mem)), aes_encrypt_BE(alg, key_words, inc32lite(ctr_BE_orig, #nat32(6*count + 6*(iter-1) + 1))));
-            len < 6 ==> inout2 == quad32_xor(old(buffer128_read(in_b, (count+iter-1)*6 + 2, mem)), aes_encrypt_BE(alg, key_words, inc32lite(ctr_BE_orig, #nat32(6*count + 6*(iter-1) + 2))));
-            len < 6 ==> inout3 == quad32_xor(old(buffer128_read(in_b, (count+iter-1)*6 + 3, mem)), aes_encrypt_BE(alg, key_words, inc32lite(ctr_BE_orig, #nat32(6*count + 6*(iter-1) + 3))));
-            len < 6 ==> inout4 == quad32_xor(old(buffer128_read(in_b, (count+iter-1)*6 + 4, mem)), aes_encrypt_BE(alg, key_words, inc32lite(ctr_BE_orig, #nat32(6*count + 6*(iter-1) + 4))));
-            len < 6 ==> inout5 == quad32_xor(old(buffer128_read(in_b, (count+iter-1)*6 + 5, mem)), aes_encrypt_BE(alg, key_words, inc32lite(ctr_BE_orig, #nat32(6*count + 6*(iter-1) + 5))));
+            len == 0 ==> inout0 == quad32_xor(old(buffer128_read(in_b, (count+iter-1)*6 + 0, mem)), aes_encrypt_BE(alg, key_words, inc32lite(ctr_BE_orig, #nat32(6*count + 6*(iter-1)))));
+            len == 0 ==> inout1 == quad32_xor(old(buffer128_read(in_b, (count+iter-1)*6 + 1, mem)), aes_encrypt_BE(alg, key_words, inc32lite(ctr_BE_orig, #nat32(6*count + 6*(iter-1) + 1))));
+            len == 0 ==> inout2 == quad32_xor(old(buffer128_read(in_b, (count+iter-1)*6 + 2, mem)), aes_encrypt_BE(alg, key_words, inc32lite(ctr_BE_orig, #nat32(6*count + 6*(iter-1) + 2))));
+            len == 0 ==> inout3 == quad32_xor(old(buffer128_read(in_b, (count+iter-1)*6 + 3, mem)), aes_encrypt_BE(alg, key_words, inc32lite(ctr_BE_orig, #nat32(6*count + 6*(iter-1) + 3))));
+            len == 0 ==> inout4 == quad32_xor(old(buffer128_read(in_b, (count+iter-1)*6 + 4, mem)), aes_encrypt_BE(alg, key_words, inc32lite(ctr_BE_orig, #nat32(6*count + 6*(iter-1) + 4))));
+            len == 0 ==> inout5 == quad32_xor(old(buffer128_read(in_b, (count+iter-1)*6 + 5, mem)), aes_encrypt_BE(alg, key_words, inc32lite(ctr_BE_orig, #nat32(6*count + 6*(iter-1) + 5))));
 
             // GCTR progress
-            len >= 6 ==> gctr_partial_opaque(alg, 6*count + 6*iter, plain_quads, buffer128_as_seq(mem, out_b), key_words, ctr_BE_orig);
-            len < 6 ==> gctr_partial_opaque(alg, #nat(6*count + 6*(iter-1)), plain_quads, buffer128_as_seq(mem, out_b), key_words, ctr_BE_orig);
+            len > 0 ==> gctr_partial_opaque(alg, 6*count + 6*iter, plain_quads, buffer128_as_seq(mem, out_b), key_words, ctr_BE_orig);
+            len == 0 ==> gctr_partial_opaque(alg, #nat(6*count + 6*(iter-1)), plain_quads, buffer128_as_seq(mem, out_b), key_words, ctr_BE_orig);
         decreases
             len;
 
@@ -3060,7 +3058,7 @@ procedure {:quick} {:verify true} AES_GCM_encrypt_6mult(
     ghost round_keys:seq(quad32),
     ghost keys_b:buffer128,
     ghost hkeys_b:buffer128
-    )
+    ) 
     lets
         inp @= rdi; outp @= rsi; len @= rdx; key @= rcx; ivp @= r8; Xip @= r9;
         Ii @= xmm0; T1 @= xmm1; T2 @= xmm2; Hkey @= xmm3;
@@ -3111,8 +3109,6 @@ procedure {:quick} {:verify true} AES_GCM_encrypt_6mult(
         Xip + 0x20 < pow2_64;
 
 
-
-        // AES reqs
         buffer_addr(keys_b, mem) + 0x80 < pow2_64;
         aes_reqs(alg, key_words, round_keys, keys_b, key + 0x80, mem, memTaint);
         T1.lo0 == 2;
@@ -3121,16 +3117,13 @@ procedure {:quick} {:verify true} AES_GCM_encrypt_6mult(
         pclmulqdq_enabled;
 
         // Len is # of 128-bit blocks
-//len % 6 == 0;
+        len % 6 == 0;
         //len >= 0x10*3;
         len >= 18;
         len / 6 >= 3;   // Should be implied by above... :(
         12 + len + 6 < pow2_32;
     ensures
-//        let blocks_of_6 := old(len)/6;
-//        let completed_blocks := 6 * blocks_of_6;
-//        gctr_partial_opaque(alg, completed_blocks, old(buffer128_as_seq(mem, in_b)), buffer128_as_seq(mem, out_b), key_words, old(T1));
-//        len == old(len) - completed_blocks;
+        gctr_partial_opaque(alg, old(len), old(buffer128_as_seq(mem, in_b)), buffer128_as_seq(mem, out_b), key_words, old(T1));
 {
     ghost var plain_quads := buffer128_as_seq(mem, in_b);
 
@@ -3180,15 +3173,11 @@ procedure {:quick} {:verify true} AES_GCM_encrypt_6mult(
 
     assert {:quick_type} old(len) / 6 >= 3;
     ghost var offset_in := #nat((old(len) / 6) - 1);
-    assert offset_in * 6 + 6 <= buffer_length(out_b);
-    assert buffer_addr(out_b, mem) + 16 * offset_in == outp - 0x60;
-    assume false;
+    Encrypt_save_and_shuffle_output(offset_in, out_b); 
 
-//    Encrypt_save_and_shuffle_output(offset_in, out_b); 
-//
-//    gctr_partial_opaque_ignores_postfix(alg, #nat32(12+mid_len - 6), old(buffer128_as_seq(mem, in_b)), old(buffer128_as_seq(mem, in_b)), out_snapshot, buffer128_as_seq(mem, out_b),key_words, ctr_BE);
-//    gctr_partial_extend6(alg, 12+mid_len - 6, old(buffer128_as_seq(mem, in_b)), buffer128_as_seq(mem, out_b), key_words, ctr_BE);
-//    //assert gctr_partial_opaque(alg, old(len), old(buffer128_as_seq(mem, in_b)), buffer128_as_seq(mem, out_b), key_words, ctr_BE);
+    gctr_partial_opaque_ignores_postfix(alg, #nat32(12+mid_len - 6), old(buffer128_as_seq(mem, in_b)), old(buffer128_as_seq(mem, in_b)), out_snapshot, buffer128_as_seq(mem, out_b),key_words, ctr_BE);
+    gctr_partial_extend6(alg, 12+mid_len - 6, old(buffer128_as_seq(mem, in_b)), buffer128_as_seq(mem, out_b), key_words, ctr_BE);
+    //assert gctr_partial_opaque(alg, old(len), old(buffer128_as_seq(mem, in_b)), buffer128_as_seq(mem, out_b), key_words, ctr_BE);
 }
 
 
