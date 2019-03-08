@@ -387,7 +387,7 @@
       1,
       [ "@query" ],
       0,
-      "9807b620229a0fbc4b55624f26a18be2"
+      "7c5209bda72507d69108f2cdd5712a13"
     ],
     [
       "Lib.Sequence.repeat_blocks_f",
@@ -395,15 +395,19 @@
       2,
       1,
       [
-        "@MaxIFuel_assumption", "@query",
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented",
+        "@fuel_irrelevance_Prims.pow2.fuel_instrumented", "@query",
         "Prims_pretyping_ae567c2fb75be05905677af440075565",
+        "constructor_distinct_Lib.IntTypes.U32",
+        "equality_tok_Lib.IntTypes.U32@tok", "equation_Lib.IntTypes.bits",
         "equation_Lib.Sequence.length", "equation_Lib.Sequence.seq",
         "equation_Prims.nat",
         "function_token_typing_Prims.__cache_version_number__",
         "int_inversion", "lemma_FStar.Seq.Base.lemma_len_slice",
-        "primitive_Prims.op_Addition", "primitive_Prims.op_Division",
-        "primitive_Prims.op_LessThanOrEqual", "primitive_Prims.op_Multiply",
-        "primitive_Prims.op_Subtraction",
+        "lemma_Lib.IntTypes.pow2_values", "primitive_Prims.op_Addition",
+        "primitive_Prims.op_Division", "primitive_Prims.op_LessThanOrEqual",
+        "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_2953f4fc7dfcc4c361e1cb2d781b5326",
@@ -412,10 +416,11 @@
         "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
         "refinement_interpretation_Tm_refine_bacfd985133e64c2447c5cadfbfa4014",
         "refinement_interpretation_Tm_refine_be3dd9f91812b6e86fca463c4f393a8e",
-        "typing_FStar.Seq.Base.length"
+        "typing_FStar.Seq.Base.length", "typing_Lib.IntTypes.bits",
+        "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "98212fdc77714f48525c641448512fe0"
+      "8adf211d5e7dd6ff4b19dd4f3f60ad84"
     ],
     [
       "Lib.Sequence.repeat_blocks",
@@ -449,7 +454,7 @@
         "typing_FStar.Seq.Base.length", "typing_Lib.Sequence.length"
       ],
       0,
-      "e09ad90c1ca33fe8aa9b8dcde82c3dd2"
+      "86389f9cff89b87f3e1b0a123a620f20"
     ],
     [
       "Lib.Sequence.repeat_blocks_multi",
@@ -458,7 +463,7 @@
       1,
       [ "@query" ],
       0,
-      "c8f498d362a4a88b0ef560a8acb96447"
+      "3e0bcec848eab01ec262d112e71f7905"
     ],
     [
       "Lib.Sequence.lemma_repeat_blocks_multi",
@@ -478,7 +483,7 @@
         "typing_Lib.Sequence.length"
       ],
       0,
-      "e1dbbb2b8edd666f83cfec66b5503faf"
+      "ef763124f7f7989a2c1b96963a3cb6c9"
     ],
     [
       "Lib.Sequence.generate_blocks",
