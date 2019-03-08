@@ -6,6 +6,7 @@ open Lib.IntTypes
 
 let v_inttype = t:inttype{t <> U1}
 let width = n:size_nat{n == 1 \/ n == 2 \/ n == 4 \/ n == 8 \/ n == 16 \/ n == 32}
+inline_for_extraction
 val vec_t: t:v_inttype -> w:width -> Type0
 type vec_index (w:width) = n:size_t{v n < w}
 let vec_v_t (t:v_inttype) (w:width) =  lseq (uint_t t SEC) w

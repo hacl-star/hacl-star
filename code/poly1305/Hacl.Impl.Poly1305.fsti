@@ -15,9 +15,7 @@ module F32xN = Hacl.Impl.Poly1305.Field32xN
 
 #reset-options "--z3rlimit 50"
 
-// The absence of inline_for_extraction / noextract is totally intentional. This relies on the
-// unsupported KreMLin feature that whenever an indexed type cannot be expressed in Low*, it gets
-// erased as "any", i.e. void*. In this case, this becomes "buffer any", i.e. void **.
+inline_for_extraction noextract
 let poly1305_ctx (s:field_spec) = lbuffer (limb s) (nlimb s +. precomplen s)
 
 noextract
