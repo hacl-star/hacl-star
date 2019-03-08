@@ -810,7 +810,7 @@ endif
 TEST_INCLUDES=test test/rfc7748_src secure_api/merkle_tree/test $(KREMLIN_HOME)/include \
   dist/generic $(OPENSSL_HOME)/include
 
-CFLAGS += $(addprefix -I,$(TEST_INCLUDES)) -Wall -Wextra \
+CFLAGS += $(addprefix -I,$(TEST_INCLUDES)) -Wall -Wextra -g \
   -Wno-infinite-recursion -Wno-int-conversion -Wno-unused-parameter \
   -O3 -march=native -mtune=native
 

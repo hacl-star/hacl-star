@@ -21,17 +21,11 @@ let getter (flag: bool) = unit -> Stack bool
     B.(modifies loc_none h0 h1) /\
     (b ==> flag)))
 
-inline_for_extraction
 val has_shaext: getter X64.CPU_Features_s.sha_enabled
-inline_for_extraction
 val has_aesni: getter X64.CPU_Features_s.aesni_enabled
-inline_for_extraction
 val has_avx2: getter X64.CPU_Features_s.avx2_enabled
-inline_for_extraction
 val has_avx: getter X64.CPU_Features_s.avx_enabled
-inline_for_extraction
 val has_bmi2: getter X64.CPU_Features_s.bmi2_enabled
-inline_for_extraction
 val has_adx: getter X64.CPU_Features_s.adx_enabled
 
 val wants_vale: unit ->
