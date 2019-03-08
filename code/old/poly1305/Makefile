@@ -106,8 +106,7 @@ poly1305.exe: poly-c/out.krml
 		$^ -o $@
 	./$@
 
-extract-c: poly-c/Hacl_Poly1305_64.c poly-c/AEAD_Poly1305_64.c \
-  poly-c89/Hacl_Poly1305_64.c poly-c89/AEAD_Poly1305_64.c
+extract-c: poly-c/AEAD_Poly1305_64.c poly-c89/AEAD_Poly1305_64.c
 
 test: poly1305.exe
 

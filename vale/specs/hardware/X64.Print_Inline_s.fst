@@ -49,42 +49,38 @@ let print_output_ret = function
   | None -> []
   | Some name -> ["\"=r\" (" ^ name ^ ")"]
 
-// If a is a integer or a modified buffer, we should specify `"+r" (name)`
-let print_modified_input (a:td) (i:nat) = match a with
-   | TD_Base _ -> ["\"+r\" (arg" ^ string_of_int i ^ "_r)"]
-   | TD_Buffer _ _ {modified=true} -> ["\"+r\" (arg" ^ string_of_int i ^ "_r)"]
-   | _ -> []
+// If the register in which a is passed is modified, we should specify `"+r" (name)`
+let print_modified_input (n:nat) (a:td) (i:nat{i < n}) (of_arg:reg_nat n -> reg) (regs_mod:reg -> bool) =
+   if regs_mod (of_arg i) then ["\"+r\" (arg" ^ string_of_int i ^ "_r)"] else []
 
 // Get a list of strings corresponding to modified inputs
-let rec get_modified_input_strings (args:list td) (i:nat) (ret_val:option string) = match args with
+let rec get_modified_input_strings (n:nat) (of_arg:reg_nat n -> reg) (regs_mod:reg -> bool) (args:list td) (i:nat{i + List.Tot.length args <= n}) (ret_val:option string) = match args with
   | [] -> print_output_ret ret_val
-  | a::q -> print_modified_input a i @ get_modified_input_strings q (i+1) ret_val
+  | a::q -> print_modified_input n a i of_arg regs_mod @ get_modified_input_strings n of_arg regs_mod q (i+1) ret_val
 
 // Print the list of modified inputs, separated by commas
-let print_modified_inputs (args:list td) (ret_val:option string) =
+let print_modified_inputs (n:nat) (of_arg:reg_nat n -> reg) (regs_mod:reg -> bool) (args:list td{List.Tot.length args <= n}) (ret_val:option string) =
   let rec aux = function
   | [] -> "\n"
   | [a] -> a ^ "\n"
   | a :: q -> a ^ ", " ^ aux q
-  in aux (get_modified_input_strings args 0 ret_val)
+  in aux (get_modified_input_strings n of_arg regs_mod args 0 ret_val)
 
-// If an arg is not modified, we should specify it as `"r" (name)`
-let print_nonmodified_input (a:td) (i:nat) = match a with
-  | TD_Base _ -> []
-  | TD_Buffer _ _ {modified=true} -> []
-  | _ -> ["\"r\" (arg" ^ string_of_int i ^ "_r)"]
+// If the register in which an arg is passed is not modified, we should specify it as `"r" (name)`
+let print_nonmodified_input (n:nat) (of_arg:reg_nat n -> reg) (regs_mod:reg -> bool) (a:td) (i:nat{i < n}) =
+   if regs_mod (of_arg i) then [] else ["\"r\" (arg" ^ string_of_int i ^ "_r)"]
 
 // Get a list of strings corresponding to modified inputs
-let rec get_nonmodified_input_strings (args:list td) (i:nat) = match args with
+let rec get_nonmodified_input_strings (n:nat) (of_arg:reg_nat n -> reg) (regs_mod:reg -> bool) (args:list td) (i:nat{List.Tot.length args + i <= n}) = match args with
   | [] -> []
-  | a::q -> print_nonmodified_input a i @ get_nonmodified_input_strings q (i+1)
+  | a::q -> print_nonmodified_input n of_arg regs_mod a i @ get_nonmodified_input_strings n of_arg regs_mod q (i+1)
 
-let print_nonmodified_inputs (args:list td) =
+let print_nonmodified_inputs (n:nat) (of_arg:reg_nat n -> reg) (regs_mod:reg->bool) (args:list td{List.Tot.length args <= n}) =
   let rec aux = function
   | [] -> "\n"
   | [a] -> a ^ "\n"
   | a :: q -> a ^ ", " ^ aux q
-  in aux (get_nonmodified_input_strings args 0)
+  in aux (get_nonmodified_input_strings n of_arg regs_mod args 0)
 
 // Print the list of modified registers, + memory and cc
 let print_modified_registers 
@@ -107,7 +103,7 @@ let print_modified_registers
     // This register is not modified, or was already specified as input or output: we skip it
     if not (regs_mod a) || input_register 0 a || output_register a then aux q
     // Register not modified or already specified in inputs, we add it
-    else "%" ^ P.print_reg_name a ^ ", " ^ aux q
+    else "\"%" ^ P.print_reg_name a ^ "\", " ^ aux q
   in aux [Rax; Rbx; Rcx; Rdx; Rsi; Rdi; Rbp; Rsp; R8; R9; R10; R11; R12; R13; R14; R15]
 
 (* This is a copy from X64.Print_s, and should remain in sync. The difference is that
@@ -186,10 +182,10 @@ let print_inline
 
   // Each *modified* input should be specified as "+r" (name) in the output line
   // If we have a return value, it should be written only and specified as "=r" (name)
-  let output_str = "  : " ^ print_modified_inputs args ret_val in
+  let output_str = "  : " ^ print_modified_inputs n of_arg regs_mod args ret_val in
 
   // Each *non-modified* input should be specified as `"r" (name)` in the input line
-  let input_str = "  : " ^ print_nonmodified_inputs args in
+  let input_str = "  : " ^ print_nonmodified_inputs n of_arg regs_mod args in
 
   // Every modified register that wasn't used for the inputs/outputs should be specified in the modified line
   let modified_str = "  : " ^ print_modified_registers n ret_val of_arg regs_mod args in

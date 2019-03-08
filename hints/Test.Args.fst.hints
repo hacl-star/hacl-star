@@ -4,8 +4,8 @@
     [
       "Test.Args.va_req_test",
       1,
+      2,
       1,
-      0,
       [
         "@MaxIFuel_assumption", "@query",
         "Prims_pretyping_f8666440faa91836cc5a13998af863fc",
@@ -16,13 +16,13 @@
         "unit_typing"
       ],
       0,
-      "cb0e32bd3e2d50a03fe65a86b7ff89f5"
+      "addc7884aa51f85f2e87c827cb6fa842"
     ],
     [
       "Test.Args.va_ens_test",
       1,
+      2,
       1,
-      0,
       [
         "@MaxIFuel_assumption", "@query",
         "Prims_pretyping_f8666440faa91836cc5a13998af863fc",
@@ -33,13 +33,13 @@
         "unit_typing"
       ],
       0,
-      "8cd628b99989081d832a14f63afa3ce2"
+      "ce120da43e80e2cc4fd3fef64c0cf00f"
     ],
     [
       "Test.Args.va_lemma_test",
       1,
+      2,
       1,
-      0,
       [
         "@MaxIFuel_assumption", "@query",
         "Prims_pretyping_f8666440faa91836cc5a13998af863fc", "b2t_def",
@@ -82,13 +82,13 @@
         "typing_tok_Interop.Types.TUInt64@tok", "unit_typing"
       ],
       0,
-      "178eb1ae7779ac3117f501d77dc81bce"
+      "39d2c1316ede678fbb86950bf2fdf7e3"
     ],
     [
       "Test.Args.va_wpMonotone_test",
       1,
+      2,
       1,
-      0,
       [
         "@MaxIFuel_assumption", "@query",
         "Prims_pretyping_ae567c2fb75be05905677af440075565",
@@ -136,39 +136,40 @@
         "typing_tok_X64.Machine_s.Rsp@tok", "unit_typing"
       ],
       0,
-      "03bcacfa0de409f30db764b023fa056a"
+      "70bf08de489c69ac6ca6686f18269317"
     ],
     [
       "Test.Args.va_wpCompute_test",
       1,
+      2,
       1,
-      0,
       [
         "@MaxIFuel_assumption", "@query", "eq2-interp",
         "equation_Test.Args.va_wp_test",
         "equation_X64.Vale.Decls.va_require_total",
-        "fuel_guarded_inversion_X64.Vale.State.state"
+        "fuel_guarded_inversion_X64.Vale.State.state",
+        "primitive_Prims.op_Addition", "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "b02556cb71dcfb7d7282de395afa671c"
+      "35512d5e4ea80d348586874a80506cb0"
     ],
     [
       "Test.Args.va_wpProof_test",
       1,
+      2,
       1,
-      0,
       [
         "@MaxIFuel_assumption", "@query", "equation_Prims.squash",
         "refinement_interpretation_Tm_refine_8d65e998a07dd53ec478e27017d9dba5"
       ],
       0,
-      "5d13f301bb642428d67f56635f4bb0b1"
+      "ea39eb999da9d6f81710c26daf6d3396"
     ],
     [
       "Test.Args.va_wpProof_test",
       2,
+      2,
       1,
-      0,
       [
         "@MaxIFuel_assumption", "@query",
         "Prims_pretyping_ae567c2fb75be05905677af440075565",
@@ -188,10 +189,9 @@
         "equality_tok_X64.Machine_s.Rdi@tok",
         "equality_tok_X64.Machine_s.Rdx@tok",
         "equality_tok_X64.Machine_s.Rsi@tok",
-        "equality_tok_X64.Machine_s.Rsp@tok", "equation_Prims.nat",
+        "equality_tok_X64.Machine_s.Rsp@tok",
         "equation_Test.Args.va_wpCompute_test",
-        "equation_Test.Args.va_wp_test", "equation_Words_s.nat64",
-        "equation_Words_s.natN", "equation_X64.Machine_s.xmm",
+        "equation_Test.Args.va_wp_test", "equation_X64.Machine_s.xmm",
         "equation_X64.Vale.Decls.va_ensure_total",
         "equation_X64.Vale.Decls.va_require_total",
         "equation_X64.Vale.Decls.va_state_eq",
@@ -205,10 +205,10 @@
         "equation_X64.Vale.State.update_reg",
         "equation_X64.Vale.State.update_xmm",
         "fuel_guarded_inversion_X64.Vale.State.state",
-        "function_token_typing_Prims.__cache_version_number__",
-        "int_inversion", "int_typing",
+        "function_token_typing_Prims.__cache_version_number__", "int_typing",
         "lemma_X64.Vale.Regs.lemma_equal_elim",
         "lemma_X64.Vale.Xmms.lemma_equal_elim",
+        "primitive_Prims.op_Addition",
         "proj_equation_X64.Vale.State.Mkstate_flags",
         "proj_equation_X64.Vale.State.Mkstate_mem",
         "proj_equation_X64.Vale.State.Mkstate_memTaint",
@@ -227,8 +227,6 @@
         "projection_inverse_X64.Vale.State.Mkstate_ok",
         "projection_inverse_X64.Vale.State.Mkstate_regs",
         "projection_inverse_X64.Vale.State.Mkstate_xmms",
-        "refinement_interpretation_Tm_refine_5514fbe9e08dfda40f950a7b9f1b2b98",
-        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
         "refinement_interpretation_Tm_refine_f0a4eeefab9c63f31c350a802a4d45dd",
         "token_correspondence_Test.Args.va_wpCompute_test",
         "typing_X64.Vale.Decls.va_upd_flags",
@@ -259,7 +257,7 @@
         "typing_tok_X64.Machine_s.Rsp@tok", "unit_typing"
       ],
       0,
-      "580a2283f8f20b4e84a1faeca72a858c"
+      "ac29e2b4ac1ff4c5b0a457f80dfc7250"
     ]
   ]
 ]

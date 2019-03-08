@@ -167,6 +167,9 @@ inline_for_extraction
 val uint: #t:inttype -> #l:secrecy_level -> (n:nat{n <= maxint t}) -> u:uint_t t l{uint_v u == n}
 
 inline_for_extraction
+let u1 (n:nat{n <= maxint U1}) : u:uint1{uint_v #U1 u == n} = uint #U1 #SEC n
+
+inline_for_extraction
 let u8 (n:nat{n <= maxint U8}) : u:uint8{uint_v #U8 u == n} = uint #U8 #SEC n
 
 inline_for_extraction
@@ -379,6 +382,11 @@ val logand: #t:inttype -> #l:secrecy_level
   -> b:uint_t t l
   -> uint_t t l
 
+val logand_spec: #t:inttype{~(U1? t)} -> #l:secrecy_level
+  -> a:uint_t t l -> b:uint_t t l
+  -> Lemma (ensures (v (a `logand` b) == v a `UInt.logand #(8 * numbytes t)` v b))
+  //[SMTPat (v (a `logand` b))]
+
 inline_for_extraction
 val logor: #t:inttype -> #l:secrecy_level
   -> a:uint_t t l
@@ -445,46 +453,40 @@ inline_for_extraction
 val ones: t:inttype -> l:secrecy_level -> v:uint_t t l{uint_v v = maxint t}
 
 inline_for_extraction
-val eq_mask: #t:inttype -> #l:secrecy_level
-  -> a:uint_t t l
-  -> b:uint_t t l
-  -> r:uint_t t l
+val eq_mask: #t:inttype -> uint_t t SEC -> uint_t t SEC -> uint_t t SEC
+
+val eq_mask_lemma: #t:inttype -> a:uint_t t SEC -> b:uint_t t SEC -> Lemma
+  (requires True)
+  (ensures  (v a = v b ==> v (eq_mask a b) == maxint t) /\
+            (v a <> v b ==> v (eq_mask a b) == 0))
+  [SMTPat (eq_mask #t a b)]
 
 inline_for_extraction
-val neq_mask: #t:inttype -> #l:secrecy_level
-  -> a:uint_t t l
-  -> b:uint_t t l
-  -> uint_t t l
+val neq_mask: #t:inttype -> a:uint_t t SEC -> b:uint_t t SEC -> uint_t t SEC
 
 inline_for_extraction
-val gte_mask:  #t:inttype -> #l:secrecy_level
-  -> a:uint_t t l
-  -> b:uint_t t l
-  -> uint_t t l
+val gte_mask: #t:inttype -> uint_t t SEC -> b:uint_t t SEC -> uint_t t SEC
+
+val gte_mask_lemma: #t:inttype -> a:uint_t t SEC -> b:uint_t t SEC -> Lemma
+  (requires True)
+  (ensures  (v a >= v b ==> v (gte_mask a b) == maxint t) /\
+            (v a < v b ==> v (gte_mask a b) == 0))
+  [SMTPat (gte_mask #t a b)]
 
 inline_for_extraction
-val lt_mask:  #t:inttype -> #l:secrecy_level
-  -> a:uint_t t l
-  -> b:uint_t t l
-  -> c:uint_t t l
+val lt_mask: #t:inttype -> uint_t t SEC -> uint_t t SEC -> uint_t t SEC
 
 inline_for_extraction
-val gt_mask:  #t:inttype -> #l:secrecy_level
-  -> a:uint_t t l
-  -> b:uint_t t l
-  -> uint_t t l
+val gt_mask: #t:inttype -> uint_t t SEC -> b:uint_t t SEC -> uint_t t SEC
 
 inline_for_extraction
-val lte_mask:  #t:inttype -> #l:secrecy_level
-  -> a:uint_t t l
-  -> b:uint_t t l
-  -> uint_t t l
+val lte_mask: #t:inttype -> uint_t t SEC -> uint_t t SEC -> uint_t t SEC
 
 inline_for_extraction
 let mod_mask (#t:inttype) (#l:secrecy_level) (m:shiftval t) : uint_t t l =
   (nat_to_uint 1 `shift_left` m) `sub_mod` nat_to_uint 1
 
-val mod_mask_lemma: #t:inttype -> #l:secrecy_level  -> a:uint_t t l -> m:shiftval t ->
+val mod_mask_lemma: #t:inttype -> #l:secrecy_level -> a:uint_t t l -> m:shiftval t ->
   Lemma
     (requires True)
     (ensures  uint_v (a `logand` (mod_mask #t m)) == uint_v a % pow2 (uint_v m))
@@ -568,7 +570,7 @@ val mod_lemma: #t:inttype{t <> U128}
 
 
 inline_for_extraction
-val eq: #t:inttype -> a:uint_t t PUB -> b:uint_t t PUB -> bool
+val eq: #t:inttype -> uint_t t PUB -> uint_t t PUB -> bool
 
 inline_for_extraction
 val eq_lemma: #t:inttype
@@ -579,7 +581,7 @@ val eq_lemma: #t:inttype
   [SMTPat (eq #t a b)]
 
 inline_for_extraction
-val ne: #t:inttype -> a:uint_t t PUB -> b:uint_t t PUB -> bool
+val ne: #t:inttype -> uint_t t PUB -> uint_t t PUB -> bool
 
 inline_for_extraction
 val ne_lemma: #t:inttype
@@ -590,7 +592,7 @@ val ne_lemma: #t:inttype
   [SMTPat (ne #t a b)]
 
 inline_for_extraction
-val lt: #t:inttype -> a:uint_t t PUB -> b:uint_t t PUB -> bool
+val lt: #t:inttype -> uint_t t PUB -> uint_t t PUB -> bool
 
 inline_for_extraction
 val lt_lemma: #t:inttype
@@ -601,7 +603,7 @@ val lt_lemma: #t:inttype
   [SMTPat (lt #t a b)]
 
 inline_for_extraction
-val lte: #t:inttype -> a:uint_t t PUB -> b:uint_t t PUB -> bool
+val lte: #t:inttype -> uint_t t PUB -> uint_t t PUB -> bool
 
 inline_for_extraction
 val lte_lemma: #t:inttype
@@ -613,7 +615,7 @@ val lte_lemma: #t:inttype
 
 
 inline_for_extraction
-val gt: #t:inttype -> a:uint_t t PUB -> b:uint_t t PUB -> bool
+val gt: #t:inttype -> uint_t t PUB -> uint_t t PUB -> bool
 
 inline_for_extraction
 val gt_lemma: #t:inttype
@@ -625,7 +627,7 @@ val gt_lemma: #t:inttype
 
 
 inline_for_extraction
-val gte: #t:inttype -> a:uint_t t PUB -> b:uint_t t PUB -> bool
+val gte: #t:inttype -> uint_t t PUB -> uint_t t PUB -> bool
 
 inline_for_extraction
 val gte_lemma: #t:inttype
@@ -649,6 +651,7 @@ let (<>.) #t = ne #t
 
 inline_for_extraction
 let (<.) #t = lt #t
+
 inline_for_extraction
 let (<=.) #t = lte #t
 
@@ -657,7 +660,6 @@ let (>.) #t = gt #t
 
 inline_for_extraction
 let (>=.) #t = gte #t
-
 
 inline_for_extraction
 let p_t (t:inttype) =

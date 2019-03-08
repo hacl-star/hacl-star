@@ -6,7 +6,7 @@ open FStar.HyperStack.All
 
 open FStar.Mul
 open FStar.Seq
-open FStar.Endianness
+open FStar.Old.Endianness
 open Seq.Create
 open Spec.Lib
 

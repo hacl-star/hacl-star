@@ -6,7 +6,7 @@ open FStar.HyperStack.ST
 open FStar.Ghost
 open FStar.Seq
 open FStar.HyperStack
-open FStar.Endianness
+open FStar.Old.Endianness
 open FStar.Buffer
 open Hacl.Cast
 

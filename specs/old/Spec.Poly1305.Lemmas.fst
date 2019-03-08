@@ -5,7 +5,7 @@ module ST = FStar.HyperStack.ST
 open FStar.Mul
 open FStar.Seq
 open FStar.UInt8
-open FStar.Endianness
+open FStar.Old.Endianness
 
 
 val lemma_prime_value: n:nat -> Lemma

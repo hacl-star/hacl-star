@@ -8,7 +8,7 @@ open FStar.Mul
 open FStar.Ghost
 open FStar.Seq
 open FStar.Seq
-open FStar.Endianness
+open FStar.Old.Endianness
 open FStar.Int.Cast.Full
 
 open Hacl.Cast

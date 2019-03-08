@@ -10,7 +10,7 @@ open FStar.HyperStack.ST
 open FStar.Seq
 open FStar.HyperStack
 open FStar.Ghost
-open FStar.Endianness
+open FStar.Old.Endianness
 open FStar.Buffer
 
 open Hacl.Spec.Endianness
@@ -573,8 +573,8 @@ let poly1305_finish_ log st mac m len key_s =
   no_upd_lemma_1 h0 h2 acc key_s;
   assert (equal h0 key_s h2 key_s);
   let k'  = hload128_le key_s in
-  assert (FStar.UInt128.v k' == FStar.Endianness.little_endian (as_seq h0 key_s));
-  FStar.UInt128.v_inj k' (FStar.UInt128.uint_to_t (FStar.Endianness.little_endian (as_seq h0 key_s))); //NS: 07/14 ... need to invoke injectivity explicitly; which is rather heavy
+  assert (FStar.UInt128.v k' == FStar.Old.Endianness.little_endian (as_seq h0 key_s));
+  FStar.UInt128.v_inj k' (FStar.UInt128.uint_to_t (FStar.Old.Endianness.little_endian (as_seq h0 key_s))); //NS: 07/14 ... need to invoke injectivity explicitly; which is rather heavy
   assert (k' == Hacl.Spec.Poly1305_64.load128_le_spec (as_seq h0 key_s));
   let open Hacl.Bignum.Wide in
   let acc' = bignum_to_128 acc in

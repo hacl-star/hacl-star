@@ -5,7 +5,8 @@ open EverCrypt.Specs
 open FStar.HyperStack.ST
 
 /// DEPRECATED MODULE -- resolves onto old-HACL modules at link-time via a
-/// series of terrible hacks below. Use EverCrypt.AEAD for all new needs.
+/// series of terrible hacks below. Use EverCrypt.AEAD, EverCrypt.Poly1305, etc.
+/// for all new needs.
 
 /// Curve
 
