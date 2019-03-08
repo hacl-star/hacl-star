@@ -26,7 +26,7 @@
         "typing_Spec.Hash.Definitions.max_input_length"
       ],
       0,
-      "479470445ea2154243ae225aaeb60f6e"
+      "8bf9d7b463ffe2bb2505fadfda92f72b"
     ],
     [
       "Test.compute",
@@ -67,7 +67,7 @@
         "typing_Spec.Hash.Definitions.word_length"
       ],
       0,
-      "d6aea42823c481abd2ffb0e9a2ecab9d"
+      "de568cd5007bd95b79b1e5f25979684f"
     ],
     [
       "Test.compute",
@@ -93,7 +93,7 @@
         "typing_Spec.Hash.Definitions.word_length"
       ],
       0,
-      "3e8f64f11e0b216846160db581c1b4e7"
+      "424d89b3e45083612e9fb169dc33ec31"
     ],
     [
       "Test.compute",
@@ -302,7 +302,7 @@
         "typing_Spec.Hash.Definitions.word_length"
       ],
       0,
-      "abc9c122c117e0d99ba8d9c887d937c4"
+      "490aa60d273c97f09601e0a81e3fd74a"
     ],
     [
       "Test.test_one_hash",
@@ -479,7 +479,7 @@
         "unit_typing"
       ],
       0,
-      "36a589e3da3eb723b0ba2653b95a1fdb"
+      "89562f825bfcdefc835b9ea31833667d"
     ],
     [
       "Test.test_hash",
@@ -508,6 +508,7 @@
         "equation_Lib.IntTypes.pub_int_t", "equation_Lib.IntTypes.uint_t",
         "equation_LowStar.Buffer.buffer",
         "equation_LowStar.Buffer.trivial_preorder",
+        "equation_LowStar.Monotonic.Buffer.includes",
         "equation_LowStar.Monotonic.Buffer.length", "equation_Prims.l_True",
         "equation_Prims.logical", "equation_Prims.nat",
         "equation_Spec.Poly1305.size_key", "equation_Test.hash_vector",
@@ -521,8 +522,11 @@
         "lemma_FStar.Map.lemma_ContainsDom",
         "lemma_FStar.Monotonic.HyperStack.lemma_tip_top_smt",
         "lemma_FStar.UInt32.vu_inv", "lemma_Lib.IntTypes.pow2_values",
+        "lemma_LowStar.Monotonic.Buffer.gsub_is_null",
         "lemma_LowStar.Monotonic.Buffer.len_gsub",
-        "lemma_LowStar.Monotonic.Buffer.recallable_mgsub",
+        "lemma_LowStar.Monotonic.Buffer.length_null_1",
+        "lemma_LowStar.Monotonic.Buffer.loc_includes_gsub_buffer_r_",
+        "lemma_LowStar.Monotonic.Buffer.recallable_includes",
         "primitive_Prims.op_Addition", "primitive_Prims.op_AmpAmp",
         "primitive_Prims.op_GreaterThan",
         "primitive_Prims.op_LessThanOrEqual",
@@ -546,7 +550,7 @@
         "typing_Spec.Poly1305.size_key"
       ],
       0,
-      "29089f681ab9ee796c47b40fea27a2bc"
+      "a2e4097a4a42293664cc57169147fa6f"
     ],
     [
       "Test.test_one_hmac",
@@ -679,7 +683,7 @@
         "unit_inversion", "unit_typing"
       ],
       0,
-      "6950112e344c24d0c05fc84617622485"
+      "9e2ccdb0b91d55bc92a1ee68d351cefe"
     ],
     [
       "Test.test_hmac",
@@ -708,6 +712,7 @@
         "equation_Lib.IntTypes.pub_int_t", "equation_Lib.IntTypes.uint_t",
         "equation_LowStar.Buffer.buffer",
         "equation_LowStar.Buffer.trivial_preorder",
+        "equation_LowStar.Monotonic.Buffer.includes",
         "equation_LowStar.Monotonic.Buffer.length", "equation_Prims.l_True",
         "equation_Prims.logical", "equation_Prims.nat",
         "equation_Spec.Poly1305.size_key", "equation_Test.hmac_vector",
@@ -721,10 +726,12 @@
         "lemma_FStar.Map.lemma_ContainsDom",
         "lemma_FStar.Monotonic.HyperStack.lemma_tip_top_smt",
         "lemma_FStar.UInt32.vu_inv", "lemma_Lib.IntTypes.pow2_values",
+        "lemma_LowStar.Monotonic.Buffer.gsub_is_null",
         "lemma_LowStar.Monotonic.Buffer.len_gsub",
         "lemma_LowStar.Monotonic.Buffer.length_null_1",
         "lemma_LowStar.Monotonic.Buffer.length_null_2",
-        "lemma_LowStar.Monotonic.Buffer.recallable_mgsub",
+        "lemma_LowStar.Monotonic.Buffer.loc_includes_gsub_buffer_r_",
+        "lemma_LowStar.Monotonic.Buffer.recallable_includes",
         "primitive_Prims.op_Addition", "primitive_Prims.op_AmpAmp",
         "primitive_Prims.op_GreaterThan",
         "primitive_Prims.op_LessThanOrEqual",
@@ -749,7 +756,7 @@
         "typing_Spec.Poly1305.size_key", "unit_inversion", "unit_typing"
       ],
       0,
-      "2d7361b378e21b8a28143d1763fee224"
+      "f10f255dc00d46d3afddaf7a8dc593a2"
     ],
     [
       "Test.test_one_hkdf",
@@ -906,7 +913,7 @@
         "unit_typing"
       ],
       0,
-      "dc726f6094e9def084a26b63c181df47"
+      "5ef2269d0904da848fa0402d7205b302"
     ],
     [
       "Test.test_hkdf",
@@ -935,6 +942,7 @@
         "equation_Lib.IntTypes.pub_int_t", "equation_Lib.IntTypes.uint_t",
         "equation_LowStar.Buffer.buffer",
         "equation_LowStar.Buffer.trivial_preorder",
+        "equation_LowStar.Monotonic.Buffer.includes",
         "equation_LowStar.Monotonic.Buffer.length", "equation_Prims.l_True",
         "equation_Prims.logical", "equation_Prims.nat",
         "equation_Spec.Poly1305.size_key", "equation_Test.hkdf_vector",
@@ -948,10 +956,12 @@
         "lemma_FStar.Map.lemma_ContainsDom",
         "lemma_FStar.Monotonic.HyperStack.lemma_tip_top_smt",
         "lemma_FStar.UInt32.vu_inv", "lemma_Lib.IntTypes.pow2_values",
+        "lemma_LowStar.Monotonic.Buffer.gsub_is_null",
         "lemma_LowStar.Monotonic.Buffer.len_gsub",
         "lemma_LowStar.Monotonic.Buffer.length_null_1",
         "lemma_LowStar.Monotonic.Buffer.length_null_2",
-        "lemma_LowStar.Monotonic.Buffer.recallable_mgsub",
+        "lemma_LowStar.Monotonic.Buffer.loc_includes_gsub_buffer_r_",
+        "lemma_LowStar.Monotonic.Buffer.recallable_includes",
         "primitive_Prims.op_Addition", "primitive_Prims.op_AmpAmp",
         "primitive_Prims.op_GreaterThan",
         "primitive_Prims.op_LessThanOrEqual",
@@ -976,7 +986,7 @@
         "typing_Spec.Poly1305.size_key", "unit_inversion", "unit_typing"
       ],
       0,
-      "6c8d84224a5bb3c35ad9b4c8943b80f5"
+      "33c90b3131cc102c47b787a9cd55398a"
     ],
     [
       "Test.test_aead",
@@ -1005,6 +1015,7 @@
         "equation_Lib.IntTypes.pub_int_t", "equation_Lib.IntTypes.uint_t",
         "equation_LowStar.Buffer.buffer",
         "equation_LowStar.Buffer.trivial_preorder",
+        "equation_LowStar.Monotonic.Buffer.includes",
         "equation_LowStar.Monotonic.Buffer.length", "equation_Prims.l_True",
         "equation_Prims.logical", "equation_Prims.nat",
         "equation_Spec.Poly1305.size_key", "equation_Test.aead_vector",
@@ -1017,12 +1028,14 @@
         "lemma_FStar.HyperStack.ST.lemma_same_refs_in_stack_regions_elim",
         "lemma_FStar.HyperStack.ST.lemma_same_refs_in_stack_regions_intro",
         "lemma_FStar.Map.lemma_ContainsDom",
-        "lemma_FStar.Monotonic.HyperStack.lemma_map_invariant",
         "lemma_FStar.Monotonic.HyperStack.lemma_tip_top_smt",
         "lemma_FStar.UInt32.uv_inv", "lemma_FStar.UInt32.vu_inv",
         "lemma_Lib.IntTypes.pow2_values",
+        "lemma_LowStar.Monotonic.Buffer.gsub_is_null",
         "lemma_LowStar.Monotonic.Buffer.len_gsub",
-        "lemma_LowStar.Monotonic.Buffer.recallable_mgsub",
+        "lemma_LowStar.Monotonic.Buffer.length_null_1",
+        "lemma_LowStar.Monotonic.Buffer.loc_includes_gsub_buffer_r_",
+        "lemma_LowStar.Monotonic.Buffer.recallable_includes",
         "primitive_Prims.op_Addition", "primitive_Prims.op_AmpAmp",
         "primitive_Prims.op_Equality", "primitive_Prims.op_LessThanOrEqual",
         "primitive_Prims.op_Subtraction",
@@ -1046,7 +1059,7 @@
         "typing_Spec.Poly1305.size_key"
       ],
       0,
-      "b204bb3b7c9de2ee62c0e9762d7ff6a5"
+      "d441452792ba0b361acec3fc771e2066"
     ],
     [
       "Test.test_rng",
@@ -1059,7 +1072,7 @@
         "lemma_FStar.HyperStack.ST.lemma_same_refs_in_stack_regions_intro"
       ],
       0,
-      "58f8c4992b1c380cbb116cae1a77cbbd"
+      "1b3d700142b39723cb927fddbe6e4916"
     ],
     [
       "Test.test_dh",
@@ -1072,7 +1085,7 @@
         "lemma_FStar.HyperStack.ST.lemma_same_refs_in_stack_regions_intro"
       ],
       0,
-      "a250d61183d677e008c97d746d465188"
+      "834d7306e3eaeaa8c2d20b34adafcce9"
     ],
     [
       "Test.main",
@@ -1145,7 +1158,7 @@
         "typing_tok_C.EXIT_SUCCESS@tok"
       ],
       0,
-      "c6136b25dc7ab907b91e3c545d51c64d"
+      "6d9d7d97db6bbb013403a0c8a5679fd5"
     ]
   ]
 ]
