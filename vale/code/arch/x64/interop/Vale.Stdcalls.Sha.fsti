@@ -29,19 +29,19 @@ let as_t (#a:Type) (x:normal a) : a = x
 noextract
 let as_normal_t (#a:Type) (x:a) : normal a = x
 
-[@__reduce__] unfold noextract
+[@__reduce__] noextract
 let b128 = buf_t TUInt32 TUInt128
-[@__reduce__] unfold noextract
+[@__reduce__] noextract
 let b8_128 = buf_t TUInt8 TUInt128
-[@__reduce__] unfold noextract
+[@__reduce__] noextract
 let ib128 = ibuf_t TUInt32 TUInt128
-[@__reduce__] unfold noextract
+[@__reduce__] noextract
 let t128_mod = TD_Buffer TUInt32 TUInt128 default_bq
-[@__reduce__] unfold noextract
+[@__reduce__] noextract
 let t128_no_mod = TD_Buffer TUInt8 TUInt128 ({modified=false; strict_disjointness=false; taint=MS.Secret})
-[@__reduce__] unfold noextract
+[@__reduce__] noextract
 let t128_imm = TD_ImmBuffer TUInt32 TUInt128 default_bq
-[@__reduce__] unfold noextract
+[@__reduce__] noextract
 let tuint64 = TD_Base TUInt64
 
 [@__reduce__]
@@ -85,7 +85,7 @@ module VS = X64.Vale.State
 
 #set-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
 
-[@__reduce__] unfold noextract
+[@__reduce__] noextract
 let sha_lemma'
     (code:V.va_code)
     (_win:bool)

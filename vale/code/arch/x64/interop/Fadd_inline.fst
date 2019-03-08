@@ -29,16 +29,16 @@ let uint64 = UInt64.t
 let as_t (#a:Type) (x:normal a) : a = x
 let as_normal_t (#a:Type) (x:a) : normal a = x
 
-[@__reduce__] unfold
+[@__reduce__]
 let b64 = buf_t TUInt64 TUInt64
-[@__reduce__] unfold
+[@__reduce__]
 let t64_mod = TD_Buffer TUInt64 TUInt64 default_bq
-[@__reduce__] unfold
+[@__reduce__]
 let t64_no_mod = TD_Buffer TUInt64 TUInt64 ({modified=false; strict_disjointness=false; taint=MS.Secret})
-[@__reduce__] unfold
+[@__reduce__]
 let tuint64 = TD_Base TUInt64
 
-[@__reduce__] unfold
+[@__reduce__]
 let dom: IX64.arity_ok 3 td =
   let y = [t64_mod; t64_no_mod; tuint64] in
   assert_norm (List.length y = 3);
@@ -77,7 +77,7 @@ let add1_regs_modified: MS.reg -> bool = fun (r:MS.reg) ->
 
 let add1_xmms_modified = fun _ -> false
 
-[@__reduce__] unfold
+[@__reduce__]
 let add1_lemma'
     (code:V.va_code)
     (_win:bool)
@@ -172,7 +172,7 @@ let add1_code_inline () : FStar.All.ML int =
   PR.print_inline "add1_inline" 0 (Some "carry_r") (List.length dom) dom code_add1 of_arg add1_regs_modified
 
 
-[@__reduce__] unfold
+[@__reduce__]
 let fadd_dom: IX64.arity_ok_stdcall td =
   let y = [t64_mod; t64_no_mod; t64_no_mod] in
   assert_norm (List.length y = 3);
@@ -211,7 +211,7 @@ let fadd_regs_modified: MS.reg -> bool = fun (r:MS.reg) ->
 
 let fadd_xmms_modified = fun _ -> false
 
-[@__reduce__] unfold
+[@__reduce__]
 let fadd_lemma'
     (code:V.va_code)
     (_win:bool)
@@ -294,7 +294,7 @@ let fadd_inline out f1 f2
 let fadd_code_inline () : FStar.All.ML int =
   PR.print_inline "fadd_inline" 0 None (List.length fadd_dom) fadd_dom code_fadd of_arg fadd_regs_modified
 
-[@__reduce__] unfold
+[@__reduce__]
 let fsub_dom: IX64.arity_ok_stdcall td =
   let y = [t64_mod; t64_no_mod; t64_no_mod] in
   assert_norm (List.length y = 3);
@@ -333,7 +333,7 @@ let fsub_regs_modified: MS.reg -> bool = fun (r:MS.reg) ->
 
 let fsub_xmms_modified = fun _ -> false
 
-[@__reduce__] unfold
+[@__reduce__]
 let fsub_lemma'
     (code:V.va_code)
     (_win:bool)

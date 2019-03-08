@@ -39,7 +39,7 @@ let aesni_post : VSig.vale_post 8 dom =
 
 (* The vale lemma doesn't quite suffice to prove the modifies clause
    expected of the interop layer *)
-[@__reduce__] unfold noextract
+[@__reduce__] noextract
 let aesni_lemma'
     (code:V.va_code)
     (_win:bool)
@@ -98,7 +98,7 @@ open X64.Vale.State
 
 (* The vale lemma doesn't quite suffice to prove the modifies clause
    expected of the interop layer *)
-[@__reduce__] unfold noextract
+[@__reduce__] noextract
 let sha_lemma'
     (code:V.va_code)
     (_win:bool)
@@ -152,7 +152,7 @@ let adx_post : VSig.vale_post 8 dom =
 
 (* The vale lemma doesn't quite suffice to prove the modifies clause
    expected of the interop layer *)
-[@__reduce__] unfold noextract
+[@__reduce__] noextract
 let adx_lemma'
     (code:V.va_code)
     (_win:bool)
@@ -205,7 +205,7 @@ let avx_post : VSig.vale_post 8 dom =
 
 (* The vale lemma doesn't quite suffice to prove the modifies clause
    expected of the interop layer *)
-[@__reduce__] unfold noextract
+[@__reduce__] noextract
 let avx_lemma'
     (code:V.va_code)
     (_win:bool)
@@ -258,7 +258,7 @@ let avx2_post : VSig.vale_post 8 dom =
 
 (* The vale lemma doesn't quite suffice to prove the modifies clause
    expected of the interop layer *)
-[@__reduce__] unfold noextract
+[@__reduce__] noextract
 let avx2_lemma'
     (code:V.va_code)
     (_win:bool)

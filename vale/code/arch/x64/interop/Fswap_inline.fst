@@ -27,16 +27,16 @@ let uint64 = UInt64.t
 let as_t (#a:Type) (x:normal a) : a = x
 let as_normal_t (#a:Type) (x:a) : normal a = x
 
-[@__reduce__] unfold
+[@__reduce__]
 let b64 = buf_t TUInt64 TUInt64
-[@__reduce__] unfold
+[@__reduce__]
 let t64_mod = TD_Buffer TUInt64 TUInt64 default_bq
-[@__reduce__] unfold
+[@__reduce__]
 let t64_no_mod = TD_Buffer TUInt64 TUInt64 ({modified=false; strict_disjointness=false; taint=MS.Secret})
-[@__reduce__] unfold
+[@__reduce__]
 let tuint64 = TD_Base TUInt64
 
-[@__reduce__] unfold
+[@__reduce__]
 let cswap_dom: IX64.arity_ok 3 td =
   let y = [t64_mod; t64_mod; tuint64] in
   assert_norm (List.length y = 3);
@@ -75,7 +75,7 @@ let cswap_regs_modified: MS.reg -> bool = fun (r:MS.reg) ->
 
 let cswap_xmms_modified = fun _ -> false
 
-[@__reduce__] unfold
+[@__reduce__]
 let cswap_lemma'
     (code:V.va_code)
     (_win:bool)

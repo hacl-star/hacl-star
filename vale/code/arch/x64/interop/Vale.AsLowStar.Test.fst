@@ -15,15 +15,15 @@ let as_normal_t (#a:Type) (x:a) : normal a = x
 
 ////////////////////////////////////////////////////////////////////////////////
 //First a little standalone, toy experiment
-[@__reduce__] unfold
+[@__reduce__]
 let b64 = buf_t TUInt8 TUInt64
-[@__reduce__] unfold
+[@__reduce__]
 let ib64 = ibuf_t TUInt8 TUInt64
-[@__reduce__] unfold
+[@__reduce__]
 let t64_mod = TD_Buffer TUInt8 TUInt64 default_bq
-[@__reduce__] unfold
+[@__reduce__]
 let t64_no_mod = TD_Buffer TUInt8 TUInt64 ({modified=false; strict_disjointness=false; taint=MS.Secret})
-[@__reduce__] unfold
+[@__reduce__]
 let t64_imm = TD_ImmBuffer TUInt8 TUInt64 ({modified=false; strict_disjointness=false; taint=MS.Secret})
 
 [@__reduce__]
@@ -81,7 +81,7 @@ module VS = X64.Vale.State
 
 (* The vale lemma doesn't quite suffice to prove the modifies clause
    expected of the interop layer *)
-[@__reduce__] unfold
+[@__reduce__]
 let vm_lemma'
     (code:V.va_code)
     (_win:bool)
@@ -256,7 +256,7 @@ let with_len (l:list 'a)
 #set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit_factor 2"
 (* The vale lemma doesn't quite suffice to prove the modifies clause
    expected of the interop layer *)
-[@__reduce__] unfold
+[@__reduce__]
 let aesni_lemma'
     (code:V.va_code)
     (_win:bool)
@@ -376,7 +376,7 @@ let ta_post : VSig.vale_post 8 ta_dom =
 #set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit_factor 4"
 (* The vale lemma doesn't quite suffice to prove the modifies clause
    expected of the interop layer *)
-[@__reduce__] unfold
+[@__reduce__]
 let ta_lemma'
     (code:V.va_code)
     (_win:bool)

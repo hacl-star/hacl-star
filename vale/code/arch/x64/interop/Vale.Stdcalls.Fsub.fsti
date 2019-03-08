@@ -31,16 +31,16 @@ let as_t (#a:Type) (x:normal a) : a = x
 noextract
 let as_normal_t (#a:Type) (x:a) : normal a = x
 
-[@__reduce__] unfold noextract
+[@__reduce__] noextract
 let b64 = buf_t TUInt64 TUInt64
-[@__reduce__] unfold noextract
+[@__reduce__] noextract
 let t64_mod = TD_Buffer TUInt64 TUInt64 default_bq
-[@__reduce__] unfold noextract
+[@__reduce__] noextract
 let t64_no_mod = TD_Buffer TUInt64 TUInt64 ({modified=false; strict_disjointness=false; taint=MS.Secret})
-[@__reduce__] unfold noextract
+[@__reduce__] noextract
 let tuint64 = TD_Base TUInt64
 
-[@__reduce__] unfold noextract
+[@__reduce__] noextract
 let dom: IX64.arity_ok_stdcall td =
   let y = [t64_mod; t64_no_mod; t64_no_mod] in
   assert_norm (List.length y = 3);
@@ -72,7 +72,7 @@ let fsub_post : VSig.vale_post 16 dom =
 
 #set-options "--z3rlimit 100"
 
-[@__reduce__] unfold noextract
+[@__reduce__] noextract
 let fsub_lemma'
     (code:V.va_code)
     (_win:bool)

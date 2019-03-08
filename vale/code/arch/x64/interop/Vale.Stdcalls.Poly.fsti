@@ -30,13 +30,13 @@ let as_t (#a:Type) (x:normal a) : a = x
 noextract
 let as_normal_t (#a:Type) (x:a) : normal a = x
 
-[@__reduce__] unfold noextract
+[@__reduce__] noextract
 let b64 = buf_t TUInt8 TUInt64
-[@__reduce__] unfold noextract
+[@__reduce__] noextract
 let t64_mod = TD_Buffer TUInt8 TUInt64 ({modified=true; strict_disjointness=false; taint=MS.Public})
-[@__reduce__] unfold noextract
+[@__reduce__] noextract
 let t64_no_mod = TD_Buffer TUInt8 TUInt64 ({modified=false; strict_disjointness=false; taint=MS.Public})
-[@__reduce__] unfold noextract
+[@__reduce__] noextract
 let tuint64 = TD_Base TUInt64
 
 [@__reduce__] noextract
@@ -77,7 +77,7 @@ module VS = X64.Vale.State
 
 #set-options "--z3rlimit 20"
 
-[@__reduce__] unfold noextract
+[@__reduce__] noextract
 let poly_lemma'
     (code:V.va_code)
     (_win:bool)

@@ -29,17 +29,17 @@ let uint64 = UInt64.t
 let as_t (#a:Type) (x:normal a) : a = x
 let as_normal_t (#a:Type) (x:a) : normal a = x
 
-[@__reduce__] unfold
+[@__reduce__]
 let b64 = buf_t TUInt64 TUInt64
-[@__reduce__] unfold
+[@__reduce__]
 let t64_mod = TD_Buffer TUInt64 TUInt64 default_bq
-[@__reduce__] unfold
+[@__reduce__]
 let t64_no_mod = TD_Buffer TUInt64 TUInt64 ({modified=false; strict_disjointness=false; taint=MS.Secret})
-[@__reduce__] unfold
+[@__reduce__]
 let tuint64 = TD_Base TUInt64
 
 
-[@__reduce__] unfold
+[@__reduce__]
 let fmul_dom: IX64.arity_ok 4 td =
   let y = [t64_mod; t64_no_mod; t64_mod; t64_no_mod] in
   assert_norm (List.length y = 4);
@@ -80,7 +80,7 @@ let fmul_xmms_modified = fun _ -> false
 
 #set-options "--z3rlimit 200"
 
-[@__reduce__] unfold
+[@__reduce__]
 let fmul_lemma'
     (code:V.va_code)
     (_win:bool)
@@ -222,7 +222,7 @@ let fmul2_post : VSig.vale_post 48 fmul_dom =
 
 #set-options "--z3rlimit 200"
 
-[@__reduce__] unfold
+[@__reduce__]
 let fmul2_lemma'
     (code:V.va_code)
     (_win:bool)
@@ -313,7 +313,7 @@ let fmul2_inline tmp f1 out f2 =
 let fmul2_code_inline () : FStar.All.ML int =
   PR.print_inline "fmul2_inline" 0 None (List.length fmul_dom) fmul_dom code_fmul2 fmul_of_arg fmul_regs_modified
 
-[@__reduce__] unfold
+[@__reduce__]
 let fmul1_dom: IX64.arity_ok 3 td =
   let y = [t64_mod; t64_no_mod; tuint64] in
   assert_norm (List.length y = 3);
@@ -352,7 +352,7 @@ let fmul1_regs_modified: MS.reg -> bool = fun (r:MS.reg) ->
 
 let fmul1_xmms_modified = fun _ -> false
 
-[@__reduce__] unfold
+[@__reduce__]
 let fmul1_lemma'
     (code:V.va_code)
     (_win:bool)

@@ -32,17 +32,17 @@ let as_t (#a:Type) (x:normal a) : a = x
 noextract
 let as_normal_t (#a:Type) (x:a) : normal a = x
 
-[@__reduce__] unfold noextract
+[@__reduce__] noextract
 let b128 = buf_t TUInt8 TUInt128
-[@__reduce__] unfold noextract
+[@__reduce__] noextract
 let t128_mod = TD_Buffer TUInt8 TUInt128 default_bq
-[@__reduce__] unfold noextract
+[@__reduce__] noextract
 let t128_no_mod = TD_Buffer TUInt8 TUInt128 ({modified=false; strict_disjointness=false; taint=MS.Secret})
-[@__reduce__] unfold noextract
+[@__reduce__] noextract
 let tuint64 = TD_Base TUInt64
 
 
-[@__reduce__] unfold noextract
+[@__reduce__] noextract
 let (dom: list td{List.length dom <= 20}) =
   let y = [t128_no_mod; tuint64; t128_no_mod; tuint64; t128_no_mod; t128_mod; t128_mod; t128_no_mod] in
   assert_norm (List.length y = 8);
@@ -96,7 +96,7 @@ let gcm128_post : Ghost.erased (Seq.seq nat32) -> VSig.vale_post 224 dom =
 
 #set-options "--z3rlimit 50"
 
-[@__reduce__] unfold noextract
+[@__reduce__] noextract
 let gcm128_lemma'
     (s:Ghost.erased (Seq.seq nat32))
     (code:V.va_code)
@@ -207,7 +207,7 @@ let gcm256_post : Ghost.erased (Seq.seq nat32) -> VSig.vale_post 224 dom =
 
 #set-options "--z3rlimit 50"
 
-[@__reduce__] unfold noextract
+[@__reduce__] noextract
 let gcm256_lemma'
     (s:Ghost.erased (Seq.seq nat32))
     (code:V.va_code)

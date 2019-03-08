@@ -31,16 +31,16 @@ let as_t (#a:Type) (x:normal a) : a = x
 noextract
 let as_normal_t (#a:Type) (x:a) : normal a = x
 
-[@__reduce__] unfold noextract
+[@__reduce__] noextract
 let b64 = buf_t TUInt64 TUInt64
-[@__reduce__] unfold noextract
+[@__reduce__] noextract
 let t64_mod = TD_Buffer TUInt64 TUInt64 default_bq
-[@__reduce__] unfold noextract
+[@__reduce__] noextract
 let t64_no_mod = TD_Buffer TUInt64 TUInt64 ({modified=false; strict_disjointness=false; taint=MS.Secret})
-[@__reduce__] unfold noextract
+[@__reduce__] noextract
 let tuint64 = TD_Base TUInt64
 
-[@__reduce__] unfold noextract
+[@__reduce__] noextract
 let fmul_dom: IX64.arity_ok_stdcall td =
   let y = [t64_mod; t64_no_mod; t64_mod; t64_no_mod] in
   assert_norm (List.length y = 4);
@@ -74,7 +74,7 @@ let fmul_post : VSig.vale_post 48 fmul_dom =
 
 #set-options "--z3rlimit 200"
 
-[@__reduce__] unfold noextract
+[@__reduce__] noextract
 let fmul_lemma'
     (code:V.va_code)
     (_win:bool)
@@ -159,7 +159,7 @@ let fmul2_post : VSig.vale_post 48 fmul_dom =
 
 #set-options "--z3rlimit 200"
 
-[@__reduce__] unfold noextract
+[@__reduce__] noextract
 let fmul2_lemma'
     (code:V.va_code)
     (_win:bool)
@@ -216,7 +216,7 @@ let lowstar_fmul2_t =
     _
     (W.mk_prediction code_fmul2 fmul_dom [] (fmul2_lemma code_fmul2 IA.win))
 
-[@__reduce__] unfold noextract
+[@__reduce__] noextract
 let fmul1_dom: IX64.arity_ok_stdcall td =
   let y = [t64_mod; t64_no_mod; tuint64] in
   assert_norm (List.length y = 3);
@@ -248,7 +248,7 @@ let fmul1_post : VSig.vale_post 32 fmul1_dom =
 
 #set-options "--z3rlimit 20"
 
-[@__reduce__] unfold noextract
+[@__reduce__] noextract
 let fmul1_lemma'
     (code:V.va_code)
     (_win:bool)
