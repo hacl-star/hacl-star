@@ -48,11 +48,17 @@ let mk_getter #b (f: cached_flag b): getter b = fun () ->
   B.recall f;
   B.index f 0ul
 
+inline_for_extraction
 let has_shaext = mk_getter cpu_has_shaext
+inline_for_extraction
 let has_aesni = mk_getter cpu_has_aesni
+inline_for_extraction
 let has_avx2 = mk_getter cpu_has_avx2
+inline_for_extraction
 let has_avx = mk_getter cpu_has_avx
+inline_for_extraction
 let has_bmi2 = mk_getter cpu_has_bmi2
+inline_for_extraction
 let has_adx = mk_getter cpu_has_adx
 
 let wants_vale () = B.recall user_wants_vale; B.index user_wants_vale 0ul
