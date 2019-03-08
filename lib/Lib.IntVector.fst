@@ -6,6 +6,7 @@ open Lib.IntVector.Intrinsics
 
 #set-options "--admit_smt_queries true"
 
+inline_for_extraction
 let vec_t t w =
   match t,w with
   | U128, 1 -> vec128

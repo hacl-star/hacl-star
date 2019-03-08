@@ -8,7 +8,7 @@
       0,
       [ "@query" ],
       0,
-      "9932f76a4b902b7201f998e5effbac48"
+      "741feb0b0463ce8d5ac95bf786353fc0"
     ],
     [
       "Vale.Stdcalls.Cpuid.as_normal_t",
@@ -17,7 +17,7 @@
       0,
       [ "@query" ],
       0,
-      "86d848bb6217c989aa579f6e041ac488"
+      "fa51475831866907b159a88a90d6ef83"
     ],
     [
       "Vale.Stdcalls.Cpuid.dom",
@@ -36,7 +36,7 @@
         "typing_Interop.X64.max_stdcall"
       ],
       0,
-      "2f7234d6bb45d7ec7e3d7fed5e8cab63"
+      "1ab31ed0d315ee36c53a19ca67972611"
     ],
     [
       "Vale.Stdcalls.Cpuid.aesni_pre",
@@ -60,7 +60,7 @@
         "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-      "0c6aac71bca2badc5d72bb528216be13"
+      "4199d9bfc213156d1708e0754691b8e2"
     ],
     [
       "Vale.Stdcalls.Cpuid.aesni_pre",
@@ -84,7 +84,7 @@
         "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-      "56169579fb96e238b0a7074bf9a04b46"
+      "9bdb8730b0334cdc2e844d5acb5d9cd1"
     ],
     [
       "Vale.Stdcalls.Cpuid.aesni_post",
@@ -108,7 +108,7 @@
         "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-      "6b93a9c19f48e5c4f8b41472aa0d87e1"
+      "decab194a198bde363288bb6f9f881c9"
     ],
     [
       "Vale.Stdcalls.Cpuid.aesni_post",
@@ -132,7 +132,7 @@
         "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-      "20c14786626aef4231f2e4e21da9bf93"
+      "80052e56004f17fdc2788cb057729e35"
     ],
     [
       "Vale.Stdcalls.Cpuid.aesni_lemma'",
@@ -156,7 +156,7 @@
         "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-      "1187bf38c6fa73b4b38fd8b308ccd632"
+      "6bcdbd99110c2ac1763dc57b5b1d429b"
     ],
     [
       "Vale.Stdcalls.Cpuid.aesni_lemma'",
@@ -203,8 +203,8 @@
         "function_token_typing_Prims.__cache_version_number__",
         "function_token_typing_Vale.AsLowStar.MemoryHelpers.fuel_eq",
         "function_token_typing_X64.MemoryAdapters.code_equiv",
-        "interpretation_Tm_abs_2711a5be3ca615fab1bb4c96f18bc987",
-        "interpretation_Tm_abs_873bc061b7a69264806f128984fbc63e",
+        "interpretation_Tm_abs_da1af80851a5d8b8ca5e6af272659813",
+        "interpretation_Tm_abs_e68675ef206154c9b0e35074bef48d51",
         "primitive_Prims.op_BarBar", "primitive_Prims.op_Equality",
         "projection_inverse_BoxBool_proj_0",
         "refinement_interpretation_Tm_refine_8d65e998a07dd53ec478e27017d9dba5",
@@ -219,7 +219,7 @@
         "typing_tok_X64.Machine_s.Rax@tok"
       ],
       0,
-      "6fd840ba1ee1e9c06e7906db89ba8285"
+      "724acf34e5d86a23e4a6ff5068b864b0"
     ],
     [
       "Vale.Stdcalls.Cpuid.aesni_lemma",
@@ -232,8 +232,10 @@
         "@fuel_correspondence_Prims.pow2.fuel_instrumented",
         "@fuel_irrelevance_Prims.pow2.fuel_instrumented", "@query",
         "Prims_pretyping_ae567c2fb75be05905677af440075565", "b2t_def",
-        "bool_inversion", "constructor_distinct_Prims.Nil", "eq2-interp",
+        "bool_inversion", "constructor_distinct_Interop.Types.TUInt8",
+        "constructor_distinct_Prims.Nil", "eq2-interp",
         "equality_tok_Interop.Types.TUInt64@tok",
+        "equality_tok_Interop.Types.TUInt8@tok",
         "equality_tok_X64.Machine_s.R10@tok",
         "equality_tok_X64.Machine_s.R11@tok",
         "equality_tok_X64.Machine_s.R12@tok",
@@ -280,8 +282,8 @@
         "function_token_typing_Prims.__cache_version_number__",
         "function_token_typing_Vale.AsLowStar.MemoryHelpers.fuel_eq",
         "function_token_typing_X64.MemoryAdapters.code_equiv", "int_typing",
-        "interpretation_Tm_abs_2711a5be3ca615fab1bb4c96f18bc987",
-        "interpretation_Tm_abs_873bc061b7a69264806f128984fbc63e",
+        "interpretation_Tm_abs_da1af80851a5d8b8ca5e6af272659813",
+        "interpretation_Tm_abs_e68675ef206154c9b0e35074bef48d51",
         "kinding_Interop.Base.td@tok", "lemma_FStar.UInt.pow2_values",
         "lemma_X64.Memory.loc_includes_refl",
         "lemma_X64.Memory.loc_includes_union_l_buffer",
@@ -298,10 +300,10 @@
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0", "projection_inverse_Prims.Nil_a",
         "projection_inverse_X64.Vale.State.Mkstate_mem",
-        "refinement_interpretation_Tm_refine_2150f4050d19ec4f72c7289c19a7e07f",
         "refinement_interpretation_Tm_refine_8d65e998a07dd53ec478e27017d9dba5",
         "refinement_interpretation_Tm_refine_b8c08cb8894cdb660d32da1093433103",
         "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "refinement_interpretation_Tm_refine_ca325aad7d9780fb975a5fcc5be1f2a9",
         "token_correspondence_Vale.Stdcalls.Cpuid.aesni_post",
         "token_correspondence_Vale.Stdcalls.Cpuid.aesni_pre",
         "typing_Interop.Assumptions.win",
@@ -310,10 +312,11 @@
         "typing_X64.Memory.loc_none", "typing_X64.Memory.loc_union",
         "typing_X64.MemoryAdapters.as_vale_buffer",
         "typing_X64.Vale.State.__proj__Mkstate__item__mem",
-        "typing_tok_Interop.Types.TUInt64@tok"
+        "typing_tok_Interop.Types.TUInt64@tok",
+        "typing_tok_Interop.Types.TUInt8@tok"
       ],
       0,
-      "81fffc0575b859275bec3b05e09f303d"
+      "74ee84fe0e1fae203b1c424a7a65e717"
     ],
     [
       "Vale.Stdcalls.Cpuid.lowstar_aesni_t",
@@ -352,7 +355,7 @@
         "typing_Vale.Stdcalls.Cpuid.dom"
       ],
       0,
-      "1335deb7928e5d6d4dc2d06699d3219c"
+      "5bfa0ae9356a76e8899773745f0523c5"
     ],
     [
       "Vale.Stdcalls.Cpuid.sha_pre",
@@ -376,7 +379,7 @@
         "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-      "84ae9ddf003d8729209aa912d92c5e16"
+      "8a6bfbeb9a97fde52bfb17df1ae945b3"
     ],
     [
       "Vale.Stdcalls.Cpuid.sha_pre",
@@ -400,7 +403,7 @@
         "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-      "8ad0f8f6ae219363ec21cc82f3f0409f"
+      "786115d122523eec40cca211e39a6211"
     ],
     [
       "Vale.Stdcalls.Cpuid.sha_post",
@@ -424,7 +427,7 @@
         "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-      "fbb774a5ee7414523961c1ffe42b2919"
+      "bfd9a06678217fa6eaba905c3cf128fe"
     ],
     [
       "Vale.Stdcalls.Cpuid.sha_post",
@@ -448,7 +451,7 @@
         "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-      "47675f7239566694451302b92496b41c"
+      "a9ed05d68caaa74b89ba6b2639e53f88"
     ],
     [
       "Vale.Stdcalls.Cpuid.sha_lemma'",
@@ -472,7 +475,7 @@
         "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-      "bb1414395316b6cd2ea5809eb6f9af7c"
+      "77e89246d2f9152c193da7e6c1b51066"
     ],
     [
       "Vale.Stdcalls.Cpuid.sha_lemma'",
@@ -516,8 +519,8 @@
         "function_token_typing_Interop.X64.xmms_modified_stdcall",
         "function_token_typing_Prims.__cache_version_number__",
         "function_token_typing_Vale.AsLowStar.MemoryHelpers.fuel_eq",
-        "interpretation_Tm_abs_c8598a4920c7e5ae791385f85175d826",
-        "interpretation_Tm_abs_cadd319e80db31f28b02a5d4ac6189c6",
+        "interpretation_Tm_abs_3abcc3024828f734df5ffa88d21a1deb",
+        "interpretation_Tm_abs_ba395823ad947b8b63c9fb9138950d4d",
         "primitive_Prims.op_BarBar", "primitive_Prims.op_Equality",
         "projection_inverse_BoxBool_proj_0",
         "refinement_interpretation_Tm_refine_733e16f605158def2df5f288aaaefd11",
@@ -532,7 +535,7 @@
         "typing_tok_X64.Machine_s.Rax@tok"
       ],
       0,
-      "cd17e98cf9f5c99a370273e8d6a61254"
+      "6d13097699dc944be53a1ed65cb6ae7d"
     ],
     [
       "Vale.Stdcalls.Cpuid.sha_lemma",
@@ -544,8 +547,10 @@
         "@fuel_correspondence_Prims.pow2.fuel_instrumented",
         "@fuel_irrelevance_Prims.pow2.fuel_instrumented", "@query",
         "Prims_pretyping_ae567c2fb75be05905677af440075565", "b2t_def",
-        "bool_inversion", "constructor_distinct_Prims.Nil", "eq2-interp",
+        "bool_inversion", "constructor_distinct_Interop.Types.TUInt8",
+        "constructor_distinct_Prims.Nil", "eq2-interp",
         "equality_tok_Interop.Types.TUInt64@tok",
+        "equality_tok_Interop.Types.TUInt8@tok",
         "equality_tok_X64.Machine_s.R10@tok",
         "equality_tok_X64.Machine_s.R11@tok",
         "equality_tok_X64.Machine_s.R12@tok",
@@ -588,8 +593,8 @@
         "function_token_typing_Prims.__cache_version_number__",
         "function_token_typing_Vale.AsLowStar.MemoryHelpers.fuel_eq",
         "function_token_typing_X64.MemoryAdapters.code_equiv", "int_typing",
-        "interpretation_Tm_abs_c8598a4920c7e5ae791385f85175d826",
-        "interpretation_Tm_abs_cadd319e80db31f28b02a5d4ac6189c6",
+        "interpretation_Tm_abs_3abcc3024828f734df5ffa88d21a1deb",
+        "interpretation_Tm_abs_ba395823ad947b8b63c9fb9138950d4d",
         "lemma_FStar.UInt.pow2_values", "lemma_X64.Memory.loc_includes_refl",
         "lemma_X64.Memory.loc_includes_union_l_buffer",
         "lemma_X64.Memory.modifies_goal_directed_refl",
@@ -605,9 +610,9 @@
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0", "projection_inverse_Prims.Nil_a",
         "projection_inverse_X64.Vale.State.Mkstate_mem",
-        "refinement_interpretation_Tm_refine_2150f4050d19ec4f72c7289c19a7e07f",
         "refinement_interpretation_Tm_refine_8d65e998a07dd53ec478e27017d9dba5",
         "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "refinement_interpretation_Tm_refine_ca325aad7d9780fb975a5fcc5be1f2a9",
         "token_correspondence_Vale.Stdcalls.Cpuid.sha_post",
         "token_correspondence_Vale.Stdcalls.Cpuid.sha_pre",
         "typing_Interop.Assumptions.win",
@@ -616,10 +621,11 @@
         "typing_X64.Memory.loc_union",
         "typing_X64.MemoryAdapters.as_vale_buffer",
         "typing_X64.Vale.State.__proj__Mkstate__item__mem",
-        "typing_tok_Interop.Types.TUInt64@tok"
+        "typing_tok_Interop.Types.TUInt64@tok",
+        "typing_tok_Interop.Types.TUInt8@tok"
       ],
       0,
-      "4f87240fb137e42e02b74dc5f557d5ad"
+      "b5ff7d7c4df42d33ab5473883d8755db"
     ],
     [
       "Vale.Stdcalls.Cpuid.lowstar_sha_t",
@@ -658,7 +664,7 @@
         "typing_Interop.X64.max_stdcall", "typing_Vale.Stdcalls.Cpuid.dom"
       ],
       0,
-      "f01d6566c60b5bcfbb83ffef9fdcadfd"
+      "ea9841f7be5756838089a2bc21ff7d88"
     ],
     [
       "Vale.Stdcalls.Cpuid.adx_pre",
@@ -682,7 +688,7 @@
         "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-      "b0a32e49b93d48a881b483d78e249da9"
+      "8da056f82374ccb2d45fcc51f7cadcf7"
     ],
     [
       "Vale.Stdcalls.Cpuid.adx_pre",
@@ -706,7 +712,7 @@
         "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-      "be0f54d57f83f13562014e95c144e71c"
+      "0a817c4b983fd193a523000d712c40f1"
     ],
     [
       "Vale.Stdcalls.Cpuid.adx_post",
@@ -730,7 +736,7 @@
         "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-      "49e0e1b023d252207fbe2083b7a3cbfe"
+      "b716090fe727159843e3386393e46558"
     ],
     [
       "Vale.Stdcalls.Cpuid.adx_post",
@@ -754,7 +760,7 @@
         "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-      "aba5533759fb1166073b1bdcf6062e06"
+      "4fe73579b6cdb9f764dcb5da27041249"
     ],
     [
       "Vale.Stdcalls.Cpuid.adx_lemma'",
@@ -778,7 +784,7 @@
         "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-      "bd89ee3d3b79e92136f933494f7ed4d5"
+      "5a87d897975249f64ba91596b77ede1a"
     ],
     [
       "Vale.Stdcalls.Cpuid.adx_lemma'",
@@ -822,8 +828,8 @@
         "function_token_typing_Interop.X64.xmms_modified_stdcall",
         "function_token_typing_Prims.__cache_version_number__",
         "function_token_typing_Vale.AsLowStar.MemoryHelpers.fuel_eq",
-        "interpretation_Tm_abs_62595b17ba8310770cb6a9abb531eecd",
-        "interpretation_Tm_abs_8b6d9a27c4d1740da15a97c1cc6460a5",
+        "interpretation_Tm_abs_2614c9a41992c6ea7825eb799d42b9f4",
+        "interpretation_Tm_abs_b7c01425566536904c87302582366138",
         "primitive_Prims.op_BarBar", "primitive_Prims.op_Equality",
         "projection_inverse_BoxBool_proj_0",
         "refinement_interpretation_Tm_refine_8d65e998a07dd53ec478e27017d9dba5",
@@ -838,7 +844,7 @@
         "typing_tok_X64.Machine_s.Rax@tok"
       ],
       0,
-      "f45ea1ff018345537d9778d989311f7e"
+      "a0ec001e5a571a9adfd50eae22f183ea"
     ],
     [
       "Vale.Stdcalls.Cpuid.adx_lemma",
@@ -850,8 +856,10 @@
         "@fuel_correspondence_Prims.pow2.fuel_instrumented",
         "@fuel_irrelevance_Prims.pow2.fuel_instrumented", "@query",
         "Prims_pretyping_ae567c2fb75be05905677af440075565", "b2t_def",
-        "bool_inversion", "constructor_distinct_Prims.Nil", "eq2-interp",
+        "bool_inversion", "constructor_distinct_Interop.Types.TUInt8",
+        "constructor_distinct_Prims.Nil", "eq2-interp",
         "equality_tok_Interop.Types.TUInt64@tok",
+        "equality_tok_Interop.Types.TUInt8@tok",
         "equality_tok_X64.Machine_s.R10@tok",
         "equality_tok_X64.Machine_s.R11@tok",
         "equality_tok_X64.Machine_s.R12@tok",
@@ -892,8 +900,8 @@
         "function_token_typing_Prims.__cache_version_number__",
         "function_token_typing_Vale.AsLowStar.MemoryHelpers.fuel_eq",
         "int_typing",
-        "interpretation_Tm_abs_62595b17ba8310770cb6a9abb531eecd",
-        "interpretation_Tm_abs_8b6d9a27c4d1740da15a97c1cc6460a5",
+        "interpretation_Tm_abs_2614c9a41992c6ea7825eb799d42b9f4",
+        "interpretation_Tm_abs_b7c01425566536904c87302582366138",
         "lemma_FStar.UInt.pow2_values", "lemma_X64.Memory.loc_includes_refl",
         "lemma_X64.Memory.loc_includes_union_l_buffer",
         "lemma_X64.Memory.modifies_goal_directed_refl",
@@ -909,9 +917,9 @@
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0", "projection_inverse_Prims.Nil_a",
         "projection_inverse_X64.Vale.State.Mkstate_mem",
-        "refinement_interpretation_Tm_refine_2150f4050d19ec4f72c7289c19a7e07f",
         "refinement_interpretation_Tm_refine_8d65e998a07dd53ec478e27017d9dba5",
         "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "refinement_interpretation_Tm_refine_ca325aad7d9780fb975a5fcc5be1f2a9",
         "token_correspondence_Vale.Stdcalls.Cpuid.adx_post",
         "token_correspondence_Vale.Stdcalls.Cpuid.adx_pre",
         "typing_Interop.Assumptions.win",
@@ -920,10 +928,11 @@
         "typing_X64.Memory.loc_union",
         "typing_X64.MemoryAdapters.as_vale_buffer",
         "typing_X64.Vale.State.__proj__Mkstate__item__mem",
-        "typing_tok_Interop.Types.TUInt64@tok"
+        "typing_tok_Interop.Types.TUInt64@tok",
+        "typing_tok_Interop.Types.TUInt8@tok"
       ],
       0,
-      "275f438c5589525242d24af762820efe"
+      "52e9da01d90df34565900e3dc03cefbb"
     ],
     [
       "Vale.Stdcalls.Cpuid.lowstar_adx_t",
@@ -962,7 +971,7 @@
         "typing_Interop.X64.max_stdcall", "typing_Vale.Stdcalls.Cpuid.dom"
       ],
       0,
-      "1daf574da6ebff63981bab421159e198"
+      "81b201a173bf7bb10e61e8377b6f6807"
     ],
     [
       "Vale.Stdcalls.Cpuid.avx_pre",
@@ -986,7 +995,7 @@
         "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-      "f78f96d0ca77e1752f0ea9fa4dfb4143"
+      "85bec73fdb003bec1e5ed774c6786769"
     ],
     [
       "Vale.Stdcalls.Cpuid.avx_pre",
@@ -1010,7 +1019,7 @@
         "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-      "0833d08828d9be181dd1ff52c814acf6"
+      "3e1ff5e3797b9a89dff06bc614d73365"
     ],
     [
       "Vale.Stdcalls.Cpuid.avx_post",
@@ -1034,7 +1043,7 @@
         "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-      "8909d2615abd787a808efaf568d9abf5"
+      "41a0d4042011fd0302c29748bc4de16e"
     ],
     [
       "Vale.Stdcalls.Cpuid.avx_post",
@@ -1058,7 +1067,7 @@
         "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-      "f43dc330c866b4b1475c5c28937de9f9"
+      "e38473d4d947dd9e37ce736c82b5fb65"
     ],
     [
       "Vale.Stdcalls.Cpuid.avx_lemma'",
@@ -1082,7 +1091,7 @@
         "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-      "11ad4ce318d221602f6c6ad0b4477057"
+      "c982c1e5baecb3dac4882efaa569a11a"
     ],
     [
       "Vale.Stdcalls.Cpuid.avx_lemma'",
@@ -1126,8 +1135,8 @@
         "function_token_typing_Interop.X64.xmms_modified_stdcall",
         "function_token_typing_Prims.__cache_version_number__",
         "function_token_typing_Vale.AsLowStar.MemoryHelpers.fuel_eq",
-        "interpretation_Tm_abs_828cd2ea3adc433516e83be04804a932",
-        "interpretation_Tm_abs_ce3b45c13a239d882da2d5205afac93f",
+        "interpretation_Tm_abs_c9f6b2ba36eb45deb7e41a7264978509",
+        "interpretation_Tm_abs_ed71cd036d0fd329451fc349cf96b85a",
         "primitive_Prims.op_BarBar", "primitive_Prims.op_Equality",
         "projection_inverse_BoxBool_proj_0",
         "refinement_interpretation_Tm_refine_733e16f605158def2df5f288aaaefd11",
@@ -1142,7 +1151,7 @@
         "typing_tok_X64.Machine_s.Rax@tok"
       ],
       0,
-      "88fd78226066d5c1948e697a3acb133e"
+      "5554c4e92d1e0861ae57f3edfdd7b72d"
     ],
     [
       "Vale.Stdcalls.Cpuid.avx_lemma",
@@ -1154,8 +1163,10 @@
         "@fuel_correspondence_Prims.pow2.fuel_instrumented",
         "@fuel_irrelevance_Prims.pow2.fuel_instrumented", "@query",
         "Prims_pretyping_ae567c2fb75be05905677af440075565", "b2t_def",
-        "bool_inversion", "constructor_distinct_Prims.Nil", "eq2-interp",
+        "bool_inversion", "constructor_distinct_Interop.Types.TUInt8",
+        "constructor_distinct_Prims.Nil", "eq2-interp",
         "equality_tok_Interop.Types.TUInt64@tok",
+        "equality_tok_Interop.Types.TUInt8@tok",
         "equality_tok_X64.Machine_s.R10@tok",
         "equality_tok_X64.Machine_s.R11@tok",
         "equality_tok_X64.Machine_s.R12@tok",
@@ -1196,8 +1207,8 @@
         "function_token_typing_Prims.__cache_version_number__",
         "function_token_typing_Vale.AsLowStar.MemoryHelpers.fuel_eq",
         "int_typing",
-        "interpretation_Tm_abs_828cd2ea3adc433516e83be04804a932",
-        "interpretation_Tm_abs_ce3b45c13a239d882da2d5205afac93f",
+        "interpretation_Tm_abs_c9f6b2ba36eb45deb7e41a7264978509",
+        "interpretation_Tm_abs_ed71cd036d0fd329451fc349cf96b85a",
         "lemma_FStar.UInt.pow2_values", "lemma_X64.Memory.loc_includes_refl",
         "lemma_X64.Memory.loc_includes_union_l_buffer",
         "lemma_X64.Memory.modifies_goal_directed_refl",
@@ -1213,9 +1224,9 @@
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0", "projection_inverse_Prims.Nil_a",
         "projection_inverse_X64.Vale.State.Mkstate_mem",
-        "refinement_interpretation_Tm_refine_2150f4050d19ec4f72c7289c19a7e07f",
         "refinement_interpretation_Tm_refine_8d65e998a07dd53ec478e27017d9dba5",
         "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "refinement_interpretation_Tm_refine_ca325aad7d9780fb975a5fcc5be1f2a9",
         "token_correspondence_Vale.Stdcalls.Cpuid.avx_post",
         "token_correspondence_Vale.Stdcalls.Cpuid.avx_pre",
         "typing_Interop.Assumptions.win",
@@ -1224,10 +1235,11 @@
         "typing_X64.Memory.loc_union",
         "typing_X64.MemoryAdapters.as_vale_buffer",
         "typing_X64.Vale.State.__proj__Mkstate__item__mem",
-        "typing_tok_Interop.Types.TUInt64@tok"
+        "typing_tok_Interop.Types.TUInt64@tok",
+        "typing_tok_Interop.Types.TUInt8@tok"
       ],
       0,
-      "bd88b00a879fbd72457c40d769b384eb"
+      "e87f5f39c3801856a4c4ca2280340b39"
     ],
     [
       "Vale.Stdcalls.Cpuid.lowstar_avx_t",
@@ -1266,7 +1278,7 @@
         "typing_Interop.X64.max_stdcall", "typing_Vale.Stdcalls.Cpuid.dom"
       ],
       0,
-      "9d90cc8eaad3175e6950600b3fcb20e8"
+      "6a4c03f3cb6ce805466985365c87114f"
     ],
     [
       "Vale.Stdcalls.Cpuid.avx2_pre",
@@ -1290,7 +1302,7 @@
         "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-      "5b7a310dcf139eecdd31dc8178ed4dad"
+      "effa68257b32d78fe07f459b25bae579"
     ],
     [
       "Vale.Stdcalls.Cpuid.avx2_pre",
@@ -1314,7 +1326,7 @@
         "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-      "652ece86dacbfb65ea7a1ed47ae54adb"
+      "8af561403e1dd7fc0821e2ff0ae4a24d"
     ],
     [
       "Vale.Stdcalls.Cpuid.avx2_post",
@@ -1338,7 +1350,7 @@
         "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-      "b9c806ad1480e4267b6630f4a7d4bfa8"
+      "3715628e4394e92c9a7bdea5cebf05ae"
     ],
     [
       "Vale.Stdcalls.Cpuid.avx2_post",
@@ -1362,7 +1374,7 @@
         "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-      "3a7fe7d7f0f4bad885a44c6f3d520ad2"
+      "89c2819dae7c649267dc3a038726e170"
     ],
     [
       "Vale.Stdcalls.Cpuid.avx2_lemma'",
@@ -1386,7 +1398,7 @@
         "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-      "e9e6ad381875074e8867f1c61c58fc27"
+      "10d568c39c25e742a8078274e4ecefd1"
     ],
     [
       "Vale.Stdcalls.Cpuid.avx2_lemma'",
@@ -1430,8 +1442,8 @@
         "function_token_typing_Interop.X64.xmms_modified_stdcall",
         "function_token_typing_Prims.__cache_version_number__",
         "function_token_typing_Vale.AsLowStar.MemoryHelpers.fuel_eq",
-        "interpretation_Tm_abs_736fe3c2ba9cebeb8d6c37032d291879",
-        "interpretation_Tm_abs_b347667abc4e4e2fa351ea8e16955838",
+        "interpretation_Tm_abs_1e9a573d0303d91f7ac90b18bec8644d",
+        "interpretation_Tm_abs_43fa24a39571f4b5519d1faa3760c447",
         "primitive_Prims.op_BarBar", "primitive_Prims.op_Equality",
         "projection_inverse_BoxBool_proj_0",
         "refinement_interpretation_Tm_refine_733e16f605158def2df5f288aaaefd11",
@@ -1446,7 +1458,7 @@
         "typing_tok_X64.Machine_s.Rax@tok"
       ],
       0,
-      "0bd2a90f615ff062778acde2538df843"
+      "8759176c28186aecb049e01b57ed1fef"
     ],
     [
       "Vale.Stdcalls.Cpuid.avx2_lemma",
@@ -1458,8 +1470,10 @@
         "@fuel_correspondence_Prims.pow2.fuel_instrumented",
         "@fuel_irrelevance_Prims.pow2.fuel_instrumented", "@query",
         "Prims_pretyping_ae567c2fb75be05905677af440075565", "b2t_def",
-        "bool_inversion", "constructor_distinct_Prims.Nil", "eq2-interp",
+        "bool_inversion", "constructor_distinct_Interop.Types.TUInt8",
+        "constructor_distinct_Prims.Nil", "eq2-interp",
         "equality_tok_Interop.Types.TUInt64@tok",
+        "equality_tok_Interop.Types.TUInt8@tok",
         "equality_tok_X64.Machine_s.R10@tok",
         "equality_tok_X64.Machine_s.R11@tok",
         "equality_tok_X64.Machine_s.R12@tok",
@@ -1500,8 +1514,8 @@
         "function_token_typing_Prims.__cache_version_number__",
         "function_token_typing_Vale.AsLowStar.MemoryHelpers.fuel_eq",
         "int_typing",
-        "interpretation_Tm_abs_736fe3c2ba9cebeb8d6c37032d291879",
-        "interpretation_Tm_abs_b347667abc4e4e2fa351ea8e16955838",
+        "interpretation_Tm_abs_1e9a573d0303d91f7ac90b18bec8644d",
+        "interpretation_Tm_abs_43fa24a39571f4b5519d1faa3760c447",
         "lemma_FStar.UInt.pow2_values", "lemma_X64.Memory.loc_includes_refl",
         "lemma_X64.Memory.loc_includes_union_l_buffer",
         "lemma_X64.Memory.modifies_goal_directed_refl",
@@ -1517,9 +1531,9 @@
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0", "projection_inverse_Prims.Nil_a",
         "projection_inverse_X64.Vale.State.Mkstate_mem",
-        "refinement_interpretation_Tm_refine_2150f4050d19ec4f72c7289c19a7e07f",
         "refinement_interpretation_Tm_refine_8d65e998a07dd53ec478e27017d9dba5",
         "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "refinement_interpretation_Tm_refine_ca325aad7d9780fb975a5fcc5be1f2a9",
         "token_correspondence_Vale.Stdcalls.Cpuid.avx2_post",
         "token_correspondence_Vale.Stdcalls.Cpuid.avx2_pre",
         "typing_Interop.Assumptions.win",
@@ -1528,10 +1542,11 @@
         "typing_X64.Memory.loc_union",
         "typing_X64.MemoryAdapters.as_vale_buffer",
         "typing_X64.Vale.State.__proj__Mkstate__item__mem",
-        "typing_tok_Interop.Types.TUInt64@tok"
+        "typing_tok_Interop.Types.TUInt64@tok",
+        "typing_tok_Interop.Types.TUInt8@tok"
       ],
       0,
-      "b2ff6131f1bac09bb4aa9d46c3244dd6"
+      "004b9549f726b1cf736879cebbc32fa7"
     ],
     [
       "Vale.Stdcalls.Cpuid.lowstar_avx2_t",
@@ -1570,7 +1585,7 @@
         "typing_Interop.X64.max_stdcall", "typing_Vale.Stdcalls.Cpuid.dom"
       ],
       0,
-      "7810baa7943538e18960a603e0f42b02"
+      "cf329a486981a2fc4ed57d0a70311394"
     ]
   ]
 ]
