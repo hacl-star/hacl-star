@@ -3197,3 +3197,106 @@ procedure {:quick} AES_GCM_encrypt(
     //assert {:quick_type} is_gctr_plain_LE(le_seq_quad32_to_bytes(old(buffer128_as_seq(mem, in_b)))) && is_aes_key_LE(alg, key_words);
     //assert le_seq_quad32_to_bytes(buffer128_as_seq(mem, out_b)) == gctr_encrypt_LE(ctr_BE, le_seq_quad32_to_bytes(old(buffer128_as_seq(mem, in_b))), alg, key_words);
 }
+
+
+/*
+
+   GCM operation summary:
+
+requires
+  Z3 = data(5)
+  s3 = data(4)
+  s4 = data(3)
+  s5 = data(2)
+  s6 = data(1)
+  s7 = data(0)
+
+
+Prelude:
+        let h0 := $$buffer128_read(hkeys_b, 0, mem);
+        let h1 := $$buffer128_read(hkeys_b, 1, mem);
+        let s3 := $$buffer128_read(stack_b, 3, mem);
+        $$Z0 == lo(old($$Z3)) *. lo(h0)  +. $$Z1;
+        $$Z1 == lo(s3) *. lo(h1);
+        $$Z2 == hi(old($$Z3)) *. lo(h0) +. lo(old($$Z3)) *. hi(h0);
+        $$Z3 == hi(old($$Z3)) *. hi(h0);
+        $$Ii == s3;
+        $$T1 == lo(s3) *. hi(h1);
+        $$Xi == old($$Xi) +. old($$Z0);
+
+  Z0 +. shift (Z2, 64) +. Z3 == old(Z3) *. h1 +. Z1 == data(5) *. h0 +. Z1
+
+step1:
+        let h3 := buffer128_read(hkeys_b, 3, mem);
+        let s1 := $$old(buffer128_read(stack_b, 1, mem));
+        let s4 := old(buffer128_read(stack_b, 4, mem));
+        Ii == s4;
+        $$T2 == hi(old($$Ii)) *. lo(old($$Hkey));
+        $$Hkey == hi(old($$Ii)) *. hi(old($$Hkey));
+        Z1 == h3;
+        $$Xi == old($$Xi) +. s1;
+
+plain:
+        let h4 := buffer128_read(hkeys_b, 4, mem);
+        let s1 := $$old(buffer128_read(stack_b, 1, mem));
+        let s5 := old(buffer128_read(stack_b, 5, mem));
+        Ii == s5;
+        T1 == h4;
+        $$T2 == lo(old($$Ii)) *. hi(old($$Z1));
+        $$Hkey == hi(old($$Ii)) *. lo(old($$Z1));
+        $$Z0 == old($$Z0) +. (lo(old($$Ii)) *. lo(old($$Z1)));
+        $$Z1 == hi(old($$Ii)) *. hi(old($$Z1));
+        $$Z2 == (old($$Z2) +. old($$T1)) +. old($$T2);
+        $$Z3 == old($$Z3) +. old($$Hkey);
+
+step2:
+        let h6 := buffer128_read(hkeys_b, 6, mem);
+        let s6 := old(buffer128_read(stack_b, 6, mem));
+        Ii == s6;
+        $$T1 == hi(old($$Ii)) *. hi(old($$T1));
+        T2 == h6;
+        $$Hkey == lo(old($$Ii)) *. hi(old($$T1));
+        $$Z0 == old($$Z0) +. (lo(old($$Ii)) *. lo(old($$T1)));
+        $$Z1 == hi(old($$Ii)) *. lo(old($$T1));
+        $$Z2 == (old($$Z2) +. old($$T2)) +. old($$Hkey);
+        $$Z3 == old($$Z3) +. old($$Z1);
+
+step3:
+        let h7 := buffer128_read(hkeys_b, 7, mem);
+        let s7 := $$old(buffer128_read(stack_b, 7, mem));
+        $$T1 == hi(old($$Ii)) *. lo(old($$T2));
+        $$T2 == hi(old($$Ii)) *. hi(old($$T2));
+        Hkey == h7;
+        $$Z0 == old($$Z0) +. (lo(old($$Ii)) *. lo(old($$T2)));
+        $$Z1 == lo(old($$Ii)) *. hi(old($$T2));
+        $$Z2 == (old($$Z2) +. old($$Hkey)) +. old($$Z1);
+        $$Z3 == old($$Z3) +. old($$T1);
+        $$Xi == old($$Xi) +. s7;
+
+step4:
+        $$T1 == hi(old($$Xi)) *. lo(old($$Hkey));
+        $$T2 == lo(old($$Xi)) *. lo(old($$Hkey));
+        $$Z1 == lo(old($$Xi)) *. hi(old($$Hkey));
+        $$Z2 == (((old($$Z2) +. old($$Z1)) +. old($$T1)) +. $$Z1) +. $$T1;
+        $$Z3 == old($$Z3) +. old($$T2);
+        $$Xi == hi(old($$Xi)) *. hi(old($$Hkey));
+
+step5:
+        $$Ii == swap((old($$Z0) +. old($$T2)) +. shift(mask(old($$Z2), 64), 64), 64);
+        //$$Hkey == 
+        $$Z0 == lo((old($$Z0) +. old($$T2)) +. shift(mask(old($$Z2), 64), 64)) *. hi($$Hkey);
+        $$Z1 == shift(mask(old($$Z2), 64), 64);
+        $$Z3 == old($$Z3) +. old($$Xi);
+
+round8:      
+        $$Z0 == old($$Z0) +. old($$Ii);
+        $$Z2 == hi(old($$Z2));
+        $$Z3 == old($$Z3) +. hi(old($$Z2));
+    
+round 9:
+        let s1 := buffer128_read(stack_b, 1, mem); 
+        s1 == old(Z3);
+        $$Xi == swap(old($$Z0), 64);
+        $$Z0 == lo(old($$Z0)) *. hi(old($$Hkey));
+
+*/
