@@ -496,7 +496,7 @@ procedure {:quick} Loop6x_ctr_update(
 }
 
 #reset-options ""
-procedure {:quick} {:verify true} Loop6x_preamble(
+procedure {:quick} Loop6x_preamble(
     inline alg:algorithm,  // OpenSSL includes the number of rounds (nr) as a dynamic parameter (stored with the key).  Saves code space but adds extra instructions to the fast path.  Maybe branch predictor is good enough for it not to matter
     ghost iv_b:buffer128,
 
@@ -585,6 +585,7 @@ procedure {:quick} {:verify true} Loop6x_preamble(
         $$Z1 == lo(s3) *. lo(h1);
         $$Z2 == hi(old($$Z3)) *. lo(h0) +. lo(old($$Z3)) *. hi(h0);
         $$Z3 == hi(old($$Z3)) *. hi(h0);
+        $$Ii == s3;
         $$T1 == lo(s3) *. hi(h1);
         $$Xi == old($$Xi) +. old($$Z0);
         
@@ -2398,6 +2399,9 @@ procedure {:quick exportOnly} {:frame false} Loop6x_loop(
             aes_reqs(alg, key_words, round_keys, keys_b, key, mem, memTaint);
             rndkey == index(round_keys, 0);
 
+            // GCM reqs
+            pclmulqdq_enabled;
+
             // Counter requirements
             len % 6 == 0;
             len < pow2_32;
@@ -3041,7 +3045,7 @@ procedure {:quick} Encrypt_save_and_shuffle_output(
 }
 
 #reset-options "--z3rlimit 30"
-procedure {:quick} {:verify true} AES_GCM_encrypt(
+procedure {:quick} AES_GCM_encrypt(
     inline alg:algorithm,  
     ghost iv_b:buffer128,
     ghost in_b:buffer128,
