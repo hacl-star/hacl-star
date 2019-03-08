@@ -3108,18 +3108,21 @@ procedure {:quick} {:verify true} AES_GCM_encrypt(
         buffer_addr(keys_b, mem) + 0x80 < pow2_64;
         aes_reqs(alg, key_words, round_keys, keys_b, key + 0x80, mem, memTaint);
 
+        // GCM reqs
+        pclmulqdq_enabled;
+
         // Len is # of 128-bit blocks
         len % 6 == 0;
         len >= 0x10*3;
         len / 6 >= 3;   // Should be implied by above... :(
         12 + len + 6 < pow2_32;
     ensures
-//        let iv_LE := old(buffer128_read(iv_b, 0, mem));
-//        let iv_BE := reverse_bytes_quad32(iv_LE);
-//        ctr_BE == Mkfour(2, iv_BE.lo1, iv_BE.hi2, iv_BE.hi3);
-//        //is_gctr_plain_LE(le_seq_quad32_to_bytes(old(buffer128_as_seq(mem, in_b)))) && is_aes_key_LE(alg, key_words);
-//        
-//        le_seq_quad32_to_bytes(buffer128_as_seq(mem, out_b)) == gctr_encrypt_LE(ctr_BE, le_seq_quad32_to_bytes(old(buffer128_as_seq(mem, in_b))), alg, key_words);
+        let iv_LE := old(buffer128_read(iv_b, 0, mem));
+        let iv_BE := reverse_bytes_quad32(iv_LE);
+        ctr_BE == Mkfour(2, iv_BE.lo1, iv_BE.hi2, iv_BE.hi3);
+        //is_gctr_plain_LE(le_seq_quad32_to_bytes(old(buffer128_as_seq(mem, in_b)))) && is_aes_key_LE(alg, key_words);
+        
+        le_seq_quad32_to_bytes(buffer128_as_seq(mem, out_b)) == gctr_encrypt_LE(ctr_BE, le_seq_quad32_to_bytes(old(buffer128_as_seq(mem, in_b))), alg, key_words);
 {
     ghost var plain_quads := buffer128_as_seq(mem, in_b);
     Load128_buffer(T1, ivp, 0, Secret, iv_b, 0);    // # input counter value
@@ -3168,14 +3171,14 @@ procedure {:quick} {:verify true} AES_GCM_encrypt(
     ghost var mid_len := len;
     assert mid_len == old(len) - 12;
     Loop6x_loop(alg, 2, iv_b, out_b, in_b, out_b, stack_b, old(buffer128_as_seq(mem, in_b)), key_words, round_keys, keys_b, hkeys_b, ctr_BE, inc32(ctr_BE, 12)); 
-/*
+
     ghost var out_snapshot := buffer128_as_seq(mem, out_b);
-    Load128_buffer(Z3, rsp, 0x20, Secret, hkeys_b, 2); // # I[5]
+    Load128_buffer(Z3, rsp, 0x20, Secret, stack_b, 2); // # I[5]
     InitPshufbMask(Ii, r12);    // # borrow $Ii for .Lbswap_mask
     Load128_buffer(Hkey, Xip, 0x00-0x20, Secret, hkeys_b, 0);   // # $Hkey^1
     VShufpd(T1, Z3, Z3, 0);     // =?= vpunpckhqdq	$Z3,$Z3,$T1
     Load128_buffer(rndkey, Xip, 0x20-0x20, Secret, hkeys_b, 2);   // # borrow $rndkey for $HK
-    VpolyAdd(T1, T1, Z3);   // Moved up two instructions compared to OpenSSL, to avoid mixing with Encrypt_save_and_shuffle_output
+    VPolyAdd(T1, T1, Z3);   // Moved up two instructions compared to OpenSSL, to avoid mixing with Encrypt_save_and_shuffle_output
 
     assert {:quick_type} old(len) / 6 >= 3;
     ghost var offset_in := #nat((old(len) / 6) - 1);
@@ -3189,5 +3192,4 @@ procedure {:quick} {:verify true} AES_GCM_encrypt(
     gctr_partial_to_full_basic(ctr_BE, old(buffer128_as_seq(mem, in_b)), alg, key_words, buffer128_as_seq(mem, out_b));
     //assert {:quick_type} is_gctr_plain_LE(le_seq_quad32_to_bytes(old(buffer128_as_seq(mem, in_b)))) && is_aes_key_LE(alg, key_words);
     //assert le_seq_quad32_to_bytes(buffer128_as_seq(mem, out_b)) == gctr_encrypt_LE(ctr_BE, le_seq_quad32_to_bytes(old(buffer128_as_seq(mem, in_b))), alg, key_words);
-    */
 }
