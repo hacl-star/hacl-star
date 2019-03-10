@@ -2,11 +2,11 @@ include "../../../arch/x64/X64.Vale.InsBasic.vaf"
 include "../../../arch/x64/X64.Vale.InsMem.vaf"
 include "../../../arch/x64/X64.Vale.InsVector.vaf"
 include "../../../lib/util/x64/X64.Stack.vaf"
-include "../../../thirdPartyPorts/OpenSSL/aes/X64.AESGCM.vaf"
 include "X64.AES.vaf"
 include "X64.GF128_Mul.vaf"
 include "X64.GCTR.vaf"
 include "X64.GHash.vaf"
+include{:fstar}{:open} "Prop_s"
 include{:fstar}{:open} "open Opaque_s"
 include{:/*TODO*/fstar}{:open} "FStar.Seq.Base"
 include{:fstar}{:open} "Words_s"
@@ -32,13 +32,13 @@ include{:fstar}{:open} "X64.Vale.Decls"
 include{:fstar}{:open} "X64.Vale.QuickCode"
 include{:fstar}{:open} "X64.Vale.QuickCodes"
 include{:fstar}{:open} "X64.CPU_Features_s"
-include{:fstar}{:open} "X64.AESGCM"
 
 module X64.GCMencryptOpt
 
 #verbatim{:interface}{:implementation}
 module GHash = GHash
 module GCTR = GCTR
+open Prop_s
 open Opaque_s
 open FStar.Seq
 open Words_s
@@ -75,12 +75,32 @@ open X64.Stack
 open X64.CPU_Features_s
 #endverbatim
 
+#verbatim{:interface}
+let aes_reqs
+  (alg:algorithm) (key:seq nat32) (round_keys:seq quad32) (keys_b:buffer128)
+  (key_ptr:int) (mem:memory) (memTaint:memtaint) : prop0
+  =
+  aesni_enabled /\
+  alg = AES_128 /\
+  //(alg = AES_128 || alg = AES_256) /\
+  is_aes_key_LE alg key /\
+  length(round_keys) == nr(alg) + 1 /\
+  round_keys == key_to_round_keys_LE alg key /\
+  validSrcAddrsOffset128 mem key_ptr keys_b 8 (nr alg + 1) memTaint Secret /\
+  buffer128_as_seq mem keys_b == round_keys
+#endverbatim
+
+function aes_reqs(alg:algorithm, key:seq(nat32), round_keys:seq(quad32), keys_b:buffer128,
+    key_ptr:int, mem:memory, memTaint:memtaint) : prop extern;
+
+
+
 #reset-options "--z3rlimit 30"
 
 ///////////////////////////
 // GCM
 ///////////////////////////
-procedure {:quick} gcm_one_pass_blocks(
+procedure {:quick} {:verify true} gcm_one_pass_blocks(
     inline alg:algorithm,
     ghost in_b:buffer128,
     ghost out_b:buffer128,
@@ -101,7 +121,6 @@ procedure {:quick} gcm_one_pass_blocks(
 
     requires
         // GCTR reqs
-        buffers_disjoint128(in_b, out_b);
         buffers_disjoint128(keys_b, out_b);
         validSrcAddrsOffset128(mem,  in_ptr,  in_b, block_offset, len, memTaint, Secret);
         validDstAddrsOffset128(mem, out_ptr, out_b, block_offset, len, memTaint, Secret);
@@ -111,15 +130,7 @@ procedure {:quick} gcm_one_pass_blocks(
         mask == Mkfour(0x0C0D0E0F, 0x08090A0B, 0x04050607, 0x00010203);
 
         // AES reqs
-        aesni_enabled;
-        alg = AES_128 || alg = AES_256;
-        is_aes_key_LE(alg, key);
-        length(round_keys) == nr(alg) + 1;
-        round_keys == key_to_round_keys_LE(alg, key);
-        r8 == buffer_addr(keys_b, mem);
-        validSrcAddrs128(mem, r8, keys_b, nr(alg) + 1, memTaint, Secret);
-        buffer128_as_seq(mem, keys_b) == round_keys;
-
+        aes_reqs(alg, key, round_keys, keys_b, r8, mem, memTaint);
 
         // GCTR
         block_offset > 0 ==> gctr_partial(alg, block_offset, buffer128_as_seq(mem, in_b), buffer128_as_seq(mem, out_b), key, old_iv);
@@ -127,7 +138,6 @@ procedure {:quick} gcm_one_pass_blocks(
 
         // GHash
         pclmulqdq_enabled;
-        //block_offset > 0 ==> length(slice_work_around(buffer128_as_seq(mem, out_b), block_offset)) > 0 /\ 
         hash == ghash_incremental0(reverse_bytes_quad32(h), old_hash, slice_work_around(buffer128_as_seq(mem, out_b), block_offset));
     ensures
         modifies_buffer128(out_b, old(mem), mem);
@@ -153,6 +163,8 @@ procedure {:quick} gcm_one_pass_blocks(
     ZeroXmm(one);
     PinsrdImm(one, 1, 0, r12);
 
+    ghost var plain_quads := buffer128_as_seq(mem, in_b);
+
     while (rdx != len)
         invariant
             //////////////////// Basic indexing //////////////////////
@@ -163,8 +175,8 @@ procedure {:quick} gcm_one_pass_blocks(
 
             //////////////////// From requires //////////////////////
             // GCTR reqs
-            buffers_disjoint128(in_b, out_b);
             buffers_disjoint128(keys_b, out_b);
+            partial_seq_agreement(plain_quads, buffer128_as_seq(mem, in_b), rdx, buffer_length(in_b));
             validSrcAddrsOffset128(mem,  in_ptr,  in_b, block_offset, len, memTaint, Secret);
             validDstAddrsOffset128(mem, out_ptr, out_b, block_offset, len, memTaint, Secret);
             in_ptr  + 16 * len < pow2_64;
@@ -172,14 +184,7 @@ procedure {:quick} gcm_one_pass_blocks(
             buffer_length(in_b) == buffer_length(out_b);
 
             // AES reqs
-            aesni_enabled;
-            alg = AES_128 || alg = AES_256;
-            is_aes_key_LE(alg, key);
-            length(round_keys) == nr(alg) + 1;
-            round_keys == key_to_round_keys_LE(alg, key);
-            r8 == buffer_addr(keys_b, mem);
-            validSrcAddrs128(mem, r8, keys_b, nr(alg) + 1, memTaint, Secret);
-            buffer128_as_seq(mem, keys_b) == round_keys;
+            aes_reqs(alg, key, round_keys, keys_b, r8, mem, memTaint);
 
             pclmulqdq_enabled;
             //////////////////// GCTR invariants //////////////////////
@@ -188,7 +193,7 @@ procedure {:quick} gcm_one_pass_blocks(
 
             //////////////////// Postcondition goals //////////////////////
             modifies_buffer128(out_b, old(mem), mem);
-            gctr_partial(alg, block_offset + rdx, buffer128_as_seq(mem, in_b), buffer128_as_seq(mem, out_b), key, old_iv);
+            gctr_partial(alg, block_offset + rdx, plain_quads, buffer128_as_seq(mem, out_b), key, old_iv);
 
             rdx == 0 ==> hash == old(hash) /\ buffer128_as_seq(mem, out_b) == old(buffer128_as_seq(mem, out_b));
 //            rdx > 0 ==> length(slice_work_around(buffer128_as_seq(mem, out_b), block_offset + rdx)) > 0 /\
@@ -219,195 +224,7 @@ procedure {:quick} gcm_one_pass_blocks(
     }
 }
 
-procedure {:quick} gcm_one_pass_blocks_opt(
-    inline alg:algorithm,
-    ghost in_b:buffer128,
-    ghost out_b:buffer128,
-    ghost key:seq(nat32),
-    ghost round_keys:seq(quad32),
-    ghost keys_b:buffer128
-    )
-    lets in_ptr @= rax; out_ptr @= rbx; len @= rcx; icb @= xmm7; mask @= xmm8; hash @= xmm1; one @= xmm10; h @= xmm11;
-
-    reads
-        r8; h; memTaint;
-
-    modifies
-        in_ptr; out_ptr; len; rdx; rdi; r9; r10; r12; 
-        xmm0; xmm1; xmm2; xmm3; xmm4; xmm5; xmm6; icb; mask; xmm9; one; 
-        xmm12; xmm13; xmm14; xmm15;
-        mem; efl;
-
-    requires
-        // GCTR reqs
-        buffers_disjoint128(in_b, out_b);
-        buffers_disjoint128(keys_b, out_b);
-        validSrcAddrs128(mem, in_ptr, in_b, len, memTaint, Secret);
-        validDstAddrs128(mem, out_ptr, out_b, len, memTaint, Secret);
-        in_ptr  + 16 * len < pow2_64;
-        out_ptr + 16 * len < pow2_64;
-        buffer_length(in_b) == buffer_length(out_b) /\ 256 * buffer_length(in_b) < pow2_32;
-        mask == Mkfour(0x0C0D0E0F, 0x08090A0B, 0x04050607, 0x00010203);
-
-        // AES reqs
-        aesni_enabled;
-        alg = AES_128 || alg = AES_256;
-        is_aes_key_LE(alg, key);
-        length(round_keys) == nr(alg) + 1;
-        round_keys == key_to_round_keys_LE(alg, key);
-        r8 == buffer_addr(keys_b, mem);
-        validSrcAddrs128(mem, r8, keys_b, nr(alg) + 1, memTaint, Secret);
-        buffer128_as_seq(mem, keys_b) == round_keys;
-            
-        pclmulqdq_enabled;
-    ensures
-        modifies_buffer128(out_b, old(mem), mem);
-        validSrcAddrs128(mem, old(out_ptr), out_b, old(len), memTaint, Secret);
-
-        r9  ==  old(in_ptr) + 16 * old(len);
-        r10 == old(out_ptr) + 16 * old(len);
-
-        mask == Mkfour(0x0C0D0E0F, 0x08090A0B, 0x04050607, 0x00010203);
-
-        // GCTR
-        gctr_partial(alg, old(len), buffer128_as_seq(mem, in_b), buffer128_as_seq(mem, out_b), key, old(icb));
-        icb == inc32(old(icb), old(len));
-
-        // GHash
-        old(len == 0) ==> hash == old(hash);
-        old(len > 0) ==> length(buffer128_as_seq(mem, out_b)) > 0 /\ 
-                         hash == ghash_incremental(reverse_bytes_quad32(h), old(hash), slice_work_around(buffer128_as_seq(mem, out_b), old(len)));
-{
-//    // len == # of blocks, so we need to figure out how many sets of four blocks we have
-//    Mov64(rdx, len);
-//    Shr64(rdx, 2);
-//    And64(len, 3);
-//    lemma_poly_bits64();
-//    //assert rdx == old(len) / 4;
-//    //assert len == old(len) % 4;
-//    ghost var num_quad_blocks := rdx;
-//    assert old(len) == 4 * num_quad_blocks + len;
-
-    if (len >= 18) {
-        // TODO: Align registers and save anything that AES_GCM_encrypt will clobber
-        Mov64(r9, in_ptr);
-        Mov64(r10, out_ptr);
-        ghost var ctr_BE := AES_GCM_encrypt(alg, iv_b, in_b, out_b, stack_b, key, round_keys, keys_b, hkeys_b);
-        // Restore registers
-        Mov64(in_ptr, r9);
-        Mov64(out_ptr, r10);
-    }
-
-    gcm_one_pass_blocks(alg, in_b, out_b, 6*(old(len) / 6), old(icb), old(hash), key, round_keys, keys_b);
-}
-
-#reset-options "--z3rlimit 30"
-procedure {:quick} gcm_one_pass(
-    inline alg:algorithm,
-    ghost in_b:buffer128,
-    ghost out_b:buffer128,
-    ghost key:seq(nat32),
-    ghost round_keys:seq(quad32),
-    ghost keys_b:buffer128
-    )
-    lets in_ptr @= rax; out_ptr @= rbx; num_bytes @= rcx; icb @= xmm7; mask @= xmm8; hash @= xmm1; one @= xmm10; h @= xmm11;
-
-    reads
-        r8; h; memTaint;
-
-    modifies
-        in_ptr; out_ptr; num_bytes; rdx; rdi; rsi; r9; r10; r12; xmm0; xmm1; xmm2; xmm3; xmm4; xmm5; xmm6; icb; mask; xmm9; one; xmm12; xmm13; xmm14; xmm15; mem; efl;
-
-    requires
-        // GCTR reqs
-        buffers_disjoint128(in_b, out_b);
-        buffers_disjoint128(keys_b, out_b);
-        validSrcAddrs128(mem, in_ptr,  in_b,  bytes_to_quad_size(num_bytes), memTaint, Secret);
-        validDstAddrs128(mem, out_ptr, out_b, bytes_to_quad_size(num_bytes), memTaint, Secret);
-        in_ptr  + 16 * bytes_to_quad_size(num_bytes) < pow2_64;
-        out_ptr + 16 * bytes_to_quad_size(num_bytes) < pow2_64;
-        buffer_length(in_b)  == buffer_length(out_b);
-        buffer_length(out_b) == bytes_to_quad_size(num_bytes);
-        256 * buffer_length(in_b) < pow2_32;
-        4096 * num_bytes < pow2_32;
-        mask == Mkfour(0x0C0D0E0F, 0x08090A0B, 0x04050607, 0x00010203);
-
-        // AES reqs
-        aesni_enabled;
-        alg = AES_128 || alg = AES_256;
-        is_aes_key_LE(alg, key);
-        length(round_keys) == nr(alg) + 1;
-        round_keys == key_to_round_keys_LE(alg, key);
-        r8 == buffer_addr(keys_b, mem);
-        validSrcAddrs128(mem, r8, keys_b, nr(alg) + 1, memTaint, Secret);
-        buffer128_as_seq(mem, keys_b) == round_keys;
-            
-        pclmulqdq_enabled;
-    ensures
-        modifies_buffer128(out_b, old(mem), mem);
-        validSrcAddrs128(mem, old(out_ptr), out_b, bytes_to_quad_size(old(num_bytes)), memTaint, Secret);
-
-        // GCTR
-        let plain  := slice_work_around(le_seq_quad32_to_bytes(buffer128_as_seq(old(mem),  in_b)), old(num_bytes));
-        let cipher := slice_work_around(le_seq_quad32_to_bytes(buffer128_as_seq(mem,      out_b)), old(num_bytes));
-        cipher == gctr_encrypt_LE(old(icb), make_gctr_plain_LE(plain), alg, key);
-
-        //icb == inc32(old(icb), bytes_to_quad_size(old(num_bytes)));
-        icb.lo1 == old(icb.lo1);
-        icb.hi2 == old(icb.hi2);
-        icb.hi3 == old(icb.hi3);
-
-        mask == Mkfour(0x0C0D0E0F, 0x08090A0B, 0x04050607, 0x00010203);
-
-        // GHash
-        old(num_bytes) == 0 ==> hash == old(hash);
-
-        let cipher_padded_bytes := pad_to_128_bits(cipher);
-        let cipher_padded_quads := le_bytes_to_seq_quad32(cipher_padded_bytes);
-        old(num_bytes) > 0 ==> length(cipher_padded_quads) > 0 /\
-            hash == ghash_incremental(reverse_bytes_quad32(h), old(hash), cipher_padded_quads);
-{
-    if (num_bytes > 0) {
-        lemma_poly_bits64();
-        Mov64(rsi, num_bytes);
-        And64(rsi, 15);
-        assert rsi == num_bytes % 16;
-        Shr64(num_bytes, 4);
-        ghost var num_blocks := old(num_bytes) / 16;
-        assert rcx == num_blocks;
-
-        gcm_one_pass_blocks_opt(alg, in_b, out_b, key, round_keys, keys_b);
-        assert icb == inc32(old(icb), num_blocks);
-
-        if (rsi == 0) {
-            gctr_bytes_no_extra(alg, old(icb), in_b, out_b, key, round_keys, keys_b, old(in_ptr), old(out_ptr), old(num_bytes));
-            ghash_incremental_bytes_no_extra(out_b, old(hash), old(out_ptr), old(num_bytes), hash, reverse_bytes_quad32(h));
-            bytes_to_quad_size_no_extra_bytes(old(num_bytes));
-            //assert icb == inc32(old(icb), bytes_to_quad_size(old(num_bytes)));
-
-            assert buffer128_as_seq(old(mem),  in_b) == buffer128_as_seq(mem,  in_b);       // OBSERVE
-        } else {
-            // TODO: Should update gcm_one_pass_blocks and gctr_* to give their results in terms of old(mem) and in_b, instead of mem
-//            assert buffer128_as_seq(old(mem),  in_b) == buffer128_as_seq(mem,  in_b);       // OBSERVE
-            Mov128(xmm3, hash); // Save hash b/c gctr_bytes_extra will clobber it
-            gctr_bytes_extra(alg, old(icb), in_b, out_b, key, round_keys, keys_b, old(in_ptr), old(out_ptr), old(num_bytes));
-            Mov64(rax, rsi);    // ghash_incremental_bytes_extra expects num_bytes % 16 in rax
-            Mov64(r9, r10);     // ghash_incremental_bytes_extra expects old(out_ptr) + 16 * num_blocks in r9
-            Mov128(hash, xmm3);
-            // TODO: Can optimize here by skipping the memory load in ghash_incremental_bytes_extra
-            //       and reading from xmm1 directly.  It's probably still in cache though
-            ghash_incremental_bytes_extra(out_b, old(out_ptr), old(hash), old(num_bytes));
-//            assert buffer128_as_seq(old(mem),  in_b) == buffer128_as_seq(mem,  in_b);       // OBSERVE
-        }
-    }
-
-    // Handle the else case:
-    ghost var plain  := buffer128_as_seq(old(mem),  in_b);
-    ghost var cipher := buffer128_as_seq(mem,      out_b);
-    gctr_encrypt_empty(old(icb), plain, cipher, alg, key);
-
-}
-
+/*
 #reset-options "--z3rlimit 30"
 procedure {:quick} gcm_core_part1(
     inline alg:algorithm,
@@ -461,13 +278,7 @@ procedure {:quick} gcm_core_part1(
         256 * bytes_to_quad_size(plain_num_bytes) < pow2_32;
 
         // AES reqs
-        aesni_enabled;
-        alg = AES_128 || alg = AES_256;
-        is_aes_key_LE(alg, key);
-        length(round_keys) == nr(alg) + 1;
-        round_keys == key_to_round_keys_LE(alg, key);
-        validSrcAddrs128(mem, keys_ptr, keys_b, nr(alg) + 1, memTaint, Secret);
-        buffer128_as_seq(mem, keys_b) == round_keys;
+        aes_reqs(alg, key, round_keys, keys_b, r8, mem, memTaint);
             
         pclmulqdq_enabled;
     ensures
@@ -627,13 +438,7 @@ procedure {:quick} gcm_core(
         256 * bytes_to_quad_size(plain_num_bytes) < pow2_32;
 
         // AES reqs
-        aesni_enabled;
-        alg = AES_128 || alg = AES_256;
-        is_aes_key_LE(alg, key);
-        length(round_keys) == nr(alg) + 1;
-        round_keys == key_to_round_keys_LE(alg, key);
-        validSrcAddrs128(mem, keys_ptr, keys_b, nr(alg) + 1, memTaint, Secret);
-        buffer128_as_seq(mem, keys_b) == round_keys;
+        aes_reqs(alg, key, round_keys, keys_b, r8, mem, memTaint);
             
         pclmulqdq_enabled;
     ensures
@@ -757,13 +562,7 @@ procedure {:quick} gcm_encrypt_stdcall_inner(
         256 * bytes_to_quad_size(plain_num_bytes) < pow2_32;
 
         // AES reqs
-        aesni_enabled;
-        alg = AES_128 || alg = AES_256;
-        is_aes_key_LE(alg, key);
-        length(round_keys) == nr(alg) + 1;
-        round_keys == key_to_round_keys_LE(alg, key);
-        validSrcAddrs128(mem, expanded_key_ptr, keys_b, nr(alg) + 1, memTaint, Secret);
-        buffer128_as_seq(mem, keys_b) == round_keys;
+        aes_reqs(alg, key, round_keys, keys_b, r8, mem, memTaint);
             
         pclmulqdq_enabled;
     ensures
@@ -878,13 +677,7 @@ procedure {:quick} gcm_encrypt_stdcall(
         256 * bytes_to_quad_size(plain_num_bytes) < pow2_32;
 
         // AES reqs
-        aesni_enabled;
-        alg = AES_128 || alg = AES_256;
-        is_aes_key_LE(alg, key);
-        length(round_keys) == nr(alg) + 1;
-        round_keys == key_to_round_keys_LE(alg, key);
-        validSrcAddrs128(mem, expanded_key_ptr, keys_b, nr(alg) + 1, memTaint, Secret);
-        buffer128_as_seq(mem, keys_b) == round_keys;
+        aes_reqs(alg, key, round_keys, keys_b, r8, mem, memTaint);
             
         pclmulqdq_enabled;
     ensures
@@ -1018,13 +811,7 @@ procedure {:quick} gcm_encrypt2_stdcall(
         256 * bytes_to_quad_size(plain_num_bytes) < pow2_32;
 
         // AES reqs
-        aesni_enabled;
-        alg = AES_128 || alg = AES_256;
-        is_aes_key_LE(alg, key);
-        length(round_keys) == nr(alg) + 1;
-        round_keys == key_to_round_keys_LE(alg, key);
-        validSrcAddrs128(mem, expanded_key_ptr, keys_b, nr(alg) + 1, memTaint, Secret);
-        buffer128_as_seq(mem, keys_b) == round_keys;
+        aes_reqs(alg, key, round_keys, keys_b, r8, mem, memTaint);
 
         pclmulqdq_enabled;
     ensures
@@ -1114,3 +901,4 @@ procedure {:quick} gcm_encrypt2_stdcall(
     callee_restore_registers(win, stack_b, old(xmm6), old(xmm7), old(xmm8), old(xmm9), old(xmm10), old(xmm11),
                              old(xmm12), old(xmm13), old(xmm14), old(xmm15));
 }
+*/
