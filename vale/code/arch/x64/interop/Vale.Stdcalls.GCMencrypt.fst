@@ -44,7 +44,7 @@ let tuint64 = TD_Base TUInt64
 
 [@__reduce__] noextract
 let (dom: list td{List.length dom <= 20}) =
-  let y = [t128_no_mod; tuint64; t128_no_mod; tuint64; t128_no_mod; t128_mod; t128_mod; t128_no_mod] in
+  let y = [t128_no_mod; tuint64; t128_no_mod; tuint64; t128_no_mod; t128_no_mod; t128_mod; t128_mod] in
   assert_norm (List.length y = 8);
   y
 
@@ -58,17 +58,17 @@ let gcm128_pre : (Ghost.erased (Seq.seq nat32)) -> VSig.vale_pre 224 dom =
     (auth_b:b128)
     (auth_num:uint64)
     (iv_b:b128)
+    (keys_b:b128)
     (out_b:b128)
     (tag_b:b128)
-    (keys_b:b128)
     (va_s0:V.va_state)
     (sb:IX64.stack_buffer 224) ->
       GC.va_req_gcm_encrypt2_stdcall c va_s0 IA.win AES_128
         (as_vale_buffer sb) 
         (as_vale_buffer plain_b) (UInt64.v plain_num)
         (as_vale_buffer auth_b) (UInt64.v auth_num)
-        (as_vale_buffer iv_b) (as_vale_buffer out_b)
-        (as_vale_buffer tag_b) (Ghost.reveal s) (as_vale_buffer keys_b)
+        (as_vale_buffer iv_b) (as_vale_buffer keys_b)
+        (as_vale_buffer out_b) (as_vale_buffer tag_b) (Ghost.reveal s)
 
 [@__reduce__] noextract
 let gcm128_post : Ghost.erased (Seq.seq nat32) -> VSig.vale_post 224 dom =
@@ -79,9 +79,9 @@ let gcm128_post : Ghost.erased (Seq.seq nat32) -> VSig.vale_post 224 dom =
     (auth_b:b128)
     (auth_num:uint64)
     (iv_b:b128)
+    (keys_b:b128)
     (out_b:b128)
     (tag_b:b128)
-    (keys_b:b128)
     (va_s0:V.va_state)
     (sb:IX64.stack_buffer 224)
     (va_s1:V.va_state)
@@ -90,8 +90,8 @@ let gcm128_post : Ghost.erased (Seq.seq nat32) -> VSig.vale_post 224 dom =
         (as_vale_buffer sb) 
         (as_vale_buffer plain_b) (UInt64.v plain_num)
         (as_vale_buffer auth_b) (UInt64.v auth_num)
-        (as_vale_buffer iv_b) (as_vale_buffer out_b)
-        (as_vale_buffer tag_b) (Ghost.reveal s) (as_vale_buffer keys_b)
+        (as_vale_buffer iv_b) (as_vale_buffer keys_b)
+        (as_vale_buffer out_b) (as_vale_buffer tag_b) (Ghost.reveal s)
         va_s1 f
 
 #set-options "--z3rlimit 50"
@@ -106,18 +106,18 @@ let gcm128_lemma'
     (auth_b:b128)
     (auth_num:uint64)
     (iv_b:b128)
+    (keys_b:b128)
     (out_b:b128)
     (tag_b:b128)
-    (keys_b:b128)
     (va_s0:V.va_state)
     (sb:IX64.stack_buffer 224)
  : Ghost (V.va_state & V.va_fuel)
      (requires
-       gcm128_pre s code plain_b plain_num auth_b auth_num iv_b out_b tag_b keys_b va_s0 sb)
+       gcm128_pre s code plain_b plain_num auth_b auth_num iv_b keys_b out_b tag_b va_s0 sb)
      (ensures (fun (va_s1, f) ->
        V.eval_code code va_s0 f va_s1 /\
        VSig.vale_calling_conventions_stdcall va_s0 va_s1 /\
-       gcm128_post s code plain_b plain_num auth_b auth_num iv_b out_b tag_b keys_b va_s0 sb va_s1 f /\
+       gcm128_post s code plain_b plain_num auth_b auth_num iv_b keys_b out_b tag_b va_s0 sb va_s1 f /\
        ME.buffer_writeable (as_vale_buffer plain_b) /\ 
        ME.buffer_writeable (as_vale_buffer auth_b) /\ 
        ME.buffer_writeable (as_vale_buffer iv_b) /\ 
@@ -128,8 +128,8 @@ let gcm128_lemma'
    let va_s1, f = GC.va_lemma_gcm_encrypt2_stdcall code va_s0 IA.win AES_128 (as_vale_buffer sb)
        (as_vale_buffer plain_b) (UInt64.v plain_num)
         (as_vale_buffer auth_b) (UInt64.v auth_num)
-        (as_vale_buffer iv_b) (as_vale_buffer out_b)
-        (as_vale_buffer tag_b) (Ghost.reveal s) (as_vale_buffer keys_b) in   
+        (as_vale_buffer iv_b) (as_vale_buffer keys_b)
+        (as_vale_buffer out_b) (as_vale_buffer tag_b) (Ghost.reveal s) in   
    Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt8 ME.TUInt128 plain_b;   
    Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt8 ME.TUInt128 auth_b;
    Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt8 ME.TUInt128 iv_b;   
@@ -169,17 +169,17 @@ let gcm256_pre : Ghost.erased (Seq.seq nat32) -> VSig.vale_pre 224 dom =
     (auth_b:b128)
     (auth_num:uint64)
     (iv_b:b128)
+    (keys_b:b128)
     (out_b:b128)
     (tag_b:b128)
-    (keys_b:b128)
     (va_s0:V.va_state)
     (sb:IX64.stack_buffer 224) ->
       GC.va_req_gcm_encrypt2_stdcall c va_s0 IA.win AES_256
         (as_vale_buffer sb) 
         (as_vale_buffer plain_b) (UInt64.v plain_num)
         (as_vale_buffer auth_b) (UInt64.v auth_num)
-        (as_vale_buffer iv_b) (as_vale_buffer out_b)
-        (as_vale_buffer tag_b) (Ghost.reveal s) (as_vale_buffer keys_b)
+        (as_vale_buffer iv_b) (as_vale_buffer keys_b)
+        (as_vale_buffer out_b) (as_vale_buffer tag_b) (Ghost.reveal s)
 
 [@__reduce__] noextract
 let gcm256_post : Ghost.erased (Seq.seq nat32) -> VSig.vale_post 224 dom =
@@ -190,9 +190,9 @@ let gcm256_post : Ghost.erased (Seq.seq nat32) -> VSig.vale_post 224 dom =
     (auth_b:b128)
     (auth_num:uint64)
     (iv_b:b128)
+    (keys_b:b128)
     (out_b:b128)
     (tag_b:b128)
-    (keys_b:b128)
     (va_s0:V.va_state)
     (sb:IX64.stack_buffer 224)
     (va_s1:V.va_state)
@@ -201,8 +201,8 @@ let gcm256_post : Ghost.erased (Seq.seq nat32) -> VSig.vale_post 224 dom =
         (as_vale_buffer sb) 
         (as_vale_buffer plain_b) (UInt64.v plain_num)
         (as_vale_buffer auth_b) (UInt64.v auth_num)
-        (as_vale_buffer iv_b) (as_vale_buffer out_b)
-        (as_vale_buffer tag_b) (Ghost.reveal s) (as_vale_buffer keys_b)
+        (as_vale_buffer iv_b) (as_vale_buffer keys_b)
+        (as_vale_buffer out_b) (as_vale_buffer tag_b) (Ghost.reveal s)
         va_s1 f
 
 #set-options "--z3rlimit 50"
@@ -217,18 +217,18 @@ let gcm256_lemma'
     (auth_b:b128)
     (auth_num:uint64)
     (iv_b:b128)
+    (keys_b:b128)
     (out_b:b128)
     (tag_b:b128)
-    (keys_b:b128)
     (va_s0:V.va_state)
     (sb:IX64.stack_buffer 224)
  : Ghost (V.va_state & V.va_fuel)
      (requires
-       gcm256_pre s code plain_b plain_num auth_b auth_num iv_b out_b tag_b keys_b va_s0 sb)
+       gcm256_pre s code plain_b plain_num auth_b auth_num iv_b keys_b out_b tag_b va_s0 sb)
      (ensures (fun (va_s1, f) ->
        V.eval_code code va_s0 f va_s1 /\
        VSig.vale_calling_conventions_stdcall va_s0 va_s1 /\
-       gcm256_post s code plain_b plain_num auth_b auth_num iv_b out_b tag_b keys_b va_s0 sb va_s1 f /\
+       gcm256_post s code plain_b plain_num auth_b auth_num iv_b keys_b out_b tag_b va_s0 sb va_s1 f /\
        ME.buffer_writeable (as_vale_buffer plain_b) /\ 
        ME.buffer_writeable (as_vale_buffer auth_b) /\ 
        ME.buffer_writeable (as_vale_buffer iv_b) /\ 
@@ -239,8 +239,8 @@ let gcm256_lemma'
    let va_s1, f = GC.va_lemma_gcm_encrypt2_stdcall code va_s0 IA.win AES_256 (as_vale_buffer sb)
        (as_vale_buffer plain_b) (UInt64.v plain_num)
         (as_vale_buffer auth_b) (UInt64.v auth_num)
-        (as_vale_buffer iv_b) (as_vale_buffer out_b)
-        (as_vale_buffer tag_b) (Ghost.reveal s) (as_vale_buffer keys_b) in   
+        (as_vale_buffer iv_b) (as_vale_buffer keys_b)
+        (as_vale_buffer out_b) (as_vale_buffer tag_b) (Ghost.reveal s) in
    Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt8 ME.TUInt128 plain_b;   
    Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt8 ME.TUInt128 auth_b;
    Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt8 ME.TUInt128 iv_b;   

@@ -955,11 +955,11 @@ procedure {:quick}{:public}{:exportSpecs} gcm_encrypt2_stdcall(
     ghost auth_b:buffer128,
     ghost auth_num_bytes:nat64,
     ghost iv_b:buffer128,
+    ghost keys_b:buffer128,    
     ghost out_b:buffer128,
     ghost tag_b:buffer128,
 
-    ghost key:seq(nat32),
-    ghost keys_b:buffer128
+    ghost key:seq(nat32)
     )
     reads memTaint;
     modifies
@@ -995,7 +995,7 @@ procedure {:quick}{:public}{:exportSpecs} gcm_encrypt2_stdcall(
         validDstAddrs128(mem, out_ptr, out_b, bytes_to_quad_size(plain_num_bytes), memTaint, Secret);
         validDstAddrs128(mem, tag_ptr, tag_b, 1, memTaint, Secret);
 
-        buffer_length(stack_b) >= 37;
+        buffer_length(stack_b) >= (if win then 37 else 35);
         valid_stack_slots(mem, rsp, stack_b, 28, memTaint);
         valid_taint_buf64(stack_b, mem, memTaint, Public);
 

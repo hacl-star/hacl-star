@@ -220,6 +220,7 @@ let vale_pre_hyp
       VSig.readable s_args VS.(s0.mem) /\
       register_args max_arity arg_reg (List.length args) args s0 /\
       stack_args max_arity n (List.length args) args sb s0 /\
+      V.buffer_length (as_vale_buffer sb) >= n/8 + (List.Tot.length args - max_arity) + 5 /\
       taint_hyp args s0
 
 [@__reduce__]

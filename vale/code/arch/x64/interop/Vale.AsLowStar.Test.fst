@@ -446,6 +446,6 @@ let lowstar_ta : lowstar_ta_t  =
     ta_dom
     (W.mk_prediction code_ta ta_dom [] (ta_lemma code_ta IA.win))
 
-let lowstar_ta_normal_t //: normal lowstar_aesni_t
+let lowstar_ta_normal_t //: normal lowstar_ta_t
   = as_normal_t #lowstar_ta_t lowstar_ta
   

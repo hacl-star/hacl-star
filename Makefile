@@ -420,6 +420,9 @@ obj/Vale.AsLowStar.Wrapper.fst.checked: \
 obj/Vale.AsLowStar.Test.fst.checked: \
   FSTAR_FLAGS=$(VALE_FSTAR_FLAGS)
 
+obj/GCMencrypt_stdcalls.fst.checked: \
+  FSTAR_FLAGS=$(VALE_FSTAR_FLAGS)
+
 obj/Sha_stdcalls.fst.checked: \
   FSTAR_FLAGS=$(VALE_FSTAR_FLAGS)
 
