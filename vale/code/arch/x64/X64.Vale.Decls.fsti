@@ -97,6 +97,7 @@ unfold let get_reg (o:va_reg_operand) : reg = OReg?.r (t_op_to_op o)
 unfold let buffer_readable (#t:M.base_typ) (h:M.mem) (b:M.buffer t) : GTot prop0 = M.buffer_readable #t h b
 unfold let buffer_writeable (#t:M.base_typ) (b:M.buffer t) : GTot prop0 = M.buffer_writeable #t b
 unfold let buffer_length (#t:M.base_typ) (b:M.buffer t) = M.buffer_length #t b
+unfold let buffer8_as_seq (m:M.mem) (b:M.buffer8) : GTot (Seq.seq nat8) = M.buffer_as_seq m b
 unfold let buffer64_as_seq (m:M.mem) (b:M.buffer64) : GTot (Seq.seq nat64) = M.buffer_as_seq m b
 unfold let buffer128_as_seq (m:M.mem) (b:M.buffer128) : GTot (Seq.seq quad32) = M.buffer_as_seq m b
 unfold let valid_src_addr (#t:M.base_typ) (m:M.mem) (b:M.buffer t) (i:int) : prop0 =
@@ -350,6 +351,19 @@ unfold let modifies_buffer_3 (b1 b2 b3:M.buffer64) (h1 h2:M.mem) =modifies_mem (
 unfold let modifies_buffer128 (b:M.buffer128) (h1 h2:M.mem) = modifies_mem (loc_buffer b) h1 h2
 unfold let modifies_buffer128_2 (b1 b2:M.buffer128) (h1 h2:M.mem) = modifies_mem (M.loc_union (loc_buffer b1) (loc_buffer b2)) h1 h2
 unfold let modifies_buffer128_3 (b1 b2 b3:M.buffer128) (h1 h2:M.mem) = modifies_mem (M.loc_union (M.loc_union (loc_buffer b1) (loc_buffer b2)) (loc_buffer b3)) h1 h2
+
+let validSrcAddrs8 (m:M.mem) (addr:int) (b:M.buffer8) (len:int) (memTaint:M.memtaint) (t:taint) =
+    buffer_readable m b /\
+    len <= buffer_length b /\
+    M.buffer_addr b m == addr ///\
+    //M.valid_taint_buf64 b m memTaint t
+
+let validDstAddrs8 (m:M.mem) (addr:int) (b:M.buffer8) (len:int) (memTaint:M.memtaint) (t:taint) =
+    buffer_readable m b /\
+    buffer_writeable b /\
+    len <= buffer_length b /\
+    M.buffer_addr b m == addr // /\
+    //M.valid_taint_buf64 b m memTaint t
 
 let validSrcAddrs64 (m:M.mem) (addr:int) (b:M.buffer64) (len:int) (memTaint:M.memtaint) (t:taint) =
     buffer_readable m b /\
