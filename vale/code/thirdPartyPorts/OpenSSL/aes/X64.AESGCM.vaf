@@ -3138,6 +3138,7 @@ procedure {:quick} {:verify true} AES_GCM_encrypt_6mult(
         // GCTR result
         gctr_partial_opaque(alg, old(len), old(buffer128_as_seq(mem, in_b)), buffer128_as_seq(mem, out_b), key_words, old(T1));
         // GCM result
+        //hash == ghash_incremental(reverse_bytes_quad32(h), old(hash), buffer128_as_seq(mem, out_b), old(len));
 
         // Counter updated
         buffer128_read(iv_b, 0, mem) == reverse_bytes_quad32(inc32lite(old(T1), #nat32(old(len))));
