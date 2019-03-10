@@ -3047,6 +3047,15 @@ procedure {:quick} Encrypt_save_and_shuffle_output(
     VPshufb(inout5, inout5, Ii);
 }
 
+ghost procedure test(ghost t1:quad32, ghost ctr_BE:quad32, ghost mid_len:int)
+    requires
+        0 <= mid_len < pow2_32;
+        t1 == reverse_bytes_quad32(inc32lite(inc32(ctr_BE, 12), #nat32(mid_len)));
+    ensures
+        true;
+{
+}
+
 // This version is designed to be integrated into a larger procedure that handles non-multiple of 6 lengths
 // Hence the requirements and guarantees are a bit weaker
 #reset-options "--z3rlimit 30"
@@ -3126,10 +3135,13 @@ procedure {:quick} {:verify true} AES_GCM_encrypt_6mult(
         len / 6 >= 3;   // Should be implied by above... :(
         12 + len + 6 < pow2_32;
     ensures
+        // GCTR result
         gctr_partial_opaque(alg, old(len), old(buffer128_as_seq(mem, in_b)), buffer128_as_seq(mem, out_b), key_words, old(T1));
-        
-//        old(len) < pow2_32;
-//        T1 == reverse_bytes_quad32(inc32lite(old(T1), #nat32(old(len))));
+        // GCM result
+
+        // Counter updated
+        buffer128_read(iv_b, 0, mem) == reverse_bytes_quad32(inc32lite(old(T1), #nat32(old(len))));
+
 {
     ghost var plain_quads := buffer128_as_seq(mem, in_b);
 
@@ -3165,14 +3177,15 @@ procedure {:quick} {:verify true} AES_GCM_encrypt_6mult(
 
     Ctr32_ghash_6_prelude(alg, stack_b, key_words, round_keys, keys_b, inc32(ctr_BE, 12));
     Mov64(counter, 14);
-    assert {:quick_type} len >= 12 && len < pow2_32;
-    ghost var mid_len:nat32 := #nat32(len);
-    assert {:quick_type} old(len) < pow2_32;
-    ghost var old_len:nat32 := #nat32(old(len));
-    assert mid_len == old(len) - 12;
+    //assert {:quick_type} len >= 12 && len < pow2_32;
+    //ghost var mid_len:nat32 := #nat32(len);
+    ghost var mid_len := len;
+    //assert {:quick_type} old(len) < pow2_32;
+    //ghost var old_len:nat32 := #nat32(old(len));
+    //assert mid_len == old(len) - 12;
     Loop6x_loop(alg, 2, iv_b, out_b, in_b, out_b, stack_b, old(buffer128_as_seq(mem, in_b)), key_words, round_keys, keys_b, hkeys_b, ctr_BE, inc32(ctr_BE, 12)); 
-    assert T1 == reverse_bytes_quad32(inc32lite(inc32(ctr_BE, 12), mid_len));
-    assert inc32lite(inc32(ctr_BE, 12), mid_len) == inc32lite(ctr_BE, old_len);
+    //test(T1, ctr_BE, mid_len);
+    Store128_buffer(ivp, T1, 0x00, Secret, iv_b, 0);
 
     ghost var out_snapshot := buffer128_as_seq(mem, out_b);
     Load128_buffer(Z3, rsp, 0x20, Secret, stack_b, 2); // # I[5]
@@ -3191,7 +3204,7 @@ procedure {:quick} {:verify true} AES_GCM_encrypt_6mult(
     //assert gctr_partial_opaque(alg, old(len), old(buffer128_as_seq(mem, in_b)), buffer128_as_seq(mem, out_b), key_words, ctr_BE);
 }
 
-
+/*
 // This version is meant to be more or less standalone
 #reset-options "--z3rlimit 30"
 procedure {:quick} AES_GCM_encrypt(
@@ -3346,7 +3359,7 @@ procedure {:quick} AES_GCM_encrypt(
     //assert {:quick_type} is_gctr_plain_LE(le_seq_quad32_to_bytes(old(buffer128_as_seq(mem, in_b)))) && is_aes_key_LE(alg, key_words);
     //assert le_seq_quad32_to_bytes(buffer128_as_seq(mem, out_b)) == gctr_encrypt_LE(ctr_BE, le_seq_quad32_to_bytes(old(buffer128_as_seq(mem, in_b))), alg, key_words);
 }
-
+*/
 
 /*
 
