@@ -17,7 +17,7 @@ open Collections.Seqs
 let make_gctr_plain_LE (p:seq nat8) : seq nat8 =
   if 4096 * length p < pow2_32 then p else empty
 
-let inc32lite (cb:quad32) (i:int) : quad32 =
+let inc32lite (cb:quad32) (i:nat32) : quad32 =
   let sum = cb.lo0 + i in
   let lo0 = if sum >= pow2_32 then sum - pow2_32 else sum in
   Mkfour lo0 cb.lo1 cb.hi2 cb.hi3
