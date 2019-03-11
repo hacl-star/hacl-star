@@ -540,10 +540,12 @@ dist/vale/%-x86_64-darwin.S: obj/vale-%.exe | dist/vale
 	$< GCC MacOS > $@
 
 dist/vale/%-inline.h: obj/inline-vale-%.exe | dist/vale
-	echo "#pragma once" > $@
+	echo "#ifdef __GNUC__" > $@
+	echo "#pragma once" >> $@
 	echo "#include <inttypes.h>" >> $@
 	$< >> $@
 	$(SED) -i 's/const//g' $@
+	echo "#endif" >> $@
 
 obj/vale-cpuid.exe: vale/code/lib/util/x64/CpuidMain.ml
 obj/vale-aesgcm.exe: vale/code/crypto/aes/x64/Main.ml
