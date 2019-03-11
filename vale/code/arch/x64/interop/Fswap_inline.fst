@@ -168,4 +168,4 @@ let cswap2_inline p0 p1 bit
     ()
 
 let cswap2_code_inline () : FStar.All.ML int =
-  PR.print_inline "cswap2" 0 None (List.length cswap_dom) cswap_dom code_cswap of_arg cswap_regs_modified
+  PR.print_inline "cswap2_inline" 0 None (List.length cswap_dom) cswap_dom code_cswap of_arg cswap_regs_modified

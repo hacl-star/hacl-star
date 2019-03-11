@@ -14,6 +14,7 @@
 # This Makefile honors the following variables:
 # - NOSHORTLOG=1 disables pretty (short) logs
 # - NODEPEND=1 disables .depend re-generation (use for debugging only)
+# - SKIPDEPEND=1 disables even *including* .depend files (use for debugging only)
 # - NOOPENSSLCHECK=1 disables OpenSSL libcrypto.a checks (useful for verifying files
 #   only, or for non-OpenSSL configurations)
 # - EVERCRYPT_CONFIG allows switching EverCrypt static configurations; when
@@ -94,15 +95,18 @@ all_: compile-compact compile-generic compile-compact-msvc \
   compile-evercrypt-external-headers compile-compact-c89 compile-coco \
   secure_api.old
 
-# Any file in code/tests is taken to contain a `main` function.
-# Any file in specs/tests is taken to contain a `test` function.
 test:
 	$(MAKE) vale-fst
 	FSTAR_DEPEND_FLAGS="--warn_error +285" $(MAKE) test_
 
-test_: test-c test-ml
+test_: test-handwritten test-c test-ml
+
+# Any file in code/tests is taken to contain an `int main()` function.
+# Test should be renamed into Test.EverCrypt
 test-c: $(subst .,_,$(patsubst %.fst,test-c-%,$(notdir $(wildcard code/tests/*.fst)))) \
-  test-c-Test test-c-merkle_tree_test
+  test-c-Test
+
+# Any file in specs/tests is taken to contain a `val test: unit -> bool` function.
 test-ml: $(subst .,_,$(patsubst %.fst,test-ml-%,$(notdir $(wildcard specs/tests/*.fst))))
 
 ci:
@@ -219,7 +223,7 @@ FSTAR_ROOTS = $(wildcard $(addsuffix /*.fsti,$(DIRS)) $(addsuffix /*.fst,$(DIRS)
   $(wildcard obj/*.fst) $(wildcard obj/*.fsti) # these two empty during the first stage
 
 # Convenience target. Remember to run make vale-fst first.
-verify: $(addsuffix .checked,$(FSTAR_ROOTS))
+verify: $(call to-obj-dir,$(addsuffix .checked,$(FSTAR_ROOTS)))
 
 # We currently force regeneration of three depend files. This is long.
 
@@ -536,7 +540,12 @@ dist/vale/%-x86_64-darwin.S: obj/vale-%.exe | dist/vale
 	$< GCC MacOS > $@
 
 dist/vale/%-inline.h: obj/inline-vale-%.exe | dist/vale
-	$< > $@
+	echo "#ifdef __GNUC__" > $@
+	echo "#pragma once" >> $@
+	echo "#include <inttypes.h>" >> $@
+	$< >> $@
+	$(SED) -i 's/const//g' $@
+	echo "#endif" >> $@
 
 obj/vale-cpuid.exe: vale/code/lib/util/x64/CpuidMain.ml
 obj/vale-aesgcm.exe: vale/code/crypto/aes/x64/Main.ml
@@ -588,9 +597,15 @@ obj/%.krml:
 	  ,[EXTRACT-KRML] $*,$@)
 
 HAND_WRITTEN_C		= Lib.PrintBuffer Lib.RandomBuffer
+
+# Always copied into the destination directory, always passed to kremlin.
 HAND_WRITTEN_FILES 	= $(wildcard $(LIB_DIR)/c/*.c) \
   $(addprefix providers/evercrypt/c/evercrypt_,vale_stubs.c)
-# Files in this list are not passed to kremlin, meaning that they don't end up
+
+# Always copied into the destination directory, not passed to kremlin.
+HAND_WRITTEN_H_FILES	= $(wildcard $(LIB_DIR)/c/*.h)
+
+# Possibly overridden, and not passed to kremlin, meaning that they don't end up
 # in the Makefile.basic list of C source files. They're added manually in
 # dist/Makefile (see ifneq tests).
 HAND_WRITTEN_OPTIONAL_FILES = \
@@ -598,15 +613,27 @@ HAND_WRITTEN_OPTIONAL_FILES = \
 
 # TODO: put all the Vale files under a single namespace to avoid this nonsense
 #
+# Note: I am using the deprecated -drop option, but it's ok because the dropped
+# module ends up in another bundle. Maybe the semantics of -drop should be
+# changed to just drop the declarations from a given module and then rely on
+# kremlin's empty-module removal.
+#
 # When extracting our libraries, we purposely don't distribute tests
 DEFAULT_FLAGS		=\
   $(addprefix -library ,$(HACL_HAND_WRITTEN_C)) \
-  -bundle Spec.*[rename=Hacl_Spec] \
+  -bundle Hacl.Spec.*,Spec.*[rename=Hacl_Spec] \
+  -bundle Hacl.Poly1305.Field32xN.Lemmas[rename=Hacl_Lemmas] \
   -bundle Lib.*[rename=Hacl_Lib] \
+  -drop Lib.IntVector.Intrinsics \
+  -add-include '"libintvector.h"' \
+  -add-include '"evercrypt_targetconfig.h"' \
+  -drop EverCrypt.TargetConfig \
   -bundle Test,Test.*,Hacl.Test.* \
   -bundle EverCrypt.BCrypt \
   -bundle EverCrypt.OpenSSL \
   -bundle MerkleTree.Spec,MerkleTree.Spec.*,MerkleTree.New.High,MerkleTree.New.High.* \
+  -bundle 'Vale.Stdcalls.*,Interop,Interop.*,Fadd_stdcalls,Cpuid_stdcalls,Fswap_stdcalls,Fmul_stdcalls,Fsqr_stdcalls,Fsub_stdcalls,Poly_stdcalls,Sha_stdcalls[rename=Vale]' \
+  -bundle 'Fadd_inline,Fmul_inline,Fsqr_inline,Fswap_inline[rename=Vale_Inline]' \
   -bundle FStar.Tactics.CanonCommMonoid,FStar.Tactics.CanonCommSemiring,FStar.Tactics.CanonCommSwaps[rename=Unused] \
   -bundle FastUtil_helpers,FastHybrid_helpers,FastSqr_helpers,FastMul_helpers[rename=Unused2] \
   -bundle Opaque_s,Map16,Test.Vale_memcpy,Fast_defs,Interop_Printer,Memcpy[rename=Unused3] \
@@ -614,27 +641,14 @@ DEFAULT_FLAGS		=\
   -bundle Prop_s,Types_s,Words_s,Views,AES_s,Workarounds,Math.*,Interop,TypesNative_s[rename=Unused5] \
   -bundle GF128_s,GF128,Poly1305.Spec_s,GCTR,GCTR_s,GHash_s,GCM_helpers,GHash[rename=Unused6] \
   -bundle AES_helpers,AES256_helpers,GCM_s,GCM,Interop_assumptions[rename=Unused7] \
-  -bundle 'Interop,Interop.*,Fadd_inline,Fadd_stdcalls,Cpuid_stdcalls,Fswap_stdcalls,Fmul_stdcalls,Fsqr_stdcalls,Fsub_stdcalls,Poly_stdcalls,Sha_stdcalls[rename=Vale]' \
-  -library 'Vale.Stdcalls.Cpuid' \
-  -library 'Vale.Stdcalls.Fadd' \
-  -library 'Vale.Stdcalls.Fmul' \
-  -library 'Vale.Stdcalls.Fsqr' \
-  -library 'Vale.Stdcalls.Fsub' \
-  -library 'Vale.Stdcalls.Fswap' \
-  -library 'Vale.Stdcalls.Poly' \
-  -library 'Vale.Stdcalls.Sha' \
+  -library 'Vale.Stdcalls.*' \
+  -static-header 'Vale_Inline' \
   -library 'Fadd_inline' \
   -library 'Fmul_inline' \
   -library 'Fswap_inline' \
   -library 'Fsqr_inline' \
-  -no-prefix 'Vale.Stdcalls.Cpuid' \
-  -no-prefix 'Vale.Stdcalls.Fadd' \
-  -no-prefix 'Vale.Stdcalls.Fmul' \
-  -no-prefix 'Vale.Stdcalls.Fsqr' \
-  -no-prefix 'Vale.Stdcalls.Fsub' \
-  -no-prefix 'Vale.Stdcalls.Fswap' \
-  -no-prefix 'Vale.Stdcalls.Poly' \
-  -no-prefix 'Vale.Stdcalls.Sha' \
+  -add-include '"curve25519-inline.h"' \
+  -no-prefix 'Vale.Stdcalls.*' \
   -no-prefix 'Fadd_inline' \
   -no-prefix 'Fmul_inline' \
   -no-prefix 'Fswap_inline' \
@@ -644,13 +658,19 @@ DEFAULT_FLAGS		=\
   -no-prefix 'MerkleTree.New.Low.Serialization' \
   -fparentheses -fno-shadow -fcurly-braces
 
+# No API for the Chacha20 bundle (yet). This would cause a name conflict with
+# old Chacha20.
 COMPACT_FLAGS	=\
   -bundle Hacl.Hash.MD5+Hacl.Hash.Core.MD5+Hacl.Hash.SHA1+Hacl.Hash.Core.SHA1+Hacl.Hash.SHA2+Hacl.Hash.Core.SHA2+Hacl.Hash.Core.SHA2.Constants=Hacl.Hash.*[rename=Hacl_Hash] \
   -bundle Hacl.Impl.SHA3+Hacl.SHA3=[rename=Hacl_SHA3] \
+  -bundle Hacl.Poly1305_32+Hacl.Poly1305_128+Hacl.Poly1305_256=Hacl.Poly1305.*,Hacl.Impl.Poly1305,Hacl.Impl.Poly1305.*[rename=Hacl_Poly1305] \
+  -bundle Hacl.Impl.Chacha20,Hacl.Impl.Chacha20.*[rename=Hacl_Chacha20_new] \
+  -bundle Hacl.Curve25519_51+Hacl.Curve25519_64=Hacl.Impl.Curve25519.*[rename=Hacl_Curve25519_new] \
+  -bundle Hacl.Impl.Chacha20Poly1305=Hacl.Impl.Chacha20Poly1305.*[rename=Hacl_Chacha20Poly1305_new] \
   -bundle LowStar.* \
   -bundle Prims,C.Failure,C,C.String,C.Loops,Spec.Loops,C.Endianness,FStar.*[rename=Hacl_Kremlib] \
   -bundle 'EverCrypt.Spec.*' \
-  -bundle 'MerkleTree.*' \
+  -bundle 'MerkleTree.New.Low+MerkleTree.New.Low.Serialization=[rename=MerkleTree]' \
   -bundle 'Test,Test.*,WindowsHack' \
   -bundle EverCrypt.Hash+EverCrypt.Hash.Incremental=[rename=EverCrypt_Hash] \
   -library EverCrypt.AutoConfig,EverCrypt.OpenSSL,EverCrypt.BCrypt \
@@ -661,7 +681,7 @@ COMPACT_FLAGS	=\
   -add-include '<string.h>'
 
 # For the time being, we rely on the old extraction to give us self-contained
-# files
+# files for algorithms that haven't been rewritten for HACLv2.
 
 .PHONY: old-%
 old-%:
@@ -669,21 +689,27 @@ old-%:
 	  KOPTS=-verbose $(MAKE) -C code/old -f Makefile.old $* \
 	  ,[OLD-MAKE $*],obj/old-$*)
 
+# This is all legacy. Some notes:
+# - Hacl_Chacha20 / AEAD_Poly1305_64 / Hacl_Chacha20Poly1305 go together for
+#   AEAD. Remove all three once we have a new-style AEAD-ChachaPoly.
+# - No symbol collision between Hacl_Chacha20 (old) and the new Hacl
+#   Chacha20 because prefixes.
 HACL_OLD_FILES=\
   code/old/experimental/aesgcm/aesgcm-c/Hacl_AES.c \
   code/old/curve25519/x25519-c/Hacl_Curve25519.c \
   code/old/ed25519/ed25519-c/Hacl_Ed25519.c \
   code/old/salsa-family/chacha-c/Hacl_Chacha20.c \
   code/old/poly1305/poly-c/AEAD_Poly1305_64.c \
-  code/old/poly1305/poly-c/Hacl_Poly1305_64.c \
   code/old/api/aead-c/Hacl_Chacha20Poly1305.c
 
 dist/compact/Makefile.basic: KRML_EXTRA=$(COMPACT_FLAGS)
 
 dist/compact-msvc/Makefile.basic: KRML_EXTRA=$(COMPACT_FLAGS) -falloca -ftail-calls
 
+# MerkleTree doesn't compile in C89 mode
 dist/compact-c89/Makefile.basic: \
-  KRML_EXTRA=$(COMPACT_FLAGS) -fc89 -ccopt -std=c89 -ccopt -Wno-typedef-redefinition
+  KRML_EXTRA=$(patsubst 'Merkle%[rename=MerkleTree]','MerkleTree.*',$(COMPACT_FLAGS)) \
+    -fc89 -ccopt -std=c89 -ccopt -Wno-typedef-redefinition
 dist/compact-c89/Makefile.basic: \
   HACL_OLD_FILES:=$(subst -c,-c89,$(HACL_OLD_FILES))
 
@@ -712,10 +738,10 @@ endif
 
 .PRECIOUS: dist/%/Makefile.basic
 dist/%/Makefile.basic: $(ALL_KRML_FILES) dist/hacl-internal-headers/Makefile.basic \
-  $(HAND_WRITTEN_FILES) $(HAND_WRITTEN_OPTIONAL_FILES) $(VALE_ASMS) | old-extract-c
+  $(HAND_WRITTEN_FILES) $(HAND_WRITTEN_H_FILES) $(HAND_WRITTEN_OPTIONAL_FILES) $(VALE_ASMS) | old-extract-c
 	mkdir -p $(dir $@)
 	cp $(HACL_OLD_FILES) $(patsubst %.c,%.h,$(HACL_OLD_FILES)) $(dir $@)
-	cp $(HAND_WRITTEN_FILES) $(HAND_WRITTEN_OPTIONAL_FILES) dist/hacl-internal-headers/*.h $(dir $@)
+	cp $(HAND_WRITTEN_FILES) $(HAND_WRITTEN_H_FILES) $(HAND_WRITTEN_OPTIONAL_FILES) dist/hacl-internal-headers/*.h $(dir $@)
 	[ x"$(VALE_ASMS)" != x ] && cp $(VALE_ASMS) $(dir $@) || true
 	$(KRML) $(DEFAULT_FLAGS) $(KRML_EXTRA) \
 	  -tmpdir $(dir $@) -skip-compilation \
@@ -775,35 +801,62 @@ compile-%: dist/Makefile dist/%/Makefile.basic
 	$(MAKE) -C dist/$*
 
 
-###########
-# C tests #
-###########
+###########################
+# C tests (from F* files) #
+###########################
 
 ifeq ($(OS),Windows_NT)
 OPENSSL_HOME	:= $(shell cygpath -u $(OPENSSL_HOME))
 LDFLAGS		+= -lbcrypt
 endif
 
-dist/test/c/merkle_tree_test.c: secure_api/merkle_tree/test/merkle_tree_test.c
-	mkdir -p $(dir $@)
-	cp $< $(patsubst %.c,%.h,$<) $(dir $@)
+TEST_INCLUDES=test test/rfc7748_src secure_api/merkle_tree/test $(KREMLIN_HOME)/include \
+  dist/generic $(OPENSSL_HOME)/include
+
+CFLAGS += $(addprefix -I,$(TEST_INCLUDES)) -Wall -Wextra -g \
+  -Wno-infinite-recursion -Wno-int-conversion -Wno-unused-parameter \
+  -O3 -march=native -mtune=native
 
 # FIXME there's a kremlin error that generates a void* -- can't use -Werror
-.PRECIOUS: dist/test/c/%.exe
-dist/test/c/%.exe: dist/test/c/%.c compile-generic
+# Need the libraries to be present and compiled.
+.PRECIOUS: %.exe
+%.exe: %.o | compile-generic
 	# Linking with full kremlib since tests may use TestLib, etc.
 	$(call run-with-log,\
-	  $(CC) -Wall -Wextra -Wno-infinite-recursion -Wno-int-conversion -Wno-unused-parameter \
-	    -I $(dir $@) -I $(KREMLIN_HOME)/include -I $(OPENSSL_HOME)/include -I dist/generic \
-	    -L$(OPENSSL_HOME) \
-	    $< -o $@ \
+	  $(CC) $(CFLAGS) -L$(OPENSSL_HOME) $^ -o $@ \
 	    dist/generic/libevercrypt.a -lcrypto $(LDFLAGS) \
 	    $(KREMLIN_HOME)/kremlib/dist/generic/libkremlib.a \
 	  ,[LD $*],$(call to-obj-dir,$@))
 
-test-c-%: dist/test/c/%.exe
+.PHONY: %.test
+%.test: %.exe
 	LD_LIBRARY_PATH="$(OPENSSL_HOME)" DYLD_LIBRARY_PATH="$(OPENSSL_HOME)" \
 	  PATH="$(OPENSSL_HOME):$(PATH)" $<
+
+test-c-%: dist/test/c/%.test
+	@
+
+###########################
+# C tests (from C* files) #
+###########################
+
+HAND_WRITTEN_C_TESTS=$(wildcard tests/*.c) secure_api/merkle_tree/test/merkle_tree_test.c
+
+%.d: %.c
+	@set -e; rm -f $@; \
+	  $(CC) -MM $(CFLAGS) $< > $@.$$$$; \
+	  sed 's,\($(notdir $*)\)\.o[ :]*,$(dir $@)\1.o $@ : ,g' < $@.$$$$ > $@; \
+	  rm -f $@.$$$$
+
+# Not including merkle_tree_test because it #includes a generated header and
+# this makefile doesn't have a third stage.
+include $(patsubst %.c,%.d,$(wildcard test/*.c))
+
+secure_api/merkle_tree/test/merkle_tree_test.o: | compile-generic
+
+test-handwritten: $(patsubst %.c,%.test,$(HAND_WRITTEN_C_TESTS))
+
+tests/curve64-rfc.exe: $(patsubst %.c,%.o,$(wildcard tests/rfc7748_src/*.c))
 
 
 #######################
