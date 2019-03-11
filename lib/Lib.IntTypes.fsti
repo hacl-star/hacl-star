@@ -208,6 +208,7 @@ val uint_v_size_lemma: s:size_nat ->
   (ensures (uint_v (size s) == s))
   [SMTPat (uint_v (size s))]
 
+
 inline_for_extraction
 let byte (n:nat{n < 256}) : b:byte_t{uint_v b == n} = uint #U8 #PUB n
 

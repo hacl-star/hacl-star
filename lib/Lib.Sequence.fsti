@@ -199,7 +199,7 @@ val lemma_concat3:
       sub s (len0 + len1) len2 == s2)
     (ensures s == concat (concat s0 s1) s2)
 
-val lemma_concat4:
+val lemma_concat4_right:
     #a:Type0
   -> len0:size_nat
   -> s0:lseq a len0
@@ -218,7 +218,7 @@ val lemma_concat4:
       sub s (len0 + len1 + len2) len3 == s3)
     (ensures s == concat s0 (concat s1 (concat s2 s3)))
 
-val lemma_concat5:
+val lemma_concat5_right:
     #a:Type0
   -> len0:size_nat
   -> s0:lseq a len0
