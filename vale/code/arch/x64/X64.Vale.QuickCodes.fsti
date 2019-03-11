@@ -244,6 +244,67 @@ val qIf_proof (#a:Type) (#c1:code) (#c2:code) (b:cmp) (qc1:quickCode a c1) (qc2:
 let qIf (#a:Type) (#c1:code) (#c2:code) (mods:mods_t) (b:cmp) (qc1:quickCode a c1) (qc2:quickCode a c2) : quickCode a (IfElse (cmp_to_ocmp b) c1 c2) =
   QProc (IfElse (cmp_to_ocmp b) c1 c2) mods (wp_If b qc1 qc2 mods) (qIf_monotone b qc1 qc2 mods) (qIf_compute b qc1 qc2 mods) (qIf_proof b qc1 qc2 mods)
 
+///// While
+
+[@va_qattr]
+let wp_While_inv
+    (#a #d:Type) (#c:code) (qc:a -> quickCode a c) (mods:mods_t) (inv:state -> a -> Type0)
+    (dec:state -> a -> d) (s1:state) (g1:a) (s2:state) (g2:a)
+    : Type0 =
+  s2.ok /\ inv s2 g2 /\ mods_contains mods (qc g2).mods /\ dec s2 g2 << dec s1 g1
+
+[@va_qattr]
+let wp_While_body
+    (#a #d:Type) (#c:code) (b:cmp) (qc:a -> quickCode a c) (mods:mods_t) (inv:state -> a -> Type0)
+    (dec:state -> a -> d) (g1:a) (s1:state) (k:state -> a -> Type0)
+    : Type0 =
+  valid_cmp b s1 /\
+  (     eval_cmp s1 b  ==> mods_contains mods (qc g1).mods /\ QProc?.wp (qc g1) s1 (wp_While_inv qc mods inv dec s1 g1)) /\
+  (not (eval_cmp s1 b) ==> k s1 g1)
+
+[@va_qattr]
+let wp_While
+    (#a #d:Type) (#c:code) (b:cmp) (qc:a -> quickCode a c) (mods:mods_t) (inv:state -> a -> Type0)
+    (dec:state -> a -> d) (g0:a) (s0:state) (k:state -> a -> Type0)
+    : Type0 =
+  inv s0 g0 /\ mods_contains mods (qc g0).mods /\
+  // REVIEW: we could get a better WP with forall (...state components...) instead of forall (s1:state)
+  (forall (s1:state) (g1:a). inv s1 g1 ==> wp_While_body b qc mods inv dec g1 s1 k)
+
+val qWhile_monotone
+    (#a #d:Type) (#c:code) (b:cmp) (qc:a -> quickCode a c) (mods:mods_t) (inv:state -> a -> Type0)
+    (dec:state -> a -> d) (g0:a) (s0:state) (k1:state -> a -> Type0) (k2:state -> a -> Type0)
+    : Lemma
+      (requires (forall (s:state) (g:a). k1 s g ==> k2 s g))
+      (ensures wp_While b qc mods inv dec g0 s0 k1 ==> wp_While b qc mods inv dec g0 s0 k2)
+
+val qWhile_compute
+    (#a #d:Type) (#c:code) (b:cmp) (qc:a -> quickCode a c) (mods:mods_t) (inv:state -> a -> Type0)
+    (dec:state -> a -> d) (g0:a) (s0:state)
+    : Ghost (state * fuel * a)
+      (requires wp_While b qc mods inv dec g0 s0 k_true)
+      (ensures fun _ -> True)
+
+val qWhile_proof
+    (#a #d:Type) (#c:code) (b:cmp) (qc:a -> quickCode a c) (mods:mods_t) (inv:state -> a -> Type0)
+    (dec:state -> a -> d) (g0:a) (s0:state) (k:state -> a -> Type0)
+    : Lemma
+      (requires wp_While b qc mods inv dec g0 s0 k)
+      (ensures (
+        qWhile_monotone b qc mods inv dec g0 s0 k k_true;
+        let (sM, f0, g) = qWhile_compute b qc mods inv dec g0 s0 in
+        eval_code (While (cmp_to_ocmp b) c) s0 f0 sM /\ update_state_mods mods sM s0 == sM /\ k sM g))
+
+[@"opaque_to_smt" va_qattr]
+let qWhile
+    (#a #d:Type) (#c:code) (mods:mods_t) (b:cmp) (qc:a -> quickCode a c) (inv:state -> a -> Type0)
+    (dec:state -> a -> d) (g0:a)
+    : quickCode a (While (cmp_to_ocmp b) c) =
+  QProc (While (cmp_to_ocmp b) c) mods (wp_While b qc mods inv dec g0)
+    (qWhile_monotone b qc mods inv dec g0)
+    (qWhile_compute b qc mods inv dec g0)
+    (qWhile_proof b qc mods inv dec g0)
+
 ///// Assert, Assume, AssertBy
 
 let tAssertLemma (p:Type0) = unit -> Lemma (requires p) (ensures p)
