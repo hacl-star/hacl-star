@@ -3047,19 +3047,479 @@ procedure {:quick} Encrypt_save_and_shuffle_output(
     VPshufb(inout5, inout5, Ii);
 }
 
-ghost procedure test(ghost t1:quad32, ghost ctr_BE:quad32, ghost mid_len:int)
+#reset-options ""
+procedure {:quick} {:verify true} GCM_finalize(
+    inline alg:algorithm,  
+    ghost stack_b:buffer128,
+    ghost hkeys_b:buffer128
+    ) 
+    lets
+        Xip @= r9;
+        Ii @= xmm0; T1 @= xmm1; T2 @= xmm2; Hkey @= xmm3;
+        Z0 @= xmm4; Z1 @= xmm5; Z2 @= xmm6; Z3 @= xmm7; Xi @= xmm8;
+        HK @= xmm15; T3 @= xmm9;
+        //inout0 @= xmm9; 
+        inout1 @= xmm10; inout2 @= xmm11; inout3 @= xmm12;
+        inout4 @= xmm13; inout5 @= xmm14; 
+        //rndkey @= xmm15;
+        constp @= r11; 
+
+    reads
+        rsp; Xip;
+        mem; memTaint;
+
+    modifies
+        constp; 
+        Ii; T1; T2; Hkey; Z0; Z1; Z2; Z3; Xi;
+        inout1; inout2; inout3; inout4; inout5; 
+        HK; T3;
+        efl;
+
     requires
-        0 <= mid_len < pow2_32;
-        t1 == reverse_bytes_quad32(inc32lite(inc32(ctr_BE, 12), #nat32(mid_len)));
+        // Valid buffers and pointers
+        validDstAddrs128(mem, rsp, stack_b, 8, memTaint, Secret);
+        validSrcAddrs128(mem, Xip - 0x20, hkeys_b, 9, memTaint, Secret);
+
+        // GCM reqs
+        pclmulqdq_enabled;
+
     ensures
-        true;
 {
+//	 vmovdqu	0x30(%rsp),$Z2		# I[4]
+    Load128_buffer(Z2, rsp, 0x30, Secret, stack_b, 3);   // # I[4]
+
+//	 vmovdqu	0x10-0x20($Xip),$Ii	# borrow $Ii for $Hkey^2
+    Load128_buffer(Ii, Xip, 0x10-0x20, Secret, hkeys_b, 1);   // # $Hkey^1
+
+//	 vpunpckhqdq	$Z2,$Z2,$T2
+    VSwap(T2, Z2);
+
+//	vpclmulqdq	\$0x00,$Hkey,$Z3,$Z1
+    VPolyMul(Z1, Z3, Hkey, false, false);
+
+//	 vpxor		$Z2,$T2,$T2
+    VPolyAdd(T2, T2, Z2);
+
+//	vpclmulqdq	\$0x11,$Hkey,$Z3,$Z3
+    VPolyMul(Z3, Z3, Hkey, false, false);
+
+//	vpclmulqdq	\$0x00,$HK,$T1,$T1
+    VPolyMul(T1, T1, HK, false, false);
+
+//	 vmovdqu	0x40(%rsp),$T3		# I[3]
+    Load128_buffer(T3, rsp, 0x40, Secret, stack_b, 4);   // # I[3]
+
+//	vpclmulqdq	\$0x00,$Ii,$Z2,$Z0
+    VPolyMul(Z0, Z2, Ii, false, false);
+
+//	 vmovdqu	0x30-0x20($Xip),$Hkey	# $Hkey^3
+    Load128_buffer(Hkey, Xip, 0x30-0x20, Secret, hkeys_b, 3);   // # $Hkey^3
+
+//	vpxor		$Z1,$Z0,$Z0
+    VPolyAdd(Z0, Z0, Z1);
+
+//	 vpunpckhqdq	$T3,$T3,$Z1
+    VSwap(Z1, T3);
+
+//	vpclmulqdq	\$0x11,$Ii,$Z2,$Z2
+    VPolyMul(Z2, Z2, Ii, true, true);
+
+//	 vpxor		$T3,$Z1,$Z1
+    VPolyAdd(Z1, Z1, T3);
+
+//	vpxor		$Z3,$Z2,$Z2
+    VPolyAdd(Z2, Z2, Z3);
+
+//	vpclmulqdq	\$0x10,$HK,$T2,$T2
+    VPolyMul(T2, T2, HK, false, true);
+
+//	 vmovdqu	0x50-0x20($Xip),$HK
+    Load128_buffer(HK, Xip, 0x50-0x20, Secret, hkeys_b, 5);
+
+//	vpxor		$T1,$T2,$T2
+    VPolyAdd(T2, T2, T1);
+
+//	 vmovdqu	0x50(%rsp),$T1		# I[2]
+    Load128_buffer(T1, rsp, 0x50, Secret, stack_b, 5);   // # I[2]
+
+//	vpclmulqdq	\$0x00,$Hkey,$T3,$Z3
+    VPolyMul(Z3, T3, Hkey, false, false);
+
+//	 vmovdqu	0x40-0x20($Xip),$Ii	# borrow $Ii for $Hkey^4
+    Load128_buffer(Ii, Xip, 0x40-0x20, Secret, hkeys_b, 4);   // # borrow $Ii for $Hkey^4
+
+//	vpxor		$Z0,$Z3,$Z3
+    VPolyAdd(Z3, Z3, Z0);
+
+//	 vpunpckhqdq	$T1,$T1,$Z0
+    VSwap(Z0, T1);
+
+//	vpclmulqdq	\$0x11,$Hkey,$T3,$T3
+    VPolyMul(T3, T3, Hkey, true, true);
+
+//	 vpxor		$T1,$Z0,$Z0
+    VPolyAdd(Z0, Z0, T1);
+
+//	vpxor		$Z2,$T3,$T3
+    VPolyAdd(T3, T3, Z2);
+
+//	vpclmulqdq	\$0x00,$HK,$Z1,$Z1
+    VPolyMul(Z1, Z1, HK, false, false);
+
+//	vpxor		$T2,$Z1,$Z1
+    VPolyAdd(Z1, Z1, T2);
+
+//	 vmovdqu	0x60(%rsp),$T2		# I[1]
+    Load128_buffer(T2, rsp, 0x60, Secret, stack_b, 6);   // # I[1]
+
+//	vpclmulqdq	\$0x00,$Ii,$T1,$Z2
+    VPolyMul(Z1, T1, Ii, false, false);
+
+//	 vmovdqu	0x60-0x20($Xip),$Hkey	# $Hkey^5
+    Load128_buffer(Hkey, Xip, 0x60-0x20, Secret, hkeys_b, 6);   // # $Hkey^5
+
+//	vpxor		$Z3,$Z2,$Z2
+    VPolyAdd(Z2, Z2, Z3);
+
+//	 vpunpckhqdq	$T2,$T2,$Z3
+    VSwap(Z3, T2);
+
+//	vpclmulqdq	\$0x11,$Ii,$T1,$T1
+    VPolyMul(T1, T1, Ii, true, true);
+
+//	 vpxor		$T2,$Z3,$Z3
+    VPolyAdd(Z3, Z3, T2);
+
+//	vpxor		$T3,$T1,$T1
+    VPolyAdd(T1, T1, T3);
+
+//	vpclmulqdq	\$0x10,$HK,$Z0,$Z0
+    VPolyMul(Z0, Z0, HK, false, true);
+
+//	 vmovdqu	0x80-0x20($Xip),$HK
+    Load128_buffer(HK, Xip, 0x80-0x20, Secret, hkeys_b, 8);   // ??
+    
+//	vpxor		$Z1,$Z0,$Z0
+    VPolyAdd(Z0, Z0, Z1);
+
+//	 vpxor		0x70(%rsp),$Xi,$Xi	# accumulate I[0]
+    VPxor_buffer(Xi, Xi, rsp, 0x70, Secret, stack_b, 7);    // # accumulate I[0]
+
+//	vpclmulqdq	\$0x00,$Hkey,$T2,$Z1
+    VPolyMul(Z1, T2, Hkey, false, false);
+
+//	 vmovdqu	0x70-0x20($Xip),$Ii	# borrow $Ii for $Hkey^6
+    Load128_buffer(Ii, Xip, 0x70-0x20, Secret, hkeys_b, 7);   // # borrow $Ii for $Hkey^6
+
+//	 vpunpckhqdq	$Xi,$Xi,$T3
+    VSwap(T3, Xi);
+
+//	vpxor		$Z2,$Z1,$Z1
+    VPolyAdd(Z1, Z1, Z2);
+
+//	vpclmulqdq	\$0x11,$Hkey,$T2,$T2
+    VPolyMul(T2, T2, Hkey, true, true);
+
+//	 vpxor		$Xi,$T3,$T3
+    VPolyAdd(T3, T3, Xi);
+
+//	vpxor		$T1,$T2,$T2
+    VPolyAdd(T2, T2, T1);
+
+//	vpclmulqdq	\$0x00,$HK,$Z3,$Z3
+    VPolyMul(Z3, Z3, HK, false, false);
+
+//	vpxor		$Z0,$Z3,$Z0
+    VPolyAdd(Z0, Z3, Z0);
+
+//	vpclmulqdq	\$0x00,$Ii,$Xi,$Z2
+    VPolyMul(Z2, Xi, Ii, false, false);
+
+//	 vmovdqu	0x00-0x20($Xip),$Hkey	# $Hkey^1
+    Load128_buffer(Hkey, Xip, 0x00-0x20, Secret, hkeys_b, 0);   // # $Hkey^1
+
+//	 vpunpckhqdq	$inout5,$inout5,$T1
+    VSwap(T1, inout5);
+
+//	vpclmulqdq	\$0x11,$Ii,$Xi,$Xi
+    VPolyMul(Xi, Xi, Ii, true, true);
+
+//	 vpxor		$inout5,$T1,$T1
+    VPolyAdd(T1, T1, inout5);
+
+//	vpxor		$Z1,$Z2,$Z1
+    VPolyAdd(Z1, Z2, Z1);
+
+//	vpclmulqdq	\$0x10,$HK,$T3,$T3
+    VPolyMul(T3, T3, HK, false, true);
+
+//	 vmovdqu	0x20-0x20($Xip),$HK
+    Load128_buffer(HK, Xip, 0x20-0x20, Secret, hkeys_b, 2);
+
+//	vpxor		$T2,$Xi,$Z3
+    VPolyAdd(Z3, Xi, T2);
+
+//	vpxor		$Z0,$T3,$Z2
+    VPolyAdd(Z2, T3, Z0);
+
+//	 vmovdqu	0x10-0x20($Xip),$Ii	# borrow $Ii for $Hkey^2
+    Load128_buffer(Ii, Xip, 0x10-0x20, Secret, hkeys_b, 1);   // # borrow $Ii for $Hkey^2
+
+//	  vpxor		$Z1,$Z3,$T3		# aggregated Karatsuba post-processing
+    VPolyAdd(T3, Z3, Z1);   // # aggregated Karatsuba post-processing
+
+//	vpclmulqdq	\$0x00,$Hkey,$inout5,$Z0
+    VPolyMul(Z0, inout5, Hkey, false, false);
+
+//	  vpxor		$T3,$Z2,$Z2
+    VPolyAdd(Z2, Z2, T3);
+
+//	 vpunpckhqdq	$inout4,$inout4,$T2
+    VSwap(T2, inout4);
+
+//	vpclmulqdq	\$0x11,$Hkey,$inout5,$inout5
+    VPolyMul(inout5, inout5, Hkey, true, true);
+
+//	 vpxor		$inout4,$T2,$T2
+    VPolyAdd(T2, T2, inout4);
+
+//	  vpslldq	\$8,$Z2,$T3
+    VLow64ToHigh(T3, Z2);
+
+//	vpclmulqdq	\$0x00,$HK,$T1,$T1
+    VPolyMul(T1, T1, HK, false, false);
+
+//	  vpxor		$T3,$Z1,$Xi
+    VPolyAdd(Xi, Z1, T3);
+
+//	  vpsrldq	\$8,$Z2,$Z2
+    VHigh64ToLow(Z2, Z2);
+
+//	  vpxor		$Z2,$Z3,$Z3
+    VPolyAdd(Z3, Z3, Z2);
+
+//	vpclmulqdq	\$0x00,$Ii,$inout4,$Z1
+    VPolyMul(Z1, inout4, Ii, false, false);
+
+//	 vmovdqu	0x30-0x20($Xip),$Hkey	# $Hkey^3
+    Load128_buffer(Hkey, Xip, 0x30-0x20, Secret, hkeys_b, 3);   // # $Hkey^3
+
+//	vpxor		$Z0,$Z1,$Z1
+    VPolyAdd(Z1, Z1, Z0);
+
+//	 vpunpckhqdq	$inout3,$inout3,$T3
+    VSwap(T3, inout3);
+
+//	vpclmulqdq	\$0x11,$Ii,$inout4,$inout4
+    VPolyMul(inout4, inout4, Ii, true, true);
+
+//	 vpxor		$inout3,$T3,$T3
+    VPolyAdd(T3, T3, inout3);
+
+//	vpxor		$inout5,$inout4,$inout4
+    VPolyAdd(inout4, inout4, inout5);
+
+//	  vpalignr	\$8,$Xi,$Xi,$inout5	# 1st phase
+    VSwap(inout5, Xi);      // # 1st phase
+
+//	vpclmulqdq	\$0x10,$HK,$T2,$T2
+    VPolyMul(T2, T2, HK, false, true);
+
+//	 vmovdqu	0x50-0x20($Xip),$HK
+    Load128_buffer(HK, Xip, 0x50-0x20, Secret, hkeys_b, 5);
+
+//	vpxor		$T1,$T2,$T2
+    VPolyAdd(T2, T2, T1);
+
+//	vpclmulqdq	\$0x00,$Hkey,$inout3,$Z0
+    VPolyMul(Z0, inout3, Hkey, false, false);
+
+//	 vmovdqu	0x40-0x20($Xip),$Ii	# borrow $Ii for $Hkey^4
+    Load128_buffer(Ii, Xip, 0x40-0x20, Secret, hkeys_b, 4);   // # borrow $Ii for $Hkey^4
+
+//	vpxor		$Z1,$Z0,$Z0
+    VPolyAdd(Z0, Z0, Z1);
+
+//	 vpunpckhqdq	$inout2,$inout2,$T1
+    VSwap(T1, inout2);
+
+//	vpclmulqdq	\$0x11,$Hkey,$inout3,$inout3
+    VPolyMul(inout3, inout3, Hkey, true, true);
+
+//	 vpxor		$inout2,$T1,$T1
+    VPolyAdd(T1, T1, inout2);
+
+//	vpxor		$inout4,$inout3,$inout3
+    VPolyAdd(inout3, inout3, inout4);
+
+//	  vxorps	0x10(%rsp),$Z3,$Z3	# accumulate $inout0
+    VPxor_buffer(Z3, Z3, rsp, 0x10, Secret, stack_b, 1);    // # accumulate $inout0
+
+//	vpclmulqdq	\$0x00,$HK,$T3,$T3
+    VPolyMul(T3, T3, HK, false, false);
+
+//	vpxor		$T2,$T3,$T3
+    VPolyAdd(T3, T3, T2);
+    
+//	  vpclmulqdq	\$0x10,0x10($const),$Xi,$Xi
+
+/*
+TODO
+TODO
+TODO
+TODO
+TODO
+TODO
+TODO
+*/
+
+//	  vxorps	$inout5,$Xi,$Xi
+    VPolyAdd(Xi, Xi, inout5);
+
+//	vpclmulqdq	\$0x00,$Ii,$inout2,$Z1
+    VPolyMul(Z1, inout2, Ii, false, false);
+
+//	 vmovdqu	0x60-0x20($Xip),$Hkey	# $Hkey^5
+    Load128_buffer(Hkey, Xip, 0x60-0x20, Secret, hkeys_b, 6);   // # $Hkey^5
+
+//	vpxor		$Z0,$Z1,$Z1
+    VPolyAdd(Z1, Z1, Z0);
+
+//	 vpunpckhqdq	$inout1,$inout1,$T2
+    VSwap(T2, inout1);
+
+//	vpclmulqdq	\$0x11,$Ii,$inout2,$inout2
+    VPolyMul(inout2, inout2, Ii, true, true);
+
+//	 vpxor		$inout1,$T2,$T2
+    VPolyAdd(T2, T2, inout1);
+
+//	  vpalignr	\$8,$Xi,$Xi,$inout5	# 2nd phase
+    VSwap(inout5, Xi);  // # 2nd phase
+
+//	vpxor		$inout3,$inout2,$inout2
+    VPolyAdd(inout2, inout2, inout3);
+
+//	vpclmulqdq	\$0x10,$HK,$T1,$T1
+    VPolyMul(T1, T1, HK, false, true);
+
+//	 vmovdqu	0x80-0x20($Xip),$HK
+    Load128_buffer(HK, Xip, 0x80-0x20, Secret, hkeys_b, 8);   // ??
+
+//	vpxor		$T3,$T1,$T1
+    VPolyAdd(T1, T1, T3);
+
+//	  vxorps	$Z3,$inout5,$inout5
+    VPolyAdd(inout5, inout5, Z3);
+
+//	  vpclmulqdq	\$0x10,0x10($const),$Xi,$Xi
+
+/*
+TODO
+TODO
+TODO
+TODO
+TODO
+TODO
+*/
+
+//	  vxorps	$inout5,$Xi,$Xi
+    VPolyAdd(Xi, Xi, inout5);
+
+//	vpclmulqdq	\$0x00,$Hkey,$inout1,$Z0
+    VPolyMul(Z0, inout1, Hkey, false, false);
+
+//	 vmovdqu	0x70-0x20($Xip),$Ii	# borrow $Ii for $Hkey^6
+    Load128_buffer(Ii, Xip, 0x70-0x20, Secret, hkeys_b, 7);   // # borrow $Ii for $Hkey^6
+
+//	vpxor		$Z1,$Z0,$Z0
+    VPolyAdd(Z0, Z0, Z1);
+
+//	 vpunpckhqdq	$Xi,$Xi,$T3
+    VSwap(T3, Xi);
+
+//	vpclmulqdq	\$0x11,$Hkey,$inout1,$inout1
+    VPolyMul(inout1, inout1, Hkey, true, true);
+
+//	 vpxor		$Xi,$T3,$T3
+    VPolyAdd(T3, T3, Xi);
+
+//	vpxor		$inout2,$inout1,$inout1
+    VPolyAdd(inout1, inout1, inout2);
+
+//	vpclmulqdq	\$0x00,$HK,$T2,$T2
+    VPolyMul(T2, T2, HK, false, false);
+
+//	vpxor		$T1,$T2,$T2
+    VPolyAdd(T2, T2, T1);
+
+//	vpclmulqdq	\$0x00,$Ii,$Xi,$Z1
+    VPolyMul(Z1, Xi, Ii, false, false);
+
+//	vpclmulqdq	\$0x11,$Ii,$Xi,$Z3
+    VPolyMul(Z3, Xi, Ii, true, true);
+
+//	vpxor		$Z0,$Z1,$Z1
+    VPolyAdd(Z1, Z1, Z0);
+
+//	vpclmulqdq	\$0x10,$HK,$T3,$Z2
+    VPolyMul(Z2, T3, HK, false, true);
+
+//	vpxor		$inout1,$Z3,$Z3
+    VPolyAdd(Z3, Z3, inout1);
+
+//	vpxor		$T2,$Z2,$Z2
+    VPolyAdd(Z2, Z2, T2);
+
+//	vpxor		$Z1,$Z3,$Z0		# aggregated Karatsuba post-processing
+    VPolyAdd(Z0, Z3, Z1);   // # aggregated Karatsuba post-processing
+
+//	vpxor		$Z0,$Z2,$Z2
+    VPolyAdd(Z2, Z2, Z0);
+
+//	vpslldq		\$8,$Z2,$T1
+    VLow64ToHigh(T1, Z2);
+
+//	vmovdqu		0x10($const),$Hkey	# .Lpoly
+    Load_0xc2_msb();
+
+//	vpsrldq		\$8,$Z2,$Z2
+    VHigh64ToLow(Z2, Z2);
+
+//	vpxor		$T1,$Z1,$Xi
+    VPolyAdd(Xi, Z1, T1);
+
+//	vpxor		$Z2,$Z3,$Z3
+    VPolyAdd(Z3, Z3, Z2);
+
+//	vpalignr	\$8,$Xi,$Xi,$T2		# 1st phase
+    VSwap(T2, Xi);  // # 1st phase
+
+//	vpclmulqdq	\$0x10,$Hkey,$Xi,$Xi
+    VPolyMul(Xi, Xi, Hkey, false, true);
+
+//	vpxor		$T2,$Xi,$Xi
+    VPolyAdd(Xi, Xi, T2);
+
+//	vpalignr	\$8,$Xi,$Xi,$T2		# 2nd phase
+    VSwap(T2, Xi);  // # 2nd phase
+
+//	vpclmulqdq	\$0x10,$Hkey,$Xi,$Xi
+    VPolyMul(Xi, Xi, Hkey, false, true);
+
+//	vpxor		$Z3,$T2,$T2
+    VPolyAdd(T2, T2, Z3);
+
+//	vpxor		$T2,$Xi,$Xi
+    VPolyAdd(Xi, Xi, T2);
 }
+
+
 
 // This version is designed to be integrated into a larger procedure that handles non-multiple of 6 lengths
 // Hence the requirements and guarantees are a bit weaker
 #reset-options "--z3rlimit 30"
-procedure {:quick} {:verify true} AES_GCM_encrypt_6mult(
+procedure {:quick} AES_GCM_encrypt_6mult(
     inline alg:algorithm,  
     ghost iv_b:buffer128,
     ghost in_b:buffer128,

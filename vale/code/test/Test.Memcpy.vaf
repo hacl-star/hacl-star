@@ -1,5 +1,7 @@
 include "../arch/x64/X64.Vale.InsBasic.vaf"
 include "../arch/x64/X64.Vale.InsMem.vaf"
+include{:fstar}{:open} "X64.Vale.QuickCode"
+include{:fstar}{:open} "X64.Vale.QuickCodes"
 
 module Test.Memcpy
 
@@ -10,10 +12,12 @@ open X64.Vale.State
 open X64.Vale.Decls
 open X64.Vale.InsBasic
 open X64.Vale.InsMem
+open X64.Vale.QuickCode
+open X64.Vale.QuickCodes
 #endverbatim
 
 #reset-options "--z3rlimit 20"
-
+/*
 procedure Copy16(inline t:taint, ghost bsrc:buffer64, ghost bdst:buffer64)
     requires/ensures
         locs_disjoint(list(loc_buffer(bsrc), loc_buffer(bdst)));
@@ -41,6 +45,22 @@ procedure Copy16(inline t:taint, ghost bsrc:buffer64, ghost bdst:buffer64)
     Load64_buffer(rcx, rsi, 8, t, bsrc, 1);
     Store64_buffer(rdi, rax, 0, t, bdst, 0);
     Store64_buffer(rdi, rcx, 8, t, bdst, 1);
+}
+*/
+procedure {:quick} TestReq()
+    requires 
+        rax > 3;
+    modifies rax;
+    ensures 
+        true;
+{
+    Mov64(rax, 0);
+}
+
+procedure {:quick} TestErr()
+    modifies rax;
+{
+    TestReq();
 }
 
 /*
