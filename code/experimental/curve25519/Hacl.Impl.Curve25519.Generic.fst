@@ -63,7 +63,8 @@ let decode_point_ #s o i =
   let h0 = ST.get () in
   uints_from_bytes_le #U64 tmp i;
   let h1 = ST.get () in
-  assume (BSeq.nat_from_intseq_le (as_seq h1 tmp) == BSeq.nat_from_bytes_le (as_seq h0 i));
+  Hacl.Impl.Curve25519.Lemmas.lemma_uints64_from_bytes_le_nat #4 (as_seq h0 i);
+  assert (BSeq.nat_from_intseq_le (as_seq h1 tmp) == BSeq.nat_from_bytes_le (as_seq h0 i));
   let tmp3 = tmp.(3ul) in
   tmp.(3ul) <- tmp3 &. u64 0x7fffffffffffffff;
   mod_mask_lemma tmp3 63ul;

@@ -551,7 +551,7 @@ let lemma_load_felem5 f u64s =
   assert_norm (pow2 51 * pow2 51 * pow2 51 * pow2 51 = pow2 12 * pow2 192);
   FStar.Math.Lemmas.euclidean_division_definition (v s3) (pow2 12);
   assert (as_nat5 f == v s0 + v s1 * pow2 64 + v s2 * pow2 128 + v s3 * pow2 192);
-  Lib.Lemmas.lemma_nat_from_uints64_le_4 u64s;
+  Hacl.Impl.Curve25519.Lemmas.lemma_nat_from_uints64_le_4 u64s;
   assert_norm (pow2 64 * pow2 64 = pow2 128);
   assert_norm (pow2 64 * pow2 64 * pow2 64 = pow2 192)
 

@@ -54,7 +54,7 @@ val load_felem:
       as_nat h1 f == BSeq.nat_from_intseq_le (as_seq h0 u64s))
 let load_felem f u64s =
   let h0 = ST.get () in
-  Lib.Lemmas.lemma_nat_from_uints64_le_4 (as_seq h0 u64s);
+  Hacl.Impl.Curve25519.Lemmas.lemma_nat_from_uints64_le_4 (as_seq h0 u64s);
   f.(0ul) <- u64s.(0ul);
   f.(1ul) <- u64s.(1ul);
   f.(2ul) <- u64s.(2ul);
@@ -106,7 +106,7 @@ let store_felem u64s f =
   u64s.(2ul) <- o2;
   u64s.(3ul) <- o3;
   let h3 = ST.get () in
-  Lib.Lemmas.lemma_nat_from_uints64_le_4 (as_seq h3 u64s)
+  Hacl.Impl.Curve25519.Lemmas.lemma_nat_from_uints64_le_4 (as_seq h3 u64s)
 
 inline_for_extraction
 val set_zero:
