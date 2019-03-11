@@ -287,7 +287,7 @@ procedure {:quick} gctr_register(
     gctr_encrypt_one_block(icb_BE, old(io), alg, key);
 }
 
-procedure {:quick} handle_bytes(
+procedure {:quick} {:verify true} handle_bytes(
     inline alg:algorithm,
     ghost in_b:buffer8,
     ghost out_b:buffer8,
@@ -295,38 +295,43 @@ procedure {:quick} handle_bytes(
     ghost round_keys:seq(quad32),
     ghost keys_b:buffer128
     )
-    lets in_ptr @= rax; len @= rbx; out_ptr @= rcx; tmp1 @= xmm1; hash @= xmm3; 
+    lets in_ptr @= rax; len @= rbx; out_ptr @= rcx; tmp0 @= rdx;
+         tmp1 @= xmm1; hash @= xmm3; 
          icb_BE @= xmm7; mask @= xmm8; h @= xmm11;
     reads
         in_ptr; out_ptr; r8; icb_BE; mask; h; memTaint;
     modifies 
-        len; r12; xmm0; tmp1; xmm2; hash; xmm4; xmm5; xmm6; mem; efl;
+        len; tmp0; r12; xmm0; tmp1; xmm2; hash; xmm4; xmm5; xmm6; mem; efl;
     requires 
         pclmulqdq_enabled;
         mask == Mkfour(0x0C0D0E0F, 0x08090A0B, 0x04050607, 0x00010203);
-        validSrcAddrs8(mem, in_ptr, in_b, rbx, memTaint, Secret);
-        validDstAddrs8(mem, out_ptr, out_b, rbx, memTaint, Secret);
+        validSrcAddrs8(mem, in_ptr, in_b, len, memTaint, Secret);
+        validDstAddrs8(mem, out_ptr, out_b, len, memTaint, Secret);
         buffer_length(in_b) == len;
         buffer_length(out_b) == len;
+        len < 16;
 
         // AES reqs
         aes_reqs(alg, key, round_keys, keys_b, r8, mem, memTaint);
     ensures
+        length(pad_to_128_bits(old(buffer8_as_seq(mem, in_b)))) == 16;
         let in_quad := le_bytes_to_quad32(pad_to_128_bits(old(buffer8_as_seq(mem, in_b))));
         let out_quad := gctr_encrypt_block(old(icb_BE), in_quad, alg, key, 0);
-        slice_work_around(le_quad32_to_bytes(out_quad), old(len)) == buffer8_as_seq(mem, out_b);
-
-        len == 0 ==> hash == old(hash) /\ buffer8_as_seq(mem, out_b) == old(buffer8_as_seq(mem, out_b));
-        len > 0  ==> hash == ghash_incremental(reverse_bytes_quad32(h), old(hash), create(1, old(out_quad)));
+//        slice_work_around(le_quad32_to_bytes(out_quad), old(len)) == buffer8_as_seq(mem, out_b);
+//
+//        len == 0 ==> hash == old(hash) /\ buffer8_as_seq(mem, out_b) == old(buffer8_as_seq(mem, out_b));
+//        len > 0  ==> hash == ghash_incremental(reverse_bytes_quad32(h), old(hash), create(1, old(out_quad)));
 {
     if (len == 0) {
     } else {
+        Mov64(tmp0, len);   // Save length
         load_bytes(in_b);   // Loads the (padded) bytes into xmm1
 
         // Encrypt the bytes
         gctr_register(alg, key, round_keys, keys_b);
 
         // Write them back out
+        Mov64(len, tmp0);
         store_bytes(out_b);
 
         compute_ghash_incremental_register();
