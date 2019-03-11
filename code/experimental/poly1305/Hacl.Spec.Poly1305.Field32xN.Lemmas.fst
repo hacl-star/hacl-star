@@ -869,3 +869,31 @@ let store_felem5_lemma #w f =
     store_felem5_lemma_i #w f 1;
     store_felem5_lemma_i #w f 2;
     store_felem5_lemma_i #w f 3
+
+val set_bit5_lemma:
+  #w:lanes
+  -> f:lseq (uint64xN w) 5
+  -> i:size_nat{i <= 128}
+  -> Lemma
+    (requires
+      lfelem_fits f (1, 1, 1, 1, 1) /\
+      lfelem_less f (pow2 i))
+    (ensures
+      lfelem_fits (set_bit5 f i) (1, 1, 1, 1, 1) /\
+      lfeval (set_bit5 f i) == map (S.pfadd (pow2 i)) (lfeval f))
+let set_bit5_lemma #w f i =
+  let tmp = map (S.pfadd (pow2 i)) (lfeval f) in
+  match w with
+  | 1 ->
+    set_bit5_lemma_k #w f i 0;
+    eq_intro (lfeval (set_bit5 f i)) tmp
+  | 2 ->
+    set_bit5_lemma_k #w f i 0;
+    set_bit5_lemma_k #w f i 1;    
+    eq_intro (lfeval (set_bit5 f i)) tmp
+  | 4 ->
+    set_bit5_lemma_k #w f i 0;
+    set_bit5_lemma_k #w f i 1;
+    set_bit5_lemma_k #w f i 2;
+    set_bit5_lemma_k #w f i 3;    
+    eq_intro (lfeval (set_bit5 f i)) tmp

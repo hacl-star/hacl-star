@@ -127,11 +127,13 @@ val set_bit:
       felem_fits h1 f (1, 1, 1, 1, 1) /\
      (Math.Lemmas.pow2_le_compat 128 (v i);
       feval h1 f == LSeq.map (S.pfadd (pow2 (v i))) (feval h0 f)))
-let set_bit #w f i = admit();
+let set_bit #w f i =
   let b = u64 1 <<. (i %. 26ul) in
   let mask = vec_load b w in
   let fi = f.(i /. 26ul) in
-  f.(i /. 26ul) <- vec_or fi mask
+  let h0 = ST.get () in
+  f.(i /. 26ul) <- vec_or fi mask;
+  set_bit5_lemma (as_seq h0 f) (v i)
 
 inline_for_extraction
 val set_bit128:
@@ -146,11 +148,15 @@ val set_bit128:
       modifies (loc f) h0 h1 /\
       felem_fits h1 f (1, 1, 1, 1, 1) /\
       feval h1 f == LSeq.map (S.pfadd (pow2 128)) (feval h0 f))
-let set_bit128 #w f = admit();
+let set_bit128 #w f =
   let b = u64 0x1000000 in
+  assert_norm (0x1000000 = pow2 24);
+  uintv_extensionality b (u64 1 <<. 24ul);
   let mask = vec_load b w in
   let f4 = f.(4ul) in
-  f.(4ul) <- vec_or f4 mask
+  let h0 = ST.get () in
+  f.(4ul) <- vec_or f4 mask;
+  set_bit5_lemma (as_seq h0 f) 128
 
 inline_for_extraction
 val set_zero:
