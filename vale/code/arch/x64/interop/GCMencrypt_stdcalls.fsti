@@ -8,8 +8,10 @@ module DV = LowStar.BufferView.Down
 module UV = LowStar.BufferView.Up
 open FStar.Mul
 open Words_s
+open Words.Seq_s
 open GCM_helpers
 open AES_s
+open GCM_s
 open Interop.Base
 
 let uint8_p = B.buffer UInt8.t
@@ -65,6 +67,9 @@ val gcm128_encrypt:
       256 * bytes_to_quad_size (UInt64.v auth_num) < pow2_32 /\
       256 * bytes_to_quad_size (UInt64.v plain_num) < pow2_32 /\      
 
+      4096 * B.length plain_b < pow2_32 /\
+      4096 * B.length auth_b < pow2_32 /\
+      
       aesni_enabled /\ pclmulqdq_enabled /\
       is_aes_key_LE AES_128 (Ghost.reveal key) /\
       (let db = get_downview keys_b in
@@ -73,5 +78,12 @@ val gcm128_encrypt:
       Seq.equal (UV.as_seq h0 ub) (key_to_round_keys_LE AES_128 (Ghost.reveal key)))
     )
     (ensures fun h0 _ h1 ->
-      True)
+      B.modifies (B.loc_union (B.loc_buffer out_b) (B.loc_buffer tag_b)) h0 h1 /\
 
+      (let iv = seq_uint8_to_seq_nat8 (B.as_seq h0 iv_b) in
+       let plain = seq_uint8_to_seq_nat8 (B.as_seq h0 plain_b) in
+       let auth = seq_uint8_to_seq_nat8 (B.as_seq h0 auth_b) in
+       let cipher, tag = gcm_encrypt_LE AES_128 (seq_nat32_to_seq_nat8_LE (Ghost.reveal key)) iv plain auth in
+       Seq.equal (seq_uint8_to_seq_nat8 (B.as_seq h1 out_b)) cipher /\
+       Seq.equal (seq_uint8_to_seq_nat8 (B.as_seq h1 tag_b)) tag)
+    )

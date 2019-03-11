@@ -26,8 +26,17 @@ let gcm128_encrypt key plain_b plain_num auth_b auth_num iv_b out_b tag_b keys_b
   Classical.forall_intro (bounded_buffer_addrs TUInt8 TUInt128 h0 plain_b);
   Classical.forall_intro (bounded_buffer_addrs TUInt8 TUInt128 h0 auth_b);
   Classical.forall_intro (bounded_buffer_addrs TUInt8 TUInt128 h0 out_b);
-
-  // TODO: Add a condition about length of stack in lowstarsig to prove length stack_b >= 37
-
+  
   let x, _ = gcm128_encrypt key plain_b plain_num auth_b auth_num iv_b keys_b out_b tag_b () in
+
+  let h1 = get() in
+
+  assume    (let iv = seq_uint8_to_seq_nat8 (B.as_seq h0 iv_b) in
+       let plain = seq_uint8_to_seq_nat8 (B.as_seq h0 plain_b) in
+       let auth = seq_uint8_to_seq_nat8 (B.as_seq h0 auth_b) in
+
+      let cipher, tag = gcm_encrypt_LE AES_128 (seq_nat32_to_seq_nat8_LE (Ghost.reveal key)) iv plain auth in
+      Seq.equal (seq_uint8_to_seq_nat8 (B.as_seq h1 out_b)) cipher /\
+      Seq.equal (seq_uint8_to_seq_nat8 (B.as_seq h1 tag_b)) tag);
+
   ()
