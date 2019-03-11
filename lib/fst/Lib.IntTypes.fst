@@ -305,9 +305,18 @@ let logor #t #l a b =
 
 let logor_spec #t #l a b = ()
 
+#set-options "--max_fuel 1"
+
 let logor_disjoint #t a b m =
-  UInt.logor_disjoint #(bits t) (uint_v b) (uint_v a) m;
-  UInt.logor_commutative #(bits t) (uint_v b) (uint_v a)
+  if m > 0 then begin
+    UInt.logor_disjoint #(bits t) (uint_v b) (uint_v a) m;
+    UInt.logor_commutative #(bits t) (uint_v b) (uint_v a) end
+  else begin
+    UInt.logor_commutative #(bits t) (uint_v a) (uint_v b);
+    UInt.logor_lemma_1 #(bits t) (uint_v b)
+  end
+
+#set-options "--max_fuel 0"
 
 let lognot #t #l a =
   match t with

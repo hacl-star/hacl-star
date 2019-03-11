@@ -406,7 +406,7 @@ val logor: #t:inttype -> #l:secrecy_level
   -> b:uint_t t l
   -> uint_t t l
 
-val logor_disjoint: #t:inttype -> a:uint_t t SEC -> b:uint_t t SEC -> m:pos{m < bits t} -> Lemma
+val logor_disjoint: #t:inttype -> a:uint_t t SEC -> b:uint_t t SEC -> m:nat{m < bits t} -> Lemma
   (requires v a < pow2 m /\ v b % pow2 m == 0)
   (ensures v (a `logor` b) == v a + v b)
 
