@@ -157,6 +157,9 @@ val le_bytes_to_nat64_to_bytes (s:nat64) :
 val le_nat64_to_bytes_to_nat64 (s:seq nat8 { length s == 8 }) :
   Lemma (le_nat64_to_bytes (le_bytes_to_nat64 s) == s)
 
+val le_bytes_to_seq_quad32_empty: unit -> 
+  Lemma (forall s . {:pattern (length (le_bytes_to_seq_quad32 s)) } length s == 0 ==> length (le_bytes_to_seq_quad32 s) == 0)
+
 val le_bytes_to_seq_quad32_to_bytes_one_quad (b:quad32) :
   Lemma (le_bytes_to_seq_quad32 (le_quad32_to_bytes b) == create 1 b)
 

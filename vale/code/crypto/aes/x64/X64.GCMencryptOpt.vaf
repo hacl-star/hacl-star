@@ -342,7 +342,7 @@ procedure {:quick} {:verify true} handle_bytes(
     compute_ghash_incremental_register();
 }
 
-procedure {:quick} gcm_auth_bytes(
+procedure {:quick} {:verify true} gcm_auth_bytes(
     inline alg:algorithm,
     ghost auth_b:buffer128,
     ghost key:seq(nat32),
@@ -400,13 +400,14 @@ procedure {:quick} gcm_auth_bytes(
     AESEncryptBlock(alg, xmm0, key, round_keys, keys_b); // h = xmm0 = aes_encrypt_LE alg key (Mkfour 0 0 0 0) in
     Pshufb(xmm0, mask);   // reverse h, since the hashing code assumes the reversal has already happened
     h := xmm0;
-    Mov128(h128, xmm0);     // Save a copy of h
+    Mov128(h128, xmm0);     // Move h to xmm11 where ghash_incremental_bytes expects it
 
     // Compute the hashes incrementally, starting with auth data
     ZeroXmm(xmm1);
     y_0 := Mkfour(0, 0, 0, 0);
     ghash_incremental_bytes(auth_b);
     y_auth := xmm1;
+    le_bytes_to_seq_quad32_empty();
 }
 
 #reset-options "--z3rlimit 10"
