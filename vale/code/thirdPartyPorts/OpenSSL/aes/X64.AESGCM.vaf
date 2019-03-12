@@ -255,15 +255,15 @@ procedure {:quick} Load_one_msb()
     reveal insert_nat64;
 }
 
-procedure {:quick} Load_0xc2_msb()
-    lets constp @= r11; Hkey @= xmm3; 
-    modifies constp; Hkey; efl;
-    ensures  Hkey == Mkfour(0, 0, 0, 0xc2000000);
+procedure {:quick exportOnly} Load_0xc2_msb(out dst:xmm)
+    lets constp @= r11; 
+    modifies constp; efl;
+    ensures  dst == Mkfour(0, 0, 0, 0xc2000000);
 {
-    ZeroXmm(Hkey);
+    ZeroXmm(dst);
     assert two_to_nat32(Mktwo(0, 0xc2000000)) == 0xc200000000000000; // OBSERVE
-    lemma_insert_nat64_nat32s(Hkey, 0, 0xc2000000);
-    PinsrqImm(Hkey, 0xc200000000000000, 1, constp);
+    lemma_insert_nat64_nat32s(dst, 0, 0xc2000000);
+    PinsrqImm(dst, 0xc200000000000000, 1, constp);
 }
 
 procedure {:quick exportOnly} Load_two_lsb(inout dst:xmm)
@@ -1384,7 +1384,7 @@ procedure {:quick} Loop6x_step5(
 //	vpxor		$T2,$Z0,$Z0
     VPolyAdd(Z0, Z0, T2);
 //	vmovdqu		0x10($const),$Hkey	# .Lpoly
-    Load_0xc2_msb();
+    Load_0xc2_msb(Hkey);
 //
 //	  vaesenc	$rndkey,$inout0,$inout0
     VAESNI_enc(inout0, inout0, rndkey);
@@ -3363,15 +3363,8 @@ procedure {:quick} {:verify true} GCM_finalize(
     
 //	  vpclmulqdq	\$0x10,0x10($const),$Xi,$Xi
 
-/*
-TODO
-TODO
-TODO
-TODO
-TODO
-TODO
-TODO
-*/
+    Load_0xc2_msb(Hkey);        // NOTE: OpenSSL does this via a memory operand that loads the const directly
+    VPolyMul(Xi, Xi, Hkey, false, true);     
 
 //	  vxorps	$inout5,$Xi,$Xi
     VPolyAdd(Xi, Xi, inout5);
@@ -3414,14 +3407,8 @@ TODO
 
 //	  vpclmulqdq	\$0x10,0x10($const),$Xi,$Xi
 
-/*
-TODO
-TODO
-TODO
-TODO
-TODO
-TODO
-*/
+    Load_0xc2_msb(Ii);        // NOTE: OpenSSL does this via a memory operand that loads the const directly
+    VPolyMul(Xi, Xi, Ii, false, true);     
 
 //	  vxorps	$inout5,$Xi,$Xi
     VPolyAdd(Xi, Xi, inout5);
@@ -3481,7 +3468,7 @@ TODO
     VLow64ToHigh(T1, Z2);
 
 //	vmovdqu		0x10($const),$Hkey	# .Lpoly
-    Load_0xc2_msb();
+    Load_0xc2_msb(Hkey);
 
 //	vpsrldq		\$8,$Z2,$Z2
     VHigh64ToLow(Z2, Z2);
