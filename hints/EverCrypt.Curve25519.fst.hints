@@ -14,7 +14,7 @@
         "typing_LowStar.Monotonic.Buffer.loc_none"
       ],
       0,
-      "e7f90f2cf06f509e14ea8952e6390379"
+      "42a83df3ee6f5c309c4752509c0ee878"
     ],
     [
       "EverCrypt.Curve25519.secret_to_public",
@@ -44,6 +44,7 @@
         "equation_Lib.IntTypes.bits", "equation_Lib.IntTypes.pub_int_v",
         "equation_Lib.IntTypes.uint8", "equation_Lib.IntTypes.uint_v",
         "equation_LowStar.Buffer.buffer",
+        "equation_LowStar.Buffer.trivial_preorder",
         "equation_LowStar.Monotonic.Buffer.length", "equation_Prims.nat",
         "equation_Spec.Curve25519.one",
         "function_token_typing_FStar.Monotonic.Heap.heap",
@@ -52,10 +53,10 @@
         "lemma_FStar.HyperStack.ST.lemma_equal_domains_trans",
         "lemma_FStar.Map.lemma_ContainsDom", "lemma_FStar.UInt32.vu_inv",
         "lemma_Lib.IntTypes.pow2_values",
-        "lemma_LowStar.Monotonic.Buffer.lemma_live_equal_mem_domains",
         "lemma_LowStar.Monotonic.Buffer.loc_disjoint_none_r",
         "lemma_LowStar.Monotonic.Buffer.loc_includes_none",
         "lemma_LowStar.Monotonic.Buffer.modifies_buffer_elim",
+        "lemma_LowStar.Monotonic.Buffer.modifies_liveness_insensitive_buffer_weak",
         "lemma_LowStar.Monotonic.Buffer.modifies_trans_linear",
         "primitive_Prims.op_AmpAmp", "primitive_Prims.op_LessThanOrEqual",
         "primitive_Prims.op_Subtraction",
@@ -72,12 +73,13 @@
         "typing_FStar.Monotonic.HyperStack.get_hmap",
         "typing_FStar.UInt32.v", "typing_Lib.Buffer.loc",
         "typing_Lib.IntTypes.bits", "typing_LowStar.Buffer.trivial_preorder",
+        "typing_LowStar.Monotonic.Buffer.address_liveness_insensitive_locs",
         "typing_LowStar.Monotonic.Buffer.len",
         "typing_LowStar.Monotonic.Buffer.loc_none",
         "typing_tok_Lib.Buffer.MUT@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "0a794e099d0cb856595e87184b425c05"
+      "626ae87560317973bad845e339405282"
     ],
     [
       "EverCrypt.Curve25519.ecdh",
@@ -94,17 +96,19 @@
         "equation_Lib.Buffer.lbuffer_t", "equation_Lib.Buffer.live",
         "equation_Lib.Buffer.loc", "equation_Lib.Buffer.modifies",
         "equation_Lib.IntTypes.uint8", "equation_LowStar.Buffer.buffer",
+        "equation_LowStar.Buffer.trivial_preorder",
         "function_token_typing_Lib.IntTypes.uint8",
         "lemma_FStar.HyperStack.ST.lemma_equal_domains_trans",
-        "lemma_LowStar.Monotonic.Buffer.lemma_live_equal_mem_domains",
         "lemma_LowStar.Monotonic.Buffer.loc_disjoint_none_r",
         "lemma_LowStar.Monotonic.Buffer.loc_includes_none",
         "lemma_LowStar.Monotonic.Buffer.modifies_buffer_elim",
+        "lemma_LowStar.Monotonic.Buffer.modifies_liveness_insensitive_buffer_weak",
         "lemma_LowStar.Monotonic.Buffer.modifies_trans_linear",
         "refinement_interpretation_Tm_refine_0773a299ec43f8fb537ec511f9cd85af",
         "refinement_interpretation_Tm_refine_1cb4ed3ac9e4cd01b6ea93696866e9b5",
         "refinement_interpretation_Tm_refine_c2215b703b2340e9e4551c4e8820d7c8",
         "typing_Lib.Buffer.loc", "typing_LowStar.Buffer.trivial_preorder",
+        "typing_LowStar.Monotonic.Buffer.address_liveness_insensitive_locs",
         "typing_LowStar.Monotonic.Buffer.loc_none",
         "typing_tok_Lib.Buffer.MUT@tok"
       ],
