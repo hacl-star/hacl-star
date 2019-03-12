@@ -3,7 +3,6 @@ module Hacl.Poly1305.Field32xN.Lemmas
 open Lib.IntTypes
 open Lib.IntVector
 open Lib.Sequence
-open Lib.Lemmas
 open FStar.Mul
 
 open Hacl.Spec.Poly1305.Vec

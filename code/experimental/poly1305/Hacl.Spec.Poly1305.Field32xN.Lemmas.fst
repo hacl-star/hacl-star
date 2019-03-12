@@ -5,10 +5,9 @@ open Lib.IntVector
 open Lib.Sequence
 open FStar.Mul
 
-open Lib.Lemmas
-
 open Hacl.Spec.Poly1305.Field32xN
 open Hacl.Poly1305.Field32xN.Lemmas
+open Hacl.Impl.Poly1305.Lemmas
 module S = Hacl.Spec.Poly1305.Vec
 
 #reset-options "--z3rlimit 100 --max_fuel 2 --using_facts_from '* -FStar.Seq'"
