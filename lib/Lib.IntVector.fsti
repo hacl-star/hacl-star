@@ -214,8 +214,20 @@ val vec_gte_mask: #t:v_inttype -> #w:width -> v1:vec_t t w -> v2:vec_t t w -> v3
 inline_for_extraction noextract
 val vec_interleave_low: #t:v_inttype -> #w:width -> vec_t t w -> vec_t t w -> vec_t t w
 
+val vec_interleave_low_lemma2: #t:v_inttype -> b1:vec_t t 2 -> b2:vec_t t 2 -> Lemma
+  (ensures (vec_v (vec_interleave_low b1 b2) == create2 (vec_v b1).[0] (vec_v b2).[0]))
+
+val vec_interleave_low_lemma_uint64_4: b1:vec_t U64 4 -> b2:vec_t U64 4 -> Lemma
+  (ensures (vec_v (vec_interleave_low b1 b2) == create4 (vec_v b1).[0] (vec_v b2).[0] (vec_v b1).[2] (vec_v b2).[2]))
+
 inline_for_extraction noextract
 val vec_interleave_high: #t:v_inttype -> #w:width -> vec_t t w -> vec_t t w -> vec_t t w
+
+val vec_interleave_high_lemma2: #t:v_inttype -> b1:vec_t t 2 -> b2:vec_t t 2 -> Lemma
+  (ensures (vec_v (vec_interleave_high b1 b2) == create2 (vec_v b1).[1] (vec_v b2).[1]))
+
+val vec_interleave_high_lemma_uint64_4: b1:vec_t U64 4 -> b2:vec_t U64 4 -> Lemma
+ (ensures (vec_v (vec_interleave_high b1 b2) == create4 (vec_v b1).[1] (vec_v b2).[1] (vec_v b1).[3] (vec_v b2).[3]))
 
 inline_for_extraction noextract
 val vec_permute2: #t:v_inttype -> v1:vec_t t 2

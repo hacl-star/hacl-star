@@ -9,30 +9,6 @@ module LSeq = Lib.Sequence
 module BSeq = Lib.ByteSequence
 open LSeq
 
-val vec_interleave_low_lemma64_2: b1:vec_t U64 2 -> b2:vec_t U64 2 ->
-  Lemma (vec_v (vec_interleave_low b1 b2) == create2 (vec_v b1).[0] (vec_v b2).[0])
-let vec_interleave_low_lemma64_2 b1 b2 = admit()
-
-val vec_interleave_high_lemma64_2: b1:vec_t U64 2 -> b2:vec_t U64 2 ->
-  Lemma (vec_v (vec_interleave_high b1 b2) == create2 (vec_v b1).[1] (vec_v b2).[1])
-let vec_interleave_high_lemma64_2 b1 b2 = admit()
-
-val vec_interleave_low_lemma64_4: b1:vec_t U64 4 -> b2:vec_t U64 4 ->
-  Lemma (vec_v (vec_interleave_low b1 b2) == create4 (vec_v b1).[0] (vec_v b2).[0] (vec_v b1).[2] (vec_v b2).[2])
-let vec_interleave_low_lemma64_4 b1 b2 = admit()
-
-val vec_interleave_high_lemma64_4: b1:vec_t U64 4 -> b2:vec_t U64 4 ->
-  Lemma (vec_v (vec_interleave_high b1 b2) == create4 (vec_v b1).[1] (vec_v b2).[1] (vec_v b1).[3] (vec_v b2).[3])
-let vec_interleave_high_lemma64_4 b1 b2 = admit()
-
-val vec_interleave_low_lemma128_2: b1:vec_t U128 2 -> b2:vec_t U128 2 ->
-  Lemma (vec_v (vec_interleave_low b1 b2) == create2 (vec_v b1).[0] (vec_v b2).[0])
-let vec_interleave_low_lemma128_2 b1 b2 = admit()
-
-val vec_interleave_high_lemma128_2: b1:vec_t U128 2 -> b2:vec_t U128 2 ->
-  Lemma (vec_v (vec_interleave_high b1 b2) == create2 (vec_v b1).[1] (vec_v b2).[1])
-let vec_interleave_high_lemma128_2 b1 b2 = admit()
-
 val lemma_cast_vec128_to_vec64: b:vec_t U128 2 ->
   Lemma (
     let r = vec_v (cast U64 4 b) in

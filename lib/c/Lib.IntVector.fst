@@ -143,7 +143,7 @@ let vec_xor (#t:v_inttype) (#w:width) (x:vec_t t w) (y:vec_t t w) =
 
 let vec_xor_lemma (#t:v_inttype) (#w:width) (x:vec_t t w) (y:vec_t t w) = ()
 
-let vec_and (#t:v_inttype) (#w:width) (x:vec_t t w) (y:vec_t t w) = 
+let vec_and (#t:v_inttype) (#w:width) (x:vec_t t w) (y:vec_t t w) =
   match t,w with
   | U128,1 -> vec128_and x y
   | _,1 -> (x <: uint_t t SEC) &. y
@@ -209,14 +209,14 @@ let vec_rotate_right (#t:v_inttype) (#w:width) (x:vec_t t w) (y:rotval t) =
   | U32,8 -> vec256_rotate_right32 x y
   | _,_ ->  vec_or (vec_shift_left x (size (bits t) -. y)) (vec_shift_right x y)
 
-let vec_rotate_left (#t:v_inttype) (#w:width) (x:vec_t t w) (y:rotval t) = 
+let vec_rotate_left (#t:v_inttype) (#w:width) (x:vec_t t w) (y:rotval t) =
   match t,w with
   | U32,4 -> vec128_rotate_left32 x y
   | U32,8 -> vec256_rotate_left32 x y
   | _,_ ->  vec_or (vec_shift_left x y) (vec_shift_right x (size (bits t) -. y))
 
- 
-let vec_eq_mask (#t:v_inttype) (#w:width) (x:vec_t t w) (y:vec_t t w) = 
+
+let vec_eq_mask (#t:v_inttype) (#w:width) (x:vec_t t w) (y:vec_t t w) =
   match t,w with
   | U128,1 -> admit()
   | _,1 -> (eq_mask (x <: uint_t t SEC) y) <: vec_t t w
@@ -257,6 +257,10 @@ let vec_interleave_low (#t:v_inttype) (#w:width) (x:vec_t t w) (y:vec_t t w) =
   | U64,4 -> vec256_interleave_low64 x y
   | U128,2 -> vec256_interleave_low128 x y
 
+let vec_interleave_low_lemma2 #vt v1 v2 = admit()
+
+let vec_interleave_low_lemma_uint64_4 v1 v2 = admit()
+
 let vec_interleave_high (#t:v_inttype) (#w:width) (x:vec_t t w) (y:vec_t t w) =
   match t,w with
   | _,1 -> x
@@ -265,6 +269,10 @@ let vec_interleave_high (#t:v_inttype) (#w:width) (x:vec_t t w) (y:vec_t t w) =
   | U32,8 -> vec256_interleave_high32 x y
   | U64,4 -> vec256_interleave_high64 x y
   | U128,2 -> vec256_interleave_high128 x y
+
+let vec_interleave_high_lemma2 #vt v1 v2 = admit()
+
+let vec_interleave_high_lemma_uint64_4 v1 v2 = admit()
 
 let vec_permute2 #t v i1 i2 =
   match t with
@@ -313,7 +321,7 @@ let vec_clmul_hi_hi x y =
 let vec_from_bytes_le t w b = admit()
 let vec_from_bytes_be t w b = admit()
 
-let vec_load_le t w b = 
+let vec_load_le t w b =
   match t,w with
   | U128,1 -> vec128_load_le b
   | _,1 -> Lib.ByteBuffer.uint_from_bytes_le #t #SEC b

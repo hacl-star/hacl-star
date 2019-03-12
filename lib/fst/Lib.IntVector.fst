@@ -256,8 +256,36 @@ let vec_gte_mask #vt #w v1 v2 =
 let vec_interleave_low #vt #w v1 v2 =
   createi w (fun i -> if i % 2 = 0 then v1.[i/2] else v2.[i/2])
 
+let vec_interleave_low_lemma2 #vt v1 v2 =
+  let res = vec_interleave_low v1 v2 in
+  assert (res.[0] == v1.[0]);
+  assert (res.[1] == v2.[0]);
+  eq_intro (vec_v res) (create2 (vec_v v1).[0] (vec_v v2).[0])
+
+let vec_interleave_low_lemma_uint64_4 v1 v2 = admit()
+//   let res = vec_interleave_low v1 v2 in
+//   assert (res.[0] == v1.[0]);
+//   assert (res.[1] == v2.[0]);
+//   assert (res.[2] == v1.[1]);
+//   assert (res.[3] == v2.[1]);
+//   eq_intro (vec_v res) (create4 (vec_v v1).[0] (vec_v v2).[0] (vec_v v1).[2] (vec_v v2).[2])
+
 let vec_interleave_high #vt #w v1 v2 =
   createi w (fun i -> if i % 2 = 0 then v1.[w/2 + i/2] else v2.[w/2 + i/2])
+
+let vec_interleave_high_lemma2 #vt v1 v2 =
+  let res = vec_interleave_high v1 v2 in
+  assert (res.[0] == v1.[1]);
+  assert (res.[1] == v2.[1]);
+  eq_intro (vec_v res) (create2 (vec_v v1).[1] (vec_v v2).[1])
+
+let vec_interleave_high_lemma_uint64_4 v1 v2 = admit()
+//   let res = vec_interleave_high v1 v2 in
+//   assert (res.[0] == v1.[2]);
+//   assert (res.[1] == v2.[2]);
+//   assert (res.[2] == v1.[3]);
+//   assert (res.[3] == v2.[3]);
+//   eq_intro (vec_v res) (create4 (vec_v v1).[1] (vec_v v2).[1] (vec_v v1).[3] (vec_v v2).[3])
 
 let vec_permute2 #vt v i1 i2 =
   create2 v.[size_v i1] v.[size_v i2]
