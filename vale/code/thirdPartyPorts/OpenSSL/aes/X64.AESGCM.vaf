@@ -129,6 +129,8 @@ function operator( $$ ) (a:quad32):poly := of_quad32;
 
 //function operator( [] ) (b:buffer128, i:int):fun(mem)->quad32:= buffer128_read;
 
+// TODO: Use constp and memory operands to directly load constants from memory, instead of constructing them
+
 procedure{:quick exportOnly} VPolyAdd(out dst:xmm, src1:xmm, src2:xmm)
     lets
         a1 := of_quad32(src1);

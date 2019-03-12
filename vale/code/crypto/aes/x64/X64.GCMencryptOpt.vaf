@@ -254,7 +254,7 @@ procedure {:quick} store_bytes(
 }
 
 // GCTR encrypt one block with mask in place
-procedure {:quick} gctr_register(
+procedure {:quick} gctr_register_masked(
     inline alg:algorithm,
     ghost key:seq(nat32),
     ghost round_keys:seq(quad32),
@@ -309,33 +309,37 @@ procedure {:quick} {:verify true} handle_bytes(
         validDstAddrs8(mem, out_ptr, out_b, len, memTaint, Secret);
         buffer_length(in_b) == len;
         buffer_length(out_b) == len;
-        len < 16;
+        0 < len < 16;
 
         // AES reqs
         aes_reqs(alg, key, round_keys, keys_b, r8, mem, memTaint);
     ensures
+        // Framing
+        modifies_mem(loc_buffer(out_b), old(mem), mem);
+
+        // Semantics
         length(pad_to_128_bits(old(buffer8_as_seq(mem, in_b)))) == 16;
+
         let in_quad := le_bytes_to_quad32(pad_to_128_bits(old(buffer8_as_seq(mem, in_b))));
         let out_quad := gctr_encrypt_block(old(icb_BE), in_quad, alg, key, 0);
-//        slice_work_around(le_quad32_to_bytes(out_quad), old(len)) == buffer8_as_seq(mem, out_b);
-//
-//        len == 0 ==> hash == old(hash) /\ buffer8_as_seq(mem, out_b) == old(buffer8_as_seq(mem, out_b));
-//        len > 0  ==> hash == ghash_incremental(reverse_bytes_quad32(h), old(hash), create(1, old(out_quad)));
+
+        slice_work_around(le_quad32_to_bytes(out_quad), old(len)) == buffer8_as_seq(mem, out_b);
+        xmm1 == ghash_incremental(reverse_bytes_quad32(h), old(hash), create(1, out_quad));
 {
-    if (len == 0) {
-    } else {
-        Mov64(tmp0, len);   // Save length
-        load_bytes(in_b);   // Loads the (padded) bytes into xmm1
+    Mov64(tmp0, len);   // Save length
+    load_bytes(in_b);   // Loads the (padded) bytes into xmm1
 
-        // Encrypt the bytes
-        gctr_register(alg, key, round_keys, keys_b);
+    // Encrypt the bytes
+    gctr_register_masked(alg, key, round_keys, keys_b);
 
-        // Write them back out
-        Mov64(len, tmp0);
-        store_bytes(out_b);
+    // Write them back out
+    Mov64(len, tmp0);
+    store_bytes(out_b);
 
-        compute_ghash_incremental_register();
-    }
+    // Line up registers:  TODO: Optimize these away
+    Mov128(xmm2, xmm1);
+    Mov128(xmm1, xmm3);
+    compute_ghash_incremental_register();
 }
 
 procedure {:quick} gcm_auth_bytes(
