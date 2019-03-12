@@ -81,6 +81,10 @@ val low_lemma_valid_mem128: b:buffer128 -> i:nat -> h:mem -> Lemma
     S.valid_addr128 (buffer_addr b h + 16 `op_Multiply` i) (get_heap h)
   )
 
+val equiv_load_mem128: ptr:int -> m:mem -> Lemma
+  (requires valid_mem128 ptr m)
+  (ensures load_mem128 ptr m == S.get_heap_val128 ptr (get_heap m))
+
 val low_lemma_load_mem128 : b:buffer128 -> i:nat -> h:mem -> Lemma
   (requires
     i < Seq.length (buffer_as_seq h b) /\

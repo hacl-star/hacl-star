@@ -489,6 +489,9 @@ let equiv_load_mem128_aux ptr h =
   index128_get_heap_val128 h b heap i;
   lemma_load_mem128 b i h
 
+let equiv_load_mem128 ptr h =
+  equiv_load_mem128_aux ptr h
+
 let low_lemma_load_mem128 b i h =
   lemma_valid_mem128 b i h;
   lemma_load_mem128 b i h;

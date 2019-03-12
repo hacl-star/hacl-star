@@ -72,7 +72,7 @@ open GF128
 open GHash
 #endverbatim
 
-procedure{:quick exportOnly} VPolyAdd(out dst:xmm, src1:xmm, src2:xmm)
+procedure{:quick exportOnly} VPolyAdd(out dst:xmm, src1:xmm, src2:opr128)
     lets
         a1 := of_quad32(src1);
         a2 := of_quad32(src2);
@@ -173,6 +173,7 @@ procedure{:quick} MulAdd_unroll(
     ghost hkeys_b:buffer128,
     ghost stack_b:buffer128,
     ghost h:poly,
+    ghost prev:poly,
     ghost data:fun(int) -> poly
     )
     lets
@@ -197,12 +198,16 @@ procedure{:quick} MulAdd_unroll(
         of_quad32(buffer128_read(hkeys_b, 4, mem)) == power(shift_gf128_key_1(h), 4);
         of_quad32(buffer128_read(hkeys_b, 6, mem)) == power(shift_gf128_key_1(h), 5);
         of_quad32(buffer128_read(hkeys_b, 7, mem)) == power(shift_gf128_key_1(h), 6);
-        validDstAddrs128(mem, rsp + 0x38, stack_b, 5, memTaint, Secret);
-        of_quad32(buffer128_read(stack_b, 0, mem)) == data(4);
-        of_quad32(buffer128_read(stack_b, 1, mem)) == data(3);
-        of_quad32(buffer128_read(stack_b, 2, mem)) == data(2);
-        of_quad32(buffer128_read(stack_b, 3, mem)) == data(1);
-        of_quad32(buffer128_read(stack_b, 4, mem)) == data(0);
+        validDstAddrs128(mem, rsp + 0x18, stack_b, 7, memTaint, Secret);
+        of_quad32(Xi) +. of_quad32(Z0) +. of_quad32(buffer128_read(stack_b, 0, mem)) == prev;
+        of_quad32(buffer128_read(stack_b, 2, mem)) == data(4);
+        of_quad32(buffer128_read(stack_b, 3, mem)) == data(3);
+        of_quad32(buffer128_read(stack_b, 4, mem)) == data(2);
+        of_quad32(buffer128_read(stack_b, 5, mem)) == data(1);
+        of_quad32(buffer128_read(stack_b, 6, mem)) == data(0);
+    ensures
+        of_quad32(Z0) +. shift(of_quad32(Z2), 64) +. shift(of_quad32(Z3), 128) ==
+            ghash_unroll_back(shift_gf128_key_1(h), prev, data, 0, 6, 5);
 {
     let h1 := shift_gf128_key_1(h);
 
@@ -210,11 +215,12 @@ procedure{:quick} MulAdd_unroll(
     Load128_buffer(Hkey, Xip, (-0x20), Secret, hkeys_b, 0);
     VPolyMul(T1, Z3, Hkey, false, false);
     VPolyMul(Z1, Z3, Hkey, false, true);
-    Load128_buffer(Ii, rsp, 0x38, Secret, stack_b, 0);
+    Load128_buffer(Ii, rsp, 0x38, Secret, stack_b, 2);
     VPolyMul(Z2, Z3, Hkey, true, false);
     VPolyMul(Z3, Z3, Hkey, true, true);
     lemma_Mul128(data(5), power(h1, 1));
     ghost var z := data(5) *. power(h1, 1);
+    assert z == ghash_unroll_back(h1, prev, data, 0, 6, 0);
     // assert z == $$T1 +. shift($$Z1 +. $$Z2, 64) +. shift($$Z3, 128);
     lemma_add_commute($$Z1, $$Z2);
     // assert z == $$T1 +. shift($$Z2 +. $$Z1, 64) +. shift($$Z3, 128);
@@ -226,17 +232,19 @@ procedure{:quick} MulAdd_unroll(
 
     // 2
     VPolyMul(Z1, Ii, Hkey, false, false);
-    // VPolyAdd(Xi, Xi, Z0);
+    VPolyAdd(Xi, Xi, Z0);
     VPolyAdd(Z0, T1, Z1);
     VPolyMul(T1, Ii, Hkey, false, true);
     VPolyMul(T2, Ii, Hkey, true, false);
-    // VPolyAdd(Xi, Xi, MemXmm(...));
+    VPolyAdd(Xi, Xi, Mem128(rsp, 0x18, stack_b, 0, Secret));
+    // assert $$Xi == prev;
     VPolyMul(Hkey, Ii, Hkey, true, true);
     lemma_Mul128_accum(z0, $$Z2, $$Z3, data(4), power(h1, 2));
     z := z +. data(4) *. power(h1, 2);
+    assert z == ghash_unroll_back(h1, prev, data, 0, 6, 1);
     // assert z == $$Z0 +. shift($$Z2 +. $$T1 +. $$T2, 64) +. shift($$Z3 +. $$Hkey, 128);
 
-    Load128_buffer(Ii, rsp, 0x48, Secret, stack_b, 1);
+    Load128_buffer(Ii, rsp, 0x48, Secret, stack_b, 3);
     Load128_buffer(Z1, Xip, 0x10, Secret, hkeys_b, 3);
     VPolyAdd(Z2, Z2, T1);
     // assert z == $$Z0 +. shift($$Z2 +. $$T2, 64) +. shift($$Z3 +. $$Hkey, 128);
@@ -252,9 +260,10 @@ procedure{:quick} MulAdd_unroll(
     VPolyMul(Z1, Ii, Z1, true, true);
     lemma_Mul128_accum($$Z0, $$Z2, $$Z3, data(3), power(h1, 3));
     z := z +. data(3) *. power(h1, 3);
+    assert z == ghash_unroll_back(h1, prev, data, 0, 6, 2);
     // assert z == ($$Z0 +. $$T1) +. shift($$Z2 +. $$T2 +. $$Hkey, 64) +. shift($$Z3 +. $$Z1, 128);
 
-    Load128_buffer(Ii, rsp, 0x58, Secret, stack_b, 2);
+    Load128_buffer(Ii, rsp, 0x58, Secret, stack_b, 4);
     VPolyAdd(Z0, Z0, T1);
     // assert z == $$Z0 +. shift($$Z2 +. $$T2 +. $$Hkey, 64) +. shift($$Z3 +. $$Z1, 128);
     Load128_buffer(T1, Xip, 0x20, Secret, hkeys_b, 4);
@@ -272,9 +281,10 @@ procedure{:quick} MulAdd_unroll(
     VPolyMul(T1, Ii, T1, true, true);
     lemma_Mul128_accum($$Z0, $$Z2, $$Z3, data(2), power(h1, 4));
     z := z +. data(2) *. power(h1, 4);
+    assert z == ghash_unroll_back(h1, prev, data, 0, 6, 3);
     // assert z == ($$Z0 +. $$T2) +. shift($$Z2 +. $$Hkey +. $$Z1, 64) +. shift($$Z3 +. $$T1, 128);
 
-    Load128_buffer(Ii, rsp, 0x68, Secret, stack_b, 3);
+    Load128_buffer(Ii, rsp, 0x68, Secret, stack_b, 5);
     VPolyAdd(Z0, Z0, T2);
     // assert z == $$Z0 +. shift($$Z2 +. $$Hkey +. $$Z1, 64) +. shift($$Z3 +. $$T1, 128);
     Load128_buffer(T2, Xip, 0x40, Secret, hkeys_b, 6);
@@ -289,10 +299,11 @@ procedure{:quick} MulAdd_unroll(
     VPolyAdd(Z3, Z3, T1);
     // assert z == $$Z0 +. shift($$Z2, 64) +. shift($$Z3, 128);
     VPolyMul(T1, Ii, T2, true, false);
-    Load128_buffer(Xi, rsp, 0x78, Secret, stack_b, 4); // TODO: xor data from memory here
+    VPolyAdd(Xi, Xi, Mem128(rsp, 0x78, stack_b, 6, Secret));
     VPolyMul(T2, Ii, T2, true, true);
     lemma_Mul128_accum($$Z0, $$Z2, $$Z3, data(1), power(h1, 5));
     z := z +. data(1) *. power(h1, 5);
+    assert z == ghash_unroll_back(h1, prev, data, 0, 6, 4);
     // assert z == ($$Z0 +. $$Hkey) +. shift($$Z2 +. $$Z1 +. $$T1, 64) +. shift($$Z3 +. $$T2, 128);
 
     VPolyAdd(Z0, Z0, Hkey);
@@ -310,8 +321,9 @@ procedure{:quick} MulAdd_unroll(
     // assert z == $$Z0 +. shift($$Z2, 64) +. shift($$Z3, 128);
     VPolyMul(T2, Xi, Hkey, false, false);
     VPolyMul(Xi, Xi, Hkey, true, true);
-    lemma_Mul128_accum($$Z0, $$Z2, $$Z3, data(0), power(h1, 6));
-    z := z +. data(0) *. power(h1, 6); // TODO: xor data(0) here
+    lemma_Mul128_accum($$Z0, $$Z2, $$Z3, prev +. data(0), power(h1, 6));
+    z := z +. (prev +. data(0)) *. power(h1, 6); // TODO: xor data(0) here
+    assert z == ghash_unroll_back(h1, prev, data, 0, 6, 5);
     // assert z == ($$Z0 +. $$T2) +. shift($$Z2 +. $$Z1 +. $$T1, 64) +. shift($$Z3 +. $$Xi, 128);
 
     VPolyAdd(Z2, Z2, Z1);
@@ -324,7 +336,7 @@ procedure{:quick} MulAdd_unroll(
     // vmovdqu into Hkey
     VPolyAdd(Z3, Z3, Xi);
 
-    assert z == $$Z0 +. shift($$Z2, 64) +. shift($$Z3, 128);
+    // assert z == $$Z0 +. shift($$Z2, 64) +. shift($$Z3, 128);
 }
 
 procedure{:quick} Reduce(ghost f:poly)

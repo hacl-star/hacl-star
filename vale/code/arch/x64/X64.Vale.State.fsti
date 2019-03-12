@@ -22,6 +22,8 @@ unfold let eval_reg (r:reg) (s:state) : nat64 = Regs.sel r s.regs
 unfold let eval_xmm (x:xmm) (s:state) : Types_s.quad32 = Xmms.sel x s.xmms
 [@va_qattr]
 unfold let eval_mem (ptr:int) (s:state) : GTot nat64 = load_mem64 ptr s.mem
+[@va_qattr]
+unfold let eval_mem128 (ptr:int) (s:state) : GTot Types_s.quad32 = load_mem128 ptr s.mem
 
 [@va_qattr]
 let eval_maddr (m:maddr) (s:state) : int =
@@ -41,6 +43,12 @@ let eval_operand (o:operand) (s:state) : GTot nat64 =
   | OConst n -> to_nat64 n
   | OReg r -> eval_reg r s
   | OMem m -> eval_mem (eval_maddr m s) s
+
+[@va_qattr]
+let eval_operand128 (o:mov128_op) (s:state) : GTot Types_s.quad32 =
+  match o with
+  | Mov128Xmm x -> eval_xmm x s
+  | Mov128Mem m -> eval_mem128 (eval_maddr m s) s
 
 [@va_qattr]
 let update_reg (r:reg) (v:nat64) (s:state) : state =
@@ -64,11 +72,20 @@ let update_operand (o:operand) (v:nat64) (sM:state) : GTot state =
 let valid_maddr (m:maddr) (s:state) : prop0 = valid_mem64 (eval_maddr m s) s.mem
 
 [@va_qattr]
+let valid_maddr128 (m:maddr) (s:state) : prop0 = valid_mem128 (eval_maddr m s) s.mem
+
+[@va_qattr]
 let valid_operand (o:operand) (s:state) : prop0 =
   match o with
   | OConst n -> 0 <= n /\ n < pow2_64
   | OReg r -> True
   | OMem m -> valid_maddr m s
+
+[@va_qattr]
+let valid_operand128 (o:mov128_op) (s:state) : prop0 =
+  match o with
+  | Mov128Xmm _ -> True
+  | Mov128Mem m -> valid_maddr128 m s
 
 [@va_qattr]
 let state_eta (s:state) : state =

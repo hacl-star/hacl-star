@@ -24,6 +24,14 @@ let rec ghash_poly (h:poly) (init:poly) (data:int -> poly128) (j:int) (k:int) : 
   if k <= j then init else
   gf128_mul_rev (ghash_poly h init data j (k - 1) +. data (k - 1)) h
 
+// Unrolled series of n ghash computations in reverse order (last to first)
+let rec ghash_unroll_back (h:poly) (prev:poly) (data:int -> poly) (k:int) (n m:nat) : poly =
+  let d = data (k + (n - 1 - m)) in
+  let p = power h (m + 1) in
+  if m = 0 then d *. p else
+  let v = if m = n - 1 then prev +. d else d in
+  ghash_unroll_back h prev data k n (m - 1) +. v *. p
+
 val lemma_ghash_poly_degree (h:poly) (init:poly) (data:int -> poly128) (j:int) (k:int) : Lemma
   (requires degree h < 128 /\ degree init < 128)
   (ensures degree (ghash_poly h init data j k) < 128)
