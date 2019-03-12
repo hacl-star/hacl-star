@@ -433,8 +433,6 @@ procedure {:quick} gcm_make_length_quad()
     Mov64(rax, auth_num_bytes);
     IMul64(rax, 8);
     Pinsrd(xmm2, rax, 2);
-    // assert xmm2 == Mkfour(#nat32(8 * plain_num_bytes), 0, #nat32(8 * auth_num_bytes), 0);     // Passes when ghost vars above are removed
-
     Pshufb(xmm2, xmm8);
 }
 
