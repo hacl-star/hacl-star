@@ -543,10 +543,12 @@ dist/vale/%-x86_64-darwin.S: obj/vale-%.exe | dist/vale
 	$< GCC MacOS > $@
 
 dist/vale/%-inline.h: obj/inline-vale-%.exe | dist/vale
-	echo "#pragma once" > $@
+	echo "#ifdef __GNUC__" > $@
+	echo "#pragma once" >> $@
 	echo "#include <inttypes.h>" >> $@
 	$< >> $@
 	$(SED) -i 's/const//g' $@
+	echo "#endif" >> $@
 
 obj/vale-cpuid.exe: vale/code/lib/util/x64/CpuidMain.ml
 obj/vale-aesgcm.exe: vale/code/crypto/aes/x64/Main.ml
@@ -814,7 +816,7 @@ endif
 TEST_INCLUDES=test test/rfc7748_src secure_api/merkle_tree/test $(KREMLIN_HOME)/include \
   dist/generic $(OPENSSL_HOME)/include
 
-CFLAGS += $(addprefix -I,$(TEST_INCLUDES)) -Wall -Wextra \
+CFLAGS += $(addprefix -I,$(TEST_INCLUDES)) -Wall -Wextra -g \
   -Wno-infinite-recursion -Wno-int-conversion -Wno-unused-parameter \
   -O3 -march=native -mtune=native
 
