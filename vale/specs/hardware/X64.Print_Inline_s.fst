@@ -19,11 +19,10 @@ let print_basetype (t:base_typ) = match t with
   | TUInt64 -> "uint64_t"
   | TUInt128 -> "ERROR"  
 
-// Returns "uint8_t arg2" or "const uint64_t* arg0" for instance
+// Returns "uint8_t arg2" or "uint64_t* arg0" for instance
 let print_arg (a:td) (i:nat) = match a with
   | TD_Base src -> print_basetype src ^ " arg" ^ string_of_int i
-  | TD_Buffer src _ {modified=true} -> print_basetype src ^ "* arg" ^ string_of_int i
-  | TD_Buffer src _ _ | TD_ImmBuffer src _ _ -> "const " ^ print_basetype src ^ "* arg" ^ string_of_int i
+  | TD_Buffer src _ _ | TD_ImmBuffer src _ _ -> print_basetype src ^ "* arg" ^ string_of_int i
 
 // Prints a list of args with their types, separated by a comma
 let rec print_args (args:list td) (i:nat) = match args with
@@ -33,7 +32,11 @@ let rec print_args (args:list td) (i:nat) = match args with
 
 // Prints "register uint64_t* argi_r asm("[reg]") = argi;\n"
 let print_register_arg (n:nat) (a:td) (i:nat{i < n}) (of_arg:reg_nat n -> reg) =
-  "  register uint64_t* arg" ^ string_of_int i ^ "_r asm(\"" ^ P.print_reg_name (of_arg i) ^ "\") = arg" ^ string_of_int i ^ ";\n"
+  let ty = match a with
+    | TD_Base _ -> "uint64_t"
+    | _ -> "uint64_t*"
+  in
+  "  register " ^ ty ^ " arg" ^ string_of_int i ^ "_r asm(\"" ^ P.print_reg_name (of_arg i) ^ "\") = arg" ^ string_of_int i ^ ";\n"
 
 let rec print_register_args (n:nat) (args:list td) (i:nat{i + List.length args = n}) (of_arg:reg_nat n -> reg) = match args with
   | [] -> ""
@@ -42,7 +45,7 @@ let rec print_register_args (n:nat) (args:list td) (i:nat{i + List.length args =
 // If we have a return parameter, print "register uint64_t* [name] asm("rax");\n"
 let print_register_ret = function
   | None -> ""
-  | Some name -> "  register uint64_t* " ^ name ^ " asm(\"rax\");\n"
+  | Some name -> "  register uint64_t " ^ name ^ " asm(\"rax\");\n"
 
 // Prints `"=r" (name)` if an output is specified
 let print_output_ret = function
@@ -190,7 +193,7 @@ let print_inline
   // Every modified register that wasn't used for the inputs/outputs should be specified in the modified line
   let modified_str = "  : " ^ print_modified_registers n ret_val of_arg regs_mod args in
 
-  let close_code = "  );\n}\n\n" in
+  let close_code = "  );\n" ^ (if Some? ret_val then "\nreturn " ^ Some?.v ret_val ^ ";\n" else "") ^ "}\n\n" in
 
   print_string (header ^ arg_regs ^ ret_reg ^ start_code ^ code_str ^ output_str ^ input_str ^ modified_str ^ close_code);
   final_label
