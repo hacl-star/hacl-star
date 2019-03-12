@@ -472,7 +472,10 @@ vale-verify_: \
   $(addsuffix .checked,$(VALE_FSTS)) \
   $(call only-for,$(HACL_HOME)/vale/%.checked) \
 
-hacl-verify: $(call only-for,$(HACL_HOME)/code/%.checked)
+hacl-verify: $(call only-for,$(HACL_HOME)/code/%)
+curve25519-verify: $(call only-for,$(HACL_HOME)/code/curve25519/%)
+poly1305-verify: $(call only-for,$(HACL_HOME)/code/poly1305/%)
+chacha20-verify: $(call only-for,$(HACL_HOME)/code/chacha20/%)
 
 
 ############
