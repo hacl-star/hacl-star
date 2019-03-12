@@ -799,7 +799,7 @@ procedure {:quick} gcm_encrypt_stdcall_inner(
     Store128_buffer(r15, xmm1, 0, Secret, tag_b, 0);
 }
 
-#reset-options "--z3rlimit 100"
+#reset-options "--z3rlimit 200"
 procedure {:quick} gcm_encrypt_stdcall(
     inline win:bool,
     inline alg:algorithm,
