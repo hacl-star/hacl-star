@@ -281,6 +281,14 @@ val vec_permute32: #t:v_inttype -> v1:vec_t t 32
 inline_for_extraction noextract
 val cast: #t:v_inttype -> #w:width -> t':v_inttype -> w':width{bits t * w == bits t' * w'} -> vec_t t w -> vec_t t' w'
 
+val cast_vec_u128_to_u64_lemma: #w:width{w < 32} -> b:vec_t U128 w -> Lemma
+   (let r = vec_v (cast U64 (2 * w) b) in
+    (forall (i:nat). i < w ==> uint_v (vec_v b).[i] == uint_v r.[2 * i] + uint_v r.[2 * i + 1] * pow2 64))
+
+val cast_vec_u64_to_u128_lemma: #w:width{w < 32} -> b:vec_t U64 (2 * w) -> Lemma
+   (let r = vec_v (cast U128 w b) in
+    (forall (i:nat). i < w ==> uint_v r.[i] == uint_v (vec_v b).[2 * i] + uint_v (vec_v b).[2 * i + 1] * pow2 64))
+
 type uint128x1 = vec_t U128 1
 type uint128x2 = vec_t U128 2
 type uint64x2 = vec_t U64 2

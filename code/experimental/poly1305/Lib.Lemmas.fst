@@ -15,7 +15,8 @@ val lemma_cast_vec128_to_vec64: b:vec_t U128 2 ->
     let b = vec_v b in
     uint_v b.[0] == uint_v r.[0] + uint_v r.[1] * pow2 64 /\
     uint_v b.[1] == uint_v r.[2] + uint_v r.[3] * pow2 64)
-let lemma_cast_vec128_to_vec64 b = admit()
+let lemma_cast_vec128_to_vec64 b =
+  cast_vec_u128_to_u64_lemma b
 
 val lemma_cast_vec64_to_vec128: b:vec_t U64 4 ->
   Lemma (
@@ -23,19 +24,46 @@ val lemma_cast_vec64_to_vec128: b:vec_t U64 4 ->
     let b = vec_v b in
     uint_v r.[0] == uint_v b.[0] + uint_v b.[1] * pow2 64 /\
     uint_v r.[1] == uint_v b.[2] + uint_v b.[3] * pow2 64)
-let lemma_cast_vec64_to_vec128 b = admit()
+let lemma_cast_vec64_to_vec128 b =
+  cast_vec_u64_to_u128_lemma #2 b
 
 val lemma_vec_interleave_low_cast_64_4: b1:vec_t U64 4 -> b2:vec_t U64 4 ->
   Lemma (
     vec_v (cast U64 4 (vec_interleave_low (cast U128 2 b1) (cast U128 2 b2))) ==
     create4 (vec_v b1).[0] (vec_v b1).[1] (vec_v b2).[0] (vec_v b2).[1])
-let lemma_vec_interleave_low_cast_64_4 b1 b2 = admit()
+let lemma_vec_interleave_low_cast_64_4 b1 b2 =
+  let r1 = cast U128 2 b1 in
+  lemma_cast_vec64_to_vec128 b1;
+  let r2 = cast U128 2 b2 in
+  lemma_cast_vec64_to_vec128 b2;
+  let r3 = vec_interleave_low r1 r2 in
+  vec_interleave_low_lemma2 r1 r2;
+  let r4 = cast U64 4 r3 in
+  lemma_cast_vec128_to_vec64 r3;
+  uintv_extensionality (vec_v r4).[0] (vec_v b1).[0];
+  uintv_extensionality (vec_v r4).[1] (vec_v b1).[1];
+  uintv_extensionality (vec_v r4).[2] (vec_v b2).[0];
+  uintv_extensionality (vec_v r4).[3] (vec_v b2).[1];
+  eq_intro (vec_v r4) (create4 (vec_v b1).[0] (vec_v b1).[1] (vec_v b2).[0] (vec_v b2).[1])
 
 val lemma_vec_interleave_high_cast_64_4: b1:vec_t U64 4 -> b2:vec_t U64 4 ->
   Lemma (
     vec_v (cast U64 4 (vec_interleave_high (cast U128 2 b1) (cast U128 2 b2))) ==
     create4 (vec_v b1).[2] (vec_v b1).[3] (vec_v b2).[2] (vec_v b2).[3])
-let lemma_vec_interleave_high_cast_64_4 b1 b2 = admit()
+let lemma_vec_interleave_high_cast_64_4 b1 b2 =
+  let r1 = cast U128 2 b1 in
+  lemma_cast_vec64_to_vec128 b1;
+  let r2 = cast U128 2 b2 in
+  lemma_cast_vec64_to_vec128 b2;
+  let r3 = vec_interleave_high r1 r2 in
+  vec_interleave_high_lemma2 r1 r2;
+  let r4 = cast U64 4 r3 in
+  lemma_cast_vec128_to_vec64 r3;
+  uintv_extensionality (vec_v r4).[0] (vec_v b1).[2];
+  uintv_extensionality (vec_v r4).[1] (vec_v b1).[3];
+  uintv_extensionality (vec_v r4).[2] (vec_v b2).[2];
+  uintv_extensionality (vec_v r4).[3] (vec_v b2).[3];
+  eq_intro (vec_v r4) (create4 (vec_v b1).[2] (vec_v b1).[3] (vec_v b2).[2] (vec_v b2).[3])
 
 val uint_from_bytes_le_lemma: b:LSeq.lseq uint8 16 ->
   Lemma (

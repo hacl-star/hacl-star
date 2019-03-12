@@ -290,6 +290,8 @@ let vec_permute32 #t = admit()
 
 let cast #t #w t' w' v = v
 
+let cast_vec_u128_to_u64_lemma #w b = admit()
+let cast_vec_u64_to_u128_lemma #w b = admit()
 
 let vec_aes_enc key state =
   ni_aes_enc key state

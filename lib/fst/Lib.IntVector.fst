@@ -315,6 +315,9 @@ let vec_permute32 #vt v i1 i2 i3 i4 i5 i6 i7 i8 i9 i10 i11 i12 i13 i14 i15 i16 i
 
 let cast #t #w t' w' x = admit()
 
+let cast_vec_u128_to_u64_lemma #w b = admit()
+let cast_vec_u64_to_u128_lemma #w b = admit()
+
 let vec_aes_enc key state = admit()
 let vec_aes_enc_lemma key state = admit()
 let vec_aes_enc_last key state = admit()
