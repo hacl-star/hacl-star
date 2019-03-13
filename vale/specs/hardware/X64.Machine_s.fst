@@ -19,7 +19,6 @@ type reg:eqtype =
   | Rsi
   | Rdi
   | Rbp
-  | Rsp
   | R8
   | R9
   | R10
@@ -54,7 +53,7 @@ type precode (t_ins:eqtype) (t_ocmp:eqtype):eqtype =
   | While: whileCond:t_ocmp -> whileBody:precode t_ins t_ocmp -> precode t_ins t_ocmp
 
 let valid_dst (o:operand) : bool =
-  not (OConst? o || (OReg? o && Rsp? (OReg?.r o)))
+  not (OConst? o)
 
 type taint:eqtype =
   | Public

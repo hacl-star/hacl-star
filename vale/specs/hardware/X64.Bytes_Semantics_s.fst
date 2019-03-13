@@ -18,6 +18,14 @@ type heap = Map.t int nat8
 let op_String_Access = Map.sel
 let op_String_Assignment = Map.upd
 
+noeq
+type stack =
+  | Vale_stack: 
+    initial_rsp:nat ->                // Initial rsp pointer when entering the function
+    rsp:nat{rsp <= initial_rsp} ->     // Current rsp pointer
+    mem:Map.t nat nat8 ->             // Actual memory
+    stack
+  
 type ins:eqtype =
   | Cpuid      : ins
   | Mov64      : dst:operand -> src:operand -> ins
@@ -36,8 +44,15 @@ type ins:eqtype =
   | And64      : dst:operand -> src:operand -> ins
   | Shr64      : dst:operand -> amt:operand -> ins
   | Shl64      : dst:operand -> amt:operand -> ins
+
+  // Stack operations
   | Push       : src:operand -> ins
   | Pop        : dst:operand -> ins
+  | Load64_stack : dst:operand -> n:nat -> ins
+  | Store64_stack: src:operand -> n:nat -> ins
+  | Alloc      : n:nat -> ins
+  | Dealloc    : n:nat -> ins
+
   | Paddd      : dst:xmm -> src:xmm -> ins
   | Pxor       : dst:xmm -> src:xmm -> ins
   | Pslld      : dst:xmm -> amt:int -> ins
@@ -64,7 +79,6 @@ type ins:eqtype =
   | SHA256_msg1  : dst:xmm -> src:xmm -> ins
   | SHA256_msg2  : dst:xmm -> src:xmm -> ins
   
-
 type ocmp:eqtype =
   | OEq: o1:operand{not (OMem? o1)} -> o2:operand{not (OMem? o2)} -> ocmp
   | ONe: o1:operand{not (OMem? o1)} -> o2:operand{not (OMem? o2)} -> ocmp
@@ -84,6 +98,7 @@ noeq type state = {
   xmms: xmms_t;
   flags: nat64;
   mem: heap;
+  stack:stack;
 }
 
 //let u (i:int{FStar.UInt.fits i 64}) : uint64 = FStar.UInt64.uint_to_t i
@@ -138,6 +153,19 @@ let eval_operand (o:operand) (s:state) : nat64 =
   | OReg r -> eval_reg r s
   | OMem m -> eval_mem (eval_maddr m s) s
 
+let get_stack_val64_def (ptr:nat) (st:stack) : nat64 =
+  let Vale_stack _ _ mem = st in
+  two_to_nat 32
+  (Mktwo
+    (four_to_nat 8 (Mkfour mem.[ptr] mem.[ptr+1] mem.[ptr+2] mem.[ptr+3]))
+    (four_to_nat 8 (Mkfour mem.[ptr+4] mem.[ptr+5] mem.[ptr+6] mem.[ptr+7]))
+  )  
+let get_stack_val64 = make_opaque get_stack_val64_def
+
+let eval_stack64 (i:nat) (s:state) =
+  if i + 8 < s.stack.rsp then get_stack_val64 i s.stack
+  else 42 // Return dummy value
+
 let eval_mov128_op (o:mov128_op) (s:state) : quad32 =
   match o with
   | Mov128Xmm i -> eval_xmm i s
@@ -191,6 +219,22 @@ let update_heap128 (ptr:int) (v:quad32) (mem:heap) =
   let mem = update_heap32 (ptr+8) v.hi2 mem in
   let mem = update_heap32 (ptr+12) v.hi3 mem in
   mem
+
+let update_stack64_def (ptr:nat) (v:nat64) (st:stack) : stack =
+  let v = nat_to_two 32 v in
+  let lo = nat_to_four 8 v.lo in
+  let hi = nat_to_four 8 v.hi in
+  let Vale_stack init_rsp rsp mem = st in
+  let mem = mem.[ptr] <- lo.lo0 in
+  let mem = mem.[ptr+1] <- lo.lo1 in
+  let mem = mem.[ptr+2] <- lo.hi2 in
+  let mem = mem.[ptr+3] <- lo.hi3 in
+  let mem = mem.[ptr+4] <- hi.lo0 in
+  let mem = mem.[ptr+5] <- hi.lo1 in
+  let mem = mem.[ptr+6] <- hi.hi2 in
+  let mem = mem.[ptr+7] <- hi.hi3 in
+  Vale_stack init_rsp rsp mem
+let update_stack64 = make_opaque update_stack64_def
 
 let valid_addr (ptr:int) (mem:heap) : bool =
   Map.contains mem ptr
@@ -281,6 +325,21 @@ let update_mov128_op_preserve_flags' (o:mov128_op) (v:quad32) (s:state) : state 
 // Default version havocs flags
 let update_operand' (o:operand) (ins:ins) (v:nat64) (s:state) : state =
   { (update_operand_preserve_flags' o v s) with flags = havoc s ins }
+
+// Only modify the stack pointer if it is valid. Validity will have been checked previously
+let update_rsp' (i:int) (s:state) : state =
+  let Vale_stack init_rsp rsp mem = s.stack in
+  if i >= 0 && i < s.stack.initial_rsp then
+    {s with stack = Vale_stack init_rsp i mem}
+  else
+    s
+
+let update_stack' (i:nat) (v:nat64) (s:state) : state =
+  if i + 8 < s.stack.initial_rsp then
+    {s with stack = update_stack64 i v s.stack}
+  else
+    // This stack slot is not valid, we do nothing
+    s
 
 (* REVIEW: Will we regret exposing a mod here?  Should flags be something with more structure? *)
 let cf (flags:nat64) : bool =
@@ -397,6 +456,18 @@ let update_operand (dst:operand) (ins:ins) (v:nat64) :st unit =
   check (valid_dst_operand dst);;
   s <-- get;
   set (update_operand' dst ins v s)
+
+unfold
+let update_rsp (i:int) : st unit =
+ check (fun s -> i >= 0);;
+ check (fun s -> i <= s.stack.initial_rsp);;
+ s <-- get;
+ set (update_rsp' i s)
+
+unfold
+let update_stack (i:nat) (v:nat64) : st unit =
+  s <-- get;
+  set (update_stack' i v s)
 
 let update_reg (r:reg) (v:nat64) :st unit =
   s <-- get;
@@ -536,17 +607,52 @@ let eval_ins (ins:ins) : st unit =
 
   | Push src ->
     check (valid_operand src);;
-    let new_rsp = ((eval_reg Rsp s) - 8) % pow2_64 in
-    update_operand_preserve_flags (OMem (MConst new_rsp)) (eval_operand src s);;
-    update_reg Rsp new_rsp
+    s <-- get;
+    // First modify the stack pointer
+    update_rsp (s.stack.rsp - 8);;
+    s <-- get;
+    // Then push the value at the new stack slot
+    update_stack s.stack.rsp (eval_operand src s)
 
   | Pop dst ->
-    let stack_val = OMem (MReg Rsp 0) in
-    check (valid_operand stack_val);;
-    let new_dst = eval_operand stack_val s in
-    let new_rsp = ((eval_reg Rsp s) + 8) % pow2_64 in
+    // The stack is not empty
+    check (fun s -> s.stack.rsp + 8 <= s.stack.initial_rsp);;
+    // Get the element currently on top of the stack
+    let new_dst = eval_stack64 s.stack.rsp s in
+    // Store it in the dst operand
     update_operand_preserve_flags dst new_dst;;
-    update_reg Rsp new_rsp
+    // Finally, update the stack pointer
+    update_rsp (s.stack.rsp + 8)
+
+  // Load64_stack loads an element at offset n above the stack pointer
+  | Load64_stack dst n ->
+    // The offset should be aligned
+    check (fun s -> n % 8 = 0);;
+    let new_dst = eval_stack64 (s.stack.rsp + n) s in
+    // We load the value at this stack offset into dst
+    update_operand_preserve_flags dst new_dst
+
+  // Store64_stack stores an element at offset n above the stack pointer
+  | Store64_stack src n ->
+    check (valid_operand src);;
+    // We only modify data below the initial stack pointer. This is conservative since we cannot modify the shadow space on Windows,
+    // but this prevents modifying the return address for instance
+    check (fun s -> s.stack.rsp + n + 8 <= s.stack.initial_rsp);;
+    // The offset should be aligned
+    check (fun s -> n % 8 = 0);;    
+    // Store the src operand at the given offset from the stack pointer
+    update_stack (s.stack.rsp + n) (eval_operand src s)
+
+  | Alloc n ->
+    check (fun s -> n % 8 = 0);;
+    // We already check in update_rsp that we do not run out of stack space
+    update_rsp (s.stack.rsp - n)
+
+  | Dealloc n ->
+    check (fun s -> n % 8 = 0);;
+    // We already check in update_rsp that we do not deallocate more than what we initially had
+    update_rsp (s.stack.rsp + n)
+
 // In the XMM-related instructions below, we generally don't need to check for validity of the operands,
 // since all possibilities are valid, thanks to dependent types
 
