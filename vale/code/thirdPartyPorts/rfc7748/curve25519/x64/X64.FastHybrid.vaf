@@ -1113,7 +1113,7 @@ procedure{:quick}{:public}{:exportSpecs} fmul1(
         validDstAddrs64(mem, dst_ptr, dst_b, 4, memTaint, Secret);
         validSrcAddrs64(mem, inA_ptr, inA_b, 4, memTaint, Secret);
         
-        b <= 121665;
+        b < 131072; // < pow2 17
     ensures
         let d0 := buffer64_read(dst_b, 0, mem);
         let d1 := buffer64_read(dst_b, 1, mem);

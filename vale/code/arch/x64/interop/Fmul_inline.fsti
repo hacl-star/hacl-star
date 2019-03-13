@@ -72,7 +72,7 @@ val fmul2_inline
 val fmul1_inline
   (out:u256)
   (f1:u256) 
-  (f2:UInt64.t{UInt64.v f2 < 121665})
+  (f2:UInt64.t{UInt64.v f2 < 131072})
   : Stack unit
     (requires fun h ->
       adx_enabled /\ bmi2_enabled /\
