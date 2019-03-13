@@ -413,7 +413,7 @@ procedure {:quick} gcm_blocks(
 {
 //    ghost var h, y_0, y_auth := gcm_auth_bytes(alg, auth_b, key, round_keys, keys_b);
 
-    ghost var ctr_BE := AES_GCM_encrypt_6mult(alg, iv_b, in128x6_b, out128x6_b, stack_b, key, round_keys, keys_b, hkeys_b);
+    (ghost var ctr_BE) := AES_GCM_encrypt_6mult(alg, iv_b, in128x6_b, out128x6_b, stack_b, key, round_keys, keys_b, hkeys_b);
 //    // TODO: Line up argument registers appropriately
 //    gcm_blocks128(alg, in128_b, out128_b, key, round_keys, keys_b);
 //    Mov64(rcx, 1);
