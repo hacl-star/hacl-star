@@ -394,7 +394,7 @@ obj/X64.Bytes_Semantics.fst.checked: \
       s/--smtencoding.nl_arith_repr native//')
 
 obj/X64.BufferViewStore.fst.checked: \
-  FSTAR_FLAGS=$(VALE_FSTAR_FLAGS_NOSMT) --smtencoding.elim_box true
+  FSTAR_FLAGS=$(VALE_FSTAR_FLAGS)
 
 obj/X64.Poly1305.Util.fst.checked: \
   FSTAR_FLAGS=$(VALE_FSTAR_FLAGS_NOSMT)
