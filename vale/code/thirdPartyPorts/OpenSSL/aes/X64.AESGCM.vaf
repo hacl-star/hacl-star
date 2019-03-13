@@ -74,7 +74,7 @@ module GCTR = GCTR
 #endverbatim
 
 #verbatim{:interface}
-let aes_reqs
+let aes_reqs_offset
   (alg:algorithm) (key:seq nat32) (round_keys:seq quad32) (keys_b:buffer128)
   (key_ptr:int) (mem:memory) (memTaint:memtaint) : prop0
   =
@@ -102,7 +102,7 @@ unfold let lo(x:poly):poly = mask x 64
 unfold let hi(x:poly):poly = shift x (-64)
 #endverbatim
 
-function aes_reqs(alg:algorithm, key:seq(nat32), round_keys:seq(quad32), keys_b:buffer128,
+function aes_reqs_offset(alg:algorithm, key:seq(nat32), round_keys:seq(quad32), keys_b:buffer128,
     key_ptr:int, mem:memory, memTaint:memtaint) : prop extern;
 
 function lo(x:poly) : poly extern;
@@ -327,7 +327,7 @@ procedure {:quick} Ctr32_ghash_6_prelude(
         validDstAddrs128(mem, rsp, stack_b, 8, memTaint, Secret);
 
         // AES reqs
-        aes_reqs(alg, key_words, round_keys, keys_b, key, mem, memTaint);
+        aes_reqs_offset(alg, key_words, round_keys, keys_b, key, mem, memTaint);
 
         // Counters
         ctr_orig.lo0 % 256 + 6 < 256;
@@ -448,7 +448,7 @@ procedure {:quick} Loop6x_ctr_update(
         validSrcAddrs128(mem, Xip - 0x20, hkeys_b, 8, memTaint, Secret);
 
         // AES reqs
-        aes_reqs(alg, key_words, round_keys, keys_b, key, mem, memTaint);
+        aes_reqs_offset(alg, key_words, round_keys, keys_b, key, mem, memTaint);
         //rndkey == index(round_keys, 0);
 
         // Counter requirements
@@ -538,7 +538,7 @@ procedure {:quick} Loop6x_preamble(
         buffers_disjoint128(iv_b, hkeys_b);
 
         // AES reqs
-        aes_reqs(alg, key_words, round_keys, keys_b, key, mem, memTaint);
+        aes_reqs_offset(alg, key_words, round_keys, keys_b, key, mem, memTaint);
         rndkey == index(round_keys, 0);
 
         // GCM reqs
@@ -679,7 +679,7 @@ procedure {:quick} Loop6x_step1(
         validSrcAddrs128(mem, Xip - 0x20, hkeys_b, 8, memTaint, Secret);
 
         // AES reqs
-        aes_reqs(alg, key_words, round_keys, keys_b, key, mem, memTaint);
+        aes_reqs_offset(alg, key_words, round_keys, keys_b, key, mem, memTaint);
         rnd + 1 < length(round_keys);
 
         // GCM reqs
@@ -802,7 +802,7 @@ procedure {:quick} Loop6x_plain(
         validSrcAddrs128(mem, Xip - 0x20, hkeys_b, 8, memTaint, Secret);
 
         // AES reqs
-        aes_reqs(alg, key_words, round_keys, keys_b, key, mem, memTaint);
+        aes_reqs_offset(alg, key_words, round_keys, keys_b, key, mem, memTaint);
         rnd + 1 < length(round_keys);
         
         // GCM reqs
@@ -930,7 +930,7 @@ procedure {:quick} Loop6x_step2(
         validSrcAddrs128(mem, Xip - 0x20, hkeys_b, 8, memTaint, Secret);
 
         // AES reqs
-        aes_reqs(alg, key_words, round_keys, keys_b, key, mem, memTaint);
+        aes_reqs_offset(alg, key_words, round_keys, keys_b, key, mem, memTaint);
         rnd + 1 < length(round_keys);
 
         // GCM reqs
@@ -1071,7 +1071,7 @@ procedure {:quick} Loop6x_step3(
         validSrcAddrs128(mem, Xip - 0x20, hkeys_b, 8, memTaint, Secret);
 
         // AES reqs
-        aes_reqs(alg, key_words, round_keys, keys_b, key, mem, memTaint);
+        aes_reqs_offset(alg, key_words, round_keys, keys_b, key, mem, memTaint);
         rnd + 1 < length(round_keys);
 
         // GCM reqs
@@ -1211,7 +1211,7 @@ procedure {:quick} Loop6x_step4(
         validDstAddrs128(mem, rsp, stack_b, 8, memTaint, Secret);
 
         // AES reqs
-        aes_reqs(alg, key_words, round_keys, keys_b, key, mem, memTaint);
+        aes_reqs_offset(alg, key_words, round_keys, keys_b, key, mem, memTaint);
         rnd + 1 < length(round_keys);
 
         // GCM reqs
@@ -1344,7 +1344,7 @@ procedure {:quick} Loop6x_step5(
         validDstAddrs128(mem, rsp, stack_b, 8, memTaint, Secret);
 
         // AES reqs
-        aes_reqs(alg, key_words, round_keys, keys_b, key, mem, memTaint);
+        aes_reqs_offset(alg, key_words, round_keys, keys_b, key, mem, memTaint);
         rnd + 1 < length(round_keys);
 
         // GCM reqs
@@ -1466,7 +1466,7 @@ procedure {:quick} Loop6x_round8(
         validSrcAddrsOffset128(mem, in0, in0_b, (count-2)*6, 1, memTaint, Secret);
 
         // AES reqs
-        aes_reqs(alg, key_words, round_keys, keys_b, key, mem, memTaint);
+        aes_reqs_offset(alg, key_words, round_keys, keys_b, key, mem, memTaint);
 
         inout0 == rounds_opaque(init0, round_keys, 7);
         inout1 == rounds_opaque(init1, round_keys, 7);
@@ -1556,7 +1556,7 @@ procedure {:quick} Loop6x_round9(
         validDstAddrs128(mem, rsp, stack_b, 8, memTaint, Secret);
 
         // AES reqs
-        aes_reqs(alg, key_words, round_keys, keys_b, key, mem, memTaint);
+        aes_reqs_offset(alg, key_words, round_keys, keys_b, key, mem, memTaint);
 
         inout0 == rounds_opaque(init0, round_keys, 8);
         inout1 == rounds_opaque(init1, round_keys, 8);
@@ -1680,7 +1680,7 @@ procedure {:quick} Loop6x_final(
         outp + 0x60 < pow2_64;
 
         // AES reqs
-        aes_reqs(alg, key_words, round_keys, keys_b, key, mem, memTaint);
+        aes_reqs_offset(alg, key_words, round_keys, keys_b, key, mem, memTaint);
 
         init0 == quad32_xor(ctr0, index(round_keys, 0));
         init1 == quad32_xor(ctr1, index(round_keys, 0));
@@ -1906,7 +1906,7 @@ procedure {:quick} Loop6x_partial(
          inp + 0x60 < pow2_64;
 
         // AES reqs
-        aes_reqs(alg, key_words, round_keys, keys_b, key, mem, memTaint);
+        aes_reqs_offset(alg, key_words, round_keys, keys_b, key, mem, memTaint);
         rndkey == index(round_keys, 0);
 
         // GCM reqs
@@ -2069,7 +2069,7 @@ procedure {:quick} {:frame false} Loop6x(
         outp + 0x60 < pow2_64;
 
         // AES reqs
-        aes_reqs(alg, key_words, round_keys, keys_b, key, mem, memTaint);
+        aes_reqs_offset(alg, key_words, round_keys, keys_b, key, mem, memTaint);
         rndkey == index(round_keys, 0);
 
         // GCM reqs
@@ -2206,7 +2206,7 @@ procedure {:quick} {:frame false} Loop6x(
 
 
 #reset-options "--z3rlimit 225"
-procedure {:quick exportOnly} {:frame false} {:verify true} Loop6x_loop(
+procedure {:quick exportOnly} {:frame false} Loop6x_loop(
     inline alg:algorithm,  
     ghost count:nat,        // Number of 6x128-bit blocks processed so far
     ghost iv_b:buffer128,
@@ -2279,7 +2279,7 @@ procedure {:quick exportOnly} {:frame false} {:verify true} Loop6x_loop(
         outp + 0x10*len < pow2_64;
 
         // AES reqs
-        aes_reqs(alg, key_words, round_keys, keys_b, key, mem, memTaint);
+        aes_reqs_offset(alg, key_words, round_keys, keys_b, key, mem, memTaint);
         rndkey == index(round_keys, 0);
 
         // GCM reqs
@@ -2401,7 +2401,7 @@ procedure {:quick exportOnly} {:frame false} {:verify true} Loop6x_loop(
             buffer_modifies_specific128(iv_b,    old(mem), mem, 0, 0);
 
             // AES reqs
-            aes_reqs(alg, key_words, round_keys, keys_b, key, mem, memTaint);
+            aes_reqs_offset(alg, key_words, round_keys, keys_b, key, mem, memTaint);
             rndkey == index(round_keys, 0);
 
             // GCM reqs
@@ -2478,7 +2478,7 @@ procedure {:quick} AESNI_ctr32_6x_preamble(
 
     requires
         // AES reqs
-        aes_reqs(alg, key_words, round_keys, keys_b, key, mem, memTaint);
+        aes_reqs_offset(alg, key_words, round_keys, keys_b, key, mem, memTaint);
         key - 0x60 >= 0;
 
         ctr_orig.lo0 % 256 + 6 < 256;
@@ -2561,7 +2561,7 @@ procedure {:quick} AESNI_ctr32_6x_loop_body(
 
     requires
         // AES reqs
-        aes_reqs(alg, key_words, round_keys, keys_b, key, mem, memTaint);
+        aes_reqs_offset(alg, key_words, round_keys, keys_b, key, mem, memTaint);
         rnd + 2 < length(round_keys);
         rndkey == index(round_keys, rnd+1);
 
@@ -2623,7 +2623,7 @@ procedure {:recursive} {:quick exportOnly} AESNI_ctr32_6x_loop_recursive(
 
     requires
         // AES reqs
-        aes_reqs(alg, key_words, round_keys, keys_b, key, mem, memTaint);
+        aes_reqs_offset(alg, key_words, round_keys, keys_b, key, mem, memTaint);
         rnd + 2 < length(round_keys);
         rndkey == index(round_keys, 1);
 
@@ -2690,7 +2690,7 @@ procedure {:quick} AESNI_ctr32_6x_round9(
         inp + 0x60 < pow2_64;
 
         // AES reqs
-        aes_reqs(alg, key_words, round_keys, keys_b, key, mem, memTaint);
+        aes_reqs_offset(alg, key_words, round_keys, keys_b, key, mem, memTaint);
         rndkey == index(round_keys, #nat(nr(alg)-1));
 
         inout0 == rounds_opaque(init0, round_keys, #nat(nr(alg)-2));
@@ -2789,7 +2789,7 @@ procedure {:quick} AESNI_ctr32_6x_final(
         outp + 0x60 < pow2_64;
 
         // AES reqs
-        aes_reqs(alg, key_words, round_keys, keys_b, key, mem, memTaint);
+        aes_reqs_offset(alg, key_words, round_keys, keys_b, key, mem, memTaint);
 
         init0 == quad32_xor(ctr0, index(round_keys, 0));
         init1 == quad32_xor(ctr1, index(round_keys, 0));
@@ -2910,7 +2910,7 @@ procedure {:quick} AESNI_ctr32_6x(
         outp + 0x60 < pow2_64;
 
         // AES reqs
-        aes_reqs(alg, key_words, round_keys, keys_b, key, mem, memTaint);
+        aes_reqs_offset(alg, key_words, round_keys, keys_b, key, mem, memTaint);
         key - 0x60 >= 0;
 
         // Counter requirements
@@ -3491,11 +3491,10 @@ procedure {:quick} GCM_finalize(
 }
 
 
-
 // This version is designed to be integrated into a larger procedure that handles non-multiple of 6 lengths
 // Hence the requirements and guarantees are a bit weaker
 #reset-options "--z3rlimit 30"
-procedure {:quick} AES_GCM_encrypt_6mult(
+procedure {:quick} {:public} AES_GCM_encrypt_6mult(
     inline alg:algorithm,  
     ghost iv_b:buffer128,
     ghost in_b:buffer128,
@@ -3506,7 +3505,9 @@ procedure {:quick} AES_GCM_encrypt_6mult(
     ghost round_keys:seq(quad32),
     ghost keys_b:buffer128,
     ghost hkeys_b:buffer128
-    ) 
+    ) returns (
+    ghost ctr_BE:quad32
+    )
     lets
         inp @= rdi; outp @= rsi; len @= rdx; key @= rcx; ivp @= r8; Xip @= r9;
         Ii @= xmm0; T1 @= xmm1; T2 @= xmm2; Hkey @= xmm3;
@@ -3558,8 +3559,7 @@ procedure {:quick} AES_GCM_encrypt_6mult(
 
 
         buffer_addr(keys_b, mem) + 0x80 < pow2_64;
-        aes_reqs(alg, key_words, round_keys, keys_b, key + 0x80, mem, memTaint);
-        T1.lo0 == 2;
+        aes_reqs_offset(alg, key_words, round_keys, keys_b, key + 0x80, mem, memTaint);
 
         // GCM reqs
         pclmulqdq_enabled;
@@ -3571,21 +3571,31 @@ procedure {:quick} AES_GCM_encrypt_6mult(
         len / 6 >= 3;   // Should be implied by above... :(
         12 + len + 6 < pow2_32;
     ensures
+        let iv_LE := old(buffer128_read(iv_b, 0, mem));
+        let iv_BE := reverse_bytes_quad32(iv_LE);
+        ctr_BE == Mkfour(2, iv_BE.lo1, iv_BE.hi2, iv_BE.hi3);
+
         // GCTR result
-        gctr_partial_opaque(alg, old(len), old(buffer128_as_seq(mem, in_b)), buffer128_as_seq(mem, out_b), key_words, old(T1));
+        gctr_partial_opaque(alg, old(len), old(buffer128_as_seq(mem, in_b)), buffer128_as_seq(mem, out_b), key_words, ctr_BE);
         // GCM result
         //hash == ghash_incremental(reverse_bytes_quad32(h), old(hash), buffer128_as_seq(mem, out_b), old(len));
 
         // Counter updated
-        buffer128_read(iv_b, 0, mem) == reverse_bytes_quad32(inc32lite(old(T1), #nat32(old(len))));
-
+        old(len) < pow2_32 /\
+        buffer128_read(iv_b, 0, mem) == reverse_bytes_quad32(inc32lite(ctr_BE, #nat32(old(len))));
 {
     ghost var plain_quads := buffer128_as_seq(mem, in_b);
 
+    Load128_buffer(T1, ivp, 0, Secret, iv_b, 0);    // # input counter value
+    ghost var iv_LE := T1;
     Add64(key, 0x80);           // # size optimization 
-
-    ghost var ctr_BE := T1;
+    // TODO: Replace all of this with a single PinsrdImm(T1, 0x02000000, 3, counter)
     InitPshufbMask(Ii, r12);    // # borrow $Ii for .Lbswap_mask
+    VPshufb(T1, T1, Ii);
+    ghost var iv_BE := T1;
+    PinsrdImm(T1, 2, 0, counter);   // Directly set the counter in T1.lo0 (and counter) to 2, rather than read the existing value as OpenSSL does
+    ctr_BE := T1;
+    //assert ctr_BE == Mkfour(2, iv_BE.lo1, iv_BE.hi2, iv_BE.hi3);
     VPshufb(T1, T1, Ii);
 
     Mov64(in0, outp);
@@ -3709,7 +3719,7 @@ procedure {:quick} AES_GCM_encrypt(
 
         // AES reqs
         buffer_addr(keys_b, mem) + 0x80 < pow2_64;
-        aes_reqs(alg, key_words, round_keys, keys_b, key + 0x80, mem, memTaint);
+        aes_reqs_offset(alg, key_words, round_keys, keys_b, key + 0x80, mem, memTaint);
 
         // GCM reqs
         pclmulqdq_enabled;
@@ -3899,3 +3909,7 @@ round 9:
         $$Z0 == lo(old($$Z0)) *. hi(old($$Hkey));
 
 */
+
+#verbatim {:interface}
+// Hello
+#endverbatim
