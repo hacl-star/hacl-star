@@ -85,5 +85,5 @@ val lemma_carry_sub_prime (a0 a1 a2 a3 a0' a1' a2' a3' carry_in:nat64) (carry:bi
 
 val lemma_fmul (a0 a1 a2 a3 b d0 d1 d2 d3 carry:nat64) : Lemma
   (requires pow2_five d0 d1 d2 d3 carry == (pow2_four a0 a1 a2 a3) * b /\
-            b <= 121665)
+            b < 131072)
   (ensures carry * 38 < pow2_63)

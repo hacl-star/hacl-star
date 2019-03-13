@@ -1160,7 +1160,7 @@ procedure{:quick}{:public}{:exportSpecs} fmul1_stdcall(
         validSrcAddrs64(mem, inA_in, inA_b, 4, memTaint, Secret);
         valid_stack_slots(mem, rsp, stack_b, 4, memTaint);
 
-        inB_in <= 121665;
+        inB_in < 131072;
     ensures
         let a0 := old(buffer64_read(inA_b, 0, mem));
         let a1 := old(buffer64_read(inA_b, 1, mem));
