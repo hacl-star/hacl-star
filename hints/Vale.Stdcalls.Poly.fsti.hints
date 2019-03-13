@@ -8,7 +8,7 @@
       0,
       [ "@query" ],
       0,
-      "cec31fb5454892684a8b56faffca4279"
+      "ab19aed00ea4ffaa6ec02e9d558420e6"
     ],
     [
       "Vale.Stdcalls.Poly.as_normal_t",
@@ -17,7 +17,7 @@
       0,
       [ "@query" ],
       0,
-      "42cb80a9e9dfc61e7313a8a31b05490b"
+      "f8514482690ff8316c70934df6ae0011"
     ],
     [
       "Vale.Stdcalls.Poly.dom",
@@ -29,7 +29,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "cce78f8f893205bd00534039710a3d66"
+      "820a9a2aa73737c4cef173b1538b95ac"
     ],
     [
       "Vale.Stdcalls.Poly.poly_pre",
@@ -59,7 +59,7 @@
         "token_correspondence_Prims.pow2.fuel_instrumented"
       ],
       0,
-      "a9d704a9a13029cb93d1b4a66108c2bd"
+      "40d602a8ad8569bc2bcde0173ee4ca4a"
     ],
     [
       "Vale.Stdcalls.Poly.poly_pre",
@@ -83,7 +83,7 @@
         "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-      "5865e66f7313bc3df7b67a75a83b33c6"
+      "64b1dafb2b69fe3b6f187ae74f1de80d"
     ],
     [
       "Vale.Stdcalls.Poly.poly_post",
@@ -113,7 +113,7 @@
         "token_correspondence_Prims.pow2.fuel_instrumented"
       ],
       0,
-      "6cd325ab6c0001136a9b309be79efc5d"
+      "f2e8e10b43e3572be4f801b264961108"
     ],
     [
       "Vale.Stdcalls.Poly.poly_post",
@@ -137,7 +137,7 @@
         "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-      "c6a8fa8aefce9f3be8438519ba33623c"
+      "086a8b961ef8a0abc92401fadfb5f896"
     ],
     [
       "Vale.Stdcalls.Poly.poly_lemma'",
@@ -163,7 +163,7 @@
         "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-      "1d836a5078c5c829285c1893d9b81d20"
+      "ced8d0346b1f9b90b1c7f20965933c70"
     ],
     [
       "Vale.Stdcalls.Poly.poly_lemma'",
@@ -176,7 +176,10 @@
         "X64.Machine_s_interpretation_Tm_arrow_196f8dfca6d67b0bd046e19b6a5a08e6",
         "X64.Machine_s_pretyping_b7c45855ed90996ceceb34aa61de24e7",
         "b2t_def", "bool_inversion",
+        "constructor_distinct_Interop.Base.TD_Buffer",
         "constructor_distinct_Interop.Types.TUInt64", "eq2-interp",
+        "equality_tok_Interop.Types.TUInt64@tok",
+        "equality_tok_Interop.Types.TUInt8@tok",
         "equality_tok_X64.Machine_s.Public@tok",
         "equality_tok_X64.Machine_s.R10@tok",
         "equality_tok_X64.Machine_s.R11@tok",
@@ -195,7 +198,7 @@
         "equality_tok_X64.Machine_s.Rsi@tok",
         "equality_tok_X64.Machine_s.Rsp@tok", "equation_FStar.UInt.fits",
         "equation_FStar.UInt.min_int", "equation_FStar.UInt.size",
-        "equation_FStar.UInt.uint_t",
+        "equation_FStar.UInt.uint_t", "equation_Interop.Base.td_as_type",
         "equation_Interop.X64.regs_modified_stdcall", "equation_Prims.eq2",
         "equation_Prims.eqtype", "equation_Prims.nat", "equation_Prims.prop",
         "equation_Prims.squash",
@@ -206,6 +209,7 @@
         "equation_Vale.Stdcalls.Poly.b64",
         "equation_Vale.Stdcalls.Poly.poly_post",
         "equation_Vale.Stdcalls.Poly.poly_pre",
+        "equation_Vale.Stdcalls.Poly.t64_mod",
         "equation_Vale.Stdcalls.Poly.uint64", "equation_Words_s.nat64",
         "equation_Words_s.natN", "equation_X64.Poly1305.va_ens_poly1305",
         "equation_X64.Poly1305.va_req_poly1305",
@@ -241,6 +245,9 @@
         "projection_inverse_BoxInt_proj_0",
         "projection_inverse_FStar.Pervasives.Native.Mktuple2__1",
         "projection_inverse_FStar.Pervasives.Native.Mktuple2__2",
+        "projection_inverse_Interop.Base.TD_Buffer__0",
+        "projection_inverse_Interop.Base.TD_Buffer__1",
+        "projection_inverse_Interop.Base.TD_Buffer__2",
         "projection_inverse_X64.Vale.State.Mkstate_mem",
         "projection_inverse_X64.Vale.State.Mkstate_ok",
         "projection_inverse_X64.Vale.State.Mkstate_regs",
@@ -261,7 +268,7 @@
         "typing_tok_X64.Machine_s.Rdx@tok"
       ],
       0,
-      "9282e558c2c1fa2d284d4c471812091f"
+      "70026850ced7637897200886d9b66e1e"
     ],
     [
       "Vale.Stdcalls.Poly.poly_lemma",
@@ -354,7 +361,7 @@
         "typing_tok_Interop.Types.TUInt8@tok"
       ],
       0,
-      "db2411fd7712a66216a06b08e4765ee5"
+      "4c3507213975870512ce07698b1f1345"
     ],
     [
       "Vale.Stdcalls.Poly.lowstar_poly_t",
@@ -392,7 +399,7 @@
         "typing_Vale.Stdcalls.Poly.dom"
       ],
       0,
-      "bf9438201e14be78d019211b405954fb"
+      "19bbb5c12bcdce083a68e29ca54159cf"
     ]
   ]
 ]
