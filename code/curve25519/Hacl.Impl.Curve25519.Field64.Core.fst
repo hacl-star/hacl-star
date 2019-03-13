@@ -9,12 +9,6 @@ friend Lib.IntTypes
 
 module FA = Fadd_stdcalls
 
-// TODO: this precondition needs to be threaded throughout the entire call-graph
-// as opposed to assumed in scope here.
-
-let _: squash (X64.CPU_Features_s.adx_enabled /\ X64.CPU_Features_s.bmi2_enabled) =
-  admit ()
-
 /// We are trying to connect HACL* abstractions with regular F* libraries, so in
 /// addition to ``friend``'ing ``Lib.*``, we also write a couple lemmas that we
 /// prove via normalization to facilitate the job of proving that calling the

@@ -53,6 +53,7 @@ val point_add_and_double0:
   -> tmp2:felem_wide2 s
   -> Stack unit
     (requires fun h0 ->
+      (s = M64 ==> X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled)) /\    
       live h0 q /\ live h0 nq /\ live h0 nq_p1 /\ live h0 ab /\ live h0 dc /\ live h0 tmp2 /\
       disjoint q nq /\ disjoint q nq_p1 /\ disjoint q ab /\ disjoint q dc /\ disjoint q tmp2 /\
       disjoint nq q /\ disjoint nq nq_p1 /\ disjoint nq ab /\ disjoint nq dc /\ disjoint nq tmp2 /\
@@ -123,6 +124,7 @@ val point_add_and_double1:
   -> tmp2:felem_wide2 s
   -> Stack unit
     (requires fun h0 ->
+      (s = M64 ==> X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled)) /\    
       live h0 nq /\ live h0 tmp1 /\ live h0 tmp2 /\
       disjoint nq tmp1 /\ disjoint nq tmp2 /\ disjoint tmp1 tmp2 /\
       state_inv_t h0 (get_x nq) /\ state_inv_t h0 (get_z nq) /\
@@ -180,7 +182,9 @@ val point_add_and_double_:
   -> p01_tmp1:lbuffer (limb s) (8ul *! nlimb s)
   -> tmp2:felem_wide2 s
   -> Stack unit
-    (requires fun h0 -> (
+    (requires fun h0 ->
+      (s = M64 ==> X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled)) /\    
+    (
       let nq = gsub p01_tmp1 0ul (2ul *! nlimb s) in
       let nq_p1 = gsub p01_tmp1 (2ul *! nlimb s) (2ul *! nlimb s) in
       live h0 q /\ live h0 p01_tmp1 /\ live h0 tmp2 /\
@@ -238,7 +242,9 @@ val point_add_and_double:
   -> p01_tmp1:lbuffer (limb s) (8ul *! nlimb s)
   -> tmp2:felem_wide2 s
   -> Stack unit
-    (requires fun h0 -> (
+    (requires fun h0 -> 
+      (s = M64 ==> X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled)) /\    
+    (
       let nq = gsub p01_tmp1 0ul (2ul *! nlimb s) in
       let nq_p1 = gsub p01_tmp1 (2ul *! nlimb s) (2ul *! nlimb s) in
       live h0 q /\ live h0 p01_tmp1 /\ live h0 tmp2 /\
@@ -269,6 +275,7 @@ val point_double_:
   -> tmp2:felem_wide2 s
   -> Stack unit
     (requires fun h0 ->
+      (s = M64 ==> X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled)) /\    
       live h0 nq /\ live h0 tmp1 /\ live h0 tmp2 /\
       disjoint nq tmp1 /\ disjoint nq tmp2 /\ disjoint tmp1 tmp2 /\
       state_inv_t h0 (get_x nq) /\ state_inv_t h0 (get_z nq))
@@ -327,6 +334,7 @@ val point_double:
   -> tmp2:felem_wide2 s
   -> Stack unit
     (requires fun h0 ->
+      (s = M64 ==> X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled)) /\    
       live h0 nq /\ live h0 tmp1 /\ live h0 tmp2 /\
       disjoint nq tmp1 /\ disjoint nq tmp2 /\ disjoint tmp1 tmp2 /\
       state_inv_t h0 (get_x nq) /\ state_inv_t h0 (get_z nq))
