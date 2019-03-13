@@ -961,9 +961,10 @@ val mod_add128:
       let (b0, b1) = b in
       (uint64xN_v r1).[0] * pow2 64 + (uint64xN_v r0).[0] ==
 	(((uint64xN_v a1).[0] + (uint64xN_v b1).[0]) * pow2 64 + (uint64xN_v a0).[0] + (uint64xN_v b0).[0]) % pow2 128))
-let mod_add128 #w (a0, a1) (b0, b1) = admit();
+let mod_add128 #w (a0, a1) (b0, b1) =
   let r0 = vec_add_mod a0 b0 in
   let r1 = vec_add_mod a1 b1 in
-  let c = r0 ^| ((r0 ^| b0) `vec_or` (r0 -| b0) ^| b0) >>| 63ul in
+  let c = r0 ^| ((r0 ^| b0) `vec_or` ((r0 -| b0) ^| b0)) >>| 63ul in
   let r1 = vec_add_mod r1 c in
+  mod_add128_lemma (a0, a1) (b0, b1);
   (r0, r1)

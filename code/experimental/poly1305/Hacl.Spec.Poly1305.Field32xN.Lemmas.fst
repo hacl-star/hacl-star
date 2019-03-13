@@ -888,11 +888,36 @@ let set_bit5_lemma #w f i =
     eq_intro (lfeval (set_bit5 f i)) tmp
   | 2 ->
     set_bit5_lemma_k #w f i 0;
-    set_bit5_lemma_k #w f i 1;    
+    set_bit5_lemma_k #w f i 1;
     eq_intro (lfeval (set_bit5 f i)) tmp
   | 4 ->
     set_bit5_lemma_k #w f i 0;
     set_bit5_lemma_k #w f i 1;
     set_bit5_lemma_k #w f i 2;
-    set_bit5_lemma_k #w f i 3;    
+    set_bit5_lemma_k #w f i 3;
     eq_intro (lfeval (set_bit5 f i)) tmp
+
+val mod_add128_lemma:
+    #w:lanes
+  -> a:(uint64xN w & uint64xN w)
+  -> b:(uint64xN w & uint64xN w)
+  -> Lemma
+    (let (r0, r1) = mod_add128_ws a b in
+     let (a0, a1) = a in
+     let (b0, b1) = b in
+    (forall (i:nat). i < w ==>
+    (uint64xN_v r1).[i] * pow2 64 + (uint64xN_v r0).[i] ==
+      (((uint64xN_v a1).[i] + (uint64xN_v b1).[i]) * pow2 64 +
+      (uint64xN_v a0).[i] + (uint64xN_v b0).[i]) % pow2 128))
+let mod_add128_lemma #w a b =
+  match w with
+  | 1 ->
+    mod_add128_lemma_i a b 0
+  | 2 ->
+    mod_add128_lemma_i a b 0;
+    mod_add128_lemma_i a b 1
+  | 4 ->
+    mod_add128_lemma_i a b 0;
+    mod_add128_lemma_i a b 1;
+    mod_add128_lemma_i a b 2;
+    mod_add128_lemma_i a b 3

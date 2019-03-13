@@ -534,3 +534,16 @@ let set_bit5 #w f i =
   let fi = f.[i / 26] in
   let res = f.[i / 26] <- vec_or fi mask in
   res
+
+inline_for_extraction noextract
+val mod_add128_ws:
+    #w:lanes
+  -> a:(uint64xN w & uint64xN w)
+  -> b:(uint64xN w & uint64xN w)
+  -> uint64xN w & uint64xN w
+let mod_add128_ws #w (a0, a1) (b0, b1) =
+  let r0 = vec_add_mod a0 b0 in
+  let r1 = vec_add_mod a1 b1 in
+  let c = r0 ^| ((r0 ^| b0) `vec_or` ((r0 -| b0) ^| b0)) >>| 63ul in
+  let r1 = vec_add_mod r1 c in
+  (r0, r1)
