@@ -1,8 +1,9 @@
+/*
 include "../../../arch/x64/X64.Vale.InsBasic.vaf"
 include "../../../arch/x64/X64.Vale.InsMem.vaf"
 include "../../../arch/x64/X64.Vale.InsVector.vaf"
 include "../../../lib/util/x64/X64.Stack.vaf"
-include "../../../thirdPartyPorts/OpenSSL/aes/X64.AESGCM.vaf"
+//i//nclude "../../../thirdPartyPorts/OpenSSL/aes/X64.AESGCM.vaf"
 include "X64.AES.vaf"
 include "X64.GF128_Mul.vaf"
 include "X64.GCTR.vaf"
@@ -1132,4 +1133,5 @@ procedure {:quick} gcm_encrypt2_stdcall(
     callee_restore_registers(win, stack_b, old(xmm6), old(xmm7), old(xmm8), old(xmm9), old(xmm10), old(xmm11),
                              old(xmm12), old(xmm13), old(xmm14), old(xmm15));
 }
+*/
 */
