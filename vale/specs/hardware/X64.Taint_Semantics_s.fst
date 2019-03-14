@@ -40,7 +40,7 @@ let extract_operands (i:ins) : (list operand * list operand) =
   | S.Pinsrd _ src _ | S.Pinsrq _ src _ -> [], [src]
   | S.Pextrq dst _ _ -> [dst], []
   | S.Push src -> [], [src]
-  | S.Pop dst -> [dst], [OMem (MReg Rsp 0)]
+  | S.Pop dst -> [dst], [OStack (MReg Rsp 0)]
   | _ -> [], []
 
 (*
@@ -144,12 +144,6 @@ let taint_eval_ins (ins:tainted_ins) (ts: traceState) : GTot traceState =
         let s' = update_operand_preserve_flags' dst_lo lo s in
         let memTaint = update_taint ts.memTaint dst_lo t s in
         update_taint memTaint dst_hi t s'
-      end
-      else if S.Push? i then begin
-        let S.Push src = i in
-        let new_rsp = ((eval_reg Rsp s) - 8) % pow2_64 in
-        let mt = update_n new_rsp 8 ts.memTaint t in
-        mt
       end
       else update_taint_list ts.memTaint dsts t s
     in

@@ -133,11 +133,11 @@ let get_heap_val128 = make_opaque get_heap_val128_def
 unfold let eval_mem (ptr:int) (s:state) : nat64 = get_heap_val64 ptr s.mem
 unfold let eval_mem128 (ptr:int) (s:state) : quad32 = get_heap_val128 ptr s.mem
 
-unfold let eval_stack (ptr:int) (s:state) : nat64 = 
-  let Vale_stack _ mem = s.stack in
+unfold let eval_stack (ptr:int) (s:stack) : nat64 = 
+  let Vale_stack _ mem = s in
   get_heap_val64 ptr mem
-unfold let eval_stack128 (ptr:int) (s:state) : quad32 = 
-  let Vale_stack _ mem = s.stack in
+unfold let eval_stack128 (ptr:int) (s:stack) : quad32 = 
+  let Vale_stack _ mem = s in
   get_heap_val128 ptr mem
 
 [@va_qattr]
@@ -153,13 +153,13 @@ let eval_operand (o:operand) (s:state) : nat64 =
   | OConst n -> int_to_nat64 n
   | OReg r -> eval_reg r s
   | OMem m -> eval_mem (eval_maddr m s) s
-  | OStack m -> eval_stack (eval_maddr m s) s
+  | OStack m -> eval_stack (eval_maddr m s) s.stack
 
 let eval_mov128_op (o:mov128_op) (s:state) : quad32 =
   match o with
   | Mov128Xmm i -> eval_xmm i s
   | Mov128Mem m -> eval_mem128 (eval_maddr m s) s
-  | Mov128Stack m -> eval_stack128 (eval_maddr m s) s
+  | Mov128Stack m -> eval_stack128 (eval_maddr m s) s.stack
 
 let eval_ocmp (s:state) (c:ocmp) :bool =
   match c with
@@ -251,13 +251,24 @@ let update_mem128 (ptr:int) (v:quad32) (s:state) : state =
   { s with mem = update_heap128 ptr v s.mem }
   else s
 
+unfold
+let update_stack' (ptr:int) (v:nat64) (s:stack) : stack =
+  let Vale_stack init_rsp mem = s in
+  let mem = update_heap64 ptr v mem in
+  Vale_stack init_rsp mem
+
+unfold
+let update_stack128' (ptr:int) (v:quad32) (s:stack) : stack =
+  let Vale_stack init_rsp mem = s in
+  let mem = update_heap128 ptr v mem in
+  Vale_stack init_rsp mem
+
 let update_stack (ptr:int) (v:nat64) (s:state) : state =
   let Vale_stack init_rsp mem = s.stack in
   // We can only write the stack between the current stack pointer and
   // the initial stack pointer. Everything above is read-only
   if (ptr >= s.regs Rsp && ptr + 8 <= init_rsp) then (
-    let mem = update_heap64 ptr v mem in
-    {s with stack = Vale_stack init_rsp mem}
+    {s with stack = update_stack' ptr v s.stack}
   ) else s
 
 let update_stack128 (ptr:int) (v:quad32) (s:state) : state =
@@ -265,22 +276,31 @@ let update_stack128 (ptr:int) (v:quad32) (s:state) : state =
   // We can only write the stack between the current stack pointer and
   // the initial stack pointer. Everything above is read-only
   if (ptr >= s.regs Rsp && ptr + 16 <= init_rsp) then (
-    let mem = update_heap128 ptr v mem in
-    {s with stack = Vale_stack init_rsp mem}
+    {s with stack = update_stack128' ptr v s.stack}
   ) else s
+
+unfold
+let valid_src_stack64 (ptr:int) (st:stack) : bool =
+  let Vale_stack init_rsp mem = st in
+  valid_addr64 ptr mem
+
+unfold
+let valid_src_stack128 (ptr:int) (st:stack) : bool =
+  let Vale_stack init_rsp mem = st in
+  valid_addr128 ptr mem
 
 let valid_src_operand (o:operand) (s:state) : bool =
   match o with
   | OConst n -> true
   | OReg r -> true
   | OMem m -> valid_addr64 (eval_maddr m s) s.mem
-  | OStack m -> let Vale_stack init_rsp mem = s.stack in valid_addr64 (eval_maddr m s) mem
+  | OStack m -> valid_src_stack64 (eval_maddr m s) s.stack
 
 let valid_src_mov128_op (o:mov128_op) (s:state) : bool =
   match o with
   | Mov128Xmm i -> true (* We leave it to the printer/assembler to object to invalid XMM indices *)
   | Mov128Mem m -> valid_addr128 (eval_maddr m s) s.mem
-  | Mov128Stack m -> let Vale_stack init_rsp mem = s.stack in valid_addr128 (eval_maddr m s) mem
+  | Mov128Stack m -> valid_src_stack128 (eval_maddr m s) s.stack
   
 let valid_src_shift_operand (o:operand) (s:state) : bool =
   valid_src_operand o s && (eval_operand o s) < 64
@@ -294,26 +314,30 @@ let valid_ocmp (c:ocmp) (s:state) :bool =
   | OLt o1 o2 -> valid_src_operand o1 s && valid_src_operand o2 s
   | OGt o1 o2 -> valid_src_operand o1 s && valid_src_operand o2 s
 
+unfold
+let valid_dst_stack64 (rsp:nat64) (ptr:int) (st:stack) : bool =
+  let Vale_stack init_rsp mem = st in
+    // We are allowed to store anywhere between Rsp and the initial buffer
+  ptr >= rsp && ptr + 8 <= init_rsp
+
+unfold
+let valid_dst_stack128 (rsp:nat64) (ptr:int) (st:stack) : bool =
+  let Vale_stack init_rsp mem = st in
+    // We are allowed to store anywhere between Rsp and the initial buffer
+    ptr >= rsp && ptr + 16 <= init_rsp
+
 let valid_dst_operand (o:operand) (s:state) : bool =
   match o with
   | OConst n -> false
   | OReg r -> not (Rsp? r)
   | OMem m -> valid_addr64 (eval_maddr m s) s.mem
-  | OStack m -> 
-    let Vale_stack init_rsp mem = s.stack in 
-    let ptr = eval_maddr m s in
-    // We are allowed to store anywhere between Rsp and the initial buffer
-    ptr >= (eval_reg Rsp s) && ptr + 8 <= init_rsp
+  | OStack m -> valid_dst_stack64 (eval_reg Rsp s) (eval_maddr m s) s.stack
 
 let valid_dst_mov128_op (o:mov128_op) (s:state) : bool =
   match o with
   | Mov128Xmm i -> true (* We leave it to the printer/assembler to object to invalid XMM indices *)
   | Mov128Mem m -> valid_addr128 (eval_maddr m s) s.mem
-  | Mov128Stack m -> 
-    let Vale_stack init_rsp mem = s.stack in 
-    let ptr = eval_maddr m s in
-    // We are allowed to store anywhere between Rsp and the initial buffer
-    ptr >= (eval_reg Rsp s) && ptr + 16 <= init_rsp
+  | Mov128Stack m -> valid_dst_stack128 (eval_reg Rsp s) (eval_maddr m s) s.stack
 
 let update_operand_preserve_flags' (o:operand) (v:nat64) (s:state) : state =
   match o with
@@ -379,7 +403,7 @@ let free_stack' (start finish:int) (st:stack) : stack =
   let domain = Map.domain mem in
   // Returns the domain, without elements between start and finish
   let restricted_domain = Vale.Set.remove_between domain start finish in
-  // The new domain of the stack does not containt elements between start and finish
+  // The new domain of the stack does not contain elements between start and finish
   let new_mem = Map.restrict restricted_domain mem in
   Vale_stack init_rsp new_mem
 
@@ -618,10 +642,10 @@ let eval_ins (ins:ins) : st unit =
     // Compute the new stack pointer
     let new_rsp = eval_reg Rsp s - 8 in
     check (valid_src_operand src);;
-    // Store the element at the new stack pointer
-    update_operand_preserve_flags (OMem (MConst new_rsp)) new_src;;
     // Actually modify the stack pointer
-    update_rsp new_rsp
+    update_rsp new_rsp;;
+    // Store the element at the new stack pointer
+    update_operand_preserve_flags (OStack (MConst new_rsp)) new_src
 
   | Pop dst ->
     let stack_op = OStack (MReg Rsp 0) in
