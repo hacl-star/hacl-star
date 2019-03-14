@@ -1,5 +1,6 @@
 include "../../../../arch/x64/X64.Vale.InsBasic.vaf"
 include "../../../../arch/x64/X64.Vale.InsMem.vaf"
+include "../../../../arch/x64/X64.Vale.InsStack.vaf"
 include{:fstar}{:open} "Fast_defs"
 include{:fstar}{:open} "Fast_lemmas_external"
 include{:fstar}{:open} "FastHybrid_helpers"
@@ -19,6 +20,7 @@ open X64.Vale.State
 open X64.Vale.Decls
 open X64.Vale.InsBasic
 open X64.Vale.InsMem
+open X64.Vale.InsStack
 open X64.Vale.QuickCode
 open X64.Vale.QuickCodes
 open Fast_defs
@@ -35,6 +37,7 @@ open X64.Vale.State
 open X64.Vale.Decls
 open X64.Vale.InsBasic
 open X64.Vale.InsMem
+open X64.Vale.InsStack
 open X64.Vale.QuickCode
 open X64.Vale.QuickCodes
 open FStar.Tactics

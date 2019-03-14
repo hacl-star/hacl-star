@@ -104,36 +104,3 @@ procedure{:instruction Ins(TS.TaintedIns(tuple(S.Mov64(OMem(MReg(get_reg(dst), o
     lemma_valid_taint64(b, old(#memTaint_t(memTaint)), old(mem), #nat(index), t);
     same_memTaint64(b, old(mem), mem, old(#memTaint_t(memTaint)), #memTaint_t(memTaint));
 }
-
-procedure{:instruction Ins(TS.TaintedIns(tuple(S.Pop(t_op_to_op(dst))), Public))}
-         {:fast_instruction}{:quick exportOnly}{:public}
-    Pop(out dst: dst_opr64)
-    modifies rsp; stack;
-    requires
-        valid_src_stack64(rsp, stack);
-        rsp >= init_rsp(stack) - 4096;
-        rsp + 8 <= init_rsp(stack);
-    ensures
-        dst == load_stack64(old(rsp), old(stack));
-        rsp == old(rsp) + 8;
-        stack == free_stack64(rsp-8, rsp, old(stack));
-{
-
-}
-
-procedure{:instruction Ins(TS.TaintedIns(tuple(S.Push(t_op_to_op(src))), Public))}
-         {:fast_instruction}{:quick exportOnly}{:public}
-    Push(src: reg_opr64)
-    reads
-    modifies
-        rsp; stack;
-    requires
-        rsp <= init_rsp(stack);
-        init_rsp(stack) - 4096 <= rsp - 8;
-    ensures
-        rsp == old(rsp) - 8;
-        stack == store_stack64(rsp, old(src), old(stack));
-{
-    equiv_store_stack64(rsp, old(src), old(stack));
-}
-

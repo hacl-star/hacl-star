@@ -1,5 +1,6 @@
 include "../../../arch/x64/X64.Vale.InsBasic.vaf"
 include "../../../arch/x64/X64.Vale.InsMem.vaf"
+include "../../../arch/x64/X64.Vale.InsStack.vaf"
 include "../../../arch/x64/X64.Vale.InsVector.vaf"
 include "../../../lib/util/x64/X64.Stack.vaf"
 include "X64.AES.vaf"
@@ -65,6 +66,7 @@ open X64.Vale.State
 open X64.Vale.Decls
 open X64.Vale.InsBasic
 open X64.Vale.InsMem
+open X64.Vale.InsStack
 open X64.Vale.InsVector
 open X64.Vale.InsAes
 open X64.Vale.QuickCode
@@ -827,7 +829,6 @@ procedure {:quick} gcm_decrypt_stdcall(
     ghost iv_b:buffer128,
     ghost out_b:buffer128,
     ghost tag_b:buffer128,
-    ghost stack_b:buffer64,
 
     ghost key:seq(nat32),
     ghost round_keys:seq(quad32),
@@ -838,7 +839,7 @@ procedure {:quick} gcm_decrypt_stdcall(
         rax; rbx; rcx; rdx; r8; r9; r10; r11; r12; r13; r14; r15; 
         xmm0; xmm1; xmm2; xmm3; xmm4; xmm5; xmm6; xmm7; xmm8; xmm9; xmm10; xmm11; xmm12; xmm13; xmm14; xmm15;
         rbp; rdi; rsi;
-        mem; efl; rsp;
+        mem; efl; rsp; stack;
     lets
         args_ptr := if win then rcx else rdi;
 
@@ -859,23 +860,11 @@ procedure {:quick} gcm_decrypt_stdcall(
         buffers_disjoint128(keys_b, out_b);
         buffers_disjoint128(out_b, tag_b);
 
-        buffers_disjoint(args_b, stack_b);
-
-        locs_disjoint(list(loc_buffer(stack_b), loc_buffer(cipher_b)));
-        locs_disjoint(list(loc_buffer(stack_b), loc_buffer(auth_b)));
-        locs_disjoint(list(loc_buffer(stack_b), loc_buffer(iv_b)));
-        locs_disjoint(list(loc_buffer(stack_b), loc_buffer(out_b)));
-        locs_disjoint(list(loc_buffer(stack_b), loc_buffer(tag_b)));
-        locs_disjoint(list(loc_buffer(stack_b), loc_buffer(keys_b)));
-
         validSrcAddrs128(mem, cipher_ptr, cipher_b, bytes_to_quad_size(cipher_num_bytes), memTaint, Secret);
         validSrcAddrs128(mem, auth_ptr, auth_b, bytes_to_quad_size(auth_num_bytes), memTaint, Secret);
         validSrcAddrs128(mem, iv_ptr, iv_b, 1, memTaint, Secret);
         validDstAddrs128(mem, out_ptr, out_b, bytes_to_quad_size(cipher_num_bytes), memTaint, Secret);
         validDstAddrs128(mem, tag_ptr, tag_b, 1, memTaint, Secret);
-
-        valid_stack_slots(mem, rsp, stack_b, if win then 28 else 8, memTaint);
-        valid_taint_buf64(stack_b, mem, memTaint, Public);
 
         cipher_ptr + 16 * bytes_to_quad_size(cipher_num_bytes) < pow2_64;
         auth_ptr  + 16 * bytes_to_quad_size(auth_num_bytes)  < pow2_64;
@@ -905,7 +894,7 @@ procedure {:quick} gcm_decrypt_stdcall(
         pclmulqdq_enabled;
 
     ensures
-        modifies_mem(loc_union(loc_buffer(stack_b), loc_buffer(out_b)), old(mem), mem);
+        modifies_mem(loc_buffer(out_b), old(mem), mem);
 
         validSrcAddrs128(mem, old(out_ptr), out_b, bytes_to_quad_size(cipher_num_bytes), memTaint, Secret);
 
@@ -958,10 +947,10 @@ procedure {:quick} gcm_decrypt_stdcall(
         Mov64(r9, rdi);
     }
 
-    callee_save_registers(win, stack_b);
+    callee_save_registers(win);
     gcm_decrypt_stdcall_inner(alg, args_b, iv_BE, cipher_b, auth_b, iv_b, out_b, tag_b, key, round_keys, keys_b);
     Mov64(rdx, rax);        // Save a copy of rax == result
-    callee_restore_registers(win, stack_b, old(xmm6), old(xmm7), old(xmm8), old(xmm9), old(xmm10), old(xmm11),
+    callee_restore_registers(win, old(xmm6), old(xmm7), old(xmm8), old(xmm9), old(xmm10), old(xmm11),
                              old(xmm12), old(xmm13), old(xmm14), old(xmm15));
     Mov64(rax, rdx);
 }

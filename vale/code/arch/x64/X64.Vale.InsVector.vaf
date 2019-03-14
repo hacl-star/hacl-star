@@ -360,53 +360,6 @@ procedure{:instruction Ins(TS.TaintedIns(tuple(S.MOVDQU(Mov128Mem(MReg(get_reg(d
     same_memTaint128(b, old(mem), mem, old(#memTaint_t(memTaint)), #memTaint_t(memTaint));
 }
 
-procedure {:quick exportOnly}{:public} PushXmm(
-        src:xmm,
-    out tmp:reg_opr64)
-    reads
-    modifies
-        rsp; stack;
-    requires
-        rsp <= init_rsp(stack);
-        init_rsp(stack) - 4096 <= rsp - 16;
-    ensures
-        let src_lo := lo64(src);
-        let src_hi := hi64(src);
-        stack == old(store_stack64(rsp - 16, src_hi, store_stack64(rsp - 8, src_lo, stack)));
-
-        rsp == old(rsp) - 16;
-{
-    Pextrq(tmp, src, 0);
-    Push(tmp);
-    Pextrq(tmp, src, 1);
-    Push(tmp);
-}
-
-procedure {:quick exportOnly}{:public} PopXmm(
-    out dst:xmm,
-    out tmp:reg_opr64,
-        ghost expected_xmm:quad32)
-    reads
-    modifies rsp; stack;
-    requires
-        valid_src_stack64(rsp, stack);
-        valid_src_stack64(rsp + 8, stack);
-        hi64(expected_xmm) == load_stack64(rsp, stack);
-        lo64(expected_xmm) == load_stack64(rsp+8, stack);
-        rsp >= init_rsp(stack) - 4096;
-        rsp + 16 <= init_rsp(stack);
-    ensures
-        dst == expected_xmm;
-        rsp == old(rsp) + 16;
-        stack == free_stack64(rsp-16, rsp, old(stack));
-{
-    Pop(tmp);
-    Pinsrq(dst, tmp, 1);
-    Pop(tmp);
-    Pinsrq(dst, tmp, 0);
-    push_pop_xmm(expected_xmm, old(dst));
-}
-
 procedure {:quick exportOnly}{:public} ZeroXmm(inout dst:xmm)
     modifies efl;
     ensures

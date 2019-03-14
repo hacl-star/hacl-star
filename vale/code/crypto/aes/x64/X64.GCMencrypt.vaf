@@ -955,16 +955,24 @@ procedure {:quick}{:public}{:exportSpecs} gcm_encrypt2_stdcall(
     lets
         plain_ptr        := if win then rcx else rdi;
         auth_ptr         := if win then r8  else rdx;
-        iv_ptr           := if win then load_stack64(32 + 8 + 0, stack) else r8;
-        expanded_key_ptr := if win then load_stack64(32 + 8 + 8, stack) else r9;
-        out_ptr          := if win then load_stack64(32 + 8 + 16, stack) else load_stack64(8 + 0, stack);
-        tag_ptr          := if win then load_stack64(32 + 8 + 24, stack) else load_stack64(8 + 8, stack);
+        iv_ptr           := if win then load_stack64(rsp + 32 + 8 + 0, stack) else r8;
+        expanded_key_ptr := if win then load_stack64(rsp + 32 + 8 + 8, stack) else r9;
+        out_ptr          := if win then load_stack64(rsp + 32 + 8 + 16, stack) else load_stack64(rsp + 8 + 0, stack);
+        tag_ptr          := if win then load_stack64(rsp + 32 + 8 + 24, stack) else load_stack64(rsp + 8 + 8, stack);
 
     requires
         buffers_disjoint128(plain_b, out_b);
         buffers_disjoint128(auth_b, out_b);
         buffers_disjoint128(keys_b, out_b);
         buffers_disjoint128(out_b, tag_b);
+
+        rsp == init_rsp(stack);
+        win ==> valid_src_stack64(rsp + 32 + 8 + 0, stack);
+        win ==> valid_src_stack64(rsp + 32 + 8 + 8, stack);
+        win ==> valid_src_stack64(rsp + 32 + 8 + 16, stack);
+        win ==> valid_src_stack64(rsp + 32 + 8 + 24, stack);
+        !win ==> valid_src_stack64(rsp + 8 + 0, stack);
+        !win ==> valid_src_stack64(rsp + 8 + 8, stack);        
 
         plain_num_bytes == (if win then rdx else rsi);
         auth_num_bytes == (if win then r9 else rcx);
@@ -1075,10 +1083,10 @@ procedure {:quick}{:public}{:exportSpecs} gcm_encrypt2_stdcall(
         Mov64(r11, r9);
 
         // These are offset, since we already moved rsp during callee_save_registers
-        Load64_buffer(r10, rsp, 224 + 40 + 0, Public, stack_b, 28 + 4 + 1 + 0);
-        Load64_buffer(r8,  rsp, 224 + 40 + 8, Public, stack_b, 28 + 4 + 1 + 1);
-        Load64_buffer(rbx, rsp, 224 + 40 +16, Public, stack_b, 28 + 4 + 1 + 2);
-        Load64_buffer(r15, rsp, 224 + 40 +24, Public, stack_b, 28 + 4 + 1 + 3);
+        Load64_stack(r10, rsp, 224 + 40 + 0);
+        Load64_stack(r8,  rsp, 224 + 40 + 8);
+        Load64_stack(rbx, rsp, 224 + 40 +16);
+        Load64_stack(r15, rsp, 224 + 40 +24);
     } else {
         Mov64(r14, rdi);
         Mov64(r13, rsi);
@@ -1088,8 +1096,8 @@ procedure {:quick}{:public}{:exportSpecs} gcm_encrypt2_stdcall(
         Mov64(r8,  r9);
 
         // These are offset, since we already moved rsp during callee_save_registers
-        Load64_buffer(rbx, rsp, 64 + 8 + 0, Public, stack_b, 28 + 1 + 0);
-        Load64_buffer(r15, rsp, 64 + 8 + 8, Public, stack_b, 28 + 1 + 1);
+        Load64_stack(rbx, rsp, 64 + 8 + 0);
+        Load64_stack(r15, rsp, 64 + 8 + 8);
     }
 
     // Load the IV into its XMM register
