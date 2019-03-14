@@ -16,7 +16,7 @@ open X64.Vale.State
 open X64.Vale.Decls
 open X64.Vale.QuickCode
 unfold let memory = X64.Memory.mem // avoid conflict with "var{...} mem" vs. "mem" from X64.Memory
-unfold let stack = X64.Stack_i.stack // avoid conflict with "var{...} stack" vs. "stack" from X64.Stack_i
+unfold let stack_t = X64.Stack_i.stack // avoid conflict with "var{...} stack" vs. "stack" from X64.Stack_i
 open X64.CPU_Features_s
 #endverbatim
 

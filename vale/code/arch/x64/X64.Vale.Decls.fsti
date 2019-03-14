@@ -212,6 +212,7 @@ val taint_at (memTaint:M.memtaint) (addr:int) : taint
 [@va_qattr] unfold let va_get_reg (r:reg) (s:va_state) : nat64 = eval_reg r s
 [@va_qattr] unfold let va_get_xmm (x:xmm) (s:va_state) : quad32 = eval_xmm x s
 [@va_qattr] unfold let va_get_mem (s:va_state) : M.mem = s.mem
+[@va_qattr] unfold let va_get_stack (s:va_state) : S.stack = s.stack
 [@va_qattr] unfold let va_get_memTaint (s:va_state) : M.memtaint = s.memTaint
 
 [@va_qattr] let va_upd_ok (ok:bool) (s:state) : state = { s with ok = ok }

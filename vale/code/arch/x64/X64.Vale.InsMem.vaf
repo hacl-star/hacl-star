@@ -3,7 +3,9 @@ include{:fstar}{:open} "Types_s"
 include{:fstar}{:open} "Arch.Types"
 include{:fstar}{:open} "X64.Machine_s"
 include{:fstar}{:open} "X64.Memory"
+include{:fstar}{:open} "X64.Stack_i"
 include{:fstar}{:open} "X64.Memory_Sems"
+include{:fstar}{:open} "X64.Stack_Sems"
 include{:fstar}{:open} "X64.Vale.State"
 include{:fstar}{:open} "X64.Vale.Decls"
 include{:fstar}{:open} "X64.Vale.QuickCode"
@@ -14,6 +16,7 @@ module X64.Vale.InsMem
 open Types_s
 open X64.Machine_s
 open X64.Memory
+open X64.Stack_i
 open X64.Vale.State
 open X64.Vale.Decls
 open X64.Vale.QuickCode
@@ -23,6 +26,7 @@ open X64.Vale.InsBasic
 #verbatim
 open X64.Machine_s
 open X64.Memory
+open X64.Stack_i
 open X64.Vale
 open X64.Vale.State
 open X64.Vale.StateLemmas
@@ -103,48 +107,35 @@ procedure{:instruction Ins(TS.TaintedIns(tuple(S.Mov64(OMem(MReg(get_reg(dst), o
 
 procedure{:instruction Ins(TS.TaintedIns(tuple(S.Pop(t_op_to_op(dst))), Public))}
          {:fast_instruction}{:quick exportOnly}{:public}
-    Pop(
-    out dst: dst_opr64,
-        ghost b:buffer64,
-        ghost index:int)
-    reads mem; memTaint;
-    modifies rsp;
+    Pop(out dst: dst_opr64)
+    modifies rsp; stack;
     requires
-        valid_src_addr(mem, b, index);
-        rsp == buffer_addr(b, mem) + 8 * index;
-        rsp + 8 < pow2_64;
-        valid_taint_buf64(b, mem, memTaint, Public);
+        valid_src_stack64(rsp, stack);
+        rsp >= init_rsp(stack) - 4096;
+        rsp + 8 <= init_rsp(stack);
     ensures
-        dst == buffer64_read(b, index, mem);
+        dst == load_stack64(old(rsp), old(stack));
         rsp == old(rsp) + 8;
+        init_rsp(stack) == init_rsp(old(stack));
+        stack == free_stack64(rsp-8, rsp, old(stack));
 {
-    low_lemma_valid_mem64(b, #nat(index), mem);
-    low_lemma_load_mem64(b, #nat(index), mem);
-    lemma_valid_taint64(b, old(#memTaint_t(memTaint)), old(mem), #nat(index), Public);
+
 }
 
 procedure{:instruction Ins(TS.TaintedIns(tuple(S.Push(t_op_to_op(src))), Public))}
          {:fast_instruction}{:quick exportOnly}{:public}
-    Push(
-        src: reg_opr64,
-        ghost b:buffer64,
-        ghost index:int)
-    reads memTaint;
+    Push(src: reg_opr64)
+    reads
     modifies
-        rsp; mem;
+        rsp; stack;
     requires
-        valid_taint_buf64(b, mem, memTaint, Public);
-        valid_dst_addr(mem, b, index);
-        rsp - 8 == buffer_addr(b, mem) + 8 * index;
-        0 <= rsp - 8;
+        rsp <= init_rsp(stack);
+        init_rsp(stack) - 4096 <= rsp - 8;
     ensures
-        modifies_mem(loc_buffer(b), old(mem), mem);
-        mem == old(buffer64_write(b, index, src, mem));
         rsp == old(rsp) - 8;
+        stack == store_stack64(rsp, old(src), old(stack));
+        init_rsp(stack) == init_rsp(old(stack));
 {
-    low_lemma_valid_mem64(b, #nat(index), old(mem));
-    low_lemma_store_mem64(b, #nat(index), old(src), old(mem));
-    lemma_valid_taint64(b, old(#memTaint_t(memTaint)), old(mem), #nat(index), Public);
-    same_memTaint64(b, old(mem), mem, old(#memTaint_t(memTaint)), #memTaint_t(memTaint));
+    equiv_store_stack64(rsp, old(src), old(stack));
 }
 
