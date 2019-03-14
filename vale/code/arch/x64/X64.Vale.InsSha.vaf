@@ -5,7 +5,7 @@ include{:fstar}{:open} "Types_s"
 include{:fstar}{:open} "Arch.Types"
 include{:fstar}{:open} "Spec.SHA2"
 include{:fstar}{:open} "SHA_helpers"
-include{:fstar}{:open} "Spec.Hash.Common"
+include{:fstar}{:open} "Spec.Hash.PadFinish"
 include{:fstar}{:open} "X64.Machine_s"
 include{:fstar}{:open} "X64.Vale.State"
 include{:fstar}{:open} "X64.Vale.Decls"
@@ -18,9 +18,9 @@ module X64.Vale.InsSha
 open Words_s
 open Types_s
 open Arch.Types
-open Spec.Hash.Common
+open Spec.Hash.PadFinish
 open Spec.SHA2
-open Spec.Hash.Helpers
+open Spec.Hash.Definitions
 open SHA_helpers
 open X64.Machine_s
 open X64.Vale.State
@@ -42,8 +42,8 @@ open X64.Vale.State
 open X64.Vale.StateLemmas
 open X64.Vale.Decls
 open X64.CryptoInstructions_s
-open Spec.Hash.Common
-open Spec.Hash.Helpers
+open Spec.Hash.PadFinish
+open Spec.Hash.Definitions
 open Spec.SHA2
 open X64.CPU_Features_s
 module S = X64.Bytes_Semantics_s

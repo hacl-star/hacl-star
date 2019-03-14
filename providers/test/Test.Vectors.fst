@@ -2,7 +2,7 @@ module Test.Vectors
 
 open Test.Lowstarize
 open EverCrypt.Hash
-open Spec.Hash.Helpers
+open Spec.Hash.Definitions
 
 /// Hash algorithms
 

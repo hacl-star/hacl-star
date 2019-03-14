@@ -1,6 +1,6 @@
 module Spec.SHA1
 
-module H = Spec.Hash.Helpers
+module H = Spec.Hash.Definitions
 module U32 = FStar.UInt32
 module Seq = FStar.Seq
 module E = FStar.Kremlin.Endianness
@@ -18,7 +18,7 @@ let init_as_list = [
   0xc3d2e1f0ul;
 ]
 
-let h0 : hash_w SHA1 = Seq.seq_of_list init_as_list
+let h0 : words_state SHA1 = Seq.seq_of_list init_as_list
 
 let init = h0
 
@@ -30,15 +30,15 @@ let rotl (n_:U32.t{0 < U32.v n_ /\ U32.v n_ < 32}) (x:U32.t): Tot U32.t =
 
 (* Section 6.1.2 Step 1: message schedule *)
 
-let rec w' (mi: Seq.lseq (word SHA1) size_block_w) (t: nat {t <= 79}) : GTot (word SHA1) (decreases (t)) =
+let rec w' (mi: Seq.lseq (word SHA1) block_word_length) (t: nat {t <= 79}) : GTot (word SHA1) (decreases (t)) =
   if t < 16
   then Seq.index mi (t)
   else rotl 1ul (w' mi (t - 3) `U32.logxor` w' mi (t - 8) `U32.logxor` w' mi (t - 14) `U32.logxor` w' mi (t - 16))
 
-let w (mi: Seq.lseq (word SHA1) size_block_w) (t: U32.t {U32.v t <= 79}) : GTot (word SHA1) = w' mi (U32.v t)
+let w (mi: Seq.lseq (word SHA1) block_word_length) (t: U32.t {U32.v t <= 79}) : GTot (word SHA1) = w' mi (U32.v t)
 
 let compute_w_post
-  (mi: Seq.lseq (word SHA1) size_block_w)
+  (mi: Seq.lseq (word SHA1) block_word_length)
   (n: nat)
   (res: Seq.lseq (word SHA1) n)
 : GTot Type0
@@ -47,7 +47,7 @@ let compute_w_post
   ))
 
 let compute_w_post_intro
-  (mi: Seq.lseq (word SHA1) size_block_w)
+  (mi: Seq.lseq (word SHA1) block_word_length)
   (n: nat)
   (res: Seq.lseq (word SHA1) n)
   (u: squash (n <= 80))
@@ -61,7 +61,7 @@ let compute_w_post_intro
 inline_for_extraction
 noextract
 let compute_w_n'
-  (mi: Seq.lseq (word SHA1) size_block_w)
+  (mi: Seq.lseq (word SHA1) block_word_length)
   (n: nat { n <= 79 } )
   (w: ((i: nat {i < n}) -> Tot (y: word SHA1 {y == w' mi i})))
 : Tot (y: word SHA1 {y == w' mi n})
@@ -75,7 +75,7 @@ let compute_w_n'
 inline_for_extraction
 noextract
 let compute_w_n
-  (mi: Seq.lseq (word SHA1) size_block_w)
+  (mi: Seq.lseq (word SHA1) block_word_length)
   (n: nat { n <= 79 } )
   (accu: Seq.lseq (word SHA1) n)
 : Pure (word SHA1)
@@ -88,7 +88,7 @@ let compute_w_n
 inline_for_extraction
 noextract
 let compute_w_next
-  (mi: Seq.lseq (word SHA1) size_block_w)
+  (mi: Seq.lseq (word SHA1) block_word_length)
   (n: nat { n <= 79 } )
   (accu: Seq.lseq (word SHA1) n)
 : Pure (Seq.lseq (word SHA1) (n + 1))
@@ -110,7 +110,7 @@ let compute_w_next
   accu'
 
 let rec compute_w
-  (mi: Seq.lseq (word SHA1) size_block_w)
+  (mi: Seq.lseq (word SHA1) block_word_length)
   (n: nat)
   (accu: Seq.lseq (word SHA1) n)
 : Pure (Seq.lseq (word SHA1) 80)
@@ -149,14 +149,14 @@ let k (t: U32.t { U32.v t <= 79 } ) : Tot (word SHA1) =
 
 (* Section 6.1.2 Step 3 *)
 
-let word_block = Seq.lseq (word SHA1) size_block_w
+let word_block = Seq.lseq (word SHA1) block_word_length
 
 let step3_body'_aux
   (mi: word_block)
-  (st: hash_w SHA1)
+  (st: words_state SHA1)
   (t: U32.t {U32.v t < 80})
   (wt: word SHA1 { wt == w mi t } )
-: Tot (hash_w SHA1)
+: Tot (words_state SHA1)
 = let sta = Seq.index st 0 in
   let stb = Seq.index st 1 in
   let stc = Seq.index st 2 in
@@ -189,9 +189,9 @@ let step3_body_w_t
 let step3_body
   (mi: word_block)
   (w: step3_body_w_t mi)
-  (st: hash_w SHA1)
+  (st: words_state SHA1)
   (t: nat {t < 80})
-: Tot (hash_w SHA1)
+: Tot (words_state SHA1)
 = step3_body' mi st (U32.uint_to_t t) (w t)
 
 inline_for_extraction
@@ -203,8 +203,8 @@ let index_compute_w
 
 let step3_aux
   (mi: word_block)
-  (h: hash_w SHA1)
-: Tot (hash_w SHA1)
+  (h: words_state SHA1)
+: Tot (words_state SHA1)
 = let cwt = compute_w mi 0 Seq.empty in
   Spec.Loops.repeat_range 0 80 (step3_body mi (index_compute_w mi cwt)) h
 
@@ -215,8 +215,8 @@ let step3 = step3_aux
 
 let step4_aux
   (mi: word_block)
-  (h: hash_w SHA1)
-: Tot (hash_w SHA1) =
+  (h: words_state SHA1)
+: Tot (words_state SHA1) =
   let st = step3 mi h in
   let sta = Seq.index st 0 in
   let stb = Seq.index st 1 in
@@ -237,20 +237,22 @@ let step4 = step4_aux
 (* Section 3.1 al. 2: words and bytes, big-endian *)
 
 let words_of_bytes_block
-  (l: bytes { Seq.length l == size_block SHA1 } )
+  (l: bytes { Seq.length l == block_length SHA1 } )
 : Tot word_block
-= E.seq_uint32_of_be size_block_w l
+= E.seq_uint32_of_be block_word_length l
 
 (* Section 6.1.2: outer loop body *)
 
-let update h l =
+let update_aux h l =
   let mi = words_of_bytes_block l in
   step4 mi h
 
+let update = update_aux
+
 (* Section 5.1.1: padding *)
 
-let pad = Spec.Hash.Common.pad SHA1
+let pad = Spec.Hash.PadFinish.pad SHA1
 
 (* Section 6.1.2: no truncation needed *)
 
-let finish = Spec.Hash.Common.finish _
+let finish = Spec.Hash.PadFinish.finish _

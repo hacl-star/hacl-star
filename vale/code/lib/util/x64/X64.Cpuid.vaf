@@ -113,4 +113,43 @@ procedure{:public}{:quick} check_adx_bmi2_support()
     Mov64(rbx, r9);     // Callee-restore
 }
 
+procedure{:public}{:quick} check_avx_support()
+    modifies rax; rbx; rcx; rdx; r9; efl;
+    ensures rax != 0 ==> avx_enabled;
+            rbx == old(rbx);
 
+{
+    Mov64(r9, rbx);     // Callee-save
+
+    Mov64(rax, 1);
+    Cpuid_Avx();
+    lemma_iand_pow2_64(rcx, 25); // ==> rcx & pow2(25) == 0 or pow2(25)
+    Mov64(rax, rcx);
+    And64(rax, 0x10000000);
+    Util.Meta.assert_norm(0x10000000 == pow2(28));
+    
+    Shr64(rax, 27);
+    lemma_ishr_pow2_diff64(1, 28); // ==> shr(pow2(25), 24) == pow2(1)
+    lemma_ishr_zero64(27);         // ==> shr(0, 24) == 0
+
+    Mov64(rbx, r9);     // Callee-restore
+}
+
+procedure{:public}{:quick} check_avx2_support()
+    modifies rax; rbx; rcx; rdx; r9; efl;
+    ensures rax != 0 ==> avx2_enabled;
+            rbx == old(rbx);
+
+{
+    Mov64(r9, rbx);     // Callee-save
+
+    Mov64(rax, 7);
+    Mov64(rcx, 0);
+    Cpuid_Avx2();
+    lemma_iand_pow2_64(rbx, 5); 
+    And64(rbx,0x20);
+    Util.Meta.assert_norm(0x20 == pow2(5));
+    Mov64(rax, rbx);
+
+    Mov64(rbx, r9);     // Callee-restore
+}

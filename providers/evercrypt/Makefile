@@ -1,3 +1,2 @@
 HACL_HOME=../..
-
-include ../Makefile.common
+include $(HACL_HOME)/Makefile.common

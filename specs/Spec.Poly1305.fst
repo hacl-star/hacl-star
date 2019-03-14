@@ -1,92 +1,76 @@
 module Spec.Poly1305
 
-module ST = FStar.HyperStack.ST
+#reset-options "--z3rlimit 60 --initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0"
 
-open FStar.Math.Lib
 open FStar.Mul
-open FStar.Seq
-open FStar.UInt8
-open FStar.Endianness
-open Spec.Poly1305.Lemmas
 
-#set-options "--initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0"
+open Lib.IntTypes
+open Lib.Sequence
+open Lib.ByteSequence
+
+/// Constants and Types
 
 (* Field types and parameters *)
-let prime = pow2 130 - 5
-type elem = e:int{e >= 0 /\ e < prime}
-let fadd (e1:elem) (e2:elem) = (e1 + e2) % prime
-let fmul (e1:elem) (e2:elem) = (e1 * e2) % prime
-let zero : elem = 0
-let one  : elem = 1
-let op_Plus_At = fadd
-let op_Star_At = fmul
-(* Type aliases *)
-let op_Amp_Bar = UInt.logand #128
-type word = w:bytes{length w <= 16}
-type word_16 = w:bytes{length w = 16}
-type tag = word_16
-type key = lbytes 32
-type text = seq word
+let prime : pos =
+  let p = pow2 130 - 5 in
+  assert_norm (p > 0);
+  p
 
-(* Specification code *)
-let encode (w:word) =
-  (pow2 (8 * length w)) `fadd` (little_endian w)
+let felem = x:nat{x < prime}
+let fadd (x:felem) (y:felem) : felem = (x + y) % prime
+let fmul (x:felem) (y:felem) : felem = (x * y) % prime
 
-let rec poly (txt:text) (r:elem) : Tot elem (decreases (length txt)) =
-  if length txt = 0 then zero
-  else
-    let a = poly (Seq.tail txt) r in
-    let n = encode (Seq.head txt) in
-    (n `fadd` a) `fmul` r
+let to_felem (x:nat{x < prime}) : felem = x
+let from_felem (x:felem) : nat = x
+let zero : felem = to_felem 0
 
-let encode_r (rb:word_16) =
-  (little_endian rb) &| 0x0ffffffc0ffffffc0ffffffc0fffffff
+(* Poly1305 parameters *)
+let size_block : size_nat = 16
+let size_key   : size_nat = 32
 
-let finish (a:elem) (s:word_16) : Tot tag =
-  let n = (a + little_endian s) % pow2 128 in
-  little_bytes 16ul n
+type block = lbytes size_block
+type tag   = lbytes size_block
+type key   = lbytes size_key
 
-let rec encode_bytes (txt:bytes) : Tot text (decreases (length txt)) =
-  if length txt = 0 then Seq.empty
-  else
-    let w, txt = split txt (min (length txt) 16) in
-    append_last (encode_bytes txt) w
+/// Specification
+
+let update1 (r:felem) (len:size_nat{len <= size_block}) (b:lbytes len) (acc:felem) : Tot felem =
+  Math.Lemmas.pow2_le_compat 128 (8 * len);
+  assert (pow2 (8 * len) <= pow2 128);
+  assert_norm (pow2 128 + pow2 128 < prime);
+  let n = to_felem (pow2 (8 * len) + nat_from_bytes_le b) in
+  let acc = fmul (fadd n acc) r in
+  acc
+
+let poly_update1_rem (r:felem) (l:size_nat{l < 16}) (b:lbytes l) (acc:felem) =
+  if l = 0 then acc else update1 r l b acc
+
+let poly (text:bytes) (acc:felem) (r:felem) : Tot felem =
+  repeat_blocks #uint8 #felem size_block text
+    (update1 r size_block)
+    (poly_update1_rem r)
+  acc
+
+let finish (k:key) (acc:felem) : Tot tag =
+  let s = nat_from_bytes_le (slice k 16 32) in
+  let n = (from_felem acc + s) % pow2 128 in
+  nat_to_bytes_le 16 n
+
+let encode_r (rb:block) : Tot felem =
+  let lo = uint_from_bytes_le (sub rb 0 8) in
+  let hi = uint_from_bytes_le (sub rb 8 8) in
+  let mask0 = u64 0x0ffffffc0fffffff in
+  let mask1 = u64 0x0ffffffc0ffffffc in
+  let lo = lo &. mask0 in
+  let hi = hi &. mask1 in
+  assert_norm (pow2 128 < prime);
+  to_felem (uint_v hi * pow2 64 + uint_v lo)
+
+let poly1305_init (k:key) : Tot (felem & felem) =
+  let r = encode_r (slice k 0 16) in
+  zero, r
 
 let poly1305 (msg:bytes) (k:key) : Tot tag =
-  let text = encode_bytes msg in
-  let r = encode_r (slice k 0 16) in
-  let s = slice k 16 32 in
-  finish (poly text r) s
-
-
-(* ********************* *)
-(* RFC 7539 Test Vectors *)
-(* ********************* *)
-
-#reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 20"
-
-unfold let msg = [
-  0x43uy; 0x72uy; 0x79uy; 0x70uy; 0x74uy; 0x6fuy; 0x67uy; 0x72uy;
-  0x61uy; 0x70uy; 0x68uy; 0x69uy; 0x63uy; 0x20uy; 0x46uy; 0x6fuy;
-  0x72uy; 0x75uy; 0x6duy; 0x20uy; 0x52uy; 0x65uy; 0x73uy; 0x65uy;
-  0x61uy; 0x72uy; 0x63uy; 0x68uy; 0x20uy; 0x47uy; 0x72uy; 0x6fuy;
-  0x75uy; 0x70uy ]
-
-unfold let k = [
-  0x85uy; 0xd6uy; 0xbeuy; 0x78uy; 0x57uy; 0x55uy; 0x6duy; 0x33uy;
-  0x7fuy; 0x44uy; 0x52uy; 0xfeuy; 0x42uy; 0xd5uy; 0x06uy; 0xa8uy;
-  0x01uy; 0x03uy; 0x80uy; 0x8auy; 0xfbuy; 0x0duy; 0xb2uy; 0xfduy;
-  0x4auy; 0xbfuy; 0xf6uy; 0xafuy; 0x41uy; 0x49uy; 0xf5uy; 0x1buy ]
-
-unfold let expected = [
-  0xa8uy; 0x06uy; 0x1duy; 0xc1uy; 0x30uy; 0x51uy; 0x36uy; 0xc6uy;
-  0xc2uy; 0x2buy; 0x8buy; 0xafuy; 0x0cuy; 0x01uy; 0x27uy; 0xa9uy ]
-
-let test () : Tot bool =
-  assert_norm(List.Tot.length msg      = 34);
-  assert_norm(List.Tot.length k        = 32);
-  assert_norm(List.Tot.length expected = 16);
-  let msg      = createL msg in
-  let k        = createL k   in
-  let expected = createL expected in
-  expected = poly1305 msg k
+  let acc, r = poly1305_init k in
+  let acc = poly msg acc r in
+  finish k acc

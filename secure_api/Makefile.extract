@@ -70,7 +70,7 @@ EXTRACT='* -FStar -CryptoTypes'
 
 include .depend.$(IMPL_CHOICE)
 
-verification: $(addprefix $(CACHE_DIR)/,$(notdir $(addsuffix .checked,$(ALL_FST_FILES))))
+verification: $(addprefix $(CACHE_DIR)/,$(notdir $(addsuffix .checked,$(ALL_UNCHECKED_FST_FILES))))
 	echo $^
 
 # Now we get parallel lax-checking, which is nice.

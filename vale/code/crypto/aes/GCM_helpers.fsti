@@ -13,6 +13,9 @@ open FStar.Math.Lemmas
 open Collections.Seqs
 open Workarounds
 
+val reveal_le_bytes_to_seq_quad32 (_:unit) : Lemma
+  (forall (b:seq nat8).{:pattern le_bytes_to_seq_quad32 b} length b % 16 == 0 ==> le_bytes_to_seq_quad32 b == seq_to_seq_four_LE (seq_nat8_to_seq_nat32_LE b))
+
 let bytes_to_quad_size (num_bytes:nat) =
   ((num_bytes + 15) / 16)
 

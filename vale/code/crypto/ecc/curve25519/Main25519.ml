@@ -14,10 +14,10 @@ let _ =
       ("fsub", (fun win -> X64_FastHybrid.va_code_fsub_stdcall win));
       ("fmul1", (fun win -> X64_FastHybrid.va_code_fmul1_stdcall win));
       (*("carry_wide", (fun win -> X64_FastHybrid.va_code_carry_wide_stdcall win));*)
-      ("fmul_v",  (fun win -> X64_FastWide.va_code_fmul_stdcall win));
-      ("fmul2_v", (fun win -> X64_FastWide.va_code_fmul2_stdcall win));
-      ("fsqr_v",  (fun win -> X64_FastWide.va_code_fsqr_stdcall win));
-      ("fsqr2_v", (fun win -> X64_FastWide.va_code_fsqr2_stdcall win));
+      ("fmul",  (fun win -> X64_FastWide.va_code_fmul_stdcall win));
+      ("fmul2", (fun win -> X64_FastWide.va_code_fmul2_stdcall win));
+      ("fsqr",  (fun win -> X64_FastWide.va_code_fsqr_stdcall win));
+      ("fsqr2", (fun win -> X64_FastWide.va_code_fsqr2_stdcall win));
       (* ("fast_sqr_loop", (fun win -> X64_FastSqr.va_code_fast_sqr_loop_stdcall win)); *)
       (*("fsqr_loop", (fun win -> X64_FastWide.va_code_fsqr_loop_stdcall win)); *)
       ("cswap2", (fun win -> X64_FastUtil.va_code_cswap2_stdcall win));

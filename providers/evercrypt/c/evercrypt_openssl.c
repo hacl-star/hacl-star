@@ -5,21 +5,22 @@
 #include <openssl/ec.h>
 #include <openssl/ecdh.h>
 #include <inttypes.h>
+#include <stdio.h>
 
 #include "kremlin/internal/target.h"
 #include "EverCrypt_OpenSSL.h"
 
-// KB, BB, JP: for now, we just ignore internal errors since the HACL* interface
-// has enough preconditions to make sure that no errors ever happen; if the
-// OpenSSL F* interface is strong enough, then any error here should be
-// catastrophic and not something we can recover from.
-// If we want to do something better, we can define:
-//   type error a = | Ok of a | Error of error_code
-// Then at the boundary we could catch the error, print it, then exit abruptly.
+/* KB, BB, JP: for now, we just ignore internal errors since the HACL* interface
+ * has enough preconditions to make sure that no errors ever happen; if the
+ * OpenSSL F* interface is strong enough, then any error here should be
+ * catastrophic and not something we can recover from.
+ * If we want to do something better, we can define:
+ *   type error a = | Ok of a | Error of error_code
+ * Then at the boundary we could catch the error, print it, then exit abruptly. */
 
 #define handleErrors(...)                                                      \
   do {                                                                         \
-    KRML_HOST_EPRINTF("Error at %s:%d\n", __FILE__, __LINE__);                   \
+    fprintf(stderr, "Error at %s:%d\n", __FILE__, __LINE__);                   \
   } while (0)
 
 
@@ -68,33 +69,33 @@ static int openssl_aead(EVP_CIPHER_CTX *ctx,
 {
   int len;
 
-  // Initialise the cipher with the key and IV
+  /* Initialise the cipher with the key and IV */
   if (1 != EVP_CipherInit_ex(ctx, NULL, NULL, NULL, iv, enc))
     handleErrors();
 
-  // Set additional authenticated data
+  /* Set additional authenticated data */
   if (aad_len > 0 && 1 != EVP_CipherUpdate(ctx, NULL, &len, aad, aad_len))
     handleErrors();
 
-  // Process the plaintext
+  /* Process the plaintext */
   if (enc && plaintext_len > 0
       && 1 != EVP_CipherUpdate(ctx, ciphertext, &len, plaintext, plaintext_len))
     handleErrors();
 
-  // Process the ciphertext
+  /* Process the ciphertext */
   if (!enc && plaintext_len > 0
       && 1 != EVP_CipherUpdate(ctx, plaintext, &len, ciphertext, plaintext_len))
     handleErrors();
 
-  // Set the tag
+  /* Set the tag */
   if(!enc && EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_AEAD_SET_TAG, 16, tag) <= 0)
     handleErrors();
 
-  // Finalize last block
+  /* Finalize last block */
   if (1 != EVP_CipherFinal_ex(ctx, ciphertext + len, &len))
     return 0;
 
-  // Get the tag
+  /* Get the tag */
   if (enc && 1 != EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_AEAD_GET_TAG, 16, tag))
     handleErrors();
 

@@ -1,6 +1,6 @@
 module Spec.SHA2
 
-open Spec.Hash.Helpers
+open Spec.Hash.Definitions
 
 val init: a:sha2_alg -> init_t a
 

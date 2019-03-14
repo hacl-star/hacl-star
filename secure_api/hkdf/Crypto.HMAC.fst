@@ -55,14 +55,14 @@ type alg =
 
 //#reset-options "--initial_ifuel 2 --initial_fuel 0 --z3rlimit 20"
 let block_size : alg -> Tot uint32_t = function
-  | SHA256 -> H256.size_block
-  | SHA384 -> H384.size_block
-  | SHA512 -> H512.size_block
+  | SHA256 -> H256.block_length
+  | SHA384 -> H384.block_length
+  | SHA512 -> H512.block_length
 
 let hash_size: alg -> Tot uint32_t = function
-  | SHA256 -> H256.size_hash
-  | SHA384 -> H384.size_hash_final // Note that `size_hash` is 64, not 48
-  | SHA512 -> H512.size_hash
+  | SHA256 -> H256.hash_length
+  | SHA384 -> H384.size_hash_final // Note that `hash_length` is 64, not 48
+  | SHA512 -> H512.hash_length
 
 // FIXME(adl): hash state allocation
 // The type of state a is a buffer of uint32 for SHA256

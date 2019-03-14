@@ -5,7 +5,7 @@ open EverCrypt.Helpers
 open EverCrypt.Hash
 
 noextract
-unfold let bytes = Spec.Hash.Helpers.bytes
+unfold let bytes = Spec.Hash.Definitions.bytes
 noextract
 unfold let lbytes = EverCrypt.HMAC.lbytes
 

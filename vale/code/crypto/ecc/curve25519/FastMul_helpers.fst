@@ -4,10 +4,11 @@ open Words_s
 open Types_s
 open FStar.Mul
 open FStar.Tactics
-open CanonCommSemiring
+open FStar.Tactics.CanonCommSemiring
 open Fast_defs
+open Fast_lemmas_internal
 
-#reset-options "--using_facts_from '* -FStar.Tactics -FStar.Reflection -CanonCommMonoid -CanonCommSwaps -CanonCommSemiring'"
+#reset-options "--using_facts_from '* -FStar.Tactics -FStar.Reflection'"
 
 (*
 let simple_helper2 (a0 b0 b1 a0b0_lo a0b0_hi a0b1_lo a0b1_hi sum:nat64) (overflow:bool) : Lemma
@@ -57,19 +58,6 @@ let a0b_helper (a0 b0 b1 b2 b3
   ()
 *)
 open FStar.Math.Lemmas
-
-let lemma_mul_bounds_le (x b_x y b_y:nat) : Lemma 
-  (requires x <= b_x /\ y <= b_y)
-  (ensures x * y <= b_x * b_y)
-  =
-  lemma_mult_le_right b_x y b_y;
-  lemma_mult_le_right y x b_x;
-  ()
-
-let mul_nats (x y:nat) : nat = 
-  let prod = x * y in
-  lemma_mul_bounds_le 0 x 0 y;
-  prod
 
 #push-options "--z3rlimit 10"
 let lemma_mul_pow2_bound (b:nat{b > 1}) (x y:natN (pow2 b)) :
@@ -329,7 +317,7 @@ let lemma_dbl_pow2_six (z0 z1 z2 z3 z4 z5:nat) :
   =
   ()
   
-#push-options "--z3rlimit 20"
+#reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0 --using_facts_from 'FStar.Pervasives Prims Words_s Fast_defs'"
 let lemma_sqr (a:int) (a0 a1 a2 a3 
                r8 r9 r10 r11 r12 r13 rax rcx
                r8' r9' r10' r11' r12' r13' r14'
@@ -384,7 +372,7 @@ let lemma_sqr (a:int) (a0 a1 a2 a3
   assert_by_tactic (pow2_eight (mul_nats a0 a0) (2*(mul_nats a0 a1)) ((2*(mul_nats a0 a2)) + mul_nats a1 a1) (2*(mul_nats a0 a3 + a1*a2)) ((2*(mul_nats a1 a3)) + mul_nats a2 a2) (2*(mul_nats a2 a3)) (mul_nats a3 a3) 0 ==
                     final_rhs) int_canon;   // PASSES
   assert (pow2_nine d0 d1 d2 d3 d4 d5 d6 d7 cf == a*a);  // PASSES
-  assert (cf == 0);
+  //assert (cf == 0);
   let ultimate_rhs:int = pow2_eight d0 d1 d2 d3 d4 d5 d6 d7 in
   assert_by_tactic (pow2_nine d0 d1 d2 d3 d4 d5 d6 d7 cf == ultimate_rhs) int_canon;
 (*
@@ -425,4 +413,3 @@ let lemma_sqr (a:int) (a0 a1 a2 a3
 }
 *)
   ()
-#pop-options  

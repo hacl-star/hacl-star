@@ -143,14 +143,14 @@ let random_bytes len =
 open FStar.Seq
 
 (* Little endian integer value of a sequence of bytes *)
-inline_for_extraction let little_endian (b:bytes) = FStar.Endianness.little_endian b
+inline_for_extraction let little_endian (b:bytes) = FStar.Old.Endianness.little_endian b
 (* let rec little_endian (b:bytes) : Tot (n:nat) (decreases (Seq.length b)) = *)
 (*   if Seq.length b = 0 then 0 *)
 (*   else *)
 (*     UInt8.v (head b) + pow2 8 * little_endian (tail b) *)
 
 (* Big endian integer value of a sequence of bytes *)
-inline_for_extraction let big_endian (b:bytes) = FStar.Endianness.big_endian b
+inline_for_extraction let big_endian (b:bytes) = FStar.Old.Endianness.big_endian b
 (* let rec big_endian (b:bytes) : Tot (n:nat) (decreases (Seq.length b)) =  *)
 (*   if Seq.length b = 0 then 0  *)
 (*   else *)
@@ -160,7 +160,7 @@ inline_for_extraction let big_endian (b:bytes) = FStar.Endianness.big_endian b
 
 val little_endian_null: len:nat{len < 16} -> Lemma
   (little_endian (Seq.create len 0uy) == 0)
-let little_endian_null len = FStar.Endianness.little_endian_null len
+let little_endian_null len = FStar.Old.Endianness.little_endian_null len
 (* let rec little_endian_null len = *)
 (*   if len = 0 then () *)
 (*   else *)
@@ -174,7 +174,7 @@ let little_endian_null len = FStar.Endianness.little_endian_null len
 
 val little_endian_singleton: n:UInt8.t -> Lemma
   (little_endian (Seq.create 1 n) == UInt8.v n)
-let little_endian_singleton n = FStar.Endianness.little_endian_singleton n
+let little_endian_singleton n = FStar.Old.Endianness.little_endian_singleton n
   (* assert (little_endian (Seq.create 1 n) == *)
   (*   UInt8.v (Seq.index (Seq.create 1 n) 0) + pow2 8 * *)
   (*   little_endian (Seq.slice (Seq.create 1 n) 1 1)) *)
@@ -184,7 +184,7 @@ val little_endian_append: w1:bytes -> w2:bytes -> Lemma
   (ensures
     little_endian (Seq.append w1 w2) ==
     little_endian w1 + pow2 (8 * Seq.length w1) * little_endian w2)
-let little_endian_append w1 w2 = FStar.Endianness.little_endian_append w1 w2
+let little_endian_append w1 w2 = FStar.Old.Endianness.little_endian_append w1 w2
   (* (decreases (Seq.length w1)) *)
 (* let rec little_endian_append w1 w2 = *)
 (*   let open FStar.Seq in *)
@@ -223,7 +223,7 @@ let lemma_factorise a b = ()
 val lemma_little_endian_is_bounded: b:bytes -> Lemma
   (requires True)
   (ensures  (little_endian b < pow2 (8 * Seq.length b)))
-let lemma_little_endian_is_bounded b = FStar.Endianness.lemma_little_endian_is_bounded b
+let lemma_little_endian_is_bounded b = FStar.Old.Endianness.lemma_little_endian_is_bounded b
 (*   (decreases (Seq.length b)) *)
 (* let rec lemma_little_endian_is_bounded b = *)
 (*   if Seq.length b = 0 then () *)
@@ -246,7 +246,7 @@ val lemma_big_endian_is_bounded: b:bytes -> Lemma
   (requires True)
   (ensures  (big_endian b < pow2 (8 * Seq.length b)))
   (decreases (Seq.length b))
-let lemma_big_endian_is_bounded b = FStar.Endianness.lemma_big_endian_is_bounded b
+let lemma_big_endian_is_bounded b = FStar.Old.Endianness.lemma_big_endian_is_bounded b
 (*   [SMTPat (big_endian b)] *)
 (* let rec lemma_big_endian_is_bounded b = *)
 (*   if Seq.length b = 0 then () *)
@@ -271,7 +271,7 @@ val lemma_little_endian_lt_2_128: b:bytes {Seq.length b <= 16} -> Lemma
   (requires True)
   (ensures  (little_endian b < pow2 128))
   [SMTPat (little_endian b)]
-let lemma_little_endian_lt_2_128 b = FStar.Endianness.lemma_little_endian_lt_2_128 b
+let lemma_little_endian_lt_2_128 b = FStar.Old.Endianness.lemma_little_endian_lt_2_128 b
   (* lemma_little_endian_is_bounded b; *)
   (* if Seq.length b = 16 then () *)
   (* else Math.Lemmas.pow2_lt_compat 128 (8 * Seq.length b) *)
@@ -492,7 +492,7 @@ let rec uint32_be len n =
 inline_for_extraction val little_bytes:
   len:UInt32.t -> n:nat{n < pow2 (8 * v len)} ->
   Tot (b:lbytes (v len) {n == little_endian b})(*  (decreases (v len)) *)
-inline_for_extraction let little_bytes len n = FStar.Endianness.little_bytes len n
+inline_for_extraction let little_bytes len n = FStar.Old.Endianness.little_bytes len n
 (* let rec little_bytes len n =  *)
 (*   if len = 0ul then  *)
 (*     Seq.empty  *)

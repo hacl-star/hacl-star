@@ -215,43 +215,42 @@ private let deserialize_index_t = deserialize_uint32_t
 
 private let deserialize_hash (ok:bool) (buf:uint8_p) (sz:uint32_t{B.len buf = sz}) (r:HST.erid) (pos:uint32_t): HST.ST (bool & uint32_t & hash)
   (requires (fun h0 -> B.live h0 buf /\ HS.disjoint (B.frameOf buf) r))
-  (ensures (fun h0 (k, _, h) h1 -> B.live h1 buf /\ HS.disjoint (B.frameOf buf) r /\ (k ==> Rgl?.r_inv hreg h1 h)))
+  (ensures (fun h0 (k, _, h) h1 -> B.live h1 buf /\ B.live h1 h /\ 
+                                   HS.disjoint (B.frameOf buf) r /\ 
+                                   (k ==> Rgl?.r_inv hreg h1 h) /\
+                                   loc_disjoint (loc_buffer buf) (loc_buffer h) /\
+                                   modifies (loc_buffer h) h0 h1))
 = if not ok || pos >= sz then (false, pos, Rgl?.dummy hreg)
   else if sz - pos < hash_size then (false, pos, Rgl?.dummy hreg)
   else begin
     let hash = Rgl?.r_alloc hreg r in
     B.blit buf pos hash 0ul hash_size;
-    (true, pos + hash_size, hash)
+    (true, pos + hash_size, hash)    
   end
   
 // joonwonc: there is a quite hard disjointness problem here; need to talk about it.
 private let rec deserialize_hash_vec_i (ok:bool) (buf:uint8_p) (sz:uint32_t{B.len buf = sz}) (r:HST.erid) (pos:uint32_t) (res:hash_vec) (i:uint32_t{i < V.size_of res})
 : HST.ST (bool & uint32_t)
-  (requires (fun h0 -> B.live h0 buf /\ V.live h0 res /\ HS.disjoint (B.frameOf buf) r))
-  (ensures (fun h0 _ h1 -> B.live h1 buf /\ V.live h1 res /\ HS.disjoint (B.frameOf buf) r))
+  (requires (fun h0 -> B.live h0 buf /\ V.live h0 res /\ HS.disjoint (B.frameOf buf) r /\ loc_disjoint (B.loc_buffer buf) (RV.loc_rvector res)))
+  (ensures (fun h0 (ok, _) h1 -> B.live h1 buf /\ V.live h1 res /\ HS.disjoint (B.frameOf buf) r))
 = if not ok || pos >= sz then (false, pos)
   else begin
-    let h0 = HST.get() in
-    assert (V.live h0 res);
     let ok, pos, h = deserialize_hash ok buf sz r pos in
-    let h1 = HST.get() in
-    assume (HS.disjoint (B.frameOf buf) r ==> V.live h1 res);
     if not ok then (false, pos) 
     else begin
-      assert (Rgl?.r_inv hreg h1 h);
       V.assign res i h;
       let h2 = HST.get() in
       assume (B.live h2 buf);
-      assume (V.live h2 res);
       let j = i + 1ul in
       if j < V.size_of res then deserialize_hash_vec_i ok buf sz r pos res j
       else (true, pos)
     end
   end
-        
+
 private let deserialize_hash_vec (ok:bool) (buf:uint8_p) (sz:uint32_t{B.len buf = sz}) (r:HST.erid) (pos:uint32_t): HST.ST (bool & uint32_t & hash_vec)
   (requires (fun h0 -> B.live h0 buf /\ HS.disjoint (B.frameOf buf) r))
-  (ensures (fun h0 (k, _, hv) h1 -> B.live h1 buf /\ HS.disjoint (B.frameOf buf) r))
+  (ensures (fun h0 (k, _, hv) h1 -> B.live h1 buf /\ V.live h1 hv /\
+                                    HS.disjoint (B.frameOf buf) r))
 = if not ok || pos >= sz then (false, pos, Rgl?.dummy hvreg)
   else begin
     let ok, pos, n = deserialize_uint32_t ok buf sz pos in
@@ -259,6 +258,7 @@ private let deserialize_hash_vec (ok:bool) (buf:uint8_p) (sz:uint32_t{B.len buf 
     else if n = 0ul then (true, pos, V.alloc_empty hash)
     else begin
       let res = V.alloc n (Rgl?.dummy hreg) in
+      assume (loc_disjoint (B.loc_buffer buf) (RV.loc_rvector #hash #hreg res));
       let ok, pos = deserialize_hash_vec_i ok buf sz r pos res 0ul in
       (ok, pos, res)
     end
@@ -266,8 +266,8 @@ private let deserialize_hash_vec (ok:bool) (buf:uint8_p) (sz:uint32_t{B.len buf 
 
 private let rec deserialize_hash_vv_i (ok:bool) (buf:uint8_p) (sz:uint32_t{B.len buf = sz}) (r:HST.erid) (pos:uint32_t) (res:hash_vv) (i:uint32_t{i < V.size_of res})
 : HST.ST (bool & uint32_t)
-  (requires (fun h0 -> B.live h0 buf /\ HS.disjoint (B.frameOf buf) r))
-  (ensures (fun h0 _ h1 -> B.live h1 buf))
+  (requires (fun h0 -> B.live h0 buf /\ V.live h0 res /\ HS.disjoint (B.frameOf buf) r))
+  (ensures (fun h0 _ h1 -> B.live h1 buf /\ HS.disjoint (B.frameOf buf) r))
 = if not ok || pos >= sz then (false, 0ul)
   else begin
     let ok, pos, hv = deserialize_hash_vec ok buf sz r pos in
@@ -278,6 +278,7 @@ private let rec deserialize_hash_vv_i (ok:bool) (buf:uint8_p) (sz:uint32_t{B.len
       V.assign res i hv;
       let h1 = HST.get() in
       assume (B.live h1 buf);
+      assert (V.live h1 res);
       let j = i + 1ul in
       if j = V.size_of res then (true, pos)
       else deserialize_hash_vv_i ok buf sz r pos res j      
