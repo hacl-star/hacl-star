@@ -55,7 +55,7 @@ val lemma_to_memTaint : s:state -> Lemma
   [SMTPat s.memTaint]
 
 val lemma_to_eval_operand : s:state -> o:operand -> Lemma
-  (requires valid_operand o s)
+  (requires valid_src_operand o s)
   (ensures eval_operand o s == BS.eval_operand o (state_to_S s).TS.state)
   [SMTPat (eval_operand o s)]
 
@@ -64,8 +64,8 @@ val lemma_to_eval_xmm : s:state -> x:xmm -> Lemma
   [SMTPat (eval_xmm x s)]
 
 val lemma_to_valid_operand : s:state -> o:operand -> Lemma
-  (ensures valid_operand o s ==> BS.valid_operand o (state_to_S s).TS.state)
-  [SMTPat (valid_operand o s)]
+  (ensures valid_src_operand o s ==> BS.valid_src_operand o (state_to_S s).TS.state)
+  [SMTPat (valid_src_operand o s)]
 
 val lemma_of_to : s:state -> Lemma
   (ensures s == state_of_S s (state_to_S s))

@@ -16,6 +16,7 @@ open X64.Vale.State
 open X64.Vale.Decls
 open X64.Vale.QuickCode
 unfold let memory = X64.Memory.mem // avoid conflict with "var{...} mem" vs. "mem" from X64.Memory
+unfold let stack = X64.Stack_i.stack // avoid conflict with "var{...} stack" vs. "stack" from X64.Stack_i
 open X64.CPU_Features_s
 #endverbatim
 
@@ -26,6 +27,7 @@ open X64.Vale.InsLemmas
 open X64.Taint_Semantics
 open X64.CPU_Features_s
 open X64.Memory
+open X64.Stack_i
 module S = X64.Bytes_Semantics_s
 module TS = X64.Taint_Semantics_s
 
@@ -53,6 +55,7 @@ let lemma_valid_taint_match o s = match o with
 #reset-options "--initial_fuel 4 --max_fuel 4 --max_ifuel 2 --z3rlimit 20"
 
 type memory:Type(1) := X64.Memory.mem;
+type stack_t:Type(1) := X64.Stack_i.stack;
 
 var{:state ok()} ok:bool;
 var{:state reg(Rax)} rax:nat64;
@@ -73,6 +76,7 @@ var{:state reg(R14)} r14:nat64;
 var{:state reg(R15)} r15:nat64;
 var{:state flags()} efl:nat64;
 var{:state mem()} mem:memory;
+var{:state stack()} stack:stack_t;
 var{:state memTaint()} memTaint:memtaint;
 
 operand_type reg64:nat64 :=
