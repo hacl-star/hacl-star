@@ -43,22 +43,18 @@ let lemma_vec_interleave_high_cast_64_4 b1 b2 =
   uintv_extensionality (vec_v r4).[3] (vec_v b2).[3];
   eq_intro (vec_v r4) (create4 (vec_v b1).[2] (vec_v b1).[3] (vec_v b2).[2] (vec_v b2).[3])
 
-//Taken from Hacl.Impl.Curve25519.Lemmas
-val lemma_uints64_from_bytes_le_nat_:
-  #len:size_nat{8 * len <= max_size_t} -> b:lseq uint8 (8 * len) -> Lemma
-  (ensures  nat_from_intseq_le_ (uints_from_bytes_le #U64 #_ #len b) == nat_from_intseq_le_ b)
-let lemma_uints64_from_bytes_le_nat_ #len b = admit()
+#set-options "--z3rlimit 50 --max_fuel 1"
 
 let uint_from_bytes_le_lemma b =
   let r1 = nat_from_bytes_le b in
-  lemma_uints64_from_bytes_le_nat_ #2 b;
+  uints_from_bytes_le_nat_lemma #U64 #_ #2 b;
   assert (r1 == nat_from_intseq_le_ (uints_from_bytes_le #U64 #_ #2 b));
   let r2 = uints_from_bytes_le #U64 #_ #2 b in
   assert (r2.[0] == uint_from_bytes_le (sub b 0 8));
   assert (r2.[1] == uint_from_bytes_le (sub b 8 8));
   assert (nat_from_intseq_le_ r2 == v r2.[0] + pow2 64 * nat_from_intseq_le_ (Seq.slice r2 1 2));
   assert (nat_from_intseq_le_ (Seq.slice r2 1 2) == v r2.[1])
-
+  
 let uints_from_bytes_le_lemma64_1 b =
   uint_from_bytes_le_lemma b
 
@@ -83,9 +79,6 @@ let rec lemma_nat_from_bytes_le_zeroes len b =
   if len = 0 then ()
   else lemma_nat_from_bytes_le_zeroes (len-1) (Seq.slice b 1 len)
 
-val lemma_mul_pow2_and_zero: a:nat -> Lemma (pow2 a * 0 = 0)
-let lemma_mul_pow2_and_zero a = ()
-
 val nat_from_bytes_le_eq_lemma_: len:size_nat{len < 16} -> b:lseq uint8 len -> Lemma
  (let tmp = create 16 (u8 0) in
   BSeq.nat_from_intseq_le_ b == BSeq.nat_from_intseq_le_ (update_sub tmp 0 len b))
@@ -98,9 +91,6 @@ let nat_from_bytes_le_eq_lemma_ len b =
   nat_from_bytes_le_slice_lemma #_ #16 r len;
   assert (nat_from_intseq_le_ r == nat_from_intseq_le_ (Seq.slice r 0 len) + pow2 (len * 8) * nat_from_intseq_le_ (Seq.slice r len 16));
   assert (nat_from_intseq_le_ r == nat_from_intseq_le_ b + pow2 (len * 8) * nat_from_intseq_le_ (Seq.slice r len 16));
-  lemma_nat_from_bytes_le_zeroes (16 - len) (Seq.slice r len 16);
-  assert (nat_from_intseq_le_ (Seq.slice r len 16) = 0);
-  assert (nat_from_intseq_le_ r == nat_from_intseq_le_ b + pow2 (len * 8) * 0);
-  lemma_mul_pow2_and_zero (len * 8)
+  lemma_nat_from_bytes_le_zeroes (16 - len) (Seq.slice r len 16)
 
 let nat_from_bytes_le_eq_lemma len b = nat_from_bytes_le_eq_lemma_ len b
