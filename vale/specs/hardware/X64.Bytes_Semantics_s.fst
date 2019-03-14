@@ -77,12 +77,12 @@ type ins:eqtype =
   | SHA256_msg2  : dst:xmm -> src:xmm -> ins
   
 type ocmp:eqtype =
-  | OEq: o1:operand{not (OMem? o1)} -> o2:operand{not (OMem? o2)} -> ocmp
-  | ONe: o1:operand{not (OMem? o1)} -> o2:operand{not (OMem? o2)} -> ocmp
-  | OLe: o1:operand{not (OMem? o1)} -> o2:operand{not (OMem? o2)} -> ocmp
-  | OGe: o1:operand{not (OMem? o1)} -> o2:operand{not (OMem? o2)} -> ocmp
-  | OLt: o1:operand{not (OMem? o1)} -> o2:operand{not (OMem? o2)} -> ocmp
-  | OGt: o1:operand{not (OMem? o1)} -> o2:operand{not (OMem? o2)} -> ocmp
+  | OEq: o1:operand{not (OMem? o1 || OStack? o1)} -> o2:operand{not (OMem? o2 || OStack? o2)} -> ocmp
+  | ONe: o1:operand{not (OMem? o1 || OStack? o1)} -> o2:operand{not (OMem? o2 || OStack? o2)} -> ocmp
+  | OLe: o1:operand{not (OMem? o1 || OStack? o1)} -> o2:operand{not (OMem? o2 || OStack? o2)} -> ocmp
+  | OGe: o1:operand{not (OMem? o1 || OStack? o1)} -> o2:operand{not (OMem? o2 || OStack? o2)} -> ocmp
+  | OLt: o1:operand{not (OMem? o1 || OStack? o1)} -> o2:operand{not (OMem? o2 || OStack? o2)} -> ocmp
+  | OGt: o1:operand{not (OMem? o1 || OStack? o1)} -> o2:operand{not (OMem? o2 || OStack? o2)} -> ocmp
 
 type code:eqtype = precode ins ocmp
 type codes:eqtype = list code

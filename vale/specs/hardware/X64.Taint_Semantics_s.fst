@@ -52,7 +52,7 @@ type tainted_ins : eqtype =
 let operand_obs (s:traceState) (o:operand) : list observation =
   match o with
     | OConst _ | OReg _ -> []
-    | OMem m ->
+    | OMem m | OStack m ->
       match m with
       | MConst _ -> []
       | MReg reg _ -> [MemAccess (eval_reg reg s.state)]
@@ -91,6 +91,7 @@ let taint_match (o:operand) (t:taint) (memTaint:memTaint_t) (s:state) : bool =
   match o with
     | OConst _ | OReg _ -> true
     | OMem m -> match_n (eval_maddr m s) 8 memTaint t
+    | OStack m -> t = Public // everything on the stack should be public
 
 let rec taint_match_list (o:list operand) (t:taint) (memTaint:memTaint_t) (s:state) : bool =
   match o with
@@ -99,7 +100,7 @@ let rec taint_match_list (o:list operand) (t:taint) (memTaint:memTaint_t) (s:sta
 
 let update_taint (memTaint:memTaint_t) (dst:operand) (t:taint) (s:state) : memTaint_t =
   match dst with
-    | OConst _ -> memTaint | OReg _ -> memTaint
+    | OConst _ | OReg _ | OStack _ -> memTaint
     | OMem m -> update_n (eval_maddr m s) 8 memTaint t
 
 let rec update_taint_list (memTaint:memTaint_t) (dst:list operand) (t:taint) (s:state)
@@ -111,11 +112,12 @@ let rec update_taint_list (memTaint:memTaint_t) (dst:list operand) (t:taint) (s:
 let taint_match128 (op:mov128_op) (t:taint) (memTaint:memTaint_t) (s:state) : bool =
   match op with
   | Mov128Xmm _ -> true
+  | Mov128Stack _ -> t = Public // Everything on the stack should be public
   | Mov128Mem addr -> match_n (eval_maddr addr s) 16 memTaint t
 
 let update_taint128 op t (memTaint:memTaint_t) (s:state) : memTaint_t =
   match op with
-  | Mov128Xmm _ -> memTaint
+  | Mov128Xmm _ | Mov128Stack _ -> memTaint
   | Mov128Mem addr -> update_n (eval_maddr addr s) 16 memTaint t
 
 // Special treatment for movdqu
