@@ -403,19 +403,6 @@ unfold let modifies_buffer128 (b:M.buffer128) (h1 h2:M.mem) = modifies_mem (loc_
 unfold let modifies_buffer128_2 (b1 b2:M.buffer128) (h1 h2:M.mem) = modifies_mem (M.loc_union (loc_buffer b1) (loc_buffer b2)) h1 h2
 unfold let modifies_buffer128_3 (b1 b2 b3:M.buffer128) (h1 h2:M.mem) = modifies_mem (M.loc_union (M.loc_union (loc_buffer b1) (loc_buffer b2)) (loc_buffer b3)) h1 h2
 
-let validSrcAddrs8 (m:M.mem) (addr:int) (b:M.buffer8) (len:int) (memTaint:M.memtaint) (t:taint) =
-    buffer_readable m b /\
-    len <= buffer_length b /\
-    M.buffer_addr b m == addr ///\
-    //M.valid_taint_buf64 b m memTaint t
-
-let validDstAddrs8 (m:M.mem) (addr:int) (b:M.buffer8) (len:int) (memTaint:M.memtaint) (t:taint) =
-    buffer_readable m b /\
-    buffer_writeable b /\
-    len <= buffer_length b /\
-    M.buffer_addr b m == addr // /\
-    //M.valid_taint_buf64 b m memTaint t
-
 let validSrcAddrs64 (m:M.mem) (addr:int) (b:M.buffer64) (len:int) (memTaint:M.memtaint) (t:taint) =
     buffer_readable m b /\
     len <= buffer_length b /\

@@ -3571,10 +3571,12 @@ procedure {:quick} {:public} AES_GCM_encrypt_6mult(
         len / 6 >= 3;   // Should be implied by above... :(
         12 + len + 6 < pow2_32;
     ensures
-
-        // Pointer updates
-        Xip == old(Xip) - 0x20;
-
+        // Framing
+        modifies_mem(loc_union(loc_buffer(iv_b), 
+                     loc_union(loc_buffer(stack_b), 
+                               loc_buffer(out_b))), old(mem), mem);
+        validSrcAddrs128(mem, Xip - 0x20, hkeys_b, 8, memTaint, Secret);
+        key == old(key);
 
         let iv_LE := old(buffer128_read(iv_b, 0, mem));
         let iv_BE := reverse_bytes_quad32(iv_LE);
@@ -3654,6 +3656,7 @@ procedure {:quick} {:public} AES_GCM_encrypt_6mult(
     gctr_partial_opaque_ignores_postfix(alg, #nat32(12+mid_len - 6), old(buffer128_as_seq(mem, in_b)), old(buffer128_as_seq(mem, in_b)), out_snapshot, buffer128_as_seq(mem, out_b),key_words, ctr_BE);
     gctr_partial_extend6(alg, 12+mid_len - 6, old(buffer128_as_seq(mem, in_b)), buffer128_as_seq(mem, out_b), key_words, ctr_BE);
     //assert gctr_partial_opaque(alg, old(len), old(buffer128_as_seq(mem, in_b)), buffer128_as_seq(mem, out_b), key_words, ctr_BE);
+    Sub64(key, 0x80);   // Restore the key pointer for later code's use
 }
 
 /*

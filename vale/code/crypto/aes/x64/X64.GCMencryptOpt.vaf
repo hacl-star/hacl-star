@@ -358,7 +358,7 @@ procedure {:quick} {:verify true} gcm_blocks(
     requires
         // Valid buffers and pointers
 // TODO: Handle auth values that aren't a multiple of 128-bits
-        validDstAddrs64 (mem,      arg_ptr,      arg_b,        8, memTaint, Public);
+        validSrcAddrs64 (mem,      arg_ptr,      arg_b,        8, memTaint, Public);
         validDstAddrs128(mem,     auth_ptr,     auth_b,  bytes_to_quad_size(auth_num_bytes), memTaint, Secret);
         validDstAddrs128(mem,       iv_ptr,       iv_b,        1, memTaint, Secret);
         validSrcAddrs128(mem,  in128x6_ptr,  in128x6_b, len128x6, memTaint, Secret);
@@ -405,12 +405,18 @@ procedure {:quick} {:verify true} gcm_blocks(
         auth_ptr  + 16 * bytes_to_quad_size(auth_num_bytes)  < pow2_64;
          in128x6_ptr + 0x10*len128x6 < pow2_64;
         out128x6_ptr + 0x10*len128x6 < pow2_64;
+           in128_ptr + 0x10*len128   < pow2_64;
+          out128_ptr + 0x10*len128   < pow2_64;
+           inout_ptr + 0x10          < pow2_64;
 
         buffer_length(auth_b) == bytes_to_quad_size(auth_num_bytes);
         buffer_length(in128x6_b) == buffer_length(out128x6_b);
+        buffer_length(in128_b) == buffer_length(out128_b);
         buffer_length(in128x6_b) == len128x6;
-        num_plain_bytes < pow2_32;
+        buffer_length(inout_b) == 1;
+        num_plain_bytes*8 < pow2_32;
         4096 * (buffer_length(in128x6_b)) * 16 < pow2_32;
+        256 * buffer_length(in128_b) < pow2_32;
         4096 * auth_num_bytes < pow2_32;
         Xip + 0x20 < pow2_64;
 
@@ -454,6 +460,9 @@ procedure {:quick} {:verify true} gcm_blocks(
 
     (ghost var h), (ghost var y_0), (ghost var y_auth) := gcm_auth_bytes(alg, auth_b, key, round_keys, keys_b);
 
+    // Save auth_num_bytes, since AES_GCM_encrypt_6mult will clobber it
+    Mov64(r15, auth_num_bytes);
+
     // Line up the arguments for AES_GCM_encrypt_6mult
     Load64_buffer(rdi, rbp,  0, Public, arg_b, 0);
     Load64_buffer(rsi, rbp,  8, Public, arg_b, 1);
@@ -464,20 +473,40 @@ procedure {:quick} {:verify true} gcm_blocks(
 
     (ghost var ctr_BE) := AES_GCM_encrypt_6mult(alg, iv_b, in128x6_b, out128x6_b, stack_b, key, round_keys, keys_b, hkeys_b);
 
-    // Line up arguments for gcm_blocks128
+    // Line up arguments for gcm_blocks128 for remaining 128-bit blocks
+    Load128_buffer(xmm7, iv_ptr, 0, Secret, iv_b, 0);
+    Mov64(r8, keys_ptr);
     Load64_buffer(rax, rbp, 24, Public, arg_b, 3);
     Load64_buffer(rbx, rbp, 32, Public, arg_b, 4);
     Load64_buffer(rcx, rbp, 40, Public, arg_b, 5);
-    Load128_buffer(xmm7, iv_ptr, 0, Secret, iv_b, 0);
     Mov128(xmm1, xmm8);     // Move the hash value into the right place
     InitPshufbMask(xmm8, r12);
     Load128_buffer(xmm11, Xip, 0 - 0x20, Secret, hkeys_b, 0); // TODO: we're expecting h to already be in hkeys_b, so why are we computing it above in gcm_auth_bytes!?
 
+    gcm_blocks128(alg, in128_b, out128_b, key, round_keys, keys_b);
 
-//    gcm_blocks128(alg, in128_b, out128_b, key, round_keys, keys_b);
-//    Mov64(rcx, 1);
-//    gcm_blocks128(alg, inout_b, inout_b, key, round_keys, keys_b);
-    // Do stuff from gcm_core
+    // Line up arguments for gcm_blocks128 for the 128-bit block that holds any extra bytes
+    Load64_buffer(rax, rbp, 48, Public, arg_b, 6);
+    Mov64(rbx, rax);
+    Mov64(rcx, 1);
+    gcm_blocks128(alg, inout_b, inout_b, key, round_keys, keys_b);
+
+    // Line up length arguments
+    Load64_buffer(r13, rbp, 56, Public, arg_b, 7);
+    Mov64(r11, r15);
+    gcm_make_length_quad();
+    ghost var length_quad32 := xmm2;
+
+    compute_ghash_incremental_register();
+    ghost var y_final := xmm1;
+
+    PinsrdImm(xmm7, 1, 0, r12);   // Reconstruct j0 (this is all we need, since gctr_core says it only changes iv.lo0)
+//    assert xmm7 == iv_BE.(lo0 := 1);
+
+    // Encrypt the hash value with gctr_register; result goes in xmm1
+    gctr_register(alg, key, round_keys, keys_b); // Encrypt using j0 and xmm0 = hash_value
+
+    le_seq_quad32_to_bytes_of_singleton(xmm1);
 }
 
 
