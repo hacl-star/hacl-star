@@ -73,3 +73,7 @@ val uints_to_bytes_le_lemma128_2: r:lseq uint128 2 -> Lemma
  (let b = BSeq.uints_to_bytes_le r in
   sub b 0 16 == BSeq.uint_to_bytes_le r.[0] /\
   sub b 16 16 == BSeq.uint_to_bytes_le r.[1])
+
+val nat_from_bytes_le_eq_lemma: len:size_nat{len < 16} -> b:lseq uint8 len -> Lemma
+ (let tmp = create 16 (u8 0) in
+  BSeq.nat_from_bytes_le b == BSeq.nat_from_bytes_le (update_sub tmp 0 len b))
