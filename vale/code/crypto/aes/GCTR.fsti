@@ -103,7 +103,7 @@ let gctr_partial_opaque_ignores_postfix (alg:algorithm) (bound:nat32) (plain pla
   assert (forall i . 0 <= i /\ i < bound ==> index cipher' i == index (slice cipher' 0 bound) i);
   ()
 
-let gctr_partial_extend6 (alg:algorithm) (bound:nat) (plain cipher:seq quad32) (key:seq nat32) (icb:quad32) : Lemma
+val gctr_partial_extend6 (alg:algorithm) (bound:nat) (plain cipher:seq quad32) (key:seq nat32) (icb:quad32) : Lemma
   (requires length plain >= bound + 6 /\
             length cipher >= bound + 6 /\
             is_aes_key_LE alg key /\
@@ -117,10 +117,6 @@ let gctr_partial_extend6 (alg:algorithm) (bound:nat) (plain cipher:seq quad32) (
             index cipher (bound + 5) == quad32_xor (index plain (bound + 5)) (aes_encrypt_BE alg key (inc32lite icb (bound + 5)))  
   )
   (ensures gctr_partial_opaque alg (bound + 6) plain cipher key icb)
-  =
-  reveal_opaque gctr_partial;
-  ()
-  
 
 let test (alg:algorithm) (plain cipher:seq quad32) (key:aes_key_LE alg) (icb:quad32) (count:nat32) : Lemma
   (requires length plain >= 4 /\ length cipher >= 4 /\

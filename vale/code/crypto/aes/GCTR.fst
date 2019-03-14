@@ -36,6 +36,11 @@ let gctr_encrypt_empty (icb_BE:quad32) (plain_LE cipher_LE:seq quad32) (alg:algo
   assert (equal (le_seq_quad32_to_bytes cipher_quads_LE) empty);  // OBSERVEs
   ()
 
+let gctr_partial_extend6 (alg:algorithm) (bound:nat) (plain cipher:seq quad32) (key:seq nat32) (icb:quad32)
+  =
+  reveal_opaque gctr_partial;
+  ()
+
 (*
 let rec seq_map_i_indexed' (#a:Type) (#b:Type) (f:int->a->b) (s:seq a) (i:int) :
   Tot (s':seq b { length s' == length s /\

@@ -285,7 +285,7 @@ let le_nat64_to_bytes_to_nat64 n =
 let le_bytes_to_seq_quad32_empty () : 
   Lemma (forall s . {:pattern (length (le_bytes_to_seq_quad32 s)) } length s == 0 ==> length (le_bytes_to_seq_quad32 s) == 0)
   =
-  Opaque_s.reveal_opaque le_bytes_to_seq_quad32_def;
+  FStar.Pervasives.reveal_opaque (`%le_bytes_to_seq_quad32) le_bytes_to_seq_quad32;
   ()
 
 #reset-options "--z3rlimit 10 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq.Properties'"
