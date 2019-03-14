@@ -7,6 +7,10 @@ open X64.Leakage_Helpers
 open X64.Leakage_Ins
 open X64.Leakage_Ins_Xmm
 
+// TODO: Restore this
+
+(*
+
 #reset-options "--initial_ifuel 0 --max_ifuel 1 --initial_fuel 1 --max_fuel 1"
 let combine_reg_taints (regs1 regs2:reg_taint) : reg_taint =
     FunctionalExtensionality.on reg (fun x -> merge_taint (regs1 x) (regs2 x))
@@ -425,3 +429,5 @@ let check_if_code_is_leakage_free code ts tsExpected =
     publicTaintsAreAsExpected ts' tsExpected
   else
     b
+
+*)
