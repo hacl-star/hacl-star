@@ -313,7 +313,7 @@ obj/Operator.fst: VALE_FLAGS=
 	  $(MONO) $(VALE_HOME)/bin/vale.exe -fstarText -quickMods \
 	    -typecheck -include $*.types.vaf \
 	    $(VALE_FLAGS) \
-	    -in $< -out $@ -outi $@i && touch -c $@i \
+	    -in $< -out $@.tmp -outi $@i.tmp && mv $@.tmp $@ && mv $@i.tmp $@i && touch -c $@i \
 	  ,[VALE] $(notdir $*),$(call to-obj-dir,$@))
 
 # A pseudo-target for the first stage.
