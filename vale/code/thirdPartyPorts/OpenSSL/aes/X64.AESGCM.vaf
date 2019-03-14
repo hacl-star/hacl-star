@@ -3571,6 +3571,11 @@ procedure {:quick} {:public} AES_GCM_encrypt_6mult(
         len / 6 >= 3;   // Should be implied by above... :(
         12 + len + 6 < pow2_32;
     ensures
+
+        // Pointer updates
+        Xip == old(Xip) - 0x20;
+
+
         let iv_LE := old(buffer128_read(iv_b, 0, mem));
         let iv_BE := reverse_bytes_quad32(iv_LE);
         ctr_BE == Mkfour(2, iv_BE.lo1, iv_BE.hi2, iv_BE.hi3);
@@ -3909,7 +3914,3 @@ round 9:
         $$Z0 == lo(old($$Z0)) *. hi(old($$Hkey));
 
 */
-
-#verbatim {:interface}
-// Hello
-#endverbatim
