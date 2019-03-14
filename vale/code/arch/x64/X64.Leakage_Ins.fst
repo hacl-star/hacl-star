@@ -25,6 +25,8 @@ let check_if_cpuid_consumes_fixed_time (ins:tainted_ins{S.Cpuid? ins.i}) (ts:tai
   true, ts
 
 let check_if_ins_consumes_fixed_time ins ts =
+(false, ts) // TODO
+(*
   if S.Cpuid? ins.i then check_if_cpuid_consumes_fixed_time ins ts
   else (
   let i = ins.i in
@@ -92,6 +94,7 @@ let check_if_ins_consumes_fixed_time ins ts =
   in
   b, ts'
   )
+*)
 
 val lemma_public_flags_same: (ts:taintState) -> (ins:tainted_ins{S.Mul64? ins.i}) -> Lemma (forall s1 s2.
   let b, ts' = check_if_ins_consumes_fixed_time ins ts in
