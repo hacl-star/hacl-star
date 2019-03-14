@@ -22,7 +22,7 @@ noeq
 type stack =
   | Vale_stack: 
     initial_rsp:nat64{initial_rsp >= 4096} ->  // Initial rsp pointer when entering the function
-    mem:Map.t int nat8 ->                       // Actual memory
+    mem:Map.t int nat8 ->                       // Stack contents
     stack
   
 type ins:eqtype =
@@ -99,8 +99,6 @@ noeq type state = {
 }
 
 assume val havoc : state -> ins -> nat64
-
-// TODO: Need to be sure that load/store_mem does an appropriate little-endian load
 
 unfold let eval_reg (r:reg) (s:state) : nat64 = s.regs r
 unfold let eval_xmm (i:xmm) (s:state) : quad32 = s.xmms i
@@ -269,7 +267,9 @@ let update_stack (ptr:int) (v:nat64) (s:state) : state =
   // the initial stack pointer. Everything above is read-only
   if (ptr >= s.regs Rsp && ptr + 8 <= init_rsp) then (
     {s with stack = update_stack' ptr v s.stack}
-  ) else s
+  ) else 
+    // If we are in this case, a previous check set the ok field to false
+    s
 
 let update_stack128 (ptr:int) (v:quad32) (s:state) : state =
   let Vale_stack init_rsp mem = s.stack in
@@ -277,7 +277,9 @@ let update_stack128 (ptr:int) (v:quad32) (s:state) : state =
   // the initial stack pointer. Everything above is read-only
   if (ptr >= s.regs Rsp && ptr + 16 <= init_rsp) then (
     {s with stack = update_stack128' ptr v s.stack}
-  ) else s
+  ) else 
+    // If we are in this case, a previous check set the ok field to false  
+    s
 
 unfold
 let valid_src_stack64 (ptr:int) (st:stack) : bool =
@@ -317,13 +319,13 @@ let valid_ocmp (c:ocmp) (s:state) :bool =
 unfold
 let valid_dst_stack64 (rsp:nat64) (ptr:int) (st:stack) : bool =
   let Vale_stack init_rsp mem = st in
-    // We are allowed to store anywhere between Rsp and the initial buffer
+    // We are allowed to store anywhere between Rsp and the initial stack pointer
   ptr >= rsp && ptr + 8 <= init_rsp
 
 unfold
 let valid_dst_stack128 (rsp:nat64) (ptr:int) (st:stack) : bool =
   let Vale_stack init_rsp mem = st in
-    // We are allowed to store anywhere between Rsp and the initial buffer
+    // We are allowed to store anywhere between Rsp and the initial stack pointer
     ptr >= rsp && ptr + 16 <= init_rsp
 
 let valid_dst_operand (o:operand) (s:state) : bool =
@@ -356,11 +358,11 @@ let update_mov128_op_preserve_flags' (o:mov128_op) (v:quad32) (s:state) : state 
 let update_operand' (o:operand) (ins:ins) (v:nat64) (s:state) : state =
   { (update_operand_preserve_flags' o v s) with flags = havoc s ins }
 
-let update_rsp' (i:int) (s:state) : state =
+let update_rsp' (new_rsp:int) (s:state) : state =
   let Vale_stack init_rsp mem = s.stack in
-  // Only modify the stack pointer if it is valid
-  if i >= init_rsp - 4096 && i <= init_rsp then
-    update_reg' Rsp i s
+  // Only modify the stack pointer if the new value is valid, that is in the current stack frame, and in the same page
+  if new_rsp >= init_rsp - 4096 && new_rsp <= init_rsp then
+    update_reg' Rsp new_rsp s
   else
     s
 
@@ -491,6 +493,7 @@ let update_operand (dst:operand) (ins:ins) (v:nat64) :st unit =
 
 unfold
 let update_rsp (i:int) : st unit =
+  // Only modify the stack pointer if the new value is valid, that is in the current stack frame, and in the same page
  check (fun s -> i >= s.stack.initial_rsp - 4096);;
  check (fun s -> i <= s.stack.initial_rsp);;
  s <-- get;
@@ -637,11 +640,11 @@ let eval_ins (ins:ins) : st unit =
     update_operand dst ins (Types_s.ishl (eval_operand dst s) (eval_operand amt s))
 
   | Push src ->
+    check (valid_src_operand src);;
     // Evaluate value on initial state
     let new_src = eval_operand src s in
     // Compute the new stack pointer
     let new_rsp = eval_reg Rsp s - 8 in
-    check (valid_src_operand src);;
     // Actually modify the stack pointer
     update_rsp new_rsp;;
     // Store the element at the new stack pointer
