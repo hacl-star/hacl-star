@@ -62,7 +62,7 @@ let lemma_to_eval_operand s o = match o with
   | OMem m ->
     let addr = eval_maddr m s in
     MS.equiv_load_mem addr s.mem
-  | OStack m -> admit()
+  | OStack m -> ()
 
 #reset-options "--initial_fuel 2 --max_fuel 2"
 
@@ -76,7 +76,7 @@ let lemma_to_valid_operand s o = match o with
     (ensures BS.valid_src_operand o (state_to_S s).TS.state) =
     MS.bytes_valid addr s.mem in
     Classical.move_requires aux ()
-  | OStack m -> admit()
+  | OStack m -> ()
 
 let lemma_to_valid_taint s o t = ()
 
@@ -97,7 +97,7 @@ let lemma_to_of_eval_ins c s0 =
   assert (feq xmms xmms'');
   X64.Bytes_Semantics.eval_ins_same_unspecified ins s0';
   X64.Bytes_Semantics.eval_ins_domains ins s0';
-  assume (stack == stack'');
+  VSS.lemma_stack_to_from stack;
   MS.get_heap_hs heap s0.mem
 
 val lemma_valid_taint64: (b:ME.buffer64) ->

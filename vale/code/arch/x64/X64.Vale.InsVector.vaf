@@ -23,6 +23,7 @@ open Types_s
 open Arch.Types
 open X64.Machine_s
 open X64.Memory
+open X64.Stack_i
 open X64.Vale.State
 open X64.Vale.Decls
 open X64.Vale.QuickCode
@@ -38,6 +39,7 @@ open X64.Vale.StateLemmas
 open X64.Vale.InsLemmas
 open X64.Taint_Semantics
 open X64.Memory
+open X64.Stack_i
 module S = X64.Bytes_Semantics_s
 module TS = X64.Taint_Semantics_s
 
@@ -360,56 +362,47 @@ procedure{:instruction Ins(TS.TaintedIns(tuple(S.MOVDQU(Mov128Mem(MReg(get_reg(d
 
 procedure {:quick exportOnly}{:public} PushXmm(
         src:xmm,
-    out tmp:reg_opr64,
-        ghost b:buffer64,
-        ghost index:int)
-    reads memTaint;
+    out tmp:reg_opr64)
+    reads
     modifies
-        rsp; mem;
+        rsp; stack;
     requires
-        valid_taint_buf64(b, mem, memTaint, Public);
-        valid_dst_addr(mem, b, index);
-        valid_dst_addr(mem, b, index - 1);
-        rsp - 8 == buffer_addr(b, mem) + 8 * index;
-        0 <= rsp - 16;
+        rsp <= init_rsp(stack);
+        init_rsp(stack) - 4096 <= rsp - 16;
     ensures
-        modifies_mem(loc_buffer(b), old(mem), mem);
-
         let src_lo := lo64(src);
         let src_hi := hi64(src);
-        mem == old(buffer64_write(b, index - 1, src_hi, buffer64_write(b, index, src_lo, mem)));
+        stack == old(store_stack64(rsp - 16, src_hi, store_stack64(rsp - 8, src_lo, stack)));
 
         rsp == old(rsp) - 16;
 {
     Pextrq(tmp, src, 0);
-    Push(tmp, b, index);
+    Push(tmp);
     Pextrq(tmp, src, 1);
-    Push(tmp, b, index - 1);
+    Push(tmp);
 }
 
 procedure {:quick exportOnly}{:public} PopXmm(
     out dst:xmm,
     out tmp:reg_opr64,
-        ghost b:buffer64,
-        ghost index:int,
         ghost expected_xmm:quad32)
-    reads mem; memTaint;
-    modifies rsp;
+    reads
+    modifies rsp; stack;
     requires
-        valid_taint_buf64(b, mem, memTaint, Public);
-        valid_src_addr(mem, b, index);
-        valid_src_addr(mem, b, index + 1);
-        hi64(expected_xmm) == buffer64_read(b, index, mem);
-        lo64(expected_xmm) == buffer64_read(b, index + 1, mem);
-        rsp == buffer_addr(b, mem) + 8 * index;
-        rsp + 16 < pow2_64;
+        valid_src_stack64(rsp, stack);
+        valid_src_stack64(rsp + 8, stack);
+        hi64(expected_xmm) == load_stack64(rsp, stack);
+        lo64(expected_xmm) == load_stack64(rsp+8, stack);
+        rsp >= init_rsp(stack) - 4096;
+        rsp + 16 <= init_rsp(stack);
     ensures
         dst == expected_xmm;
         rsp == old(rsp) + 16;
+        stack == free_stack64(rsp-16, rsp, old(stack));
 {
-    Pop(tmp, b, index);
+    Pop(tmp);
     Pinsrq(dst, tmp, 1);
-    Pop(tmp, b, index + 1);
+    Pop(tmp);
     Pinsrq(dst, tmp, 0);
     push_pop_xmm(expected_xmm, old(dst));
 }

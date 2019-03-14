@@ -400,10 +400,6 @@ let validDstAddrsOffset128 (m:M.mem) (addr:int) (b:M.buffer128) (offset len:int)
     M.buffer_addr b m + 16 `op_Multiply` offset == addr /\
     M.valid_taint_buf128 b m memTaint t
 
-// TODO: Correct this predicate
-let valid_stack_slots (m:M.mem) (rsp:int) (b:M.buffer64) (num_slots:int) (memTaint:M.memtaint) =
-  True
-
 let modifies_buffer_specific128 (b:M.buffer128) (h1 h2:M.mem) (start last:nat) : GTot prop0 =
     modifies_buffer128 b h1 h2 /\
     // TODO: Consider replacing this with: modifies (loc_buffer (gsub_buffer b i len)) h1 h2

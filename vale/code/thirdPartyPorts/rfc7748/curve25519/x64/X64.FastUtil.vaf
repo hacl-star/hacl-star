@@ -114,8 +114,7 @@ procedure{:quick} fast_mul1(
 procedure{:quick}{:public}{:exportSpecs} fast_mul1_stdcall(
     inline win:bool,
     ghost dst_b:buffer64,
-    ghost inA_b:buffer64,
-    ghost stack_b:buffer64)
+    ghost inA_b:buffer64)
     lets
         dst_ptr @= rdi; inA_ptr @= rsi; b @= rdx;
         dst_in := (if win then rcx else rdi);
@@ -129,12 +128,8 @@ procedure{:quick}{:public}{:exportSpecs} fast_mul1_stdcall(
         adx_enabled && bmi2_enabled;
         buffers_disjoint(dst_b, inA_b) || inA_b == dst_b;
 
-        buffers_disjoint(stack_b, dst_b);
-        buffers_disjoint(stack_b, inA_b);
-
         validDstAddrs64(mem, dst_in, dst_b, 4, memTaint, Secret);
         validSrcAddrs64(mem, inA_in, inA_b, 4, memTaint, Secret);
-        valid_stack_slots(mem, rsp, stack_b, 4, memTaint);
     ensures
         let a0 := old(buffer64_read(inA_b, 0, mem));
         let a1 := old(buffer64_read(inA_b, 1, mem));
@@ -155,7 +150,7 @@ procedure{:quick}{:public}{:exportSpecs} fast_mul1_stdcall(
         //   Framing
         //////////////////////////////////////
 
-        modifies_buffer_2(dst_b, stack_b, old(mem), mem);
+        modifies_buffer(dst_b, old(mem), mem);
         validSrcAddrs64(mem, dst_in, dst_b, 4, memTaint, Secret);
 
         rbx == old(rbx);
@@ -167,10 +162,10 @@ procedure{:quick}{:public}{:exportSpecs} fast_mul1_stdcall(
         rsp == old(rsp);
 {
     // Store callee-save registers
-    Push(rsi, stack_b, 3);
-    Push(r12, stack_b, 2);
-    Push(r13, stack_b, 1);
-    Push(r14, stack_b, 0);
+    Push(rsi);
+    Push(r12);
+    Push(r13);
+    Push(r14);
 
     // Line up the rest of the arguments
     inline if (win) {
@@ -181,16 +176,15 @@ procedure{:quick}{:public}{:exportSpecs} fast_mul1_stdcall(
 
     fast_mul1(dst_b, inA_b);
 
-    Pop(r14, stack_b, 0);
-    Pop(r13, stack_b, 1);
-    Pop(r12, stack_b, 2);
-    Pop(rsi, stack_b, 3);
+    Pop(r14);
+    Pop(r13);
+    Pop(r12);
+    Pop(rsi);
 }
 */
 
 #reset-options "--z3rlimit 600"
 procedure{:quick}{:public}{:exportSpecs} fast_add1(
-    ghost stack_b:buffer64,                                        
     ghost dst_b:buffer64,
     ghost inA_b:buffer64,
     ghost inB:nat64)
@@ -257,7 +251,6 @@ procedure{:quick}{:public}{:exportSpecs} fast_add1(
 
 procedure{:quick}{:public}{:exportSpecs} fast_add1_stdcall(
     inline win:bool,
-    ghost stack_b:buffer64,
     ghost dst_b:buffer64,
     ghost inA_b:buffer64,
     ghost inB_in:nat64
@@ -269,18 +262,14 @@ procedure{:quick}{:public}{:exportSpecs} fast_add1_stdcall(
     reads memTaint;
     modifies
         rax; rbx; rcx; rdx; rsi; rdi; rbp; rsp; r8; r9; r10; r11; r12; r13; r14; r15;    
-        efl; mem;
+        efl; mem; stack;
     requires
         adx_enabled && bmi2_enabled;
         buffers_disjoint(dst_b, inA_b) || inA_b == dst_b;
 
-        buffers_disjoint(stack_b, dst_b);
-        buffers_disjoint(stack_b, inA_b);
-
         inB_in = (if win then r8 else rdx);
         validDstAddrs64(mem, dst_in, dst_b, 4, memTaint, Secret);
         validSrcAddrs64(mem, inA_in, inA_b, 4, memTaint, Secret);
-        valid_stack_slots(mem, rsp, stack_b, 2, memTaint);
     ensures
         let a0 := old(buffer64_read(inA_b, 0, mem));
         let a1 := old(buffer64_read(inA_b, 1, mem));
@@ -301,7 +290,7 @@ procedure{:quick}{:public}{:exportSpecs} fast_add1_stdcall(
         //   Framing
         //////////////////////////////////////
 
-        modifies_buffer_2(stack_b, dst_b, old(mem), mem);
+        modifies_buffer(dst_b, old(mem), mem);
         validSrcAddrs64(mem, dst_in, dst_b, 4, memTaint, Secret);
 
 
@@ -324,8 +313,8 @@ procedure{:quick}{:public}{:exportSpecs} fast_add1_stdcall(
         rsp == old(rsp);
 {
     // Store callee-save registers
-    Push(rdi, stack_b, 1);
-    Push(rsi, stack_b, 0);
+    Push(rdi);
+    Push(rsi);
 
     // Line up the rest of the arguments
     inline if (win) {
@@ -334,10 +323,10 @@ procedure{:quick}{:public}{:exportSpecs} fast_add1_stdcall(
         Mov64(b, r8);
     } 
 
-    fast_add1(stack_b, dst_b, inA_b, inB_in);
+    fast_add1(dst_b, inA_b, inB_in);
 
-    Pop(rsi, stack_b, 0);
-    Pop(rdi, stack_b, 1);
+    Pop(rsi);
+    Pop(rdi);
 }
 
 #reset-options "--z3rlimit 1200"
@@ -413,8 +402,7 @@ procedure{:quick} fast_sub1(
 procedure{:quick}{:public}{:exportSpecs} fast_sub1_stdcall(
     inline win:bool,
     ghost dst_b:buffer64,
-    ghost inA_b:buffer64,
-    ghost stack_b:buffer64)
+    ghost inA_b:buffer64)
     lets
         dst_ptr @= rdi; inA_ptr @= rsi; b @= rdx;
         dst_in := (if win then rcx else rdi);
@@ -423,17 +411,13 @@ procedure{:quick}{:public}{:exportSpecs} fast_sub1_stdcall(
     reads memTaint;
     modifies
         rax; rbx; rcx; rdx; rdi; rsi; r8; r9; r10; r11; r12; r13; r14; r15;
-        rsp; efl; mem;
+        rsp; efl; mem; stack;
     requires
         adx_enabled && bmi2_enabled;
         buffers_disjoint(dst_b, inA_b) || inA_b == dst_b;
 
-        buffers_disjoint(stack_b, dst_b);
-        buffers_disjoint(stack_b, inA_b);
-
         validDstAddrs64(mem, dst_in, dst_b, 4, memTaint, Secret);
         validSrcAddrs64(mem, inA_in, inA_b, 4, memTaint, Secret);
-        valid_stack_slots(mem, rsp, stack_b, 1, memTaint);
     ensures
         let a0 := old(buffer64_read(inA_b, 0, mem));
         let a1 := old(buffer64_read(inA_b, 1, mem));
@@ -454,7 +438,7 @@ procedure{:quick}{:public}{:exportSpecs} fast_sub1_stdcall(
         //   Framing
         //////////////////////////////////////
 
-        modifies_buffer_2(dst_b, stack_b, old(mem), mem);
+        modifies_buffer(dst_b, old(mem), mem);
         validSrcAddrs64(mem, dst_in, dst_b, 4, memTaint, Secret);
 
         rbx == old(rbx);
@@ -466,7 +450,7 @@ procedure{:quick}{:public}{:exportSpecs} fast_sub1_stdcall(
         rsp == old(rsp);
 {
     // Store callee-save registers
-    Push(rsi, stack_b, 0);
+    Push(rsi);
 
     // Line up the rest of the arguments
     inline if (win) {
@@ -478,7 +462,7 @@ procedure{:quick}{:public}{:exportSpecs} fast_sub1_stdcall(
 
     fast_sub1(dst_b, inA_b);
 
-    Pop(rsi, stack_b, 0);
+    Pop(rsi);
 }
 */
 
@@ -559,8 +543,7 @@ procedure{:quick}{:public}{:exportSpecs} fast_add_stdcall(
     inline win:bool,
     ghost dst_b:buffer64,
     ghost inA_b:buffer64,
-    ghost inB_b:buffer64,
-    ghost stack_b:buffer64)
+    ghost inB_b:buffer64)
     lets
         dst_ptr @= rdi; inA_ptr @= rsi; inB_ptr @= rcx;
         dst_in := (if win then rcx else rdi);
@@ -569,20 +552,15 @@ procedure{:quick}{:public}{:exportSpecs} fast_add_stdcall(
     reads memTaint;
     modifies
         rax; rbx; rcx; rdx; rdi; rsi; r8; r9; r10; r11; r12; r13; r14;
-        rsp; efl; mem;
+        rsp; efl; mem; stack;
     requires
         adx_enabled && bmi2_enabled;
         buffers_disjoint(dst_b, inA_b) || dst_b == inA_b;
         buffers_disjoint(dst_b, inB_b) || dst_b == inB_b;
 
-        buffers_disjoint(stack_b, dst_b);
-        buffers_disjoint(stack_b, inA_b);
-        buffers_disjoint(stack_b, inB_b);
-
         validDstAddrs64(mem, dst_in, dst_b, 4, memTaint, Secret);
         validSrcAddrs64(mem, inA_in, inA_b, 4, memTaint, Secret);
         validSrcAddrs64(mem, inB_in, inB_b, 4, memTaint, Secret);
-        valid_stack_slots(mem, rsp, stack_b, 2, memTaint);
     ensures
         let a0 := old(buffer64_read(inA_b, 0, mem));
         let a1 := old(buffer64_read(inA_b, 1, mem));
@@ -609,7 +587,7 @@ procedure{:quick}{:public}{:exportSpecs} fast_add_stdcall(
         //   Framing
         //////////////////////////////////////
 
-        modifies_buffer_2(dst_b, stack_b, old(mem), mem);
+        modifies_buffer(dst_b, old(mem), mem);
         validSrcAddrs64(mem, dst_in, dst_b, 4, memTaint, Secret);
 
         rsi == old(rsi);
@@ -620,8 +598,8 @@ procedure{:quick}{:public}{:exportSpecs} fast_add_stdcall(
         rsp == old(rsp);
 {
     // Store callee-save registers
-    Push(rsi, stack_b, 1);
-    Push(r12, stack_b, 0);
+    Push(rsi);
+    Push(r12);
 
     // Line up the rest of the arguments
     inline if (win) {
@@ -634,8 +612,8 @@ procedure{:quick}{:public}{:exportSpecs} fast_add_stdcall(
 
     fast_add(dst_b, inA_b, inB_b);
 
-    Pop(r12, stack_b, 0);
-    Pop(rsi, stack_b, 1);
+    Pop(r12);
+    Pop(rsi);
 }
 */
 
@@ -728,8 +706,7 @@ procedure{:quick}{:public}{:exportSpecs} fast_sub_stdcall(
     inline win:bool,
     ghost dst_b:buffer64,
     ghost inA_b:buffer64,
-    ghost inB_b:buffer64,
-    ghost stack_b:buffer64)
+    ghost inB_b:buffer64)
     lets
         dst_ptr @= rdi; inA_ptr @= rsi; inB_ptr @= rcx;
         dst_in := (if win then rcx else rdi);
@@ -738,20 +715,15 @@ procedure{:quick}{:public}{:exportSpecs} fast_sub_stdcall(
     reads memTaint;
     modifies
         rax; rbx; rcx; rdx; rdi; rsi; r8; r9; r10; r11; r12; r13; r14;
-        rsp; efl; mem;
+        rsp; efl; mem; stack;
     requires
         adx_enabled && bmi2_enabled;
         buffers_disjoint(dst_b, inA_b) || dst_b == inA_b;
         buffers_disjoint(dst_b, inB_b) || dst_b == inB_b;
 
-        buffers_disjoint(stack_b, dst_b);
-        buffers_disjoint(stack_b, inA_b);
-        buffers_disjoint(stack_b, inB_b);
-
         validDstAddrs64(mem, dst_in, dst_b, 4, memTaint, Secret);
         validSrcAddrs64(mem, inA_in, inA_b, 4, memTaint, Secret);
         validSrcAddrs64(mem, inB_in, inB_b, 4, memTaint, Secret);
-        valid_stack_slots(mem, rsp, stack_b, 2, memTaint);
     ensures
         let a0 := old(buffer64_read(inA_b, 0, mem));
         let a1 := old(buffer64_read(inA_b, 1, mem));
@@ -778,7 +750,7 @@ procedure{:quick}{:public}{:exportSpecs} fast_sub_stdcall(
         //   Framing
         //////////////////////////////////////
 
-        modifies_buffer_2(dst_b, stack_b, old(mem), mem);
+        modifies_buffer(dst_b, old(mem), mem);
         validSrcAddrs64(mem, dst_in, dst_b, 4, memTaint, Secret);
 
         rsi == old(rsi);
@@ -789,8 +761,8 @@ procedure{:quick}{:public}{:exportSpecs} fast_sub_stdcall(
         rsp == old(rsp);
 {
     // Store callee-save registers
-    Push(rsi, stack_b, 1);
-    Push(r12, stack_b, 0);
+    Push(rsi);
+    Push(r12);
 
     // Line up the rest of the arguments
     inline if (win) {
@@ -803,8 +775,8 @@ procedure{:quick}{:public}{:exportSpecs} fast_sub_stdcall(
 
     fast_sub(dst_b, inA_b, inB_b);
 
-    Pop(r12, stack_b, 0);
-    Pop(rsi, stack_b, 1);
+    Pop(r12);
+    Pop(rsi);
 }
 */
 
@@ -866,7 +838,6 @@ procedure{:quick} cswap_single(
 }
 
 procedure{:quick}{:public}{:exportSpecs} cswap2(
-    ghost stack_b:buffer64,
     ghost p0_b:buffer64,
     ghost p1_b:buffer64,
     ghost bit_in:nat64)
@@ -966,7 +937,6 @@ procedure{:quick}{:public}{:exportSpecs} cswap2(
 
 procedure{:quick}{:public}{:exportSpecs} cswap2_stdcall(
     inline win:bool,
-    ghost stack_b:buffer64,
     ghost p0_b:buffer64,
     ghost p1_b:buffer64,
     ghost bit_in:nat64)
@@ -996,19 +966,15 @@ procedure{:quick}{:public}{:exportSpecs} cswap2_stdcall(
     reads memTaint;
     modifies
         rax; rbx; rcx; rdx; rsi; rdi; rbp; rsp; r8; r9; r10; r11; r12; r13; r14; r15;        
-        efl; mem;
+        efl; mem; stack;
     requires
         bit_in <= 1;
         bit_in = (if win then r8  else rdx);        
         //adx_enabled && bmi2_enabled;
         buffers_disjoint(p0_b, p1_b) || p1_b == p0_b;
 
-        buffers_disjoint(stack_b, p0_b);
-        buffers_disjoint(stack_b, p1_b);
-
         validDstAddrs64(mem, p0_in, p0_b, 8, memTaint, Secret);
         validDstAddrs64(mem, p1_in, p1_b, 8, memTaint, Secret);
-        valid_stack_slots(mem, rsp, stack_b, 2, memTaint);
     ensures
         let p0_0 := buffer64_read(p0_b, 0, mem);
         let p0_1 := buffer64_read(p0_b, 1, mem);
@@ -1049,7 +1015,7 @@ procedure{:quick}{:public}{:exportSpecs} cswap2_stdcall(
         //   Framing
         //////////////////////////////////////
 
-        modifies_buffer_3(p0_b, p1_b, stack_b, old(mem), mem);
+        modifies_buffer_2(p0_b, p1_b, old(mem), mem);
         validDstAddrs64(mem, p0_in, p0_b, 8, memTaint, Secret);
         validDstAddrs64(mem, p1_in, p1_b, 8, memTaint, Secret);
 
@@ -1074,18 +1040,18 @@ procedure{:quick}{:public}{:exportSpecs} cswap2_stdcall(
     // Line up the rest of the arguments
     inline if (win) {
         // Store callee-save registers
-        Push(rdi, stack_b, 1);
-        Push(rsi, stack_b, 0);
+        Push(rdi);
+        Push(rsi);
         Mov64(p0_ptr, rcx);
         Mov64(p1_ptr, rdx);
         Mov64(bit, r8);
     } 
 
-    cswap2(stack_b, p0_b, p1_b, bit_in);
+    cswap2(p0_b, p1_b, bit_in);
     
     inline if (win) {
-        Pop(rsi, stack_b, 0);
-        Pop(rdi, stack_b, 1);
+        Pop(rsi);
+        Pop(rdi);
     }
 
 }

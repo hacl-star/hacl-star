@@ -675,7 +675,6 @@ procedure{:quick} poly1305_impl(
 // affect the result.
 procedure{:quick}{:public}{:exportSpecs} poly1305(
     inline win:bool,
-    ghost stack_b:buffer64,
     ghost ctx_b:buffer64,
     ghost inp_b:buffer64,
     ghost len_in:nat64)
@@ -694,7 +693,6 @@ procedure{:quick}{:public}{:exportSpecs} poly1305(
         validDstAddrs64(mem, ctx_in, ctx_b, 24, memTaint, Public);
         validSrcAddrs64(mem, inp_in, inp_b, readable_words(len_in), memTaint, Public);
         len_in == (if win then r8 else len);
-        valid_stack_slots(mem, rsp, stack_b, 1, memTaint);
 
         inp_in + len_in < pow2_64;
     ensures

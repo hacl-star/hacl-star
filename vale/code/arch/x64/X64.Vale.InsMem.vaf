@@ -116,7 +116,6 @@ procedure{:instruction Ins(TS.TaintedIns(tuple(S.Pop(t_op_to_op(dst))), Public))
     ensures
         dst == load_stack64(old(rsp), old(stack));
         rsp == old(rsp) + 8;
-        init_rsp(stack) == init_rsp(old(stack));
         stack == free_stack64(rsp-8, rsp, old(stack));
 {
 
@@ -134,7 +133,6 @@ procedure{:instruction Ins(TS.TaintedIns(tuple(S.Push(t_op_to_op(src))), Public)
     ensures
         rsp == old(rsp) - 8;
         stack == store_stack64(rsp, old(src), old(stack));
-        init_rsp(stack) == init_rsp(old(stack));
 {
     equiv_store_stack64(rsp, old(src), old(stack));
 }

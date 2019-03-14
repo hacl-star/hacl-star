@@ -325,8 +325,7 @@ procedure{:quick}{:public} fast_sqr(
 procedure{:quick}{:public} fast_sqr_stdcall(
     inline win:bool,
     ghost dst_b:buffer64,
-    ghost inA_b:buffer64,
-    ghost stack_b:buffer64)
+    ghost inA_b:buffer64)
     lets
         dst_ptr @= rdi; inA_ptr @= rsi; 
         dst_in := (if win then rcx else rdi);
@@ -334,17 +333,13 @@ procedure{:quick}{:public} fast_sqr_stdcall(
     reads memTaint;
     modifies
         rax; rbx; rcx; rdx; rdi; rsi; r8; r9; r10; r11; r12; r13; r14; r15;
-        rsp; efl; mem;
+        rsp; efl; mem; stack;
     requires
         adx_enabled && bmi2_enabled;
         buffers_disjoint(dst_b, inA_b);
 
-        buffers_disjoint(stack_b, dst_b);
-        buffers_disjoint(stack_b, inA_b);
-
         validDstAddrs64(mem, dst_in, dst_b, 8, memTaint, Secret);
         validSrcAddrs64(mem, inA_in, inA_b, 4, memTaint, Secret);
-        valid_stack_slots(mem, rsp, stack_b, 5, memTaint);
     ensures
         let a0 := old(buffer64_read(inA_b, 0, mem));
         let a1 := old(buffer64_read(inA_b, 1, mem));
@@ -370,7 +365,7 @@ procedure{:quick}{:public} fast_sqr_stdcall(
         //   Framing
         //////////////////////////////////////
 
-        modifies_buffer_2(dst_b, stack_b, old(mem), mem);
+        modifies_buffer(dst_b, old(mem), mem);
         validSrcAddrs64(mem, dst_in, dst_b, 8, memTaint, Secret);
 
         rbx == old(rbx);
@@ -383,11 +378,11 @@ procedure{:quick}{:public} fast_sqr_stdcall(
         rsp == old(rsp);
 {
     // Store callee-save registers
-    Push(r15, stack_b, 4);
-    Push(rsi, stack_b, 3);
-    Push(r12, stack_b, 2);
-    Push(r13, stack_b, 1);
-    Push(r14, stack_b, 0);
+    Push(r15);
+    Push(rsi);
+    Push(r12);
+    Push(r13);
+    Push(r14);
 
     // Line up the rest of the arguments
     inline if (win) {
@@ -397,11 +392,11 @@ procedure{:quick}{:public} fast_sqr_stdcall(
 
     fast_sqr(0, dst_b, inA_b);
 
-    Pop(r14, stack_b, 0);
-    Pop(r13, stack_b, 1);
-    Pop(r12, stack_b, 2);
-    Pop(rsi, stack_b, 3);
-    Pop(r15, stack_b, 4);
+    Pop(r14);
+    Pop(r13);
+    Pop(r12);
+    Pop(rsi);
+    Pop(r15);
 }
 
 /*
@@ -475,8 +470,7 @@ procedure{:quick} fast_sqr_loop(
 procedure{:quick}{:public} fast_sqr_loop_stdcall(
     inline win:bool,
     ghost dst_b:buffer64,
-    ghost inA_b:buffer64,
-    ghost stack_b:buffer64)
+    ghost inA_b:buffer64)
     lets
         dst_ptr @= rdi; inA_ptr @= rsi; count @= rbx;
         dst_in   := (if win then rcx else rdi);
@@ -485,17 +479,13 @@ procedure{:quick}{:public} fast_sqr_loop_stdcall(
     reads memTaint;
     modifies
         rax; rbx; rcx; rdx; rdi; rsi; r8; r9; r10; r11; r12; r13; r14; r15;
-        rsp; efl; mem;
+        rsp; efl; mem; stack;
     requires
         adx_enabled && bmi2_enabled;
         buffers_disjoint(dst_b, inA_b);
 
-        buffers_disjoint(stack_b, dst_b);
-        buffers_disjoint(stack_b, inA_b);
-
         validDstAddrs64(mem, dst_in, dst_b, 8, memTaint, Secret);
         validSrcAddrs64(mem, inA_in, inA_b, 4, memTaint, Secret);
-        valid_stack_slots(mem, rsp, stack_b, 6, memTaint);
     ensures
         let a0 := old(buffer64_read(inA_b, 0, mem));
         let a1 := old(buffer64_read(inA_b, 1, mem));
@@ -521,7 +511,7 @@ procedure{:quick}{:public} fast_sqr_loop_stdcall(
         //   Framing
         //////////////////////////////////////
 
-        modifies_buffer_2(dst_b, stack_b, old(mem), mem);
+        modifies_buffer(dst_b, old(mem), mem);
         validSrcAddrs64(mem, dst_in, dst_b, 8, memTaint, Secret);
 
         rbx == old(rbx);
@@ -534,12 +524,12 @@ procedure{:quick}{:public} fast_sqr_loop_stdcall(
         rsp == old(rsp);
 {
     // Store callee-save registers
-    Push(rbx, stack_b, 5);
-    Push(r15, stack_b, 4);
-    Push(rsi, stack_b, 3);
-    Push(r12, stack_b, 2);
-    Push(r13, stack_b, 1);
-    Push(r14, stack_b, 0);
+    Push(rbx);
+    Push(r15);
+    Push(rsi);
+    Push(r12);
+    Push(r13);
+    Push(r14);
 
     // Line up the rest of the arguments
     inline if (win) {
@@ -552,20 +542,19 @@ procedure{:quick}{:public} fast_sqr_loop_stdcall(
 
     fast_sqr(0, dst_b, inA_b);
 
-    Pop(r14, stack_b, 0);
-    Pop(r13, stack_b, 1);
-    Pop(r12, stack_b, 2);
-    Pop(rsi, stack_b, 3);
-    Pop(r15, stack_b, 4);
-    Pop(rbx, stack_b, 5);
+    Pop(r14);
+    Pop(r13);
+    Pop(r12);
+    Pop(rsi);
+    Pop(r15);
+    Pop(rbx);
 }
 */
 
 procedure{:quick}{:public} sqr2_stdcall(
     inline win:bool,
     ghost dst_b:buffer64,
-    ghost inA_b:buffer64,
-    ghost stack_b:buffer64)
+    ghost inA_b:buffer64)
     lets
         dst_ptr @= rdi; inA_ptr @= rsi; 
         dst_in := (if win then rcx else rdi);
@@ -573,17 +562,13 @@ procedure{:quick}{:public} sqr2_stdcall(
     reads memTaint;
     modifies
         rax; rbx; rcx; rdx; rdi; rsi; r8; r9; r10; r11; r12; r13; r14; r15;
-        rsp; efl; mem;
+        rsp; efl; mem; stack;
     requires
         adx_enabled && bmi2_enabled;
         buffers_disjoint(dst_b, inA_b);
 
-        buffers_disjoint(stack_b, dst_b);
-        buffers_disjoint(stack_b, inA_b);
-
         validDstAddrs64(mem, dst_in, dst_b, 16, memTaint, Secret);
         validSrcAddrs64(mem, inA_in, inA_b, 8, memTaint, Secret);
-        valid_stack_slots(mem, rsp, stack_b, 5, memTaint);
     ensures
         let a0 := old(buffer64_read(inA_b, 0, mem));
         let a1 := old(buffer64_read(inA_b, 1, mem));
@@ -609,7 +594,7 @@ procedure{:quick}{:public} sqr2_stdcall(
         //   Framing
         //////////////////////////////////////
 
-        modifies_buffer_2(dst_b, stack_b, old(mem), mem);
+        modifies_buffer(dst_b, old(mem), mem);
         validSrcAddrs64(mem, dst_in, dst_b, 16, memTaint, Secret);
 
         rbx == old(rbx);
@@ -622,14 +607,14 @@ procedure{:quick}{:public} sqr2_stdcall(
         rsp == old(rsp);
 {
     // Store callee-save registers
-    Push(r15, stack_b, 4);
-    Push(r12, stack_b, 3);
-    Push(r13, stack_b, 2);
-    Push(r14, stack_b, 1);
+    Push(r15);
+    Push(r12);
+    Push(r13);
+    Push(r14);
 
     // Line up the rest of the arguments
     inline if (win) {
-        Push(rsi, stack_b, 0);
+        Push(rsi);
         Mov64(dst_ptr, rcx);
         Mov64(inA_ptr, rdx);
     } 
@@ -638,11 +623,11 @@ procedure{:quick}{:public} sqr2_stdcall(
     fast_sqr(4, dst_b, inA_b);
     
     inline if (win) {
-        Pop(rsi, stack_b, 0);
+        Pop(rsi);
     }
 
-    Pop(r14, stack_b, 1);
-    Pop(r13, stack_b, 2);
-    Pop(r12, stack_b, 3);
-    Pop(r15, stack_b, 4);
+    Pop(r14);
+    Pop(r13);
+    Pop(r12);
+    Pop(r15);
 }
