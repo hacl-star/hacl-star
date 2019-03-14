@@ -225,3 +225,41 @@ let uints_from_bytes_le #t #l #len b =
 let uints_from_bytes_be #t #l #len b =
   Lib.Sequence.createi #(uint_t t l) len
     (fun i -> uint_from_bytes_be (sub b (i * numbytes t) (numbytes t)))
+
+val nat_from_intseq_le_slice_lemma0:
+  #t:inttype -> #l:secrecy_level -> #len:size_nat{len > 0} -> b:lseq (uint_t t l) len -> i:size_nat{0 < i /\ i <= len} ->
+  Lemma
+    (pow2 ((i - 1) * bits t) * nat_from_intseq_le_ (Seq.slice b (i - 1) len) ==
+     pow2 ((i - 1) * bits t) * v b.[i - 1] + pow2 (i * bits t) * nat_from_intseq_le_ (Seq.slice b i len))
+let nat_from_intseq_le_slice_lemma0 #t #l #len b i =
+  FStar.Math.Lemmas.distributivity_add_right (pow2 ((i - 1) * bits t)) (v b.[i - 1]) (pow2 (bits t) * nat_from_intseq_le_ (Seq.slice b i len));
+  FStar.Math.Lemmas.paren_mul_right (pow2 ((i - 1) * bits t)) (pow2 (bits t)) (nat_from_intseq_le_ (Seq.slice b i len));
+  FStar.Math.Lemmas.pow2_plus ((i - 1) * bits t) (bits t)
+
+val nat_from_intseq_le_slice_lemma1:
+  #t:inttype -> #l:secrecy_level -> #len:size_nat -> b:lseq (uint_t t l) len -> i:size_nat{0 < i /\ i <= len} ->
+  Lemma
+    (requires (let b1 = Seq.slice b 0 i in
+      nat_from_intseq_le_ b1 == nat_from_intseq_le_ (Seq.slice b1 0 (i - 1)) + pow2 ((i - 1) * bits t) * nat_from_intseq_le_ (Seq.slice b1 (i - 1) i)))
+    (ensures
+      nat_from_intseq_le_ (Seq.slice b 0 i) == nat_from_intseq_le_ (Seq.slice b 0 (i - 1)) + pow2 ((i - 1) * bits t) * v b.[i - 1])
+let nat_from_intseq_le_slice_lemma1 #t #l #len b i = ()
+
+val nat_from_intseq_le_slice_lemma_:
+  #t:inttype -> #l:secrecy_level -> #len:size_nat -> b:lseq (uint_t t l) len -> i:nat{i <= len} ->
+  Lemma
+    (nat_from_intseq_le_ b == nat_from_intseq_le_ (Seq.slice b 0 i) + pow2 (i * bits t) * nat_from_intseq_le_ (Seq.slice b i len))
+let rec nat_from_intseq_le_slice_lemma_ #t #l #len b i =
+  if len = 0 then ()
+  else begin
+    if i = 0 then ()
+    else begin
+      nat_from_intseq_le_slice_lemma_ b (i - 1);
+      nat_from_intseq_le_slice_lemma0 b i;
+      nat_from_intseq_le_slice_lemma_ #t #l #i (Seq.slice b 0 i) (i - 1);
+      nat_from_intseq_le_slice_lemma1 b i
+    end
+  end
+
+let nat_from_intseq_le_slice_lemma #t #l #len b i = nat_from_intseq_le_slice_lemma_ b i
+let nat_from_bytes_le_slice_lemma #l #len b i = nat_from_intseq_le_slice_lemma_ b i

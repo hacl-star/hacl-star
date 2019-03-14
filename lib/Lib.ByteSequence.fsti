@@ -93,3 +93,9 @@ val uints_from_bytes_le: #t:inttype{~(t == U1)} -> #l:secrecy_level -> #len:size
 inline_for_extraction
 val uints_from_bytes_be: #t:inttype{~(t == U1)} -> #l:secrecy_level -> #len:size_nat{len * numbytes t < pow2 32}
   -> lbytes_l l (len * numbytes t) -> lseq (uint_t t l) len
+
+val nat_from_intseq_le_slice_lemma: #t:inttype -> #l:secrecy_level -> #len:size_nat -> b:lseq (uint_t t l) len -> i:nat{i <= len} ->
+  Lemma (nat_from_intseq_le b == nat_from_intseq_le (Seq.slice b 0 i) + pow2 (i * bits t) * nat_from_intseq_le (Seq.slice b i len))
+
+val nat_from_bytes_le_slice_lemma: #l:secrecy_level -> #len:size_nat -> b:lbytes_l l len -> i:nat{i <= len} ->
+  Lemma (nat_from_bytes_le b == nat_from_bytes_le (Seq.slice b 0 i) + pow2 (i * 8) * nat_from_bytes_le (Seq.slice b i len))
