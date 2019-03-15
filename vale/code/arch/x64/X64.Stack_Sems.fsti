@@ -15,8 +15,7 @@ val lemma_stack_to_from (s:S.stack) : Lemma
   (stack_to_s (stack_from_s s) == s)
 
 val equiv_valid_src_stack64: (ptr:int) -> (h:stack) -> Lemma
-  (requires valid_src_stack64 ptr h)
-  (ensures S.valid_src_stack64 ptr (stack_to_s h))
+  (valid_src_stack64 ptr h == S.valid_src_stack64 ptr (stack_to_s h))
   [SMTPat (valid_src_stack64 ptr h)]
 
 val equiv_load_stack64: (ptr:int) -> (h:stack) -> Lemma

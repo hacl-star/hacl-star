@@ -156,7 +156,7 @@ let rec stack_args (max_arity:nat)
                    (args:list arg{List.Tot.length args = n})
                    : VSig.sprop =
     match args with
-    | [] -> (fun s -> VS.eval_reg MS.Rsp s == SI.init_rsp s.VS.stack)
+    | [] -> (fun s -> True)
     | hd::tl ->
       fun s ->
         stack_args max_arity (n - 1) tl s /\
@@ -216,6 +216,7 @@ let vale_pre_hyp
       VSig.readable args VS.(s0.mem) /\
       register_args max_arity arg_reg (List.length args) args s0 /\
       stack_args max_arity (List.length args) args s0 /\
+      VS.eval_reg MS.Rsp s0 == SI.init_rsp s0.VS.stack /\
       taint_hyp args s0
 
 [@__reduce__]

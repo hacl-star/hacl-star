@@ -8,6 +8,7 @@ module UV = LowStar.BufferView.Up
 module HS = FStar.HyperStack
 module ME = X64.Memory
 module MES = X64.Memory_Sems
+module SI = X64.Stack_i
 module VSS = X64.Stack_Sems
 module TS = X64.Taint_Semantics_s
 module MS = X64.Machine_s
@@ -86,7 +87,8 @@ val get_heap_mk_mem_reveal
 
 
 val mk_stack_reveal (stack:BS.stack) : Lemma
-  (VSS.stack_to_s (as_vale_stack stack) == stack)
+  (VSS.stack_to_s (as_vale_stack stack) == stack /\ 
+   SI.init_rsp (as_vale_stack stack) == stack.BS.initial_rsp)
 
 val buffer_as_seq_reveal
   (src t:ME.base_typ)

@@ -9,6 +9,7 @@ module VSig = Vale.AsLowStar.ValeSig
 
 friend X64.Memory
 friend X64.Memory_Sems
+friend X64.Stack_i
 friend X64.Stack_Sems
 friend X64.Vale.Decls
 friend X64.Vale.StateLemmas

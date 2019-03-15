@@ -21,6 +21,7 @@ module SL = X64.Vale.StateLemmas
 module VL = X64.Vale.Lemmas
 module ST = FStar.HyperStack.ST
 open FStar.Mul
+open FStar.Calc
 
 let lemma_create_initial_vale_state_core
     (#max_arity:nat)
@@ -306,80 +307,105 @@ let core_create_lemma_state
     Vale.AsLowStar.MemoryHelpers.get_heap_mk_mem_reveal args h0;
     Vale.AsLowStar.MemoryHelpers.mk_stack_reveal tr_s.TS.state.BS.stack
 
-// let rec stack_of_args_equal_domains
-//     (#num_b8_slots:_)
-//     (max_arity:nat)
-//     (n:nat)
-//     (args:IX64.arg_list{List.Tot.length args = n})
-//     (h:HS.mem) : Lemma
-//     (ST.equal_domains h (IX64.stack_of_args max_arity n args stack_b h))
-//     = match args with
-//     | [] -> ()
-//     | hd::tl ->
-//     if n <= max_arity then ()
-//     else 
-//       let i = (n - max_arity) - 1 // Arguments on the stack are pushed from right to left
-//         + (if IA.win then 4 else 0) // The shadow space on Windows comes next
-//         + 1 // The return address is then pushed on the stack
-//         + num_b8_slots / 8 // And we then have all the extra slots required for the Vale procedure
-//       in
-//       let h1 = IX64.stack_of_args max_arity (n-1) tl stack_b h in      
-//       let v = UInt64.uint_to_t (IX64.arg_as_nat64 hd) in // We will store the arg hd
-//       B.g_upd_seq_as_seq stack_b (Seq.upd (B.as_seq h1 stack_b) i v) h1;
-//       stack_of_args_equal_domains max_arity (n-1) tl stack_b h
-
-(*
 let rec stack_args' (max_arity:nat)
-                   (num_b8_slots:IX64.max_slots)
-                   (n:nat)
-                   (args:list arg{List.Tot.length args = n})
-                   (h0:HS.mem)
-                   : prop =
+                    (n:nat)
+                    (args:list arg{List.Tot.length args = n})
+                    (rsp:int)
+                    (stack:Map.t int Words_s.nat8)
+                    : prop =
     match args with
     | [] -> True
     | hd::tl ->
-        stack_args' max_arity num_b8_slots (n - 1) tl h0 stack_b /\
+        stack_args' max_arity (n-1) tl rsp stack /\
         (if n <= max_arity then True // This arg is passed in registers
          else 
-           let i = (n - max_arity) - 1
-             + (if IA.win then 4 else 0)
-             + 1
-             + num_b8_slots/8
+           let ptr = ((n - max_arity) - 1) * 8
+             + (if IA.win then 32 else 0)
+             + 8
+             + rsp
            in
-           UInt64.v (B.get h0 stack_b i) == IX64.arg_as_nat64 hd)
+           BS.valid_addr64 ptr stack /\
+           BS.get_heap_val64 ptr stack == IX64.arg_as_nat64 hd)
 
+let frame_update_get_heap (ptr:int) (v:MS.nat64) (mem:BS.heap) (j:int) : Lemma
+  (requires ptr >= j + 8)
+  (ensures BS.get_heap_val64 j mem == BS.get_heap_val64 j (BS.update_heap64 ptr v mem))
+  =
+  Opaque_s.reveal_opaque BS.get_heap_val64_def;
+  Opaque_s.reveal_opaque BS.update_heap64_def
+  
+let frame_update_valid_heap (ptr:int) (v:MS.nat64) (mem:BS.heap) (j:int) : Lemma
+  (requires ptr >= j + 8)
+  (ensures BS.valid_addr64 j mem == BS.valid_addr64 j (BS.update_heap64 ptr v mem))
+  = Opaque_s.reveal_opaque BS.update_heap64_def
+
+let rec stack_of_args_stack_args'_aux
+    (max_arity:nat)
+    (n_init:nat)
+    (n:nat)
+    (args:IX64.arg_list{List.Tot.length args = n})
+    (rsp:int) 
+    (stack:Map.t int Words_s.nat8)
+    (v:MS.nat64)
+    : Lemma
+  (requires stack_args' max_arity n args rsp stack /\ n_init >= n)
+  (ensures 
+    (let ptr = (n_init - max_arity) * 8 + (if IA.win then 32 else 0) + 8 + rsp in
+    stack_args' max_arity n args rsp (BS.update_heap64 ptr v stack)))
+  = match args with
+    | [] -> ()
+    | hd::tl ->
+      stack_of_args_stack_args'_aux max_arity n_init (n-1) tl rsp stack v;
+      if n <= max_arity then ()
+      else (
+        let fixed = (n_init - max_arity) * 8 + (if IA.win then 32 else 0) + 8 + rsp in      
+        let ptr = ((n - max_arity) - 1) * 8
+          + (if IA.win then 32 else 0)
+          + 8
+          + rsp
+        in
+        calc ( <= ) {
+          ((n - max_arity) - 1) * 8;
+          ( <= ) { FStar.Math.Lemmas.lemma_mult_le_right 8 ((n - max_arity) - 1) (n_init - max_arity) }
+          (n_init - max_arity) * 8;
+        };
+        frame_update_get_heap fixed v stack ptr;
+        frame_update_valid_heap fixed v stack ptr
+     )
+     
 let rec stack_of_args_stack_args'
-    (#num_b8_slots:_)
     (max_arity:nat)
     (n:nat)
     (args:IX64.arg_list{List.Tot.length args = n})
-    (h0:HS.mem{B.live h0 stack_b}) : Lemma
-    (stack_args' max_arity num_b8_slots n args (IX64.stack_of_args max_arity n args stack_b h0) stack_b)
-    = match args with
-    | [] -> ()
-    | hd::tl ->
-      if n <= max_arity then stack_of_args_stack_args' max_arity (n-1) tl stack_b h0
-      else
-      let i = (n - max_arity) - 1 // Arguments on the stack are pushed from right to left
-        + (if IA.win then 4 else 0) // The shadow space on Windows comes next
-        + 1 // The return address is then pushed on the stack
-        + num_b8_slots / 8 // And we then have all the extra slots required for the Vale procedure
-      in
-      let v = UInt64.uint_to_t (IX64.arg_as_nat64 hd) in // We will store the arg hd
-      let h1 = IX64.stack_of_args max_arity (n-1) tl stack_b h0 in
-      B.g_upd_seq_as_seq stack_b (Seq.upd (B.as_seq h1 stack_b) i v) h1;
-      stack_of_args_stack_args' max_arity (n-1) tl stack_b h0;
-      let h_f = IX64.stack_of_args max_arity n args stack_b h0 in
-      let rec aux (accu:list arg{List.length accu < n}) : Lemma
-        (requires 
-          Seq.equal (B.as_seq h_f stack_b) (Seq.upd (B.as_seq h1 stack_b) i v) /\
-          stack_args' max_arity num_b8_slots (List.length accu) accu h1 stack_b)
-        (ensures stack_args' max_arity num_b8_slots (List.length accu) accu h_f stack_b)
-      = match accu with
+    (init_rsp:MS.nat64{init_rsp >= 4096}) : Lemma
+    (let mem = Map.const_on Set.empty 0 in
+    stack_args' max_arity n args init_rsp (IX64.stack_of_args max_arity n init_rsp args mem))
+    =
+    let rec aux (args:IX64.arg_list) (accu:Map.t int Words_s.nat8) : Lemma (
+      stack_args' max_arity (List.length args) args init_rsp 
+        (IX64.stack_of_args max_arity (List.length args) init_rsp args accu))
+      = match args with
       | [] -> ()
-      | hd::tl -> aux tl
-      in aux tl
-*)
+      | hd::tl ->
+        aux tl accu;
+        let n = List.length args in
+        if n <= max_arity then ()
+        else (
+          let ptr = ((n - max_arity) - 1) * 8 // Arguments on the stack are pushed from right to left
+            + (if IA.win then 32 else 0) // The shadow space on Windows comes next
+            + 8 // The return address is then pushed on the stack
+            + init_rsp // And we then have all the extra slots required for the Vale procedure
+          in
+          let accu' = IX64.stack_of_args max_arity (n-1) init_rsp tl accu in
+          let v = IX64.arg_as_nat64 hd in // We will store the arg hd
+          let h_final = BS.update_heap64 ptr v accu' in
+          stack_of_args_stack_args'_aux max_arity (n-1) (n-1) tl init_rsp accu' v;
+          X64.Bytes_Semantics.correct_update_get ptr v accu';
+          Opaque_s.reveal_opaque BS.update_heap64_def
+        )
+        
+
+    in aux args (Map.const_on Set.empty 0)
 
 let core_create_lemma_stack_args
     (#max_arity:nat)
@@ -389,40 +415,42 @@ let core_create_lemma_stack_args
   : Lemma
       (ensures (let va_s = LSig.create_initial_vale_state #max_arity #arg_reg args h0 in
                 LSig.stack_args max_arity (List.length args) args va_s))
-  = admit()
-    // let va_s = LSig.create_initial_vale_state #max_arity #arg_reg args h0 in
-    // // let h1 = IX64.stack_of_args max_arity (List.Tot.length args) args h0 in
-    // // IX64.live_arg_modifies h0 h1 args stack;
-    // // assert (mem_roots_p h1 (arg_of_sb stack::args));   
-    // let rec aux (accu:IX64.arg_list{List.length accu <= List.length args}) : Lemma
-    //   (requires 
-    //     mem_roots_p h1 (arg_of_sb stack::args) /\
-    //     stack_args' max_arity n (List.length accu) accu h1 stack)
-    //   (ensures LSig.stack_args max_arity n (List.length accu) accu stack va_s)
-    // = match accu with
-    //   | [] -> ()
-    //   | hd::tl -> aux tl;
-    //     let i = List.length accu in
-    //     if i <= max_arity then ()
-    //     else (
-    //       let j = (i - max_arity) - 1 + (if IA.win then 4 else 0) + 1 + n/8 in
-    //       assert (UInt64.v (B.get h1 stack j) == IX64.arg_as_nat64 hd);
-    //       DV.length_eq (get_downview stack);
-    //       let aux2 () : Lemma (IX64.arg_as_nat64 hd == LSig.arg_as_nat64 hd va_s) =
-    //         match hd with
-    //         | (| TD_Buffer src bt _, x |) ->
-    //           Vale.AsLowStar.MemoryHelpers.buffer_addr_reveal src bt x (arg_of_sb stack::args) h1
-    //         | (| TD_ImmBuffer src bt _, x |) ->              
-    //           Vale.AsLowStar.MemoryHelpers.immbuffer_addr_reveal src bt x (arg_of_sb stack::args) h1
-    //         | _ -> ()
-    //       in aux2();
-    //       Vale.AsLowStar.MemoryHelpers.buffer_as_seq_reveal2 TUInt64 TUInt64 stack va_s;
-    //       Vale.AsLowStar.MemoryHelpers.down_up_buffer_read_reveal TUInt64 h1 va_s.VS.mem stack j
-    //     )
-    // in
-    // stack_of_args_stack_args' max_arity (List.length args) args stack h0;
-    // aux args
-
+  = let va_s = LSig.create_initial_vale_state #max_arity #arg_reg args h0 in
+    let init_rsp = IA.init_regs MS.Rsp in    
+    let stack = Map.const_on Set.empty 0 in
+    let stack_map = IX64.stack_of_args max_arity (List.Tot.length args) init_rsp args stack in
+    let stack_f = BS.Vale_stack init_rsp stack_map in 
+    let rec aux (accu:IX64.arg_list{List.length accu <= List.length args}) : Lemma
+      (requires 
+         stack_args' max_arity (List.length accu) accu init_rsp stack_map)
+      (ensures LSig.stack_args max_arity (List.length accu) accu va_s)
+    =
+    match accu with
+      | [] -> ()
+      | hd::tl ->
+        aux tl;
+        let i = List.length accu in
+        if i <= max_arity then ()
+        else (
+          let ptr = 
+            ((i  - max_arity) - 1) * 8
+             + (if IA.win then 32 else 0)
+             + 8
+             + init_rsp
+          in 
+          Vale.AsLowStar.MemoryHelpers.mk_stack_reveal stack_f;
+          let aux2 () : Lemma (IX64.arg_as_nat64 hd == LSig.arg_as_nat64 hd va_s) =
+            match hd with
+            | (| TD_Buffer src bt _, x |) ->
+              Vale.AsLowStar.MemoryHelpers.buffer_addr_reveal src bt x args h0
+            | (| TD_ImmBuffer src bt _, x |) ->              
+              Vale.AsLowStar.MemoryHelpers.immbuffer_addr_reveal src bt x args h0
+            | _ -> ()
+          in aux2()
+        )
+    in
+    stack_of_args_stack_args' max_arity (List.length args) args init_rsp;
+    aux args
 
 let core_create_lemma
     (#max_arity:nat)
@@ -439,77 +467,17 @@ let core_create_lemma
          LSig.vale_pre_hyp #max_arity #arg_reg args va_s /\
          ST.equal_domains h0 (hs_of_mem (as_mem va_s.VS.mem))
   ))
-  =  
-  let va_s = LSig.create_initial_vale_state #max_arity #arg_reg args h0 in
+  = let va_s = LSig.create_initial_vale_state #max_arity #arg_reg args h0 in
+    let t_state = fst (IX64.create_initial_trusted_state max_arity arg_reg args I.down_mem h0) in
+    let t_stack = t_state.TS.state.BS.stack in  
     core_create_lemma_mem_correspondance #max_arity #arg_reg args h0;
     core_create_lemma_disjointness args;
     core_create_lemma_readable #max_arity #arg_reg args h0;
     core_create_lemma_register_args #max_arity #arg_reg args h0;
     core_create_lemma_stack_args #max_arity #arg_reg args h0;
+    Vale.AsLowStar.MemoryHelpers.mk_stack_reveal t_stack;
     Vale.AsLowStar.MemoryHelpers.core_create_lemma_taint_hyp #max_arity #arg_reg args h0;
     core_create_lemma_state #max_arity #arg_reg args h0
-
-// let rec frame_mem_correspondence_back
-//        (args:list arg)
-//        (h0:mem_roots args)
-//        (h1:mem_roots args)
-//        (va_s:V.va_state)
-//        (l:B.loc)
-//  : Lemma
-//      (requires
-//        LSig.mem_correspondence args h1 va_s /\
-//        B.modifies l h0 h1 /\
-//        B.loc_disjoint (loc_all_args args) l)
-//      (ensures
-//        LSig.mem_correspondence args h0 va_s)
-//  = match args with
-//    | [] -> ()
-//    | hd::tl ->
-//      frame_mem_correspondence_back tl h0 h1 va_s l;
-//      match hd with
-//      | (| TD_Buffer src bt _, x |) | (| TD_ImmBuffer src bt _, x |) ->
-//        BufferViewHelpers.lemma_dv_equal (down_view src) x h0 h1;
-//        DV.length_eq (get_downview x);
-//        BufferViewHelpers.lemma_uv_equal (LSig.view_of_base_typ bt) (get_downview x) h0 h1
-//      | (| TD_Base _, _ |) -> ()
-
-// let rec frame_mem_correspondence
-//        (args:list arg)
-//        (h0:mem_roots args)
-//        (h1:HS.mem)
-//        (va_s:V.va_state)
-//        (l:B.loc)
-//  : Lemma
-//      (requires
-//        LSig.mem_correspondence args h0 va_s /\
-//        B.modifies l h0 h1 /\
-//        B.loc_disjoint (loc_all_args args) l)
-//      (ensures
-//        LSig.mem_correspondence args h1 va_s /\
-//        mem_roots_p h1 args)
-//  = match args with
-//    | [] -> ()
-//    | hd::tl ->
-//      frame_mem_correspondence tl h0 h1 va_s l;
-//      match hd with
-//      | (| TD_Buffer src bt _, x |) | (| TD_ImmBuffer src bt _, x |) ->
-//        BufferViewHelpers.lemma_dv_equal (down_view src) x h0 h1;
-//        DV.length_eq (get_downview x);
-//        BufferViewHelpers.lemma_uv_equal (LSig.view_of_base_typ bt) (get_downview x) h0 h1     
-//      | (| TD_Base _, _ |) -> ()
-
-// let rec args_fp (args:list arg)
-//                 (h0:mem_roots args)
-//                 (h1:HS.mem{HS.fresh_frame h0 h1})
-//   : Lemma
-//       (B.loc_disjoint (loc_all_args args) (B.loc_regions false (Set.singleton (HS.get_tip h1))))
-//   = match args with
-//     | [] -> ()
-//     | hd::tl -> args_fp tl h0 h1; 
-//       match hd with
-//       | (| TD_Buffer _ _ _, _ |) | (| TD_Base _, _ |) -> ()
-//       | (| TD_ImmBuffer _ _ _, x |) -> 
-//         assert (B.loc_includes (B.loc_not_unused_in h0) (B.loc_buffer x))
 
 let eval_code_ts (c:TS.tainted_code)
                  (s0:TS.traceState)
