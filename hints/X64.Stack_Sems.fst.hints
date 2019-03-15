@@ -1,5 +1,5 @@
 [
-  "\u001b€ê\u0003Ïç9\u0003Qµ\nºóY\u0017Ö",
+  "0˚ñ6Ãõø“µ—`Ÿˇ&í@",
   [
     [
       "X64.Stack_Sems.lemma_stack_from_to",
@@ -11,7 +11,7 @@
         "equation_X64.Stack_Sems.stack_to_s"
       ],
       0,
-      "93a5ddda02790d623a6baa076d5fde9f"
+      "2d1c77e3d2d5f60ee15f301a1bc47e18"
     ],
     [
       "X64.Stack_Sems.lemma_stack_to_from",
@@ -23,7 +23,31 @@
         "equation_X64.Stack_Sems.stack_to_s"
       ],
       0,
-      "055dc6d36c18ee84522f783c1148ecde"
+      "72f7c39a2748ce0feb9897c6cc9e8138"
+    ],
+    [
+      "X64.Stack_Sems.equiv_valid_src_stack64",
+      1,
+      1,
+      0,
+      [
+        "@query", "equation_X64.Stack_Sems.stack_to_s",
+        "equation_X64.Stack_i.valid_src_stack64"
+      ],
+      0,
+      "9cb49727e3c286435a94b3c1329cc0ab"
+    ],
+    [
+      "X64.Stack_Sems.equiv_load_stack64",
+      1,
+      1,
+      0,
+      [
+        "@query", "equation_X64.Stack_Sems.stack_to_s",
+        "equation_X64.Stack_i.load_stack64"
+      ],
+      0,
+      "90c3203af8f5d41bd5d908ee9bb85f28"
     ],
     [
       "X64.Stack_Sems.free_stack_same_load",
@@ -59,7 +83,20 @@
         "typing_X64.Bytes_Semantics_s.valid_addr64"
       ],
       0,
-      "b5c3492b26cb30d63859485dbded9313"
+      "1a738bc9889745bcd6b235a9d96396dd"
+    ],
+    [
+      "X64.Stack_Sems.equiv_store_stack64",
+      1,
+      1,
+      0,
+      [
+        "@query", "equation_X64.Stack_Sems.stack_from_s",
+        "equation_X64.Stack_Sems.stack_to_s",
+        "equation_X64.Stack_i.store_stack64"
+      ],
+      0,
+      "11e50f4adc9b9d87b325663c9c821875"
     ],
     [
       "X64.Stack_Sems.equiv_init_rsp",
@@ -68,7 +105,32 @@
       0,
       [ "@query" ],
       0,
-      "515c0d66a991892572635e31d8d0b927"
+      "1fd01538e7ad1e31d2d286278d5f319a"
+    ],
+    [
+      "X64.Stack_Sems.equiv_init_rsp",
+      2,
+      1,
+      0,
+      [
+        "@query", "equation_X64.Stack_Sems.stack_to_s",
+        "equation_X64.Stack_i.init_rsp"
+      ],
+      0,
+      "50e47ce25a0323430bfdc89c809f2737"
+    ],
+    [
+      "X64.Stack_Sems.equiv_free_stack",
+      1,
+      1,
+      0,
+      [
+        "@query", "equation_X64.Stack_Sems.stack_from_s",
+        "equation_X64.Stack_Sems.stack_to_s",
+        "equation_X64.Stack_i.free_stack64"
+      ],
+      0,
+      "da603fcfe2693d0417d1c03ffe04db21"
     ]
   ]
 ]

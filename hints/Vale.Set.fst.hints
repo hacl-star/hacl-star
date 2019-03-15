@@ -1,5 +1,5 @@
 [
-  "-ôð\bÔ³]!5\u0003ê0Â-$h",
+  "{yl`\u0015ÉA\u0005å 4\n6¬xÒ",
   [
     [
       "Vale.Set.remove_between'",
@@ -26,7 +26,7 @@
         "typing_FStar.Set.singleton", "well-founded-ordering-on-nat"
       ],
       0,
-      "508af661685bbe0472df11d8b9190b7a"
+      "ad986a8755c864071312e39d654f6856"
     ],
     [
       "Vale.Set.remove_between",
@@ -35,7 +35,7 @@
       0,
       [ "@query", "primitive_Prims.op_LessThanOrEqual" ],
       0,
-      "36fff94d21bdd308c4a4f996f6f13b4b"
+      "78e69debf7146fdd2272b2be5ac920ad"
     ],
     [
       "Vale.Set.remove_between_reveal",
@@ -56,7 +56,25 @@
         "typing_Vale.Set.remove_between_"
       ],
       0,
-      "f1c1ec266f628fbaab88e81d063bcccf"
+      "461dd3738f1d05a9da0b3e3c8650bc86"
+    ],
+    [
+      "Vale.Set.lemma_sel_restrict",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565",
+        "equation_FStar.Map.restrict", "equation_FStar.Map.sel",
+        "fuel_guarded_inversion_FStar.Map.t",
+        "function_token_typing_Prims.__cache_version_number__",
+        "proj_equation_FStar.Map.Mkt_mappings",
+        "projection_inverse_FStar.Map.Mkt_mappings",
+        "token_correspondence_FStar.Map.__proj__Mkt__item__mappings"
+      ],
+      0,
+      "60d3ca660387d76af4133c11d2653533"
     ]
   ]
 ]
