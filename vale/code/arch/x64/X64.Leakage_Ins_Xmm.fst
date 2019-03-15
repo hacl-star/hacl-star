@@ -463,5 +463,6 @@ let check_if_xmm_ins_consumes_fixed_time ins ts =
     | SHA256_rnds2 _ _ -> check_if_sha256_rnds2_leakage_free ins ts
     | SHA256_msg1 _ _ -> check_if_sha256_msg1_leakage_free ins ts
     | SHA256_msg2 _ _ -> check_if_sha256_msg2_leakage_free ins ts
+    | _ -> (false, ts)
 
 *)

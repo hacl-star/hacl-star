@@ -9,6 +9,10 @@ val load_stack64 : ptr:int -> h:stack -> GTot nat64
 val store_stack64 : ptr:int -> v:nat64 -> h:stack -> GTot stack
 val free_stack64 : start:int -> finish:int -> h:stack -> GTot stack
 
+val valid_src_stack128 : ptr:int -> h:stack -> GTot bool
+val load_stack128 : ptr:int -> h:stack -> GTot quad32
+val store_stack128 : ptr:int -> v:quad32 -> h:stack -> GTot stack
+
 val init_rsp: h:stack -> (n:nat64{n >= 4096})
 
 (* Validity preservation *)

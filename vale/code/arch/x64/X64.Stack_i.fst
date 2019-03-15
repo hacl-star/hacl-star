@@ -10,6 +10,10 @@ let load_stack64 i st = BS.eval_stack i st
 let store_stack64 i v h = BS.update_stack' i v h
 let free_stack64 start finish h = BS.free_stack' start finish h
 
+let valid_src_stack128 i st = BS.valid_src_stack128 i st
+let load_stack128 i st = BS.eval_stack128 i st
+let store_stack128 i v h = BS.update_stack128' i v h
+
 let init_rsp h = h.BS.initial_rsp
 
 (* Lemmas *)

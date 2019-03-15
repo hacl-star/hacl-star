@@ -136,8 +136,8 @@ let update_multi_256 s blocks n =
     let open Hacl.Hash.Core.SHA2.Constants in
     B.recall k224_256;
     IB.recall_contents k224_256 Spec.SHA2.Constants.k224_256;
-    assume (B.disjoint s k224_256);
-    assume (B.disjoint blocks k224_256);
+    IB.buffer_immutable_buffer_disjoint s k224_256 (ST.get ());
+    IB.buffer_immutable_buffer_disjoint blocks k224_256 (ST.get ());
     Sha_stdcalls.sha256_update s blocks n k224_256
   end else
     Hacl.Hash.SHA2.update_multi_256 s blocks n

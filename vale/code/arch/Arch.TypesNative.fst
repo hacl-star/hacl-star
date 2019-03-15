@@ -124,6 +124,30 @@ let lemma_quad32_xor_commutes_forall () : Lemma
   =
   FStar.Classical.forall_intro_2 lemma_quad32_xor_commutes
 
+
+let lemma_nat32_xor_associates (x y z:nat32) : Lemma
+  (nat32_xor (nat32_xor x y) z = nat32_xor x (nat32_xor y z))
+  =
+  reveal_ixor 32 x y;
+  reveal_ixor 32 y z;
+  reveal_ixor 32 (nat32_xor x y) z;
+  reveal_ixor 32 x (nat32_xor y z);  
+  FStar.UInt.logxor_associative #32 x y z;  
+  ()
+
+let lemma_quad32_xor_associates (x y z:quad32) : Lemma
+  (quad32_xor (quad32_xor x y) z == (quad32_xor x (quad32_xor y z)))
+  =
+  Opaque_s.reveal_opaque quad32_xor_def;
+  let Mkfour x0 x1 x2 x3 = x in
+  let Mkfour y0 y1 y2 y3 = y in
+  let Mkfour z0 z1 z2 z3 = z in
+  lemma_nat32_xor_associates x0 y0 z0;
+  lemma_nat32_xor_associates x1 y1 z1;
+  lemma_nat32_xor_associates x2 y2 z2;
+  lemma_nat32_xor_associates x3 y3 z3;  
+  ()
+  
 let lemma_iand_pow2 (n:pos) (x:natN (pow2_norm n)) (i:nat{i < n}) : Lemma
   (pow2 i < pow2 n /\ (iand x (pow2 i) == 0 \/ iand x (pow2 i) == pow2 i))
   =

@@ -69,6 +69,16 @@ let lemma_to_eval_operand s o = match o with
 
 let lemma_to_eval_xmm s x = ()
 
+#set-options "--max_ifuel 2 --initial_ifuel 2"
+let lemma_to_eval_operand128 s o = match o with
+  | Mov128Xmm _ -> ()
+  | Mov128Mem m ->
+    let addr = eval_maddr m s in
+    MS.equiv_load_mem128 addr s.mem
+  | Mov128Stack m -> () 
+
+#reset-options "--initial_fuel 2 --max_fuel 2"
+
 let lemma_to_valid_operand s o = match o with
   | OConst _ | OReg _ -> ()
   | OMem m -> let addr = eval_maddr m s in

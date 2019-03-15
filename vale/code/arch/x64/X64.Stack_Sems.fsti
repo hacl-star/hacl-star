@@ -39,3 +39,21 @@ val equiv_init_rsp: (h:stack) -> Lemma
 val equiv_free_stack: (start:int) -> (finish:int) -> (h:stack) -> Lemma
   (free_stack64 start finish h == stack_from_s (S.free_stack' start finish (stack_to_s h)))
   [SMTPat (free_stack64 start finish h)]
+
+val equiv_valid_src_stack128: (ptr:int) -> (h:stack) -> Lemma
+  (valid_src_stack128 ptr h == S.valid_src_stack128 ptr (stack_to_s h))
+  [SMTPat (valid_src_stack128 ptr h)]
+
+val equiv_load_stack128: (ptr:int) -> (h:stack) -> Lemma
+  (S.eval_stack128 ptr (stack_to_s h) == load_stack128 ptr h)
+  [SMTPat (load_stack128 ptr h)]
+
+val free_stack_same_load128: (start:int) -> (finish:int) -> (ptr:int) -> (h:S.stack) -> Lemma
+  (requires S.valid_src_stack128 ptr h /\
+    (ptr >= finish \/ ptr + 16 <= start))
+  (ensures S.eval_stack128 ptr h == S.eval_stack128 ptr (S.free_stack' start finish h))
+  [SMTPat (S.eval_stack128 ptr (S.free_stack' start finish h))]
+
+val equiv_store_stack128: (ptr:int) -> (v:quad32) -> (h:stack) -> Lemma
+  (stack_from_s (S.update_stack128' ptr v (stack_to_s h)) == store_stack128 ptr v h)
+  [SMTPat (store_stack128 ptr v h)]

@@ -1,0 +1,378 @@
+include "../../../arch/x64/X64.Vale.InsBasic.vaf"
+include "../../../arch/x64/X64.Vale.InsMem.vaf"
+include "../../../arch/x64/X64.Vale.InsVector.vaf"
+include "../../../arch/x64/X64.Vale.InsAes.vaf"
+include{:fstar}{:open} "Prop_s"
+include{:fstar}{:open} "Opaque_s"
+include{:fstar}{:open} "Words_s"
+include{:fstar}{:open} "Types_s"
+include{:/*TODO*/fstar}{:open} "FStar.Seq.Base"
+include{:fstar}{:open} "AES_s"
+include{:fstar}{:open} "X64.Machine_s"
+include{:fstar}{:open} "X64.Memory"
+include{:fstar}{:open} "X64.Vale.State"
+include{:fstar}{:open} "X64.Vale.Decls"
+include{:fstar}{:open} "X64.Vale.QuickCode"
+include{:fstar}{:open} "X64.Vale.QuickCodes"
+include{:fstar}{:open} "Arch.Types"
+include{:fstar}{:open} "AES_helpers"
+include{:fstar}{:open} "X64.Poly1305.Math"
+include{:fstar}{:open} "GCM_helpers"
+include{:fstar}{:open} "Workarounds"
+include{:fstar}{:open} "GCTR_s"
+include{:fstar}{:open} "GCTR"
+include{:fstar}{:open} "Arch.TypesNative"
+include{:fstar}{:open} "X64.CPU_Features_s"
+
+include{:fstar}{:open} "Math.Poly2_s"
+include{:fstar}{:open} "Math.Poly2"
+include{:fstar}{:open} "Math.Poly2.Bits_s"
+include{:fstar}{:open} "Math.Poly2.Bits"
+include{:fstar}{:open} "Math.Poly2.Words"
+include{:fstar}{:open} "Math.Poly2.Lemmas"
+include{:fstar}{:open} "GF128_s"
+include{:fstar}{:open} "GF128"
+include{:fstar}{:open} "GHash"
+module X64.AESopt2
+
+#verbatim{:interface}{:implementation}
+open Prop_s
+open Opaque_s
+open Words_s
+open Types_s
+open FStar.Seq
+open AES_s
+open X64.Machine_s
+open X64.Memory
+open X64.Vale.State
+open X64.Vale.Decls
+open X64.Vale.InsBasic
+open X64.Vale.InsMem
+open X64.Vale.InsVector
+open X64.Vale.InsAes
+open X64.Vale.QuickCode
+open X64.Vale.QuickCodes
+open Arch.Types
+open AES_helpers
+open X64.Poly1305.Math    // For lemma_poly_bits64()
+open GCM_helpers
+open Workarounds
+open GCTR_s
+open GCTR
+open Arch.TypesNative
+open X64.CPU_Features_s
+
+open Math.Poly2_s
+open Math.Poly2
+open Math.Poly2.Bits_s
+open Math.Poly2.Bits
+open Math.Poly2.Lemmas
+open GF128_s
+open GF128
+open GHash
+#endverbatim
+
+procedure{:quick exportOnly} VPolyAdd(out dst:xmm, src1:xmm, src2:opr128)
+    lets
+        a1 := of_quad32(src1);
+        a2 := of_quad32(src2);
+    modifies
+        efl;
+    ensures
+        of_quad32(dst) == add(a1, a2);
+{
+    lemma_to_of_quad32(src1);
+    lemma_to_of_quad32(src2);
+    VPxor(dst, src1, src2);
+    lemma_add128(a1, a2);
+    lemma_of_to_quad32(add(a1, a2));
+}
+
+procedure{:quick exportOnly} VHigh64ToLow(out dst:xmm, src:xmm)
+    lets
+        a := of_quad32(src);
+    modifies
+        efl;
+    ensures
+        of_quad32(dst) == shift(a, (-64));
+{
+    lemma_to_of_quad32(src);
+    Vpsrldq8(dst, src);
+    lemma_quad32_double_shift(a);
+    lemma_shift_is_div(a, 64);
+    lemma_of_to_quad32(shift(a, (-64)));
+}
+
+procedure{:quick exportOnly} VLow64ToHigh(out dst:xmm, src:xmm)
+    lets
+        a := of_quad32(src);
+    modifies
+        efl;
+    ensures
+        of_quad32(dst) == shift(mask(a, 64), 64);
+{
+    lemma_to_of_quad32(src);
+    Vpslldq8(dst, src);
+    lemma_quad32_double_shift(a);
+    lemma_mask_is_mod(a, 64);
+    lemma_shift_is_mul(mask(a, 64), 64);
+    lemma_of_to_quad32(shift(mask(a, 64), 64));
+}
+
+procedure{:quick exportOnly} VSwap(out dst:xmm, src:xmm)
+    lets
+        a := of_quad32(src);
+    modifies
+        efl;
+    ensures
+        of_quad32(dst) == swap(a, 64);
+{
+    lemma_to_of_quad32(src);
+    VPalignr8(dst, src, src);
+    lemma_quad32_double_swap(a);
+    lemma_of_to_quad32(swap(a, 64));
+}
+
+procedure{:quick exportOnly} VPolyMul(out dst:xmm, src1:xmm, src2:xmm, inline src1Hi:bool, inline src2Hi:bool)
+    lets
+        a1 := of_quad32(src1);
+        a2 := of_quad32(src2);
+    modifies
+        efl;
+    requires
+        pclmulqdq_enabled;
+    ensures
+        of_quad32(dst) == mul(
+            if src1Hi then shift(a1, (-64)) else mask(a1, 64),
+            if src2Hi then shift(a2, (-64)) else mask(a2, 64));
+{
+    lemma_to_of_quad32(src1);
+    lemma_to_of_quad32(src2);
+    VPclmulqdq(dst, src1, src2, src1Hi, src2Hi);
+    lemma_quad32_double(a1);
+    lemma_quad32_double(a2);
+    lemma_shift_is_div(a1, 64);
+    lemma_shift_is_div(a2, 64);
+    lemma_mask_is_mod(a1, 64);
+    lemma_mask_is_mod(a2, 64);
+    lemma_of_to_quad32(mul(
+        if src1Hi then shift(a1, (-64)) else mask(a1, 64),
+        if src2Hi then shift(a2, (-64)) else mask(a2, 64)));
+}
+
+#token +. precedence +
+#token *. precedence *
+#token %. precedence *
+#token $$ precedence !
+function operator( +. ) (a:poly, b:poly):poly := add;
+function operator( *. ) (a:poly, b:poly):poly := mul;
+function operator( %. ) (a:poly, b:poly):poly := mod;
+function operator( $$ ) (a:quad32):poly := of_quad32;
+
+procedure{:quick} MulAdd_unroll(
+    ghost hkeys_b:buffer128,
+    ghost stack_b:buffer128,
+    ghost h:poly,
+    ghost prev:poly,
+    ghost data:fun(int) -> poly
+    )
+    lets
+        Xip @= r9;
+        Ii @= xmm0; T1 @= xmm1; T2 @= xmm2; Hkey @= xmm3;
+        Z0 @= xmm4; Z1 @= xmm5; Z2 @= xmm6; Z3 @= xmm7;
+        Xi @= xmm8;
+    reads
+        mem; memTaint;
+        Xip; rsp;
+    modifies
+        efl;
+        Ii; T1; T2; Hkey; Z0; Z1; Z2; Z3; Xi;
+    requires
+        pclmulqdq_enabled;
+        of_quad32(Z3) == data(5);
+        buffers_disjoint128(hkeys_b, stack_b);
+        validDstAddrs128(mem, Xip - 0x20, hkeys_b, 8, memTaint, Secret);
+        of_quad32(buffer128_read(hkeys_b, 0, mem)) == power(shift_gf128_key_1(h), 1);
+        of_quad32(buffer128_read(hkeys_b, 1, mem)) == power(shift_gf128_key_1(h), 2);
+        of_quad32(buffer128_read(hkeys_b, 3, mem)) == power(shift_gf128_key_1(h), 3);
+        of_quad32(buffer128_read(hkeys_b, 4, mem)) == power(shift_gf128_key_1(h), 4);
+        of_quad32(buffer128_read(hkeys_b, 6, mem)) == power(shift_gf128_key_1(h), 5);
+        of_quad32(buffer128_read(hkeys_b, 7, mem)) == power(shift_gf128_key_1(h), 6);
+        validDstAddrs128(mem, rsp + 0x18, stack_b, 7, memTaint, Secret);
+        of_quad32(Xi) +. of_quad32(Z0) +. of_quad32(buffer128_read(stack_b, 0, mem)) == prev;
+        of_quad32(buffer128_read(stack_b, 2, mem)) == data(4);
+        of_quad32(buffer128_read(stack_b, 3, mem)) == data(3);
+        of_quad32(buffer128_read(stack_b, 4, mem)) == data(2);
+        of_quad32(buffer128_read(stack_b, 5, mem)) == data(1);
+        of_quad32(buffer128_read(stack_b, 6, mem)) == data(0);
+    ensures
+        of_quad32(Z0) +. shift(of_quad32(Z2), 64) +. shift(of_quad32(Z3), 128) ==
+            ghash_unroll_back(shift_gf128_key_1(h), prev, data, 0, 6, 5);
+{
+    let h1 := shift_gf128_key_1(h);
+
+    // 1
+    Load128_buffer(Hkey, Xip, (-0x20), Secret, hkeys_b, 0);
+    VPolyMul(T1, Z3, Hkey, false, false);
+    VPolyMul(Z1, Z3, Hkey, false, true);
+    Load128_buffer(Ii, rsp, 0x38, Secret, stack_b, 2);
+    VPolyMul(Z2, Z3, Hkey, true, false);
+    VPolyMul(Z3, Z3, Hkey, true, true);
+    lemma_Mul128(data(5), power(h1, 1));
+    ghost var z := data(5) *. power(h1, 1);
+    assert z == ghash_unroll_back(h1, prev, data, 0, 6, 0);
+    // assert z == $$T1 +. shift($$Z1 +. $$Z2, 64) +. shift($$Z3, 128);
+    lemma_add_commute($$Z1, $$Z2);
+    // assert z == $$T1 +. shift($$Z2 +. $$Z1, 64) +. shift($$Z3, 128);
+
+    Load128_buffer(Hkey, Xip, (-0x10), Secret, hkeys_b, 1);
+    VPolyAdd(Z2, Z2, Z1);
+    ghost var z0 := $$T1;
+    // assert z == z0 +. shift($$Z2, 64) +. shift($$Z3, 128);
+
+    // 2
+    VPolyMul(Z1, Ii, Hkey, false, false);
+    VPolyAdd(Xi, Xi, Z0);
+    VPolyAdd(Z0, T1, Z1);
+    VPolyMul(T1, Ii, Hkey, false, true);
+    VPolyMul(T2, Ii, Hkey, true, false);
+    VPolyAdd(Xi, Xi, Mem128(rsp, 0x18, stack_b, 0, Secret));
+    // assert $$Xi == prev;
+    VPolyMul(Hkey, Ii, Hkey, true, true);
+    lemma_Mul128_accum(z0, $$Z2, $$Z3, data(4), power(h1, 2));
+    z := z +. data(4) *. power(h1, 2);
+    assert z == ghash_unroll_back(h1, prev, data, 0, 6, 1);
+    // assert z == $$Z0 +. shift($$Z2 +. $$T1 +. $$T2, 64) +. shift($$Z3 +. $$Hkey, 128);
+
+    Load128_buffer(Ii, rsp, 0x48, Secret, stack_b, 3);
+    Load128_buffer(Z1, Xip, 0x10, Secret, hkeys_b, 3);
+    VPolyAdd(Z2, Z2, T1);
+    // assert z == $$Z0 +. shift($$Z2 +. $$T2, 64) +. shift($$Z3 +. $$Hkey, 128);
+
+    // 3
+    VPolyMul(T1, Ii, Z1, false, false);
+    VPolyAdd(Z2, Z2, T2);
+    // assert z == $$Z0 +. shift($$Z2, 64) +. shift($$Z3 +. $$Hkey, 128);
+    VPolyMul(T2, Ii, Z1, false, true);
+    VPolyAdd(Z3, Z3, Hkey);
+    // assert z == $$Z0 +. shift($$Z2, 64) +. shift($$Z3, 128);
+    VPolyMul(Hkey, Ii, Z1, true, false);
+    VPolyMul(Z1, Ii, Z1, true, true);
+    lemma_Mul128_accum($$Z0, $$Z2, $$Z3, data(3), power(h1, 3));
+    z := z +. data(3) *. power(h1, 3);
+    assert z == ghash_unroll_back(h1, prev, data, 0, 6, 2);
+    // assert z == ($$Z0 +. $$T1) +. shift($$Z2 +. $$T2 +. $$Hkey, 64) +. shift($$Z3 +. $$Z1, 128);
+
+    Load128_buffer(Ii, rsp, 0x58, Secret, stack_b, 4);
+    VPolyAdd(Z0, Z0, T1);
+    // assert z == $$Z0 +. shift($$Z2 +. $$T2 +. $$Hkey, 64) +. shift($$Z3 +. $$Z1, 128);
+    Load128_buffer(T1, Xip, 0x20, Secret, hkeys_b, 4);
+    VPolyAdd(Z2, Z2, T2);
+    // assert z == $$Z0 +. shift($$Z2 +. $$Hkey, 64) +. shift($$Z3 +. $$Z1, 128);
+
+    // 4
+    VPolyMul(T2, Ii, T1, false, false);
+    VPolyAdd(Z2, Z2, Hkey);
+    // assert z == $$Z0 +. shift($$Z2, 64) +. shift($$Z3 +. $$Z1, 128);
+    VPolyMul(Hkey, Ii, T1, false, true);
+    VPolyAdd(Z3, Z3, Z1);
+    // assert z == $$Z0 +. shift($$Z2, 64) +. shift($$Z3, 128);
+    VPolyMul(Z1, Ii, T1, true, false);
+    VPolyMul(T1, Ii, T1, true, true);
+    lemma_Mul128_accum($$Z0, $$Z2, $$Z3, data(2), power(h1, 4));
+    z := z +. data(2) *. power(h1, 4);
+    assert z == ghash_unroll_back(h1, prev, data, 0, 6, 3);
+    // assert z == ($$Z0 +. $$T2) +. shift($$Z2 +. $$Hkey +. $$Z1, 64) +. shift($$Z3 +. $$T1, 128);
+
+    Load128_buffer(Ii, rsp, 0x68, Secret, stack_b, 5);
+    VPolyAdd(Z0, Z0, T2);
+    // assert z == $$Z0 +. shift($$Z2 +. $$Hkey +. $$Z1, 64) +. shift($$Z3 +. $$T1, 128);
+    Load128_buffer(T2, Xip, 0x40, Secret, hkeys_b, 6);
+    VPolyAdd(Z2, Z2, Hkey);
+    // assert z == $$Z0 +. shift($$Z2 +. $$Z1, 64) +. shift($$Z3 +. $$T1, 128);
+
+    // 5
+    VPolyMul(Hkey, Ii, T2, false, false);
+    VPolyAdd(Z2, Z2, Z1);
+    // assert z == $$Z0 +. shift($$Z2, 64) +. shift($$Z3 +. $$T1, 128);
+    VPolyMul(Z1, Ii, T2, false, true);
+    VPolyAdd(Z3, Z3, T1);
+    // assert z == $$Z0 +. shift($$Z2, 64) +. shift($$Z3, 128);
+    VPolyMul(T1, Ii, T2, true, false);
+    VPolyAdd(Xi, Xi, Mem128(rsp, 0x78, stack_b, 6, Secret));
+    VPolyMul(T2, Ii, T2, true, true);
+    lemma_Mul128_accum($$Z0, $$Z2, $$Z3, data(1), power(h1, 5));
+    z := z +. data(1) *. power(h1, 5);
+    assert z == ghash_unroll_back(h1, prev, data, 0, 6, 4);
+    // assert z == ($$Z0 +. $$Hkey) +. shift($$Z2 +. $$Z1 +. $$T1, 64) +. shift($$Z3 +. $$T2, 128);
+
+    VPolyAdd(Z0, Z0, Hkey);
+    // assert z == $$Z0 +. shift($$Z2 +. $$Z1 +. $$T1, 64) +. shift($$Z3 +. $$T2, 128);
+    Load128_buffer(Hkey, Xip, 0x50, Secret, hkeys_b, 7);
+    VPolyAdd(Z2, Z2, Z1);
+    // assert z == $$Z0 +. shift($$Z2 +. $$T1, 64) +. shift($$Z3 +. $$T2, 128);
+
+    // 6
+    VPolyMul(Z1, Xi, Hkey, false, true);
+    VPolyAdd(Z2, Z2, T1);
+    // assert z == $$Z0 +. shift($$Z2, 64) +. shift($$Z3 +. $$T2, 128);
+    VPolyMul(T1, Xi, Hkey, true, false);
+    VPolyAdd(Z3, Z3, T2);
+    // assert z == $$Z0 +. shift($$Z2, 64) +. shift($$Z3, 128);
+    VPolyMul(T2, Xi, Hkey, false, false);
+    VPolyMul(Xi, Xi, Hkey, true, true);
+    lemma_Mul128_accum($$Z0, $$Z2, $$Z3, prev +. data(0), power(h1, 6));
+    z := z +. (prev +. data(0)) *. power(h1, 6); // TODO: xor data(0) here
+    assert z == ghash_unroll_back(h1, prev, data, 0, 6, 5);
+    // assert z == ($$Z0 +. $$T2) +. shift($$Z2 +. $$Z1 +. $$T1, 64) +. shift($$Z3 +. $$Xi, 128);
+
+    VPolyAdd(Z2, Z2, Z1);
+    // assert z == ($$Z0 +. $$T2) +. shift($$Z2 +. $$T1, 64) +. shift($$Z3 +. $$Xi, 128);
+    VPolyAdd(Z2, Z2, T1);
+    // assert z == ($$Z0 +. $$T2) +. shift($$Z2, 64) +. shift($$Z3 +. $$Xi, 128);
+    // vpslldq in Reduce
+    VPolyAdd(Z0, Z0, T2);
+    // assert z == $$Z0 +. shift($$Z2, 64) +. shift($$Z3 +. $$Xi, 128);
+    // vmovdqu into Hkey
+    VPolyAdd(Z3, Z3, Xi);
+
+    // assert z == $$Z0 +. shift($$Z2, 64) +. shift($$Z3, 128);
+}
+
+procedure{:quick} Reduce(ghost f:poly)
+    lets
+        Ii @= xmm0; Hkey @= xmm3;
+        Z0 @= xmm4; Z1 @= xmm5; Z2 @= xmm6; Z3 @= xmm7;
+        Xi @= xmm8;
+        g := monomial(128) +. f;
+        c := reverse(shift(f, (-1)), 63);
+        a0 := of_quad32(Z0);
+        a1 := of_quad32(Z2);
+        a2 := of_quad32(Z3);
+        a := a0 +. shift(a1, 64) +. shift(a2, 128);
+    modifies
+        efl;
+        Ii; Hkey; Z0; Z1; Z2; Z3; Xi;
+    requires
+        pclmulqdq_enabled;
+        shift(of_quad32(Hkey), (-64)) == c;
+        degree(f) < 64;
+        degree(g) == 128;
+        poly_index(f, 0);
+    ensures
+        of_quad32(Xi) == reverse(reverse(a, 255) %. g, 127);
+{
+    VLow64ToHigh(Z1, Z2);
+    VPolyAdd(Z0, Z0, Z1);
+    VSwap(Ii, Z0);
+    VPolyMul(Z0, Z0, Hkey, false, true);
+    VHigh64ToLow(Z2, Z2);
+    VPolyAdd(Z3, Z3, Z2);
+    VPolyAdd(Z0, Ii, Z0);
+    // TODO: save Z3 in memory
+    VSwap(Xi, Z0);
+    VPolyMul(Z0, Z0, Hkey, false, true);
+    VPolyAdd(Xi, Xi, Z3);
+    VPolyAdd(Xi, Xi, Z0);
+    lemma_reduce_rev(a0, a1, a2, f, 64);
+}

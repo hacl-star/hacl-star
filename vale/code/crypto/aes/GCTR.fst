@@ -36,6 +36,11 @@ let gctr_encrypt_empty (icb_BE:quad32) (plain_LE cipher_LE:seq quad32) (alg:algo
   assert (equal (le_seq_quad32_to_bytes cipher_quads_LE) empty);  // OBSERVEs
   ()
 
+let gctr_partial_extend6 (alg:algorithm) (bound:nat) (plain cipher:seq quad32) (key:seq nat32) (icb:quad32)
+  =
+  reveal_opaque gctr_partial;
+  ()
+
 (*
 let rec seq_map_i_indexed' (#a:Type) (#b:Type) (f:int->a->b) (s:seq a) (i:int) :
   Tot (s':seq b { length s' == length s /\
@@ -153,6 +158,18 @@ let rec gctr_indexed (icb:quad32) (plain:gctr_plain_internal_LE)
 let gctr_partial_completed (alg:algorithm) (plain cipher:seq quad32) (key:seq nat32) (icb:quad32) =
   gctr_indexed icb plain alg key cipher;
   ()
+
+let gctr_partial_opaque_completed (alg:algorithm) (plain cipher:seq quad32) (key:seq nat32) (icb:quad32) : Lemma
+  (requires
+    is_aes_key_LE alg key /\
+    length plain == length cipher /\
+    256 * (length plain) < pow2_32 /\
+    gctr_partial_opaque alg (length cipher) plain cipher key icb
+  )
+  (ensures cipher == gctr_encrypt_recursive icb plain alg key 0)
+  =
+  reveal_opaque gctr_partial;
+  gctr_partial_completed alg plain cipher key icb
 
 let gctr_partial_to_full_basic (icb_BE:quad32) (plain:seq quad32) (alg:algorithm) (key:seq nat32) (cipher:seq quad32) =
   reveal_opaque gctr_encrypt_LE_def;

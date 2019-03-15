@@ -1,5 +1,7 @@
 include "../arch/x64/X64.Vale.InsBasic.vaf"
 include "../arch/x64/X64.Vale.InsMem.vaf"
+include{:fstar}{:open} "X64.Vale.QuickCode"
+include{:fstar}{:open} "X64.Vale.QuickCodes"
 
 module Test.Memcpy
 
@@ -13,7 +15,6 @@ open X64.Vale.InsMem
 #endverbatim
 
 #reset-options "--z3rlimit 20"
-
 procedure Copy16(inline t:taint, ghost bsrc:buffer64, ghost bdst:buffer64)
     requires/ensures
         locs_disjoint(list(loc_buffer(bsrc), loc_buffer(bdst)));
