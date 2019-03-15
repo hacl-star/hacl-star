@@ -14,7 +14,7 @@ let operand_taint (op:operand) ts taint =
     | OConst _ -> Public
     | OReg reg -> ts.regTaint reg
     | OMem _ -> taint
-    | OStack _ -> Public // The stack is public
+    | OStack _ -> Secret // Secret for now
 
 let maddr_does_not_use_secrets addr ts =
   match addr with
@@ -27,7 +27,7 @@ let maddr_does_not_use_secrets addr ts =
 
 let operand_does_not_use_secrets op ts =
   match op with
-  | OConst _ | OReg _ -> true
+  | OConst _ | OReg _ -> true 
   | OMem m | OStack m -> maddr_does_not_use_secrets m ts
 
 val lemma_operand_obs:  (ts:taintState) ->  (dst:operand) -> (s1 : traceState) -> (s2:traceState) -> Lemma ((operand_does_not_use_secrets dst ts) /\ publicValuesAreSame ts s1 s2 ==> (operand_obs s1 dst) = (operand_obs s2 dst))
@@ -101,7 +101,7 @@ let lemma_public_op_are_same ts op s1 s2 =
     assert (a1 == a2);
     assert (forall a. (a >= a1 /\ a < a1 + 8) ==> s1.state.mem.[a] == s2.state.mem.[a]);
     Opaque_s.reveal_opaque get_heap_val64_def
-  | OStack m -> admit()
+  | OStack m -> ()
 
 val lemma_public_op_are_same2: 
   (ts:taintState) -> (op:operand) -> (s1:traceState) -> (s2:traceState) -> 
@@ -112,7 +112,7 @@ val lemma_public_op_are_same2:
                   taint_match op Public s2.memTaint s2.state)
         (ensures eval_operand op s1.state == eval_operand op s2.state)
 
-let lemma_public_op_are_same2 ts op s1 s2 = admit()
+let lemma_public_op_are_same2 ts op s1 s2 = ()
 
 val publicFlagValuesAreAsExpected: (tsAnalysis:taintState) -> (tsExpected:taintState) -> b:bool{b <==> (Public? tsExpected.flagsTaint ==> Public? tsAnalysis.flagsTaint)}
 
