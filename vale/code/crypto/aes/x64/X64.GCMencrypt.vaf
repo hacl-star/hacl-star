@@ -1,6 +1,7 @@
 include "../../../arch/x64/X64.Vale.InsBasic.vaf"
 include "../../../arch/x64/X64.Vale.InsMem.vaf"
 include "../../../arch/x64/X64.Vale.InsVector.vaf"
+include "../../../arch/x64/X64.Vale.InsStack.vaf"
 include "../../../thirdPartyPorts/Intel/aes/x64/X64.AESCTR.vaf"
 include "../../../lib/util/x64/X64.Stack.vaf"
 include "X64.AES.vaf"
@@ -27,6 +28,7 @@ include{:fstar}{:open} "GCM_helpers"
 include{:fstar}{:open} "Workarounds"
 include{:fstar}{:open} "X64.Machine_s"
 include{:fstar}{:open} "X64.Memory"
+include{:fstar}{:open} "X64.Stack_i"
 include{:fstar}{:open} "X64.Vale.State"
 include{:fstar}{:open} "X64.Vale.Decls"
 include{:fstar}{:open} "X64.Vale.QuickCode"
@@ -61,10 +63,12 @@ open X64.GHash
 open X64.GCTR
 open X64.Machine_s
 open X64.Memory
+open X64.Stack_i
 open X64.Vale.State
 open X64.Vale.Decls
 open X64.Vale.InsBasic
 open X64.Vale.InsMem
+open X64.Vale.InsStack
 open X64.Vale.InsVector
 open X64.Vale.InsAes
 open X64.Vale.QuickCode
@@ -834,6 +838,7 @@ procedure {:quick} gcm_encrypt_stdcall(
         tag_ptr           := buffer64_read(args_b, 7, mem);
 
     requires
+        rsp == init_rsp(stack);
         validSrcAddrs64(mem, args_ptr, args_b, 8, memTaint, Public);
 
         buffers_disjoint128(plain_b, out_b);
@@ -924,10 +929,51 @@ procedure {:quick} gcm_encrypt_stdcall(
         Mov64(r9, rdi);
     }
 
-    callee_save_registers(win);
+    Push(r15);
+    Push(r14);
+    Push(r13);
+    Push(r12);
+    Push(rsi);
+    Push(rdi);
+    Push(rbp);
+    Push(rbx);
+
+    inline if (win) {
+        PushXmm(xmm15, rax);
+        PushXmm(xmm14, rax);
+        PushXmm(xmm13, rax);
+        PushXmm(xmm12, rax);
+        PushXmm(xmm11, rax);
+        PushXmm(xmm10, rax);
+        PushXmm(xmm9,  rax);
+        PushXmm(xmm8,  rax);
+        PushXmm(xmm7,  rax);
+        PushXmm(xmm6,  rax);
+    }
+
     gcm_encrypt_stdcall_inner(alg, args_b, iv_BE, plain_b, auth_b, iv_b, out_b, tag_b, key, round_keys, keys_b);
-    callee_restore_registers(win, old(xmm6), old(xmm7), old(xmm8), old(xmm9), old(xmm10), old(xmm11),
-                             old(xmm12), old(xmm13), old(xmm14), old(xmm15));
+
+    inline if (win) {
+        PopXmm(xmm6,  rax, old(xmm6));
+        PopXmm(xmm7,  rax, old(xmm7));
+        PopXmm(xmm8,  rax, old(xmm8));
+        PopXmm(xmm9,  rax, old(xmm9));
+        PopXmm(xmm10, rax, old(xmm10));
+        PopXmm(xmm11, rax, old(xmm11));
+        PopXmm(xmm12, rax, old(xmm12));
+        PopXmm(xmm13, rax, old(xmm13));
+        PopXmm(xmm14, rax, old(xmm14));
+        PopXmm(xmm15, rax, old(xmm15));
+    }
+
+    Pop(rbx);
+    Pop(rbp);
+    Pop(rdi);
+    Pop(rsi);
+    Pop(r12);
+    Pop(r13);
+    Pop(r14);
+    Pop(r15);
 }
 
 

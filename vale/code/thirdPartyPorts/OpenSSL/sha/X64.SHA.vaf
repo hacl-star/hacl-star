@@ -1,5 +1,6 @@
 include "../../../arch/x64/X64.Vale.InsBasic.vaf"
 include "../../../arch/x64/X64.Vale.InsMem.vaf"
+include "../../../arch/x64/X64.Vale.InsStack.vaf"
 include "../../../arch/x64/X64.Vale.InsVector.vaf"
 include "../../../arch/x64/X64.Vale.InsSha.vaf"
 include "../../../lib/util/x64/X64.Stack.vaf"
@@ -33,10 +34,12 @@ open Words.Seq_s
 open FStar.Seq
 open X64.Machine_s
 open X64.Memory
+open X64.Stack_i
 open X64.Vale.State
 open X64.Vale.Decls
 open X64.Vale.InsBasic
 open X64.Vale.InsMem
+open X64.Vale.InsStack
 open X64.Vale.InsVector
 open X64.Vale.InsSha
 open X64.Vale.QuickCode
@@ -747,6 +750,8 @@ procedure {:quick}{:exportSpecs}{:public} sha_update_bytes_stdcall(
            num         := if win then r8  else rdx;
           k_ptr        := if win then r9  else rcx;
     requires
+        rsp == init_rsp(stack);
+        
         sha_enabled;
         locs_disjoint(list(loc_buffer(ctx_b), loc_buffer(in_b))) \/ ctx_b == in_b;
         locs_disjoint(list(loc_buffer(ctx_b), loc_buffer(k_b))) \/ ctx_b == k_b;

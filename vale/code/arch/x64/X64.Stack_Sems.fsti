@@ -19,11 +19,6 @@ val equiv_valid_src_stack64: (ptr:int) -> (h:stack) -> Lemma
   (ensures S.valid_src_stack64 ptr (stack_to_s h))
   [SMTPat (valid_src_stack64 ptr h)]
 
-val equiv_valid_dst_stack64: (rsp:nat64) -> (ptr:int) -> (h:stack) -> Lemma
-  (requires valid_dst_stack64 rsp ptr h)
-  (ensures S.valid_dst_stack64 rsp ptr (stack_to_s h))
-  [SMTPat (valid_dst_stack64 rsp ptr h)]
-
 val equiv_load_stack64: (ptr:int) -> (h:stack) -> Lemma
   (S.eval_stack ptr (stack_to_s h) == load_stack64 ptr h)
   [SMTPat (load_stack64 ptr h)]
