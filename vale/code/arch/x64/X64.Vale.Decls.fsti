@@ -196,6 +196,7 @@ val va_fuel_default : unit -> va_fuel
 [@va_qattr] unfold let va_coerce_operand_to_dst_operand (o:va_operand) : va_dst_operand = o
 [@va_qattr] unfold let va_coerce_dst_operand_to_operand (o:va_dst_operand) : va_operand = o
 [@va_qattr] unfold let va_coerce_dst_opr64_to_opr64 (o:va_dst_operand) : va_operand = o
+[@va_qattr] unfold let va_coerce_xmm_to_opr128 (x:xmm) : va_operand128 = TReg128 x
 
 [@va_qattr]
 unfold let va_opr_code_Mem (o:va_operand) (offset:int) (t:taint) : va_operand =
