@@ -87,10 +87,10 @@ operand_type xmm:quad32 @ nat4 :=
 | inout xmm8 | inout xmm9 | inout xmm10 | inout xmm11
 | inout xmm12 | inout xmm13 | inout xmm14 | inout xmm15
 ;
-operand_type Mem128(base:reg64, inline offset:int, ghost b:buffer128, ghost index:int, inline t:taint):quad32;
+operand_type Mem128(base:reg64, inline offset:int, inline t:taint, ghost b:buffer128, ghost index:int):quad32;
 operand_type opr128:quad32 := xmm | Mem128;
 
-procedure{:operand} Mem128_in(base:reg64, inline offset:int, ghost b:buffer128, ghost index:int, inline t:taint) returns(o:opr)
+procedure{:operand} Mem128_in(base:reg64, inline offset:int, inline t:taint, ghost b:buffer128, ghost index:int) returns(o:opr)
     reads
         mem;
     extern;

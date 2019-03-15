@@ -236,7 +236,7 @@ procedure{:quick} MulAdd_unroll(
     VPolyAdd(Z0, T1, Z1);
     VPolyMul(T1, Ii, Hkey, false, true);
     VPolyMul(T2, Ii, Hkey, true, false);
-    VPolyAdd(Xi, Xi, Mem128(rsp, 0x18, stack_b, 0, Secret));
+    VPolyAdd(Xi, Xi, Mem128(rsp, 0x18, Secret, stack_b, 0));
     // assert $$Xi == prev;
     VPolyMul(Hkey, Ii, Hkey, true, true);
     lemma_Mul128_accum(z0, $$Z2, $$Z3, data(4), power(h1, 2));
@@ -299,7 +299,7 @@ procedure{:quick} MulAdd_unroll(
     VPolyAdd(Z3, Z3, T1);
     // assert z == $$Z0 +. shift($$Z2, 64) +. shift($$Z3, 128);
     VPolyMul(T1, Ii, T2, true, false);
-    VPolyAdd(Xi, Xi, Mem128(rsp, 0x78, stack_b, 6, Secret));
+    VPolyAdd(Xi, Xi, Mem128(rsp, 0x78, Secret, stack_b, 6));
     VPolyMul(T2, Ii, T2, true, true);
     lemma_Mul128_accum($$Z0, $$Z2, $$Z3, data(1), power(h1, 5));
     z := z +. data(1) *. power(h1, 5);

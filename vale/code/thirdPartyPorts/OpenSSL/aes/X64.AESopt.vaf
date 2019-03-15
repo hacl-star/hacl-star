@@ -682,16 +682,16 @@ procedure {:quick} Loop6x_round9(
 
     VAESNI_enc(inout0, inout0, rndkey);
     VAESNI_enc(inout1, inout1, rndkey);
-    VPxor_buffer(T2, T1, inp, 0x00, Secret, in_b, count*6 + 0);
+    VPxor(T2, T1, Mem128(inp, 0x00, Secret, in_b, count*6 + 0));
     VAESNI_enc(inout2, inout2, rndkey);
-    VPxor_buffer(Ii, T1, inp, 0x10, Secret, in_b, count*6 + 1);
+    VPxor(Ii, T1, Mem128(inp, 0x10, Secret, in_b, count*6 + 1));
     VAESNI_enc(inout3, inout3, rndkey);
-    VPxor_buffer(Z1, T1, inp, 0x20, Secret, in_b, count*6 + 2);
+    VPxor(Z1, T1, Mem128(inp, 0x20, Secret, in_b, count*6 + 2));
     VAESNI_enc(inout4, inout4, rndkey);
-    VPxor_buffer(Z2, T1, inp, 0x30, Secret, in_b, count*6 + 3);
+    VPxor(Z2, T1, Mem128(inp, 0x30, Secret, in_b, count*6 + 3));
     VAESNI_enc(inout5, inout5, rndkey);
-    VPxor_buffer(Z3, T1, inp, 0x40, Secret, in_b, count*6 + 4);
-    VPxor_buffer(Hkey, T1, inp, 0x50, Secret, in_b, count*6 + 5);
+    VPxor(Z3, T1, Mem128(inp, 0x40, Secret, in_b, count*6 + 4));
+    VPxor(Hkey, T1, Mem128(inp, 0x50, Secret, in_b, count*6 + 5));
 
     reveal rounds;
     commute_sub_bytes_shift_rows_forall();
@@ -1278,7 +1278,7 @@ procedure {:quick} {:frame false} Loop6x(
 }
 
 
-#reset-options "--z3rlimit 300"
+#reset-options "--z3rlimit 600"
 procedure {:quick exportOnly} {:frame false} Loop6x_loop(
     inline alg:algorithm,  
     ghost count:nat,        // Number of 6x128-bit blocks processed so far
@@ -1781,17 +1781,17 @@ procedure {:quick} AESNI_ctr32_6x_round9(
     Load128_buffer(Hkey, key, 0xa0-0x80, Secret, keys_b, 10);  // # last round key
     
     VAESNI_enc(inout0, inout0, rndkey);
-    VPxor_buffer(Z0, Hkey, inp, 0x00, Secret, in_b, count*6 + 0);
+    VPxor(Z0, Hkey, Mem128(inp, 0x00, Secret, in_b, count*6 + 0));
     VAESNI_enc(inout1, inout1, rndkey);
-    VPxor_buffer(Z1, Hkey, inp, 0x10, Secret, in_b, count*6 + 1);
+    VPxor(Z1, Hkey, Mem128(inp, 0x10, Secret, in_b, count*6 + 1));
     VAESNI_enc(inout2, inout2, rndkey);
-    VPxor_buffer(Z2, Hkey, inp, 0x20, Secret, in_b, count*6 + 2);
+    VPxor(Z2, Hkey, Mem128(inp, 0x20, Secret, in_b, count*6 + 2));
     VAESNI_enc(inout3, inout3, rndkey);
-    VPxor_buffer(Xi, Hkey, inp, 0x30, Secret, in_b, count*6 + 3);
+    VPxor(Xi, Hkey, Mem128(inp, 0x30, Secret, in_b, count*6 + 3));
     VAESNI_enc(inout4, inout4, rndkey);
-    VPxor_buffer(T2, Hkey, inp, 0x40, Secret, in_b, count*6 + 4);
+    VPxor(T2, Hkey, Mem128(inp, 0x40, Secret, in_b, count*6 + 4));
     VAESNI_enc(inout5, inout5, rndkey);
-    VPxor_buffer(Hkey, Hkey, inp, 0x50, Secret, in_b, count*6 + 5);
+    VPxor(Hkey, Hkey, Mem128(inp, 0x50, Secret, in_b, count*6 + 5));
 
     reveal rounds;
     commute_sub_bytes_shift_rows_forall();
