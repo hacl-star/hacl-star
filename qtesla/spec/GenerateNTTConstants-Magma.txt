@@ -1,0 +1,29 @@
+// Magma script to generate constants for doing NTT transformations
+// given a parameter set. Set the values of q and N appropriately and
+// run. The script can be run: http://magma.maths.usyd.edu.au/calc/
+// Example with qTESLA-I
+
+q:=4205569;
+N:=512;
+
+Fq:=GF(q);
+P<x>:=PolynomialRing(Fq);
+phi:=0;
+phi_inv:=0;
+
+if q mod (2*N) ne 1 then
+   printf "UNSUPPORTED PARAMETERS... \n";
+else
+   w:=RootOfUnity(N,Fq);
+   w_inv:=Fq!(w^-1);
+   N_inv:=Fq!(N^-1);
+   phis:=AllRoots(w,2);
+   phi:=phis[2];
+   phi_inv:=Fq!(phi^-1);
+end if;
+
+printf "let computed_phi = "; phi;
+printf "let computed_omega = "; w;
+printf "let computed_phi_inv = "; phi_inv;
+printf "let computed_omega_inv = "; w_inv;
+printf "let computed_n_inv = "; N_inv; 
