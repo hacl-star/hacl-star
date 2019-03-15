@@ -1,1 +1,74 @@
-[ ".3Òï≈íâ¥÷iù6¿\n™8", [] ]
+[
+  "\u001b€ê\u0003Ïç9\u0003Qµ\nºóY\u0017Ö",
+  [
+    [
+      "X64.Stack_Sems.lemma_stack_from_to",
+      1,
+      1,
+      0,
+      [
+        "@query", "equation_X64.Stack_Sems.stack_from_s",
+        "equation_X64.Stack_Sems.stack_to_s"
+      ],
+      0,
+      "93a5ddda02790d623a6baa076d5fde9f"
+    ],
+    [
+      "X64.Stack_Sems.lemma_stack_to_from",
+      1,
+      1,
+      0,
+      [
+        "@query", "equation_X64.Stack_Sems.stack_from_s",
+        "equation_X64.Stack_Sems.stack_to_s"
+      ],
+      0,
+      "055dc6d36c18ee84522f783c1148ecde"
+    ],
+    [
+      "X64.Stack_Sems.free_stack_same_load",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565", "bool_inversion",
+        "equation_Words_s.nat8",
+        "equation_X64.Bytes_Semantics_s.free_stack_",
+        "equation_X64.Bytes_Semantics_s.get_heap_val64",
+        "equation_X64.Bytes_Semantics_s.get_heap_val64_def",
+        "equation_X64.Bytes_Semantics_s.heap",
+        "equation_X64.Bytes_Semantics_s.op_String_Access",
+        "equation_X64.Bytes_Semantics_s.valid_addr",
+        "equation_X64.Bytes_Semantics_s.valid_addr64",
+        "function_token_typing_Opaque_s.make_opaque",
+        "function_token_typing_Prims.__cache_version_number__",
+        "function_token_typing_Prims.int",
+        "function_token_typing_Words_s.nat8", "int_inversion", "int_typing",
+        "lemma_FStar.Map.lemma_ContainsDom",
+        "lemma_FStar.Map.lemma_SelRestrict", "primitive_Prims.op_AmpAmp",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "projection_inverse_X64.Bytes_Semantics_s.Vale_stack_initial_rsp",
+        "projection_inverse_X64.Bytes_Semantics_s.Vale_stack_mem",
+        "token_correspondence_FStar.Map.sel",
+        "token_correspondence_X64.Bytes_Semantics_s.get_heap_val64_def",
+        "token_correspondence_X64.Bytes_Semantics_s.op_String_Access",
+        "typing_FStar.Map.domain", "typing_Vale.Set.remove_between",
+        "typing_X64.Bytes_Semantics_s.valid_addr",
+        "typing_X64.Bytes_Semantics_s.valid_addr64"
+      ],
+      0,
+      "b5c3492b26cb30d63859485dbded9313"
+    ],
+    [
+      "X64.Stack_Sems.equiv_init_rsp",
+      1,
+      1,
+      0,
+      [ "@query" ],
+      0,
+      "515c0d66a991892572635e31d8d0b927"
+    ]
+  ]
+]
