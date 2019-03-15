@@ -223,7 +223,7 @@ unfold let va_opr_code_Mem128 (o:va_operand) (offset:int) (t:taint) : va_operand
   | TReg r -> TMem128 (MReg r offset) t
   | _ -> TMem128 (MConst 42) t
 
-val va_opr_lemma_Mem128 (s:va_state) (base:va_operand) (offset:int) (b:M.buffer128) (index:int) (t:taint) : Lemma
+val va_opr_lemma_Mem128 (s:va_state) (base:va_operand) (offset:int) (t:taint) (b:M.buffer128) (index:int) : Lemma
   (requires
     TReg? base /\
     valid_src_addr s.mem b index /\
@@ -416,19 +416,6 @@ unfold let modifies_buffer_3 (b1 b2 b3:M.buffer64) (h1 h2:M.mem) =modifies_mem (
 unfold let modifies_buffer128 (b:M.buffer128) (h1 h2:M.mem) = modifies_mem (loc_buffer b) h1 h2
 unfold let modifies_buffer128_2 (b1 b2:M.buffer128) (h1 h2:M.mem) = modifies_mem (M.loc_union (loc_buffer b1) (loc_buffer b2)) h1 h2
 unfold let modifies_buffer128_3 (b1 b2 b3:M.buffer128) (h1 h2:M.mem) = modifies_mem (M.loc_union (M.loc_union (loc_buffer b1) (loc_buffer b2)) (loc_buffer b3)) h1 h2
-
-let validSrcAddrs8 (m:M.mem) (addr:int) (b:M.buffer8) (len:int) (memTaint:M.memtaint) (t:taint) =
-    buffer_readable m b /\
-    len <= buffer_length b /\
-    M.buffer_addr b m == addr ///\
-    //M.valid_taint_buf64 b m memTaint t
-
-let validDstAddrs8 (m:M.mem) (addr:int) (b:M.buffer8) (len:int) (memTaint:M.memtaint) (t:taint) =
-    buffer_readable m b /\
-    buffer_writeable b /\
-    len <= buffer_length b /\
-    M.buffer_addr b m == addr // /\
-    //M.valid_taint_buf64 b m memTaint t
 
 let validSrcAddrs64 (m:M.mem) (addr:int) (b:M.buffer64) (len:int) (memTaint:M.memtaint) (t:taint) =
     buffer_readable m b /\

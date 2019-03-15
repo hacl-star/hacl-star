@@ -67,6 +67,23 @@ let rec lemma_hash_append (h:quad32) (y_prev:quad32) (a b:ghash_plain_LE)
     assert(all_but_last ab == append a (all_but_last b));
   ()
 
+let lemma_ghash_incremental0_append (h y0 y1 y2:quad32) (s1 s2:seq quad32) : Lemma
+  (requires y1 = ghash_incremental0 h y0 s1 /\
+            y2 = ghash_incremental0 h y1 s2)
+  (ensures  y2 = ghash_incremental0 h y0 (s1 @| s2))
+  =
+  let s12 = s1 @| s2 in
+  if length s1 = 0 then (
+    assert (equal s12 s2)
+  ) else (
+    if length s2 = 0 then (
+      assert (equal s12 s1)
+    ) else (
+      lemma_hash_append h y0 s1 s2
+    )
+  );
+  ()
+
 let lemma_hash_append2 (h y_init y_mid y_final:quad32) (s1:seq quad32) (q:quad32)
   =
   let qs = create 1 q in
