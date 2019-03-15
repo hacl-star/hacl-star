@@ -6,7 +6,6 @@ let lowstar_fsub : lowstar_fsub_t  =
   IX64.wrap_weak_stdcall
     Interop.down_mem
     code_fsub
-    16
     dom
     (W.mk_prediction code_fsub dom [] (fsub_lemma code_fsub IA.win))
 

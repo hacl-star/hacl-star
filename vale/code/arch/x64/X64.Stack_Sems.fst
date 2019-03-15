@@ -1,10 +1,12 @@
 module X64.Stack_Sems
 
-let stack_to_s s = admit()
-let stack_from_s s = admit()
+friend X64.Stack_i
 
-let lemma_stack_from_to s = admit()
-let lemma_stack_to_from s = admit()
+let stack_to_s s = s
+let stack_from_s s = s
+
+let lemma_stack_from_to s = ()
+let lemma_stack_to_from s = ()
 
 let equiv_valid_src_stack64 ptr h = admit()
 

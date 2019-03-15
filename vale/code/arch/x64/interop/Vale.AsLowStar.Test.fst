@@ -32,18 +32,17 @@ let (dom : list td{List.length dom <= 20}) =
   assert_norm (List.length y = 2);
   y
 
-assume val n : IX64.max_slots
-assume val pre : VSig.vale_pre n dom
-assume val post : VSig.vale_post n dom
+assume val pre : VSig.vale_pre dom
+assume val post : VSig.vale_post dom
 assume val v: VSig.vale_sig_stdcall pre post
 assume val c: V.va_code
 
 [@__reduce__]
-let call_c_t = IX64.as_lowstar_sig_t_weak_stdcall Interop.down_mem c n dom [] _ _ (W.mk_prediction c dom [] (v c IA.win))
+let call_c_t = IX64.as_lowstar_sig_t_weak_stdcall Interop.down_mem c dom [] _ _ (W.mk_prediction c dom [] (v c IA.win))
 
 
 let call_c : call_c_t = IX64.wrap_weak_stdcall
-  Interop.down_mem c n dom (W.mk_prediction c dom [] (v c IA.win))
+  Interop.down_mem c  dom (W.mk_prediction c dom [] (v c IA.win))
 
 let call_c_normal_t : normal call_c_t = as_normal_t #call_c_t call_c
 //You can ask emacs to show you the type of call_c_normal_t ...
@@ -57,24 +56,22 @@ let vm_dom = [t64_mod; t64_imm]
 open X64.MemoryAdapters
 (* Need to rearrange the order of arguments *)
 [@__reduce__]
-let vm_pre : VSig.vale_pre 24 vm_dom =
+let vm_pre : VSig.vale_pre vm_dom =
   fun (c:V.va_code)
     (dst:b64)
     (src:ib64)
-    (va_s0:V.va_state)
-    (sb:IX64.stack_buffer 24) ->
-      VM.va_req_memcpy c va_s0 IA.win (as_vale_buffer sb) (as_vale_buffer dst) (as_vale_immbuffer src)
+    (va_s0:V.va_state) ->
+      VM.va_req_memcpy c va_s0 IA.win (as_vale_buffer dst) (as_vale_immbuffer src)
 
 [@__reduce__]
-let vm_post : VSig.vale_post 24 vm_dom =
+let vm_post : VSig.vale_post  vm_dom =
   fun (c:V.va_code)
     (dst:b64)
     (src:ib64)
     (va_s0:V.va_state)
-    (sb:IX64.stack_buffer 24)
     (va_s1:V.va_state)
     (f:V.va_fuel) ->
-      VM.va_ens_memcpy c va_s0 IA.win (as_vale_buffer sb) (as_vale_buffer dst) (as_vale_immbuffer src) va_s1 f
+      VM.va_ens_memcpy c va_s0 IA.win (as_vale_buffer dst) (as_vale_immbuffer src) va_s1 f
 
 module VS = X64.Vale.State
 #set-options "--print_effect_args --z3rlimit 20"
@@ -88,35 +85,20 @@ let vm_lemma'
     (dst:b64)
     (src:ib64)
     (va_s0:V.va_state)
-    (sb:IX64.stack_buffer 24)
  : Ghost (V.va_state & V.va_fuel)
      (requires
-       vm_pre code dst src va_s0 sb)
+       vm_pre code dst src va_s0)
      (ensures (fun (va_s1, f) ->
        V.eval_code code va_s0 f va_s1 /\
        VSig.vale_calling_conventions_stdcall va_s0 va_s1 /\
-       vm_post code dst src va_s0 sb va_s1 f /\
+       vm_post code dst src va_s0 va_s1 f /\
        ME.buffer_readable VS.(va_s1.mem) (as_vale_immbuffer src) /\
        ME.buffer_readable VS.(va_s1.mem) (as_vale_buffer dst) /\ 
        ME.buffer_writeable (as_vale_buffer dst) /\ 
-       ME.modifies (ME.loc_union (ME.loc_buffer (as_vale_buffer sb))
-                   (ME.loc_union (ME.loc_buffer (as_vale_buffer dst))
-                                 ME.loc_none)) va_s0.VS.mem va_s1.VS.mem
+       ME.modifies (ME.loc_union (ME.loc_buffer (as_vale_buffer dst))
+                                 ME.loc_none) va_s0.VS.mem va_s1.VS.mem
  ))
- =  let va_s1, f = VM.va_lemma_memcpy code va_s0 IA.win (as_vale_buffer sb) (as_vale_buffer dst) (as_vale_immbuffer src) in
-    assert (ME.modifies (ME.loc_buffer (as_vale_buffer dst)) va_s0.VS.mem va_s1.VS.mem);
-    //modifies clause in the postcondition should follow automatically by weakening
-    //but seems to require a bunch of hand-holding
-    ME.loc_includes_union_l (ME.loc_buffer (as_vale_buffer dst)) ME.loc_none (ME.loc_buffer (as_vale_buffer dst));
-
-    let l = (ME.loc_union (ME.loc_buffer (as_vale_buffer dst))
-                                      ME.loc_none) in
-    assert (ME.modifies l va_s0.VS.mem va_s1.VS.mem);
-    ME.loc_includes_union_l (ME.loc_buffer (as_vale_buffer sb)) l l;
-    assert (ME.modifies (ME.loc_union (ME.loc_buffer (as_vale_buffer sb)) l)
-                        va_s0.VS.mem va_s1.VS.mem);
-    assert (ME.buffer_readable VS.(va_s1.mem) (as_vale_buffer dst));
-    assert (ME.buffer_readable VS.(va_s1.mem) (as_vale_immbuffer src));    
+ =  let va_s1, f = VM.va_lemma_memcpy code va_s0 IA.win (as_vale_buffer dst) (as_vale_immbuffer src) in
     Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt8 ME.TUInt64 dst;
     va_s1, f
 
@@ -131,7 +113,6 @@ let lowstar_memcpy_t =
   IX64.as_lowstar_sig_t_weak_stdcall
     Interop.down_mem
     code_memcpy
-    24
     vm_dom
     []
     _
@@ -143,7 +124,6 @@ let lowstar_memcpy : lowstar_memcpy_t  =
   IX64.wrap_weak_stdcall
     Interop.down_mem
     code_memcpy
-    24
     vm_dom
     (W.mk_prediction code_memcpy vm_dom [] (vm_lemma code_memcpy IA.win))
 
@@ -203,20 +183,18 @@ let aesni_dom : IX64.arity_ok_stdcall td = []
 
 (* Need to rearrange the order of arguments *)
 [@__reduce__]
-let aesni_pre : VSig.vale_pre 8 aesni_dom =
+let aesni_pre : VSig.vale_pre aesni_dom =
   fun (c:V.va_code)
-    (va_s0:V.va_state)
-    (sb:IX64.stack_buffer 8) ->
-      VC.va_req_check_aesni_stdcall c va_s0 IA.win (as_vale_buffer sb)
+    (va_s0:V.va_state) ->
+      VC.va_req_check_aesni_stdcall c va_s0 IA.win
 
 [@__reduce__]
-let aesni_post : VSig.vale_post 8 aesni_dom =
+let aesni_post : VSig.vale_post aesni_dom =
   fun (c:V.va_code)
     (va_s0:V.va_state)
-    (sb:IX64.stack_buffer 8)
     (va_s1:V.va_state)
     (f:V.va_fuel) ->
-      VC.va_ens_check_aesni_stdcall c va_s0 IA.win (as_vale_buffer sb) va_s1 f
+      VC.va_ens_check_aesni_stdcall c va_s0 IA.win va_s1 f
 
 [@__reduce__]
 let with_len (l:list 'a) 
@@ -233,15 +211,14 @@ let aesni_lemma'
     (code:V.va_code)
     (_win:bool)
     (va_s0:V.va_state)
-    (sb:IX64.stack_buffer 8)
  : Ghost (V.va_state & V.va_fuel)
      (requires
-       aesni_pre code va_s0 sb)
+       aesni_pre code va_s0)
      (ensures (fun (va_s1, f) ->
        V.eval_code code va_s0 f va_s1 /\
        VSig.vale_calling_conventions_stdcall va_s0 va_s1 /\
-       aesni_post code va_s0 sb va_s1 f))
- = VC.va_lemma_check_aesni_stdcall code va_s0 IA.win (as_vale_buffer sb)
+       aesni_post code va_s0 va_s1 f))
+ = VC.va_lemma_check_aesni_stdcall code va_s0 IA.win
 
 (* Prove that vm_lemma' has the required type *)
 let aesni_lemma = as_t #(VSig.vale_sig_stdcall aesni_pre aesni_post) aesni_lemma'
@@ -254,7 +231,6 @@ let lowstar_aesni_t =
   IX64.as_lowstar_sig_t_weak_stdcall
     Interop.down_mem
     (coerce code_aesni)
-    8
     aesni_dom
     empty_list
     _
@@ -266,7 +242,6 @@ let lowstar_aesni : lowstar_aesni_t  =
   IX64.wrap_weak_stdcall
     Interop.down_mem
     (coerce code_aesni)
-    8
     aesni_dom
     (W.mk_prediction code_aesni aesni_dom [] (aesni_lemma code_aesni IA.win))
 
@@ -297,7 +272,7 @@ let (ta_dom:list td{List.length ta_dom <= 20}) =
 
 (* Need to rearrange the order of arguments *)
 [@__reduce__]
-let ta_pre : VSig.vale_pre 8 ta_dom =
+let ta_pre : VSig.vale_pre ta_dom =
   fun (c:V.va_code)
     (arg0:ib64)
     (arg1:ib64)
@@ -307,9 +282,8 @@ let ta_pre : VSig.vale_pre 8 ta_dom =
     (arg5:ib64)
     (arg6:ib64)
     (arg7:ib64)
-    (va_s0:V.va_state)    
-    (sb:IX64.stack_buffer 8) ->
-      TA.va_req_test c va_s0 IA.win (as_vale_buffer sb) 
+    (va_s0:V.va_state) ->
+      TA.va_req_test c va_s0 IA.win
       (as_vale_immbuffer arg0)
       (as_vale_immbuffer arg1)
       (as_vale_immbuffer arg2)
@@ -320,7 +294,7 @@ let ta_pre : VSig.vale_pre 8 ta_dom =
       (as_vale_immbuffer arg7)      
 
 [@__reduce__]
-let ta_post : VSig.vale_post 8 ta_dom =
+let ta_post : VSig.vale_post ta_dom =
   fun (c:V.va_code)
     (arg0:ib64)
     (arg1:ib64)
@@ -331,10 +305,9 @@ let ta_post : VSig.vale_post 8 ta_dom =
     (arg6:ib64)
     (arg7:ib64)  
     (va_s0:V.va_state)
-    (sb:IX64.stack_buffer 8)
     (va_s1:V.va_state)
     (f:V.va_fuel) ->
-      TA.va_ens_test c va_s0 IA.win (as_vale_buffer sb) 
+      TA.va_ens_test c va_s0 IA.win
       (as_vale_immbuffer arg0)
       (as_vale_immbuffer arg1)
       (as_vale_immbuffer arg2)
@@ -361,14 +334,13 @@ let ta_lemma'
     (arg6:ib64)
     (arg7:ib64)     
     (va_s0:V.va_state)
-    (sb:IX64.stack_buffer 8)
  : Ghost (V.va_state & V.va_fuel)
      (requires
-       ta_pre code arg0 arg1 arg2 arg3 arg4 arg5 arg6 arg7 va_s0 sb)
+       ta_pre code arg0 arg1 arg2 arg3 arg4 arg5 arg6 arg7 va_s0)
      (ensures (fun (va_s1, f) ->
        V.eval_code code va_s0 f va_s1 /\
        VSig.vale_calling_conventions_stdcall va_s0 va_s1 /\
-       ta_post code arg0 arg1 arg2 arg3 arg4 arg5 arg6 arg7 va_s0 sb va_s1 f /\
+       ta_post code arg0 arg1 arg2 arg3 arg4 arg5 arg6 arg7 va_s0 va_s1 f /\
        ME.buffer_readable VS.(va_s1.mem) (as_vale_immbuffer arg0) /\
        ME.buffer_readable VS.(va_s1.mem) (as_vale_immbuffer arg1) /\
        ME.buffer_readable VS.(va_s1.mem) (as_vale_immbuffer arg2) /\
@@ -377,9 +349,9 @@ let ta_lemma'
        ME.buffer_readable VS.(va_s1.mem) (as_vale_immbuffer arg5) /\
        ME.buffer_readable VS.(va_s1.mem) (as_vale_immbuffer arg6) /\
        ME.buffer_readable VS.(va_s1.mem) (as_vale_immbuffer arg7) /\       
-       ME.modifies (ME.loc_buffer (as_vale_buffer sb)) va_s0.VS.mem va_s1.VS.mem))
+       ME.modifies ME.loc_none va_s0.VS.mem va_s1.VS.mem))
  = 
- let va_s1, f = TA.va_lemma_test code va_s0 IA.win (as_vale_buffer sb)
+ let va_s1, f = TA.va_lemma_test code va_s0 IA.win
       (as_vale_immbuffer arg0)
       (as_vale_immbuffer arg1)
       (as_vale_immbuffer arg2)
@@ -402,7 +374,6 @@ let lowstar_ta_t =
   IX64.as_lowstar_sig_t_weak_stdcall
     Interop.down_mem
     (coerce code_ta)
-    8
     ta_dom
     []
     _
@@ -414,7 +385,6 @@ let lowstar_ta : lowstar_ta_t  =
   IX64.wrap_weak_stdcall
     Interop.down_mem
     (coerce code_ta)
-    8
     ta_dom
     (W.mk_prediction code_ta ta_dom [] (ta_lemma code_ta IA.win))
 

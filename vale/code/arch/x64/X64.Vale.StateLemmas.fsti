@@ -5,6 +5,7 @@ open FStar.FunctionalExtensionality
 module BS = X64.Bytes_Semantics_s
 module ME = X64.Memory
 module MS = X64.Memory_Sems
+module VSS = X64.Stack_Sems
 module TS = X64.Taint_Semantics_s
 open Prop_s
 
@@ -13,6 +14,7 @@ unfold let regs' s = s.BS.regs
 unfold let xmms' s = s.BS.xmms
 unfold let flags' s = s.BS.flags
 unfold let mem' s = s.BS.mem
+unfold let stack' s = s.BS.stack
 unfold let trace' = TS.MktraceState?.trace
 unfold let memTaint' = TS.MktraceState?.memTaint
 
@@ -45,6 +47,9 @@ val lemma_to_xmm : s:state -> x:xmm -> Lemma
 
 val lemma_to_mem : s:state -> Lemma
   (ensures MS.get_heap s.mem == mem' (state_to_S s).TS.state)
+
+val lemma_to_stack : s:state -> Lemma
+  (ensures VSS.stack_to_s s.stack == stack' (state_to_S s).TS.state)
 
 val lemma_to_trace : s:state -> Lemma
   (ensures [] == trace' (state_to_S s))

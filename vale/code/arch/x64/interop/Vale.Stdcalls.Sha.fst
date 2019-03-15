@@ -5,7 +5,6 @@ let lowstar_sha : lowstar_sha_t  =
   IX64.wrap_weak_stdcall
     Interop.down_mem
     code_sha
-    224
     dom
     (W.mk_prediction code_sha dom [] (sha_lemma code_sha IA.win))
 

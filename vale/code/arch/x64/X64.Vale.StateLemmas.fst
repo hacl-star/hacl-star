@@ -53,6 +53,7 @@ let lemma_to_flags s = ()
 let lemma_to_reg s r = ()
 let lemma_to_xmm s x = ()
 let lemma_to_mem s = ()
+let lemma_to_stack s = ()
 let lemma_to_trace s = ()
 let lemma_to_memTaint s = ()
 

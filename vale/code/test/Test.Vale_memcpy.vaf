@@ -35,6 +35,8 @@ procedure {:quick}{:exportSpecs}{:public} memcpy(
         !win ==> rdi == buffer_addr(dst, mem);
         !win ==> rsi == buffer_addr(src, mem);
     ensures
+        rsp == old(rsp);
+    
         win ==>  rbx == old(rbx);
         win ==>  rbp == old(rbp);
         win ==>  rdi == old(rdi);

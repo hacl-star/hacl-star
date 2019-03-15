@@ -714,11 +714,12 @@ procedure{:quick}{:public}{:exportSpecs} poly1305(
 
         h == poly1305_hash(key_r, key_s, inp_mem, len_in);
 
+        rsp == old(rsp);
+
         win ==>  rbx == old(rbx);
         win ==>  rbp == old(rbp);
         win ==>  rdi == old(rdi);
         win ==>  rsi == old(rsi);
-        win ==>  rsp == old(rsp);
         win ==>  r12 == old(r12);
         win ==>  r13 == old(r13);
         win ==>  r14 == old(r14);

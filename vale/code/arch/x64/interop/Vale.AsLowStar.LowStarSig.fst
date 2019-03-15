@@ -7,6 +7,7 @@ module UV = LowStar.BufferView.Up
 module DV = LowStar.BufferView.Down
 module HS = FStar.HyperStack
 module ME = X64.Memory
+module SI = X64.Stack_i
 module TS = X64.Taint_Semantics_s
 module MS = X64.Machine_s
 module IA = Interop.Assumptions
@@ -14,6 +15,7 @@ module V = X64.Vale.Decls
 module VS = X64.Vale.State
 module IX64 = Interop.X64
 module VSig = Vale.AsLowStar.ValeSig
+open FStar.Mul
 
 [@__reduce__]
 let nat_to_uint (t:ME.base_typ) (x:ME.base_typ_as_vale_type t)
@@ -150,25 +152,23 @@ let rec register_args (max_arity:nat)
 
 [@__reduce__]
 let rec stack_args (max_arity:nat)
-                   (num_b8_slots:IX64.max_slots)
                    (n:nat)
                    (args:list arg{List.Tot.length args = n})
-                   (stack_b:IX64.stack_buffer num_b8_slots
-                      {B.length stack_b >= num_b8_slots/8 + (List.Tot.length args - max_arity) + 5 })
                    : VSig.sprop =
     match args with
-    | [] -> (fun s -> True)
+    | [] -> (fun s -> VS.eval_reg MS.Rsp s == SI.init_rsp s.VS.stack)
     | hd::tl ->
       fun s ->
-        stack_args max_arity num_b8_slots (n - 1) tl stack_b s /\
+        stack_args max_arity (n - 1) tl s /\
         (if n <= max_arity then True // This arg is passed in registers
          else 
-           let i = (n - max_arity) - 1
-             + (if IA.win then 4 else 0)
-             + 1
-             + num_b8_slots/8
+           let ptr = ((n - max_arity) - 1) * 8
+             + (if IA.win then 32 else 0)
+             + 8
+             + VS.eval_reg MS.Rsp s
            in
-           ME.buffer_read (as_vale_buffer stack_b) i s.VS.mem == arg_as_nat64 hd s)
+           SI.valid_src_stack64 ptr s.VS.stack /\
+           SI.load_stack64 ptr s.VS.stack == arg_as_nat64 hd s)
 
 [@__reduce__]
 let taint_hyp_arg (m:ME.mem) (tm:MS.memTaint_t) (a:arg) =
@@ -209,42 +209,32 @@ let taint_hyp (args:list arg) : VSig.sprop =
 let vale_pre_hyp
   (#max_arity:nat)
   (#arg_reg:IX64.arg_reg_relation max_arity)
-  #n 
   (args:IX64.arg_list)
-  (sb:IX64.stack_buffer n
-    {B.length sb >= n/8 + (List.Tot.length args - max_arity) + 5 })  
   : VSig.sprop =
     fun s0 ->
-      let s_args = arg_of_sb sb :: args in
-      VSig.disjoint_or_eq s_args /\
-      VSig.readable s_args VS.(s0.mem) /\
+      VSig.disjoint_or_eq args /\
+      VSig.readable args VS.(s0.mem) /\
       register_args max_arity arg_reg (List.length args) args s0 /\
-      stack_args max_arity n (List.length args) args sb s0 /\
-      V.buffer_length (as_vale_buffer sb) >= n/8 + (List.Tot.length args - max_arity) + 5 /\
+      stack_args max_arity (List.length args) args s0 /\
       taint_hyp args s0
 
 [@__reduce__]
 let to_low_pre
     (#max_arity:nat)
     (#arg_reg:IX64.arg_reg_relation max_arity)
-    (#n:IX64.max_slots)
-    (pre:VSig.vale_pre_tl n [])
+    (pre:VSig.vale_pre_tl [])
     (args:IX64.arg_list)
     (hs_mem:mem_roots args)
   : prop =
-  (forall (s0:V.va_state)
-     (sb:IX64.stack_buffer n
-       {B.length sb >= n/8 + (List.Tot.length args - max_arity) + 5 }).
+  (forall (s0:V.va_state).
     V.va_get_ok s0 /\
-    vale_pre_hyp #max_arity #arg_reg #n args sb s0 /\
-    mem_correspondence args hs_mem s0 /\
-    V.valid_stack_slots s0.VS.mem (VS.eval_reg MS.Rsp s0) (as_vale_buffer sb) (n / 8) s0.VS.memTaint ==>
-    elim_nil pre s0 sb)
+    vale_pre_hyp #max_arity #arg_reg args s0 /\
+    mem_correspondence args hs_mem s0 ==>
+    elim_nil pre s0)
 
 [@__reduce__]
 let to_low_post
-    (#n:IX64.max_slots)
-    (post:VSig.vale_post_tl n [])
+    (post:VSig.vale_post_tl [])
     (args:list arg)
     (hs_mem0:mem_roots args)
     (res:UInt64.t)
@@ -254,27 +244,26 @@ let to_low_post
   B.modifies (loc_modified_args args) hs_mem0 hs_mem1 /\
   (exists
     (s0:va_state)
-    (sb:IX64.stack_buffer n)
     (s1:va_state)
     (f:va_fuel).
        mem_correspondence args hs_mem0 s0 /\
        mem_correspondence args hs_mem1 s1 /\
        UInt64.v res == VS.eval_reg MS.Rax s1 /\
-       elim_nil post s0 sb s1 f)
+       elim_nil post s0 s1 f)
 
 [@__reduce__]
 let create_initial_vale_state
        (#max_arity:nat)
        (#arg_reg:IX64.arg_reg_relation max_arity)
-       (#n:IX64.max_slots)
        (args:IX64.arg_list)
-  : IX64.state_builder_t max_arity n args V.va_state =
-  fun h0 stack ->
-    let t_state, mem = IX64.create_initial_trusted_state max_arity arg_reg n args Interop.down_mem h0 stack in
+  : IX64.state_builder_t max_arity args V.va_state =
+  fun h0 ->
+    let t_state, mem = IX64.create_initial_trusted_state max_arity arg_reg args Interop.down_mem h0 in
     let open VS in
     { ok = true;
       regs = X64.Vale.Regs.of_fun t_state.TS.state.BS.regs;
       xmms = X64.Vale.Xmms.of_fun t_state.TS.state.BS.xmms;
       flags = IA.init_flags;
       mem = as_vale_mem mem;
-      memTaint = TS.(t_state.memTaint) }
+      memTaint = TS.(t_state.memTaint);
+      stack = as_vale_stack t_state.TS.state.BS.stack}

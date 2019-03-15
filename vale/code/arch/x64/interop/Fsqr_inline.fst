@@ -47,27 +47,25 @@ let fsqr_dom: IX64.arity_ok 3 td =
 
 (* Need to rearrange the order of arguments *)
 [@__reduce__]
-let fsqr_pre : VSig.vale_pre 56 fsqr_dom =
+let fsqr_pre : VSig.vale_pre fsqr_dom =
   fun (c:V.va_code)
     (tmp:b64)
     (f1:b64)
     (out:b64)
-    (va_s0:V.va_state)
-    (sb:IX64.stack_buffer 56) ->
-      FW.va_req_fsqr c va_s0 (as_vale_buffer sb) 
+    (va_s0:V.va_state) ->
+      FW.va_req_fsqr c va_s0
         (as_vale_buffer tmp) (as_vale_buffer f1) (as_vale_buffer out)
 
 [@__reduce__]
-let fsqr_post : VSig.vale_post 56 fsqr_dom =
+let fsqr_post : VSig.vale_post fsqr_dom =
   fun (c:V.va_code)
     (tmp:b64)
     (f1:b64)
     (out:b64)
     (va_s0:V.va_state)
-    (sb:IX64.stack_buffer 56)
     (va_s1:V.va_state)
     (f:V.va_fuel) ->
-      FW.va_ens_fsqr c va_s0 (as_vale_buffer sb) (as_vale_buffer tmp) (as_vale_buffer f1) (as_vale_buffer out) va_s1 f
+      FW.va_ens_fsqr c va_s0 (as_vale_buffer tmp) (as_vale_buffer f1) (as_vale_buffer out) va_s1 f
 
 let fsqr_regs_modified: MS.reg -> bool = fun (r:MS.reg) ->
   let open MS in
@@ -86,26 +84,24 @@ let fsqr_lemma'
     (f1:b64)
     (out:b64)
     (va_s0:V.va_state)
-    (sb:IX64.stack_buffer 56)
  : Ghost (V.va_state & V.va_fuel)
      (requires
-       fsqr_pre code tmp f1 out va_s0 sb)
+       fsqr_pre code tmp f1 out va_s0)
      (ensures (fun (va_s1, f) ->
        V.eval_code code va_s0 f va_s1 /\
        VSig.vale_calling_conventions va_s0 va_s1 fsqr_regs_modified fsqr_xmms_modified /\
-       fsqr_post code tmp f1 out va_s0 sb va_s1 f /\
+       fsqr_post code tmp f1 out va_s0 va_s1 f /\
        ME.buffer_readable VS.(va_s1.mem) (as_vale_buffer out) /\
        ME.buffer_readable VS.(va_s1.mem) (as_vale_buffer f1) /\ 
        ME.buffer_readable VS.(va_s1.mem) (as_vale_buffer tmp) /\ 
        ME.buffer_writeable (as_vale_buffer out) /\ 
        ME.buffer_writeable (as_vale_buffer f1) /\
        ME.buffer_writeable (as_vale_buffer tmp) /\       
-       ME.modifies (ME.loc_union (ME.loc_buffer (as_vale_buffer sb))
-                   (ME.loc_union (ME.loc_buffer (as_vale_buffer out))
+       ME.modifies (ME.loc_union (ME.loc_buffer (as_vale_buffer out))
                    (ME.loc_union (ME.loc_buffer (as_vale_buffer tmp))
-                                 ME.loc_none))) va_s0.VS.mem va_s1.VS.mem
+                                 ME.loc_none)) va_s0.VS.mem va_s1.VS.mem
  )) = 
-   let va_s1, f = FW.va_lemma_fsqr code va_s0 (as_vale_buffer sb) (as_vale_buffer tmp) (as_vale_buffer f1) (as_vale_buffer out) in
+   let va_s1, f = FW.va_lemma_fsqr code va_s0 (as_vale_buffer tmp) (as_vale_buffer f1) (as_vale_buffer out) in
    Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 out;   
    Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 f1;   
    Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 tmp;   
@@ -139,7 +135,6 @@ let lowstar_fsqr_t =
     fsqr_xmms_modified
     Interop.down_mem
     code_fsqr
-    56
     fsqr_dom
     []
     _
@@ -157,7 +152,6 @@ let lowstar_fsqr : lowstar_fsqr_t  =
     fsqr_xmms_modified
     Interop.down_mem
     code_fsqr
-    56
     fsqr_dom
     (W.mk_prediction code_fsqr fsqr_dom [] (fsqr_lemma code_fsqr IA.win))
 
@@ -178,27 +172,25 @@ let fsqr_code_inline () : FStar.All.ML int =
 
 (* Need to rearrange the order of arguments *)
 [@__reduce__]
-let fsqr2_pre : VSig.vale_pre 56 fsqr_dom =
+let fsqr2_pre : VSig.vale_pre fsqr_dom =
   fun (c:V.va_code)
     (tmp:b64)
     (f1:b64)
     (out:b64)
-    (va_s0:V.va_state)
-    (sb:IX64.stack_buffer 56) ->
-      FW.va_req_fsqr2 c va_s0 (as_vale_buffer sb) 
+    (va_s0:V.va_state) ->
+      FW.va_req_fsqr2 c va_s0
         (as_vale_buffer tmp) (as_vale_buffer f1) (as_vale_buffer out)
 
 [@__reduce__]
-let fsqr2_post : VSig.vale_post 56 fsqr_dom =
+let fsqr2_post : VSig.vale_post fsqr_dom =
   fun (c:V.va_code)
     (tmp:b64)
     (f1:b64)
     (out:b64)
     (va_s0:V.va_state)
-    (sb:IX64.stack_buffer 56)
     (va_s1:V.va_state)
     (f:V.va_fuel) ->
-      FW.va_ens_fsqr2 c va_s0 (as_vale_buffer sb) (as_vale_buffer tmp) (as_vale_buffer f1) (as_vale_buffer out) va_s1 f
+      FW.va_ens_fsqr2 c va_s0 (as_vale_buffer tmp) (as_vale_buffer f1) (as_vale_buffer out) va_s1 f
 
 #set-options "--z3rlimit 200"
 
@@ -210,26 +202,24 @@ let fsqr2_lemma'
     (f1:b64)
     (out:b64)
     (va_s0:V.va_state)
-    (sb:IX64.stack_buffer 56)
  : Ghost (V.va_state & V.va_fuel)
      (requires
-       fsqr2_pre code tmp f1 out va_s0 sb)
+       fsqr2_pre code tmp f1 out va_s0)
      (ensures (fun (va_s1, f) ->
        V.eval_code code va_s0 f va_s1 /\
        VSig.vale_calling_conventions va_s0 va_s1 fsqr_regs_modified fsqr_xmms_modified /\
-       fsqr2_post code tmp f1 out va_s0 sb va_s1 f /\
+       fsqr2_post code tmp f1 out va_s0 va_s1 f /\
        ME.buffer_readable VS.(va_s1.mem) (as_vale_buffer out) /\
        ME.buffer_readable VS.(va_s1.mem) (as_vale_buffer f1) /\ 
        ME.buffer_readable VS.(va_s1.mem) (as_vale_buffer tmp) /\ 
        ME.buffer_writeable (as_vale_buffer out) /\ 
        ME.buffer_writeable (as_vale_buffer f1) /\
        ME.buffer_writeable (as_vale_buffer tmp) /\       
-       ME.modifies (ME.loc_union (ME.loc_buffer (as_vale_buffer sb))
-                   (ME.loc_union (ME.loc_buffer (as_vale_buffer out))
+       ME.modifies (ME.loc_union (ME.loc_buffer (as_vale_buffer out))
                    (ME.loc_union (ME.loc_buffer (as_vale_buffer tmp))
-                                 ME.loc_none))) va_s0.VS.mem va_s1.VS.mem
+                                 ME.loc_none)) va_s0.VS.mem va_s1.VS.mem
  )) = 
-   let va_s1, f = FW.va_lemma_fsqr2 code va_s0 (as_vale_buffer sb) (as_vale_buffer tmp) (as_vale_buffer f1) (as_vale_buffer out) in
+   let va_s1, f = FW.va_lemma_fsqr2 code va_s0 (as_vale_buffer tmp) (as_vale_buffer f1) (as_vale_buffer out) in
    Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 out;   
    Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 f1;   
    Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 tmp;    
@@ -250,7 +240,6 @@ let lowstar_fsqr2_t =
     fsqr_xmms_modified
     Interop.down_mem
     code_fsqr2
-    56
     fsqr_dom
     []
     _
@@ -267,7 +256,6 @@ let lowstar_fsqr2 : lowstar_fsqr2_t  =
     fsqr_xmms_modified
     Interop.down_mem
     code_fsqr2
-    56
     fsqr_dom
     (W.mk_prediction code_fsqr2 fsqr_dom [] (fsqr2_lemma code_fsqr2 IA.win))
 

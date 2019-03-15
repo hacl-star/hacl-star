@@ -9,6 +9,7 @@ module VSig = Vale.AsLowStar.ValeSig
 
 friend X64.Memory
 friend X64.Memory_Sems
+friend X64.Stack_Sems
 friend X64.Vale.Decls
 friend X64.Vale.StateLemmas
 friend X64.MemoryAdapters
@@ -36,10 +37,11 @@ let reveal_readable (#src #t:_) (x:buf_t src t) (s:ME.mem) = ()
 let reveal_imm_readable (#src #t:_) (x:ibuf_t src t) (s:ME.mem) = ()
 let readable_live (#src #t:_) (x:buf_t src t) (s:ME.mem) = ()
 let readable_imm_live (#src #t:_) (x:ibuf_t src t) (s:ME.mem) = ()
-let buffer_readable_reveal #max_arity #n src bt x args h0 stack = ()
-let get_heap_mk_mem_reveal #n args h0 stack = ()
-let buffer_as_seq_reveal #n src t x args h0 stack = ()
-let immbuffer_as_seq_reveal #n src t x args h0 stack = ()
+let buffer_readable_reveal #max_arity src bt x args h0 = ()
+let get_heap_mk_mem_reveal args h0 = ()
+let mk_stack_reveal stack = ()
+let buffer_as_seq_reveal src t x args h0 = ()
+let immbuffer_as_seq_reveal src t x args h0 = ()
 let buffer_as_seq_reveal2 src t x va_s = ()
 let immbuffer_as_seq_reveal2 src t x va_s = ()
 let buffer_addr_reveal src t x args h0 = ()
@@ -58,29 +60,21 @@ let loc_disjoint_sym (x y:ME.loc)  = ()
 let core_create_lemma_taint_hyp
     #max_arity
     #arg_reg
-    #n
     (args:IX64.arg_list)
-    (h0:HS.mem)
-    (stack:IX64.stack_buffer n{
-      B.length stack >= n/8 + (List.Tot.length args - max_arity) + 5 /\
-      mem_roots_p h0 (arg_of_sb stack::args)})    
+    (h0:HS.mem{mem_roots_p h0 args})
   : Lemma
-      (ensures (let va_s = LSig.create_initial_vale_state #max_arity #arg_reg args h0 stack in
-                LSig.taint_hyp args va_s /\
-                ME.valid_taint_buf64 (as_vale_buffer stack) va_s.VS.mem va_s.VS.memTaint X64.Machine_s.Public))
-  = let va_s = LSig.create_initial_vale_state #max_arity #arg_reg args h0 stack in
+      (ensures (let va_s = LSig.create_initial_vale_state #max_arity #arg_reg args h0 in
+                LSig.taint_hyp args va_s))
+  = let va_s = LSig.create_initial_vale_state #max_arity #arg_reg args h0 in
     let taint_map = va_s.VS.memTaint in
-    let s_args = arg_of_sb stack::args in
     let mem = va_s.VS.mem in
-    let h1 = IX64.stack_of_args max_arity (List.Tot.length args) args stack h0 in  
-    IX64.live_arg_modifies h0 h1 args stack;
-    assert (mem == mk_mem s_args h1);
-    let raw_taint = IX64.(mk_taint s_args IX64.init_taint) in
-    assert (taint_map == create_memtaint mem (args_b8 s_args) raw_taint);
-    ME.valid_memtaint mem (args_b8 s_args) raw_taint;
-    assert (forall x. List.memP x (args_b8 s_args) ==> ME.valid_taint_buf x mem taint_map (raw_taint x));
+//    assert (mem == mk_mem args h0);
+    let raw_taint = IX64.(mk_taint args IX64.init_taint) in
+    assert (taint_map == create_memtaint mem (args_b8 args) raw_taint);
+    ME.valid_memtaint mem (args_b8 args) raw_taint;
+//    assert (forall x. List.memP x (args_b8 args) ==> ME.valid_taint_buf x mem taint_map (raw_taint x));
     assert (forall x. List.memP x (args_b8 args) ==> ME.valid_taint_buf x mem taint_map (raw_taint x));
-    Classical.forall_intro (IX64.mk_taint_equiv s_args);
+    Classical.forall_intro (IX64.mk_taint_equiv args);
     assert (forall (a:arg). List.memP a args /\ Some? (IX64.taint_of_arg a) ==>
             Some?.v (IX64.taint_of_arg a) == raw_taint (IX64.taint_arg_b8 a));
     Classical.forall_intro (args_b8_mem args);

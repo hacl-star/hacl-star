@@ -2,7 +2,7 @@ module X64.Stack_i
 
 open X64.Machine_s
 
-val stack: Type u#1
+val stack: Type u#0
 
 val valid_src_stack64 : ptr:int -> h:stack -> GTot bool
 val load_stack64 : ptr:int -> h:stack -> GTot nat64

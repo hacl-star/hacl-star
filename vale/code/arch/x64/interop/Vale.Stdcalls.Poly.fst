@@ -5,7 +5,6 @@ let lowstar_poly : lowstar_poly_t  =
   IX64.wrap_weak_stdcall
     Interop.down_mem
     code_poly
-    8
     dom
     (W.mk_prediction code_poly dom [] (poly_lemma code_poly IA.win))
 

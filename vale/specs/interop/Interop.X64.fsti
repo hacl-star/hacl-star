@@ -95,8 +95,6 @@ let update_regs (n:nat)
   : GTot registers
   = upd_reg n arg_reg regs i (arg_as_nat64 x)
 
-let max_slots = n:pos{UInt.size n UInt32.n /\ n % 8 == 0}
-
 [@__reduce__]
 let rec register_of_args (max_arity:nat)
                          (arg_reg:arg_reg_relation max_arity)
@@ -345,7 +343,7 @@ let as_lowstar_sig_post
  (let fuel = As_lowstar_sig_ret?.fuel ret in
   let final_mem = As_lowstar_sig_ret?.final_mem ret in
   let s0 = fst (create_initial_trusted_state n arg_reg args down_mem h0) in
-  let h1 = hs_of_mem final_mem in
+  h1 == hs_of_mem final_mem /\
   prediction_pre n arg_reg down_mem c args pre_rel h0 s0 /\
   (rax, fuel, final_mem) == predict h0 s0 /\
   prediction_post n regs_modified xmms_modified down_mem c args post_rel h0 s0 (rax, fuel, final_mem) /\
@@ -374,11 +372,10 @@ let as_lowstar_sig_post_weak
  (let fuel = As_lowstar_sig_ret?.fuel ret in
   let final_mem = As_lowstar_sig_ret?.final_mem ret in
   let s0 = fst (create_initial_trusted_state n arg_reg args down_mem h0) in
-  let h1 = hs_of_mem final_mem in
   (exists fuel
      final_mem
      s1.
-     let h1 = hs_of_mem final_mem in
+     h1 == hs_of_mem final_mem /\
      rax == return_val s1 /\
      post_rel h0 s0 (return_val s1, fuel, final_mem) s1))
 

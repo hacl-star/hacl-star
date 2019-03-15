@@ -1,6 +1,8 @@
 module X64.Stack_i
 
-let stack = admit()
+module BS = X64.Bytes_Semantics_s
+
+let stack = BS.stack
 
 let valid_src_stack64 i st = admit()
 let load_stack64 i st = admit()

@@ -787,11 +787,12 @@ procedure {:quick}{:exportSpecs}{:public} sha_update_bytes_stdcall(
         // Framing
         modifies_mem(loc_buffer(ctx_b), old(mem), mem);
 
+        rsp == old(rsp);
+
         win ==>  rbx == old(rbx);
         win ==>  rbp == old(rbp);
         win ==>  rdi == old(rdi);
         win ==>  rsi == old(rsi);
-        win ==>  rsp == old(rsp);
         win ==>  r12 == old(r12);
         win ==>  r13 == old(r13);
         win ==>  r14 == old(r14);

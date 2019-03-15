@@ -46,27 +46,25 @@ let dom: IX64.arity_ok 3 td =
 
 (* Need to rearrange the order of arguments *)
 [@__reduce__]
-let add1_pre : VSig.vale_pre 16 dom =
+let add1_pre : VSig.vale_pre dom =
   fun (c:V.va_code)
     (out:b64)
     (f1:b64)
     (f2:uint64)
-    (va_s0:V.va_state)
-    (sb:IX64.stack_buffer 16) ->
-      FU.va_req_fast_add1 c va_s0 (as_vale_buffer sb) 
+    (va_s0:V.va_state) ->
+      FU.va_req_fast_add1 c va_s0
         (as_vale_buffer out) (as_vale_buffer f1) (UInt64.v f2)
 
 [@__reduce__]
-let add1_post : VSig.vale_post 16 dom =
+let add1_post : VSig.vale_post dom =
   fun (c:V.va_code)
     (out:b64)
     (f1:b64)
     (f2:uint64)
     (va_s0:V.va_state)
-    (sb:IX64.stack_buffer 16)
     (va_s1:V.va_state)
     (f:V.va_fuel) ->
-      FU.va_ens_fast_add1 c va_s0 (as_vale_buffer sb) (as_vale_buffer out) (as_vale_buffer f1) (UInt64.v f2) va_s1 f
+      FU.va_ens_fast_add1 c va_s0 (as_vale_buffer out) (as_vale_buffer f1) (UInt64.v f2) va_s1 f
 
 #set-options "--z3rlimit 50"
 
@@ -85,23 +83,21 @@ let add1_lemma'
     (f1:b64)
     (f2:uint64)
     (va_s0:V.va_state)
-    (sb:IX64.stack_buffer 16)
  : Ghost (V.va_state & V.va_fuel)
      (requires
-       add1_pre code out f1 f2 va_s0 sb)
+       add1_pre code out f1 f2 va_s0)
      (ensures (fun (va_s1, f) ->
        V.eval_code code va_s0 f va_s1 /\
        VSig.vale_calling_conventions va_s0 va_s1 add1_regs_modified add1_xmms_modified /\
-       add1_post code out f1 f2 va_s0 sb va_s1 f /\
+       add1_post code out f1 f2 va_s0 va_s1 f /\
        ME.buffer_readable VS.(va_s1.mem) (as_vale_buffer f1) /\
        ME.buffer_readable VS.(va_s1.mem) (as_vale_buffer out) /\ 
        ME.buffer_writeable (as_vale_buffer out) /\ 
        ME.buffer_writeable (as_vale_buffer f1) /\ 
-       ME.modifies (ME.loc_union (ME.loc_buffer (as_vale_buffer sb))
-                   (ME.loc_union (ME.loc_buffer (as_vale_buffer out))
-                                 ME.loc_none)) va_s0.VS.mem va_s1.VS.mem
+       ME.modifies (ME.loc_union (ME.loc_buffer (as_vale_buffer out))
+                                 ME.loc_none) va_s0.VS.mem va_s1.VS.mem
  )) = 
-   let va_s1, f = FU.va_lemma_fast_add1 code va_s0 (as_vale_buffer sb) (as_vale_buffer out) (as_vale_buffer f1) (UInt64.v f2) in
+   let va_s1, f = FU.va_lemma_fast_add1 code va_s0 (as_vale_buffer out) (as_vale_buffer f1) (UInt64.v f2) in
    Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 out;   
    Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 f1;   
    va_s1, f                                   
@@ -135,7 +131,6 @@ let lowstar_add1_t =
     add1_xmms_modified
     Interop.down_mem
     code_add1
-    16
     dom
     []
     _
@@ -153,7 +148,6 @@ let lowstar_add1 : lowstar_add1_t  =
     add1_xmms_modified
     Interop.down_mem
     code_add1
-    16
     dom
     (W.mk_prediction code_add1 dom [] (add1_lemma code_add1 IA.win))
 
@@ -180,27 +174,25 @@ let fadd_dom: IX64.arity_ok_stdcall td =
 
 (* Need to rearrange the order of arguments *)
 [@__reduce__]
-let fadd_pre : VSig.vale_pre 16 fadd_dom =
+let fadd_pre : VSig.vale_pre fadd_dom =
   fun (c:V.va_code)
     (out:b64)
     (f1:b64)
     (f2:b64)
-    (va_s0:V.va_state)
-    (sb:IX64.stack_buffer 16) ->
-      FH.va_req_fadd c va_s0 (as_vale_buffer sb) 
+    (va_s0:V.va_state) ->
+      FH.va_req_fadd c va_s0
         (as_vale_buffer out) (as_vale_buffer f1) (as_vale_buffer f2)
 
 [@__reduce__]
-let fadd_post : VSig.vale_post 16 fadd_dom =
+let fadd_post : VSig.vale_post fadd_dom =
   fun (c:V.va_code)
     (out:b64)
     (f1:b64)
     (f2:b64)
     (va_s0:V.va_state)
-    (sb:IX64.stack_buffer 16)
     (va_s1:V.va_state)
     (f:V.va_fuel) ->
-      FH.va_ens_fadd c va_s0 (as_vale_buffer sb) (as_vale_buffer out) (as_vale_buffer f1) (as_vale_buffer f2) va_s1 f
+      FH.va_ens_fadd c va_s0 (as_vale_buffer out) (as_vale_buffer f1) (as_vale_buffer f2) va_s1 f
 
 #set-options "--z3rlimit 50"
 
@@ -219,25 +211,23 @@ let fadd_lemma'
     (f1:b64)
     (f2:b64)
     (va_s0:V.va_state)
-    (sb:IX64.stack_buffer 16)
  : Ghost (V.va_state & V.va_fuel)
      (requires
-       fadd_pre code out f1 f2 va_s0 sb)
+       fadd_pre code out f1 f2 va_s0)
      (ensures (fun (va_s1, f) ->
        V.eval_code code va_s0 f va_s1 /\
        VSig.vale_calling_conventions va_s0 va_s1 fadd_regs_modified fadd_xmms_modified /\
-       fadd_post code out f1 f2 va_s0 sb va_s1 f /\
+       fadd_post code out f1 f2 va_s0 va_s1 f /\
        ME.buffer_readable VS.(va_s1.mem) (as_vale_buffer out) /\
        ME.buffer_readable VS.(va_s1.mem) (as_vale_buffer f1) /\ 
        ME.buffer_readable VS.(va_s1.mem) (as_vale_buffer f2) /\ 
        ME.buffer_writeable (as_vale_buffer out) /\ 
        ME.buffer_writeable (as_vale_buffer f1) /\
        ME.buffer_writeable (as_vale_buffer f2) /\       
-       ME.modifies (ME.loc_union (ME.loc_buffer (as_vale_buffer sb))
-                   (ME.loc_union (ME.loc_buffer (as_vale_buffer out))
-                                 ME.loc_none)) va_s0.VS.mem va_s1.VS.mem
+       ME.modifies (ME.loc_union (ME.loc_buffer (as_vale_buffer out))
+                                 ME.loc_none) va_s0.VS.mem va_s1.VS.mem
  )) = 
-   let va_s1, f = FH.va_lemma_fadd code va_s0 (as_vale_buffer sb) (as_vale_buffer out) (as_vale_buffer f1) (as_vale_buffer f2) in
+   let va_s1, f = FH.va_lemma_fadd code va_s0 (as_vale_buffer out) (as_vale_buffer f1) (as_vale_buffer f2) in
    Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 out;   
    Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 f1;   
    Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 f2;   
@@ -259,7 +249,6 @@ let lowstar_fadd_t =
     fadd_xmms_modified
     Interop.down_mem
     code_fadd
-    16
     fadd_dom
     []
     _
@@ -277,7 +266,6 @@ let lowstar_fadd : lowstar_fadd_t  =
     fadd_xmms_modified
     Interop.down_mem
     code_fadd
-    16
     fadd_dom
     (W.mk_prediction code_fadd fadd_dom [] (fadd_lemma code_fadd IA.win))
 
@@ -302,27 +290,25 @@ let fsub_dom: IX64.arity_ok_stdcall td =
 
 (* Need to rearrange the order of arguments *)
 [@__reduce__]
-let fsub_pre : VSig.vale_pre 16 fsub_dom =
+let fsub_pre : VSig.vale_pre fsub_dom =
   fun (c:V.va_code)
     (out:b64)
     (f1:b64)
     (f2:b64)
-    (va_s0:V.va_state)
-    (sb:IX64.stack_buffer 16) ->
-      FH.va_req_fsub c va_s0 (as_vale_buffer sb) 
+    (va_s0:V.va_state) ->
+      FH.va_req_fsub c va_s0
         (as_vale_buffer out) (as_vale_buffer f1) (as_vale_buffer f2)
 
 [@__reduce__]
-let fsub_post : VSig.vale_post 16 fsub_dom =
+let fsub_post : VSig.vale_post fsub_dom =
   fun (c:V.va_code)
     (out:b64)
     (f1:b64)
     (f2:b64)
     (va_s0:V.va_state)
-    (sb:IX64.stack_buffer 16)
     (va_s1:V.va_state)
     (f:V.va_fuel) ->
-      FH.va_ens_fsub c va_s0 (as_vale_buffer sb) (as_vale_buffer out) (as_vale_buffer f1) (as_vale_buffer f2) va_s1 f
+      FH.va_ens_fsub c va_s0 (as_vale_buffer out) (as_vale_buffer f1) (as_vale_buffer f2) va_s1 f
 
 #set-options "--z3rlimit 50"
 
@@ -341,25 +327,23 @@ let fsub_lemma'
     (f1:b64)
     (f2:b64)
     (va_s0:V.va_state)
-    (sb:IX64.stack_buffer 16)
  : Ghost (V.va_state & V.va_fuel)
      (requires
-       fsub_pre code out f1 f2 va_s0 sb)
+       fsub_pre code out f1 f2 va_s0)
      (ensures (fun (va_s1, f) ->
        V.eval_code code va_s0 f va_s1 /\
        VSig.vale_calling_conventions va_s0 va_s1 fsub_regs_modified fsub_xmms_modified /\
-       fsub_post code out f1 f2 va_s0 sb va_s1 f /\
+       fsub_post code out f1 f2 va_s0 va_s1 f /\
        ME.buffer_readable VS.(va_s1.mem) (as_vale_buffer out) /\
        ME.buffer_readable VS.(va_s1.mem) (as_vale_buffer f1) /\ 
        ME.buffer_readable VS.(va_s1.mem) (as_vale_buffer f2) /\ 
        ME.buffer_writeable (as_vale_buffer out) /\ 
        ME.buffer_writeable (as_vale_buffer f1) /\
        ME.buffer_writeable (as_vale_buffer f2) /\       
-       ME.modifies (ME.loc_union (ME.loc_buffer (as_vale_buffer sb))
-                   (ME.loc_union (ME.loc_buffer (as_vale_buffer out))
-                                 ME.loc_none)) va_s0.VS.mem va_s1.VS.mem
+       ME.modifies (ME.loc_union (ME.loc_buffer (as_vale_buffer out))
+                                 ME.loc_none) va_s0.VS.mem va_s1.VS.mem
  )) = 
-   let va_s1, f = FH.va_lemma_fsub code va_s0 (as_vale_buffer sb) (as_vale_buffer out) (as_vale_buffer f1) (as_vale_buffer f2) in
+   let va_s1, f = FH.va_lemma_fsub code va_s0 (as_vale_buffer out) (as_vale_buffer f1) (as_vale_buffer f2) in
    Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 out;   
    Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 f1;   
    Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 f2;   
@@ -381,7 +365,6 @@ let lowstar_fsub_t =
     fsub_xmms_modified
     Interop.down_mem
     code_fsub
-    16
     fsub_dom
     []
     _
@@ -399,7 +382,6 @@ let lowstar_fsub : lowstar_fsub_t  =
     fsub_xmms_modified
     Interop.down_mem
     code_fsub
-    16
     fsub_dom
     (W.mk_prediction code_fsub fsub_dom [] (fsub_lemma code_fsub IA.win))
 
