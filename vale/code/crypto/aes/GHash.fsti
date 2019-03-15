@@ -77,6 +77,11 @@ val lemma_hash_append (h:quad32) (y_prev:quad32) (a b:ghash_plain_LE) : Lemma
 let ghash_incremental0 (h:quad32) (y_prev:quad32) (x:seq quad32) : quad32 =
   if length x > 0 then ghash_incremental h y_prev x else y_prev
 
+val lemma_ghash_incremental0_append (h y0 y1 y2:quad32) (s1 s2:seq quad32) : Lemma
+  (requires y1 = ghash_incremental0 h y0 s1 /\
+            y2 = ghash_incremental0 h y1 s2)
+  (ensures  y2 = ghash_incremental0 h y0 (s1 @| s2))
+
 val lemma_hash_append2 (h y_init y_mid y_final:quad32) (s1:seq quad32) (q:quad32) : Lemma
   (requires y_mid = ghash_incremental0 h y_init s1 /\
             y_final = ghash_incremental h y_mid (create 1 q))

@@ -3585,7 +3585,7 @@ procedure {:quick} {:public} AES_GCM_encrypt_6mult(
         // GCTR result
         gctr_partial_opaque(alg, old(len), old(buffer128_as_seq(mem, in_b)), buffer128_as_seq(mem, out_b), key_words, ctr_BE);
         // GCM result
-        //hash == ghash_incremental(reverse_bytes_quad32(h), old(hash), buffer128_as_seq(mem, out_b), old(len));
+        Xi == ghash_incremental0(reverse_bytes_quad32(buffer128_read(hkeys_b, 0, mem)), old(Xi), buffer128_as_seq(mem, out_b));
 
         // Counter updated
         old(len) < pow2_32 /\
@@ -3657,6 +3657,12 @@ procedure {:quick} {:public} AES_GCM_encrypt_6mult(
     gctr_partial_extend6(alg, 12+mid_len - 6, old(buffer128_as_seq(mem, in_b)), buffer128_as_seq(mem, out_b), key_words, ctr_BE);
     //assert gctr_partial_opaque(alg, old(len), old(buffer128_as_seq(mem, in_b)), buffer128_as_seq(mem, out_b), key_words, ctr_BE);
     Sub64(key, 0x80);   // Restore the key pointer for later code's use
+//////////////////////////////////////////
+//////////////////////////////////////////
+// TODO: Remove this assumption!
+//////////////////////////////////////////
+//////////////////////////////////////////
+    assume Xi == ghash_incremental0(reverse_bytes_quad32(buffer128_read(hkeys_b, 0, mem)), old(Xi), buffer128_as_seq(mem, out_b));
 }
 
 /*
