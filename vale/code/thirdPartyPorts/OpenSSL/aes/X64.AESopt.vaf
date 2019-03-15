@@ -1082,7 +1082,7 @@ procedure {:quick} Loop6x_partial(
 }
 
 #reset-options "--z3rlimit 30"
-procedure {:quick} {:frame false} Loop6x(
+procedure {:quick} Loop6x(
     inline alg:algorithm,  
     ghost count:nat,        // Number of 6x128-bit blocks processed so far
     ghost iv_b:buffer128,
@@ -1111,6 +1111,7 @@ procedure {:quick} {:frame false} Loop6x(
         counter @= rbx; constp @= r11; in0 @= r14; 
 
     reads
+        rax; rbp; r9; r10; r15; xmm4; xmm8;
         key; ivp; rsp;
         memTaint;
 
@@ -1279,7 +1280,7 @@ procedure {:quick} {:frame false} Loop6x(
 
 
 #reset-options "--z3rlimit 600"
-procedure {:quick exportOnly} {:frame false} Loop6x_loop(
+procedure {:quick exportOnly} Loop6x_loop(
     inline alg:algorithm,  
     ghost count:nat,        // Number of 6x128-bit blocks processed so far
     ghost iv_b:buffer128,
@@ -1307,6 +1308,7 @@ procedure {:quick exportOnly} {:frame false} Loop6x_loop(
         counter @= rbx; constp @= r11; in0 @= r14; 
 
     reads
+        rax; rbp; r9; r10; r15; xmm4; xmm8;
         key; ivp; rsp; 
         memTaint;
 
@@ -2165,7 +2167,7 @@ procedure {:quick} Encrypt_save_and_shuffle_output(
 }
 
 #reset-options "--z3rlimit 30"
-procedure {:quick} {:verify true} AES_GCM_encrypt(
+procedure {:quick} AES_GCM_encrypt(
     inline alg:algorithm,  
     ghost iv_b:buffer128,
     ghost in_b:buffer128,
@@ -2190,6 +2192,7 @@ procedure {:quick} {:verify true} AES_GCM_encrypt(
         counter @= rbx; constp @= r11; in0 @= r14;
 
     reads
+        rax; rbp; r9; r10; r15;
         ivp; rsp;
         memTaint;
 
