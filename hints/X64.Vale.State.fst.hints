@@ -14,7 +14,7 @@
         "fuel_guarded_inversion_X64.Machine_s.maddr"
       ],
       0,
-      "270ceffce00a4cb7ad9a93d2b9bc924f"
+      "b4dc591e5c0b5c38401c9a046b9eb627"
     ],
     [
       "X64.Vale.State.to_nat64",
@@ -28,7 +28,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "c7f8f9597d6d088acf48abbf24d8bb56"
+      "dc902373ec691e427a4104a932ccd3f0"
     ],
     [
       "X64.Vale.State.eval_operand",
@@ -44,7 +44,22 @@
         "fuel_guarded_inversion_X64.Machine_s.operand"
       ],
       0,
-      "6e870710e4161f42f7c149d4d1df5847"
+      "1661a196f257d7c363b6b23fdff7745f"
+    ],
+    [
+      "X64.Vale.State.eval_operand128",
+      1,
+      1,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "disc_equation_X64.Machine_s.Mov128Mem",
+        "disc_equation_X64.Machine_s.Mov128Stack",
+        "disc_equation_X64.Machine_s.Mov128Xmm",
+        "fuel_guarded_inversion_X64.Machine_s.mov128_op"
+      ],
+      0,
+      "ed04e0c4bbf5ab9984be9009cc9471a4"
     ],
     [
       "X64.Vale.State.update_operand",
@@ -60,7 +75,7 @@
         "fuel_guarded_inversion_X64.Machine_s.operand"
       ],
       0,
-      "9b3e236e7ee8acc4d93f2ef8e9f147ba"
+      "3b9867728c84a2ba7346c30996a80427"
     ],
     [
       "X64.Vale.State.valid_src_operand",
@@ -76,7 +91,22 @@
         "fuel_guarded_inversion_X64.Machine_s.operand"
       ],
       0,
-      "cbd91ccae75b337498942a400786dc6f"
+      "a369a04e6ebae819d11a67cee51d4fea"
+    ],
+    [
+      "X64.Vale.State.valid_src_operand128",
+      1,
+      1,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "disc_equation_X64.Machine_s.Mov128Mem",
+        "disc_equation_X64.Machine_s.Mov128Stack",
+        "disc_equation_X64.Machine_s.Mov128Xmm",
+        "fuel_guarded_inversion_X64.Machine_s.mov128_op"
+      ],
+      0,
+      "7ac393c6ddb990c63d14f941df7221fc"
     ]
   ]
 ]
