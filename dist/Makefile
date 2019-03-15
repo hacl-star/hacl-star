@@ -71,7 +71,7 @@ OBJS 		+= $(patsubst %.S,%.o,$(wildcard *-$(MARCH)$(VARIANT).S))
 
 include Makefile.basic
 
-CFLAGS		+= -Wno-parentheses -g -mavx -mavx2 -std=gnu11 -Wno-error \
+CFLAGS		+= -Wno-parentheses -g -mavx -mavx2 -std=gnu11 \
   -O3 -march=native -mtune=native
 
 $(KREMLIB_A):
