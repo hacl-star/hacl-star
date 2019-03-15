@@ -1,7 +1,57 @@
 module Math.Poly2.Bits
 open Arch.TypesNative
 
-let of_nat32 n = of_uint 32 n
+let rec of_nat x =
+  if x = 0 then zero
+  else
+    let p = shift (of_nat (x / 2)) 1 in
+    if x % 2 = 0 then p else p +. one
+
+let rec lemma_of_to_vec_zero (i:nat) (n:nat) : Lemma
+  (requires i < n)
+  (ensures index (to_vec #n 0) i == false)
+  [SMTPat (index (to_vec #n 0) i)]
+  =
+  if i + 1 < n then lemma_of_to_vec_zero i (n - 1)
+
+let lemma_of_uint_zero (n:nat) : Lemma
+  (ensures of_uint_ n 0 == zero)
+  =
+  lemma_bitwise_all ();
+  lemma_equal (of_uint_ n 0) zero
+
+let rec lemma_of_nat_of_uint n x
+  =
+  if n > 0 then
+  (
+    lemma_of_nat_of_uint (n - 1) (x / 2);
+    lemma_bitwise_all ();
+    lemma_equal (of_nat x) (of_uint n x)
+  )
+
+let rec lemma_to_nat_rec (len:nat) (p:poly) (c:nat) (n:nat) (i:nat) : Lemma
+  (requires degree p < len /\ normalize (poly_nat_eq_rec len p c n))
+  (ensures p.[len - n + i] == (of_nat c).[i])
+  =
+  lemma_bitwise_all ();
+  if (i > 0 && n > 0) then lemma_to_nat_rec len p (c / 2) (n - 1) (i - 1)
+
+let lemma_to_nat len p c =
+  lemma_bitwise_all ();
+  let f (i:int) : Lemma (p.[i] == (of_nat c).[i]) =
+    if 0 <= i then lemma_to_nat_rec len p c len i
+    in
+  FStar.Classical.forall_intro f;
+  lemma_equal p (of_nat c)
+
+let of_nat32 n =
+  lemma_of_nat_of_uint 32 n;
+  of_uint 32 n
+
+let rec lemma_of_nat_of_uint32 (x:nat32) : Lemma
+  (ensures of_nat32 x == of_nat x)
+  =
+  lemma_of_nat_of_uint 32 x
 
 let of_nat32_zero =
   lemma_bitwise_all ();
@@ -13,11 +63,13 @@ let of_nat32_xor a b =
   lemma_ixor_nth_all 32;
   lemma_equal (of_nat32 a +. of_nat32 b) (of_nat32 (ixor a b))
 
+#reset-options "--z3rlimit 20"
 let lemma_quad32_of_nat32s a0 a1 a2 a3 =
   let a = poly128_of_nat32s a0 a1 a2 a3 in
   reveal_to_quad32 a;
   lemma_bitwise_all ();
   lemma_quad32_vec_equal (Mkfour a0 a1 a2 a3) (to_quad32 a)
+#reset-options
 
 let lemma_quad32_to_nat32s a =
   let Mkfour a0 a1 a2 a3 = to_quad32 a in

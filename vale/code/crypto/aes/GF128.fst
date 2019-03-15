@@ -70,28 +70,22 @@ let lemma_gf128_degree () =
   ()
 
 let lemma_gf128_constant_rev q =
-  Arch.Types.lemma_quad32_xor ();
-  let h = gf128_modulus_low_terms in
-  let rh = reverse h 127 in
-  reveal_to_quad32 rh;
-  lemma_gf128_degree ();
-  lemma_zero_nth 32;
-  lemma_reverse_define h 127;
-  lemma_index h;
-  let Mkfour a b c _ = to_quad32 rh in
-  assert (equal (UInt.to_vec #32 a) (UInt.to_vec #32 0));
-  assert (equal (UInt.to_vec #32 b) (UInt.to_vec #32 0));
-  assert (equal (UInt.to_vec #32 c) (UInt.to_vec #32 0));
-  let s = to_seq (reverse rh 127) 128 in
-  let s0_32 = slice s 0 32 in
-  let s0_8 = slice s0_32 0 8 in
-  let s8_32 = slice s0_32 8 32 in
-  assert (equal s8_32 (UInt.to_vec #24 (UInt.zero 24)));
-  assert_norm (UInt.from_vec #8 s0_8 == 0xe1);
-  UInt.from_vec_propriety #32 s0_32 8;
-  assert_norm (pow2 24 == 0x1000000);
-  assert (UInt.from_vec #32 s0_32 == 0xe1000000);
-  lemma_quad32_vec_equal (to_quad32 rh) (Mkfour 0 0 0 0xe1000000)
+  let n0:nat32 = 0 in
+  let n1:nat32 = 0 in
+  let n2:nat32 = 0 in
+  let n3:nat32 = 0xe1000000 in
+  calc (==) {
+    Mkfour n0 n1 n2 n3;
+    == { lemma_quad32_of_nat32s n0 n1 n2 n3 }
+    to_quad32 (poly128_of_nat32s n0 n1 n2 n3);
+    == {
+      lemma_bitwise_all ();
+      lemma_to_nat 32 (reverse gf128_modulus_low_terms 31) 0xe1000000;
+      lemma_equal (poly128_of_nat32s n0 n1 n2 n3) (reverse gf128_modulus_low_terms 127)
+    }
+    to_quad32 (reverse gf128_modulus_low_terms 127);
+  };
+  Arch.Types.lemma_quad32_xor ()
 
 let lemma_quad32_double_hi_rev a =
   let ra = reverse a 127 in
@@ -571,6 +565,37 @@ let lemma_reduce_rev a0 a1 a2 h n =
     rev (x0 +. shift x1 n) +. ((y1 +. mask (y0 *. c) n) *. c +. (shift y1 n +. y0 +. swap (y0 *. c) n));
     == {lemma_reduce_rev_bits a0 a1 a2 c n}
     swap y_10c n +. (a2 +. shift a1 (-n)) +. mask y_10c n *. c;
+  }
+
+let lemma_gf128_low_shift () =
+  let n0:nat32 = 0 in
+  let n1:nat32 = 0 in
+  let n2:nat32 = 0 in
+  let n3:nat32 = 0xc2000000 in
+  let r3 = gf128_low_shift in
+  calc (==) {
+    shift (of_quad32 (Mkfour n0 n1 n2 n3)) (-64);
+    == {
+      calc (==) {
+        Mkfour n0 n1 n2 n3;
+        == {lemma_quad32_of_nat32s n0 n1 n2 n3}
+        to_quad32 (poly128_of_nat32s n0 n1 n2 n3);
+        == {
+          lemma_bitwise_all ();
+          lemma_to_nat 32 (reverse r3 31) n3;
+          lemma_equal (poly128_of_nat32s n0 n1 n2 n3) (reverse r3 127)
+        }
+        to_quad32 (reverse r3 127);
+      }
+    }
+    shift (of_quad32 (to_quad32 (reverse r3 127))) (-64);
+    == {lemma_of_to_quad32 (reverse r3 127)}
+    shift (reverse r3 127) (-64);
+    == {
+      lemma_bitwise_all ();
+      lemma_equal (shift (reverse r3 127) (-64)) (reverse r3 63)
+    }
+    reverse r3 63;
   }
 
 let lemma_shift_key_1 n f h =

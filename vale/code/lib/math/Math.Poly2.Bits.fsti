@@ -9,7 +9,29 @@ open Math.Poly2.Bits_s
 open Math.Poly2
 open Math.Poly2.Lemmas
 
-val of_nat32 (n:nat32) : p:poly{degree p < 32}
+val of_nat (x:nat) : poly
+
+// TODO: of_uint should accept n = 0
+let of_uint_ (n:nat) (u:uint_t n) : poly =
+  if n = 0 then zero else of_uint n u
+
+val lemma_of_nat_of_uint (n:nat) (x:nat) : Lemma
+  (requires x < pow2 n)
+  (ensures of_nat x == of_uint_ n x)
+
+let rec poly_nat_eq_rec (len:nat) (p:poly) (c:nat) (n:nat) : bool =
+  if n = 0 then c = 0
+  else
+    (c % 2 = (if p.[len - n] then 1 else 0)) &&
+    poly_nat_eq_rec len p (c / 2) (n - 1)
+
+// Useful for proving variable p equivalent to constant c via normalization
+// (c and len should be constant integers)
+val lemma_to_nat (len:nat) (p:poly) (c:nat) : Lemma
+  (requires degree p < len /\ normalize (poly_nat_eq_rec len p c len))
+  (ensures p == of_nat c)
+
+val of_nat32 (n:nat32) : p:poly{degree p < 32 /\ p == of_nat n}
 
 val of_nat32_zero : _:unit{of_nat32 0 == zero}
 

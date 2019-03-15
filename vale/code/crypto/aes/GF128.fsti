@@ -150,6 +150,9 @@ let gf128_low_shift : poly = shift gf128_modulus_low_terms (-1)
 // of_fun 8 (fun (i:nat) -> i = 127 || i = 126 || i = 121)
 let gf128_rev_shift : poly = reverse gf128_low_shift 127
 
+val lemma_gf128_low_shift (_:unit) : Lemma
+  (shift (of_quad32 (Mkfour 0 0 0 0xc2000000)) (-64) == reverse gf128_low_shift 63)
+
 let gf128_mul_rev (a b:poly) : poly =
   reverse (gf128_mul (reverse a 127) (reverse b 127)) 127
 
