@@ -11,7 +11,7 @@
         "refinement_interpretation_Tm_refine_ed0c82b529ba35f1d88d0cb19afaf666"
       ],
       0,
-      "cc3f6fa1aebcab8c73093444806f7d08"
+      "207402103f72208809e14950a0f1b564"
     ],
     [
       "X64.AES128.va_lemma_KeyExpansionRound",
@@ -23,7 +23,7 @@
         "refinement_interpretation_Tm_refine_9e6c4d1f47fc56330c9a82c5ea290690"
       ],
       0,
-      "ae43c8e24884f908f42591047ee97964"
+      "3f03573e2ff2731d1452c7933fb6a2cd"
     ],
     [
       "X64.AES128.va_lemma_KeyExpansionRound",
@@ -153,7 +153,7 @@
         "unit_typing"
       ],
       0,
-      "0a8beab206948e10f7f0571b5141768e"
+      "d6995354bb486c9a122e97008e374bcf"
     ],
     [
       "X64.AES128.va_wp_KeyExpansionRound",
@@ -162,7 +162,7 @@
       0,
       [ "@query" ],
       0,
-      "f65037e338411f2636617aa8b6df33cf"
+      "a40a13ed4316c6f9fa336bdfe952efa8"
     ],
     [
       "X64.AES128.va_wpMonotone_KeyExpansionRound",
@@ -183,7 +183,7 @@
         "typing_X64.Vale.Decls.va_upd_xmm", "unit_typing"
       ],
       0,
-      "58aaba382bf9f233ab4ab08e659ee2b5"
+      "d13e1eab8e408aac06521bdea7e4c7b3"
     ],
     [
       "X64.AES128.va_wpCompute_KeyExpansionRound",
@@ -197,7 +197,7 @@
         "fuel_guarded_inversion_X64.Vale.State.state"
       ],
       0,
-      "1cdb7a93491e65d87e54ee9e47d65b62"
+      "8ea310d7848372c8b9fae076d76ddf3f"
     ],
     [
       "X64.AES128.va_wpProof_KeyExpansionRound",
@@ -209,7 +209,7 @@
         "refinement_interpretation_Tm_refine_8d65e998a07dd53ec478e27017d9dba5"
       ],
       0,
-      "04e715d52d49698ef0663f90bc162baa"
+      "f2fce7c62120cb6fbb64a73451784cce"
     ],
     [
       "X64.AES128.va_wpProof_KeyExpansionRound",
@@ -250,6 +250,7 @@
         "proj_equation_X64.Vale.State.Mkstate_memTaint",
         "proj_equation_X64.Vale.State.Mkstate_ok",
         "proj_equation_X64.Vale.State.Mkstate_regs",
+        "proj_equation_X64.Vale.State.Mkstate_stack",
         "proj_equation_X64.Vale.State.Mkstate_xmms",
         "projection_inverse_BoxInt_proj_0",
         "projection_inverse_FStar.Pervasives.Native.Mktuple2__1",
@@ -262,6 +263,7 @@
         "projection_inverse_X64.Vale.State.Mkstate_memTaint",
         "projection_inverse_X64.Vale.State.Mkstate_ok",
         "projection_inverse_X64.Vale.State.Mkstate_regs",
+        "projection_inverse_X64.Vale.State.Mkstate_stack",
         "projection_inverse_X64.Vale.State.Mkstate_xmms",
         "refinement_interpretation_Tm_refine_5514fbe9e08dfda40f950a7b9f1b2b98",
         "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
@@ -280,7 +282,7 @@
         "unit_typing"
       ],
       0,
-      "1fcdd2c92c1a3dab69d991de5b5c19e2"
+      "371a15a19bd98ed120886d58d15f8ed7"
     ],
     [
       "X64.AES128.va_transparent_code_KeyExpansionRoundUnrolledRecursive",
@@ -301,7 +303,7 @@
         "typing_AES_s.aes_rcon", "well-founded-ordering-on-nat"
       ],
       0,
-      "45f5b058b692a80e9949f2d6c01996de"
+      "24dd897e1f978b6838367dc408d5c395"
     ],
     [
       "X64.AES128.va_transparent_code_KeyExpansionRoundUnrolledRecursive",
@@ -314,7 +316,7 @@
         "well-founded-ordering-on-nat"
       ],
       0,
-      "9a12d7427d50d7c766e83f125bf7912e"
+      "7482c3c87ed5b588b6f621b539bdc3e5"
     ],
     [
       "X64.AES128.va_lemma_KeyExpansionRoundUnrolledRecursive",
@@ -326,7 +328,7 @@
         "refinement_interpretation_Tm_refine_af078a811023c82fb6e2aa84f40ff02e"
       ],
       0,
-      "d64bec3bb09052d8a762f7b5bc72f1cd"
+      "70e99113df4ff0db902a077fba923250"
     ],
     [
       "X64.AES128.va_lemma_KeyExpansionRoundUnrolledRecursive",
@@ -338,7 +340,7 @@
         "refinement_interpretation_Tm_refine_af078a811023c82fb6e2aa84f40ff02e"
       ],
       0,
-      "2b04d5cc9edb22b312c6cebd8950a922"
+      "1d38a09c8816c7ba5b8d5f9ff5d98053"
     ],
     [
       "X64.AES128.va_lemma_KeyExpansionRoundUnrolledRecursive",
@@ -357,7 +359,7 @@
         "binder_x_6d0180d4fcd10237cf0d87dd345d77cc_4",
         "binder_x_dc562848c16e0cba66fd6b1d2deb3252_2",
         "binder_x_fe088cebb0ded7cb1ab9490a140fe934_3", "bool_inversion",
-        "constructor_distinct_Interop.Types.TUInt128",
+        "bool_typing", "constructor_distinct_Interop.Types.TUInt128",
         "constructor_distinct_Prims.Cons",
         "constructor_distinct_X64.Machine_s.Block",
         "disc_equation_Prims.Cons", "disc_equation_X64.Machine_s.Block",
@@ -412,6 +414,7 @@
         "proj_equation_X64.Vale.State.Mkstate_memTaint",
         "proj_equation_X64.Vale.State.Mkstate_ok",
         "proj_equation_X64.Vale.State.Mkstate_regs",
+        "proj_equation_X64.Vale.State.Mkstate_stack",
         "proj_equation_X64.Vale.State.Mkstate_xmms",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
@@ -428,6 +431,7 @@
         "projection_inverse_X64.Vale.State.Mkstate_memTaint",
         "projection_inverse_X64.Vale.State.Mkstate_ok",
         "projection_inverse_X64.Vale.State.Mkstate_regs",
+        "projection_inverse_X64.Vale.State.Mkstate_stack",
         "projection_inverse_X64.Vale.State.Mkstate_xmms",
         "refinement_interpretation_Tm_refine_5514fbe9e08dfda40f950a7b9f1b2b98",
         "refinement_interpretation_Tm_refine_9b586769ce9055ff9a2af06f49d5ce52",
@@ -455,7 +459,7 @@
         "well-founded-ordering-on-nat"
       ],
       0,
-      "12390ac8b329b489237afcdeaeb00444"
+      "71ea566313e30b80405c03ddff1efe56"
     ],
     [
       "X64.AES128.va_wp_KeyExpansionRoundUnrolledRecursive",
@@ -464,7 +468,7 @@
       0,
       [ "@query" ],
       0,
-      "651a0449c083f2affe64afc2aa25c547"
+      "ddf9f94dd244c5c92a143628035f6cba"
     ],
     [
       "X64.AES128.va_wpMonotone_KeyExpansionRoundUnrolledRecursive",
@@ -485,7 +489,7 @@
         "typing_X64.Vale.Decls.va_upd_xmm", "unit_typing"
       ],
       0,
-      "be38f4034469fe846322220dcabf016b"
+      "79e60ef0adb43526aa7488ea61dd3dbf"
     ],
     [
       "X64.AES128.va_wpCompute_KeyExpansionRoundUnrolledRecursive",
@@ -501,7 +505,7 @@
         "fuel_guarded_inversion_X64.Vale.State.state", "int_inversion"
       ],
       0,
-      "b0b0bc726d82103f067a6c2660ee5fbf"
+      "5b35263b695ce6160da31bfbb02df03d"
     ],
     [
       "X64.AES128.va_wpProof_KeyExpansionRoundUnrolledRecursive",
@@ -513,7 +517,7 @@
         "refinement_interpretation_Tm_refine_8d65e998a07dd53ec478e27017d9dba5"
       ],
       0,
-      "39fd10eca9286525bc46f06c76e5ae98"
+      "bb887105700c39f0b6b5263a07e8a9f6"
     ],
     [
       "X64.AES128.va_wpProof_KeyExpansionRoundUnrolledRecursive",
@@ -552,6 +556,7 @@
         "proj_equation_X64.Vale.State.Mkstate_memTaint",
         "proj_equation_X64.Vale.State.Mkstate_ok",
         "proj_equation_X64.Vale.State.Mkstate_regs",
+        "proj_equation_X64.Vale.State.Mkstate_stack",
         "proj_equation_X64.Vale.State.Mkstate_xmms",
         "projection_inverse_BoxInt_proj_0",
         "projection_inverse_FStar.Pervasives.Native.Mktuple2__1",
@@ -564,6 +569,7 @@
         "projection_inverse_X64.Vale.State.Mkstate_memTaint",
         "projection_inverse_X64.Vale.State.Mkstate_ok",
         "projection_inverse_X64.Vale.State.Mkstate_regs",
+        "projection_inverse_X64.Vale.State.Mkstate_stack",
         "projection_inverse_X64.Vale.State.Mkstate_xmms",
         "refinement_interpretation_Tm_refine_f0a4eeefab9c63f31c350a802a4d45dd",
         "token_correspondence_X64.AES128.va_wpCompute_KeyExpansionRoundUnrolledRecursive",
@@ -580,7 +586,7 @@
         "unit_typing"
       ],
       0,
-      "517552f5487b5e4b44806868a98b363c"
+      "1907d76b9ef209b3f91fce2a024c782e"
     ],
     [
       "X64.AES128.va_qcode_KeyExpansion128Stdcall",
@@ -594,7 +600,7 @@
         "refinement_interpretation_Words_s_Tm_refine_5514fbe9e08dfda40f950a7b9f1b2b98"
       ],
       0,
-      "5db9c88e174e717ff9d5e3dd12bc8452"
+      "f1537b31b88530cb0d39c272b454b55f"
     ],
     [
       "X64.AES128.va_qcode_KeyExpansion128Stdcall",
@@ -609,7 +615,7 @@
         "refinement_interpretation_Tm_refine_cc6b282658fa00092f7d9fca3f46a5ff"
       ],
       0,
-      "f4121e3144f698438fcfe9c4bb957220"
+      "acd35bed46701a067f4d34a66b3c03a0"
     ],
     [
       "X64.AES128.va_qcode_KeyExpansion128Stdcall",
@@ -630,7 +636,7 @@
         "typing_FStar.Seq.Base.length"
       ],
       0,
-      "d40a5cf9515706c714a23ecccef66851"
+      "64d7d82a1274b00cfe1c4e7198ff3934"
     ],
     [
       "X64.AES128.va_qcode_KeyExpansion128Stdcall",
@@ -651,7 +657,7 @@
         "typing_FStar.Seq.Base.length"
       ],
       0,
-      "046d8e6796f19bd1380fd571814faa3c"
+      "3aa4f216cfb58105cb8f763c0d284ad2"
     ],
     [
       "X64.AES128.va_lemma_KeyExpansion128Stdcall",
@@ -683,7 +689,7 @@
         "typing_tok_Interop.Types.TUInt128@tok"
       ],
       0,
-      "e491baab17f3c6c3df6f60bef3f74264"
+      "028c8210c2903d40783771c4fb6c6094"
     ],
     [
       "X64.AES128.va_lemma_KeyExpansion128Stdcall",
@@ -804,7 +810,7 @@
         "unit_typing"
       ],
       0,
-      "d74a254949bbce5308c6337ddaaa88ba"
+      "376a35551483b12cef6c9c861aeabf81"
     ],
     [
       "X64.AES128.va_wp_KeyExpansion128Stdcall",
@@ -836,7 +842,7 @@
         "typing_tok_Interop.Types.TUInt128@tok"
       ],
       0,
-      "6a332779172d687cd5c798337de44ee8"
+      "f3681a86e367db091677119950586cbe"
     ],
     [
       "X64.AES128.va_wpMonotone_KeyExpansion128Stdcall",
@@ -860,7 +866,7 @@
         "typing_tok_X64.Machine_s.Rdx@tok", "unit_typing"
       ],
       0,
-      "b4db9fb7f6a9541e5291885ddc28738f"
+      "dc1d6b3745b793ccc5c1cf4eb2419eaf"
     ],
     [
       "X64.AES128.va_wpCompute_KeyExpansion128Stdcall",
@@ -885,7 +891,7 @@
         "proj_equation_X64.Vale.State.Mkstate_mem", "unit_typing"
       ],
       0,
-      "0b173149c8ab66209986afb55b8114ba"
+      "b478349217e2da3b923e6a1d83e482f9"
     ],
     [
       "X64.AES128.va_wpProof_KeyExpansion128Stdcall",
@@ -897,7 +903,7 @@
         "refinement_interpretation_Tm_refine_8d65e998a07dd53ec478e27017d9dba5"
       ],
       0,
-      "fb43d435978ef57d80330e5baec75ba9"
+      "fb4b12e52441e2091ddc3bf28e9d9c6f"
     ],
     [
       "X64.AES128.va_wpProof_KeyExpansion128Stdcall",
@@ -941,6 +947,7 @@
         "proj_equation_X64.Vale.State.Mkstate_memTaint",
         "proj_equation_X64.Vale.State.Mkstate_ok",
         "proj_equation_X64.Vale.State.Mkstate_regs",
+        "proj_equation_X64.Vale.State.Mkstate_stack",
         "proj_equation_X64.Vale.State.Mkstate_xmms",
         "projection_inverse_BoxInt_proj_0",
         "projection_inverse_FStar.Pervasives.Native.Mktuple2__1",
@@ -953,6 +960,7 @@
         "projection_inverse_X64.Vale.State.Mkstate_memTaint",
         "projection_inverse_X64.Vale.State.Mkstate_ok",
         "projection_inverse_X64.Vale.State.Mkstate_regs",
+        "projection_inverse_X64.Vale.State.Mkstate_stack",
         "projection_inverse_X64.Vale.State.Mkstate_xmms",
         "refinement_interpretation_Tm_refine_f0a4eeefab9c63f31c350a802a4d45dd",
         "token_correspondence_X64.AES128.va_wpCompute_KeyExpansion128Stdcall",
@@ -971,7 +979,7 @@
         "unit_typing"
       ],
       0,
-      "aba8cd8b7b23d3d2de8804a3742ce67e"
+      "5014d19a5bc962177aa20991887b5421"
     ],
     [
       "X64.AES128.va_lemma_AES128EncryptRound",
@@ -987,7 +995,7 @@
         "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-      "1e6fd1bdd8cdba9ac6b18b03d018c666"
+      "146f15aa0fef05bce25c8fee95bf48f2"
     ],
     [
       "X64.AES128.va_lemma_AES128EncryptRound",
@@ -1059,7 +1067,7 @@
         "typing_tok_X64.Machine_s.R8@tok", "unit_inversion", "unit_typing"
       ],
       0,
-      "66806c0c88d84e694f7d6a9e8d80ed63"
+      "c14d70540fcbfd4f8db859eaab784421"
     ],
     [
       "X64.AES128.va_wp_AES128EncryptRound",
@@ -1068,7 +1076,7 @@
       0,
       [ "@query" ],
       0,
-      "9daf5472ac8527d5870def9be536a5d8"
+      "68942fb0fa416f38764c267df0b3e9cb"
     ],
     [
       "X64.AES128.va_wpMonotone_AES128EncryptRound",
@@ -1088,7 +1096,7 @@
         "typing_X64.Vale.State.update_xmm", "unit_typing"
       ],
       0,
-      "8b1c550d827507d9f57e86723a0082cc"
+      "c715f04e152900c3c3e784d10c340289"
     ],
     [
       "X64.AES128.va_wpCompute_AES128EncryptRound",
@@ -1102,7 +1110,7 @@
         "fuel_guarded_inversion_X64.Vale.State.state"
       ],
       0,
-      "cb0aeaf5f6ba8eb5df56012893a7485d"
+      "858c9b330b5a9008efc1738ca1904351"
     ],
     [
       "X64.AES128.va_wpProof_AES128EncryptRound",
@@ -1114,7 +1122,7 @@
         "refinement_interpretation_Tm_refine_8d65e998a07dd53ec478e27017d9dba5"
       ],
       0,
-      "4a1450a2ba50ac41dd84d240c7d08b34"
+      "5a3b1560d9637e08c6083e923c1497c1"
     ],
     [
       "X64.AES128.va_wpProof_AES128EncryptRound",
@@ -1150,6 +1158,7 @@
         "proj_equation_X64.Vale.State.Mkstate_memTaint",
         "proj_equation_X64.Vale.State.Mkstate_ok",
         "proj_equation_X64.Vale.State.Mkstate_regs",
+        "proj_equation_X64.Vale.State.Mkstate_stack",
         "proj_equation_X64.Vale.State.Mkstate_xmms",
         "projection_inverse_BoxInt_proj_0",
         "projection_inverse_FStar.Pervasives.Native.Mktuple2__1",
@@ -1162,6 +1171,7 @@
         "projection_inverse_X64.Vale.State.Mkstate_memTaint",
         "projection_inverse_X64.Vale.State.Mkstate_ok",
         "projection_inverse_X64.Vale.State.Mkstate_regs",
+        "projection_inverse_X64.Vale.State.Mkstate_stack",
         "projection_inverse_X64.Vale.State.Mkstate_xmms",
         "refinement_interpretation_Tm_refine_36f208f2b1019ab7b5d9be73f4c89349",
         "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
@@ -1175,7 +1185,7 @@
         "typing_X64.Vale.Xmms.sel", "typing_X64.Vale.Xmms.upd", "unit_typing"
       ],
       0,
-      "c3e69d8b9cc7bd6a7065637476b8d326"
+      "f309a176259c019b5c6c95cc9f369c23"
     ],
     [
       "X64.AES128.va_qcode_AES128EncryptBlock",
@@ -1188,7 +1198,7 @@
         "refinement_interpretation_Tm_refine_8d65e998a07dd53ec478e27017d9dba5"
       ],
       0,
-      "fa3552b9b184d8cc0b045a7c677c533b"
+      "a3534f26841af95633f73e48bc8ce676"
     ],
     [
       "X64.AES128.va_lemma_AES128EncryptBlock",
@@ -1204,7 +1214,7 @@
         "refinement_interpretation_Tm_refine_90ae01a890cdd020e0797ad7ddfeacf9"
       ],
       0,
-      "303da6d1d41487e3e11a45dbc843dbeb"
+      "dde48b3fc7761e9ba960b5c68d7b5eeb"
     ],
     [
       "X64.AES128.va_lemma_AES128EncryptBlock",
@@ -1280,7 +1290,7 @@
         "unit_inversion", "unit_typing"
       ],
       0,
-      "7e8fd4c956409429117c2c7344b8a5b0"
+      "26f90f4430e08cecc641cad68e3f2336"
     ],
     [
       "X64.AES128.va_wp_AES128EncryptBlock",
@@ -1289,7 +1299,7 @@
       0,
       [ "@query", "projection_inverse_BoxInt_proj_0" ],
       0,
-      "5633b2238b0c9ef22a5dfb53de10bd47"
+      "7c55e20673e2da1553617e67ffce1ae2"
     ],
     [
       "X64.AES128.va_wpMonotone_AES128EncryptBlock",
@@ -1309,7 +1319,7 @@
         "typing_X64.Vale.State.update_xmm", "unit_typing"
       ],
       0,
-      "905a4b5fa6cc6dff1dd7ee8098dcc866"
+      "73c56da2272613383230d972ad2fdb46"
     ],
     [
       "X64.AES128.va_wpCompute_AES128EncryptBlock",
@@ -1323,7 +1333,7 @@
         "fuel_guarded_inversion_X64.Vale.State.state"
       ],
       0,
-      "bca34c263ffab8335cb22a8d7020bf7a"
+      "4b7c3f905e0f4421bc7b4cb1509e194b"
     ],
     [
       "X64.AES128.va_wpProof_AES128EncryptBlock",
@@ -1335,7 +1345,7 @@
         "refinement_interpretation_Tm_refine_8d65e998a07dd53ec478e27017d9dba5"
       ],
       0,
-      "190cb9688b697b4ff0b1cfc4f6186e09"
+      "966b01b8d911bf90caaf2eea67c895f6"
     ],
     [
       "X64.AES128.va_wpProof_AES128EncryptBlock",
@@ -1370,6 +1380,7 @@
         "proj_equation_X64.Vale.State.Mkstate_memTaint",
         "proj_equation_X64.Vale.State.Mkstate_ok",
         "proj_equation_X64.Vale.State.Mkstate_regs",
+        "proj_equation_X64.Vale.State.Mkstate_stack",
         "proj_equation_X64.Vale.State.Mkstate_xmms",
         "projection_inverse_BoxInt_proj_0",
         "projection_inverse_FStar.Pervasives.Native.Mktuple2__1",
@@ -1382,6 +1393,7 @@
         "projection_inverse_X64.Vale.State.Mkstate_memTaint",
         "projection_inverse_X64.Vale.State.Mkstate_ok",
         "projection_inverse_X64.Vale.State.Mkstate_regs",
+        "projection_inverse_X64.Vale.State.Mkstate_stack",
         "projection_inverse_X64.Vale.State.Mkstate_xmms",
         "refinement_interpretation_Tm_refine_8d65e998a07dd53ec478e27017d9dba5",
         "refinement_interpretation_Tm_refine_c16bc1b61f58b349bf6fc1c94dcaf83b",
@@ -1396,7 +1408,7 @@
         "typing_tok_AES_s.AES_128@tok", "unit_typing"
       ],
       0,
-      "7eb19cb0d06d46553f11c5b9edac14e7"
+      "ce65a22bcee413f779349c75d5e773b6"
     ],
     [
       "X64.AES128.va_qcode_AES128EncryptBlockStdcall",
@@ -1412,7 +1424,7 @@
         "unit_typing"
       ],
       0,
-      "ced0c60c152be5726f9c08dbeaf1b4c8"
+      "1c72d0613eda12c949664b5743fa0216"
     ],
     [
       "X64.AES128.va_lemma_AES128EncryptBlockStdcall",
@@ -1444,7 +1456,7 @@
         "typing_tok_X64.Machine_s.Rsi@tok"
       ],
       0,
-      "e693ffb77c342fed3fadba2bde99afb9"
+      "f3b4abd4ffaf730a470b9e96916f0348"
     ],
     [
       "X64.AES128.va_lemma_AES128EncryptBlockStdcall",
@@ -1549,7 +1561,7 @@
         "typing_tok_X64.Machine_s.Secret@tok", "unit_typing"
       ],
       0,
-      "4f50cdde1132265dfdd9f354dac838af"
+      "9ea2f98755fdab3865fda4d64cadebb9"
     ],
     [
       "X64.AES128.va_wp_AES128EncryptBlockStdcall",
@@ -1573,7 +1585,7 @@
         "typing_X64.Vale.Decls.va_if", "unit_typing"
       ],
       0,
-      "c5c66f92029504c6960633be0d97a870"
+      "b77faada1b79e5106e9fa9a907bf43d3"
     ],
     [
       "X64.AES128.va_wpMonotone_AES128EncryptBlockStdcall",
@@ -1597,7 +1609,7 @@
         "typing_tok_X64.Machine_s.R8@tok", "unit_typing"
       ],
       0,
-      "b7aee04a22449767661fe2f502e4041c"
+      "8aeeeefa905dff4b1d331a6a7ba28ee9"
     ],
     [
       "X64.AES128.va_wpCompute_AES128EncryptBlockStdcall",
@@ -1624,7 +1636,7 @@
         "proj_equation_X64.Vale.State.Mkstate_mem", "unit_typing"
       ],
       0,
-      "341a2b49f6a7db0ea01b8c9332723d4f"
+      "4aaccd6a0302ae83942504096dba5613"
     ],
     [
       "X64.AES128.va_wpProof_AES128EncryptBlockStdcall",
@@ -1636,7 +1648,7 @@
         "refinement_interpretation_Tm_refine_8d65e998a07dd53ec478e27017d9dba5"
       ],
       0,
-      "927039edd0cedc26da86bc15372def69"
+      "f69fa8afd3023fb1890b1b042f3be19e"
     ],
     [
       "X64.AES128.va_wpProof_AES128EncryptBlockStdcall",
@@ -1682,6 +1694,7 @@
         "proj_equation_X64.Vale.State.Mkstate_memTaint",
         "proj_equation_X64.Vale.State.Mkstate_ok",
         "proj_equation_X64.Vale.State.Mkstate_regs",
+        "proj_equation_X64.Vale.State.Mkstate_stack",
         "proj_equation_X64.Vale.State.Mkstate_xmms",
         "projection_inverse_BoxInt_proj_0",
         "projection_inverse_FStar.Pervasives.Native.Mktuple2__1",
@@ -1694,6 +1707,7 @@
         "projection_inverse_X64.Vale.State.Mkstate_memTaint",
         "projection_inverse_X64.Vale.State.Mkstate_ok",
         "projection_inverse_X64.Vale.State.Mkstate_regs",
+        "projection_inverse_X64.Vale.State.Mkstate_stack",
         "projection_inverse_X64.Vale.State.Mkstate_xmms",
         "refinement_interpretation_Tm_refine_f0a4eeefab9c63f31c350a802a4d45dd",
         "token_correspondence_X64.AES128.va_wpCompute_AES128EncryptBlockStdcall",
@@ -1712,7 +1726,7 @@
         "unit_typing"
       ],
       0,
-      "61925ff2a1fca4723aa357e9d08997c5"
+      "0ae15c2878adf3766c2cd0397b9b39f2"
     ]
   ]
 ]

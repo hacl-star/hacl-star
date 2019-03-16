@@ -1,5 +1,5 @@
 [
-  "6¿É9—ÿ‡]hô¼ÀG©¦\u001d",
+  "–\u0002Ìù\u0013;!I0¯ÙFøÇ/\u001e",
   [
     [
       "GHash.ghash_poly",
@@ -12,7 +12,7 @@
         "projection_inverse_BoxInt_proj_0", "well-founded-ordering-on-nat"
       ],
       0,
-      "c06da08a318a6aac8d83fddf260abfc3"
+      "32a3a14b325c28efbea8ac641eae9eb6"
     ],
     [
       "GHash.ghash_unroll_back",
@@ -34,7 +34,7 @@
         "well-founded-ordering-on-nat"
       ],
       0,
-      "dcf89f615903e415ed2e596b63b55b8f"
+      "edaebf18396d7c6b7d6c9b1498a2ec6b"
     ],
     [
       "GHash.lemma_ghash_poly_degree",
@@ -68,7 +68,7 @@
         "typing_Math.Poly2_s.reverse", "well-founded-ordering-on-nat"
       ],
       0,
-      "e4318097d124a1ad8f24f03eebdf6956"
+      "aa419aa6f328f87f3c79c965818f70b7"
     ],
     [
       "GHash.lemma_ghash_rev",
@@ -113,7 +113,7 @@
         "typing_Tm_abs_716d8adf6e9a0d31e273b653461d856b"
       ],
       0,
-      "bc0bb3f52556e393f5d4851d604ecb0c"
+      "fa5a894bc361b787f479bd9190fd93c2"
     ],
     [
       "GHash.ghash_incremental_def",
@@ -266,7 +266,7 @@
         "typing_FStar.Seq.Base.length", "well-founded-ordering-on-nat"
       ],
       0,
-      "af5be0c170387a290b4b2a20efa3cff6"
+      "315e868f10c5a3a1e5b197f3a7f954ec"
     ],
     [
       "GHash.lemma_hash_append",
@@ -317,6 +317,37 @@
       "ec7fc15cde3f92dd5a9340f093918161"
     ],
     [
+      "GHash.lemma_ghash_incremental0_append",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565",
+        "equation_FStar.Seq.Base.op_At_Bar",
+        "equation_GHash.ghash_incremental0", "equation_Prims.nat",
+        "equation_Types_s.quad32", "equation_Words_s.nat32",
+        "fuel_guarded_inversion_Words_s.four",
+        "function_token_typing_Prims.__cache_version_number__",
+        "function_token_typing_Words_s.nat32", "int_inversion",
+        "kinding_Words_s.four@tok", "lemma_FStar.Seq.Base.lemma_eq_elim",
+        "lemma_FStar.Seq.Base.lemma_eq_intro",
+        "lemma_FStar.Seq.Base.lemma_index_app1",
+        "lemma_FStar.Seq.Base.lemma_index_app2",
+        "lemma_FStar.Seq.Base.lemma_len_append",
+        "primitive_Prims.op_Addition", "primitive_Prims.op_Equality",
+        "primitive_Prims.op_GreaterThan", "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_03127b5d59ee3055620018693b4264e8",
+        "refinement_interpretation_Tm_refine_36f208f2b1019ab7b5d9be73f4c89349",
+        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "typing_FStar.Seq.Base.length", "typing_FStar.Seq.Base.op_At_Bar"
+      ],
+      0,
+      "07b55ca677c10dd17e16fac6c7596826"
+    ],
+    [
       "GHash.lemma_hash_append2",
       1,
       1,
@@ -346,7 +377,7 @@
         "typing_FStar.Seq.Base.op_At_Bar"
       ],
       0,
-      "704240f7bbabd88ffb229b7f980dfda3"
+      "6789e4b76ff807d6bab615cf04070c4d"
     ],
     [
       "GHash.lemma_hash_append3",
@@ -382,7 +413,7 @@
         "typing_Types_s.quad32", "unit_inversion", "unit_typing"
       ],
       0,
-      "d5b44b2848095490589cf90ed9a18114"
+      "a8fd17605e1973ae092c863cd6f46e5a"
     ],
     [
       "GHash.lemma_hash_append3",
@@ -412,7 +443,7 @@
         "unit_inversion", "unit_typing"
       ],
       0,
-      "8db87d5f3f4eeff74bcf854b5caade73"
+      "1e834572bacd73a4fd56ac20e721e5dd"
     ],
     [
       "GHash.lemma_ghash_incremental_bytes_extra_helper",
@@ -462,7 +493,7 @@
         "typing_FStar.Seq.Base.slice", "typing_GCTR_s.pad_to_128_bits"
       ],
       0,
-      "cf48deb3c57ecd42fadebd98d45756a6"
+      "ccdd078fb043d5672b3fa1bb8eaa5ada"
     ],
     [
       "GHash.lemma_ghash_incremental_bytes_extra_helper",
@@ -506,7 +537,7 @@
         "typing_Types_s.le_seq_quad32_to_bytes"
       ],
       0,
-      "1c91b9fbed771c022651de2d8aabb13a"
+      "9fdde8d6b087bae03a175e62742a9ecf"
     ],
     [
       "GHash.lemma_ghash_registers",
@@ -553,7 +584,7 @@
         "unit_typing"
       ],
       0,
-      "73596342837752d9681c26249804618e"
+      "23c4583d4aac5161a9f518baa1405905"
     ],
     [
       "GHash.lemma_ghash_registers",
@@ -595,7 +626,7 @@
         "typing_FStar.Seq.Base.length"
       ],
       0,
-      "d4864f161d4e542658dd71fbad63ff54"
+      "e46dcc06544b081daa21b9af2e96ca11"
     ]
   ]
 ]
