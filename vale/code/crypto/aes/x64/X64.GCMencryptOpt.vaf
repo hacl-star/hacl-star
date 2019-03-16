@@ -102,7 +102,7 @@ function aes_reqs(alg:algorithm, key:seq(nat32), round_keys:seq(quad32), keys_b:
 // GCM
 ///////////////////////////
 #reset-options "--z3rlimit 30"
-procedure {:quick} {:verify true} gcm_blocks128(
+procedure {:quick} gcm_blocks128(
     inline alg:algorithm,
     ghost in_b:buffer128,
     ghost out_b:buffer128,
