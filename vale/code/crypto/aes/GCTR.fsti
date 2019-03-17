@@ -25,6 +25,8 @@ let inc32lite (cb:quad32) (i:int) : quad32 =
   else
     Mkfour 42 42 42 42
 
+let empty_seq_quad32 : seq quad32 = empty
+
 let partial_seq_agreement (x y:seq quad32) (lo hi:nat) =
   lo <= hi /\ hi <= length x /\ hi <= length y /\
   (forall i . {:pattern (index x i) \/ (index y i)} lo <= i /\ i < hi ==> index x i == index y i)

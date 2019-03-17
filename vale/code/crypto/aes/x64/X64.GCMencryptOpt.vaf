@@ -299,7 +299,7 @@ procedure {:quick} gcm_make_length_quad()
 }
 
 #reset-options "--z3rlimit 90"
-procedure {:quick} gcm_blocks(
+procedure {:quick} {:verify true} gcm_blocks(
     inline alg:algorithm,
     ghost arg_b:buffer64,
     ghost auth_b:buffer128,
@@ -436,7 +436,9 @@ procedure {:quick} gcm_blocks(
         let h:quad32 := reverse_bytes_quad32(buffer128_read(hkeys_b, 0, mem));
         let length_quad:quad32 := reverse_bytes_quad32(Mkfour(#nat32(8 * old(plain_num_bytes)), 0, 
                                                        #nat32(8 * old(auth_num_bytes)), 0));
-        let auth_in:seq(quad32) := append(
+        let auth_in:seq(quad32) := 
+            if (old(auth_num_bytes) > old(auth_len * 128/8)) then
+                       append(
                        append(
                        append(
                        append(
@@ -445,7 +447,17 @@ procedure {:quick} gcm_blocks(
                               s128(mem, out128x6_b)),
                               s128(mem, out128_b)),
                               s128(mem, inout_b)),
-                              create(1, length_quad));
+                              create(1, length_quad))
+            else
+                       append(
+                       append(
+                       append(
+                       append(old(s128(mem, auth_b)),
+                              s128(mem, out128x6_b)),
+                              s128(mem, out128_b)),
+                              s128(mem, inout_b)),
+                              create(1, length_quad))
+            ;
         xmm1 == gctr_encrypt_block(ctr_BE_1, ghash_LE(h, #ghash_plain_LE(auth_in)), alg, key, 0);
 {
     // Preserve arguments that gcm_auth_bytes will clobber
@@ -457,19 +469,24 @@ procedure {:quick} gcm_blocks(
     InitPshufbMask(xmm8, r12);
     Mov64(rax, auth_ptr);
     Mov64(r8, keys_ptr);
-    //Mov64(r11, auth_num_bytes);
     Load64_buffer(r11, rbp, 0, Public, arg_b, 0); // Load auth_len
     Load128_buffer(xmm11, Xip, 0, Secret, hkeys_b, 0); // Load h instead of computing it
 
     (ghost var y_0), (ghost var y_auth) := gcm_auth_bytes(alg, auth_b, key, round_keys, keys_b);
+    IMul64(r11, 16);     // Convert auth_len into auth bytes (16 == 128/8)
 
-    // Ghash the extra auth bytes
-    Load64_buffer(r11, rbp, 8, Public, arg_b, 1); // Load abytes_ptr
-    Load128_buffer(xmm2, r11, 0, Secret, abytes_b, 0);
-    compute_ghash_incremental_register();
-    assert equal(create(1, buffer128_read(abytes_b, 0, mem)), s128(mem, abytes_b));
-    ghost var y_auth_bytes := xmm1;
-//    assert y_auth_bytes == ghash_incremental(reverse_bytes_quad32(xmm11), y_auth, s128(mem, abytes_b));
+    ghost var y_auth_bytes:quad32 := y_auth;
+    ghost var auth_byte_seq:seq(quad32) := empty_seq_quad32;
+    assert equal(append(s128(mem, auth_b), auth_byte_seq), s128(mem, auth_b));
+    if (auth_num_bytes > r11) {
+        // Ghash the extra auth bytes
+        Load64_buffer(r11, rbp, 8, Public, arg_b, 1); // Load abytes_ptr
+        Load128_buffer(xmm2, r11, 0, Secret, abytes_b, 0);
+        compute_ghash_incremental_register();
+        assert equal(create(1, buffer128_read(abytes_b, 0, mem)), s128(mem, abytes_b));
+        y_auth_bytes := xmm1;
+        auth_byte_seq := s128(mem, abytes_b);                     
+    }
 
     // Save auth_num_bytes, since AES_GCM_encrypt_6mult will clobber it
     Mov64(r15, auth_num_bytes);
@@ -549,9 +566,20 @@ procedure {:quick} gcm_blocks(
     // Consolidate hashing results
     ghost var h := reverse_bytes_quad32(buffer128_read(hkeys_b, 0, mem));
     ghost var auth_in := old(s128(mem, auth_b));
-    lemma_ghash_incremental0_append(h, y_0, y_auth, y_auth_bytes, auth_in, old(s128(mem, abytes_b)));
-    auth_in := append(auth_in, old(s128(mem, abytes_b)));
+    lemma_ghash_incremental0_append(h, y_0, y_auth, y_auth_bytes, auth_in, auth_byte_seq);
+    auth_in := append(auth_in, auth_byte_seq);
     lemma_ghash_incremental0_append(h, y_0, y_auth_bytes, y_cipher128x6, auth_in, s128(mem, out128x6_b));
+
+
+//    ghost var test := old(auth_num_bytes) > old(auth_len * 128/8);
+//    ghost if (test) {
+//        lemma_ghash_incremental0_append(h, y_0, y_auth, y_auth_bytes, auth_in, old(s128(mem, abytes_b)));
+//        auth_in := append(auth_in, old(s128(mem, abytes_b)));
+//        lemma_ghash_incremental0_append(h, y_0, y_auth_bytes, y_cipher128x6, auth_in, s128(mem, out128x6_b));
+//    } else {
+//        lemma_ghash_incremental0_append(h, y_0, y_auth, y_cipher128x6, auth_in, s128(mem, out128x6_b));
+//    }
+
     auth_in := append(auth_in, s128(mem, out128x6_b));
     lemma_ghash_incremental0_append(h, y_0, y_cipher128x6, y_cipher128, auth_in, s128(mem, out128_b));
     auth_in := append(auth_in, s128(mem, out128_b));
