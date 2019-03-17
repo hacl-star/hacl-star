@@ -2289,7 +2289,7 @@ procedure {:quick} Loop6x_loop(
         T1 == reverse_bytes_quad32(inc32lite(ctr_BE, old(len)));
 {
     ghost var iter:nat := 0;
-    ghost var ctr := ctr_BE;
+    ghost var ctr:quad32 := ctr_BE;
 
     while (len > 0) 
         invariant

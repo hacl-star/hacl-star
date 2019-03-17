@@ -303,7 +303,7 @@ procedure {:quick} gcm_make_length_quad()
 }
 
 #reset-options "--z3rlimit 60"
-procedure {:quick} gcm_blocks(
+procedure {:quick} {:verify true} gcm_blocks(
     inline alg:algorithm,
     ghost arg_b:buffer64,
     ghost auth_b:buffer128,
@@ -322,6 +322,7 @@ procedure {:quick} gcm_blocks(
     lets
         auth_ptr @= rdi; auth_num_bytes @= rsi; arg_ptr @= rdx; keys_ptr @= rcx; iv_ptr @= r8; Xip @= r9;
 
+//abytes_ptr      := buffer64_read(arg_b, 0, mem); 
         in128x6_ptr     := buffer64_read(arg_b, 0, mem); 
         out128x6_ptr    := buffer64_read(arg_b, 1, mem); 
         len128x6        := buffer64_read(arg_b, 2, mem); 
@@ -364,37 +365,20 @@ procedure {:quick} gcm_blocks(
 //        valid_taint_buf64(stack_b, mem, memTaint, Secret);
 
         locs_disjoint(list(loc_buffer(iv_b), loc_buffer(arg_b)));
-        buffers_disjoint128(iv_b, keys_b);
-        buffers_disjoint128(iv_b, stack_b);
-        buffers_disjoint128(iv_b, in128x6_b);
-        buffers_disjoint128(iv_b, out128x6_b);
-        buffers_disjoint128(iv_b, hkeys_b);
-        buffers_disjoint128(iv_b, in128_b);
-        buffers_disjoint128(iv_b, out128_b);
-        buffers_disjoint128(iv_b, inout_b);
+        buffer_disjoints128(iv_b, list(keys_b, stack_b, in128x6_b, out128x6_b, hkeys_b, in128_b, out128_b, inout_b));
+
         locs_disjoint(list(loc_buffer(stack_b), loc_buffer(arg_b)));
-        buffers_disjoint128(stack_b, keys_b);
-        buffers_disjoint128(stack_b, in128x6_b);
-        buffers_disjoint128(stack_b, out128x6_b);
-        buffers_disjoint128(stack_b, in128_b);
-        buffers_disjoint128(stack_b, out128_b);
-        buffers_disjoint128(stack_b, inout_b);
-        buffers_disjoint128(stack_b, hkeys_b);
+        buffer_disjoints128(stack_b, list(keys_b, in128x6_b, out128x6_b, in128_b, out128_b, inout_b, hkeys_b));
+
         locs_disjoint(list(loc_buffer(out128x6_b), loc_buffer(arg_b)));
-        buffers_disjoint128(out128x6_b, keys_b);
-        buffers_disjoint128(out128x6_b, hkeys_b);
-        buffers_disjoint128(out128x6_b, in128_b);
-        buffers_disjoint128(out128x6_b, inout_b);
+        buffer_disjoints128(out128x6_b, list(keys_b, hkeys_b, in128_b, inout_b));
+
         locs_disjoint(list(loc_buffer(out128_b), loc_buffer(arg_b)));
-        buffers_disjoint128(out128_b, keys_b);
-        buffers_disjoint128(out128_b, hkeys_b);
-        buffers_disjoint128(out128_b, out128x6_b);
-        buffers_disjoint128(out128_b, inout_b);
+        buffer_disjoints128(out128_b, list(keys_b, hkeys_b, out128x6_b, inout_b));
+
         locs_disjoint(list(loc_buffer(inout_b), loc_buffer(arg_b)));
-        buffers_disjoint128(inout_b, keys_b);
-        buffers_disjoint128(inout_b, hkeys_b);
-        buffers_disjoint128(inout_b, out128x6_b);
-        buffers_disjoint128(inout_b, out128_b);
+        buffer_disjoints128(inout_b, list(keys_b, hkeys_b, out128x6_b, out128_b));
+
         buffers_disjoint128(in128x6_b, out128x6_b) || in128x6_b == out128x6_b;
         buffers_disjoint128(in128_b, out128_b) || in128_b == out128_b;
 
