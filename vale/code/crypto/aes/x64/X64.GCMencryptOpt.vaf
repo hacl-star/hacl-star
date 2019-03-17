@@ -234,11 +234,11 @@ procedure {:quick} gcm_auth_bytes(
     ghost y_auth:quad32
     )
 
-    lets auth_ptr @= rax; keys_ptr @= r8; auth_num_bytes @= r11; 
+    lets auth_ptr @= rax; keys_ptr @= r8; auth_len @= r11; 
          hash @= xmm1; mask @= xmm8; h128 @= xmm11; 
 
     reads
-        keys_ptr; auth_num_bytes; mask; h128; mem; memTaint;
+        keys_ptr; auth_len; mask; h128; mem; memTaint;
 
     modifies
         auth_ptr; rcx; rdx; r9; r12;
@@ -248,30 +248,26 @@ procedure {:quick} gcm_auth_bytes(
 
     requires
         // GCM reqs
-        validSrcAddrs128(mem, auth_ptr,  auth_b,  bytes_to_quad_size(auth_num_bytes), memTaint, Secret);
-        auth_ptr  + 16 * bytes_to_quad_size(auth_num_bytes)  < pow2_64;
-        buffer_length(auth_b) == bytes_to_quad_size(auth_num_bytes);
-        4096 * auth_num_bytes < pow2_32;
+        validSrcAddrs128(mem, auth_ptr,  auth_b,  auth_len, memTaint, Secret);
+        auth_ptr  + 16 * auth_len  < pow2_64;
+        buffer_length(auth_b) == auth_len;
         pclmulqdq_enabled;
 
         mask == Mkfour(0x0C0D0E0F, 0x08090A0B, 0x04050607, 0x00010203);
     ensures
         // Main result
-        let auth   := slice_work_around(le_seq_quad32_to_bytes(s128(old(mem), auth_b)),  old(auth_num_bytes));
-        let auth_padded_bytes := pad_to_128_bits(auth);
-        let auth_padded_quads := le_bytes_to_seq_quad32(auth_padded_bytes);
-
         y_0 == Mkfour(0, 0, 0, 0);
-        y_auth == ghash_incremental0(reverse_bytes_quad32(old(h128)), y_0, auth_padded_quads);
+        y_auth == ghash_incremental0(reverse_bytes_quad32(old(h128)), y_0, s128(mem, auth_b));
         hash == y_auth;
 
         // Other intermediate facts
-        auth_num_bytes == 0 ==> rdx == old(rdx) /\ r9 == old(r9);
+        auth_len == 0 ==> rdx == old(rdx) /\ r9 == old(r9);
 {
     // Compute the hashes incrementally, starting with auth data
     ZeroXmm(hash);
     y_0 := Mkfour(0, 0, 0, 0);
-    ghash_incremental_bytes(auth_b);
+    Mov64(rcx, auth_len);
+    compute_ghash_incremental(auth_b);
     y_auth := hash;
     le_bytes_to_seq_quad32_empty();
 }
@@ -302,11 +298,12 @@ procedure {:quick} gcm_make_length_quad()
     Pshufb(xmm2, xmm8);
 }
 
-#reset-options "--z3rlimit 60"
-procedure {:quick} {:verify true} gcm_blocks(
+#reset-options "--z3rlimit 90"
+procedure {:quick} gcm_blocks(
     inline alg:algorithm,
     ghost arg_b:buffer64,
     ghost auth_b:buffer128,
+    ghost abytes_b:buffer128,
     ghost in128x6_b:buffer128,
     ghost out128x6_b:buffer128,
     ghost in128_b:buffer128,
@@ -322,22 +319,18 @@ procedure {:quick} {:verify true} gcm_blocks(
     lets
         auth_ptr @= rdi; auth_num_bytes @= rsi; arg_ptr @= rdx; keys_ptr @= rcx; iv_ptr @= r8; Xip @= r9;
 
-//abytes_ptr      := buffer64_read(arg_b, 0, mem); 
-        in128x6_ptr     := buffer64_read(arg_b, 0, mem); 
-        out128x6_ptr    := buffer64_read(arg_b, 1, mem); 
-        len128x6        := buffer64_read(arg_b, 2, mem); 
-        in128_ptr       := buffer64_read(arg_b, 3, mem); 
-        out128_ptr      := buffer64_read(arg_b, 4, mem); 
-        len128          := buffer64_read(arg_b, 5, mem); 
-        inout_ptr       := buffer64_read(arg_b, 6, mem);
-        plain_num_bytes := buffer64_read(arg_b, 7, mem);
-
-//        in128x6_ptr @= rdi; out128x6_ptr @= rsi; len128x6 @= rdx; key_ptr @= rcx; iv_ptr @= r8; Xip @= r9;
-//        in128_ptr @= rax; out128_ptr @= rbp; len128 @= r10; 
-//        inout_ptr @= r15;
+        auth_len        := buffer64_read(arg_b, 0, mem); 
+        abytes_ptr      := buffer64_read(arg_b, 1, mem); 
+        in128x6_ptr     := buffer64_read(arg_b, 2, mem); 
+        out128x6_ptr    := buffer64_read(arg_b, 3, mem); 
+        len128x6        := buffer64_read(arg_b, 4, mem); 
+        in128_ptr       := buffer64_read(arg_b, 5, mem); 
+        out128_ptr      := buffer64_read(arg_b, 6, mem); 
+        len128          := buffer64_read(arg_b, 7, mem); 
+        inout_ptr       := buffer64_read(arg_b, 8, mem);
+        plain_num_bytes := buffer64_read(arg_b, 9, mem);
 
     reads
-        //in128_ptr; out128_ptr; len128; inout_ptr; iv_ptr; rsp; 
         rsp; memTaint;
 
     modifies
@@ -348,9 +341,9 @@ procedure {:quick} {:verify true} gcm_blocks(
 
     requires
         // Valid buffers and pointers
-// TODO: Handle auth values that aren't a multiple of 128-bits
-        validSrcAddrs64 (mem,      arg_ptr,      arg_b,        8, memTaint, Public);
-        validDstAddrs128(mem,     auth_ptr,     auth_b,  bytes_to_quad_size(auth_num_bytes), memTaint, Secret);
+        validSrcAddrs64 (mem,      arg_ptr,      arg_b,       10, memTaint, Public);
+        validDstAddrs128(mem,     auth_ptr,     auth_b, auth_len, memTaint, Secret);
+        validDstAddrs128(mem,   abytes_ptr,   abytes_b,        1, memTaint, Secret);
         validDstAddrs128(mem,       iv_ptr,       iv_b,        1, memTaint, Secret);
         validSrcAddrs128(mem,  in128x6_ptr,  in128x6_b, len128x6, memTaint, Secret);
         validDstAddrs128(mem, out128x6_ptr, out128x6_b, len128x6, memTaint, Secret);
@@ -359,10 +352,6 @@ procedure {:quick} {:verify true} gcm_blocks(
         validDstAddrs128(mem,    inout_ptr,    inout_b,        1, memTaint, Secret);
         validDstAddrs128(mem,          rsp,    stack_b,        8, memTaint, Secret);
         validSrcAddrs128(mem,          Xip,    hkeys_b,       10, memTaint, Secret);
-
-//        buffer_length(stack_b) >= 30;       
-//        valid_stack_slots(mem, rsp, stack_b, 30, memTaint);
-//        valid_taint_buf64(stack_b, mem, memTaint, Secret);
 
         locs_disjoint(list(loc_buffer(iv_b), loc_buffer(arg_b)));
         buffer_disjoints128(iv_b, list(keys_b, stack_b, in128x6_b, out128x6_b, hkeys_b, in128_b, out128_b, inout_b));
@@ -382,14 +371,15 @@ procedure {:quick} {:verify true} gcm_blocks(
         buffers_disjoint128(in128x6_b, out128x6_b) || in128x6_b == out128x6_b;
         buffers_disjoint128(in128_b, out128_b) || in128_b == out128_b;
 
-        auth_ptr  + 16 * bytes_to_quad_size(auth_num_bytes)  < pow2_64;
+            auth_ptr + 0x10*auth_len < pow2_64;
          in128x6_ptr + 0x10*len128x6 < pow2_64;
         out128x6_ptr + 0x10*len128x6 < pow2_64;
            in128_ptr + 0x10*len128   < pow2_64;
           out128_ptr + 0x10*len128   < pow2_64;
            inout_ptr + 0x10          < pow2_64;
 
-        buffer_length(auth_b) == bytes_to_quad_size(auth_num_bytes);
+        buffer_length(auth_b) == auth_len;
+        buffer_length(abytes_b) == 1;
         buffer_length(in128x6_b) == buffer_length(out128x6_b);
         buffer_length(in128_b) == buffer_length(out128_b);
         buffer_length(in128x6_b) == len128x6;
@@ -406,7 +396,6 @@ procedure {:quick} {:verify true} gcm_blocks(
         // len128x6 is # of 128-bit blocks that come in 6-block chunks
         len128x6 % 6 == 0;
         len128x6 >= 18;
-        //len128x6 / 6 >= 3;   // Should be implied by above... :(
         12 + len128x6 + 6 < pow2_32;
 
         // GCTR reqs
@@ -417,6 +406,8 @@ procedure {:quick} {:verify true} gcm_blocks(
 
 
     ensures
+    // TODO: Add framing here!
+
 //        modifies_buffer128(out_b, old(mem), mem);
 //        validSrcAddrsOffset128(mem, out_ptr, out_b, block_offset, len, memTaint, Secret);
 
@@ -441,17 +432,16 @@ procedure {:quick} {:verify true} gcm_blocks(
                                    s128(mem, inout_b)),
                      key, ctr_BE_2);
 
-//        // Hashing results
-        let h := reverse_bytes_quad32(buffer128_read(hkeys_b, 0, mem));
-        let auth := slice_work_around(le_seq_quad32_to_bytes(s128(old(mem), auth_b)),  old(auth_num_bytes));
-        let auth_padded_bytes := pad_to_128_bits(auth);
-        let auth_padded_quads := le_bytes_to_seq_quad32(auth_padded_bytes);
-        let length_quad := reverse_bytes_quad32(Mkfour(#nat32(8 * old(plain_num_bytes)), 0, 
+        // Hashing results
+        let h:quad32 := reverse_bytes_quad32(buffer128_read(hkeys_b, 0, mem));
+        let length_quad:quad32 := reverse_bytes_quad32(Mkfour(#nat32(8 * old(plain_num_bytes)), 0, 
                                                        #nat32(8 * old(auth_num_bytes)), 0));
-        let auth_in := append(
+        let auth_in:seq(quad32) := append(
                        append(
                        append(
-                       append(auth_padded_quads, 
+                       append(
+                       append(old(s128(mem, auth_b)),
+                              old(s128(mem, abytes_b))),
                               s128(mem, out128x6_b)),
                               s128(mem, out128_b)),
                               s128(mem, inout_b)),
@@ -467,21 +457,27 @@ procedure {:quick} {:verify true} gcm_blocks(
     InitPshufbMask(xmm8, r12);
     Mov64(rax, auth_ptr);
     Mov64(r8, keys_ptr);
-    Mov64(r11, auth_num_bytes);
+    //Mov64(r11, auth_num_bytes);
+    Load64_buffer(r11, rbp, 0, Public, arg_b, 0); // Load auth_len
     Load128_buffer(xmm11, Xip, 0, Secret, hkeys_b, 0); // Load h instead of computing it
 
     (ghost var y_0), (ghost var y_auth) := gcm_auth_bytes(alg, auth_b, key, round_keys, keys_b);
-    ghost var auth   := slice_work_around(le_seq_quad32_to_bytes(s128(old(mem), auth_b)),  old(auth_num_bytes));
-    ghost var auth_padded_bytes := pad_to_128_bits(auth);
-    ghost var auth_padded_quads := le_bytes_to_seq_quad32(auth_padded_bytes);
+
+    // Ghash the extra auth bytes
+    Load64_buffer(r11, rbp, 8, Public, arg_b, 1); // Load abytes_ptr
+    Load128_buffer(xmm2, r11, 0, Secret, abytes_b, 0);
+    compute_ghash_incremental_register();
+    assert equal(create(1, buffer128_read(abytes_b, 0, mem)), s128(mem, abytes_b));
+    ghost var y_auth_bytes := xmm1;
+//    assert y_auth_bytes == ghash_incremental(reverse_bytes_quad32(xmm11), y_auth, s128(mem, abytes_b));
 
     // Save auth_num_bytes, since AES_GCM_encrypt_6mult will clobber it
     Mov64(r15, auth_num_bytes);
 
     // Line up the arguments for AES_GCM_encrypt_6mult
-    Load64_buffer(rdi, rbp,  0, Public, arg_b, 0);
-    Load64_buffer(rsi, rbp,  8, Public, arg_b, 1);
-    Load64_buffer(rdx, rbp, 16, Public, arg_b, 2);
+    Load64_buffer(rdi, rbp, 16, Public, arg_b, 2);
+    Load64_buffer(rsi, rbp, 24, Public, arg_b, 3);
+    Load64_buffer(rdx, rbp, 32, Public, arg_b, 4);
     Mov64(keys_ptr, r8);
     Mov64(iv_ptr, r13);
     Mov64(Xip, r14);
@@ -493,9 +489,9 @@ procedure {:quick} {:verify true} gcm_blocks(
     // Line up arguments for gcm_blocks128 for remaining 128-bit blocks
     Load128_buffer(xmm7, iv_ptr, 0, Secret, iv_b, 0);
     Mov64(r8, keys_ptr);
-    Load64_buffer(rax, rbp, 24, Public, arg_b, 3);
-    Load64_buffer(rbx, rbp, 32, Public, arg_b, 4);
-    Load64_buffer(rcx, rbp, 40, Public, arg_b, 5);
+    Load64_buffer(rax, rbp, 40, Public, arg_b, 5);
+    Load64_buffer(rbx, rbp, 48, Public, arg_b, 6);
+    Load64_buffer(rcx, rbp, 56, Public, arg_b, 7);
     Mov128(xmm1, xmm8);     // Move the hash value into the right place
     InitPshufbMask(xmm8, r12);
     Pshufb(xmm7, xmm8);
@@ -504,14 +500,14 @@ procedure {:quick} {:verify true} gcm_blocks(
     ghost var y_cipher128 := xmm1;
 
     // Line up arguments for gcm_blocks128 for the 128-bit block that holds any extra bytes
-    Load64_buffer(rax, rbp, 48, Public, arg_b, 6);
+    Load64_buffer(rax, rbp, 64, Public, arg_b, 8);
     Mov64(rbx, rax);
     Mov64(rcx, 1);
     gcm_blocks128(alg, inout_b, inout_b, key, round_keys, keys_b);
     ghost var y_inout := xmm1;
 
     // Line up length arguments
-    Load64_buffer(r13, rbp, 56, Public, arg_b, 7);
+    Load64_buffer(r13, rbp, 72, Public, arg_b, 9);
     Mov64(r11, r15);
     gcm_make_length_quad();
     ghost var length_quad32 := xmm2;
@@ -527,14 +523,12 @@ procedure {:quick} {:verify true} gcm_blocks(
     gctr_register(alg, key, round_keys, keys_b); // Encrypt using j0 and xmm0 = hash_value
 
     le_seq_quad32_to_bytes_of_singleton(xmm1);
+    assert {:quick_type}  is_aes_key_LE(alg, key);
+    assert xmm1 == gctr_encrypt_block(ctr_BE_1, y_final, alg, key, 0);
 
     // Consolidate encryption results
 
     ghost var ctr_BE_2:quad32 := Mkfour(2, ctr_BE.lo1, ctr_BE.hi2, ctr_BE.hi3); 
-//    assert gctr_partial_opaque(alg, old(len128x6), old(s128(mem, in128x6_b)), s128(mem, out128x6_b), key, ctr_BE_2);
-//    assert gctr_partial(alg, old(len128), old(s128(mem, in128_b)), s128(mem, out128_b), key, inc32(ctr_BE_2, old(len128x6)));
-//    assert gctr_partial(alg, 1, old(s128(mem, inout_b)), s128(mem, inout_b), key, inc32(inc32(ctr_BE_2, old(len128x6)), old(len128)));
-
     reveal gctr_partial;
     lemma_gctr_partial_append(alg, old(len128x6), old(len128), 
                               old(s128(mem, in128x6_b)), s128(mem, out128x6_b), 
@@ -554,14 +548,15 @@ procedure {:quick} {:verify true} gcm_blocks(
 
     // Consolidate hashing results
     ghost var h := reverse_bytes_quad32(buffer128_read(hkeys_b, 0, mem));
-    ghost var auth_in := auth_padded_quads;
-    lemma_ghash_incremental0_append(h, y_0, y_auth, y_cipher128x6, auth_in, s128(mem, out128x6_b));
+    ghost var auth_in := old(s128(mem, auth_b));
+    lemma_ghash_incremental0_append(h, y_0, y_auth, y_auth_bytes, auth_in, old(s128(mem, abytes_b)));
+    auth_in := append(auth_in, old(s128(mem, abytes_b)));
+    lemma_ghash_incremental0_append(h, y_0, y_auth_bytes, y_cipher128x6, auth_in, s128(mem, out128x6_b));
     auth_in := append(auth_in, s128(mem, out128x6_b));
     lemma_ghash_incremental0_append(h, y_0, y_cipher128x6, y_cipher128, auth_in, s128(mem, out128_b));
     auth_in := append(auth_in, s128(mem, out128_b));
     lemma_ghash_incremental0_append(h, y_0, y_cipher128, y_inout, auth_in, s128(mem, inout_b));
     auth_in := append(auth_in, s128(mem, inout_b));
-
     lemma_hash_append2(h, y_0, y_inout, y_final, auth_in, length_quad32);
     auth_in := append(auth_in, create(1, length_quad32));
     ghash_incremental_to_ghash(h, auth_in);
