@@ -706,6 +706,8 @@ dist/compact-msvc/Makefile.basic: KRML_EXTRA=$(COMPACT_FLAGS) -falloca -ftail-ca
 
 dist/compact-gcc/Makefile.basic: KRML_EXTRA=$(COMPACT_FLAGS) -fbuiltin-uint128
 
+dist/curve25519-64/Makefile.basic: KRML_EXTRA=-bundle Hacl.Curve25519_64=* -fbuiltin-uint128 -extract-uints
+
 # MerkleTree doesn't compile in C89 mode
 dist/compact-c89/Makefile.basic: \
   KRML_EXTRA=$(patsubst 'Merkle%[rename=MerkleTree]','MerkleTree.*',$(COMPACT_FLAGS)) \
@@ -813,7 +815,7 @@ LDFLAGS 	+= -L$(OPENSSL_HOME)
 
 CFLAGS += -Wall -Wextra -g \
   -Wno-infinite-recursion -Wno-int-conversion -Wno-unused-parameter \
-  -O3 -march=native -mtune=native
+  -O3 -march=native -mtune=native -I$(KREMLIN_HOME)/include
 
 # FIXME there's a kremlin error that generates a void* -- can't use -Werror
 # Need the libraries to be present and compiled.
@@ -821,7 +823,7 @@ CFLAGS += -Wall -Wextra -g \
 %.exe: %.o | compile-generic
 	# Linking with full kremlib since tests may use TestLib, etc.
 	$(call run-with-log,\
-	  $(CC) $(CFLAGS) $(LDFLAGS) -I$(KREMLIN_HOME)/include $^ -o $@ \
+	  $(CC) $(CFLAGS) $(LDFLAGS) $^ -o $@ \
 	    dist/generic/libevercrypt.a -lcrypto $(LDFLAGS) \
 	    $(KREMLIN_HOME)/kremlib/dist/generic/libkremlib.a \
 	  ,[LD $*],$(call to-obj-dir,$@))
