@@ -1,7 +1,9 @@
 module Hacl.Impl.QTesla.Heuristic.Pack
 
 open FStar.HyperStack
+module HS = FStar.HyperStack
 open FStar.HyperStack.ST
+module ST = FStar.HyperStack.ST
 open FStar.Mul
 
 module I = FStar.Int
@@ -21,26 +23,122 @@ open Lib.Buffer
 open Lib.ByteBuffer
 
 open C.Loops
+module LL = Lib.Loops
 
 open Hacl.Impl.QTesla.Params
 open Hacl.Impl.QTesla.Constants
 open Hacl.Impl.QTesla.Globals
 
-#reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0 --admit_smt_queries true"
+#reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0"
 
 // qTESLA-I and qTESLA-III-size share the implementation for: encode_pk decode_pk encode_sig decode_sig
 
+[@"opaque_to_smt"]
+private let valid_pk (pk: lbuffer uint8 crypto_publickeybytes) (h0 h1: HS.mem) = 
+    live h0 pk /\ live h1 pk /\ modifies1 pk h0 h1 /\ equal_domains h0 h1
+
+private let reveal_valid_pk (pk: lbuffer uint8 crypto_publickeybytes) (h0 h1: HS.mem) : 
+    Lemma (ensures (valid_pk pk h0 h1) <==> (live h0 pk /\ live h1 pk /\ modifies1 pk h0 h1 /\ equal_domains h0 h1)) =
+    reveal_opaque (`%valid_pk) valid_pk
+
 private inline_for_extraction noextract
 val encode_pk_ptSet:
-    pk : lbuffer uint8 crypto_publickeybytes
-  -> i : size_t{i <. crypto_publickeybytes /. (size UI32.n /. size 8)}
-  -> value : elem
+    snapshot: HS.mem
+  -> pk: lbuffer uint8 crypto_publickeybytes
+  -> i: size_t{i <. crypto_publickeybytes /. (size UI32.n /. size 8)}
+  -> value: I32.t
+  -> Unsafe unit // Despite the name of the effect, Nik assures us this is a correct use!
+    (requires fun h -> valid_pk pk snapshot h)
+    (ensures fun _ _ h1 -> valid_pk pk snapshot h1)
+
+let encode_pk_ptSet snapshot pk i value =
+    let h0 = ST.get () in
+    reveal_valid_pk pk snapshot h0;
+    [@inline_let] let elem_to_uint32 x = Lib.RawIntTypes.u32_from_UInt32 (elem_to_uint32 x) in
+    uint_to_bytes_le #U32 #_ (sub pk (i *. size UI32.n /. size 8) (size UI32.n /. size 8)) (elem_to_uint32 value);
+    let h1 = ST.get () in
+    reveal_valid_pk pk snapshot h1
+
+[@"opaque_to_smt"]
+private let valid_t (t: poly_k) (h0 h1: HS.mem) = live h0 t /\ live h1 t /\ h0 == h1
+
+private let reveal_valid_t (t: poly_k) (h0 h1: HS.mem) :
+    Lemma (ensures (valid_t t h0 h1) <==> (live h0 t /\ live h1 t /\ h0 == h1)) =
+    reveal_opaque (`%valid_t) valid_t
+
+private inline_for_extraction noextract
+val encode_pk_tGet:
+    snapshot: HS.mem
+  -> t: poly_k
+  -> j: size_t{v j < v params_n}
+  -> Unsafe elem
+    (requires fun h -> valid_t t snapshot h)
+    (ensures fun _ _ h1 -> valid_t t snapshot h1)
+
+let encode_pk_tGet snapshot t j = 
+    let h = ST.get () in
+    reveal_valid_t t snapshot h;
+    t.(j)
+
+private inline_for_extraction noextract
+val encode_pk_loopBody:
+    pk: lbuffer uint8 crypto_publickeybytes
+  -> t: poly_k
+  -> i: size_t{v i + 22 < v (crypto_publickeybytes /. (size UI32.n /. size 8))}
+  -> j: size_t{v j + 31 < v params_n}
   -> Stack unit
-    (requires fun h -> live h pk)
+    (requires fun h -> live h pk /\ live h t /\ disjoint pk t)
     (ensures fun h0 _ h1 -> modifies1 pk h0 h1)
 
-let encode_pk_ptSet pk i value =
-    uint_to_bytes_le #U32 #_ (sub pk (i *. size UI32.n /. size 8) (size UI32.n /. size 8)) (elem_to_uint32 value)
+#reset-options "--z3rlimit 500 --max_fuel 0 --max_ifuel 0 --admit_smt_queries true"
+
+let encode_pk_loopBody pk t i j =
+    push_frame();
+    
+    let h0 = ST.get () in
+    reveal_valid_t t h0 h0;
+    assert(valid_t t h0 h0);
+    [@inline_let] let tj = encode_pk_tGet h0 t in
+    let tj0  = tj (j)          in let tj1 = tj (j+.size 1)   in let tj2  = tj (j+.size 2)  in let tj3  = tj (j+.size 3) in 
+    let tj4  = tj (j+.size 4)  in let tj5 = tj (j+.size 5)   in let tj6  = tj (j+.size 6)  in let tj7  = tj (j+.size 7) in
+    let tj8  = tj (j+.size 8)  in let tj9 = tj (j+.size 9)   in let tj10 = tj (j+.size 10) in let tj11 = tj (j+.size 11) in 
+    let tj12 = tj (j+.size 12) in let tj13 = tj (j+.size 13) in let tj14 = tj (j+.size 14) in let tj15 = tj (j+.size 15) in 
+    let tj16 = tj (j+.size 16) in let tj17 = tj (j+.size 17) in let tj18 = tj (j+.size 18) in let tj19 = tj (j+.size 19) in 
+    let tj20 = tj (j+.size 20) in let tj21 = tj (j+.size 21) in let tj22 = tj (j+.size 22) in let tj23 = tj (j+.size 23) in 
+    let tj24 = tj (j+.size 24) in let tj25 = tj (j+.size 25) in let tj26 = tj (j+.size 26) in let tj27 = tj (j+.size 27) in 
+    let tj28 = tj (j+.size 28) in let tj29 = tj (j+.size 29) in let tj30 = tj (j+.size 30) in let tj31 = tj (j+.size 31) in 
+    let h1 = ST.get () in
+    reveal_valid_t t h0 h1;
+    assert(valid_t t h0 h1);
+
+    reveal_valid_pk pk h1 h1;
+    assert(valid_pk pk h1 h1);
+    // In the reference code, "pt = (uint32_t*)pk" where pk is (unsigned char *). We can't recast buffers to have different
+    // element types in F*. (BufferView does this, but only as ghost predicates for proving theorems.)
+    // Instead, we curry encode_pk_ptSet above with pk as its first parameter to provide a function that looks a lot
+    // like the integer assignment in the reference code, and it extracts down to store32_le in C.
+    [@inline_let] let pt = encode_pk_ptSet h1 pk in
+    pt (i)          (tj0              |^ (tj1  <<^ 23ul)); 
+    pt (i+.size 1)  ((tj1  >>^ 9ul)   |^ (tj2  <<^ 14ul)); pt (i+.size 2)   ((tj2  >>^ 18ul)  |^ (tj3  <<^  5ul) |^ (tj4 <<^ 28ul)); 
+    pt (i+.size 3)  ((tj4  >>^  4ul)  |^ (tj5  <<^ 19ul));
+    pt (i+.size 4)  ((tj5  >>^ 13ul)  |^ (tj6  <<^ 10ul)); pt (i+.size 5)   ((tj6  >>^ 22ul)  |^ (tj7  <<^  1ul) |^ (tj8 <<^ 24ul));
+    pt (i+.size 6)  ((tj8  >>^  8ul)  |^ (tj9  <<^ 15ul)); pt (i+.size 7)   ((tj9  >>^ 17ul)  |^ (tj10 <<^ 6ul) |^ (tj11 <<^ 29ul));
+    pt (i+.size 8)  ((tj11 >>^  3ul)  |^ (tj12 <<^ 20ul));
+    pt (i+.size 9)  ((tj12 >>^ 12ul)  |^ (tj13 <<^ 11ul)); pt (i+.size 10)  ((tj13 >>^ 21ul)  |^ (tj14 <<^  2ul) |^ (tj15 <<^ 25ul));
+    pt (i+.size 11) ((tj15 >>^  7ul)  |^ (tj16 <<^ 16ul)); pt (i+.size 12)  ((tj16 >>^ 16ul)  |^ (tj17 <<^  7ul) |^ (tj18 <<^ 30ul));
+    pt (i+.size 13) ((tj18 >>^  2ul)  |^ (tj19 <<^ 21ul));
+    pt (i+.size 14) ((tj19 >>^ 11ul)  |^ (tj20 <<^ 12ul)); pt (i+.size 15)  ((tj20 >>^ 20ul)  |^ (tj21 <<^  3ul) |^ (tj22 <<^ 26ul));
+    pt (i+.size 16) ((tj22 >>^  6ul)  |^ (tj23 <<^ 17ul)); pt (i+.size 17)  ((tj23 >>^ 15ul)  |^ (tj24 <<^  8ul) |^ (tj25 <<^ 31ul));
+    pt (i+.size 18) ((tj25 >>^  1ul)  |^ (tj26 <<^ 22ul)); 
+    pt (i+.size 19) ((tj26 >>^ 10ul)  |^ (tj27 <<^ 13ul)); pt (i+.size 20)  ((tj27 >>^ 19ul)  |^ (tj28 <<^  4ul) |^ (tj29 <<^ 27ul)); 
+    pt (i+.size 21) ((tj29 >>^  5ul)  |^ (tj30 <<^ 18ul));
+    pt (i+.size 22) ((tj30 >>^ 14ul)  |^ (tj31 <<^  9ul));
+    let h2 = ST.get () in
+    reveal_valid_pk pk h1 h2;
+    assert(valid_pk pk h1 h2); 
+    pop_frame()
+
+#reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0"
 
 val encode_pk:
     pk: lbuffer uint8 crypto_publickeybytes
@@ -49,60 +147,30 @@ val encode_pk:
   -> Stack unit
     (requires fun h -> live h pk /\ live h t /\ live h seedA /\
                     disjoint pk t /\ disjoint pk seedA /\ disjoint t seedA)
-    (ensures fun h0 _ h1 -> modifies (loc pk) h0 h1)
+    (ensures fun h0 _ h1 -> modifies1 pk h0 h1)
 
 let encode_pk pk t seedA =
     push_frame();
 
-    let iBuf = create (size 1) (size 0) in
-    let jBuf = create (size 1) (size 0) in
-
-    // In the reference code, "pt = (uint32_t*)pk" where pk is (unsigned char *). We can't recast buffers to have different
-    // element types in F*. (BufferView does this, but only as ghost predicates for proving theorems.)
-    // Instead, we curry encode_pk_ptSet above with pk as its first parameter to provide a function that looks a lot
-    // like the integer assignment in the reference code, and it extracts down to store32_le in C.
-    [@inline_let] let pt = encode_pk_ptSet pk in
+    let i = create (size 1) (size 0) in
+    let j = create (size 1) (size 0) in
 
     assert(v params_k = 1);
-    
-    while
-    #(fun h -> live h t /\ live h iBuf /\ live h jBuf)
-    #(fun _ h -> live h t /\ live h iBuf /\ live h jBuf)
-    (fun _ -> (iBuf.(size 0)) <. params_n *. params_q_log /. size 32)
+
+    let h0 = ST.get () in
+    LL.while
+    (fun h -> live h pk /\ live h t /\ live h i /\ live h j /\ modifies3 pk i j h0 h)
+    (fun h -> v (bget h i 0) < v params_n * v params_q_log / 32)
+    (fun _ -> i.(size 0) <. params_n *. params_q_log /. size 32)
     (fun _ ->
-        let i = iBuf.(size 0) in
-	let j = jBuf.(size 0) in
-
-        // I can't think of a better way of doing this, because having buffer index ops in-line causes 
-        // typechecking errors. So here I declare a whole range of let bindings for the 32 elements of t
-	// starting at index j. I'm open to suggestions for a better way of doing this.
-	let tj   = t.(j)          in let tj1 = t.(j+.size 1)   in let tj2  = t.(j+.size 2)  in let tj3  = t.(j+.size 3) in
-	let tj4  = t.(j+.size 4)  in let tj5 = t.(j+.size 5)   in let tj6  = t.(j+.size 6)  in let tj7  = t.(j+.size 7) in
-	let tj8  = t.(j+.size 8)  in let tj9 = t.(j+.size 9)   in let tj10 = t.(j+.size 10) in let tj11 = t.(j+.size 11) in
-	let tj12 = t.(j+.size 12) in let tj13 = t.(j+.size 13) in let tj14 = t.(j+.size 14) in let tj15 = t.(j+.size 15) in
-	let tj16 = t.(j+.size 16) in let tj17 = t.(j+.size 17) in let tj18 = t.(j+.size 18) in let tj19 = t.(j+.size 19) in
-	let tj20 = t.(j+.size 20) in let tj21 = t.(j+.size 21) in let tj22 = t.(j+.size 22) in let tj23 = t.(j+.size 23) in
-	let tj24 = t.(j+.size 24) in let tj25 = t.(j+.size 25) in let tj26 = t.(j+.size 26) in let tj27 = t.(j+.size 27) in
-	let tj28 = t.(j+.size 28) in let tj29 = t.(j+.size 29) in let tj30 = t.(j+.size 30) in let tj31 = t.(j+.size 31) in
-
-        pt (i)          (tj               |^ (tj1  <<^ 23ul)); 
-	pt (i+.size 1)  ((tj1  >>^ 9ul)   |^ (tj2  <<^ 14ul)); pt (i+.size 2)   ((tj2  >>^ 18ul)  |^ (tj3  <<^  5ul) |^ (tj4 <<^ 28ul)); 
-	pt (i+.size 3)  ((tj4  >>^  4ul)  |^ (tj5  <<^ 19ul));
-	pt (i+.size 4)  ((tj5  >>^ 13ul)  |^ (tj6  <<^ 10ul)); pt (i+.size 5)   ((tj6  >>^ 22ul)  |^ (tj7  <<^  1ul) |^ (tj8 <<^ 24ul));
-	pt (i+.size 6)  ((tj8  >>^  8ul)  |^ (tj9  <<^ 15ul)); pt (i+.size 7)   ((tj9  >>^ 17ul)  |^ (tj10 <<^ 6ul) |^ (tj11 <<^ 29ul));
-	pt (i+.size 8)  ((tj11 >>^  3ul)  |^ (tj12 <<^ 20ul));
-	pt (i+.size 9)  ((tj12 >>^ 12ul)  |^ (tj13 <<^ 11ul)); pt (i+.size 10)  ((tj13 >>^ 21ul)  |^ (tj14 <<^  2ul) |^ (tj15 <<^ 25ul));
-	pt (i+.size 11) ((tj15 >>^  7ul)  |^ (tj16 <<^ 16ul)); pt (i+.size 12)  ((tj16 >>^ 16ul)  |^ (tj17 <<^  7ul) |^ (tj18 <<^ 30ul));
-	pt (i+.size 13) ((tj18 >>^  2ul)  |^ (tj19 <<^ 21ul));
-	pt (i+.size 14) ((tj19 >>^ 11ul)  |^ (tj20 <<^ 12ul)); pt (i+.size 15)  ((tj20 >>^ 20ul)  |^ (tj21 <<^  3ul) |^ (tj22 <<^ 26ul));
-	pt (i+.size 16) ((tj22 >>^  6ul)  |^ (tj23 <<^ 17ul)); pt (i+.size 17)  ((tj23 >>^ 15ul)  |^ (tj24 <<^  8ul) |^ (tj25 <<^ 31ul));
-	pt (i+.size 18) ((tj25 >>^  1ul)  |^ (tj26 <<^ 22ul)); 
-	pt (i+.size 19) ((tj26 >>^ 10ul)  |^ (tj27 <<^ 13ul)); pt (i+.size 20)  ((tj27 >>^ 19ul)  |^ (tj28 <<^  4ul) |^ (tj29 <<^ 27ul)); 
-	pt (i+.size 21) ((tj29 >>^  5ul)  |^ (tj30 <<^ 18ul));
-	pt (i+.size 22) ((tj30 >>^ 14ul)  |^ (tj31 <<^  9ul));
-	
-        jBuf.(size 0) <- j +. size 32;
-	iBuf.(size 0) <- i +. params_q_log
+        let h1 = ST.get () in
+        assume(v (bget h1 j 0) + 31 < v params_n);
+        assume(v (bget h1 i 0) + 22 < v (crypto_publickeybytes /. (size UI32.n /. size 8)));
+        encode_pk_loopBody pk t i.(size 0) j.(size 0);
+        let h2 = ST.get () in
+        assume(v (bget h2 j 0) + 32 + 31 < v params_n);
+        j.(size 0) <- j.(size 0) +. size 32;
+	i.(size 0) <- i.(size 0) +. params_q_log
     );
 
     update_sub #MUT #_ #_ pk (params_n *. params_q_log /. size 8) crypto_seedbytes seedA;
@@ -118,7 +186,10 @@ val decode_pk_pt:
     (ensures fun h0 _ h1 -> h0 == h1)
 
 let decode_pk_pt pk j =
-    uint_from_bytes_le #U32 #PUB (sub pk (j *. size UI32.n /. size 8) (size UI32.n /. size 8))
+    let u = uint_from_bytes_le #U32 #_ (sub pk (j *. size UI32.n /. size 8) (size UI32.n /. size 8)) in
+    Lib.RawIntTypes.u32_to_UInt32 u
+
+#reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0 --admit_smt_queries true"
 
 val decode_pk:
     pk : lbuffer I32.t (params_n *. params_k)

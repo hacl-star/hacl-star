@@ -18,7 +18,7 @@ unfold let uelem_v = UI32.v
 
 unfold let elem_to_int8 = int32_to_int8
 unfold let int8_to_elem = int8_to_int32
-unfold let elem_to_uint8 = int32_to_uint8
+unfold let elem_to_uint8 x = Lib.RawIntTypes.u8_from_UInt8 (int32_to_uint8 x)
 unfold let uint8_to_elem = uint8_to_int32
 unfold let elem_to_int16 = int32_to_int16
 unfold let int16_to_elem = int16_to_int32

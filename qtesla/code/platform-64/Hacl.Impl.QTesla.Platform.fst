@@ -1,6 +1,7 @@
 module Hacl.Impl.QTesla.Platform
 
 open Hacl.Impl.QTesla.Params
+open Hacl.Impl.QTesla.Globals
 
 module I64 = FStar.Int64
 module UI64 = FStar.UInt64
@@ -9,11 +10,13 @@ unfold let params_radix = 64
 unfold let params_radix32 = 32
 unfold let sdigit_t = I64.t
 unfold let sdigit_n = I64.n
+unfold let sdigit_v = I64.v
 unfold let to_sdigit = I64.int_to_t
 unfold let sdigit_to_int32 = FStar.Int.Cast.int64_to_int32
 unfold let sdigit_to_int64 x = x
 unfold let sdigit_to_elem = int64_to_elem
 unfold let elem_to_sdigit = elem_to_int64
+unfold let is_elem_sdigit = is_elem_i64
 unfold let digit_t = UI64.t
 unfold let digit_n = UI64.n
 unfold let digit_inttype = Lib.IntTypes.U64

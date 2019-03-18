@@ -27,19 +27,22 @@ module LL = Lib.Loops
 open Hacl.Impl.QTesla.Params
 open Hacl.Impl.QTesla.Constants
 open Hacl.Impl.QTesla.Globals
+open Hacl.Impl.QTesla.Lemmas
+
+#reset-options "--z3rlimit 100 --max_fuel 1 --max_ifuel 1"
 
 inline_for_extraction noextract
 let ntt = Hacl.Impl.QTesla.Heuristic.Poly.ntt
 
 inline_for_extraction noextract private
 val nttinv_innerfor:
-    numoProblems: size_t{v numoProblems > 0 /\ v numoProblems < v params_n}
+    numoProblems: size_t{v numoProblems > 0 /\ v numoProblems <= v params_n / 2}
   -> jFirst: size_t{v jFirst + 2 * v numoProblems < v params_n}
   -> a: poly
   -> wj: elem
   -> Stack size_t
     (requires fun h -> live h a)
-    (ensures fun h0 _ h1 -> True) //modifies1 a h0 h1)
+    (ensures fun h0 _ h1 -> modifies1 a h0 h1)
 
 let nttinv_innerfor numoProblems jFirst a wj = 
     push_frame();
@@ -51,40 +54,37 @@ let nttinv_innerfor numoProblems jFirst a wj =
     let h0 = ST.get() in
     assert(bget h0 jBuf 0 <. params_n);
     LL.while
-       (fun h -> liveness h /\ v (bget h jBuf 0) < v params_n) //  /\ modifies1 a h0 h)
+       (fun h -> liveness h /\ v (bget h jBuf 0) < v params_n /\ modifies2 jBuf a h0 h /\
+              v jFirst + 2 * v numoProblems < v params_n)
        (fun h -> v (bget h jBuf 0) < v jFirst + v numoProblems)
        (fun _ -> jBuf.(size 0) <. jFirst +. numoProblems)
        (fun _ -> 
            let j:size_t = jBuf.(size 0) in
            let jNumo = j +. numoProblems in
            let temp:elem = a.(j) in
-           assume(v jNumo < v params_n);
            let ajNumo:elem = a.(jNumo) in
+           assume(FStar.Int.fits (elem_v temp + elem_v ajNumo) elem_n);
            assume(is_elem (temp +^ ajNumo));
-           let h1 = ST.get() in
-           a.(j) <- temp +^ ajNumo;
+           a.(j) <- temp +^ ajNumo; // TODO (kkane): This line is where I differs from III-size and III-speed.
            [@inline_let] let difference = temp -^ ajNumo in
-           assume(FStar.Int.fits (elem_v wj * elem_v difference) 64);
+           lemma_elem_product_fits_int64 wj difference;
            [@inline_let] let product = I64.((elem_to_int64 wj) *^ (elem_to_int64 difference)) in
-           assume(FStar.Int.fits (I64.v product * I64.v params_qinv) 64);
+           assume(FStar.Int.fits (I64.v product * I64.v params_qinv) I64.n);
            a.(jNumo) <- reduce product;
-           let h2 = ST.get() in
-           assert(modifies1 a h1 h2);
            jBuf.(size 0) <- j +. size 1
        );
     let res = jBuf.(size 0) in
     pop_frame();
     res
 
-inline_for_extraction noextract private
 val nttinv_middlefor:
-    numoProblems: size_t{v numoProblems > 0 /\ v numoProblems < v params_n}
+    numoProblems: size_t{v numoProblems > 0 /\ v numoProblems <= v params_n / 2}
   -> jTwiddle: lbuffer size_t (size 1)
   -> w: poly
   -> a: poly
   -> Stack unit
     (requires fun h -> live h jTwiddle /\ live h w /\ live h a /\ v (bget h jTwiddle 0) < v params_n)
-    (ensures fun h0 _ h1 -> True) // modifies2 w a h0 h1)
+    (ensures fun h0 _ h1 -> modifies2 jTwiddle a h0 h1)
 
 let nttinv_middlefor numoProblems jTwiddle w a =
     push_frame();
@@ -94,8 +94,9 @@ let nttinv_middlefor numoProblems jTwiddle w a =
       (ensures fun h0 _ h1 -> live h1 jFirst)
     = jFirst.(size 0) <. params_n in
     let liveness h = live h jTwiddle /\ live h jFirst /\ live h a /\ live h w in
+    let h0 = ST.get() in
     LL.while // Middle for loop
-        liveness
+        (fun h -> liveness h /\ modifies3 jFirst jTwiddle a h0 h)
         (fun h -> v (bget h jFirst 0) < v params_n)
         (fun _ -> jFirst.(size 0) <. params_n)
         (fun _ ->
@@ -118,7 +119,7 @@ val nttinv:
   -> w: poly
   -> Stack unit
     (requires fun h -> live h a /\ live h w /\ disjoint a w)
-    (ensures fun h0 _ h1 -> True) // modifies1 a h0 h1)
+    (ensures fun h0 _ h1 -> modifies1 a h0 h1)
 
 let nttinv a w =
     push_frame();
@@ -132,118 +133,65 @@ let nttinv a w =
       = numoProblems.(size 0) <. params_n in*)
 
     let h0 = ST.get() in
-    assert(v (bget h0 numoProblems 0) > 0);
-
     LL.while // Outermost for loop
-        test_pre
+        (fun h -> test_pre h /\ modifies3 numoProblems jTwiddle a h0 h)
         (fun h -> v (bget h numoProblems 0) < v params_n)
         (fun _ -> numoProblems.(size 0) <. params_n)
         (fun _ ->
             let h1 = ST.get() in
             assume(v (bget h1 numoProblems 0) > 0);
-            assume(v (bget h1 numoProblems 0) < v params_n);
+            assume(v (bget h1 numoProblems 0) <= v params_n / 2);
             assume(v (bget h1 jTwiddle 0) < v params_n);
             nttinv_middlefor numoProblems.(size 0) jTwiddle w a;
             numoProblems.(size 0) <- numoProblems.(size 0) *. size 2
         );
 
+    let h1 = ST.get() in
     for 0ul (params_n /. size 2)
-    (fun h _ -> live h a)
+    (fun h _ -> live h a /\ modifies1 a h1 h)
     (fun i ->
-        //assert(v i < v params_n / 2);
         assert_norm(v params_n / 2 < v params_n);
         assume(v i < v params_n);
         let ai = a.(i) in
-        assume(FStar.Int.fits (I64.v params_r * elem_v ai * I64.v params_qinv) 64); 
+        assume(FStar.Int.fits (I64.v params_r * elem_v ai * I64.v params_qinv) I64.n); 
 	a.(i) <- reduce I64.(params_r *^ (elem_to_int64 ai))
     );
 
     pop_frame()
 
-#reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0 --admit_smt_queries true"
+private val move_refinement: #a:Type -> #p:(a -> Type)
+  -> l:list a{forall z. FStar.List.Tot.Base.memP z l ==> p z} -> list (x:a{p x})
+let rec move_refinement #a #p = function
+  | [] -> []
+  | hd :: tl -> hd :: move_refinement #a #p tl
 
+private let rec list_of_elem l : GTot bool =
+    match l with
+    | [] -> true
+    | hd :: tl -> is_elem hd && list_of_elem tl
 
-(*val nttinv:
-    a: poly
-  -> w: poly
-  -> Stack unit
-    (requires fun h -> live h a /\ live h w /\ disjoint a w)
-    (ensures fun h0 _ h1 -> modifies1 a h0 h1)
+private val list_of_elem_memP: l:list elem_base -> Lemma 
+  (requires list_of_elem l)
+  (ensures (forall x. FStar.List.Tot.Base.memP x l ==> is_elem x))
+let rec list_of_elem_memP = function
+  | [] -> ()
+  | x :: tl -> list_of_elem_memP tl
 
-let nttinv a w =
-    push_frame();
-    let numoProblems:lbuffer size_t (size 1) = create (size 1) (size 1) in
-    let jTwiddle = create (size 1) (size 0) in
+private unfold val coerce: l:list elem_base{list_of_elem l} -> list elem
+let coerce l =
+  list_of_elem_memP l;
+  normalize_term (move_refinement l)
 
-    let test_pre h = live h numoProblems /\ live h jTwiddle /\ live h a /\ live h w in
-    let guard () : Stack bool
-      (requires fun h -> live h numoProblems)
-      (ensures fun h0 _ h1 -> h0 == h1)
-      = numoProblems.(size 0) <. params_n in
+#reset-options "--z3rlimit 100 --max_fuel 1 --max_ifuel 0"
 
-    while // Outermost for loop
-        #test_pre
-        #(fun _ h -> test_pre h)
-        guard
-        (fun _ ->
-            push_frame();
-            let jBuf = create (size 1) (size 0) in
-            let jFirst = create (size 1) (size 0) in
-            let cond () : Stack bool
-              (requires fun h -> live h jFirst)
-              (ensures fun h0 _ h1 -> live h1 jFirst)
-            = jFirst.(size 0) <. params_n in
-            let liveness h = live h numoProblems /\ live h jTwiddle /\ live h jBuf /\ live h jFirst /\ live h a /\ live h w in
-            while // Middle for loop
-                #(fun h -> liveness h /\ bget h jTwiddle 0 <. params_n)
-                #(fun _ h -> liveness h /\ bget h jTwiddle 0 <. params_n)
-                (fun _ -> jFirst.(size 0) <. params_n)
-                (fun _ ->
-                    let jTwiddleVal = jTwiddle.(size 0) in
-                    let wj:elem = w.(jTwiddleVal) in
-                    jTwiddle.(size 0) <- jTwiddleVal +. (size 1);
-                    // Innermost for loop. Have to use a while because the middle for loop's increment depends on the
-                    // final value of j from each inner for loop, so its scope can't be constrained to the for loop.
-                    jBuf.(size 0) <- jFirst.(size 0);
-                    let jFinish = jFirst.(size 0) +. numoProblems.(size 0) in
-                    let liveness h = live h numoProblems /\ live h jTwiddle /\ live h jFirst /\ live h jBuf /\ live h a in
-                    while
-                        #(fun h -> liveness h /\ bget h jBuf 0 <. params_n)
-                        #(fun _ h -> liveness h /\ bget h jBuf 0 <. params_n)
-                        (fun _ -> jBuf.(size 0) <. jFinish)
-                        (fun _ ->
-                            let j:size_t = jBuf.(size 0) in
-                            let jNumo = j +. numoProblems.(size 0) in
-                            let temp:elem = a.(j) in
-                            assume(jNumo <. params_n); // TODO
-                            let ajNumo:elem = a.(jNumo) in
-                            assume(elem_v temp + elem_v ajNumo < elem_v params_q);
-                            assume(elem_v temp + elem_v ajNumo > -(elem_v params_q));
-                            a.(j) <- temp +^ ajNumo;
-                            a.(jNumo) <- reduce I64.((elem_to_int64 wj) *^ ((elem_to_int64 temp) -^ (elem_to_int64 ajNumo)));
-                            jBuf.(size 0) <- j +. size 1
-                        );
-                    jFirst.(size 0) <- jBuf.(size 0) +. numoProblems.(size 0)
-                );
-            numoProblems.(size 0) <- numoProblems.(size 0) *. size 2;
-            pop_frame()
-        );
+//let test _ = assert_norm(list_of_elem zeta_list); coerce zeta_list
 
-    for 0ul (params_n /. size 2)
-    (fun h _ -> live h a)
-    (fun i ->
-        let ai = a.(i) in
-        a.(i) <- reduce I64.(params_r *^ (elem_to_int64 ai))
-    );
-
-    pop_frame()
-*)
 val poly_ntt:
     x_ntt: poly
   -> x: poly
   -> Stack unit
     (requires fun h -> live h x_ntt /\ live h x /\ disjoint x_ntt x)
-    (ensures fun h0 _ h1 -> modifies1 x h0 h1)
+    (ensures fun h0 _ h1 -> modifies1 x_ntt h0 h1)
 
 let poly_ntt x_ntt x =
     push_frame();
@@ -254,11 +202,14 @@ let poly_ntt x_ntt x =
     and we'd essentially be asking the world never to mutate a poly, which is obviously not going to work. So
     we use createL, which makes it mutable, but we just never change it.
     *)
-    let zeta: poly = createL zeta_list in
+    assert_norm(list_of_elem zeta_list);
+    [@inline_let] let (zeta_list_elem:list elem) = coerce zeta_list in 
+    let zeta : poly = createL zeta_list_elem in 
+    let h0 = ST.get() in
     for 0ul params_n
-    (fun h _ -> live h x_ntt /\ live h x)
+    (fun h _ -> live h x_ntt /\ live h x /\ modifies1 x_ntt h0 h)
     (fun i ->
-        x_ntt.(i) <- (x.(i))
+        x_ntt.(i) <- x.(i)
     );
 
     ntt x_ntt zeta;
@@ -277,8 +228,10 @@ val poly_mul:
     (ensures fun h0 _ h1 -> modifies1 result h0 h1)
 
 let poly_mul result x y =
-    push_frame();
-    let zetainv : poly = createL zetainv_list in
+    push_frame(); 
+    assert_norm(list_of_elem zetainv_list);
+    [@inline_let] let (zetainv_list_elem:list elem) = coerce zetainv_list in
+    let zetainv : poly = createL zetainv_list_elem in
     poly_pointwise result x y;
     nttinv result zetainv;
     pop_frame()

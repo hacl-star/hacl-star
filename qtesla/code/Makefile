@@ -75,7 +75,6 @@ FSTAR_INCLUDE_DIRS = \
   $(KREMLIN_HOME)/kremlib \
   $(HACL_HOME)/specs \
   $(HACL_HOME)/lib \
-  $(HACL_HOME)/lib/fst \
   $(HACL_HOME)/lib/c \
   $(HACL_HOME)/code/sha3
 

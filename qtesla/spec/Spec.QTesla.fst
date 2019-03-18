@@ -19,8 +19,8 @@ module FSeq = FStar.Seq
 
 // TODO: this disappeared from Lib.ByteSequence.fsti and I don't know why.
 inline_for_extraction
-let to_lbytes (b:bytes{length b > 0 /\ length b < max_size_t}) : lbytes (length b) =
-  to_lseq #uint8 b
+let to_lbytes (b:bytes{Seq.length b > 0 /\ Seq.length b < max_size_t}) : lbytes (Seq.length b) =
+  Seq.to_lseq #uint8 b
 
 (** qTesla often uses [pos] as a variable name, so we define a transparent synonym *)
 unfold let positive = pos

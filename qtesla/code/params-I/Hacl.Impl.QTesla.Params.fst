@@ -19,8 +19,6 @@ module UI64 = FStar.UInt64
 
 include Hacl.Impl.QTesla.Heuristic.Parameters
 
-/// Parameters in QTesla.Params aren't marked as unfold or inline_for_extraction;
-/// so we need to normalize them here
 let params_n = size S.params_n
 let params_k = size S.params_k
 let params_q = to_elem S.params_q

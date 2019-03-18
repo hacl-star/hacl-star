@@ -26,8 +26,7 @@ verify: $(addprefix $(CACHE_DIR)/,Spec.QTesla.fst.checked)
 FSTAR_INCLUDE_DIRS = \
   params-$(VARIANT) \
   $(HACL_HOME)/specs \
-  $(HACL_HOME)/lib \
-  $(HACL_HOME)/lib/fst
+  $(HACL_HOME)/lib
 
 FSTAR_FLAGS = $(OTHERFLAGS) --cmi \
   --cache_checked_modules --cache_dir $(CACHE_DIR) --odir $(OUT_DIR) \
