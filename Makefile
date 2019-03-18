@@ -845,7 +845,7 @@ test-c-%: dist/test/c/%.test
 # C tests (from C files) #
 ##########################
 
-test-handwritten: compile-generic
+test-handwritten: compile-compact-gcc
 	$(LD_EXTRA) KREMLIN_HOME="$(KREMLIN_HOME)" \
 	  LDFLAGS="$(LDFLAGS)" CFLAGS="$(CFLAGS)" \
 	  $(MAKE) -C tests test
