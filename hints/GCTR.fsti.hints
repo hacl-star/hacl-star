@@ -1,6 +1,42 @@
 [
-  "\r\n\"ç98\u0012®ƒ\u0005§\u0006\u0006‡)›",
+  "hs{9\u00052VÂΩnR¸iáaÕ",
   [
+    [
+      "GCTR.inc32lite",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565",
+        "equation_Prims.nat", "equation_Types_s.quad32",
+        "equation_Words_s.nat32", "equation_Words_s.natN",
+        "fuel_guarded_inversion_Words_s.four",
+        "function_token_typing_Prims.__cache_version_number__",
+        "function_token_typing_Words_s.nat32",
+        "primitive_Prims.op_GreaterThanOrEqual",
+        "proj_equation_Words_s.Mkfour_lo0",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_5514fbe9e08dfda40f950a7b9f1b2b98",
+        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "typing_Words_s.__proj__Mkfour__item__lo0"
+      ],
+      0,
+      "7a59e3beb8309d0b42d6faf0b5e4f40b"
+    ],
+    [
+      "GCTR.partial_seq_agreement",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "refinement_interpretation_Tm_refine_6d2333afbb8ce899cd8937b56b09e98d"
+      ],
+      0,
+      "cbbb15faca75fb4e442ff526f2bfa66b"
+    ],
     [
       "GCTR.gctr_encrypt_block_offset",
       1,
@@ -12,7 +48,7 @@
         "refinement_interpretation_Tm_refine_8d65e998a07dd53ec478e27017d9dba5"
       ],
       0,
-      "e14d3e78490c6ccbb799c2e96a931a06"
+      "60ba2f72fb38b7802ef6429f7d80bcd0"
     ],
     [
       "GCTR.gctr_encrypt_empty",
@@ -44,7 +80,7 @@
         "typing_Types_s.le_seq_quad32_to_bytes"
       ],
       0,
-      "9261f05f0f7f99c46406169fea8b7346"
+      "b39e3388c0051d8d9ab4882909606cb6"
     ],
     [
       "GCTR.aes_encrypt_BE",
@@ -53,7 +89,7 @@
       0,
       [ "@query" ],
       0,
-      "6e009926c216c7dcf89e5db346c2b0d9"
+      "55dbcefd9c0386e54fbef3f25bbaee37"
     ],
     [
       "GCTR.gctr_partial",
@@ -65,7 +101,73 @@
         "refinement_interpretation_FStar.Seq.Base_Tm_refine_6d2333afbb8ce899cd8937b56b09e98d"
       ],
       0,
-      "675e0a5389bc6d2e4d2645cb463544e2"
+      "4912e42c68fbdf5f23508f0ef4d3cc9f"
+    ],
+    [
+      "GCTR.gctr_partial_opaque_init",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_GCTR.gctr_partial",
+        "equation_GCTR.gctr_partial_opaque", "equation_Prims.min",
+        "equation_Types_s.quad32", "equation_Words_s.nat32",
+        "fuel_guarded_inversion_Words_s.four",
+        "function_token_typing_Opaque_s.make_opaque",
+        "primitive_Prims.op_LessThanOrEqual",
+        "projection_inverse_BoxInt_proj_0",
+        "token_correspondence_GCTR.gctr_partial"
+      ],
+      0,
+      "f2d59631c8c5778466c5e51f7024968b"
+    ],
+    [
+      "GCTR.gctr_partial_opaque_ignores_postfix",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565",
+        "equation_GCTR.gctr_partial", "equation_GCTR.gctr_partial_opaque",
+        "equation_Prims.min", "equation_Prims.nat",
+        "equation_Types_s.quad32", "equation_Words_s.nat32",
+        "equation_Words_s.natN", "fuel_guarded_inversion_Words_s.four",
+        "function_token_typing_Opaque_s.make_opaque",
+        "function_token_typing_Prims.__cache_version_number__",
+        "function_token_typing_Words_s.nat32", "int_inversion", "int_typing",
+        "kinding_Words_s.four@tok", "lemma_FStar.Seq.Base.lemma_index_slice",
+        "lemma_FStar.Seq.Base.lemma_len_slice",
+        "primitive_Prims.op_Addition",
+        "primitive_Prims.op_GreaterThanOrEqual",
+        "primitive_Prims.op_LessThanOrEqual",
+        "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_3321cbe2f573e3c988fd0895bf1f0cf9",
+        "refinement_interpretation_Tm_refine_5514fbe9e08dfda40f950a7b9f1b2b98",
+        "refinement_interpretation_Tm_refine_559c261b1c3777929ea329abfe70ab33",
+        "refinement_interpretation_Tm_refine_6d2333afbb8ce899cd8937b56b09e98d",
+        "refinement_interpretation_Tm_refine_aebc5aa9049e78f605051015a3436e68",
+        "refinement_interpretation_Tm_refine_b9307adb178ed6e057c5597ce0481094",
+        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "token_correspondence_GCTR.gctr_partial"
+      ],
+      0,
+      "1d84706545a2e1389dee1a8c7512a154"
+    ],
+    [
+      "GCTR.gctr_partial_extend6",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
+      ],
+      0,
+      "c1ddb272e362f59500cacf358a5242f6"
     ],
     [
       "GCTR.test",
@@ -98,7 +200,7 @@
         "typing_Workarounds.index_work_around_quad32"
       ],
       0,
-      "e0ea1d66854d85bec1122f3d7c20fd24"
+      "077f1cad7cdd302b6461a1b01740fe71"
     ],
     [
       "GCTR.gctr_partial_completed",
@@ -111,7 +213,20 @@
         "refinement_interpretation_Tm_refine_8d65e998a07dd53ec478e27017d9dba5"
       ],
       0,
-      "0280939900fc28406bbab3621ad56ce4"
+      "3022db9ce0ebd610b56f5babe4a49063"
+    ],
+    [
+      "GCTR.gctr_partial_opaque_completed",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.l_and",
+        "equation_Prims.squash", "l_and-interp",
+        "refinement_interpretation_Tm_refine_8d65e998a07dd53ec478e27017d9dba5"
+      ],
+      0,
+      "5d7e4968f895a0fb17b8ddb8bd615e91"
     ],
     [
       "GCTR.gctr_partial_to_full_basic",
@@ -127,7 +242,7 @@
         "refinement_interpretation_Tm_refine_8d65e998a07dd53ec478e27017d9dba5"
       ],
       0,
-      "782c5db6915da593dfc9ff34a2070ec5"
+      "5f62ead89e6ea06d0da702d872679ed8"
     ],
     [
       "GCTR.gctr_partial_to_full_advanced",
@@ -155,7 +270,7 @@
         "typing_Types_s.le_seq_quad32_to_bytes", "unit_typing"
       ],
       0,
-      "e39bedc66ee072012cb2eada6a18e2d2"
+      "c26e85f1dbff0c7c4aaea3c8aee8179a"
     ],
     [
       "GCTR.gctr_encrypt_one_block",
@@ -171,7 +286,7 @@
         "refinement_interpretation_Tm_refine_8d65e998a07dd53ec478e27017d9dba5"
       ],
       0,
-      "01fe9ca744e8771ea483b7ef25717539"
+      "c7676f321da6a324a0f2868e2580003f"
     ]
   ]
 ]

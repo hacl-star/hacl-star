@@ -9,6 +9,8 @@
 #include <stdbool.h>
 #include <time.h>
 
+#include "Hacl_Curve25519_new.h"
+
 typedef __attribute__((aligned(32))) uint8_t X25519_KEY[32];
 
 typedef uint64_t cycles;
@@ -32,8 +34,6 @@ static __inline__ cycles cpucycles_end(void)
   //__asm__ __volatile__ ("RDTSCP\n\t"  "mov %%edx, %0\n\t"  "mov %%eax, %1\n\t"  "CPUID\n\t": "=r" (hi), "=r" (lo)::     "%rax", "%rbx", "%rcx", "%rdx");
   //return ( (uint64_t)lo)|( ((uint64_t)hi)<<32 );
 }
-
-extern void Hacl_Curve25519_64_ecdh(uint8_t* sec, uint8_t* priv, uint8_t* pub);
 
 #define ROUNDS 100000
 #define SIZE   1
