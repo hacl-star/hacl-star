@@ -298,7 +298,7 @@ procedure {:quick} gcm_make_length_quad()
     Pshufb(xmm2, xmm8);
 }
 
-#reset-options "--z3rlimit 120"
+#reset-options "--z3rlimit 150"
 procedure {:quick} {:verify true} gcm_blocks(
     inline alg:algorithm,
     ghost arg_b:buffer64,
@@ -342,8 +342,8 @@ procedure {:quick} {:verify true} gcm_blocks(
     requires
         // Valid buffers and pointers
         validSrcAddrs64 (mem,      arg_ptr,      arg_b,       10, memTaint, Public);
-        validDstAddrs128(mem,     auth_ptr,     auth_b, auth_len, memTaint, Secret);
-        validDstAddrs128(mem,   abytes_ptr,   abytes_b,        1, memTaint, Secret);
+        validSrcAddrs128(mem,     auth_ptr,     auth_b, auth_len, memTaint, Secret);
+        validSrcAddrs128(mem,   abytes_ptr,   abytes_b,        1, memTaint, Secret);
         validDstAddrs128(mem,       iv_ptr,       iv_b,        1, memTaint, Secret);
         validSrcAddrs128(mem,  in128x6_ptr,  in128x6_b, len128x6, memTaint, Secret);
         validDstAddrs128(mem, out128x6_ptr, out128x6_b, len128x6, memTaint, Secret);
@@ -406,14 +406,14 @@ procedure {:quick} {:verify true} gcm_blocks(
 
 
     ensures
-    // TODO: Add framing here!
+        // Framing
+        modifies_mem(loc_union(loc_buffer(iv_b), 
+                     loc_union(loc_buffer(stack_b), 
+                     loc_union(loc_buffer(out128x6_b), 
+                     loc_union(loc_buffer(out128_b), 
+                               loc_buffer(inout_b))))), old(mem), mem);
 
-//        modifies_buffer128(out_b, old(mem), mem);
-//        validSrcAddrsOffset128(mem, out_ptr, out_b, block_offset, len, memTaint, Secret);
-
-//        r9  ==  in128x6_ptr + 16 * len;
-//        r10 == out128x6_ptr + 16 * len;
-
+        // Semantics
         8 * old(plain_num_bytes) < pow2_32;
         8 * old(auth_num_bytes) < pow2_32;
 
