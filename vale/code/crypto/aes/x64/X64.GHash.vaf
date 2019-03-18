@@ -129,7 +129,7 @@ procedure {:quick}{:public} compute_ghash_incremental_register()
     reveal ghash_incremental_def;
 }
 
-procedure {:quick} compute_ghash_incremental(
+procedure {:quick} {:public} compute_ghash_incremental(
     ghost in_b:buffer128
     )
     lets in_ptr @= rax; len @= rcx; io @= xmm1; mask @= xmm8; h @= xmm11;
@@ -208,8 +208,7 @@ procedure {:quick} compute_ghash_incremental_partial(
     modifies
         rdx; r9; r12;
         io; efl;
-
-        // ReduceMul128_LE touches almost everything
+// ReduceMul128_LE touches almost everything
         xmm2; xmm3; xmm4; xmm5; xmm6;
 
     requires

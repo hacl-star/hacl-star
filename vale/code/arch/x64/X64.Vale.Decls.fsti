@@ -118,7 +118,9 @@ unfold let buffer_writeable (#t:M.base_typ) (b:M.buffer t) : GTot prop0 = M.buff
 unfold let buffer_length (#t:M.base_typ) (b:M.buffer t) = M.buffer_length #t b
 unfold let buffer8_as_seq (m:M.mem) (b:M.buffer8) : GTot (Seq.seq nat8) = M.buffer_as_seq m b
 unfold let buffer64_as_seq (m:M.mem) (b:M.buffer64) : GTot (Seq.seq nat64) = M.buffer_as_seq m b
+unfold let s64 (m:M.mem) (b:M.buffer64) : GTot (Seq.seq nat64) = buffer64_as_seq m b
 unfold let buffer128_as_seq (m:M.mem) (b:M.buffer128) : GTot (Seq.seq quad32) = M.buffer_as_seq m b
+unfold let s128 (m:M.mem) (b:M.buffer128) : GTot (Seq.seq quad32) = buffer128_as_seq m b
 unfold let valid_src_addr (#t:M.base_typ) (m:M.mem) (b:M.buffer t) (i:int) : prop0 =
   0 <= i /\ i < buffer_length b /\ buffer_readable m b
 unfold let valid_dst_addr (#t:M.base_typ) (m:M.mem) (b:M.buffer t) (i:int) : prop0 =
@@ -487,6 +489,14 @@ unfold let buffers_disjoint (b1 b2:M.buffer64) =
 
 unfold let buffers_disjoint128 (b1 b2:M.buffer128) =
     locs_disjoint [loc_buffer b1; loc_buffer b2]
+
+let rec loc_locs_disjoint_rec128 (l:M.buffer128) (ls:list (M.buffer128)) : prop0 =
+  match ls with
+  | [] -> True
+  | h::t -> locs_disjoint [loc_buffer l; loc_buffer h] /\ loc_locs_disjoint_rec128 l t
+
+unfold
+let buffer_disjoints128 (l:M.buffer128) (ls:list (M.buffer128)) : prop0 = normalize (loc_locs_disjoint_rec128 l ls)
 
 unfold let buffers3_disjoint128 (b1 b2 b3:M.buffer128) =
     locs_disjoint [loc_buffer b1; loc_buffer b2; loc_buffer b3]

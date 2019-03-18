@@ -17,10 +17,15 @@ open Collections.Seqs
 let make_gctr_plain_LE (p:seq nat8) : seq nat8 =
   if 4096 * length p < pow2_32 then p else empty
 
-let inc32lite (cb:quad32) (i:nat32) : quad32 =
-  let sum = cb.lo0 + i in
-  let lo0 = if sum >= pow2_32 then sum - pow2_32 else sum in
-  Mkfour lo0 cb.lo1 cb.hi2 cb.hi3
+let inc32lite (cb:quad32) (i:int) : quad32 =
+  if 0 <= i && i < pow2_32 then
+    let sum = cb.lo0 + i in
+    let lo0 = if sum >= pow2_32 then sum - pow2_32 else sum in
+    Mkfour lo0 cb.lo1 cb.hi2 cb.hi3
+  else
+    Mkfour 42 42 42 42
+
+let empty_seq_quad32 : seq quad32 = empty
 
 let partial_seq_agreement (x y:seq quad32) (lo hi:nat) =
   lo <= hi /\ hi <= length x /\ hi <= length y /\
@@ -83,6 +88,16 @@ let gctr_partial_opaque_init (alg:algorithm) (plain cipher:seq quad32) (key:seq 
   (ensures gctr_partial_opaque alg 0 plain cipher key icb)
   =
   reveal_opaque gctr_partial;
+  ()
+
+let lemma_gctr_partial_append (alg:algorithm) (b1 b2:nat) (p1 c1 p2 c2:seq quad32) (key:seq nat32) (icb1 icb2:quad32) : Lemma
+  (requires gctr_partial alg b1 p1 c1 key icb1 /\
+            gctr_partial alg b2 p2 c2 key icb2 /\
+            b1 == length p1 /\ b1 == length c1 /\
+            b2 == length p2 /\ b2 == length c2 /\
+            icb2 == inc32 icb1 b1)
+  (ensures gctr_partial alg (b1 + b2) (p1 @| p2) (c1 @| c2) key icb1)
+  =
   ()
 
 let gctr_partial_opaque_ignores_postfix (alg:algorithm) (bound:nat32) (plain plain' cipher cipher':seq quad32) (key:seq nat32) (icb:quad32) : Lemma
