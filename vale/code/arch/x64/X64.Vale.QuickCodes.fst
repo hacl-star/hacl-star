@@ -16,6 +16,7 @@ let state_mod_eq (m:mod_t) (s1 s2:state) =
   | Mod_xmm x -> eval_xmm x s1 == eval_xmm x s2
   | Mod_flags -> s1.flags == s2.flags
   | Mod_mem -> s1.mem == s2.mem
+  | Mod_stack -> s1.stack == s2.stack
   | Mod_memTaint -> s1.memTaint == s2.memTaint
 
 let rec update_state_mods_refl (mods:mods_t) (s:state) : Lemma
@@ -81,6 +82,7 @@ let update_state_mods_to (mods:mods_t) (s' s:state) : Lemma
   FStar.Classical.forall_intro f1_xmm;
   f1 (Mod_flags);
   f1 (Mod_mem);
+  f1 (Mod_stack);
   f1 (Mod_memTaint);
   ()
 

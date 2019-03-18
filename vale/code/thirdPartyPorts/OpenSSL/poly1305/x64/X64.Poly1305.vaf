@@ -27,6 +27,7 @@ include{:fstar}{:open} "Types_s"
 include{:fstar}{:open} "Arch.Types"
 include{:fstar}{:open} "X64.Machine_s"
 include{:fstar}{:open} "X64.Memory"
+include{:fstar}{:open} "X64.Stack_i"
 include{:fstar}{:open} "X64.Vale.State"
 include{:fstar}{:open} "X64.Vale.Decls"
 include{:fstar}{:open} "X64.Vale.QuickCode"
@@ -44,6 +45,7 @@ open Types_s
 open Arch.Types
 open X64.Machine_s
 open X64.Memory
+open X64.Stack_i
 open X64.Vale.State
 open X64.Vale.Decls
 open X64.Vale.InsBasic
@@ -673,7 +675,6 @@ procedure{:quick} poly1305_impl(
 // affect the result.
 procedure{:quick}{:public}{:exportSpecs} poly1305(
     inline win:bool,
-    ghost stack_b:buffer64,
     ghost ctx_b:buffer64,
     ghost inp_b:buffer64,
     ghost len_in:nat64)
@@ -692,7 +693,6 @@ procedure{:quick}{:public}{:exportSpecs} poly1305(
         validDstAddrs64(mem, ctx_in, ctx_b, 24, memTaint, Public);
         validSrcAddrs64(mem, inp_in, inp_b, readable_words(len_in), memTaint, Public);
         len_in == (if win then r8 else len);
-        valid_stack_slots(mem, rsp, stack_b, 1, memTaint);
 
         inp_in + len_in < pow2_64;
     ensures
@@ -714,11 +714,12 @@ procedure{:quick}{:public}{:exportSpecs} poly1305(
 
         h == poly1305_hash(key_r, key_s, inp_mem, len_in);
 
+        rsp == old(rsp);
+
         win ==>  rbx == old(rbx);
         win ==>  rbp == old(rbp);
         win ==>  rdi == old(rdi);
         win ==>  rsi == old(rsi);
-        win ==>  rsp == old(rsp);
         win ==>  r12 == old(r12);
         win ==>  r13 == old(r13);
         win ==>  r14 == old(r14);

@@ -18,6 +18,13 @@ type heap = Map.t int nat8
 let op_String_Access = Map.sel
 let op_String_Assignment = Map.upd
 
+noeq
+type stack =
+  | Vale_stack: 
+    initial_rsp:nat64{initial_rsp >= 4096} ->  // Initial rsp pointer when entering the function
+    mem:Map.t int nat8 ->                       // Stack contents
+    stack
+  
 type ins:eqtype =
   | Cpuid      : ins
   | Mov64      : dst:operand -> src:operand -> ins
@@ -37,8 +44,13 @@ type ins:eqtype =
   | And64      : dst:operand -> src:operand -> ins
   | Shr64      : dst:operand -> amt:operand -> ins
   | Shl64      : dst:operand -> amt:operand -> ins
+
+  // Stack operations
   | Push       : src:operand -> ins
   | Pop        : dst:operand -> ins
+  | Alloc      : n:nat -> ins
+  | Dealloc    : n:nat -> ins
+
   | Paddd      : dst:xmm -> src:xmm -> ins
   |VPaddd      : dst:xmm -> src1:xmm -> src2:xmm -> ins
   | Pxor       : dst:xmm -> src:xmm -> ins
@@ -74,14 +86,13 @@ type ins:eqtype =
   | SHA256_msg1  : dst:xmm -> src:xmm -> ins
   | SHA256_msg2  : dst:xmm -> src:xmm -> ins
   
-
 type ocmp:eqtype =
-  | OEq: o1:operand{not (OMem? o1)} -> o2:operand{not (OMem? o2)} -> ocmp
-  | ONe: o1:operand{not (OMem? o1)} -> o2:operand{not (OMem? o2)} -> ocmp
-  | OLe: o1:operand{not (OMem? o1)} -> o2:operand{not (OMem? o2)} -> ocmp
-  | OGe: o1:operand{not (OMem? o1)} -> o2:operand{not (OMem? o2)} -> ocmp
-  | OLt: o1:operand{not (OMem? o1)} -> o2:operand{not (OMem? o2)} -> ocmp
-  | OGt: o1:operand{not (OMem? o1)} -> o2:operand{not (OMem? o2)} -> ocmp
+  | OEq: o1:operand{not (OMem? o1 || OStack? o1)} -> o2:operand{not (OMem? o2 || OStack? o2)} -> ocmp
+  | ONe: o1:operand{not (OMem? o1 || OStack? o1)} -> o2:operand{not (OMem? o2 || OStack? o2)} -> ocmp
+  | OLe: o1:operand{not (OMem? o1 || OStack? o1)} -> o2:operand{not (OMem? o2 || OStack? o2)} -> ocmp
+  | OGe: o1:operand{not (OMem? o1 || OStack? o1)} -> o2:operand{not (OMem? o2 || OStack? o2)} -> ocmp
+  | OLt: o1:operand{not (OMem? o1 || OStack? o1)} -> o2:operand{not (OMem? o2 || OStack? o2)} -> ocmp
+  | OGt: o1:operand{not (OMem? o1 || OStack? o1)} -> o2:operand{not (OMem? o2 || OStack? o2)} -> ocmp
 
 type code:eqtype = precode ins ocmp
 type codes:eqtype = list code
@@ -94,14 +105,10 @@ noeq type state = {
   xmms: xmms_t;
   flags: nat64;
   mem: heap;
+  stack:stack;
 }
 
-//let u (i:int{FStar.UInt.fits i 64}) : uint64 = FStar.UInt64.uint_to_t i
-//let v (u:uint64) : nat64 = FStar.UInt64.v u
-
 assume val havoc : state -> ins -> nat64
-
-// TODO: Need to be sure that load/store_mem does an appropriate little-endian load
 
 unfold let eval_reg (r:reg) (s:state) : nat64 = s.regs r
 unfold let eval_xmm (i:xmm) (s:state) : quad32 = s.xmms i
@@ -134,6 +141,13 @@ let get_heap_val128 = make_opaque get_heap_val128_def
 unfold let eval_mem (ptr:int) (s:state) : nat64 = get_heap_val64 ptr s.mem
 unfold let eval_mem128 (ptr:int) (s:state) : quad32 = get_heap_val128 ptr s.mem
 
+unfold let eval_stack (ptr:int) (s:stack) : nat64 = 
+  let Vale_stack _ mem = s in
+  get_heap_val64 ptr mem
+unfold let eval_stack128 (ptr:int) (s:stack) : quad32 = 
+  let Vale_stack _ mem = s in
+  get_heap_val128 ptr mem
+
 [@va_qattr]
 let eval_maddr (m:maddr) (s:state) : int =
   let open FStar.Mul in
@@ -147,11 +161,13 @@ let eval_operand (o:operand) (s:state) : nat64 =
   | OConst n -> int_to_nat64 n
   | OReg r -> eval_reg r s
   | OMem m -> eval_mem (eval_maddr m s) s
+  | OStack m -> eval_stack (eval_maddr m s) s.stack
 
 let eval_mov128_op (o:mov128_op) (s:state) : quad32 =
   match o with
   | Mov128Xmm i -> eval_xmm i s
   | Mov128Mem m -> eval_mem128 (eval_maddr m s) s
+  | Mov128Stack m -> eval_stack128 (eval_maddr m s) s.stack
 
 let eval_ocmp (s:state) (c:ocmp) :bool =
   match c with
@@ -243,54 +259,122 @@ let update_mem128 (ptr:int) (v:quad32) (s:state) : state =
   { s with mem = update_heap128 ptr v s.mem }
   else s
 
-let valid_maddr (m:maddr) (s:state) : bool =
-  let ptr = eval_maddr m s in
-  valid_addr64 ptr s.mem
+unfold
+let update_stack' (ptr:int) (v:nat64) (s:stack) : stack =
+  let Vale_stack init_rsp mem = s in
+  let mem = update_heap64 ptr v mem in
+  Vale_stack init_rsp mem
 
-let valid_maddr128 (m:maddr) (s:state) : bool =
-  let ptr = eval_maddr m s in
-  valid_addr128 ptr s.mem
+unfold
+let update_stack128' (ptr:int) (v:quad32) (s:stack) : stack =
+  let Vale_stack init_rsp mem = s in
+  let mem = update_heap128 ptr v mem in
+  Vale_stack init_rsp mem
 
-let valid_operand (o:operand) (s:state) : bool =
+let update_stack (ptr:int) (v:nat64) (s:state) : state =
+  let Vale_stack init_rsp mem = s.stack in
+  // We can only write the stack between the current stack pointer and
+  // the initial stack pointer. Everything above is read-only
+  if (ptr >= s.regs Rsp && ptr + 8 <= init_rsp) then (
+    {s with stack = update_stack' ptr v s.stack}
+  ) else 
+    // If we are in this case, a previous check set the ok field to false
+    s
+
+let update_stack128 (ptr:int) (v:quad32) (s:state) : state =
+  let Vale_stack init_rsp mem = s.stack in
+  // We can only write the stack between the current stack pointer and
+  // the initial stack pointer. Everything above is read-only
+  if (ptr >= s.regs Rsp && ptr + 16 <= init_rsp) then (
+    {s with stack = update_stack128' ptr v s.stack}
+  ) else 
+    // If we are in this case, a previous check set the ok field to false  
+    s
+
+unfold
+let valid_src_stack64 (ptr:int) (st:stack) : bool =
+  let Vale_stack init_rsp mem = st in
+  valid_addr64 ptr mem
+
+unfold
+let valid_src_stack128 (ptr:int) (st:stack) : bool =
+  let Vale_stack init_rsp mem = st in
+  valid_addr128 ptr mem
+
+let valid_src_operand (o:operand) (s:state) : bool =
   match o with
   | OConst n -> true
   | OReg r -> true
-  | OMem m -> valid_maddr m s
+  | OMem m -> valid_addr64 (eval_maddr m s) s.mem
+  | OStack m -> valid_src_stack64 (eval_maddr m s) s.stack
 
-let valid_mov128_op (o:mov128_op) (s:state) : bool =
+let valid_src_mov128_op (o:mov128_op) (s:state) : bool =
   match o with
   | Mov128Xmm i -> true (* We leave it to the printer/assembler to object to invalid XMM indices *)
-  | Mov128Mem m -> valid_maddr128 m s
-
-let valid_shift_operand (o:operand) (s:state) : bool =
-  valid_operand o s && (eval_operand o s) < 64
+  | Mov128Mem m -> valid_addr128 (eval_maddr m s) s.mem
+  | Mov128Stack m -> valid_src_stack128 (eval_maddr m s) s.stack
+  
+let valid_src_shift_operand (o:operand) (s:state) : bool =
+  valid_src_operand o s && (eval_operand o s) < 64
 
 let valid_ocmp (c:ocmp) (s:state) :bool =
   match c with
-  | OEq o1 o2 -> valid_operand o1 s && valid_operand o2 s
-  | ONe o1 o2 -> valid_operand o1 s && valid_operand o2 s
-  | OLe o1 o2 -> valid_operand o1 s && valid_operand o2 s
-  | OGe o1 o2 -> valid_operand o1 s && valid_operand o2 s
-  | OLt o1 o2 -> valid_operand o1 s && valid_operand o2 s
-  | OGt o1 o2 -> valid_operand o1 s && valid_operand o2 s
+  | OEq o1 o2 -> valid_src_operand o1 s && valid_src_operand o2 s
+  | ONe o1 o2 -> valid_src_operand o1 s && valid_src_operand o2 s
+  | OLe o1 o2 -> valid_src_operand o1 s && valid_src_operand o2 s
+  | OGe o1 o2 -> valid_src_operand o1 s && valid_src_operand o2 s
+  | OLt o1 o2 -> valid_src_operand o1 s && valid_src_operand o2 s
+  | OGt o1 o2 -> valid_src_operand o1 s && valid_src_operand o2 s
+
+unfold
+let valid_dst_stack64 (rsp:nat64) (ptr:int) (st:stack) : bool =
+  let Vale_stack init_rsp mem = st in
+    // We are allowed to store anywhere between Rsp and the initial stack pointer
+  ptr >= rsp && ptr + 8 <= init_rsp
+
+unfold
+let valid_dst_stack128 (rsp:nat64) (ptr:int) (st:stack) : bool =
+  let Vale_stack init_rsp mem = st in
+    // We are allowed to store anywhere between Rsp and the initial stack pointer
+    ptr >= rsp && ptr + 16 <= init_rsp
 
 let valid_dst_operand (o:operand) (s:state) : bool =
-  valid_operand o s && valid_dst o
+  match o with
+  | OConst n -> false
+  | OReg r -> not (Rsp? r)
+  | OMem m -> valid_addr64 (eval_maddr m s) s.mem
+  | OStack m -> valid_dst_stack64 (eval_reg Rsp s) (eval_maddr m s) s.stack
+
+let valid_dst_mov128_op (o:mov128_op) (s:state) : bool =
+  match o with
+  | Mov128Xmm i -> true (* We leave it to the printer/assembler to object to invalid XMM indices *)
+  | Mov128Mem m -> valid_addr128 (eval_maddr m s) s.mem
+  | Mov128Stack m -> valid_dst_stack128 (eval_reg Rsp s) (eval_maddr m s) s.stack
 
 let update_operand_preserve_flags' (o:operand) (v:nat64) (s:state) : state =
   match o with
   | OConst _ -> {s with ok = false}
   | OReg r -> update_reg' r v s
   | OMem m -> update_mem (eval_maddr m s) v s // see valid_maddr for how eval_maddr connects to b and i
+  | OStack m -> update_stack (eval_maddr m s) v s 
 
 let update_mov128_op_preserve_flags' (o:mov128_op) (v:quad32) (s:state) : state =
   match o with
   | Mov128Xmm i -> update_xmm' i v s
   | Mov128Mem m -> update_mem128 (eval_maddr m s) v s
+  | Mov128Stack m -> update_stack128 (eval_maddr m s) v s
 
 // Default version havocs flags
 let update_operand' (o:operand) (ins:ins) (v:nat64) (s:state) : state =
   { (update_operand_preserve_flags' o v s) with flags = havoc s ins }
+
+let update_rsp' (new_rsp:int) (s:state) : state =
+  let Vale_stack init_rsp mem = s.stack in
+  // Only modify the stack pointer if the new value is valid, that is in the current stack frame, and in the same page
+  if new_rsp >= init_rsp - 4096 && new_rsp <= init_rsp then
+    update_reg' Rsp new_rsp s
+  else
+    s
 
 (* REVIEW: Will we regret exposing a mod here?  Should flags be something with more structure? *)
 let cf (flags:nat64) : bool =
@@ -325,7 +409,16 @@ let update_of' (flags:nat64) (new_of:bool) : (new_flags:nat64{overflow new_flags
       flags - 2048
     else
       flags
-  
+
+let free_stack' (start finish:int) (st:stack) : stack =
+  let Vale_stack init_rsp mem = st in
+  let domain = Map.domain mem in
+  // Returns the domain, without elements between start and finish
+  let restricted_domain = Vale.Set.remove_between domain start finish in
+  // The new domain of the stack does not contain elements between start and finish
+  let new_mem = Map.restrict restricted_domain mem in
+  Vale_stack init_rsp new_mem
+
 let is_full_byte_reversal_mask (q:quad32) : bool =
   q.lo0 = 0x0C0D0E0F &&
   q.lo1 = 0x08090A0B &&
@@ -397,7 +490,7 @@ let update_operand_preserve_flags (dst:operand) (v:nat64) :st unit =
 
 unfold
 let update_mov128_op_preserve_flags (dst:mov128_op) (v:quad32) :st unit =
-  check (valid_mov128_op dst);;
+  check (valid_dst_mov128_op dst);;
   s <-- get;
   set (update_mov128_op_preserve_flags' dst v s)
 
@@ -407,6 +500,14 @@ let update_operand (dst:operand) (ins:ins) (v:nat64) :st unit =
   check (valid_dst_operand dst);;
   s <-- get;
   set (update_operand' dst ins v s)
+
+unfold
+let update_rsp (i:int) : st unit =
+  // Only modify the stack pointer if the new value is valid, that is in the current stack frame, and in the same page
+ check (fun s -> i >= s.stack.initial_rsp - 4096);;
+ check (fun s -> i <= s.stack.initial_rsp);;
+ s <-- get;
+ set (update_rsp' i s)
 
 let update_reg (r:reg) (v:nat64) :st unit =
   s <-- get;
@@ -436,6 +537,9 @@ let update_cf_of (new_cf new_of:bool) :st unit =
   s <-- get;
   set ( { s with flags = update_cf' (update_of' s.flags new_of) new_cf } )
 
+let free_stack (start finish:int) : st unit =
+  s <-- get;
+  set ( { s with stack = free_stack' start finish s.stack} )
 
 (* Factor out common instruction shortcuts *)
 let paddd (src1 src2:quad32) : quad32 =
@@ -505,31 +609,31 @@ let eval_ins (ins:ins) : st unit =
     update_reg Rdx (cpuid Rdx (eval_reg Rax s) (eval_reg Rcx s))
 
   | Mov64 dst src ->
-    check (valid_operand src);;
+    check (valid_src_operand src);;
     update_operand_preserve_flags dst (eval_operand src s)
     
   | MovBe64 dst src ->
-    check (valid_operand src);;
+    check (valid_src_operand src);;
     update_operand_preserve_flags dst (reverse_bytes_nat64 (eval_operand src s))
         
   | Cmovc64 dst src ->
-    check (valid_operand src);;
+    check (valid_src_operand src);;
     update_operand_preserve_flags dst (eval_operand (if cf s.flags then src else dst) s)
 
   | Add64 dst src ->
-    check (valid_operand src);;
+    check (valid_src_operand src);;
     let sum = (eval_operand dst s) + (eval_operand src s) in
     let new_carry = sum >= pow2_64 in
     update_operand dst ins (sum % pow2_64);;
     update_cf new_carry
 
   | AddLea64 dst src1 src2 ->
-    check (valid_operand src1);;
-    check (valid_operand src2);;
+    check (valid_src_operand src1);;
+    check (valid_src_operand src2);;
     update_operand_preserve_flags dst ((eval_operand src1 s + eval_operand src2 s) % pow2_64)
 
   | AddCarry64 dst src ->
-    check (valid_operand src);;
+    check (valid_src_operand src);;
     let old_carry = if cf(s.flags) then 1 else 0 in
     let sum = (eval_operand dst s) + (eval_operand src s) + old_carry in
     let new_carry = sum >= pow2_64 in
@@ -539,7 +643,7 @@ let eval_ins (ins:ins) : st unit =
 
   | Adcx64 dst src ->
     check_imm adx_enabled;;
-    check (valid_operand src);;
+    check (valid_src_operand src);;
     let old_carry = if cf(s.flags) then 1 else 0 in
     let sum = (eval_operand dst s) + (eval_operand src s) + old_carry in
     let new_carry = sum >= pow2_64 in
@@ -548,7 +652,7 @@ let eval_ins (ins:ins) : st unit =
 
   | Adox64 dst src ->
     check_imm adx_enabled;;
-    check (valid_operand src);;
+    check (valid_src_operand src);;
     let old_carry = if overflow(s.flags) then 1 else 0 in
     let sum = (eval_operand dst s) + (eval_operand src s) + old_carry in
     let new_carry = sum >= pow2_64 in
@@ -556,7 +660,7 @@ let eval_ins (ins:ins) : st unit =
     update_of new_carry  // Explicitly touches only OF
 
   | Sub64 dst src ->
-    check (valid_operand src);;
+    check (valid_src_operand src);;
     let diff = eval_operand dst s - eval_operand src s in
     let new_carry = diff < 0 in
     update_operand dst ins (diff % pow2_64);;
@@ -570,7 +674,7 @@ let eval_ins (ins:ins) : st unit =
     update_cf new_carry  // We specify cf, but underspecify everything else (which update_operand havocs)
     
   | Mul64 src ->
-    check (valid_operand src);;
+    check (valid_src_operand src);;
     let hi = FStar.UInt.mul_div #64 (eval_reg Rax s) (eval_operand src s) in
     let lo = FStar.UInt.mul_mod #64 (eval_reg Rax s) (eval_operand src s) in
     update_reg Rax lo;;
@@ -579,46 +683,70 @@ let eval_ins (ins:ins) : st unit =
 
   | Mulx64 dst_hi dst_lo src ->
     check_imm bmi2_enabled;;
-    check (valid_operand src);;
+    check (valid_src_operand src);;
     let hi = FStar.UInt.mul_div #64 (eval_reg Rdx s) (eval_operand src s) in
     let lo = FStar.UInt.mul_mod #64 (eval_reg Rdx s) (eval_operand src s) in
     update_operand_preserve_flags dst_lo lo;;
     update_operand_preserve_flags dst_hi hi
 
   | IMul64 dst src ->
-    check (valid_operand src);;
+    check (valid_src_operand src);;
     update_operand dst ins (FStar.UInt.mul_mod #64 (eval_operand dst s) (eval_operand src s))
 
   | Xor64 dst src ->
-    check (valid_operand src);;
+    check (valid_src_operand src);;
     update_operand dst ins (Types_s.ixor (eval_operand dst s) (eval_operand src s));;
     update_cf_of false false
 
   | And64 dst src ->
-    check (valid_operand src);;
+    check (valid_src_operand src);;
     update_operand dst ins (Types_s.iand (eval_operand dst s) (eval_operand src s))
 
   | Shr64 dst amt ->
-    check (valid_shift_operand amt);;
+    check (valid_src_shift_operand amt);;
     update_operand dst ins (Types_s.ishr (eval_operand dst s) (eval_operand amt s))
 
   | Shl64 dst amt ->
-    check (valid_shift_operand amt);;
+    check (valid_src_shift_operand amt);;
     update_operand dst ins (Types_s.ishl (eval_operand dst s) (eval_operand amt s))
 
   | Push src ->
-    check (valid_operand src);;
-    let new_rsp = ((eval_reg Rsp s) - 8) % pow2_64 in
-    update_operand_preserve_flags (OMem (MConst new_rsp)) (eval_operand src s);;
-    update_reg Rsp new_rsp
+    check (valid_src_operand src);;
+    // Evaluate value on initial state
+    let new_src = eval_operand src s in
+    // Compute the new stack pointer
+    let new_rsp = eval_reg Rsp s - 8 in
+    // Actually modify the stack pointer
+    update_rsp new_rsp;;
+    // Store the element at the new stack pointer
+    update_operand_preserve_flags (OStack (MConst new_rsp)) new_src
 
   | Pop dst ->
-    let stack_val = OMem (MReg Rsp 0) in
-    check (valid_operand stack_val);;
-    let new_dst = eval_operand stack_val s in
-    let new_rsp = ((eval_reg Rsp s) + 8) % pow2_64 in
+    let stack_op = OStack (MReg Rsp 0) in
+    // Ensure that we can read at the initial stack pointer
+    check (valid_src_operand stack_op);;
+    // Get the element currently on top of the stack
+    let new_dst = eval_operand stack_op s in
+    // Compute the new stack pointer
+    let new_rsp = (eval_reg Rsp s + 8) % pow2_64 in
+    // Store it in the dst operand
     update_operand_preserve_flags dst new_dst;;
-    update_reg Rsp new_rsp
+    // Free the memory that is popped
+    free_stack (new_rsp - 8) new_rsp;;
+    // Finally, update the stack pointer
+    update_rsp new_rsp
+
+  | Alloc n ->
+    // We already check in update_rsp that the new stack pointer is valid
+    update_rsp (eval_reg Rsp s - n)
+  
+  | Dealloc n ->
+    let old_rsp = eval_reg Rsp s in
+    let new_rsp = old_rsp + n in
+    update_rsp new_rsp;;
+    // The deallocated stack memory should now be considered invalid
+    free_stack old_rsp new_rsp
+
 // In the XMM-related instructions below, we generally don't need to check for validity of the operands,
 // since all possibilities are valid, thanks to dependent types
 
@@ -632,7 +760,7 @@ let eval_ins (ins:ins) : st unit =
     update_xmm_preserve_flags dst (quad32_xor (eval_xmm dst s) (eval_xmm src s))
 
   |VPxor dst src1 src2 ->
-    check (valid_mov128_op src2);;
+    check (valid_src_mov128_op src2);;
     update_xmm_preserve_flags dst (quad32_xor (eval_xmm src1 s) (eval_mov128_op src2 s))
 
   | Pslld dst amt ->
@@ -715,12 +843,12 @@ let eval_ins (ins:ins) : st unit =
     update_operand_preserve_flags dst extracted_nat64
 
   | Pinsrd dst src index ->
-    check (valid_operand src);;
+    check (valid_src_operand src);;
     let dst_q = eval_xmm dst s in
     update_xmm_preserve_flags dst  (insert_nat32 dst_q ((eval_operand src s) % pow2_32) (index % 4))
 
   | Pinsrq dst src index ->
-    check (valid_operand src);;
+    check (valid_src_operand src);;
     let dst_q = eval_xmm dst s in
     update_xmm_preserve_flags dst (insert_nat64 dst_q (eval_operand src s) (index % 2))
 
@@ -740,7 +868,7 @@ let eval_ins (ins:ins) : st unit =
     update_xmm_preserve_flags dst shifted_xmm
 
   | MOVDQU dst src ->
-    check (valid_mov128_op src);;
+    check (valid_src_mov128_op src);;
     update_mov128_op_preserve_flags dst (eval_mov128_op src s)
 
   | Pclmulqdq dst src imm ->

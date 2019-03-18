@@ -25,8 +25,9 @@ let check_if_cpuid_consumes_fixed_time (ins:tainted_ins{S.Cpuid? ins.i}) (ts:tai
   true, ts
 
 let check_if_ins_consumes_fixed_time ins ts =
-(false, ts) // TODO
-(*
+  false, ts
+  (* Verifying, but too slow. Need to refactor
+  
   if S.Cpuid? ins.i then check_if_cpuid_consumes_fixed_time ins ts
   else (
   let i = ins.i in
@@ -58,6 +59,7 @@ let check_if_ins_consumes_fixed_time ins ts =
         | OConst _ -> false, ts (* Should not happen *)
         | OReg r -> fixedTime, ts'
         | OMem m -> fixedTime, ts'
+        | OStack m -> false, ts
     end
      | S.Mul64 _ -> fixedTime, (TaintState ts'.regTaint Secret Secret ts'.xmmTaint)
 
@@ -71,6 +73,7 @@ let check_if_ins_consumes_fixed_time ins ts =
               | OConst _ -> false, (TaintState ts'.regTaint Secret Secret ts'.xmmTaint) (* Should not happen *)
               | OReg r -> fixedTime, (TaintState ts'.regTaint Secret Secret ts'.xmmTaint)
               | OMem m -> fixedTime, (TaintState ts'.regTaint Secret Secret ts'.xmmTaint)
+              | OStack m -> false, ts
         end
    | S.Push src -> if Secret? (ts'.regTaint Rsp) || Secret? (operand_taint src ts' Public) then false, ts
      else fixedTime, ts'
@@ -84,12 +87,14 @@ let check_if_ins_consumes_fixed_time ins ts =
         | [OConst _] -> true, (TaintState ts'.regTaint Secret taint ts'.xmmTaint) (* Should not happen *)
         | [OReg r] -> fixedTime, (TaintState ts'.regTaint Secret taint ts'.xmmTaint)
         | [OMem m] -> fixedTime, (TaintState ts'.regTaint Secret taint ts'.xmmTaint)
+        | [OStack m] -> false, ts
     end
     | _ ->
       match dsts with
       | [OConst _] -> false, (TaintState ts'.regTaint Secret Secret ts'.xmmTaint) (* Should not happen *)
       | [OReg r] -> fixedTime, (TaintState ts'.regTaint Secret Secret ts'.xmmTaint)
       | [OMem m] ->  fixedTime, (TaintState ts'.regTaint Secret Secret ts'.xmmTaint)
+      | [OStack m] -> false, ts
       | [] -> false, ts'  (* AR: this case was missing, Unhandled yet *)
   in
   b, ts'
@@ -1381,6 +1386,8 @@ let lemma_ins_same_public ts ins s1 s2 fuel =
   | S.Push _ -> lemma_push_same_public ts ins s1 s2 fuel
   | S.Pop _ -> lemma_pop_same_public ts ins s1 s2 fuel
   | S.Adox64 _ _ -> () // TODO
+  | S.Alloc _ -> ()
+  | S.Dealloc _ -> ()
 
 let lemma_ins_leakage_free ts ins =
   let b, ts' = check_if_ins_consumes_fixed_time ins ts in

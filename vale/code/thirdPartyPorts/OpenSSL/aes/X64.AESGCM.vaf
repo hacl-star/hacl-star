@@ -131,7 +131,7 @@ function operator( $$ ) (a:quad32):poly := of_quad32;
 
 // TODO: Use constp and memory operands to directly load constants from memory, instead of constructing them
 
-procedure{:quick exportOnly} VPolyAdd(out dst:xmm, src1:xmm, src2:xmm)
+procedure{:quick exportOnly} VPolyAdd(out dst:xmm, src1:xmm, src2:opr128)
     lets
         a1 := of_quad32(src1);
         a2 := of_quad32(src2);
@@ -145,33 +145,6 @@ procedure{:quick exportOnly} VPolyAdd(out dst:xmm, src1:xmm, src2:xmm)
     VPxor(dst, src1, src2);
     lemma_add128(a1, a2);
     lemma_of_to_quad32(add(a1, a2));
-}
-
-procedure{:quick exportOnly} VPolyAdd_buffer(
-        out dst:xmm, 
-        src1:xmm, 
-        src2:reg_opr64,
-        inline offset:int,
-        inline t:taint,
-        ghost b:buffer128,
-        ghost index:int)
-    reads 
-        mem; memTaint;
-    modifies
-        efl;
-    requires
-       valid_src_addr(mem, b, index);
-       valid_taint_buf128(b, mem, memTaint, t);
-       src2 + offset == buffer_addr(b, mem) + 16 * index;
-    ensures
-        $$dst == old($$src1) +. $$buffer128_read(b, index, mem);
-        valid_taint_buf128(b, mem, memTaint, t);  // REVIEW: Why is this needed?
-{
-    lemma_to_of_quad32(src1);
-    lemma_to_of_quad32(buffer128_read(b, index, mem));
-    VPxor_buffer(dst, src1, src2, offset, t, b, index);
-    lemma_add128(old($$src1), $$buffer128_read(b, index, mem));
-    lemma_of_to_quad32(add(old($$src1), $$buffer128_read(b, index, mem)));
 }
 
 procedure{:quick exportOnly} VHigh64ToLow(out dst:xmm, src:xmm)
@@ -724,7 +697,7 @@ procedure {:quick} Loop6x_step1(
 //	  vaesenc	$rndkey,$inout0,$inout0
     VAESNI_enc(inout0, inout0, rndkey);
 //	 vpxor		16+8(%rsp),$Xi,$Xi	# modulo-scheduled [vpxor $Z3,$Xi,$Xi]
-    VPolyAdd_buffer(Xi, Xi, rsp, 0x10, Secret, stack_b, 1);  // # modulo-scheduled [vpxor $Z3,$Xi,$Xi]
+    VPolyAdd(Xi, Xi, Mem128(rsp, 0x10, Secret, stack_b, 1));  // # modulo-scheduled [vpxor $Z3,$Xi,$Xi]
 //	vpclmulqdq	\$0x11,$Hkey,$Ii,$Hkey
     VPolyMul(Hkey, Ii, Hkey, true, true);
 //	 vmovdqu	0x40+8(%rsp),$Ii	# I[3]
@@ -1131,7 +1104,7 @@ procedure {:quick} Loop6x_step3(
 //	vpclmulqdq	\$0x01,$T2,$Ii,$T1
     VPolyMul(T1, Ii, T2, true, false);
 //	 vpxor		0x70+8(%rsp),$Xi,$Xi	# accumulate I[0]
-    VPolyAdd_buffer(Xi, Xi, rsp, 0x70, Secret, stack_b, 7);  // # accumulate I[0]
+    VPolyAdd(Xi, Xi, Mem128(rsp, 0x70, Secret, stack_b, 7));  // # accumulate I[0]
 //	  vaesenc	$rndkey,$inout2,$inout2
     VAESNI_enc(inout2, inout2, rndkey);
 //	movbe		0x30($in0),%r12
@@ -1605,16 +1578,16 @@ procedure {:quick} Loop6x_round9(
     VSwap(Xi, Z0);  // # 2nd phase
     VAESNI_enc(inout1, inout1, rndkey);
     VPolyMul(Z0, Z0, Hkey, false, true);
-    VPxor_buffer(T2, T1, inp, 0x00, Secret, in_b, count*6 + 0);
+    VPxor(T2, T1, Mem128(inp, 0x00, Secret, in_b, count*6 + 0));
     VAESNI_enc(inout2, inout2, rndkey);
-    VPxor_buffer(Ii, T1, inp, 0x10, Secret, in_b, count*6 + 1);
+    VPxor(Ii, T1, Mem128(inp, 0x10, Secret, in_b, count*6 + 1));
     VAESNI_enc(inout3, inout3, rndkey);
-    VPxor_buffer(Z1, T1, inp, 0x20, Secret, in_b, count*6 + 2);
+    VPxor(Z1, T1, Mem128(inp, 0x20, Secret, in_b, count*6 + 2));
     VAESNI_enc(inout4, inout4, rndkey);
-    VPxor_buffer(Z2, T1, inp, 0x30, Secret, in_b, count*6 + 3);
+    VPxor(Z2, T1, Mem128(inp, 0x30, Secret, in_b, count*6 + 3));
     VAESNI_enc(inout5, inout5, rndkey);
-    VPxor_buffer(Z3, T1, inp, 0x40, Secret, in_b, count*6 + 4);
-    VPxor_buffer(Hkey, T1, inp, 0x50, Secret, in_b, count*6 + 5);
+    VPxor(Z3, T1, Mem128(inp, 0x40, Secret, in_b, count*6 + 4));
+    VPxor(Hkey, T1, Mem128(inp, 0x50, Secret, in_b, count*6 + 5));
 
     reveal rounds;
     commute_sub_bytes_shift_rows_forall();
@@ -2001,7 +1974,7 @@ procedure {:quick} Loop6x_partial(
 }
 
 #reset-options "--z3rlimit 30"
-procedure {:quick} {:frame false} Loop6x(
+procedure {:quick} Loop6x(
     inline alg:algorithm,  
     ghost count:nat,        // Number of 6x128-bit blocks processed so far
     ghost iv_b:buffer128,
@@ -2031,6 +2004,7 @@ procedure {:quick} {:frame false} Loop6x(
         counter @= rbx; constp @= r11; in0 @= r14; 
 
     reads
+        rax; rbp; r10; r15;
         key; ivp; Xip; rsp;
         memTaint;
 
@@ -2199,14 +2173,14 @@ procedure {:quick} {:frame false} Loop6x(
                                             cipher, key_words, ctr_BE_orig);
         gctr_partial_extend6(alg, bound, plain_quads, cipher, key_words, ctr_BE_orig);
     } else {
-        VPolyAdd_buffer(Xi, Xi, rsp, 0x10, Secret, stack_b, 1);  // # modulo-scheduled 
+        VPolyAdd(Xi, Xi, Mem128(rsp, 0x10, Secret, stack_b, 1));  // # modulo-scheduled 
         VPolyAdd(Xi, Xi, Z0);                                    // # modulo-scheduled 
     }
 }
 
 
-#reset-options "--z3rlimit 225"
-procedure {:quick exportOnly} {:frame false} Loop6x_loop(
+#reset-options "--z3rlimit 525"
+procedure {:quick exportOnly} Loop6x_loop(
     inline alg:algorithm,  
     ghost count:nat,        // Number of 6x128-bit blocks processed so far
     ghost iv_b:buffer128,
@@ -2235,6 +2209,7 @@ procedure {:quick exportOnly} {:frame false} Loop6x_loop(
         counter @= rbx; constp @= r11; in0 @= r14; 
 
     reads
+        rax; rbp; r9; r10; r15;
         key; ivp; rsp; 
         memTaint;
 
@@ -2721,17 +2696,17 @@ procedure {:quick} AESNI_ctr32_6x_round9(
     Load128_buffer(Hkey, key, 0xa0-0x80, Secret, keys_b, 10);  // # last round key
     
     VAESNI_enc(inout0, inout0, rndkey);
-    VPxor_buffer(Z0, Hkey, inp, 0x00, Secret, in_b, count*6 + 0);
+    VPxor(Z0, Hkey, Mem128(inp, 0x00, Secret, in_b, count*6 + 0));
     VAESNI_enc(inout1, inout1, rndkey);
-    VPxor_buffer(Z1, Hkey, inp, 0x10, Secret, in_b, count*6 + 1);
+    VPxor(Z1, Hkey, Mem128(inp, 0x10, Secret, in_b, count*6 + 1));
     VAESNI_enc(inout2, inout2, rndkey);
-    VPxor_buffer(Z2, Hkey, inp, 0x20, Secret, in_b, count*6 + 2);
+    VPxor(Z2, Hkey, Mem128(inp, 0x20, Secret, in_b, count*6 + 2));
     VAESNI_enc(inout3, inout3, rndkey);
-    VPxor_buffer(Xi, Hkey, inp, 0x30, Secret, in_b, count*6 + 3);
+    VPxor(Xi, Hkey, Mem128(inp, 0x30, Secret, in_b, count*6 + 3));
     VAESNI_enc(inout4, inout4, rndkey);
-    VPxor_buffer(T2, Hkey, inp, 0x40, Secret, in_b, count*6 + 4);
+    VPxor(T2, Hkey, Mem128(inp, 0x40, Secret, in_b, count*6 + 4));
     VAESNI_enc(inout5, inout5, rndkey);
-    VPxor_buffer(Hkey, Hkey, inp, 0x50, Secret, in_b, count*6 + 5);
+    VPxor(Hkey, Hkey, Mem128(inp, 0x50, Secret, in_b, count*6 + 5));
 
     reveal rounds;
     commute_sub_bytes_shift_rows_forall();
@@ -2864,7 +2839,7 @@ procedure {:quick} AESNI_ctr32_6x_final(
     finish_aes_encrypt_le(alg, ctr5, key_words);
 }
 
-#reset-options "--z3rlimit 20"
+#reset-options "--z3rlimit 30"
 procedure {:quick} AESNI_ctr32_6x(
     inline alg:algorithm,  
     ghost count:nat,
@@ -3192,7 +3167,7 @@ procedure {:quick} GCM_finalize(
     VPolyAdd(Z0, Z0, Z1);
 
 //	 vpxor		0x70(%rsp),$Xi,$Xi	# accumulate I[0]
-    VPxor_buffer(Xi, Xi, rsp, 0x70, Secret, stack_b, 7);    // # accumulate I[0]
+    VPolyAdd(Xi, Xi, Mem128(rsp, 0x70, Secret, stack_b, 7));    // # accumulate I[0]
 
 //	vpclmulqdq	\$0x00,$Hkey,$T2,$Z1
     VPolyMul(Z1, T2, Hkey, false, false);
@@ -3342,7 +3317,7 @@ procedure {:quick} GCM_finalize(
     VPolyAdd(inout3, inout3, inout4);
 
 //	  vxorps	0x10(%rsp),$Z3,$Z3	# accumulate $inout0
-    VPxor_buffer(Z3, Z3, rsp, 0x10, Secret, stack_b, 1);    // # accumulate $inout0
+    VPxor(Z3, Z3, Mem128(rsp, 0x10, Secret, stack_b, 1));    // # accumulate $inout0
 
 //	vpclmulqdq	\$0x00,$HK,$T3,$T3
     VPolyMul(T3, T3, HK, false, false);
@@ -3519,6 +3494,7 @@ procedure {:quick} {:public} AES_GCM_encrypt_6mult(
         counter @= rbx; constp @= r11; in0 @= r14;
 
     reads
+        rax; rbp; r10; r15;
         ivp; rsp;
         memTaint;
 
@@ -3571,10 +3547,12 @@ procedure {:quick} {:public} AES_GCM_encrypt_6mult(
         len / 6 >= 3;   // Should be implied by above... :(
         12 + len + 6 < pow2_32;
     ensures
-
-        // Pointer updates
-        Xip == old(Xip) - 0x20;
-
+        // Framing
+        modifies_mem(loc_union(loc_buffer(iv_b), 
+                     loc_union(loc_buffer(stack_b), 
+                               loc_buffer(out_b))), old(mem), mem);
+        validSrcAddrs128(mem, Xip - 0x20, hkeys_b, 8, memTaint, Secret);
+        key == old(key);
 
         let iv_LE := old(buffer128_read(iv_b, 0, mem));
         let iv_BE := reverse_bytes_quad32(iv_LE);
@@ -3583,7 +3561,7 @@ procedure {:quick} {:public} AES_GCM_encrypt_6mult(
         // GCTR result
         gctr_partial_opaque(alg, old(len), old(buffer128_as_seq(mem, in_b)), buffer128_as_seq(mem, out_b), key_words, ctr_BE);
         // GCM result
-        //hash == ghash_incremental(reverse_bytes_quad32(h), old(hash), buffer128_as_seq(mem, out_b), old(len));
+        Xi == ghash_incremental0(reverse_bytes_quad32(buffer128_read(hkeys_b, 0, mem)), old(Xi), buffer128_as_seq(mem, out_b));
 
         // Counter updated
         old(len) < pow2_32 /\
@@ -3654,6 +3632,13 @@ procedure {:quick} {:public} AES_GCM_encrypt_6mult(
     gctr_partial_opaque_ignores_postfix(alg, #nat32(12+mid_len - 6), old(buffer128_as_seq(mem, in_b)), old(buffer128_as_seq(mem, in_b)), out_snapshot, buffer128_as_seq(mem, out_b),key_words, ctr_BE);
     gctr_partial_extend6(alg, 12+mid_len - 6, old(buffer128_as_seq(mem, in_b)), buffer128_as_seq(mem, out_b), key_words, ctr_BE);
     //assert gctr_partial_opaque(alg, old(len), old(buffer128_as_seq(mem, in_b)), buffer128_as_seq(mem, out_b), key_words, ctr_BE);
+    Sub64(key, 0x80);   // Restore the key pointer for later code's use
+//////////////////////////////////////////
+//////////////////////////////////////////
+// TODO: Remove this assumption!
+//////////////////////////////////////////
+//////////////////////////////////////////
+    assume Xi == ghash_incremental0(reverse_bytes_quad32(buffer128_read(hkeys_b, 0, mem)), old(Xi), buffer128_as_seq(mem, out_b));
 }
 
 /*

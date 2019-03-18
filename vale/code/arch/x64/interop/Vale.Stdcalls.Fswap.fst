@@ -6,7 +6,6 @@ let lowstar_cswap : lowstar_cswap_t  =
   IX64.wrap_weak_stdcall
     Interop.down_mem
     code_cswap
-    16
     cswap_dom
     (W.mk_prediction code_cswap cswap_dom [] (cswap_lemma code_cswap IA.win))
 

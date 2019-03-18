@@ -9,6 +9,7 @@ open GCM_helpers
 
 #set-options "--z3rlimit 200 --max_fuel 0 --max_ifuel 0"
 
+let math_aux (n:nat) : Lemma (n * 1 == n) = ()
 
 let gcm128_encrypt key plain_b plain_num auth_b auth_num iv_b out_b tag_b keys_b =
   let h0 = get() in
@@ -25,6 +26,11 @@ let gcm128_encrypt key plain_b plain_num auth_b auth_num iv_b out_b tag_b keys_b
   DV.length_eq (get_downview tag_b);
   DV.length_eq (get_downview keys_b); 
 
+  math_aux (B.length plain_b);
+  math_aux (B.length auth_b);
+  math_aux (B.length iv_b);
+  math_aux (B.length keys_b);
+  
   as_vale_buffer_len #TUInt8 #TUInt128 plain_b;
   as_vale_buffer_len #TUInt8 #TUInt128 auth_b;
   as_vale_buffer_len #TUInt8 #TUInt128 iv_b;
@@ -35,7 +41,7 @@ let gcm128_encrypt key plain_b plain_num auth_b auth_num iv_b out_b tag_b keys_b
   Classical.forall_intro (bounded_buffer_addrs TUInt8 TUInt128 h0 plain_b);
   Classical.forall_intro (bounded_buffer_addrs TUInt8 TUInt128 h0 auth_b);
   Classical.forall_intro (bounded_buffer_addrs TUInt8 TUInt128 h0 out_b);
-  
+
   let x, _ = gcm128_encrypt key plain_b plain_num auth_b auth_num iv_b keys_b out_b tag_b () in
 
   let h1 = get() in
@@ -61,6 +67,11 @@ let gcm256_encrypt key plain_b plain_num auth_b auth_num iv_b out_b tag_b keys_b
   DV.length_eq (get_downview out_b);
   DV.length_eq (get_downview tag_b);
   DV.length_eq (get_downview keys_b); 
+
+  math_aux (B.length plain_b);
+  math_aux (B.length auth_b);
+  math_aux (B.length iv_b);
+  math_aux (B.length keys_b);
 
   as_vale_buffer_len #TUInt8 #TUInt128 plain_b;
   as_vale_buffer_len #TUInt8 #TUInt128 auth_b;

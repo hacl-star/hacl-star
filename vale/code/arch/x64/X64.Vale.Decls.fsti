@@ -1,11 +1,12 @@
 module X64.Vale.Decls
 module M = X64.Memory
+module S = X64.Stack_i
 
 // This interface should hide all of Semantics_s.
 // (It should not refer to Semantics_s, directly or indirectly.)
 // It should not refer to StateLemmas, Lemmas, or Print_s,
 // because they refer to Semantics_s.
-// Memory, Regs and State are ok, because they do not refer to Semantics_s.
+// Stack_i, Memory, Regs and State are ok, because they do not refer to Semantics_s.
 
 open Prop_s
 open X64.Machine_s
@@ -39,6 +40,8 @@ type tainted_operand:eqtype =
 | TConst: n:int -> tainted_operand
 | TReg: r:reg -> tainted_operand
 | TMem: m:maddr -> t:taint -> tainted_operand
+| TStack: m:maddr -> tainted_operand
+
 
 [@va_qattr]
 type tainted_operand128:eqtype =
@@ -51,6 +54,8 @@ unfold let t_op_to_op (t:tainted_operand) : operand =
   | TConst n -> OConst n
   | TReg r -> OReg r
   | TMem m _ -> OMem m
+  | TStack m -> OStack m
+  
 
 [@va_qattr]
 unfold let t_op_to_op128 (t:tainted_operand128) : mov128_op =
@@ -63,6 +68,7 @@ let get_taint (t:tainted_operand) : taint =
   | TConst _ -> Public
   | TReg _ -> Public
   | TMem _ t -> t
+  | TStack _ -> Public
 
 let extract_taint (o1 o2:tainted_operand) : taint =
   if TMem? o1 then TMem?.t o1
@@ -150,12 +156,12 @@ let valid_mem_operand128 (addr:int) (t:taint) (s_mem:M.mem) (s_memTaint:M.memtai
 
 [@va_qattr]
 let valid_operand (t:tainted_operand) (s:state) : prop0 =
-  X64.Vale.State.valid_operand (t_op_to_op t) s /\
+  X64.Vale.State.valid_src_operand (t_op_to_op t) s /\
   (match t with TMem m t -> valid_mem_operand (eval_maddr m s) t s.mem s.memTaint | _ -> True)
 
 [@va_qattr]
 let valid_operand128 (t:tainted_operand128) (s:state) : prop0 =
-  X64.Vale.State.valid_operand128 (t_op_to_op128 t) s /\
+  X64.Vale.State.valid_src_operand128 (t_op_to_op128 t) s /\
   (match t with TMem128 m t -> valid_mem_operand128 (eval_maddr m s) t s.mem s.memTaint | _ -> True)
 
 (* Constructors *)
@@ -190,6 +196,7 @@ val va_fuel_default : unit -> va_fuel
 [@va_qattr] unfold let va_coerce_operand_to_dst_operand (o:va_operand) : va_dst_operand = o
 [@va_qattr] unfold let va_coerce_dst_operand_to_operand (o:va_dst_operand) : va_operand = o
 [@va_qattr] unfold let va_coerce_dst_opr64_to_opr64 (o:va_dst_operand) : va_operand = o
+[@va_qattr] unfold let va_coerce_xmm_to_opr128 (x:xmm) : va_operand128 = TReg128 x
 
 [@va_qattr]
 unfold let va_opr_code_Mem (o:va_operand) (offset:int) (t:taint) : va_operand =
@@ -216,7 +223,7 @@ unfold let va_opr_code_Mem128 (o:va_operand) (offset:int) (t:taint) : va_operand
   | TReg r -> TMem128 (MReg r offset) t
   | _ -> TMem128 (MConst 42) t
 
-val va_opr_lemma_Mem128 (s:va_state) (base:va_operand) (offset:int) (b:M.buffer128) (index:int) (t:taint) : Lemma
+val va_opr_lemma_Mem128 (s:va_state) (base:va_operand) (offset:int) (t:taint) (b:M.buffer128) (index:int) : Lemma
   (requires
     TReg? base /\
     valid_src_addr s.mem b index /\
@@ -259,6 +266,7 @@ val taint_at (memTaint:M.memtaint) (addr:int) : taint
 [@va_qattr] unfold let va_get_reg (r:reg) (s:va_state) : nat64 = eval_reg r s
 [@va_qattr] unfold let va_get_xmm (x:xmm) (s:va_state) : quad32 = eval_xmm x s
 [@va_qattr] unfold let va_get_mem (s:va_state) : M.mem = s.mem
+[@va_qattr] unfold let va_get_stack (s:va_state) : S.stack = s.stack
 [@va_qattr] unfold let va_get_memTaint (s:va_state) : M.memtaint = s.memTaint
 
 [@va_qattr] let va_upd_ok (ok:bool) (s:state) : state = { s with ok = ok }
@@ -266,6 +274,7 @@ val taint_at (memTaint:M.memtaint) (addr:int) : taint
 [@va_qattr] let va_upd_reg (r:reg) (v:nat64) (s:state) : state = update_reg r v s
 [@va_qattr] let va_upd_xmm (x:xmm) (v:quad32) (s:state) : state = update_xmm x v s
 [@va_qattr] let va_upd_mem (mem:M.mem) (s:state) : state = { s with mem = mem }
+[@va_qattr] let va_upd_stack (stack:S.stack) (s:state) : state = { s with stack = stack }
 [@va_qattr] let va_upd_memTaint (memTaint:M.memtaint) (s:state) : state = { s with memTaint = memTaint }
 
 (* Framing: va_update_foo means the two states are the same except for foo *)
@@ -276,6 +285,7 @@ val taint_at (memTaint:M.memtaint) (addr:int) : taint
 [@va_qattr] unfold let va_update_xmm (x:xmm) (sM:va_state) (sK:va_state) : va_state =
   va_upd_xmm x (eval_xmm x sM) sK
 [@va_qattr] unfold let va_update_mem (sM:va_state) (sK:va_state) : va_state = va_upd_mem sM.mem sK
+[@va_qattr] unfold let va_update_stack (sM:va_state) (sK:va_state) : va_state = va_upd_stack sM.stack sK
 [@va_qattr] unfold let va_update_memTaint (sM:va_state) (sK:va_state) : va_state = va_upd_memTaint sM.memTaint sK
 
 [@va_qattr]
@@ -284,6 +294,7 @@ let va_update_operand (o:va_operand) (sM:va_state) (sK:va_state) : va_state =
   | OConst n -> sK
   | OReg r -> va_update_reg r sM sK
   | OMem m -> va_update_mem sM sK
+  | OStack m -> va_update_stack sM sK
 
 [@va_qattr] unfold
 let va_update_dst_operand (o:va_operand) (sM:va_state) (sK:va_state) : va_state =
@@ -324,6 +335,7 @@ let va_upd_operand_dst_opr64 (o:va_operand) (v:nat64) (s:state) =
   | OConst n -> s
   | OReg r -> update_reg r v s
   | OMem m -> s // TODO: support destination memory operands
+  | OStack m -> s // TODO: support destination stack operands
 
 [@va_qattr]
 let va_upd_operand_reg_opr64 (o:va_operand) (v:nat64) (s:state) =
@@ -331,6 +343,7 @@ let va_upd_operand_reg_opr64 (o:va_operand) (v:nat64) (s:state) =
   | OConst n -> s
   | OReg r -> update_reg r v s
   | OMem m -> s
+  | OStack m -> s
 
 let va_lemma_upd_update (sM:state) : Lemma
   (
@@ -349,12 +362,12 @@ unfold let va_Block (block:va_codes) : va_code = Block block
 unfold let va_IfElse (ifCond:ocmp) (ifTrue:va_code) (ifFalse:va_code) : va_code = IfElse ifCond ifTrue ifFalse
 unfold let va_While (whileCond:ocmp) (whileBody:va_code) : va_code = While whileCond whileBody
 
-val va_cmp_eq (o1:va_operand{ not (TMem? o1) }) (o2:va_operand{ not (TMem? o2) }) : ocmp
-val va_cmp_ne (o1:va_operand{ not (TMem? o1) }) (o2:va_operand{ not (TMem? o2) }) : ocmp
-val va_cmp_le (o1:va_operand{ not (TMem? o1) }) (o2:va_operand{ not (TMem? o2) }) : ocmp
-val va_cmp_ge (o1:va_operand{ not (TMem? o1) }) (o2:va_operand{ not (TMem? o2) }) : ocmp
-val va_cmp_lt (o1:va_operand{ not (TMem? o1) }) (o2:va_operand{ not (TMem? o2) }) : ocmp
-val va_cmp_gt (o1:va_operand{ not (TMem? o1) }) (o2:va_operand{ not (TMem? o2) }) : ocmp
+val va_cmp_eq (o1:va_operand{ not (TMem? o1 || TStack? o1) }) (o2:va_operand{ not (TMem? o2 || TStack? o2) }) : ocmp
+val va_cmp_ne (o1:va_operand{ not (TMem? o1 || TStack? o1) }) (o2:va_operand{ not (TMem? o2 || TStack? o2) }) : ocmp
+val va_cmp_le (o1:va_operand{ not (TMem? o1 || TStack? o1) }) (o2:va_operand{ not (TMem? o2 || TStack? o2) }) : ocmp
+val va_cmp_ge (o1:va_operand{ not (TMem? o1 || TStack? o1) }) (o2:va_operand{ not (TMem? o2 || TStack? o2) }) : ocmp
+val va_cmp_lt (o1:va_operand{ not (TMem? o1 || TStack? o1) }) (o2:va_operand{ not (TMem? o2 || TStack? o2) }) : ocmp
+val va_cmp_gt (o1:va_operand{ not (TMem? o1 || TStack? o1) }) (o2:va_operand{ not (TMem? o2 || TStack? o2) }) : ocmp
 
 unfold let va_get_block (c:va_code{Block? c}) : va_codes = Block?.block c
 unfold let va_get_ifCond (c:va_code{IfElse? c}) : ocmp = IfElse?.ifCond c
@@ -396,25 +409,13 @@ let rec buffers_readable (h: M.mem) (l: list M.buffer64) : GTot prop0 (decreases
     | [] -> True
     | b :: l'  -> buffer_readable h b /\ buffers_readable h l'
 
+unfold let modifies_none (h1 h2:M.mem) = modifies_mem M.loc_none h1 h2
 unfold let modifies_buffer (b:M.buffer64) (h1 h2:M.mem) = modifies_mem (loc_buffer b) h1 h2
 unfold let modifies_buffer_2 (b1 b2:M.buffer64) (h1 h2:M.mem) =modifies_mem (M.loc_union (loc_buffer b1) (loc_buffer b2)) h1 h2
 unfold let modifies_buffer_3 (b1 b2 b3:M.buffer64) (h1 h2:M.mem) =modifies_mem (M.loc_union (M.loc_union (loc_buffer b1) (loc_buffer b2)) (loc_buffer b3)) h1 h2
 unfold let modifies_buffer128 (b:M.buffer128) (h1 h2:M.mem) = modifies_mem (loc_buffer b) h1 h2
 unfold let modifies_buffer128_2 (b1 b2:M.buffer128) (h1 h2:M.mem) = modifies_mem (M.loc_union (loc_buffer b1) (loc_buffer b2)) h1 h2
 unfold let modifies_buffer128_3 (b1 b2 b3:M.buffer128) (h1 h2:M.mem) = modifies_mem (M.loc_union (M.loc_union (loc_buffer b1) (loc_buffer b2)) (loc_buffer b3)) h1 h2
-
-let validSrcAddrs8 (m:M.mem) (addr:int) (b:M.buffer8) (len:int) (memTaint:M.memtaint) (t:taint) =
-    buffer_readable m b /\
-    len <= buffer_length b /\
-    M.buffer_addr b m == addr ///\
-    //M.valid_taint_buf64 b m memTaint t
-
-let validDstAddrs8 (m:M.mem) (addr:int) (b:M.buffer8) (len:int) (memTaint:M.memtaint) (t:taint) =
-    buffer_readable m b /\
-    buffer_writeable b /\
-    len <= buffer_length b /\
-    M.buffer_addr b m == addr // /\
-    //M.valid_taint_buf64 b m memTaint t
 
 let validSrcAddrs64 (m:M.mem) (addr:int) (b:M.buffer64) (len:int) (memTaint:M.memtaint) (t:taint) =
     buffer_readable m b /\
@@ -454,16 +455,6 @@ let validDstAddrsOffset128 (m:M.mem) (addr:int) (b:M.buffer128) (offset len:int)
     offset + len <= buffer_length b /\
     M.buffer_addr b m + 16 `op_Multiply` offset == addr /\
     M.valid_taint_buf128 b m memTaint t
-
-let valid_stack_slots (m:M.mem) (rsp:int) (b:M.buffer64) (num_slots:int) (memTaint:M.memtaint) =
-    M.valid_taint_buf64 b m memTaint Public /\
-    buffer_readable m b /\
-    buffer_writeable b /\
-    num_slots <= buffer_length b /\
-    (let open FStar.Mul in
-     rsp == M.buffer_addr b m + 8 * num_slots /\
-     0 <= rsp - 8 * num_slots /\
-     rsp < pow2_64)
 
 let modifies_buffer_specific128 (b:M.buffer128) (h1 h2:M.mem) (start last:nat) : GTot prop0 =
     modifies_buffer128 b h1 h2 /\
@@ -519,62 +510,62 @@ unfold let va_evalCond (b:ocmp) (s:va_state) : GTot bool = eval_ocmp s b
 
 val valid_ocmp : c:ocmp -> s:va_state -> GTot bool
 
-val lemma_cmp_eq : s:va_state -> o1:va_operand{ not (TMem? o1) } -> o2:va_operand{ not (TMem? o2) } -> Lemma
+val lemma_cmp_eq : s:va_state -> o1:va_operand{ not (TMem? o1 || TStack? o1) } -> o2:va_operand{ not (TMem? o2 || TStack? o2) } -> Lemma
   (requires True)
   (ensures  (eval_ocmp s (va_cmp_eq o1 o2)) <==> (va_eval_opr64 s o1 == va_eval_opr64 s o2))
   [SMTPat (eval_ocmp s (va_cmp_eq o1 o2))]
 
-val lemma_cmp_ne : s:va_state -> o1:va_operand{ not (TMem? o1) } -> o2:va_operand{ not (TMem? o2) } -> Lemma
+val lemma_cmp_ne : s:va_state -> o1:va_operand{ not (TMem? o1 || TStack? o1) } -> o2:va_operand{ not (TMem? o2 || TStack? o2) } -> Lemma
   (requires True)
   (ensures  (eval_ocmp s (va_cmp_ne o1 o2)) <==> (va_eval_opr64 s o1 <> va_eval_opr64 s o2))
   [SMTPat (eval_ocmp s (va_cmp_ne o1 o2))]
 
-val lemma_cmp_le : s:va_state -> o1:va_operand{ not (TMem? o1) } -> o2:va_operand{ not (TMem? o2) } -> Lemma
+val lemma_cmp_le : s:va_state -> o1:va_operand{ not (TMem? o1 || TStack? o1) } -> o2:va_operand{ not (TMem? o2 || TStack? o2) } -> Lemma
   (requires True)
   (ensures  (eval_ocmp s (va_cmp_le o1 o2)) <==> (va_eval_opr64 s o1 <= va_eval_opr64 s o2))
   [SMTPat (eval_ocmp s (va_cmp_le o1 o2))]
 
-val lemma_cmp_ge : s:va_state -> o1:va_operand{ not (TMem? o1) } -> o2:va_operand{ not (TMem? o2) } -> Lemma
+val lemma_cmp_ge : s:va_state -> o1:va_operand{ not (TMem? o1 || TStack? o1) } -> o2:va_operand{ not (TMem? o2 || TStack? o2) } -> Lemma
   (requires True)
   (ensures  (eval_ocmp s (va_cmp_ge o1 o2)) <==> (va_eval_opr64 s o1 >= va_eval_opr64 s o2))
   [SMTPat (eval_ocmp s (va_cmp_ge o1 o2))]
 
-val lemma_cmp_lt : s:va_state -> o1:va_operand{ not (TMem? o1) } -> o2:va_operand{ not (TMem? o2) } -> Lemma
+val lemma_cmp_lt : s:va_state -> o1:va_operand{ not (TMem? o1 || TStack? o1) } -> o2:va_operand{ not (TMem? o2 || TStack? o2) } -> Lemma
   (requires True)
   (ensures  (eval_ocmp s (va_cmp_lt o1 o2)) <==> (va_eval_opr64 s o1 < va_eval_opr64 s o2))
   [SMTPat (eval_ocmp s (va_cmp_lt o1 o2))]
 
-val lemma_cmp_gt : s:va_state -> o1:va_operand{ not (TMem? o1) } -> o2:va_operand{ not (TMem? o2) } -> Lemma
+val lemma_cmp_gt : s:va_state -> o1:va_operand{ not (TMem? o1 || TStack? o1) } -> o2:va_operand{ not (TMem? o2 || TStack? o2) } -> Lemma
   (requires True)
   (ensures  (eval_ocmp s (va_cmp_gt o1 o2)) <==> (va_eval_opr64 s o1 > va_eval_opr64 s o2))
   [SMTPat (eval_ocmp s (va_cmp_gt o1 o2))]
 
-val lemma_valid_cmp_eq : s:va_state -> o1:va_operand{ not (TMem? o1) } -> o2:va_operand{ not (TMem? o2) } -> Lemma
+val lemma_valid_cmp_eq : s:va_state -> o1:va_operand{ not (TMem? o1 || TStack? o1) } -> o2:va_operand{ not (TMem? o2 || TStack? o2) } -> Lemma
   (requires True)
   (ensures  (valid_operand o1 s /\ valid_operand o2 s) ==> (valid_ocmp (va_cmp_eq o1 o2) s))
   [SMTPat (valid_ocmp (va_cmp_eq o1 o2) s)]
 
-val lemma_valid_cmp_ne : s:va_state -> o1:va_operand{ not (TMem? o1) } -> o2:va_operand{ not (TMem? o2) } -> Lemma
+val lemma_valid_cmp_ne : s:va_state -> o1:va_operand{ not (TMem? o1 || TStack? o1) } -> o2:va_operand{ not (TMem? o2 || TStack? o2) } -> Lemma
   (requires True)
   (ensures (valid_operand o1 s /\ valid_operand o2 s) ==> (valid_ocmp (va_cmp_ne o1 o2) s))
   [SMTPat (valid_ocmp (va_cmp_ne o1 o2) s)]
 
-val lemma_valid_cmp_le : s:va_state -> o1:va_operand{ not (TMem? o1) } -> o2:va_operand{ not (TMem? o2) } -> Lemma
+val lemma_valid_cmp_le : s:va_state -> o1:va_operand{ not (TMem? o1 || TStack? o1) } -> o2:va_operand{ not (TMem? o2 || TStack? o2) } -> Lemma
   (requires True)
   (ensures (valid_operand o1 s /\ valid_operand o2 s) ==> (valid_ocmp (va_cmp_le o1 o2) s))
   [SMTPat (valid_ocmp (va_cmp_le o1 o2) s)]
 
-val lemma_valid_cmp_ge : s:va_state -> o1:va_operand{ not (TMem? o1) } -> o2:va_operand{ not (TMem? o2) } -> Lemma
+val lemma_valid_cmp_ge : s:va_state -> o1:va_operand{ not (TMem? o1 || TStack? o1) } -> o2:va_operand{ not (TMem? o2 || TStack? o2) } -> Lemma
   (requires True)
   (ensures (valid_operand o1 s /\ valid_operand o2 s) ==> (valid_ocmp (va_cmp_ge o1 o2) s))
   [SMTPat (valid_ocmp (va_cmp_ge o1 o2) s)]
 
-val lemma_valid_cmp_lt : s:va_state -> o1:va_operand{ not (TMem? o1) } -> o2:va_operand{ not (TMem? o2) } -> Lemma
+val lemma_valid_cmp_lt : s:va_state -> o1:va_operand{ not (TMem? o1 || TStack? o1) } -> o2:va_operand{ not (TMem? o2 || TStack? o2) } -> Lemma
   (requires True)
   (ensures (valid_operand o1 s /\ valid_operand o2 s) ==> (valid_ocmp (va_cmp_lt o1 o2) s))
   [SMTPat (valid_ocmp (va_cmp_lt o1 o2) s)]
 
-val lemma_valid_cmp_gt : s:va_state -> o1:va_operand{ not (TMem? o1) } -> o2:va_operand{ not (TMem? o2) } -> Lemma
+val lemma_valid_cmp_gt : s:va_state -> o1:va_operand{ not (TMem? o1 || TStack? o1) } -> o2:va_operand{ not (TMem? o2 || TStack? o2) } -> Lemma
   (requires True)
   (ensures (valid_operand o1 s /\ valid_operand o2 s) ==> (valid_ocmp (va_cmp_gt o1 o2) s))
   [SMTPat (valid_ocmp (va_cmp_gt o1 o2) s)]
@@ -678,6 +669,6 @@ unfold let memTaint_type = Map.t int taint
 [@va_qattr]
 let max_one_mem (o1 o2:va_operand) : prop0 =
   match (o1, o2) with
-  | (TMem _ _, TMem _ _) -> False
+  | (TMem _ _, TMem _ _) | (TMem _ _, TStack _) | (TStack _, TMem _ _) | (TStack _, TStack _) -> False
   | _ -> True
 

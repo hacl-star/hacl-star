@@ -86,7 +86,7 @@ let print_operand (o:operand) (p:printer) =
       if 0 <= n && n < pow2_64 then p.const n
       else "!!! INVALID constant: " ^ string_of_int n ^ " !!!"
   | OReg r -> print_reg r p
-  | OMem m -> print_maddr m "qword" print_reg p
+  | OMem m | OStack m -> print_maddr m "qword" print_reg p
 
 let print_operand32 (o:operand) (p:printer) =
   match o with
@@ -94,7 +94,7 @@ let print_operand32 (o:operand) (p:printer) =
       if 0 <= n && n < pow2_32 then p.const n
       else "!!! INVALID constant: " ^ string_of_int n ^ " !!!"
   | OReg r -> print_reg32 r p
-  | OMem m -> print_maddr m "dword" print_reg32 p
+  | OMem m | OStack m -> print_maddr m "dword" print_reg32 p
 
 let print_small_operand (o:operand) (p:printer) =
   match o with
@@ -113,7 +113,7 @@ let print_xmm (x:xmm) (p:printer) =
 let print_mov128_op (o:mov128_op) (p:printer) =
   match o with
   | Mov128Xmm x -> print_xmm x p
-  | Mov128Mem m -> print_maddr m "xmmword" print_reg p
+  | Mov128Mem m | Mov128Stack m -> print_maddr m "xmmword" print_reg p
 
 assume val print_any: 'a -> string
 
@@ -204,6 +204,8 @@ let print_ins (ins:tainted_ins) (p:printer) =
   | Shl64 dst amt -> p.ins_name "  shl" [dst; amt] ^ print_shift dst amt
   | Push src      -> p.ins_name "  push" [src] ^ print_operand src p
   | Pop dst       -> p.ins_name "  pop"  [dst] ^ print_operand dst p
+  | Alloc n       -> p.ins_name "  sub" [OReg Rsp; OConst n] ^ print_ops (OReg Rsp) (OConst n)
+  | Dealloc n       -> p.ins_name "  add" [OReg Rsp; OConst n] ^ print_ops (OReg Rsp) (OConst n)
   | Paddd dst src                -> "  paddd "      ^ print_xmms dst src
   |VPaddd dst src1 src2          -> "  vpaddd "     ^ print_xmms_3 dst src1 src2
   | Pxor dst src                 -> "  pxor "       ^ print_xmms dst src

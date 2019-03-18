@@ -1,5 +1,5 @@
 [
-  "tªñˆF×\nÁÖBàÿ\u0012\\/ ",
+  "lí´ŽJ!=\u0002•ãf™9Œ–Ò",
   [
     [
       "X64.Taint_Semantics_s.tainted_ins",
@@ -11,7 +11,7 @@
         "assumption_X64.Machine_s.taint__uu___haseq"
       ],
       0,
-      "5606931a5336be56b4d7cdfce251a2e0"
+      "2602668168b6e5a035c776657a5bfb7c"
     ],
     [
       "X64.Taint_Semantics_s.operand_obs",
@@ -26,11 +26,12 @@
         "disc_equation_X64.Machine_s.OConst",
         "disc_equation_X64.Machine_s.OMem",
         "disc_equation_X64.Machine_s.OReg",
+        "disc_equation_X64.Machine_s.OStack",
         "fuel_guarded_inversion_X64.Machine_s.maddr",
         "fuel_guarded_inversion_X64.Machine_s.operand"
       ],
       0,
-      "1bc9ace46c6553a739941df21c234ab5"
+      "cd42339047e9d5e66276e0e0a31364b9"
     ],
     [
       "X64.Taint_Semantics_s.operand_obs_list",
@@ -48,7 +49,7 @@
         "subterm_ordering_Prims.Cons"
       ],
       0,
-      "7e7f49a1aeb640a8018156ec63e5409d"
+      "87d7bc616610fad428adeaefdd118f4a"
     ],
     [
       "X64.Taint_Semantics_s.match_n",
@@ -72,7 +73,7 @@
         "typing_tok_X64.Machine_s.Public@tok", "well-founded-ordering-on-nat"
       ],
       0,
-      "090b5d010126ac4e5e091d3d89995dbf"
+      "a9857f60af48d44d1888f53a79fcdfb6"
     ],
     [
       "X64.Taint_Semantics_s.update_n",
@@ -112,7 +113,7 @@
         "typing_tok_X64.Machine_s.Public@tok", "well-founded-ordering-on-nat"
       ],
       0,
-      "b6351d5eda0f3e6742b6d676e6421a5c"
+      "069f90b5d3db4b155150ba93a70b2c4c"
     ],
     [
       "X64.Taint_Semantics_s.taint_match",
@@ -124,10 +125,11 @@
         "disc_equation_X64.Machine_s.OConst",
         "disc_equation_X64.Machine_s.OMem",
         "disc_equation_X64.Machine_s.OReg",
+        "disc_equation_X64.Machine_s.OStack",
         "fuel_guarded_inversion_X64.Machine_s.operand"
       ],
       0,
-      "c86bf9ae69a453eac679bc98ed84003e"
+      "ba8f832563409edf09e4cd9c85a0a011"
     ],
     [
       "X64.Taint_Semantics_s.taint_match_list",
@@ -141,7 +143,7 @@
         "fuel_guarded_inversion_Prims.list", "subterm_ordering_Prims.Cons"
       ],
       0,
-      "5c715755bb1bfde496612f0efd486fe7"
+      "46acf16d9dffa0879c56733ac2295194"
     ],
     [
       "X64.Taint_Semantics_s.update_taint",
@@ -153,10 +155,11 @@
         "disc_equation_X64.Machine_s.OConst",
         "disc_equation_X64.Machine_s.OMem",
         "disc_equation_X64.Machine_s.OReg",
+        "disc_equation_X64.Machine_s.OStack",
         "fuel_guarded_inversion_X64.Machine_s.operand"
       ],
       0,
-      "6d23e705e1d94ea9012fb6e8dfe4561d"
+      "134260bdcf9162d995216586b4d47e3e"
     ],
     [
       "X64.Taint_Semantics_s.update_taint_list",
@@ -171,7 +174,7 @@
         "subterm_ordering_Prims.Cons"
       ],
       0,
-      "d15b42ed99fbba91a5de30a2f7982238"
+      "de2334d03c1a866a8a5b6dc3d20aab6f"
     ],
     [
       "X64.Taint_Semantics_s.taint_match128",
@@ -181,11 +184,12 @@
       [
         "@MaxIFuel_assumption", "@query",
         "disc_equation_X64.Machine_s.Mov128Mem",
+        "disc_equation_X64.Machine_s.Mov128Stack",
         "disc_equation_X64.Machine_s.Mov128Xmm",
         "fuel_guarded_inversion_X64.Machine_s.mov128_op"
       ],
       0,
-      "a67a8a6ac163333267964bc8eeb6bd10"
+      "c6348350a010dd76c9bd8ef8d29ec498"
     ],
     [
       "X64.Taint_Semantics_s.update_taint128",
@@ -195,11 +199,12 @@
       [
         "@MaxIFuel_assumption", "@query",
         "disc_equation_X64.Machine_s.Mov128Mem",
+        "disc_equation_X64.Machine_s.Mov128Stack",
         "disc_equation_X64.Machine_s.Mov128Xmm",
         "fuel_guarded_inversion_X64.Machine_s.mov128_op"
       ],
       0,
-      "e89f59ad9615342c9ac420ed66ea61fb"
+      "060445d03ecdf2df40e9cb673d11ca19"
     ],
     [
       "X64.Taint_Semantics_s.taint_eval_movdqu",
@@ -213,7 +218,7 @@
         "refinement_interpretation_Tm_refine_69a34f712728736367447fdb81c0edd0"
       ],
       0,
-      "07d83187b9d9a18ba35a8245bea40e9c"
+      "e88efaa1d2d8ac09d5c148caae2fd2cb"
     ],
     [
       "X64.Taint_Semantics_s.taint_eval_ins",
@@ -243,7 +248,7 @@
         "unit_typing"
       ],
       0,
-      "eaf643656287dafbc082582e06eb54f3"
+      "3c8c0c8ebf28d7b0eae87ef564f72f78"
     ],
     [
       "X64.Taint_Semantics_s.tainted_ocmp",
@@ -255,7 +260,7 @@
         "assumption_X64.Machine_s.taint__uu___haseq"
       ],
       0,
-      "4c6d27de1f0dd78a4d3d9f9add8782e2"
+      "d3f685b94b569ba26b7ebd8756ee21b4"
     ],
     [
       "X64.Taint_Semantics_s.get_fst_ocmp",
@@ -273,7 +278,7 @@
         "fuel_guarded_inversion_X64.Bytes_Semantics_s.ocmp"
       ],
       0,
-      "7343cf70d2dd52052f4f493e7b6ea60c"
+      "ed55a007d4583e2bbe03822f9bd4b97c"
     ],
     [
       "X64.Taint_Semantics_s.get_snd_ocmp",
@@ -291,7 +296,7 @@
         "fuel_guarded_inversion_X64.Bytes_Semantics_s.ocmp"
       ],
       0,
-      "de50d94007d3502b343959510de4a605"
+      "1f48df461a68048807efd2a3739422ae"
     ],
     [
       "X64.Taint_Semantics_s.tainted_codes",
@@ -306,7 +311,7 @@
         "typing_X64.Taint_Semantics_s.tainted_code"
       ],
       0,
-      "493d1b70a35b78bc8be75b84bc04a1be"
+      "52ab251e0b92a823cb885e49637923b3"
     ],
     [
       "X64.Taint_Semantics_s.taint_eval_code",
@@ -335,7 +340,7 @@
         "well-founded-ordering-on-nat"
       ],
       0,
-      "27c274bde164f8fc1a00cbc5ec83504f"
+      "6c027dc5605262b60f019151b846c0bd"
     ],
     [
       "X64.Taint_Semantics_s.taint_eval_code",
@@ -361,7 +366,7 @@
         "subterm_ordering_Prims.Cons"
       ],
       0,
-      "0de25abaf04081b70df85771da2a7314"
+      "ee2faef195993b210e726ea2f8d487c3"
     ],
     [
       "X64.Taint_Semantics_s.taint_eval_code",
@@ -390,7 +395,7 @@
         "well-founded-ordering-on-nat"
       ],
       0,
-      "a3c3e6523fac197de550ec6252e2205b"
+      "3d8481be429fdafe9efd4a620b28217c"
     ],
     [
       "X64.Taint_Semantics_s.tainted_ins",
@@ -402,7 +407,7 @@
         "assumption_X64.Machine_s.taint__uu___haseq"
       ],
       0,
-      "230d67b0d6c8caf2f8f53e3cda71f46f"
+      "2a24139dd533b34c46c37c931382c692"
     ],
     [
       "X64.Taint_Semantics_s.operand_obs",
@@ -417,11 +422,12 @@
         "disc_equation_X64.Machine_s.OConst",
         "disc_equation_X64.Machine_s.OMem",
         "disc_equation_X64.Machine_s.OReg",
+        "disc_equation_X64.Machine_s.OStack",
         "fuel_guarded_inversion_X64.Machine_s.maddr",
         "fuel_guarded_inversion_X64.Machine_s.operand"
       ],
       0,
-      "ee56454a7f492826ab4c405a8e13f0fd"
+      "696d73dfd2fa7788aa49d482e8531967"
     ],
     [
       "X64.Taint_Semantics_s.operand_obs_list",
@@ -439,7 +445,7 @@
         "subterm_ordering_Prims.Cons"
       ],
       0,
-      "d9ae680fcac8ead08391419073b2297f"
+      "fd6e17fcd1e21e6c7396f6b98aac3d5c"
     ],
     [
       "X64.Taint_Semantics_s.match_n",
@@ -463,7 +469,7 @@
         "typing_tok_X64.Machine_s.Public@tok", "well-founded-ordering-on-nat"
       ],
       0,
-      "e3b96f1c5c429f8240594572b059eaff"
+      "9837e9465b4b5526abed309e53696e8c"
     ],
     [
       "X64.Taint_Semantics_s.update_n",
@@ -503,7 +509,7 @@
         "typing_tok_X64.Machine_s.Public@tok", "well-founded-ordering-on-nat"
       ],
       0,
-      "d0fad5fbfce902a5fddd448025af9845"
+      "62026cc589ece11a2389644c13a8af21"
     ],
     [
       "X64.Taint_Semantics_s.taint_match",
@@ -515,10 +521,11 @@
         "disc_equation_X64.Machine_s.OConst",
         "disc_equation_X64.Machine_s.OMem",
         "disc_equation_X64.Machine_s.OReg",
+        "disc_equation_X64.Machine_s.OStack",
         "fuel_guarded_inversion_X64.Machine_s.operand"
       ],
       0,
-      "a3560107723404b757be8f8942696906"
+      "a169e24e177d0c8b0089cc6280dda5b0"
     ],
     [
       "X64.Taint_Semantics_s.taint_match_list",
@@ -532,7 +539,7 @@
         "fuel_guarded_inversion_Prims.list", "subterm_ordering_Prims.Cons"
       ],
       0,
-      "631f2963471bd03839cc041ff173c8aa"
+      "ecc6d522c5b81b95a07ccf517860d8be"
     ],
     [
       "X64.Taint_Semantics_s.update_taint",
@@ -544,10 +551,11 @@
         "disc_equation_X64.Machine_s.OConst",
         "disc_equation_X64.Machine_s.OMem",
         "disc_equation_X64.Machine_s.OReg",
+        "disc_equation_X64.Machine_s.OStack",
         "fuel_guarded_inversion_X64.Machine_s.operand"
       ],
       0,
-      "012ae23922c5324ae323d7473798aead"
+      "e7416bb532e2f2658bce7daf3ba1d229"
     ],
     [
       "X64.Taint_Semantics_s.update_taint_list",
@@ -562,7 +570,7 @@
         "subterm_ordering_Prims.Cons"
       ],
       0,
-      "dcb816d1ef2961a85a066a96e2a867f6"
+      "84d3fac532d14565b8a2c46d45870bc1"
     ],
     [
       "X64.Taint_Semantics_s.taint_match128",
@@ -572,11 +580,12 @@
       [
         "@MaxIFuel_assumption", "@query",
         "disc_equation_X64.Machine_s.Mov128Mem",
+        "disc_equation_X64.Machine_s.Mov128Stack",
         "disc_equation_X64.Machine_s.Mov128Xmm",
         "fuel_guarded_inversion_X64.Machine_s.mov128_op"
       ],
       0,
-      "377c87c3c1390d963e383d40a5bfeb9c"
+      "1828e048e4836a16bdac12c29c55c1b3"
     ],
     [
       "X64.Taint_Semantics_s.update_taint128",
@@ -586,11 +595,12 @@
       [
         "@MaxIFuel_assumption", "@query",
         "disc_equation_X64.Machine_s.Mov128Mem",
+        "disc_equation_X64.Machine_s.Mov128Stack",
         "disc_equation_X64.Machine_s.Mov128Xmm",
         "fuel_guarded_inversion_X64.Machine_s.mov128_op"
       ],
       0,
-      "52c6097ee65f5cddc83d8943e5613165"
+      "89e2fc75c23cd5df6f75707ae078b35b"
     ],
     [
       "X64.Taint_Semantics_s.taint_eval_movdqu",
@@ -604,7 +614,7 @@
         "refinement_interpretation_Tm_refine_69a34f712728736367447fdb81c0edd0"
       ],
       0,
-      "40284e13314de25e914602235e3a3ee9"
+      "bdae5c4e6831e63752830511b2be3800"
     ],
     [
       "X64.Taint_Semantics_s.taint_eval_ins",
@@ -634,7 +644,7 @@
         "unit_typing"
       ],
       0,
-      "32da166c72a549c2b7c4b396f0bf29c8"
+      "ddf3c90ddc69c7bb2221ad842403d074"
     ],
     [
       "X64.Taint_Semantics_s.tainted_ocmp",
@@ -646,7 +656,7 @@
         "assumption_X64.Machine_s.taint__uu___haseq"
       ],
       0,
-      "b5899a7284992ce9ea08bee72214226d"
+      "66f56791995ae7c61b8ea08e15c6cef3"
     ],
     [
       "X64.Taint_Semantics_s.get_fst_ocmp",
@@ -664,7 +674,7 @@
         "fuel_guarded_inversion_X64.Bytes_Semantics_s.ocmp"
       ],
       0,
-      "b7e4c54d8928a29128e71db746969d6b"
+      "d63e278536dbad605ce98aed3e0e440f"
     ],
     [
       "X64.Taint_Semantics_s.get_snd_ocmp",
@@ -682,7 +692,7 @@
         "fuel_guarded_inversion_X64.Bytes_Semantics_s.ocmp"
       ],
       0,
-      "e43037cdbf4d7d306a0aa829eca28f34"
+      "ce501eab61903dce985daf083ec89ec0"
     ],
     [
       "X64.Taint_Semantics_s.tainted_codes",
@@ -697,7 +707,7 @@
         "typing_X64.Taint_Semantics_s.tainted_code"
       ],
       0,
-      "a759b1c7aa86dea0b474112f5ec7c542"
+      "70293a4254d44686b4644cb84847742e"
     ],
     [
       "X64.Taint_Semantics_s.taint_eval_code",
@@ -726,7 +736,7 @@
         "well-founded-ordering-on-nat"
       ],
       0,
-      "42cbfc268137b54b93ce5e3ec0311d03"
+      "3fcb14a789856dc67b535f44365c0a72"
     ],
     [
       "X64.Taint_Semantics_s.taint_eval_code",
@@ -752,7 +762,7 @@
         "subterm_ordering_Prims.Cons"
       ],
       0,
-      "e4e3521a90c25d12c3264b75cde6584e"
+      "18238181d07c84b57a88721ab7a0a776"
     ],
     [
       "X64.Taint_Semantics_s.taint_eval_code",
@@ -781,7 +791,7 @@
         "well-founded-ordering-on-nat"
       ],
       0,
-      "820ae52272f80f14573e80b72fc97fe9"
+      "1924f0b1aa4e8a4c476b58e754b73547"
     ]
   ]
 ]

@@ -1,5 +1,5 @@
 [
-  "#\u0002|[◊sÛ\u0002Ê˘´w˝∑∫‘",
+  "b†\u001d\u0014≥üçwÆå\"ækiÅ\u0015",
   [
     [
       "X64.MemoryAdapters.as_vale_buffer",
@@ -42,7 +42,7 @@
         "typing_Interop.Types.down_view", "typing_Interop.Types.view_n"
       ],
       0,
-      "3c242f6c58163b70e686a90262de5d0c"
+      "4ba61c093e378c3a104fc0756870806a"
     ],
     [
       "X64.MemoryAdapters.as_vale_immbuffer",
@@ -85,7 +85,7 @@
         "typing_Interop.Types.down_view", "typing_Interop.Types.view_n"
       ],
       0,
-      "46d441faeaf3f3df79d6e73c76e3776d"
+      "9d58db78e03dd208ea4a946e312931e3"
     ],
     [
       "X64.MemoryAdapters.mem_eq",
@@ -94,7 +94,16 @@
       0,
       [ "@query", "equation_X64.Memory.mem" ],
       0,
-      "8103bae85abe26c21c67463b481c8d00"
+      "9a8691da7fc763154cf74cc8987df34a"
+    ],
+    [
+      "X64.MemoryAdapters.stack_eq",
+      1,
+      1,
+      0,
+      [ "@query", "equation_X64.Stack_i.stack" ],
+      0,
+      "402d6eb45d51c1e4fae727cca02cdd5c"
     ],
     [
       "X64.MemoryAdapters.as_mem",
@@ -103,7 +112,7 @@
       0,
       [ "@query", "equation_X64.Memory.mem" ],
       0,
-      "f31320e376e70f3a9619b3a1afeeb134"
+      "ba1b0b7bf1186ba204b257db8d157db7"
     ],
     [
       "X64.MemoryAdapters.as_vale_mem",
@@ -112,7 +121,16 @@
       0,
       [ "@query", "equation_X64.Memory.mem" ],
       0,
-      "5dd26cc2f733c1a7133ab1a9499ed68f"
+      "0ab646b44ea60519d165a8b9e4dc252e"
+    ],
+    [
+      "X64.MemoryAdapters.as_vale_stack",
+      1,
+      1,
+      0,
+      [ "@query", "equation_X64.Stack_i.stack" ],
+      0,
+      "538cc0556e2314f7ea4919468e39e672"
     ],
     [
       "X64.MemoryAdapters.buffer_addr_is_nat64",
@@ -155,7 +173,7 @@
         "typing_X64.Vale.State.__proj__Mkstate__item__mem"
       ],
       0,
-      "bf0bbc4b5048cc0b033c984c4d9cd594"
+      "cfb16a1f0fc3dfdee105515b536a5eda"
     ],
     [
       "X64.MemoryAdapters.code_equiv",
@@ -167,7 +185,7 @@
         "equation_X64.Vale.Decls.ins", "equation_X64.Vale.Decls.ocmp"
       ],
       0,
-      "eac0624b0bf05798d8256b872bf5b4be"
+      "10d1bdf912972b7f85c1e69d75b87107"
     ],
     [
       "X64.MemoryAdapters.ins_equiv",
@@ -176,7 +194,7 @@
       0,
       [ "@query", "equation_X64.Vale.Decls.ins" ],
       0,
-      "8b5e2057443b002472ee0ad5be060819"
+      "d6cc17838c58c19cf1275e56c65d390e"
     ],
     [
       "X64.MemoryAdapters.ocmp_equiv",
@@ -185,7 +203,7 @@
       0,
       [ "@query", "equation_X64.Vale.Decls.ocmp" ],
       0,
-      "631e47b8771c5b72793458e26ad87793"
+      "400b6ff083bc49f6d20655fc019cc6f8"
     ]
   ]
 ]

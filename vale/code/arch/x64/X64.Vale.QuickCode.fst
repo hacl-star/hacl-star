@@ -13,6 +13,7 @@ type mod_t =
 | Mod_xmm: xmm -> mod_t
 | Mod_flags: mod_t
 | Mod_mem: mod_t
+| Mod_stack: mod_t
 | Mod_memTaint: mod_t
 unfold let mods_t = list mod_t
 
@@ -25,6 +26,7 @@ let mod_eq (x y:mod_t) : Pure bool (requires True) (ensures fun b -> b == (x = y
   | Mod_xmm xx -> (match y with Mod_xmm xy -> xx = xy | _ -> false)
   | Mod_flags -> (match y with Mod_flags -> true | _ -> false)
   | Mod_mem -> (match y with Mod_mem -> true | _ -> false)
+  | Mod_stack -> (match y with Mod_stack -> true | _ -> false)
   | Mod_memTaint -> (match y with Mod_memTaint -> true | _ -> false)
 
 [@va_qattr]
@@ -36,6 +38,7 @@ let update_state_mod (m:mod_t) (sM sK:state) : state =
   | Mod_xmm x -> va_update_xmm x sM sK
   | Mod_flags -> va_update_flags sM sK
   | Mod_mem -> va_update_mem sM sK
+  | Mod_stack -> va_update_stack sM sK
   | Mod_memTaint -> va_update_memTaint sM sK
 
 [@va_qattr]
@@ -58,6 +61,7 @@ let va_mod_dst_opr64 (o:va_operand) : mod_t =
   | TConst n -> Mod_None
   | TReg r -> Mod_reg r
   | TMem _ _ -> Mod_None // TODO: support destination memory operands
+  | TStack _ -> Mod_None // TODO: support destination stack operands
 
 [@va_qattr qmodattr]
 let va_mod_reg_opr64 (o:va_reg_operand) : mod_t =
