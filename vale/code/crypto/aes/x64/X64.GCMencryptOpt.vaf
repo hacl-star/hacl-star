@@ -299,7 +299,7 @@ procedure {:quick} gcm_make_length_quad()
 }
 
 #reset-options "--z3rlimit 150"
-procedure {:quick} {:verify true} gcm_blocks(
+procedure {:quick} gcm_blocks(
     inline alg:algorithm,
     ghost stack_b:buffer64,
     ghost auth_b:buffer128,
