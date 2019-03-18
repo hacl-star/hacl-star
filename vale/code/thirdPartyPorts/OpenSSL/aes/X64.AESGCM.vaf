@@ -2377,6 +2377,7 @@ procedure {:quick} Loop6x_loop(
             len;
 
     {
+        assume(false);
         Loop6x(alg, count+iter, iv_b, in0_b, in_b, out_b, scratch_b, plain_quads,
                key_words, round_keys, keys_b, hkeys_b, ctr_BE_orig, ctr);
         iter := #nat(iter + 1);
