@@ -486,7 +486,7 @@ procedure {:quick} gcm_blocks(
     Load128_buffer(xmm11, Xip, 0, Secret, hkeys_b, 0); // Load h instead of computing it
 
     (ghost var y_0), (ghost var y_auth) := gcm_auth_bytes(alg, auth_b, key, round_keys, keys_b);
-    IMul64(r11, 16);     // Convert auth_len into auth bytes (16 == 128/8)
+    IMul64(r11, 128/8);     // Convert auth_len into auth bytes
 
     ghost var y_auth_bytes:quad32 := y_auth;
     ghost var auth_byte_seq:seq(quad32) := empty_seq_quad32;
@@ -530,7 +530,7 @@ procedure {:quick} gcm_blocks(
     ghost var y_cipher128 := xmm1;
 
     Add64(rcx, Mem(rsp, 24, stack_b, 3, Public));    // rcx == len128x6 + len128
-    IMul64(rcx, 16);  // rcx *= 128/8 == # bytes of plain
+    IMul64(rcx, 128/8);  // rcx *= 128/8;   rcx == # bytes of plain
     Load64_buffer(r13, rsp, 64, Public, stack_b, 8);  // r13 := plain_num_bytes
 
     ghost var y_inout := y_cipher128;
