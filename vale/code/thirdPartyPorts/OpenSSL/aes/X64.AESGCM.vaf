@@ -2095,12 +2095,8 @@ procedure {:quick} Loop6x(
         counter == inc32lite(ctr_BE, 6).lo0 % 256;
 
         // Encryption results
-        len == 0 ==> inout0 == quad32_xor(old(buffer128_read(in_b, count*6 + 0, mem)), aes_encrypt_BE(alg, key_words, inc32lite(ctr_BE, 0)));
-        len == 0 ==> inout1 == quad32_xor(old(buffer128_read(in_b, count*6 + 1, mem)), aes_encrypt_BE(alg, key_words, inc32lite(ctr_BE, 1)));
-        len == 0 ==> inout2 == quad32_xor(old(buffer128_read(in_b, count*6 + 2, mem)), aes_encrypt_BE(alg, key_words, inc32lite(ctr_BE, 2)));
-        len == 0 ==> inout3 == quad32_xor(old(buffer128_read(in_b, count*6 + 3, mem)), aes_encrypt_BE(alg, key_words, inc32lite(ctr_BE, 3)));
-        len == 0 ==> inout4 == quad32_xor(old(buffer128_read(in_b, count*6 + 4, mem)), aes_encrypt_BE(alg, key_words, inc32lite(ctr_BE, 4)));
-        len == 0 ==> inout5 == quad32_xor(old(buffer128_read(in_b, count*6 + 5, mem)), aes_encrypt_BE(alg, key_words, inc32lite(ctr_BE, 5)));
+        len == 0 ==> gctr_registers(inout0, inout1, inout2, inout3, inout4, inout5,
+                                    plain_quads, alg, key_words, ctr_BE_orig, count);
 
         len > 0 ==> inout0 == quad32_xor(reverse_bytes_quad32(inc32lite(ctr_BE, 6)), rndkey);
         len > 0 ==> inout1 == Ii;
@@ -2163,6 +2159,7 @@ procedure {:quick} Loop6x(
         VPolyAdd(Xi, Xi, Mem128(rbp, 0x10, Secret, scratch_b, 1));  // # modulo-scheduled 
         VPolyAdd(Xi, Xi, Z0);                                    // # modulo-scheduled 
     }
+    reveal gctr_registers_def;
 }
 
 
@@ -2278,6 +2275,7 @@ procedure {:quick} Loop6x_loop(
 
         // GCTR
         gctr_partial_opaque(alg, #nat(6*count + old(len) - 6), plain_quads, s128(mem, out_b), key_words, ctr_BE_orig);
+
         inout0 == quad32_xor(old(buffer128_read(in_b, 6*count+old(len)-6 + 0, mem)), aes_encrypt_BE(alg, key_words, inc32lite(ctr_BE_orig, 6*count + old(len) - 6)));
         inout1 == quad32_xor(old(buffer128_read(in_b, 6*count+old(len)-6 + 1, mem)), aes_encrypt_BE(alg, key_words, inc32lite(ctr_BE_orig, 6*count + old(len) - 6 + 1)));
         inout2 == quad32_xor(old(buffer128_read(in_b, 6*count+old(len)-6 + 2, mem)), aes_encrypt_BE(alg, key_words, inc32lite(ctr_BE_orig, 6*count + old(len) - 6 + 2)));
@@ -2363,12 +2361,8 @@ procedure {:quick} Loop6x_loop(
             len > 0 ==> counter + 6 < 256 ==> inout4 == reverse_bytes_quad32(inc32lite(ctr, 4));
             len > 0 ==> counter + 6 < 256 ==> inout5 == reverse_bytes_quad32(inc32lite(ctr, 5));
 
-            len == 0 ==> inout0 == quad32_xor(old(buffer128_read(in_b, (count+iter-1)*6 + 0, mem)), aes_encrypt_BE(alg, key_words, inc32lite(ctr_BE_orig, 6*count + 6*(iter-1))));
-            len == 0 ==> inout1 == quad32_xor(old(buffer128_read(in_b, (count+iter-1)*6 + 1, mem)), aes_encrypt_BE(alg, key_words, inc32lite(ctr_BE_orig, 6*count + 6*(iter-1) + 1)));
-            len == 0 ==> inout2 == quad32_xor(old(buffer128_read(in_b, (count+iter-1)*6 + 2, mem)), aes_encrypt_BE(alg, key_words, inc32lite(ctr_BE_orig, 6*count + 6*(iter-1) + 2)));
-            len == 0 ==> inout3 == quad32_xor(old(buffer128_read(in_b, (count+iter-1)*6 + 3, mem)), aes_encrypt_BE(alg, key_words, inc32lite(ctr_BE_orig, 6*count + 6*(iter-1) + 3)));
-            len == 0 ==> inout4 == quad32_xor(old(buffer128_read(in_b, (count+iter-1)*6 + 4, mem)), aes_encrypt_BE(alg, key_words, inc32lite(ctr_BE_orig, 6*count + 6*(iter-1) + 4)));
-            len == 0 ==> inout5 == quad32_xor(old(buffer128_read(in_b, (count+iter-1)*6 + 5, mem)), aes_encrypt_BE(alg, key_words, inc32lite(ctr_BE_orig, 6*count + 6*(iter-1) + 5)));
+            len == 0 ==> gctr_registers(inout0, inout1, inout2, inout3, inout4, inout5,
+                                        plain_quads, alg, key_words, ctr_BE_orig, count+iter-1);
 
             // GCTR progress
             len > 0 ==> gctr_partial_opaque(alg, 6*count + 6*iter, plain_quads, s128(mem, out_b), key_words, ctr_BE_orig);
@@ -2377,12 +2371,12 @@ procedure {:quick} Loop6x_loop(
             len;
 
     {
-        assume(false);
         Loop6x(alg, count+iter, iv_b, in0_b, in_b, out_b, scratch_b, plain_quads,
                key_words, round_keys, keys_b, hkeys_b, ctr_BE_orig, ctr);
         iter := #nat(iter + 1);
         ctr := inc32(ctr, 6);
     }
+    reveal gctr_registers_def;
 }
 
 
