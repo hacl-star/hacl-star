@@ -821,7 +821,7 @@ CFLAGS += -Wall -Wextra -g \
 %.exe: %.o | compile-generic
 	# Linking with full kremlib since tests may use TestLib, etc.
 	$(call run-with-log,\
-	  $(CC) $(CFLAGS) $(LDFLAGS) $^ -o $@ \
+	  $(CC) $(CFLAGS) $(LDFLAGS) -I$(KREMLIN_HOME)/include $^ -o $@ \
 	    dist/generic/libevercrypt.a -lcrypto $(LDFLAGS) \
 	    $(KREMLIN_HOME)/kremlib/dist/generic/libkremlib.a \
 	  ,[LD $*],$(call to-obj-dir,$@))
