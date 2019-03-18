@@ -150,19 +150,20 @@ let print_compare len expected result =
 
 let print_compare_display len expected result =
   let r = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) expected result in
-  if r then IO.print_string "\nSuccess !"
+  if r then IO.print_string "\nSuccess !\n"
   else begin
     IO.print_string "\nResult:   ";
     List.iter (fun a -> print_uint8_hex_pad a) (to_list result);
     IO.print_string "\nExpected: ";
     List.iter (fun a -> print_uint8_hex_pad a) (to_list expected);
-    IO.print_string "\nFailure !"
+    IO.print_string "\nFailure !";
+    IO.print_newline ()
   end
 
 let print_compare_display_diff len expected result =
   let r = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) expected result in
   let diff = map2 (fun a b -> a ^. b) expected result in
-  if r then IO.print_string "\nSuccess !"
+  if r then IO.print_string "\nSuccess !\n"
   else begin
     IO.print_string "\nFailure !";
     IO.print_newline ();
@@ -173,14 +174,16 @@ let print_compare_display_diff len expected result =
     List.iter (fun a -> print_uint8_hex_pad a) (to_list result);
     IO.print_newline ();
     IO.print_string "\nExpected: ";
-    List.iter (fun a -> print_uint8_hex_pad a) (to_list expected)
+    List.iter (fun a -> print_uint8_hex_pad a) (to_list expected);
+    IO.print_newline ()
   end
 
 let print_label_compare_display s len expected result =
   let r = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) expected result in
   if r then (
     IO.print_string "\nSuccess ! ";
-    IO.print_string s)
+    IO.print_string s;
+    IO.print_newline ())
   else begin
     IO.print_string "\nFailure ! ";
     IO.print_string s;
@@ -188,7 +191,8 @@ let print_label_compare_display s len expected result =
     IO.print_string "\nResult:   ";
     List.iter (fun a -> print_uint8_hex_pad a) (to_list result);
     IO.print_string "\nExpected: ";
-    List.iter (fun a -> print_uint8_hex_pad a) (to_list expected)
+    List.iter (fun a -> print_uint8_hex_pad a) (to_list expected);
+    IO.print_newline ()
   end
 
 let print_label_compare_display_diff s len expected result =
@@ -196,7 +200,8 @@ let print_label_compare_display_diff s len expected result =
   let diff = map2 (fun a b -> a ^. b) expected result in
   if r then (
     IO.print_string "\nSuccess ! ";
-    IO.print_string s)
+    IO.print_string s;
+    IO.print_newline ())
   else begin
     IO.print_string "\nFailure ! ";
     IO.print_string s;
@@ -208,5 +213,6 @@ let print_label_compare_display_diff s len expected result =
     List.iter (fun a -> print_uint8_hex_pad a) (to_list result);
     IO.print_newline ();
     IO.print_string "\nExpected: ";
-    List.iter (fun a -> print_uint8_hex_pad a) (to_list expected)
+    List.iter (fun a -> print_uint8_hex_pad a) (to_list expected);
+    IO.print_newline ()
   end
