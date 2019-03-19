@@ -447,6 +447,9 @@ obj/Fsqr_inline.fst.checked: \
 obj/Vale.Stdcalls.GCMencrypt.fst.checked: \
   FSTAR_FLAGS=$(VALE_FSTAR_FLAGS)
 
+obj/Vale.Stdcalls.GCMencryptOpt.fst.checked: \
+  FSTAR_FLAGS=$(VALE_FSTAR_FLAGS)
+
 hints:
 	mkdir -p $@
 

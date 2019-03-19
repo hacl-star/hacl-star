@@ -643,6 +643,7 @@ procedure {:quick exportOnly}{:public}{:exportSpecs} gcm_blocks_stdcall(
     ghost out128_b:buffer128,
     ghost len128_num:nat64,
     ghost inout_b:buffer128,
+    ghost plain_num:nat64,
 
     ghost scratch_b:buffer128,
     ghost tag_b:buffer128,    
@@ -709,6 +710,7 @@ procedure {:quick exportOnly}{:public}{:exportSpecs} gcm_blocks_stdcall(
         auth_num_bytes == auth_bytes;
         len128x6 == len128x6_num;
         len128 == len128_num;
+        plain_num_bytes == plain_num;
 
         validSrcAddrs128(mem,     auth_ptr,     auth_b, auth_len, memTaint, Secret);
         validSrcAddrs128(mem,   abytes_ptr,   abytes_b,        1, memTaint, Secret);

@@ -8,4 +8,5 @@ let _ =
       ("gcm256_encrypt0",       (fun win -> X64_GCMencrypt.va_code_gcm_encrypt_stdcall win AES_s.AES_256));
       ("gcm256_encrypt",       (fun win -> X64_GCMencrypt.va_code_gcm_encrypt2_stdcall win AES_s.AES_256));
       ("gcm256_decrypt",       (fun win -> X64_GCMdecrypt.va_code_gcm_decrypt_stdcall win AES_s.AES_256));
+      ("gcm_blocks128",       (fun win -> X64_GCMencryptOpt.va_code_gcm_blocks_stdcall win AES_s.AES_128));
     ]
