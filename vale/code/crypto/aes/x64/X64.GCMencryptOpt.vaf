@@ -623,7 +623,7 @@ procedure {:quick} gcm_blocks(
     ghash_incremental_to_ghash(h, auth_in);
 }
 
-#reset-options "--z3rlimit 350"
+#reset-options "--z3rlimit 700"
 procedure {:quick exportOnly}{:public}{:exportSpecs} gcm_blocks_stdcall(
     inline win:bool,
     inline alg:algorithm,
@@ -774,6 +774,73 @@ procedure {:quick exportOnly}{:public}{:exportSpecs} gcm_blocks_stdcall(
         // GCM reqs
         pclmulqdq_enabled;
     ensures
+        modifies_mem(loc_union(loc_buffer(iv_b), 
+                     loc_union(loc_buffer(scratch_b), 
+                     loc_union(loc_buffer(out128x6_b), 
+                     loc_union(loc_buffer(out128_b), 
+                               loc_buffer(inout_b))))), old(mem), mem);
+
+        // Semantics
+        8 * old(plain_num_bytes) < pow2_32;
+        8 * old(auth_num_bytes) < pow2_32;
+
+        let iv_LE := old(buffer128_read(iv_b, 0, mem));
+        let iv_BE := reverse_bytes_quad32(iv_LE);
+        let ctr_BE_1:quad32 := Mkfour(1, iv_BE.lo1, iv_BE.hi2, iv_BE.hi3);
+        let ctr_BE_2:quad32 := Mkfour(2, iv_BE.lo1, iv_BE.hi2, iv_BE.hi3);
+
+        // Encryption results
+        let plain_in:seq(quad32) :=
+            if (old(plain_num_bytes) > old((len128x6 + len128) * 128/8)) then
+                append(append(old(s128(mem, in128x6_b)), 
+                              old(s128(mem, in128_b))),
+                              old(s128(mem, inout_b)))
+            else
+                append(old(s128(mem, in128x6_b)), 
+                       old(s128(mem, in128_b)));
+
+        let cipher_out:seq(quad32) :=
+            if (old(plain_num_bytes) > old((len128x6 + len128) * 128/8)) then
+                append(append(s128(mem, out128x6_b),
+                              s128(mem, out128_b)),
+                              s128(mem, inout_b))
+            else
+                append(s128(mem, out128x6_b),
+                       s128(mem, out128_b));
+                
+        gctr_partial(alg, old(len128x6) + old(len128) + 1, plain_in, cipher_out, key, ctr_BE_2);
+
+        // Hashing results
+        let h:quad32 := reverse_bytes_quad32(buffer128_read(hkeys_b, 0, mem));
+        let length_quad:quad32 := reverse_bytes_quad32(Mkfour(#nat32(8 * old(plain_num_bytes)), 0, 
+                                                       #nat32(8 * old(auth_num_bytes)), 0));
+        let cipher_bytes:seq(quad32) := 
+            if (old(plain_num_bytes) > old((len128x6 + len128) * 128/8)) then s128(mem, inout_b)
+            else empty_seq_quad32;
+        let auth_in:seq(quad32) := 
+            if (old(auth_num_bytes) > old(auth_len * 128/8)) then
+                       append(
+                       append(
+                       append(
+                       append(
+                       append(old(s128(mem, auth_b)),
+                              old(s128(mem, abytes_b))),
+                              s128(mem, out128x6_b)),
+                              s128(mem, out128_b)),
+                              cipher_bytes),
+                              create(1, length_quad))
+            else
+                       append(
+                       append(
+                       append(
+                       append(old(s128(mem, auth_b)),
+                              s128(mem, out128x6_b)),
+                              s128(mem, out128_b)),
+                              cipher_bytes),
+                              create(1, length_quad))
+            ;
+        buffer128_read(tag_b, 0, mem) == gctr_encrypt_block(ctr_BE_1, ghash_LE(h, #ghash_plain_LE(auth_in)), alg, key, 0);
+
         // Calling convention for caller/callee saved registers
         rsp == old(rsp);
 
