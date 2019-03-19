@@ -4,6 +4,8 @@ open FStar.Integers
 
 module S = FStar.Seq
 
+#set-options "--max_fuel 0 --max_ifuel 0"
+
 // to be used via a module abbreviation, e.g. AEAD.alg
 type alg =
   | AES128_GCM
@@ -16,12 +18,16 @@ type alg =
   | AES128_CCM8 // variant with truncated 8-byte tags
   | AES256_CCM8
 
-let supported_alg (a: alg): bool =
+let _: squash (inversion alg) = allow_inversion alg
+
+let is_supported_alg (a: alg): bool =
   match a with
   | AES128_GCM
   | AES256_GCM
   | CHACHA20_POLY1305 -> true
   | _ -> false
+
+let supported_alg = a:alg { is_supported_alg a }
 
 // naming convention: length for nats, len for uint32s
 let key_length: alg -> nat =
@@ -47,15 +53,28 @@ let tag_length: alg -> nat =
 let iv_length (a: alg): nat =
   12
 
-// TODO
-val ekv_length (a: alg): nat
+let ekv_length: supported_alg -> nat =
+  function
+  | CHACHA20_POLY1305 -> 32
+  | AES128_GCM -> 176
+  | AES256_GCM -> 240
 
 // Maximum length for both plaintexts and additional data.
-// TODO... 16 * 2**31, or something like that (to be completed, depends on the
-// block size for the algorithm), but it always fits in 32 bits
-val max_length: alg -> nat
+//
+// Some notes:
+// - we have both closed (HACL-style specs) and semi-open (Vale specs)
+//   intervals; just picking one arbitrary choice here... see
+//   https://github.com/mitls/mitls-papers/wiki/Discussion-to-Converge-on-Design-Decisions
+//   for a failure to make decisions
+// - because the specs for HACL* are very concrete, they limit the size
+//   artificially; we could've limited each of cipher and ad to 16 * 2**31 (see
+//   chacha block size) but instead have a smaller bound because of the size of arrays.
+let max_length: supported_alg -> nat =
+  function
+  | CHACHA20_POLY1305 -> pow2 32 - 1 - 16
+  | AES128_GCM | AES256_GCM -> pow2 20 - 1
 
-// TODO: move to a shared place
+// Proudly defining this type abbreviation for the tenth time in HACL*!
 let lbytes (l:nat) = b:Seq.seq UInt8.t { Seq.length b = l }
 
 // Note: using <= for maximum admissible lengths
@@ -63,8 +82,8 @@ let lbytes (l:nat) = b:Seq.seq UInt8.t { Seq.length b = l }
 let kv a = lbytes (key_length a)
 let iv a = lbytes (iv_length a)
 let ad a = s:S.seq UInt8.t { S.length s <= max_length a }
-let plain a = s:S.seq UInt8.t { S.length s <= max_length a }
-let cipher a = s:S.seq UInt8.t { S.length s >= tag_length a }
+let plain (a: supported_alg) = s:S.seq UInt8.t { S.length s <= max_length a }
+let cipher (a: supported_alg) = s:S.seq UInt8.t { S.length s >= tag_length a }
 
 let cipher_length #a (p: plain a) =
   S.length p + tag_length a
@@ -76,7 +95,7 @@ let decrypted #a (c: cipher a) = p:plain a { S.length c = cipher_length p }
 // Note: no GTot, specs need to be executable for testing
 
 // Expanded key value. Can't be abstract (see type ekv in implementation).
-let ekv (a: alg) = lbytes (ekv_length a)
+let ekv (a: supported_alg) = lbytes (ekv_length a)
 
 // Note: expand corresponds to the "beginning" of the spec of encrypt. We know
 // nothing about it, even though, under this interface:
@@ -90,6 +109,8 @@ let ekv (a: alg) = lbytes (ekv_length a)
 // still expresses its post-condition using Spec.AEAD.encrypt. So, encrypt takes
 // a kv, not an ekv.
 
-val expand: #(a: alg) -> kv a -> ekv a
-val encrypt: #(a: alg) -> kv a -> iv a -> ad a -> p:plain a -> encrypted p
-val decrypt: #(a: alg) -> kv a -> iv a -> ad a -> c:cipher a -> option (decrypted c)
+// Note: adopting the argument order of EverCrypt... which doesn't match other
+// specs. Sigh.
+val expand: #(a: supported_alg) -> kv a -> ekv a
+val encrypt: #(a: supported_alg) -> kv a -> iv a -> ad a -> p:plain a -> encrypted p
+val decrypt: #(a: supported_alg) -> kv a -> iv a -> ad a -> c:cipher a -> option (decrypted c)
