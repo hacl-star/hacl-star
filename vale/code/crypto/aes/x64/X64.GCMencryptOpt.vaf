@@ -774,11 +774,12 @@ procedure {:quick exportOnly}{:public}{:exportSpecs} gcm_blocks_stdcall(
         // GCM reqs
         pclmulqdq_enabled;
     ensures
-        modifies_mem(loc_union(loc_buffer(iv_b), 
+        modifies_mem(loc_union(loc_buffer(tag_b),
+                     loc_union(loc_buffer(iv_b), 
                      loc_union(loc_buffer(scratch_b), 
                      loc_union(loc_buffer(out128x6_b), 
                      loc_union(loc_buffer(out128_b), 
-                               loc_buffer(inout_b))))), old(mem), mem);
+                               loc_buffer(inout_b)))))), old(mem), mem);
 
         // Semantics
         8 * old(plain_num_bytes) < pow2_32;
