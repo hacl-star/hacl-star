@@ -162,7 +162,7 @@ $(GENERATED_DIR)/Makefile.include: $(ALL_KRML_INPUTS) | .depend
 	-bundle 'Hacl.SHA3=Hacl.Impl.SHA3,Hacl.SHA3' \
 	-library 'C,FStar' \
 	-drop 'LowStar,Spec,Prims,Lib' \
-	-add-include '"c/Lib_PrintBuffer.h"' \
+	-add-include '"Lib_PrintBuffer.h"' \
 	-tmpdir $(GENERATED_DIR) \
 	$^
 
@@ -198,7 +198,7 @@ ALL_OBJS = $(patsubst %.c,%.o,$(ALL_SOURCES)) \
 INCLUDE_DIRS = \
   $(KREMLIN_HOME)/include \
   $(KREMLIN_HOME)/kremlib \
-  $(HACL_HOME)/lib \
+  $(HACL_HOME)/dist/hacl-internal-headers \
   $(HACL_HOME)/code/sha3 \
   $(OUT_DIR)
 
