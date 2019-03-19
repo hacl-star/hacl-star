@@ -5,7 +5,7 @@ module ST = FStar.HyperStack.ST
 open FStar.Mul
 open FStar.Seq
 open FStar.UInt32
-open FStar.Endianness
+open FStar.Old.Endianness
 open Spec.Lib
 open Spec.Chacha20.Lemmas
 open Seq.Create

@@ -28,9 +28,7 @@ open Hacl.Hash.Definitions
 friend Spec.SHA2
 friend Hacl.Hash.PadFinish
 
-open LowStar.Modifies.Linear
-
-#reset-options "--max_fuel 0 --max_ifuel 0 --using_facts_from '* -LowStar.Monotonic.Buffer.modifies_trans'"
+#reset-options "--max_fuel 0 --max_ifuel 0"
 
 (** Top-level constant arrays for the SHA2 algorithms. *)
 

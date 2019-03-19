@@ -2,44 +2,48 @@ module X64.BufferViewStore
 
 open Views
 open Interop
-module B = LowStar.Buffer
-module BV = LowStar.BufferView
+module MB = LowStar.Monotonic.Buffer
+module DV = LowStar.BufferView.Down
+module UV = LowStar.BufferView.Up
 module HS = FStar.HyperStack
 open BufferViewHelpers
+open FStar.Mul
 
 open X64.Machine_s
 open X64.Bytes_Semantics_s
+module ME = X64.Memory
+module IB = Interop.Base
 
 val bv_upd_update_heap64:
-  (b:b8{B.length b % 8 == 0}) ->
+  (b:IB.b8{DV.length (IB.get_downview b.IB.bsrc) % 8 == 0}) ->
   (heap:heap) ->
-  (i:nat{i < B.length b / 8}) ->
+  (i:nat{i < DV.length (IB.get_downview b.IB.bsrc) / 8}) ->
   (v:nat64) ->
-  (addrs:addr_map) ->
-  (ptrs:list b8) ->
-  (h:HS.mem{B.live h b}) ->
+  (mem:IB.mem{MB.live (IB.hs_of_mem mem) b.IB.bsrc}) ->
    Lemma
-     (requires correct_down_p h addrs heap b)
-     (ensures (let bv = BV.mk_buffer_view b view64 in
-     BV.as_buffer_mk_buffer_view b view64;
-     BV.get_view_mk_buffer_view b view64;
-     BV.length_eq bv;
-     let heap' = update_heap64 (addrs b + 8 `op_Multiply` i) v heap in
-     BV.upd h bv i (UInt64.uint_to_t v) == B.g_upd_seq b (get_seq_heap heap' addrs b) h))
+     (requires IB.correct_down_p mem heap b)
+     (ensures 
+       (let dv = IB.get_downview b.IB.bsrc in
+        let bv = UV.mk_buffer dv up_view64 in
+        let addrs = IB.addrs_of_mem mem in
+        let h = IB.hs_of_mem mem in
+        UV.length_eq bv;
+        let heap' = update_heap64 (addrs b + 8 * i) v heap in
+        UV.upd h bv i (UInt64.uint_to_t v) == DV.upd_seq h dv (get_seq_heap heap' addrs b)))
 
 val bv_upd_update_heap128:
-  (b:b8{B.length b % 16 == 0}) ->
+  (b:IB.b8{DV.length (IB.get_downview b.IB.bsrc) % 16 == 0}) ->
   (heap:heap) ->
-  (i:nat{i < B.length b / 16}) ->
+  (i:nat{i < DV.length (IB.get_downview b.IB.bsrc) / 16}) ->
   (v:quad32) ->
-  (addrs:addr_map) ->
-  (ptrs:list b8) ->
-  (h:HS.mem{B.live h b}) ->
-   Lemma 
-     (requires correct_down_p h addrs heap b)
-     (ensures (let bv = BV.mk_buffer_view b view128 in
-     BV.as_buffer_mk_buffer_view b view128;
-     BV.get_view_mk_buffer_view b view128;
-     BV.length_eq bv;
-     let heap' = update_heap128 (addrs b + 16 `op_Multiply` i) v heap in
-     BV.upd h bv i v == B.g_upd_seq b (get_seq_heap heap' addrs b) h))
+  (mem:IB.mem{MB.live (IB.hs_of_mem mem) b.IB.bsrc}) ->
+   Lemma
+     (requires IB.correct_down_p mem heap b)
+     (ensures 
+       (let dv = IB.get_downview b.IB.bsrc in
+        let bv = UV.mk_buffer dv up_view128 in
+        let addrs = IB.addrs_of_mem mem in
+        let h = IB.hs_of_mem mem in
+        UV.length_eq bv;
+        let heap' = update_heap128 (addrs b + 16 * i) v heap in
+        UV.upd h bv i v == DV.upd_seq h dv (get_seq_heap heap' addrs b)))

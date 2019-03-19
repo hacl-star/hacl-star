@@ -17,24 +17,26 @@ open X64.Vale.QuickCodes
 #set-options "--z3rlimit 20"
 #endverbatim
 
-procedure {:quick}{:exportSpecs}{:public} memcpy(inline win:bool,ghost stack_b:buffer64, ghost dst:buffer64, ghost src:buffer64)
+procedure {:quick}{:exportSpecs}{:public} memcpy(
+  inline win:bool,
+  ghost dst:buffer64,
+  ghost src:buffer64)
     requires
-        locs_disjoint(list(loc_buffer(stack_b), loc_buffer(dst), loc_buffer(src)));
-        buffer_readable(mem, stack_b);
+        locs_disjoint(list(loc_buffer(dst), loc_buffer(src)));
         buffer_readable(mem, dst);
         buffer_readable(mem, src);
-        valid_taint_buf64(stack_b, mem, memTaint, Public);
+        buffer_writeable(dst);
         valid_taint_buf64(dst, mem, memTaint, Secret);
         valid_taint_buf64(src, mem, memTaint, Secret);
         buffer_length(src) == 2;
         buffer_length(dst) == 2;        
-        buffer_length(stack_b) >= 3;
-        valid_stack_slots(mem, rsp, stack_b, 0, memTaint);
         win ==> rcx == buffer_addr(dst, mem);
         win ==> rdx == buffer_addr(src, mem);
         !win ==> rdi == buffer_addr(dst, mem);
         !win ==> rsi == buffer_addr(src, mem);
     ensures
+        rsp == old(rsp);
+    
         win ==>  rbx == old(rbx);
         win ==>  rbp == old(rbp);
         win ==>  rdi == old(rdi);

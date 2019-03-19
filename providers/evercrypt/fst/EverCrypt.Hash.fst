@@ -126,15 +126,6 @@ let init #a s =
 
 friend SHA_helpers
 
-assume val such_a_bad_hack: #a:Type -> b:IB.ibuffer a ->
-  Stack (b': B.buffer a)
-    (requires (fun h ->
-      B.live h b))
-    (ensures (fun h0 b' h1 ->
-      forall h. {:pattern B.live h b } B.live h b ==> B.live h b' /\
-      B.length b = B.length b' /\
-      B.modifies B.loc_none h0 h1))
-
 // A new switch between HACL and Vale; can be used in place of Hacl.Hash.SHA2.update_256
 inline_for_extraction noextract
 val update_multi_256: Hacl.Hash.Definitions.update_multi_st SHA2_256
@@ -145,16 +136,9 @@ let update_multi_256 s blocks n =
     let open Hacl.Hash.Core.SHA2.Constants in
     B.recall k224_256;
     IB.recall_contents k224_256 Spec.SHA2.Constants.k224_256;
-    // Hack alert!
-    let k = such_a_bad_hack k224_256 in
-    let h0 = ST.get () in
-    assume (B.loc_disjoint (B.loc_buffer k) (B.loc_buffer s));
-    assume (B.loc_disjoint (B.loc_buffer k) (B.loc_buffer blocks));
-    assume (
-      let k_b128 = LowStar.BufferView.mk_buffer_view k Views.view32_128 in
-      SHA_helpers.k_reqs (LowStar.BufferView.as_seq h0 k_b128));
-    Sha_update_bytes_stdcall.sha256_update s blocks n k;
-    admit ()
+    IB.buffer_immutable_buffer_disjoint s k224_256 (ST.get ());
+    IB.buffer_immutable_buffer_disjoint blocks k224_256 (ST.get ());
+    Sha_stdcalls.sha256_update s blocks n k224_256
   end else
     Hacl.Hash.SHA2.update_multi_256 s blocks n
 

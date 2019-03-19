@@ -5,14 +5,14 @@
 # By default it always look for the latest FStar container available
 # In case you would like to reference a specific commit,
 # replace latest with the commit id from github using 12 characters.
+ARG DOCKERHUBPROJECT
 ARG COMMITID
-FROM fstar-windows-nt:${COMMITID}
+FROM ${DOCKERHUBPROJECT}fstar-windows-nt:${COMMITID}
 
 ARG BUILDLOGFILE
 ARG MAXTHREADS
 ARG TARGET
 ARG BRANCHNAME
-ARG FSTARSOURCEVERSION
 
 # Add ssh key
 # We cannot copy directly to the .ssh folder, instead we copy to a temp folder
@@ -48,7 +48,7 @@ RUN Invoke-BashCmd rm hacl-star/commitinfofilename.json
 COPY build.sh build.sh
 COPY build_helper.sh build_helper.sh
 
-RUN Invoke-BashCmd ./build_helper.sh $Env:TARGET $Env:BUILDLOGFILE $Env:MAXTHREADS $Env:BRANCHNAME $Env:FSTARSOURCEVERSION '||' true
+RUN Invoke-BashCmd ./build_helper.sh $Env:TARGET $Env:BUILDLOGFILE $Env:MAXTHREADS $Env:BRANCHNAME '||' true
 
 # Remove ssh key.
 RUN Invoke-BashCmd rm .ssh/id_rsa

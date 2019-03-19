@@ -6,10 +6,6 @@ open FStar.Integers
 open Spec.Hash.Definitions
 open Hacl.Hash.Definitions
 
-/// Stating the obvious: TODO remove me
-[@ (CPrologue "#define EverCrypt_Hash_such_a_bad_hack(X) (X)") ]
-let bad_hack (): Stack unit (fun _ -> True) (fun _ _ _ -> True) = ()
-
 #set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
 
 /// Algorithmic agility for hash specifications. We reuse the agile
@@ -198,7 +194,7 @@ val frame_invariant: #a:alg -> l:M.loc -> s:state a -> h0:HS.mem -> h1:HS.mem ->
   (requires (
     invariant s h0 /\
     M.loc_disjoint l (footprint s h0) /\
-    M.modifies_inert l h0 h1))
+    M.modifies l h0 h1))
   (ensures (
     invariant s h1 /\
     repr s h0 == repr s h1))
@@ -211,7 +207,7 @@ let frame_invariant_implies_footprint_preservation
   (requires (
     invariant s h0 /\
     M.loc_disjoint l (footprint s h0) /\
-    M.modifies_inert l h0 h1))
+    M.modifies l h0 h1))
   (ensures (
     footprint s h1 == footprint s h0))
 =

@@ -18,7 +18,7 @@ let gctr_encrypt_block_offset (icb_BE:quad32) (plain_LE:quad32) (alg:algorithm) 
   ()
 
 let gctr_encrypt_empty (icb_BE:quad32) (plain_LE cipher_LE:seq quad32) (alg:algorithm) (key:seq nat32) =
-  reveal_opaque le_bytes_to_seq_quad32_def;
+  FStar.Pervasives.reveal_opaque (`%le_bytes_to_seq_quad32) le_bytes_to_seq_quad32;
   reveal_opaque gctr_encrypt_LE_def;
   let plain = slice_work_around (le_seq_quad32_to_bytes plain_LE) 0 in
   let cipher = slice_work_around (le_seq_quad32_to_bytes cipher_LE) 0 in
@@ -34,6 +34,11 @@ let gctr_encrypt_empty (icb_BE:quad32) (plain_LE cipher_LE:seq quad32) (alg:algo
   assert (plain_quads_LE == empty);
   assert (cipher_quads_LE == empty);
   assert (equal (le_seq_quad32_to_bytes cipher_quads_LE) empty);  // OBSERVEs
+  ()
+
+let gctr_partial_extend6 (alg:algorithm) (bound:nat) (plain cipher:seq quad32) (key:seq nat32) (icb:quad32)
+  =
+  reveal_opaque gctr_partial;
   ()
 
 (*
@@ -82,7 +87,7 @@ let rec gctr_encrypt_length (icb_BE:quad32) (plain:gctr_plain_LE)
   Lemma(length (gctr_encrypt_LE icb_BE plain alg key) == length plain)
   [SMTPat (length (gctr_encrypt_LE icb_BE plain alg key))]
   =
-  reveal_opaque le_bytes_to_seq_quad32_def;
+  FStar.Pervasives.reveal_opaque (`%le_bytes_to_seq_quad32) le_bytes_to_seq_quad32;
   reveal_opaque gctr_encrypt_LE_def;
   let num_extra = (length plain) % 16 in
   let result = gctr_encrypt_LE icb_BE plain alg key in
@@ -153,6 +158,18 @@ let rec gctr_indexed (icb:quad32) (plain:gctr_plain_internal_LE)
 let gctr_partial_completed (alg:algorithm) (plain cipher:seq quad32) (key:seq nat32) (icb:quad32) =
   gctr_indexed icb plain alg key cipher;
   ()
+
+let gctr_partial_opaque_completed (alg:algorithm) (plain cipher:seq quad32) (key:seq nat32) (icb:quad32) : Lemma
+  (requires
+    is_aes_key_LE alg key /\
+    length plain == length cipher /\
+    256 * (length plain) < pow2_32 /\
+    gctr_partial_opaque alg (length cipher) plain cipher key icb
+  )
+  (ensures cipher == gctr_encrypt_recursive icb plain alg key 0)
+  =
+  reveal_opaque gctr_partial;
+  gctr_partial_completed alg plain cipher key icb
 
 let gctr_partial_to_full_basic (icb_BE:quad32) (plain:seq quad32) (alg:algorithm) (key:seq nat32) (cipher:seq quad32) =
   reveal_opaque gctr_encrypt_LE_def;
@@ -519,7 +536,7 @@ let lemma_slices_le_quad32_to_bytes (q:quad32) : Lemma
     q.hi3 == four_to_nat 8 (seq_to_four_LE (slice s 12 16))
   ))
   =
-  reveal_opaque le_quad32_to_bytes_def;
+  FStar.Pervasives.reveal_opaque (`%le_quad32_to_bytes) le_quad32_to_bytes;
   ()
 
 let quad32_xor_bytewise (q q' r:quad32) (n:nat{ n <= 16 }) : Lemma

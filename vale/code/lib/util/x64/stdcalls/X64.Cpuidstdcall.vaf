@@ -27,18 +27,15 @@ open X64.Cpuid
 #endverbatim
 
 
-procedure {:quick}{:exportSpecs}{:public} check_aesni_stdcall(inline win:bool,ghost stack_b:buffer64)
+procedure {:quick}{:exportSpecs}{:public} check_aesni_stdcall(inline win:bool)
     requires
-        buffer_readable(mem, stack_b);
-        valid_taint_buf64(stack_b, mem, memTaint, Public);
-        valid_stack_slots(mem, rsp, stack_b, 0, memTaint);
     ensures
-        modifies_mem(loc_buffer(stack_b), old(mem), mem);
+        rsp == old(rsp);
+
         win ==>  rbx == old(rbx);
         win ==>  rbp == old(rbp);
         win ==>  rdi == old(rdi);
         win ==>  rsi == old(rsi);
-        win ==>  rsp == old(rsp);
         win ==>  r12 == old(r12);
         win ==>  r13 == old(r13);
         win ==>  r14 == old(r14);
@@ -61,6 +58,8 @@ procedure {:quick}{:exportSpecs}{:public} check_aesni_stdcall(inline win:bool,gh
         win ==>  xmm15 == old(xmm15);
 
         rax != 0 ==> aesni_enabled && pclmulqdq_enabled;
+
+        modifies_none(old(mem), mem);
     reads memTaint;
     modifies
         rax; rbx; rcx; rdx; rsi; rdi; rbp; rsp; r8; r9; r10; r11; r12; r13; r14; r15;
@@ -71,18 +70,15 @@ procedure {:quick}{:exportSpecs}{:public} check_aesni_stdcall(inline win:bool,gh
 }
 
 
-procedure {:quick}{:exportSpecs}{:public} check_sha_stdcall(inline win:bool,ghost stack_b:buffer64)
+procedure {:quick}{:exportSpecs}{:public} check_sha_stdcall(inline win:bool)
     requires
-        buffer_readable(mem, stack_b);
-        valid_taint_buf64(stack_b, mem, memTaint, Public);
-        valid_stack_slots(mem, rsp, stack_b, 0, memTaint);
     ensures
-        modifies_mem(loc_buffer(stack_b), old(mem), mem);
+        rsp == old(rsp);
+    
         win ==>  rbx == old(rbx);
         win ==>  rbp == old(rbp);
         win ==>  rdi == old(rdi);
         win ==>  rsi == old(rsi);
-        win ==>  rsp == old(rsp);
         win ==>  r12 == old(r12);
         win ==>  r13 == old(r13);
         win ==>  r14 == old(r14);
@@ -105,6 +101,8 @@ procedure {:quick}{:exportSpecs}{:public} check_sha_stdcall(inline win:bool,ghos
         win ==>  xmm15 == old(xmm15);
 
         rax != 0 ==> sha_enabled;
+
+        modifies_none(old(mem), mem);
     reads memTaint;
     modifies
         rax; rbx; rcx; rdx; rsi; rdi; rbp; rsp; r8; r9; r10; r11; r12; r13; r14; r15;
@@ -112,4 +110,130 @@ procedure {:quick}{:exportSpecs}{:public} check_sha_stdcall(inline win:bool,ghos
         efl; mem;
 {
         check_sha_support();
+}
+
+procedure {:quick}{:exportSpecs}{:public} check_adx_bmi2_stdcall(inline win:bool)
+    requires
+    ensures
+        rsp == old(rsp);
+
+        win ==>  rbx == old(rbx);
+        win ==>  rbp == old(rbp);
+        win ==>  rdi == old(rdi);
+        win ==>  rsi == old(rsi);
+        win ==>  r12 == old(r12);
+        win ==>  r13 == old(r13);
+        win ==>  r14 == old(r14);
+        win ==>  r15 == old(r15);
+        !win ==>  rbx == old(rbx);
+        !win ==>  rbp == old(rbp);
+        !win ==>  r12 == old(r12);
+        !win ==>  r13 == old(r13);
+        !win ==>  r14 == old(r14);
+        !win ==>  r15 == old(r15);
+        win ==>  xmm6 == old(xmm6);
+        win ==>  xmm7 == old(xmm7);
+        win ==>  xmm8 == old(xmm8);
+        win ==>  xmm9 == old(xmm9);
+        win ==>  xmm10 == old(xmm10);
+        win ==>  xmm11 == old(xmm11);
+        win ==>  xmm12 == old(xmm12);
+        win ==>  xmm13 == old(xmm13);
+        win ==>  xmm14 == old(xmm14);
+        win ==>  xmm15 == old(xmm15);
+
+        modifies_none(old(mem), mem);
+        
+        rax != 0 ==> adx_enabled && bmi2_enabled;
+    reads memTaint;
+    modifies
+        rax; rbx; rcx; rdx; rsi; rdi; rbp; rsp; r8; r9; r10; r11; r12; r13; r14; r15;
+        xmm0; xmm1; xmm2; xmm3; xmm4; xmm5; xmm6; xmm7; xmm8; xmm9; xmm10; xmm11; xmm12; xmm13; xmm14; xmm15;
+        efl; mem;
+{
+        check_adx_bmi2_support();
+}
+
+procedure {:quick}{:exportSpecs}{:public} check_avx_stdcall(inline win:bool)
+    requires
+    ensures
+        rsp == old(rsp);
+
+        win ==>  rbx == old(rbx);
+        win ==>  rbp == old(rbp);
+        win ==>  rdi == old(rdi);
+        win ==>  rsi == old(rsi);
+        win ==>  r12 == old(r12);
+        win ==>  r13 == old(r13);
+        win ==>  r14 == old(r14);
+        win ==>  r15 == old(r15);
+        !win ==>  rbx == old(rbx);
+        !win ==>  rbp == old(rbp);
+        !win ==>  r12 == old(r12);
+        !win ==>  r13 == old(r13);
+        !win ==>  r14 == old(r14);
+        !win ==>  r15 == old(r15);
+        win ==>  xmm6 == old(xmm6);
+        win ==>  xmm7 == old(xmm7);
+        win ==>  xmm8 == old(xmm8);
+        win ==>  xmm9 == old(xmm9);
+        win ==>  xmm10 == old(xmm10);
+        win ==>  xmm11 == old(xmm11);
+        win ==>  xmm12 == old(xmm12);
+        win ==>  xmm13 == old(xmm13);
+        win ==>  xmm14 == old(xmm14);
+        win ==>  xmm15 == old(xmm15);
+
+        modifies_none(old(mem), mem);
+
+        rax != 0 ==> avx_enabled;
+    reads memTaint;
+    modifies
+        rax; rbx; rcx; rdx; rsi; rdi; rbp; rsp; r8; r9; r10; r11; r12; r13; r14; r15;
+        xmm0; xmm1; xmm2; xmm3; xmm4; xmm5; xmm6; xmm7; xmm8; xmm9; xmm10; xmm11; xmm12; xmm13; xmm14; xmm15;
+        efl; mem;
+{
+        check_avx_support();
+}
+
+procedure {:quick}{:exportSpecs}{:public} check_avx2_stdcall(inline win:bool)
+    requires
+    ensures
+        rsp == old(rsp);
+
+        win ==>  rbx == old(rbx);
+        win ==>  rbp == old(rbp);
+        win ==>  rdi == old(rdi);
+        win ==>  rsi == old(rsi);
+        win ==>  r12 == old(r12);
+        win ==>  r13 == old(r13);
+        win ==>  r14 == old(r14);
+        win ==>  r15 == old(r15);
+        !win ==>  rbx == old(rbx);
+        !win ==>  rbp == old(rbp);
+        !win ==>  r12 == old(r12);
+        !win ==>  r13 == old(r13);
+        !win ==>  r14 == old(r14);
+        !win ==>  r15 == old(r15);
+        win ==>  xmm6 == old(xmm6);
+        win ==>  xmm7 == old(xmm7);
+        win ==>  xmm8 == old(xmm8);
+        win ==>  xmm9 == old(xmm9);
+        win ==>  xmm10 == old(xmm10);
+        win ==>  xmm11 == old(xmm11);
+        win ==>  xmm12 == old(xmm12);
+        win ==>  xmm13 == old(xmm13);
+        win ==>  xmm14 == old(xmm14);
+        win ==>  xmm15 == old(xmm15);
+
+        modifies_none(old(mem), mem);
+
+        rax != 0 ==> avx2_enabled;
+    reads memTaint;
+    modifies
+        rax; rbx; rcx; rdx; rsi; rdi; rbp; rsp; r8; r9; r10; r11; r12; r13; r14; r15;
+        xmm0; xmm1; xmm2; xmm3; xmm4; xmm5; xmm6; xmm7; xmm8; xmm9; xmm10; xmm11; xmm12; xmm13; xmm14; xmm15;
+        efl; mem;
+{
+        check_avx2_support();
 }

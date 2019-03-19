@@ -4,11 +4,11 @@ open Words_s
 open Types_s
 open FStar.Mul
 open FStar.Tactics
-open CanonCommSemiring
+open FStar.Tactics.CanonCommSemiring
 open Fast_defs
 open Fast_lemmas_internal
 
-#reset-options "--max_fuel 0 --max_ifuel 0"
+#reset-options "--max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Tactics -FStar.Reflection'"
 
 let lemma_carry_prime (a0 a1 a2 a3 a0' a1' a2' a3' carry_in:nat64) (carry:bit) : Lemma
   (requires pow2_five a0' a1' a2' a3' carry == pow2_four a0 a1 a2 a3 + carry_in * 38 /\
@@ -38,7 +38,7 @@ let lemma_carry_prime (a0 a1 a2 a3 a0' a1' a2' a3' carry_in:nat64) (carry:bit) :
   };
   ()
 
-#reset-options "--z3rlimit 30 --max_fuel 0 --max_ifuel 0"
+#reset-options "--z3rlimit 30 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Tactics -FStar.Reflection'"
 let lemma_fast_mul1 (a:nat) 
                (b a0 a1 a2 a3 
                 ba0_hi ba0_lo 
@@ -119,12 +119,14 @@ let lemma_carry_wide (a0 a1 a2 a3 a4 a5 a6 a7
 
 let pow2int_four (c0 c1 c2 c3:int) : int = c0 + c1 * pow2_64 + c2 * pow2_128 + c3 * pow2_192
 
+#reset-options "--z3rlimit 10 --max_fuel 0 --max_ifuel 0 --using_facts_from '' --smtencoding.nl_arith_repr native"
 let lemma_mul_pow256_sub (x y:nat) : 
   Lemma ((x - y * pow2_256) % prime == (x - y * 38) % prime)
   =
   assert_norm (pow2_256 % prime == 38);
   ()
-  
+
+#reset-options "--z3rlimit 30 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Tactics -FStar.Reflection'"
 let lemma_carry_sub_prime (a0 a1 a2 a3 a0' a1' a2' a3' carry_in:nat64) (carry:bit) : Lemma
   (requires pow2_four a0' a1' a2' a3' - carry * pow2_256 == pow2_four a0 a1 a2 a3 - carry_in * 38 /\
             carry_in * 38 - 1 + 38 < pow2_64)
@@ -154,14 +156,12 @@ let lemma_carry_sub_prime (a0 a1 a2 a3 a0' a1' a2' a3' carry_in:nat64) (carry:bi
 
 let lemma_fmul (a0 a1 a2 a3 b d0 d1 d2 d3 carry:nat64) : Lemma
   (requires pow2_five d0 d1 d2 d3 carry == (pow2_four a0 a1 a2 a3) * b /\
-            b <= 121665)
+            b < 131072)
   (ensures carry * 38 < pow2_63)
   =
   assert (pow2_four a0 a1 a2 a3 < pow2_256);
-  assert_norm (121665 < pow2 17);
-  lemma_mul_bounds_le (pow2_four a0 a1 a2 a3) pow2_256 121665  (pow2 17);
-  assert ((pow2_four a0 a1 a2 a3) * 121665 <= pow2_256 * pow2 17);
-  lemma_mul_bounds_le b 121665 (pow2_four a0 a1 a2 a3) (pow2_four a0 a1 a2 a3);
+  assert_norm (131072 == pow2 17);  
+  lemma_mul_bounds_le (pow2_four a0 a1 a2 a3) pow2_256 b (pow2 17);
   assert ((pow2_four a0 a1 a2 a3) * b <= pow2_256 * pow2 17);
-  assert_norm (131072 == pow2 17);
-  ()
+  lemma_mul_bounds_le b b (pow2_four a0 a1 a2 a3) (pow2_four a0 a1 a2 a3);
+  assert ((pow2_four a0 a1 a2 a3) * b <= pow2_256 * pow2 17)

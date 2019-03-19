@@ -4,7 +4,7 @@ module ST = FStar.HyperStack.ST
 
 open FStar.Mul
 open FStar.Seq
-open FStar.Endianness
+open FStar.Old.Endianness
 open FStar.UInt8
 open Spec.Lib
 open Spec.Curve25519

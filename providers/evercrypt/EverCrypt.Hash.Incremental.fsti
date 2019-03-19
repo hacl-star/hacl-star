@@ -55,7 +55,6 @@ let modifies_disjoint_preserves #a (l: B.loc) (h0 h1: HS.mem) (s: state a): Lemm
     footprint s h0 == footprint s h1))
 =
   let hash_state = State?.hash_state s in
-  B.modifies_inert_intro l h0 h1;
   Hash.frame_invariant l hash_state h0 h1;
   Hash.frame_invariant_implies_footprint_preservation l hash_state h0 h1
 
@@ -90,6 +89,7 @@ let hashes (#a: Hash.alg) (h: HS.mem) (s: state a) (b: bytes) =
   S.equal (Hash.repr hash_state h) (Hash.compress_many (Hash.acc0 #a) blocks) /\
   S.equal (S.slice (B.as_seq h buf_) 0 (v total_len % block_length a)) rest
 
+noextract
 let bytes = S.seq UInt8.t
 
 val create_in (a: Hash.alg) (r: HS.rid): ST (state a)

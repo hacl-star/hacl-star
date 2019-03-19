@@ -27,7 +27,9 @@ let update a: update_t a =
 let split_block (a: hash_alg)
   (blocks: bytes_blocks a)
   (n: nat{n <= S.length blocks / block_length a}):
-  Tot (bytes_blocks a * bytes_blocks a)
+  Tot (p:(Spec.Hash.Definitions.bytes_blocks a * Spec.Hash.Definitions.bytes_blocks a)
+         {fst p == fst (Seq.split blocks (FStar.Mul.(n * block_length a))) /\
+	  snd p == snd (Seq.split blocks (FStar.Mul.(n * block_length a)))})
 =
   let block, rem = S.split blocks FStar.Mul.(n * block_length a) in
   assert (S.length rem = S.length blocks - S.length block);

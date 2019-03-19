@@ -6,7 +6,7 @@ open FStar.HyperStack.All
 
 open FStar.Mul
 open FStar.Seq
-open FStar.Endianness
+open FStar.Old.Endianness
 
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 40"

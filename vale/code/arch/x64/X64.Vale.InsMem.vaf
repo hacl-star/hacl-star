@@ -3,7 +3,9 @@ include{:fstar}{:open} "Types_s"
 include{:fstar}{:open} "Arch.Types"
 include{:fstar}{:open} "X64.Machine_s"
 include{:fstar}{:open} "X64.Memory"
+include{:fstar}{:open} "X64.Stack_i"
 include{:fstar}{:open} "X64.Memory_Sems"
+include{:fstar}{:open} "X64.Stack_Sems"
 include{:fstar}{:open} "X64.Vale.State"
 include{:fstar}{:open} "X64.Vale.Decls"
 include{:fstar}{:open} "X64.Vale.QuickCode"
@@ -14,6 +16,7 @@ module X64.Vale.InsMem
 open Types_s
 open X64.Machine_s
 open X64.Memory
+open X64.Stack_i
 open X64.Vale.State
 open X64.Vale.Decls
 open X64.Vale.QuickCode
@@ -23,6 +26,7 @@ open X64.Vale.InsBasic
 #verbatim
 open X64.Machine_s
 open X64.Memory
+open X64.Stack_i
 open X64.Vale
 open X64.Vale.State
 open X64.Vale.StateLemmas
@@ -101,50 +105,57 @@ procedure{:instruction Ins(TS.TaintedIns(tuple(S.Mov64(OMem(MReg(get_reg(dst), o
     same_memTaint64(b, old(mem), mem, old(#memTaint_t(memTaint)), #memTaint_t(memTaint));
 }
 
-procedure{:instruction Ins(TS.TaintedIns(tuple(S.Pop(t_op_to_op(dst))), Public))}
+procedure{:instruction mk_taint_ins2(S.MovBe64, dst, TMem(MReg(get_reg(src), offset), t))}
          {:fast_instruction}{:quick exportOnly}{:public}
-    Pop(
+    LoadBe64_buffer(
     out dst: dst_opr64,
+        src:reg_opr64,
+        inline offset:int,
+        inline t:taint,
         ghost b:buffer64,
         ghost index:int)
-    reads mem; memTaint;
-    modifies rsp;
+    reads
+        mem; memTaint;
+    modifies
+
     requires
         valid_src_addr(mem, b, index);
-        rsp == buffer_addr(b, mem) + 8 * index;
-        rsp + 8 < pow2_64;
-        valid_taint_buf64(b, mem, memTaint, Public);
+        valid_taint_buf64(b, mem, memTaint, t);
+        src + offset == buffer_addr(b, mem) + 8 * index;
     ensures
-        dst == buffer64_read(b, index, mem);
-        rsp == old(rsp) + 8;
+        dst == reverse_bytes_nat64(buffer64_read(b, index, mem));
+        //dst == mem[b](index);
+        valid_taint_buf64(b, mem, memTaint, t);
 {
     low_lemma_valid_mem64(b, #nat(index), mem);
     low_lemma_load_mem64(b, #nat(index), mem);
-    lemma_valid_taint64(b, old(#memTaint_t(memTaint)), old(mem), #nat(index), Public);
+    lemma_valid_taint64(b, #memTaint_t(memTaint), mem, #nat(index), t);
 }
 
-procedure{:instruction Ins(TS.TaintedIns(tuple(S.Push(t_op_to_op(src))), Public))}
+procedure{:instruction Ins(TS.TaintedIns(tuple(S.MovBe64(OMem(MReg(get_reg(dst), offset)), t_op_to_op(src))), t))}
          {:fast_instruction}{:quick exportOnly}{:public}
-    Push(
+    StoreBe64_buffer(
+        dst:reg_opr64,
         src: reg_opr64,
+        inline offset:int,
+        inline t:taint,
         ghost b:buffer64,
         ghost index:int)
     reads memTaint;
     modifies
-        rsp; mem;
+        mem;
     requires
-        valid_taint_buf64(b, mem, memTaint, Public);
         valid_dst_addr(mem, b, index);
-        rsp - 8 == buffer_addr(b, mem) + 8 * index;
-        0 <= rsp - 8;
+        valid_taint_buf64(b, mem, memTaint, t);
+        dst + offset == buffer_addr(b, mem) + 8 * index;
     ensures
         modifies_mem(loc_buffer(b), old(mem), mem);
-        mem == old(buffer64_write(b, index, src, mem));
-        rsp == old(rsp) - 8;
+        mem == old(buffer64_write(b, index, reverse_bytes_nat64(src), mem));
+        valid_taint_buf64(b, mem, memTaint, t);
 {
     low_lemma_valid_mem64(b, #nat(index), old(mem));
-    low_lemma_store_mem64(b, #nat(index), old(src), old(mem));
-    lemma_valid_taint64(b, old(#memTaint_t(memTaint)), old(mem), #nat(index), Public);
+    low_lemma_store_mem64(b, #nat(index), old(reverse_bytes_nat64(src)), old(mem));
+    lemma_valid_taint64(b, old(#memTaint_t(memTaint)), old(mem), #nat(index), t);
     same_memTaint64(b, old(mem), mem, old(#memTaint_t(memTaint)), #memTaint_t(memTaint));
 }
 

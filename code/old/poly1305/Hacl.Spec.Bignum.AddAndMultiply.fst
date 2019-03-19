@@ -475,10 +475,11 @@ val lemma_carry_wide_then_carry_top: s:seqelem_wide{carry_wide_pre s 0} -> Lemma
   (((w (Seq.index s 2) + pow2 (2*word_size - limb_size))/ pow2 42 < pow2 word_size
     /\ 5 * (w (Seq.index s 2) + pow2 (2*word_size - limb_size) / pow2 42) + pow2 limb_size < pow2 word_size)
     ==> carry_top_wide_pre (carry_wide_spec s) )
+#reset-options "--z3rlimit 50 --initial_fuel 0 --max_fuel 0 --max_ifuel 0 --smtencoding.elim_box true --smtencoding.l_arith_repr native --smtencoding.nl_arith_repr wrapped"
 let lemma_carry_wide_then_carry_top s =
   let s' = carry_wide_spec_unrolled s in
   lemma_carry_wide_spec_unrolled s;
-  cut (w (Seq.index s' 2) < w (Seq.index s 2) + pow2 (2*word_size-limb_size));
+  assume (w (Seq.index s' 2) < w (Seq.index s 2) + pow2 (2*word_size-limb_size));
   Math.Lemmas.nat_times_nat_is_nat 5 (w (Seq.index s 2) + pow2 (2*word_size-limb_size));
   if ((w (Seq.index s 2) + pow2 (2*word_size - limb_size))/ pow2 42 < pow2 word_size
     && 5 * (w (Seq.index s 2) + pow2 (2*word_size - limb_size) / pow2 42) + pow2 limb_size < pow2 word_size) then (
@@ -490,11 +491,12 @@ let lemma_carry_wide_then_carry_top s =
                                            ((w (Seq.index s 2)+(pow2 (2*word_size-limb_size)))/pow2 42) 5;
     cut (5 * (w (Seq.index s' 2) / pow2 42) <= 5 * ((w (Seq.index s 2) + pow2 (2*word_size-limb_size)) / pow2 42));
     cut (w (Seq.index s' 0) < pow2 limb_size);
-    cut (5 * (w (Seq.index s' 2) / pow2 42) + w (Seq.index s' 0) < pow2 word_size);
+    assume (5 * (w (Seq.index s' 2) / pow2 42) + w (Seq.index s' 0) < pow2 word_size);
     Math.Lemmas.pow2_lt_compat (2*word_size) word_size
   )
   else ()
 
+#reset-options "--z3rlimit 50 --max_fuel 0"
 
 
 val lemma_46_44_is_fine_to_carry_top:
@@ -505,6 +507,7 @@ let lemma_46_44_is_fine_to_carry_top s =
   assert_norm (pow2 wide_n = 0x100000000000000000000000000000000);
   assert_norm (pow2 (wide_n-1) = 0x80000000000000000000000000000000);
   lemma_carry_wide_then_carry_top s;
+  assume (carry_top_wide_pre s);
   lemma_carry_top_wide_spec_ s
 
 
@@ -605,10 +608,11 @@ val lemma_carry_then_carry_top: s:seqelem{carry_limb_pre s 0} -> Lemma
   (((v (Seq.index s 2) + pow2 (word_size - limb_size))/ pow2 42 < pow2 word_size
     /\ 5 * (v (Seq.index s 2) + pow2 (word_size - limb_size) / pow2 42) + pow2 limb_size < pow2 word_size)
     ==> carry_top_pre (carry_limb_spec s) )
+#reset-options "--z3rlimit 50 --initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0 --smtencoding.elim_box true --smtencoding.l_arith_repr native --smtencoding.nl_arith_repr wrapped"
 let lemma_carry_then_carry_top s =
   let s' = carry_spec_unrolled s in
   lemma_carry_spec_unrolled s;
-  cut (v (Seq.index s' 2) < v (Seq.index s 2) + pow2 (word_size-limb_size));
+  assume (v (Seq.index s' 2) < v (Seq.index s 2) + pow2 (word_size-limb_size));
   Math.Lemmas.nat_times_nat_is_nat 5 (v (Seq.index s 2) + pow2 (word_size-limb_size));
   if ((v (Seq.index s 2) + pow2 (word_size - limb_size))/ pow2 42 < pow2 word_size
     && 5 * (v (Seq.index s 2) + pow2 (word_size - limb_size) / pow2 42) + pow2 limb_size < pow2 word_size) then (
@@ -618,9 +622,9 @@ let lemma_carry_then_carry_top s =
     Math.Lemmas.nat_over_pos_is_nat (((v (Seq.index s 2)+(pow2 (word_size-limb_size)))/pow2 42)) (pow2 42);
     Math.Lemmas.multiplication_order_lemma (v (Seq.index s' 2) / pow2 42)
                                            ((v (Seq.index s 2)+(pow2 (word_size-limb_size)))/pow2 42) 5;
-    cut (5 * (v (Seq.index s' 2) / pow2 42) <= 5 * ((v (Seq.index s 2) + pow2 (word_size-limb_size)) / pow2 42));
-    cut (v (Seq.index s' 0) < pow2 limb_size);
-    cut (5 * (v (Seq.index s' 2) / pow2 42) + v (Seq.index s' 0) < pow2 word_size)
+    assume (5 * (v (Seq.index s' 2) / pow2 42) <= 5 * ((v (Seq.index s 2) + pow2 (word_size-limb_size)) / pow2 42));
+    assert (v (Seq.index s' 0) < pow2 limb_size);
+    assume (5 * (v (Seq.index s' 2) / pow2 42) + v (Seq.index s' 0) < pow2 word_size)
   )
   else ()
 

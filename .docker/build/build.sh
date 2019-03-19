@@ -29,7 +29,7 @@ function export_home() {
 function vale_test() {
   echo Running Vale Test &&
   fetch_kremlin &&
-        fetch_and_make_vale &&
+        fetch_vale &&
         env VALE_SCONS_PARALLEL_OPT="-j $threads" make -j $threads vale.build -k
 }
 
@@ -37,7 +37,7 @@ function hacl_test() {
     fetch_and_make_kremlin &&
         fetch_and_make_mlcrypto &&
         fetch_mitls &&
-        fetch_and_make_vale &&
+        fetch_vale &&
         export_home OPENSSL "$(pwd)/mlcrypto/openssl" &&
         env VALE_SCONS_PARALLEL_OPT="-j $threads" make -j $threads ci -k
 }
@@ -68,7 +68,12 @@ function fetch_kremlin() {
     fi
     cd kremlin
     git fetch origin
-    local ref=$(if [ -f ../.kremlin_version ]; then cat ../.kremlin_version | tr -d '\r\n'; else echo origin/master; fi)
+    local ref=$(jq -c -r '.RepoVersions["kremlin_version"]' "$rootPath/.docker/build/config.json" )
+    if [[ $ref == "" || $ref == "null" ]]; then
+        echo "Unable to find RepoVersions.kremlin_version on $rootPath/.docker/build/config.json"
+        return -1
+    fi
+
     echo Switching to KreMLin $ref
     git reset --hard $ref
     cd ..
@@ -86,7 +91,12 @@ function fetch_mlcrypto() {
     fi
     cd mlcrypto
     git fetch origin
-    local ref=$(if [ -f ../.mlcrypto_version ]; then cat ../.mlcrypto_version | tr -d '\r\n'; else echo origin/master; fi)
+    local ref=$(jq -c -r '.RepoVersions["mlcrypto_version"]' "$rootPath/.docker/build/config.json" )
+    if [[ $ref == "" || $ref == "null" ]]; then
+        echo "Unable to find RepoVersions.mlcrypto_version on $rootPath/.docker/build/config.json"
+        return -1
+    fi
+
     echo Switching to MLCrypto $ref
     git reset --hard $ref
     git submodule update
@@ -101,7 +111,12 @@ function fetch_mitls() {
     fi
     cd mitls-fstar
     git fetch origin
-    local ref=$(if [ -f ../.mitls_version ]; then cat ../.mitls_version | tr -d '\r\n'; else echo origin/master; fi)
+    local ref=$(jq -c -r '.RepoVersions["mitls_version"]' "$rootPath/.docker/build/config.json" )
+    if [[ $ref == "" || $ref == "null" ]]; then
+        echo "Unable to find RepoVersions.mitls_version on $rootPath/.docker/build/config.json"
+        return -1
+    fi
+
     echo Switching to mitls-fstar $ref
     git reset --hard $ref
     git clean -fdx
@@ -113,20 +128,17 @@ function fetch_vale() {
     # NOTE: the name of the directory where Vale is downloaded MUST NOT be vale, because the latter already exists
     # so let's call it valebin
     if [ ! -d valebin ]; then
-        git clone https://github.com/project-everest/vale valebin
+        mkdir valebin
     fi
-    cd valebin
-    git fetch origin
-    local ref=$(if [ -f ../.vale_version ]; then cat ../.vale_version | tr -d '\r\n'; else echo origin/master; fi)
-    echo Switching to Vale $ref
-    git reset --hard $ref
-    cd ..
+    vale_version=$(<vale/.vale_version)
+    vale_version=${vale_version%$'\r'}  # remove Windows carriage return, if it exists
+    wget "https://github.com/project-everest/vale/releases/download/v${vale_version}/vale-release-${vale_version}.zip" -O valebin/vale-release.zip
+    rm -rf "valebin/vale-release-${vale_version}"
+    unzip -o valebin/vale-release.zip -d valebin
+    rm -rf "valebin/bin"
+    mv "valebin/vale-release-${vale_version}/bin" valebin/
+    chmod +x valebin/bin/*.exe
     export_home VALE "$(pwd)/valebin"
-}
-
-function fetch_and_make_vale() {
-    fetch_vale
-    pushd valebin && ./run_scons.sh -j $threads && popd
 }
 
 function refresh_hacl_hints() {
@@ -224,10 +236,11 @@ function exec_build() {
 
 # Some environment variables we want
 export OCAMLRUNPARAM=b
-export OTHERFLAGS="--print_z3_statistics --use_hints --query_stats"
+export OTHERFLAGS="--use_hints --query_stats"
 export MAKEFLAGS="$MAKEFLAGS -Otarget"
 
 export_home FSTAR "$(pwd)/FStar"
 cd hacl-star
+rootPath=$(pwd)
 exec_build
 cd ..

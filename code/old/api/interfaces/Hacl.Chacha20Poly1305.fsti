@@ -9,7 +9,7 @@ open Hacl.Constants
 open Hacl.Policies
 open Hacl.Cast
 open Hacl.Spec.Endianness
-open FStar.Endianness
+open FStar.Old.Endianness
 open Hacl.Endianness
 
 open Spec.Chacha20Poly1305
@@ -36,7 +36,7 @@ let state = Hacl.Impl.Poly1305_64.State.poly1305_state
 inline_for_extraction let log_t = Ghost.erased (Spec.Poly1305.text)
 
 open FStar.Mul
-open FStar.Endianness
+open FStar.Old.Endianness
 
 
 #reset-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 300"

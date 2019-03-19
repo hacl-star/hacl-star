@@ -1,52 +1,58 @@
 module GHash
-
-open Opaque_s
-open Words_s
-open Types_s
-open Arch.Types
-open GHash_s
-open GF128_s
-open GCTR_s
-open GCM_helpers
-open Workarounds
-open Collections.Seqs_s
-open Collections.Seqs
-open FStar.Seq
+open Math.Poly2.Lemmas
 
 #reset-options "--use_two_phase_tc true"
-let rec ghash_incremental_def (h_LE:quad32) (y_prev:quad32) (x:seq quad32) : Tot quad32 (decreases %[length x]) =
-  if length x = 0 then y_prev else
-  let y_i_minus_1 = ghash_incremental_def h_LE y_prev (all_but_last x) in
-  let x_i = last x in
-  let xor_LE = quad32_xor y_i_minus_1 x_i in
-  gf128_mul_LE xor_LE h_LE
 
-let ghash_incremental = make_opaque ghash_incremental_def
+let rec lemma_ghash_poly_degree h init data j k =
+  if k > j then lemma_ghash_poly_degree h init data j (k - 1)
 
-// avoids need for extra fuel
-let lemma_ghash_incremental_def_0 (h_LE:quad32) (y_prev:quad32) (x:seq quad32) : Lemma
-  (requires length x == 0)
-  (ensures ghash_incremental_def h_LE y_prev x == y_prev)
-  [SMTPat (ghash_incremental_def h_LE y_prev x)]
+let shift_gf128_key_1 h =
+  shift_key_1 128 gf128_modulus_low_terms h
+
+let lemma_ghash_rev (h:poly) (init:poly) (data:int -> poly128) (j:int) (k:int) : Lemma
+  (requires k > j /\ degree h < 128 /\ degree init < 128 /\ degree (data (k - 1)) < 128)
+  (ensures (
+    let h1 = shift_gf128_key_1 h in
+    let a = ghash_poly h init data j (k - 1) +. data (k - 1) in
+    ghash_poly h init data j k == mod_rev 128 (a *. h1) gf128_modulus
+  ))
+  =
+  let h1 = shift_gf128_key_1 h in
+  let a = ghash_poly h init data j (k - 1) +. data (k - 1) in
+  let rev x = reverse x 127 in
+  let g = gf128_modulus in
+  lemma_gf128_degree ();
+  calc (==) {
+    // ghash_poly h init data j k
+    rev ((rev a *. rev h) %. g);
+    == {lemma_mod_mul_mod_right (rev a) (rev h) g}
+    rev ((rev a *. (rev h %. g)) %. g);
+    == {lemma_shift_key_1 128 gf128_modulus_low_terms h}
+    rev ((rev a *. (shift (rev h1) 1 %. g)) %. g);
+    == {lemma_mod_mul_mod_right (rev a) (shift (rev h1) 1) g}
+    rev ((rev a *. (shift (rev h1) 1)) %. g);
+    == {lemma_shift_is_mul (rev h1) 1}
+    rev ((rev a *. (rev h1 *. monomial 1)) %. g);
+    == {lemma_mul_all ()}
+    rev (((rev a *. rev h1) *. monomial 1) %. g);
+    == {lemma_shift_is_mul (rev a *. rev h1) 1}
+    rev (shift (rev a *. rev h1) 1 %. g);
+    == {lemma_mul_reverse_shift_1 a h1 127}
+    rev (reverse (a *. h1) 255 %. g);
+  }
+
+let lemma_ghash_incremental_def_0 (h_LE:quad32) (y_prev:quad32) (x:seq quad32)
   =
   ()
 
-let rec ghash_incremental_to_ghash (h:quad32) (x:seq quad32) : Lemma
-  (requires length x > 0)
-  (ensures ghash_incremental h (Mkfour 0 0 0 0) x == ghash_LE h x)
-  (decreases %[length x])
+let rec ghash_incremental_to_ghash (h:quad32) (x:seq quad32)
   =
   reveal_opaque ghash_incremental_def;
   reveal_opaque ghash_LE_def;
   if length x = 1 then ()
   else ghash_incremental_to_ghash h (all_but_last x)
 
-let rec lemma_hash_append (h:quad32) (y_prev:quad32) (a b:ghash_plain_LE) :
-  Lemma(ensures
-        ghash_incremental h y_prev (append a b) ==
-        (let y_a = ghash_incremental h y_prev a in
-         ghash_incremental h y_a b))
-        (decreases %[length b])
+let rec lemma_hash_append (h:quad32) (y_prev:quad32) (a b:ghash_plain_LE)
   =
   reveal_opaque ghash_incremental_def;
   let ab = append a b in
@@ -61,13 +67,24 @@ let rec lemma_hash_append (h:quad32) (y_prev:quad32) (a b:ghash_plain_LE) :
     assert(all_but_last ab == append a (all_but_last b));
   ()
 
-let ghash_incremental0 (h:quad32) (y_prev:quad32) (x:seq quad32) : quad32 =
-  if length x > 0 then ghash_incremental h y_prev x else y_prev
+let lemma_ghash_incremental0_append (h y0 y1 y2:quad32) (s1 s2:seq quad32) : Lemma
+  (requires y1 = ghash_incremental0 h y0 s1 /\
+            y2 = ghash_incremental0 h y1 s2)
+  (ensures  y2 = ghash_incremental0 h y0 (s1 @| s2))
+  =
+  let s12 = s1 @| s2 in
+  if length s1 = 0 then (
+    assert (equal s12 s2)
+  ) else (
+    if length s2 = 0 then (
+      assert (equal s12 s1)
+    ) else (
+      lemma_hash_append h y0 s1 s2
+    )
+  );
+  ()
 
-let lemma_hash_append2 (h y_init y_mid y_final:quad32) (s1:seq quad32) (q:quad32) : Lemma
-  (requires y_mid = ghash_incremental0 h y_init s1 /\
-            y_final = ghash_incremental h y_mid (create 1 q))
-  (ensures  y_final == ghash_incremental h y_init (s1 @| (create 1 q)))
+let lemma_hash_append2 (h y_init y_mid y_final:quad32) (s1:seq quad32) (q:quad32)
   =
   let qs = create 1 q in
   let s12 = s1 @| qs in
@@ -78,13 +95,7 @@ let lemma_hash_append2 (h y_init y_mid y_final:quad32) (s1:seq quad32) (q:quad32
   );
   ()
 
-let lemma_hash_append3 (h y_init y_mid1 y_mid2 y_final:quad32) (s1 s2 s3:seq quad32) : Lemma
-  (requires y_init = Mkfour 0 0 0 0 /\
-            y_mid1 = ghash_incremental0 h y_init s1 /\
-            y_mid2 = ghash_incremental0 h y_mid1 s2 /\
-            length s3 > 0 /\
-            y_final = ghash_incremental h y_mid2 s3)
-  (ensures y_final == ghash_LE h (append s1 (append s2 s3)))
+let lemma_hash_append3 (h y_init y_mid1 y_mid2 y_final:quad32) (s1 s2 s3:seq quad32)
   =
   let s23 = append s2 s3 in
   let s123 = append s1 s23 in
@@ -109,26 +120,8 @@ let lemma_hash_append3 (h y_init y_mid1 y_mid2 y_final:quad32) (s1 s2 s3:seq qua
 
 #reset-options "--z3rlimit 30"
 open FStar.Mul
-let lemma_ghash_incremental_bytes_extra_helper (h y_init y_mid y_final:quad32) (input:seq quad32) (final final_padded:quad32) (num_bytes:nat) : Lemma
-  (requires (1 <= num_bytes /\
-             num_bytes < 16 * length input /\
-             16 * (length input - 1) < num_bytes /\
-             num_bytes % 16 <> 0 /\ //4096 * num_bytes < pow2_32 /\
-             (let num_blocks = num_bytes / 16 in
-              let full_blocks = slice_work_around input num_blocks in
-              y_mid = ghash_incremental0 h y_init full_blocks /\
-              final == index input num_blocks /\
-              (let padded_bytes = pad_to_128_bits (slice_work_around (le_quad32_to_bytes final) (num_bytes % 16)) in
-               length padded_bytes == 16 /\
-               final_padded == le_bytes_to_quad32 padded_bytes /\
-               y_final = ghash_incremental h y_mid (create 1 final_padded)))))
-  (ensures (let input_bytes = slice_work_around (le_seq_quad32_to_bytes input) num_bytes in
-            let padded_bytes = pad_to_128_bits input_bytes in
-            let input_quads = le_bytes_to_seq_quad32 padded_bytes in
-            length padded_bytes == 16 * length input_quads /\
-            y_final == ghash_incremental h y_init input_quads))
+let lemma_ghash_incremental_bytes_extra_helper (h y_init y_mid y_final:quad32) (input:seq quad32) (final final_padded:quad32) (num_bytes:nat)  // Precondition definitions
   =
-  // Precondition definitions
   let num_blocks = num_bytes / 16 in
   let full_blocks = slice_work_around input num_blocks in
   let padded_bytes = pad_to_128_bits (slice_work_around (le_quad32_to_bytes final) (num_bytes % 16)) in
@@ -158,18 +151,7 @@ let lemma_ghash_incremental_bytes_extra_helper (h y_init y_mid y_final:quad32) (
 
   ()
 
-let lemma_ghash_registers (h y_init y0 y1 y2 y3 y4 r0 r1 r2 r3:quad32) (input:seq quad32) (bound:nat): Lemma
-  (requires length input >= bound + 4 /\
-            r0 == index input (bound + 0) /\
-            r1 == index input (bound + 1) /\
-            r2 == index input (bound + 2) /\
-            r3 == index input (bound + 3) /\
-            y0 == ghash_incremental0 h y_init (slice input 0 bound) /\
-            y1 == ghash_incremental h y0 (create 1 r0) /\
-            y2 == ghash_incremental h y1 (create 1 r1) /\
-            y3 == ghash_incremental h y2 (create 1 r2) /\
-            y4 == ghash_incremental h y3 (create 1 r3))
-  (ensures y4 == ghash_incremental h y_init (slice input 0 (bound + 4)))
+let lemma_ghash_registers (h y_init y0 y1 y2 y3 y4 r0 r1 r2 r3:quad32) (input:seq quad32) (bound:nat)
   =
   lemma_hash_append2 h y_init y0 y1 (slice input 0 bound) r0;
 
@@ -184,11 +166,7 @@ let lemma_ghash_registers (h y_init y0 y1 y2 y3 y4 r0 r1 r2 r3:quad32) (input:se
   ()
 
 (*
-let lemma_slice_extension (s:seq quad32) (bound:int) (q:quad32) : Lemma
-  (requires 0 <= bound /\ bound + 1 <= length s /\ 
-            index_work_around_quad32 (slice_work_around s (bound + 1)) bound == q)
-  (ensures equal (slice_work_around s (bound + 1))
-                 (append (slice_work_around s bound) (create 1 q)))
+let lemma_slice_extension (s:seq quad32) (bound:int) (q:quad32)
   =
   ()
 *)   

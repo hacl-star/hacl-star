@@ -320,7 +320,7 @@ procedure{:quick}{:public} AES256EncryptBlockStdcall(
         buffer128_read(input_buffer, 0, mem) == input;
         expanded_key_ptr == buffer_addr(keys_buffer, mem);
         validSrcAddrs128(mem, input_ptr, input_buffer, 1, memTaint, Secret);
-        validSrcAddrs128(mem, output_ptr, output_buffer, 1, memTaint, Secret);
+        validDstAddrs128(mem, output_ptr, output_buffer, 1, memTaint, Secret);
         validSrcAddrs128(mem, expanded_key_ptr, keys_buffer, 15, memTaint, Secret);
         forall i:nat :: i < 15 ==>
             buffer128_read(keys_buffer, i, mem) == index(key_to_round_keys_LE(AES_256, key), i);

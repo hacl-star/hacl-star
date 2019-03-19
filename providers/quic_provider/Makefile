@@ -26,7 +26,7 @@ ifeq ($(OS),Windows_NT)
     # altered to include by default the mingw64 native DLLs. We also need to
     # find dllcorecrypto.dll; it is in the current directory, which Windows
     # always uses to search for DLLs.
-    EXTRA_PATH = PATH="$(shell cygpath -u $(OPENSSL_HOME)):../dist/compact:$(PATH)"
+    EXTRA_PATH = PATH="$(shell cygpath -u $(OPENSSL_HOME)):../../dist/compact:$(PATH)"
     EXTRA_OPTS =
     AR = $(MARCH)-w64-mingw32-ar
     CC = $(MARCH)-w64-mingw32-gcc
@@ -35,11 +35,11 @@ else
     UNAME_S := $(shell uname -s)
     AR = ar
     ifeq ($(UNAME_S),Darwin)
-	EXTRA_PATH = DYLD_LIBRARY_PATH=$(OPENSSL_HOME):../dist/compact:.:$(DYLD_LIBRARY_PATH)
+	EXTRA_PATH = DYLD_LIBRARY_PATH=$(OPENSSL_HOME):../../dist/compact:.:$(DYLD_LIBRARY_PATH)
         EXTRA_OPTS =
         ARCH = osx
     else
-	EXTRA_PATH = LD_LIBRARY_PATH=$(OPENSSL_HOME):../dist/compact:.:$(LD_LIBRARY_PATH)
+	EXTRA_PATH = LD_LIBRARY_PATH=$(OPENSSL_HOME):../../dist/compact:.:$(LD_LIBRARY_PATH)
         EXTRA_OPTS = -thread -ccopt -fPIC
         ARCH = x86_64
     endif
@@ -57,8 +57,8 @@ else
 LIB_MACHINE=x86
 endif
 
-CFLAGS += -I $(KREMLIN_HOME)/include -I ../dist/header
-LDFLAGS += -L ../dist/compact -levercrypt
+CFLAGS += -I $(KREMLIN_HOME)/include -I ../../dist/evercrypt-external-headers
+LDFLAGS += -L ../../dist/compact -levercrypt
 
 ifeq (,$(EVEREST_WINDOWS))
 LDFLAGS += -L$(OPENSSL_HOME) -lcrypto
@@ -67,7 +67,6 @@ LDFLAGS += -lbcrypt
 endif
 
 LDFLAGS += $(KREMLIN_HOME)/kremlib/dist/generic/libkremlib.a
-LDFLAGS += ../../dist/compact/libhacl.a
 
 .PHONY: all test
 

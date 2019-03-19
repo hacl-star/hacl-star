@@ -80,9 +80,9 @@ let be_bytes_to_quad32_def (b:seq nat8) : Pure quad32 (requires length b == 16) 
   seq_to_four_BE (seq_map (four_to_nat 8) (seq_to_seq_four_BE b))
 let be_bytes_to_quad32 = make_opaque be_bytes_to_quad32_def
 
-let le_quad32_to_bytes_def (b:quad32) : Pure (seq nat8) (requires True) (ensures fun s -> length s == 16) =
+[@"opaque_to_smt"]
+let le_quad32_to_bytes (b:quad32) : Pure (seq nat8) (requires True) (ensures fun s -> length s == 16) =
   seq_four_to_seq_LE (seq_map (nat_to_four 8) (four_to_seq_LE b))
-let le_quad32_to_bytes = make_opaque le_quad32_to_bytes_def
 
 let le_seq_quad32_to_bytes_def (b:seq quad32) : seq nat8 =
   seq_nat32_to_seq_nat8_LE (seq_four_to_seq_LE b)
@@ -94,13 +94,18 @@ let le_seq_quad32_to_bytes_length (s:seq quad32) : Lemma
   =
   reveal_opaque le_seq_quad32_to_bytes_def
 
-let le_bytes_to_seq_quad32_def (b:seq nat8) : Pure (seq quad32) (requires length b % 16 == 0) (ensures fun _ -> True) =
+[@"opaque_to_smt"]
+let le_bytes_to_seq_quad32 (b:seq nat8) : Pure (seq quad32) (requires length b % 16 == 0) (ensures fun _ -> True) =
   seq_to_seq_four_LE (seq_nat8_to_seq_nat32_LE b)
-let le_bytes_to_seq_quad32 = make_opaque le_bytes_to_seq_quad32_def
 
 let reverse_bytes_nat32_def (n:nat32) : nat32 =
   be_bytes_to_nat32 (reverse_seq (nat32_to_be_bytes n))
 let reverse_bytes_nat32 = make_opaque reverse_bytes_nat32_def  
+
+let reverse_bytes_nat64_def (n:nat64) : nat64 =
+  let Mktwo n0 n1 = nat_to_two 32 n in
+  two_to_nat 32 (Mktwo (reverse_bytes_nat32 n1) (reverse_bytes_nat32 n0))
+let reverse_bytes_nat64 = make_opaque reverse_bytes_nat64_def 
 
 assume val reverse_bytes_quad32 (q:quad32) : quad32
 

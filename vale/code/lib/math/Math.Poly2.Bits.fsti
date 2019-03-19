@@ -1,17 +1,36 @@
 module Math.Poly2.Bits
 open Words_s
 open Types_s
+open FStar.UInt
+open FStar.Seq
 open Arch.Types
 open Math.Poly2_s
 open Math.Poly2.Bits_s
 open Math.Poly2
 open Math.Poly2.Lemmas
-open FStar.Seq
-open FStar.UInt
 
-val lemma_add128 (a b:poly) : Lemma
-  (requires degree a <= 127 /\ degree b <= 127)
-  (ensures to_quad32 (a +. b) == quad32_xor (to_quad32 a) (to_quad32 b))
+val of_nat32 (n:nat32) : p:poly{degree p < 32}
+
+val of_nat32_zero : _:unit{of_nat32 0 == zero}
+
+val of_nat32_xor (a b:nat32) : Lemma
+  (of_nat32 a +. of_nat32 b == of_nat32 (ixor a b))
+
+let poly128_of_poly32s (a0 a1 a2 a3:poly) : poly =
+  a0 +. shift a1 32 +. shift a2 64 +. shift a3 96
+
+let poly128_of_nat32s (a0 a1 a2 a3:nat32) : poly =
+  poly128_of_poly32s (of_nat32 a0) (of_nat32 a1) (of_nat32 a2) (of_nat32 a3)
+
+val lemma_quad32_of_nat32s (a0 a1 a2 a3:nat32) : Lemma
+  (Mkfour a0 a1 a2 a3 == to_quad32 (poly128_of_nat32s a0 a1 a2 a3))
+
+val lemma_quad32_to_nat32s (a:poly) : Lemma
+  (requires degree a <= 127)
+  (ensures (
+    let Mkfour a0 a1 a2 a3 = to_quad32 a in
+    a == poly128_of_nat32s a0 a1 a2 a3
+  ))
 
 val lemma_quad32_double (a:poly) : Lemma
   (requires degree a <= 127)
@@ -22,11 +41,17 @@ val lemma_quad32_double (a:poly) : Lemma
     (a /. monomial 64) *. monomial 64 == shift (a /. monomial 64) 64
   )
 
-val lemma_quad32_double_shift (a:poly) : Lemma
-  (requires degree a <= 127)
-  (ensures (
-    let Mkfour q0 q1 q2 q3 = to_quad32 a in
-    Mkfour #nat32 0 0 q0 q1 == to_quad32 ((a %. monomial 64) *. monomial 64) /\
-    Mkfour #nat32 q2 q3 0 0 == to_quad32 (a /. monomial 64)
-  ))
+val lemma_of_double32_degree (d:double32) : Lemma
+  (degree (of_double32 d) < 64)
+  [SMTPat (degree (of_double32 d))]
+
+val lemma_of_quad32_degree (q:quad32) : Lemma
+  (degree (of_quad32 q) < 128)
+  [SMTPat (degree (of_quad32 q))]
+
+val lemma_to_of_quad32 (q:quad32) : Lemma (to_quad32 (of_quad32 q) == q)
+
+val lemma_of_to_quad32 (a:poly) : Lemma
+  (requires degree a < 128)
+  (ensures of_quad32 (to_quad32 a) == a)
 

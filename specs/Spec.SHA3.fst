@@ -197,7 +197,7 @@ let squeeze
   in
   let remOut = outputByteLen % rateInBytes in
   let block = storeState remOut s in
-  output @| block
+  Seq.append output block
 
 
 val keccak:

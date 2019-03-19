@@ -6,6 +6,7 @@ open X64.Leakage_s
 open X64.Leakage_Helpers
 open Types_s
 open Words_s
+open Arch.Types
 open TypesNative_s
 open FStar.FunctionalExtensionality
 open X64.Bytes_Semantics
@@ -25,7 +26,7 @@ let check_if_pxor_leakage_free ins ts =
   let Pxor dst src = ins.i in
   if src = dst then begin
     let ts' = set_xmm_taint ts dst Public in
-    Arch.Types.lemma_quad32_xor();
+    lemma_quad32_xor ();
     true, TaintState ts'.regTaint ts.flagsTaint ts.cfFlagsTaint ts'.xmmTaint
   end
   else begin
@@ -184,6 +185,7 @@ let lemma_pextrq_same_public_aux (ts:taintState) (ins:tainted_ins{Pextrq? ins.i}
         )
       
       in Classical.forall_intro (Classical.move_requires aux)
+    | OStack m -> ()
 
 let lemma_pextrq_same_public (ts:taintState) (ins:tainted_ins{Pextrq? ins.i}) (s1:traceState) (s2:traceState) 
   (fuel:nat)
@@ -329,17 +331,19 @@ val check_if_movdqu_leakage_free: (ins:tainted_ins{MOVDQU? ins.i}) -> (ts:taintS
 
 let mov128_does_not_use_secret ts = function
   | Mov128Xmm _ -> true
-  | Mov128Mem m -> maddr_does_not_use_secrets m ts
+  | Mov128Mem m | Mov128Stack m-> maddr_does_not_use_secrets m ts
 
 let check_if_movdqu_leakage_free_aux (ins:tainted_ins{MOVDQU? ins.i}) ts =
   let MOVDQU dst src = ins.i in
   let taint = match src with
     | Mov128Mem _ -> ins.t
     | Mov128Xmm x -> (xmm_taint ts x)
+    | Mov128Stack m -> Secret
   in
   let ts' = match dst with
     | Mov128Mem _ -> ts
     | Mov128Xmm x -> set_xmm_taint ts x taint
+    | Mov128Stack _ -> ts
   in
   if Mov128Mem? dst && taint <> ins.t then false, ts
   else
@@ -377,6 +381,7 @@ let lemma_movdqu_same_public_aux (ts:taintState) (ins:tainted_ins{MOVDQU? ins.i}
     let taint = match src with
       | Mov128Mem _ -> ins.t
       | Mov128Xmm x -> (xmm_taint ts x)
+      | Mov128Stack _ -> Secret
     in
 
     let aux_value() : Lemma
@@ -417,6 +422,7 @@ let lemma_movdqu_same_public_aux (ts:taintState) (ins:tainted_ins{MOVDQU? ins.i}
         )
       
       in Classical.forall_intro (Classical.move_requires aux)
+      | Mov128Stack _ -> ()
 
 let lemma_movdqu_same_public (ts:taintState) (ins:tainted_ins{MOVDQU? ins.i}) (s1:traceState) (s2:traceState) 
   (fuel:nat)
@@ -456,4 +462,4 @@ let check_if_xmm_ins_consumes_fixed_time ins ts =
     | SHA256_rnds2 _ _ -> check_if_sha256_rnds2_leakage_free ins ts
     | SHA256_msg1 _ _ -> check_if_sha256_msg1_leakage_free ins ts
     | SHA256_msg2 _ _ -> check_if_sha256_msg2_leakage_free ins ts
-
+    | _ -> (false, ts)

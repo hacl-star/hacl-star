@@ -5,7 +5,7 @@ open FStar.Tactics.Canon
 open FStar.Math.Lemmas
 // open FStar.Math.Lib
 open Math.Lemmas.Int
-open CanonCommSemiring
+open FStar.Tactics.CanonCommSemiring
 open FStar.Mul
 open TypesNative_s
 open Arch.TypesNative

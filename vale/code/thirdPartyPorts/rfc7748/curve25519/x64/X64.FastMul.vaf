@@ -1,5 +1,6 @@
 include "../../../../arch/x64/X64.Vale.InsBasic.vaf"
 include "../../../../arch/x64/X64.Vale.InsMem.vaf"
+include "../../../../arch/x64/X64.Vale.InsStack.vaf"
 include{:fstar}{:open} "Fast_defs"
 include{:fstar}{:open} "Fast_lemmas_external"
 include{:fstar}{:open} "FastMul_helpers"
@@ -8,17 +9,19 @@ include{:fstar}{:open} "X64.CPU_Features_s"
 //include{:fstar}{:open} "Prop_s"
 module X64.FastMul
 
-#reset-options "--z3rlimit 30"
+#reset-options "--z3rlimit 60"
 
 #verbatim{:interface}
 open Types_s
 open Arch.Types
 open X64.Machine_s
 open X64.Memory
+open X64.Stack_i
 open X64.Vale.State
 open X64.Vale.Decls
 open X64.Vale.InsBasic
 open X64.Vale.InsMem
+open X64.Vale.InsStack
 open X64.Vale.QuickCode
 open X64.Vale.QuickCodes
 open Fast_defs
@@ -30,10 +33,12 @@ open Types_s
 open Arch.Types
 open X64.Machine_s
 open X64.Memory
+open X64.Stack_i
 open X64.Vale.State
 open X64.Vale.Decls
 open X64.Vale.InsBasic
 open X64.Vale.InsMem
+open X64.Vale.InsStack
 open X64.Vale.QuickCode
 open X64.Vale.QuickCodes
 open FStar.Tactics
@@ -48,7 +53,7 @@ const int_canon:tactic extern;
 ghost procedure assert_by_tactic(ghost p:prop, ghost t:tactic) extern;
 
 
-#reset-options "--z3rlimit 100"
+#reset-options "--z3rlimit 200"
 procedure{:quick} fast_multiply_a0b(
     inline offset:nat,
     ghost dst_b:buffer64,
@@ -157,7 +162,7 @@ procedure{:quick} fast_multiply_a0b(
 }
 
 
-#reset-options "--z3rlimit 300"
+#reset-options "--z3rlimit 600"
 procedure{:quick} fast_multiply_a1b(
     inline offset:nat,
     ghost dst_b:buffer64,
@@ -279,7 +284,7 @@ procedure{:quick} fast_multiply_a1b(
     assert pow2_two(a0, a1) * b == a0a1b;   // Conclusion from the lemma
 }
 
-#reset-options "--z3rlimit 400"
+#reset-options "--z3rlimit 800"
 procedure{:quick} fast_multiply_a2b(
     inline offset:nat,
     ghost dst_b:buffer64,
@@ -406,7 +411,7 @@ procedure{:quick} fast_multiply_a2b(
 
 
 
-#reset-options "--z3rlimit 400"
+#reset-options "--z3rlimit 800"
 procedure{:quick} fast_multiply_a3b(
     inline offset:nat,
     ghost dst_b:buffer64,
@@ -542,7 +547,7 @@ procedure{:quick} fast_multiply_a3b(
 }
 
 
-#reset-options "--z3rlimit 20"
+#reset-options "--z3rlimit 40"
 
 procedure{:quick}{:public} fast_multiply(
     inline offset:nat,
@@ -608,8 +613,7 @@ procedure{:quick}{:public} fast_mul_stdcall(
     inline win:bool,
     ghost dst_b:buffer64,
     ghost inA_b:buffer64,
-    ghost inB_b:buffer64,
-    ghost stack_b:buffer64)
+    ghost inB_b:buffer64)
     lets
         dst_ptr @= rdi; inA_ptr @= rsi; inB_ptr @= rcx;
         dst_in := (if win then rcx else rdi);
@@ -618,20 +622,16 @@ procedure{:quick}{:public} fast_mul_stdcall(
     reads memTaint;
     modifies
         rax; rbx; rcx; rdx; rdi; rsi; r8; r9; r10; r11; r12; r13; r14;
-        rsp; efl; mem;
+        rsp; efl; mem; stack;
     requires
+        rsp == init_rsp(stack);
         adx_enabled && bmi2_enabled;
         buffers_disjoint(dst_b, inA_b);
         buffers_disjoint(dst_b, inB_b);
 
-        buffers_disjoint(stack_b, dst_b);
-        buffers_disjoint(stack_b, inA_b);
-        buffers_disjoint(stack_b, inB_b);
-
         validDstAddrs64(mem, dst_in, dst_b, 8, memTaint, Secret);
         validSrcAddrs64(mem, inA_in, inA_b, 4, memTaint, Secret);
         validSrcAddrs64(mem, inB_in, inB_b, 4, memTaint, Secret);
-        valid_stack_slots(mem, rsp, stack_b, 4, memTaint);
     ensures
         let a0 := old(buffer64_read(inA_b, 0, mem));
         let a1 := old(buffer64_read(inA_b, 1, mem));
@@ -663,7 +663,7 @@ procedure{:quick}{:public} fast_mul_stdcall(
         //   Framing
         //////////////////////////////////////
 
-        modifies_buffer_2(dst_b, stack_b, old(mem), mem);
+        modifies_buffer(dst_b, old(mem), mem);
         validSrcAddrs64(mem, dst_in, dst_b, 8, memTaint, Secret);
 
         rsi == old(rsi);
@@ -674,10 +674,10 @@ procedure{:quick}{:public} fast_mul_stdcall(
         rsp == old(rsp);
 {
     // Store callee-save registers
-    Push(rsi, stack_b, 3);
-    Push(r12, stack_b, 2);
-    Push(r13, stack_b, 1);
-    Push(r14, stack_b, 0);
+    Push(rsi);
+    Push(r12);
+    Push(r13);
+    Push(r14);
 
     // Line up the rest of the arguments
     inline if (win) {
@@ -690,18 +690,17 @@ procedure{:quick}{:public} fast_mul_stdcall(
 
     fast_multiply(0, dst_b, inA_b, inB_b);
 
-    Pop(r14, stack_b, 0);
-    Pop(r13, stack_b, 1);
-    Pop(r12, stack_b, 2);
-    Pop(rsi, stack_b, 3);
+    Pop(r14);
+    Pop(r13);
+    Pop(r12);
+    Pop(rsi);
 }
 
 procedure{:quick}{:public} fast_mul2_stdcall(
     inline win:bool,
     ghost dst_b:buffer64,
     ghost inA_b:buffer64,
-    ghost inB_b:buffer64,
-    ghost stack_b:buffer64)
+    ghost inB_b:buffer64)
     lets
         dst_ptr @= rdi; inA_ptr @= rsi; inB_ptr @= rcx;
         dst_in := (if win then rcx else rdi);
@@ -710,20 +709,16 @@ procedure{:quick}{:public} fast_mul2_stdcall(
     reads memTaint;
     modifies
         rax; rbx; rcx; rdx; rdi; rsi; r8; r9; r10; r11; r12; r13; r14;
-        rsp; efl; mem;
+        rsp; efl; mem; stack;
     requires
+        rsp == init_rsp(stack);
         adx_enabled && bmi2_enabled;
         buffers_disjoint(dst_b, inA_b);
         buffers_disjoint(dst_b, inB_b);
 
-        buffers_disjoint(stack_b, dst_b);
-        buffers_disjoint(stack_b, inA_b);
-        buffers_disjoint(stack_b, inB_b);
-
         validDstAddrs64(mem, dst_in, dst_b, 16, memTaint, Secret);
         validSrcAddrs64(mem, inA_in, inA_b, 8, memTaint, Secret);
         validSrcAddrs64(mem, inB_in, inB_b, 8, memTaint, Secret);
-        valid_stack_slots(mem, rsp, stack_b, 4, memTaint);
     ensures
 
         let a0 := old(buffer64_read(inA_b, 0, mem));
@@ -781,7 +776,7 @@ procedure{:quick}{:public} fast_mul2_stdcall(
         //   Framing
         //////////////////////////////////////
 
-        modifies_buffer_2(dst_b, stack_b, old(mem), mem);
+        modifies_buffer(dst_b, old(mem), mem);
         validSrcAddrs64(mem, dst_in, dst_b, 16, memTaint, Secret);
 
         rsi == old(rsi);
@@ -792,13 +787,13 @@ procedure{:quick}{:public} fast_mul2_stdcall(
         rsp == old(rsp);
 {
     // Store callee-save registers
-    Push(r12, stack_b, 3);
-    Push(r13, stack_b, 2);
-    Push(r14, stack_b, 1);
+    Push(r12);
+    Push(r13);
+    Push(r14);
 
     // Line up the rest of the arguments
     inline if (win) {
-        Push(rsi, stack_b, 0);
+        Push(rsi);
         Mov64(dst_ptr, rcx);
         Mov64(inA_ptr, rdx);
         Mov64(inB_ptr, r8);
@@ -810,9 +805,9 @@ procedure{:quick}{:public} fast_mul2_stdcall(
     fast_multiply(4, dst_b, inA_b, inB_b);
 
     inline if (win) {
-        Pop(rsi, stack_b, 0);
+        Pop(rsi);
     }
-    Pop(r14, stack_b, 1);
-    Pop(r13, stack_b, 2);
-    Pop(r12, stack_b, 3);
+    Pop(r14);
+    Pop(r13);
+    Pop(r12);
 }

@@ -8,7 +8,7 @@ module P = X64.Print_s
 module BS = X64.Bytes_Semantics_s
 module TS = X64.Taint_Semantics_s
 
-#reset-options "--z3cliopt smt.arith.nl=true"
+#reset-options "--max_fuel 0 --max_ifuel 0 --smtencoding.elim_box true --smtencoding.l_arith_repr boxwrap --smtencoding.nl_arith_repr boxwrap --z3cliopt smt.arith.nl=true --using_facts_from 'Prims FStar.UInt Words_s FStar.UInt64'"
 let lemma_mul_in_bounds (x y:nat64) : Lemma (requires x `op_Multiply` y < pow2_64) (ensures FStar.UInt.mul_mod #64 x y == x `op_Multiply` y) = ()
 
 #reset-options "--z3cliopt smt.arith.nl=true --using_facts_from Prims --using_facts_from FStar.Math"
@@ -24,12 +24,19 @@ type ocmp = TS.tainted_ocmp
 type va_fuel = nat
 let va_fuel_default () = 0
 
-let va_opr_lemma_Mem (s:va_state) (base:va_operand) (offset:int) (b:M.buffer64) (index:int) (t:taint) =
+let va_opr_lemma_Mem s base offset b index t =
   let t = va_opr_code_Mem base offset t in
   M.lemma_valid_mem64 b index s.mem;
   let TMem m t = t in
   assert (valid_maddr (eval_maddr m s) s.mem s.memTaint b index t);
   M.lemma_load_mem64 b index s.mem
+
+let va_opr_lemma_Mem128 s base offset t b index =
+  let t = va_opr_code_Mem128 base offset t in
+  M.lemma_valid_mem128 b index s.mem;
+  let TMem128 m t = t in
+  assert (valid_maddr128 (eval_maddr m s) s.mem s.memTaint b index t);
+  M.lemma_load_mem128 b index s.mem
 
 let taint_at memTaint addr = Map.sel memTaint addr
 

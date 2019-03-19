@@ -87,16 +87,19 @@ let uint_ext (#n : nat) (#m : nat{n <= m}) (x : uint_t n) : r:(uint_t m){uint_to
   modulo_lemma x (pow2 m);
   to_uint_t m x
 
+#reset-options "--smtencoding.elim_box true --smtencoding.l_arith_repr boxwrap --smtencoding.nl_arith_repr boxwrap"
 let mul_bvshl (u:uint_t 64) :
-  Lemma (int2bv #128 (0x10000000000000000 `op_Multiply` u) ==
-         bvshl (bv_uext #64 #64 (int2bv u)) 64) =
-  assert ( 0x10000000000000000 * u < pow2 128);
+  Lemma (0x10000000000000000 * u < pow2 128 /\
+         (int2bv #128 (0x10000000000000000 `op_Multiply` u) ==
+          bvshl (bv_uext #64 #64 (int2bv u)) 64)) =
+  assert_norm ( 0x10000000000000000 * pow2 63 < pow2 128);	    
   modulo_lemma (0x10000000000000000 * u) (pow2 128);
   assert_by_tactic
     (int2bv #128 (mul_mod #128 0x10000000000000000 (uint_ext #64 #128 u)) ==
     bvmul #128 (int2bv #128 0x10000000000000000) (uint_ext #64 #128 u))
     (fun () -> mapply (`trans); arith_to_bv_tac (); trefl ())
 
+#reset-options "--smtencoding.elim_box true"
 let plus_bvor (u h:bv_t 128) :
   Lemma (bvand u h = bv_zero ==> bvadd u h == bvor u h) = ()
 
@@ -295,16 +298,17 @@ let bv128_64_64_lowerUpper128u_int (x0 x1:uint_t 64) (xx0 xx1:uint_t 128) : Lemm
 
 let bv128_64_64_lowerUpper128u_helper (x0 x1:uint_t 64) (xx0 xx1:uint_t 128) : Lemma
   (requires x0 == xx0 /\ x1 == xx1)
-        (ensures int2bv (lowerUpper128u x0 x1) == bv128_64_64 (int2bv x0) (int2bv x1))
+  (ensures int2bv (lowerUpper128u x0 x1) == bv128_64_64 (int2bv x0) (int2bv x1))
   =
-  // int2bv (lowerUpper128u x0 x1)
-  bv128_64_64_lowerUpper128u_bv_lhs_lu x0 x1 xx0 xx1;
-  // bvadd (bvmul #128 (int2bv xx1) 0x10000000000000000) (int2bv xx0)
-  bv128_64_64_lowerUpper128u_int x0 x1 xx0 xx1;
-  // bvor (bvshl (int2bv xx1) 64) (int2bv xx0)
-  bv128_64_64_lowerUpper128u_bv_rhs2 x0 x1 xx0 xx1;
-  // bv128_64_64 (int2bv x0) (int2bv x1)
-  ()
+  calc (==) {
+    int2bv (lowerUpper128u x0 x1);
+    == { bv128_64_64_lowerUpper128u_bv_lhs_lu x0 x1 xx0 xx1 }
+    bvadd (bvmul #128 (int2bv xx1) 0x10000000000000000) (int2bv xx0);
+    == { bv128_64_64_lowerUpper128u_int x0 x1 xx0 xx1 }
+    bvor (bvshl (int2bv xx1) 64) (int2bv xx0);
+    == { bv128_64_64_lowerUpper128u_bv_rhs2 x0 x1 xx0 xx1 }
+    bv128_64_64 (int2bv x0) (int2bv x1);
+  }
 
 let bv128_64_64_lowerUpper128u (x0 x1:nat) :
   Lemma (requires (FStar.UInt.size x0 64 /\ FStar.UInt.size x1 64))

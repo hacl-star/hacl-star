@@ -64,7 +64,8 @@ val same_domain_update64: b:buffer64 -> i:nat -> v:nat64 -> h:mem -> Lemma
 val low_lemma_store_mem64 : b:buffer64 -> i:nat-> v:nat64 -> h:mem -> Lemma
   (requires
     i < Seq.length (buffer_as_seq h b) /\
-    buffer_readable h b
+    buffer_readable h b /\
+    buffer_writeable b
   )
   (ensures (
     same_domain_update64 b i v h;
@@ -79,6 +80,10 @@ val low_lemma_valid_mem128: b:buffer128 -> i:nat -> h:mem -> Lemma
   (ensures
     S.valid_addr128 (buffer_addr b h + 16 `op_Multiply` i) (get_heap h)
   )
+
+val equiv_load_mem128: ptr:int -> m:mem -> Lemma
+  (requires valid_mem128 ptr m)
+  (ensures load_mem128 ptr m == S.get_heap_val128 ptr (get_heap m))
 
 val low_lemma_load_mem128 : b:buffer128 -> i:nat -> h:mem -> Lemma
   (requires
@@ -99,9 +104,77 @@ val same_domain_update128: b:buffer128 -> i:nat -> v:quad32 -> h:mem -> Lemma
 val low_lemma_store_mem128 : b:buffer128 -> i:nat-> v:quad32 -> h:mem -> Lemma
   (requires
     i < Seq.length (buffer_as_seq h b) /\
-    buffer_readable h b
+    buffer_readable h b /\
+    buffer_writeable b
   )
   (ensures (
     same_domain_update128 b i v h;
     get_hs h (S.update_heap128 (buffer_addr b h + 16 `op_Multiply` i) v (get_heap h)) == buffer_write b i v h)
+  )
+
+val low_lemma_valid_mem128_64: b:buffer128 -> i:nat -> h:mem -> Lemma
+  (requires
+    i < Seq.length (buffer_as_seq h b) /\
+    buffer_readable h b
+  )
+  (ensures
+    S.valid_addr64 (buffer_addr b h + 16 `op_Multiply` i) (get_heap h) /\
+    S.valid_addr64 (buffer_addr b h + 16 `op_Multiply` i + 8) (get_heap h)    
+  )
+
+open Arch.Types
+
+val low_lemma_load_mem128_lo64 : b:buffer128 -> i:nat -> h:mem -> Lemma
+  (requires
+    i < Seq.length (buffer_as_seq h b) /\
+    buffer_readable h b
+  )
+  (ensures
+    S.get_heap_val64 (buffer_addr b h + 16 `op_Multiply` i) (get_heap h) == 
+      lo64 (buffer_read b i h)
+  )
+
+val low_lemma_load_mem128_hi64 : b:buffer128 -> i:nat -> h:mem -> Lemma
+  (requires
+    i < Seq.length (buffer_as_seq h b) /\
+    buffer_readable h b
+  )
+  (ensures
+    S.get_heap_val64 (buffer_addr b h + 16 `op_Multiply` i + 8) (get_heap h) == 
+      hi64 (buffer_read b i h)
+  )
+
+val same_domain_update128_64: b:buffer128 -> i:nat -> v:nat64 -> h:mem -> Lemma
+  (requires
+    i < Seq.length (buffer_as_seq h b) /\
+    buffer_readable h b
+  )
+  (ensures 
+    same_domain h (S.update_heap64 (buffer_addr b h + 16 `op_Multiply` i) v (get_heap h)) /\
+    same_domain h (S.update_heap64 (buffer_addr b h + 16 `op_Multiply` i + 8) v (get_heap h))    
+  )
+
+
+val low_lemma_store_mem128_lo64 : b:buffer128 -> i:nat-> v:nat64 -> h:mem -> Lemma
+  (requires
+    i < Seq.length (buffer_as_seq h b) /\
+    buffer_readable h b /\
+    buffer_writeable b
+  )
+  (ensures (
+    let v' = insert_nat64_opaque (buffer_read b i h) v 0 in
+    same_domain_update128_64 b i v h;
+    get_hs h (S.update_heap64 (buffer_addr b h + 16 `op_Multiply` i) v (get_heap h)) == buffer_write b i v' h)
+  )
+
+val low_lemma_store_mem128_hi64 : b:buffer128 -> i:nat-> v:nat64 -> h:mem -> Lemma
+  (requires
+    i < Seq.length (buffer_as_seq h b) /\
+    buffer_readable h b /\
+    buffer_writeable b
+  )
+  (ensures (
+    let v' = insert_nat64_opaque (buffer_read b i h) v 1 in
+    same_domain_update128_64 b i v h;
+    get_hs h (S.update_heap64 (buffer_addr b h + 16 `op_Multiply` i + 8) v (get_heap h)) == buffer_write b i v' h)
   )

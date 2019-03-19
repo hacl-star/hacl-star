@@ -4,12 +4,28 @@ open Words_s
 open Types_s
 open FStar.Mul
 open FStar.Tactics
-open CanonCommSemiring
+open FStar.Tactics.CanonCommSemiring
 open Fast_defs
 open Fast_lemmas_internal
 
-#reset-options "--using_facts_from '* -FStar.Tactics -FStar.Reflection \
-  -CanonCommMonoid -CanonCommSwaps -CanonCommSemiring' --max_fuel 0 --max_ifuel 0 --z3rlimit 50"
+
+let lemma_sub_carry_equiv (x y:nat64) (c:bit) : 
+  Lemma (let v, c' = sub_carry x y c in
+         v == (x - (y + c)) % pow2_64 /\
+         c' == bool_bit (x - (y+c) < 0))
+  =
+  ()
+
+let lemma_sub_carry_equiv_forall () :
+  Lemma (forall x y c . {:pattern (sub_carry x y c)}
+         let v, c' = sub_carry x y c in
+         v == (x - (y + c)) % pow2_64 /\
+         c' == bool_bit (x - (y+c) < 0))
+  =
+  ()
+
+#reset-options "--using_facts_from '* -FStar.Tactics -FStar.Reflection' \
+  --max_fuel 0 --max_ifuel 0 --z3rlimit 50"
 let lemma_sub2
       (a:nat) (a0 a1:nat64)      
       (b:nat) (b0 b1:nat64)
@@ -75,7 +91,7 @@ let lemma_sub3
   ()
 
 //
-#push-options "--z3rlimit 300 --max_fuel 0 --max_ifuel 0"
+#push-options "--z3rlimit 30 --max_fuel 0 --max_ifuel 0"
 let lemma_sub
       (a:nat) (a0 a1 a2 a3:nat64)      
       (b:nat) (b0 b1 b2 b3:nat64)
