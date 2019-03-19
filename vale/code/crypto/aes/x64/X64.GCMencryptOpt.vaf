@@ -722,6 +722,8 @@ procedure {:quick exportOnly}{:public}{:exportSpecs} gcm_blocks_stdcall(
         validSrcAddrs128(mem,          xip,    hkeys_b,       10, memTaint, Secret);
         validDstAddrs128(mem,      tag_ptr,      tag_b,        1, memTaint, Secret);        
 
+        buffer_disjoints128(tag_b, list(out128x6_b, out128_b, inout_b));
+
         buffer_disjoints128(iv_b, list(keys_b, scratch_b, in128x6_b, out128x6_b, hkeys_b, in128_b, out128_b, inout_b));
 
         buffer_disjoints128(scratch_b, list(keys_b, in128x6_b, out128x6_b, in128_b, out128_b, inout_b, hkeys_b));
