@@ -16,14 +16,11 @@ open Spec.AEAD
 noextract
 let bytes = Seq.seq UInt8.t
 
-let supported_alg =
-  a:alg { supported_alg a }
-
 let frozen_preorder (s: bytes): MB.srel UInt8.t = fun (s1 s2: bytes) ->
   S.equal s1 s ==> S.equal s2 s
 
 noeq
-type expanded_key (a: alg) =
+type expanded_key (a: supported_alg) =
 | EK:
     kv:G.erased (kv a) -> ek:(
     let s = expand (G.reveal kv) in
@@ -37,6 +34,7 @@ val expand_in:
   k:B.buffer UInt8.t { B.length k = key_length a } ->
   ST (expanded_key a)
     (requires fun h0 ->
+      ST.is_eternal_region r /\
       B.live h0 k)
     (ensures fun h0 ek h1 ->
       let l = B.loc_buffer (EK?.ek ek) in

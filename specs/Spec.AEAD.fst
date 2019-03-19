@@ -8,24 +8,21 @@ module S = FStar.Seq
 
 friend Lib.IntTypes
 
+let vale_alg_of_alg (a: alg { a = AES128_GCM \/ a = AES256_GCM }) =
+  match a with
+  | AES128_GCM -> AES_s.AES_128
+  | AES256_GCM -> AES_s.AES_256
+
 let expand #a k =
   match a with
   | CHACHA20_POLY1305 -> k
-  | AES256_GCM ->
+  | AES256_GCM | AES128_GCM ->
       let open AES_s in
       assert_norm (32 % 4 = 0);
-      let k_nat = Words.Seq_s.seq_uint8_to_seq_nat8 k in
-      let k_w = Words.Seq_s.seq_nat8_to_seq_nat32_LE k_nat in
-      let ekv_w = key_to_round_keys_LE AES_256 k_w in
-      let ekv_nat = Types_s.le_seq_quad32_to_bytes ekv_w in
-      Types_s.le_seq_quad32_to_bytes_length ekv_w;
-      Words.Seq_s.seq_nat8_to_seq_uint8 ekv_nat
-  | AES128_GCM ->
-      let open AES_s in
       assert_norm (16 % 4 = 0);
       let k_nat = Words.Seq_s.seq_uint8_to_seq_nat8 k in
       let k_w = Words.Seq_s.seq_nat8_to_seq_nat32_LE k_nat in
-      let ekv_w = key_to_round_keys_LE AES_128 k_w in
+      let ekv_w = key_to_round_keys_LE (vale_alg_of_alg a) k_w in
       let ekv_nat = Types_s.le_seq_quad32_to_bytes ekv_w in
       Types_s.le_seq_quad32_to_bytes_length ekv_w;
       Words.Seq_s.seq_nat8_to_seq_uint8 ekv_nat
@@ -56,11 +53,6 @@ let gcm_encrypt_cipher_length alg key iv plain auth: Lemma
 =
   Opaque_s.reveal_opaque (GCM_s.gcm_encrypt_LE_def alg key iv plain auth)
 #pop-options
-
-let vale_alg_of_alg (a: alg { a = AES128_GCM \/ a = AES256_GCM }) =
-  match a with
-  | AES128_GCM -> AES_s.AES_128
-  | AES256_GCM -> AES_s.AES_256
 
 let encrypt #a kv iv ad plain =
   match a with
