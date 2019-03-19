@@ -57,6 +57,12 @@ friend X64.Vale.Decls
 
 #reset-options "--initial_fuel 2 --max_fuel 4 --max_ifuel 2 --z3rlimit 50"
 
+procedure{:operand} Stack_in(base:reg64, inline offset:int) returns(o:opr)
+    reads
+        stack;
+    extern;
+
+
 procedure{:instruction Ins(TS.TaintedIns(tuple(S.Pop(t_op_to_op(dst))), Public))}
          {:fast_instruction}{:quick exportOnly}{:public}
     Pop(out dst: dst_opr64)

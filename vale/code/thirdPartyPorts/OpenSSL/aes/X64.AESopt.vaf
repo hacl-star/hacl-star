@@ -1279,7 +1279,7 @@ procedure {:quick} Loop6x(
 }
 
 
-#reset-options "--z3rlimit 600"
+#reset-options "--z3rlimit 900"
 procedure {:quick exportOnly} Loop6x_loop(
     inline alg:algorithm,  
     ghost count:nat,        // Number of 6x128-bit blocks processed so far

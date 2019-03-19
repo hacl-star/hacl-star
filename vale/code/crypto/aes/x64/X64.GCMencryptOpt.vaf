@@ -65,6 +65,7 @@ open X64.GHash
 open X64.GCTR
 open X64.Machine_s
 open X64.Memory
+open X64.Stack_i
 open X64.Vale.State
 open X64.Vale.Decls
 open X64.Vale.InsBasic
@@ -303,7 +304,7 @@ procedure {:quick} gcm_make_length_quad()
 #reset-options "--z3rlimit 150"
 procedure {:quick} gcm_blocks(
     inline alg:algorithm,
-    ghost stack_b:buffer64,
+    inline offset:int,
     ghost auth_b:buffer128,
     ghost abytes_b:buffer128,
     ghost in128x6_b:buffer128,
@@ -322,18 +323,18 @@ procedure {:quick} gcm_blocks(
         auth_ptr @= rdi; auth_num_bytes @= rsi; auth_len @= rdx; keys_ptr @= rcx; scratch_ptr @= rbp; 
         iv_ptr @= r8; Xip @= r9;
 
-        abytes_ptr      := buffer64_read(stack_b, 0, mem); 
-        in128x6_ptr     := buffer64_read(stack_b, 1, mem); 
-        out128x6_ptr    := buffer64_read(stack_b, 2, mem); 
-        len128x6        := buffer64_read(stack_b, 3, mem); 
-        in128_ptr       := buffer64_read(stack_b, 4, mem); 
-        out128_ptr      := buffer64_read(stack_b, 5, mem); 
-        len128          := buffer64_read(stack_b, 6, mem); 
-        inout_ptr       := buffer64_read(stack_b, 7, mem);
-        plain_num_bytes := buffer64_read(stack_b, 8, mem);
+        abytes_ptr      := load_stack64(rsp + offset +  0, stack); 
+        in128x6_ptr     := load_stack64(rsp + offset + 8, stack); 
+        out128x6_ptr    := load_stack64(rsp + offset + 16, stack); 
+        len128x6        := load_stack64(rsp + offset + 24, stack); 
+        in128_ptr       := load_stack64(rsp + offset + 32, stack); 
+        out128_ptr      := load_stack64(rsp + offset + 40, stack); 
+        len128          := load_stack64(rsp + offset + 48, stack); 
+        inout_ptr       := load_stack64(rsp + offset + 56, stack);
+        plain_num_bytes := load_stack64(rsp + offset + 64, stack);
 
     reads
-        rsp; memTaint;
+        rsp; memTaint; stack;
 
     modifies
         rax; rbx; rcx; rdx; rdi; rsi; scratch_ptr;
@@ -343,7 +344,16 @@ procedure {:quick} gcm_blocks(
 
     requires
         // Valid buffers and pointers
-        validSrcAddrs64 (mem,          rsp,    stack_b,        9, memTaint, Public);
+        valid_src_stack64(rsp + offset + 0, stack);
+        valid_src_stack64(rsp + offset + 8, stack);
+        valid_src_stack64(rsp + offset + 16, stack);
+        valid_src_stack64(rsp + offset + 24, stack);
+        valid_src_stack64(rsp + offset + 32, stack);
+        valid_src_stack64(rsp + offset + 40, stack);
+        valid_src_stack64(rsp + offset + 48, stack);
+        valid_src_stack64(rsp + offset + 56, stack);
+        valid_src_stack64(rsp + offset + 64, stack);        
+
         validSrcAddrs128(mem,     auth_ptr,     auth_b, auth_len, memTaint, Secret);
         validSrcAddrs128(mem,   abytes_ptr,   abytes_b,        1, memTaint, Secret);
         validDstAddrs128(mem,       iv_ptr,       iv_b,        1, memTaint, Secret);
@@ -355,19 +365,14 @@ procedure {:quick} gcm_blocks(
         validDstAddrs128(mem,  scratch_ptr,  scratch_b,        8, memTaint, Secret);
         validSrcAddrs128(mem,          Xip,    hkeys_b,       10, memTaint, Secret);
 
-        locs_disjoint(list(loc_buffer(iv_b), loc_buffer(stack_b)));
         buffer_disjoints128(iv_b, list(keys_b, scratch_b, in128x6_b, out128x6_b, hkeys_b, in128_b, out128_b, inout_b));
 
-        locs_disjoint(list(loc_buffer(scratch_b), loc_buffer(stack_b)));
         buffer_disjoints128(scratch_b, list(keys_b, in128x6_b, out128x6_b, in128_b, out128_b, inout_b, hkeys_b));
 
-        locs_disjoint(list(loc_buffer(out128x6_b), loc_buffer(stack_b)));
         buffer_disjoints128(out128x6_b, list(keys_b, hkeys_b, in128_b, inout_b));
 
-        locs_disjoint(list(loc_buffer(out128_b), loc_buffer(stack_b)));
         buffer_disjoints128(out128_b, list(keys_b, hkeys_b, out128x6_b, inout_b));
 
-        locs_disjoint(list(loc_buffer(inout_b), loc_buffer(stack_b)));
         buffer_disjoints128(inout_b, list(keys_b, hkeys_b, out128x6_b, out128_b));
 
         buffers_disjoint128(in128x6_b, out128x6_b) || in128x6_b == out128x6_b;
@@ -495,7 +500,7 @@ procedure {:quick} gcm_blocks(
     assert equal(append(s128(mem, auth_b), auth_byte_seq), s128(mem, auth_b));
     if (auth_num_bytes > r11) {
         // Ghash the extra auth bytes
-        Load64_buffer(r11, rsp, 0, Public, stack_b, 0); // Load abytes_ptr
+        Load64_stack(r11, rsp, offset + 0); // Load abytes_ptr
         Load128_buffer(xmm2, r11, 0, Secret, abytes_b, 0);
         compute_ghash_incremental_register();
         assert equal(create(1, buffer128_read(abytes_b, 0, mem)), s128(mem, abytes_b));
@@ -507,9 +512,9 @@ procedure {:quick} gcm_blocks(
     Mov64(r15, auth_num_bytes);
 
     // Line up the arguments for AES_GCM_encrypt_6mult
-    Load64_buffer(rdi, rsp,  8, Public, stack_b, 1);
-    Load64_buffer(rsi, rsp, 16, Public, stack_b, 2);
-    Load64_buffer(rdx, rsp, 24, Public, stack_b, 3);
+    Load64_stack(rdi, rsp, offset + 8);
+    Load64_stack(rsi, rsp, offset + 16);
+    Load64_stack(rdx, rsp, offset + 24);
     Mov64(keys_ptr, r8);
     Mov64(iv_ptr, r13);
     Mov64(Xip, r14);
@@ -521,9 +526,9 @@ procedure {:quick} gcm_blocks(
     // Line up arguments for gcm_blocks128 for remaining 128-bit blocks
     Load128_buffer(xmm7, iv_ptr, 0, Secret, iv_b, 0);
     Mov64(r8, keys_ptr);
-    Load64_buffer(rax, rsp, 32, Public, stack_b, 4);
-    Load64_buffer(rbx, rsp, 40, Public, stack_b, 5);
-    Load64_buffer(rcx, rsp, 48, Public, stack_b, 6);
+    Load64_stack(rax, rsp, offset + 32);
+    Load64_stack(rbx, rsp, offset + 40);
+    Load64_stack(rcx, rsp, offset + 48);
     Mov128(xmm1, xmm8);     // Move the hash value into the right place
     InitPshufbMask(xmm8, r12);
     Pshufb(xmm7, xmm8);
@@ -531,16 +536,16 @@ procedure {:quick} gcm_blocks(
     gcm_blocks128(alg, in128_b, out128_b, key, round_keys, keys_b);
     ghost var y_cipher128 := xmm1;
 
-    Add64(rcx, Mem(rsp, 24, stack_b, 3, Public));    // rcx == len128x6 + len128
+    Add64(rcx, Stack(rsp, offset + 24));    // rcx == len128x6 + len128
     IMul64(rcx, 128/8);  // rcx *= 128/8;   rcx == # bytes of plain
-    Load64_buffer(r13, rsp, 64, Public, stack_b, 8);  // r13 := plain_num_bytes
+    Load64_stack(r13, rsp, offset + 64);  // r13 := plain_num_bytes
 
     ghost var y_inout := y_cipher128;
     ghost var plain_byte_seq:seq(quad32) := empty_seq_quad32;
     ghost var cipher_byte_seq:seq(quad32) := empty_seq_quad32;
     if (r13 > rcx) {
         // Line up arguments for gcm_blocks128 for the 128-bit block that holds any extra bytes
-        Load64_buffer(rax, rsp, 56, Public, stack_b, 7);
+        Load64_stack(rax, rsp, offset + 56);
         Mov64(rbx, rax);
         Mov64(rcx, 1);
         gcm_blocks128(alg, inout_b, inout_b, key, round_keys, keys_b);

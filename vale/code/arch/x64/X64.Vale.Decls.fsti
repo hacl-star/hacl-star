@@ -220,6 +220,20 @@ val va_opr_lemma_Mem (s:va_state) (base:va_operand) (offset:int) (b:M.buffer64) 
   )
 
 [@va_qattr]
+unfold let va_opr_code_Stack (o:va_operand) (offset:int) : va_operand =
+  match o with
+  | TConst n -> TStack (MConst (n + offset))
+  | TReg r -> TStack (MReg r offset)
+  | _ -> TStack (MConst 42)
+
+val va_opr_lemma_Stack (s:va_state) (base:va_operand) (offset:int) : Lemma
+  (requires
+    TReg? base /\
+    S.valid_src_stack64 (eval_operand (t_op_to_op base) s + offset) s.stack
+  )
+  (ensures True)
+
+[@va_qattr]
 unfold let va_opr_code_Mem128 (o:va_operand) (offset:int) (t:taint) : va_operand128 =
   match o with
   | TReg r -> TMem128 (MReg r offset) t

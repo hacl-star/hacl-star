@@ -31,6 +31,8 @@ let va_opr_lemma_Mem s base offset b index t =
   assert (valid_maddr (eval_maddr m s) s.mem s.memTaint b index t);
   M.lemma_load_mem64 b index s.mem
 
+let va_opr_lemma_Stack s base offset = ()
+
 let va_opr_lemma_Mem128 s base offset t b index =
   let t = va_opr_code_Mem128 base offset t in
   M.lemma_valid_mem128 b index s.mem;
