@@ -220,5 +220,5 @@ let lowstar_gcm128 (s:Ghost.erased (Seq.seq nat32)) : lowstar_gcm128_t s =
     (W.mk_prediction code_gcm128 dom [] ((gcm128_lemma s) code_gcm128 IA.win))
 
 [@ (CCConv "stdcall") ]
-let gcm128_encrypt //: normal ((s:Ghost.erased (Seq.seq nat32)) -> lowstar_gcm128_t s)
+let gcm128_encrypt_opt //: normal ((s:Ghost.erased (Seq.seq nat32)) -> lowstar_gcm128_t s)
   = as_normal_t #((s:Ghost.erased (Seq.seq nat32)) -> lowstar_gcm128_t s) (fun (s:Ghost.erased (Seq.seq nat32)) -> lowstar_gcm128 s)

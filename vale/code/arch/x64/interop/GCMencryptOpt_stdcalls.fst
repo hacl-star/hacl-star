@@ -80,7 +80,7 @@ let gcm128_encrypt key auth_b auth_bytes auth_num keys_b iv_b hkeys_b abytes_b
   Classical.forall_intro (bounded_buffer_addrs TUInt8 TUInt128 h0 keys_b);  
   Classical.forall_intro (bounded_buffer_addrs TUInt8 TUInt128 h0 hkeys_b);  
 
-  let x, _ = gcm128_encrypt  key auth_b auth_bytes auth_num keys_b iv_b hkeys_b abytes_b
+  let x, _ = gcm128_encrypt_opt  key auth_b auth_bytes auth_num keys_b iv_b hkeys_b abytes_b
   in128x6_b out128x6_b len128x6 in128_b out128_b len128_num inout_b plain_num scratch_b tag_b () in
 
   let h1 = get() in
