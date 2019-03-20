@@ -231,8 +231,8 @@ let print_ins (ins:tainted_ins) (p:printer) =
   |VPclmulqdq dst src1 src2 imm  -> "  vpclmulqdq " ^ print_pair (print_xmms_3 dst src1 src2) (print_imm8 imm p)  
   | AESNI_enc dst src            -> "  aesenc "     ^ print_xmms dst src
   | AESNI_enc_last dst src       -> "  aesenclast " ^ print_xmms dst src
-  |VAESNI_enc dst src1 src2      -> "  aesenc "     ^ print_xmms_3 dst src1 src2 
-  |VAESNI_enc_last dst src1 src2 -> "  aesenclast " ^ print_xmms_3 dst src1 src2
+  |VAESNI_enc dst src1 src2      -> "  vaesenc "     ^ print_xmms_3 dst src1 src2 
+  |VAESNI_enc_last dst src1 src2 -> "  vaesenclast " ^ print_xmms_3 dst src1 src2
   | AESNI_dec dst src      -> "  aesdec "     ^ print_xmms dst src
   | AESNI_dec_last dst src -> "  aesdeclast " ^ print_xmms dst src
   | AESNI_imc dst src      -> "  aesimc "     ^ print_xmms dst src
