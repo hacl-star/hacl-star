@@ -29,6 +29,7 @@
 # - vale-verify: properly staged target for re-verifying all the vale files
 # - vale-asm: re-generation of the Vale assemblies in dist/vale
 # - hacl-verify: non-staged target for reverifying HACL* files
+#   also: curve25519-verify poly1305-verify chacha20-verify
 # - verify: UNSTAGED, may only be invoked after a successful run of vale-fst,
 #   verifies all .fst files, both hand-written and generated.
 #
@@ -52,12 +53,14 @@ ifeq (3.81,$(MAKE_VERSION))
 endif
 
 # Better error early.
+ifeq (,$(NOVALE))
 ifeq (,$(VALE_HOME))
   $(error Please define VALE_HOME, possibly using cygpath -m on Windows)
 endif
 
 ifeq (,$(wildcard $(VALE_HOME)/bin/vale.exe))
   $(error $$VALE_HOME/bin/vale.exe does not exist (VALE_HOME=$(VALE_HOME)))
+endif
 endif
 
 # Backwards-compat, remove
