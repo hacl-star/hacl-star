@@ -659,17 +659,17 @@ procedure {:quick exportOnly}{:public}{:exportSpecs} gcm_blocks_stdcall(
         iv_ptr :=           if win then load_stack64(rsp + 32 + 8 + 0, stack) else r8;
         xip    :=           if win then load_stack64(rsp + 32 + 8 + 8, stack) else r9;
 
-        abytes_ptr      := if win then load_stack64(rsp + 40 + 16, stack) else load_stack64(rsp + 0, stack); 
-        in128x6_ptr     := if win then load_stack64(rsp + 40 + 24, stack) else load_stack64(rsp + 8, stack); 
-        out128x6_ptr    := if win then load_stack64(rsp + 40 + 32, stack) else load_stack64(rsp + 16, stack); 
-        len128x6        := if win then load_stack64(rsp + 40 + 40, stack) else load_stack64(rsp + 24, stack); 
-        in128_ptr       := if win then load_stack64(rsp + 40 + 48, stack) else load_stack64(rsp + 32, stack); 
-        out128_ptr      := if win then load_stack64(rsp + 40 + 56, stack) else load_stack64(rsp + 40, stack); 
-        len128          := if win then load_stack64(rsp + 40 + 64, stack) else load_stack64(rsp + 48, stack); 
-        inout_ptr       := if win then load_stack64(rsp + 40 + 72, stack) else load_stack64(rsp + 56, stack);
-        plain_num_bytes := if win then load_stack64(rsp + 40 + 80, stack) else load_stack64(rsp + 64, stack);
-        scratch_ptr     := if win then load_stack64(rsp + 40 + 88, stack) else load_stack64(rsp + 72, stack);
-        tag_ptr         := if win then load_stack64(rsp + 40 + 96, stack) else load_stack64(rsp + 80, stack);
+        abytes_ptr      := if win then load_stack64(rsp + 40 + 16, stack) else load_stack64(rsp + 8 + 0, stack); 
+        in128x6_ptr     := if win then load_stack64(rsp + 40 + 24, stack) else load_stack64(rsp + 8 + 8, stack); 
+        out128x6_ptr    := if win then load_stack64(rsp + 40 + 32, stack) else load_stack64(rsp + 8 + 16, stack); 
+        len128x6        := if win then load_stack64(rsp + 40 + 40, stack) else load_stack64(rsp + 8 + 24, stack); 
+        in128_ptr       := if win then load_stack64(rsp + 40 + 48, stack) else load_stack64(rsp + 8 + 32, stack); 
+        out128_ptr      := if win then load_stack64(rsp + 40 + 56, stack) else load_stack64(rsp + 8 + 40, stack); 
+        len128          := if win then load_stack64(rsp + 40 + 64, stack) else load_stack64(rsp + 8 + 48, stack); 
+        inout_ptr       := if win then load_stack64(rsp + 40 + 72, stack) else load_stack64(rsp + 8 + 56, stack);
+        plain_num_bytes := if win then load_stack64(rsp + 40 + 80, stack) else load_stack64(rsp + 8 + 64, stack);
+        scratch_ptr     := if win then load_stack64(rsp + 40 + 88, stack) else load_stack64(rsp + 8 + 72, stack);
+        tag_ptr         := if win then load_stack64(rsp + 40 + 96, stack) else load_stack64(rsp + 8 + 80, stack);
         
     reads memTaint;
     modifies
@@ -680,17 +680,17 @@ procedure {:quick exportOnly}{:public}{:exportSpecs} gcm_blocks_stdcall(
         rsp == init_rsp(stack);
         
         // Valid buffers and pointers
-        !win ==> valid_src_stack64(rsp + 0, stack);
-        !win ==> valid_src_stack64(rsp + 8, stack);
-        !win ==> valid_src_stack64(rsp + 16, stack);
-        !win ==> valid_src_stack64(rsp + 24, stack);
-        !win ==> valid_src_stack64(rsp + 32, stack);
-        !win ==> valid_src_stack64(rsp + 40, stack);
-        !win ==> valid_src_stack64(rsp + 48, stack);
-        !win ==> valid_src_stack64(rsp + 56, stack);
-        !win ==> valid_src_stack64(rsp + 64, stack);        
-        !win ==> valid_src_stack64(rsp + 72, stack);
-        !win ==> valid_src_stack64(rsp + 80, stack);
+        !win ==> valid_src_stack64(rsp + 8 + 0, stack);
+        !win ==> valid_src_stack64(rsp + 8 + 8, stack);
+        !win ==> valid_src_stack64(rsp + 8 + 16, stack);
+        !win ==> valid_src_stack64(rsp + 8 + 24, stack);
+        !win ==> valid_src_stack64(rsp + 8 + 32, stack);
+        !win ==> valid_src_stack64(rsp + 8 + 40, stack);
+        !win ==> valid_src_stack64(rsp + 8 + 48, stack);
+        !win ==> valid_src_stack64(rsp + 8 + 56, stack);
+        !win ==> valid_src_stack64(rsp + 8 + 64, stack);        
+        !win ==> valid_src_stack64(rsp + 8 + 72, stack);
+        !win ==> valid_src_stack64(rsp + 8 + 80, stack);
         
         win ==> valid_src_stack64(rsp + 40 + 0, stack);
         win ==> valid_src_stack64(rsp + 40 + 8, stack);
@@ -911,12 +911,12 @@ procedure {:quick exportOnly}{:public}{:exportSpecs} gcm_blocks_stdcall(
         Load64_stack(r9, rsp, 224 + 40 + 8);
         Load64_stack(rbp, rsp, 224 + 40 + 88);
     } else {
-        Load64_stack(rbp, rsp, 64 + 72);
+        Load64_stack(rbp, rsp, 64 + 8 + 72);
     }
     
 
     gcm_blocks(alg,
-               if win then 224 + 56 else 64,
+               if win then 224 + 56 else 64 + 8,
                auth_b,
                abytes_b,
                in128x6_b,
@@ -933,7 +933,7 @@ procedure {:quick exportOnly}{:public}{:exportSpecs} gcm_blocks_stdcall(
 
 
     // Auth tag is still in xmm1, so save it to memory
-    Load64_stack(r15, rsp, if win then 224 + 40 + 96 else 64 + 80);
+    Load64_stack(r15, rsp, if win then 224 + 40 + 96 else 64 + 8 + 80);
     Store128_buffer(r15, xmm1, 0, Secret, tag_b, 0);
 
     inline if (win) {

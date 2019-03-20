@@ -123,7 +123,7 @@ val gcm128_encrypt:
       8 * (UInt64.v plain_num) < pow2_32 /\
       4096 * 16 * (UInt64.v len128x6) < pow2_32 /\
       4096 * (UInt64.v len128_num) < pow2_32 /\
-      4096 * (UInt64.v auth_num) < pow2_32 /\
+      4096 * (UInt64.v auth_bytes) < pow2_32 /\
 
       UInt64.v len128x6 % 6 == 0 /\
       UInt64.v len128x6 >= 18 /\
