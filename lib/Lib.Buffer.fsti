@@ -27,8 +27,8 @@ type buftype =
 inline_for_extraction
 let buffer_t (ty:buftype) (a:Type0) =
   match ty with
-  | IMMUT -> ib:IB.ibuffer a{B.frameOf ib == HyperStack.root}
-  | MUT -> b:B.buffer a{B.frameOf b <> HyperStack.root}
+  | IMMUT -> ib:IB.ibuffer a
+  | MUT -> b:B.buffer a
 
 (** Mutable buffer *)
 unfold let buffer (a:Type0) = buffer_t MUT a
@@ -40,6 +40,14 @@ let length (#t:buftype) (#a:Type0) (b:buffer_t t a) =
   match t with
   | MUT -> B.length (b <: buffer a)
   | IMMUT -> IB.length (b <: ibuffer a)
+
+let mut_immut_disjoint #t #t' (b: buffer_t MUT t) (ib: buffer_t IMMUT t') (h: HS.mem):
+  Lemma
+    (requires (B.live h b /\ B.live h ib))
+    (ensures (B.disjoint b ib))
+//  [ SMTPat [ B.disjoint b ib; B.live h b ] ]
+=
+  IB.buffer_immutable_buffer_disjoint b ib h
 
 inline_for_extraction
 let lbuffer_t (ty:buftype) (a:Type0) (len:size_t) =
