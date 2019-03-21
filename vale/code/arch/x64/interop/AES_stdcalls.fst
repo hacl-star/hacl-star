@@ -21,3 +21,16 @@ let aes128_key_expansion input_b output_b =
   DV.length_eq (get_downview output_b);
   
   ()
+
+let aes256_key_expansion input_b output_b =
+  let h0 = get() in
+
+  let x, _ = aes256_key_expansion input_b output_b () in
+
+  let h1 = get() in
+
+  aes_simplify2 input_b h0;
+  DV.length_eq (get_downview input_b);
+  DV.length_eq (get_downview output_b);
+  
+  ()
