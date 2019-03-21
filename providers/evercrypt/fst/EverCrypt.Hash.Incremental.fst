@@ -158,7 +158,7 @@ val update_empty_buf:
     (ensures fun h0 s' h1 ->
       update_post a s s' prev data len h0 h1)
 
-#push-options "--z3rlimit 150"
+#set-options "--z3rlimit 50"
 let split_at_last_blocks (a: Hash.alg) (b: bytes) (d: bytes): Lemma
   (requires (
     let blocks, rest = split_at_last a b in
@@ -175,15 +175,59 @@ let split_at_last_blocks (a: Hash.alg) (b: bytes) (d: bytes): Lemma
   let blocks'', rest'' = split_at_last a (S.append b d) in
   let b' = S.append blocks rest in
   let d' = S.append blocks' rest' in
-  assert (S.equal (S.append b' d') (S.append blocks'' rest''));
-  assert (S.equal b' blocks);
-  assert (S.equal (S.append b' d') (S.append (S.append blocks blocks') rest'));
-  assert (S.equal (S.append blocks'' rest'') (S.append (S.append blocks blocks') rest'));
-  assert (S.length b % block_length a = 0);
-  assert (S.length rest' = S.length rest'');
-  Seq.Properties.append_slices (S.append blocks blocks') rest';
-  Seq.Properties.append_slices blocks'' rest''
+  let l = block_length a in
+  calc (S.equal) {
+    rest';
+  (S.equal) { }
+    snd (split_at_last a d);
+  (S.equal) { }
+    S.slice d ((S.length d / l) * l) (S.length d);
+  (S.equal) { }
+    S.slice (S.append b d) (S.length b + (S.length d / l) * l) (S.length b + S.length d);
+  (S.equal) { }
+    S.slice (S.append b d) (S.length b + (S.length d / l) * l) (S.length (S.append b d));
+  (S.equal) { Math.Lemmas.div_exact_r (S.length b) l }
+    // For some reason this doesn't go through with the default rlimit, even
+    // though this is a direct rewriting based on the application of the lemma
+    // above.
+    S.slice (S.append b d) ((S.length b / l) * l + (S.length d / l) * l) (S.length (S.append b d));
+  (S.equal) { Math.Lemmas.distributivity_add_left (S.length b / l) (S.length d / l) l }
+    S.slice (S.append b d) ((S.length b / l + S.length d / l) * l) (S.length (S.append b d));
+  (S.equal) { Math.Lemmas.lemma_div_plus (S.length d) (S.length b / l) l }
+    S.slice (S.append b d) (((S.length b + S.length d) / l) * l) (S.length (S.append b d));
+  (S.equal) { }
+    snd (S.split (S.append b d) (((S.length (S.append b d)) / l) * l));
+  (S.equal) { }
+    rest'';
+  };
 
+  calc (S.equal) {
+    S.append blocks blocks';
+  (S.equal) { (* rest = S.empty *) }
+    S.append (S.append blocks rest) blocks';
+  (S.equal) { }
+    S.append b blocks';
+  (S.equal) { }
+    S.append b (fst (split_at_last a d));
+  (S.equal) { (* definition of split_at_last *) }
+    S.append b (fst (S.split d ((S.length d / l) * l)));
+  (S.equal) { (* definition of split *) }
+    S.append b (S.slice d 0 ((S.length d / l) * l));
+  (S.equal) { }
+    S.slice (S.append b d) 0 (S.length b + (S.length d / l) * l);
+  (S.equal) { Math.Lemmas.div_exact_r (S.length b) l }
+    S.slice (S.append b d) 0 ((S.length b / l) * l + (S.length d / l) * l);
+  (S.equal) { Math.Lemmas.distributivity_add_left (S.length b / l) (S.length d / l) l }
+    S.slice (S.append b d) 0 ((S.length b / l + S.length d / l) * l);
+  (S.equal) { Math.Lemmas.lemma_div_plus (S.length d) (S.length b / l) l }
+    S.slice (S.append b d) 0 (((S.length b + S.length d) / l) * l);
+  (S.equal) { }
+    fst (S.split (S.append b d) (((S.length (S.append b d)) / l) * l));
+  (S.equal) { }
+    blocks'';
+  }
+
+#push-options "--z3rlimit 150"
 let update_empty_buf a s prev data len =
   let State hash_state buf total_len = s in
   let sz = rest a total_len in
