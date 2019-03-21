@@ -30,7 +30,7 @@
         "typing_Spec.Hash.Definitions.word_length"
       ],
       0,
-      "b4b8f1f3b70fdf3e2e646cd6de0e7246"
+      "9f60d69b8e781a8763f42dc643d6abe1"
     ],
     [
       "EverCrypt.HKDF.expand0",
@@ -90,7 +90,7 @@
         "typing_FStar.UInt.max_int", "well-founded-ordering-on-nat"
       ],
       0,
-      "eef013b7e2685aa2d8d44b40f0f2fd64"
+      "c774cb9e855d08000c45bf7e53182968"
     ],
     [
       "EverCrypt.HKDF.expand0",
@@ -112,7 +112,7 @@
         "typing_FStar.Seq.Base.length"
       ],
       0,
-      "2bafad33f58edef587bd8bdb2d1a5ae5"
+      "10b11dc30026a5b689a0cd8c9ffd5766"
     ],
     [
       "EverCrypt.HKDF.expand0",
@@ -139,7 +139,7 @@
         "typing_FStar.Seq.Base.length"
       ],
       0,
-      "62133095d4a0187dee3d237d88c2609e"
+      "87cd6ea7993d0375469dc97f80a3b15f"
     ],
     [
       "EverCrypt.HKDF.expand",
@@ -151,7 +151,7 @@
         "refinement_interpretation_Tm_refine_561b19b989af62ac06ac97d973d1c77c"
       ],
       0,
-      "6182659f9a76610916bb6369abe60bef"
+      "deb2090dfac02fa77bf6110af950fe57"
     ],
     [
       "EverCrypt.HKDF.expand",
@@ -160,7 +160,7 @@
       1,
       [ "@query" ],
       0,
-      "973b6c19f6fc5ee7d5ed774ff50e893e"
+      "9cceee44989ec467f53baf159f8ea4c4"
     ],
     [
       "EverCrypt.HKDF.hkdf_expand_loop",
@@ -268,7 +268,7 @@
         "typing_tok_FStar.Integers.W32@tok"
       ],
       0,
-      "55d1175cc84a950543ae090a1197adfc"
+      "dce58bc7e436409b2eb33a9efd47d4da"
     ],
     [
       "EverCrypt.HKDF.hkdf_expand_loop",
@@ -316,7 +316,7 @@
         "typing_FStar.UInt32.v", "typing_Spec.Hash.Definitions.word_length"
       ],
       0,
-      "f87b07204c9ae1cd9572badb2865a8e2"
+      "830c843526b4a4adffd5c1ab32cb5657"
     ],
     [
       "EverCrypt.HKDF.hkdf_expand_loop",
@@ -433,6 +433,7 @@
         "lemma_LowStar.Monotonic.Buffer.fresh_frame_loc_not_unused_in_disjoint",
         "lemma_LowStar.Monotonic.Buffer.fresh_frame_modifies",
         "lemma_LowStar.Monotonic.Buffer.gsub_gsub",
+        "lemma_LowStar.Monotonic.Buffer.gsub_is_null",
         "lemma_LowStar.Monotonic.Buffer.len_gsub",
         "lemma_LowStar.Monotonic.Buffer.length_as_seq",
         "lemma_LowStar.Monotonic.Buffer.length_null_1",
@@ -447,7 +448,6 @@
         "lemma_LowStar.Monotonic.Buffer.loc_disjoint_union_r_",
         "lemma_LowStar.Monotonic.Buffer.loc_includes_addresses_addresses_2",
         "lemma_LowStar.Monotonic.Buffer.loc_includes_addresses_buffer_",
-        "lemma_LowStar.Monotonic.Buffer.loc_includes_gsub_buffer_l",
         "lemma_LowStar.Monotonic.Buffer.loc_includes_gsub_buffer_r",
         "lemma_LowStar.Monotonic.Buffer.loc_includes_gsub_buffer_r_",
         "lemma_LowStar.Monotonic.Buffer.loc_includes_none",
@@ -493,7 +493,6 @@
         "refinement_interpretation_Tm_refine_528d1ac7a4a801fe55aa0f436f85ad2a",
         "refinement_interpretation_Tm_refine_5514fbe9e08dfda40f950a7b9f1b2b98",
         "refinement_interpretation_Tm_refine_559c261b1c3777929ea329abfe70ab33",
-        "refinement_interpretation_Tm_refine_5d995b9a639fc9d6540d18a048edd573",
         "refinement_interpretation_Tm_refine_6c25b42778726de94cd4dac42edb4860",
         "refinement_interpretation_Tm_refine_6c5b5bfca8736b34d6f700f752d1df10",
         "refinement_interpretation_Tm_refine_6d4b9796ae7c389d6e22c2a5094daacb",
@@ -526,10 +525,9 @@
         "typing_FStar.Monotonic.HyperStack.live_region",
         "typing_FStar.Monotonic.HyperStack.remove_elt",
         "typing_FStar.Seq.Base.create", "typing_FStar.Seq.Base.empty",
-        "typing_FStar.Seq.Base.length", "typing_FStar.Seq.Base.op_At_Bar",
-        "typing_FStar.Seq.Base.slice", "typing_FStar.Set.complement",
-        "typing_FStar.Set.singleton", "typing_FStar.Set.union",
-        "typing_FStar.UInt.fits", "typing_FStar.UInt.lte",
+        "typing_FStar.Seq.Base.op_At_Bar", "typing_FStar.Set.complement",
+        "typing_FStar.Set.mem", "typing_FStar.Set.singleton",
+        "typing_FStar.Set.union", "typing_FStar.UInt.fits",
         "typing_FStar.UInt32.add", "typing_FStar.UInt32.sub",
         "typing_FStar.UInt32.uint_to_t", "typing_FStar.UInt32.v",
         "typing_FStar.UInt8.add", "typing_FStar.UInt8.v",
@@ -548,7 +546,7 @@
         "typing_LowStar.Monotonic.Buffer.loc_not_unused_in",
         "typing_LowStar.Monotonic.Buffer.loc_regions",
         "typing_LowStar.Monotonic.Buffer.loc_union",
-        "typing_LowStar.Monotonic.Buffer.mgsub",
+        "typing_LowStar.Monotonic.Buffer.mgsub", "typing_Prims.pow2",
         "typing_Spec.Hash.Definitions.hash_length",
         "typing_Spec.Hash.Definitions.word_length",
         "typing_tok_Spec.Hash.Definitions.SHA1@tok",
@@ -557,7 +555,7 @@
         "typing_tok_Spec.Hash.Definitions.SHA2_512@tok"
       ],
       0,
-      "96df128ec03180ffc47290ebd07f0ea7"
+      "19cf9d7eb5def0836e2d3a8df75a2a36"
     ],
     [
       "EverCrypt.HKDF.hkdf_extract",
@@ -604,7 +602,7 @@
         "typing_Spec.Hash.Definitions.word_length"
       ],
       0,
-      "93d4f7b7c8f9e24b656c5dd3469d49b5"
+      "fb5c5f3c20f614323580b2cd8f4f2c8f"
     ],
     [
       "EverCrypt.HKDF.hkdf_extract",
@@ -631,7 +629,7 @@
         "refinement_interpretation_EverCrypt.HMAC_Tm_refine_ebffc3f6e29e8ccae641682a151feefa"
       ],
       0,
-      "e158a8c63943e6632102e3a3fae52934"
+      "87d9f5f792ed23a8f25bece31ffba622"
     ],
     [
       "EverCrypt.HKDF.hkdf_extract",
@@ -647,7 +645,7 @@
         "refinement_interpretation_EverCrypt.Helpers_Tm_refine_156677950ba130498d26fd9f8eb20439"
       ],
       0,
-      "528d998d502ecb3e7b1839c60378eeb4"
+      "9e0870f819e36889710650104d6aacba"
     ],
     [
       "EverCrypt.HKDF.hkdf_expand",
@@ -700,7 +698,7 @@
         "typing_Spec.Hash.Definitions.word_length"
       ],
       0,
-      "14feb12b711b015caf33289ee4034099"
+      "1da5d0052c43b2b9eea2f72556312176"
     ],
     [
       "EverCrypt.HKDF.hkdf_expand",
@@ -721,7 +719,7 @@
         "projection_inverse_FStar.Integers.Signed__0"
       ],
       0,
-      "a150a0f797f5a60a5e32fa61999315dd"
+      "6ca79c9d58f1d35bb02a8d4a744d7db6"
     ],
     [
       "EverCrypt.HKDF.hkdf_expand",
@@ -897,7 +895,7 @@
         "typing_Spec.Hash.Definitions.word_length"
       ],
       0,
-      "79a3f046ebc63d0e5574464e7064717f"
+      "c39f6616e9133e90478e225522320ff9"
     ]
   ]
 ]
