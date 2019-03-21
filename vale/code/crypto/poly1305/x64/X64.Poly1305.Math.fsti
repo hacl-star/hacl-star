@@ -146,12 +146,9 @@ val lemma_add_mod128 (x y :int) : Lemma
   (requires True)
   (ensures mod2_128 ((mod2_128 x) + y) == mod2_128 (x + y))
 
-let modp_0 () : Lemma
+val modp_0 (_:unit) : Lemma
   (requires True)
   (ensures modp 0 == 0)
-    =
-    reveal_opaque modp';
-    ()
 
 let bare_r (key_r:nat128) : nat128 = iand key_r 0x0ffffffc0ffffffc0ffffffc0fffffff
 
