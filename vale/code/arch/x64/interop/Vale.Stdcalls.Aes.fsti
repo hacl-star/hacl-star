@@ -22,7 +22,7 @@ module VS = X64.Vale.State
 module MS = X64.Machine_s
 open AES_s
 
-module AES = X64.AES
+module AE = X64.AES
 
 let uint64 = UInt64.t
 
@@ -52,7 +52,7 @@ let key128_pre : VSig.vale_pre dom =
     (input_b:b128)
     (output_b:b128)
     (va_s0:V.va_state) ->
-      AES.va_req_KeyExpansionStdcall c va_s0 IA.win AES_128
+      AE.va_req_KeyExpansionStdcall c va_s0 IA.win AES_128
         (as_vale_buffer input_b) (as_vale_buffer output_b)
 
 [@__reduce__] noextract
@@ -63,7 +63,7 @@ let key128_post : VSig.vale_post dom =
     (va_s0:V.va_state)
     (va_s1:V.va_state)
     (f:V.va_fuel) ->
-      AES.va_ens_KeyExpansionStdcall c va_s0 IA.win AES_128 (as_vale_buffer input_b) (as_vale_buffer output_b) va_s1 f
+      AE.va_ens_KeyExpansionStdcall c va_s0 IA.win AES_128 (as_vale_buffer input_b) (as_vale_buffer output_b) va_s1 f
 
 #set-options "--z3rlimit 20"
 
@@ -84,7 +84,7 @@ let key128_lemma'
        ME.buffer_writeable (as_vale_buffer input_b) /\ 
        ME.buffer_writeable (as_vale_buffer output_b)
  )) = 
-   let va_s1, f = AES.va_lemma_KeyExpansionStdcall code va_s0 IA.win AES_128
+   let va_s1, f = AE.va_lemma_KeyExpansionStdcall code va_s0 IA.win AES_128
      (as_vale_buffer input_b) (as_vale_buffer output_b) in
    Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt8 ME.TUInt128 input_b;   
    Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt8 ME.TUInt128 output_b;   
@@ -94,7 +94,7 @@ noextract
 let key128_lemma = as_t #(VSig.vale_sig_stdcall key128_pre key128_post) key128_lemma'
 
 noextract
-let code_key128 = AES.va_code_KeyExpansionStdcall IA.win AES_128
+let code_key128 = AE.va_code_KeyExpansionStdcall IA.win AES_128
 
 [@__reduce__] noextract
 let lowstar_key128_t =
@@ -116,7 +116,7 @@ let key256_pre : VSig.vale_pre dom =
     (input_b:b128)
     (output_b:b128)
     (va_s0:V.va_state) ->
-      AES.va_req_KeyExpansionStdcall c va_s0 IA.win AES_256
+      AE.va_req_KeyExpansionStdcall c va_s0 IA.win AES_256
         (as_vale_buffer input_b) (as_vale_buffer output_b)
 
 [@__reduce__] noextract
@@ -127,7 +127,7 @@ let key256_post : VSig.vale_post dom =
     (va_s0:V.va_state)
     (va_s1:V.va_state)
     (f:V.va_fuel) ->
-      AES.va_ens_KeyExpansionStdcall c va_s0 IA.win AES_256 (as_vale_buffer input_b) (as_vale_buffer output_b) va_s1 f
+      AE.va_ens_KeyExpansionStdcall c va_s0 IA.win AES_256 (as_vale_buffer input_b) (as_vale_buffer output_b) va_s1 f
 
 #set-options "--z3rlimit 20"
 
@@ -148,7 +148,7 @@ let key256_lemma'
        ME.buffer_writeable (as_vale_buffer input_b) /\ 
        ME.buffer_writeable (as_vale_buffer output_b)
  )) = 
-   let va_s1, f = AES.va_lemma_KeyExpansionStdcall code va_s0 IA.win AES_256
+   let va_s1, f = AE.va_lemma_KeyExpansionStdcall code va_s0 IA.win AES_256
      (as_vale_buffer input_b) (as_vale_buffer output_b) in
    Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt8 ME.TUInt128 input_b;   
    Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt8 ME.TUInt128 output_b;   
@@ -158,7 +158,7 @@ noextract
 let key256_lemma = as_t #(VSig.vale_sig_stdcall key256_pre key256_post) key256_lemma'
 
 noextract
-let code_key256 = AES.va_code_KeyExpansionStdcall IA.win AES_256
+let code_key256 = AE.va_code_KeyExpansionStdcall IA.win AES_256
 
 [@__reduce__] noextract
 let lowstar_key256_t =
