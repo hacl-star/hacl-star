@@ -1,5 +1,5 @@
 [
-  "Ójâ˜Ê ’‘X£Ùþm$\fÓ",
+  "5 —PÑ6\u0016ì‹ÐãAÂ!Aä",
   [
     [
       "EverCrypt.AEAD.frozen_preorder",
@@ -15,7 +15,7 @@
         "l_imp-interp"
       ],
       0,
-      "f736066cbebd412dfbc689fe993c70d5"
+      "c6a01e847373435e4336159b02b99436"
     ],
     [
       "EverCrypt.AEAD.expand_or_dummy",
@@ -27,7 +27,7 @@
         "projection_inverse_BoxBool_proj_0"
       ],
       0,
-      "192e2c4ce2204205306befd612720308"
+      "58a52f62ea18d39e693eb041b9f0f2ce"
     ],
     [
       "EverCrypt.AEAD.__proj__EK__item__ek",
@@ -41,7 +41,7 @@
         "refinement_interpretation_Tm_refine_3db8709c78401853d88d34765f54bab3"
       ],
       0,
-      "a8a4600fc88a48978fd1fd9a3dea829d"
+      "01a7e67c7fb0310f7902ec90235a3c7e"
     ],
     [
       "EverCrypt.AEAD.expand_in",
@@ -56,7 +56,7 @@
         "refinement_interpretation_Tm_refine_a0cd7d06c5da6444b6b51b319febde8e"
       ],
       0,
-      "2a6193e969d671a94aebdce75a593e3e"
+      "92a64a7f5a0b5ec33b7912c764df6be0"
     ],
     [
       "EverCrypt.AEAD.iv_p",
@@ -65,16 +65,16 @@
       1,
       [ "@query" ],
       0,
-      "3aa2971e6de7395bfe8484c3cd8dfa6b"
+      "5da2a0e74de9ae6f17666f8b748dcc1c"
     ],
     [
-      "EverCrypt.AEAD.uu___317",
+      "EverCrypt.AEAD.uu___338",
       1,
       0,
       0,
       [ "@query" ],
       0,
-      "e46aafdadbd41837833718cb952c3196"
+      "153214444b67065fb1dabdbcfa0f23d0"
     ],
     [
       "EverCrypt.AEAD.encrypt",
@@ -123,7 +123,7 @@
         "typing_Spec.AEAD.is_supported_alg"
       ],
       0,
-      "a37424c2cbf89bf7b1f3af8011e46408"
+      "7428a2a9905c0cb3faf3f375f9bdd379"
     ],
     [
       "EverCrypt.AEAD.decrypt",
@@ -131,7 +131,8 @@
       0,
       0,
       [
-        "@MaxIFuel_assumption", "@query", "bool_inversion",
+        "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565", "bool_inversion",
         "constructor_distinct_FStar.Integers.Signed",
         "constructor_distinct_FStar.Integers.Unsigned",
         "constructor_distinct_FStar.Integers.W8",
@@ -156,6 +157,7 @@
         "fuel_guarded_inversion_EverCrypt.AEAD.expanded_key",
         "function_token_typing_FStar.Integers.uint_8",
         "function_token_typing_FStar.UInt8.t",
+        "function_token_typing_Prims.__cache_version_number__",
         "function_token_typing_Prims.int", "inversion-interp",
         "lemma_LowStar.Monotonic.Buffer.length_as_seq",
         "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
@@ -174,7 +176,7 @@
         "typing_Spec.AEAD.is_supported_alg"
       ],
       0,
-      "6e3791453f4c2b8f01681bf2431b9a54"
+      "33085e09e9c3db3185717f0df6478403"
     ]
   ]
 ]
