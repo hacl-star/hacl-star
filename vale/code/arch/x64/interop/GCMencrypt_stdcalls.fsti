@@ -29,6 +29,7 @@ let length_aux2 (b:uint8_p) : Lemma
     let db = get_downview b in
     DV.length_eq db
 
+inline_for_extraction
 val gcm128_encrypt:
   key:Ghost.erased (Seq.seq nat32) ->
   plain_b:uint8_p ->
@@ -90,6 +91,7 @@ val gcm128_encrypt:
        Seq.equal (seq_uint8_to_seq_nat8 (B.as_seq h1 tag_b)) tag)
     )
 
+inline_for_extraction
 val gcm256_encrypt:
   key:Ghost.erased (Seq.seq nat32) ->
   plain_b:uint8_p ->

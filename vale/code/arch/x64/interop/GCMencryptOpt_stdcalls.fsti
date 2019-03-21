@@ -55,6 +55,7 @@ let length_aux5 (b:uint8_p) : Lemma
     let db = get_downview b in
     DV.length_eq db
 
+inline_for_extraction
 val gcm128_encrypt:
   key:Ghost.erased (Seq.seq nat32) ->
   auth_b:uint8_p ->

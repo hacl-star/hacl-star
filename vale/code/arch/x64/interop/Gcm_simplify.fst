@@ -169,3 +169,29 @@ let gcm_simplify3 b h =
   assert (DV.length (get_downview b) / 16 = 1);
   simplify_be_quad32 (low_buffer_read TUInt8 TUInt128 h b 0);
   gcm_simplify2 b h
+
+let aes_simplify_aux (s:seq16 nat8) : Lemma
+  (seq_nat8_to_seq_nat32_LE s == quad32_to_seq (le_bytes_to_quad32 s))
+  = Opaque_s.reveal_opaque le_bytes_to_quad32_def;
+    assert (Seq.equal (seq_nat8_to_seq_nat32_LE s) (quad32_to_seq (le_bytes_to_quad32 s)))
+
+let aes_simplify1 b h =
+  let view = Views.up_view128 in
+  let s_init = B.as_seq h b in
+  let db = get_downview b in
+  let s_down = DV.as_seq h db in
+  DV.length_eq db;
+  assert (DV.length (get_downview b) / 16 = 1);
+  let b_v = UV.mk_buffer db view in
+  UV.length_eq b_v;  
+  UV.get_sel h b_v 0;
+  let aux (i:nat{i < B.length b}) : Lemma (Seq.index s_init i == Seq.index s_down i) =
+    DV.as_seq_sel h db i;
+    DV.get_sel h db i;
+    Opaque_s.reveal_opaque Views.get8_def
+  in Classical.forall_intro aux;
+  assert (Seq.equal (DV.as_seq h db) (B.as_seq h b));
+  assert (quad32_to_seq (low_buffer_read TUInt8 TUInt128 h b 0) ==
+    four_to_seq_LE (Views.get128 (B.as_seq h b)));
+  Opaque_s.reveal_opaque Views.get128_def;
+  aes_simplify_aux (seq_uint8_to_seq_nat8 s_init)
