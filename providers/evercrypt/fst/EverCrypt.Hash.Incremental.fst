@@ -382,7 +382,7 @@ let update a s prev data len =
 inline_for_extraction noextract
 val mk_finish: a:Hash.alg -> finish_st a
 
-#reset-options "--z3rlimit 300 --max_fuel 0 --max_ifuel 0"
+#reset-options "--z3rlimit 350 --max_fuel 0 --max_ifuel 0"
 inline_for_extraction noextract
 let mk_finish a s prev dst =
   let h0 = ST.get () in
@@ -458,6 +458,7 @@ let mk_finish a s prev dst =
   B.modifies_remove_fresh_frame h0 h1 h6 mloc;
   B.popped_modifies h5 h6;
   assert (B.(modifies mloc h0 h6))
+
   // So much for automated proofs.
 
 /// The wrapper pattern, to ensure that the stack-allocated state is properly
