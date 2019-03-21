@@ -38,11 +38,9 @@ EverCrypt meets or beats the performance of most existing cryptographic implemen
 and for certain targeted platforms meets or beats the performance of state-of-the-art
 libraries that rely on hand-tuned assembly code.
 
-Portions of EverCrypt are being used in [Firefox][Hacl-Firefox], the Windows kernel,
-the [Tezos blockchain][Hacl-Tezos], and the [Wireguard VPN][Hacl-Wireguard].
-
-This repository brings together several components of [Project Everest],
-which aims to build and deploy a verified HTTPS stack.
+Portions of EverCrypt are being used in [Firefox](https://bugzilla.mozilla.org/show_bug.cgi?id=1387183), the Windows kernel,
+the [Tezos blockchain](https://www.reddit.com/r/tezos/comments/8hrsz2/tezos_switches_cryptographic_libraries_from/),
+and the [Wireguard VPN](https://lwn.net/Articles/770750/).
 
 # Algorithms Supported by EverCrypt
 
@@ -69,12 +67,12 @@ which aims to build and deploy a verified HTTPS stack.
 |                 |                          |                            |           |
 | Poly1305        | ✔︎⁶ (+ AVX + AVX2)        | ✔︎ (X64)                    |           |
 
-¹: does not multiplex (yet) over the underlying Poly1305 implementation
-²: insecure algorithms provided for legacy interop purposes
-³: SHA2-256 only; SHA2-224, SHA2-384 and SHA2-512 are pure C
+¹: does not multiplex (yet) over the underlying Poly1305 implementation  
+²: insecure algorithms provided for legacy interop purposes  
+³: SHA2-256 only; SHA2-224, SHA2-384 and SHA2-512 are pure C  
 ⁴: HMAC and HKDF on top of the agile hash API, so HMAC-SHA2-256 and
-   HKDF-SHA2-256 leverage the assembly version under the hood
-⁵: legacy implementation
+   HKDF-SHA2-256 leverage the assembly version under the hood  
+⁵: legacy implementation  
 ⁶: achieved via C compiler intrinsincs
 
 # Building or Integrating EverCrypt
@@ -93,13 +91,13 @@ corresponds to a particular flavor of generated C code.
 | compact-c89³  | ✔︎        | ✔︎    | ✔︎            |
 | generic⁴      | ✔︎        |      |              |
 
-¹: x86-64 only: assumes `unsigned __int128`
+¹: x86-64 only: assumes `unsigned __int128`  
 ²: relies on `alloca` to avoid C11 VLA for the sake of MSVC; relies on KreMLin
    for tail-call optimizations; relies on an unverified uint128 implementation
-   using compiler intrinsics for MSVC
+   using compiler intrinsics for MSVC  
 ³: relies on `alloca`; eliminates compound literals and enforces C89 scope to
    generate syntactically C89-compliant code; code still relies on inttypes.h
-   and other headers that you may have to provide depending on your target
+   and other headers that you may have to provide depending on your target  
 ⁴: compact variants minimize the amount of C files; the generic variant does not
 
 ## Integrating EverCrypt
@@ -203,8 +201,8 @@ All F\* source code is released under Apache 2.0.
 
 All generated assembly, C, OCaml, Javascript, and Web Assembly code is released under MIT.
 
-[INRIA Paris](https://www.inria.fr/en/centre/paris)
-[Prosecco](http://prosecco.inria.fr)
+[INRIA Paris]: https://www.inria.fr/en/centre/paris
+[Prosecco]: http://prosecco.inria.fr
 [F\*]: https://github.com/FStarLang/FStar
 [KreMLin]: https://github.com/FStarLang/kremlin
 [miTLS]: https://github.com/mitls/mitls-fstar
