@@ -49,6 +49,15 @@ let expand_or_dummy (a: alg) (kv: G.erased (kv_or_dummy a)) =
   else
     S.empty
 
+/// A well-formedness predicate for expanded keys, that captures everything the
+/// encrypt/decrypt functions will need to know or recall later on.
+unfold
+let wf #rel a (ek: MB.mbuffer UInt8.t rel rel) s =
+  (not (MB.g_is_null ek) ==> MB.witnessed ek (S.equal s)) /\
+  (not (MB.g_is_null ek) /\ (a == AES128_GCM \/ a == AES256_GCM) ==>
+    EverCrypt.TargetConfig.x64 /\ X64.CPU_Features_s.(aesni_enabled /\ pclmulqdq_enabled))
+
+
 /// This type, following several rounds of optimization by KreMLin, will extract
 /// to a regular pointer type. A NULL pointer indicates an invalid expanded key.
 noeq
@@ -60,7 +69,7 @@ type expanded_key (a: alg) =
     let s = expand_or_dummy a kv in
     [@ inline_let ]
     let p = frozen_preorder s in
-    ek:MB.mbuffer UInt8.t p p { not (MB.g_is_null ek) ==> MB.witnessed ek (S.equal s) }) ->
+    ek:MB.mbuffer UInt8.t p p { wf a ek s }) ->
     expanded_key a
 
 /// When successful, this function returns a non-NULL pointer that has been

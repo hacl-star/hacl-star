@@ -28,13 +28,16 @@ let expand_in #a r k =
   | AES128_GCM | AES256_GCM ->
       let h0 = ST.get () in
       let kv: G.erased (kv a) = G.hide (B.as_seq h0 k) in
-      if EverCrypt.TargetConfig.x64 then
+      let has_aesni = EverCrypt.AutoConfig2.has_aesni () in
+      let has_pclmulqdq = EverCrypt.AutoConfig2.has_pclmulqdq () in
+      if EverCrypt.TargetConfig.x64 && (has_aesni && has_pclmulqdq) then
         let ek =
           MB.mmalloc #UInt8.t #(frozen_preorder (expand #a (G.reveal kv))) r 0uy (ekv_len a)
         in
         admit () // waiting for interop wrappers
       else
         EK kv MB.mnull
+
   | CHACHA20_POLY1305 ->
       let h0 = ST.get () in
       let kv: G.erased (kv a) = G.hide (B.as_seq h0 k) in
@@ -45,16 +48,35 @@ let expand_in #a r k =
       assert (B.as_seq h2 ek == B.as_seq h0 k);
       MB.witness_p ek (S.equal (G.reveal kv));
       EK kv ek
+
   | _ ->
       EK (G.hide (S.empty #UInt8.t)) MB.mnull
 
-#set-options "--z3rlimit 100"
+#set-options "--z3rlimit 50"
 let encrypt #a ek iv ad ad_len plain plain_len dst =
   if MB.is_null (EK?.ek ek) then
     InvalidKey
   else match a with
   | AES128_GCM | AES256_GCM ->
+      // From the well-formedness invariant: the only implementation we
+      // (currently) know how to use on X64 is Vale's. In the future, we will
+      // have to either:
+      // - have a run-time representation of expanded keys that is uniform
+      //   (preferred), or
+      // - add a run-time tag that indicates which implementation we're running
+      //   with (and cover that with the wf invariant).
+      MB.recall_p (EK?.ek ek) (S.equal (expand_or_dummy a (EK?.kv ek)));
+      assert (EverCrypt.TargetConfig.x64 /\ X64.CPU_Features_s.(aesni_enabled /\ pclmulqdq_enabled));
+      assert (is_supported_alg a /\ not (MB.g_is_null (EK?.ek ek)));
+
+      assert (
+        let k = G.reveal (EK?.kv ek) in
+        let k_nat = Words.Seq_s.seq_uint8_to_seq_nat8 k in
+        let k_w = Words.Seq_s.seq_nat8_to_seq_nat32_LE k_nat in
+        AES_s.is_aes_key_LE (vale_alg_of_alg a) k_w);
+
       admit ()
+
   | CHACHA20_POLY1305 ->
       // Monotonicity; gives us proper length for ek while we're at it.
       MB.recall_p (EK?.ek ek) (S.equal (expand_or_dummy a (EK?.kv ek)));
@@ -75,3 +97,11 @@ let encrypt #a ek iv ad ad_len plain plain_len dst =
         tmp iv ad_len ad plain_len plain dst;
       pop_frame ();
       Success
+
+
+let decrypt #a ek iv ad ad_len cipher cipher_len dst =
+  if MB.is_null (EK?.ek ek) then
+    InvalidKey
+
+  else
+    admit ()
