@@ -63,7 +63,7 @@ and the [Wireguard VPN](https://lwn.net/Articles/770750/).
 |                 |                          |                            |           |
 | Chacha20        | ✔︎                        |                            |           |
 | AES128, 256     |                          | ✔︎ (AES NI + PCLMULQDQ)     |           |
-| AES CTR         | ✔︎                        | ✔︎ (AES NI + PCLMULQDQ)     |           |
+| AES CTR         |                          | ✔︎ (AES NI + PCLMULQDQ)     |           |
 |                 |                          |                            |           |
 | Poly1305        | ✔︎⁶ (+ AVX + AVX2)        | ✔︎ (X64)                    |           |
 
@@ -132,7 +132,10 @@ Using the Everest script is the easiest approach.
 ```bash
 $ git clone https://github.com/project-everest/everest/
 $ cd everest
+$ ./everest check
+$ # Keep trying everest check until all requirements are met
 $ ./everest pull
+$ # Follow suggestions and export FSTAR_HOME, KREMLIN_HOME, HACL_HOME
 $ ./everest FStar make kremlin make
 $ # At this stage all dependencies have been fetched and built
 $ cd hacl-star
