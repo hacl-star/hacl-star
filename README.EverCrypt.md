@@ -215,19 +215,44 @@ Karthikeyan Bhargavan, Antoine Delignat-Lavaud, Cedric Fournet, Markulf
 Kohlweiss, Jianyang Pan, Jonathan Protzenko, Aseem Rastogi, Nikhil Swamy,
 Santiago Zanella-Beguelin, Jean-Karim Zinzindohoue
 
+# Components of EverCrypt
+EverCrypt brings together several components of [Project Everest],
+which aims to build and deploy a verified HTTPS stack.
+
+## HACL\*: Verified C-level Cryptographic Code
+
+[HACL\*](README.HACL.md), the High-Assurance Cryptographic Library,
+is a formally verified cryptographic library providing efficient implementations
+of popular algorithms; it compiles to C, using the [KreMLin] compiler.
+
+## Vale: Verified Cryptographic Assembly Code
+
+[Vale] (Verified Assembly Language for Everest) is a tool for constructing
+formally verified high-performance assembly language code, with an emphasis on
+cryptographic code.  It supports multiple architectures, such as x86, x64, and
+ARM, and multiple platforms, such as Windows, Mac, and Linux. Additional
+architectures and platforms can be supported with no changes to the Vale tool.
+
+## Verification Tools
+
+EverCrypt is developed in [F\*], a programming language with support for
+program verification. To implement efficient, low-level, optimized code,
+EverCrypt relies on [Low\*], a subset of F\*.  Programs written in Low\* compile
+to readable, idiomatic C code using the [KreMLin] compiler.
+
 # Research
 
 The HACL\* library:
-- [HACL\*: A Verified Modern Cryptographic Library](http://eprint.iacr.org/2017/536)
-  Jean-Karim Zinzindohoué, Karthikeyan Bhargavan, Jonathan Protzenko, Benjamin Beurdouche
-- [A verified extensible library of elliptic curves](https://hal.inria.fr/hal-01425957)
-  Jean Karim Zinzindohoué, Evmorfia-Iro Bartzia, Karthikeyan Bhargavan
+- [HACL\*: A Verified Modern Cryptographic Library](http://eprint.iacr.org/2017/536)  
+Jean-Karim Zinzindohoué, Karthikeyan Bhargavan, Jonathan Protzenko, Benjamin Beurdouche
+- [A Verified Extensible Library of Elliptic Curves](https://hal.inria.fr/hal-01425957)  
+Jean Karim Zinzindohoué, Evmorfia-Iro Bartzia, Karthikeyan Bhargavan
 - The origins of HACL\* can be found in the [Ph.D. thesis of Jean Karim
   Zinzindohoué](https://www.theses.fr/s175861), and its design is 
   inspired by discussions at the [HACS series of workshops](https://github.com/HACS-workshop). 
 
 The Low\* verification technology:
-- [Verified Low-Level Programming Embedded in F\*](https://arxiv.org/abs/1703.00053)
+- [Verified Low-Level Programming Embedded in F\*](https://arxiv.org/abs/1703.00053)  
   Jonathan Protzenko, Jean-Karim Zinzindohoué, Aseem Rastogi, Tahina
   Ramananandro, Peng Wang, Santiago Zanella-Béguelin, Antoine Delignat-Lavaud,
   Cătălin Hriţcu, Karthikeyan Bhargavan, Cédric Fournet, and Nikhil Swamy
@@ -250,6 +275,7 @@ All generated assembly, C, OCaml, Javascript, and Web Assembly code is released 
 [INRIA Paris]: https://www.inria.fr/en/centre/paris
 [Prosecco]: http://prosecco.inria.fr
 [F\*]: https://github.com/FStarLang/FStar
+[Low\*]: https://arxiv.org/abs/1703.00053
 [KreMLin]: https://github.com/FStarLang/kremlin
 [miTLS]: https://github.com/mitls/mitls-fstar
 [NaCl API]: https://nacl.cr.yp.to
