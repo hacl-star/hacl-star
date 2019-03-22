@@ -231,7 +231,7 @@ let vale_aes128_gcm_encrypt xkey (iv:uint8_p) (ad:uint8_p) (adlen:uint32_t)
     cipher = cipher';
     tag = tag
   }) 1ul in
-  Vale.gcm128_encrypt_old b;
+  Vale.old_gcm128_encrypt b;
   blit cipher' 0ul cipher 0ul len;
   pop_frame ()
 
@@ -257,7 +257,7 @@ let vale_aes128_gcm_decrypt xkey (iv:uint8_p) (ad:uint8_p) (adlen:uint32_t)
     cipher = plaintext';
     tag = tag
   }) 1ul in
-  let ret = Vale.gcm128_decrypt b in
+  let ret = Vale.old_gcm128_decrypt b in
   blit plaintext' 0ul plaintext 0ul len;
   pop_frame ();
   if ret = 0ul then 1ul else 0ul
@@ -266,7 +266,7 @@ let aes128_gcm_encrypt key iv ad adlen plaintext len cipher tag =
   if vale_and_aesni () then begin
     push_frame ();
     let expanded = B.alloca 0uy 176ul in
-    Vale.aes128_key_expansion key expanded;
+    Vale.old_aes128_key_expansion key expanded;
     vale_aes128_gcm_encrypt expanded iv ad adlen plaintext len cipher tag;
     pop_frame ()
   end
@@ -282,7 +282,7 @@ let aes128_gcm_decrypt key iv ad adlen plaintext len cipher tag =
    begin
     push_frame ();
     let expanded = B.alloca 0uy 176ul in
-    Vale.aes128_key_expansion key expanded;
+    Vale.old_aes128_key_expansion key expanded;
     let r = vale_aes128_gcm_decrypt expanded iv ad adlen plaintext len cipher tag in
     pop_frame ();
     r
@@ -319,7 +319,7 @@ let vale_aes256_gcm_encrypt xkey (iv:uint8_p) (ad:uint8_p) (adlen:uint32_t)
     cipher = cipher';
     tag = tag
   }) 1ul in
-  Vale.gcm256_encrypt_old b;
+  Vale.old_gcm256_encrypt_old b;
   blit cipher' 0ul cipher 0ul len;
   pop_frame ()
 
@@ -345,7 +345,7 @@ let vale_aes256_gcm_decrypt xkey (iv:uint8_p) (ad:uint8_p) (adlen:uint32_t)
     cipher = plaintext';
     tag = tag
   }) 1ul in
-  let ret = Vale.gcm256_decrypt b in
+  let ret = Vale.old_gcm256_decrypt b in
   blit plaintext' 0ul plaintext 0ul len;
   pop_frame ();
   if ret = 0ul then 1ul else 0ul
@@ -354,7 +354,7 @@ let aes256_gcm_encrypt key iv ad adlen plaintext len cipher tag =
   if vale_and_aesni () then begin
     push_frame ();
     let expanded = B.alloca 0uy 240ul in
-    Vale.aes256_key_expansion key expanded;
+    Vale.old_aes256_key_expansion key expanded;
     vale_aes256_gcm_encrypt expanded iv ad adlen plaintext len cipher tag;
     pop_frame ()
   end
@@ -369,7 +369,7 @@ let aes256_gcm_decrypt key iv ad adlen plaintext len cipher tag =
   if vale_and_aesni () then begin
     push_frame ();
     let expanded = B.alloca 0uy 240ul in
-    Vale.aes256_key_expansion key expanded;
+    Vale.old_aes256_key_expansion key expanded;
     let r = vale_aes256_gcm_decrypt expanded iv ad adlen plaintext len cipher tag in
     pop_frame ();
     r
@@ -417,7 +417,7 @@ let aead_create alg k =
     | AES128_GCM ->
       if vale_and_aesni () then
         let xk = B.malloc HS.root 0uy 176ul in
-        Vale.aes128_key_expansion k xk;
+        Vale.old_aes128_key_expansion k xk;
         AEAD_AES128_GCM_VALE xk
       else if bcrypt () then
         AEAD_BCRYPT (BCrypt.aead_create BCrypt.AES128_GCM k)
@@ -428,7 +428,7 @@ let aead_create alg k =
     | AES256_GCM ->
       if vale_and_aesni () then
         let xk = B.malloc HS.root 0uy 240ul in
-        Vale.aes256_key_expansion k xk;
+        Vale.old_aes256_key_expansion k xk;
         AEAD_AES256_GCM_VALE xk
       else if bcrypt () then
         AEAD_BCRYPT (BCrypt.aead_create BCrypt.AES256_GCM k)
