@@ -382,7 +382,7 @@ let update a s prev data len =
 inline_for_extraction noextract
 val mk_finish: a:Hash.alg -> finish_st a
 
-#reset-options "--z3rlimit 350 --max_fuel 0 --max_ifuel 0"
+#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
 inline_for_extraction noextract
 let mk_finish a s prev dst =
   let h0 = ST.get () in
@@ -431,8 +431,40 @@ let mk_finish a s prev dst =
   EverCrypt.Hash.finish #(G.hide a) tmp_hash_state dst;
 
   let h5 = ST.get () in
-  Spec.Hash.Lemmas.hash_is_hash_incremental a (G.reveal prev);
-  assert (S.equal (B.as_seq h5 dst) (Spec.Hash.hash a (G.reveal prev)));
+  begin
+    let open Spec.Hash.PadFinish in
+    let open Spec.Hash in
+    let prev = G.reveal prev in
+    let n = S.length prev / block_length a in
+    let blocks, rest_ = S.split prev (n * block_length a) in
+    calc (S.equal) {
+      B.as_seq h5 dst;
+    (S.equal) { }
+      finish a (Hash.repr tmp_hash_state h4);
+    (S.equal) { }
+      finish a (
+        update_multi a (Hash.repr tmp_hash_state h3)
+          (S.append
+            (S.slice (B.as_seq h3 buf_) 0 (v (rest a total_len)))
+            (pad a (UInt64.v total_len))));
+    (S.equal) { }
+      finish a (
+        update_multi a
+          (update_multi a (init a) blocks)
+          (S.append rest_ (pad a (UInt64.v total_len))));
+    (S.equal) { }
+      finish a (
+        update_multi a (init a)
+          (S.append blocks (S.append rest_ (pad a (UInt64.v total_len)))));
+    (S.equal) { S.append_assoc blocks rest_ (pad a (UInt64.v total_len)) }
+      finish a (
+        update_multi a (init a)
+          (S.append (S.append blocks rest_) (pad a (UInt64.v total_len))));
+    (S.equal) { Spec.Hash.Lemmas.hash_is_hash_incremental a prev }
+      Spec.Hash.hash a prev;
+    }
+  end;
+
   Hash.frame_invariant (B.loc_buffer dst) hash_state h4 h5;
   Hash.frame_invariant_implies_footprint_preservation
     (B.loc_buffer dst) hash_state h4 h5;
