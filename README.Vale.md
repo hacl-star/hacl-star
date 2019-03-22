@@ -2,7 +2,7 @@ Vale (Verified Assembly Language for Everest) cryptographic libraries
 =====================================================================
 
 This directory contains the Vale cryptographic libraries, i.e., formally verified high-performance
-cryptographic code in assembly language.  They
+cryptographic code in assembly language.  They rely
 on the [Vale tool](https://github.com/project-everest/vale) to produce
 code and proofs in [F\*](https://github.com/FStarLang/FStar).
 
