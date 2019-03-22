@@ -73,9 +73,9 @@ inline_for_extraction
 val felem_set_zero:
     #s: field_spec
   -> f: felem s ->
-  StackInline unit
+  Stack unit
   (requires (fun h -> live h f))
-  (ensures (fun h0 _ h1 -> modifies (loc f) h0 h1))
+  (ensures  (fun h0 _ h1 -> modifies1 f h0 h1))
 
 let felem_set_zero #s f =
   match s with
@@ -116,7 +116,7 @@ val load_felem:
   -> y: block ->
   Stack unit
   (requires (fun h -> live h x /\ live h y))
-  (ensures (fun h0 _ h1 -> live h1 x /\ live h1 y /\ modifies (loc x) h0 h1))
+  (ensures (fun h0 _ h1 -> modifies1 x h0 h1))
 
 let load_felem #s x y =
   match s with
@@ -130,7 +130,7 @@ val load_felem4:
   -> y: block4 ->
   Stack unit
   (requires (fun h -> live h x /\ live h y))
-  (ensures (fun h0 _ h1 -> live h1 x /\ live h1 y /\ modifies (loc x) h0 h1))
+  (ensures (fun h0 _ h1 -> modifies1 x h0 h1))
 
 let load_felem4 #s x y =
   match s with
@@ -145,7 +145,7 @@ val store_felem:
   -> y: felem s ->
   Stack unit
   (requires (fun h -> live h x /\ live h y))
-  (ensures (fun h0 _ h1 -> live h1 x /\ live h1 y /\ modifies (loc x) h0 h1))
+  (ensures (fun h0 _ h1 -> modifies1 x h0 h1))
 
 let store_felem #s x y =
   match s with
@@ -159,7 +159,10 @@ val get_acc:
   -> ctx: gcm_ctx s ->
   Stack (felem s)
   (requires (fun h -> live h ctx))
-  (ensures (fun h0 f h1 -> h0 == h1 /\ live h1 f))
+  (ensures (fun h0 f h1 -> h0 == h1 /\ live h1 f
+                      /\ f == (match s with
+                              | F32 -> gsub ctx 0ul 2ul
+                              | FNI -> gsub ctx 0ul 1ul)))
 
 let get_acc #s ctx =
   match s with
@@ -173,7 +176,10 @@ val get_r:
   -> ctx: gcm_ctx s ->
   Stack (felem s)
   (requires (fun h -> live h ctx))
-  (ensures (fun h0 f h1 -> h0 == h1 /\ live h1 f))
+  (ensures (fun h0 f h1 -> h0 == h1 /\ live h1 f
+                      /\ f == (match s with
+                              | F32 -> gsub ctx 8ul 2ul
+                              | FNI -> gsub ctx 4ul 1ul)))
 
 let get_r #s ctx =
   match s with
@@ -187,7 +193,10 @@ val get_precomp:
   -> ctx: gcm_ctx s ->
   Stack (precomp s)
   (requires (fun h -> live h ctx))
-  (ensures (fun h0 f h1 -> h0 == h1 /\ live h1 f))
+  (ensures (fun h0 f h1 -> h0 == h1 /\ live h1 f
+                      /\ f == (match s with
+                              | F32 -> gsub ctx 2ul 264ul
+                              | FNI -> gsub ctx 1ul 4ul)))
 
 let get_precomp #s ctx =
   match s with
@@ -202,7 +211,7 @@ val load_precompute_r:
   -> key: block ->
   Stack unit
   (requires (fun h -> live h pre /\ live h key))
-  (ensures (fun h0 _ h1 -> modifies (loc pre) h0 h1))
+  (ensures (fun h0 _ h1 -> modifies1 pre h0 h1))
 
 let load_precompute_r #s pre key =
   match s with
@@ -217,7 +226,7 @@ val fadd:
   -> y: felem s ->
   Stack unit
   (requires (fun h -> live h x /\ live h y))
-  (ensures (fun h0 _ h1 -> live h1 x /\ live h1 y /\ modifies (loc x) h0 h1))
+  (ensures (fun h0 _ h1 -> modifies1 x h0 h1))
 
 let fadd #s x y =
   match s with
@@ -232,7 +241,7 @@ val fmul:
   -> y: felem s ->
   Stack unit
   (requires (fun h -> live h x /\ live h y))
-  (ensures (fun h0 _ h1 -> live h1 x /\ live h1 y /\ modifies (loc x) h0 h1))
+  (ensures (fun h0 _ h1 -> modifies1 x h0 h1))
 
 let fmul #s x y =
   match s with
@@ -247,7 +256,7 @@ val fadd4:
   -> y: felem4 s ->
   Stack unit
   (requires (fun h -> live h x /\ live h y))
-  (ensures (fun h0 _ h1 -> live h1 x /\ live h1 y /\ modifies (loc x) h0 h1))
+  (ensures (fun h0 _ h1 -> modifies1 x h0 h1))
 
 let fadd4 #s x y =
   match s with
@@ -262,7 +271,7 @@ val fmul_pre:
   -> y: precomp s ->
   Stack unit
   (requires (fun h -> live h x /\ live h y))
-  (ensures (fun h0 _ h1 -> live h1 x /\ live h1 y /\ modifies (loc x) h0 h1))
+  (ensures (fun h0 _ h1 -> modifies1 x h0 h1))
 
 let fmul_pre #s x y =
   match s with
@@ -277,7 +286,7 @@ val fmul4:
   -> y: precomp s ->
   Stack unit
   (requires (fun h -> live h x /\ live h y))
-  (ensures (fun h0 _ h1 -> live h1 x /\ live h1 y /\ modifies (loc x) h0 h1))
+  (ensures (fun h0 _ h1 -> modifies1 x h0 h1))
 
 let fmul4 #s x pre =
   match s with
@@ -293,7 +302,7 @@ val fadd_mul4:
   -> y: precomp s ->
   Stack unit
   (requires (fun h -> live h acc /\ live h x /\ live h y))
-  (ensures (fun h0 _ h1 -> live h1 acc /\ live h1 x /\ live h1 y /\ modifies (loc acc) h0 h1))
+  (ensures (fun h0 _ h1 -> modifies1 acc h0 h1))
 
 let fadd_mul4 #s acc x pre =
   match s with

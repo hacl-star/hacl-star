@@ -9,11 +9,12 @@ open Lib.Vec128
 module ST = FStar.HyperStack.ST
 
 
-inline_for_extraction
-let cl_add (x:vec128) (y:vec128) : vec128 = vec128_xor x y
 
 inline_for_extraction
-let clmul_wide (x:vec128) (y:vec128) : vec128 * vec128 =
+let cl_add (x:vec128) (y:vec128) : Tot vec128 = vec128_xor x y
+
+inline_for_extraction
+let clmul_wide (x:vec128) (y:vec128) : Tot (vec128 & vec128) =
   let lo = ni_clmul x y (u8 0x00) in
   let m1 = ni_clmul x y (u8 0x10) in
   let m2 = ni_clmul x y (u8 0x01) in
@@ -29,7 +30,7 @@ let clmul_wide (x:vec128) (y:vec128) : vec128 * vec128 =
 inline_for_extraction
 let clmul_wide4
   (x1:vec128) (x2:vec128) (x3:vec128) (x4:vec128)
-  (y1:vec128) (y2:vec128) (y3:vec128) (y4:vec128): vec128 * vec128 =
+  (y1:vec128) (y2:vec128) (y3:vec128) (y4:vec128): Tot (vec128 & vec128) =
 
   let lo1 = ni_clmul x1 y1 (u8 0x00) in
   let lo2 = ni_clmul x2 y2 (u8 0x00) in
@@ -72,7 +73,7 @@ let clmul_wide4
 
 
 inline_for_extraction
-let vec128_shift_left_bits (x:vec128) (y:size_t): vec128 =
+let vec128_shift_left_bits (x:vec128) (y:size_t): Tot vec128 =
   if (y %. size 8 =. size 0) then
     vec128_shift_left x y
   else if (y <. size 64) then
@@ -88,7 +89,7 @@ let vec128_shift_left_bits (x:vec128) (y:size_t): vec128 =
 
 
 inline_for_extraction
-let vec128_shift_right_bits (x:vec128) (y:size_t) : vec128 =
+let vec128_shift_right_bits (x:vec128) (y:size_t) : Tot vec128 =
   if (y %. size 8 =. size 0) then
     vec128_shift_right x y
   else if (y <. size 64) then
@@ -104,7 +105,7 @@ let vec128_shift_right_bits (x:vec128) (y:size_t) : vec128 =
 
 
 inline_for_extraction
-let gf128_reduce (hi:vec128) (lo:vec128) : vec128 =
+let gf128_reduce (hi:vec128) (lo:vec128) : Tot vec128 =
     (* LEFT SHIFT [hi:lo] by 1 *)
 let lo1 = vec128_shift_right64 lo (size 63) in
   let lo2 = vec128_shift_left lo1 (size 64) in
@@ -165,7 +166,7 @@ inline_for_extraction
 val get_acc: ctx:gcm_ctx ->
   Stack felem
   (requires (fun h -> live h ctx))
-  (ensures (fun h0 f h1 -> h0 == h1 /\ live h1 f))
+  (ensures (fun h0 f h1 -> h0 == h1 /\ live h1 f /\ f == gsub ctx 0ul 1ul))
 
 let get_acc (ctx:gcm_ctx) =
   sub ctx (size 0) (size 1)
@@ -175,7 +176,7 @@ inline_for_extraction
 val get_r: ctx:gcm_ctx ->
   Stack felem
   (requires (fun h -> live h ctx))
-  (ensures (fun h0 f h1 -> h0 == h1 /\ live h1 f))
+  (ensures (fun h0 f h1 -> h0 == h1 /\ live h1 f /\ f == gsub ctx 4ul 1ul))
 
 let get_r (ctx:gcm_ctx) =
   sub ctx (size 4) (size 1)
@@ -185,7 +186,7 @@ inline_for_extraction
 val get_precomp: ctx: gcm_ctx ->
   Stack precomp
   (requires (fun h -> live h ctx))
-  (ensures (fun h0 f h1 -> h0 == h1 /\ live h1 f))
+  (ensures (fun h0 f h1 -> h0 == h1 /\ live h1 f /\  f == gsub ctx 1ul 4ul))
 
 let get_precomp (ctx:gcm_ctx) =
   sub ctx (size 1) (size 4)
@@ -202,9 +203,9 @@ let create_felem () = create 1ul vec128_zero
 
 inline_for_extraction
 val felem_set_zero: f:felem ->
-  StackInline unit
+  Stack unit
   (requires (fun h -> live h f))
-  (ensures (fun h0 _ h1 -> modifies (loc f) h0 h1))
+  (ensures (fun h0 _ h1 -> modifies1 f h0 h1))
 
 let felem_set_zero f =  f.(0ul) <- vec128_zero
 
@@ -233,7 +234,7 @@ val load_felem:
   -> y: lbuffer uint8 16ul ->
   Stack unit
   (requires (fun h -> live h x /\ live h y))
-  (ensures (fun h0 _ h1 -> live h1 x /\ live h1 y /\ modifies (loc x) h0 h1))
+  (ensures (fun h0 _ h1 -> modifies1 x h0 h1))
 
 let load_felem x y =
   x.(size 0) <- vec128_load_be y
@@ -245,7 +246,7 @@ val load_felem4:
   -> y: lbuffer uint8 64ul ->
   Stack unit
   (requires (fun h -> live h x /\ live h y))
-  (ensures (fun h0 _ h1 -> live h1 x /\ live h1 y /\ modifies (loc x) h0 h1))
+  (ensures (fun h0 _ h1 -> modifies1 x h0 h1))
 
 let load_felem4 x y =
   x.(size 0) <- vec128_load_be (sub y (size 0) (size 16));
@@ -260,7 +261,7 @@ val store_felem:
   -> y: felem ->
   Stack unit
   (requires (fun h -> live h x /\ live h y))
-  (ensures (fun h0 _ h1 -> live h1 x /\ live h1 y /\ modifies (loc x) h0 h1))
+  (ensures (fun h0 _ h1 -> modifies1 x h0 h1))
 
 let store_felem x y =
   vec128_store_be x y.(size 0)
@@ -272,7 +273,7 @@ val fadd:
   -> y: felem ->
   Stack unit
   (requires (fun h -> live h x /\ live h y))
-  (ensures (fun h0 _ h1 -> live h1 x /\ live h1 y /\ modifies (loc x) h0 h1))
+  (ensures (fun h0 _ h1 -> modifies1 x h0 h1))
 
 let fadd (x:felem) (y:felem) =
   x.(size 0) <- cl_add x.(size 0) y.(size 0)
@@ -284,7 +285,7 @@ val fmul:
   -> y: felem ->
   Stack unit
   (requires (fun h -> live h x /\ live h y))
-  (ensures (fun h0 _ h1 -> live h1 x /\ live h1 y /\ modifies (loc x) h0 h1))
+  (ensures (fun h0 _ h1 -> modifies1 x h0 h1))
 
 let fmul (x:felem) (y:felem) =
   let xe = x.(size 0) in
@@ -300,7 +301,7 @@ val load_precompute_r:
   -> key: block ->
   Stack unit
   (requires (fun h -> live h pre /\ live h key))
-  (ensures (fun h0 _ h1 -> modifies (loc pre) h0 h1))
+  (ensures (fun h0 _ h1 -> modifies1 pre h0 h1))
 
 let load_precompute_r pre key =
   let r_4 = sub pre (size 0) (size 1) in
@@ -322,7 +323,7 @@ val fmul_pre:
   -> y: precomp ->
   Stack unit
   (requires (fun h -> live h x /\ live h y))
-  (ensures (fun h0 _ h1 -> live h1 x /\ live h1 y /\ modifies (loc x) h0 h1))
+  (ensures (fun h0 _ h1 -> modifies1 x h0 h1))
 
 let fmul_pre x pre =
   let r = sub pre (size 3) (size 1) in
@@ -339,7 +340,7 @@ val fadd4:
   -> y: felem4 ->
   Stack unit
   (requires (fun h -> live h x /\ live h y))
-  (ensures (fun h0 _ h1 -> live h1 x /\ live h1 y /\ modifies (loc x) h0 h1))
+  (ensures (fun h0 _ h1 -> modifies1 x h0 h1))
 
 let fadd4 (x:felem4) (y:felem4) =
   x.(size 0) <- cl_add x.(size 0) y.(size 0);
@@ -354,7 +355,7 @@ val fmul4:
   -> pre: precomp ->
   Stack unit
   (requires (fun h -> live h x /\ live h pre))
-  (ensures (fun h0 _ h1 -> live h1 x /\ live h1 pre /\ modifies (loc x) h0 h1))
+  (ensures (fun h0 _ h1 -> modifies1 x h0 h1))
 
 let fmul4 (x:felem4) (pre:precomp) =
   fmul (sub x (size 0) (size 1)) (sub pre (size 0) (size 1));
@@ -370,7 +371,7 @@ val fadd_mul4:
   -> pre: precomp ->
   Stack unit
   (requires (fun h -> live h acc /\ live h x /\ live h pre))
-  (ensures (fun h0 _ h1 -> modifies (loc acc) h0 h1))
+  (ensures (fun h0 _ h1 -> modifies1 acc h0 h1))
 
 let fadd_mul4 (acc:felem) (x:felem4) (pre:precomp) =
   let x1 = x.(size 0) in

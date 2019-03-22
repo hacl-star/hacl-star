@@ -1,4 +1,5 @@
 module Hacl.Gf128.PreComp
+
 open FStar.HyperStack
 open FStar.HyperStack.All
 open Lib.IntTypes
@@ -22,7 +23,7 @@ val gcm_init:
   -> key: lbuffer uint8 16ul ->
   Stack unit
   (requires (fun h -> live h ctx /\ live h key))
-  (ensures (fun h0 _ h1 -> modifies (loc ctx) h0 h1))
+  (ensures (fun h0 _ h1 -> modifies1 ctx h0 h1))
 
 let gcm_init ctx key = gcm_init #F32 ctx key
 
@@ -34,7 +35,7 @@ val gcm_update_blocks:
   -> text: lbuffer uint8 len ->
   Stack unit
   (requires (fun h -> live h ctx /\ live h text))
-  (ensures (fun h0 _ h1 -> modifies (loc ctx) h0 h1))
+  (ensures (fun h0 _ h1 -> modifies1 ctx h0 h1))
 
 let gcm_update_blocks  ctx len text = poly4_mul_add #F32 ctx len text
 
@@ -46,7 +47,7 @@ val gcm_update_blocks_padded:
   -> text: lbuffer uint8 len ->
   Stack unit
   (requires (fun h -> live h ctx /\ live h text))
-  (ensures (fun h0 _ h1 -> modifies (loc ctx) h0 h1))
+  (ensures (fun h0 _ h1 -> modifies1 ctx h0 h1))
 
 let gcm_update_blocks_padded  ctx len text = poly4_mul_add #F32 ctx len text
 
@@ -58,7 +59,7 @@ val gcm_update_last:
   -> text: lbuffer uint8 len ->
   Stack unit
   (requires (fun h -> live h ctx /\ live h text))
-  (ensures (fun h0 _ h1 -> modifies (loc ctx) h0 h1))
+  (ensures (fun h0 _ h1 -> modifies1 ctx h0 h1))
 
 let gcm_update_last  ctx len text = poly #F32 ctx len text
 
@@ -69,7 +70,7 @@ val gcm_emit:
   -> ctx: gcm_ctx ->
   Stack unit
   (requires (fun h -> live h ctx /\ live h tag))
-  (ensures (fun h0 _ h1 -> modifies (loc tag) h0 h1))
+  (ensures (fun h0 _ h1 -> modifies1 tag h0 h1))
 
 let gcm_emit tag ctx =
   let acc = get_acc ctx in
@@ -83,7 +84,7 @@ val ghash:
   -> key: block ->
   Stack unit
   (requires (fun h -> live h tag /\ live h text /\ live h key))
-  (ensures (fun h0 _ h1 -> modifies (loc tag) h0 h1))
+  (ensures (fun h0 _ h1 -> modifies1 tag h0 h1))
 
 let ghash tag len text key =
   ghash_mul_add #F32 tag len text key
