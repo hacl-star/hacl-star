@@ -14,6 +14,8 @@ open GCM_helpers
 open FStar.Math.Lemmas
 open Collections.Seqs
 
+#set-options "--z3rlimit 20 --max_fuel 1 --max_ifuel 0"
+
 let gctr_encrypt_block_offset (icb_BE:quad32) (plain_LE:quad32) (alg:algorithm) (key:seq nat32) (i:int) =
   ()
 
