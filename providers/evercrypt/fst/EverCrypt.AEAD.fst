@@ -15,7 +15,7 @@ open Spec.AEAD
 
 friend Spec.AEAD
 
-#set-options "--max_fuel 0 --max_ifuel 0"
+#set-options "--z3rlimit 20 --max_fuel 0 --max_ifuel 0"
 
 let ekv_len (a: supported_alg): Tot (x:UInt32.t { UInt32.v x = ekv_length a }) =
   match a with
@@ -25,18 +25,57 @@ let ekv_len (a: supported_alg): Tot (x:UInt32.t { UInt32.v x = ekv_length a }) =
 
 let expand_in #a r k =
   match a with
-  | AES128_GCM | AES256_GCM ->
+  | AES128_GCM ->
       let h0 = ST.get () in
       let kv: G.erased (kv a) = G.hide (B.as_seq h0 k) in
       let has_aesni = EverCrypt.AutoConfig2.has_aesni () in
       let has_pclmulqdq = EverCrypt.AutoConfig2.has_pclmulqdq () in
-      if EverCrypt.TargetConfig.x64 && (has_aesni && has_pclmulqdq) then
+      if EverCrypt.TargetConfig.x64 && (has_aesni && has_pclmulqdq) then (
         let ek =
           MB.mmalloc #UInt8.t #(frozen_preorder (expand #a (G.reveal kv))) r 0uy (ekv_len a)
         in
-        admit () // waiting for interop wrappers
-      else
+        push_frame();
+        let ek' =
+          B.alloca #UInt8.t 0uy 176ul
+        in
+        AES_stdcalls.aes128_key_expansion k ek';
+        let h1 = ST.get() in
+        Gcm_simplify.aes_simplify3 ek' h1 (AES_s.key_to_round_keys_LE AES_s.AES_128 (Words.Seq_s.seq_nat8_to_seq_nat32_LE (Words.Seq_s.seq_uint8_to_seq_nat8 (G.reveal kv))));
+        MB.blit ek' 0ul ek 0ul 176ul;
+        pop_frame();
+        let h2 = ST.get() in
+        assert (Seq.equal (B.as_seq h2 ek)  (expand #a (G.reveal kv)));
+        B.modifies_only_not_unused_in B.loc_none h0 h2;
+        MB.witness_p ek (S.equal (expand #a (G.reveal kv)));
+        EK kv ek
+      ) else
         EK kv MB.mnull
+
+  | AES256_GCM ->
+      let h0 = ST.get () in
+      let kv: G.erased (kv a) = G.hide (B.as_seq h0 k) in
+      let has_aesni = EverCrypt.AutoConfig2.has_aesni () in
+      let has_pclmulqdq = EverCrypt.AutoConfig2.has_pclmulqdq () in
+      if EverCrypt.TargetConfig.x64 && (has_aesni && has_pclmulqdq) then (
+        let ek =
+          MB.mmalloc #UInt8.t #(frozen_preorder (expand #a (G.reveal kv))) r 0uy (ekv_len a)
+        in
+        push_frame();
+        let ek' =
+          B.alloca #UInt8.t 0uy 240ul
+        in
+        AES_stdcalls.aes256_key_expansion k ek';
+        let h1 = ST.get() in
+        Gcm_simplify.aes_simplify3 ek' h1 (AES_s.key_to_round_keys_LE AES_s.AES_256 (Words.Seq_s.seq_nat8_to_seq_nat32_LE (Words.Seq_s.seq_uint8_to_seq_nat8 (G.reveal kv))));
+        MB.blit ek' 0ul ek 0ul 240ul;
+        pop_frame();
+        let h2 = ST.get() in
+        assert (Seq.equal (B.as_seq h2 ek)  (expand #a (G.reveal kv)));
+        B.modifies_only_not_unused_in B.loc_none h0 h2;
+        MB.witness_p ek (S.equal (expand #a (G.reveal kv)));
+        EK kv ek
+      ) else
+        EK kv MB.mnull  
 
   | CHACHA20_POLY1305 ->
       let h0 = ST.get () in

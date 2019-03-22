@@ -225,3 +225,17 @@ let aes_simplify2 b h =
       (seq_nat8_to_seq_nat32_LE (seq_uint8_to_seq_nat8 (Seq.slice s_init 0 16)))
       (seq_nat8_to_seq_nat32_LE (seq_uint8_to_seq_nat8 (Seq.slice s_init 16 32)))
     ))
+
+let aes_simplify3 b h s =
+  let db = get_downview b in
+  DV.length_eq db;
+  let ub = UV.mk_buffer db Views.up_view128 in
+  let s_b = B.as_seq h b in
+  let s_f = seq_nat8_to_seq_uint8 (le_seq_quad32_to_bytes s) in
+  UV.length_eq ub;
+  Types_s.le_seq_quad32_to_bytes_length s; 
+  FStar.Math.Lemmas.euclidean_division_definition (B.length b) 16;
+  assert (Seq.length s_b = Seq.length s_f);
+  let aux (i:nat{i < Seq.length s_b}) : Lemma (Seq.index s_b i == Seq.index s_f i)
+    = admit()
+  in Classical.forall_intro aux
