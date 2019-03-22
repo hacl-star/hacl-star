@@ -23,6 +23,8 @@ let modifies_includes l1 l2 h0 h1 = ()
 let modifies_trans l1 l2 h0 h1 h2 = ()
 let live_sub #t #a #len b start n h = ()
 let modifies_sub #t #a #len b start n h0 h1 = ()
+let modifies1_is_modifies2 #a0 #a1 b0 b1 h0 h1 = ()
+let modifies1_is_modifies3 #a0 #a1 #a2 b0 b1 b2 h0 h1 = ()
 
 let as_seq_gsub #t #a #len h b start n = ()
 
@@ -134,6 +136,10 @@ let loop_nospec2 #h0 #a1 #a2 #len1 #len2 n buf1 buf2 impl =
   let inv h1 j = modifies (union (loc buf1) (loc buf2)) h0 h1 in
   Lib.Loops.for (size 0) n inv impl
 
+let loop_nospec3 #h0 #a1 #a2 #a3 #len1 #len2 #len3 n buf1 buf2 buf3 impl =
+  let inv h1 j = modifies (union (loc buf3) (union (loc buf1) (loc buf2))) h0 h1 in
+  Lib.Loops.for (size 0) n inv impl
+
 let loop_range_nospec #h0 #a #len start n buf impl =
   let inv h1 j = modifies (loc buf) h0 h1 in
   Lib.Loops.for start (start +. n) inv impl
@@ -239,6 +245,8 @@ val loopi_blocks_f_nospec:
   Stack unit
     (requires fun h -> live h inp /\ live h w /\ disjoint inp w)
     (ensures  fun h0 _ h1 -> modifies (loc w) h0 h1)
+
+#set-options "--z3rlimit 25 --max_fuel 0"
 
 let loopi_blocks_f_nospec #a #b #blen bs inpLen inp f nb i w =
   assert ((v i + 1) * v bs <= v nb * v bs);
