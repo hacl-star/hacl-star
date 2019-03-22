@@ -432,6 +432,24 @@ val loop_nospec:
 
 (** Loop combinator with just memory safety specification *)
 inline_for_extraction noextract
+val loop_nospec2:
+    #h0:mem
+  -> #a1:Type0
+  -> #a2:Type0
+  -> #len1:size_t
+  -> #len2:size_t
+  -> n:size_t
+  -> buf1:lbuffer a1 len1
+  -> buf2:lbuffer a2 len2
+  -> impl: (i:size_t{v i < v n} -> Stack unit
+      (requires fun h -> modifies2 buf1 buf2 h0 h)
+      (ensures  fun _ _ h1 -> modifies2 buf1 buf2 h0 h1)) ->
+  Stack unit
+    (requires fun h -> h0 == h /\ live h0 buf1 /\ live h0 buf2)
+    (ensures  fun _ _ h1 -> modifies2 buf1 buf2 h0 h1)
+
+(** Loop combinator with just memory safety specification *)
+inline_for_extraction noextract
 val loop_range_nospec:
     #h0:mem
   -> #a:Type0

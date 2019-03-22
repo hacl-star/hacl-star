@@ -16,7 +16,7 @@ module HS = FStar.HyperStack
 module Seq = Lib.Sequence
 module ByteSeq = Lib.ByteSequence
 
-#reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0"
+#reset-options "--z3rlimit 150 --max_fuel 0 --max_ifuel 0"
 
 let modifies_preserves_live #t #a b l h0 h1 = ()
 let modifies_includes l1 l2 h0 h1 = ()
@@ -130,6 +130,10 @@ let loop_nospec #h0 #a #len n buf impl =
   let inv h1 j = modifies (loc buf) h0 h1 in
   Lib.Loops.for (size 0) n inv impl
 
+let loop_nospec2 #h0 #a1 #a2 #len1 #len2 n buf1 buf2 impl =
+  let inv h1 j = modifies (union (loc buf1) (loc buf2)) h0 h1 in
+  Lib.Loops.for (size 0) n inv impl
+
 let loop_range_nospec #h0 #a #len start n buf impl =
   let inv h1 j = modifies (loc buf) h0 h1 in
   Lib.Loops.for start (start +. n) inv impl
@@ -206,6 +210,7 @@ val loopi_blocks_f:
       modifies (loc w) h0 h1 /\
       as_seq h1 w ==
       Sequence.repeati_blocks_f (v blocksize) (as_seq h0 inp) spec_f (v nb) (v i) (as_seq h0 w))
+
 let loopi_blocks_f #a #b #blen bs inpLen inp spec_f f nb i w =
   Math.Lemmas.lemma_mult_lt_right (v bs) (v i) (v nb);
   assert ((v i + 1) * v bs == v i * v bs + v bs);
@@ -385,7 +390,7 @@ let fill #a h0 clen out spec impl =
   loop h0 clen a_spec refl footprint spec
   (fun i ->
            Loop.unfold_repeat_gen (v clen) a_spec (spec h0) (refl h0 0) (v i);
-	   let os = sub out 0ul (i +! 1ul) in 
+	   let os = sub out 0ul (i +! 1ul) in
 	   let h = ST.get() in
 	   let x = impl i in
 	   os.(i) <- x;
@@ -394,7 +399,7 @@ let fill #a h0 clen out spec impl =
   )
 
 inline_for_extraction noextract
-val lemma_eq_disjoint:     
+val lemma_eq_disjoint:
     #t2:buftype
   -> #a1:Type
   -> #a2:Type
@@ -413,14 +418,14 @@ val lemma_eq_disjoint:
 	    Seq.index (as_seq h0 b2) (v n) ==
 	    Seq.index (as_seq h1 b2) (v n)))
 
-let lemma_eq_disjoint #t2 #a1 #a2 clen1 clen2 b1 b2 n h0 h1 = 
+let lemma_eq_disjoint #t2 #a1 #a2 clen1 clen2 b1 b2 n h0 h1 =
   let b1s = gsub b1 0ul n in
   let b2s = gsub b2 0ul n in
   assert (modifies (loc b1s) h0 h1);
   assert (disjoint b1 b2 ==> Seq.equal (as_seq h0 b2) (as_seq h1 b2));
   assert (disjoint b1 b2 ==> Seq.equal (as_seq h0 b2s) (as_seq h1 b2s));
   assert (Seq.index (as_seq h1 b2) (v n) == Seq.index (as_seq h1 (gsub b2 n (clen2 -! n))) 0)
-         
+
 
 #set-options "--z3rlimit 50 --max_fuel 0"
 
@@ -434,14 +439,14 @@ let mapT #t #a #b clen out f inp =
 	   let h1 = ST.get() in
 	   lemma_eq_disjoint #t clen clen out inp i h0 h1;
 	   f x)
-	   
+
 inline_for_extraction
 let map2T #t #a1 #a2 #b clen out f inp1 inp2 =
   let h0 = ST.get () in
   [@inline_let]
   let spec (h:mem) = Seq.map2_inner #a1 #a2 #b #(v clen) f (as_seq h inp1) (as_seq h inp2) in
   fill h0 clen out spec
-    (fun i -> 	   
+    (fun i ->
       let h1 = ST.get () in
       lemma_eq_disjoint #t clen clen out inp1 i h0 h1;
       lemma_eq_disjoint #t clen clen out inp2 i h0 h1;
@@ -451,16 +456,16 @@ let mapiT #t #a #b clen out f inp =
   let h0 = ST.get () in
   fill h0 clen out
     (fun h -> Seq.mapi_inner (fun i -> f (size i)) (as_seq h inp))
-    (fun i -> 
+    (fun i ->
       let h1 = ST.get () in
       lemma_eq_disjoint #t clen clen out inp i h0 h1;
       let xi = inp.(i) in f i xi)
 
-let mapi #a #b h0 clen out spec_f f inp = 
+let mapi #a #b h0 clen out spec_f f inp =
   let h0 = ST.get () in
   fill h0 clen out
     (fun h -> Seq.mapi_inner (spec_f h0) (as_seq h inp))
-    (fun i -> 
+    (fun i ->
       let h1 = ST.get () in
       lemma_eq_disjoint clen clen out inp i h0 h1;
       let xi = inp.(i) in f i xi)
