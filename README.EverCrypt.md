@@ -222,6 +222,9 @@ The HACL\* library:
   Jean-Karim Zinzindohoué, Karthikeyan Bhargavan, Jonathan Protzenko, Benjamin Beurdouche
 - [A verified extensible library of elliptic curves](https://hal.inria.fr/hal-01425957)
   Jean Karim Zinzindohoué, Evmorfia-Iro Bartzia, Karthikeyan Bhargavan
+- The origins of HACL\* can be found in the [Ph.D. thesis of Jean Karim
+  Zinzindohoué](https://www.theses.fr/s175861), and its design is 
+  inspired by discussions at the [HACS series of workshops](https://github.com/HACS-workshop). 
 
 The Low\* verification technology:
 - [Verified Low-Level Programming Embedded in F\*](https://arxiv.org/abs/1703.00053)
