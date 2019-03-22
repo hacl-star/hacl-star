@@ -382,7 +382,7 @@ let update a s prev data len =
 inline_for_extraction noextract
 val mk_finish: a:Hash.alg -> finish_st a
 
-#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
+#reset-options "--z3rlimit 30 --max_fuel 0 --max_ifuel 0"
 inline_for_extraction noextract
 let mk_finish a s prev dst =
   let h0 = ST.get () in

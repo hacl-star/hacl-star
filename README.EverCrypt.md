@@ -6,6 +6,9 @@ that are automatically enabled if processor support is detected (*multiplexing*)
 Furthermore, EverCrypt offers an (*agile*) API that makes it simple to
 switch between algorithms (e.g., from SHA2 to SHA3).
 
+EverCrypt is written and verified using the [F\*] programming language, then
+compiled to a mixture of C (using a dedicated compiler, [KreMLin]) and assembly.
+
 EverCrypt's formal verification involves using software tools to analyze *all
 possible behaviors* of a program and prove mathematically that they comply with
 the code's specification (i.e., a machine-readable description of the
@@ -44,28 +47,41 @@ and the [Wireguard VPN](https://lwn.net/Articles/770750/).
 
 # Algorithms Supported by EverCrypt
 
-| Algorithm       | C version                | ASM version                | Agile API |
-| --------------- | ------------------------ | -------------------------- | --------- |
-| AES-GCM         |                          | ✔︎ (AES-NI + PCLMULQDQ)     | ✔︎         |
-| ChachaPoly      | ✔︎¹                       |                            | ✔︎         |
-|                 |                          |                            |           |
-| MD5             | ✔︎²                       |                            | ✔︎         |
-| SHA1            | ✔︎²                       |                            | ✔︎         |
-| SHA2            | ✔︎                        | ✔︎³ (SHAEXT)                | ✔︎         |
-| SHA3            | ✔︎                        |                            |           |
-| Blake2          | ✔︎                        |                            |           |
-|                 |                          |                            |           |
-| HMAC            | ✔︎⁴                       |                            | ✔︎         |
-| HKDF            | ✔︎⁴                       |                            | ✔︎         |
-|                 |                          |                            |           |
-| Curve25519      | ✔︎                        | ✔︎ (BMI2 + ADX)             |           |
-| Ed25519         | ✔︎⁵                       |                            |           |
-|                 |                          |                            |           |
-| Chacha20        | ✔︎                        |                            |           |
-| AES128, 256     |                          | ✔︎ (AES NI + PCLMULQDQ)     |           |
-| AES CTR         |                          | ✔︎ (AES NI + PCLMULQDQ)     |           |
-|                 |                          |                            |           |
-| Poly1305        | ✔︎⁶ (+ AVX + AVX2)        | ✔︎ (X64)                    |           |
+EverCrypt is a work in progress! Many algorithms are missing. Among our goals for
+the first release are:
+- fallback C versions for all algorithms
+- NIST P curves
+- AES-CBC
+- an up-to-date Ed25519
+
+| Algorithm           | C version                | ASM version                | Agile API |
+| ------------------- | ------------------------ | -------------------------- | --------- |
+| **AEAD**            |                          |                            |           |
+| AES-GCM             |                          | ✔︎ (AES-NI + PCLMULQDQ)     | ✔︎         |
+| ChachaPoly          | ✔︎¹                       |                            | ✔︎         |
+|                     |                          |                            |           |
+| **HASHES**          |                          |                            |           |
+| MD5                 | ✔︎²                       |                            | ✔︎         |
+| SHA1                | ✔︎²                       |                            | ✔︎         |
+| SHA2                | ✔︎                        | ✔︎³ (SHAEXT)                | ✔︎         |
+| SHA3                | ✔︎                        |                            |           |
+| Blake2              | ✔︎                        |                            |           |
+|                     |                          |                            |           |
+| **MACS**            |                          |                            |           |
+| HMAC                | ✔︎⁴                       |                            | ✔︎         |
+| Poly1305            | ✔︎⁶ (+ AVX + AVX2)        | ✔︎ (X64)                    |           |
+|                     |                          |                            |           |
+| **Key Derivation**  |                          |                            |           |
+| HKDF                | ✔︎⁴                       |                            | ✔︎         |
+|                     |                          |                            |           |
+| **Elliptic**        |                          |                            |           |
+| Curve25519          | ✔︎                        | ✔︎ (BMI2 + ADX)             |           |
+| Ed25519             | ✔︎⁵                       |                            |           |
+|                     |                          |                            |           |
+| **Ciphers**         |                          |                            |           |
+| Chacha20            | ✔︎                        |                            |           |
+| AES128, 256         |                          | ✔︎ (AES NI + PCLMULQDQ)     |           |
+| AES CTR             |                          | ✔︎ (AES NI + PCLMULQDQ)     |           |
 
 ¹: does not multiplex (yet) over the underlying Poly1305 implementation  
 ²: insecure algorithms provided for legacy interop purposes  
@@ -77,8 +93,19 @@ and the [Wireguard VPN](https://lwn.net/Articles/770750/).
 
 # Building or Integrating EverCrypt
 
-Release branches contains a copy of the generated C/ASM code under version
-control. This is by far the easiest way to obtain a copy of EverCrypt.
+⚠️⚠️⚠️ EverCrypt is a work in progress -- if you're seriously contemplating using
+this code is a real system, get in touch with us first! ⚠️⚠️⚠️
+
+## Current limitations
+
+As we work our way towards our first release, bear in mind that:
+- only X64 is supported at the moment
+- many algorithms are missing (see above).
+
+## Finding the code
+
+Release branches (e.g. `v0.1+`) contain a copy of the generated C/ASM code under
+version control. This is by far the easiest way to obtain a copy of EverCrypt.
 
 EverCrypt is packaged as a set of self-contained files in one of the
 `dist/*` directories where `*` is the name of a distribution. A distribution
@@ -89,7 +116,6 @@ corresponds to a particular flavor of generated C code.
 | compact-gcc¹  | ✔︎        |      |              |
 | compact-msvc² | ✔︎        | ✔︎    |              |
 | compact-c89³  | ✔︎        | ✔︎    | ✔︎            |
-| generic⁴      | ✔︎        |      |              |
 
 ¹: x86-64 only: assumes `unsigned __int128`  
 ²: relies on `alloca` to avoid C11 VLA for the sake of MSVC; relies on KreMLin
@@ -97,8 +123,8 @@ corresponds to a particular flavor of generated C code.
    using compiler intrinsics for MSVC  
 ³: relies on `alloca`; eliminates compound literals and enforces C89 scope to
    generate syntactically C89-compliant code; code still relies on inttypes.h
-   and other headers that you may have to provide depending on your target  
-⁴: compact variants minimize the amount of C files; the generic variant does not
+   and other headers that you may have to provide depending on your target; does
+   not include Merkle Trees
 
 ## Integrating EverCrypt
 
