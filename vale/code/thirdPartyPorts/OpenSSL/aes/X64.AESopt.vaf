@@ -1279,6 +1279,7 @@ procedure {:quick} Loop6x(
 }
 
 
+/*
 #reset-options "--z3rlimit 600"
 procedure {:quick exportOnly} Loop6x_loop(
     inline alg:algorithm,  
@@ -2303,3 +2304,4 @@ procedure {:quick} AES_GCM_encrypt(
     //assert le_seq_quad32_to_bytes(buffer128_as_seq(mem, out_b)) == gctr_encrypt_LE(ctr_BE, le_seq_quad32_to_bytes(old(buffer128_as_seq(mem, in_b))), alg, key_words);
 }
 
+*/
