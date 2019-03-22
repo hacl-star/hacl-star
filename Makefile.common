@@ -72,7 +72,7 @@ FSTAR_INCLUDES = $(addprefix --include ,$(INCLUDES))
 #      verify... see https://github.com/FStarLang/FStar/issues/1652
 FSTAR_NO_FLAGS = $(FSTAR_HOME)/bin/fstar.exe --use_hints --record_hints --use_hint_hashes \
   --odir $(OUTPUT_DIR) --cache_checked_modules $(FSTAR_INCLUDES) --cmi \
-  --already_cached 'Prims FStar LowStar C' --warn_error '+241@247-272' \
+  --already_cached 'Prims FStar LowStar C Spec.Loops TestLib' --warn_error '+241@247-272' \
   --cache_dir obj
 
 FSTAR = $(FSTAR_NO_FLAGS) $(OTHERFLAGS)
