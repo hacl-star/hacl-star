@@ -1,4 +1,4 @@
-# EverCrypt: A Verified Crypto Provider Engineered for Agile, Multi-Platform Performance
+# EverCrypt: A Verified Crypto Provider <br>Engineered for Agile, Multi-Platform Performance
 
 EverCrypt is a formally verified modern cryptographic provider
 that provides cross-platform support as well as platform-specific optimizations
@@ -47,8 +47,8 @@ and the [Wireguard VPN](https://lwn.net/Articles/770750/).
 
 # Algorithms Supported by EverCrypt
 
-EverCrypt is a work in progress! Many algorithms are missing. Among our goals for
-the first release are:
+EverCrypt is a work in progress!  Many algorithms are still under development.
+In upcoming releases, we aim to include:
 - fallback C versions for all algorithms
 - NIST P curves
 - AES-CBC
@@ -60,7 +60,7 @@ the first release are:
 | AES-GCM             |                          | ✔︎ (AES-NI + PCLMULQDQ)     | ✔︎         |
 | ChachaPoly          | ✔︎¹                       |                            | ✔︎         |
 |                     |                          |                            |           |
-| **HASHES**          |                          |                            |           |
+| **Hashes**          |                          |                            |           |
 | MD5                 | ✔︎²                       |                            | ✔︎         |
 | SHA1                | ✔︎²                       |                            | ✔︎         |
 | SHA2                | ✔︎                        | ✔︎³ (SHAEXT)                | ✔︎         |
@@ -74,7 +74,7 @@ the first release are:
 | **Key Derivation**  |                          |                            |           |
 | HKDF                | ✔︎⁴                       |                            | ✔︎         |
 |                     |                          |                            |           |
-| **Elliptic**        |                          |                            |           |
+| **ECC**             |                          |                            |           |
 | Curve25519          | ✔︎                        | ✔︎ (BMI2 + ADX)             |           |
 | Ed25519             | ✔︎⁵                       |                            |           |
 |                     |                          |                            |           |
@@ -93,21 +93,25 @@ the first release are:
 
 # Building or Integrating EverCrypt
 
-⚠️⚠️⚠️ EverCrypt is a work in progress -- if you're seriously contemplating using
-this code is a real system, get in touch with us first! ⚠️⚠️⚠️
+⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️
+
+EverCrypt is a work in progress -- if you're seriously contemplating using
+this code is a real system, get in touch with us first! 
+
+⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️
 
 ## Current limitations
 
-As we work our way towards our first release, bear in mind that:
+As we work our way towards our first official release, bear in mind that:
 - only X64 is supported at the moment
-- many algorithms are missing (see above).
+- many algorithms are still under development (see above).
 
-## Finding the code
+## Finding the code EverCrypt produces
 
 Release branches (e.g. `v0.1+`) contain a copy of the generated C/ASM code under
 version control. This is by far the easiest way to obtain a copy of EverCrypt.
 
-EverCrypt is packaged as a set of self-contained files in one of the
+EverCrypt's C/ASM code is packaged as a set of self-contained files in one of the
 `dist/*` directories where `*` is the name of a distribution. A distribution
 corresponds to a particular flavor of generated C code.
 
@@ -126,7 +130,7 @@ corresponds to a particular flavor of generated C code.
    and other headers that you may have to provide depending on your target; does
    not include Merkle Trees
 
-## Integrating EverCrypt
+## Integrating EverCrypt with your code
 
 Each distribution of EverCrypt contains a GNU Makefile that generates a static
 library and a shared object. The code depends on `kremlib`, which contains
@@ -142,18 +146,19 @@ For release branches, a copy of `kremlib` is provided in `dist/kremlib` and
   file contains the list of other headers (and implementations) it depends on.
 
 Customizing distributions is easy; contact us if you need something bespoke
-(e.g. EverCrypt as single file).
+(e.g., EverCrypt as single file).
 
-## Building EverCrypt with Docker
+## Verifying and building EverCrypt with Docker
 
-Building EverCrypt from scratch is fairly involved and requires several tools.
+Verifying and building EverCrypt from scratch is fairly involved and requires several tools.
 Hence the simplest approach is to look up the latest tag for the [HACL\* docker
 container](https://cloud.docker.com/u/projecteverest/repository/docker/projecteverest/hacl-star-linux)
 then retrieve it using `docker pull`.
 
-## Building EverCrypt locally
+## Verifying and building EverCrypt locally
 
-Using the Everest script is the easiest approach.
+We strongly recommend using the Everest script (as shown below)
+to verify and build EverCrypt.
 
 ```bash
 $ git clone https://github.com/project-everest/everest/
