@@ -1,7 +1,8 @@
 # High Performance Verified Cryptographic Code
 
 This repository contains code from several related projects developed as part of
-[Project Everest](https://project-everest.github.io/).
+[Project Everest](https://project-everest.github.io/), which aims to build and 
+deploy a verified HTTPS stack.
 
 ## EverCrypt
 
@@ -22,9 +23,9 @@ functional correctness, and secret independence.
 
 ## Vale-Crypto
 
-[Vale-Crypto](README.Vale.md) (Verified Assembly Language for Everest) provides
-formally verified high-performance cryptographic code in assembly language. It
-relies on the [Vale tool](https://github.com/project-everest/vale) to produce
+[Vale-Crypto](README.Vale.md) provides formally verified high-performance
+cryptographic code in assembly language. It relies on the 
+[Vale tool](https://github.com/project-everest/vale) to produce
 code and proofs in [F\*](https://github.com/FStarLang/FStar). Vale supports
 multiple platforms and proves that its implementations are memory safe,
 functionally correct, and that timing and memory accesses are secret
