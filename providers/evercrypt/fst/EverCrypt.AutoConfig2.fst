@@ -29,6 +29,8 @@ let cpu_has_shaext: cached_flag X64.CPU_Features_s.sha_enabled =
   B.gcmalloc_of_list HS.root [ false ]
 let cpu_has_aesni: cached_flag X64.CPU_Features_s.aesni_enabled =
   B.gcmalloc_of_list HS.root [ false ]
+let cpu_has_pclmulqdq: cached_flag X64.CPU_Features_s.pclmulqdq_enabled =
+  B.gcmalloc_of_list HS.root [ false ]
 let cpu_has_avx2: cached_flag X64.CPU_Features_s.avx2_enabled =
   B.gcmalloc_of_list HS.root [ false ]
 let cpu_has_avx: cached_flag X64.CPU_Features_s.avx_enabled =
@@ -50,6 +52,7 @@ let mk_getter #b (f: cached_flag b): getter b = fun () ->
 
 let has_shaext = mk_getter cpu_has_shaext
 let has_aesni = mk_getter cpu_has_aesni
+let has_pclmulqdq = mk_getter cpu_has_pclmulqdq
 let has_avx2 = mk_getter cpu_has_avx2
 let has_avx = mk_getter cpu_has_avx
 let has_bmi2 = mk_getter cpu_has_bmi2
@@ -63,6 +66,7 @@ let wants_bcrypt () = B.recall user_wants_bcrypt; B.index user_wants_bcrypt 0ul
 let fp () =
   B.loc_buffer cpu_has_shaext `B.loc_union`
   B.loc_buffer cpu_has_aesni `B.loc_union`
+  B.loc_buffer cpu_has_pclmulqdq `B.loc_union`
   B.loc_buffer cpu_has_avx2 `B.loc_union`
   B.loc_buffer cpu_has_avx `B.loc_union`
   B.loc_buffer cpu_has_bmi2 `B.loc_union`
@@ -75,6 +79,7 @@ let fp () =
 let recall () =
   B.recall cpu_has_shaext;
   B.recall cpu_has_aesni;
+  B.recall cpu_has_pclmulqdq;
   B.recall cpu_has_avx2;
   B.recall cpu_has_avx;
   B.recall cpu_has_bmi2;
@@ -91,7 +96,9 @@ let init () =
     if SC.vale then begin
       if Cpuid_stdcalls.check_aesni () <> 0UL then begin
         B.recall cpu_has_aesni;
-        B.upd cpu_has_aesni 0ul true
+        B.upd cpu_has_aesni 0ul true;
+        B.recall cpu_has_pclmulqdq;
+        B.upd cpu_has_pclmulqdq 0ul true
       end;
       if Cpuid_stdcalls.check_sha () <> 0UL then begin
         B.recall cpu_has_shaext;
@@ -126,6 +133,7 @@ let disable_bmi2 () = B.recall cpu_has_bmi2; B.upd cpu_has_bmi2 0ul false
 let disable_adx () = B.recall cpu_has_adx; B.upd cpu_has_adx 0ul false
 let disable_shaext () = B.recall cpu_has_shaext; B.upd cpu_has_shaext 0ul false
 let disable_aesni () = B.recall cpu_has_aesni; B.upd cpu_has_aesni 0ul false
+let disable_pclmulqdq () = B.recall cpu_has_pclmulqdq; B.upd cpu_has_pclmulqdq 0ul false
 let disable_vale = mk_disabler user_wants_vale
 let disable_hacl = mk_disabler user_wants_hacl
 let disable_openssl = mk_disabler user_wants_openssl

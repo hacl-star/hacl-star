@@ -65,7 +65,8 @@ let split_at_last (a: Hash.alg) (b: bytes):
     (ensures (fun (blocks, rest) ->
       S.length rest < block_length a /\
       S.length rest = S.length b % block_length a /\
-      S.equal (S.append blocks rest) b))
+      S.equal (S.append blocks rest) b /\
+      S.length blocks % block_length a = 0))
 =
   let n = S.length b / block_length a in
   let blocks, rest = S.split b (n * block_length a) in

@@ -423,3 +423,8 @@ let lemma_lowerUpper128_and (x:nat128) (x0:nat64) (x1:nat64) (y:nat128) (y0:nat6
 
 let lemma_add_mod128 (x y :int) =
   reveal_opaque mod2_128'
+
+let modp_0 () =
+  assert_norm (modp' 0 == 0);
+  reveal_opaque modp';
+  ()

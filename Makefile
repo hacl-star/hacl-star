@@ -29,6 +29,7 @@
 # - vale-verify: properly staged target for re-verifying all the vale files
 # - vale-asm: re-generation of the Vale assemblies in dist/vale
 # - hacl-verify: non-staged target for reverifying HACL* files
+#   also: curve25519-verify poly1305-verify chacha20-verify
 # - verify: UNSTAGED, may only be invoked after a successful run of vale-fst,
 #   verifies all .fst files, both hand-written and generated.
 #
@@ -52,12 +53,14 @@ ifeq (3.81,$(MAKE_VERSION))
 endif
 
 # Better error early.
+ifeq (,$(NOVALE))
 ifeq (,$(VALE_HOME))
   $(error Please define VALE_HOME, possibly using cygpath -m on Windows)
 endif
 
 ifeq (,$(wildcard $(VALE_HOME)/bin/vale.exe))
   $(error $$VALE_HOME/bin/vale.exe does not exist (VALE_HOME=$(VALE_HOME)))
+endif
 endif
 
 # Backwards-compat, remove
@@ -91,7 +94,7 @@ all:
 	FSTAR_DEPEND_FLAGS="--warn_error +285" $(MAKE) all_
 
 
-all_: compile-compact compile-generic compile-compact-msvc \
+all_: compile-compact compile-generic compile-compact-msvc compile-compact-gcc \
   compile-evercrypt-external-headers compile-compact-c89 compile-coco \
   secure_api.old
 
@@ -707,6 +710,10 @@ dist/compact/Makefile.basic: KRML_EXTRA=$(COMPACT_FLAGS)
 
 dist/compact-msvc/Makefile.basic: KRML_EXTRA=$(COMPACT_FLAGS) -falloca -ftail-calls
 
+dist/compact-gcc/Makefile.basic: KRML_EXTRA=$(COMPACT_FLAGS) -fbuiltin-uint128
+
+dist/curve25519-64/Makefile.basic: KRML_EXTRA=-bundle Hacl.Curve25519_64=* -fbuiltin-uint128 -extract-uints
+
 # MerkleTree doesn't compile in C89 mode
 dist/compact-c89/Makefile.basic: \
   KRML_EXTRA=$(patsubst 'Merkle%[rename=MerkleTree]','MerkleTree.*',$(COMPACT_FLAGS)) \
@@ -810,13 +817,11 @@ ifeq ($(OS),Windows_NT)
 OPENSSL_HOME	:= $(shell cygpath -u $(OPENSSL_HOME))
 LDFLAGS		+= -lbcrypt
 endif
+LDFLAGS 	+= -L$(OPENSSL_HOME)
 
-TEST_INCLUDES=test test/rfc7748_src secure_api/merkle_tree/test $(KREMLIN_HOME)/include \
-  dist/generic $(OPENSSL_HOME)/include
-
-CFLAGS += $(addprefix -I,$(TEST_INCLUDES)) -Wall -Wextra -g \
+CFLAGS += -Wall -Wextra -g \
   -Wno-infinite-recursion -Wno-int-conversion -Wno-unused-parameter \
-  -O3 -march=native -mtune=native
+  -O3 -march=native -mtune=native -I$(KREMLIN_HOME)/include
 
 # FIXME there's a kremlin error that generates a void* -- can't use -Werror
 # Need the libraries to be present and compiled.
@@ -824,40 +829,34 @@ CFLAGS += $(addprefix -I,$(TEST_INCLUDES)) -Wall -Wextra -g \
 %.exe: %.o | compile-generic
 	# Linking with full kremlib since tests may use TestLib, etc.
 	$(call run-with-log,\
-	  $(CC) $(CFLAGS) -L$(OPENSSL_HOME) $^ -o $@ \
+	  $(CC) $(CFLAGS) $(LDFLAGS) $^ -o $@ \
 	    dist/generic/libevercrypt.a -lcrypto $(LDFLAGS) \
 	    $(KREMLIN_HOME)/kremlib/dist/generic/libkremlib.a \
 	  ,[LD $*],$(call to-obj-dir,$@))
 
+ifeq ($(OS),Windows_NT)
+  LD_EXTRA = PATH="$(OPENSSL_HOME):$$PATH"
+else ifeq ($(shell uname -s),Darwin)
+  LD_EXTRA = DYLD_LIBRARY_PATH="$(OPENSSL_HOME)"
+else
+  LD_EXTRA = LD_LIBRARY_PATH="$(OPENSSL_HOME)"
+endif
+
 .PHONY: %.test
 %.test: %.exe
-	LD_LIBRARY_PATH="$(OPENSSL_HOME)" DYLD_LIBRARY_PATH="$(OPENSSL_HOME)" \
-	  PATH="$(OPENSSL_HOME):$(PATH)" $<
+	$(LD_EXTRA) $<
 
 test-c-%: dist/test/c/%.test
 	@
 
-###########################
-# C tests (from C* files) #
-###########################
+##########################
+# C tests (from C files) #
+##########################
 
-HAND_WRITTEN_C_TESTS=$(wildcard tests/*.c) secure_api/merkle_tree/test/merkle_tree_test.c
-
-%.d: %.c
-	@set -e; rm -f $@; \
-	  $(CC) -MM $(CFLAGS) $< > $@.$$$$; \
-	  sed 's,\($(notdir $*)\)\.o[ :]*,$(dir $@)\1.o $@ : ,g' < $@.$$$$ > $@; \
-	  rm -f $@.$$$$
-
-# Not including merkle_tree_test because it #includes a generated header and
-# this makefile doesn't have a third stage.
-include $(patsubst %.c,%.d,$(wildcard test/*.c))
-
-secure_api/merkle_tree/test/merkle_tree_test.o: | compile-generic
-
-test-handwritten: $(patsubst %.c,%.test,$(HAND_WRITTEN_C_TESTS))
-
-tests/curve64-rfc.exe: $(patsubst %.c,%.o,$(wildcard tests/rfc7748_src/*.c))
+test-handwritten: compile-compact-gcc
+	$(LD_EXTRA) KREMLIN_HOME="$(KREMLIN_HOME)" \
+	  LDFLAGS="$(LDFLAGS)" CFLAGS="$(CFLAGS)" \
+	  $(MAKE) -C tests test
 
 
 #######################

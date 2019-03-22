@@ -83,6 +83,7 @@ val chacha20_init: ctx:state -> k:lbuffer uint8 32ul -> n:lbuffer uint8 12ul -> 
 let chacha20_init ctx k n ctr =
     let h0 = ST.get() in
     recall_contents chacha20_constants Spec.chacha20_constants;
+    mut_immut_disjoint ctx chacha20_constants (ST.get ());
     update_sub_f h0 ctx 0ul 4ul
       (fun h -> Lib.Sequence.map secret Spec.chacha20_constants)
       (fun _ -> mapT 4ul (sub ctx 0ul 4ul) secret chacha20_constants);

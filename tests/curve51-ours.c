@@ -9,6 +9,8 @@
 #include <stdbool.h>
 #include <time.h>
 
+#include "Hacl_Curve25519_new.h"
+
 typedef uint64_t cycles;
 
 static __inline__ cycles cpucycles_begin(void)
@@ -31,7 +33,6 @@ static __inline__ cycles cpucycles_end(void)
   //return ( (uint64_t)lo)|( ((uint64_t)hi)<<32 );
 }
 
-extern void Hacl_Curve25519_51_ecdh(uint8_t* sec, uint8_t* priv, uint8_t* pub);
 #define ROUNDS 100000
 #define SIZE   1
 

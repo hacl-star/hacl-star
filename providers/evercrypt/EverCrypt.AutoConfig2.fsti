@@ -23,6 +23,7 @@ let getter (flag: bool) = unit -> Stack bool
 
 val has_shaext: getter X64.CPU_Features_s.sha_enabled
 val has_aesni: getter X64.CPU_Features_s.aesni_enabled
+val has_pclmulqdq: getter X64.CPU_Features_s.pclmulqdq_enabled
 val has_avx2: getter X64.CPU_Features_s.avx2_enabled
 val has_avx: getter X64.CPU_Features_s.avx_enabled
 val has_bmi2: getter X64.CPU_Features_s.bmi2_enabled
@@ -70,6 +71,7 @@ val disable_avx2: disabler
 val disable_avx: disabler
 val disable_shaext: disabler
 val disable_aesni: disabler
+val disable_pclmulqdq: disabler
 val disable_vale: disabler
 val disable_hacl: disabler
 val disable_openssl: disabler

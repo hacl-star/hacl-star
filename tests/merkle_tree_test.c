@@ -2,8 +2,7 @@
 #include <stdint.h>
 #include <sys/time.h>
 #include "merkle_tree_test.h"
-#include "MerkleTree_New_Low.h"
-#include "MerkleTree_New_Low_Serialization.h"
+#include "MerkleTree.h"
 #include "EverCrypt_AutoConfig2.h"
 
 static struct timeval timer;
