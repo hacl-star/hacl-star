@@ -3,6 +3,8 @@ module Fsqr_stdcalls
 module DV = LowStar.BufferView.Down
 open Interop.Base
 
+open Vale.AsLowStar.MemoryHelpers
+
 #push-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
 
 let fsqr tmp f1 out =
