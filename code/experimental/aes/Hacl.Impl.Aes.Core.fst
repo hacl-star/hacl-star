@@ -1,11 +1,15 @@
 module Hacl.Impl.Aes.Core
 
-module ST = FStar.HyperStack.ST
 open FStar.HyperStack
 open FStar.HyperStack.All
 open Lib.IntTypes
 open Lib.Buffer
 open Lib.Vec128
+
+module ST = FStar.HyperStack.ST
+
+
+#set-options "--z3rlimit 50"
 
 
 inline_for_extraction

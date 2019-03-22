@@ -59,7 +59,7 @@ val create_state:
   #m: m_spec ->
   StackInline (state m)
   (requires (fun h -> True))
-  (ensures (fun h0 f h1 -> live h1 f /\ stack_allocated f h0 h1 (Seq.create (v (stlen m)) (elem_zero m))))
+  (ensures  (fun h0 f h1 -> live h1 f /\ stack_allocated f h0 h1 (Seq.create (v (stlen m)) (elem_zero m))))
 
 
 inline_for_extraction
@@ -67,36 +67,36 @@ val copy_state:
     #m: m_spec
   -> st: state m
   -> ost: state m ->
-  ST unit
+  Stack unit
   (requires (fun h -> live h st /\ live h ost /\ disjoint st ost))
-  (ensures (fun h0 _ h1 -> modifies (loc st) h0 h1))
+  (ensures  (fun h0 _ h1 -> modifies1 st h0 h1))
 
 inline_for_extraction
 val load_block0:
     #m: m_spec
   -> st: state m
   -> b: lbuffer uint8 16ul ->
-  ST unit
+  Stack unit
   (requires (fun h -> live h st /\ live h b))
-  (ensures (fun h0 _ h1 -> modifies (loc st) h0 h1))
+  (ensures  (fun h0 _ h1 -> modifies1 st h0 h1))
 
 inline_for_extraction
 val load_key1:
     #m: m_spec
   -> k: key1 m
   -> b: lbuffer uint8 16ul ->
-  ST unit
+  Stack unit
   (requires (fun h -> live h k /\ live h b))
-  (ensures (fun h0 _ h1 -> modifies (loc k) h0 h1))
+  (ensures  (fun h0 _ h1 -> modifies1 k h0 h1))
 
 inline_for_extraction
 val load_nonce:
     #m: m_spec
   -> n: nonce m
   -> b: lbuffer uint8 12ul ->
-  ST unit
+  Stack unit
   (requires (fun h -> live h n /\ live h b))
-  (ensures (fun h0 _ h1 -> modifies (loc n) h0 h1))
+  (ensures  (fun h0 _ h1 -> modifies1 n h0 h1))
 
 inline_for_extraction
 val load_state:
@@ -104,27 +104,27 @@ val load_state:
   -> st: state m
   -> nonce: nonce m
   -> counter: size_t ->
-  ST unit
+  Stack unit
   (requires (fun h -> live h st /\ live h nonce))
-  (ensures (fun h0 _ h1 -> modifies (loc st) h0 h1))
+  (ensures  (fun h0 _ h1 -> modifies1 st h0 h1))
 
 inline_for_extraction
 val store_block0:
     #m: m_spec
   -> out: lbuffer uint8 16ul
   -> st: state m ->
-  ST unit
+  Stack unit
   (requires (fun h -> live h st /\ live h out))
-  (ensures (fun h0 _ h1 -> modifies (loc out) h0 h1))
+  (ensures  (fun h0 _ h1 -> modifies1 out h0 h1))
 
 inline_for_extraction
 val xor_state_key1:
     #m: m_spec
   -> st: state m
   -> key: key1 m ->
-  ST unit
+  Stack unit
   (requires (fun h -> live h st /\ live h key))
-  (ensures (fun h0 _ h1 -> live h1 st /\ live h1 key /\ modifies (loc st) h0 h1))
+  (ensures  (fun h0 _ h1 -> modifies1 st h0 h1))
 
 inline_for_extraction
 val xor_block:
@@ -132,27 +132,27 @@ val xor_block:
   -> out: lbuffer uint8 64ul
   -> st: state m
   -> b: lbuffer uint8 64ul ->
-  ST unit
+  Stack unit
   (requires (fun h -> live h st /\ live h out /\ live h b))
-  (ensures (fun h0 _ h1 -> modifies (loc out) h0 h1))
+  (ensures  (fun h0 _ h1 -> modifies2 out st h0 h1))
 
 inline_for_extraction
 val aes_enc:
     #m: m_spec
   -> st: state m
   -> key: key1 m ->
-  ST unit
+  Stack unit
   (requires (fun h -> live h st /\ live h key))
-  (ensures (fun h0 _ h1 -> live h1 st /\ live h1 key /\ modifies (loc st) h0 h1))
+  (ensures  (fun h0 _ h1 -> modifies1 st h0 h1))
 
 inline_for_extraction
 val aes_enc_last:
     #m: m_spec
   -> st: state m
   -> key: key1 m ->
-  ST unit
+  Stack unit
   (requires (fun h -> live h st /\ live h key))
-  (ensures (fun h0 _ h1 -> live h1 st /\ live h1 key /\ modifies (loc st) h0 h1))
+  (ensures  (fun h0 _ h1 -> modifies1 st h0 h1))
 
 inline_for_extraction
 val aes_keygen_assist:
@@ -160,24 +160,24 @@ val aes_keygen_assist:
   -> ok: key1 m
   -> ik: key1 m
   -> rcon: uint8 ->
-  ST unit
+  Stack unit
   (requires (fun h -> live h ok /\ live h ik /\ disjoint ik ok))
-  (ensures (fun h0 _ h1 -> live h1 ok /\ live h1 ik /\ modifies (loc ok) h0 h1))
+  (ensures  (fun h0 _ h1 -> modifies1 ok h0 h1))
 
 inline_for_extraction
 val key_expansion_step:
     #m: m_spec
   -> next: key1 m
   -> prev: key1 m ->
-  ST unit
+  Stack unit
   (requires (fun h -> live h prev /\ live h next))
-  (ensures (fun h0 _ h1 -> live h1 prev /\ live h1 next /\ modifies (loc next) h0 h1))
+  (ensures  (fun h0 _ h1 -> modifies1 next h0 h1))
 
 inline_for_extraction
 val key_expansion_step2:
     #m: m_spec
   -> next: key1 m
   -> prev: key1 m ->
-  ST unit
+  Stack unit
   (requires (fun h -> live h prev /\ live h next))
-  (ensures (fun h0 _ h1 -> live h1 prev /\ live h1 next /\ modifies (loc next) h0 h1))
+  (ensures  (fun h0 _ h1 -> modifies1 next h0 h1))

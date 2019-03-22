@@ -11,6 +11,7 @@ module ST = FStar.HyperStack.ST
 
 
 
+
 type state = lbuffer uint64 8ul
 type key1 =  lbuffer uint64 8ul
 type nonce =  lbuffer uint64 8ul
@@ -32,9 +33,9 @@ inline_for_extraction
 val copy_state:
     next: state
   -> prev: state ->
-  ST unit
+  Stack unit
   (requires (fun h -> live h prev /\ live h next /\ disjoint next prev))
-  (ensures (fun h0 _ h1 -> live h1 prev /\ live h1 next /\ modifies (loc next) h0 h1))
+  (ensures (fun h0 _ h1 -> modifies1 next h0 h1))
 
 let copy_state next prev = copy next prev
 
@@ -44,7 +45,7 @@ val load_block0:
   -> inp: block ->
   ST unit
   (requires (fun h -> live h out /\ live h inp))
-  (ensures (fun h0 _ h1 -> live h1 out /\ live h1 inp /\ modifies (loc out) h0 h1))
+  (ensures (fun h0 _ h1 -> modifies1 out h0 h1))
 
 let load_block0 (out:state) (inp:block) =
   let b1 = sub inp (size 0) (size 8) in
@@ -56,7 +57,7 @@ let load_block0 (out:state) (inp:block) =
   let h0 = ST.get() in
   Lib.Buffer.loop_nospec #h0 (size 8) out
     (fun i ->
-      let sh = i *. size 8 in
+      let sh = i *. (size 8) in
       let u = (fst >>. sh) &. u64 0xff in
       let u = u ^. (((snd >>. sh) &. u64 0xff) <<. size 8) in
       out.(i) <- u)
@@ -64,9 +65,9 @@ let load_block0 (out:state) (inp:block) =
 
 val transpose_state:
   st: state ->
-  ST unit
+  Stack unit
   (requires (fun h -> live h st))
-  (ensures (fun h0 _ h1 -> live h1 st /\ modifies (loc st) h0 h1))
+  (ensures (fun h0 _ h1 -> modifies1 st h0 h1))
 
 let transpose_state st =
   let i0 = st.(size 0) in
@@ -92,9 +93,9 @@ let transpose_state st =
 val store_block0:
     out: block
   -> inp: state ->
-  ST unit
+  Stack unit
   (requires (fun h -> live h out /\ live h inp))
-  (ensures (fun h0 _ h1 -> live h1 out /\ live h1 inp /\ modifies (loc out) h0 h1))
+  (ensures (fun h0 _ h1 -> modifies1 out h0 h1))
 
 let store_block0 out (inp:state) =
   let (t0,t1,t2,t3,t4,t5,t6,t7) =
@@ -108,9 +109,9 @@ let store_block0 out (inp:state) =
 val load_key1:
     out: key1
   -> k: block ->
-  ST unit
+  Stack unit
   (requires (fun h -> live h out /\ live h k))
-  (ensures (fun h0 _ h1 -> live h1 out /\ live h1 k /\ modifies (loc out) h0 h1))
+  (ensures (fun h0 _ h1 -> modifies1 out h0 h1))
 
 let load_key1 (out:state) (k:block) =
   load_block0 out k;
@@ -126,9 +127,9 @@ let load_key1 (out:state) (k:block) =
 val load_nonce:
     out: nonce
   -> nonce: lbuffer uint8 12ul ->
-  ST unit
+  Stack unit
   (requires (fun h -> live h out /\ live h nonce))
-  (ensures (fun h0 _ h1 -> live h1 out /\ live h1 nonce /\ modifies (loc out) h0 h1))
+  (ensures (fun h0 _ h1 -> modifies1 out h0 h1))
 
 let load_nonce out nonce =
   push_frame();
@@ -144,9 +145,9 @@ val load_state:
     out: state
   -> nonce: nonce
   -> counter: size_t ->
-  ST unit
+  Stack unit
   (requires (fun h -> live h out /\ live h nonce))
-  (ensures (fun h0 _ h1 -> modifies (loc out) h0 h1))
+  (ensures (fun h0 _ h1 -> modifies1 out h0 h1))
 
 let load_state out nonce counter =
   push_frame();
@@ -163,15 +164,15 @@ let load_state out nonce counter =
       let u = (u <<. size 12) |. (u <<. size 24) |. (u <<. size 36) |. (u <<. size 48) in
       let u = u &. u64 0xf000f000f000f000 in
       out.(i) <- u ^. nonce.(i));
-  admit()
+  pop_frame ()
 
 
 val xor_state_key1:
     st: state
   -> ost: state ->
-  ST unit
+  Stack unit
   (requires (fun h -> live h st /\ live h ost))
-  (ensures (fun h0 _ h1 -> live h1 st /\ live h1 ost /\ modifies (loc st) h0 h1))
+  (ensures (fun h0 _ h1 -> modifies1 st h0 h1))
 
 let xor_state_key1 st ost =
   let h0 = ST.get() in
@@ -183,27 +184,26 @@ val xor_block:
     out: lbuffer uint8 64ul
   -> st: state
   -> b: lbuffer uint8 64ul ->
-  ST unit
+  Stack unit
   (requires (fun h -> live h st /\ live h out /\ live h b))
-  (ensures (fun h0 _ h1 -> modifies (loc out) h0 h1))
+  (ensures (fun h0 _ h1 -> modifies2 out st h0 h1))
 
 let xor_block out st inp =
   transpose_state st;
-  let h0 = ST.get() in
-  loop_nospec #h0 (size 8) out
+  let h1 = ST.get () in
+  loop_nospec #h1 (size 8) out
     (fun j ->
       let ob = sub out (j *. size 8) (size 8) in
       let ib = sub inp (j *. size 8) (size 8) in
       let u = uint_from_bytes_le #U64 ib in
-      uint_to_bytes_le #U64 ob (u ^. st.(j)));
-  admit()
+      uint_to_bytes_le #U64 ob (u ^. st.(j)))
 
 
 val sub_bytes_state:
   st: state ->
-  ST unit
+  Stack unit
   (requires (fun h -> live h st))
-  (ensures (fun h0 _ h1 -> live h1 st /\ modifies (loc st) h0 h1))
+  (ensures (fun h0 _ h1 -> modifies1 st h0 h1))
 
 let sub_bytes_state (st:state) =
   let (st0,st1,st2,st3,st4,st5,st6,st7) =
@@ -222,9 +222,9 @@ let sub_bytes_state (st:state) =
 
 val shift_rows_state:
   st: state ->
-  ST unit
+  Stack unit
   (requires (fun h -> live h st))
-  (ensures (fun h0 _ h1 -> live h1 st /\ modifies (loc st) h0 h1))
+  (ensures (fun h0 _ h1 -> modifies1 st h0 h1))
 
 let shift_rows_state st =
   let h0 = ST.get() in
@@ -234,44 +234,42 @@ let shift_rows_state st =
 
 val mix_columns_state:
   st: state ->
-  ST unit
+  Stack unit
   (requires (fun h -> live h st))
-  (ensures (fun h0 _ h1 -> live h1 st /\ modifies (loc st) h0 h1))
+  (ensures (fun h0 _ h1 -> modifies1 st h0 h1))
 
 let mix_columns_state st =
   push_frame () ;
   let col = create 8ul (u64 0) in
   let h0 = ST.get() in
-  loop_nospec #h0 (size 8) col
-    (fun i ->
+  loop_nospec #h0 (size 8) col (fun i ->
 	 let coli = st.(i) in
 	 col.(i) <- coli ^. (((coli &. u64 0xeeeeeeeeeeeeeeee) >>. size 1)
                 |. ((coli &. u64 0x1111111111111111) <<. size 3)));
-    let col0 = col.(size 0) in
-    let ncol0 = col0 ^. (((col0 &. u64 0xcccccccccccccccc ) >>. size  2)
-		  |. ((col0 &. u64 0x3333333333333333) <<. size  2)) in
-    st.(size 0) <- st.(size 0) ^. ncol0;
-    let h0 = ST.get() in
-    loop_nospec #h0 (size 7) st
-      (fun i ->
-         let prev = col.(i) in
-         let next = col.(i +. size 1) in
-         let ncoli = next ^. (((next &. u64 0xcccccccccccccccc ) >>. size  2)
-		  |. ((next &. u64 0x3333333333333333) <<. size  2)) in
-	 st.(i +. size 1) <- st.(i +. size 1) ^. ncoli ^. prev);
-    st.(size 0) <- st.(size 0) ^. col.(size 7);
-    st.(size 1) <- st.(size 1) ^. col.(size 7);
-    st.(size 3) <- st.(size 3) ^. col.(size 7);
-    st.(size 4) <- st.(size 4) ^. col.(size 7);
-    pop_frame()
+  let col0 = col.(size 0) in
+  let ncol0 = col0 ^. (((col0 &. u64 0xcccccccccccccccc ) >>. size  2)
+		      |. ((col0 &. u64 0x3333333333333333) <<. size  2)) in
+  st.(size 0) <- st.(size 0) ^. ncol0;
+  let h0 = ST.get() in
+  loop_nospec #h0 (size 7) st (fun i ->
+    let prev = col.(i) in
+    let next = col.(i +. size 1) in
+    let ncoli = next ^. (((next &. u64 0xcccccccccccccccc ) >>. size  2)
+		               |. ((next &. u64 0x3333333333333333) <<. size  2)) in
+  st.(i +. size 1) <- st.(i +. size 1) ^. ncoli ^. prev);
+  st.(size 0) <- st.(size 0) ^. col.(size 7);
+  st.(size 1) <- st.(size 1) ^. col.(size 7);
+  st.(size 3) <- st.(size 3) ^. col.(size 7);
+  st.(size 4) <- st.(size 4) ^. col.(size 7);
+  pop_frame()
 
 
 val aes_enc:
     st: state
   -> key: key1 ->
-  ST unit
+  Stack unit
   (requires (fun h -> live h st /\ live h key))
-  (ensures (fun h0 _ h1 -> live h1 st /\ live h1 key /\ modifies (loc st) h0 h1))
+  (ensures (fun h0 _ h1 -> modifies1 st h0 h1))
 
 let aes_enc st key =
   sub_bytes_state st;
@@ -283,9 +281,9 @@ let aes_enc st key =
 val aes_enc_last:
     st: state
   -> key: key1 ->
-  ST unit
+  Stack unit
   (requires (fun h -> live h st /\ live h key))
-  (ensures (fun h0 _ h1 -> live h1 st /\ live h1 key /\ modifies (loc st) h0 h1))
+  (ensures (fun h0 _ h1 -> modifies1 st h0 h1))
 
 let aes_enc_last st key =
   sub_bytes_state st;
@@ -321,9 +319,9 @@ val aes_keygen_assist:
     next: state
   -> prev: state
   -> rcon: uint8 ->
-  ST unit
+  Stack unit
   (requires (fun h -> live h next /\ live h prev /\ disjoint next prev))
-  (ensures (fun h0 _ h1 -> modifies (loc next) h0 h1))
+  (ensures (fun h0 _ h1 -> modifies1 next h0 h1))
 
 let aes_keygen_assist next prev rcon =
   copy_state next prev;
@@ -344,11 +342,11 @@ let key_expand1 (p:uint64) (n:uint64) =
 
 
 val key_expansion_step:
-  next: state
+    next: state
   -> prev: state ->
   ST unit
   (requires (fun h -> live h prev /\ live h next))
-  (ensures (fun h0 _ h1 -> live h1 prev /\ live h1 next /\ modifies (loc next) h0 h1))
+  (ensures (fun h0 _ h1 -> modifies1 next h0 h1))
 
 let key_expansion_step next prev =
   let h0 = ST.get() in
