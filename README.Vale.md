@@ -1,4 +1,4 @@
-Vale (Verified Assembly Language for Everest) cryptographic libraries
+Vale (Verified Assembly Language for Everest) <br>Cryptographic Libraries
 =====================================================================
 
 This directory contains the Vale cryptographic libraries, i.e., formally verified high-performance
