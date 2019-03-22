@@ -89,14 +89,15 @@ In upcoming releases, we aim to include:
 ⁴: HMAC and HKDF on top of the agile hash API, so HMAC-SHA2-256 and
    HKDF-SHA2-256 leverage the assembly version under the hood  
 ⁵: legacy implementation  
-⁶: achieved via C compiler intrinsincs
+⁶: achieved via C compiler intrinsincs; no verification results claimed for the
+   AVX and AVX2 versions whose verification is not complete yet
 
 # Building or Integrating EverCrypt
 
 ⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️
 
 EverCrypt is a work in progress -- if you're seriously contemplating using
-this code is a real system, get in touch with us first! 
+this code is a real system, get in touch with us first!
 
 ⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️
 
@@ -216,6 +217,7 @@ Kohlweiss, Jianyang Pan, Jonathan Protzenko, Aseem Rastogi, Nikhil Swamy,
 Santiago Zanella-Beguelin, Jean-Karim Zinzindohoue
 
 # Components of EverCrypt
+
 EverCrypt brings together several components of [Project Everest],
 which aims to build and deploy a verified HTTPS stack.
 
@@ -244,9 +246,9 @@ to readable, idiomatic C code using the [KreMLin] compiler.
 
 The HACL\* library:
 - [HACL\*: A Verified Modern Cryptographic Library](http://eprint.iacr.org/2017/536)  
-Jean-Karim Zinzindohoué, Karthikeyan Bhargavan, Jonathan Protzenko, Benjamin Beurdouche
+  Jean-Karim Zinzindohoué, Karthikeyan Bhargavan, Jonathan Protzenko, Benjamin Beurdouche
 - [A Verified Extensible Library of Elliptic Curves](https://hal.inria.fr/hal-01425957)  
-Jean Karim Zinzindohoué, Evmorfia-Iro Bartzia, Karthikeyan Bhargavan
+  Jean Karim Zinzindohoué, Evmorfia-Iro Bartzia, Karthikeyan Bhargavan
 - The origins of HACL\* can be found in the [Ph.D. thesis of Jean Karim
   Zinzindohoué](https://www.theses.fr/s175861), and its design is 
   inspired by discussions at the [HACS series of workshops](https://github.com/HACS-workshop). 
@@ -259,12 +261,12 @@ The Low\* verification technology:
 
 The Vale tool and verified assembly libraries:
 - [Vale: Verifying High-Performance Cryptographic Assembly Code](https://project-everest.github.io/assets/vale2017.pdf)  
-Barry Bond, Chris Hawblitzel, Manos Kapritsos, K. Rustan M. Leino, Jacob R. Lorch, Bryan Parno, Ashay Rane, Srinath Setty, Laure Thompson.
-In Proceedings of the USENIX Security Symposium, 2017.
-*Distinguished Paper Award*
+  Barry Bond, Chris Hawblitzel, Manos Kapritsos, K. Rustan M. Leino, Jacob R. Lorch, Bryan Parno, Ashay Rane, Srinath Setty, Laure Thompson.
+  In Proceedings of the USENIX Security Symposium, 2017.
+  *Distinguished Paper Award*
 
 - [A Verified, Efficient Embedding of a Verifiable Assembly Language](https://www.microsoft.com/en-us/research/publication/a-verified-efficient-embedding-of-a-verifiable-assembly-language/)  
-Aymeric Fromherz, Nick Giannarakis, Chris Hawblitzel, Bryan Parno, Aseem Rastogi, Nikhil Swamy. In Proceedings of the Symposium on Principles of Programming Languages (POPL), 2019.
+  Aymeric Fromherz, Nick Giannarakis, Chris Hawblitzel, Bryan Parno, Aseem Rastogi, Nikhil Swamy. In Proceedings of the Symposium on Principles of Programming Languages (POPL), 2019.
 
 # License
 
