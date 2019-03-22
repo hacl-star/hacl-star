@@ -34,7 +34,7 @@ void __stdcall aes128_key_expansion(uint8_t *key_ptr, uint8_t *expanded_key_ptr)
     KRML_HOST_EXIT(255);
 }
 
-void __stdcall gcm128_encrypt(void *x0)
+void __stdcall gcm128_encrypt_old(void *x0)
 {
     KRML_HOST_EPRINTF("Vale gcm128_encrypt() isn't implemented in this platform.  Do not call.\n");
     KRML_HOST_EXIT(255);
@@ -52,7 +52,7 @@ void __stdcall aes256_key_expansion(uint8_t *key_ptr, uint8_t *expanded_key_ptr)
     KRML_HOST_EXIT(255);
 }
 
-void __stdcall gcm256_encrypt(void *x0)
+void __stdcall gcm256_encrypt_old(void *x0)
 {
     KRML_HOST_EPRINTF("Vale gcm256_encrypt() isn't implemented in this platform.  Do not call.\n");
     KRML_HOST_EXIT(255);

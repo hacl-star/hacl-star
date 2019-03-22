@@ -231,7 +231,7 @@ let vale_aes128_gcm_encrypt xkey (iv:uint8_p) (ad:uint8_p) (adlen:uint32_t)
     cipher = cipher';
     tag = tag
   }) 1ul in
-  Vale.gcm128_encrypt b;
+  Vale.gcm128_encrypt_old b;
   blit cipher' 0ul cipher 0ul len;
   pop_frame ()
 
@@ -319,7 +319,7 @@ let vale_aes256_gcm_encrypt xkey (iv:uint8_p) (ad:uint8_p) (adlen:uint32_t)
     cipher = cipher';
     tag = tag
   }) 1ul in
-  Vale.gcm256_encrypt b;
+  Vale.gcm256_encrypt_old b;
   blit cipher' 0ul cipher 0ul len;
   pop_frame ()
 
