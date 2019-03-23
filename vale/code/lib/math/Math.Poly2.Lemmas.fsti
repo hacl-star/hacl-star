@@ -113,8 +113,7 @@ val lemma_mul_monomials (m n:nat) : Lemma
   (monomial (m + n) == monomial m *. monomial n)
 
 val lemma_add_reverse (a b:poly) (n:nat) : Lemma
-  (requires degree a <= n /\ degree b <= n)
-  (ensures reverse (a +. b) n == reverse a n +. reverse b n)
+  (reverse (a +. b) n == reverse a n +. reverse b n)
 
 val lemma_mul_reverse_shift_1 (a b:poly) (n:nat) : Lemma
   (requires degree a <= n /\ degree b <= n)

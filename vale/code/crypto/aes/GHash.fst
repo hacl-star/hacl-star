@@ -3,27 +3,46 @@ open Math.Poly2.Lemmas
 
 #reset-options "--use_two_phase_tc true"
 
-let rec lemma_ghash_poly_degree h init data j k =
-  if k > j then lemma_ghash_poly_degree h init data j (k - 1)
-
-let shift_gf128_key_1 h =
+let shift_gf128_key_1 (h:poly) : poly =
   shift_key_1 128 gf128_modulus_low_terms h
 
-let lemma_ghash_rev (h:poly) (init:poly) (data:int -> poly128) (j:int) (k:int) : Lemma
-  (requires k > j /\ degree h < 128 /\ degree init < 128 /\ degree (data (k - 1)) < 128)
-  (ensures (
-    let h1 = shift_gf128_key_1 h in
-    let a = ghash_poly h init data j (k - 1) +. data (k - 1) in
-    ghash_poly h init data j k == mod_rev 128 (a *. h1) gf128_modulus
-  ))
+let rec g_power (a:poly) (n:nat) : poly =
+  if n = 0 then zero else // arbitrary value for n = 0
+  if n = 1 then a else
+  a *~ (g_power a (n - 1))
+
+let gf128_power h n = shift_gf128_key_1 (g_power h n)
+
+let rec ghash_poly_unroll (h:poly) (prev:poly) (data:int -> poly128) (k:int) (m n:nat) : poly =
+  let d = data (k + m) in
+  let p = g_power h (n + 1) in
+  if m = 0 then (prev +. d) *~ p else
+  ghash_poly_unroll h prev data k (m - 1) (n + 1) +. d *~ p
+
+let rec lemma_ghash_unroll_back_forward_rec (h:poly) (prev:poly) (data:int -> poly128) (k:int) (n m:nat) : Lemma
+  (requires m < n)
+  (ensures ghash_unroll h prev data k n 0 ==
+    ghash_unroll h prev data k (n - 1 - m) (m + 1) +. ghash_unroll_back h prev data k (n + 1) m)
+  =
+  lemma_add_all ();
+  if m > 0 then lemma_ghash_unroll_back_forward_rec h prev data k n (m - 1)
+
+let lemma_ghash_unroll_back_forward (h:poly) (prev:poly) (data:int -> poly128) (k:int) (n:nat) : Lemma
+  (ghash_unroll h prev data k n 0 == ghash_unroll_back h prev data k (n + 1) n)
+  =
+  lemma_add_all ();
+  if n > 0 then lemma_ghash_unroll_back_forward_rec h prev data k n (n - 1)
+
+let lemma_gf128_mul_rev_mod_rev (a h:poly) : Lemma
+  (requires degree a < 128 /\ degree h < 128)
+  (ensures gf128_mul_rev a h == mod_rev 128 (a *. shift_gf128_key_1 h) gf128_modulus)
   =
   let h1 = shift_gf128_key_1 h in
-  let a = ghash_poly h init data j (k - 1) +. data (k - 1) in
   let rev x = reverse x 127 in
   let g = gf128_modulus in
   lemma_gf128_degree ();
   calc (==) {
-    // ghash_poly h init data j k
+    // gf128_mul_rev a h
     rev ((rev a *. rev h) %. g);
     == {lemma_mod_mul_mod_right (rev a) (rev h) g}
     rev ((rev a *. (rev h %. g)) %. g);
@@ -40,6 +59,134 @@ let lemma_ghash_rev (h:poly) (init:poly) (data:int -> poly128) (j:int) (k:int) :
     == {lemma_mul_reverse_shift_1 a h1 127}
     rev (reverse (a *. h1) 255 %. g);
   }
+
+let rec lemma_ghash_poly_degree h init data j k =
+  if k > j then lemma_ghash_poly_degree h init data j (k - 1)
+
+let rec lemma_ghash_poly_unroll_n (h:poly) (prev:poly) (data:int -> poly128) (k:int) (m n:nat) : Lemma
+  (ghash_poly_unroll h prev data k m (n + 1) == ghash_poly_unroll h prev data k m n *~ h)
+  =
+  let d = data (k + m) in
+  let p0 = g_power h (n + 1) in
+  let p1 = g_power h (n + 2) in
+  if m = 0 then
+    calc (==) {
+      ghash_poly_unroll h prev data k m (n + 1);
+      == {}
+      (prev +. d) *~ p1;
+      == {}
+      (prev +. d) *~ (h *~ p0);
+      == {lemma_gf128_mul_rev_commute p0 h}
+      (prev +. d) *~ (p0 *~ h);
+      == {lemma_gf128_mul_rev_associate (prev +. d) p0 h}
+      ((prev +. d) *~ p0) *~ h;
+      == {}
+      ghash_poly_unroll h prev data k m n *~ h;
+    }
+  else
+    let ghash0 = ghash_poly_unroll h prev data k (m - 1) (n + 1) in
+    let ghash1 = ghash_poly_unroll h prev data k (m - 1) (n + 2) in
+    calc (==) {
+      ghash_poly_unroll h prev data k m (n + 1);
+      == {}
+      ghash1 +. d *~ p1;
+      == {lemma_ghash_poly_unroll_n h prev data k (m - 1) (n + 1)}
+      ghash0 *~ h +. d *~ p1;
+      == {}
+      ghash0 *~ h +. d *~ (h *~ p0);
+      == {lemma_gf128_mul_rev_commute p0 h}
+      ghash0 *~ h +. d *~ (p0 *~ h);
+      == {lemma_gf128_mul_rev_associate d p0 h}
+      ghash0 *~ h +. (d *~ p0) *~ h;
+      == {lemma_gf128_mul_rev_distribute_left ghash0 (d *~ p0) h}
+      (ghash0 +. d *~ p0) *~ h;
+      == {}
+      ghash_poly_unroll h prev data k m n *~ h;
+    }
+
+let rec lemma_ghash_poly_unroll (h0:poly) (prev:poly) (data:int -> poly128) (k:int) (m:nat) : Lemma
+  (requires degree h0 < 128 /\ degree prev < 128)
+  (ensures ghash_poly_unroll h0 prev data k m 0 == ghash_poly h0 prev data k (k + m + 1))
+  =
+  let d = data (k + m) in
+  let p1 = g_power h0 1 in
+  let ghash0 = ghash_poly h0 prev data k (k + m) in
+  if m = 0 then
+    calc (==) {
+      ghash_poly_unroll h0 prev data k m 0;
+      == {}
+      (prev +. d) *~ p1;
+      == {}
+      (ghash0 +. d) *~ h0;
+      == {}
+      ghash_poly h0 prev data k (k + m + 1);
+    }
+  else
+    let unroll0 = ghash_poly_unroll h0 prev data k (m - 1) 0 in
+    let unroll1 = ghash_poly_unroll h0 prev data k (m - 1) 1 in
+    calc (==) {
+      ghash_poly_unroll h0 prev data k m 0;
+      == {}
+      unroll1 +. d *~ p1;
+      == {
+        calc (==) {
+          unroll1;
+          == {lemma_ghash_poly_unroll_n h0 prev data k (m - 1) 0}
+          unroll0 *~ h0;
+          == {lemma_ghash_poly_unroll h0 prev data k (m - 1)}
+          ghash0 *~ h0;
+        }
+      }
+      ghash0 *~ h0 +. d *~ h0;
+      == {lemma_gf128_mul_rev_distribute_left ghash0 d h0}
+      (ghash0 +. d) *~ h0;
+      == {}
+      ghash_poly h0 prev data k (k + m + 1);
+    }
+
+let rec lemma_ghash_unroll_poly_unroll (h:poly) (prev:poly) (data:int -> poly128) (k:int) (m n:nat) : Lemma
+  (requires degree h < 128 /\ degree prev < 128)
+  (ensures
+    mod_rev 128 (ghash_unroll h prev data k m n) gf128_modulus ==
+    ghash_poly_unroll h prev data k m n
+  )
+  =
+  let g = gf128_modulus in
+  let d = data (k + m) in
+  let p = g_power h (n + 1) in
+  let sp = shift_gf128_key_1 p in
+  lemma_gf128_degree ();
+  if m = 0 then
+    calc (==) {
+      mod_rev 128 (ghash_unroll h prev data k m n) g;
+      == {}
+      mod_rev 128 ((prev +. d) *. sp) g;
+      == {lemma_gf128_mul_rev_mod_rev (prev +. d) p}
+      (prev +. d) *~ p;
+      == {}
+      ghash_poly_unroll h prev data k m n;
+    }
+  else
+    let unroll1 = ghash_unroll h prev data k (m - 1) (n + 1) in
+    let ghash0 = ghash_poly_unroll h prev data k (m - 1) (n + 1) in
+    calc (==) {
+      mod_rev 128 (ghash_unroll h prev data k m n) g;
+      == {}
+      mod_rev 128 (unroll1 +. d *. sp) g;
+      == {lemma_add_mod_rev 128 unroll1 (d *. sp) g}
+      mod_rev 128 unroll1 g +. mod_rev 128 (d *. sp) g;
+      == {lemma_ghash_unroll_poly_unroll h prev data k (m - 1) (n + 1)}
+      ghash0 +. mod_rev 128 (d *. sp) g;
+      == {lemma_gf128_mul_rev_mod_rev d p}
+      ghash0 +. d *~ p;
+      == {}
+      ghash_poly_unroll h prev data k m n;
+    }
+
+let lemma_ghash_poly_of_unroll h prev data k m =
+  lemma_ghash_poly_unroll h prev data k m;
+  lemma_ghash_unroll_poly_unroll h prev data k m 0;
+  ()
 
 let lemma_ghash_incremental_def_0 (h_LE:quad32) (y_prev:quad32) (x:seq quad32)
   =

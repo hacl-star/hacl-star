@@ -43,6 +43,7 @@ val lemma_shift_2_left_1 (lo hi:poly) : Lemma
     hi' == to_quad32 (a' /. n)
   ))
 
+// TODO: move this to Poly library
 val lemma_reverse_reverse (a:poly) (n:nat) : Lemma
   (requires degree a <= n)
   (ensures reverse (reverse a n) n == a)
@@ -156,9 +157,26 @@ val lemma_gf128_low_shift (_:unit) : Lemma
 let gf128_mul_rev (a b:poly) : poly =
   reverse (gf128_mul (reverse a 127) (reverse b 127)) 127
 
+let ( *~ ) = gf128_mul_rev
+
+val lemma_gf128_mul_rev_commute (a b:poly) : Lemma (a *~ b == b *~ a)
+
+val lemma_gf128_mul_rev_associate (a b c:poly) : Lemma
+  (a *~ (b *~ c) == (a *~ b) *~ c)
+
+val lemma_gf128_mul_rev_distribute_left (a b c:poly) : Lemma
+  ((a +. b) *~ c == a *~ c +. b *~ c)
+
+val lemma_gf128_mul_rev_distribute_right (a b c:poly) : Lemma
+  (a *~ (b +. c) == a *~ b +. a *~ c)
+
 // TODO: change definition of reverse from (reverse a 127) to (reverse 128 a)
 let mod_rev (n:pos) (a b:poly) : poly =
   reverse (reverse a (n + n - 1) %. b) (n - 1)
+
+val lemma_add_mod_rev (n:pos) (a1 a2 b:poly) : Lemma
+  (requires degree b >= 0)
+  (ensures mod_rev n (a1 +. a2) b == mod_rev n a1 b +. mod_rev n a2 b)
 
 let shift_key_1 (n:pos) (f h:poly) : poly =
   let g = monomial n +. f in

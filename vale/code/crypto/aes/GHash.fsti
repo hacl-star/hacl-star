@@ -14,23 +14,40 @@ open Collections.Seqs
 open FStar.Seq
 open Math.Poly2_s
 open Math.Poly2
+open Math.Poly2.Bits_s
+open Math.Poly2.Bits
 open GF128
 
 #reset-options "--use_two_phase_tc true"
 
 let poly128 = p:poly{degree p < 128}
 
+let fun_quad32_poly128 (f:int -> quad32) : (int -> poly128) =
+  fun (i:int) -> of_quad32 (f i)
+
 let rec ghash_poly (h:poly) (init:poly) (data:int -> poly128) (j:int) (k:int) : Tot poly (decreases (k - j)) =
   if k <= j then init else
   gf128_mul_rev (ghash_poly h init data j (k - 1) +. data (k - 1)) h
 
+val gf128_power (h:poly) (n:nat) : poly
+
+// Unrolled series of n ghash computations
+let rec ghash_unroll (h:poly) (prev:poly) (data:int -> poly128) (k:int) (m n:nat) : poly =
+  let d = data (k + m) in
+  let p = gf128_power h (n + 1) in
+  if m = 0 then (prev +. d) *. p else
+  ghash_unroll h prev data k (m - 1) (n + 1) +. d *. p
+
 // Unrolled series of n ghash computations in reverse order (last to first)
-let rec ghash_unroll_back (h:poly) (prev:poly) (data:int -> poly) (k:int) (n m:nat) : poly =
+let rec ghash_unroll_back (h:poly) (prev:poly) (data:int -> poly128) (k:int) (n m:nat) : poly =
   let d = data (k + (n - 1 - m)) in
-  let p = power h (m + 1) in
-  if m = 0 then d *. p else
+  let p = gf128_power h (m + 1) in
   let v = if m = n - 1 then prev +. d else d in
+  if m = 0 then v *. p else
   ghash_unroll_back h prev data k n (m - 1) +. v *. p
+
+val lemma_ghash_unroll_back_forward (h:poly) (prev:poly) (data:int -> poly128) (k:int) (n:nat) : Lemma
+  (ghash_unroll h prev data k n 0 == ghash_unroll_back h prev data k (n + 1) n)
 
 val lemma_ghash_poly_degree (h:poly) (init:poly) (data:int -> poly128) (j:int) (k:int) : Lemma
   (requires degree h < 128 /\ degree init < 128)
@@ -38,15 +55,12 @@ val lemma_ghash_poly_degree (h:poly) (init:poly) (data:int -> poly128) (j:int) (
   (decreases (k - j))
   [SMTPat (ghash_poly h init data j k)]
 
-val shift_gf128_key_1 (h:poly) : poly
-
-val lemma_ghash_rev (h:poly) (init:poly) (data:int -> poly128) (j:int) (k:int) : Lemma
-  (requires k > j /\ degree h < 128 /\ degree init < 128 /\ degree (data (k - 1)) < 128)
-  (ensures (
-    let h1 = shift_gf128_key_1 h in
-    let a = ghash_poly h init data j (k - 1) +. data (k - 1) in
-    ghash_poly h init data j k == mod_rev 128 (a *. h1) gf128_modulus
-  ))
+val lemma_ghash_poly_of_unroll (h:poly) (prev:poly) (data:int -> poly128) (k:int) (m:nat) : Lemma
+  (requires degree h < 128 /\ degree prev < 128)
+  (ensures
+    mod_rev 128 (ghash_unroll h prev data k m 0) gf128_modulus ==
+    ghash_poly h prev data k (k + m + 1)
+  )
 
 let rec ghash_incremental_def (h_LE:quad32) (y_prev:quad32) (x:seq quad32) : Tot quad32 (decreases %[length x]) =
   if length x = 0 then y_prev else
