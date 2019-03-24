@@ -22,8 +22,8 @@ open GF128
 
 let poly128 = p:poly{degree p < 128}
 
-let fun_quad32_poly128 (f:int -> quad32) : (int -> poly128) =
-  fun (i:int) -> of_quad32 (f i)
+let fun_seq_quad32_LE_poly128 (s:seq quad32) : (int -> poly128) =
+  fun (i:int) -> if 0 <= i && i < length s then of_quad32 (reverse_bytes_quad32 (index s i)) else zero
 
 let rec ghash_poly (h:poly) (init:poly) (data:int -> poly128) (j:int) (k:int) : Tot poly (decreases (k - j)) =
   if k <= j then init else
@@ -70,6 +70,15 @@ let rec ghash_incremental_def (h_LE:quad32) (y_prev:quad32) (x:seq quad32) : Tot
   gf128_mul_LE xor_LE h_LE
 
 let ghash_incremental = make_opaque ghash_incremental_def
+
+val lemma_ghash_incremental_poly (h_LE:quad32) (y_prev:quad32) (x:seq quad32) : Lemma
+  (ensures
+    of_quad32 (reverse_bytes_quad32 (ghash_incremental h_LE y_prev x)) ==
+    ghash_poly
+      (of_quad32 (reverse_bytes_quad32 h_LE))
+      (of_quad32 (reverse_bytes_quad32 y_prev))
+      (fun_seq_quad32_LE_poly128 x) 0 (length x)
+  )
 
 // avoids need for extra fuel
 val lemma_ghash_incremental_def_0 (h_LE:quad32) (y_prev:quad32) (x:seq quad32) : Lemma

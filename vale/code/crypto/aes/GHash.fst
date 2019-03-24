@@ -1,5 +1,6 @@
 module GHash
 open Math.Poly2.Lemmas
+open Math.Poly2.Words
 
 #reset-options "--use_two_phase_tc true"
 
@@ -187,6 +188,217 @@ let lemma_ghash_poly_of_unroll h prev data k m =
   lemma_ghash_poly_unroll h prev data k m;
   lemma_ghash_unroll_poly_unroll h prev data k m 0;
   ()
+
+// TODO:
+// The spec for ghash_LE_def should be rewritten in a more endian-consistent style.
+// Right now, it performs the gf128_mul on BE (forward) values but performs the quad32_xor
+// on LE (backwards) values.  Xor is endianness-neutral, so it's still correct, but
+// it forces us to either insert extra byte reversals into the implementation (see the two
+// Pshufb operations in ReduceMul128_LE) or to prove this otherwise-unnecessary lemma:
+#reset-options "--z3rlimit 20"
+let lemma_reverse_bytes_quad32_xor (a b:quad32) : Lemma
+  (reverse_bytes_quad32 (quad32_xor a b) == quad32_xor (reverse_bytes_quad32 a) (reverse_bytes_quad32 b))
+  =
+  let open Words.Four_s in
+  let open FStar.Mul in
+  let open FStar.UInt in
+  let open FStar.BV in
+  let open Math.Bits in
+  let (!!) = reverse_bytes_quad32 in
+  let r32 = reverse_bytes_nat32 in
+  let mk4 (x0 x1 x2 x3:nat8) : nat32 = four_to_nat 8 (Mkfour x0 x1 x2 x3) in
+  let mk4n (x0 x1 x2 x3:nat8) : nat32 = x0 + x1 * 0x100 + x2 * 0x10000 + x3 * 0x1000000 in
+  let mk4m (x0 x1 x2 x3:nat8) : nat32 = add_hide #32 x0 (add_hide #32 (mul_hide #32 x1 0x100) (add_hide #32 (mul_hide #32 x2 0x10000) (mul_hide #32 x3 0x1000000))) in
+  let mk4b (x0 x1 x2 x3:bv_t 32) : bv_t 32 = b_add x0 (b_add (b_mul x1 0x100) (b_add (b_mul x2 0x10000) (b_mul x3 0x1000000))) in
+  let lemma_mk4_mk4m (a0 a1 a2 a3:nat8) : Lemma
+    (mk4 a0 a1 a2 a3 == mk4m a0 a1 a2 a3)
+    =
+    assert_norm (mk4 a0 a1 a2 a3 == mk4n a0 a1 a2 a3);
+    assert_norm (mk4m a0 a1 a2 a3 == mk4n a0 a1 a2 a3)
+    in
+  let lemma_small_logxor_32_8 (a b:nat8) : Lemma (logxor #32 a b < 0x100) =
+    lemma_to_is_bv8 a;
+    lemma_to_is_bv8 b;
+    let va = b_i2b #32 a in
+    let vb = b_i2b #32 b in
+    assert_norm (is_bv8 va /\ is_bv8 vb ==> b_xor va vb == b_and (b_xor va vb) (b_i2b 0xff));
+    lemma_i2b_equal (logxor #32 a b) (logand (logxor #32 a b) 0xff);
+    logand_le (logxor #32 a b) 0xff
+    in
+  let lemma_small_nat32_xor_32_8 (a b:nat8) : Lemma (nat32_xor a b < 0x100) =
+    Arch.TypesNative.reveal_ixor_all 32;
+    lemma_small_logxor_32_8 a b
+    in
+  let lemma_small_logxor_32_8 : (_:squash (forall (a b:nat8).{:pattern (logxor #32 a b)} logxor #32 a b < 0x100)) =
+    // FStar.Classical.forall_intro_2_with_pat didn't work; TODO: use new non-top-level SMTPat feature
+    FStar.Classical.forall_intro_2 lemma_small_logxor_32_8
+    in
+  let lemma_small_logxor_32_8 : (_:squash (forall (a b:nat8).{:pattern (nat32_xor a b)} nat32_xor a b < 0x100)) =
+    FStar.Classical.forall_intro_2 lemma_small_nat32_xor_32_8
+    in
+  let lemma_xor_mk4b (a0 a1 a2 a3 b0 b1 b2 b3:bv_t 32) : Lemma
+    (requires
+      is_bv8 a0 /\ is_bv8 a1 /\ is_bv8 a2 /\ is_bv8 a3 /\
+      is_bv8 b0 /\ is_bv8 b1 /\ is_bv8 b2 /\ is_bv8 b3
+    )
+    (ensures
+      b_xor (mk4b a0 a1 a2 a3) (mk4b b0 b1 b2 b3) ==
+      mk4b (b_xor a0 b0) (b_xor a1 b1) (b_xor a2 b2) (b_xor a3 b3)
+    )
+    =
+    let fact1 =
+      is_bv8 a0 /\ is_bv8 a1 /\ is_bv8 a2 /\ is_bv8 a3 /\
+      is_bv8 b0 /\ is_bv8 b1 /\ is_bv8 b2 /\ is_bv8 b3
+      in
+    // This turns out to be too slow:
+    // assert_norm (fact1 ==> bvxor (mk4b a0 a1 a2 a3) (mk4b b0 b1 b2 b3) == mk4b (bvxor a0 b0) (bvxor a1 b1) (bvxor a2 b2) (bvxor a3 b3));
+    let a = mk4b a0 a1 a2 a3 in
+    let b = mk4b b0 b1 b2 b3 in
+    assert_norm (fact1 ==> b_and (b_xor a b) (b_i2b 0x000000ff) ==        b_xor a0 b0);
+    assert_norm (fact1 ==> b_and (b_xor a b) (b_i2b 0x0000ff00) == b_shl (b_xor a1 b1) 8);
+    assert_norm (fact1 ==> b_and (b_xor a b) (b_i2b 0x00ff0000) == b_shl (b_xor a2 b2) 16);
+    assert_norm (fact1 ==> b_and (b_xor a b) (b_i2b 0xff000000) == b_shl (b_xor a3 b3) 24);
+    let f_pre (x x0 x1 x2 x3:bv_t 32) =
+      b_and x (b_i2b 0x000000ff) ==       x0 /\
+      b_and x (b_i2b 0x0000ff00) == b_shl x1 8 /\
+      b_and x (b_i2b 0x00ff0000) == b_shl x2 16 /\
+      b_and x (b_i2b 0xff000000) == b_shl x3 24
+      in
+    let f (x x0 x1 x2 x3:bv_t 32) : Lemma
+      (requires f_pre x x0 x1 x2 x3)
+      (ensures bveq x (mk4b x0 x1 x2 x3))
+      =
+      assert_norm (f_pre x x0 x1 x2 x3 ==> bveq x (mk4b x0 x1 x2 x3))
+    in
+    f (b_xor a b) (b_xor a0 b0) (b_xor a1 b1) (b_xor a2 b2) (b_xor a3 b3);
+    lemma_bveq (b_xor a b) (mk4b (b_xor a0 b0) (b_xor a1 b1) (b_xor a2 b2) (b_xor a3 b3));
+    ()
+    in
+  let lemma_logxor_4_nat8 (a0 a1 a2 a3 b0 b1 b2 b3:nat8) : Lemma
+    (logxor #32 (mk4m a0 a1 a2 a3) (mk4m b0 b1 b2 b3) == mk4m (logxor #32 a0 b0) (logxor #32 a1 b1) (logxor #32 a2 b2) (logxor #32 a3 b3))
+    =
+    lemma_to_is_bv8 a0;
+    lemma_to_is_bv8 a1;
+    lemma_to_is_bv8 a2;
+    lemma_to_is_bv8 a3;
+    lemma_to_is_bv8 b0;
+    lemma_to_is_bv8 b1;
+    lemma_to_is_bv8 b2;
+    lemma_to_is_bv8 b3;
+    lemma_xor_mk4b (b_i2b a0) (b_i2b a1) (b_i2b a2) (b_i2b a3) (b_i2b b0) (b_i2b b1) (b_i2b b2) (b_i2b b3);
+    lemma_i2b_equal
+      (logxor #32 (mk4m a0 a1 a2 a3) (mk4m b0 b1 b2 b3))
+      (mk4m (logxor #32 a0 b0) (logxor #32 a1 b1) (logxor #32 a2 b2) (logxor #32 a3 b3))
+    in
+  let lemma_xor_4_nat8_n (a0 a1 a2 a3 b0 b1 b2 b3:nat8) : Lemma
+    (nat32_xor (mk4m a0 a1 a2 a3) (mk4m b0 b1 b2 b3) == mk4m (nat32_xor a0 b0) (nat32_xor a1 b1) (nat32_xor a2 b2) (nat32_xor a3 b3))
+    =
+    Arch.TypesNative.reveal_ixor_all 32;
+    lemma_logxor_4_nat8 a0 a1 a2 a3 b0 b1 b2 b3
+    in
+  let lemma_xor_4_nat8 (a0 a1 a2 a3 b0 b1 b2 b3:nat8) : Lemma
+    (nat32_xor (mk4 a0 a1 a2 a3) (mk4 b0 b1 b2 b3) == mk4 (nat32_xor a0 b0) (nat32_xor a1 b1) (nat32_xor a2 b2) (nat32_xor a3 b3))
+    =
+    lemma_mk4_mk4m a0 a1 a2 a3;
+    lemma_mk4_mk4m b0 b1 b2 b3;
+    lemma_mk4_mk4m (nat32_xor a0 b0) (nat32_xor a1 b1) (nat32_xor a2 b2) (nat32_xor a3 b3);
+    lemma_xor_4_nat8_n a0 a1 a2 a3 b0 b1 b2 b3
+    in
+  let rev_nat32 (a b:nat32) : Lemma
+    (r32 (nat32_xor a b) == nat32_xor (r32 a) (r32 b))
+    =
+    calc (==) {
+      r32 (nat32_xor a b);
+      == {reveal_opaque reverse_bytes_nat32_def}
+      be_bytes_to_nat32 (reverse_seq (nat32_to_be_bytes (nat32_xor a b)));
+      == {
+        let x = nat32_xor a b in
+        let y = r32 x in
+        let Mkfour a0 a1 a2 a3 = nat_to_four 8 a in
+        let Mkfour b0 b1 b2 b3 = nat_to_four 8 b in
+        let Mkfour x0 x1 x2 x3 = nat_to_four 8 x in
+        let Mkfour y0 y1 y2 y3 = nat_to_four 8 y in
+        lemma_xor_4_nat8 a0 a1 a2 a3 b0 b1 b2 b3;
+        lemma_xor_4_nat8 a3 a2 a1 a0 b3 b2 b1 b0;
+        ()
+      }
+      nat32_xor (be_bytes_to_nat32 (reverse_seq (nat32_to_be_bytes a))) (be_bytes_to_nat32 (reverse_seq (nat32_to_be_bytes b)));
+      == {reveal_opaque reverse_bytes_nat32_def}
+      nat32_xor (r32 a) (r32 b);
+    }
+    // r32 n = be_bytes_to_nat32 (reverse_seq (nat32_to_be_bytes n))
+    // lemma_ixor_nth_all 32;
+    in
+  calc (==) {
+    !!(quad32_xor a b);
+    == {reveal_opaque quad32_xor_def}
+    !!(four_map2 nat32_xor a b);
+    == {reveal_reverse_bytes_quad32 (four_map2 nat32_xor a b)}
+    four_reverse (four_map r32 (four_map2 nat32_xor a b));
+    == {
+      let Mkfour a0 a1 a2 a3 = a in
+      let Mkfour b0 b1 b2 b3 = b in
+      rev_nat32 a0 b0;
+      rev_nat32 a1 b1;
+      rev_nat32 a2 b2;
+      rev_nat32 a3 b3;
+      ()
+    }
+    four_reverse (four_map2 nat32_xor (four_map r32 a) (four_map r32 b));
+    == {}
+    four_map2 nat32_xor (four_reverse (four_map r32 a)) (four_reverse (four_map r32 b));
+    == {reveal_reverse_bytes_quad32 a; reveal_reverse_bytes_quad32 b}
+    four_map2 nat32_xor !!a !!b;
+    == {reveal_opaque quad32_xor_def}
+    quad32_xor !!a !!b;
+  }
+
+let rec lemma_ghash_incremental_poly_rec (h_LE:quad32) (y_prev:quad32) (x:seq quad32) (data:int -> poly128) : Lemma
+  (requires
+    (forall (i:int).{:pattern data i \/ index x i} 0 <= i && i < length x ==>
+      data i == of_quad32 (reverse_bytes_quad32 (index x i)))
+  )
+  (ensures
+    of_quad32 (reverse_bytes_quad32 (ghash_incremental_def h_LE y_prev x)) ==
+    ghash_poly (of_quad32 (reverse_bytes_quad32 h_LE)) (of_quad32 (reverse_bytes_quad32 y_prev)) data 0 (length x)
+  )
+  (decreases (length x))
+  =
+  reveal_opaque ghash_incremental_def;
+  let (~~) = of_quad32 in
+  let (!!) = reverse_bytes_quad32 in
+  let (~!) x = ~~(!!x) in
+  let h = ~!h_LE in
+  let prev = ~!y_prev in
+  let m = length x in
+  if m > 0 then
+    let y_i_minus_1 = ghash_incremental_def h_LE y_prev (all_but_last x) in
+    let x_i = last x in
+    let xor_LE = quad32_xor y_i_minus_1 x_i in
+    let g = gf128_modulus in
+    calc (==) {
+      ~!(ghash_incremental_def h_LE y_prev x);
+      == {}
+      ~!(gf128_mul_LE xor_LE h_LE);
+      == {lemma_of_to_quad32 (~!xor_LE *~ h)}
+      ~!xor_LE *~ h;
+      == {calc (==) {
+        ~!(quad32_xor y_i_minus_1 x_i);
+        == {lemma_reverse_bytes_quad32_xor y_i_minus_1 x_i}
+        ~~(quad32_xor !!y_i_minus_1 !!x_i);
+        == {lemma_add_quad32 !!y_i_minus_1 !!x_i}
+        ~!y_i_minus_1 +. ~!x_i;
+      }}
+      (~!y_i_minus_1 +. ~!x_i) *~ h;
+      == {lemma_ghash_incremental_poly_rec h_LE y_prev (all_but_last x) data}
+      (ghash_poly h prev data 0 (m - 1) +. data (m - 1)) *~ h;
+      == {}
+      ghash_poly h prev data 0 m;
+    }
+
+let lemma_ghash_incremental_poly h_LE y_prev x =
+  reveal_opaque ghash_incremental_def;
+  lemma_ghash_incremental_poly_rec h_LE y_prev x (fun_seq_quad32_LE_poly128 x)
 
 let lemma_ghash_incremental_def_0 (h_LE:quad32) (y_prev:quad32) (x:seq quad32)
   =
