@@ -111,7 +111,7 @@ val gcm128_encrypt_opt':
       4096 * (UInt64.v auth_bytes) < pow2_32 /\
 
       UInt64.v len128x6 % 6 == 0 /\
-      UInt64.v len128x6 >= 18 /\
+      (UInt64.v len128x6 > 0 ==> UInt64.v len128x6 >= 18) /\
       12 + UInt64.v len128x6 + 6 < pow2_32 /\
 
       aesni_enabled /\ pclmulqdq_enabled /\
@@ -370,40 +370,76 @@ let gcm128_encrypt_opt_alloca key plain_b plain_len auth_b auth_len iv_b
   
   // Compute length of biggest blocks of 6 * 128-bit blocks
   let len128x6 = UInt64.mul (plain_len / 96uL) 96uL in
-  // Compute the size of the remaining 128-bit blocks
-  let len128_num = ((plain_len / 16uL) * 16uL) - len128x6 in
-  let auth_num = (auth_len / 16uL) * 16uL in
-  // Casting to uint32 is here the equality
-  FStar.Math.Lemmas.small_mod (UInt64.v len128x6) pow2_32;
-  FStar.Math.Lemmas.small_mod (UInt64.v len128_num) pow2_32;
-  FStar.Math.Lemmas.small_mod (UInt64.v auth_num) pow2_32;
-  let in128x6_b = B.sub plain_b 0ul (uint64_to_uint32 len128x6) in
-  let out128x6_b = B.sub out_b 0ul (uint64_to_uint32 len128x6) in
-  let in128_b = B.sub plain_b (uint64_to_uint32 len128x6) (uint64_to_uint32 len128_num) in
-  let out128_b = B.sub out_b (uint64_to_uint32 len128x6) (uint64_to_uint32 len128_num) in
-  let vauth_b = B.sub auth_b 0ul (uint64_to_uint32 auth_num) in
+  if len128x6 / 16uL >= 18uL then (
+    // Compute the size of the remaining 128-bit blocks
+    let len128_num = ((plain_len / 16uL) * 16uL) - len128x6 in
+    let auth_num = (auth_len / 16uL) * 16uL in
+    // Casting to uint32 is here the equality
+    FStar.Math.Lemmas.small_mod (UInt64.v len128x6) pow2_32;
+    FStar.Math.Lemmas.small_mod (UInt64.v len128_num) pow2_32;
+    FStar.Math.Lemmas.small_mod (UInt64.v auth_num) pow2_32;
+    let in128x6_b = B.sub plain_b 0ul (uint64_to_uint32 len128x6) in
+    let out128x6_b = B.sub out_b 0ul (uint64_to_uint32 len128x6) in
+    let in128_b = B.sub plain_b (uint64_to_uint32 len128x6) (uint64_to_uint32 len128_num) in
+    let out128_b = B.sub out_b (uint64_to_uint32 len128x6) (uint64_to_uint32 len128_num) in
+    let vauth_b = B.sub auth_b 0ul (uint64_to_uint32 auth_num) in
 
-  assume (UInt64.v len128x6 / 16 >= 18);
+    gcm128_encrypt_opt'
+      key
+      vauth_b 
+      auth_len 
+      (UInt64.div auth_num 16uL) 
+      keys_b 
+      iv_b 
+      hkeys_b 
+      abytes_b 
+      in128x6_b
+      out128x6_b 
+      (UInt64.div len128x6 16uL)
+      in128_b
+      out128_b
+      (UInt64.div len128_num 16uL)
+      inout_b
+      plain_len 
+      scratch_b
+      tag_b
 
-  gcm128_encrypt_opt'
-    key
-    vauth_b 
-    auth_len 
-    (UInt64.div auth_num 16uL) 
-    keys_b 
-    iv_b 
-    hkeys_b 
-    abytes_b 
-    in128x6_b
-    out128x6_b 
-    (UInt64.div len128x6 16uL)
-    in128_b
-    out128_b
-    (UInt64.div len128_num 16uL)
-    inout_b
-    plain_len 
-    scratch_b
-    tag_b
+  ) else (
+    let len128x6 = 0ul in
+    // Compute the size of the remaining 128-bit blocks
+    let len128_num = ((plain_len / 16uL) * 16uL) in
+    let auth_num = (auth_len / 16uL) * 16uL in
+    // Casting to uint32 is here the equality
+    FStar.Math.Lemmas.small_mod (UInt64.v len128_num) pow2_32;
+    FStar.Math.Lemmas.small_mod (UInt64.v auth_num) pow2_32;
+    let in128x6_b = B.sub plain_b 0ul len128x6 in
+    let out128x6_b = B.sub out_b 0ul len128x6 in
+    let in128_b = B.sub plain_b len128x6 (uint64_to_uint32 len128_num) in
+    let out128_b = B.sub out_b len128x6 (uint64_to_uint32 len128_num) in
+    let vauth_b = B.sub auth_b 0ul (uint64_to_uint32 auth_num) in
+
+    gcm128_encrypt_opt'
+      key
+      vauth_b 
+      auth_len 
+      (UInt64.div auth_num 16uL) 
+      keys_b 
+      iv_b 
+      hkeys_b 
+      abytes_b 
+      in128x6_b
+      out128x6_b 
+      0uL
+      in128_b
+      out128_b
+      (UInt64.div len128_num 16uL)
+      inout_b
+      plain_len 
+      scratch_b
+      tag_b
+
+
+  )
 
 let gcm128_encrypt_opt_stdcall key plain_b plain_len auth_b auth_len iv_b out_b tag_b keys_b hkeys_b =
   let h0 = get() in
