@@ -69,7 +69,7 @@
         "typing_Spec.Poly1305.size_key"
       ],
       0,
-      "fc86a06cb8cd617e16cb4a40b142fb8b"
+      "95f63c098cd6232422905a8c23d81338"
     ],
     [
       "Hacl.Spec.Poly1305.Vec.zero",
@@ -148,7 +148,7 @@
         "typing_Spec.Poly1305.size_key"
       ],
       0,
-      "44a3f6c061f07f29be13571f52b8a7d2"
+      "620ad80dc0b5351c28279107c2d9fa4a"
     ],
     [
       "Hacl.Spec.Poly1305.Vec.load_elem2",
@@ -365,7 +365,7 @@
         "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-      "d76e7006712bd0afe92f6a43554c9162"
+      "aa635a5357fd6e8e05c95f705a901ed5"
     ],
     [
       "Hacl.Spec.Poly1305.Vec.normalize_1",
@@ -380,7 +380,7 @@
         "typing_Spec.Poly1305.size_key"
       ],
       0,
-      "9a12c06d7a2abc0385730b6515f860de"
+      "f586ccf15e173b78118a22a4d9f17728"
     ],
     [
       "Hacl.Spec.Poly1305.Vec.normalize_1",
@@ -618,19 +618,21 @@
       0,
       0,
       [
-        "@MaxIFuel_assumption",
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
         "Prims_pretyping_ae567c2fb75be05905677af440075565",
         "equation_Hacl.Spec.Poly1305.Vec.size_block",
         "equation_Hacl.Spec.Poly1305.Vec.size_key",
         "equation_Lib.Sequence.length", "equation_Lib.Sequence.lseq",
-        "equation_Prims.nat", "equation_Spec.Poly1305.size_block",
+        "equation_Prims.nat", "equation_Prims.nonzero",
+        "equation_Spec.Poly1305.size_block",
         "function_token_typing_Prims.__cache_version_number__",
+        "int_inversion", "int_typing", "lemma_Lib.IntTypes.pow2_values",
         "primitive_Prims.op_Modulus", "primitive_Prims.op_Multiply",
         "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_5a4fe33be2b93c781e552e491bb9dd31",
+        "refinement_interpretation_Tm_refine_7075614a0e8c0bdbec6de0d0ef7f1280",
         "refinement_interpretation_Tm_refine_74f0d7bdd477972ce26ebb8dfc944a86",
-        "refinement_interpretation_Tm_refine_8abbcd28c4e04b06571f0426a0a59713",
         "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
         "refinement_interpretation_Tm_refine_d8d83307254a8900dd20598654272e42",
         "typing_Spec.Poly1305.size_block"
