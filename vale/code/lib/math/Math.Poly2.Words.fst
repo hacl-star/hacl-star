@@ -22,8 +22,6 @@ let lemma_add128 a b =
   }
 
 let lemma_add_quad32 a b =
-  lemma_to_of_quad32 a;
-  lemma_to_of_quad32 b;
   calc (==) {
     of_quad32 a +. of_quad32 b;
     == {lemma_of_to_quad32 (of_quad32 a +. of_quad32 b)}

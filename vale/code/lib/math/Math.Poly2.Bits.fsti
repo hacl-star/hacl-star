@@ -71,9 +71,14 @@ val lemma_of_quad32_degree (q:quad32) : Lemma
   (degree (of_quad32 q) < 128)
   [SMTPat (degree (of_quad32 q))]
 
-val lemma_to_of_quad32 (q:quad32) : Lemma (to_quad32 (of_quad32 q) == q)
+val lemma_to_of_quad32 (q:quad32) : Lemma
+  (ensures to_quad32 (of_quad32 q) == q)
+  [SMTPat (to_quad32 (of_quad32 q))]
 
 val lemma_of_to_quad32 (a:poly) : Lemma
   (requires degree a < 128)
   (ensures of_quad32 (to_quad32 a) == a)
+
+val lemma_of_to_quad32_mask (a:poly) : Lemma
+  (of_quad32 (to_quad32 a) == mask a 128)
 
