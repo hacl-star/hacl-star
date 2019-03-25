@@ -2,6 +2,7 @@ include "../../../arch/x64/X64.Vale.InsBasic.vaf"
 include "../../../arch/x64/X64.Vale.InsMem.vaf"
 include "../../../arch/x64/X64.Vale.InsVector.vaf"
 include "../../../arch/x64/X64.Vale.InsAes.vaf"
+include "../../../crypto/aes/x64/X64.PolyOps.vaf"
 include{:fstar}{:open} "Prop_s"
 include{:fstar}{:open} "Opaque_s"
 include{:fstar}{:open} "Words_s"
@@ -61,6 +62,7 @@ open GCTR_s
 open GCTR
 open Arch.TypesNative
 open X64.CPU_Features_s
+open X64.PolyOps
 open Math.Poly2_s
 open Math.Poly2
 open Math.Poly2.Bits_s
@@ -130,87 +132,6 @@ function operator( $$ ) (a:quad32):poly := of_quad32;
 //function operator( [] ) (b:buffer128, i:int):fun(mem)->quad32:= buffer128_read;
 
 // TODO: Use constp and memory operands to directly load constants from memory, instead of constructing them
-
-procedure{:quick exportOnly} VPolyAdd(out dst:xmm, src1:xmm, src2:opr128)
-    lets
-        a1 := of_quad32(src1);
-        a2 := of_quad32(src2);
-    modifies
-        efl;
-    ensures
-        of_quad32(dst) == add(a1, a2);
-{
-    VPxor(dst, src1, src2);
-    lemma_add128(a1, a2);
-    lemma_of_to_quad32(add(a1, a2));
-}
-
-procedure{:quick exportOnly} VHigh64ToLow(out dst:xmm, src:xmm)
-    lets
-        a := of_quad32(src);
-    modifies
-        efl;
-    ensures
-        of_quad32(dst) == shift(a, (-64));
-{
-    Vpsrldq8(dst, src);
-    lemma_quad32_double_shift(a);
-    lemma_shift_is_div(a, 64);
-    lemma_of_to_quad32(shift(a, (-64)));
-}
-
-procedure{:quick exportOnly} VLow64ToHigh(out dst:xmm, src:xmm)
-    lets
-        a := of_quad32(src);
-    modifies
-        efl;
-    ensures
-        of_quad32(dst) == shift(mask(a, 64), 64);
-{
-    Vpslldq8(dst, src);
-    lemma_quad32_double_shift(a);
-    lemma_mask_is_mod(a, 64);
-    lemma_shift_is_mul(mask(a, 64), 64);
-    lemma_of_to_quad32(shift(mask(a, 64), 64));
-}
-
-procedure{:quick exportOnly} VSwap(out dst:xmm, src:xmm)
-    lets
-        a := of_quad32(src);
-    modifies
-        efl;
-    ensures
-        of_quad32(dst) == swap(a, 64);
-{
-    VPalignr8(dst, src, src);
-    lemma_quad32_double_swap(a);
-    lemma_of_to_quad32(swap(a, 64));
-}
-
-procedure{:quick exportOnly} VPolyMul(out dst:xmm, src1:xmm, src2:xmm, inline src1Hi:bool, inline src2Hi:bool)
-    lets
-        a1 := of_quad32(src1);
-        a2 := of_quad32(src2);
-    modifies
-        efl;
-    requires
-        pclmulqdq_enabled;
-    ensures
-        of_quad32(dst) == mul(
-            if src1Hi then hi(a1) else lo(a1),
-            if src2Hi then hi(a2) else lo(a2));
-{
-    VPclmulqdq(dst, src1, src2, src1Hi, src2Hi);
-    lemma_quad32_double(a1);
-    lemma_quad32_double(a2);
-    lemma_shift_is_div(a1, 64);
-    lemma_shift_is_div(a2, 64);
-    lemma_mask_is_mod(a1, 64);
-    lemma_mask_is_mod(a2, 64);
-    lemma_of_to_quad32(mul(
-        if src1Hi then shift(a1, (-64)) else mask(a1, 64),
-        if src2Hi then shift(a2, (-64)) else mask(a2, 64)));
-}
 
 procedure {:quick} Load_one_msb()
     lets constp @= r11; T2 @= xmm2; 
