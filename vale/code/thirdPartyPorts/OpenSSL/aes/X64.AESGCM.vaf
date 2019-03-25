@@ -3492,7 +3492,7 @@ procedure {:quick} {:public} AES_GCM_encrypt_6mult(
         // Len is # of 128-bit blocks
         len % 6 == 0;
         len > 0 ==> len >= 18;
-        len / 6 >= 3;   // Should be implied by above... :(
+        len > 0 ==> len / 6 >= 3;   // Should be implied by above... :(
         12 + len + 6 < pow2_32;
     ensures
         // Framing
@@ -3518,11 +3518,14 @@ procedure {:quick} {:public} AES_GCM_encrypt_6mult(
     if (len == 0) {
         AddLea64(Xip, Xip, 0x20);   // # size optimization
 
+        Load128_buffer(T1, ivp, 0, Secret, iv_b, 0);    // # input counter value
         // TODO: Replace all of this with a single PinsrdImm(T1, 0x02000000, 3, counter)
         InitPshufbMask(Ii, r12);    // # borrow $Ii for .Lbswap_mask
         VPshufb(T1, T1, Ii);
         PinsrdImm(T1, 2, 0, counter);   // Directly set the counter in T1.lo0 (and counter) to 2, rather than read the existing value as OpenSSL does
         ctr_BE := T1;
+        VPshufb(T1, T1, Ii);
+        Store128_buffer(ivp, T1, 0x00, Secret, iv_b, 0);
         gctr_partial_opaque_init(alg, s128(mem, in_b), s128(mem, out_b), key_words, ctr_BE);
     } else {
         ghost var plain_quads := s128(mem, in_b);
