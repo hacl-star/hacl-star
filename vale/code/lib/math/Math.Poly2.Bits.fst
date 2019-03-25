@@ -130,3 +130,10 @@ let lemma_of_to_quad32 a =
   lemma_reverse_define_all ();
   lemma_equal a (of_quad32 (to_quad32 a))
 
+let lemma_of_to_quad32_mask a =
+  reveal_to_quad32 a;
+  reveal_of_quad32 (to_quad32 a);
+  lemma_index_all ();
+  lemma_reverse_define_all ();
+  lemma_mask_define_all ();
+  lemma_equal (mask a 128) (of_quad32 (to_quad32 a))

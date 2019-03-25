@@ -82,8 +82,6 @@ procedure{:quick exportOnly} VPolyAdd(out dst:xmm, src1:xmm, src2:opr128)
     ensures
         of_quad32(dst) == add(a1, a2);
 {
-    lemma_to_of_quad32(src1);
-    lemma_to_of_quad32(src2);
     VPxor(dst, src1, src2);
     lemma_add128(a1, a2);
     lemma_of_to_quad32(add(a1, a2));
@@ -97,7 +95,6 @@ procedure{:quick exportOnly} VHigh64ToLow(out dst:xmm, src:xmm)
     ensures
         of_quad32(dst) == shift(a, (-64));
 {
-    lemma_to_of_quad32(src);
     Vpsrldq8(dst, src);
     lemma_quad32_double_shift(a);
     lemma_shift_is_div(a, 64);
@@ -112,7 +109,6 @@ procedure{:quick exportOnly} VLow64ToHigh(out dst:xmm, src:xmm)
     ensures
         of_quad32(dst) == shift(mask(a, 64), 64);
 {
-    lemma_to_of_quad32(src);
     Vpslldq8(dst, src);
     lemma_quad32_double_shift(a);
     lemma_mask_is_mod(a, 64);
@@ -128,7 +124,6 @@ procedure{:quick exportOnly} VSwap(out dst:xmm, src:xmm)
     ensures
         of_quad32(dst) == swap(a, 64);
 {
-    lemma_to_of_quad32(src);
     VPalignr8(dst, src, src);
     lemma_quad32_double_swap(a);
     lemma_of_to_quad32(swap(a, 64));
@@ -147,8 +142,6 @@ procedure{:quick exportOnly} VPolyMul(out dst:xmm, src1:xmm, src2:xmm, inline sr
             if src1Hi then shift(a1, (-64)) else mask(a1, 64),
             if src2Hi then shift(a2, (-64)) else mask(a2, 64));
 {
-    lemma_to_of_quad32(src1);
-    lemma_to_of_quad32(src2);
     VPclmulqdq(dst, src1, src2, src1Hi, src2Hi);
     lemma_quad32_double(a1);
     lemma_quad32_double(a2);
@@ -447,6 +440,5 @@ procedure{:quick} GhashUnroll6x(
     // assert of_quad32(Xi) == ghash_poly(h, prev, pdata, 0, 6);
     lemma_ghash_incremental_poly(h_LE, y_prev, data);
     // assert of_quad32(Xi) == of_quad32(reverse_bytes_quad32(ghash_incremental(h_LE, y_prev, data)));
-    lemma_to_of_quad32(Xi);
     lemma_to_of_quad32(reverse_bytes_quad32(ghash_incremental(h_LE, y_prev, data)));
 }
