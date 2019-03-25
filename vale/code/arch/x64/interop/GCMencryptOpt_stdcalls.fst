@@ -7,6 +7,7 @@ module V = X64.Vale.Decls
 open Gcm_simplify
 open GCM_helpers
 open FStar.Calc
+open FStar.Int.Cast
 
 #set-options "--z3rlimit 400 --max_fuel 0 --max_ifuel 0"
 
@@ -271,7 +272,62 @@ let gcm128_encrypt_opt' key auth_b auth_bytes auth_num keys_b iv_b hkeys_b abyte
   ()
 
 let gcm128_encrypt_opt_stdcall key plain_b plain_len auth_b auth_len iv_b out_b tag_b keys_b hkeys_b =
+  let h0 = get() in
+
   push_frame();
+  // Scratch space for Vale procedure
   let scratch_b = B.alloca 0uy 128ul in
-  admit();
+  // Extra space to have a full input/output with length % 16 = 0
+  let inout_b = B.alloca 0uy 16ul in
+  // Same for auth_b
+  let abytes_b = B.alloca 0uy 16ul in
+  // Compute length of biggest blocks of 6 * 128-bit blocks
+  // Look at FStar.Math.Lemmas.modulo_modulo_lemma
+  let len128x6 = UInt64.mul (UInt64.div plain_len 96uL) 96uL in
+  // Compute the size of the remaining 128-bit blocks
+  let len128_num = UInt64.sub (UInt64.mul (UInt64.div plain_len 16uL) 16uL) len128x6 in
+  let auth_num = UInt64.mul (UInt64.div auth_len 16uL) 16uL in
+  // Casting to uint32 is here the equality
+  FStar.Math.Lemmas.small_mod (UInt64.v len128x6) pow2_32;
+  FStar.Math.Lemmas.small_mod (UInt64.v len128_num) pow2_32;
+  FStar.Math.Lemmas.small_mod (UInt64.v auth_num) pow2_32;
+  let in128x6_b = B.sub plain_b 0ul (uint64_to_uint32 len128x6) in
+  let out128x6_b = B.sub out_b 0ul (uint64_to_uint32 len128x6) in
+  let in128_b = B.sub plain_b (uint64_to_uint32 len128x6) (uint64_to_uint32 len128_num) in
+  let out128_b = B.sub out_b (uint64_to_uint32 len128x6) (uint64_to_uint32 len128_num) in
+  let vauth_b = B.sub auth_b 0ul (uint64_to_uint32 auth_num) in
+
+  // TODO: Blit remain of plain_b into inout_b, same with auth_b and abytes_b
+
+  assume (UInt64.v (UInt64.div len128x6 16uL) >= 18);
+
+  let h1 = get() in
+
+  // Ensures that the view on the keys buffer is the same after allocations
+  BufferViewHelpers.lemma_dv_equal Views.down_view8 keys_b h0 h1;
+  assert (let db = get_downview keys_b in
+      length_aux keys_b;
+      let ub = UV.mk_buffer db Views.up_view128 in
+      Seq.equal (UV.as_seq h0 ub) (UV.as_seq h1 ub));
+
+  gcm128_encrypt_opt'
+    key
+    vauth_b 
+    auth_len 
+    (UInt64.div auth_num 16uL) 
+    keys_b 
+    iv_b 
+    hkeys_b 
+    abytes_b 
+    in128x6_b
+    out128x6_b 
+    (UInt64.div len128x6 16uL)
+    in128_b
+    out128_b
+    (UInt64.div len128_num 16uL)
+    inout_b
+    plain_len 
+    scratch_b
+    tag_b;
+
   pop_frame()

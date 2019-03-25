@@ -71,21 +71,21 @@ val gcm128_encrypt_opt_stdcall:
   Stack unit
     (requires fun h0 ->
       B.disjoint tag_b out_b /\ B.disjoint tag_b hkeys_b /\
-      disjoint_or_eq tag_b plain_b /\ disjoint_or_eq iv_b auth_b /\
+      B.disjoint tag_b plain_b /\ B.disjoint tag_b auth_b /\
       disjoint_or_eq tag_b iv_b /\ disjoint_or_eq tag_b keys_b /\
 
       B.disjoint iv_b keys_b /\ B.disjoint iv_b out_b /\
       B.disjoint iv_b plain_b /\ B.disjoint iv_b hkeys_b /\
-      disjoint_or_eq iv_b auth_b /\
+      B.disjoint iv_b auth_b /\
 
       B.disjoint out_b keys_b /\ B.disjoint out_b hkeys_b /\
-      disjoint_or_eq out_b auth_b /\ disjoint_or_eq out_b plain_b /\
+      B.disjoint out_b auth_b /\ disjoint_or_eq out_b plain_b /\
       
       B.disjoint plain_b keys_b /\ B.disjoint plain_b hkeys_b /\
-      disjoint_or_eq plain_b auth_b /\
+      B.disjoint plain_b auth_b /\
 
-      disjoint_or_eq keys_b hkeys_b /\ disjoint_or_eq keys_b auth_b /\
-      disjoint_or_eq hkeys_b auth_b /\
+      disjoint_or_eq keys_b hkeys_b /\ 
+      B.disjoint keys_b auth_b /\ B.disjoint hkeys_b auth_b /\
 
       B.live h0 auth_b /\ B.live h0 keys_b /\
       B.live h0 iv_b /\ B.live h0 hkeys_b /\
@@ -95,6 +95,7 @@ val gcm128_encrypt_opt_stdcall:
       B.length auth_b = UInt64.v auth_len /\
       B.length iv_b = 16 /\
       B.length plain_b = UInt64.v plain_len /\
+      B.length out_b = B.length plain_b /\
       B.length hkeys_b = 160 /\
       B.length tag_b == 16 /\
       B.length keys_b = 176 /\
