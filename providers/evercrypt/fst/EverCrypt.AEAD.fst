@@ -38,7 +38,7 @@ let expand_in #a r k =
         let ek' =
           B.alloca #UInt8.t 0uy 176ul
         in
-        AES_stdcalls.aes128_key_expansion k ek';
+        AES_stdcalls.aes128_key_expansion_stdcall k ek';
         let h1 = ST.get() in
         Gcm_simplify.aes_simplify3 ek' h1 (AES_s.key_to_round_keys_LE AES_s.AES_128 (Words.Seq_s.seq_nat8_to_seq_nat32_LE (Words.Seq_s.seq_uint8_to_seq_nat8 (G.reveal kv))));
         MB.blit ek' 0ul ek 0ul 176ul;
@@ -64,7 +64,7 @@ let expand_in #a r k =
         let ek' =
           B.alloca #UInt8.t 0uy 240ul
         in
-        AES_stdcalls.aes256_key_expansion k ek';
+        AES_stdcalls.aes256_key_expansion_stdcall k ek';
         let h1 = ST.get() in
         Gcm_simplify.aes_simplify3 ek' h1 (AES_s.key_to_round_keys_LE AES_s.AES_256 (Words.Seq_s.seq_nat8_to_seq_nat32_LE (Words.Seq_s.seq_uint8_to_seq_nat8 (G.reveal kv))));
         MB.blit ek' 0ul ek 0ul 240ul;
