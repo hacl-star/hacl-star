@@ -39,6 +39,7 @@ let uint32_fits_maxLength a (x: UInt32.t): Lemma
   assert_norm (pow2 32 <= pow2 61);
   assert_norm (pow2 61 <= pow2 125)
 
+#set-options "--max_fuel 0 --z3rlimit 100"
 val compute:
   a: EverCrypt.Hash.alg ->
   len: UInt32.t ->
@@ -267,21 +268,26 @@ let test_chacha20_poly1305 vec =
       (LB tag_len tag), (LB plaintext_len plaintext), (LB ciphertext_len ciphertext) = vec
     in
     let plaintext'    = B.alloca 0uy plaintext_len in
-    let ciphertext'   = B.alloca 0uy plaintext_len in
-    let tag'          = B.alloca 0uy 16ul in
+    let ciphertext'   = B.alloca 0uy (plaintext_len `U32.add` 16ul) in
 
     let s0 = TestLib.cpucycles () in
-    EverCrypt.chacha20_poly1305_encrypt key iv aad aad_len plaintext plaintext_len ciphertext' tag';
+    let ek = EverCrypt.AEAD.expand_in #Spec.AEAD.CHACHA20_POLY1305 HyperStack.root key in
+    if LowStar.Monotonic.Buffer.is_null (EverCrypt.AEAD.EK?.ek ek) then begin
+      C.String.print !$"Expansion failed!\n"; C.portable_exit 1l
+    end;
+    if EverCrypt.AEAD.encrypt ek iv aad aad_len plaintext plaintext_len ciphertext' <>
+      EverCrypt.AEAD.Success then begin
+      C.String.print !$"Expansion failed!\n"; C.portable_exit 1l
+    end;
     let s1 = TestLib.cpucycles () in
     TestLib.print_cycles_per_round s0 s1 1ul;
-    TestLib.compare_and_print !$"of Chacha20-Poly1305 cipher" ciphertext ciphertext' plaintext_len;
-    TestLib.compare_and_print !$"of Chacha20-Poly1305 tag" tag tag' 16ul;
+    TestLib.compare_and_print !$"of Chacha20-Poly1305 cipher" ciphertext (B.sub ciphertext' 0ul plaintext_len) plaintext_len;
+    TestLib.compare_and_print !$"of Chacha20-Poly1305 tag" tag (B.sub ciphertext' plaintext_len 16ul) 16ul;
 
-    match EverCrypt.chacha20_poly1305_decrypt key iv aad aad_len plaintext' plaintext_len ciphertext tag with
-    | 1ul ->
-      TestLib.compare_and_print !$"of Chacha20-Poly1305 plaintext" plaintext plaintext' plaintext_len
-    | _ ->
-      C.String.print !$"Decryption failed!\n"; C.portable_exit 1l;
+    if EverCrypt.AEAD.decrypt ek iv aad aad_len ciphertext' (plaintext_len `U32.add` 16ul) plaintext' <> EverCrypt.AEAD.Success then begin
+      C.String.print !$"Decryption failed!\n"; C.portable_exit 1l
+    end;
+    TestLib.compare_and_print !$"of Chacha20-Poly1305 plaintext" plaintext plaintext' plaintext_len;
 
     pop_frame()
   end
@@ -398,7 +404,7 @@ let rec test_chacha20 (LB len vs) =
     push_frame ();
     let (LB key_len key), (LB iv_len iv), ctr, (LB plain_len plain), (LB cipher_len cipher) = vs.(0ul) in
     let cipher' = B.alloca 0uy cipher_len in
-    EverCrypt.chacha20 key iv ctr plain plain_len cipher';
+    EverCrypt.Cipher.chacha20 plain_len cipher' plain key iv ctr;
     TestLib.compare_and_print !$"of ChaCha20 message" cipher cipher' cipher_len;
     pop_frame ();
     B.recall vs;

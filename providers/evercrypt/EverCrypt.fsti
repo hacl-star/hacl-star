@@ -24,11 +24,6 @@ include EverCrypt.Cipher
 /// Unverified, legacy wrappers calling into old HACL* code. Clients should
 /// abandon these in favor of the verified, properly-specified modules above.
 
-/// Curve25519
-
-val x25519: dst:uint8_p -> secret:uint8_p -> base:uint8_p ->
-  Stack unit curve_x25519_pre curve_x25519_post
-
 /// Random sampling
 
 val random_init: unit ->
@@ -72,11 +67,6 @@ val aes256_compute: key:aes256_key ->
 val aes256_free: aes256_key ->
   ST unit aes256_free_pre aes256_free_post
 
-/// ChaCha20
-
-val chacha20: key:uint8_p -> iv:uint8_p -> ctr: uint32_t ->
-  plain: uint8_p -> len: uint32_t -> cipher: uint8_p ->
-  Stack unit chacha20_pre chacha20_post
 
 /// AES-GCM
 
@@ -103,20 +93,6 @@ val aes256_gcm_decrypt: key:uint8_p -> iv:uint8_p ->
   plain:uint8_p -> len:uint32_t ->
   cipher: uint8_p -> tag:uint8_p ->
   ST uint32_t aes256_gcm_decrypt_pre aes256_gcm_decrypt_post
-
-/// Chacha20-Poly1305
-
-val chacha20_poly1305_encrypt: key:uint8_p -> iv:uint8_p ->
-  ad:uint8_p -> adlen:uint32_t ->
-  plain:uint8_p -> len:uint32_t ->
-  cipher: uint8_p -> tag:uint8_p ->
-  ST unit chacha20_poly1305_encrypt_pre chacha20_poly1305_encrypt_post
-
-val chacha20_poly1305_decrypt: key:uint8_p -> iv:uint8_p ->
-  ad:uint8_p -> adlen:uint32_t ->
-  plain:uint8_p -> len:uint32_t ->
-  cipher: uint8_p -> tag:uint8_p ->
-  ST uint32_t chacha20_poly1305_decrypt_pre chacha20_poly1305_decrypt_post
 
 /// Agile Block and Stream Ciphers (adapted from CoreCrypto, TBC)
 
