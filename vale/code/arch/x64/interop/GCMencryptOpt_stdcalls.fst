@@ -8,6 +8,7 @@ open Gcm_simplify
 open GCM_helpers
 open FStar.Calc
 open FStar.Int.Cast
+open FStar.Integers
 
 #set-options "--z3rlimit 400 --max_fuel 0 --max_ifuel 0"
 
@@ -271,22 +272,107 @@ let gcm128_encrypt_opt' key auth_b auth_bytes auth_num keys_b iv_b hkeys_b abyte
   let h1 = get() in
   ()
 
-let gcm128_encrypt_opt_stdcall key plain_b plain_len auth_b auth_len iv_b out_b tag_b keys_b hkeys_b =
-  let h0 = get() in
 
-  push_frame();
-  // Scratch space for Vale procedure
-  let scratch_b = B.alloca 0uy 128ul in
-  // Extra space to have a full input/output with length % 16 = 0
-  let inout_b = B.alloca 0uy 16ul in
-  // Same for auth_b
-  let abytes_b = B.alloca 0uy 16ul in
+inline_for_extraction
+val gcm128_encrypt_opt_alloca:
+  key:Ghost.erased (Seq.seq nat32) ->
+  plain_b:uint8_p ->
+  plain_len:uint64 ->
+  auth_b:uint8_p ->
+  auth_len:uint64 ->
+  iv_b:uint8_p ->
+  out_b:uint8_p ->
+  tag_b:uint8_p ->
+  keys_b:uint8_p ->
+  hkeys_b:uint8_p ->
+
+  scratch_b:uint8_p ->
+  inout_b : uint8_p ->
+  abytes_b : uint8_p ->
+
+  Stack unit
+    (requires fun h0 ->
+      B.disjoint scratch_b tag_b /\ B.disjoint scratch_b out_b /\
+      B.disjoint scratch_b hkeys_b /\ B.disjoint scratch_b plain_b /\
+      B.disjoint scratch_b auth_b /\ B.disjoint scratch_b iv_b /\
+      B.disjoint scratch_b keys_b /\ B.disjoint scratch_b inout_b /\
+      B.disjoint scratch_b abytes_b /\
+
+      B.disjoint inout_b tag_b /\ B.disjoint inout_b out_b /\
+      B.disjoint inout_b hkeys_b /\ B.disjoint inout_b plain_b /\
+      B.disjoint inout_b auth_b /\ B.disjoint inout_b iv_b /\
+      B.disjoint inout_b keys_b /\ B.disjoint inout_b abytes_b /\
+
+      B.disjoint abytes_b tag_b /\ B.disjoint abytes_b out_b /\
+      B.disjoint abytes_b hkeys_b /\ B.disjoint abytes_b plain_b /\
+      B.disjoint abytes_b auth_b /\ B.disjoint abytes_b iv_b /\
+      B.disjoint abytes_b keys_b /\
+
+      B.disjoint tag_b out_b /\ B.disjoint tag_b hkeys_b /\
+      B.disjoint tag_b plain_b /\ B.disjoint tag_b auth_b /\
+      disjoint_or_eq tag_b iv_b /\ disjoint_or_eq tag_b keys_b /\
+
+      B.disjoint iv_b keys_b /\ B.disjoint iv_b out_b /\
+      B.disjoint iv_b plain_b /\ B.disjoint iv_b hkeys_b /\
+      B.disjoint iv_b auth_b /\
+
+      B.disjoint out_b keys_b /\ B.disjoint out_b hkeys_b /\
+      B.disjoint out_b auth_b /\ disjoint_or_eq out_b plain_b /\
+      
+      B.disjoint plain_b keys_b /\ B.disjoint plain_b hkeys_b /\
+      B.disjoint plain_b auth_b /\
+
+      disjoint_or_eq keys_b hkeys_b /\ 
+      B.disjoint keys_b auth_b /\ B.disjoint hkeys_b auth_b /\
+
+      B.live h0 auth_b /\ B.live h0 keys_b /\
+      B.live h0 iv_b /\ B.live h0 hkeys_b /\
+      B.live h0 out_b /\ B.live h0 plain_b /\
+      B.live h0 tag_b /\
+
+      B.live h0 scratch_b /\ B.live h0 inout_b /\ B.live h0 abytes_b /\
+
+      B.length auth_b = UInt64.v auth_len /\
+      B.length iv_b = 16 /\
+      B.length plain_b = UInt64.v plain_len /\
+      B.length out_b = B.length plain_b /\
+      B.length hkeys_b = 160 /\
+      B.length tag_b == 16 /\
+      B.length keys_b = 176 /\
+
+      B.length scratch_b = 128 /\
+      B.length inout_b = 16 /\
+      B.length abytes_b = 16 /\
+
+      4096 * (UInt64.v plain_len) < pow2_32 /\
+      4096 * (UInt64.v auth_len) < pow2_32 /\
+
+      aesni_enabled /\ pclmulqdq_enabled /\
+      is_aes_key_LE AES_128 (Ghost.reveal key) /\
+      (let db = get_downview keys_b in
+      length_aux keys_b;
+      let ub = UV.mk_buffer db Views.up_view128 in
+      Seq.equal (UV.as_seq h0 ub) (key_to_round_keys_LE AES_128 (Ghost.reveal key)))
+    )
+    (ensures fun h0 _ h1 ->
+      B.modifies (B.loc_union (B.loc_buffer tag_b)
+                  (B.loc_union (B.loc_buffer iv_b)
+                  (B.loc_union (B.loc_buffer scratch_b)
+                  (B.loc_union (B.loc_buffer out_b)
+                  (B.loc_buffer inout_b))))) h0 h1      
+    )
+
+
+let gcm128_encrypt_opt_alloca key plain_b plain_len auth_b auth_len iv_b
+  out_b tag_b keys_b hkeys_b scratch_b inout_b abytes_b =
+
+  let h0 = get() in
+  
   // Compute length of biggest blocks of 6 * 128-bit blocks
-  // Look at FStar.Math.Lemmas.modulo_modulo_lemma
-  let len128x6 = UInt64.mul (UInt64.div plain_len 96uL) 96uL in
+  let len128x6 = UInt64.mul (plain_len / 96uL) 96uL in
   // Compute the size of the remaining 128-bit blocks
-  let len128_num = UInt64.sub (UInt64.mul (UInt64.div plain_len 16uL) 16uL) len128x6 in
-  let auth_num = UInt64.mul (UInt64.div auth_len 16uL) 16uL in
+  let len128_num = ((plain_len / 16uL) * 16uL) - len128x6 in
+  let auth_num = (auth_len / 16uL) * 16uL in
   // Casting to uint32 is here the equality
   FStar.Math.Lemmas.small_mod (UInt64.v len128x6) pow2_32;
   FStar.Math.Lemmas.small_mod (UInt64.v len128_num) pow2_32;
@@ -297,18 +383,7 @@ let gcm128_encrypt_opt_stdcall key plain_b plain_len auth_b auth_len iv_b out_b 
   let out128_b = B.sub out_b (uint64_to_uint32 len128x6) (uint64_to_uint32 len128_num) in
   let vauth_b = B.sub auth_b 0ul (uint64_to_uint32 auth_num) in
 
-  // TODO: Blit remain of plain_b into inout_b, same with auth_b and abytes_b
-
-  assume (UInt64.v (UInt64.div len128x6 16uL) >= 18);
-
-  let h1 = get() in
-
-  // Ensures that the view on the keys buffer is the same after allocations
-  BufferViewHelpers.lemma_dv_equal Views.down_view8 keys_b h0 h1;
-  assert (let db = get_downview keys_b in
-      length_aux keys_b;
-      let ub = UV.mk_buffer db Views.up_view128 in
-      Seq.equal (UV.as_seq h0 ub) (UV.as_seq h1 ub));
+  assume (UInt64.v len128x6 / 16 >= 18);
 
   gcm128_encrypt_opt'
     key
@@ -328,6 +403,57 @@ let gcm128_encrypt_opt_stdcall key plain_b plain_len auth_b auth_len iv_b out_b 
     inout_b
     plain_len 
     scratch_b
-    tag_b;
+    tag_b
+
+let gcm128_encrypt_opt_stdcall key plain_b plain_len auth_b auth_len iv_b out_b tag_b keys_b hkeys_b =
+  let h0 = get() in
+
+  push_frame();
+  // Scratch space for Vale procedure
+  let scratch_b = B.alloca 0uy 128ul in
+  // Extra space to have a full input/output with length % 16 = 0
+  let inout_b = B.alloca 0uy 16ul in
+  // Same for auth_b
+  let abytes_b = B.alloca 0uy 16ul in
+
+  // Copy the remainder of plain_b into inout_b
+
+  FStar.Math.Lemmas.small_mod (UInt64.v plain_len) pow2_32;
+  FStar.Math.Lemmas.small_mod (UInt64.v auth_len) pow2_32;
+  
+  B.blit plain_b ((uint64_to_uint32 plain_len / 16ul) * 16ul) inout_b 0ul (uint64_to_uint32 plain_len % 16ul);
+
+  // Same with auth_b and abytes_b
+
+  B.blit auth_b ((uint64_to_uint32 auth_len / 16ul) * 16ul) abytes_b 0ul (uint64_to_uint32 auth_len % 16ul);
+
+  let h1 = get() in
+
+  // Ensures that the view on the keys buffer is the same after allocations
+  BufferViewHelpers.lemma_dv_equal Views.down_view8 keys_b h0 h1;
+  assert (let db = get_downview keys_b in
+      length_aux keys_b;
+      let ub = UV.mk_buffer db Views.up_view128 in
+      Seq.equal (UV.as_seq h0 ub) (UV.as_seq h1 ub));
+
+  gcm128_encrypt_opt_alloca
+    key
+    plain_b
+    plain_len
+    auth_b 
+    auth_len 
+    iv_b
+    out_b
+    tag_b
+    keys_b 
+    hkeys_b 
+    scratch_b
+    inout_b
+    abytes_b;
+
+
+  // Copy back the remainder in inout_b into out_b
+  B.blit inout_b 0ul out_b ((uint64_to_uint32 plain_len / 16ul) * 16ul) (uint64_to_uint32 plain_len % 16ul);
+
 
   pop_frame()

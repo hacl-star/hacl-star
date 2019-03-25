@@ -24,18 +24,25 @@ type gcm_args = {
   tag: uint8_p;
 }
 
+// This old is to avoid naming conflicts in KreMLin, since there is already an aes128_key_expansion
+// extracted by KreMLin
 [@ (CCConv "stdcall") ]
 val old_aes128_key_expansion: key_ptr:uint8_p -> expanded_key_ptr: uint8_p -> Stack_ unit
 
+// This old is because calling conventions changed in Vale, we now take a list of arguments instead
+// of a pointer to a struct containing all addresses
 [@ (CCConv "stdcall") ]
 val old_gcm128_encrypt: B.pointer gcm_args -> Stack_ unit
 
 [@ (CCConv "stdcall") ]
 val gcm128_decrypt: B.pointer gcm_args -> Stack_ uint32_t
 
+// This old is to avoid naming conflicts in KreMLin, since there is already an aes256_key_expansion
+// extracted by KreMLin
 [@ (CCConv "stdcall") ]
 val old_aes256_key_expansion: key_ptr:uint8_p -> expanded_key_ptr: uint8_p -> Stack_ unit
 
+// This old is because calling conventions changed in Vale, we now take a list of arguments
 [@ (CCConv "stdcall") ]
 val old_gcm256_encrypt: B.pointer gcm_args -> Stack_ unit
 

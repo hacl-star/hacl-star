@@ -110,5 +110,8 @@ val gcm128_encrypt_opt_stdcall:
       let ub = UV.mk_buffer db Views.up_view128 in
       Seq.equal (UV.as_seq h0 ub) (key_to_round_keys_LE AES_128 (Ghost.reveal key)))
     )
-    (ensures fun h0 _ h1 -> True
+    (ensures fun h0 _ h1 ->
+      B.modifies (B.loc_union (B.loc_buffer tag_b)
+                 (B.loc_union (B.loc_buffer iv_b)
+                 (B.loc_buffer out_b))) h0 h1
     )
