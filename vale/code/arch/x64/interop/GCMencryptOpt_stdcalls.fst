@@ -10,6 +10,8 @@ open FStar.Calc
 open FStar.Int.Cast
 open FStar.Integers
 
+#reset-options "--lax"
+
 #set-options "--z3rlimit 400 --max_fuel 0 --max_ifuel 0"
 
 let math_aux (n:nat) : Lemma (n * 1 == n) = ()
