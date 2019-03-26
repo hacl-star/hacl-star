@@ -15,7 +15,7 @@
         "l_imp-interp"
       ],
       0,
-      "7b936c5561f64cc2bb80239830b8d9a8"
+      "337de6855e2e6ad16b026e957fdff7bf"
     ],
     [
       "EverCrypt.AEAD.expand_or_dummy",
@@ -27,7 +27,7 @@
         "projection_inverse_BoxBool_proj_0"
       ],
       0,
-      "9dc08e0a85191a9e96b32d37ac44fd92"
+      "7aa026e079fb406c092268ccfc84a5b2"
     ],
     [
       "EverCrypt.AEAD.__proj__EK__item__ek",
@@ -41,7 +41,7 @@
         "refinement_interpretation_Tm_refine_3db8709c78401853d88d34765f54bab3"
       ],
       0,
-      "9681a8a22082986384d299de5e65a4c9"
+      "bb801be324652de3aa28f93a71201cd8"
     ],
     [
       "EverCrypt.AEAD.expand_in",
@@ -56,7 +56,7 @@
         "refinement_interpretation_Tm_refine_a0cd7d06c5da6444b6b51b319febde8e"
       ],
       0,
-      "94b8a70edd4c71570b847232ad08066e"
+      "880025c31868ae3becd3b9207b87eb60"
     ],
     [
       "EverCrypt.AEAD.iv_p",
@@ -65,7 +65,7 @@
       1,
       [ "@query" ],
       0,
-      "10b03e8beb8d9824cbcd8cc050acbf94"
+      "5666ba531ffe52490dfb7c4fe29a5660"
     ],
     [
       "EverCrypt.AEAD.uu___41",
@@ -74,7 +74,7 @@
       0,
       [ "@query" ],
       0,
-      "d6f5fefc0caed887b2abb5b84081110c"
+      "ec4d6781340031dfceef00b0ff26e10f"
     ],
     [
       "EverCrypt.AEAD.encrypt",
@@ -84,20 +84,26 @@
       [
         "@MaxIFuel_assumption", "@query",
         "Prims_pretyping_ae567c2fb75be05905677af440075565", "b2t_def",
-        "bool_inversion", "disc_equation_EverCrypt.AEAD.Failure",
+        "bool_inversion", "constructor_distinct_FStar.Integers.Unsigned",
+        "constructor_distinct_FStar.Integers.W8",
+        "disc_equation_EverCrypt.AEAD.Failure",
         "disc_equation_EverCrypt.AEAD.InvalidKey",
         "disc_equation_EverCrypt.AEAD.Success",
-        "equation_EverCrypt.AEAD.ad_p", "equation_EverCrypt.AEAD.iv_p",
+        "equality_tok_FStar.Integers.W8@tok", "equation_EverCrypt.AEAD.ad_p",
+        "equation_EverCrypt.AEAD.iv_p",
         "equation_EverCrypt.AEAD.kv_or_dummy",
-        "equation_EverCrypt.AEAD.plain_p", "equation_FStar.Integers.v",
-        "equation_FStar.Pervasives.inversion", "equation_FStar.UInt.fits",
-        "equation_FStar.UInt.min_int", "equation_FStar.UInt.size",
-        "equation_LowStar.Buffer.buffer",
+        "equation_EverCrypt.AEAD.plain_p",
+        "equation_EverCrypt.Helpers.uint8_t",
+        "equation_FStar.Integers.int_t", "equation_FStar.Integers.uint_8",
+        "equation_FStar.Integers.v", "equation_FStar.Pervasives.inversion",
+        "equation_FStar.UInt.fits", "equation_FStar.UInt.min_int",
+        "equation_FStar.UInt.size", "equation_LowStar.Buffer.buffer",
         "equation_LowStar.Buffer.trivial_preorder", "equation_Prims.eqtype",
         "equation_Prims.nat", "equation_Spec.AEAD.is_supported_alg",
         "equation_Spec.AEAD.supported_alg",
         "fuel_guarded_inversion_EverCrypt.AEAD.error_code",
         "fuel_guarded_inversion_EverCrypt.AEAD.expanded_key",
+        "function_token_typing_FStar.Integers.uint_8",
         "function_token_typing_FStar.UInt8.t",
         "function_token_typing_Prims.__cache_version_number__",
         "function_token_typing_Prims.int",
@@ -106,6 +112,7 @@
         "primitive_Prims.op_AmpAmp", "primitive_Prims.op_LessThanOrEqual",
         "proj_equation_EverCrypt.AEAD.EK_kv",
         "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_FStar.Integers.Unsigned__0",
         "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
         "refinement_interpretation_Tm_refine_96e95adc5dd2b841bfab679eafa25477",
         "refinement_interpretation_Tm_refine_d2d399e4b0cd736cb6130361c7530aa2",
@@ -116,7 +123,7 @@
         "typing_Spec.AEAD.is_supported_alg"
       ],
       0,
-      "deb57765b992c0660484b87005c985a5"
+      "2785b87a4724b1337ac59d01d1fd5385"
     ],
     [
       "EverCrypt.AEAD.decrypt",
@@ -169,7 +176,7 @@
         "typing_Spec.AEAD.is_supported_alg"
       ],
       0,
-      "a048b78803288ec56f803d84ce889c8e"
+      "33085e09e9c3db3185717f0df6478403"
     ]
   ]
 ]
