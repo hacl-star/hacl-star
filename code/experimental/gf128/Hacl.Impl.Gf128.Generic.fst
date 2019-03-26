@@ -194,7 +194,7 @@ val poly4_mul_add:
   -> len: size_t
   -> text: lbuffer uint8 len ->
   Stack unit
-  (requires (fun h -> live h ctx /\ live h text))
+  (requires (fun h -> live h ctx /\ live h text /\ s == F32))
   (ensures (fun h0 _ h1 -> modifies1 ctx h0 h1))
 
 let poly4_mul_add #s ctx len text =
@@ -221,9 +221,7 @@ let poly4_mul_add #s ctx len text =
 	   fadd4 acc4 b4);
     let r4 = sub pre 0ul 2ul in
     let r3 = sub pre 2ul 2ul in
-    assume(6 <= length pre);
     let r2 = sub pre 4ul 2ul in
-    assume(8 <= length pre);
     let r = sub pre 6ul 2ul in
     let acc0 = sub acc4 0ul 2ul in
     let acc1 = sub acc4 2ul 2ul in
@@ -299,7 +297,7 @@ val ghash_mul_add:
   -> text: lbuffer uint8 len
   -> key: block ->
   Stack unit
-  (requires (fun h -> live h tag /\ live h text /\ live h key))
+  (requires (fun h -> s == F32 /\ live h tag /\ live h text /\ live h key))
   (ensures (fun h0 _ h1 -> modifies1 tag h0 h1))
 
 let ghash_mul_add #s tag len text key =
