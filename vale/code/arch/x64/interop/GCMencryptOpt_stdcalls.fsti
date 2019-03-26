@@ -113,5 +113,25 @@ val gcm128_encrypt_opt_stdcall:
     (ensures fun h0 _ h1 ->
       B.modifies (B.loc_union (B.loc_buffer tag_b)
                  (B.loc_union (B.loc_buffer iv_b)
-                 (B.loc_buffer out_b))) h0 h1
-    )
+                 (B.loc_buffer out_b))) h0 h1 /\
+
+      (let iv_LE = le_bytes_to_quad32 (seq_uint8_to_seq_nat8 (B.as_seq h0 iv_b)) in
+       let iv_BE = reverse_bytes_quad32 iv_LE in
+       let ctr_BE_1 = Mkfour 1 iv_BE.lo1 iv_BE.hi2 iv_BE.hi3 in
+       let ctr_BE_2 = Mkfour 2 iv_BE.lo1 iv_BE.hi2 iv_BE.hi3 in
+
+       let plain_in = le_bytes_to_seq_quad32 (pad_to_128_bits (seq_uint8_to_seq_nat8 (B.as_seq h0 plain_b))) in
+       let cipher_out = le_bytes_to_seq_quad32 (pad_to_128_bits (seq_uint8_to_seq_nat8 (B.as_seq h1 out_b))) in
+
+       DV.length_eq (get_downview hkeys_b);
+       length_aux5 hkeys_b;
+       let h = reverse_bytes_quad32 (low_buffer_read TUInt8 TUInt128 h1 hkeys_b 0) in
+       let length_quad = reverse_bytes_quad32 (Mkfour (8 * UInt64.v plain_len) 0 (8 * UInt64.v auth_len) 0) in
+      let auth_pad = le_bytes_to_seq_quad32 (pad_to_128_bits (seq_uint8_to_seq_nat8 (B.as_seq h0 auth_b))) in
+      let auth_in = Seq.append auth_pad (Seq.append cipher_out (Seq.create 1 length_quad)) in       
+
+      DV.length_eq (get_downview tag_b);
+      low_buffer_read TUInt8 TUInt128 h1 tag_b 0 ==
+         gctr_encrypt_block ctr_BE_1 (ghash_LE h auth_in) AES_128 (Ghost.reveal key) 0 /\
+      gctr_partial AES_128 (B.length plain_b / 16 + 1) plain_in cipher_out (Ghost.reveal key) ctr_BE_2)
+  )
