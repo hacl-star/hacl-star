@@ -32,11 +32,15 @@ val derive_key:
         (Spec.Chacha20.chacha20_key_block0 (as_seq h0 k) (as_seq h0 n))
     )
 
+#set-options "--z3rlimit 20 --max_fuel 0 --max_ifuel 0"
+
 let derive_key k n out =
   push_frame();
   let ctx = ChachaCore.create_state () in
+  let ctx_core = ChachaCore.create_state () in
   Chacha.chacha20_init ctx k n 0ul;
-  ChachaCore.store_state out ctx;
+  Chacha.chacha20_core ctx_core ctx 0ul;
+  ChachaCore.store_state out ctx_core;
   pop_frame()
 
 val poly1305_do_core_padded:
