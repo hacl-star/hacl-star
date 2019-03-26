@@ -3,7 +3,6 @@ module Hacl.Spec.Curve25519.Field64.Lemmas
 open FStar.Mul
 open Lib.Sequence
 open Lib.IntTypes
-open Lib.CurveLemmas
 
 open Spec.Curve25519
 open Hacl.Spec.Curve25519.Field64.Definition
@@ -338,7 +337,7 @@ val lemma_felem64_mod255: a:lseq uint64 4 ->
     BSeq.nat_from_intseq_le r == BSeq.nat_from_intseq_le a % pow2 255)
 let lemma_felem64_mod255 a =
   let (a0, a1, a2, a3) = (a.[0], a.[1], a.[2], a.[3]) in
-  Lib.CurveLemmas.lemma_nat_from_uints64_le_4 a;
+  Hacl.Impl.Curve25519.Lemmas.lemma_nat_from_uints64_le_4 a;
   assert (BSeq.nat_from_intseq_le a == v a0 + v a1 * pow2 64 +
     v a2 * pow2 64 * pow2 64 + v a3 * pow2 64 * pow2 64 * pow2 64);
   FStar.Math.Lemmas.lemma_mod_plus_distr_r (v a0 + v a1 * pow2 64 +
@@ -366,7 +365,7 @@ let lemma_felem64_mod255 a =
   assert_norm (0x7fffffffffffffff = pow2 63 - 1);
   uintv_extensionality (mod_mask #U64 63ul) (u64 0x7fffffffffffffff);
   let r = a.[3] <- a3' in
-  Lib.CurveLemmas.lemma_nat_from_uints64_le_4 r
+  Hacl.Impl.Curve25519.Lemmas.lemma_nat_from_uints64_le_4 r
 
 val lemma_prime19: unit ->
   Lemma (pow2 255 % prime == 19)

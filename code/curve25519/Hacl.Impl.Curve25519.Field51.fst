@@ -473,7 +473,7 @@ let store_felem u64s f =
   u64s.(2ul) <- o2;
   u64s.(3ul) <- o3;
   let h1 = ST.get () in
-  Lib.CurveLemmas.lemma_nat_from_uints64_le_4 (as_seq h1 u64s)
+  Hacl.Impl.Curve25519.Lemmas.lemma_nat_from_uints64_le_4 (as_seq h1 u64s)
 
 val cswap2:
     bit:uint64{v bit <= 1}
