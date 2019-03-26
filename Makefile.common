@@ -6,7 +6,7 @@ KREMLIN_HOME 	?= $(HACL_HOME)/../kremlin
 FSTAR_HOME	?= $(HACL_HOME)/../FStar
 VALE_HOME	?= $(HACL_HOME)/../vale
 
-include Makefile.include
+include $(HACL_HOME)/Makefile.include
 
 INCLUDES = \
   $(ALL_HACL_DIRS) \
