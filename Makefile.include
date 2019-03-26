@@ -1,6 +1,7 @@
 # This Makefile can be included by client projects; it exports the set of
 # include directories relative to HACL_HOME and exports the set of needed
-# kremlin flags to successfully extract Vale.
+# kremlin flags to successfully extract Vale. This Makefile honors
+# EVERCRYPT_CONFIG.
 
 VALE_BUNDLES=\
   -bundle 'Vale.Stdcalls.*,Interop,Interop.*,Fadd_stdcalls,Cpuid_stdcalls,Fswap_stdcalls,Fmul_stdcalls,Fsqr_stdcalls,Fsub_stdcalls,Poly_stdcalls,Sha_stdcalls,GCMencrypt_stdcalls,GCMencryptOpt_stdcalls,AES_stdcalls[rename=Vale]' \
@@ -12,6 +13,16 @@ VALE_BUNDLES=\
   -bundle Prop_s,Types_s,Words_s,Views,AES_s,Workarounds,Math.*,Interop,TypesNative_s[rename=Unused5] \
   -bundle GF128_s,GF128,Poly1305.Spec_s,GCTR,GCTR_s,GHash_s,GCM_helpers,GHash[rename=Unused6] \
   -bundle AES_helpers,AES256_helpers,GCM_s,GCM,Interop_assumptions[rename=Unused7]
+
+# Other configs are possible, e.g. everest or hacl-vale, by exporting
+# EVERCRYPT_CONFIG manually.
+ifneq (,$(EVEREST_WINDOWS))
+  EVERCRYPT_CONFIG = noopenssl # hacl, vale, bcrypt
+else ifneq (,$(KAIZALA))
+  EVERCRYPT_CONFIG = kaizala # hacl, openssl
+else
+  EVERCRYPT_CONFIG ?= default # everything
+endif
 
 # TODO: no more separate variable definitions?
 LIB_DIR		= $(HACL_HOME)/lib

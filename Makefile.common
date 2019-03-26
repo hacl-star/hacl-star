@@ -8,16 +8,6 @@ VALE_HOME	?= $(HACL_HOME)/../vale
 
 include Makefile.include
 
-# Other configs are possible, e.g. everest or hacl-vale, by exporting
-# EVERCRYPT_CONFIG manually.
-ifneq (,$(EVEREST_WINDOWS))
-  EVERCRYPT_CONFIG = noopenssl # hacl, vale, bcrypt
-else ifneq (,$(KAIZALA))
-  EVERCRYPT_CONFIG = kaizala # hacl, openssl
-else
-  EVERCRYPT_CONFIG ?= default
-endif
-
 INCLUDES = \
   $(ALL_HACL_DIRS) \
   $(KREMLIN_HOME)/kremlib
