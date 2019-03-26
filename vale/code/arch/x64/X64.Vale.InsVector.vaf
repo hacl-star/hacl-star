@@ -314,7 +314,7 @@ procedure{:instruction Ins(TS.TaintedIns(tuple(S.Pshufd(dst, src, permutation)),
 {
 }
 
-procedure{:instruction Ins(TS.TaintedIns(tuple(S.Pcmpeqd(dst, src)), Public))}{:quick exportOnly}
+procedure{:instruction Ins(TS.TaintedIns(tuple(S.Pcmpeqd(dst, src)), Public))}{:quick exportOnly}{:public}
           Pcmpeqd(inout dst:xmm, src:xmm)
     ensures
         dst == old(Mkfour(

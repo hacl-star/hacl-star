@@ -47,9 +47,21 @@ procedure{:public}{:quick exportOnly} VPolyAdd(out dst:xmm, src1:xmm, src2:opr12
     ensures
         of_quad32(dst) == add(a1, a2);
 {
+    lemma_add_quad32(src1, src2);
     VPxor(dst, src1, src2);
-    lemma_add128(a1, a2);
-    lemma_of_to_quad32(add(a1, a2));
+}
+
+procedure{:public}{:quick exportOnly} PolyAnd(inout dst:xmm, src:xmm)
+    lets
+        a1 := of_quad32(dst);
+        a2 := of_quad32(src);
+    modifies
+        efl;
+    ensures
+        of_quad32(dst) == poly_and(a1, a2);
+{
+    lemma_and_quad32(dst, src);
+    Pand(dst, src);
 }
 
 procedure{:public}{:quick exportOnly} VHigh64ToLow(out dst:xmm, src:xmm)

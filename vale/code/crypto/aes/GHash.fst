@@ -10,9 +10,13 @@ let shift_gf128_key_1 (h:poly) : poly =
 let rec g_power (a:poly) (n:nat) : poly =
   if n = 0 then zero else // arbitrary value for n = 0
   if n = 1 then a else
-  a *~ (g_power a (n - 1))
+  a *~ g_power a (n - 1)
+
+let lemma_g_power_1 a = ()
+let lemma_g_power_n a n = ()
 
 let gf128_power h n = shift_gf128_key_1 (g_power h n)
+let lemma_gf128_power h n = ()
 
 let rec ghash_poly_unroll (h:poly) (prev:poly) (data:int -> poly128) (k:int) (m n:nat) : poly =
   let d = data (k + m) in

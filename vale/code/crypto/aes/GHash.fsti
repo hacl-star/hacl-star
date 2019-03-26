@@ -29,7 +29,13 @@ let rec ghash_poly (h:poly) (init:poly) (data:int -> poly128) (j:int) (k:int) : 
   if k <= j then init else
   gf128_mul_rev (ghash_poly h init data j (k - 1) +. data (k - 1)) h
 
+val g_power (a:poly) (n:nat) : poly
+val lemma_g_power_1 (a:poly) : Lemma (g_power a 1 == a)
+val lemma_g_power_n (a:poly) (n:pos) : Lemma (g_power a (n + 1) == a *~ g_power a n)
+
 val gf128_power (h:poly) (n:nat) : poly
+val lemma_gf128_power (h:poly) (n:nat) : Lemma
+  (gf128_power h n == shift_key_1 128 gf128_modulus_low_terms (g_power h n))
 
 // Unrolled series of n ghash computations
 let rec ghash_unroll (h:poly) (prev:poly) (data:int -> poly128) (k:int) (m n:nat) : poly =
