@@ -63,7 +63,8 @@ let decode_point_ #s o i =
   let h0 = ST.get () in
   uints_from_bytes_le #U64 tmp i;
   let h1 = ST.get () in
-  assume (BSeq.nat_from_intseq_le (as_seq h1 tmp) == BSeq.nat_from_bytes_le (as_seq h0 i));
+  BSeq.uints_from_bytes_le_nat_lemma #U64 #SEC #4 (as_seq h0 i);
+  assert (BSeq.nat_from_intseq_le (as_seq h1 tmp) == BSeq.nat_from_bytes_le (as_seq h0 i));
   let tmp3 = tmp.(3ul) in
   tmp.(3ul) <- tmp3 &. u64 0x7fffffffffffffff;
   mod_mask_lemma tmp3 63ul;
@@ -109,7 +110,7 @@ val encode_point_:
   -> i:point s
   -> Stack unit
     (requires fun h0 ->
-      (s = M64 ==> X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled)) /\    
+      (s = M64 ==> X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled)) /\
       live h0 o /\ live h0 i /\ disjoint o i /\
       state_inv_t h0 (get_x i) /\ state_inv_t h0 (get_z i))
     (ensures  fun h0 _ h1 -> modifies (loc o) h0 h1 /\
@@ -128,9 +129,14 @@ let encode_point_ #s o i =
   assert (feval h1 tmp == S.fmul (S.fpow (feval h0 z) (pow2 255 - 21)) (feval h0 x));
   assert (feval h1 tmp == S.fmul (feval h0 x) (S.fpow (feval h0 z) (pow2 255 - 21)));
   store_felem u64s tmp;
-  uints_to_bytes_le #U64 4ul o u64s;
   let h2 = ST.get () in
-  assume (as_seq h2 o == BSeq.nat_to_bytes_le 32 (feval h1 tmp));
+  assert (BSeq.nat_from_intseq_le (as_seq h2 u64s) == feval h1 tmp);
+  Hacl.Impl.Curve25519.Lemmas.lemma_nat_to_uints64_le_4 (as_seq h2 u64s) (feval h1 tmp);
+  assert (as_seq h2 u64s == BSeq.nat_to_intseq_le 4 (feval h1 tmp));
+  uints_to_bytes_le #U64 4ul o u64s;
+  let h3 = ST.get () in
+  BSeq.uints_to_bytes_le_nat_lemma #U64 #SEC 4 (feval h1 tmp);
+  assert (as_seq h3 o == BSeq.nat_to_bytes_le 32 (feval h1 tmp));
   pop_frame()
 
 (* WRAPPER to Prevent Inlining *)
@@ -164,7 +170,7 @@ val cswap2:
   -> p1:felem2 s
   -> p2:felem2 s
   -> Stack unit
-    (requires fun h0 -> 
+    (requires fun h0 ->
       (s = M64 ==> X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled)) /\
       live h0 p1 /\ live h0 p2 /\ disjoint p1 p2)
     (ensures  fun h0 _ h1 ->
@@ -189,7 +195,7 @@ val ladder_step:
   -> tmp2:felem_wide2 s
   -> Stack unit
     (requires fun h0 ->
-      (s = M64 ==> X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled)) /\    
+      (s = M64 ==> X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled)) /\
       live h0 k /\ live h0 q /\ live h0 p01_tmp1_swap /\ live h0 tmp2 /\
       LowStar.Monotonic.Buffer.all_disjoint [loc k; loc q; loc p01_tmp1_swap; loc tmp2] /\
      (let nq = gsub p01_tmp1_swap 0ul (2ul *! nlimb s) in
@@ -229,7 +235,7 @@ let ladder_step #s k q i p01_tmp1_swap tmp2 =
   let bit = scalar_bit k (253ul -. i) in
   uintv_extensionality bit (S.ith_bit (as_seq h0 k) (253 - v i));
   let sw = swap.(0ul) ^. bit in
-  Lib.CurveLemmas.logxor_lemma1 (LSeq.index (as_seq h0 swap) 0) bit;
+  logxor_lemma1 (LSeq.index (as_seq h0 swap) 0) bit;
   cswap2 #s sw nq nq_p1;
   point_add_and_double #s q p01_tmp1 tmp2;
   swap.(0ul) <- bit
@@ -245,7 +251,7 @@ val ladder_step_loop:
   -> tmp2:felem_wide2 s
   -> Stack unit
     (requires fun h0 ->
-      (s = M64 ==> X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled)) /\    
+      (s = M64 ==> X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled)) /\
       live h0 k /\ live h0 q /\ live h0 p01_tmp1_swap /\ live h0 tmp2 /\
       LowStar.Monotonic.Buffer.all_disjoint [loc k; loc q; loc p01_tmp1_swap; loc tmp2] /\
      (let nq = gsub p01_tmp1_swap 0ul (2ul *! nlimb s) in
@@ -310,7 +316,7 @@ val ladder0_:
   -> tmp2:felem_wide2 s
   -> Stack unit
     (requires fun h0 ->
-      (s = M64 ==> X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled)) /\    
+      (s = M64 ==> X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled)) /\
       live h0 k /\ live h0 q /\ live h0 p01_tmp1_swap /\ live h0 tmp2 /\
       LowStar.Monotonic.Buffer.all_disjoint [loc k; loc q; loc p01_tmp1_swap; loc tmp2] /\
      (let nq = gsub p01_tmp1_swap 0ul (2ul *! nlimb s) in
@@ -356,7 +362,7 @@ val ladder1_:
   -> tmp2:felem_wide2 s
   -> Stack unit
     (requires fun h0 ->
-      (s = M64 ==> X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled)) /\    
+      (s = M64 ==> X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled)) /\
       live h0 p01_tmp1 /\ live h0 tmp2 /\ disjoint p01_tmp1 tmp2 /\
      (let nq = gsub p01_tmp1 0ul (2ul *! nlimb s) in
       state_inv_t h0 (get_x nq) /\ state_inv_t h0 (get_z nq)))
@@ -385,7 +391,7 @@ val ladder2_:
   -> tmp2:felem_wide2 s
   -> Stack unit
     (requires fun h0 ->
-      (s = M64 ==> X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled)) /\    
+      (s = M64 ==> X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled)) /\
       live h0 k /\ live h0 q /\ live h0 p01_tmp1_swap /\ live h0 tmp2 /\
       LowStar.Monotonic.Buffer.all_disjoint [loc k; loc q; loc p01_tmp1_swap; loc tmp2] /\
      (let nq = gsub p01_tmp1_swap 0ul (2ul *! nlimb s) in
@@ -419,7 +425,7 @@ val ladder3_:
   -> p01:lbuffer (limb s) (4ul *! nlimb s)
   -> Stack unit
     (requires fun h0 ->
-      (s = M64 ==> X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled)) /\    
+      (s = M64 ==> X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled)) /\
       live h0 q /\ live h0 p01 /\ disjoint q p01 /\
       fget_z h0 q == 1 /\ state_inv_t h0 (get_x q) /\ state_inv_t h0 (get_z q))
     (ensures  fun h0 _ h1 ->
@@ -463,7 +469,7 @@ val ladder4_:
   -> tmp2:felem_wide2 s
   -> Stack unit
     (requires fun h0 ->
-      (s = M64 ==> X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled)) /\    
+      (s = M64 ==> X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled)) /\
       live h0 k /\ live h0 q /\ live h0 p01_tmp1_swap /\ live h0 tmp2 /\
       LowStar.Monotonic.Buffer.all_disjoint [loc k; loc q; loc p01_tmp1_swap; loc tmp2] /\
       fget_z h0 q == 1 /\ state_inv_t h0 (get_x q) /\ state_inv_t h0 (get_z q))
@@ -496,7 +502,7 @@ val montgomery_ladder_:
   -> i:point s
   -> Stack unit
     (requires fun h0 ->
-      (s = M64 ==> X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled)) /\    
+      (s = M64 ==> X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled)) /\
       live h0 o /\ live h0 k /\ live h0 i /\
       (disjoint o i \/ o == i) /\ disjoint o k /\ disjoint k i /\
       fget_z h0 i == 1 /\ state_inv_t h0 (get_x i) /\ state_inv_t h0 (get_z i))
@@ -530,7 +536,7 @@ val montgomery_ladder:
   -> i:point s
   -> Stack unit
     (requires fun h0 ->
-      (s = M64 ==> X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled)) /\    
+      (s = M64 ==> X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled)) /\
       live h0 o /\ live h0 k /\ live h0 i /\
       (disjoint o i \/ o == i) /\ disjoint o k /\ disjoint k i /\
       fget_z h0 i == 1 /\ state_inv_t h0 (get_x i) /\ state_inv_t h0 (get_z i))

@@ -3,7 +3,6 @@ module Hacl.Poly1305.Field32xN.Lemmas
 open Lib.IntTypes
 open Lib.IntVector
 open Lib.Sequence
-open Lib.Lemmas
 open FStar.Mul
 
 open Hacl.Spec.Poly1305.Vec
@@ -1285,7 +1284,9 @@ let subtract_p5_s #w f i =
   let mask4 = mask3 &. gte_mask f0 (u64 0x3fffffb) in
 
   let p0 = mask4 &. u64 0x3fffffb in
+  logand_lemma mask4 (u64 0x3fffffb);
   let p1 = mask4 &. u64 0x3ffffff in
+  logand_lemma mask4 (u64 0x3ffffff);
   let p2 = mask4 &. u64 0x3ffffff in
   let p3 = mask4 &. u64 0x3ffffff in
   let p4 = mask4 &. u64 0x3ffffff in
@@ -1412,7 +1413,7 @@ let load_tup64_lemma lo hi =
   mod_mask_lemma hi 14ul;
   uintv_extensionality (mod_mask #U64 14ul) (u64 0x3fff);
   FStar.Math.Lemmas.pow2_multiplication_modulo_lemma_1 (v hi % pow2 14) 12 12;
-  logor_disjoint64 (lo >>. 52ul) ((hi &. u64 0x3fff) <<. 12ul) 12;
+  logor_disjoint (lo >>. 52ul) ((hi &. u64 0x3fff) <<. 12ul) 12;
   assert (v f2 == v lo / pow2 52 + (v hi % pow2 14) * pow2 12);
 
   let f3 = (hi >>. 14ul) &. mask26 in
@@ -1449,12 +1450,12 @@ let lemma_store_felem_lo f lo =
   assert_norm (max26 = pow2 26 - 1);
   let lo = f0 |. (f1 <<. 26ul) |. (f2 <<. 52ul) in
   FStar.Math.Lemmas.pow2_multiplication_modulo_lemma_1 (v f1) 26 26;
-  logor_disjoint64 f0 (f1 <<. 26ul) 26;
+  logor_disjoint f0 (f1 <<. 26ul) 26;
   assert (v (f0 |. (f1 <<. 26ul)) == v f0 + v f1 * pow2 26);
   assert_norm (pow2 26 * pow2 26 = pow2 52);
   assert (v f0 + v f1 * pow2 26 < pow2 52);
   assert (((v f2 * pow2 52) % pow2 64) % pow2 52 = 0);
-  logor_disjoint64 (f0 |. (f1 <<. 26ul)) (f2 <<. 52ul) 52
+  logor_disjoint (f0 |. (f1 <<. 26ul)) (f2 <<. 52ul) 52
 
 val lemma_store_felem_hi: f:tup64_5 -> hi:uint64 ->
   Lemma
@@ -1474,7 +1475,7 @@ let lemma_store_felem_hi f hi =
   FStar.Math.Lemmas.modulo_lemma (v f3 * pow2 14) (pow2 64);
   FStar.Math.Lemmas.pow2_multiplication_modulo_lemma_1 (v f3) 14 14;
   assert ((v f3 * pow2 14) % pow2 14 = 0);
-  logor_disjoint64 (f2 >>. 12ul) (f3 <<. 14ul) 14;
+  logor_disjoint (f2 >>. 12ul) (f3 <<. 14ul) 14;
   assert (v ((f2 >>. 12ul) |. (f3 <<. 14ul)) == v f2 / pow2 12 + v f3 * pow2 14);
   FStar.Math.Lemmas.lemma_mult_le_right (pow2 14) (v f3) (pow2 26 - 1);
   assert (v f2 / pow2 12 + v f3 * pow2 14 < pow2 40);
@@ -1482,7 +1483,7 @@ let lemma_store_felem_hi f hi =
   //assert (((v f4 * pow2 40) % pow2 64) % pow2 40 = (v f4 * pow2 40) % pow2 40);
   FStar.Math.Lemmas.pow2_multiplication_modulo_lemma_1 (v f4) 40 40;
   //assert ((v f4 * pow2 40) % pow2 40 = 0);
-  logor_disjoint64 ((f2 >>. 12ul) |. (f3 <<. 14ul)) (f4 <<. 40ul) 40
+  logor_disjoint ((f2 >>. 12ul) |. (f3 <<. 14ul)) (f4 <<. 40ul) 40
 
 val lemma_tup64_mod_pow2_128: f:tup64_5 ->
   Lemma
@@ -1569,6 +1570,8 @@ let store_tup64_lemma f =
   assert (v lo + v hi * pow2 64 ==
     v f0 + v f1 * pow2 26 + v f2 * pow2 52 +
     v f3 * pow2 14 * pow2 64 + (v f4 % pow2 24) * pow2 40 * pow2 64);
+  lemma_mul_assos_3 (v f3) (pow2 14) (pow2 64);
+  lemma_mul_assos_3 (v f4 % pow2 24) (pow2 40) (pow2 64);
   assert_norm (pow2 40 * pow2 64 = pow2 104);
   assert_norm (pow2 14 * pow2 64 = pow2 78);
   assert (v lo + v hi * pow2 64 ==
@@ -1592,3 +1595,274 @@ let store_felem5_lemma_i #w f i =
   let loi = (vec_v lo).[i] in
   let hii = (vec_v hi).[i] in
   assert (store_tup64_lemma (as_tup64_i f i) == (loi, hii))
+
+#set-options "--z3rlimit 150 --max_fuel 0"
+
+val lset_bit5_lemma0:
+    f:lseq uint64 5
+  -> i:size_nat{i <= 128}
+  -> Lemma
+    (requires
+      (forall (i:nat). i < 5 ==> v f.[i] <= max26) /\
+      as_nat5 (f.[0], f.[1], f.[2], f.[3], f.[4]) < pow2 i)
+    (ensures v f.[i / 26] < pow2 (i % 26))
+let lset_bit5_lemma0 f i =
+  let j = i % 26 in
+  let ind = i / 26 in
+  let (f0, f1, f2, f3, f4) = (f.[0], f.[1], f.[2], f.[3], f.[4]) in
+  let tf = (f0, f1, f2, f3, f4) in
+  assert (as_nat5 tf ==
+    v f0 + v f1 * pow26 + v f2 * pow26 * pow26 +
+    v f3 * pow26 * pow26 * pow26 + v f4 * pow26 * pow26 * pow26 * pow26);
+  assert_norm (pow26 = pow2 26);
+  FStar.Math.Lemmas.euclidean_division_definition i 26;
+  assert (i == ind * 26 + j);
+  match ind with
+  | 0 -> ()
+  | 1 ->
+    assert (v f1 * pow2 26 < pow2 i);
+    FStar.Math.Lemmas.lemma_div_lt_nat (v f1 * pow2 26) i 26;
+    assert (v f1 < pow2 (i - 26));
+    assert (i - 26 == j)
+  | 2 ->
+    assert (v f2 * pow2 26 * pow2 26 < pow2 i);
+    FStar.Math.Lemmas.paren_mul_right (v f2) (pow2 26) (pow2 26);
+    assert_norm (pow2 26 * pow2 26 = pow2 52);
+    FStar.Math.Lemmas.lemma_div_lt_nat (v f2 * pow2 52) i 52;
+    assert (v f2 < pow2 (i - 52));
+    assert (i - 52 == j)
+  | 3 ->
+    assert (78 <= i /\ i < 104);
+    let b3 = v f3 * pow2 26 * pow2 26 * pow2 26 in
+    lemma_mul_assos_4 (v f3) (pow2 26) (pow2 26) (pow2 26);
+    assert_norm (pow2 26 * pow2 26 * pow2 26 = pow2 78);
+    FStar.Math.Lemmas.lemma_div_lt_nat (v f3 * pow2 78) i 78;
+    assert (v f3 < pow2 (i - 78));
+    assert (i - 78 == j)
+  | 4 ->
+    assert (v f4 * pow2 26 * pow2 26 * pow2 26 * pow2 26 < pow2 i);
+    lemma_mul_assos_5 (v f4) (pow2 26) (pow2 26) (pow2 26) (pow2 26);
+    assert_norm (pow2 26 * pow2 26 * pow2 26 * pow2 26 = pow2 104);
+    assert (v f4 * pow2 104 < pow2 i);
+    FStar.Math.Lemmas.lemma_div_lt_nat (v f4 * pow2 104) i 104;
+    assert (v f4 < pow2 (i - 104));
+    assert (i - 104 == j)
+
+val lset_bit5_lemma1_:
+    f:lseq uint64 5
+  -> i:size_nat{i <= 128}
+  -> Lemma
+    (requires
+      (forall (i:nat). i < 5 ==> v f.[i] <= max26) /\
+      v f.[i / 26] + pow2 (i % 26) <= max26)
+    (ensures (
+      let fi = u64 (v f.[i / 26] + pow2 (i % 26)) in
+      let out = f.[i / 26] <- fi in
+      let f1 = (f.[0], f.[1], f.[2], f.[3], f.[4]) in
+      let out1 = (out.[0], out.[1], out.[2], out.[3], out.[4]) in
+      as_nat5 out1 == pow2 i + as_nat5 f1))
+let lset_bit5_lemma1_ f i =
+  let fi = u64 (v f.[i / 26] + pow2 (i % 26)) in
+  let out = f.[i / 26] <- fi in
+  let (f0, f1, f2, f3, f4) = (f.[0], f.[1], f.[2], f.[3], f.[4]) in
+  let (o0, o1, o2, o3, o4) = (out.[0], out.[1], out.[2], out.[3], out.[4]) in
+  let tf = (f0, f1, f2, f3, f4) in
+  let to = (o0, o1, o2, o3, o4) in
+  assert_norm (pow26 = pow2 26);
+  assert (as_nat5 to == v o0 + v o1 * pow26 + v o2 * pow26 * pow26 +
+    v o3 * pow26 * pow26 * pow26 + v o4 * pow26 * pow26 * pow26 * pow26);
+  let ind = i / 26 in
+  let j = i % 26 in
+  assert (i == ind * 26 + j);
+  match ind with
+  | 0 -> ()
+  | 1 ->
+    assert (as_nat5 to ==
+      v f0 + (v f1 + pow2 j) * pow26 + v f2 * pow26 * pow26 +
+      v f3 * pow26 * pow26 * pow26 + v f4 * pow26 * pow26 * pow26 * pow26);
+    assert (as_nat5 to == as_nat5 tf + pow2 j * pow26);
+    FStar.Math.Lemmas.pow2_plus j 26
+  | 2 ->
+    assert (as_nat5 to == v f0 + v f1 * pow26 + (v f2 + pow2 j) * pow26 * pow26 +
+      v f3 * pow26 * pow26 * pow26 + v f4 * pow26 * pow26 * pow26 * pow26);
+    assert (as_nat5 to == as_nat5 tf + pow2 j * pow26 * pow26);
+    lemma_mul_assos_3 (pow2 j) pow26 pow26;
+    assert_norm (pow2 26 * pow2 26 = pow2 52);
+    FStar.Math.Lemmas.pow2_plus j 52
+  | 3 ->
+    assert (as_nat5 to == v f0 + v f1 * pow26 + v f2 * pow26 * pow26 +
+      (v f3 + pow2 j) * pow26 * pow26 * pow26 + v f4 * pow26 * pow26 * pow26 * pow26);
+    assert (as_nat5 to == as_nat5 tf + pow2 j * pow26 * pow26 * pow26);
+    lemma_mul_assos_4 (pow2 j) pow26 pow26 pow26;
+    assert_norm (pow2 26 * pow2 26 * pow2 26 = pow2 78);
+    FStar.Math.Lemmas.pow2_plus j 78
+  | 4 ->
+    assert (as_nat5 to == v f0 + v f1 * pow26 + v f2 * pow26 * pow26 +
+      v f3 * pow26 * pow26 * pow26 + (v f4 + pow2 j) * pow26 * pow26 * pow26 * pow26);
+    assert (as_nat5 to == as_nat5 tf + pow2 j * pow26 * pow26 * pow26 * pow26);
+    lemma_mul_assos_5 (pow2 j) pow26 pow26 pow26 pow26;
+    assert_norm (pow2 26 * pow2 26 * pow2 26 * pow26 = pow2 104);
+    FStar.Math.Lemmas.pow2_plus j 104
+
+val lset_bit5_lemma1:
+    f:lseq uint64 5
+  -> i:size_nat{i <= 128}
+  -> Lemma
+    (requires
+      (forall (i:nat). i < 5 ==> v f.[i] <= max26) /\
+      v f.[i / 26] + pow2 (i % 26) <= max26)
+    (ensures (
+      let fi = u64 (v f.[i / 26] + pow2 (i % 26)) in
+      let out = f.[i / 26] <- fi in
+      let f1 = (f.[0], f.[1], f.[2], f.[3], f.[4]) in
+      let out1 = (out.[0], out.[1], out.[2], out.[3], out.[4]) in
+      as_nat5 out1 % prime == pfadd (pow2 i) (as_nat5 f1 % prime)))
+let lset_bit5_lemma1 f i =
+  let fi = u64 (v f.[i / 26] + pow2 (i % 26)) in
+  let out = f.[i / 26] <- fi in
+  let f1 = (f.[0], f.[1], f.[2], f.[3], f.[4]) in
+  let out1 = (out.[0], out.[1], out.[2], out.[3], out.[4]) in
+  lset_bit5_lemma1_ f i;
+  assert (as_nat5 out1 == pow2 i + as_nat5 f1);
+  FStar.Math.Lemmas.lemma_mod_plus_distr_r
+    (pow2 i) (as_nat5 f1) prime
+
+val lemma_sum_lt_pow2_26: i:nat -> a:nat{a < pow2 (i % 26)} -> b:nat{b <= pow2 (i % 26)} ->
+  Lemma (a + b <= max26)
+let lemma_sum_lt_pow2_26 i a b =
+  assert (a + b < pow2 (i % 26) + pow2 (i % 26));
+  FStar.Math.Lemmas.pow2_le_compat 25 (i % 26);
+  assert (a + b < pow2 25 + pow2 25);
+  FStar.Math.Lemmas.pow2_double_sum 25;
+  assert_norm (pow26 = pow2 26)
+
+val lset_bit5:
+    f:lseq uint64 5
+  -> i:size_nat{i <= 128}
+  -> Pure (lseq uint64 5)
+    (requires
+      (forall (i:nat). i < 5 ==> v f.[i] <= max26) /\
+      as_nat5 (f.[0], f.[1], f.[2], f.[3], f.[4]) < pow2 i)
+    (ensures fun out -> (
+      let f1 = (f.[0], f.[1], f.[2], f.[3], f.[4]) in
+      let out1 = (out.[0], out.[1], out.[2], out.[3], out.[4]) in
+      (forall (i:nat). i < 5 ==> v out.[i] <= max26) /\
+      as_nat5 out1 % prime == pfadd (pow2 i) (as_nat5 f1 % prime)))
+let lset_bit5 f i =
+  let b = u64 1 <<. size (i % 26) in
+  let fi = f.[i / 26] in
+  lset_bit5_lemma0 f i;
+  assert (v fi < pow2 (i % 26));
+
+  FStar.Math.Lemmas.pow2_lt_compat 26 (i % 26);
+  FStar.Math.Lemmas.pow2_lt_compat 64 26;
+  FStar.Math.Lemmas.modulo_lemma (pow2 (i % 26)) (pow2 64);
+  assert (v b == pow2 (i % 26));
+  logor_disjoint fi b (i % 26);
+  let out_i = fi |. b in
+  assert (v out_i == v fi + v b);
+  assert (v out_i == v fi + pow2 (i % 26));
+  lemma_sum_lt_pow2_26 i (v fi) (v b);
+  assert_norm (pow26 = pow2 26);
+  assert (v out_i <= max26);
+  let out = f.[i / 26] <- out_i in
+  lset_bit5_lemma1 f i;
+  out
+
+val set_bit5_lemma_k:
+    #w:lanes
+  -> f:lseq (uint64xN w) 5
+  -> i:size_nat{i <= 128}
+  -> k:nat{k < w}
+  -> Lemma
+    (requires
+      lfelem_fits f (1, 1, 1, 1, 1) /\
+      lfelem_less f (pow2 i))
+    (ensures (
+      let out = set_bit5 f i in
+      tup64_fits5 (as_tup64_i (as_tup5 out) k) (1, 1, 1, 1, 1) /\
+      (lfeval out).[k] == pfadd (pow2 i) (lfeval f).[k]))
+let set_bit5_lemma_k #w f i k =
+  let lf = create 5 (u64 0) in
+  let lf = lf.[0] <- (vec_v f.[0]).[k] in
+  let lf = lf.[1] <- (vec_v f.[1]).[k] in
+  let lf = lf.[2] <- (vec_v f.[2]).[k] in
+  let lf = lf.[3] <- (vec_v f.[3]).[k] in
+  let lf = lf.[4] <- (vec_v f.[4]).[k] in
+  let res = lset_bit5 lf i in
+
+  let out = set_bit5 f i in
+  let lout = create 5 (u64 0) in
+  let lout = lout.[0] <- (vec_v out.[0]).[k] in
+  let lout = lout.[1] <- (vec_v out.[1]).[k] in
+  let lout = lout.[2] <- (vec_v out.[2]).[k] in
+  let lout = lout.[3] <- (vec_v out.[3]).[k] in
+  let lout = lout.[4] <- (vec_v out.[4]).[k] in
+  eq_intro lout res
+
+val add_mod_small: a:nat -> b:nat -> n:pos -> Lemma
+  (requires a % n + b % n < n)
+  (ensures  a % n + b % n == (a + b) % n)
+let add_mod_small a b n =
+  FStar.Math.Lemmas.modulo_lemma (a % n + b % n) n;
+  assert (a % n + b % n == (a % n + b % n) % n);
+  FStar.Math.Lemmas.lemma_mod_plus_distr_l a (b % n) n;
+  FStar.Math.Lemmas.lemma_mod_plus_distr_r a b n
+
+val mod_add128_sc:
+    a:(uint64 & uint64)
+  -> b:(uint64 & uint64)
+  -> Pure (uint64 & uint64)
+    (requires True)
+    (ensures fun (r0, r1) ->
+     let (a0, a1) = a in
+     let (b0, b1) = b in
+     v r1 * pow2 64 + v r0 ==
+     ((v a1 + v b1) * pow2 64 + v a0 + v b0) % pow2 128)
+let mod_add128_sc a b =
+  let (a0, a1) = a in
+  let (b0, b1) = b in
+  let r0 = a0 +. b0 in
+  let r1 = a1 +. b1 in
+  let c = r0 ^. ((r0 ^. b0) |. ((r0 -. b0) ^. b0)) >>. 63ul in
+  assume (v c == (if v r0 < v b0 then 1 else 0));
+  let r2 = r1 +. c in
+  assert (v c == (v a0 + v b0) / pow2 64);
+  assert (v r2 == ((v a1 + v b1) % pow2 64 + (v a0 + v b0) / pow2 64) % pow2 64);
+  assert (v r2 * pow2 64 == ((v a1 + v b1) % pow2 64 + (v a0 + v b0) / pow2 64) % pow2 64 * pow2 64);
+  FStar.Math.Lemmas.pow2_multiplication_modulo_lemma_2 ((v a1 + v b1) % pow2 64 + (v a0 + v b0) / pow2 64) 128 64;
+  assert (v r2 * pow2 64 == ((v a1 + v b1) % pow2 64 + (v a0 + v b0) / pow2 64) * pow2 64 % pow2 128);
+  assert (((v a1 + v b1) % pow2 64 + (v a0 + v b0) / pow2 64) * pow2 64 == (v a1 + v b1) % pow2 64 * pow2 64 + (v a0 + v b0) / pow2 64 * pow2 64);
+  FStar.Math.Lemmas.pow2_multiplication_modulo_lemma_2 (v a1 + v b1) 128 64;
+  assert (v r2 * pow2 64 == ((v a1 + v b1) * pow2 64 % pow2 128 + (v a0 + v b0) / pow2 64 * pow2 64) % pow2 128);
+  FStar.Math.Lemmas.lemma_mod_plus_distr_l ((v a1 + v b1) * pow2 64) ((v a0 + v b0) / pow2 64 * pow2 64) (pow2 128);
+  assert (v r2 * pow2 64 == ((v a1 + v b1) * pow2 64 + (v a0 + v b0) / pow2 64 * pow2 64) % pow2 128);
+  assert (v r0 == (v a0 + v b0) % pow2 64);
+  FStar.Math.Lemmas.modulo_lemma ((v a0 + v b0) % pow2 64) (pow2 128);
+  add_mod_small ((v a1 + v b1) * pow2 64 + (v a0 + v b0) / pow2 64 * pow2 64) ((v a0 + v b0) % pow2 64) (pow2 128);
+  assert (v r2 * pow2 64 + v r0 == ((v a1 + v b1) * pow2 64 + (v a0 + v b0) / pow2 64 * pow2 64 + (v a0 + v b0) % pow2 64) % pow2 128);
+  FStar.Math.Lemmas.euclidean_division_definition (v a0 + v b0) (pow2 64);
+  assert (v r2 * pow2 64 + v r0 == ((v a1 + v b1) * pow2 64 + v a0 + v b0) % pow2 128);
+  (r0, r2)
+
+val mod_add128_lemma_i:
+    #w:lanes
+  -> a:(uint64xN w & uint64xN w)
+  -> b:(uint64xN w & uint64xN w)
+  -> i:nat{i < w}
+  -> Lemma
+    (let (r0, r1) = mod_add128_ws a b in
+     let (a0, a1) = a in
+     let (b0, b1) = b in
+    (uint64xN_v r1).[i] * pow2 64 + (uint64xN_v r0).[i] ==
+      (((uint64xN_v a1).[i] + (uint64xN_v b1).[i]) * pow2 64 +
+      (uint64xN_v a0).[i] + (uint64xN_v b0).[i]) % pow2 128)
+let mod_add128_lemma_i #w a b i =
+  let (a0, a1) = a in
+  let (b0, b1) = b in
+  let (r0, r1) = mod_add128_ws a b in
+  let (a0i, a1i) = ((vec_v a0).[i], (vec_v a1).[i]) in
+  let (b0i, b1i) = ((vec_v b0).[i], (vec_v b1).[i]) in
+
+  let r0s, r1s = mod_add128_sc (a0i, a1i) (b0i, b1i) in
+  assert ((vec_v r0).[i] == r0s /\ (vec_v r1).[i] == r1s)
