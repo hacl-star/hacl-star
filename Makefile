@@ -406,12 +406,6 @@ obj/X64.Bytes_Semantics.fst.checked: \
 obj/X64.BufferViewStore.fst.checked: \
   FSTAR_FLAGS=$(VALE_FSTAR_FLAGS)
 
-obj/X64.Poly1305.Util.fst.checked: \
-  FSTAR_FLAGS=$(VALE_FSTAR_FLAGS_NOSMT)
-
-obj/X64.Poly1305.Util.fsti.checked: \
-  FSTAR_FLAGS=$(VALE_FSTAR_FLAGS_NOSMT)
-
 obj/X64.Memory.fst.checked: \
   FSTAR_FLAGS=$(shell echo $(VALE_FSTAR_FLAGS_NOSMT) | \
     sed 's/--use_extracted_interfaces true//; \
