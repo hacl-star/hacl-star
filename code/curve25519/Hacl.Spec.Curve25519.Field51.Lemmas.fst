@@ -914,7 +914,7 @@ val mul64_wide_add3_lemma:
      (v a0 * v a1 + v b0 * v b1 + v c0 * v c1) <=
       (m0 * m1 + m2 * m3 + m4 * m5) * max51 * max51)
 let mul64_wide_add3_lemma #m0 #m1 #m2 #m3 #m4 #m5 a0 a1 b0 b1 c0 c1 =
-  assert_norm (pow51 = pow2 51);
+  assert (pow51 = pow2 51);
   lemma_mul_le (v a0) (m0 * max51) (v a1) (m1 * max51);
   lemma_mul_le (v b0) (m2 * max51) (v b1) (m3 * max51);
   lemma_mul_le (v c0) (m4 * max51) (v c1) (m5 * max51);
