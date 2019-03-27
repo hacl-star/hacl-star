@@ -212,6 +212,8 @@ let poly1305_do_core k aadlen aad mlen m out =
   poly1305_do_core_ k aadlen aad mlen m out ctx block;
   pop_frame()
 
+#set-options "--z3rlimit 20 --max_fuel 0 --max_ifuel 0"
+
 // Derives the key, and then perform poly1305
 val poly1305_do:
   k:lbuffer uint8 32ul ->
