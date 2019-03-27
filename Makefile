@@ -28,10 +28,9 @@
 # - vale-fst: the minimum needed to compile .vaf files to .fst files
 # - vale-verify: properly staged target for re-verifying all the vale files
 # - vale-asm: re-generation of the Vale assemblies in dist/vale
-# - hacl-verify: non-staged target for reverifying HACL* files
-#   also: curve25519-verify poly1305-verify chacha20-verify
-# - verify: UNSTAGED, may only be invoked after a successful run of vale-fst,
-#   verifies all .fst files, both hand-written and generated.
+# - hacl-verify: staged target for verifying HACL* files
+#   curve25519-verify poly1305-verify chacha20-verify spec-verify
+#   code-verify: subsets of hacl-verify (each staged)
 #
 # To generate a Makefile for the interactive mode, use:
 # - make foo/bar/Makefile
@@ -90,19 +89,21 @@ endif
 
 all:
 	tools/blast-staticconfig.sh $(EVERCRYPT_CONFIG)
-	$(MAKE) vale-fst
-	FSTAR_DEPEND_FLAGS="--warn_error +285" $(MAKE) all_
+	$(MAKE) all-staged
 
-
-all_: compile-compact compile-generic compile-compact-msvc compile-compact-gcc \
+all-unstaged: compile-compact compile-generic compile-compact-msvc compile-compact-gcc \
   compile-evercrypt-external-headers compile-compact-c89 compile-coco \
   secure_api.old
 
-test:
+# Automatic staging.
+%-staged:
+	@echo "[STAGE1] Vale to F*"
 	$(MAKE) vale-fst
-	FSTAR_DEPEND_FLAGS="--warn_error +285" $(MAKE) test_
+	@echo "[STAGE2] Main target: $*"
+	FSTAR_DEPEND_FLAGS="--warn_error +285" $(MAKE) $*-unstaged
 
-test_: test-handwritten test-c test-ml
+test: test-staged
+test-unstaged: test-handwritten test-c test-ml
 
 # Any file in code/tests is taken to contain an `int main()` function.
 # Test should be renamed into Test.EverCrypt
@@ -112,14 +113,16 @@ test-c: $(subst .,_,$(patsubst %.fst,test-c-%,$(notdir $(wildcard code/tests/*.f
 # Any file in specs/tests is taken to contain a `val test: unit -> bool` function.
 test-ml: $(subst .,_,$(patsubst %.fst,test-ml-%,$(notdir $(wildcard specs/tests/*.fst))))
 
+# Not reusing the -staged automatic target so as to export NOSHORTLOG
 ci:
 	NOSHORTLOG=1 $(MAKE) vale-fst
-	FSTAR_DEPEND_FLAGS="--warn_error +285" NOSHORTLOG=1 $(MAKE) all_ test_
+	FSTAR_DEPEND_FLAGS="--warn_error +285" NOSHORTLOG=1 $(MAKE) all-unstaged test-unstaged
 
+# Not reusing the -staged automatic target so as to export MIN_TEST
 min-test:
 	MIN_TEST=1 NOSHORTLOG=1 $(MAKE) vale-fst
 	MIN_TEST=1 FSTAR_DEPEND_FLAGS="--warn_error +285" NOSHORTLOG=1 \
-	  $(MAKE) min-test_
+	  $(MAKE) min-test-unstaged
 
 # Backwards-compat target
 .PHONY: secure_api.old
@@ -225,9 +228,6 @@ VALE_FSTS = $(call to-obj-dir,$(VAF_AS_FSTS))
 FSTAR_ROOTS = $(wildcard $(addsuffix /*.fsti,$(ALL_HACL_DIRS)) $(addsuffix /*.fst,$(ALL_HACL_DIRS))) \
   $(wildcard obj/*.fst) $(wildcard obj/*.fsti) # these two empty during the first stage
 
-# Convenience target. Remember to run make vale-fst first.
-verify: $(call to-obj-dir,$(addsuffix .checked,$(FSTAR_ROOTS)))
-
 # We currently force regeneration of three depend files. This is long.
 
 # If were are debugging (i.e. the files exist already); or within a restarting
@@ -241,6 +241,7 @@ ifndef MAKE_RESTARTS
 # meaning we can eliminate large chunks of the dependency graph, since we only
 # need to run: Vale stuff, and HACL spec tests.
 .fstar-depend-%: .FORCE
+	@if ! [ -f .didhelp ]; then echo "💡 Did you know? If your dependency graph didn't change (e.g. no files added or removed, no reference to a new module in your code), run NODEPEND=1 make <your-target> to skip dependency graph regeneration!"; touch .didhelp; fi
 	$(call run-with-log,\
 	  $(FSTAR_NO_FLAGS) --dep $* $(notdir $(FSTAR_ROOTS)) --warn_error '-285' $(FSTAR_DEPEND_FLAGS) \
 	    --extract '* -Prims -LowStar -Lib.Buffer -Hacl -FStar +FStar.Endianness +FStar.Kremlin.Endianness -EverCrypt -MerkleTree -Vale.Tactics -FastHybrid_helpers -FastMul_helpers -FastSqr_helpers -FastUtil_helpers -TestLib -EverCrypt -MerkleTree -Test -Vale_memcpy -Vale.AsLowStar.Test -Lib.IntVector' > $@ && \
@@ -269,11 +270,17 @@ ifeq ($(MAKECMDGOALS),clean)
   SKIPDEPEND=1
 else ifeq ($(MAKECMDGOALS),)
   SKIPDEPEND=1
+else ifeq ($(MAKECMDGOALS),test)
+  SKIPDEPEND=1
 else ifeq ($(MAKECMDGOALS),all)
   SKIPDEPEND=1
-else ifeq ($(MAKECMDGOALS),vale-verify)
+else ifeq (,$(filter-out %-staged,$(MAKECMDGOALS)))
+  SKIPDEPEND=1
+else ifeq (,$(filter-out %-verify,$(MAKECMDGOALS)))
   SKIPDEPEND=1
 else ifeq ($(MAKECMDGOALS),ci)
+  SKIPDEPEND=1
+else ifeq ($(MAKECMDGOALS),min-test)
   SKIPDEPEND=1
 else ifeq (,$(filter-out %/Makefile,$(MAKECMDGOALS)))
   SKIPDEPEND=1
@@ -463,26 +470,25 @@ hints:
 	    touch -c $@ \
 	  ,[VERIFY] $(notdir $*),$(call to-obj-dir,$@))
 
-# Convenience pseudo-targets
-vale-verify:
-	$(MAKE) vale-fst
-	$(MAKE) vale-verify_
+%-verify: %-verify-staged
+	@
 
-vale-verify_: \
+vale-verify-unstaged: \
   $(addsuffix .checked,$(VALE_FSTS)) \
   $(call only-for,$(HACL_HOME)/vale/%.checked) \
 
-hacl-verify: $(call only-for,$(HACL_HOME)/code/%)
-curve25519-verify: $(call only-for,$(HACL_HOME)/code/curve25519/%)
-poly1305-verify: $(call only-for,$(HACL_HOME)/code/poly1305/%)
-chacha20-verify: $(call only-for,$(HACL_HOME)/code/chacha20/%)
-
+hacl-verify-unstaged: code-verify-unstaged spec-verify-unstaged
+code-verify-unstaged: $(call only-for,$(HACL_HOME)/code/%)
+spec-verify-unstaged: $(call only-for,$(HACL_HOME)/spec/%)
+curve25519-verify-unstaged: $(call only-for,$(HACL_HOME)/code/curve25519/%)
+poly1305-verify-unstaged: $(call only-for,$(HACL_HOME)/code/poly1305/%)
+chacha20-verify-unstaged: $(call only-for,$(HACL_HOME)/code/chacha20/%)
 
 ############
 # min-test #
 ############
 
-min-test_: $(filter-out \
+min-test-unstaged: $(filter-out \
   obj/X64.Vale.InsSha.% \
   $(call only-for,$(HACL_HOME)/vale/code/arch/x64/interop/%)\
   ,\

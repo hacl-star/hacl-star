@@ -45,10 +45,10 @@ let reveal_ctx_inv #s ctx h0 h1 =
   as_seq_gsub h0 ctx (nlimb s) (nlimb s);
   as_seq_gsub h1 ctx (nlimb s) (nlimb s);
   as_seq_gsub h0 ctx (nlimb s) (precomplen s);
-  as_seq_gsub h1 ctx (nlimb s) (precomplen s);  
+  as_seq_gsub h1 ctx (nlimb s) (precomplen s);
   assert (as_seq h0 acc_b == as_seq h1 acc_b);
   assert (as_seq h0 r_b == as_seq h1 r_b);
-  assert (as_seq h0 precom_b == as_seq h1 precom_b) 
+  assert (as_seq h0 precom_b == as_seq h1 precom_b)
 
 #reset-options "--z3rlimit 50 --max_fuel 0 --using_facts_from '* -FStar.Seq'"
 
@@ -131,9 +131,10 @@ val poly1305_encode_last:
 let poly1305_encode_last #s f len b =
   push_frame();
   let tmp = create 16ul (u8 0) in
-  copy (sub tmp 0ul len) (sub b 0ul len);
+  update_sub tmp 0ul len b;
   let h0 = ST.get () in
-  assume (BSeq.nat_from_bytes_le (as_seq h0 b) == BSeq.nat_from_bytes_le (as_seq h0 tmp));
+  Hacl.Impl.Poly1305.Lemmas.nat_from_bytes_le_eq_lemma (v len) (as_seq h0 b);
+  assert (BSeq.nat_from_bytes_le (as_seq h0 b) == BSeq.nat_from_bytes_le (as_seq h0 tmp));
   load_felem_le f tmp;
   let h1 = ST.get () in
   lemma_feval_is_fas_nat h1 f;
