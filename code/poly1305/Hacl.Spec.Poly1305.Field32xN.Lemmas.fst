@@ -577,7 +577,7 @@ let fmul_r2_normalize51 a fa1 =
     (as_nat5 (a0, a1, a2, a3, a4)) (as_nat5 (a10, a11, a12, a13, a14)) S.prime;
   FStar.Math.Lemmas.lemma_mod_plus_distr_r
     (as_nat5 (a0, a1, a2, a3, a4) % S.prime) (as_nat5 (a10, a11, a12, a13, a14)) S.prime;
-  admit ();
+  assert (felem_fits5 out (2, 4, 2, 2, 2));
   out
 
 val fmul_r2_normalize5_lemma:

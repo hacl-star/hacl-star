@@ -106,10 +106,10 @@ inline_for_extraction
 let felem_wide5 (w:lanes) = felem5 w
 
 let felem_fits1 (#w:lanes) (x:uint64xN w) (m:scale32) =
-  forall (i:nat). i < w ==> uint_v (vec_v x).[i] <= m * max26
+  forall (i:nat). {:pattern (vec_v x).[i] } i < w ==> uint_v (vec_v x).[i] <= m * max26
 
 let felem_wide_fits1 (#w:lanes) (x:uint64xN w) (m:scale64) =
-  forall (i:nat). i < w ==> uint_v (vec_v x).[i] <= m * max26 * max26
+  forall (i:nat). {:pattern (vec_v x).[i] } i < w ==> uint_v (vec_v x).[i] <= m * max26 * max26
 
 let felem_fits5 (#w:lanes) (f:felem5 w) (m:scale32_5) =
   let (x1,x2,x3,x4,x5) = f in
