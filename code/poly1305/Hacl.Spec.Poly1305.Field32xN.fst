@@ -52,12 +52,14 @@ let ( <=* ) (x:nat5) (y:nat5) : Type =
   (x4 <= y4) /\
   (x5 <= y5)
 
-assume val pow26: nat
+let pow26: nat = normalize_term (pow2 26)
 inline_for_extraction
 let max26 = pow26 - 1
 
-assume val lemma_pow_32_26: _:unit{pow2 32 == 64 * pow26}
-assume val lemma_pow_64_26: _:unit{pow2 64 == 4096 * pow26 * pow26}
+let lemma_pow_32_26: squash (pow2 32 == 64 * pow26) =
+  assert_norm (pow2 32 == 64 * pow26)
+let lemma_pow_64_26: squash (pow2 64 == 4096 * pow26 * pow26) =
+  assert_norm (pow2 64 == 4096 * pow26 * pow26)
 
 
 let tup64_5 = (uint64 & uint64 & uint64 & uint64 & uint64)
