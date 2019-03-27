@@ -381,7 +381,7 @@ let lemma_reduce128  (h:int) (h2:nat64) (h1:nat64) (h0:nat64) (g:int) (g2:nat64)
   reveal_opaque mod2_128';
   reveal_opaque lowerUpper128;
   reveal_opaque lowerUpper192;
-  reveal_opaque modp';
+  FStar.Pervasives.reveal_opaque (`%modp) modp;
   assert_norm (mod2_128'(g - 0x400000000000000000000000000000000) == mod2_128'(g));
   if (g2<4) then
   begin
@@ -425,6 +425,5 @@ let lemma_add_mod128 (x y :int) =
   reveal_opaque mod2_128'
 
 let modp_0 () =
-  assert_norm (modp' 0 == 0);
-  reveal_opaque modp';
+  assert_norm (modp 0 == 0);
   ()
