@@ -10,7 +10,7 @@ open Hacl.Poly1305.Field32xN.Lemmas
 open Hacl.Impl.Poly1305.Lemmas
 module S = Hacl.Spec.Poly1305.Vec
 
-#reset-options "--z3rlimit 100 --max_fuel 2 --using_facts_from '* -FStar.Seq'"
+#reset-options "--z3rlimit 100 --max_fuel 0 --using_facts_from '* -FStar.Seq'"
 
 val lemma_feval_is_fas_nat_i:
   #w:lanes
@@ -577,6 +577,7 @@ let fmul_r2_normalize51 a fa1 =
     (as_nat5 (a0, a1, a2, a3, a4)) (as_nat5 (a10, a11, a12, a13, a14)) S.prime;
   FStar.Math.Lemmas.lemma_mod_plus_distr_r
     (as_nat5 (a0, a1, a2, a3, a4) % S.prime) (as_nat5 (a10, a11, a12, a13, a14)) S.prime;
+  admit ();
   out
 
 val fmul_r2_normalize5_lemma:
