@@ -73,7 +73,15 @@ let ( *^ ) (x:scale64) (y:scale64_5) : scale128_5 =
    x * y4 ,
    x * y5)
 
-let pow51: nat = normalize_term (pow2 51)
+abstract
+let pow51: (pow51: pos { pow2 64 == 8192 * pow51 /\ pow2 128 == 67108864 * pow51 * pow51 /\ pow51 == pow2 51 }) =
+  let pow51: pos = normalize_term (pow2 51) in
+  assert_norm (pow51 > 0);
+  assert_norm (pow51 == pow2 51);
+  assert_norm (pow2 64 == 8192 * pow51);
+  assert_norm (pow2 128 == 67108864 * pow51 * pow51);
+  pow51
+
 inline_for_extraction noextract
 let max51 = pow51 - 1
 
@@ -81,11 +89,6 @@ inline_for_extraction noextract
 let mask51 : x:uint64{v x == pow2 51 - 1} =
   assert_norm (pow2 51 - 1 == 0x7ffffffffffff);
   u64 0x7ffffffffffff
-
-let lemma_pow_64_51: squash (pow2 64 == 8192 * pow51) =
-  assert_norm (pow2 64 == 8192 * pow51)
-let lemma_pow_128_51: squash (pow2 128 == 67108864 * pow51 * pow51) =
-  assert_norm (pow2 128 == 67108864 * pow51 * pow51)
 
 let felem_fits1 (x:uint64) (m:scale64) =
   uint_v x <= m * max51
