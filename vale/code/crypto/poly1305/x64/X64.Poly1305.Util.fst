@@ -53,3 +53,6 @@ let rec lemma_poly1305_heap_hash_blocks_alt h pad r m b n =
 
 let reveal_modp () =
   FStar.Pervasives.reveal_opaque (`%modp) modp
+
+let reveal_mod2_128 () =
+  FStar.Pervasives.reveal_opaque (`%mod2_128) mod2_128

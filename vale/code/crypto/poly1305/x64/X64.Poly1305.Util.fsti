@@ -92,3 +92,7 @@ let readable_words (len:nat) =
 // TODO: remove this when Vale supports new reveal_opaque directly
 val reveal_modp (_:unit) : Lemma
   (forall (x:int).{:pattern (modp x)} modp x == x % (pow2_128 * 4 - 5))
+
+// TODO: remove this when Vale supports new reveal_opaque directly
+val reveal_mod2_128 (_:unit) : Lemma
+  (forall (x:int).{:pattern (mod2_128 x)} mod2_128 x == x % pow2_128)
