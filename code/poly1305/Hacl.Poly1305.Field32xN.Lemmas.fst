@@ -1641,7 +1641,7 @@ let store_felem5_lemma_i #w f i =
   assert (store_tup64_lemma (as_tup64_i f i) == (loi, hii))
 #pop-options
 
-#push-options "--z3rlimit 150"
+#push-options "--z3rlimit 200"
 #push-options "--max_ifuel 1"
 
 val lset_bit5_lemma0:
