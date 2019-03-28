@@ -4,15 +4,46 @@ open FStar.Mul
 open Lib.IntTypes
 open Spec.Curve25519
 
-val lemma_add:
-  q:proj_point -> nq:proj_point -> nqp1:proj_point ->
-  Lemma (add q nq nqp1 == snd (add_and_double q nq nqp1))
-let lemma_add q nq nqp1 = ()
+let add_and_double1_0 a b nqp1 =
+  let x_3, z_3 = nqp1 in
+  let c = x_3 +% z_3 in
+  let d = x_3 -% z_3 in
 
-val lemma_double:
-  q:proj_point -> nq:proj_point -> nqp1:proj_point ->
-  Lemma (double nq == fst (add_and_double q nq nqp1))
-let lemma_double q nq nqp1 = ()
+  let da = d *% a in
+  let cb = c *% b in
+  let x_3 = da +% cb in
+  let z_3 = da -% cb in
+  (x_3, z_3)
+
+let add_and_double1_1 a b nqp1 =
+  let x_3, z_3 = nqp1 in
+  let aa = a *% a in
+  let bb = b *% b in
+
+  let x_3 = x_3 *% x_3 in
+  let z_3 = z_3 *% z_3 in
+
+  let e = aa -% bb in
+  let e121665 = e *% 121665 in
+  let aa_e121665 = e121665 +% aa in
+  let x_2 = aa *% bb in
+  let z_2 = e *% aa_e121665 in
+  (x_2, z_2), (x_3, z_3)
+
+let add_and_double1 q nq nqp1 =
+  let x_1, z_1 = q in
+  let x_2, z_2 = nq in
+  let a = x_2 +% z_2 in
+  let b = x_2 -% z_2 in
+  let nqp1 = add_and_double1_0 a b nqp1 in
+  let (x_2, z_2), (x_3, z_3) = add_and_double1_1 a b nqp1 in
+  let z_3 = z_3 *% x_1 in
+  (x_2, z_2), (x_3, z_3)
+
+val lemma_add_and_double: q:proj_point -> nq:proj_point -> nqp1:proj_point ->
+  Lemma (add_and_double1 q nq nqp1 == add_and_double q nq nqp1)
+let lemma_add_and_double q nq nqp1 = ()
+
 
 let montgomery_ladder1_0 (k:scalar) (q:proj_point) (nq:proj_point) (nqp1:proj_point) =
   // bit 255 is 0 and bit 254 is 1

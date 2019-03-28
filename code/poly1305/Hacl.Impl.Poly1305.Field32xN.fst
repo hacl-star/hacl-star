@@ -9,10 +9,9 @@ open Lib.Buffer
 open Lib.ByteBuffer
 open Lib.IntVector
 
-open Lib.Lemmas
-
 include Hacl.Spec.Poly1305.Field32xN
 open Hacl.Spec.Poly1305.Field32xN.Lemmas
+open Hacl.Impl.Poly1305.Lemmas
 
 module S = Hacl.Spec.Poly1305.Vec
 module ST = FStar.HyperStack.ST
@@ -130,11 +129,13 @@ val set_bit:
       felem_fits h1 f (1, 1, 1, 1, 1) /\
      (Math.Lemmas.pow2_le_compat 128 (v i);
       feval h1 f == LSeq.map (S.pfadd (pow2 (v i))) (feval h0 f)))
-let set_bit #w f i = admit();
+let set_bit #w f i =
   let b = u64 1 <<. (i %. 26ul) in
   let mask = vec_load b w in
   let fi = f.(i /. 26ul) in
-  f.(i /. 26ul) <- vec_or fi mask
+  let h0 = ST.get () in
+  f.(i /. 26ul) <- vec_or fi mask;
+  set_bit5_lemma (as_seq h0 f) (v i)
 
 inline_for_extraction noextract
 val set_bit128:
@@ -149,11 +150,15 @@ val set_bit128:
       modifies (loc f) h0 h1 /\
       felem_fits h1 f (1, 1, 1, 1, 1) /\
       feval h1 f == LSeq.map (S.pfadd (pow2 128)) (feval h0 f))
-let set_bit128 #w f = admit();
+let set_bit128 #w f =
   let b = u64 0x1000000 in
+  assert_norm (0x1000000 = pow2 24);
+  uintv_extensionality b (u64 1 <<. 24ul);
   let mask = vec_load b w in
   let f4 = f.(4ul) in
-  f.(4ul) <- vec_or f4 mask
+  let h0 = ST.get () in
+  f.(4ul) <- vec_or f4 mask;
+  set_bit5_lemma (as_seq h0 f) 128
 
 inline_for_extraction noextract
 val set_zero:
@@ -587,8 +592,8 @@ let load_felem2_le f b =
   let hi = vec_interleave_high b1 b2 in
   load_felem f lo hi;
   let h1 = ST.get () in
-  vec_interleave_low_lemma64_2 b1 b2;
-  vec_interleave_high_lemma64_2 b1 b2;
+  vec_interleave_low_lemma2 b1 b2;
+  vec_interleave_high_lemma2 b1 b2;
   uints_from_bytes_le_lemma64_2 (as_seq h0 b);
   LSeq.eq_intro (feval h1 f) (S.load_elem2 (as_seq h0 b))
 
@@ -634,15 +639,15 @@ let load_felem4_le f b =
   let hi0 = vec_load_le U128 2 (sub b 32ul 32ul) in
   let lo1 = vec_interleave_low lo0 hi0 in
   let hi1 = vec_interleave_high lo0 hi0 in
-  vec_interleave_low_lemma128_2 lo0 hi0;
-  vec_interleave_high_lemma128_2 lo0 hi0;
+  vec_interleave_low_lemma2 lo0 hi0;
+  vec_interleave_high_lemma2 lo0 hi0;
   let lo2 = cast U64 4 lo1 in
   let hi2 = cast U64 4 hi1 in
 
   let lo = vec_interleave_low lo2 hi2 in
   let hi = vec_interleave_high lo2 hi2 in
-  vec_interleave_low_lemma64_4 lo2 hi2;
-  vec_interleave_high_lemma64_4 lo2 hi2;
+  vec_interleave_low_lemma_uint64_4 lo2 hi2;
+  vec_interleave_high_lemma_uint64_4 lo2 hi2;
 
   load_felem f lo hi;
   let h1 = ST.get () in
@@ -757,7 +762,7 @@ val store_felem2_le:
       as_seq h1 b == BSeq.nat_to_bytes_le 16 ((uint64xN_v hi).[0] * pow2 64 + (uint64xN_v lo).[0]))
 let store_felem2_le b f0 f1 =
   let r0 = vec_interleave_low f0 f1 in
-  vec_interleave_low_lemma64_2 f0 f1;
+  vec_interleave_low_lemma2 f0 f1;
   vec_store_le b r0;
   uints_to_bytes_le_lemma64_2 (vec_v r0)
 
@@ -775,14 +780,13 @@ let store_felem4_le b f0 f1 =
   push_frame ();
   let lo = vec_interleave_low f0 f1 in
   let hi = vec_interleave_high f0 f1 in
-  vec_interleave_low_lemma64_4 f0 f1;
-  vec_interleave_high_lemma64_4 f0 f1;
-  let lo1 = cast U128 2 lo in
+  vec_interleave_low_lemma_uint64_4 f0 f1;
+  vec_interleave_high_lemma_uint64_4 f0 f1;  let lo1 = cast U128 2 lo in
   let hi1 = cast U128 2 hi in
   lemma_cast_vec64_to_vec128 lo;
   lemma_cast_vec64_to_vec128 hi;
   let r0 = vec_interleave_low lo1 hi1 in
-  vec_interleave_low_lemma128_2 lo1 hi1;
+  vec_interleave_low_lemma2 lo1 hi1;
   let tmp = create 32ul (u8 0) in
   vec_store_le tmp r0;
   uints_to_bytes_le_lemma128_2 (vec_v r0);
@@ -959,9 +963,10 @@ val mod_add128:
       let (b0, b1) = b in
       (uint64xN_v r1).[0] * pow2 64 + (uint64xN_v r0).[0] ==
 	(((uint64xN_v a1).[0] + (uint64xN_v b1).[0]) * pow2 64 + (uint64xN_v a0).[0] + (uint64xN_v b0).[0]) % pow2 128))
-let mod_add128 #w (a0, a1) (b0, b1) = admit();
+let mod_add128 #w (a0, a1) (b0, b1) =
   let r0 = vec_add_mod a0 b0 in
   let r1 = vec_add_mod a1 b1 in
-  let c = r0 ^| ((r0 ^| b0) `vec_or` (r0 -| b0) ^| b0) >>| 63ul in
+  let c = r0 ^| ((r0 ^| b0) `vec_or` ((r0 -| b0) ^| b0)) >>| 63ul in
   let r1 = vec_add_mod r1 c in
+  mod_add128_lemma (a0, a1) (b0, b1);
   (r0, r1)

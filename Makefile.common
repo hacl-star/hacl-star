@@ -6,57 +6,10 @@ KREMLIN_HOME 	?= $(HACL_HOME)/../kremlin
 FSTAR_HOME	?= $(HACL_HOME)/../FStar
 VALE_HOME	?= $(HACL_HOME)/../vale
 
-# Other configs are possible, e.g. everest or hacl-vale, by exporting
-# EVERCRYPT_CONFIG manually.
-ifneq (,$(EVEREST_WINDOWS))
-  EVERCRYPT_CONFIG = noopenssl # hacl, vale, bcrypt
-else ifneq (,$(KAIZALA))
-  EVERCRYPT_CONFIG = kaizala # hacl, openssl
-else
-  EVERCRYPT_CONFIG ?= default
-endif
-
-# TODO: no more separate variable definitions?
-LIB_DIR		= $(HACL_HOME)/lib
-SPECS_DIR 	= $(HACL_HOME)/specs $(HACL_HOME)/specs/derived $(HACL_HOME)/specs/tests
-CODE_DIRS	= $(addprefix $(HACL_HOME)/code/,hash sha3 poly1305 chacha20 chacha20poly1305 curve25519 tests)
-EVERCRYPT_DIRS  = $(addprefix $(HACL_HOME)/providers/,evercrypt evercrypt/fst test evercrypt/config/$(EVERCRYPT_CONFIG))
-MERKLE_DIRS	= $(HACL_HOME)/secure_api/merkle_tree
-# Vale dirs also include directories that only contain .vaf files
-# (for a in $(find vale -iname '*.fst' -or -iname '*.fsti' -or -iname '*.vaf'); do dirname $a; done) | sort | uniq
-VALE_DIRS	= \
-  $(HACL_HOME)/vale/code/arch \
-  $(HACL_HOME)/vale/code/arch/x64 \
-  $(HACL_HOME)/vale/code/arch/x64/interop \
-  $(HACL_HOME)/vale/code/crypto/aes \
-  $(HACL_HOME)/vale/code/crypto/aes/x64 \
-  $(HACL_HOME)/vale/code/crypto/ecc/curve25519 \
-  $(HACL_HOME)/vale/code/crypto/poly1305/x64 \
-  $(HACL_HOME)/vale/code/crypto/sha \
-  $(HACL_HOME)/vale/code/lib/collections \
-  $(HACL_HOME)/vale/code/lib/math \
-  $(HACL_HOME)/vale/code/lib/util \
-  $(HACL_HOME)/vale/code/lib/util/x64 \
-  $(HACL_HOME)/vale/code/lib/util/x64/stdcalls \
-  $(HACL_HOME)/vale/code/test \
-  $(HACL_HOME)/vale/code/thirdPartyPorts/Intel/aes/x64 \
-  $(HACL_HOME)/vale/code/thirdPartyPorts/OpenSSL/aes \
-  $(HACL_HOME)/vale/code/thirdPartyPorts/OpenSSL/poly1305/x64 \
-  $(HACL_HOME)/vale/code/thirdPartyPorts/OpenSSL/sha \
-  $(HACL_HOME)/vale/code/thirdPartyPorts/rfc7748/curve25519/x64 \
-  $(HACL_HOME)/vale/specs/crypto \
-  $(HACL_HOME)/vale/specs/defs \
-  $(HACL_HOME)/vale/specs/hardware \
-  $(HACL_HOME)/vale/specs/interop \
-  $(HACL_HOME)/vale/specs/math
-DIRS		= \
-  $(LIB_DIR) $(SPECS_DIR) $(CODE_DIRS) $(VALE_DIRS) \
-  $(EVERCRYPT_DIRS) $(MERKLE_DIRS) \
-  $(HACL_HOME)/obj
-
+include $(HACL_HOME)/Makefile.include
 
 INCLUDES = \
-  $(DIRS) \
+  $(ALL_HACL_DIRS) \
   $(KREMLIN_HOME)/kremlib
 
 # 1. FStar

@@ -28,10 +28,9 @@
 # - vale-fst: the minimum needed to compile .vaf files to .fst files
 # - vale-verify: properly staged target for re-verifying all the vale files
 # - vale-asm: re-generation of the Vale assemblies in dist/vale
-# - hacl-verify: non-staged target for reverifying HACL* files
-#   also: curve25519-verify poly1305-verify chacha20-verify
-# - verify: UNSTAGED, may only be invoked after a successful run of vale-fst,
-#   verifies all .fst files, both hand-written and generated.
+# - hacl-verify: staged target for verifying HACL* files
+#   curve25519-verify poly1305-verify chacha20-verify spec-verify
+#   code-verify: subsets of hacl-verify (each staged)
 #
 # To generate a Makefile for the interactive mode, use:
 # - make foo/bar/Makefile
@@ -90,18 +89,20 @@ endif
 
 all:
 	tools/blast-staticconfig.sh $(EVERCRYPT_CONFIG)
-	$(MAKE) vale-fst
-	FSTAR_DEPEND_FLAGS="--warn_error +285" $(MAKE) all_
+	$(MAKE) all-staged
 
-
-all_: compile-compact compile-generic compile-compact-msvc compile-compact-gcc \
+all-unstaged: compile-compact compile-generic compile-compact-msvc compile-compact-gcc \
   compile-evercrypt-external-headers compile-compact-c89 compile-coco
 
-test:
+# Automatic staging.
+%-staged:
+	@echo "[STAGE1] Vale to F*"
 	$(MAKE) vale-fst
-	FSTAR_DEPEND_FLAGS="--warn_error +285" $(MAKE) test_
+	@echo "[STAGE2] Main target: $*"
+	FSTAR_DEPEND_FLAGS="--warn_error +285" $(MAKE) $*-unstaged
 
-test_: test-handwritten test-c test-ml
+test: test-staged
+test-unstaged: test-handwritten test-c test-ml
 
 # Any file in code/tests is taken to contain an `int main()` function.
 # Test should be renamed into Test.EverCrypt
@@ -111,14 +112,16 @@ test-c: $(subst .,_,$(patsubst %.fst,test-c-%,$(notdir $(wildcard code/tests/*.f
 # Any file in specs/tests is taken to contain a `val test: unit -> bool` function.
 test-ml: $(subst .,_,$(patsubst %.fst,test-ml-%,$(notdir $(wildcard specs/tests/*.fst))))
 
+# Not reusing the -staged automatic target so as to export NOSHORTLOG
 ci:
 	NOSHORTLOG=1 $(MAKE) vale-fst
-	FSTAR_DEPEND_FLAGS="--warn_error +285" NOSHORTLOG=1 $(MAKE) all_ test_
+	FSTAR_DEPEND_FLAGS="--warn_error +285" NOSHORTLOG=1 $(MAKE) all-unstaged test-unstaged
 
+# Not reusing the -staged automatic target so as to export MIN_TEST
 min-test:
 	MIN_TEST=1 NOSHORTLOG=1 $(MAKE) vale-fst
 	MIN_TEST=1 FSTAR_DEPEND_FLAGS="--warn_error +285" NOSHORTLOG=1 \
-	  $(MAKE) min-test_
+	  $(MAKE) min-test-unstaged
 
 # So that this Makefile can also clean the previous directory layout. In the
 # long run, TO_CLEAN should be able to go.
@@ -216,11 +219,8 @@ VALE_FSTS = $(call to-obj-dir,$(VAF_AS_FSTS))
 
 # The complete set of F* files, both hand-written and Vale-generated. Note that
 # this is only correct in the second stage of the build.
-FSTAR_ROOTS = $(wildcard $(addsuffix /*.fsti,$(DIRS)) $(addsuffix /*.fst,$(DIRS))) \
+FSTAR_ROOTS = $(wildcard $(addsuffix /*.fsti,$(ALL_HACL_DIRS)) $(addsuffix /*.fst,$(ALL_HACL_DIRS))) \
   $(wildcard obj/*.fst) $(wildcard obj/*.fsti) # these two empty during the first stage
-
-# Convenience target. Remember to run make vale-fst first.
-verify: $(call to-obj-dir,$(addsuffix .checked,$(FSTAR_ROOTS)))
 
 # We currently force regeneration of three depend files. This is long.
 
@@ -235,6 +235,7 @@ ifndef MAKE_RESTARTS
 # meaning we can eliminate large chunks of the dependency graph, since we only
 # need to run: Vale stuff, and HACL spec tests.
 .fstar-depend-%: .FORCE
+	@if ! [ -f .didhelp ]; then echo "💡 Did you know? If your dependency graph didn't change (e.g. no files added or removed, no reference to a new module in your code), run NODEPEND=1 make <your-target> to skip dependency graph regeneration!"; touch .didhelp; fi
 	$(call run-with-log,\
 	  $(FSTAR_NO_FLAGS) --dep $* $(notdir $(FSTAR_ROOTS)) --warn_error '-285' $(FSTAR_DEPEND_FLAGS) \
 	    --extract '* -Prims -LowStar -Lib.Buffer -Hacl -FStar +FStar.Endianness +FStar.Kremlin.Endianness -EverCrypt -MerkleTree -Vale.Tactics -FastHybrid_helpers -FastMul_helpers -FastSqr_helpers -FastUtil_helpers -TestLib -EverCrypt -MerkleTree -Test -Vale_memcpy -Vale.AsLowStar.Test -Lib.IntVector' > $@ && \
@@ -263,11 +264,17 @@ ifeq ($(MAKECMDGOALS),clean)
   SKIPDEPEND=1
 else ifeq ($(MAKECMDGOALS),)
   SKIPDEPEND=1
+else ifeq ($(MAKECMDGOALS),test)
+  SKIPDEPEND=1
 else ifeq ($(MAKECMDGOALS),all)
   SKIPDEPEND=1
-else ifeq ($(MAKECMDGOALS),vale-verify)
+else ifeq (,$(filter-out %-staged,$(MAKECMDGOALS)))
+  SKIPDEPEND=1
+else ifeq (,$(filter-out %-verify,$(MAKECMDGOALS)))
   SKIPDEPEND=1
 else ifeq ($(MAKECMDGOALS),ci)
+  SKIPDEPEND=1
+else ifeq ($(MAKECMDGOALS),min-test)
   SKIPDEPEND=1
 else ifeq (,$(filter-out %/Makefile,$(MAKECMDGOALS)))
   SKIPDEPEND=1
@@ -393,12 +400,6 @@ obj/X64.Bytes_Semantics.fst.checked: \
 obj/X64.BufferViewStore.fst.checked: \
   FSTAR_FLAGS=$(VALE_FSTAR_FLAGS)
 
-obj/X64.Poly1305.Util.fst.checked: \
-  FSTAR_FLAGS=$(VALE_FSTAR_FLAGS_NOSMT)
-
-obj/X64.Poly1305.Util.fsti.checked: \
-  FSTAR_FLAGS=$(VALE_FSTAR_FLAGS_NOSMT)
-
 obj/X64.Memory.fst.checked: \
   FSTAR_FLAGS=$(shell echo $(VALE_FSTAR_FLAGS_NOSMT) | \
     sed 's/--use_extracted_interfaces true//; \
@@ -447,6 +448,9 @@ obj/Vale.Stdcalls.GCMencrypt.fst.checked: \
 obj/Vale.Stdcalls.GCMencryptOpt.fst.checked: \
   FSTAR_FLAGS=$(VALE_FSTAR_FLAGS)
 
+obj/GCMencryptOpt_stdcalls.fst.checked: \
+  FSTAR_FLAGS=$(VALE_FSTAR_FLAGS)
+
 hints:
 	mkdir -p $@
 
@@ -463,26 +467,25 @@ hints:
 	    touch -c $@ \
 	  ,[VERIFY] $(notdir $*),$(call to-obj-dir,$@))
 
-# Convenience pseudo-targets
-vale-verify:
-	$(MAKE) vale-fst
-	$(MAKE) vale-verify_
+%-verify: %-verify-staged
+	@
 
-vale-verify_: \
+vale-verify-unstaged: \
   $(addsuffix .checked,$(VALE_FSTS)) \
   $(call only-for,$(HACL_HOME)/vale/%.checked) \
 
-hacl-verify: $(call only-for,$(HACL_HOME)/code/%)
-curve25519-verify: $(call only-for,$(HACL_HOME)/code/curve25519/%)
-poly1305-verify: $(call only-for,$(HACL_HOME)/code/poly1305/%)
-chacha20-verify: $(call only-for,$(HACL_HOME)/code/chacha20/%)
-
+hacl-verify-unstaged: code-verify-unstaged spec-verify-unstaged
+code-verify-unstaged: $(call only-for,$(HACL_HOME)/code/%)
+spec-verify-unstaged: $(call only-for,$(HACL_HOME)/spec/%)
+curve25519-verify-unstaged: $(call only-for,$(HACL_HOME)/code/curve25519/%)
+poly1305-verify-unstaged: $(call only-for,$(HACL_HOME)/code/poly1305/%)
+chacha20-verify-unstaged: $(call only-for,$(HACL_HOME)/code/chacha20/%)
 
 ############
 # min-test #
 ############
 
-min-test_: $(filter-out \
+min-test-unstaged: $(filter-out \
   obj/X64.Vale.InsSha.% \
   $(call only-for,$(HACL_HOME)/vale/code/arch/x64/interop/%)\
   ,\
@@ -617,6 +620,8 @@ HAND_WRITTEN_OPTIONAL_FILES = \
 # kremlin's empty-module removal.
 #
 # When extracting our libraries, we purposely don't distribute tests
+#
+# See Makefile.include for the definition of VALE_BUNDLES
 DEFAULT_FLAGS		=\
   $(addprefix -library ,$(HACL_HAND_WRITTEN_C)) \
   -bundle Hacl.Spec.*,Spec.*[rename=Hacl_Spec] \
@@ -630,28 +635,20 @@ DEFAULT_FLAGS		=\
   -bundle EverCrypt.BCrypt \
   -bundle EverCrypt.OpenSSL \
   -bundle MerkleTree.Spec,MerkleTree.Spec.*,MerkleTree.New.High,MerkleTree.New.High.* \
-  -bundle 'Vale.Stdcalls.*,Interop,Interop.*,Fadd_stdcalls,Cpuid_stdcalls,Fswap_stdcalls,Fmul_stdcalls,Fsqr_stdcalls,Fsub_stdcalls,Poly_stdcalls,Sha_stdcalls,GCMencrypt_stdcalls,GCMencryptOpt_stdcalls,AES_stdcalls[rename=Vale]' \
-  -bundle 'Fadd_inline,Fmul_inline,Fsqr_inline,Fswap_inline[rename=Vale_Inline]' \
-  -bundle FStar.Tactics.CanonCommMonoid,FStar.Tactics.CanonCommSemiring,FStar.Tactics.CanonCommSwaps[rename=Unused] \
-  -bundle FastUtil_helpers,FastHybrid_helpers,FastSqr_helpers,FastMul_helpers[rename=Unused2] \
-  -bundle Opaque_s,Map16,Test.Vale_memcpy,Fast_defs,Interop_Printer,Memcpy[rename=Unused3] \
-  -bundle X64.*,Arch.*,Words.*,Vale.*,Collections.*,Collections,SHA_helpers[rename=Unused4] \
-  -bundle Prop_s,Types_s,Words_s,Views,AES_s,Workarounds,Math.*,Interop,TypesNative_s[rename=Unused5] \
-  -bundle GF128_s,GF128,Poly1305.Spec_s,GCTR,GCTR_s,GHash_s,GCM_helpers,GHash[rename=Unused6] \
-  -bundle AES_helpers,AES256_helpers,GCM_s,GCM,Interop_assumptions[rename=Unused7] \
+  $(VALE_BUNDLES) \
   -library 'Vale.Stdcalls.*' \
   -static-header 'Vale_Inline' \
   -library 'Fadd_inline' \
   -library 'Fmul_inline' \
   -library 'Fswap_inline' \
   -library 'Fsqr_inline' \
-  -add-include '"curve25519-inline.h"' \
   -no-prefix 'Vale.Stdcalls.*' \
   -no-prefix 'Fadd_inline' \
   -no-prefix 'Fmul_inline' \
   -no-prefix 'Fswap_inline' \
   -no-prefix 'Fsqr_inline' \
   -no-prefix 'EverCrypt.Vale' \
+  -add-include '"curve25519-inline.h"' \
   -no-prefix 'MerkleTree.New.Low' \
   -no-prefix 'MerkleTree.New.Low.Serialization' \
   -fparentheses -fno-shadow -fcurly-braces

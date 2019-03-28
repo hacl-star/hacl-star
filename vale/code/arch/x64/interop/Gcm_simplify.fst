@@ -225,3 +225,10 @@ let aes_simplify2 b h =
       (seq_nat8_to_seq_nat32_LE (seq_uint8_to_seq_nat8 (Seq.slice s_init 0 16)))
       (seq_nat8_to_seq_nat32_LE (seq_uint8_to_seq_nat8 (Seq.slice s_init 16 32)))
     ))
+
+let aes_simplify3 b h s =
+  let db = get_downview b in
+  DV.length_eq db;
+  let ub = UV.mk_buffer db Views.up_view128 in
+  assert (s == UV.as_seq h ub);
+  lemma_seq_nat8_le_seq_quad32_to_bytes_uint32 b h

@@ -14,6 +14,9 @@ val lemma_add128 (a b:poly) : Lemma
   (requires degree a <= 127 /\ degree b <= 127)
   (ensures to_quad32 (a +. b) == quad32_xor (to_quad32 a) (to_quad32 b))
 
+val lemma_add_quad32 (a b:quad32) : Lemma
+  (ensures of_quad32 a +. of_quad32 b == of_quad32 (quad32_xor a b))
+
 val lemma_quad32_double_shift (a:poly) : Lemma
   (requires degree a <= 127)
   (ensures (

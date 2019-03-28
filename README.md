@@ -4,15 +4,6 @@ This repository contains code from several related projects developed as part of
 [Project Everest](https://project-everest.github.io/), which aims to build and 
 deploy a verified HTTPS stack.
 
-## EverCrypt
-
-[EverCrypt](README.EverCrypt.md) is a high-performance, cross-platform, formally
-verified modern cryptographic provider. EverCrypt packages implementations from
-HACL\* and Vale-Crypto (see below), and automatically picks the fastest one
-available, depending on processor support and the target execution environment
-(*multiplexing*). Furthermore, EverCrypt offers an (*agile*) API that makes it
-simple to switch between algorithms (e.g., from SHA2 to SHA3).
-
 ## HACL\*
 
 [HACL\*](README.HACL.md), the High-Assurance Cryptographic Library, is a
@@ -30,3 +21,12 @@ code and proofs in [F\*](https://github.com/FStarLang/FStar). Vale supports
 multiple platforms and proves that its implementations are memory safe,
 functionally correct, and that timing and memory accesses are secret
 independent.
+
+## EverCrypt
+
+[EverCrypt](README.EverCrypt.md) is a high-performance, cross-platform, formally
+verified modern cryptographic provider. EverCrypt packages implementations from
+HACL\* and Vale-Crypto, and automatically picks the fastest one available,
+depending on processor support and the target execution environment
+(*multiplexing*). Furthermore, EverCrypt offers an (*agile*) API that makes it
+simple to switch between algorithms (e.g., from SHA2 to SHA3).

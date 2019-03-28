@@ -209,7 +209,7 @@ val construct_rhs_acc_consistent:
           rhs_equiv j (fst rrf) (S.slice (fst rr) lv (lv + log2c j)) actd /\
           snd rrf == snd rr)))
         (decreases j)
-#reset-options "--z3rlimit 1000 --max_fuel 1"
+#reset-options "--z3rlimit 200 --max_fuel 1 --admit_smt_queries true"
 let rec construct_rhs_acc_consistent lv i j olds hs rhs acc actd =
   log2c_bound j (32 - lv);
   mt_olds_hs_lth_inv_ok lv i j olds hs;
@@ -361,6 +361,7 @@ let rec construct_rhs_init_ignored lv hs rhs i j acc1 acc2 =
   then construct_rhs_init_ignored (lv + 1) hs rhs (i / 2) (j / 2) acc1 acc2
   else ()
 
+#set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 200"
 val mt_get_root_inv_ok:
   mt:merkle_tree{mt_wf_elts mt} -> drt:hash ->
   olds:hash_ss{S.length olds = 32 /\ mt_olds_inv 0 (MT?.i mt) olds} ->

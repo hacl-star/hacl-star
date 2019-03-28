@@ -123,8 +123,6 @@ procedure {:quick}{:public} compute_ghash_incremental_register()
     Pxor(io, input);    // Y_i := Y_{i-1} ^ x
     Mov128(xmm2, h);    // Move h into the register that ReduceMul128_LE expects
 
-    lemma_to_of_quad32(reverse_bytes_quad32(io));   // Help satisfy precondition
-    lemma_to_of_quad32(h);    // Help satisfy precondition
     ReduceMul128_LE(gf128_of_quad32(reverse_bytes_quad32(io)), gf128_of_quad32(h));    // io := Y_i * H
     reveal ghash_incremental_def;
 }
@@ -186,8 +184,6 @@ procedure {:quick} {:public} compute_ghash_incremental(
             Pxor(io, xmm2);        // Y_i := Y_{i-1} ^ x
             Mov128(xmm2, h);       // xmm2 := H
 
-            lemma_to_of_quad32(reverse_bytes_quad32(xmm1));   // Help satisfy precondition
-            lemma_to_of_quad32(xmm2);   // Help satisfy precondition
             ReduceMul128_LE(gf128_of_quad32(reverse_bytes_quad32(xmm1)), gf128_of_quad32(xmm2));  // io := Y_i * H
 
             Add64(rdx, 1);
@@ -255,8 +251,6 @@ procedure {:quick} compute_ghash_incremental_partial(
             Pxor(io, xmm2);        // Y_i := Y_{i-1} ^ x
             Mov128(xmm2, h);       // xmm2 := H
 
-            lemma_to_of_quad32(reverse_bytes_quad32(xmm1));   // Help satisfy precondition
-            lemma_to_of_quad32(xmm2);   // Help satisfy precondition
             ReduceMul128_LE(gf128_of_quad32(reverse_bytes_quad32(xmm1)), gf128_of_quad32(xmm2));  // io := Y_i * H
 
             Add64(rdx, 1);

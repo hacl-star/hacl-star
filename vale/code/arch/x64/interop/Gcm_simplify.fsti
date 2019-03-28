@@ -61,3 +61,15 @@ val aes_simplify2 (b:buf_t TUInt8 TUInt128) (h:HS.mem) : Lemma
     (seq_nat8_to_seq_nat32_LE (seq_uint8_to_seq_nat8 (B.as_seq h b)))
     (make_AES256_key (low_buffer_read TUInt8 TUInt128 h b 0) (low_buffer_read TUInt8 TUInt128 h b 1))
   ))
+
+val aes_simplify3 (b:buf_t TUInt8 TUInt128) (h:HS.mem) (s:Seq.seq quad32) : Lemma
+  (requires B.live h b /\
+    (let db = get_downview b in
+     DV.length_eq db;
+     let ub = UV.mk_buffer db Views.up_view128 in
+     Seq.equal (UV.as_seq h ub) s)
+  )
+  (ensures
+     Seq.equal (B.as_seq h b)
+       (seq_nat8_to_seq_uint8 (le_seq_quad32_to_bytes s)))
+   
