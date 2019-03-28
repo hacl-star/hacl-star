@@ -362,6 +362,8 @@ verify_options = [
 #   ('code/arch/x64/interop/Fast_inline.fst*', None), 
 
   #('code/thirdPartyPorts/OpenSSL/sha/X64.SHA.vaf', None),
+  ('code/arch/x64/interop/GCMencryptOpt_stdcalls.fst', BuildOptions(fstar_default_args_nosmtencoding())),
+  ('code/arch/x64/interop/GCMencrypt_stdcalls.fst', BuildOptions(fstar_default_args_nosmtencoding())),
 
   ('code/*/*.fst', BuildOptions(fstar_default_args())),
   ('code/*/*.fsti', BuildOptions(fstar_default_args())),

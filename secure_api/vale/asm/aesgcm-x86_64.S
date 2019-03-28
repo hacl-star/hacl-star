@@ -1,6 +1,6 @@
 .text
-.global aes128_key_expansion
-aes128_key_expansion:
+.global old_aes128_key_expansion
+old_aes128_key_expansion:
   movdqu 0(%rcx), %xmm1
   movdqu %xmm1, 0(%rdx)
   aeskeygenassist $1, %xmm1, %xmm2
@@ -108,8 +108,8 @@ aes128_key_expansion:
   pxor %xmm3, %xmm3
   ret
 
-.global aes256_key_expansion
-aes256_key_expansion:
+.global old_aes256_key_expansion
+old_aes256_key_expansion:
   movdqu 0(%rcx), %xmm1
   movdqu 16(%rcx), %xmm3
   movdqu %xmm1, 0(%rdx)
@@ -250,8 +250,8 @@ aes256_key_expansion:
   pxor %xmm4, %xmm4
   ret
 
-.global gcm128_encrypt
-gcm128_encrypt:
+.global old_gcm128_encrypt
+old_gcm128_encrypt:
   mov %rcx, %r9
   pextrq $0, %xmm11, %rax
   push %rax
@@ -1117,8 +1117,8 @@ L11:
   pinsrq $0, %rax, %xmm11
   ret
 
-.global gcm128_decrypt
-gcm128_decrypt:
+.global old_gcm128_decrypt
+old_gcm128_decrypt:
   mov %rcx, %r9
   pextrq $0, %xmm11, %rax
   push %rax
@@ -2005,8 +2005,8 @@ L39:
   mov %rdx, %rax
   ret
 
-.global gcm256_encrypt
-gcm256_encrypt:
+.global old_gcm256_encrypt
+old_gcm256_encrypt:
   mov %rcx, %r9
   pextrq $0, %xmm11, %rax
   push %rax
@@ -2904,8 +2904,8 @@ L51:
   pinsrq $0, %rax, %xmm11
   ret
 
-.global gcm256_decrypt
-gcm256_decrypt:
+.global old_gcm256_decrypt
+old_gcm256_decrypt:
   mov %rcx, %r9
   pextrq $0, %xmm11, %rax
   push %rax
