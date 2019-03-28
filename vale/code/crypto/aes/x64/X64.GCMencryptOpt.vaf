@@ -106,7 +106,7 @@ function aes_reqs(alg:algorithm, key:seq(nat32), round_keys:seq(quad32), keys_b:
 ///////////////////////////
 
 #reset-options "--z3rlimit 10"
-procedure {:quick} {:verify true}  gcm_block_bytes(
+procedure {:quick} gcm_block_bytes(
     inline alg:algorithm,
     ghost in_b:buffer128,
     ghost out_b:buffer128,
@@ -161,11 +161,8 @@ procedure {:quick} {:verify true}  gcm_block_bytes(
 
         // GCTR
         gctr_partial(alg, len, old(s128(mem, in_b)), s128(mem, out_b), key, old(icb));
-        //icb == inc32(old(icb), old(len));
 
         // GHash
-//        length(s128(mem, out_b)) > 0 /\ 
-//            hash == ghash_incremental(reverse_bytes_quad32(h), old(hash), s128(mem, out_b));
         let raw_quads := append(completed_quads, s128(mem, out_b));
         let input_bytes := slice_work_around(le_seq_quad32_to_bytes(raw_quads), total_bytes);
         let padded_bytes := pad_to_128_bits(input_bytes);
@@ -189,9 +186,7 @@ procedure {:quick} {:verify true}  gcm_block_bytes(
 
     Mov64(rax, num_bytes);
     ghash_incremental_bytes_register(total_bytes, old_hash, completed_quads);
-
-    //lemma_hash_append2(reverse_bytes_quad32(h), old(hash), hash_prev, hash, s128(mem, out_b), hash_input);
-    assert equal(s128(mem, out_b), create(1, hash_input));
+    assert equal(s128(mem, out_b), create(1, hash_input));      // OBSERVE
 }
 
 
