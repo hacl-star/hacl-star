@@ -37,7 +37,7 @@ include{:fstar}{:open} "X64.Poly1305.Util"
 
 module X64.Poly1305
 
-#reset-options "--z3rlimit 5000"
+#reset-options "--z3rlimit 40"
 
 #verbatim{:interface}{:implementation}
 open Opaque_s
@@ -214,7 +214,7 @@ procedure{:quick} poly1305_iteration(ghost r1:nat64) returns(ghost hh:int)
 
     (ghost var hd) := poly1305_multiply(r1);
     hh := poly1305_reduce();
-    reveal modp';
+    reveal_modp();
     assert hh == (n * n) * h2 + n * h1 + h0 /\ (h * r) % p == hh % p;
 }
 
@@ -303,7 +303,7 @@ procedure{:quick} poly1305_blocks(
     h := h_in;
     assert modp(h) == poly1305_heap_blocks(modp(h_in), padbit * (n * n), r, buffer64_as_seq(mem, inp_b), 0) by
     {
-        reveal modp';
+        reveal_modp();
         reveal_poly1305_heap_blocks(modp(h_in), padbit * (n * n), r, buffer64_as_seq(mem, inp_b), 0);
     }
 
@@ -365,7 +365,7 @@ procedure{:quick} poly1305_blocks(
         {
             reveal_poly1305_heap_blocks(modp(h_in), padbit * (nn * nn), r, buffer64_as_seq(mem, inp_b), word_index);
             reveal_poly1305_heap_blocks(modp(h_in), padbit * (nn * nn), r, buffer64_as_seq(mem, inp_b), word_index - 2);
-            reveal modp';
+            reveal_modp();
             lemma_poly_demod(p, hp, hq - hp, r);
             lemma_poly1305_heap_blocks_unroll(modp(h_in), padbit * (nn * nn), r, buffer64_as_seq(mem, inp_b), word_index);
             lemma_poly1305_heap_blocks_unroll(modp(h_in), padbit * (nn * nn), r, buffer64_as_seq(mem, inp_b), word_index - 2);
@@ -376,7 +376,7 @@ procedure{:quick} poly1305_blocks(
     Store64_buffer(ctx, h2, 16, Public, ctx_b, 2);
 }
 
-#reset-options "--z3rlimit 5000"
+#reset-options "--z3rlimit 40"
 
 // last 1..15 bytes, in case len is not a multiple of 16
 procedure{:quick} poly1305_last_block()
@@ -471,7 +471,7 @@ procedure{:quick} poly1305_last_block()
     (ghost var hLast) := poly1305_iteration(r1);
     assert hLast == lowerUpper192_opaque(lowerUpper128_opaque(h0, h1), h2) by { reveal lowerUpper192; reveal lowerUpper128; }
     lemma_poly_demod(p, hBlocks, (inpLast % padLast) + padLast, r);
-    assert modp(hLast) == modp((modp(hBlocks) + padLast + (inpLast % padLast)) * r) by { reveal modp'; }
+    assert modp(hLast) == modp((modp(hBlocks) + padLast + (inpLast % padLast)) * r) by { reveal_modp(); }
 }
 
 // h := (h % p) % 2^128;
@@ -630,7 +630,7 @@ procedure{:quick} poly1305_impl(
     assert modp(0) == 0 by
     {
         modp_0();
-//        reveal modp';
+//        reveal_modp();
 //        assert_by_tactic(modp(0) == 0, retain_only_modp());
     }
     lemma_poly1305_heap_hash_blocks_alt(0, n * n, r, mem, inp_b, old(len) / 16);
@@ -665,7 +665,7 @@ procedure{:quick} poly1305_impl(
     h := lowerUpper128_opaque(h0, h1);
 
     assert h == poly1305_hash(key_r, key_s, seqTo128(buffer64_as_seq(mem, inp_b)), len_in)
-        by { reveal mod2_128'; reveal modp'; }
+        by { reveal_mod2_128(); reveal_modp(); }
 }
 
 // poly1305(ctx, inp, len)

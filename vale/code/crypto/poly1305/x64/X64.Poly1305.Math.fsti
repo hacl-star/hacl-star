@@ -21,12 +21,6 @@ let lowerUpper192 (l:nat128) (u:nat64) : int =
 
 let lowerUpper192_opaque = make_opaque lowerUpper192
 
-let mod2_128' x:int = x % pow2_128
-
-let mod2_128 = make_opaque mod2_128'
-
-let modp = make_opaque modp'
-
 // There are some assumptions here, which will either go away when the library switches to ints everywhere (for division too)
 // or when we switch to nats (which is doable right away)
 val lemma_poly_multiply : n:int -> p:int -> r:int -> h:int -> r0:int -> r1:int -> h0:int -> h1:int -> h2:int -> s1:int -> d0:int -> d1:int -> d2:int -> hh:int -> Lemma

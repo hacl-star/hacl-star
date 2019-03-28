@@ -50,19 +50,38 @@ let ( ** ) (x:nat5) (y:nat5) : nat5 =
    x4 * y4 ,
    x5 * y5)
 
-#reset-options "--z3rlimit 100 --using_facts_from '* -FStar.Seq'"
+#set-options "--z3rlimit 100"
+
+val lemma_mul_le_scale64: a:nat -> b:nat ->
+  Lemma
+    (requires a <= 8192 /\ b <= 8192)
+    (ensures a * b <= 67108864)
+let lemma_mul_le_scale64 a b =
+  assert (a * b <= 8192 * 8192);
+  assert_norm (8192 * 8192 = 67108864)
 
 let ( *^ ) (x:scale64) (y:scale64_5) : scale128_5 =
-  assert_norm (8192 * 8192 = 67108864);
   let (y1,y2,y3,y4,y5) = y in
-  admit ();
+  lemma_mul_le_scale64 x y1;
+  lemma_mul_le_scale64 x y2;
+  lemma_mul_le_scale64 x y3;
+  lemma_mul_le_scale64 x y4;
+  lemma_mul_le_scale64 x y5;
   (x * y1 ,
    x * y2 ,
    x * y3 ,
    x * y4 ,
    x * y5)
 
-assume val pow51: nat
+abstract
+let pow51: (pow51: pos { pow2 64 == 8192 * pow51 /\ pow2 128 == 67108864 * pow51 * pow51 /\ pow51 == pow2 51 }) =
+  let pow51: pos = normalize_term (pow2 51) in
+  assert_norm (pow51 > 0);
+  assert_norm (pow51 == pow2 51);
+  assert_norm (pow2 64 == 8192 * pow51);
+  assert_norm (pow2 128 == 67108864 * pow51 * pow51);
+  pow51
+
 inline_for_extraction noextract
 let max51 = pow51 - 1
 
@@ -70,13 +89,6 @@ inline_for_extraction noextract
 let mask51 : x:uint64{v x == pow2 51 - 1} =
   assert_norm (pow2 51 - 1 == 0x7ffffffffffff);
   u64 0x7ffffffffffff
-
-assume val lemma_pow_64_51: _:unit{pow2 64 == 8192 * pow51}
-assume val lemma_pow_128_51: _:unit{pow2 128 == 67108864 * pow51 * pow51}
-
-// assume val lemma_pow_51_2: _:unit{pow2 102 == pow51 * pow51}
-// assume val lemma_pow_51_3: _:unit{pow2 153 == pow51 * pow51 * pow51}
-// assume val lemma_pow_51_4: _:unit{pow2 204 == pow51 * pow51 * pow51 * pow51}
 
 let felem_fits1 (x:uint64) (m:scale64) =
   uint_v x <= m * max51

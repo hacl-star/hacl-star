@@ -98,15 +98,15 @@ let core_create_lemma_readable
          VSig.readable args VS.(va_s.mem)))
   =
     let readable_registered_one (a:arg) (s:ME.mem)
-      : Lemma
-          VSig.(arg_is_registered_root s a <==> readable_one s a)
+      : Lemma VSig.(arg_is_registered_root s a <==> readable_one s a)
       = match a with
         | (| TD_Buffer src bt _, x |) ->
           Vale.AsLowStar.MemoryHelpers.reveal_readable #src #bt x s;
           Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal src bt x
-        | (| TD_ImmBuffer src bt _, x |) -> 
+        | (| TD_ImmBuffer src bt ig, x |) ->
           Vale.AsLowStar.MemoryHelpers.reveal_imm_readable #src #bt x s;
-          assert_norm (arg_is_registered_root s a ==> VSig.readable_one s a)
+          assert_norm (ME.buffer_readable s (as_vale_immbuffer #src #bt x) <==>
+                       VSig.readable_one s (| TD_ImmBuffer src bt ig, x |))
         | (| TD_Base _, _ |) -> ()
     in
     let rec readable_registered_all

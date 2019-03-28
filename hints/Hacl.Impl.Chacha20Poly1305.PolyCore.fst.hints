@@ -31,7 +31,7 @@
         "typing_tok_Hacl.Impl.Poly1305.Fields.M32@tok"
       ],
       0,
-      "765a370d7ab3d08bde7e4afb4ab1cd8a"
+      "33baa2bac2f516c929af39264708c24f"
     ],
     [
       "Hacl.Impl.Chacha20Poly1305.PolyCore.poly1305_padded",
@@ -73,11 +73,11 @@
         "equation_Lib.Buffer.live", "equation_Lib.Buffer.loc",
         "equation_Lib.Buffer.modifies", "equation_Lib.Buffer.modifies1",
         "equation_Lib.Buffer.op_Bar_Plus_Bar", "equation_Lib.Buffer.union",
-        "equation_Lib.IntTypes.bits", "equation_Lib.IntTypes.pub_int_t",
-        "equation_Lib.IntTypes.pub_int_v", "equation_Lib.IntTypes.uint8",
-        "equation_Lib.IntTypes.uint_t", "equation_Lib.IntTypes.uint_v",
-        "equation_Lib.IntVector.width", "equation_Lib.Sequence.to_seq",
-        "equation_LowStar.Buffer.buffer",
+        "equation_Lib.IntTypes.bits", "equation_Lib.IntTypes.op_Plus_Dot",
+        "equation_Lib.IntTypes.pub_int_t", "equation_Lib.IntTypes.pub_int_v",
+        "equation_Lib.IntTypes.uint8", "equation_Lib.IntTypes.uint_t",
+        "equation_Lib.IntTypes.uint_v", "equation_Lib.IntVector.width",
+        "equation_Lib.Sequence.to_seq", "equation_LowStar.Buffer.buffer",
         "equation_LowStar.Buffer.trivial_preorder",
         "equation_LowStar.Monotonic.Buffer.length", "equation_Prims.nat",
         "equation_Spec.Chacha20Poly1305.poly1305_padded",
@@ -94,7 +94,8 @@
         "lemma_FStar.Seq.Base.lemma_eq_refl", "lemma_FStar.UInt32.uv_inv",
         "lemma_FStar.UInt32.vu_inv",
         "lemma_Lib.Buffer.modifies_preserves_live",
-        "lemma_Lib.IntTypes.mul_lemma", "lemma_Lib.IntTypes.pow2_values",
+        "lemma_Lib.IntTypes.add_mod_lemma", "lemma_Lib.IntTypes.mul_lemma",
+        "lemma_Lib.IntTypes.pow2_values",
         "lemma_LowStar.Monotonic.Buffer.as_seq_gsub",
         "lemma_LowStar.Monotonic.Buffer.length_null_1",
         "lemma_LowStar.Monotonic.Buffer.length_null_2",
@@ -132,6 +133,8 @@
         "refinement_interpretation_Tm_refine_bdf838ca6535f5c66267c2f746c75ae7",
         "refinement_interpretation_Tm_refine_c2215b703b2340e9e4551c4e8820d7c8",
         "refinement_interpretation_Tm_refine_e94f1237bb5eaf4592fd3cc45f9145fb",
+        "token_correspondence_Lib.IntTypes.add_mod",
+        "token_correspondence_Lib.IntTypes.op_Plus_Dot",
         "typing_FStar.Map.contains", "typing_FStar.Monotonic.HyperHeap.rid",
         "typing_FStar.Monotonic.HyperStack.get_hmap",
         "typing_FStar.Monotonic.HyperStack.get_tip",
@@ -150,7 +153,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "d792bb099f3f0861164b111175b45e3b"
+      "8aaba8f83385d8324940f47e38445b76"
     ],
     [
       "Hacl.Impl.Chacha20Poly1305.PolyCore.poly1305_init",
@@ -177,7 +180,7 @@
         "typing_tok_Hacl.Impl.Poly1305.Fields.M32@tok"
       ],
       0,
-      "50701cf4a7c63e63799f0bc8770d1a33"
+      "f6d02c00dc85e48a4c100468da97adba"
     ],
     [
       "Hacl.Impl.Chacha20Poly1305.PolyCore.poly1305_init",
@@ -255,7 +258,7 @@
         "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "a4f285278eedace99110477f916f2bc5"
+      "6da6c1a6cec775acd1a625f5a96ecff2"
     ],
     [
       "Hacl.Impl.Chacha20Poly1305.PolyCore.update1",
@@ -289,7 +292,7 @@
         "typing_tok_Hacl.Impl.Poly1305.Fields.M32@tok"
       ],
       0,
-      "ea9b5830eb9e483e62614e9bbeed2f9c"
+      "1252937a2d820d0cf82d2fee6cfcdedd"
     ],
     [
       "Hacl.Impl.Chacha20Poly1305.PolyCore.update1",
@@ -333,7 +336,7 @@
         "typing_Spec.Poly1305.size_key"
       ],
       0,
-      "dfb9bd8368cb6511a0d47abb2477b692"
+      "35f7c653213868dbc44425fb6cef1699"
     ],
     [
       "Hacl.Impl.Chacha20Poly1305.PolyCore.finish",
@@ -349,7 +352,7 @@
         "typing_Spec.Poly1305.size_key"
       ],
       0,
-      "7753070e876d37fdd2c099ddf1a8edd5"
+      "254f450dd3b8a17de29ded0ea55f17e2"
     ],
     [
       "Hacl.Impl.Chacha20Poly1305.PolyCore.finish",
@@ -370,7 +373,7 @@
         "refinement_interpretation_Tm_refine_77d59b9a3fdfbd6da5e5cf7d3e7afe9d"
       ],
       0,
-      "f486ea5726ad0d2c7d83c7e083404823"
+      "d1a380acf9c36e028974ad51312de66b"
     ]
   ]
 ]

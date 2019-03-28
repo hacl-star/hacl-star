@@ -1,5 +1,5 @@
 [
-  "]çn§\f&6Gû©Ô»ö±p`",
+  "LÖEÌ|™\u001cLZ∫ÕÃG&é\u0004",
   [
     [
       "Hacl.Spec.Curve25519.Field51.Definition.s64x5",
@@ -13,7 +13,7 @@
         "refinement_interpretation_Tm_refine_a4d846f75d08409fefe20d97e8c8a5cc"
       ],
       0,
-      "1befbe52da02c1a0b664f3ae3faa5c17"
+      "edad4c1aa4bfdd6111693b3b44a61776"
     ],
     [
       "Hacl.Spec.Curve25519.Field51.Definition.s128x5",
@@ -27,7 +27,7 @@
         "refinement_interpretation_Tm_refine_035d4b5093e17f7f6148810d60d9f745"
       ],
       0,
-      "494be67a9460c9945ca65db01edf8bec"
+      "878c8f831a95f50c7e0ca5d50e632467"
     ],
     [
       "Hacl.Spec.Curve25519.Field51.Definition.op_Plus_Star",
@@ -40,7 +40,7 @@
         "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-      "59d0ad2670aa8ab494f1334215c767bb"
+      "1c70de5c0dbbb6ba0d191a3b509d5a45"
     ],
     [
       "Hacl.Spec.Curve25519.Field51.Definition.op_Star_Star",
@@ -53,7 +53,57 @@
         "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-      "7fc82a248899a772bfb1724e9a2d01be"
+      "c02b9223ce3f19659131f5a8a4e9f282"
+    ],
+    [
+      "Hacl.Spec.Curve25519.Field51.Definition.lemma_mul_le_scale64",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
+        "int_inversion", "primitive_Prims.op_Multiply",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
+      ],
+      0,
+      "f2647733a2e7339bd9935e90091c430b"
+    ],
+    [
+      "Hacl.Spec.Curve25519.Field51.Definition.op_Star_Hat",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565",
+        "equation_Hacl.Spec.Curve25519.Field51.Definition.nat5",
+        "equation_Hacl.Spec.Curve25519.Field51.Definition.scale64",
+        "equation_Hacl.Spec.Curve25519.Field51.Definition.scale64_5",
+        "equation_Prims.nat",
+        "function_token_typing_Prims.__cache_version_number__",
+        "int_inversion", "primitive_Prims.op_Multiply",
+        "projection_inverse_BoxInt_proj_0",
+        "projection_inverse_FStar.Pervasives.Native.Mktuple5__1",
+        "projection_inverse_FStar.Pervasives.Native.Mktuple5__2",
+        "projection_inverse_FStar.Pervasives.Native.Mktuple5__3",
+        "projection_inverse_FStar.Pervasives.Native.Mktuple5__4",
+        "projection_inverse_FStar.Pervasives.Native.Mktuple5__5",
+        "refinement_interpretation_Tm_refine_a4d846f75d08409fefe20d97e8c8a5cc",
+        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "refinement_interpretation_Tm_refine_f1fa0081d4e3c738be99cf6719aaf407"
+      ],
+      0,
+      "5754d611725e0d3e24b7ab327c69da44"
+    ],
+    [
+      "Hacl.Spec.Curve25519.Field51.Definition.pow51",
+      1,
+      2,
+      1,
+      [ "@query" ],
+      0,
+      "070810eb7b0a39426c0329ff93bce822"
     ],
     [
       "Hacl.Spec.Curve25519.Field51.Definition.mask51",
@@ -74,7 +124,7 @@
         "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-      "f68e02518127c07ed9b56de6adcde322"
+      "3c2c1ab1ecfbc91e60452804feff9570"
     ],
     [
       "Hacl.Spec.Curve25519.Field51.Definition.felem_fits5",
@@ -94,7 +144,7 @@
         "refinement_interpretation_Tm_refine_f1fa0081d4e3c738be99cf6719aaf407"
       ],
       0,
-      "463e7ddc1c9aaed590f7b4632810967f"
+      "bc22945d83cba317fe84c9ae4ec5f1f6"
     ],
     [
       "Hacl.Spec.Curve25519.Field51.Definition.felem_wide_fits5",
@@ -114,7 +164,7 @@
         "refinement_interpretation_Tm_refine_ee34040b26bcb73023832486dde736a0"
       ],
       0,
-      "ebffd18f1259fc7fb9c1a10d91cfadab"
+      "b3f44f5d69ca4fd0a217607bfd647192"
     ],
     [
       "Hacl.Spec.Curve25519.Field51.Definition.as_nat5",
@@ -122,25 +172,23 @@
       2,
       1,
       [
-        "@MaxFuel_assumption", "@MaxIFuel_assumption",
-        "@fuel_correspondence_Prims.pow2.fuel_instrumented",
-        "@fuel_irrelevance_Prims.pow2.fuel_instrumented", "@query",
+        "@MaxIFuel_assumption", "@query",
         "Prims_pretyping_ae567c2fb75be05905677af440075565",
         "equality_tok_Lib.IntTypes.SEC@tok",
-        "equality_tok_Lib.IntTypes.U64@tok", "equation_Lib.IntTypes.uint64",
-        "equation_Lib.IntTypes.uint_v", "equation_Prims.nat",
-        "function_token_typing_Hacl.Spec.Curve25519.Field51.Definition.lemma_pow_64_51",
-        "function_token_typing_Prims.__cache_version_number__", "int_typing",
-        "lemma_Lib.IntTypes.pow2_values", "primitive_Prims.op_Addition",
-        "primitive_Prims.op_Multiply", "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_82b65099892bcd4ee1cd969350ddb986",
+        "equality_tok_Lib.IntTypes.U64@tok",
+        "equation_Hacl.Spec.Curve25519.Field51.Definition.pow51",
+        "equation_Lib.IntTypes.uint64", "equation_Lib.IntTypes.uint_v",
+        "equation_Prims.nat",
+        "function_token_typing_Prims.__cache_version_number__",
+        "primitive_Prims.op_Addition", "primitive_Prims.op_Multiply",
+        "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_a023f390483b324d20370f23ed0795dc",
         "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
         "typing_Lib.IntTypes.uint_v", "typing_tok_Lib.IntTypes.SEC@tok",
         "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "53e03eeff429d0f24fa96dc642325077"
+      "265f5de02c9ec5a0d3d51cfebbfee28c"
     ],
     [
       "Hacl.Spec.Curve25519.Field51.Definition.wide_as_nat5",
@@ -148,26 +196,23 @@
       2,
       1,
       [
-        "@MaxFuel_assumption", "@MaxIFuel_assumption",
-        "@fuel_correspondence_Prims.pow2.fuel_instrumented",
-        "@fuel_irrelevance_Prims.pow2.fuel_instrumented", "@query",
+        "@MaxIFuel_assumption", "@query",
         "Prims_pretyping_ae567c2fb75be05905677af440075565",
         "equality_tok_Lib.IntTypes.SEC@tok",
         "equality_tok_Lib.IntTypes.U128@tok",
+        "equation_Hacl.Spec.Curve25519.Field51.Definition.pow51",
         "equation_Lib.IntTypes.uint128", "equation_Lib.IntTypes.uint_v",
         "equation_Prims.nat",
-        "function_token_typing_Hacl.Spec.Curve25519.Field51.Definition.lemma_pow_64_51",
-        "function_token_typing_Prims.__cache_version_number__", "int_typing",
-        "lemma_Lib.IntTypes.pow2_values", "primitive_Prims.op_Addition",
-        "primitive_Prims.op_Multiply", "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_82b65099892bcd4ee1cd969350ddb986",
+        "function_token_typing_Prims.__cache_version_number__",
+        "primitive_Prims.op_Addition", "primitive_Prims.op_Multiply",
+        "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_a023f390483b324d20370f23ed0795dc",
         "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
         "typing_Lib.IntTypes.uint_v", "typing_tok_Lib.IntTypes.SEC@tok",
         "typing_tok_Lib.IntTypes.U128@tok"
       ],
       0,
-      "95f38af4abaee609427f9445e9b0799a"
+      "f74d298ac378724be52cdc3de99972ba"
     ],
     [
       "Hacl.Spec.Curve25519.Field51.Definition.feval",
@@ -189,7 +234,7 @@
         "typing_Spec.Curve25519.prime"
       ],
       0,
-      "98fbef76468804b8cc0f99042f8c9c34"
+      "de89570bf601c0f0d3a3018273c68d55"
     ],
     [
       "Hacl.Spec.Curve25519.Field51.Definition.feval_wide",
@@ -211,7 +256,7 @@
         "typing_Spec.Curve25519.prime"
       ],
       0,
-      "60214e03ad22dad193214248ef1d263b"
+      "3310373b7e93d64bdc0000e3ad781fdd"
     ]
   ]
 ]

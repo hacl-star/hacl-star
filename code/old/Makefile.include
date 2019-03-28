@@ -37,11 +37,7 @@ HACL_KREMLIN_FILES=$(addprefix $(HACL_KREMLIN)/, $(HACL_FILES))
 HACL_API=$(HACL_HOME)/code/old/api
 HACL_CRYPTO_UTILS=$(HACL_HOME)/code/old/lib
 
-ifeq ($(CI),true)
-VERBOSE=
-else
 VERBOSE=-verbose
-endif
 
 #
 # Kremlin
@@ -53,7 +49,7 @@ KREMTEST=$(KREMLIN_HOME)/test
 
 
 # Default Kremlin arguments
-KREMLIN_ARGS?=
+KREMLIN_ARGS?=-verbose
 KREMLIN_ARGS+=$(KOPTS)
 KREMLIN_ARGS+=-I $(HACL_KREMLIN) -I $(KREMLIB)/compat -I $(HACL_HOME)/specs -I $(HACL_HOME)/specs/old -I . -fparentheses -fcurly-braces -fno-shadow
 
