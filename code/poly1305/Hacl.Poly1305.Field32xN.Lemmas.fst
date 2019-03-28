@@ -1395,6 +1395,28 @@ let load_tup64_lemma0 f lo hi =
   load_tup64_lemma0_lo lo;
   load_tup64_lemma0_hi hi
 
+val load_tup64_fits_lemma:
+    f:tup64_5
+  -> lo:uint64
+  -> hi:uint64
+  -> Lemma
+    (requires (
+      let (f0, f1, f2, f3, f4) = f in
+      v f0 == v lo % pow2 26 /\
+      v f1 == (v lo / pow2 26) % pow2 26 /\
+      v f2 == v lo / pow2 52 + (v hi % pow2 14) * pow2 12 /\
+      v f3 == (v hi / pow2 14) % pow2 26 /\
+      v f4 == v hi / pow2 40))
+    (ensures tup64_fits5 f (1, 1, 1, 1, 1))
+let load_tup64_fits_lemma f lo hi =
+  let (f0, f1, f2, f3, f4) = f in
+  assert_norm (pow26 = pow2 26);
+  FStar.Math.Lemmas.lemma_div_lt_nat (v lo) 64 52;
+  lemma_mult_le (v hi % pow2 14) (pow2 14 - 1) (pow2 12) (pow2 12);
+  assert_norm (pow2 14 * pow2 12 = pow2 26);
+  FStar.Math.Lemmas.lemma_div_lt_nat (v hi) 64 40;
+  assert_norm (pow2 24 < pow2 26)
+
 val load_tup64_lemma:
     lo:uint64
   -> hi:uint64
@@ -1461,7 +1483,7 @@ let load_tup64_lemma lo hi =
   assert (v f4 == v hi / pow2 40);
   let f = (f0, f1, f2, f3, f4) in
   load_tup64_lemma0 f lo hi;
-  assume (tup64_fits5 f (1, 1, 1, 1, 1));
+  load_tup64_fits_lemma f lo hi;
   assert (as_nat5 f < pow2 128);
   assert_norm (pow2 128 < prime);
   FStar.Math.Lemmas.small_modulo_lemma_1 (as_nat5 f) prime;
