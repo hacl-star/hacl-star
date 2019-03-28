@@ -17,6 +17,7 @@ open Math.Poly2
 open Math.Poly2.Bits_s
 open Math.Poly2.Bits
 open GF128
+open FStar.Mul
 
 #reset-options "--use_two_phase_tc true"
 
@@ -29,7 +30,13 @@ let rec ghash_poly (h:poly) (init:poly) (data:int -> poly128) (j:int) (k:int) : 
   if k <= j then init else
   gf128_mul_rev (ghash_poly h init data j (k - 1) +. data (k - 1)) h
 
+val g_power (a:poly) (n:nat) : poly
+val lemma_g_power_1 (a:poly) : Lemma (g_power a 1 == a)
+val lemma_g_power_n (a:poly) (n:pos) : Lemma (g_power a (n + 1) == a *~ g_power a n)
+
 val gf128_power (h:poly) (n:nat) : poly
+val lemma_gf128_power (h:poly) (n:nat) : Lemma
+  (gf128_power h n == shift_key_1 128 gf128_modulus_low_terms (g_power h n))
 
 // Unrolled series of n ghash computations
 let rec ghash_unroll (h:poly) (prev:poly) (data:int -> poly128) (k:int) (m n:nat) : poly =
@@ -118,6 +125,16 @@ val lemma_hash_append3 (h y_init y_mid1 y_mid2 y_final:quad32) (s1 s2 s3:seq qua
             y_final = ghash_incremental h y_mid2 s3)
   (ensures y_final == ghash_LE h (append s1 (append s2 s3)))
 
+val ghash_incremental_bytes_pure_no_extra (old_io io h:quad32) (in_quads:seq quad32) (num_bytes:nat64) : Lemma
+  (requires io = ghash_incremental0 h old_io in_quads)
+  (ensures  length in_quads == (num_bytes / 16) /\ 
+            num_bytes % 16 == 0 ==>
+            (let input_bytes = slice (le_seq_quad32_to_bytes in_quads) 0 num_bytes in
+             let padded_bytes = pad_to_128_bits input_bytes in
+             let input_quads = le_bytes_to_seq_quad32 padded_bytes in
+             num_bytes > 0 ==> length input_quads > 0 /\
+                              io == ghash_incremental h old_io input_quads))
+
 #reset-options "--z3rlimit 30"
 open FStar.Mul
 val lemma_ghash_incremental_bytes_extra_helper (h y_init y_mid y_final:quad32) (input:seq quad32) (final final_padded:quad32) (num_bytes:nat) : Lemma
@@ -134,6 +151,22 @@ val lemma_ghash_incremental_bytes_extra_helper (h y_init y_mid y_final:quad32) (
                final_padded == le_bytes_to_quad32 padded_bytes /\
                y_final = ghash_incremental h y_mid (create 1 final_padded)))))
   (ensures (let input_bytes = slice_work_around (le_seq_quad32_to_bytes input) num_bytes in
+            let padded_bytes = pad_to_128_bits input_bytes in
+            let input_quads = le_bytes_to_seq_quad32 padded_bytes in
+            length padded_bytes == 16 * length input_quads /\
+            y_final == ghash_incremental h y_init input_quads))
+
+val lemma_ghash_incremental_bytes_extra_helper_alt (h y_init y_mid y_final:quad32) (input_blocks:seq quad32) (final final_padded:quad32) (num_bytes:nat) : Lemma
+  (requires (1 <= num_bytes /\
+             num_bytes < 16 * (length input_blocks) + 16 /\
+             16 * (length input_blocks) < num_bytes /\
+             num_bytes % 16 <> 0 /\
+             y_mid = ghash_incremental0 h y_init input_blocks /\
+            (let padded_bytes = pad_to_128_bits (slice_work_around (le_quad32_to_bytes final) (num_bytes % 16)) in
+             length padded_bytes == 16 /\
+             final_padded == le_bytes_to_quad32 padded_bytes /\
+             y_final = ghash_incremental h y_mid (create 1 final_padded))))
+  (ensures (let input_bytes = slice_work_around (le_seq_quad32_to_bytes (append input_blocks (create 1 final))) num_bytes in
             let padded_bytes = pad_to_128_bits input_bytes in
             let input_quads = le_bytes_to_seq_quad32 padded_bytes in
             length padded_bytes == 16 * length input_quads /\

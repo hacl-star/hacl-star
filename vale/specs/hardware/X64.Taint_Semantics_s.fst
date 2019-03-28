@@ -224,7 +224,7 @@ and taint_eval_while c fuel s0 =
 let is_xmm_ins (ins:tainted_ins) =
   let i = ins.i in
   match i with
-    | S.VPaddd _ _ _ | S.Paddd _ _ | S.Pxor _ _ | S.VPxor _ _ _ | S.Pslld _ _ | S.Psrld _ _ | S.Psrldq _ _ 
+    | S.VPaddd _ _ _ | S.Paddd _ _ | S.Pxor _ _ | S.Pand _ _ | S.VPxor _ _ _ | S.Pslld _ _ | S.Psrld _ _ | S.Psrldq _ _ 
     | S.Palignr _ _ _ | S.VPalignr _ _ _ _ | S.Shufpd _ _ _ | S.VShufpd _ _ _ _ | S.Pshufb _ _ | S.VPshufb _ _ _
     | S.Pshufd _ _ _ | S.Pcmpeqd _ _ | S.Pextrq _ _ _ | S.Pinsrd _ _ _ | S.Pinsrq _ _ _
     | S.VPSLLDQ _ _ _ | S.Vpsrldq _ _ _ | S.MOVDQU _ _

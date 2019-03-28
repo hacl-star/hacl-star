@@ -389,6 +389,61 @@ procedure {:quick} compute_pad_to_128_bits()
 }
 
 #reset-options "--z3rlimit 10"
+procedure {:quick}{:public} ghash_incremental_bytes_register(
+        ghost total_bytes:nat,
+        ghost old_hash:quad32,
+        ghost completed_quads:seq(quad32)
+    )
+    lets num_bytes @= rax; io @= xmm1; input_quad @= xmm2; mask @= xmm8; h @= xmm11;
+
+    reads
+        h; mask;
+
+    modifies
+        num_bytes; rcx; rdx; r12;
+        io; efl;
+
+        // ReduceMul128_LE touches almost everything
+        xmm2; xmm3; xmm4; xmm5; xmm6;
+
+    requires
+        // GHash reqs
+        pclmulqdq_enabled;
+        mask == Mkfour(0x0C0D0E0F, 0x08090A0B, 0x04050607, 0x00010203);
+
+        io == ghash_incremental0(reverse_bytes_quad32(h), old_hash, completed_quads);
+
+        // Extra reqs
+        length(completed_quads) == total_bytes / 16;
+        total_bytes < 16 * length(completed_quads) + 16;
+        num_bytes == total_bytes;
+        total_bytes % 16 != 0;        // Note: This implies total_bytes > 0
+        0 < total_bytes < 16 * bytes_to_quad_size(total_bytes);
+        16 * (bytes_to_quad_size(total_bytes) - 1) < total_bytes;
+
+    ensures
+        let raw_quads := append(completed_quads, create(1, old(input_quad)));
+        let input_bytes := slice_work_around(le_seq_quad32_to_bytes(raw_quads), total_bytes);
+        let padded_bytes := pad_to_128_bits(input_bytes);
+        let input_quads := le_bytes_to_seq_quad32(padded_bytes);
+        total_bytes > 0 ==> length(input_quads) > 0 /\
+                          io == ghash_incremental(reverse_bytes_quad32(h), old_hash, input_quads);
+{
+    lemma_poly_bits64();
+    And64(num_bytes, 15);
+    assert num_bytes == old(num_bytes) % 16;
+
+    ghost var final_quad := xmm2;
+
+    compute_pad_to_128_bits();
+    ghost var final_quad_padded := xmm2;
+
+    compute_ghash_incremental_register();
+
+    lemma_ghash_incremental_bytes_extra_helper_alt(reverse_bytes_quad32(h), old_hash, old(io), io, completed_quads, final_quad, final_quad_padded, total_bytes);
+}
+
+#reset-options "--z3rlimit 10"
 procedure {:quick}{:public} ghash_incremental_bytes_extra(
     ghost in_b:buffer128,
     ghost orig_in_ptr:nat64,
