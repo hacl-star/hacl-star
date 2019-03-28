@@ -14,7 +14,7 @@
         "typing_Spec.Poly1305.size_block"
       ],
       0,
-      "0989f87d6db5744eaaad01a42412c755"
+      "0a3872633166368a99d23114e15ace22"
     ],
     [
       "Hacl.Poly1305_32.poly1305_init",
@@ -92,7 +92,7 @@
         "typing_tok_Lib.IntTypes.U32@tok", "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "165cb3e747e0bbea102b471230a24875"
+      "169d95814c3c4ad31c19e96992ab37c9"
     ],
     [
       "Hacl.Poly1305_32.poly1305_init",
@@ -168,7 +168,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "7697cc7b0ccae0849414c037037283d6"
+      "250915dc201c65446c53310035b6fe95"
     ],
     [
       "Hacl.Poly1305_32.poly1305_update_blocks",
@@ -235,7 +235,7 @@
         "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "8dc3d19a4e03e5dbea66147ce5c32128"
+      "3f0b4c7cc9f09589b83e2cc055c8feaa"
     ],
     [
       "Hacl.Poly1305_32.poly1305_update_blocks",
@@ -270,7 +270,7 @@
         "typing_Spec.Poly1305.size_key"
       ],
       0,
-      "ecb6a437a3a3da62ff34dd0b86fd1baf"
+      "5443a9710160879c692e5d49d3ada118"
     ],
     [
       "Hacl.Poly1305_32.poly1305_update_blocks",
@@ -336,7 +336,7 @@
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "c35782da0dd3ed3d32542fb4525e4881"
+      "2c12b35ee34bf5d3e5d5b2c0254579e8"
     ],
     [
       "Hacl.Poly1305_32.poly1305_update_padded",
@@ -402,7 +402,7 @@
         "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "0e695d2b91f201f175228c646961bfeb"
+      "af9da9309dd2b7533ae4b1909476c7dc"
     ],
     [
       "Hacl.Poly1305_32.poly1305_update_padded",
@@ -473,7 +473,7 @@
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "6a3a8021f88c6cf3c3ad3582516b2df4"
+      "1dd85833041e2fb047884110709d5b93"
     ],
     [
       "Hacl.Poly1305_32.poly1305_update_last",
@@ -539,7 +539,7 @@
         "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "156d1a58b112cc8bc120d8094cc0ea1b"
+      "cc9a88ca78f89434b0ce8a11140e77c2"
     ],
     [
       "Hacl.Poly1305_32.poly1305_update_last",
@@ -610,7 +610,7 @@
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "64c8bad605486a963975531dbcf48481"
+      "b062b4f66013599c0541495cfee463ee"
     ],
     [
       "Hacl.Poly1305_32.poly1305_finish",
@@ -678,7 +678,7 @@
         "typing_tok_Lib.IntTypes.U32@tok", "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "5131690ba0833c239e3ca2eac0c826a9"
+      "5ff6d5d5bacb4e5c997d0b140e65d25d"
     ],
     [
       "Hacl.Poly1305_32.poly1305_finish",
@@ -689,8 +689,6 @@
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented",
         "@fuel_irrelevance_Prims.pow2.fuel_instrumented", "@query",
-        "Lib.IntTypes_interpretation_Tm_arrow_49f388450e5cfc91da46292c2a5d5b7b",
-        "Lib.IntTypes_interpretation_Tm_arrow_64d9bcf6dc13bcbde626455717781a82",
         "Prims_pretyping_ae567c2fb75be05905677af440075565", "b2t_def",
         "bool_inversion", "bool_typing",
         "constructor_distinct_Lib.Buffer.MUT",
@@ -719,7 +717,6 @@
         "equation_Spec.Poly1305.size_key",
         "function_token_typing_FStar.Monotonic.Heap.heap",
         "function_token_typing_Hacl.Spec.Poly1305.Field32xN.lemma_pow_32_26",
-        "function_token_typing_Lib.IntTypes.op_Plus_Dot",
         "function_token_typing_Lib.IntTypes.uint8",
         "function_token_typing_Prims.__cache_version_number__", "int_typing",
         "lemma_FStar.Map.lemma_ContainsDom", "lemma_FStar.UInt32.vu_inv",
@@ -737,7 +734,6 @@
         "refinement_interpretation_Tm_refine_722e67d50ad211c792a7485b88732129",
         "refinement_interpretation_Tm_refine_77d59b9a3fdfbd6da5e5cf7d3e7afe9d",
         "refinement_interpretation_Tm_refine_9a74d818566e70513bc032cc3b65a144",
-        "refinement_interpretation_Tm_refine_a023f390483b324d20370f23ed0795dc",
         "refinement_interpretation_Tm_refine_a347709bfeba48709474ad26f4f6be87",
         "refinement_interpretation_Tm_refine_c2215b703b2340e9e4551c4e8820d7c8",
         "token_correspondence_Lib.IntTypes.add_mod",
@@ -746,13 +742,12 @@
         "typing_FStar.Monotonic.HyperStack.get_hmap",
         "typing_FStar.Monotonic.HyperStack.get_tip",
         "typing_FStar.UInt.fits", "typing_FStar.UInt32.uint_to_t",
-        "typing_Lib.Buffer.length", "typing_Lib.IntTypes.uint_v",
-        "typing_LowStar.Buffer.trivial_preorder",
+        "typing_Lib.Buffer.length", "typing_LowStar.Buffer.trivial_preorder",
         "typing_Spec.Poly1305.size_key", "typing_tok_Lib.Buffer.MUT@tok",
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "d6e4423811363d13315ba3778a6b812a"
+      "c162eb93e7fa2305e0e0518e198ba8c1"
     ],
     [
       "Hacl.Poly1305_32.poly1305_mac",
@@ -770,7 +765,7 @@
         "typing_Spec.Poly1305.size_key"
       ],
       0,
-      "d3125b564ef4456d2c3f4dcbff383515"
+      "40b534ff078dba5075934cdd808578a5"
     ],
     [
       "Hacl.Poly1305_32.poly1305_mac",
@@ -784,7 +779,7 @@
         "refinement_interpretation_Tm_refine_c2215b703b2340e9e4551c4e8820d7c8"
       ],
       0,
-      "324fb10059aea6fe18ec967b8d514173"
+      "0e110f30bdfbf1fe7be89561ab981dbd"
     ]
   ]
 ]
