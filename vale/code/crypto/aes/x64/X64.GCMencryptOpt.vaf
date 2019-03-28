@@ -302,7 +302,7 @@ procedure {:quick} gcm_make_length_quad()
 }
 
 #reset-options "--z3rlimit 10"
-procedure {:quick} {:verify true} gcm_blocks(
+procedure {:quick} gcm_blocks(
     inline alg:algorithm,
     inline offset:int,
     ghost auth_b:buffer128,
@@ -566,7 +566,7 @@ assume false;
 /////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////
-
+/*
     if (r13 > rcx) {
         // Line up arguments for gcm_blocks128 for the 128-bit block that holds any extra bytes
         Load64_stack(rax, rsp, offset + 56);
@@ -645,6 +645,7 @@ assume false;
     lemma_hash_append2(h, y_0, y_inout, y_final, auth_in, length_quad32);
     auth_in := append(auth_in, create(1, length_quad32));
     ghash_incremental_to_ghash(h, auth_in);
+    */
 }
 
 #reset-options "--z3rlimit 50"
@@ -817,11 +818,6 @@ procedure {:quick exportOnly}{:public}{:exportSpecs} gcm_blocks_stdcall_aspirati
         8 * old(plain_num_bytes) < pow2_32;
         8 * old(auth_num_bytes) < pow2_32;
 
-        let iv_LE := old(buffer128_read(iv_b, 0, mem));
-        let iv_BE := reverse_bytes_quad32(iv_LE);
-        let ctr_BE_1:quad32 := Mkfour(1, iv_BE.lo1, iv_BE.hi2, iv_BE.hi3);
-        let ctr_BE_2:quad32 := Mkfour(2, iv_BE.lo1, iv_BE.hi2, iv_BE.hi3);
-
         // Encryption results
         let plain_in:seq(quad32) :=
             if (old(plain_num_bytes) > old((len128x6 + len128) * 128/8)) then
@@ -842,9 +838,6 @@ procedure {:quick exportOnly}{:public}{:exportSpecs} gcm_blocks_stdcall_aspirati
                 append(s128(mem, out128x6_b),
                        s128(mem, out128_b));
         let cipher_bytes:seq(nat8) := slice_work_around(le_seq_quad32_to_bytes(cipher_out), old(plain_num_bytes));
-
-                
-        gctr_partial(alg, old(len128x6) + old(len128) + 1, plain_in, cipher_out, key, ctr_BE_2);
 
         // Hashing results
         let auth_in:seq(quad32) := 
