@@ -129,6 +129,11 @@ function operator( *. ) (a:poly, b:poly):poly := mul;
 function operator( %. ) (a:poly, b:poly):poly := mod;
 function operator( ~~ ) (a:quad32):poly := of_quad32;
 
+function operator([]) #[a:Type(0)](s:FStar.Seq.Base.seq(a), i:int):a extern;
+#verbatim
+let va_subscript_FStar__Seq__Base__seq = Seq.index
+#endverbatim
+
 //function operator( [] ) (b:buffer128, i:int):fun(mem)->quad32:= buffer128_read;
 
 // TODO: Use constp and memory operands to directly load constants from memory, instead of constructing them
@@ -387,6 +392,9 @@ procedure {:quick} Loop6x_ctr_update(
 #reset-options ""
 procedure {:quick} Loop6x_preamble(
     inline alg:algorithm,  // OpenSSL includes the number of rounds (nr) as a dynamic parameter (stored with the key).  Saves code space but adds extra instructions to the fast path.  Maybe branch predictor is good enough for it not to matter
+    ghost h:poly,
+    ghost prev:poly,
+    ghost data:seq(quad32),
     ghost iv_b:buffer128,
 
     ghost scratch_b:buffer128,
@@ -499,6 +507,7 @@ procedure {:quick} Loop6x_preamble(
     VAESNI_enc(inout1, inout1, T2);
     VPxor(inout5, inout5, rndkey); init_rounds_opaque(inout5, round_keys);
     VPolyMul(Z3, Z3, Hkey, true, true);
+
     VAESNI_enc(inout2, inout2, T2);
     Load128_buffer(Hkey, Xip, 0x10-0x20, Secret, hkeys_b, 1);   // # $Hkey^2
     VAESNI_enc(inout3, inout3, T2);
@@ -520,6 +529,9 @@ procedure {:quick} Loop6x_step1(
     inline rnd:nat,
     inline in0_offset:nat,
     inline stack_offset:nat,
+    ghost h:poly,
+    ghost prev:poly,
+    ghost data:seq(quad32),
     ghost count:nat,
     ghost in0_b:buffer128,
     ghost scratch_b:buffer128,
@@ -653,6 +665,9 @@ procedure {:quick} Loop6x_step1(
 procedure {:quick} Loop6x_plain(
     inline alg:algorithm, 
     inline rnd:nat,
+    ghost h:poly,
+    ghost prev:poly,
+    ghost data:seq(quad32),
     ghost scratch_b:buffer128,
     ghost key_words:seq(nat32),
     ghost round_keys:seq(quad32),
@@ -771,6 +786,9 @@ procedure {:quick} Loop6x_step2(
     inline rnd:nat,
     inline in0_offset:nat,
     inline stack_offset:nat,
+    ghost h:poly,
+    ghost prev:poly,
+    ghost data:seq(quad32),
     ghost count:nat,
     ghost in0_b:buffer128,
     ghost scratch_b:buffer128,
@@ -912,6 +930,9 @@ procedure {:quick} Loop6x_step3(
     inline rnd:nat,
     inline in0_offset:nat,
     inline stack_offset:nat,
+    ghost h:poly,
+    ghost prev:poly,
+    ghost data:seq(quad32),
     ghost count:nat,
     ghost in0_b:buffer128,
     ghost scratch_b:buffer128,
@@ -1053,6 +1074,9 @@ procedure {:quick} Loop6x_step4(
     inline rnd:nat,
     inline in0_offset:nat,
     inline stack_offset:nat,
+    ghost h:poly,
+    ghost prev:poly,
+    ghost data:seq(quad32),
     ghost count:nat,
     ghost in0_b:buffer128,
     ghost scratch_b:buffer128,
@@ -1187,6 +1211,9 @@ procedure {:quick} Loop6x_step5(
     inline rnd:nat,
     inline in0_offset:nat,
     inline stack_offset:nat,
+    ghost h:poly,
+    ghost prev:poly,
+    ghost data:seq(quad32),
     ghost count:nat,
     ghost in0_b:buffer128,
     ghost scratch_b:buffer128,
@@ -1312,6 +1339,9 @@ procedure {:quick} Loop6x_step5(
 
 procedure {:quick} Loop6x_round8(
     inline alg:algorithm,  
+    ghost h:poly,
+    ghost prev:poly,
+    ghost data:seq(quad32),
     ghost count:nat,
     ghost in0_b:buffer128,
     ghost scratch_b:buffer128,
@@ -1731,6 +1761,9 @@ procedure {:quick} Loop6x_save_output(
 #reset-options "--z3rlimit 20"
 procedure {:quick} Loop6x_partial(
     inline alg:algorithm,  
+    ghost h:poly,
+    ghost prev:poly,
+    ghost data:seq(quad32),
     ghost count:nat,        // Number of 6x128-bit blocks processed so far
     ghost iv_b:buffer128,
     ghost in0_b:buffer128,
@@ -1868,20 +1901,20 @@ procedure {:quick} Loop6x_partial(
     init4 := quad32_xor(reverse_bytes_quad32(inc32lite(ctr_BE, 4)), rndkey);
     init5 := quad32_xor(reverse_bytes_quad32(inc32lite(ctr_BE, 5)), rndkey);
 
-    Loop6x_preamble(alg, iv_b, scratch_b, key_words, round_keys, keys_b, hkeys_b, ctr_BE);
-    Loop6x_step1(alg, 1, 5, 2, count, in0_b, scratch_b, key_words, round_keys, keys_b, hkeys_b,
+    Loop6x_preamble(alg, h, prev, data, iv_b, scratch_b, key_words, round_keys, keys_b, hkeys_b, ctr_BE);
+    Loop6x_step1(alg, 1, 5, 2, h, prev, data, count, in0_b, scratch_b, key_words, round_keys, keys_b, hkeys_b,
                 init0, init1, init2, init3, init4, init5);
-    Loop6x_plain(alg, 2, scratch_b, key_words, round_keys, keys_b, hkeys_b,
+    Loop6x_plain(alg, 2, h, prev, data, scratch_b, key_words, round_keys, keys_b, hkeys_b,
                  init0, init1, init2, init3, init4, init5);
-    Loop6x_step2(alg, 3, 4, 3, count, in0_b, scratch_b, key_words, round_keys, keys_b, hkeys_b,
+    Loop6x_step2(alg, 3, 4, 3, h, prev, data, count, in0_b, scratch_b, key_words, round_keys, keys_b, hkeys_b,
                 init0, init1, init2, init3, init4, init5);
-    Loop6x_step3(alg, 4, 3, 4, count, in0_b, scratch_b, key_words, round_keys, keys_b, hkeys_b,
+    Loop6x_step3(alg, 4, 3, 4, h, prev, data, count, in0_b, scratch_b, key_words, round_keys, keys_b, hkeys_b,
                 init0, init1, init2, init3, init4, init5);
-    Loop6x_step4(alg, 5, 2, 5, count, in0_b, scratch_b, key_words, round_keys, keys_b,
+    Loop6x_step4(alg, 5, 2, 5, h, prev, data, count, in0_b, scratch_b, key_words, round_keys, keys_b,
                 init0, init1, init2, init3, init4, init5);
-    Loop6x_step5(alg, 6, 1, 6, count, in0_b, scratch_b, key_words, round_keys, keys_b,
+    Loop6x_step5(alg, 6, 1, 6, h, prev, data, count, in0_b, scratch_b, key_words, round_keys, keys_b,
                 init0, init1, init2, init3, init4, init5);
-    Loop6x_round8(alg, count, in0_b, scratch_b, key_words, round_keys, keys_b,
+    Loop6x_round8(alg, h, prev, data, count, in0_b, scratch_b, key_words, round_keys, keys_b,
                   init0, init1, init2, init3, init4, init5);
     Loop6x_round9(alg, count, in_b, scratch_b, key_words, round_keys, keys_b,
                   init0, init1, init2, init3, init4, init5);
@@ -1890,6 +1923,9 @@ procedure {:quick} Loop6x_partial(
 #reset-options "--z3rlimit 30"
 procedure {:quick} Loop6x(
     inline alg:algorithm,  
+    ghost h:poly,
+    ghost prev:poly,
+    ghost data:seq(quad32),
     ghost count:nat,        // Number of 6x128-bit blocks processed so far
     ghost iv_b:buffer128,
     ghost in0_b:buffer128,
@@ -2039,7 +2075,7 @@ procedure {:quick} Loop6x(
 {
     (ghost var init0), (ghost var init1), (ghost var init2), 
     (ghost var init3), (ghost var init4), (ghost var init5) := 
-        Loop6x_partial(alg, count, iv_b, in0_b, in_b, scratch_b, key_words, round_keys, keys_b, hkeys_b, ctr_BE);
+        Loop6x_partial(alg, h, prev, data, count, iv_b, in0_b, in_b, scratch_b, key_words, round_keys, keys_b, hkeys_b, ctr_BE);
 
     Loop6x_final(alg, iv_b, scratch_b, key_words, round_keys, keys_b, 
                  inc32lite(ctr_BE, 6), init0, init1, init2, init3, init4, init5,
@@ -2080,6 +2116,9 @@ procedure {:quick} Loop6x(
 #reset-options "--z3rlimit 525"
 procedure {:quick} Loop6x_loop(
     inline alg:algorithm,  
+    ghost h:poly,
+    ghost prev:poly,
+    ghost data:seq(quad32),
     ghost count:nat,        // Number of 6x128-bit blocks processed so far
     ghost iv_b:buffer128,
     ghost in0_b:buffer128,
@@ -2285,7 +2324,7 @@ procedure {:quick} Loop6x_loop(
             len;
 
     {
-        Loop6x(alg, count+iter, iv_b, in0_b, in_b, out_b, scratch_b, plain_quads,
+        Loop6x(alg, h, prev, data, count+iter, iv_b, in0_b, in_b, out_b, scratch_b, plain_quads,
                key_words, round_keys, keys_b, hkeys_b, ctr_BE_orig, ctr);
         iter := #nat(iter + 1);
         ctr := inc32(ctr, 6);
@@ -2885,6 +2924,9 @@ procedure {:quick} Encrypt_save_and_shuffle_output(
 #reset-options ""
 procedure {:quick} GCM_finalize(
     inline alg:algorithm,  
+    ghost h:poly,
+    ghost prev:poly,
+    ghost data:seq(quad32),
     ghost scratch_b:buffer128,
     ghost hkeys_b:buffer128
     ) 
@@ -3342,6 +3384,7 @@ procedure {:quick} GCM_finalize(
 #reset-options "--z3rlimit 30"
 procedure {:quick} {:public} AES_GCM_encrypt_6mult(
     inline alg:algorithm,  
+    ghost h_LE:quad32,
     ghost iv_b:buffer128,
     ghost in_b:buffer128,
     ghost out_b:buffer128,
@@ -3430,7 +3473,7 @@ procedure {:quick} {:public} AES_GCM_encrypt_6mult(
         // GCTR result
         gctr_partial_opaque(alg, old(len), old(s128(mem, in_b)), s128(mem, out_b), key_words, ctr_BE);
         // GCM result
-        Xi == ghash_incremental0(reverse_bytes_quad32(buffer128_read(hkeys_b, 0, mem)), old(Xi), s128(mem, out_b));
+        Xi == ghash_incremental0(h_LE, old(Xi), s128(mem, out_b));
 
         // Counter updated
         old(len) < pow2_32 /\
@@ -3495,7 +3538,10 @@ procedure {:quick} {:public} AES_GCM_encrypt_6mult(
         //assert {:quick_type} old(len) < pow2_32;
         //ghost var old_len:nat32 := #nat32(old(len));
         //assert mid_len == old(len) - 12;
-        Loop6x_loop(alg, 2, iv_b, out_b, in_b, out_b, scratch_b, old(s128(mem, in_b)), key_words, round_keys, keys_b, hkeys_b, ctr_BE, inc32(ctr_BE, 12)); 
+        let h := of_quad32(reverse_bytes_quad32(h_LE));
+        let prev := of_quad32(reverse_bytes_quad32(old(Xi)));
+        let data := old(s128(mem, in_b));
+        Loop6x_loop(alg, h, prev, data, 2, iv_b, out_b, in_b, out_b, scratch_b, old(s128(mem, in_b)), key_words, round_keys, keys_b, hkeys_b, ctr_BE, inc32(ctr_BE, 12)); 
         //test(T1, ctr_BE, mid_len);
         Store128_buffer(ivp, T1, 0x00, Secret, iv_b, 0);
 
@@ -3520,7 +3566,7 @@ procedure {:quick} {:public} AES_GCM_encrypt_6mult(
     // TODO: Remove this assumption!
     //////////////////////////////////////////
     //////////////////////////////////////////
-        assume Xi == ghash_incremental0(reverse_bytes_quad32(buffer128_read(hkeys_b, 0, mem)), old(Xi), s128(mem, out_b));
+        assume Xi == ghash_incremental0(h_LE, old(Xi), s128(mem, out_b));
     }
 }
 

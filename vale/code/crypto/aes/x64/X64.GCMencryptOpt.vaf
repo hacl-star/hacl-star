@@ -493,7 +493,9 @@ procedure {:quick} {:verify true} gcm_blocks(
     Mov64(rax, auth_ptr);
     Mov64(r8, keys_ptr);
     Mov64(r11, rdx);
+// TODO: load or compute h here (hkeys_b[0] contains gf128_power(h, 1) rather than h)
     Load128_buffer(xmm11, Xip, 0, Secret, hkeys_b, 0); // Load h instead of computing it
+    let h := xmm11;
 
     (ghost var y_0), (ghost var y_auth) := gcm_auth_bytes(alg, auth_b, key, round_keys, keys_b);
     IMul64(r11, 128 / 8);     // Convert auth_len into auth bytes
@@ -531,7 +533,7 @@ procedure {:quick} {:verify true} gcm_blocks(
     Mov64(Xip, r14);
     Mov128(xmm8, xmm1); // Line up the intermediate hash value
 
-    (ghost var ctr_BE) := AES_GCM_encrypt_6mult(alg, iv_b, in128x6_b, out128x6_b, scratch_b, key, round_keys, keys_b, hkeys_b);
+    (ghost var ctr_BE) := AES_GCM_encrypt_6mult(alg, h, iv_b, in128x6_b, out128x6_b, scratch_b, key, round_keys, keys_b, hkeys_b);
     ghost var y_cipher128x6 := xmm8;
 
     // Line up arguments for gcm_blocks128 for remaining 128-bit blocks
