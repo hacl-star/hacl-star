@@ -481,6 +481,26 @@ let lemma_hash_append3 (h y_init y_mid1 y_mid2 y_final:quad32) (s1 s2 s3:seq qua
     ()
   )
 
+let ghash_incremental_bytes_pure_no_extra (old_io io h:quad32) (in_quads:seq quad32) (num_bytes:nat64) : Lemma
+  (requires io = ghash_incremental0 h old_io in_quads)
+  (ensures  length in_quads == (num_bytes / 16) /\ 
+            num_bytes % 16 == 0 ==>
+            (let input_bytes = slice (le_seq_quad32_to_bytes in_quads) 0 num_bytes in
+             let padded_bytes = pad_to_128_bits input_bytes in
+             let input_quads = le_bytes_to_seq_quad32 padded_bytes in
+             num_bytes > 0 ==> length input_quads > 0 /\
+                              io == ghash_incremental h old_io input_quads))
+  =
+  if length in_quads = (num_bytes / 16) && num_bytes % 16 = 0 && num_bytes > 0 then (
+    let input_bytes = slice (le_seq_quad32_to_bytes in_quads) 0 num_bytes in
+    no_extra_bytes_helper in_quads num_bytes;
+    le_bytes_to_seq_quad32_to_bytes in_quads;
+    ()
+  ) else ()
+  ;
+  ()
+
+
 #reset-options "--z3rlimit 30"
 open FStar.Mul
 let lemma_ghash_incremental_bytes_extra_helper (h y_init y_mid y_final:quad32) (input:seq quad32) (final final_padded:quad32) (num_bytes:nat)  // Precondition definitions
@@ -513,6 +533,29 @@ let lemma_ghash_incremental_bytes_extra_helper (h y_init y_mid y_final:quad32) (
   assert (input_quads == full_blocks @| (create 1 final_padded));
 
   ()
+
+let lemma_ghash_incremental_bytes_extra_helper_alt (h y_init y_mid y_final:quad32) (input_blocks:seq quad32) (final final_padded:quad32) (num_bytes:nat) : Lemma
+  (requires (1 <= num_bytes /\
+             num_bytes < 16 * (length input_blocks) + 16 /\
+             16 * (length input_blocks) < num_bytes /\
+             num_bytes % 16 <> 0 /\
+             y_mid = ghash_incremental0 h y_init input_blocks /\
+            (let padded_bytes = pad_to_128_bits (slice_work_around (le_quad32_to_bytes final) (num_bytes % 16)) in
+             length padded_bytes == 16 /\
+             final_padded == le_bytes_to_quad32 padded_bytes /\
+             y_final = ghash_incremental h y_mid (create 1 final_padded))))
+  (ensures (let input_bytes = slice_work_around (le_seq_quad32_to_bytes (append input_blocks (create 1 final))) num_bytes in
+            let padded_bytes = pad_to_128_bits input_bytes in
+            let input_quads = le_bytes_to_seq_quad32 padded_bytes in
+            length padded_bytes == 16 * length input_quads /\
+            y_final == ghash_incremental h y_init input_quads))
+  =
+  let q_in = append input_blocks (create 1 final) in
+  let num_blocks = num_bytes / 16 in
+  let full_blocks = slice_work_around q_in num_blocks in
+  assert (equal full_blocks input_blocks);
+  lemma_ghash_incremental_bytes_extra_helper h y_init y_mid y_final q_in final final_padded num_bytes
+
 
 let lemma_ghash_registers (h y_init y0 y1 y2 y3 y4 r0 r1 r2 r3:quad32) (input:seq quad32) (bound:nat)
   =
