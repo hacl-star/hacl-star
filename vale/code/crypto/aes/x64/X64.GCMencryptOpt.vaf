@@ -95,6 +95,8 @@ let aes_reqs
   round_keys == key_to_round_keys_LE alg key /\
   validSrcAddrs128 mem key_ptr keys_b (nr alg + 1) memTaint Secret /\
   s128 mem keys_b == round_keys
+
+#set-options "--z3rlimit 50"
 #endverbatim
 
 function aes_reqs(alg:algorithm, key:seq(nat32), round_keys:seq(quad32), keys_b:buffer128,
@@ -1179,6 +1181,7 @@ procedure {:quick exportOnly}{:public}{:exportSpecs} gcm_blocks_stdcall(
         Load64_stack(rbp, rsp, 64 + 8 + 72);
     }
     
+    assume(false);
 
     gcm_blocks(alg,
                if win then 224 + 56 else 64 + 8,

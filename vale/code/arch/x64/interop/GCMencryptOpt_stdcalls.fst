@@ -114,12 +114,21 @@ val gcm128_encrypt_opt':
       (UInt64.v len128x6 > 0 ==> UInt64.v len128x6 >= 18) /\
       12 + UInt64.v len128x6 + 6 < pow2_32 /\
 
+      UInt64.v len128x6 * (128/8) + UInt64.v len128_num * (128/8) <= UInt64.v plain_num /\
+      UInt64.v plain_num <= UInt64.v len128x6 * (128/8) + UInt64.v len128_num * (128/8) + 128/8 /\
+      UInt64.v auth_num * (128/8) <= UInt64.v auth_bytes /\
+      UInt64.v auth_bytes <= UInt64.v auth_num * (128/8) + 128/8 /\
+
       aesni_enabled /\ pclmulqdq_enabled /\
       is_aes_key_LE AES_128 (Ghost.reveal key) /\
       (let db = get_downview keys_b in
       length_aux keys_b;
       let ub = UV.mk_buffer db Views.up_view128 in
-      Seq.equal (UV.as_seq h0 ub) (key_to_round_keys_LE AES_128 (Ghost.reveal key)))
+      Seq.equal (UV.as_seq h0 ub) (key_to_round_keys_LE AES_128 (Ghost.reveal key))) /\
+
+      (DV.length_eq (get_downview hkeys_b);
+      length_aux5 hkeys_b;
+      low_buffer_read TUInt8 TUInt128 h0 hkeys_b 0 == aes_encrypt_LE AES_128 (Ghost.reveal key) (Mkfour 0 0 0 0))
     )
     (ensures fun h0 _ h1 -> True)
     //   B.modifies (B.loc_union (B.loc_buffer tag_b)
@@ -201,10 +210,7 @@ val gcm128_encrypt_opt':
 inline_for_extraction
 let gcm128_encrypt_opt' key auth_b auth_bytes auth_num keys_b iv_b hkeys_b abytes_b
   in128x6_b out128x6_b len128x6 in128_b out128_b len128_num inout_b plain_num scratch_b tag_b =
-
-  admit()
-(*  
-
+ 
   let h0 = get() in
 
   DV.length_eq (get_downview auth_b);
@@ -275,8 +281,6 @@ let gcm128_encrypt_opt' key auth_b auth_bytes auth_num keys_b iv_b hkeys_b abyte
 
   let h1 = get() in
   ()
-
-*)
 
 (*
 inline_for_extraction
