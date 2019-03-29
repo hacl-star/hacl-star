@@ -22,10 +22,10 @@ friend Lib.LoopCombinators
 unfold
 let op_String_Access #a #len = LSeq.index #a #len
 
-inline_for_extraction
+inline_for_extraction noextract
 let get_acc #s (ctx:poly1305_ctx s) = sub ctx 0ul (nlimb s)
 
-inline_for_extraction
+inline_for_extraction noextract
 let get_precomp_r #s (ctx:poly1305_ctx s) = sub ctx (nlimb s) (precomplen s)
 
 let as_get_acc #s h ctx = feval h (gsub ctx 0ul (nlimb s))
@@ -33,6 +33,24 @@ let as_get_r #s h ctx = feval h (gsub ctx (nlimb s) (nlimb s))
 let state_inv_t #s h ctx =
   F32xN.acc_inv_t #(width s) (F32xN.as_tup5 h (gsub ctx 0ul (nlimb s))) /\
   F32xN.load_precompute_r_post #(width s) h (gsub ctx (nlimb s) (precomplen s))
+
+#reset-options "--z3rlimit 100 --max_fuel 0"
+
+let reveal_ctx_inv #s ctx h0 h1 =
+  let acc_b = gsub ctx 0ul (nlimb s) in
+  let r_b = gsub ctx (nlimb s) (nlimb s) in
+  let precom_b = gsub ctx (nlimb s) (precomplen s) in
+  as_seq_gsub h0 ctx 0ul (nlimb s);
+  as_seq_gsub h1 ctx 0ul (nlimb s);
+  as_seq_gsub h0 ctx (nlimb s) (nlimb s);
+  as_seq_gsub h1 ctx (nlimb s) (nlimb s);
+  as_seq_gsub h0 ctx (nlimb s) (precomplen s);
+  as_seq_gsub h1 ctx (nlimb s) (precomplen s);
+  assert (as_seq h0 acc_b == as_seq h1 acc_b);
+  assert (as_seq h0 r_b == as_seq h1 r_b);
+  assert (as_seq h0 precom_b == as_seq h1 precom_b)
+
+#reset-options "--z3rlimit 50 --max_fuel 0 --using_facts_from '* -FStar.Seq'"
 
 val lemma_pow2_128: n:nat ->
   Lemma
@@ -62,7 +80,7 @@ val lemma_felem_fits_update_pre:
     (ensures felem_fits h f (2, 3, 2, 2, 2))
 let lemma_felem_fits_update_pre #s h f = ()
 
-inline_for_extraction
+inline_for_extraction noextract
 val poly1305_encode_block:
     #s:field_spec
   -> f:felem s
@@ -79,7 +97,7 @@ let poly1305_encode_block #s f b =
   load_felem_le f b;
   set_bit128 f
 
-inline_for_extraction
+inline_for_extraction noextract
 val poly1305_encode_blocks:
     #s:field_spec
   -> f:felem s
@@ -96,7 +114,7 @@ let poly1305_encode_blocks #s f b =
   load_felems_le f b;
   set_bit128 f
 
-inline_for_extraction
+inline_for_extraction noextract
 val poly1305_encode_last:
     #s:field_spec
   -> f:felem s
@@ -130,7 +148,7 @@ let poly1305_encode_last #s f len b =
   set_bit f (len *! 8ul);
   pop_frame()
 
-inline_for_extraction
+inline_for_extraction noextract
 val poly1305_encode_r:
     #s:field_spec
   -> p:precomp_r s
@@ -151,7 +169,7 @@ let poly1305_encode_r #s p b =
   let hi = hi &. mask1 in
   load_precompute_r p lo hi
 
-inline_for_extraction
+inline_for_extraction noextract
 val poly1305_init_:
     #s:field_spec
   -> ctx:poly1305_ctx s
@@ -190,7 +208,7 @@ let poly1305_init #s ctx key =
   | M256 -> poly1305_init_256 ctx key
 (* WRAPPER to Prevent Inlining *)
 
-inline_for_extraction
+inline_for_extraction noextract
 val update1:
     #s:field_spec
   -> p:precomp_r s
@@ -214,7 +232,7 @@ let update1 #s pre b acc =
   fadd_mul_r acc e pre;
   pop_frame ()
 
-inline_for_extraction
+inline_for_extraction noextract
 val update1_last:
     #s:field_spec
   -> p:precomp_r s
@@ -239,7 +257,7 @@ let update1_last #s pre len b acc =
   fadd_mul_r acc e pre;
   pop_frame ()
 
-inline_for_extraction
+inline_for_extraction noextract
 val updaten:
     #s:field_spec
   -> p:precomp_r s
@@ -297,7 +315,7 @@ let poly1305_update_multi_f #s pre bs nb len text i acc=
 
 #set-options "--max_fuel 1"
 
-inline_for_extraction
+inline_for_extraction noextract
 val poly1305_update_multi:
     #s:field_spec
   -> len:size_t{v len % v (blocklen s) == 0}
@@ -390,7 +408,7 @@ val poly1305_update1_rem:
 let poly1305_update1_rem #s pre rem b acc =
   if (rem >. 0ul) then update1_last #s pre rem b acc
 
-inline_for_extraction
+inline_for_extraction noextract
 val poly1305_update1:
     #s:field_spec
   -> len:size_t
@@ -444,7 +462,7 @@ let poly1305_update1 #s len text pre acc =
   assert (disjoint b acc);
   poly1305_update1_rem #s pre rem b acc
 
-inline_for_extraction
+inline_for_extraction noextract
 val poly1305_update_:
     #s:field_spec
   -> len:size_t
@@ -479,7 +497,7 @@ let poly1305_update_ #s len text pre acc =
   assert (as_seq h1 t1 == FStar.Seq.slice (as_seq h0 text) (v len0) (v len));
   poly1305_update1 #s len1 t1 pre acc
 
-inline_for_extraction
+inline_for_extraction noextract
 val poly1305_update1_:
     #s:field_spec
   -> ctx:poly1305_ctx s
@@ -492,6 +510,7 @@ val poly1305_update1_:
     (ensures  fun h0 _ h1 ->
       modifies (loc ctx) h0 h1 /\
       state_inv_t #s h1 ctx /\
+      as_get_r h1 ctx == as_get_r h0 ctx /\
       (as_get_acc h1 ctx).[0] ==
       S.poly_update1 (as_seq h0 text) (as_get_acc h0 ctx).[0] (as_get_r h0 ctx).[0])
 let poly1305_update1_ #s ctx len text =
@@ -499,7 +518,7 @@ let poly1305_update1_ #s ctx len text =
   let acc = get_acc ctx in
   poly1305_update1 #s len text pre acc
 
-inline_for_extraction
+inline_for_extraction noextract
 val poly1305_update__:
     #s:field_spec
   -> ctx:poly1305_ctx s
@@ -512,6 +531,7 @@ val poly1305_update__:
     (ensures  fun h0 _ h1 ->
       modifies (loc ctx) h0 h1 /\
       state_inv_t #s h1 ctx /\
+      as_get_r h1 ctx == as_get_r h0 ctx /\
       (as_get_acc h1 ctx).[0] ==
       S.poly #(width s) (as_seq h0 text) (as_get_acc h0 ctx) (as_get_r h0 ctx))
 let poly1305_update__ #s ctx len text =
@@ -534,7 +554,7 @@ let poly1305_update #s ctx len text =
   | M256 -> poly1305_update_256 ctx len text
 (* WRAPPER to Prevent Inlining *)
 
-inline_for_extraction
+inline_for_extraction noextract
 val poly1305_finish_:
     #s:field_spec
   -> tag:lbuffer uint8 16ul
@@ -547,6 +567,7 @@ val poly1305_finish_:
       state_inv_t #s h ctx)
     (ensures  fun h0 _ h1 ->
       modifies (loc tag |+| loc ctx) h0 h1 /\
+      as_get_r h1 ctx == as_get_r h0 ctx /\
       as_seq h1 tag == S.finish (as_seq h0 key) (as_get_acc h0 ctx).[0])
 let poly1305_finish_ #s tag key ctx =
   let acc = get_acc ctx in

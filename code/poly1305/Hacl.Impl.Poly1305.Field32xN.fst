@@ -18,11 +18,14 @@ module ST = FStar.HyperStack.ST
 module LSeq = Lib.Sequence
 module BSeq = Lib.ByteSequence
 
+inline_for_extraction noextract
 let felem (w:lanes) = lbuffer (uint64xN w) 5ul
+inline_for_extraction noextract
 let felem_wide (w:lanes) = felem w
+inline_for_extraction noextract
 let precomp_r (w:lanes) = lbuffer (uint64xN w) 20ul
 
-unfold
+unfold noextract
 let op_String_Access #a #len = LSeq.index #a #len
 
 noextract
@@ -97,7 +100,7 @@ let load_precompute_r_post #w h p =
   as_tup5 h rn_5 == precomp_r5 (as_tup5 h rn) /\
   feval h rn == S.compute_rw (feval h r)
 
-inline_for_extraction
+inline_for_extraction noextract
 val create_felem:
     w:lanes
   -> StackInline (felem w)
@@ -111,7 +114,7 @@ let create_felem w =
   LSeq.eq_intro (feval h1 r) (LSeq.create w 0);
   r
 
-inline_for_extraction
+inline_for_extraction noextract
 val set_bit:
     #w:lanes
   -> f:felem w
@@ -134,7 +137,7 @@ let set_bit #w f i =
   f.(i /. 26ul) <- vec_or fi mask;
   set_bit5_lemma (as_seq h0 f) (v i)
 
-inline_for_extraction
+inline_for_extraction noextract
 val set_bit128:
     #w:lanes
   -> f:felem w
@@ -157,7 +160,7 @@ let set_bit128 #w f =
   f.(4ul) <- vec_or f4 mask;
   set_bit5_lemma (as_seq h0 f) 128
 
-inline_for_extraction
+inline_for_extraction noextract
 val set_zero:
     #w:lanes
   -> f:felem w
@@ -176,7 +179,7 @@ let set_zero #w f =
   let h1 = ST.get () in
   LSeq.eq_intro (feval h1 f) (LSeq.create w 0)
 
-inline_for_extraction
+inline_for_extraction noextract
 val copy_felem:
     #w:lanes
   -> #m:scale32_5
@@ -197,7 +200,7 @@ let copy_felem #w #m f1 f2 =
   f1.(3ul) <- f2.(3ul);
   f1.(4ul) <- f2.(4ul)
 
-inline_for_extraction
+inline_for_extraction noextract
 val fadd:
     #w:lanes
   -> out:felem w
@@ -234,7 +237,7 @@ let fadd #w out f1 f2 =
 
 #reset-options "--z3rlimit 50 --using_facts_from '* -FStar.Seq'"
 
-inline_for_extraction
+inline_for_extraction noextract
 val fmul_r:
     #w:lanes
   -> out:felem w
@@ -281,7 +284,7 @@ let fmul_r #w out f1 r r5 =
   out.(3ul) <- o3;
   out.(4ul) <- o4
 
-inline_for_extraction
+inline_for_extraction noextract
 val fadd_mul_r:
     #w:lanes
   -> acc:felem w
@@ -335,7 +338,7 @@ let fadd_mul_r #w out f1 p =
   out.(3ul) <- o3;
   out.(4ul) <- o4
 
-inline_for_extraction
+inline_for_extraction noextract
 val fmul_rn:
     #w:lanes
   -> out:felem w
@@ -359,7 +362,7 @@ let fmul_rn #w out f1 p =
   let rn5 = sub p 15ul 5ul in
   fmul_r #w out f1 rn rn5
 
-inline_for_extraction
+inline_for_extraction noextract
 val reduce_felem:
     #w:lanes
   -> f:felem w
@@ -384,7 +387,7 @@ let reduce_felem #w f =
   f.(3ul) <- f3;
   f.(4ul) <- f4
 
-inline_for_extraction
+inline_for_extraction noextract
 val precompute_shift_reduce:
     #w:lanes
   -> f1:felem w
@@ -406,7 +409,7 @@ let precompute_shift_reduce #w f1 f2 =
   f1.(3ul) <- vec_smul_mod f23 (u64 5);
   f1.(4ul) <- vec_smul_mod f24 (u64 5)
 
-inline_for_extraction
+inline_for_extraction noextract
 val load_felem:
     #w:lanes
   -> f:felem w
@@ -429,7 +432,7 @@ let load_felem #w f lo hi =
   f.(3ul) <- f3;
   f.(4ul) <- f4
 
-inline_for_extraction
+inline_for_extraction noextract
 val load_precompute_r1:
     p:precomp_r 1
   -> r0:uint64
@@ -462,7 +465,7 @@ let load_precompute_r1 p r0 r1 =
   copy_felem #_ #(1,1,1,1,1) rn r;
   copy_felem #_ #(5,5,5,5,5) rn_5 r5
 
-inline_for_extraction
+inline_for_extraction noextract
 val load_precompute_r2:
     p:precomp_r 2
   -> r0:uint64
@@ -495,7 +498,7 @@ let load_precompute_r2 p r0 r1 =
   fmul_r rn r r r5;
   precompute_shift_reduce rn_5 rn
 
-inline_for_extraction
+inline_for_extraction noextract
 val load_precompute_r4:
     p:precomp_r 4
   -> r0:uint64
@@ -530,7 +533,7 @@ let load_precompute_r4 p r0 r1 =
   fmul_r rn rn rn rn_5;
   precompute_shift_reduce rn_5 rn
 
-inline_for_extraction
+inline_for_extraction noextract
 val load_precompute_r:
     #w:lanes
   -> p:precomp_r w
@@ -549,7 +552,7 @@ let load_precompute_r #w p r0 r1 =
   | 2 -> load_precompute_r2 p r0 r1
   | 4 -> load_precompute_r4 p r0 r1
 
-inline_for_extraction
+inline_for_extraction noextract
 val load_felem1_le:
     f:felem 1
   -> b:lbuffer uint8 16ul
@@ -570,7 +573,7 @@ let load_felem1_le f b =
   uints_from_bytes_le_lemma64_1 (as_seq h0 b);
   LSeq.eq_intro (feval h1 f) (S.load_elem1 (as_seq h0 b))
 
-inline_for_extraction
+inline_for_extraction noextract
 val load_felem2_le:
     f:felem 2
   -> b:lbuffer uint8 32ul
@@ -619,7 +622,7 @@ let lemma_load_felem4_le b lo0 hi0 =
   lemma_cast_vec128_to_vec64 lo0;
   lemma_cast_vec128_to_vec64 hi0
 
-inline_for_extraction
+inline_for_extraction noextract
 val load_felem4_le:
     f:felem 4
   -> b:lbuffer uint8 64ul
@@ -651,7 +654,7 @@ let load_felem4_le f b =
   lemma_load_felem4_le (as_seq h0 b) lo1 hi1;
   LSeq.eq_intro (feval h1 f) (S.load_elem4 (as_seq h0 b))
 
-inline_for_extraction
+inline_for_extraction noextract
 val load_felems_le:
     #w:lanes
   -> f:felem w
@@ -669,7 +672,7 @@ let load_felems_le #w f b =
   | 2 -> load_felem2_le f b
   | 4 -> load_felem4_le f b
 
-inline_for_extraction
+inline_for_extraction noextract
 val load_felem_le:
     #w:lanes
   -> f:felem w
@@ -692,7 +695,7 @@ let load_felem_le #w f b =
   uint_from_bytes_le_lemma (as_seq h0 b);
   LSeq.eq_intro (feval h1 f) (LSeq.create w (BSeq.nat_from_bytes_le (as_seq h0 b)))
 
-inline_for_extraction
+inline_for_extraction noextract
 val bytes_to_limbs:
     #w:lanes
   -> b:lbuffer uint8 16ul
@@ -711,7 +714,7 @@ let bytes_to_limbs #w b =
   uint_from_bytes_le_lemma (as_seq h0 b);
   f0, f1
 
-inline_for_extraction
+inline_for_extraction noextract
 val store_felem:
     #w:lanes
   -> f:felem w
@@ -729,7 +732,7 @@ let store_felem #w f =
   let f4 = f.(4ul) in
   store_felem5 #w (f0, f1, f2, f3, f4)
 
-inline_for_extraction
+inline_for_extraction noextract
 val store_felem1_le:
     b:lbuffer uint8 16ul
   -> lo:uint64xN 1
@@ -747,7 +750,7 @@ let store_felem1_le b r0 r1 =
   uints_to_bytes_le_lemma64_1 (vec_v r0) (vec_v r1);
   LSeq.lemma_concat2 8 (LSeq.sub (as_seq h1 b) 0 8) 8 (LSeq.sub (as_seq h1 b) 8 8) (as_seq h1 b)
 
-inline_for_extraction
+inline_for_extraction noextract
 val store_felem2_le:
     b:lbuffer uint8 16ul
   -> lo:uint64xN 2
@@ -763,7 +766,7 @@ let store_felem2_le b f0 f1 =
   vec_store_le b r0;
   uints_to_bytes_le_lemma64_2 (vec_v r0)
 
-inline_for_extraction
+inline_for_extraction noextract
 val store_felem4_le:
     b:lbuffer uint8 16ul
   -> lo:uint64xN 4
@@ -778,8 +781,7 @@ let store_felem4_le b f0 f1 =
   let lo = vec_interleave_low f0 f1 in
   let hi = vec_interleave_high f0 f1 in
   vec_interleave_low_lemma_uint64_4 f0 f1;
-  vec_interleave_high_lemma_uint64_4 f0 f1;
-  let lo1 = cast U128 2 lo in
+  vec_interleave_high_lemma_uint64_4 f0 f1;  let lo1 = cast U128 2 lo in
   let hi1 = cast U128 2 hi in
   lemma_cast_vec64_to_vec128 lo;
   lemma_cast_vec64_to_vec128 hi;
@@ -796,7 +798,7 @@ let store_felem4_le b f0 f1 =
   uint_to_bytes_le_lemma128 (vec_v r0).[0];
   pop_frame()
 
-inline_for_extraction
+inline_for_extraction noextract
 val store_felem_le:
     #w:lanes
   -> b:lbuffer uint8 16ul
@@ -813,7 +815,7 @@ let store_felem_le #w b lo hi =
   | 2 -> store_felem2_le b lo hi
   | 4 -> store_felem4_le b lo hi
 
-inline_for_extraction
+inline_for_extraction noextract
 val fmul_r1_normalize:
     out:felem 1
   -> p:precomp_r 1
@@ -832,7 +834,7 @@ let fmul_r1_normalize out p =
   let r5 = sub p 5ul 5ul in
   fmul_r out out r r5
 
-inline_for_extraction
+inline_for_extraction noextract
 val fmul_r2_normalize:
     out:felem 2
   -> p:precomp_r 2
@@ -876,7 +878,7 @@ let fmul_r2_normalize out p =
   out.(3ul) <- o3;
   out.(4ul) <- o4
 
-inline_for_extraction
+inline_for_extraction noextract
 val fmul_r4_normalize:
     out:felem 4
   -> p:precomp_r 4
@@ -928,7 +930,7 @@ let fmul_r4_normalize out p =
   out.(3ul) <- o3;
   out.(4ul) <- o4
 
-inline_for_extraction
+inline_for_extraction noextract
 val fmul_rn_normalize:
     #w:lanes
   -> out:felem w
@@ -949,7 +951,7 @@ let fmul_rn_normalize #w out p =
   | 2 -> fmul_r2_normalize out p
   | 4 -> fmul_r4_normalize out p
 
-inline_for_extraction
+inline_for_extraction noextract
 val mod_add128:
     #w:lanes
   -> a:(uint64xN w & uint64xN w)

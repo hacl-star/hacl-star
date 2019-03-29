@@ -16,7 +16,7 @@ module Loop = Lib.LoopCombinators
 
 //inline_for_extraction
 [@ CInline]
-val rounds: st:state -> ST unit
+val rounds: st:state -> Stack unit
 		  (requires (fun h -> live h st))
 		  (ensures (fun h0 _ h1 -> modifies (loc st) h0 h1 /\
 		    as_seq h1 st == Spec.rounds (as_seq h0 st)))
@@ -47,7 +47,7 @@ let rounds st =
   double_round st
 
 [@ CInline ]
-val chacha20_core: k:state -> ctx0:state -> ctr:size_t -> ST unit
+val chacha20_core: k:state -> ctx0:state -> ctr:size_t -> Stack unit
 		  (requires (fun h -> live h ctx0 /\ live h k /\ disjoint ctx0 k /\
 			       (let s0 = as_seq h ctx0 in
 				v (Lib.Sequence.index s0 12) + v ctr <= max_size_t)))
@@ -75,15 +75,15 @@ let chacha20_constants =
 
 
 inline_for_extraction
-val chacha20_init: ctx:state -> k:lbuffer uint8 32ul -> n:lbuffer uint8 12ul -> ctr0:size_t -> ST unit
+val chacha20_init: ctx:state -> k:lbuffer uint8 32ul -> n:lbuffer uint8 12ul -> ctr0:size_t -> Stack unit
 		  (requires (fun h -> live h ctx /\ live h k /\ live h n /\ disjoint ctx k /\ disjoint ctx n /\ as_seq h ctx == Lib.Sequence.create 16 (u32 0)))
 		  (ensures (fun h0 _ h1 -> modifies (loc ctx) h0 h1 /\
 			   as_seq h1 ctx == Spec.chacha20_init (as_seq h0 k) (as_seq h0 n) (v ctr0)))
-
 [@ CInline]
 let chacha20_init ctx k n ctr =
     let h0 = ST.get() in
     recall_contents chacha20_constants Spec.chacha20_constants;
+    mut_immut_disjoint ctx chacha20_constants (ST.get ());
     update_sub_f h0 ctx 0ul 4ul
       (fun h -> Lib.Sequence.map secret Spec.chacha20_constants)
       (fun _ -> mapT 4ul (sub ctx 0ul 4ul) secret chacha20_constants);
@@ -101,12 +101,13 @@ let chacha20_init ctx k n ctr =
     assert (as_seq h4 ctx == Spec.setup (as_seq h0 k) (as_seq h0 n) (v ctr) (as_seq h0 ctx));
     ()
 
+
 inline_for_extraction
 val chacha20_encrypt_block: ctx:state ->
 			   out:lbuffer uint8 64ul ->
 			   incr:size_t ->
 			   text:lbuffer uint8 64ul ->
-			   ST unit
+			   Stack unit
 		  (requires (fun h ->
 			    live h ctx /\
 			    live h text /\
@@ -120,7 +121,7 @@ val chacha20_encrypt_block: ctx:state ->
 [@ CInline ]
 let chacha20_encrypt_block ctx out incr text =
     push_frame();
-   let k = create 16ul (u32 0) in
+    let k = create 16ul (u32 0) in
     chacha20_core k ctx incr;
     xor_block out k text;
     pop_frame()
@@ -132,7 +133,7 @@ val chacha20_encrypt_last: ctx:state ->
 			   out:lbuffer uint8 len ->
 			   incr:size_t ->
 			   text:lbuffer uint8 len ->
-			   ST unit
+			   Stack unit
 		  (requires (fun h ->
 			    live h ctx /\
 			    live h text /\
@@ -155,7 +156,7 @@ let chacha20_encrypt_last ctx len out incr text =
 
 
 inline_for_extraction
-val chacha20_update: ctx:state -> len:size_t -> out:lbuffer uint8 len -> text:lbuffer uint8 len -> ST unit
+val chacha20_update: ctx:state -> len:size_t -> out:lbuffer uint8 len -> text:lbuffer uint8 len -> Stack unit
 		  (requires (fun h ->
 			    live h ctx /\
 			    live h text /\
@@ -181,8 +182,8 @@ let chacha20_update ctx len out text =
     (fun i -> chacha20_encrypt_last ctx rem (sub out (i *! 64ul) rem) i (sub text (i *! 64ul) rem));
   pop_frame()
 
-  inline_for_extraction
-val chacha20_encrypt: len:size_t -> out:lbuffer uint8 len -> text:lbuffer uint8 len -> key:lbuffer uint8 32ul -> n:lbuffer uint8 12ul -> ctr:size_t -> ST unit
+inline_for_extraction
+val chacha20_encrypt: len:size_t -> out:lbuffer uint8 len -> text:lbuffer uint8 len -> key:lbuffer uint8 32ul -> n:lbuffer uint8 12ul -> ctr:size_t -> Stack unit
 		  (requires (fun h -> live h key /\ live h n /\ live h text /\ live h out /\ eq_or_disjoint text out /\ v ctr + v len / 64 <= max_size_t ))
 		  (ensures (fun h0 _ h1 -> modifies (loc out) h0 h1 /\
 			      as_seq h1 out == Spec.chacha20_encrypt_bytes (as_seq h0 key) (as_seq h0 n) (v ctr) (as_seq h0 text)))
@@ -196,7 +197,7 @@ let chacha20_encrypt len out text key n ctr =
 
 
 inline_for_extraction
-val chacha20_decrypt: len:size_t -> out:lbuffer uint8 len -> cipher:lbuffer uint8 len -> key:lbuffer uint8 32ul -> n:lbuffer uint8 12ul -> ctr:size_t -> ST unit
+val chacha20_decrypt: len:size_t -> out:lbuffer uint8 len -> cipher:lbuffer uint8 len -> key:lbuffer uint8 32ul -> n:lbuffer uint8 12ul -> ctr:size_t -> Stack unit
 		  (requires (fun h -> live h key /\ live h n /\ live h cipher /\ live h out /\ eq_or_disjoint cipher out /\ v ctr + v len / 64 <= max_size_t ))
 		  (ensures (fun h0 _ h1 -> modifies (loc out) h0 h1 /\
 			      as_seq h1 out == Spec.chacha20_decrypt_bytes (as_seq h0 key) (as_seq h0 n) (v ctr) (as_seq h0 cipher)))

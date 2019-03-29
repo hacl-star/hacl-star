@@ -14,7 +14,7 @@ let blocklen = 16ul
 
 type poly1305_ctx = lbuffer (Lib.IntVector.vec_t U64 2) 25ul
 
-unfold
+noextract unfold
 let op_String_Access #a #len = Lib.Sequence.index #a #len
 
 val poly1305_init:
