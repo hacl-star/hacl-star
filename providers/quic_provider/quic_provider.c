@@ -306,7 +306,8 @@ int MITLS_CALLCONV quic_crypto_encrypt(quic_key *key, unsigned char *cipher, uin
   }
   else if(key->alg == TLS_aead_CHACHA20_POLY1305)
   {
-    EverCrypt_chacha20_poly1305_encrypt(key->key, iv, (uint8_t*)ad, ad_len, (uint8_t*)plain, plain_len, cipher, (cipher+plain_len));
+    EverCrypt_Chacha20Poly1305_aead_encrypt(key->key, iv, ad_len, (uint8_t*)ad,
+        plain_len, (uint8_t*)plain, cipher, cipher + plain_len);
   }
 
 #if DEBUG
@@ -344,7 +345,8 @@ int MITLS_CALLCONV quic_crypto_decrypt(quic_key *key, unsigned char *plain, uint
   }
   else if(key->alg == TLS_aead_CHACHA20_POLY1305)
   {
-    r = EverCrypt_chacha20_poly1305_decrypt(key->key, iv, (uint8_t*)ad, ad_len, plain, plain_len, (uint8_t*)cipher, (uint8_t*)(cipher+plain_len));
+    r = EverCrypt_Chacha20Poly1305_aead_decrypt(key->key, iv, ad_len, (uint8_t*)ad,
+        plain_len, (uint8_t*)plain, cipher, cipher + plain_len);
   }
 
 #if DEBUG
@@ -382,7 +384,8 @@ int MITLS_CALLCONV quic_crypto_packet_number_otp(quic_key *key, const unsigned c
     uint8_t zero[4] = {0};
     uint32_t ctr = sample[0] + (sample[1] << 8) + (sample[2] << 16) + (sample[3] << 24);
 
-    EverCrypt_chacha20((uint8_t*)key->pne.case_chacha20, (uint8_t*)sample+4, ctr, zero, 4, mask);
+    EverCrypt_Cipher_chacha20(4, mask, zero, (uint8_t*)key->pne.case_chacha20,
+        (uint8_t*)sample+4, ctr);
     return 1;
   }
 
