@@ -715,9 +715,9 @@ procedure {:quick} {:verify true} gcm_blocks(
 //        let auth_input_bytes:seq(nat8) := slice_work_around(le_seq_quad32_to_bytes(raw_quad_seq), total_bytes);
 //        let padded_auth_bytes:seq(nat8) := pad_to_128_bits(auth_input_bytes);
 //        let auth_quad_seq:seq(quad32) := le_bytes_to_seq_quad32(padded_auth_bytes);
-        let auth_quad_seq:seq(quad32) := append(auth_quad_seq, create(1, length_quad));
+        let auth_quad_seq:seq(quad32) := append(raw_quad_seq, create(1, length_quad));
 
-        //test2 == auth_quad_seq;  // FAILS 
+        test2 == auth_quad_seq;  // FAILS 
         //8 * length(auth_quad_seq) < pow2_32 /\
 //        0 < length(auth_quad_seq) /\
 //        xmm1 == gctr_encrypt_block(ctr_BE_1, ghash_LE(h, #ghash_plain_LE(auth_quad_seq)), alg, key, 0);
