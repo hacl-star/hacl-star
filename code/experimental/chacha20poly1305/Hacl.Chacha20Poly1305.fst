@@ -1,18 +1,21 @@
-module Hacl.Impl.Chacha20Poly1305
+module Hacl.Chacha20Poly1305
 
-module ST = FStar.HyperStack.ST
+open FStar.Mul
 open FStar.HyperStack
 open FStar.HyperStack.All
+
 open Lib.IntTypes
 open Lib.Buffer
 open Lib.ByteBuffer
-module Seq = Lib.Sequence
-open FStar.Mul
 
+open Hacl.Impl.Chacha20Poly1305.Poly
+
+
+module Seq = Lib.Sequence
+module ST = FStar.HyperStack.ST
 module Spec = Spec.Chacha20Poly1305
 module Chacha = Hacl.Impl.Chacha20
 
-open Hacl.Impl.Chacha20Poly1305.Poly
 
 #set-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
 
