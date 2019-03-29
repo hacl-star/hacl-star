@@ -10,6 +10,8 @@ open Lib.LoopCombinators
 module AES = Spec.AES
 module GF = Spec.GF128
 
+#set-options "--z3rlimit 25 --max_fuel 1"
+
 (* Constants *)
 let size_key: size_nat = 16
 let size_block: size_nat = 16
@@ -19,6 +21,7 @@ let size_tag: size_nat = size_block
 (* Types *)
 type key = lbytes size_key
 type nonce = lbytes size_nonce
+type tag = lbytes size_tag
 
 
 inline_for_extraction
@@ -63,8 +66,6 @@ let gcm k n m aad =
   mac
 
 
-#reset-options "--z3rlimit 15"
-
 val aead_encrypt:
     k: key
   -> n: nonce
@@ -87,19 +88,16 @@ let aead_encrypt k n m aad =
 val aead_decrypt:
     k: key
   -> n: nonce
-  -> c: bytes{size_block <= length c /\ length c <= max_size_t}
+  -> c: bytes{length c + size_block <= max_size_t}
+  -> mac: tag
   -> aad: bytes{length aad <= max_size_t /\ length aad + padlen (length aad) <= max_size_t} ->
-  Tot (option (lbytes (length c - size_block)))
+  Tot (option (lbytes (length c)))
 
-let aead_decrypt k n c aad =
+let aead_decrypt k n c tag aad =
   let clen = length c in
   let nonce = create size_nonce (u8 0) in
   let nonce = update_sub nonce 0 size_nonce n in
-  let encrypted_plaintext = sub #uint8 #clen c 0 (clen - size_block) in
-  let associated_mac = sub #uint8 #clen c (clen - size_block) size_block in
-  let computed_mac = gcm k nonce encrypted_plaintext aad in
-  let result = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) computed_mac associated_mac in
-  let zeros = create (clen - size_block) (u8 0) in
-  if result then
-    Some (AES.aes128_encrypt_bytes k size_nonce nonce 2 encrypted_plaintext)
+  let computed_tag = gcm k nonce c aad in
+  if lbytes_eq computed_tag tag then
+    Some (AES.aes128_encrypt_bytes k size_nonce nonce 2 c)
   else None
