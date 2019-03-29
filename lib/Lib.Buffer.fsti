@@ -41,6 +41,13 @@ let length (#t:buftype) (#a:Type0) (b:buffer_t t a) =
   | MUT -> B.length (b <: buffer a)
   | IMMUT -> IB.length (b <: ibuffer a)
 
+let mut_immut_disjoint #t #t' (b: buffer_t MUT t) (ib: buffer_t IMMUT t') (h: HS.mem):
+  Lemma
+    (requires (B.live h b /\ B.live h ib))
+    (ensures (B.disjoint b ib))
+=
+  IB.buffer_immutable_buffer_disjoint b ib h
+
 inline_for_extraction
 let lbuffer_t (ty:buftype) (a:Type0) (len:size_t) =
   b:buffer_t ty a{length #ty #a b == v len}
