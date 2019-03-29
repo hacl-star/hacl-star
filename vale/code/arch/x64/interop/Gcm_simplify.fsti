@@ -44,6 +44,14 @@ val gcm_simplify3 (b:buf_t TUInt8 TUInt128) (h:HS.mem) : Lemma
       (be_quad32_to_bytes (reverse_bytes_quad32 (low_buffer_read TUInt8 TUInt128 h b 0)))
   ))
 
+val gcm_simplify4 (b:buf_t TUInt8 TUInt128) (h:HS.mem) : Lemma
+  (requires B.live h b /\ B.length b % 16 = 0 /\ B.length b >= 16)
+  (ensures (
+    DV.length_eq (get_downview b);
+    le_bytes_to_quad32 (seq_uint8_to_seq_nat8 (Seq.slice (B.as_seq h b) 0 16)) ==
+      low_buffer_read TUInt8 TUInt128 h b 0
+  ))
+
 val aes_simplify1 (b:buf_t TUInt8 TUInt128) (h:HS.mem) : Lemma 
   (requires B.live h b /\ B.length b = 16)
   (ensures (
