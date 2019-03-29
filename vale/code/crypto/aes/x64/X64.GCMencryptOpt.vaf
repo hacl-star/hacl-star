@@ -525,7 +525,7 @@ procedure {:quick} gcm_blocks_auth(
     Mov64(r15, auth_num_bytes);
 }
 
-#reset-options "--z3rlimit 55"
+#reset-options "--z3rlimit 90"
 procedure {:quick} {:verify true} gcm_blocks(
     inline alg:algorithm,
     inline offset:int,
@@ -542,6 +542,8 @@ procedure {:quick} {:verify true} gcm_blocks(
     ghost round_keys:seq(quad32),
     ghost keys_b:buffer128,
     ghost hkeys_b:buffer128
+    ) returns (
+    ghost test:seq(quad32)
     )
     lets
         auth_ptr @= rdi; auth_num_bytes @= rsi; auth_len @= rdx; keys_ptr @= rcx; scratch_ptr @= rbp; 
@@ -650,64 +652,66 @@ procedure {:quick} {:verify true} gcm_blocks(
 //        // Semantics
         8 * old(plain_num_bytes) < pow2_32;
         8 * old(auth_num_bytes) < pow2_32;
-
+//
         let iv_LE := old(buffer128_read(iv_b, 0, mem));
         let iv_BE := reverse_bytes_quad32(iv_LE);
         let ctr_BE_1:quad32 := Mkfour(1, iv_BE.lo1, iv_BE.hi2, iv_BE.hi3);
-        let ctr_BE_2:quad32 := Mkfour(2, iv_BE.lo1, iv_BE.hi2, iv_BE.hi3);
-
-        // Encryption results
-        let plain_in:seq(quad32) :=
-            if (old(plain_num_bytes) > old((len128x6 + len128) * 128/8)) then
-                append(append(old(s128(mem, in128x6_b)), 
-                              old(s128(mem, in128_b))),
-                              old(s128(mem, inout_b)))
-            else
-                append(old(s128(mem, in128x6_b)), 
-                       old(s128(mem, in128_b)));
-
-        let cipher_out:seq(quad32) :=
-            if (old(plain_num_bytes) > old((len128x6 + len128) * 128/8)) then
-                append(append(s128(mem, out128x6_b),
-                              s128(mem, out128_b)),
-                              s128(mem, inout_b))
-            else
-                append(s128(mem, out128x6_b),
-                       s128(mem, out128_b));
-                
-        let cipher_bound:nat := if (old(plain_num_bytes) > old((len128x6 + len128) * 128/8)) then
-                                old(len128x6) + old(len128) + 1
-                            else 
-                                old(len128x6) + old(len128);
-        gctr_partial_opaque(alg, cipher_bound, plain_in, cipher_out, key, ctr_BE_2);
-
-//        // Hashing results
-//        let h:quad32 := reverse_bytes_quad32(buffer128_read(hkeys_b, 0, mem));
-//        let length_quad:quad32 := reverse_bytes_quad32(Mkfour(#nat32(8 * old(plain_num_bytes)), 0, 
-//                                                       #nat32(8 * old(auth_num_bytes)), 0));
-//        let raw_auth_quads:seq(quad32) := if (old(auth_num_bytes) > old(auth_len * 128/8)) then 
-//                                append(s128(mem, auth_b), old(s128(mem, abytes_b)))
-//                              else 
-//                                s128(mem, auth_b);
-//        let auth_input_bytes:seq(nat8) := slice_work_around(le_seq_quad32_to_bytes(raw_auth_quads), old(auth_num_bytes));
-//        let padded_auth_bytes:seq(nat8) := pad_to_128_bits(auth_input_bytes);
-//        let auth_quad_seq:seq(quad32) := le_bytes_to_seq_quad32(padded_auth_bytes);
-//        let raw_quad_seq:seq(quad32) := append(
-//                            append(auth_quad_seq,
-//                                   s128(mem, out128x6_b)),
-//                                   s128(mem, out128_b));
-//        let raw_quad_seq:seq(quad32) := if (old(plain_num_bytes) > old((len128x6 + len128) * 128/8)) then
-//                               append(raw_quad_seq, s128(mem, inout_b))
-//                            else
-//                              raw_quad_seq;
-//        
-//        let total_bytes:seq(nat8) := length(auth_quad_seq) * 16 + old(plain_num_bytes);
-//        let auth_input_bytes:seq(nat8) := slice_work_around(le_seq_quad32_to_bytes(raw_quad_seq), total_bytes);
-//        let padded_auth_bytes:seq(nat8) := pad_to_128_bits(auth_input_bytes);
-//        let auth_quad_seq:seq(quad32) := le_bytes_to_seq_quad32(padded_auth_bytes);
-//        let auth_quad_seq:seq(quad32) := append(auth_quad_seq, create(1, length_quad));
+//        let ctr_BE_2:quad32 := Mkfour(2, iv_BE.lo1, iv_BE.hi2, iv_BE.hi3);
 //
-//        xmm1 == gctr_encrypt_block(ctr_BE_1, ghash_LE(h, #ghash_plain_LE(auth_in)), alg, key, 0);
+//        // Encryption results
+//        let plain_in:seq(quad32) :=
+//            if (old(plain_num_bytes) > old((len128x6 + len128) * 128/8)) then
+//                append(append(old(s128(mem, in128x6_b)), 
+//                              old(s128(mem, in128_b))),
+//                              old(s128(mem, inout_b)))
+//            else
+//                append(old(s128(mem, in128x6_b)), 
+//                       old(s128(mem, in128_b)));
+//
+//        let cipher_out:seq(quad32) :=
+//            if (old(plain_num_bytes) > old((len128x6 + len128) * 128/8)) then
+//                append(append(s128(mem, out128x6_b),
+//                              s128(mem, out128_b)),
+//                              s128(mem, inout_b))
+//            else
+//                append(s128(mem, out128x6_b),
+//                       s128(mem, out128_b));
+//                
+//        let cipher_bound:nat := if (old(plain_num_bytes) > old((len128x6 + len128) * 128/8)) then
+//                                old(len128x6) + old(len128) + 1
+//                            else 
+//                                old(len128x6) + old(len128);
+//        gctr_partial_opaque(alg, cipher_bound, plain_in, cipher_out, key, ctr_BE_2);
+
+        // Hashing results
+        let h:quad32 := reverse_bytes_quad32(buffer128_read(hkeys_b, 0, mem));
+        let length_quad:quad32 := reverse_bytes_quad32(Mkfour(#nat32(8 * old(plain_num_bytes)), 0, 
+                                                       #nat32(8 * old(auth_num_bytes)), 0));
+        let raw_auth_quads:seq(quad32) := if (old(auth_num_bytes) > old(auth_len * 128/8)) then 
+                                append(s128(mem, auth_b), old(s128(mem, abytes_b)))
+                              else 
+                                s128(mem, auth_b);
+        let auth_input_bytes:seq(nat8) := slice_work_around(le_seq_quad32_to_bytes(raw_auth_quads), old(auth_num_bytes));
+        let padded_auth_bytes:seq(nat8) := pad_to_128_bits(auth_input_bytes);
+        let auth_quad_seq:seq(quad32) := le_bytes_to_seq_quad32(padded_auth_bytes);
+        test == auth_quad_seq;
+
+        let raw_quad_seq:seq(quad32) := append(
+                            append(auth_quad_seq,
+                                   s128(mem, out128x6_b)),
+                                   s128(mem, out128_b));
+        let raw_quad_seq:seq(quad32) := if (old(plain_num_bytes) > old((len128x6 + len128) * 128/8)) then
+                               append(raw_quad_seq, s128(mem, inout_b))
+                            else
+                              raw_quad_seq;
+        
+        let total_bytes:nat := length(auth_quad_seq) * 16 + old(plain_num_bytes);
+        let auth_input_bytes:seq(nat8) := slice_work_around(le_seq_quad32_to_bytes(raw_quad_seq), total_bytes);
+        let padded_auth_bytes:seq(nat8) := pad_to_128_bits(auth_input_bytes);
+        let auth_quad_seq:seq(quad32) := le_bytes_to_seq_quad32(padded_auth_bytes);
+        let auth_quad_seq:seq(quad32) := append(auth_quad_seq, create(1, length_quad));
+        //test == auth_quad_seq;
+        //xmm1 == gctr_encrypt_block(ctr_BE_1, ghash_LE(h, #ghash_plain_LE(auth_quad_seq)), alg, key, 0);
 //                                    
 
 
@@ -738,6 +742,7 @@ procedure {:quick} {:verify true} gcm_blocks(
     (ghost var auth_quad_seq:seq(quad32)) := gcm_blocks_auth(alg, offset, auth_b, abytes_b, key, round_keys, keys_b, hkeys_b);
     ghost var y_0:quad32 := Mkfour(0,0,0,0);
     ghost var y_auth_bytes:quad32 := xmm1;
+    test := auth_quad_seq;
     ghost var h:quad32 := reverse_bytes_quad32(xmm11);
 
     // TODO: Skip some steps below when len128x6 == 0
@@ -877,6 +882,9 @@ procedure {:quick} {:verify true} gcm_blocks(
     auth_in := append(auth_in, create(1, length_quad32));
     ghash_incremental_to_ghash(h, auth_in);
 */
+    lemma_hash_append2(h, y_0, y_inout, y_final, auth_in, length_quad32);
+    auth_in := append(auth_in, create(1, length_quad32));
+    ghash_incremental_to_ghash(h, auth_in);
 }
 
 /*
@@ -1127,7 +1135,6 @@ procedure {:quick exportOnly}{:public}{:exportSpecs} gcm_blocks_stdcall_aspirati
 {
     assume false;
 }  
-*/
 
 #reset-options "--z3rlimit 700"
 procedure {:quick exportOnly}{:public}{:exportSpecs} gcm_blocks_stdcall(
@@ -1464,3 +1471,4 @@ procedure {:quick exportOnly}{:public}{:exportSpecs} gcm_blocks_stdcall(
     Pop(r14);
     Pop(r15);
 }                    
+*/
