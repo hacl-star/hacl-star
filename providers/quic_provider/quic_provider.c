@@ -13,8 +13,6 @@
 #include "EverCrypt.h"
 #include "quic_provider.h"
 
-#define DEBUG 0
-
 typedef struct quic_key {
   mitls_aead alg;
   unsigned char key[32];
@@ -346,7 +344,7 @@ int MITLS_CALLCONV quic_crypto_decrypt(quic_key *key, unsigned char *plain, uint
   else if(key->alg == TLS_aead_CHACHA20_POLY1305)
   {
     r = 1 - EverCrypt_Chacha20Poly1305_aead_decrypt(key->key, iv, ad_len, (uint8_t*)ad,
-        plain_len, (uint8_t*)plain, cipher, cipher + plain_len);
+        plain_len, (uint8_t*)plain, cipher, (uint8_t*)(cipher+plain_len));
   }
 
 #if DEBUG
