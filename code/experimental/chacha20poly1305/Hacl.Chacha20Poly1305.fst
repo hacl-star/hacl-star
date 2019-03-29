@@ -19,7 +19,7 @@ module Chacha = Hacl.Impl.Chacha20
 
 #set-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
 
-let aead_encrypt_chacha_poly k n aadlen aad mlen m cipher mac =
+let aead_encrypt k n aadlen aad mlen m cipher mac =
   let h0 = ST.get() in
   Chacha.chacha20_encrypt mlen cipher m k n 1ul;
   let h1 = ST.get() in
@@ -31,7 +31,7 @@ let aead_encrypt_chacha_poly k n aadlen aad mlen m cipher mac =
       (Spec.poly1305_do poly_k (v mlen) (as_seq h1 cipher) (v aadlen) (as_seq h1 aad))
     )
 
-let aead_decrypt_chacha_poly k n aadlen aad mlen m cipher mac =
+let aead_decrypt k n aadlen aad mlen m cipher mac =
   push_frame();
   let h0 = get() in
   // Create a buffer to store the temporary mac
