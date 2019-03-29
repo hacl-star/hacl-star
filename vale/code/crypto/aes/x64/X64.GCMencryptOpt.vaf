@@ -525,7 +525,7 @@ procedure {:quick} gcm_blocks_auth(
     Mov64(r15, auth_num_bytes);
 }
 
-#reset-options "--z3rlimit 24"
+#reset-options "--z3rlimit 60"
 procedure {:quick} {:verify true} gcm_blocks(
     inline alg:algorithm,
     inline offset:int,
@@ -640,13 +640,13 @@ procedure {:quick} {:verify true} gcm_blocks(
 
 
     ensures
-//        // Framing
-//        modifies_mem(loc_union(loc_buffer(iv_b), 
-//                     loc_union(loc_buffer(scratch_b), 
-//                     loc_union(loc_buffer(out128x6_b), 
-//                     loc_union(loc_buffer(out128_b), 
-//                               loc_buffer(inout_b))))), old(mem), mem);
-//
+        // Framing
+        modifies_mem(loc_union(loc_buffer(iv_b), 
+                     loc_union(loc_buffer(scratch_b), 
+                     loc_union(loc_buffer(out128x6_b), 
+                     loc_union(loc_buffer(out128_b), 
+                               loc_buffer(inout_b))))), old(mem), mem);
+
 //        // Semantics
 //        8 * old(plain_num_bytes) < pow2_32;
 //        8 * old(auth_num_bytes) < pow2_32;
