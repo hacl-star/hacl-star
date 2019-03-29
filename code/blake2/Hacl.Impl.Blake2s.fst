@@ -252,7 +252,9 @@ val blake2_compress1:
 let blake2_compress1 wv s m offset flag =
   update_sub wv (size 0) (size 8) s;
   set_iv_sub wv;
+  [@inline_let]
   let low_offset = Spec.limb_to_word Spec.Blake2S offset in
+  [@inline_let]
   let high_offset = Spec.limb_to_word Spec.Blake2S (offset >>. size 32) in
   let wv_12 = logxor wv.(size 12) low_offset in
   let wv_13 = logxor wv.(size 13) high_offset in

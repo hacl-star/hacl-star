@@ -10,6 +10,7 @@ open Lib.Buffer
 open Lib.PrintBuffer
 open Hacl.Blake2s
 
+#reset-options "--admit_smt_queries true"
 
 val test_blake2s:
     msg_len:size_t
