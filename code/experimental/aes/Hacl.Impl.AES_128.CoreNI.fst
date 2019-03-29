@@ -1,4 +1,4 @@
-module Hacl.Impl.Aes.CoreNI
+module Hacl.Impl.AES_128.CoreNI
 
 open FStar.HyperStack
 open FStar.HyperStack.All

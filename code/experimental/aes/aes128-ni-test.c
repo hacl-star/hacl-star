@@ -31,7 +31,7 @@ static __inline__ cycles cpucycles_end(void)
   //return ( (uint64_t)lo)|( ((uint64_t)hi)<<32 );
 }
 
-extern void Hacl_Aes_NI_aes128_ctr_encrypt(int in_len, uint8_t* out, uint8_t* in, uint8_t* k, uint8_t* n, uint32_t c);
+extern void Hacl_AES_128_NI_aes128_ctr_encrypt(int in_len, uint8_t* out, uint8_t* in, uint8_t* k, uint8_t* n, uint32_t c);
 
 #define ROUNDS 100000
 #define SIZE   16384
@@ -56,8 +56,8 @@ int main() {
     0xFC,0xE6,0x30,0xDF,0x91,0x41,0xBE,0x28};
   uint8_t comp[32] = {0};
   bool ok = true;
-  
-  Hacl_Aes_NI_aes128_ctr_encrypt(in_len,comp,in,k,n,1);
+
+  Hacl_AES_128_NI_aes128_ctr_encrypt(in_len,comp,in,k,n,1);
   printf("AES-NI computed:");
   for (int i = 0; i < 32; i++)
     printf("%02x",comp[i]);
@@ -83,13 +83,13 @@ int main() {
   memset(nonce,'N',12);
 
   for (int j = 0; j < ROUNDS; j++) {
-    Hacl_Aes_NI_aes128_ctr_encrypt(SIZE,plain,plain,key,nonce,1);
+    Hacl_AES_128_NI_aes128_ctr_encrypt(SIZE,plain,plain,key,nonce,1);
   }
 
   t1 = clock();
   a = cpucycles_begin();
   for (int j = 0; j < ROUNDS; j++) {
-    Hacl_Aes_NI_aes128_ctr_encrypt(SIZE,plain,plain,key,nonce,1);
+    Hacl_AES_128_NI_aes128_ctr_encrypt(SIZE,plain,plain,key,nonce,1);
   }
   b = cpucycles_end();
   t2 = clock();
@@ -101,5 +101,5 @@ int main() {
   printf("time for %" PRIu64 " bytes: %" PRIu64 " (%.2fus/byte)\n",count,(uint64_t)tdiff1,(double)tdiff1/count);
   printf("bw %8.2f MB/s\n",(double)count/(((double)tdiff1 / CLOCKS_PER_SEC) * 1000000.0));
 
-  
+
 }

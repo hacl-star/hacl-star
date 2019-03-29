@@ -1,4 +1,4 @@
-module Hacl.Aes.BitSlice
+module Hacl.AES_128.BitSlice
 
 module ST = FStar.HyperStack.ST
 open FStar.HyperStack
@@ -6,8 +6,8 @@ open FStar.HyperStack.All
 open Lib.IntTypes
 open Lib.Buffer
 
-open Hacl.Impl.Aes.Core
-open Hacl.Impl.Aes.Generic
+open Hacl.Impl.AES_128.Core
+open Hacl.Impl.AES_128.Generic
 
 
 

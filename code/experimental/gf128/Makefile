@@ -14,32 +14,32 @@ all: gf128-ni.exe gf128-precomp.exe
 
 verify: test
 
-CC=/usr/local/Cellar/llvm/7.0.0/bin/clang-7
-#CC=gcc-8
+#CC=/usr/local/Cellar/llvm/7.0.0/bin/clang-7
+CC=gcc-8
 
 GF128_PRECOMP_FILES= $(HACL_HOME)/lib/fst/Lib.IntTypes.fst \
 	$(HACL_HOME)/lib/fst/Lib.RawIntTypes.fst \
 	$(HACL_HOME)/lib/fst/Lib.Buffer.fst \
 	$(HACL_HOME)/lib/fst/Lib.ByteBuffer.fst \
-	$(HACL_HOME)/lib/c/Lib.Loops.fst \
+	$(HACL_HOME)/lib/fst/Lib.Loops.fst \
 	Hacl.Impl.Gf128.FieldPreComp.fst \
 	Hacl.Impl.Gf128.Fields.fst \
 	Hacl.Impl.Gf128.Generic.fst \
-	Hacl.Gf128.PreComp.fst 
+	Hacl.Gf128.PreComp.fst
 
 GF128_NI_FILES= $(HACL_HOME)/lib/fst/Lib.IntTypes.fst \
 	$(HACL_HOME)/lib/fst/Lib.RawIntTypes.fst \
 	$(HACL_HOME)/lib/fst/Lib.Buffer.fst \
 	$(HACL_HOME)/lib/fst/Lib.ByteBuffer.fst \
-	$(HACL_HOME)/lib/c/Lib.Loops.fst \
+	$(HACL_HOME)/lib/fst/Lib.Loops.fst \
 	Hacl.Impl.Gf128.FieldNI.fst \
 	Hacl.Impl.Gf128.Fields.fst \
 	Hacl.Impl.Gf128.Generic.fst \
-	Hacl.Gf128.NI.fst 
+	Hacl.Gf128.NI.fst
 
 
 
-KREMLIN_ARGS:=-funroll-loops 8 -warn-error +9 -I $(HACL_HOME)/lib/ -I $(HACL_HOME)/lib/fst -I $(KREMLIN_HOME)/kremlib -I $(HACL_HOME)/specs -I . -ccopt '-march=native' -fbuiltin-uint128 -drop FStar.UInt128 -fnocompound-literals -fparentheses -fcurly-braces 
+KREMLIN_ARGS:=-funroll-loops 8 -warn-error +9 -I $(HACL_HOME)/lib/ -I $(HACL_HOME)/lib/fst -I $(KREMLIN_HOME)/kremlib -I $(HACL_HOME)/specs -I . -ccopt '-march=native' -fbuiltin-uint128 -drop FStar.UInt128 -fnocompound-literals -fparentheses -fcurly-braces
 
 gf128-precomp-c/out.krml: $(GF128_PRECOMP_FILES)
 	 $(KREMLIN) $(KREMLIN_ARGS) -tmpdir gf128-precomp-c $(GF128_PRECOMP_FILES) -skip-translation
@@ -49,7 +49,7 @@ gf128-precomp-c/Hacl_Gf128_PreComp.c: gf128-precomp-c/out.krml
 	   -minimal -add-include '"kremlib.h"' -bundle 'Hacl.Gf128.PreComp=*'
 
 gf128-precomp.exe: gf128-precomp-c/Hacl_Gf128_PreComp.c gf128-precomp-test.c
-	$(CC) -march=native -mtune=native -O3 -I $(KREMLIN_HOME)/kremlib/c -I $(KREMLIN_HOME)/include -I . gf128-precomp-c/Hacl_Gf128_PreComp.c $(KREMLIN_HOME)/kremlib/c/testlib.o gf128-precomp-test.c -o gf128-precomp.exe
+	$(CC) -march=native -mtune=native -O3 -I $(KREMLIN_HOME)/kremlib/dist/generic -I $(KREMLIN_HOME)/include -I . gf128-precomp-c/Hacl_Gf128_PreComp.c $(KREMLIN_HOME)/kremlib/dist/generic/testlib.o gf128-precomp-test.c -o gf128-precomp.exe
 	./gf128-precomp.exe
 
 
@@ -61,7 +61,7 @@ gf128-ni-c/Hacl_Gf128_NI.c: gf128-ni-c/out.krml
 	   -minimal -add-include '"kremlib.h"' -add-include '"vec128.h"' -drop Lib.Vec128 -bundle 'Hacl.Gf128.NI=*'
 
 gf128-ni.exe: gf128-ni-c/Hacl_Gf128_NI.c gf128-ni-test.c
-	$(CC) -march=native -mtune=native -O3 -I $(KREMLIN_HOME)/kremlib/c -I $(KREMLIN_HOME)/include -I . gf128-ni-c/Hacl_Gf128_NI.c $(KREMLIN_HOME)/kremlib/c/testlib.o gf128-ni-test.c -o gf128-ni.exe
+	$(CC) -march=native -mtune=native -O3 -I $(KREMLIN_HOME)/kremlib/dist/generic -I $(KREMLIN_HOME)/include -I . gf128-ni-c/Hacl_Gf128_NI.c $(KREMLIN_HOME)/kremlib/dist/generic/testlib.o gf128-ni-test.c -o gf128-ni.exe
 	./gf128-ni.exe
 
 gf128-perf: gf128-precomp.exe gf128-ni.exe

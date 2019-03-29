@@ -1,4 +1,4 @@
-module Hacl.Spec.Aes.BitSlice
+module Hacl.Spec.AES_128.BitSlice
 
 open Lib.IntTypes
 

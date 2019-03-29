@@ -1,12 +1,14 @@
-module Hacl.AesGCM.NI
+module Hacl.AES_128_GCM.NI
+
 open FStar.HyperStack
 open FStar.HyperStack.All
+
 open Lib.IntTypes
 open Lib.Buffer
 open Lib.ByteBuffer
-
 open Lib.Vec128
-open Hacl.Aes.NI
+
+open Hacl.AES_128.NI
 open Hacl.Gf128.NI
 
 module ST = FStar.HyperStack.ST

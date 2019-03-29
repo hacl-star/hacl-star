@@ -31,10 +31,10 @@ static __inline__ cycles cpucycles_end(void)
   //return ( (uint64_t)lo)|( ((uint64_t)hi)<<32 );
 }
 
-extern void Hacl_Aes_BitSlice_aes128_ctr_encrypt(int in_len, uint8_t* out, uint8_t* in, uint8_t* k, uint8_t* n, uint32_t c);
-extern void Hacl_Aes_BitSlice_aes128_init(uint64_t *ctx, uint8_t *key, uint8_t *nonce);
+extern void Hacl_AES_128_BitSlice_aes128_ctr_encrypt(int in_len, uint8_t* out, uint8_t* in, uint8_t* k, uint8_t* n, uint32_t c);
+extern void Hacl_AES_128_BitSlice_aes128_init(uint64_t *ctx, uint8_t *key, uint8_t *nonce);
 extern void
-Hacl_Aes_BitSlice_aes_ctr(
+Hacl_AES_128_BitSlice_aes_ctr(
   uint32_t len,
   uint8_t *out,
   uint8_t *inp,
@@ -65,10 +65,10 @@ int main() {
     0xFC,0xE6,0x30,0xDF,0x91,0x41,0xBE,0x28};
   uint8_t comp[32] = {0};
   bool ok = true;
-  
+
   uint64_t ctx[(uint32_t)8U + (uint32_t)15U * (uint32_t)8U] = {0};
 
-  Hacl_Aes_BitSlice_aes128_ctr_encrypt(in_len,comp,in,k,n,1);
+  Hacl_AES_128_BitSlice_aes128_ctr_encrypt(in_len,comp,in,k,n,1);
 
   printf("AES-BitSlice computed:");
   for (int i = 0; i < 32; i++)
@@ -95,15 +95,15 @@ int main() {
   memset(nonce,'N',12);
 
   for (int j = 0; j < ROUNDS; j++) {
-    Hacl_Aes_BitSlice_aes128_ctr_encrypt(SIZE,plain,plain,key,nonce,1);
+    Hacl_AES_128_BitSlice_aes128_ctr_encrypt(SIZE,plain,plain,key,nonce,1);
   }
 
   t1 = clock();
   a = cpucycles_begin();
   for (int j = 0; j < ROUNDS; j++) {
-   Hacl_Aes_BitSlice_aes128_ctr_encrypt(SIZE,plain,plain,key,nonce,1);
- //   Hacl_Aes_BitSlice_aes128_init(ctx,key,nonce);
- //   Hacl_Aes_BitSlice_aes_ctr(SIZE,plain,plain,ctx,1,10);
+   Hacl_AES_128_BitSlice_aes128_ctr_encrypt(SIZE,plain,plain,key,nonce,1);
+ //   Hacl_AES_128_BitSlice_aes128_init(ctx,key,nonce);
+ //   Hacl_AES_128_BitSlice_aes_ctr(SIZE,plain,plain,ctx,1,10);
 
   }
   b = cpucycles_end();
@@ -116,5 +116,5 @@ int main() {
   printf("time for %" PRIu64 " bytes: %" PRIu64 " (%.2fus/byte)\n",count,(uint64_t)tdiff2,(double)tdiff2/count);
   printf("bw %8.2f MB/s\n",(double)count/(((double)tdiff2 / CLOCKS_PER_SEC) * 1000000.0));
 
-  
+
 }
