@@ -21,22 +21,22 @@ CHACHA20_FILES= $(HACL_HOME)/lib/fst/Lib.IntTypes.fst \
 	$(HACL_HOME)/lib/fst/Lib.RawIntTypes.fst \
 	$(HACL_HOME)/lib/fst/Lib.Buffer.fst \
 	$(HACL_HOME)/lib/fst/Lib.ByteBuffer.fst \
-	$(HACL_HOME)/lib/c/Lib.Loops.fst \
+	$(HACL_HOME)/lib/fst/Lib.Loops.fst \
 	Hacl.Impl.Chacha20.Core32.fst \
 	Hacl.Impl.Chacha20.fst \
-	Hacl.Chacha20.fst 
+	Hacl.Chacha20.fst
 
 KREMLIN_ARGS:=-funroll-loops 8 -warn-error +9 -I $(HACL_HOME)/lib/ -I $(HACL_HOME)/lib/fst -I $(KREMLIN_HOME)/kremlib -I $(HACL_HOME)/specs -I . -ccopt '-march=native' -fbuiltin-uint128 -bundle Prims -bundle FStar -drop Prims -drop FStar -drop FStar.UInt128 -fnocompound-literals -fc89-scope -fparentheses -fcurly-braces -dast
 
 chacha20-c/out.krml: $(CHACHA20_FILES)
-	 $(KREMLIN) $(KREMLIN_ARGS) -tmpdir chacha20-c $(CHACHA20_FILES) -skip-translation 
+	 $(KREMLIN) $(KREMLIN_ARGS) -tmpdir chacha20-c $(CHACHA20_FILES) -skip-translation
 
 chacha20-c/Hacl_Chacha20.c: chacha20-c/out.krml
 	 $(KREMLIN) $(KREMLIN_ARGS) -tmpdir chacha20-c  $^ -skip-compilation \
 	   -minimal -add-include '"kremlib.h"' -bundle 'Hacl.Chacha20=*'
 
 chacha20.exe: chacha20-c/Hacl_Chacha20.c chacha20-c/out.krml
-	$(CC) -march=native -mtune=native -O3 -I $(KREMLIN_HOME)/kremlib/c -I $(KREMLIN_HOME)/include -I . chacha20-c/Hacl_Chacha20.c $(KREMLIN_HOME)/kremlib/c/testlib.o chacha20-test.c -o chacha20.exe 
+	$(CC) -march=native -mtune=native -O3 -I $(KREMLIN_HOME)/kremlib/c -I $(KREMLIN_HOME)/include -I . chacha20-c/Hacl_Chacha20.c $(KREMLIN_HOME)/kremlib/c/testlib.o chacha20-test.c -o chacha20.exe
 	./chacha20.exe
 
 chacha20-perf: chacha20.exe
