@@ -41,6 +41,9 @@ let uint #t #l x =
   | U64 -> UInt64.uint_to_t x
   | U128 -> UInt128.uint_to_t x
 
+let uintv_injective #t #l a =
+  uintv_extensionality a (uint (uint_v a))
+
 let u16_us x = x
 let u32_ul x = x
 let u64_uL x = x

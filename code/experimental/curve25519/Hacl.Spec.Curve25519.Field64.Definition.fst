@@ -3,7 +3,7 @@ module Hacl.Spec.Curve25519.Field64.Definition
 open Lib.Sequence
 open Lib.IntTypes
 
-module P = Spec.Curve25519
+module P = NatPrime
 
 #reset-options "--z3rlimit 50  --using_facts_from '* -FStar.Seq'"
 
@@ -30,5 +30,5 @@ let wide_as_nat4 f =
   v s6 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 +
   v s7 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64
 
-let feval (f:felem4) : GTot P.elem = (as_nat4 f) % P.prime
-let feval_wide (f:felem_wide4) : GTot P.elem = (wide_as_nat4 f) % P.prime
+let feval (f:felem4) : GTot P.felem = (as_nat4 f) % P.prime
+let feval_wide (f:felem_wide4) : GTot P.felem = (wide_as_nat4 f) % P.prime

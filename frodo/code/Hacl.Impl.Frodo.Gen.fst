@@ -55,7 +55,7 @@ val frodo_gen_matrix_cshake1:
       as_matrix h1 res == S.frodo_gen_matrix_cshake1 (v n) (v seed_len) (as_seq h0 seed) (v i) (as_matrix h0 res))
 let frodo_gen_matrix_cshake1 n seed_len seed r i res =
   let ctr = size_to_uint32 (size 256 +. i) in
-  uintv_extensionality (to_u16 (size_to_uint32 (size 256 +. i))) (u16 (256 + v i));
+  //uintv_extensionality (to_u16 ctr) (u16 (256 + v i));
   SHA3.cshake128_frodo seed_len seed (to_u16 ctr) (size 2 *! n) r;
   [@ inline_let]
   let spec h0 = S.frodo_gen_matrix_cshake0 (v n) (v i) (as_seq h0 r) in
@@ -117,7 +117,7 @@ val frodo_gen_matrix_cshake_4x0:
       modifies1 res h0 h1 /\
       as_matrix h1 res ==
       S.frodo_gen_matrix_cshake_4x0 (v n) (v i) (as_seq h0 r0) (as_seq h0 r1)
-	(as_seq h0 r2) (as_seq h0 r3) (v j) (as_matrix h0 res))
+        (as_seq h0 r2) (as_seq h0 r3) (v j) (as_matrix h0 res))
 let frodo_gen_matrix_cshake_4x0 n i r0 r1 r2 r3 j res =
   let resij0 = sub r0 (j *! size 2) (size 2) in
   let resij1 = sub r1 (j *! size 2) (size 2) in
@@ -128,7 +128,8 @@ let frodo_gen_matrix_cshake_4x0 n i r0 r1 r2 r3 j res =
   mset res (size 4 *! i +! size 2) j (uint_from_bytes_le resij2);
   mset res (size 4 *! i +! size 3) j (uint_from_bytes_le resij3)
 
-#set-options "--z3rlimit 100"
+// 2019.03.04: SZ this works with ifuel=0 in interactive mode but fails in batch
+#set-options "--z3rlimit 100 --initial_ifuel 1 --max_ifuel 1"
 
 inline_for_extraction noextract private
 val frodo_gen_matrix_cshake_4x1:
@@ -152,17 +153,16 @@ let frodo_gen_matrix_cshake_4x1 n seed_len seed r i res =
   let r2 = sub r (size 4 *! n) (size 2 *! n) in
   let r3 = sub r (size 6 *! n) (size 2 *! n) in
   let ctr0 = size_to_uint32 (size 256 +. size 4 *! i +. size 0) in
-  uintv_extensionality (to_u16 (size_to_uint32 (size 256 +. size 4 *! i +. size 0))) (u16 (256 + 4 * v i + 0));
+  uintv_extensionality (to_u16 ctr0) (u16 (256 + 4 * v i + 0));
   let ctr1 = size_to_uint32 (size 256 +. size 4 *! i +. size 1) in
-  uintv_extensionality (to_u16 (size_to_uint32 (size 256 +. size 4 *! i +. size 1))) (u16 (256 + 4 * v i + 1));
+  uintv_extensionality (to_u16 ctr1) (u16 (256 + 4 * v i + 1));
   let ctr2 = size_to_uint32 (size 256 +. size 4 *! i +. size 2) in
-  uintv_extensionality (to_u16 (size_to_uint32 (size 256 +. size 4 *! i +. size 2))) (u16 (256 + 4 * v i + 2));
+  uintv_extensionality (to_u16 ctr2) (u16 (256 + 4 * v i + 2));
   let ctr3 = size_to_uint32 (size 256 +. size 4 *! i +. size 3) in
-  uintv_extensionality (to_u16 (size_to_uint32 (size 256 +. size 4 *! i +. size 3))) (u16 (256 + 4 * v i + 3));
+  uintv_extensionality (to_u16 ctr3) (u16 (256 + 4 * v i + 3));
   Hacl.Keccak.cshake128_frodo_4x seed_len seed
     (to_u16 ctr0) (to_u16 ctr1) (to_u16 ctr2) (to_u16 ctr3)
     (size 2 *! n) r0 r1 r2 r3;
-
   [@ inline_let]
   let spec h0 = S.frodo_gen_matrix_cshake_4x0 (v n) (v i)
     (as_seq h0 r0) (as_seq h0 r1) (as_seq h0 r2) (as_seq h0 r3) in
@@ -172,6 +172,8 @@ let frodo_gen_matrix_cshake_4x1 n seed_len seed r i res =
     Lib.LoopCombinators.unfold_repeati (v n) (spec h0) (as_matrix h0 res) (v j);
     frodo_gen_matrix_cshake_4x0 n i r0 r1 r2 r3 j res
   )
+
+#set-options "--max_ifuel 0"
 
 inline_for_extraction noextract
 val frodo_gen_matrix_cshake_4x:

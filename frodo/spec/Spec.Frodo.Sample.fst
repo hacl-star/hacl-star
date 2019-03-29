@@ -75,7 +75,6 @@ let frodo_sample_res r0 e =
   u16 (e % modulus U16)
 
 #set-options "--max_fuel 1"
-
 val frodo_sample: r:uint16 -> uint16
 let frodo_sample r =
   let t = r >>. 1ul in

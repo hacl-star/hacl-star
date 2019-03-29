@@ -3,29 +3,31 @@ module Hacl.Spec.Aes.BitSlice
 open Lib.IntTypes
 
 
-let transpose_bits64 (x:uint64) : Tot uint64 = 
-     (x &. u64 0x8040201008040201)    |.
-    ((x &. u64 0x4020100804020100) >>. size 7) |.
-    ((x &. u64 0x2010080402010000) >>. size 14) |.
-    ((x &. u64 0x1008040201000000) >>. size 21) |.
-    ((x &. u64 0x0804020100000000) >>. size 28) |.
-    ((x &. u64 0x0402010000000000) >>. size 35) |.
-    ((x &. u64 0x0201000000000000) >>. size 42) |.
-    ((x &. u64 0x0100000000000000) >>. size 49) |.
-    ((x <<. size  7) &. u64 0x4020100804020100) |.
-    ((x <<. size 14) &. u64 0x2010080402010000) |.
-    ((x <<. size 21) &. u64 0x1008040201000000) |.
-    ((x <<. size 28) &. u64 0x0804020100000000) |.
-    ((x <<. size 35) &. u64 0x0402010000000000) |.
-    ((x <<. size 42) &. u64 0x0201000000000000) |.
-    ((x <<. size 49) &. u64 0x0100000000000000)
+let transpose_bits64 (x:uint64) : Tot uint64 =
+  (x &. u64 0x8040201008040201)    |.
+  ((x &. u64 0x4020100804020100) >>. size 7) |.
+  ((x &. u64 0x2010080402010000) >>. size 14) |.
+  ((x &. u64 0x1008040201000000) >>. size 21) |.
+  ((x &. u64 0x0804020100000000) >>. size 28) |.
+  ((x &. u64 0x0402010000000000) >>. size 35) |.
+  ((x &. u64 0x0201000000000000) >>. size 42) |.
+  ((x &. u64 0x0100000000000000) >>. size 49) |.
+  ((x <<. size  7) &. u64 0x4020100804020100) |.
+  ((x <<. size 14) &. u64 0x2010080402010000) |.
+  ((x <<. size 21) &. u64 0x1008040201000000) |.
+  ((x <<. size 28) &. u64 0x0804020100000000) |.
+  ((x <<. size 35) &. u64 0x0402010000000000) |.
+  ((x <<. size 42) &. u64 0x0201000000000000) |.
+  ((x <<. size 49) &. u64 0x0100000000000000)
 
 
 inline_for_extraction
-val transpose_bits64x8: i0:uint64 -> i1:uint64 -> i2: uint64 -> i3:uint64 ->
-		     i4:uint64 -> i5:uint64 -> i6: uint64 -> i7:uint64 ->
-		     Tot (uint64 * uint64 * uint64 * uint64 * uint64 * uint64 * uint64 * uint64)
-let transpose_bits64x8 i0 i1 i2 i3 i4 i5 i6 i7 = 
+val transpose_bits64x8:
+  i0:uint64 -> i1:uint64 -> i2: uint64 -> i3:uint64 ->
+  i4:uint64 -> i5:uint64 -> i6: uint64 -> i7:uint64 ->
+  Tot (uint64 * uint64 * uint64 * uint64 * uint64 * uint64 * uint64 * uint64)
+
+let transpose_bits64x8 i0 i1 i2 i3 i4 i5 i6 i7 =
   let t0 = (i0 &. u64 0xffffffff) ^. (i4 <<. size 32) in
   let t1 = (i1 &. u64 0xffffffff) ^. (i5 <<. size 32) in
   let t2 = (i2 &. u64 0xffffffff) ^. (i6 <<. size 32) in
@@ -43,7 +45,7 @@ let transpose_bits64x8 i0 i1 i2 i3 i4 i5 i6 i7 =
   let t5_ = t5 in
   let t6_ = t6 in
   let t7_ = t7 in
-  
+
   let t0 = (t0 &. u64 0x0000ffff0000ffff) ^. ((t2 &. u64 0x0000ffff0000ffff) <<. size 16) in
   let t1 = (t1 &. u64 0x0000ffff0000ffff) ^. ((t3 &. u64 0x0000ffff0000ffff) <<. size 16) in
   let t2 = (t2 &. u64 0xffff0000ffff0000) ^. ((t0_ &. u64 0xffff0000ffff0000) >>. size  16) in
@@ -82,9 +84,14 @@ let transpose_bits64x8 i0 i1 i2 i3 i4 i5 i6 i7 =
 
   (t0,t1,t2,t3,t4,t5,t6,t7)
 
-inline_for_extraction 
-val sub_bytes64x8: uint64 -> uint64 -> uint64 -> uint64 -> uint64 -> uint64 -> uint64 -> uint64 -> Tot (uint64 * uint64 * uint64 * uint64 * uint64 * uint64 * uint64 * uint64)
-let sub_bytes64x8 (st0:uint64) (st1:uint64) (st2:uint64) (st3:uint64) (st4:uint64) (st5:uint64) (st6:uint64) (st7:uint64) = 
+
+inline_for_extraction
+val sub_bytes64x8:
+    uint64 -> uint64 -> uint64 -> uint64
+  -> uint64 -> uint64 -> uint64 -> uint64 ->
+  Tot (uint64 * uint64 * uint64 * uint64 * uint64 * uint64 * uint64 * uint64)
+
+let sub_bytes64x8 (st0:uint64) (st1:uint64) (st2:uint64) (st3:uint64) (st4:uint64) (st5:uint64) (st6:uint64) (st7:uint64) =
   let u0 = st7 in
   let u1 = st6 in
   let u2 = st5 in
@@ -94,35 +101,35 @@ let sub_bytes64x8 (st0:uint64) (st1:uint64) (st2:uint64) (st3:uint64) (st4:uint6
   let u6 = st1 in
   let u7 = st0 in
 
-  let t1 = u6 ^. u4 in 
+  let t1 = u6 ^. u4 in
   let t2 = u3 ^. u0 in
   let t3 = u1 ^. u2 in
-  let t6 = u1 ^. u5 in 
-  let t7 = u0 ^. u6 in 
-  let t13 = u2 ^. u5 in 
+  let t6 = u1 ^. u5 in
+  let t7 = u0 ^. u6 in
+  let t13 = u2 ^. u5 in
   let t16 = u0 ^. u5 in
   let t18 = u6 ^. u5 in
-  
+
   let t4 = u7 ^. t3 in
-  let t5 = t1 ^. t2 in 
+  let t5 = t1 ^. t2 in
   let t8 = t1 ^. t6 in
   let t9 = u6 ^. t4 in
-    
+
   let t10 = u3 ^. t4 in
   let t11 = u7 ^. t5 in
   let t12 = t5 ^. t6 in
   let t14 = t3 ^. t5 in
-  let t15 = u5 ^. t7 in 
-  let t17 = u7 ^. t8 in  
+  let t15 = u5 ^. t7 in
+  let t17 = u7 ^. t8 in
   let t19 = t2 ^. t18 in
   let t22 = u0 ^. t4 in
   let t54 = t2 &. t8 in
   let t50 = t9 &. t4 in
-    
-  let t20 = t4 ^. t15 in 
+
+  let t20 = t4 ^. t15 in
   let t21 = t1 ^. t13 in
   let t39 = t21 ^. t5 in
-  let t40 = t21 ^. t7 in  
+  let t40 = t21 ^. t7 in
   let t41 = t7 ^. t19 in
   let t42 = t16 ^. t14 in
   let t43 = t22 ^. t17 in
@@ -130,8 +137,8 @@ let sub_bytes64x8 (st0:uint64) (st1:uint64) (st2:uint64) (st3:uint64) (st4:uint6
   let t45 = t20 &. t11 in
   let t47 = t10 &. u7 in
   let t57 = t16 &. t14 in
-  
-  let t46 = t12 ^. t44 in  
+
+  let t46 = t12 ^. t44 in
   let t48 = t47 ^. t44 in
   let t49 = t7 &. t21 in
   let t51 = t40 ^. t49 in
@@ -149,11 +156,11 @@ let sub_bytes64x8 (st0:uint64) (st1:uint64) (st2:uint64) (st3:uint64) (st4:uint6
   let t64 = t60 ^. t58 in
   let t65 = t61 ^. t56 in
   let t66 = t62 ^. t43 in
-  let t67 = t65 ^. t66 in 
+  let t67 = t65 ^. t66 in
   let t68 = t65 &. t63 in
   let t69 = t64 ^. t68 in
   let t70 = t63 ^. t64 in
-  let t71 = t66 ^. t68 in 
+  let t71 = t66 ^. t68 in
   let t72 = t71 &. t70 in
   let t73 = t69 &. t67 in
   let t74 = t63 &. t66 in
@@ -223,21 +230,17 @@ let sub_bytes64x8 (st0:uint64) (st1:uint64) (st2:uint64) (st3:uint64) (st4:uint6
   let t138 = t119 ^. t132 in
   let st2 = t109 ^. t138 in
   let t140 = t114 ^. t136 in
-  let st6 = lognot (t109 ^. t140) in 
+  let st6 = lognot (t109 ^. t140) in
   (st0,st1,st2,st3,st4,st5,st6,st7)
 
-inline_for_extraction 
-let shift_row64 (u:uint64) = 
-    let u = (u &. u64 0x1111111111111111) |.
-      ((u &. u64 0x2220222022202220) >>. size 4) |. 
-      ((u &. u64 0x0002000200020002) <<. size 12) |.
-      ((u &. u64 0x4400440044004400) >>. size 8) |. 
-      ((u &. u64 0x0044004400440044) <<. size 8) |.
-      ((u &. u64 0x8000800080008000) >>. size 12) |. 
-      ((u &. u64 0x0888088808880888) <<. size 4) in
-    u
 
-
-
-
-
+inline_for_extraction
+let shift_row64 (u:uint64) =
+  let u = (u &. u64 0x1111111111111111) |.
+          ((u &. u64 0x2220222022202220) >>. size 4) |.
+          ((u &. u64 0x0002000200020002) <<. size 12) |.
+          ((u &. u64 0x4400440044004400) >>. size 8) |.
+          ((u &. u64 0x0044004400440044) <<. size 8) |.
+          ((u &. u64 0x8000800080008000) >>. size 12) |.
+          ((u &. u64 0x0888088808880888) <<. size 4) in
+  u

@@ -110,8 +110,6 @@ val uintv_extensionality:
  -> Lemma
   (requires uint_v #t #l a == uint_v #t #l b)
   (ensures  a == b)
-// REMARK: We can't mark `uint_v` as `unfold` and keep this pattern
- [SMTPat (uint_v #t #l a == uint_v #t #l b)]
 
 ///
 /// Definition of machine integers
@@ -165,6 +163,13 @@ val secret: #t:inttype -> u:uint_t t PUB -> v:uint_t t SEC{uint_v v == uint_v u}
 
 inline_for_extraction
 val uint: #t:inttype -> #l:secrecy_level -> (n:nat{n <= maxint t}) -> u:uint_t t l{uint_v u == n}
+
+val uintv_injective:
+   #t:inttype
+ -> #l:secrecy_level
+ -> a:uint_t t l
+ -> Lemma (ensures uint (uint_v #t #l a) == a)
+ [SMTPat (uint_v #t #l a)]
 
 inline_for_extraction
 let u1 (n:nat{n <= maxint U1}) : u:uint1{uint_v #U1 u == n} = uint #U1 #SEC n

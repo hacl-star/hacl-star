@@ -106,7 +106,6 @@ FSTAR_INCLUDE_DIRS = \
   $(HACL_HOME)/specs \
   $(HACL_HOME)/lib \
   $(HACL_HOME)/lib/fst \
-  $(HACL_HOME)/lib/c \
   $(HACL_HOME)/code/sha3
 
 FSTAR_FLAGS = $(OTHERFLAGS) --cmi \

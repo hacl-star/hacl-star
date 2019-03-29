@@ -11,7 +11,7 @@ open Lib.Buffer
 include Hacl.Spec.Curve25519.Field51
 include Hacl.Spec.Curve25519.Field51.Definition
 
-module P = Spec.Curve25519
+module P = NatPrime
 module S = Hacl.Spec.Curve25519.Field51.Definition
 module ST = FStar.HyperStack.ST
 module LSeq = Lib.Sequence
@@ -47,11 +47,11 @@ let wide_as_nat h e =
   S.wide_as_nat5 (s0, s1, s2, s3, s4)
 
 noextract
-val fevalh: h:mem -> f:felem -> GTot P.elem
+val fevalh: h:mem -> f:felem -> GTot P.felem
 let fevalh h f = (as_nat h f) % P.prime
 
 noextract
-val feval_wideh: h:mem -> f:felem_wide -> GTot P.elem
+val feval_wideh: h:mem -> f:felem_wide -> GTot P.felem
 let feval_wideh h f = (wide_as_nat h f) % P.prime
 
 noextract
@@ -137,15 +137,13 @@ val copy_felem:
       live h f1 /\ live h f2 /\ disjoint f1 f2)
     (ensures  fun h0 _ h1 ->
       modifies (loc f1) h0 h1 /\
-      as_seq h1 f1 == as_seq h0 f2)
+      as_nat h1 f1 == as_nat h0 f2)
 let copy_felem f1 f2 =
   f1.(0ul) <- f2.(0ul);
   f1.(1ul) <- f2.(1ul);
   f1.(2ul) <- f2.(2ul);
   f1.(3ul) <- f2.(3ul);
-  f1.(4ul) <- f2.(4ul);
-  let h1 = ST.get () in
-  LSeq.eq_intro (as_seq h1 f1) (as_seq h1 f2)
+  f1.(4ul) <- f2.(4ul)
 
 #set-options "--max_fuel 0 --max_ifuel 0"
 
@@ -359,7 +357,7 @@ val fsqr:
     (ensures  fun h0 _ h1 ->
       modifies (loc out) h0 h1 /\
       mul_inv_t h1 out /\
-      fevalh h1 out == P.fmul (fevalh h0 f) (fevalh h0 f))
+      fevalh h1 out == P.fsqr (fevalh h0 f))
 [@ CInline]
 let fsqr out f =
   let f0 = f.(0ul) in
@@ -392,8 +390,8 @@ val fsqr2:
       let f2 = gsub f 5ul 5ul in
       mul_inv_t h1 out1 /\
       mul_inv_t h1 out2 /\
-      fevalh h1 out1 == P.fmul (fevalh h0 f1) (fevalh h0 f1) /\
-      fevalh h1 out2 == P.fmul (fevalh h0 f2) (fevalh h0 f2)))
+      fevalh h1 out1 == P.fsqr (fevalh h0 f1) /\
+      fevalh h1 out2 == P.fsqr (fevalh h0 f2)))
 [@ CInline]
 let fsqr2 out f =
   let f10 = f.(0ul) in
@@ -428,12 +426,9 @@ val load_felem:
   -> u64s:lbuffer uint64 4ul
   -> Stack unit
     (requires fun h ->
-      live h u64s /\ live h f /\ disjoint u64s f /\
-      v (as_seq h u64s).[3] < pow2 63)
+      live h u64s /\ live h f /\ disjoint u64s f)
     (ensures  fun h0 _ h1 ->
       modifies (loc f) h0 h1 /\
-      //felem_fits h1 f (1, 1, 1, 1, 1) /\
-      mul_inv_t h1 f /\
       as_nat h1 f == BSeq.nat_from_intseq_le (as_seq h0 u64s))
 let load_felem f u64s =
   let h0 = ST.get () in
@@ -458,57 +453,35 @@ val store_felem:
   -> Stack unit
     (requires fun h ->
       live h f /\ live h u64s /\ mul_inv_t h f)
-    (ensures  fun h0 _ h1 ->
-      modifies (loc u64s) h0 h1 /\
-      BSeq.nat_from_intseq_le (as_seq h1 u64s) == (as_nat h0 f) % P.prime)
+    (ensures  fun h0 _ h1 -> modifies (loc u64s) h0 h1)
 let store_felem u64s f =
   let f0 = f.(0ul) in
   let f1 = f.(1ul) in
   let f2 = f.(2ul) in
   let f3 = f.(3ul) in
   let f4 = f.(4ul) in
-  let (o0, o1, o2, o3) = store_felem5 (f0, f1, f2, f3, f4) in
-  u64s.(0ul) <- o0;
-  u64s.(1ul) <- o1;
-  u64s.(2ul) <- o2;
-  u64s.(3ul) <- o3;
-  let h1 = ST.get () in
-  Hacl.Impl.Curve25519.Lemmas.lemma_nat_from_uints64_le_4 (as_seq h1 u64s)
+  let (f0, f1, f2, f3, f4) = reduce_felem5 (f0, f1, f2, f3, f4) in
+  let f0 = f0 ^. (f1 <<. 51ul) in
+  let f1 = (f1 >>. 13ul) ^. (f2 <<. 38ul) in
+  let f2 = (f2 >>. 26ul) ^. (f3 <<. 25ul) in
+  let f3 = (f3 >>. 39ul) ^. (f4 <<. 12ul) in
+  u64s.(0ul) <- f0;
+  u64s.(1ul) <- f1;
+  u64s.(2ul) <- f2;
+  u64s.(3ul) <- f3
 
-val cswap2:
-    bit:uint64{v bit <= 1}
-  -> p1:felem2
-  -> p2:felem2
-  -> Stack unit
-    (requires fun h ->
-      live h p1 /\ live h p2 /\
-      (disjoint p1 p2 \/ p1 == p2))
-    (ensures  fun h0 _ h1 ->
-      modifies (loc p1 |+| loc p2) h0 h1 /\
-      (v bit == 1 ==> as_seq h1 p1 == as_seq h0 p2 /\ as_seq h1 p2 == as_seq h0 p1) /\
-      (v bit == 0 ==> as_seq h1 p1 == as_seq h0 p1 /\ as_seq h1 p2 == as_seq h0 p2))
-[@ CInline]
-let cswap2 bit p1 p2 =
-  let h0 = ST.get () in
-  let mask = u64 0 -. bit in
-
-  [@ inline_let]
-  let inv h1 (i:nat{i <= 10}) =
-    (forall (k:nat{k < i}).
-      if v bit = 1
-      then (as_seq h1 p1).[k] == (as_seq h0 p2).[k] /\ (as_seq h1 p2).[k] == (as_seq h0 p1).[k]
-      else (as_seq h1 p1).[k] == (as_seq h0 p1).[k] /\ (as_seq h1 p2).[k] == (as_seq h0 p2).[k]) /\
-    (forall (k:nat{i <= k /\ k < 10}).
-      (as_seq h1 p1).[k] == (as_seq h0 p1).[k] /\ (as_seq h1 p2).[k] == (as_seq h0 p2).[k]) /\
-    modifies (loc p1 |+| loc p2) h0 h1 in
-
-  Lib.Loops.for 0ul 10ul inv
+[@CInline]
+val cswap2: bit:uint64 -> p1:felem2 -> p2:felem2 -> Stack unit
+    (requires (fun h0 -> live h0 p1 /\ live h0 p2))
+    (ensures (fun h0 _ h1 -> modifies (loc p1 |+| loc p2) h0 h1))
+[@CInline]
+let cswap2 bit p0 p1 =
+    let mask = u64 0 -. bit in
+    let h0 = ST.get() in
+    loop2 h0 10ul p0 p1
+    (fun h -> (fun i s -> s))
     (fun i ->
-      let dummy = mask &. (p1.(i) ^. p2.(i)) in
-      p1.(i) <- p1.(i) ^. dummy;
-      p2.(i) <- p2.(i) ^. dummy;
-      Lemmas.lemma_cswap2_step bit ((as_seq h0 p1).[v i]) ((as_seq h0 p2).[v i])
-    );
-  let h1 = ST.get () in
-  Lib.Sequence.eq_intro (as_seq h1 p1) (if v bit = 1 then as_seq h0 p2 else as_seq h0 p1);
-  Lib.Sequence.eq_intro (as_seq h1 p2) (if v bit = 1 then as_seq h0 p1 else as_seq h0 p2)
+         let dummy = mask &. (p0.(i) ^. p1.(i)) in
+         p0.(i) <- p0.(i) ^. dummy;
+         p1.(i) <- p1.(i) ^. dummy;
+	 admit())

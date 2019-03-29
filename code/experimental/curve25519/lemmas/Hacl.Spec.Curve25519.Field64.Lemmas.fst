@@ -1,13 +1,11 @@
 module Hacl.Spec.Curve25519.Field64.Lemmas
 
-open FStar.Mul
 open Lib.Sequence
 open Lib.IntTypes
+open FStar.Mul
+open NatPrime
 
-open Spec.Curve25519
 open Hacl.Spec.Curve25519.Field64.Definition
-
-module BSeq = Lib.ByteSequence
 
 #reset-options "--z3rlimit 30 --using_facts_from '* -FStar.Seq'"
 
@@ -18,6 +16,12 @@ val lemma_add_mul_le:
     (requires a <= a0 /\ b <= b0 /\ c <= c0)
     (ensures a + b * c <= a0 + b0 * c0)
 let lemma_add_mul_le a b c a0 b0 c0 = ()
+
+val lemma_nat_from_uints64_le_4: b:lseq uint64 4 ->
+  Lemma (Lib.ByteSequence.nat_from_intseq_le b ==
+    v b.[0] + v b.[1] * pow2 64 +
+    v b.[2] * pow2 64 * pow2 64 + v b.[3] * pow2 64 * pow2 64 * pow2 64)
+let lemma_nat_from_uints64_le_4 b = admit()
 
 val lemma_mul_lt: a:nat -> b:nat -> c:pos -> d:pos
   -> Lemma
@@ -274,7 +278,6 @@ val lemma_fmul14:
   a:nat{a < pow2 256} -> b:nat{b < pow2 17}
   -> Lemma (a * b < pow2 273)
 let lemma_fmul14 a b =
-  lemma_mul_lt a b (pow2 256) (pow2 17);
   assert_norm (pow2 256 * pow2 17 = pow2 273)
 
 val lemma_fmul14_no_carry0:
@@ -330,128 +333,3 @@ val lemma_mul4_expand:
       as_nat4 r * v f2 * pow2 64 * pow2 64 + as_nat4 r * v f3 * pow2 64 * pow2 64 * pow2 64 ==
       as_nat4 f * as_nat4 r)
 let lemma_mul4_expand f r = ()
-
-val lemma_felem64_mod255: a:lseq uint64 4 ->
-  Lemma (
-    let r = a.[3] <- (a.[3] &. u64 0x7fffffffffffffff) in
-    BSeq.nat_from_intseq_le r == BSeq.nat_from_intseq_le a % pow2 255)
-let lemma_felem64_mod255 a =
-  let (a0, a1, a2, a3) = (a.[0], a.[1], a.[2], a.[3]) in
-  Hacl.Impl.Curve25519.Lemmas.lemma_nat_from_uints64_le_4 a;
-  assert (BSeq.nat_from_intseq_le a == v a0 + v a1 * pow2 64 +
-    v a2 * pow2 64 * pow2 64 + v a3 * pow2 64 * pow2 64 * pow2 64);
-  FStar.Math.Lemmas.lemma_mod_plus_distr_r (v a0 + v a1 * pow2 64 +
-    v a2 * pow2 64 * pow2 64) (v a3 * pow2 64 * pow2 64 * pow2 64) (pow2 255);
-  assert_norm (pow2 64 * pow2 64 * pow2 64 = pow2 192);
-  FStar.Math.Lemmas.pow2_multiplication_modulo_lemma_2 (v a3) 255 192;
-  assert ((v a3 * pow2 192) % pow2 255 = (v a3 % pow2 63) * pow2 192);
-  assert_norm (BSeq.nat_from_intseq_le a % pow2 255 ==
-    (v a0 + v a1 * pow2 64 + v a2 * pow2 64 * pow2 64 +
-    (v a3 % pow2 63) * pow2 64 * pow2 64 * pow2 64) % pow2 255);
-  assert (v a0 + v a1 * pow2 64 + v a2 * pow2 64 * pow2 64 +
-    (v a3 % pow2 63) * pow2 64 * pow2 64 * pow2 64 <=
-    (pow2 64 - 1) + (pow2 64 - 1) * pow2 64 + (pow2 64 - 1) * pow2 64 * pow2 64 +
-    (pow2 63 - 1) * pow2 64 * pow2 64 * pow2 64);
-  assert (v a0 + v a1 * pow2 64 + v a2 * pow2 64 * pow2 64 +
-    (v a3 % pow2 63) * pow2 64 * pow2 64 * pow2 64 <=
-    pow2 63 * pow2 64 * pow2 64 * pow2 64 - 1);
-  assert_norm (pow2 63 * pow2 64 * pow2 64 * pow2 64 = pow2 255);
-  FStar.Math.Lemmas.modulo_lemma (v a0 + v a1 * pow2 64 + v a2 * pow2 64 * pow2 64 +
-    (v a3 % pow2 63) * pow2 64 * pow2 64 * pow2 64) (pow2 255);
-  assert_norm (BSeq.nat_from_intseq_le a % pow2 255 ==
-    v a0 + v a1 * pow2 64 + v a2 * pow2 64 * pow2 64 +
-    (v a3 % pow2 63) * pow2 64 * pow2 64 * pow2 64);
-  let a3' = a3 &. u64 0x7fffffffffffffff in
-  assert_norm (0x7fffffffffffffff = pow2 63 - 1);
-  uintv_extensionality (mod_mask #U64 63ul) (u64 0x7fffffffffffffff);
-  let r = a.[3] <- a3' in
-  Hacl.Impl.Curve25519.Lemmas.lemma_nat_from_uints64_le_4 r
-
-val lemma_prime19: unit ->
-  Lemma (pow2 255 % prime == 19)
-let lemma_prime19 () =
-  assert_norm (pow2 255 % prime = 19 % prime);
-  assert_norm (19 < prime);
-  FStar.Math.Lemmas.modulo_lemma 19 prime
-
-val lemma_add_le: a:nat -> b:nat -> c:nat -> d:nat ->
-  Lemma
-  (requires (a <= b /\ c <= d))
-  (ensures (a + c <= b + d))
-let lemma_add_le a b c d = ()
-
-val lemma_subtract_p4_0:
-    f:felem4
-  -> f':felem4
-  -> Lemma
-    (requires (
-      let (f0, f1, f2, f3) = f in
-      let (f0', f1', f2', f3') = f' in
-      v f3 < pow2 63 /\
-      (v f3 <> 0x7fffffffffffffff || v f2 <> 0xffffffffffffffff || v f1 <> 0xffffffffffffffff || v f0 < 0xffffffffffffffed) /\
-      (v f0' = v f0 && v f1' = v f1 && v f2' = v f2 && v f3' = v f3)))
-    (ensures as_nat4 f' == as_nat4 f % prime)
-let lemma_subtract_p4_0 f f' =
-  let (f0, f1, f2, f3) = f in
-  let (f0', f1', f2', f3') = f' in
-  assert_norm (0x7fffffffffffffff = pow2 63 - 1);
-  assert_norm (0xffffffffffffffff = pow2 64 - 1);
-  assert_norm (0xffffffffffffffed = pow2 64 - 19);
-  assert (as_nat4 f == v f0 + v f1 * pow2 64 + v f2 * pow2 64 * pow2 64 + v f3 * pow2 64 * pow2 64 * pow2 64);
-  assert (as_nat4 f <= pow2 64 - 20 + (pow2 64 - 1) * pow2 64 + (pow2 64 - 1) * pow2 64 * pow2 64 +
-    (pow2 63 - 1) * pow2 64 * pow2 64 * pow2 64);
-  assert_norm (pow2 63 * pow2 64 * pow2 64 * pow2 64 = pow2 255);
-  assert (as_nat4 f < pow2 255 - 19);
-  assert (as_nat4 f == as_nat4 f');
-  FStar.Math.Lemmas.modulo_lemma (as_nat4 f') prime
-
-val lemma_subtract_p4_1:
-    f:felem4
-  -> f':felem4
-  -> Lemma
-    (requires
-      (let (f0, f1, f2, f3) = f in
-      let (f0', f1', f2', f3') = f' in
-      (v f3 = 0x7fffffffffffffff && v f2 = 0xffffffffffffffff && v f1 = 0xffffffffffffffff && v f0 >= 0xffffffffffffffed) /\
-      (v f0' = v f0 - 0xffffffffffffffed && v f1' = v f1 - 0xffffffffffffffff && v f2' = v f2 - 0xffffffffffffffff &&
-       v f3' = v f3 - 0x7fffffffffffffff)))
-    (ensures as_nat4 f' == as_nat4 f % prime)
-let lemma_subtract_p4_1 f f' =
-  let (f0, f1, f2, f3) = f in
-  let (f0', f1', f2', f3') = f' in
-  assert_norm (0x7fffffffffffffff = pow2 63 - 1);
-  assert_norm (0xffffffffffffffff = pow2 64 - 1);
-  assert_norm (0xffffffffffffffed = pow2 64 - 19);
-  assert (as_nat4 f' % prime ==
-    (v f0' + v f1' * pow2 64 + v f2' * pow2 64 * pow2 64 + v f3' * pow2 64 * pow2 64 * pow2 64) % prime);
-  assert (as_nat4 f' % prime ==
-    (v f0 - (pow2 64 - 19) + (v f1 - (pow2 64 - 1)) * pow2 64 + (v f2 - (pow2 64 - 1)) * pow2 64 * pow2 64 +
-    (v f3 - (pow2 63 - 1)) * pow2 64 * pow2 64 * pow2 64) % prime);
-  assert_norm (pow2 63 * pow2 64 * pow2 64 * pow2 64 = pow2 255);
-  assert (as_nat4 f' % prime ==
-    (v f0 + v f1 * pow2 64 + v f2 * pow2 64 * pow2 64 +
-    v f3 * pow2 64 * pow2 64 * pow2 64 - prime) % prime);
-  FStar.Math.Lemmas.lemma_mod_sub
-    (v f0 + v f1 * pow2 64 + v f2 * pow2 64 * pow2 64 + v f3 * pow2 64 * pow2 64 * pow2 64) 1 prime
-
-val lemma_subtract_p:
-    f:felem4
-  -> f':felem4
-  -> Lemma
-    (requires (
-      let (f0, f1, f2, f3) = f in
-      let (f0', f1', f2', f3') = f' in
-      v f3 < pow2 63 /\
-     (((v f3 <> 0x7fffffffffffffff || v f2 <> 0xffffffffffffffff || v f1 <> 0xffffffffffffffff || v f0 < 0xffffffffffffffed) /\
-      (v f0' = v f0 && v f1' = v f1 && v f2' = v f2 && v f3' = v f3)) \/
-     ((v f3 = 0x7fffffffffffffff && v f2 = 0xffffffffffffffff && v f1 = 0xffffffffffffffff && v f0 >= 0xffffffffffffffed) /\
-      (v f0' = v f0 - 0xffffffffffffffed && v f1' = v f1 - 0xffffffffffffffff && v f2' = v f2 - 0xffffffffffffffff &&
-       v f3' = v f3 - 0x7fffffffffffffff)))))
-    (ensures as_nat4 f' == as_nat4 f % prime)
-let lemma_subtract_p f f' =
-  let (f0, f1, f2, f3) = f in
-  let (f0', f1', f2', f3') = f' in
-  if ((v f3 <> 0x7fffffffffffffff || v f2 <> 0xffffffffffffffff || v f1 <> 0xffffffffffffffff || v f0 < 0xffffffffffffffed) &&
-       (v f0' = v f0 && v f1' = v f1 && v f2' = v f2 && v f3' = v f3))
-  then lemma_subtract_p4_0 f f'
-  else lemma_subtract_p4_1 f f'

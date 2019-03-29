@@ -24,6 +24,7 @@ type buftype =
   | MUT
   | IMMUT
 
+inline_for_extraction
 let buffer_t (ty:buftype) (a:Type0) =
   match ty with
   | IMMUT -> ib:IB.ibuffer a{B.frameOf ib == HyperStack.root}
@@ -40,6 +41,7 @@ let length (#t:buftype) (#a:Type0) (b:buffer_t t a) =
   | MUT -> B.length (b <: buffer a)
   | IMMUT -> IB.length (b <: ibuffer a)
 
+inline_for_extraction
 let lbuffer_t (ty:buftype) (a:Type0) (len:size_t) =
   b:buffer_t ty a{length #ty #a b == v len}
 
@@ -106,6 +108,11 @@ let modifies3 (#a0:Type0) (#a1:Type0) (#a2:Type0)
   (b0:buffer_t MUT a0) (b1:buffer_t MUT a1) (b2:buffer_t MUT a2) (h1 h2: HS.mem) =
   modifies (loc b0 |+| loc b1 |+| loc b2) h1 h2
 
+(** Modification four buffers *)
+let modifies4 (#a0:Type0) (#a1:Type0) (#a2:Type0) (#a3:Type0)
+  (b0:buffer_t MUT a0) (b1:buffer_t MUT a1) (b2:buffer_t MUT a2) (b3:buffer_t MUT a3) (h1 h2: HS.mem) =
+  modifies (loc b0 |+| loc b1 |+| loc b2 |+| loc b3) h1 h2
+
 (** Ghost reveal a buffer as a sequence *)
 let as_seq (#t:buftype) (#a:Type0) (#len:size_t) (h:HS.mem) (b:lbuffer_t t a len) :
   GTot (Seq.lseq a (v len)) =
@@ -132,7 +139,7 @@ let gsub (#t:buftype) (#a:Type0) (#len:size_t) (b:lbuffer_t t a len)
 val live_sub: #t:buftype -> #a:Type0 -> #len:size_t -> b:lbuffer_t t a len
   -> start:size_t -> n:size_t{v start + v n <= v len} -> h:mem
   -> Lemma
-    (ensures live h b <==> live h (gsub b start n))
+    (ensures live h b ==> live h (gsub b start n))
     [SMTPat (live h (gsub b start n))]
 
 val modifies_sub: #t:buftype -> #a:Type0 -> #len:size_t -> b:lbuffer_t t a len
@@ -141,6 +148,65 @@ val modifies_sub: #t:buftype -> #a:Type0 -> #len:size_t -> b:lbuffer_t t a len
     (requires modifies (loc (gsub b start n)) h0 h1)
     (ensures  modifies (loc b) h0 h1)
     [SMTPat (modifies (loc (gsub b start n)) h0 h1)]
+
+val modifies0_is_modifies1: #a0:Type0 -> b0:buffer_t MUT a0 -> h0: HS.mem -> h1: HS.mem ->
+  Lemma
+  (requires (live h0 b0))
+  (ensures  (modifies0 h0 h1 ==> modifies1 b0 h0 h1))
+
+val modifies0_is_modifies2: #a0:Type0 -> #a1:Type0 ->
+  b0:buffer_t MUT a0 -> b1:buffer_t MUT a1 -> h0: HS.mem -> h1: HS.mem ->
+  Lemma
+  (requires (live h0 b0 /\ live h0 b1))
+  (ensures  (modifies0 h0 h1 ==> modifies2 b0 b1 h0 h1))
+
+val modifies0_is_modifies3: #a0:Type0 -> #a1:Type0 -> #a2:Type0 ->
+  b0:buffer_t MUT a0 -> b1:buffer_t MUT a1 -> b2:buffer_t MUT a2 -> h0: HS.mem -> h1: HS.mem ->
+  Lemma
+  (requires (live h0 b0 /\ live h0 b1 /\ live h0 b2))
+  (ensures  (modifies0 h0 h1 ==> modifies3 b0 b1 b2 h0 h1))
+
+val modifies0_is_modifies4: #a0:Type0 -> #a1:Type0 -> #a2:Type0 -> #a3:Type0 ->
+  b0:buffer_t MUT a0 -> b1:buffer_t MUT a1 -> b2:buffer_t MUT a2 -> b3:buffer_t MUT a3 -> h0: HS.mem -> h1: HS.mem ->
+  Lemma
+  (requires (live h0 b0 /\ live h0 b1 /\ live h0 b2 /\ live h0 b3))
+  (ensures  (modifies0 h0 h1 ==> modifies4 b0 b1 b2 b3 h0 h1))
+
+val modifies1_is_modifies2: #a0:Type0 -> #a1:Type0 ->
+  b0:buffer_t MUT a0 -> b1:buffer_t MUT a1 -> h0: HS.mem -> h1: HS.mem ->
+  Lemma
+  (requires (live h0 b0 /\ live h0 b1))
+  (ensures  (modifies1 b0 h0 h1 ==> modifies2 b0 b1 h0 h1))
+
+val modifies1_is_modifies3: #a0:Type0 -> #a1:Type0 -> #a2:Type0 ->
+  b0:buffer_t MUT a0 -> b1:buffer_t MUT a1 -> b2:buffer_t MUT a2 -> h0: HS.mem -> h1: HS.mem ->
+  Lemma
+  (requires (live h0 b0 /\ live h0 b1 /\ live h0 b2))
+  (ensures  (modifies1 b0 h0 h1 ==> modifies3 b0 b1 b2 h0 h1))
+
+val modifies1_is_modifies4: #a0:Type0 -> #a1:Type0 -> #a2:Type0 -> #a3:Type0 ->
+  b0:buffer_t MUT a0 -> b1:buffer_t MUT a1 -> b2:buffer_t MUT a2 -> b3:buffer_t MUT a3 -> h0: HS.mem -> h1: HS.mem ->
+  Lemma
+  (requires (live h0 b0 /\ live h0 b1 /\ live h0 b2 /\ live h0 b3))
+  (ensures  (modifies1 b0 h0 h1 ==> modifies4 b0 b1 b2 b3 h0 h1))
+
+val modifies2_is_modifies3: #a0:Type0 -> #a1:Type0 -> #a2:Type0 ->
+  b0:buffer_t MUT a0 -> b1:buffer_t MUT a1 -> b2:buffer_t MUT a2 -> h0: HS.mem -> h1: HS.mem ->
+  Lemma
+  (requires (live h0 b0 /\ live h0 b1 /\ live h0 b2))
+  (ensures  (modifies2 b0 b1 h0 h1 ==> modifies3 b0 b1 b2 h0 h1))
+
+val modifies2_is_modifies4: #a0:Type0 -> #a1:Type0 -> #a2:Type0 -> #a3:Type0 ->
+  b0:buffer_t MUT a0 -> b1:buffer_t MUT a1 -> b2:buffer_t MUT a2 -> b3:buffer_t MUT a3 -> h0: HS.mem -> h1: HS.mem ->
+  Lemma
+  (requires (live h0 b0 /\ live h0 b1 /\ live h0 b2 /\ live h0 b3))
+  (ensures  (modifies2 b0 b1 h0 h1 ==> modifies4 b0 b1 b2 b3 h0 h1))
+
+val modifies3_is_modifies4: #a0:Type0 -> #a1:Type0 -> #a2:Type0 -> #a3:Type0 ->
+  b0:buffer_t MUT a0 -> b1:buffer_t MUT a1 -> b2:buffer_t MUT a2 -> b3:buffer_t MUT a3 -> h0: HS.mem -> h1: HS.mem ->
+  Lemma
+  (requires (live h0 b0 /\ live h0 b1 /\ live h0 b2 /\ live h0 b3))
+  (ensures  (modifies3 b0 b1 b2 h0 h1 ==> modifies4 b0 b1 b2 b3 h0 h1))
 
 inline_for_extraction
 val as_seq_gsub:
@@ -430,6 +496,45 @@ val loop_nospec:
   Stack unit
     (requires fun h -> h0 == h /\ live h0 buf)
     (ensures  fun _ _ h1 -> modifies1 buf h0 h1)
+
+(** Loop combinator with just memory safety specification *)
+inline_for_extraction noextract
+val loop_nospec2:
+    #h0:mem
+  -> #a1:Type0
+  -> #a2:Type0
+  -> #len1:size_t
+  -> #len2:size_t
+  -> n:size_t
+  -> buf1:lbuffer a1 len1
+  -> buf2:lbuffer a2 len2
+  -> impl: (i:size_t{v i < v n} -> Stack unit
+      (requires fun h -> modifies2 buf1 buf2 h0 h)
+      (ensures  fun _ _ h1 -> modifies2 buf1 buf2 h0 h1)) ->
+  Stack unit
+    (requires fun h -> h0 == h /\ live h0 buf1 /\ live h0 buf2)
+    (ensures  fun _ _ h1 -> modifies2 buf1 buf2 h0 h1)
+
+(** Loop combinator with just memory safety specification *)
+inline_for_extraction noextract
+val loop_nospec3:
+    #h0:mem
+  -> #a1:Type0
+  -> #a2:Type0
+  -> #a3:Type0
+  -> #len1:size_t
+  -> #len2:size_t
+  -> #len3:size_t
+  -> n:size_t
+  -> buf1:lbuffer a1 len1
+  -> buf2:lbuffer a2 len2
+  -> buf3:lbuffer a3 len3
+  -> impl: (i:size_t{v i < v n} -> Stack unit
+      (requires fun h -> modifies3 buf1 buf2 buf3 h0 h)
+      (ensures  fun _ _ h1 -> modifies3 buf1 buf2 buf3 h0 h1)) ->
+  Stack unit
+    (requires fun h -> h0 == h /\ live h0 buf1 /\ live h0 buf2 /\ live h0 buf3)
+    (ensures  fun _ _ h1 -> modifies3 buf1 buf2 buf3 h0 h1)
 
 (** Loop combinator with just memory safety specification *)
 inline_for_extraction noextract

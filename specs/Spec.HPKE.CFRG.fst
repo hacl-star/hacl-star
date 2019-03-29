@@ -17,13 +17,16 @@ let pow2_61 : _:unit{pow2 61 == 2305843009213693952} = assert_norm(pow2 61 == 23
 let pow2_35_less_than_pow2_61 : _:unit{pow2 32 * pow2 3 <= pow2 61 - 1} = assert_norm(pow2 32 * pow2 3 <= pow2 61 - 1)
 let pow2_35_less_than_pow2_125 : _:unit{pow2 32 * pow2 3 <= pow2 125 - 1} = assert_norm(pow2 32 * pow2 3 <= pow2 125 - 1)
 
-#set-options "--z3rlimit 100"
+#set-options "--z3rlimit 25 --max_fuel 0"
 
 /// Types
 
 type ciphersuite = DH.algorithm & AEAD.algorithm & a:Hash.algorithm{a == Hash.SHA2_256 \/ a == Hash.SHA2_512}
 
-val id_of_cs: cs:ciphersuite -> Tot (lbytes 1)
+inline_for_extraction
+let size_cs_identifier: size_nat = 1
+
+val id_of_cs: cs:ciphersuite -> Tot (lbytes size_cs_identifier)
 let id_of_cs cs =
   match cs with
   | DH.DH_Curve25519, AEAD.AEAD_AES128_GCM,        Hash.SHA2_256 -> create 1 (u8 0x01)
@@ -74,7 +77,7 @@ inline_for_extraction
 let size_nonce (cs:ciphersuite): size_nat = AEAD.size_nonce (aead_of_cs cs)
 
 inline_for_extraction
-let size_key (cs:ciphersuite): size_nat = AEAD.size_key (aead_of_cs cs) + size_nonce cs - numbytes U32
+let size_key (cs:ciphersuite): size_nat = AEAD.size_key (aead_of_cs cs)
 
 inline_for_extraction
 let size_key_dh (cs:ciphersuite): size_nat = DH.size_key (curve_of_cs cs)
@@ -102,7 +105,7 @@ val encap:
     cs: ciphersuite
   -> e: entropy
   -> pkR: key_public_s cs
-  -> info: bytes{length info <= max_size_t} ->
+  -> info: lbytes 32 ->
   Tot (entropy & key_public_s cs & key_s cs & nonce_s cs)
 
 let encap cs e pkR info =
@@ -112,7 +115,7 @@ let encap cs e pkR info =
   let nh0 = create (Spec.Hash.size_hash (hash_of_cs cs)) (u8 0) in
   let secret = HKDF.hkdf_extract (hash_of_cs cs) nh0 zz in
   let context = (id_of_cs cs) @| pkE @| pkR in
-  let context = concat #uint8 #_ #(length info) context info in
+  let context = concat #uint8 #(length context) #(length info) context info in
   let keyIR = HKDF.hkdf_expand (hash_of_cs cs) secret (label_key @| context) (size_key cs) in
   let nonceIR = HKDF.hkdf_expand (hash_of_cs cs) secret (label_nonce @| context) (size_nonce cs) in
   e', pkE, keyIR, nonceIR
@@ -132,7 +135,7 @@ val decap:
     cs: ciphersuite
   -> pkE: key_public_s cs
   -> skR: key_secret_s cs
-  -> info: bytes{length info <= max_size_t} ->
+  -> info: lbytes 32 ->
   Tot (key_s cs & nonce_s cs)
 
 let decap cs pkE skR info =
@@ -157,9 +160,11 @@ val encrypt:
     cs: ciphersuite
   -> e: entropy
   -> pkR: key_public_s cs
-  -> info: bytes
-  -> aad: bytes
-  -> pt: bytes ->
+  -> info: lbytes 32
+  -> aad: bytes {length aad <= max_size_t /\ length aad + AEAD.padlen (aead_of_cs cs) (length aad) <= max_size_t}
+  -> pt: bytes{length pt <= max_size_t
+           /\ length pt + AEAD.size_block (aead_of_cs cs) <= max_size_t
+           /\ length pt + AEAD.padlen (aead_of_cs cs) (length pt) <= max_size_t} ->
   Tot (bytes & key_public_s cs)
 
 let encrypt cs e pkR info aad pt =
@@ -174,14 +179,17 @@ let encrypt cs e pkR info aad pt =
 ///
 /// Output: pt
 
+#set-options "--z3rlimit 50 --max_fuel 1"
+
 val decrypt:
     cs: ciphersuite
   -> skR: key_secret_s cs
   -> pkE: key_public_s cs
-  -> info: bytes
-  -> aad: bytes
-  -> ct: bytes ->
-  Tot (option bytes)
+  -> info: lbytes 32
+  -> aad: bytes{length aad <= max_size_t
+             /\ length aad + AEAD.padlen (aead_of_cs cs) (length aad) <= max_size_t}
+  -> ct: bytes{AEAD.size_tag (aead_of_cs cs) <= length ct /\ (length ct + length aad) / 64 <= max_size_t /\ length ct <= max_size_t} ->
+  Tot (option (lbytes (length ct - AEAD.size_tag (aead_of_cs cs))))
 
 let decrypt cs skR pkE info aad ct =
   let keyIR, nonceIR = decap cs pkE skR info in

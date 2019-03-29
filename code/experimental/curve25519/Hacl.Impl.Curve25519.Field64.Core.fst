@@ -375,52 +375,13 @@ let fsqr2 out f tmp =
   FStar.Math.Lemmas.lemma_mod_mul_distr_r (as_nat h0 (gsub f 4ul 4ul) % P.prime) (as_nat h0 (gsub f 4ul 4ul)) P.prime;
   pop_frame()
 
-
-val lemma_cswap2_step:
-    bit:uint64{v bit <= 1}
-  -> p1:uint64
-  -> p2:uint64
-  -> Lemma (
-      let mask = u64 0 -. bit in
-      let dummy = mask &. (p1 ^. p2) in
-      let p1' = p1 ^. dummy in
-      let p2' = p2 ^. dummy in
-      if v bit = 1 then p1' == p2 /\ p2' == p1 else p1' == p1 /\ p2' == p2)
-let lemma_cswap2_step bit p1 p2 =
+let cswap2 bit p0 p1 =
   let mask = u64 0 -. bit in
-  assert (v bit == 0 ==> v mask == 0);
-  assert (v bit == 1 ==> v mask == pow2 64 - 1);
-  let dummy = mask &. (p1 ^. p2) in
-  logand_lemma mask (p1 ^. p2);
-  assert (v bit == 1 ==> v dummy == v (p1 ^. p2));
-  assert (v bit == 0 ==> v dummy == 0);
-  let p1' = p1 ^. dummy in
-  uintv_extensionality dummy (if v bit = 1 then (p1 ^. p2) else u64 0);
-  logxor_lemma p1 p2;
-  let p2' = p2 ^. dummy in
-  logxor_lemma p2 p1
-
-let cswap2 bit p1 p2 =
-  let h0 = ST.get () in
-  let mask = u64 0 -. bit in
-
-  [@ inline_let]
-  let inv h1 (i:nat{i <= 8}) =
-    (forall (k:nat{k < i}).
-      if v bit = 1
-      then (as_seq h1 p1).[k] == (as_seq h0 p2).[k] /\ (as_seq h1 p2).[k] == (as_seq h0 p1).[k]
-      else (as_seq h1 p1).[k] == (as_seq h0 p1).[k] /\ (as_seq h1 p2).[k] == (as_seq h0 p2).[k]) /\
-    (forall (k:nat{i <= k /\ k < 8}).
-      (as_seq h1 p1).[k] == (as_seq h0 p1).[k] /\ (as_seq h1 p2).[k] == (as_seq h0 p2).[k]) /\
-    modifies (loc p1 |+| loc p2) h0 h1 in
-
-  Lib.Loops.for 0ul 8ul inv
+  let h0 = ST.get() in
+  loop2 h0 8ul p0 p1
+    (fun h -> (fun i s -> s))
     (fun i ->
-      let dummy = mask &. (p1.(i) ^. p2.(i)) in
+      let dummy = mask &. (p0.(i) ^. p1.(i)) in
+      p0.(i) <- p0.(i) ^. dummy;
       p1.(i) <- p1.(i) ^. dummy;
-      p2.(i) <- p2.(i) ^. dummy;
-      lemma_cswap2_step bit ((as_seq h0 p1).[v i]) ((as_seq h0 p2).[v i])
-    );
-  let h1 = ST.get () in
-  Lib.Sequence.eq_intro (as_seq h1 p1) (if v bit = 1 then as_seq h0 p2 else as_seq h0 p1);
-  Lib.Sequence.eq_intro (as_seq h1 p2) (if v bit = 1 then as_seq h0 p1 else as_seq h0 p2)
+    admit())

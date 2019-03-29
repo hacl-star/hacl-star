@@ -25,7 +25,7 @@ FSTAR = $(FSTAR_HOME)/bin/fstar.exe $(FSTAR_FLAGS)
 
 ENABLE_HINTS = --use_hints --use_hint_hashes --record_hints --query_stats
 
-ALL_SOURCES = $(wildcard fst/*.fst) $(wildcard c/*.fst) $(wildcard *.fsti)
+ALL_SOURCES = $(wildcard fst/*.fst) $(wildcard *.fsti)
 
 FIXME = fst/Lib.IntVector.fst Lib.IntVector.fsti
 

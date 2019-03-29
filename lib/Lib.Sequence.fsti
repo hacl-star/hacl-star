@@ -347,9 +347,9 @@ val eq_generate_blocks0:
   -> a:(i:nat{i <= n} -> Type)
   -> f:(i:nat{i < n} -> a i -> a (i + 1) & s:seq t{length s == len})
   -> init:a 0 ->
-  Lemma (generate_blocks #t len 0 a f init == 
+  Lemma (generate_blocks #t len 0 a f init ==
 	 (init,Seq.empty))
-	 
+
 
 val unfold_generate_blocks:
     #t:Type0
@@ -357,9 +357,9 @@ val unfold_generate_blocks:
   -> n:nat
   -> a:(i:nat{i <= n} -> Type)
   -> f:(i:nat{i < n} -> a i -> a (i + 1) & s:seq t{length s == len})
-  -> init:a 0 
+  -> init:a 0
   -> i:nat{i < n} ->
-  Lemma (generate_blocks #t len (i+1) a f init == 
+  Lemma (generate_blocks #t len (i+1) a f init ==
 	   (let (acc,s) = generate_blocks #t len i a f init in
 	    let (acc',s') = f i acc in
 	    (acc',Seq.append s s')))
@@ -393,7 +393,7 @@ val map_blocks_multi_lemma:
   -> blocksize:size_nat{blocksize > 0}
   -> n:size_nat
   -> inp:seq a{length inp == n * blocksize}
-  -> f:(i:nat{i < length inp / blocksize} -> lseq a blocksize -> lseq a blocksize) 
+  -> f:(i:nat{i < length inp / blocksize} -> lseq a blocksize -> lseq a blocksize)
   -> j:nat{j < length inp} ->
   Lemma (
     Seq.index (map_blocks_multi blocksize n inp f) j ==
@@ -404,8 +404,8 @@ val map_blocks_lemma:
     #a:Type0
   -> blocksize:size_nat{blocksize > 0}
   -> inp:seq a{length inp % blocksize == 0}
-  -> f:(i:nat{i < length inp / blocksize} -> lseq a blocksize -> lseq a blocksize) 
-  -> g:(i:nat{i == length inp / blocksize} -> len:size_nat{len < blocksize} -> s:lseq a len -> lseq a len) 
+  -> f:(i:nat{i < length inp / blocksize} -> lseq a blocksize -> lseq a blocksize)
+  -> g:(i:nat{i == length inp / blocksize} -> len:size_nat{len < blocksize} -> s:lseq a len -> lseq a len)
   -> i:nat{i < length inp} ->
   Lemma (
     let blocks = length inp / blocksize in
@@ -421,7 +421,7 @@ val map_blocks_lemma:
 
 val map_blocks_n_fits_lemma:
     len:nat ->
-    blocksize:nat -> 
+    blocksize:nat ->
     n:nat{n * blocksize > 0} ->
     i:nat{i < len / (n * blocksize)} ->
     j:nat{j < n} ->
@@ -434,15 +434,15 @@ val map_blocks_n_lemma:
   -> blocksize:size_nat{blocksize > 0}
   -> n:size_nat{n * blocksize <= max_size_t /\ n * blocksize > 0}
   -> inp:seq a
-  -> f:(i:nat{i < length inp / blocksize} -> lseq a blocksize -> lseq a blocksize) 
+  -> f:(i:nat{i < length inp / blocksize} -> lseq a blocksize -> lseq a blocksize)
   -> g:(i:nat{i == length inp / blocksize} -> len:size_nat{len < blocksize} -> s:lseq a len -> lseq a len) ->
   Lemma (
 	map_blocks #a blocksize inp f g ==
 	map_blocks #a (n * blocksize) inp
-	  (fun i nb -> 
+	  (fun i nb ->
 	    map_blocks_multi #a blocksize n nb
 	      (fun j b -> f (n * i + j) b))
-	  (fun i len l -> 
+	  (fun i len l ->
 	    map_blocks #a blocksize l
 	      (fun j b -> f (n * i + j) b)
 	      (fun j l b -> g (n * i + j) l b)))
@@ -454,7 +454,7 @@ val repeat_blocks_n_fits_lemma:
   -> len:nat ->
     Lemma ((len % (n * blocksize)) % blocksize == len % blocksize)
     [SMTPat (len % (n * blocksize) % blocksize)]
-    
+
 val repeat_blocks_n_lemma:
     #a:Type0
   -> #b:Type0
@@ -466,7 +466,7 @@ val repeat_blocks_n_lemma:
   -> init:b ->
   Lemma (repeat_blocks blocksize inp f l init ==
 	 repeat_blocks (n * blocksize) inp
-	   (fun bl a -> 
+	   (fun bl a ->
 	     repeat_blocks blocksize bl f (fun len bl a -> a) a)
 	   (fun len bl a ->
 	     repeat_blocks blocksize bl f l a) init)
@@ -488,7 +488,5 @@ val map_blocks_multi1_lemma:
   -> f:(i:nat{i < length inp / blocksize} -> lseq a blocksize -> lseq a blocksize) ->
   Lemma (ensures (map_blocks_multi blocksize 1 inp f ==
 		  f 0 inp))
-
-
 
 *)

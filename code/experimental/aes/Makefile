@@ -32,8 +32,6 @@ AES_NI_FILES= $(HACL_HOME)/lib/fst/Lib.IntTypes.fst \
 	$(HACL_HOME)/lib/fst/Lib.RawIntTypes.fst \
 	$(HACL_HOME)/lib/fst/Lib.Buffer.fst \
 	$(HACL_HOME)/lib/fst/Lib.ByteBuffer.fst \
-	$(HACL_HOME)/lib/c/Lib.IntVector.Intrinsics.fsti \
-	$(HACL_HOME)/lib/c/Lib.IntVector.fst \
 	$(HACL_HOME)/lib/c/Lib.Loops.fst \
 	Hacl.Impl.Aes.CoreNI.fst \
 	Hacl.Impl.Aes.Core.fst \
@@ -41,7 +39,7 @@ AES_NI_FILES= $(HACL_HOME)/lib/fst/Lib.IntTypes.fst \
 	Hacl.Aes.NI.fst 
 
 
-KREMLIN_ARGS:=-funroll-loops 8 -warn-error +9 -I $(HACL_HOME)/lib/ -I $(HACL_HOME)/lib/fst -I $(KREMLIN_HOME)/kremlib  -I $(HACL_HOME)/specs  -I . -ccopt '-march=native' -fbuiltin-uint128 -drop FStar.UInt128 -fnocompound-literals -fc89-scope -fparentheses -fcurly-braces
+KREMLIN_ARGS:=-funroll-loops 8 -warn-error +9 -I $(HACL_HOME)/lib/ -I $(HACL_HOME)/lib/fst -I $(KREMLIN_HOME)/kremlib -I $(HACL_HOME)/specs -I . -ccopt '-march=native' -fbuiltin-uint128 -drop FStar.UInt128 -fnocompound-literals -fc89-scope -fparentheses -fcurly-braces
 
 aes128-bitslice-c/out.krml: $(AES_BS_FILES)
 	 $(KREMLIN) $(KREMLIN_ARGS) -tmpdir aes128-bitslice-c $(AES_BS_FILES) -skip-translation
@@ -60,10 +58,10 @@ aes128-ni-c/out.krml: $(AES_NI_FILES)
 
 aes128-ni-c/Hacl_Aes_NI.c: aes128-ni-c/out.krml
 	 $(KREMLIN) $(KREMLIN_ARGS) -tmpdir aes128-ni-c  $^ -skip-compilation \
-	   -minimal -add-include '"kremlib.h"' -add-include '"vec-intrin.h"' -drop Lib.IntVector.Intrinsics -bundle 'Hacl.Aes.NI=*'
+	   -minimal -add-include '"kremlib.h"' -add-include '"vec128.h"' -drop Lib.Vec128 -bundle 'Hacl.Aes.NI=*'
 
 aes128-ni.exe: aes128-ni-c/Hacl_Aes_NI.c aes128-ni-test.c
-	$(CC) -march=native -mtune=native -O3 -I $(HACL_HOME)/lib/c -I $(KREMLIN_HOME)/kremlib/c -I $(KREMLIN_HOME)/include -I . aes128-ni-c/Hacl_Aes_NI.c $(KREMLIN_HOME)/kremlib/c/testlib.o aes128-ni-test.c -o aes128-ni.exe
+	$(CC) -march=native -mtune=native -O3 -I $(KREMLIN_HOME)/kremlib/c -I $(KREMLIN_HOME)/include -I . aes128-ni-c/Hacl_Aes_NI.c $(KREMLIN_HOME)/kremlib/c/testlib.o aes128-ni-test.c -o aes128-ni.exe
 	./aes128-ni.exe
 
 aes128-perf: aes128-bitslice.exe aes128-ni.exe

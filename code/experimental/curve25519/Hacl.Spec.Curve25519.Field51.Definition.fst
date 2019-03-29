@@ -2,7 +2,7 @@ module Hacl.Spec.Curve25519.Field51.Definition
 
 open Lib.Sequence
 open Lib.IntTypes
-open Spec.Curve25519
+open NatPrime
 
 #reset-options "--z3rlimit 20"
 
@@ -50,7 +50,7 @@ let ( ** ) (x:nat5) (y:nat5) : nat5 =
    x4 * y4 ,
    x5 * y5)
 
-#reset-options "--z3rlimit 100 --using_facts_from '* -FStar.Seq'"
+#set-options "--z3rlimit 100"
 
 let ( *^ ) (x:scale64) (y:scale64_5) : scale128_5 =
   assert_norm (8192 * 8192 = 67108864);
@@ -60,6 +60,8 @@ let ( *^ ) (x:scale64) (y:scale64_5) : scale128_5 =
    x * y3 ,
    x * y4 ,
    x * y5)
+
+#reset-options "--z3rlimit 50  --using_facts_from '* -FStar.Seq'"
 
 assume val pow51: nat
 inline_for_extraction
@@ -115,5 +117,5 @@ let wide_as_nat5 f =
   uint_v s0 + (uint_v s1 * pow51) + (uint_v s2 * pow51 * pow51) +
     (uint_v s3 * pow51 * pow51 * pow51) + (uint_v s4 * pow51 * pow51 * pow51 * pow51)
 
-let feval (f:felem5) : GTot elem = (as_nat5 f) % prime
-let feval_wide (f:felem_wide5) : GTot elem = (wide_as_nat5 f) % prime
+let feval (f:felem5) : GTot felem = (as_nat5 f) % prime
+let feval_wide (f:felem_wide5) : GTot felem = (wide_as_nat5 f) % prime

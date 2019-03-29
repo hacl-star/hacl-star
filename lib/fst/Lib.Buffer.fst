@@ -16,13 +16,23 @@ module HS = FStar.HyperStack
 module Seq = Lib.Sequence
 module ByteSeq = Lib.ByteSequence
 
-#reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0"
+#reset-options "--z3rlimit 150 --max_fuel 0 --max_ifuel 0"
 
 let modifies_preserves_live #t #a b l h0 h1 = ()
 let modifies_includes l1 l2 h0 h1 = ()
 let modifies_trans l1 l2 h0 h1 h2 = ()
 let live_sub #t #a #len b start n h = ()
 let modifies_sub #t #a #len b start n h0 h1 = ()
+let modifies0_is_modifies1 #a0 b0 h0 h1 = ()
+let modifies0_is_modifies2 #a0 #a1 b0 b1 h0 h1 = ()
+let modifies0_is_modifies3 #a0 #a1 #a2 b0 b1 b2 h0 h1 = ()
+let modifies0_is_modifies4 #a0 #a1 #a2 #a3 b0 b1 b2 b3 h0 h1 = ()
+let modifies1_is_modifies2 #a0 #a1 b0 b1 h0 h1 = ()
+let modifies1_is_modifies3 #a0 #a1 #a2 b0 b1 b2 h0 h1 = ()
+let modifies1_is_modifies4 #a0 #a1 #a2 #a3 b0 b1 b2 b3 h0 h1 = ()
+let modifies2_is_modifies3 #a0 #a1 #a2 b0 b1 b2 h0 h1 = ()
+let modifies2_is_modifies4 #a0 #a1 #a2 #a3 b0 b1 b2 b3 h0 h1 = ()
+let modifies3_is_modifies4 #a0 #a1 #a2 #a3 b0 b1 b2 b3 h0 h1 = ()
 
 let as_seq_gsub #t #a #len h b start n = ()
 
@@ -130,6 +140,14 @@ let loop_nospec #h0 #a #len n buf impl =
   let inv h1 j = modifies (loc buf) h0 h1 in
   Lib.Loops.for (size 0) n inv impl
 
+let loop_nospec2 #h0 #a1 #a2 #len1 #len2 n buf1 buf2 impl =
+  let inv h1 j = modifies (union (loc buf1) (loc buf2)) h0 h1 in
+  Lib.Loops.for (size 0) n inv impl
+
+let loop_nospec3 #h0 #a1 #a2 #a3 #len1 #len2 #len3 n buf1 buf2 buf3 impl =
+  let inv h1 j = modifies (union (loc buf3) (union (loc buf1) (loc buf2))) h0 h1 in
+  Lib.Loops.for (size 0) n inv impl
+
 let loop_range_nospec #h0 #a #len start n buf impl =
   let inv h1 j = modifies (loc buf) h0 h1 in
   Lib.Loops.for start (start +. n) inv impl
@@ -206,6 +224,7 @@ val loopi_blocks_f:
       modifies (loc w) h0 h1 /\
       as_seq h1 w ==
       Sequence.repeati_blocks_f (v blocksize) (as_seq h0 inp) spec_f (v nb) (v i) (as_seq h0 w))
+
 let loopi_blocks_f #a #b #blen bs inpLen inp spec_f f nb i w =
   Math.Lemmas.lemma_mult_lt_right (v bs) (v i) (v nb);
   assert ((v i + 1) * v bs == v i * v bs + v bs);
@@ -234,6 +253,8 @@ val loopi_blocks_f_nospec:
   Stack unit
     (requires fun h -> live h inp /\ live h w /\ disjoint inp w)
     (ensures  fun h0 _ h1 -> modifies (loc w) h0 h1)
+
+#set-options "--z3rlimit 25 --max_fuel 0"
 
 let loopi_blocks_f_nospec #a #b #blen bs inpLen inp f nb i w =
   assert ((v i + 1) * v bs <= v nb * v bs);
@@ -484,6 +505,7 @@ let mapi #a #b h0 clen out spec_f f inp =
 
 #set-options "--z3rlimit 1000 --max_fuel 3"
 let map_blocks_multi #t #a h0 len blocksize inp output spec_f impl_f =
+  admit();
   let nb = len /. blocksize in
   let h0 = ST.get() in
   assert(Sequence.length (as_seq h0 inp) == v len);
@@ -504,8 +526,7 @@ let map_blocks_multi #t #a h0 len blocksize inp output spec_f impl_f =
   assert (let s, o = Sequence.generate_blocks (v blocksize) (v nb) a_spec (spec h0) (refl h0 0) in as_seq h1 (gsub output 0ul (nb *! blocksize)) == o);
   assert_norm (
     Sequence.map_blocks_multi (v blocksize) (length inp / v blocksize) (as_seq h0 inp) (spec_f h0) ==
-    norm [delta] Sequence.map_blocks_multi (v blocksize) (length inp / v blocksize) (as_seq h0 inp) (spec_f h0));
-  admit()
+    norm [delta] Sequence.map_blocks_multi (v blocksize) (length inp / v blocksize) (as_seq h0 inp) (spec_f h0))
 
 let map_blocks #t #a h0 len blocksize inp output spec_f spec_l impl_f impl_l =
   let nb = len /. blocksize in
