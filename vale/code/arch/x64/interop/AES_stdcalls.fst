@@ -9,7 +9,7 @@ open Gcm_simplify
 
 #set-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
 
-let aes128_key_expansion input_b output_b =
+let aes128_key_expansion_stdcall input_b output_b =
   let h0 = get() in
 
   let x, _ = aes128_key_expansion input_b output_b () in
@@ -22,7 +22,7 @@ let aes128_key_expansion input_b output_b =
   
   ()
 
-let aes256_key_expansion input_b output_b =
+let aes256_key_expansion_stdcall input_b output_b =
   let h0 = get() in
 
   let x, _ = aes256_key_expansion input_b output_b () in

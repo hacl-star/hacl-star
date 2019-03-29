@@ -21,6 +21,15 @@ let lemma_add128 a b =
     quad32_xor (to_quad32 a) (to_quad32 b);
   }
 
+let lemma_add_quad32 a b =
+  calc (==) {
+    of_quad32 a +. of_quad32 b;
+    == {lemma_of_to_quad32 (of_quad32 a +. of_quad32 b)}
+    of_quad32 (to_quad32 (of_quad32 a +. of_quad32 b));
+    == {lemma_add128 (of_quad32 a) (of_quad32 b)}
+    of_quad32 (quad32_xor a b);
+  }
+
 let lemma_quad32_double_shift a =
   let q = to_quad32 a in
   let Mkfour q0 q1 q2 q3 = to_quad32 a in

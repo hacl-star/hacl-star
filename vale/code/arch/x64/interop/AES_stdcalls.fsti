@@ -28,7 +28,7 @@ let length_aux2 (b:uint8_p) : Lemma
     DV.length_eq db
 
 inline_for_extraction
-val aes128_key_expansion
+val aes128_key_expansion_stdcall
   (input_key_b:uint8_p)
   (output_key_expansion_b:uint8_p)
   : Stack unit
@@ -51,7 +51,7 @@ val aes128_key_expansion
       Seq.equal (UV.as_seq h1 ub) (key_to_round_keys_LE AES_128 key)))
 
 inline_for_extraction
-val aes256_key_expansion
+val aes256_key_expansion_stdcall
   (input_key_b:uint8_p)
   (output_key_expansion_b:uint8_p)
   : Stack unit

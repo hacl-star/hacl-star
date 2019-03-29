@@ -598,6 +598,79 @@ let lemma_gf128_low_shift () =
     reverse r3 63;
   }
 
+let lemma_gf128_mul_rev_commute a b =
+  lemma_mul_all ()
+
+let lemma_gf128_mul_rev_associate a b c =
+  let rev x = reverse x 127 in
+  let ra = rev a in
+  let rb = rev b in
+  let rc = rev c in
+  let g = gf128_modulus in
+  lemma_gf128_degree ();
+  calc (==) {
+    a *~ (b *~ c);
+    == {}
+    rev (ra *. (rb *. rc %. g) %. g);
+    == {lemma_mod_mul_mod_right ra (rb *. rc) g}
+    rev (ra *. (rb *. rc) %. g);
+    == {lemma_mul_associate ra rb rc}
+    rev ((ra *. rb) *. rc %. g);
+    == {lemma_mod_mul_mod (ra *. rb) g rc}
+    rev ((ra *. rb %. g) *. rc %. g);
+    == {}
+    (a *~ b) *~ c;
+  }
+
+let lemma_gf128_mul_rev_distribute_left a b c =
+  let rev x = reverse x 127 in
+  let ra = rev a in
+  let rb = rev b in
+  let rc = rev c in
+  let g = gf128_modulus in
+  lemma_gf128_degree ();
+  calc (==) {
+    (a +. b) *~ c;
+    == {}
+    rev (rev (a +. b) *. rc %. g);
+    == {lemma_add_reverse a b 127}
+    rev ((ra +. rb) *. rc %. g);
+    == {lemma_mul_distribute_left ra rb rc}
+    rev ((ra *. rc +. rb *. rc) %. g);
+    == {lemma_mod_distribute (ra *. rc) (rb *. rc) g}
+    rev (ra *. rc %. g +. rb *. rc %. g);
+    == {lemma_add_reverse (ra *. rc %. g) (rb *. rc %. g) 127}
+    rev (ra *. rc %. g) +. rev (rb *. rc %. g);
+    == {}
+    (a *~ c) +. (b *~ c);
+  }
+
+let lemma_gf128_mul_rev_distribute_right a b c =
+  calc (==) {
+    a *~ (b +. c);
+    == {lemma_gf128_mul_rev_commute a (b +. c)}
+    (b +. c) *~ a;
+    == {lemma_gf128_mul_rev_distribute_left b c a}
+    b *~ a +. c *~ a;
+    == {lemma_gf128_mul_rev_commute a b; lemma_gf128_mul_rev_commute a c}
+    a *~ b +. a *~ c;
+  }
+
+let lemma_add_mod_rev n a1 a2 b =
+  let rev x = reverse x (n - 1) in
+  let rev' x = reverse x (n + n - 1) in
+  calc (==) {
+    // mod_rev n (a1 +. a2) b;
+    rev (rev' (a1 +. a2) %. b);
+    == {lemma_add_reverse a1 a2 (n + n - 1)}
+    rev ((rev' a1 +. rev' a2) %. b);
+    == {lemma_mod_distribute (rev' a1) (rev' a2) b}
+    rev (rev' a1 %. b +. rev' a2 %. b);
+    == {lemma_add_reverse (rev' a1 %. b) (rev' a2 %. b) (n - 1)}
+    rev (rev' a1 %. b) +. rev (rev' a2 %. b);
+    // mod_rev n a1 b +. mod_rev n a2 b
+  }
+
 let lemma_shift_key_1 n f h =
   let g = monomial n +. f in
   lemma_monomial_add_degree n f;

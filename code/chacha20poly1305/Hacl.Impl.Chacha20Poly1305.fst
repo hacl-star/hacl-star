@@ -14,32 +14,9 @@ module Chacha = Hacl.Impl.Chacha20
 
 open Hacl.Impl.Chacha20Poly1305.Poly
 
-inline_for_extraction
-val aead_encrypt_chacha_poly_:
-  k:lbuffer uint8 32ul ->
-  n:lbuffer uint8 12ul ->
-  aadlen:size_t ->
-  aad:lbuffer uint8 aadlen ->
-  (mlen:size_t{v mlen + 16 <= max_size_t /\ v aadlen + v mlen / 64 <= max_size_t}) ->
-  m:lbuffer uint8 mlen ->
-  cipher:lbuffer uint8 mlen ->
-  mac:lbuffer uint8 16ul ->
-  Stack unit
-    (requires (fun h ->
-      disjoint k cipher /\ disjoint n cipher /\ 
-      disjoint k mac /\ disjoint n mac /\
-      disjoint cipher mac /\
-      eq_or_disjoint m cipher /\
-      disjoint aad cipher /\
-      live h k /\ live h n /\ live h aad /\ live h m /\ live h cipher /\ live h mac))
-    (ensures  (fun h0 _ h1 -> modifies (loc cipher |+| loc mac) h0 h1 /\
-    Seq.equal
-      (Seq.concat (as_seq h1 cipher) (as_seq h1 mac))
-      (Spec.aead_encrypt (as_seq h0 k) (as_seq h0 n) (as_seq h0 m) (as_seq h0 aad))))
-
 #set-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
 
-let aead_encrypt_chacha_poly_ k n aadlen aad mlen m cipher mac =
+let aead_encrypt_chacha_poly k n aadlen aad mlen m cipher mac =
   let h0 = ST.get() in
   Chacha.chacha20_encrypt mlen cipher m k n 1ul;
   let h1 = ST.get() in
@@ -50,13 +27,6 @@ let aead_encrypt_chacha_poly_ k n aadlen aad mlen m cipher mac =
     Seq.equal (as_seq h2 mac)
       (Spec.poly1305_do poly_k (v mlen) (as_seq h1 cipher) (v aadlen) (as_seq h1 aad))
     )
-
-let aead_encrypt_chacha_poly k n aadlen aad mlen m out =
-  let cipher = sub out 0ul mlen in
-  let mac = sub out mlen 16ul in
-  aead_encrypt_chacha_poly_ k n aadlen aad mlen m cipher mac
-
-#set-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
 
 let aead_decrypt_chacha_poly k n aadlen aad mlen m cipher mac =
   push_frame();

@@ -4,7 +4,7 @@ module I = Math.Poly2.Defs
 open FStar.Seq
 unfold let max = FStar.Math.Lib.max
 
-let mask (a:poly) (n:nat) : poly = of_fun n (fun (i:nat) -> a.[i])
+let mask a n : poly = of_fun n (fun (i:nat) -> a.[i])
 
 let all_defs =
   poly == D.poly /\

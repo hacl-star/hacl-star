@@ -98,6 +98,7 @@ val expand_in:
 let iv_p a = iv:B.buffer UInt8.t { B.length iv = iv_length a }
 let ad_p a = ad:B.buffer UInt8.t { B.length ad <= max_length a }
 let plain_p a = p:B.buffer UInt8.t { B.length p <= max_length a }
+let cipher_p a = p:B.buffer UInt8.t { B.length p + tag_length a <= max_length a }
 
 type error_code =
 | Success
@@ -120,18 +121,20 @@ val encrypt:
   ad_len: UInt32.t { v ad_len = B.length ad /\ v ad_len <= pow2 31 } ->
   plain: plain_p a ->
   plain_len: UInt32.t { v plain_len = B.length plain /\ v plain_len <= max_length a } ->
-  dst: B.buffer UInt8.t { B.length dst = B.length plain + tag_length a } ->
+  cipher: B.buffer UInt8.t { B.length cipher = B.length plain } ->
+  tag: B.buffer UInt8.t { B.length tag = tag_length a } ->
   Stack error_code
     (requires fun h0 ->
-      MB.(all_live h0 [ buf (EK?.ek ek); buf iv; buf ad; buf plain; buf dst ]) /\
-      (B.disjoint plain dst \/ plain == dst) /\
-      B.disjoint iv dst /\
-      B.disjoint ad dst)
+      MB.(all_live h0 [ buf (EK?.ek ek); buf iv; buf ad; buf plain; buf cipher; buf tag ]) /\
+      (B.disjoint plain cipher \/ plain == cipher) /\
+      B.disjoint cipher tag /\
+      B.disjoint iv cipher /\ B.disjoint iv tag /\
+      B.disjoint ad cipher)
     (ensures fun h0 r h1 ->
       match r with
       | Success ->
-          B.(modifies (loc_buffer dst) h0 h1) /\
-          S.equal (B.as_seq h1 dst)
+          B.(modifies (loc_union (loc_buffer cipher) (loc_buffer tag)) h0 h1) /\
+          S.equal (S.append (B.as_seq h1 cipher) (B.as_seq h1 tag))
             (encrypt #a (G.reveal (EK?.kv ek)) (B.as_seq h0 iv) (B.as_seq h0 ad) (B.as_seq h0 plain))
       | InvalidKey ->
           B.(modifies loc_none h0 h1)
@@ -149,20 +152,19 @@ val decrypt:
   ek:expanded_key a ->
   iv:iv_p a ->
   ad:ad_p a ->
-  ad_len: UInt32.t { v ad_len = B.length ad } ->
-  cipher: plain_p a ->
+  ad_len: UInt32.t { v ad_len = B.length ad /\ v ad_len <= pow2 31 } ->
+  cipher: cipher_p a ->
   cipher_len: UInt32.t { v cipher_len = B.length cipher } ->
-  dst: B.buffer UInt8.t { B.length dst = B.length cipher - tag_length a } ->
+  tag: B.buffer UInt8.t { B.length tag = tag_length a } ->
+  dst: B.buffer UInt8.t { B.length dst = B.length cipher } ->
   Stack error_code
     (requires fun h0 ->
-      B.live h0 (EK?.ek ek) /\
-      B.live h0 iv /\
-      B.live h0 ad /\
-      B.live h0 cipher /\
-      B.live h0 dst)
+      MB.(all_live h0 [ buf (EK?.ek ek); buf iv; buf ad; buf cipher; buf tag; buf dst ]) /\
+      (B.disjoint cipher dst \/ cipher == dst))
     (ensures fun h0 err h1 ->
       let kv = G.reveal (EK?.kv ek) in
-      let plain = decrypt #a kv (B.as_seq h0 iv) (B.as_seq h0 ad) (B.as_seq h0 cipher) in
+      let cipher_tag = B.as_seq h0 cipher `S.append` B.as_seq h0 tag in
+      let plain = decrypt #a kv (B.as_seq h0 iv) (B.as_seq h0 ad) cipher_tag in
       match err with
       | InvalidKey ->
           B.(modifies loc_none h0 h1)
