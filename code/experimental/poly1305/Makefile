@@ -5,107 +5,22 @@ HACL_HOME    ?= ../../..
 CACHE_DIR     = .cache
 OUTPUT_DIR    = .output
 HINT_DIR      = .hints
-GENERATED_DIR = poly64-c
-OUT_DIR	      = poly64-c
+GENERATED_DIR = poly-c
+OUT_DIR	      = poly-c
 
 .PHONY: all test stage1 stage2 clean clean-c distclean
 
-all: chacha20.exe
-
-verify: test
-
-#CC=/usr/local/Cellar/llvm/7.0.0/bin/clang-7
-CC=gcc-8
-
-POLY1305_64_FILES= $(HACL_HOME)/lib/fst/Lib.IntTypes.fst \
-	$(HACL_HOME)/lib/fst/Lib.RawIntTypes.fst \
-	$(HACL_HOME)/lib/fst/Lib.Buffer.fst \
-	$(HACL_HOME)/lib/fst/Lib.ByteBuffer.fst \
-	$(HACL_HOME)/lib/c/Lib.Loops.fst \
-	Hacl.Impl.Poly1305.Field64.fst \
-	Hacl.Impl.Poly1305.Fields.fst \
-	Hacl.Impl.Poly1305.fst \
-	Hacl.Poly1305_64.fst 
-
-KREMLIN_ARGS:=-funroll-loops 8 -warn-error +9 -I $(HACL_HOME)/lib/ -I $(HACL_HOME)/lib/fst -I $(KREMLIN_HOME)/kremlib -I $(HACL_HOME)/specs -I ./lemmas -I . -ccopt '-march=native' -fbuiltin-uint128 -drop FStar.UInt128 -fnocompound-literals -fc89-scope -fparentheses -fcurly-braces
-poly64-c/out.krml: $(POLY1305_64_FILES)
-	 $(KREMLIN) $(KREMLIN_ARGS) -tmpdir poly64-c $(POLY1305_64_FILES) -skip-translation 
-
-poly64-c/Hacl_Poly1305_64.c: poly64-c/out.krml
-	 $(KREMLIN) $(KREMLIN_ARGS) -tmpdir poly64-c  $^ -skip-compilation \
-	   -minimal -add-include '"kremlib.h"' -add-include '"vec128.h"' -bundle 'Hacl.Poly1305_64=*'
-
-POLY1305_32_FILES= $(HACL_HOME)/lib/fst/Lib.IntTypes.fst \
-	$(HACL_HOME)/lib/fst/Lib.RawIntTypes.fst \
-	$(HACL_HOME)/lib/fst/Lib.Buffer.fst \
-	$(HACL_HOME)/lib/fst/Lib.ByteBuffer.fst \
-	$(HACL_HOME)/lib/c/Lib.Loops.fst \
-	Hacl.Impl.Poly1305.Field32.fst \
-	Hacl.Impl.Poly1305.Fields.fst \
-	Hacl.Impl.Poly1305.fst \
-	Hacl.Poly1305_32.fst 
-
-poly32-c/out.krml: $(POLY1305_32_FILES)
-	 $(KREMLIN) $(KREMLIN_ARGS) -tmpdir poly32-c $(POLY1305_32_FILES) -skip-translation 
-
-poly32-c/Hacl_Poly1305_32.c: poly32-c/out.krml
-	 $(KREMLIN) $(KREMLIN_ARGS) -tmpdir poly32-c  $^ -skip-compilation \
-	   -minimal -add-include '"kremlib.h"' -add-include '"vec128.h"' -bundle 'Hacl.Poly1305_32=*'
-
-POLY1305_128_FILES= $(HACL_HOME)/lib/fst/Lib.IntTypes.fst \
-	$(HACL_HOME)/lib/fst/Lib.RawIntTypes.fst \
-	$(HACL_HOME)/lib/fst/Lib.Buffer.fst \
-	$(HACL_HOME)/lib/fst/Lib.ByteBuffer.fst \
-	$(HACL_HOME)/lib/c/Lib.Loops.fst \
-	Lib.Vec128.fsti \
-	Hacl.Impl.Poly1305.Field128.fst \
-	Hacl.Impl.Poly1305.Fields.fst \
-	Hacl.Impl.Poly1305.fst \
-	Hacl.Poly1305_128.fst 
-
-poly128-c/out.krml: $(POLY1305_128_FILES)
-	 $(KREMLIN) $(KREMLIN_ARGS) -tmpdir poly128-c $(POLY1305_128_FILES) -skip-translation 
-
-poly128-c/Hacl_Poly1305_128.c: poly128-c/out.krml
-	 $(KREMLIN) $(KREMLIN_ARGS) -tmpdir poly128-c  $^ -skip-compilation \
-	   -minimal -add-include '"kremlib.h"' -add-include '"vec128.h"' -drop Lib.Vec128 -bundle 'Hacl.Poly1305_128=*'
-
-POLY1305_256_FILES= $(HACL_HOME)/lib/fst/Lib.IntTypes.fst \
-	$(HACL_HOME)/lib/fst/Lib.RawIntTypes.fst \
-	$(HACL_HOME)/lib/fst/Lib.Buffer.fst \
-	$(HACL_HOME)/lib/fst/Lib.ByteBuffer.fst \
-	$(HACL_HOME)/lib/c/Lib.Loops.fst \
-	Lib.Vec256.fsti \
-	Hacl.Impl.Poly1305.Field256.fst \
-	Hacl.Impl.Poly1305.Fields.fst \
-	Hacl.Impl.Poly1305.fst \
-	Hacl.Poly1305_256.fst 
-
-poly256-c/out.krml: $(POLY1305_256_FILES)
-	 $(KREMLIN) $(KREMLIN_ARGS) -tmpdir poly256-c $(POLY1305_256_FILES) -skip-translation 
-
-poly256-c/Hacl_Poly1305_256.c: poly256-c/out.krml
-	 $(KREMLIN) $(KREMLIN_ARGS) -tmpdir poly256-c  $^ -skip-compilation \
-	   -minimal -add-include '"kremlib.h"' -add-include '"vec256.h"' -drop Lib.Vec256 -bundle 'Hacl.Poly1305_256=*'
-
-poly1305.exe: poly32-c/Hacl_Poly1305_32.c poly64-c/Hacl_Poly1305_64.c poly128-c/Hacl_Poly1305_128.c poly256-c/Hacl_Poly1305_256.c 
-	$(CC) -march=native -mtune=native -O3 -I $(KREMLIN_HOME)/kremlib/c -I $(KREMLIN_HOME)/include -I . poly32-c/Hacl_Poly1305_32.c poly64-c/Hacl_Poly1305_64.c poly128-c/Hacl_Poly1305_128.c poly256-c/Hacl_Poly1305_256.c $(KREMLIN_HOME)/kremlib/c/testlib.o poly1305_test.c -o poly1305.exe 
-	./poly1305.exe
-
-poly1305-test: poly1305.exe
-	./poly1305.exe
-
-poly1305-perf: poly1305_64.exe poly1305_32.exe poly1305_128.exe poly1305_256.exe
-	gcc-8 -march=native -mtune=native -Ofast -flto -I $(KREMLIN_HOME)/kremlib/c -I $(KREMLIN_HOME)/include -I . poly64-c/Hacl_Poly1305_64.c poly32-c/Hacl_Poly1305_32.c poly128-c/Hacl_Poly1305_128.c  poly256-c/Hacl_Poly1305_256.c $(KREMLIN_HOME)/kremlib/c/testlib.o poly1305_test.c -o poly1305-perf.exe 
-	./poly1305-perf.exe
-
+all: test
 
 test:
 	rm -f .depend && $(MAKE) .depend
 	$(MAKE) stage1
 	STAGE=2 $(MAKE) stage2
 
-stage1: $(GENERATED_DIR)/Makefile.include
+stage1: $(GENERATED_DIR)/Hacl_Poly1305_32.c \
+	$(GENERATED_DIR)/Hacl_Poly1305_128.c \
+	$(GENERATED_DIR)/Hacl_Poly1305_256.c
+
 
 stage2: $(OUT_DIR)/test.exe
 	$(OUT_DIR)/test.exe
@@ -126,8 +41,7 @@ FSTAR = $(FSTAR_HOME)/bin/fstar.exe $(FSTAR_FLAGS)
 
 ENABLE_HINTS = --use_hints --use_hint_hashes --record_hints --query_stats
 
-ROOTS = Hacl.Poly1305_64.fst
-
+ROOTS = Hacl.Poly1305_32.fst Hacl.Poly1305_128.fst Hacl.Poly1305_256.fst
 
 .PRECIOUS: %.krml
 
@@ -137,7 +51,7 @@ ROOTS = Hacl.Poly1305_64.fst
 include .depend
 
 # Admit SMT queries for modules in FStar, LowStar, and C
-$(CACHE_DIR)/FStar.%.checked $(CACHE_DIR)/LowStar.%.checked $(CACHE_DIR)/C.%.checked: | .depend
+$(CACHE_DIR)/FStar.%.checked $(CACHE_DIR)/LowStar.%.checked $(CACHE_DIR)/C.%.checked $(CACHE_DIR)/Lib.%.checked: | .depend
 	$(FSTAR) $< --admit_smt_queries true && \
 	touch $@
 
@@ -153,25 +67,43 @@ $(OUTPUT_DIR)/%.krml: | .depend
 
 # 2. Generation of .c files
 
-KREMLIN_TESTLIB=-add-include '"extracted/TestLib.h"' $(KREMLIB)/c/testlib.c
+KREMLIN_TESTLIB=-funroll-loops 8 -warn-error +9 -add-include '"TestLib.h"' -add-include '"vec-intrin.h"'  -add-include '"FStar_UInt_8_16_32_64.h"' $(KREMLIB)/dist/generic/testlib.c
 
 KREMLIN=$(KREMLIN_HOME)/krml
 
 # 2. Generation of .c files
 
 # We use -drop (deprecated) only to avoid creating unnecessary .c,.h files
-$(GENERATED_DIR)/Makefile.include: $(ALL_KRML_FILES) | .depend
+$(GENERATED_DIR)/Hacl_Poly1305_32.c: $(ALL_KRML_FILES) | .depend
 	$(KREMLIN) $(KREMLIN_TESTLIB) -skip-compilation \
-	-no-prefix 'Hacl.Test.SHA3' \
-	-no-prefix 'Hacl.Impl.SHA3' \
-	-no-prefix 'Hacl.SHA3' \
 	-bundle 'Lib.*' \
 	-bundle 'Spec.*' \
 	-bundle 'C=C.Endianness' \
-	-bundle 'Hacl.SHA3=Hacl.Impl.*,Hacl.SHA3' \
+	-bundle 'Hacl.Poly1305_32=Hacl.Impl.*' \
 	-library 'C,FStar' \
-	-drop 'LowStar,Spec,Prims,Lib,C.Loops.*' \
-	-add-include '"c/Lib_PrintBuffer.h"' \
+	-drop 'Lib.IntVector.Intrinsics,LowStar,Spec,Prims,Lib,C.Loops.*,Hacl.Spec.*,Hacl.Poly1305.Field32xN.Lemmas,Hacl.Poly1305_128,Hacl.Poly1305_256' \
+	-tmpdir $(GENERATED_DIR) \
+	$^
+
+$(GENERATED_DIR)/Hacl_Poly1305_128.c: $(ALL_KRML_FILES) | .depend
+	$(KREMLIN) $(KREMLIN_TESTLIB) -skip-compilation \
+	-bundle 'Lib.*' \
+	-bundle 'Spec.*' \
+	-bundle 'C=C.Endianness' \
+	-bundle 'Hacl.Poly1305_128=Hacl.Impl.*' \
+	-library 'C,FStar' \
+	-drop 'Lib.IntVector.Intrinsics,LowStar,Spec,Prims,Lib,C.Loops.*,Hacl.Spec.*,Hacl.Poly1305.Field32xN.Lemmas,Hacl.Poly1305_32,Hacl.Poly1305_256' \
+	-tmpdir $(GENERATED_DIR) \
+	$^
+
+$(GENERATED_DIR)/Hacl_Poly1305_256.c: $(ALL_KRML_FILES) | .depend
+	$(KREMLIN) $(KREMLIN_TESTLIB) -skip-compilation \
+	-bundle 'Lib.*' \
+	-bundle 'Spec.*' \
+	-bundle 'C=C.Endianness' \
+	-bundle 'Hacl.Poly1305_256=Hacl.Impl.*' \
+	-library 'C,FStar' \
+	-drop 'Lib.IntVector.Intrinsics,LowStar,Spec,Prims,Lib,C.Loops.*,Hacl.Spec.*,Hacl.Poly1305.Field32xN.Lemmas,Hacl.Poly1305_32,Hacl.Poly1305_128' \
 	-tmpdir $(GENERATED_DIR) \
 	$^
 
@@ -183,7 +115,7 @@ ifeq ($(STAGE),2)
 
 # The top-level invocation guarantees that stage1 has been run and this file is
 # there.
-include $(GENERATED_DIR)/Makefile.include
+#include $(GENERATED_DIR)/Makefile.include
 
 # 3. Collecting all of our source files, and generating corresponding object
 # files.
@@ -195,25 +127,27 @@ include $(GENERATED_DIR)/Makefile.include
 # KreMLin sees the fsti's for the various Lib* and LowStar modules and creates .h/.c
 # files for them in $(GENERATED_DIR). However, we are only interested in the header,
 # and drop these (mostly empty) C files.
-ALL_OUR_FILES 	    = $(filter-out FStar_* Lib.c LowStar.c C.c, $(ALL_C_FILES))
-ALL_GENERATED_FILES = $(addprefix $(GENERATED_DIR)/,$(ALL_OUR_FILES))
+#ALL_OUR_FILES 	    = $(filter-out FStar_* Lib.c LowStar.c C.c, $(ALL_C_FILES))
+#ALL_GENERATED_FILES = $(addprefix $(GENERATED_DIR)/,$(ALL_OUR_FILES))
 
 ALL_SOURCES = \
-  $(ALL_GENERATED_FILES) \
-  $(HACL_HOME)/lib/c/Lib_PrintBuffer.c
+  $(GENERATED_DIR)/Hacl_Poly1305_32.c \
+  $(GENERATED_DIR)/Hacl_Poly1305_128.c \
+  $(GENERATED_DIR)/Hacl_Poly1305_256.c \
+  ./poly1305_test.c
 
 ALL_OBJS = $(patsubst %.c,%.o,$(ALL_SOURCES))
 
 INCLUDE_DIRS = \
   $(KREMLIN_HOME)/include \
   $(KREMLIN_HOME)/kremlib \
-  $(HACL_HOME)/lib
+  $(KREMLIN_HOME)/kremlib/dist/generic \
+  $(HACL_HOME)/lib \
+  $(HACL_HOME)/lib/c
 
-# TODO: remove -Wno-incompatible-pointer-types when issue with --cmi is fixed
 CFLAGS += -O3 -march=native -mtune=native -funroll-loops
 CFLAGS += $(addprefix -I ,$(INCLUDE_DIRS)) -Wall -Wextra -Werror \
-  -Wno-parentheses -Wno-unused-parameter -Wno-unused-variable \
-  -Wno-incompatible-pointer-types
+  -Wno-parentheses -Wno-unused-parameter -Wno-unused-variable
 
 # GNU Make manual section 4.14
 %.d: %.c
@@ -229,7 +163,7 @@ $(OUT_DIR):
 
 $(OUT_DIR)/test.exe: $(ALL_OBJS) | $(OUT_DIR)
 	$(info ALL_SOURCES is $(ALL_SOURCES))
-	$(CC) $(CFLAGS) -o $@ $^ -L $(KREMLIN_HOME)/kremlib/out -lkremlib
+	$(CC) $(CFLAGS) -o $@ $^ -L $(KREMLIN_HOME)/kremlib/dist/generic -lkremlib
 
 .PRECIOUS: %.o
 
