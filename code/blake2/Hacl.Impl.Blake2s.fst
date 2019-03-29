@@ -14,7 +14,7 @@ module Seq = Lib.Sequence
 module Loops = Lib.LoopCombinators
 module Spec = Spec.Blake2
 
-#reset-options "--z3rlimit 50 --max_ifuel 0 --max_fuel 0"
+#set-options "--z3rlimit 50 --max_ifuel 0 --max_fuel 0"
 
 (* Define algorithm parameters *)
 type vector_wp = lbuffer uint32 (size Spec.size_block_w)
@@ -222,7 +222,7 @@ let blake2_round2 wv m i =
   blake2_mixing wv (size 1) (size 6) (size 11) (size 12) m.(s2) m.(s3);
   blake2_mixing wv (size 2) (size 7) (size  8) (size 13) m.(s4) m.(s5);
   blake2_mixing wv (size 3) (size 4) (size  9) (size 14) m.(s6) m.(s7)
-  
+
 
 val blake2_round: wv:vector_wp -> m:block_wp -> i:size_t{v i <= 9} ->
   Stack unit
@@ -437,7 +437,7 @@ let blake2s_init hash kk k nn =
 val blake2s_update_last:
     hash: hash_wp
   -> prev: uint64{uint_v prev <= Spec.Blake2.max_limb Spec.Blake2S}
-  -> len: size_t{v len <= Spec.size_block Spec.Blake2S} 
+  -> len: size_t{v len <= Spec.size_block Spec.Blake2S}
   -> last: lbuffer uint8 len ->
   Stack unit
     (requires (fun h -> live h hash /\ live h last /\ disjoint hash last))
@@ -457,7 +457,7 @@ let blake2s_update_last hash prev len last =
 
 
 val blake2s_finish:
-    nn: size_t{1 <= v nn /\ v nn <= 32} 
+    nn: size_t{1 <= v nn /\ v nn <= 32}
   -> output: lbuffer uint8 nn
   -> hash: hash_wp ->
   Stack unit
@@ -530,7 +530,7 @@ let blake2s_update hash ll d kk =
 #set-options "--z3rlimit 50"
 
 val blake2s:
-    nn:size_t{1 <= v nn /\ v nn <= 32} 
+    nn:size_t{1 <= v nn /\ v nn <= 32}
   -> output: lbuffer uint8 nn
   -> ll: size_t
   -> d: lbuffer uint8 ll
