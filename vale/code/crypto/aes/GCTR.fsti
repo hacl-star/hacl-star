@@ -103,13 +103,14 @@ let gctr_partial_opaque_init (alg:algorithm) (plain cipher:seq quad32) (key:seq 
   ()
 
 let lemma_gctr_partial_append (alg:algorithm) (b1 b2:nat) (p1 c1 p2 c2:seq quad32) (key:seq nat32) (icb1 icb2:quad32) : Lemma
-  (requires gctr_partial alg b1 p1 c1 key icb1 /\
-            gctr_partial alg b2 p2 c2 key icb2 /\
+  (requires gctr_partial_opaque alg b1 p1 c1 key icb1 /\
+            gctr_partial_opaque alg b2 p2 c2 key icb2 /\
             b1 == length p1 /\ b1 == length c1 /\
             b2 == length p2 /\ b2 == length c2 /\
             icb2 == inc32 icb1 b1)
-  (ensures gctr_partial alg (b1 + b2) (p1 @| p2) (c1 @| c2) key icb1)
+  (ensures gctr_partial_opaque alg (b1 + b2) (p1 @| p2) (c1 @| c2) key icb1)
   =
+  reveal_opaque gctr_partial;
   ()
 
 let gctr_partial_opaque_ignores_postfix (alg:algorithm) (bound:nat32) (plain plain' cipher cipher':seq quad32) (key:seq nat32) (icb:quad32) : Lemma
