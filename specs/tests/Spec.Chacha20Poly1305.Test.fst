@@ -80,7 +80,7 @@ let test() =
   let dec =  aead_decrypt test_key test_nonce test_cipher test_mac test_aad in
   let result_c = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) cipher test_cipher in
   let result_m = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) mac test_mac in
-//  let result_p = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) dec test_plaintext in  
+  let result_p = Some? dec && for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) (Some?.v dec) test_plaintext in  
   IO.print_string   "Expected cipher:";
   List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test_cipher);
   IO.print_string "\nComputed cipher:";
@@ -89,9 +89,9 @@ let test() =
   List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test_mac);
   IO.print_string "\nComputed mac:";
   List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list mac);
-  // IO.print_string   "\nExpected plaintext:";
-  // List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test_plaintext);
-  // IO.print_string "\nComputed plaintext:";
-  // List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list dec);
-  if result_c && result_m then begin IO.print_string "\n\nChacha20 : Success!\n"; true end
+  IO.print_string   "\nExpected plaintext:";
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test_plaintext);
+  IO.print_string "\nComputed plaintext:";
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list (Some?.v dec));
+  if result_c && result_m && result_p then begin IO.print_string "\n\nChacha20 : Success!\n"; true end
   else begin IO.print_string "\n\nChacha20: Failure :(\n"; false end
