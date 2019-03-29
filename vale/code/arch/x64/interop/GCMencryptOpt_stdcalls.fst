@@ -839,6 +839,14 @@ let gcm128_encrypt_opt_stdcall key plain_b plain_len auth_b auth_len iv_b out_b 
   
   B.blit plain_b plain_len' inout_b 0ul (uint64_to_uint32 plain_len % 16ul);
 
+  let h1 = get() in
+
+  // assert (    Seq.equal 
+  //     (B.as_seq h1 plain_b)
+  //     (Seq.slice (Seq.append (B.as_seq h1 plain_b') (B.as_seq h1 inout_b)) 0 (B.length plain_b)));
+
+  admit();
+
   // Same with auth_b and abytes_b
 
   B.blit auth_b auth_len' abytes_b 0ul (uint64_to_uint32 auth_len % 16ul);

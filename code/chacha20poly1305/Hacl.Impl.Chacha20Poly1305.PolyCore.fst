@@ -34,9 +34,10 @@ let poly1305_padded ctx len text tmp =
   update_sub tmp 0ul r rem;
   let h2 = ST.get() in
   Poly.reveal_ctx_inv ctx h1 h2;
-  update1_equiv (Poly.as_get_r h2 ctx) 16 (as_seq h2 tmp) (Poly.as_get_acc h2 ctx);  
-  Poly.poly1305_update ctx 16ul tmp
-
+  update1_equiv (Poly.as_get_r h2 ctx) 16 (as_seq h2 tmp) (Poly.as_get_acc h2 ctx);
+  if gt r 0ul then   // if r > 0
+    Poly.poly1305_update ctx 16ul tmp
+  
 let poly1305_init ctx k = Poly.poly1305_init ctx k
   
 let update1 ctx len text = 
