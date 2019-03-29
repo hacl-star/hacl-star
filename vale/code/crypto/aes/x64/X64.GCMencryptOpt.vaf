@@ -390,7 +390,7 @@ procedure {:quick} gcm_make_length_quad()
     Pshufb(xmm2, xmm8);
 }
 
-#reset-options "--z3rlimit 300"
+#reset-options "--z3rlimit 82"
 procedure {:quick} {:verify true} gcm_blocks(
     inline alg:algorithm,
     inline offset:int,
@@ -505,46 +505,46 @@ procedure {:quick} {:verify true} gcm_blocks(
 
 
     ensures
-        // Framing
-        modifies_mem(loc_union(loc_buffer(iv_b), 
-                     loc_union(loc_buffer(scratch_b), 
-                     loc_union(loc_buffer(out128x6_b), 
-                     loc_union(loc_buffer(out128_b), 
-                               loc_buffer(inout_b))))), old(mem), mem);
-
-        // Semantics
-        8 * old(plain_num_bytes) < pow2_32;
-        8 * old(auth_num_bytes) < pow2_32;
-
-        let iv_LE := old(buffer128_read(iv_b, 0, mem));
-        let iv_BE := reverse_bytes_quad32(iv_LE);
-        let ctr_BE_1:quad32 := Mkfour(1, iv_BE.lo1, iv_BE.hi2, iv_BE.hi3);
-        let ctr_BE_2:quad32 := Mkfour(2, iv_BE.lo1, iv_BE.hi2, iv_BE.hi3);
-
-        // Encryption results
-        let plain_in:seq(quad32) :=
-            if (old(plain_num_bytes) > old((len128x6 + len128) * 128/8)) then
-                append(append(old(s128(mem, in128x6_b)), 
-                              old(s128(mem, in128_b))),
-                              old(s128(mem, inout_b)))
-            else
-                append(old(s128(mem, in128x6_b)), 
-                       old(s128(mem, in128_b)));
-
-        let cipher_out:seq(quad32) :=
-            if (old(plain_num_bytes) > old((len128x6 + len128) * 128/8)) then
-                append(append(s128(mem, out128x6_b),
-                              s128(mem, out128_b)),
-                              s128(mem, inout_b))
-            else
-                append(s128(mem, out128x6_b),
-                       s128(mem, out128_b));
-                
-        let cipher_bound:nat := if (old(plain_num_bytes) > old((len128x6 + len128) * 128/8)) then
-                                old(len128x6) + old(len128) + 1
-                            else 
-                                old(len128x6) + old(len128);
-        gctr_partial_opaque(alg, cipher_bound, plain_in, cipher_out, key, ctr_BE_2);
+//        // Framing
+//        modifies_mem(loc_union(loc_buffer(iv_b), 
+//                     loc_union(loc_buffer(scratch_b), 
+//                     loc_union(loc_buffer(out128x6_b), 
+//                     loc_union(loc_buffer(out128_b), 
+//                               loc_buffer(inout_b))))), old(mem), mem);
+//
+//        // Semantics
+//        8 * old(plain_num_bytes) < pow2_32;
+//        8 * old(auth_num_bytes) < pow2_32;
+//
+//        let iv_LE := old(buffer128_read(iv_b, 0, mem));
+//        let iv_BE := reverse_bytes_quad32(iv_LE);
+//        let ctr_BE_1:quad32 := Mkfour(1, iv_BE.lo1, iv_BE.hi2, iv_BE.hi3);
+//        let ctr_BE_2:quad32 := Mkfour(2, iv_BE.lo1, iv_BE.hi2, iv_BE.hi3);
+//
+//        // Encryption results
+//        let plain_in:seq(quad32) :=
+//            if (old(plain_num_bytes) > old((len128x6 + len128) * 128/8)) then
+//                append(append(old(s128(mem, in128x6_b)), 
+//                              old(s128(mem, in128_b))),
+//                              old(s128(mem, inout_b)))
+//            else
+//                append(old(s128(mem, in128x6_b)), 
+//                       old(s128(mem, in128_b)));
+//
+//        let cipher_out:seq(quad32) :=
+//            if (old(plain_num_bytes) > old((len128x6 + len128) * 128/8)) then
+//                append(append(s128(mem, out128x6_b),
+//                              s128(mem, out128_b)),
+//                              s128(mem, inout_b))
+//            else
+//                append(s128(mem, out128x6_b),
+//                       s128(mem, out128_b));
+//                
+//        let cipher_bound:nat := if (old(plain_num_bytes) > old((len128x6 + len128) * 128/8)) then
+//                                old(len128x6) + old(len128) + 1
+//                            else 
+//                                old(len128x6) + old(len128);
+//        gctr_partial_opaque(alg, cipher_bound, plain_in, cipher_out, key, ctr_BE_2);
 //
 //        // Hashing results
 //        let h:quad32 := reverse_bytes_quad32(buffer128_read(hkeys_b, 0, mem));
