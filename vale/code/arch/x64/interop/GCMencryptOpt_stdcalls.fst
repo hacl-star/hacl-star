@@ -11,6 +11,7 @@ open FStar.Int.Cast
 open FStar.Integers
 open Arch.Types
 open Workarounds
+open BufferViewHelpers
 
 #set-options "--z3rlimit 400 --max_fuel 0 --max_ifuel 0"
 
@@ -785,33 +786,81 @@ let length_aux7 (b:uint8_p) : Lemma
     DV.length_eq db  
 *)
 
+let lemma_identical_uv (b:uint8_p) (h0 h1:HS.mem) : Lemma
+  (requires B.length b % 16 = 0 /\ Seq.equal (B.as_seq h0 b) (B.as_seq h1 b))
+  (ensures (
+    let b_d = get_downview b in
+    length_aux3 b (B.length b / 16);
+    let b_u = UV.mk_buffer b_d Views.up_view128 in
+    Seq.equal (UV.as_seq h0 b_u) (UV.as_seq h1 b_u)))
+  = lemma_dv_equal Views.down_view8 b h0 h1;
+    length_aux3 b (B.length b / 16);
+    lemma_uv_equal Views.up_view128 (get_downview b) h0 h1
+
+
 let length_aux6 (b:uint8_p) : Lemma (B.length b = DV.length (get_downview b))
   = DV.length_eq (get_downview b)
 
-// let lemma_slice_uv_extra (b:uint8_p) (b_start:uint8_p) (b_extra:uint8_p) (h:HS.mem) : Lemma
-//   (requires
-//     B.length b_extra = 16 /\ B.length b_start % 16 = 0 /\
-//     B.length b_extra + B.length b_start >= B.length b /\
-//     Seq.equal 
-//       (B.as_seq h b)
-//       (Seq.slice (Seq.append (B.as_seq h b_start) (B.as_seq h b_extra)) 0 (B.length b))
-//     )
-//   (ensures (
-//     let b_start_d = get_downview b_start in
-//     length_aux6 b_start;
-//     let b_start_u = UV.mk_buffer b_start_d Views.up_view128 in
-//     let b_extra_d = get_downview b_extra in
-//     length_aux6 b_extra;
-//     let b_extra_u = UV.mk_buffer b_extra_d Views.up_view128 in
-//     let suv =
-//       if B.length b > B.length b_start then
-//         Seq.append (UV.as_seq h b_start_u) (UV.as_seq h b_extra_u)
-//       else UV.as_seq h b_start_u
-//     in let sf = slice_work_around (le_seq_quad32_to_bytes suv) (B.length b) in
-//     Seq.equal sf (seq_uint8_to_seq_nat8 (B.as_seq h b))
-//  ))
-//  = admit()
+let lemma_slice_uv_extra (b:uint8_p) (b_start:uint8_p) (b_extra:uint8_p) (h:HS.mem) : Lemma
+  (requires
+    B.length b_extra = 16 /\ B.length b_start % 16 = 0 /\
+    B.length b_extra + B.length b_start >= B.length b /\
+    Seq.equal 
+      (B.as_seq h b)
+      (Seq.slice (Seq.append (B.as_seq h b_start) (B.as_seq h b_extra)) 0 (B.length b))
+    )
+  (ensures (
+    let b_start_d = get_downview b_start in
+    length_aux6 b_start;
+    let b_start_u = UV.mk_buffer b_start_d Views.up_view128 in
+    let b_extra_d = get_downview b_extra in
+    length_aux6 b_extra;
+    let b_extra_u = UV.mk_buffer b_extra_d Views.up_view128 in
+    let suv =
+      if B.length b > B.length b_start then
+        Seq.append (UV.as_seq h b_start_u) (UV.as_seq h b_extra_u)
+      else UV.as_seq h b_start_u
+    in let sf = slice_work_around (le_seq_quad32_to_bytes suv) (B.length b) in
+    Seq.equal sf (seq_uint8_to_seq_nat8 (B.as_seq h b))
+ ))
+ = admit()
 
+
+let lemma_slice_sub (b:uint8_p) (b_sub:uint8_p) (b_extra:uint8_p) (h:HS.mem) : Lemma
+  (requires B.length b_extra = 16 /\ B.length b_sub = B.length b / 16 * 16 /\
+    b_sub == B.gsub b 0ul (UInt32.uint_to_t (B.length b_sub)) /\
+    Seq.equal
+      (Seq.slice (B.as_seq h b) (B.length b_sub) (B.length b_sub + B.length b % 16))
+      (Seq.slice (B.as_seq h b_extra) 0 (B.length b % 16))
+  )
+  (ensures Seq.equal
+    (B.as_seq h b)
+    (Seq.slice (Seq.append (B.as_seq h b_sub) (B.as_seq h b_extra)) 0 (B.length b))
+  ) =
+  calc (==) {
+    Seq.slice (Seq.append (B.as_seq h b_sub) (B.as_seq h b_extra)) 0 (B.length b);
+    (==) { Seq.lemma_eq_intro
+     (Seq.slice (Seq.append (B.as_seq h b_sub) (B.as_seq h b_extra)) 0 (B.length b))
+     (Seq.append (B.as_seq h b_sub) (Seq.slice (B.as_seq h b_extra) 0 (B.length b % 16)))
+    }
+    Seq.append (B.as_seq h b_sub) (Seq.slice (B.as_seq h b_extra) 0 (B.length b % 16));
+    (==) { }
+    Seq.append 
+      (Seq.slice (B.as_seq h b) 0 (B.length b_sub))
+      (Seq.slice (B.as_seq h b_extra) 0 (B.length b % 16));      
+    (==) { }
+    Seq.append 
+      (Seq.slice (B.as_seq h b) 0 (B.length b_sub))
+      (Seq.slice (B.as_seq h b) (B.length b_sub) (B.length b));
+    (==) { Seq.lemma_eq_intro (B.as_seq h b)
+      (Seq.append 
+        (Seq.slice (B.as_seq h b) 0 (B.length b_sub))
+        (Seq.slice (B.as_seq h b) (B.length b_sub) (B.length b)))
+      }
+    B.as_seq h b;
+  }
+
+#set-options "--z3rlimit 600 --max_fuel 0 --max_ifuel 0"
 
 inline_for_extraction
 let gcm128_encrypt_opt_stdcall key plain_b plain_len auth_b auth_len iv_b out_b tag_b keys_b hkeys_b =
@@ -841,11 +890,11 @@ let gcm128_encrypt_opt_stdcall key plain_b plain_len auth_b auth_len iv_b out_b 
 
   let h1 = get() in
 
-  // assert (    Seq.equal 
-  //     (B.as_seq h1 plain_b)
-  //     (Seq.slice (Seq.append (B.as_seq h1 plain_b') (B.as_seq h1 inout_b)) 0 (B.length plain_b)));
+  // lemma_slice_sub plain_b plain_b' inout_b h1;
 
-  admit();
+  // assert (Seq.equal
+  //   (B.as_seq h1 plain_b)
+  //   (Seq.slice (Seq.append (B.as_seq h1 plain_b') (B.as_seq h1 inout_b)) 0 (B.length plain_b)));
 
   // Same with auth_b and abytes_b
 
@@ -876,13 +925,84 @@ let gcm128_encrypt_opt_stdcall key plain_b plain_len auth_b auth_len iv_b out_b 
     inout_b
     abytes_b;
 
+  let h_post = get() in
 
   // Copy back the remainder in inout_b into out_b
   B.blit inout_b 0ul out_b ((uint64_to_uint32 plain_len / 16ul) * 16ul) (uint64_to_uint32 plain_len % 16ul);
 
   let h2 = get() in
 
-  assume (
+  assert (
+       let plain_d = get_downview plain_b' in
+       length_aux3 plain_b' (UInt64.v plain_len / 16);       
+       let plain_u = UV.mk_buffer plain_d Views.up_view128 in
+       let inout_d = get_downview inout_b in
+       length_aux3 inout_b 1;
+       let inout_u = UV.mk_buffer inout_d Views.up_view128 in
+       let out_d = get_downview out_b' in
+       length_aux3 out_b' (UInt64.v plain_len / 16); 
+       let out_u = UV.mk_buffer out_d Views.up_view128 in
+       length_aux4 iv_b;
+       DV.length_eq (get_downview iv_b);
+       let iv = seq_uint8_to_seq_nat8 (B.as_seq h1 iv_b) in
+       let plain_in =
+         if UInt64.v plain_len > B.length plain_b' then
+           Seq.append (UV.as_seq h1 plain_u) (UV.as_seq h1 inout_u)
+         else UV.as_seq h1 plain_u
+       in let plain_bytes = slice_work_around (le_seq_quad32_to_bytes plain_in) (UInt64.v plain_len)
+       in let cipher_out =
+         if UInt64.v plain_len > B.length plain_b' then
+           Seq.append (UV.as_seq h_post out_u) (UV.as_seq h_post inout_u)
+         else UV.as_seq h_post out_u
+       in let cipher_bytes = slice_work_around (le_seq_quad32_to_bytes cipher_out) (UInt64.v plain_len)
+       in let auth_d = get_downview auth_b' in
+       length_aux3 auth_b' (UInt64.v auth_len / 16);
+       let auth_u = UV.mk_buffer auth_d Views.up_view128 in
+       let abytes_d = get_downview abytes_b in
+       length_aux3 abytes_b 1;      
+       let abytes_u = UV.mk_buffer abytes_d Views.up_view128 in        
+       let auth_in =
+         if UInt64.v auth_len > B.length auth_b' then
+           Seq.append (UV.as_seq h1 auth_u) (UV.as_seq h1 abytes_u)
+         else UV.as_seq h1 auth_u
+       in
+      let auth_bytes = slice_work_around (le_seq_quad32_to_bytes auth_in) (UInt64.v auth_len) in
+      4096 * (Seq.length plain_bytes) < pow2_32 /\
+      4096 * (Seq.length auth_bytes) < pow2_32 /\
+      (let cipher, tag = gcm_encrypt_LE AES_128 (seq_nat32_to_seq_nat8_LE (Ghost.reveal key)) iv plain_bytes auth_bytes in
+      Seq.equal cipher cipher_bytes /\
+      Seq.equal (seq_uint8_to_seq_nat8 (B.as_seq h_post tag_b)) tag
+  ));
+
+  lemma_identical_uv out_b' h_post h2;
+  lemma_identical_uv inout_b h_post h2;
+
+
+  assert (
+       let out_d = get_downview out_b' in
+       length_aux3 out_b' (UInt64.v plain_len / 16); 
+       let out_u = UV.mk_buffer out_d Views.up_view128 in  
+       UV.as_seq h_post out_u == UV.as_seq h2 out_u);
+
+  assert (
+       let inout_d = get_downview inout_b in
+       length_aux3 inout_b 1; 
+       let inout_u = UV.mk_buffer inout_d Views.up_view128 in
+       UV.as_seq h_post inout_u == UV.as_seq h2 inout_u);
+
+  lemma_slice_sub plain_b plain_b' inout_b h1;
+
+
+  lemma_slice_uv_extra plain_b plain_b' inout_b h1;
+
+  lemma_slice_sub auth_b auth_b' abytes_b h1;
+
+  lemma_slice_sub out_b out_b' inout_b h2;
+
+  lemma_slice_uv_extra auth_b auth_b' abytes_b h1;
+  lemma_slice_uv_extra out_b out_b' inout_b h2;  
+
+  assert (
     let iv = seq_uint8_to_seq_nat8 (B.as_seq h1 iv_b) in
     let plain = seq_uint8_to_seq_nat8 (B.as_seq h1 plain_b) in
     let auth = seq_uint8_to_seq_nat8 (B.as_seq h1 auth_b) in
@@ -890,28 +1010,4 @@ let gcm128_encrypt_opt_stdcall key plain_b plain_len auth_b auth_len iv_b out_b 
     Seq.equal (seq_uint8_to_seq_nat8 (B.as_seq h2 out_b)) cipher /\
     Seq.equal (seq_uint8_to_seq_nat8 (B.as_seq h2 tag_b)) tag);
 
- //  assume (    Seq.equal 
- //      (B.as_seq h1 plain_b)
- //      (Seq.slice (Seq.append (B.as_seq h1 plain_b') (B.as_seq h1 inout_b)) 0 (B.length plain_b)));
-
- //  lemma_slice_uv_extra plain_b plain_b' inout_b h1;
-
- // assume (    Seq.equal 
- //      (B.as_seq h1 auth_b)
- //      (Seq.slice (Seq.append (B.as_seq h1 auth_b') (B.as_seq h1 abytes_b)) 0 (B.length auth_b)));
-
- // assume (    Seq.equal 
- //      (B.as_seq h2 out_b)
- //      (Seq.slice (Seq.append (B.as_seq h2 out_b') (B.as_seq h2 inout_b)) 0 (B.length out_b)));
-
- //  lemma_slice_uv_extra auth_b auth_b' abytes_b h1;
- //  lemma_slice_uv_extra out_b out_b' inout_b h2;  
-
- //  assume (Seq.equal (B.as_seq h0 iv_b) (B.as_seq h1 iv_b));
- //  assume (Seq.equal (B.as_seq h0 plain_b) (B.as_seq h1 plain_b));
- //  assume (Seq.equal (B.as_seq h0 auth_b) (B.as_seq h1 auth_b));
-
   pop_frame()
-
-  // let h_f = get() in
-  // assume (Seq.equal (B.as_seq h2 out_b) (B.as_seq h_f out_b))
