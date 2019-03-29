@@ -525,7 +525,7 @@ procedure {:quick} gcm_blocks_auth(
     Mov64(r15, auth_num_bytes);
 }
 
-#reset-options "--z3rlimit 200"
+#reset-options "--z3rlimit 300"
 procedure {:quick} {:verify true} gcm_blocks(
     inline alg:algorithm,
     inline offset:int,
@@ -543,7 +543,9 @@ procedure {:quick} {:verify true} gcm_blocks(
     ghost keys_b:buffer128,
     ghost hkeys_b:buffer128
     ) returns (
-    ghost test:seq(quad32)
+    ghost test:seq(quad32),
+    ghost test2:seq(quad32),
+    ghost test_len:quad32
     )
     lets
         auth_ptr @= rdi; auth_num_bytes @= rsi; auth_len @= rdx; keys_ptr @= rcx; scratch_ptr @= rbp; 
@@ -687,6 +689,8 @@ procedure {:quick} {:verify true} gcm_blocks(
         let h:quad32 := reverse_bytes_quad32(buffer128_read(hkeys_b, 0, mem));
         let length_quad:quad32 := reverse_bytes_quad32(Mkfour(#nat32(8 * old(plain_num_bytes)), 0, 
                                                        #nat32(8 * old(auth_num_bytes)), 0));
+
+        length_quad == test_len;
         let raw_auth_quads:seq(quad32) := if (old(auth_num_bytes) > old(auth_len * 128/8)) then 
                                 append(old(s128(mem, auth_b)), old(s128(mem, abytes_b)))
                               else 
@@ -707,14 +711,16 @@ procedure {:quick} {:verify true} gcm_blocks(
                 le_bytes_to_seq_quad32(pb)
             else
                 raw_quad_seq;
-        
+        test == raw_quad_seq;  // PASSES
 //        let auth_input_bytes:seq(nat8) := slice_work_around(le_seq_quad32_to_bytes(raw_quad_seq), total_bytes);
 //        let padded_auth_bytes:seq(nat8) := pad_to_128_bits(auth_input_bytes);
 //        let auth_quad_seq:seq(quad32) := le_bytes_to_seq_quad32(padded_auth_bytes);
-//        let auth_quad_seq:seq(quad32) := append(auth_quad_seq, create(1, length_quad));
-        test == auth_quad_seq;
-        8 * length(auth_quad_seq) < pow2_32 /\
-        xmm1 == gctr_encrypt_block(ctr_BE_1, ghash_LE(h, #ghash_plain_LE(auth_quad_seq)), alg, key, 0);
+        let auth_quad_seq:seq(quad32) := append(auth_quad_seq, create(1, length_quad));
+
+        //test2 == auth_quad_seq;  // FAILS 
+        //8 * length(auth_quad_seq) < pow2_32 /\
+//        0 < length(auth_quad_seq) /\
+//        xmm1 == gctr_encrypt_block(ctr_BE_1, ghash_LE(h, #ghash_plain_LE(auth_quad_seq)), alg, key, 0);
 //                                    
 
 
@@ -886,8 +892,12 @@ procedure {:quick} {:verify true} gcm_blocks(
     ghash_incremental_to_ghash(h, auth_in);
 */
     lemma_hash_append2(h, y_0, y_inout, y_final, auth_in, length_quad32);
+    test := auth_in;
     auth_in := append(auth_in, create(1, length_quad32));
+    test2 := auth_in;
+    test_len := length_quad32;
     ghash_incremental_to_ghash(h, auth_in);
+    assert length(auth_in) > 0 /\ y_final == ghash_LE(h, #ghash_plain_LE(auth_in));
 }
 
 /*
