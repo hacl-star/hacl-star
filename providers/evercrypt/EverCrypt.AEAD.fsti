@@ -149,17 +149,14 @@ val decrypt:
   ek:expanded_key a ->
   iv:iv_p a ->
   ad:ad_p a ->
-  ad_len: UInt32.t { v ad_len = B.length ad } ->
+  ad_len: UInt32.t { v ad_len = B.length ad /\ v ad_len <= pow2 31 } ->
   cipher: plain_p a ->
   cipher_len: UInt32.t { v cipher_len = B.length cipher } ->
   dst: B.buffer UInt8.t { B.length dst = B.length cipher - tag_length a } ->
   Stack error_code
     (requires fun h0 ->
-      B.live h0 (EK?.ek ek) /\
-      B.live h0 iv /\
-      B.live h0 ad /\
-      B.live h0 cipher /\
-      B.live h0 dst)
+      MB.(all_live h0 [ buf (EK?.ek ek); buf iv; buf ad; buf cipher; buf dst ]) /\
+      (B.disjoint cipher dst \/ cipher == dst))
     (ensures fun h0 err h1 ->
       let kv = G.reveal (EK?.kv ek) in
       let plain = decrypt #a kv (B.as_seq h0 iv) (B.as_seq h0 ad) (B.as_seq h0 cipher) in

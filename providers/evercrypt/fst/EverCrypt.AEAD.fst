@@ -138,9 +138,52 @@ let encrypt #a ek iv ad ad_len plain plain_len dst =
       Success
 
 
-let decrypt #a ek iv ad ad_len cipher cipher_len dst =
+#set-options "--z3rlimit 100"
+let decrypt #a ek iv ad ad_len cipher_and_tag cipher_and_tag_len dst =
   if MB.is_null (EK?.ek ek) then
     InvalidKey
 
-  else
-    admit ()
+  else match a with
+  | AES128_GCM | AES256_GCM ->
+      // See comments for encrypt above
+      MB.recall_p (EK?.ek ek) (S.equal (expand_or_dummy a (EK?.kv ek)));
+      assert (EverCrypt.TargetConfig.x64 /\ X64.CPU_Features_s.(aesni_enabled /\ pclmulqdq_enabled));
+      assert (is_supported_alg a /\ not (MB.g_is_null (EK?.ek ek)));
+
+      assert (
+        let k = G.reveal (EK?.kv ek) in
+        let k_nat = Words.Seq_s.seq_uint8_to_seq_nat8 k in
+        let k_w = Words.Seq_s.seq_nat8_to_seq_nat32_LE k_nat in
+        AES_s.is_aes_key_LE (vale_alg_of_alg a) k_w);
+
+      admit ()
+
+  | CHACHA20_POLY1305 ->
+      // See comments for encrypt above
+      MB.recall_p (EK?.ek ek) (S.equal (expand_or_dummy a (EK?.kv ek)));
+      assert (MB.length (EK?.ek ek) = 32);
+      assert (B.length iv = 12);
+
+      push_frame ();
+
+      let tmp = B.alloca 0uy 32ul in
+      MB.blit (EK?.ek ek) 0ul tmp 0ul 32ul;
+
+      let cipher_len = cipher_and_tag_len - 16ul in
+      [@ inline_let ] let bound = pow2 32 - 1 - 16 in
+      assert (v cipher_len <= bound);
+      assert_norm (bound + 16 <= pow2 32 - 1);
+      assert_norm (pow2 31 + bound / 64 <= pow2 32 - 1);
+
+      let cipher = B.sub cipher_and_tag 0ul cipher_len in
+      let tag = B.sub cipher_and_tag cipher_len 16ul in
+      let r = Hacl.Impl.Chacha20Poly1305.aead_decrypt_chacha_poly
+        tmp iv ad_len ad cipher_len dst cipher tag
+      in
+      pop_frame ();
+      if r = 0ul then
+        Success
+      else if r = 1ul then
+        Failure
+      else
+        admit () // missing exhaustivity in post-condition of ChachaPoly
