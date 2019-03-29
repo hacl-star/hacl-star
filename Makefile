@@ -40,6 +40,10 @@
 # - min-test: staged, runs only a subset of verification for the purposes of
 #   F*'s extended CI
 
+# Put your local configuration (e.g. HACL_HOME, KREMLIN_HOME, etc.) in
+# Makefile.config
+-include Makefile.config
+
 #########################
 # Catching setup errors #
 #########################

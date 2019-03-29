@@ -9,7 +9,7 @@
 #include <stdbool.h>
 #include <time.h>
 
-#include "Hacl_Curve25519_new.h"
+#include "Hacl_Curve25519.h"
 
 typedef uint64_t cycles;
 
