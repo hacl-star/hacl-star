@@ -425,12 +425,7 @@ let aead_encrypt pkey iv ad adlen plaintext len cipher tag =
     vale_aes256_gcm_encrypt xk iv ad adlen plaintext len cipher tag
   else if SC.hacl && AEAD_CHACHA20_POLY1305_HACL? k then
     let key = AEAD_CHACHA20_POLY1305_HACL?.k k in
-    push_frame ();
-    let tmp = B.alloca 0uy (len `UInt32.add` 16ul) in
-    Hacl.Impl.Chacha20Poly1305.aead_encrypt_chacha_poly key iv adlen ad len plaintext tmp;
-    B.blit tmp 0ul cipher 0ul len;
-    B.blit tmp len tag 0ul 16ul;
-    pop_frame ()
+    Hacl.Impl.Chacha20Poly1305.aead_encrypt_chacha_poly key iv adlen ad len plaintext cipher tag
   else if SC.openssl && AEAD_OPENSSL? k then
     let key = AEAD_OPENSSL?.st k in
     OpenSSL.aead_encrypt key iv ad adlen plaintext len cipher tag

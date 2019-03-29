@@ -92,7 +92,7 @@ let expand_in #a r k =
       EK (G.hide (S.empty #UInt8.t)) MB.mnull
 
 #set-options "--z3rlimit 50"
-let encrypt #a ek iv ad ad_len plain plain_len dst =
+let encrypt #a ek iv ad ad_len plain plain_len cipher tag =
   if MB.is_null (EK?.ek ek) then
     InvalidKey
   else match a with
@@ -133,13 +133,13 @@ let encrypt #a ek iv ad ad_len plain plain_len dst =
       assert_norm (pow2 31 + pow2 32 / 64 <= pow2 32 - 1);
 
       Hacl.Impl.Chacha20Poly1305.aead_encrypt_chacha_poly
-        tmp iv ad_len ad plain_len plain dst;
+        tmp iv ad_len ad plain_len plain cipher tag;
       pop_frame ();
       Success
 
 
-#set-options "--z3rlimit 100"
-let decrypt #a ek iv ad ad_len cipher_and_tag cipher_and_tag_len dst =
+#set-options "--z3rlimit 50"
+let decrypt #a ek iv ad ad_len cipher cipher_len tag dst =
   if MB.is_null (EK?.ek ek) then
     InvalidKey
 
@@ -169,21 +169,22 @@ let decrypt #a ek iv ad ad_len cipher_and_tag cipher_and_tag_len dst =
       let tmp = B.alloca 0uy 32ul in
       MB.blit (EK?.ek ek) 0ul tmp 0ul 32ul;
 
-      let cipher_len = cipher_and_tag_len - 16ul in
       [@ inline_let ] let bound = pow2 32 - 1 - 16 in
       assert (v cipher_len <= bound);
       assert_norm (bound + 16 <= pow2 32 - 1);
       assert_norm (pow2 31 + bound / 64 <= pow2 32 - 1);
 
-      let cipher = B.sub cipher_and_tag 0ul cipher_len in
-      let tag = B.sub cipher_and_tag cipher_len 16ul in
+      let h0 = ST.get () in
       let r = Hacl.Impl.Chacha20Poly1305.aead_decrypt_chacha_poly
         tmp iv ad_len ad cipher_len dst cipher tag
       in
+      assert (
+        let cipher_tag = B.as_seq h0 cipher `S.append` B.as_seq h0 tag in
+        let tag_s = S.slice cipher_tag (S.length cipher_tag - tag_length a) (S.length cipher_tag) in
+        let cipher_s = S.slice cipher_tag 0 (S.length cipher_tag - tag_length a) in
+        S.equal cipher_s (B.as_seq h0 cipher) /\ S.equal tag_s (B.as_seq h0 tag));
       pop_frame ();
       if r = 0ul then
         Success
-      else if r = 1ul then
-        Failure
       else
-        admit () // missing exhaustivity in post-condition of ChachaPoly
+        Failure
