@@ -29,6 +29,7 @@ type subblock = b:bytes{length b <= size_block}
 
 // Internally, blocks are represented as 16 x 4-byte integers
 let lanes = n:width{n == 1 \/ n == 4 \/ n == 8}
+inline_for_extraction
 let uint32xN (w:lanes) = vec_t U32 w
 type state (w:lanes) = lseq (uint32xN w) 16
 type idx = n:size_nat{n < 16}
