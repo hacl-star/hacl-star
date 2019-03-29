@@ -268,23 +268,24 @@ let test_chacha20_poly1305 vec =
       (LB tag_len tag), (LB plaintext_len plaintext), (LB ciphertext_len ciphertext) = vec
     in
     let plaintext'    = B.alloca 0uy plaintext_len in
-    let ciphertext'   = B.alloca 0uy (plaintext_len `U32.add` 16ul) in
+    let ciphertext'   = B.alloca 0uy plaintext_len in
+    let tag'          = B.alloca 0uy 16ul in
 
     let s0 = TestLib.cpucycles () in
     let ek = EverCrypt.AEAD.expand_in #Spec.AEAD.CHACHA20_POLY1305 HyperStack.root key in
     if LowStar.Monotonic.Buffer.is_null (EverCrypt.AEAD.EK?.ek ek) then begin
       C.String.print !$"Expansion failed!\n"; C.portable_exit 1l
     end;
-    if EverCrypt.AEAD.encrypt ek iv aad aad_len plaintext plaintext_len ciphertext' <>
+    if EverCrypt.AEAD.encrypt ek iv aad aad_len plaintext plaintext_len ciphertext' tag' <>
       EverCrypt.AEAD.Success then begin
       C.String.print !$"Expansion failed!\n"; C.portable_exit 1l
     end;
     let s1 = TestLib.cpucycles () in
     TestLib.print_cycles_per_round s0 s1 1ul;
-    TestLib.compare_and_print !$"of Chacha20-Poly1305 cipher" ciphertext (B.sub ciphertext' 0ul plaintext_len) plaintext_len;
-    TestLib.compare_and_print !$"of Chacha20-Poly1305 tag" tag (B.sub ciphertext' plaintext_len 16ul) 16ul;
+    TestLib.compare_and_print !$"of Chacha20-Poly1305 cipher" ciphertext ciphertext' plaintext_len;
+    TestLib.compare_and_print !$"of Chacha20-Poly1305 tag" tag tag' 16ul;
 
-    if EverCrypt.AEAD.decrypt ek iv aad aad_len ciphertext' (plaintext_len `U32.add` 16ul) plaintext' <> EverCrypt.AEAD.Success then begin
+    if EverCrypt.AEAD.decrypt ek iv aad aad_len ciphertext' plaintext_len tag plaintext' <> EverCrypt.AEAD.Success then begin
       C.String.print !$"Decryption failed!\n"; C.portable_exit 1l
     end;
     TestLib.compare_and_print !$"of Chacha20-Poly1305 plaintext" plaintext plaintext' plaintext_len;
