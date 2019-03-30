@@ -68,7 +68,6 @@ let gcm_encrypt_LE_snd_helper (iv_BE length_quad32 hash mac:quad32) (plain auth 
   //()
 
 
-
 #reset-options "--z3rlimit 10"
 let gcm_blocks_helper_enc (alg:algorithm) (key:seq nat32)
                    (p128x6 p128 p_bytes c128x6 c128 c_bytes:seq quad32)
@@ -178,6 +177,26 @@ let gcm_blocks_helper_enc (alg:algorithm) (key:seq nat32)
   gcm_encrypt_LE_fst_helper ctr_BE_2 iv_BE plain_bytes auth_bytes cipher_bytes alg key;
   ()
 
+
+let slice_append_back (#a:Type) (x y:seq a) (i:nat) : Lemma
+  (requires length x <= i /\ i <= length x + length y)
+  (ensures slice (append x y) 0 i == append x (slice y 0 (i - length x)))
+  =
+  assert (equal (slice (append x y) 0 i) (append x (slice y 0 (i - length x))));
+  ()
+
+let append_distributes_le_seq_quad32_to_bytes (x y:seq quad32) : 
+  Lemma (le_seq_quad32_to_bytes (append x y) == append (le_seq_quad32_to_bytes x) (le_seq_quad32_to_bytes y))
+  =
+  admit()
+  
+let pad_to_128_bits_multiple_append (x y:seq nat8) : Lemma
+  (requires length x % 16 == 0)
+  (ensures pad_to_128_bits (append x y) == append x (pad_to_128_bits y))
+  = 
+  assert (equal (pad_to_128_bits (append x y)) (append x (pad_to_128_bits y)))
+
+#reset-options "--z3rlimit 30"
 let gcm_blocks_helper (alg:algorithm) (key:seq nat32)
                    (a128 a_bytes p128x6 p128 p_bytes c128x6 c128 c_bytes:seq quad32)
                    (p_num_bytes a_num_bytes:nat)
@@ -302,30 +321,7 @@ let gcm_blocks_helper (alg:algorithm) (key:seq nat32)
   gcm_blocks_helper_enc alg key p128x6 p128 p_bytes c128x6 c128 c_bytes auth_input_bytes p_num_bytes iv_BE;
   //assert (cipher_bytes == fst (gcm_encrypt_LE alg (seq_nat32_to_seq_nat8_LE key) (be_quad32_to_bytes iv_BE) plain_bytes auth_input_bytes)); // Passes
 
-  if p_num_bytes > (length p128x6 + length p128) * 16 then (
-    ()
-  ) else (
-    (*
-    calc (==) {
-      append (append (append auth_quads c128x6) c128) (create 1 length_quad);
-        == { append_assoc auth_quads c128x6 c128 }
-      append (append auth_quads (append c128x6 c128)) (create 1 length_quad);
-        == { append_assoc auth_quads (append c128x6 c128) (create 1 length_quad) }
-      append auth_quads (append (append c128x6 c128) (create 1 length_quad));
-    };
-    let c = append c128x6 c128 in
-    calc (==) {
-      le_bytes_to_seq_quad32 (pad_to_128_bits (slice (le_seq_quad32_to_bytes c) 0 p_num_bytes));
-      == { assert (equal (le_seq_quad32_to_bytes c) (slice (le_seq_quad32_to_bytes c) 0 p_num_bytes)) }
-      le_bytes_to_seq_quad32 (pad_to_128_bits (le_seq_quad32_to_bytes c));
-      == { assert (pad_to_128_bits (le_seq_quad32_to_bytes c) == (le_seq_quad32_to_bytes c)) }
-      le_bytes_to_seq_quad32 (le_seq_quad32_to_bytes c);
-      == { le_bytes_to_seq_quad32_to_bytes c }
-      c;
-    };
-
-
-    calc (==) {
+  calc (==) {
       enc_hash;
       == {}
       gctr_encrypt_block ctr_BE_1 (ghash_LE h final_quads) alg key 0;
@@ -348,12 +344,99 @@ let gcm_blocks_helper (alg:algorithm) (key:seq nat32)
       == { le_seq_quad32_to_bytes_of_singleton enc_hash }
       le_quad32_to_bytes enc_hash;
     };  
+
+
+  if p_num_bytes > (length p128x6 + length p128) * 16 then (
+    let c = append (append c128x6 c128) c_bytes in
+    calc (==) {
+      append (append (append auth_quads c128x6) c128) c_bytes;
+        == { append_assoc auth_quads c128x6 c128 }
+      append (append auth_quads (append c128x6 c128)) c_bytes;  
+        == { append_assoc auth_quads (append c128x6 c128) c_bytes }
+      append auth_quads (append (append c128x6 c128) c_bytes);
+        == {}
+      append auth_quads c;
+    };
+
+    calc (==) {
+      append (append (append (append auth_quads c128x6) c128) c_bytes) (create 1 length_quad);
+        = {} // See previous calc
+      append (append auth_quads (append (append c128x6 c128) c_bytes)) (create 1 length_quad);  
+        == { append_assoc auth_quads c (create 1 length_quad) }
+      append auth_quads (append c (create 1 length_quad));
+    };
+
+    let raw_quads_old = append auth_quads c in  
+    calc (==) {
+      raw_quads;
+        == {}
+      le_bytes_to_seq_quad32 (pad_to_128_bits (slice (le_seq_quad32_to_bytes raw_quads_old) 0 total_bytes));
+        == {
+          calc (==) {
+            pad_to_128_bits (slice (le_seq_quad32_to_bytes raw_quads_old) 0 total_bytes);
+              == {
+                   calc (==) {
+                     slice (le_seq_quad32_to_bytes raw_quads_old) 0 total_bytes;
+                       == { append_distributes_le_seq_quad32_to_bytes auth_quads c } 
+                     slice (append (le_seq_quad32_to_bytes auth_quads) (le_seq_quad32_to_bytes c)) 0 total_bytes;
+                       == { slice_append_back (le_seq_quad32_to_bytes auth_quads) 
+                                            (le_seq_quad32_to_bytes c) 
+                                            total_bytes }
+                     append (le_seq_quad32_to_bytes auth_quads) (slice (le_seq_quad32_to_bytes c) 0 p_num_bytes);
+                       == {}
+                     append (le_seq_quad32_to_bytes auth_quads) cipher_bytes;
+                   }
+                 }
+            pad_to_128_bits (append (le_seq_quad32_to_bytes auth_quads) cipher_bytes);
+              == { pad_to_128_bits_multiple_append (le_seq_quad32_to_bytes auth_quads) cipher_bytes }
+            append (le_seq_quad32_to_bytes auth_quads) (pad_to_128_bits cipher_bytes);
+          }
+        }
+      le_bytes_to_seq_quad32 (append (le_seq_quad32_to_bytes auth_quads) (pad_to_128_bits cipher_bytes));
+        == { append_distributes_le_bytes_to_seq_quad32 
+               (le_seq_quad32_to_bytes auth_quads) 
+               (pad_to_128_bits cipher_bytes) }
+      append (le_bytes_to_seq_quad32 (le_seq_quad32_to_bytes auth_quads)) (le_bytes_to_seq_quad32 (pad_to_128_bits cipher_bytes));
+        == { le_bytes_to_seq_quad32_to_bytes auth_quads }
+      append auth_quads (le_bytes_to_seq_quad32 (pad_to_128_bits cipher_bytes));
+    };
+
+    let auth_padded_quads' = le_bytes_to_seq_quad32 (pad_to_128_bits auth_input_bytes) in
+    let cipher_padded_quads' = le_bytes_to_seq_quad32 (pad_to_128_bits cipher_bytes) in
+    
+    calc (==) {
+      append raw_quads (create 1 length_quad);
+        == {}   
+      append (append auth_quads (le_bytes_to_seq_quad32 (pad_to_128_bits cipher_bytes))) (create 1 length_quad);
+        == { assert (equal auth_quads auth_padded_quads') }
+      append (append auth_padded_quads' cipher_padded_quads') (create 1 length_quad);
+        == { append_assoc auth_padded_quads' cipher_padded_quads' (create 1 length_quad) }
+      append auth_padded_quads' (append cipher_padded_quads' (create 1 length_quad));
+    };
     gcm_encrypt_LE_snd_helper iv_BE length_quad hash enc_hash plain_bytes auth_input_bytes cipher_bytes alg key;
-    *)
-    admit()
+    ()
+  ) else (
+    calc (==) {
+      append (append (append auth_quads c128x6) c128) (create 1 length_quad);
+        == { append_assoc auth_quads c128x6 c128 }
+      append (append auth_quads (append c128x6 c128)) (create 1 length_quad);
+        == { append_assoc auth_quads (append c128x6 c128) (create 1 length_quad) }
+      append auth_quads (append (append c128x6 c128) (create 1 length_quad));
+    };
+    let c = append c128x6 c128 in
+    calc (==) {
+      le_bytes_to_seq_quad32 (pad_to_128_bits (slice (le_seq_quad32_to_bytes c) 0 p_num_bytes));
+      == { assert (equal (le_seq_quad32_to_bytes c) (slice (le_seq_quad32_to_bytes c) 0 p_num_bytes)) }
+      le_bytes_to_seq_quad32 (pad_to_128_bits (le_seq_quad32_to_bytes c));
+      == { assert (pad_to_128_bits (le_seq_quad32_to_bytes c) == (le_seq_quad32_to_bytes c)) }
+      le_bytes_to_seq_quad32 (le_seq_quad32_to_bytes c);
+      == { le_bytes_to_seq_quad32_to_bytes c }
+      c;
+    };
+
+    gcm_encrypt_LE_snd_helper iv_BE length_quad hash enc_hash plain_bytes auth_input_bytes cipher_bytes alg key;
     ()
   );
-  admit();
   ()
 
 
