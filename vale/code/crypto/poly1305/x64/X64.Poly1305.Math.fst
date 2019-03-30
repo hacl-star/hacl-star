@@ -5,7 +5,7 @@ open FStar.Tactics.Canon
 open FStar.Math.Lemmas
 // open FStar.Math.Lib
 open Math.Lemmas.Int
-open CanonCommSemiring
+open FStar.Tactics.CanonCommSemiring
 open FStar.Mul
 open TypesNative_s
 open Arch.TypesNative
@@ -378,11 +378,11 @@ let lemma_poly_demod (p:pos) (h:int) (x:int) (r:int) =
 
 #reset-options "--z3cliopt smt.QI.EAGER_THRESHOLD=100 --z3cliopt smt.CASE_SPLIT=3 --z3cliopt smt.arith.nl=false --max_fuel 2 --max_ifuel 1 --smtencoding.elim_box true --smtencoding.nl_arith_repr wrapped --smtencoding.l_arith_repr native --z3rlimit 50"
 let lemma_reduce128  (h:int) (h2:nat64) (h1:nat64) (h0:nat64) (g:int) (g2:nat64) (g1:nat64) (g0:nat64) =
-  reveal_opaque mod2_128';
+  FStar.Pervasives.reveal_opaque (`%mod2_128) mod2_128;
   reveal_opaque lowerUpper128;
   reveal_opaque lowerUpper192;
-  reveal_opaque modp';
-  assert_norm (mod2_128'(g - 0x400000000000000000000000000000000) == mod2_128'(g));
+  FStar.Pervasives.reveal_opaque (`%modp) modp;
+  assert_norm (mod2_128 (g - 0x400000000000000000000000000000000) == mod2_128 g);
   if (g2<4) then
   begin
     assert(h < 0x3fffffffffffffffffffffffffffffffb);
@@ -390,7 +390,7 @@ let lemma_reduce128  (h:int) (h2:nat64) (h1:nat64) (h0:nat64) (g:int) (g2:nat64)
     assert (modp(h) == h % 0x3fffffffffffffffffffffffffffffffb);
     assert (mod2_128(modp(h)) == mod2_128(h));
     reveal_opaque lowerUpper128;
-    assert_norm (mod2_128'(h) == lowerUpper128 h0 h1)
+    assert_norm (mod2_128 h == lowerUpper128 h0 h1)
   end
   else
   begin
@@ -405,12 +405,12 @@ let lemma_reduce128  (h:int) (h2:nat64) (h1:nat64) (h0:nat64) (g:int) (g2:nat64)
     assert(mod2_128(h - 0x3fffffffffffffffffffffffffffffffb) ==
                       mod2_128(g - 0x400000000000000000000000000000000));
     assert(mod2_128(g - 0x400000000000000000000000000000000) == mod2_128(g));
-    assert_norm (mod2_128'(g) == lowerUpper128 g0 g1)
+    assert_norm (mod2_128 g == lowerUpper128 g0 g1)
   end
 
 let lemma_add_key (old_h0:nat64) (old_h1:nat64) (h_in:int) (key_s0:nat64) (key_s1:nat64) (key_s:int) (h0:nat64) (h1:nat64) =
   reveal_opaque lowerUpper128;
-  reveal_opaque mod2_128';
+  FStar.Pervasives.reveal_opaque (`%mod2_128) mod2_128;
   ()
 
 
@@ -422,4 +422,8 @@ let lemma_lowerUpper128_and (x:nat128) (x0:nat64) (x1:nat64) (y:nat128) (y0:nat6
   lemma_lowerUpper128_andu x x0 x1 y y0 y1 z z0 z1
 
 let lemma_add_mod128 (x y :int) =
-  reveal_opaque mod2_128'
+  FStar.Pervasives.reveal_opaque (`%mod2_128) mod2_128
+
+let modp_0 () =
+  assert_norm (modp 0 == 0);
+  ()

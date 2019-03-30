@@ -1,5 +1,6 @@
 module X64.Memory
-
+include Interop.Types
+open Prop_s
 open X64.Machine_s
 
 val heap : Type u#1
@@ -11,17 +12,7 @@ unfold let nat32 = Words_s.nat32
 unfold let nat64 = Words_s.nat64
 unfold let quad32 = Types_s.quad32
 
-type base_typ =
-| TUInt8
-| TUInt16
-| TUInt32
-| TUInt64
-| TUInt128
-
-type typ =
-| TBase: (b:base_typ) -> typ
-
-let type_of_base_typ (t:base_typ) : Tot Type0 =
+let base_typ_as_vale_type (t:base_typ) : Tot eqtype =
   match t with
   | TUInt8 -> nat8
   | TUInt16 -> nat16
@@ -29,54 +20,49 @@ let type_of_base_typ (t:base_typ) : Tot Type0 =
   | TUInt64 -> nat64
   | TUInt128 -> quad32
 
-let type_of_typ (t:typ) : Tot Type0 =
-  match t with
-  | TBase b -> type_of_base_typ b
-
-val buffer (t:typ) : Type0
-val buffer_as_seq (#t:typ) (h:mem) (b:buffer t) : GTot (Seq.seq (type_of_typ t))
-val buffer_readable (#t:typ) (h:mem) (b:buffer t) : GTot Type0
-val buffer_length (#t:typ) (b:buffer t) : GTot nat
+val buffer (t:base_typ) : Type u#1
+val buffer_as_seq (#t:base_typ) (h:mem) (b:buffer t) : GTot (Seq.seq (base_typ_as_vale_type t))
+val buffer_readable (#t:base_typ) (h:mem) (b:buffer t) : GTot prop0
+val buffer_writeable (#t:base_typ) (b:buffer t) : GTot prop0
+val buffer_length (#t:base_typ) (b:buffer t) : GTot nat
 val loc : Type u#0
 val loc_none : loc
 val loc_union (s1 s2:loc) : GTot loc
-val loc_buffer (#t:typ) (b:buffer t) : GTot loc
-val loc_disjoint (s1 s2:loc) : GTot Type0
-val loc_includes (s1 s2:loc) : GTot Type0
-val modifies (s:loc) (h1 h2:mem) : GTot Type0
+val loc_buffer (#t:base_typ) (b:buffer t) : GTot loc
+val loc_disjoint (s1 s2:loc) : GTot prop0
+val loc_includes (s1 s2:loc) : GTot prop0
+val modifies (s:loc) (h1 h2:mem) : GTot prop0
 
-unfold let buffer8 = buffer (TBase TUInt8)
-unfold let buffer16 = buffer (TBase TUInt16)
-unfold let buffer32 = buffer (TBase TUInt32)
-unfold let buffer64 = buffer (TBase TUInt64)
-unfold let buffer128 = buffer (TBase TUInt128)
+// Named abbreviations for Vale type system:
+unfold let vuint8 = TUInt8
+unfold let vuint16 = TUInt16
+unfold let vuint32 = TUInt32
+unfold let vuint64 = TUInt64
+unfold let vuint128 = TUInt128
 
-val buffer_addr : #t:typ -> b:buffer t -> h:mem -> GTot int
+let buffer8 = buffer vuint8
+let buffer16 = buffer vuint16
+let buffer32 = buffer vuint32
+let buffer64 = buffer vuint64
+let buffer128 = buffer vuint128
 
-let rec loc_locs_disjoint_rec (l:loc) (ls:list loc) : Type0 =
-  match ls with
-  | [] -> True
-  | h::t -> loc_disjoint l h /\ loc_disjoint h l /\ loc_locs_disjoint_rec l t
-
-let rec locs_disjoint_rec (ls:list loc) : Type0 =
-  match ls with
-  | [] -> True
-  | h::t -> loc_locs_disjoint_rec h t /\ locs_disjoint_rec t
+val buffer_addr : #t:base_typ -> b:buffer t -> h:mem -> GTot int
 
 unfold
-let locs_disjoint (ls:list loc) : Type0 = normalize (locs_disjoint_rec ls)
+let locs_disjoint (ls:list loc) : prop0 =
+  BigOps.normal (BigOps.pairwise_and' (fun x y -> loc_disjoint x y /\ loc_disjoint y x) ls)
 
 // equivalent to modifies; used to prove modifies clauses via modifies_goal_directed_trans
-val modifies_goal_directed (s:loc) (h1 h2:mem) : GTot Type0
+val modifies_goal_directed (s:loc) (h1 h2:mem) : GTot prop0
 val lemma_modifies_goal_directed (s:loc) (h1 h2:mem) : Lemma
   (modifies s h1 h2 == modifies_goal_directed s h1 h2)
 
-val buffer_length_buffer_as_seq (#t:typ) (h:mem) (b:buffer t) : Lemma
+val buffer_length_buffer_as_seq (#t:base_typ) (h:mem) (b:buffer t) : Lemma
   (requires True)
   (ensures (Seq.length (buffer_as_seq h b) == buffer_length b))
   [SMTPat (Seq.length (buffer_as_seq h b))]
 
-val modifies_buffer_elim (#t1:typ) (b:buffer t1) (p:loc) (h h':mem) : Lemma
+val modifies_buffer_elim (#t1:base_typ) (b:buffer t1) (p:loc) (h h':mem) : Lemma
   (requires
     loc_disjoint (loc_buffer b) p /\
     buffer_readable h b /\
@@ -92,7 +78,7 @@ val modifies_buffer_elim (#t1:typ) (b:buffer t1) (p:loc) (h h':mem) : Lemma
     [SMTPat (modifies p h h'); SMTPat (buffer_as_seq h' b)];
   ]]
 
-val modifies_buffer_addr (#t:typ) (b:buffer t) (p:loc) (h h':mem) : Lemma
+val modifies_buffer_addr (#t:base_typ) (b:buffer t) (p:loc) (h h':mem) : Lemma
   (requires
     modifies p h h'
   )
@@ -100,7 +86,7 @@ val modifies_buffer_addr (#t:typ) (b:buffer t) (p:loc) (h h':mem) : Lemma
   [SMTPat (modifies p h h'); SMTPat (buffer_addr b h')]
 
 
-val modifies_buffer_readable (#t:typ) (b:buffer t) (p:loc) (h h':mem) : Lemma
+val modifies_buffer_readable (#t:base_typ) (b:buffer t) (p:loc) (h h':mem) : Lemma
   (requires
     modifies p h h' /\
     buffer_readable h b
@@ -135,7 +121,7 @@ val loc_includes_union_l (s1 s2 s:loc) : Lemma
   (ensures (loc_includes (loc_union s1 s2) s))
   // for efficiency, no SMT pattern
 
-val loc_includes_union_l_buffer (#t:typ) (s1 s2:loc) (b:buffer t) : Lemma
+val loc_includes_union_l_buffer (#t:base_typ) (s1 s2:loc) (b:buffer t) : Lemma
   (requires (loc_includes s1 (loc_buffer b) \/ loc_includes s2 (loc_buffer b)))
   (ensures (loc_includes (loc_union s1 s2) (loc_buffer b)))
   [SMTPat (loc_includes (loc_union s1 s2) (loc_buffer b))]
@@ -183,15 +169,15 @@ val modifies_goal_directed_trans2 (s12:loc) (h1 h2:mem) (s13:loc) (h3:mem) : Lem
   (ensures (modifies_goal_directed s13 h1 h3))
   [SMTPat (modifies s12 h1 h2); SMTPat (modifies_goal_directed s13 h1 h3)]
 
-val buffer_read (#t:typ) (b:buffer t) (i:int) (h:mem) : Ghost (type_of_typ t)
+val buffer_read (#t:base_typ) (b:buffer t) (i:int) (h:mem) : Ghost (base_typ_as_vale_type t)
   (requires True)
   (ensures (fun v ->
     0 <= i /\ i < buffer_length b /\ buffer_readable h b ==>
     v == Seq.index (buffer_as_seq h b) i
   ))
 
-val buffer_write (#t:typ) (b:buffer t) (i:int) (v:type_of_typ t) (h:mem) : Ghost mem
-  (requires buffer_readable h b)
+val buffer_write (#t:base_typ) (b:buffer t) (i:int) (v:base_typ_as_vale_type t) (h:mem) : Ghost mem
+  (requires buffer_readable h b /\ buffer_writeable b)
   (ensures (fun h' ->
     0 <= i /\ i < buffer_length b /\ buffer_readable h b ==>
     modifies (loc_buffer b) h h' /\
@@ -201,13 +187,16 @@ val buffer_write (#t:typ) (b:buffer t) (i:int) (v:type_of_typ t) (h:mem) : Ghost
 
 
 val valid_mem64 : ptr:int -> h:mem -> GTot bool // is there a 64-bit word at address ptr?
+val writeable_mem64 : ptr:int -> h:mem -> GTot bool // can we write a 64-bit word at address ptr?
 val load_mem64 : ptr:int -> h:mem -> GTot nat64 // the 64-bit word at ptr (if valid_mem64 holds)
 val store_mem64 : ptr:int -> v:nat64 -> h:mem -> GTot mem
 
 val valid_mem128 (ptr:int) (h:mem) : GTot bool
+val writeable_mem128 (ptr:int) (h:mem) : GTot bool
 val load_mem128  (ptr:int) (h:mem) : GTot quad32
 val store_mem128 (ptr:int) (v:quad32) (h:mem) : GTot mem
 
+// TODO: We can probably remove the following lemmas from at least this interface
 val lemma_valid_mem64 : b:buffer64 -> i:nat -> h:mem -> Lemma
   (requires
     i < Seq.length (buffer_as_seq h b) /\
@@ -215,6 +204,16 @@ val lemma_valid_mem64 : b:buffer64 -> i:nat -> h:mem -> Lemma
   )
   (ensures
     valid_mem64 (buffer_addr b h + 8 `op_Multiply` i) h
+  )
+
+val lemma_writeable_mem64 : b:buffer64 -> i:nat -> h:mem -> Lemma
+  (requires
+    i < Seq.length (buffer_as_seq h b) /\
+    buffer_readable h b /\
+    buffer_writeable b
+  )
+  (ensures
+    writeable_mem64 (buffer_addr b h + 8 `op_Multiply` i) h
   )
 
 val lemma_load_mem64 : b:buffer64 -> i:nat -> h:mem -> Lemma
@@ -229,7 +228,8 @@ val lemma_load_mem64 : b:buffer64 -> i:nat -> h:mem -> Lemma
 val lemma_store_mem64 : b:buffer64 -> i:nat-> v:nat64 -> h:mem -> Lemma
   (requires
     i < Seq.length (buffer_as_seq h b) /\
-    buffer_readable h b
+    buffer_readable h b /\
+    buffer_writeable b
   )
   (ensures
     store_mem64 (buffer_addr b h + 8 `op_Multiply` i) v h == buffer_write b i v h
@@ -244,6 +244,16 @@ val lemma_valid_mem128 : b:buffer128 -> i:nat -> h:mem -> Lemma
     valid_mem128 (buffer_addr b h + 16 `op_Multiply` i) h
   )
 
+val lemma_writeable_mem128 : b:buffer128 -> i:nat -> h:mem -> Lemma
+  (requires
+    i < Seq.length (buffer_as_seq h b) /\
+    buffer_readable h b /\
+    buffer_writeable b
+  )
+  (ensures
+    writeable_mem128 (buffer_addr b h + 16 `op_Multiply` i) h
+  )
+
 val lemma_load_mem128 : b:buffer128 -> i:nat -> h:mem -> Lemma
   (requires
     i < Seq.length (buffer_as_seq h b) /\
@@ -256,40 +266,57 @@ val lemma_load_mem128 : b:buffer128 -> i:nat -> h:mem -> Lemma
 val lemma_store_mem128 : b:buffer128 -> i:nat -> v:quad32 -> h:mem -> Lemma
   (requires
     i < Seq.length (buffer_as_seq h b) /\
-    buffer_readable h b
+    buffer_readable h b /\
+    buffer_writeable b
   )
   (ensures
     store_mem128 (buffer_addr b h + 16 `op_Multiply` i) v h == buffer_write b i v h
   )
 
-val lemma_store_load_mem64 : ptr:int -> v:nat64 -> h:mem -> Lemma
-  (requires valid_mem64 ptr h)
-  (ensures (load_mem64 ptr (store_mem64 ptr v h) = v))
+//Memtaint related functions
 
-val lemma_frame_store_mem64: i:int -> v:nat64 -> h:mem -> Lemma (
-  let h' = store_mem64 i v h in
-  forall i'. i' <> i /\ valid_mem64 i h /\ valid_mem64 i' h ==> load_mem64 i' h = load_mem64 i' h')
+type memtaint = memTaint_t
 
-val lemma_valid_store_mem64: i:int -> v:nat64 -> h:mem -> Lemma (
-  let h' = store_mem64 i v h in
-  forall j. valid_mem64 j h <==> valid_mem64 j h')
+val valid_taint_buf64 (b:buffer64) (mem:mem) (memTaint:memtaint) (t:taint) : GTot prop0
+val valid_taint_buf128 (b:buffer128) (mem:mem) (memTaint:memtaint) (t:taint) : GTot prop0
 
-val lemma_store_load_mem128 : ptr:int -> v:quad32 -> h:mem -> Lemma
-  (requires valid_mem128 ptr h)
-  (ensures load_mem128 ptr (store_mem128 ptr v h) = v)
+val lemma_valid_taint64: (b:buffer64) ->
+                         (memTaint:memtaint) ->
+                         (mem:mem) ->
+                         (i:nat{i < buffer_length b}) ->
+                         (t:taint) -> Lemma
+  (requires valid_taint_buf64 b mem memTaint t /\ buffer_readable mem b)
+  (ensures (
+    let ptr = buffer_addr b mem + 8 `op_Multiply` i in
+    forall i'. i' >= ptr /\ i' < ptr + 8 ==> Map.sel memTaint i' == t))
 
-val lemma_frame_store_mem128: i:int -> v:quad32 -> h:mem -> Lemma (
-  let h' = store_mem128 i v h in
-  forall i'. i' <> i /\ valid_mem128 i h /\ valid_mem128 i' h ==> load_mem128 i' h = load_mem128 i' h')
+val lemma_valid_taint128: (b:buffer128) ->
+                         (memTaint:memtaint) ->
+                         (mem:mem) ->
+                         (i:nat{i < buffer_length b}) ->
+                         (t:taint) -> Lemma
+  (requires valid_taint_buf128 b mem memTaint t /\ buffer_readable mem b)
+  (ensures ( 
+    let ptr = buffer_addr b mem + 16 `op_Multiply` i in
+    forall i'. i' >= ptr /\ i' < ptr + 16 ==> Map.sel memTaint i' == t))
 
-val lemma_valid_store_mem128: i:int -> v:quad32 -> h:mem -> Lemma (
-  let h' = store_mem128 i v h in
-  forall j. valid_mem128 j h <==> valid_mem128 j h')
+val same_memTaint64: (b:buffer64) ->
+                   (mem0:mem) ->
+                   (mem1:mem) ->
+                   (memtaint0:memtaint) ->
+                   (memtaint1:memtaint) -> Lemma
+  (requires (modifies (loc_buffer b) mem0 mem1 /\
+    (forall p. Map.sel memtaint0 p == Map.sel memtaint1 p)))
+  (ensures memtaint0 == memtaint1)
 
-val memtaint: Type u#0
-
-val valid_taint_buf64: (b:buffer64) -> (mem:mem) -> (memTaint:memtaint) -> (taint:taint) -> GTot Type0
-val valid_taint_buf128: (b:buffer128) -> (mem:mem) -> (memTaint:memtaint) -> (taint:taint) -> GTot Type0
+val same_memTaint128: (b:buffer128) ->
+                   (mem0:mem) ->
+                   (mem1:mem) ->
+                   (memtaint0:memtaint) ->
+                   (memtaint1:memtaint) -> Lemma
+  (requires (modifies (loc_buffer b) mem0 mem1 /\
+    (forall p. Map.sel memtaint0 p == Map.sel memtaint1 p)))
+  (ensures memtaint0 == memtaint1)
 
 val modifies_valid_taint64 (b:buffer64) (p:loc) (h h':mem) (memTaint:memtaint) (t:taint) : Lemma
   (requires

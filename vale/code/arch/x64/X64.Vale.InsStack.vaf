@@ -1,0 +1,161 @@
+include "X64.Vale.InsBasic.vaf"
+include "X64.Vale.InsVector.vaf"
+include{:fstar}{:open} "Words.Seq_s"
+include{:fstar}{:open} "Words.Two_s"
+include{:fstar}{:open} "Words.Four_s"
+include{:fstar}{:open} "Types_s"
+include{:fstar}{:open} "Arch.Types"
+include{:fstar}{:open} "X64.Machine_s"
+include{:fstar}{:open} "X64.Memory"
+include{:fstar}{:open} "X64.Stack_i"
+include{:fstar}{:open} "X64.Memory_Sems"
+include{:fstar}{:open} "X64.Stack_Sems"
+include{:fstar}{:open} "X64.Vale.State"
+include{:fstar}{:open} "X64.Vale.Decls"
+include{:fstar}{:open} "X64.Vale.QuickCode"
+
+module X64.Vale.InsStack
+
+#verbatim{:interface}
+open Words_s
+open Words.Seq_s
+open Words.Two_s
+open Words.Four_s
+open Types_s
+open Arch.Types
+open X64.Machine_s
+open X64.Memory
+open X64.Stack_i
+open X64.Vale.State
+open X64.Vale.Decls
+open X64.Vale.QuickCode
+open X64.Vale.InsBasic
+open X64.Vale.InsVector
+#endverbatim
+
+#verbatim
+open X64.Machine_s
+open X64.Memory
+open X64.Stack_i
+open X64.Vale
+open X64.Vale.State
+open X64.Vale.StateLemmas
+open X64.Vale.Decls
+open X64.Vale.InsBasic
+open X64.Vale.InsVector
+module S = X64.Bytes_Semantics_s
+module TS = X64.Taint_Semantics_s
+module P = X64.Print_s
+open X64.Taint_Semantics
+
+friend X64.Vale.StateLemmas
+friend X64.Vale.Decls
+#endverbatim
+
+//function operator([]) #[a:Type(0), b:Type(0)](m:FStar.Map.t(a, b), key:a):b extern;
+//function operator([]) (m:mem, b:X64.Memory.buffer64):fun(int) -> nat64 extern;
+
+#reset-options "--initial_fuel 2 --max_fuel 4 --max_ifuel 2 --z3rlimit 50"
+
+procedure{:operand} Stack_in(base:reg64, inline offset:int) returns(o:opr)
+    reads
+        stack;
+    extern;
+
+
+procedure{:instruction Ins(TS.TaintedIns(tuple(S.Pop(t_op_to_op(dst))), Public))}
+         {:fast_instruction}{:quick exportOnly}{:public}
+    Pop(out dst: dst_opr64)
+    modifies rsp; stack;
+    requires
+        valid_src_stack64(rsp, stack);
+        rsp >= init_rsp(stack) - 4096;
+        rsp + 8 <= init_rsp(stack);
+    ensures
+        dst == load_stack64(old(rsp), old(stack));
+        rsp == old(rsp) + 8;
+        stack == free_stack64(rsp-8, rsp, old(stack));
+{
+
+}
+
+procedure{:instruction Ins(TS.TaintedIns(tuple(S.Push(t_op_to_op(src))), Public))}
+         {:fast_instruction}{:quick exportOnly}{:public}
+    Push(src: reg_opr64)
+    reads
+    modifies
+        rsp; stack;
+    requires
+        rsp <= init_rsp(stack);
+        init_rsp(stack) - 4096 <= rsp - 8;
+    ensures
+        rsp == old(rsp) - 8;
+        stack == store_stack64(rsp, old(src), old(stack));
+{
+    equiv_store_stack64(rsp, old(src), old(stack));
+}
+
+procedure{:instruction mk_taint_ins2(S.Mov64, dst, TStack(MReg(get_reg(src), offset)))}
+         {:fast_instruction}{:quick exportOnly}{:public}
+    Load64_stack(
+    out dst: dst_opr64,
+        src:reg_opr64,
+        inline offset:int)
+    reads
+      stack;
+    requires
+        valid_src_stack64(src + offset, stack);
+    ensures
+        dst == old(load_stack64(src + offset, stack));
+{
+
+}
+
+
+procedure {:quick exportOnly}{:public} PushXmm(
+        src:xmm,
+    out tmp:reg_opr64)
+    reads
+    modifies
+        rsp; stack;
+    requires
+        rsp <= init_rsp(stack);
+        init_rsp(stack) - 4096 <= rsp - 16;
+    ensures
+        let src_lo := lo64(src);
+        let src_hi := hi64(src);
+        stack == old(store_stack64(rsp - 16, src_hi, store_stack64(rsp - 8, src_lo, stack)));
+
+        rsp == old(rsp) - 16;
+{
+    Pextrq(tmp, src, 0);
+    Push(tmp);
+    Pextrq(tmp, src, 1);
+    Push(tmp);
+}
+
+procedure {:quick exportOnly}{:public} PopXmm(
+    out dst:xmm,
+    out tmp:reg_opr64,
+        ghost expected_xmm:quad32)
+    reads
+    modifies rsp; stack;
+    requires
+        valid_src_stack64(rsp, stack);
+        valid_src_stack64(rsp + 8, stack);
+        hi64(expected_xmm) == load_stack64(rsp, stack);
+        lo64(expected_xmm) == load_stack64(rsp+8, stack);
+        rsp >= init_rsp(stack) - 4096;
+        rsp + 16 <= init_rsp(stack);
+    ensures
+        dst == expected_xmm;
+        rsp == old(rsp) + 16;
+        stack == free_stack64(rsp-16, rsp, old(stack));
+{
+    Pop(tmp);
+    Pinsrq(dst, tmp, 1);
+    Pop(tmp);
+    Pinsrq(dst, tmp, 0);
+    push_pop_xmm(expected_xmm, old(dst));
+}
+

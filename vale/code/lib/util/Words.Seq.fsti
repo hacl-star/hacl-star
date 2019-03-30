@@ -6,6 +6,14 @@ open Words.Four_s
 open Words.Seq_s
 open FStar.Mul
 
+val two_to_seq_to_two_LE (#a:Type) (x:seq2 a) :
+  Lemma (two_to_seq_LE (seq_to_two_LE x) == x)
+  [SMTPat (two_to_seq_LE (seq_to_two_LE x))]
+
+val seq_to_two_to_seq_LE (#a:Type) (x:two a) :
+  Lemma (seq_to_two_LE (two_to_seq_LE x) == x)
+  [SMTPat (seq_to_two_LE (two_to_seq_LE x))]
+  
 val seq_to_seq_four_to_seq_LE  (#a:Type) (x:seq (four a)) :
   Lemma (seq_to_seq_four_LE (seq_four_to_seq_LE x) == x)
   [SMTPat (seq_to_seq_four_LE (seq_four_to_seq_LE x))]
@@ -45,6 +53,18 @@ val four_to_seq_LE_is_seq_four_to_seq_LE(#a:Type) (x:four a) :
 val seq_nat8_to_seq_nat32_to_seq_nat8_LE (x:seq nat32) :
   Lemma (seq_nat8_to_seq_nat32_LE (seq_nat32_to_seq_nat8_LE x) == x)
   [SMTPat (seq_nat8_to_seq_nat32_LE (seq_nat32_to_seq_nat8_LE x))]
+
+val seq_nat32_to_seq_nat8_to_seq_nat32_LE (x:seq nat8{length x % 4 == 0}) :
+  Lemma (seq_nat32_to_seq_nat8_LE (seq_nat8_to_seq_nat32_LE x) == x)
+  [SMTPat (seq_nat32_to_seq_nat8_LE (seq_nat8_to_seq_nat32_LE x))]
+
+val seq_nat8_to_seq_uint8_to_seq_nat8 (x:seq UInt8.t) :
+  Lemma (seq_nat8_to_seq_uint8 (seq_uint8_to_seq_nat8 x) == x)
+  [SMTPat (seq_nat8_to_seq_uint8 (seq_uint8_to_seq_nat8 x))]
+
+val seq_uint8_to_seq_nat8_to_seq_uint8 (x:seq nat8) :
+  Lemma (seq_uint8_to_seq_nat8 (seq_nat8_to_seq_uint8 x) == x)
+  [SMTPat (seq_uint8_to_seq_nat8 (seq_nat8_to_seq_uint8 x))]
 
 val seq_four_to_seq_LE_injective: (a:eqtype) ->
   Lemma (forall (x x':seq (four a)). seq_four_to_seq_LE x == seq_four_to_seq_LE x' ==> x == x')

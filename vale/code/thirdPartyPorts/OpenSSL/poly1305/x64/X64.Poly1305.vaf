@@ -23,16 +23,29 @@
 
 include "../../../../arch/x64/X64.Vale.InsBasic.vaf"
 include "../../../../arch/x64/X64.Vale.InsMem.vaf"
+include{:fstar}{:open} "Types_s"
+include{:fstar}{:open} "Arch.Types"
+include{:fstar}{:open} "X64.Machine_s"
+include{:fstar}{:open} "X64.Memory"
+include{:fstar}{:open} "X64.Stack_i"
+include{:fstar}{:open} "X64.Vale.State"
+include{:fstar}{:open} "X64.Vale.Decls"
+include{:fstar}{:open} "X64.Vale.QuickCode"
+include{:fstar}{:open} "Poly1305.Spec_s"
+include{:fstar}{:open} "X64.Poly1305.Math"
+include{:fstar}{:open} "X64.Poly1305.Util"
 
 module X64.Poly1305
 
-#reset-options "--z3rlimit 5000"
+#reset-options "--z3rlimit 40"
 
 #verbatim{:interface}{:implementation}
 open Opaque_s
 open Types_s
+open Arch.Types
 open X64.Machine_s
 open X64.Memory
+open X64.Stack_i
 open X64.Vale.State
 open X64.Vale.Decls
 open X64.Vale.InsBasic
@@ -81,10 +94,11 @@ procedure{:quick} poly1305_multiply(ghost r1:nat64) returns(ghost hh:int)
     assert s1 * h1 == h1 * s1;
     //assert s1 * h2 == h2 * s1;
 
-    ghost var gd0 := h0 * r0 + h1 * s1;
-    ghost var gd1 := h0 * r1 + h1 * r0 + h2 * s1;
-    ghost var gd2 := h2 * r0;
-    // TODO: assert{:fast_block} true;
+    // TODO: Vale infers a more precise type than int, but F* needs either nonlinear arithmetic or more assistance to accept the inferred type
+    let gd0:int := h0 * r0 + h1 * s1;
+    let gd1:int := h0 * r1 + h1 * r0 + h2 * s1;
+    let gd2:int := h2 * r0;
+
     assert va_is_src_opr64(va_op_opr64_reg(R14), this); // TODO: get rid of this
     Mul64Wrap(h0);  // h0*r1
     Mov64(d2, rax);
@@ -162,8 +176,8 @@ procedure{:quick} poly1305_reduce() returns(ghost hh:int)
 procedure{:quick} poly1305_iteration(ghost r1:nat64) returns(ghost hh:int)
     lets
         d1 @= r8; d2 @= r9; d3 @= r10; r0 @= r11; s1 @= r13; h0 @= r14; h1 @= rbx; h2 @= rbp;
-        n:nat := 0x1_0000_0000_0000_0000;
-        p:pos := n * n * 4 - 5;
+        n := 0x1_0000_0000_0000_0000;
+        p := n * n * 4 - 5;
         r := r1 * n + r0;
         h := h2 * (n * n) + h1 * n + h0;
     reads
@@ -200,7 +214,7 @@ procedure{:quick} poly1305_iteration(ghost r1:nat64) returns(ghost hh:int)
 
     (ghost var hd) := poly1305_multiply(r1);
     hh := poly1305_reduce();
-    reveal_opaque(modp');
+    reveal_modp();
     assert hh == (n * n) * h2 + n * h1 + h0 /\ (h * r) % p == hh % p;
 }
 
@@ -213,8 +227,8 @@ procedure{:quick} poly1305_blocks(
     lets
         ctx @= rdi; inp @= rsi; len @= rdx; padbit @= rcx; d1 @= r8; d2 @= r9; d3 @= r10;
         r0 @= r11; r1 @= r12; s1 @= r13; h0 @= r14; h1 @= rbx; h2 @= rbp;
-        n:nat := pow2_64;
-        p:pos := n * n * 4 - 5;
+        n := pow2_64;
+        p := n * n * 4 - 5;
     reads
         ctx; padbit; memTaint;
     modifies
@@ -228,7 +242,7 @@ procedure{:quick} poly1305_blocks(
         len % 16 == 0; // REVIEW: may be stronger than necessary
         inp + len < pow2_64;
         buffers_disjoint(ctx_b, inp_b);
-        validSrcAddrs64(mem, ctx, ctx_b, 24, memTaint, Public);
+        validDstAddrs64(mem, ctx, ctx_b, 24, memTaint, Public);
         validSrcAddrs64(mem, inp, inp_b, len / 8, memTaint, Public);
 // TODO: Would be nice to have some syntax for buffer64_read
         let h0_in := buffer64_read(ctx_b, 0, mem);
@@ -289,7 +303,7 @@ procedure{:quick} poly1305_blocks(
     h := h_in;
     assert modp(h) == poly1305_heap_blocks(modp(h_in), padbit * (n * n), r, buffer64_as_seq(mem, inp_b), 0) by
     {
-        reveal_opaque(modp');
+        reveal_modp();
         reveal_poly1305_heap_blocks(modp(h_in), padbit * (n * n), r, buffer64_as_seq(mem, inp_b), 0);
     }
 
@@ -318,7 +332,7 @@ procedure{:quick} poly1305_blocks(
 
             r15 * 16 <= length;    // Not needed with Dafny version
             padbit < 2;            // Not needed with Dafny version
-            validSrcAddrs64(mem, ctx, ctx_b, 24, memTaint, Public);
+            validDstAddrs64(mem, ctx, ctx_b, 24, memTaint, Public);
             validSrcAddrs64(mem, old(inp), inp_b, length/8, memTaint, Public);
             ctx == old(ctx); // REVIEW: framing should add this automatically
             rcx == old(rcx); // REVIEW: framing should add this automatically
@@ -335,9 +349,7 @@ procedure{:quick} poly1305_blocks(
 
 
         Add64Wrap(h0, Mem(inp, 0, inp_b, word_index, Public)); // accumulate input
-        lemma_load_mem64(inp_b, word_index, mem);   // TODO: Really shouldn't need this, but it's the only connection between eval_operand and buffer64_read
         Adc64Wrap(h1, Mem(inp, 8, inp_b, word_index+1, Public));
-        lemma_load_mem64(inp_b, word_index + 1, mem);   // TODO: Really shouldn't need this, but it's the only connection between eval_operand and buffer64_read
         AddLea64(inp, inp, 16);
         Adc64Wrap(h2, padbit);
 
@@ -353,8 +365,10 @@ procedure{:quick} poly1305_blocks(
         {
             reveal_poly1305_heap_blocks(modp(h_in), padbit * (nn * nn), r, buffer64_as_seq(mem, inp_b), word_index);
             reveal_poly1305_heap_blocks(modp(h_in), padbit * (nn * nn), r, buffer64_as_seq(mem, inp_b), word_index - 2);
-            reveal_opaque(modp');
+            reveal_modp();
             lemma_poly_demod(p, hp, hq - hp, r);
+            lemma_poly1305_heap_blocks_unroll(modp(h_in), padbit * (nn * nn), r, buffer64_as_seq(mem, inp_b), word_index);
+            lemma_poly1305_heap_blocks_unroll(modp(h_in), padbit * (nn * nn), r, buffer64_as_seq(mem, inp_b), word_index - 2);
         }
     }
     Store64_buffer(ctx, h0, 0, Public, ctx_b, 0);
@@ -362,12 +376,14 @@ procedure{:quick} poly1305_blocks(
     Store64_buffer(ctx, h2, 16, Public, ctx_b, 2);
 }
 
+#reset-options "--z3rlimit 40"
+
 // last 1..15 bytes, in case len is not a multiple of 16
 procedure{:quick} poly1305_last_block()
     lets
         h0 @= r14; h1 @= rbx; h2 @= rbp; r0 @= r11; s1 @= r13; nExtra @= r15;
-        n:nat := 0x1_0000_0000_0000_0000;
-        p:pos := n * n * 4 - 5;
+        n := 0x1_0000_0000_0000_0000;
+        p := n * n * 4 - 5;
         r1 := rax;
         r := lowerUpper128_opaque(r0, r1);
         hBlocks := lowerUpper192_opaque(lowerUpper128_opaque(h0, h1), h2);
@@ -419,7 +435,7 @@ procedure{:quick} poly1305_last_block()
         Adc64Wrap(h1, 0);
         Adc64Wrap(h2, 0);
     } else {
-        lemma_bytes_shift_power2(nExtra - 8);
+        lemma_bytes_shift_power2(#nat64(nExtra - 8));
         Mov64(rcx, nExtra);
         Sub64(rcx, 8);
         Shl64(rcx, 3);
@@ -427,13 +443,13 @@ procedure{:quick} poly1305_last_block()
         Shl64(rdx, rcx);
 
         assert padLast == lowerUpper128_opaque(0, rdx) by {
-            lemma_power2_add64(8 * nExtra - 64);
-            reveal_opaque(lowerUpper128);
+            lemma_power2_add64(#nat64(8 * nExtra - 64));
+            reveal lowerUpper128;
         }
 
         // inpLast := (inpLast % padLast)
-        lemma_bytes_and_mod(r9, nExtra - 8);
-        lemma_mod_hi(r8, r9, pow2(8 * (nExtra - 8)));
+        lemma_bytes_and_mod(r9, #nat64(nExtra - 8));
+        lemma_mod_hi(r8, r9, #nat64(pow2(#nat(8 * (nExtra - 8)))));
         Mov64(rcx, rdx);
         Sub64(rcx, 1);
         And64(r9, rcx);
@@ -450,12 +466,12 @@ procedure{:quick} poly1305_last_block()
     }
 
     ghost var h := hBlocks + (inpLast % padLast) + padLast;
-    assert h == h2 * (n * n) + h1 * n + h0 by { reveal_opaque(lowerUpper192); reveal_opaque(lowerUpper128); }
-    assert r == r1 * n + r0 by { reveal_opaque(lowerUpper128); }
+    assert h == h2 * (n * n) + h1 * n + h0 by { reveal lowerUpper192; reveal lowerUpper128; }
+    assert r == r1 * n + r0 by { reveal lowerUpper128; }
     (ghost var hLast) := poly1305_iteration(r1);
-    assert hLast == lowerUpper192_opaque(lowerUpper128_opaque(h0, h1), h2) by { reveal_opaque(lowerUpper192); reveal_opaque(lowerUpper128); }
+    assert hLast == lowerUpper192_opaque(lowerUpper128_opaque(h0, h1), h2) by { reveal lowerUpper192; reveal lowerUpper128; }
     lemma_poly_demod(p, hBlocks, (inpLast % padLast) + padLast, r);
-    assert modp(hLast) == modp((modp(hBlocks) + padLast + (inpLast % padLast)) * r) by { reveal_opaque(modp'); }
+    assert modp(hLast) == modp((modp(hBlocks) + padLast + (inpLast % padLast)) * r) by { reveal_modp(); }
 }
 
 // h := (h % p) % 2^128;
@@ -480,7 +496,7 @@ procedure{:quick} poly1305_reduce_last()
     Adc64Wrap(r10, 0);
 
     assert h + 5 == lowerUpper192_opaque(lowerUpper128_opaque(r8, r9), r10)
-        by { reveal_opaque(lowerUpper128); reveal_opaque(lowerUpper192); }
+        by { reveal lowerUpper128; reveal lowerUpper192; }
     lemma_reduce128(h, old(h2), old(h1), old(h0), h + 5, r10, r9, r8);
 
     Shr64(r10, 2);
@@ -528,6 +544,7 @@ let reveal_logand128 (x y:nat128) : Lemma
   (ensures Types_s.iand x y == FStar.UInt.logand #128 x y)
   = TypesNative_s.reveal_iand 128 x y
 #endverbatim
+ghost procedure reveal_logand128(ghost x:nat128, ghost y:nat128) extern;
 
 procedure{:quick} poly1305_impl(
     ghost key_r:nat128,
@@ -546,7 +563,7 @@ procedure{:quick} poly1305_impl(
 
     requires
         buffers_disjoint(ctx_b, inp_b);
-        validSrcAddrs64(mem, ctx, ctx_b, 24, memTaint, Public);
+        validDstAddrs64(mem, ctx, ctx_b, 24, memTaint, Public);
         validSrcAddrs64(mem, inp, inp_b, readable_words(len), memTaint, Public);
         inp + len < pow2_64;
         let key_r0 := buffer64_read(ctx_b, 3, mem);
@@ -589,12 +606,12 @@ procedure{:quick} poly1305_impl(
     Store64_buffer(ctx, r1, 32, Public, ctx_b, 4);
 
     ghost var r:nat128 := lowerUpper128_opaque(r0, r1);
-    assert r == r0 + n * r1 by { reveal_opaque(lowerUpper128); }
+    assert r == r0 + n * r1 by { reveal lowerUpper128; }
 
     let mask:nat128 := 0x0ffffffc_0ffffffc_0ffffffc_0fffffff; // REVIEW: why do we need to put this constant in a variable?
-    assert r == iand(key_r, mask) by
+    assert r == iand128(key_r, mask) by
     {
-        reveal_opaque(lowerUpper128);
+        reveal lowerUpper128;
         lemma_lowerUpper128_and(key_r, key_r0, key_r1, mask,
             0x0fff_fffc_0fff_ffff, 0x0fff_fffc_0fff_fffc, r, r0, r1);
     }
@@ -613,7 +630,7 @@ procedure{:quick} poly1305_impl(
     assert modp(0) == 0 by
     {
         modp_0();
-//        reveal_opaque(modp');
+//        reveal_modp();
 //        assert_by_tactic(modp(0) == 0, retain_only_modp());
     }
     lemma_poly1305_heap_hash_blocks_alt(0, n * n, r, mem, inp_b, old(len) / 16);
@@ -621,7 +638,7 @@ procedure{:quick} poly1305_impl(
     reveal_logand128(key_r, mask);
     assert r == bare_r(key_r);
     assert h == lowerUpper192_opaque(lowerUpper128_opaque(h0, h1), h2)
-        by { reveal_opaque(lowerUpper192); reveal_opaque(lowerUpper128); }
+        by { reveal lowerUpper192; reveal lowerUpper128; }
 
     Load64_buffer(r15, ctx, 56, Public, ctx_b, 7);
     // assert r15 == len_in % 16;
@@ -631,9 +648,9 @@ procedure{:quick} poly1305_impl(
         Load64_buffer(rax, ctx, 32, Public, ctx_b, 4);
         Load64_buffer(r8, inp, 0, Public, inp_b, (len_in / 16) * 2);
         Load64_buffer(r9, inp, 8, Public, inp_b, (len_in / 16) * 2 + 1);
-        ghost var a := seqTo128(buffer64_as_seq(mem, inp_b), len_in / 16);
+        ghost var a := seqTo128_app(buffer64_as_seq(mem, inp_b), len_in / 16);
         assert lowerUpper128_opaque(r8, r9) == a
-            by { /* reveal heapletTo128; */ reveal_opaque(lowerUpper128); }
+            by { /* reveal heapletTo128; */ reveal lowerUpper128; }
         poly1305_last_block();
         h := lowerUpper192_opaque(lowerUpper128_opaque(h0, h1), h2);
     }
@@ -648,7 +665,7 @@ procedure{:quick} poly1305_impl(
     h := lowerUpper128_opaque(h0, h1);
 
     assert h == poly1305_hash(key_r, key_s, seqTo128(buffer64_as_seq(mem, inp_b)), len_in)
-        by { reveal_opaque(mod2_128'); reveal_opaque(modp'); }
+        by { reveal_mod2_128(); reveal_modp(); }
 }
 
 // poly1305(ctx, inp, len)
@@ -656,53 +673,71 @@ procedure{:quick} poly1305_impl(
 // Note that this reads 16-byte chunks directly from the input buffer,
 // so (len + 15) / 16 * 16 bytes must be readable, even though only len bytes
 // affect the result.
-procedure{:quick} poly1305(
+procedure{:quick}{:public}{:exportSpecs} poly1305(
     inline win:bool,
-    ghost key_r:nat128,
-    ghost key_s:nat128,
     ghost ctx_b:buffer64,
-    ghost inp_b:buffer64)
-    returns(ghost h:int)
+    ghost inp_b:buffer64,
+    ghost len_in:nat64)
     lets
         ctx @= rdi; inp @= rsi; len @= rdx; r0 @= r11; r1 @= r12; h0 @= r14; h1 @= rbx; h2 @= rbp;
         ctx_in := (if win then rcx else ctx);
         inp_in := (if win then rdx else inp);
-        len_in := (if win then r8 else len);
         n := 0x1_0000_0000_0000_0000;
         p := n * n * 4 - 5;
     reads memTaint;
     modifies
-        rax; rcx; r8; r9; r10; r13; r15; ctx; inp; len; r0; r1; h0; h1; h2; efl; mem;
+        rax; rbx; rcx; rdx; rsi; rdi; rbp; rsp; r8; r9; r10; r11; r12; r13; r14; r15;     
+        efl; mem;    
     requires
         buffers_disjoint(ctx_b, inp_b);
-        validSrcAddrs64(mem, ctx_in, ctx_b, 24, memTaint, Public);
+        validDstAddrs64(mem, ctx_in, ctx_b, 24, memTaint, Public);
         validSrcAddrs64(mem, inp_in, inp_b, readable_words(len_in), memTaint, Public);
+        len_in == (if win then r8 else len);
+
         inp_in + len_in < pow2_64;
-        let key_r0 := buffer64_read(ctx_b, 3, mem);
-        let key_r1 := buffer64_read(ctx_b, 4, mem);
-        let key_s0 := buffer64_read(ctx_b, 5, mem);
-        let key_s1 := buffer64_read(ctx_b, 6, mem);
-        key_r == lowerUpper128_opaque(key_r0, key_r1);
-        key_s == lowerUpper128_opaque(key_s0, key_s1);
     ensures
         validSrcAddrs64(mem, ctx_in, ctx_b, 24, memTaint, Public);
         validSrcAddrs64(mem, inp_in, inp_b, readable_words(len_in), memTaint, Public);
         modifies_buffer(ctx_b, old(mem), mem);
+
+        let key_r0 := buffer64_read(ctx_b, 3, old(mem));
+        let key_r1 := buffer64_read(ctx_b, 4, old(mem));
+        let key_s0 := buffer64_read(ctx_b, 5, old(mem));
+        let key_s1 := buffer64_read(ctx_b, 6, old(mem));
+        let key_r := lowerUpper128_opaque(key_r0, key_r1);
+        let key_s := lowerUpper128_opaque(key_s0, key_s1);
+
         let h0_out := buffer64_read(ctx_b, 0, mem);
         let h1_out := buffer64_read(ctx_b, 1, mem);
-        h == lowerUpper128_opaque(h0_out, h1_out);
+        let h := lowerUpper128_opaque(h0_out, h1_out);
         let inp_mem := seqTo128(buffer64_as_seq(mem, inp_b));
+
         h == poly1305_hash(key_r, key_s, inp_mem, len_in);
-        h1 == old(h1);
-        h2 == old(h2);
-        ctx == old(ctx);
-        inp == old(inp);
-        r1 == old(r1);
-        r13 == old(r13);
-        h0 == old(h0);
-        r15 == old(r15);
+
+        rsp == old(rsp);
+
+        win ==>  rbx == old(rbx);
+        win ==>  rbp == old(rbp);
+        win ==>  rdi == old(rdi);
+        win ==>  rsi == old(rsi);
+        win ==>  r12 == old(r12);
+        win ==>  r13 == old(r13);
+        win ==>  r14 == old(r14);
+        win ==>  r15 == old(r15);
+        !win ==>  rbx == old(rbx);
+        !win ==>  rbp == old(rbp);
+        !win ==>  r12 == old(r12);
+        !win ==>  r13 == old(r13);
+        !win ==>  r14 == old(r14);
+        !win ==>  r15 == old(r15);
 {
-    h := 0;
+    ghost var h' := #int(0);
+    ghost var key_r0 := buffer64_read(ctx_b, 3, mem);
+    ghost var key_r1 := buffer64_read(ctx_b, 4, mem);
+    ghost var key_s0 := buffer64_read(ctx_b, 5, mem);
+    ghost var key_s1 := buffer64_read(ctx_b, 6, mem);
+    ghost var key_r := lowerUpper128_opaque(key_r0, key_r1);
+    ghost var key_s := lowerUpper128_opaque(key_s0, key_s1);
     Mov64(rax, ctx);
     Mov64(r9, inp);
     inline if (win)
@@ -732,7 +767,7 @@ procedure{:quick} poly1305(
     Store64_buffer(ctx, h0,  120, Public, ctx_b, 15);
     Store64_buffer(ctx, r15, 128, Public, ctx_b, 16);
 
-    h := poly1305_impl(key_r, key_s, ctx_b, inp_b);
+    h' := poly1305_impl(key_r, key_s, ctx_b, inp_b);
 
     //assert {:fast_block} true;
     Store64_buffer(ctx, h0,  0, Public, ctx_b, 0);
@@ -747,4 +782,5 @@ procedure{:quick} poly1305(
     Load64_buffer(h0,  ctx, 120, Public, ctx_b, 15);
     Load64_buffer(r15, ctx, 128, Public, ctx_b, 16);
     Mov64(ctx, rax);
+
 }

@@ -1,5 +1,6 @@
 # This file requires Python version >= 3.6
 # This file requires SCons version >= 3.00
+# See ./INSTALL.md for more information
 
 ##################################################################################################
 #
@@ -93,7 +94,7 @@ import SCons.Util
 import atexit
 import platform
 import fnmatch
-import distutils.dir_util
+import pathlib
 import shutil
 
 if sys.version_info < (3, 6):
@@ -109,17 +110,21 @@ if sys.version_info < (3, 6):
 if 'VALE_HOME' in os.environ:
   vale_default_path = os.environ['VALE_HOME']
 else:
-  vale_default_path = 'tools/Vale'
+  vale_default_path = '../../vale'
 
 if 'KREMLIN_HOME' in os.environ:
   kremlin_default_path = os.environ['KREMLIN_HOME']
 else:
-  kremlin_default_path = 'tools/Kremlin'
+  kremlin_default_path = '../../kremlin'
 
 if 'FSTAR_HOME' in os.environ:
   fstar_default_path = os.environ['FSTAR_HOME']
 else:
-  fstar_default_path = 'tools/FStar'
+  fstar_default_path = '../../FStar'
+
+def AddOptYesNo(name, dest, default, help):
+  AddOption('--' + name, dest = dest, default = default, action = 'store_true', help = f'{help} (default {default})')
+  AddOption('--NO-' + name, dest = dest, default = default, action = 'store_false')
 
 # Retrieve tool-specific command overrides passed in by the user
 AddOption('--VALE-PATH', dest = 'vale_path', type = 'string', default = vale_default_path, action = 'store',
@@ -130,13 +135,15 @@ AddOption('--FSTAR-PATH', dest = 'fstar_path', type = 'string', default = fstar_
   help = 'Specify the path to F* tool')
 AddOption('--FSTAR-Z3', dest = 'fstar_z3', type = 'string', default = '', action = 'store',
   help = 'Specify the path to z3 or z3.exe for F*')
-AddOption('--FSTAR-MY-VERSION', dest = 'fstar_my_version', default = False, action = 'store_true',
+AddOptYesNo('FSTAR-MY-VERSION', dest = 'fstar_my_version', default = False,
   help = 'Use version of F* that does not necessarily match .tested_fstar_version')
-AddOption('--Z3-MY-VERSION', dest = 'z3_my_version', default = False, action = 'store_true',
+AddOptYesNo('Z3-MY-VERSION', dest = 'z3_my_version', default = False,
   help = 'Use version of Z3 that does not necessarily match .tested_z3_version')
-AddOption('--RECORD-HINTS', dest = 'record_hints', default = False, action = 'store_true',
+AddOptYesNo('VALE-MY-VERSION', dest = 'vale_my_version', default = False,
+  help = 'Use version of Vale that does not necessarily match .vale_version')
+AddOptYesNo('RECORD-HINTS', dest = 'record_hints', default = False,
   help = 'Record new F* .hints files into the hints directory')
-AddOption('--USE-HINTS', dest = 'use_hints', default = False, action = 'store_true',
+AddOptYesNo('USE-HINTS', dest = 'use_hints', default = True,
   help = 'Use F* .hints files from the hints directory')
 AddOption('--FARGS', dest = 'fstar_user_args', type = 'string', default = [], action = 'append',
   help = 'Supply temporary additional arguments to the F* compiler')
@@ -150,18 +157,20 @@ AddOption('--OPENSSL', dest = 'openssl_path', type = 'string', default = None, a
   help = 'Specify the path to the root of an OpenSSL source tree')
 AddOption('--CACHE-DIR', dest = 'cache_dir', type = 'string', default = None, action = 'store',
   help = 'Specify the SCons Shared Cache Directory')
-AddOption('--NO-VERIFY', dest = 'noverify', default = False, action = 'store_true',
+AddOptYesNo('VERIFY', dest = 'verify', default = True,
   help = 'Verify and compile, or compile only')
 AddOption('--ONE', dest = 'single_vaf', type = 'string', default = None, action = 'store',
   help = 'Only verify one specified .vaf file, and in that file, only verify procedures or verbatim blocks marked as {:verify}.')
-AddOption('--NO-COLOR', dest='no_color', default=False, action='store_true',
-  help="Don't add color to build output")
-AddOption('--DUMP-ARGS', dest = 'dump_args', default = False, action = 'store_true',
+AddOptYesNo('COLOR', dest = 'do_color', default = True,
+  help="Add color to build output")
+AddOptYesNo('DUMP-ARGS', dest = 'dump_args', default = False,
   help = "Print arguments that will be passed to the verification tools")
-AddOption('--FSTAR-EXTRACT', dest = 'fstar_extract', default = False, action = 'store_true',
-  help = "Extract .ml files from F* files")
-AddOption('--MIN-TEST', dest = 'min_test', default = False, action = 'store_true',
+AddOptYesNo('FSTAR-EXTRACT', dest = 'fstar_extract', default = False,
+  help = "Generate .S and .asm files via F* extraction to OCaml")
+AddOptYesNo('MIN-TEST', dest = 'min_test', default = False,
   help = "Only run on a minimal set of test files")
+AddOptYesNo('PROFILE', dest = 'profile', default = False,
+  help = "Turn on profile options to measure verification performance (note: --NO-USE-HINTS is recommended when profiling)")
 
 is_help = GetOption('help')
 vale_path = Dir(GetOption('vale_path')).abspath
@@ -174,14 +183,16 @@ c_user_args = GetOption('c_user_args')
 openssl_path = GetOption('openssl_path')
 fstar_my_version = GetOption('fstar_my_version')
 z3_my_version = GetOption('z3_my_version')
+vale_my_version = GetOption('vale_my_version')
 fstar_extract = GetOption('fstar_extract')
 record_hints = GetOption('record_hints')
 use_hints = GetOption('use_hints')
-no_color = GetOption('no_color')
+do_color = GetOption('do_color')
 dump_args = GetOption('dump_args')
 single_vaf = GetOption('single_vaf')
 is_single_vaf = not (single_vaf is None)
 min_test = GetOption('min_test')
+profile = GetOption('profile')
 
 ##################################################################################################
 #
@@ -219,7 +230,8 @@ if not is_help:
       extended_info['BasicLimitInformation']['LimitFlags'] = win32job.JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE
       win32job.SetInformationJobObject(hdl, win32job.JobObjectExtendedLimitInformation, extended_info)
   else:
-    common_env.Append(CCFLAGS = ['-O3', '-flto', '-g', '-DKRML_NOUINT128', '-std=c++11'])
+    common_env.Append(CCFLAGS = ['-O3', '-flto', '-g', '-DKRML_NOUINT128'])
+    common_env.Append(CXXFLAGS = ['-std=c++11'])  # This option is C++ specific
     mono = 'mono'
 
   if sys.platform == 'win32':
@@ -242,35 +254,70 @@ class BuildOptions:
 #
 ##################################################################################################
 
-fstar_default_args_nosmtencoding = ('--max_fuel 1 --max_ifuel 1'
+def fstar_default_args_nosmtencoding(relative=True):
+  cache_dir = 'obj/cache_checked'
+  cache_dir = cache_dir if relative else os.path.abspath(cache_dir)
+
+  return ('--max_fuel 1 --max_ifuel 1'
   + (' --initial_ifuel 1' if is_single_vaf else ' --initial_ifuel 0')
   # The main purpose of --z3cliopt smt.QI.EAGER_THRESHOLD=100 is to make sure that matching loops get caught
   # Don't remove unless you're sure you've used the axiom profiler to make sure you have no matching loops
   + ' --z3cliopt smt.arith.nl=false --z3cliopt smt.QI.EAGER_THRESHOLD=100 --z3cliopt smt.CASE_SPLIT=3'
   + ' --hint_info'
   + (' --use_hints --use_hint_hashes' if use_hints else '')
-  + (' --record_hints' if record_hints else ' --cache_checked_modules')
-  + ' --cache_dir obj/cache_checked'
+  + (' --cache_off' if record_hints else ' --cache_checked_modules')
+  + ' --cache_dir ' + cache_dir
   + ' --use_extracted_interfaces true'
   )
-fstar_default_args = (fstar_default_args_nosmtencoding
+
+def fstar_default_args(relative=True):
+  return (fstar_default_args_nosmtencoding(relative)
   + ' --smtencoding.elim_box true --smtencoding.l_arith_repr native --smtencoding.nl_arith_repr wrapped'
   )
 
-vale_scons_args = '-disableVerify -omitUnverified' if is_single_vaf else ''
-vale_includes = f'-include {File("code/lib/util/operator.vaf")}'
+fstar_record_hints = ' --record_hints' if record_hints else ''
 
-verify_paths = [
-  'code',
-  'specs',
-]
+vale_scons_args = '-disableVerify -omitUnverified' if is_single_vaf else ''
+vale_includes = f'-include {File("code/lib/util/Operator.vaf")}'
+
+if min_test:
+  verify_paths = [
+    'code/arch',
+    'code/lib',
+    'code/crypto/poly1305',
+    'code/thirdPartyPorts/OpenSSL/poly1305',
+    'specs',
+  ]
+else:
+  verify_paths = [
+    'code',
+    'specs',
+  ]
+
+class ExternalFile:
+  def __init__ (self, filename):
+    self.filename = filename
+
+  def obj_name(self):
+    return 'obj/external/' + os.path.basename(self.filename)
 
 external_files = [
-  'obj/external/CanonCommSwaps.fst',
-  'obj/external/CanonCommMonoid.fst',
-  'obj/external/CanonCommSemiring.fst',
-  'obj/external/C.Loops.fst',
-  'obj/external/Spec.Loops.fst',
+  ExternalFile(f'{kremlin_path}/kremlib/C.Loops.fst'),
+  ExternalFile(f'{kremlin_path}/kremlib/Spec.Loops.fst'),
+  ExternalFile(f'{kremlin_path}/kremlib/FStar.Kremlin.Endianness.fst'),
+  ExternalFile('../specs/Spec.Hash.PadFinish.fst'),
+  ExternalFile('../specs/Spec.Hash.Lemmas0.fst'),
+  ExternalFile('../specs/Spec.Hash.Lemmas.fst'),
+  ExternalFile('../specs/derived/Spec.Hash.Incremental.fst'),
+  ExternalFile('../specs/Spec.SHA2.fst'),
+  ExternalFile('../specs/Spec.SHA2.fsti'),
+  ExternalFile('../specs/Spec.SHA2.Constants.fst'),
+  ExternalFile('../specs/Spec.SHA1.fsti'),
+  ExternalFile('../specs/Spec.SHA1.fst'),
+  ExternalFile('../specs/Spec.MD5.fst'),
+  ExternalFile('../specs/Spec.MD5.fsti'),
+  ExternalFile('../specs/Spec.Hash.fst'),
+  ExternalFile('../specs/Spec.Hash.Definitions.fst'),
 ]
 
 no_extraction_files = [File(x) for x in [
@@ -278,6 +325,10 @@ no_extraction_files = [File(x) for x in [
   'obj/ml_out/CanonCommSemiring.ml',
   'obj/ml_out/X64_Poly1305_Math.ml',
   'obj/ml_out/Vale_Tactics.ml',
+  'obj/ml_out/FastHybrid_helpers.ml',
+  'obj/ml_out/FastMul_helpers.ml',
+  'obj/ml_out/FastSqr_helpers.ml',
+  'obj/ml_out/FastUtil_helpers.ml',
 ]]
 
 #
@@ -286,96 +337,62 @@ no_extraction_files = [File(x) for x in [
 # Note that the entries below are prefixes of blacklisted files
 #
 min_test_suite_blacklist = [File(x) for x in [
-  'obj/code/crypto/aes/x64/X64.GCMencrypt.fst',
-  'obj/code/crypto/aes/x64/X64.GCMdecrypt.fst',
-  'obj/code/thirdPartyPorts/OpenSSL/poly1305/x64/X64.Poly1305.fst',
-  'obj/code/crypto/aes/x64/X64.GHash',
-  'obj/code/crypto/aes/x64/X64.GCTR.fst',
-  'obj/code/crypto/aes/x64/X64.AES.fst',
-  'obj/code/thirdPartyPorts/Intel/aes/x64/X64.AESCTR',
+  'code/arch/x64/X64.Vale.InsSha.vaf'
+]] + [Dir(x) for x in [
+  'code/arch/x64/interop/',
 ]]
 
 manual_dependencies = {
-  'obj/code/arch/x64/X64.Vale.InsLemmas.fst.verified.tmp': 'obj/code/arch/x64/X64.Vale.Decls.fst',
-  'obj/code/arch/x64/X64.Vale.InsBasic.fst.verified.tmp': 'obj/code/arch/x64/X64.Vale.Decls.fst',
-  'obj/code/arch/x64/X64.Vale.InsMem.fst.verified.tmp': 'obj/code/arch/x64/X64.Vale.Decls.fst',
-  'obj/code/arch/x64/X64.Vale.InsVector.fst.verified.tmp': 'obj/code/arch/x64/X64.Vale.Decls.fst',
-  'obj/code/arch/x64/X64.Vale.InsAes.fst.verified.tmp': 'obj/code/arch/x64/X64.Vale.Decls.fst',
-  'obj/code/arch/x64/X64.Vale.InsMem.fst.tmp': 'src/code/arch/x64/X64.Memory.fst',
-  'obj/code/arch/x64/X64.Vale.InsVector.fst.tmp': 'src/code/arch/x64/X64.Memory.fst',
-  'obj/code/arch/x64/X64.Vale.StateLemmas.fsti.tmp': 'src/code/arch/x64/X64.Memory.fst',
-  'obj/code/arch/x64/X64.Vale.StateLemmas.fst.tmp': 'src/code/arch/x64/X64.Memory.fst',
-  'obj/code/arch/x64/X64.Memory_s.fst.tmp': 'src/code/arch/SecretByte.fst',
 }
 
 #
 # Table of special-case sources which requires non-default arguments
 #
 verify_options = [
-  ('code/lib/util/operator.vaf', BuildOptions(fstar_default_args, vale_includes = '')),
-
-  # Any use of expose_interfaces requires adding to manual_dependencies
-  ('code/arch/x64/X64.Vale.InsLemmas.fst', BuildOptions(fstar_default_args + ' --expose_interfaces X64.Vale.Decls.fst' + ' --expose_interfaces X64.Memory.fst')),
-  ('obj/code/arch/x64/X64.Vale.InsBasic.fst', BuildOptions(fstar_default_args + ' --expose_interfaces X64.Vale.Decls.fst' + ' --expose_interfaces X64.Memory.fst')),
-  ('obj/code/arch/x64/X64.Vale.InsMem.fst', BuildOptions(fstar_default_args + ' --expose_interfaces X64.Vale.Decls.fst' + ' --expose_interfaces X64.Memory.fst')),
-  ('obj/code/arch/x64/X64.Vale.InsVector.fst', BuildOptions(fstar_default_args + ' --expose_interfaces X64.Vale.Decls.fst' + ' --expose_interfaces X64.Memory.fst')),
-  ('obj/code/arch/x64/X64.Vale.InsAes.fst', BuildOptions(fstar_default_args + ' --expose_interfaces X64.Vale.Decls.fst' + ' --expose_interfaces X64.Memory.fst')),
-  ('code/arch/x64/X64.Vale.StateLemmas.fsti', BuildOptions(fstar_default_args + ' --expose_interfaces X64.Memory.fst')),
-  ('code/arch/x64/X64.Vale.StateLemmas.fst', BuildOptions(fstar_default_args + ' --expose_interfaces X64.Memory.fst')),
-  ('code/arch/x64/X64.Vale.Lemmas.fsti', BuildOptions(fstar_default_args + ' --expose_interfaces X64.Memory.fst')),
-  ('code/arch/x64/X64.Vale.Lemmas.fst', BuildOptions(fstar_default_args + ' --expose_interfaces X64.Memory.fst')),
-  ('code/arch/x64/X64.Vale.Decls.fst', BuildOptions(fstar_default_args + ' --expose_interfaces X64.Memory.fst')),
+  ('code/lib/util/Operator.vaf', BuildOptions(fstar_default_args(), vale_includes = '')),
 
   # Special treatment for sensitive modules
-  ('code/arch/x64/X64.Leakage_Ins.fst', BuildOptions(fstar_default_args_nosmtencoding)),
 
   # Disable verification by adding 'filename': None
-  ('code/crypto/aes/x64/Low.GCMencrypt.fst', None), # TODO: timeout in gcm_core
 
-  # Interop stubs
-  ('code/arch/x64/interop/AESEncryptBlock_win.fst', BuildOptions(fstar_default_args_nosmtencoding.replace('--z3cliopt smt.QI.EAGER_THRESHOLD=100', '').replace('--use_extracted_interfaces true', '').replace('--z3cliopt smt.arith.nl=false', '') + '--smtencoding.elim_box true ' + ' --expose_interfaces SecretByte.fst --expose_interfaces X64.Memory_s.fst --expose_interfaces X64.Memory.fst')),
-  ('code/arch/x64/interop/AESEncryptBE_win.fst', BuildOptions(fstar_default_args_nosmtencoding.replace('--z3cliopt smt.QI.EAGER_THRESHOLD=100', '').replace('--use_extracted_interfaces true', '').replace('--z3cliopt smt.arith.nl=false', '') + '--smtencoding.elim_box true ' + ' --expose_interfaces SecretByte.fst --expose_interfaces X64.Memory_s.fst --expose_interfaces X64.Memory.fst')),
-  ('code/arch/x64/interop/Gcm_load_xor_win.fst', BuildOptions(fstar_default_args_nosmtencoding.replace('--z3cliopt smt.QI.EAGER_THRESHOLD=100', '').replace('--use_extracted_interfaces true', '').replace('--z3cliopt smt.arith.nl=false', '') + '--smtencoding.elim_box true ' + ' --expose_interfaces SecretByte.fst --expose_interfaces X64.Memory_s.fst --expose_interfaces X64.Memory.fst')),
-  ('code/arch/x64/interop/Gcm_make_length_win.fst', BuildOptions(fstar_default_args_nosmtencoding.replace('--z3cliopt smt.QI.EAGER_THRESHOLD=100', '').replace('--use_extracted_interfaces true', '').replace('--z3cliopt smt.arith.nl=false', '') + '--smtencoding.elim_box true ' + ' --expose_interfaces SecretByte.fst --expose_interfaces X64.Memory_s.fst --expose_interfaces X64.Memory.fst')),
-  ('code/arch/x64/interop/GCTR_win.fst', BuildOptions(fstar_default_args_nosmtencoding.replace('--z3cliopt smt.QI.EAGER_THRESHOLD=100', '').replace('--use_extracted_interfaces true', '').replace('--z3cliopt smt.arith.nl=false', '') + '--smtencoding.elim_box true ' + ' --expose_interfaces SecretByte.fst --expose_interfaces X64.Memory_s.fst --expose_interfaces X64.Memory.fst')),
-  ('code/arch/x64/interop/GHash_extra_win.fst', BuildOptions(fstar_default_args_nosmtencoding.replace('--z3cliopt smt.QI.EAGER_THRESHOLD=100', '').replace('--use_extracted_interfaces true', '').replace('--z3cliopt smt.arith.nl=false', '') + '--smtencoding.elim_box true ' + ' --expose_interfaces SecretByte.fst --expose_interfaces X64.Memory_s.fst --expose_interfaces X64.Memory.fst')),
-  ('code/arch/x64/interop/GHash_one_block_win.fst', BuildOptions(fstar_default_args_nosmtencoding.replace('--z3cliopt smt.QI.EAGER_THRESHOLD=100', '').replace('--use_extracted_interfaces true', '').replace('--z3cliopt smt.arith.nl=false', '') + '--smtencoding.elim_box true ' + ' --expose_interfaces SecretByte.fst --expose_interfaces X64.Memory_s.fst --expose_interfaces X64.Memory.fst')),
-  ('code/arch/x64/interop/GHash_stdcall_win.fst', BuildOptions(fstar_default_args_nosmtencoding.replace('--z3cliopt smt.QI.EAGER_THRESHOLD=100', '').replace('--use_extracted_interfaces true', '').replace('--z3cliopt smt.arith.nl=false', '') + '--smtencoding.elim_box true ' + ' --expose_interfaces SecretByte.fst --expose_interfaces X64.Memory_s.fst --expose_interfaces X64.Memory.fst')),
-  ('code/arch/x64/interop/Inc32_win.fst', BuildOptions(fstar_default_args_nosmtencoding.replace('--z3cliopt smt.QI.EAGER_THRESHOLD=100', '').replace('--use_extracted_interfaces true', '').replace('--z3cliopt smt.arith.nl=false', '') + '--smtencoding.elim_box true ' + ' --expose_interfaces SecretByte.fst --expose_interfaces X64.Memory_s.fst --expose_interfaces X64.Memory.fst')),
-  ('code/arch/x64/interop/Mk_quad32_1_win.fst', BuildOptions(fstar_default_args_nosmtencoding.replace('--z3cliopt smt.QI.EAGER_THRESHOLD=100', '').replace('--use_extracted_interfaces true', '').replace('--z3cliopt smt.arith.nl=false', '') + '--smtencoding.elim_box true ' + ' --expose_interfaces SecretByte.fst --expose_interfaces X64.Memory_s.fst --expose_interfaces X64.Memory.fst')),
-  ('code/arch/x64/interop/Quad32_xor_win.fst', BuildOptions(fstar_default_args_nosmtencoding.replace('--z3cliopt smt.QI.EAGER_THRESHOLD=100', '').replace('--use_extracted_interfaces true', '').replace('--z3cliopt smt.arith.nl=false', '') + '--smtencoding.elim_box true ' + ' --expose_interfaces SecretByte.fst --expose_interfaces X64.Memory_s.fst --expose_interfaces X64.Memory.fst')),
-  ('code/arch/x64/interop/Reverse_quad32_win.fst', BuildOptions(fstar_default_args_nosmtencoding.replace('--z3cliopt smt.QI.EAGER_THRESHOLD=100', '').replace('--use_extracted_interfaces true', '').replace('--z3cliopt smt.arith.nl=false', '') + '--smtencoding.elim_box true ' + ' --expose_interfaces SecretByte.fst --expose_interfaces X64.Memory_s.fst --expose_interfaces X64.Memory.fst')),
-  ('code/arch/x64/interop/Zero_quad32_win.fst', BuildOptions(fstar_default_args_nosmtencoding.replace('--z3cliopt smt.QI.EAGER_THRESHOLD=100', '').replace('--use_extracted_interfaces true', '').replace('--z3cliopt smt.arith.nl=false', '') + '--smtencoding.elim_box true ' + ' --expose_interfaces SecretByte.fst --expose_interfaces X64.Memory_s.fst --expose_interfaces X64.Memory.fst')),
+#  ('code/thirdPartyPorts/rfc7748/curve25519/x64/X64.FastSqr.vaf', None),
 
-  #'src/thirdPartyPorts/OpenSSL/poly1305/x64/X64.Poly1305.vaf': None,
+   # Temporarily deactivate verification of the whole interop layer
+#   ('code/arch/x64/interop/*', None), 
+#   ('code/arch/x64/interop/Fast_inline.fst*', None), 
 
-  ('code/*/*.fst', BuildOptions(fstar_default_args)),
-  ('code/*/*.fsti', BuildOptions(fstar_default_args)),
-  ('specs/*/*.fst', BuildOptions(fstar_default_args)),
-  ('specs/*/*.fsti', BuildOptions(fstar_default_args)),
+  #('code/thirdPartyPorts/OpenSSL/sha/X64.SHA.vaf', None),
+  ('code/arch/x64/interop/GCMencryptOpt_stdcalls.fst', BuildOptions(fstar_default_args_nosmtencoding())),
+  ('code/arch/x64/interop/GCMencrypt_stdcalls.fst', BuildOptions(fstar_default_args_nosmtencoding())),
+
+  ('code/*/*.fst', BuildOptions(fstar_default_args())),
+  ('code/*/*.fsti', BuildOptions(fstar_default_args())),
+  ('specs/*/*.fst', BuildOptions(fstar_default_args())),
+  ('specs/*/*.fsti', BuildOptions(fstar_default_args())),
 
   # .fst/.fsti files default to this set of options
-  ('.fst', BuildOptions(fstar_default_args + ' --use_two_phase_tc false')),
-  ('.fsti', BuildOptions(fstar_default_args + ' --use_two_phase_tc false')),
+  ('.fst', BuildOptions(fstar_default_args() + ' --use_two_phase_tc false')),
+  ('.fsti', BuildOptions(fstar_default_args() + ' --use_two_phase_tc false')),
 
-  # Needed to significantly speed up verification of interop files (and use the checked Memory_s.fst with expose_interfaces)
-  ('code/arch/x64/Views.fst', BuildOptions(fstar_default_args.replace('--smtencoding.nl_arith_repr wrapped', '--smtencoding.nl_arith_repr native') + ' --expose_interfaces SecretByte.fst')),
-  ('code/arch/x64/X64.Bytes_Semantics.fst', BuildOptions(fstar_default_args.replace('--smtencoding.nl_arith_repr wrapped', '--smtencoding.nl_arith_repr native') + ' --expose_interfaces SecretByte.fst')),
+  ('code/arch/x64/X64.Leakage_Ins.fst', None),
+  ('code/arch/x64/X64.Leakage_Ins_Xmm.fst', None),
 
-  ('code/lib/collections/Collections.Lists.fst', BuildOptions(fstar_default_args.replace('--z3cliopt smt.QI.EAGER_THRESHOLD=100',''))),
-  ('code/crypto/poly1305/x64/X64.Poly1305.Util.fst', BuildOptions(fstar_default_args_nosmtencoding)),
-  ('code/crypto/poly1305/x64/X64.Poly1305.Util.fsti', BuildOptions(fstar_default_args_nosmtencoding)),
-  ('code/arch/x64/X64.Memory_s.fst', BuildOptions(fstar_default_args_nosmtencoding.replace('--z3cliopt smt.QI.EAGER_THRESHOLD=100', '').replace('--use_extracted_interfaces true', '').replace('--z3cliopt smt.arith.nl=false', '') + '--smtencoding.elim_box true ' + ' --expose_interfaces SecretByte.fst')),
-  ('code/arch/x64/Interop.fst', BuildOptions(fstar_default_args_nosmtencoding.replace('--use_extracted_interfaces true', '').replace('--z3cliopt smt.QI.EAGER_THRESHOLD=100', '') + '--smtencoding.elim_box true ')),
-  ('code/arch/Memory_s.fst', BuildOptions(fstar_default_args.replace('--use_extracted_interfaces true', ''))),
-  ('code/lib/util/BufferViewHelpers.fst' , BuildOptions(fstar_default_args_nosmtencoding.replace('--z3cliopt smt.arith.nl=false', ''))),
+  ('code/arch/x64/Views.fst', BuildOptions(fstar_default_args().replace('--smtencoding.nl_arith_repr wrapped', '--smtencoding.nl_arith_repr native'))),
+  ('code/arch/x64/X64.Bytes_Semantics.fst', BuildOptions(fstar_default_args().replace('--smtencoding.nl_arith_repr wrapped', '--smtencoding.nl_arith_repr native'))),
+
+  ('code/lib/collections/Collections.Lists.fst', BuildOptions(fstar_default_args().replace('--z3cliopt smt.QI.EAGER_THRESHOLD=100',''))),
+  ('code/arch/x64/X64.Memory.fst', BuildOptions(fstar_default_args_nosmtencoding().replace('--use_extracted_interfaces true', '').replace('--z3cliopt smt.arith.nl=false', '') + '--smtencoding.elim_box true ')),
+  ('code/arch/x64/X64.Memory_Sems.fst', BuildOptions(fstar_default_args_nosmtencoding().replace('--use_extracted_interfaces true', '').replace('--z3cliopt smt.arith.nl=false', '') + '--smtencoding.elim_box true ')),
+  ('code/arch/x64/Interop.fst', BuildOptions(fstar_default_args_nosmtencoding().replace('--use_extracted_interfaces true', '').replace('--z3cliopt smt.QI.EAGER_THRESHOLD=100', '') + '--smtencoding.elim_box true ')),
+  ('code/lib/util/BufferViewHelpers.fst' , BuildOptions(fstar_default_args_nosmtencoding().replace('--z3cliopt smt.arith.nl=false', ''))),
 
   # We copy these files from F*'s library because we need to generate a .checked file for them,
   # but we don't need to reverify them:
+  ('obj/external/*.fsti', BuildOptions('--cache_checked_modules --admit_smt_queries true')),
   ('obj/external/*.fst', BuildOptions('--cache_checked_modules --admit_smt_queries true')),
 
   # .vaf files default to this set of options when compiling .fst/.fsti
-  ('.vaf', BuildOptions(fstar_default_args + ' --use_two_phase_tc false'))
+  ('.vaf', BuildOptions(fstar_default_args() + ' --use_two_phase_tc false'))
 ]
 
 verify_options_dict = { k:v for (k,v) in verify_options}
@@ -383,14 +400,14 @@ verify_options_dict = { k:v for (k,v) in verify_options}
 # --NOVERIFY is intended for CI scenarios, where the Win32/x86 build is verified, so
 # the other build flavors do not redundently re-verify the same results.
 fstar_no_verify = ''
-verify = (GetOption('noverify') == False)
+verify = GetOption('verify')
 if not verify:
   print('***\n*** WARNING:  NOT VERIFYING ANY CODE\n***')
-  fstar_no_verify = '--lax'
+  fstar_no_verify = '--admit_smt_queries true'
 
 # Find Z3 for F*
 found_z3 = False
-if verify and not is_help:
+if not is_help:
   fstar_z3 = GetOption('fstar_z3')
   if fstar_z3 == '':
     fstar_z3 = File('tools/Z3/z3.exe').path if sys.platform == 'win32' else 'tools/Z3/z3'
@@ -406,12 +423,24 @@ if verify and not is_help:
         fstar_z3 = str(find_z3)
   else:
     found_z3 = True
-  fstar_z3_path = '--smt ' + fstar_z3
+  fstar_z3_path = '--smt ' + (os.path.abspath(fstar_z3) if dump_args else fstar_z3)
 else:
   fstar_z3_path = ''
 
 vale_exe = File(f'{vale_path}/bin/vale.exe')
+import_fstar_types_exe = File(f'{vale_path}/bin/importFStarTypes.exe')
 fstar_exe = File(f'{fstar_path}/bin/fstar.exe')
+
+def add_from_os_env(env, name):
+  if name in os.environ:
+    env['ENV'][name] = os.environ[name]
+
+ocaml_env = Environment()
+add_from_os_env(ocaml_env, 'PATH')
+add_from_os_env(ocaml_env, 'OCAMLPATH')
+add_from_os_env(ocaml_env, 'OCAMLLIB')
+add_from_os_env(ocaml_env, 'OCAML_TOPLEVEL_PATH')
+add_from_os_env(ocaml_env, 'CAML_LD_LIBRARY_PATH')
 
 ##################################################################################################
 #
@@ -424,15 +453,20 @@ src_include_paths = []  # string paths in sources where .fst, .fsti are found
 obj_include_paths = []  # string paths in obj/, but omitting the 'obj/' prefix
 ml_out_deps = {}
 fsti_map = {}  # map module names to .fsti File nodes (or .fst File nodes if no .fsti exists)
+dump_deps = {}  # map F* type .dump file names x.dump to sets of .dump file names that x.dump depends on
+vaf_dump_deps = {} # map .vaf file names x.vaf to sets of .dump file names that x.vaf depends on
+vaf_vaf_deps = {} # map .vaf file names x.vaf to sets of y.vaf file names that x.vaf depends on
 
 # match 'include {:attr1} ... {:attrn} "filename"'
 # where attr may be 'verbatim' or 'from BASE'
 vale_include_re = re.compile(r'include((?:\s*\{\:(?:\w|[ ])*\})*)\s*"(\S+)"', re.M)
+vale_fstar_re = re.compile(r'\{\:\s*fstar\s*\}')
 vale_from_base_re = re.compile(r'\{\:\s*from\s*BASE\s*\}')
 vale_open_re = re.compile(r'open\s+([a-zA-Z0-9_.]+)')
+vale_friend_re = re.compile(r'friend\s+([a-zA-Z0-9_.]+)')
 vale_import_re = re.compile(r'module\s+[a-zA-Z0-9_]+\s*[=]\s*([a-zA-Z0-9_.]+)')
 
-if (not sys.stdout.isatty()) or no_color:
+if (not sys.stdout.isatty()) or not do_color:
   # No color if the output is not a terminal or user opts out
   yellow = ''
   red = ''
@@ -457,7 +491,9 @@ def print_error_exit(s):
 
 # Given a File node for dir/dir/.../m.extension, return m
 def file_module_name(file):
-  return os.path.splitext(file.name)[0]
+  name = file.name
+  name = name[:1].upper() + name[1:] # capitalize first letter, as expected for F* module names
+  return os.path.splitext(name)[0]
 
 # Return '.vaf', '.fst', etc.
 def file_extension(file):
@@ -475,7 +511,7 @@ def to_obj_dir(file):
     return File(f'obj/{file}')
 
 def to_hint_file(file):
-  return File(f'hints/{file.name}.hints')
+  return File(f'../hints/{file.name}.hints')
 
 def ml_out_file(sourcefile, suffix):
   module_name = file_module_name(sourcefile).replace('.', '_')
@@ -489,9 +525,9 @@ def is_our_file(file):
 def compute_include_paths(src_include_paths, obj_include_paths, obj_prefix):
   return src_include_paths + [str(Dir('obj/external'))] + [str(Dir(f'{obj_prefix}/{x}')) for x in obj_include_paths]
 
-def compute_includes(src_include_paths, obj_include_paths, obj_prefix):
+def compute_includes(src_include_paths, obj_include_paths, obj_prefix, relative=True):
   fstar_include_paths = compute_include_paths(src_include_paths, obj_include_paths, obj_prefix)
-  return " ".join(["--include " + x for x in fstar_include_paths])
+  return " ".join(["--include " + (x if relative else os.path.abspath(x)) for x in fstar_include_paths])
 
 def CopyFile(target, source):
   Command(target, source, Copy(target, source))
@@ -546,7 +582,8 @@ def check_fstar_version():
       f' modify .tested_fstar_version, or use the --FSTAR-MY-VERSION option to override.' +
       f' (We try to update the F* version frequently; feel free to change .tested_fstar_version' +
       f' to a more recent F* version as long as the build still succeeds with the new version.' +
-      f' We try to maintain the invariant that the build succeeds with the F* version in .tested_fstar_version.)')
+      f' We try to maintain the invariant that the build succeeds with the F* version in .tested_fstar_version.)' +
+      f' See ./INSTALL.md for more information.')
 
 def check_z3_version(fstar_z3):
   import subprocess
@@ -568,14 +605,34 @@ def check_z3_version(fstar_z3):
     for line in lines:
       print_error('  ' + line)
     print_error_exit(
-      'Get a recent Z3 executable from https://github.com/FStarLang/binaries/tree/master/z3-tested,' +
-      ' modify .tested_z3_version, or use the --Z3-MY-VERSION option to override.' +
-      ' (We rarely change the Z3 version; we strongly recommend using the expected version of Z3.)')
+      f'Get a recent Z3 executable from https://github.com/FStarLang/binaries/tree/master/z3-tested,' +
+      f' modify .tested_z3_version, or use the --Z3-MY-VERSION option to override.' +
+      f' (We rarely change the Z3 version; we strongly recommend using the expected version of Z3.)' +
+      f' See ./INSTALL.md for more information.')
+
+def check_vale_version():
+  with open(".vale_version") as f:
+    version = f.read().splitlines()[0]
+  vale_version_file = f'{vale_path}/bin/.vale_version'
+  vale_version = '0.2.7 or older'
+  if os.path.isfile(vale_version_file):
+    with open(vale_version_file) as f:
+      vale_version = f.read().splitlines()[0]
+  if vale_version != version:
+    print_error(f'Expected Vale version {version}, but found Vale version {vale_version}')
+    print_error_exit(
+      f'Get version {version} from https://github.com/project-everest/vale/releases/download/v{version}/vale-release-{version}.zip,' +
+      f' modify .vale_version, or use the --VALE-MY-VERSION option to override.' +
+      f' See ./INSTALL.md for more information.')
 
 def print_dump_args():
-  print('Currently using the following F* args:')
-  fstar_includes = compute_includes(src_include_paths, obj_include_paths, 'obj')
-  for option in [fstar_z3_path, fstar_no_verify, fstar_includes, fstar_user_args, fstar_default_args]:
+  #print('Currently using the following F* args:')
+  options = fstar_default_args(relative=False)
+  if len(COMMAND_LINE_TARGETS) > 0:
+    options = get_build_options(File(COMMAND_LINE_TARGETS[0])).verifier_flags
+    #print("The options are: %s" % options.verifier_flags)
+  fstar_includes = compute_includes(src_include_paths, obj_include_paths, 'obj', relative=False)
+  for option in [fstar_z3_path, fstar_no_verify, fstar_includes, fstar_user_args, options]:
     if len(option) > 0:
       print(f'{option} ', end='')
   print()
@@ -623,6 +680,22 @@ def report_verification_failures():
           print()
           time.sleep(1)
           os.rename(filename, error_filename)
+        if filename.endswith('.dump') and os.path.isfile(filename):
+          stderr_filename = filename[:-len('.dump')] + '.stderr'
+          report_filename = stderr_filename if os.path.isfile(stderr_filename) else filename
+          print()
+          print(f'##### {red}Verification error{uncolor}')
+          print('Printing contents of ' + report_filename + ' #####')
+          with open (report_filename, 'r') as myfile:
+            lines = myfile.read().splitlines()
+            valeErrors = [line for line in lines if ("*****" in line)]
+            for line in lines:
+              if 'error was reported' in line or '(Error)' in line or ' failed' in line:
+                line = f'{red}{line}{uncolor}'
+              print(line)
+          print()
+          time.sleep(1)
+         
 
 ##################################################################################################
 #
@@ -642,7 +715,7 @@ def add_include_dir_for_file(include_paths, file):
   d = str(file.dir)
   if not (d in include_paths):
     include_paths.append(d)
-    distutils.dir_util.mkpath(str(to_obj_dir(file).dir))
+    pathlib.Path(str(to_obj_dir(file).dir)).mkdir(parents = True, exist_ok = True)
 
 def include_fstar_file(env, file):
   options = get_build_options(file)
@@ -656,7 +729,7 @@ def include_vale_file(env, file):
   options = get_build_options(file)
   add_include_dir_for_file(obj_include_paths, file)
   dummy_dir = File(f'obj/dummies/{file_drop_extension(file)}').dir
-  distutils.dir_util.mkpath(str(dummy_dir))
+  pathlib.Path(str(dummy_dir)).mkdir(parents = True, exist_ok = True)
   if options != None:
     add_module_for_file(file)
     module_name = file_module_name(file)
@@ -665,7 +738,7 @@ def include_vale_file(env, file):
       # The F* dependency analysis runs before .vaf files are converted to .fst/.fsti files,
       # so generate a dummy .fst/.fsti file pair for each .vaf file for the F* dependency analysis.
       dummy_file = File(f'obj/dummies/{file_drop_extension(file)}{extension}')
-      distutils.dir_util.mkpath(str(dummy_file.dir))
+      pathlib.Path(str(dummy_file.dir)).mkdir(parents = True, exist_ok = True)
       with open(str(dummy_file), 'w') as myfile:
         myfile.write(f'module {module_name}' + '\n')
 
@@ -689,22 +762,28 @@ def verify_fstar_file(options, targetfile, sourcefile, fstar_includes):
   stderrfile = File(f'{targetfile}.stderr')
   temptargetfile = File(f'{targetfile}.tmp')
   temptargetfiles = [temptargetfile]
+  dumptargetfile = File(re.sub('\.verified$', '.dump', str(targetfile)))
   hintfile = to_hint_file(sourcefile)
-  outs = []
   if min_test and on_black_list(sourcefile, min_test_suite_blacklist):
     print(f'Skipping {sourcefile} because it is on min_test_suite_blacklist')
-    return outs
   if record_hints:
     temptargetfiles.append(hintfile)
   elif use_hints and os.path.isfile(str(hintfile)):
     Depends(temptargetfiles, hintfile)
-  temptargets = env.Command(temptargetfiles, sourcefile,
+  env.Command(temptargetfiles, sourcefile,
     f'{fstar_exe} {sourcefile} {options.verifier_flags} {fstar_z3_path} {fstar_no_verify}' +
-    f' {fstar_includes} {" ".join(fstar_user_args)} --hint_file {hintfile}' +
+    f' {fstar_includes} {" ".join(fstar_user_args)} --hint_file {hintfile} {fstar_record_hints}' +
+    (f' --debug {file_module_name(File(sourcefile))} --debug_level print_normalized_terms' if profile else '') +
     f' 1> {temptargetfile} 2> {stderrfile}')
-  temptarget = temptargets[0]
-  outs.append(CopyFile(targetfile, temptarget))
-  return outs
+  CopyFile(targetfile, temptargetfile)
+  dump_module_flag = '--dump_module ' + file_module_name(sourcefile)
+  dump_flags = ('--print_implicits --print_universes --print_effect_args --print_full_names' +
+    ' --print_bound_var_types --ugly ' + dump_module_flag)
+  env.Command(dumptargetfile, sourcefile,
+    f'{fstar_exe} {sourcefile} {options.verifier_flags} {fstar_z3_path} {fstar_no_verify} --admit_smt_queries true' +
+    f' {fstar_includes} {" ".join(fstar_user_args)}' +
+    f' {dump_flags} 1>{dumptargetfile} 2>{dumptargetfile}.stderr')
+  Depends(dumptargetfile, targetfile)
 
 def extract_fstar_file(options, sourcefile, fstar_includes):
   env = options.env
@@ -715,41 +794,63 @@ def extract_fstar_file(options, sourcefile, fstar_includes):
   Depends(mlfile, to_obj_dir(base_name + '.fst.verified'))
   verifier_flags = options.verifier_flags.replace('--use_extracted_interfaces true', '')
   return env.Command(mlfile, sourcefile,
-    f'{fstar_exe} {sourcefile} {verifier_flags} {fstar_z3_path} {fstar_no_verify}' +
-    f' {fstar_includes} {" ".join(fstar_user_args)} --hint_file {hintfile}' +
-    f' --odir obj/ml_out --codegen OCaml --admit_smt_queries true --extract_module {module_name}')
+    f'{fstar_exe} {sourcefile} {verifier_flags} {fstar_z3_path} {fstar_no_verify} --admit_smt_queries true' +
+    f' {fstar_includes} {" ".join(fstar_user_args)}' +
+    f' --odir obj/ml_out --codegen OCaml --extract_module {module_name}')
 
 # Process a .fst or .fsti file
 def process_fstar_file(env, file, fstar_includes):
   options = get_build_options(file)
   if options != None:
-    if verify:
-      target = File(f'{to_obj_dir(file)}.verified')
-      verify_fstar_file(options, target, file, fstar_includes)
-      if fstar_extract:
-        if file_extension(file) == '.fst':
-          if not (ml_out_file(file, '.ml') in no_extraction_files):
-            extract_fstar_file(options, file, fstar_includes)
+    target = File(f'{to_obj_dir(file)}.verified')
+    verify_fstar_file(options, target, file, fstar_includes)
+    if fstar_extract:
+      if file_extension(file) == '.fst':
+        if not (ml_out_file(file, '.ml') in no_extraction_files):
+          extract_fstar_file(options, file, fstar_includes)
 
 def vale_dependency_scan(env, file):
+  if min_test and on_black_list(file, min_test_suite_blacklist):
+    print(f'Skipping {file} because it is on min_test_suite_blacklist')
+    return
   contents = file.get_text_contents()
   dirname = os.path.dirname(str(file))
   vaf_includes = vale_include_re.findall(contents)
   fst_includes = vale_open_re.findall(contents) + vale_import_re.findall(contents)
+  fst_friends = vale_friend_re.findall(contents)
   obj_file_base = file_drop_extension(to_obj_dir(file))
+  vaf_dump_deps[str(file)] = set()
+  vaf_vaf_deps[str(file)] = set()
+  fst_fsti = [f'{obj_file_base}.fst', f'{obj_file_base}.fsti']
+  obj_tmp = [f'{obj_file_base}.fst.verified.tmp']
   obj_tmps = [f'{obj_file_base}.fst.verified.tmp', f'{obj_file_base}.fsti.verified.tmp']
+  typesfile = File(f'{obj_file_base}.types.vaf')
   for (attrs, inc) in vaf_includes:
-    f = os.path.join('code' if vale_from_base_re.search(attrs) else dirname, inc)
-    # if A.vaf includes B.vaf, then manually establish these dependencies:
-    #   A.fst.verified  depends on B.fsti
-    #   A.fsti.verified depends on B.fsti
-    f_base = file_drop_extension(to_obj_dir(File(f)))
-    f_fsti = File(f_base + '.fsti.verified')
-    Depends(obj_tmps, f_fsti)
-    add_ml_dependencies([obj_file_base + '.fst'], [f_base + '.fst'])
+    if vale_fstar_re.search(attrs):
+      dumpsourcebase = to_obj_dir(File(f'{fsti_map[inc]}'))
+      dumpsourcefile = File(f'{dumpsourcebase}.dump')
+      if is_our_file(dumpsourcebase):
+        vaf_dump_deps[str(file)].add(str(dumpsourcefile))
+      else:
+        print_error_exit(f'TODO: not implemented: .vaf includes extern F* file {inc}')
+    else:
+      f = os.path.join('code' if vale_from_base_re.search(attrs) else dirname, inc)
+      # if A.vaf includes B.vaf, then manually establish these dependencies:
+      #   A.fst.verified.tmp  depends on B.fsti.verified
+      #   A.fsti.verified.tmp depends on B.fsti.verified
+      vaf_vaf_deps[str(file)].add(str(File(f)))
+      f_base = file_drop_extension(to_obj_dir(File(f)))
+      f_fsti = File(f_base + '.fsti.verified')
+      Depends(obj_tmps, f_fsti)
+      add_ml_dependencies([obj_file_base + '.fst'], [f_base + '.fst'])
+  Depends(fst_fsti, typesfile)
   for inc in fst_includes:
     if inc in fsti_map:
-      Depends(obj_tmps, [fsti_map[inc]])
+      Depends(obj_tmps, to_obj_dir(File(f'{fsti_map[inc]}.verified')))
+      add_ml_dependencies([obj_file_base + '.fst'], [fsti_map[inc]])
+  for inc in fst_friends:
+    if inc in fsti_map:
+      Depends(obj_tmp, re.sub('\.fsti$', '.fst.verified', str(to_obj_dir(fsti_map[inc]))))
       add_ml_dependencies([obj_file_base + '.fst'], [fsti_map[inc]])
 
 # Translate Vale .vaf to F* .fst/fsti pair
@@ -762,8 +863,10 @@ def translate_vale_file(options, source_vaf):
   target_fsti = File(target + '.fsti')
   targets = [target_fst, target_fsti]
   opt_vale_includes = vale_includes if options.vale_includes == None else options.vale_includes
+  types_include = ''
+  types_include = f'-include {target}.types.vaf'
   env.Command(targets, source_vaf,
-    f'{mono} {vale_exe} -fstarText {opt_vale_includes}' +
+    f'{mono} {vale_exe} -fstarText -quickMods -typecheck {types_include} {opt_vale_includes}' +
     f' -in {source_vaf} -out {target_fst} -outi {target_fsti}' +
     f' {vale_scons_args} {" ".join(vale_user_args)}')
   return targets
@@ -776,27 +879,56 @@ def process_vale_file(env, file, fstar_includes):
     fsts = translate_vale_file(options, file)
     fst = fsts[0]
     fsti = fsts[1]
-    if verify:
-      fst_options = get_build_options(fst)
-      fsti_options = get_build_options(fsti)
-      target = file_drop_extension(to_obj_dir(file))
-      target_fst = f'{target}.fst.verified'
-      target_fsti = f'{target}.fsti.verified'
-      verify_fstar_file(fst_options, target_fst, fst, fstar_includes)
-      verify_fstar_file(fsti_options, target_fsti, fsti, fstar_includes)
-      if fstar_extract:
-        extract_fstar_file(fst_options, fst, fstar_includes)
+    fst_options = get_build_options(fst)
+    fsti_options = get_build_options(fsti)
+    target = file_drop_extension(to_obj_dir(file))
+    target_fst = f'{target}.fst.verified'
+    target_fsti = f'{target}.fsti.verified'
+    Depends(f'{target_fst}.tmp', target_fsti)
+    verify_fstar_file(fst_options, target_fst, fst, fstar_includes)
+    verify_fstar_file(fsti_options, target_fsti, fsti, fstar_includes)
+    if fstar_extract:
+      extract_fstar_file(fst_options, fst, fstar_includes)
+
+def compute_module_types(env, source_vaf):
+  source_base = file_drop_extension(to_obj_dir(File(source_vaf)))
+  types_vaf = f'{source_base}.types.vaf'
+  done = set()
+  dumps = []
+  def collect_dumps_in_order(x):
+    if not (x in done):
+      done.add(x)
+      for y in sorted(dump_deps[x]):
+        # if x depends on y, y must appear first
+        collect_dumps_in_order(y)
+      x_vaf = re.sub('\.dump$', '.types.vaf', x)
+      Depends(types_vaf, x)
+      dumps.append(x)
+  for vaf in sorted(vaf_vaf_deps[source_vaf] | {source_vaf}):
+    for x in sorted(vaf_dump_deps[vaf]):
+      collect_dumps_in_order(x)
+  dumps_string = " ".join(['-in ' + str(x) for x in dumps])
+  Depends(types_vaf, import_fstar_types_exe)
+  Command(types_vaf, dumps, f'{mono} {import_fstar_types_exe} {dumps_string} -out {types_vaf} > {types_vaf}.errors')
 
 def recursive_glob(env, pattern, strings = False):
   matches = []
   split = os.path.split(pattern) # [0] is the directory, [1] is the actual pattern
   platform_directory = split[0] #os.path.normpath(split[0])
   for d in os.listdir(platform_directory):
-    if os.path.isdir(os.path.join(platform_directory, d)):
-      newpattern = os.path.join(split[0], d, split[1])
-      matches.append(recursive_glob(env, newpattern, strings))
+    f = os.path.join(platform_directory, d)
+    if os.path.isdir(f):
+      if min_test and on_black_list(f, min_test_suite_blacklist):
+        print(f'Skipping {f} because it is on min_test_suite_blacklist')
+      else:
+        newpattern = os.path.join(split[0], d, split[1])
+        matches.append(recursive_glob(env, newpattern, strings))
   files = env.Glob(pattern, strings=strings)
-  matches.append(files)
+  for f in files:
+    if min_test and on_black_list(f, min_test_suite_blacklist):
+      print(f'Skipping {f} because it is on min_test_suite_blacklist')
+    else:
+      matches.append(f)
   return Flatten([File(x) for x in matches])
 
 # Verify *.fst, *.fsti, *.vaf files in a list of directories.  This enumerates
@@ -815,6 +947,9 @@ def process_files_in(env, directories):
     include_fstar_file(env, file)
   for file in fstis:
     include_fstar_file(env, file)
+  for file in external_files:
+    file_node = File(file.obj_name())
+    fsti_map[file_module_name(file_node)] = file_node
   for file in vafs:
     include_vale_file(env, file)
   # Process and verify files:
@@ -828,41 +963,50 @@ def process_files_in(env, directories):
     for file in fstis:
       process_fstar_file(env, file, fstar_includes)
     for file in external_files:
-      process_fstar_file(env, File(file), fstar_includes)
+      process_fstar_file(env, File(file.obj_name()), fstar_includes)
     for file in vafs:
       process_vale_file(env, file, fstar_includes)
+    for target in manual_dependencies:
+      Depends(target, manual_dependencies[target])
 
-def extract_assembly_code(env, output_base_name, main_file, alg_file, cmdline_file):
+def extract_assembly_code(env, output_base_name, main_file, alg_files, cmdline_file):
   # OCaml depends on many libraries and executables; we have to assume they are in the user's PATH:
-  ocaml_env = Environment(ENV = {'PATH' : os.environ['PATH'], 'OCAMLPATH' : fstar_path + '/bin'})
+  ocaml_env.PrependENVPath('OCAMLPATH', fstar_path + '/bin')
   main_ml = ml_out_file(main_file, '.ml')
   main_cmx = ml_out_file(main_file, '.cmx')
   main_exe = ml_out_file(main_file, '.exe')
-  alg_ml = ml_out_file(alg_file, '.ml')
-  alg_cmx = ml_out_file(alg_file, '.cmx')
+  alg_mls = [ml_out_file(x, '.ml') for x in alg_files]
+  alg_cmxs = [ml_out_file(x, '.cmx') for x in alg_files]
   cmdline_ml = ml_out_file(cmdline_file, '.ml')
   cmdline_cmx = ml_out_file(cmdline_file, '.cmx')
-  pointer_src = File('code/lib/util/FStar_Pointer_Base.ml')
-  pointer_ml = ml_out_file(pointer_src, '.ml')
-  pointer_cmx = ml_out_file(pointer_src, '.cmx')
-  CopyFile(pointer_ml, pointer_src)
+  #pointer_src = File('code/lib/util/FStar_Pointer_Base.ml')
+  #pointer_ml = ml_out_file(pointer_src, '.ml')
+  #pointer_cmx = ml_out_file(pointer_src, '.cmx')
+  #CopyFile(pointer_ml, pointer_src)
   CopyFile(cmdline_ml, cmdline_file)
   CopyFile(main_ml, main_file)
-  Depends(cmdline_cmx, alg_cmx)
+  for alg_cmx in alg_cmxs:
+    Depends(cmdline_cmx, alg_cmx)
+    Depends(main_cmx, alg_cmx)
   Depends(cmdline_cmx, cmdline_ml)
-  Depends(main_cmx, alg_cmx)
   Depends(main_cmx, cmdline_cmx)
   Depends(main_cmx, main_ml)
   done = set()
   cmxs = []
+  objs = []
+  ignore_warnings = [ "8", # Warning 8: this pattern-matching is not exhaustive.
+                     "20", # Warning 20: this argument will not be used by the function.
+                     "26"] # Warning 26: unused variable
+  ignore_warnings_str = "-w " + "".join(["-" + s for s in ignore_warnings])
   def add_cmx(x_ml):
     x_cmx = ml_out_file(x_ml, '.cmx')
-    if x_ml != pointer_ml:
-      Depends(x_cmx, pointer_cmx)
-    cmx = ocaml_env.Command(x_cmx, x_ml,
-      f'ocamlfind ocamlopt -c -package fstarlib -package fstar-tactics-lib -o {x_cmx} {x_ml} -I obj/ml_out')
+    x_obj = ml_out_file(x_ml, '.o')
+    cmx = ocaml_env.Command([x_cmx, x_obj], x_ml,
+      f'ocamlfind ocamlopt -c -package fstarlib -o {x_cmx} {x_ml} -I obj/ml_out {ignore_warnings_str}')
     cmxs.append(cmx[0])
+    objs.append(x_obj)
     Depends(main_exe, cmx[0])
+    Depends(main_exe, x_obj)
   def collect_cmxs_in_order(x_ml):
     if not (x_ml in done):
       done.add(x_ml)
@@ -870,24 +1014,25 @@ def extract_assembly_code(env, output_base_name, main_file, alg_file, cmdline_fi
         # if x depends on y, y must appear first in ocaml link step
         Depends(ml_out_file(x_ml, '.cmx'), ml_out_file(y_ml, '.cmx'))
         collect_cmxs_in_order(y_ml)
-      Depends(x_ml, pointer_ml)
       add_cmx(x_ml)
-  add_cmx(pointer_ml)
-  collect_cmxs_in_order(alg_ml)
+  for alg_ml in alg_mls:
+    collect_cmxs_in_order(alg_ml)
   add_cmx(cmdline_ml)
   add_cmx(main_ml)
   cmxs_string = " ".join([str(cmx) for cmx in cmxs])
-  ocaml_env.Command(main_exe, cmxs,
-    f'ocamlfind ocamlopt -linkpkg -package fstarlib -package fstar-tactics-lib {cmxs_string} -o {main_exe}')
+  ocaml_env.Command(main_exe, cmxs + objs,
+    f'ocamlfind ocamlopt -linkpkg -package fstarlib {cmxs_string} -o {main_exe}')
   # Run executable to generate assembly files:
   output_target_base = 'obj/' + output_base_name
-  def generate_asm(suffix, assembler, platform):
-    target = output_target_base + suffix
-    return env.Command(target, main_exe, f'{main_exe} {assembler} {platform} > {target}')
-  masm_win = generate_asm('.asm', 'MASM', 'Win')
-  gcc_win = generate_asm('-gcc.S', 'GCC', 'Win')
+  def generate_asm(suffix, assembler, os):
+    # TODO: cross-compilation support; note that platform.machine() does not
+    # produce a consistent string across OSes
+    target = output_target_base + "-x86_64" + suffix
+    return ocaml_env.Command(target, main_exe, f'{main_exe} {assembler} {os} > {target}')
+  masm_win = generate_asm('-msvc.asm', 'MASM', 'Win')
+  gcc_win = generate_asm('-mingw.S', 'GCC', 'Win')
   gcc_linux = generate_asm('-linux.S', 'GCC', 'Linux')
-  gcc_macos = generate_asm('-macos.S', 'GCC', 'MacOS')
+  gcc_macos = generate_asm('-darwin.S', 'GCC', 'MacOS')
   if sys.platform.startswith('linux'):
     return [gcc_linux, masm_win, gcc_win, gcc_macos]
   elif sys.platform == 'win32':
@@ -929,9 +1074,11 @@ def compute_fstar_deps(env, src_directories, fstar_includes):
   cmd = [str(x) for x in cmd]
   #print(" ".join(cmd))
   try:
-    print('F* dependency analysis starting')
+    if not dump_args:
+      print('F* dependency analysis starting')
     o = subprocess.check_output(cmd, stderr = subprocess.STDOUT).decode('ascii')
-    print('F* dependency analysis finished')
+    if not dump_args:
+      print('F* dependency analysis finished')
   except (subprocess.CalledProcessError) as e:
     print(f'F* dependency analysis: error: {e.output}')
     Exit(1)
@@ -942,6 +1089,9 @@ def compute_fstar_deps(env, src_directories, fstar_includes):
       print(line)
       fstar_deps_ok = False
     if len(line) == 0:
+      pass
+    elif '(Warning ' in line:
+      # example: "(Warning 307) logic qualifier is deprecated"
       pass
     else:
       # lines are of the form:
@@ -958,12 +1108,34 @@ def compute_fstar_deps(env, src_directories, fstar_includes):
       targets = [str(File(x)).replace(dummies_name, obj_name) for x in targets]
       for source in sources:
         for target in targets:
-          if target.startswith('specs') and (source.startswith('obj') or source.startswith('code')):
+          if target.startswith('specs') and (source.startswith('obj') or source.startswith('code')) and not dump_args:
             print(f'{yellow}Warning: file {target} in specs directory depends on file {source} outside specs directory{uncolor}')
       sources_ver = [to_obj_dir(File(re.sub('\.fst$', '.fst.verified', re.sub('\.fsti$', '.fsti.verified', x)))) for x in sources if is_our_file(File(x))]
       targets_ver = [to_obj_dir(File(re.sub('\.fst$', '.fst.verified.tmp', re.sub('\.fsti$', '.fsti.verified.tmp', x)))) for x in targets if is_our_file(File(x))]
       Depends(targets_ver, sources_ver)
       add_ml_dependencies(targets, sources)
+      # Computing types from F* files
+      # Dump F* types for for each of a1.fst a2.fst ... into a1.fst.dump, a2.fst.dump, ...
+      # Targets that we don't verify go in obj/external
+      for t in targets:
+        if is_our_file(File(t)):
+          dumptargetfile = str(to_obj_dir(t + '.dump'))
+        else:
+          # Compute types of an external module, assuming it was compiled with default arguments
+          dumptargetfile = 'obj/external/' + os.path.split(t)[1] + '.dump'
+          dump_module_flag = '--dump_module ' + file_module_name(File(t))
+          dump_flags = ('--print_implicits --print_universes --print_effect_args --print_full_names' +
+            ' --print_bound_var_types --ugly ' + dump_module_flag)
+          env.Command(dumptargetfile, t,
+            f'{fstar_exe} {t} {fstar_z3_path} {fstar_no_verify} --admit_smt_queries true' +
+            f' {dump_flags} 1>{dumptargetfile} 2> {dumptargetfile}.stderr')
+        if not (dumptargetfile in dump_deps):
+          dump_deps[dumptargetfile] = set()
+        for s in sources:
+          if is_our_file(File(s)):
+            dump_deps[dumptargetfile].add(str(to_obj_dir(s + '.dump')))
+          else:
+            dump_deps[dumptargetfile].add('obj/external/' + os.path.split(s)[1] + '.dump')
   if fstar_deps_ok:
     # Save results in depsBackupFile
     with open(depsBackupFile, 'w') as myfile:
@@ -985,42 +1157,65 @@ if not is_help:
 
   # Create obj directory and any subdirectories needed during dependency analysis
   # (SCons will create other subdirectories during build)
-  distutils.dir_util.mkpath('obj')
-  distutils.dir_util.mkpath('obj/external')
-  distutils.dir_util.mkpath('obj/cache_checked')
+  pathlib.Path('obj').mkdir(parents = True, exist_ok = True)
+  pathlib.Path('obj/external').mkdir(parents = True, exist_ok = True)
+  pathlib.Path('obj/cache_checked').mkdir(parents = True, exist_ok = True)
 
-  # Check F* and Z3 versions
+  # Check F*, Z3, and Vale versions
   if not fstar_my_version:
     check_fstar_version()
-  if verify and not z3_my_version:
+  if not z3_my_version:
     if not found_z3:
       print_error_exit('Could not find z3 executable.  Either put z3 in your path, or put it in the directory tools/Z3/, or use the --FSTARZ3=<z3-executable> option.')
     check_z3_version(fstar_z3)
+  if not vale_my_version:
+    check_vale_version()
 
   # HACK: copy external files
-  for x in ['CanonCommSwaps.fst', 'CanonCommMonoid.fst', 'CanonCommSemiring.fst']:
-    source = f'{fstar_path}/examples/tactics/{x}'
-    target = f'obj/external/{x}'
-    shutil.copy(source, target)
-  for x in ['C.Loops.fst', 'Spec.Loops.fst']:
-    source = f'{kremlin_path}/kremlib/{x}'
-    target = f'obj/external/{x}'
+  for f in external_files:
+    source = f.filename
+    target = f.obj_name()
     shutil.copy(source, target)
 
-  print('Processing source files')
+  if not dump_args:
+    print('Processing source files')
   process_files_in(env, verify_paths)
-  compute_fstar_deps(env, verify_paths, compute_include_paths(src_include_paths, obj_include_paths, 'obj/dummies'))
+  if not is_single_vaf:
+    compute_fstar_deps(env, verify_paths, compute_include_paths(src_include_paths, obj_include_paths, 'obj/dummies'))
+    for x in vaf_dump_deps:
+      compute_module_types(env, x)
 
-  if fstar_extract:
+  if fstar_extract and not min_test:
     # Build AES-GCM
     aesgcm_asm = extract_assembly_code(env, 'aesgcm', File('code/crypto/aes/x64/Main.ml'),
-      File('code/crypto/aes/x64/X64.GCMdecrypt.vaf'), File('code/lib/util/CmdLineParser.ml'))
+      [File('code/crypto/aes/x64/X64.GCMdecrypt.vaf')], File('code/lib/util/CmdLineParser.ml'))
+    cpuid_asm = extract_assembly_code(env, 'cpuid', File('code/lib/util/x64/CpuidMain.ml'),
+      [File('code/lib/util/x64/stdcalls/X64.Cpuidstdcall.vaf')], File('code/lib/util/CmdLineParser.ml'))
+    sha256_asm = extract_assembly_code(env, 'sha256', File('code/crypto/sha/ShaMain.ml'),
+      [File('code/thirdPartyPorts/OpenSSL/sha/X64.SHA.vaf')], File('code/lib/util/CmdLineParser.ml'))
+    curve25519_asm = extract_assembly_code(env, 'curve25519', File('code/crypto/ecc/curve25519/Main25519.ml'), [
+        File('code/thirdPartyPorts/rfc7748/curve25519/X64.FastUtil.vaf'),
+        File('code/thirdPartyPorts/rfc7748/curve25519/X64.FastHybrid.vaf'),
+        File('code/thirdPartyPorts/rfc7748/curve25519/X64.FastWide.vaf'),
+        File('code/thirdPartyPorts/rfc7748/curve25519/X64.FastSqr.vaf'),
+        File('code/thirdPartyPorts/rfc7748/curve25519/X64.FastMul.vaf')],
+      File('code/lib/util/CmdLineParser.ml'))
     if env['TARGET_ARCH'] == 'amd64':
       aesgcmasm_obj = env.Object('obj/aesgcmasm_openssl', aesgcm_asm[0])
       aesgcmtest_src = File('code/crypto/aes/x64/TestAesGcm.cpp')
       aesgcmtest_cpp = to_obj_dir(aesgcmtest_src)
       CopyFile(aesgcmtest_cpp, aesgcmtest_src)
       aesgcmtest_exe = env.Program(source = [aesgcmasm_obj, aesgcmtest_cpp], target = 'obj/TestAesGcm.exe')
+      sha256asm_obj = env.Object('obj/sha256asm_openssl', sha256_asm[0])
+      sha256test_src = File('code/crypto/sha/TestSha.cpp')
+      sha256test_cpp = to_obj_dir(sha256test_src)
+      CopyFile(sha256test_cpp, sha256test_src)
+      sha256test_exe = env.Program(source = [sha256asm_obj, sha256test_cpp], target = 'obj/TestSha.exe')
+      curve25519asm_obj = env.Object('obj/curve25519asm_openssl', curve25519_asm[0])
+      curve25519test_src = File('code/crypto/ecc/curve25519/test_ecc.c')
+      curve25519test_cpp = to_obj_dir(curve25519test_src)
+      CopyFile(curve25519test_cpp, curve25519test_src)
+      curve25519test_exe = env.Program(source = [curve25519asm_obj, curve25519test_cpp], target = 'obj/TestEcc.exe')
 
   if dump_args:
     print_dump_args()

@@ -4,13 +4,15 @@ module I = Math.Poly2.Defs
 open FStar.Seq
 unfold let max = FStar.Math.Lib.max
 
+let mask a n : poly = of_fun n (fun (i:nat) -> a.[i])
+
 let all_defs =
   poly == D.poly /\
   (forall (p:poly).{:pattern (degree p)} degree p == D.degree (to_poly p)) /\
   zero == of_poly D.zero /\
   one == of_poly D.one /\
   (forall (n:nat).{:pattern (monomial n)} monomial n == of_poly (D.monomial n)) /\
-  (forall (p:poly) (n:nat).{:pattern (shift p n)} shift p n == of_poly (D.shift (to_poly p) n)) /\
+  (forall (p:poly) (n:int).{:pattern (shift p n)} shift p n == of_poly (D.shift (to_poly p) n)) /\
   (forall (p:poly) (n:nat).{:pattern (reverse p n)} reverse p n == of_poly (D.reverse (to_poly p) n)) /\
   (forall (p:poly) (n:int).{:pattern (poly_index p n)} poly_index p n == D.poly_index (to_poly p) n) /\
   (forall (a b:poly).{:pattern (add a b)} add a b == of_poly (D.add (to_poly a) (to_poly b))) /\
@@ -28,6 +30,7 @@ let lemma_zero_define_i i = ()
 let lemma_one_define_i i = ()
 let lemma_monomial_define_i n i = ()
 let lemma_shift_define_i p n i = ()
+let lemma_mask_define_i p n i = ()
 let lemma_reverse_define_i p n i = ()
 
 let lemma_add_zero a = I.lemma_add_zero (to_poly a)

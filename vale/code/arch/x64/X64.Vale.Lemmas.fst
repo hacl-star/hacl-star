@@ -2,10 +2,11 @@ module X64.Vale.Lemmas
 open X64.Machine_s
 open X64.Vale.State
 open X64.Vale.StateLemmas
-module S = X64.Semantics_s
 module BS = X64.Bytes_Semantics_s
 module TS = X64.Taint_Semantics_s
-module ME = X64.Memory_s
+module ME = X64.Memory
+
+friend X64.Vale.StateLemmas
 
 #reset-options "--initial_fuel 2 --max_fuel 2 --z3rlimit 20"
 
@@ -67,25 +68,28 @@ let eval_while_eq (c:code) (f:fuel) (s1 s2:TS.traceState) : Lemma
   =
   eval_while_eq_all c f
 
-val increase_fuel (c:code) (s0:state) (f0:fuel) (sN:state) (fN:fuel) : Lemma
-  (requires eval_code c s0 f0 sN /\ f0 <= fN)
-  (ensures eval_code c s0 fN sN)
+let eval_code_ts (c:code) (s0:TS.traceState) (f0:fuel) (s1:TS.traceState) : Type0 =
+  state_eq_opt (TS.taint_eval_code c f0 s0) (Some s1)
+
+val increase_fuel (c:code) (s0:TS.traceState) (f0:fuel) (sN:TS.traceState) (fN:fuel) : Lemma
+  (requires eval_code_ts c s0 f0 sN /\ f0 <= fN)
+  (ensures eval_code_ts c s0 fN sN)
   (decreases %[f0; c])
 
-val increase_fuels (c:codes) (s0:state) (f0:fuel) (sN:state) (fN:fuel) : Lemma
-  (requires eval_code (Block c) s0 f0 sN /\ f0 <= fN)
-  (ensures eval_code (Block c) s0 fN sN)
+val increase_fuels (c:codes) (s0:TS.traceState) (f0:fuel) (sN:TS.traceState) (fN:fuel) : Lemma
+  (requires eval_code_ts (Block c) s0 f0 sN /\ f0 <= fN)
+  (ensures eval_code_ts (Block c) s0 fN sN)
   (decreases %[f0; c])
 
-let rec increase_fuel (c:code) (s0:state) (f0:fuel) (sN:state) (fN:fuel) =
+let rec increase_fuel c s0 f0 sN fN =
   match c with
   | Ins ins -> ()
   | Block l -> increase_fuels l s0 f0 sN fN
   | IfElse b t f ->
-      let _, b0 = TS.taint_eval_ocmp (state_to_S s0) b in
+      let _, b0 = TS.taint_eval_ocmp s0 b in
       if b0 then increase_fuel t s0 f0 sN fN else increase_fuel f s0 f0 sN fN
   | While b c ->
-      let s1, b0 = TS.taint_eval_ocmp (state_to_S s0) b in
+      let s1, b0 = TS.taint_eval_ocmp s0 b in
       if not b0 then ()
       else
       (
@@ -93,18 +97,17 @@ let rec increase_fuel (c:code) (s0:state) (f0:fuel) (sN:state) (fN:fuel) =
         match TS.taint_eval_code c (f0 - 1) s1 with
         | None -> ()
         | Some s2 ->
-            let s2 = state_of_S s2 in
-            increase_fuel c (state_of_S s1) (f0 - 1) s2 (fN - 1);
-            if s2.ok then increase_fuel (While b c) s2 (f0 - 1) sN (fN - 1)
+            increase_fuel c s1 (f0 - 1) s2 (fN - 1);
+            if s2.TS.state.BS.ok then increase_fuel (While b c) s2 (f0 - 1) sN (fN - 1)
             else ()
       )
-and increase_fuels (c:codes) (s0:state) (f0:fuel) (sN:state) (fN:fuel) =
+
+and increase_fuels c s0 f0 sN fN =
   match c with
   | [] -> ()
   | h::t ->
     (
-      let Some s1 = TS.taint_eval_code h f0 (state_to_S s0) in
-      let s1 = state_of_S s1 in
+      let Some s1 = TS.taint_eval_code h f0 s0 in
       increase_fuel h s0 f0 s1 fN;
       increase_fuels t s1 f0 sN fN
     )
@@ -128,8 +131,8 @@ let compute_merge_total (f0:fuel) (fM:fuel) =
 
 let lemma_merge_total (b0:codes) (s0:state) (f0:fuel) (sM:state) (fM:fuel) (sN:state) =
   let f = if f0 > fM then f0 else fM in
-  increase_fuel (Cons?.hd b0) s0 f0 sM f;
-  increase_fuel (Block (Cons?.tl b0)) sM fM sN f
+  increase_fuel (Cons?.hd b0) (state_to_S s0) f0 (state_to_S sM) f;
+  increase_fuel (Block (Cons?.tl b0)) (state_to_S sM) fM (state_to_S sN) f
 
 let lemma_empty_total (s0:state) (bN:codes) =
   (s0, 0)
@@ -176,14 +179,16 @@ let lemma_whileMerge_total (c:code) (s0:state) (f0:fuel) (sM:state) (fM:fuel) (s
       (ensures state_eq_opt (TS.taint_eval_code c (f + fN) (state_to_S s0)) (TS.taint_eval_code c f (state_to_S sN))) =
       let Some sZ = TS.taint_eval_code c f (state_to_S sN) in
       let fZ = if f > fM then f else fM in
-      increase_fuel (While?.whileBody c) sM fM sN fZ;
-      increase_fuel c sN f (state_of_S sZ) fZ;
-
+      increase_fuel (While?.whileBody c) (state_to_S sM) fM (state_to_S sN) fZ;
+      
+      increase_fuel c (state_to_S sN) f sZ fZ;
+      
       assert (state_eq_opt (TS.taint_eval_code c (fZ + 1) (state_to_S sM)) (Some sZ)); // via eval_code for While
       assert (state_eq_opt (TS.taint_eval_code c (fZ + 1) (state_to_S sM)) (TS.taint_eval_code c (fZ + 1 + f0) (state_to_S s0))); // via eval_while_inv, choosing f = fZ + 1
 
       // Two assertions above prove (TS.taint_eval_code c (fZ + 1 + f0) (state_to_S s0)) equals (Some sZ)
-      increase_fuel c s0 (fZ + 1 + f0) (state_of_S sZ) (f + fN);
+      // increase_fuel c s0 (fZ + 1 + f0) (state_of_S s0 sZ) (f + fN);
+      increase_fuel c (state_to_S s0) (fZ + 1 + f0) sZ (f + fN);
       assert (state_eq_opt (TS.taint_eval_code c (f + fN) (state_to_S s0)) (Some sZ));
       ()
       in
