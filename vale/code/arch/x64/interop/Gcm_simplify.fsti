@@ -16,7 +16,7 @@ open AES256_helpers
 open FStar.Mul
 
 val gcm_simplify1 (b:buf_t TUInt8 TUInt128) (h:HS.mem) (n:nat) : Lemma 
-  (requires B.live h b /\ B.length b = n)
+  (requires B.length b = n)
   (ensures (
   DV.length_eq (get_downview b);
   Seq.equal

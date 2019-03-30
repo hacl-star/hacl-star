@@ -166,6 +166,9 @@ val le_bytes_to_seq_quad32_to_bytes_one_quad (b:quad32) :
 val le_bytes_to_seq_quad32_to_bytes (s:seq quad32) :
   Lemma (le_bytes_to_seq_quad32 (le_seq_quad32_to_bytes s) == s)
 
+val le_seq_quad32_to_bytes_to_seq_quad32 (s:seq nat8{length s % 16 = 0}) :
+  Lemma (le_seq_quad32_to_bytes (le_bytes_to_seq_quad32 s) == s)
+
 val le_quad32_to_bytes_to_quad32 (s:seq nat8 { length s == 16 }) :
   Lemma(le_quad32_to_bytes (le_bytes_to_quad32 s) == s)
 
@@ -229,3 +232,6 @@ val slice_commutes_le_bytes_to_seq_quad32 (s:seq nat8 { length s % 16 == 0 }) (n
 
 val append_distributes_le_bytes_to_seq_quad32 (s1:seq nat8 { length s1 % 16 == 0 }) (s2:seq nat8 { length s2 % 16 == 0 }) :
   Lemma(le_bytes_to_seq_quad32 (s1 @| s2) == (le_bytes_to_seq_quad32 s1) @| (le_bytes_to_seq_quad32 s2))
+
+val append_distributes_le_seq_quad32_to_bytes (s1:seq quad32) (s2:seq quad32) :
+  Lemma(le_seq_quad32_to_bytes (s1 @| s2) == (le_seq_quad32_to_bytes s1) @| (le_seq_quad32_to_bytes s2))

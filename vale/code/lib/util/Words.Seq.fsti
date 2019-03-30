@@ -91,3 +91,6 @@ val seq_to_four_LE_injective: unit ->
 
 val append_distributes_seq_to_seq_four_LE (#a:Type) (x:seq a{length x % 4 == 0}) (y:seq a{length y % 4 == 0}) :
   Lemma (seq_to_seq_four_LE (x @| y) == seq_to_seq_four_LE x @| seq_to_seq_four_LE y)
+
+val append_distributes_seq_four_to_seq_LE (#a:Type) (x:seq (four a)) (y:seq (four a)) :
+  Lemma (seq_four_to_seq_LE (x @| y) == seq_four_to_seq_LE x @| seq_four_to_seq_LE y)

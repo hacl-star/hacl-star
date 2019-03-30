@@ -192,3 +192,6 @@ let append_distributes_seq_to_seq_four_LE (#a:Type) (x:seq a{length x % 4 == 0})
   =
   assert (equal (seq_to_seq_four_LE (x @| y)) (seq_to_seq_four_LE x @| seq_to_seq_four_LE y));
   ()
+
+let append_distributes_seq_four_to_seq_LE #a x y =
+  assert (equal (seq_four_to_seq_LE (x @| y)) (seq_four_to_seq_LE x @| seq_four_to_seq_LE y))
