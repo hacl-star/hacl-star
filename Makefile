@@ -657,13 +657,11 @@ DEFAULT_FLAGS		=\
   -no-prefix 'MerkleTree.New.Low.Serialization' \
   -fparentheses -fno-shadow -fcurly-braces
 
-# No API for the Chacha20 bundle (yet). This would cause a name conflict with
-# old Chacha20.
 COMPACT_FLAGS	=\
   -bundle Hacl.Hash.MD5+Hacl.Hash.Core.MD5+Hacl.Hash.SHA1+Hacl.Hash.Core.SHA1+Hacl.Hash.SHA2+Hacl.Hash.Core.SHA2+Hacl.Hash.Core.SHA2.Constants=Hacl.Hash.*[rename=Hacl_Hash] \
   -bundle Hacl.Impl.SHA3+Hacl.SHA3=[rename=Hacl_SHA3] \
   -bundle Hacl.Poly1305_32+Hacl.Poly1305_128+Hacl.Poly1305_256=Hacl.Poly1305.*,Hacl.Impl.Poly1305,Hacl.Impl.Poly1305.*[rename=Hacl_Poly1305] \
-  -bundle Hacl.Impl.Chacha20=Hacl.Impl.Chacha20.* \
+  -bundle Hacl.Impl.Chacha20=Hacl.Impl.Chacha20.*[rename=Hacl_Chacha20] \
   -bundle Hacl.Curve25519_51+Hacl.Curve25519_64=Hacl.Impl.Curve25519.*[rename=Hacl_Curve25519] \
   -bundle Hacl.Impl.Chacha20Poly1305=Hacl.Impl.Chacha20Poly1305.*[rename=Hacl_Chacha20Poly1305] \
   -bundle LowStar.* \
