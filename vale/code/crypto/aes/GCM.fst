@@ -526,9 +526,9 @@ let gcm_blocks_helper_simplified (alg:algorithm) (key:seq nat32)
            let auth_input_bytes = slice (le_seq_quad32_to_bytes auth_raw_quads) 0 a_num_bytes in
            let auth_padded_bytes = pad_to_128_bits auth_input_bytes in
            let auth_quads = le_bytes_to_seq_quad32 auth_padded_bytes in
-           
+                      
            let raw_quads = append (append auth_quads c128x6) c128 in
-           let total_bytes = (length auth_quads) * 16 + p_num_bytes in
+           let total_bytes = (length auth_quads) * 16 + p_num_bytes in           
            let raw_quads = 
              if p_num_bytes > (length p128x6 + length p128) * 16 then
                let raw_quads = append raw_quads c_bytes in
