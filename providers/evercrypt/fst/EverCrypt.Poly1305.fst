@@ -28,8 +28,8 @@ let poly1305 dst src len key =
     Poly_stdcalls.poly1305 ctx src (FStar.Int.Cast.Full.uint32_to_uint64 len);
     B.blit ctx 0ul dst 0ul 16ul;
     let h1 = ST.get () in
-    X64.Poly1305.CallingFromLowStar.lemma_call_poly1305 h0 h1 ctx (*inp*)src src key;
-    Poly1305.Equiv.lemma_poly1305_equiv src key;
+    X64.Poly1305.CallingFromLowStar.lemma_call_poly1305 h0 h1 ctx (*inp*)src (Arch.BufferFriend.to_bytes (B.as_seq h0 src)) (Arch.BufferFriend.to_bytes (B.as_seq h0 key));
+    Poly1305.Equiv.lemma_poly1305_equiv (Arch.BufferFriend.to_bytes (B.as_seq h0 src)) (Arch.BufferFriend.to_bytes (B.as_seq h0 key));
     assert (B.as_seq h1 dst == Spec.Poly1305.poly1305 (B.as_seq h0 src) (B.as_seq h0 key));
     pop_frame ()
   end else begin
