@@ -291,6 +291,52 @@ let rec test_poly1305 (i: U32.t): St unit =
     test_poly1305 (i `U32.add_mod` 1ul)
   end
 
+/// Curve25519
+
+let test_curve25519_one (v: Test.Vectors.Curve25519.vector): St unit =
+  let open Test.Vectors.Curve25519 in
+  let Vector result result_len public public_len private_ private__len valid = v in
+  push_frame ();
+  // WHY?!! These are in the refinement in the vectors file.
+  assume (B.recallable result);
+  assume (B.recallable public);
+  assume (B.recallable private_);
+  B.recall result;
+  B.recall public;
+  B.recall private_;
+  let h0 = get () in
+  let dst = B.alloca 0uy 32ul in
+  // WHY?! key, tag and input were live before dst was created fresh
+  assume (B.disjoint dst public);
+  assume (B.disjoint dst private_);
+  let h1 = get () in
+  B.recall result;
+  B.recall public;
+  B.recall private_;
+  admit (); // HACL* libraries getting in our way, once again
+  if public_len = 32ul && private__len = 32ul then
+    EverCrypt.Curve25519.ecdh dst private_ public;
+  B.recall result;
+  if result_len = 32ul && valid then
+    TestLib.compare_and_print !$"Curve25519" result dst 32ul;
+  pop_frame ()
+
+let rec test_curve25519 (i: U32.t): St unit =
+  let open Test.Vectors.Curve25519 in
+  if i `U32.gte` vectors_len then
+    ()
+  else begin
+    assume (B.recallable vectors);
+    B.recall vectors;
+    // WHY? This is the refinement!
+    assume (U32.v vectors_len = B.length vectors);
+    assert (U32.v i < B.length vectors);
+    test_curve25519_one (B.index vectors i);
+    test_curve25519 (i `U32.add_mod` 1ul)
+  end
+
+
+
 /// ChaCha20-Poly1305
 
 let aead_vector = cipher * vec8 * vec8 * vec8 * vec8 * vec8 * vec8
@@ -549,6 +595,7 @@ let main (): St C.exit_code =
     test_hash hash_vectors_low;
     test_cipher block_cipher_vectors_low;
     Test.Hash.main ();
+    test_curve25519 0ul;
 
     print !$"\n  Vale/POLY1305\n";
     EverCrypt.AutoConfig2.disable_avx2 ();
@@ -567,6 +614,7 @@ let main (): St C.exit_code =
   test_cipher block_cipher_vectors_low;
   test_chacha20 chacha20_vectors_low;
   Test.Hash.main ();
+  test_curve25519 0ul;
   //Test.Bytes.main ();
 
   print !$"\n  AVX2/POLY1305\n";
