@@ -10,7 +10,7 @@ open FStar.HyperStack.ST
 
 val poly1305: dst:B.buffer UInt8.t { B.length dst = 16 } ->
   src:B.buffer UInt8.t ->
-  len:U32.t { U32.v len = B.length src } ->
+  len:U32.t { U32.v len = B.length src /\ U32.v len + 31 <= UInt.max_int 32 } ->
   key:B.buffer UInt8.t { B.length key = 32 } ->
   Stack unit
     (requires fun h ->
