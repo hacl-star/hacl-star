@@ -133,6 +133,7 @@ procedure{:quick} Gf128_powers(
         modifies_mem(loc_buffer(hkeys_b), old(mem), mem);
         of_quad32(buffer128_read(hkeys_b, 0, mem)) == gf128_power(h, 1);
         of_quad32(buffer128_read(hkeys_b, 1, mem)) == gf128_power(h, 2);
+        of_quad32(buffer128_read(hkeys_b, 2, mem)) == h;
         of_quad32(buffer128_read(hkeys_b, 3, mem)) == gf128_power(h, 3);
         of_quad32(buffer128_read(hkeys_b, 4, mem)) == gf128_power(h, 4);
         of_quad32(buffer128_read(hkeys_b, 6, mem)) == gf128_power(h, 5);

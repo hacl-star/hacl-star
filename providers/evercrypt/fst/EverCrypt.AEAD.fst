@@ -124,11 +124,6 @@ let encrypt #a ek iv ad ad_len plain plain_len dst =
 
       let h0 = get() in
 
-      let open Words.Seq_s in
-      let open Types_s in
-      let open Words_s in
-      let open AES_s in
-
       let cipher = B.sub dst 0ul plain_len in
       let tag = B.sub dst plain_len 16ul in
 
@@ -165,8 +160,8 @@ let encrypt #a ek iv ad ad_len plain plain_len dst =
         let k = G.reveal (EK?.kv ek) in
         let k_nat = Words.Seq_s.seq_uint8_to_seq_nat8 k in
         let k_w = Words.Seq_s.seq_nat8_to_seq_nat32_LE k_nat in      
-        le_bytes_to_quad32 (seq_uint8_to_seq_nat8 (Seq.slice (B.as_seq h0 hkeys_b) 0 16)) == 
-          aes_encrypt_LE AES_128 k_w (Mkfour 0 0 0 0));
+        Seq.slice (B.as_seq h0 hkeys_b) 0 16 == 
+          Words.Seq_s.seq_nat8_to_seq_uint8 (Types_s.le_quad32_to_bytes (AES_s.aes_encrypt_LE AES_s.AES_128 k_w (Words_s.Mkfour 0 0 0 0))));
 
       // These asserts prove that 4096 * (len {plain, ad}) are smaller than pow2_32
       assert (max_length a = pow2 20 - 1);
@@ -206,8 +201,8 @@ let encrypt #a ek iv ad ad_len plain plain_len dst =
         let cipher_nat, tag_nat =
           GCM_s.gcm_encrypt_LE (vale_alg_of_alg a) kv_nat iv_nat plain_nat ad_nat
         in
-        Seq.equal (B.as_seq h1 cipher) (seq_nat8_to_seq_uint8 cipher_nat) /\
-        Seq.equal (B.as_seq h1 tag) (seq_nat8_to_seq_uint8 tag_nat));
+        Seq.equal (B.as_seq h1 cipher) (Words.Seq_s.seq_nat8_to_seq_uint8 cipher_nat) /\
+        Seq.equal (B.as_seq h1 tag) (Words.Seq_s.seq_nat8_to_seq_uint8 tag_nat));
 
 
       assert (Seq.equal

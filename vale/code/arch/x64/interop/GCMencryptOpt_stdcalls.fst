@@ -350,8 +350,8 @@ val gcm128_encrypt_opt_alloca:
       (Seq.equal (B.as_seq h0 keys_b)
          (seq_nat8_to_seq_uint8 (le_seq_quad32_to_bytes (key_to_round_keys_LE AES_128 (Ghost.reveal key))))) /\
          
-      le_bytes_to_quad32 (seq_uint8_to_seq_nat8 (Seq.slice (B.as_seq h0 hkeys_b) 0 16)) ==
-        aes_encrypt_LE AES_128 (Ghost.reveal key) (Mkfour 0 0 0 0)
+      Seq.slice (B.as_seq h0 hkeys_b) 0 16 ==
+        (seq_nat8_to_seq_uint8 (le_quad32_to_bytes (aes_encrypt_LE AES_128 (Ghost.reveal key) (Mkfour 0 0 0 0))))
     )
     (ensures fun h0 _ h1 ->
       B.modifies (B.loc_union (B.loc_buffer tag_b)
@@ -536,6 +536,9 @@ let gcm128_encrypt_opt_alloca key plain_b plain_len auth_b auth_bytes iv_b
       }
 
   in lemma_uv_key ();
+
+  // Simplify the precondition for hkeys_b
+  le_bytes_to_quad32_to_bytes (aes_encrypt_LE AES_128 (Ghost.reveal key) (Mkfour 0 0 0 0));
 
   // Simplify the expression for the iv
   DV.length_eq (get_downview iv_b);
