@@ -5,6 +5,27 @@ ocamlfind ocamlopt -package yojson gen.ml -linkpkg -o gen.exe && \
 
 *)
 
+let generate_hex_field oc i f hex =
+  let l = String.length hex / 2 in
+  Printf.fprintf oc
+    "let %s%d: (b: B.buffer UInt8.t { B.length b = %d /\\ B.recallable b }) =\n  \
+       [@inline_let] let l = [ " f i l;
+  if String.length hex mod 2 <> 0 then
+    failwith (Printf.sprintf "data in entry %d field %s end on a half-byte boundary" i f);
+  for i = 0 to l - 1 do
+    Printf.fprintf oc "0x%c%cuy; " hex.[2*i] hex.[2*i+1];
+  done;
+  Printf.fprintf oc "] in\n  \
+    assert_norm (List.Tot.length l = %d);\n  \
+    B.gcmalloc_of_list HyperStack.root l\n\n" l;
+
+  Printf.fprintf oc
+    "let %s%d_len: (x:UInt32.t { UInt32.v x = B.length %s%d }) =\n  \
+       %dul\n\n" f i f i l
+
+let generate_bool_field oc i f b =
+  Printf.fprintf oc "let %s%d = %b\n\n" f i b
+
 let syntax_of_json module_ json =
   let oc = open_out_bin (module_ ^ ".fst") in
   Printf.fprintf oc "module %s\n\n" module_;
@@ -17,7 +38,8 @@ let syntax_of_json module_ json =
     | `List vectors -> vectors
     | _ -> failwith "JSON does not start with a list"
   in
-  let kept_fields = ref [] in
+  let hex_fields = ref [] in
+  let bool_fields = ref [] in
 
   List.iteri (fun i vec ->
     let fields = match vec with
@@ -25,32 +47,20 @@ let syntax_of_json module_ json =
       | _ -> failwith "JSON list entries are not associative objects"
     in
     List.iter (fun (f, hex) ->
-      if String.length f < 4 || String.sub f (String.length f - 4) 4 <> "_len" then begin
-        let hex = match hex with
-          | `String hex -> hex
-          | _ -> failwith "JSON list entry has a field that is not a string"
-        in
-        let l = String.length hex / 2 in
-        Printf.fprintf oc
-          "let %s%d: (b: B.buffer UInt8.t { B.length b = %d /\\ B.recallable b }) =\n  \
-             [@inline_let] let l = [ " f i l;
-        if String.length hex mod 2 <> 0 then
-          failwith (Printf.sprintf "data in entry %d field %s end on a half-byte boundary" i f);
-        for i = 0 to l - 1 do
-          Printf.fprintf oc "0x%c%cuy; " hex.[2*i] hex.[2*i+1];
-        done;
-        Printf.fprintf oc "] in\n  \
-          assert_norm (List.Tot.length l = %d);\n  \
-          B.gcmalloc_of_list HyperStack.root l\n\n" l;
+      if String.length f < 4 || String.sub f (String.length f - 4) 4 <> "_len" then
+        match hex with
+        | `String hex ->
+            (* Just trusting the first entry to have the right fields. *)
+            if i = 0 then
+              hex_fields := f :: !hex_fields;
+            generate_hex_field oc i f hex
 
-        Printf.fprintf oc
-          "let %s%d_len: (x:UInt32.t { UInt32.v x = B.length %s%d }) =\n  \
-             %dul\n\n" f i f i l;
+        | `Bool b ->
+            if i = 0 then
+              bool_fields := f :: !bool_fields;
+            generate_bool_field oc i f b
 
-        (* Just trusting the first entry to have the right fields. *)
-        if i = 0 then
-          kept_fields := f :: !kept_fields
-      end
+        | _ -> failwith "JSON list entry has a field that is not a string or a bool"
     ) fields
   ) vectors;
 
@@ -58,7 +68,10 @@ let syntax_of_json module_ json =
   List.iter (fun f ->
     Printf.fprintf oc "  %s: B.buffer UInt8.t { B.recallable %s } ->\n" f f;
     Printf.fprintf oc "  %s_len: UInt32.t { B.length %s = UInt32.v %s_len } ->\n" f f f
-  ) !kept_fields;
+  ) !hex_fields;
+  List.iter (fun f ->
+    Printf.fprintf oc "  %s: bool ->\n" f
+  ) !bool_fields;
   Printf.fprintf oc "  vector\n\n";
 
   let l = List.length vectors in
@@ -70,12 +83,15 @@ let syntax_of_json module_ json =
     List.iter (fun f ->
       Printf.fprintf oc "%s%d " f i;
       Printf.fprintf oc "%s%d_len " f i
-    ) !kept_fields;
+    ) !hex_fields;
+    List.iter (fun f ->
+      Printf.fprintf oc "%s%d" f i
+    ) !bool_fields;
     Printf.fprintf oc ";\n";
   done;
   Printf.fprintf oc "  ] in\n  \
     assert_norm (List.Tot.length l = %d);\n  \
-    B.gcmalloc_of_list HyperStack.root l\n" l;
+    B.gcmalloc_of_list HyperStack.root l\n\n" l;
   Printf.fprintf oc
     "let vectors_len: (x:UInt32.t { UInt32.v x = B.length vectors }) =\n  \
        %dul\n" l
