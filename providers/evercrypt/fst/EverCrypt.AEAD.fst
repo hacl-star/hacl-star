@@ -156,13 +156,11 @@ let encrypt #a ek iv ad ad_len plain plain_len dst =
 
       in lemma_iv_eq ();
 
-      assume (UInt32.v plain_len > 0);
-
       assume (
         let k = G.reveal (EK?.kv ek) in
         let k_nat = Words.Seq_s.seq_uint8_to_seq_nat8 k in
         let k_w = Words.Seq_s.seq_nat8_to_seq_nat32_LE k_nat in      
-        Seq.slice (B.as_seq h0 hkeys_b) 0 16 == 
+        Seq.slice (B.as_seq h0 hkeys_b) 32 48 == 
           Words.Seq_s.seq_nat8_to_seq_uint8 (Types_s.le_quad32_to_bytes (Types_s.reverse_bytes_quad32 (AES_s.aes_encrypt_LE AES_s.AES_128 k_w (Words_s.Mkfour 0 0 0 0)))));
 
       // These asserts prove that 4096 * (len {plain, ad}) are smaller than pow2_32

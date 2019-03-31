@@ -921,7 +921,6 @@ procedure {:quick exportOnly} gcm_blocks_wrapped(
         buffer_length(in128_b) == len128;
         buffer_length(inout_b) == 1;
 
-        0 < plain_num_bytes;
         8 * plain_num_bytes < pow2_32;
         4096 * (buffer_length(in128x6_b)) * 16 < pow2_32;
         256 * buffer_length(in128_b) < pow2_32;
@@ -1337,7 +1336,6 @@ procedure {:quick exportOnly}{:public}{:exportSpecs} gcm_blocks_stdcall(
         buffer_length(in128_b) == len128;
         buffer_length(inout_b) == 1;
 
-        0 < plain_num_bytes;
         8 * plain_num_bytes < pow2_32;
         4096 * (buffer_length(in128x6_b)) * 16 < pow2_32;
         256 * buffer_length(in128_b) < pow2_32;
@@ -1452,7 +1450,7 @@ procedure {:quick exportOnly}{:public}{:exportSpecs} gcm_blocks_stdcall(
         Load64_stack(rbp, rsp, 64 + 8 + 72);
     }
     
-    gcm_blocks(alg,
+    gcm_blocks_wrapped(alg,
                if win then 224 + 56 else 64 + 8,
                auth_b,
                abytes_b,
