@@ -38,7 +38,7 @@ val add1
     as_nat out h1 + pow2_256 * UInt64.v c == as_nat f1 h0 + UInt64.v f2)  
 
 inline_for_extraction
-val fadd
+val fadd_
   (out:u256)
   (f1:u256)
   (f2:u256)

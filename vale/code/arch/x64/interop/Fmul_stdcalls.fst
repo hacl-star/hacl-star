@@ -5,7 +5,7 @@ open Interop.Base
 
 #push-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 200"
 
-let fmul tmp f1 out f2 =
+let fmul_ tmp f1 out f2 =
   DV.length_eq (get_downview tmp);
   DV.length_eq (get_downview out);
   DV.length_eq (get_downview f1);
