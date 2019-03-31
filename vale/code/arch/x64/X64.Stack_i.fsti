@@ -15,6 +15,17 @@ val store_stack128 : ptr:int -> v:quad32 -> h:stack -> GTot stack
 
 val init_rsp: h:stack -> (n:nat64{n >= 4096})
 
+let modifies_stack (lo_rsp hi_rsp:nat) (h h':stack) : Prop_s.prop0 =
+  forall addr . {:pattern (load_stack64 addr h') \/ (valid_src_stack64 addr h') }
+    valid_src_stack64 addr h /\ (addr + 8 <= lo_rsp || addr >= hi_rsp) ==>
+      valid_src_stack64 addr h' /\ 
+      load_stack64 addr h == load_stack64 addr h'
+
+let valid_src_stack64s (base num_slots:nat) (h:stack) : Prop_s.prop0 =
+  forall addr . {:pattern (valid_src_stack64 addr h)}
+    (base <= addr) && (addr < base + num_slots `op_Multiply` 8) && (addr - base) % 8 = 0 ==>
+      valid_src_stack64 addr h
+
 (* Validity preservation *)
 
 val lemma_store_stack_same_valid64: (ptr:int) -> (v:nat64) -> (h:stack) -> (i:int) -> Lemma
