@@ -5,7 +5,9 @@
 ocamlfind ocamlopt -package yojson gen.ml -linkpkg -o gen.exe && \
   ./gen.exe -module Test.Vectors.Poly1305 poly1305_test_vectors.json && \
   ./gen.exe -module Test.Vectors.Curve25519 curve25519_test_vectors.json && \
-  ./gen.exe -module Test.Vectors.Chacha20Poly1305 aead_chacha20poly1305_test_vectors.json
+  ./gen.exe -module Test.Vectors.Chacha20Poly1305 aead_chacha20poly1305_test_vectors.json \
+  ./gen.exe -module Test.Vectors.Aes128Gcm aead_aes128gcm_test_vectors.json && \
+  ./gen.exe -module Test.Vectors.Aes128 aes128_test_vectors.json
 
 *)
 
