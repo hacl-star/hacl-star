@@ -1208,7 +1208,7 @@ procedure {:quick} restore_registers(inline win:bool, ghost old_rsp:nat,
 #reset-options "--z3rlimit 300"
 // Using exportOnly, since verification with quick mode fails with:
 // (Error 196) Implicit argument: Expected a total term; got a ghost term
-procedure {:quick exportOnly}{:public}{:exportSpecs} gcm_blocks_stdcall(
+procedure {:quick exportOnly}{:public}{:exportSpecs} {:verify true} gcm_blocks_stdcall(
     inline win:bool,
     inline alg:algorithm,
     
@@ -1345,13 +1345,13 @@ procedure {:quick exportOnly}{:public}{:exportSpecs} gcm_blocks_stdcall(
         buffer128_read(hkeys_b, 0, mem) == reverse_bytes_quad32(aes_encrypt_LE(alg, key, Mkfour(0,0,0,0)));
 
     ensures
-//        modifies_mem(loc_union(loc_buffer(tag_b),
-//                     loc_union(loc_buffer(iv_b), 
-//                     loc_union(loc_buffer(scratch_b), 
-//                     loc_union(loc_buffer(out128x6_b), 
-//                     loc_union(loc_buffer(out128_b), 
-//                               loc_buffer(inout_b)))))), old(mem), mem);
-//
+        modifies_mem(loc_union(loc_buffer(tag_b),
+                     loc_union(loc_buffer(iv_b), 
+                     loc_union(loc_buffer(scratch_b), 
+                     loc_union(loc_buffer(out128x6_b), 
+                     loc_union(loc_buffer(out128_b), 
+                               loc_buffer(inout_b)))))), old(mem), mem);
+
 //        // Semantics
 //        8 * old(plain_num_bytes) < pow2_32;
 //        8 * old(auth_num_bytes) < pow2_32;
@@ -1375,38 +1375,38 @@ procedure {:quick exportOnly}{:public}{:exportSpecs} gcm_blocks_stdcall(
 //        le_quad32_to_bytes(buffer128_read(tag_b, 0, mem)) == 
 //            gcm_encrypt_LE(alg, seq_nat32_to_seq_nat8_LE(key), be_quad32_to_bytes(iv_BE), 
 //                           plain_bytes, auth_bytes)._2;
-//
-//        // Calling convention for caller/callee saved registers
-//        rsp == old(rsp);
-//
-//        // Windows:
-//        win ==> rbx == old(rbx);
-//        win ==> rbp == old(rbp);
-//        win ==> rdi == old(rdi);
-//        win ==> rsi == old(rsi);
-//        win ==> r12 == old(r12);
-//        win ==> r13 == old(r13);
-//        win ==> r14 == old(r14);
-//        win ==> r15 == old(r15);
-//
-//        win ==> xmm6  == old(xmm6);
-//        win ==> xmm7  == old(xmm7);
-//        win ==> xmm8  == old(xmm8);
-//        win ==> xmm9  == old(xmm9);
-//        win ==> xmm10 == old(xmm10);
-//        win ==> xmm11 == old(xmm11);
-//        win ==> xmm12 == old(xmm12);
-//        win ==> xmm13 == old(xmm13);
-//        win ==> xmm14 == old(xmm14);
-//        win ==> xmm15 == old(xmm15);
-//
-//        // Linux:
-//        !win ==> rbx == old(rbx);
-//        !win ==> rbp == old(rbp);
-//        !win ==> r12 == old(r12);
-//        !win ==> r13 == old(r13);
-//        !win ==> r14 == old(r14);
-//        !win ==> r15 == old(r15);
+
+        // Calling convention for caller/callee saved registers
+        rsp == old(rsp);
+
+        // Windows:
+        win ==> rbx == old(rbx);
+        win ==> rbp == old(rbp);
+        win ==> rdi == old(rdi);
+        win ==> rsi == old(rsi);
+        win ==> r12 == old(r12);
+        win ==> r13 == old(r13);
+        win ==> r14 == old(r14);
+        win ==> r15 == old(r15);
+
+        win ==> xmm6  == old(xmm6);
+        win ==> xmm7  == old(xmm7);
+        win ==> xmm8  == old(xmm8);
+        win ==> xmm9  == old(xmm9);
+        win ==> xmm10 == old(xmm10);
+        win ==> xmm11 == old(xmm11);
+        win ==> xmm12 == old(xmm12);
+        win ==> xmm13 == old(xmm13);
+        win ==> xmm14 == old(xmm14);
+        win ==> xmm15 == old(xmm15);
+
+        // Linux:
+        !win ==> rbx == old(rbx);
+        !win ==> rbp == old(rbp);
+        !win ==> r12 == old(r12);
+        !win ==> r13 == old(r13);
+        !win ==> r14 == old(r14);
+        !win ==> r15 == old(r15);
 {
     assert win ==> valid_src_stack64(rsp + 40, stack);
     assert !win ==> valid_src_stack64(rsp + 80, stack);
