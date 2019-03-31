@@ -65,7 +65,6 @@ val set_h0Table:
 [@ Substitute ]
 let set_h0Table s =
   recall_contents const_h0Table (Spec.h0Table Spec.SHA2_256);
-  assume(disjoint s const_h0Table);
   copy s const_h0Table
 
 
@@ -83,34 +82,34 @@ let get_opTable s =
 
 
 
-val _Ch: x: uint32 -> y: uint32 -> z: uint32 ->
-  Tot (r: uint32{r == Spec._Ch Spec.SHA2_256 x y z})
+val _Ch: x: word_t -> y: word_t -> z: word_t ->
+  Tot (r: word_t{r == Spec._Ch Spec.SHA2_256 x y z})
 
 let _Ch x y z = ((x &. y) ^. ((~. x) &. z))
 
 
-val _Maj: x: uint32 -> y: uint32 -> z: uint32 ->
-  Tot (r: uint32{r == Spec._Maj Spec.SHA2_256 x y z})
+val _Maj: x: word_t -> y: word_t -> z: word_t ->
+  Tot (r: word_t{r == Spec._Maj Spec.SHA2_256 x y z})
 
 let _Maj x y z = (x &. y) ^. ((x &. z) ^. (y &. z))
 
 
-val _Sigma0: x:uint32 ->
-  Stack uint32
+val _Sigma0: x:word_t ->
+  Stack word_t
   (requires (fun h -> True))
   (ensures  (fun h0 r h1 -> modifies0 h0 h1 /\ r == Spec._Sigma0 Spec.SHA2_256 x))
 
 let _Sigma0 x = (x >>>. (get_opTable 0ul)) ^. ((x >>>. get_opTable 1ul) ^. (x >>>. get_opTable 2ul))
 
-val _Sigma1: x:uint32 ->
-  Stack uint32
+val _Sigma1: x:word_t ->
+  Stack word_t
   (requires (fun h -> True))
   (ensures  (fun h0 r h1 -> modifies0 h0 h1 /\ r == Spec._Sigma1 Spec.SHA2_256 x))
 
 let _Sigma1 x = (x >>>. get_opTable 3ul) ^. ((x >>>. get_opTable 4ul) ^. (x >>>. get_opTable 5ul))
 
-val _sigma0: x:uint32 ->
-  Stack uint32
+val _sigma0: x:word_t ->
+  Stack word_t
   (requires (fun h -> True))
   (ensures  (fun h0 r h1 -> modifies0 h0 h1 /\ r == Spec._sigma0 Spec.SHA2_256 x))
 
@@ -118,8 +117,8 @@ let _sigma0 x =
   let n = get_opTable 8ul in
   (x >>>. get_opTable 6ul) ^. ((x >>>. get_opTable 7ul) ^. (x >>. n))
 
-val _sigma1: x: uint32 ->
-  Stack uint32
+val _sigma1: x: word_t ->
+  Stack word_t
   (requires (fun h -> True))
   (ensures  (fun h0 r h1 -> modifies0 h0 h1 /\ r == Spec._sigma1 Spec.SHA2_256 x))
 
@@ -139,7 +138,7 @@ val step_ws0:
 let step_ws0 s b i = s.(i) <- b.(i)
 
 
-#reset-options "--z3rlimit 50"
+#reset-options "--z3rlimit 150"
 
 val step_ws1:
     s: ws_wp
@@ -162,31 +161,46 @@ let step_ws1 s i =
 val loop_ws0: s:ws_wp -> b:block_wp ->
   Stack unit
   (requires (fun h -> live h s /\ live h b /\ disjoint s b))
-  (ensures  (fun h0 _ h1 -> modifies1 s h0 h1))
-                       (* /\ h1.[|s|] == Spec.loop_ws0 Spec.SHA2_256 h0.[|b|] h0.[|s|])) *)
+  (ensures  (fun h0 _ h1 -> modifies1 s h0 h1
+                       /\ h1.[|s|] == Spec.loop_ws0 Spec.SHA2_256 h0.[|b|] h0.[|s|]))
 let loop_ws0 s b =
   let h0 = ST.get () in
-  loop_nospec #h0 (size 16) s
-  (fun i -> step_ws0 s b i)
+  [@inline_let]
+  let spec h = Spec.step_ws0 Spec.SHA2_256 h.[|b|] in
+  loop1 h0 (size 16) s spec
+  (fun i ->
+    Loops.unfold_repeati 16 (spec h0) h0.[|s|] (v i);
+    step_ws0 s b i)
 
 
 val loop_ws1: s: ws_wp ->
   Stack unit
   (requires (fun h -> live h s))
-  (ensures  (fun h0 _ h1 -> modifies1 s h0 h1))
-                       (* /\ h1.[|s|] == Spec.loop_ws1 Spec.SHA2_256 h0.[|s|])) *)
+  (ensures  (fun h0 _ h1 -> modifies1 s h0 h1
+                       /\ h1.[|s|] == Spec.loop_ws1 Spec.SHA2_256 h0.[|s|]))
 let loop_ws1 s =
   let h0 = ST.get () in
-  loop_nospec #h0 (size (Spec.size_kTable Spec.SHA2_256) -. (size 16)) s
-  (fun i -> step_ws1 s (i +. size 16))
+  [@inline_let]
+  let spec h = Spec.step_ws1 Spec.SHA2_256 in
+  [@inline_let]
+  let rounds = Spec.size_kTable Spec.SHA2_256 - 16 in
+  assert(rounds + 16 >= 16 /\ rounds < Spec.size_kTable Spec.SHA2_256);
+  assert(v (size rounds) + 16 >= 16 /\ v (size rounds) < Spec.size_kTable Spec.SHA2_256);
+  admit();
+  loop1 h0 (size rounds) s spec
+  (fun i ->
+    Loops.unfold_repeati rounds (spec h0) h0.[|s|] (v i);
+    step_ws1 s (i +. size 16))
 
 
 val ws:
     s: ws_wp
   -> b: block_wp ->
   Stack unit
-  (requires (fun h -> live h s /\ live h b /\ disjoint s b))
-  (ensures  (fun h0 _ h1 -> modifies1 s h0 h1))
+  (requires (fun h -> live h s /\ live h b /\ disjoint s b
+                 /\ h.[|s|] == Seq.create (Spec.size_kTable Spec.SHA2.SHA2_256) (u32 0)))
+  (ensures  (fun h0 _ h1 -> modifies1 s h0 h1
+                       /\ h1.[|s|] == Spec.ws Spec.SHA2_256 h0.[|b|]))
 
 let ws s b =
   loop_ws0 s b;
@@ -199,8 +213,8 @@ val shuffle_core:
   -> t: size_t{v t < Spec.size_kTable Spec.SHA2_256} ->
   Stack unit
   (requires (fun h -> live h s /\ live h wsTable /\ disjoint s wsTable))
-  (ensures  (fun h0 _ h1 -> modifies1 s h0 h1))
-                       (* /\ h1.[|s|] == Spec.shuffle_core Spec.SHA2_256 h0.[|wsTable|] (v t) h0.[|s|])) *)
+  (ensures  (fun h0 _ h1 -> modifies1 s h0 h1
+                       /\ h1.[|s|] == Spec.shuffle_core Spec.SHA2_256 h0.[|wsTable|] (v t) h0.[|s|]))
 
 let shuffle_core hash wsTable i =
   let a0 = hash.(0ul) in
@@ -212,8 +226,8 @@ let shuffle_core hash wsTable i =
   let g0 = hash.(6ul) in
   let h0 = hash.(7ul) in
 
-  let ws_i: uint32 = wsTable.(i) in
-  let k_i: uint32 = get_kTable i in
+  let ws_i: word_t = wsTable.(i) in
+  let k_i: word_t = get_kTable i in
   let r =  k_i +. ws_i in
   let s0 = _Sigma0 a0 in
   let s1 = _Sigma1 e0 in
@@ -233,13 +247,17 @@ let shuffle_core hash wsTable i =
 val shuffle: hash:hash_wp -> wsTable: ws_wp ->
   Stack unit
   (requires (fun h -> live h hash /\ live h wsTable /\ disjoint hash wsTable))
-  (ensures  (fun h0 _ h1 -> modifies1 hash h0 h1))
-                       (* /\ h1.[|hash|] == Spec.shuffle Spec.SHA2_256 h0.[|wsTable|] h0.[|hash|])) *)
+  (ensures  (fun h0 _ h1 -> modifies1 hash h0 h1
+                       /\ h1.[|hash|] == Spec.shuffle Spec.SHA2_256 h0.[|wsTable|] h0.[|hash|]))
 
 let shuffle hash wsTable =
   let h0 = ST.get () in
-  loop_nospec #h0 (size (Spec.size_kTable Spec.SHA2_256)) hash
-  (fun i -> shuffle_core hash wsTable i)
+  [@inline_let]
+  let spec h = Spec.shuffle_core Spec.SHA2_256 h.[|wsTable|] in
+  loop1 h0 (size (Spec.size_kTable Spec.SHA2_256)) hash spec
+  (fun i ->
+    (admit(); Loops.unfold_repeati (Spec.size_kTable Spec.SHA2_256) (spec h0) h0.[|wsTable|] (v i));
+    shuffle_core hash wsTable i)
 
 
 val compress: hash:hash_wp -> block:block_wp ->
