@@ -223,6 +223,7 @@ procedure {:quick} gcm_blocks128(
         buffer_length(in_b) == buffer_length(out_b) /\ 256 * buffer_length(in_b) < pow2_32;
         len == buffer_length(in_b);
         mask == Mkfour(0x0C0D0E0F, 0x08090A0B, 0x04050607, 0x00010203);
+        len < pow2_32;
 
         // AES reqs
         aes_reqs(alg, key, round_keys, keys_b, keys_ptr, mem, memTaint);
@@ -272,6 +273,7 @@ procedure {:quick} gcm_blocks128(
             out_ptr + 16 * len < pow2_64;
             buffer_length(in_b) == buffer_length(out_b);
             rdx != len ==> partial_seq_agreement(plain_quads, s128(mem, in_b), rdx, buffer_length(in_b));
+            len < pow2_32;
 
             // AES reqs
             aes_reqs(alg, key, round_keys, keys_b, keys_ptr, mem, memTaint);
@@ -454,10 +456,10 @@ procedure {:quick} gcm_blocks_auth(
         r13 == old(iv_ptr);
         r14 == old(Xip);
         r15 == auth_num_bytes;
-        xmm11 == buffer128_read(hkeys_b, 0, mem);
+        xmm11 == buffer128_read(hkeys_b, 2, mem);
         
         // Semantics
-        let h:quad32 := reverse_bytes_quad32(buffer128_read(hkeys_b, 0, mem));
+        let h:quad32 := reverse_bytes_quad32(buffer128_read(hkeys_b, 2, mem));
         let raw_auth_quads:seq(quad32) := if (old(auth_num_bytes) > old(auth_len * 128/8)) then 
                                 append(s128(mem, auth_b), old(s128(mem, abytes_b)))
                               else 
@@ -477,12 +479,8 @@ procedure {:quick} gcm_blocks_auth(
     Mov64(rax, auth_ptr);
     Mov64(r8, keys_ptr);
     Mov64(r11, rdx);
-/////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////
-// TODO: load or compute h here (hkeys_b[0] contains gf128_power(h, 1) rather than h)
-/////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////
-    Load128_buffer(xmm11, Xip, 0, Secret, hkeys_b, 0); // Load h instead of computing it
+
+    Load128_buffer(xmm11, Xip, 0x20, Secret, hkeys_b, 2); // Load h instead of computing it
     ghost var h := reverse_bytes_quad32(xmm11);
 
     (ghost var y_0), (ghost var y_auth) := gcm_auth_bytes(alg, auth_b, key, round_keys, keys_b);
@@ -684,7 +682,7 @@ procedure {:quick} gcm_blocks(
         gctr_partial_opaque(alg, cipher_bound, plain_in, cipher_out, key, ctr_BE_2);
 
         // Hashing results
-        let h:quad32 := reverse_bytes_quad32(buffer128_read(hkeys_b, 0, mem));
+        let h:quad32 := reverse_bytes_quad32(buffer128_read(hkeys_b, 2, mem));
         let length_quad:quad32 := reverse_bytes_quad32(Mkfour(#nat32(8 * old(plain_num_bytes)), 0, 
                                                        #nat32(8 * old(auth_num_bytes)), 0));
 
@@ -742,7 +740,7 @@ procedure {:quick} gcm_blocks(
     Mov128(xmm1, xmm8);     // Move the hash value into the right place
     InitPshufbMask(xmm8, r12);
     Pshufb(xmm7, xmm8);
-    Load128_buffer(xmm11, Xip, 0 - 0x20, Secret, hkeys_b, 0); 
+    Load128_buffer(xmm11, Xip, 0x20 - 0x20, Secret, hkeys_b, 2); 
     gcm_blocks128(alg, in128_b, out128_b, key, round_keys, keys_b);
     ghost var y_cipher128 := xmm1;
     lemma_ghash_incremental0_append(h, y_0, y_cipher128x6, y_cipher128, auth_in, s128(mem, out128_b));
@@ -947,7 +945,7 @@ procedure {:quick exportOnly} gcm_blocks_wrapped(
 
         // GCM reqs
         pclmulqdq_enabled;
-        buffer128_read(hkeys_b, 0, mem) == reverse_bytes_quad32(aes_encrypt_LE(alg, key, Mkfour(0,0,0,0)));
+        buffer128_read(hkeys_b, 2, mem) == reverse_bytes_quad32(aes_encrypt_LE(alg, key, Mkfour(0,0,0,0)));
 
 
     ensures
@@ -1014,7 +1012,7 @@ procedure {:quick exportOnly} gcm_blocks_wrapped(
 //                            old(len128x6) + old(len128);
 
     // Hashing results
-    ghost var h:quad32 := reverse_bytes_quad32(buffer128_read(hkeys_b, 0, mem));
+    ghost var h:quad32 := reverse_bytes_quad32(buffer128_read(hkeys_b, 2, mem));
     ghost var length_quad:quad32 := reverse_bytes_quad32(Mkfour(#nat32(8 * old(plain_num_bytes)), 0, 
                                                    #nat32(8 * old(auth_num_bytes)), 0));
 
@@ -1049,8 +1047,7 @@ procedure {:quick exportOnly} gcm_blocks_wrapped(
                                  s128(mem, out128x6_b), s128(mem, out128_b), s128(mem, inout_b), 
                                  old(plain_num_bytes), old(auth_num_bytes),
                                  reverse_bytes_quad32(old(buffer128_read(iv_b, 0, mem))),
-                                 reverse_bytes_quad32(buffer128_read(hkeys_b, 0, mem)),
-                                 //buffer128_read(hkeys_b, 0, mem),
+                                 reverse_bytes_quad32(buffer128_read(hkeys_b, 2, mem)),
                                  xmm1, 
                                  reverse_bytes_quad32(Mkfour(#nat32(8 * old(plain_num_bytes)), 0, 
                                                       #nat32(8 * old(auth_num_bytes)), 0)));
@@ -1207,7 +1204,7 @@ procedure {:quick} restore_registers(inline win:bool, ghost old_rsp:nat,
     Pop(r15);
 }
 
-#reset-options "--z3rlimit 300"
+#reset-options "--z3rlimit 800"
 // Using exportOnly, since verification with quick mode fails with:
 // (Error 196) Implicit argument: Expected a total term; got a ghost term
 procedure {:quick exportOnly}{:public}{:exportSpecs} gcm_blocks_stdcall(
@@ -1368,7 +1365,7 @@ procedure {:quick exportOnly}{:public}{:exportSpecs} gcm_blocks_stdcall(
 
         // GCM reqs
         pclmulqdq_enabled;
-        buffer128_read(hkeys_b, 0, mem) == reverse_bytes_quad32(aes_encrypt_LE(alg, key, Mkfour(0,0,0,0)));
+        buffer128_read(hkeys_b, 2, mem) == reverse_bytes_quad32(aes_encrypt_LE(alg, key, Mkfour(0,0,0,0)));
 
     ensures
         modifies_mem(loc_union(loc_buffer(tag_b),
