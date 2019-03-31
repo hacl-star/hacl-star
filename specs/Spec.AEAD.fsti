@@ -56,8 +56,8 @@ let iv_length (a: alg): nat =
 let ekv_length: supported_alg -> nat =
   function
   | CHACHA20_POLY1305 -> 32
-  | AES128_GCM -> 176
-  | AES256_GCM -> 240
+  | AES128_GCM -> 176 + 160 // Include the hashed keys here
+  | AES256_GCM -> 240 + 160 // Include the hashed keys here
 
 // Maximum length for both plaintexts and additional data.
 //

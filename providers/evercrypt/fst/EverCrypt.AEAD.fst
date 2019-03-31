@@ -16,13 +16,13 @@ open Spec.AEAD
 
 friend Spec.AEAD
 
-#set-options "--z3rlimit 20 --max_fuel 0 --max_ifuel 0"
+#set-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0"
 
 let ekv_len (a: supported_alg): Tot (x:UInt32.t { UInt32.v x = ekv_length a }) =
   match a with
   | CHACHA20_POLY1305 -> 32ul
-  | AES128_GCM -> 176ul
-  | AES256_GCM -> 240ul
+  | AES128_GCM -> 176ul + 160ul
+  | AES256_GCM -> 240ul + 160ul
 
 let expand_in #a r k =
   match a with
@@ -37,11 +37,14 @@ let expand_in #a r k =
         in
         push_frame();
         let ek' =
-          B.alloca #UInt8.t 0uy 176ul
+          B.alloca #UInt8.t 0uy 336ul
         in
-        AES_stdcalls.aes128_key_expansion_stdcall k ek';
+        let keys_b = B.sub ek' 0ul 176ul in
+        let hkeys_b = B.sub ek' 176ul 160ul in
+        AES_stdcalls.aes128_key_expansion_stdcall k keys_b;
+        AEShash_stdcalls.aes128_keyhash_init_stdcall k hkeys_b;
         let h1 = ST.get() in
-        MB.blit ek' 0ul ek 0ul 176ul;
+        MB.blit ek' 0ul ek 0ul 336ul;
         pop_frame();
         let h2 = ST.get() in
         assert (Seq.equal (B.as_seq h2 ek)  (expand #a (G.reveal kv)));
@@ -62,11 +65,14 @@ let expand_in #a r k =
         in
         push_frame();
         let ek' =
-          B.alloca #UInt8.t 0uy 240ul
+          B.alloca #UInt8.t 0uy 400ul
         in
-        AES_stdcalls.aes256_key_expansion_stdcall k ek';
+        let keys_b = B.sub ek' 0ul 240ul in
+        let hkeys_b = B.sub ek' 240ul 160ul in
+        AES_stdcalls.aes256_key_expansion_stdcall k keys_b;
+        AEShash_stdcalls.aes256_keyhash_init_stdcall k hkeys_b;
         let h1 = ST.get() in
-        MB.blit ek' 0ul ek 0ul 240ul;
+        MB.blit ek' 0ul ek 0ul 400ul;
         pop_frame();
         let h2 = ST.get() in
         assert (Seq.equal (B.as_seq h2 ek)  (expand #a (G.reveal kv)));
@@ -90,7 +96,7 @@ let expand_in #a r k =
   | _ ->
       EK (G.hide (S.empty #UInt8.t)) MB.mnull
 
-#set-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0"
+#set-options "--z3rlimit 150 --max_fuel 0 --max_ifuel 0"
 let encrypt #a ek iv ad ad_len plain plain_len dst =
   if MB.is_null (EK?.ek ek) then
     InvalidKey
@@ -121,6 +127,7 @@ let encrypt #a ek iv ad ad_len plain plain_len dst =
       MB.blit (EK?.ek ek) 0ul tmp_keys 0ul 176ul;      
 
       let hkeys_b = B.alloca 0uy 160ul in
+      MB.blit (EK?.ek ek) 176ul hkeys_b 0ul 160ul;
 
       let h0 = get() in
 
@@ -156,7 +163,9 @@ let encrypt #a ek iv ad ad_len plain plain_len dst =
 
       in lemma_iv_eq ();
 
-      assume (
+      assert (Seq.equal (B.as_seq h0 hkeys_b) (gcm_hashed_keys #AES128_GCM (G.reveal (EK?.kv ek))));
+
+      assert (
         let k = G.reveal (EK?.kv ek) in
         let k_nat = Words.Seq_s.seq_uint8_to_seq_nat8 k in
         let k_w = Words.Seq_s.seq_nat8_to_seq_nat32_LE k_nat in      
