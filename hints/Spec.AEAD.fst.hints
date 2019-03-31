@@ -1,5 +1,5 @@
 [
-  "\rî\u0002ÿ9πgùù\u0010©¶\\<óû",
+  "[CÕfç›Ô¯Uˇ\u0003?ãïÌ:",
   [
     [
       "Spec.AEAD.uu___4",
@@ -8,7 +8,7 @@
       0,
       [ "@query" ],
       0,
-      "e6e91a69cb9a3d3d103ca98918d790ab"
+      "8a103501b2ceb6146bf9b76dc5218e19"
     ],
     [
       "Spec.AEAD.key_length",
@@ -28,7 +28,7 @@
         "fuel_guarded_inversion_Spec.AEAD.alg", "inversion-interp"
       ],
       0,
-      "f8a5e5f2be8305594489a64fa5efc4ff"
+      "e7989e08229d041d66013c1ebe48ddb5"
     ],
     [
       "Spec.AEAD.tag_length",
@@ -48,7 +48,7 @@
         "fuel_guarded_inversion_Spec.AEAD.alg", "inversion-interp"
       ],
       0,
-      "f4282eb502235112b09045aaac4eb063"
+      "23e75b79bf4df5854a08b6c4d2ce13e2"
     ],
     [
       "Spec.AEAD.ekv_length",
@@ -66,7 +66,7 @@
         "typing_Spec.AEAD.is_supported_alg"
       ],
       0,
-      "917128b6a50b7756b16a31f5c640331f"
+      "316e95d47ec66d53280d1e36d673bbb6"
     ],
     [
       "Spec.AEAD.max_length",
@@ -76,19 +76,25 @@
       [
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
-        "bool_inversion", "disc_equation_Spec.AEAD.AES128_GCM",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565", "bool_inversion",
+        "disc_equation_Spec.AEAD.AES128_GCM",
         "disc_equation_Spec.AEAD.AES256_GCM",
         "disc_equation_Spec.AEAD.CHACHA20_POLY1305", "equation_Prims.nat",
-        "equation_Spec.AEAD.is_supported_alg",
+        "equation_Prims.pos", "equation_Spec.AEAD.is_supported_alg",
         "equation_Spec.AEAD.supported_alg",
-        "equation_Spec.Poly1305.size_key", "lemma_Lib.IntTypes.pow2_values",
-        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
+        "equation_Spec.Poly1305.size_key",
+        "function_token_typing_Prims.__cache_version_number__", "int_typing",
+        "lemma_Lib.IntTypes.pow2_values", "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_5a4fe33be2b93c781e552e491bb9dd31",
+        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
         "refinement_interpretation_Tm_refine_d2d399e4b0cd736cb6130361c7530aa2",
-        "typing_Spec.AEAD.is_supported_alg", "typing_Spec.Poly1305.size_key"
+        "refinement_interpretation_Tm_refine_f048236b5f8051f83b495ea5eaa6127b",
+        "typing_Prims.pow2", "typing_Spec.AEAD.is_supported_alg",
+        "typing_Spec.Poly1305.size_key"
       ],
       0,
-      "209e7d7b29f80b38e79799e0741ca1c8"
+      "d23679fc65e5a3212b5a492c535ad42e"
     ],
     [
       "Spec.AEAD.lbytes",
@@ -97,7 +103,7 @@
       0,
       [ "@query" ],
       0,
-      "f850a04d08f86b7182572049f26f71f5"
+      "2a90e319422704747aa3d7a5ef1e3014"
     ],
     [
       "Spec.AEAD.vale_alg_of_alg",
@@ -106,7 +112,7 @@
       0,
       [ "@query", "assumption_Spec.AEAD.alg__uu___haseq" ],
       0,
-      "c2eff6f09bb0a6ec3647d6b998862b8f"
+      "12719a306463a189f761aee9987e0f7d"
     ],
     [
       "Spec.AEAD.vale_alg_of_alg",
@@ -124,7 +130,7 @@
         "refinement_interpretation_Tm_refine_703f66a7c02f9a98bc52781f977506bd"
       ],
       0,
-      "b617f250a2ecf9d08980356fc2591c35"
+      "f453f75f5245aad87ea209bebfe41b11"
     ],
     [
       "Spec.AEAD.expand",
@@ -199,7 +205,7 @@
         "typing_Types_s.le_seq_quad32_to_bytes"
       ],
       0,
-      "ccc8efb8407c1ad2d37a6aa586c1664f"
+      "86c29f50f8d8f16b7db3e523bb8311fb"
     ],
     [
       "Spec.AEAD.gcm_encrypt_tag_length",
@@ -289,7 +295,7 @@
         "typing_Words_s.__proj__Mkfour__item__lo1", "unit_typing"
       ],
       0,
-      "74a922a3b9f649bd2b9503d226cebb06"
+      "16bfb8f5ca6855eb91291c02d348c8e6"
     ],
     [
       "Spec.AEAD.gcm_encrypt_cipher_length",
@@ -364,7 +370,7 @@
         "typing_Words_s.__proj__Mkfour__item__lo1", "unit_typing"
       ],
       0,
-      "f70a913035094f03e745b42828a22141"
+      "f984c66e8a30956a5c9cc2a8a6aa3172"
     ],
     [
       "Spec.AEAD.encrypt",
@@ -464,7 +470,7 @@
         "typing_Words.Seq_s.seq_uint8_to_seq_nat8"
       ],
       0,
-      "3f9d3d18baada5f5991207494be7e538"
+      "e9f5f6cd373a1de698adbacebf344bc5"
     ],
     [
       "Spec.AEAD.gcm_decrypt_cipher_length",
@@ -539,7 +545,7 @@
         "typing_Words_s.__proj__Mkfour__item__lo1", "unit_typing"
       ],
       0,
-      "3fbd6cf61ebd10a85a9fb51a52308f5b"
+      "ee95111fb6ad470a8fe9c7ca01bc4a67"
     ],
     [
       "Spec.AEAD.decrypt",
@@ -646,7 +652,7 @@
         "typing_Words.Seq_s.seq_uint8_to_seq_nat8"
       ],
       0,
-      "c18e498c246891e9a8195c6f547ef215"
+      "c947e3f4e448c9f9e6b2c8a2ba63f8b0"
     ]
   ]
 ]

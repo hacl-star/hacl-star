@@ -32,6 +32,8 @@ val chacha20: dst:B.buffer U8.t ->
 // whatever spec is currently in there, i.e. the HACL* spec with Lib.*.
 *)
 
+(** @type: true
+*)
 val chacha20: len:size_t ->
   dst:lbuffer uint8 len ->
   src:lbuffer uint8 len ->

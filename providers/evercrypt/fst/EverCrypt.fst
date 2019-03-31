@@ -51,14 +51,6 @@ let bcrypt (): Stack bool (fun _ -> True) (fun h0 _ h1 -> B.modifies B.loc_none 
   else
     false
 
-/// X25519
-
-let x25519 dst secret base =
-  if hacl () then
-    Hacl.x25519 dst secret base
-  else
-    failwith !$"ERROR: inconsistent configuration (x25519)"
-
 /// Random sampling
 
 let random_init () =
@@ -197,14 +189,6 @@ let aes256_free pk =
   else
     failwith !$"ERROR: inconsistent configuration (aes256_free)";
   B.free pk
-
-/// ChaCha20
-
-let chacha20 key iv ctr plain len cipher =
-  if hacl () then
-    EverCrypt.Hacl.chacha20 key iv ctr plain len cipher
-  else
-    failwith !$"ERROR: inconsistent configuration (chacha20)"
 
 /// AES128-GCM
 
@@ -381,23 +365,6 @@ let aes256_gcm_decrypt key iv ad adlen plaintext len cipher tag =
   else
     failwith !$"ERROR: inconsistent configuration (aes256_gcm_decrypt)"
 
-/// Chacha20-Poly1305
-
-let chacha20_poly1305_encrypt key iv ad adlen plaintext len cipher tag =
-  if hacl () then
-    ignore (Hacl.chacha20_poly1305_encrypt cipher tag plaintext len ad adlen key iv)
-  else if openssl () then
-    OpenSSL.chacha20_poly1305_encrypt key iv ad adlen plaintext len cipher tag
-  else
-    failwith !$"ERROR: inconsistent configuration (chacha20_poly1305_encrypt)"
-
-let chacha20_poly1305_decrypt key iv ad adlen plaintext len cipher tag =
-  if hacl () then
-    U32.(1ul -^ Hacl.chacha20_poly1305_decrypt plaintext cipher len tag ad adlen key iv)
-  else if openssl () then
-    OpenSSL.chacha20_poly1305_decrypt key iv ad adlen plaintext len cipher tag
-  else
-    failwith !$"ERROR: inconsistent configuration (chacha20_poly1305_decrypt)"
 
 /// AEAD
 
@@ -458,7 +425,7 @@ let aead_encrypt pkey iv ad adlen plaintext len cipher tag =
     vale_aes256_gcm_encrypt xk iv ad adlen plaintext len cipher tag
   else if SC.hacl && AEAD_CHACHA20_POLY1305_HACL? k then
     let key = AEAD_CHACHA20_POLY1305_HACL?.k k in
-    ignore (Hacl.chacha20_poly1305_encrypt cipher tag plaintext len ad adlen key iv)
+    Hacl.Impl.Chacha20Poly1305.aead_encrypt_chacha_poly key iv adlen ad len plaintext cipher tag
   else if SC.openssl && AEAD_OPENSSL? k then
     let key = AEAD_OPENSSL?.st k in
     OpenSSL.aead_encrypt key iv ad adlen plaintext len cipher tag
@@ -478,7 +445,7 @@ let aead_decrypt pkey iv ad adlen plaintext len cipher tag =
     vale_aes256_gcm_decrypt xk iv ad adlen plaintext len cipher tag
   else if SC.hacl && AEAD_CHACHA20_POLY1305_HACL? k then
     let key = AEAD_CHACHA20_POLY1305_HACL?.k k in
-    let r = Hacl.chacha20_poly1305_decrypt plaintext cipher len tag ad adlen key iv in
+    let r = Hacl.Impl.Chacha20Poly1305.aead_decrypt_chacha_poly key iv adlen ad len plaintext cipher tag in
     U32.(1ul -^ r)
   else if SC.openssl && AEAD_OPENSSL? k then
     let key = AEAD_OPENSSL?.st k in

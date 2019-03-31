@@ -40,6 +40,10 @@
 # - min-test: staged, runs only a subset of verification for the purposes of
 #   F*'s extended CI
 
+# Put your local configuration (e.g. HACL_HOME, KREMLIN_HOME, etc.) in
+# Makefile.config
+-include Makefile.config
+
 #########################
 # Catching setup errors #
 #########################
@@ -92,8 +96,7 @@ all:
 	$(MAKE) all-staged
 
 all-unstaged: compile-compact compile-generic compile-compact-msvc compile-compact-gcc \
-  compile-evercrypt-external-headers compile-compact-c89 compile-coco \
-  secure_api.old
+  compile-evercrypt-external-headers compile-compact-c89 compile-coco
 
 # Automatic staging.
 %-staged:
@@ -123,11 +126,6 @@ min-test:
 	MIN_TEST=1 NOSHORTLOG=1 $(MAKE) vale-fst
 	MIN_TEST=1 FSTAR_DEPEND_FLAGS="--warn_error +285" NOSHORTLOG=1 \
 	  $(MAKE) min-test-unstaged
-
-# Backwards-compat target
-.PHONY: secure_api.old
-secure_api.old:
-	$(call run-with-log,$(MAKE) -C secure_api,[OLD-MAKE secure_api],obj/secure_api)
 
 # So that this Makefile can also clean the previous directory layout. In the
 # long run, TO_CLEAN should be able to go.
@@ -663,15 +661,13 @@ DEFAULT_FLAGS		=\
   -no-prefix 'MerkleTree.New.Low.Serialization' \
   -fparentheses -fno-shadow -fcurly-braces
 
-# No API for the Chacha20 bundle (yet). This would cause a name conflict with
-# old Chacha20.
 COMPACT_FLAGS	=\
   -bundle Hacl.Hash.MD5+Hacl.Hash.Core.MD5+Hacl.Hash.SHA1+Hacl.Hash.Core.SHA1+Hacl.Hash.SHA2+Hacl.Hash.Core.SHA2+Hacl.Hash.Core.SHA2.Constants=Hacl.Hash.*[rename=Hacl_Hash] \
   -bundle Hacl.Impl.SHA3+Hacl.SHA3=[rename=Hacl_SHA3] \
   -bundle Hacl.Poly1305_32+Hacl.Poly1305_128+Hacl.Poly1305_256=Hacl.Poly1305.*,Hacl.Impl.Poly1305,Hacl.Impl.Poly1305.*[rename=Hacl_Poly1305] \
-  -bundle Hacl.Impl.Chacha20,Hacl.Impl.Chacha20.*[rename=Hacl_Chacha20_new] \
-  -bundle Hacl.Curve25519_51+Hacl.Curve25519_64=Hacl.Impl.Curve25519.*[rename=Hacl_Curve25519_new] \
-  -bundle Hacl.Impl.Chacha20Poly1305=Hacl.Impl.Chacha20Poly1305.*[rename=Hacl_Chacha20Poly1305_new] \
+  -bundle Hacl.Impl.Chacha20=Hacl.Impl.Chacha20.*[rename=Hacl_Chacha20] \
+  -bundle Hacl.Curve25519_51+Hacl.Curve25519_64=Hacl.Impl.Curve25519.*[rename=Hacl_Curve25519] \
+  -bundle Hacl.Impl.Chacha20Poly1305=Hacl.Impl.Chacha20Poly1305.*[rename=Hacl_Chacha20Poly1305] \
   -bundle LowStar.* \
   -bundle Prims,C.Failure,C,C.String,C.Loops,Spec.Loops,C.Endianness,FStar.*[rename=Hacl_Kremlib] \
   -bundle 'EverCrypt.Spec.*' \
@@ -695,17 +691,9 @@ old-%:
 	  ,[OLD-MAKE $*],obj/old-$*)
 
 # This is all legacy. Some notes:
-# - Hacl_Chacha20 / AEAD_Poly1305_64 / Hacl_Chacha20Poly1305 go together for
-#   AEAD. Remove all three once we have a new-style AEAD-ChachaPoly.
-# - No symbol collision between Hacl_Chacha20 (old) and the new Hacl
-#   Chacha20 because prefixes.
 HACL_OLD_FILES=\
   code/old/experimental/aesgcm/aesgcm-c/Hacl_AES.c \
-  code/old/curve25519/x25519-c/Hacl_Curve25519.c \
-  code/old/ed25519/ed25519-c/Hacl_Ed25519.c \
-  code/old/salsa-family/chacha-c/Hacl_Chacha20.c \
-  code/old/poly1305/poly-c/AEAD_Poly1305_64.c \
-  code/old/api/aead-c/Hacl_Chacha20Poly1305.c
+  code/old/ed25519/ed25519-c/Hacl_Ed25519.c
 
 dist/compact/Makefile.basic: KRML_EXTRA=$(COMPACT_FLAGS)
 
@@ -778,7 +766,7 @@ dist/hacl-internal-headers/Makefile.basic: $(ALL_KRML_FILES)
 dist/evercrypt-external-headers/Makefile.basic: $(ALL_KRML_FILES)
 	$(KRML) -silent \
 	  -minimal \
-	  -bundle EverCrypt+EverCrypt.AutoConfig2+EverCrypt.HKDF+EverCrypt.HMAC+EverCrypt.Hash+EverCrypt.Hash.Incremental=*[rename=EverCrypt] \
+	  -bundle EverCrypt+EverCrypt.AutoConfig2+EverCrypt.HKDF+EverCrypt.HMAC+EverCrypt.Hash+EverCrypt.Hash.Incremental+EverCrypt.Cipher+EverCrypt.Poly1305+EverCrypt.Chacha20Poly1305+EverCrypt.Curve25519=*[rename=EverCrypt] \
 	  -library EverCrypt,EverCrypt.* \
 	  -add-include '<inttypes.h>' \
 	  -add-include '<stdbool.h>' \

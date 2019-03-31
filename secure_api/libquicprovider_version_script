@@ -1,5 +1,0 @@
-VERS_0.1 {
-    # only make symbols prefixed by "quic_" accessible from outside of the .so
-    global:quic_*;
-    local:*;
-};

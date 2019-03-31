@@ -51,12 +51,25 @@ let compute_st (a: ha) =
     as_seq h1 tag == hmac a (as_seq h0 key) (as_seq h0 data))
 
 // Four monomorphized variants, for callers who already know which algorithm they want.
+(** @type: true
+*)
 val compute_sha1: compute_st SHA1
+
+(** @type: true
+*)
 val compute_sha2_256: compute_st SHA2_256
+
+(** @type: true
+*)
 val compute_sha2_384: compute_st SHA2_384
+
+(** @type: true
+*)
 val compute_sha2_512: compute_st SHA2_512
 
 // The agile version that dynamically dispatches between the above four.
+(** @type: true
+*)
 val compute: a: ha -> compute_st a
 
 //18-07-13 pick uniform names? hash{spec} vs compute{hmac}
