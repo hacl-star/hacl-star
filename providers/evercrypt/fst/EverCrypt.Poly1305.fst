@@ -61,7 +61,9 @@ let poly1305 dst src len key =
     Poly1305.Equiv.lemma_poly1305_equiv (Arch.BufferFriend.to_bytes (B.as_seq h1 src))
       (Arch.BufferFriend.to_bytes (B.as_seq h1 key));
 
-    assume (S.slice (B.as_seq h2 ctx) 0 16 `S.equal`
+    Opaque_s.reveal_opaque X64.Poly1305.Math.lowerUpper128;
+
+    assert (S.slice (B.as_seq h2 ctx) 0 16 `S.equal`
       Spec.Poly1305.poly1305 (B.as_seq h1 src) (B.as_seq h1 key));
 
     B.blit ctx 0ul dst 0ul 16ul;
