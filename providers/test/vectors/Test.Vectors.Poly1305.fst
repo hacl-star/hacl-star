@@ -9,7 +9,7 @@ let input0: (b: B.buffer UInt8.t { B.length b = 34 /\ B.recallable b }) =
   assert_norm (List.Tot.length l = 34);
   B.gcmalloc_of_list HyperStack.root l
 
-let input0_len: (x:UInt32.t { UInt32.v x = B.length input0 }) =
+inline_for_extraction let input0_len: (x:UInt32.t { UInt32.v x = B.length input0 }) =
   34ul
 
 let key0: (b: B.buffer UInt8.t { B.length b = 32 /\ B.recallable b }) =
@@ -17,7 +17,7 @@ let key0: (b: B.buffer UInt8.t { B.length b = 32 /\ B.recallable b }) =
   assert_norm (List.Tot.length l = 32);
   B.gcmalloc_of_list HyperStack.root l
 
-let key0_len: (x:UInt32.t { UInt32.v x = B.length key0 }) =
+inline_for_extraction let key0_len: (x:UInt32.t { UInt32.v x = B.length key0 }) =
   32ul
 
 let tag0: (b: B.buffer UInt8.t { B.length b = 16 /\ B.recallable b }) =
@@ -25,7 +25,7 @@ let tag0: (b: B.buffer UInt8.t { B.length b = 16 /\ B.recallable b }) =
   assert_norm (List.Tot.length l = 16);
   B.gcmalloc_of_list HyperStack.root l
 
-let tag0_len: (x:UInt32.t { UInt32.v x = B.length tag0 }) =
+inline_for_extraction let tag0_len: (x:UInt32.t { UInt32.v x = B.length tag0 }) =
   16ul
 
 let input1: (b: B.buffer UInt8.t { B.length b = 2 /\ B.recallable b }) =
@@ -33,7 +33,7 @@ let input1: (b: B.buffer UInt8.t { B.length b = 2 /\ B.recallable b }) =
   assert_norm (List.Tot.length l = 2);
   B.gcmalloc_of_list HyperStack.root l
 
-let input1_len: (x:UInt32.t { UInt32.v x = B.length input1 }) =
+inline_for_extraction let input1_len: (x:UInt32.t { UInt32.v x = B.length input1 }) =
   2ul
 
 let key1: (b: B.buffer UInt8.t { B.length b = 32 /\ B.recallable b }) =
@@ -41,7 +41,7 @@ let key1: (b: B.buffer UInt8.t { B.length b = 32 /\ B.recallable b }) =
   assert_norm (List.Tot.length l = 32);
   B.gcmalloc_of_list HyperStack.root l
 
-let key1_len: (x:UInt32.t { UInt32.v x = B.length key1 }) =
+inline_for_extraction let key1_len: (x:UInt32.t { UInt32.v x = B.length key1 }) =
   32ul
 
 let tag1: (b: B.buffer UInt8.t { B.length b = 16 /\ B.recallable b }) =
@@ -49,7 +49,7 @@ let tag1: (b: B.buffer UInt8.t { B.length b = 16 /\ B.recallable b }) =
   assert_norm (List.Tot.length l = 16);
   B.gcmalloc_of_list HyperStack.root l
 
-let tag1_len: (x:UInt32.t { UInt32.v x = B.length tag1 }) =
+inline_for_extraction let tag1_len: (x:UInt32.t { UInt32.v x = B.length tag1 }) =
   16ul
 
 let input2: (b: B.buffer UInt8.t { B.length b = 0 /\ B.recallable b }) =
@@ -57,7 +57,7 @@ let input2: (b: B.buffer UInt8.t { B.length b = 0 /\ B.recallable b }) =
   assert_norm (List.Tot.length l = 0);
   B.gcmalloc_of_list HyperStack.root l
 
-let input2_len: (x:UInt32.t { UInt32.v x = B.length input2 }) =
+inline_for_extraction let input2_len: (x:UInt32.t { UInt32.v x = B.length input2 }) =
   0ul
 
 let key2: (b: B.buffer UInt8.t { B.length b = 32 /\ B.recallable b }) =
@@ -65,7 +65,7 @@ let key2: (b: B.buffer UInt8.t { B.length b = 32 /\ B.recallable b }) =
   assert_norm (List.Tot.length l = 32);
   B.gcmalloc_of_list HyperStack.root l
 
-let key2_len: (x:UInt32.t { UInt32.v x = B.length key2 }) =
+inline_for_extraction let key2_len: (x:UInt32.t { UInt32.v x = B.length key2 }) =
   32ul
 
 let tag2: (b: B.buffer UInt8.t { B.length b = 16 /\ B.recallable b }) =
@@ -73,7 +73,7 @@ let tag2: (b: B.buffer UInt8.t { B.length b = 16 /\ B.recallable b }) =
   assert_norm (List.Tot.length l = 16);
   B.gcmalloc_of_list HyperStack.root l
 
-let tag2_len: (x:UInt32.t { UInt32.v x = B.length tag2 }) =
+inline_for_extraction let tag2_len: (x:UInt32.t { UInt32.v x = B.length tag2 }) =
   16ul
 
 let input3: (b: B.buffer UInt8.t { B.length b = 32 /\ B.recallable b }) =
@@ -81,7 +81,7 @@ let input3: (b: B.buffer UInt8.t { B.length b = 32 /\ B.recallable b }) =
   assert_norm (List.Tot.length l = 32);
   B.gcmalloc_of_list HyperStack.root l
 
-let input3_len: (x:UInt32.t { UInt32.v x = B.length input3 }) =
+inline_for_extraction let input3_len: (x:UInt32.t { UInt32.v x = B.length input3 }) =
   32ul
 
 let key3: (b: B.buffer UInt8.t { B.length b = 32 /\ B.recallable b }) =
@@ -89,7 +89,7 @@ let key3: (b: B.buffer UInt8.t { B.length b = 32 /\ B.recallable b }) =
   assert_norm (List.Tot.length l = 32);
   B.gcmalloc_of_list HyperStack.root l
 
-let key3_len: (x:UInt32.t { UInt32.v x = B.length key3 }) =
+inline_for_extraction let key3_len: (x:UInt32.t { UInt32.v x = B.length key3 }) =
   32ul
 
 let tag3: (b: B.buffer UInt8.t { B.length b = 16 /\ B.recallable b }) =
@@ -97,7 +97,7 @@ let tag3: (b: B.buffer UInt8.t { B.length b = 16 /\ B.recallable b }) =
   assert_norm (List.Tot.length l = 16);
   B.gcmalloc_of_list HyperStack.root l
 
-let tag3_len: (x:UInt32.t { UInt32.v x = B.length tag3 }) =
+inline_for_extraction let tag3_len: (x:UInt32.t { UInt32.v x = B.length tag3 }) =
   16ul
 
 let input4: (b: B.buffer UInt8.t { B.length b = 63 /\ B.recallable b }) =
@@ -105,7 +105,7 @@ let input4: (b: B.buffer UInt8.t { B.length b = 63 /\ B.recallable b }) =
   assert_norm (List.Tot.length l = 63);
   B.gcmalloc_of_list HyperStack.root l
 
-let input4_len: (x:UInt32.t { UInt32.v x = B.length input4 }) =
+inline_for_extraction let input4_len: (x:UInt32.t { UInt32.v x = B.length input4 }) =
   63ul
 
 let key4: (b: B.buffer UInt8.t { B.length b = 32 /\ B.recallable b }) =
@@ -113,7 +113,7 @@ let key4: (b: B.buffer UInt8.t { B.length b = 32 /\ B.recallable b }) =
   assert_norm (List.Tot.length l = 32);
   B.gcmalloc_of_list HyperStack.root l
 
-let key4_len: (x:UInt32.t { UInt32.v x = B.length key4 }) =
+inline_for_extraction let key4_len: (x:UInt32.t { UInt32.v x = B.length key4 }) =
   32ul
 
 let tag4: (b: B.buffer UInt8.t { B.length b = 16 /\ B.recallable b }) =
@@ -121,7 +121,7 @@ let tag4: (b: B.buffer UInt8.t { B.length b = 16 /\ B.recallable b }) =
   assert_norm (List.Tot.length l = 16);
   B.gcmalloc_of_list HyperStack.root l
 
-let tag4_len: (x:UInt32.t { UInt32.v x = B.length tag4 }) =
+inline_for_extraction let tag4_len: (x:UInt32.t { UInt32.v x = B.length tag4 }) =
   16ul
 
 let input5: (b: B.buffer UInt8.t { B.length b = 64 /\ B.recallable b }) =
@@ -129,7 +129,7 @@ let input5: (b: B.buffer UInt8.t { B.length b = 64 /\ B.recallable b }) =
   assert_norm (List.Tot.length l = 64);
   B.gcmalloc_of_list HyperStack.root l
 
-let input5_len: (x:UInt32.t { UInt32.v x = B.length input5 }) =
+inline_for_extraction let input5_len: (x:UInt32.t { UInt32.v x = B.length input5 }) =
   64ul
 
 let key5: (b: B.buffer UInt8.t { B.length b = 32 /\ B.recallable b }) =
@@ -137,7 +137,7 @@ let key5: (b: B.buffer UInt8.t { B.length b = 32 /\ B.recallable b }) =
   assert_norm (List.Tot.length l = 32);
   B.gcmalloc_of_list HyperStack.root l
 
-let key5_len: (x:UInt32.t { UInt32.v x = B.length key5 }) =
+inline_for_extraction let key5_len: (x:UInt32.t { UInt32.v x = B.length key5 }) =
   32ul
 
 let tag5: (b: B.buffer UInt8.t { B.length b = 16 /\ B.recallable b }) =
@@ -145,7 +145,7 @@ let tag5: (b: B.buffer UInt8.t { B.length b = 16 /\ B.recallable b }) =
   assert_norm (List.Tot.length l = 16);
   B.gcmalloc_of_list HyperStack.root l
 
-let tag5_len: (x:UInt32.t { UInt32.v x = B.length tag5 }) =
+inline_for_extraction let tag5_len: (x:UInt32.t { UInt32.v x = B.length tag5 }) =
   16ul
 
 let input6: (b: B.buffer UInt8.t { B.length b = 48 /\ B.recallable b }) =
@@ -153,7 +153,7 @@ let input6: (b: B.buffer UInt8.t { B.length b = 48 /\ B.recallable b }) =
   assert_norm (List.Tot.length l = 48);
   B.gcmalloc_of_list HyperStack.root l
 
-let input6_len: (x:UInt32.t { UInt32.v x = B.length input6 }) =
+inline_for_extraction let input6_len: (x:UInt32.t { UInt32.v x = B.length input6 }) =
   48ul
 
 let key6: (b: B.buffer UInt8.t { B.length b = 32 /\ B.recallable b }) =
@@ -161,7 +161,7 @@ let key6: (b: B.buffer UInt8.t { B.length b = 32 /\ B.recallable b }) =
   assert_norm (List.Tot.length l = 32);
   B.gcmalloc_of_list HyperStack.root l
 
-let key6_len: (x:UInt32.t { UInt32.v x = B.length key6 }) =
+inline_for_extraction let key6_len: (x:UInt32.t { UInt32.v x = B.length key6 }) =
   32ul
 
 let tag6: (b: B.buffer UInt8.t { B.length b = 16 /\ B.recallable b }) =
@@ -169,7 +169,7 @@ let tag6: (b: B.buffer UInt8.t { B.length b = 16 /\ B.recallable b }) =
   assert_norm (List.Tot.length l = 16);
   B.gcmalloc_of_list HyperStack.root l
 
-let tag6_len: (x:UInt32.t { UInt32.v x = B.length tag6 }) =
+inline_for_extraction let tag6_len: (x:UInt32.t { UInt32.v x = B.length tag6 }) =
   16ul
 
 let input7: (b: B.buffer UInt8.t { B.length b = 96 /\ B.recallable b }) =
@@ -177,7 +177,7 @@ let input7: (b: B.buffer UInt8.t { B.length b = 96 /\ B.recallable b }) =
   assert_norm (List.Tot.length l = 96);
   B.gcmalloc_of_list HyperStack.root l
 
-let input7_len: (x:UInt32.t { UInt32.v x = B.length input7 }) =
+inline_for_extraction let input7_len: (x:UInt32.t { UInt32.v x = B.length input7 }) =
   96ul
 
 let key7: (b: B.buffer UInt8.t { B.length b = 32 /\ B.recallable b }) =
@@ -185,7 +185,7 @@ let key7: (b: B.buffer UInt8.t { B.length b = 32 /\ B.recallable b }) =
   assert_norm (List.Tot.length l = 32);
   B.gcmalloc_of_list HyperStack.root l
 
-let key7_len: (x:UInt32.t { UInt32.v x = B.length key7 }) =
+inline_for_extraction let key7_len: (x:UInt32.t { UInt32.v x = B.length key7 }) =
   32ul
 
 let tag7: (b: B.buffer UInt8.t { B.length b = 16 /\ B.recallable b }) =
@@ -193,7 +193,7 @@ let tag7: (b: B.buffer UInt8.t { B.length b = 16 /\ B.recallable b }) =
   assert_norm (List.Tot.length l = 16);
   B.gcmalloc_of_list HyperStack.root l
 
-let tag7_len: (x:UInt32.t { UInt32.v x = B.length tag7 }) =
+inline_for_extraction let tag7_len: (x:UInt32.t { UInt32.v x = B.length tag7 }) =
   16ul
 
 let input8: (b: B.buffer UInt8.t { B.length b = 112 /\ B.recallable b }) =
@@ -201,7 +201,7 @@ let input8: (b: B.buffer UInt8.t { B.length b = 112 /\ B.recallable b }) =
   assert_norm (List.Tot.length l = 112);
   B.gcmalloc_of_list HyperStack.root l
 
-let input8_len: (x:UInt32.t { UInt32.v x = B.length input8 }) =
+inline_for_extraction let input8_len: (x:UInt32.t { UInt32.v x = B.length input8 }) =
   112ul
 
 let key8: (b: B.buffer UInt8.t { B.length b = 32 /\ B.recallable b }) =
@@ -209,7 +209,7 @@ let key8: (b: B.buffer UInt8.t { B.length b = 32 /\ B.recallable b }) =
   assert_norm (List.Tot.length l = 32);
   B.gcmalloc_of_list HyperStack.root l
 
-let key8_len: (x:UInt32.t { UInt32.v x = B.length key8 }) =
+inline_for_extraction let key8_len: (x:UInt32.t { UInt32.v x = B.length key8 }) =
   32ul
 
 let tag8: (b: B.buffer UInt8.t { B.length b = 16 /\ B.recallable b }) =
@@ -217,7 +217,7 @@ let tag8: (b: B.buffer UInt8.t { B.length b = 16 /\ B.recallable b }) =
   assert_norm (List.Tot.length l = 16);
   B.gcmalloc_of_list HyperStack.root l
 
-let tag8_len: (x:UInt32.t { UInt32.v x = B.length tag8 }) =
+inline_for_extraction let tag8_len: (x:UInt32.t { UInt32.v x = B.length tag8 }) =
   16ul
 
 let input9: (b: B.buffer UInt8.t { B.length b = 128 /\ B.recallable b }) =
@@ -225,7 +225,7 @@ let input9: (b: B.buffer UInt8.t { B.length b = 128 /\ B.recallable b }) =
   assert_norm (List.Tot.length l = 128);
   B.gcmalloc_of_list HyperStack.root l
 
-let input9_len: (x:UInt32.t { UInt32.v x = B.length input9 }) =
+inline_for_extraction let input9_len: (x:UInt32.t { UInt32.v x = B.length input9 }) =
   128ul
 
 let key9: (b: B.buffer UInt8.t { B.length b = 32 /\ B.recallable b }) =
@@ -233,7 +233,7 @@ let key9: (b: B.buffer UInt8.t { B.length b = 32 /\ B.recallable b }) =
   assert_norm (List.Tot.length l = 32);
   B.gcmalloc_of_list HyperStack.root l
 
-let key9_len: (x:UInt32.t { UInt32.v x = B.length key9 }) =
+inline_for_extraction let key9_len: (x:UInt32.t { UInt32.v x = B.length key9 }) =
   32ul
 
 let tag9: (b: B.buffer UInt8.t { B.length b = 16 /\ B.recallable b }) =
@@ -241,7 +241,7 @@ let tag9: (b: B.buffer UInt8.t { B.length b = 16 /\ B.recallable b }) =
   assert_norm (List.Tot.length l = 16);
   B.gcmalloc_of_list HyperStack.root l
 
-let tag9_len: (x:UInt32.t { UInt32.v x = B.length tag9 }) =
+inline_for_extraction let tag9_len: (x:UInt32.t { UInt32.v x = B.length tag9 }) =
   16ul
 
 let input10: (b: B.buffer UInt8.t { B.length b = 144 /\ B.recallable b }) =
@@ -249,7 +249,7 @@ let input10: (b: B.buffer UInt8.t { B.length b = 144 /\ B.recallable b }) =
   assert_norm (List.Tot.length l = 144);
   B.gcmalloc_of_list HyperStack.root l
 
-let input10_len: (x:UInt32.t { UInt32.v x = B.length input10 }) =
+inline_for_extraction let input10_len: (x:UInt32.t { UInt32.v x = B.length input10 }) =
   144ul
 
 let key10: (b: B.buffer UInt8.t { B.length b = 32 /\ B.recallable b }) =
@@ -257,7 +257,7 @@ let key10: (b: B.buffer UInt8.t { B.length b = 32 /\ B.recallable b }) =
   assert_norm (List.Tot.length l = 32);
   B.gcmalloc_of_list HyperStack.root l
 
-let key10_len: (x:UInt32.t { UInt32.v x = B.length key10 }) =
+inline_for_extraction let key10_len: (x:UInt32.t { UInt32.v x = B.length key10 }) =
   32ul
 
 let tag10: (b: B.buffer UInt8.t { B.length b = 16 /\ B.recallable b }) =
@@ -265,7 +265,7 @@ let tag10: (b: B.buffer UInt8.t { B.length b = 16 /\ B.recallable b }) =
   assert_norm (List.Tot.length l = 16);
   B.gcmalloc_of_list HyperStack.root l
 
-let tag10_len: (x:UInt32.t { UInt32.v x = B.length tag10 }) =
+inline_for_extraction let tag10_len: (x:UInt32.t { UInt32.v x = B.length tag10 }) =
   16ul
 
 let input11: (b: B.buffer UInt8.t { B.length b = 160 /\ B.recallable b }) =
@@ -273,7 +273,7 @@ let input11: (b: B.buffer UInt8.t { B.length b = 160 /\ B.recallable b }) =
   assert_norm (List.Tot.length l = 160);
   B.gcmalloc_of_list HyperStack.root l
 
-let input11_len: (x:UInt32.t { UInt32.v x = B.length input11 }) =
+inline_for_extraction let input11_len: (x:UInt32.t { UInt32.v x = B.length input11 }) =
   160ul
 
 let key11: (b: B.buffer UInt8.t { B.length b = 32 /\ B.recallable b }) =
@@ -281,7 +281,7 @@ let key11: (b: B.buffer UInt8.t { B.length b = 32 /\ B.recallable b }) =
   assert_norm (List.Tot.length l = 32);
   B.gcmalloc_of_list HyperStack.root l
 
-let key11_len: (x:UInt32.t { UInt32.v x = B.length key11 }) =
+inline_for_extraction let key11_len: (x:UInt32.t { UInt32.v x = B.length key11 }) =
   32ul
 
 let tag11: (b: B.buffer UInt8.t { B.length b = 16 /\ B.recallable b }) =
@@ -289,7 +289,7 @@ let tag11: (b: B.buffer UInt8.t { B.length b = 16 /\ B.recallable b }) =
   assert_norm (List.Tot.length l = 16);
   B.gcmalloc_of_list HyperStack.root l
 
-let tag11_len: (x:UInt32.t { UInt32.v x = B.length tag11 }) =
+inline_for_extraction let tag11_len: (x:UInt32.t { UInt32.v x = B.length tag11 }) =
   16ul
 
 let input12: (b: B.buffer UInt8.t { B.length b = 288 /\ B.recallable b }) =
@@ -297,7 +297,7 @@ let input12: (b: B.buffer UInt8.t { B.length b = 288 /\ B.recallable b }) =
   assert_norm (List.Tot.length l = 288);
   B.gcmalloc_of_list HyperStack.root l
 
-let input12_len: (x:UInt32.t { UInt32.v x = B.length input12 }) =
+inline_for_extraction let input12_len: (x:UInt32.t { UInt32.v x = B.length input12 }) =
   288ul
 
 let key12: (b: B.buffer UInt8.t { B.length b = 32 /\ B.recallable b }) =
@@ -305,7 +305,7 @@ let key12: (b: B.buffer UInt8.t { B.length b = 32 /\ B.recallable b }) =
   assert_norm (List.Tot.length l = 32);
   B.gcmalloc_of_list HyperStack.root l
 
-let key12_len: (x:UInt32.t { UInt32.v x = B.length key12 }) =
+inline_for_extraction let key12_len: (x:UInt32.t { UInt32.v x = B.length key12 }) =
   32ul
 
 let tag12: (b: B.buffer UInt8.t { B.length b = 16 /\ B.recallable b }) =
@@ -313,7 +313,7 @@ let tag12: (b: B.buffer UInt8.t { B.length b = 16 /\ B.recallable b }) =
   assert_norm (List.Tot.length l = 16);
   B.gcmalloc_of_list HyperStack.root l
 
-let tag12_len: (x:UInt32.t { UInt32.v x = B.length tag12 }) =
+inline_for_extraction let tag12_len: (x:UInt32.t { UInt32.v x = B.length tag12 }) =
   16ul
 
 let input13: (b: B.buffer UInt8.t { B.length b = 320 /\ B.recallable b }) =
@@ -321,7 +321,7 @@ let input13: (b: B.buffer UInt8.t { B.length b = 320 /\ B.recallable b }) =
   assert_norm (List.Tot.length l = 320);
   B.gcmalloc_of_list HyperStack.root l
 
-let input13_len: (x:UInt32.t { UInt32.v x = B.length input13 }) =
+inline_for_extraction let input13_len: (x:UInt32.t { UInt32.v x = B.length input13 }) =
   320ul
 
 let key13: (b: B.buffer UInt8.t { B.length b = 32 /\ B.recallable b }) =
@@ -329,7 +329,7 @@ let key13: (b: B.buffer UInt8.t { B.length b = 32 /\ B.recallable b }) =
   assert_norm (List.Tot.length l = 32);
   B.gcmalloc_of_list HyperStack.root l
 
-let key13_len: (x:UInt32.t { UInt32.v x = B.length key13 }) =
+inline_for_extraction let key13_len: (x:UInt32.t { UInt32.v x = B.length key13 }) =
   32ul
 
 let tag13: (b: B.buffer UInt8.t { B.length b = 16 /\ B.recallable b }) =
@@ -337,7 +337,7 @@ let tag13: (b: B.buffer UInt8.t { B.length b = 16 /\ B.recallable b }) =
   assert_norm (List.Tot.length l = 16);
   B.gcmalloc_of_list HyperStack.root l
 
-let tag13_len: (x:UInt32.t { UInt32.v x = B.length tag13 }) =
+inline_for_extraction let tag13_len: (x:UInt32.t { UInt32.v x = B.length tag13 }) =
   16ul
 
 let input14: (b: B.buffer UInt8.t { B.length b = 256 /\ B.recallable b }) =
@@ -345,7 +345,7 @@ let input14: (b: B.buffer UInt8.t { B.length b = 256 /\ B.recallable b }) =
   assert_norm (List.Tot.length l = 256);
   B.gcmalloc_of_list HyperStack.root l
 
-let input14_len: (x:UInt32.t { UInt32.v x = B.length input14 }) =
+inline_for_extraction let input14_len: (x:UInt32.t { UInt32.v x = B.length input14 }) =
   256ul
 
 let key14: (b: B.buffer UInt8.t { B.length b = 32 /\ B.recallable b }) =
@@ -353,7 +353,7 @@ let key14: (b: B.buffer UInt8.t { B.length b = 32 /\ B.recallable b }) =
   assert_norm (List.Tot.length l = 32);
   B.gcmalloc_of_list HyperStack.root l
 
-let key14_len: (x:UInt32.t { UInt32.v x = B.length key14 }) =
+inline_for_extraction let key14_len: (x:UInt32.t { UInt32.v x = B.length key14 }) =
   32ul
 
 let tag14: (b: B.buffer UInt8.t { B.length b = 16 /\ B.recallable b }) =
@@ -361,7 +361,7 @@ let tag14: (b: B.buffer UInt8.t { B.length b = 16 /\ B.recallable b }) =
   assert_norm (List.Tot.length l = 16);
   B.gcmalloc_of_list HyperStack.root l
 
-let tag14_len: (x:UInt32.t { UInt32.v x = B.length tag14 }) =
+inline_for_extraction let tag14_len: (x:UInt32.t { UInt32.v x = B.length tag14 }) =
   16ul
 
 let input15: (b: B.buffer UInt8.t { B.length b = 252 /\ B.recallable b }) =
@@ -369,7 +369,7 @@ let input15: (b: B.buffer UInt8.t { B.length b = 252 /\ B.recallable b }) =
   assert_norm (List.Tot.length l = 252);
   B.gcmalloc_of_list HyperStack.root l
 
-let input15_len: (x:UInt32.t { UInt32.v x = B.length input15 }) =
+inline_for_extraction let input15_len: (x:UInt32.t { UInt32.v x = B.length input15 }) =
   252ul
 
 let key15: (b: B.buffer UInt8.t { B.length b = 32 /\ B.recallable b }) =
@@ -377,7 +377,7 @@ let key15: (b: B.buffer UInt8.t { B.length b = 32 /\ B.recallable b }) =
   assert_norm (List.Tot.length l = 32);
   B.gcmalloc_of_list HyperStack.root l
 
-let key15_len: (x:UInt32.t { UInt32.v x = B.length key15 }) =
+inline_for_extraction let key15_len: (x:UInt32.t { UInt32.v x = B.length key15 }) =
   32ul
 
 let tag15: (b: B.buffer UInt8.t { B.length b = 16 /\ B.recallable b }) =
@@ -385,7 +385,7 @@ let tag15: (b: B.buffer UInt8.t { B.length b = 16 /\ B.recallable b }) =
   assert_norm (List.Tot.length l = 16);
   B.gcmalloc_of_list HyperStack.root l
 
-let tag15_len: (x:UInt32.t { UInt32.v x = B.length tag15 }) =
+inline_for_extraction let tag15_len: (x:UInt32.t { UInt32.v x = B.length tag15 }) =
   16ul
 
 let input16: (b: B.buffer UInt8.t { B.length b = 208 /\ B.recallable b }) =
@@ -393,7 +393,7 @@ let input16: (b: B.buffer UInt8.t { B.length b = 208 /\ B.recallable b }) =
   assert_norm (List.Tot.length l = 208);
   B.gcmalloc_of_list HyperStack.root l
 
-let input16_len: (x:UInt32.t { UInt32.v x = B.length input16 }) =
+inline_for_extraction let input16_len: (x:UInt32.t { UInt32.v x = B.length input16 }) =
   208ul
 
 let key16: (b: B.buffer UInt8.t { B.length b = 32 /\ B.recallable b }) =
@@ -401,7 +401,7 @@ let key16: (b: B.buffer UInt8.t { B.length b = 32 /\ B.recallable b }) =
   assert_norm (List.Tot.length l = 32);
   B.gcmalloc_of_list HyperStack.root l
 
-let key16_len: (x:UInt32.t { UInt32.v x = B.length key16 }) =
+inline_for_extraction let key16_len: (x:UInt32.t { UInt32.v x = B.length key16 }) =
   32ul
 
 let tag16: (b: B.buffer UInt8.t { B.length b = 16 /\ B.recallable b }) =
@@ -409,7 +409,7 @@ let tag16: (b: B.buffer UInt8.t { B.length b = 16 /\ B.recallable b }) =
   assert_norm (List.Tot.length l = 16);
   B.gcmalloc_of_list HyperStack.root l
 
-let tag16_len: (x:UInt32.t { UInt32.v x = B.length tag16 }) =
+inline_for_extraction let tag16_len: (x:UInt32.t { UInt32.v x = B.length tag16 }) =
   16ul
 
 let input17: (b: B.buffer UInt8.t { B.length b = 0 /\ B.recallable b }) =
@@ -417,7 +417,7 @@ let input17: (b: B.buffer UInt8.t { B.length b = 0 /\ B.recallable b }) =
   assert_norm (List.Tot.length l = 0);
   B.gcmalloc_of_list HyperStack.root l
 
-let input17_len: (x:UInt32.t { UInt32.v x = B.length input17 }) =
+inline_for_extraction let input17_len: (x:UInt32.t { UInt32.v x = B.length input17 }) =
   0ul
 
 let key17: (b: B.buffer UInt8.t { B.length b = 32 /\ B.recallable b }) =
@@ -425,7 +425,7 @@ let key17: (b: B.buffer UInt8.t { B.length b = 32 /\ B.recallable b }) =
   assert_norm (List.Tot.length l = 32);
   B.gcmalloc_of_list HyperStack.root l
 
-let key17_len: (x:UInt32.t { UInt32.v x = B.length key17 }) =
+inline_for_extraction let key17_len: (x:UInt32.t { UInt32.v x = B.length key17 }) =
   32ul
 
 let tag17: (b: B.buffer UInt8.t { B.length b = 16 /\ B.recallable b }) =
@@ -433,7 +433,7 @@ let tag17: (b: B.buffer UInt8.t { B.length b = 16 /\ B.recallable b }) =
   assert_norm (List.Tot.length l = 16);
   B.gcmalloc_of_list HyperStack.root l
 
-let tag17_len: (x:UInt32.t { UInt32.v x = B.length tag17 }) =
+inline_for_extraction let tag17_len: (x:UInt32.t { UInt32.v x = B.length tag17 }) =
   16ul
 
 let input18: (b: B.buffer UInt8.t { B.length b = 12 /\ B.recallable b }) =
@@ -441,7 +441,7 @@ let input18: (b: B.buffer UInt8.t { B.length b = 12 /\ B.recallable b }) =
   assert_norm (List.Tot.length l = 12);
   B.gcmalloc_of_list HyperStack.root l
 
-let input18_len: (x:UInt32.t { UInt32.v x = B.length input18 }) =
+inline_for_extraction let input18_len: (x:UInt32.t { UInt32.v x = B.length input18 }) =
   12ul
 
 let key18: (b: B.buffer UInt8.t { B.length b = 32 /\ B.recallable b }) =
@@ -449,7 +449,7 @@ let key18: (b: B.buffer UInt8.t { B.length b = 32 /\ B.recallable b }) =
   assert_norm (List.Tot.length l = 32);
   B.gcmalloc_of_list HyperStack.root l
 
-let key18_len: (x:UInt32.t { UInt32.v x = B.length key18 }) =
+inline_for_extraction let key18_len: (x:UInt32.t { UInt32.v x = B.length key18 }) =
   32ul
 
 let tag18: (b: B.buffer UInt8.t { B.length b = 16 /\ B.recallable b }) =
@@ -457,7 +457,7 @@ let tag18: (b: B.buffer UInt8.t { B.length b = 16 /\ B.recallable b }) =
   assert_norm (List.Tot.length l = 16);
   B.gcmalloc_of_list HyperStack.root l
 
-let tag18_len: (x:UInt32.t { UInt32.v x = B.length tag18 }) =
+inline_for_extraction let tag18_len: (x:UInt32.t { UInt32.v x = B.length tag18 }) =
   16ul
 
 let input19: (b: B.buffer UInt8.t { B.length b = 32 /\ B.recallable b }) =
@@ -465,7 +465,7 @@ let input19: (b: B.buffer UInt8.t { B.length b = 32 /\ B.recallable b }) =
   assert_norm (List.Tot.length l = 32);
   B.gcmalloc_of_list HyperStack.root l
 
-let input19_len: (x:UInt32.t { UInt32.v x = B.length input19 }) =
+inline_for_extraction let input19_len: (x:UInt32.t { UInt32.v x = B.length input19 }) =
   32ul
 
 let key19: (b: B.buffer UInt8.t { B.length b = 32 /\ B.recallable b }) =
@@ -473,7 +473,7 @@ let key19: (b: B.buffer UInt8.t { B.length b = 32 /\ B.recallable b }) =
   assert_norm (List.Tot.length l = 32);
   B.gcmalloc_of_list HyperStack.root l
 
-let key19_len: (x:UInt32.t { UInt32.v x = B.length key19 }) =
+inline_for_extraction let key19_len: (x:UInt32.t { UInt32.v x = B.length key19 }) =
   32ul
 
 let tag19: (b: B.buffer UInt8.t { B.length b = 16 /\ B.recallable b }) =
@@ -481,7 +481,7 @@ let tag19: (b: B.buffer UInt8.t { B.length b = 16 /\ B.recallable b }) =
   assert_norm (List.Tot.length l = 16);
   B.gcmalloc_of_list HyperStack.root l
 
-let tag19_len: (x:UInt32.t { UInt32.v x = B.length tag19 }) =
+inline_for_extraction let tag19_len: (x:UInt32.t { UInt32.v x = B.length tag19 }) =
   16ul
 
 let input20: (b: B.buffer UInt8.t { B.length b = 128 /\ B.recallable b }) =
@@ -489,7 +489,7 @@ let input20: (b: B.buffer UInt8.t { B.length b = 128 /\ B.recallable b }) =
   assert_norm (List.Tot.length l = 128);
   B.gcmalloc_of_list HyperStack.root l
 
-let input20_len: (x:UInt32.t { UInt32.v x = B.length input20 }) =
+inline_for_extraction let input20_len: (x:UInt32.t { UInt32.v x = B.length input20 }) =
   128ul
 
 let key20: (b: B.buffer UInt8.t { B.length b = 32 /\ B.recallable b }) =
@@ -497,7 +497,7 @@ let key20: (b: B.buffer UInt8.t { B.length b = 32 /\ B.recallable b }) =
   assert_norm (List.Tot.length l = 32);
   B.gcmalloc_of_list HyperStack.root l
 
-let key20_len: (x:UInt32.t { UInt32.v x = B.length key20 }) =
+inline_for_extraction let key20_len: (x:UInt32.t { UInt32.v x = B.length key20 }) =
   32ul
 
 let tag20: (b: B.buffer UInt8.t { B.length b = 16 /\ B.recallable b }) =
@@ -505,7 +505,7 @@ let tag20: (b: B.buffer UInt8.t { B.length b = 16 /\ B.recallable b }) =
   assert_norm (List.Tot.length l = 16);
   B.gcmalloc_of_list HyperStack.root l
 
-let tag20_len: (x:UInt32.t { UInt32.v x = B.length tag20 }) =
+inline_for_extraction let tag20_len: (x:UInt32.t { UInt32.v x = B.length tag20 }) =
   16ul
 
 let input21: (b: B.buffer UInt8.t { B.length b = 528 /\ B.recallable b }) =
@@ -513,7 +513,7 @@ let input21: (b: B.buffer UInt8.t { B.length b = 528 /\ B.recallable b }) =
   assert_norm (List.Tot.length l = 528);
   B.gcmalloc_of_list HyperStack.root l
 
-let input21_len: (x:UInt32.t { UInt32.v x = B.length input21 }) =
+inline_for_extraction let input21_len: (x:UInt32.t { UInt32.v x = B.length input21 }) =
   528ul
 
 let key21: (b: B.buffer UInt8.t { B.length b = 32 /\ B.recallable b }) =
@@ -521,7 +521,7 @@ let key21: (b: B.buffer UInt8.t { B.length b = 32 /\ B.recallable b }) =
   assert_norm (List.Tot.length l = 32);
   B.gcmalloc_of_list HyperStack.root l
 
-let key21_len: (x:UInt32.t { UInt32.v x = B.length key21 }) =
+inline_for_extraction let key21_len: (x:UInt32.t { UInt32.v x = B.length key21 }) =
   32ul
 
 let tag21: (b: B.buffer UInt8.t { B.length b = 16 /\ B.recallable b }) =
@@ -529,7 +529,7 @@ let tag21: (b: B.buffer UInt8.t { B.length b = 16 /\ B.recallable b }) =
   assert_norm (List.Tot.length l = 16);
   B.gcmalloc_of_list HyperStack.root l
 
-let tag21_len: (x:UInt32.t { UInt32.v x = B.length tag21 }) =
+inline_for_extraction let tag21_len: (x:UInt32.t { UInt32.v x = B.length tag21 }) =
   16ul
 
 let input22: (b: B.buffer UInt8.t { B.length b = 257 /\ B.recallable b }) =
@@ -537,7 +537,7 @@ let input22: (b: B.buffer UInt8.t { B.length b = 257 /\ B.recallable b }) =
   assert_norm (List.Tot.length l = 257);
   B.gcmalloc_of_list HyperStack.root l
 
-let input22_len: (x:UInt32.t { UInt32.v x = B.length input22 }) =
+inline_for_extraction let input22_len: (x:UInt32.t { UInt32.v x = B.length input22 }) =
   257ul
 
 let key22: (b: B.buffer UInt8.t { B.length b = 32 /\ B.recallable b }) =
@@ -545,7 +545,7 @@ let key22: (b: B.buffer UInt8.t { B.length b = 32 /\ B.recallable b }) =
   assert_norm (List.Tot.length l = 32);
   B.gcmalloc_of_list HyperStack.root l
 
-let key22_len: (x:UInt32.t { UInt32.v x = B.length key22 }) =
+inline_for_extraction let key22_len: (x:UInt32.t { UInt32.v x = B.length key22 }) =
   32ul
 
 let tag22: (b: B.buffer UInt8.t { B.length b = 16 /\ B.recallable b }) =
@@ -553,7 +553,7 @@ let tag22: (b: B.buffer UInt8.t { B.length b = 16 /\ B.recallable b }) =
   assert_norm (List.Tot.length l = 16);
   B.gcmalloc_of_list HyperStack.root l
 
-let tag22_len: (x:UInt32.t { UInt32.v x = B.length tag22 }) =
+inline_for_extraction let tag22_len: (x:UInt32.t { UInt32.v x = B.length tag22 }) =
   16ul
 
 let input23: (b: B.buffer UInt8.t { B.length b = 39 /\ B.recallable b }) =
@@ -561,7 +561,7 @@ let input23: (b: B.buffer UInt8.t { B.length b = 39 /\ B.recallable b }) =
   assert_norm (List.Tot.length l = 39);
   B.gcmalloc_of_list HyperStack.root l
 
-let input23_len: (x:UInt32.t { UInt32.v x = B.length input23 }) =
+inline_for_extraction let input23_len: (x:UInt32.t { UInt32.v x = B.length input23 }) =
   39ul
 
 let key23: (b: B.buffer UInt8.t { B.length b = 32 /\ B.recallable b }) =
@@ -569,7 +569,7 @@ let key23: (b: B.buffer UInt8.t { B.length b = 32 /\ B.recallable b }) =
   assert_norm (List.Tot.length l = 32);
   B.gcmalloc_of_list HyperStack.root l
 
-let key23_len: (x:UInt32.t { UInt32.v x = B.length key23 }) =
+inline_for_extraction let key23_len: (x:UInt32.t { UInt32.v x = B.length key23 }) =
   32ul
 
 let tag23: (b: B.buffer UInt8.t { B.length b = 16 /\ B.recallable b }) =
@@ -577,7 +577,7 @@ let tag23: (b: B.buffer UInt8.t { B.length b = 16 /\ B.recallable b }) =
   assert_norm (List.Tot.length l = 16);
   B.gcmalloc_of_list HyperStack.root l
 
-let tag23_len: (x:UInt32.t { UInt32.v x = B.length tag23 }) =
+inline_for_extraction let tag23_len: (x:UInt32.t { UInt32.v x = B.length tag23 }) =
   16ul
 
 let input24: (b: B.buffer UInt8.t { B.length b = 2 /\ B.recallable b }) =
@@ -585,7 +585,7 @@ let input24: (b: B.buffer UInt8.t { B.length b = 2 /\ B.recallable b }) =
   assert_norm (List.Tot.length l = 2);
   B.gcmalloc_of_list HyperStack.root l
 
-let input24_len: (x:UInt32.t { UInt32.v x = B.length input24 }) =
+inline_for_extraction let input24_len: (x:UInt32.t { UInt32.v x = B.length input24 }) =
   2ul
 
 let key24: (b: B.buffer UInt8.t { B.length b = 32 /\ B.recallable b }) =
@@ -593,7 +593,7 @@ let key24: (b: B.buffer UInt8.t { B.length b = 32 /\ B.recallable b }) =
   assert_norm (List.Tot.length l = 32);
   B.gcmalloc_of_list HyperStack.root l
 
-let key24_len: (x:UInt32.t { UInt32.v x = B.length key24 }) =
+inline_for_extraction let key24_len: (x:UInt32.t { UInt32.v x = B.length key24 }) =
   32ul
 
 let tag24: (b: B.buffer UInt8.t { B.length b = 16 /\ B.recallable b }) =
@@ -601,7 +601,7 @@ let tag24: (b: B.buffer UInt8.t { B.length b = 16 /\ B.recallable b }) =
   assert_norm (List.Tot.length l = 16);
   B.gcmalloc_of_list HyperStack.root l
 
-let tag24_len: (x:UInt32.t { UInt32.v x = B.length tag24 }) =
+inline_for_extraction let tag24_len: (x:UInt32.t { UInt32.v x = B.length tag24 }) =
   16ul
 
 let input25: (b: B.buffer UInt8.t { B.length b = 415 /\ B.recallable b }) =
@@ -609,7 +609,7 @@ let input25: (b: B.buffer UInt8.t { B.length b = 415 /\ B.recallable b }) =
   assert_norm (List.Tot.length l = 415);
   B.gcmalloc_of_list HyperStack.root l
 
-let input25_len: (x:UInt32.t { UInt32.v x = B.length input25 }) =
+inline_for_extraction let input25_len: (x:UInt32.t { UInt32.v x = B.length input25 }) =
   415ul
 
 let key25: (b: B.buffer UInt8.t { B.length b = 32 /\ B.recallable b }) =
@@ -617,7 +617,7 @@ let key25: (b: B.buffer UInt8.t { B.length b = 32 /\ B.recallable b }) =
   assert_norm (List.Tot.length l = 32);
   B.gcmalloc_of_list HyperStack.root l
 
-let key25_len: (x:UInt32.t { UInt32.v x = B.length key25 }) =
+inline_for_extraction let key25_len: (x:UInt32.t { UInt32.v x = B.length key25 }) =
   32ul
 
 let tag25: (b: B.buffer UInt8.t { B.length b = 16 /\ B.recallable b }) =
@@ -625,7 +625,7 @@ let tag25: (b: B.buffer UInt8.t { B.length b = 16 /\ B.recallable b }) =
   assert_norm (List.Tot.length l = 16);
   B.gcmalloc_of_list HyperStack.root l
 
-let tag25_len: (x:UInt32.t { UInt32.v x = B.length tag25 }) =
+inline_for_extraction let tag25_len: (x:UInt32.t { UInt32.v x = B.length tag25 }) =
   16ul
 
 let input26: (b: B.buffer UInt8.t { B.length b = 118 /\ B.recallable b }) =
@@ -633,7 +633,7 @@ let input26: (b: B.buffer UInt8.t { B.length b = 118 /\ B.recallable b }) =
   assert_norm (List.Tot.length l = 118);
   B.gcmalloc_of_list HyperStack.root l
 
-let input26_len: (x:UInt32.t { UInt32.v x = B.length input26 }) =
+inline_for_extraction let input26_len: (x:UInt32.t { UInt32.v x = B.length input26 }) =
   118ul
 
 let key26: (b: B.buffer UInt8.t { B.length b = 32 /\ B.recallable b }) =
@@ -641,7 +641,7 @@ let key26: (b: B.buffer UInt8.t { B.length b = 32 /\ B.recallable b }) =
   assert_norm (List.Tot.length l = 32);
   B.gcmalloc_of_list HyperStack.root l
 
-let key26_len: (x:UInt32.t { UInt32.v x = B.length key26 }) =
+inline_for_extraction let key26_len: (x:UInt32.t { UInt32.v x = B.length key26 }) =
   32ul
 
 let tag26: (b: B.buffer UInt8.t { B.length b = 16 /\ B.recallable b }) =
@@ -649,7 +649,7 @@ let tag26: (b: B.buffer UInt8.t { B.length b = 16 /\ B.recallable b }) =
   assert_norm (List.Tot.length l = 16);
   B.gcmalloc_of_list HyperStack.root l
 
-let tag26_len: (x:UInt32.t { UInt32.v x = B.length tag26 }) =
+inline_for_extraction let tag26_len: (x:UInt32.t { UInt32.v x = B.length tag26 }) =
   16ul
 
 let input27: (b: B.buffer UInt8.t { B.length b = 131 /\ B.recallable b }) =
@@ -657,7 +657,7 @@ let input27: (b: B.buffer UInt8.t { B.length b = 131 /\ B.recallable b }) =
   assert_norm (List.Tot.length l = 131);
   B.gcmalloc_of_list HyperStack.root l
 
-let input27_len: (x:UInt32.t { UInt32.v x = B.length input27 }) =
+inline_for_extraction let input27_len: (x:UInt32.t { UInt32.v x = B.length input27 }) =
   131ul
 
 let key27: (b: B.buffer UInt8.t { B.length b = 32 /\ B.recallable b }) =
@@ -665,7 +665,7 @@ let key27: (b: B.buffer UInt8.t { B.length b = 32 /\ B.recallable b }) =
   assert_norm (List.Tot.length l = 32);
   B.gcmalloc_of_list HyperStack.root l
 
-let key27_len: (x:UInt32.t { UInt32.v x = B.length key27 }) =
+inline_for_extraction let key27_len: (x:UInt32.t { UInt32.v x = B.length key27 }) =
   32ul
 
 let tag27: (b: B.buffer UInt8.t { B.length b = 16 /\ B.recallable b }) =
@@ -673,7 +673,7 @@ let tag27: (b: B.buffer UInt8.t { B.length b = 16 /\ B.recallable b }) =
   assert_norm (List.Tot.length l = 16);
   B.gcmalloc_of_list HyperStack.root l
 
-let tag27_len: (x:UInt32.t { UInt32.v x = B.length tag27 }) =
+inline_for_extraction let tag27_len: (x:UInt32.t { UInt32.v x = B.length tag27 }) =
   16ul
 
 let input28: (b: B.buffer UInt8.t { B.length b = 16 /\ B.recallable b }) =
@@ -681,7 +681,7 @@ let input28: (b: B.buffer UInt8.t { B.length b = 16 /\ B.recallable b }) =
   assert_norm (List.Tot.length l = 16);
   B.gcmalloc_of_list HyperStack.root l
 
-let input28_len: (x:UInt32.t { UInt32.v x = B.length input28 }) =
+inline_for_extraction let input28_len: (x:UInt32.t { UInt32.v x = B.length input28 }) =
   16ul
 
 let key28: (b: B.buffer UInt8.t { B.length b = 32 /\ B.recallable b }) =
@@ -689,7 +689,7 @@ let key28: (b: B.buffer UInt8.t { B.length b = 32 /\ B.recallable b }) =
   assert_norm (List.Tot.length l = 32);
   B.gcmalloc_of_list HyperStack.root l
 
-let key28_len: (x:UInt32.t { UInt32.v x = B.length key28 }) =
+inline_for_extraction let key28_len: (x:UInt32.t { UInt32.v x = B.length key28 }) =
   32ul
 
 let tag28: (b: B.buffer UInt8.t { B.length b = 16 /\ B.recallable b }) =
@@ -697,7 +697,7 @@ let tag28: (b: B.buffer UInt8.t { B.length b = 16 /\ B.recallable b }) =
   assert_norm (List.Tot.length l = 16);
   B.gcmalloc_of_list HyperStack.root l
 
-let tag28_len: (x:UInt32.t { UInt32.v x = B.length tag28 }) =
+inline_for_extraction let tag28_len: (x:UInt32.t { UInt32.v x = B.length tag28 }) =
   16ul
 
 let input29: (b: B.buffer UInt8.t { B.length b = 16 /\ B.recallable b }) =
@@ -705,7 +705,7 @@ let input29: (b: B.buffer UInt8.t { B.length b = 16 /\ B.recallable b }) =
   assert_norm (List.Tot.length l = 16);
   B.gcmalloc_of_list HyperStack.root l
 
-let input29_len: (x:UInt32.t { UInt32.v x = B.length input29 }) =
+inline_for_extraction let input29_len: (x:UInt32.t { UInt32.v x = B.length input29 }) =
   16ul
 
 let key29: (b: B.buffer UInt8.t { B.length b = 32 /\ B.recallable b }) =
@@ -713,7 +713,7 @@ let key29: (b: B.buffer UInt8.t { B.length b = 32 /\ B.recallable b }) =
   assert_norm (List.Tot.length l = 32);
   B.gcmalloc_of_list HyperStack.root l
 
-let key29_len: (x:UInt32.t { UInt32.v x = B.length key29 }) =
+inline_for_extraction let key29_len: (x:UInt32.t { UInt32.v x = B.length key29 }) =
   32ul
 
 let tag29: (b: B.buffer UInt8.t { B.length b = 16 /\ B.recallable b }) =
@@ -721,7 +721,7 @@ let tag29: (b: B.buffer UInt8.t { B.length b = 16 /\ B.recallable b }) =
   assert_norm (List.Tot.length l = 16);
   B.gcmalloc_of_list HyperStack.root l
 
-let tag29_len: (x:UInt32.t { UInt32.v x = B.length tag29 }) =
+inline_for_extraction let tag29_len: (x:UInt32.t { UInt32.v x = B.length tag29 }) =
   16ul
 
 let input30: (b: B.buffer UInt8.t { B.length b = 48 /\ B.recallable b }) =
@@ -729,7 +729,7 @@ let input30: (b: B.buffer UInt8.t { B.length b = 48 /\ B.recallable b }) =
   assert_norm (List.Tot.length l = 48);
   B.gcmalloc_of_list HyperStack.root l
 
-let input30_len: (x:UInt32.t { UInt32.v x = B.length input30 }) =
+inline_for_extraction let input30_len: (x:UInt32.t { UInt32.v x = B.length input30 }) =
   48ul
 
 let key30: (b: B.buffer UInt8.t { B.length b = 32 /\ B.recallable b }) =
@@ -737,7 +737,7 @@ let key30: (b: B.buffer UInt8.t { B.length b = 32 /\ B.recallable b }) =
   assert_norm (List.Tot.length l = 32);
   B.gcmalloc_of_list HyperStack.root l
 
-let key30_len: (x:UInt32.t { UInt32.v x = B.length key30 }) =
+inline_for_extraction let key30_len: (x:UInt32.t { UInt32.v x = B.length key30 }) =
   32ul
 
 let tag30: (b: B.buffer UInt8.t { B.length b = 16 /\ B.recallable b }) =
@@ -745,7 +745,7 @@ let tag30: (b: B.buffer UInt8.t { B.length b = 16 /\ B.recallable b }) =
   assert_norm (List.Tot.length l = 16);
   B.gcmalloc_of_list HyperStack.root l
 
-let tag30_len: (x:UInt32.t { UInt32.v x = B.length tag30 }) =
+inline_for_extraction let tag30_len: (x:UInt32.t { UInt32.v x = B.length tag30 }) =
   16ul
 
 let input31: (b: B.buffer UInt8.t { B.length b = 48 /\ B.recallable b }) =
@@ -753,7 +753,7 @@ let input31: (b: B.buffer UInt8.t { B.length b = 48 /\ B.recallable b }) =
   assert_norm (List.Tot.length l = 48);
   B.gcmalloc_of_list HyperStack.root l
 
-let input31_len: (x:UInt32.t { UInt32.v x = B.length input31 }) =
+inline_for_extraction let input31_len: (x:UInt32.t { UInt32.v x = B.length input31 }) =
   48ul
 
 let key31: (b: B.buffer UInt8.t { B.length b = 32 /\ B.recallable b }) =
@@ -761,7 +761,7 @@ let key31: (b: B.buffer UInt8.t { B.length b = 32 /\ B.recallable b }) =
   assert_norm (List.Tot.length l = 32);
   B.gcmalloc_of_list HyperStack.root l
 
-let key31_len: (x:UInt32.t { UInt32.v x = B.length key31 }) =
+inline_for_extraction let key31_len: (x:UInt32.t { UInt32.v x = B.length key31 }) =
   32ul
 
 let tag31: (b: B.buffer UInt8.t { B.length b = 16 /\ B.recallable b }) =
@@ -769,7 +769,7 @@ let tag31: (b: B.buffer UInt8.t { B.length b = 16 /\ B.recallable b }) =
   assert_norm (List.Tot.length l = 16);
   B.gcmalloc_of_list HyperStack.root l
 
-let tag31_len: (x:UInt32.t { UInt32.v x = B.length tag31 }) =
+inline_for_extraction let tag31_len: (x:UInt32.t { UInt32.v x = B.length tag31 }) =
   16ul
 
 let input32: (b: B.buffer UInt8.t { B.length b = 16 /\ B.recallable b }) =
@@ -777,7 +777,7 @@ let input32: (b: B.buffer UInt8.t { B.length b = 16 /\ B.recallable b }) =
   assert_norm (List.Tot.length l = 16);
   B.gcmalloc_of_list HyperStack.root l
 
-let input32_len: (x:UInt32.t { UInt32.v x = B.length input32 }) =
+inline_for_extraction let input32_len: (x:UInt32.t { UInt32.v x = B.length input32 }) =
   16ul
 
 let key32: (b: B.buffer UInt8.t { B.length b = 32 /\ B.recallable b }) =
@@ -785,7 +785,7 @@ let key32: (b: B.buffer UInt8.t { B.length b = 32 /\ B.recallable b }) =
   assert_norm (List.Tot.length l = 32);
   B.gcmalloc_of_list HyperStack.root l
 
-let key32_len: (x:UInt32.t { UInt32.v x = B.length key32 }) =
+inline_for_extraction let key32_len: (x:UInt32.t { UInt32.v x = B.length key32 }) =
   32ul
 
 let tag32: (b: B.buffer UInt8.t { B.length b = 16 /\ B.recallable b }) =
@@ -793,7 +793,7 @@ let tag32: (b: B.buffer UInt8.t { B.length b = 16 /\ B.recallable b }) =
   assert_norm (List.Tot.length l = 16);
   B.gcmalloc_of_list HyperStack.root l
 
-let tag32_len: (x:UInt32.t { UInt32.v x = B.length tag32 }) =
+inline_for_extraction let tag32_len: (x:UInt32.t { UInt32.v x = B.length tag32 }) =
   16ul
 
 let input33: (b: B.buffer UInt8.t { B.length b = 64 /\ B.recallable b }) =
@@ -801,7 +801,7 @@ let input33: (b: B.buffer UInt8.t { B.length b = 64 /\ B.recallable b }) =
   assert_norm (List.Tot.length l = 64);
   B.gcmalloc_of_list HyperStack.root l
 
-let input33_len: (x:UInt32.t { UInt32.v x = B.length input33 }) =
+inline_for_extraction let input33_len: (x:UInt32.t { UInt32.v x = B.length input33 }) =
   64ul
 
 let key33: (b: B.buffer UInt8.t { B.length b = 32 /\ B.recallable b }) =
@@ -809,7 +809,7 @@ let key33: (b: B.buffer UInt8.t { B.length b = 32 /\ B.recallable b }) =
   assert_norm (List.Tot.length l = 32);
   B.gcmalloc_of_list HyperStack.root l
 
-let key33_len: (x:UInt32.t { UInt32.v x = B.length key33 }) =
+inline_for_extraction let key33_len: (x:UInt32.t { UInt32.v x = B.length key33 }) =
   32ul
 
 let tag33: (b: B.buffer UInt8.t { B.length b = 16 /\ B.recallable b }) =
@@ -817,7 +817,7 @@ let tag33: (b: B.buffer UInt8.t { B.length b = 16 /\ B.recallable b }) =
   assert_norm (List.Tot.length l = 16);
   B.gcmalloc_of_list HyperStack.root l
 
-let tag33_len: (x:UInt32.t { UInt32.v x = B.length tag33 }) =
+inline_for_extraction let tag33_len: (x:UInt32.t { UInt32.v x = B.length tag33 }) =
   16ul
 
 let input34: (b: B.buffer UInt8.t { B.length b = 48 /\ B.recallable b }) =
@@ -825,7 +825,7 @@ let input34: (b: B.buffer UInt8.t { B.length b = 48 /\ B.recallable b }) =
   assert_norm (List.Tot.length l = 48);
   B.gcmalloc_of_list HyperStack.root l
 
-let input34_len: (x:UInt32.t { UInt32.v x = B.length input34 }) =
+inline_for_extraction let input34_len: (x:UInt32.t { UInt32.v x = B.length input34 }) =
   48ul
 
 let key34: (b: B.buffer UInt8.t { B.length b = 32 /\ B.recallable b }) =
@@ -833,7 +833,7 @@ let key34: (b: B.buffer UInt8.t { B.length b = 32 /\ B.recallable b }) =
   assert_norm (List.Tot.length l = 32);
   B.gcmalloc_of_list HyperStack.root l
 
-let key34_len: (x:UInt32.t { UInt32.v x = B.length key34 }) =
+inline_for_extraction let key34_len: (x:UInt32.t { UInt32.v x = B.length key34 }) =
   32ul
 
 let tag34: (b: B.buffer UInt8.t { B.length b = 16 /\ B.recallable b }) =
@@ -841,9 +841,10 @@ let tag34: (b: B.buffer UInt8.t { B.length b = 16 /\ B.recallable b }) =
   assert_norm (List.Tot.length l = 16);
   B.gcmalloc_of_list HyperStack.root l
 
-let tag34_len: (x:UInt32.t { UInt32.v x = B.length tag34 }) =
+inline_for_extraction let tag34_len: (x:UInt32.t { UInt32.v x = B.length tag34 }) =
   16ul
 
+noeq
 type vector = | Vector:
   tag: B.buffer UInt8.t { B.recallable tag } ->
   tag_len: UInt32.t { B.length tag = UInt32.v tag_len } ->
@@ -853,7 +854,7 @@ type vector = | Vector:
   input_len: UInt32.t { B.length input = UInt32.v input_len } ->
   vector
 
-let vectors: (b: B.buffer vector { B.length b = 35 }) =
+let vectors: (b: B.buffer vector { B.length b = 35 /\ B.recallable b }) =
   [@inline_let] let l = [ 
     Vector tag0 tag0_len key0 key0_len input0 input0_len ;
     Vector tag1 tag1_len key1 key1_len input1 input1_len ;
@@ -893,5 +894,6 @@ let vectors: (b: B.buffer vector { B.length b = 35 }) =
   ] in
   assert_norm (List.Tot.length l = 35);
   B.gcmalloc_of_list HyperStack.root l
+
 let vectors_len: (x:UInt32.t { UInt32.v x = B.length vectors }) =
   35ul

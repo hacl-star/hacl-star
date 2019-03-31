@@ -4,12 +4,12 @@ module B = LowStar.Buffer
 
 #set-options "--max_fuel 0 --max_ifuel 0"
 
-let private0: (b: B.buffer UInt8.t { B.length b = 32 /\ B.recallable b }) =
+let private_0: (b: B.buffer UInt8.t { B.length b = 32 /\ B.recallable b }) =
   [@inline_let] let l = [ 0x77uy; 0x07uy; 0x6duy; 0x0auy; 0x73uy; 0x18uy; 0xa5uy; 0x7duy; 0x3cuy; 0x16uy; 0xc1uy; 0x72uy; 0x51uy; 0xb2uy; 0x66uy; 0x45uy; 0xdfuy; 0x4cuy; 0x2fuy; 0x87uy; 0xebuy; 0xc0uy; 0x99uy; 0x2auy; 0xb1uy; 0x77uy; 0xfbuy; 0xa5uy; 0x1duy; 0xb9uy; 0x2cuy; 0x2auy; ] in
   assert_norm (List.Tot.length l = 32);
   B.gcmalloc_of_list HyperStack.root l
 
-let private0_len: (x:UInt32.t { UInt32.v x = B.length private0 }) =
+inline_for_extraction let private_0_len: (x:UInt32.t { UInt32.v x = B.length private_0 }) =
   32ul
 
 let public0: (b: B.buffer UInt8.t { B.length b = 32 /\ B.recallable b }) =
@@ -17,7 +17,7 @@ let public0: (b: B.buffer UInt8.t { B.length b = 32 /\ B.recallable b }) =
   assert_norm (List.Tot.length l = 32);
   B.gcmalloc_of_list HyperStack.root l
 
-let public0_len: (x:UInt32.t { UInt32.v x = B.length public0 }) =
+inline_for_extraction let public0_len: (x:UInt32.t { UInt32.v x = B.length public0 }) =
   32ul
 
 let result0: (b: B.buffer UInt8.t { B.length b = 32 /\ B.recallable b }) =
@@ -25,17 +25,17 @@ let result0: (b: B.buffer UInt8.t { B.length b = 32 /\ B.recallable b }) =
   assert_norm (List.Tot.length l = 32);
   B.gcmalloc_of_list HyperStack.root l
 
-let result0_len: (x:UInt32.t { UInt32.v x = B.length result0 }) =
+inline_for_extraction let result0_len: (x:UInt32.t { UInt32.v x = B.length result0 }) =
   32ul
 
-let valid0 = true
+inline_for_extraction let valid0 = true
 
-let private1: (b: B.buffer UInt8.t { B.length b = 32 /\ B.recallable b }) =
+let private_1: (b: B.buffer UInt8.t { B.length b = 32 /\ B.recallable b }) =
   [@inline_let] let l = [ 0x5duy; 0xabuy; 0x08uy; 0x7euy; 0x62uy; 0x4auy; 0x8auy; 0x4buy; 0x79uy; 0xe1uy; 0x7fuy; 0x8buy; 0x83uy; 0x80uy; 0x0euy; 0xe6uy; 0x6fuy; 0x3buy; 0xb1uy; 0x29uy; 0x26uy; 0x18uy; 0xb6uy; 0xfduy; 0x1cuy; 0x2fuy; 0x8buy; 0x27uy; 0xffuy; 0x88uy; 0xe0uy; 0xebuy; ] in
   assert_norm (List.Tot.length l = 32);
   B.gcmalloc_of_list HyperStack.root l
 
-let private1_len: (x:UInt32.t { UInt32.v x = B.length private1 }) =
+inline_for_extraction let private_1_len: (x:UInt32.t { UInt32.v x = B.length private_1 }) =
   32ul
 
 let public1: (b: B.buffer UInt8.t { B.length b = 32 /\ B.recallable b }) =
@@ -43,7 +43,7 @@ let public1: (b: B.buffer UInt8.t { B.length b = 32 /\ B.recallable b }) =
   assert_norm (List.Tot.length l = 32);
   B.gcmalloc_of_list HyperStack.root l
 
-let public1_len: (x:UInt32.t { UInt32.v x = B.length public1 }) =
+inline_for_extraction let public1_len: (x:UInt32.t { UInt32.v x = B.length public1 }) =
   32ul
 
 let result1: (b: B.buffer UInt8.t { B.length b = 32 /\ B.recallable b }) =
@@ -51,17 +51,17 @@ let result1: (b: B.buffer UInt8.t { B.length b = 32 /\ B.recallable b }) =
   assert_norm (List.Tot.length l = 32);
   B.gcmalloc_of_list HyperStack.root l
 
-let result1_len: (x:UInt32.t { UInt32.v x = B.length result1 }) =
+inline_for_extraction let result1_len: (x:UInt32.t { UInt32.v x = B.length result1 }) =
   32ul
 
-let valid1 = true
+inline_for_extraction let valid1 = true
 
-let private2: (b: B.buffer UInt8.t { B.length b = 32 /\ B.recallable b }) =
+let private_2: (b: B.buffer UInt8.t { B.length b = 32 /\ B.recallable b }) =
   [@inline_let] let l = [ 0x01uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; ] in
   assert_norm (List.Tot.length l = 32);
   B.gcmalloc_of_list HyperStack.root l
 
-let private2_len: (x:UInt32.t { UInt32.v x = B.length private2 }) =
+inline_for_extraction let private_2_len: (x:UInt32.t { UInt32.v x = B.length private_2 }) =
   32ul
 
 let public2: (b: B.buffer UInt8.t { B.length b = 32 /\ B.recallable b }) =
@@ -69,7 +69,7 @@ let public2: (b: B.buffer UInt8.t { B.length b = 32 /\ B.recallable b }) =
   assert_norm (List.Tot.length l = 32);
   B.gcmalloc_of_list HyperStack.root l
 
-let public2_len: (x:UInt32.t { UInt32.v x = B.length public2 }) =
+inline_for_extraction let public2_len: (x:UInt32.t { UInt32.v x = B.length public2 }) =
   32ul
 
 let result2: (b: B.buffer UInt8.t { B.length b = 32 /\ B.recallable b }) =
@@ -77,17 +77,17 @@ let result2: (b: B.buffer UInt8.t { B.length b = 32 /\ B.recallable b }) =
   assert_norm (List.Tot.length l = 32);
   B.gcmalloc_of_list HyperStack.root l
 
-let result2_len: (x:UInt32.t { UInt32.v x = B.length result2 }) =
+inline_for_extraction let result2_len: (x:UInt32.t { UInt32.v x = B.length result2 }) =
   32ul
 
-let valid2 = true
+inline_for_extraction let valid2 = true
 
-let private3: (b: B.buffer UInt8.t { B.length b = 32 /\ B.recallable b }) =
+let private_3: (b: B.buffer UInt8.t { B.length b = 32 /\ B.recallable b }) =
   [@inline_let] let l = [ 0x01uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; ] in
   assert_norm (List.Tot.length l = 32);
   B.gcmalloc_of_list HyperStack.root l
 
-let private3_len: (x:UInt32.t { UInt32.v x = B.length private3 }) =
+inline_for_extraction let private_3_len: (x:UInt32.t { UInt32.v x = B.length private_3 }) =
   32ul
 
 let public3: (b: B.buffer UInt8.t { B.length b = 32 /\ B.recallable b }) =
@@ -95,7 +95,7 @@ let public3: (b: B.buffer UInt8.t { B.length b = 32 /\ B.recallable b }) =
   assert_norm (List.Tot.length l = 32);
   B.gcmalloc_of_list HyperStack.root l
 
-let public3_len: (x:UInt32.t { UInt32.v x = B.length public3 }) =
+inline_for_extraction let public3_len: (x:UInt32.t { UInt32.v x = B.length public3 }) =
   32ul
 
 let result3: (b: B.buffer UInt8.t { B.length b = 32 /\ B.recallable b }) =
@@ -103,17 +103,17 @@ let result3: (b: B.buffer UInt8.t { B.length b = 32 /\ B.recallable b }) =
   assert_norm (List.Tot.length l = 32);
   B.gcmalloc_of_list HyperStack.root l
 
-let result3_len: (x:UInt32.t { UInt32.v x = B.length result3 }) =
+inline_for_extraction let result3_len: (x:UInt32.t { UInt32.v x = B.length result3 }) =
   32ul
 
-let valid3 = true
+inline_for_extraction let valid3 = true
 
-let private4: (b: B.buffer UInt8.t { B.length b = 32 /\ B.recallable b }) =
+let private_4: (b: B.buffer UInt8.t { B.length b = 32 /\ B.recallable b }) =
   [@inline_let] let l = [ 0xa5uy; 0x46uy; 0xe3uy; 0x6buy; 0xf0uy; 0x52uy; 0x7cuy; 0x9duy; 0x3buy; 0x16uy; 0x15uy; 0x4buy; 0x82uy; 0x46uy; 0x5euy; 0xdduy; 0x62uy; 0x14uy; 0x4cuy; 0x0auy; 0xc1uy; 0xfcuy; 0x5auy; 0x18uy; 0x50uy; 0x6auy; 0x22uy; 0x44uy; 0xbauy; 0x44uy; 0x9auy; 0xc4uy; ] in
   assert_norm (List.Tot.length l = 32);
   B.gcmalloc_of_list HyperStack.root l
 
-let private4_len: (x:UInt32.t { UInt32.v x = B.length private4 }) =
+inline_for_extraction let private_4_len: (x:UInt32.t { UInt32.v x = B.length private_4 }) =
   32ul
 
 let public4: (b: B.buffer UInt8.t { B.length b = 32 /\ B.recallable b }) =
@@ -121,7 +121,7 @@ let public4: (b: B.buffer UInt8.t { B.length b = 32 /\ B.recallable b }) =
   assert_norm (List.Tot.length l = 32);
   B.gcmalloc_of_list HyperStack.root l
 
-let public4_len: (x:UInt32.t { UInt32.v x = B.length public4 }) =
+inline_for_extraction let public4_len: (x:UInt32.t { UInt32.v x = B.length public4 }) =
   32ul
 
 let result4: (b: B.buffer UInt8.t { B.length b = 32 /\ B.recallable b }) =
@@ -129,17 +129,17 @@ let result4: (b: B.buffer UInt8.t { B.length b = 32 /\ B.recallable b }) =
   assert_norm (List.Tot.length l = 32);
   B.gcmalloc_of_list HyperStack.root l
 
-let result4_len: (x:UInt32.t { UInt32.v x = B.length result4 }) =
+inline_for_extraction let result4_len: (x:UInt32.t { UInt32.v x = B.length result4 }) =
   32ul
 
-let valid4 = true
+inline_for_extraction let valid4 = true
 
-let private5: (b: B.buffer UInt8.t { B.length b = 32 /\ B.recallable b }) =
+let private_5: (b: B.buffer UInt8.t { B.length b = 32 /\ B.recallable b }) =
   [@inline_let] let l = [ 0x01uy; 0x02uy; 0x03uy; 0x04uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; ] in
   assert_norm (List.Tot.length l = 32);
   B.gcmalloc_of_list HyperStack.root l
 
-let private5_len: (x:UInt32.t { UInt32.v x = B.length private5 }) =
+inline_for_extraction let private_5_len: (x:UInt32.t { UInt32.v x = B.length private_5 }) =
   32ul
 
 let public5: (b: B.buffer UInt8.t { B.length b = 32 /\ B.recallable b }) =
@@ -147,7 +147,7 @@ let public5: (b: B.buffer UInt8.t { B.length b = 32 /\ B.recallable b }) =
   assert_norm (List.Tot.length l = 32);
   B.gcmalloc_of_list HyperStack.root l
 
-let public5_len: (x:UInt32.t { UInt32.v x = B.length public5 }) =
+inline_for_extraction let public5_len: (x:UInt32.t { UInt32.v x = B.length public5 }) =
   32ul
 
 let result5: (b: B.buffer UInt8.t { B.length b = 32 /\ B.recallable b }) =
@@ -155,17 +155,17 @@ let result5: (b: B.buffer UInt8.t { B.length b = 32 /\ B.recallable b }) =
   assert_norm (List.Tot.length l = 32);
   B.gcmalloc_of_list HyperStack.root l
 
-let result5_len: (x:UInt32.t { UInt32.v x = B.length result5 }) =
+inline_for_extraction let result5_len: (x:UInt32.t { UInt32.v x = B.length result5 }) =
   32ul
 
-let valid5 = false
+inline_for_extraction let valid5 = false
 
-let private6: (b: B.buffer UInt8.t { B.length b = 32 /\ B.recallable b }) =
+let private_6: (b: B.buffer UInt8.t { B.length b = 32 /\ B.recallable b }) =
   [@inline_let] let l = [ 0x02uy; 0x04uy; 0x06uy; 0x08uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; ] in
   assert_norm (List.Tot.length l = 32);
   B.gcmalloc_of_list HyperStack.root l
 
-let private6_len: (x:UInt32.t { UInt32.v x = B.length private6 }) =
+inline_for_extraction let private_6_len: (x:UInt32.t { UInt32.v x = B.length private_6 }) =
   32ul
 
 let public6: (b: B.buffer UInt8.t { B.length b = 32 /\ B.recallable b }) =
@@ -173,7 +173,7 @@ let public6: (b: B.buffer UInt8.t { B.length b = 32 /\ B.recallable b }) =
   assert_norm (List.Tot.length l = 32);
   B.gcmalloc_of_list HyperStack.root l
 
-let public6_len: (x:UInt32.t { UInt32.v x = B.length public6 }) =
+inline_for_extraction let public6_len: (x:UInt32.t { UInt32.v x = B.length public6 }) =
   32ul
 
 let result6: (b: B.buffer UInt8.t { B.length b = 32 /\ B.recallable b }) =
@@ -181,30 +181,31 @@ let result6: (b: B.buffer UInt8.t { B.length b = 32 /\ B.recallable b }) =
   assert_norm (List.Tot.length l = 32);
   B.gcmalloc_of_list HyperStack.root l
 
-let result6_len: (x:UInt32.t { UInt32.v x = B.length result6 }) =
+inline_for_extraction let result6_len: (x:UInt32.t { UInt32.v x = B.length result6 }) =
   32ul
 
-let valid6 = false
+inline_for_extraction let valid6 = false
 
+noeq
 type vector = | Vector:
   result: B.buffer UInt8.t { B.recallable result } ->
   result_len: UInt32.t { B.length result = UInt32.v result_len } ->
   public: B.buffer UInt8.t { B.recallable public } ->
   public_len: UInt32.t { B.length public = UInt32.v public_len } ->
-  private: B.buffer UInt8.t { B.recallable private } ->
-  private_len: UInt32.t { B.length private = UInt32.v private_len } ->
+  private_: B.buffer UInt8.t { B.recallable private_ } ->
+  private__len: UInt32.t { B.length private_ = UInt32.v private__len } ->
   valid: bool ->
   vector
 
-let vectors: (b: B.buffer vector { B.length b = 7 }) =
+let vectors: (b: B.buffer vector { B.length b = 7 /\ B.recallable b }) =
   [@inline_let] let l = [ 
-    Vector result0 result0_len public0 public0_len private0 private0_len valid0;
-    Vector result1 result1_len public1 public1_len private1 private1_len valid1;
-    Vector result2 result2_len public2 public2_len private2 private2_len valid2;
-    Vector result3 result3_len public3 public3_len private3 private3_len valid3;
-    Vector result4 result4_len public4 public4_len private4 private4_len valid4;
-    Vector result5 result5_len public5 public5_len private5 private5_len valid5;
-    Vector result6 result6_len public6 public6_len private6 private6_len valid6;
+    Vector result0 result0_len public0 public0_len private_0 private_0_len valid0;
+    Vector result1 result1_len public1 public1_len private_1 private_1_len valid1;
+    Vector result2 result2_len public2 public2_len private_2 private_2_len valid2;
+    Vector result3 result3_len public3 public3_len private_3 private_3_len valid3;
+    Vector result4 result4_len public4 public4_len private_4 private_4_len valid4;
+    Vector result5 result5_len public5 public5_len private_5 private_5_len valid5;
+    Vector result6 result6_len public6 public6_len private_6 private_6_len valid6;
   ] in
   assert_norm (List.Tot.length l = 7);
   B.gcmalloc_of_list HyperStack.root l

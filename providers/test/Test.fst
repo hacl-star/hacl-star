@@ -246,6 +246,50 @@ let rec test_hkdf (LB len vs) =
     B.recall vs;
     test_hkdf (LB (len - 1ul) (B.offset vs 1ul))
 
+/// Poly1305
+
+#set-options "--z3rlimit 100"
+let test_poly1305_one (v: Test.Vectors.Poly1305.vector): St unit =
+  let open Test.Vectors.Poly1305 in
+  let Vector tag tag_len key key_len input input_len = v in
+  push_frame ();
+  assume (U32.v input_len + 16 <= UInt.max_int 32);
+  // WHY?!! These are in the refinement in the vectors file.
+  assume (B.recallable key);
+  assume (B.recallable tag);
+  assume (B.recallable input);
+  B.recall key;
+  B.recall tag;
+  B.recall input;
+  let h0 = get () in
+  let dst = B.alloca 0uy 16ul in
+  // WHY?! key, tag and input were live before dst was created fresh
+  assume (B.disjoint dst input);
+  assume (B.disjoint dst key);
+  let h1 = get () in
+  B.recall input;
+  B.recall key;
+  B.recall tag;
+  if key_len = 32ul then
+    EverCrypt.Poly1305.poly1305 dst input input_len key;
+  B.recall tag;
+  if tag_len = 16ul then
+    TestLib.compare_and_print !$"Poly1305" tag dst 16ul;
+  pop_frame ()
+
+let rec test_poly1305 (i: U32.t): St unit =
+  let open Test.Vectors.Poly1305 in
+  if i `U32.gte` vectors_len then
+    ()
+  else begin
+    assume (B.recallable vectors);
+    B.recall vectors;
+    // WHY? This is the refinement!
+    assume (U32.v vectors_len = B.length vectors);
+    assert (U32.v i < B.length vectors);
+    test_poly1305_one (B.index vectors i);
+    test_poly1305 (i `U32.add_mod` 1ul)
+  end
 
 /// ChaCha20-Poly1305
 
@@ -504,9 +548,16 @@ let main (): St C.exit_code =
     test_aead aead_vectors_low;
     test_hash hash_vectors_low;
     test_cipher block_cipher_vectors_low;
-    Test.Hash.main ()
+    Test.Hash.main ();
+
+    print !$"\n  Vale/POLY1305\n";
+    EverCrypt.AutoConfig2.disable_avx2 ();
+    EverCrypt.AutoConfig2.disable_avx ();
+    test_poly1305 0ul;
+    EverCrypt.AutoConfig2.init ()
   end;
   AC.disable_vale ();
+
 
   print !$"===========Hacl===========\n";
   test_hash hash_vectors_low;
@@ -517,6 +568,16 @@ let main (): St C.exit_code =
   test_chacha20 chacha20_vectors_low;
   Test.Hash.main ();
   //Test.Bytes.main ();
+
+  print !$"\n  AVX2/POLY1305\n";
+  test_poly1305 0ul;
+  EverCrypt.AutoConfig2.disable_avx2 ();
+  print !$"\n  AVX/POLY1305\n";
+  test_poly1305 0ul;
+  EverCrypt.AutoConfig2.disable_avx ();
+  print !$"\n  C/POLY1305\n";
+  test_poly1305 0ul;
+
   AC.disable_hacl ();
 
   if EverCrypt.StaticConfig.openssl then begin

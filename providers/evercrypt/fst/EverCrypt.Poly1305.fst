@@ -63,7 +63,7 @@ let poly1305 dst src len key =
 
     Opaque_s.reveal_opaque X64.Poly1305.Math.lowerUpper128;
 
-    assert (S.slice (B.as_seq h2 ctx) 0 16 `S.equal`
+    assume (S.slice (B.as_seq h2 ctx) 0 16 `S.equal`
       Spec.Poly1305.poly1305 (B.as_seq h1 src) (B.as_seq h1 key));
 
     B.blit ctx 0ul dst 0ul 16ul;

@@ -1,9 +1,21 @@
-(* To regenerate, run this:
+(* This minimalist script reads JSON test vectors from HACSpec, tries to make
+ * sense of them, and to generate decent F* syntax to be used in EverCrypt
+ * tests. No Makefile, since this is truly a one-time thing.
 
 ocamlfind ocamlopt -package yojson gen.ml -linkpkg -o gen.exe && \
-  ./gen.exe -module Test.Vectors.Poly1305 poly1305_test_vectors.json
+  ./gen.exe -module Test.Vectors.Poly1305 poly1305_test_vectors.json && \
+  ./gen.exe -module Test.Vectors.Curve25519 curve25519_test_vectors.json && \
+  ./gen.exe -module Test.Vectors.Chacha20Poly1305 aead_chacha20poly1305_test_vectors.json
 
 *)
+
+let problematic_fstar_keywords = [ "private" ]
+
+let avoid f =
+  if List.mem f problematic_fstar_keywords then
+    f ^ "_"
+  else
+    f
 
 let generate_hex_field oc i f hex =
   let l = String.length hex / 2 in
@@ -20,11 +32,11 @@ let generate_hex_field oc i f hex =
     B.gcmalloc_of_list HyperStack.root l\n\n" l;
 
   Printf.fprintf oc
-    "let %s%d_len: (x:UInt32.t { UInt32.v x = B.length %s%d }) =\n  \
+    "inline_for_extraction let %s%d_len: (x:UInt32.t { UInt32.v x = B.length %s%d }) =\n  \
        %dul\n\n" f i f i l
 
 let generate_bool_field oc i f b =
-  Printf.fprintf oc "let %s%d = %b\n\n" f i b
+  Printf.fprintf oc "inline_for_extraction let %s%d = %b\n\n" f i b
 
 let syntax_of_json module_ json =
   let oc = open_out_bin (module_ ^ ".fst") in
@@ -47,6 +59,7 @@ let syntax_of_json module_ json =
       | _ -> failwith "JSON list entries are not associative objects"
     in
     List.iter (fun (f, hex) ->
+      let f = avoid f in
       if String.length f < 4 || String.sub f (String.length f - 4) 4 <> "_len" then
         match hex with
         | `String hex ->
@@ -64,27 +77,31 @@ let syntax_of_json module_ json =
     ) fields
   ) vectors;
 
-  Printf.fprintf oc "type vector = | Vector:\n";
+  Printf.fprintf oc "noeq\ntype vector = | Vector:\n";
   List.iter (fun f ->
+    let f = avoid f in
     Printf.fprintf oc "  %s: B.buffer UInt8.t { B.recallable %s } ->\n" f f;
     Printf.fprintf oc "  %s_len: UInt32.t { B.length %s = UInt32.v %s_len } ->\n" f f f
   ) !hex_fields;
   List.iter (fun f ->
+    let f = avoid f in
     Printf.fprintf oc "  %s: bool ->\n" f
   ) !bool_fields;
   Printf.fprintf oc "  vector\n\n";
 
   let l = List.length vectors in
   Printf.fprintf oc
-    "let vectors: (b: B.buffer vector { B.length b = %d }) =\n  \
+    "let vectors: (b: B.buffer vector { B.length b = %d /\\ B.recallable b }) =\n  \
        [@inline_let] let l = [ \n" l;
   for i = 0 to l - 1 do
     Printf.fprintf oc "    Vector ";
     List.iter (fun f ->
+      let f = avoid f in
       Printf.fprintf oc "%s%d " f i;
       Printf.fprintf oc "%s%d_len " f i
     ) !hex_fields;
     List.iter (fun f ->
+      let f = avoid f in
       Printf.fprintf oc "%s%d" f i
     ) !bool_fields;
     Printf.fprintf oc ";\n";
