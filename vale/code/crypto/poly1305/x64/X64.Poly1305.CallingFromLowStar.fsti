@@ -18,18 +18,18 @@ open FStar.Seq.Base
 open Poly1305.Spec_s
 open Poly1305.Equiv
 
-val lemma_call_poly1305 (h0 h1:HS.mem) (ctx_b:PS.uint8_p) (inp_b:PS.uint8_p) (src key:bytes) : Lemma
+val lemma_call_poly1305 (h1 h2:HS.mem) (ctx_b:PS.uint8_p) (inp_b:PS.uint8_p) (src key:bytes) : Lemma
   (requires (
     let open PU in
     let len = length src in
-    B.live h1 ctx_b /\
+    B.live h2 ctx_b /\
     // copied from Poly_stdcalls.poly1305:
-    B.live h0 ctx_b /\ B.live h0 inp_b /\
+    B.live h1 ctx_b /\ B.live h1 inp_b /\
     B.length ctx_b = 192 /\
     B.length inp_b = 8 * readable_words len /\
     // interface to Poly1305.Equiv:
-    equal (BF.of_bytes key) (slice (B.as_seq h0 ctx_b) 24 72) /\
-    equal (BF.of_bytes src) (slice (B.as_seq h1 inp_b) 0 len)
+    equal (BF.of_bytes key) (slice (B.as_seq h1 ctx_b) 24 56) /\
+    equal (BF.of_bytes src) (slice (B.as_seq h2 inp_b) 0 len)
   ))
   (ensures (
     let open PU in
@@ -42,19 +42,19 @@ val lemma_call_poly1305 (h0 h1:HS.mem) (ctx_b:PS.uint8_p) (inp_b:PS.uint8_p) (sr
 
     // copied from Poly_stdcalls.poly1305:
     DV.length_eq (get_downview ctx_b);
-    let key_r0 = UInt64.v (MH.low_buffer_read TUInt8 TUInt64 h0 ctx_b 3) in
-    let key_r1 = UInt64.v (MH.low_buffer_read TUInt8 TUInt64 h0 ctx_b 4) in
-    let key_s0 = UInt64.v (MH.low_buffer_read TUInt8 TUInt64 h0 ctx_b 5) in
-    let key_s1 = UInt64.v (MH.low_buffer_read TUInt8 TUInt64 h0 ctx_b 6) in    
+    let key_r0 = UInt64.v (MH.low_buffer_read TUInt8 TUInt64 h1 ctx_b 3) in
+    let key_r1 = UInt64.v (MH.low_buffer_read TUInt8 TUInt64 h1 ctx_b 4) in
+    let key_s0 = UInt64.v (MH.low_buffer_read TUInt8 TUInt64 h1 ctx_b 5) in
+    let key_s1 = UInt64.v (MH.low_buffer_read TUInt8 TUInt64 h1 ctx_b 6) in    
     let key_r = lowerUpper128_opaque key_r0 key_r1 in
     let key_s = lowerUpper128_opaque key_s0 key_s1 in
 
-    let h0_out = UInt64.v (MH.low_buffer_read TUInt8 TUInt64 h1 ctx_b 0) in    
-    let h1_out = UInt64.v (MH.low_buffer_read TUInt8 TUInt64 h1 ctx_b 1) in    
-    let h = lowerUpper128_opaque h0_out h1_out in
+    let h1_out = UInt64.v (MH.low_buffer_read TUInt8 TUInt64 h2 ctx_b 0) in    
+    let h2_out = UInt64.v (MH.low_buffer_read TUInt8 TUInt64 h2 ctx_b 1) in    
+    let h = lowerUpper128_opaque h1_out h2_out in
     let db = get_downview inp_b in
     math_aux inp_b (readable_words len);
-    let inp_mem = seqTo128 (uint64_to_nat_seq (UV.as_seq h1 (UV.mk_buffer db Views.up_view64))) in
+    let inp_mem = seqTo128 (uint64_to_nat_seq (UV.as_seq h2 (UV.mk_buffer db Views.up_view64))) in
     let h_call = poly1305_hash key_r key_s inp_mem len in
 
     // interface to Poly1305.Equiv:
