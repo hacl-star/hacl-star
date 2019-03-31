@@ -10,6 +10,7 @@ module B = LowStar.Buffer
 
 open FStar.HyperStack.ST
 open FStar.Integers
+open FStar.Int.Cast
 
 open Spec.AEAD
 
@@ -40,7 +41,7 @@ let expand_in #a r k =
         in
         AES_stdcalls.aes128_key_expansion_stdcall k ek';
         let h1 = ST.get() in
-        Gcm_simplify.aes_simplify3 ek' h1 (AES_s.key_to_round_keys_LE AES_s.AES_128 (Words.Seq_s.seq_nat8_to_seq_nat32_LE (Words.Seq_s.seq_uint8_to_seq_nat8 (G.reveal kv))));
+        // Gcm_simplify.aes_simplify3 ek' h1 (AES_s.key_to_round_keys_LE AES_s.AES_128 (Words.Seq_s.seq_nat8_to_seq_nat32_LE (Words.Seq_s.seq_uint8_to_seq_nat8 (G.reveal kv))));
         MB.blit ek' 0ul ek 0ul 176ul;
         pop_frame();
         let h2 = ST.get() in
@@ -66,7 +67,7 @@ let expand_in #a r k =
         in
         AES_stdcalls.aes256_key_expansion_stdcall k ek';
         let h1 = ST.get() in
-        Gcm_simplify.aes_simplify3 ek' h1 (AES_s.key_to_round_keys_LE AES_s.AES_256 (Words.Seq_s.seq_nat8_to_seq_nat32_LE (Words.Seq_s.seq_uint8_to_seq_nat8 (G.reveal kv))));
+        // Gcm_simplify.aes_simplify3 ek' h1 (AES_s.key_to_round_keys_LE AES_s.AES_256 (Words.Seq_s.seq_nat8_to_seq_nat32_LE (Words.Seq_s.seq_uint8_to_seq_nat8 (G.reveal kv))));
         MB.blit ek' 0ul ek 0ul 240ul;
         pop_frame();
         let h2 = ST.get() in
@@ -91,12 +92,12 @@ let expand_in #a r k =
   | _ ->
       EK (G.hide (S.empty #UInt8.t)) MB.mnull
 
-#set-options "--z3rlimit 50"
+#set-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0"
 let encrypt #a ek iv ad ad_len plain plain_len dst =
   if MB.is_null (EK?.ek ek) then
     InvalidKey
   else match a with
-  | AES128_GCM | AES256_GCM ->
+  | AES128_GCM ->
       // From the well-formedness invariant: the only implementation we
       // (currently) know how to use on X64 is Vale's. In the future, we will
       // have to either:
@@ -114,7 +115,62 @@ let encrypt #a ek iv ad ad_len plain plain_len dst =
         let k_w = Words.Seq_s.seq_nat8_to_seq_nat32_LE k_nat in
         AES_s.is_aes_key_LE (vale_alg_of_alg a) k_w);
 
-      admit ()
+      admit()
+      
+      // push_frame();
+      // // Cannot pass a frozen buffer to a function that expects a regular
+      // // buffer. (Or can we? Prove compatibility of preorders?). In any case, we
+      // // just allocate a temporary on the stack and blit.
+      // let tmp_keys = B.alloca 0uy 176ul in
+      // MB.blit (EK?.ek ek) 0ul tmp_keys 0ul 176ul;      
+
+      // let hkeys_b = B.alloca 0uy 160ul in
+
+      // let h0 = get() in
+
+      // let open Words.Seq_s in
+      // let open Types_s in
+      // let open Words_s in
+      // let open AES_s in
+
+      // let cipher = B.sub dst 0ul plain_len in
+      // let tag = B.sub dst plain_len 16ul in
+      
+      // // The iv is modified by Vale, which the API does not allow. Hence
+      // // we allocate a temporary buffer and blit the contents of the iv
+      // let iv' = B.alloca 0uy 16ul in
+      // MB.blit iv 0ul iv' 0ul 12ul;
+
+      // assume (
+      //   let k = G.reveal (EK?.kv ek) in
+      //   let k_nat = Words.Seq_s.seq_uint8_to_seq_nat8 k in
+      //   let k_w = Words.Seq_s.seq_nat8_to_seq_nat32_LE k_nat in      
+      //   le_bytes_to_quad32 (seq_uint8_to_seq_nat8 (Seq.slice (B.as_seq h0 hkeys_b) 0 16)) == 
+      //     aes_encrypt_LE AES_128 k_w (Mkfour 0 0 0 0));
+
+      // assume (4096 * UInt32.v plain_len < pow2_32);
+      // assume (4096 * UInt32.v ad_len < pow2_32);
+
+      // GCMencryptOpt_stdcalls.gcm128_encrypt_opt_stdcall
+      //   (let k = G.reveal (EK?.kv ek) in
+      //   let k_nat = Words.Seq_s.seq_uint8_to_seq_nat8 k in
+      //   let k_w = Words.Seq_s.seq_nat8_to_seq_nat32_LE k_nat in G.hide k_w)
+      //   plain
+      //   (uint32_to_uint64 plain_len)
+      //   ad
+      //   (uint32_to_uint64 ad_len)
+      //   iv'
+      //   cipher
+      //   tag
+      //   tmp_keys
+      //   hkeys_b;
+        
+
+      // pop_frame();
+
+      // admit ()
+
+  | AES256_GCM -> admit()
 
   | CHACHA20_POLY1305 ->
       // Monotonicity; gives us proper length for ek while we're at it.

@@ -106,10 +106,8 @@ val gcm128_encrypt_opt_stdcall:
 
       aesni_enabled /\ pclmulqdq_enabled /\
       is_aes_key_LE AES_128 (Ghost.reveal key) /\
-      (let db = get_downview keys_b in
-      length_aux keys_b;
-      let ub = UV.mk_buffer db Views.up_view128 in
-      Seq.equal (UV.as_seq h0 ub) (key_to_round_keys_LE AES_128 (Ghost.reveal key))) /\
+      (Seq.equal (B.as_seq h0 keys_b)
+        (seq_nat8_to_seq_uint8 (le_seq_quad32_to_bytes (key_to_round_keys_LE AES_128 (Ghost.reveal key))))) /\
       le_bytes_to_quad32 (seq_uint8_to_seq_nat8 (Seq.slice (B.as_seq h0 hkeys_b) 0 16)) == 
         aes_encrypt_LE AES_128 (Ghost.reveal key) (Mkfour 0 0 0 0)      
     )

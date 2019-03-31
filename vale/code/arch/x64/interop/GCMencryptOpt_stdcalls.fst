@@ -347,11 +347,9 @@ val gcm128_encrypt_opt_alloca:
 
       aesni_enabled /\ pclmulqdq_enabled /\
       is_aes_key_LE AES_128 (Ghost.reveal key) /\
-      (let db = get_downview keys_b in
-      length_aux keys_b;
-      let ub = UV.mk_buffer db Views.up_view128 in
-      Seq.equal (UV.as_seq h0 ub) (key_to_round_keys_LE AES_128 (Ghost.reveal key))) /\
-
+      (Seq.equal (B.as_seq h0 keys_b)
+         (seq_nat8_to_seq_uint8 (le_seq_quad32_to_bytes (key_to_round_keys_LE AES_128 (Ghost.reveal key))))) /\
+         
       le_bytes_to_quad32 (seq_uint8_to_seq_nat8 (Seq.slice (B.as_seq h0 hkeys_b) 0 16)) ==
         aes_encrypt_LE AES_128 (Ghost.reveal key) (Mkfour 0 0 0 0)
     )
@@ -517,6 +515,27 @@ let gcm128_encrypt_opt_alloca key plain_b plain_len auth_b auth_bytes iv_b
   out_b tag_b keys_b hkeys_b scratch_b inout_b abytes_b =
 
   let h0 = get() in
+
+  let lemma_uv_key () : Lemma
+    (let db = get_downview keys_b in
+      length_aux keys_b;
+      let ub = UV.mk_buffer db Views.up_view128 in
+      Seq.equal (UV.as_seq h0 ub) (key_to_round_keys_LE AES_128 (Ghost.reveal key)))
+    = length_aux keys_b;
+      let db = get_downview keys_b in
+      let ub = UV.mk_buffer db Views.up_view128 in
+      le_bytes_to_seq_quad32_to_bytes (key_to_round_keys_LE AES_128 (Ghost.reveal key));
+      assert (Seq.equal (le_bytes_to_seq_quad32 (seq_uint8_to_seq_nat8 (B.as_seq h0 keys_b)))
+         (key_to_round_keys_LE AES_128 (Ghost.reveal key)));   
+      calc (==) {
+        le_bytes_to_seq_quad32 (seq_uint8_to_seq_nat8 (B.as_seq h0 keys_b));
+        (==) { lemma_seq_nat8_le_seq_quad32_to_bytes_uint32 keys_b h0 }
+        le_bytes_to_seq_quad32 (seq_uint8_to_seq_nat8 (seq_nat8_to_seq_uint8 (le_seq_quad32_to_bytes (UV.as_seq h0 ub))));
+        (==) { le_bytes_to_seq_quad32_to_bytes (UV.as_seq h0 ub) }
+        UV.as_seq h0 ub;
+      }
+
+  in lemma_uv_key ();
 
   // Simplify the expression for the iv
   DV.length_eq (get_downview iv_b);
@@ -865,14 +884,6 @@ let gcm128_encrypt_opt_stdcall key plain_b plain_len auth_b auth_len iv_b out_b 
   B.blit auth_b auth_len' abytes_b 0ul (uint64_to_uint32 auth_len % 16ul);
 
   let h1 = get() in
-
-  // Ensures that the view on the keys buffer is the same after allocations
-  BufferViewHelpers.lemma_dv_equal Views.down_view8 keys_b h0 h1;
-  assert (let db = get_downview keys_b in
-      length_aux keys_b;
-      let ub = UV.mk_buffer db Views.up_view128 in
-      Seq.equal (UV.as_seq h0 ub) (UV.as_seq h1 ub));
-
 
   gcm128_encrypt_opt_alloca
     key

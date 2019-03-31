@@ -11,6 +11,7 @@ open Words_s
 open Words.Seq_s
 open AES_s
 open Interop.Base
+open Types_s
 
 unfold
 let uint8_p = B.buffer UInt8.t
@@ -45,12 +46,10 @@ val aes128_key_expansion_stdcall
       B.modifies (B.loc_buffer output_key_expansion_b) h0 h1 /\
 
       (let key = seq_nat8_to_seq_nat32_LE (seq_uint8_to_seq_nat8 (B.as_seq h0 input_key_b)) in
-      let db = get_downview output_key_expansion_b in
-      length_aux output_key_expansion_b;
-      let ub = UV.mk_buffer db Views.up_view128 in
-      Seq.equal (UV.as_seq h1 ub) (key_to_round_keys_LE AES_128 key)))
+      Seq.equal (B.as_seq h1 output_key_expansion_b)
+         (seq_nat8_to_seq_uint8 (le_seq_quad32_to_bytes (key_to_round_keys_LE AES_128 key)))))
 
-inline_for_extraction
+ inline_for_extraction
 val aes256_key_expansion_stdcall
   (input_key_b:uint8_p)
   (output_key_expansion_b:uint8_p)
@@ -68,7 +67,5 @@ val aes256_key_expansion_stdcall
       B.modifies (B.loc_buffer output_key_expansion_b) h0 h1 /\
 
       (let key = seq_nat8_to_seq_nat32_LE (seq_uint8_to_seq_nat8 (B.as_seq h0 input_key_b)) in
-      let db = get_downview output_key_expansion_b in
-      length_aux2 output_key_expansion_b;
-      let ub = UV.mk_buffer db Views.up_view128 in
-      Seq.equal (UV.as_seq h1 ub) (key_to_round_keys_LE AES_256 key)))
+      Seq.equal (B.as_seq h1 output_key_expansion_b)
+        (seq_nat8_to_seq_uint8 (le_seq_quad32_to_bytes (key_to_round_keys_LE AES_256 key)))))
