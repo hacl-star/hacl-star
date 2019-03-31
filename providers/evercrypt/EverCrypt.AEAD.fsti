@@ -126,7 +126,7 @@ val encrypt:
       MB.(all_live h0 [ buf (EK?.ek ek); buf iv; buf ad; buf plain; buf dst ]) /\
       (B.disjoint plain dst \/ plain == dst) /\
       B.disjoint iv dst /\
-      (B.disjoint plain ad \/ plain == ad) /\
+      B.disjoint plain ad /\
       B.disjoint ad dst)
     (ensures fun h0 r h1 ->
       match r with
