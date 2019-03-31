@@ -78,6 +78,8 @@ type expanded_key (a: alg) =
 /// Possible causes for a NULL pointer include:
 /// - unsupported algorithm
 /// - unavailable implementation on target platform
+(** @type: true
+*)
 val expand_in:
   #a:alg ->
   r:HS.rid ->
@@ -113,6 +115,8 @@ let _: squash (inversion error_code) = allow_inversion error_code
 /// - ``Success``: encryption was successfully performed
 /// - ``InvalidKey``: the function was passed a NULL expanded key (see above)
 /// ``Failure`` is currently unused but may be used in the future.
+(** @type: true
+*)
 val encrypt:
   #a:supported_alg ->
   ek:expanded_key a ->
@@ -147,6 +151,8 @@ val encrypt:
 /// - ``Success``: decryption was successfully performed
 /// - ``InvalidKey``: the function was passed a NULL expanded key (see above)
 /// - ``Failure``: cipher text could not be decrypted (e.g. tag mismatch)
+(** @type: true
+*)
 val decrypt:
   #a:supported_alg ->
   ek:expanded_key a ->

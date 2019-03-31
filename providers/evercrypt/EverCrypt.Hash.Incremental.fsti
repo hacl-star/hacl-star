@@ -93,6 +93,8 @@ let hashes (#a: Hash.alg) (h: HS.mem) (s: state a) (b: bytes) =
 noextract
 let bytes = S.seq UInt8.t
 
+(** @type: true
+*)
 val create_in (a: Hash.alg) (r: HS.rid): ST (state a)
   (requires (fun _ ->
     HyperStack.ST.is_eternal_region r))
@@ -134,6 +136,8 @@ let update_post
   State?.hash_state s == State?.hash_state s' /\
   State?.buf s == State?.buf s'
 
+(** @type: true
+*)
 val update:
   a:Hash.alg ->
   s:state a ->
@@ -164,4 +168,6 @@ let finish_st (a: Hash.alg) =
       B.(modifies (loc_union (loc_buffer dst) (footprint s h0)) h0 h1) /\
       S.equal (B.as_seq h1 dst) (Spec.Hash.hash a (G.reveal prev)))
 
+(** @type: true
+*)
 val finish: a:Hash.alg -> finish_st a

@@ -11,6 +11,8 @@ open FStar.Mul
 
 module Spec = Spec.Chacha20Poly1305
 
+(** @type: true
+*)
 val aead_encrypt:
   k:lbuffer uint8 32ul -> // key
   n:lbuffer uint8 12ul -> // nonce
@@ -33,6 +35,8 @@ val aead_encrypt:
         (Seq.concat (as_seq h1 cipher) (as_seq h1 tag))
         (Spec.aead_encrypt (as_seq h0 k) (as_seq h0 n) (as_seq h0 m) (as_seq h0 aad))))
 
+(** @type: true
+*)
 val aead_decrypt:
   k:lbuffer uint8 32ul -> // key
   n:lbuffer uint8 12ul -> // nonce
