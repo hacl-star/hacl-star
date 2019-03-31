@@ -226,6 +226,9 @@ inline_for_extraction
 val size_to_uint32: s:size_t -> u:uint32{u == u32 (uint_v s)}
 
 inline_for_extraction
+val size_to_uint64: s:size_t -> u:uint64{u == u64 (uint_v s)}
+
+inline_for_extraction
 val byte_to_uint8: s:byte_t -> u:uint8{u == u8 (byte_v s)}
 
 inline_for_extraction
