@@ -156,16 +156,19 @@ let encrypt #a ek iv ad ad_len plain plain_len dst =
 
       in lemma_iv_eq ();
 
+      assume (UInt32.v plain_len > 0);
+
       assume (
         let k = G.reveal (EK?.kv ek) in
         let k_nat = Words.Seq_s.seq_uint8_to_seq_nat8 k in
         let k_w = Words.Seq_s.seq_nat8_to_seq_nat32_LE k_nat in      
         Seq.slice (B.as_seq h0 hkeys_b) 0 16 == 
-          Words.Seq_s.seq_nat8_to_seq_uint8 (Types_s.le_quad32_to_bytes (AES_s.aes_encrypt_LE AES_s.AES_128 k_w (Words_s.Mkfour 0 0 0 0))));
+          Words.Seq_s.seq_nat8_to_seq_uint8 (Types_s.le_quad32_to_bytes (Types_s.reverse_bytes_quad32 (AES_s.aes_encrypt_LE AES_s.AES_128 k_w (Words_s.Mkfour 0 0 0 0)))));
 
       // These asserts prove that 4096 * (len {plain, ad}) are smaller than pow2_32
-      assert (max_length a = pow2 20 - 1);
+      assert (max_length a = pow2 20 - 1 - 16);
       assert_norm (4096 * (pow2 20 - 1) < Words_s.pow2_32);
+      assert_norm (4096 * (pow2 20 - 1 - 16) < Words_s.pow2_32);
 
       GCMencryptOpt_stdcalls.gcm128_encrypt_opt_stdcall
         (let k = G.reveal (EK?.kv ek) in
@@ -196,8 +199,8 @@ let encrypt #a ek iv ad ad_len plain plain_len dst =
         // data", potato, potato
         let ad_nat = Words.Seq_s.seq_uint8_to_seq_nat8 (B.as_seq h0 ad) in
         let plain_nat = Words.Seq_s.seq_uint8_to_seq_nat8 (B.as_seq h0 plain) in
-        assert (max_length a = pow2 20 - 1);
-        assert_norm (4096 * (pow2 20 - 1) < Words_s.pow2_32);
+        assert (max_length a = pow2 20 - 1 - 16);
+        assert_norm (4096 * (pow2 20 - 1 - 16) < Words_s.pow2_32);
         let cipher_nat, tag_nat =
           GCM_s.gcm_encrypt_LE (vale_alg_of_alg a) kv_nat iv_nat plain_nat ad_nat
         in

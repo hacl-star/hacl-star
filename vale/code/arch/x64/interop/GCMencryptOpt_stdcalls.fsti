@@ -101,7 +101,8 @@ val gcm128_encrypt_opt_stdcall:
       B.length tag_b == 16 /\
       B.length keys_b = 176 /\
 
-      4096 * (UInt64.v plain_len) < pow2_32 /\
+      0 < (UInt64.v plain_len) /\
+      4096 * (UInt64.v plain_len + 16) < pow2_32 /\
       4096 * (UInt64.v auth_len) < pow2_32 /\
 
       aesni_enabled /\ pclmulqdq_enabled /\
@@ -109,7 +110,7 @@ val gcm128_encrypt_opt_stdcall:
       (Seq.equal (B.as_seq h0 keys_b)
         (seq_nat8_to_seq_uint8 (le_seq_quad32_to_bytes (key_to_round_keys_LE AES_128 (Ghost.reveal key))))) /\
       Seq.slice (B.as_seq h0 hkeys_b) 0 16 == 
-        (seq_nat8_to_seq_uint8 (le_quad32_to_bytes (aes_encrypt_LE AES_128 (Ghost.reveal key) (Mkfour 0 0 0 0))))
+        (seq_nat8_to_seq_uint8 (le_quad32_to_bytes (reverse_bytes_quad32 (aes_encrypt_LE AES_128 (Ghost.reveal key) (Mkfour 0 0 0 0)))))
     )
     (ensures fun h0 _ h1 ->
       B.modifies (B.loc_union (B.loc_buffer tag_b)

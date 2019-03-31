@@ -18,6 +18,10 @@ open BufferViewHelpers
 
 let math_aux (n:nat) : Lemma (n * 1 == n) = ()
 
+let length_div (b:uint8_p) : Lemma
+  (requires B.length b = 16)
+  (ensures DV.length (get_downview b) / 16 = 1)
+  = DV.length_eq (get_downview b)
 
 inline_for_extraction
 val gcm128_encrypt_opt':
@@ -109,8 +113,9 @@ val gcm128_encrypt_opt':
       B.length tag_b == 16 /\
       B.length keys_b = 176 /\
 
+      0 < (UInt64.v plain_num) /\
       8 * (UInt64.v plain_num) < pow2_32 /\
-      4096 * 16 * (UInt64.v len128x6) < pow2_32 /\
+      4096 * (UInt64.v len128x6) * 16 < pow2_32 /\
       4096 * (UInt64.v len128_num) < pow2_32 /\
       4096 * (UInt64.v auth_bytes) < pow2_32 /\
 
@@ -118,10 +123,12 @@ val gcm128_encrypt_opt':
       (UInt64.v len128x6 > 0 ==> UInt64.v len128x6 >= 18) /\
       12 + UInt64.v len128x6 + 6 < pow2_32 /\
 
+      4096 * (UInt64.v len128x6 + UInt64.v len128_num + 1) * 16 < pow2_32 /\
+
       UInt64.v len128x6 * (128/8) + UInt64.v len128_num * (128/8) <= UInt64.v plain_num /\
-      UInt64.v plain_num <= UInt64.v len128x6 * (128/8) + UInt64.v len128_num * (128/8) + 128/8 /\
+      UInt64.v plain_num < UInt64.v len128x6 * (128/8) + UInt64.v len128_num * (128/8) + 128/8 /\
       UInt64.v auth_num * (128/8) <= UInt64.v auth_bytes /\
-      UInt64.v auth_bytes <= UInt64.v auth_num * (128/8) + 128/8 /\
+      UInt64.v auth_bytes < UInt64.v auth_num * (128/8) + 128/8 /\
 
       aesni_enabled /\ pclmulqdq_enabled /\
       is_aes_key_LE AES_128 (Ghost.reveal key) /\
@@ -132,7 +139,7 @@ val gcm128_encrypt_opt':
 
       (DV.length_eq (get_downview hkeys_b);
       length_aux5 hkeys_b;
-      low_buffer_read TUInt8 TUInt128 h0 hkeys_b 0 == aes_encrypt_LE AES_128 (Ghost.reveal key) (Mkfour 0 0 0 0))
+      low_buffer_read TUInt8 TUInt128 h0 hkeys_b 0 == reverse_bytes_quad32 (aes_encrypt_LE AES_128 (Ghost.reveal key) (Mkfour 0 0 0 0)))
     )
     (ensures fun h0 _ h1 ->
       B.modifies (B.loc_union (B.loc_buffer tag_b)
@@ -159,20 +166,16 @@ val gcm128_encrypt_opt':
        length_aux3 out128_b (UInt64.v len128_num);
        let out128_u = UV.mk_buffer out128_d Views.up_view128 in       
        length_aux4 iv_b;
-       DV.length_eq (get_downview iv_b);
+       length_div iv_b;
        let iv_LE = low_buffer_read TUInt8 TUInt128 h0 iv_b 0 in
-       let iv = be_quad32_to_bytes (reverse_bytes_quad32 iv_LE) in
+       let iv_BE = reverse_bytes_quad32 iv_LE in
        let plain_in =
-         if (UInt64.v plain_num > (UInt64.v len128x6 + UInt64.v len128_num) * 128/8) then
            Seq.append (Seq.append (UV.as_seq h0 in128x6_u) (UV.as_seq h0 in128_u))
                       (UV.as_seq h0 inout_u)
-         else Seq.append (UV.as_seq h0 in128x6_u) (UV.as_seq h0 in128_u)
        in let plain_bytes = slice_work_around (le_seq_quad32_to_bytes plain_in) (UInt64.v plain_num)
        in let cipher_out =
-         if (UInt64.v plain_num > (UInt64.v len128x6 + UInt64.v len128_num) * 128/8) then
            Seq.append (Seq.append (UV.as_seq h1 out128x6_u) (UV.as_seq h1 out128_u))
                       (UV.as_seq h1 inout_u)
-         else Seq.append (UV.as_seq h1 out128x6_u) (UV.as_seq h1 out128_u)
        in let cipher_bytes = slice_work_around (le_seq_quad32_to_bytes cipher_out) (UInt64.v plain_num)
        in let auth_d = get_downview auth_b in
        length_aux3 auth_b (UInt64.v auth_num);
@@ -180,17 +183,14 @@ val gcm128_encrypt_opt':
        let abytes_d = get_downview abytes_b in
        length_aux3 abytes_b 1;      
        let abytes_u = UV.mk_buffer abytes_d Views.up_view128 in        
-       let auth_in =
-         if UInt64.v auth_bytes > UInt64.v auth_num * 128 / 8 then
-           Seq.append (UV.as_seq h0 auth_u) (UV.as_seq h0 abytes_u)
-         else UV.as_seq h0 auth_u
-       in
+       let auth_in = Seq.append (UV.as_seq h0 auth_u) (UV.as_seq h0 abytes_u) in
       let auth_bytes = slice_work_around (le_seq_quad32_to_bytes auth_in) (UInt64.v auth_bytes) in
       4096 * (Seq.length plain_bytes) < pow2_32 /\
       4096 * (Seq.length auth_bytes) < pow2_32 /\
-      (let cipher, tag = gcm_encrypt_LE AES_128 (seq_nat32_to_seq_nat8_LE (Ghost.reveal key)) iv plain_bytes auth_bytes in
-      Seq.equal cipher cipher_bytes /\
-      (DV.length_eq (get_downview tag_b);
+      is_aes_key AES_128 (seq_nat32_to_seq_nat8_LE (Ghost.reveal key)) /\
+      (let cipher, tag = gcm_encrypt_LE AES_128 (seq_nat32_to_seq_nat8_LE (Ghost.reveal key)) (be_quad32_to_bytes iv_BE) plain_bytes auth_bytes in
+      cipher == cipher_bytes /\
+      (length_div tag_b;
       le_quad32_to_bytes (low_buffer_read TUInt8 TUInt128 h1 tag_b 0) == tag
       ))))
     )
@@ -342,7 +342,8 @@ val gcm128_encrypt_opt_alloca:
       B.length inout_b = 16 /\
       B.length abytes_b = 16 /\
 
-      4096 * (UInt64.v plain_len) < pow2_32 /\
+      0 < (UInt64.v plain_len) /\
+      4096 * (UInt64.v plain_len + 16) < pow2_32 /\
       4096 * (UInt64.v auth_len) < pow2_32 /\
 
       aesni_enabled /\ pclmulqdq_enabled /\
@@ -351,7 +352,7 @@ val gcm128_encrypt_opt_alloca:
          (seq_nat8_to_seq_uint8 (le_seq_quad32_to_bytes (key_to_round_keys_LE AES_128 (Ghost.reveal key))))) /\
          
       Seq.slice (B.as_seq h0 hkeys_b) 0 16 ==
-        (seq_nat8_to_seq_uint8 (le_quad32_to_bytes (aes_encrypt_LE AES_128 (Ghost.reveal key) (Mkfour 0 0 0 0))))
+        (seq_nat8_to_seq_uint8 (le_quad32_to_bytes (reverse_bytes_quad32 (aes_encrypt_LE AES_128 (Ghost.reveal key) (Mkfour 0 0 0 0)))))
     )
     (ensures fun h0 _ h1 ->
       B.modifies (B.loc_union (B.loc_buffer tag_b)
@@ -373,27 +374,17 @@ val gcm128_encrypt_opt_alloca:
        length_aux4 iv_b;
        DV.length_eq (get_downview iv_b);
        let iv = seq_uint8_to_seq_nat8 (B.as_seq h0 iv_b) in
-       let plain_in =
-         if UInt64.v plain_len > B.length plain_b then
-           Seq.append (UV.as_seq h0 plain_u) (UV.as_seq h0 inout_u)
-         else UV.as_seq h0 plain_u
-       in let plain_bytes = slice_work_around (le_seq_quad32_to_bytes plain_in) (UInt64.v plain_len)
-       in let cipher_out =
-         if UInt64.v plain_len > B.length plain_b then
-           Seq.append (UV.as_seq h1 out_u) (UV.as_seq h1 inout_u)
-         else UV.as_seq h1 out_u
-       in let cipher_bytes = slice_work_around (le_seq_quad32_to_bytes cipher_out) (UInt64.v plain_len)
-       in let auth_d = get_downview auth_b in
+       let plain_in = Seq.append (UV.as_seq h0 plain_u) (UV.as_seq h0 inout_u) in
+       let plain_bytes = slice_work_around (le_seq_quad32_to_bytes plain_in) (UInt64.v plain_len) in
+       let cipher_out = Seq.append (UV.as_seq h1 out_u) (UV.as_seq h1 inout_u) in
+       let cipher_bytes = slice_work_around (le_seq_quad32_to_bytes cipher_out) (UInt64.v plain_len) in
+       let auth_d = get_downview auth_b in
        length_aux3 auth_b (UInt64.v auth_len / 16);
        let auth_u = UV.mk_buffer auth_d Views.up_view128 in
        let abytes_d = get_downview abytes_b in
        length_aux3 abytes_b 1;      
        let abytes_u = UV.mk_buffer abytes_d Views.up_view128 in        
-       let auth_in =
-         if UInt64.v auth_len > B.length auth_b then
-           Seq.append (UV.as_seq h0 auth_u) (UV.as_seq h0 abytes_u)
-         else UV.as_seq h0 auth_u
-       in
+       let auth_in = Seq.append (UV.as_seq h0 auth_u) (UV.as_seq h0 abytes_u) in
       let auth_bytes = slice_work_around (le_seq_quad32_to_bytes auth_in) (UInt64.v auth_len) in
       4096 * (Seq.length plain_bytes) < pow2_32 /\
       4096 * (Seq.length auth_bytes) < pow2_32 /\
@@ -538,7 +529,7 @@ let gcm128_encrypt_opt_alloca key plain_b plain_len auth_b auth_bytes iv_b
   in lemma_uv_key ();
 
   // Simplify the precondition for hkeys_b
-  le_bytes_to_quad32_to_bytes (aes_encrypt_LE AES_128 (Ghost.reveal key) (Mkfour 0 0 0 0));
+  le_bytes_to_quad32_to_bytes (reverse_bytes_quad32 (aes_encrypt_LE AES_128 (Ghost.reveal key) (Mkfour 0 0 0 0)));
 
   // Simplify the expression for the iv
   DV.length_eq (get_downview iv_b);
@@ -742,11 +733,8 @@ let lemma_slice_uv_extra (b:uint8_p) (b_start:uint8_p) (b_extra:uint8_p) (h:HS.m
     let b_extra_d = get_downview b_extra in
     length_aux6 b_extra;
     let b_extra_u = UV.mk_buffer b_extra_d Views.up_view128 in
-    let suv =
-      if B.length b > B.length b_start then
-        Seq.append (UV.as_seq h b_start_u) (UV.as_seq h b_extra_u)
-      else UV.as_seq h b_start_u
-    in let sf = slice_work_around (le_seq_quad32_to_bytes suv) (B.length b) in
+    let suv = Seq.append (UV.as_seq h b_start_u) (UV.as_seq h b_extra_u) in
+    let sf = slice_work_around (le_seq_quad32_to_bytes suv) (B.length b) in
     Seq.equal sf (seq_uint8_to_seq_nat8 (B.as_seq h b))
  ))
  =
@@ -756,13 +744,10 @@ let lemma_slice_uv_extra (b:uint8_p) (b_start:uint8_p) (b_extra:uint8_p) (h:HS.m
  let b_extra_d = get_downview b_extra in
  length_aux6 b_extra;
  let b_extra_u = UV.mk_buffer b_extra_d Views.up_view128 in
- let suv =
-   if B.length b > B.length b_start then
-     Seq.append (UV.as_seq h b_start_u) (UV.as_seq h b_extra_u)
-   else UV.as_seq h b_start_u
- in let sf = slice_work_around (le_seq_quad32_to_bytes suv) (B.length b) in
+ let suv = Seq.append (UV.as_seq h b_start_u) (UV.as_seq h b_extra_u) in
+ let sf = slice_work_around (le_seq_quad32_to_bytes suv) (B.length b) in
  let b_f = seq_uint8_to_seq_nat8 (B.as_seq h b) in
- if B.length b > B.length b_start then (
+ // if B.length b > B.length b_start then (
    calc (==) {
      sf;
      (==) { DV.length_eq b_start_d; lemma_seq_nat8_le_seq_quad32_to_bytes_uint32 b_start h;
@@ -799,18 +784,18 @@ let lemma_slice_uv_extra (b:uint8_p) (b_start:uint8_p) (b_extra:uint8_p) (h:HS.m
      }
      b_f;
    }
- ) else (
-   calc (==) {
-     sf;
-     (==) { }
-     slice_work_around (le_seq_quad32_to_bytes (UV.as_seq h b_start_u)) (B.length b);
-     (==) {    DV.length_eq (get_downview b_start);
-               gcm_simplify1 b_start h (B.length b) }
-     seq_uint8_to_seq_nat8 (B.as_seq h b_start);
-     (==) { }
-     b_f;
-   }
- )
+ // ) else (
+ //   calc (==) {
+ //     sf;
+ //     (==) { }
+ //     slice_work_around (le_seq_quad32_to_bytes (UV.as_seq h b_start_u)) (B.length b);
+ //     (==) {    DV.length_eq (get_downview b_start);
+ //               gcm_simplify1 b_start h (B.length b) }
+ //     seq_uint8_to_seq_nat8 (B.as_seq h b_start);
+ //     (==) { }
+ //     b_f;
+ //   }
+ // )
 
 let lemma_slice_sub (b:uint8_p) (b_sub:uint8_p) (b_extra:uint8_p) (h:HS.mem) : Lemma
   (requires B.length b_extra = 16 /\ B.length b_sub = B.length b / 16 * 16 /\
@@ -923,33 +908,23 @@ let gcm128_encrypt_opt_stdcall key plain_b plain_len auth_b auth_len iv_b out_b 
        length_aux4 iv_b;
        DV.length_eq (get_downview iv_b);
        let iv = seq_uint8_to_seq_nat8 (B.as_seq h1 iv_b) in
-       let plain_in =
-         if UInt64.v plain_len > B.length plain_b' then
-           Seq.append (UV.as_seq h1 plain_u) (UV.as_seq h1 inout_u)
-         else UV.as_seq h1 plain_u
-       in let plain_bytes = slice_work_around (le_seq_quad32_to_bytes plain_in) (UInt64.v plain_len)
-       in let cipher_out =
-         if UInt64.v plain_len > B.length plain_b' then
-           Seq.append (UV.as_seq h_post out_u) (UV.as_seq h_post inout_u)
-         else UV.as_seq h_post out_u
-       in let cipher_bytes = slice_work_around (le_seq_quad32_to_bytes cipher_out) (UInt64.v plain_len)
-       in let auth_d = get_downview auth_b' in
+       let plain_in = Seq.append (UV.as_seq h1 plain_u) (UV.as_seq h1 inout_u) in
+       let plain_bytes = slice_work_around (le_seq_quad32_to_bytes plain_in) (UInt64.v plain_len) in
+       let cipher_out = Seq.append (UV.as_seq h_post out_u) (UV.as_seq h_post inout_u) in
+       let cipher_bytes = slice_work_around (le_seq_quad32_to_bytes cipher_out) (UInt64.v plain_len) in
+       let auth_d = get_downview auth_b' in
        length_aux3 auth_b' (UInt64.v auth_len / 16);
        let auth_u = UV.mk_buffer auth_d Views.up_view128 in
        let abytes_d = get_downview abytes_b in
        length_aux3 abytes_b 1;      
        let abytes_u = UV.mk_buffer abytes_d Views.up_view128 in        
-       let auth_in =
-         if UInt64.v auth_len > B.length auth_b' then
-           Seq.append (UV.as_seq h1 auth_u) (UV.as_seq h1 abytes_u)
-         else UV.as_seq h1 auth_u
-       in
-      let auth_bytes = slice_work_around (le_seq_quad32_to_bytes auth_in) (UInt64.v auth_len) in
-      4096 * (Seq.length plain_bytes) < pow2_32 /\
-      4096 * (Seq.length auth_bytes) < pow2_32 /\
-      (let cipher, tag = gcm_encrypt_LE AES_128 (seq_nat32_to_seq_nat8_LE (Ghost.reveal key)) iv plain_bytes auth_bytes in
-      Seq.equal cipher cipher_bytes /\
-      Seq.equal (seq_uint8_to_seq_nat8 (B.as_seq h_post tag_b)) tag
+       let auth_in = Seq.append (UV.as_seq h1 auth_u) (UV.as_seq h1 abytes_u) in
+       let auth_bytes = slice_work_around (le_seq_quad32_to_bytes auth_in) (UInt64.v auth_len) in
+       4096 * (Seq.length plain_bytes) < pow2_32 /\
+       4096 * (Seq.length auth_bytes) < pow2_32 /\
+       (let cipher, tag = gcm_encrypt_LE AES_128 (seq_nat32_to_seq_nat8_LE (Ghost.reveal key)) iv plain_bytes auth_bytes in
+       Seq.equal cipher cipher_bytes /\
+       Seq.equal (seq_uint8_to_seq_nat8 (B.as_seq h_post tag_b)) tag
   ));
 
   lemma_identical_uv out_b' h_post h2;

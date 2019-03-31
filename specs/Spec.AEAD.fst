@@ -70,8 +70,8 @@ let encrypt #a kv iv ad plain =
       // data", potato, potato
       let ad_nat = Words.Seq_s.seq_uint8_to_seq_nat8 ad in
       let plain_nat = Words.Seq_s.seq_uint8_to_seq_nat8 plain in
-      assert (max_length a = pow2 20 - 1);
-      assert_norm (4096 * (pow2 20 - 1) < Words_s.pow2_32);
+      assert (max_length a = pow2 20 - 1 - 16);
+      assert_norm (4096 * (pow2 20 - 1 - 16) < Words_s.pow2_32);
       let cipher_nat, tag_nat =
         GCM_s.gcm_encrypt_LE (vale_alg_of_alg a) kv_nat iv_nat plain_nat ad_nat
       in
@@ -105,8 +105,8 @@ let decrypt #a kv iv ad cipher =
       Spec.Chacha20Poly1305.aead_decrypt kv iv cipher tag ad
 
   | AES128_GCM | AES256_GCM ->
-      assert (max_length a = pow2 20 - 1);
-      assert_norm (4096 * (pow2 20 - 1) < Words_s.pow2_32);
+      assert (max_length a = pow2 20 - 1 - 16);
+      assert_norm (4096 * (pow2 20 - 1 - 16) < Words_s.pow2_32);
       let kv_nat = Words.Seq_s.seq_uint8_to_seq_nat8 kv in
       let iv_nat = Words.Seq_s.seq_uint8_to_seq_nat8 iv in
       let iv_nat = S.append iv_nat (S.create 4 0) in
