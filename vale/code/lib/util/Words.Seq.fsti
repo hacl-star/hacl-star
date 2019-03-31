@@ -66,6 +66,10 @@ val seq_uint8_to_seq_nat8_to_seq_uint8 (x:seq nat8) :
   Lemma (seq_uint8_to_seq_nat8 (seq_nat8_to_seq_uint8 x) == x)
   [SMTPat (seq_uint8_to_seq_nat8 (seq_nat8_to_seq_uint8 x))]
 
+val seq_nat8_to_seq_uint8_injective (b b':seq nat8) : Lemma
+  (requires equal (seq_nat8_to_seq_uint8 b) (seq_nat8_to_seq_uint8 b'))
+  (ensures b == b')
+
 val seq_four_to_seq_LE_injective: (a:eqtype) ->
   Lemma (forall (x x':seq (four a)). seq_four_to_seq_LE x == seq_four_to_seq_LE x' ==> x == x')
 

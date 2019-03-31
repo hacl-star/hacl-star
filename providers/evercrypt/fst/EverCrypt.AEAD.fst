@@ -42,7 +42,11 @@ let expand_in #a r k =
         let keys_b = B.sub ek' 0ul 176ul in
         let hkeys_b = B.sub ek' 176ul 160ul in
         AES_stdcalls.aes128_key_expansion_stdcall k keys_b;
-        AEShash_stdcalls.aes128_keyhash_init_stdcall k hkeys_b;
+        AEShash_stdcalls.aes128_keyhash_init_stdcall
+          (let k = G.reveal kv in
+          let k_nat = Words.Seq_s.seq_uint8_to_seq_nat8 k in
+          let k_w = Words.Seq_s.seq_nat8_to_seq_nat32_LE k_nat in G.hide k_w)
+          keys_b hkeys_b;
         let h1 = ST.get() in
         MB.blit ek' 0ul ek 0ul 336ul;
         pop_frame();
@@ -70,7 +74,11 @@ let expand_in #a r k =
         let keys_b = B.sub ek' 0ul 240ul in
         let hkeys_b = B.sub ek' 240ul 160ul in
         AES_stdcalls.aes256_key_expansion_stdcall k keys_b;
-        AEShash_stdcalls.aes256_keyhash_init_stdcall k hkeys_b;
+        AEShash_stdcalls.aes256_keyhash_init_stdcall     
+          (let k = G.reveal kv in
+          let k_nat = Words.Seq_s.seq_uint8_to_seq_nat8 k in
+          let k_w = Words.Seq_s.seq_nat8_to_seq_nat32_LE k_nat in G.hide k_w)
+          keys_b hkeys_b;
         let h1 = ST.get() in
         MB.blit ek' 0ul ek 0ul 400ul;
         pop_frame();

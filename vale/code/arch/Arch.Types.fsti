@@ -181,6 +181,10 @@ val le_quad32_to_bytes_injective: unit ->
 val le_quad32_to_bytes_injective_specific (b b':quad32) :
   Lemma (le_quad32_to_bytes b == le_quad32_to_bytes b' ==> b == b')
 
+val le_seq_quad32_to_bytes_injective (b b':Seq.seq quad32) : Lemma
+  (requires Seq.equal (le_seq_quad32_to_bytes b) (le_seq_quad32_to_bytes b'))
+  (ensures b == b')
+
 val seq_to_four_LE_is_seq_to_seq_four_LE (#a:Type) (s:seq4 a) : Lemma
   (create 1 (seq_to_four_LE s) == seq_to_seq_four_LE s)
 

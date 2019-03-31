@@ -4,6 +4,8 @@ include "../../../arch/x64/X64.Vale.InsVector.vaf"
 include "../../../arch/x64/X64.Vale.InsAes.vaf"
 include "X64.PolyOps.vaf"
 include "X64.GF128_Mul.vaf"
+include "X64.AES.vaf"
+include{:/*TODO*/fstar}{:open} "FStar.Seq.Base"
 include{:fstar}{:open} "Types_s"
 include{:fstar}{:open} "Arch.Types"
 include{:fstar}{:open} "Math.Poly2_s"
@@ -31,6 +33,7 @@ module GHash = GHash
 open Words_s
 open Words.Four_s
 open Types_s
+open FStar.Seq
 open Arch.Types
 open Math.Poly2_s
 open Math.Poly2
@@ -42,6 +45,7 @@ open GF128
 open GHash
 open AES_s
 open AES256_helpers
+open X64.AES
 open X64.Machine_s
 open X64.Memory
 open X64.Vale.State
@@ -207,43 +211,42 @@ procedure{:quick} Gf128_powers(
 procedure{:quick}{:public}{:exportSpecs} Keyhash_init(
     inline win:bool,
     inline alg:algorithm,
-    ghost keys_b:buffer128,
+    ghost key:seq(nat32),
+    ghost roundkeys_b:buffer128,
     ghost hkeys_b:buffer128)
     reads
         rcx; rsi; rdi; memTaint;
     modifies
-        rdx;
-        mem; xmm1; xmm2; xmm3; xmm4; efl;
+        rdx; r8;
+        mem; xmm0; xmm1; xmm2; xmm3; xmm4; efl;
     lets
-        key_ptr := if win then rcx else rdi;
+        round_ptr := if win then rcx else rdi;
         hkey_ptr := if win then rdx else rsi;
-        key :=
-            if alg = AES_128 then quad32_to_seq(buffer128_read(keys_b, 0, mem))
-            else make_AES256_key(buffer128_read(keys_b, 0, mem), buffer128_read(keys_b, 1, mem));
     requires/ensures
         aesni_enabled;
         alg = AES_128 || alg = AES_256;
-        buffers_disjoint128(keys_b, hkeys_b);
-        validSrcAddrs128(mem, key_ptr, keys_b, if alg = AES_128 then 1 else 2, memTaint, Secret);
-        validDstAddrs128(mem, hkey_ptr, hkeys_b, 10, memTaint, Secret);
+        buffers_disjoint128(roundkeys_b, hkeys_b);
+        is_aes_key_LE(alg, key);
+        buffer128_as_seq(mem, roundkeys_b) == key_to_round_keys_LE(alg, key);
+        validSrcAddrs128(mem, round_ptr, roundkeys_b, nr(alg) + 1, memTaint, Secret);
+        validDstAddrs128(mem, hkey_ptr, hkeys_b, 1, memTaint, Secret);
     ensures
         modifies_buffer128(hkeys_b, old(mem), mem);
-        buffer128_read(hkeys_b, 2, mem) == reverse_bytes_quad32(aes_encrypt_LE(alg, key, Mkfour(0, 0, 0, 0)));
-        forall j :: 0 <= j < 2 ==>
-               old(buffer128_read(hkeys_b, j, mem)) == buffer128_read(hkeys_b, j, mem);
-        forall j :: 3 <= j < 10 ==>
-               old(buffer128_read(hkeys_b, j, mem)) == buffer128_read(hkeys_b, j, mem);
-
+        buffer128_read(hkeys_b, 0, mem) == reverse_bytes_quad32(aes_encrypt_LE(alg, key, Mkfour(0, 0, 0, 0)));
 {
 
-   assume(false);
-
-/*
-   InitPshufbMask(xmm8, r12);
+   InitPshufbMask(xmm4, r8);
    ZeroXmm(xmm0);
-   AESEncryptBlock(alg, xmm0, key, round_keys, keys_b); // h = xmm0 = aes_encrypt_LE alg key (Mkfour 0 0 0 0) in
-   Pshufb(xmm0, xmm8);   // reverse h, since the hashing code assumes the reversal has already happened
-   Store128_buffer(hkey_ptr, xmm0, 32, hkeys_b, 2);
-*/
-
+   inline if (win) {
+     Mov64(r8, rcx);
+   } else {
+     Mov64(r8, rdi);
+   }
+   AESEncryptBlock(alg, xmm0, key, old(buffer128_as_seq(mem, roundkeys_b)), roundkeys_b); // h = xmm0 = aes_encrypt_LE alg key (Mkfour 0 0 0 0) in
+   Pshufb(xmm0, xmm4);   // reverse h, since the hashing code assumes the reversal has already happened
+   inline if (win) {
+     Store128_buffer(rdx, xmm0, 0, Secret, hkeys_b, 0);
+   } else {
+     Store128_buffer(rsi, xmm0, 0, Secret, hkeys_b, 0);
+   }
 }

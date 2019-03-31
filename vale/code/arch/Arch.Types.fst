@@ -462,6 +462,14 @@ let le_quad32_to_bytes_injective_specific (b b':quad32) :
   =
   le_quad32_to_bytes_injective()
 
+let le_seq_quad32_to_bytes_injective (b b':seq quad32) =
+  Opaque_s.reveal_opaque le_seq_quad32_to_bytes_def;
+  seq_four_to_seq_LE_injective nat8; 
+  nat_to_four_8_injective();
+  seq_map_injective (nat_to_four 8) (seq_four_to_seq_LE b) (seq_four_to_seq_LE b');
+  seq_four_to_seq_LE_injective_specific b b';
+  assert (equal b b')
+
 (*
 
 let seq_to_four_LE (#a:Type) (s:seq4 a) : four a =
