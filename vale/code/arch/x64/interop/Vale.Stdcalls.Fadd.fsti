@@ -204,4 +204,4 @@ let lowstar_fadd_t =
 val add1 : normal lowstar_add1_t
 
 [@ (CCConv "stdcall") ]
-val fadd : normal lowstar_fadd_t
+val fadd_ : normal lowstar_fadd_t

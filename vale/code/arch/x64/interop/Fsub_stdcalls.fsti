@@ -9,7 +9,7 @@ open FStar.Mul
 open Fadd_stdcalls
 
 inline_for_extraction
-val fsub_
+val fsub
   (out:u256)
   (f1:u256)
   (f2:u256)
