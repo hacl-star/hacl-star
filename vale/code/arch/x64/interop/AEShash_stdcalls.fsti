@@ -29,7 +29,7 @@ val aes128_keyhash_init_stdcall:
       B.live h0 roundkeys_b /\ B.live h0 hkeys_b /\
 
       B.length roundkeys_b = 176 /\
-      B.length hkeys_b = 160 /\
+      B.length hkeys_b = 128 /\
 
       is_aes_key_LE AES_128 (Ghost.reveal key) /\
       (Seq.equal (B.as_seq h0 roundkeys_b)
@@ -54,7 +54,7 @@ val aes256_keyhash_init_stdcall:
       B.live h0 roundkeys_b /\ B.live h0 hkeys_b /\
 
       B.length roundkeys_b = 240 /\
-      B.length hkeys_b = 160 /\
+      B.length hkeys_b = 128 /\
 
       is_aes_key_LE AES_256 (Ghost.reveal key) /\
       (Seq.equal (B.as_seq h0 roundkeys_b)

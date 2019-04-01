@@ -52,7 +52,7 @@ let length_aux4 (b:uint8_p) : Lemma
     DV.length_eq db
 
 let length_aux5 (b:uint8_p) : Lemma
-  (requires B.length b = 160)
+  (requires B.length b = 128)
   (ensures DV.length (get_downview b) % 16 = 0) =
     let db = get_downview b in
     DV.length_eq db
@@ -98,7 +98,7 @@ val gcm128_encrypt_opt_stdcall:
       B.length iv_b = 16 /\
       B.length plain_b = UInt64.v plain_len /\
       B.length out_b = B.length plain_b /\
-      B.length hkeys_b = 160 /\
+      B.length hkeys_b = 128 /\
       B.length tag_b == 16 /\
       B.length keys_b = 176 /\
 

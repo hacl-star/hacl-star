@@ -21,8 +21,8 @@ friend Spec.AEAD
 let ekv_len (a: supported_alg): Tot (x:UInt32.t { UInt32.v x = ekv_length a }) =
   match a with
   | CHACHA20_POLY1305 -> 32ul
-  | AES128_GCM -> 176ul + 160ul
-  | AES256_GCM -> 240ul + 160ul
+  | AES128_GCM -> 176ul + 128ul
+  | AES256_GCM -> 240ul + 128ul
 
 let expand_in #a r k =
   match a with
@@ -37,10 +37,10 @@ let expand_in #a r k =
         in
         push_frame();
         let ek' =
-          B.alloca #UInt8.t 0uy 336ul
+          B.alloca #UInt8.t 0uy 304ul
         in
         let keys_b = B.sub ek' 0ul 176ul in
-        let hkeys_b = B.sub ek' 176ul 160ul in
+        let hkeys_b = B.sub ek' 176ul 128ul in
         AES_stdcalls.aes128_key_expansion_stdcall k keys_b;
         AEShash_stdcalls.aes128_keyhash_init_stdcall
           (let k = G.reveal kv in
@@ -49,7 +49,7 @@ let expand_in #a r k =
           keys_b hkeys_b;
         let h1 = ST.get() in
         assume (Seq.equal (B.as_seq h1 ek')  (expand #a (G.reveal kv)));        
-        MB.blit ek' 0ul ek 0ul 336ul;
+        MB.blit ek' 0ul ek 0ul 304ul;
         pop_frame();
         let h2 = ST.get() in
         assert (Seq.equal (B.as_seq h2 ek)  (expand #a (G.reveal kv)));
@@ -59,7 +59,7 @@ let expand_in #a r k =
       ) else
         EK kv MB.mnull
 
-  | AES256_GCM -> admit();
+  | AES256_GCM -> 
       let h0 = ST.get () in
       let kv: G.erased (kv a) = G.hide (B.as_seq h0 k) in
       let has_aesni = EverCrypt.AutoConfig2.has_aesni () in
@@ -70,10 +70,10 @@ let expand_in #a r k =
         in
         push_frame();
         let ek' =
-          B.alloca #UInt8.t 0uy 400ul
+          B.alloca #UInt8.t 0uy 368ul
         in
         let keys_b = B.sub ek' 0ul 240ul in
-        let hkeys_b = B.sub ek' 240ul 160ul in
+        let hkeys_b = B.sub ek' 240ul 128ul in
         AES_stdcalls.aes256_key_expansion_stdcall k keys_b;
         AEShash_stdcalls.aes256_keyhash_init_stdcall     
           (let k = G.reveal kv in
@@ -82,7 +82,7 @@ let expand_in #a r k =
           keys_b hkeys_b;
         let h1 = ST.get() in
         assume (Seq.equal (B.as_seq h1 ek')  (expand #a (G.reveal kv)));
-        MB.blit ek' 0ul ek 0ul 400ul;
+        MB.blit ek' 0ul ek 0ul 368ul;
         pop_frame();
         let h2 = ST.get() in
         assert (Seq.equal (B.as_seq h2 ek)  (expand #a (G.reveal kv)));
@@ -136,8 +136,8 @@ let encrypt #a ek iv ad ad_len plain plain_len cipher tag =
       let tmp_keys = B.alloca 0uy 176ul in
       MB.blit (EK?.ek ek) 0ul tmp_keys 0ul 176ul;      
 
-      let hkeys_b = B.alloca 0uy 160ul in
-      MB.blit (EK?.ek ek) 176ul hkeys_b 0ul 160ul;
+      let hkeys_b = B.alloca 0uy 128ul in
+      MB.blit (EK?.ek ek) 176ul hkeys_b 0ul 128ul;
 
       let h0 = get() in
 
@@ -170,13 +170,20 @@ let encrypt #a ek iv ad ad_len plain plain_len cipher tag =
 
       in lemma_iv_eq ();
 
-      assume (
-        let k = G.reveal (EK?.kv ek) in
+      // There is no SMTPat on le_bytes_to_seq_quad32_to_bytes and the converse,
+      // so we need an explicit lemma
+      let lemma_hkeys_eq () : Lemma
+        (let k = G.reveal (EK?.kv ek) in
         let k_nat = Words.Seq_s.seq_uint8_to_seq_nat8 k in
         let k_w = Words.Seq_s.seq_nat8_to_seq_nat32_LE k_nat in
         OptPublic.hkeys_reqs_pub 
           (Types_s.le_bytes_to_seq_quad32 (Words.Seq_s.seq_uint8_to_seq_nat8 (B.as_seq h0 hkeys_b)))
-          (Types_s.reverse_bytes_quad32 (AES_s.aes_encrypt_LE AES_s.AES_128 k_w (Words_s.Mkfour 0 0 0 0))));
+          (Types_s.reverse_bytes_quad32 (AES_s.aes_encrypt_LE AES_s.AES_128 k_w (Words_s.Mkfour 0 0 0 0)))) = admit()
+        
+
+      in lemma_hkeys_eq ();
+
+      admit();
 
       // These asserts prove that 4096 * (len {plain, ad}) are smaller than pow2_32
       assert (max_length a = pow2 20 - 1 - 16);
@@ -224,7 +231,7 @@ let encrypt #a ek iv ad ad_len plain plain_len cipher tag =
       pop_frame();
       Success
 
-  | AES256_GCM ->
+  | AES256_GCM -> admit();
       // From the well-formedness invariant: the only implementation we
       // (currently) know how to use on X64 is Vale's. In the future, we will
       // have to either:
@@ -249,8 +256,8 @@ let encrypt #a ek iv ad ad_len plain plain_len cipher tag =
       let tmp_keys = B.alloca 0uy 240ul in
       MB.blit (EK?.ek ek) 0ul tmp_keys 0ul 240ul;      
 
-      let hkeys_b = B.alloca 0uy 160ul in
-      MB.blit (EK?.ek ek) 240ul hkeys_b 0ul 160ul;
+      let hkeys_b = B.alloca 0uy 128ul in
+      MB.blit (EK?.ek ek) 240ul hkeys_b 0ul 128ul;
 
       let h0 = get() in
 
@@ -336,7 +343,7 @@ let encrypt #a ek iv ad ad_len plain plain_len cipher tag =
       pop_frame();
       Success
 
-  | CHACHA20_POLY1305 ->
+  | CHACHA20_POLY1305 -> admit();
       // Monotonicity; gives us proper length for ek while we're at it.
       MB.recall_p (EK?.ek ek) (S.equal (expand_or_dummy a (EK?.kv ek)));
       assert (MB.length (EK?.ek ek) = 32);

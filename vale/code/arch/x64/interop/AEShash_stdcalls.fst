@@ -25,7 +25,7 @@ let length_aux2 (b:uint8_p) : Lemma
 
 
 let length_aux5 (b:uint8_p) : Lemma
-  (requires B.length b = 160)
+  (requires B.length b = 128)
   (ensures DV.length (get_downview b) % 16 = 0) = 
     let db = get_downview b in
     DV.length_eq db

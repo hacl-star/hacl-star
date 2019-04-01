@@ -109,7 +109,7 @@ val gcm256_encrypt_opt':
       B.length out128_b == B.length in128_b /\
       B.length inout_b == 16 /\
       B.length scratch_b == 128 /\
-      B.length hkeys_b = 160 /\
+      B.length hkeys_b = 128 /\
       B.length tag_b == 16 /\
       B.length keys_b = 240 /\
 
@@ -225,7 +225,6 @@ let gcm256_encrypt_opt' key auth_b auth_bytes auth_num keys_b iv_b hkeys_b abyte
   FStar.Math.Lemmas.cancel_mul_mod (UInt64.v auth_num) 16;
   assert_norm (240 % 16 = 0);
   assert_norm (16 % 16 = 0);
-  assert_norm (160 % 16 = 0);
   assert_norm (128 % 16 = 0);
   FStar.Math.Lemmas.cancel_mul_mod (UInt64.v len128x6) 16;
   FStar.Math.Lemmas.cancel_mul_mod (UInt64.v len128_num) 16;
@@ -334,7 +333,7 @@ val gcm256_encrypt_opt_alloca:
       B.length iv_b = 16 /\
       B.length plain_b = (UInt64.v plain_len / 16) * 16 /\
       B.length out_b = B.length plain_b /\
-      B.length hkeys_b = 160 /\
+      B.length hkeys_b = 128 /\
       B.length tag_b == 16 /\
       B.length keys_b = 240 /\
 

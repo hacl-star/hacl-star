@@ -3284,7 +3284,7 @@ procedure {:quick} GCM_finalize(
     requires
         // Valid buffers and pointers
         validDstAddrs128(mem, rbp, scratch_b, 8, memTaint, Secret);
-        validSrcAddrs128(mem, Xip - 0x20, hkeys_b, 9, memTaint, Secret);
+        validSrcAddrs128(mem, Xip - 0x20, hkeys_b, 8, memTaint, Secret);
 
         // GCM reqs
         pclmulqdq_enabled;
@@ -3403,7 +3403,7 @@ procedure {:quick} GCM_finalize(
     VPolyMul(Z0, Z0, HK, false, true);
 
 //	 vmovdqu	0x80-0x20($Xip),$HK
-    Load128_buffer(HK, Xip, 0x80-0x20, Secret, hkeys_b, 8);   // ??
+//    Load128_buffer(HK, Xip, 0x80-0x20, Secret, hkeys_b, 8);   // ??
     
 //	vpxor		$Z1,$Z0,$Z0
     VPolyAdd(Z0, Z0, Z1);
@@ -3603,7 +3603,7 @@ procedure {:quick} GCM_finalize(
     VPolyMul(T1, T1, HK, false, true);
 
 //	 vmovdqu	0x80-0x20($Xip),$HK
-    Load128_buffer(HK, Xip, 0x80-0x20, Secret, hkeys_b, 8);   // ??
+//    Load128_buffer(HK, Xip, 0x80-0x20, Secret, hkeys_b, 8);   // ??
 
 //	vpxor		$T3,$T1,$T1
     VPolyAdd(T1, T1, T3);
@@ -3750,7 +3750,7 @@ procedure {:quick} {:public} AES_GCM_encrypt_6mult(
         validSrcAddrs128(mem,  inp,  in_b, len, memTaint, Secret);
         validDstAddrs128(mem, outp, out_b, len, memTaint, Secret);
         validDstAddrs128(mem, rbp, scratch_b, 8, memTaint, Secret);
-        validSrcAddrs128(mem, Xip, hkeys_b, 10, memTaint, Secret);
+        validSrcAddrs128(mem, Xip, hkeys_b, 8, memTaint, Secret);
 
         buffers_disjoint128(iv_b, keys_b);
         buffers_disjoint128(iv_b, scratch_b);
