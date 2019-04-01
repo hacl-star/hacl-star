@@ -76,9 +76,8 @@ include Makefile.basic
 CFLAGS		+= -Wno-parentheses -g -mavx -mavx2 -std=gnu11 \
   -O3 -march=native -mtune=native
 
-.PHONY: $(KREMLIN_A)
 $(KREMLIB_A):
-	$(MAKE) -C $(dir $@) -f Makefile.basic
+	$(MAKE) -C $(dir $@)
 
 KREMLIB_A 	= $(KREMLIN_HOME)/kremlib/dist/minimal/libkremlib.a
 
