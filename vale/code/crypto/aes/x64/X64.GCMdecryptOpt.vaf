@@ -37,6 +37,7 @@ include{:fstar}{:open} "X64.Vale.QuickCode"
 include{:fstar}{:open} "X64.Vale.QuickCodes"
 include{:fstar}{:open} "X64.CPU_Features_s"
 include{:fstar}{:open} "Math.Poly2.Bits_s"
+include{:fstar}{:open} "OptPublic"
 
 module X64.GCMdecryptOpt
 
@@ -84,6 +85,7 @@ open Math.Poly2.Bits_s
 open X64.AESGCM
 open Util.Meta
 open X64.GCMencryptOpt
+open OptPublic
 #endverbatim
 
 
@@ -222,8 +224,7 @@ procedure {:quick exportOnly}{:public}{:exportSpecs} gcm_blocks_decrypt_stdcall(
 
         // GCM reqs
         pclmulqdq_enabled;
-        buffer128_read(hkeys_b, 2, mem) == reverse_bytes_quad32(aes_encrypt_LE(alg, key, Mkfour(0,0,0,0)));
-        hkeys_reqs(hkeys_b, reverse_bytes_quad32(buffer128_read(hkeys_b, 2, mem)), mem);
+        hkeys_reqs_pub(s128(mem, hkeys_b), reverse_bytes_quad32(aes_encrypt_LE(alg, key, Mkfour(0,0,0,0))));
 
     ensures
         modifies_mem(loc_union(loc_buffer(iv_b), 

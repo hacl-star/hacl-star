@@ -40,11 +40,11 @@ val gf128_power (h:poly) (n:nat) : poly
 val lemma_gf128_power (h:poly) (n:nat) : Lemma
   (gf128_power h n == shift_key_1 128 gf128_modulus_low_terms (g_power h n))
 
-let hkeys_reqs_priv (hkeys:seq quad32) (h_LE v2:quad32) : Prop_s.prop0
+let hkeys_reqs_priv (hkeys:seq quad32) (h_BE:quad32) : Prop_s.prop0
   = 
-  let h = of_quad32 (reverse_bytes_quad32 h_LE) in
+  let h = of_quad32 (reverse_bytes_quad32 (reverse_bytes_quad32 h_BE)) in
   length hkeys >= 8 /\
-  index hkeys 2 == v2 /\
+  index hkeys 2 == h_BE /\
   of_quad32 (index hkeys 0) == gf128_power h 1 /\
   of_quad32 (index hkeys 1) == gf128_power h 2 /\
   of_quad32 (index hkeys 3) == gf128_power h 3 /\
@@ -52,8 +52,8 @@ let hkeys_reqs_priv (hkeys:seq quad32) (h_LE v2:quad32) : Prop_s.prop0
   of_quad32 (index hkeys 6) == gf128_power h 5 /\
   of_quad32 (index hkeys 7) == gf128_power h 6 
 
-val lemma_hkeys_reqs_pub_priv (hkeys:seq quad32) (h_LE v2:quad32) : Lemma
-  (hkeys_reqs_pub hkeys h_LE v2 <==> hkeys_reqs_priv hkeys h_LE v2)
+val lemma_hkeys_reqs_pub_priv (hkeys:seq quad32) (h_BE:quad32) : Lemma
+  (hkeys_reqs_pub hkeys h_BE <==> hkeys_reqs_priv hkeys h_BE)
 
 // Unrolled series of n ghash computations
 let rec ghash_unroll (h:poly) (prev:poly) (data:int -> poly128) (k:int) (m n:nat) : poly =

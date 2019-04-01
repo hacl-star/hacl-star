@@ -26,8 +26,8 @@ let rec ghash_poly_unroll (h:poly) (prev:poly) (data:int -> poly128) (k:int) (m 
   if m = 0 then (prev +. d) *~ p else
   ghash_poly_unroll h prev data k (m - 1) (n + 1) +. d *~ p
 
-let lemma_hkeys_reqs_pub_priv (hkeys:seq quad32) (h_LE v2:quad32) : Lemma
-  (hkeys_reqs_pub hkeys h_LE v2 <==> hkeys_reqs_priv hkeys h_LE v2)
+let lemma_hkeys_reqs_pub_priv (hkeys:seq quad32) (h_BE:quad32) : Lemma
+  (hkeys_reqs_pub hkeys h_BE <==> hkeys_reqs_priv hkeys h_BE)
   =
   ()
 

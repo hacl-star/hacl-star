@@ -2196,8 +2196,8 @@ procedure {:quick} Loop6x(
 
         // GHash reqs
         pclmulqdq_enabled;
-        hkeys_reqs_priv(s128(mem, hkeys_b), h_LE,
-                        reverse_bytes_quad32(aes_encrypt_LE(alg, key_words, Mkfour(0,0,0,0))));
+        h_LE == aes_encrypt_LE(alg, key_words, Mkfour(0, 0, 0, 0));
+        hkeys_reqs_priv(s128(mem, hkeys_b), reverse_bytes_quad32(h_LE));
         scratch_reqs(scratch_b, #nat(count - 2), mem, s128(mem, out_b), Z3);
         y_prev == ghash_incremental0(h_LE, y_orig, slice_work_around(s128(mem, out_b), (count-2)*6));
         y_prev == reverse_bytes_quad32(to_quad32( 
@@ -2442,8 +2442,8 @@ procedure {:quick} Loop6x_loop(
 
         // GHash reqs
         pclmulqdq_enabled;
-        hkeys_reqs_priv(s128(mem, hkeys_b), h_LE,
-                        reverse_bytes_quad32(aes_encrypt_LE(alg, key_words, Mkfour(0,0,0,0))));
+        h_LE == aes_encrypt_LE(alg, key_words, Mkfour(0, 0, 0, 0));
+        hkeys_reqs_priv(s128(mem, hkeys_b), reverse_bytes_quad32(h_LE));
         scratch_reqs(scratch_b, #nat(count - 2), mem, s128(mem, out_b), Z3);
         y_prev == ghash_incremental0(h_LE, y_orig, slice_work_around(s128(mem, out_b), (count-2)*6));
         y_prev == reverse_bytes_quad32(to_quad32( 
@@ -2557,8 +2557,8 @@ procedure {:quick} Loop6x_loop(
 
             // GHash reqs
             pclmulqdq_enabled;
-            hkeys_reqs_priv(s128(mem, hkeys_b), h_LE,
-                        reverse_bytes_quad32(aes_encrypt_LE(alg, key_words, Mkfour(0,0,0,0))));
+            h_LE == aes_encrypt_LE(alg, key_words, Mkfour(0, 0, 0, 0));
+            hkeys_reqs_priv(s128(mem, hkeys_b), reverse_bytes_quad32(h_LE));
 
             count + iter - 2 >= 0;
             len > 0 ==> scratch_reqs(scratch_b, #nat(count + iter - 2), mem, s128(mem, out_b), Z3);
@@ -3779,8 +3779,8 @@ procedure {:quick} {:public} AES_GCM_encrypt_6mult(
 
         // GHash reqs
         pclmulqdq_enabled;
-        hkeys_reqs_priv(s128(mem, hkeys_b), h_LE,
-                        reverse_bytes_quad32(aes_encrypt_LE(alg, key_words, Mkfour(0,0,0,0))));
+        h_LE == aes_encrypt_LE(alg, key_words, Mkfour(0, 0, 0, 0));
+        hkeys_reqs_priv(s128(mem, hkeys_b), reverse_bytes_quad32(h_LE));
 
         // Len is # of 128-bit blocks
         len % 6 == 0;

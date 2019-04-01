@@ -638,8 +638,7 @@ procedure {:quick} gcm_blocks(
 
         // GCM reqs
         pclmulqdq_enabled;
-        hkeys_reqs_priv(s128(mem, hkeys_b), reverse_bytes_quad32(buffer128_read(hkeys_b, 2, mem)),
-                        reverse_bytes_quad32(aes_encrypt_LE(alg, key, Mkfour(0,0,0,0))));
+        hkeys_reqs_priv(s128(mem, hkeys_b), reverse_bytes_quad32(aes_encrypt_LE(alg, key, Mkfour(0,0,0,0))));
 
     ensures
         // Framing
@@ -946,8 +945,7 @@ procedure {:quick exportOnly} gcm_blocks_wrapped(
 
         // GCM reqs
         pclmulqdq_enabled;
-        hkeys_reqs_priv(s128(mem, hkeys_b), reverse_bytes_quad32(buffer128_read(hkeys_b, 2, mem)),
-                        reverse_bytes_quad32(aes_encrypt_LE(alg, key, Mkfour(0,0,0,0))));
+        hkeys_reqs_priv(s128(mem, hkeys_b), reverse_bytes_quad32(aes_encrypt_LE(alg, key, Mkfour(0,0,0,0))));
 
 
     ensures
@@ -1369,8 +1367,7 @@ procedure {:quick exportOnly}{:public}{:exportSpecs}{:frame false} gcm_blocks_st
 
         // GCM reqs
         pclmulqdq_enabled;
-        hkeys_reqs_pub(s128(mem, hkeys_b), reverse_bytes_quad32(buffer128_read(hkeys_b, 2, mem)),
-                       reverse_bytes_quad32(aes_encrypt_LE(alg, key, Mkfour(0,0,0,0))));
+        hkeys_reqs_pub(s128(mem, hkeys_b), reverse_bytes_quad32(aes_encrypt_LE(alg, key, Mkfour(0,0,0,0))));
 
     ensures
         // Manual framing
@@ -1440,8 +1437,7 @@ procedure {:quick exportOnly}{:public}{:exportSpecs}{:frame false} gcm_blocks_st
         !win ==> r14 == old(r14);
         !win ==> r15 == old(r15);
 {
-    lemma_hkeys_reqs_pub_priv(s128(mem, hkeys_b), reverse_bytes_quad32(buffer128_read(hkeys_b, 2, mem)),
-                              reverse_bytes_quad32(aes_encrypt_LE(alg, key, Mkfour(0,0,0,0))));
+    lemma_hkeys_reqs_pub_priv(s128(mem, hkeys_b), reverse_bytes_quad32(aes_encrypt_LE(alg, key, Mkfour(0,0,0,0))));
     assert win ==> valid_src_stack64(rsp + 40, stack);
     assert !win ==> valid_src_stack64(rsp + 80, stack);
     save_registers(win);

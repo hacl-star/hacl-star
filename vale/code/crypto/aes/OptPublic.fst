@@ -17,11 +17,11 @@ let rec g_power (a:poly) (n:nat) : poly =
 
 let gf128_power (h:poly) (n:nat) : poly = shift_gf128_key_1 (g_power h n)
 
-let hkeys_reqs_pub (hkeys:seq quad32) (h_LE:quad32) (v2:quad32) : Prop_s.prop0
+let hkeys_reqs_pub (hkeys:seq quad32) (h_BE:quad32) : Prop_s.prop0
   = 
-  let h = of_quad32 (reverse_bytes_quad32 h_LE) in
+  let h = of_quad32 (reverse_bytes_quad32 (reverse_bytes_quad32 h_BE)) in
   length hkeys >= 8 /\
-  index hkeys 2 == v2 /\
+  index hkeys 2 == h_BE /\
   of_quad32 (index hkeys 0) == gf128_power h 1 /\
   of_quad32 (index hkeys 1) == gf128_power h 2 /\
   of_quad32 (index hkeys 3) == gf128_power h 3 /\
