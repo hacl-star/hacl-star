@@ -1,6 +1,61 @@
 [
-  "\u0010çv\u0017\u001d”\u001fBh²º¡ÀSóx",
+  "Âe­tÑºZs~l³«ÑF±!",
   [
+    [
+      "Math.Poly2.Words.lemma_quad32_zero",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_f537159ed795b314b4e58c260361ae86", "bool_inversion",
+        "equation_Math.Poly2.Bits.poly128_of_nat32s",
+        "equation_Math.Poly2.Bits.poly128_of_poly32s",
+        "function_token_typing_Math.Poly2.Bits.of_nat32_zero",
+        "function_token_typing_Math.Poly2.Lemmas.lemma_zero_degree",
+        "int_inversion", "int_typing", "primitive_Prims.op_AmpAmp",
+        "primitive_Prims.op_GreaterThanOrEqual",
+        "primitive_Prims.op_disEquality", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_85de810eea785cf58956329a12443de8",
+        "refinement_interpretation_Tm_refine_c1ab68825de73db721f656a458681729",
+        "typing_Math.Poly2_s.add", "typing_Math.Poly2_s.poly_index",
+        "typing_Math.Poly2_s.shift", "typing_Math.Poly2_s.zero"
+      ],
+      0,
+      "fdad6a78854da7d8d75e5e3a977f90e9"
+    ],
+    [
+      "Math.Poly2.Words.lemma_quad32_ones",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565",
+        "Prims_pretyping_f537159ed795b314b4e58c260361ae86", "bool_inversion",
+        "equation_Math.Poly2.Bits.poly128_of_nat32s",
+        "equation_Math.Poly2.Bits.poly128_of_poly32s", "equation_Prims.nat",
+        "equation_Words_s.nat32", "equation_Words_s.natN",
+        "function_token_typing_Math.Poly2.Bits.of_nat32_ones",
+        "function_token_typing_Prims.__cache_version_number__",
+        "int_inversion", "int_typing",
+        "lemma_Math.Poly2.Lemmas.lemma_ones_degree",
+        "primitive_Prims.op_AmpAmp", "primitive_Prims.op_GreaterThanOrEqual",
+        "primitive_Prims.op_LessThan", "primitive_Prims.op_LessThanOrEqual",
+        "primitive_Prims.op_disEquality",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_5514fbe9e08dfda40f950a7b9f1b2b98",
+        "refinement_interpretation_Tm_refine_870f27a0f57b0438a2cb1c2e8b046715",
+        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "refinement_interpretation_Tm_refine_ea5b3abe82a2dc9af7267abe0cf68ca5",
+        "typing_Math.Poly2.Bits.of_nat32", "typing_Math.Poly2.ones",
+        "typing_Math.Poly2_s.add", "typing_Math.Poly2_s.poly_index",
+        "typing_Math.Poly2_s.shift"
+      ],
+      0,
+      "ca8f66a6b6d1160337dd9bec078cf1cc"
+    ],
     [
       "Math.Poly2.Words.lemma_add128",
       1,
@@ -31,7 +86,67 @@
         "typing_Math.Poly2_s.shift"
       ],
       0,
-      "f9b9fd78ba8cc6104dae7fb127a61b7e"
+      "6999abd30bf353ed361046a137f1327c"
+    ],
+    [
+      "Math.Poly2.Words.lemma_add_quad32",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Types_s.quad32",
+        "equation_Words_s.nat32", "fuel_guarded_inversion_Words_s.four",
+        "lemma_Math.Poly2.Bits.lemma_of_quad32_degree",
+        "lemma_Math.Poly2.Bits.lemma_to_of_quad32",
+        "lemma_Math.Poly2.lemma_add_degree",
+        "typing_Math.Poly2.Bits_s.of_quad32"
+      ],
+      0,
+      "fc8ba301ba76528d977bd7d27be91f6f"
+    ],
+    [
+      "Math.Poly2.Words.lemma_and128",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_f537159ed795b314b4e58c260361ae86", "bool_inversion",
+        "equation_Math.Poly2.Bits.poly128_of_nat32s",
+        "equation_Math.Poly2.Bits.poly128_of_poly32s",
+        "equation_Words_s.nat32", "int_inversion", "int_typing",
+        "primitive_Prims.op_AmpAmp", "primitive_Prims.op_GreaterThanOrEqual",
+        "primitive_Prims.op_disEquality",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "projection_inverse_Words_s.Mkfour_hi2",
+        "projection_inverse_Words_s.Mkfour_hi3",
+        "projection_inverse_Words_s.Mkfour_lo0",
+        "projection_inverse_Words_s.Mkfour_lo1",
+        "refinement_interpretation_Tm_refine_ea5b3abe82a2dc9af7267abe0cf68ca5",
+        "typing_Math.Poly2.Bits.of_nat32",
+        "typing_Math.Poly2.Bits.poly128_of_poly32s",
+        "typing_Math.Poly2.poly_and", "typing_Math.Poly2_s.add",
+        "typing_Math.Poly2_s.poly_index", "typing_Math.Poly2_s.shift"
+      ],
+      0,
+      "e31f8c76ffe047ed6496a52e2d41fb1c"
+    ],
+    [
+      "Math.Poly2.Words.lemma_and_quad32",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Types_s.quad32",
+        "equation_Words_s.nat32", "fuel_guarded_inversion_Words_s.four",
+        "lemma_Math.Poly2.Bits.lemma_of_quad32_degree",
+        "lemma_Math.Poly2.Bits.lemma_to_of_quad32",
+        "lemma_Math.Poly2.Lemmas.lemma_and_degree",
+        "typing_Math.Poly2.Bits_s.of_quad32"
+      ],
+      0,
+      "f3a3d7162a1abaac153ae314667f1a45"
     ],
     [
       "Math.Poly2.Words.lemma_quad32_double_shift",
@@ -66,7 +181,7 @@
         "typing_Math.Poly2_s.shift", "typing_Math.Poly2_s.zero"
       ],
       0,
-      "8892d2b8648dfd9287249713fe28e691"
+      "e90d02dc777c5b11e8828c2bf18684ee"
     ],
     [
       "Math.Poly2.Words.lemma_quad32_double_swap",
@@ -99,7 +214,7 @@
         "typing_Math.Poly2_s.poly_index", "typing_Math.Poly2_s.shift"
       ],
       0,
-      "a74fcbaecea4a2b87330faaf294962aa"
+      "d73c3db19ec2b05828b34e21d51f06ae"
     ]
   ]
 ]

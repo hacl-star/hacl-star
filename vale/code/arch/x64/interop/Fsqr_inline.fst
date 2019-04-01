@@ -74,7 +74,7 @@ let fsqr_regs_modified: MS.reg -> bool = fun (r:MS.reg) ->
 
 let fsqr_xmms_modified = fun _ -> false
 
-#set-options "--z3rlimit 200"
+#set-options "--z3rlimit 200 --max_fuel 0 --max_ifuel 0"
 
 [@__reduce__]
 let fsqr_lemma'
@@ -164,6 +164,9 @@ let fsqr_inline tmp f1 out =
     DV.length_eq (get_downview tmp);
     DV.length_eq (get_downview f1);
     DV.length_eq (get_downview out);
+    as_vale_buffer_len #TUInt64 #TUInt64 tmp;
+    as_vale_buffer_len #TUInt64 #TUInt64 f1;
+    as_vale_buffer_len #TUInt64 #TUInt64 out;    
     let x, _ = lowstar_fsqr_normal_t tmp f1 out () in
     ()
 

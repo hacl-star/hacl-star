@@ -52,12 +52,15 @@ let ( <=* ) (x:nat5) (y:nat5) : Type =
   (x4 <= y4) /\
   (x5 <= y5)
 
-assume val pow26: nat
+abstract
+let pow26: (pow26: pos { pow2 32 == 64 * pow26 /\ pow2 64 == 4096 * pow26 * pow26 /\ pow26 == pow2 26 }) =
+  let pow26: pos = pow2 26 in
+  assert_norm (pow2 32 == 64 * pow26);
+  assert_norm (pow2 64 == 4096 * pow26 * pow26);
+  pow26
+
 inline_for_extraction
 let max26 = pow26 - 1
-
-assume val lemma_pow_32_26: _:unit{pow2 32 == 64 * pow26}
-assume val lemma_pow_64_26: _:unit{pow2 64 == 4096 * pow26 * pow26}
 
 
 let tup64_5 = (uint64 & uint64 & uint64 & uint64 & uint64)
@@ -103,10 +106,10 @@ inline_for_extraction
 let felem_wide5 (w:lanes) = felem5 w
 
 let felem_fits1 (#w:lanes) (x:uint64xN w) (m:scale32) =
-  forall (i:nat). i < w ==> uint_v (vec_v x).[i] <= m * max26
+  forall (i:nat). {:pattern (vec_v x).[i] } i < w ==> uint_v (vec_v x).[i] <= m * max26
 
 let felem_wide_fits1 (#w:lanes) (x:uint64xN w) (m:scale64) =
-  forall (i:nat). i < w ==> uint_v (vec_v x).[i] <= m * max26 * max26
+  forall (i:nat). {:pattern (vec_v x).[i] } i < w ==> uint_v (vec_v x).[i] <= m * max26 * max26
 
 let felem_fits5 (#w:lanes) (f:felem5 w) (m:scale32_5) =
   let (x1,x2,x3,x4,x5) = f in
@@ -174,6 +177,24 @@ let acc_inv_t (#w:lanes) (acc:felem5 w) : Type0 =
       tup64_fits5 (as_tup64_i acc i) (1, 2, 1, 1, 1) /\
       uint_v (vec_v o1).[i] % pow2 26 < 73
     else tup64_fits5 (as_tup64_i acc i) (1, 1, 1, 1, 1))
+
+noextract
+val as_tup5: #w:lanes -> f:lseq (uint64xN w) 5 -> GTot (felem5 w)
+let as_tup5 #w s =
+  (s.[0], s.[1], s.[2], s.[3], s.[4])
+
+noextract
+val lfelem_fits: #w:lanes -> f:lseq (uint64xN w) 5 -> m:scale32_5 -> Type0
+let lfelem_fits #w f m =
+  felem_fits5 (as_tup5 f) m
+
+noextract
+let lfeval (#w:lanes) (f:lseq (uint64xN w) 5) : GTot (lseq pfelem w) =
+  feval5 (as_tup5 f)
+
+noextract
+let lfelem_less (#w:lanes) (f:lseq (uint64xN w) 5) (max:nat) : Type0 =
+  felem_less5 (as_tup5 f) max
 
 inline_for_extraction noextract
 val precomp_r5:
@@ -503,3 +524,29 @@ let fmul_r4_normalize5 (a0, a1, a2, a3, a4) (r10, r11, r12, r13, r14) (r150, r15
   let v14 = vec_add_mod o4 v04 in
   let v24 = vec_add_mod v14 (vec_permute4 v14 1ul 1ul 1ul 1ul) in
   carry_full_felem5 (v20, v21, v22, v23, v24)
+
+noextract
+val set_bit5:
+    #w:lanes
+  -> f:lseq (uint64xN w) 5
+  -> i:size_nat{i <= 128}
+  -> out:lseq (uint64xN w) 5
+let set_bit5 #w f i =
+  let b = u64 1 <<. size (i % 26) in
+  let mask = vec_load b w in
+  let fi = f.[i / 26] in
+  let res = f.[i / 26] <- vec_or fi mask in
+  res
+
+inline_for_extraction noextract
+val mod_add128_ws:
+    #w:lanes
+  -> a:(uint64xN w & uint64xN w)
+  -> b:(uint64xN w & uint64xN w)
+  -> uint64xN w & uint64xN w
+let mod_add128_ws #w (a0, a1) (b0, b1) =
+  let r0 = vec_add_mod a0 b0 in
+  let r1 = vec_add_mod a1 b1 in
+  let c = r0 ^| ((r0 ^| b0) `vec_or` ((r0 -| b0) ^| b0)) >>| 63ul in
+  let r1 = vec_add_mod r1 c in
+  (r0, r1)

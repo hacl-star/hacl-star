@@ -4,7 +4,6 @@ open Lib.Sequence
 open Lib.IntTypes
 open FStar.Mul
 open Spec.Curve25519
-open Lib.CurveLemmas
 
 open Hacl.Spec.Curve25519.Field51.Definition
 open Hacl.Spec.Curve25519.Field51.Lemmas
@@ -434,6 +433,8 @@ let subtract_p5 (f0, f1, f2, f3, f4) =
   let f2' = f2 -. (mask &. u64 0x7ffffffffffff) in
   let f3' = f3 -. (mask &. u64 0x7ffffffffffff) in
   let f4' = f4 -. (mask &. u64 0x7ffffffffffff) in
+  logand_lemma mask (u64 0x7ffffffffffed);
+  logand_lemma mask (u64 0x7ffffffffffff);
   lemma_subtract_p (f0, f1, f2, f3, f4) (f0', f1', f2', f3', f4');
   (f0', f1', f2', f3', f4')
 

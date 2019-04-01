@@ -25,7 +25,7 @@ test: $(patsubst %.exe,%.test,$(TARGETS))
 %.exe: %.o
 	$(CC) $(CFLAGS) $(LDFLAGS) $^ -o $@
 
-curve51-ours.exe curve64-ours.exe: ../dist/compact-gcc/Hacl_Curve25519_new.o \
+curve51-ours.exe curve64-ours.exe: ../dist/compact-gcc/Hacl_Curve25519.o \
   $(KREMLIN_HOME)/kremlib/dist/minimal/FStar_UInt_8_16_32_64.o
 
 curve64-rfc.exe: $(patsubst %.c,%.o,$(wildcard rfc7748_src/*.c))

@@ -388,6 +388,17 @@ let le_bytes_to_seq_quad32_to_bytes (s:seq quad32) :
   seq_to_seq_four_to_seq_LE (s) ;
   ()
 
+let le_seq_quad32_to_bytes_to_seq_quad32 s =
+  FStar.Pervasives.reveal_opaque (`%le_bytes_to_seq_quad32) le_bytes_to_seq_quad32;
+  Opaque_s.reveal_opaque le_seq_quad32_to_bytes_def;
+  calc (==) {
+    le_seq_quad32_to_bytes (le_bytes_to_seq_quad32 s);
+    (==) { }
+    seq_nat32_to_seq_nat8_LE (seq_four_to_seq_LE (seq_to_seq_four_LE (seq_nat8_to_seq_nat32_LE s)));
+    (==) { }
+    s;
+  }
+
 (*
 le_quad32_to_bytes (le_bytes_to_quad32 s)
 == { definition of le_quad32_to_bytes }
@@ -450,6 +461,14 @@ let le_quad32_to_bytes_injective_specific (b b':quad32) :
   Lemma (le_quad32_to_bytes b == le_quad32_to_bytes b' ==> b == b')
   =
   le_quad32_to_bytes_injective()
+
+let le_seq_quad32_to_bytes_injective (b b':seq quad32) =
+  Opaque_s.reveal_opaque le_seq_quad32_to_bytes_def;
+  seq_four_to_seq_LE_injective nat8; 
+  nat_to_four_8_injective();
+  seq_map_injective (nat_to_four 8) (seq_four_to_seq_LE b) (seq_four_to_seq_LE b');
+  seq_four_to_seq_LE_injective_specific b b';
+  assert (equal b b')
 
 (*
 
@@ -585,7 +604,7 @@ let seq_nat8_to_seq_nat32_LE (x:seq nat8{length x % 4 == 0}) : seq nat32 =
   seq_map (four_to_nat 8) (seq_to_seq_four_LE x)
 *)
 #reset-options "--z3rlimit 20 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq.Properties'"
-let rec append_distributes_le_bytes_to_seq_quad32 (s1:seq nat8 { length s1 % 16 == 0 }) (s2:seq nat8 { length s2 % 16 == 0 }) :
+let append_distributes_le_bytes_to_seq_quad32 (s1:seq nat8 { length s1 % 16 == 0 }) (s2:seq nat8 { length s2 % 16 == 0 }) :
   Lemma(le_bytes_to_seq_quad32 (s1 @| s2) == (le_bytes_to_seq_quad32 s1) @| (le_bytes_to_seq_quad32 s2))
   =
   FStar.Pervasives.reveal_opaque (`%le_bytes_to_seq_quad32) le_bytes_to_seq_quad32;
@@ -603,3 +622,24 @@ let rec append_distributes_le_bytes_to_seq_quad32 (s1:seq nat8 { length s1 % 16 
   // seq_to_seq_four_LE (seq_map (four_to_nat 8) (seq_to_seq_four_LE (s1 @| s2)))
   // le_bytes_to_seq_quad32 (s1 @| s2)
   ()
+
+let append_distributes_le_seq_quad32_to_bytes s1 s2 =
+  Opaque_s.reveal_opaque le_seq_quad32_to_bytes_def;
+  calc (==) {
+    le_seq_quad32_to_bytes (s1 @| s2);
+    (==) { }
+    seq_nat32_to_seq_nat8_LE (seq_four_to_seq_LE (s1 @| s2));
+    (==) { append_distributes_seq_four_to_seq_LE s1 s2 }
+    seq_nat32_to_seq_nat8_LE (seq_four_to_seq_LE s1 @| seq_four_to_seq_LE s2);
+    (==) { append_distributes_seq_map (nat_to_four 8) (seq_four_to_seq_LE s1) (seq_four_to_seq_LE s2) }
+    seq_four_to_seq_LE (
+      seq_map (nat_to_four 8) (seq_four_to_seq_LE s1) @| 
+      seq_map (nat_to_four 8) (seq_four_to_seq_LE s2));
+    (==) { append_distributes_seq_four_to_seq_LE
+         (seq_map (nat_to_four 8) (seq_four_to_seq_LE s1))
+         (seq_map (nat_to_four 8) (seq_four_to_seq_LE s2)) }
+      seq_four_to_seq_LE (seq_map (nat_to_four 8) (seq_four_to_seq_LE s1)) @|
+      seq_four_to_seq_LE (seq_map (nat_to_four 8) (seq_four_to_seq_LE s2));
+    (==) { }
+    le_seq_quad32_to_bytes s1 @| le_seq_quad32_to_bytes s2;
+  }

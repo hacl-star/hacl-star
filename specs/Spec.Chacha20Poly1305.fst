@@ -39,7 +39,8 @@ let poly1305_padded
     let rem = sub text (n * Poly.size_block) r in
     let acc = Poly.poly blocks acc r_elem in
     let tmp = update_sub tmp 0 r rem in
-    let acc = Poly.update1 r_elem Poly.size_block tmp acc in
+    // Only run the padded block if the initial text needed padding
+    let acc = if r > 0 then Poly.update1 r_elem Poly.size_block tmp acc else acc in
     acc
 
 let poly1305_do

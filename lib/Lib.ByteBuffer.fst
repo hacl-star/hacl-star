@@ -174,7 +174,7 @@ let uint_to_bytes_le #t #l o i =
   | U1 | U8 ->
     o.(0ul) <- i;
     let h1 = ST.get () in
-    assert (Seq.equal (as_seq h1 o) (BS.nat_to_bytes_le_ #l (numbytes t) (Raw.uint_to_nat i)))
+    assert (Seq.equal (as_seq h1 o) (BS.nat_to_intseq_le_ #U8 #l (numbytes t) (Raw.uint_to_nat i)))
   | U16 ->
     C.store16_le o (Raw.u16_to_UInt16 i);
     let h1 = ST.get () in
@@ -197,7 +197,7 @@ let uint_to_bytes_be #t #l o i =
   | U1 | U8 ->
     o.(0ul) <- i;
     let h1 = ST.get () in
-    assert (Seq.equal (as_seq h1 o) (BS.nat_to_bytes_be_ #l (numbytes t) (Raw.uint_to_nat i)))
+    assert (Seq.equal (as_seq h1 o) (BS.nat_to_intseq_be_ #U8 #l (numbytes t) (Raw.uint_to_nat i)))
   | U16 ->
     C.store16_be o (Raw.u16_to_UInt16 i);
     let h1 = ST.get () in

@@ -3,7 +3,6 @@ module Hacl.Spec.Curve25519.Field51.Lemmas
 open FStar.Mul
 open Lib.Sequence
 open Lib.IntTypes
-open Lib.CurveLemmas
 
 open Spec.Curve25519
 open Hacl.Spec.Curve25519.Field51.Definition
@@ -552,7 +551,7 @@ let lemma_load_felem5 f u64s =
   assert_norm (pow2 51 * pow2 51 * pow2 51 * pow2 51 = pow2 12 * pow2 192);
   FStar.Math.Lemmas.euclidean_division_definition (v s3) (pow2 12);
   assert (as_nat5 f == v s0 + v s1 * pow2 64 + v s2 * pow2 128 + v s3 * pow2 192);
-  lemma_nat_from_uints64_le_4 u64s;
+  Hacl.Impl.Curve25519.Lemmas.lemma_nat_from_uints64_le_4 u64s;
   assert_norm (pow2 64 * pow2 64 = pow2 128);
   assert_norm (pow2 64 * pow2 64 * pow2 64 = pow2 192)
 
@@ -656,11 +655,11 @@ let lemma_load_felem u64s =
 
   let f0 = f0l in
   let f1 = f0h |. f1l in
-  logor_disjoint64 f0h f1l 13;
+  logor_disjoint f0h f1l 13;
   let f2 = f1h |. f2l in
-  logor_disjoint64 f1h f2l 26;
+  logor_disjoint f1h f2l 26;
   let f3 = f2h |. f3l in
-  logor_disjoint64 f2h f3l 39;
+  logor_disjoint f2h f3l 39;
   let f4 = f3h in
   let f = (f0, f1, f2, f3, f4) in
   lemma_load_felem_fits5 f u64s;
@@ -854,25 +853,25 @@ let lemma_store_felem f =
   assert_norm (pow51 = pow2 51);
   let o0 = f0 |. (f1 <<. 51ul) in
   FStar.Math.Lemmas.pow2_multiplication_modulo_lemma_2 (v f1) 64 51;
-  logor_disjoint64 f0 (f1 <<. 51ul) 51;
+  logor_disjoint f0 (f1 <<. 51ul) 51;
 
   let o1 = (f1 >>. 13ul) |. (f2 <<. 38ul) in
   FStar.Math.Lemmas.lemma_div_lt (v f1) 51 13;
   FStar.Math.Lemmas.pow2_multiplication_modulo_lemma_2 (v f2) 64 38;
   FStar.Math.Lemmas.multiple_modulo_lemma (v f2 % pow2 26) (pow2 38);
-  logor_disjoint64 (f1 >>. 13ul) (f2 <<. 38ul) 38;
+  logor_disjoint (f1 >>. 13ul) (f2 <<. 38ul) 38;
 
   let o2 = (f2 >>. 26ul) |. (f3 <<. 25ul) in
   FStar.Math.Lemmas.lemma_div_lt (v f2) 51 26;
   FStar.Math.Lemmas.pow2_multiplication_modulo_lemma_2 (v f3) 64 25;
   FStar.Math.Lemmas.multiple_modulo_lemma (v f3 % pow2 39) (pow2 25);
-  logor_disjoint64 (f2 >>. 26ul) (f3 <<. 25ul) 25;
+  logor_disjoint (f2 >>. 26ul) (f3 <<. 25ul) 25;
 
   let o3 = (f3 >>. 39ul) |. (f4 <<. 12ul) in
   FStar.Math.Lemmas.lemma_div_lt (v f3) 51 39;
   FStar.Math.Lemmas.pow2_multiplication_modulo_lemma_2 (v f4) 64 12;
   FStar.Math.Lemmas.multiple_modulo_lemma (v f4 % pow2 52) (pow2 12);
-  logor_disjoint64 (f3 >>. 39ul) (f4 <<. 12ul) 12;
+  logor_disjoint (f3 >>. 39ul) (f4 <<. 12ul) 12;
   lemma_store_felem0 f
 
 val lemma_cswap2_step:
@@ -890,6 +889,7 @@ let lemma_cswap2_step bit p1 p2 =
   assert (v bit == 0 ==> v mask == 0);
   assert (v bit == 1 ==> v mask == pow2 64 - 1);
   let dummy = mask &. (p1 ^. p2) in
+  logand_lemma mask (p1 ^. p2);
   assert (v bit == 1 ==> v dummy == v (p1 ^. p2));
   assert (v bit == 0 ==> v dummy == 0);
   let p1' = p1 ^. dummy in
@@ -914,7 +914,7 @@ val mul64_wide_add3_lemma:
      (v a0 * v a1 + v b0 * v b1 + v c0 * v c1) <=
       (m0 * m1 + m2 * m3 + m4 * m5) * max51 * max51)
 let mul64_wide_add3_lemma #m0 #m1 #m2 #m3 #m4 #m5 a0 a1 b0 b1 c0 c1 =
-  assert_norm (pow51 = pow2 51);
+  assert (pow51 = pow2 51);
   lemma_mul_le (v a0) (m0 * max51) (v a1) (m1 * max51);
   lemma_mul_le (v b0) (m2 * max51) (v b1) (m3 * max51);
   lemma_mul_le (v c0) (m4 * max51) (v c1) (m5 * max51);

@@ -75,7 +75,6 @@ let gcm_blocks_helper_enc (alg:algorithm) (key:seq nat32)
                    (p_num_bytes:nat)
                    (iv_BE:quad32) : Lemma
   (requires // Required by gcm_blocks
-           0 < p_num_bytes /\
            4096 * (length p128x6 + length p128 + 1) * 16 < pow2_32 /\
            length p128x6 * 16 + length p128 * 16 <= p_num_bytes /\
            p_num_bytes < length p128x6 * 16 + length p128 * 16 + 16 /\
@@ -188,7 +187,7 @@ let slice_append_back (#a:Type) (x y:seq a) (i:nat) : Lemma
 let append_distributes_le_seq_quad32_to_bytes (x y:seq quad32) : 
   Lemma (le_seq_quad32_to_bytes (append x y) == append (le_seq_quad32_to_bytes x) (le_seq_quad32_to_bytes y))
   =
-  admit()
+  append_distributes_le_seq_quad32_to_bytes x y
   
 let pad_to_128_bits_multiple_append (x y:seq nat8) : Lemma
   (requires length x % 16 == 0)
@@ -202,7 +201,6 @@ let gcm_blocks_helper (alg:algorithm) (key:seq nat32)
                    (p_num_bytes a_num_bytes:nat)
                    (iv_BE h enc_hash length_quad:quad32) : Lemma
   (requires // Required by gcm_blocks
-           0 < p_num_bytes /\
            4096 * (length p128x6 + length p128 + 1) * 16 < pow2_32 /\
            length p128x6 * 16 + length p128 * 16 <= p_num_bytes /\
            p_num_bytes < length p128x6 * 16 + length p128 * 16 + 16 /\
@@ -481,7 +479,6 @@ let gcm_blocks_helper_simplified (alg:algorithm) (key:seq nat32)
                    (p_num_bytes a_num_bytes:nat)
                    (iv_BE h enc_hash length_quad:quad32) : Lemma
   (requires // Required by gcm_blocks
-           0 < p_num_bytes /\
            4096 * (length p128x6 + length p128 + 1) * 16 < pow2_32 /\
            length p128x6 * 16 + length p128 * 16 <= p_num_bytes /\
            p_num_bytes < length p128x6 * 16 + length p128 * 16 + 16 /\
