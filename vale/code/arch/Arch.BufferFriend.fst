@@ -3,6 +3,7 @@ friend Lib.IntTypes
 friend Lib.RawIntTypes
 friend Lib.ByteSequence
 friend LowStar.BufferView.Up
+friend FStar.Endianness
 
 module PU = X64.Poly1305.Util
 module IT = Interop.Types
@@ -52,6 +53,20 @@ let lemma_raw_nat_from_bytes_le_n (b:BS.bytes) : Lemma
   (ensures BS.nat_from_bytes_le b == Raw.uint_to_nat b.[0] + pow2 8 * (BS.nat_from_bytes_le (slice b 1 (length b))))
   =
   ()
+
+let rec lemma_le_to_n_is_nat_from_bytes (s:FE.bytes) =
+  //FE.reveal_le_to_n s;
+  if length s > 0 then lemma_le_to_n_is_nat_from_bytes (Seq.tail s)
+
+let rec lemma_n_to_le_is_nat_to_bytes (len:nat) (n:nat) =
+  //FE.reveal_n_to_le len n;
+  if len > 0 then
+  (
+    FStar.Math.Lemmas.pow2_plus 8 (8 * (len - 1));
+    lemma_n_to_le_is_nat_to_bytes (len - 1) (n / 256);
+    ()
+  );
+  assert (equal (FE.n_to_le len n) (of_bytes (BS.nat_to_bytes_le len n)))
 #reset-options
 
 let nat_from_bytes_le_is_four_to_nat b =
