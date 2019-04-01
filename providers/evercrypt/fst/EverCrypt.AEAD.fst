@@ -48,6 +48,7 @@ let expand_in #a r k =
           let k_w = Words.Seq_s.seq_nat8_to_seq_nat32_LE k_nat in G.hide k_w)
           keys_b hkeys_b;
         let h1 = ST.get() in
+        assume (Seq.equal (B.as_seq h1 ek')  (expand #a (G.reveal kv)));        
         MB.blit ek' 0ul ek 0ul 336ul;
         pop_frame();
         let h2 = ST.get() in
@@ -58,7 +59,7 @@ let expand_in #a r k =
       ) else
         EK kv MB.mnull
 
-  | AES256_GCM ->
+  | AES256_GCM -> admit();
       let h0 = ST.get () in
       let kv: G.erased (kv a) = G.hide (B.as_seq h0 k) in
       let has_aesni = EverCrypt.AutoConfig2.has_aesni () in
@@ -80,6 +81,7 @@ let expand_in #a r k =
           let k_w = Words.Seq_s.seq_nat8_to_seq_nat32_LE k_nat in G.hide k_w)
           keys_b hkeys_b;
         let h1 = ST.get() in
+        assume (Seq.equal (B.as_seq h1 ek')  (expand #a (G.reveal kv)));
         MB.blit ek' 0ul ek 0ul 400ul;
         pop_frame();
         let h2 = ST.get() in
@@ -168,14 +170,13 @@ let encrypt #a ek iv ad ad_len plain plain_len cipher tag =
 
       in lemma_iv_eq ();
 
-      assert (Seq.equal (B.as_seq h0 hkeys_b) (gcm_hashed_keys #AES128_GCM (G.reveal (EK?.kv ek))));
-
-      assert (
+      assume (
         let k = G.reveal (EK?.kv ek) in
         let k_nat = Words.Seq_s.seq_uint8_to_seq_nat8 k in
-        let k_w = Words.Seq_s.seq_nat8_to_seq_nat32_LE k_nat in      
-        Seq.slice (B.as_seq h0 hkeys_b) 32 48 == 
-          Words.Seq_s.seq_nat8_to_seq_uint8 (Types_s.le_quad32_to_bytes (Types_s.reverse_bytes_quad32 (AES_s.aes_encrypt_LE AES_s.AES_128 k_w (Words_s.Mkfour 0 0 0 0)))));
+        let k_w = Words.Seq_s.seq_nat8_to_seq_nat32_LE k_nat in
+        OptPublic.hkeys_reqs_pub 
+          (Types_s.le_bytes_to_seq_quad32 (Words.Seq_s.seq_uint8_to_seq_nat8 (B.as_seq h0 hkeys_b)))
+          (Types_s.reverse_bytes_quad32 (AES_s.aes_encrypt_LE AES_s.AES_128 k_w (Words_s.Mkfour 0 0 0 0))));
 
       // These asserts prove that 4096 * (len {plain, ad}) are smaller than pow2_32
       assert (max_length a = pow2 20 - 1 - 16);
@@ -281,14 +282,13 @@ let encrypt #a ek iv ad ad_len plain plain_len cipher tag =
 
       in lemma_iv_eq ();
 
-      assert (Seq.equal (B.as_seq h0 hkeys_b) (gcm_hashed_keys #AES256_GCM (G.reveal (EK?.kv ek))));
-
-      assert (
+      assume (
         let k = G.reveal (EK?.kv ek) in
         let k_nat = Words.Seq_s.seq_uint8_to_seq_nat8 k in
-        let k_w = Words.Seq_s.seq_nat8_to_seq_nat32_LE k_nat in      
-        Seq.slice (B.as_seq h0 hkeys_b) 32 48 == 
-          Words.Seq_s.seq_nat8_to_seq_uint8 (Types_s.le_quad32_to_bytes (Types_s.reverse_bytes_quad32 (AES_s.aes_encrypt_LE AES_s.AES_256 k_w (Words_s.Mkfour 0 0 0 0)))));
+        let k_w = Words.Seq_s.seq_nat8_to_seq_nat32_LE k_nat in
+        OptPublic.hkeys_reqs_pub 
+          (Types_s.le_bytes_to_seq_quad32 (Words.Seq_s.seq_uint8_to_seq_nat8 (B.as_seq h0 hkeys_b)))
+          (Types_s.reverse_bytes_quad32 (AES_s.aes_encrypt_LE AES_s.AES_256 k_w (Words_s.Mkfour 0 0 0 0))));
 
       // These asserts prove that 4096 * (len {plain, ad}) are smaller than pow2_32
       assert (max_length a = pow2 20 - 1 - 16);

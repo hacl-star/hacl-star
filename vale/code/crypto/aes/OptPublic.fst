@@ -28,3 +28,5 @@ let hkeys_reqs_pub (hkeys:seq quad32) (h_BE:quad32) : Prop_s.prop0
   of_quad32 (index hkeys 4) == gf128_power h 4 /\
   of_quad32 (index hkeys 6) == gf128_power h 5 /\
   of_quad32 (index hkeys 7) == gf128_power h 6 
+
+let get_hkeys_reqs h_LE = admit()

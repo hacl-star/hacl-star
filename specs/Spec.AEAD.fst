@@ -13,23 +13,6 @@ let vale_alg_of_alg (a: alg { a = AES128_GCM \/ a = AES256_GCM }) =
   | AES128_GCM -> AES_s.AES_128
   | AES256_GCM -> AES_s.AES_256
 
-let gcm_hashed_keys (#a: alg { a = AES128_GCM \/ a = AES256_GCM }) (k:kv a) 
-  : (s:lbytes 160{Seq.slice s 32 48 == 
-    Words.Seq_s.seq_nat8_to_seq_uint8 (Types_s.le_quad32_to_bytes (Types_s.reverse_bytes_quad32 (
-      AES_s.aes_encrypt_LE (vale_alg_of_alg a) 
-        (Words.Seq_s.seq_nat8_to_seq_nat32_LE (Words.Seq_s.seq_uint8_to_seq_nat8 k))
-        (Words_s.Mkfour 0 0 0 0))))}) =
-  let open AES_s in
-  assert_norm (32 % 4 = 0);
-  assert_norm (16 % 4 = 0);
-  let k_nat = Words.Seq_s.seq_uint8_to_seq_nat8 k in
-  let k_w = Words.Seq_s.seq_nat8_to_seq_nat32_LE k_nat in
-  let v = Words.Seq_s.seq_nat8_to_seq_uint8 (Types_s.le_quad32_to_bytes (Types_s.reverse_bytes_quad32 (
-      AES_s.aes_encrypt_LE (vale_alg_of_alg a) k_w (Words_s.Mkfour 0 0 0 0)))) in
-  let s_f = Seq.append (Seq.create 32 0uy) (Seq.append v (Seq.create 112 0uy)) in
-  assert (Seq.equal (Seq.slice s_f 32 48) v);
-  s_f
-
 let expand #a k =
   match a with
   | CHACHA20_POLY1305 -> k
@@ -43,7 +26,10 @@ let expand #a k =
       let ekv_nat = Types_s.le_seq_quad32_to_bytes ekv_w in
       Types_s.le_seq_quad32_to_bytes_length ekv_w;
       let ek = Words.Seq_s.seq_nat8_to_seq_uint8 ekv_nat in
-      Seq.append ek (gcm_hashed_keys k)
+      let hkeys_quad = OptPublic.get_hkeys_reqs (Types_s.reverse_bytes_quad32 (
+        aes_encrypt_LE (vale_alg_of_alg a) k_w (Words_s.Mkfour 0 0 0 0))) in
+      let hkeys = Words.Seq_s.seq_nat8_to_seq_uint8 (Types_s.le_seq_quad32_to_bytes hkeys_quad) in
+      Seq.append ek hkeys
 
 // For gctr_encrypt_recursive and its pattern!
 friend GCTR
