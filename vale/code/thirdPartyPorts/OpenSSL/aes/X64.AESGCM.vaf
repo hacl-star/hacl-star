@@ -273,6 +273,7 @@ procedure {:quick} Ctr32_ghash_6_prelude(
         inout5 == reverse_bytes_quad32(inc32lite(ctr_orig, 5));
 
         buffer128_read(scratch_b, 1, mem) == Mkfour(0, 0, 0, 0);
+        Z0 == Mkfour(0, 0, 0, 0);
         //scratch_b[1](mem) == Mkfour(0, 0, 0, 0);
 {
     Load_one_msb();   // # borrow $T2, .Lone_msb
@@ -2301,7 +2302,7 @@ procedure {:quick} Loop6x(
 }
 
 #reset-options "--z3rlimit 750"
-procedure {:quick} {:verify true} Loop6x_loop(
+procedure {:quick} Loop6x_loop(
     inline alg:algorithm,  
     ghost h_LE:quad32,
     ghost y_orig:quad32,
@@ -2425,7 +2426,7 @@ procedure {:quick} {:verify true} Loop6x_loop(
         // GCTR
         gctr_partial_opaque(alg, #nat(6*count + old(len) - 6), plain_quads, s128(mem, out_b), key_words, ctr_BE_orig);
 
-        inout0 == quad32_xor(old(buffreverse_bytes_quad32(inc32lite(ctr_orig, 4))er128_read(in_b, 6*count+old(len)-6 + 0, mem)), aes_encrypt_BE(alg, key_words, inc32lite(ctr_BE_orig, 6*count + old(len) - 6)));
+        inout0 == quad32_xor(old(buffer128_read(in_b, 6*count+old(len)-6 + 0, mem)), aes_encrypt_BE(alg, key_words, inc32lite(ctr_BE_orig, 6*count + old(len) - 6)));
         inout1 == quad32_xor(old(buffer128_read(in_b, 6*count+old(len)-6 + 1, mem)), aes_encrypt_BE(alg, key_words, inc32lite(ctr_BE_orig, 6*count + old(len) - 6 + 1)));
         inout2 == quad32_xor(old(buffer128_read(in_b, 6*count+old(len)-6 + 2, mem)), aes_encrypt_BE(alg, key_words, inc32lite(ctr_BE_orig, 6*count + old(len) - 6 + 2)));
         inout3 == quad32_xor(old(buffer128_read(in_b, 6*count+old(len)-6 + 3, mem)), aes_encrypt_BE(alg, key_words, inc32lite(ctr_BE_orig, 6*count + old(len) - 6 + 3)));
@@ -2549,7 +2550,6 @@ procedure {:quick} {:verify true} Loop6x_loop(
 }
 
 
-/*
 #reset-options "--z3rlimit 40"
 procedure {:quick} AESNI_ctr32_6x_preamble(
     inline alg:algorithm,  // OpenSSL includes the number of rounds (nr) as a dynamic parameter (stored with the key).  Saves code space but adds extra instructions to the fast path.  Maybe branch predictor is good enough for it not to matter
@@ -3596,10 +3596,8 @@ procedure {:quick} GCM_finalize(
 }
 
 
-// This version is designed to be integrated into a larger procedure that handles non-multiple of 6 lengths
-// Hence the requirements and guarantees are a bit weaker
 #reset-options "--z3rlimit 30"
-procedure {:quick} {:public} AES_GCM_encrypt_6mult(
+procedure {:quick} {:public} {:verify true} AES_GCM_encrypt_6mult(
     inline alg:algorithm,  
     ghost h_LE:quad32,
     ghost iv_b:buffer128,
@@ -3667,8 +3665,9 @@ procedure {:quick} {:public} AES_GCM_encrypt_6mult(
         buffer_addr(keys_b, mem) + 0x80 < pow2_64;
         aes_reqs_offset(alg, key_words, round_keys, keys_b, key + 0x80, mem, memTaint);
 
-        // GCM reqs
+        // GHash reqs
         pclmulqdq_enabled;
+        hkeys_reqs(hkeys_b, h_LE, mem);
 
         // Len is # of 128-bit blocks
         len % 6 == 0;
@@ -3712,6 +3711,7 @@ procedure {:quick} {:public} AES_GCM_encrypt_6mult(
         ghost var plain_quads := s128(mem, in_b);
 
         Load128_buffer(T1, ivp, 0, Secret, iv_b, 0);    // # input counter value
+        Store128_buffer(ivp, Xi, 0x00, Secret, iv_b, 0); // Save a copy of the interm. hash in Xi
         ghost var iv_LE := T1;
         Add64(key, 0x80);           // # size optimization 
         // TODO: Replace all of this with a single PinsrdImm(T1, 0x02000000, 3, counter)
@@ -3723,7 +3723,8 @@ procedure {:quick} {:public} AES_GCM_encrypt_6mult(
         //assert ctr_BE == Mkfour(2, iv_BE.lo1, iv_BE.hi2, iv_BE.hi3);
         VPshufb(T1, T1, Ii);
 
-        Mov64(in0, outp);
+        //Mov64(in0, outp); // OpenSSL uses this, and then does complicated in0 manipulation inside Loop6x
+        AddLea64(in0, outp, 96); // 96 == 128/8*6
 
         gctr_partial_opaque_init(alg, s128(mem, in_b), s128(mem, out_b), key_words, ctr_BE);
         AESNI_ctr32_6x(alg, 0, in_b, out_b, plain_quads, key_words, round_keys, keys_b, ctr_BE, ctr_BE);
@@ -3743,8 +3744,8 @@ procedure {:quick} {:public} AES_GCM_encrypt_6mult(
         AESNI_ctr32_6x(alg, 1, in_b, out_b, plain_quads, key_words, round_keys, keys_b, inc32(ctr_BE, 6), ctr_BE);
         Sub64(len, 12);
         // TODO: OpenSSL does this to enable multiple incremental calls.  For now, we only handle one, so Xi = X0 = Mkfour 0 0 0 0
-        ZeroXmm(Xi);
         //Load128_buffer(Xi, Xip, 0, Secret, hkeys_b, 0); // # load Xi
+        Load128_buffer(Xi, ivp, 0, Secret, iv_b, 0);      // # load interm. hash (Xi)
         AddLea64(Xip, Xip, 0x20);   // # size optimization
 
         Ctr32_ghash_6_prelude(alg, scratch_b, key_words, round_keys, keys_b, inc32(ctr_BE, 12));
@@ -3755,7 +3756,11 @@ procedure {:quick} {:public} AES_GCM_encrypt_6mult(
         //assert {:quick_type} old(len) < pow2_32;
         //ghost var old_len:nat32 := #nat32(old(len));
         //assert mid_len == old(len) - 12;
-        Loop6x_loop(alg, h_LE, 2, iv_b, out_b, in_b, out_b, scratch_b, old(s128(mem, in_b)), key_words, round_keys, keys_b, hkeys_b, ctr_BE, inc32(ctr_BE, 12)); 
+        lemma_quad32_zero();
+        lemma_add_zero(of_quad32(Xi));
+        assert of_quad32(Xi) == of_quad32(Xi) +. of_quad32(Z0) +. of_quad32(buffer128_read(scratch_b, 1, mem));
+        assert to_quad32(of_quad32(Xi)) == Xi;
+        (ghost var y_new) := Loop6x_loop(alg, h_LE, reverse_bytes_quad32(Xi), reverse_bytes_quad32(Xi), 2, iv_b, out_b, in_b, out_b, scratch_b, old(s128(mem, in_b)), key_words, round_keys, keys_b, hkeys_b, ctr_BE, inc32(ctr_BE, 12)); 
         //test(T1, ctr_BE, mid_len);
         Store128_buffer(ivp, T1, 0x00, Secret, iv_b, 0);
 
@@ -3783,6 +3788,4 @@ procedure {:quick} {:public} AES_GCM_encrypt_6mult(
         assume Xi == ghash_incremental0(h_LE, old(Xi), s128(mem, out_b));
     }
 }
-
-*/
 
