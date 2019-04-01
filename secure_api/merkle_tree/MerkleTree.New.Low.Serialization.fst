@@ -168,21 +168,26 @@ private let serialize_hash_vv (ok:bool) (x:hash_vv) (buf:uint8_p) (sz:uint32_t{B
     else (ok, pos)
   end
 
+(*
+ * AR: 04/01: Strengthening the postcondition of the deserialize_ functions
+ *              to say that they don't change the memory, else they are too weak to do framing
+ *)
+
 private let deserialize_bool (ok:bool) (buf:uint8_p) (sz:uint32_t{B.len buf = sz}) (pos:uint32_t): HST.ST (bool & uint32_t & bool)
   (requires (fun h0 -> B.live h0 buf))
-  (ensures (fun _ _ h1 -> B.live h1 buf))
+  (ensures  (fun h0 _ h1 -> h0 == h1))
 = if not ok || pos >= sz then (false, pos, false)
   else (true, pos + 1ul, (match B.index buf pos with| 0uy -> false | _ -> true))
 
 private let deserialize_uint8_t (ok:bool) (buf:uint8_p) (sz:uint32_t{B.len buf = sz}) (pos:uint32_t): HST.ST (bool & uint32_t & uint8_t)
   (requires (fun h0 -> B.live h0 buf))
-  (ensures (fun _ _ h1 -> B.live h1 buf))
+  (ensures  (fun h0 _ h1 -> h0 == h1))
 = if not ok || pos >= sz then (false, pos, 0uy)
   else (true, pos + 1ul, B.index buf pos)
 
 private let deserialize_uint16_t (ok:bool) (buf:uint8_p) (sz:uint32_t{B.len buf = sz}) (pos:uint32_t): HST.ST (bool & uint32_t & uint16_t)
   (requires (fun h0 -> B.live h0 buf))
-  (ensures (fun _ _ h1 -> B.live h1 buf))
+  (ensures  (fun h0 _ h1 -> h0 == h1))
 = if not ok || pos >= sz then (false, pos, 0us)
   else begin
     let ok, pos, b0 = deserialize_uint8_t ok buf sz pos in
@@ -192,7 +197,7 @@ private let deserialize_uint16_t (ok:bool) (buf:uint8_p) (sz:uint32_t{B.len buf 
 
 private let deserialize_uint32_t (ok:bool) (buf:uint8_p) (sz:uint32_t{B.len buf = sz}) (pos:uint32_t): HST.ST (bool & uint32_t & uint32_t)
   (requires (fun h0 -> B.live h0 buf))
-  (ensures (fun _ _ h1 -> B.live h1 buf))
+  (ensures  (fun h0 _ h1 -> h0 == h1))
 = if not ok || pos >= sz then (false, pos, 0ul)
   else begin
     let ok, pos, b0 = deserialize_uint16_t ok buf sz pos in
@@ -202,7 +207,7 @@ private let deserialize_uint32_t (ok:bool) (buf:uint8_p) (sz:uint32_t{B.len buf 
 
 private let deserialize_uint64_t (ok:bool) (buf:uint8_p) (sz:uint32_t{B.len buf = sz}) (pos:uint32_t): HST.ST (bool & uint32_t & uint64_t)
   (requires (fun h0 -> B.live h0 buf))
-  (ensures (fun _ _ h1 -> B.live h1 buf))
+  (ensures  (fun h0 _ h1 -> h0 == h1))
 = if not ok || pos >= sz then (false, pos, 0UL)
   else begin
     let ok, pos, b0 = deserialize_uint32_t ok buf sz pos in
@@ -219,7 +224,7 @@ private let deserialize_hash (ok:bool) (buf:uint8_p) (sz:uint32_t{B.len buf = sz
                                    HS.disjoint (B.frameOf buf) r /\ 
                                    (k ==> Rgl?.r_inv hreg h1 h) /\
                                    loc_disjoint (loc_buffer buf) (loc_buffer h) /\
-                                   modifies (loc_buffer h) h0 h1))
+                                   modifies B.loc_none h0 h1))  //AR: 04/01: modifies only local state
 = if not ok || pos >= sz then (false, pos, Rgl?.dummy hreg)
   else if sz - pos < hash_size then (false, pos, Rgl?.dummy hreg)
   else begin
@@ -227,20 +232,37 @@ private let deserialize_hash (ok:bool) (buf:uint8_p) (sz:uint32_t{B.len buf = sz
     B.blit buf pos hash 0ul hash_size;
     (true, pos + hash_size, hash)    
   end
-  
-// joonwonc: there is a quite hard disjointness problem here; need to talk about it.
+
+(*
+ * AR: 04/01: The precondition of frameOf buf being disjoint from loc_rvector res
+ *              is overly restrictive, we only need disjointness of buf and loc_vector res
+ *)
 private let rec deserialize_hash_vec_i (ok:bool) (buf:uint8_p) (sz:uint32_t{B.len buf = sz}) (r:HST.erid) (pos:uint32_t) (res:hash_vec) (i:uint32_t{i < V.size_of res})
 : HST.ST (bool & uint32_t)
-  (requires (fun h0 -> B.live h0 buf /\ V.live h0 res /\ HS.disjoint (B.frameOf buf) r /\ loc_disjoint (B.loc_buffer buf) (RV.loc_rvector res)))
-  (ensures (fun h0 (ok, _) h1 -> B.live h1 buf /\ V.live h1 res /\ HS.disjoint (B.frameOf buf) r))
+  (requires (fun h0 ->
+    B.live h0 buf /\ V.live h0 res /\ HS.disjoint (B.frameOf buf) r /\
+    loc_disjoint (B.loc_buffer buf) (V.loc_vector res)))
+  (ensures (fun h0 (ok, _) h1 ->
+    B.live h1 buf /\ V.live h1 res /\ HS.disjoint (B.frameOf buf) r /\
+    B.modifies (B.loc_buffer (V.Vec?.vs res)) h0 h1))  //AR: 04/01: Adding a modifies postcondition
 = if not ok || pos >= sz then (false, pos)
   else begin
     let ok, pos, h = deserialize_hash ok buf sz r pos in
-    if not ok then (false, pos) 
+    if not ok then (false, pos)
     else begin
       V.assign res i h;
-      let h2 = HST.get() in
-      assume (B.live h2 buf);
+      (*
+       * AR: 04/01: The call deserialize_hash_vec_i below needs liveness of buf
+       *            So we have to frame buf liveness for the V.assign call
+       *            V.assign provides a modifies postcondition in terms of
+       *              loc_vector_within, which is a recursive predicate and
+       *              I guess hard to reason about directly
+       *            Whereas to reason about liveness of buf, we only need an
+       *              overapproximation that V.assign modifies V.Vec?.vs res
+       *            Looking at the Vector library, I found the following lemma
+       *              that does the trick
+       *)      
+      V.loc_vector_within_included res i (i + 1ul);
       let j = i + 1ul in
       if j < V.size_of res then deserialize_hash_vec_i ok buf sz r pos res j
       else (true, pos)
@@ -249,8 +271,10 @@ private let rec deserialize_hash_vec_i (ok:bool) (buf:uint8_p) (sz:uint32_t{B.le
 
 private let deserialize_hash_vec (ok:bool) (buf:uint8_p) (sz:uint32_t{B.len buf = sz}) (r:HST.erid) (pos:uint32_t): HST.ST (bool & uint32_t & hash_vec)
   (requires (fun h0 -> B.live h0 buf /\ HS.disjoint (B.frameOf buf) r))
-  (ensures (fun h0 (k, _, hv) h1 -> B.live h1 buf /\ V.live h1 hv /\
-                                    HS.disjoint (B.frameOf buf) r))
+  (ensures (fun h0 (k, _, hv) h1 ->
+    B.live h1 buf /\ V.live h1 hv /\
+    HS.disjoint (B.frameOf buf) r /\
+    B.modifies B.loc_none h0 h1))  //AR: 04/01: Adding a modifies predicate, only modifies local state
 = if not ok || pos >= sz then (false, pos, Rgl?.dummy hvreg)
   else begin
     let ok, pos, n = deserialize_uint32_t ok buf sz pos in
@@ -258,27 +282,41 @@ private let deserialize_hash_vec (ok:bool) (buf:uint8_p) (sz:uint32_t{B.len buf 
     else if n = 0ul then (true, pos, V.alloc_empty hash)
     else begin
       let res = V.alloc n (Rgl?.dummy hreg) in
-      assume (loc_disjoint (B.loc_buffer buf) (RV.loc_rvector #hash #hreg res));
       let ok, pos = deserialize_hash_vec_i ok buf sz r pos res 0ul in
       (ok, pos, res)
     end
   end
 
+(*
+ * AR: 04/01: The precondition of frameOf buf being disjoint from loc_rvector res
+ *              is overly restrictive, we only need disjointness of buf and loc_vector res
+ *)
 private let rec deserialize_hash_vv_i (ok:bool) (buf:uint8_p) (sz:uint32_t{B.len buf = sz}) (r:HST.erid) (pos:uint32_t) (res:hash_vv) (i:uint32_t{i < V.size_of res})
 : HST.ST (bool & uint32_t)
-  (requires (fun h0 -> B.live h0 buf /\ V.live h0 res /\ HS.disjoint (B.frameOf buf) r))
+  (requires (fun h0 ->
+    B.live h0 buf /\ V.live h0 res /\ HS.disjoint (B.frameOf buf) r /\
+    B.loc_disjoint (B.loc_buffer buf) (V.loc_vector res)))
   (ensures (fun h0 _ h1 -> B.live h1 buf /\ HS.disjoint (B.frameOf buf) r))
-= if not ok || pos >= sz then (false, 0ul)
+= 
+  if not ok || pos >= sz then (false, 0ul)
   else begin
     let ok, pos, hv = deserialize_hash_vec ok buf sz r pos in
     let h0 = HST.get() in
     if not ok then (false, pos) 
     else begin
-      assume (V.live h0 res);
       V.assign res i hv;
-      let h1 = HST.get() in
-      assume (B.live h1 buf);
-      assert (V.live h1 res);
+      (*
+       * AR: 04/01: The call deserialize_hash_vv_i below needs liveness of buf
+       *            So we have to frame buf liveness for the V.assign call
+       *            V.assign provides a modifies postcondition in terms of
+       *              loc_vector_within, which is a recursive predicate and
+       *              I guess hard to reason about directly
+       *            Whereas to reason about liveness of buf, we only need an
+       *              overapproximation that V.assign modifies V.Vec?.vs res
+       *            Looking at the Vector library, I found the following lemma
+       *              that does the trick
+       *)      
+      V.loc_vector_within_included res i (i + 1ul);
       let j = i + 1ul in
       if j = V.size_of res then (true, pos)
       else deserialize_hash_vv_i ok buf sz r pos res j      
@@ -350,15 +388,12 @@ let mt_serialize mt output sz =
   if ok then pos else 0ul
 
 val mt_deserialize: rid:HST.erid -> input:uint8_p -> sz:uint32_t{B.len input = sz} -> HST.ST (B.pointer_or_null merkle_tree)
-  (requires (fun h0 -> B.live h0 input))
-  (ensures (fun _ _ h1 -> B.live h1 input))
+  (requires (fun h0 -> B.live h0 input /\ HS.disjoint rid (B.frameOf input)))
+  (ensures  (fun _ _ h1 -> B.live h1 input))
 let mt_deserialize rid input sz =
   let hrid = HST.new_region rid in
   let hvrid = HST.new_region rid in
   let hvvrid = HST.new_region rid in
-  assume (HS.disjoint (B.frameOf input) hrid);
-  assume (HS.disjoint (B.frameOf input) hvrid);
-  assume (HS.disjoint (B.frameOf input) hvvrid);
   let ok, pos, format_version = deserialize_uint8_t true input sz 0ul in
   let ok, pos, hash_size = deserialize_uint32_t ok input sz pos in
   let ok, pos, offset = deserialize_offset_t ok input sz pos in
