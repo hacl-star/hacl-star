@@ -1,6 +1,16 @@
 module Math.Poly2.Bits
 open Arch.TypesNative
 
+let lemma_to_of_uint n u =
+  let a = of_uint n u in
+  let u' = to_uint n a in
+  lemma_index a;
+  lemma_reverse_define_all ();
+  let s = UInt.to_vec #n u in
+  let s' = UInt.to_vec #n u' in
+  assert (equal s s');
+  ()
+
 let rec of_nat x =
   if x = 0 then zero
   else
@@ -58,10 +68,35 @@ let of_nat32_zero =
   lemma_zero_nth 32;
   lemma_equal (of_nat32 0) zero
 
+let of_nat32_ones =
+  lemma_bitwise_all ();
+  lemma_to_nat 32 (ones 32) 0xffffffff
+
+let of_nat32_eq a b =
+  lemma_of_nat_of_uint 32 a;
+  lemma_of_nat_of_uint 32 b;
+  lemma_to_of_uint 32 a;
+  lemma_to_of_uint 32 b;
+  ()
+
 let of_nat32_xor a b =
   lemma_bitwise_all ();
   lemma_ixor_nth_all 32;
   lemma_equal (of_nat32 a +. of_nat32 b) (of_nat32 (ixor a b))
+
+let of_nat32_and a b =
+  lemma_bitwise_all ();
+  lemma_iand_nth_all 32;
+  lemma_equal (poly_and (of_nat32 a) (of_nat32 b)) (of_nat32 (iand a b))
+
+let lemma_poly128_extract_nat32s a0 a1 a2 a3 =
+  let a = poly128_of_nat32s a0 a1 a2 a3 in
+  lemma_bitwise_all ();
+  lemma_equal (of_nat32 a0) (mask a 32);
+  lemma_equal (of_nat32 a1) (mask (shift a (-32)) 32);
+  lemma_equal (of_nat32 a2) (mask (shift a (-64)) 32);
+  lemma_equal (of_nat32 a3) (shift a (-96));
+  ()
 
 #reset-options "--z3rlimit 20"
 let lemma_quad32_of_nat32s a0 a1 a2 a3 =
@@ -76,6 +111,12 @@ let lemma_quad32_to_nat32s a =
   reveal_to_quad32 a;
   lemma_bitwise_all ();
   lemma_equal a (poly128_of_nat32s a0 a1 a2 a3)
+
+let lemma_quad32_extract_nat32s a =
+  let Mkfour a0 a1 a2 a3 = to_quad32 a in
+  lemma_quad32_to_nat32s a;
+  lemma_poly128_extract_nat32s a0 a1 a2 a3;
+  ()
 
 let lemma_quad32_double a =
   let q = to_quad32 a in
@@ -130,3 +171,10 @@ let lemma_of_to_quad32 a =
   lemma_reverse_define_all ();
   lemma_equal a (of_quad32 (to_quad32 a))
 
+let lemma_of_to_quad32_mask a =
+  reveal_to_quad32 a;
+  reveal_of_quad32 (to_quad32 a);
+  lemma_index_all ();
+  lemma_reverse_define_all ();
+  lemma_mask_define_all ();
+  lemma_equal (mask a 128) (of_quad32 (to_quad32 a))

@@ -9,7 +9,7 @@
 #include <stdbool.h>
 #include <time.h>
 
-#include "Hacl_Curve25519_new.h"
+#include "Hacl_Curve25519.h"
 
 typedef __attribute__((aligned(32))) uint8_t X25519_KEY[32];
 

@@ -120,4 +120,4 @@ let lowstar_fsub_t =
     (W.mk_prediction code_fsub dom [] (fsub_lemma code_fsub IA.win))
 
 [@ (CCConv "stdcall") ]
-val fsub: normal lowstar_fsub_t
+val fsub_: normal lowstar_fsub_t

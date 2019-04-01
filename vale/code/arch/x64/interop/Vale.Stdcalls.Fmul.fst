@@ -9,7 +9,7 @@ let lowstar_fmul : lowstar_fmul_t  =
     fmul_dom
     (W.mk_prediction code_fmul fmul_dom [] (fmul_lemma code_fmul IA.win))
 
-let fmul = as_normal_t #lowstar_fmul_t lowstar_fmul
+let fmul_ = as_normal_t #lowstar_fmul_t lowstar_fmul
 
 (* And here's the fmul2 wrapper itself *)
 let lowstar_fmul2 : lowstar_fmul2_t  =

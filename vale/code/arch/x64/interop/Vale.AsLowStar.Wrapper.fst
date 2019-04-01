@@ -85,6 +85,8 @@ let arg_is_registered_root (s:ME.mem) (a:arg) =
     List.memP (imm_to_b8 src x) (ptrs_of_mem (as_mem s))    
   | _ -> true
 
+#set-options "--z3rlimit 20"
+
 let core_create_lemma_readable
     (#max_arity:nat)
     (#arg_reg:IX64.arg_reg_relation max_arity)
@@ -185,8 +187,6 @@ let core_create_lemma_mem_correspondance
     in
     BigOps.big_and'_forall (live_arg h0) args;
     aux args
-
-#set-options "--z3rlimit 20"
 
 let rec register_args'
     (max_arity:nat)

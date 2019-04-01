@@ -115,6 +115,8 @@ open LowStar.Buffer
 
 //18-03-05 TODO drop hkdf_ prefix? conflicts with spec name
 
+(** @type: true
+*)
 val hkdf_extract :
   a       : alg ->
   prk     : uint8_pl (tagLength a) ->
@@ -129,6 +131,8 @@ val hkdf_extract :
     length ikm + blockLength a < maxLength a /\
     as_seq h1 prk == HMAC.hmac a (as_seq h0 salt) (as_seq h0 ikm)))
 
+(** @type: true
+*)
 val hkdf_expand :
   a       : alg ->
   okm     : uint8_p ->

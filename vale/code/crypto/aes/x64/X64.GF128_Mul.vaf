@@ -42,12 +42,12 @@ open X64.Vale.QuickCodes
 open X64.CPU_Features_s
 #endverbatim
 
-procedure{:quick} ShiftLeft128_1(ghost a:poly)
+procedure{:public}{:quick} ShiftLeft128_1(ghost a:poly)
     modifies
         efl;
         xmm1; xmm2;
     requires
-        degree(a) < 127;
+        degree(a) < 128;
         xmm1 == to_quad32(a);
     ensures
         xmm1 == to_quad32(shift(a, 1));
@@ -329,3 +329,20 @@ procedure{:quick}{:public} ReduceMulRev128(ghost a:poly, ghost b:poly)
     AddPoly(xmm1, xmm5, rdhLh, div(rdh, m));
     AddPoly(xmm1, xmm6, add(rdhLh, div(rdh, m)), div(rab, m));
 }
+
+procedure{:quick}{:public} Gf128MulRev128()
+    lets
+        a := of_quad32(xmm1);
+        b := of_quad32(xmm2);
+    modifies
+        efl; r12;
+        xmm1; xmm2; xmm3; xmm4; xmm5; xmm6;
+    requires
+        pclmulqdq_enabled;
+    ensures
+        of_quad32(xmm1) == gf128_mul_rev(a, b);
+{
+    ReduceMulRev128(reverse(a, 127), reverse(b, 127));
+    lemma_of_to_quad32(gf128_mul_rev(a, b));
+}
+

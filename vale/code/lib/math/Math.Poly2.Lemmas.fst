@@ -18,6 +18,12 @@ let lemma_monomial_define n =
 let lemma_monomial_define_all () =
   FStar.Classical.forall_intro_with_pat (fun n -> monomial n) lemma_monomial_define
 
+let lemma_ones_define n =
+  FStar.Classical.forall_intro (lemma_ones_define_i n)
+
+let lemma_ones_define_all () =
+  FStar.Classical.forall_intro_with_pat (fun n -> ones n) lemma_ones_define
+
 let lemma_shift_define p n =
   FStar.Classical.forall_intro (lemma_shift_define_i p n)
 
@@ -26,6 +32,18 @@ let lemma_shift_define_forward p n =
 
 let lemma_shift_define_all () =
   FStar.Classical.forall_intro_2_with_pat (fun p n -> shift p n) lemma_shift_define
+
+let lemma_and_define a b =
+  FStar.Classical.forall_intro (lemma_and_define_i a b)
+
+let lemma_and_define_all () =
+  FStar.Classical.forall_intro_2_with_pat (fun a b -> poly_and a b) lemma_and_define
+
+let lemma_or_define a b =
+  FStar.Classical.forall_intro (lemma_or_define_i a b)
+
+let lemma_or_define_all () =
+  FStar.Classical.forall_intro_2_with_pat (fun a b -> poly_or a b) lemma_or_define
 
 let lemma_mask_define p n =
   FStar.Classical.forall_intro (lemma_mask_define_i p n);
@@ -40,10 +58,6 @@ let lemma_reverse_define p n =
 let lemma_reverse_define_all () =
   FStar.Classical.forall_intro_2 lemma_reverse_define
 
-let lemma_degree_is a n =
-  lemma_index_i a n;
-  lemma_degree a
-
 let lemma_degree_negative a =
   let f (i:int) : Lemma (not a.[i]) =
     lemma_index_i a i
@@ -52,13 +66,26 @@ let lemma_degree_negative a =
   lemma_zero_define ();
   lemma_equal a zero
 
+let lemma_degree_is a n =
+  lemma_index a;
+  lemma_index_i a n;
+  lemma_degree a
+
 let lemma_zero_degree =
   lemma_degree zero;
   lemma_zero_define ()
 
+let lemma_one_degree =
+  lemma_one_define ();
+  lemma_degree_is one 0
+
 let lemma_monomial_degree n =
   lemma_monomial_define n;
   lemma_degree_is (monomial n) n
+
+let lemma_ones_degree n =
+  lemma_ones_define n;
+  lemma_degree_is (ones n) (n - 1)
 
 let lemma_shift_degree a n =
   lemma_index a;
@@ -72,6 +99,20 @@ let lemma_shift_degree a n =
   )
   else
     lemma_degree_is (shift a n) (degree a + n)
+
+let lemma_and_degree a b =
+  lemma_and_define a b;
+  lemma_index_all ();
+  lemma_degree a;
+  lemma_degree b;
+  lemma_degree (poly_and a b)
+
+let lemma_or_degree a b =
+  lemma_or_define a b;
+  lemma_index_all ();
+  lemma_degree a;
+  lemma_degree b;
+  lemma_degree_is (poly_or a b) (FStar.Math.Lib.max (degree a) (degree b)) 
 
 let lemma_mask_degree a n =
   lemma_mask_define a n;
@@ -115,7 +156,10 @@ let lemma_bitwise_all () =
   lemma_zero_define ();
   lemma_one_define ();
   lemma_monomial_define_all ();
+  lemma_ones_define_all ();
   lemma_shift_define_all ();
+  lemma_and_define_all ();
+  lemma_or_define_all ();
   lemma_mask_define_all ();
   lemma_reverse_define_all ();
   lemma_add_define_all ();
@@ -125,6 +169,61 @@ let lemma_monomial_add_degree n a =
   lemma_bitwise_all ();
   lemma_degree_is (monomial n +. a) n;
   lemma_degree_is (a +. monomial n) n;
+  ()
+
+let lemma_and_zero a =
+  lemma_bitwise_all ();
+  lemma_equal (poly_and a zero) zero;
+  lemma_equal (poly_and zero a) zero;
+  ()
+
+let lemma_and_ones a n =
+  lemma_bitwise_all ();
+  lemma_equal (poly_and a (ones n)) a;
+  lemma_equal (poly_and (ones n) a) a;
+  ()
+
+let lemma_and_ones_smt (a:poly) (n:nat) : Lemma
+  (requires degree a < n)
+  (ensures poly_and a (ones n) == a /\ poly_and (ones n) a == a)
+  [SMTPat (poly_and a (ones n)); SMTPat (poly_and (ones n) a)]
+  =
+  lemma_and_ones a n
+
+let lemma_and_consts () =
+  let f1 a n : Lemma (degree a < n ==> poly_and a (ones n) == a) =
+    if degree a < n then lemma_and_ones a n
+    in
+  let f2 a n : Lemma (degree a < n ==> poly_and (ones n) a == a) =
+    if degree a < n then lemma_and_ones a n
+    in
+  FStar.Classical.forall_intro lemma_and_zero;
+  FStar.Classical.forall_intro_2 f1;
+  FStar.Classical.forall_intro_2 f2;
+  ()
+
+let lemma_or_zero a =
+  lemma_bitwise_all ();
+  lemma_equal (poly_or a zero) a;
+  lemma_equal (poly_or zero a) a;
+  ()
+
+let lemma_or_ones a n =
+  lemma_bitwise_all ();
+  lemma_equal (poly_or a (ones n)) (ones n);
+  lemma_equal (poly_or (ones n) a) (ones n);
+  ()
+
+let lemma_or_consts () =
+  let f1 a n : Lemma (degree a < n ==> poly_or a (ones n) == (ones n)) =
+    if degree a < n then lemma_or_ones a n
+    in
+  let f2 a n : Lemma (degree a < n ==> poly_or (ones n) a == (ones n)) =
+    if degree a < n then lemma_or_ones a n
+    in
+  FStar.Classical.forall_intro lemma_or_zero;
+  FStar.Classical.forall_intro_2 f1;
+  FStar.Classical.forall_intro_2 f2;
   ()
 
 let lemma_mul_distribute_left a b c =

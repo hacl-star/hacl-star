@@ -118,6 +118,7 @@ let chacha20_set_counter (st:state) (c:counter) : Tot state =
 
 let chacha20_key_block0 (k:key) (n:nonce) : Tot block =
   let st = chacha20_init k n 0 in
+  let st = chacha20_core 0 st in
   uints_to_bytes_le st
 
 let xor_block (k:state) (b:block) : block  = 

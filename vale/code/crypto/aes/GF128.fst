@@ -76,7 +76,7 @@ let lemma_gf128_constant_rev q =
   let n3:nat32 = 0xe1000000 in
   calc (==) {
     Mkfour n0 n1 n2 n3;
-    == { lemma_quad32_of_nat32s n0 n1 n2 n3 }
+    == {lemma_quad32_of_nat32s n0 n1 n2 n3}
     to_quad32 (poly128_of_nat32s n0 n1 n2 n3);
     == {
       lemma_bitwise_all ();
@@ -598,6 +598,123 @@ let lemma_gf128_low_shift () =
     reverse r3 63;
   }
 
+let lemma_gf128_high_bit () =
+  let n0:nat32 = 0 in
+  let n1:nat32 = 0 in
+  let n2:nat32 = 0 in
+  let n3:nat32 = 0x80000000 in
+  let a = monomial 127 in
+  let a3 = monomial 31 in
+  calc (==) {
+    of_quad32 (Mkfour n0 n1 n2 n3);
+    == {lemma_quad32_of_nat32s n0 n1 n2 n3}
+    of_quad32 (to_quad32 (poly128_of_nat32s n0 n1 n2 n3));
+    == {
+      lemma_bitwise_all ();
+      lemma_to_nat 32 a3 n3;
+      lemma_equal (poly128_of_nat32s n0 n1 n2 n3) a
+    }
+    of_quad32 (to_quad32 a);
+    == {lemma_of_to_quad32 a}
+    a;
+  }
+
+let lemma_gf128_low_shift_1 () =
+  let n0:nat32 = 1 in
+  let n1:nat32 = 0 in
+  let n2:nat32 = 0 in
+  let n3:nat32 = 0xc2000000 in
+  let a = reverse (shift (monomial 128 +. gf128_modulus_low_terms) (-1)) 127 in
+  let a0 = one in
+  let a3 = reverse gf128_low_shift 31 in
+  calc (==) {
+    of_quad32 (Mkfour n0 n1 n2 n3);
+    == {lemma_quad32_of_nat32s n0 n1 n2 n3}
+    of_quad32 (to_quad32 (poly128_of_nat32s n0 n1 n2 n3));
+    == {
+      lemma_bitwise_all ();
+      lemma_to_nat 32 a0 n0;
+      lemma_to_nat 32 a3 n3;
+      lemma_equal (poly128_of_nat32s n0 n1 n2 n3) a
+    }
+    of_quad32 (to_quad32 a);
+    == {lemma_of_to_quad32 a}
+    a;
+  }
+
+let lemma_gf128_mul_rev_commute a b =
+  lemma_mul_all ()
+
+let lemma_gf128_mul_rev_associate a b c =
+  let rev x = reverse x 127 in
+  let ra = rev a in
+  let rb = rev b in
+  let rc = rev c in
+  let g = gf128_modulus in
+  lemma_gf128_degree ();
+  calc (==) {
+    a *~ (b *~ c);
+    == {}
+    rev (ra *. (rb *. rc %. g) %. g);
+    == {lemma_mod_mul_mod_right ra (rb *. rc) g}
+    rev (ra *. (rb *. rc) %. g);
+    == {lemma_mul_associate ra rb rc}
+    rev ((ra *. rb) *. rc %. g);
+    == {lemma_mod_mul_mod (ra *. rb) g rc}
+    rev ((ra *. rb %. g) *. rc %. g);
+    == {}
+    (a *~ b) *~ c;
+  }
+
+let lemma_gf128_mul_rev_distribute_left a b c =
+  let rev x = reverse x 127 in
+  let ra = rev a in
+  let rb = rev b in
+  let rc = rev c in
+  let g = gf128_modulus in
+  lemma_gf128_degree ();
+  calc (==) {
+    (a +. b) *~ c;
+    == {}
+    rev (rev (a +. b) *. rc %. g);
+    == {lemma_add_reverse a b 127}
+    rev ((ra +. rb) *. rc %. g);
+    == {lemma_mul_distribute_left ra rb rc}
+    rev ((ra *. rc +. rb *. rc) %. g);
+    == {lemma_mod_distribute (ra *. rc) (rb *. rc) g}
+    rev (ra *. rc %. g +. rb *. rc %. g);
+    == {lemma_add_reverse (ra *. rc %. g) (rb *. rc %. g) 127}
+    rev (ra *. rc %. g) +. rev (rb *. rc %. g);
+    == {}
+    (a *~ c) +. (b *~ c);
+  }
+
+let lemma_gf128_mul_rev_distribute_right a b c =
+  calc (==) {
+    a *~ (b +. c);
+    == {lemma_gf128_mul_rev_commute a (b +. c)}
+    (b +. c) *~ a;
+    == {lemma_gf128_mul_rev_distribute_left b c a}
+    b *~ a +. c *~ a;
+    == {lemma_gf128_mul_rev_commute a b; lemma_gf128_mul_rev_commute a c}
+    a *~ b +. a *~ c;
+  }
+
+let lemma_add_mod_rev n a1 a2 b =
+  let rev x = reverse x (n - 1) in
+  let rev' x = reverse x (n + n - 1) in
+  calc (==) {
+    // mod_rev n (a1 +. a2) b;
+    rev (rev' (a1 +. a2) %. b);
+    == {lemma_add_reverse a1 a2 (n + n - 1)}
+    rev ((rev' a1 +. rev' a2) %. b);
+    == {lemma_mod_distribute (rev' a1) (rev' a2) b}
+    rev (rev' a1 %. b +. rev' a2 %. b);
+    == {lemma_add_reverse (rev' a1 %. b) (rev' a2 %. b) (n - 1)}
+    rev (rev' a1 %. b) +. rev (rev' a2 %. b);
+    // mod_rev n a1 b +. mod_rev n a2 b
+  }
+
 let lemma_shift_key_1 n f h =
   let g = monomial n +. f in
   lemma_monomial_add_degree n f;
@@ -624,6 +741,33 @@ let lemma_shift_key_1 n f h =
       }
       rev h %. g;
     }
+
+let lemma_test_high_bit a =
+  calc (==) {
+    of_nat ((to_quad32 (monomial 127)).hi3);
+    == {lemma_quad32_extract_nat32s (monomial 127)}
+    shift (monomial 127) (-96);
+  };
+  calc (==) {
+    of_nat (to_quad32 (poly_and a (monomial 127))).hi3;
+    == {lemma_quad32_extract_nat32s (poly_and a (monomial 127))}
+    shift (poly_and a (monomial 127)) (-96);
+  };
+  if (shift (monomial 127) (-96) = shift (poly_and a (monomial 127)) (-96)) then
+  (
+    of_nat32_eq (to_quad32 (poly_and a (monomial 127))).hi3 ((to_quad32 (monomial 127)).hi3);
+    lemma_bitwise_all ();
+    assert ((shift (monomial 127) (-96)).[31]);
+    assert ((shift (poly_and a (monomial 127)) (-96)).[31]);
+    assert (a.[127]);
+    ()
+  );
+  if a.[127] then
+  (
+    lemma_bitwise_all ();
+    lemma_equal (shift (monomial 127) (-96)) (shift (poly_and a (monomial 127)) (-96));
+    ()
+  )
 
 let lemma_Mul128 a b =
   let aL = mask a 64 in

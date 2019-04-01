@@ -56,8 +56,8 @@ let iv_length (a: alg): nat =
 let ekv_length: supported_alg -> nat =
   function
   | CHACHA20_POLY1305 -> 32
-  | AES128_GCM -> 176
-  | AES256_GCM -> 240
+  | AES128_GCM -> 176 + 160 // Include the hashed keys here
+  | AES256_GCM -> 240 + 160 // Include the hashed keys here
 
 // Maximum length for both plaintexts and additional data.
 //
@@ -72,7 +72,7 @@ let ekv_length: supported_alg -> nat =
 let max_length: supported_alg -> nat =
   function
   | CHACHA20_POLY1305 -> pow2 32 - 1 - 16
-  | AES128_GCM | AES256_GCM -> pow2 20 - 1
+  | AES128_GCM | AES256_GCM -> assert_norm (pow2 20 - 1 - 16 >= 0); pow2 20 - 1 - 16
 
 // Proudly defining this type abbreviation for the tenth time in HACL*!
 let lbytes (l:nat) = b:Seq.seq UInt8.t { Seq.length b = l }

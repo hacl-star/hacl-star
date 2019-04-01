@@ -170,6 +170,41 @@ let gcm_simplify3 b h =
   simplify_be_quad32 (low_buffer_read TUInt8 TUInt128 h b 0);
   gcm_simplify2 b h
 
+let lemma_same_seq_dv (h:HS.mem) (b:B.buffer UInt8.t) : Lemma
+  (Seq.equal (B.as_seq h b) (DV.as_seq h (get_downview b))) =
+  let db = get_downview b in
+  DV.length_eq db;
+  let aux (i:nat{i < B.length b}) : Lemma (Seq.index (B.as_seq h b) i == Seq.index (DV.as_seq h db) i) =
+    DV.as_seq_sel h db i;
+    DV.get_sel h db i;
+    Opaque_s.reveal_opaque Views.put8_def
+  in Classical.forall_intro aux
+
+let gcm_simplify4 b h =
+  let b' = B.gsub b 32ul 16ul in
+  assert (Seq.equal
+    (B.as_seq h b')
+    (Seq.slice (B.as_seq h b) 32 48));
+  gcm_simplify2 (B.gsub b 32ul 16ul) h;
+  DV.length_eq (get_downview b');
+  assert (Seq.equal
+    (seq_uint8_to_seq_nat8 (Seq.slice (B.as_seq h b) 32 48))
+    (le_quad32_to_bytes (low_buffer_read TUInt8 TUInt128 h b' 0)));
+  DV.length_eq (get_downview b);
+  let b_u = UV.mk_buffer (get_downview b) Views.up_view128 in
+  let b'_u = UV.mk_buffer (get_downview b') Views.up_view128 in
+  UV.length_eq b_u;
+  UV.length_eq b'_u;
+
+  calc (==) {
+    low_buffer_read TUInt8 TUInt128 h b 2;
+    (==) { UV.as_seq_sel h b_u 2; UV.get_sel h b_u 2; lemma_same_seq_dv h b;
+           UV.as_seq_sel h b'_u 0; UV.get_sel h b'_u 0; lemma_same_seq_dv h b' }    
+     low_buffer_read TUInt8 TUInt128 h b' 0;
+  };
+  
+  le_bytes_to_quad32_to_bytes (low_buffer_read TUInt8 TUInt128 h b 2)
+
 #set-options "--z3rlimit 20 --max_fuel 0 --initial_ifuel 1 --max_ifuel 1"
 
 let aes_simplify_aux (s:seq16 nat8) : Lemma
@@ -225,3 +260,10 @@ let aes_simplify2 b h =
       (seq_nat8_to_seq_nat32_LE (seq_uint8_to_seq_nat8 (Seq.slice s_init 0 16)))
       (seq_nat8_to_seq_nat32_LE (seq_uint8_to_seq_nat8 (Seq.slice s_init 16 32)))
     ))
+
+let aes_simplify3 b h s =
+  let db = get_downview b in
+  DV.length_eq db;
+  let ub = UV.mk_buffer db Views.up_view128 in
+  assert (s == UV.as_seq h ub);
+  lemma_seq_nat8_le_seq_quad32_to_bytes_uint32 b h
