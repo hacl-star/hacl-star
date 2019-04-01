@@ -118,6 +118,11 @@ test-ml: $(subst .,_,$(patsubst %.fst,test-ml-%,$(notdir $(wildcard specs/tests/
 
 # Not reusing the -staged automatic target so as to export NOSHORTLOG
 ci:
+	$(MAKE) -C dist/generic
+	$(MAKE) -C dist/compact-gcc
+	$(MAKE) -C dist/compact-msvc
+	$(MAKE) -C dist/compact-c89
+	$(MAKE) -C dist/compact-gcc
 	NOSHORTLOG=1 $(MAKE) vale-fst
 	FSTAR_DEPEND_FLAGS="--warn_error +285" NOSHORTLOG=1 $(MAKE) all-unstaged test-unstaged
 
