@@ -4,6 +4,7 @@ include "../../../arch/x64/X64.Vale.InsVector.vaf"
 include "../../../arch/x64/X64.Vale.InsStack.vaf"
 include "../../../lib/util/x64/X64.Stack.vaf"
 include "../../../thirdPartyPorts/OpenSSL/aes/X64.AESGCM.vaf"
+include "X64.GCMencryptOpt.vaf"
 include "X64.AES.vaf"
 include "X64.GF128_Mul.vaf"
 include "X64.GCTR.vaf"
@@ -36,7 +37,6 @@ include{:fstar}{:open} "X64.Vale.QuickCode"
 include{:fstar}{:open} "X64.Vale.QuickCodes"
 include{:fstar}{:open} "X64.CPU_Features_s"
 include{:fstar}{:open} "Math.Poly2.Bits_s"
-include{:fstar}{:open} "X64.GCMencryptOpt"
 
 module X64.GCMdecryptOpt
 
