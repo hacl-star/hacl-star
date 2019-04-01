@@ -114,19 +114,19 @@ let aes128_gcm_decrypt ctx len out cipher aad_len aad =
   let h1 = ST.get () in
   gcm_update_blocks_padded gcm_ctx aad_len aad;
   gcm_update_blocks_padded gcm_ctx len ciphertext;
-  uint_to_bytes_be #U64 (sub scratch (size 0) (size 8)) (to_u64 (aad_len *. size 8));
-  uint_to_bytes_be #U64 (sub scratch (size 8) (size 8)) (to_u64 (len *. size 8));
+  uint_to_bytes_be #U64 (sub text (size 0) (size 8)) (to_u64 (aad_len *. size 8));
+  uint_to_bytes_be #U64 (sub text (size 8) (size 8)) (to_u64 (len *. size 8));
   gcm_update_blocks gcm_ctx (size 16) text;
   gcm_emit text gcm_ctx;
-  let scratch0 = uint_from_bytes_le #U64 (sub scratch 0ul 8ul) in
-  let scratch1 = uint_from_bytes_le #U64 (sub scratch 8ul 8ul) in
-  let scratch0 = scratch0 ^. tag_mix.(0ul) in
-  let scratch1 = scratch1 ^. tag_mix.(1ul) in
-  uint_to_bytes_le #U64 (sub scratch 0ul 8ul) scratch0;
-  uint_to_bytes_le #U64 (sub scratch 8ul 8ul) scratch1;
+  let text0 = uint_from_bytes_le #U64 (sub text 0ul 8ul) in
+  let text1 = uint_from_bytes_le #U64 (sub text 8ul 8ul) in
+  let text0 = text0 ^. tag_mix.(0ul) in
+  let text1 = text1 ^. tag_mix.(1ul) in
+  uint_to_bytes_le #U64 (sub text 0ul 8ul) text0;
+  uint_to_bytes_le #U64 (sub text 8ul 8ul) text1;
   let h7 = ST.get () in
   loop_nospec #h7 (size 16) result
-    (fun i -> result.(0ul) <- result.(0ul) |. (scratch.(i) ^. tag.(i)));
+    (fun i -> result.(0ul) <- result.(0ul) |. (text.(i) ^. tag.(i)));
   let h8 = ST.get () in
   assert(modifies2 ctx scratch h1 h8);
   let res8 = result.(0ul) in
