@@ -33,6 +33,7 @@ include{:fstar}{:open} "Math.Poly2.Lemmas"
 include{:fstar}{:open} "GF128_s"
 include{:fstar}{:open} "GF128"
 include{:fstar}{:open} "GHash"
+include "X64.AESopt2.vaf"
 
 module X64.AESGCM
 
@@ -72,6 +73,7 @@ open Math.Poly2.Lemmas
 open GF128_s
 open GF128
 open GHash
+open X64.AESopt2
 
 module GCTR = GCTR
 #endverbatim
@@ -3596,7 +3598,7 @@ procedure {:quick} GCM_finalize(
 }
 
 
-#reset-options "--z3rlimit 30"
+#reset-options "--z3rlimit 60"
 procedure {:quick} {:public} {:verify true} AES_GCM_encrypt_6mult(
     inline alg:algorithm,  
     ghost h_LE:quad32,
@@ -3627,7 +3629,7 @@ procedure {:quick} {:public} {:verify true} AES_GCM_encrypt_6mult(
         memTaint;
 
     modifies
-        inp; outp; len; key; Xip; counter; constp; r12; r13; in0;
+        rax; inp; outp; len; key; Xip; counter; constp; r12; r13; in0;  // rax due to X64.AESopt2
         Ii; T1; T2; Hkey; Z0; Z1; Z2; Z3; Xi;
         inout0; inout1; inout2; inout3; inout4; inout5; rndkey;
         mem; efl;
@@ -3761,11 +3763,22 @@ procedure {:quick} {:public} {:verify true} AES_GCM_encrypt_6mult(
         assert of_quad32(Xi) == of_quad32(Xi) +. of_quad32(Z0) +. of_quad32(buffer128_read(scratch_b, 1, mem));
         assert to_quad32(of_quad32(Xi)) == Xi;
         (ghost var y_new) := Loop6x_loop(alg, h_LE, reverse_bytes_quad32(Xi), reverse_bytes_quad32(Xi), 2, iv_b, out_b, in_b, out_b, scratch_b, old(s128(mem, in_b)), key_words, round_keys, keys_b, hkeys_b, ctr_BE, inc32(ctr_BE, 12)); 
+
         //test(T1, ctr_BE, mid_len);
         Store128_buffer(ivp, T1, 0x00, Secret, iv_b, 0);
 
         ghost var out_snapshot := s128(mem, out_b);
         Load128_buffer(Z3, rbp, 0x20, Secret, scratch_b, 2); // # I[5]
+
+        // TODO: Update AESOpt2 so we can skip these steps (borow rndkey, for example, instead of scratch_b[0])
+        ZeroXmm(Z0);
+        Store128_buffer(rbp, Z0, 0x00, Secret, scratch_b, 0);
+        lemma_add_zero(of_quad32(Xi));
+
+        GhashUnroll6x(hkeys_b, scratch_b, h_LE, y_new, slice_workaround(s128(mem, out_b), #nat(old(len)-12), #nat(old(len)-6)));
+
+
+
         InitPshufbMask(Ii, r12);    // # borrow $Ii for .Lbswap_mask
         Load128_buffer(Hkey, Xip, 0x00-0x20, Secret, hkeys_b, 0);   // # $Hkey^1
         VShufpd(T1, Z3, Z3, 0);     // =?= vpunpckhqdq	$Z3,$Z3,$T1
