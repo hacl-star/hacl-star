@@ -10,7 +10,7 @@ OUT_DIR	      = x25519-c
 
 .PHONY: all test stage1 stage2 clean clean-c distclean
 
-all: aesgcm-ni.exe
+all: aesgcm-ni.exe aesgcm-m32.exe
 
 verify: test
 
