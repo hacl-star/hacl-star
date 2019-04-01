@@ -56,6 +56,8 @@ let uint_v_size_lemma s = ()
 
 let size_to_uint32 x = x
 
+let size_to_uint64 x = FStar.Int.Cast.uint32_to_uint64 x
+
 let byte_to_uint8 x = x
 
 let nat_to_uint #t #l x =
