@@ -88,8 +88,7 @@ let aes_reqs
   (key_ptr:int) (mem:memory) (memTaint:memtaint) : prop0
   =
   aesni_enabled /\
-  alg = AES_128 /\
-  //(alg = AES_128 || alg = AES_256) /\
+  (alg = AES_128 \/ alg = AES_256) /\
   is_aes_key_LE alg key /\
   length(round_keys) == nr(alg) + 1 /\
   round_keys == key_to_round_keys_LE alg key /\
@@ -1359,7 +1358,7 @@ procedure {:quick exportOnly}{:public}{:exportSpecs}{:frame false} gcm_blocks_st
 
         // GCTR reqs
         aesni_enabled;
-        alg = AES_128;
+        alg = AES_128 || alg = AES_256;
         is_aes_key_LE(alg, key);
         buffer128_as_seq(mem, keys_b) == key_to_round_keys_LE(alg, key);
         validSrcAddrs128(mem, keys_ptr, keys_b, nr(alg) + 1, memTaint, Secret);
