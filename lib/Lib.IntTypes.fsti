@@ -260,9 +260,9 @@ inline_for_extraction
 val add_mod_lemma: #t:inttype -> #l:secrecy_level ->
              a:uint_t t l ->
              b:uint_t t l ->
-	     Lemma
-	     (ensures (uint_v #t #l (add_mod #t #l a b) == (uint_v a + uint_v b) % modulus t))
-	     [SMTPat (uint_v #t #l (add_mod #t #l a b))]
+             Lemma
+             (ensures (uint_v #t #l (add_mod #t #l a b) == (uint_v a + uint_v b) % modulus t))
+             [SMTPat (uint_v #t #l (add_mod #t #l a b))]
 
 inline_for_extraction
 val add: #t:inttype -> #l:secrecy_level
@@ -341,9 +341,9 @@ inline_for_extraction
 val sub_mod_lemma: #t:inttype -> #l:secrecy_level ->
              a:uint_t t l ->
              b:uint_t t l ->
-	     Lemma
-	     (ensures (uint_v #t #l (sub_mod #t #l a b) == (uint_v a - uint_v b) % modulus t))
-	     [SMTPat (uint_v #t #l (sub_mod #t #l a b))]
+             Lemma
+             (ensures (uint_v #t #l (sub_mod #t #l a b) == (uint_v a - uint_v b) % modulus t))
+             [SMTPat (uint_v #t #l (sub_mod #t #l a b))]
 
 inline_for_extraction
 val sub: #t:inttype -> #l:secrecy_level
@@ -355,9 +355,9 @@ inline_for_extraction
 val sub_lemma: #t:inttype -> #l:secrecy_level ->
              a:uint_t t l ->
              b:uint_t t l{uint_v a >= uint_v b} ->
-	     Lemma
-	     (ensures (uint_v #t #l (sub #t #l a b) == uint_v a - uint_v b))
-	     [SMTPat (uint_v #t #l (sub #t #l a b))]
+             Lemma
+             (ensures (uint_v #t #l (sub #t #l a b) == uint_v a - uint_v b))
+             [SMTPat (uint_v #t #l (sub #t #l a b))]
 
 inline_for_extraction
 val decr: #t:inttype -> #l:secrecy_level

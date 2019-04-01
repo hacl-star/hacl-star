@@ -117,7 +117,8 @@ private val hash_r_alloc:
       hash_r_alloc_p v /\
       hash_r_inv h1 v /\
       hash_region_of v = r /\
-      hash_r_repr h1 v == Ghost.reveal hash_irepr))
+      hash_r_repr h1 v == Ghost.reveal hash_irepr /\
+      B.fresh_loc (B.loc_buffer v) h0 h1))
 private let hash_r_alloc r =
   B.malloc r 0uy hash_size
 
@@ -148,6 +149,7 @@ inline_for_extraction
 val hreg: regional hash
 let hreg =
   Rgl hash_region_of
+      B.loc_buffer
       hash_dummy
       hash_r_inv
       hash_r_inv_reg
@@ -223,7 +225,8 @@ private val hash_vec_r_alloc:
       hash_vec_r_alloc_p v /\
       hash_vec_r_inv h1 v /\
       hash_vec_region_of v = r /\
-      hash_vec_r_repr h1 v == Ghost.reveal hash_vec_irepr))
+      hash_vec_r_repr h1 v == Ghost.reveal hash_vec_irepr /\
+      B.fresh_loc (V.loc_vector v) h0 h1))
 private let hash_vec_r_alloc r =
   let nrid = HST.new_region r in
   let ia = Rgl?.dummy hreg in
@@ -243,6 +246,7 @@ inline_for_extraction
 val hvreg: regional hash_vec
 let hvreg =
   Rgl hash_vec_region_of
+      V.loc_vector
       hash_vec_dummy
       hash_vec_r_inv
       hash_vec_r_inv_reg

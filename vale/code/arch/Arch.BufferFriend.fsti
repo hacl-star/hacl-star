@@ -3,6 +3,7 @@ module Arch.BufferFriend
 module B = LowStar.Buffer
 module LI = Lib.IntTypes
 module BS = Lib.ByteSequence
+module FE = FStar.Endianness
 module HS = FStar.HyperStack
 module DV = LowStar.BufferView.Down
 module UV = LowStar.BufferView.Up
@@ -39,6 +40,15 @@ val lemma_up_as_seq_index (#b:_) (h:HS.mem) (vb:UV.buffer b) (i:nat) : Lemma
 // TODO: this was copied out of Simplify_Sha.fst, but with the liveness requirement on b removed; we could consolidate the two versions
 val same_seq_downview8 (b:B.buffer UInt8.t) (h:HS.mem) : Lemma
   (DV.as_seq h (DV.mk_buffer_view b (Views.down_view8)) == B.as_seq h b)
+
+val lemma_le_to_n_is_nat_from_bytes (s:FE.bytes) : Lemma
+  (ensures FE.le_to_n s == BS.nat_from_bytes_le (to_bytes s))
+  (decreases (length s))
+
+val lemma_n_to_le_is_nat_to_bytes (len:nat) (n:nat) : Lemma
+  (requires n < pow2 (8 * len))
+  (ensures FE.n_to_le len n == of_bytes (BS.nat_to_bytes_le len n))
+  (decreases len)
 
 val nat_from_bytes_le_is_four_to_nat (b:BS.bytes) : Lemma
   (requires length b == 4)

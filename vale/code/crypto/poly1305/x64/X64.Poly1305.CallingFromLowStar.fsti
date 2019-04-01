@@ -61,5 +61,6 @@ val lemma_call_poly1305 (h1 h2:HS.mem) (ctx_b:PS.uint8_p) (inp_b:PS.uint8_p) (sr
     let key_r_spec:nat128 = nat_from_bytes_le (slice key 0 16) in
     let key_s_spec:nat128 = nat_from_bytes_le (slice key 16 32) in
     let h_spec = poly1305_hash key_r key_s (block_fun src) len in
-    key_r == key_r_spec /\ key_s == key_s_spec /\ h_call == h_spec
+    let tag = BF.to_bytes (slice (B.as_seq h2 ctx_b) 0 16) in
+    key_r == key_r_spec /\ key_s == key_s_spec /\ h_call == h_spec /\ h == nat_from_bytes_le tag
   ))
