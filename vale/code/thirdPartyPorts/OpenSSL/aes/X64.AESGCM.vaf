@@ -2220,18 +2220,6 @@ procedure {:quick} {:verify true} Loop6x(
     assert degree(of_quad32(buffer128_read(scratch_b, 1, mem))) < 128;
     assert degree(prev) < 128;
     lemma_of_to_quad32(prev);
-assert Z3 == reverse_bytes_quad32(data[5]);
-assert buffer128_read(scratch_b, 3, mem) == reverse_bytes_quad32(data[4]);
-assert buffer128_read(scratch_b, 4, mem) == reverse_bytes_quad32(data[3]);
-assert buffer128_read(scratch_b, 5, mem) == reverse_bytes_quad32(data[2]);
-assert buffer128_read(scratch_b, 6, mem) == reverse_bytes_quad32(data[1]);
-assert buffer128_read(scratch_b, 7, mem) == reverse_bytes_quad32(data[0]);
-assert of_quad32(buffer128_read(hkeys_b, 0, mem)) == gf128_power(h, 1);
-assert of_quad32(buffer128_read(hkeys_b, 1, mem)) == gf128_power(h, 2);
-assert of_quad32(buffer128_read(hkeys_b, 3, mem)) == gf128_power(h, 3);
-assert of_quad32(buffer128_read(hkeys_b, 4, mem)) == gf128_power(h, 4);
-assert of_quad32(buffer128_read(hkeys_b, 6, mem)) == gf128_power(h, 5);
-assert of_quad32(buffer128_read(hkeys_b, 7, mem)) == gf128_power(h, 6);
 
     (ghost var init0), (ghost var init1), (ghost var init2), 
     (ghost var init3), (ghost var init4), (ghost var init5) := 
@@ -2280,7 +2268,7 @@ assert of_quad32(buffer128_read(hkeys_b, 7, mem)) == gf128_power(h, 6);
     reveal gctr_registers_def;
 }
 
-
+/*
 #reset-options "--z3rlimit 525"
 procedure {:quick} Loop6x_loop(
     inline alg:algorithm,  
@@ -3732,6 +3720,8 @@ procedure {:quick} {:public} AES_GCM_encrypt_6mult(
         assume Xi == ghash_incremental0(h_LE, old(Xi), s128(mem, out_b));
     }
 }
+
+*/
 
 /*
 // This version is meant to be more or less standalone
