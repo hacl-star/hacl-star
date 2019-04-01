@@ -98,18 +98,41 @@ let aes_reqs_offset
 
   s128 mem keys_b == round_keys
 
+
+
+let hkeys_reqs (hkeys_b:buffer128) (h_LE:quad32) (mem:memory) : prop0 =
+  let h = of_quad32 (reverse_bytes_quad32 h_LE) in
+  of_quad32 (buffer128_read hkeys_b 0 mem) == gf128_power h 1 /\
+  of_quad32 (buffer128_read hkeys_b 1 mem) == gf128_power h 2 /\
+  of_quad32 (buffer128_read hkeys_b 3 mem) == gf128_power h 3 /\
+  of_quad32 (buffer128_read hkeys_b 4 mem) == gf128_power h 4 /\
+  of_quad32 (buffer128_read hkeys_b 6 mem) == gf128_power h 5 /\
+  of_quad32 (buffer128_read hkeys_b 7 mem) == gf128_power h 6 
 #endverbatim
 
 #verbatim{:implementation}
 unfold let lo(x:poly):poly = mask x 64
 unfold let hi(x:poly):poly = shift x (-64)
+
+let scratch_reqs (scratch_b:buffer128) (count:nat) (mem:memory) (s:seq quad32) (z3:quad32) : prop0 =
+  let open FStar.Mul in
+  count * 6 + 6 <= length s /\
+  (let data = slice s (count * 6) (count * 6 + 6) in
+   z3 == reverse_bytes_quad32 (index data 5) /\
+   buffer128_read scratch_b 3 mem == reverse_bytes_quad32 (index data 4) /\
+   buffer128_read scratch_b 4 mem == reverse_bytes_quad32 (index data 3) /\
+   buffer128_read scratch_b 5 mem == reverse_bytes_quad32 (index data 2) /\
+   buffer128_read scratch_b 6 mem == reverse_bytes_quad32 (index data 1) /\
+   buffer128_read scratch_b 7 mem == reverse_bytes_quad32 (index data 0))
 #endverbatim
 
 function aes_reqs_offset(alg:algorithm, key:seq(nat32), round_keys:seq(quad32), keys_b:buffer128,
     key_ptr:int, mem:memory, memTaint:memtaint) : prop extern;
+function hkeys_reqs(hkeys_b:buffer128, h_LE:quad32, mem:memory) : prop extern;
 
 function lo(x:poly) : poly extern;
 function hi(x:poly) : poly extern;
+function scratch_reqs(scratch_b:buffer128, count:nat, mem:memory, s:seq(quad32), z3:quad32) : prop extern;
 
 ghost procedure finish_aes_encrypt_le(ghost alg:algorithm, ghost input_LE:quad32, ghost key:seq(nat32))
     requires
@@ -2025,8 +2048,8 @@ procedure {:quick} Loop6x_partial(
 //    assert to_quad32(eventual_Xi) == reverse_bytes_quad32(ghash_incremental(h_LE, y_prev, data));
 }
 
-#reset-options "--z3rlimit 30"
-procedure {:quick} Loop6x(
+#reset-options "--z3rlimit 60"
+procedure {:quick} {:verify true} Loop6x(
     inline alg:algorithm,  
     ghost h_LE:quad32,
     ghost count:nat,        // Number of 6x128-bit blocks processed so far
@@ -2097,8 +2120,10 @@ procedure {:quick} Loop6x(
         aes_reqs_offset(alg, key_words, round_keys, keys_b, key, mem, memTaint);
         rndkey == index(round_keys, 0);
 
-        // GCM reqs
+        // GHash reqs
         pclmulqdq_enabled;
+        hkeys_reqs(hkeys_b, h_LE, mem);
+        scratch_reqs(scratch_b, count, mem, s128(mem, out_b), Z3);
 
         // Counter requirements
         count*6 + 6 < pow2_32;
@@ -2168,6 +2193,13 @@ procedure {:quick} Loop6x(
 
         // GCTR progress
         len > 0 ==> gctr_partial_opaque(alg, 6*(count+1), plain_quads, s128(mem, out_b), key_words, ctr_BE_orig);
+
+        // GHash progress
+//        let h := of_quad32(reverse_bytes_quad32(h_LE));
+//        let prev := old(of_quad32(Xi) +. of_quad32(Z0) +. of_quad32(buffer128_read(scratch_b, 1, mem)));
+//        let y_prev := reverse_bytes_quad32(to_quad32(prev));
+//        len > 0 ==> of_quad32(Xi) +. of_quad32(buffer128_read(scratch_b, 1, mem)) +. of_quad32(Z0) ==
+//            of_quad32(reverse_bytes_quad32(ghash_incremental(h_LE, y_prev, data)));
         
         // Byte reversals for use by GCM
         buffer128_read(scratch_b, 2, mem) == old(reverse_bytes_quad32(buffer128_read(in0_b, (count-2)*6 + 5, mem)));
@@ -2182,8 +2214,12 @@ procedure {:quick} Loop6x(
     let y_prev := reverse_bytes_quad32(to_quad32(prev));
     assert{:quick_type} count * 6 + 6 <= Seq.length(s128(mem, out_b));
     let data := Seq.slice(s128(mem, out_b), count * 6, count * 6 + 6);
-    lemma_of_to_quad32(prev);
 
+    assert degree(of_quad32(Xi)) < 128;
+    assert degree(of_quad32(Z0)) < 128;
+    assert degree(of_quad32(buffer128_read(scratch_b, 1, mem))) < 128;
+    assert degree(prev) < 128;
+    lemma_of_to_quad32(prev);
 assert Z3 == reverse_bytes_quad32(data[5]);
 assert buffer128_read(scratch_b, 3, mem) == reverse_bytes_quad32(data[4]);
 assert buffer128_read(scratch_b, 4, mem) == reverse_bytes_quad32(data[3]);
@@ -2238,6 +2274,8 @@ assert of_quad32(buffer128_read(hkeys_b, 7, mem)) == gf128_power(h, 6);
         VPolyAdd(Xi, Xi, Mem128(rbp, 0x10, Secret, scratch_b, 1));  // # modulo-scheduled 
         VPolyAdd(Xi, Xi, Z0);                                    // # modulo-scheduled 
         assert of_quad32(Xi) == of_quad32(reverse_bytes_quad32(ghash_incremental(h_LE, y_prev, data)));
+        assert to_quad32(of_quad32(Xi)) == to_quad32(of_quad32(reverse_bytes_quad32(ghash_incremental(h_LE, y_prev, data))));
+        assert Xi == reverse_bytes_quad32(ghash_incremental(h_LE, y_prev, data));
     }
     reveal gctr_registers_def;
 }
