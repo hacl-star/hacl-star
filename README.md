@@ -20,6 +20,13 @@ the [KreMLin tool](https://github.com/FStarLang/kremlin/). Details on the verifi
 toolchain and their formal guarantees can be found in the ICFP 2017 paper:
 https://arxiv.org/abs/1703.00053
 
+# Development branch
+
+This branch holds the last public (stable) release of HACL\*. Active development
+and integration, including HACLv2 and the EverCrypt provider, is happening on
+the [fstar-master](https://github.com/project-everest/hacl-star/tree/fstar-master/)
+branch.
+
 # Warning
 
 While HACL* is used in several products such as Mozilla Firefox or Wireguard,
