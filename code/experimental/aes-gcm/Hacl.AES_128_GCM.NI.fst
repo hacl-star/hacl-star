@@ -118,7 +118,7 @@ let aes128_gcm_decrypt ctx len out cipher aad_len aad =
   vec128_store_le text text_vec;
   let h7 = ST.get () in
   loop_nospec #h7 (size 16) result
-    (fun i -> result.(0ul) <- result.(0ul) |. (scratch.(i) ^. tag.(i)));
+    (fun i -> result.(0ul) <- result.(0ul) |. (text.(i) ^. tag.(i)));
   let h8 = ST.get () in
   assert(modifies2 ctx scratch h1 h8);
   let res8 = result.(0ul) in
