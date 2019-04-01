@@ -21,7 +21,7 @@ ifneq (,$(EVEREST_WINDOWS))
 else ifneq (,$(KAIZALA))
   EVERCRYPT_CONFIG = kaizala # hacl, openssl
 else
-  EVERCRYPT_CONFIG ?= default # everything
+  EVERCRYPT_CONFIG ?= everest # everything
 endif
 
 # TODO: no more separate variable definitions?

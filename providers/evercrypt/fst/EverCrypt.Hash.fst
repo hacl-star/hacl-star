@@ -131,7 +131,7 @@ inline_for_extraction noextract
 val update_multi_256: Hacl.Hash.Definitions.update_multi_st SHA2_256
 let update_multi_256 s blocks n =
   let has_shaext = AC.has_shaext () in
-  if SC.vale && has_shaext then begin
+  if false && (SC.vale && has_shaext) then begin
     let n = Int.Cast.Full.uint32_to_uint64 n in
     let open Hacl.Hash.Core.SHA2.Constants in
     B.recall k224_256;
