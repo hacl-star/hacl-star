@@ -96,7 +96,7 @@ all:
 	$(MAKE) all-staged
 
 all-unstaged: compile-compact compile-generic compile-compact-msvc compile-compact-gcc \
-  compile-evercrypt-external-headers compile-compact-c89 compile-coco
+  compile-evercrypt-external-headers compile-compact-c89 # compile-coco
 
 # Automatic staging.
 %-staged:
