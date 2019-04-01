@@ -136,9 +136,10 @@ val gcm256_encrypt_opt':
       let ub = UV.mk_buffer db Views.up_view128 in
       Seq.equal (UV.as_seq h0 ub) (key_to_round_keys_LE AES_256 (Ghost.reveal key))) /\
 
-      (DV.length_eq (get_downview hkeys_b);
-      length_aux5 hkeys_b;
-      low_buffer_read TUInt8 TUInt128 h0 hkeys_b 2 == reverse_bytes_quad32 (aes_encrypt_LE AES_256 (Ghost.reveal key) (Mkfour 0 0 0 0)))
+      (let db = get_downview hkeys_b in
+       length_aux5 hkeys_b;
+       let ub = UV.mk_buffer db Views.up_view128 in
+       hkeys_reqs_pub (UV.as_seq h0 ub) (reverse_bytes_quad32 (aes_encrypt_LE AES_256 (Ghost.reveal key) (Mkfour 0 0 0 0))))
     )
     (ensures fun h0 _ h1 ->
       B.modifies (B.loc_union (B.loc_buffer tag_b)
@@ -349,8 +350,8 @@ val gcm256_encrypt_opt_alloca:
       (Seq.equal (B.as_seq h0 keys_b)
          (seq_nat8_to_seq_uint8 (le_seq_quad32_to_bytes (key_to_round_keys_LE AES_256 (Ghost.reveal key))))) /\
          
-      Seq.slice (B.as_seq h0 hkeys_b) 32 48 ==
-        (seq_nat8_to_seq_uint8 (le_quad32_to_bytes (reverse_bytes_quad32 (aes_encrypt_LE AES_256 (Ghost.reveal key) (Mkfour 0 0 0 0)))))
+      hkeys_reqs_pub (le_bytes_to_seq_quad32 (seq_uint8_to_seq_nat8 (B.as_seq h0 hkeys_b)))
+      	(reverse_bytes_quad32 (aes_encrypt_LE AES_256 (Ghost.reveal key) (Mkfour 0 0 0 0)))
     )
     (ensures fun h0 _ h1 ->
       B.modifies (B.loc_union (B.loc_buffer tag_b)
@@ -527,7 +528,23 @@ let gcm256_encrypt_opt_alloca key plain_b plain_len auth_b auth_bytes iv_b
   in lemma_uv_key ();
 
   // Simplify the precondition for hkeys_b
-  le_bytes_to_quad32_to_bytes (reverse_bytes_quad32 (aes_encrypt_LE AES_256 (Ghost.reveal key) (Mkfour 0 0 0 0)));
+  let lemma_uv_hkey () : Lemma
+    (let db = get_downview hkeys_b in
+      length_aux5 hkeys_b;
+      let ub = UV.mk_buffer db Views.up_view128 in
+      UV.as_seq h0 ub == le_bytes_to_seq_quad32 (seq_uint8_to_seq_nat8 (B.as_seq h0 hkeys_b)))
+    = length_aux5 hkeys_b;
+      let db = get_downview hkeys_b in
+      let ub = UV.mk_buffer db Views.up_view128 in
+      calc (==) {
+        le_bytes_to_seq_quad32 (seq_uint8_to_seq_nat8 (B.as_seq h0 hkeys_b));
+        (==) { lemma_seq_nat8_le_seq_quad32_to_bytes_uint32 hkeys_b h0 }
+        le_bytes_to_seq_quad32 (seq_uint8_to_seq_nat8 (seq_nat8_to_seq_uint8 (le_seq_quad32_to_bytes (UV.as_seq h0 ub))));
+        (==) { le_bytes_to_seq_quad32_to_bytes (UV.as_seq h0 ub) }
+        UV.as_seq h0 ub;
+      }
+
+  in lemma_uv_hkey ();
 
   // Simplify the expression for the iv
   DV.length_eq (get_downview iv_b);
