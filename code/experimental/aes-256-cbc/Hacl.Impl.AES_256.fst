@@ -59,7 +59,7 @@ let multiply a b =
 
 #set-options "--z3rlimit 20"
 
-let inv_sbox_list : l:list uint8{List.Tot.Base.length l == 256} =
+inline_for_extraction noextract let inv_sbox_list : l:list uint8{List.Tot.Base.length l == 256} =
   [@ inline_let]
   let l : list FStar.UInt8.t = [
     0x52uy; 0x09uy; 0x6auy; 0xd5uy;
@@ -127,11 +127,12 @@ let inv_sbox_list : l:list uint8{List.Tot.Base.length l == 256} =
     0xe1uy; 0x69uy; 0x14uy; 0x63uy;
     0x55uy; 0x21uy; 0x0cuy; 0x7duy
   ] in
+  [@ inline_let]
   let l = FStar.List.Tot.Base.map Lib.RawIntTypes.u8_from_UInt8 l in
   assert_norm(List.Tot.length l == 256);
-  l
+  normalize_term(l)
 
-let inv_sbox_seq : Lib.Sequence.lseq uint8 256 =
+noextract let inv_sbox_seq : Lib.Sequence.lseq uint8 256 =
   Lib.Sequence.createL inv_sbox_list
 
 let inv_sbox : (b:ilbuffer uint8 (size 256){
@@ -139,7 +140,7 @@ let inv_sbox : (b:ilbuffer uint8 (size 256){
 }) =
   createL_global inv_sbox_list
 
-let sbox_list : l:list uint8{List.Tot.Base.length l == 256} =
+inline_for_extraction noextract let sbox_list : l:list uint8{List.Tot.Base.length l == 256} =
   [@ inline_let]
   let l : list FStar.UInt8.t = [
   0x63uy; 0x7cuy; 0x77uy; 0x7buy; 0xf2uy; 0x6buy; 0x6fuy; 0xc5uy;
@@ -173,12 +174,14 @@ let sbox_list : l:list uint8{List.Tot.Base.length l == 256} =
   0xe1uy; 0xf8uy; 0x98uy; 0x11uy; 0x69uy; 0xd9uy; 0x8euy; 0x94uy;
   0x9buy; 0x1euy; 0x87uy; 0xe9uy; 0xceuy; 0x55uy; 0x28uy; 0xdfuy;
   0x8cuy; 0xa1uy; 0x89uy; 0x0duy; 0xbfuy; 0xe6uy; 0x42uy; 0x68uy;
-  0x41uy; 0x99uy; 0x2duy; 0x0fuy; 0xb0uy; 0x54uy; 0xbbuy; 0x16uy] in
+  0x41uy; 0x99uy; 0x2duy; 0x0fuy; 0xb0uy; 0x54uy; 0xbbuy; 0x16uy
+    ] in
+  [@ inline_let]
   let l = FStar.List.Tot.Base.map Lib.RawIntTypes.u8_from_UInt8 l in
   assert_norm(List.Tot.length l == 256);
-  l
+  normalize_term(l)
 
-let sbox_seq : Lib.Sequence.lseq uint8 256 =
+noextract let sbox_seq : Lib.Sequence.lseq uint8 256 =
   Lib.Sequence.createL sbox_list
 
 let sbox : (b:ilbuffer uint8 (size 256){
@@ -200,6 +203,7 @@ let access_sbox (i: uint8) : Stack uint8 (requires (fun _ -> True)) (ensures (fu
       (Lib.RawIntTypes.u8_to_UInt8 i)) in
   assert(v idx <= 256);
   recall_contents sbox sbox_seq;
+
   sbox.(idx)
 
 let access_inv_sbox (i: uint8) : Stack uint8 (requires (fun _ -> True)) (ensures (fun h0 _ h1 -> modifies0 h0 h1)) =
@@ -376,6 +380,7 @@ let keyExpansion_aux_0 w temp j =
   copy temp (sub w (size 4 *. j -. size 4) (size 4));
   if j %. nk = size 0 then (
     rotWord temp;
+
     subWord temp;
     let t0 = temp.(size 0) in
     let rc = rcon (j/.nk) (u8 1) in
@@ -410,8 +415,6 @@ private val keyExpansion_aux: w:xkey -> temp:lbytes (size 4) -> i:size_t{v i <= 
   (requires (fun h -> live h w /\ live h temp /\ disjoint w temp))
   (ensures  (fun h0 _ h1 -> modifies2 temp w h0 h1))
 let rec keyExpansion_aux w temp j =
-  let open FStar.UInt32 in
-  let h0 = ST.get() in
   if j <. (xkeylen /. size 4) then
   begin
     keyExpansion_aux_0 w temp j;
