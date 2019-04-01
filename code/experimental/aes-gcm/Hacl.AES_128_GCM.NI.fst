@@ -97,32 +97,40 @@ val aes128_gcm_decrypt:
 
 let aes128_gcm_decrypt ctx len out cipher aad_len aad =
   push_frame();
+  let scratch = create 18ul (u8 0) in
+  let text = sub scratch 0ul 16ul in
+  let zero = sub scratch 16ul 1ul in
+  let result = sub scratch 17ul 1ul in
   let ciphertext = sub cipher 0ul len in
+  let tag = sub cipher len (size 16) in
   let aes_ctx = sub ctx (size 0) (size 16) in
   let gcm_ctx = sub ctx (size 16) (size 5) in
   let tag_mix = ctx.(21ul) in
+  let h1 = ST.get () in
   gcm_update_padded gcm_ctx aad_len aad;
   gcm_update_padded gcm_ctx len ciphertext;
-  let tmp = create 16ul (u8 0) in
-  uint_to_bytes_be #U64 (sub tmp (size 0) (size 8)) (to_u64 (aad_len *. size 8));
-  uint_to_bytes_be #U64 (sub tmp (size 8) (size 8)) (to_u64 (len *. size 8));
-  gcm_update_blocks gcm_ctx (size 16) tmp;
-  gcm_emit tmp gcm_ctx;
-  let tmp_vec = vec128_load_le tmp in
-  let tmp_vec = vec128_xor tmp_vec tag_mix in
-  vec128_store_le tmp tmp_vec;
-  let tag = sub cipher len (size 16) in
-  let res = create 1ul (u8 0) in
-  let h1 = ST.get() in
-  admit();
-  loop_nospec #h1 (size 16) res
-    (fun i -> res.(0ul) <- res.(0ul) |. (tmp.(i) ^. tag.(i)));
-  let r = res.(size 0) in
-  if Lib.RawIntTypes.u8_to_UInt8 r = 0uy then (
-    let cip = sub cipher (size 0) len in
-    aes128_ctr len out cip aes_ctx (size 2);
-    pop_frame();
-    true)
-  else (
-    pop_frame();
-    false)
+  uint_to_bytes_be #U64 (sub text (size 0) (size 8)) (to_u64 (aad_len *. size 8));
+  uint_to_bytes_be #U64 (sub text (size 8) (size 8)) (to_u64 (len *. size 8));
+  gcm_update_blocks gcm_ctx (size 16) text;
+  gcm_emit text gcm_ctx;
+  let text_vec = vec128_load_le text in
+  let text_vec = vec128_xor text_vec tag_mix in
+  vec128_store_le text text_vec;
+  let h7 = ST.get () in
+  loop_nospec #h7 (size 16) result
+    (fun i -> result.(0ul) <- result.(0ul) |. (scratch.(i) ^. tag.(i)));
+  let h8 = ST.get () in
+  assert(modifies2 ctx scratch h1 h8);
+  let res8 = result.(0ul) in
+  let r =
+    if Lib.RawIntTypes.u8_to_UInt8 res8 = 0uy then (
+      aes128_ctr len out ciphertext aes_ctx (size 2);
+      true)
+    else (
+      let h9 = ST.get () in
+      modifies2_is_modifies3 ctx scratch out h1 h9;
+      assert(modifies3 out ctx scratch h1 h9);
+      false)
+  in
+  pop_frame();
+  r
