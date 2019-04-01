@@ -209,7 +209,7 @@ val construct_rhs_acc_consistent:
           rhs_equiv j (fst rrf) (S.slice (fst rr) lv (lv + log2c j)) actd /\
           snd rrf == snd rr)))
         (decreases j)
-#reset-options "--z3rlimit 200 --max_fuel 1 --admit_smt_queries true"
+#reset-options "--z3rlimit 240 --max_fuel 1"
 let rec construct_rhs_acc_consistent lv i j olds hs rhs acc actd =
   log2c_bound j (32 - lv);
   mt_olds_hs_lth_inv_ok lv i j olds hs;
@@ -222,9 +222,13 @@ let rec construct_rhs_acc_consistent lv i j olds hs rhs acc actd =
 
   if j = 0 then ()
   else if j % 2 = 0 then begin
+    log2c_bound (j / 2) (32 - (lv + 1));
+    mt_olds_hs_lth_inv_ok (lv + 1) (i / 2) (j / 2) olds hs;
+    mt_hashes_lth_inv_log_converted_ (lv + 1) (j / 2) (merge_hs olds hs);
     construct_rhs_acc_consistent (lv + 1) (i / 2) (j / 2)
       olds hs rhs acc actd
   end
+
   else begin
     let rhd = if actd then acc else hash_init in
     let nacc = if actd
@@ -242,6 +246,7 @@ let rec construct_rhs_acc_consistent lv i j olds hs rhs acc actd =
     let nrrf = construct_rhs_acc (j / 2)
                  (S.slice (merge_hs olds hs) (lv + 1) (lv + 1 + (log2c (j / 2))))
                  nacc true in
+
     assert (S.equal (fst rrf) (S.cons rhd (fst nrrf)));
     seq_tail_cons rhd (fst nrrf);
     seq_head_cons rhd (fst nrrf);
@@ -273,6 +278,7 @@ let rec construct_rhs_acc_consistent lv i j olds hs rhs acc actd =
          assert (S.index nrhs lv == acc);
          assert (S.head (fst rrf) == S.index (fst rr) lv))
     else ());
+
     assert (if actd then S.head (fst rrf) == S.index (fst rr) lv else true);
     assert (rhs_equiv (j / 2) (S.tail (fst rrf))
              (S.slice (fst rr) (lv + 1) (lv + 1 + log2c (j / 2))) true);
@@ -281,7 +287,7 @@ let rec construct_rhs_acc_consistent lv i j olds hs rhs acc actd =
   end
 #reset-options
 
-#reset-options "--z3rlimit 10"
+#reset-options "--z3rlimit 20"
 val construct_rhs_inv_ok:
   lv:nat{lv <= 32} ->
   i:nat ->
