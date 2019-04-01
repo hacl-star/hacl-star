@@ -1,5 +1,5 @@
 [
-  "c\u0012¢ÈÍ¢¦œuoµ\u000e²á¤æ",
+  "4J\u001föÁëúI/;fa¬ÄkJ",
   [
     [
       "GHash.fun_seq_quad32_LE_poly128",
@@ -17,7 +17,7 @@
         "refinement_interpretation_Tm_refine_85de810eea785cf58956329a12443de8"
       ],
       0,
-      "c3159d8f0d267d924bc441b5ce426075"
+      "89841998d4a21778bb643b29822dd0eb"
     ],
     [
       "GHash.ghash_poly",
@@ -30,7 +30,7 @@
         "projection_inverse_BoxInt_proj_0", "well-founded-ordering-on-nat"
       ],
       0,
-      "d2f31b47a36c39db6af2c2c4d214d599"
+      "28367dfe6db7d996edb109fba46db861"
     ],
     [
       "GHash.g_power",
@@ -47,7 +47,7 @@
         "well-founded-ordering-on-nat"
       ],
       0,
-      "006a3106c05b0a68ce6537bd161aad25"
+      "51540303c204183b5a6516684fa8f581"
     ],
     [
       "GHash.lemma_g_power_1",
@@ -66,7 +66,7 @@
         "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-      "b1c6167661c5dbb2d41f8dbb18e06436"
+      "50f4fbb20915fa6565590fdb2d7e0fd5"
     ],
     [
       "GHash.lemma_g_power_n",
@@ -79,7 +79,7 @@
         "refinement_interpretation_Tm_refine_f048236b5f8051f83b495ea5eaa6127b"
       ],
       0,
-      "a1286981435bf9af12bd25419ee32347"
+      "e2c9805ab7a695d635b3775d71372bf4"
     ],
     [
       "GHash.lemma_g_power_n",
@@ -101,7 +101,7 @@
         "refinement_interpretation_Tm_refine_f048236b5f8051f83b495ea5eaa6127b"
       ],
       0,
-      "da3b943057831da4889606c526126fcb"
+      "89cd0058463651f1f8170d5866d47c2a"
     ],
     [
       "GHash.lemma_gf128_power",
@@ -113,7 +113,67 @@
         "equation_GHash.gf128_power", "equation_GHash.shift_gf128_key_1"
       ],
       0,
-      "169f863e2392951772fc5fcd8bd857be"
+      "903de81765cd964eae0b826c63e976c3"
+    ],
+    [
+      "GHash.hkeys_reqs_priv",
+      1,
+      1,
+      0,
+      [ "@query" ],
+      0,
+      "be998e920e19a836117f13213dc9ca45"
+    ],
+    [
+      "GHash.ghash_poly_unroll",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565",
+        "binder_x_6d0180d4fcd10237cf0d87dd345d77cc_3",
+        "binder_x_e22ba7a032a73f6d0678d3d186686631_4",
+        "binder_x_e22ba7a032a73f6d0678d3d186686631_5", "equation_Prims.nat",
+        "function_token_typing_Prims.__cache_version_number__",
+        "int_inversion", "int_typing", "primitive_Prims.op_Equality",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "well-founded-ordering-on-nat"
+      ],
+      0,
+      "162a59b577a2e5679c7d2c9b50225505"
+    ],
+    [
+      "GHash.lemma_hkeys_reqs_pub_priv",
+      1,
+      1,
+      0,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_GHash.g_power.fuel_instrumented",
+        "@fuel_correspondence_OptPublic.g_power.fuel_instrumented",
+        "@fuel_irrelevance_GHash.g_power.fuel_instrumented",
+        "@fuel_irrelevance_OptPublic.g_power.fuel_instrumented", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565", "b2t_def",
+        "bool_inversion", "bool_typing", "eq2-interp",
+        "equation_GHash.gf128_power", "equation_GHash.hkeys_reqs_priv",
+        "equation_GHash.shift_gf128_key_1", "equation_OptPublic.gf128_power",
+        "equation_OptPublic.hkeys_reqs_pub",
+        "equation_OptPublic.shift_gf128_key_1", "equation_Prims.nat",
+        "equation_with_fuel_GHash.g_power.fuel_instrumented",
+        "equation_with_fuel_OptPublic.g_power.fuel_instrumented",
+        "function_token_typing_Prims.__cache_version_number__", "int_typing",
+        "l_and-interp", "primitive_Prims.op_Equality",
+        "primitive_Prims.op_GreaterThanOrEqual",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "typing_Math.Poly2.Bits_s.of_quad32",
+        "typing_Types_s.reverse_bytes_quad32"
+      ],
+      0,
+      "3e4e4c3fe62616e80558fe060b7002d2"
     ],
     [
       "GHash.ghash_unroll",
@@ -133,7 +193,7 @@
         "well-founded-ordering-on-nat"
       ],
       0,
-      "bd80c4772178e8a500e8474eeacd9156"
+      "0860b5938173561b3a4eb6f5643868b7"
     ],
     [
       "GHash.ghash_unroll_back",
@@ -155,27 +215,7 @@
         "well-founded-ordering-on-nat"
       ],
       0,
-      "7f454934df91411b670100cfa54d23f9"
-    ],
-    [
-      "GHash.ghash_poly_unroll",
-      1,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "Prims_pretyping_ae567c2fb75be05905677af440075565",
-        "binder_x_6d0180d4fcd10237cf0d87dd345d77cc_3",
-        "binder_x_e22ba7a032a73f6d0678d3d186686631_4",
-        "binder_x_e22ba7a032a73f6d0678d3d186686631_5", "equation_Prims.nat",
-        "function_token_typing_Prims.__cache_version_number__",
-        "int_inversion", "int_typing", "primitive_Prims.op_Equality",
-        "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
-        "well-founded-ordering-on-nat"
-      ],
-      0,
-      "a47a8b77a33697a51713d2c0ce07f31d"
+      "23b38c7631d333bc88a609117d92d52d"
     ],
     [
       "GHash.lemma_ghash_unroll_back_forward_rec",
@@ -189,12 +229,12 @@
         "function_token_typing_Prims.__cache_version_number__",
         "primitive_Prims.op_LessThan", "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_865988ed837d882afe56e7a0ad3400b0",
         "refinement_interpretation_Tm_refine_8d65e998a07dd53ec478e27017d9dba5",
-        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
-        "refinement_interpretation_Tm_refine_cfba81042a4bf622e5454331ca8705b0"
+        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-      "8dd886045e01e3ccaf4d353eb59ff4a1"
+      "4583375e016d982824c8a224f5d49686"
     ],
     [
       "GHash.lemma_ghash_unroll_back_forward_rec",
@@ -236,7 +276,7 @@
         "unit_typing", "well-founded-ordering-on-nat"
       ],
       0,
-      "422a35d8abeef99628c90f02f7925392"
+      "ffab625958a10b1113cbe305ec3dc086"
     ],
     [
       "GHash.lemma_ghash_unroll_back_forward",
@@ -249,7 +289,7 @@
         "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-      "35a2f30d0acd643fecac23ad762c5158"
+      "03cef3e7088cffe10dd3eb360ab0093e"
     ],
     [
       "GHash.lemma_ghash_unroll_back_forward",
@@ -274,7 +314,7 @@
         "typing_GHash.ghash_unroll", "typing_GHash.ghash_unroll_back"
       ],
       0,
-      "2039047d9eefc1cd0c0de0ff58254567"
+      "9692f086a55340b593bd9c56db7ac0d4"
     ],
     [
       "GHash.lemma_gf128_mul_rev_mod_rev",
@@ -307,7 +347,7 @@
         "typing_Tm_abs_716d8adf6e9a0d31e273b653461d856b"
       ],
       0,
-      "50de36af2d69a0d56b250f94db896b8b"
+      "415e54e51a6f95ccb751d0310c81fcd5"
     ],
     [
       "GHash.lemma_ghash_poly_degree",
@@ -341,7 +381,7 @@
         "typing_Math.Poly2_s.reverse", "well-founded-ordering-on-nat"
       ],
       0,
-      "95223914f9aa218061fc2abf1960eae3"
+      "732a72338437e8ba65200d39a5a5d25c"
     ],
     [
       "GHash.lemma_ghash_poly_unroll_n",
@@ -354,11 +394,11 @@
         "equation_Prims.nat",
         "function_token_typing_Prims.__cache_version_number__",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
-        "refinement_interpretation_Tm_refine_eb454217305d1abfc219ec749d6ba72b"
+        "refinement_interpretation_Tm_refine_b2000fdd86b61dc92e9429595fe84bea",
+        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-      "9d71a98f2d2cc993dd6047b226a02bd0"
+      "3218cc03d41b2a78a339b60f58aee42d"
     ],
     [
       "GHash.lemma_ghash_poly_unroll_n",
@@ -388,7 +428,7 @@
         "well-founded-ordering-on-nat"
       ],
       0,
-      "3b2624b04877f65bcf634a3ce93b91bd"
+      "4d1ff5e6b896f7d3c081b86cca6c1e0e"
     ],
     [
       "GHash.lemma_ghash_poly_unroll",
@@ -423,7 +463,7 @@
         "well-founded-ordering-on-nat"
       ],
       0,
-      "fc29810761806202588dd754b8d20aac"
+      "a53a0fa59acec6e1540074d9961443c4"
     ],
     [
       "GHash.lemma_ghash_unroll_poly_unroll",
@@ -466,7 +506,7 @@
         "well-founded-ordering-on-nat"
       ],
       0,
-      "4247b21c74429e3981aa5a783a17c700"
+      "100870e4dceece52e39acd502407ae54"
     ],
     [
       "GHash.lemma_ghash_poly_of_unroll",
@@ -475,7 +515,16 @@
       0,
       [ "@query" ],
       0,
-      "790c285c40283b81138aeba3f4cfdb4c"
+      "32f5a87d14ec90b7dbc179124b6f196e"
+    ],
+    [
+      "GHash.lemma_add_manip",
+      1,
+      1,
+      0,
+      [ "@query" ],
+      0,
+      "bd04831a4b7516d143990e795dc1b65e"
     ],
     [
       "GHash.ghash_incremental_def",
@@ -501,7 +550,7 @@
         "typing_FStar.Seq.Base.length", "well-founded-ordering-on-nat"
       ],
       0,
-      "861cdaed58666ccfac51c4bd3de5bd51"
+      "a4ee3e66b2e545904abbbb3430b7a66a"
     ],
     [
       "GHash.lemma_reverse_bytes_quad32_xor",
@@ -588,7 +637,7 @@
         "typing_Words_s.int_to_natN", "unit_typing"
       ],
       0,
-      "1bc38941259fbce10ab3e038e35fea03"
+      "fc2eb76b58b4be81d75ad30c711f0afc"
     ],
     [
       "GHash.lemma_ghash_incremental_poly_rec",
@@ -602,7 +651,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "5196187b4858a69db432cd543fa1a0d1"
+      "aa65c8aec300fa3479d203b274901b18"
     ],
     [
       "GHash.lemma_ghash_incremental_poly_rec",
@@ -654,7 +703,7 @@
         "well-founded-ordering-on-nat"
       ],
       0,
-      "728764846321d25eac588ce577b14e36"
+      "a236081401052fae96f088374baba7db"
     ],
     [
       "GHash.lemma_ghash_incremental_poly",
@@ -679,7 +728,7 @@
         "token_correspondence_GHash.fun_seq_quad32_LE_poly128"
       ],
       0,
-      "1614c2791130f836e9574887d2bb5fe4"
+      "61a6b8038efd3b7e1d9d2bb66bcb2c6a"
     ],
     [
       "GHash.lemma_ghash_incremental_def_0",
@@ -697,7 +746,7 @@
         "function_token_typing_Words_s.pow2_1", "primitive_Prims.op_Equality"
       ],
       0,
-      "4acf351ab993265b99294b35d5a11d67"
+      "521f1617ef5a52c291ea41bf4722e51d"
     ],
     [
       "GHash.ghash_incremental_to_ghash",
@@ -712,7 +761,7 @@
         "refinement_interpretation_Tm_refine_8d65e998a07dd53ec478e27017d9dba5"
       ],
       0,
-      "4c9ff6d85686436a01d78e693086fa43"
+      "6528400069456f56adfc8533b468b838"
     ],
     [
       "GHash.ghash_incremental_to_ghash",
@@ -761,7 +810,7 @@
         "well-founded-ordering-on-nat"
       ],
       0,
-      "c9e91ebb8a8734202a7236d0d59fb4b8"
+      "e9c6babc49d99a3e888a09476be967e9"
     ],
     [
       "GHash.ghash_incremental_to_ghash",
@@ -806,7 +855,7 @@
         "typing_FStar.Seq.Base.length", "well-founded-ordering-on-nat"
       ],
       0,
-      "29eb6dcf7cc824db6ae74ed525a13f7b"
+      "2480aeb6cd229c69d6d453930a78988a"
     ],
     [
       "GHash.lemma_hash_append",
@@ -854,7 +903,7 @@
         "typing_Types_s.quad32", "well-founded-ordering-on-nat"
       ],
       0,
-      "1641958708500c36922735a381f09470"
+      "04bd07483bae420308cbe1567238a8fb"
     ],
     [
       "GHash.lemma_ghash_incremental0_append",
@@ -885,7 +934,7 @@
         "typing_FStar.Seq.Base.length", "typing_FStar.Seq.Base.op_At_Bar"
       ],
       0,
-      "96763d2aa3c143acc9c828d6739798fa"
+      "da73924d663951f9acf2b5e69a146aa1"
     ],
     [
       "GHash.lemma_hash_append2",
@@ -917,7 +966,7 @@
         "typing_FStar.Seq.Base.op_At_Bar"
       ],
       0,
-      "f8270e5221cafd37583086010d83374e"
+      "aceab9413bbb4b45aba45ffa575d20bd"
     ],
     [
       "GHash.lemma_hash_append3",
@@ -953,7 +1002,7 @@
         "typing_Types_s.quad32", "unit_inversion", "unit_typing"
       ],
       0,
-      "6046e7121be0b4358739d4fe480f56f3"
+      "1d46fbbacb68d5dd1a93bafff5684964"
     ],
     [
       "GHash.lemma_hash_append3",
@@ -983,7 +1032,7 @@
         "unit_inversion", "unit_typing"
       ],
       0,
-      "fe4fd71fd1d7230a201c8b72e53a847a"
+      "820ac9ecc2bfb29da8d31e509e9f53af"
     ],
     [
       "GHash.ghash_incremental_bytes_pure_no_extra",
@@ -1008,7 +1057,7 @@
         "typing_FStar.Seq.Base.length"
       ],
       0,
-      "2029d42843a7a5815f519039cc18b439"
+      "2c0c4c24fb118b5134eafdfd161e9a3a"
     ],
     [
       "GHash.ghash_incremental_bytes_pure_no_extra",
@@ -1053,7 +1102,7 @@
         "typing_Workarounds.slice_work_around"
       ],
       0,
-      "5d5f83aa638e263d98f14ed431c86e94"
+      "8c54549b88ee64d13dc543fb5689003f"
     ],
     [
       "GHash.lemma_ghash_incremental_bytes_extra_helper",
@@ -1103,7 +1152,7 @@
         "typing_FStar.Seq.Base.slice", "typing_GCTR_s.pad_to_128_bits"
       ],
       0,
-      "062de810f958d30c5a9b3a8bbd76400e"
+      "e66460844c5047096c0c56574c2a11a8"
     ],
     [
       "GHash.lemma_ghash_incremental_bytes_extra_helper",
@@ -1147,7 +1196,7 @@
         "typing_Types_s.le_seq_quad32_to_bytes"
       ],
       0,
-      "106e52ad30e5bcfd3c557aff6295d688"
+      "fb3905960a4c3bff9ac77e4540d08391"
     ],
     [
       "GHash.lemma_ghash_incremental_bytes_extra_helper_alt",
@@ -1156,7 +1205,7 @@
       0,
       [ "@query" ],
       0,
-      "86528db121d51663685bc646aa618272"
+      "8b7edf5dfb4ebac9d66e34e6b315cb5b"
     ],
     [
       "GHash.lemma_ghash_incremental_bytes_extra_helper_alt",
@@ -1194,7 +1243,7 @@
         "typing_FStar.Seq.Base.length"
       ],
       0,
-      "f9f4d9812c5849ecece35afc381dbe2e"
+      "a63aa9c10fa89e00ccd2876d5bcad2b4"
     ],
     [
       "GHash.lemma_ghash_registers",
@@ -1241,7 +1290,7 @@
         "unit_typing"
       ],
       0,
-      "107c8222cf5258e5dc48711afc63295d"
+      "8d44151562617358aea38989126e397d"
     ],
     [
       "GHash.lemma_ghash_registers",
@@ -1283,7 +1332,7 @@
         "typing_FStar.Seq.Base.length"
       ],
       0,
-      "ed7a2037ea0212724f40fb21221011bf"
+      "694992e2c24965efd82df76bf1fbee74"
     ]
   ]
 ]
