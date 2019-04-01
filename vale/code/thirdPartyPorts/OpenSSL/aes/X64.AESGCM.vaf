@@ -124,6 +124,16 @@ let scratch_reqs (scratch_b:buffer128) (count:nat) (mem:memory) (s:seq quad32) (
    buffer128_read scratch_b 5 mem == reverse_bytes_quad32 (index data 2) /\
    buffer128_read scratch_b 6 mem == reverse_bytes_quad32 (index data 1) /\
    buffer128_read scratch_b 7 mem == reverse_bytes_quad32 (index data 0))
+
+
+let scratch_reqs_simple (scratch_b:buffer128) (mem:memory) (data:seq quad32) (z3:quad32) : prop0 =
+   length data == 6 /\
+   z3 == reverse_bytes_quad32 (index data 5) /\
+   buffer128_read scratch_b 3 mem == reverse_bytes_quad32 (index data 4) /\
+   buffer128_read scratch_b 4 mem == reverse_bytes_quad32 (index data 3) /\
+   buffer128_read scratch_b 5 mem == reverse_bytes_quad32 (index data 2) /\
+   buffer128_read scratch_b 6 mem == reverse_bytes_quad32 (index data 1) /\
+   buffer128_read scratch_b 7 mem == reverse_bytes_quad32 (index data 0)
 #endverbatim
 
 function aes_reqs_offset(alg:algorithm, key:seq(nat32), round_keys:seq(quad32), keys_b:buffer128,
@@ -133,6 +143,7 @@ function hkeys_reqs(hkeys_b:buffer128, h_LE:quad32, mem:memory) : prop extern;
 function lo(x:poly) : poly extern;
 function hi(x:poly) : poly extern;
 function scratch_reqs(scratch_b:buffer128, count:nat, mem:memory, s:seq(quad32), z3:quad32) : prop extern;
+function scratch_reqs_simple(scratch_b:buffer128, mem:memory, data:seq(quad32), z3:quad32) : prop extern;
 
 ghost procedure finish_aes_encrypt_le(ghost alg:algorithm, ghost input_LE:quad32, ghost key:seq(nat32))
     requires
@@ -2424,7 +2435,8 @@ procedure {:quick} {:verify true} Loop6x_loop(
         // GHash
         y_new == ghash_incremental0(h_LE, y_orig, slice_work_around(s128(mem, out_b), 6*count+old(len)-12));
         Xi == reverse_bytes_quad32(y_new);
-//        scratch_reqs(scratch_b, #nat(count + iter - 2), mem, s128(mem, out_b), buffer128_read(scratch_b, 2, mem));
+
+        scratch_reqs_simple(scratch_b, mem, slice_workaround(s128(mem, out_b), #nat(6*count+old(len)-12), #nat(6*count+old(len)-6)), buffer128_read(scratch_b, 2, mem));
 
         // Counters
         T1 == reverse_bytes_quad32(inc32lite(ctr_BE, old(len)));
