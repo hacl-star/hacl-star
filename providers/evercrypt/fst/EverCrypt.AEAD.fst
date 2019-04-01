@@ -172,18 +172,27 @@ let encrypt #a ek iv ad ad_len plain plain_len cipher tag =
 
       // There is no SMTPat on le_bytes_to_seq_quad32_to_bytes and the converse,
       // so we need an explicit lemma
-      let lemma_hkeys_eq () : Lemma
+      let lemma_hkeys_reqs () : Lemma
         (let k = G.reveal (EK?.kv ek) in
         let k_nat = Words.Seq_s.seq_uint8_to_seq_nat8 k in
         let k_w = Words.Seq_s.seq_nat8_to_seq_nat32_LE k_nat in
         OptPublic.hkeys_reqs_pub 
           (Types_s.le_bytes_to_seq_quad32 (Words.Seq_s.seq_uint8_to_seq_nat8 (B.as_seq h0 hkeys_b)))
-          (Types_s.reverse_bytes_quad32 (AES_s.aes_encrypt_LE AES_s.AES_128 k_w (Words_s.Mkfour 0 0 0 0)))) = admit()
-        
+          (Types_s.reverse_bytes_quad32 (AES_s.aes_encrypt_LE AES_s.AES_128 k_w (Words_s.Mkfour 0 0 0 0)))) 
+        = let k = G.reveal (EK?.kv ek) in
+          let k_nat = Words.Seq_s.seq_uint8_to_seq_nat8 k in
+          let k_w = Words.Seq_s.seq_nat8_to_seq_nat32_LE k_nat in
+          let hkeys_quad = OptPublic.get_hkeys_reqs (Types_s.reverse_bytes_quad32 (
+            AES_s.aes_encrypt_LE (vale_alg_of_alg a) k_w (Words_s.Mkfour 0 0 0 0))) in
+          let hkeys = Words.Seq_s.seq_nat8_to_seq_uint8 (Types_s.le_seq_quad32_to_bytes hkeys_quad) in
+          assert (Seq.equal (B.as_seq h0 hkeys_b) hkeys);
+          calc (==) {
+            Types_s.le_bytes_to_seq_quad32 (Words.Seq_s.seq_uint8_to_seq_nat8 hkeys);
+            (==) { Arch.Types.le_bytes_to_seq_quad32_to_bytes hkeys_quad }
+            hkeys_quad;
+          }
 
-      in lemma_hkeys_eq ();
-
-      admit();
+      in lemma_hkeys_reqs ();
 
       // These asserts prove that 4096 * (len {plain, ad}) are smaller than pow2_32
       assert (max_length a = pow2 20 - 1 - 16);
@@ -231,7 +240,7 @@ let encrypt #a ek iv ad ad_len plain plain_len cipher tag =
       pop_frame();
       Success
 
-  | AES256_GCM -> admit();
+  | AES256_GCM ->
       // From the well-formedness invariant: the only implementation we
       // (currently) know how to use on X64 is Vale's. In the future, we will
       // have to either:
@@ -289,13 +298,29 @@ let encrypt #a ek iv ad ad_len plain plain_len cipher tag =
 
       in lemma_iv_eq ();
 
-      assume (
-        let k = G.reveal (EK?.kv ek) in
+      // There is no SMTPat on le_bytes_to_seq_quad32_to_bytes and the converse,
+      // so we need an explicit lemma
+      let lemma_hkeys_reqs () : Lemma
+        (let k = G.reveal (EK?.kv ek) in
         let k_nat = Words.Seq_s.seq_uint8_to_seq_nat8 k in
         let k_w = Words.Seq_s.seq_nat8_to_seq_nat32_LE k_nat in
         OptPublic.hkeys_reqs_pub 
           (Types_s.le_bytes_to_seq_quad32 (Words.Seq_s.seq_uint8_to_seq_nat8 (B.as_seq h0 hkeys_b)))
-          (Types_s.reverse_bytes_quad32 (AES_s.aes_encrypt_LE AES_s.AES_256 k_w (Words_s.Mkfour 0 0 0 0))));
+          (Types_s.reverse_bytes_quad32 (AES_s.aes_encrypt_LE AES_s.AES_256 k_w (Words_s.Mkfour 0 0 0 0)))) 
+        = let k = G.reveal (EK?.kv ek) in
+          let k_nat = Words.Seq_s.seq_uint8_to_seq_nat8 k in
+          let k_w = Words.Seq_s.seq_nat8_to_seq_nat32_LE k_nat in
+          let hkeys_quad = OptPublic.get_hkeys_reqs (Types_s.reverse_bytes_quad32 (
+            AES_s.aes_encrypt_LE (vale_alg_of_alg a) k_w (Words_s.Mkfour 0 0 0 0))) in
+          let hkeys = Words.Seq_s.seq_nat8_to_seq_uint8 (Types_s.le_seq_quad32_to_bytes hkeys_quad) in
+          assert (Seq.equal (B.as_seq h0 hkeys_b) hkeys);
+          calc (==) {
+            Types_s.le_bytes_to_seq_quad32 (Words.Seq_s.seq_uint8_to_seq_nat8 hkeys);
+            (==) { Arch.Types.le_bytes_to_seq_quad32_to_bytes hkeys_quad }
+            hkeys_quad;
+          }
+
+      in lemma_hkeys_reqs ();
 
       // These asserts prove that 4096 * (len {plain, ad}) are smaller than pow2_32
       assert (max_length a = pow2 20 - 1 - 16);
@@ -343,7 +368,7 @@ let encrypt #a ek iv ad ad_len plain plain_len cipher tag =
       pop_frame();
       Success
 
-  | CHACHA20_POLY1305 -> admit();
+  | CHACHA20_POLY1305 ->
       // Monotonicity; gives us proper length for ek while we're at it.
       MB.recall_p (EK?.ek ek) (S.equal (expand_or_dummy a (EK?.kv ek)));
       assert (MB.length (EK?.ek ek) = 32);
