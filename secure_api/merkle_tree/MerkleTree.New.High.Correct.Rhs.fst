@@ -209,7 +209,7 @@ val construct_rhs_acc_consistent:
           rhs_equiv j (fst rrf) (S.slice (fst rr) lv (lv + log2c j)) actd /\
           snd rrf == snd rr)))
         (decreases j)
-#reset-options "--z3rlimit 240 --max_fuel 1"
+#reset-options "--z3rlimit 720 --max_fuel 1"
 let rec construct_rhs_acc_consistent lv i j olds hs rhs acc actd =
   log2c_bound j (32 - lv);
   mt_olds_hs_lth_inv_ok lv i j olds hs;
@@ -228,7 +228,6 @@ let rec construct_rhs_acc_consistent lv i j olds hs rhs acc actd =
     construct_rhs_acc_consistent (lv + 1) (i / 2) (j / 2)
       olds hs rhs acc actd
   end
-
   else begin
     let rhd = if actd then acc else hash_init in
     let nacc = if actd
