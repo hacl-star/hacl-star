@@ -96,9 +96,14 @@ let uints_to_bytes_le_lemma64_1 lo hi =
   Lib.Unlib.reveal_secret8 ();
   admit ()
 
-let uints_to_bytes_le_lemma64_2 r = admit()
+let uints_to_bytes_le_lemma64_2 r =
+  // Similarly mundane. The Lib.ByteSequence library currently lacks enough
+  // lemmas to prove this simply.
+  admit ()
 
-let uints_to_bytes_le_lemma128_2 r = admit()
+let uints_to_bytes_le_lemma128_2 r =
+  // ibid.
+  admit ()
 
 val lemma_nat_from_bytes_le_zeroes: len:size_nat -> b:lseq uint8 len -> Lemma
   (requires (forall (i:nat). i < len ==> b.[i] == u8 0))
