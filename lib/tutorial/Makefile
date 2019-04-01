@@ -43,7 +43,7 @@ OBJS = $(HACL_HOME)/lib/c/Lib_PrintBuffer.o $(OUT_DIR)/Loops.o
 HACL_LIBS = \
   $(HACL_HOME)/lib/fst/Lib.IntTypes.fst \
   $(HACL_HOME)/lib/fst/Lib.RawIntTypes.fst \
-  $(HACL_HOME)/lib/c/Lib.Loops.fst \
+  $(HACL_HOME)/lib/fst/Lib.Loops.fst \
   $(HACL_HOME)/lib/fst/Lib.Buffer.fst
 
 $(OUT_DIR)/out.krml: $(HACL_LIBS) Loops.fst
@@ -54,7 +54,6 @@ $(OUT_DIR)/out.krml: $(HACL_LIBS) Loops.fst
 $(OUT_DIR)/Loops.c: $(OUT_DIR)/out.krml
 	$(KREMLIN) \
 	  -add-include '"c/Lib_PrintBuffer.h"' \
-	  -add-include '"extracted/TestLib.h"' \
 	  -add-include '"kremlin/internal/compat.h"' \
 	  -skip-compilation \
 	  -bundle 'Lib.*' \
@@ -63,7 +62,7 @@ $(OUT_DIR)/Loops.c: $(OUT_DIR)/out.krml
 	  $^
 
 $(OUT_DIR)/test.exe: $(OBJS)
-	$(CC) $(CFLAGS) -o $@ $^ -L $(KREMLIN_HOME)/kremlib/out -lkremlib
+	$(CC) $(CFLAGS) -o $@ $^ -L $(KREMLIN_HOME)/kremlib/dist/generic -lkremlib
 
 test: $(OUT_DIR)/test.exe
 	$(OUT_DIR)/test.exe
