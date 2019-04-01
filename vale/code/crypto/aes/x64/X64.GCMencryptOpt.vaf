@@ -35,6 +35,7 @@ include{:fstar}{:open} "X64.Vale.Decls"
 include{:fstar}{:open} "X64.Vale.QuickCode"
 include{:fstar}{:open} "X64.Vale.QuickCodes"
 include{:fstar}{:open} "X64.CPU_Features_s"
+include{:fstar}{:open} "Math.Poly2.Bits_s"
 
 module X64.GCMencryptOpt
 
@@ -78,6 +79,7 @@ open X64.Vale.QuickCodes
 open X64.GF128_Mul
 open X64.Stack
 open X64.CPU_Features_s
+open Math.Poly2.Bits_s
 open X64.AESGCM
 open Util.Meta
 #endverbatim
@@ -95,11 +97,19 @@ let aes_reqs
   validSrcAddrs128 mem key_ptr keys_b (nr alg + 1) memTaint Secret /\
   s128 mem keys_b == round_keys
 
-#set-options "--z3rlimit 50"
+let hkeys_reqs (hkeys_b:buffer128) (h_LE:quad32) (mem:memory) : prop0 =
+  let h = of_quad32 (reverse_bytes_quad32 h_LE) in
+  of_quad32 (buffer128_read hkeys_b 0 mem) == gf128_power h 1 /\
+  of_quad32 (buffer128_read hkeys_b 1 mem) == gf128_power h 2 /\
+  of_quad32 (buffer128_read hkeys_b 3 mem) == gf128_power h 3 /\
+  of_quad32 (buffer128_read hkeys_b 4 mem) == gf128_power h 4 /\
+  of_quad32 (buffer128_read hkeys_b 6 mem) == gf128_power h 5 /\
+  of_quad32 (buffer128_read hkeys_b 7 mem) == gf128_power h 6 
 #endverbatim
 
 function aes_reqs(alg:algorithm, key:seq(nat32), round_keys:seq(quad32), keys_b:buffer128,
     key_ptr:int, mem:memory, memTaint:memtaint) : prop extern;
+function hkeys_reqs(hkeys_b:buffer128, h_LE:quad32, mem:memory) : prop extern;
 
 
 ///////////////////////////
@@ -636,7 +646,7 @@ procedure {:quick} gcm_blocks(
 
         // GCM reqs
         pclmulqdq_enabled;
-
+        hkeys_reqs(hkeys_b, reverse_bytes_quad32(buffer128_read(hkeys_b, 2, mem)), mem);
 
     ensures
         // Framing
@@ -944,6 +954,7 @@ procedure {:quick exportOnly} gcm_blocks_wrapped(
         // GCM reqs
         pclmulqdq_enabled;
         buffer128_read(hkeys_b, 2, mem) == reverse_bytes_quad32(aes_encrypt_LE(alg, key, Mkfour(0,0,0,0)));
+        hkeys_reqs(hkeys_b, reverse_bytes_quad32(buffer128_read(hkeys_b, 2, mem)), mem);
 
 
     ensures
@@ -1366,6 +1377,7 @@ procedure {:quick exportOnly}{:public}{:exportSpecs}{:frame false} gcm_blocks_st
         // GCM reqs
         pclmulqdq_enabled;
         buffer128_read(hkeys_b, 2, mem) == reverse_bytes_quad32(aes_encrypt_LE(alg, key, Mkfour(0,0,0,0)));
+        hkeys_reqs(hkeys_b, reverse_bytes_quad32(buffer128_read(hkeys_b, 2, mem)), mem);
 
     ensures
         // Manual framing
