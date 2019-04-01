@@ -404,7 +404,7 @@
         "typing_tok_Spec.AEAD.AES256_GCM@tok"
       ],
       0,
-      "4d2659df64bdf756012450609c63efc8"
+      "7744b1b2707bb613448f8ae011c17f21"
     ],
     [
       "EverCrypt.AEAD.iv_p",
@@ -422,7 +422,7 @@
       0,
       [ "@query" ],
       0,
-      "fa0a7337b5ce0aac44ba0cacdda5ae0a"
+      "749b57182a72fb2cd8090978294cf666"
     ],
     [
       "EverCrypt.AEAD.encrypt",
@@ -464,7 +464,7 @@
         "typing_Spec.AEAD.is_supported_alg"
       ],
       0,
-      "0b3cea0de1c9f2f06c9e35d62cb03a7f"
+      "c855e97072ee9a613a3739bd73eb226f"
     ],
     [
       "EverCrypt.AEAD.encrypt",
@@ -823,7 +823,7 @@
         "typing_tok_Spec.AEAD.AES128_GCM@tok"
       ],
       0,
-      "1197a5c3f9efe65fbcfa6d9e885702e3"
+      "517be2161340e020aaacd82a9177484e"
     ],
     [
       "EverCrypt.AEAD.decrypt",
@@ -878,7 +878,7 @@
         "typing_Spec.AEAD.is_supported_alg"
       ],
       0,
-      "2ee92e4d0e77f072baa050a7871dd5d9"
+      "3713fcdcba36c5472fc3eee92371fe7b"
     ],
     [
       "EverCrypt.AEAD.decrypt",
@@ -951,6 +951,7 @@
         "constructor_distinct_Lib.IntTypes.U128",
         "constructor_distinct_Lib.IntTypes.U16",
         "constructor_distinct_Lib.IntTypes.U32",
+        "constructor_distinct_Lib.IntTypes.U64",
         "constructor_distinct_Lib.IntTypes.U8",
         "constructor_distinct_Spec.AEAD.AES128_GCM",
         "constructor_distinct_Spec.AEAD.AES256_GCM",
@@ -1012,7 +1013,6 @@
         "equation_Lib.Buffer.modifies", "equation_Lib.IntTypes.bits",
         "equation_Lib.IntTypes.byte_t", "equation_Lib.IntTypes.pub_int_t",
         "equation_Lib.IntTypes.pub_int_v", "equation_Lib.IntTypes.sec_int_t",
-        "equation_Lib.IntTypes.u8", "equation_Lib.IntTypes.uint",
         "equation_Lib.IntTypes.uint8", "equation_Lib.IntTypes.uint_t",
         "equation_Lib.IntTypes.uint_v", "equation_LowStar.Buffer.buffer",
         "equation_LowStar.Buffer.trivial_preorder",
@@ -1059,7 +1059,6 @@
         "lemma_FStar.Map.lemma_UpdDomain",
         "lemma_FStar.Monotonic.HyperHeap.lemma_includes_refl",
         "lemma_FStar.Monotonic.HyperStack.lemma_mk_mem__projectors",
-        "lemma_FStar.Seq.Base.lemma_create_len",
         "lemma_FStar.Seq.Base.lemma_eq_elim",
         "lemma_FStar.Seq.Base.lemma_eq_intro",
         "lemma_FStar.Seq.Base.lemma_eq_refl",
@@ -1121,7 +1120,6 @@
         "projection_inverse_FStar.Pervasives.Native.Some_v",
         "refinement_interpretation_Tm_refine_03127b5d59ee3055620018693b4264e8",
         "refinement_interpretation_Tm_refine_2011e81e05d092e08833cbfdaea77df9",
-        "refinement_interpretation_Tm_refine_22871ed0ff70fd094ad3e8d742624d47",
         "refinement_interpretation_Tm_refine_3321cbe2f573e3c988fd0895bf1f0cf9",
         "refinement_interpretation_Tm_refine_36f208f2b1019ab7b5d9be73f4c89349",
         "refinement_interpretation_Tm_refine_39deefe1f5545d253ca4f882d8886f22",
@@ -1166,13 +1164,12 @@
         "typing_FStar.Monotonic.HyperStack.get_tip",
         "typing_FStar.Monotonic.HyperStack.mk_mem",
         "typing_FStar.Monotonic.HyperStack.remove_elt",
-        "typing_FStar.Seq.Base.append", "typing_FStar.Seq.Base.create",
-        "typing_FStar.Seq.Base.empty", "typing_FStar.Seq.Base.length",
-        "typing_FStar.Seq.Base.slice", "typing_FStar.Set.complement",
-        "typing_FStar.Set.mem", "typing_FStar.Set.singleton",
-        "typing_FStar.Set.union", "typing_FStar.UInt.fits",
-        "typing_FStar.UInt32.v", "typing_FStar.UInt8.uint_to_t",
-        "typing_Lib.Buffer.loc", "typing_LowStar.Buffer.trivial_preorder",
+        "typing_FStar.Seq.Base.append", "typing_FStar.Seq.Base.empty",
+        "typing_FStar.Seq.Base.length", "typing_FStar.Seq.Base.slice",
+        "typing_FStar.Set.complement", "typing_FStar.Set.mem",
+        "typing_FStar.Set.singleton", "typing_FStar.Set.union",
+        "typing_FStar.UInt.fits", "typing_FStar.UInt32.v",
+        "typing_LowStar.Buffer.trivial_preorder",
         "typing_LowStar.Monotonic.Buffer.address_liveness_insensitive_locs",
         "typing_LowStar.Monotonic.Buffer.as_addr",
         "typing_LowStar.Monotonic.Buffer.as_seq",
@@ -1192,8 +1189,7 @@
         "typing_Tm_abs_45bc106d66ff9e2c3c9f4100524b39b3",
         "typing_tok_EverCrypt.AEAD.Failure@tok",
         "typing_tok_EverCrypt.AEAD.InvalidKey@tok",
-        "typing_tok_EverCrypt.AEAD.Success@tok",
-        "typing_tok_Lib.Buffer.MUT@tok"
+        "typing_tok_EverCrypt.AEAD.Success@tok"
       ],
       0,
       "a43303f591c5c2e355490874f35dbe75"

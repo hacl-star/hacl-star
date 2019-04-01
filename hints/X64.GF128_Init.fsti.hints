@@ -1,1 +1,87 @@
-[ "çÙEbý\u0001~se×€\u001dóïÃa", [] ]
+[
+  "ï.p{Ûâ+\u000f‚âòœŽ\u001bÐ‹",
+  [
+    [
+      "X64.GF128_Init.va_req_Keyhash_init",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_f8666440faa91836cc5a13998af863fc",
+        "equation_Prims.l_and", "equation_Prims.squash",
+        "equation_Prims.subtype_of",
+        "l_quant_interp_0235708612358a0dd8d2d21a7f9984d9",
+        "refinement_interpretation_Tm_refine_8d65e998a07dd53ec478e27017d9dba5",
+        "unit_typing"
+      ],
+      0,
+      "6e0c8bd3d803be28893833721bd9a787"
+    ],
+    [
+      "X64.GF128_Init.va_ens_Keyhash_init",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565",
+        "Prims_pretyping_f8666440faa91836cc5a13998af863fc", "bool_inversion",
+        "equality_tok_X64.Machine_s.Rsi@tok", "equation_Prims.l_and",
+        "equation_Prims.nat", "equation_Prims.squash",
+        "equation_Prims.subtype_of", "equation_Words_s.nat64",
+        "equation_Words_s.natN", "equation_X64.Vale.Decls.va_state_eq",
+        "fuel_guarded_inversion_X64.Vale.State.state",
+        "function_token_typing_Prims.__cache_version_number__",
+        "l_quant_interp_0235708612358a0dd8d2d21a7f9984d9",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_5514fbe9e08dfda40f950a7b9f1b2b98",
+        "refinement_interpretation_Tm_refine_8d65e998a07dd53ec478e27017d9dba5",
+        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "typing_X64.Vale.Regs.sel",
+        "typing_X64.Vale.State.__proj__Mkstate__item__regs",
+        "typing_tok_X64.Machine_s.Rsi@tok", "unit_typing"
+      ],
+      0,
+      "37f43093720c26a79347a42ecb112d32"
+    ],
+    [
+      "X64.GF128_Init.va_lemma_Keyhash_init",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "bool_inversion",
+        "equality_tok_X64.Machine_s.Secret@tok",
+        "equation_X64.Vale.Decls.validDstAddrs128",
+        "fuel_guarded_inversion_X64.Vale.State.state",
+        "proj_equation_X64.Vale.State.Mkstate_mem",
+        "proj_equation_X64.Vale.State.Mkstate_memTaint",
+        "refinement_interpretation_Tm_refine_0e84df8c550a9c858e0e9ceb0abaa9f6"
+      ],
+      0,
+      "dda2fd72ec0007cc4ae15e4c2f092b0d"
+    ],
+    [
+      "X64.GF128_Init.va_wp_Keyhash_init",
+      1,
+      1,
+      0,
+      [ "@query" ],
+      0,
+      "3de546e35ca8ff6036007ea99674238a"
+    ],
+    [
+      "X64.GF128_Init.va_wpProof_Keyhash_init",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.squash",
+        "refinement_interpretation_Tm_refine_8d65e998a07dd53ec478e27017d9dba5"
+      ],
+      0,
+      "b30aa2424a8c527b8f405960c6fe3784"
+    ]
+  ]
+]
