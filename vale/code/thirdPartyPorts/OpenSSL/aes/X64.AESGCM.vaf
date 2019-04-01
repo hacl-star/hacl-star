@@ -2177,7 +2177,7 @@ procedure {:quick} Loop6x(
         counter + 6 < 256 ==> Ii   == reverse_bytes_quad32(inc32lite(ctr_BE, 7));
         counter + 6 < 256 ==> Z1   == reverse_bytes_quad32(inc32lite(ctr_BE, 8));
         counter + 6 < 256 ==> Z2   == reverse_bytes_quad32(inc32lite(ctr_BE, 9));
-        len == 0 ==> (counter + 6 < 256 ==> Z3   == reverse_bytes_quad32(inc32lite(ctr_BE,10)));
+        len == 0 ==> (counter + 6 < 256 ==> Z3 == reverse_bytes_quad32(inc32lite(ctr_BE,10)));
         counter + 6 < 256 ==> Hkey == reverse_bytes_quad32(inc32lite(ctr_BE,11));
 
         counter == inc32lite(ctr_BE, 6).lo0 % 256;
@@ -2190,7 +2190,7 @@ procedure {:quick} Loop6x(
         len > 0 ==> inout1 == Ii;
         len > 0 ==> inout2 == Z1;
         len > 0 ==> inout3 == Z2;
-        //len > 0 ==> inout4 == Z3;
+        len > 0 ==> (counter + 6 < 256 ==> inout4 == reverse_bytes_quad32(inc32lite(ctr_BE, 10)));
         len > 0 ==> inout5 == Hkey;
         
         len > 0 ==> buffer128_read(out_b, count*6 + 0, mem) == quad32_xor(old(buffer128_read(in_b, count*6 + 0, mem)), aes_encrypt_BE(alg, key_words, inc32lite(ctr_BE, 0)));
@@ -2289,11 +2289,12 @@ procedure {:quick} Loop6x(
     reveal gctr_registers_def;
 }
 
-/*
-#reset-options "--z3rlimit 525"
-procedure {:quick} Loop6x_loop(
+#reset-options "--z3rlimit 750"
+procedure {:quick} {:verify true} Loop6x_loop(
     inline alg:algorithm,  
     ghost h_LE:quad32,
+    ghost y_orig:quad32,
+    ghost y_prev:quad32,
     ghost count:nat,        // Number of 6x128-bit blocks processed so far
     ghost iv_b:buffer128,
     ghost in0_b:buffer128,
@@ -2309,6 +2310,8 @@ procedure {:quick} Loop6x_loop(
 
     ghost ctr_BE_orig:quad32,
     ghost ctr_BE:quad32
+    ) returns (
+    ghost y_new:quad32
     )
     lets
 //      inp @= rdi; outp @= rsi; len @= rdx; key @= rcx; ivp @= r8; Xip @= r9;
@@ -2358,6 +2361,7 @@ procedure {:quick} Loop6x_loop(
         buffers_disjoint128(out_b, keys_b);
         buffers_disjoint128(out_b, hkeys_b);
         buffers_disjoint128(in_b, out_b) || in_b == out_b;
+        in0_b == out_b;
         partial_seq_agreement(plain_quads, s128(mem, in_b), count*6, length(s128(mem, in_b)));
          inp + 0x10*len < pow2_64;
          in0 + 0x10*len < pow2_64;
@@ -2367,8 +2371,14 @@ procedure {:quick} Loop6x_loop(
         aes_reqs_offset(alg, key_words, round_keys, keys_b, key, mem, memTaint);
         rndkey == index(round_keys, 0);
 
-        // GCM reqs
+        // GHash reqs
         pclmulqdq_enabled;
+        hkeys_reqs(hkeys_b, h_LE, mem);
+        scratch_reqs(scratch_b, #nat(count - 2), mem, s128(mem, out_b), Z3);
+        y_prev == ghash_incremental0(h_LE, y_orig, slice_work_around(s128(mem, out_b), (count-2)*6));
+        y_prev == reverse_bytes_quad32(to_quad32( 
+              of_quad32(Xi) +. of_quad32(Z0) +. of_quad32(buffer128_read(scratch_b, 1, mem))));
+
 
         // Counter requirements
         count*6 + 6 < pow2_32;
@@ -2411,11 +2421,17 @@ procedure {:quick} Loop6x_loop(
         inout4 == quad32_xor(old(buffer128_read(in_b, 6*count+old(len)-6 + 4, mem)), aes_encrypt_BE(alg, key_words, inc32lite(ctr_BE_orig, 6*count + old(len) - 6 + 4)));
         inout5 == quad32_xor(old(buffer128_read(in_b, 6*count+old(len)-6 + 5, mem)), aes_encrypt_BE(alg, key_words, inc32lite(ctr_BE_orig, 6*count + old(len) - 6 + 5)));
 
+        // GHash
+        y_new == ghash_incremental0(h_LE, y_orig, slice_work_around(s128(mem, out_b), 6*count+old(len)-12));
+        Xi == reverse_bytes_quad32(y_new);
+//        scratch_reqs(scratch_b, #nat(count + iter - 2), mem, s128(mem, out_b), buffer128_read(scratch_b, 2, mem));
+
         // Counters
         T1 == reverse_bytes_quad32(inc32lite(ctr_BE, old(len)));
 {
     ghost var iter:nat := 0;
     ghost var ctr:quad32 := ctr_BE;
+    ghost var y_cur:quad32 := y_prev;
 
     while (len > 0) 
         invariant
@@ -2450,6 +2466,8 @@ procedure {:quick} Loop6x_loop(
             buffers_disjoint128(out_b, keys_b);
             buffers_disjoint128(out_b, hkeys_b);
             buffers_disjoint128(in_b, out_b) || in_b == out_b;
+            in0_b == out_b;
+
             old(length(s128(mem, in_b))) >= 6;
             len > 0 ==> partial_seq_agreement(plain_quads, s128(mem, in_b), 6*count + 6*iter, old(length(s128(mem, in_b))));
             len > 0 ==>  inp + 0x10*len < pow2_64;
@@ -2466,8 +2484,18 @@ procedure {:quick} Loop6x_loop(
             aes_reqs_offset(alg, key_words, round_keys, keys_b, key, mem, memTaint);
             rndkey == index(round_keys, 0);
 
-            // GCM reqs
+            // GHash reqs
             pclmulqdq_enabled;
+            hkeys_reqs(hkeys_b, h_LE, mem);
+
+            count + iter - 2 >= 0;
+            len > 0 ==> scratch_reqs(scratch_b, #nat(count + iter - 2), mem, s128(mem, out_b), Z3);
+            len == 0 ==> scratch_reqs(scratch_b, #nat(count + iter - 2), mem, s128(mem, out_b), buffer128_read(scratch_b, 2, mem));
+
+            y_cur == ghash_incremental0(h_LE, y_orig, slice_work_around(s128(mem, out_b), (count + iter - 2)*6));
+            len > 0 ==> y_cur == reverse_bytes_quad32(to_quad32( 
+                        of_quad32(Xi) +. of_quad32(Z0) +. of_quad32(buffer128_read(scratch_b, 1, mem))));
+            len == 0 ==> Xi == reverse_bytes_quad32(y_cur);
 
             // Counter requirements
             2 <= count;
@@ -2499,15 +2527,17 @@ procedure {:quick} Loop6x_loop(
             len;
 
     {
-        Loop6x(alg, h_LE, count+iter, iv_b, in0_b, in_b, out_b, scratch_b, plain_quads,
-               key_words, round_keys, keys_b, hkeys_b, ctr_BE_orig, ctr);
+        y_cur := Loop6x(alg, h_LE, y_orig, y_cur, count+iter, iv_b, in0_b, in_b, out_b, scratch_b, plain_quads,
+                        key_words, round_keys, keys_b, hkeys_b, ctr_BE_orig, ctr);
         iter := #nat(iter + 1);
         ctr := inc32(ctr, 6);
     }
     reveal gctr_registers_def;
+    y_new := y_cur;
 }
 
 
+/*
 #reset-options "--z3rlimit 40"
 procedure {:quick} AESNI_ctr32_6x_preamble(
     inline alg:algorithm,  // OpenSSL includes the number of rounds (nr) as a dynamic parameter (stored with the key).  Saves code space but adds extra instructions to the fast path.  Maybe branch predictor is good enough for it not to matter
