@@ -1434,7 +1434,7 @@ procedure {:quick exportOnly}{:public}{:exportSpecs}{:frame false} gcm_blocks_st
     }
     
 
-    gcm_blocks(alg,
+    gcm_blocks_wrapped(alg,
                if win then 224 + 56 else 64 + 8,
                auth_b,
                abytes_b,
