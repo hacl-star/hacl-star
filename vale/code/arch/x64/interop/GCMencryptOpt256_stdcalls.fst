@@ -550,9 +550,6 @@ let gcm256_encrypt_opt_alloca key plain_b plain_len auth_b auth_bytes iv_b
   length_aux4 iv_b;
   gcm_simplify3 iv_b h0;
 
-  // Simplify the precondition for hkeys_b
-  gcm_simplify4 hkeys_b h0;
-
   // Compute length of biggest blocks of 6 * 128-bit blocks
   let len128x6 = UInt64.mul (plain_len / 96uL) 96uL in
   if len128x6 / 16uL >= 18uL then (

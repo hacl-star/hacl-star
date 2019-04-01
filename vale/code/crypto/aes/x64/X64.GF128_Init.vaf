@@ -149,6 +149,7 @@ procedure{:quick} Gf128_powers(
         buffer128_read(hkeys_b, 2, mem) == old(buffer128_read(hkeys_b, 2, mem));
         of_quad32(buffer128_read(hkeys_b, 3, mem)) == gf128_power(h, 3);
         of_quad32(buffer128_read(hkeys_b, 4, mem)) == gf128_power(h, 4);
+        buffer128_read(hkeys_b, 5, mem) == old(buffer128_read(hkeys_b, 5, mem));
         of_quad32(buffer128_read(hkeys_b, 6, mem)) == gf128_power(h, 5);
         of_quad32(buffer128_read(hkeys_b, 7, mem)) == gf128_power(h, 6);
 {
@@ -247,8 +248,10 @@ procedure{:quick}{:public}{:exportSpecs} Keyhash_init(
    InitPshufbMask(xmm4, r8);
    ZeroXmm(xmm0);
    inline if (win) {
+     Store128_buffer(rdx, xmm0, 0x50, Secret, hkeys_b, 5); // Store 0 into 5th element
      Mov64(r8, rcx);
    } else {
+     Store128_buffer(rsi, xmm0, 0x50, Secret, hkeys_b, 5); // Store 0 into 5th element
      Mov64(r8, rdi);
    }
    AESEncryptBlock(alg, xmm0, key, old(buffer128_as_seq(mem, roundkeys_b)), roundkeys_b); // h = xmm0 = aes_encrypt_LE alg key (Mkfour 0 0 0 0) in

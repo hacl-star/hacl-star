@@ -15,6 +15,10 @@ open GCM_helpers
 open AES256_helpers
 open FStar.Mul
 
+val le_bytes_to_seq_quad32_uint8_to_nat8_length (s:Seq.seq UInt8.t) : Lemma
+  (requires Seq.length s % 16 = 0)
+  (ensures Seq.length (le_bytes_to_seq_quad32 (seq_uint8_to_seq_nat8 s)) == Seq.length s / 16)
+
 val gcm_simplify1 (b:buf_t TUInt8 TUInt128) (h:HS.mem) (n:nat) : Lemma 
   (requires B.length b = n)
   (ensures (
@@ -42,14 +46,6 @@ val gcm_simplify3 (b:buf_t TUInt8 TUInt128) (h:HS.mem) : Lemma
     Seq.equal
       (seq_uint8_to_seq_nat8 (B.as_seq h b))
       (be_quad32_to_bytes (reverse_bytes_quad32 (low_buffer_read TUInt8 TUInt128 h b 0)))
-  ))
-
-val gcm_simplify4 (b:buf_t TUInt8 TUInt128) (h:HS.mem) : Lemma
-  (requires B.live h b /\ B.length b % 16 = 0 /\ B.length b = 160)
-  (ensures (
-    DV.length_eq (get_downview b);
-    le_bytes_to_quad32 (seq_uint8_to_seq_nat8 (Seq.slice (B.as_seq h b) 32 48)) ==
-      low_buffer_read TUInt8 TUInt128 h b 2
   ))
 
 val aes_simplify1 (b:buf_t TUInt8 TUInt128) (h:HS.mem) : Lemma 

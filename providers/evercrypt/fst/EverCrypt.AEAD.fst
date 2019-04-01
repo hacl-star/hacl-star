@@ -48,7 +48,35 @@ let expand_in #a r k =
           let k_w = Words.Seq_s.seq_nat8_to_seq_nat32_LE k_nat in G.hide k_w)
           keys_b hkeys_b;
         let h1 = ST.get() in
-        assume (Seq.equal (B.as_seq h1 ek')  (expand #a (G.reveal kv)));        
+
+        // Since ek has a frozen preorder, we need to prove that we are copying the
+        // expanded key into it. In particular, that the hashed part corresponds to the spec
+        let lemma_aux_hkeys () : Lemma
+          (let k = G.reveal kv in
+           let k_nat = Words.Seq_s.seq_uint8_to_seq_nat8 k in
+           let k_w = Words.Seq_s.seq_nat8_to_seq_nat32_LE k_nat in
+           let hkeys_quad = OptPublic.get_hkeys_reqs (Types_s.reverse_bytes_quad32 (
+             AES_s.aes_encrypt_LE (vale_alg_of_alg a) k_w (Words_s.Mkfour 0 0 0 0))) in
+           let hkeys = Words.Seq_s.seq_nat8_to_seq_uint8 (Types_s.le_seq_quad32_to_bytes hkeys_quad) in
+           Seq.equal (B.as_seq h1 hkeys_b) hkeys)
+           = let k = G.reveal kv in
+             let k_nat = Words.Seq_s.seq_uint8_to_seq_nat8 k in
+             let k_w = Words.Seq_s.seq_nat8_to_seq_nat32_LE k_nat in
+             let hkeys_quad = OptPublic.get_hkeys_reqs (Types_s.reverse_bytes_quad32 (
+               AES_s.aes_encrypt_LE (vale_alg_of_alg a) k_w (Words_s.Mkfour 0 0 0 0))) in
+             let hkeys = Words.Seq_s.seq_nat8_to_seq_uint8 (Types_s.le_seq_quad32_to_bytes hkeys_quad) in
+            Gcm_simplify.le_bytes_to_seq_quad32_uint8_to_nat8_length (B.as_seq h1 hkeys_b);
+            assert_norm (128 / 16 = 8);
+            // These two are equal
+            OptPublic.get_hkeys_reqs_injective
+              (Types_s.reverse_bytes_quad32 (
+               AES_s.aes_encrypt_LE (vale_alg_of_alg a) k_w (Words_s.Mkfour 0 0 0 0)))
+              hkeys_quad
+              (Types_s.le_bytes_to_seq_quad32 (Words.Seq_s.seq_uint8_to_seq_nat8 (B.as_seq h1 hkeys_b)));
+            Arch.Types.le_seq_quad32_to_bytes_to_seq_quad32 (Words.Seq_s.seq_uint8_to_seq_nat8 (B.as_seq h1 hkeys_b))
+
+        in lemma_aux_hkeys ();
+                   
         MB.blit ek' 0ul ek 0ul 304ul;
         pop_frame();
         let h2 = ST.get() in
@@ -81,7 +109,35 @@ let expand_in #a r k =
           let k_w = Words.Seq_s.seq_nat8_to_seq_nat32_LE k_nat in G.hide k_w)
           keys_b hkeys_b;
         let h1 = ST.get() in
-        assume (Seq.equal (B.as_seq h1 ek')  (expand #a (G.reveal kv)));
+
+        // Since ek has a frozen preorder, we need to prove that we are copying the
+        // expanded key into it. In particular, that the hashed part corresponds to the spec
+        let lemma_aux_hkeys () : Lemma
+          (let k = G.reveal kv in
+           let k_nat = Words.Seq_s.seq_uint8_to_seq_nat8 k in
+           let k_w = Words.Seq_s.seq_nat8_to_seq_nat32_LE k_nat in
+           let hkeys_quad = OptPublic.get_hkeys_reqs (Types_s.reverse_bytes_quad32 (
+             AES_s.aes_encrypt_LE (vale_alg_of_alg a) k_w (Words_s.Mkfour 0 0 0 0))) in
+           let hkeys = Words.Seq_s.seq_nat8_to_seq_uint8 (Types_s.le_seq_quad32_to_bytes hkeys_quad) in
+           Seq.equal (B.as_seq h1 hkeys_b) hkeys)
+           = let k = G.reveal kv in
+             let k_nat = Words.Seq_s.seq_uint8_to_seq_nat8 k in
+             let k_w = Words.Seq_s.seq_nat8_to_seq_nat32_LE k_nat in
+             let hkeys_quad = OptPublic.get_hkeys_reqs (Types_s.reverse_bytes_quad32 (
+               AES_s.aes_encrypt_LE (vale_alg_of_alg a) k_w (Words_s.Mkfour 0 0 0 0))) in
+             let hkeys = Words.Seq_s.seq_nat8_to_seq_uint8 (Types_s.le_seq_quad32_to_bytes hkeys_quad) in
+            Gcm_simplify.le_bytes_to_seq_quad32_uint8_to_nat8_length (B.as_seq h1 hkeys_b);
+            assert_norm (128 / 16 = 8);
+            // These two are equal
+            OptPublic.get_hkeys_reqs_injective
+              (Types_s.reverse_bytes_quad32 (
+               AES_s.aes_encrypt_LE (vale_alg_of_alg a) k_w (Words_s.Mkfour 0 0 0 0)))
+              hkeys_quad
+              (Types_s.le_bytes_to_seq_quad32 (Words.Seq_s.seq_uint8_to_seq_nat8 (B.as_seq h1 hkeys_b)));
+            Arch.Types.le_seq_quad32_to_bytes_to_seq_quad32 (Words.Seq_s.seq_uint8_to_seq_nat8 (B.as_seq h1 hkeys_b))
+
+        in lemma_aux_hkeys ();
+        
         MB.blit ek' 0ul ek 0ul 368ul;
         pop_frame();
         let h2 = ST.get() in
