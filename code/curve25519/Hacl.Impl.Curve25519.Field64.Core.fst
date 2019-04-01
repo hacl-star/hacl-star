@@ -49,7 +49,7 @@ let fadd out f1 f2 =
   if EverCrypt.TargetConfig.gcc then
     Fadd_inline.fadd_inline out f1 f2
   else
-    Fadd_stdcalls.fadd_ out f1 f2
+    Fadd_stdcalls.fadd out f1 f2
 
 [@ CInline]
 let fsub out f1 f2 =
@@ -76,7 +76,7 @@ let fsub out f1 f2 =
   if EverCrypt.TargetConfig.gcc then
     Fadd_inline.fsub_inline out f1 f2
   else
-    Fsub_stdcalls.fsub_ out f1 f2
+    Fsub_stdcalls.fsub out f1 f2
 
 let lemma_fmul_equiv (h0:HS.mem) (f1 f2:u256) : Lemma 
   (P.fmul (fevalh h0 f1) (fevalh h0 f2) == (FA.as_nat f1 h0 * FA.as_nat f2 h0) % Fast_defs.prime)
@@ -104,7 +104,7 @@ let fmul out f1 f2 tmp =
   if EverCrypt.TargetConfig.gcc then
     Fmul_inline.fmul_inline (sub tmp 0ul 8ul) f1 out f2
   else
-    Fmul_stdcalls.fmul_ (sub tmp 0ul 8ul) f1 out f2
+    Fmul_stdcalls.fmul (sub tmp 0ul 8ul) f1 out f2
 
 [@ CInline]
 let fmul2 out f1 f2 tmp =

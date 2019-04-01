@@ -397,10 +397,10 @@ procedure {:quick}{:public} ghash_incremental_bytes_register(
     lets num_bytes @= rax; io @= xmm1; input_quad @= xmm2; mask @= xmm8; h @= xmm11;
 
     reads
-        h; mask;
+        num_bytes; h; mask;
 
     modifies
-        num_bytes; rcx; rdx; r12;
+        rcx; rdx; r12;
         io; efl;
 
         // ReduceMul128_LE touches almost everything
@@ -416,7 +416,7 @@ procedure {:quick}{:public} ghash_incremental_bytes_register(
         // Extra reqs
         length(completed_quads) == total_bytes / 16;
         total_bytes < 16 * length(completed_quads) + 16;
-        num_bytes == total_bytes;
+        num_bytes == total_bytes % 16;
         total_bytes % 16 != 0;        // Note: This implies total_bytes > 0
         0 < total_bytes < 16 * bytes_to_quad_size(total_bytes);
         16 * (bytes_to_quad_size(total_bytes) - 1) < total_bytes;
@@ -429,10 +429,6 @@ procedure {:quick}{:public} ghash_incremental_bytes_register(
         total_bytes > 0 ==> length(input_quads) > 0 /\
                           io == ghash_incremental(reverse_bytes_quad32(h), old_hash, input_quads);
 {
-    lemma_poly_bits64();
-    And64(num_bytes, 15);
-    assert num_bytes == old(num_bytes) % 16;
-
     ghost var final_quad := xmm2;
 
     compute_pad_to_128_bits();

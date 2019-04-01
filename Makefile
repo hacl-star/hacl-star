@@ -455,6 +455,10 @@ obj/Vale.Stdcalls.GCMencryptOpt.fst.checked: \
 obj/GCMencryptOpt_stdcalls.fst.checked: \
   FSTAR_FLAGS=$(VALE_FSTAR_FLAGS)
 
+obj/GCM.fst.checked: \
+  FSTAR_FLAGS=$(VALE_FSTAR_FLAGS)
+  
+
 hints:
 	mkdir -p $@
 

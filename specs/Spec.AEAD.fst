@@ -13,6 +13,23 @@ let vale_alg_of_alg (a: alg { a = AES128_GCM \/ a = AES256_GCM }) =
   | AES128_GCM -> AES_s.AES_128
   | AES256_GCM -> AES_s.AES_256
 
+let gcm_hashed_keys (#a: alg { a = AES128_GCM \/ a = AES256_GCM }) (k:kv a) 
+  : (s:lbytes 160{Seq.slice s 32 48 == 
+    Words.Seq_s.seq_nat8_to_seq_uint8 (Types_s.le_quad32_to_bytes (Types_s.reverse_bytes_quad32 (
+      AES_s.aes_encrypt_LE (vale_alg_of_alg a) 
+        (Words.Seq_s.seq_nat8_to_seq_nat32_LE (Words.Seq_s.seq_uint8_to_seq_nat8 k))
+        (Words_s.Mkfour 0 0 0 0))))}) =
+  let open AES_s in
+  assert_norm (32 % 4 = 0);
+  assert_norm (16 % 4 = 0);
+  let k_nat = Words.Seq_s.seq_uint8_to_seq_nat8 k in
+  let k_w = Words.Seq_s.seq_nat8_to_seq_nat32_LE k_nat in
+  let v = Words.Seq_s.seq_nat8_to_seq_uint8 (Types_s.le_quad32_to_bytes (Types_s.reverse_bytes_quad32 (
+      AES_s.aes_encrypt_LE (vale_alg_of_alg a) k_w (Words_s.Mkfour 0 0 0 0)))) in
+  let s_f = Seq.append (Seq.create 32 0uy) (Seq.append v (Seq.create 112 0uy)) in
+  assert (Seq.equal (Seq.slice s_f 32 48) v);
+  s_f
+
 let expand #a k =
   match a with
   | CHACHA20_POLY1305 -> k
@@ -25,7 +42,8 @@ let expand #a k =
       let ekv_w = key_to_round_keys_LE (vale_alg_of_alg a) k_w in
       let ekv_nat = Types_s.le_seq_quad32_to_bytes ekv_w in
       Types_s.le_seq_quad32_to_bytes_length ekv_w;
-      Words.Seq_s.seq_nat8_to_seq_uint8 ekv_nat
+      let ek = Words.Seq_s.seq_nat8_to_seq_uint8 ekv_nat in
+      Seq.append ek (gcm_hashed_keys k)
 
 // For gctr_encrypt_recursive and its pattern!
 friend GCTR
@@ -70,8 +88,8 @@ let encrypt #a kv iv ad plain =
       // data", potato, potato
       let ad_nat = Words.Seq_s.seq_uint8_to_seq_nat8 ad in
       let plain_nat = Words.Seq_s.seq_uint8_to_seq_nat8 plain in
-      assert (max_length a = pow2 20 - 1);
-      assert_norm (4096 * (pow2 20 - 1) < Words_s.pow2_32);
+      assert (max_length a = pow2 20 - 1 - 16);
+      assert_norm (4096 * (pow2 20 - 1 - 16) < Words_s.pow2_32);
       let cipher_nat, tag_nat =
         GCM_s.gcm_encrypt_LE (vale_alg_of_alg a) kv_nat iv_nat plain_nat ad_nat
       in
@@ -105,8 +123,8 @@ let decrypt #a kv iv ad cipher =
       Spec.Chacha20Poly1305.aead_decrypt kv iv cipher tag ad
 
   | AES128_GCM | AES256_GCM ->
-      assert (max_length a = pow2 20 - 1);
-      assert_norm (4096 * (pow2 20 - 1) < Words_s.pow2_32);
+      assert (max_length a = pow2 20 - 1 - 16);
+      assert_norm (4096 * (pow2 20 - 1 - 16) < Words_s.pow2_32);
       let kv_nat = Words.Seq_s.seq_uint8_to_seq_nat8 kv in
       let iv_nat = Words.Seq_s.seq_uint8_to_seq_nat8 iv in
       let iv_nat = S.append iv_nat (S.create 4 0) in

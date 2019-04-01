@@ -44,5 +44,5 @@ let lowstar_fadd : lowstar_fadd_t  =
     fadd_dom
     (W.mk_prediction code_fadd fadd_dom [] (fadd_lemma code_fadd IA.win))
 
-let fadd //: normal lowstar_add1_t
+let fadd_ //: normal lowstar_add1_t
 = as_normal_t #lowstar_fadd_t lowstar_fadd

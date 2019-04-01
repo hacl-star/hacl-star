@@ -133,7 +133,9 @@ val encrypt:
       (B.disjoint plain cipher \/ plain == cipher) /\
       B.disjoint cipher tag /\
       B.disjoint iv cipher /\ B.disjoint iv tag /\
-      B.disjoint ad cipher)
+      B.disjoint plain tag /\
+      B.disjoint plain ad /\
+      B.disjoint ad cipher /\ B.disjoint ad tag)
     (ensures fun h0 r h1 ->
       match r with
       | Success ->

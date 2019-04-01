@@ -13,11 +13,11 @@ let add1 out f1 f2 =
 
 #push-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
 
-let fadd_ out f1 f2 =
+let fadd out f1 f2 =
   DV.length_eq (get_downview out);
   DV.length_eq (get_downview f1);
   DV.length_eq (get_downview f2);
-  let x, _ = Vale.Stdcalls.Fadd.fadd out f1 f2 () in
+  let x, _ = Vale.Stdcalls.Fadd.fadd_ out f1 f2 () in
   ()
   
 #pop-options

@@ -76,7 +76,7 @@ let lemma_k_reqs_equiv k_b h =
 
 open Collections.Seqs_s
 
-let same_seq_downview8 (b:B.buffer UInt8.t) (h:HS.mem{B.live h b}) : Lemma
+let same_seq_downview8 (b:B.buffer UInt8.t) (h:HS.mem) : Lemma
   (DV.as_seq h (DV.mk_buffer_view b (Views.down_view8)) == B.as_seq h b) =
   let db = DV.mk_buffer_view b (Views.down_view8) in
   DV.length_eq db;
