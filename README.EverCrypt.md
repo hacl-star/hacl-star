@@ -109,7 +109,9 @@ As we work our way towards our first official release, bear in mind that:
 
 ## Finding the code EverCrypt produces
 
-Release branches (e.g. `v0.1+`) contain a copy of the generated C/ASM code under
+Release branches (e.g.
+[evercrypt-v0.1+](https://github.com/project-everest/hacl-star/tree/evercrypt-v0.1+))
+contain a copy of the generated C/ASM code under
 version control. This is by far the easiest way to obtain a copy of EverCrypt.
 
 EverCrypt's C/ASM code is packaged as a set of self-contained files in one of the
@@ -136,11 +138,10 @@ corresponds to a particular flavor of generated C code.
 Each distribution of EverCrypt contains a GNU Makefile that generates a static
 library and a shared object. The code depends on `kremlib`, which contains
 verified, extracted C implementations of some F\* standard library functions.
-For release branches, a copy of `kremlib` is provided in `dist/kremlib` and
-`dist/include`.
+For release branches, a copy of `kremlib` is provided in `dist/kremlib`.
 
 - When integrating EverCrypt, one can pick a distribution, along with the
-  `kremlib` and `include` directories, thus giving a "wholesale" integration of
+  `kremlib` directory, thus giving a "wholesale" integration of
   the EverCrypt library.
 - For a more gradual integration, consumers can integrate algorithms one at a
   time, by cherry-picking the files that they are interested in. Each header
