@@ -2366,7 +2366,7 @@ procedure {:quick} Loop6x(
     reveal gctr_registers_def;
 }
 
-#reset-options "--z3rlimit 20"
+#reset-options "--z3rlimit 30"
 procedure {:quick} {:verify true} Loop6x_wrapper(
     inline alg:algorithm,  
     ghost h_LE:quad32,
@@ -2538,6 +2538,8 @@ procedure {:quick} {:verify true} Loop6x_wrapper(
 {
     y_new := Loop6x(alg, h_LE, y_orig, y_prev, count, in0_count, iv_b, in0_b, in_b, out_b, scratch_b, plain_quads, 
                     key_words, round_keys, keys_b, hkeys_b, ctr_BE_orig, ctr_BE);
+    assert equal(slice_work_around(old(s128(mem, out_b)), (in0_count+1)*6),
+                 slice_work_around(    s128(mem, out_b),  (in0_count+1)*6));
 }
 
 /*
