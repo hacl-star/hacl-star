@@ -241,7 +241,7 @@ let vale_aes128_gcm_decrypt xkey (iv:uint8_p) (ad:uint8_p) (adlen:uint32_t)
     cipher = plaintext';
     tag = tag
   }) 1ul in
-  let ret = Vale.gcm128_decrypt b in
+  let ret = Vale.old_gcm128_decrypt b in
   blit plaintext' 0ul plaintext 0ul len;
   pop_frame ();
   if ret = 0ul then 1ul else 0ul
@@ -329,7 +329,7 @@ let vale_aes256_gcm_decrypt xkey (iv:uint8_p) (ad:uint8_p) (adlen:uint32_t)
     cipher = plaintext';
     tag = tag
   }) 1ul in
-  let ret = Vale.gcm256_decrypt b in
+  let ret = Vale.old_gcm256_decrypt b in
   blit plaintext' 0ul plaintext 0ul len;
   pop_frame ();
   if ret = 0ul then 1ul else 0ul
