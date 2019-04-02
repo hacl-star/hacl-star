@@ -86,7 +86,7 @@ In upcoming releases, we aim to include:
 ¹: does not multiplex (yet) over the underlying Poly1305 implementation  
 ²: insecure algorithms provided for legacy interop purposes  
 ³: achieved via C compiler intrinsincs; no verification results claimed for the
-   AVX and AVX2 versions whose verification is not complete yet
+   AVX and AVX2 versions whose verification is not complete yet  
 ⁴: HMAC and HKDF on top of the agile hash API, so HMAC-SHA2-256 and
    HKDF-SHA2-256 leverage the assembly version under the hood  
 ⁵: legacy implementation  
