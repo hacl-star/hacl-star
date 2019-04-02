@@ -79,43 +79,43 @@ val vec128_load32s: x3:uint32 -> x2:uint32 -> x1:uint32 -> x0:uint32 -> vec128
 
 
 val vec128_load_le: b:lbuffer uint8 16ul -> ST vec128
-			   (requires (fun h -> live h b))
-			   (ensures (fun h0 _ h1 ->  h1 == h0))
+         (requires (fun h -> live h b))
+         (ensures (fun h0 _ h1 ->  h1 == h0))
 
 
 val vec128_load_be: b:lbuffer uint8 16ul -> ST vec128
-			   (requires (fun h -> live h b))
-			   (ensures (fun h0 _ h1 ->  h1 == h0))
+         (requires (fun h -> live h b))
+         (ensures (fun h0 _ h1 ->  h1 == h0))
 
 
 val vec128_load32_be: b:lbuffer uint8 16ul -> ST vec128
-			   (requires (fun h -> live h b))
-			   (ensures (fun h0 _ h1 ->  h1 == h0))
+         (requires (fun h -> live h b))
+         (ensures (fun h0 _ h1 ->  h1 == h0))
 
 
 val vec128_load64_be: b:lbuffer uint8 16ul -> ST vec128
-			   (requires (fun h -> live h b))
-			   (ensures (fun h0 _ h1 ->  h1 == h0))
+         (requires (fun h -> live h b))
+         (ensures (fun h0 _ h1 ->  h1 == h0))
 
 
 val vec128_store_le: b:lbuffer uint8 16ul -> vec128 -> ST unit
-			   (requires (fun h -> live h b))
-			   (ensures (fun h0 _ h1 ->  live h1 b /\ modifies (loc b) h0 h1))
+         (requires (fun h -> live h b))
+         (ensures (fun h0 _ h1 ->  live h1 b /\ modifies (loc b) h0 h1))
 
 
 val vec128_store_be: b:lbuffer uint8 16ul -> vec128 -> ST unit
-			   (requires (fun h -> live h b))
-			   (ensures (fun h0 _ h1 ->  live h1 b /\ modifies (loc b) h0 h1))
+         (requires (fun h -> live h b))
+         (ensures (fun h0 _ h1 ->  live h1 b /\ modifies (loc b) h0 h1))
 
 
 val vec128_store32_be: b:lbuffer uint8 16ul -> vec128 -> ST unit
-			   (requires (fun h -> live h b))
-			   (ensures (fun h0 _ h1 ->  live h1 b /\ modifies (loc b) h0 h1))
+         (requires (fun h -> live h b))
+         (ensures (fun h0 _ h1 ->  live h1 b /\ modifies (loc b) h0 h1))
 
 
 val vec128_store64_be: b:lbuffer uint8 16ul -> vec128 -> ST unit
-			   (requires (fun h -> live h b))
-			   (ensures (fun h0 _ h1 ->  live h1 b /\ modifies (loc b) h0 h1))
+         (requires (fun h -> live h b))
+         (ensures (fun h0 _ h1 ->  live h1 b /\ modifies (loc b) h0 h1))
 
 
 val vec128_insert8: vec128 -> uint8 -> size_t -> vec128
@@ -234,23 +234,23 @@ val vec256_load128s: x1:uint128 -> x0:uint128 -> vec256
 
 
 val vec256_load_le: b:lbuffer uint8 32ul -> ST vec256
-			   (requires (fun h -> live h b))
-			   (ensures (fun h0 _ h1 ->  h1 == h0))
+         (requires (fun h -> live h b))
+         (ensures (fun h0 _ h1 ->  h1 == h0))
 
 
 val vec256_load_be: b:lbuffer uint8 32ul -> ST vec256
-			   (requires (fun h -> live h b))
-			   (ensures (fun h0 _ h1 ->  h1 == h0))
-			   
+         (requires (fun h -> live h b))
+         (ensures (fun h0 _ h1 ->  h1 == h0))
+         
 
 val vec256_store_le: b:lbuffer uint8 32ul -> vec256 -> ST unit
-			   (requires (fun h -> live h b))
-			   (ensures (fun h0 _ h1 ->  live h1 b /\ modifies (loc b) h0 h1))
+         (requires (fun h -> live h b))
+         (ensures (fun h0 _ h1 ->  live h1 b /\ modifies (loc b) h0 h1))
 
 
 val vec256_store_be: b:lbuffer uint8 32ul -> vec256 -> ST unit
-			   (requires (fun h -> live h b))
-			   (ensures (fun h0 _ h1 ->  live h1 b /\ modifies (loc b) h0 h1))
+         (requires (fun h -> live h b))
+         (ensures (fun h0 _ h1 ->  live h1 b /\ modifies (loc b) h0 h1))
 
 
 val vec256_insert8: vec256 -> uint8 -> size_t -> vec256

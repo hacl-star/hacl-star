@@ -19,6 +19,7 @@ open GCTR_s
 open GCTR
 open Interop.Base
 open Arch.Types
+open OptPublic
 
 let uint8_p = B.buffer UInt8.t
 let uint64 = UInt64.t
@@ -51,7 +52,7 @@ let length_aux4 (b:uint8_p) : Lemma
     DV.length_eq db
 
 let length_aux5 (b:uint8_p) : Lemma
-  (requires B.length b = 160)
+  (requires B.length b = 128)
   (ensures DV.length (get_downview b) % 16 = 0) =
     let db = get_downview b in
     DV.length_eq db
@@ -97,7 +98,7 @@ val gcm128_encrypt_opt_stdcall:
       B.length iv_b = 16 /\
       B.length plain_b = UInt64.v plain_len /\
       B.length out_b = B.length plain_b /\
-      B.length hkeys_b = 160 /\
+      B.length hkeys_b = 128 /\
       B.length tag_b == 16 /\
       B.length keys_b = 176 /\
 
@@ -108,8 +109,9 @@ val gcm128_encrypt_opt_stdcall:
       is_aes_key_LE AES_128 (Ghost.reveal key) /\
       (Seq.equal (B.as_seq h0 keys_b)
         (seq_nat8_to_seq_uint8 (le_seq_quad32_to_bytes (key_to_round_keys_LE AES_128 (Ghost.reveal key))))) /\
-      Seq.slice (B.as_seq h0 hkeys_b) 32 48 == 
-        (seq_nat8_to_seq_uint8 (le_quad32_to_bytes (reverse_bytes_quad32 (aes_encrypt_LE AES_128 (Ghost.reveal key) (Mkfour 0 0 0 0)))))
+
+      hkeys_reqs_pub (le_bytes_to_seq_quad32 (seq_uint8_to_seq_nat8 (B.as_seq h0 hkeys_b)))
+	(reverse_bytes_quad32 (aes_encrypt_LE AES_128 (Ghost.reveal key) (Mkfour 0 0 0 0)))
     )
     (ensures fun h0 _ h1 ->
       B.modifies (B.loc_union (B.loc_buffer tag_b)

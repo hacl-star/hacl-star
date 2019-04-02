@@ -69,7 +69,7 @@ let createi_pred (a:Type) (len:size_nat) (init:(i:nat{i < len} -> a)) (k:nat{k <
   forall (i:nat).{:pattern (index s i)} i < k ==> index s i == init i
 
 let createi_step (a:Type) (len:size_nat) (init:(i:nat{i < len} -> a)) (i:nat{i < len})
-	         (si:createi_a a len init i)
+                 (si:createi_a a len init i)
   : r:createi_a a len init (i + 1)
       {createi_pred a len init i si ==> createi_pred a len init (i + 1) r}
   =

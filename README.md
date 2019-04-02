@@ -1,8 +1,14 @@
 # High Performance Verified Cryptographic Code
 
 This repository contains code from several related projects developed as part of
-[Project Everest](https://project-everest.github.io/), which aims to build and 
+[Project Everest](https://project-everest.github.io/), which aims to build and
 deploy a verified HTTPS stack.
+
+We are actively developing and integrating our code on the
+[fstar-master](https://github.com/project-everest/hacl-star/tree/fstar-master/)
+branch, which tracks F\*'s `master` branch. See
+[releases](https://github.com/project-everest/hacl-star/releases) for a preview
+of our C and assembly code, including EverCrypt 0.1 (currently in **alpha**).
 
 ## HACL\*
 

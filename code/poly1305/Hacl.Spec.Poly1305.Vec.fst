@@ -174,4 +174,7 @@ let poly1305_vec_is_poly1305 (#w: lanes) (msg: bytes) (k: key):
   Lemma
     (ensures (poly1305 #w msg k == Spec.Poly1305.poly1305 msg k))
 =
+  // The central spec equivalence lemma. Proved for the case M32 (see
+  // Hacl.Spec.Poly1305.Equiv). The vectorized spec is in progress and we disable
+  // for EverCrypt v1 the vectorized implementations.
   admit ()

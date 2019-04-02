@@ -1,5 +1,5 @@
 [
-  " >ÓŸß/ç0á&Á\r|¹„9",
+  "–¿dvÒ\u0002E18\u000b:¸ “’Ê",
   [
     [
       "Test.uint32_fits_maxLength",
@@ -26,7 +26,7 @@
         "typing_Spec.Hash.Definitions.max_input_length"
       ],
       0,
-      "30edc0a6fef019c07b3475540617c0af"
+      "708f5ea8ca4181f57232e0a228414c51"
     ],
     [
       "Test.compute",
@@ -67,7 +67,7 @@
         "typing_Spec.Hash.Definitions.word_length"
       ],
       0,
-      "0b8f53d71f9890c8b688bb7d3c1de813"
+      "0ea82fa3bedc2a3b15c782bf8b4929ed"
     ],
     [
       "Test.compute",
@@ -93,7 +93,7 @@
         "typing_Spec.Hash.Definitions.word_length"
       ],
       0,
-      "94d4671a5ac414837982b563af897e41"
+      "2e7f3c45e984614ab69e287b47a802e4"
     ],
     [
       "Test.compute",
@@ -323,7 +323,7 @@
         "typing_Spec.Poly1305.size_key"
       ],
       0,
-      "7a9a9ff943c33389c160b76ed56aa99d"
+      "f2631fe1c46c7f7b76ef978c442470c1"
     ],
     [
       "Test.test_one_hash",
@@ -500,7 +500,7 @@
         "unit_typing"
       ],
       0,
-      "379f1801171164ca15c3a8c5b0fda063"
+      "7d19e92456615f511124953683f998ce"
     ],
     [
       "Test.test_hash",
@@ -565,7 +565,7 @@
         "typing_LowStar.Buffer.trivial_preorder"
       ],
       0,
-      "b56099ef9751119edc244deabd1c0847"
+      "2e10268d8ebbc87a0cac5185223b02ac"
     ],
     [
       "Test.test_one_hmac",
@@ -661,13 +661,6 @@
         "projection_inverse_BoxInt_proj_0",
         "projection_inverse_FStar.Integers.Signed__0",
         "projection_inverse_FStar.Integers.Unsigned__0",
-        "projection_inverse_FStar.Pervasives.Native.Mktuple3__1",
-        "projection_inverse_FStar.Pervasives.Native.Mktuple3__2",
-        "projection_inverse_FStar.Pervasives.Native.Mktuple3__3",
-        "projection_inverse_FStar.Pervasives.Native.Mktuple4__1",
-        "projection_inverse_FStar.Pervasives.Native.Mktuple4__2",
-        "projection_inverse_FStar.Pervasives.Native.Mktuple4__3",
-        "projection_inverse_FStar.Pervasives.Native.Mktuple4__4",
         "refinement_interpretation_Tm_refine_0adae6f2ca300a91f2e307caeacdf073",
         "refinement_interpretation_Tm_refine_2011e81e05d092e08833cbfdaea77df9",
         "refinement_interpretation_Tm_refine_36c12323dbf231e2a6b4d0836a1ea634",
@@ -705,7 +698,7 @@
         "unit_inversion", "unit_typing"
       ],
       0,
-      "669e28e90f7aac490a12249b21cbf80c"
+      "2c01121219c471ddbcf1caffbc03f911"
     ],
     [
       "Test.test_hmac",
@@ -774,7 +767,7 @@
         "unit_typing"
       ],
       0,
-      "9099ce722c0a9636e4cc8c76926c99ae"
+      "ce9cf96542111a29cf9daabc1df60ab2"
     ],
     [
       "Test.test_one_hkdf",
@@ -931,7 +924,7 @@
         "unit_typing"
       ],
       0,
-      "f019e4aae6670ec31648ff94a3db3442"
+      "d11e9bd93e9bab3c8b485a49e4d90669"
     ],
     [
       "Test.test_hkdf",
@@ -1000,7 +993,7 @@
         "unit_typing"
       ],
       0,
-      "10214a52d3e2eb893733f87b33406ec4"
+      "0a2da91ab839d260ef9454ae86d94f4c"
     ],
     [
       "Test.test_poly1305_one",
@@ -1118,7 +1111,7 @@
         "typing_Spec.Poly1305.size_key"
       ],
       0,
-      "b810fb8836c7a1c82dc394ec1dcae56a"
+      "eb09e39cc0e35290fda0df0a65ca6457"
     ],
     [
       "Test.test_poly1305",
@@ -1135,7 +1128,7 @@
         "primitive_Prims.op_GreaterThanOrEqual"
       ],
       0,
-      "1c93830092daba4d11378504b0025fea"
+      "385cdcec4d65b9d00db9afde79b763ce"
     ],
     [
       "Test.test_curve25519_one",
@@ -1151,7 +1144,7 @@
         "refinement_interpretation_Tm_refine_9a74d818566e70513bc032cc3b65a144"
       ],
       0,
-      "c92e8f4eac1a9bc7c518cf67132839e7"
+      "90fae6be1e5f2046f30157a3089f01c4"
     ],
     [
       "Test.test_curve25519",
@@ -1168,7 +1161,22 @@
         "primitive_Prims.op_GreaterThanOrEqual"
       ],
       0,
-      "0fafb0f2294c16189f0a92b76f60ae42"
+      "b6bf9f5f5a3bcd1ea617758f5691eebf"
+    ],
+    [
+      "Test.alg_of_alg",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "disc_equation_Test.Vectors.AES_128_GCM",
+        "disc_equation_Test.Vectors.AES_256_GCM",
+        "disc_equation_Test.Vectors.CHACHA20_POLY1305",
+        "fuel_guarded_inversion_Test.Vectors.cipher"
+      ],
+      0,
+      "dafbbf17fdc96f59d66bed0f009ff103"
     ],
     [
       "Test.test_aead",
@@ -1226,7 +1234,37 @@
         "typing_LowStar.Monotonic.Buffer.length"
       ],
       0,
-      "6e194e790cc55237097ad34c76a37ee3"
+      "efc27ad24c7daa1dcdb06a80fdd80dd5"
+    ],
+    [
+      "Test.test_chacha20poly1305",
+      1,
+      1,
+      0,
+      [
+        "@query", "equation_FStar.HyperStack.ST.equal_stack_domains",
+        "equation_FStar.Monotonic.Heap.equal_dom", "equation_FStar.UInt.gte",
+        "equation_FStar.UInt32.gte",
+        "lemma_FStar.HyperStack.ST.lemma_same_refs_in_stack_regions_intro",
+        "primitive_Prims.op_GreaterThanOrEqual"
+      ],
+      0,
+      "345855d1e7b977a9634f4bcf31efbf53"
+    ],
+    [
+      "Test.test_aes128_gcm",
+      1,
+      1,
+      0,
+      [
+        "@query", "equation_FStar.HyperStack.ST.equal_stack_domains",
+        "equation_FStar.Monotonic.Heap.equal_dom", "equation_FStar.UInt.gte",
+        "equation_FStar.UInt32.gte",
+        "lemma_FStar.HyperStack.ST.lemma_same_refs_in_stack_regions_intro",
+        "primitive_Prims.op_GreaterThanOrEqual"
+      ],
+      0,
+      "61bd2c6a8f25e25c0c22e88d2244936e"
     ],
     [
       "Test.test_rng",
@@ -1239,7 +1277,7 @@
         "lemma_FStar.HyperStack.ST.lemma_same_refs_in_stack_regions_intro"
       ],
       0,
-      "7560b83230486f467e83d667ad70d107"
+      "d9d106518807970342f2dbac50d2fbc4"
     ],
     [
       "Test.test_dh",
@@ -1252,7 +1290,7 @@
         "lemma_FStar.HyperStack.ST.lemma_same_refs_in_stack_regions_intro"
       ],
       0,
-      "3eb1f6d6fdd4a72fe012745393b31316"
+      "435d858195646d14e58bd524c01a5554"
     ],
     [
       "Test.main",
@@ -1325,7 +1363,7 @@
         "typing_tok_C.EXIT_SUCCESS@tok"
       ],
       0,
-      "7159f8edd59559414d1485aa2b9a6b83"
+      "41b745f9f3095ec9b67a8d399738a091"
     ]
   ]
 ]

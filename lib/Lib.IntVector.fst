@@ -4,6 +4,9 @@ open FStar.Mul
 module Ints = Lib.IntTypes
 open Lib.IntVector.Intrinsics
 
+// WARNING: this file is experimental and the vectorized implementations are
+// currently not enabled on EverCrypt release builds.
+
 #set-options "--admit_smt_queries true"
 
 inline_for_extraction

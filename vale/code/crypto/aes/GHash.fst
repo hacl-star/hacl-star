@@ -2,6 +2,8 @@ module GHash
 open Math.Poly2.Lemmas
 open Math.Poly2.Words
 
+friend OptPublic
+
 #reset-options "--use_two_phase_tc true"
 
 let shift_gf128_key_1 (h:poly) : poly =
@@ -23,6 +25,11 @@ let rec ghash_poly_unroll (h:poly) (prev:poly) (data:int -> poly128) (k:int) (m 
   let p = g_power h (n + 1) in
   if m = 0 then (prev +. d) *~ p else
   ghash_poly_unroll h prev data k (m - 1) (n + 1) +. d *~ p
+
+let lemma_hkeys_reqs_pub_priv (hkeys:seq quad32) (h_BE:quad32) : Lemma
+  (hkeys_reqs_pub hkeys h_BE <==> hkeys_reqs_priv hkeys h_BE)
+  =
+  ()
 
 let rec lemma_ghash_unroll_back_forward_rec (h:poly) (prev:poly) (data:int -> poly128) (k:int) (n m:nat) : Lemma
   (requires m < n)

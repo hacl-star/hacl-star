@@ -785,7 +785,7 @@ val fill_blocks:
   -> spec:(mem -> GTot (i:size_nat{i < v n} -> a_spec i -> a_spec (i + 1) & Seq.lseq t (v len)))
   -> impl:(i:size_t{v i < v n} -> Stack unit
       (requires fun h1 ->
-      	(v i + 1) * v len <= max_size_t /\
+        (v i + 1) * v len <= max_size_t /\
         modifies (footprint (v i) |+| loc (gsub output 0ul (i *! len))) h0 h1)
       (ensures  fun h1 _ h2 ->
         (let block = gsub output (i *! len) len in
@@ -826,7 +826,7 @@ val fill:
   -> impl:(i:size_t{v i < v clen} -> Stack a
           (requires fun h -> modifies1 (gsub o 0ul i) h0 h)
           (ensures  fun h r h' -> h == h' /\
-			       r == spec h0 (v i)))
+            r == spec h0 (v i)))
   -> Stack unit
     (requires fun h -> h == h0 /\ live h0 o)
     (ensures  fun h _ h' ->
@@ -876,7 +876,7 @@ val map2T:
   -> i2:lbuffer_t t a2 clen ->
   Stack unit
     (requires fun h0 -> live h0 o /\ live h0 i1 /\ live h0 i2 /\
-		     eq_or_disjoint o i1 /\ eq_or_disjoint o i2)
+      eq_or_disjoint o i1 /\ eq_or_disjoint o i2)
     (ensures  fun h0 _ h1 ->
       modifies1 o h0 h1 /\
       as_seq h1 o == Seq.map2 f (as_seq h0 i1) (as_seq h0 i2))
@@ -929,11 +929,11 @@ val map_blocks:
   -> spec_l:(mem -> GTot (i:nat{i == v len / v blocksize} -> llen:size_nat{llen < v blocksize} -> Seq.lseq a llen -> Seq.lseq a llen))
   -> impl_f:(i:size_t{v i < v len / v blocksize} -> Stack unit
       (requires fun h1 ->
-	(v i + 1) * v blocksize <= max_size_t /\
+        (v i + 1) * v blocksize <= max_size_t /\
         modifies (loc (gsub output 0ul (i *! blocksize))) h0 h1)
       (ensures  fun h1 _ h2 ->
-	let iblock = gsub inp (i *! blocksize) blocksize in
-	let oblock = gsub output (i *! blocksize) blocksize in
+        let iblock = gsub inp (i *! blocksize) blocksize in
+        let oblock = gsub output (i *! blocksize) blocksize in
         let ob = spec_f h0 (v i) (as_seq h1 iblock) in
         B.modifies (loc oblock) h1 h2 /\
         as_seq h2 oblock == ob))
@@ -941,12 +941,12 @@ val map_blocks:
       (requires fun h1 ->
         modifies (loc (gsub output 0ul (i *! blocksize))) h0 h1)
       (ensures  fun h1 _ h2 ->
-	let iblock = gsub inp (i *! blocksize) (len %. blocksize)  in
-	let oblock = gsub output (i *! blocksize) (len %. blocksize) in
+        let iblock = gsub inp (i *! blocksize) (len %. blocksize)  in
+        let oblock = gsub output (i *! blocksize) (len %. blocksize) in
         let ob = spec_l h0 (v i) (v len % v blocksize) (as_seq h1 iblock) in
         B.modifies (loc oblock) h1 h2 /\
         as_seq h2 oblock == ob))
   -> Stack unit
     (requires fun h -> h0 == h /\ live h output /\ live h inp /\ eq_or_disjoint inp output)
     (ensures  fun _ _ h1 -> modifies1 output h0 h1 /\
-	as_seq h1 output == Seq.map_blocks (v blocksize) (as_seq h0 inp) (spec_f h0) (spec_l h0))
+      as_seq h1 output == Seq.map_blocks (v blocksize) (as_seq h0 inp) (spec_f h0) (spec_l h0))

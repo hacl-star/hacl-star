@@ -1894,6 +1894,20 @@ let mod_add128_sc a b =
   let r0 = a0 +. b0 in
   let r1 = a1 +. b1 in
   let c = r0 ^. ((r0 ^. b0) |. ((r0 -. b0) ^. b0)) >>. 63ul in
+  // This is a well-documented assume that is also present in FStar's own
+  // FStar.UInt128.fst. The lemma can be proven for 8-bit integers via Z3's
+  // bitvector theory, as follows:
+  //
+  // open FStar.BV
+  // let test (a b:bv_t 8) =
+  // let ( ^ ) = bvxor in
+  // let ( ||| ) = bvor in
+  // let ( --- ) = bvsub in
+  // let ( >> ) = bvshr in
+  // assume (bvult a b);
+  // assert (((a ^ ((a ^ b) ||| ((a --- b) ^ b))) >> 7) == (int2bv 1))
+  //
+  // Unfortunately, z3 times out for larger bit widths.
   assume (v c == (if v r0 < v b0 then 1 else 0));
   let r2 = r1 +. c in
   assert (v c == (v a0 + v b0) / pow2 64);
