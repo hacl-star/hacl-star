@@ -43,7 +43,7 @@ let tuint64 = TD_Base TUInt64
 
 [@__reduce__] noextract
 let (dom: list td{List.length dom <= 20}) =
-  let y = [t128_no_mod; tuint64; t128_no_mod; tuint64; t128_no_mod; t128_no_mod; t128_mod; t128_mod] in
+  let y = [t128_no_mod; tuint64; t128_no_mod; tuint64; t128_no_mod; t128_no_mod; t128_mod; t128_no_mod] in
   assert_norm (List.length y = 8);
   y
 

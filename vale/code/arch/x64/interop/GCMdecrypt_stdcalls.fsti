@@ -7,12 +7,14 @@ module HS = FStar.HyperStack
 module DV = LowStar.BufferView.Down
 module UV = LowStar.BufferView.Up
 open FStar.Mul
+open Types_s
 open Words_s
 open Words.Seq_s
 open GCM_helpers
 open AES_s
 open GCM_s
 open Interop.Base
+open Arch.Types
 
 let uint8_p = B.buffer UInt8.t
 let uint64 = UInt64.t
@@ -30,7 +32,7 @@ let length_aux2 (b:uint8_p) : Lemma
     DV.length_eq db
 
 inline_for_extraction
-val gcm128_decrypt:
+val gcm128_decrypt_stdcall:
   key:Ghost.erased (Seq.seq nat32) ->
   cipher_b:uint8_p ->
   cipher_num:uint64 ->
@@ -75,13 +77,11 @@ val gcm128_decrypt:
       
       aesni_enabled /\ pclmulqdq_enabled /\
       is_aes_key_LE AES_128 (Ghost.reveal key) /\
-      (let db = get_downview keys_b in
-      length_aux keys_b;
-      let ub = UV.mk_buffer db Views.up_view128 in
-      Seq.equal (UV.as_seq h0 ub) (key_to_round_keys_LE AES_128 (Ghost.reveal key)))
+      (Seq.equal (B.as_seq h0 keys_b)
+        (seq_nat8_to_seq_uint8 (le_seq_quad32_to_bytes (key_to_round_keys_LE AES_128 (Ghost.reveal key)))))
     )
     (ensures fun h0 r h1 ->
-      B.modifies (B.loc_union (B.loc_buffer out_b) (B.loc_buffer tag_b)) h0 h1 /\
+      B.modifies (B.loc_buffer out_b) h0 h1 /\
 
       (let iv = seq_uint8_to_seq_nat8 (B.as_seq h0 iv_b) in
        let cipher = seq_uint8_to_seq_nat8 (B.as_seq h0 cipher_b) in
@@ -93,7 +93,7 @@ val gcm128_decrypt:
     )
 
 inline_for_extraction
-val gcm256_decrypt:
+val gcm256_decrypt_stdcall:
   key:Ghost.erased (Seq.seq nat32) ->
   cipher_b:uint8_p ->
   cipher_num:uint64 ->
@@ -138,13 +138,11 @@ val gcm256_decrypt:
       
       aesni_enabled /\ pclmulqdq_enabled /\
       is_aes_key_LE AES_256 (Ghost.reveal key) /\
-      (let db = get_downview keys_b in
-      length_aux2 keys_b;
-      let ub = UV.mk_buffer db Views.up_view128 in
-      Seq.equal (UV.as_seq h0 ub) (key_to_round_keys_LE AES_256 (Ghost.reveal key)))
+      (Seq.equal (B.as_seq h0 keys_b)
+        (seq_nat8_to_seq_uint8 (le_seq_quad32_to_bytes (key_to_round_keys_LE AES_256 (Ghost.reveal key)))))
     )
     (ensures fun h0 r h1 ->
-      B.modifies (B.loc_union (B.loc_buffer out_b) (B.loc_buffer tag_b)) h0 h1 /\
+      B.modifies (B.loc_buffer out_b) h0 h1 /\
 
       (let iv = seq_uint8_to_seq_nat8 (B.as_seq h0 iv_b) in
        let cipher = seq_uint8_to_seq_nat8 (B.as_seq h0 cipher_b) in

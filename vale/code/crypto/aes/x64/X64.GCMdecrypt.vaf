@@ -1079,7 +1079,7 @@ procedure {:quick}{:public}{:exportSpecs} gcm_decrypt2_stdcall(
 
         pclmulqdq_enabled;
     ensures
-        modifies_mem(loc_union(loc_buffer(out_b), loc_buffer(tag_b)), old(mem), mem);
+        modifies_mem(loc_buffer(out_b), old(mem), mem);
 
         validSrcAddrs128(mem, old(out_ptr), out_b, old(bytes_to_quad_size(cipher_num_bytes)), memTaint, Secret);
         validSrcAddrs128(mem, old(tag_ptr), tag_b, 1, memTaint, Secret);
