@@ -30,7 +30,7 @@ FSTAR_INCLUDE_DIRS = \
   $(HACL_HOME)/lib/fst \
   $(HACL_HOME)/lib/c \
   $(HACL_HOME)/code/poly1305 \
-  $(HACL_HOME)/code/experimental/chacha20
+  $(HACL_HOME)/code/chacha20
 
 FSTAR_FLAGS = $(OTHERFLAGS) --cmi \
   --cache_checked_modules --cache_dir $(CACHE_DIR) --odir $(OUTPUT_DIR) \
@@ -95,7 +95,7 @@ $(GENERATED_DIR)/Makefile.include: $(ALL_KRML_FILES) | .depend
 	-bundle 'C=C.Endianness' \
 	-bundle 'Hacl.Chacha20Poly1305=Hacl.Impl.*,Hacl.Chacha20Poly1305' \
 	-library 'C,FStar' \
-	-drop 'LowStar,Spec,Prims,Lib,C.Loops.*' \
+	-drop 'C,FStar,LowStar,Spec,Prims,Lib,C.Loops.*,Hacl.Spec.*,Hacl.Poly1305.Field32xN.Lemmas' \
 	-add-include '"c/Lib_PrintBuffer.h"' \
 	-tmpdir $(GENERATED_DIR) \
 	$^
