@@ -1,5 +1,7 @@
 # A minimalistic Makefile for all testing options.
 
+KREMLIN_HOME ?= ../dist/kremlin
+
 TARGETS = $(patsubst %.c,%.exe,$(wildcard *.c))
 
 CFLAGS += -I$(KREMLIN_HOME)/include -I../dist/compact-gcc \

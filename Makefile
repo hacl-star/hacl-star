@@ -123,6 +123,7 @@ ci:
 	KREMLIN_HOME=$(HACL_HOME)/dist/kremlin $(MAKE) -C dist/compact-msvc
 	KREMLIN_HOME=$(HACL_HOME)/dist/kremlin $(MAKE) -C dist/compact-c89
 	KREMLIN_HOME=$(HACL_HOME)/dist/kremlin $(MAKE) -C dist/compact-gcc
+	KREMLIN_HOME=$(HACL_HOME)/dist/kremlin $(MAKE) -C tests
 	NOSHORTLOG=1 $(MAKE) vale-fst
 	FSTAR_DEPEND_FLAGS="--warn_error +285" NOSHORTLOG=1 $(MAKE) all-unstaged test-unstaged
 
