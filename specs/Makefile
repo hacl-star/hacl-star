@@ -129,6 +129,26 @@ aes128cbc.exe: $(LIBS_FILES) Spec.GaloisField.fst Spec.AES.fst Spec.AES128_CBC.f
 	$(OCAMLOPT) -I aes128cbc-ml $(OCAML_INCLUDES) $(addprefix aes128cbc-ml/, $(LIBS_ML)) aes128cbc-ml/Spec_GaloisField.ml aes128cbc-ml/Spec_AES.ml aes128cbc-ml/Spec_AES128_CBC.ml aes128cbc-ml/Spec_AES128_CBC_Test.ml -o aes128cbc.exe
 	./aes128cbc.exe
 
+# Not Under CI
+aes256.exe: $(LIBS_FILES) Spec.AES256.fst tests/Spec.AES256.Test.fst
+	mkdir -p aes256-ml
+	$(FSTAR) --codegen OCaml --lax $(LIBS_EX) --extract_module Spec.AES256 --extract_module Spec.AES256.Test --odir aes256-ml $^
+	@echo 'let _ = test()' >> aes256-ml/Spec_AES256_Test.ml
+	$(OCAMLOPT) -I aes256-ml $(OCAML_INCLUDES) $(addprefix aes256-ml/, $(LIBS_ML)) aes256-ml/Spec_AES256.ml aes256-ml/Spec_AES256_Test.ml -o aes256.exe
+	./aes256.exe
+
+# Not Under CI
+aes256cbc.exe: $(LIBS_FILES) Spec.AES256_CBC.fst tests/Spec.AES256_CBC.Test.fst
+	mkdir -p aes256cbc-ml
+	$(FSTAR) --codegen OCaml --lax $(LIBS_EX) --extract_module Spec.AES256 \
+		--extract_module Spec.AES256_CBC --extract_module Spec.AES256_CBC.Test \
+		--odir aes256cbc-ml $^
+	@echo 'let _ = test()' >> aes256cbc-ml/Spec_AES256_CBC_Test.ml
+	$(OCAMLOPT) -I aes256cbc-ml $(OCAML_INCLUDES) $(addprefix aes256cbc-ml/, $(LIBS_ML)) \
+		aes256cbc-ml/Spec_AES256.ml aes256cbc-ml/Spec_AES256_CBC.ml \
+		aes256cbc-ml/Spec_AES256_CBC_Test.ml -o aes256cbc.exe
+	./aes256cbc.exe
+
 # Under CI
 kyber.exe: $(LIBS_FILES) Spec.Kyber.fst
 	mkdir -p kyber-ml
