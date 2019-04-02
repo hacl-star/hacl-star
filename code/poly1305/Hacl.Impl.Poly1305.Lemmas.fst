@@ -93,7 +93,6 @@ let uints_to_bytes_le_lemma64_1 lo hi =
   //   b
   // (==) { def }
   //   concat
-  Lib.Unlib.reveal_secret8 ();
   admit ()
 
 let uints_to_bytes_le_lemma64_2 r =

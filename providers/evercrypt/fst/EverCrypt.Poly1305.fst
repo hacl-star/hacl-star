@@ -61,9 +61,6 @@ let poly1305 dst src len key =
     Poly1305.Equiv.lemma_poly1305_equiv (Arch.BufferFriend.to_bytes (B.as_seq h1 src))
       (Arch.BufferFriend.to_bytes (B.as_seq h1 key));
 
-    // REVIEW: Shouldn't need this:
-    Opaque_s.reveal_opaque X64.Poly1305.Math.lowerUpper128;
-
     Arch.BufferFriend.lemma_le_to_n_is_nat_from_bytes (S.slice (B.as_seq h2 ctx) 0 16);
     Arch.BufferFriend.lemma_n_to_le_is_nat_to_bytes 16 (FStar.Endianness.le_to_n (S.slice (B.as_seq h2 ctx) 0 16));
     FStar.Endianness.n_to_le_le_to_n 16 (S.slice (B.as_seq h2 ctx) 0 16);
