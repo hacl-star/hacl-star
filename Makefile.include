@@ -17,11 +17,14 @@ VALE_BUNDLES=\
 # Other configs are possible, e.g. everest or hacl-vale, by exporting
 # EVERCRYPT_CONFIG manually.
 ifneq (,$(EVEREST_WINDOWS))
-  EVERCRYPT_CONFIG = noopenssl # hacl, vale, bcrypt
+  # hacl, vale, bcrypt
+  EVERCRYPT_CONFIG = noopenssl
 else ifneq (,$(KAIZALA))
-  EVERCRYPT_CONFIG = kaizala # hacl, openssl
+  # hacl, openssl
+  EVERCRYPT_CONFIG = kaizala
 else
-  EVERCRYPT_CONFIG ?= everest # everything
+  # no "native" system libraries (openssl, bcrypt)
+  EVERCRYPT_CONFIG ?= everest
 endif
 
 # TODO: no more separate variable definitions?

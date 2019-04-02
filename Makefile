@@ -626,6 +626,7 @@ HAND_WRITTEN_H_FILES	= $(wildcard $(LIB_DIR)/c/*.h)
 HAND_WRITTEN_OPTIONAL_FILES = \
   $(addprefix providers/evercrypt/c/evercrypt_,openssl.c bcrypt.c)
 
+
 # TODO: put all the Vale files under a single namespace to avoid this nonsense
 #
 # Note: I am using the deprecated -drop option, but it's ok because the dropped
@@ -724,8 +725,7 @@ dist/coco/Makefile.basic: \
     -bundle EverCrypt.Hacl \
     -bundle '\*[rename=EverCrypt_Misc]'
 
-# The "coco" distribution is only optimized when EVERCRYPT_CONFIG=everest.
-# Everest means: no openssl, no bcrypt
+# OpenSSL and BCrypt disabled
 ifeq ($(EVERCRYPT_CONFIG),everest)
 HAND_WRITTEN_OPTIONAL_FILES :=
 endif
