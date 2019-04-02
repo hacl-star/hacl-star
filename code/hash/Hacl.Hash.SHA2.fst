@@ -33,3 +33,11 @@ let hash_384: hash_st SHA2_384 =
   Hacl.Hash.MD.mk_hash SHA2_384 alloca_384 update_multi_384 update_last_384 finish_384
 let hash_512: hash_st SHA2_512 =
   Hacl.Hash.MD.mk_hash SHA2_512 alloca_512 update_multi_512 update_last_512 finish_512
+
+// Friend-ing for compatibility with HACL* libs until we unify the secret integers
+
+friend Lib.IntTypes
+
+noextract inline_for_extraction
+let hash_512_lib input_len input dst =
+  hash_512 input input_len dst
