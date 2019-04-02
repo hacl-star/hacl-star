@@ -20,6 +20,8 @@
 # - libevercrypt.so, a shared object where unused symbols have been removed
 # - libevercrypt.a, a static archive that includes libhacl.a and libkremlib.a
 
+KREMLIN_HOME ?= ../kremlin
+
 # 1. The usual pseudo auto-configuration
 
 UNAME		= $(shell uname)
@@ -74,10 +76,10 @@ include Makefile.basic
 CFLAGS		+= -Wno-parentheses -g -mavx -mavx2 -std=gnu11 \
   -O3 -march=native -mtune=native
 
-$(KREMLIB_A):
-	@echo "Please run make in the $(HACL_HOME)/code directory before invoking this Makefile" && false
+KREMLIB_A 	= $(KREMLIN_HOME)/kremlib/dist/minimal/libkremlib.a
 
-KREMLIB_A 	= $(KREMLIN_HOME)/kremlib/dist/generic/libkremlib.a
+$(KREMLIB_A):
+	$(MAKE) -C $(dir $@)
 
 all: libevercrypt.$(SO)
 

@@ -40,7 +40,7 @@ void __stdcall old_gcm128_encrypt(void *x0)
     KRML_HOST_EXIT(255);
 }
 
-void __stdcall gcm128_decrypt(void *x0)
+void __stdcall old_gcm128_decrypt(void *x0)
 {
     KRML_HOST_EPRINTF("Vale gcm128_decrypt() isn't implemented in this platform.  Do not call.\n");
     KRML_HOST_EXIT(255);
@@ -58,7 +58,7 @@ void __stdcall old_gcm256_encrypt(void *x0)
     KRML_HOST_EXIT(255);
 }
 
-void __stdcall gcm256_decrypt(void *x0)
+void __stdcall old_gcm256_decrypt(void *x0)
 {
     KRML_HOST_EPRINTF("Vale gcm256_decrypt() isn't implemented in this platform.  Do not call.\n");
     KRML_HOST_EXIT(255);
