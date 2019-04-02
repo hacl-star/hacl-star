@@ -541,7 +541,7 @@ let main (): St C.exit_code =
     print !$">>> AEAD (AES128_GCM vectors)\n";
     test_aes128_gcm 0ul;
     print !$">>> Cipher\n";
-    test_cipher block_cipher_vectors_low;
+    //test_cipher block_cipher_vectors_low;
     print !$">>> Curve25519\n";
     test_curve25519 0ul;
 
@@ -563,7 +563,7 @@ let main (): St C.exit_code =
   print !$">>> Chacha20\n";
   test_chacha20 chacha20_vectors_low;
   print !$">>> Block ciphers\n";
-  test_cipher block_cipher_vectors_low;
+  //test_cipher block_cipher_vectors_low;
   print !$">>> AEAD (old vectors)\n";
   test_aead aead_vectors_low;
   print !$">>> AEAD (ChachaPoly vectors)\n";
@@ -585,15 +585,15 @@ let main (): St C.exit_code =
 
   if EverCrypt.StaticConfig.openssl then begin
     print !$"==========OpenSSL=========\n";
-    test_aead aead_vectors_low;
-    test_cipher block_cipher_vectors_low
+    test_aead aead_vectors_low
+    //test_cipher block_cipher_vectors_low
   end;
   AC.disable_openssl ();
 
   if EverCrypt.StaticConfig.bcrypt then begin
     print !$"==========BCrypt==========\n";
-    test_aead aead_vectors_low;
-    test_cipher block_cipher_vectors_low
+    test_aead aead_vectors_low
+    //test_cipher block_cipher_vectors_low
   end;
 
   // AR: 09/07: commenting it, random_init calls fails to verify, also see comment on test_rng above
