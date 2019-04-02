@@ -1,5 +1,5 @@
 [
-  " >ÓŸß/ç0á&Á\r|¹„9",
+  "–¿dvÒ\u0002E18\u000b:¸ “’Ê",
   [
     [
       "Test.uint32_fits_maxLength",
@@ -26,7 +26,7 @@
         "typing_Spec.Hash.Definitions.max_input_length"
       ],
       0,
-      "715ff4d9e834d22450b7d0ee1dd1a1d1"
+      "708f5ea8ca4181f57232e0a228414c51"
     ],
     [
       "Test.compute",
@@ -67,7 +67,7 @@
         "typing_Spec.Hash.Definitions.word_length"
       ],
       0,
-      "ee4619793437d6fe64379ae4bace1626"
+      "0ea82fa3bedc2a3b15c782bf8b4929ed"
     ],
     [
       "Test.compute",
@@ -93,7 +93,7 @@
         "typing_Spec.Hash.Definitions.word_length"
       ],
       0,
-      "396f7c279e181c2a5e2411afc7cd511e"
+      "2e7f3c45e984614ab69e287b47a802e4"
     ],
     [
       "Test.compute",
@@ -323,7 +323,7 @@
         "typing_Spec.Poly1305.size_key"
       ],
       0,
-      "b9e7cc081f1ce84b5eca308d844ee7e6"
+      "f2631fe1c46c7f7b76ef978c442470c1"
     ],
     [
       "Test.test_one_hash",
@@ -500,7 +500,7 @@
         "unit_typing"
       ],
       0,
-      "1fa4711453a5e759044f76248874d812"
+      "7d19e92456615f511124953683f998ce"
     ],
     [
       "Test.test_hash",
@@ -565,7 +565,7 @@
         "typing_LowStar.Buffer.trivial_preorder"
       ],
       0,
-      "735772fc1aae1dad0f372d1ee5114832"
+      "2e10268d8ebbc87a0cac5185223b02ac"
     ],
     [
       "Test.test_one_hmac",
@@ -698,7 +698,7 @@
         "unit_inversion", "unit_typing"
       ],
       0,
-      "f8f18009ad8a9082546a58fe3a9690b2"
+      "2c01121219c471ddbcf1caffbc03f911"
     ],
     [
       "Test.test_hmac",
@@ -767,7 +767,7 @@
         "unit_typing"
       ],
       0,
-      "fd712001f36313edfaff7a0781e7d30d"
+      "ce9cf96542111a29cf9daabc1df60ab2"
     ],
     [
       "Test.test_one_hkdf",
@@ -924,7 +924,7 @@
         "unit_typing"
       ],
       0,
-      "ed88a9638a96bc22c983b68129dbe8aa"
+      "d11e9bd93e9bab3c8b485a49e4d90669"
     ],
     [
       "Test.test_hkdf",
@@ -993,7 +993,7 @@
         "unit_typing"
       ],
       0,
-      "eb819fc0ff14ec6d221672736789bdcc"
+      "0a2da91ab839d260ef9454ae86d94f4c"
     ],
     [
       "Test.test_poly1305_one",
@@ -1111,7 +1111,7 @@
         "typing_Spec.Poly1305.size_key"
       ],
       0,
-      "55c6a5e5c9db02301851847b19878169"
+      "eb09e39cc0e35290fda0df0a65ca6457"
     ],
     [
       "Test.test_poly1305",
@@ -1128,7 +1128,7 @@
         "primitive_Prims.op_GreaterThanOrEqual"
       ],
       0,
-      "8ee1f452aef053b2c1b9a8e443138b1b"
+      "385cdcec4d65b9d00db9afde79b763ce"
     ],
     [
       "Test.test_curve25519_one",
@@ -1144,7 +1144,7 @@
         "refinement_interpretation_Tm_refine_9a74d818566e70513bc032cc3b65a144"
       ],
       0,
-      "864a7c97d549a1471e7e3aab3117c3a5"
+      "90fae6be1e5f2046f30157a3089f01c4"
     ],
     [
       "Test.test_curve25519",
@@ -1161,7 +1161,22 @@
         "primitive_Prims.op_GreaterThanOrEqual"
       ],
       0,
-      "02d94d28118d6de298c20741b6e63d04"
+      "b6bf9f5f5a3bcd1ea617758f5691eebf"
+    ],
+    [
+      "Test.alg_of_alg",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "disc_equation_Test.Vectors.AES_128_GCM",
+        "disc_equation_Test.Vectors.AES_256_GCM",
+        "disc_equation_Test.Vectors.CHACHA20_POLY1305",
+        "fuel_guarded_inversion_Test.Vectors.cipher"
+      ],
+      0,
+      "dafbbf17fdc96f59d66bed0f009ff103"
     ],
     [
       "Test.test_aead",
@@ -1219,7 +1234,37 @@
         "typing_LowStar.Monotonic.Buffer.length"
       ],
       0,
-      "b90a4f07d5907b08e66f4a26288e97d5"
+      "efc27ad24c7daa1dcdb06a80fdd80dd5"
+    ],
+    [
+      "Test.test_chacha20poly1305",
+      1,
+      1,
+      0,
+      [
+        "@query", "equation_FStar.HyperStack.ST.equal_stack_domains",
+        "equation_FStar.Monotonic.Heap.equal_dom", "equation_FStar.UInt.gte",
+        "equation_FStar.UInt32.gte",
+        "lemma_FStar.HyperStack.ST.lemma_same_refs_in_stack_regions_intro",
+        "primitive_Prims.op_GreaterThanOrEqual"
+      ],
+      0,
+      "345855d1e7b977a9634f4bcf31efbf53"
+    ],
+    [
+      "Test.test_aes128_gcm",
+      1,
+      1,
+      0,
+      [
+        "@query", "equation_FStar.HyperStack.ST.equal_stack_domains",
+        "equation_FStar.Monotonic.Heap.equal_dom", "equation_FStar.UInt.gte",
+        "equation_FStar.UInt32.gte",
+        "lemma_FStar.HyperStack.ST.lemma_same_refs_in_stack_regions_intro",
+        "primitive_Prims.op_GreaterThanOrEqual"
+      ],
+      0,
+      "61bd2c6a8f25e25c0c22e88d2244936e"
     ],
     [
       "Test.test_rng",
@@ -1232,7 +1277,7 @@
         "lemma_FStar.HyperStack.ST.lemma_same_refs_in_stack_regions_intro"
       ],
       0,
-      "f04e47e3c61a79f0be335d649a51a30d"
+      "d9d106518807970342f2dbac50d2fbc4"
     ],
     [
       "Test.test_dh",
@@ -1245,7 +1290,7 @@
         "lemma_FStar.HyperStack.ST.lemma_same_refs_in_stack_regions_intro"
       ],
       0,
-      "a00ea009131de03076e649ca155f49f1"
+      "435d858195646d14e58bd524c01a5554"
     ],
     [
       "Test.main",
@@ -1318,7 +1363,7 @@
         "typing_tok_C.EXIT_SUCCESS@tok"
       ],
       0,
-      "8f72aae4947ceca50c48f37e4340d604"
+      "41b745f9f3095ec9b67a8d399738a091"
     ]
   ]
 ]

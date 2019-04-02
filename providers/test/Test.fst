@@ -349,13 +349,12 @@ type block_cipher_vector = block_cipher * vec8 * vec8 * vec8
 
 val test_aes_ecb: block_cipher_vector -> St unit
 let test_aes_ecb v =
-  let wb = AC.wants_bcrypt () in
-  let wo = AC.wants_openssl () in
-  if not wb && not wo then
-    C.String.print !$"Warning: not testing aes_ecb because OpenSSL & BCrypt are \
+  let wh = AC.wants_hacl () in
+  let wv = AC.wants_vale () in
+  if not wh && not wv then
+    C.String.print !$"Warning: not testing aes_ecb because Vale & Hacl are \
       disabled, no implementation\n"
-  // Make tests on release branches pass...
-  else if EverCrypt.StaticConfig.( openssl || bcrypt ) then begin
+  else begin
     push_frame();
     let block, (LB key_len key), (LB plain_len plain), (LB cipher_len cipher) = v in
     let cipher' = B.alloca 0uy 16ul in
@@ -429,7 +428,8 @@ let test_aead_st alg key key_len iv iv_len aad aad_len tag tag_len plaintext pla
       TestLib.compare_and_print !$"of AEAD cipher" ciphertext ciphertext' plaintext_len;
       TestLib.compare_and_print !$"of AEAD plain" plaintext plaintext' plaintext_len;
       TestLib.compare_and_print !$"of AEAD tag" tag tag' tag_len
-    | _ -> C.portable_exit 1l);
+    | _ -> 
+      C.Failure.failwith !$"Failure AEAD decrypt\n");
     //EverCrypt.aead_free st;
     pop_frame ()
   end
@@ -476,7 +476,7 @@ let rec test_chacha20poly1305 (i: U32.t): St unit =
     let tag = B.sub output input_len 16ul in
     let output = B.sub output 0ul input_len in
     test_aead_st Spec.AEAD.CHACHA20_POLY1305 key key_len nonce nonce_len aad aad_len tag 16ul
-      input input_len output output_len;
+      input input_len output input_len;
     test_chacha20poly1305 (i `U32.add_mod` 1ul)
   end
 
@@ -534,13 +534,18 @@ let main (): St C.exit_code =
   if EverCrypt.StaticConfig.vale then begin
     print !$"===========Vale===========\n";
     Test.Hash.main ();
+    print !$">>> Hash\n";
     test_hash hash_vectors_low;
+    print !$">>> AEAD (old vectors)\n";
     test_aead aead_vectors_low;
+    print !$">>> AEAD (AES128_GCM vectors)\n";
     test_aes128_gcm 0ul;
+    print !$">>> Cipher\n";
     test_cipher block_cipher_vectors_low;
+    print !$">>> Curve25519\n";
     test_curve25519 0ul;
 
-    print !$"\n  Vale/POLY1305\n";
+    print !$">>> Poly1305 (Vale/X64)\n";
     EverCrypt.AutoConfig2.disable_avx2 ();
     EverCrypt.AutoConfig2.disable_avx ();
     test_poly1305 0ul;
@@ -550,14 +555,20 @@ let main (): St C.exit_code =
 
 
   print !$"===========Hacl===========\n";
+  print !$">>> Hash\n";
   Test.Hash.main ();
   test_hash hash_vectors_low;
   test_hmac hmac_vectors_low;
   test_hkdf hkdf_vectors_low;
+  print !$">>> Chacha20\n";
   test_chacha20 chacha20_vectors_low;
+  print !$">>> Block ciphers\n";
   test_cipher block_cipher_vectors_low;
+  print !$">>> AEAD (old vectors)\n";
   test_aead aead_vectors_low;
+  print !$">>> AEAD (ChachaPoly vectors)\n";
   test_chacha20poly1305 0ul;
+  print !$">>> Curve25519 (HACL Curve51)\n";
   test_curve25519 0ul;
   //Test.Bytes.main ();
 
