@@ -720,7 +720,7 @@ dist/coco/Makefile.basic: \
 # The "coco" distribution is only optimized when EVERCRYPT_CONFIG=everest.
 # Everest means: no openssl, no bcrypt
 ifeq ($(EVERCRYPT_CONFIG),everest)
-dist/coco/Makefile.basic: HAND_WRITTEN_OPTIONAL_FILES =
+HAND_WRITTEN_OPTIONAL_FILES :=
 endif
 
 # For Kaizala, no BCrypt, no Vale.
