@@ -44,15 +44,9 @@ val gcm128_decrypt_stdcall:
   keys_b:uint8_p ->
   Stack UInt64.t 
     (requires fun h0 ->
-      B.disjoint cipher_b out_b /\ B.disjoint auth_b out_b /\
-      B.disjoint keys_b out_b /\ B.disjoint tag_b out_b /\
-
-      (B.disjoint cipher_b auth_b \/ cipher_b == auth_b) /\
       (B.disjoint cipher_b iv_b \/ cipher_b == iv_b) /\
-      (B.disjoint cipher_b tag_b \/ cipher_b == tag_b) /\
       (B.disjoint cipher_b keys_b \/ cipher_b == keys_b) /\
       (B.disjoint auth_b iv_b \/ auth_b == iv_b) /\      
-      (B.disjoint auth_b tag_b \/ auth_b == tag_b) /\
       (B.disjoint auth_b keys_b \/ auth_b == keys_b) /\
       (B.disjoint iv_b out_b \/ iv_b == out_b) /\      
       (B.disjoint iv_b tag_b \/ iv_b == tag_b) /\
@@ -61,9 +55,6 @@ val gcm128_decrypt_stdcall:
       
       B.live h0 keys_b /\ B.live h0 cipher_b /\ B.live h0 iv_b /\ 
       B.live h0 out_b /\ B.live h0 tag_b /\ B.live h0 auth_b /\
-
-      UInt64.v cipher_num % 16 = 0 /\
-      UInt64.v auth_num % 16 = 0 /\
 
       B.length cipher_b = UInt64.v cipher_num /\
       B.length auth_b = UInt64.v auth_num /\
@@ -105,15 +96,9 @@ val gcm256_decrypt_stdcall:
   keys_b:uint8_p ->
   Stack UInt64.t
     (requires fun h0 ->
-      B.disjoint cipher_b out_b /\ B.disjoint auth_b out_b /\
-      B.disjoint keys_b out_b /\ B.disjoint tag_b out_b /\
-
-      (B.disjoint cipher_b auth_b \/ cipher_b == auth_b) /\
       (B.disjoint cipher_b iv_b \/ cipher_b == iv_b) /\
-      (B.disjoint cipher_b tag_b \/ cipher_b == tag_b) /\
       (B.disjoint cipher_b keys_b \/ cipher_b == keys_b) /\
       (B.disjoint auth_b iv_b \/ auth_b == iv_b) /\      
-      (B.disjoint auth_b tag_b \/ auth_b == tag_b) /\
       (B.disjoint auth_b keys_b \/ auth_b == keys_b) /\
       (B.disjoint iv_b out_b \/ iv_b == out_b) /\      
       (B.disjoint iv_b tag_b \/ iv_b == tag_b) /\
@@ -122,9 +107,6 @@ val gcm256_decrypt_stdcall:
       
       B.live h0 keys_b /\ B.live h0 cipher_b /\ B.live h0 iv_b /\ 
       B.live h0 out_b /\ B.live h0 tag_b /\ B.live h0 auth_b /\
-
-      UInt64.v cipher_num % 16 = 0 /\
-      UInt64.v auth_num % 16 = 0 /\
 
       B.length cipher_b = UInt64.v cipher_num /\
       B.length auth_b = UInt64.v auth_num /\
