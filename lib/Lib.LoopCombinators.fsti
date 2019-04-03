@@ -154,13 +154,6 @@ val unfold_repeati:
   -> i:nat{i < n}
   -> Lemma (repeati #a (i + 1) f acc0 == f i (repeati #a i f acc0))
 
-val eq_repeati0:
-    #a:Type
-  -> n:nat
-  -> f:(i:nat{i < n} -> a -> a)
-  -> acc0:a
-  -> Lemma (repeati #a 0 f acc0 == acc0)
-
 val repeat:
     #a:Type
   -> n:nat

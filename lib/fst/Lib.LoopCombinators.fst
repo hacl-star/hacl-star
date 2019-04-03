@@ -56,8 +56,6 @@ let eq_repeati0 #a n f acc0 = ()
 let unfold_repeati #a n f acc0 i =
   unfold_repeat_gen n (fixed_a a) f acc0 i
 
-let eq_repeati0 #a n f acc0 = ()
-
 let repeat #a n f acc0 =
   repeati n (fixed_i f) acc0
 
