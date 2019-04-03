@@ -190,12 +190,11 @@ let u64 (n:nat{n <= maxint U64}) : u:uint64{uint_v #U64 u == n} = uint #U64 #SEC
 inline_for_extraction
 val u128: n:nat{n <= maxint U64} -> u:uint128{uint_v #U128 u == n}
 
-
-unfold inline_for_extraction
+unfold noextract
 let max_size_t = maxint U32
 
-inline_for_extraction
-unfold type size_nat = n:nat{n <= max_size_t}
+unfold inline_for_extraction
+type size_nat = n:nat{n <= max_size_t}
 
 inline_for_extraction
 let size (n:size_nat) : size_t = uint #U32 #PUB n

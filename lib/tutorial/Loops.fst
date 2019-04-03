@@ -12,7 +12,7 @@ module Loops
 /// iteration index. This allows, for instance, to use as an
 /// accumulator a sequence that grows iteratively, which is a common
 /// pattern in Hacl*.
-///
+/// 
 /// ``repeat`` is currently defined as ``repeat_right`` below, which
 /// has a recursive definition that unfolds to an application of ``f``
 /// at the head.
@@ -30,6 +30,13 @@ module Loops
 ///  else f (hi - 1) (repeat_right lo (hi - 1) a f acc)
 /// ```
 ///
+/// The `a` parameter gives the type of the function to be
+/// iterated. This is more general than a `fold` in that it allows the
+/// type of the function to depend in the iteration index. The
+/// `repeati` combinator is a special case of `repeat_right` where
+/// iteration starts from `0` and the type of the iterated function
+/// `f` doesn't depend on the iteration index.
+/// 
 /// - ``loop`` is a wrapper around ``Lib.Loops.for`` that abstracts
 /// over the Low* state used by the body. It takes as input a pure
 /// function operating over an arbitrary index-dependent state (as in
@@ -89,7 +96,6 @@ open Lib.Buffer
 open Lib.PrintBuffer
 
 module ST = FStar.HyperStack.ST
-module B = LowStar.Buffer
 module Seq = Lib.Sequence
 
 unfold let op_String_Access #a #len = Seq.op_String_Access #a #len
