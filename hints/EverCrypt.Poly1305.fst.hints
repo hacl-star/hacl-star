@@ -1,5 +1,5 @@
 [
-  "øùrf\u000eû\u0017f\u001cCJ\"\u001f∞\u0005u",
+  "˚ù∞„[≥\u0015∆\u007f“’Ö{Å\fÜ",
   [
     [
       "EverCrypt.Poly1305.poly1305",
@@ -15,7 +15,7 @@
         "typing_LowStar.Buffer.trivial_preorder"
       ],
       0,
-      "d31d9b50300bd5bc711a6493ffa713fe"
+      "67a2fa6f444afcb49e6365d44aaa586b"
     ],
     [
       "EverCrypt.Poly1305.poly1305",
@@ -24,7 +24,7 @@
       0,
       [ "@query" ],
       0,
-      "cfed55f212a72ec28c2008a4d047f301"
+      "7ac85fc10688684ced353748e324d70a"
     ],
     [
       "EverCrypt.Poly1305.poly1305",
@@ -90,15 +90,14 @@
         "equation_Lib.IntTypes.byte_t", "equation_Lib.IntTypes.pub_int_t",
         "equation_Lib.IntTypes.pub_int_v", "equation_Lib.IntTypes.sec_int_t",
         "equation_Lib.IntTypes.uint8", "equation_Lib.IntTypes.uint_t",
-        "equation_Lib.IntTypes.uint_v", "equation_Lib.Sequence.lseq",
-        "equation_Lib.Sequence.seq", "equation_LowStar.Buffer.buffer",
+        "equation_Lib.IntTypes.uint_v", "equation_Lib.Sequence.seq",
+        "equation_LowStar.Buffer.buffer",
         "equation_LowStar.Buffer.trivial_preorder",
         "equation_LowStar.Monotonic.Buffer.disjoint",
         "equation_LowStar.Monotonic.Buffer.length", "equation_Prims.eqtype",
         "equation_Prims.l_True", "equation_Prims.logical",
-        "equation_Prims.nat", "equation_Spec.Poly1305.key",
-        "equation_Spec.Poly1305.size_block",
-        "equation_Spec.Poly1305.size_key", "equation_Spec.Poly1305.tag",
+        "equation_Prims.nat", "equation_Spec.Poly1305.size_block",
+        "equation_Spec.Poly1305.size_key",
         "equation_X64.Poly1305.Util.readable_words",
         "function_token_typing_FStar.Monotonic.Heap.heap",
         "function_token_typing_FStar.UInt8.t",
@@ -180,9 +179,12 @@
         "refinement_interpretation_Tm_refine_4e25a7905e98128bc6f88dd9d64b6204",
         "refinement_interpretation_Tm_refine_56ab909861a887a471ba68f10063795f",
         "refinement_interpretation_Tm_refine_5a4fe33be2b93c781e552e491bb9dd31",
+        "refinement_interpretation_Tm_refine_5a9b07a98aac9ef86cf806048f3fefbd",
+        "refinement_interpretation_Tm_refine_6a722253105466a793c8366b0d8b327c",
         "refinement_interpretation_Tm_refine_6c25b42778726de94cd4dac42edb4860",
         "refinement_interpretation_Tm_refine_6e3f78b75dbac4079b8eec2087da6bff",
         "refinement_interpretation_Tm_refine_814770d986f06f66b84225be16b5517a",
+        "refinement_interpretation_Tm_refine_81aa92b7573e33eeaa7a335b747501de",
         "refinement_interpretation_Tm_refine_8af61d0447e6887060c2411d0a533c0b",
         "refinement_interpretation_Tm_refine_9a74d818566e70513bc032cc3b65a144",
         "refinement_interpretation_Tm_refine_9e8bec944afe09933cb5aed7ee6e285c",
@@ -195,7 +197,6 @@
         "refinement_interpretation_Tm_refine_cf51693b595960604bbe46bea87bbc32",
         "refinement_interpretation_Tm_refine_d3f87b68b4bf3e552b80bbb81c580058",
         "refinement_interpretation_Tm_refine_d4c7098650bd63ee7195c3ca69b31faa",
-        "refinement_interpretation_Tm_refine_d8d83307254a8900dd20598654272e42",
         "refinement_interpretation_Tm_refine_e27881a99184f8c07cf4428cbf7e2122",
         "refinement_interpretation_Tm_refine_e3588258e1439e7bbe20158183cb2f8b",
         "refinement_interpretation_Tm_refine_e36e7fa194162fb94cb448be97de0361",
@@ -220,6 +221,7 @@
         "typing_FStar.UInt32.add", "typing_FStar.UInt32.div",
         "typing_FStar.UInt32.mul", "typing_FStar.UInt32.uint_to_t",
         "typing_FStar.UInt32.v", "typing_Lib.Buffer.loc",
+        "typing_Lib.ByteSequence.nat_to_bytes_le",
         "typing_LowStar.Buffer.trivial_preorder",
         "typing_LowStar.Monotonic.Buffer.address_liveness_insensitive_locs",
         "typing_LowStar.Monotonic.Buffer.as_addr",
@@ -233,12 +235,12 @@
         "typing_LowStar.Monotonic.Buffer.loc_not_unused_in",
         "typing_LowStar.Monotonic.Buffer.loc_regions",
         "typing_LowStar.Monotonic.Buffer.loc_union",
-        "typing_Spec.Poly1305.poly1305", "typing_Spec.Poly1305.size_block",
-        "typing_Spec.Poly1305.size_key", "typing_tok_Lib.Buffer.MUT@tok",
+        "typing_Spec.Poly1305.size_block", "typing_Spec.Poly1305.size_key",
+        "typing_tok_Lib.Buffer.MUT@tok", "typing_tok_Lib.IntTypes.SEC@tok",
         "unit_inversion", "unit_typing"
       ],
       0,
-      "9bb3ce8c10d2102aed7dcd0649d2a6de"
+      "452d298d845a18385c07d02452124f60"
     ]
   ]
 ]
