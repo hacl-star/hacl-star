@@ -123,6 +123,7 @@ ci:
 	NOSHORTLOG=1 $(MAKE) wasm
 
 wasm:
+	tools/blast-staticconfig.sh hacl-only
 	EVERCRYPT_CONFIG=hacl-only $(MAKE) dist/wasm/Makefile.basic
 
 # Not reusing the -staged automatic target so as to export MIN_TEST
@@ -228,7 +229,7 @@ VALE_FSTS = $(call to-obj-dir,$(VAF_AS_FSTS))
 # The complete set of F* files, both hand-written and Vale-generated. Note that
 # this is only correct in the second stage of the build.
 FSTAR_ROOTS = $(wildcard $(addsuffix /*.fsti,$(ALL_HACL_DIRS)) $(addsuffix /*.fst,$(ALL_HACL_DIRS))) \
-  $(KREMLIN_HOME)/runtime/WasmSupport.fst $(FSTAR_HOME)/ulib/LowStar.Endianness.fst \
+  $(FSTAR_HOME)/ulib/LowStar.Endianness.fst \
   $(wildcard obj/*.fst) $(wildcard obj/*.fsti) # these two empty during the first stage
 
 # We currently force regeneration of three depend files. This is long.
@@ -667,12 +668,14 @@ DEFAULT_FLAGS		=\
   -add-include '"curve25519-inline.h"' \
   -no-prefix 'MerkleTree.New.Low' \
   -no-prefix 'MerkleTree.New.Low.Serialization' \
-  -fparentheses -fno-shadow -fcurly-braces
+  -fparentheses -fno-shadow -fcurly-braces \
+  -bundle WasmSupport
 
 # Should be fixed by having KreMLin better handle imported names
-WASM_STANDALONE=WasmSupport Prims LowStar.Endianness C C.Endianness \
+WASM_STANDALONE=Prims LowStar.Endianness C C.Endianness \
   C.String TestLib
 
+# Notes: we disable MerkleTree (function pointers not supported)
 WASM_FLAGS	=\
   $(patsubst %,-bundle %=,$(WASM_STANDALONE)) \
   -bundle FStar.* \
@@ -683,7 +686,7 @@ WASM_FLAGS	=\
   -bundle Hacl.Curve25519_51=Hacl.Impl.Curve25519.*[rename=Hacl_Curve25519] \
   -bundle Hacl.Impl.Chacha20Poly1305=Hacl.Impl.Chacha20Poly1305.*[rename=Hacl_Chacha20Poly1305] \
   -bundle 'EverCrypt.Spec.*' \
-  -bundle 'MerkleTree.New.Low+MerkleTree.New.Low.Serialization=[rename=MerkleTree]' \
+  -bundle 'MerkleTree.*' \
   -bundle 'Test,Test.*,WindowsHack' \
   -bundle EverCrypt.Hash+EverCrypt.Hash.Incremental=[rename=EverCrypt_Hash] \
   -bundle '\*[rename=Misc]' \
