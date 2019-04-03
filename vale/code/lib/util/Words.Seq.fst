@@ -5,8 +5,13 @@ open Words_s
 open Words.Four_s
 open Words.Seq_s
 open FStar.Mul
-open Meta
+open Util.Meta
 
+let two_to_seq_to_two_LE #a x =
+  assert (equal (two_to_seq_LE (seq_to_two_LE x)) x)
+
+let seq_to_two_to_seq_LE #a x = ()
+  
 let seq_to_seq_four_to_seq_LE  (#a:Type) (x:seq (four a)) :
   Lemma (seq_to_seq_four_LE (seq_four_to_seq_LE x) == x)
   [SMTPat (seq_to_seq_four_LE (seq_four_to_seq_LE x))]
@@ -32,7 +37,7 @@ let seq_four_to_seq_to_seq_four_LE (#a:Type) (x:seq a{length x % 4 == 0}) :
 
 unfold let pow2_24 = 16777216 //normalize_term (pow2 24)
 
-#reset-options "--z3rlimit 30 --using_facts_from 'Prims Words_s'"
+#reset-options "--z3rlimit 200 --using_facts_from 'Prims Words_s'"
 let lemma_fundamental_div_mod_4 (x:nat32) :
   Lemma (x = x % pow2_8 + pow2_8 * ((x / pow2_8) % pow2_8) + pow2_16 * ((x / pow2_16) % pow2_8) + pow2_24 * ((x / pow2_24) % pow2_8))
   =
@@ -60,12 +65,12 @@ let four_to_nat_to_four_8 (x:natN (pow2_norm 32)) :
   lemma_fundamental_div_mod_4 x;
   ()
 
-#reset-options "--z3rlimit 100 --using_facts_from 'Words_s Prims'"
+#reset-options "--z3rlimit 400 --using_facts_from 'Words_s Prims'"
 let nat_to_four_to_nat (x:four (natN (pow2_norm 8))) :
   Lemma (nat_to_four 8 (four_to_nat 8 x) == x)
-  [SMTPat (nat_to_four 8 (four_to_nat 8 x) == x)]
+  [SMTPat (nat_to_four 8 (four_to_nat 8 x))]
   =
-    let size = 8 in
+  let size = 8 in
   let n1 = pow2_norm size in
   let n2 = pow2_norm (2 * size) in
   let n3 = pow2_norm (3 * size) in
@@ -134,6 +139,18 @@ let seq_nat8_to_seq_nat32_to_seq_nat8_LE (x:seq nat32) :
   assert (equal (seq_nat8_to_seq_nat32_LE (seq_nat32_to_seq_nat8_LE x)) x);
   ()
 
+let seq_nat32_to_seq_nat8_to_seq_nat32_LE (x:seq nat8{length x % 4 == 0}) :
+  Lemma (seq_nat32_to_seq_nat8_LE (seq_nat8_to_seq_nat32_LE x) == x)
+  =
+  assert (equal (seq_nat32_to_seq_nat8_LE (seq_nat8_to_seq_nat32_LE x)) x);
+  ()
+
+let seq_nat8_to_seq_uint8_to_seq_nat8 (x:seq UInt8.t) =
+  assert (equal (seq_nat8_to_seq_uint8 (seq_uint8_to_seq_nat8 x)) x)  
+
+let seq_uint8_to_seq_nat8_to_seq_uint8 (x:seq nat8) =
+  assert (equal (seq_uint8_to_seq_nat8 (seq_nat8_to_seq_uint8 x)) x)
+  
 let seq_four_to_seq_LE_injective (a:eqtype) :
   Lemma (forall (x x': seq (four a)). seq_four_to_seq_LE #a x == seq_four_to_seq_LE #a x' ==> x == x')
   =

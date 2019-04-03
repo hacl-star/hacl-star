@@ -6,6 +6,8 @@ open Lib.Sequence
 open Lib.ByteSequence
 
 
+#set-options "--z3rlimit 25 --max_fuel 1"
+
 type algorithm =
   | AEAD_AES128_GCM
   | AEAD_Chacha20_Poly1305
@@ -45,6 +47,7 @@ let padlen (a:algorithm) (x:size_nat) : size_nat =
 type key (a:algorithm) = lbytes (size_key a)
 type block (a:algorithm) = lbytes (size_block a)
 type nonce (a:algorithm) = lbytes (size_nonce a)
+type tag (a:algorithm) = lbytes (size_tag a)
 
 
 /// API
@@ -69,13 +72,14 @@ val aead_decrypt:
     a: algorithm
   -> k: key a
   -> n: nonce a
-  -> c: bytes{size_tag a <= length c /\ length c <= max_size_t}
+  -> c: bytes{length c + size_block a <= max_size_t}
+  -> mac: tag a
   -> aad: bytes{length aad <= max_size_t
              /\ (length c + length aad) / 64 <= max_size_t
              /\ length aad + padlen a (length aad) <= max_size_t} ->
-  Tot (option (lbytes (length c - size_tag a)))
+  Tot (option (lbytes (length c)))
 
-let aead_decrypt a k n c aad =
+let aead_decrypt a k n c mac aad =
   match a with
-  | AEAD_AES128_GCM -> Spec.AES128_GCM.aead_decrypt k n c aad
-  | AEAD_Chacha20_Poly1305 -> Spec.Chacha20Poly1305.aead_decrypt k n c aad
+  | AEAD_AES128_GCM -> Spec.AES128_GCM.aead_decrypt k n c mac aad
+  | AEAD_Chacha20_Poly1305 -> Spec.Chacha20Poly1305.aead_decrypt k n c mac aad

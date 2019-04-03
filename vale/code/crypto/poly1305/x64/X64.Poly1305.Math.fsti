@@ -21,12 +21,6 @@ let lowerUpper192 (l:nat128) (u:nat64) : int =
 
 let lowerUpper192_opaque = make_opaque lowerUpper192
 
-let mod2_128' x:int = x % pow2_128
-
-let mod2_128 = make_opaque mod2_128'
-
-let modp = make_opaque modp'
-
 // There are some assumptions here, which will either go away when the library switches to ints everywhere (for division too)
 // or when we switch to nats (which is doable right away)
 val lemma_poly_multiply : n:int -> p:int -> r:int -> h:int -> r0:int -> r1:int -> h0:int -> h1:int -> h2:int -> s1:int -> d0:int -> d1:int -> d2:int -> hh:int -> Lemma
@@ -146,12 +140,9 @@ val lemma_add_mod128 (x y :int) : Lemma
   (requires True)
   (ensures mod2_128 ((mod2_128 x) + y) == mod2_128 (x + y))
 
-let modp_0 () : Lemma
+val modp_0 (_:unit) : Lemma
   (requires True)
   (ensures modp 0 == 0)
-    =
-    reveal_opaque modp';
-    ()
 
 let bare_r (key_r:nat128) : nat128 = iand key_r 0x0ffffffc0ffffffc0ffffffc0fffffff
 

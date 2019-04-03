@@ -78,7 +78,7 @@ let test () =
   let enc = Spec.Chacha20Poly1305.aead_encrypt k n p aad in
   let cipher = sub enc 0 114 in
   let mac = sub enc 114 16 in
-  let dec = Spec.Chacha20Poly1305.aead_decrypt k n enc aad in
+  let dec = Spec.Chacha20Poly1305.aead_decrypt k n cipher mac aad in
   let result_encryption = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) cipher xcipher in
   let result_mac_compare = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) mac xmac in
   let dec_p = match dec with | Some p -> p | None -> create 114 (u8 0) in

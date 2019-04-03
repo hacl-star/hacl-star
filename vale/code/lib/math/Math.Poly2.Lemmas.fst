@@ -15,11 +15,24 @@ let lemma_one_define () =
 let lemma_monomial_define n =
   FStar.Classical.forall_intro (lemma_monomial_define_i n)
 
+let lemma_monomial_define_all () =
+  FStar.Classical.forall_intro_with_pat (fun n -> monomial n) lemma_monomial_define
+
 let lemma_shift_define p n =
   FStar.Classical.forall_intro (lemma_shift_define_i p n)
 
 let lemma_shift_define_forward p n =
   lemma_shift_define p n
+
+let lemma_shift_define_all () =
+  FStar.Classical.forall_intro_2_with_pat (fun p n -> shift p n) lemma_shift_define
+
+let lemma_mask_define p n =
+  FStar.Classical.forall_intro (lemma_mask_define_i p n);
+  ()
+
+let lemma_mask_define_all () =
+  FStar.Classical.forall_intro_2_with_pat (fun p n -> mask p n) lemma_mask_define
 
 let lemma_reverse_define p n =
   FStar.Classical.forall_intro (lemma_reverse_define_i p n)
@@ -52,13 +65,17 @@ let lemma_shift_degree a n =
   lemma_degree a;
   lemma_shift_define a n;
   lemma_zero_define ();
-  if degree a < 0 then
+  if degree a < 0 || degree a + n < 0 then
   (
     lemma_equal zero (shift a n);
-    lemma_degree_negative a
+    lemma_degree_negative (shift a n)
   )
   else
     lemma_degree_is (shift a n) (degree a + n)
+
+let lemma_mask_degree a n =
+  lemma_mask_define a n;
+  lemma_degree (mask a n)
 
 let lemma_reverse_degree a n =
   lemma_index a;
@@ -84,6 +101,32 @@ let lemma_add_define a b =
 let lemma_add_define_all () =
   FStar.Classical.forall_intro_2_with_pat (fun a b -> (a +. b)) lemma_add_define
 
+let lemma_add_zero_right = lemma_add_zero
+let lemma_add_zero_left a = lemma_add_zero a; lemma_add_commute a zero
+
+let lemma_add_all () =
+  FStar.Classical.forall_intro_with_pat (fun a -> a +. zero) lemma_add_zero;
+  FStar.Classical.forall_intro_with_pat (fun a -> a +. a) lemma_add_cancel;
+  FStar.Classical.forall_intro_2_with_pat (fun a b -> a +. b) lemma_add_commute;
+  FStar.Classical.forall_intro_3_with_pat (fun a b c -> a +. (b +. c)) lemma_add_associate
+
+let lemma_bitwise_all () =
+  lemma_index_all ();
+  lemma_zero_define ();
+  lemma_one_define ();
+  lemma_monomial_define_all ();
+  lemma_shift_define_all ();
+  lemma_mask_define_all ();
+  lemma_reverse_define_all ();
+  lemma_add_define_all ();
+  ()
+
+let lemma_monomial_add_degree n a =
+  lemma_bitwise_all ();
+  lemma_degree_is (monomial n +. a) n;
+  lemma_degree_is (a +. monomial n) n;
+  ()
+
 let lemma_mul_distribute_left a b c =
   lemma_mul_commute (a +. b) c;
   lemma_mul_commute a c;
@@ -105,6 +148,10 @@ let lemma_mul_monomials m n =
   lemma_shift_define (monomial m) n;
   lemma_equal (shift (monomial m) n) (monomial (m + n))
 
+let lemma_add_reverse a b n =
+  lemma_bitwise_all ();
+  lemma_equal (reverse (a +. b) n) (reverse a n +. reverse b n)
+
 let lemma_mul_reverse_shift_1 a b n =
   let ab = a *. b in
   let ra = reverse a n in
@@ -117,6 +164,17 @@ let lemma_mul_reverse_shift_1 a b n =
   lemma_reverse_define ab (n + n + 1);
   lemma_shift_define (ra *. rb) 1;
   lemma_equal rab1 (shift (ra *. rb) 1)
+
+let lemma_shift_is_mul_right = lemma_shift_is_mul
+let lemma_shift_is_mul_left a n =
+  lemma_shift_is_mul a n;
+  lemma_mul_commute (monomial n) a
+
+let lemma_mul_all () =
+  FStar.Classical.forall_intro_with_pat (fun a -> a *. zero) lemma_mul_zero;
+  FStar.Classical.forall_intro_with_pat (fun a -> a *. one) lemma_mul_one;
+  FStar.Classical.forall_intro_2_with_pat (fun a b -> a *. b) lemma_mul_commute;
+  FStar.Classical.forall_intro_3_with_pat (fun a b c -> a *. (b *. c)) lemma_mul_associate
 
 let lemma_mod_distribute a b c =
   let ab = a +. b in
@@ -217,6 +275,25 @@ let lemma_mod_mul_mod a b c =
   lemma_add_cancel_eq y y';
   ()
 
+let lemma_mod_mul_mod_right a b c =
+  lemma_mul_all ();
+  lemma_mod_mul_mod b c a
+
+let lemma_mod_reduce a b c =
+  calc (==) {
+    (a *. b) %. (b +. c);
+    == {lemma_add_zero_right ((a *. b) %. (b +. c))}
+    (a *. b) %. (b +. c) +. zero;
+    == {lemma_div_mod_exact a (b +. c)}
+    (a *. b) %. (b +. c) +. (a *. (b +. c)) %. (b +. c);
+    == {lemma_mod_distribute (a *. b) (a *. (b +. c)) (b +. c)}
+    (a *. b  +. a *. (b +. c)) %. (b +. c);
+    == {lemma_mul_distribute_right a b (b +. c)}
+    (a *. (b +. (b +. c))) %. (b +. c);
+    == {lemma_add_all ()}
+    (a *. c) %. (b +. c);
+  }
+
 let lemma_split_define a n =
   let b = monomial n in
   lemma_div_mod a b;
@@ -239,3 +316,13 @@ let lemma_combine_define a b n =
   lemma_add_define_all ();
   lemma_index_all ();
   ()
+
+let lemma_mask_is_mod a n =
+  lemma_bitwise_all ();
+  lemma_split_define a n;
+  lemma_equal (mask a n) (a %. monomial n)
+
+let lemma_shift_is_div a n =
+  lemma_bitwise_all ();
+  lemma_split_define a n;
+  lemma_equal (shift a (-n)) (a /. monomial n)

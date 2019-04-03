@@ -7,9 +7,13 @@ open Lib.ByteSequence
 open Lib.RawIntTypes
 open Spec.SHA2
 open Spec.Curve25519
-open Lib.NatMod
+
 
 #reset-options "--max_fuel 0 --z3rlimit 20"
+
+inline_for_extraction
+let size_signature: size_nat = 64
+
 
 (* Point addition *)
 type aff_point = tuple2 elem elem           // Affine point
@@ -18,7 +22,10 @@ type ext_point = tuple4 elem elem elem elem // Homogeneous extended coordinates
 let modp_inv (x:elem) : Tot elem =
   x **% (prime - 2)
 
-let d : elem = to_elem 37095705934669439343138083508754565189542113879843219016388785533085940283555
+let d : elem =
+  let x = 37095705934669439343138083508754565189542113879843219016388785533085940283555 in
+  assert_norm(x < prime);
+  x
 
 let q: n:nat{n < pow2 256} =
   assert_norm(pow2 252 + 27742317777372353535851937790883648493 < pow2 255 - 19);
@@ -34,8 +41,8 @@ let point_add (p:ext_point) (q:ext_point) : Tot ext_point =
   let x2, y2, z2, t2 = q in
   let a = (y1 -% x1) *% (y2 -% x2) in
   let b = (y1 +% x1) *% (y2 +% x2) in
-  let c = (to_elem 2 *% d *% t1) *% t2 in
-  let d = (to_elem 2 *% z1) *% z2 in
+  let c = (2 *% d *% t1) *% t2 in
+  let d = (2 *% z1) *% z2 in
   let e = b -% a in
   let f = d -% c in
   let g = d +% c in
@@ -50,7 +57,7 @@ let point_double (p:ext_point) : Tot ext_point =
   let x1, y1, z1, t1 = p in
   let a = x1 *% x1 in
   let b = y1 *% y1 in
-  let c = to_elem 2 *% (z1 *% z1) in
+  let c = 2 *% (z1 *% z1) in
   let h = a +% b in
   let e = h -% ((x1 +% y1) *% (x1 +% y1)) in
   let g = a -% b in
@@ -82,37 +89,40 @@ let rec montgomery_ladder_ (x:ext_point) (xp1:ext_point) (len:size_nat{8 * len <
 let point_mul (len:size_nat{8 * len <= max_size_t}) (a:lbytes len) (p:ext_point) =
   fst (montgomery_ladder_ (zero, one, one, zero) p len a (8 * len))
 
-let modp_sqrt_m1 : elem = to_elem 2 **% ((prime - 1) / 4)
+let modp_sqrt_m1 : elem = 2 **% ((prime - 1) / 4)
 
 noeq type record = { s:(s':lseq bool 3)}
 
 let recover_x (y:nat) (sign:bool) : Tot (option elem) =
+  admit();
   if y >= prime then None
   else (
-    let y2 = to_elem (y * y) in
+    let y2 = (y * y) in
     let x2 = (y2 -% one) *% (modp_inv ((d *% y2) +% one)) in
-    if x2 =% zero then (
+    if x2 = zero then (
       if sign then None
       else Some zero
     ) else (
       let x = x2 **% ((prime + 3) / 8) in
-      let x = if ((x *% x) -% x2) <>% zero then x *% modp_sqrt_m1 else x in
-      if ((x *% x) -% x2) <>% zero then None
+      let x = if ((x *% x) -% x2) <> zero then x *% modp_sqrt_m1 else x in
+      if ((x *% x) -% x2) <> zero then None
       else (
-        let x = if (nat_mod_v x % 2 = 1) <> sign then to_elem (prime - nat_mod_v x) else x in
+        let x = if (x % 2 = 1) <> sign then (prime - x) else x in
         Some x)))
 
-let g_x : elem = to_elem 15112221349535400772501151409588531511454012693041857206046113283949847762202
-let g_y : elem = to_elem 46316835694926478169428394003475163141307993866256225615783033603165251855960
+#reset-options "--z3refresh"
 
-let g: ext_point = (g_x, g_y, to_elem 1, g_x *% g_y)
+let g_x : elem = 15112221349535400772501151409588531511454012693041857206046113283949847762202
+let g_y : elem = 46316835694926478169428394003475163141307993866256225615783033603165251855960
+
+let g: ext_point = (g_x, g_y, 1, g_x *% g_y)
 
 let point_compress (p:ext_point) : Tot (lbytes 32) =
   let px, py, pz, pt = p in
   let zinv = modp_inv pz in
   let x = px *% zinv in
   let y = py *% zinv in
-  nat_to_bytes_le 32 ((pow2 255 * (nat_mod_v x % 2)) + nat_mod_v y)
+  nat_to_bytes_le 32 ((pow2 255 * (x % 2)) + y)
 
 let point_decompress (s:lbytes 32) : Tot (option ext_point) =
   let y = nat_from_bytes_le s in
@@ -120,7 +130,7 @@ let point_decompress (s:lbytes 32) : Tot (option ext_point) =
   let y = y % (pow2 255) in
   let x = recover_x y sign in
   match x with
-  | Some x -> Some (x, to_elem y, one, x *% to_elem y)
+  | Some x -> Some (x, y, one, x *% y)
   | _ -> None
 
 let secret_expand (secret:lbytes 32) : (lbytes 32 & lbytes 32) =
@@ -139,7 +149,8 @@ let secret_to_public (secret:lbytes 32) =
 
 #reset-options "--max_fuel 0 --z3rlimit 50"
 
-let sign (secret:lbytes 32) (len:size_nat{ 8 * len < max_size_t}) (msg:lbytes len) =
+let sign (secret:lbytes 32) (msg:bytes{8 * length msg < max_size_t}) =
+  let len = length msg in
   let a, prefix = secret_expand secret in
   let a' = point_compress (point_mul 32 a g) in
   let tmp = create (len + 64) (u8 0) in
@@ -160,11 +171,12 @@ let sign (secret:lbytes 32) (len:size_nat{ 8 * len < max_size_t}) (msg:lbytes le
 let point_equal (p:ext_point) (q:ext_point) =
   let px, py, pz, pt = p in
   let qx, qy, qz, qt = q in
-  if ((px *% qz) <>% (qx *% pz)) then false
-  else if ((py *% qz) <>% (qy *% pz)) then false
+  if ((px *% qz) <> (qx *% pz)) then false
+  else if ((py *% qz) <> (qy *% pz)) then false
   else true
 
-let verify (public:lbytes 32) (len:size_nat{ 8 * len < max_size_t}) (msg:lbytes len) (signature:lbytes 64) =
+let verify (public:lbytes 32) (msg:bytes{8 * length msg < max_size_t}) (signature:lbytes 64) =
+  let len = length msg in
   let a' = point_decompress public in
   match a' with
   | None -> false

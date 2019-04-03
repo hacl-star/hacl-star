@@ -151,11 +151,11 @@ providers:
 CC = $(GCC)
 
 ci: .clean-banner .clean-git .clean-snapshots
-	$(MAKE) -C lib
-	$(MAKE) -C code/blake2 verify
+	$(MAKE) -C lib	
 	$(MAKE) -C code/sha3
 	$(MAKE) -C frodo/spec
 	$(MAKE) -C frodo/code TARGET=
+	# $(MAKE) -C code/blake2
 	# $(MAKE) extract-specs
 	# $(MAKE) extract-all
 	# $(MAKE) -C code clean-c

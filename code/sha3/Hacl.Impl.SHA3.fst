@@ -21,17 +21,13 @@ module LB = Lib.ByteSequence
 module Loop = Lib.LoopCombinators
 module S = Spec.SHA3
 
-let keccak_rotc :x:ilbuffer rotc_t 24ul{witnessed x S.keccak_rotc /\ recallable x}
+let keccak_rotc :x:ilbuffer rotc_t 24ul{witnessed x keccak_rotc /\ recallable x}
   = createL_global rotc_list
 
-let piln_list: x:list piln_t{List.Tot.length x <= max_size_t} =
-  assert_norm (List.Tot.length piln_list <= max_size_t);
-  piln_list
-
-let keccak_piln :x:ilbuffer piln_t 24ul{witnessed x (LSeq.of_list piln_list) /\ recallable x}
+let keccak_piln :x:ilbuffer piln_t 24ul{witnessed x keccak_piln /\ recallable x}
   = createL_global piln_list
 
-let keccak_rndc :x:ilbuffer pub_uint64 24ul{witnessed x S.keccak_rndc /\ recallable x}
+let keccak_rndc :x:ilbuffer pub_uint64 24ul{witnessed x keccak_rndc /\ recallable x}
   = createL_global rndc_list
 
 #reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq'"
@@ -177,11 +173,11 @@ val state_pi_rho_inner:
       bget h1 current 0 == c' /\
       as_seq h1 s == s'))
 let state_pi_rho_inner i current s =
-  assert_norm (List.Tot.length piln_list <= max_size_t);
+  assert_norm (List.Tot.length piln_list == 24);
   let h0 = ST.get () in
-  recall_contents keccak_rotc S.keccak_rotc;
-  recall_contents keccak_piln (LSeq.of_list piln_list);
-  index_map S.sizes_v piln_list (v i);
+  recall_contents keccak_rotc Spec.SHA3.Constants.keccak_rotc;
+  recall_contents keccak_piln Spec.SHA3.Constants.keccak_piln;
+  index_map v piln_list (v i);
   let _Y = keccak_piln.(i) in
   let r = keccak_rotc.(i) in
   let temp = s.(_Y) in
@@ -289,7 +285,7 @@ val state_iota:
       modifies (loc s) h0 h1 /\
       as_seq h1 s == S.state_iota (as_seq h0 s) (v round))
 let state_iota s round =
-  recall_contents keccak_rndc S.keccak_rndc;
+  recall_contents keccak_rndc Spec.SHA3.Constants.keccak_rndc;
   let c = keccak_rndc.(round) in
   writeLane s 0ul 0ul (readLane s 0ul 0ul ^. secret c)
 
@@ -334,7 +330,11 @@ let loadState rateInBytes input s =
       loop1 h0 25ul s spec
       (fun j ->
         Loop.unfold_repeati 25 (spec h0) (as_seq h0 s) (v j);
-        s.(j) <- s.(j) ^. uint_from_bytes_le #U64 (sub block (j *! 8ul) 8ul)
+        let h0 = ST.get() in
+        let x = uint_from_bytes_le #U64 (sub block (j *! 8ul) 8ul) in
+        s.(j) <- s.(j) ^. x;
+        let h1 = ST.get() in
+        uintv_extensionality x (Lib.ByteSequence.uint_from_bytes_le #U64 (LSeq.sub (as_seq h0 block) (v j * 8) 8))
       ))
 
 inline_for_extraction noextract
@@ -350,15 +350,9 @@ val storeState_inner:
 let storeState_inner s j block =
   let sj = s.(j) in
   let h0 = ST.get () in
-  [@ inline_let]
-  let spec h0 = Lib.ByteSequence.uint_to_bytes_le sj in
-  let impl (b:lbuffer uint8 8ul) : Stack unit
-    (requires fun h -> h0 == h /\ live h b)
-    (ensures  fun h0 _ h1 ->
-      modifies (loc b) h0 h1 /\
-      as_seq h1 b == spec h0)
-    = uint_to_bytes_le #U64 b sj in
-  update_sub_f h0 block (j *! 8ul) 8ul spec impl
+  update_sub_f h0 block (j *! 8ul) 8ul
+    (fun h -> Lib.ByteSequence.uint_to_bytes_le sj)
+    (fun _ -> uint_to_bytes_le #U64 (sub block (j *! 8ul) 8ul) sj)
 
 val storeState:
     rateInBytes:size_t{v rateInBytes <= 200}
@@ -489,7 +483,7 @@ let squeeze_inner rateInBytes outputByteLen s output i =
   storeState rateInBytes s output;
   state_permute s
 
-#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
+#reset-options "--z3rlimit 150 --max_fuel 1 --max_ifuel 1"
 
 val squeeze:
     s:state
@@ -514,7 +508,7 @@ let squeeze s rateInBytes outputByteLen output =
     (fun h i -> as_seq h s)
     (fun _ -> loc s)
     (fun h0 -> S.squeeze_inner (v rateInBytes) (v outputByteLen))
-    (fun i block -> squeeze_inner rateInBytes outputByteLen s block i);
+    (fun i -> squeeze_inner rateInBytes outputByteLen s (sub blocks (i *! rateInBytes) rateInBytes) i);
   storeState remOut s last;
   let h1 = ST.get() in
   Seq.lemma_split (as_seq h1 output) (v outBlocks * v rateInBytes);

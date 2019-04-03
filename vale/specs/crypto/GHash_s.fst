@@ -8,7 +8,7 @@ open Collections.Seqs_s
 open FStar.Mul
 open FStar.Seq
 
-type ghash_plain_LE = s:seq quad32 { length s > 0 }
+type ghash_plain_LE:eqtype = s:seq quad32 { length s > 0 }
 
 let gf128_mul_LE (a_LE b_LE:quad32) : quad32 =
   let a_BE = reverse_bytes_quad32 a_LE in

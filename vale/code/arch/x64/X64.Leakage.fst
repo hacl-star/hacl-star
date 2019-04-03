@@ -1,7 +1,5 @@
 module X64.Leakage
 open X64.Machine_s
-open X64.Memory_s
-open X64.Semantics_s
 module S = X64.Bytes_Semantics_s
 open X64.Taint_Semantics_s
 open X64.Leakage_s
@@ -10,24 +8,22 @@ open X64.Leakage_Ins
 open X64.Leakage_Ins_Xmm
 
 #reset-options "--initial_ifuel 0 --max_ifuel 1 --initial_fuel 1 --max_fuel 1"
-let combine_reg_taints regs1 regs2 =
-    fun x -> merge_taint (regs1 x) (regs2 x)
+let combine_reg_taints (regs1 regs2:reg_taint) : reg_taint =
+    FunctionalExtensionality.on reg (fun x -> merge_taint (regs1 x) (regs2 x))
 
-let combine_reg_taints_monotone regs1 regs2: Lemma
+let combine_reg_taints_monotone (regs1 regs2:reg_taint) : Lemma
   (forall r. Public? ((combine_reg_taints regs1 regs2) r) ==> Public? (regs1 r) /\ Public? (regs2 r))
 = ()
 
 
-let combine_xmm_taints xmms1 xmms2 =
-    fun x -> merge_taint (xmms1 x) (xmms2 x)
+let combine_xmm_taints (xmms1 xmms2:xmms_taint) : xmms_taint =
+    FunctionalExtensionality.on xmm (fun x -> merge_taint (xmms1 x) (xmms2 x))
 
-let combine_xmm_taints_monotone xmms1 xmms2: Lemma
+let combine_xmm_taints_monotone (xmms1 xmms2:xmms_taint) : Lemma
   (forall r. Public? ((combine_xmm_taints xmms1 xmms2) r) ==> Public? (xmms1 r) /\ Public? (xmms2 r))
 = ()
 
-val eq_registers: (regs1: (reg -> taint)) -> (regs2: (reg -> taint)) -> (b:bool{b <==> (regs1 == regs2)})
-
-let eq_registers regs1 regs2 =
+let eq_registers (regs1 regs2:reg_taint) : (b:bool{b <==> regs1 == regs2}) =
   let b = regs1 Rax = regs2 Rax &&
   regs1 Rbx = regs2 Rbx &&
   regs1 Rcx = regs2 Rcx &&
@@ -47,9 +43,7 @@ let eq_registers regs1 regs2 =
   assert (FStar.FunctionalExtensionality.feq regs1 regs2 <==> b);
   b
 
-val eq_xmms: (xmms1: (xmm -> taint)) -> (xmms2: (xmm -> taint)) -> (b:bool{b <==> (xmms1 == xmms2)})
-
-let eq_xmms xmms1 xmms2 =
+let eq_xmms (xmms1 xmms2:xmms_taint) : (b:bool{b <==> (xmms1 == xmms2)})  =
   let b = xmms1 0 = xmms2 0 &&
     xmms1 1 = xmms2 1 &&
     xmms1 2 = xmms2 2 &&
@@ -70,45 +64,39 @@ let eq_xmms xmms1 xmms2 =
   assert (FStar.FunctionalExtensionality.feq xmms1 xmms2 <==> b);
   b
 
-val eq_taintStates: (ts1:taintState) -> (ts2:taintState) -> (b:bool{b <==> ts1 == ts2})
-
-let eq_taintStates ts1 ts2 =
+let eq_taintStates (ts1 ts2:taintState) : (b:bool{b <==> ts1 == ts2}) =
     eq_registers ts1.regTaint ts2.regTaint && ts1.flagsTaint = ts2.flagsTaint && ts1.cfFlagsTaint = ts2.cfFlagsTaint && eq_xmms ts1.xmmTaint ts2.xmmTaint
 
-let taintstate_monotone ts ts' = ( forall r. Public? (ts'.regTaint r) ==> Public? (ts.regTaint r)) /\ (Public? (ts'.flagsTaint) ==> Public? (ts.flagsTaint)) /\
+let taintstate_monotone (ts ts':taintState) = ( forall r. Public? (ts'.regTaint r) ==> Public? (ts.regTaint r)) /\ (Public? (ts'.flagsTaint) ==> Public? (ts.flagsTaint)) /\
   (Public? (ts'.cfFlagsTaint) ==> Public? (ts.cfFlagsTaint)) /\
   (forall x. Public? (ts'.xmmTaint x) ==> Public? (ts.xmmTaint x))
 
-val taintstate_monotone_trans: (ts1:taintState) -> (ts2:taintState) -> (ts3:taintState) ->
-Lemma (taintstate_monotone ts1 ts2 /\ taintstate_monotone ts2 ts3 ==> taintstate_monotone ts1 ts3)
-let taintstate_monotone_trans ts1 ts2 ts3 = ()
+let taintstate_monotone_trans (ts1:taintState) (ts2:taintState) (ts3:taintState)
+  :Lemma (taintstate_monotone ts1 ts2 /\ taintstate_monotone ts2 ts3 ==> taintstate_monotone ts1 ts3) = ()
 
-val isConstant_monotone: (ts1:taintState) -> (ts2:taintState) -> (code:tainted_code) -> (fuel:nat) -> (s1:traceState) -> (s2:traceState) -> Lemma
-(isConstantTimeGivenStates code fuel ts2 s1 s2 /\ taintstate_monotone ts1 ts2 ==> isConstantTimeGivenStates code fuel ts1 s1 s2)
+let isConstant_monotone (ts1:taintState) (ts2:taintState) (code:tainted_code) (fuel:nat) (s1:traceState) (s2:traceState) 
+  :Lemma (isConstantTimeGivenStates code fuel ts2 s1 s2 /\ taintstate_monotone ts1 ts2 ==> isConstantTimeGivenStates code fuel ts1 s1 s2)
+  = ()
 
-let isConstant_monotone ts1 ts2 code fuel s1 s2 = ()
+let isExplicit_monotone (ts:taintState) (ts1:taintState) (ts2:taintState) (code:tainted_code) 
+  (fuel:nat) (s1:traceState) (s2:traceState) 
+  :Lemma (isExplicitLeakageFreeGivenStates code fuel ts ts1 s1 s2 /\ taintstate_monotone ts1 ts2 ==> isExplicitLeakageFreeGivenStates code fuel ts ts2 s1 s2)
+  = ()
 
-val isExplicit_monotone: (ts:taintState) -> (ts1:taintState) -> (ts2:taintState) -> (code:tainted_code) -> (fuel:nat) -> (s1:traceState) -> (s2:traceState) -> Lemma
-(isExplicitLeakageFreeGivenStates code fuel ts ts1 s1 s2 /\ taintstate_monotone ts1 ts2 ==> isExplicitLeakageFreeGivenStates code fuel ts ts2 s1 s2)
+let isExplicit_monotone2 (ts:taintState) (ts1:taintState) (ts2:taintState)
+  (code:tainted_code) (fuel:nat) (s1:traceState) (s2:traceState) 
+  :Lemma (isExplicitLeakageFreeGivenStates code fuel ts2 ts s1 s2 /\ taintstate_monotone ts1 ts2 ==> isExplicitLeakageFreeGivenStates code fuel ts1 ts s1 s2)
+  = ()
 
-let isExplicit_monotone ts ts1 ts2 code fuel s1 s2 = ()
-
-val isExplicit_monotone2: (ts:taintState) -> (ts1:taintState) -> (ts2:taintState) -> (code:tainted_code) -> (fuel:nat) -> (s1:traceState) -> (s2:traceState) -> Lemma
-(isExplicitLeakageFreeGivenStates code fuel ts2 ts s1 s2 /\ taintstate_monotone ts1 ts2 ==> isExplicitLeakageFreeGivenStates code fuel ts1 ts s1 s2)
-
-let isExplicit_monotone2 ts ts1 ts2 code fuel s1 s2 = ()
-
-
-val combine_taint_states: (ts1:taintState) -> (ts2:taintState) -> (ts:taintState{taintstate_monotone ts1 ts /\ taintstate_monotone ts2 ts})
-let combine_taint_states (ts1:taintState) (ts2:taintState) =
+let combine_taint_states (ts1:taintState) (ts2:taintState) : (ts:taintState{taintstate_monotone ts1 ts /\ taintstate_monotone ts2 ts}) =
   TaintState (combine_reg_taints ts1.regTaint ts2.regTaint)
     (merge_taint ts1.flagsTaint ts2.flagsTaint)
     (merge_taint ts1.cfFlagsTaint ts2.cfFlagsTaint)
     (combine_xmm_taints ts1.xmmTaint ts2.xmmTaint)
 
-let count_public_register regs r = if Public? (regs r) then 1 else 0
+let count_public_register (regs:reg_taint) (r:reg) = if Public? (regs r) then 1 else 0
 
-let count_public_registers regs : nat =
+let count_public_registers (regs:reg_taint) : nat =
   count_public_register regs Rax +
   count_public_register regs Rbx +
   count_public_register regs Rcx +
@@ -126,13 +114,13 @@ let count_public_registers regs : nat =
   count_public_register regs R14 +
   count_public_register regs R15
 
-let count_flagTaint ts = if Public? ts.flagsTaint then 1 else 0
+let count_flagTaint (ts:taintState) : nat = if Public? ts.flagsTaint then 1 else 0
 
-let count_cfFlagTaint ts = if Public? ts.cfFlagsTaint then 1 else 0
+let count_cfFlagTaint (ts:taintState) : nat = if Public? ts.cfFlagsTaint then 1 else 0
 
-let count_public_xmm xmms x = if Public? (xmms x) then 1 else 0
+let count_public_xmm (xmms:xmms_taint) (x:xmm) : nat = if Public? (xmms x) then 1 else 0
 
-let count_public_xmms (xmms:xmm->taint) : nat =
+let count_public_xmms (xmms:xmms_taint) : nat =
   count_public_xmm xmms 0 +
   count_public_xmm xmms 1 +
   count_public_xmm xmms 2 +
@@ -150,28 +138,24 @@ let count_public_xmms (xmms:xmm->taint) : nat =
   count_public_xmm xmms 14 +
   count_public_xmm xmms 15
 
-val count_publics: taintState -> nat
-
-let count_publics ts =
+let count_publics (ts:taintState) : nat =
   count_public_registers ts.regTaint +
   count_flagTaint ts +
   count_cfFlagTaint ts +
   count_public_xmms ts.xmmTaint
 
-val monotone_decreases_count: (ts:taintState) -> (ts':taintState) -> Lemma
-  (requires taintstate_monotone ts ts' /\ not (eq_taintStates ts ts'))
-  (ensures count_publics ts' < count_publics ts)
-
 #set-options "--z3rlimit 50"
-let monotone_decreases_count ts ts' =
+
+#push-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 1 --initial_ifuel 1"
+let monotone_decreases_count (ts ts':taintState) : Lemma
+  (requires taintstate_monotone ts ts' /\ not (eq_taintStates ts ts'))
+  (ensures count_publics ts' < count_publics ts)  
+  =
   assert (forall r. count_public_register ts'.regTaint r <= count_public_register ts.regTaint r);
   assert (forall r. count_public_xmm ts'.xmmTaint r <= count_public_xmm ts.xmmTaint r);
   assert (count_cfFlagTaint ts' <= count_cfFlagTaint ts);
-  assert (count_flagTaint ts' <= count_flagTaint ts);
-  if ts.flagsTaint <> ts'.flagsTaint || ts.cfFlagsTaint <> ts'.cfFlagsTaint then ()
-  else
-  assert ((exists r. ts.regTaint r <> ts'.regTaint r) \/ (exists x. ts.xmmTaint x <> ts'.xmmTaint x));
-  ()
+  assert (count_flagTaint ts' <= count_flagTaint ts)
+#pop-options
 
 val check_if_block_consumes_fixed_time: (block:tainted_codes) -> (ts:taintState) -> Tot (bool * taintState)
 (decreases %[block])
@@ -243,28 +227,16 @@ and check_if_loop_consumes_fixed_time c (ts:taintState) : (bool * taintState) =
       check_if_loop_consumes_fixed_time c combined_ts
     )
 
-#set-options "--z3rlimit 50"
-val lemma_equal_eval_isConstant_aux: (code1: tainted_code) -> (code2:tainted_code) -> (ts:taintState) -> (ts':taintState) -> (s1 : traceState) -> (s2:traceState) -> (fuel:nat) -> Lemma ((forall s. taint_eval_code code1 fuel s == taint_eval_code code2 fuel s) ==>
-  isConstantTimeGivenStates code1 fuel ts s1 s2 /\ isExplicitLeakageFreeGivenStates code1 fuel ts ts' s1 s2 ==> isConstantTimeGivenStates code2 fuel ts s1 s2 /\ isExplicitLeakageFreeGivenStates code2 fuel ts ts' s1 s2)
-
-let lemma_equal_eval_isConstant_aux code1 code2 ts ts' s1 s2 fuel = ()
-
-val lemma_equal_eval_isConstant: (code1: tainted_code) -> (code2:tainted_code) -> (ts:taintState) -> (ts':taintState) -> Lemma ((forall s. taint_eval_code code1 s == taint_eval_code code2 s) ==>
-  isConstantTime code1 ts /\ isLeakageFree code1 ts ts' ==> isConstantTime code2 ts /\ isLeakageFree code2 ts ts')
-
-#set-options "--z3rlimit 20"
-let lemma_equal_eval_isConstant code1 code2 ts ts' = FStar.Classical.forall_intro_3 (lemma_equal_eval_isConstant_aux code1 code2 ts ts')
-
 val monotone_ok_eval: (code:tainted_code) -> (fuel:nat) -> (s:traceState) -> Lemma
  (requires True)
  (ensures (let s' = taint_eval_code code fuel s in
-    Some? s' /\ (Some?.v s').state.X64.Memory_s.state.S.ok ==> s.state.X64.Memory_s.state.S.ok))
+    Some? s' /\ (Some?.v s').state.S.ok ==> s.state.S.ok))
  (decreases %[code; 0])
 
 val monotone_ok_eval_block: (codes:tainted_codes) -> (fuel:nat) -> (s:traceState) -> Lemma
  (requires True)
  (ensures (let s' = taint_eval_codes codes fuel s in
-    Some? s' /\ (Some?.v s').state.X64.Memory_s.state.S.ok ==> s.state.X64.Memory_s.state.S.ok))
+    Some? s' /\ (Some?.v s').state.S.ok ==> s.state.S.ok))
  (decreases %[codes;1])
 
 #set-options "--z3rlimit 20 --initial_ifuel 0 --max_ifuel 1 --initial_fuel 2 --max_fuel 2"
@@ -300,7 +272,7 @@ val monotone_ok_eval_while: (code:tainted_code{While? code}) -> (fuel:nat) -> (s
       let While cond body = code in
       let (s1, b1) = taint_eval_ocmp s cond in
       let r1 = taint_eval_code code fuel s in
-      Some? r1 /\ (Some?.v r1).state.X64.Memory_s.state.S.ok ==> s1.state.X64.Memory_s.state.S.ok))
+      Some? r1 /\ (Some?.v r1).state.S.ok ==> s1.state.S.ok))
 
 let monotone_ok_eval_while code fuel s =
   let While cond body = code in
@@ -312,7 +284,7 @@ let monotone_ok_eval_while code fuel s =
   let s_opt = taint_eval_code body (fuel - 1) s0 in
   match s_opt with
     | None -> ()
-    | Some s -> if not s.state.X64.Memory_s.state.S.ok then ()
+    | Some s -> if not s.state.S.ok then ()
       else monotone_ok_eval body (fuel -1) s0; monotone_ok_eval code (fuel - 1) s
 
 val lemma_loop_taintstate_monotone: (ts:taintState) -> (code:tainted_code{While? code}) -> Lemma
@@ -363,14 +335,13 @@ val lemma_loop_explicit_leakage_free: (ts:taintState) -> (code:tainted_code{Whil
     let st1 = {st1 with trace=BranchPredicate(b1)::s1.trace} in
     let st2, b2 = taint_eval_ocmp s2 ifCond in
     let st2 = {st2 with trace=BranchPredicate(b2)::s2.trace} in
-    assert (b2t b_fin ==> constTimeInvariant ts s1 s2 /\ st1.state.X64.Memory_s.state.S.ok /\ st2.state.X64.Memory_s.state.S.ok ==> constTimeInvariant ts st1 st2);
+    assert (b2t b_fin ==> constTimeInvariant ts s1 s2 /\ st1.state.S.ok /\ st2.state.S.ok ==> constTimeInvariant ts st1 st2);
     monotone_ok_eval ifTrue fuel st1;
     monotone_ok_eval ifTrue fuel st2;
     lemma_code_explicit_leakage_free ts ifTrue st1 st2 fuel;
     monotone_ok_eval ifFalse fuel st1;
     monotone_ok_eval ifFalse fuel st2;
-    lemma_code_explicit_leakage_free ts ifFalse st1 st2 fuel;
-    ()
+    lemma_code_explicit_leakage_free ts ifFalse st1 st2 fuel
   | While _ _ -> lemma_loop_explicit_leakage_free ts code s1 s2 fuel
 
 and lemma_block_explicit_leakage_free ts block s1 s2 fuel = match block with
@@ -398,17 +369,17 @@ and lemma_loop_explicit_leakage_free ts code s1 s2 fuel =
   let (st1, b1) = taint_eval_ocmp s1 cond in
   let (st2, b2) = taint_eval_ocmp s2 cond in
 
-  assert (b2t b_fin ==> constTimeInvariant ts s1 s2 /\ st1.state.X64.Memory_s.state.S.ok /\ st2.state.X64.Memory_s.state.S.ok ==> b1 = b2);
-  assert (b2t b_fin ==> constTimeInvariant ts s1 s2 /\ st1.state.X64.Memory_s.state.S.ok /\ st2.state.X64.Memory_s.state.S.ok ==> constTimeInvariant ts st1 st2);
+  assert (b2t b_fin ==> constTimeInvariant ts s1 s2 /\ st1.state.S.ok /\ st2.state.S.ok ==> b1 = b2);
+  assert (b2t b_fin ==> constTimeInvariant ts s1 s2 /\ st1.state.S.ok /\ st2.state.S.ok ==> constTimeInvariant ts st1 st2);
   if not b1 || not b2 then
   (
-  assert (b2t b_fin ==> constTimeInvariant ts s1 s2 /\ st1.state.X64.Memory_s.state.S.ok /\ st2.state.X64.Memory_s.state.S.ok ==> not b1 /\ not b2);
+  assert (b2t b_fin ==> constTimeInvariant ts s1 s2 /\ st1.state.S.ok /\ st2.state.S.ok ==> not b1 /\ not b2);
   assert (not b1 ==> r1 == Some ({st1 with trace = BranchPredicate(false)::st1.trace}));
   assert (not b2 ==> r2 == Some ({st2 with trace = BranchPredicate(false)::st2.trace}));
   monotone_ok_eval_while code fuel s1;
-  assert (Some? r1 /\ (Some?.v r1).state.X64.Memory_s.state.S.ok ==> st1.state.X64.Memory_s.state.S.ok);
+  assert (Some? r1 /\ (Some?.v r1).state.S.ok ==> st1.state.S.ok);
   monotone_ok_eval_while code fuel s2;
-  assert (Some? r2 /\ (Some?.v r2).state.X64.Memory_s.state.S.ok ==> st2.state.X64.Memory_s.state.S.ok);
+  assert (Some? r2 /\ (Some?.v r2).state.S.ok ==> st2.state.S.ok);
   lemma_loop_taintstate_monotone ts code;
   isExplicit_monotone ts ts ts_fin code fuel s1 s2;
   ()
@@ -416,7 +387,7 @@ and lemma_loop_explicit_leakage_free ts code s1 s2 fuel =
   else
   let st'1 = ({st1 with trace = BranchPredicate(true)::st1.trace}) in
   let st'2 = ({st2 with trace = BranchPredicate(true)::st2.trace}) in
-  assert (b2t b_fin ==> constTimeInvariant ts s1 s2 /\ st'1.state.X64.Memory_s.state.S.ok /\ st'2.state.X64.Memory_s.state.S.ok ==> constTimeInvariant ts st'1 st'2);
+  assert (b2t b_fin ==> constTimeInvariant ts s1 s2 /\ st'1.state.S.ok /\ st'2.state.S.ok ==> constTimeInvariant ts st'1 st'2);
   let b', ts' = check_if_code_consumes_fixed_time body ts in
   lemma_code_explicit_leakage_free ts body st'1 st'2 (fuel-1);
   monotone_ok_eval body (fuel-1) st'1;
@@ -429,15 +400,14 @@ and lemma_loop_explicit_leakage_free ts code s1 s2 fuel =
   else
   let st1 = Some?.v st1 in
   let st2 = Some?.v st2 in
-  if not st1.state.X64.Memory_s.state.S.ok || not st2.state.X64.Memory_s.state.S.ok then ()
+  if not st1.state.S.ok || not st2.state.S.ok then ()
   else
   let combined_ts = combine_taint_states ts ts' in
   let b_aux, ts_aux = check_if_loop_consumes_fixed_time code combined_ts in
   lemma_loop_explicit_leakage_free combined_ts code st1 st2 (fuel-1);
   isConstant_monotone ts combined_ts code (fuel-1) st1 st2;
   isExplicit_monotone2 ts_aux ts combined_ts code (fuel-1) st1 st2;
-  assert (b2t b_fin ==> constTimeInvariant ts s1 s2 /\ st1.state.X64.Memory_s.state.S.ok /\ st2.state.X64.Memory_s.state.S.ok ==> constTimeInvariant ts' st1 st2);
-  ()
+  assert (b2t b_fin ==> constTimeInvariant ts s1 s2 /\ st1.state.S.ok /\ st2.state.S.ok ==> constTimeInvariant ts' st1 st2)
 
 val lemma_code_leakage_free: (ts:taintState) -> (code:tainted_code) -> Lemma
  (let b, ts' = check_if_code_consumes_fixed_time code ts in

@@ -239,8 +239,8 @@ let test () =
   let test1_expected_sig_len :size_t = List.Tot.length test1_expected_sig in
   let test1_expected_sig :lbytes test1_expected_sig_len = of_list test1_expected_sig in
 
-  let test1_sig : lbytes 64 = Spec.Ed25519.sign test1_sk test1_msg_len test1_msg in
-  let test1_verify : bool = Spec.Ed25519.verify test1_pk test1_msg_len test1_msg test1_sig in
+  let test1_sig : lbytes 64 = Spec.Ed25519.sign test1_sk test1_msg in
+  let test1_verify : bool = Spec.Ed25519.verify test1_pk test1_msg test1_sig in
 
   IO.print_string "\nExpected Ed25519 signature: ";
   List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test1_expected_sig);
