@@ -138,6 +138,13 @@ val repeati_all_ml:
   -> acc0:a
   -> FStar.All.ML a
 
+val eq_repeati0:
+    #a:Type
+  -> n:nat
+  -> f:(i:nat{i < n} -> a -> a)
+  -> acc0:a
+  -> Lemma (repeati #a 0 f acc0 == acc0)
+
 (** Unfolding one iteration *)
 val unfold_repeati:
     #a:Type

@@ -33,6 +33,7 @@ val lbytes_eq: #len:size_nat -> b1:lbytes len -> b2:lbytes len -> b:bool{b <==> 
 
 /// Constant for empty lbytes
 
+noextract
 let lbytes_empty: lbytes 0 = create 0 (u8 0)
 
 /// Conversions between natural numbers and sequences

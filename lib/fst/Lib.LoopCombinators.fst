@@ -51,6 +51,8 @@ let repeati #a n f acc0 =
 let repeati_all_ml #a n f acc0 =
   repeat_gen_all_ml n (fixed_a a) f acc0
 
+let eq_repeati0 #a n f acc0 = ()
+
 let unfold_repeati #a n f acc0 i =
   unfold_repeat_gen n (fixed_a a) f acc0 i
 
