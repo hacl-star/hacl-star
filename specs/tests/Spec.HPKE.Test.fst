@@ -52,8 +52,10 @@ let test () =
     IO.print_newline ();
     Lib.PrintSequence.print_label_lbytes #(Spec.HPKE.size_key_dh cs) "\nHPKE Encap Ephemeral Public" epk);
     IO.print_newline ();
-    let ciphertext = Spec.HPKE.encrypt cs ek test1_input lbytes_empty (u32 0) in
-    Lib.PrintSequence.print_label_lbytes #(32 + Spec.AEAD.size_tag Spec.AEAD.AEAD_AES128_GCM) "\nHPKE Ciphertext" ciphertext;
+    let output = Spec.HPKE.encrypt cs ek test1_input lbytes_empty (u32 0) in
+    let ciphertext = sub #uint8 #(32 + Spec.AEAD.size_tag Spec.AEAD.AEAD_AES128_GCM) output 0 32 in
+    let tag = sub #uint8 #(32 + Spec.AEAD.size_tag Spec.AEAD.AEAD_AES128_GCM) output 32 (Spec.AEAD.size_tag Spec.AEAD.AEAD_AES128_GCM) in
+    Lib.PrintSequence.print_label_lbytes #(32 + Spec.AEAD.size_tag Spec.AEAD.AEAD_AES128_GCM) "\nHPKE Output" output;
     IO.print_newline ();
     match Spec.HPKE.decap cs test1_sk epk test1_context with
     | None -> IO.print_string "\nError: Spec.HPKE.decap failed\n"
@@ -63,7 +65,7 @@ let test () =
       let result_decap = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) ek dk in
       if result_decap then ()
       else IO.print_string "\nHPKE Decap: Failure\n";
-      match Spec.HPKE.decrypt cs dk ciphertext lbytes_empty (u32 0) with
+      match Spec.HPKE.decrypt cs dk ciphertext tag lbytes_empty (u32 0) with
       | None -> IO.print_string "\nError: Spec.HPKE.decrypt failed\n"
       | Some plaintext ->
         Lib.PrintSequence.print_label_lbytes #32 "\nHPKE Computed Plaintext" plaintext;
