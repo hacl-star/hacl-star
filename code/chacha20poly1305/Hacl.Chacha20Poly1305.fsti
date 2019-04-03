@@ -3,11 +3,11 @@ module Hacl.Chacha20Poly1305
 open FStar.Mul
 open FStar.HyperStack
 open FStar.HyperStack.All
+
 open Lib.IntTypes
 open Lib.Buffer
-open Lib.ByteBuffer
 
-module Seq = Lib.Sequence
+module LSeq = Lib.Sequence
 module ST = FStar.HyperStack.ST
 module Spec = Spec.Chacha20Poly1305
 
@@ -30,8 +30,8 @@ val aead_encrypt:
       disjoint aad output /\
       live h key /\ live h nonce /\ live h aad /\ live h input /\ live h output /\ live h tag))
     (ensures  (fun h0 _ h1 -> modifies (loc output |+| loc tag) h0 h1 /\
-      Seq.equal
-        (Seq.concat (as_seq h1 output) (as_seq h1 tag))
+      LSeq.equal
+        (LSeq.concat (as_seq h1 output) (as_seq h1 tag))
         (Spec.aead_encrypt (as_seq h0 key) (as_seq h0 nonce) (as_seq h0 input) (as_seq h0 aad))))
 
 
