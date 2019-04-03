@@ -112,6 +112,14 @@ val unfold_repeat_gen:
   -> i:nat{i < n}
   -> Lemma (repeat_gen (i + 1) a f acc0 == f i (repeat_gen i a f acc0))
 
+val eq_repeat_gen0:
+    n:nat
+  -> a:(i:nat{i <= n} -> Type)
+  -> f:(i:nat{i < n} -> a i -> a (i + 1))
+  -> acc0:a 0
+  -> Lemma (repeat_gen 0 a f acc0 == acc0)
+
+
 (**
 * Repetition with a fixed accumulator type
 *)
@@ -138,6 +146,13 @@ val unfold_repeati:
   -> acc0:a
   -> i:nat{i < n}
   -> Lemma (repeati #a (i + 1) f acc0 == f i (repeati #a i f acc0))
+
+val eq_repeati0:
+    #a:Type
+  -> n:nat
+  -> f:(i:nat{i < n} -> a -> a)
+  -> acc0:a
+  -> Lemma (repeati #a 0 f acc0 == acc0)
 
 val repeat:
     #a:Type

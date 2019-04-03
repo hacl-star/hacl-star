@@ -52,6 +52,14 @@ inline_for_extraction
 val nat_from_bytes_le: #l:secrecy_level -> b:bytes_l l -> n:nat{n < pow2 (length b * 8)}
 
 inline_for_extraction
+val nat_to_intseq_be: #t:inttype -> #l:secrecy_level -> len:nat -> n:nat{n < pow2 (bits t * len)} ->
+  b:seq (uint_t t l){length b == len /\ n == nat_from_intseq_be b}
+
+inline_for_extraction
+val nat_to_intseq_le: #t:inttype -> #l:secrecy_level -> len:nat -> n:nat{n < pow2 (bits t * len)} ->
+  b:seq (uint_t t l){length b == len /\ n == nat_from_intseq_le b}
+
+inline_for_extraction
 val nat_to_bytes_be: #l:secrecy_level -> len:nat -> n:nat{n < pow2 (8 * len)}
   -> b:bytes_l l{length b == len /\ n == nat_from_intseq_be #U8 b}
 
@@ -93,3 +101,26 @@ val uints_from_bytes_le: #t:inttype{~(t == U1)} -> #l:secrecy_level -> #len:size
 inline_for_extraction
 val uints_from_bytes_be: #t:inttype{~(t == U1)} -> #l:secrecy_level -> #len:size_nat{len * numbytes t < pow2 32}
   -> lbytes_l l (len * numbytes t) -> lseq (uint_t t l) len
+
+val nat_from_intseq_le_slice_lemma: #t:inttype -> #l:secrecy_level -> #len:size_nat
+  -> b:lseq (uint_t t l) len -> i:nat{i <= len} ->
+  Lemma (nat_from_intseq_le b == nat_from_intseq_le (Seq.slice b 0 i) + pow2 (i * bits t) * nat_from_intseq_le (Seq.slice b i len))
+
+val nat_from_bytes_le_slice_lemma: #l:secrecy_level -> #len:size_nat
+  -> b:lbytes_l l len -> i:nat{i <= len} ->
+  Lemma (nat_from_bytes_le b == nat_from_bytes_le (Seq.slice b 0 i) + pow2 (i * 8) * nat_from_bytes_le (Seq.slice b i len))
+
+val uints_from_bytes_le_nat_lemma: #t:inttype{~(t == U1)} -> #l:secrecy_level -> #len:size_nat{len * numbytes t < pow2 32}
+  -> b:lbytes_l l (len * numbytes t) ->
+  Lemma (nat_from_intseq_le (uints_from_bytes_le #t #l #len b) == nat_from_bytes_le b)
+
+val uints_to_bytes_le_nat_lemma: #t:inttype{~(t == U1)} -> #l:secrecy_level -> len:nat{len * numbytes t < pow2 32}
+  -> n:nat{n < pow2 (bits t * len)} ->
+  Lemma (uints_to_bytes_le #t #l #len (nat_to_intseq_le #t #l len n) == nat_to_bytes_le (len * numbytes t) n)
+
+val nat_from_intseq_le_inj:
+  #t:inttype -> #l:secrecy_level -> b1:seq (uint_t t l) -> b2:seq (uint_t t l) ->
+  Lemma
+    (requires length b1 == length b2 /\ nat_from_intseq_le b1 == nat_from_intseq_le b2)
+    (ensures Seq.equal b1 b2)
+    (decreases (length b1))

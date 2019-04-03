@@ -56,6 +56,8 @@ let uint_v_size_lemma s = ()
 
 let size_to_uint32 x = x
 
+let size_to_uint64 x = FStar.Int.Cast.uint32_to_uint64 x
+
 let byte_to_uint8 x = x
 
 let nat_to_uint #t #l x =
@@ -234,6 +236,40 @@ let logxor #t #l a b =
   | U64  -> UInt64.logxor a b
   | U128 -> UInt128.logxor a b
 
+#set-options "--max_fuel 1"
+
+val logxor_lemma_: #t:inttype -> a:uint_t t SEC -> b:uint_t t SEC -> Lemma
+  (uint_v (a `logxor` (a `logxor` b)) == uint_v b)
+let logxor_lemma_ #t a b =
+  UInt.logxor_associative #(bits t) (uint_v a) (uint_v a) (uint_v b);
+  UInt.logxor_self #(bits t) (uint_v a);
+  UInt.logxor_commutative #(bits t) 0 (uint_v b);
+  UInt.logxor_lemma_1 #(bits t) (uint_v b)
+
+let logxor_lemma #t a b =
+  logxor_lemma_ #t a b;
+  uintv_extensionality (logxor a (logxor a b)) b;
+  assert (a `logxor` (a `logxor` b) == b);
+  UInt.logxor_commutative #(bits t) (uint_v a) (uint_v b);
+  logxor_lemma_ #t a b;
+  uintv_extensionality (logxor a (logxor b a)) b;
+  assert ((a `logxor` (b `logxor` a)) == b);
+  UInt.logxor_lemma_1 #(bits t) (uint_v a);
+  uintv_extensionality (logxor a (uint #t #SEC 0)) a
+
+let logxor_lemma1 #t a b =
+  match (v a, v b) with
+  | _, 0 ->
+    UInt.logxor_lemma_1 #(bits t) (uint_v a)
+  | 0, _ ->
+    UInt.logxor_commutative #(bits t) (uint_v a) (uint_v b);
+    UInt.logxor_lemma_1 #(bits t) (uint_v b)
+  | 1, 1 ->
+    uintv_extensionality a b;
+    UInt.logxor_self #(bits t) (uint_v a)
+
+#set-options "--max_fuel 0"
+
 let logand #t #l a b =
   match t with
   | U1   ->
@@ -247,6 +283,14 @@ let logand #t #l a b =
   | U32  -> UInt32.logand a b
   | U64  -> UInt64.logand a b
   | U128 -> UInt128.logand a b
+
+let logand_lemma #t a b =
+  if (uint_v a = 0) then begin
+    UInt.logand_commutative #(bits t) (uint_v a) (uint_v b);
+    UInt.logand_lemma_1 #(bits t) (uint_v b) end
+  else begin
+    UInt.logand_commutative #(bits t) (uint_v a) (uint_v b);
+    UInt.logand_lemma_2 #(bits t) (uint_v b) end
 
 let logand_spec #t #l a b = ()
 
@@ -263,6 +307,21 @@ let logor #t #l a b =
   | U32  -> UInt32.logor a b
   | U64  -> UInt64.logor a b
   | U128 -> UInt128.logor a b
+
+let logor_spec #t #l a b = ()
+
+#set-options "--max_fuel 1"
+
+let logor_disjoint #t a b m =
+  if m > 0 then begin
+    UInt.logor_disjoint #(bits t) (uint_v b) (uint_v a) m;
+    UInt.logor_commutative #(bits t) (uint_v b) (uint_v a) end
+  else begin
+    UInt.logor_commutative #(bits t) (uint_v a) (uint_v b);
+    UInt.logor_lemma_1 #(bits t) (uint_v b)
+  end
+
+#set-options "--max_fuel 0"
 
 let lognot #t #l a =
   match t with
@@ -336,6 +395,11 @@ let eq_mask_lemma #t a b =
     end
   | _ -> ()
 
+let eq_mask_logand_lemma #t a b c =
+  eq_mask_lemma a b;
+  logand_lemma (eq_mask a b) c;
+  UInt.logand_commutative #(bits t) (uint_v (eq_mask a b)) (uint_v c)
+
 let neq_mask #t a b = lognot (eq_mask #t a b)
 
 let gte_mask #t a b =
@@ -357,6 +421,11 @@ let gte_mask_lemma #t a b =
       lognot (u1 1) == u1 0 /\ lognot (u1 0) == u1 1)
     end
   | _ -> ()
+
+let gte_mask_logand_lemma #t a b c =
+  gte_mask_lemma a b;
+  logand_lemma (gte_mask a b) c;
+  UInt.logand_commutative #(bits t) (uint_v (gte_mask a b)) (uint_v c)
 
 let lt_mask #t a b = lognot (gte_mask a b)
 

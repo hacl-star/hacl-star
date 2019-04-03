@@ -18,7 +18,7 @@ friend Lib.IntTypes
  * Despite befriending IntTypes this module enforces secrecy. The only exception,
  * for backwards compatibility, is `lbytes_eq`, which declassifies its result.
  *
- * We befriend IntTypes (or use RawIntTypes) to call into KreMLin C library 
+ * We befriend IntTypes (or use RawIntTypes) to call into KreMLin C library
  * for endianness conversions, which uses public machine integers.
  * E.g. `uint_to_bytes_le` loads a secret integer into a buffer of secret bytes by
  * internally casting the integer to a public machine integer, calling into KreMLin,
@@ -26,8 +26,8 @@ friend Lib.IntTypes
  *
  * We use RawIntTypes when possible and only when this would be inconvenient
  * rely on opening the definitions in IntTypes. Specifically, only
- * `uint_from_bytes_le`, uint_from_bytes_be`, `uint_to_bytes_le`, and `uint_to_bytes_be` 
- * rely on definitions in IntTypes. Alternatively, RawIntTypes could be used to cast 
+ * `uint_from_bytes_le`, uint_from_bytes_be`, `uint_to_bytes_le`, and `uint_to_bytes_be`
+ * rely on definitions in IntTypes. Alternatively, RawIntTypes could be used to cast
  * sequences and buffers of secret integers to sequences and buffers of machine integers,
  * but this would be too cumbersome.
 *)
@@ -125,12 +125,12 @@ let uint_from_bytes_le #t #l i =
   | U16 -> let u = C.load16_le i in cast #t #l U16 l u
   | U32 -> let u = C.load32_le i in cast #t #l U32 l u
   | U64 -> let u = C.load64_le i in cast #t #l U64 l u
-  | U128 -> 
-    let u = C.load128_le i in 
+  | U128 ->
+    let u = C.load128_le i in
     let o = cast #t #l U128 l u in
     uintv_extensionality o (BS.uint_from_bytes_le (as_seq h0 i));
     o
-  
+
 let uint_from_bytes_be #t #l i =
   let h0 = ST.get () in
   nat_from_bytes_be_to_n l (as_seq h0 i);
@@ -139,8 +139,8 @@ let uint_from_bytes_be #t #l i =
   | U16 -> let u = C.load16_be i in cast #t #l U16 l u
   | U32 -> let u = C.load32_be i in cast #t #l U32 l u
   | U64 -> let u = C.load64_be i in cast #t #l U64 l u
-  | U128 -> 
-    let u = C.load128_be i in 
+  | U128 ->
+    let u = C.load128_be i in
     let o = cast #t #l U128 l u in
     uintv_extensionality o (BS.uint_from_bytes_be (as_seq h0 i));
     o
@@ -174,7 +174,7 @@ let uint_to_bytes_le #t #l o i =
   | U1 | U8 ->
     o.(0ul) <- i;
     let h1 = ST.get () in
-    assert (Seq.equal (as_seq h1 o) (BS.nat_to_bytes_le_ #l (numbytes t) (Raw.uint_to_nat i)))
+    assert (Seq.equal (as_seq h1 o) (BS.nat_to_intseq_le_ #U8 #l (numbytes t) (Raw.uint_to_nat i)))
   | U16 ->
     C.store16_le o (Raw.u16_to_UInt16 i);
     let h1 = ST.get () in
@@ -197,7 +197,7 @@ let uint_to_bytes_be #t #l o i =
   | U1 | U8 ->
     o.(0ul) <- i;
     let h1 = ST.get () in
-    assert (Seq.equal (as_seq h1 o) (BS.nat_to_bytes_be_ #l (numbytes t) (Raw.uint_to_nat i)))
+    assert (Seq.equal (as_seq h1 o) (BS.nat_to_intseq_be_ #U8 #l (numbytes t) (Raw.uint_to_nat i)))
   | U16 ->
     C.store16_be o (Raw.u16_to_UInt16 i);
     let h1 = ST.get () in
@@ -253,20 +253,26 @@ let uints_from_bytes_be #t #l #len o i =
   let h1 = ST.get() in
   assert (Seq.equal (as_seq h1 o) (BS.uints_from_bytes_be (as_seq h0 i)))
 
+#set-options "--z3rlimit 150"
+
 let uints_to_bytes_le #t #l len o i =
   let h0 = ST.get () in
+  [@ inline_let]
   let a_spec i = unit in
+  [@ inline_let]
   let spec (h:mem) = BS.uints_to_bytes_le_inner (as_seq h i) in
   fill_blocks h0 (size (numbytes t)) len o a_spec (fun _ _ -> ()) (fun _ -> loc_none) spec
-    (fun j oj -> uint_to_bytes_le oj i.(j));
+    (fun j -> uint_to_bytes_le (sub o (mul_mod j (size (numbytes t))) (size (numbytes t))) i.(j));
   assert_norm (BS.uints_to_bytes_le (as_seq h0 i) ==
                norm [delta] BS.uints_to_bytes_le (as_seq h0 i))
 
 let uints_to_bytes_be #t #l len o i =
   let h0 = ST.get () in
+  [@ inline_let]
   let a_spec i = unit in
+  [@ inline_let]
   let spec (h:mem) = BS.uints_to_bytes_be_inner (as_seq h i) in
   fill_blocks h0 (size (numbytes t)) len o a_spec (fun _ _ -> ()) (fun _ -> loc_none) spec
-    (fun j oj -> uint_to_bytes_be oj i.(j));
+    (fun j -> uint_to_bytes_be (sub o (mul_mod j (size (numbytes t))) (size (numbytes t))) i.(j));
   assert_norm (BS.uints_to_bytes_be (as_seq h0 i) ==
                norm [delta] BS.uints_to_bytes_be (as_seq h0 i))

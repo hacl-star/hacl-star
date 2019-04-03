@@ -6,12 +6,12 @@ open FStar.Seq
 // where coefficients ck are treated mod 2
 // Each coefficient is 0 (false) or 1 (true)
 
-val poly : Type0
+val poly : eqtype
 val degree (p:poly) : int // note: degree zero == -1
 val zero : poly
 val one : poly
 val monomial (n:nat) : poly // x^n
-val shift (p:poly) (n:nat) : poly // x^n * p
+val shift (p:poly) (n:int) : poly // x^n * p
 val reverse (p:poly) (n:nat) : poly // x^n <--> x^0, x^(n-1) <--> x^1, ...
 
 // Index any coefficient, where all coefficients beyond highest-order term are zero
@@ -58,7 +58,7 @@ val reveal_defs (_:unit) : Lemma
     zero == of_poly D.zero /\
     one == of_poly D.one /\
     (forall (n:nat).{:pattern (monomial n)} monomial n == of_poly (D.monomial n)) /\
-    (forall (p:poly) (n:nat).{:pattern (shift p n)} shift p n == of_poly (D.shift (to_poly p) n)) /\
+    (forall (p:poly) (n:int).{:pattern (shift p n)} shift p n == of_poly (D.shift (to_poly p) n)) /\
     (forall (p:poly) (n:nat).{:pattern (reverse p n)} reverse p n == of_poly (D.reverse (to_poly p) n)) /\
     (forall (p:poly) (n:int).{:pattern (poly_index p n)} poly_index p n == D.poly_index (to_poly p) n) /\
     (forall (a b:poly).{:pattern (add a b)} add a b == of_poly (D.add (to_poly a) (to_poly b))) /\

@@ -1,9 +1,0 @@
-#!/bin/sh
-echo 'gcc-7 -m32 -O3 -fomit-frame-pointer'
-echo 'gcc-7 -m32 -march=native -mtune=native -O3 -fomit-frame-pointer'
-echo 'gcc-7 -m32 -march=corei7 -O3 -fomit-frame-pointer'
-echo 'gcc-7 -m32 -march=corei7-avx -O3 -fomit-frame-pointer'
-echo 'gcc-7 -m32 -march=core-avx-i -O3 -fomit-frame-pointer'
-echo 'gcc-7 -m32 -march=core-avx2 -O3 -fomit-frame-pointer'
-echo 'gcc-7 -funroll-loops -m32 -O3 -fomit-frame-pointer'
-echo 'gcc-7 -funroll-loops -m32 -march=athlon -O3 -fomit-frame-pointer'

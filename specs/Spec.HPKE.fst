@@ -83,14 +83,20 @@ let size_key (cs:ciphersuite): size_nat = AEAD.size_key (aead_of_cs cs) + size_n
 inline_for_extraction
 let size_key_dh (cs:ciphersuite): size_nat = DH.size_key (curve_of_cs cs)
 
+inline_for_extraction
+let size_tag (cs:ciphersuite): size_nat = AEAD.size_tag (aead_of_cs cs)
+
 /// Types
 
 type key_public_s (cs:ciphersuite) = lbytes (size_key_dh cs)
 type key_private_s (cs:ciphersuite) = lbytes (size_key_dh cs)
 type key_s (cs:ciphersuite) = lbytes (size_key cs)
+type tag_s (cs:ciphersuite) = lbytes (size_tag cs)
 
 
 /// Cryptographic Primitives
+
+#reset-options "--z3rlimit 100 --max_fuel 0"
 
 val encap:
     cs: ciphersuite
@@ -152,19 +158,20 @@ let encrypt cs sk input aad counter =
 val decrypt:
     cs: ciphersuite
   -> sk: key_s cs
-  -> c: bytes{AEAD.size_tag (aead_of_cs cs) <= length c /\ length c <= max_size_t}
+  -> c: bytes{length c + AEAD.size_block (aead_of_cs cs) <= length c /\ length c <= max_size_t}
+  -> mac: tag_s cs
   -> aad: bytes{length aad <= max_size_t
              /\ (length c + length aad) / 64 <= max_size_t
              /\ length aad + AEAD.padlen (aead_of_cs cs) (length aad) <= max_size_t}
   -> counter:uint32 ->
-  Tot (option (lbytes (length c - AEAD.size_tag (aead_of_cs cs))))
+  Tot (option (lbytes (length c)))
 
-let decrypt cs sk input aad counter =
+let decrypt cs sk input mac aad counter =
   let klen = AEAD.size_key (aead_of_cs cs) in
   let key = sub sk 0 klen in
   let nonce = sub sk klen (size_nonce cs - numbytes U32) in
   let ctr = uint_to_bytes_le counter in
-  AEAD.aead_decrypt (aead_of_cs cs) key (nonce @| ctr) input aad
+  AEAD.aead_decrypt (aead_of_cs cs) key (nonce @| ctr) input mac aad
 
 ///
 /// One time KEM API
@@ -193,13 +200,17 @@ let encrypt_single cs e pk input context =
 val decrypt_single:
     cs: ciphersuite
   -> sk: key_private_s cs
-  -> input: bytes {size_key_dh cs + AEAD.size_tag (aead_of_cs cs) <= length input /\ length input <= max_size_t}
+  -> input: bytes {length input + AEAD.size_block (aead_of_cs cs) <= max_size_t}
+  -> mac: tag_s cs
   -> context: lbytes 32 ->
   Tot (option (lbytes (length input - (size_key_dh cs) - AEAD.size_tag ((aead_of_cs cs)))))
 
-let decrypt_single cs sk input context =
+#reset-options "--z3rlimit 100"
+
+
+let decrypt_single cs sk input mac context =
   let epk = sub #uint8 #(length input) input 0 (size_key_dh cs) in
   let ciphertext = sub #uint8 #(length input) input (size_key_dh cs) ((length input) - size_key_dh cs) in
   match decap cs sk epk context with
   | None -> None
-  | Some key -> decrypt cs key ciphertext lbytes_empty (u32 0)
+  | Some key -> decrypt cs key ciphertext mac lbytes_empty (u32 0)

@@ -11,7 +11,9 @@ FSTAR_INCLUDES+= \
 	--expose_interfaces
 
 SPEC_FILES=	Spec.Chacha20.fst \
+		Spec.Chacha20_Vec.fst \
 		Spec.Poly1305.fst \
+		Spec.Poly1305_Vec.fst \
 		Spec.Chacha20.fst \
 		Spec.Chacha20Poly1305.fst \
 		Spec.Curve25519.fst \
@@ -32,9 +34,9 @@ SPEC_FILES=	Spec.Chacha20.fst \
 		Spec.HPKE.CFRG.fst \
 		Spec.HSalsa20.fst
 
-LIBS = Lib.IntTypes.fst Lib.RawIntTypes.fst Lib.NatMod.fst Lib.LoopCombinators.fst Lib.Sequence.fst Lib.ByteSequence.fst Lib.PrintSequence.fst
+LIBS = Lib.IntTypes.fst Lib.RawIntTypes.fst Lib.NatMod.fst Lib.LoopCombinators.fst Lib.Sequence.fst Lib.ByteSequence.fst Lib.IntVector.fst
 LIBS_FILES= $(addprefix ../lib/fst/, $(LIBS))
-LIBS_ML = Lib_IntTypes.ml Lib_RawIntTypes.ml Lib_NatMod.ml Lib_LoopCombinators.ml Lib_Sequence.ml Lib_ByteSequence.ml Lib_PrintSequence.ml
+LIBS_ML = Lib_IntTypes.ml Lib_RawIntTypes.ml Lib_NatMod.ml Lib_LoopCombinators.ml Lib_Sequence.ml Lib_ByteSequence.ml Lib_IntVector.ml 
 LIBS_EX = $(addprefix --extract_module , $(LIBS:.fst=))
 
 #

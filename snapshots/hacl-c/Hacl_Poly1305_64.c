@@ -434,45 +434,6 @@ Hacl_Standalone_Poly1305_64_crypto_onetimeauth(
   Hacl_Standalone_Poly1305_64_crypto_onetimeauth_(output, input, len1, k1);
 }
 
-extern void TestLib_compare_and_print(C_String_t x0, uint8_t *x1, uint8_t *x2, uint32_t x3);
-
-exit_code main()
-{
-  uint64_t len_ = (uint64_t)34U;
-  uint32_t macsize = (uint32_t)16U;
-  uint8_t mac[16U] = { 0U };
-  uint8_t
-  plaintext[34U] =
-    {
-      (uint8_t)0x43U, (uint8_t)0x72U, (uint8_t)0x79U, (uint8_t)0x70U, (uint8_t)0x74U, (uint8_t)0x6fU,
-      (uint8_t)0x67U, (uint8_t)0x72U, (uint8_t)0x61U, (uint8_t)0x70U, (uint8_t)0x68U, (uint8_t)0x69U,
-      (uint8_t)0x63U, (uint8_t)0x20U, (uint8_t)0x46U, (uint8_t)0x6fU, (uint8_t)0x72U, (uint8_t)0x75U,
-      (uint8_t)0x6dU, (uint8_t)0x20U, (uint8_t)0x52U, (uint8_t)0x65U, (uint8_t)0x73U, (uint8_t)0x65U,
-      (uint8_t)0x61U, (uint8_t)0x72U, (uint8_t)0x63U, (uint8_t)0x68U, (uint8_t)0x20U, (uint8_t)0x47U,
-      (uint8_t)0x72U, (uint8_t)0x6fU, (uint8_t)0x75U, (uint8_t)0x70U
-    };
-  uint8_t
-  expected1[16U] =
-    {
-      (uint8_t)0xa8U, (uint8_t)0x06U, (uint8_t)0x1dU, (uint8_t)0xc1U, (uint8_t)0x30U, (uint8_t)0x51U,
-      (uint8_t)0x36U, (uint8_t)0xc6U, (uint8_t)0xc2U, (uint8_t)0x2bU, (uint8_t)0x8bU, (uint8_t)0xafU,
-      (uint8_t)0x0cU, (uint8_t)0x01U, (uint8_t)0x27U, (uint8_t)0xa9U
-    };
-  uint8_t
-  key[32U] =
-    {
-      (uint8_t)0x85U, (uint8_t)0xd6U, (uint8_t)0xbeU, (uint8_t)0x78U, (uint8_t)0x57U, (uint8_t)0x55U,
-      (uint8_t)0x6dU, (uint8_t)0x33U, (uint8_t)0x7fU, (uint8_t)0x44U, (uint8_t)0x52U, (uint8_t)0xfeU,
-      (uint8_t)0x42U, (uint8_t)0xd5U, (uint8_t)0x06U, (uint8_t)0xa8U, (uint8_t)0x01U, (uint8_t)0x03U,
-      (uint8_t)0x80U, (uint8_t)0x8aU, (uint8_t)0xfbU, (uint8_t)0x0dU, (uint8_t)0xb2U, (uint8_t)0xfdU,
-      (uint8_t)0x4aU, (uint8_t)0xbfU, (uint8_t)0xf6U, (uint8_t)0xafU, (uint8_t)0x41U, (uint8_t)0x49U,
-      (uint8_t)0xf5U, (uint8_t)0x1bU
-    };
-  Hacl_Poly1305_64_crypto_onetimeauth(mac, plaintext, len_, key);
-  TestLib_compare_and_print("poly1305", expected1, mac, macsize);
-  return EXIT_SUCCESS;
-}
-
 void
 Hacl_Poly1305_64_crypto_onetimeauth(
   uint8_t *output,

@@ -1,11 +1,11 @@
 module Spec.Chacha20
 
-
 open FStar.Mul
 open Lib.IntTypes
 open Lib.Sequence
 open Lib.ByteSequence
 open Lib.LoopCombinators
+
 
 #set-options "--max_fuel 0 --z3rlimit 100"
 
@@ -65,12 +65,17 @@ let double_round : shuffle =
 let rounds : shuffle =
   repeat 10 double_round (* 20 rounds *)
 
-let chacha20_core (s0:state) (ctr:counter{v s0.[12] + ctr <= max_size_t}) : Tot state =
-  let k = s0 in
-  let k = k.[12] <- k.[12] +. u32 ctr in
+let sum_state (s0:state) (s1:state) : Tot state =
+  map2 (+.) s0 s1
+
+let add_counter (ctr:counter) (s0:state) : Tot state =
+  s0.[12] <- s0.[12] +. u32 ctr
+
+let chacha20_core (ctr:counter) (s0:state) : Tot state =
+  let k = add_counter ctr s0 in
   let k = rounds k in
-  let k = map2 (+.) k s0 in
-  k.[12] <- k.[12] +. u32 ctr
+  let k = sum_state k s0 in
+  add_counter ctr k
 
 inline_for_extraction
 let c0 = 0x61707865ul
@@ -81,12 +86,12 @@ let c2 = 0x79622d32ul
 inline_for_extraction
 let c3 = 0x6b206574ul
 
-let chacha20_constants : lseq size_t 4 = 
+let chacha20_constants : lseq size_t 4 =
   [@ inline_let]
   let l = [c0;c1;c2;c3] in
   assert_norm(List.Tot.length l == 4);
   createL l
-  
+
 let setup (k:key) (n:nonce) (ctr0:counter) (st:state) : Tot state =
   let st = update_sub st 0 4 (map secret chacha20_constants) in
   let st = update_sub st 4 8 (uints_from_bytes_le #U32 #SEC #8 k) in
@@ -100,7 +105,7 @@ let setup_ (k:key) (n:nonce) : Tot state =
   let uk = uints_from_bytes_le #U32 #SEC #8 k in
   let uctr = create 1 (u32 0) in
   let un = uints_from_bytes_le #U32 #SEC #3 n in
-  uc @| uk @| uctr @| un      
+  uc @| uk @| uctr @| un
 
 
 let chacha20_init (k:key) (n:nonce) (ctr0:counter) : Tot state =
@@ -113,20 +118,21 @@ let chacha20_set_counter (st:state) (c:counter) : Tot state =
 
 let chacha20_key_block0 (k:key) (n:nonce) : Tot block =
   let st = chacha20_init k n 0 in
+  let st = chacha20_core 0 st in
   uints_to_bytes_le st
 
-let xor_block (k:state) (b:block) : block  = 
+let xor_block (k:state) (b:block) : block  =
   let ib = uints_from_bytes_le b in
   let ob = map2 (^.) ib k in
   uints_to_bytes_le ob
 
-let chacha20_encrypt_block (st0:state) (incr:counter{v st0.[12] + incr <= max_size_t}) (b:block) : Tot block =
-  let k = chacha20_core st0 incr in
+let chacha20_encrypt_block (st0:state) (incr:counter) (b:block) : Tot block =
+  let k = chacha20_core incr st0 in
   xor_block k b
-  
+
 let chacha20_encrypt_last
   (st0: state)
-  (incr: counter{v st0.[12] + incr <= max_size_t})
+  (incr: counter)
   (len: size_nat{len < size_block})
   (b: lbytes len) :
   Tot (lbytes len) =
@@ -141,7 +147,8 @@ val chacha20_update:
     ctx: state
   -> msg: bytes{length msg / size_block + v ctx.[12] <= max_size_t}
   -> cipher: bytes{length cipher == length msg}
-let chacha20_update ctx msg = 
+
+let chacha20_update ctx msg =
   let cipher = msg in
   map_blocks size_block cipher
     (chacha20_encrypt_block ctx)
@@ -158,6 +165,7 @@ val chacha20_encrypt_bytes:
 let chacha20_encrypt_bytes key nonce ctr0 msg =
   let st0 = chacha20_init key nonce ctr0 in
   chacha20_update st0 msg
+
 
 val chacha20_decrypt_bytes:
     k: key
