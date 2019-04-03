@@ -120,6 +120,10 @@ test-ml: $(subst .,_,$(patsubst %.fst,test-ml-%,$(notdir $(wildcard specs/tests/
 ci:
 	NOSHORTLOG=1 $(MAKE) vale-fst
 	FSTAR_DEPEND_FLAGS="--warn_error +285" NOSHORTLOG=1 $(MAKE) all-unstaged test-unstaged
+	NOSHORTLOG=1 $(MAKE) wasm
+
+wasm:
+	EVERCRYPT_CONFIG=hacl-only $(MAKE) dist/wasm/Makefile.basic
 
 # Not reusing the -staged automatic target so as to export MIN_TEST
 min-test:
@@ -224,6 +228,7 @@ VALE_FSTS = $(call to-obj-dir,$(VAF_AS_FSTS))
 # The complete set of F* files, both hand-written and Vale-generated. Note that
 # this is only correct in the second stage of the build.
 FSTAR_ROOTS = $(wildcard $(addsuffix /*.fsti,$(ALL_HACL_DIRS)) $(addsuffix /*.fst,$(ALL_HACL_DIRS))) \
+  $(KREMLIN_HOME)/runtime/WasmSupport.fst $(FSTAR_HOME)/ulib/LowStar.Endianness.fst \
   $(wildcard obj/*.fst) $(wildcard obj/*.fsti) # these two empty during the first stage
 
 # We currently force regeneration of three depend files. This is long.
@@ -275,6 +280,8 @@ else ifeq ($(MAKECMDGOALS),all)
 else ifeq (,$(filter-out %-staged,$(MAKECMDGOALS)))
   SKIPDEPEND=1
 else ifeq (,$(filter-out %-verify,$(MAKECMDGOALS)))
+  SKIPDEPEND=1
+else ifeq ($(MAKECMDGOALS),wasm)
   SKIPDEPEND=1
 else ifeq ($(MAKECMDGOALS),ci)
   SKIPDEPEND=1
@@ -662,6 +669,26 @@ DEFAULT_FLAGS		=\
   -no-prefix 'MerkleTree.New.Low.Serialization' \
   -fparentheses -fno-shadow -fcurly-braces
 
+# Should be fixed by having KreMLin better handle imported names
+WASM_STANDALONE=WasmSupport Prims LowStar.Endianness C C.Endianness \
+  C.String TestLib
+
+WASM_FLAGS	=\
+  $(patsubst %,-bundle %=,$(WASM_STANDALONE)) \
+  -bundle FStar.* \
+  -bundle Hacl.Hash.MD5+Hacl.Hash.Core.MD5+Hacl.Hash.SHA1+Hacl.Hash.Core.SHA1+Hacl.Hash.SHA2+Hacl.Hash.Core.SHA2+Hacl.Hash.Core.SHA2.Constants=Hacl.Hash.*[rename=Hacl_Hash] \
+  -bundle Hacl.Impl.SHA3+Hacl.SHA3=[rename=Hacl_SHA3] \
+  -bundle Hacl.Poly1305_32=Hacl.Poly1305.*,Hacl.Impl.Poly1305,Hacl.Impl.Poly1305.*[rename=Hacl_Poly1305] \
+  -bundle Hacl.Impl.Chacha20=Hacl.Impl.Chacha20.*[rename=Hacl_Chacha20] \
+  -bundle Hacl.Curve25519_51=Hacl.Impl.Curve25519.*[rename=Hacl_Curve25519] \
+  -bundle Hacl.Impl.Chacha20Poly1305=Hacl.Impl.Chacha20Poly1305.*[rename=Hacl_Chacha20Poly1305] \
+  -bundle 'EverCrypt.Spec.*' \
+  -bundle 'MerkleTree.New.Low+MerkleTree.New.Low.Serialization=[rename=MerkleTree]' \
+  -bundle 'Test,Test.*,WindowsHack' \
+  -bundle EverCrypt.Hash+EverCrypt.Hash.Incremental=[rename=EverCrypt_Hash] \
+  -bundle '\*[rename=Misc]' \
+  -minimal -wasm
+
 COMPACT_FLAGS	=\
   -bundle Hacl.Hash.MD5+Hacl.Hash.Core.MD5+Hacl.Hash.SHA1+Hacl.Hash.Core.SHA1+Hacl.Hash.SHA2+Hacl.Hash.Core.SHA2+Hacl.Hash.Core.SHA2.Constants=Hacl.Hash.*[rename=Hacl_Hash] \
   -bundle Hacl.Impl.SHA3+Hacl.SHA3=[rename=Hacl_SHA3] \
@@ -717,6 +744,8 @@ dist/coco/Makefile.basic: \
     -bundle EverCrypt= \
     -bundle EverCrypt.Hacl \
     -bundle '\*[rename=EverCrypt_Misc]'
+
+dist/wasm/Makefile.basic: KRML_EXTRA=$(WASM_FLAGS)
 
 # OpenSSL and BCrypt disabled
 ifeq ($(EVERCRYPT_CONFIG),everest)
