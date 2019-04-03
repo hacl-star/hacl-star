@@ -97,6 +97,7 @@ $(GENERATED_DIR)/Makefile.include: $(ALL_KRML_FILES) | .depend
 	-library 'C,FStar' \
 	-drop 'C,FStar,LowStar,Spec,Prims,Lib,C.Loops.*,Hacl.Spec.*,Hacl.Poly1305.Field32xN.Lemmas' \
 	-add-include '"c/Lib_PrintBuffer.h"' \
+	-add-include '"FStar_UInt_8_16_32_64.h"' \
 	-tmpdir $(GENERATED_DIR) \
 	$^
 
