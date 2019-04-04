@@ -419,6 +419,7 @@ let test_aead_st alg key key_len iv iv_len aad aad_len tag tag_len plaintext pla
     push_frame();
     let st = B.alloca B.null 1ul in
     let _ = EverCrypt.AEAD.create_in #alg HyperStack.root st key in
+    let st = B.index st 0ul in
     let plaintext'    = B.alloca 0uy plaintext_len in
     let ciphertext'   = B.alloca 0uy plaintext_len in
     let tag' = B.alloca 0uy tag_len in
