@@ -17,9 +17,6 @@ open OptPublic
 unfold
 let uint8_p = B.buffer UInt8.t
 
-// One more dependency analysis bug
-open AES_stdcalls
-
 let keyhash_init_st (a: algorithm { a = AES_128 \/ a = AES_256 }) =
   key:Ghost.erased (Seq.seq nat32) ->
   roundkeys_b:uint8_p ->
@@ -40,13 +37,12 @@ let keyhash_init_st (a: algorithm { a = AES_128 \/ a = AES_256 }) =
       aesni_enabled /\ pclmulqdq_enabled)
     (ensures fun h0 _ h1 ->
       B.modifies (B.loc_buffer hkeys_b) h0 h1 /\
-  
+
       hkeys_reqs_pub (le_bytes_to_seq_quad32 (seq_uint8_to_seq_nat8 (B.as_seq h1 hkeys_b)))
       	(reverse_bytes_quad32 (aes_encrypt_LE a (Ghost.reveal key) (Mkfour 0 0 0 0))))
 
 inline_for_extraction
 val aes128_keyhash_init_stdcall: keyhash_init_st AES_128
-
 
 inline_for_extraction
 val aes256_keyhash_init_stdcall: keyhash_init_st AES_256
