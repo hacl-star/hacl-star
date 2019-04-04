@@ -72,16 +72,8 @@ type expanded_key (a: alg) =
     ek:MB.mbuffer UInt8.t p p { wf a ek s }) ->
     expanded_key a
 
-/// When successful, this function returns a non-NULL pointer that has been
-/// freshly allocated and that contains the expanded key.
-///
-/// Possible causes for a NULL pointer include:
-/// - unsupported algorithm
-/// - unavailable implementation on target platform
-(** @type: true
-*)
-val expand_in:
-  #a:alg ->
+inline_for_extraction noextract
+let create_in_st (a: alg) =
   r:HS.rid ->
   k:B.buffer UInt8.t { B.length k = key_length a } ->
   ST (expanded_key a)
@@ -97,6 +89,17 @@ val expand_in:
         S.equal (G.reveal (EK?.kv ek)) (B.as_seq h0 k) /\
         is_supported_alg a)))
 
+
+/// When successful, this function returns a non-NULL pointer that has been
+/// freshly allocated and that contains the expanded key.
+///
+/// Possible causes for a NULL pointer include:
+/// - unsupported algorithm
+/// - unavailable implementation on target platform
+(** @type: true
+*)
+val create_in: #a:alg -> create_in_st a
+
 let iv_p a = iv:B.buffer UInt8.t { B.length iv = iv_length a }
 let ad_p a = ad:B.buffer UInt8.t { B.length ad <= max_length a }
 let plain_p a = p:B.buffer UInt8.t { B.length p <= max_length a }
@@ -109,16 +112,8 @@ type error_code =
 
 let _: squash (inversion error_code) = allow_inversion error_code
 
-/// This function takes a previously expanded key and performs encryption.
-///
-/// Possible return values are:
-/// - ``Success``: encryption was successfully performed
-/// - ``InvalidKey``: the function was passed a NULL expanded key (see above)
-/// ``Failure`` is currently unused but may be used in the future.
-(** @type: true
-*)
-val encrypt:
-  #a:supported_alg ->
+inline_for_extraction noextract
+let encrypt_st (a: supported_alg) =
   ek:expanded_key a ->
   iv:iv_p a ->
   ad:ad_p a ->
@@ -147,16 +142,18 @@ val encrypt:
       | Failure ->
         False)
 
-/// This function takes a previously expanded key and performs decryption.
+/// This function takes a previously expanded key and performs encryption.
 ///
 /// Possible return values are:
-/// - ``Success``: decryption was successfully performed
+/// - ``Success``: encryption was successfully performed
 /// - ``InvalidKey``: the function was passed a NULL expanded key (see above)
-/// - ``Failure``: cipher text could not be decrypted (e.g. tag mismatch)
+/// ``Failure`` is currently unused but may be used in the future.
 (** @type: true
 *)
-val decrypt:
-  #a:supported_alg ->
+val encrypt: #a:supported_alg -> encrypt_st a
+
+inline_for_extraction noextract
+let decrypt_st (a: supported_alg) =
   ek:expanded_key a ->
   iv:iv_p a ->
   ad:ad_p a ->
@@ -182,3 +179,14 @@ val decrypt:
       | Failure ->
           B.(modifies (loc_buffer dst) h0 h1) /\
           None? plain)
+
+
+/// This function takes a previously expanded key and performs decryption.
+///
+/// Possible return values are:
+/// - ``Success``: decryption was successfully performed
+/// - ``InvalidKey``: the function was passed a NULL expanded key (see above)
+/// - ``Failure``: cipher text could not be decrypted (e.g. tag mismatch)
+(** @type: true
+*)
+val decrypt: #a:supported_alg -> decrypt_st a

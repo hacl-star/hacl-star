@@ -18,135 +18,105 @@ friend Spec.AEAD
 
 #set-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0"
 
+inline_for_extraction noextract
+let aes_gcm_alg = a:alg { a = AES128_GCM \/ a = AES256_GCM }
+
+inline_for_extraction noextract
+let key_offset (a: aes_gcm_alg) =
+  match a with
+  | AES128_GCM -> 176ul
+  | AES256_GCM -> 240ul
+
+inline_for_extraction
 let ekv_len (a: supported_alg): Tot (x:UInt32.t { UInt32.v x = ekv_length a }) =
   match a with
   | CHACHA20_POLY1305 -> 32ul
-  | AES128_GCM -> 176ul + 128ul
-  | AES256_GCM -> 240ul + 128ul
+  | AES128_GCM -> key_offset a + 128ul
+  | AES256_GCM -> key_offset a + 128ul
 
-let expand_in #a r k =
+inline_for_extraction noextract
+let aes_gcm_key_expansion (a: aes_gcm_alg): AES_stdcalls.key_expansion_st (vale_alg_of_alg a) =
   match a with
-  | AES128_GCM ->
-      let h0 = ST.get () in
-      let kv: G.erased (kv a) = G.hide (B.as_seq h0 k) in
-      let has_aesni = EverCrypt.AutoConfig2.has_aesni () in
-      let has_pclmulqdq = EverCrypt.AutoConfig2.has_pclmulqdq () in
-      if EverCrypt.TargetConfig.x64 && (has_aesni && has_pclmulqdq) then (
-        let ek =
-          MB.mmalloc #UInt8.t #(frozen_preorder (expand #a (G.reveal kv))) r 0uy (ekv_len a)
-        in
-        push_frame();
-        let ek' =
-          B.alloca #UInt8.t 0uy 304ul
-        in
-        let keys_b = B.sub ek' 0ul 176ul in
-        let hkeys_b = B.sub ek' 176ul 128ul in
-        AES_stdcalls.aes128_key_expansion_stdcall k keys_b;
-        AEShash_stdcalls.aes128_keyhash_init_stdcall
-          (let k = G.reveal kv in
+  | AES128_GCM -> AES_stdcalls.aes128_key_expansion_stdcall
+  | AES256_GCM -> AES_stdcalls.aes256_key_expansion_stdcall
+
+inline_for_extraction noextract
+let aes_gcm_keyhash_init (a: aes_gcm_alg): AEShash_stdcalls.keyhash_init_st (vale_alg_of_alg a) =
+  match a with
+  | AES128_GCM -> AEShash_stdcalls.aes128_keyhash_init_stdcall
+  | AES256_GCM -> AEShash_stdcalls.aes256_keyhash_init_stdcall
+
+inline_for_extraction noextract
+let create_in_aes_gcm (a: alg { a = AES128_GCM \/ a = AES256_GCM }):
+  create_in_st a =
+fun r k ->
+  let h0 = ST.get () in
+  let kv: G.erased (kv a) = G.hide (B.as_seq h0 k) in
+  let has_aesni = EverCrypt.AutoConfig2.has_aesni () in
+  let has_pclmulqdq = EverCrypt.AutoConfig2.has_pclmulqdq () in
+  if EverCrypt.TargetConfig.x64 && (has_aesni && has_pclmulqdq) then (
+    let ek =
+      MB.mmalloc #UInt8.t #(frozen_preorder (expand #a (G.reveal kv))) r 0uy (ekv_len a)
+    in
+    push_frame();
+    let ek' = B.alloca #UInt8.t 0uy (ekv_len a) in
+    let keys_b = B.sub ek' 0ul (key_offset a) in
+    let hkeys_b = B.sub ek' (key_offset a) 128ul in
+    aes_gcm_key_expansion a k keys_b;
+    aes_gcm_keyhash_init a
+      (let k = G.reveal kv in
+      let k_nat = Words.Seq_s.seq_uint8_to_seq_nat8 k in
+      let k_w = Words.Seq_s.seq_nat8_to_seq_nat32_LE k_nat in G.hide k_w)
+      keys_b hkeys_b;
+    let h1 = ST.get() in
+
+    // Since ek has a frozen preorder, we need to prove that we are copying the
+    // expanded key into it. In particular, that the hashed part corresponds to the spec
+    let lemma_aux_hkeys () : Lemma
+      (let k = G.reveal kv in
+        let k_nat = Words.Seq_s.seq_uint8_to_seq_nat8 k in
+        let k_w = Words.Seq_s.seq_nat8_to_seq_nat32_LE k_nat in
+        let hkeys_quad = OptPublic.get_hkeys_reqs (Types_s.reverse_bytes_quad32 (
+          AES_s.aes_encrypt_LE (vale_alg_of_alg a) k_w (Words_s.Mkfour 0 0 0 0))) in
+        let hkeys = Words.Seq_s.seq_nat8_to_seq_uint8 (Types_s.le_seq_quad32_to_bytes hkeys_quad) in
+        Seq.equal (B.as_seq h1 hkeys_b) hkeys)
+        = let k = G.reveal kv in
           let k_nat = Words.Seq_s.seq_uint8_to_seq_nat8 k in
-          let k_w = Words.Seq_s.seq_nat8_to_seq_nat32_LE k_nat in G.hide k_w)
-          keys_b hkeys_b;
-        let h1 = ST.get() in
+          let k_w = Words.Seq_s.seq_nat8_to_seq_nat32_LE k_nat in
+          let hkeys_quad = OptPublic.get_hkeys_reqs (Types_s.reverse_bytes_quad32 (
+            AES_s.aes_encrypt_LE (vale_alg_of_alg a) k_w (Words_s.Mkfour 0 0 0 0))) in
+          let hkeys = Words.Seq_s.seq_nat8_to_seq_uint8 (Types_s.le_seq_quad32_to_bytes hkeys_quad) in
+        Gcm_simplify.le_bytes_to_seq_quad32_uint8_to_nat8_length (B.as_seq h1 hkeys_b);
+        assert_norm (128 / 16 = 8);
+        // These two are equal
+        OptPublic.get_hkeys_reqs_injective
+          (Types_s.reverse_bytes_quad32 (
+            AES_s.aes_encrypt_LE (vale_alg_of_alg a) k_w (Words_s.Mkfour 0 0 0 0)))
+          hkeys_quad
+          (Types_s.le_bytes_to_seq_quad32 (Words.Seq_s.seq_uint8_to_seq_nat8 (B.as_seq h1 hkeys_b)));
+        Arch.Types.le_seq_quad32_to_bytes_to_seq_quad32 (Words.Seq_s.seq_uint8_to_seq_nat8 (B.as_seq h1 hkeys_b))
 
-        // Since ek has a frozen preorder, we need to prove that we are copying the
-        // expanded key into it. In particular, that the hashed part corresponds to the spec
-        let lemma_aux_hkeys () : Lemma
-          (let k = G.reveal kv in
-           let k_nat = Words.Seq_s.seq_uint8_to_seq_nat8 k in
-           let k_w = Words.Seq_s.seq_nat8_to_seq_nat32_LE k_nat in
-           let hkeys_quad = OptPublic.get_hkeys_reqs (Types_s.reverse_bytes_quad32 (
-             AES_s.aes_encrypt_LE (vale_alg_of_alg a) k_w (Words_s.Mkfour 0 0 0 0))) in
-           let hkeys = Words.Seq_s.seq_nat8_to_seq_uint8 (Types_s.le_seq_quad32_to_bytes hkeys_quad) in
-           Seq.equal (B.as_seq h1 hkeys_b) hkeys)
-           = let k = G.reveal kv in
-             let k_nat = Words.Seq_s.seq_uint8_to_seq_nat8 k in
-             let k_w = Words.Seq_s.seq_nat8_to_seq_nat32_LE k_nat in
-             let hkeys_quad = OptPublic.get_hkeys_reqs (Types_s.reverse_bytes_quad32 (
-               AES_s.aes_encrypt_LE (vale_alg_of_alg a) k_w (Words_s.Mkfour 0 0 0 0))) in
-             let hkeys = Words.Seq_s.seq_nat8_to_seq_uint8 (Types_s.le_seq_quad32_to_bytes hkeys_quad) in
-            Gcm_simplify.le_bytes_to_seq_quad32_uint8_to_nat8_length (B.as_seq h1 hkeys_b);
-            assert_norm (128 / 16 = 8);
-            // These two are equal
-            OptPublic.get_hkeys_reqs_injective
-              (Types_s.reverse_bytes_quad32 (
-               AES_s.aes_encrypt_LE (vale_alg_of_alg a) k_w (Words_s.Mkfour 0 0 0 0)))
-              hkeys_quad
-              (Types_s.le_bytes_to_seq_quad32 (Words.Seq_s.seq_uint8_to_seq_nat8 (B.as_seq h1 hkeys_b)));
-            Arch.Types.le_seq_quad32_to_bytes_to_seq_quad32 (Words.Seq_s.seq_uint8_to_seq_nat8 (B.as_seq h1 hkeys_b))
+    in lemma_aux_hkeys ();
 
-        in lemma_aux_hkeys ();
-                   
-        MB.blit ek' 0ul ek 0ul 304ul;
-        pop_frame();
-        let h2 = ST.get() in
-        assert (Seq.equal (B.as_seq h2 ek)  (expand #a (G.reveal kv)));
-        B.modifies_only_not_unused_in B.loc_none h0 h2;
-        MB.witness_p ek (S.equal (expand #a (G.reveal kv)));
-        EK kv ek
-      ) else
-        EK kv MB.mnull
+    MB.blit ek' 0ul ek 0ul (ekv_len a);
+    pop_frame();
+    let h2 = ST.get() in
+    assert (Seq.equal (B.as_seq h2 ek)  (expand #a (G.reveal kv)));
+    B.modifies_only_not_unused_in B.loc_none h0 h2;
+    MB.witness_p ek (S.equal (expand #a (G.reveal kv)));
+    EK kv ek
+  ) else
+    EK kv MB.mnull
 
-  | AES256_GCM -> 
-      let h0 = ST.get () in
-      let kv: G.erased (kv a) = G.hide (B.as_seq h0 k) in
-      let has_aesni = EverCrypt.AutoConfig2.has_aesni () in
-      let has_pclmulqdq = EverCrypt.AutoConfig2.has_pclmulqdq () in
-      if EverCrypt.TargetConfig.x64 && (has_aesni && has_pclmulqdq) then (
-        let ek =
-          MB.mmalloc #UInt8.t #(frozen_preorder (expand #a (G.reveal kv))) r 0uy (ekv_len a)
-        in
-        push_frame();
-        let ek' =
-          B.alloca #UInt8.t 0uy 368ul
-        in
-        let keys_b = B.sub ek' 0ul 240ul in
-        let hkeys_b = B.sub ek' 240ul 128ul in
-        AES_stdcalls.aes256_key_expansion_stdcall k keys_b;
-        AEShash_stdcalls.aes256_keyhash_init_stdcall     
-          (let k = G.reveal kv in
-          let k_nat = Words.Seq_s.seq_uint8_to_seq_nat8 k in
-          let k_w = Words.Seq_s.seq_nat8_to_seq_nat32_LE k_nat in G.hide k_w)
-          keys_b hkeys_b;
-        let h1 = ST.get() in
 
-        // Since ek has a frozen preorder, we need to prove that we are copying the
-        // expanded key into it. In particular, that the hashed part corresponds to the spec
-        let lemma_aux_hkeys () : Lemma
-          (let k = G.reveal kv in
-           let k_nat = Words.Seq_s.seq_uint8_to_seq_nat8 k in
-           let k_w = Words.Seq_s.seq_nat8_to_seq_nat32_LE k_nat in
-           let hkeys_quad = OptPublic.get_hkeys_reqs (Types_s.reverse_bytes_quad32 (
-             AES_s.aes_encrypt_LE (vale_alg_of_alg a) k_w (Words_s.Mkfour 0 0 0 0))) in
-           let hkeys = Words.Seq_s.seq_nat8_to_seq_uint8 (Types_s.le_seq_quad32_to_bytes hkeys_quad) in
-           Seq.equal (B.as_seq h1 hkeys_b) hkeys)
-           = let k = G.reveal kv in
-             let k_nat = Words.Seq_s.seq_uint8_to_seq_nat8 k in
-             let k_w = Words.Seq_s.seq_nat8_to_seq_nat32_LE k_nat in
-             let hkeys_quad = OptPublic.get_hkeys_reqs (Types_s.reverse_bytes_quad32 (
-               AES_s.aes_encrypt_LE (vale_alg_of_alg a) k_w (Words_s.Mkfour 0 0 0 0))) in
-             let hkeys = Words.Seq_s.seq_nat8_to_seq_uint8 (Types_s.le_seq_quad32_to_bytes hkeys_quad) in
-            Gcm_simplify.le_bytes_to_seq_quad32_uint8_to_nat8_length (B.as_seq h1 hkeys_b);
-            assert_norm (128 / 16 = 8);
-            // These two are equal
-            OptPublic.get_hkeys_reqs_injective
-              (Types_s.reverse_bytes_quad32 (
-               AES_s.aes_encrypt_LE (vale_alg_of_alg a) k_w (Words_s.Mkfour 0 0 0 0)))
-              hkeys_quad
-              (Types_s.le_bytes_to_seq_quad32 (Words.Seq_s.seq_uint8_to_seq_nat8 (B.as_seq h1 hkeys_b)));
-            Arch.Types.le_seq_quad32_to_bytes_to_seq_quad32 (Words.Seq_s.seq_uint8_to_seq_nat8 (B.as_seq h1 hkeys_b))
+let create_in_aes128_gcm: create_in_st AES128_GCM = create_in_aes_gcm AES128_GCM
+let create_in_aes256_gcm: create_in_st AES256_GCM = create_in_aes_gcm AES256_GCM
 
-        in lemma_aux_hkeys ();
-        
-        MB.blit ek' 0ul ek 0ul 368ul;
-        pop_frame();
-        let h2 = ST.get() in
-        assert (Seq.equal (B.as_seq h2 ek)  (expand #a (G.reveal kv)));
-        B.modifies_only_not_unused_in B.loc_none h0 h2;
-        MB.witness_p ek (S.equal (expand #a (G.reveal kv)));
-        EK kv ek
-      ) else
-        EK kv MB.mnull  
+let create_in #a r k =
+  match a with
+  | AES128_GCM -> create_in_aes128_gcm r k
+
+  | AES256_GCM -> create_in_aes256_gcm r k
 
   | CHACHA20_POLY1305 ->
       let h0 = ST.get () in

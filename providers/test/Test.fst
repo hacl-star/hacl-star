@@ -416,7 +416,7 @@ let test_aead_st alg key key_len iv iv_len aad aad_len tag tag_len plaintext pla
     C.String.print !$"Warning: skipping test_aead_st/chachapoly because no BCrypt implementation\n"
   else begin
     push_frame();
-    let st = EverCrypt.AEAD.expand_in #alg HyperStack.root key in
+    let st = EverCrypt.AEAD.create_in #alg HyperStack.root key in
     let plaintext'    = B.alloca 0uy plaintext_len in
     let ciphertext'   = B.alloca 0uy plaintext_len in
     let tag' = B.alloca 0uy tag_len in
