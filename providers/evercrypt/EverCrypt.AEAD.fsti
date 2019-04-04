@@ -187,7 +187,7 @@ val encrypt: #a:G.erased (supported_alg) -> encrypt_st (G.reveal a)
 
 inline_for_extraction noextract
 let decrypt_st (a: supported_alg) =
-  ek:expanded_key a ->
+  s:B.pointer_or_null (state_s a) ->
   iv:iv_p a ->
   ad:ad_p a ->
   ad_len: UInt32.t { v ad_len = B.length ad /\ v ad_len <= pow2 31 } ->
@@ -197,21 +197,32 @@ let decrypt_st (a: supported_alg) =
   dst: B.buffer UInt8.t { B.length dst = B.length cipher } ->
   Stack error_code
     (requires fun h0 ->
-      MB.(all_live h0 [ buf (EK?.ek ek); buf iv; buf ad; buf cipher; buf tag; buf dst ]) /\
-      (B.disjoint cipher dst \/ cipher == dst))
+      not (B.g_is_null s) ==>
+        invariant h0 s /\
+        B.(loc_disjoint (footprint h0 s) (loc_buffer iv)) /\
+        B.(loc_disjoint (footprint h0 s) (loc_buffer ad)) /\
+        B.(loc_disjoint (footprint h0 s) (loc_buffer tag)) /\
+        B.(loc_disjoint (footprint h0 s) (loc_buffer dst)) /\
+        B.(loc_disjoint (footprint h0 s) (loc_buffer cipher)) /\
+        MB.(all_live h0 [ buf iv; buf ad; buf cipher; buf tag; buf dst ]) /\
+        (B.disjoint cipher dst \/ cipher == dst))
     (ensures fun h0 err h1 ->
-      let kv = G.reveal (EK?.kv ek) in
       let cipher_tag = B.as_seq h0 cipher `S.append` B.as_seq h0 tag in
-      let plain = decrypt #a kv (B.as_seq h0 iv) (B.as_seq h0 ad) cipher_tag in
       match err with
       | InvalidKey ->
           B.(modifies loc_none h0 h1)
       | Success ->
+          not (B.g_is_null s) /\ (
+          let plain = decrypt #a (as_kv (B.deref h0 s)) (B.as_seq h0 iv) (B.as_seq h0 ad) cipher_tag in
           B.(modifies (loc_buffer dst) h0 h1) /\
-          Some? plain /\ S.equal (Some?.v plain) (B.as_seq h1 dst)
-      | Failure ->
+          Some? plain /\ S.equal (Some?.v plain) (B.as_seq h1 dst))
+      | AuthenticationFailure ->
+          not (B.g_is_null s) /\ (
+          let plain = decrypt #a (as_kv (B.deref h0 s)) (B.as_seq h0 iv) (B.as_seq h0 ad) cipher_tag in
           B.(modifies (loc_buffer dst) h0 h1) /\
           None? plain)
+      | _ ->
+          False)
 
 
 /// This function takes a previously expanded key and performs decryption.
@@ -222,4 +233,4 @@ let decrypt_st (a: supported_alg) =
 /// - ``Failure``: cipher text could not be decrypted (e.g. tag mismatch)
 (** @type: true
 *)
-val decrypt: #a:supported_alg -> decrypt_st a
+val decrypt: #a:G.erased supported_alg -> decrypt_st (G.reveal a)

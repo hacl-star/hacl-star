@@ -1,5 +1,5 @@
 [
-  "aò‹\rè÷ 6§?å.S?‚œ",
+  "ﬂ§é~\u0017\u0015e‹•Ä\u001bt_r$∫",
   [
     [
       "EverCrypt.AEAD.frozen_preorder",
@@ -15,7 +15,7 @@
         "l_imp-interp"
       ],
       0,
-      "2527c9f97a6be3684d692b93a99c0148"
+      "aada4da22a38e7f312c382e8168be345"
     ],
     [
       "EverCrypt.AEAD.expand_or_dummy",
@@ -27,7 +27,7 @@
         "projection_inverse_BoxBool_proj_0"
       ],
       0,
-      "6f5506db90fe2c97bff3b53468fdfabe"
+      "ef8ba277ff1b798cf4ec94a8aedfd6c1"
     ],
     [
       "EverCrypt.AEAD.__proj__EK__item__ek",
@@ -41,22 +41,28 @@
         "refinement_interpretation_Tm_refine_3db8709c78401853d88d34765f54bab3"
       ],
       0,
-      "0934243e34117c19d0d0066e807b38f3"
+      "fc672ed97755ac3af94b95874a4d67d9"
     ],
     [
-      "EverCrypt.AEAD.expand_in",
+      "EverCrypt.AEAD.create_in_st",
       1,
       0,
       0,
       [
-        "@MaxIFuel_assumption", "@query", "equation_EverCrypt.AEAD.bytes",
-        "equation_EverCrypt.AEAD.kv_or_dummy", "equation_Spec.AEAD.kv",
+        "@MaxIFuel_assumption", "@query",
+        "constructor_distinct_FStar.Integers.Unsigned",
+        "constructor_distinct_FStar.Integers.W8",
+        "equality_tok_FStar.Integers.W8@tok",
+        "equation_EverCrypt.AEAD.bytes",
+        "equation_EverCrypt.AEAD.kv_or_dummy",
+        "equation_FStar.Integers.int_t", "equation_Spec.AEAD.kv",
         "equation_Spec.AEAD.lbytes",
         "fuel_guarded_inversion_EverCrypt.AEAD.expanded_key",
+        "projection_inverse_FStar.Integers.Unsigned__0",
         "refinement_interpretation_Tm_refine_a0cd7d06c5da6444b6b51b319febde8e"
       ],
       0,
-      "da0ada3dbd3e2491afc4ffe84da02bd3"
+      "711ba894ecfe5a627f672217e0fc2dac"
     ],
     [
       "EverCrypt.AEAD.iv_p",
@@ -65,19 +71,19 @@
       1,
       [ "@query" ],
       0,
-      "8eaad9edc160c3f6095a3be165fcf0bb"
+      "b792c79c15c15364c6ad3b418d095bd1"
     ],
     [
-      "EverCrypt.AEAD.uu___43",
+      "EverCrypt.AEAD.uu___44",
       1,
       0,
       0,
       [ "@query" ],
       0,
-      "289e41ccb3872ce56bc4b95157b91866"
+      "28f2ceb1abdce9cd263deefbf98f5490"
     ],
     [
-      "EverCrypt.AEAD.encrypt",
+      "EverCrypt.AEAD.encrypt_st",
       1,
       0,
       0,
@@ -122,10 +128,10 @@
         "typing_Spec.AEAD.is_supported_alg"
       ],
       0,
-      "53a3201fc105aaec7beb25492d25264a"
+      "9e8cb12217903bffcbfebc5307525253"
     ],
     [
-      "EverCrypt.AEAD.decrypt",
+      "EverCrypt.AEAD.decrypt_st",
       1,
       0,
       0,
@@ -183,7 +189,7 @@
         "typing_Spec.AEAD.is_supported_alg"
       ],
       0,
-      "090c2213b48733e8acd4081be7615955"
+      "436ea8577f240ed9d451f834a6725984"
     ]
   ]
 ]
