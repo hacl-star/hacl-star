@@ -155,6 +155,7 @@ let encrypt_st (a: supported_alg) =
         invariant h0 s /\
         B.(loc_disjoint (footprint h0 s) (loc_buffer iv)) /\
         B.(loc_disjoint (footprint h0 s) (loc_buffer ad)) /\
+        B.(loc_disjoint (footprint h0 s) (loc_buffer tag)) /\
         B.(loc_disjoint (footprint h0 s) (loc_buffer plain)) /\
         B.(loc_disjoint (footprint h0 s) (loc_buffer cipher)) /\
         MB.(all_live h0 [ buf iv; buf ad; buf plain; buf cipher; buf tag ]) /\
