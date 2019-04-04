@@ -56,6 +56,9 @@ let create_in a r =
   assert (hashes h3 s S.empty);
   assert (freeable s h3);
   assert (Hash.fresh_loc (footprint s h3) h0 h3);
+  assert (B.modifies (footprint s h3) h0 h3);
+  B.modifies_only_not_unused_in B.loc_none h0 h3;
+  assert (B.modifies B.loc_none h0 h3);
   s
 
 /// We keep the total length at run-time, on 64 bits, but require that it abides
