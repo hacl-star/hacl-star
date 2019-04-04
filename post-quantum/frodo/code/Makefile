@@ -1,6 +1,6 @@
-FSTAR_HOME   ?= ../../../FStar
-KREMLIN_HOME ?= ../../../kremlin
-HACL_HOME    ?= ../..
+FSTAR_HOME   ?= ../../../../FStar
+KREMLIN_HOME ?= ../../../../kremlin
+HACL_HOME    ?= ../../..
 
 VARIANT      ?= 64-cSHAKE
 
@@ -105,7 +105,6 @@ FSTAR_INCLUDE_DIRS = \
   $(KREMLIN_HOME)/kremlib \
   $(HACL_HOME)/specs \
   $(HACL_HOME)/lib \
-  $(HACL_HOME)/lib/fst \
   $(HACL_HOME)/code/sha3
 
 FSTAR_FLAGS = $(OTHERFLAGS) --cmi \

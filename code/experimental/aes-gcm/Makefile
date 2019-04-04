@@ -18,11 +18,11 @@ verify: test
 CC=gcc-8
 
 
-AESGCM_NI_FILES= $(HACL_HOME)/lib/fst/Lib.IntTypes.fst \
-	$(HACL_HOME)/lib/fst/Lib.RawIntTypes.fst \
-	$(HACL_HOME)/lib/fst/Lib.Buffer.fst \
-	$(HACL_HOME)/lib/fst/Lib.ByteBuffer.fst \
-	$(HACL_HOME)/lib/fst/Lib.Loops.fst \
+AESGCM_NI_FILES= $(HACL_HOME)/lib/Lib.IntTypes.fst \
+	$(HACL_HOME)/lib/Lib.RawIntTypes.fst \
+	$(HACL_HOME)/lib/Lib.Buffer.fst \
+	$(HACL_HOME)/lib/Lib.ByteBuffer.fst \
+	$(HACL_HOME)/lib/Lib.Loops.fst \
 	../gf128/Hacl.Impl.Gf128.FieldNI.fst \
 	../gf128/Hacl.Impl.Gf128.Fields.fst \
 	../gf128/Hacl.Impl.Gf128.Generic.fst \
@@ -34,11 +34,11 @@ AESGCM_NI_FILES= $(HACL_HOME)/lib/fst/Lib.IntTypes.fst \
 	Hacl.AES_128_GCM.NI.fst
 
 
-AESGCM_M32_FILES= $(HACL_HOME)/lib/fst/Lib.IntTypes.fst \
-	$(HACL_HOME)/lib/fst/Lib.RawIntTypes.fst \
-	$(HACL_HOME)/lib/fst/Lib.Buffer.fst \
-	$(HACL_HOME)/lib/fst/Lib.ByteBuffer.fst \
-	$(HACL_HOME)/lib/fst/Lib.Loops.fst \
+AESGCM_M32_FILES= $(HACL_HOME)/lib/Lib.IntTypes.fst \
+	$(HACL_HOME)/lib/Lib.RawIntTypes.fst \
+	$(HACL_HOME)/lib/Lib.Buffer.fst \
+	$(HACL_HOME)/lib/Lib.ByteBuffer.fst \
+	$(HACL_HOME)/lib/Lib.Loops.fst \
 	../gf128/Hacl.Impl.Gf128.FieldPreComp.fst \
 	../gf128/Hacl.Impl.Gf128.Fields.fst \
 	../gf128/Hacl.Impl.Gf128.Generic.fst \
@@ -50,7 +50,7 @@ AESGCM_M32_FILES= $(HACL_HOME)/lib/fst/Lib.IntTypes.fst \
 	Hacl.AES_128_GCM.M32.fst
 
 
-KREMLIN_ARGS:=-funroll-loops 8 -warn-error +9 -I $(HACL_HOME)/lib/ -I $(HACL_HOME)/lib/fst -I $(KREMLIN_HOME)/kremlib -I $(HACL_HOME)/specs -I . -I $(HACL_HOME)/code/experimental/aes -I $(HACL_HOME)/code/experimental/gf128 -ccopt '-march=native' -fbuiltin-uint128 -drop FStar.UInt128 -fnocompound-literals -fparentheses -fcurly-braces
+KREMLIN_ARGS:=-funroll-loops 8 -warn-error +9 -I $(HACL_HOME)/lib -I $(KREMLIN_HOME)/kremlib -I $(HACL_HOME)/specs -I . -I $(HACL_HOME)/code/experimental/aes -I $(HACL_HOME)/code/experimental/gf128 -ccopt '-march=native' -fbuiltin-uint128 -drop FStar.UInt128 -fnocompound-literals -fparentheses -fcurly-braces
 
 aesgcm-ni-c/out.krml: $(AESGCM_NI_FILES)
 	 $(KREMLIN) $(KREMLIN_ARGS) -tmpdir aesgcm-ni-c $(AESGCM_NI_FILES) -skip-translation
@@ -93,7 +93,6 @@ FSTAR_INCLUDE_DIRS = \
   $(KREMLIN_HOME)/kremlib \
   $(HACL_HOME)/specs \
   $(HACL_HOME)/lib \
-  $(HACL_HOME)/lib/fst \
   $(HACL_HOME)/lib/c
 
 FSTAR_FLAGS = $(OTHERFLAGS) --cmi \

@@ -153,8 +153,8 @@ CC = $(GCC)
 ci: .clean-banner .clean-git .clean-snapshots
 	$(MAKE) -C lib	
 	$(MAKE) -C code/sha3
-	$(MAKE) -C frodo/spec
-	$(MAKE) -C frodo/code TARGET=
+	$(MAKE) -C post-quantum/frodo/spec
+	$(MAKE) -C post-quantum/frodo/code TARGET=
 	# $(MAKE) -C code/blake2
 	# $(MAKE) extract-specs
 	# $(MAKE) extract-all

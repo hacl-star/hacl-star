@@ -77,7 +77,6 @@ FSTAR_LIB=$(FSTAR_HOME)/ulib
 HINTS_ENABLED?=--use_hints
 FSTAR_INCLUDES+= \
 	--include $(HACL_HOME)/lib \
-	--include $(HACL_HOME)/lib/fst \
 	--include $(HACL_HOME)/specs \
 	--query_stats
 

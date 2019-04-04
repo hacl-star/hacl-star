@@ -31,7 +31,6 @@ FSTAR_INCLUDE_DIRS = \
   $(HACL_HOME)/specs \
   $(HACL_HOME)/specs/lemmas \
   $(HACL_HOME)/lib \
-  $(HACL_HOME)/lib/fst \
   $(HACL_HOME)/lib/c \
   ./lemmas \
 

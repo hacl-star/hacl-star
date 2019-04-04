@@ -2,7 +2,6 @@ FSTAR_HOME   ?= ../../../FStar
 KREMLIN_HOME ?= ../../../kremlin
 HACL_HOME    ?= ../..
 
-CACHE_DIR     = .cache
 OUTPUT_DIR    = .output
 HINT_DIR      = .hints
 GENERATED_DIR = sha3-c
@@ -27,11 +26,11 @@ FSTAR_INCLUDE_DIRS = \
   $(KREMLIN_HOME)/kremlib \
   $(HACL_HOME)/specs \
   $(HACL_HOME)/lib \
-  $(HACL_HOME)/lib/fst \
   $(HACL_HOME)/lib/c
 
 FSTAR_FLAGS = $(OTHERFLAGS) --cmi \
-  --cache_checked_modules --cache_dir $(CACHE_DIR) --odir $(OUTPUT_DIR) \
+  --cache_checked_modules --odir $(OUTPUT_DIR) \
+  --already_cached "'Prims+FStar+LowStar+C+Spec.Loops+TestLib'" \
   $(addprefix --include ,$(FSTAR_INCLUDE_DIRS))
 
 FSTAR = $(FSTAR_HOME)/bin/fstar.exe $(FSTAR_FLAGS)
@@ -43,31 +42,17 @@ ROOTS = Hacl.Test.SHA3.fst
 
 .PRECIOUS: %.krml
 
+$(HINT_DIR):
+	mkdir -p $@
+
 .depend:
 	$(FSTAR) --dep full $(ROOTS) --extract '* -Prims -FStar +FStar.UInt128 -LowStar -Spec' > $@
 
 include .depend
 
-# Admit SMT queries for modules in FStar, LowStar, C, and Lib
-$(CACHE_DIR)/FStar.%.checked: | .depend
-	$(FSTAR) $< --admit_smt_queries true && \
-	touch $@
-
-$(CACHE_DIR)/LowStar.%.checked: | .depend
-	$(FSTAR) $< --admit_smt_queries true && \
-	touch $@
-
-$(CACHE_DIR)/C.%.checked: | .depend
-	$(FSTAR) $< --admit_smt_queries true && \
-	touch $@
-
-$(CACHE_DIR)/Lib.%.checked: | .depend
-	$(FSTAR) $< --admit_smt_queries true && \
-	touch $@
-
-$(CACHE_DIR)/%.checked: | .depend
-	$(FSTAR) $< $(ENABLE_HINTS) --hint_file $(HINT_DIR)/$(notdir $<).hints && \
-	touch $@
+%.checked: | .depend $(HINT_DIR)
+	$(FSTAR) $< $(ENABLE_HINTS) --hint_file $(HINT_DIR)/$(notdir $*).hints && \
+	touch -c $@
 
 $(OUTPUT_DIR)/%.krml: | .depend
 	$(FSTAR) --codegen Kremlin \
@@ -182,4 +167,4 @@ clean-c:
 	rm -rf $(GENERATED_DIR)/{*.{c,h},Makefile.include}
 
 distclean: clean
-	rm -rf $(OUT_DIR) $(CACHE_DIR) $(OUTPUT_DIR)
+	rm -rf $(OUT_DIR) $(OUTPUT_DIR) *.checked

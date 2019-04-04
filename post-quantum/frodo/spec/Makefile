@@ -1,5 +1,5 @@
-FSTAR_HOME ?= ../../../FStar
-HACL_HOME  ?= ../..
+FSTAR_HOME ?= ../../../../FStar
+HACL_HOME  ?= ../../..
 
 VARIANT    ?= 64-cSHAKE
 
@@ -42,8 +42,7 @@ verify: $(addprefix $(CACHE_DIR)/,Spec.Frodo.KEM.KeyGen.fst.checked Spec.Frodo.K
 FSTAR_INCLUDE_DIRS = \
   params-$(VARIANT) \
   $(HACL_HOME)/specs \
-  $(HACL_HOME)/lib \
-  $(HACL_HOME)/lib/fst
+  $(HACL_HOME)/lib
 
 FSTAR_FLAGS = $(OTHERFLAGS) --cmi \
   --cache_checked_modules --cache_dir $(CACHE_DIR) --odir $(OUT_DIR) \

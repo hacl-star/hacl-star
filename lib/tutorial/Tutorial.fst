@@ -1,4 +1,4 @@
-module Loops
+module Tutorial
 
 /// This file illustrates the use the new generalized iterators in
 /// Hacl* libraries, namely ``Lib.Sequence.repeat`` and its Low*
@@ -102,7 +102,7 @@ unfold let op_String_Access #a #len = Seq.op_String_Access #a #len
 noextract unfold let repeat = repeat_gen
 unfold let unfold_repeat = unfold_repeat_gen
 
-#reset-options "--max_fuel 0 --max_ifuel 0"
+#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 20"
 
 /// Reverse
 /// =======
