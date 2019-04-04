@@ -127,6 +127,15 @@ noextract
 val vec128_insert64: vec128 -> uint64 -> size_t -> vec128
 
 noextract
+val vec128_extract8: vec128 -> size_t -> uint8
+
+noextract
+val vec128_extract32: vec128 -> size_t -> uint32
+
+noextract
+val vec128_extract64: vec128 -> size_t -> uint64
+
+noextract
 val vec128_zero: vec128
 
 noextract
@@ -241,7 +250,7 @@ noextract
 val vec256_load_be: b:lbuffer uint8 32ul -> ST vec256
 			   (requires (fun h -> live h b))
 			   (ensures (fun h0 _ h1 ->  h1 == h0))
-			   
+
 noextract
 val vec256_store_le: b:lbuffer uint8 32ul -> vec256 -> ST unit
 			   (requires (fun h -> live h b))
@@ -260,6 +269,15 @@ val vec256_insert32: vec256 -> uint32 -> size_t -> vec256
 
 noextract
 val vec256_insert64: vec256 -> uint64 -> size_t -> vec256
+
+noextract
+val vec256_extract8: vec256 -> size_t -> uint8
+
+noextract
+val vec256_extract32: vec256 -> size_t -> uint32
+
+noextract
+val vec256_extract64: vec256 -> size_t -> uint64
 
 noextract
 val vec256_zero: vec256

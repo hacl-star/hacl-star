@@ -89,6 +89,15 @@ let vec_set (#t:v_inttype) (#w:width) (v:vec_t t w) (i:vec_index w) (x:uint_t t 
   | U32,8 -> vec256_insert32 v x i
   | U64,4 -> vec256_insert64 v x i
 
+let vec_get (#t:v_inttype) (#w:width) (v:vec_t t w) (i:vec_index w) =
+  match t,w with
+  | _,1 -> v
+  | U8,16 -> vec128_extract8 v i
+  | U32,4 -> vec128_extract32 v i
+  | U64,2 -> vec128_extract64 v i
+  | U8,32 -> vec256_extract8 v i
+  | U32,8 -> vec256_extract32 v i
+  | U64,4 -> vec256_extract64 v i
 
 let vec_add_mod (#t:v_inttype) (#w:width) (x:vec_t t w) (y:vec_t t w) =
   match t,w with

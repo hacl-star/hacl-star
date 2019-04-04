@@ -191,6 +191,8 @@ let vec_load32 #vt i1 i2 i3 i4 i5 i6 i7 i8 i9 i10 i11 i12 i13 i14 i15 i16 i17 i1
 
 let vec_set #vt #w v i x = upd v (size_v i) x
 
+let vec_get #vt #w v i = index v (size_v i)
+
 let vec_add_mod #vt #w (v1:vec_t vt w) (v2:vec_t vt w) : vec_t vt w =
   map2 (Ints.add_mod #vt) v1 v2
 
