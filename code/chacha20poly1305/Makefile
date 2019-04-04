@@ -12,6 +12,10 @@ OUT_DIR	      = chacha20poly1305-c
 
 all: test
 
+
+hack.exe:
+	$(CC) -O3 -march=native -mtune=native -funroll-loops -I $(KREMLIN_HOME)/include -I $(KREMLIN_HOME)/kremlib -I $(KREMLIN_HOME)/kremlib/dist/generic -I $(HACL_HOME)/lib -I chacha20poly1305-c -Wall -Wextra -Werror -Wno-parentheses -Wno-unused-parameter -Wno-unused-variable -Wno-incompatible-pointer-types -o chacha20poly1305-c/test.exe chacha20poly1305-c/Hacl_Chacha20Poly1305.c chacha20poly1305-test.c $(HACL_HOME)/lib/c/Lib_PrintBuffer.c -L /opt/kremlin/kremlib/dist/generic -lkremlib
+
 test:
 	rm -f .depend && $(MAKE) .depend
 	$(MAKE) stage1
