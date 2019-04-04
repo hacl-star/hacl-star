@@ -30,7 +30,7 @@ FSTAR_INCLUDE_DIRS = \
 
 FSTAR_FLAGS = $(OTHERFLAGS) --cmi \
   --cache_checked_modules --odir $(OUTPUT_DIR) \
-  --already_cached "'Prims+FStar+LowStar+C+Spec.Loops+TestLib'" \
+  --already_cached "'Prims+FStar+LowStar+C+Spec.Loops+TestLib+Lib'" \
   $(addprefix --include ,$(FSTAR_INCLUDE_DIRS))
 
 FSTAR = $(FSTAR_HOME)/bin/fstar.exe $(FSTAR_FLAGS)
