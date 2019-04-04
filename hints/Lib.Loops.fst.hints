@@ -1,5 +1,5 @@
 [
-  "r\u0016gàö9|˜]nËñÃR0¹",
+  "ÂĞ\u0004'˜zpl<éÍœ¡8k",
   [
     [
       "Lib.Loops.for",
@@ -22,7 +22,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "4e734aed659a3b70254126c8519b0721"
+      "4f8fa079c63c0954a2a1f78d9fa4ebd8"
     ],
     [
       "Lib.Loops.for",
@@ -44,7 +44,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "c7a09a816228030cd2fb4ae9a51c4ec4"
+      "9d4a9bd3af76e76e405bca7d5d117690"
     ],
     [
       "Lib.Loops.for",
@@ -77,7 +77,57 @@
         "typing_Lib.RawIntTypes.size_to_UInt32"
       ],
       0,
-      "c241250f34c82bd24b7510bff563f651"
+      "56f180232f7636f9c9f235e26faef524"
+    ],
+    [
+      "Lib.Loops.while",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "equation_FStar.Monotonic.HyperStack.mem",
+        "refinement_interpretation_Tm_refine_557d46919d3626ac17d05f14a46b11ea"
+      ],
+      0,
+      "4f2d23a5530f627a0b201a1690d5ee82"
+    ],
+    [
+      "Lib.Loops.while",
+      2,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "equation_FStar.Monotonic.HyperStack.mem",
+        "refinement_interpretation_Tm_refine_557d46919d3626ac17d05f14a46b11ea"
+      ],
+      0,
+      "b65263435c1220e0c75d3d3ac802522c"
+    ],
+    [
+      "Lib.Loops.while",
+      3,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query", "bool_inversion",
+        "equation_FStar.Monotonic.HyperHeap.hmap",
+        "equation_FStar.Monotonic.HyperStack.is_tip",
+        "equation_FStar.Monotonic.HyperStack.is_wf_with_ctr_and_tip",
+        "equation_FStar.Monotonic.HyperStack.mem",
+        "function_token_typing_FStar.Monotonic.Heap.heap",
+        "lemma_FStar.Map.lemma_ContainsDom",
+        "projection_inverse_BoxBool_proj_0",
+        "refinement_interpretation_Tm_refine_9a74d818566e70513bc032cc3b65a144",
+        "refinement_interpretation_Tm_refine_acfe154edf7116150a3423acd08e4fdc",
+        "refinement_interpretation_Tm_refine_fe39771c35a4b4c696cab447d642fea7",
+        "typing_FStar.Map.contains", "typing_FStar.Monotonic.HyperHeap.rid",
+        "typing_FStar.Monotonic.HyperStack.get_hmap",
+        "typing_FStar.Monotonic.HyperStack.get_tip"
+      ],
+      0,
+      "881693767a84605169872b233627360e"
     ]
   ]
 ]
