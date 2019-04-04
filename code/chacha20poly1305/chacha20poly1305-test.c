@@ -4,7 +4,7 @@
 #include <stdbool.h>
 #include <time.h>
 
-#include "Hacl_Chacha20Poly1305.h"
+#include "chacha20poly1305-c/Hacl_Chacha20Poly1305.h"
 
 uint8_t
 aead_plaintext[114] =

@@ -42,10 +42,13 @@ let update1 (r:felem) (len:size_nat{len <= size_block}) (b:lbytes len) (acc:fele
   let acc = fmul (fadd n acc) r in
   acc
 
+let poly_update1_rem (r:felem) (l:size_nat{l < 16}) (b:lbytes l) (acc:felem) =
+  if l = 0 then acc else update1 r l b acc
+
 let poly (text:bytes) (acc:felem) (r:felem) : Tot felem =
   repeat_blocks #uint8 #felem size_block text
-    (fun b -> update1 r size_block b)
-    (fun l b a -> if l = 0 then a else update1 r l b a)
+    (update1 r size_block)
+    (poly_update1_rem r)
   acc
 
 let finish (k:key) (acc:felem) : Tot tag =

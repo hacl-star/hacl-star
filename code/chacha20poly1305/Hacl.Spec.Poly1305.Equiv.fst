@@ -88,19 +88,17 @@ let lemma_repeat_blocks_small_size #a #b bs inp f l init =
 // This is only true if the block is non-empty. If it is empty, poly_update will leave acc invariant,
 // while update1 would perform the computation ((1 + acc) * r) % prime
 let update1_equiv
-  (r:PolyVec.elem (width M32))
+  (r:PolyVec.pfelem)
   (len:size_nat{0 < len /\ len <= Poly.size_block})
   (b:lbytes len)
-  (acc:PolyVec.elem (width M32))
+  (acc:PolyVec.pfelem)
   : Lemma (
-    Poly.update1 (Seq.index r 0) len b (Seq.index acc 0) = PolyVec.poly_update b acc r)
+    Poly.update1 r len b acc = PolyVec.poly_update #1 b acc r)
   =
-  assert (PolyVec.poly_update b acc r == PolyVec.poly_update1 b (PolyVec.from_elem acc) (PolyVec.from_elem r));
-  assert (PolyVec.from_elem acc = Seq.index acc 0);
-  assert (PolyVec.from_elem r = Seq.index r 0);
-  let r_f = Seq.index r 0 in
-  let acc_f = Seq.index acc 0 in
-  assert (PolyVec.poly_update b acc r == repeat_blocks 16 b (PolyVec.update1 r_f 16) (PolyVec.poly_update1_rem r_f) acc_f);
+  assert (PolyVec.poly_update #1 b acc r == PolyVec.poly_update1 b acc r);
+  let r_f = r in
+  let acc_f = acc in
+  assert (PolyVec.poly_update #1 b acc r == repeat_blocks 16 b (PolyVec.update1 r_f 16) (PolyVec.poly_update1_rem r_f) acc_f);
   lemma_repeat_blocks 16 b (PolyVec.update1 r_f 16) (PolyVec.poly_update1_rem r_f) acc_f;
   let f = PolyVec.update1 r_f 16 in
   let l = PolyVec.poly_update1_rem r_f in
@@ -127,18 +125,18 @@ let update1_rem_equiv
 let poly_equiv
   (len:size_nat)
   (text:lbytes len)
-  (acc:PolyVec.elem (width M32))
-  (r:PolyVec.elem (width M32))
-  : Lemma (Poly.poly text (Seq.index acc 0) (Seq.index r 0) == PolyVec.poly_update #1 text acc r)
+  (acc:PolyVec.pfelem)
+  (r:PolyVec.pfelem)
+  : Lemma (Poly.poly text acc r == PolyVec.poly_update #1 text acc r)
   =
-  assert (PolyVec.poly_update text acc r == PolyVec.poly_update1 text (PolyVec.from_elem acc) (PolyVec.from_elem r));
-  let r_f = Seq.index r 0 in
-  let acc_f = Seq.index acc 0 in
+  assert (PolyVec.poly_update #1 text acc r == PolyVec.poly_update1 text acc r);
+  let r_f = r in
+  let acc_f = acc in
   let f = Poly.update1 r_f 16 in
-  let l = PolyVec.poly_update1_rem r_f in
+  let l = Poly.poly_update1_rem r_f in
   let f_v = PolyVec.update1 r_f 16 in
   let l_v = PolyVec.poly_update1_rem r_f in
-  assert (PolyVec.poly_update text acc r == repeat_blocks 16 text f_v l_v acc_f);
+  assert (PolyVec.poly_update #1 text acc r == repeat_blocks 16 text f_v l_v acc_f);
   assert (Poly.poly text acc_f r_f == repeat_blocks 16 text f l acc_f);
   lemma_repeat_blocks 16 text f l acc_f;
   lemma_repeat_blocks 16 text f_v l_v acc_f;
