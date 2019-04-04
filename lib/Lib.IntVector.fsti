@@ -122,6 +122,11 @@ val vec_set: #t:v_inttype -> #w:width
   v':vec_t t w{vec_v v' == upd (vec_v v) (size_v i) x}
 
 inline_for_extraction noextract
+val vec_get: #t:v_inttype -> #w:width
+  -> v:vec_t t w -> i:vec_index w ->
+  x:uint_t t SEC{x == index (vec_v v) (size_v i)}
+
+inline_for_extraction noextract
 val vec_add_mod: #t:v_inttype -> #w:width -> v1:vec_t t w -> v2:vec_t t w -> v3:vec_t t w
 
 noextract

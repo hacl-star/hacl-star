@@ -20,6 +20,10 @@ let rec repeat_right_plus lo mi hi a f acc =
   if hi = mi then ()
   else repeat_right_plus lo mi (hi - 1) a f acc
 
+let unfold_repeat_right lo hi a f acc0 i = ()
+
+let eq_repeat_right lo hi a f acc0 = ()
+
 let rec repeat_left_right lo hi a f acc =
   if lo = hi then ()
   else
@@ -42,7 +46,6 @@ let unfold_repeat_gen n a f acc0 i = ()
 
 let eq_repeat_gen0 n a f acc0 = ()
 
-let fixed_a (a:Type) (i:nat) = a
 let fixed_i f (i:nat) = f
 
 let repeati #a n f acc0 =
@@ -55,6 +58,8 @@ let eq_repeati0 #a n f acc0 = ()
 
 let unfold_repeati #a n f acc0 i =
   unfold_repeat_gen n (fixed_a a) f acc0 i
+
+let repeati_def #a n f acc0 = ()
 
 let repeat #a n f acc0 =
   repeati n (fixed_i f) acc0

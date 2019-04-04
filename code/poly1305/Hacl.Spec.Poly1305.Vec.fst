@@ -70,6 +70,60 @@ let load_elem (#w:lanes) (b:lbytes (w * size_block)) : elem w =
   | 2 -> load_elem2 b
   | 4 -> load_elem4 b
 
+let load_blocks (#w:lanes) (b:lbytes (w * size_block)) : elem w =
+  let e = load_elem #w b in
+  let e = map (pfadd (pow2 128)) e in
+  e
+
+let load_acc1 (acc:pfelem) (text:lbytes size_block) : elem 1 =
+  let acc = create 1 acc in
+  fadd acc (load_blocks #1 text)
+
+let load_acc2 (acc:pfelem) (text:lbytes (2 * size_block)) : elem 2 =
+  let acc = create2 acc 0 in
+  fadd acc (load_blocks #2 text)
+
+let load_acc4 (acc:pfelem) (text:lbytes (4 * size_block)) : elem 4 =
+  let acc = create4 acc 0 0 0 in
+  fadd acc (load_blocks #4 text)
+
+let load_acc (#w:lanes) (acc:pfelem) (text:lbytes (w * size_block)) : elem w =
+  match w with
+  | 1 -> load_acc1 acc text
+  | 2 -> load_acc2 acc text
+  | 4 -> load_acc4 acc text
+
+let normalize_1 (acc:elem 1) (r:pfelem) : pfelem =
+  pfmul acc.[0] r
+
+let normalize_2 (acc:elem 2) (r:pfelem) : pfelem =
+  let r2 = pfmul r r in
+  let r21 = create2 r2 r in
+  let a = fmul acc r21 in
+  pfadd a.[0] a.[1]
+
+let normalize_4 (acc:elem 4) (r:pfelem) : pfelem =
+  let r2 = pfmul r r in
+  let r3 = pfmul r2 r in
+  let r4 = pfmul r2 r2 in
+  let r4321 = create4 r4 r3 r2 r in
+  let a = fmul acc r4321 in
+  pfadd (pfadd (pfadd a.[0] a.[1]) a.[2]) a.[3]
+
+let normalize_n (#w:lanes) (acc:elem w) (r:pfelem) : pfelem =
+  match w with
+  | 1 -> normalize_1 acc r
+  | 2 -> normalize_2 acc r
+  | 4 -> normalize_4 acc r
+
+let compute_r1 (r:pfelem) : elem 1 = to_elem 1 r
+let compute_r2 (r:pfelem) : elem 2 = to_elem 2 (pfmul r r)
+let compute_r4 (r:pfelem) : elem 4 = to_elem 4 (pfmul (pfmul r r) (pfmul r r))
+let compute_rw (#w:lanes) (r:pfelem) : elem w =
+  match w with
+  | 1 -> compute_r1 r
+  | 2 -> compute_r2 r
+  | 4 -> compute_r4 r
 
 let update1 (r:pfelem) (len:size_nat{len <= size_block}) (b:lbytes len) (acc:pfelem) : pfelem =
   let e = nat_from_bytes_le b in
@@ -78,49 +132,17 @@ let update1 (r:pfelem) (len:size_nat{len <= size_block}) (b:lbytes len) (acc:pfe
   acc
 
 let updaten (#w:lanes) (r_w:elem w) (b:lbytes (w * size_block)) (acc:elem w) : elem w =
-  let e = load_elem #w b in
-  let e = map (pfadd (pow2 128)) e in
+  let e = load_blocks b in
   let acc = fadd (fmul acc r_w) e in
   acc
 
-let normalize_1 (acc:elem 1) (r:elem 1) : pfelem =
-  pfmul acc.[0] r.[0]
-
-let normalize_2 (acc:elem 2) (r:elem 2) : pfelem =
-  let r = r.[0] in
-  let r2 = pfmul r r in
-  let r21 = create2 r2 r in
-  let a = fmul acc r21 in
-  pfadd a.[0] a.[1]
-
-let normalize_4 (acc:elem 4) (r:elem 4) : pfelem =
-  let r = r.[0] in
-  let r2 = pfmul r r in
-  let r3 = pfmul r2 r in
-  let r4 = pfmul r2 r2 in
-  let r4321 = create4 r4 r3 r2 r in
-  let a = fmul acc r4321 in
-  pfadd (pfadd (pfadd a.[0] a.[1]) a.[2]) a.[3]
-
-let normalize_n (#w:lanes) (acc:elem w) (r:elem w) : pfelem =
-  match w with
-  | 1 -> normalize_1 acc r
-  | 2 -> normalize_2 acc r
-  | 4 -> normalize_4 acc r
-
-let compute_r1 (#w:lanes) (r:elem w) : elem w = r
-let compute_r2 (#w:lanes) (r:elem w) : elem w = fmul r r
-let compute_r4 (#w:lanes) (r:elem w) : elem w = fmul (fmul r r) (fmul r r)
-let compute_rw (#w:lanes) (r:elem w) : elem w =
-  match w with
-  | 1 -> compute_r1 r
-  | 2 -> compute_r2 r
-  | 4 -> compute_r4 r
-
-let poly_update_multi (#w:lanes) (text:bytes{length text % (w * size_block) = 0}) (acc:elem w) (r:elem w) : pfelem =
+let poly_update_multi (#w:lanes) (text:bytes{0 < length text /\ length text % (w * size_block) = 0}) (acc:pfelem) (r:pfelem) : pfelem =
+  let acc = load_acc acc (Seq.slice text 0 (w * size_block)) in
+  let text = Seq.slice text (w * size_block) (length text) in
   let rw = compute_rw r in
   let acc = repeat_blocks_multi #uint8 #(elem w) (w * size_block) text (updaten rw) acc in
-  normalize_n acc r
+  let acc = normalize_n acc r in
+  acc
 
 let poly_update1_rem (r:pfelem) (l:size_nat{l < 16}) (block:lbytes l) (acc:pfelem) : pfelem =
   if l = 0 then acc else update1 r l block acc
@@ -131,42 +153,42 @@ let poly_update1 (text:bytes) (acc:pfelem) (r:pfelem) : pfelem =
   (poly_update1_rem r)
   acc
 
-let poly (#w:lanes) (text:bytes) (acc:elem w) (r:elem w) : pfelem =
+let poly (#w:lanes) (text:bytes) (acc:pfelem) (r:pfelem) : pfelem =
   let len = length text in
   let sz_block = w * size_block in
   let len0 = len / sz_block * sz_block in
   let t0 = Seq.slice text 0 len0 in
-  let acc = poly_update_multi t0 acc r in
+  let acc = if len0 > 0 then poly_update_multi #w t0 acc r else acc in
 
   let t1 = Seq.slice text len0 len in
-  poly_update1 t1 acc (from_elem r)
+  poly_update1 t1 acc r
 
-let poly_update (#w:lanes) (text:bytes) (acc:elem w) (r:elem w) : pfelem =
+let poly_update (#w:lanes) (text:bytes) (acc:pfelem) (r:pfelem) : pfelem =
   match w with
-  | 1 -> poly_update1 text (from_elem acc) (from_elem r)
-  | 2 -> poly text acc r
-  | 4 -> poly text acc r
+  | 1 -> poly_update1 text acc r
+  | 2 -> poly #2 text acc r
+  | 4 -> poly #4 text acc r
 
 let finish (k:key) (acc:pfelem) : tag =
   let s = nat_from_bytes_le (sub k 16 16) in
   let n = (acc + s) % pow2 128 in
   nat_to_bytes_le 16 n
 
-let encode_r (#w:lanes) (rb:block) : elem w =
+let encode_r (rb:block) : pfelem =
   let lo = uint_from_bytes_le (sub rb 0 8) in
   let hi = uint_from_bytes_le (sub rb 8 8) in
   let mask0 = u64 0x0ffffffc0fffffff in
   let mask1 = u64 0x0ffffffc0ffffffc in
   let lo = lo &. mask0 in
   let hi = hi &. mask1 in
-  to_elem w (uint_v hi * pow2 64 + uint_v lo)
+  uint_v hi * pow2 64 + uint_v lo
 
-let poly1305_init (#w:lanes) (k:key) : elem w & elem w =
+let poly1305_init (k:key) : pfelem & pfelem =
   let r = encode_r (sub k 0 16) in
-  zero w, r
+  0, r
 
 let poly1305 (#w:lanes) (msg:bytes) (k:key) : tag =
-  let acc, r = poly1305_init #w k in
+  let acc, r = poly1305_init k in
   let acc = poly_update #w msg acc r in
   finish k acc
 
