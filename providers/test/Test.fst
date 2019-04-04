@@ -6,6 +6,7 @@ module U32 = FStar.UInt32
 
 open FStar.HyperStack.ST
 open EverCrypt.Helpers
+open EverCrypt.Error
 
 module AC = EverCrypt.AutoConfig2
 module SC = EverCrypt.StaticConfig
@@ -416,15 +417,16 @@ let test_aead_st alg key key_len iv iv_len aad aad_len tag tag_len plaintext pla
     C.String.print !$"Warning: skipping test_aead_st/chachapoly because no BCrypt implementation\n"
   else begin
     push_frame();
-    let st = EverCrypt.AEAD.create_in #alg HyperStack.root key in
+    let st = B.alloca B.null 1ul in
+    let _ = EverCrypt.AEAD.create_in #alg HyperStack.root st key in
     let plaintext'    = B.alloca 0uy plaintext_len in
     let ciphertext'   = B.alloca 0uy plaintext_len in
     let tag' = B.alloca 0uy tag_len in
 
-    if EverCrypt.AEAD.(encrypt st iv aad aad_len plaintext plaintext_len ciphertext' tag' <> Success) then
+    if EverCrypt.AEAD.(encrypt #(G.hide alg) st iv aad aad_len plaintext plaintext_len ciphertext' tag' <> Success) then
       C.Failure.failwith !$"Failure AEAD encrypt\n";
-    (match EverCrypt.AEAD.decrypt st iv aad aad_len ciphertext' ciphertext_len tag' plaintext' with
-    | EverCrypt.AEAD.Success ->
+    (match EverCrypt.AEAD.decrypt #(G.hide alg) st iv aad aad_len ciphertext' ciphertext_len tag' plaintext' with
+    | Success ->
       TestLib.compare_and_print !$"of AEAD cipher" ciphertext ciphertext' plaintext_len;
       TestLib.compare_and_print !$"of AEAD plain" plaintext plaintext' plaintext_len;
       TestLib.compare_and_print !$"of AEAD tag" tag tag' tag_len
