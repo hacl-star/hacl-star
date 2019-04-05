@@ -156,6 +156,7 @@ let smul_felem5_eval_lemma_i #w #m1 #m2 u1 f2 i =
   smul_lemma vu1 (v tf20) (v tf21) (v tf22) (v tf23) (v tf24)
 #pop-options
 
+// 2019.04.05 SZ: this proof is fragile; use [calc]? 
 val smul_add_felem5_fits_lemma_i:
     #w:lanes
   -> #m1:scale32

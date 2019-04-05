@@ -17,10 +17,10 @@ verify: test
 #CC=/usr/local/Cellar/llvm/7.0.0/bin/clang-7
 CC=gcc-8
 
-CURVE25519_FILES= $(HACL_HOME)/lib/fst/Lib.IntTypes.fst \
-	$(HACL_HOME)/lib/fst/Lib.RawIntTypes.fst \
-	$(HACL_HOME)/lib/fst/Lib.Buffer.fst \
-	$(HACL_HOME)/lib/fst/Lib.ByteBuffer.fst \
+CURVE25519_FILES= $(HACL_HOME)/lib/Lib.IntTypes.fst \
+	$(HACL_HOME)/lib/Lib.RawIntTypes.fst \
+	$(HACL_HOME)/lib/Lib.Buffer.fst \
+	$(HACL_HOME)/lib/Lib.ByteBuffer.fst \
 	$(HACL_HOME)/lib/c/Lib.Loops.fst \
 	Hacl.Impl.Curve25519.Field26.fst \
 	Hacl.Impl.Curve25519.Field64.fst \
@@ -28,7 +28,7 @@ CURVE25519_FILES= $(HACL_HOME)/lib/fst/Lib.IntTypes.fst \
 	Hacl.Impl.Curve25519.Fields.fst \
 	Hacl.Impl.Curve25519.Generic.fst 
 
-KREMLIN_ARGS:=-funroll-loops 8 -warn-error +9 -I $(HACL_HOME)/lib/ -I $(HACL_HOME)/lib/fst -I $(KREMLIN_HOME)/kremlib -I $(HACL_HOME)/specs -I $(HACL_HOME)/specs/lemmas -I ./lemmas -I . -ccopt '-march=native' -fbuiltin-uint128 -drop FStar.UInt128 -fnocompound-literals -fc89-scope -fparentheses -fcurly-braces
+KREMLIN_ARGS:=-funroll-loops 8 -warn-error +9 -I $(HACL_HOME)/lib/ -I $(KREMLIN_HOME)/kremlib -I $(HACL_HOME)/specs -I $(HACL_HOME)/specs/lemmas -I ./lemmas -I . -ccopt '-march=native' -fbuiltin-uint128 -drop FStar.UInt128 -fnocompound-literals -fc89-scope -fparentheses -fcurly-braces
 
 curve51-c/out.krml: $(CURVE25519_FILES) Hacl.Curve25519_51.fst
 	 $(KREMLIN) $(KREMLIN_ARGS) -tmpdir curve51-c $(CURVE25519_FILES) Hacl.Curve25519_51.fst -skip-translation 
@@ -105,7 +105,6 @@ FSTAR_INCLUDE_DIRS = \
   $(KREMLIN_HOME)/kremlib \
   $(HACL_HOME)/specs \
   $(HACL_HOME)/lib \
-  $(HACL_HOME)/lib/fst \
   $(HACL_HOME)/lib/c
 
 FSTAR_FLAGS = $(OTHERFLAGS) --cmi \

@@ -18,10 +18,10 @@ CC=/usr/local/Cellar/llvm/7.0.0/bin/clang-7
 #CC=gcc-8
 
 
-ECIES_FILES= $(HACL_HOME)/lib/fst/Lib.IntTypes.fst \
-	$(HACL_HOME)/lib/fst/Lib.RawIntTypes.fst \
-	$(HACL_HOME)/lib/fst/Lib.Buffer.fst \
-	$(HACL_HOME)/lib/fst/Lib.ByteBuffer.fst \
+ECIES_FILES= $(HACL_HOME)/lib/Lib.IntTypes.fst \
+	$(HACL_HOME)/lib/Lib.RawIntTypes.fst \
+	$(HACL_HOME)/lib/Lib.Buffer.fst \
+	$(HACL_HOME)/lib/Lib.ByteBuffer.fst \
 	$(HACL_HOME)/lib/c/Lib.Loops.fst \
 	../sha2/Hacl.Impl.SHA2_256.fst \
 	../hmac/Hacl.Impl.HMAC_SHA2_256.fst \
@@ -39,7 +39,7 @@ ECIES_FILES= $(HACL_HOME)/lib/fst/Lib.IntTypes.fst \
 	Hacl.Impl.ECIES.fst \
 	Hacl.ECIES.fst
 
-KREMLIN_ARGS:=-funroll-loops 8 -warn-error +9 -I $(HACL_HOME)/lib/ -I $(HACL_HOME)/lib/fst -I $(KREMLIN_HOME)/kremlib -I $(HACL_HOME)/specs -I . -I $(HACL_HOME)/code/experimental/aes -I $(HACL_HOME)/code/experimental/gf128 -I $(HACL_HOME)/code/experimental/ecies -ccopt '-march=native' -fbuiltin-uint128 -drop FStar.UInt128 -fnocompound-literals -fparentheses -fcurly-braces
+KREMLIN_ARGS:=-funroll-loops 8 -warn-error +9 -I $(HACL_HOME)/lib/ -I $(KREMLIN_HOME)/kremlib -I $(HACL_HOME)/specs -I . -I $(HACL_HOME)/code/experimental/aes -I $(HACL_HOME)/code/experimental/gf128 -I $(HACL_HOME)/code/experimental/ecies -ccopt '-march=native' -fbuiltin-uint128 -drop FStar.UInt128 -fnocompound-literals -fparentheses -fcurly-braces
 
 
 ecies-c/out.krml: $(ECIES_FILES)
@@ -66,7 +66,6 @@ FSTAR_INCLUDE_DIRS = \
   $(KREMLIN_HOME)/kremlib \
   $(HACL_HOME)/specs \
   $(HACL_HOME)/lib \
-  $(HACL_HOME)/lib/fst \
   $(HACL_HOME)/lib/c
 
 FSTAR_FLAGS = $(OTHERFLAGS) --cmi \
