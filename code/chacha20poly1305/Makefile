@@ -130,6 +130,7 @@ ALL_GENERATED_FILES = $(addprefix $(GENERATED_DIR)/,$(ALL_OUR_FILES))
 
 ALL_SOURCES = \
   $(ALL_GENERATED_FILES) \
+  chacha20poly1305-test.c \
   $(HACL_HOME)/lib/c/Lib_PrintBuffer.c
 
 ALL_OBJS = $(patsubst %.c,%.o,$(ALL_SOURCES))
