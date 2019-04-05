@@ -25,7 +25,7 @@ SPEC_FILES=	Spec.Chacha20.fst \
 		Spec.SHA3.fst \
 		Spec.HMAC.fst \
 		Spec.HKDF.fst \
-#		Spec.HPKE.fst \
+		Spec.HPKE.fst \
 #		Spec.HPKE.CFRG.fst
 
 LIBS = Lib.IntTypes.fst Lib.RawIntTypes.fst Lib.NatMod.fst Lib.LoopCombinators.fst Lib.Sequence.fst Lib.ByteSequence.fst Lib.PrintSequence.fst # Lib.IntVector.fst
@@ -45,7 +45,7 @@ all: test
 test: test-unified-target test-individual-target
 
 test-unified-target: Chacha20.exe Curve25519.exe Curve448.exe SHA2.exe Blake2.exe
-test-individual-target: Poly1305.exe Chacha20Poly1305.exe Ed25519.exe hmac.exe hkdf.exe argon2i.exe kyber.exe aes.exe gf128.exe aes128gcm.exe rsapss.exe sha3.exe # hpke.exe
+test-individual-target: Poly1305.exe Chacha20Poly1305.exe Ed25519.exe hmac.exe hkdf.exe argon2i.exe kyber.exe aes.exe gf128.exe aes128gcm.exe rsapss.exe sha3.exe hpke.exe
 
 clean:
 	rm -rf *.cmi *.cmo *.cmx *.o *~ *.out *.exe *-ml
