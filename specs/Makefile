@@ -45,7 +45,7 @@ all: test
 test: test-unified-target test-individual-target
 
 test-unified-target: Chacha20.exe Curve25519.exe Curve448.exe SHA2.exe Blake2.exe
-test-individual-target: Poly1305.exe Chacha20Poly1305.exe Ed25519.exe hmac.exe hkdf.exe argon2i.exe kyber.exe aes.exe gf128.exe aes128gcm.exe rsapss.exe sha3.exe hpke.exe
+test-individual-target: Poly1305.exe Chacha20Poly1305.exe Ed25519.exe hmac.exe hkdf.exe argon2i.exe kyber.exe aes.exe gf128.exe aes128gcm.exe rsapss.exe sha3.exe # hpke.exe
 
 clean:
 	rm -rf *.cmi *.cmo *.cmx *.o *~ *.out *.exe *-ml
