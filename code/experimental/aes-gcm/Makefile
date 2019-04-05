@@ -15,7 +15,7 @@ all: aesgcm-ni.exe aesgcm-m32.exe
 verify: test
 
 #CC=/usr/local/Cellar/llvm/7.0.0/bin/clang-7
-CC=gcc-8
+CC=gcc
 
 
 AESGCM_NI_FILES= $(HACL_HOME)/lib/Lib.IntTypes.fst \

@@ -14,7 +14,7 @@ all: chacha20-vec-perf
 verify: test
 
 #CC=clang-7
-CC=gcc-8
+CC=gcc
 
 CHACHA20_FILES= $(HACL_HOME)/lib/Lib.IntTypes.fst \
 	$(HACL_HOME)/lib/Lib.RawIntTypes.fst \
