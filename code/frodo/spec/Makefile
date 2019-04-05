@@ -46,6 +46,7 @@ FSTAR_INCLUDE_DIRS = \
 
 FSTAR_FLAGS = $(OTHERFLAGS) --cmi \
   --cache_checked_modules --cache_dir $(CACHE_DIR) --odir $(OUT_DIR) \
+  --already_cached "'Prims+FStar+LowStar+C+Spec.Loops+TestLib+Lib'" \
   $(addprefix --include ,$(FSTAR_INCLUDE_DIRS))
 
 FSTAR = $(FSTAR_HOME)/bin/fstar.exe $(FSTAR_FLAGS)
@@ -66,11 +67,6 @@ endif
 	$(FSTAR) --dep full $(ROOTS) --extract '* -Prims -FStar' > $@
 
 include .depend
-
-# Admit SMT queries for modules in the FStar and Lib namespaces, and prims
-$(CACHE_DIR)/FStar.%.checked $(CACHE_DIR)/prims.%.checked $(CACHE_DIR)/Lib.%.checked: | .depend
-	$(FSTAR) $< --admit_smt_queries true && \
-	touch $@
 
 $(CACHE_DIR)/%.checked: | .depend
 	$(FSTAR) $< $(ENABLE_HINTS) --hint_file $(HINT_DIR)/$(notdir $<).hints && \

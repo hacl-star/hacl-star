@@ -55,15 +55,15 @@ HINT_DIR      = .hints.$(VARIANT)
 GENERATED_DIR = frodo-c.$(VARIANT)
 OUT_DIR	      = frodo-c.$(VARIANT)
 
-# CACHE_DIR     .checked    
-# OUTPUT_DIR    .krml	      
-# HINT_DIR      .hints      
-# GENERATED_DIR .c, .h, .d  
+# CACHE_DIR     .checked
+# OUTPUT_DIR    .krml
+# HINT_DIR      .hints
+# GENERATED_DIR .c, .h, .d
 # OUT_DIR       .o, .a
 
 .PHONY: test lib stage1 stage2 KATs benchmark clean clean-c distclean
 
-# Manual staging. The default target is test for 64-cSHAKE, lib for the rest 
+# Manual staging. The default target is test for 64-cSHAKE, lib for the rest
 ifeq ($(VARIANT),64-cSHAKE)
 test:
 	rm -f .depend && $(MAKE) .depend
@@ -101,6 +101,7 @@ FSTAR_INCLUDE_DIRS = \
   params-$(VARIANT)$(TARGET) \
   ../spec \
   ../spec/params-$(VARIANT) \
+  ../spec/.cache.$(VARIANT) \
   $(HACL_KREMLIN) \
   $(KREMLIN_HOME)/kremlib \
   $(HACL_HOME)/specs \
@@ -109,6 +110,7 @@ FSTAR_INCLUDE_DIRS = \
 
 FSTAR_FLAGS = $(OTHERFLAGS) --cmi \
   --cache_checked_modules --cache_dir $(CACHE_DIR) --odir $(OUTPUT_DIR) \
+  --already_cached "'Prims+FStar+LowStar+C+Spec.Loops+TestLib+Lib+Spec'" \
   $(addprefix --include ,$(FSTAR_INCLUDE_DIRS))
 
 FSTAR = $(FSTAR_HOME)/bin/fstar.exe $(FSTAR_FLAGS)

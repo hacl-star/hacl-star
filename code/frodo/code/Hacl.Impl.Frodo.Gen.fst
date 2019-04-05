@@ -173,7 +173,7 @@ let frodo_gen_matrix_cshake_4x1 n seed_len seed r i res =
     frodo_gen_matrix_cshake_4x0 n i r0 r1 r2 r3 j res
   )
 
-#set-options "--max_ifuel 0"
+#reset-options "--z3rlimit 150 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq'"
 
 inline_for_extraction noextract
 val frodo_gen_matrix_cshake_4x:
@@ -211,6 +211,7 @@ let frodo_gen_matrix_cshake_4x n seed_len seed res =
   assert (
     S.frodo_gen_matrix_cshake_4x (v n) (v seed_len) (as_seq h0 seed) ==
     S.frodo_gen_matrix_cshake (v n) (v seed_len) (as_seq h0 seed))
+
 
 /// AES128
 
