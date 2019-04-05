@@ -45,7 +45,7 @@ $(HINT_DIR):
 	$(FSTAR) $< $(ENABLE_HINTS) --hint_file $(HINT_DIR)/$(notdir $*).hints && \
 	touch -c $@
 
-verify: $(addsuffix .checked, $(notdir $(ROOTS)))
+verify: $(addsuffix .checked, $(ROOTS))
 
 # Targets for interactive mode
 
