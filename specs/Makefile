@@ -5,37 +5,32 @@ include ../Makefile.include
 .PHONY=all test
 
 FSTAR_INCLUDES+= \
+	--include $(HACL_HOME)/lib/ml \
 	--include $(HACL_HOME)/lib \
 	--include $(HACL_HOME)/specs/lemmas \
 	--expose_interfaces
 
 SPEC_FILES=	Spec.Chacha20.fst \
-		Spec.Chacha20_Vec.fst \
 		Spec.Poly1305.fst \
-		Spec.Poly1305_Vec.fst \
 		Spec.Chacha20.fst \
 		Spec.Chacha20Poly1305.fst \
 		Spec.Curve25519.fst \
 		Spec.Curve448.fst \
 		Spec.Salsa20.fst \
 		Spec.Ed25519.fst \
-		Spec.Chacha20_vec.fst \
 		Spec.GaloisField.fst \
 		Spec.GF128.fst \
 		Spec.AES.fst \
-		Spec.AESGCM.fst \
 		Spec.SHA2.fst \
-		Spec.SHA2.Constants.fst \
-		Spec.SHA2.New.fst \
+		Spec.SHA3.fst \
 		Spec.HMAC.fst \
 		Spec.HKDF.fst \
-		Spec.HPKE.fst \
-		Spec.HPKE.CFRG.fst \
-		Spec.HSalsa20.fst
+#		Spec.HPKE.fst \
+#		Spec.HPKE.CFRG.fst
 
-LIBS = Lib.IntTypes.fst Lib.RawIntTypes.fst Lib.NatMod.fst Lib.LoopCombinators.fst Lib.Sequence.fst Lib.ByteSequence.fst Lib.PrintSequence.fst Lib.IntVector.fst
+LIBS = Lib.IntTypes.fst Lib.RawIntTypes.fst Lib.NatMod.fst Lib.LoopCombinators.fst Lib.Sequence.fst Lib.ByteSequence.fst Lib.PrintSequence.fst # Lib.IntVector.fst
 LIBS_FILES= $(addprefix ../lib/, $(LIBS))
-LIBS_ML = Lib_IntTypes.ml Lib_RawIntTypes.ml Lib_NatMod.ml Lib_LoopCombinators.ml Lib_Sequence.ml Lib_ByteSequence.ml Lib_PrintSequence.ml Lib_IntVector.ml
+LIBS_ML = Lib_IntTypes.ml Lib_RawIntTypes.ml Lib_NatMod.ml Lib_LoopCombinators.ml Lib_Sequence.ml Lib_ByteSequence.ml Lib_PrintSequence.ml # Lib_IntVector.ml
 LIBS_EX = $(addprefix --extract_module , $(LIBS:.fst=))
 
 #
