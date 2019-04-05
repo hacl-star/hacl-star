@@ -1,0 +1,61 @@
+[
+  "ŸÙìÙ7E™¼„§\b¢\u0000^a\u0013",
+  [
+    [
+      "Hacl.Impl.Chacha20Poly1305.PolyCore.poly1305_padded",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "equation_Hacl.Spec.Poly1305.Vec.pfelem",
+        "equation_Hacl.Spec.Poly1305.Vec.prime", "equation_Prims.nat",
+        "equation_Spec.Poly1305.prime",
+        "refinement_interpretation_Tm_refine_5514fbe9e08dfda40f950a7b9f1b2b98"
+      ],
+      0,
+      "50b2a60b1ffa167ce7510c180db03cf0"
+    ],
+    [
+      "Hacl.Impl.Chacha20Poly1305.PolyCore.poly1305_init",
+      1,
+      2,
+      1,
+      [ "@query" ],
+      0,
+      "5054b1852a4a49592659e72735076838"
+    ],
+    [
+      "Hacl.Impl.Chacha20Poly1305.PolyCore.update1",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "equation_Hacl.Spec.Poly1305.Vec.pfelem",
+        "equation_Hacl.Spec.Poly1305.Vec.prime", "equation_Prims.nat",
+        "equation_Spec.Poly1305.prime", "equation_Spec.Poly1305.size_block",
+        "equation_Spec.Poly1305.size_key",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_5514fbe9e08dfda40f950a7b9f1b2b98",
+        "refinement_interpretation_Tm_refine_5a4fe33be2b93c781e552e491bb9dd31",
+        "refinement_interpretation_Tm_refine_f31969a2d60f043762c28fb173117dec",
+        "typing_Spec.Poly1305.size_key"
+      ],
+      0,
+      "cd63bb71d959b0ab5c7e47af5891d35a"
+    ],
+    [
+      "Hacl.Impl.Chacha20Poly1305.PolyCore.finish",
+      1,
+      2,
+      1,
+      [
+        "@query", "equation_Hacl.Spec.Poly1305.Vec.prime",
+        "equation_Spec.Poly1305.prime"
+      ],
+      0,
+      "14ebe6d0152ace8de6ea522d9ec9b2f3"
+    ]
+  ]
+]

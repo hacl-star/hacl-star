@@ -17,21 +17,21 @@ verify: test
 #CC=/usr/local/Cellar/llvm/7.0.0/bin/clang-7
 CC=gcc-8
 
-GF128_PRECOMP_FILES= $(HACL_HOME)/lib/fst/Lib.IntTypes.fst \
-	$(HACL_HOME)/lib/fst/Lib.RawIntTypes.fst \
-	$(HACL_HOME)/lib/fst/Lib.Buffer.fst \
-	$(HACL_HOME)/lib/fst/Lib.ByteBuffer.fst \
-	$(HACL_HOME)/lib/fst/Lib.Loops.fst \
+GF128_PRECOMP_FILES= $(HACL_HOME)/lib/Lib.IntTypes.fst \
+	$(HACL_HOME)/lib/Lib.RawIntTypes.fst \
+	$(HACL_HOME)/lib/Lib.Buffer.fst \
+	$(HACL_HOME)/lib/Lib.ByteBuffer.fst \
+	$(HACL_HOME)/lib/Lib.Loops.fst \
 	Hacl.Impl.Gf128.FieldPreComp.fst \
 	Hacl.Impl.Gf128.Fields.fst \
 	Hacl.Impl.Gf128.Generic.fst \
 	Hacl.Gf128.PreComp.fst
 
-GF128_NI_FILES= $(HACL_HOME)/lib/fst/Lib.IntTypes.fst \
-	$(HACL_HOME)/lib/fst/Lib.RawIntTypes.fst \
-	$(HACL_HOME)/lib/fst/Lib.Buffer.fst \
-	$(HACL_HOME)/lib/fst/Lib.ByteBuffer.fst \
-	$(HACL_HOME)/lib/fst/Lib.Loops.fst \
+GF128_NI_FILES= $(HACL_HOME)/lib/Lib.IntTypes.fst \
+	$(HACL_HOME)/lib/Lib.RawIntTypes.fst \
+	$(HACL_HOME)/lib/Lib.Buffer.fst \
+	$(HACL_HOME)/lib/Lib.ByteBuffer.fst \
+	$(HACL_HOME)/lib/Lib.Loops.fst \
 	Hacl.Impl.Gf128.FieldNI.fst \
 	Hacl.Impl.Gf128.Fields.fst \
 	Hacl.Impl.Gf128.Generic.fst \
@@ -39,7 +39,7 @@ GF128_NI_FILES= $(HACL_HOME)/lib/fst/Lib.IntTypes.fst \
 
 
 
-KREMLIN_ARGS:=-funroll-loops 8 -warn-error +9 -I $(HACL_HOME)/lib/ -I $(HACL_HOME)/lib/fst -I $(KREMLIN_HOME)/kremlib -I $(HACL_HOME)/specs -I . -ccopt '-march=native' -fbuiltin-uint128 -drop FStar.UInt128 -fnocompound-literals -fparentheses -fcurly-braces
+KREMLIN_ARGS:=-funroll-loops 8 -warn-error +9 -I $(HACL_HOME)/lib/ -I $(KREMLIN_HOME)/kremlib -I $(HACL_HOME)/specs -I . -ccopt '-march=native' -fbuiltin-uint128 -drop FStar.UInt128 -fnocompound-literals -fparentheses -fcurly-braces
 
 gf128-precomp-c/out.krml: $(GF128_PRECOMP_FILES)
 	 $(KREMLIN) $(KREMLIN_ARGS) -tmpdir gf128-precomp-c $(GF128_PRECOMP_FILES) -skip-translation
@@ -83,7 +83,6 @@ FSTAR_INCLUDE_DIRS = \
   $(KREMLIN_HOME)/kremlib \
   $(HACL_HOME)/specs \
   $(HACL_HOME)/lib \
-  $(HACL_HOME)/lib/fst \
   $(HACL_HOME)/lib/c
 
 FSTAR_FLAGS = $(OTHERFLAGS) --cmi \

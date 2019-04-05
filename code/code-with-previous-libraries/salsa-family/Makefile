@@ -42,7 +42,7 @@ all-ver: verify
 KREMLIN_ARGS+= \
 	-drop Prims,FStar,LowStar,C.Loops.Spec.Loops \
 	-drop Hacl.UInt8,Hacl.UInt16,Hacl.UInt32,Hacl.UInt64,Hacl.UInt128,Hacl.Endianness,Hacl.Cast,Hacl.Spec.*,Spec.*,Seq.* \
-	$(KREMLIN_TESTLIB) -I $(HACL_HOME)/specs -I $(HACL_HOME)/lib -I $(HACL_HOME)/lib/fst
+	$(KREMLIN_TESTLIB) -I $(HACL_HOME)/specs -I $(HACL_HOME)/lib
 
 
 chacha-c/out.krml: Hacl.Lib.LoadStore32.fst Hacl.Lib.Create.fst Hacl.Impl.Xor.Lemmas.fst Hacl.Impl.Chacha20.fst Hacl.Chacha20.fst Hacl.Test.Chacha20.fst
@@ -54,13 +54,13 @@ chacha-c/Hacl_Chacha20.c: chacha-c/out.krml
 		-add-include '"kremlib.h"' -minimal -bundle 'Hacl.Chacha20=*' \
 		-skip-compilation $^ -o $@
 
-chacha20-ml.exe: ../../lib/fst/Lib.IntTypes.fst ../../lib/fst/Lib.RawIntTypes.fst ../../lib/ml/Lib.Loops.fst ../../lib/fst/Lib.Buffer.fst ../../lib/ml/Lib.Endian.fst ../../lib/fst/Lib.IntBuf.LoadStore.fst Hacl.Impl.Chacha20.fst
+chacha20-ml.exe: ../../lib/Lib.IntTypes.fst ../../lib/Lib.RawIntTypes.fst ../../lib/ml/Lib.Loops.fst ../../lib/Lib.Buffer.fst ../../lib/ml/Lib.Endian.fst ../../lib/Lib.IntBuf.LoadStore.fst Hacl.Impl.Chacha20.fst
 	mkdir -p chacha20-ml
-	$(FSTAR) --include ../../specs --include ../../lib --include ../../lib/fst  --include ../../lib/ml --codegen OCaml --lax --odir chacha20-ml $^
+	$(FSTAR) --include ../../specs --include ../../lib --include ../../lib/ml --codegen OCaml --lax --odir chacha20-ml $^
 	$(OCAMLOPT) -I chacha20-ml chacha20-ml/Lib_Loops.ml chacha20-ml/Hacl_Impl_Chacha20.ml
 
 
-chacha20-c/out.krml: ../../lib/fst/Lib.IntTypes.fst ../../lib/fst/Lib.RawIntTypes.fst ../../lib/c/Lib.Loops.fst ../../lib/fst/Lib.Buffer.fst  ../../lib/fst/Lib.ByteBuffer.fst  Hacl.Impl.Chacha20.fst Hacl.Test.Chacha20.fst
+chacha20-c/out.krml: ../../lib/Lib.IntTypes.fst ../../lib/Lib.RawIntTypes.fst ../../lib/c/Lib.Loops.fst ../../lib/Lib.Buffer.fst  ../../lib/Lib.ByteBuffer.fst  Hacl.Impl.Chacha20.fst Hacl.Test.Chacha20.fst
 	$(KREMLIN) $(KREMLIN_ARGS) -tmpdir chacha20-c \
 		-bundle 'Hacl.Impl.Chacha20=Hacl.Impl.*,Lib.*' \
 		-skip-translation $^ -o $@
