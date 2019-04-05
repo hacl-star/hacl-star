@@ -106,9 +106,9 @@ tests: lib976 tests/ds_benchmark.h
 
 tests-fstar: lib976 tests/ds_benchmark.h
 ifeq "$(GENERATION_A)" "CSHAKE128"
-	        $(CC) $(CFLAGS) -L$(FRODO_HOME)/code/frodo-c.976-cSHAKE -L$(KREMLIN_HOME)/kremlib/out tests/test_KEM976.c -lfrodo -lkremlib $(LDFLAGS) -o frodo/test_KEM_fstar $(ARM_SETTING)
+	        $(CC) $(CFLAGS) -L$(FRODO_HOME)/code/frodo-c.976-cSHAKE -L$(KREMLIN_HOME)/kremlib/dist/generic tests/test_KEM976.c -lfrodo -lkremlib $(LDFLAGS) -o frodo/test_KEM_fstar $(ARM_SETTING)
 else
-	        $(CC) $(CFLAGS) -L$(FRODO_HOME)/code/frodo-c.976-AES -L$(KREMLIN_HOME)/kremlib/out tests/test_KEM976.c -lfrodo -lkremlib $(LDFLAGS) -o frodo/test_KEM_fstar $(ARM_SETTING)
+	        $(CC) $(CFLAGS) -L$(FRODO_HOME)/code/frodo-c.976-AES -L$(KREMLIN_HOME)/kremlib/dist/generic tests/test_KEM976.c -lfrodo -lkremlib $(LDFLAGS) -o frodo/test_KEM_fstar $(ARM_SETTING)
 endif
 
 lib976_for_KATs: $(KEM_FRODO976_OBJS) $(AES_OBJS) $(AES_NI_OBJS) $(SHAKE_OBJS) $(SHAKEx4_OBJS)
@@ -125,9 +125,9 @@ endif
 KATS-fstar:
 	mkdir -p frodo
 ifeq "$(GENERATION_A)" "CSHAKE128"
-	$(CC) $(CFLAGS) -L$(FRODO_HOME)/code/frodo-c.976-cSHAKE -L$(KREMLIN_HOME)/kremlib/out tests/PQCtestKAT_kem_cshake.c tests/rng.c -lfrodo_for_testing -lkremlib $(LDFLAGS) -o frodo/PQCtestKAT_kem_fstar $(ARM_SETTING)
+	$(CC) $(CFLAGS) -L$(FRODO_HOME)/code/frodo-c.976-cSHAKE -L$(KREMLIN_HOME)/kremlib/dist/generic tests/PQCtestKAT_kem_cshake.c tests/rng.c -lfrodo_for_testing -lkremlib $(LDFLAGS) -o frodo/PQCtestKAT_kem_fstar $(ARM_SETTING)
 else
-	$(CC) $(CFLAGS) -L$(FRODO_HOME)/code/frodo-c.976-AES -L$(KREMLIN_HOME)/kremlib/out tests/PQCtestKAT_kem.c tests/rng.c -lfrodo_for_testing -lkremlib $(LDFLAGS) -o frodo/PQCtestKAT_kem_fstar $(ARM_SETTING)
+	$(CC) $(CFLAGS) -L$(FRODO_HOME)/code/frodo-c.976-AES -L$(KREMLIN_HOME)/kremlib/dist/generic tests/PQCtestKAT_kem.c tests/rng.c -lfrodo_for_testing -lkremlib $(LDFLAGS) -o frodo/PQCtestKAT_kem_fstar $(ARM_SETTING)
 endif
 
 check: tests

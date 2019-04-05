@@ -272,7 +272,7 @@ $(OUT_DIR)/libfrodo.a: $(filter-out include/rng.o, $(ALL_OBJS)) $(LWEKE_HOME)/ob
 
 $(OUT_DIR)/test.exe: $(filter-out include/random.o, $(ALL_OBJS)) $(LWEKE_HOME)/tests/rng.o | $(OUT_DIR)
 	$(info ALL_SOURCES is $(ALL_SOURCES))
-	$(CC) $(CFLAGS) -o $@ $^ -L $(KREMLIN_HOME)/kremlib/out -lkremlib
+	$(CC) $(CFLAGS) -o $@ $^ -L $(KREMLIN_HOME)/kremlib/dist/generic -lkremlib
 
 .PRECIOUS: %.o
 
