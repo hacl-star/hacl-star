@@ -45,8 +45,8 @@ CHACHA20_VEC_FILES= $(HACL_HOME)/lib/Lib.IntTypes.fst \
 	$(HACL_HOME)/lib/Lib.RawIntTypes.fst \
 	$(HACL_HOME)/lib/Lib.Buffer.fst \
 	$(HACL_HOME)/lib/Lib.ByteBuffer.fst \
-	$(HACL_HOME)/lib/c/Lib.IntVector.Intrinsics.fsti \
-	$(HACL_HOME)/lib/c/Lib.IntVector.fst \
+	$(HACL_HOME)/lib/Lib.IntVector.Intrinsics.fsti \
+	$(HACL_HOME)/lib/Lib.IntVector.fst \
 	$(HACL_HOME)/lib/Lib.Loops.fst \
 	Hacl.Impl.Chacha20.Core32xN.fst \
 	Hacl.Impl.Chacha20.Vec.fst 
@@ -102,7 +102,6 @@ FSTAR_INCLUDE_DIRS = \
   $(HACL_KREMLIN) \
   $(KREMLIN_HOME)/kremlib \
   $(HACL_HOME)/specs \
-  $(HACL_HOME)/lib/c \
   $(HACL_HOME)/lib
 
 FSTAR_FLAGS = $(OTHERFLAGS) --cmi \
@@ -139,11 +138,11 @@ verify-all: $(addsuffix .checked,$(ALL_FST_FILES))
 # 	  $(notdir $(subst .checked,,$<)) && \
 # 	touch $@
 
-# # 2. Generation of .c files
+# 2. Generation of .c files
 
-# KREMLIN_TESTLIB=-add-include '"extracted/TestLib.h"' $(KREMLIB)/dist/generic/testlib.c
+KREMLIN_TESTLIB=-add-include '"extracted/TestLib.h"' $(KREMLIB)/dist/generic/testlib.c
 
-# KREMLIN=$(KREMLIN_HOME)/krml
+KREMLIN=$(KREMLIN_HOME)/krml
 
 # # 2. Generation of .c files
 
