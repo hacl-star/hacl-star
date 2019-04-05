@@ -158,7 +158,7 @@ let encrypt cs sk input aad counter =
 val decrypt:
     cs: ciphersuite
   -> sk: key_s cs
-  -> c: bytes{length c + AEAD.size_block (aead_of_cs cs) <= length c /\ length c <= max_size_t}
+  -> c: bytes{length c + AEAD.size_block (aead_of_cs cs) <= max_size_t /\ length c <= max_size_t}
   -> mac: tag_s cs
   -> aad: bytes{length aad <= max_size_t
              /\ (length c + length aad) / 64 <= max_size_t
@@ -200,13 +200,12 @@ let encrypt_single cs e pk input context =
 val decrypt_single:
     cs: ciphersuite
   -> sk: key_private_s cs
-  -> input: bytes {length input + AEAD.size_block (aead_of_cs cs) <= max_size_t}
+  -> input: bytes {size_key_dh cs <= length input /\ length input + AEAD.size_block (aead_of_cs cs) <= max_size_t}
   -> mac: tag_s cs
   -> context: lbytes 32 ->
-  Tot (option (lbytes (length input - (size_key_dh cs) - AEAD.size_tag ((aead_of_cs cs)))))
+  Tot (option (lbytes (length input - size_key_dh cs)))
 
 #reset-options "--z3rlimit 100"
-
 
 let decrypt_single cs sk input mac context =
   let epk = sub #uint8 #(length input) input 0 (size_key_dh cs) in
