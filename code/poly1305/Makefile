@@ -2,7 +2,6 @@ FSTAR_HOME   ?= ../../../../FStar
 KREMLIN_HOME ?= ../../../../kremlin
 HACL_HOME    ?= ../../..
 
-CACHE_DIR     = .cache
 OUTPUT_DIR    = .output
 HINT_DIR      = .hints
 GENERATED_DIR = poly-c
@@ -29,11 +28,12 @@ FSTAR_INCLUDE_DIRS = \
   $(HACL_KREMLIN) \
   $(KREMLIN_HOME)/kremlib \
   $(HACL_HOME)/specs \
-  $(HACL_HOME)/lib \
-  $(HACL_HOME)/lib/c
+  $(HACL_HOME)/lib/c \
+  $(HACL_HOME)/lib
 
 FSTAR_FLAGS = $(OTHERFLAGS) --cmi \
-  --cache_checked_modules --cache_dir $(CACHE_DIR) --odir $(OUTPUT_DIR) \
+  --cache_checked_modules --odir $(OUTPUT_DIR) \
+  --already_cached "'Prims+FStar+LowStar+C+Spec.Loops+TestLib+Lib'" \
   $(addprefix --include ,$(FSTAR_INCLUDE_DIRS))
 
 FSTAR = $(FSTAR_HOME)/bin/fstar.exe $(FSTAR_FLAGS)
@@ -44,19 +44,17 @@ ROOTS = Hacl.Poly1305_32.fst Hacl.Poly1305_128.fst Hacl.Poly1305_256.fst
 
 .PRECIOUS: %.krml
 
+$(HINT_DIR):
+	mkdir -p $@
+
 .depend:
 	$(FSTAR) --dep full $(ROOTS) --extract '* -Prims -FStar +FStar.UInt128 -LowStar -Spec' > $@
 
 include .depend
 
-# Admit SMT queries for modules in FStar, LowStar, and C
-$(CACHE_DIR)/FStar.%.checked $(CACHE_DIR)/LowStar.%.checked $(CACHE_DIR)/C.%.checked $(CACHE_DIR)/Lib.%.checked: | .depend
-	$(FSTAR) $< --admit_smt_queries true && \
-	touch $@
-
-$(CACHE_DIR)/%.checked: | .depend
-	$(FSTAR) $< $(ENABLE_HINTS) --hint_file $(HINT_DIR)/$(notdir $<).hints && \
-	touch $@
+%.checked: | .depend $(HINT_DIR)
+	$(FSTAR) $< $(ENABLE_HINTS) --hint_file $(HINT_DIR)/$(notdir $*).hints && \
+	touch -c $@
 
 $(OUTPUT_DIR)/%.krml: | .depend
 	$(FSTAR) --codegen Kremlin \
@@ -66,7 +64,7 @@ $(OUTPUT_DIR)/%.krml: | .depend
 
 # 2. Generation of .c files
 
-KREMLIN_TESTLIB=-funroll-loops 8 -warn-error +9 -add-include '"TestLib.h"' -add-include '"vec-intrin.h"'  -add-include '"FStar_UInt_8_16_32_64.h"' $(KREMLIB)/dist/generic/testlib.c
+KREMLIN_TESTLIB=-funroll-loops 8 -warn-error +9 -add-include '"TestLib.h"' -add-include '"vec-intrin.h"' -add-include '"FStar_UInt_8_16_32_64.h"' $(KREMLIB)/dist/generic/testlib.c
 
 KREMLIN=$(KREMLIN_HOME)/krml
 
@@ -76,7 +74,7 @@ KREMLIN=$(KREMLIN_HOME)/krml
 $(GENERATED_DIR)/Hacl_Poly1305_32.c: $(ALL_KRML_FILES) | .depend
 	$(KREMLIN) $(KREMLIN_TESTLIB) -skip-compilation \
 	-bundle 'Lib.*' \
-	-bundle 'Spec.*' \
+	-bundle 'Spec.\*' \
 	-bundle 'C=C.Endianness' \
 	-bundle 'Hacl.Poly1305_32=Hacl.Impl.*' \
 	-library 'C,FStar' \
@@ -87,7 +85,7 @@ $(GENERATED_DIR)/Hacl_Poly1305_32.c: $(ALL_KRML_FILES) | .depend
 $(GENERATED_DIR)/Hacl_Poly1305_128.c: $(ALL_KRML_FILES) | .depend
 	$(KREMLIN) $(KREMLIN_TESTLIB) -skip-compilation \
 	-bundle 'Lib.*' \
-	-bundle 'Spec.*' \
+	-bundle 'Spec.\*' \
 	-bundle 'C=C.Endianness' \
 	-bundle 'Hacl.Poly1305_128=Hacl.Impl.*' \
 	-library 'C,FStar' \
@@ -98,7 +96,7 @@ $(GENERATED_DIR)/Hacl_Poly1305_128.c: $(ALL_KRML_FILES) | .depend
 $(GENERATED_DIR)/Hacl_Poly1305_256.c: $(ALL_KRML_FILES) | .depend
 	$(KREMLIN) $(KREMLIN_TESTLIB) -skip-compilation \
 	-bundle 'Lib.*' \
-	-bundle 'Spec.*' \
+	-bundle 'Spec.\*' \
 	-bundle 'C=C.Endianness' \
 	-bundle 'Hacl.Poly1305_256=Hacl.Impl.*' \
 	-library 'C,FStar' \
@@ -190,4 +188,4 @@ clean-c:
 	rm -rf $(GENERATED_DIR)/{*.{c,h},Makefile.include}
 
 distclean: clean
-	rm -rf $(OUT_DIR) $(CACHE_DIR) $(OUTPUT_DIR)
+	rm -rf $(OUT_DIR) $(OUTPUT_DIR) *.checked
