@@ -9,18 +9,16 @@ open Spec.SHA2
 open Spec.Curve25519
 
 
-#reset-options "--max_fuel 0 --z3rlimit 20"
+#reset-options "--max_fuel 0 --z3rlimit 100"
+
+///
+/// Constants
+///
 
 inline_for_extraction
 let size_signature: size_nat = 64
 
-
-(* Point addition *)
-type aff_point = tuple2 elem elem           // Affine point
-type ext_point = tuple4 elem elem elem elem // Homogeneous extended coordinates
-
-let modp_inv (x:elem) : Tot elem =
-  x **% (prime - 2)
+let modp_sqrt_m1 : elem = 2 **% ((prime - 1) / 4)
 
 let d : elem =
   let x = 37095705934669439343138083508754565189542113879843219016388785533085940283555 in
@@ -33,8 +31,25 @@ let q: n:nat{n < pow2 256} =
 
 let _:_:unit{max_input SHA2_512 > pow2 32} = assert_norm (max_input SHA2_512 > pow2 32)
 
+let g_x : elem = 15112221349535400772501151409588531511454012693041857206046113283949847762202
+let g_y : elem = 46316835694926478169428394003475163141307993866256225615783033603165251855960
+
+(* Point addition *)
+type aff_point = tuple2 elem elem           // Affine point
+type ext_point = tuple4 elem elem elem elem // Homogeneous extended coordinates
+
+let g: ext_point = (g_x, g_y, 1, g_x *% g_y)
+
+///
+/// Internal functions
+///
+
+let modp_inv (x:elem) : Tot elem =
+  x **% (prime - 2)
+
 let sha512_modq (len:size_nat) (s:lbytes len) : n:nat{n < pow2 256} =
   (nat_from_bytes_le (hash512 s) % q)
+
 
 let point_add (p:ext_point) (q:ext_point) : Tot ext_point =
   let x1, y1, z1, t1 = p in
@@ -68,54 +83,48 @@ let point_double (p:ext_point) : Tot ext_point =
   let z3 = f *% g in
   (x3, y3, z3, t3)
 
-#reset-options "--max_fuel 0 --z3rlimit 100"
-
 let ith_bit (len:size_nat) (k:lbytes len) (i:size_nat{i < 8 * len}) =
   let q = i / 8 in let r = size (i % 8) in
   (k.[q] >>. r) &. u8 1
 
-let rec montgomery_ladder_ (x:ext_point) (xp1:ext_point) (len:size_nat{8 * len <= max_size_t}) (k:lbytes len) (ctr:size_nat{ ctr <= 8 * len})
-  : Tot (tuple2 ext_point ext_point) (decreases ctr) =
+
+val montgomery_ladder:
+    x: ext_point
+  -> xp1: ext_point
+  -> len: size_nat{8 * len <= max_size_t}
+  -> k: lbytes len
+  -> ctr:size_nat{ctr <= 8 * len} ->
+  Tot (tuple2 ext_point ext_point) (decreases ctr)
+
+let rec montgomery_ladder x xp1 len k ctr =
   if ctr = 0 then x, xp1
   else (
-    let x, xp1 = montgomery_ladder_ x xp1 len k (ctr-1) in
+    let x, xp1 = montgomery_ladder x xp1 len k (ctr-1) in
     let ctr' : size_nat = 8 * len - ctr in
     let x, xp1 = if uint_to_nat (ith_bit len k ctr') = 1 then xp1, x else x, xp1 in
     let xx = point_double x in
     let xxp1 = point_add x xp1 in
-    if uint_to_nat (ith_bit len k ctr') = 1 then xxp1, xx else xx, xxp1
-  )
+    if uint_to_nat (ith_bit len k ctr') = 1 then xxp1, xx else xx, xxp1)
+
 
 let point_mul (len:size_nat{8 * len <= max_size_t}) (a:lbytes len) (p:ext_point) =
-  fst (montgomery_ladder_ (zero, one, one, zero) p len a (8 * len))
-
-let modp_sqrt_m1 : elem = 2 **% ((prime - 1) / 4)
-
-noeq type record = { s:(s':lseq bool 3)}
+  fst (montgomery_ladder (zero, one, one, zero) p len a (8 * len))
 
 let recover_x (y:nat) (sign:bool) : Tot (option elem) =
-  admit();
   if y >= prime then None
   else (
-    let y2 = (y * y) in
+    let y2 = (y *% y) in
     let x2 = (y2 -% one) *% (modp_inv ((d *% y2) +% one)) in
     if x2 = zero then (
       if sign then None
-      else Some zero
-    ) else (
+      else Some zero)
+    else (
       let x = x2 **% ((prime + 3) / 8) in
       let x = if ((x *% x) -% x2) <> zero then x *% modp_sqrt_m1 else x in
       if ((x *% x) -% x2) <> zero then None
       else (
         let x = if (x % 2 = 1) <> sign then (prime - x) else x in
         Some x)))
-
-#reset-options "--z3refresh"
-
-let g_x : elem = 15112221349535400772501151409588531511454012693041857206046113283949847762202
-let g_y : elem = 46316835694926478169428394003475163141307993866256225615783033603165251855960
-
-let g: ext_point = (g_x, g_y, 1, g_x *% g_y)
 
 let point_compress (p:ext_point) : Tot (lbytes 32) =
   let px, py, pz, pt = p in
@@ -147,9 +156,23 @@ let secret_to_public (secret:lbytes 32) =
   let a, dummy = secret_expand secret in
   point_compress (point_mul 32 a g)
 
-#reset-options "--max_fuel 0 --z3rlimit 50"
+let point_equal (p:ext_point) (q:ext_point) =
+  let px, py, pz, pt = p in
+  let qx, qy, qz, qt = q in
+  if ((px *% qz) <> (qx *% pz)) then false
+  else if ((py *% qz) <> (qy *% pz)) then false
+  else true
 
-let sign (secret:lbytes 32) (msg:bytes{8 * length msg < max_size_t}) =
+///
+/// Ed25519 API
+///
+
+val sign:
+    secret: lbytes 32
+  -> msg: bytes{8 * length msg < max_size_t} ->
+  Tot (lbytes size_signature)
+
+let sign secret msg =
   let len = length msg in
   let a, prefix = secret_expand secret in
   let a' = point_compress (point_mul 32 a g) in
@@ -168,14 +191,13 @@ let sign (secret:lbytes 32) (msg:bytes{8 * length msg < max_size_t}) =
   slice tmp 0 64
 
 
-let point_equal (p:ext_point) (q:ext_point) =
-  let px, py, pz, pt = p in
-  let qx, qy, qz, qt = q in
-  if ((px *% qz) <> (qx *% pz)) then false
-  else if ((py *% qz) <> (qy *% pz)) then false
-  else true
+val verify:
+    public: lbytes 32
+  -> msg: bytes{8 * length msg < max_size_t}
+  -> signature: lbytes 64 ->
+  Tot bool
 
-let verify (public:lbytes 32) (msg:bytes{8 * length msg < max_size_t}) (signature:lbytes 64) =
+let verify public msg signature =
   let len = length msg in
   let a' = point_decompress public in
   match a' with
