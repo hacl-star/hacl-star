@@ -18,6 +18,10 @@ open Spec.Curve25519
 inline_for_extraction
 let size_signature: size_nat = 64
 
+
+type aff_point = elem & elem               // Affine point
+type ext_point = elem & elem & elem & elem // Homogeneous extended coordinates
+
 let modp_sqrt_m1 : elem = 2 **% ((prime - 1) / 4)
 
 let d : elem =
@@ -33,10 +37,6 @@ let _:_:unit{max_input SHA2_512 > pow2 32} = assert_norm (max_input SHA2_512 > p
 
 let g_x : elem = 15112221349535400772501151409588531511454012693041857206046113283949847762202
 let g_y : elem = 46316835694926478169428394003475163141307993866256225615783033603165251855960
-
-(* Point addition *)
-type aff_point = tuple2 elem elem           // Affine point
-type ext_point = tuple4 elem elem elem elem // Homogeneous extended coordinates
 
 let g: ext_point = (g_x, g_y, 1, g_x *% g_y)
 
@@ -94,7 +94,7 @@ val montgomery_ladder:
   -> len: size_nat{8 * len <= max_size_t}
   -> k: lbytes len
   -> ctr:size_nat{ctr <= 8 * len} ->
-  Tot (tuple2 ext_point ext_point) (decreases ctr)
+  Tot (ext_point & ext_point) (decreases ctr)
 
 let rec montgomery_ladder x xp1 len k ctr =
   if ctr = 0 then x, xp1
