@@ -26,7 +26,7 @@ SPEC_FILES=	Spec.Chacha20.fst \
 		Spec.HMAC.fst \
 		Spec.HKDF.fst \
 		Spec.HPKE.fst \
-#		Spec.HPKE.CFRG.fst
+		Spec.HPKE.CFRG.fst
 
 LIBS = Lib.IntTypes.fst Lib.RawIntTypes.fst Lib.NatMod.fst Lib.LoopCombinators.fst Lib.Sequence.fst Lib.ByteSequence.fst Lib.PrintSequence.fst # Lib.IntVector.fst
 LIBS_FILES= $(addprefix ../lib/, $(LIBS))
