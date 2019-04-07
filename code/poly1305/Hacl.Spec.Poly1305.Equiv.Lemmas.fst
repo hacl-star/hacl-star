@@ -18,6 +18,12 @@ let lemma_mod_add_distr_twice a b n =
   FStar.Math.Lemmas.lemma_mod_add_distr a b n;
   FStar.Math.Lemmas.lemma_mod_add_distr (b % n) a n
 
+val lemma_mod_mul_distr_twice: a:nat -> b:nat -> n:pos -> Lemma
+  (((a % n) * (b % n)) % n == (a * b) % n)
+let lemma_mod_mul_distr_twice a b n =
+  FStar.Math.Lemmas.lemma_mod_mul_distr_l a (b % n) n;
+  FStar.Math.Lemmas.lemma_mod_mul_distr_r a b n
+
 val lemma_mod_add_mul_distr: a:nat -> b:nat -> c:nat -> n:pos -> Lemma
   ((a * (b % n) + c) % n == (a * b + c) % n)
 let lemma_mod_add_mul_distr a b c n =
@@ -25,52 +31,101 @@ let lemma_mod_add_mul_distr a b c n =
   FStar.Math.Lemmas.lemma_mod_mul_distr_r a b n;
   FStar.Math.Lemmas.lemma_mod_plus_distr_l (a * b) c n
 
+val poly_update_repeat_blocks_multi_lemma2_simplify_lp:
+  a0r2:pfelem -> acc1:pfelem -> c0:pfelem -> c1:pfelem -> r:pfelem -> r2:nat{r2 == r * r} -> Lemma
+  (((((a0r2 + c0) % prime) * (r2 % prime) % prime) + (((((acc1 * (r2 % prime)) % prime) + c1) % prime) * r % prime)) % prime ==
+  (a0r2 * r2 + c0 * r2 + acc1 * r2 * r + c1 * r) % prime)
+let poly_update_repeat_blocks_multi_lemma2_simplify_lp a0r2 acc1 c0 c1 r r2 =
+  let lp = ((((a0r2 + c0) % prime) * (r2 % prime) % prime) + (((((acc1 * (r2 % prime)) % prime) + c1) % prime) * r % prime)) % prime in
+  calc (==) {
+    ((((a0r2 + c0) % prime) * (r2 % prime) % prime) + (((((acc1 * (r2 % prime)) % prime) + c1) % prime) * r % prime)) % prime;
+  (==) { lemma_mod_mul_distr_twice (a0r2 + c0) r2 prime }
+    (((a0r2 + c0) * r2 % prime) + (((((acc1 * (r2 % prime)) % prime) + c1) % prime) * r % prime)) % prime;
+  (==) { FStar.Math.Lemmas.lemma_mod_mul_distr_r acc1 r2 prime }
+    (((a0r2 + c0) * r2 % prime) + (((((acc1 * r2) % prime) + c1) % prime) * r % prime)) % prime;
+  (==) { FStar.Math.Lemmas.lemma_mod_plus_distr_l (acc1 * r2) c1 prime }
+    (((a0r2 + c0) * r2 % prime) + (((acc1 * r2 + c1) % prime) * r % prime)) % prime;
+  (==) { FStar.Math.Lemmas.lemma_mod_mul_distr_l (acc1 * r2 + c1) r prime }
+    (((a0r2 + c0) * r2 % prime) + ((acc1 * r2 + c1) * r % prime)) % prime;
+  (==) { lemma_mod_add_distr_twice ((a0r2 + c0) * r2) ((acc1 * r2 + c1) * r) prime }
+    ((a0r2 + c0) * r2 + (acc1 * r2 + c1) * r) % prime;
+  (==) { FStar.Math.Lemmas.distributivity_add_left a0r2 c0 r2 }
+    (a0r2 * r2 + c0 * r2 + (acc1 * r2 + c1) * r) % prime;
+  (==) { FStar.Math.Lemmas.distributivity_add_left (acc1 * r2) c1 r }
+    (a0r2 * r2 + c0 * r2 + acc1 * r2 * r + c1 * r) % prime;
+  };
+  assert (lp == (a0r2 * r2 + c0 * r2 + acc1 * r2 * r + c1 * r) % prime)
+
+val poly_update_repeat_blocks_multi_lemma2_simplify_rp:
+  a0r2:pfelem -> acc1:pfelem -> c0:pfelem -> c1:pfelem -> r:pfelem -> r2:nat{r2 == r * r} -> Lemma
+  (((((((a0r2 + (acc1 * r % prime)) % prime) + c0) % prime) * r % prime) + c1) % prime * r % prime ==
+   (a0r2 * r2 + c0 * r2 + acc1 * r2 * r + c1 * r) % prime)
+let poly_update_repeat_blocks_multi_lemma2_simplify_rp a0r2 acc1 c0 c1 r r2 =
+  calc (==) {
+    ((((((a0r2 + (acc1 * r % prime)) % prime) + c0) % prime) * r % prime) + c1) % prime * r % prime;
+  (==) { FStar.Math.Lemmas.lemma_mod_plus_distr_r a0r2 (acc1 * r) prime }
+    ((((((a0r2 + acc1 * r) % prime) + c0) % prime) * r % prime) + c1) % prime * r % prime;
+  (==) { FStar.Math.Lemmas.lemma_mod_plus_distr_l (a0r2 + acc1 * r) c0 prime }
+    ((((a0r2 + acc1 * r + c0) % prime) * r % prime) + c1) % prime * r % prime;
+  (==) { FStar.Math.Lemmas.lemma_mod_mul_distr_l (a0r2 + acc1 * r + c0) r prime }
+    (((a0r2 + acc1 * r + c0) * r % prime) + c1) % prime * r % prime;
+  (==) { FStar.Math.Lemmas.lemma_mod_plus_distr_l ((a0r2 + acc1 * r + c0) * r) c1 prime }
+    ((a0r2 + acc1 * r + c0) * r + c1) % prime * r % prime;
+  (==) { FStar.Math.Lemmas.lemma_mod_mul_distr_l ((a0r2 + acc1 * r + c0) * r + c1) r prime }
+    ((a0r2 + acc1 * r + c0) * r + c1) * r % prime;
+  (==) { FStar.Math.Lemmas.distributivity_add_left ((a0r2 + acc1 * r + c0) * r) c1 r }
+    ((a0r2 + acc1 * r + c0) * r * r + c1 * r) % prime;
+  (==) { FStar.Math.Lemmas.paren_mul_right (a0r2 + acc1 * r + c0) r r }
+    ((a0r2 + acc1 * r + c0) * (r * r) + c1 * r) % prime;
+  (==) { assert (r * r == r2) }
+    ((a0r2 + acc1 * r + c0) * r2 + c1 * r) % prime;
+  (==) { FStar.Math.Lemmas.distributivity_add_left (a0r2 + acc1 * r) c0 r2 }
+    ((a0r2 + acc1 * r) * r2 + c0 * r2 + c1 * r) % prime;
+  (==) { FStar.Math.Lemmas.distributivity_add_left a0r2 (acc1 * r) r2 }
+    (a0r2 * r2 + acc1 * r * r2 + c0 * r2 + c1 * r) % prime;
+  (==) { FStar.Math.Lemmas.paren_mul_right acc1 r r2 }
+    (a0r2 * r2 + acc1 * (r2 * r) + c0 * r2 + c1 * r) % prime;
+  (==) { FStar.Math.Lemmas.paren_mul_right acc1 r2 r }
+    (a0r2 * r2 + acc1 * r2 * r + c0 * r2 + c1 * r) % prime;
+    }
+
 val poly_update_repeat_blocks_multi_lemma2_simplify:
-  acc0:pfelem -> acc1:pfelem -> c0:pfelem -> c1:pfelem -> r0:pfelem -> Lemma
-    (pfadd (pfmul (pfadd (pfmul acc0 (pfmul r0 r0)) c0) (pfmul r0 r0)) (pfmul (pfadd (pfmul acc1 (pfmul r0 r0)) c1) r0) ==
-    pfmul (pfadd (pfmul (pfadd (pfadd (pfmul acc0 (pfmul r0 r0)) (pfmul acc1 r0)) c0) r0) c1) r0)
-let poly_update_repeat_blocks_multi_lemma2_simplify acc0 acc1 c0 c1 r0 = admit() //the proof is fragile
-  // let r02 = pfmul r0 r0 in
-  // let a0r02 = pfmul acc0 r02 in
-  // let a1r02 = pfmul acc1 r02 in
+  acc0:pfelem -> acc1:pfelem -> c0:pfelem -> c1:pfelem -> r:pfelem -> Lemma
+    (pfadd (pfmul (pfadd (pfmul acc0 (pfmul r r)) c0) (pfmul r r)) (pfmul (pfadd (pfmul acc1 (pfmul r r)) c1) r) ==
+    pfmul (pfadd (pfmul (pfadd (pfadd (pfmul acc0 (pfmul r r)) (pfmul acc1 r)) c0) r) c1) r)
+let poly_update_repeat_blocks_multi_lemma2_simplify acc0 acc1 c0 c1 r =
+  let a0r2 = pfmul acc0 (pfmul r r) in
+  let r2 = r * r in
+  poly_update_repeat_blocks_multi_lemma2_simplify_lp a0r2 acc1 c0 c1 r r2;
+  poly_update_repeat_blocks_multi_lemma2_simplify_rp a0r2 acc1 c0 c1 r r2
 
-  // let lp = pfadd (pfmul (pfadd a0r02 c0) r02) (pfmul (pfadd a1r02 c1) r0) in
-  // assert (lp == ((((a0r02 + c0) % prime) * r02 % prime) + (((a1r02 + c1) % prime) * r0 % prime)) % prime);
-  // FStar.Math.Lemmas.lemma_mod_mul_distr_l (a0r02 + c0) r02 prime;
-  // FStar.Math.Lemmas.lemma_mod_mul_distr_l (a1r02 + c1) r0 prime;
-  // assert (lp == (((a0r02 + c0) * r02 % prime) + ((a1r02 + c1) * r0 % prime)) % prime);
-  // lemma_mod_add_distr_twice ((a0r02 + c0) * r02) ((a1r02 + c1) * r0) prime;
-  // assert (lp == ((a0r02 + c0) * r02 + (a1r02 + c1) * r0) % prime);
-  // FStar.Math.Lemmas.distributivity_add_left a0r02 c0 r02;
-  // FStar.Math.Lemmas.distributivity_add_left a1r02 c1 r0;
-  // assert (lp == (a0r02 * r02 + c0 * r02 + a1r02 * r0 + c1 * r0) % prime);
+val poly_update_multi_lemma_load2_simplify_lp:
+  a0:pfelem -> r0:pfelem -> c0:pfelem -> c1:pfelem -> Lemma
+  ((((a0 * r0 % prime) + c1) % prime) * r0 % prime == (a0 * r0 * r0 + c1 * r0) % prime)
+let poly_update_multi_lemma_load2_simplify_lp a0 r0 c0 c1 =
+  calc (==) {
+    (((a0 * r0 % prime) + c1) % prime) * r0 % prime;
+  (==) { FStar.Math.Lemmas.lemma_mod_plus_distr_l (a0 * r0) c1 prime }
+    ((a0 * r0 + c1) % prime) * r0 % prime;
+  (==) { FStar.Math.Lemmas.lemma_mod_mul_distr_l (a0 * r0 + c1) r0 prime }
+    (a0 * r0 + c1) * r0 % prime;
+  (==) { FStar.Math.Lemmas.distributivity_add_left (a0 * r0) c1 r0 }
+    (a0 * r0 * r0 + c1 * r0) % prime;
+  }
 
-  // let rp = pfmul (pfadd (pfmul (pfadd (pfadd a0r02 (pfmul acc1 r0)) c0) r0) c1) r0 in
-  // assert (rp == (((((((((a0r02 + acc1 * r0 % prime) % prime) + c0) % prime) * r0) % prime) + c1) % prime) * r0) % prime);
-  // FStar.Math.Lemmas.lemma_mod_plus_distr_r a0r02 (acc1 * r0) prime;
-  // assert (rp == (((((((((a0r02 + acc1 * r0) % prime) + c0) % prime) * r0) % prime) + c1) % prime) * r0) % prime);
-  // FStar.Math.Lemmas.lemma_mod_mul_distr_l (((((((a0r02 + acc1 * r0) % prime) + c0) % prime) * r0) % prime) + c1) r0 prime;
-  // assert (rp == ((((((((a0r02 + acc1 * r0) % prime) + c0) % prime) * r0) % prime) + c1) * r0) % prime);
-  // FStar.Math.Lemmas.lemma_mod_plus_distr_l (a0r02 + acc1 * r0) c0 prime;
-  // assert (rp == ((((((a0r02 + acc1 * r0 + c0) % prime) * r0) % prime) + c1) * r0) % prime);
-  // FStar.Math.Lemmas.lemma_mod_mul_distr_l (a0r02 + acc1 * r0 + c0) r0 prime;
-  // assert (rp == (((((a0r02 + acc1 * r0 + c0) * r0) % prime) + c1) * r0) % prime);
-  // FStar.Math.Lemmas.distributivity_add_left (((a0r02 + acc1 * r0 + c0) * r0) % prime) c1 r0;
-  // assert (rp == ((((a0r02 + acc1 * r0 + c0) * r0) % prime) * r0 + c1 * r0) % prime);
-  // lemma_mod_add_mul_distr r0 ((a0r02 + acc1 * r0 + c0) * r0) (c1 * r0) prime;
-  // assert (rp == (((a0r02 + acc1 * r0 + c0) * r0) * r0 + c1 * r0) % prime);
-  // FStar.Math.Lemmas.paren_mul_right (a0r02 + acc1 * r0 + c0) r0 r0;
-  // lemma_mod_add_mul_distr (a0r02 + acc1 * r0 + c0) (r0 * r0) (c1 * r0) prime;
-  // assert (rp == ((a0r02 + acc1 * r0 + c0) * r02 + c1 * r0) % prime);
-  // assert (rp == (a0r02 * r02 + acc1 * r0 * r02 + c0 * r02 + c1 * r0) % prime);
-  // FStar.Math.Lemmas.lemma_mod_plus_distr_l (acc1 * r0 * r02) (a0r02 * r02 + c0 * r02 + c1 * r0) prime;
-  // assert (acc1 * r0 * r02 == r0 * acc1 * r02);
-  // FStar.Math.Lemmas.paren_mul_right r0 acc1 r02;
-  // FStar.Math.Lemmas.lemma_mod_mul_distr_r r0 (acc1 * r02) prime;
-  // assert ((acc1 * r0 * r02) % prime  == a1r02 * r0 % prime);
-  // FStar.Math.Lemmas.lemma_mod_plus_distr_l (a1r02 * r0) (a0r02 * r02 + c0 * r02 + c1 * r0) prime
-
-#set-options "--z3rlimit 150"
+val poly_update_multi_lemma_load2_simplify_rp:
+  a0:pfelem -> r0:pfelem -> c0:pfelem -> c1:pfelem -> Lemma
+  (((a0 * (r0 * r0 % prime) % prime) + (c1 * r0 % prime)) % prime == (a0 * r0 * r0 + c1 * r0) % prime)
+let poly_update_multi_lemma_load2_simplify_rp a0 r0 c0 c1 =
+  calc (==) {
+    ((a0 * (r0 * r0 % prime) % prime) + (c1 * r0 % prime)) % prime;
+  (==) { FStar.Math.Lemmas.lemma_mod_mul_distr_r a0 (r0 * r0) prime }
+    ((a0 * (r0 * r0) % prime) + (c1 * r0 % prime)) % prime;
+  (==) { FStar.Math.Lemmas.paren_mul_right a0 r0 r0 }
+    ((a0 * r0 * r0 % prime) + (c1 * r0 % prime)) % prime;
+  (==) { lemma_mod_add_distr_twice (a0 * r0 * r0) (c1 * r0) prime }
+    (a0 * r0 * r0 + c1 * r0) % prime;
+   }
 
 val poly_update_multi_lemma_load2_simplify:
   acc0:pfelem -> r0:pfelem -> c0:pfelem -> c1:pfelem ->
@@ -78,24 +133,9 @@ val poly_update_multi_lemma_load2_simplify:
     (pfmul (pfadd (pfmul (pfadd acc0 c0) r0) c1) r0 ==
      pfadd (pfmul (pfadd acc0 c0) (pfmul r0 r0)) (pfmul c1 r0))
 let poly_update_multi_lemma_load2_simplify acc0 r0 c0 c1 =
-  let lp = pfmul (pfadd (pfmul (pfadd acc0 c0) r0) c1) r0 in
-  let rp = pfadd (pfmul (pfadd acc0 c0) (pfmul r0 r0)) (pfmul c1 r0) in
   let a0 = pfadd acc0 c0 in
-
-  assert (rp == pfadd (pfmul a0 (pfmul r0 r0)) (pfmul c1 r0));
-  assert (rp == ((a0 * (r0 * r0 % prime) % prime) + (c1 * r0 % prime)) % prime);
-  lemma_mod_add_distr_twice (a0 * (r0 * r0 % prime)) (c1 * r0) prime;
-  lemma_mod_add_mul_distr a0 (r0 * r0) (c1 * r0) prime;
-  assert (rp == (a0 * (r0 * r0) + c1 * r0) % prime);
-
-  assert (lp == pfmul (pfadd (pfmul a0 r0) c1) r0);
-  assert (lp == ((((a0 * r0 % prime) + c1) % prime) * r0) % prime);
-  FStar.Math.Lemmas.lemma_mod_plus_distr_l (a0 * r0) c1 prime;
-  FStar.Math.Lemmas.lemma_mod_mul_distr_l (a0 * r0 + c1) r0 prime;
-  assert (lp == ((a0 * r0 + c1) * r0) % prime);
-  FStar.Math.Lemmas.distributivity_add_left (a0 * r0) c1 r0;
-  FStar.Math.Lemmas.paren_mul_right a0 r0 r0;
-  assert (lp == (a0 * (r0 * r0) + c1 * r0) % prime)
+  poly_update_multi_lemma_load2_simplify_lp a0 r0 c0 c1;
+  poly_update_multi_lemma_load2_simplify_rp a0 r0 c0 c1
 
 //
 // Lemma
@@ -229,6 +269,8 @@ let poly_update_repeat_blocks_multi_lemma2 text acc_vec0 r =
       assert (normalize_2 res1 r == res2)
     )
   in aux nb_vec
+
+#reset-options "--z3rlimit 150 --max_fuel 2"
 
 val poly_update_repeat_blocks_multi_lemma4:
     text:bytes{length text % (4 * size_block) = 0}

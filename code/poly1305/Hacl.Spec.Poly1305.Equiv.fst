@@ -544,6 +544,22 @@ let poly_eq_lemma #w text acc0 r =
   else
     poly_eq_lemma_zero #w text acc0 r
 
+val update1_eq_lemma:
+    r:pfelem
+  -> len:size_nat{len <= size_block}
+  -> b:lbytes len
+  -> acc:pfelem ->
+  Lemma
+    (update1 r len b acc == S.update1 r len b acc)
+let update1_eq_lemma r len b acc =
+  let e = nat_from_bytes_le b in
+  assert (e < pow2 (len * 8));
+  Math.Lemmas.pow2_le_compat 128 (len * 8);
+  assert_norm (pow2 128 + pow2 128 < prime);
+  let e1 = pfadd (pow2 (8 * len)) e in
+  FStar.Math.Lemmas.modulo_lemma (pow2 (8 * len) + e) prime
+
+//chacha20poly1305/Hacl.Spec.Poly1305.Equiv.fst
 val poly_eq_lemma_vec:
     #w:lanes
   -> text:bytes
@@ -551,7 +567,58 @@ val poly_eq_lemma_vec:
   -> r:pfelem ->
   Lemma
     (poly_update1 text acc r == Spec.Poly1305.poly text acc r)
-let poly_eq_lemma_vec #w text acc r = admit() //from vale
+let poly_eq_lemma_vec #w text acc r =
+  let len = length text in
+  let nb = len / size_block in
+  let rem = len % size_block in
+
+  let f = S.update1 r 16 in
+  let f_vec = update1 r 16 in
+  let repeat_bf_s = repeat_blocks_f size_block text f nb in
+  let repeat_bf_v = repeat_blocks_f size_block text f_vec nb in
+
+  lemma_repeat_blocks #uint8 #pfelem size_block text f_vec (poly_update1_rem r) acc;
+  lemma_repeat_blocks #uint8 #S.felem size_block text f (S.poly_update1_rem r) acc;
+
+  let acc_s = Loops.repeati nb repeat_bf_s acc in
+  let acc_v = Loops.repeati nb repeat_bf_v acc in
+
+  let aux_repeat_bf (i:nat{i < nb}) (acc:pfelem) :
+    Lemma (repeat_bf_s i acc == repeat_bf_v i acc)
+    = assert (repeat_bf_v i acc = repeat_blocks_f size_block text f_vec nb i acc);
+      assert ((i+1) * 16 <= nb * 16);
+      let block = Seq.slice text (i*16) (i*16+16) in
+      FStar.Seq.lemma_len_slice text (i*16) (i*16+16);
+      assert (repeat_bf_s i acc == f block acc);
+      assert (repeat_bf_v i acc == f_vec block acc);
+      update1_eq_lemma r size_block block acc
+  in
+
+  let rec aux (n:nat{n <= nb}) : Lemma
+    (Loops.repeati n repeat_bf_s acc == Loops.repeati n repeat_bf_v acc) =
+    if n = 0 then (
+      Loops.eq_repeati0 n repeat_bf_s acc;
+      Loops.eq_repeati0 n repeat_bf_v acc
+    ) else (
+      let lp = Loops.repeati n repeat_bf_s acc in
+      let rp = Loops.repeati n repeat_bf_v acc in
+      Loops.unfold_repeati n repeat_bf_s acc (n-1);
+      let next_s = Loops.repeati (n-1) repeat_bf_s acc in
+      assert (lp == repeat_bf_s (n-1) next_s);
+      Loops.unfold_repeati n repeat_bf_v acc (n-1);
+      let next_v = Loops.repeati (n-1) repeat_bf_v acc in
+      assert (rp == repeat_bf_v (n-1) next_v);
+      aux (n-1);
+      assert (next_s == next_v);
+      aux_repeat_bf (n-1) next_v;
+      assert (repeat_bf_s (n-1) next_s == repeat_bf_v (n-1) next_v)
+    )
+  in aux nb;
+
+  let last = Seq.slice text (nb * size_block) len in
+  FStar.Seq.lemma_len_slice text (nb * size_block) len;
+  FStar.Math.Lemmas.lemma_div_mod len size_block;
+  update1_eq_lemma r rem last acc_v
 
 val poly1305_eq_lemma:
     #w:lanes
