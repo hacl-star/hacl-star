@@ -191,9 +191,3 @@ let poly1305 (#w:lanes) (msg:bytes) (k:key) : tag =
   let acc, r = poly1305_init k in
   let acc = poly_update #w msg acc r in
   finish k acc
-
-let poly1305_vec_is_poly1305 (#w: lanes) (msg: bytes) (k: key):
-  Lemma
-    (ensures (poly1305 #w msg k == Spec.Poly1305.poly1305 msg k))
-=
-  admit ()
