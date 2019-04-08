@@ -144,7 +144,7 @@ We are also working on a JavaScript backend for F* that would enable us to extra
 
 # Authors and Maintainers
 
-HACL* was originially developed as part of the Ph.D. thesis of Jean Karim Zinzindohoué
+HACL* was originally developed as part of the Ph.D. thesis of Jean Karim Zinzindohoué
 in the [Prosecco](http://prosecco.inria.fr) team at [INRIA Paris](https://www.inria.fr/en/centre/paris).
 It contains contributions from many researchers at INRIA and Microsoft Research, and is
 being actively developed and maintained within [Project Everest].
