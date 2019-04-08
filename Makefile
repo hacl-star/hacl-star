@@ -242,7 +242,7 @@ ifndef MAKE_RESTARTS
 	@if ! [ -f .didhelp ]; then echo "💡 Did you know? If your dependency graph didn't change (e.g. no files added or removed, no reference to a new module in your code), run NODEPEND=1 make <your-target> to skip dependency graph regeneration!"; touch .didhelp; fi
 	$(call run-with-log,\
 	  $(FSTAR_NO_FLAGS) --dep $* $(notdir $(FSTAR_ROOTS)) --warn_error '-285' $(FSTAR_DEPEND_FLAGS) \
-	    --extract '* -Prims -LowStar -Lib.Buffer -Hacl -FStar +FStar.Endianness +FStar.Kremlin.Endianness -EverCrypt -MerkleTree -Vale.Tactics -FastHybrid_helpers -FastMul_helpers -FastSqr_helpers -FastUtil_helpers -TestLib -EverCrypt -MerkleTree -Test -Vale_memcpy -Vale.AsLowStar.Test -Lib.IntVector' > $@ && \
+	    --extract '* -Prims -LowStar -Lib.Buffer -Hacl -FStar +FStar.Kremlin.Endianness -EverCrypt -MerkleTree -Vale.Tactics -FastHybrid_helpers -FastMul_helpers -FastSqr_helpers -FastUtil_helpers -TestLib -EverCrypt -MerkleTree -Test -Vale_memcpy -Vale.AsLowStar.Test -Lib.IntVector' > $@ && \
 	  $(SED) -i 's!$(HACL_HOME)/obj/\(.*.checked\)!obj/\1!;s!/bin/../ulib/!/ulib/!g' $@ \
 	  ,[FSTAR-DEPEND ($*)],$(call to-obj-dir,$@))
 
@@ -620,6 +620,7 @@ HAND_WRITTEN_H_FILES	= $(wildcard $(LIB_DIR)/c/*.h)
 HAND_WRITTEN_OPTIONAL_FILES = \
   $(addprefix providers/evercrypt/c/evercrypt_,openssl.c bcrypt.c)
 
+
 # TODO: put all the Vale files under a single namespace to avoid this nonsense
 #
 # Note: I am using the deprecated -drop option, but it's ok because the dropped
@@ -717,10 +718,9 @@ dist/coco/Makefile.basic: \
     -bundle EverCrypt.Hacl \
     -bundle '\*[rename=EverCrypt_Misc]'
 
-# The "coco" distribution is only optimized when EVERCRYPT_CONFIG=everest.
-# Everest means: no openssl, no bcrypt
+# OpenSSL and BCrypt disabled
 ifeq ($(EVERCRYPT_CONFIG),everest)
-dist/coco/Makefile.basic: HAND_WRITTEN_OPTIONAL_FILES =
+HAND_WRITTEN_OPTIONAL_FILES :=
 endif
 
 # For Kaizala, no BCrypt, no Vale.

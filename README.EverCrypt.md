@@ -28,7 +28,7 @@ For EverCrypt, our specifications cover a range of properties, including:
   the wrong kind of parameters to another, or accesses its private state.
 
 * Functional correctness: EverCrypt's input/output behavior is fully
-  characterized by a simple mathematical functions derived directly
+  characterized by simple mathematical functions derived directly
   from the official cryptographic standards (e.g., from NIST or the IETF).
 
 * Side-channel resistance: Observations about EverCrypt's low-level behavior
@@ -63,13 +63,13 @@ In upcoming releases, we aim to include:
 | **Hashes**          |                          |                            |           |
 | MD5                 | ✔︎²                       |                            | ✔︎         |
 | SHA1                | ✔︎²                       |                            | ✔︎         |
-| SHA2                | ✔︎                        | ✔︎³ (SHAEXT)                | ✔︎         |
+| SHA2                | ✔︎                        |                            | ✔︎         |
 | SHA3                | ✔︎                        |                            |           |
 | Blake2              | ✔︎                        |                            |           |
 |                     |                          |                            |           |
 | **MACS**            |                          |                            |           |
 | HMAC                | ✔︎⁴                       |                            | ✔︎         |
-| Poly1305            | ✔︎⁶ (+ AVX + AVX2)        | ✔︎ (X64)                    |           |
+| Poly1305            | ✔︎³ (+ AVX + AVX2)        | ✔︎ (X64)                    |           |
 |                     |                          |                            |           |
 | **Key Derivation**  |                          |                            |           |
 | HKDF                | ✔︎⁴                       |                            | ✔︎         |
@@ -85,12 +85,11 @@ In upcoming releases, we aim to include:
 
 ¹: does not multiplex (yet) over the underlying Poly1305 implementation  
 ²: insecure algorithms provided for legacy interop purposes  
-³: SHA2-256 only; SHA2-224, SHA2-384 and SHA2-512 are pure C  
+³: achieved via C compiler intrinsincs; no verification results claimed for the
+   AVX and AVX2 versions whose verification is not complete yet  
 ⁴: HMAC and HKDF on top of the agile hash API, so HMAC-SHA2-256 and
    HKDF-SHA2-256 leverage the assembly version under the hood  
 ⁵: legacy implementation  
-⁶: achieved via C compiler intrinsincs; no verification results claimed for the
-   AVX and AVX2 versions whose verification is not complete yet
 
 # Building or Integrating EverCrypt
 
@@ -109,7 +108,9 @@ As we work our way towards our first official release, bear in mind that:
 
 ## Finding the code EverCrypt produces
 
-Release branches (e.g. `v0.1+`) contain a copy of the generated C/ASM code under
+Release branches (e.g.
+[evercrypt-v0.1+](https://github.com/project-everest/hacl-star/tree/evercrypt-v0.1+))
+contain a copy of the generated C/ASM code under
 version control. This is by far the easiest way to obtain a copy of EverCrypt.
 
 EverCrypt's C/ASM code is packaged as a set of self-contained files in one of the
@@ -136,11 +137,10 @@ corresponds to a particular flavor of generated C code.
 Each distribution of EverCrypt contains a GNU Makefile that generates a static
 library and a shared object. The code depends on `kremlib`, which contains
 verified, extracted C implementations of some F\* standard library functions.
-For release branches, a copy of `kremlib` is provided in `dist/kremlib` and
-`dist/include`.
+For release branches, a copy of `kremlib` is provided in `dist/kremlib`.
 
 - When integrating EverCrypt, one can pick a distribution, along with the
-  `kremlib` and `include` directories, thus giving a "wholesale" integration of
+  `kremlib` directory, thus giving a "wholesale" integration of
   the EverCrypt library.
 - For a more gradual integration, consumers can integrate algorithms one at a
   time, by cherry-picking the files that they are interested in. Each header

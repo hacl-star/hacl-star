@@ -100,7 +100,7 @@ val create_in (a: Hash.alg) (r: HS.rid): ST (state a)
     HyperStack.ST.is_eternal_region r))
   (ensures (fun h0 s h1 ->
     hashes h1 s S.empty /\
-    B.(modifies (footprint s h1) h0 h1) /\
+    B.(modifies loc_none h0 h1) /\
     Hash.fresh_loc (footprint s h1) h0 h1 /\
     B.(loc_includes (loc_region_only true r) (footprint s h1)) /\
     freeable s h1))

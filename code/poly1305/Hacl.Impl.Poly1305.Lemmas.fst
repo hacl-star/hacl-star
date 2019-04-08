@@ -66,11 +66,43 @@ let uints_from_bytes_le_lemma128_2 b = ()
 
 let uint_to_bytes_le_lemma128 r = ()
 
-let uints_to_bytes_le_lemma64_1 lo hi = admit()
+module BF = Arch.BufferFriend
 
-let uints_to_bytes_le_lemma64_2 r = admit()
+#set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
+let uints_to_bytes_le_lemma64_1 lo hi =
+  // Sketch:
+  //
+  // let b0 = BSeq.uints_to_bytes_le lo in
+  // let b1 = BSeq.uints_to_bytes_le hi in
+  // calc (==) {
+  //   nat_to_bytes_le 16 (uint_v hi.[0] * pow2 64 + uint_v lo.[0])
+  // (==) { Arch.BufferFriend }
+  //   let lo = uints_from_bytes_le (uints_to_bytes_le lo) in
+  //   let hi = uints_from_bytes_le (uints_to_bytes_le hi) in
+  //   nat_to_bytes_le 16 (uint_v hi.[0] * pow2 64 + uint_v lo.[0])
+  // (==) { }
+  //   let b = concat (uints_to_bytes_le lo) (uints_to_bytes_le hi) in
+  //   let lo = uints_from_bytes_le (sub b 0 8) in
+  //   let hi = uints_from_bytes_le (sub b 8 8) in
+  //   nat_to_bytes_le 16 (uint_v hi.[0] * pow2 64 + uint_v lo.[0])
+  // (==) { lemma_uints_from_bytes_le_lemma_64_1 (concat b0 b1) }
+  //   nat_to_bytes_le (nat_from_bytes_le 16 (concat b0 b1));
+  // (==) { Arch.BufferFriend }
+  //   n_to_le (le_to_n 16 b)
+  // (==) { FStar.Endianness }
+  //   b
+  // (==) { def }
+  //   concat
+  admit ()
 
-let uints_to_bytes_le_lemma128_2 r = admit()
+let uints_to_bytes_le_lemma64_2 r =
+  // Similarly mundane. The Lib.ByteSequence library currently lacks enough
+  // lemmas to prove this simply.
+  admit ()
+
+let uints_to_bytes_le_lemma128_2 r =
+  // ibid.
+  admit ()
 
 val lemma_nat_from_bytes_le_zeroes: len:size_nat -> b:lseq uint8 len -> Lemma
   (requires (forall (i:nat). i < len ==> b.[i] == u8 0))

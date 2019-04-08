@@ -1,13 +1,19 @@
 # High Performance Verified Cryptographic Code
 
 This repository contains code from several related projects developed as part of
-[Project Everest](https://project-everest.github.io/), which aims to build and 
+[Project Everest](https://project-everest.github.io/), which aims to build and
 deploy a verified HTTPS stack.
+
+We are actively developing and integrating our code on the
+[fstar-master](https://github.com/project-everest/hacl-star/tree/fstar-master/)
+branch, which tracks F\*'s `master` branch. See
+[releases](https://github.com/project-everest/hacl-star/releases) for a preview
+of our C and assembly code, including EverCrypt 0.1 (currently in **alpha**).
 
 ## HACL\*
 
 [HACL\*](README.HACL.md), the High-Assurance Cryptographic Library, is a
-formally verified cryptographic library in [F\*](https://www.fsar-lang.org).
+formally verified cryptographic library in [F\*](https://www.fstar-lang.org).
 The goal of this library is to develop highly efficient, pure C implementations
 for popular cryptographic primitives and to verify them for memory safety,
 functional correctness, and secret independence.

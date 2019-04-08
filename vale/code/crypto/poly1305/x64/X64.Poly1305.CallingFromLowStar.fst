@@ -284,4 +284,39 @@ let lemma_call_poly1305 h0 h1 ctx_b inp_b src key =
   };
 
   lemma_call_poly1305_all h1 inp_b src key_r key_s;
+
+  let tag = BF.to_bytes (slice (B.as_seq h1 ctx_b) 0 16) in
+
+  BF.nat_from_bytes_le_is_le_bytes_to_nat64 (slice tag 0 8);
+  calc (==) {
+    h0_out;
+    == {}
+    UInt64.v (UV.sel h1 ctx_vb 0);
+    == {UV.get_sel h1 ctx_vb 0; Opaque_s.reveal_opaque Views.get64_def}
+    le_bytes_to_nat64 (seq_uint8_to_seq_nat8 (slice (DV.as_seq h1 (UV.as_down_buffer ctx_vb)) 0 8));
+    == {BF.same_seq_downview8 ctx_b h1}
+    nat_from_bytes_le (slice tag 0 8);
+  };
+
+  BF.nat_from_bytes_le_is_le_bytes_to_nat64 (slice tag 8 16);
+  calc (==) {
+    h1_out;
+    == {}
+    UInt64.v (UV.sel h1 ctx_vb 1);
+    == {UV.get_sel h1 ctx_vb 1; Opaque_s.reveal_opaque Views.get64_def}
+    le_bytes_to_nat64 (seq_uint8_to_seq_nat8 (slice (DV.as_seq h1 (UV.as_down_buffer ctx_vb)) 8 16));
+    == {BF.same_seq_downview8 ctx_b h1}
+    nat_from_bytes_le (slice tag 8 16);
+  };
+
+  calc (==) {
+    h;
+    == {}
+    lowerUpper128_opaque h0_out h1_out;
+    == {Opaque_s.reveal_opaque lowerUpper128}
+    nat_from_bytes_le (slice tag 0 8) + pow2 64 * nat_from_bytes_le (slice tag 8 16);
+    == {BS.nat_from_bytes_le_slice_lemma #LI.SEC #16 tag 8}
+    nat_from_bytes_le tag;
+  };
+
   ()

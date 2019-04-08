@@ -6,6 +6,8 @@ module B = LowStar.Buffer
 module U32 = FStar.UInt32
 module ST = FStar.HyperStack.ST
 
+module BF = Arch.BufferFriend
+
 open FStar.HyperStack.ST
 
 (** @type: true
@@ -20,5 +22,7 @@ val poly1305: dst:B.buffer UInt8.t { B.length dst = 16 } ->
       B.disjoint dst src /\ B.disjoint dst key)
     (ensures fun h0 _ h1 ->
       B.(modifies (loc_buffer dst) h0 h1 /\ (
-      Lib.Unlib.reveal_secret8 ();
-      B.as_seq h1 dst == Spec.Poly1305.poly1305 (B.as_seq h0 src) (B.as_seq h0 key))))
+      B.as_seq h1 dst ==
+        BF.of_bytes (Spec.Poly1305.poly1305
+          (BF.to_bytes (B.as_seq h0 src))
+          (BF.to_bytes (B.as_seq h0 key))))))

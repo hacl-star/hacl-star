@@ -318,6 +318,16 @@ external_files = [
   ExternalFile('../specs/Spec.MD5.fsti'),
   ExternalFile('../specs/Spec.Hash.fst'),
   ExternalFile('../specs/Spec.Hash.Definitions.fst'),
+  ExternalFile('../lib/Lib.IntTypes.fst'),
+  ExternalFile('../lib/Lib.IntTypes.fsti'),
+  ExternalFile('../lib/Lib.ByteSequence.fst'),
+  ExternalFile('../lib/Lib.ByteSequence.fsti'),
+  ExternalFile('../lib/Lib.RawIntTypes.fst'),
+  ExternalFile('../lib/Lib.RawIntTypes.fsti'),
+  ExternalFile('../lib/Lib.LoopCombinators.fst'),
+  ExternalFile('../lib/Lib.LoopCombinators.fsti'),
+  ExternalFile('../lib/Lib.Sequence.fst'),
+  ExternalFile('../lib/Lib.Sequence.fsti'),
 ]
 
 no_extraction_files = [File(x) for x in [

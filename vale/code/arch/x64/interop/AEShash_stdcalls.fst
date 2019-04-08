@@ -23,33 +23,15 @@ let length_aux2 (b:uint8_p) : Lemma
     let db = get_downview b in
     DV.length_eq db
 
-inline_for_extraction
-val aes128_keyhash_init_stdcall':
-  key:Ghost.erased (Seq.seq nat32) ->
-  roundkeys_b:uint8_p ->
-  hkeys_b:uint8_p ->
-  Stack unit
-    (requires fun h0 ->
-      B.disjoint roundkeys_b hkeys_b /\
 
-      B.live h0 roundkeys_b /\ B.live h0 hkeys_b /\
-
-      B.length roundkeys_b = 176 /\
-      B.length hkeys_b = 16 /\
-
-      is_aes_key_LE AES_128 (Ghost.reveal key) /\
-      (Seq.equal (B.as_seq h0 roundkeys_b)
-        (seq_nat8_to_seq_uint8 (le_seq_quad32_to_bytes (key_to_round_keys_LE AES_128 (Ghost.reveal key))))) /\
-
-      aesni_enabled)
-    (ensures fun h0 _ h1 ->
-      B.modifies (B.loc_buffer hkeys_b) h0 h1 /\
-  
-      (let v = seq_nat8_to_seq_uint8 (le_quad32_to_bytes (reverse_bytes_quad32 (aes_encrypt_LE AES_128 (Ghost.reveal key) (Mkfour 0 0 0 0)))) in
-      Seq.equal (B.as_seq h1 hkeys_b) v))
+let length_aux5 (b:uint8_p) : Lemma
+  (requires B.length b = 128)
+  (ensures DV.length (get_downview b) % 16 = 0) = 
+    let db = get_downview b in
+    DV.length_eq db
 
 inline_for_extraction
-let aes128_keyhash_init_stdcall' key roundkeys_b hkeys_b =
+let aes128_keyhash_init_stdcall key roundkeys_b hkeys_b =
   let h0 = get() in
 
   DV.length_eq (get_downview roundkeys_b);
@@ -72,51 +54,20 @@ let aes128_keyhash_init_stdcall' key roundkeys_b hkeys_b =
 
   let h1 = get() in
 
+
   let lemma_aux2 () : Lemma
-    (Seq.equal (B.as_seq h1 hkeys_b)
-      (seq_nat8_to_seq_uint8 (le_quad32_to_bytes (low_buffer_read TUInt8 TUInt128 h1 hkeys_b 0))))
-    = gcm_simplify2 hkeys_b h1
+    (let db = get_downview hkeys_b in
+      length_aux5 hkeys_b;
+      let ub = UV.mk_buffer db Views.up_view128 in
+      UV.as_seq h1 ub == le_bytes_to_seq_quad32 (seq_uint8_to_seq_nat8 (B.as_seq h1 hkeys_b)))
+    = let db = get_downview hkeys_b in
+      let ub = UV.mk_buffer db Views.up_view128 in
+      lemma_seq_nat8_le_seq_quad32_to_bytes_uint32 hkeys_b h1;
+      le_bytes_to_seq_quad32_to_bytes (UV.as_seq h1 ub)
   in lemma_aux2 ()
 
 inline_for_extraction
-let aes128_keyhash_init_stdcall key roundkeys_b hkeys_b =
-  let h0 = get() in
-  let b_sub = B.sub hkeys_b 32ul 16ul in
-  aes128_keyhash_init_stdcall' key roundkeys_b b_sub;
-  let h1 = get() in
-  assert (Seq.equal (Seq.slice (B.as_seq h1 hkeys_b) 0 32) (B.as_seq h1 (B.gsub hkeys_b 0ul 32ul)));
-  assert (Seq.equal (Seq.slice (B.as_seq h1 hkeys_b) 48 160) (B.as_seq h1 (B.gsub hkeys_b 48ul 112ul)));
-  assert (Seq.equal (Seq.slice (B.as_seq h1 hkeys_b) 0 32) (Seq.create 32 0uy));
-  assert (Seq.equal (Seq.slice (B.as_seq h1 hkeys_b) 48 160) (Seq.create 112 0uy));
-  assert (Seq.equal (B.as_seq h1 b_sub) (Seq.slice (B.as_seq h1 hkeys_b) 32 48))
-
-inline_for_extraction
-val aes256_keyhash_init_stdcall':
-  key:Ghost.erased (Seq.seq nat32) ->
-  roundkeys_b:uint8_p ->
-  hkeys_b:uint8_p ->
-  Stack unit
-    (requires fun h0 ->
-      B.disjoint roundkeys_b hkeys_b /\
-
-      B.live h0 roundkeys_b /\ B.live h0 hkeys_b /\
-
-      B.length roundkeys_b = 240 /\
-      B.length hkeys_b = 16 /\
-
-      is_aes_key_LE AES_256 (Ghost.reveal key) /\
-      (Seq.equal (B.as_seq h0 roundkeys_b)
-        (seq_nat8_to_seq_uint8 (le_seq_quad32_to_bytes (key_to_round_keys_LE AES_256 (Ghost.reveal key))))) /\
-
-      aesni_enabled)
-    (ensures fun h0 _ h1 ->
-      B.modifies (B.loc_buffer hkeys_b) h0 h1 /\
-  
-      (let v = seq_nat8_to_seq_uint8 (le_quad32_to_bytes (reverse_bytes_quad32 (aes_encrypt_LE AES_256 (Ghost.reveal key) (Mkfour 0 0 0 0)))) in
-      Seq.equal (B.as_seq h1 hkeys_b) v))
-
-inline_for_extraction
-let aes256_keyhash_init_stdcall' key roundkeys_b hkeys_b =
+let aes256_keyhash_init_stdcall key roundkeys_b hkeys_b =
   let h0 = get() in
 
   DV.length_eq (get_downview roundkeys_b);
@@ -140,19 +91,12 @@ let aes256_keyhash_init_stdcall' key roundkeys_b hkeys_b =
   let h1 = get() in
 
   let lemma_aux2 () : Lemma
-    (Seq.equal (B.as_seq h1 hkeys_b)
-      (seq_nat8_to_seq_uint8 (le_quad32_to_bytes (low_buffer_read TUInt8 TUInt128 h1 hkeys_b 0))))
-    = gcm_simplify2 hkeys_b h1
+    (let db = get_downview hkeys_b in
+      length_aux5 hkeys_b;
+      let ub = UV.mk_buffer db Views.up_view128 in
+      UV.as_seq h1 ub == le_bytes_to_seq_quad32 (seq_uint8_to_seq_nat8 (B.as_seq h1 hkeys_b)))
+    = let db = get_downview hkeys_b in
+      let ub = UV.mk_buffer db Views.up_view128 in
+      lemma_seq_nat8_le_seq_quad32_to_bytes_uint32 hkeys_b h1;
+      le_bytes_to_seq_quad32_to_bytes (UV.as_seq h1 ub)
   in lemma_aux2 ()
-
-inline_for_extraction
-let aes256_keyhash_init_stdcall key roundkeys_b hkeys_b =
-  let h0 = get() in
-  let b_sub = B.sub hkeys_b 32ul 16ul in
-  aes256_keyhash_init_stdcall' key roundkeys_b b_sub;
-  let h1 = get() in
-  assert (Seq.equal (Seq.slice (B.as_seq h1 hkeys_b) 0 32) (B.as_seq h1 (B.gsub hkeys_b 0ul 32ul)));
-  assert (Seq.equal (Seq.slice (B.as_seq h1 hkeys_b) 48 160) (B.as_seq h1 (B.gsub hkeys_b 48ul 112ul)));
-  assert (Seq.equal (Seq.slice (B.as_seq h1 hkeys_b) 0 32) (Seq.create 32 0uy));
-  assert (Seq.equal (Seq.slice (B.as_seq h1 hkeys_b) 48 160) (Seq.create 112 0uy));
-  assert (Seq.equal (B.as_seq h1 b_sub) (Seq.slice (B.as_seq h1 hkeys_b) 32 48))

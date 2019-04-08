@@ -35,7 +35,7 @@ val old_aes128_key_expansion: key_ptr:uint8_p -> expanded_key_ptr: uint8_p -> St
 val old_gcm128_encrypt: B.pointer gcm_args -> Stack_ unit
 
 [@ (CCConv "stdcall") ]
-val gcm128_decrypt: B.pointer gcm_args -> Stack_ uint32_t
+val old_gcm128_decrypt: B.pointer gcm_args -> Stack_ uint32_t
 
 // This old is to avoid naming conflicts in KreMLin, since there is already an aes256_key_expansion
 // extracted by KreMLin
@@ -47,4 +47,4 @@ val old_aes256_key_expansion: key_ptr:uint8_p -> expanded_key_ptr: uint8_p -> St
 val old_gcm256_encrypt: B.pointer gcm_args -> Stack_ unit
 
 [@ (CCConv "stdcall") ]
-val gcm256_decrypt: B.pointer gcm_args -> Stack_ uint32_t
+val old_gcm256_decrypt: B.pointer gcm_args -> Stack_ uint32_t

@@ -1,5 +1,5 @@
 [
-  "}?n∆\u00179rw\u0001ú?_c\u001729",
+  "|â+3ìÄ:\u001bè¡¿X\u0000!\u0000g",
   [
     [
       "Arch.BufferFriend.lemma_to_bytes_slice",
@@ -17,7 +17,7 @@
         "typing_Arch.BufferFriend.to_bytes"
       ],
       0,
-      "951d8ef7ed8be22f2fd740319aaf1326"
+      "0ce481642c9777755abfad560e9cb109"
     ],
     [
       "Arch.BufferFriend.lemma_of_bytes_slice",
@@ -35,7 +35,7 @@
         "typing_Arch.BufferFriend.of_bytes"
       ],
       0,
-      "7b98cd78a04860ae904912dbf70b748b"
+      "e2d0f21186ae3c0541be508dfcce3398"
     ],
     [
       "Arch.BufferFriend.lemma_up_as_seq_index",
@@ -68,7 +68,25 @@
         "typing_LowStar.BufferView.Up.get_view"
       ],
       0,
-      "36ce508fa7a5d2290732fbeac4f9255a"
+      "641a8a560f71145d0bef9e5368be9e2d"
+    ],
+    [
+      "Arch.BufferFriend.lemma_n_to_le_is_nat_to_bytes",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_f8666440faa91836cc5a13998af863fc", "b2t_def",
+        "equation_Prims.nat", "equation_Prims.squash", "int_inversion",
+        "primitive_Prims.op_LessThan", "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_8d65e998a07dd53ec478e27017d9dba5",
+        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "unit_typing"
+      ],
+      0,
+      "ebf5476870583601dfd64734bf68394d"
     ],
     [
       "Arch.BufferFriend.nat_from_bytes_le_is_four_to_nat",
@@ -91,7 +109,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "76e880ccd2272b3b1faae91d9ea3972d"
+      "aaedbc69f561d210beda4893b032fc5f"
     ],
     [
       "Arch.BufferFriend.nat_from_bytes_le_is_le_bytes_to_nat32",
@@ -117,7 +135,7 @@
         "typing_Tm_abs_45bc106d66ff9e2c3c9f4100524b39b3"
       ],
       0,
-      "2d13c9f4a001435c52cad72029486113"
+      "9d67825504bfcfb4734f57550849de5d"
     ],
     [
       "Arch.BufferFriend.nat_from_bytes_le_is_le_bytes_to_nat64",
@@ -143,7 +161,7 @@
         "typing_Tm_abs_45bc106d66ff9e2c3c9f4100524b39b3"
       ],
       0,
-      "222a8f293237f3fc9c70c721a9d55fbb"
+      "43aac2d96455bed1266c9356ea33a431"
     ]
   ]
 ]

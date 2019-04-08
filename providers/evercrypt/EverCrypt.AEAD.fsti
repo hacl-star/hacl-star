@@ -22,104 +22,126 @@ open FStar.HyperStack.ST
 open FStar.Integers
 
 open Spec.AEAD
+open EverCrypt.Error
 
 /// Note: if the fst and the fsti are running on different fuel settings,
 /// something that works in the interactive mode for the fsti, when
 /// "re-interpreted" in the fst, might stop working!
 #set-options "--max_fuel 0 --max_ifuel 0"
 
+
+/// Abstract footprints, with the same machinery as EverCrypt.Hash
+/// --------------------------------------------------------------
+///
+/// Differences from EverCrypt.Hash include: combined framing lemma, the
+/// equivalent of the ``repr`` function does *not* require the memory, and order
+/// of arguments to be in line with ``B.as_seq``, etc. which take the memory
+/// first.
+
+[@CAbstractStruct]
+val state_s: alg -> Type0
+
+let state alg = B.pointer (state_s alg)
+
+val freeable_s: #(a: alg) -> state_s a -> Type0
+
+let freeable (#a: alg) (h: HS.mem) (p: state a) =
+  B.freeable p /\ freeable_s (B.deref h p)
+
+let preserves_freeable #a (s: state a) (h0 h1: HS.mem): Type0 =
+  freeable h0 s ==> freeable h1 s
+
+val footprint_s: #a:alg -> state_s a -> GTot B.loc
+let footprint (#a:alg) (m: HS.mem) (s: state a) =
+  B.(loc_union (loc_addr_of_buffer s) (footprint_s (B.deref m s)))
+
+unfold let loc_includes_union_l_footprint_s = EverCrypt.Hash.loc_includes_union_l_footprint_s
+unfold let loc_in = EverCrypt.Hash.loc_in
+unfold let loc_unused_in = EverCrypt.Hash.loc_unused_in
+unfold let fresh_loc = EverCrypt.Hash.fresh_loc
+unfold let fresh_is_disjoint = EverCrypt.Hash.fresh_is_disjoint
+
+val invariant_s: (#a:alg) -> HS.mem -> state_s a -> Type0
+let invariant (#a:alg) (m: HS.mem) (s: state a) =
+  B.live m s /\
+  B.(loc_disjoint (loc_addr_of_buffer s) (footprint_s (B.deref m s))) /\
+  invariant_s m (B.get m s 0)
+
+val invariant_loc_in_footprint
+  (#a: alg)
+  (s: state a)
+  (m: HS.mem)
+: Lemma
+  (requires (invariant m s))
+  (ensures (loc_in (footprint m s) m))
+  [SMTPat (invariant m s)]
+
+val frame_invariant: #a:alg -> l:B.loc -> s:state a -> h0:HS.mem -> h1:HS.mem -> Lemma
+  (requires (
+    invariant h0 s /\
+    B.loc_disjoint l (footprint h0 s) /\
+    B.modifies l h0 h1))
+  (ensures (
+    invariant h1 s /\
+    footprint h0 s == footprint h1 s))
+
+
+/// Actual stateful API
+/// -------------------
+
 noextract
 let bytes = Seq.seq UInt8.t
 
-let frozen_preorder (s: bytes): MB.srel UInt8.t = fun (s1 s2: bytes) ->
-  S.equal s1 s ==> S.equal s2 s
+/// The API is constructed in a way that one can always get the original key
+/// value behind a state, any any memory.
+val as_kv: (#a: alg) -> state_s a -> GTot (kv a)
 
-/// We need to be able to return a proper ``expanded_key`` even if the algorithm
-/// is unsupported, so that C clients don't trip this interface. Alternatively,
-/// we could remove this layer of complexity and let C clients get a fatal
-/// kremlin abort if they try to use AEAD for an unsupported algorithm (see
-/// 486790f5).
-let kv_or_dummy (a: alg) = if is_supported_alg a then kv a else bytes
-
-let expand_or_dummy (a: alg) (kv: G.erased (kv_or_dummy a)) =
-  if is_supported_alg a then
-    // JP: I regularly have to perform let-bindings for these refinement types to work
-    let a = a in
-    expand #a (G.reveal kv)
-  else
-    S.empty
-
-/// A well-formedness predicate for expanded keys, that captures everything the
-/// encrypt/decrypt functions will need to know or recall later on.
-unfold
-let wf #rel a (ek: MB.mbuffer UInt8.t rel rel) s =
-  (not (MB.g_is_null ek) ==> MB.witnessed ek (S.equal s)) /\
-  (not (MB.g_is_null ek) /\ (a == AES128_GCM \/ a == AES256_GCM) ==>
-    EverCrypt.TargetConfig.x64 /\ X64.CPU_Features_s.(aesni_enabled /\ pclmulqdq_enabled))
-
-
-/// This type, following several rounds of optimization by KreMLin, will extract
-/// to a regular pointer type. A NULL pointer indicates an invalid expanded key.
-noeq
-type expanded_key (a: alg) =
-| EK:
-    kv:G.erased (kv_or_dummy a) ->
-    ek:(
-    [@ inline_let ]
-    let s = expand_or_dummy a kv in
-    [@ inline_let ]
-    let p = frozen_preorder s in
-    ek:MB.mbuffer UInt8.t p p { wf a ek s }) ->
-    expanded_key a
-
-/// When successful, this function returns a non-NULL pointer that has been
-/// freshly allocated and that contains the expanded key.
-///
-/// Possible causes for a NULL pointer include:
-/// - unsupported algorithm
-/// - unavailable implementation on target platform
-(** @type: true
-*)
-val expand_in:
-  #a:alg ->
+inline_for_extraction noextract
+let create_in_st (a: alg) =
   r:HS.rid ->
+  dst:B.pointer (B.pointer_or_null (state_s a)) ->
   k:B.buffer UInt8.t { B.length k = key_length a } ->
-  ST (expanded_key a)
+  ST error_code
     (requires fun h0 ->
       ST.is_eternal_region r /\
-      B.live h0 k)
-    (ensures fun h0 ek h1 ->
-      let l = B.loc_buffer (EK?.ek ek) in
-      Hash.fresh_loc l h0 h1 /\
-      B.(modifies loc_none h0 h1) /\
-      B.(loc_includes (loc_region_only true r) l) /\
-      (not (MB.g_is_null (EK?.ek ek)) ==> (
-        S.equal (G.reveal (EK?.kv ek)) (B.as_seq h0 k) /\
-        is_supported_alg a)))
+      B.live h0 k /\ B.live h0 dst)
+    (ensures fun h0 e h1 ->
+      match e with
+      | UnsupportedAlgorithm ->
+          B.(modifies loc_none h0 h1)
+      | Success ->
+          let s = B.deref h1 dst in
+          // Sanity
+          is_supported_alg a /\
+          not (B.g_is_null s) /\
+
+          // Memory stuff
+          B.(modifies (loc_buffer dst) h0 h1) /\
+          fresh_loc (footprint h1 s) h0 h1 /\
+          B.(loc_includes (loc_region_only true r) (footprint h1 s)) /\
+          freeable h1 s /\
+
+          // Useful stuff
+          as_kv (B.deref h1 s) == B.as_seq h0 k
+      | _ -> False)
+
+/// This function takes a pointer to a caller-allocated reference ``dst`` then,
+/// if the algorithm is supported, allocates a fresh state and modifies ``dst``
+/// to point to it. The key-value associated with this can be obtained via ``kv
+/// (B.deref dst)``; as long as ``dst`` is not modified, then the caller can
+/// derive that the ``kv`` remains the same, which will be required for encrypt.
+(** @type: true
+*)
+val create_in: #a:alg -> create_in_st a
 
 let iv_p a = iv:B.buffer UInt8.t { B.length iv = iv_length a }
 let ad_p a = ad:B.buffer UInt8.t { B.length ad <= max_length a }
 let plain_p a = p:B.buffer UInt8.t { B.length p <= max_length a }
 let cipher_p a = p:B.buffer UInt8.t { B.length p + tag_length a <= max_length a }
 
-type error_code =
-| Success
-| InvalidKey
-| Failure
-
-let _: squash (inversion error_code) = allow_inversion error_code
-
-/// This function takes a previously expanded key and performs encryption.
-///
-/// Possible return values are:
-/// - ``Success``: encryption was successfully performed
-/// - ``InvalidKey``: the function was passed a NULL expanded key (see above)
-/// ``Failure`` is currently unused but may be used in the future.
-(** @type: true
-*)
-val encrypt:
-  #a:supported_alg ->
-  ek:expanded_key a ->
+inline_for_extraction noextract
+let encrypt_st (a: supported_alg) =
+  s:B.pointer_or_null (state_s a) ->
   iv:iv_p a ->
   ad:ad_p a ->
   ad_len: UInt32.t { v ad_len = B.length ad /\ v ad_len <= pow2 31 } ->
@@ -129,35 +151,43 @@ val encrypt:
   tag: B.buffer UInt8.t { B.length tag = tag_length a } ->
   Stack error_code
     (requires fun h0 ->
-      MB.(all_live h0 [ buf (EK?.ek ek); buf iv; buf ad; buf plain; buf cipher; buf tag ]) /\
-      (B.disjoint plain cipher \/ plain == cipher) /\
-      B.disjoint cipher tag /\
-      B.disjoint iv cipher /\ B.disjoint iv tag /\
-      B.disjoint plain tag /\
-      B.disjoint plain ad /\
-      B.disjoint ad cipher /\ B.disjoint ad tag)
+      not (B.g_is_null s) ==>
+        invariant h0 s /\
+        B.(loc_disjoint (footprint h0 s) (loc_buffer iv)) /\
+        B.(loc_disjoint (footprint h0 s) (loc_buffer ad)) /\
+        B.(loc_disjoint (footprint h0 s) (loc_buffer tag)) /\
+        B.(loc_disjoint (footprint h0 s) (loc_buffer plain)) /\
+        B.(loc_disjoint (footprint h0 s) (loc_buffer cipher)) /\
+        MB.(all_live h0 [ buf iv; buf ad; buf plain; buf cipher; buf tag ]) /\
+        (B.disjoint plain cipher \/ plain == cipher) /\
+        B.disjoint cipher tag /\
+        B.disjoint iv cipher /\ B.disjoint iv tag /\
+        B.disjoint plain tag /\
+        B.disjoint plain ad /\
+        B.disjoint ad cipher /\ B.disjoint ad tag)
     (ensures fun h0 r h1 ->
       match r with
       | Success ->
+          not (B.g_is_null s) /\
           B.(modifies (loc_union (loc_buffer cipher) (loc_buffer tag)) h0 h1) /\
           S.equal (S.append (B.as_seq h1 cipher) (B.as_seq h1 tag))
-            (encrypt #a (G.reveal (EK?.kv ek)) (B.as_seq h0 iv) (B.as_seq h0 ad) (B.as_seq h0 plain))
+            (encrypt #a (as_kv (B.deref h0 s)) (B.as_seq h0 iv) (B.as_seq h0 ad) (B.as_seq h0 plain))
       | InvalidKey ->
           B.(modifies loc_none h0 h1)
-      | Failure ->
-        False)
+      | _ -> False)
 
-/// This function takes a previously expanded key and performs decryption.
+/// This function takes a previously expanded key and performs encryption.
 ///
 /// Possible return values are:
-/// - ``Success``: decryption was successfully performed
+/// - ``Success``: encryption was successfully performed
 /// - ``InvalidKey``: the function was passed a NULL expanded key (see above)
-/// - ``Failure``: cipher text could not be decrypted (e.g. tag mismatch)
 (** @type: true
 *)
-val decrypt:
-  #a:supported_alg ->
-  ek:expanded_key a ->
+val encrypt: #a:G.erased (supported_alg) -> encrypt_st (G.reveal a)
+
+inline_for_extraction noextract
+let decrypt_st (a: supported_alg) =
+  s:B.pointer_or_null (state_s a) ->
   iv:iv_p a ->
   ad:ad_p a ->
   ad_len: UInt32.t { v ad_len = B.length ad /\ v ad_len <= pow2 31 } ->
@@ -167,18 +197,40 @@ val decrypt:
   dst: B.buffer UInt8.t { B.length dst = B.length cipher } ->
   Stack error_code
     (requires fun h0 ->
-      MB.(all_live h0 [ buf (EK?.ek ek); buf iv; buf ad; buf cipher; buf tag; buf dst ]) /\
-      (B.disjoint cipher dst \/ cipher == dst))
+      not (B.g_is_null s) ==>
+        invariant h0 s /\
+        B.(loc_disjoint (footprint h0 s) (loc_buffer iv)) /\
+        B.(loc_disjoint (footprint h0 s) (loc_buffer ad)) /\
+        B.(loc_disjoint (footprint h0 s) (loc_buffer tag)) /\
+        B.(loc_disjoint (footprint h0 s) (loc_buffer dst)) /\
+        B.(loc_disjoint (footprint h0 s) (loc_buffer cipher)) /\
+        MB.(all_live h0 [ buf iv; buf ad; buf cipher; buf tag; buf dst ]) /\
+        (B.disjoint cipher dst \/ cipher == dst))
     (ensures fun h0 err h1 ->
-      let kv = G.reveal (EK?.kv ek) in
       let cipher_tag = B.as_seq h0 cipher `S.append` B.as_seq h0 tag in
-      let plain = decrypt #a kv (B.as_seq h0 iv) (B.as_seq h0 ad) cipher_tag in
       match err with
       | InvalidKey ->
           B.(modifies loc_none h0 h1)
       | Success ->
+          not (B.g_is_null s) /\ (
+          let plain = decrypt #a (as_kv (B.deref h0 s)) (B.as_seq h0 iv) (B.as_seq h0 ad) cipher_tag in
           B.(modifies (loc_buffer dst) h0 h1) /\
-          Some? plain /\ S.equal (Some?.v plain) (B.as_seq h1 dst)
-      | Failure ->
+          Some? plain /\ S.equal (Some?.v plain) (B.as_seq h1 dst))
+      | AuthenticationFailure ->
+          not (B.g_is_null s) /\ (
+          let plain = decrypt #a (as_kv (B.deref h0 s)) (B.as_seq h0 iv) (B.as_seq h0 ad) cipher_tag in
           B.(modifies (loc_buffer dst) h0 h1) /\
           None? plain)
+      | _ ->
+          False)
+
+
+/// This function takes a previously expanded key and performs decryption.
+///
+/// Possible return values are:
+/// - ``Success``: decryption was successfully performed
+/// - ``InvalidKey``: the function was passed a NULL expanded key (see above)
+/// - ``Failure``: cipher text could not be decrypted (e.g. tag mismatch)
+(** @type: true
+*)
+val decrypt: #a:G.erased supported_alg -> decrypt_st (G.reveal a)

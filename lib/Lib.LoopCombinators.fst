@@ -79,9 +79,9 @@ let repeati_inductive_repeat_gen #a n pred f x0 =
 
 let repeat_gen_inductive n a pred f x0 =
   let f' (i:nat{i < n})
-	 (x:a i{pred i x /\ x == repeat_gen i a f x0})
-	 : x':a (i + 1){pred (i + 1) x' /\ x' == repeat_gen (i + 1) a f x0}
-	 = f i x in
+         (x:a i{pred i x /\ x == repeat_gen i a f x0})
+         : x':a (i + 1){pred (i + 1) x' /\ x' == repeat_gen (i + 1) a f x0}
+         = f i x in
   repeat_gen n (fun i -> x:a i{pred i x /\ x == repeat_gen i a f x0}) f' x0
 
 let repeati_inductive' #a n pred f x0 =
