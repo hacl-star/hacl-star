@@ -10,7 +10,7 @@ module Loops = Lib.LoopCombinators
 module S = Spec.Poly1305
 include Hacl.Spec.Poly1305.Vec
 
-#reset-options "--z3rlimit 50 --max_fuel 1 --max_ifuel 1"
+#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
 
 val lemma_mod_add_distr_twice: a:nat -> b:nat -> n:pos -> Lemma
   ((a % n + b % n) % n == (a + b) % n)
@@ -99,16 +99,353 @@ let poly_update_repeat_blocks_multi_lemma2_simplify acc0 acc1 c0 c1 r =
   poly_update_repeat_blocks_multi_lemma2_simplify_lp a0r2 acc1 c0 c1 r r2;
   poly_update_repeat_blocks_multi_lemma2_simplify_rp a0r2 acc1 c0 c1 r r2
 
+val poly_update_repeat_blocks_multi_lemma4_simplify_lp:
+    a0r4:pfelem -> a1:pfelem -> a2:pfelem -> a3:pfelem
+  -> c0:pfelem -> c1:pfelem -> c2:pfelem -> c3:pfelem
+  -> r:pfelem -> r2:pfelem{r2 == pfmul r r} -> r3:pfelem{r3 == pfmul r2 r} -> r4:pfelem {r4 == pfmul r2 r2} ->
+  Lemma
+    (((((a0r4 + c0) % prime * r4 % prime + (a1 * r4 % prime + c1) % prime * r3 % prime) % prime +
+     (a2 * r4 % prime + c2) % prime * r2 % prime) % prime + (a3 * r4 % prime + c3) % prime * r % prime) % prime ==
+     ((a0r4 + c0) * r4 + (a1 * r4 + c1) * r3 + (a2 * r4 + c2) * r2 + (a3 * r4 + c3) * r) % prime)
+let poly_update_repeat_blocks_multi_lemma4_simplify_lp a0r4 a1 a2 a3 c0 c1 c2 c3 r r2 r3 r4 =
+  calc (==) {
+    ((((a0r4 + c0) % prime * r4 % prime + (a1 * r4 % prime + c1) % prime * r3 % prime) % prime +
+     (a2 * r4 % prime + c2) % prime * r2 % prime) % prime + (a3 * r4 % prime + c3) % prime * r % prime) % prime;
+  (==) { FStar.Math.Lemmas.lemma_mod_mul_distr_l (a0r4 + c0) r4 prime }
+    ((((a0r4 + c0) * r4 % prime + (a1 * r4 % prime + c1) % prime * r3 % prime) % prime +
+     (a2 * r4 % prime + c2) % prime * r2 % prime) % prime + (a3 * r4 % prime + c3) % prime * r % prime) % prime;
+  (==) { FStar.Math.Lemmas.lemma_mod_plus_distr_l (a1 * r4) c1 prime }
+    ((((a0r4 + c0) * r4 % prime + (a1 * r4 + c1) % prime * r3 % prime) % prime +
+     (a2 * r4 % prime + c2) % prime * r2 % prime) % prime + (a3 * r4 % prime + c3) % prime * r % prime) % prime;
+  (==) { FStar.Math.Lemmas.lemma_mod_mul_distr_l (a1 * r4 + c1) r3 prime }
+    ((((a0r4 + c0) * r4 % prime + (a1 * r4 + c1) * r3 % prime) % prime +
+     (a2 * r4 % prime + c2) % prime * r2 % prime) % prime + (a3 * r4 % prime + c3) % prime * r % prime) % prime;
+  (==) { FStar.Math.Lemmas.lemma_mod_plus_distr_l (a2 * r4) c2 prime }
+    ((((a0r4 + c0) * r4 % prime + (a1 * r4 + c1) * r3 % prime) % prime +
+     (a2 * r4 + c2) % prime * r2 % prime) % prime + (a3 * r4 % prime + c3) % prime * r % prime) % prime;
+  (==) { FStar.Math.Lemmas.lemma_mod_mul_distr_l (a2 * r4 + c2) r2 prime }
+    ((((a0r4 + c0) * r4 % prime + (a1 * r4 + c1) * r3 % prime) % prime +
+     (a2 * r4 + c2) * r2 % prime) % prime + (a3 * r4 % prime + c3) % prime * r % prime) % prime;
+  (==) { FStar.Math.Lemmas.lemma_mod_plus_distr_l (a3 * r4) c3 prime }
+    ((((a0r4 + c0) * r4 % prime + (a1 * r4 + c1) * r3 % prime) % prime +
+     (a2 * r4 + c2) * r2 % prime) % prime + (a3 * r4 + c3) % prime * r % prime) % prime;
+  (==) { FStar.Math.Lemmas.lemma_mod_mul_distr_l (a3 * r4 + c3) r prime }
+    ((((a0r4 + c0) * r4 % prime + (a1 * r4 + c1) * r3 % prime) % prime +
+     (a2 * r4 + c2) * r2 % prime) % prime + (a3 * r4 + c3) * r % prime) % prime;
+  (==) { FStar.Math.Lemmas.lemma_mod_plus_distr_l ((a0r4 + c0) * r4) ((a1 * r4 + c1) * r3 % prime) prime }
+    ((((a0r4 + c0) * r4 + (a1 * r4 + c1) * r3 % prime) % prime +
+     (a2 * r4 + c2) * r2 % prime) % prime + (a3 * r4 + c3) * r % prime) % prime;
+  (==) { FStar.Math.Lemmas.lemma_mod_plus_distr_r ((a0r4 + c0) * r4) ((a1 * r4 + c1) * r3) prime }
+    ((((a0r4 + c0) * r4 + (a1 * r4 + c1) * r3) % prime +
+     (a2 * r4 + c2) * r2 % prime) % prime + (a3 * r4 + c3) * r % prime) % prime;
+  (==) { FStar.Math.Lemmas.lemma_mod_plus_distr_l ((a0r4 + c0) * r4 + (a1 * r4 + c1) * r3) ((a2 * r4 + c2) * r2 % prime) prime }
+    (((a0r4 + c0) * r4 + (a1 * r4 + c1) * r3 + (a2 * r4 + c2) * r2 % prime) % prime + (a3 * r4 + c3) * r % prime) % prime;
+  (==) { FStar.Math.Lemmas.lemma_mod_plus_distr_r ((a0r4 + c0) * r4 + (a1 * r4 + c1) * r3) ((a2 * r4 + c2) * r2) prime }
+    (((a0r4 + c0) * r4 + (a1 * r4 + c1) * r3 + (a2 * r4 + c2) * r2) % prime + (a3 * r4 + c3) * r % prime) % prime;
+  (==) { FStar.Math.Lemmas.lemma_mod_plus_distr_l ((a0r4 + c0) * r4 + (a1 * r4 + c1) * r3 + (a2 * r4 + c2) * r2) ((a3 * r4 + c3) * r % prime) prime }
+    ((a0r4 + c0) * r4 + (a1 * r4 + c1) * r3 + (a2 * r4 + c2) * r2 + (a3 * r4 + c3) * r % prime) % prime;
+  (==) { FStar.Math.Lemmas.lemma_mod_plus_distr_r ((a0r4 + c0) * r4 + (a1 * r4 + c1) * r3 + (a2 * r4 + c2) * r2) ((a3 * r4 + c3) * r) prime }
+    ((a0r4 + c0) * r4 + (a1 * r4 + c1) * r3 + (a2 * r4 + c2) * r2 + (a3 * r4 + c3) * r) % prime;
+  }
+
+val poly_update_repeat_blocks_multi_lemma4_simplify_rp:
+    a0r4:pfelem -> a1:pfelem -> a2:pfelem -> a3:pfelem
+  -> c0:pfelem -> c1:pfelem -> c2:pfelem -> c3:pfelem
+  -> r:pfelem -> r2:pfelem{r2 == pfmul r r} -> r3:pfelem{r3 == pfmul r2 r} -> r4:pfelem {r4 == pfmul r2 r2} ->
+  Lemma
+    (((((((((((((((((a0r4 + a1 * r3 % prime) % prime + a2 * r2 % prime) % prime) + a3 * r % prime) % prime)
+      + c0) % prime) * r % prime) + c1) % prime) * r % prime) + c2) % prime) * r % prime) + c3) % prime) * r % prime ==
+     ((((a0r4 + a1 * r3 + a2 * r2 + a3 * r + c0) * r + c1) * r + c2) * r + c3) * r % prime)
+let poly_update_repeat_blocks_multi_lemma4_simplify_rp a0r4 a1 a2 a3 c0 c1 c2 c3 r r2 r3 r4 =
+  calc (==) {
+    ((((((((((((((((a0r4 + a1 * r3 % prime) % prime + a2 * r2 % prime) % prime) + a3 * r % prime) % prime)
+      + c0) % prime) * r % prime) + c1) % prime) * r % prime) + c2) % prime) * r % prime) + c3) % prime) * r % prime;
+  (==) { FStar.Math.Lemmas.lemma_mod_plus_distr_r a0r4 (a1 * r3) prime }
+    ((((((((((((((((a0r4 + a1 * r3) % prime + a2 * r2 % prime) % prime) + a3 * r % prime) % prime)
+      + c0) % prime) * r % prime) + c1) % prime) * r % prime) + c2) % prime) * r % prime) + c3) % prime) * r % prime;
+  (==) { FStar.Math.Lemmas.lemma_mod_plus_distr_l (a0r4 + a1 * r3) (a2 * r2 % prime) prime }
+    (((((((((((((((a0r4 + a1 * r3 + a2 * r2 % prime) % prime) + a3 * r % prime) % prime)
+      + c0) % prime) * r % prime) + c1) % prime) * r % prime) + c2) % prime) * r % prime) + c3) % prime) * r % prime;
+  (==) { FStar.Math.Lemmas.lemma_mod_plus_distr_r (a0r4 + a1 * r3) (a2 * r2) prime }
+    (((((((((((((((a0r4 + a1 * r3 + a2 * r2) % prime) + a3 * r % prime) % prime)
+      + c0) % prime) * r % prime) + c1) % prime) * r % prime) + c2) % prime) * r % prime) + c3) % prime) * r % prime;
+  (==) { FStar.Math.Lemmas.lemma_mod_plus_distr_l (a0r4 + a1 * r3 + a2 * r2) (a3 * r % prime) prime }
+    (((((((((((((a0r4 + a1 * r3 + a2 * r2 + a3 * r % prime) % prime)
+      + c0) % prime) * r % prime) + c1) % prime) * r % prime) + c2) % prime) * r % prime) + c3) % prime) * r % prime;
+  (==) { FStar.Math.Lemmas.lemma_mod_plus_distr_r (a0r4 + a1 * r3 + a2 * r2) (a3 * r) prime }
+    (((((((((((((a0r4 + a1 * r3 + a2 * r2 + a3 * r) % prime)
+      + c0) % prime) * r % prime) + c1) % prime) * r % prime) + c2) % prime) * r % prime) + c3) % prime) * r % prime;
+  (==) { FStar.Math.Lemmas.lemma_mod_plus_distr_l (a0r4 + a1 * r3 + a2 * r2 + a3 * r) c0 prime }
+    (((((((((((a0r4 + a1 * r3 + a2 * r2 + a3 * r + c0) % prime) * r % prime) + c1) % prime) * r % prime) + c2) % prime)
+      * r % prime) + c3) % prime) * r % prime;
+  (==) { FStar.Math.Lemmas.lemma_mod_mul_distr_l (a0r4 + a1 * r3 + a2 * r2 + a3 * r + c0) r prime }
+    ((((((((((a0r4 + a1 * r3 + a2 * r2 + a3 * r + c0) * r % prime) + c1) % prime) * r % prime) + c2) % prime)
+      * r % prime) + c3) % prime) * r % prime;
+  (==) { FStar.Math.Lemmas.lemma_mod_plus_distr_l ((a0r4 + a1 * r3 + a2 * r2 + a3 * r + c0) * r) c1 prime }
+    (((((((((a0r4 + a1 * r3 + a2 * r2 + a3 * r + c0) * r + c1) % prime) * r % prime) + c2) % prime)
+      * r % prime) + c3) % prime) * r % prime;
+  (==) { FStar.Math.Lemmas.lemma_mod_mul_distr_l ((a0r4 + a1 * r3 + a2 * r2 + a3 * r + c0) * r + c1) r prime }
+    (((((((a0r4 + a1 * r3 + a2 * r2 + a3 * r + c0) * r + c1) * r % prime + c2) % prime)
+      * r % prime) + c3) % prime) * r % prime;
+  (==) { FStar.Math.Lemmas.lemma_mod_plus_distr_l (((a0r4 + a1 * r3 + a2 * r2 + a3 * r + c0) * r + c1) * r) c2 prime }
+    (((((((a0r4 + a1 * r3 + a2 * r2 + a3 * r + c0) * r + c1) * r + c2) % prime) * r % prime) + c3) % prime) * r % prime;
+  (==) { FStar.Math.Lemmas.lemma_mod_mul_distr_l ((((a0r4 + a1 * r3 + a2 * r2 + a3 * r + c0) * r + c1) * r) + c2) r prime }
+    ((((((a0r4 + a1 * r3 + a2 * r2 + a3 * r + c0) * r + c1) * r + c2) * r % prime) + c3) % prime) * r % prime;
+  (==) { FStar.Math.Lemmas.lemma_mod_plus_distr_l (((((a0r4 + a1 * r3 + a2 * r2 + a3 * r + c0) * r + c1) * r) + c2) * r) c3 prime }
+    (((((a0r4 + a1 * r3 + a2 * r2 + a3 * r + c0) * r + c1) * r + c2) * r + c3) % prime) * r % prime;
+  (==) { FStar.Math.Lemmas.lemma_mod_mul_distr_l ((((((a0r4 + a1 * r3 + a2 * r2 + a3 * r + c0) * r + c1) * r) + c2) * r) + c3) r prime }
+    ((((a0r4 + a1 * r3 + a2 * r2 + a3 * r + c0) * r + c1) * r + c2) * r + c3) * r % prime;
+  }
+
+val lemma_paren_mul_4: r:nat -> Lemma
+   ((r * r) * (r * r) == r * r * r * r)
+let lemma_paren_mul_4 r = ()
+
+val lemma_remove_mod4:
+  a:nat -> r:pfelem -> n:pos -> Lemma
+  (a * pfmul (pfmul r r) (pfmul r r) % prime == a * (r * r * r * r) % prime)
+let lemma_remove_mod4 a r n =
+  calc (==) {
+    a * ((r * r % prime) * (r * r % prime) % prime) % prime;
+  (==) { lemma_mod_mul_distr_twice (r * r) (r * r) prime }
+    a * ((r * r) * (r * r) % prime) % prime;
+  (==) { lemma_paren_mul_4 r }
+    a * (r * r * r * r % prime) % prime;
+  (==) { FStar.Math.Lemmas.lemma_mod_mul_distr_r a (r * r * r * r) prime }
+    a * (r * r * r * r) % prime;
+  }
+
+val lemma_remove_mod3:
+  a:nat -> r:pfelem -> n:pos -> Lemma
+  (a * pfmul (pfmul r r) r % prime == a * (r * r * r) % prime)
+let lemma_remove_mod3 a r n =
+  calc (==) {
+    a * ((r * r % prime) * r % prime) % prime;
+  (==) { FStar.Math.Lemmas.lemma_mod_mul_distr_l (r * r) r prime }
+    a * (r * r * r % prime) % prime;
+  (==) { FStar.Math.Lemmas.lemma_mod_mul_distr_r a (r * r * r) prime }
+    a * (r * r * r) % prime;
+  }
+
+val lemma_remove_mod2:
+  a:nat -> r:pfelem -> n:pos -> Lemma
+  (a * pfmul r r % prime == a * (r * r) % prime)
+let lemma_remove_mod2 a r n =
+  calc (==) {
+    a * (r * r % prime) % prime;
+  (==) { FStar.Math.Lemmas.lemma_mod_mul_distr_r a (r * r) prime }
+    a * (r * r) % prime;
+  }
+
+val poly_update_repeat_blocks_multi_lemma4_simplify_lp1:
+    a0r4:pfelem -> a1:pfelem -> a2:pfelem -> a3:pfelem
+  -> c0:pfelem -> c1:pfelem -> c2:pfelem -> c3:pfelem
+  -> r:pfelem -> r2:pfelem{r2 == pfmul r r} -> r3:pfelem{r3 == pfmul r2 r} -> r4:pfelem {r4 == pfmul r2 r2} ->
+  Lemma
+    (((a0r4 + c0) * r4 + (a1 * r4 + c1) * r3 + (a2 * r4 + c2) * r2 + (a3 * r4 + c3) * r) % prime ==
+    (a0r4 * (r * r * r * r) + c0 * (r * r * r * r) + a1 * r3 * (r * r * r * r) +
+       c1 * r3 + a2 * r2 * r4 + c2 * r2 + a3 * r * r4 + c3 * r) % prime)
+let poly_update_repeat_blocks_multi_lemma4_simplify_lp1 a0r4 a1 a2 a3 c0 c1 c2 c3 r r2 r3 r4 =
+  calc (==) {
+    ((a0r4 + c0) * r4 + (a1 * r4 + c1) * r3 + (a2 * r4 + c2) * r2 + (a3 * r4 + c3) * r) % prime;
+  (==) { FStar.Math.Lemmas.distributivity_add_left a0r4 c0 r4 }
+    (a0r4 * r4 + c0 * r4 + (a1 * r4 + c1) * r3 + (a2 * r4 + c2) * r2 + (a3 * r4 + c3) * r) % prime;
+  (==) { FStar.Math.Lemmas.distributivity_add_left (a1 * r4) c1 r3 }
+    (a0r4 * r4 + c0 * r4 + a1 * r4 * r3 + c1 * r3 + (a2 * r4 + c2) * r2 + (a3 * r4 + c3) * r) % prime;
+  (==) { FStar.Math.Lemmas.distributivity_add_left (a2 * r4) c2 r2 }
+    (a0r4 * r4 + c0 * r4 + a1 * r4 * r3 + c1 * r3 + a2 * r4 * r2 + c2 * r2 + (a3 * r4 + c3) * r) % prime;
+  (==) { FStar.Math.Lemmas.distributivity_add_left (a3 * r4) c3 r }
+    (a0r4 * r4 + c0 * r4 + a1 * r4 * r3 + c1 * r3 + a2 * r4 * r2 + c2 * r2 + a3 * r4 * r + c3 * r) % prime;
+  (==) { FStar.Math.Lemmas.paren_mul_right a1 r4 r3 }
+    (a0r4 * r4 + c0 * r4 + a1 * (r3 * r4) + c1 * r3 + a2 * r4 * r2 + c2 * r2 + a3 * r4 * r + c3 * r) % prime;
+  (==) { FStar.Math.Lemmas.paren_mul_right a1 r3 r4 }
+    (a0r4 * r4 + c0 * r4 + a1 * r3 * r4 + c1 * r3 + a2 * r4 * r2 + c2 * r2 + a3 * r4 * r + c3 * r) % prime;
+  (==) { FStar.Math.Lemmas.paren_mul_right a2 r4 r2 }
+    (a0r4 * r4 + c0 * r4 + a1 * r3 * r4 + c1 * r3 + a2 * (r2 * r4) + c2 * r2 + a3 * r4 * r + c3 * r) % prime;
+  (==) { FStar.Math.Lemmas.paren_mul_right a2 r2 r4 }
+    (a0r4 * r4 + c0 * r4 + a1 * r3 * r4 + c1 * r3 + a2 * r2 * r4 + c2 * r2 + a3 * r4 * r + c3 * r) % prime;
+  (==) { FStar.Math.Lemmas.paren_mul_right a3 r4 r }
+    (a0r4 * r4 + c0 * r4 + a1 * r3 * r4 + c1 * r3 + a2 * r2 * r4 + c2 * r2 + a3 * (r * r4) + c3 * r) % prime;
+  (==) { FStar.Math.Lemmas.paren_mul_right a3 r r4 }
+    (a0r4 * r4 + c0 * r4 + a1 * r3 * r4 + c1 * r3 + a2 * r2 * r4 + c2 * r2 + a3 * r * r4 + c3 * r) % prime;
+  (==) { FStar.Math.Lemmas.lemma_mod_plus_distr_l (a0r4 * r4)
+       (c0 * r4 + a1 * r3 * r4 + c1 * r3 + a2 * r2 * r4 + c2 * r2 + a3 * r * r4 + c3 * r) prime }
+    (a0r4 * r4 % prime + c0 * r4 + a1 * r3 * r4 + c1 * r3 + a2 * r2 * r4 + c2 * r2 + a3 * r * r4 + c3 * r) % prime;
+  (==) { lemma_remove_mod4 a0r4 r prime }
+    (a0r4 * (r * r * r * r) % prime + c0 * r4 + a1 * r3 * r4 + c1 * r3 + a2 * r2 * r4 + c2 * r2 + a3 * r * r4 + c3 * r) % prime;
+  (==) { FStar.Math.Lemmas.lemma_mod_plus_distr_l (a0r4 * (r * r * r * r))
+       (c0 * r4 + a1 * r3 * r4 + c1 * r3 + a2 * r2 * r4 + c2 * r2 + a3 * r * r4 + c3 * r) prime }
+    (a0r4 * (r * r * r * r) + c0 * r4 + a1 * r3 * r4 + c1 * r3 + a2 * r2 * r4 + c2 * r2 + a3 * r * r4 + c3 * r) % prime;
+  (==) { FStar.Math.Lemmas.lemma_mod_plus_distr_l (c0 * r4)
+       (a0r4 * (r * r * r * r) + a1 * r3 * r4 + c1 * r3 + a2 * r2 * r4 + c2 * r2 + a3 * r * r4 + c3 * r) prime }
+     (c0 * r4 % prime + a0r4 * (r * r * r * r) + a1 * r3 * r4 + c1 * r3 + a2 * r2 * r4 + c2 * r2 + a3 * r * r4 + c3 * r) % prime;
+  (==) { lemma_remove_mod4 c0 r prime }
+     (c0 * (r * r * r * r) % prime + a0r4 * (r * r * r * r) + a1 * r3 * r4 + c1 * r3 + a2 * r2 * r4 + c2 * r2 + a3 * r * r4 + c3 * r) % prime;
+  (==) { FStar.Math.Lemmas.lemma_mod_plus_distr_l (c0 * (r * r * r * r))
+       (a0r4 * (r * r * r * r) + a1 * r3 * r4 + c1 * r3 + a2 * r2 * r4 + c2 * r2 + a3 * r * r4 + c3 * r) prime }
+     (a0r4 * (r * r * r * r) + c0 * (r * r * r * r) + a1 * r3 * r4 + c1 * r3 + a2 * r2 * r4 + c2 * r2 + a3 * r * r4 + c3 * r) % prime;
+  (==) { FStar.Math.Lemmas.lemma_mod_plus_distr_l (a1 * r3 * r4)
+       (a0r4 * (r * r * r * r) + c0 * (r * r * r * r) + c1 * r3 + a2 * r2 * r4 + c2 * r2 + a3 * r * r4 + c3 * r) prime }
+     (a0r4 * (r * r * r * r) + c0 * (r * r * r * r) + a1 * r3 * r4 % prime + c1 * r3 + a2 * r2 * r4 + c2 * r2 + a3 * r * r4 + c3 * r) % prime;
+  (==) { lemma_remove_mod4 (a1 * r3) r prime }
+      (a0r4 * (r * r * r * r) + c0 * (r * r * r * r) + a1 * r3 * (r * r * r * r) % prime +
+	c1 * r3 + a2 * r2 * r4 + c2 * r2 + a3 * r * r4 + c3 * r) % prime;
+  (==) { FStar.Math.Lemmas.lemma_mod_plus_distr_l (a1 * r3 * (r * r * r * r))
+       (a0r4 * (r * r * r * r) + c0 * (r * r * r * r) + c1 * r3 + a2 * r2 * r4 + c2 * r2 + a3 * r * r4 + c3 * r) prime }
+     (a0r4 * (r * r * r * r) + c0 * (r * r * r * r) + a1 * r3 * (r * r * r * r) +
+       c1 * r3 + a2 * r2 * r4 + c2 * r2 + a3 * r * r4 + c3 * r) % prime;
+  }
+
+val paren_mul_right4: a:nat -> b:nat -> Lemma
+  (a * b * b * b == a * (b * b * b))
+let paren_mul_right4 a b = ()
+
+val poly_update_repeat_blocks_multi_lemma4_simplify_lp2:
+    a0r4:pfelem -> a1:pfelem -> a2:pfelem -> a3:pfelem
+  -> c0:pfelem -> c1:pfelem -> c2:pfelem -> c3:pfelem
+  -> r:pfelem -> r2:pfelem{r2 == pfmul r r} -> r3:pfelem{r3 == pfmul r2 r} -> r4:pfelem {r4 == pfmul r2 r2} ->
+  Lemma
+    (((a0r4 + c0) * r4 + (a1 * r4 + c1) * r3 + (a2 * r4 + c2) * r2 + (a3 * r4 + c3) * r) % prime ==
+    (a0r4 * (r * r * r * r) + a1 * r3 * (r * r * r * r) + a2 * r2 * (r * r * r * r) +
+      a3 * r * (r * r * r * r) + c0 * (r * r * r * r) + c1 * r * r * r + c2 * r * r + c3 * r) % prime)
+let poly_update_repeat_blocks_multi_lemma4_simplify_lp2 a0r4 a1 a2 a3 c0 c1 c2 c3 r r2 r3 r4 =
+  calc (==) {
+    ((a0r4 + c0) * r4 + (a1 * r4 + c1) * r3 + (a2 * r4 + c2) * r2 + (a3 * r4 + c3) * r) % prime;
+  (==) { poly_update_repeat_blocks_multi_lemma4_simplify_lp1 a0r4 a1 a2 a3 c0 c1 c2 c3 r r2 r3 r4 }
+    (a0r4 * (r * r * r * r) + c0 * (r * r * r * r) + a1 * r3 * (r * r * r * r) +
+       c1 * r3 + a2 * r2 * r4 + c2 * r2 + a3 * r * r4 + c3 * r) % prime;
+  (==) { FStar.Math.Lemmas.lemma_mod_plus_distr_l (a2 * r2 * r4)
+    (a0r4 * (r * r * r * r) + c0 * (r * r * r * r) + a1 * r3 * (r * r * r * r) +
+       c1 * r3 + c2 * r2 + a3 * r * r4 + c3 * r) prime}
+    (a0r4 * (r * r * r * r) + c0 * (r * r * r * r) + a1 * r3 * (r * r * r * r) +
+       c1 * r3 + a2 * r2 * r4 % prime + c2 * r2 + a3 * r * r4 + c3 * r) % prime;
+  (==) { lemma_remove_mod4 (a2 * r2) r prime }
+    (a0r4 * (r * r * r * r) + c0 * (r * r * r * r) + a1 * r3 * (r * r * r * r) +
+       c1 * r3 + a2 * r2 * (r * r * r * r) % prime + c2 * r2 + a3 * r * r4 + c3 * r) % prime;
+  (==) { FStar.Math.Lemmas.lemma_mod_plus_distr_l (a2 * r2 * (r * r * r * r))
+    (a0r4 * (r * r * r * r) + c0 * (r * r * r * r) + a1 * r3 * (r * r * r * r) +
+       c1 * r3 + c2 * r2 + a3 * r * r4 + c3 * r) prime }
+    (a0r4 * (r * r * r * r) + c0 * (r * r * r * r) + a1 * r3 * (r * r * r * r) +
+       c1 * r3 + a2 * r2 * (r * r * r * r) + c2 * r2 + a3 * r * r4 + c3 * r) % prime;
+  (==) { FStar.Math.Lemmas.lemma_mod_plus_distr_l (a3 * r * r4)
+    (a0r4 * (r * r * r * r) + c0 * (r * r * r * r) + a1 * r3 * (r * r * r * r) +
+       c1 * r3 + a2 * r2 * (r * r * r * r) + c2 * r2 + c3 * r) prime }
+    (a0r4 * (r * r * r * r) + c0 * (r * r * r * r) + a1 * r3 * (r * r * r * r) +
+       c1 * r3 + a2 * r2 * (r * r * r * r) + c2 * r2 + a3 * r * r4 % prime + c3 * r) % prime;
+  (==) { lemma_remove_mod4 (a3 * r) r prime }
+    (a0r4 * (r * r * r * r) + c0 * (r * r * r * r) + a1 * r3 * (r * r * r * r) +
+       c1 * r3 + a2 * r2 * (r * r * r * r) + c2 * r2 + a3 * r * (r * r * r * r) % prime + c3 * r) % prime;
+  (==) { FStar.Math.Lemmas.lemma_mod_plus_distr_l (a3 * r * (r * r * r * r))
+    (a0r4 * (r * r * r * r) + c0 * (r * r * r * r) + a1 * r3 * (r * r * r * r) +
+       c1 * r3 + a2 * r2 * (r * r * r * r) + c2 * r2 + c3 * r) prime }
+    (a0r4 * (r * r * r * r) + c0 * (r * r * r * r) + a1 * r3 * (r * r * r * r) +
+       c1 * r3 + a2 * r2 * (r * r * r * r) + c2 * r2 + a3 * r * (r * r * r * r) + c3 * r) % prime;
+  (==) { FStar.Math.Lemmas.lemma_mod_plus_distr_l (c1 * r3)
+    (a0r4 * (r * r * r * r) + c0 * (r * r * r * r) + a1 * r3 * (r * r * r * r) +
+        a2 * r2 * (r * r * r * r) + c2 * r2 + a3 * r * (r * r * r * r) + c3 * r) prime }
+    (a0r4 * (r * r * r * r) + c0 * (r * r * r * r) + a1 * r3 * (r * r * r * r) +
+       c1 * r3 % prime + a2 * r2 * (r * r * r * r) + c2 * r2 + a3 * r * (r * r * r * r) + c3 * r) % prime;
+  (==) { lemma_remove_mod3 c1 r prime }
+    (a0r4 * (r * r * r * r) + c0 * (r * r * r * r) + a1 * r3 * (r * r * r * r) +
+       c1 * (r * r * r) % prime + a2 * r2 * (r * r * r * r) + c2 * r2 + a3 * r * (r * r * r * r) + c3 * r) % prime;
+  (==) { FStar.Math.Lemmas.lemma_mod_plus_distr_l (c1 * (r * r * r))
+    (a0r4 * (r * r * r * r) + c0 * (r * r * r * r) + a1 * r3 * (r * r * r * r) +
+        a2 * r2 * (r * r * r * r) + c2 * r2 + a3 * r * (r * r * r * r) + c3 * r) prime }
+    (a0r4 * (r * r * r * r) + c0 * (r * r * r * r) + a1 * r3 * (r * r * r * r) +
+       c1 * (r * r * r) + a2 * r2 * (r * r * r * r) + c2 * r2 + a3 * r * (r * r * r * r) + c3 * r) % prime;
+  (==) { FStar.Math.Lemmas.lemma_mod_plus_distr_l (c2 * r2)
+    (a0r4 * (r * r * r * r) + c0 * (r * r * r * r) + a1 * r3 * (r * r * r * r) +
+       c1 * (r * r * r) + a2 * r2 * (r * r * r * r) + a3 * r * (r * r * r * r) + c3 * r) prime }
+    (a0r4 * (r * r * r * r) + c0 * (r * r * r * r) + a1 * r3 * (r * r * r * r) +
+       c1 * (r * r * r) + a2 * r2 * (r * r * r * r) + c2 * r2 % prime + a3 * r * (r * r * r * r) + c3 * r) % prime;
+  (==) { lemma_remove_mod2 c2 r prime }
+    (a0r4 * (r * r * r * r) + c0 * (r * r * r * r) + a1 * r3 * (r * r * r * r) +
+       c1 * (r * r * r) + a2 * r2 * (r * r * r * r) + c2 * (r * r) % prime + a3 * r * (r * r * r * r) + c3 * r) % prime;
+  (==) { FStar.Math.Lemmas.lemma_mod_plus_distr_l (c2 * (r * r))
+    (a0r4 * (r * r * r * r) + c0 * (r * r * r * r) + a1 * r3 * (r * r * r * r) +
+       c1 * (r * r * r) + a2 * r2 * (r * r * r * r) + a3 * r * (r * r * r * r) + c3 * r) prime }
+    (a0r4 * (r * r * r * r) + c0 * (r * r * r * r) + a1 * r3 * (r * r * r * r) +
+       c1 * (r * r * r) + a2 * r2 * (r * r * r * r) + c2 * (r * r) + a3 * r * (r * r * r * r) + c3 * r) % prime;
+  (==) { FStar.Math.Lemmas.paren_mul_right c2 r r }
+    (a0r4 * (r * r * r * r) + c0 * (r * r * r * r) + a1 * r3 * (r * r * r * r) +
+       c1 * (r * r * r) + a2 * r2 * (r * r * r * r) + c2 * r * r + a3 * r * (r * r * r * r) + c3 * r) % prime;
+  (==) { paren_mul_right4 c1 r }
+    (a0r4 * (r * r * r * r) + c0 * (r * r * r * r) + a1 * r3 * (r * r * r * r) +
+       c1 * r * r * r + a2 * r2 * (r * r * r * r) + c2 * r * r + a3 * r * (r * r * r * r) + c3 * r) % prime;
+   }
+
+val paren_mul_right5: a:nat -> b:nat -> Lemma
+  (a * b * b * b * b == a * (b * b * b * b))
+let paren_mul_right5 a b = ()
+
+#reset-options "--z3rlimit 50 --max_fuel 0"
+
+val poly_update_repeat_blocks_multi_lemma4_simplify_rp1:
+    a0r4:pfelem -> a1:pfelem -> a2:pfelem -> a3:pfelem
+  -> c0:pfelem -> c1:pfelem -> c2:pfelem -> c3:pfelem
+  -> r:pfelem -> r2:pfelem{r2 == pfmul r r} -> r3:pfelem{r3 == pfmul r2 r} -> r4:pfelem {r4 == pfmul r2 r2} ->
+  Lemma
+    (((((a0r4 + a1 * r3 + a2 * r2 + a3 * r + c0) * r + c1) * r + c2) * r + c3) * r % prime ==
+    (a0r4 * (r * r * r * r) + a1 * r3 * (r * r * r * r) + a2 * r2 * (r * r * r * r) +
+      a3 * r * (r * r * r * r) + c0 * (r * r * r * r) + c1 * r * r * r + c2 * r * r + c3 * r) % prime)
+let poly_update_repeat_blocks_multi_lemma4_simplify_rp1 a0r4 a1 a2 a3 c0 c1 c2 c3 r r2 r3 r4 =
+  let res = ((((a0r4 + a1 * r3 + a2 * r2 + a3 * r + c0) * r + c1) * r + c2) * r + c3) * r % prime in
+  let d = a0r4 + a1 * r3 + a2 * r2 + a3 * r + c0 in
+  calc (==) {
+    (((d * r + c1) * r + c2) * r + c3) * r % prime;
+  (==) { FStar.Math.Lemmas.distributivity_add_left (d * r) c1 r }
+    ((d * r * r + c1 * r + c2) * r + c3) * r % prime;
+  (==) { FStar.Math.Lemmas.distributivity_add_left (d * r * r + c1 * r) c2 r }
+    ((d * r * r + c1 * r) * r + c2 * r + c3) * r % prime;
+  (==) { FStar.Math.Lemmas.distributivity_add_left (d * r * r) (c1 * r) r }
+    (d * r * r * r + c1 * r * r + c2 * r + c3) * r % prime;
+  (==) { FStar.Math.Lemmas.distributivity_add_left (d * r * r * r + c1 * r * r + c2 * r) c3 r }
+    ((d * r * r * r + c1 * r * r + c2 * r) * r + c3 * r) % prime;
+  (==) { FStar.Math.Lemmas.distributivity_add_left (d * r * r * r + c1 * r * r) (c2 * r) r }
+    ((d * r * r * r + c1 * r * r) * r + c2 * r * r + c3 * r) % prime;
+  (==) { FStar.Math.Lemmas.distributivity_add_left (d * r * r * r) (c1 * r * r) r }
+    (d * r * r * r * r + c1 * r * r * r + c2 * r * r + c3 * r) % prime;
+  (==) { paren_mul_right5 d r }
+    (d * (r * r * r * r) + c1 * r * r * r + c2 * r * r + c3 * r) % prime;
+  }; 
+  assert (
+    (((d * r + c1) * r + c2) * r + c3) * r % prime ==
+    (d * (r * r * r * r) + c1 * r * r * r + c2 * r * r + c3 * r) % prime);
+  assert (res == (d * (r * r * r * r) + c1 * r * r * r + c2 * r * r + c3 * r) % prime);
+  calc (==) {
+    ((a0r4 + a1 * r3 + a2 * r2 + a3 * r + c0) * (r * r * r * r) + c1 * r * r * r + c2 * r * r + c3 * r) % prime;
+  (==) { FStar.Math.Lemmas.distributivity_add_left (a0r4 + a1 * r3 + a2 * r2 + a3 * r) c0 (r * r * r * r) }
+    ((a0r4 + a1 * r3 + a2 * r2 + a3 * r) * (r * r * r * r) + c0 * (r * r * r * r) + c1 * r * r * r + c2 * r * r + c3 * r) % prime;
+  (==) { FStar.Math.Lemmas.distributivity_add_left (a0r4 + a1 * r3 + a2 * r2) (a3 * r) (r * r * r * r) }
+    ((a0r4 + a1 * r3 + a2 * r2) * (r * r * r * r) + a3 * r * (r * r * r * r) +
+      c0 * (r * r * r * r) + c1 * r * r * r + c2 * r * r + c3 * r) % prime;
+  (==) { FStar.Math.Lemmas.distributivity_add_left (a0r4 + a1 * r3) (a2 * r2) (r * r * r * r) }
+    ((a0r4 + a1 * r3) * (r * r * r * r) + a2 * r2 * (r * r * r * r) + a3 * r * (r * r * r * r) +
+      c0 * (r * r * r * r) + c1 * r * r * r + c2 * r * r + c3 * r) % prime;
+  (==) { FStar.Math.Lemmas.distributivity_add_left a0r4 (a1 * r3) (r * r * r * r) }
+    (a0r4 * (r * r * r * r) + a1 * r3 * (r * r * r * r) + a2 * r2 * (r * r * r * r) +
+      a3 * r * (r * r * r * r) + c0 * (r * r * r * r) + c1 * r * r * r + c2 * r * r + c3 * r) % prime;
+  };
+  assert (res ==
+    (a0r4 * (r * r * r * r) + a1 * r3 * (r * r * r * r) + a2 * r2 * (r * r * r * r) +
+      a3 * r * (r * r * r * r) + c0 * (r * r * r * r) + c1 * r * r * r + c2 * r * r + c3 * r) % prime)
+
 val poly_update_repeat_blocks_multi_lemma4_simplify:
     a0:pfelem -> a1:pfelem -> a2:pfelem -> a3:pfelem
-  -> c0:pfelem -> c1:pfelem -> c2:pfelem -> c3: pfelem
+  -> c0:pfelem -> c1:pfelem -> c2:pfelem -> c3:pfelem
   -> r:pfelem -> r2:pfelem{r2 == pfmul r r} -> r4:pfelem {r4 == pfmul r2 r2} ->
   Lemma
    (pfadd (pfadd (pfadd (pfmul (pfadd (pfmul a0 r4) c0) r4)
 	  (pfmul (pfadd (pfmul a1 r4) c1) (pfmul r2 r))) (pfmul (pfadd (pfmul a2 r4) c2) r2)) (pfmul (pfadd (pfmul a3 r4) c3) r) ==
     pfmul (pfadd (pfmul (pfadd (pfmul (pfadd (pfmul (pfadd (pfadd (pfadd (pfadd (pfmul a0 r4)
 	  (pfmul a1 (pfmul r2 r))) (pfmul a2 r2)) (pfmul a3 r)) c0) r) c1) r) c2) r) c3) r)
-let poly_update_repeat_blocks_multi_lemma4_simplify a0 a1 a2 a3 c0 c1 c2 c3 r r2 r4 = admit()
+let poly_update_repeat_blocks_multi_lemma4_simplify a0 a1 a2 a3 c0 c1 c2 c3 r r2 r4 =
+  let r3 = pfmul r2 r in
+  let a0r4 = pfmul a0 r4 in
+  poly_update_repeat_blocks_multi_lemma4_simplify_lp a0r4 a1 a2 a3 c0 c1 c2 c3 r r2 r3 r4;
+  poly_update_repeat_blocks_multi_lemma4_simplify_lp2 a0r4 a1 a2 a3 c0 c1 c2 c3 r r2 r3 r4;
+  poly_update_repeat_blocks_multi_lemma4_simplify_rp a0r4 a1 a2 a3 c0 c1 c2 c3 r r2 r3 r4;
+  poly_update_repeat_blocks_multi_lemma4_simplify_rp1 a0r4 a1 a2 a3 c0 c1 c2 c3 r r2 r3 r4
 
 val poly_update_multi_lemma_load2_simplify_lp:
   a0:pfelem -> r:pfelem -> c0:pfelem -> c1:pfelem -> Lemma
@@ -186,6 +523,8 @@ let poly_update_multi_lemma_load4_simplify_lp a0 r c0 c1 c2 c3 =
 val mul_distr_a_r_lemma: a:nat -> r:nat -> Lemma
   (a * (r * r) * (r * r) == a * r * (r * r * r))
 let mul_distr_a_r_lemma a r = ()
+
+#set-options "--max_ifuel 0"
 
 val poly_update_multi_lemma_load4_simplify_rp:
   a0:pfelem -> r:pfelem -> c0:pfelem -> c1:pfelem -> c2:pfelem -> c3:pfelem -> Lemma
