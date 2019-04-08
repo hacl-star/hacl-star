@@ -2031,7 +2031,7 @@ procedure {:quick} Loop6x_partial(
     ghost var old_Ii := ~~Ii;
     ghost var old_Hkey := ~~Hkey;
     old_Xi := ~~Xi;
-    Loop6x_step1(alg, 1, 5, 2, h, prev, data, in0_count, in0_b, scratch_b, key_words, round_keys, keys_b, hkeys_b,
+    Loop6x_step1(alg, 1, 5, 2, h, prev, data, in0_count + 1, in0_b, scratch_b, key_words, round_keys, keys_b, hkeys_b,
                 init0, init1, init2, init3, init4, init5);
 
     old_Z0 := ~~Z0;
@@ -2043,7 +2043,7 @@ procedure {:quick} Loop6x_partial(
 
     old_Z0 := ~~Z0;
     assert z == ~~Z0 +. shift((~~Z2 +. ~~T2) +. ~~Hkey, 64) +. shift(~~Z3 +. ~~Z1, 128);
-    Loop6x_step2(alg, 3, 4, 3, h, prev, data, in0_count, in0_b, scratch_b, key_words, round_keys, keys_b, hkeys_b,
+    Loop6x_step2(alg, 3, 4, 3, h, prev, data, in0_count + 1, in0_b, scratch_b, key_words, round_keys, keys_b, hkeys_b,
                 init0, init1, init2, init3, init4, init5);
     lemma_Mul128_accum(old_Z0, ~~Z2, ~~Z3, data2, gf128_power(h, 4));
     z := z +. data2 *. gf128_power(h, 4);
@@ -2051,7 +2051,7 @@ procedure {:quick} Loop6x_partial(
     assert z == ~~Z0 +. shift(~~Z2 +. ~~Hkey +. ~~Z1, 64) +. shift(~~Z3 +. ~~T1, 128);
 
     old_Z0 := ~~Z0;
-    Loop6x_step3(alg, 4, 3, 4, h, prev, data, in0_count, in0_b, scratch_b, key_words, round_keys, keys_b, hkeys_b,
+    Loop6x_step3(alg, 4, 3, 4, h, prev, data, in0_count + 1, in0_b, scratch_b, key_words, round_keys, keys_b, hkeys_b,
                 init0, init1, init2, init3, init4, init5);
     lemma_Mul128_accum(old_Z0, ~~Z2, ~~Z3, data1, gf128_power(h, 5));
     z := z +. data1 *. gf128_power(h, 5);
@@ -2061,7 +2061,7 @@ procedure {:quick} Loop6x_partial(
     ghost var old_Z1 := ~~Z1;
     ghost var old_Z2 := ~~Z2;
     ghost var old_T1 := ~~T1;
-    Loop6x_step4(alg, 5, 2, 5, h, prev, data, in0_count, in0_b, scratch_b, key_words, round_keys, keys_b,
+    Loop6x_step4(alg, 5, 2, 5, h, prev, data, in0_count + 1, in0_b, scratch_b, key_words, round_keys, keys_b,
                 init0, init1, init2, init3, init4, init5);
     lemma_Mul128_accum(~~Z0, old_Z2 +. old_Z1 +. old_T1, ~~Z3, prev +. data0, gf128_power(h, 6));
     z := z +. (prev +. data0) *. gf128_power(h, 6);
@@ -2069,7 +2069,7 @@ procedure {:quick} Loop6x_partial(
     assert z == (~~Z0 +. ~~T2) +. shift(~~Z2, 64) +. shift(~~Z3 +. ~~Xi, 128);
 
     old_Z0 := ~~Z0;
-    Loop6x_step5(alg, 6, 1, 6, h, prev, data, in0_count, in0_b, scratch_b, key_words, round_keys, keys_b,
+    Loop6x_step5(alg, 6, 1, 6, h, prev, data, in0_count + 1, in0_b, scratch_b, key_words, round_keys, keys_b,
                 init0, init1, init2, init3, init4, init5);
     let a0 := old_Z0 +. ~~T2;
     let a1 := ~~Z2;
@@ -2077,7 +2077,7 @@ procedure {:quick} Loop6x_partial(
     let a := a0 +. shift(a1, 64) +. shift(a2, 128);
     assert z == a;
 
-    Loop6x_round8(alg, h, prev, data, in0_count, in0_b, scratch_b, key_words, round_keys, keys_b,
+    Loop6x_round8(alg, h, prev, data, in0_count + 1, in0_b, scratch_b, key_words, round_keys, keys_b,
                   init0, init1, init2, init3, init4, init5);
 
     old_Z3 := ~~Z3;
@@ -2109,7 +2109,6 @@ procedure {:quick} Loop6x(
     ghost y_orig:quad32,
     ghost y_prev:quad32,
     ghost count:nat,        // Number of 6x128-bit blocks processed so far
-    ghost in0_count:nat,
     ghost iv_b:buffer128,
     ghost in0_b:buffer128,
     ghost in_b:buffer128,
@@ -2149,13 +2148,12 @@ procedure {:quick} Loop6x(
 
     requires
         count >= 2;
-        in0_count == count || in0_count == count - 2;
         len >= 6;
         T2 == Mkfour(0, 0, 0, 0x1000000);
 
         // Valid ptrs and buffers
         validDstAddrs128(mem, ivp, iv_b, 1, memTaint, Secret);
-        validSrcAddrsOffset128(mem, in0, in0_b, (in0_count+1)*6, 6, memTaint, Secret);
+        validSrcAddrsOffset128(mem, in0, in0_b, (count-1)*6, 6, memTaint, Secret);
         validSrcAddrsOffset128(mem, inp, in_b, count*6, 6, memTaint, Secret);
         validDstAddrsOffset128(mem, outp, out_b, count*6, 6, memTaint, Secret);
         validDstAddrs128(mem, rbp, scratch_b, 8, memTaint, Secret);
@@ -2174,7 +2172,6 @@ procedure {:quick} Loop6x(
         partial_seq_agreement(plain_quads, s128(mem, in_b), count*6, count*6+6);
         buffers_disjoint128(in_b, out_b) || in_b == out_b;
         in0_b == in_b || in0_b == out_b;
-        //if in0_count = count then in0_b == in_b else in0_b == out_b;
          inp + 0x60 < pow2_64;
          in0 + 0x60 < pow2_64;
         outp + 0x60 < pow2_64;
@@ -2187,8 +2184,8 @@ procedure {:quick} Loop6x(
         pclmulqdq_enabled;
         h_LE == aes_encrypt_LE(alg, key_words, Mkfour(0, 0, 0, 0));
         hkeys_reqs_priv(s128(mem, hkeys_b), reverse_bytes_quad32(h_LE));
-        scratch_reqs(scratch_b, in0_count, mem, s128(mem, in0_b), Z3);
-        y_prev == ghash_incremental0(h_LE, y_orig, slice_work_around(s128(mem, in0_b), in0_count*6));
+        scratch_reqs(scratch_b, #nat(count-2), mem, s128(mem, in0_b), Z3);
+        y_prev == ghash_incremental0(h_LE, y_orig, slice_work_around(s128(mem, in0_b), (count-2)*6));
         y_prev == reverse_bytes_quad32(to_quad32( 
               of_quad32(Xi) +. of_quad32(Z0) +. of_quad32(buffer128_read(scratch_b, 1, mem))));
 
@@ -2262,21 +2259,19 @@ procedure {:quick} Loop6x(
         len > 0 ==> gctr_partial_opaque(alg, 6*(count+1), plain_quads, s128(mem, out_b), key_words, ctr_BE_orig);
 
         // GHash progress
-//        in0_b ==  in_b ==> y_new == ghash_incremental0(h_LE, y_orig, slice_work_around(old(s128(mem, in0_b)), (in0_count+1)*6));
-//        in0_b == out_b ==> y_new == ghash_incremental0(h_LE, y_orig, slice_work_around(s128(mem, in0_b), (in0_count+1)*6));
-        y_new == ghash_incremental0(h_LE, y_orig, slice_work_around(old(s128(mem, in0_b)), (in0_count+1)*6));
+        y_new == ghash_incremental0(h_LE, y_orig, slice_work_around(old(s128(mem, in0_b)), (count-1)*6));
         len > 0 ==> y_new == reverse_bytes_quad32(to_quad32( 
                     of_quad32(Xi) +. of_quad32(Z0) +. of_quad32(buffer128_read(scratch_b, 1, mem))));
         len == 0 ==> Xi == reverse_bytes_quad32(y_new);
 
-        len > 0 ==> scratch_reqs(scratch_b, in0_count+1, mem, old(s128(mem, in0_b)), Z3);
-        len == 0 ==> scratch_reqs(scratch_b, in0_count+1, mem, old(s128(mem, in0_b)), buffer128_read(scratch_b, 2, mem));
+        len > 0 ==> scratch_reqs(scratch_b, #nat(count-1), mem, old(s128(mem, in0_b)), Z3);
+        len == 0 ==> scratch_reqs(scratch_b, #nat(count-1), mem, old(s128(mem, in0_b)), buffer128_read(scratch_b, 2, mem));
 {
     //let h := of_quad32(reverse_bytes_quad32(h_LE));
     let prev := of_quad32(Xi) +. of_quad32(Z0) +. of_quad32(buffer128_read(scratch_b, 1, mem));
     let y_prev := reverse_bytes_quad32(to_quad32(prev));
-    assert{:quick_type} 0 <= in0_count * 6 /\ in0_count * 6 + 6 <= Seq.length(s128(mem, in0_b));
-    let data := Seq.slice(s128(mem, in0_b), in0_count * 6, in0_count * 6 + 6);
+    assert{:quick_type} 0 <= #nat(count-2) * 6 /\ #nat(count-2) * 6 + 6 <= Seq.length(s128(mem, in0_b));
+    let data := Seq.slice(s128(mem, in0_b), #nat(count-2) * 6, #nat(count-2) * 6 + 6);
 
     assert degree(of_quad32(Xi)) < 128;
     assert degree(of_quad32(Z0)) < 128;
@@ -2286,7 +2281,7 @@ procedure {:quick} Loop6x(
 
     (ghost var init0), (ghost var init1), (ghost var init2), 
     (ghost var init3), (ghost var init4), (ghost var init5) := 
-        Loop6x_partial(alg, h_LE, y_prev, data, count, in0_count, iv_b, in0_b, in_b, scratch_b, key_words, round_keys, keys_b, hkeys_b, ctr_BE);
+        Loop6x_partial(alg, h_LE, y_prev, data, count, #nat(count-2), iv_b, in0_b, in_b, scratch_b, key_words, round_keys, keys_b, hkeys_b, ctr_BE);
     let eventual_Xi := of_quad32(Xi) +. of_quad32(buffer128_read(scratch_b, 1, mem)) +. of_quad32(Z0);
     assert eventual_Xi == of_quad32(reverse_bytes_quad32(ghash_incremental(h_LE, y_prev, data)));
 
@@ -2304,18 +2299,18 @@ procedure {:quick} Loop6x(
                  buffer128_read(in_b, count*6 + 3, mem),
                  buffer128_read(in_b, count*6 + 4, mem),
                  buffer128_read(in_b, count*6 + 5, mem),
-                 buffer128_read(in0_b, (in0_count+1)*6 + 0, mem));
+                 buffer128_read(in0_b, (count-1)*6 + 0, mem));
 
     Sub64(len, 6);
     Add64(in0, 0x60);
 
     y_new := ghash_incremental0(h_LE, y_prev, data);
     ghost var mem_snap := mem;
-    lemma_ghash_incremental0_append(h_LE, y_orig, y_prev, y_new, slice_work_around(s128(mem, in0_b), in0_count*6), data);
-    assert y_new == ghash_incremental0(h_LE, y_orig, append(slice_work_around(s128(mem, in0_b), in0_count*6), data));
-    assert equal(append(slice_work_around(s128(mem, in0_b), in0_count*6), data),
-                 slice_work_around(s128(mem, in0_b), (in0_count+1)*6)); // OBSERVE
-    assert y_new == ghash_incremental0(h_LE, y_orig, slice_work_around(s128(mem, in0_b), (in0_count+1)*6));
+    lemma_ghash_incremental0_append(h_LE, y_orig, y_prev, y_new, slice_work_around(s128(mem, in0_b), (count-2)*6), data);
+    assert y_new == ghash_incremental0(h_LE, y_orig, append(slice_work_around(s128(mem, in0_b), (count-2)*6), data));
+    assert equal(append(slice_work_around(s128(mem, in0_b), (count-2)*6), data),
+                 slice_work_around(s128(mem, in0_b), (count-1)*6)); // OBSERVE
+    assert y_new == ghash_incremental0(h_LE, y_orig, slice_work_around(s128(mem, in0_b), (count-1)*6));
 
 
     if (len > 0) {
@@ -2349,7 +2344,7 @@ procedure {:quick} Loop6x(
     }
     reveal gctr_registers_def;
 }
-
+/*
 #reset-options "--z3rlimit 16"
 procedure {:quick} Loop6x_decrypt(
     inline alg:algorithm,  
@@ -2523,9 +2518,9 @@ procedure {:quick} Loop6x_decrypt(
     y_new := Loop6x(alg, h_LE, y_orig, y_prev, count, in0_count, iv_b, in0_b, in_b, out_b, scratch_b, plain_quads, 
                     key_words, round_keys, keys_b, hkeys_b, ctr_BE_orig, ctr_BE);
 }
-
+*/
 #reset-options "--z3rlimit 750"
-procedure {:quick} Loop6x_loop(
+procedure {:quick} {:verify true} Loop6x_loop(
     inline alg:algorithm,  
     ghost h_LE:quad32,
     ghost y_orig:quad32,
@@ -2765,7 +2760,7 @@ procedure {:quick} Loop6x_loop(
             len;
 
     {
-        y_cur := Loop6x(alg, h_LE, y_orig, y_cur, count+iter, #nat(count+iter-2), iv_b, in0_b, in_b, out_b, scratch_b, plain_quads,
+        y_cur := Loop6x(alg, h_LE, y_orig, y_cur, count+iter, iv_b, in0_b, in_b, out_b, scratch_b, plain_quads,
                         key_words, round_keys, keys_b, hkeys_b, ctr_BE_orig, ctr);
         iter := #nat(iter + 1);
         ctr := inc32(ctr, 6);
