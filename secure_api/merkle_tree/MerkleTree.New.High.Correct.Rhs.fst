@@ -34,6 +34,7 @@ val construct_rhs_acc:
   acc:hash ->
   actd:bool ->
   GTot (rhs:hash_seq{S.length rhs = log2c j} * hash) (decreases j)
+#reset-options "--z3rlimit 10"
 let rec construct_rhs_acc j fhs acc actd =
   if j = 0 then (S.empty, acc)
   else begin
@@ -226,7 +227,7 @@ val construct_rhs_acc_consistent:
           rhs_equiv j (fst rrf) (S.slice (fst rr) lv (lv + log2c j)) actd /\
           snd rrf == snd rr)))
         (decreases j)
-#reset-options "--z3rlimit 240 --max_fuel 1"
+#reset-options "--z3rlimit 320 --max_fuel 1"
 let rec construct_rhs_acc_consistent lv i j olds hs rhs acc actd =
   log2c_bound j (32 - lv);
   mt_olds_hs_lth_inv_ok lv i j olds hs;
