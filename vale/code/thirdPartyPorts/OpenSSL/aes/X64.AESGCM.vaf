@@ -560,7 +560,7 @@ procedure {:quick} Loop6x_step1(
     ghost h:poly,
     ghost prev:poly,
     ghost data:seq(quad32),
-    ghost count:nat,
+    ghost in0_count:nat,
     ghost in0_b:buffer128,
     ghost scratch_b:buffer128,
 
@@ -597,10 +597,8 @@ procedure {:quick} Loop6x_step1(
         mem; efl;
 
     requires
-        count >= 2;
-
         // Valid ptrs and buffers
-        validSrcAddrsOffset128(mem, in0, in0_b, (count-1)*6, in0_offset + 1, memTaint, Secret);
+        validSrcAddrsOffset128(mem, in0, in0_b, in0_count*6, in0_offset + 1, memTaint, Secret);
         validDstAddrs128(mem, rbp, scratch_b, stack_offset + 1, memTaint, Secret);
         validDstAddrs128(mem, rbp, scratch_b, 8, memTaint, Secret);
         validSrcAddrs128(mem, Xip - 0x20, hkeys_b, 8, memTaint, Secret);
@@ -631,7 +629,7 @@ procedure {:quick} Loop6x_step1(
         inout4 == rounds_opaque(init4, round_keys, rnd + 1);
         inout5 == rounds_opaque(init5, round_keys, rnd + 1);
 
-        buffer128_read(scratch_b, stack_offset, mem) == old(reverse_bytes_quad32(buffer128_read(in0_b, (count-1)*6+in0_offset, mem)));
+        buffer128_read(scratch_b, stack_offset, mem) == old(reverse_bytes_quad32(buffer128_read(in0_b, in0_count*6+in0_offset, mem)));
 
         // GCM
         let h3 := buffer128_read(hkeys_b, 3, mem);
@@ -665,9 +663,9 @@ procedure {:quick} Loop6x_step1(
 //	  vaesenc	$rndkey,$inout2,$inout2
 //	movbe		0x50($in0),%r12
 //	  vaesenc	$rndkey,$inout3,$inout3
-    LoadBe64_buffer128(r13, in0, in0_offset*16+8, Secret, true,  in0_b, (count-1)*6 + in0_offset);
+    LoadBe64_buffer128(r13, in0, in0_offset*16+8, Secret, true,  in0_b, in0_count*6 + in0_offset);
     VAESNI_enc(inout2, inout2, rndkey);
-    LoadBe64_buffer128(r12, in0, in0_offset*16,   Secret, false, in0_b, (count-1)*6 + in0_offset);
+    LoadBe64_buffer128(r12, in0, in0_offset*16,   Secret, false, in0_b, in0_count*6 + in0_offset);
     VAESNI_enc(inout3, inout3, rndkey);
 
 //	mov		%r13,0x20+8(%rbp)
@@ -684,10 +682,9 @@ procedure {:quick} Loop6x_step1(
 
     reveal rounds;
     commute_sub_bytes_shift_rows_forall();
-    lemma_reverse_bytes_quad32_64(old(buffer128_read(in0_b, (count-1)*6+in0_offset, mem)), old(buffer128_read(scratch_b, stack_offset, mem)), buffer128_read(scratch_b, stack_offset, mem));
+    lemma_reverse_bytes_quad32_64(old(buffer128_read(in0_b, in0_count*6+in0_offset, mem)), old(buffer128_read(scratch_b, stack_offset, mem)), buffer128_read(scratch_b, stack_offset, mem));
 
 }
-
 
 #reset-options ""
 procedure {:quick} Loop6x_plain(
@@ -817,7 +814,7 @@ procedure {:quick} Loop6x_step2(
     ghost h:poly,
     ghost prev:poly,
     ghost data:seq(quad32),
-    ghost count:nat,
+    ghost in0_count:nat,
     ghost in0_b:buffer128,
     ghost scratch_b:buffer128,
 
@@ -854,10 +851,8 @@ procedure {:quick} Loop6x_step2(
         mem; efl;
 
     requires
-        count >= 2;
-
         // Valid ptrs and buffers
-        validSrcAddrsOffset128(mem, in0, in0_b, (count-1)*6, in0_offset + 1, memTaint, Secret);
+        validSrcAddrsOffset128(mem, in0, in0_b, in0_count*6, in0_offset + 1, memTaint, Secret);
         validDstAddrs128(mem, rbp, scratch_b, stack_offset + 1, memTaint, Secret);
         validDstAddrs128(mem, rbp, scratch_b, 8, memTaint, Secret);
         validSrcAddrs128(mem, Xip - 0x20, hkeys_b, 8, memTaint, Secret);
@@ -888,7 +883,7 @@ procedure {:quick} Loop6x_step2(
         inout4 == rounds_opaque(init4, round_keys, rnd + 1);
         inout5 == rounds_opaque(init5, round_keys, rnd + 1);
 
-        buffer128_read(scratch_b, stack_offset, mem) == old(reverse_bytes_quad32(buffer128_read(in0_b, (count-1)*6+in0_offset, mem)));
+        buffer128_read(scratch_b, stack_offset, mem) == old(reverse_bytes_quad32(buffer128_read(in0_b, in0_count*6+in0_offset, mem)));
 
         // GCM
         let h6 := buffer128_read(hkeys_b, 6, mem);
@@ -918,7 +913,7 @@ procedure {:quick} Loop6x_step2(
 //	  vaesenc	$rndkey,$inout1,$inout1
     VAESNI_enc(inout1, inout1, rndkey);
 //	movbe		0x48($in0),%r13
-    LoadBe64_buffer128(r13, in0, in0_offset*16+8, Secret, true,  in0_b, (count-1)*6 + in0_offset);
+    LoadBe64_buffer128(r13, in0, in0_offset*16+8, Secret, true,  in0_b, in0_count*6 + in0_offset);
 //	 vpxor		$Z1,$Z3,$Z3
     VPolyAdd(Z3, Z3, Z1);
 //	vpclmulqdq	\$0x01,$T1,$Ii,$Z1
@@ -926,7 +921,7 @@ procedure {:quick} Loop6x_step2(
 //	  vaesenc	$rndkey,$inout2,$inout2
     VAESNI_enc(inout2, inout2, rndkey);
 //	movbe		0x40($in0),%r12
-    LoadBe64_buffer128(r12, in0, in0_offset*16,   Secret, false, in0_b, (count-1)*6 + in0_offset);
+    LoadBe64_buffer128(r12, in0, in0_offset*16,   Secret, false, in0_b, in0_count*6 + in0_offset);
 //	vpclmulqdq	\$0x11,$T1,$Ii,$T1
     VPolyMul(T1, Ii, T1, true, true);
 //	 vmovdqu	0x60+8(%rbp),$Ii	# I[1]
@@ -948,7 +943,7 @@ procedure {:quick} Loop6x_step2(
 
     reveal rounds;
     commute_sub_bytes_shift_rows_forall();
-    lemma_reverse_bytes_quad32_64(old(buffer128_read(in0_b, (count-1)*6+in0_offset, mem)), old(buffer128_read(scratch_b, stack_offset, mem)), buffer128_read(scratch_b, stack_offset, mem));
+    lemma_reverse_bytes_quad32_64(old(buffer128_read(in0_b, in0_count*6+in0_offset, mem)), old(buffer128_read(scratch_b, stack_offset, mem)), buffer128_read(scratch_b, stack_offset, mem));
 
 }
 
@@ -961,7 +956,7 @@ procedure {:quick} Loop6x_step3(
     ghost h:poly,
     ghost prev:poly,
     ghost data:seq(quad32),
-    ghost count:nat,
+    ghost in0_count:nat,
     ghost in0_b:buffer128,
     ghost scratch_b:buffer128,
 
@@ -998,10 +993,8 @@ procedure {:quick} Loop6x_step3(
         mem; efl;
 
     requires
-        count >= 2;
-
         // Valid ptrs and buffers
-        validSrcAddrsOffset128(mem, in0, in0_b, (count-1)*6, in0_offset + 1, memTaint, Secret);
+        validSrcAddrsOffset128(mem, in0, in0_b, in0_count*6, in0_offset + 1, memTaint, Secret);
         validDstAddrs128(mem, rbp, scratch_b, stack_offset + 1, memTaint, Secret);
         validDstAddrs128(mem, rbp, scratch_b, 8, memTaint, Secret);
         validSrcAddrs128(mem, Xip - 0x20, hkeys_b, 8, memTaint, Secret);
@@ -1032,7 +1025,7 @@ procedure {:quick} Loop6x_step3(
         inout4 == rounds_opaque(init4, round_keys, rnd + 1);
         inout5 == rounds_opaque(init5, round_keys, rnd + 1);
 
-        buffer128_read(scratch_b, stack_offset, mem) == old(reverse_bytes_quad32(buffer128_read(in0_b, (count-1)*6+in0_offset, mem)));
+        buffer128_read(scratch_b, stack_offset, mem) == old(reverse_bytes_quad32(buffer128_read(in0_b, in0_count*6+in0_offset, mem)));
 
         // GCM
         let h7 := buffer128_read(hkeys_b, 7, mem);
@@ -1061,7 +1054,7 @@ procedure {:quick} Loop6x_step3(
 //	  vaesenc	$rndkey,$inout1,$inout1
     VAESNI_enc(inout1, inout1, rndkey);
 //	movbe		0x38($in0),%r13
-    LoadBe64_buffer128(r13, in0, in0_offset*16+8, Secret, true,  in0_b, (count-1)*6 + in0_offset);
+    LoadBe64_buffer128(r13, in0, in0_offset*16+8, Secret, true,  in0_b, in0_count*6 + in0_offset);
 //	 vpxor		$T1,$Z3,$Z3
     VPolyAdd(Z3, Z3, T1);
 //	vpclmulqdq	\$0x01,$T2,$Ii,$T1
@@ -1071,7 +1064,7 @@ procedure {:quick} Loop6x_step3(
 //	  vaesenc	$rndkey,$inout2,$inout2
     VAESNI_enc(inout2, inout2, rndkey);
 //	movbe		0x30($in0),%r12
-    LoadBe64_buffer128(r12, in0, in0_offset*16,   Secret, false, in0_b, (count-1)*6 + in0_offset);
+    LoadBe64_buffer128(r12, in0, in0_offset*16,   Secret, false, in0_b, in0_count*6 + in0_offset);
 //	vpclmulqdq	\$0x11,$T2,$Ii,$T2
     VPolyMul(T2, Ii, T2, true, true);
 //	  vaesenc	$rndkey,$inout3,$inout3
@@ -1091,10 +1084,9 @@ procedure {:quick} Loop6x_step3(
 
     reveal rounds;
     commute_sub_bytes_shift_rows_forall();
-    lemma_reverse_bytes_quad32_64(old(buffer128_read(in0_b, (count-1)*6+in0_offset, mem)), old(buffer128_read(scratch_b, stack_offset, mem)), buffer128_read(scratch_b, stack_offset, mem));
+    lemma_reverse_bytes_quad32_64(old(buffer128_read(in0_b, in0_count*6+in0_offset, mem)), old(buffer128_read(scratch_b, stack_offset, mem)), buffer128_read(scratch_b, stack_offset, mem));
 
 }
-
 
 #reset-options ""
 procedure {:quick} Loop6x_step4(
@@ -1105,7 +1097,7 @@ procedure {:quick} Loop6x_step4(
     ghost h:poly,
     ghost prev:poly,
     ghost data:seq(quad32),
-    ghost count:nat,
+    ghost in0_count:nat,
     ghost in0_b:buffer128,
     ghost scratch_b:buffer128,
 
@@ -1142,10 +1134,8 @@ procedure {:quick} Loop6x_step4(
         mem; efl;
 
     requires
-        count >= 2;
-
         // Valid ptrs and buffers
-        validSrcAddrsOffset128(mem, in0, in0_b, (count-1)*6, in0_offset + 1, memTaint, Secret);
+        validSrcAddrsOffset128(mem, in0, in0_b, in0_count*6, in0_offset + 1, memTaint, Secret);
         validDstAddrs128(mem, rbp, scratch_b, stack_offset + 1, memTaint, Secret);
         validDstAddrs128(mem, rbp, scratch_b, 8, memTaint, Secret);
 
@@ -1175,7 +1165,7 @@ procedure {:quick} Loop6x_step4(
         inout4 == rounds_opaque(init4, round_keys, rnd + 1);
         inout5 == rounds_opaque(init5, round_keys, rnd + 1);
 
-        buffer128_read(scratch_b, stack_offset, mem) == old(reverse_bytes_quad32(buffer128_read(in0_b, (count-1)*6+in0_offset, mem)));
+        buffer128_read(scratch_b, stack_offset, mem) == old(reverse_bytes_quad32(buffer128_read(in0_b, in0_count*6+in0_offset, mem)));
 
         // GCM
         ~~T1 == hi(old(~~Xi)) *. lo(old(~~Hkey));
@@ -1201,7 +1191,7 @@ procedure {:quick} Loop6x_step4(
 //	  vaesenc	$rndkey,$inout1,$inout1
     VAESNI_enc(inout1, inout1, rndkey);
 //	movbe		0x28($in0),%r13
-    LoadBe64_buffer128(r13, in0, in0_offset*16+8, Secret, true,  in0_b, (count-1)*6 + in0_offset);
+    LoadBe64_buffer128(r13, in0, in0_offset*16+8, Secret, true,  in0_b, in0_count*6 + in0_offset);
 //	 vpxor		$T2,$Z3,$Z3
     VPolyAdd(Z3, Z3, T2);
 //	vpclmulqdq	\$0x00,$Hkey,$Xi,$T2
@@ -1209,7 +1199,7 @@ procedure {:quick} Loop6x_step4(
 //	  vaesenc	$rndkey,$inout2,$inout2
     VAESNI_enc(inout2, inout2, rndkey);
 //	movbe		0x20($in0),%r12
-    LoadBe64_buffer128(r12, in0, in0_offset*16,   Secret, false, in0_b, (count-1)*6 + in0_offset);
+    LoadBe64_buffer128(r12, in0, in0_offset*16,   Secret, false, in0_b, in0_count*6 + in0_offset);
 //	vpclmulqdq	\$0x11,$Hkey,$Xi,$Xi
     VPolyMul(Xi, Xi, Hkey, true, true);
 //	  vaesenc	$rndkey,$inout3,$inout3
@@ -1229,7 +1219,7 @@ procedure {:quick} Loop6x_step4(
 
     reveal rounds;
     commute_sub_bytes_shift_rows_forall();
-    lemma_reverse_bytes_quad32_64(old(buffer128_read(in0_b, (count-1)*6+in0_offset, mem)), old(buffer128_read(scratch_b, stack_offset, mem)), buffer128_read(scratch_b, stack_offset, mem));
+    lemma_reverse_bytes_quad32_64(old(buffer128_read(in0_b, in0_count*6+in0_offset, mem)), old(buffer128_read(scratch_b, stack_offset, mem)), buffer128_read(scratch_b, stack_offset, mem));
 
 }
 
@@ -1242,7 +1232,7 @@ procedure {:quick} Loop6x_step5(
     ghost h:poly,
     ghost prev:poly,
     ghost data:seq(quad32),
-    ghost count:nat,
+    ghost in0_count:nat,
     ghost in0_b:buffer128,
     ghost scratch_b:buffer128,
 
@@ -1278,10 +1268,8 @@ procedure {:quick} Loop6x_step5(
         mem; efl;
 
     requires
-        count >= 2;
-
         // Valid ptrs and buffers
-        validSrcAddrsOffset128(mem, in0, in0_b, (count-1)*6, in0_offset + 1, memTaint, Secret);
+        validSrcAddrsOffset128(mem, in0, in0_b, in0_count*6, in0_offset + 1, memTaint, Secret);
         validDstAddrs128(mem, rbp, scratch_b, stack_offset + 1, memTaint, Secret);
         validDstAddrs128(mem, rbp, scratch_b, 8, memTaint, Secret);
 
@@ -1311,7 +1299,7 @@ procedure {:quick} Loop6x_step5(
         inout4 == rounds_opaque(init4, round_keys, rnd + 1);
         inout5 == rounds_opaque(init5, round_keys, rnd + 1);
 
-        buffer128_read(scratch_b, stack_offset, mem) == old(reverse_bytes_quad32(buffer128_read(in0_b, (count-1)*6+in0_offset, mem)));
+        buffer128_read(scratch_b, stack_offset, mem) == old(reverse_bytes_quad32(buffer128_read(in0_b, in0_count*6+in0_offset, mem)));
 
         // GCM
         ~~Ii == swap((old(~~Z0) +. old(~~T2)) +. shift(mask(old(~~Z2), 64), 64), 64);
@@ -1339,11 +1327,11 @@ procedure {:quick} Loop6x_step5(
 //	vpxor		$Z1,$Z0,$Z0
     VPolyAdd(Z0, Z0, Z1);
 //	movbe		0x18($in0),%r13
-    LoadBe64_buffer128(r13, in0, in0_offset*16+8, Secret, true,  in0_b, (count-1)*6 + in0_offset);
+    LoadBe64_buffer128(r13, in0, in0_offset*16+8, Secret, true,  in0_b, in0_count*6 + in0_offset);
 //	  vaesenc	$rndkey,$inout2,$inout2
     VAESNI_enc(inout2, inout2, rndkey);
 //	movbe		0x10($in0),%r12
-    LoadBe64_buffer128(r12, in0, in0_offset*16,   Secret, false, in0_b, (count-1)*6 + in0_offset);
+    LoadBe64_buffer128(r12, in0, in0_offset*16,   Secret, false, in0_b, in0_count*6 + in0_offset);
 //	vpalignr	\$8,$Z0,$Z0,$Ii		# 1st phase
     VSwap(Ii, Z0); // # 1st phase
 //	vpclmulqdq	\$0x10,$Hkey,$Z0,$Z0
@@ -1361,7 +1349,7 @@ procedure {:quick} Loop6x_step5(
 
     reveal rounds;
     commute_sub_bytes_shift_rows_forall();
-    lemma_reverse_bytes_quad32_64(old(buffer128_read(in0_b, (count-1)*6+in0_offset, mem)), old(buffer128_read(scratch_b, stack_offset, mem)), buffer128_read(scratch_b, stack_offset, mem));
+    lemma_reverse_bytes_quad32_64(old(buffer128_read(in0_b, in0_count*6+in0_offset, mem)), old(buffer128_read(scratch_b, stack_offset, mem)), buffer128_read(scratch_b, stack_offset, mem));
 }
 
 
@@ -1370,7 +1358,7 @@ procedure {:quick} Loop6x_round8(
     ghost h:poly,
     ghost prev:poly,
     ghost data:seq(quad32),
-    ghost count:nat,
+    ghost in0_count:nat,
     ghost in0_b:buffer128,
     ghost scratch_b:buffer128,
 
@@ -1405,10 +1393,8 @@ procedure {:quick} Loop6x_round8(
         efl;
 
     requires
-        count >= 2;
-
         // Valid ptrs and buffers
-        validSrcAddrsOffset128(mem, in0, in0_b, (count-1)*6, 1, memTaint, Secret);
+        validSrcAddrsOffset128(mem, in0, in0_b, in0_count*6, 1, memTaint, Secret);
 
         // AES reqs
         aes_reqs_offset(alg, key_words, round_keys, keys_b, key, mem, memTaint);
@@ -1429,8 +1415,8 @@ procedure {:quick} Loop6x_round8(
         inout4 == rounds_opaque(init4, round_keys, 8);
         inout5 == rounds_opaque(init5, round_keys, 8);
 
-        r13 == reverse_bytes_nat64(hi64(buffer128_read(in0_b, (count-1)*6+0, mem))); 
-        r12 == reverse_bytes_nat64(lo64(buffer128_read(in0_b, (count-1)*6+0, mem))); 
+        r13 == reverse_bytes_nat64(hi64(buffer128_read(in0_b, in0_count*6+0, mem))); 
+        r12 == reverse_bytes_nat64(lo64(buffer128_read(in0_b, in0_count*6+0, mem))); 
         rndkey == index(round_keys, 9);
 
         // GCM
@@ -1450,9 +1436,9 @@ procedure {:quick} Loop6x_round8(
     lemma_add_commute(~~Z0, ~~Ii);
     VPolyAdd(Z0, Z0, Ii);
 
-    LoadBe64_buffer128(r13, in0, 0*16+8, Secret, true,  in0_b, (count-1)*6 + 0);
+    LoadBe64_buffer128(r13, in0, 0*16+8, Secret, true,  in0_b, in0_count*6 + 0);
     VAESNI_enc(inout4, inout4, T1);
-    LoadBe64_buffer128(r12, in0, 0*16,   Secret, false, in0_b, (count-1)*6 + 0);
+    LoadBe64_buffer128(r12, in0, 0*16,   Secret, false, in0_b, in0_count*6 + 0);
 
     VAESNI_enc(inout5, inout5, T1);
 
@@ -1903,8 +1889,6 @@ procedure {:quick} Loop6x_partial(
         mem; efl;
 
     requires
-        count >= 2;
-        in0_count == count || in0_count == count - 2;
         T2 == Mkfour(0, 0, 0, 0x1000000);
 
         // Valid ptrs and buffers
@@ -2047,7 +2031,7 @@ procedure {:quick} Loop6x_partial(
     ghost var old_Ii := ~~Ii;
     ghost var old_Hkey := ~~Hkey;
     old_Xi := ~~Xi;
-    Loop6x_step1(alg, 1, 5, 2, h, prev, data, count, in0_b, scratch_b, key_words, round_keys, keys_b, hkeys_b,
+    Loop6x_step1(alg, 1, 5, 2, h, prev, data, in0_count, in0_b, scratch_b, key_words, round_keys, keys_b, hkeys_b,
                 init0, init1, init2, init3, init4, init5);
 
     old_Z0 := ~~Z0;
@@ -2059,7 +2043,7 @@ procedure {:quick} Loop6x_partial(
 
     old_Z0 := ~~Z0;
     assert z == ~~Z0 +. shift((~~Z2 +. ~~T2) +. ~~Hkey, 64) +. shift(~~Z3 +. ~~Z1, 128);
-    Loop6x_step2(alg, 3, 4, 3, h, prev, data, count, in0_b, scratch_b, key_words, round_keys, keys_b, hkeys_b,
+    Loop6x_step2(alg, 3, 4, 3, h, prev, data, in0_count, in0_b, scratch_b, key_words, round_keys, keys_b, hkeys_b,
                 init0, init1, init2, init3, init4, init5);
     lemma_Mul128_accum(old_Z0, ~~Z2, ~~Z3, data2, gf128_power(h, 4));
     z := z +. data2 *. gf128_power(h, 4);
@@ -2067,7 +2051,7 @@ procedure {:quick} Loop6x_partial(
     assert z == ~~Z0 +. shift(~~Z2 +. ~~Hkey +. ~~Z1, 64) +. shift(~~Z3 +. ~~T1, 128);
 
     old_Z0 := ~~Z0;
-    Loop6x_step3(alg, 4, 3, 4, h, prev, data, count, in0_b, scratch_b, key_words, round_keys, keys_b, hkeys_b,
+    Loop6x_step3(alg, 4, 3, 4, h, prev, data, in0_count, in0_b, scratch_b, key_words, round_keys, keys_b, hkeys_b,
                 init0, init1, init2, init3, init4, init5);
     lemma_Mul128_accum(old_Z0, ~~Z2, ~~Z3, data1, gf128_power(h, 5));
     z := z +. data1 *. gf128_power(h, 5);
@@ -2077,7 +2061,7 @@ procedure {:quick} Loop6x_partial(
     ghost var old_Z1 := ~~Z1;
     ghost var old_Z2 := ~~Z2;
     ghost var old_T1 := ~~T1;
-    Loop6x_step4(alg, 5, 2, 5, h, prev, data, count, in0_b, scratch_b, key_words, round_keys, keys_b,
+    Loop6x_step4(alg, 5, 2, 5, h, prev, data, in0_count, in0_b, scratch_b, key_words, round_keys, keys_b,
                 init0, init1, init2, init3, init4, init5);
     lemma_Mul128_accum(~~Z0, old_Z2 +. old_Z1 +. old_T1, ~~Z3, prev +. data0, gf128_power(h, 6));
     z := z +. (prev +. data0) *. gf128_power(h, 6);
@@ -2085,7 +2069,7 @@ procedure {:quick} Loop6x_partial(
     assert z == (~~Z0 +. ~~T2) +. shift(~~Z2, 64) +. shift(~~Z3 +. ~~Xi, 128);
 
     old_Z0 := ~~Z0;
-    Loop6x_step5(alg, 6, 1, 6, h, prev, data, count, in0_b, scratch_b, key_words, round_keys, keys_b,
+    Loop6x_step5(alg, 6, 1, 6, h, prev, data, in0_count, in0_b, scratch_b, key_words, round_keys, keys_b,
                 init0, init1, init2, init3, init4, init5);
     let a0 := old_Z0 +. ~~T2;
     let a1 := ~~Z2;
@@ -2093,7 +2077,7 @@ procedure {:quick} Loop6x_partial(
     let a := a0 +. shift(a1, 64) +. shift(a2, 128);
     assert z == a;
 
-    Loop6x_round8(alg, h, prev, data, count, in0_b, scratch_b, key_words, round_keys, keys_b,
+    Loop6x_round8(alg, h, prev, data, in0_count, in0_b, scratch_b, key_words, round_keys, keys_b,
                   init0, init1, init2, init3, init4, init5);
 
     old_Z3 := ~~Z3;
@@ -2367,7 +2351,7 @@ procedure {:quick} Loop6x(
 }
 
 #reset-options "--z3rlimit 16"
-procedure {:quick} {:verify true} Loop6x_wrapper(
+procedure {:quick} Loop6x_decrypt(
     inline alg:algorithm,  
     ghost h_LE:quad32,
     ghost y_orig:quad32,
@@ -2412,8 +2396,8 @@ procedure {:quick} {:verify true} Loop6x_wrapper(
         mem; efl;
 
     requires
-        count >= 2;
-        in0_count == count || in0_count == count - 2;
+        //count >= 2;
+        in0_count == count;// || in0_count == count - 2;
         len >= 6;
         T2 == Mkfour(0, 0, 0, 0x1000000);
 
@@ -2540,7 +2524,6 @@ procedure {:quick} {:verify true} Loop6x_wrapper(
                     key_words, round_keys, keys_b, hkeys_b, ctr_BE_orig, ctr_BE);
 }
 
-/*
 #reset-options "--z3rlimit 750"
 procedure {:quick} Loop6x_loop(
     inline alg:algorithm,  
@@ -2782,7 +2765,7 @@ procedure {:quick} Loop6x_loop(
             len;
 
     {
-        y_cur := Loop6x(alg, h_LE, y_orig, y_cur, count+iter, iv_b, in0_b, in_b, out_b, scratch_b, plain_quads,
+        y_cur := Loop6x(alg, h_LE, y_orig, y_cur, count+iter, #nat(count+iter-2), iv_b, in0_b, in_b, out_b, scratch_b, plain_quads,
                         key_words, round_keys, keys_b, hkeys_b, ctr_BE_orig, ctr);
         iter := #nat(iter + 1);
         ctr := inc32(ctr, 6);
@@ -4116,4 +4099,3 @@ procedure {:quick} {:public} AES_GCM_encrypt_6mult(
         //assert Xi == ghash_incremental0(h_LE, old(Xi), s128(mem, out_b));
     }
 }
-*/
