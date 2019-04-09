@@ -4,13 +4,16 @@ open FStar.Mul
 open Lib.Sequence
 open Lib.IntTypes
 
+open FStar.Tactics
+open FStar.Tactics.Canon
+
 open Spec.Curve25519
 open Hacl.Spec.Curve25519.Field51.Definition
 
 module BSeq = Lib.ByteSequence
 module LSeq = Lib.Sequence
 
-#reset-options "--z3rlimit 50 --using_facts_from '* -FStar.Seq'"
+#reset-options "--z3rlimit 50 --using_facts_from '* -FStar.Seq -FStar.Tactics'"
 
 val lemma_mod_sub_distr: a:int -> b:int -> n:pos ->
   Lemma ((a - b % n) % n = (a - b) % n)
@@ -898,6 +901,7 @@ let lemma_cswap2_step bit p1 p2 =
   let p2' = p2 ^. dummy in
   logxor_lemma p2 p1
 
+#push-options "--max_fuel 0 --max_ifuel 0"
 val mul64_wide_add3_lemma:
   #m0:scale64 -> #m1:scale64 -> #m2:scale64
  -> #m3:scale64 -> #m4:scale64 -> #m5:scale64
@@ -924,14 +928,15 @@ let mul64_wide_add3_lemma #m0 #m1 #m2 #m3 #m4 #m5 a0 a1 b0 b1 c0 c1 =
 
   assert (v a0 * v a1 + v b0 * v b1 + v c0 * v c1 <=
     m0 * max51 * m1 * max51 + m2 * max51 * m3 * max51 + m4 * max51 * m5 * max51);
-  assert (m0 * max51 * m1 * max51 + m2 * max51 * m3 * max51 + m4 * max51 * m5 * max51 ==
-    (m0 * m1 + m2 * m3 + m4 * m5) * max51 * max51);
+  assert_by_tactic (m0 * max51 * m1 * max51 + m2 * max51 * m3 * max51 + m4 * max51 * m5 * max51 ==
+    (m0 * m1 + m2 * m3 + m4 * m5) * max51 * max51) canon;
   assert_norm (pow2 13 > 0);
   lemma_mul_le (m0 * m1 + m2 * m3 + m4 * m5) (pow2 13 - 1) (max51 * max51) (max51 * max51);
   assert ((m0 * m1 + m2 * m3 + m4 * m5) * max51 * max51 < pow2 13 * max51 * max51);
   assert (v a0 * v a1 + v b0 * v b1 + v c0 * v c1 < pow2 13 * max51 * max51);
   assert_norm (pow2 13 * pow2 51 * pow2 51 = pow2 115);
   assert_norm (pow2 115 < pow2 128)
+#pop-options
 
 val lemma_fmul_fsqr50: f0:nat -> f1:nat -> f2:nat -> f3:nat -> f4:nat ->
   Lemma
