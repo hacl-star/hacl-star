@@ -522,10 +522,22 @@ let test_dh () : St unit =
   ()
 
 let main (): St C.exit_code =
+  let equal_heap_dom_lemma (h1 h2:Heap.heap)
+    : Lemma
+      (requires Heap.equal_dom h1 h2)
+      (ensures  ((forall (a:Type0) (rel:Preorder.preorder a) (r:Heap.mref a rel).
+                    h1 `Heap.contains` r <==> h2 `Heap.contains` r) /\ 
+                 (forall (a:Type0) (rel:Preorder.preorder a) (r:Heap.mref a rel).
+                     r `Heap.unused_in` h1 <==> r `Heap.unused_in` h2)))
+      [SMTPat (Heap.equal_dom h1 h2)]
+    = ()
+  in
+    
   EverCrypt.AutoConfig2.init ();
 
   let open EverCrypt in
   let open C.String in
+
   push_frame ();
 
   print !$"\n  HASHING TESTS\n";
@@ -555,7 +567,6 @@ let main (): St C.exit_code =
     EverCrypt.AutoConfig2.init ()
   end;
   AC.disable_vale ();
-
 
   print !$"===========Hacl===========\n";
   print !$">>> Hash\n";
@@ -598,7 +609,6 @@ let main (): St C.exit_code =
     test_aead aead_vectors_low;
     test_cipher block_cipher_vectors_low
   end;
-
   // AR: 09/07: commenting it, random_init calls fails to verify, also see comment on test_rng above
   // print !$"\n  PSEUDO-RANDOM GENERATOR\n";
   // if EverCrypt.random_init () = 1ul then
@@ -611,6 +621,6 @@ let main (): St C.exit_code =
   //   print !$"Failed to seed the PRNG!\n";
   //   C.portable_exit 3l
   //  end;
-  
+
   pop_frame ();
   C.EXIT_SUCCESS
