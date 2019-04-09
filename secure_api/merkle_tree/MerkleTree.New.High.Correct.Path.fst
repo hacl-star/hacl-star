@@ -145,7 +145,7 @@ let rec mt_get_path_acc_consistent lv i j olds hs rhs k actd =
                (S.slice rhs lv (lv + log2c j)) k actd in
     let p = mt_get_path_ lv hs rhs i j k S.empty actd in
 
-    log2c_bound (j / 2) (32 - (lv + 1));
+    log2c_div j; log2c_bound (j / 2) (32 - (lv + 1));
     assert (mt_hashes_lth_inv (lv + 1) (j / 2) (merge_hs olds hs));
     assert (mt_hashes_lth_inv_log (j / 2)
              (S.slice (merge_hs olds hs) (lv + 1) (lv + 1 + log2c (j / 2))));
@@ -235,17 +235,16 @@ let rec mt_get_path_acc_inv_ok j fhs rhs k acc actd =
 val mt_get_path_inv_ok_:
   lv:nat{lv < 32} ->
   i:nat -> 
-  j:nat{i <= j /\ j < pow2 (32 - lv)} ->
+  j:nat{j > 0 /\ i <= j /\ j < pow2 (32 - lv)} ->
   olds:hash_ss{S.length olds = 32 /\ mt_olds_inv lv i olds} ->
   hs:hash_ss{S.length hs = 32 /\ hs_wf_elts lv hs i j} ->
   rhs:hash_seq{S.length rhs = 32} ->
   k:nat{i <= k && k <= j} ->
   p:path ->
   acc:hash -> actd:bool ->
-  Lemma (requires (log2c_bound j (32 - lv);
+  Lemma (requires (log2c_div j; log2c_bound j (32 - lv);
                   mt_olds_hs_lth_inv_ok lv i j olds hs;
-                  (j > 0 /\
-                  mt_hashes_inv lv j (merge_hs olds hs) /\
+                  (mt_hashes_inv lv j (merge_hs olds hs) /\
 		  (let t1 = hash_seq_spec_full (S.index (merge_hs olds hs) lv) acc actd in
 		   let t2 = S.slice rhs lv (lv + log2c j) in
                    mt_rhs_inv j t1 t2 actd))))
@@ -257,7 +256,7 @@ val mt_get_path_inv_ok_:
                               (S.index (merge_hs olds hs) lv) acc actd) k)))
 #reset-options "--z3rlimit 40 --max_fuel 0"
 let mt_get_path_inv_ok_ lv i j olds hs rhs k p acc actd =
-  log2c_bound j (32 - lv);
+  log2c_div j; log2c_bound j (32 - lv);
   mt_olds_hs_lth_inv_ok lv i j olds hs;
   mt_hashes_lth_inv_log_converted_ lv j (merge_hs olds hs);
   mt_hashes_inv_log_converted_ lv j (merge_hs olds hs);
@@ -283,6 +282,7 @@ val mt_get_path_inv_ok:
                  (assert (S.length (S.tail p) == mt_path_length idx (MT?.j mt) false);
                  S.equal (path_spec idx (MT?.j mt) false (S.tail p))
                          (MTS.mt_get_path #(log2c j) (mt_spec mt olds) idx))))
+#reset-options "--z3rlimit 40"
 let mt_get_path_inv_ok mt olds idx drt =
   let j, p, rt = mt_get_path mt idx drt in
   mt_get_root_inv_ok mt drt olds;
@@ -320,6 +320,7 @@ val mt_verify_ok_:
 let rec mt_verify_ok_ k j p ppos acc actd =
   if j = 0 then ()
   else begin
+    log2c_div j;
     let vi = mt_verify_ k j p ppos acc actd in
     let plen = mt_path_length k j actd in
     let vs = MTS.mt_verify_ #(log2c j)

@@ -61,7 +61,7 @@ val insert_inv_preserved_even:
   Lemma (requires (j % 2 <> 1 /\ mt_olds_hs_inv lv i j olds hs))
         (ensures (mt_olds_hs_inv lv i (j + 1) olds (insert_ lv i j hs acc)))
         (decreases (32 - lv))
-#reset-options "--z3rlimit 40 --max_fuel 2"
+#reset-options "--z3rlimit 120 --max_fuel 2"
 let insert_inv_preserved_even lv i j olds hs acc =
   let ihs = hash_ss_insert lv i j hs acc in
   mt_olds_hs_lth_inv_ok lv i j olds hs;
@@ -102,7 +102,7 @@ val insert_inv_preserved:
   Lemma (requires (mt_olds_hs_inv lv i j olds hs))
         (ensures (mt_olds_hs_inv lv i (j + 1) olds (insert_ lv i j hs acc)))
         (decreases (32 - lv))
-#reset-options "--z3rlimit 240 --max_fuel 2"
+#reset-options "--z3rlimit 240 --max_fuel 1"
 let rec insert_inv_preserved lv i j olds hs acc =
   if j % 2 = 1 
   then begin
