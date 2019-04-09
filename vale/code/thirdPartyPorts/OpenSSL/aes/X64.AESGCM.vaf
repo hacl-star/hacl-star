@@ -2103,7 +2103,7 @@ procedure {:quick} Loop6x_partial(
 }
 
 #reset-options "--z3rlimit 100"
-procedure {:quick} Loop6x(
+procedure {:quick} {:verify true} Loop6x(
     inline alg:algorithm,  
     ghost h_LE:quad32,
     ghost y_orig:quad32,
@@ -2171,7 +2171,7 @@ procedure {:quick} Loop6x(
         buffers_disjoint128(scratch_b, hkeys_b);
         partial_seq_agreement(plain_quads, s128(mem, in_b), count*6, count*6+6);
         buffers_disjoint128(in_b, out_b) || in_b == out_b;
-        in0_b == in_b || in0_b == out_b;
+        in0_b == out_b;
          inp + 0x60 < pow2_64;
          in0 + 0x60 < pow2_64;
         outp + 0x60 < pow2_64;
@@ -2259,7 +2259,7 @@ procedure {:quick} Loop6x(
         len > 0 ==> gctr_partial_opaque(alg, 6*(count+1), plain_quads, s128(mem, out_b), key_words, ctr_BE_orig);
 
         // GHash progress
-        y_new == ghash_incremental0(h_LE, y_orig, slice_work_around(old(s128(mem, in0_b)), (count-1)*6));
+        y_new == ghash_incremental0(h_LE, y_orig, slice_work_around(s128(mem, in0_b), (count-1)*6));
         len > 0 ==> y_new == reverse_bytes_quad32(to_quad32( 
                     of_quad32(Xi) +. of_quad32(Z0) +. of_quad32(buffer128_read(scratch_b, 1, mem))));
         len == 0 ==> Xi == reverse_bytes_quad32(y_new);
@@ -2520,7 +2520,7 @@ procedure {:quick} Loop6x_decrypt(
 }
 */
 #reset-options "--z3rlimit 750"
-procedure {:quick} {:verify true} Loop6x_loop(
+procedure {:quick} Loop6x_loop(
     inline alg:algorithm,  
     ghost h_LE:quad32,
     ghost y_orig:quad32,
@@ -2591,7 +2591,7 @@ procedure {:quick} {:verify true} Loop6x_loop(
         buffers_disjoint128(out_b, keys_b);
         buffers_disjoint128(out_b, hkeys_b);
         buffers_disjoint128(in_b, out_b) || in_b == out_b;
-        in0_b == in_b || in0_b == out_b;
+        in0_b == out_b;
         partial_seq_agreement(plain_quads, s128(mem, in_b), count*6, length(s128(mem, in_b)));
          inp + 0x10*len < pow2_64;
          in0 + 0x10*len < pow2_64;
@@ -2698,7 +2698,7 @@ procedure {:quick} {:verify true} Loop6x_loop(
             buffers_disjoint128(out_b, keys_b);
             buffers_disjoint128(out_b, hkeys_b);
             buffers_disjoint128(in_b, out_b) || in_b == out_b;
-            in0_b == in_b || in0_b == out_b;
+            in0_b == out_b;
 
             old(length(s128(mem, in_b))) >= 6;
             len > 0 ==> partial_seq_agreement(plain_quads, s128(mem, in_b), 6*count + 6*iter, old(length(s128(mem, in_b))));
