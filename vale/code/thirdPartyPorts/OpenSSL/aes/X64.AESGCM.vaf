@@ -2745,7 +2745,7 @@ procedure {:quick} Loop6x_loop_decrypt(
             // Valid ptrs and buffers
             validDstAddrs128(mem, ivp, iv_b, 1, memTaint, Secret);
 
-            len > 6 ==> validSrcAddrsOffset128(mem,  in0, in0_b, (iter+1)*6, old(len) - 6*iter, memTaint, Secret);
+            len > 6 ==> validSrcAddrsOffset128(mem,  in0, in0_b, (iter+1)*6, old(len) - 6*(iter+1), memTaint, Secret);
             len == 6 ==> validSrcAddrsOffset128(mem, in0, in0_b, iter*6, old(len) - 6*iter, memTaint, Secret);
 
             len > 0 ==> validSrcAddrsOffset128(mem,  inp,  in_b, iter*6, old(len) - 6*iter, memTaint, Secret);
@@ -2772,7 +2772,7 @@ procedure {:quick} Loop6x_loop_decrypt(
             old(length(s128(mem, in_b))) >= 6;
             len > 0 ==> partial_seq_agreement(plain_quads, s128(mem, in_b), 6*iter, old(length(s128(mem, in_b))));
             len > 0 ==>  inp + 0x10*len < pow2_64;
-            len > 0 ==>  in0 + 0x10*len < pow2_64;
+            len > 0 ==>  in0 + 0x10*(len-6) < pow2_64;
             len > 0 ==> outp + 0x10*len < pow2_64;
         
             modifies_buffer128_3(scratch_b, out_b, iv_b, old(mem), mem);
@@ -4413,7 +4413,7 @@ procedure {:quick} {:public} AES_GCM_encrypt_6mult(
 
 
 #reset-options ""
-procedure {:quick} {:verify true} DecryptPrelude(
+procedure {:quick} DecryptPrelude(
     ghost in_b:buffer128,
     ghost scratch_b:buffer128
     ) 
@@ -4483,7 +4483,7 @@ procedure {:quick} {:verify true} DecryptPrelude(
 
 
 #reset-options "--z3rlimit 50"
-procedure {:quick} {:public} {:verify true} AES_GCM_decrypt_6mult(
+procedure {:quick} {:public} AES_GCM_decrypt_6mult(
     inline alg:algorithm,  
     ghost h_LE:quad32,
     ghost iv_b:buffer128,
