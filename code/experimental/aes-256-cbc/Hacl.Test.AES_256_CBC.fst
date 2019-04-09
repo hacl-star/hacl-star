@@ -289,26 +289,25 @@ let main () =
   let _ = Hacl.Impl.AES_256_CBC.aes256_cbc_encrypt
     comp1 key1 iv1 input1 (size 16) in
   TestLib.compare_and_print (C.String.of_literal "AES-CBC encryption 1") cip1 comp1 16ul;
-  (*
-  let dec1 = create (size 16) (u8 0) in
-  let len1 = Hacl.Impl.AES_256_CBC.aes256_cbc_decrypt dec1 key1 iv1 comp1 32ul in
-  if len1 <> 16ul then C.String.print (C.String.of_literal "incorrect length from decryption\n") else ();
-  TestLib.compare_and_print (C.String.of_literal "AES-CBC decryption 1") input1 dec1 16ul;
+  //let dec1 = create (size 16) (u8 0) in
+  //let len1 = Hacl.Impl.AES_256_CBC.aes256_cbc_decrypt dec1 key1 iv1 comp1 32ul in
+  //if len1 <> 16ul then C.String.print (C.String.of_literal "incorrect length from decryption\n") else ();
+  //TestLib.compare_and_print (C.String.of_literal "AES-CBC decryption 1") input1 dec1 16ul;
 
   let comp2 = create (size 80) (u8 0) in
-  Hacl.Impl.AES_256_CBC.aes256_cbc_encrypt comp2 key2 iv2 input2 64ul;
+  let _ = Hacl.Impl.AES_256_CBC.aes256_cbc_encrypt comp2 key2 iv2 input2 64ul in
   TestLib.compare_and_print (C.String.of_literal "AES-CBC encryption 2") cip2 comp2 80ul;
-  let dec2 = create (size 64) (u8 0) in
-  let len2 = Hacl.Impl.AES_256_CBC.aes256_cbc_decrypt dec2 key2 iv2 comp2 80ul in
-  if len2 <> 64ul then C.String.print (C.String.of_literal "incorrect length from decryption\n") else ();
-  TestLib.compare_and_print (C.String.of_literal "AES-CBC decryption 2") input2 dec2 64ul;
+  //let dec2 = create (size 64) (u8 0) in
+  //let len2 = Hacl.Impl.AES_256_CBC.aes256_cbc_decrypt dec2 key2 iv2 comp2 80ul in
+  //if len2 <> 64ul then C.String.print (C.String.of_literal "incorrect length from decryption\n") else ();
+  //TestLib.compare_and_print (C.String.of_literal "AES-CBC decryption 2") input2 dec2 64ul;
 
   let comp3 = create (size 160) (u8 0) in
-  Hacl.Impl.AES_256_CBC.aes256_cbc_encrypt comp3 key3 iv3 input3 159ul;
+  let _ = Hacl.Impl.AES_256_CBC.aes256_cbc_encrypt comp3 key3 iv3 input3 159ul in
   TestLib.compare_and_print (C.String.of_literal "AES-CBC encryption 3") cip3 comp3 160ul;
-  let dec3 = create (size 159) (u8 0) in
-  let len3 = Hacl.Impl.AES_256_CBC.aes256_cbc_decrypt dec3 key3 iv3 comp3 160ul in
-  if len3 <> 159ul then C.String.print (C.String.of_literal "incorrect length from decryption\n") else ();
-  TestLib.compare_and_print (C.String.of_literal "AES-CBC decryption 3") input3 dec3 159ul;*)
+  //let dec3 = create (size 159) (u8 0) in
+  //let len3 = Hacl.Impl.AES_256_CBC.aes256_cbc_decrypt dec3 key3 iv3 comp3 160ul in
+  //if len3 <> 159ul then C.String.print (C.String.of_literal "incorrect length from decryption\n") else ();
+  //TestLib.compare_and_print (C.String.of_literal "AES-CBC decryption 3") input3 dec3 159ul;
     pop_frame();
   C.EXIT_SUCCESS

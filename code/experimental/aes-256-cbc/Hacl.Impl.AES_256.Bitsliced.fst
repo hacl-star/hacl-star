@@ -199,43 +199,37 @@ let bitslice_inv_sbox state =
   upd state (size 1) (q3 ^. q6 ^. q0);
   upd state (size 0) (q2 ^. q5 ^. q7)
 
-val swapn: cl:uint64 -> ch:uint64 -> s:rotval U64 -> x:uint64 -> y:uint64 ->  Tot (uint64 & uint64)
-let swapn cl ch s x y =
-  let a = x in
-  let b = y in
+inline_for_extraction noextract val swapn: cl:uint64 -> ch:uint64 -> s:rotval U64 -> state:state -> i:state_idx -> j:state_idx -> Stack unit
+  (requires (fun h -> live h state))
+  (ensures (fun h0 _ h1 -> modifies1 state h0 h1))
+inline_for_extraction noextract let swapn cl ch s state i j =
+  let a = index state i in
+  let b = index state j in
   let x = (a &. cl) |. ((b &. cl) <<. s) in
   let y = ((a &. ch) >>. s) |. (b &. ch) in
-  (x, y)
+  upd state i x;
+  upd state j y
 
 val swap2: state:state -> i:state_idx -> j:state_idx -> Stack unit
   (requires (fun h -> live h state))
   (ensures (fun h0 _ h1 -> modifies1 state h0 h1))
 let swap2 state i j =
-  let (x, y) = swapn (u64 0x5555555555555555) (u64 0xAAAAAAAAAAAAAAAA) (size 1)
-    (index state i) (index state j)
-  in
-  upd state i x;
-  upd state j x
+  swapn (u64 0x5555555555555555) (u64 0xAAAAAAAAAAAAAAAA) (size 1)
+    state i j
 
 val swap4: state:state -> i:state_idx -> j:state_idx -> Stack unit
   (requires (fun h -> live h state))
   (ensures (fun h0 _ h1 -> modifies1 state h0 h1))
 let swap4 state i j =
-  let (x, y) = swapn (u64 0x3333333333333333) (u64 0xCCCCCCCCCCCCCCCC) (size 2)
-    (index state i) (index state j)
-  in
-  upd state i x;
-  upd state j x
+  swapn (u64 0x3333333333333333) (u64 0xCCCCCCCCCCCCCCCC) (size 2)
+    state i j
 
 val swap8: state:state -> i:state_idx -> j:state_idx -> Stack unit
   (requires (fun h -> live h state))
   (ensures (fun h0 _ h1 -> modifies1 state h0 h1))
 let swap8 state i j =
-  let (x, y) = swapn (u64 0x0F0F0F0F0F0F0F0F) (u64 0xF0F0F0F0F0F0F0F0) (size 4)
-    (index state i) (index state j)
-  in
-  upd state i x;
-  upd state j x
+  swapn (u64 0x0F0F0F0F0F0F0F0F) (u64 0xF0F0F0F0F0F0F0F0) (size 4)
+    state i j
 
 val ortho: state:state -> Stack unit
   (requires (fun h -> live h state))
@@ -249,15 +243,15 @@ let ortho state =
   swap2 state (size 4) (size 5);
   swap2 state (size 6) (size 7);
 
-  swap4 state (size 0) (size 1);
-  swap4 state (size 2) (size 3);
-  swap4 state (size 4) (size 5);
-  swap4 state (size 6) (size 7);
+  swap4 state (size 0) (size 2);
+  swap4 state (size 1) (size 3);
+  swap4 state (size 4) (size 6);
+  swap4 state (size 5) (size 7);
 
-  swap8 state (size 0) (size 1);
-  swap8 state (size 2) (size 3);
-  swap8 state (size 4) (size 5);
-  swap8 state (size 6) (size 7)
+  swap8 state (size 0) (size 4);
+  swap8 state (size 1) (size 5);
+  swap8 state (size 2) (size 6);
+  swap8 state (size 3) (size 7)
 
 val interleave_in:
   q0: lbuffer uint64 (size 1) ->
@@ -353,6 +347,8 @@ val keysched:
     (requires (fun h -> live h comp_skey /\ live h key /\ disjoint comp_skey key))
     (ensures (fun h0 _ h1 -> modifies1 comp_skey h0 h1))
 
+#set-options "--z3rlimit 100"
+
 let keysched comp_skey key =
   let num_rounds = size 14 in
   let nk = size 32 >>. size 2 in
@@ -360,23 +356,25 @@ let keysched comp_skey key =
   push_frame ();
   let skey = create #uint32 (size 60) (u32 0) in
   uint32s_from_bytes_le #(size 8) (sub skey (size 0) (size 8)) key;
-  let tmp = index skey (size 8 -. size 1) in
   (**) let h0 = ST.get () in
-  loop_range_nospec #h0 #uint32 #(size 60) nk (nkf -. nk) skey (fun i ->
-    let j = i -. nk in
+  loop_nospec #h0 #uint32 #(size 60) (nkf -. nk) skey (fun i ->
+    let i = i +. nk in
+    let j = i %. nk in
+    let k = i /. nk -. size 1 in
+    let tmp = index skey (i -. size 1) in
     let tmp =
-      if j %. nk = size 0 then
+      if j = size 0 then
         let tmp = (tmp <<. size 24) |. (tmp >>. size 8) in
 	(**) recall_contents rcon rcon_seq;
-        let tmp = sub_word tmp ^. (to_u32 (index rcon (j /. nk))) in
+        let tmp = sub_word tmp ^. (to_u32 (index rcon k)) in
         tmp
-      else if j %. size 4 = size 0 then
+      else if j = size 4 then
         let tmp = sub_word tmp in
 	tmp
       else
         tmp
     in
-    let tmp = tmp ^. index skey j in
+    let tmp = tmp ^. index skey (i -. nk) in
     upd skey i tmp
   );
   let q = create (size 8) (u64 0) in
@@ -384,10 +382,12 @@ let keysched comp_skey key =
   loop_nospec3 #h1 #uint64 #uint32 #uint64
     #(size 30) #(size 60) #(size 8)
     (nkf /. size 4) comp_skey skey q (fun i ->
+    let j = size 2 *. i in
+    let i = size 4 *. i in
     interleave_in
       (sub q (size 0) (size 1))
       (sub q (size 4) (size 1))
-      (sub skey (i *. size 4) (size 4));
+      (sub skey i (size 4));
     upd q (size 1) (index q (size 0));
     upd q (size 2) (index q (size 0));
     upd q (size 3) (index q (size 0));
@@ -400,13 +400,13 @@ let keysched comp_skey key =
      ((index q (size 2)) &. (u64 0x4444444444444444)) |.
      ((index q (size 3)) &. (u64 0x8888888888888888))
     in
-    upd comp_skey (i *. size 2) x0;
+    upd comp_skey j x0;
     let x1 = ((index q (size 4)) &. (u64 0x1111111111111111)) |.
      ((index q (size 5)) &. (u64 0x2222222222222222)) |.
      ((index q (size 6)) &. (u64 0x4444444444444444)) |.
      ((index q (size 7)) &. (u64 0x8888888888888888))
     in
-    upd comp_skey ((i *. size 2) +. size 1) x1
+    upd comp_skey (j +. size 1) x1
   );
   pop_frame ();
   ()
@@ -470,6 +470,24 @@ let shift_rows q =
 	|. ((x &. (u64 0x0FFF000000000000)) <<. size 4))
   )
 
+val inv_shift_rows: q:state -> Stack unit
+  (requires (fun h -> live h q))
+  (ensures (fun h0 _ h1 -> modifies1 q h0 h1))
+
+let inv_shift_rows q =
+  (**) let h0 = ST.get () in
+  loop_nospec #h0 #uint64 #(size 8) (size 8) q (fun i ->
+    let x = index q i in
+    upd q i ((x &. (u64 0x000000000000FFFF))
+			|. ((x &. (u64 0x000000000FFF0000) <<. size 4))
+			|. ((x &. (u64 0x00000000F0000000) >>. size 12))
+			|. ((x &. (u64 0x000000FF00000000) <<. size 8))
+			|. ((x &. (u64 0x0000FF0000000000) >>. size 8))
+			|. ((x &. (u64 0x000F000000000000) <<. size 12))
+			|. ((x &. (u64 0xFFF0000000000000) >>. size 4)))
+  )
+
+
 let rotr32 (x: uint64) : Tot uint64 =
   (x <<. size 32) |. (x >>. size 32)
 
@@ -504,6 +522,36 @@ let mix_columns q =
   upd q (size 6) (q5 ^. r5 ^. r6 ^. rotr32 (q6 ^. r6));
   upd q (size 7) (q6 ^. r6 ^. r7 ^. rotr32 (q7 ^. r7))
 
+val inv_mix_columns: q:state -> Stack unit
+  (requires (fun h -> live h q))
+  (ensures (fun h0 _ h1 -> modifies1 q h0 h1))
+
+let inv_mix_columns q =
+  let q0 = index q (size 0) in
+  let q1 = index q (size 1) in
+  let q2 = index q (size 2) in
+  let q3 = index q (size 3) in
+  let q4 = index q (size 4) in
+  let q5 = index q (size 5) in
+  let q6 = index q (size 6) in
+  let q7 = index q (size 7) in
+  let r0 = (q0 >>. size 16) |. (q0 <<. size 48) in
+  let r1 = (q1 >>. size 16) |. (q1 <<. size 48) in
+  let r2 = (q2 >>. size 16) |. (q2 <<. size 48) in
+  let r3 = (q3 >>. size 16) |. (q3 <<. size 48) in
+  let r4 = (q4 >>. size 16) |. (q4 <<. size 48) in
+  let r5 = (q5 >>. size 16) |. (q5 <<. size 48) in
+  let r6 = (q6 >>. size 16) |. (q6 <<. size 48) in
+  let r7 = (q7 >>. size 16) |. (q7 <<. size 48) in
+  upd q (size 0) (q5 ^. q6 ^. q7 ^. r0 ^. r5 ^. r7 ^. rotr32 (q0 ^. q5 ^. q6 ^. r0 ^. r5));
+  upd q (size 1) (q0 ^. q5 ^. r0 ^. r1 ^. r5 ^. r6 ^. r7 ^. rotr32 (q1 ^. q5 ^. q7 ^. r1 ^. r5 ^. r6));
+  upd q (size 2) (q0 ^. q1 ^. q6 ^. r1 ^. r2 ^. r6 ^. r7 ^. rotr32(q0 ^. q2 ^. q6 ^. r2 ^. r6 ^. r7));
+  upd q (size 3) (q0 ^. q1 ^. q2 ^. q5 ^. q6 ^. r0 ^. r2 ^. r3 ^. r5 ^. rotr32(q0 ^. q1 ^. q3 ^. q5 ^. q6 ^. q7 ^. r0 ^. r3 ^. r5 ^. r7));
+  upd q (size 4) (q1 ^. q2 ^. q3 ^. q5 ^. r1 ^. r3 ^. r4 ^. r5 ^. r6 ^. r7 ^. rotr32(q1 ^. q2 ^. q4 ^. q5 ^. q7 ^. r1 ^. r4 ^. r5 ^. r6));
+  upd q (size 5) (q2 ^. q3 ^. q4 ^. q6 ^. r2 ^. r4 ^. r5 ^. r6 ^. r7 ^. rotr32(q2 ^. q3 ^. q5 ^. q6 ^. r2 ^. r5 ^. r6 ^. r7));
+  upd q (size 6) (q3 ^. q4 ^. q5 ^. q7 ^. r3 ^. r5 ^. r6 ^. r7 ^. rotr32(q3 ^. q4 ^. q6 ^. q7 ^. r3 ^. r6 ^. r7));
+  upd q (size 7) (q4 ^. q5 ^. q6 ^. r4 ^. r6 ^. r7 ^. rotr32 (q4 ^. q5 ^. q7 ^. r4 ^. r7))
+
 val encrypt:
   q:state ->
   skey: lbuffer uint64 (size 120) ->
@@ -512,8 +560,10 @@ val encrypt:
     (ensures (fun h0 _ h1 -> modifies1 q h0 h1))
 
 let encrypt q skey =
+  add_round_key q (sub skey (size 0) (size 8));
   (**) let h0 = ST.get () in
-  loop_nospec #h0 #uint64 #(size 8) (size 14) q (fun u ->
+  loop_nospec #h0 #uint64 #(size 8) (size 14 -. size 1) q (fun u ->
+    let u = u +. size 1 in
     bitslice_sbox q;
     shift_rows q;
     mix_columns q;
@@ -522,6 +572,27 @@ let encrypt q skey =
   bitslice_sbox q;
   shift_rows q;
   add_round_key q (sub skey ((size 14) <<. size 3) (size 8))
+
+val decrypt:
+  q:state ->
+  skey: lbuffer uint64 (size 120) ->
+  Stack unit
+    (requires (fun h -> live h q /\ live h skey /\ disjoint q skey))
+    (ensures (fun h0 _ h1 -> modifies1 q h0 h1))
+
+let decrypt q skey =
+  add_round_key q (sub skey ((size 14) <<. size 3) (size 8));
+  (**) let h0 = ST.get () in
+  loop_nospec #h0 #uint64 #(size 8) (size 14 -. size 1) q (fun u ->
+    let u = size 13 -. u in
+    shift_rows q;
+    bitslice_inv_sbox q;
+    add_round_key q (sub skey (u <<. size 3) (size 8));
+    inv_mix_columns q
+  );
+  bitslice_sbox q;
+  shift_rows q;
+  add_round_key q (sub skey (size 0) (size 8))
 
 
 val update_w_from_ivw_and_plaintext:
