@@ -138,8 +138,10 @@ let readable_live_one (m:ME.mem) (a:arg)
   = match a with
     | (| TD_Buffer src bt _, x |) ->
       Vale.AsLowStar.MemoryHelpers.readable_live #src #bt x m
-    | (| TD_ImmBuffer src bt _, x |) ->
-      Vale.AsLowStar.MemoryHelpers.readable_imm_live #src #bt x m
+    | (| TD_ImmBuffer src bt ig, x |) ->
+      Vale.AsLowStar.MemoryHelpers.readable_imm_live #src #bt x m;
+      assert_norm (ME.buffer_readable m (as_vale_immbuffer #src #bt x) <==>
+                   VSig.readable_one m (| TD_ImmBuffer src bt ig, x |))
     | (| TD_Base _, _ |) -> ()
 
 let rec readable_all_live (m:ME.mem) (args:list arg)
