@@ -2346,7 +2346,7 @@ procedure {:quick} Loop6x(
 }
 
 
-#reset-options "--z3rlimit 100"
+#reset-options "--z3rlimit 300"
 procedure {:quick} Loop6x_decrypt(
     inline alg:algorithm,  
     ghost h_LE:quad32,
