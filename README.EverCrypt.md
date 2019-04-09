@@ -28,7 +28,7 @@ For EverCrypt, our specifications cover a range of properties, including:
   the wrong kind of parameters to another, or accesses its private state.
 
 * Functional correctness: EverCrypt's input/output behavior is fully
-  characterized by a simple mathematical functions derived directly
+  characterized by simple mathematical functions derived directly
   from the official cryptographic standards (e.g., from NIST or the IETF).
 
 * Side-channel resistance: Observations about EverCrypt's low-level behavior
