@@ -352,3 +352,7 @@ let rec nat_from_intseq_le_inj #t #l b1 b2 =
     Seq.lemma_split b2 1;
     uintv_extensionality (Seq.index b1 0) (Seq.index b2 0)
   end
+
+let lemma_nat_to_from_bytes_be_preserves_value #l b len x = admit()
+
+let lemma_nat_to_from_bytes_le_preserves_value #l b len x = admit()
