@@ -162,7 +162,7 @@ let point_equal (p:ext_point) (q:ext_point) =
 
 val sign:
     secret: lbytes 32
-  -> msg: bytes{8 * length msg < max_size_t} ->
+  -> msg: bytes{64 + length msg <= max_size_t} ->
   Tot (lbytes 64)
 
 let sign secret msg =
@@ -178,7 +178,7 @@ let sign secret msg =
 
 val verify:
     public: lbytes 32
-  -> msg: bytes{8 * length msg < max_size_t}
+  -> msg: bytes{64 + length msg <= max_size_t}
   -> signature: lbytes 64 ->
   Tot bool
 
