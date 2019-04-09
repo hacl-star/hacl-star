@@ -95,7 +95,7 @@ all:
 	tools/blast-staticconfig.sh $(EVERCRYPT_CONFIG)
 	$(MAKE) all-staged
 
-all-unstaged: compile-compact compile-generic compile-compact-msvc compile-compact-gcc \
+all-unstaged: compile-compact compile-compact-msvc compile-compact-gcc \
   compile-evercrypt-external-headers compile-compact-c89 compile-coco
 
 # Automatic staging.
@@ -815,11 +815,11 @@ CFLAGS += -Wall -Wextra -g \
 # FIXME there's a kremlin error that generates a void* -- can't use -Werror
 # Need the libraries to be present and compiled.
 .PRECIOUS: %.exe
-%.exe: %.o | compile-generic
+%.exe: %.o | compile-compact
 	# Linking with full kremlib since tests may use TestLib, etc.
 	$(call run-with-log,\
 	  $(CC) $(CFLAGS) $(LDFLAGS) $^ -o $@ \
-	    dist/generic/libevercrypt.a -lcrypto $(LDFLAGS) \
+	    dist/compact/libevercrypt.a -lcrypto $(LDFLAGS) \
 	    $(KREMLIN_HOME)/kremlib/dist/generic/libkremlib.a \
 	  ,[LD $*],$(call to-obj-dir,$@))
 
