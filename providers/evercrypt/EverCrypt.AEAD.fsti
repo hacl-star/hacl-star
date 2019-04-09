@@ -234,3 +234,15 @@ let decrypt_st (a: supported_alg) =
 (** @type: true
 *)
 val decrypt: #a:G.erased supported_alg -> decrypt_st (G.reveal a)
+
+(** @type: true
+*)
+val free:
+  #a:G.erased supported_alg -> (
+  let a = Ghost.reveal a in
+  s:state a -> ST unit
+  (requires fun h0 ->
+    freeable h0 s /\
+    invariant h0 s)
+  (ensures fun h0 _ h1 ->
+    B.(modifies (footprint h0 s) h0 h1)))

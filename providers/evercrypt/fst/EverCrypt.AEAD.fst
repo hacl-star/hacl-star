@@ -89,8 +89,8 @@ let create_in_chacha20_poly1305: create_in_st CHACHA20_POLY1305 = fun r dst k ->
   let open LowStar.BufferOps in
   let h0 = ST.get () in
   let ek = B.malloc r 0uy 32ul in
-  B.blit k 0ul ek 0ul 32ul;
   let p = B.malloc r (Ek Hacl_CHACHA20_POLY1305 (G.hide (B.as_seq h0 k)) ek) 1ul in
+  B.blit k 0ul ek 0ul 32ul;
   let h1 = ST.get () in
   dst *= p;
   B.modifies_only_not_unused_in B.(loc_buffer dst) h0 h1;
@@ -690,3 +690,9 @@ let decrypt #a s iv ad ad_len cipher cipher_len tag dst =
           Success
         else
           AuthenticationFailure
+
+let free #a s =
+  let open LowStar.BufferOps in
+  let Ek _ _ ek = !*s in
+  B.free ek;
+  B.free s
