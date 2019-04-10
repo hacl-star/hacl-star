@@ -842,7 +842,7 @@ procedure {:quick} gcm_blocks(
 }
 
 #reset-options "--z3rlimit 60"
-procedure {:quick exportOnly} {:verify true} gcm_blocks_wrapped(
+procedure {:quick exportOnly} gcm_blocks_wrapped(
     inline alg:algorithm,
     inline offset:int,
     ghost auth_b:buffer128,
@@ -1009,11 +1009,7 @@ procedure {:quick exportOnly} {:verify true} gcm_blocks_wrapped(
                                      s128(mem, out128x6_b), s128(mem, out128_b), s128(mem, inout_b), 
                                      auth_bytes, le_quad32_to_bytes(xmm1), 
                                      old(plain_num_bytes), 
-                                     reverse_bytes_quad32(old(buffer128_read(iv_b, 0, mem))),
-                                     reverse_bytes_quad32(buffer128_read(hkeys_b, 2, mem)),
-                                     xmm1, 
-                                     reverse_bytes_quad32(Mkfour(#nat32(8 * old(plain_num_bytes)), 0, 
-                                                          #nat32(8 * old(auth_num_bytes)), 0)));
+                                     reverse_bytes_quad32(old(buffer128_read(iv_b, 0, mem))));
 
 }
 
