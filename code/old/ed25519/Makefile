@@ -128,7 +128,7 @@ KREMLIN_ARGS+= \
 		-I ../bignum -I ../curve25519 -I ../hash \
 
 ed25519-c/out.krml: $(ED25519_FILES)
-	 $(KREMLIN) -tmpdir ed25519-c $(KREMLIN_ARGS) $(FSTS) -skip-translation
+	 $(KREMLIN) -verbose -tmpdir ed25519-c $(KREMLIN_ARGS) $(FSTS) -skip-translation
 
 ed25519-c/Hacl_Ed25519.c: ed25519-c/out.krml
 	 $(KREMLIN) -tmpdir ed25519-c $(KREMLIN_ARGS) \
