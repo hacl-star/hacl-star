@@ -672,12 +672,12 @@ DEFAULT_FLAGS		=\
   -bundle WasmSupport
 
 # Should be fixed by having KreMLin better handle imported names
-WASM_STANDALONE=Prims LowStar.Endianness C C.Endianness \
+WASM_STANDALONE=Prims LowStar.Endianness C.Endianness \
   C.String TestLib
 
 # Notes: we disable MerkleTree (function pointers not supported)
 WASM_FLAGS	=\
-  $(patsubst %,-bundle %=,$(WASM_STANDALONE)) \
+  $(patsubst %,-bundle %,$(WASM_STANDALONE)) \
   -bundle FStar.* \
   -bundle Hacl.Hash.MD5+Hacl.Hash.Core.MD5+Hacl.Hash.SHA1+Hacl.Hash.Core.SHA1+Hacl.Hash.SHA2+Hacl.Hash.Core.SHA2+Hacl.Hash.Core.SHA2.Constants=Hacl.Hash.*[rename=Hacl_Hash] \
   -bundle Hacl.Impl.SHA3+Hacl.SHA3=[rename=Hacl_SHA3] \
