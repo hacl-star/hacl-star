@@ -331,7 +331,6 @@ procedure {:quick} gcm_blocks128(
 }
 
 
-/*
 procedure {:quick} gcm_auth_bytes(
     inline alg:algorithm,
     ghost auth_b:buffer128,
@@ -539,7 +538,7 @@ procedure {:quick} gcm_blocks_auth(
 }
 
 #reset-options "--z3rlimit 300"
-procedure {:quick} gcm_blocks(
+procedure {:quick} {:verify true} gcm_blocks(
     inline alg:algorithm,
     inline offset:int,
     ghost auth_b:buffer128,
@@ -709,12 +708,12 @@ procedure {:quick} gcm_blocks(
 
         let raw_quad_seq:seq(quad32) := append(
                             append(auth_quad_seq,
-                                   s128(mem, out128x6_b)),
-                                   s128(mem, out128_b));
+                                   old(s128(mem, in128x6_b))),
+                                   old(s128(mem, in128_b)));
         let total_bytes:nat := length(auth_quad_seq) * 16 + old(plain_num_bytes);
         let raw_quad_seq:seq(quad32) := 
             if (old(plain_num_bytes) > old((len128x6 + len128) * 128/8)) then
-                let ab:seq(nat8) := slice_work_around(le_seq_quad32_to_bytes(append(raw_quad_seq, s128(mem, inout_b))), total_bytes) in
+                let ab:seq(nat8) := slice_work_around(le_seq_quad32_to_bytes(append(raw_quad_seq, old(s128(mem, inout_b)))), total_bytes) in
                 let pb:seq(nat8) := pad_to_128_bits(ab) in
                 le_bytes_to_seq_quad32(pb)
             else
@@ -741,8 +740,8 @@ procedure {:quick} gcm_blocks(
     (ghost var ctr_BE) := AES_GCM_decrypt_6mult(alg, h, iv_b, in128x6_b, out128x6_b, scratch_b, key, round_keys, keys_b, hkeys_b);
     ghost var y_cipher128x6 := xmm8;
     ghost var auth_in := auth_quad_seq;
-    lemma_ghash_incremental0_append(h, y_0, y_auth_bytes, y_cipher128x6, auth_in, s128(mem, out128x6_b));
-    auth_in := append(auth_in, s128(mem, out128x6_b));
+    lemma_ghash_incremental0_append(h, y_0, y_auth_bytes, y_cipher128x6, auth_in, old(s128(mem, in128x6_b)));
+    auth_in := append(auth_in, old(s128(mem, in128x6_b)));
 
     // Line up arguments for gcm_blocks128 for remaining 128-bit blocks
     Load128_buffer(xmm7, iv_ptr, 0, Secret, iv_b, 0);
@@ -756,8 +755,8 @@ procedure {:quick} gcm_blocks(
     Load128_buffer(xmm11, Xip, 0x20 - 0x20, Secret, hkeys_b, 2); 
     gcm_blocks128(alg, in128_b, out128_b, key, round_keys, keys_b);
     ghost var y_cipher128 := xmm1;
-    lemma_ghash_incremental0_append(h, y_0, y_cipher128x6, y_cipher128, auth_in, s128(mem, out128_b));
-    auth_in := append(auth_in, s128(mem, out128_b));
+    lemma_ghash_incremental0_append(h, y_0, y_cipher128x6, y_cipher128, auth_in, old(s128(mem, in128_b)));
+    auth_in := append(auth_in, old(s128(mem, in128_b)));
 //    assert y_cipher128 == ghash_incremental0(h, y_0, auth_in);
 
     Add64(rcx, Stack(rsp, offset + 24));    // rcx == len128x6 + len128
@@ -785,7 +784,7 @@ procedure {:quick} gcm_blocks(
         gcm_block_bytes(alg, inout_b, inout_b, key, round_keys, keys_b, total_bytes, y_0, auth_in);
         y_inout := xmm1;
 
-        ghost var raw_auth_quads := append(auth_in, s128(mem, inout_b));
+        ghost var raw_auth_quads := append(auth_in, old(s128(mem, inout_b)));
         ghost var auth_input_bytes := slice_work_around(le_seq_quad32_to_bytes(raw_auth_quads), total_bytes);
         ghost var padded_auth_bytes := pad_to_128_bits(auth_input_bytes);
         auth_in := le_bytes_to_seq_quad32(padded_auth_bytes);
@@ -842,6 +841,7 @@ procedure {:quick} gcm_blocks(
     ghash_incremental_to_ghash(h, auth_in);
 }
 
+/*
 #reset-options "--z3rlimit 60"
 procedure {:quick exportOnly} gcm_blocks_wrapped(
     inline alg:algorithm,
