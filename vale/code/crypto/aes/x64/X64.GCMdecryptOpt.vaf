@@ -538,7 +538,7 @@ procedure {:quick} gcm_blocks_auth(
 }
 
 #reset-options "--z3rlimit 300"
-procedure {:quick} {:verify true} gcm_blocks(
+procedure {:quick} gcm_blocks(
     inline alg:algorithm,
     inline offset:int,
     ghost auth_b:buffer128,
@@ -841,9 +841,8 @@ procedure {:quick} {:verify true} gcm_blocks(
     ghash_incremental_to_ghash(h, auth_in);
 }
 
-/*
 #reset-options "--z3rlimit 60"
-procedure {:quick exportOnly} gcm_blocks_wrapped(
+procedure {:quick exportOnly} {:verify true} gcm_blocks_wrapped(
     inline alg:algorithm,
     inline offset:int,
     ghost auth_b:buffer128,
@@ -1066,6 +1065,7 @@ procedure {:quick exportOnly} gcm_blocks_wrapped(
 
 }
 
+/*
 procedure {:quick} save_registers(inline win:bool)
     requires
         rsp == init_rsp(stack);
