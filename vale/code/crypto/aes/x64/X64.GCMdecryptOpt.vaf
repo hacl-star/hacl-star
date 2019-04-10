@@ -1008,7 +1008,7 @@ procedure {:quick exportOnly} gcm_blocks_wrapped(
     gcm_blocks_helper_dec_simplified(alg, key, 
                                      old(s128(mem, in128x6_b)), old(s128(mem, in128_b)), old(s128(mem, inout_b)), 
                                      s128(mem, out128x6_b), s128(mem, out128_b), s128(mem, inout_b), 
-                                     auth_bytes, le_quad32_to_bytes(xmm1), 
+                                     auth_bytes, expected_tag,
                                      old(plain_num_bytes), 
                                      reverse_bytes_quad32(old(buffer128_read(iv_b, 0, mem))));
 
