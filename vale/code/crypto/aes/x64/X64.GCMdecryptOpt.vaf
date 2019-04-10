@@ -984,84 +984,36 @@ procedure {:quick exportOnly} {:verify true} gcm_blocks_wrapped(
         4096 * length(auth_bytes)  < pow2_32 /\
         4096 * length(plain_bytes) < pow2_32 /\
         cipher_bytes == 
-            gcm_encrypt_LE(alg, seq_nat32_to_seq_nat8_LE(key), be_quad32_to_bytes(iv_BE), 
-                           plain_bytes, auth_bytes)._1 /\
+            gcm_decrypt_LE(alg, seq_nat32_to_seq_nat8_LE(key), be_quad32_to_bytes(iv_BE), 
+                           plain_bytes, auth_bytes, le_quad32_to_bytes(xmm1))._1 /\
         le_quad32_to_bytes(xmm1) == 
-            gcm_encrypt_LE(alg, seq_nat32_to_seq_nat8_LE(key), be_quad32_to_bytes(iv_BE), 
-                           plain_bytes, auth_bytes)._2;
+            gcm_decrypt_LE_tag(alg, seq_nat32_to_seq_nat8_LE(key), be_quad32_to_bytes(iv_BE), 
+                           plain_bytes, auth_bytes);
 {
     gcm_blocks(alg, offset, auth_b, abytes_b, in128x6_b, out128x6_b, in128_b, out128_b, inout_b, iv_b, scratch_b, key, round_keys, keys_b, hkeys_b);
 
-/*   
-    ghost var iv_LE := old(buffer128_read(iv_b, 0, mem));
-    ghost var iv_BE := reverse_bytes_quad32(iv_LE);
-    ghost var ctr_BE_1:quad32 := Mkfour(1, iv_BE.lo1, iv_BE.hi2, iv_BE.hi3);
-    ghost var ctr_BE_2:quad32 := Mkfour(2, iv_BE.lo1, iv_BE.hi2, iv_BE.hi3);
+    gcm_blocks_dec_helper_simplified(alg, key, old(s128(mem, auth_b)), old(s128(mem, abytes_b)),
+                                     old(s128(mem, in128x6_b)), old(s128(mem, in128_b)), old(s128(mem, inout_b)), 
+                                     s128(mem, out128x6_b), s128(mem, out128_b), s128(mem, inout_b), 
+                                     old(plain_num_bytes), old(auth_num_bytes),
+                                     reverse_bytes_quad32(old(buffer128_read(iv_b, 0, mem))),
+                                     reverse_bytes_quad32(buffer128_read(hkeys_b, 2, mem)),
+                                     xmm1, 
+                                     reverse_bytes_quad32(Mkfour(#nat32(8 * old(plain_num_bytes)), 0, 
+                                                          #nat32(8 * old(auth_num_bytes)), 0)));
 
-    // Encryption results
-    ghost var plain_in:seq(quad32) :=
-        if (old(plain_num_bytes) > old((len128x6 + len128) * 128/8)) then
-            append(append(old(s128(mem, in128x6_b)), 
-                          old(s128(mem, in128_b))),
-                          old(s128(mem, inout_b)))
-        else
-            append(old(s128(mem, in128x6_b)), 
-                   old(s128(mem, in128_b)));
-
-    ghost var cipher_out:seq(quad32) :=
-        if (old(plain_num_bytes) > old((len128x6 + len128) * 128/8)) then
-            append(append(s128(mem, out128x6_b),
-                          s128(mem, out128_b)),
-                          s128(mem, inout_b))
-        else
-            append(s128(mem, out128x6_b),
-                   s128(mem, out128_b));
-            
-//    ghost var cipher_bound:nat := if (old(plain_num_bytes) > old((len128x6 + len128) * 128/8)) then
-//                            old(len128x6) + old(len128) + 1
-//                        else 
-//                            old(len128x6) + old(len128);
-
-    // Hashing results
-    ghost var h:quad32 := reverse_bytes_quad32(buffer128_read(hkeys_b, 2, mem));
-    ghost var length_quad:quad32 := reverse_bytes_quad32(Mkfour(#nat32(8 * old(plain_num_bytes)), 0, 
-                                                   #nat32(8 * old(auth_num_bytes)), 0));
-
-    ghost var raw_auth_quads:seq(quad32) := if (old(auth_num_bytes) > old(auth_len * 128/8)) then 
-                            append(old(s128(mem, auth_b)), old(s128(mem, abytes_b)))
-                          else 
-                            old(s128(mem, auth_b));
-    ghost var auth_input_bytes:seq(nat8) := slice_work_around(le_seq_quad32_to_bytes(raw_auth_quads), old(auth_num_bytes));
-    ghost var padded_auth_bytes:seq(nat8) := pad_to_128_bits(auth_input_bytes);
-    ghost var auth_quad_seq:seq(quad32) := le_bytes_to_seq_quad32(padded_auth_bytes);
-
-    //assert test == auth_quad_seq;   // Passes
-
-    ghost var raw_quad_seq:seq(quad32) := append(
-                        append(auth_quad_seq,
-                               s128(mem, out128x6_b)),
-                               s128(mem, out128_b));
-    ghost var total_bytes:nat := length(auth_quad_seq) * 16 + old(plain_num_bytes);
-    raw_quad_seq := 
-        if (old(plain_num_bytes) > old((len128x6 + len128) * 128/8)) then
-            (let ab:seq(nat8) := slice_work_around(le_seq_quad32_to_bytes(append(raw_quad_seq, s128(mem, inout_b))), total_bytes) in
-            (let pb:seq(nat8) := pad_to_128_bits(ab) in
-            le_bytes_to_seq_quad32(pb)))
-        else
-            raw_quad_seq;
-    ghost var auth_quad_seq' := append(raw_quad_seq, create(1, length_quad));
-    assert test == auth_quad_seq';
-    assert xmm1 == gctr_encrypt_block(ctr_BE_1, ghash_LE(h, #ghash_plain_LE(auth_quad_seq')), alg, key, 0);
-*/
-    gcm_blocks_helper_simplified(alg, key, old(s128(mem, auth_b)), old(s128(mem, abytes_b)),
-                                 old(s128(mem, in128x6_b)), old(s128(mem, in128_b)), old(s128(mem, inout_b)), 
-                                 s128(mem, out128x6_b), s128(mem, out128_b), s128(mem, inout_b), 
-                                 old(plain_num_bytes), old(auth_num_bytes),
-                                 reverse_bytes_quad32(old(buffer128_read(iv_b, 0, mem))),
-                                 reverse_bytes_quad32(buffer128_read(hkeys_b, 2, mem)),
-                                 xmm1, 
-                                 reverse_bytes_quad32(Mkfour(#nat32(8 * old(plain_num_bytes)), 0, 
-                                                      #nat32(8 * old(auth_num_bytes)), 0)));
+    ghost var auth_raw_quads := old(append(s128(mem, auth_b), s128(mem, abytes_b)));
+    ghost var auth_bytes := slice_work_around(le_seq_quad32_to_bytes(auth_raw_quads), old(auth_num_bytes));
+    gcm_blocks_helper_dec_simplified(alg, key, 
+                                     old(s128(mem, in128x6_b)), old(s128(mem, in128_b)), old(s128(mem, inout_b)), 
+                                     s128(mem, out128x6_b), s128(mem, out128_b), s128(mem, inout_b), 
+                                     auth_bytes, le_quad32_to_bytes(xmm1), 
+                                     old(plain_num_bytes), 
+                                     reverse_bytes_quad32(old(buffer128_read(iv_b, 0, mem))),
+                                     reverse_bytes_quad32(buffer128_read(hkeys_b, 2, mem)),
+                                     xmm1, 
+                                     reverse_bytes_quad32(Mkfour(#nat32(8 * old(plain_num_bytes)), 0, 
+                                                          #nat32(8 * old(auth_num_bytes)), 0)));
 
 }
 
