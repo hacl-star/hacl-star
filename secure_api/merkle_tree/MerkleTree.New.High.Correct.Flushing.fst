@@ -84,7 +84,7 @@ val mt_flush_to_merge_preserved:
                             (mt_flush_to_olds lv pi i j olds hs) 
                             (mt_flush_to_ lv hs pi i j))))
         (decreases i)
-#reset-options "--z3rlimit 20 --max_fuel 2"
+#reset-options "--z3rlimit 40 --max_fuel 2"
 let rec mt_flush_to_merge_preserved lv pi i j olds hs =
   let oi = offset_of i in
   let opi = offset_of pi in
