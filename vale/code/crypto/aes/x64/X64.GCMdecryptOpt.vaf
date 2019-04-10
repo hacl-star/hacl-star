@@ -857,7 +857,8 @@ procedure {:quick exportOnly} gcm_blocks_wrapped(
     ghost key:seq(nat32),
     ghost round_keys:seq(quad32),
     ghost keys_b:buffer128,
-    ghost hkeys_b:buffer128
+    ghost hkeys_b:buffer128,
+    ghost expected_tag:seq(nat8)
     ) 
     lets
         auth_ptr @= rdi; auth_num_bytes @= rsi; auth_len @= rdx; keys_ptr @= rcx; scratch_ptr @= rbp; 
@@ -985,7 +986,7 @@ procedure {:quick exportOnly} gcm_blocks_wrapped(
         4096 * length(plain_bytes) < pow2_32 /\
         cipher_bytes == 
             gcm_decrypt_LE(alg, seq_nat32_to_seq_nat8_LE(key), be_quad32_to_bytes(iv_BE), 
-                           plain_bytes, auth_bytes, le_quad32_to_bytes(xmm1))._1 /\
+                           plain_bytes, auth_bytes, expected_tag)._1 /\
         le_quad32_to_bytes(xmm1) == 
             gcm_decrypt_LE_tag(alg, seq_nat32_to_seq_nat8_LE(key), be_quad32_to_bytes(iv_BE), 
                            plain_bytes, auth_bytes);
@@ -1013,7 +1014,6 @@ procedure {:quick exportOnly} gcm_blocks_wrapped(
 
 }
 
-/*
 #reset-options "--z3rlimit 1600"
 // Using exportOnly, since verification with quick mode fails with:
 // (Error 196) Implicit argument: Expected a total term; got a ghost term
@@ -1093,7 +1093,7 @@ procedure {:quick exportOnly}{:public}{:exportSpecs} gcm_blocks_decrypt_stdcall(
         validSrcAddrs128(mem,          xip,    hkeys_b,       10, memTaint, Secret);
         validDstAddrs128(mem,      tag_ptr,      tag_b,        1, memTaint, Secret);        
 
-        buffer_disjoints128(tag_b, list(out128x6_b, out128_b, inout_b, hkeys_b));
+        buffer_disjoints128(tag_b, list(out128x6_b, out128_b, inout_b, iv_b, scratch_b));
 
         buffer_disjoints128(iv_b, list(keys_b, scratch_b, in128x6_b, out128x6_b, hkeys_b, in128_b, out128_b, inout_b));
 
@@ -1253,12 +1253,32 @@ procedure {:quick exportOnly}{:public}{:exportSpecs} gcm_blocks_decrypt_stdcall(
                key,
                buffer128_as_seq(old(mem), keys_b),
                keys_b,
-               hkeys_b);
+               hkeys_b,
+               old(le_quad32_to_bytes(buffer128_read(tag_b, 0, mem)))
+               );
 
-    // Auth tag is still in xmm1, so save it to memory
+    // Auth tag is still in xmm1, so load it for comparison purposes
     Load64_stack(r15, rsp, if win then 224 + 40 + 96 else 64 + 8 + 80);
-    Store128_buffer(r15, xmm1, 0, Secret, tag_b, 0);
+    Load128_buffer(xmm0, r15, 0, Secret, tag_b, 0);
+    assert xmm0 == buffer128_read(tag_b, 0, mem);       // OBSERVE?
+    assert xmm0 == buffer128_read(tag_b, 0, old(mem));  // OBSERVE?
+    ghost var alleged_tag_quad := xmm0;
+    ghost var computed_tag := xmm1;
+    XmmEqual();
 
+    ghost var iv_LE := old(buffer128_read(iv_b, 0, mem));
+    ghost var iv_BE := reverse_bytes_quad32(iv_LE);
+    ghost var auth_raw_quads := old(append(s128(mem, auth_b), s128(mem, abytes_b)));
+    ghost var auth_bytes := slice_work_around(le_seq_quad32_to_bytes(auth_raw_quads), old(auth_num_bytes));
+    ghost var cipher_raw_quads := old(append(append(s128(mem, in128x6_b), s128(mem, in128_b)), s128(mem, inout_b)));
+    ghost var cipher_bytes := slice_work_around(le_seq_quad32_to_bytes(cipher_raw_quads), old(cipher_num_bytes));
+    decrypt_helper(alg, seq_nat32_to_seq_nat8_LE(key), be_quad32_to_bytes(iv_BE), cipher_bytes, auth_bytes, rax, alleged_tag_quad, computed_tag);
+    // Proves:
+//    assert (rax = 0) == 
+//            gcm_decrypt_LE(alg, seq_nat32_to_seq_nat8_LE(key), be_quad32_to_bytes(iv_BE), 
+//                            cipher_bytes, auth_bytes, old(le_quad32_to_bytes(buffer128_read(tag_b, 0, mem))))._2;
+    // Save a copy of rax, since restore_registers clobbers it.  TODO: avoid this.
+    Mov64(rcx, rax);
     restore_registers(win, old(rsp), old(xmm6), old(xmm7), old(xmm8), old(xmm9), old(xmm10), old(xmm11), old(xmm12), old(xmm13), old(xmm14), old(xmm15));
+    Mov64(rax, rcx);
 }
-*/
