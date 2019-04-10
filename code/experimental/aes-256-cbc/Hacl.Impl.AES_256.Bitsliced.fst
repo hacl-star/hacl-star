@@ -479,12 +479,12 @@ let inv_shift_rows q =
   loop_nospec #h0 #uint64 #(size 8) (size 8) q (fun i ->
     let x = index q i in
     upd q i ((x &. (u64 0x000000000000FFFF))
-			|. ((x &. (u64 0x000000000FFF0000) <<. size 4))
-			|. ((x &. (u64 0x00000000F0000000) >>. size 12))
-			|. ((x &. (u64 0x000000FF00000000) <<. size 8))
-			|. ((x &. (u64 0x0000FF0000000000) >>. size 8))
-			|. ((x &. (u64 0x000F000000000000) <<. size 12))
-			|. ((x &. (u64 0xFFF0000000000000) >>. size 4)))
+			|. ((x &. (u64 0x000000000FFF0000)) <<. size 4)
+			|. ((x &. (u64 0x00000000F0000000)) >>. size 12)
+			|. ((x &. (u64 0x000000FF00000000)) <<. size 8)
+			|. ((x &. (u64 0x0000FF0000000000)) >>. size 8)
+			|. ((x &. (u64 0x000F000000000000)) <<. size 12)
+			|. ((x &. (u64 0xFFF0000000000000)) >>. size 4))
   )
 
 
@@ -585,13 +585,13 @@ let decrypt q skey =
   (**) let h0 = ST.get () in
   loop_nospec #h0 #uint64 #(size 8) (size 14 -. size 1) q (fun u ->
     let u = size 13 -. u in
-    shift_rows q;
+    inv_shift_rows q;
     bitslice_inv_sbox q;
     add_round_key q (sub skey (u <<. size 3) (size 8));
     inv_mix_columns q
   );
-  bitslice_sbox q;
-  shift_rows q;
+  inv_shift_rows q;
+  bitslice_inv_sbox q;
   add_round_key q (sub skey (size 0) (size 8))
 
 
@@ -681,7 +681,7 @@ val encrypt_blocks_cbc:
     ))
     (ensures (fun h0 _ h1 -> modifies1 out h0 h1))
 
-#set-options "--z3rlimit 1000"
+#set-options "--z3rlimit 200"
 
 let encrypt_blocks_cbc out key iv plaintext len =
   push_frame ();
@@ -709,3 +709,68 @@ let encrypt_blocks_cbc out key iv plaintext len =
   );
   pop_frame ();
   ()
+
+val update_out_from_ivw_w:
+  w: lbuffer uint32 (size 4) ->
+  ivw: lbuffer uint32 (size 4) ->
+  out: buffer uint8 ->
+  len: size_t{length out = v len /\ v len % 16 = 0} ->
+  i: size_t{ i <. len /. size 16} ->
+  Stack unit
+    (requires (fun h -> live h w /\ live h out /\ live h ivw /\
+      disjoint w out /\ disjoint ivw out
+    ))
+    (ensures (fun h0 _ h1 -> modifies1 out h0 h1))
+
+let update_out_from_ivw_w w ivw out len i =
+  uint_to_bytes_le #U32 #SEC
+    (sub #MUT #uint8 #len out ((i *. size 16) +. size 0) (size 4))
+    (index w (size 0) ^. index ivw (size 0));
+  uint_to_bytes_le #U32 #SEC
+    (sub #MUT #uint8 #len out ((i *. size 16) +. size 4) (size 4))
+    (index w (size 1) ^. index ivw (size 1));
+  uint_to_bytes_le #U32 #SEC
+    (sub #MUT #uint8 #len out ((i *. size 16) +. size 8) (size 4))
+    (index w (size 2) ^. index ivw (size 2));
+  uint_to_bytes_le #U32 #SEC
+    (sub #MUT #uint8 #len out ((i*. size 16) +. size 12) (size 4))
+    (index w (size 3) ^. index ivw (size 3))
+
+val decrypt_blocks_cbc:
+  out: buffer uint8 ->
+  key: lbuffer uint8 (size 32) ->
+  iv: lbuffer uint8 (size 16) ->
+  plaintext: buffer uint8 ->
+  len: size_t{length out = v len /\ length plaintext = v len /\ v len % 16 = 0} ->
+  Stack unit
+    (requires (fun h -> live h out /\ live h key /\ live h iv /\ live h plaintext /\
+      disjoint out key /\ disjoint out iv /\ disjoint out plaintext
+    ))
+    (ensures (fun h0 _ h1 -> modifies1 out h0 h1))
+
+let decrypt_blocks_cbc out key iv ciphertext len =
+  push_frame ();
+  let sk_exp = create (size 120) (u64 0) in
+  let ivw = create (size 4) (u32 0) in
+  let skey = create (size 30) (u64 0) in
+  keysched skey key;
+  skey_expand sk_exp skey;
+  uint32s_from_bytes_le ivw iv;
+  let w = create (size 4) (u32 0) in
+  let q = create (size 8) (u64 0) in
+  (**) let h0 = ST.get () in
+  loop_nospec4 #h0
+    #uint32 #uint32 #uint64 #uint8
+    #(size 4) #(size 4) #(size 8) #len
+    (len /. (size 16)) w ivw q out (fun i ->
+    let cip_block = sub #MUT #uint8 #len ciphertext (i *. size 16) (size 16) in
+    uint32s_from_bytes_le w cip_block;
+    interleave_in (sub q (size 0) (size 1)) (sub q (size 4) (size 1)) w;
+    ortho q;
+    decrypt q sk_exp;
+    ortho q;
+    interleave_out w (index q (size 0)) (index q (size 4));
+    update_out_from_ivw_w w ivw out len i;
+    uint32s_from_bytes_le ivw cip_block
+  );
+  pop_frame ()
