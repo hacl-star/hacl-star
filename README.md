@@ -13,7 +13,7 @@ of our C and assembly code, including EverCrypt 0.1 (currently in **alpha**).
 ## HACL\*
 
 [HACL\*](README.HACL.md), the High-Assurance Cryptographic Library, is a
-formally verified cryptographic library in [F\*](https://www.fsar-lang.org).
+formally verified cryptographic library in [F\*](https://www.fstar-lang.org).
 The goal of this library is to develop highly efficient, pure C implementations
 for popular cryptographic primitives and to verify them for memory safety,
 functional correctness, and secret independence.

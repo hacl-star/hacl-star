@@ -8,7 +8,7 @@
       1,
       [ "@query", "assumption_Spec.Hash.Definitions.hash_alg__uu___haseq" ],
       0,
-      "6e0f65d8d781aef43fd8e825d0eca158"
+      "53f2ee73764c9c29503197e1cdea9471"
     ],
     [
       "EverCrypt.HMAC.lbytes",
@@ -22,7 +22,7 @@
         "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "3baea8801eb2ca59859e30285e5d0710"
+      "8620f762a0385c80eb9a08b98be759ae"
     ],
     [
       "EverCrypt.HMAC.uu___5",
@@ -31,7 +31,7 @@
       1,
       [ "@query" ],
       0,
-      "d6bebf455a416167224d49c737542ed3"
+      "8a9258f9d16692c72f910cc5853747ea"
     ],
     [
       "EverCrypt.HMAC.wrap",
@@ -87,7 +87,7 @@
         "typing_Spec.Hash.Definitions.word_length"
       ],
       0,
-      "09ce7f0f5bfd7c9cdc46a4320bc9597f"
+      "2dff9cb8945f2578c8518fce3a336f90"
     ],
     [
       "EverCrypt.HMAC.wrap_lemma",
@@ -126,7 +126,7 @@
         "typing_Spec.Hash.hash"
       ],
       0,
-      "226fb2ebe259497156f6d8b5eca498a1"
+      "d7d7ead092c665db58cc091a8725c9c2"
     ],
     [
       "EverCrypt.HMAC.xor8",
@@ -143,7 +143,7 @@
         "projection_inverse_FStar.Integers.Unsigned__0"
       ],
       0,
-      "58e05e5fb8b686b7fa1b9cc112741e69"
+      "6a2a49d41ce04fa73082602036ab1dae"
     ],
     [
       "EverCrypt.HMAC.xor",
@@ -152,7 +152,7 @@
       0,
       [ "@query" ],
       0,
-      "c56ab59dbb71d5838d5b0c9f3f9d5098"
+      "e3d2c30fdeb9d3be0874fa07695e34a6"
     ],
     [
       "EverCrypt.HMAC.xor_lemma",
@@ -174,7 +174,7 @@
         "typing_FStar.Seq.Base.length"
       ],
       0,
-      "867c4914bddebb5b158b9219924c9978"
+      "3bbca4ad3eb4c58105a5b3edeb30e337"
     ],
     [
       "EverCrypt.HMAC.xor_lemma",
@@ -234,7 +234,7 @@
         "typing_FStar.Seq.Base.length", "well-founded-ordering-on-nat"
       ],
       0,
-      "c6c8861eedcd9d0c8bed78542ca7b591"
+      "a08bcb3e82838d1fa8cde18accf1ee6f"
     ],
     [
       "EverCrypt.HMAC.hmac",
@@ -255,7 +255,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "a85eb1340bd6bb83274f71892afb48e0"
+      "ad481fcc0eca5371f9eb74acfcc78ebd"
     ],
     [
       "EverCrypt.HMAC.hmac",
@@ -308,7 +308,7 @@
         "typing_Spec.Hash.Definitions.word_length"
       ],
       0,
-      "e836f97c1c71960d557d7d1c8df5d4fd"
+      "6d4e1ceda1a676b2a7737eac54ab6470"
     ],
     [
       "EverCrypt.HMAC.compute_st",
@@ -354,7 +354,7 @@
         "typing_Spec.Hash.Definitions.word_length"
       ],
       0,
-      "261730e1e983f49e4143f2dce5825191"
+      "406f5d8198d668d09f429152efd9ff96"
     ],
     [
       "EverCrypt.HMAC.wrap_key",
@@ -396,7 +396,7 @@
         "typing_Spec.Hash.Definitions.word_length"
       ],
       0,
-      "1000827c5d71472e4d106a5596ada1bb"
+      "1fdefaab7595aef969e3ab74e5751caa"
     ],
     [
       "EverCrypt.HMAC.helper_smtpat",
@@ -435,7 +435,7 @@
         "typing_Spec.Hash.Definitions.word_length"
       ],
       0,
-      "4d222842753e77e530a36887af04b1ef"
+      "82bb88044cb86467927388042bf2e6ff"
     ],
     [
       "EverCrypt.HMAC.wrap_key",
@@ -471,7 +471,7 @@
         "typing_Spec.Hash.Definitions.word_length"
       ],
       0,
-      "bc89920c9d7a9a1fda5d26fa03f0ab2b"
+      "ce7f4540881d7391ab4bffef05472509"
     ],
     [
       "EverCrypt.HMAC.wrap_key",
@@ -610,7 +610,7 @@
         "unit_typing"
       ],
       0,
-      "e7456addb6776c29ed086966af09c504"
+      "37554e9d7f583aaa60244a26b7c57b8b"
     ],
     [
       "EverCrypt.HMAC.part1",
@@ -620,7 +620,6 @@
       [
         "@MaxIFuel_assumption", "@query",
         "Prims_pretyping_ae567c2fb75be05905677af440075565", "b2t_def",
-        "constructor_distinct_FStar.Integers.Unsigned",
         "constructor_distinct_FStar.Integers.W16",
         "constructor_distinct_FStar.Integers.W31",
         "constructor_distinct_FStar.Integers.W32",
@@ -631,9 +630,7 @@
         "equality_tok_FStar.Integers.W8@tok",
         "equation_EverCrypt.Helpers.uint8_p",
         "equation_EverCrypt.Helpers.uint8_pl",
-        "equation_EverCrypt.Helpers.uint8_t",
-        "equation_FStar.Integers.int_t", "equation_FStar.Integers.uint_8",
-        "equation_FStar.Integers.v",
+        "equation_EverCrypt.Helpers.uint8_t", "equation_FStar.Integers.v",
         "equation_FStar.Monotonic.HyperStack.mem",
         "equation_FStar.Pervasives.inversion", "equation_FStar.UInt.fits",
         "equation_FStar.UInt.min_int", "equation_FStar.UInt.size",
@@ -644,7 +641,6 @@
         "equation_Spec.Hash.Definitions.hash_word_length",
         "equation_Spec.Hash.Definitions.word_length",
         "fuel_guarded_inversion_Spec.Hash.Definitions.hash_alg",
-        "function_token_typing_FStar.Integers.uint_8",
         "function_token_typing_FStar.UInt8.t",
         "function_token_typing_Prims.__cache_version_number__",
         "function_token_typing_Prims.int",
@@ -667,7 +663,7 @@
         "typing_Spec.Hash.Definitions.word_length"
       ],
       0,
-      "72e9368a4986ea2062b6af053639d2bb"
+      "93f9c5ab2aacb8fe7619c68cf1244a06"
     ],
     [
       "EverCrypt.HMAC.part1",
@@ -694,7 +690,7 @@
         "typing_Spec.Hash.Definitions.word_length"
       ],
       0,
-      "9a9fa741b6bcd6eb1996c9d0ddc14483"
+      "3651df5d7cb73818dfe500c1e22197d3"
     ],
     [
       "EverCrypt.HMAC.part1",
@@ -918,7 +914,7 @@
         "typing_tok_Spec.Hash.Definitions.SHA2_512@tok"
       ],
       0,
-      "618ed455e15a5c7cc48853f5039dcacf"
+      "384d15a069e6014b2ee909657f70d0f3"
     ],
     [
       "EverCrypt.HMAC.part2",
@@ -955,7 +951,7 @@
         "typing_Spec.Hash.Definitions.word_length"
       ],
       0,
-      "e0a91cfe619e628a4b5cc239f9d4ad36"
+      "a32cfe9744ca50557c9534ed8b39abb0"
     ],
     [
       "EverCrypt.HMAC.part2",
@@ -985,7 +981,7 @@
         "typing_Spec.Hash.Definitions.word_length"
       ],
       0,
-      "e02f376f53923ddc3c6d056ed7c49f16"
+      "9268bb1ed1e51c9197e142dfad5c7ff0"
     ],
     [
       "EverCrypt.HMAC.part2",
@@ -1133,7 +1129,7 @@
         "typing_Spec.Hash.Definitions.word_length"
       ],
       0,
-      "e940c970cccc5b7b6cb4698ba74fb8e5"
+      "5418c56e2290448442ba4b0602e49e3e"
     ],
     [
       "EverCrypt.HMAC.hmac_core",
@@ -1189,7 +1185,7 @@
         "typing_Spec.Hash.Definitions.word_length"
       ],
       0,
-      "6801c1a7fcf90622dfaa3ef0e5307b7c"
+      "6e48b4bbcc8dfae83ae4b355ac769869"
     ],
     [
       "EverCrypt.HMAC.xor_bytes_inplace",
@@ -1225,7 +1221,7 @@
         "typing_LowStar.Monotonic.Buffer.length"
       ],
       0,
-      "58485110a86c167b243e242bd6406062"
+      "65bbd34f0325c3c35338b8a181bb2044"
     ],
     [
       "EverCrypt.HMAC.xor_bytes_inplace",
@@ -1258,7 +1254,7 @@
         "typing_LowStar.Monotonic.Buffer.length"
       ],
       0,
-      "ef8bc90032ffa6fe566065a9dcab4e81"
+      "40ea481213fdb3dcf6603c9ac0afa8a4"
     ],
     [
       "EverCrypt.HMAC.xor_bytes_inplace",
@@ -1281,7 +1277,7 @@
         "refinement_interpretation_Tm_refine_66f1ed28ed773b30b98e0595312568f0"
       ],
       0,
-      "08b07c2bde2fc8e7628fd8e3dcdc1046"
+      "b6aa0c7a32c060e771a9c7d151ccb297"
     ],
     [
       "EverCrypt.HMAC.hmac_core",
@@ -1326,7 +1322,7 @@
         "typing_Spec.Hash.Definitions.word_length"
       ],
       0,
-      "ae7ce6fe761dcb71541fa69861515955"
+      "9946fdb3c2c426550d2872f1108d2c82"
     ],
     [
       "EverCrypt.HMAC.hmac_core",
@@ -1545,7 +1541,7 @@
         "typing_tok_Spec.Hash.Definitions.MD5@tok"
       ],
       0,
-      "f71a3423cdee85f685d087106f627747"
+      "2e4aded64847d47d784a2f85dea8e414"
     ],
     [
       "EverCrypt.HMAC.mk_compute",
@@ -1572,7 +1568,7 @@
         "refinement_interpretation_EverCrypt.HMAC_Tm_refine_ebffc3f6e29e8ccae641682a151feefa"
       ],
       0,
-      "337945f538367ad476dc270638397c3c"
+      "3ca4ddb5998110f7ae205688a790dc95"
     ],
     [
       "EverCrypt.HMAC.mk_compute",
@@ -1739,7 +1735,7 @@
         "typing_Spec.Hash.Definitions.word_length"
       ],
       0,
-      "dd67cb76dcec2b35b641b7670347785c"
+      "bca311c2bd2f1b33180cf1de32736a10"
     ],
     [
       "EverCrypt.HMAC.compute",
@@ -1766,7 +1762,7 @@
         "refinement_interpretation_EverCrypt.HMAC_Tm_refine_ebffc3f6e29e8ccae641682a151feefa"
       ],
       0,
-      "61ca5c01396670ea9a96784188fe2752"
+      "1d49498b6399c0738ab96f3d1f899e00"
     ],
     [
       "EverCrypt.HMAC.compute",
@@ -1808,7 +1804,7 @@
         "typing_FStar.Monotonic.HyperStack.get_tip"
       ],
       0,
-      "7e4a6a7182c3b77c71e6560f19796872"
+      "9ebe0c28151b87b98bef419eec8006d4"
     ]
   ]
 ]

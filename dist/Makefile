@@ -71,8 +71,10 @@ OBJS 		+= $(patsubst %.S,%.o,$(wildcard *-$(MARCH)$(VARIANT).S))
 
 include Makefile.basic
 
-CFLAGS		+= -Wno-parentheses -g -mavx -mavx2 -std=gnu11 \
+CFLAGS		+= -Wno-parentheses -g -std=gnu11 \
   -O3 -march=native -mtune=native
+
+Hacl_Poly1305.o: CFLAGS += -mavx -mavx2
 
 $(KREMLIB_A):
 	@echo "Please run make in the $(HACL_HOME)/code directory before invoking this Makefile" && false

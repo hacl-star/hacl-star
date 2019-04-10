@@ -1,62 +1,40 @@
 [
-  "aò‹\rè÷ 6§?å.S?‚œ",
+  "tH√~M≤O“77qÀ\u000bŒX$",
   [
     [
-      "EverCrypt.AEAD.frozen_preorder",
-      1,
-      2,
-      1,
-      [
-        "@query", "equation_EverCrypt.AEAD.bytes",
-        "equation_FStar.Preorder.preorder_rel",
-        "equation_FStar.Preorder.reflexive",
-        "equation_FStar.Preorder.transitive", "equation_Prims.logical",
-        "interpretation_Tm_abs_f889570fcf51f11d9be684fd799195bb",
-        "l_imp-interp"
-      ],
-      0,
-      "d8bad2ab668102ff1e2e68053c40ec82"
-    ],
-    [
-      "EverCrypt.AEAD.expand_or_dummy",
+      "EverCrypt.AEAD.invariant",
       1,
       0,
       0,
       [
-        "@query", "equation_EverCrypt.AEAD.kv_or_dummy",
-        "projection_inverse_BoxBool_proj_0"
+        "@MaxIFuel_assumption", "@query", "equation_EverCrypt.AEAD.state",
+        "equation_LowStar.Buffer.pointer",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_573cfed777dae20cc82e8fef9622857e"
       ],
       0,
-      "ac7163a41e0b912c15704d3fae0b3df6"
+      "4e798be169682b847c7fdb3af56b7a10"
     ],
     [
-      "EverCrypt.AEAD.__proj__EK__item__ek",
+      "EverCrypt.AEAD.create_in_st",
       1,
-      2,
-      1,
+      0,
+      0,
       [
         "@MaxIFuel_assumption", "@query",
-        "proj_equation_EverCrypt.AEAD.EK_kv",
-        "projection_inverse_EverCrypt.AEAD.EK_kv",
-        "refinement_interpretation_Tm_refine_3db8709c78401853d88d34765f54bab3"
-      ],
-      0,
-      "31d050b065f7d79680f9b9a907526f38"
-    ],
-    [
-      "EverCrypt.AEAD.expand_in",
-      1,
-      0,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query", "equation_EverCrypt.AEAD.bytes",
-        "equation_EverCrypt.AEAD.kv_or_dummy", "equation_Spec.AEAD.kv",
+        "constructor_distinct_FStar.Integers.Unsigned",
+        "constructor_distinct_FStar.Integers.W8",
+        "equality_tok_FStar.Integers.W8@tok",
+        "equation_EverCrypt.AEAD.bytes",
+        "equation_EverCrypt.AEAD.kv_or_dummy",
+        "equation_FStar.Integers.int_t", "equation_Spec.AEAD.kv",
         "equation_Spec.AEAD.lbytes",
         "fuel_guarded_inversion_EverCrypt.AEAD.expanded_key",
+        "projection_inverse_FStar.Integers.Unsigned__0",
         "refinement_interpretation_Tm_refine_a0cd7d06c5da6444b6b51b319febde8e"
       ],
       0,
-      "d61e894f5be89b1f0395793b2681f491"
+      "0403732d35193acb56e53d15ca8a6a3a"
     ],
     [
       "EverCrypt.AEAD.iv_p",
@@ -65,19 +43,10 @@
       1,
       [ "@query" ],
       0,
-      "f1d8bbe8b0b95319e2b71dcd626def05"
+      "5a6cb0f50e5c4c655c8397b5a5a5a654"
     ],
     [
-      "EverCrypt.AEAD.uu___43",
-      1,
-      0,
-      0,
-      [ "@query" ],
-      0,
-      "fdc65c4b88ea1bd0bc303263a6985e0d"
-    ],
-    [
-      "EverCrypt.AEAD.encrypt",
+      "EverCrypt.AEAD.encrypt_st",
       1,
       0,
       0,
@@ -122,10 +91,10 @@
         "typing_Spec.AEAD.is_supported_alg"
       ],
       0,
-      "9ef3c692737a616bc46454b74e761841"
+      "4f760ea59c2a696b4ee50752147e6960"
     ],
     [
-      "EverCrypt.AEAD.decrypt",
+      "EverCrypt.AEAD.decrypt_st",
       1,
       0,
       0,
@@ -183,7 +152,7 @@
         "typing_Spec.AEAD.is_supported_alg"
       ],
       0,
-      "96f877d72f492c482694391bf1ba97c8"
+      "b6b9ea934d7df7bfa32ffcd8613a8706"
     ]
   ]
 ]

@@ -41,7 +41,15 @@ let lemma_mul_assos_5 a b c d e = ()
 val lemma_mul_assos_6:
   a:nat -> b:nat -> c:nat -> d:nat -> e:nat -> f:nat ->
   Lemma (a * b * c * d * e * f == a * (b * c * d * e * f))
-let lemma_mul_assos_6 a b c d e f = ()
+let lemma_mul_assos_6 a b c d e f =
+  let open FStar.Calc in
+  calc (==) {
+      a * b * c * d * e * f;
+    == { lemma_mul_assos_5 a b c d e }
+      (a * (b * c * d * e)) * f;
+    == { FStar.Math.Lemmas.paren_mul_right a (b * c * d * e) f }
+      a * (b * c * d * e * f);
+  }
 
 val lemma_mul5_distr_l:
   a:nat -> b:nat -> c:nat -> d:nat -> e:nat -> f:nat ->

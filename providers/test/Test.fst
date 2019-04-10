@@ -6,6 +6,7 @@ module U32 = FStar.UInt32
 
 open FStar.HyperStack.ST
 open EverCrypt.Helpers
+open EverCrypt.Error
 
 module AC = EverCrypt.AutoConfig2
 module SC = EverCrypt.StaticConfig
@@ -416,15 +417,17 @@ let test_aead_st alg key key_len iv iv_len aad aad_len tag tag_len plaintext pla
     C.String.print !$"Warning: skipping test_aead_st/chachapoly because no BCrypt implementation\n"
   else begin
     push_frame();
-    let st = EverCrypt.AEAD.expand_in #alg HyperStack.root key in
+    let st = B.alloca B.null 1ul in
+    let _ = EverCrypt.AEAD.create_in #alg HyperStack.root st key in
+    let st = B.index st 0ul in
     let plaintext'    = B.alloca 0uy plaintext_len in
     let ciphertext'   = B.alloca 0uy plaintext_len in
     let tag' = B.alloca 0uy tag_len in
 
-    if EverCrypt.AEAD.(encrypt st iv aad aad_len plaintext plaintext_len ciphertext' tag' <> Success) then
+    if EverCrypt.AEAD.(encrypt #(G.hide alg) st iv aad aad_len plaintext plaintext_len ciphertext' tag' <> Success) then
       C.Failure.failwith !$"Failure AEAD encrypt\n";
-    (match EverCrypt.AEAD.decrypt st iv aad aad_len ciphertext' ciphertext_len tag' plaintext' with
-    | EverCrypt.AEAD.Success ->
+    (match EverCrypt.AEAD.decrypt #(G.hide alg) st iv aad aad_len ciphertext' ciphertext_len tag' plaintext' with
+    | Success ->
       TestLib.compare_and_print !$"of AEAD cipher" ciphertext ciphertext' plaintext_len;
       TestLib.compare_and_print !$"of AEAD plain" plaintext plaintext' plaintext_len;
       TestLib.compare_and_print !$"of AEAD tag" tag tag' tag_len
@@ -519,10 +522,22 @@ let test_dh () : St unit =
   ()
 
 let main (): St C.exit_code =
+  let equal_heap_dom_lemma (h1 h2:Heap.heap)
+    : Lemma
+      (requires Heap.equal_dom h1 h2)
+      (ensures  ((forall (a:Type0) (rel:Preorder.preorder a) (r:Heap.mref a rel).
+                    h1 `Heap.contains` r <==> h2 `Heap.contains` r) /\ 
+                 (forall (a:Type0) (rel:Preorder.preorder a) (r:Heap.mref a rel).
+                     r `Heap.unused_in` h1 <==> r `Heap.unused_in` h2)))
+      [SMTPat (Heap.equal_dom h1 h2)]
+    = ()
+  in
+    
   EverCrypt.AutoConfig2.init ();
 
   let open EverCrypt in
   let open C.String in
+
   push_frame ();
 
   print !$"\n  HASHING TESTS\n";
@@ -552,7 +567,6 @@ let main (): St C.exit_code =
     EverCrypt.AutoConfig2.init ()
   end;
   AC.disable_vale ();
-
 
   print !$"===========Hacl===========\n";
   print !$">>> Hash\n";
@@ -595,7 +609,6 @@ let main (): St C.exit_code =
     test_aead aead_vectors_low;
     test_cipher block_cipher_vectors_low
   end;
-
   // AR: 09/07: commenting it, random_init calls fails to verify, also see comment on test_rng above
   // print !$"\n  PSEUDO-RANDOM GENERATOR\n";
   // if EverCrypt.random_init () = 1ul then
@@ -608,6 +621,6 @@ let main (): St C.exit_code =
   //   print !$"Failed to seed the PRNG!\n";
   //   C.portable_exit 3l
   //  end;
-  
+
   pop_frame ();
   C.EXIT_SUCCESS
