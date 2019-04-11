@@ -119,8 +119,10 @@ let print_list_nat64 l =
 ) ()
 
 
+let print_string flag s = if flag then IO.print_string s else ()
 
-let print_lbytes #len b =
+let print_lbytes flag len b =
+  if not flag then () else
   let q = 32 in
   let n = len / q in
   let r = len % q in
@@ -135,88 +137,99 @@ let print_lbytes #len b =
   let sb = sub #uint8 #len b (n * q) r in
   List.iter (fun a -> print_uint8_hex_pad a) (to_list sb))
 
-let print_label_lbytes #len label b =
+let print_label_lbytes flag len label b =
+  if not flag then () else
   IO.print_string label;
   IO.print_string ": \n";
-  print_lbytes #len b;
+  print_lbytes flag len b;
   IO.print_newline ()
 
-let print_compare len expected result =
+let print_compare flag len expected result =
+  let r:bool = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) expected result in
+  if (not flag) then r else (
   IO.print_string "\nResult:   ";
   List.iter (fun a -> print_uint8_hex_pad a) (to_list result);
   IO.print_string "\nExpected: ";
   List.iter (fun a -> print_uint8_hex_pad a) (to_list expected);
-  for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) expected result
+  r)
 
-let print_compare_display len expected result =
+let print_compare_display flag len expected result =
   let r = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) expected result in
-  if r then IO.print_string "\nSuccess !\n"
-  else begin
-    IO.print_string "\nResult:   ";
-    List.iter (fun a -> print_uint8_hex_pad a) (to_list result);
-    IO.print_string "\nExpected: ";
-    List.iter (fun a -> print_uint8_hex_pad a) (to_list expected);
-    IO.print_string "\nFailure !";
-    IO.print_newline ()
-  end;
-  r
+  if not flag then r
+  else (
+    if r then IO.print_string "\nSuccess !\n"
+    else begin
+      IO.print_string "\nResult:   ";
+      List.iter (fun a -> print_uint8_hex_pad a) (to_list result);
+      IO.print_string "\nExpected: ";
+      List.iter (fun a -> print_uint8_hex_pad a) (to_list expected);
+      IO.print_string "\nFailure !";
+      IO.print_newline ()
+    end;
+    r)
 
-let print_compare_display_diff len expected result =
+let print_compare_display_diff flag len expected result =
   let r = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) expected result in
-  let diff = map2 (fun a b -> a ^. b) expected result in
-  if r then IO.print_string "\nSuccess !\n"
-  else begin
-    IO.print_string "\nFailure !";
-    IO.print_newline ();
-    IO.print_string "\nDiff: ";
-    List.iter (fun a -> print_uint8_hex_pad a) (to_list diff);
-    IO.print_newline ();
-    IO.print_string "\nResult:   ";
-    List.iter (fun a -> print_uint8_hex_pad a) (to_list result);
-    IO.print_newline ();
-    IO.print_string "\nExpected: ";
-    List.iter (fun a -> print_uint8_hex_pad a) (to_list expected);
-    IO.print_newline ()
-  end;
-  r
+  if not flag then r
+  else (
+    let diff = map2 (fun a b -> a ^. b) expected result in
+    if r then IO.print_string "\nSuccess !\n"
+    else begin
+      IO.print_string "\nFailure !";
+      IO.print_newline ();
+      IO.print_string "\nDiff: ";
+      List.iter (fun a -> print_uint8_hex_pad a) (to_list diff);
+      IO.print_newline ();
+      IO.print_string "\nResult:   ";
+      List.iter (fun a -> print_uint8_hex_pad a) (to_list result);
+      IO.print_newline ();
+      IO.print_string "\nExpected: ";
+      List.iter (fun a -> print_uint8_hex_pad a) (to_list expected);
+      IO.print_newline ()
+    end;
+    r)
 
-let print_label_compare_display s len expected result =
+let print_label_compare_display flag s len expected result =
   let r = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) expected result in
-  if r then (
-    IO.print_string "\nSuccess ! ";
-    IO.print_string s;
-    IO.print_newline ())
-  else begin
-    IO.print_string "\nFailure ! ";
-    IO.print_string s;
-    IO.print_newline ();
-    IO.print_string "\nResult:   ";
-    List.iter (fun a -> print_uint8_hex_pad a) (to_list result);
-    IO.print_string "\nExpected: ";
-    List.iter (fun a -> print_uint8_hex_pad a) (to_list expected);
-    IO.print_newline ()
-  end;
-  r
+  if not flag then r
+  else (
+    if r then (
+      IO.print_string "\nSuccess ! ";
+      IO.print_string s;
+      IO.print_newline ())
+    else begin
+      IO.print_string "\nFailure ! ";
+      IO.print_string s;
+      IO.print_newline ();
+      IO.print_string "\nResult:   ";
+      List.iter (fun a -> print_uint8_hex_pad a) (to_list result);
+      IO.print_string "\nExpected: ";
+      List.iter (fun a -> print_uint8_hex_pad a) (to_list expected);
+      IO.print_newline ()
+    end;
+    r)
 
-let print_label_compare_display_diff s len expected result =
+let print_label_compare_display_diff flag s len expected result =
   let r = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) expected result in
-  let diff = map2 (fun a b -> a ^. b) expected result in
-  if r then (
-    IO.print_string "\nSuccess ! ";
-    IO.print_string s;
-    IO.print_newline ())
-  else begin
-    IO.print_string "\nFailure ! ";
-    IO.print_string s;
-    IO.print_newline ();
-    IO.print_string "\nDiff: ";
-    List.iter (fun a -> print_uint8_hex_pad a) (to_list diff);
-    IO.print_newline ();
-    IO.print_string "\nResult:   ";
-    List.iter (fun a -> print_uint8_hex_pad a) (to_list result);
-    IO.print_newline ();
-    IO.print_string "\nExpected: ";
-    List.iter (fun a -> print_uint8_hex_pad a) (to_list expected);
-    IO.print_newline ()
-  end;
-  r
+  if not flag then r
+  else (
+    let diff = map2 (fun a b -> a ^. b) expected result in
+    if r then (
+      IO.print_string "\nSuccess ! ";
+      IO.print_string s;
+      IO.print_newline ())
+    else begin
+      IO.print_string "\nFailure ! ";
+      IO.print_string s;
+      IO.print_newline ();
+      IO.print_string "\nDiff: ";
+      List.iter (fun a -> print_uint8_hex_pad a) (to_list diff);
+      IO.print_newline ();
+      IO.print_string "\nResult:   ";
+      List.iter (fun a -> print_uint8_hex_pad a) (to_list result);
+      IO.print_newline ();
+      IO.print_string "\nExpected: ";
+      List.iter (fun a -> print_uint8_hex_pad a) (to_list expected);
+      IO.print_newline ()
+    end;
+    r)
