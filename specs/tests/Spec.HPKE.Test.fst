@@ -10,6 +10,7 @@ open Lib.ByteSequence
 
 module Spec = Spec.HPKE
 
+let dflag:bool = true
 
 //
 // Test 1
@@ -48,19 +49,19 @@ let test () =
   (match Spec.HPKE.encap cs e test1_pk test1_context with
   | _, None -> IO.print_string "Error: Spec.HPKE.encap failed\n"
   | _, Some (ek, epk) -> (
-    Lib.PrintSequence.print_label_lbytes #(Spec.HPKE.size_key cs) "\nHPKE Encap Secret" ek;
+    Lib.PrintSequence.print_label_lbytes dflag (Spec.HPKE.size_key cs) "\nHPKE Encap Secret" ek;
     IO.print_newline ();
-    Lib.PrintSequence.print_label_lbytes #(Spec.HPKE.size_key_dh cs) "\nHPKE Encap Ephemeral Public" epk);
+    Lib.PrintSequence.print_label_lbytes dflag (Spec.HPKE.size_key_dh cs) "\nHPKE Encap Ephemeral Public" epk);
     IO.print_newline ();
     let output = Spec.HPKE.encrypt cs ek test1_input lbytes_empty (u32 0) in
     let ciphertext = sub #uint8 #(32 + Spec.AEAD.size_tag Spec.AEAD.AEAD_AES128_GCM) output 0 32 in
     let tag = sub #uint8 #(32 + Spec.AEAD.size_tag Spec.AEAD.AEAD_AES128_GCM) output 32 (Spec.AEAD.size_tag Spec.AEAD.AEAD_AES128_GCM) in
-    Lib.PrintSequence.print_label_lbytes #(32 + Spec.AEAD.size_tag Spec.AEAD.AEAD_AES128_GCM) "\nHPKE Output" output;
+    Lib.PrintSequence.print_label_lbytes dflag (32 + Spec.AEAD.size_tag Spec.AEAD.AEAD_AES128_GCM) "\nHPKE Output" output;
     IO.print_newline ();
     match Spec.HPKE.decap cs test1_sk epk test1_context with
     | None -> IO.print_string "\nError: Spec.HPKE.decap failed\n"
     | Some dk -> (
-      Lib.PrintSequence.print_label_lbytes #(Spec.HPKE.size_key cs) "\nHPKE Decap Secret" dk;
+      Lib.PrintSequence.print_label_lbytes dflag (Spec.HPKE.size_key cs) "\nHPKE Decap Secret" dk;
       IO.print_newline ();
       let result_decap = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) ek dk in
       if result_decap then ()
@@ -68,7 +69,7 @@ let test () =
       match Spec.HPKE.decrypt cs dk ciphertext tag lbytes_empty (u32 0) with
       | None -> IO.print_string "\nError: Spec.HPKE.decrypt failed\n"
       | Some plaintext ->
-        Lib.PrintSequence.print_label_lbytes #32 "\nHPKE Computed Plaintext" plaintext;
+        Lib.PrintSequence.print_label_lbytes dflag 32 "\nHPKE Computed Plaintext" plaintext;
         IO.print_newline ();
         let result_decrypt = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) test1_input plaintext in
         if result_decap then ()
