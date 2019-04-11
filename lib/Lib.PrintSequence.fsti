@@ -55,7 +55,7 @@ val print_lbytes: #len:size_nat -> lbytes len -> FStar.All.ML unit
 val print_label_lbytes: #len:size_nat -> string -> lbytes len -> FStar.All.ML unit
 
 val print_compare: len:size_nat -> expected:lbytes len -> result:lbytes len -> FStar.All.ML bool
-val print_compare_display: len:size_nat -> expected:lbytes len -> result:lbytes len -> FStar.All.ML unit
-val print_compare_display_diff: len:size_nat -> expected:lbytes len -> result:lbytes len -> FStar.All.ML unit
-val print_label_compare_display: s:string -> len:size_nat -> expected:lbytes len -> result:lbytes len -> FStar.All.ML unit
-val print_label_compare_display_diff: s:string -> len:size_nat -> expected:lbytes len -> result:lbytes len -> FStar.All.ML unit
+val print_compare_display: len:size_nat -> expected:lbytes len -> result:lbytes len -> FStar.All.ML bool
+val print_compare_display_diff: len:size_nat -> expected:lbytes len -> result:lbytes len -> FStar.All.ML bool
+val print_label_compare_display: s:string -> len:size_nat -> expected:lbytes len -> result:lbytes len -> FStar.All.ML bool
+val print_label_compare_display_diff: s:string -> len:size_nat -> expected:lbytes len -> result:lbytes len -> FStar.All.ML bool

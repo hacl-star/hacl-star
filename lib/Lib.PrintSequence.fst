@@ -158,7 +158,8 @@ let print_compare_display len expected result =
     List.iter (fun a -> print_uint8_hex_pad a) (to_list expected);
     IO.print_string "\nFailure !";
     IO.print_newline ()
-  end
+  end;
+  r
 
 let print_compare_display_diff len expected result =
   let r = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) expected result in
@@ -176,7 +177,8 @@ let print_compare_display_diff len expected result =
     IO.print_string "\nExpected: ";
     List.iter (fun a -> print_uint8_hex_pad a) (to_list expected);
     IO.print_newline ()
-  end
+  end;
+  r
 
 let print_label_compare_display s len expected result =
   let r = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) expected result in
@@ -193,7 +195,8 @@ let print_label_compare_display s len expected result =
     IO.print_string "\nExpected: ";
     List.iter (fun a -> print_uint8_hex_pad a) (to_list expected);
     IO.print_newline ()
-  end
+  end;
+  r
 
 let print_label_compare_display_diff s len expected result =
   let r = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) expected result in
@@ -215,4 +218,5 @@ let print_label_compare_display_diff s len expected result =
     IO.print_string "\nExpected: ";
     List.iter (fun a -> print_uint8_hex_pad a) (to_list expected);
     IO.print_newline ()
-  end
+  end;
+  r
