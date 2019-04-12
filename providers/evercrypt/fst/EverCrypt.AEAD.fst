@@ -210,8 +210,6 @@ let aes_gcm_encrypt (a:aes_gcm_alg): GCMencryptOpt_stdcalls.encrypt_opt_stdcall_
   | AES128_GCM -> GCMencryptOpt_stdcalls.gcm128_encrypt_opt_stdcall
   | AES256_GCM -> GCMencryptOpt256_stdcalls.gcm256_encrypt_opt_stdcall
 
-//let _: squash (inversion AES_s.algorithm) = allow_inversion AES_s.algorithm
-
 #set-options "--z3rlimit 200 --max_fuel 0 --max_ifuel 0"
 inline_for_extraction noextract
 let encrypt_aes_gcm (a: aes_gcm_alg): encrypt_st a =
@@ -359,218 +357,139 @@ let encrypt #a s iv ad ad_len plain plain_len cipher tag =
           ek iv ad_len ad plain_len plain cipher tag;
         Success
 
+inline_for_extraction noextract
+let aes_gcm_decrypt (a:aes_gcm_alg): GCMdecrypt_stdcalls.gcm_decrypt_st (vale_alg_of_alg a) =
+  match a with
+  | AES128_GCM -> GCMdecrypt_stdcalls.gcm128_decrypt_stdcall
+  | AES256_GCM -> GCMdecrypt_stdcalls.gcm256_decrypt_stdcall
+
 #set-options "--z3rlimit 200"
-let decrypt #a s iv ad ad_len cipher cipher_len tag dst =
+inline_for_extraction noextract
+let decrypt_aes_gcm (a: aes_gcm_alg): decrypt_st a =
+fun s iv ad ad_len cipher cipher_len tag dst ->
   if B.is_null s then
     InvalidKey
 
   else
     let open LowStar.BufferOps in
     let Ek i kv ek = !*s in
+      assert (
+        let k = G.reveal kv in
+        let k_nat = Words.Seq_s.seq_uint8_to_seq_nat8 k in
+        let k_w = Words.Seq_s.seq_nat8_to_seq_nat32_LE k_nat in
+        AES_s.is_aes_key_LE (vale_alg_of_alg a) k_w);
+
+      push_frame();
+      // Cannot pass a frozen buffer to a function that expects a regular
+      // buffer. (Or can we? Prove compatibility of preorders?). In any case, we
+      // just allocate a temporary on the stack and blit.
+      let tmp_keys = B.alloca 0uy (key_offset a) in
+      MB.blit ek 0ul tmp_keys 0ul (key_offset a);
+
+      // The iv is modified by Vale, which the API does not allow. Hence
+      // we allocate a temporary buffer and blit the contents of the iv
+      let tmp_iv = B.alloca 0uy 16ul in
+      let h_pre = get() in
+
+      MB.blit iv 0ul tmp_iv 0ul 12ul;
+
+      let h0 = get() in
+
+      // Some help is needed to prove that the end of the tmp_iv buffer
+      // is still 0s after blitting the contents of iv into the start of the buffer
+      let lemma_iv_eq () : Lemma
+        (let iv_nat = Words.Seq_s.seq_uint8_to_seq_nat8 (B.as_seq h0 iv) in
+        let iv_nat = Seq.append iv_nat (Seq.create 4 0) in
+        Seq.equal
+          (Words.Seq_s.seq_uint8_to_seq_nat8 (B.as_seq h0 tmp_iv))
+          iv_nat)
+        = let iv_nat = Words.Seq_s.seq_uint8_to_seq_nat8 (B.as_seq h0 iv) in
+          let iv_nat = Seq.append iv_nat (Seq.create 4 0) in
+          let s_tmp = Words.Seq_s.seq_uint8_to_seq_nat8 (B.as_seq h0 tmp_iv) in
+          Seq.lemma_index_slice (B.as_seq h0 tmp_iv) 12 16 0;
+          Seq.lemma_index_slice (B.as_seq h0 tmp_iv) 12 16 1;
+          Seq.lemma_index_slice (B.as_seq h0 tmp_iv) 12 16 2;
+          Seq.lemma_index_slice (B.as_seq h0 tmp_iv) 12 16 3;
+          assert (Seq.equal iv_nat s_tmp)
+
+
+      in lemma_iv_eq ();
+
+      // These asserts prove that 4096 * (len {cipher, ad}) are smaller than pow2_32
+      assert (max_length AES128_GCM = pow2 20 - 1 - 16);
+      assert (max_length AES256_GCM = pow2 20 - 1 - 16);
+      assert_norm (4096 * (pow2 20 - 1) < Words_s.pow2_32);
+      assert_norm (4096 * (pow2 20 - 1 - 16) < Words_s.pow2_32);
+
+      let h0 = get() in
+
+      let r = aes_gcm_decrypt a
+        (let k = G.reveal kv in
+        let k_nat = Words.Seq_s.seq_uint8_to_seq_nat8 k in
+        let k_w = Words.Seq_s.seq_nat8_to_seq_nat32_LE k_nat in G.hide k_w)
+        cipher
+        (uint32_to_uint64 cipher_len)
+        ad
+        (uint32_to_uint64 ad_len)
+        tmp_iv
+        dst
+        tag
+        tmp_keys in
+
+      let h1 = get() in
+
+      // This assert is needed for z3 to pick up sequence equality for ciphertext
+      // It could be avoided if the spec returned both instead of appending them
+      assert (
+        let kv_nat = Words.Seq_s.seq_uint8_to_seq_nat8 (G.reveal kv) in
+        let iv_nat = Words.Seq_s.seq_uint8_to_seq_nat8 (B.as_seq h0 iv) in
+        // the specification takes a seq16 for convenience, but actually discards
+        // the trailing four bytes; we are, however, constrained by it and append
+        // zeroes just to satisfy the spec
+        let iv_nat = S.append iv_nat (S.create 4 0) in
+        // `ad` is called `auth` in Vale world; "additional data", "authenticated
+        // data", potato, potato
+        let ad_nat = Words.Seq_s.seq_uint8_to_seq_nat8 (B.as_seq h0 ad) in
+        let cipher_nat = Words.Seq_s.seq_uint8_to_seq_nat8 (B.as_seq h0 cipher) in
+        let tag_nat = Words.Seq_s.seq_uint8_to_seq_nat8 (B.as_seq h0 tag) in
+        assert (max_length AES128_GCM = pow2 20 - 1 - 16);
+        assert (max_length AES256_GCM = pow2 20 - 1 - 16);
+        assert_norm (4096 * (pow2 20 - 1 - 16) < Words_s.pow2_32);
+        let plain_nat, success =
+          GCM_s.gcm_decrypt_LE (vale_alg_of_alg a) kv_nat iv_nat cipher_nat ad_nat tag_nat
+        in
+        Seq.equal (B.as_seq h1 dst) (Words.Seq_s.seq_nat8_to_seq_uint8 plain_nat) /\
+        (UInt64.v r = 0) == success);
+
+      assert (
+        let kv = G.reveal kv in
+        let cipher_tag = B.as_seq h0 cipher `S.append` B.as_seq h0 tag in
+        Seq.equal (Seq.slice cipher_tag (S.length cipher_tag - tag_length a) (S.length cipher_tag))
+          (B.as_seq h0 tag) /\
+        Seq.equal (Seq.slice cipher_tag 0 (S.length cipher_tag - tag_length a)) (B.as_seq h0 cipher));
+
+      pop_frame();
+
+      if r = 0uL then
+        Success
+      else
+        AuthenticationFailure
+
+let decrypt_aes128_gcm: decrypt_st AES128_GCM = decrypt_aes_gcm AES128_GCM
+let decrypt_aes256_gcm: decrypt_st AES256_GCM = decrypt_aes_gcm AES256_GCM
+
+let decrypt #a s iv ad ad_len cipher cipher_len tag dst =
+  if B.is_null s then
+    InvalidKey
+  else
+    let open LowStar.BufferOps in
+    let Ek i kv ek = !*s in
     match i with
     | Vale_AES128_GCM ->
-        assert (
-          let k = G.reveal kv in
-          let k_nat = Words.Seq_s.seq_uint8_to_seq_nat8 k in
-          let k_w = Words.Seq_s.seq_nat8_to_seq_nat32_LE k_nat in
-          AES_s.is_aes_key_LE AES_s.AES_128 k_w);
-
-        push_frame();
-        // Cannot pass a frozen buffer to a function that expects a regular
-        // buffer. (Or can we? Prove compatibility of preorders?). In any case, we
-        // just allocate a temporary on the stack and blit.
-        let tmp_keys = B.alloca 0uy 176ul in
-        MB.blit ek 0ul tmp_keys 0ul 176ul;
-
-        // The iv is modified by Vale, which the API does not allow. Hence
-        // we allocate a temporary buffer and blit the contents of the iv
-        let tmp_iv = B.alloca 0uy 16ul in
-        let h_pre = get() in
-
-        MB.blit iv 0ul tmp_iv 0ul 12ul;
-
-        let h0 = get() in
-
-        // Some help is needed to prove that the end of the tmp_iv buffer
-        // is still 0s after blitting the contents of iv into the start of the buffer
-        let lemma_iv_eq () : Lemma
-          (let iv_nat = Words.Seq_s.seq_uint8_to_seq_nat8 (B.as_seq h0 iv) in
-          let iv_nat = Seq.append iv_nat (Seq.create 4 0) in
-          Seq.equal
-            (Words.Seq_s.seq_uint8_to_seq_nat8 (B.as_seq h0 tmp_iv))
-            iv_nat)
-          = let iv_nat = Words.Seq_s.seq_uint8_to_seq_nat8 (B.as_seq h0 iv) in
-            let iv_nat = Seq.append iv_nat (Seq.create 4 0) in
-            let s_tmp = Words.Seq_s.seq_uint8_to_seq_nat8 (B.as_seq h0 tmp_iv) in
-            Seq.lemma_index_slice (B.as_seq h0 tmp_iv) 12 16 0;
-            Seq.lemma_index_slice (B.as_seq h0 tmp_iv) 12 16 1;
-            Seq.lemma_index_slice (B.as_seq h0 tmp_iv) 12 16 2;
-            Seq.lemma_index_slice (B.as_seq h0 tmp_iv) 12 16 3;
-            assert (Seq.equal iv_nat s_tmp)
-
-
-        in lemma_iv_eq ();
-
-        // These asserts prove that 4096 * (len {cipher, ad}) are smaller than pow2_32
-        assert (max_length AES128_GCM = pow2 20 - 1 - 16);
-        assert_norm (4096 * (pow2 20 - 1) < Words_s.pow2_32);
-        assert_norm (4096 * (pow2 20 - 1 - 16) < Words_s.pow2_32);
-
-        let h0 = get() in
-
-        let r = GCMdecrypt_stdcalls.gcm128_decrypt_stdcall
-          (let k = G.reveal kv in
-          let k_nat = Words.Seq_s.seq_uint8_to_seq_nat8 k in
-          let k_w = Words.Seq_s.seq_nat8_to_seq_nat32_LE k_nat in G.hide k_w)
-          cipher
-          (uint32_to_uint64 cipher_len)
-          ad
-          (uint32_to_uint64 ad_len)
-          tmp_iv
-          dst
-          tag
-          tmp_keys in
-
-        let h1 = get() in
-
-        // This assert is needed for z3 to pick up sequence equality for ciphertext
-        // It could be avoided if the spec returned both instead of appending them
-        assert (
-          let kv_nat = Words.Seq_s.seq_uint8_to_seq_nat8 (G.reveal kv) in
-          let iv_nat = Words.Seq_s.seq_uint8_to_seq_nat8 (B.as_seq h0 iv) in
-          // the specification takes a seq16 for convenience, but actually discards
-          // the trailing four bytes; we are, however, constrained by it and append
-          // zeroes just to satisfy the spec
-          let iv_nat = S.append iv_nat (S.create 4 0) in
-          // `ad` is called `auth` in Vale world; "additional data", "authenticated
-          // data", potato, potato
-          let ad_nat = Words.Seq_s.seq_uint8_to_seq_nat8 (B.as_seq h0 ad) in
-          let cipher_nat = Words.Seq_s.seq_uint8_to_seq_nat8 (B.as_seq h0 cipher) in
-          let tag_nat = Words.Seq_s.seq_uint8_to_seq_nat8 (B.as_seq h0 tag) in
-          assert (max_length AES128_GCM = pow2 20 - 1 - 16);
-          assert_norm (4096 * (pow2 20 - 1 - 16) < Words_s.pow2_32);
-          let plain_nat, success =
-            GCM_s.gcm_decrypt_LE AES_s.AES_128 kv_nat iv_nat cipher_nat ad_nat tag_nat
-          in
-          Seq.equal (B.as_seq h1 dst) (Words.Seq_s.seq_nat8_to_seq_uint8 plain_nat) /\
-          (UInt64.v r = 0) == success);
-
-        assert (
-          let kv = G.reveal kv in
-          let cipher_tag = B.as_seq h0 cipher `S.append` B.as_seq h0 tag in
-          Seq.equal (Seq.slice cipher_tag (S.length cipher_tag - tag_length AES128_GCM) (S.length cipher_tag))
-            (B.as_seq h0 tag) /\
-          Seq.equal (Seq.slice cipher_tag 0 (S.length cipher_tag - tag_length AES128_GCM)) (B.as_seq h0 cipher));
-
-        pop_frame();
-
-        if r = 0uL then
-          Success
-        else
-          AuthenticationFailure
-
+        decrypt_aes128_gcm s iv ad ad_len cipher cipher_len tag dst
     | Vale_AES256_GCM ->
-        assert (
-          let k = G.reveal kv in
-          let k_nat = Words.Seq_s.seq_uint8_to_seq_nat8 k in
-          let k_w = Words.Seq_s.seq_nat8_to_seq_nat32_LE k_nat in
-          AES_s.is_aes_key_LE AES_s.AES_256 k_w);
-
-        push_frame();
-        // Cannot pass a frozen buffer to a function that expects a regular
-        // buffer. (Or can we? Prove compatibility of preorders?). In any case, we
-        // just allocate a temporary on the stack and blit.
-        let tmp_keys = B.alloca 0uy 240ul in
-        MB.blit ek 0ul tmp_keys 0ul 240ul;
-
-        // The iv is modified by Vale, which the API does not allow. Hence
-        // we allocate a temporary buffer and blit the contents of the iv
-        let tmp_iv = B.alloca 0uy 16ul in
-        let h_pre = get() in
-
-        MB.blit iv 0ul tmp_iv 0ul 12ul;
-
-        let h0 = get() in
-
-        // Some help is needed to prove that the end of the tmp_iv buffer
-        // is still 0s after blitting the contents of iv into the start of the buffer
-        let lemma_iv_eq () : Lemma
-          (let iv_nat = Words.Seq_s.seq_uint8_to_seq_nat8 (B.as_seq h0 iv) in
-          let iv_nat = Seq.append iv_nat (Seq.create 4 0) in
-          Seq.equal
-            (Words.Seq_s.seq_uint8_to_seq_nat8 (B.as_seq h0 tmp_iv))
-            iv_nat)
-          = let iv_nat = Words.Seq_s.seq_uint8_to_seq_nat8 (B.as_seq h0 iv) in
-            let iv_nat = Seq.append iv_nat (Seq.create 4 0) in
-            let s_tmp = Words.Seq_s.seq_uint8_to_seq_nat8 (B.as_seq h0 tmp_iv) in
-            Seq.lemma_index_slice (B.as_seq h0 tmp_iv) 12 16 0;
-            Seq.lemma_index_slice (B.as_seq h0 tmp_iv) 12 16 1;
-            Seq.lemma_index_slice (B.as_seq h0 tmp_iv) 12 16 2;
-            Seq.lemma_index_slice (B.as_seq h0 tmp_iv) 12 16 3;
-            assert (Seq.equal iv_nat s_tmp)
-
-
-        in lemma_iv_eq ();
-
-        // These asserts prove that 4096 * (len {cipher, ad}) are smaller than pow2_32
-        assert (max_length AES256_GCM = pow2 20 - 1 - 16);
-        assert_norm (4096 * (pow2 20 - 1) < Words_s.pow2_32);
-        assert_norm (4096 * (pow2 20 - 1 - 16) < Words_s.pow2_32);
-
-        let r = GCMdecrypt_stdcalls.gcm256_decrypt_stdcall
-          (let k = G.reveal kv in
-          let k_nat = Words.Seq_s.seq_uint8_to_seq_nat8 k in
-          let k_w = Words.Seq_s.seq_nat8_to_seq_nat32_LE k_nat in G.hide k_w)
-          cipher
-          (uint32_to_uint64 cipher_len)
-          ad
-          (uint32_to_uint64 ad_len)
-          tmp_iv
-          dst
-          tag
-          tmp_keys in
-
-        let h1 = get() in
-
-        // This assert is needed for z3 to pick up sequence equality for ciphertext
-        // It could be avoided if the spec returned both instead of appending them
-        assert (
-          let kv_nat = Words.Seq_s.seq_uint8_to_seq_nat8 (G.reveal kv) in
-          let iv_nat = Words.Seq_s.seq_uint8_to_seq_nat8 (B.as_seq h0 iv) in
-          // the specification takes a seq16 for convenience, but actually discards
-          // the trailing four bytes; we are, however, constrained by it and append
-          // zeroes just to satisfy the spec
-          let iv_nat = S.append iv_nat (S.create 4 0) in
-          // `ad` is called `auth` in Vale world; "additional data", "authenticated
-          // data", potato, potato
-          let ad_nat = Words.Seq_s.seq_uint8_to_seq_nat8 (B.as_seq h0 ad) in
-          let cipher_nat = Words.Seq_s.seq_uint8_to_seq_nat8 (B.as_seq h0 cipher) in
-          let tag_nat = Words.Seq_s.seq_uint8_to_seq_nat8 (B.as_seq h0 tag) in
-          assert (max_length AES256_GCM = pow2 20 - 1 - 16);
-          assert_norm (4096 * (pow2 20 - 1 - 16) < Words_s.pow2_32);
-          let plain_nat, success =
-            GCM_s.gcm_decrypt_LE AES_s.AES_256 kv_nat iv_nat cipher_nat ad_nat tag_nat
-          in
-          Seq.equal (B.as_seq h1 dst) (Words.Seq_s.seq_nat8_to_seq_uint8 plain_nat) /\
-          (UInt64.v r = 0) == success);
-
-        assert (
-          let kv = G.reveal kv in
-          let cipher_tag = B.as_seq h0 cipher `S.append` B.as_seq h0 tag in
-          Seq.equal (Seq.slice cipher_tag (S.length cipher_tag - tag_length AES256_GCM) (S.length cipher_tag))
-            (B.as_seq h0 tag) /\
-          Seq.equal (Seq.slice cipher_tag 0 (S.length cipher_tag - tag_length AES256_GCM)) (B.as_seq h0 cipher));
-
-        pop_frame();
-
-        if r = 0uL then
-          Success
-        else
-          AuthenticationFailure
-
+        decrypt_aes256_gcm s iv ad ad_len cipher cipher_len tag dst
     | Hacl_CHACHA20_POLY1305 ->
-        push_frame ();
-
         [@ inline_let ] let bound = pow2 32 - 1 - 16 in
         assert (v cipher_len <= bound);
         assert_norm (bound + 16 <= pow2 32 - 1);
@@ -585,7 +504,7 @@ let decrypt #a s iv ad ad_len cipher cipher_len tag dst =
           let tag_s = S.slice cipher_tag (S.length cipher_tag - tag_length CHACHA20_POLY1305) (S.length cipher_tag) in
           let cipher_s = S.slice cipher_tag 0 (S.length cipher_tag - tag_length CHACHA20_POLY1305) in
           S.equal cipher_s (B.as_seq h0 cipher) /\ S.equal tag_s (B.as_seq h0 tag));
-        pop_frame ();
+
         if r = 0ul then
           Success
         else
