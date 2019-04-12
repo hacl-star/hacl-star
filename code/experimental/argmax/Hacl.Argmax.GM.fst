@@ -1,64 +1,8 @@
 module Hacl.Argmax.GM
 
-open FStar.Array
-open FStar.Bytes
-open FStar.Classical
-open FStar.Math.Lemmas
-open FStar.Math.Lib
 open FStar.Mul
-open FStar.ST
 
-
-(* Primes and composite numbers *)
-
-type big = x:int{x > 1}
-
-val isprm: p:big -> bool
-let isprm _ = magic()
-
-type prm = n:big{isprm n}
-
-val iscomp: n:big -> Type0
-let iscomp n = exists (p:prm) (q:prm). n = p * q
-
-type comp = n:big{iscomp n}
-
-(* Basic algebra *)
-
-val field_el: #n:big -> a:int -> bool
-let field_el #n a = a >= 0 && a < n
-
-val prod_bigger: p:big -> q:big -> Lemma (p * q > p /\ p * q > q)
-let prod_bigger p q = ()
-
-val to_bigger: n:big -> m:big{m >= n} -> a:int -> Lemma (field_el #n a ==> field_el #m a)
-let to_bigger n m a = ()
-
-type fe n = x:int{field_el #n x}
-
-val to_fe: #n:big -> a:nat -> r:fe n
-let to_fe #n a = lemma_mod_lt a n; a % n
-
-type binop = #n:big -> fe n -> fe n -> fe n
-val ( +% ): binop
-val ( *% ): binop
-let ( +% ) #n n1 n2 = (n1 + n2) % n
-let ( *% ) #n n1 n2 = (n1 * n2) % n
-
-val sqr: #n:big -> fe n -> fe n
-let sqr #n a = a *% a
-
-val mul_one: #n:big -> a:fe n -> Lemma (ensures (a *% 1 = a)) [SMTPat (a *% a)]
-let mul_one #n a = ()
-
-val fexp: #n:big -> fe n -> e:fe n -> Tot (fe n) (decreases e)
-let rec fexp #n g e =
-  if e = 1 then g
-  else if e = 0 then 1
-  else
-     if n % 2 = 0
-     then fexp (g *% g) (e / 2)
-     else fexp (g *% g) ((e - 1) / 2) *% g
+open Hacl.Argmax.Common
 
 (* Quadratic reciprocity *)
 
@@ -120,7 +64,7 @@ val nonsq_mul_comp: p:prm -> q:prm -> a:fe (p * q) -> Lemma
   (ensures (is_nonsq #p (to_fe a) /\ is_nonsq #q (to_fe a) ==> is_nonsq a))
 let nonsq_mul_comp _ _ _ = admit()
 
-(* Parameters *)
+(* Keys *)
 
 type secret =
   | Secret: p:prm
@@ -140,7 +84,7 @@ let s2p sec =
 
 (* Enc/Dec *)
 
-type ciphertext (n:big) = c:fe n{c > 0 && leg_symbol c <> 0}
+type ciphertext (n:comp) = c:fe n{c > 0 && leg_symbol c <> 0}
 
 val encrypt:
      p:public
