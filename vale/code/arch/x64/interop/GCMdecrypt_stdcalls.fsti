@@ -31,6 +31,7 @@ let length_aux2 (b:uint8_p) : Lemma
     let db = get_downview b in
     DV.length_eq db
 
+inline_for_extraction noextract
 let gcm_decrypt_st (a: algorithm { a = AES_128 \/ a = AES_256 }) =
   key:Ghost.erased (Seq.seq nat32) ->
   cipher_b:uint8_p ->
