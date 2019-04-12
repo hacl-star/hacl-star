@@ -14,7 +14,7 @@ open FStar.ST
 type big = x:int{x > 1}
 
 val isprm: p:big -> bool
-let isprm _ = admit()
+let isprm _ = magic()
 
 type prm = n:big{isprm n}
 
@@ -22,7 +22,6 @@ val iscomp: n:big -> Type0
 let iscomp n = exists (p:prm) (q:prm). n = p * q
 
 type comp = n:big{iscomp n}
-
 
 (* Basic algebra *)
 
@@ -75,28 +74,40 @@ let legSymbol #n a = fexp a ((n-1)/2)
 
 val isLegSymbol: #n:big -> a:fe n -> Lemma
   (ensures (let l = legSymbol a in
-              //(l = 1 \/ l = 0 \/ l = -1) \/
-              (l = 1 <==> (isSq a /\ a <> 0)) \/
-              (l = (-1) <==> (isNonsq a /\ a <> 0)) \/
-              (l = 0 \/ b2t(a = 0))))
+              (l = 1 \/ l = 0 \/ l = -1) /\
+              (l = 1 <==> (isSq a /\ a <> 0)) /\
+              (l = (-1) <==> (isNonsq a /\ a <> 0)) /\
+              (l = 0 \/ b2t(a = 0))
+              ))
   [SMTPat (legSymbol a)]
 let isLegSymbol #n _ = admit()
 
+val legSymbolMult: #n:big -> a:fe n -> b:fe n -> Lemma
+  (ensures (legSymbol (a *% b) = legSymbol a * legSymbol b))
+  [SMTPat (legSymbol (a *% b))]
+let legSymbolMult #n _ _ = admit()
+
 val legSymbolComp: p:prm -> q:prm -> a:fe (p * q) -> Lemma
   (ensures (legSymbol a = legSymbol #p (toFe #p a) * legSymbol #q (toFe #q a)))
+  [SMTPat (legSymbol a)]
 let legSymbolComp _ _ _ = admit()
 
-#reset-options
-
-val canSplitMulSq: #n:comp -> a:fe n{isSq a /\ a <> 0} -> b:fe n{b <> a && b <> 0} -> Lemma
+val canSplitMulSq: #n:comp -> a:fe n{isSq a} -> b:fe n{b <> a && b <> 0} -> Lemma
   (ensures (isSq (a *% b) ==> isSq b))
 let canSplitMulSq #n a b =
-  assert(forall (x: fe n). (isLegSymbol #n x; legSymbol x = 1) <==> isSq x);
-  admit();
-  //assert(isSq (a *% b) ==> legSymbol (a *% b) = 1);
-  admit()
+  if a = 0 then () else
+  assert(forall (x: fe n). legSymbol x = 1 <==> (isSq x /\ x <> 0));
+  assert(isSq (a *% b) ==> legSymbol (a *% b) = 1);
+  assert(isSq (a *% b) ==> legSymbol a * legSymbol b = 1);
+  assert(legSymbol a = 1 \/ legSymbol a = (-1));
+  assert(legSymbol b = 1 \/ legSymbol b = (-1));
+  assert(isSq (a *% b) ==> (legSymbol a = 1 /\ legSymbol b = 1) \/
+                           (legSymbol a = (-1) /\ legSymbol b = (-1)));
+  assert(isSq (a *% b) ==> (isSq a /\ isSq b) \/
+                           (isNonsq a /\ isNonsq b));
+  assert(isSq (a *% b) ==> isSq b)
 
-val mulSqNonsq: #n:big -> a:fe n{isSq a} -> b:fe n{isNonsq b} -> Lemma
+val mulSqNonsq: #n:comp -> a:fe n{isSq a} -> b:fe n{isNonsq b} -> Lemma
   (ensures (isNonsq (a *% b)))
   [SMTPat (a *% b)]
 let mulSqNonsq #n a b =
@@ -104,6 +115,10 @@ let mulSqNonsq #n a b =
   assert((exists s. b2t (sqr s = b)) ==> false);
   canSplitMulSq a b;
   assert(isSq (a *% b) ==> isSq b)
+
+val nonsqMulComp: p:prm -> q:prm -> a:fe (p * q) -> Lemma
+  (ensures (isNonsq #p (toFe a) /\ isNonsq #q (toFe a) ==> isNonsq a))
+let nonsqMulComp _ _ _ = admit()
 
 (* Parameters *)
 
@@ -127,22 +142,15 @@ let s2p sec =
 
 type ciphertext (n:big) = c:fe n{c > 0 && legSymbol c <> 0}
 
-#reset-options
-// #set-options "--z3rlimit 100 --initial_fuel 5 --max_fuel 5 --initial_ifuel 2 --max_ifuel 2"
-
 val encrypt:
      p:public
-  -> r:fe (Public?.n p){r>0}
+  -> r:fe (Public?.n p){sqr r <> 0}
   -> m:bool
   -> c:ciphertext (Public?.n p)
 let encrypt p r m =
-  let n = Public?.n p in
-  let extra: fe n = if m then Public?.y p else 1 in
-  let c = (r *% r) *% extra in
-  assert(if m then isNonsq c else isSq c);
-  assert(if m then isNonsq c else isSq c);
-
-  assume(c > 0 && legSymbol c <> 0);
+  let extra = if m then Public?.y p else 1 in
+  let c = sqr r *% extra in
+  assert(m <==> isNonsq c);
   c
 
 val decrypt: s:secret -> c:ciphertext (Public?.n (s2p s)) -> m:bool
@@ -151,6 +159,25 @@ let decrypt s c =
   let v2 = legSymbol #(Secret?.q s) (toFe c) in
   v1 = 1 && v2 = 1
 
-val encDecId: s:secret -> r:fe (Public?.n (s2p s)){r>0} -> m:bool -> Lemma
+val encDecId: s:secret -> r:fe (Public?.n (s2p s)){sqr r <> 0} -> m:bool -> Lemma
   (decrypt s (encrypt (s2p s) r m) = m)
-let encDecId s r m = admit()
+let encDecId sec r m =
+  let pub = s2p sec in
+  let p = Secret?.p sec in
+  let q = Secret?.q sec in
+  let n = Public?.n pub in
+  let c = encrypt pub r m in
+  assert(m <==> isNonsq c);
+
+  let d = decrypt sec c in
+  let v1 = legSymbol #p (toFe c) in
+  let v2 = legSymbol #q (toFe c) in
+
+  assert(m ==> legSymbol c = (-1));
+  assert(m ==> (v1 = (-1) /\ v2 = 1) \/ (v1 = 1 /\ v2 = (-1)));
+  assert(m ==> d = false);
+
+  nonsqMulComp p q c;
+  assert(not m ==> legSymbol c = 1);
+  assert(not m ==> (v1 = 1 /\ v2 = 1));
+  assert(not m ==> d = true)
