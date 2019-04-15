@@ -122,7 +122,7 @@ let print_list_nat64 l =
 let print_string flag s = if flag then IO.print_string s else ()
 
 let print_lbytes flag len b =
-  if not flag then () else
+  if not flag then () else (
   let q = 32 in
   let n = len / q in
   let r = len % q in
@@ -135,14 +135,14 @@ let print_lbytes flag len b =
     (if i < n - 1 then IO.print_string "\n" else ())) ();
   (if r <> 0 then IO.print_newline ());
   let sb = sub #uint8 #len b (n * q) r in
-  List.iter (fun a -> print_uint8_hex_pad a) (to_list sb))
+  List.iter (fun a -> print_uint8_hex_pad a) (to_list sb)))
 
-let print_label_lbytes flag len label b =
-  if not flag then () else
+let print_label_lbytes flag label len b =
+  if not flag then () else (
   IO.print_string label;
   IO.print_string ": \n";
   print_lbytes flag len b;
-  IO.print_newline ()
+  IO.print_newline ())
 
 let print_compare flag len expected result =
   let r:bool = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) expected result in

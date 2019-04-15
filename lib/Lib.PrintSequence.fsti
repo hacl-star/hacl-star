@@ -52,7 +52,7 @@ val print_list_nat64: list size_nat -> FStar.All.ML unit
 
 val print_string: display:bool -> string -> FStar.All.ML unit
 val print_lbytes: display:bool -> len:size_nat -> lbytes len -> FStar.All.ML unit
-val print_label_lbytes: display:bool -> len:size_nat -> string -> lbytes len -> FStar.All.ML unit
+val print_label_lbytes: display:bool -> string -> len:size_nat -> lbytes len -> FStar.All.ML unit
 
 val print_compare: display:bool -> len:size_nat -> expected:lbytes len -> result:lbytes len -> FStar.All.ML bool
 val print_compare_display: display:bool -> len:size_nat -> expected:lbytes len -> result:lbytes len -> FStar.All.ML bool
