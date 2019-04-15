@@ -675,18 +675,18 @@ let lemma_le_bytes_to_seq_quad32_length (b:seq nat8) : Lemma
   ()
 
 #push-options "--max_fuel 1" // Without this, F* refuses to do even one unfolding of recursive functions :(
-let lemma_slice_commutes_reverse_bytes_quad32_seq (s:seq quad32) (pivot:nat) : Lemma
+let lemma_slice_commutes_reverse_bytes_nat32_quad32_seq (s:seq quad32) (pivot:nat) : Lemma
   (requires pivot <= length s)
-  (ensures  slice (reverse_bytes_quad32_seq s) 0 pivot == reverse_bytes_quad32_seq (slice s 0 pivot))
+  (ensures  slice (reverse_bytes_nat32_quad32_seq s) 0 pivot == reverse_bytes_nat32_quad32_seq (slice s 0 pivot))
   =
-  let rs = reverse_bytes_quad32_seq s in
-  let srs = slice (reverse_bytes_quad32_seq s) 0 pivot in
+  let rs = reverse_bytes_nat32_quad32_seq s in
+  let srs = slice (reverse_bytes_nat32_quad32_seq s) 0 pivot in
   let ss = slice s 0 pivot in
-  let rss = reverse_bytes_quad32_seq ss in
+  let rss = reverse_bytes_nat32_quad32_seq ss in
   if pivot = 0 then (
     assert (equal ss empty);
     assert (equal srs empty);
-    assert (equal empty (reverse_bytes_quad32_seq empty));
+    assert (equal empty (reverse_bytes_nat32_quad32_seq empty));
     ()
   ) else (
     assert (equal srs rss)
@@ -719,17 +719,16 @@ let update_multi_one (h:hash256) (b:bytes_blocks {length b = block_length}) : Le
 (*+ TODO +*)
 let lemma_endian_relation (quads qs:seq quad32) (input2:seq UInt8.t) : Lemma
   (requires length qs == 4 /\ length input2 == 64 /\
-            qs == reverse_bytes_quad32_seq quads /\
+            qs == reverse_bytes_nat32_quad32_seq quads /\
             input2 == seq_nat8_to_seq_uint8 (le_seq_quad32_to_bytes quads))
   (ensures  quads_to_block qs == words_of_bytes SHA2_256 block_word_length input2)
   =
   // calc {
-  //   quads_to_block (reverse_bytes_quad32_seq quads)
-  //   seq_nat32_to_seq_U32 (seq_four_to_seq_LE (reverse_bytes_quad32_seq quads))
-//reveal_reverse_bytes_quad32 quads;
-  //   seq_nat32_to_seq_U32 (seq_four_to_seq_LE (four_reverse (four_map reverse_bytes_nat32 q)))
+  //   quads_to_block (reverse_bytes_nat32_quad32_seq quads)
+  //   seq_nat32_to_seq_U32 (seq_four_to_seq_LE (reverse_bytes_nat32_quad32_seq quads))
+  //   seq_nat32_to_seq_U32 (seq_four_to_seq_LE (four_map reverse_bytes_nat32 q))
   reveal_opaque reverse_bytes_nat32_def;
-  //   seq_nat32_to_seq_U32 (seq_four_to_seq_LE (four_reverse (four_map (fun n -> be_bytes_to_nat32 (reverse_seq (nat32_to_be_bytes n))) q)))
+  //   seq_nat32_to_seq_U32 (seq_four_to_seq_LE (four_map (fun n -> be_bytes_to_nat32 (reverse_seq (nat32_to_be_bytes n))) q))
 
   //   words_of_bytes SHA2_256 16 (seq_nat8_to_seq_U8 (seq_nat32_to_seq_nat8_LE (seq_four_to_seq_LE b)))
   reveal_opaque le_seq_quad32_to_bytes_def;
@@ -748,7 +747,7 @@ let lemma_mod_transform (quads:seq quad32) : Lemma
 let rec lemma_update_multi_equiv_vale (hash hash':hash256) (quads:seq quad32) (r_quads:seq quad32)
   (nat8s:seq nat8) (blocks:seq UInt8.t) :
   Lemma (requires length quads % 4 == 0 /\
-                  r_quads == reverse_bytes_quad32_seq quads /\
+                  r_quads == reverse_bytes_nat32_quad32_seq quads /\
                   nat8s == le_seq_quad32_to_bytes quads /\
                   blocks == seq_nat8_to_seq_uint8 nat8s /\
                   hash' == update_multi_quads r_quads hash)        
@@ -796,7 +795,7 @@ let rec lemma_update_multi_equiv_vale (hash hash':hash256) (quads:seq quad32) (r
     (* Step 1: Show that h_prefix == h_bytes1 *)
 
     // Inductive hypothesis says that we roughly line up on input1  
-    let r_prefix = reverse_bytes_quad32_seq prefix in
+    let r_prefix = reverse_bytes_nat32_quad32_seq prefix in
     lemma_update_multi_equiv_vale hash h_prefix r_prefix prefix 
                              (le_seq_quad32_to_bytes r_prefix) 
                              (seq_nat8_to_seq_uint8 (le_seq_quad32_to_bytes r_prefix));
@@ -817,10 +816,10 @@ let rec lemma_update_multi_equiv_vale (hash hash':hash256) (quads:seq quad32) (r
     //   seq_nat8_to_seq_U8 (le_seq_quad32_to_bytes (slice quads 0 (length quads - 4)))
     //
     //   seq_nat8_to_seq_U8 (le_seq_quad32_to_bytes (slice quads 0 (length quads - 4)))))
-    assert (reverse_bytes_quad32_seq (reverse_bytes_quad32_seq (slice quads 0 (length quads - 4))) == slice quads 0 (length quads - 4));
-    //   seq_nat8_to_seq_U8 (le_seq_quad32_to_bytes (reverse_bytes_quad32_seq (reverse_bytes_quad32_seq (slice quads 0 (length quads - 4)))))
-    Collections.Seqs.slice_seq_map_commute reverse_bytes_quad32 quads 0 (length quads - 4);
-    //   seq_nat8_to_seq_U8 (le_seq_quad32_to_bytes (reverse_bytes_quad32_seq (slice (reverse_bytes_quad32_seq quads) 0 (length quads - 4)))
+    assert (reverse_bytes_nat32_quad32_seq (reverse_bytes_nat32_quad32_seq (slice quads 0 (length quads - 4))) == slice quads 0 (length quads - 4));
+    //   seq_nat8_to_seq_U8 (le_seq_quad32_to_bytes (reverse_bytes_nat32_quad32_seq (reverse_bytes_nat32_quad32_seq (slice quads 0 (length quads - 4)))))
+    Collections.Seqs.slice_seq_map_commute reverse_bytes_nat32_quad32 quads 0 (length quads - 4);
+    //   seq_nat8_to_seq_U8 (le_seq_quad32_to_bytes (reverse_bytes_nat32_quad32_seq (slice (reverse_bytes_nat32_quad32_seq quads) 0 (length quads - 4)))
     //   seq_nat8_to_seq_U8 (le_seq_quad32_to_bytes r_prefix)
     // }   
     // assert (seq_nat8_to_seq_U8 (le_seq_quad32_to_bytes r_prefix) == input1); // Conclusion of the calc
@@ -829,9 +828,9 @@ let rec lemma_update_multi_equiv_vale (hash hash':hash256) (quads:seq quad32) (r
     // we need to show (1):
     // calc {
     //   qs
-    Collections.Seqs.slice_seq_map_commute reverse_bytes_quad32 quads (length quads - 4) (length quads);
-    //   slice (reverse_bytes_quad32_seq quads) (length quads - 4) (length quads))
-    //   reverse_bytes_quad32_seq (slice quads (length quads - 4) (length quads))
+    Collections.Seqs.slice_seq_map_commute reverse_bytes_nat32_quad32 quads (length quads - 4) (length quads);
+    //   slice (reverse_bytes_nat32_quad32_seq quads) (length quads - 4) (length quads))
+    //   reverse_bytes_nat32_quad32_seq (slice quads (length quads - 4) (length quads))
     // }
     // And (2):
     // calc {
@@ -877,27 +876,27 @@ let rec lemma_update_multi_equiv_vale (hash hash':hash256) (quads:seq quad32) (r
 let rec lemma_update_multi_quads (s:seq quad32) (hash_orig:hash256) (bound:nat) : Lemma
     (requires bound + 4 <= length s)
     (ensures (let prefix_LE = slice s 0 bound in
-              let prefix_BE = reverse_bytes_quad32_seq prefix_LE in
+              let prefix_BE = reverse_bytes_nat32_quad32_seq prefix_LE in
               let h_prefix = update_multi_quads prefix_BE hash_orig in
               let block_quads_LE = slice s bound (bound + 4) in
-              let block_quads_BE = reverse_bytes_quad32_seq block_quads_LE in
+              let block_quads_BE = reverse_bytes_nat32_quad32_seq block_quads_LE in
               let input_LE = slice s 0 (bound+4) in
-              let input_BE = reverse_bytes_quad32_seq input_LE in
+              let input_BE = reverse_bytes_nat32_quad32_seq input_LE in
               let h = update_block h_prefix (quads_to_block block_quads_BE) in
               h == update_multi_quads input_BE hash_orig))
   =
   let prefix_LE = slice s 0 bound in
-  let prefix_BE = reverse_bytes_quad32_seq prefix_LE in
+  let prefix_BE = reverse_bytes_nat32_quad32_seq prefix_LE in
   let h_prefix = update_multi_quads prefix_BE hash_orig in
   let block_quads_LE = slice s bound (bound + 4) in
-  let block_quads_BE = reverse_bytes_quad32_seq block_quads_LE in
+  let block_quads_BE = reverse_bytes_nat32_quad32_seq block_quads_LE in
   let input_LE = slice s 0 (bound+4) in
-  let input_BE = reverse_bytes_quad32_seq input_LE in
+  let input_BE = reverse_bytes_nat32_quad32_seq input_LE in
   let h = update_block h_prefix (quads_to_block block_quads_BE) in
-  lemma_slice_commutes_reverse_bytes_quad32_seq s bound;
-  lemma_slice_commutes_reverse_bytes_quad32_seq s (bound + 4);
-  assert (prefix_BE == slice (reverse_bytes_quad32_seq s) 0 bound);
-  assert (input_BE == slice (reverse_bytes_quad32_seq s) 0 (bound + 4));
+  lemma_slice_commutes_reverse_bytes_nat32_quad32_seq s bound;
+  lemma_slice_commutes_reverse_bytes_nat32_quad32_seq s (bound + 4);
+  assert (prefix_BE == slice (reverse_bytes_nat32_quad32_seq s) 0 bound);
+  assert (input_BE == slice (reverse_bytes_nat32_quad32_seq s) 0 (bound + 4));
   if bound = 0 then ()
   else (
     let prefix, qs = split input_BE (length input_BE - 4) in

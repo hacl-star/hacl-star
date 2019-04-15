@@ -426,6 +426,12 @@ let is_full_byte_reversal_mask (q:quad32) : bool =
   q.hi2 = 0x04050607 &&
   q.hi3 = 0x00010203
 
+let is_byte_reversal_mask (q:quad32) : bool =
+  q.lo0 = 0x00010203 &&
+  q.lo1 = 0x04050607 &&
+  q.hi2 = 0x08090A0B &&
+  q.hi3 = 0x0C0D0E0F
+
 let is_high_dup_reversal_mask (q:quad32) : bool =
   q.lo0 = 0x0C0D0E0F &&
   q.lo1 = 0x08090A0B &&
@@ -566,6 +572,11 @@ let pshufb (src1 src2:quad32) : option quad32 =
     // We only spec a restricted version sufficient for a handful of standard patterns
     if is_full_byte_reversal_mask src2 then
       Some (reverse_bytes_quad32 src1)
+    else if is_byte_reversal_mask src2 then
+      Some (Mkfour (reverse_bytes_nat32 src1.lo0)
+                   (reverse_bytes_nat32 src1.lo1)
+                   (reverse_bytes_nat32 src1.hi2)
+                   (reverse_bytes_nat32 src1.hi3))  
     else if is_high_dup_reversal_mask src2 then
       Some (Mkfour (reverse_bytes_nat32 src1.hi3)
                    (reverse_bytes_nat32 src1.hi2)

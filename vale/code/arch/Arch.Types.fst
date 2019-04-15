@@ -546,6 +546,24 @@ let be_bytes_to_quad32_to_bytes (q:quad32) :
   seq_to_four_to_seq_BE q;
   ()
 
+let lemma_reverse_reverse_bytes_nat32_quad32 (s:quad32) :
+  Lemma (reverse_bytes_nat32_quad32 (reverse_bytes_nat32_quad32 s) == s)
+  [SMTPat (reverse_bytes_nat32_quad32 (reverse_bytes_nat32_quad32 s))]
+  =
+  let s' = reverse_bytes_nat32_quad32 s in
+  let s''= reverse_bytes_nat32_quad32 s' in
+  assert (s''.lo0 == reverse_bytes_nat32 (reverse_bytes_nat32 s.lo0));  // OBSERVE
+  assert (s''.lo1 == reverse_bytes_nat32 (reverse_bytes_nat32 s.lo1));  // OBSERVE
+  assert (s''.hi2 == reverse_bytes_nat32 (reverse_bytes_nat32 s.hi2));  // OBSERVE
+  assert (s''.hi3 == reverse_bytes_nat32 (reverse_bytes_nat32 s.hi3));  // OBSERVE
+  ()
+
+let lemma_reverse_reverse_bytes_nat32_quad32_seq (s:seq quad32) :
+  Lemma (reverse_bytes_nat32_quad32_seq (reverse_bytes_nat32_quad32_seq s) == s)
+  [SMTPat (reverse_bytes_nat32_quad32_seq (reverse_bytes_nat32_quad32_seq s))]
+  =
+  seq_map_inverses reverse_bytes_nat32_quad32 reverse_bytes_nat32_quad32 s
+
 let lemma_reverse_reverse_bytes_quad32_seq (s:seq quad32) :
   Lemma (reverse_bytes_quad32_seq (reverse_bytes_quad32_seq s) == s)
   [SMTPat (reverse_bytes_quad32_seq (reverse_bytes_quad32_seq s))]
