@@ -5,7 +5,6 @@ let lowstar_aesni : lowstar_aesni_t  =
   IX64.wrap_weak_stdcall
     Interop.down_mem
     code_aesni
-    8
     dom
     (W.mk_prediction code_aesni dom [] (aesni_lemma code_aesni IA.win))
 
@@ -16,7 +15,6 @@ let lowstar_sha : lowstar_sha_t  =
   IX64.wrap_weak_stdcall
     Interop.down_mem
     code_sha
-    8
     dom
     (W.mk_prediction code_sha dom [] (sha_lemma code_sha IA.win))
 
@@ -27,7 +25,6 @@ let lowstar_adx : lowstar_adx_t  =
   IX64.wrap_weak_stdcall
     Interop.down_mem
     code_adx
-    8
     dom
     (W.mk_prediction code_adx dom [] (adx_lemma code_adx IA.win))
 
@@ -38,7 +35,6 @@ let lowstar_avx : lowstar_avx_t  =
   IX64.wrap_weak_stdcall
     Interop.down_mem
     code_avx
-    8
     dom
     (W.mk_prediction code_avx dom [] (avx_lemma code_avx IA.win))
 
@@ -49,7 +45,6 @@ let lowstar_avx2 : lowstar_avx2_t  =
   IX64.wrap_weak_stdcall
     Interop.down_mem
     code_avx2
-    8
     dom
     (W.mk_prediction code_avx2 dom [] (avx2_lemma code_avx2 IA.win))
 

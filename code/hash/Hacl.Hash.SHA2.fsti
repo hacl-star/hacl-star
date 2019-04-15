@@ -19,3 +19,26 @@ val hash_224: hash_st SHA2_224
 val hash_256: hash_st SHA2_256
 val hash_384: hash_st SHA2_384
 val hash_512: hash_st SHA2_512
+
+// Interface that exposes a sha2-512 signature suitable for calling from HACL-lib code.
+module BF = Arch.BufferFriend
+
+open Lib.IntTypes
+open Lib.Sequence
+open Lib.Buffer
+
+noextract inline_for_extraction
+val hash_512_lib:
+  input_len:size_t ->
+  input:lbuffer uint8 input_len ->
+  dst:lbuffer uint8 64ul ->
+  HyperStack.ST.Stack unit
+    (requires (fun h ->
+      live h input /\
+      live h dst /\
+      disjoint input dst /\
+      length input < max_input_length SHA2_512))
+    (ensures (fun h0 _ h1 ->
+      modifies1 dst h0 h1 /\
+      as_seq h1 dst `equal`
+        BF.to_bytes (Spec.Hash.hash SHA2_512 (BF.of_bytes (as_seq h0 input)))))

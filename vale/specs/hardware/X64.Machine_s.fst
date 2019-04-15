@@ -39,6 +39,7 @@ type operand:eqtype =
   | OConst: n:int -> operand
   | OReg: r:reg -> operand
   | OMem: m:maddr -> operand
+  | OStack: m:maddr -> operand
 
 type imm8:eqtype = i:int{0 <= i && i < 256}
 type xmm:eqtype = i:int{0 <= i /\ i < 16}
@@ -46,15 +47,13 @@ type xmm:eqtype = i:int{0 <= i /\ i < 16}
 type mov128_op:eqtype =
   | Mov128Xmm: x:xmm -> mov128_op
   | Mov128Mem: m:maddr -> mov128_op
+  | Mov128Stack: m:maddr -> mov128_op
 
 type precode (t_ins:eqtype) (t_ocmp:eqtype):eqtype =
   | Ins: ins:t_ins -> precode t_ins t_ocmp
   | Block: block:list (precode t_ins t_ocmp) -> precode t_ins t_ocmp
   | IfElse: ifCond:t_ocmp -> ifTrue:precode t_ins t_ocmp -> ifFalse:precode t_ins t_ocmp -> precode t_ins t_ocmp
   | While: whileCond:t_ocmp -> whileBody:precode t_ins t_ocmp -> precode t_ins t_ocmp
-
-let valid_dst (o:operand) : bool =
-  not (OConst? o || (OReg? o && Rsp? (OReg?.r o)))
 
 type taint:eqtype =
   | Public

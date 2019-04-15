@@ -94,7 +94,13 @@ val lemma_insert_nat64_properties (q:quad32) (n:nat64) :
             q'.lo0 == q.lo0 /\
             q'.lo1 == q.lo1))
   [SMTPat (insert_nat64_opaque q n)]            
-         
+
+val lemma_insert_nat64_nat32s (q:quad32) (n0 n1:nat32) :
+  Lemma ( insert_nat64_opaque q (two_to_nat32 (Mktwo n0 n1)) 0 ==
+          Mkfour n0 n1 q.hi2 q.hi3 /\
+          insert_nat64_opaque q (two_to_nat32 (Mktwo n0 n1)) 1 ==
+          Mkfour q.lo0 q.lo1 n0 n1 )
+
 let lo64_def (q:quad32) : nat64 = two_to_nat 32 (two_select (four_to_two_two q) 0)
 let hi64_def (q:quad32) : nat64 = two_to_nat 32 (two_select (four_to_two_two q) 1)
 
@@ -106,6 +112,10 @@ val lemma_lo64_properties (_:unit) :
 
 val lemma_hi64_properties (_:unit) :
   Lemma (forall (q0 q1:quad32) . (q0.hi2 == q1.hi2 /\ q0.hi3 == q1.hi3) <==> (hi64 q0 == hi64 q1))
+
+val lemma_reverse_bytes_quad32_64 (src orig final:quad32) : Lemma
+  (requires final == insert_nat64_opaque (insert_nat64_opaque orig (reverse_bytes_nat64 (hi64 src)) 0) (reverse_bytes_nat64 (lo64 src)) 1)
+  (ensures  final == reverse_bytes_quad32 src)
 
 val lemma_equality_check_helper (q:quad32) :
   Lemma ((q.lo0 == 0 /\ q.lo1 == 0 ==> lo64 q == 0) /\
@@ -147,11 +157,17 @@ val le_bytes_to_nat64_to_bytes (s:nat64) :
 val le_nat64_to_bytes_to_nat64 (s:seq nat8 { length s == 8 }) :
   Lemma (le_nat64_to_bytes (le_bytes_to_nat64 s) == s)
 
+val le_bytes_to_seq_quad32_empty: unit -> 
+  Lemma (forall s . {:pattern (length (le_bytes_to_seq_quad32 s)) } length s == 0 ==> length (le_bytes_to_seq_quad32 s) == 0)
+
 val le_bytes_to_seq_quad32_to_bytes_one_quad (b:quad32) :
   Lemma (le_bytes_to_seq_quad32 (le_quad32_to_bytes b) == create 1 b)
 
 val le_bytes_to_seq_quad32_to_bytes (s:seq quad32) :
   Lemma (le_bytes_to_seq_quad32 (le_seq_quad32_to_bytes s) == s)
+
+val le_seq_quad32_to_bytes_to_seq_quad32 (s:seq nat8{length s % 16 = 0}) :
+  Lemma (le_seq_quad32_to_bytes (le_bytes_to_seq_quad32 s) == s)
 
 val le_quad32_to_bytes_to_quad32 (s:seq nat8 { length s == 16 }) :
   Lemma(le_quad32_to_bytes (le_bytes_to_quad32 s) == s)
@@ -164,6 +180,10 @@ val le_quad32_to_bytes_injective: unit ->
 
 val le_quad32_to_bytes_injective_specific (b b':quad32) :
   Lemma (le_quad32_to_bytes b == le_quad32_to_bytes b' ==> b == b')
+
+val le_seq_quad32_to_bytes_injective (b b':Seq.seq quad32) : Lemma
+  (requires Seq.equal (le_seq_quad32_to_bytes b) (le_seq_quad32_to_bytes b'))
+  (ensures b == b')
 
 val seq_to_four_LE_is_seq_to_seq_four_LE (#a:Type) (s:seq4 a) : Lemma
   (create 1 (seq_to_four_LE s) == seq_to_seq_four_LE s)
@@ -216,3 +236,6 @@ val slice_commutes_le_bytes_to_seq_quad32 (s:seq nat8 { length s % 16 == 0 }) (n
 
 val append_distributes_le_bytes_to_seq_quad32 (s1:seq nat8 { length s1 % 16 == 0 }) (s2:seq nat8 { length s2 % 16 == 0 }) :
   Lemma(le_bytes_to_seq_quad32 (s1 @| s2) == (le_bytes_to_seq_quad32 s1) @| (le_bytes_to_seq_quad32 s2))
+
+val append_distributes_le_seq_quad32_to_bytes (s1:seq quad32) (s2:seq quad32) :
+  Lemma(le_seq_quad32_to_bytes (s1 @| s2) == (le_seq_quad32_to_bytes s1) @| (le_seq_quad32_to_bytes s2))

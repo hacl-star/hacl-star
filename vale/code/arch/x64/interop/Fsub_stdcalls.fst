@@ -9,7 +9,7 @@ let fsub out f1 f2 =
   DV.length_eq (get_downview out);
   DV.length_eq (get_downview f1);
   DV.length_eq (get_downview f2);
-  let x, _ = Vale.Stdcalls.Fsub.fsub out f1 f2 () in
+  let x, _ = Vale.Stdcalls.Fsub.fsub_ out f1 f2 () in
   ()
 
 #pop-options

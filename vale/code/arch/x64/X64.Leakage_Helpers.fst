@@ -14,6 +14,7 @@ let operand_taint (op:operand) ts taint =
     | OConst _ -> Public
     | OReg reg -> ts.regTaint reg
     | OMem _ -> taint
+    | OStack _ -> Secret // Secret for now
 
 let maddr_does_not_use_secrets addr ts =
   match addr with
@@ -26,22 +27,22 @@ let maddr_does_not_use_secrets addr ts =
 
 let operand_does_not_use_secrets op ts =
   match op with
-  | OConst _ | OReg _ -> true
-  | OMem m -> maddr_does_not_use_secrets m ts
+  | OConst _ | OReg _ -> true 
+  | OMem m | OStack m -> maddr_does_not_use_secrets m ts
 
 val lemma_operand_obs:  (ts:taintState) ->  (dst:operand) -> (s1 : traceState) -> (s2:traceState) -> Lemma ((operand_does_not_use_secrets dst ts) /\ publicValuesAreSame ts s1 s2 ==> (operand_obs s1 dst) = (operand_obs s2 dst))
 
 #reset-options "--initial_ifuel 2 --max_ifuel 2 --initial_fuel 4 --max_fuel 4 --z3rlimit 20"
 let lemma_operand_obs ts dst s1 s2 = match dst with
   | OConst _ | OReg _ -> ()
-  | OMem m -> ()
+  | OMem m | OStack m  -> ()
 #reset-options "--initial_ifuel 2 --max_ifuel 2 --initial_fuel 4 --max_fuel 4 --z3rlimit 5"
 
 let set_taint (dst:operand) ts taint : Tot taintState =
   match dst with
   | OConst _ -> ts  (* Shouldn't actually happen *)
   | OReg r -> TaintState (FunctionalExtensionality.on reg (fun x -> if x = r then taint else ts.regTaint x)) ts.flagsTaint ts.cfFlagsTaint ts.xmmTaint
-  | OMem m -> ts (* Ensured by taint semantics *)
+  | OMem m | OStack m -> ts (* Ensured by taint semantics *)
 
 let rec operands_do_not_use_secrets ops ts = match ops with
   | [] -> true
@@ -100,6 +101,7 @@ let lemma_public_op_are_same ts op s1 s2 =
     assert (a1 == a2);
     assert (forall a. (a >= a1 /\ a < a1 + 8) ==> s1.state.mem.[a] == s2.state.mem.[a]);
     Opaque_s.reveal_opaque get_heap_val64_def
+  | OStack m -> ()
 
 val lemma_public_op_are_same2: 
   (ts:taintState) -> (op:operand) -> (s1:traceState) -> (s2:traceState) -> 

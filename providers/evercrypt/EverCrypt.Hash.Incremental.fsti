@@ -65,7 +65,8 @@ let split_at_last (a: Hash.alg) (b: bytes):
     (ensures (fun (blocks, rest) ->
       S.length rest < block_length a /\
       S.length rest = S.length b % block_length a /\
-      S.equal (S.append blocks rest) b))
+      S.equal (S.append blocks rest) b /\
+      S.length blocks % block_length a = 0))
 =
   let n = S.length b / block_length a in
   let blocks, rest = S.split b (n * block_length a) in
@@ -92,12 +93,14 @@ let hashes (#a: Hash.alg) (h: HS.mem) (s: state a) (b: bytes) =
 noextract
 let bytes = S.seq UInt8.t
 
+(** @type: true
+*)
 val create_in (a: Hash.alg) (r: HS.rid): ST (state a)
   (requires (fun _ ->
     HyperStack.ST.is_eternal_region r))
   (ensures (fun h0 s h1 ->
     hashes h1 s S.empty /\
-    B.(modifies (footprint s h1) h0 h1) /\
+    B.(modifies loc_none h0 h1) /\
     Hash.fresh_loc (footprint s h1) h0 h1 /\
     B.(loc_includes (loc_region_only true r) (footprint s h1)) /\
     freeable s h1))
@@ -133,6 +136,8 @@ let update_post
   State?.hash_state s == State?.hash_state s' /\
   State?.buf s == State?.buf s'
 
+(** @type: true
+*)
 val update:
   a:Hash.alg ->
   s:state a ->
@@ -163,4 +168,6 @@ let finish_st (a: Hash.alg) =
       B.(modifies (loc_union (loc_buffer dst) (footprint s h0)) h0 h1) /\
       S.equal (B.as_seq h1 dst) (Spec.Hash.hash a (G.reveal prev)))
 
+(** @type: true
+*)
 val finish: a:Hash.alg -> finish_st a

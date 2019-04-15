@@ -1,5 +1,5 @@
 [
-  "UPQxÀ™ÜùÏsΩÊR*\u0011",
+  "T0Kø.©√kî¢¢yÙnP\u007f",
   [
     [
       "X64.Vale.State.eval_maddr",
@@ -14,7 +14,7 @@
         "fuel_guarded_inversion_X64.Machine_s.maddr"
       ],
       0,
-      "7e7ee47412b9589f3a32b8ea3abe0efb"
+      "f48ad672201a9f307eff0b7c34016a74"
     ],
     [
       "X64.Vale.State.to_nat64",
@@ -28,7 +28,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "93a5bc9659ef80e7d8963587354f3afb"
+      "edfa488041b6563798d8be735dd746a4"
     ],
     [
       "X64.Vale.State.eval_operand",
@@ -40,10 +40,26 @@
         "disc_equation_X64.Machine_s.OConst",
         "disc_equation_X64.Machine_s.OMem",
         "disc_equation_X64.Machine_s.OReg",
+        "disc_equation_X64.Machine_s.OStack",
         "fuel_guarded_inversion_X64.Machine_s.operand"
       ],
       0,
-      "e41515bbfd1949f1c865d44c81fcecd1"
+      "63f89784b697f056760c379e2792a3c0"
+    ],
+    [
+      "X64.Vale.State.eval_operand128",
+      1,
+      1,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "disc_equation_X64.Machine_s.Mov128Mem",
+        "disc_equation_X64.Machine_s.Mov128Stack",
+        "disc_equation_X64.Machine_s.Mov128Xmm",
+        "fuel_guarded_inversion_X64.Machine_s.mov128_op"
+      ],
+      0,
+      "a2bb9cacc9df52109c02cb8cd6d2cb80"
     ],
     [
       "X64.Vale.State.update_operand",
@@ -55,13 +71,14 @@
         "disc_equation_X64.Machine_s.OConst",
         "disc_equation_X64.Machine_s.OMem",
         "disc_equation_X64.Machine_s.OReg",
+        "disc_equation_X64.Machine_s.OStack",
         "fuel_guarded_inversion_X64.Machine_s.operand"
       ],
       0,
-      "682815559296ffc417cfe7ddb0685d7f"
+      "506bfb83467bce0db39179f2b1aa3604"
     ],
     [
-      "X64.Vale.State.valid_operand",
+      "X64.Vale.State.valid_src_operand",
       1,
       1,
       1,
@@ -70,10 +87,26 @@
         "disc_equation_X64.Machine_s.OConst",
         "disc_equation_X64.Machine_s.OMem",
         "disc_equation_X64.Machine_s.OReg",
+        "disc_equation_X64.Machine_s.OStack",
         "fuel_guarded_inversion_X64.Machine_s.operand"
       ],
       0,
-      "9014d2ae0ac52beac7fa92cc957d0131"
+      "230785a14e50f40debde7a099864a750"
+    ],
+    [
+      "X64.Vale.State.valid_src_operand128",
+      1,
+      1,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "disc_equation_X64.Machine_s.Mov128Mem",
+        "disc_equation_X64.Machine_s.Mov128Stack",
+        "disc_equation_X64.Machine_s.Mov128Xmm",
+        "fuel_guarded_inversion_X64.Machine_s.mov128_op"
+      ],
+      0,
+      "3300c78b4a12bebefafa35c21ee4832f"
     ]
   ]
 ]

@@ -110,3 +110,25 @@ val finish_cipher (alg:algorithm) (input:quad32) (round_keys:seq quad32) :
             let state = sub_bytes state in
             let state = quad32_xor state (index round_keys (nr alg)) in
             state == cipher_opaque alg input round_keys))
+
+val finish_cipher_opt (alg:algorithm) (input plain t0 t1 out:quad32) (round_keys:seq quad32) : Lemma
+  (requires length round_keys == (nr alg) + 1 /\
+            length round_keys > 0 /\ nr alg > 1 /\   // REVIEW: Why are these needed?
+            t0 = quad32_xor input (index round_keys 0) /\
+            t1 = rounds_opaque t0 round_keys (nr alg - 1) /\
+            out = quad32_xor (sub_bytes (shift_rows_LE t1)) (quad32_xor plain (index round_keys (nr alg))))
+  (ensures out == quad32_xor plain (cipher_opaque alg input round_keys))
+
+
+val lemma_incr_msb (orig ctr ctr':quad32) (increment:nat) : Lemma
+  (requires increment < 256 /\
+            ctr == reverse_bytes_quad32 orig /\
+            ctr' == Arch.Types.add_wrap_quad32 ctr (Mkfour 0 0 0 (increment * 0x1000000)))
+  (ensures  (orig.lo0 % 256) + increment < 256 ==> ctr' == reverse_bytes_quad32 (GCTR_s.inc32 orig increment))
+
+val lemma_msb_in_bounds (ctr_BE inout5 t1':quad32) (counter:nat) : Lemma
+  (requires inout5 == reverse_bytes_quad32 (GCTR_s.inc32 ctr_BE 5) /\
+            counter == ctr_BE.lo0 % 256 /\
+            counter + 6 < 256 /\
+            t1' == Arch.Types.add_wrap_quad32 inout5 (Mkfour 0 0 0 0x1000000))
+  (ensures  t1' == reverse_bytes_quad32 (GCTR_s.inc32 ctr_BE 6))

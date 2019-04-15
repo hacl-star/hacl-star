@@ -229,6 +229,8 @@ val alloca: a:alg -> StackInline (state a)
     fresh_loc (footprint s h1) h0 h1 /\
     M.(loc_includes (loc_region_only true (HS.get_tip h1)) (footprint s h1))))
 
+(** @type: true
+*)
 val create_in: a:alg -> r:HS.rid -> ST (state a)
   (requires (fun _ ->
     HyperStack.ST.is_eternal_region r))
@@ -239,6 +241,8 @@ val create_in: a:alg -> r:HS.rid -> ST (state a)
     M.(loc_includes (loc_region_only true r) (footprint s h1)) /\
     freeable h1 s))
 
+(** @type: true
+*)
 val create: a:alg -> ST (state a)
   (requires fun h0 -> True)
   (ensures fun h0 s h1 ->
@@ -247,6 +251,8 @@ val create: a:alg -> ST (state a)
     fresh_loc (footprint s h1) h0 h1 /\
     freeable h1 s)
 
+(** @type: true
+*)
 val init: #a:e_alg -> (
   let a = Ghost.reveal a in
   s: state a -> ST unit
@@ -262,6 +268,8 @@ val init: #a:e_alg -> (
 // code/lib/kremlin and that we know that machine integers and secret integers
 // are the same. In the long run, we should standardize on a secret integer type
 // in F*'s ulib and have evercrypt use it.
+(** @type: true
+*)
 val update:
   #a:e_alg -> (
   let a = Ghost.reveal a in
@@ -280,6 +288,8 @@ val update:
     preserves_freeable s h0 h1))
 
 // Note that we pass the data length in bytes (rather than blocks).
+(** @type: true
+*)
 val update_multi:
   #a:e_alg -> (
   let a = Ghost.reveal a in
@@ -306,6 +316,8 @@ val update_multi:
 // 18-10-15 a crucial bit is that this function reveals that last @| padding is a multiple of the
 //   block size; indeed, any caller will want to know this in order to reason
 //   about that sequence concatenation
+(** @type: true
+*)
 val update_last:
   #a:e_alg -> (
   let a = Ghost.reveal a in
@@ -329,6 +341,8 @@ val update_last:
     footprint s h0 == footprint s h1 /\
     preserves_freeable s h0 h1))
 
+(** @type: true
+*)
 val finish:
   #a:e_alg -> (
   let a = Ghost.reveal a in
@@ -346,6 +360,8 @@ val finish:
     B.as_seq h1 dst == extract (repr s h0) /\
     preserves_freeable s h0 h1))
 
+(** @type: true
+*)
 val free:
   #a:e_alg -> (
   let a = Ghost.reveal a in
@@ -356,6 +372,8 @@ val free:
   (ensures fun h0 _ h1 ->
     M.(modifies (footprint s h0) h0 h1)))
 
+(** @type: true
+*)
 val copy:
   #a:e_alg -> (
   let a = Ghost.reveal a in
@@ -373,6 +391,8 @@ val copy:
       invariant s_dst h1 /\
       repr s_dst h1 == repr s_src h0))
 
+(** @type: true
+*)
 val hash:
   a:alg ->
   dst:uint8_p {B.length dst = hash_length a} ->

@@ -15,23 +15,23 @@ module List = FStar.List.Tot
 open X64.MemoryAdapters
 
 [@__reduce__]
-let vale_pre_tl (num_b8_slots:IX64.max_slots) (dom:list td) =
-    n_arrow dom (V.va_state -> IX64.stack_buffer num_b8_slots -> prop)
+let vale_pre_tl (dom:list td) =
+    n_arrow dom (V.va_state -> prop)
 
 [@__reduce__]
-let vale_pre n (dom:list td) =
+let vale_pre (dom:list td) =
     code:V.va_code ->
-    vale_pre_tl n dom
+    vale_pre_tl dom
 
 [@__reduce__]
-let vale_post_tl n (dom:list td) =
+let vale_post_tl (dom:list td) =
     n_arrow dom
-            (s0:V.va_state -> sb:IX64.stack_buffer n -> s1:V.va_state -> f:V.va_fuel -> prop)
+            (s0:V.va_state -> s1:V.va_state -> f:V.va_fuel -> prop)
 
 [@__reduce__]
-let vale_post n (dom:list td) =
+let vale_post (dom:list td) =
     code:V.va_code ->
-    vale_post_tl n dom
+    vale_post_tl dom
 
 let vale_save_reg (r:MS.reg) (s0 s1:V.va_state) =
   VS.eval_reg r s0 == VS.eval_reg r s1
@@ -45,6 +45,7 @@ let vale_calling_conventions
   (xmms_modified:MS.xmm -> bool) =
   let open MS in
   s1.VS.ok /\
+  vale_save_reg MS.Rsp s0 s1 /\
   (forall (r:MS.reg).
     not (regs_modified r) ==> vale_save_reg r s0 s1) /\
   (forall (x:MS.xmm).
@@ -109,36 +110,34 @@ let disjoint_or_eq (l:list arg) =
   BigOps.pairwise_and' disjoint_or_eq_1  l
 
 [@__reduce__] unfold
-let vale_sig_nil #n
+let vale_sig_nil
                  (regs_modified:MS.reg -> bool)
                  (xmms_modified:MS.xmm -> bool)
                  (args:list arg)
                  (code:V.va_code)
-                 (pre:vale_pre_tl n [])
-                 (post:vale_post_tl n []) =
+                 (pre:vale_pre_tl [])
+                 (post:vale_post_tl []) =
     va_s0:V.va_state ->
-    stack_b:IX64.stack_buffer n ->
     Ghost (V.va_state & V.va_fuel)
      (requires
-       elim_nil pre va_s0 stack_b)
+       elim_nil pre va_s0)
      (ensures (fun r ->
        let va_s1 = state_of r in
        let f = fuel_of r in
        V.eval_code code va_s0 f va_s1 /\
        vale_calling_conventions va_s0 va_s1 regs_modified xmms_modified /\
-       elim_nil post va_s0 stack_b va_s1 f /\
+       elim_nil post va_s0 va_s1 f /\
        readable args VS.(va_s1.mem) /\
-       ME.modifies (mloc_modified_args (arg_of_sb stack_b :: args)) va_s0.VS.mem va_s1.VS.mem))
+       ME.modifies (mloc_modified_args args) va_s0.VS.mem va_s1.VS.mem))
 
 [@__reduce__]
-let rec vale_sig_tl #n
-                    (regs_modified:MS.reg -> bool)
+let rec vale_sig_tl (regs_modified:MS.reg -> bool)
                     (xmms_modified:MS.xmm -> bool)
                     (#dom:list td)
                     (args:list arg)
                     (code:V.va_code)
-                    (pre:vale_pre_tl n dom)
-                    (post:vale_post_tl n dom)
+                    (pre:vale_pre_tl dom)
+                    (post:vale_post_tl dom)
   : Type =
     match dom with
     | [] ->
@@ -146,40 +145,39 @@ let rec vale_sig_tl #n
 
     | hd::tl ->
       x:td_as_type hd ->
-      vale_sig_tl #n regs_modified xmms_modified #tl ((|hd,x|)::args) code (elim_1 pre x) (elim_1 post x)
-
+      vale_sig_tl regs_modified xmms_modified #tl ((|hd,x|)::args) code (elim_1 pre x) (elim_1 post x)
 
 [@__reduce__]
-let elim_vale_sig_nil #n #code
+let elim_vale_sig_nil  #code
                        (#regs_modified:MS.reg -> bool)
                        (#xmms_modified:MS.xmm -> bool)
                        (#args:list arg)
-                       (#pre:vale_pre_tl n [])
-                       (#post:vale_post_tl n [])
-                       (v:vale_sig_tl #n regs_modified xmms_modified #[] args code pre post)
+                       (#pre:vale_pre_tl [])
+                       (#post:vale_post_tl [])
+                       (v:vale_sig_tl regs_modified xmms_modified #[] args code pre post)
     : vale_sig_nil regs_modified xmms_modified args code pre post
     = v
 
 [@__reduce__]
-let elim_vale_sig_cons #n #code
+let elim_vale_sig_cons #code
                        (#regs_modified:MS.reg -> bool)
                        (#xmms_modified:MS.xmm -> bool)
                        (hd:td)
                        (tl:list td)
                        (args:list arg)
-                       (pre:vale_pre_tl n (hd::tl))
-                       (post:vale_post_tl n (hd::tl))
+                       (pre:vale_pre_tl (hd::tl))
+                       (post:vale_post_tl (hd::tl))
                        (v:vale_sig_tl regs_modified xmms_modified args code pre post)
     : x:td_as_type hd
     -> vale_sig_tl regs_modified xmms_modified ((|hd, x|)::args) code (elim_1 pre x) (elim_1 post x)
     = v
 
 [@__reduce__]
-let vale_sig #n (#dom:list td)
+let vale_sig (#dom:list td)
              (regs_modified:MS.reg -> bool)
              (xmms_modified:MS.xmm -> bool)
-             (pre:vale_pre n dom)
-             (post:vale_post n dom)
+             (pre:vale_pre dom)
+             (post:vale_post dom)
   : Type =
     code:V.va_code ->
     win:bool ->
@@ -192,7 +190,7 @@ let vale_sig #n (#dom:list td)
       (post code)
 
 [@__reduce__]
-let vale_sig_stdcall #n #dom = vale_sig #n #dom IX64.regs_modified_stdcall IX64.xmms_modified_stdcall
+let vale_sig_stdcall #dom = vale_sig #dom IX64.regs_modified_stdcall IX64.xmms_modified_stdcall
 
 [@__reduce__]
 let vale_calling_conventions_stdcall (s0 s1:VS.state) = 

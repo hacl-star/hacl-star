@@ -1,10 +1,13 @@
-# EverCrypt: A Verified Crypto Library Engineered for Agile, Multi-Platform Performance
+# EverCrypt: A Verified Crypto Provider <br>Engineered for Agile, Multi-Platform Performance
 
-EverCrypt is a formally verified modern cryptographic library
+EverCrypt is a formally verified modern cryptographic provider
 that provides cross-platform support as well as platform-specific optimizations
 that are automatically enabled if processor support is detected (*multiplexing*).
 Furthermore, EverCrypt offers an (*agile*) API that makes it simple to
-switch between algorithms (e.g., from SHA2 to SHA3) if one of the algorithms is broken.
+switch between algorithms (e.g., from SHA2 to SHA3).
+
+EverCrypt is written and verified using the [F\*] programming language, then
+compiled to a mixture of C (using a dedicated compiler, [KreMLin]) and assembly.
 
 EverCrypt's formal verification involves using software tools to analyze *all
 possible behaviors* of a program and prove mathematically that they comply with
@@ -25,67 +28,151 @@ For EverCrypt, our specifications cover a range of properties, including:
   the wrong kind of parameters to another, or accesses its private state.
 
 * Functional correctness: EverCrypt's input/output behavior is fully
-  characterized by a simple mathematical functions derived directly
+  characterized by simple mathematical functions derived directly
   from the official cryptographic standards (e.g., from NIST or the IETF).
 
-* Side-channel resistance: Observations about EverCrypt's low-level
-  behavior (specifically, the time it takes to execute or the memory addresses that it accesses)
-  are independent of the secrets manipulated by the library.
-  Hence, an adversary monitoring these "side-channels" learns
-  nothing about the secrets.
-
-* Cryptographic security: Based on standard cryptographic assumptions (e.g.,
-  factoring is hard), except for negligible probability, EverCrypt algorithms are
-  indistinguishable from ideal cryptographic functionalities; i.e., the
-  mathematical definitions that cryptographers use to capture the notion of
-  secrecy, integrity, or secure encryption.  Note that these guarantees
-  currently only apply to ***SUBSET HERE***; extending these guarantees
-  to the entire library is on-going work.
+* Side-channel resistance: Observations about EverCrypt's low-level behavior
+  (specifically, the time it takes to execute or the memory addresses that it
+  accesses) are independent of the secrets manipulated by the library. Hence, an
+  adversary monitoring these "side-channels" learns nothing about the secrets.
 
 All of these guarantees *do not* prevent EverCrypt from achieving good performance!
 EverCrypt meets or beats the performance of most existing cryptographic implementations in C,
 and for certain targeted platforms meets or beats the performance of state-of-the-art
 libraries that rely on hand-tuned assembly code.
 
-Portions of EverCrypt are being used in [Firefox][Hacl-Firefox], the Windows kernel,
-the [Tezos blockchain][Hacl-Tezos], and the [Wireguard VPN][Hacl-Wireguard].
-
-This repository brings together several components of [Project Everest],
-which aims to build and deploy a verified HTTPS stack.
+Portions of EverCrypt are being used in [Firefox](https://bugzilla.mozilla.org/show_bug.cgi?id=1387183), the Windows kernel,
+the [Tezos blockchain](https://www.reddit.com/r/tezos/comments/8hrsz2/tezos_switches_cryptographic_libraries_from/),
+and the [Wireguard VPN](https://lwn.net/Articles/770750/).
 
 # Algorithms Supported by EverCrypt
 
-* Block ciphers: AES (128, 256)\*, AES-CBC\*, AES-CTR\*
-* Stream ciphers: Chacha20, Salsa20
-* MACs: Poly1305\*, HMAC+
-* Key Derivation+: HKDF
-* Elliptic curves: Curve25519\*
-* Elliptic curves signatures: Ed25519
-* Hash functions+: MD5, SHA1, SHA2 (224, 256\*, 384, 512), SHA3, Blake2
-* NaCl API: secret_box, box, sign
-* AEAD: IETF Chacha20Poly1305, AES-GCM\*
+EverCrypt is a work in progress!  Many algorithms are still under development.
+In upcoming releases, we aim to include:
+- fallback C versions for all algorithms
+- NIST P curves
+- AES-CBC
+- an up-to-date Ed25519
 
-Algorithms with stars include optimized implementations targeting specific platforms
-(e.g., x64 with AES-NI, BMI2, ADX, or SHA).
-Algorithms with a plus are agile and multiplexed.
+| Algorithm           | C version                | ASM version                | Agile API |
+| ------------------- | ------------------------ | -------------------------- | --------- |
+| **AEAD**            |                          |                            |           |
+| AES-GCM             |                          | ✔︎ (AES-NI + PCLMULQDQ)     | ✔︎         |
+| ChachaPoly          | ✔︎¹                       |                            | ✔︎         |
+|                     |                          |                            |           |
+| **Hashes**          |                          |                            |           |
+| MD5                 | ✔︎²                       |                            | ✔︎         |
+| SHA1                | ✔︎²                       |                            | ✔︎         |
+| SHA2                | ✔︎                        |                            | ✔︎         |
+| SHA3                | ✔︎                        |                            |           |
+| Blake2              | ✔︎                        |                            |           |
+|                     |                          |                            |           |
+| **MACS**            |                          |                            |           |
+| HMAC                | ✔︎⁴                       |                            | ✔︎         |
+| Poly1305            | ✔︎³ (+ AVX + AVX2)        | ✔︎ (X64)                    |           |
+|                     |                          |                            |           |
+| **Key Derivation**  |                          |                            |           |
+| HKDF                | ✔︎⁴                       |                            | ✔︎         |
+|                     |                          |                            |           |
+| **ECC**             |                          |                            |           |
+| Curve25519          | ✔︎                        | ✔︎ (BMI2 + ADX)             |           |
+| Ed25519             | ✔︎⁵                       |                            |           |
+|                     |                          |                            |           |
+| **Ciphers**         |                          |                            |           |
+| Chacha20            | ✔︎                        |                            |           |
+| AES128, 256         |                          | ✔︎ (AES NI + PCLMULQDQ)     |           |
+| AES CTR             |                          | ✔︎ (AES NI + PCLMULQDQ)     |           |
+
+¹: does not multiplex (yet) over the underlying Poly1305 implementation  
+²: insecure algorithms provided for legacy interop purposes  
+³: achieved via C compiler intrinsincs; no verification results claimed for the
+   AVX and AVX2 versions whose verification is not complete yet  
+⁴: HMAC and HKDF on top of the agile hash API, so HMAC-SHA2-256 and
+   HKDF-SHA2-256 leverage the assembly version under the hood  
+⁵: legacy implementation  
 
 # Building or Integrating EverCrypt
 
-Building EverCrypt from scratch is fairly involved and requires several tools.
-Hence the simplest approach is to use the [Everest Docker] project, then get
-the latest `everest` image. The EverCrypt code will be in
-`$HOME/everest/hacl-star/code/dist/*`; in order to integrate it in your project,
-you will also need the `minimal` variant of `kremlib`, found in
-`$HOME/everest/kremlin/kremlib/dist/minimal`.
+⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️
 
-The `.c` files in `code/dist`, along with their headers, form the EverCrypt C API.
-The EverCrypt API subsumes the original [NaCl API] as offered by [libsodium],
-meaning that applications that rely on the [NaCl] subset of [libsodium] can be
-straightforwardly recompiled against EverCrypt.
+EverCrypt is a work in progress -- if you're seriously contemplating using
+this code is a real system, get in touch with us first!
 
-Note that `code/dist` contains several flavors of generated C code, depending on
-whether you need to support MSVC or not, C89 or not, etc. It's always easy to
-add one more flavor of generated C code. Ask us.
+⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️⚠️
+
+## Current limitations
+
+As we work our way towards our first official release, bear in mind that:
+- only X64 is supported at the moment
+- many algorithms are still under development (see above).
+
+## Finding the code EverCrypt produces
+
+Release branches (e.g.
+[evercrypt-v0.1+](https://github.com/project-everest/hacl-star/tree/evercrypt-v0.1+))
+contain a copy of the generated C/ASM code under
+version control. This is by far the easiest way to obtain a copy of EverCrypt.
+
+EverCrypt's C/ASM code is packaged as a set of self-contained files in one of the
+`dist/*` directories where `*` is the name of a distribution. A distribution
+corresponds to a particular flavor of generated C code.
+
+| Distribution  | GCC-like | MSVC | C89 compiler |
+| ------------- | -------- | ---- | ------------ |
+| compact-gcc¹  | ✔︎        |      |              |
+| compact-msvc² | ✔︎        | ✔︎    |              |
+| compact-c89³  | ✔︎        | ✔︎    | ✔︎            |
+
+¹: x86-64 only: assumes `unsigned __int128`  
+²: relies on `alloca` to avoid C11 VLA for the sake of MSVC; relies on KreMLin
+   for tail-call optimizations; relies on an unverified uint128 implementation
+   using compiler intrinsics for MSVC  
+³: relies on `alloca`; eliminates compound literals and enforces C89 scope to
+   generate syntactically C89-compliant code; code still relies on inttypes.h
+   and other headers that you may have to provide depending on your target; does
+   not include Merkle Trees
+
+## Integrating EverCrypt with your code
+
+Each distribution of EverCrypt contains a GNU Makefile that generates a static
+library and a shared object. The code depends on `kremlib`, which contains
+verified, extracted C implementations of some F\* standard library functions.
+For release branches, a copy of `kremlib` is provided in `dist/kremlib`.
+
+- When integrating EverCrypt, one can pick a distribution, along with the
+  `kremlib` directory, thus giving a "wholesale" integration of
+  the EverCrypt library.
+- For a more gradual integration, consumers can integrate algorithms one at a
+  time, by cherry-picking the files that they are interested in. Each header
+  file contains the list of other headers (and implementations) it depends on.
+
+Customizing distributions is easy; contact us if you need something bespoke
+(e.g., EverCrypt as single file).
+
+## Verifying and building EverCrypt with Docker
+
+Verifying and building EverCrypt from scratch is fairly involved and requires several tools.
+Hence the simplest approach is to look up the latest tag for the [HACL\* docker
+container](https://cloud.docker.com/u/projecteverest/repository/docker/projecteverest/hacl-star-linux)
+then retrieve it using `docker pull`.
+
+## Verifying and building EverCrypt locally
+
+We strongly recommend using the Everest script (as shown below)
+to verify and build EverCrypt.
+
+```bash
+$ git clone https://github.com/project-everest/everest/
+$ cd everest
+$ ./everest check
+$ # Keep trying everest check until all requirements are met
+$ ./everest pull
+$ # Follow suggestions and export FSTAR_HOME, KREMLIN_HOME, HACL_HOME
+$ ./everest FStar make kremlin make
+$ # At this stage all dependencies have been fetched and built
+$ cd hacl-star
+$ make -j
+```
 
 # Code Layout
 
@@ -129,19 +216,57 @@ Karthikeyan Bhargavan, Antoine Delignat-Lavaud, Cedric Fournet, Markulf
 Kohlweiss, Jianyang Pan, Jonathan Protzenko, Aseem Rastogi, Nikhil Swamy,
 Santiago Zanella-Beguelin, Jean-Karim Zinzindohoue
 
+# Components of EverCrypt
+
+EverCrypt brings together several components of [Project Everest],
+which aims to build and deploy a verified HTTPS stack.
+
+## HACL\*: Verified C-level Cryptographic Code
+
+[HACL\*](README.HACL.md), the High-Assurance Cryptographic Library,
+is a formally verified cryptographic library providing efficient implementations
+of popular algorithms; it compiles to C, using the [KreMLin] compiler.
+
+## Vale: Verified Cryptographic Assembly Code
+
+[Vale] (Verified Assembly Language for Everest) is a tool for constructing
+formally verified high-performance assembly language code, with an emphasis on
+cryptographic code.  It supports multiple architectures, such as x86, x64, and
+ARM, and multiple platforms, such as Windows, Mac, and Linux. Additional
+architectures and platforms can be supported with no changes to the Vale tool.
+
+## Verification Tools
+
+EverCrypt is developed in [F\*], a programming language with support for
+program verification. To implement efficient, low-level, optimized code,
+EverCrypt relies on [Low\*], a subset of F\*.  Programs written in Low\* compile
+to readable, idiomatic C code using the [KreMLin] compiler.
+
 # Research
 
 The HACL\* library:
-- [HACL\*: A Verified Modern Cryptographic Library](http://eprint.iacr.org/2017/536)
+- [HACL\*: A Verified Modern Cryptographic Library](http://eprint.iacr.org/2017/536)  
   Jean-Karim Zinzindohoué, Karthikeyan Bhargavan, Jonathan Protzenko, Benjamin Beurdouche
-- [A verified extensible library of elliptic curves](https://hal.inria.fr/hal-01425957)
+- [A Verified Extensible Library of Elliptic Curves](https://hal.inria.fr/hal-01425957)  
   Jean Karim Zinzindohoué, Evmorfia-Iro Bartzia, Karthikeyan Bhargavan
+- The origins of HACL\* can be found in the [Ph.D. thesis of Jean Karim
+  Zinzindohoué](https://www.theses.fr/s175861), and its design is 
+  inspired by discussions at the [HACS series of workshops](https://github.com/HACS-workshop). 
 
 The Low\* verification technology:
-- [Verified Low-Level Programming Embedded in F\*](https://arxiv.org/abs/1703.00053)
+- [Verified Low-Level Programming Embedded in F\*](https://arxiv.org/abs/1703.00053)  
   Jonathan Protzenko, Jean-Karim Zinzindohoué, Aseem Rastogi, Tahina
   Ramananandro, Peng Wang, Santiago Zanella-Béguelin, Antoine Delignat-Lavaud,
   Cătălin Hriţcu, Karthikeyan Bhargavan, Cédric Fournet, and Nikhil Swamy
+
+The Vale tool and verified assembly libraries:
+- [Vale: Verifying High-Performance Cryptographic Assembly Code](https://project-everest.github.io/assets/vale2017.pdf)  
+  Barry Bond, Chris Hawblitzel, Manos Kapritsos, K. Rustan M. Leino, Jacob R. Lorch, Bryan Parno, Ashay Rane, Srinath Setty, Laure Thompson.
+  In Proceedings of the USENIX Security Symposium, 2017.
+  *Distinguished Paper Award*
+
+- [A Verified, Efficient Embedding of a Verifiable Assembly Language](https://www.microsoft.com/en-us/research/publication/a-verified-efficient-embedding-of-a-verifiable-assembly-language/)  
+  Aymeric Fromherz, Nick Giannarakis, Chris Hawblitzel, Bryan Parno, Aseem Rastogi, Nikhil Swamy. In Proceedings of the Symposium on Principles of Programming Languages (POPL), 2019.
 
 # License
 
@@ -149,9 +274,10 @@ All F\* source code is released under Apache 2.0.
 
 All generated assembly, C, OCaml, Javascript, and Web Assembly code is released under MIT.
 
-[INRIA Paris](https://www.inria.fr/en/centre/paris)
-[Prosecco](http://prosecco.inria.fr)
+[INRIA Paris]: https://www.inria.fr/en/centre/paris
+[Prosecco]: http://prosecco.inria.fr
 [F\*]: https://github.com/FStarLang/FStar
+[Low\*]: https://arxiv.org/abs/1703.00053
 [KreMLin]: https://github.com/FStarLang/kremlin
 [miTLS]: https://github.com/mitls/mitls-fstar
 [NaCl API]: https://nacl.cr.yp.to

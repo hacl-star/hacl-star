@@ -25,6 +25,9 @@ let check_if_cpuid_consumes_fixed_time (ins:tainted_ins{S.Cpuid? ins.i}) (ts:tai
   true, ts
 
 let check_if_ins_consumes_fixed_time ins ts =
+  false, ts
+  (* Verifying, but too slow. Need to refactor
+  
   if S.Cpuid? ins.i then check_if_cpuid_consumes_fixed_time ins ts
   else (
   let i = ins.i in
@@ -51,11 +54,12 @@ let check_if_ins_consumes_fixed_time ins ts =
   else
   let ts' = set_taints dsts ts taint in
   let b, ts' = match i with
-    | S.Mov64 dst _ | S.AddLea64 dst _ _ | S.Cmovc64 dst _ -> begin
+    | S.Mov64 dst _ | S.MovBe64 dst _ | S.AddLea64 dst _ _ | S.Cmovc64 dst _ -> begin
       match dst with
         | OConst _ -> false, ts (* Should not happen *)
         | OReg r -> fixedTime, ts'
         | OMem m -> fixedTime, ts'
+        | OStack m -> false, ts
     end
      | S.Mul64 _ -> fixedTime, (TaintState ts'.regTaint Secret Secret ts'.xmmTaint)
 
@@ -69,6 +73,7 @@ let check_if_ins_consumes_fixed_time ins ts =
               | OConst _ -> false, (TaintState ts'.regTaint Secret Secret ts'.xmmTaint) (* Should not happen *)
               | OReg r -> fixedTime, (TaintState ts'.regTaint Secret Secret ts'.xmmTaint)
               | OMem m -> fixedTime, (TaintState ts'.regTaint Secret Secret ts'.xmmTaint)
+              | OStack m -> false, ts
         end
    | S.Push src -> if Secret? (ts'.regTaint Rsp) || Secret? (operand_taint src ts' Public) then false, ts
      else fixedTime, ts'
@@ -82,16 +87,19 @@ let check_if_ins_consumes_fixed_time ins ts =
         | [OConst _] -> true, (TaintState ts'.regTaint Secret taint ts'.xmmTaint) (* Should not happen *)
         | [OReg r] -> fixedTime, (TaintState ts'.regTaint Secret taint ts'.xmmTaint)
         | [OMem m] -> fixedTime, (TaintState ts'.regTaint Secret taint ts'.xmmTaint)
+        | [OStack m] -> false, ts
     end
     | _ ->
       match dsts with
       | [OConst _] -> false, (TaintState ts'.regTaint Secret Secret ts'.xmmTaint) (* Should not happen *)
       | [OReg r] -> fixedTime, (TaintState ts'.regTaint Secret Secret ts'.xmmTaint)
       | [OMem m] ->  fixedTime, (TaintState ts'.regTaint Secret Secret ts'.xmmTaint)
+      | [OStack m] -> false, ts
       | [] -> false, ts'  (* AR: this case was missing, Unhandled yet *)
   in
   b, ts'
   )
+*)
 
 val lemma_public_flags_same: (ts:taintState) -> (ins:tainted_ins{S.Mul64? ins.i}) -> Lemma (forall s1 s2.
   let b, ts' = check_if_ins_consumes_fixed_time ins ts in
@@ -1360,6 +1368,7 @@ let lemma_ins_same_public ts ins s1 s2 fuel =
   match ins.i with
   | S.Cpuid -> ()
   | S.Mov64 _ _ -> lemma_mov_same_public ts ins s1 s2 fuel
+  | S.MovBe64 _ _ -> () // TODO
   | S.Cmovc64 _ _ -> lemma_cmovc_same_public ts ins s1 s2 fuel
   | S.Add64 _ _ -> lemma_add_same_public ts ins s1 s2 fuel
   | S.AddLea64 _ _ _ -> lemma_addlea_same_public ts ins s1 s2 fuel
@@ -1377,6 +1386,8 @@ let lemma_ins_same_public ts ins s1 s2 fuel =
   | S.Push _ -> lemma_push_same_public ts ins s1 s2 fuel
   | S.Pop _ -> lemma_pop_same_public ts ins s1 s2 fuel
   | S.Adox64 _ _ -> () // TODO
+  | S.Alloc _ -> ()
+  | S.Dealloc _ -> ()
 
 let lemma_ins_leakage_free ts ins =
   let b, ts' = check_if_ins_consumes_fixed_time ins ts in

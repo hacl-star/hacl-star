@@ -57,6 +57,18 @@ procedure{:quick exportOnly}{:public}
 {
 }
 
+procedure{:quick exportOnly}{:public}
+    {:instruction Ins(TS.TaintedIns(tuple(S.VPclmulqdq(dst, src1, src2, (if src1Hi then 1 else 0) + (if src2Hi then 16 else 0))), Public))}
+    VPclmulqdq(out dst:xmm, src1:xmm, src2:xmm, inline src1Hi:bool, inline src2Hi:bool)
+    requires pclmulqdq_enabled;
+    modifies efl;
+    ensures
+        dst == old(to_quad32(mul(
+            of_double32(if src1Hi then quad32_double_hi(src1) else quad32_double_lo(src1)),
+            of_double32(if src2Hi then quad32_double_hi(src2) else quad32_double_lo(src2)))));
+{
+}
+
 procedure{:instruction Ins(TS.TaintedIns(tuple(S.AESNI_enc(dst, src)), Public))}{:quick exportOnly}{:public}
     AESNI_enc(inout dst:xmm, src:xmm)
     requires aesni_enabled;
@@ -66,12 +78,30 @@ procedure{:instruction Ins(TS.TaintedIns(tuple(S.AESNI_enc(dst, src)), Public))}
 {
 }
 
+procedure{:instruction Ins(TS.TaintedIns(tuple(S.VAESNI_enc(dst, src1, src2)), Public))}{:quick exportOnly}{:public}
+    VAESNI_enc(inout dst:xmm, src1:xmm, src2:xmm)
+    requires aesni_enabled;
+    modifies efl;
+    ensures
+        dst == old(quad32_xor(mix_columns_LE(sub_bytes(shift_rows_LE(src1))), src2));
+{
+}
+
 procedure{:instruction Ins(TS.TaintedIns(tuple(S.AESNI_enc_last(dst, src)), Public))}{:quick exportOnly}{:public}
     AESNI_enc_last(inout dst:xmm, src:xmm)
     requires aesni_enabled;
     modifies efl;
     ensures
         dst == old(quad32_xor(sub_bytes(shift_rows_LE(dst)), src));
+{
+}
+
+procedure{:instruction Ins(TS.TaintedIns(tuple(S.VAESNI_enc_last(dst, src1, src2)), Public))}{:quick exportOnly}{:public}
+    VAESNI_enc_last(inout dst:xmm, src1:xmm, src2:xmm)
+    requires aesni_enabled;
+    modifies efl;
+    ensures
+        dst == old(quad32_xor(sub_bytes(shift_rows_LE(src1)), src2));
 {
 }
 

@@ -464,11 +464,11 @@ let rec mem_roots_p_modifies_none (args:list arg) (h0:HS.mem) (h1:HS.mem)
 let arg_of_lb #src #t (x:buf_t src t) : arg = (| TD_Buffer src t default_bq, x |)
 
 [@__reduce__]
-let arg_of_sb #t (x:buf_t TUInt8 t) :arg = (| TD_Buffer TUInt8 t stack_bq, x |)
+let arg_of_sb #t (x:buf_t TUInt64 t) :arg = (| TD_Buffer TUInt64 t stack_bq, x |)
 
 let rec disjoint_or_eq_fresh
        #t
-       (x:buf_t TUInt8 t)
+       (x:buf_t TUInt64 t)
        (args:list arg)
        (h0:HS.mem)
   : Lemma

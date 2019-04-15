@@ -53,7 +53,7 @@ open X64.Stack
 // KEY EXPANSION
 ///////////////////////////
 
-procedure{:quick} KeyExpansionStdcall(
+procedure{:quick}{:public}{:exportSpecs} KeyExpansionStdcall(
     inline win:bool,
     inline alg:algorithm,
     ghost input_key_b:buffer128,
@@ -77,7 +77,7 @@ procedure{:quick} KeyExpansionStdcall(
         validDstAddrs128(mem, key_expansion_ptr, output_key_expansion_b, nr(alg) + 1, memTaint, Secret);
     ensures
         modifies_buffer128(output_key_expansion_b, old(mem), mem);
-        forall j {buffer128_read(output_key_expansion_b, j, mem)} :: 0 <= j <= nr(alg) ==>
+        forall j :: 0 <= j <= nr(alg) ==>
             buffer128_read(output_key_expansion_b, j, mem) == index(key_to_round_keys_LE(alg, key), j);
 {
     inline if (alg = AES_128) {

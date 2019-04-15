@@ -13,6 +13,7 @@ type base_typ:eqtype =
   | TUInt64
   | TUInt128
 
+[@__reduce__]
 let base_typ_as_type (t:base_typ) : Tot eqtype =
   let open W in
   let open Types_s in

@@ -1,4 +1,6 @@
 module GF128
+open FStar.Seq
+open FStar.Mul
 open Words_s
 open Words.Four_s
 open Types_s
@@ -8,22 +10,6 @@ open Math.Poly2_s
 open Math.Poly2.Bits_s
 open Math.Poly2
 open Math.Poly2.Lemmas
-open FStar.Seq
-open FStar.Mul
-
-val lemma_of_double32_degree (d:double32) : Lemma
-  (degree (of_double32 d) < 64)
-  [SMTPat (degree (of_double32 d))]
-
-val lemma_of_quad32_degree (q:quad32) : Lemma
-  (degree (of_quad32 q) < 128)
-  [SMTPat (degree (of_quad32 q))]
-
-val lemma_to_of_quad32 (q:quad32) : Lemma (to_quad32 (of_quad32 q) == q)
-
-val lemma_of_to_quad32 (a:poly) : Lemma
-  (requires degree a < 128)
-  (ensures of_quad32 (to_quad32 a) == a)
 
 let quad32_shift_left_1 (q:quad32) : quad32 =
   let l = four_map (fun (i:nat32) -> ishl i 1) q in
@@ -43,7 +29,7 @@ let quad32_shift_2_left_1 (qa qb:quad32) : tuple2 quad32 quad32 =
   (qa', qb')
 
 val lemma_shift_left_1 (a:poly) : Lemma
-  (requires degree a < 127)
+  (requires degree a < 128)
   (ensures to_quad32 (shift a 1) == quad32_shift_left_1 (to_quad32 a))
 
 val lemma_shift_2_left_1 (lo hi:poly) : Lemma
@@ -57,6 +43,7 @@ val lemma_shift_2_left_1 (lo hi:poly) : Lemma
     hi' == to_quad32 (a' /. n)
   ))
 
+// TODO: move this to Poly library
 val lemma_reverse_reverse (a:poly) (n:nat) : Lemma
   (requires degree a <= n)
   (ensures reverse (reverse a n) n == a)
@@ -132,4 +119,105 @@ val lemma_gf128_reduce_rev (a b h:poly) (n:pos) : Lemma
     degree (r rdhL) <= 2 * degree h /\
     degree (r rdhLh) <= 2 * degree h /\
     r ((a *. b) %. g) == rdhLh +. rdh /. m +. rab /. m
+  ))
+
+val lemma_reduce_rev (a0 a1 a2 h:poly) (n:pos) : Lemma
+  (requires
+    n == 64 /\ // verification times out unless n is known
+    degree a0 < n + n /\
+    degree a1 < n + n /\
+    degree a2 < n + n /\
+    degree (monomial (n + n) +. h) == n + n /\
+    degree h < n /\
+    h.[0]
+  )
+  (ensures (
+    let nn = n + n in
+    let mm = monomial nn in
+    let m = monomial n in
+    let g = mm +. h in
+    let c = reverse (shift h (-1)) (n - 1) in
+    let y_10 = a0 +. shift (mask a1 64) 64 in
+    let y_0 = mask y_10 64 in
+    let y_10c = swap y_10 64 +. y_0 *. c in
+    let a = a0 +. shift a1 64 +. shift a2 128 in
+    let x = reverse a (nn + nn - 1) in
+    reverse (x %. g) (nn - 1) == swap y_10c 64 +. (a2 +. shift a1 (-64)) +. mask y_10c 64 *. c
+  ))
+
+// of_fun 8 (fun (i:nat) -> i = 0 || i = 1 || i = 6)
+let gf128_low_shift : poly = shift gf128_modulus_low_terms (-1)
+
+// of_fun 8 (fun (i:nat) -> i = 127 || i = 126 || i = 121)
+let gf128_rev_shift : poly = reverse gf128_low_shift 127
+
+val lemma_gf128_low_shift (_:unit) : Lemma
+  (shift (of_quad32 (Mkfour 0 0 0 0xc2000000)) (-64) == reverse gf128_low_shift 63)
+
+val lemma_gf128_high_bit (_:unit) : Lemma
+  (of_quad32 (Mkfour 0 0 0 0x80000000) == monomial 127)
+
+val lemma_gf128_low_shift_1 (_:unit) : Lemma
+  (of_quad32 (Mkfour 1 0 0 0xc2000000) == reverse (shift (monomial 128 +. gf128_modulus_low_terms) (-1)) 127)
+
+let gf128_mul_rev (a b:poly) : poly =
+  reverse (gf128_mul (reverse a 127) (reverse b 127)) 127
+
+let ( *~ ) = gf128_mul_rev
+
+val lemma_gf128_mul_rev_commute (a b:poly) : Lemma (a *~ b == b *~ a)
+
+val lemma_gf128_mul_rev_associate (a b c:poly) : Lemma
+  (a *~ (b *~ c) == (a *~ b) *~ c)
+
+val lemma_gf128_mul_rev_distribute_left (a b c:poly) : Lemma
+  ((a +. b) *~ c == a *~ c +. b *~ c)
+
+val lemma_gf128_mul_rev_distribute_right (a b c:poly) : Lemma
+  (a *~ (b +. c) == a *~ b +. a *~ c)
+
+// TODO: change definition of reverse from (reverse a 127) to (reverse 128 a)
+let mod_rev (n:pos) (a b:poly) : poly =
+  reverse (reverse a (n + n - 1) %. b) (n - 1)
+
+val lemma_add_mod_rev (n:pos) (a1 a2 b:poly) : Lemma
+  (requires degree b >= 0)
+  (ensures mod_rev n (a1 +. a2) b == mod_rev n a1 b +. mod_rev n a2 b)
+
+let shift_key_1 (n:pos) (f h:poly) : poly =
+  let g = monomial n +. f in
+  let h1 = shift h 1 in
+  let offset = reverse (shift g (-1)) (n - 1) in
+  mask h1 n +. (if h1.[n] then offset else zero)
+
+val lemma_shift_key_1 (n:pos) (f h:poly) : Lemma
+  (requires f.[0] /\ degree f < n /\ degree h < n)
+  (ensures (
+    let g = monomial n +. f in
+    shift (reverse (shift_key_1 n f h) (n - 1)) 1 %. g == reverse h (n - 1) %. g
+  ))
+
+val lemma_test_high_bit (a:poly) : Lemma
+  (requires degree a < 128)
+  (ensures a.[127] == ((to_quad32 (poly_and a (monomial 127))).hi3 = (to_quad32 (monomial 127)).hi3))
+
+val lemma_Mul128 (a b:poly) : Lemma
+  (requires degree a < 128 /\ degree b < 128)
+  (ensures (
+    let aL = mask a 64 in
+    let bL = mask b 64 in
+    let aH = shift a (-64) in
+    let bH = shift b (-64) in
+    a *. b == aL *. bL +. shift (aL *. bH +. aH *. bL) 64 +. shift (aH *. bH) 128
+  ))
+
+val lemma_Mul128_accum (z0 z1 z2 a b:poly) : Lemma
+  (requires degree a < 128 /\ degree b < 128)
+  (ensures (
+    let z = z0 +. shift z1 64 +. shift z2 128 in
+    let aL = mask a 64 in
+    let bL = mask b 64 in
+    let aH = shift a (-64) in
+    let bH = shift b (-64) in
+    z +. a *. b == (z0 +. aL *. bL) +. shift (z1 +. aL *. bH +. aH *. bL) 64 +. shift (z2 +. aH *. bH) 128
   ))

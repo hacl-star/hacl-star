@@ -22,37 +22,34 @@ let dom: IX64.arity_ok_stdcall td = []
 
 (* Need to rearrange the order of arguments *)
 [@__reduce__] noextract
-let aesni_pre : VSig.vale_pre 8 dom =
+let aesni_pre : VSig.vale_pre dom =
   fun (c:V.va_code)
-    (va_s0:V.va_state)
-    (sb:IX64.stack_buffer 8) ->
-      VC.va_req_check_aesni_stdcall c va_s0 IA.win (as_vale_buffer sb)
+    (va_s0:V.va_state) ->
+      VC.va_req_check_aesni_stdcall c va_s0 IA.win
 
 [@__reduce__] noextract
-let aesni_post : VSig.vale_post 8 dom =
+let aesni_post : VSig.vale_post dom =
   fun (c:V.va_code)
     (va_s0:V.va_state)
-    (sb:IX64.stack_buffer 8)
     (va_s1:V.va_state)
     (f:V.va_fuel) ->
-      VC.va_ens_check_aesni_stdcall c va_s0 IA.win (as_vale_buffer sb) va_s1 f
+      VC.va_ens_check_aesni_stdcall c va_s0 IA.win va_s1 f
 
 (* The vale lemma doesn't quite suffice to prove the modifies clause
    expected of the interop layer *)
-[@__reduce__] unfold noextract
+[@__reduce__] noextract
 let aesni_lemma'
     (code:V.va_code)
     (_win:bool)
     (va_s0:V.va_state)
-    (sb:IX64.stack_buffer 8)
  : Ghost (V.va_state & V.va_fuel)
      (requires
-       aesni_pre code va_s0 sb)
+       aesni_pre code va_s0)
      (ensures (fun (va_s1, f) ->
        V.eval_code code va_s0 f va_s1 /\
        VSig.vale_calling_conventions_stdcall va_s0 va_s1 /\
-       aesni_post code va_s0 sb va_s1 f))
- = VC.va_lemma_check_aesni_stdcall code va_s0 IA.win (as_vale_buffer sb)
+       aesni_post code va_s0 va_s1 f))
+ = VC.va_lemma_check_aesni_stdcall code va_s0 IA.win
 
 (* Prove that vm_lemma' has the required type *)
 noextract
@@ -66,7 +63,6 @@ let lowstar_aesni_t =
   IX64.as_lowstar_sig_t_weak_stdcall
     Interop.down_mem
     code_aesni
-    8
     dom
     []
     _
@@ -76,20 +72,18 @@ let lowstar_aesni_t =
 
 (* Need to rearrange the order of arguments *)
 [@__reduce__] noextract
-let sha_pre : VSig.vale_pre 8 dom =
+let sha_pre : VSig.vale_pre dom =
   fun (c:V.va_code)
-    (va_s0:V.va_state)
-    (sb:IX64.stack_buffer 8) ->
-      VC.va_req_check_sha_stdcall c va_s0 IA.win (as_vale_buffer sb)
+    (va_s0:V.va_state) ->
+      VC.va_req_check_sha_stdcall c va_s0 IA.win
 
 [@__reduce__] noextract
-let sha_post : VSig.vale_post 8 dom =
+let sha_post : VSig.vale_post dom =
   fun (c:V.va_code)
     (va_s0:V.va_state)
-    (sb:IX64.stack_buffer 8)
     (va_s1:V.va_state)
     (f:V.va_fuel) ->
-      VC.va_ens_check_sha_stdcall c va_s0 IA.win (as_vale_buffer sb) va_s1 f
+      VC.va_ens_check_sha_stdcall c va_s0 IA.win va_s1 f
 
 open X64.Machine_s
 open X64.Vale.State
@@ -98,20 +92,19 @@ open X64.Vale.State
 
 (* The vale lemma doesn't quite suffice to prove the modifies clause
    expected of the interop layer *)
-[@__reduce__] unfold noextract
+[@__reduce__] noextract
 let sha_lemma'
     (code:V.va_code)
     (_win:bool)
     (va_s0:V.va_state)
-    (sb:IX64.stack_buffer 8)
  : Ghost (V.va_state & V.va_fuel)
      (requires
-       sha_pre code va_s0 sb)
+       sha_pre code va_s0)
      (ensures (fun (va_s1, f) ->
        V.eval_code code va_s0 f va_s1 /\
        VSig.vale_calling_conventions_stdcall va_s0 va_s1 /\
-       sha_post code va_s0 sb va_s1 f))
- = VC.va_lemma_check_sha_stdcall code va_s0 IA.win (as_vale_buffer sb)
+       sha_post code va_s0 va_s1 f))
+ = VC.va_lemma_check_sha_stdcall code va_s0 IA.win
  
 (* Prove that vm_lemma' has the required type *)
 noextract
@@ -125,7 +118,6 @@ let lowstar_sha_t =
   IX64.as_lowstar_sig_t_weak_stdcall
     Interop.down_mem
     code_sha
-    8
     dom
     []
     _
@@ -135,37 +127,34 @@ let lowstar_sha_t =
 
 (* Need to rearrange the order of arguments *)
 [@__reduce__] noextract
-let adx_pre : VSig.vale_pre 8 dom =
+let adx_pre : VSig.vale_pre dom =
   fun (c:V.va_code)
-    (va_s0:V.va_state)
-    (sb:IX64.stack_buffer 8) ->
-      VC.va_req_check_adx_bmi2_stdcall c va_s0 IA.win (as_vale_buffer sb)
+    (va_s0:V.va_state) ->
+      VC.va_req_check_adx_bmi2_stdcall c va_s0 IA.win
 
 [@__reduce__] noextract
-let adx_post : VSig.vale_post 8 dom =
+let adx_post : VSig.vale_post dom =
   fun (c:V.va_code)
     (va_s0:V.va_state)
-    (sb:IX64.stack_buffer 8)
     (va_s1:V.va_state)
     (f:V.va_fuel) ->
-      VC.va_ens_check_adx_bmi2_stdcall c va_s0 IA.win (as_vale_buffer sb) va_s1 f
+      VC.va_ens_check_adx_bmi2_stdcall c va_s0 IA.win va_s1 f
 
 (* The vale lemma doesn't quite suffice to prove the modifies clause
    expected of the interop layer *)
-[@__reduce__] unfold noextract
+[@__reduce__] noextract
 let adx_lemma'
     (code:V.va_code)
     (_win:bool)
     (va_s0:V.va_state)
-    (sb:IX64.stack_buffer 8)
  : Ghost (V.va_state & V.va_fuel)
      (requires
-       adx_pre code va_s0 sb)
+       adx_pre code va_s0)
      (ensures (fun (va_s1, f) ->
        V.eval_code code va_s0 f va_s1 /\
        VSig.vale_calling_conventions_stdcall va_s0 va_s1 /\
-       adx_post code va_s0 sb va_s1 f))
- = VC.va_lemma_check_adx_bmi2_stdcall code va_s0 IA.win (as_vale_buffer sb)
+       adx_post code va_s0 va_s1 f))
+ = VC.va_lemma_check_adx_bmi2_stdcall code va_s0 IA.win
 
 (* Prove that vm_lemma' has the required type *)
 noextract
@@ -179,7 +168,6 @@ let lowstar_adx_t =
   IX64.as_lowstar_sig_t_weak_stdcall
     Interop.down_mem
     code_adx
-    8
     dom
     []
     _
@@ -188,37 +176,34 @@ let lowstar_adx_t =
 
 (* Need to rearrange the order of arguments *)
 [@__reduce__] noextract
-let avx_pre : VSig.vale_pre 8 dom =
+let avx_pre : VSig.vale_pre dom =
   fun (c:V.va_code)
-    (va_s0:V.va_state)
-    (sb:IX64.stack_buffer 8) ->
-      VC.va_req_check_avx_stdcall c va_s0 IA.win (as_vale_buffer sb)
+    (va_s0:V.va_state) ->
+      VC.va_req_check_avx_stdcall c va_s0 IA.win
 
 [@__reduce__] noextract
-let avx_post : VSig.vale_post 8 dom =
+let avx_post : VSig.vale_post dom =
   fun (c:V.va_code)
     (va_s0:V.va_state)
-    (sb:IX64.stack_buffer 8)
     (va_s1:V.va_state)
     (f:V.va_fuel) ->
-      VC.va_ens_check_avx_stdcall c va_s0 IA.win (as_vale_buffer sb) va_s1 f
+      VC.va_ens_check_avx_stdcall c va_s0 IA.win va_s1 f
 
 (* The vale lemma doesn't quite suffice to prove the modifies clause
    expected of the interop layer *)
-[@__reduce__] unfold noextract
+[@__reduce__] noextract
 let avx_lemma'
     (code:V.va_code)
     (_win:bool)
     (va_s0:V.va_state)
-    (sb:IX64.stack_buffer 8)
  : Ghost (V.va_state & V.va_fuel)
      (requires
-       avx_pre code va_s0 sb)
+       avx_pre code va_s0)
      (ensures (fun (va_s1, f) ->
        V.eval_code code va_s0 f va_s1 /\
        VSig.vale_calling_conventions_stdcall va_s0 va_s1 /\
-       avx_post code va_s0 sb va_s1 f))
- = VC.va_lemma_check_avx_stdcall code va_s0 IA.win (as_vale_buffer sb)
+       avx_post code va_s0 va_s1 f))
+ = VC.va_lemma_check_avx_stdcall code va_s0 IA.win
 
 (* Prove that vm_lemma' has the required type *)
 noextract
@@ -232,7 +217,6 @@ let lowstar_avx_t =
   IX64.as_lowstar_sig_t_weak_stdcall
     Interop.down_mem
     code_avx
-    8
     dom
     []
     _
@@ -241,37 +225,34 @@ let lowstar_avx_t =
 
 (* Need to rearrange the order of arguments *)
 [@__reduce__] noextract
-let avx2_pre : VSig.vale_pre 8 dom =
+let avx2_pre : VSig.vale_pre dom =
   fun (c:V.va_code)
-    (va_s0:V.va_state)
-    (sb:IX64.stack_buffer 8) ->
-      VC.va_req_check_avx2_stdcall c va_s0 IA.win (as_vale_buffer sb)
+    (va_s0:V.va_state) ->
+      VC.va_req_check_avx2_stdcall c va_s0 IA.win
 
 [@__reduce__] noextract
-let avx2_post : VSig.vale_post 8 dom =
+let avx2_post : VSig.vale_post dom =
   fun (c:V.va_code)
     (va_s0:V.va_state)
-    (sb:IX64.stack_buffer 8)
     (va_s1:V.va_state)
     (f:V.va_fuel) ->
-      VC.va_ens_check_avx2_stdcall c va_s0 IA.win (as_vale_buffer sb) va_s1 f
+      VC.va_ens_check_avx2_stdcall c va_s0 IA.win va_s1 f
 
 (* The vale lemma doesn't quite suffice to prove the modifies clause
    expected of the interop layer *)
-[@__reduce__] unfold noextract
+[@__reduce__] noextract
 let avx2_lemma'
     (code:V.va_code)
     (_win:bool)
     (va_s0:V.va_state)
-    (sb:IX64.stack_buffer 8)
  : Ghost (V.va_state & V.va_fuel)
      (requires
-       avx2_pre code va_s0 sb)
+       avx2_pre code va_s0)
      (ensures (fun (va_s1, f) ->
        V.eval_code code va_s0 f va_s1 /\
        VSig.vale_calling_conventions_stdcall va_s0 va_s1 /\
-       avx2_post code va_s0 sb va_s1 f))
- = VC.va_lemma_check_avx2_stdcall code va_s0 IA.win (as_vale_buffer sb)
+       avx2_post code va_s0 va_s1 f))
+ = VC.va_lemma_check_avx2_stdcall code va_s0 IA.win
 
 (* Prove that vm_lemma' has the required type *)
 noextract
@@ -285,7 +266,6 @@ let lowstar_avx2_t =
   IX64.as_lowstar_sig_t_weak_stdcall
     Interop.down_mem
     code_avx2
-    8
     dom
     []
     _

@@ -492,6 +492,9 @@ let equiv_load_mem128_aux ptr h =
   index128_get_heap_val128 h b heap i;
   lemma_load_mem128 b i h
 
+let equiv_load_mem128 ptr h =
+  equiv_load_mem128_aux ptr h
+
 let low_lemma_load_mem128 b i h =
   lemma_valid_mem128 b i h;
   lemma_load_mem128 b i h;
@@ -710,3 +713,83 @@ let low_lemma_store_mem128 b i v h =
   X64.Bytes_Semantics.frame_update_heap128 (buffer_addr b h + 16 `op_Multiply` i) v heap;
   in_bounds128 h b i;
   I.update_buffer_up_mem h b heap heap'
+
+let low_lemma_valid_mem128_64 b i h = 
+  low_lemma_valid_mem128 b i h;
+  let ptr = buffer_addr b h + 16 `op_Multiply` i in
+  assert (buffer_addr b h + 16 `op_Multiply` i + 8 = ptr + 8)
+
+open Words.Two_s
+open Words.Four_s
+
+let low_lemma_load_mem128_lo64 b i h =
+  low_lemma_load_mem128 b i h;
+  Opaque_s.reveal_opaque lo64_def;
+  Opaque_s.reveal_opaque S.get_heap_val128_def;
+  Opaque_s.reveal_opaque S.get_heap_val64_def;
+  Opaque_s.reveal_opaque S.get_heap_val32_def
+
+let low_lemma_load_mem128_hi64 b i h =
+  low_lemma_load_mem128 b i h;
+  Opaque_s.reveal_opaque hi64_def;
+  Opaque_s.reveal_opaque S.get_heap_val128_def;
+  Opaque_s.reveal_opaque S.get_heap_val64_def;
+  Opaque_s.reveal_opaque S.get_heap_val32_def
+
+let same_domain_update128_64 b i v h =
+  low_lemma_valid_mem128_64 b i h;
+  X64.Bytes_Semantics.same_domain_update (buffer_addr b h + 16 `op_Multiply` i) v (get_heap h);
+  X64.Bytes_Semantics.same_domain_update (buffer_addr b h + 16 `op_Multiply` i + 8) v (get_heap h)  
+
+open Types_s
+
+let frame_get_heap32 (ptr:int) (mem1 mem2:S.heap) : Lemma
+  (requires (forall i. i >= ptr /\ i < ptr + 4 ==> mem1.[i] == mem2.[i]))
+  (ensures S.get_heap_val32 ptr mem1 == S.get_heap_val32 ptr mem2) =
+  Opaque_s.reveal_opaque S.get_heap_val32_def
+
+let update_heap128_lo (ptr:int) (v:quad32) (mem:S.heap) : Lemma
+  (requires 
+    S.valid_addr128 ptr mem /\
+    v.hi2 == S.get_heap_val32 (ptr+8) mem /\
+    v.hi3 == S.get_heap_val32 (ptr+12) mem
+  )
+  (ensures S.update_heap128 ptr v mem ==
+    S.update_heap32 (ptr+4) v.lo1 (S.update_heap32 ptr v.lo0 mem)) =
+  let mem0 = S.update_heap32 ptr v.lo0 mem in
+  let mem1 = S.update_heap32 (ptr+4) v.lo1 mem0 in  
+  X64.Bytes_Semantics.frame_update_heap32 ptr v.lo0 mem;
+  X64.Bytes_Semantics.frame_update_heap32 (ptr+4) v.lo1 mem0;
+  X64.Bytes_Semantics.same_domain_update32 ptr v.lo0 mem;
+  X64.Bytes_Semantics.same_domain_update32 (ptr+4) v.lo1 mem0;
+  frame_get_heap32 (ptr+8) mem mem1;
+  frame_get_heap32 (ptr+12) mem mem1;
+  X64.Bytes_Semantics.update_heap32_get_heap32 (ptr+8) mem1;
+  X64.Bytes_Semantics.update_heap32_get_heap32 (ptr+12) mem1
+
+let low_lemma_store_mem128_lo64 b i v h =
+  let ptr = buffer_addr b h + 16 `op_Multiply` i in
+  let v128 = buffer_read b i h in
+  let v' = insert_nat64_opaque v128 v 0 in
+  low_lemma_load_mem128 b i h;
+  low_lemma_store_mem128 b i v' h;
+  Opaque_s.reveal_opaque S.get_heap_val128_def;
+  update_heap128_lo ptr v' (get_heap h);
+  Opaque_s.reveal_opaque S.update_heap64_def;
+  Opaque_s.reveal_opaque S.update_heap32_def;
+  Opaque_s.reveal_opaque insert_nat64
+
+
+let low_lemma_store_mem128_hi64 b i v h =
+  let ptr = buffer_addr b h + 16 `op_Multiply` i in
+  let v128 = buffer_read b i h in
+  let v' = insert_nat64_opaque v128 v 1 in
+  low_lemma_load_mem128 b i h;
+  low_lemma_store_mem128 b i v' h;
+  assert (S.valid_addr128 ptr (get_heap h));
+  X64.Bytes_Semantics.update_heap32_get_heap32 ptr (get_heap h);
+  X64.Bytes_Semantics.update_heap32_get_heap32 (ptr+4) (get_heap h);
+  Opaque_s.reveal_opaque S.get_heap_val128_def;
+  Opaque_s.reveal_opaque S.update_heap64_def;
+  Opaque_s.reveal_opaque S.update_heap32_def;
+  Opaque_s.reveal_opaque insert_nat64  

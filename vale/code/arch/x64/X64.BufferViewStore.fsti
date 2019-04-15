@@ -7,6 +7,7 @@ module DV = LowStar.BufferView.Down
 module UV = LowStar.BufferView.Up
 module HS = FStar.HyperStack
 open BufferViewHelpers
+open FStar.Mul
 
 open X64.Machine_s
 open X64.Bytes_Semantics_s
@@ -27,7 +28,7 @@ val bv_upd_update_heap64:
         let addrs = IB.addrs_of_mem mem in
         let h = IB.hs_of_mem mem in
         UV.length_eq bv;
-        let heap' = update_heap64 (addrs b + 8 `op_Multiply` i) v heap in
+        let heap' = update_heap64 (addrs b + 8 * i) v heap in
         UV.upd h bv i (UInt64.uint_to_t v) == DV.upd_seq h dv (get_seq_heap heap' addrs b)))
 
 val bv_upd_update_heap128:
@@ -44,5 +45,5 @@ val bv_upd_update_heap128:
         let addrs = IB.addrs_of_mem mem in
         let h = IB.hs_of_mem mem in
         UV.length_eq bv;
-        let heap' = update_heap128 (addrs b + 16 `op_Multiply` i) v heap in
+        let heap' = update_heap128 (addrs b + 16 * i) v heap in
         UV.upd h bv i v == DV.upd_seq h dv (get_seq_heap heap' addrs b)))

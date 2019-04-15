@@ -16,6 +16,7 @@ let state_mod_eq (m:mod_t) (s1 s2:state) =
   | Mod_xmm x -> eval_xmm x s1 == eval_xmm x s2
   | Mod_flags -> s1.flags == s2.flags
   | Mod_mem -> s1.mem == s2.mem
+  | Mod_stack -> s1.stack == s2.stack
   | Mod_memTaint -> s1.memTaint == s2.memTaint
 
 let rec update_state_mods_refl (mods:mods_t) (s:state) : Lemma
@@ -81,6 +82,7 @@ let update_state_mods_to (mods:mods_t) (s' s:state) : Lemma
   FStar.Classical.forall_intro f1_xmm;
   f1 (Mod_flags);
   f1 (Mod_mem);
+  f1 (Mod_stack);
   f1 (Mod_memTaint);
   ()
 
@@ -319,6 +321,89 @@ let qIf_proof #a #c1 #c2 b qc1 qc2 mods s0 k =
     va_lemma_ifElseFalse_total (cmp_to_ocmp b) c1 c2 s0 f0 sM;
     update_state_mods_weaken qc2.mods mods sM s0
   )
+
+let qWhile_monotone #a #d #c b qc mods inv dec g0 s0 k1 k2 =
+  ()
+
+let rec qWhile_compute_rec
+    (#a #d:Type) (#c:code) (b:cmp) (qc:a -> quickCode a c) (mods:mods_t) (inv:state -> a -> Type0)
+    (dec:state -> a -> d) (s0 s1:state) (g1:a) (f1:fuel)
+    : Ghost (state * fuel * a)
+      (requires
+        wp_While b qc mods inv dec g1 s1 k_true /\
+        eval_while_inv (While (cmp_to_ocmp b) c) s0 f1 s1)
+      (ensures fun _ -> True)
+      (decreases (dec s1 g1))
+  =
+  let ob = cmp_to_ocmp b in
+  if eval_cmp s1 b then
+  (
+    let inv2 = wp_While_inv qc mods inv dec s1 g1 in
+    let wp = QProc?.wp (qc g1) in
+    let monotone = QProc?.monotone (qc g1) in
+    let proof = QProc?.proof (qc g1) in
+    let (s2, f2) = va_lemma_whileTrue_total ob c s0 s1 f1 in
+    monotone s2 inv2 k_true;
+    proof s2 inv2;
+    let (sc, fc, gc) = QProc?.compute (qc g1) s2 in
+    let fN = va_lemma_whileMerge_total (While ob c) s0 f2 s2 fc sc in
+    qWhile_compute_rec b qc mods inv dec s0 sc gc fN
+  )
+  else
+  (
+    let (s2, f2) = va_lemma_whileFalse_total ob c s0 s1 f1 in
+    (s2, f2, g1)
+  )
+
+let rec qWhile_proof_rec
+    (#a #d:Type) (#c:code) (b:cmp) (qc:a -> quickCode a c) (mods:mods_t) (inv:state -> a -> Type0)
+    (dec:state -> a -> d) (s0 s1:state) (g1:a) (f1:fuel) (k:state -> a -> Type0)
+    : Lemma
+      (requires
+        wp_While b qc mods inv dec g1 s1 k /\
+        eval_while_inv (While (cmp_to_ocmp b) c) s0 f1 s1 /\
+        update_state_mods mods s1 s0 == s1)
+      (ensures (
+        qWhile_monotone b qc mods inv dec g1 s1 k k_true;
+        let (s2, f2, g2) = qWhile_compute_rec b qc mods inv dec s0 s1 g1 f1 in
+        eval_code (While (cmp_to_ocmp b) c) s0 f2 s2 /\
+        update_state_mods mods s2 s0 == s2 /\ k s2 g2
+      ))
+      (decreases (dec s1 g1))
+    =
+  let ob = cmp_to_ocmp b in
+  if eval_cmp s1 b then
+  (
+    let inv2 = wp_While_inv qc mods inv dec s1 g1 in
+    let wp = QProc?.wp (qc g1) in
+    let monotone = QProc?.monotone (qc g1) in
+    let compute = QProc?.compute (qc g1) in
+    let proof = QProc?.proof (qc g1) in
+    let (s2, f2) = va_lemma_whileTrue_total ob c s0 s1 f1 in
+    monotone s2 inv2 k_true;
+    proof s2 inv2;
+    let (sc, fc, gc) = compute s2 in
+    let fN = va_lemma_whileMerge_total (While ob c) s0 f2 s2 fc sc in
+    update_state_mods_weaken (qc g1).mods mods sc s2;
+    update_state_mods_trans mods s0 s2 sc;
+    qWhile_proof_rec b qc mods inv dec s0 sc gc fN k
+  )
+  else
+  (
+    let _ = va_lemma_whileFalse_total ob c s0 s1 f1 in
+    ()
+  )
+
+let qWhile_compute #a #d #c b qc mods inv dec g0 s0 =
+  let ob = cmp_to_ocmp b in
+  let (s1, f1) = va_lemma_while_total ob c s0 in
+  qWhile_compute_rec b qc mods inv dec s0 s1 g0 f1
+
+let qWhile_proof #a #d #c b qc mods inv dec g0 s0 k =
+  let ob = cmp_to_ocmp b in
+  let (s1, f1) = va_lemma_while_total ob c s0 in
+  update_state_mods_refl mods s0;
+  qWhile_proof_rec b qc mods inv dec s0 s1 g0 f1 k
 
 let qAssertLemma p = fun () -> ()
 let qAssumeLemma p = fun () -> assume p

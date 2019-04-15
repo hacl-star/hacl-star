@@ -31,16 +31,16 @@ let as_t (#a:Type) (x:normal a) : a = x
 noextract
 let as_normal_t (#a:Type) (x:a) : normal a = x
 
-[@__reduce__] unfold noextract
+[@__reduce__] noextract
 let b64 = buf_t TUInt64 TUInt64
-[@__reduce__] unfold noextract
+[@__reduce__] noextract
 let t64_mod = TD_Buffer TUInt64 TUInt64 default_bq
-[@__reduce__] unfold noextract
+[@__reduce__] noextract
 let t64_no_mod = TD_Buffer TUInt64 TUInt64 ({modified=false; strict_disjointness=false; taint=MS.Secret})
-[@__reduce__] unfold noextract
+[@__reduce__] noextract
 let tuint64 = TD_Base TUInt64
 
-[@__reduce__] unfold noextract
+[@__reduce__] noextract
 let fmul_dom: IX64.arity_ok_stdcall td =
   let y = [t64_mod; t64_no_mod; t64_mod; t64_no_mod] in
   assert_norm (List.length y = 4);
@@ -48,33 +48,31 @@ let fmul_dom: IX64.arity_ok_stdcall td =
 
 (* Need to rearrange the order of arguments *)
 [@__reduce__] noextract
-let fmul_pre : VSig.vale_pre 48 fmul_dom =
+let fmul_pre : VSig.vale_pre fmul_dom =
   fun (c:V.va_code)
     (tmp:b64)
     (f1:b64)
     (out:b64)
     (f2:b64)
-    (va_s0:V.va_state)
-    (sb:IX64.stack_buffer 48) ->
-      FW.va_req_fmul_stdcall c va_s0 IA.win (as_vale_buffer sb) 
+    (va_s0:V.va_state) ->
+      FW.va_req_fmul_stdcall c va_s0 IA.win
         (as_vale_buffer tmp) (as_vale_buffer f1) (as_vale_buffer out) (as_vale_buffer f2)
 
 [@__reduce__] noextract
-let fmul_post : VSig.vale_post 48 fmul_dom =
+let fmul_post : VSig.vale_post fmul_dom =
   fun (c:V.va_code)
     (tmp:b64)
     (f1:b64)
     (out:b64)
     (f2:b64)
     (va_s0:V.va_state)
-    (sb:IX64.stack_buffer 48)
     (va_s1:V.va_state)
     (f:V.va_fuel) ->
-      FW.va_ens_fmul_stdcall c va_s0 IA.win (as_vale_buffer sb) (as_vale_buffer tmp) (as_vale_buffer f1) (as_vale_buffer out) (as_vale_buffer f2) va_s1 f
+      FW.va_ens_fmul_stdcall c va_s0 IA.win (as_vale_buffer tmp) (as_vale_buffer f1) (as_vale_buffer out) (as_vale_buffer f2) va_s1 f
 
 #set-options "--z3rlimit 200"
 
-[@__reduce__] unfold noextract
+[@__reduce__] noextract
 let fmul_lemma'
     (code:V.va_code)
     (_win:bool)
@@ -83,14 +81,13 @@ let fmul_lemma'
     (out:b64)
     (f2:b64)
     (va_s0:V.va_state)
-    (sb:IX64.stack_buffer 48)
  : Ghost (V.va_state & V.va_fuel)
      (requires
-       fmul_pre code tmp f1 out f2 va_s0 sb)
+       fmul_pre code tmp f1 out f2 va_s0)
      (ensures (fun (va_s1, f) ->
        V.eval_code code va_s0 f va_s1 /\
        VSig.vale_calling_conventions_stdcall va_s0 va_s1 /\
-       fmul_post code tmp f1 out f2 va_s0 sb va_s1 f /\
+       fmul_post code tmp f1 out f2 va_s0 va_s1 f /\
        ME.buffer_readable VS.(va_s1.mem) (as_vale_buffer out) /\
        ME.buffer_readable VS.(va_s1.mem) (as_vale_buffer f1) /\ 
        ME.buffer_readable VS.(va_s1.mem) (as_vale_buffer f2) /\ 
@@ -99,12 +96,11 @@ let fmul_lemma'
        ME.buffer_writeable (as_vale_buffer f1) /\
        ME.buffer_writeable (as_vale_buffer f2) /\       
        ME.buffer_writeable (as_vale_buffer tmp) /\       
-       ME.modifies (ME.loc_union (ME.loc_buffer (as_vale_buffer sb))
-                   (ME.loc_union (ME.loc_buffer (as_vale_buffer out))
+       ME.modifies (ME.loc_union (ME.loc_buffer (as_vale_buffer out))
                    (ME.loc_union (ME.loc_buffer (as_vale_buffer tmp))
-                                 ME.loc_none))) va_s0.VS.mem va_s1.VS.mem
+                                 ME.loc_none)) va_s0.VS.mem va_s1.VS.mem
  )) = 
-   let va_s1, f = FW.va_lemma_fmul_stdcall code va_s0 IA.win (as_vale_buffer sb) (as_vale_buffer tmp) (as_vale_buffer f1) (as_vale_buffer out) (as_vale_buffer f2) in
+   let va_s1, f = FW.va_lemma_fmul_stdcall code va_s0 IA.win (as_vale_buffer tmp) (as_vale_buffer f1) (as_vale_buffer out) (as_vale_buffer f2) in
    Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 out;   
    Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 f1;   
    Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 f2;   
@@ -124,7 +120,6 @@ let lowstar_fmul_t =
   IX64.as_lowstar_sig_t_weak_stdcall
     Interop.down_mem
     code_fmul
-    48
     fmul_dom
     []
     _
@@ -133,33 +128,31 @@ let lowstar_fmul_t =
 
 (* Need to rearrange the order of arguments *)
 [@__reduce__] noextract
-let fmul2_pre : VSig.vale_pre 48 fmul_dom =
+let fmul2_pre : VSig.vale_pre fmul_dom =
   fun (c:V.va_code)
     (tmp:b64)
     (f1:b64)
     (out:b64)
     (f2:b64)
-    (va_s0:V.va_state)
-    (sb:IX64.stack_buffer 48) ->
-      FW.va_req_fmul2_stdcall c va_s0 IA.win (as_vale_buffer sb) 
+    (va_s0:V.va_state) ->
+      FW.va_req_fmul2_stdcall c va_s0 IA.win
         (as_vale_buffer tmp) (as_vale_buffer f1) (as_vale_buffer out) (as_vale_buffer f2)
 
 [@__reduce__] noextract
-let fmul2_post : VSig.vale_post 48 fmul_dom =
+let fmul2_post : VSig.vale_post fmul_dom =
   fun (c:V.va_code)
     (tmp:b64)
     (f1:b64)
     (out:b64)
     (f2:b64)
     (va_s0:V.va_state)
-    (sb:IX64.stack_buffer 48)
     (va_s1:V.va_state)
     (f:V.va_fuel) ->
-      FW.va_ens_fmul2_stdcall c va_s0 IA.win (as_vale_buffer sb) (as_vale_buffer tmp) (as_vale_buffer f1) (as_vale_buffer out) (as_vale_buffer f2) va_s1 f
+      FW.va_ens_fmul2_stdcall c va_s0 IA.win (as_vale_buffer tmp) (as_vale_buffer f1) (as_vale_buffer out) (as_vale_buffer f2) va_s1 f
 
 #set-options "--z3rlimit 200"
 
-[@__reduce__] unfold noextract
+[@__reduce__] noextract
 let fmul2_lemma'
     (code:V.va_code)
     (_win:bool)
@@ -168,14 +161,13 @@ let fmul2_lemma'
     (out:b64)
     (f2:b64)
     (va_s0:V.va_state)
-    (sb:IX64.stack_buffer 48)
  : Ghost (V.va_state & V.va_fuel)
      (requires
-       fmul2_pre code tmp f1 out f2 va_s0 sb)
+       fmul2_pre code tmp f1 out f2 va_s0)
      (ensures (fun (va_s1, f) ->
        V.eval_code code va_s0 f va_s1 /\
        VSig.vale_calling_conventions_stdcall va_s0 va_s1 /\
-       fmul2_post code tmp f1 out f2 va_s0 sb va_s1 f /\
+       fmul2_post code tmp f1 out f2 va_s0 va_s1 f /\
        ME.buffer_readable VS.(va_s1.mem) (as_vale_buffer out) /\
        ME.buffer_readable VS.(va_s1.mem) (as_vale_buffer f1) /\ 
        ME.buffer_readable VS.(va_s1.mem) (as_vale_buffer f2) /\ 
@@ -184,12 +176,11 @@ let fmul2_lemma'
        ME.buffer_writeable (as_vale_buffer f1) /\
        ME.buffer_writeable (as_vale_buffer f2) /\       
        ME.buffer_writeable (as_vale_buffer tmp) /\       
-       ME.modifies (ME.loc_union (ME.loc_buffer (as_vale_buffer sb))
-                   (ME.loc_union (ME.loc_buffer (as_vale_buffer out))
+       ME.modifies (ME.loc_union (ME.loc_buffer (as_vale_buffer out))
                    (ME.loc_union (ME.loc_buffer (as_vale_buffer tmp))
-                                 ME.loc_none))) va_s0.VS.mem va_s1.VS.mem
+                                 ME.loc_none)) va_s0.VS.mem va_s1.VS.mem
  )) = 
-   let va_s1, f = FW.va_lemma_fmul2_stdcall code va_s0 IA.win (as_vale_buffer sb) (as_vale_buffer tmp) (as_vale_buffer f1) (as_vale_buffer out) (as_vale_buffer f2) in
+   let va_s1, f = FW.va_lemma_fmul2_stdcall code va_s0 IA.win (as_vale_buffer tmp) (as_vale_buffer f1) (as_vale_buffer out) (as_vale_buffer f2) in
    Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 out;   
    Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 f1;   
    Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 f2;   
@@ -209,14 +200,13 @@ let lowstar_fmul2_t =
   IX64.as_lowstar_sig_t_weak_stdcall
     Interop.down_mem
     code_fmul2
-    48
     fmul_dom
     []
     _
     _
     (W.mk_prediction code_fmul2 fmul_dom [] (fmul2_lemma code_fmul2 IA.win))
 
-[@__reduce__] unfold noextract
+[@__reduce__] noextract
 let fmul1_dom: IX64.arity_ok_stdcall td =
   let y = [t64_mod; t64_no_mod; tuint64] in
   assert_norm (List.length y = 3);
@@ -224,31 +214,29 @@ let fmul1_dom: IX64.arity_ok_stdcall td =
 
 (* Need to rearrange the order of arguments *)
 [@__reduce__] noextract
-let fmul1_pre : VSig.vale_pre 32 fmul1_dom =
+let fmul1_pre : VSig.vale_pre fmul1_dom =
   fun (c:V.va_code)
     (out:b64)
     (f1:b64)
     (f2:uint64)
-    (va_s0:V.va_state)
-    (sb:IX64.stack_buffer 32) ->
-      FH.va_req_fmul1_stdcall c va_s0 IA.win (as_vale_buffer sb) 
+    (va_s0:V.va_state) ->
+      FH.va_req_fmul1_stdcall c va_s0 IA.win
         (as_vale_buffer out) (as_vale_buffer f1) (UInt64.v f2)
 
 [@__reduce__] noextract
-let fmul1_post : VSig.vale_post 32 fmul1_dom =
+let fmul1_post : VSig.vale_post fmul1_dom =
   fun (c:V.va_code)
     (out:b64)
     (f1:b64)
     (f2:uint64)
     (va_s0:V.va_state)
-    (sb:IX64.stack_buffer 32)
     (va_s1:V.va_state)
     (f:V.va_fuel) ->
-      FH.va_ens_fmul1_stdcall c va_s0 IA.win (as_vale_buffer sb) (as_vale_buffer out) (as_vale_buffer f1) (UInt64.v f2) va_s1 f
+      FH.va_ens_fmul1_stdcall c va_s0 IA.win (as_vale_buffer out) (as_vale_buffer f1) (UInt64.v f2) va_s1 f
 
 #set-options "--z3rlimit 20"
 
-[@__reduce__] unfold noextract
+[@__reduce__] noextract
 let fmul1_lemma'
     (code:V.va_code)
     (_win:bool)
@@ -256,23 +244,21 @@ let fmul1_lemma'
     (f1:b64)
     (f2:uint64)
     (va_s0:V.va_state)
-    (sb:IX64.stack_buffer 32)
  : Ghost (V.va_state & V.va_fuel)
      (requires
-       fmul1_pre code out f1 f2 va_s0 sb)
+       fmul1_pre code out f1 f2 va_s0)
      (ensures (fun (va_s1, f) ->
        V.eval_code code va_s0 f va_s1 /\
        VSig.vale_calling_conventions_stdcall va_s0 va_s1 /\
-       fmul1_post code out f1 f2 va_s0 sb va_s1 f /\
+       fmul1_post code out f1 f2 va_s0 va_s1 f /\
        ME.buffer_readable VS.(va_s1.mem) (as_vale_buffer f1) /\
        ME.buffer_readable VS.(va_s1.mem) (as_vale_buffer out) /\ 
        ME.buffer_writeable (as_vale_buffer out) /\ 
        ME.buffer_writeable (as_vale_buffer f1) /\ 
-       ME.modifies (ME.loc_union (ME.loc_buffer (as_vale_buffer sb))
-                   (ME.loc_union (ME.loc_buffer (as_vale_buffer out))
-                                 ME.loc_none)) va_s0.VS.mem va_s1.VS.mem
+       ME.modifies (ME.loc_union (ME.loc_buffer (as_vale_buffer out))
+                                 ME.loc_none) va_s0.VS.mem va_s1.VS.mem
  )) = 
-   let va_s1, f = FH.va_lemma_fmul1_stdcall code va_s0 IA.win (as_vale_buffer sb) (as_vale_buffer out) (as_vale_buffer f1) (UInt64.v f2) in
+   let va_s1, f = FH.va_lemma_fmul1_stdcall code va_s0 IA.win (as_vale_buffer out) (as_vale_buffer f1) (UInt64.v f2) in
    Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 out;   
    Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 f1;   
    va_s1, f                                   
@@ -290,7 +276,6 @@ let lowstar_fmul1_t =
   IX64.as_lowstar_sig_t_weak_stdcall
     Interop.down_mem
     code_fmul1
-    32
     fmul1_dom
     []
     _
@@ -298,7 +283,7 @@ let lowstar_fmul1_t =
     (W.mk_prediction code_fmul1 fmul1_dom [] (fmul1_lemma code_fmul1 IA.win))
 
 [@ (CCConv "stdcall") ]
-val fmul : normal lowstar_fmul_t
+val fmul_ : normal lowstar_fmul_t
 
 [@ (CCConv "stdcall") ]
 val fmul2 : normal lowstar_fmul2_t

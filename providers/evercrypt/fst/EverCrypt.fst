@@ -51,14 +51,6 @@ let bcrypt (): Stack bool (fun _ -> True) (fun h0 _ h1 -> B.modifies B.loc_none 
   else
     false
 
-/// X25519
-
-let x25519 dst secret base =
-  if hacl () then
-    Hacl.x25519 dst secret base
-  else
-    failwith !$"ERROR: inconsistent configuration (x25519)"
-
 /// Random sampling
 
 let random_init () =
@@ -198,14 +190,6 @@ let aes256_free pk =
     failwith !$"ERROR: inconsistent configuration (aes256_free)";
   B.free pk
 
-/// ChaCha20
-
-let chacha20 key iv ctr plain len cipher =
-  if hacl () then
-    EverCrypt.Hacl.chacha20 key iv ctr plain len cipher
-  else
-    failwith !$"ERROR: inconsistent configuration (chacha20)"
-
 /// AES128-GCM
 
 // TODO move to ValeGlue
@@ -231,7 +215,7 @@ let vale_aes128_gcm_encrypt xkey (iv:uint8_p) (ad:uint8_p) (adlen:uint32_t)
     cipher = cipher';
     tag = tag
   }) 1ul in
-  Vale.gcm128_encrypt b;
+  Vale.old_gcm128_encrypt b;
   blit cipher' 0ul cipher 0ul len;
   pop_frame ()
 
@@ -257,7 +241,7 @@ let vale_aes128_gcm_decrypt xkey (iv:uint8_p) (ad:uint8_p) (adlen:uint32_t)
     cipher = plaintext';
     tag = tag
   }) 1ul in
-  let ret = Vale.gcm128_decrypt b in
+  let ret = Vale.old_gcm128_decrypt b in
   blit plaintext' 0ul plaintext 0ul len;
   pop_frame ();
   if ret = 0ul then 1ul else 0ul
@@ -266,7 +250,7 @@ let aes128_gcm_encrypt key iv ad adlen plaintext len cipher tag =
   if vale_and_aesni () then begin
     push_frame ();
     let expanded = B.alloca 0uy 176ul in
-    Vale.aes128_key_expansion key expanded;
+    Vale.old_aes128_key_expansion key expanded;
     vale_aes128_gcm_encrypt expanded iv ad adlen plaintext len cipher tag;
     pop_frame ()
   end
@@ -282,7 +266,7 @@ let aes128_gcm_decrypt key iv ad adlen plaintext len cipher tag =
    begin
     push_frame ();
     let expanded = B.alloca 0uy 176ul in
-    Vale.aes128_key_expansion key expanded;
+    Vale.old_aes128_key_expansion key expanded;
     let r = vale_aes128_gcm_decrypt expanded iv ad adlen plaintext len cipher tag in
     pop_frame ();
     r
@@ -319,7 +303,7 @@ let vale_aes256_gcm_encrypt xkey (iv:uint8_p) (ad:uint8_p) (adlen:uint32_t)
     cipher = cipher';
     tag = tag
   }) 1ul in
-  Vale.gcm256_encrypt b;
+  Vale.old_gcm256_encrypt b;
   blit cipher' 0ul cipher 0ul len;
   pop_frame ()
 
@@ -345,7 +329,7 @@ let vale_aes256_gcm_decrypt xkey (iv:uint8_p) (ad:uint8_p) (adlen:uint32_t)
     cipher = plaintext';
     tag = tag
   }) 1ul in
-  let ret = Vale.gcm256_decrypt b in
+  let ret = Vale.old_gcm256_decrypt b in
   blit plaintext' 0ul plaintext 0ul len;
   pop_frame ();
   if ret = 0ul then 1ul else 0ul
@@ -354,7 +338,7 @@ let aes256_gcm_encrypt key iv ad adlen plaintext len cipher tag =
   if vale_and_aesni () then begin
     push_frame ();
     let expanded = B.alloca 0uy 240ul in
-    Vale.aes256_key_expansion key expanded;
+    Vale.old_aes256_key_expansion key expanded;
     vale_aes256_gcm_encrypt expanded iv ad adlen plaintext len cipher tag;
     pop_frame ()
   end
@@ -369,7 +353,7 @@ let aes256_gcm_decrypt key iv ad adlen plaintext len cipher tag =
   if vale_and_aesni () then begin
     push_frame ();
     let expanded = B.alloca 0uy 240ul in
-    Vale.aes256_key_expansion key expanded;
+    Vale.old_aes256_key_expansion key expanded;
     let r = vale_aes256_gcm_decrypt expanded iv ad adlen plaintext len cipher tag in
     pop_frame ();
     r
@@ -381,23 +365,6 @@ let aes256_gcm_decrypt key iv ad adlen plaintext len cipher tag =
   else
     failwith !$"ERROR: inconsistent configuration (aes256_gcm_decrypt)"
 
-/// Chacha20-Poly1305
-
-let chacha20_poly1305_encrypt key iv ad adlen plaintext len cipher tag =
-  if hacl () then
-    ignore (Hacl.chacha20_poly1305_encrypt cipher tag plaintext len ad adlen key iv)
-  else if openssl () then
-    OpenSSL.chacha20_poly1305_encrypt key iv ad adlen plaintext len cipher tag
-  else
-    failwith !$"ERROR: inconsistent configuration (chacha20_poly1305_encrypt)"
-
-let chacha20_poly1305_decrypt key iv ad adlen plaintext len cipher tag =
-  if hacl () then
-    U32.(1ul -^ Hacl.chacha20_poly1305_decrypt plaintext cipher len tag ad adlen key iv)
-  else if openssl () then
-    OpenSSL.chacha20_poly1305_decrypt key iv ad adlen plaintext len cipher tag
-  else
-    failwith !$"ERROR: inconsistent configuration (chacha20_poly1305_decrypt)"
 
 /// AEAD
 
@@ -417,7 +384,7 @@ let aead_create alg k =
     | AES128_GCM ->
       if vale_and_aesni () then
         let xk = B.malloc HS.root 0uy 176ul in
-        Vale.aes128_key_expansion k xk;
+        Vale.old_aes128_key_expansion k xk;
         AEAD_AES128_GCM_VALE xk
       else if bcrypt () then
         AEAD_BCRYPT (BCrypt.aead_create BCrypt.AES128_GCM k)
@@ -428,7 +395,7 @@ let aead_create alg k =
     | AES256_GCM ->
       if vale_and_aesni () then
         let xk = B.malloc HS.root 0uy 240ul in
-        Vale.aes256_key_expansion k xk;
+        Vale.old_aes256_key_expansion k xk;
         AEAD_AES256_GCM_VALE xk
       else if bcrypt () then
         AEAD_BCRYPT (BCrypt.aead_create BCrypt.AES256_GCM k)
@@ -458,7 +425,7 @@ let aead_encrypt pkey iv ad adlen plaintext len cipher tag =
     vale_aes256_gcm_encrypt xk iv ad adlen plaintext len cipher tag
   else if SC.hacl && AEAD_CHACHA20_POLY1305_HACL? k then
     let key = AEAD_CHACHA20_POLY1305_HACL?.k k in
-    ignore (Hacl.chacha20_poly1305_encrypt cipher tag plaintext len ad adlen key iv)
+    Hacl.Impl.Chacha20Poly1305.aead_encrypt_chacha_poly key iv adlen ad len plaintext cipher tag
   else if SC.openssl && AEAD_OPENSSL? k then
     let key = AEAD_OPENSSL?.st k in
     OpenSSL.aead_encrypt key iv ad adlen plaintext len cipher tag
@@ -478,7 +445,7 @@ let aead_decrypt pkey iv ad adlen plaintext len cipher tag =
     vale_aes256_gcm_decrypt xk iv ad adlen plaintext len cipher tag
   else if SC.hacl && AEAD_CHACHA20_POLY1305_HACL? k then
     let key = AEAD_CHACHA20_POLY1305_HACL?.k k in
-    let r = Hacl.chacha20_poly1305_decrypt plaintext cipher len tag ad adlen key iv in
+    let r = Hacl.Impl.Chacha20Poly1305.aead_decrypt_chacha_poly key iv adlen ad len plaintext cipher tag in
     U32.(1ul -^ r)
   else if SC.openssl && AEAD_OPENSSL? k then
     let key = AEAD_OPENSSL?.st k in

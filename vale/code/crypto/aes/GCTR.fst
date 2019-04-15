@@ -14,6 +14,8 @@ open GCM_helpers
 open FStar.Math.Lemmas
 open Collections.Seqs
 
+#set-options "--z3rlimit 20 --max_fuel 1 --max_ifuel 0"
+
 let gctr_encrypt_block_offset (icb_BE:quad32) (plain_LE:quad32) (alg:algorithm) (key:seq nat32) (i:int) =
   ()
 
@@ -34,6 +36,11 @@ let gctr_encrypt_empty (icb_BE:quad32) (plain_LE cipher_LE:seq quad32) (alg:algo
   assert (plain_quads_LE == empty);
   assert (cipher_quads_LE == empty);
   assert (equal (le_seq_quad32_to_bytes cipher_quads_LE) empty);  // OBSERVEs
+  ()
+
+let gctr_partial_extend6 (alg:algorithm) (bound:nat) (plain cipher:seq quad32) (key:seq nat32) (icb:quad32)
+  =
+  reveal_opaque gctr_partial;
   ()
 
 (*
@@ -153,6 +160,18 @@ let rec gctr_indexed (icb:quad32) (plain:gctr_plain_internal_LE)
 let gctr_partial_completed (alg:algorithm) (plain cipher:seq quad32) (key:seq nat32) (icb:quad32) =
   gctr_indexed icb plain alg key cipher;
   ()
+
+let gctr_partial_opaque_completed (alg:algorithm) (plain cipher:seq quad32) (key:seq nat32) (icb:quad32) : Lemma
+  (requires
+    is_aes_key_LE alg key /\
+    length plain == length cipher /\
+    256 * (length plain) < pow2_32 /\
+    gctr_partial_opaque alg (length cipher) plain cipher key icb
+  )
+  (ensures cipher == gctr_encrypt_recursive icb plain alg key 0)
+  =
+  reveal_opaque gctr_partial;
+  gctr_partial_completed alg plain cipher key icb
 
 let gctr_partial_to_full_basic (icb_BE:quad32) (plain:seq quad32) (alg:algorithm) (key:seq nat32) (cipher:seq quad32) =
   reveal_opaque gctr_encrypt_LE_def;

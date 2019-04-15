@@ -1,6 +1,6 @@
 .code
 ALIGN 16
-aes128_key_expansion proc
+old_aes128_key_expansion proc
   movdqu xmm1, xmmword ptr [rcx + 0]
   movdqu xmmword ptr [rdx + 0], xmm1
   aeskeygenassist xmm2, xmm1, 1
@@ -107,9 +107,9 @@ aes128_key_expansion proc
   pxor xmm2, xmm2
   pxor xmm3, xmm3
   ret
-aes128_key_expansion endp
+old_aes128_key_expansion endp
 ALIGN 16
-aes256_key_expansion proc
+old_aes256_key_expansion proc
   movdqu xmm1, xmmword ptr [rcx + 0]
   movdqu xmm3, xmmword ptr [rcx + 16]
   movdqu xmmword ptr [rdx + 0], xmm1
@@ -249,9 +249,9 @@ aes256_key_expansion proc
   pxor xmm3, xmm3
   pxor xmm4, xmm4
   ret
-aes256_key_expansion endp
+old_aes256_key_expansion endp
 ALIGN 16
-gcm128_encrypt proc
+old_gcm128_encrypt proc
   mov r9, rcx
   pextrq rax, xmm11, 0
   push rax
@@ -1116,9 +1116,9 @@ L11:
   pop rax
   pinsrq xmm11, rax, 0
   ret
-gcm128_encrypt endp
+old_gcm128_encrypt endp
 ALIGN 16
-gcm128_decrypt proc
+old_gcm128_decrypt proc
   mov r9, rcx
   pextrq rax, xmm11, 0
   push rax
@@ -2004,9 +2004,9 @@ L39:
   pinsrq xmm11, rax, 0
   mov rax, rdx
   ret
-gcm128_decrypt endp
+old_gcm128_decrypt endp
 ALIGN 16
-gcm256_encrypt proc
+old_gcm256_encrypt proc
   mov r9, rcx
   pextrq rax, xmm11, 0
   push rax
@@ -2903,9 +2903,9 @@ L51:
   pop rax
   pinsrq xmm11, rax, 0
   ret
-gcm256_encrypt endp
+old_gcm256_encrypt endp
 ALIGN 16
-gcm256_decrypt proc
+old_gcm256_decrypt proc
   mov r9, rcx
   pextrq rax, xmm11, 0
   push rax
@@ -3823,5 +3823,5 @@ L79:
   pinsrq xmm11, rax, 0
   mov rax, rdx
   ret
-gcm256_decrypt endp
+old_gcm256_decrypt endp
 end

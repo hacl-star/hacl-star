@@ -167,21 +167,28 @@ let lemma_add_mod_commutes (x y:UInt32.t) :
   =
   ()
 
+(*
 let lemma_add_mod32_associates (x y z:int) :
   Lemma ( ((x + y % pow2_32) + z) % pow2_32 == (x + ((y + z) % pow2_32)) % pow2_32 )
   =
   ()
+*)
 
+#reset-options "--using_facts_from ''"
 let lemma_add_mod_associates_U32 (x y z:UInt32.t) :
   Lemma (add_mod x (add_mod y z) == add_mod (add_mod x y) z)
   =
+  assert_norm (FStar.UInt.add_mod (v x) (FStar.UInt.add_mod (v y) (v z)) == FStar.UInt.add_mod (FStar.UInt.add_mod (v x) (v y)) (v z));
+  v_inj (add_mod x (add_mod y z)) (add_mod (add_mod x y) z)
+(*
   assert_norm (pow2 32 == pow2_32);
   //assert (add_mod y z == to_uint32 ((vv y + vv z) % pow2_32));
   //assert (add_mod x (add_mod y z) == to_uint32 ((vv x + vv (to_uint32 ((vv y + vv z) % pow2_32))) % pow2_32));
   lemma_add_mod32_associates (vv x) (vv y) (vv z);
   //assert (to_uint32 ((vv x + vv (to_uint32 ((vv y + vv z) % pow2_32))) % pow2_32) ==
   //        to_uint32 (((vv x + vv y % pow2_32) + vv z) % pow2_32));
-  admit() // TODO: This proof is flaky.  Some combination of the asserts above will make it go through, but the combo varies day by day
+*)
+#reset-options "--max_fuel 0 --max_ifuel 0"
 
 let lemma_add_wrap_is_add_mod (n0 n1:nat32) :
   Lemma (add_wrap n0 n1 == vv (add_mod (to_uint32 n0) (to_uint32 n1)))
@@ -572,23 +579,11 @@ let lemma_sha256_msg2 (src1 src2:quad32) (t:counter) (block:block_w) : Lemma
 (* Abbreviations and lemmas for the code itself *)
 open Workarounds
 
-(*+ TODO: Why does this work in fsti but not here? +*)
-(*
-#push-options "--z3rlimit 20 --max_fuel 1"
-let lemma_quads_to_block (qs:seq quad32) : Lemma
-  (requires length qs == 4)
-  (ensures (let block = quads_to_block qs in
-            forall i . {:pattern (index_work_around_quad32 qs i)} 0 <= i /\ i < 4 ==>
-              (qs.[i]).lo0 == ws_opaque block (4 `op_Multiply` i + 0) /\
-              (qs.[i]).lo1 == ws_opaque block (4 `op_Multiply` i + 1) /\
-              (qs.[i]).hi2 == ws_opaque block (4 `op_Multiply` i + 2) /\
-              (qs.[i]).hi3 == ws_opaque block (4 `op_Multiply` i + 3) /\
-              qs.[i] == ws_quad32 (4 `op_Multiply` i) block))
+#reset-options "--z3rlimit 20 --max_fuel 1"
+let lemma_quads_to_block qs
   =  
-  //reveal_opaque ws;
-  admit()
-#pop-options
-*)
+  FStar.Pervasives.reveal_opaque (`%ws) ws
+#reset-options "--max_fuel 0 --max_ifuel 0"
 
 let translate_hash_update (h0 h1 h0' h1' a0 a1:quad32) : Lemma
   (requires h0' == add_wrap_quad32 a0 h0 /\
@@ -621,7 +616,6 @@ let lemma_update_block_equiv (hash:hash256) (block:bytes{length block = block_le
   assert (equal (update_block hash (words_of_bytes SHA2_256 block_word_length block)) (update SHA2_256 hash block));
   ()
 
-(*+ TODO: Broken due to indirection of opaque +*)
 let update_lemma (src1 src2 src1' src2' h0 h1:quad32) (block:block_w) : Lemma
   (requires (let hash_orig = make_hash h0 h1 in
              make_hash src1 src2 == 
@@ -635,10 +629,24 @@ let update_lemma (src1 src2 src1' src2' h0 h1:quad32) (block:block_w) : Lemma
   let hash_1 = shuffle_opaque SHA2_256 hash_orig block in
   Pervasives.reveal_opaque (`%shuffle) shuffle;
   Pervasives.reveal_opaque (`%shuffle_core) shuffle_core;
+  let rec f (i:nat{i <= 64}) : Lemma (
+    Spec.Loops.repeat_range 0 i (shuffle_core_opaque block) hash_orig ==
+    Spec.Loops.repeat_range 0 i (shuffle_core SHA2_256 block) hash_orig)
+    =
+    if i = 0 then (
+      Spec.Loops.repeat_range_base 0 (shuffle_core_opaque block) hash_orig;
+      Spec.Loops.repeat_range_base 0 (shuffle_core SHA2_256 block) hash_orig
+    ) else (
+      f (i - 1);
+      Spec.Loops.repeat_range_induction 0 i (shuffle_core_opaque block) hash_orig;
+      Spec.Loops.repeat_range_induction 0 i (shuffle_core SHA2_256 block) hash_orig
+    )
+  in
+  f 64;
+(*
   let h = make_hash src1 src2 in
   assert (forall (block:block_w) (hash:hash256) . FStar.FunctionalExtensionality.feq (shuffle_core_opaque block hash) (shuffle_core_opaque_aux SHA2_256 block hash));
   //assert (forall (block:block_w) . (shuffle_core_opaque block) == (shuffle_core_opaque_aux SHA2_256 block));
-  admit();
   assert (shuffle_core_opaque == shuffle_core_opaque_aux SHA2_256);
   assert (shuffle_core_opaque == shuffle_core SHA2_256);
   assert (shuffle_core_opaque block == shuffle_core SHA2_256 block);
@@ -646,6 +654,7 @@ let update_lemma (src1 src2 src1' src2' h0 h1:quad32) (block:block_w) : Lemma
           Spec.Loops.repeat_range 0 64 (shuffle_core SHA2_256 block) hash_orig);
   assert (make_hash src1 src2 == shuffle SHA2_256 hash_orig block); 
   assert (make_hash src1 src2 == shuffle_opaque SHA2_256 hash_orig block);
+*)
   translate_hash_update src1 src2 src1' src2' h0 h1;
   assert (equal (make_hash src1' src2') (update_block hash_orig block));
   ()

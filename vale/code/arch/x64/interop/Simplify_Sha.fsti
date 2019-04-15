@@ -26,7 +26,7 @@ val lemma_k_reqs_equiv
 val lemma_seq_nat8_le_seq_quad32_to_bytes_uint32 
   (b:buf_t TUInt8 TUInt128) 
   (h:HS.mem) : Lemma
-  (requires B.live h b )
+  (requires True )
   (ensures (
   DV.length_eq (get_downview b);
   Seq.equal

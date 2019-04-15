@@ -29,7 +29,6 @@ let lowstar_add1 : lowstar_add1_t  =
   IX64.wrap_weak_stdcall
     Interop.down_mem
     code_add1
-    16
     dom
     (W.mk_prediction code_add1 dom [] (add1_lemma code_add1 IA.win))
 
@@ -42,9 +41,8 @@ let lowstar_fadd : lowstar_fadd_t  =
   IX64.wrap_weak_stdcall
     Interop.down_mem
     code_fadd
-    16
     fadd_dom
     (W.mk_prediction code_fadd fadd_dom [] (fadd_lemma code_fadd IA.win))
 
-let fadd //: normal lowstar_add1_t
+let fadd_ //: normal lowstar_add1_t
 = as_normal_t #lowstar_fadd_t lowstar_fadd

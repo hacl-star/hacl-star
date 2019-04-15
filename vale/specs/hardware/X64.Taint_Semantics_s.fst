@@ -22,6 +22,7 @@ noeq type traceState = {
 let extract_operands (i:ins) : (list operand * list operand) =
   match i with
   | S.Mov64 dst src -> [dst], [src]
+  | S.MovBe64 dst src -> [dst], [src]
   | S.Cmovc64 dst src -> [dst], [src; dst]
   | S.Add64 dst src -> [dst], [dst; src]
   | S.AddLea64 dst src1 src2 -> [dst], [dst; src1; src2]
@@ -40,7 +41,8 @@ let extract_operands (i:ins) : (list operand * list operand) =
   | S.Pinsrd _ src _ | S.Pinsrq _ src _ -> [], [src]
   | S.Pextrq dst _ _ -> [dst], []
   | S.Push src -> [], [src]
-  | S.Pop dst -> [dst], [OMem (MReg Rsp 0)]
+  | S.Pop dst -> [dst], [OStack (MReg Rsp 0)]
+  | S.Alloc _ | S.Dealloc _ -> [OReg Rsp], [OReg Rsp]
   | _ -> [], []
 
 (*
@@ -52,7 +54,7 @@ type tainted_ins : eqtype =
 let operand_obs (s:traceState) (o:operand) : list observation =
   match o with
     | OConst _ | OReg _ -> []
-    | OMem m ->
+    | OMem m | OStack m ->
       match m with
       | MConst _ -> []
       | MReg reg _ -> [MemAccess (eval_reg reg s.state)]
@@ -91,6 +93,7 @@ let taint_match (o:operand) (t:taint) (memTaint:memTaint_t) (s:state) : bool =
   match o with
     | OConst _ | OReg _ -> true
     | OMem m -> match_n (eval_maddr m s) 8 memTaint t
+    | OStack m -> t = Public // everything on the stack should be public
 
 let rec taint_match_list (o:list operand) (t:taint) (memTaint:memTaint_t) (s:state) : bool =
   match o with
@@ -99,7 +102,7 @@ let rec taint_match_list (o:list operand) (t:taint) (memTaint:memTaint_t) (s:sta
 
 let update_taint (memTaint:memTaint_t) (dst:operand) (t:taint) (s:state) : memTaint_t =
   match dst with
-    | OConst _ -> memTaint | OReg _ -> memTaint
+    | OConst _ | OReg _ | OStack _ -> memTaint
     | OMem m -> update_n (eval_maddr m s) 8 memTaint t
 
 let rec update_taint_list (memTaint:memTaint_t) (dst:list operand) (t:taint) (s:state)
@@ -111,11 +114,12 @@ let rec update_taint_list (memTaint:memTaint_t) (dst:list operand) (t:taint) (s:
 let taint_match128 (op:mov128_op) (t:taint) (memTaint:memTaint_t) (s:state) : bool =
   match op with
   | Mov128Xmm _ -> true
+  | Mov128Stack _ -> t = Public // Everything on the stack should be public
   | Mov128Mem addr -> match_n (eval_maddr addr s) 16 memTaint t
 
 let update_taint128 op t (memTaint:memTaint_t) (s:state) : memTaint_t =
   match op with
-  | Mov128Xmm _ -> memTaint
+  | Mov128Xmm _ | Mov128Stack _ -> memTaint
   | Mov128Mem addr -> update_n (eval_maddr addr s) 16 memTaint t
 
 // Special treatment for movdqu
@@ -142,12 +146,6 @@ let taint_eval_ins (ins:tainted_ins) (ts: traceState) : GTot traceState =
         let s' = update_operand_preserve_flags' dst_lo lo s in
         let memTaint = update_taint ts.memTaint dst_lo t s in
         update_taint memTaint dst_hi t s'
-      end
-      else if S.Push? i then begin
-        let S.Push src = i in
-        let new_rsp = ((eval_reg Rsp s) - 8) % pow2_64 in
-        let mt = update_n new_rsp 8 ts.memTaint t in
-        mt
       end
       else update_taint_list ts.memTaint dsts t s
     in
@@ -226,10 +224,12 @@ and taint_eval_while c fuel s0 =
 let is_xmm_ins (ins:tainted_ins) =
   let i = ins.i in
   match i with
-    | S.Paddd _ _ | S.Pxor _ _ | S.Pslld _ _ | S.Psrld _ _ | S.Psrldq _ _ | S.Palignr _ _ _ | S.Shufpd _ _ _ | S.Pshufb _ _ 
+    | S.VPaddd _ _ _ | S.Paddd _ _ | S.Pxor _ _ | S.Pand _ _ | S.VPxor _ _ _ | S.Pslld _ _ | S.Psrld _ _ | S.Psrldq _ _ 
+    | S.Palignr _ _ _ | S.VPalignr _ _ _ _ | S.Shufpd _ _ _ | S.VShufpd _ _ _ _ | S.Pshufb _ _ | S.VPshufb _ _ _
     | S.Pshufd _ _ _ | S.Pcmpeqd _ _ | S.Pextrq _ _ _ | S.Pinsrd _ _ _ | S.Pinsrq _ _ _
-    | S.VPSLLDQ _ _ _ | S.MOVDQU _ _
-    | S.Pclmulqdq _ _ _ | S.AESNI_enc _ _ | S.AESNI_enc_last _ _
+    | S.VPSLLDQ _ _ _ | S.Vpsrldq _ _ _ | S.MOVDQU _ _
+    | S.Pclmulqdq _ _ _ | S.VPclmulqdq _ _ _ _ 
+    | S.AESNI_enc _ _ | S.AESNI_enc_last _ _ | S.VAESNI_enc _ _ _ | S.VAESNI_enc_last _ _ _
     | S.AESNI_dec _ _ | S.AESNI_dec_last _ _ | S.AESNI_imc _ _
     | S.AESNI_keygen_assist _ _ _ 
     | S.SHA256_rnds2 _ _ | S.SHA256_msg1 _ _ | S.SHA256_msg2 _ _ -> true

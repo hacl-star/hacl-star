@@ -134,6 +134,9 @@ val lemma_quad32_xor_commutes (x y:quad32) :Lemma
 val lemma_quad32_xor_commutes_forall (_:unit) : Lemma
   (forall (x y:quad32) . {:pattern (quad32_xor x y)} quad32_xor x y = quad32_xor y x)
 
+val lemma_quad32_xor_associates (x y z:quad32) : Lemma
+  (quad32_xor (quad32_xor x y) z == (quad32_xor x (quad32_xor y z)))
+
 val lemma_iand_pow2 (n:pos) (x:natN (pow2_norm n)) (i:nat{i < n}) : Lemma
   (pow2 i < pow2 n /\ (iand x (pow2 i) == 0 \/ iand x (pow2 i) == pow2 i))
 

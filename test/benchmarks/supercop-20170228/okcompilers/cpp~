@@ -1,8 +1,0 @@
-g++-6 -march=native -mtune=native -O3 -fomit-frame-pointer -fwrapv
-clang++-3.9 -march=native -O3 -fomit-frame-pointer -fwrapv -Qunused-arguments
-g++-6 -mcpu=native -mfpu=neon -O3 -fomit-frame-pointer -fwrapv
-clang++-3.9 -mcpu=native -mfpu=neon -O3 -fomit-frame-pointer -fwrapv -Qunused-arguments
-g++-6 -mcpu=cortex-a8 -mfpu=neon -O3 -fomit-frame-pointer -fwrapv
-clang++-3.9 -mcpu=cortex-a9 -mfpu=neon -O3 -fomit-frame-pointer -fwrapv -Qunused-arguments
-g++-6 -m64 -O3 -fomit-frame-pointer
-g++-6 -m64 -march=native -mtune=native -O3 -fomit-frame-pointer

@@ -318,6 +318,16 @@ external_files = [
   ExternalFile('../specs/Spec.MD5.fsti'),
   ExternalFile('../specs/Spec.Hash.fst'),
   ExternalFile('../specs/Spec.Hash.Definitions.fst'),
+  ExternalFile('../lib/Lib.IntTypes.fst'),
+  ExternalFile('../lib/Lib.IntTypes.fsti'),
+  ExternalFile('../lib/Lib.ByteSequence.fst'),
+  ExternalFile('../lib/Lib.ByteSequence.fsti'),
+  ExternalFile('../lib/Lib.RawIntTypes.fst'),
+  ExternalFile('../lib/Lib.RawIntTypes.fsti'),
+  ExternalFile('../lib/Lib.LoopCombinators.fst'),
+  ExternalFile('../lib/Lib.LoopCombinators.fsti'),
+  ExternalFile('../lib/Lib.Sequence.fst'),
+  ExternalFile('../lib/Lib.Sequence.fsti'),
 ]
 
 no_extraction_files = [File(x) for x in [
@@ -361,9 +371,9 @@ verify_options = [
 #   ('code/arch/x64/interop/*', None), 
 #   ('code/arch/x64/interop/Fast_inline.fst*', None), 
 
-  #'src/thirdPartyPorts/OpenSSL/poly1305/x64/X64.Poly1305.vaf': None,
   #('code/thirdPartyPorts/OpenSSL/sha/X64.SHA.vaf', None),
-  ('code/arch/x64/interop/*.fst*', BuildOptions(fstar_default_args_nosmtencoding().replace('--use_extracted_interfaces true', '').replace('--z3cliopt smt.QI.EAGER_THRESHOLD=100', '').replace('--z3cliopt smt.arith.nl=false', ''))),
+  ('code/arch/x64/interop/GCMencryptOpt_stdcalls.fst', BuildOptions(fstar_default_args_nosmtencoding())),
+  ('code/arch/x64/interop/GCMencrypt_stdcalls.fst', BuildOptions(fstar_default_args_nosmtencoding())),
 
   ('code/*/*.fst', BuildOptions(fstar_default_args())),
   ('code/*/*.fsti', BuildOptions(fstar_default_args())),
@@ -374,13 +384,13 @@ verify_options = [
   ('.fst', BuildOptions(fstar_default_args() + ' --use_two_phase_tc false')),
   ('.fsti', BuildOptions(fstar_default_args() + ' --use_two_phase_tc false')),
 
+  ('code/arch/x64/X64.Leakage_Ins.fst', None),
+  ('code/arch/x64/X64.Leakage_Ins_Xmm.fst', None),
+
   ('code/arch/x64/Views.fst', BuildOptions(fstar_default_args().replace('--smtencoding.nl_arith_repr wrapped', '--smtencoding.nl_arith_repr native'))),
   ('code/arch/x64/X64.Bytes_Semantics.fst', BuildOptions(fstar_default_args().replace('--smtencoding.nl_arith_repr wrapped', '--smtencoding.nl_arith_repr native'))),
 
-  ('code/arch/x64/X64.BufferViewStore.fst', BuildOptions(fstar_default_args_nosmtencoding() + ' --smtencoding.elim_box true')),
   ('code/lib/collections/Collections.Lists.fst', BuildOptions(fstar_default_args().replace('--z3cliopt smt.QI.EAGER_THRESHOLD=100',''))),
-  ('code/crypto/poly1305/x64/X64.Poly1305.Util.fst', BuildOptions(fstar_default_args_nosmtencoding())),
-  ('code/crypto/poly1305/x64/X64.Poly1305.Util.fsti', BuildOptions(fstar_default_args_nosmtencoding())),
   ('code/arch/x64/X64.Memory.fst', BuildOptions(fstar_default_args_nosmtencoding().replace('--use_extracted_interfaces true', '').replace('--z3cliopt smt.arith.nl=false', '') + '--smtencoding.elim_box true ')),
   ('code/arch/x64/X64.Memory_Sems.fst', BuildOptions(fstar_default_args_nosmtencoding().replace('--use_extracted_interfaces true', '').replace('--z3cliopt smt.arith.nl=false', '') + '--smtencoding.elim_box true ')),
   ('code/arch/x64/Interop.fst', BuildOptions(fstar_default_args_nosmtencoding().replace('--use_extracted_interfaces true', '').replace('--z3cliopt smt.QI.EAGER_THRESHOLD=100', '') + '--smtencoding.elim_box true ')),
@@ -388,6 +398,7 @@ verify_options = [
 
   # We copy these files from F*'s library because we need to generate a .checked file for them,
   # but we don't need to reverify them:
+  ('obj/external/*.fsti', BuildOptions('--cache_checked_modules --admit_smt_queries true')),
   ('obj/external/*.fst', BuildOptions('--cache_checked_modules --admit_smt_queries true')),
 
   # .vaf files default to this set of options when compiling .fst/.fsti

@@ -56,6 +56,9 @@ let create_in a r =
   assert (hashes h3 s S.empty);
   assert (freeable s h3);
   assert (Hash.fresh_loc (footprint s h3) h0 h3);
+  assert (B.modifies (footprint s h3) h0 h3);
+  B.modifies_only_not_unused_in B.loc_none h0 h3;
+  assert (B.modifies B.loc_none h0 h3);
   s
 
 /// We keep the total length at run-time, on 64 bits, but require that it abides
@@ -158,7 +161,7 @@ val update_empty_buf:
     (ensures fun h0 s' h1 ->
       update_post a s s' prev data len h0 h1)
 
-#push-options "--z3rlimit 150"
+#set-options "--z3rlimit 50"
 let split_at_last_blocks (a: Hash.alg) (b: bytes) (d: bytes): Lemma
   (requires (
     let blocks, rest = split_at_last a b in
@@ -175,15 +178,59 @@ let split_at_last_blocks (a: Hash.alg) (b: bytes) (d: bytes): Lemma
   let blocks'', rest'' = split_at_last a (S.append b d) in
   let b' = S.append blocks rest in
   let d' = S.append blocks' rest' in
-  assert (S.equal (S.append b' d') (S.append blocks'' rest''));
-  assert (S.equal b' blocks);
-  assert (S.equal (S.append b' d') (S.append (S.append blocks blocks') rest'));
-  assert (S.equal (S.append blocks'' rest'') (S.append (S.append blocks blocks') rest'));
-  assert (S.length b % block_length a = 0);
-  assert (S.length rest' = S.length rest'');
-  Seq.Properties.append_slices (S.append blocks blocks') rest';
-  Seq.Properties.append_slices blocks'' rest''
+  let l = block_length a in
+  calc (S.equal) {
+    rest';
+  (S.equal) { }
+    snd (split_at_last a d);
+  (S.equal) { }
+    S.slice d ((S.length d / l) * l) (S.length d);
+  (S.equal) { }
+    S.slice (S.append b d) (S.length b + (S.length d / l) * l) (S.length b + S.length d);
+  (S.equal) { }
+    S.slice (S.append b d) (S.length b + (S.length d / l) * l) (S.length (S.append b d));
+  (S.equal) { Math.Lemmas.div_exact_r (S.length b) l }
+    // For some reason this doesn't go through with the default rlimit, even
+    // though this is a direct rewriting based on the application of the lemma
+    // above.
+    S.slice (S.append b d) ((S.length b / l) * l + (S.length d / l) * l) (S.length (S.append b d));
+  (S.equal) { Math.Lemmas.distributivity_add_left (S.length b / l) (S.length d / l) l }
+    S.slice (S.append b d) ((S.length b / l + S.length d / l) * l) (S.length (S.append b d));
+  (S.equal) { Math.Lemmas.lemma_div_plus (S.length d) (S.length b / l) l }
+    S.slice (S.append b d) (((S.length b + S.length d) / l) * l) (S.length (S.append b d));
+  (S.equal) { }
+    snd (S.split (S.append b d) (((S.length (S.append b d)) / l) * l));
+  (S.equal) { }
+    rest'';
+  };
 
+  calc (S.equal) {
+    S.append blocks blocks';
+  (S.equal) { (* rest = S.empty *) }
+    S.append (S.append blocks rest) blocks';
+  (S.equal) { }
+    S.append b blocks';
+  (S.equal) { }
+    S.append b (fst (split_at_last a d));
+  (S.equal) { (* definition of split_at_last *) }
+    S.append b (fst (S.split d ((S.length d / l) * l)));
+  (S.equal) { (* definition of split *) }
+    S.append b (S.slice d 0 ((S.length d / l) * l));
+  (S.equal) { }
+    S.slice (S.append b d) 0 (S.length b + (S.length d / l) * l);
+  (S.equal) { Math.Lemmas.div_exact_r (S.length b) l }
+    S.slice (S.append b d) 0 ((S.length b / l) * l + (S.length d / l) * l);
+  (S.equal) { Math.Lemmas.distributivity_add_left (S.length b / l) (S.length d / l) l }
+    S.slice (S.append b d) 0 ((S.length b / l + S.length d / l) * l);
+  (S.equal) { Math.Lemmas.lemma_div_plus (S.length d) (S.length b / l) l }
+    S.slice (S.append b d) 0 (((S.length b + S.length d) / l) * l);
+  (S.equal) { }
+    fst (S.split (S.append b d) (((S.length (S.append b d)) / l) * l));
+  (S.equal) { }
+    blocks'';
+  }
+
+#push-options "--z3rlimit 150"
 let update_empty_buf a s prev data len =
   let State hash_state buf total_len = s in
   let sz = rest a total_len in
@@ -338,7 +385,7 @@ let update a s prev data len =
 inline_for_extraction noextract
 val mk_finish: a:Hash.alg -> finish_st a
 
-#reset-options "--z3rlimit 300 --max_fuel 0 --max_ifuel 0"
+#reset-options "--z3rlimit 30 --max_fuel 0 --max_ifuel 0"
 inline_for_extraction noextract
 let mk_finish a s prev dst =
   let h0 = ST.get () in
@@ -387,8 +434,40 @@ let mk_finish a s prev dst =
   EverCrypt.Hash.finish #(G.hide a) tmp_hash_state dst;
 
   let h5 = ST.get () in
-  Spec.Hash.Lemmas.hash_is_hash_incremental a (G.reveal prev);
-  assert (S.equal (B.as_seq h5 dst) (Spec.Hash.hash a (G.reveal prev)));
+  begin
+    let open Spec.Hash.PadFinish in
+    let open Spec.Hash in
+    let prev = G.reveal prev in
+    let n = S.length prev / block_length a in
+    let blocks, rest_ = S.split prev (n * block_length a) in
+    calc (S.equal) {
+      B.as_seq h5 dst;
+    (S.equal) { }
+      finish a (Hash.repr tmp_hash_state h4);
+    (S.equal) { }
+      finish a (
+        update_multi a (Hash.repr tmp_hash_state h3)
+          (S.append
+            (S.slice (B.as_seq h3 buf_) 0 (v (rest a total_len)))
+            (pad a (UInt64.v total_len))));
+    (S.equal) { }
+      finish a (
+        update_multi a
+          (update_multi a (init a) blocks)
+          (S.append rest_ (pad a (UInt64.v total_len))));
+    (S.equal) { }
+      finish a (
+        update_multi a (init a)
+          (S.append blocks (S.append rest_ (pad a (UInt64.v total_len)))));
+    (S.equal) { S.append_assoc blocks rest_ (pad a (UInt64.v total_len)) }
+      finish a (
+        update_multi a (init a)
+          (S.append (S.append blocks rest_) (pad a (UInt64.v total_len))));
+    (S.equal) { Spec.Hash.Lemmas.hash_is_hash_incremental a prev }
+      Spec.Hash.hash a prev;
+    }
+  end;
+
   Hash.frame_invariant (B.loc_buffer dst) hash_state h4 h5;
   Hash.frame_invariant_implies_footprint_preservation
     (B.loc_buffer dst) hash_state h4 h5;
@@ -414,6 +493,7 @@ let mk_finish a s prev dst =
   B.modifies_remove_fresh_frame h0 h1 h6 mloc;
   B.popped_modifies h5 h6;
   assert (B.(modifies mloc h0 h6))
+
   // So much for automated proofs.
 
 /// The wrapper pattern, to ensure that the stack-allocated state is properly

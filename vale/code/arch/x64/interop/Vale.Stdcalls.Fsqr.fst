@@ -6,7 +6,6 @@ let lowstar_fsqr : lowstar_fsqr_t  =
   IX64.wrap_weak_stdcall
     Interop.down_mem
     code_fsqr
-    56
     fsqr_dom
     (W.mk_prediction code_fsqr fsqr_dom [] (fsqr_lemma code_fsqr IA.win))
 
@@ -18,7 +17,6 @@ let lowstar_fsqr2 : lowstar_fsqr2_t  =
   IX64.wrap_weak_stdcall
     Interop.down_mem
     code_fsqr2
-    56
     fsqr_dom
     (W.mk_prediction code_fsqr2 fsqr_dom [] (fsqr2_lemma code_fsqr2 IA.win))
 

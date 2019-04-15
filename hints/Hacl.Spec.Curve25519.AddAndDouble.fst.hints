@@ -1,0 +1,86 @@
+[
+  "êAìxÕ\u000edëÜæÎN\u0005§5¶",
+  [
+    [
+      "Hacl.Spec.Curve25519.AddAndDouble.add_and_double1_1",
+      1,
+      2,
+      1,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented",
+        "@fuel_irrelevance_Prims.pow2.fuel_instrumented", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565",
+        "equation_Prims.nat", "equation_Spec.Curve25519.prime",
+        "function_token_typing_Prims.__cache_version_number__", "int_typing",
+        "lemma_Spec.Curve25519.Lemmas.lemma_prime_value",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
+      ],
+      0,
+      "0ffbefa503010691787e4e4f5d6f4836"
+    ],
+    [
+      "Hacl.Spec.Curve25519.AddAndDouble.lemma_add_and_double",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "equation_Hacl.Spec.Curve25519.AddAndDouble.add_and_double1",
+        "equation_Hacl.Spec.Curve25519.AddAndDouble.add_and_double1_0",
+        "equation_Hacl.Spec.Curve25519.AddAndDouble.add_and_double1_1",
+        "equation_Spec.Curve25519.add_and_double",
+        "equation_Spec.Curve25519.elem",
+        "equation_Spec.Curve25519.op_Plus_Percent",
+        "equation_Spec.Curve25519.op_Subtraction_Percent",
+        "equation_Spec.Curve25519.proj_point",
+        "fuel_guarded_inversion_FStar.Pervasives.Native.tuple2",
+        "projection_inverse_FStar.Pervasives.Native.Mktuple2__1",
+        "projection_inverse_FStar.Pervasives.Native.Mktuple2__2"
+      ],
+      0,
+      "df691e7c0b6a2a43db5579d5c4309296"
+    ],
+    [
+      "Hacl.Spec.Curve25519.AddAndDouble.montgomery_ladder1_0",
+      1,
+      2,
+      1,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented",
+        "@fuel_irrelevance_Prims.pow2.fuel_instrumented", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565",
+        "constructor_distinct_Lib.IntTypes.U64",
+        "equality_tok_Lib.IntTypes.U64@tok", "equation_Lib.IntTypes.bits",
+        "equation_Prims.nat",
+        "function_token_typing_Prims.__cache_version_number__", "int_typing",
+        "lemma_Lib.IntTypes.pow2_values", "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
+      ],
+      0,
+      "82b88ec31b1223cc793652e7b3298491"
+    ],
+    [
+      "Hacl.Spec.Curve25519.AddAndDouble.lemma_montgomery_ladder",
+      1,
+      2,
+      1,
+      [
+        "@query",
+        "equation_Hacl.Spec.Curve25519.AddAndDouble.montgomery_ladder1",
+        "equation_Hacl.Spec.Curve25519.AddAndDouble.montgomery_ladder1_0",
+        "equation_Hacl.Spec.Curve25519.AddAndDouble.montgomery_ladder1_1",
+        "equation_Hacl.Spec.Curve25519.AddAndDouble.montgomery_ladder1_2",
+        "equation_Spec.Curve25519.montgomery_ladder",
+        "projection_inverse_FStar.Pervasives.Native.Mktuple3__1",
+        "projection_inverse_FStar.Pervasives.Native.Mktuple3__2",
+        "projection_inverse_FStar.Pervasives.Native.Mktuple3__3"
+      ],
+      0,
+      "ad43c55f05e37b950ed0bdb133d4a1c1"
+    ]
+  ]
+]

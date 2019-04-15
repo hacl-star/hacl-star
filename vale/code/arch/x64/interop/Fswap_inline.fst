@@ -27,16 +27,16 @@ let uint64 = UInt64.t
 let as_t (#a:Type) (x:normal a) : a = x
 let as_normal_t (#a:Type) (x:a) : normal a = x
 
-[@__reduce__] unfold
+[@__reduce__]
 let b64 = buf_t TUInt64 TUInt64
-[@__reduce__] unfold
+[@__reduce__]
 let t64_mod = TD_Buffer TUInt64 TUInt64 default_bq
-[@__reduce__] unfold
+[@__reduce__]
 let t64_no_mod = TD_Buffer TUInt64 TUInt64 ({modified=false; strict_disjointness=false; taint=MS.Secret})
-[@__reduce__] unfold
+[@__reduce__]
 let tuint64 = TD_Base TUInt64
 
-[@__reduce__] unfold
+[@__reduce__]
 let cswap_dom: IX64.arity_ok 3 td =
   let y = [t64_mod; t64_mod; tuint64] in
   assert_norm (List.length y = 3);
@@ -44,27 +44,25 @@ let cswap_dom: IX64.arity_ok 3 td =
 
 (* Need to rearrange the order of arguments *)
 [@__reduce__]
-let cswap_pre : VSig.vale_pre 16 cswap_dom =
+let cswap_pre : VSig.vale_pre cswap_dom =
   fun (c:V.va_code)
     (p0:b64)
     (p1:b64)
     (bit:uint64)
-    (va_s0:V.va_state)
-    (sb:IX64.stack_buffer 16) ->
-      FU.va_req_cswap2 c va_s0 (as_vale_buffer sb) 
+    (va_s0:V.va_state) ->
+      FU.va_req_cswap2 c va_s0
         (as_vale_buffer p0) (as_vale_buffer p1) (UInt64.v bit)
 
 [@__reduce__]
-let cswap_post : VSig.vale_post 16 cswap_dom =
+let cswap_post : VSig.vale_post cswap_dom =
   fun (c:V.va_code)
     (p0:b64)
     (p1:b64)
     (bit:uint64)
     (va_s0:V.va_state)
-    (sb:IX64.stack_buffer 16)
     (va_s1:V.va_state)
     (f:V.va_fuel) ->
-      FU.va_ens_cswap2 c va_s0 (as_vale_buffer sb) (as_vale_buffer p0) (as_vale_buffer p1) (UInt64.v bit) va_s1 f
+      FU.va_ens_cswap2 c va_s0 (as_vale_buffer p0) (as_vale_buffer p1) (UInt64.v bit) va_s1 f
 
 #set-options "--z3rlimit 50"
 
@@ -75,7 +73,7 @@ let cswap_regs_modified: MS.reg -> bool = fun (r:MS.reg) ->
 
 let cswap_xmms_modified = fun _ -> false
 
-[@__reduce__] unfold
+[@__reduce__]
 let cswap_lemma'
     (code:V.va_code)
     (_win:bool)
@@ -83,24 +81,22 @@ let cswap_lemma'
     (p1:b64)
     (bit:uint64)
     (va_s0:V.va_state)
-    (sb:IX64.stack_buffer 16)
  : Ghost (V.va_state & V.va_fuel)
      (requires
-       cswap_pre code p0 p1 bit va_s0 sb)
+       cswap_pre code p0 p1 bit va_s0)
      (ensures (fun (va_s1, f) ->
        V.eval_code code va_s0 f va_s1 /\
        VSig.vale_calling_conventions va_s0 va_s1 cswap_regs_modified cswap_xmms_modified /\
-       cswap_post code p0 p1 bit va_s0 sb va_s1 f /\
+       cswap_post code p0 p1 bit va_s0 va_s1 f /\
        ME.buffer_readable VS.(va_s1.mem) (as_vale_buffer p0) /\
        ME.buffer_readable VS.(va_s1.mem) (as_vale_buffer p1) /\ 
        ME.buffer_writeable (as_vale_buffer p0) /\ 
        ME.buffer_writeable (as_vale_buffer p1) /\ 
-       ME.modifies (ME.loc_union (ME.loc_buffer (as_vale_buffer sb))
-                   (ME.loc_union (ME.loc_buffer (as_vale_buffer p0))
+       ME.modifies (ME.loc_union (ME.loc_buffer (as_vale_buffer p0))
                    (ME.loc_union (ME.loc_buffer (as_vale_buffer p1))
-                                 ME.loc_none))) va_s0.VS.mem va_s1.VS.mem
+                                 ME.loc_none)) va_s0.VS.mem va_s1.VS.mem
  )) = 
-   let va_s1, f = FU.va_lemma_cswap2 code va_s0 (as_vale_buffer sb) (as_vale_buffer p0) (as_vale_buffer p1) (UInt64.v bit) in
+   let va_s1, f = FU.va_lemma_cswap2 code va_s0 (as_vale_buffer p0) (as_vale_buffer p1) (UInt64.v bit) in
    Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 p0;   
    Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 p1;   
    va_s1, f                                   
@@ -134,7 +130,6 @@ let lowstar_cswap_t =
     cswap_xmms_modified
     Interop.down_mem
     code_cswap
-    16
     cswap_dom
     []
     _
@@ -152,7 +147,6 @@ let lowstar_cswap : lowstar_cswap_t  =
     cswap_xmms_modified
     Interop.down_mem
     code_cswap
-    16
     cswap_dom
     (W.mk_prediction code_cswap cswap_dom [] (cswap_lemma code_cswap IA.win))
 
@@ -168,4 +162,4 @@ let cswap2_inline p0 p1 bit
     ()
 
 let cswap2_code_inline () : FStar.All.ML int =
-  PR.print_inline "cswap2" 0 None (List.length cswap_dom) cswap_dom code_cswap of_arg cswap_regs_modified
+  PR.print_inline "cswap2_inline" 0 None (List.length cswap_dom) cswap_dom code_cswap of_arg cswap_regs_modified

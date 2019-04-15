@@ -97,7 +97,7 @@ val eq_elim: #a:Type -> #len:size_nat -> s1:lseq a len -> s2:lseq a len ->
   [SMTPat (equal s1 s2)]
 
 (* Alias for creation from a list *)
-let createL #a l = of_list #a l
+unfold let createL #a l = of_list #a l
 
 (** Updating an element of a fixed-length Sequence *)
 val upd:
@@ -257,15 +257,6 @@ val for_all2:#a:Type -> #b:Type -> #len:size_nat
   -> s2:lseq b len ->
   Tot bool
 
-(* The following functions allow us to bridge between unbounded and bounded sequences *)
-val map_blocks:
-    #a:Type0
-  -> blocksize:size_nat{blocksize > 0}
-  -> inp:seq a
-  -> f:(i:nat{i < length inp / blocksize} -> lseq a blocksize -> lseq a blocksize)
-  -> g:(i:nat{i <= length inp / blocksize} -> len:size_nat{len < blocksize} -> s:lseq a len -> lseq a len) ->
-  Tot (out:seq a {length out == length inp})
-
 val repeati_blocks:
     #a:Type0
   -> #b:Type0
@@ -275,6 +266,20 @@ val repeati_blocks:
   -> l:(i:nat{i == length inp / blocksize} -> len:size_nat{len == length inp % blocksize} -> s:lseq a len -> b -> b)
   -> init:b ->
   Tot b
+
+let repeat_blocks_f
+  (#a:Type0)
+  (#b:Type0)
+  (bs:size_nat{bs > 0})
+  (inp:seq a)
+  (f:(lseq a bs -> b -> b))
+  (nb:nat{nb == length inp / bs})
+  (i:nat{i < nb})
+  (acc:b) : b
+ =
+  assert ((i+1) * bs <= nb * bs);
+  let block = Seq.slice inp (i * bs) (i * bs + bs) in
+  f block acc
 
 val repeat_blocks:
     #a:Type0
@@ -286,12 +291,60 @@ val repeat_blocks:
   -> init:b ->
   Tot b
 
+val lemma_repeat_blocks:
+    #a:Type0
+  -> #b:Type0
+  -> bs:size_nat{bs > 0}
+  -> inp:seq a
+  -> f:(lseq a bs -> b -> b)
+  -> l:(len:size_nat{len == length inp % bs} -> s:lseq a len -> b -> b)
+  -> init:b ->
+  Lemma (
+    let len = length inp in
+    let nb = len / bs in
+    let rem = len % bs in
+    let acc = Lib.LoopCombinators.repeati nb (repeat_blocks_f bs inp f nb) init in
+    let last = Seq.slice inp (nb * bs) len in
+    let acc = l rem last acc in
+    repeat_blocks #a #b bs inp f l init == acc)
+
+val repeat_blocks_multi:
+    #a:Type0
+  -> #b:Type0
+  -> blocksize:size_nat{blocksize > 0}
+  -> inp:seq a{length inp % blocksize = 0}
+  -> f:(lseq a blocksize -> b -> b)
+  -> init:b ->
+  Tot b
+
+val lemma_repeat_blocks_multi:
+    #a:Type0
+  -> #b:Type0
+  -> bs:size_nat{bs > 0}
+  -> inp:seq a{length inp % bs = 0}
+  -> f:(lseq a bs -> b -> b)
+  -> init:b ->
+  Lemma (
+    let len = length inp in
+    let nb = len / bs in
+    repeat_blocks_multi #a #b bs inp f init ==
+    Lib.LoopCombinators.repeati nb (repeat_blocks_f bs inp f nb) init)
+
 (** Generates `n` blocks of length `len` by iteratively applying a function with an accumulator *)
 val generate_blocks:
     #t:Type0
   -> len:size_nat
-  -> n:nat{n * len <= max_size_t}
+  -> n:nat
   -> a:(i:nat{i <= n} -> Type)
-  -> f:(i:nat{i < n} -> a i -> a (i + 1) & lseq t len)
+  -> f:(i:nat{i < n} -> a i -> a (i + 1) & s:seq t{length s == len})
   -> init:a 0 ->
-  Tot (a n & lseq t (n * len))
+  Tot (a n & s:seq t{ length s == n * len})
+
+(** The following functions allow us to bridge between unbounded and bounded sequences *)
+val map_blocks:
+    #a:Type0
+  -> blocksize:size_nat{blocksize > 0}
+  -> inp:seq a
+  -> f:(i:nat{i < length inp / blocksize} -> lseq a blocksize -> lseq a blocksize)
+  -> g:(i:nat{i == length inp / blocksize} -> len:size_nat{len < blocksize} -> s:lseq a len -> lseq a len) ->
+  Tot (out:seq a {length out == length inp})

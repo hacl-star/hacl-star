@@ -123,13 +123,11 @@ procedure {:quick}{:public} compute_ghash_incremental_register()
     Pxor(io, input);    // Y_i := Y_{i-1} ^ x
     Mov128(xmm2, h);    // Move h into the register that ReduceMul128_LE expects
 
-    lemma_to_of_quad32(reverse_bytes_quad32(io));   // Help satisfy precondition
-    lemma_to_of_quad32(h);    // Help satisfy precondition
     ReduceMul128_LE(gf128_of_quad32(reverse_bytes_quad32(io)), gf128_of_quad32(h));    // io := Y_i * H
     reveal ghash_incremental_def;
 }
 
-procedure {:quick} compute_ghash_incremental(
+procedure {:quick} {:public} compute_ghash_incremental(
     ghost in_b:buffer128
     )
     lets in_ptr @= rax; len @= rcx; io @= xmm1; mask @= xmm8; h @= xmm11;
@@ -186,8 +184,6 @@ procedure {:quick} compute_ghash_incremental(
             Pxor(io, xmm2);        // Y_i := Y_{i-1} ^ x
             Mov128(xmm2, h);       // xmm2 := H
 
-            lemma_to_of_quad32(reverse_bytes_quad32(xmm1));   // Help satisfy precondition
-            lemma_to_of_quad32(xmm2);   // Help satisfy precondition
             ReduceMul128_LE(gf128_of_quad32(reverse_bytes_quad32(xmm1)), gf128_of_quad32(xmm2));  // io := Y_i * H
 
             Add64(rdx, 1);
@@ -208,8 +204,7 @@ procedure {:quick} compute_ghash_incremental_partial(
     modifies
         rdx; r9; r12;
         io; efl;
-
-        // ReduceMul128_LE touches almost everything
+// ReduceMul128_LE touches almost everything
         xmm2; xmm3; xmm4; xmm5; xmm6;
 
     requires
@@ -256,8 +251,6 @@ procedure {:quick} compute_ghash_incremental_partial(
             Pxor(io, xmm2);        // Y_i := Y_{i-1} ^ x
             Mov128(xmm2, h);       // xmm2 := H
 
-            lemma_to_of_quad32(reverse_bytes_quad32(xmm1));   // Help satisfy precondition
-            lemma_to_of_quad32(xmm2);   // Help satisfy precondition
             ReduceMul128_LE(gf128_of_quad32(reverse_bytes_quad32(xmm1)), gf128_of_quad32(xmm2));  // io := Y_i * H
 
             Add64(rdx, 1);
@@ -393,6 +386,57 @@ procedure {:quick} compute_pad_to_128_bits()
         lemma_hi64_properties();
         pad_to_128_bits_upper(old(io), num_bytes);
     }
+}
+
+#reset-options "--z3rlimit 10"
+procedure {:quick}{:public} ghash_incremental_bytes_register(
+        ghost total_bytes:nat,
+        ghost old_hash:quad32,
+        ghost completed_quads:seq(quad32)
+    )
+    lets num_bytes @= rax; io @= xmm1; input_quad @= xmm2; mask @= xmm8; h @= xmm11;
+
+    reads
+        num_bytes; h; mask;
+
+    modifies
+        rcx; rdx; r12;
+        io; efl;
+
+        // ReduceMul128_LE touches almost everything
+        xmm2; xmm3; xmm4; xmm5; xmm6;
+
+    requires
+        // GHash reqs
+        pclmulqdq_enabled;
+        mask == Mkfour(0x0C0D0E0F, 0x08090A0B, 0x04050607, 0x00010203);
+
+        io == ghash_incremental0(reverse_bytes_quad32(h), old_hash, completed_quads);
+
+        // Extra reqs
+        length(completed_quads) == total_bytes / 16;
+        total_bytes < 16 * length(completed_quads) + 16;
+        num_bytes == total_bytes % 16;
+        total_bytes % 16 != 0;        // Note: This implies total_bytes > 0
+        0 < total_bytes < 16 * bytes_to_quad_size(total_bytes);
+        16 * (bytes_to_quad_size(total_bytes) - 1) < total_bytes;
+
+    ensures
+        let raw_quads := append(completed_quads, create(1, old(input_quad)));
+        let input_bytes := slice_work_around(le_seq_quad32_to_bytes(raw_quads), total_bytes);
+        let padded_bytes := pad_to_128_bits(input_bytes);
+        let input_quads := le_bytes_to_seq_quad32(padded_bytes);
+        total_bytes > 0 ==> length(input_quads) > 0 /\
+                          io == ghash_incremental(reverse_bytes_quad32(h), old_hash, input_quads);
+{
+    ghost var final_quad := xmm2;
+
+    compute_pad_to_128_bits();
+    ghost var final_quad_padded := xmm2;
+
+    compute_ghash_incremental_register();
+
+    lemma_ghash_incremental_bytes_extra_helper_alt(reverse_bytes_quad32(h), old_hash, old(io), io, completed_quads, final_quad, final_quad_padded, total_bytes);
 }
 
 #reset-options "--z3rlimit 10"

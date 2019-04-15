@@ -148,8 +148,6 @@ let quads_to_block (qs:seq quad32) : block_w
   let f (n:nat{n < 16}) : word = nat32_to_word (if n < length nat32_seq then nat32_seq.[n] else 0) in
   init 16 f
 
-(*+ TODO: Why doesn't this work in the .fst? +*)
-(*
 val lemma_quads_to_block (qs:seq quad32) : Lemma
   (requires length qs == 4)
   (ensures
@@ -160,7 +158,7 @@ val lemma_quads_to_block (qs:seq quad32) : Lemma
               (qs.[i]).hi2 == ws_opaque block (4 `op_Multiply` i + 2) /\
               (qs.[i]).hi3 == ws_opaque block (4 `op_Multiply` i + 3) /\
               qs.[i] == ws_quad32 (4 `op_Multiply` i) block))
-*)
+(*
 #push-options "--z3rlimit 20 --max_fuel 1"
 let lemma_quads_to_block (qs:seq quad32) : Lemma
   (requires length qs == 4)
@@ -173,8 +171,9 @@ let lemma_quads_to_block (qs:seq quad32) : Lemma
               qs.[i] == ws_quad32 (4 `op_Multiply` i) block))
   =  
   //reveal_opaque ws;
-  admit()
+  ()
 #pop-options
+*)
 
 val update_block (hash:hash256) (block:block_w): hash256
 

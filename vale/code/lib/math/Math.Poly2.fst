@@ -20,6 +20,13 @@ let all_defs =
 
 let reveal_all_defs : squash all_defs = reveal_defs ()
 
+let poly_and a b = of_fun (1 + FStar.Math.Lib.max (size a) (size b)) (fun (i:nat) -> a.[i] && b.[i])
+let poly_or a b = of_fun (FStar.Math.Lib.max (size a) (size b)) (fun (i:nat) -> a.[i] || b.[i])
+
+let mask a n = of_fun n (fun (i:nat) -> a.[i])
+
+let ones n = of_fun n (fun (i:nat) -> true)
+
 let lemma_equal a b = I.lemma_poly_equal_elim (to_poly a) (to_poly b)
 let lemma_index_i a i = ()
 let lemma_degree a = ()
@@ -28,6 +35,10 @@ let lemma_zero_define_i i = ()
 let lemma_one_define_i i = ()
 let lemma_monomial_define_i n i = ()
 let lemma_shift_define_i p n i = ()
+let lemma_and_define_i a b i = ()
+let lemma_or_define_i a b i = ()
+let lemma_mask_define_i p n i = ()
+let lemma_ones_define_i n i = ()
 let lemma_reverse_define_i p n i = ()
 
 let lemma_add_zero a = I.lemma_add_zero (to_poly a)

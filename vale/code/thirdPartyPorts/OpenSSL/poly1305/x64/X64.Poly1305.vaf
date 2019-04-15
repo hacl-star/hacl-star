@@ -27,6 +27,7 @@ include{:fstar}{:open} "Types_s"
 include{:fstar}{:open} "Arch.Types"
 include{:fstar}{:open} "X64.Machine_s"
 include{:fstar}{:open} "X64.Memory"
+include{:fstar}{:open} "X64.Stack_i"
 include{:fstar}{:open} "X64.Vale.State"
 include{:fstar}{:open} "X64.Vale.Decls"
 include{:fstar}{:open} "X64.Vale.QuickCode"
@@ -36,7 +37,7 @@ include{:fstar}{:open} "X64.Poly1305.Util"
 
 module X64.Poly1305
 
-#reset-options "--z3rlimit 5000"
+#reset-options "--z3rlimit 40"
 
 #verbatim{:interface}{:implementation}
 open Opaque_s
@@ -44,6 +45,7 @@ open Types_s
 open Arch.Types
 open X64.Machine_s
 open X64.Memory
+open X64.Stack_i
 open X64.Vale.State
 open X64.Vale.Decls
 open X64.Vale.InsBasic
@@ -212,7 +214,7 @@ procedure{:quick} poly1305_iteration(ghost r1:nat64) returns(ghost hh:int)
 
     (ghost var hd) := poly1305_multiply(r1);
     hh := poly1305_reduce();
-    reveal modp';
+    reveal_modp();
     assert hh == (n * n) * h2 + n * h1 + h0 /\ (h * r) % p == hh % p;
 }
 
@@ -301,7 +303,7 @@ procedure{:quick} poly1305_blocks(
     h := h_in;
     assert modp(h) == poly1305_heap_blocks(modp(h_in), padbit * (n * n), r, buffer64_as_seq(mem, inp_b), 0) by
     {
-        reveal modp';
+        reveal_modp();
         reveal_poly1305_heap_blocks(modp(h_in), padbit * (n * n), r, buffer64_as_seq(mem, inp_b), 0);
     }
 
@@ -363,7 +365,7 @@ procedure{:quick} poly1305_blocks(
         {
             reveal_poly1305_heap_blocks(modp(h_in), padbit * (nn * nn), r, buffer64_as_seq(mem, inp_b), word_index);
             reveal_poly1305_heap_blocks(modp(h_in), padbit * (nn * nn), r, buffer64_as_seq(mem, inp_b), word_index - 2);
-            reveal modp';
+            reveal_modp();
             lemma_poly_demod(p, hp, hq - hp, r);
             lemma_poly1305_heap_blocks_unroll(modp(h_in), padbit * (nn * nn), r, buffer64_as_seq(mem, inp_b), word_index);
             lemma_poly1305_heap_blocks_unroll(modp(h_in), padbit * (nn * nn), r, buffer64_as_seq(mem, inp_b), word_index - 2);
@@ -374,7 +376,7 @@ procedure{:quick} poly1305_blocks(
     Store64_buffer(ctx, h2, 16, Public, ctx_b, 2);
 }
 
-#reset-options "--z3rlimit 5000"
+#reset-options "--z3rlimit 40"
 
 // last 1..15 bytes, in case len is not a multiple of 16
 procedure{:quick} poly1305_last_block()
@@ -469,7 +471,7 @@ procedure{:quick} poly1305_last_block()
     (ghost var hLast) := poly1305_iteration(r1);
     assert hLast == lowerUpper192_opaque(lowerUpper128_opaque(h0, h1), h2) by { reveal lowerUpper192; reveal lowerUpper128; }
     lemma_poly_demod(p, hBlocks, (inpLast % padLast) + padLast, r);
-    assert modp(hLast) == modp((modp(hBlocks) + padLast + (inpLast % padLast)) * r) by { reveal modp'; }
+    assert modp(hLast) == modp((modp(hBlocks) + padLast + (inpLast % padLast)) * r) by { reveal_modp(); }
 }
 
 // h := (h % p) % 2^128;
@@ -628,7 +630,7 @@ procedure{:quick} poly1305_impl(
     assert modp(0) == 0 by
     {
         modp_0();
-//        reveal modp';
+//        reveal_modp();
 //        assert_by_tactic(modp(0) == 0, retain_only_modp());
     }
     lemma_poly1305_heap_hash_blocks_alt(0, n * n, r, mem, inp_b, old(len) / 16);
@@ -663,7 +665,7 @@ procedure{:quick} poly1305_impl(
     h := lowerUpper128_opaque(h0, h1);
 
     assert h == poly1305_hash(key_r, key_s, seqTo128(buffer64_as_seq(mem, inp_b)), len_in)
-        by { reveal mod2_128'; reveal modp'; }
+        by { reveal_mod2_128(); reveal_modp(); }
 }
 
 // poly1305(ctx, inp, len)
@@ -673,7 +675,6 @@ procedure{:quick} poly1305_impl(
 // affect the result.
 procedure{:quick}{:public}{:exportSpecs} poly1305(
     inline win:bool,
-    ghost stack_b:buffer64,
     ghost ctx_b:buffer64,
     ghost inp_b:buffer64,
     ghost len_in:nat64)
@@ -692,7 +693,6 @@ procedure{:quick}{:public}{:exportSpecs} poly1305(
         validDstAddrs64(mem, ctx_in, ctx_b, 24, memTaint, Public);
         validSrcAddrs64(mem, inp_in, inp_b, readable_words(len_in), memTaint, Public);
         len_in == (if win then r8 else len);
-        valid_stack_slots(mem, rsp, stack_b, 1, memTaint);
 
         inp_in + len_in < pow2_64;
     ensures
@@ -714,11 +714,12 @@ procedure{:quick}{:public}{:exportSpecs} poly1305(
 
         h == poly1305_hash(key_r, key_s, inp_mem, len_in);
 
+        rsp == old(rsp);
+
         win ==>  rbx == old(rbx);
         win ==>  rbp == old(rbp);
         win ==>  rdi == old(rdi);
         win ==>  rsi == old(rsi);
-        win ==>  rsp == old(rsp);
         win ==>  r12 == old(r12);
         win ==>  r13 == old(r13);
         win ==>  r14 == old(r14);

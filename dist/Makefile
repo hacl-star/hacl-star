@@ -41,8 +41,6 @@ endif
 
 # 2. Parameters we want to compile with, for the generated Makefile
 
-CFLAGS		+= -Wno-parentheses -g
-
 # 3. Honor configurations
 
 # Backwards-compat
@@ -72,6 +70,12 @@ OBJS 		+= $(patsubst %.S,%.o,$(wildcard *-$(MARCH)$(VARIANT).S))
 
 
 include Makefile.basic
+
+CFLAGS		+= -Wno-parentheses -g -std=gnu11 \
+  -O3 -march=native -mtune=native
+
+Hacl_Poly1305_128.o: CFLAGS += -mavx
+Hacl_Poly1305_256.o: CFLAGS += -mavx -mavx2
 
 $(KREMLIB_A):
 	@echo "Please run make in the $(HACL_HOME)/code directory before invoking this Makefile" && false

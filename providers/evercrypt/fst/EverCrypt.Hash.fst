@@ -136,8 +136,8 @@ let update_multi_256 s blocks n =
     let open Hacl.Hash.Core.SHA2.Constants in
     B.recall k224_256;
     IB.recall_contents k224_256 Spec.SHA2.Constants.k224_256;
-    assume (B.disjoint s k224_256);
-    assume (B.disjoint blocks k224_256);
+    IB.buffer_immutable_buffer_disjoint s k224_256 (ST.get ());
+    IB.buffer_immutable_buffer_disjoint blocks k224_256 (ST.get ());
     Sha_stdcalls.sha256_update s blocks n k224_256
   end else
     Hacl.Hash.SHA2.update_multi_256 s blocks n
@@ -300,6 +300,7 @@ val hash_256: Hacl.Hash.Definitions.hash_st SHA2_256
 let hash_256 input input_len dst =
   let open Hacl.Hash.SHA2 in
   let open Hacl.Hash.MD in
+  // FIXME seems to be like this would be resolved to Hacl.Hash.SHA2.update_multi_256!!
   mk_hash SHA2_256 alloca_256 update_multi_256 update_last_256 finish_256 input input_len dst
 
 let hash a dst input len =

@@ -102,6 +102,11 @@ let reverse_bytes_nat32_def (n:nat32) : nat32 =
   be_bytes_to_nat32 (reverse_seq (nat32_to_be_bytes n))
 let reverse_bytes_nat32 = make_opaque reverse_bytes_nat32_def  
 
+let reverse_bytes_nat64_def (n:nat64) : nat64 =
+  let Mktwo n0 n1 = nat_to_two 32 n in
+  two_to_nat 32 (Mktwo (reverse_bytes_nat32 n1) (reverse_bytes_nat32 n0))
+let reverse_bytes_nat64 = make_opaque reverse_bytes_nat64_def 
+
 assume val reverse_bytes_quad32 (q:quad32) : quad32
 
 assume val reveal_reverse_bytes_quad32 (q:quad32) : Lemma

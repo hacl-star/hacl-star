@@ -14,6 +14,7 @@
 # This Makefile honors the following variables:
 # - NOSHORTLOG=1 disables pretty (short) logs
 # - NODEPEND=1 disables .depend re-generation (use for debugging only)
+# - SKIPDEPEND=1 disables even *including* .depend files (use for debugging only)
 # - NOOPENSSLCHECK=1 disables OpenSSL libcrypto.a checks (useful for verifying files
 #   only, or for non-OpenSSL configurations)
 # - EVERCRYPT_CONFIG allows switching EverCrypt static configurations; when
@@ -27,9 +28,9 @@
 # - vale-fst: the minimum needed to compile .vaf files to .fst files
 # - vale-verify: properly staged target for re-verifying all the vale files
 # - vale-asm: re-generation of the Vale assemblies in dist/vale
-# - hacl-verify: non-staged target for reverifying HACL* files
-# - verify: UNSTAGED, may only be invoked after a successful run of vale-fst,
-#   verifies all .fst files, both hand-written and generated.
+# - hacl-verify: staged target for verifying HACL* files
+#   curve25519-verify poly1305-verify chacha20-verify spec-verify
+#   code-verify: subsets of hacl-verify (each staged)
 #
 # To generate a Makefile for the interactive mode, use:
 # - make foo/bar/Makefile
@@ -38,6 +39,10 @@
 # - ci: staged, runs all + test, without short logs (this repository's CI)
 # - min-test: staged, runs only a subset of verification for the purposes of
 #   F*'s extended CI
+
+# Put your local configuration (e.g. HACL_HOME, KREMLIN_HOME, etc.) in
+# Makefile.config
+-include Makefile.config
 
 #########################
 # Catching setup errors #
@@ -51,12 +56,14 @@ ifeq (3.81,$(MAKE_VERSION))
 endif
 
 # Better error early.
+ifeq (,$(NOVALE))
 ifeq (,$(VALE_HOME))
   $(error Please define VALE_HOME, possibly using cygpath -m on Windows)
 endif
 
 ifeq (,$(wildcard $(VALE_HOME)/bin/vale.exe))
   $(error $$VALE_HOME/bin/vale.exe does not exist (VALE_HOME=$(VALE_HOME)))
+endif
 endif
 
 # Backwards-compat, remove
@@ -86,38 +93,39 @@ endif
 
 all:
 	tools/blast-staticconfig.sh $(EVERCRYPT_CONFIG)
+	$(MAKE) all-staged
+
+all-unstaged: compile-compact compile-compact-msvc compile-compact-gcc \
+  compile-evercrypt-external-headers compile-compact-c89 compile-coco
+
+# Automatic staging.
+%-staged:
+	@echo "[STAGE1] Vale to F*"
 	$(MAKE) vale-fst
-	FSTAR_DEPEND_FLAGS="--warn_error +285" $(MAKE) all_
+	@echo "[STAGE2] Main target: $*"
+	FSTAR_DEPEND_FLAGS="--warn_error +285" $(MAKE) $*-unstaged
 
+test: test-staged
+test-unstaged: test-handwritten test-c test-ml
 
-all_: compile-compact compile-generic compile-compact-msvc \
-  compile-evercrypt-external-headers compile-compact-c89 compile-coco \
-  secure_api.old
-
-# Any file in code/tests is taken to contain a `main` function.
-# Any file in specs/tests is taken to contain a `test` function.
-test:
-	$(MAKE) vale-fst
-	FSTAR_DEPEND_FLAGS="--warn_error +285" $(MAKE) test_
-
-test_: test-c test-ml
+# Any file in code/tests is taken to contain an `int main()` function.
+# Test should be renamed into Test.EverCrypt
 test-c: $(subst .,_,$(patsubst %.fst,test-c-%,$(notdir $(wildcard code/tests/*.fst)))) \
-  test-c-Test test-c-merkle_tree_test
+  test-c-Test
+
+# Any file in specs/tests is taken to contain a `val test: unit -> bool` function.
 test-ml: $(subst .,_,$(patsubst %.fst,test-ml-%,$(notdir $(wildcard specs/tests/*.fst))))
 
+# Not reusing the -staged automatic target so as to export NOSHORTLOG
 ci:
 	NOSHORTLOG=1 $(MAKE) vale-fst
-	FSTAR_DEPEND_FLAGS="--warn_error +285" NOSHORTLOG=1 $(MAKE) all_ test_
+	FSTAR_DEPEND_FLAGS="--warn_error +285" NOSHORTLOG=1 $(MAKE) all-unstaged test-unstaged
 
+# Not reusing the -staged automatic target so as to export MIN_TEST
 min-test:
 	MIN_TEST=1 NOSHORTLOG=1 $(MAKE) vale-fst
 	MIN_TEST=1 FSTAR_DEPEND_FLAGS="--warn_error +285" NOSHORTLOG=1 \
-	  $(MAKE) min-test_
-
-# Backwards-compat target
-.PHONY: secure_api.old
-secure_api.old:
-	$(call run-with-log,$(MAKE) -C secure_api,[OLD-MAKE secure_api],obj/secure_api)
+	  $(MAKE) min-test-unstaged
 
 # So that this Makefile can also clean the previous directory layout. In the
 # long run, TO_CLEAN should be able to go.
@@ -156,7 +164,7 @@ else
 endif
 
 ifneq ($(OS),Windows_NT)
-ifneq ($(shell realpath $$(pwd)),$(shell realpath $$HACL_HOME))
+ifneq ($(shell realpath $$(pwd)),$(shell realpath $(HACL_HOME)))
   $(error HACL_HOME, currently set to $(HACL_HOME), does not seem to point to the current directory)
 endif
 endif
@@ -215,11 +223,8 @@ VALE_FSTS = $(call to-obj-dir,$(VAF_AS_FSTS))
 
 # The complete set of F* files, both hand-written and Vale-generated. Note that
 # this is only correct in the second stage of the build.
-FSTAR_ROOTS = $(wildcard $(addsuffix /*.fsti,$(DIRS)) $(addsuffix /*.fst,$(DIRS))) \
+FSTAR_ROOTS = $(wildcard $(addsuffix /*.fsti,$(ALL_HACL_DIRS)) $(addsuffix /*.fst,$(ALL_HACL_DIRS))) \
   $(wildcard obj/*.fst) $(wildcard obj/*.fsti) # these two empty during the first stage
-
-# Convenience target. Remember to run make vale-fst first.
-verify: $(addsuffix .checked,$(FSTAR_ROOTS))
 
 # We currently force regeneration of three depend files. This is long.
 
@@ -234,9 +239,10 @@ ifndef MAKE_RESTARTS
 # meaning we can eliminate large chunks of the dependency graph, since we only
 # need to run: Vale stuff, and HACL spec tests.
 .fstar-depend-%: .FORCE
+	@if ! [ -f .didhelp ]; then echo "💡 Did you know? If your dependency graph didn't change (e.g. no files added or removed, no reference to a new module in your code), run NODEPEND=1 make <your-target> to skip dependency graph regeneration!"; touch .didhelp; fi
 	$(call run-with-log,\
 	  $(FSTAR_NO_FLAGS) --dep $* $(notdir $(FSTAR_ROOTS)) --warn_error '-285' $(FSTAR_DEPEND_FLAGS) \
-	    --extract '* -Prims -LowStar -Lib.Buffer -Hacl -FStar +FStar.Endianness +FStar.Kremlin.Endianness -EverCrypt -MerkleTree -Vale.Tactics -FastHybrid_helpers -FastMul_helpers -FastSqr_helpers -FastUtil_helpers -TestLib -EverCrypt -MerkleTree -Test -Vale_memcpy -Vale.AsLowStar.Test -Lib.IntVector' > $@ && \
+	    --extract '* -Prims -LowStar -Lib.Buffer -Hacl -FStar +FStar.Kremlin.Endianness -EverCrypt -MerkleTree -Vale.Tactics -FastHybrid_helpers -FastMul_helpers -FastSqr_helpers -FastUtil_helpers -TestLib -EverCrypt -MerkleTree -Test -Vale_memcpy -Vale.AsLowStar.Test -Lib.IntVector' > $@ && \
 	  $(SED) -i 's!$(HACL_HOME)/obj/\(.*.checked\)!obj/\1!;s!/bin/../ulib/!/ulib/!g' $@ \
 	  ,[FSTAR-DEPEND ($*)],$(call to-obj-dir,$@))
 
@@ -262,11 +268,17 @@ ifeq ($(MAKECMDGOALS),clean)
   SKIPDEPEND=1
 else ifeq ($(MAKECMDGOALS),)
   SKIPDEPEND=1
+else ifeq ($(MAKECMDGOALS),test)
+  SKIPDEPEND=1
 else ifeq ($(MAKECMDGOALS),all)
   SKIPDEPEND=1
-else ifeq ($(MAKECMDGOALS),vale-verify)
+else ifeq (,$(filter-out %-staged,$(MAKECMDGOALS)))
+  SKIPDEPEND=1
+else ifeq (,$(filter-out %-verify,$(MAKECMDGOALS)))
   SKIPDEPEND=1
 else ifeq ($(MAKECMDGOALS),ci)
+  SKIPDEPEND=1
+else ifeq ($(MAKECMDGOALS),min-test)
   SKIPDEPEND=1
 else ifeq (,$(filter-out %/Makefile,$(MAKECMDGOALS)))
   SKIPDEPEND=1
@@ -390,13 +402,7 @@ obj/X64.Bytes_Semantics.fst.checked: \
       s/--smtencoding.nl_arith_repr native//')
 
 obj/X64.BufferViewStore.fst.checked: \
-  FSTAR_FLAGS=$(VALE_FSTAR_FLAGS_NOSMT) --smtencoding.elim_box true
-
-obj/X64.Poly1305.Util.fst.checked: \
-  FSTAR_FLAGS=$(VALE_FSTAR_FLAGS_NOSMT)
-
-obj/X64.Poly1305.Util.fsti.checked: \
-  FSTAR_FLAGS=$(VALE_FSTAR_FLAGS_NOSMT)
+  FSTAR_FLAGS=$(VALE_FSTAR_FLAGS)
 
 obj/X64.Memory.fst.checked: \
   FSTAR_FLAGS=$(shell echo $(VALE_FSTAR_FLAGS_NOSMT) | \
@@ -440,8 +446,18 @@ obj/Fmul_inline.fst.checked: \
 obj/Fsqr_inline.fst.checked: \
   FSTAR_FLAGS=$(VALE_FSTAR_FLAGS)
 
-obj/Vale.Stdcalls.%.checked: \
+obj/Vale.Stdcalls.GCMencrypt.fst.checked: \
   FSTAR_FLAGS=$(VALE_FSTAR_FLAGS)
+
+obj/Vale.Stdcalls.GCMencryptOpt.fst.checked: \
+  FSTAR_FLAGS=$(VALE_FSTAR_FLAGS)
+
+obj/GCMencryptOpt_stdcalls.fst.checked: \
+  FSTAR_FLAGS=$(VALE_FSTAR_FLAGS)
+
+obj/GCM.fst.checked: \
+  FSTAR_FLAGS=$(VALE_FSTAR_FLAGS)
+  
 
 hints:
 	mkdir -p $@
@@ -459,23 +475,25 @@ hints:
 	    touch -c $@ \
 	  ,[VERIFY] $(notdir $*),$(call to-obj-dir,$@))
 
-# Convenience pseudo-targets
-vale-verify:
-	$(MAKE) vale-fst
-	$(MAKE) vale-verify_
+%-verify: %-verify-staged
+	@
 
-vale-verify_: \
+vale-verify-unstaged: \
   $(addsuffix .checked,$(VALE_FSTS)) \
   $(call only-for,$(HACL_HOME)/vale/%.checked) \
 
-hacl-verify: $(call only-for,$(HACL_HOME)/code/%.checked)
-
+hacl-verify-unstaged: code-verify-unstaged spec-verify-unstaged
+code-verify-unstaged: $(call only-for,$(HACL_HOME)/code/%)
+spec-verify-unstaged: $(call only-for,$(HACL_HOME)/spec/%)
+curve25519-verify-unstaged: $(call only-for,$(HACL_HOME)/code/curve25519/%)
+poly1305-verify-unstaged: $(call only-for,$(HACL_HOME)/code/poly1305/%)
+chacha20-verify-unstaged: $(call only-for,$(HACL_HOME)/code/chacha20/%)
 
 ############
 # min-test #
 ############
 
-min-test_: $(filter-out \
+min-test-unstaged: $(filter-out \
   obj/X64.Vale.InsSha.% \
   $(call only-for,$(HACL_HOME)/vale/code/arch/x64/interop/%)\
   ,\
@@ -588,58 +606,58 @@ obj/%.krml:
 	  ,[EXTRACT-KRML] $*,$@)
 
 HAND_WRITTEN_C		= Lib.PrintBuffer Lib.RandomBuffer
+
+# Always copied into the destination directory, always passed to kremlin.
 HAND_WRITTEN_FILES 	= $(wildcard $(LIB_DIR)/c/*.c) \
   $(addprefix providers/evercrypt/c/evercrypt_,vale_stubs.c)
-# Files in this list are not passed to kremlin, meaning that they don't end up
+
+# Always copied into the destination directory, not passed to kremlin.
+HAND_WRITTEN_H_FILES	= $(wildcard $(LIB_DIR)/c/*.h)
+
+# Possibly overridden, and not passed to kremlin, meaning that they don't end up
 # in the Makefile.basic list of C source files. They're added manually in
 # dist/Makefile (see ifneq tests).
 HAND_WRITTEN_OPTIONAL_FILES = \
   $(addprefix providers/evercrypt/c/evercrypt_,openssl.c bcrypt.c)
 
+
 # TODO: put all the Vale files under a single namespace to avoid this nonsense
 #
+# Note: I am using the deprecated -drop option, but it's ok because the dropped
+# module ends up in another bundle. Maybe the semantics of -drop should be
+# changed to just drop the declarations from a given module and then rely on
+# kremlin's empty-module removal.
+#
 # When extracting our libraries, we purposely don't distribute tests
+#
+# See Makefile.include for the definition of VALE_BUNDLES
 DEFAULT_FLAGS		=\
   $(addprefix -library ,$(HACL_HAND_WRITTEN_C)) \
-  -bundle Spec.*[rename=Hacl_Spec] \
+  -bundle Hacl.Spec.*,Spec.*[rename=Hacl_Spec] \
+  -bundle Hacl.Poly1305.Field32xN.Lemmas[rename=Hacl_Lemmas] \
   -bundle Lib.*[rename=Hacl_Lib] \
+  -drop Lib.IntVector.Intrinsics \
+  -add-include '"libintvector.h"' \
+  -add-include '"evercrypt_targetconfig.h"' \
+  -drop EverCrypt.TargetConfig \
   -bundle Test,Test.*,Hacl.Test.* \
   -bundle EverCrypt.BCrypt \
   -bundle EverCrypt.OpenSSL \
   -bundle MerkleTree.Spec,MerkleTree.Spec.*,MerkleTree.New.High,MerkleTree.New.High.* \
-  -bundle FStar.Tactics.CanonCommMonoid,FStar.Tactics.CanonCommSemiring,FStar.Tactics.CanonCommSwaps[rename=Unused] \
-  -bundle FastUtil_helpers,FastHybrid_helpers,FastSqr_helpers,FastMul_helpers[rename=Unused2] \
-  -bundle Opaque_s,Map16,Test.Vale_memcpy,Fast_defs,Interop_Printer,Memcpy[rename=Unused3] \
-  -bundle X64.*,Arch.*,Words.*,Vale.*,Collections.*,Collections,SHA_helpers[rename=Unused4] \
-  -bundle Prop_s,Types_s,Words_s,Views,AES_s,Workarounds,Math.*,Interop,TypesNative_s[rename=Unused5] \
-  -bundle GF128_s,GF128,Poly1305.Spec_s,GCTR,GCTR_s,GHash_s,GCM_helpers,GHash[rename=Unused6] \
-  -bundle AES_helpers,AES256_helpers,GCM_s,GCM,Interop_assumptions[rename=Unused7] \
-  -bundle 'Interop,Interop.*,Fadd_inline,Fadd_stdcalls,Cpuid_stdcalls,Fswap_stdcalls,Fmul_stdcalls,Fsqr_stdcalls,Fsub_stdcalls,Poly_stdcalls,Sha_stdcalls[rename=Vale]' \
-  -library 'Vale.Stdcalls.Cpuid' \
-  -library 'Vale.Stdcalls.Fadd' \
-  -library 'Vale.Stdcalls.Fmul' \
-  -library 'Vale.Stdcalls.Fsqr' \
-  -library 'Vale.Stdcalls.Fsub' \
-  -library 'Vale.Stdcalls.Fswap' \
-  -library 'Vale.Stdcalls.Poly' \
-  -library 'Vale.Stdcalls.Sha' \
+  $(VALE_BUNDLES) \
+  -library 'Vale.Stdcalls.*' \
+  -static-header 'Vale_Inline' \
   -library 'Fadd_inline' \
   -library 'Fmul_inline' \
   -library 'Fswap_inline' \
   -library 'Fsqr_inline' \
-  -no-prefix 'Vale.Stdcalls.Cpuid' \
-  -no-prefix 'Vale.Stdcalls.Fadd' \
-  -no-prefix 'Vale.Stdcalls.Fmul' \
-  -no-prefix 'Vale.Stdcalls.Fsqr' \
-  -no-prefix 'Vale.Stdcalls.Fsub' \
-  -no-prefix 'Vale.Stdcalls.Fswap' \
-  -no-prefix 'Vale.Stdcalls.Poly' \
-  -no-prefix 'Vale.Stdcalls.Sha' \
+  -no-prefix 'Vale.Stdcalls.*' \
   -no-prefix 'Fadd_inline' \
   -no-prefix 'Fmul_inline' \
   -no-prefix 'Fswap_inline' \
   -no-prefix 'Fsqr_inline' \
   -no-prefix 'EverCrypt.Vale' \
+  -add-include '"curve25519-inline.h"' \
   -no-prefix 'MerkleTree.New.Low' \
   -no-prefix 'MerkleTree.New.Low.Serialization' \
   -fparentheses -fno-shadow -fcurly-braces
@@ -647,10 +665,14 @@ DEFAULT_FLAGS		=\
 COMPACT_FLAGS	=\
   -bundle Hacl.Hash.MD5+Hacl.Hash.Core.MD5+Hacl.Hash.SHA1+Hacl.Hash.Core.SHA1+Hacl.Hash.SHA2+Hacl.Hash.Core.SHA2+Hacl.Hash.Core.SHA2.Constants=Hacl.Hash.*[rename=Hacl_Hash] \
   -bundle Hacl.Impl.SHA3+Hacl.SHA3=[rename=Hacl_SHA3] \
+  -bundle Hacl.Impl.Poly1305.*[rename=Unused_Poly1305] \
+  -bundle Hacl.Impl.Chacha20=Hacl.Impl.Chacha20.*[rename=Hacl_Chacha20] \
+  -bundle Hacl.Curve25519_51+Hacl.Curve25519_64=Hacl.Impl.Curve25519.*[rename=Hacl_Curve25519] \
+  -bundle Hacl.Impl.Chacha20Poly1305=Hacl.Impl.Chacha20Poly1305.*[rename=Hacl_Chacha20Poly1305] \
   -bundle LowStar.* \
   -bundle Prims,C.Failure,C,C.String,C.Loops,Spec.Loops,C.Endianness,FStar.*[rename=Hacl_Kremlib] \
   -bundle 'EverCrypt.Spec.*' \
-  -bundle 'MerkleTree.*' \
+  -bundle 'MerkleTree.New.Low+MerkleTree.New.Low.Serialization=[rename=MerkleTree]' \
   -bundle 'Test,Test.*,WindowsHack' \
   -bundle EverCrypt.Hash+EverCrypt.Hash.Incremental=[rename=EverCrypt_Hash] \
   -library EverCrypt.AutoConfig,EverCrypt.OpenSSL,EverCrypt.BCrypt \
@@ -661,7 +683,7 @@ COMPACT_FLAGS	=\
   -add-include '<string.h>'
 
 # For the time being, we rely on the old extraction to give us self-contained
-# files
+# files for algorithms that haven't been rewritten for HACLv2.
 
 .PHONY: old-%
 old-%:
@@ -669,21 +691,23 @@ old-%:
 	  KOPTS=-verbose $(MAKE) -C code/old -f Makefile.old $* \
 	  ,[OLD-MAKE $*],obj/old-$*)
 
+# This is all legacy. Some notes:
 HACL_OLD_FILES=\
   code/old/experimental/aesgcm/aesgcm-c/Hacl_AES.c \
-  code/old/curve25519/x25519-c/Hacl_Curve25519.c \
-  code/old/ed25519/ed25519-c/Hacl_Ed25519.c \
-  code/old/salsa-family/chacha-c/Hacl_Chacha20.c \
-  code/old/poly1305/poly-c/AEAD_Poly1305_64.c \
-  code/old/poly1305/poly-c/Hacl_Poly1305_64.c \
-  code/old/api/aead-c/Hacl_Chacha20Poly1305.c
+  code/old/ed25519/ed25519-c/Hacl_Ed25519.c
 
 dist/compact/Makefile.basic: KRML_EXTRA=$(COMPACT_FLAGS)
 
 dist/compact-msvc/Makefile.basic: KRML_EXTRA=$(COMPACT_FLAGS) -falloca -ftail-calls
 
+dist/compact-gcc/Makefile.basic: KRML_EXTRA=$(COMPACT_FLAGS) -fbuiltin-uint128
+
+dist/curve25519-64/Makefile.basic: KRML_EXTRA=-bundle Hacl.Curve25519_64=* -fbuiltin-uint128 -extract-uints
+
+# MerkleTree doesn't compile in C89 mode
 dist/compact-c89/Makefile.basic: \
-  KRML_EXTRA=$(COMPACT_FLAGS) -fc89 -ccopt -std=c89 -ccopt -Wno-typedef-redefinition
+  KRML_EXTRA=$(patsubst 'Merkle%[rename=MerkleTree]','MerkleTree.*',$(COMPACT_FLAGS)) \
+    -fc89 -ccopt -std=c89 -ccopt -Wno-typedef-redefinition
 dist/compact-c89/Makefile.basic: \
   HACL_OLD_FILES:=$(subst -c,-c89,$(HACL_OLD_FILES))
 
@@ -694,10 +718,9 @@ dist/coco/Makefile.basic: \
     -bundle EverCrypt.Hacl \
     -bundle '\*[rename=EverCrypt_Misc]'
 
-# The "coco" distribution is only optimized when EVERCRYPT_CONFIG=everest.
-# Everest means: no openssl, no bcrypt
+# OpenSSL and BCrypt disabled
 ifeq ($(EVERCRYPT_CONFIG),everest)
-dist/coco/Makefile.basic: HAND_WRITTEN_OPTIONAL_FILES =
+HAND_WRITTEN_OPTIONAL_FILES :=
 endif
 
 # For Kaizala, no BCrypt, no Vale.
@@ -712,10 +735,10 @@ endif
 
 .PRECIOUS: dist/%/Makefile.basic
 dist/%/Makefile.basic: $(ALL_KRML_FILES) dist/hacl-internal-headers/Makefile.basic \
-  $(HAND_WRITTEN_FILES) $(HAND_WRITTEN_OPTIONAL_FILES) $(VALE_ASMS) | old-extract-c
+  $(HAND_WRITTEN_FILES) $(HAND_WRITTEN_H_FILES) $(HAND_WRITTEN_OPTIONAL_FILES) $(VALE_ASMS) | old-extract-c
 	mkdir -p $(dir $@)
 	cp $(HACL_OLD_FILES) $(patsubst %.c,%.h,$(HACL_OLD_FILES)) $(dir $@)
-	cp $(HAND_WRITTEN_FILES) $(HAND_WRITTEN_OPTIONAL_FILES) dist/hacl-internal-headers/*.h $(dir $@)
+	cp $(HAND_WRITTEN_FILES) $(HAND_WRITTEN_H_FILES) $(HAND_WRITTEN_OPTIONAL_FILES) dist/hacl-internal-headers/*.h $(dir $@)
 	[ x"$(VALE_ASMS)" != x ] && cp $(VALE_ASMS) $(dir $@) || true
 	$(KRML) $(DEFAULT_FLAGS) $(KRML_EXTRA) \
 	  -tmpdir $(dir $@) -skip-compilation \
@@ -743,7 +766,7 @@ dist/hacl-internal-headers/Makefile.basic: $(ALL_KRML_FILES)
 dist/evercrypt-external-headers/Makefile.basic: $(ALL_KRML_FILES)
 	$(KRML) -silent \
 	  -minimal \
-	  -bundle EverCrypt+EverCrypt.AutoConfig2+EverCrypt.HKDF+EverCrypt.HMAC+EverCrypt.Hash+EverCrypt.Hash.Incremental=*[rename=EverCrypt] \
+	  -bundle EverCrypt+EverCrypt.AutoConfig2+EverCrypt.HKDF+EverCrypt.HMAC+EverCrypt.Hash+EverCrypt.Hash.Incremental+EverCrypt.Cipher+EverCrypt.Poly1305+EverCrypt.Chacha20Poly1305+EverCrypt.Curve25519=*[rename=EverCrypt] \
 	  -library EverCrypt,EverCrypt.* \
 	  -add-include '<inttypes.h>' \
 	  -add-include '<stdbool.h>' \
@@ -775,35 +798,54 @@ compile-%: dist/Makefile dist/%/Makefile.basic
 	$(MAKE) -C dist/$*
 
 
-###########
-# C tests #
-###########
+###########################
+# C tests (from F* files) #
+###########################
 
 ifeq ($(OS),Windows_NT)
 OPENSSL_HOME	:= $(shell cygpath -u $(OPENSSL_HOME))
 LDFLAGS		+= -lbcrypt
 endif
+LDFLAGS 	+= -L$(OPENSSL_HOME)
 
-dist/test/c/merkle_tree_test.c: secure_api/merkle_tree/test/merkle_tree_test.c
-	mkdir -p $(dir $@)
-	cp $< $(patsubst %.c,%.h,$<) $(dir $@)
+CFLAGS += -Wall -Wextra -g \
+  -Wno-infinite-recursion -Wno-int-conversion -Wno-unused-parameter \
+  -O3 -march=native -mtune=native -I$(KREMLIN_HOME)/include
 
 # FIXME there's a kremlin error that generates a void* -- can't use -Werror
-.PRECIOUS: dist/test/c/%.exe
-dist/test/c/%.exe: dist/test/c/%.c compile-generic
+# Need the libraries to be present and compiled.
+.PRECIOUS: %.exe
+%.exe: %.o | compile-compact
 	# Linking with full kremlib since tests may use TestLib, etc.
 	$(call run-with-log,\
-	  $(CC) -Wall -Wextra -Wno-infinite-recursion -Wno-int-conversion -Wno-unused-parameter \
-	    -I $(dir $@) -I $(KREMLIN_HOME)/include -I $(OPENSSL_HOME)/include -I dist/generic \
-	    -L$(OPENSSL_HOME) \
-	    $< -o $@ \
-	    dist/generic/libevercrypt.a -lcrypto $(LDFLAGS) \
+	  $(CC) $(CFLAGS) $(LDFLAGS) $^ -o $@ \
+	    dist/compact/libevercrypt.a -lcrypto $(LDFLAGS) \
 	    $(KREMLIN_HOME)/kremlib/dist/generic/libkremlib.a \
 	  ,[LD $*],$(call to-obj-dir,$@))
 
-test-c-%: dist/test/c/%.exe
-	LD_LIBRARY_PATH="$(OPENSSL_HOME)" DYLD_LIBRARY_PATH="$(OPENSSL_HOME)" \
-	  PATH="$(OPENSSL_HOME):$(PATH)" $<
+ifeq ($(OS),Windows_NT)
+  LD_EXTRA = PATH="$(OPENSSL_HOME):$$PATH"
+else ifeq ($(shell uname -s),Darwin)
+  LD_EXTRA = DYLD_LIBRARY_PATH="$(OPENSSL_HOME)"
+else
+  LD_EXTRA = LD_LIBRARY_PATH="$(OPENSSL_HOME)"
+endif
+
+.PHONY: %.test
+%.test: %.exe
+	$(LD_EXTRA) $<
+
+test-c-%: dist/test/c/%.test
+	@
+
+##########################
+# C tests (from C files) #
+##########################
+
+test-handwritten: compile-compact-gcc
+	$(LD_EXTRA) KREMLIN_HOME="$(KREMLIN_HOME)" \
+	  LDFLAGS="$(LDFLAGS)" CFLAGS="$(CFLAGS)" \
+	  $(MAKE) -C tests test
 
 
 #######################

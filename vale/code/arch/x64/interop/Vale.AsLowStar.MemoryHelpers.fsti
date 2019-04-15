@@ -8,6 +8,8 @@ module UV = LowStar.BufferView.Up
 module HS = FStar.HyperStack
 module ME = X64.Memory
 module MES = X64.Memory_Sems
+module SI = X64.Stack_i
+module VSS = X64.Stack_Sems
 module TS = X64.Taint_Semantics_s
 module MS = X64.Machine_s
 module IA = Interop.Assumptions
@@ -69,54 +71,47 @@ val readable_imm_live (#src #t:_) (x:ibuf_t src t) (s:ME.mem)
 
 val buffer_readable_reveal 
   (#max_arity:_)
-  (#n:_)
   (src bt:base_typ)
   (x:buf_t src bt)
   (args:IX64.arity_ok max_arity arg)
-  (h0:HS.mem)
-  (stack:IX64.stack_buffer n{mem_roots_p h0 (arg_of_sb stack::args)}) : Lemma (
-    let mem = mk_mem (arg_of_sb stack::args) h0 in
+  (h0:HS.mem{mem_roots_p h0 args}) : Lemma (
+    let mem = mk_mem args h0 in
     ME.buffer_readable (as_vale_mem mem) (as_vale_buffer x) <==>
       List.memP (mut_to_b8 src x) (ptrs_of_mem mem))
 
 val get_heap_mk_mem_reveal
-  (#max_arity:_)
-  (#n:_)
-  (args:IX64.arity_ok max_arity arg)
-  (h0:HS.mem)
-  (stack:IX64.stack_buffer n{mem_roots_p h0 (arg_of_sb stack::args)}) : Lemma
-  (let mem = mk_mem (arg_of_sb stack::args) h0 in
-   liveness_disjointness (arg_of_sb stack::args) h0;
+  (args:IX64.arg_list)
+  (h0:HS.mem{mem_roots_p h0 args}) : Lemma (
+   let mem = mk_mem args h0 in
    MES.get_heap (as_vale_mem mem) == I.down_mem mem)
 
+
+val mk_stack_reveal (stack:BS.stack) : Lemma
+  (VSS.stack_to_s (as_vale_stack stack) == stack /\ 
+   SI.init_rsp (as_vale_stack stack) == stack.BS.initial_rsp)
+
 val buffer_as_seq_reveal
-  (#max_arity:_)
-  (#n:_)
   (src t:ME.base_typ)
   (x:buf_t src t)
-  (args:IX64.arity_ok max_arity arg)
-  (h0:HS.mem)
-  (stack:IX64.stack_buffer n{mem_roots_p h0 (arg_of_sb stack::args)}) : Lemma
+  (args:IX64.arg_list)
+  (h0:HS.mem{mem_roots_p h0 args}) : Lemma
   (let y = as_vale_buffer x in
    let db = get_downview x in
    DV.length_eq db;
-   let mem = mk_mem (arg_of_sb stack::args) h0 in
+   let mem = mk_mem args h0 in
    Seq.equal 
     (LSig.nat_to_uint_seq_t t (ME.buffer_as_seq (as_vale_mem mem) y))
     (UV.as_seq h0 (UV.mk_buffer db (LSig.view_of_base_typ t))))
 
 val immbuffer_as_seq_reveal
-  (#max_arity:_)
-  (#n:_)
   (src t:ME.base_typ)
   (x:ibuf_t src t)
-  (args:IX64.arity_ok max_arity arg)
-  (h0:HS.mem)
-  (stack:IX64.stack_buffer n{mem_roots_p h0 (arg_of_sb stack::args)}) : Lemma
+  (args:IX64.arg_list)
+  (h0:HS.mem{mem_roots_p h0 args}) : Lemma
   (let y = as_vale_immbuffer x in
    let db = get_downview x in
    DV.length_eq db;
-   let mem = mk_mem (arg_of_sb stack::args) h0 in
+   let mem = mk_mem args h0 in
    Seq.equal 
     (LSig.nat_to_uint_seq_t t (ME.buffer_as_seq (as_vale_mem mem) y))
     (UV.as_seq h0 (UV.mk_buffer db (LSig.view_of_base_typ t))))
@@ -201,14 +196,11 @@ val loc_disjoint_sym (x y:ME.loc)
 val core_create_lemma_taint_hyp
     (#max_arity:_)
     (#arg_reg:IX64.arg_reg_relation max_arity)
-    (#n:_)
-    (args:IX64.arity_ok max_arity arg)
-    (h0:HS.mem)
-    (stack:IX64.stack_buffer n{mem_roots_p h0 (arg_of_sb stack::args)})
+    (args:IX64.arg_list)
+    (h0:HS.mem{mem_roots_p h0 args})
   : Lemma
-      (ensures (let va_s = LSig.create_initial_vale_state #max_arity #arg_reg args h0 stack in
-                LSig.taint_hyp args va_s /\
-                ME.valid_taint_buf64 (as_vale_buffer stack) va_s.VS.mem va_s.VS.memTaint X64.Machine_s.Public))
+      (ensures (let va_s = LSig.create_initial_vale_state #max_arity #arg_reg args h0 in
+                LSig.taint_hyp args va_s))
 
 val buffer_writeable_reveal (src t:ME.base_typ) (x:buf_t src t) : Lemma
   (ME.buffer_writeable (as_vale_buffer x))
@@ -298,3 +290,19 @@ val down_up_buffer_read_reveal (src:base_typ) (h:HS.mem) (s:ME.mem) (b:(buf_t sr
   (ensures LSig.nat_to_uint src (ME.buffer_read (as_vale_buffer b) i s) == 
     Seq.index (B.as_seq h b) i)
   [SMTPat (ME.buffer_read (as_vale_buffer b) i s); SMTPat (Seq.index (B.as_seq h b) i)]
+
+val same_buffer_same_upviews (#src #bt:base_typ) (b:buf_t src bt) (h0 h1:HS.mem) : Lemma
+  (requires Seq.equal (B.as_seq h0 b) (B.as_seq h1 b))
+  (ensures (
+    let db = get_downview b in
+    DV.length_eq db;
+    let ub = UV.mk_buffer db (LSig.view_of_base_typ bt) in
+    Seq.equal (UV.as_seq h0 ub) (UV.as_seq h1 ub)))
+
+val same_immbuffer_same_upviews (#src #bt:base_typ) (b:ibuf_t src bt) (h0 h1:HS.mem) : Lemma
+  (requires Seq.equal (B.as_seq h0 b) (B.as_seq h1 b))
+  (ensures (
+    let db = get_downview b in
+    DV.length_eq db;
+    let ub = UV.mk_buffer db (LSig.view_of_base_typ bt) in
+    Seq.equal (UV.as_seq h0 ub) (UV.as_seq h1 ub)))

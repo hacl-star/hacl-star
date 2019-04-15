@@ -16,6 +16,7 @@ open X64.Vale.State
 open X64.Vale.Decls
 open X64.Vale.QuickCode
 unfold let memory = X64.Memory.mem // avoid conflict with "var{...} mem" vs. "mem" from X64.Memory
+unfold let stack_t = X64.Stack_i.stack // avoid conflict with "var{...} stack" vs. "stack" from X64.Stack_i
 open X64.CPU_Features_s
 #endverbatim
 
@@ -26,6 +27,7 @@ open X64.Vale.InsLemmas
 open X64.Taint_Semantics
 open X64.CPU_Features_s
 open X64.Memory
+open X64.Stack_i
 module S = X64.Bytes_Semantics_s
 module TS = X64.Taint_Semantics_s
 
@@ -53,6 +55,7 @@ let lemma_valid_taint_match o s = match o with
 #reset-options "--initial_fuel 4 --max_fuel 4 --max_ifuel 2 --z3rlimit 20"
 
 type memory:Type(1) := X64.Memory.mem;
+type stack_t:Type(1) := X64.Stack_i.stack;
 
 var{:state ok()} ok:bool;
 var{:state reg(Rax)} rax:nat64;
@@ -73,6 +76,7 @@ var{:state reg(R14)} r14:nat64;
 var{:state reg(R15)} r15:nat64;
 var{:state flags()} efl:nat64;
 var{:state mem()} mem:memory;
+var{:state stack()} stack:stack_t;
 var{:state memTaint()} memTaint:memtaint;
 
 operand_type reg64:nat64 :=
@@ -84,7 +88,8 @@ operand_type reg64:nat64 :=
 operand_type shift_amt64:nat64 := in rcx | const;
 operand_type reg_opr64:nat64 := reg64;
 operand_type Mem(base:reg64, inline offset:int, ghost b:buffer64, ghost index:int, inline t:taint):int;
-operand_type dst_opr64:nat64 @ va_operand := reg_opr64 | Mem;
+operand_type Stack(base:reg64, inline offset:int):int;
+operand_type dst_opr64:nat64 @ va_operand := reg_opr64 | Mem | Stack;
 operand_type opr64:nat64 @ va_operand := dst_opr64 | const;
 
 // add {:typecheck false} attr because Type0 is not defined. (TODO: get rid of this)

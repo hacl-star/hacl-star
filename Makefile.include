@@ -1,0 +1,68 @@
+# This Makefile can be included by client projects; it exports the set of
+# include directories relative to HACL_HOME and exports the set of needed
+# kremlin flags to successfully extract Vale. This Makefile honors
+# EVERCRYPT_CONFIG.
+
+VALE_BUNDLES=\
+  -bundle 'Vale.Stdcalls.*,Interop,Interop.*,Fadd_stdcalls,Cpuid_stdcalls,Fswap_stdcalls,Fmul_stdcalls,Fsqr_stdcalls,Fsub_stdcalls,Poly_stdcalls,Sha_stdcalls,GCMencrypt_stdcalls,GCMencryptOpt_stdcalls,AES_stdcalls,AEShash_stdcalls,GCMencryptOpt256_stdcalls,GCMdecrypt_stdcalls[rename=Vale]' \
+  -bundle 'Fadd_inline,Fmul_inline,Fsqr_inline,Fswap_inline[rename=Vale_Inline]' \
+  -bundle FStar.Tactics.CanonCommMonoid,FStar.Tactics.CanonCommSemiring,FStar.Tactics.CanonCommSwaps[rename=Unused] \
+  -bundle FastUtil_helpers,FastHybrid_helpers,FastSqr_helpers,FastMul_helpers[rename=Unused2] \
+  -bundle Opaque_s,Map16,Test.Vale_memcpy,Fast_defs,Interop_Printer,Memcpy[rename=Unused3] \
+  -bundle X64.*,Arch.*,Words.*,Vale.*,Collections.*,Collections,SHA_helpers[rename=Unused4] \
+  -bundle Prop_s,Types_s,Words_s,Views,AES_s,Workarounds,Math.*,Interop,TypesNative_s[rename=Unused5] \
+  -bundle GF128_s,GF128,Poly1305.*,GCTR,GCTR_s,GHash_s,GCM_helpers,GHash[rename=Unused6] \
+  -bundle AES_helpers,AES256_helpers,GCM_s,GCM,Interop_assumptions[rename=Unused7]
+
+# Other configs are possible, e.g. everest or hacl-vale, by exporting
+# EVERCRYPT_CONFIG manually.
+ifneq (,$(EVEREST_WINDOWS))
+  # hacl, vale, bcrypt
+  EVERCRYPT_CONFIG = noopenssl
+else ifneq (,$(KAIZALA))
+  # hacl, openssl
+  EVERCRYPT_CONFIG = kaizala
+else
+  # everything
+  EVERCRYPT_CONFIG ?= default
+endif
+
+# TODO: no more separate variable definitions?
+LIB_DIR		= $(HACL_HOME)/lib
+SPECS_DIR 	= $(HACL_HOME)/specs $(HACL_HOME)/specs/derived $(HACL_HOME)/specs/tests
+CODE_DIRS	= $(addprefix $(HACL_HOME)/code/,hash sha3 poly1305 chacha20 chacha20poly1305 curve25519 tests)
+EVERCRYPT_DIRS  = $(addprefix $(HACL_HOME)/providers/,evercrypt evercrypt/fst test test/vectors evercrypt/config/$(EVERCRYPT_CONFIG))
+MERKLE_DIRS	= $(HACL_HOME)/secure_api/merkle_tree
+# Vale dirs also include directories that only contain .vaf files
+# (for a in $(find vale -iname '*.fst' -or -iname '*.fsti' -or -iname '*.vaf'); do dirname $a; done) | sort | uniq
+VALE_DIRS	= \
+  $(HACL_HOME)/vale/code/arch \
+  $(HACL_HOME)/vale/code/arch/x64 \
+  $(HACL_HOME)/vale/code/arch/x64/interop \
+  $(HACL_HOME)/vale/code/crypto/aes \
+  $(HACL_HOME)/vale/code/crypto/aes/x64 \
+  $(HACL_HOME)/vale/code/crypto/ecc/curve25519 \
+  $(HACL_HOME)/vale/code/crypto/poly1305 \
+  $(HACL_HOME)/vale/code/crypto/poly1305/x64 \
+  $(HACL_HOME)/vale/code/crypto/sha \
+  $(HACL_HOME)/vale/code/lib/collections \
+  $(HACL_HOME)/vale/code/lib/math \
+  $(HACL_HOME)/vale/code/lib/util \
+  $(HACL_HOME)/vale/code/lib/util/x64 \
+  $(HACL_HOME)/vale/code/lib/util/x64/stdcalls \
+  $(HACL_HOME)/vale/code/test \
+  $(HACL_HOME)/vale/code/thirdPartyPorts/Intel/aes/x64 \
+  $(HACL_HOME)/vale/code/thirdPartyPorts/OpenSSL/aes \
+  $(HACL_HOME)/vale/code/thirdPartyPorts/OpenSSL/poly1305/x64 \
+  $(HACL_HOME)/vale/code/thirdPartyPorts/OpenSSL/sha \
+  $(HACL_HOME)/vale/code/thirdPartyPorts/rfc7748/curve25519/x64 \
+  $(HACL_HOME)/vale/specs/crypto \
+  $(HACL_HOME)/vale/specs/defs \
+  $(HACL_HOME)/vale/specs/hardware \
+  $(HACL_HOME)/vale/specs/interop \
+  $(HACL_HOME)/vale/specs/math
+
+ALL_HACL_DIRS	= \
+  $(LIB_DIR) $(SPECS_DIR) $(CODE_DIRS) $(VALE_DIRS) \
+  $(EVERCRYPT_DIRS) $(MERKLE_DIRS) \
+  $(HACL_HOME)/obj
