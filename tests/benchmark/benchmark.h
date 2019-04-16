@@ -2,10 +2,11 @@
 #ifndef _HACL_PERFTEST_H_
 #define _HACL_PERFTEST_H_
 
-#include <string>
-
 #include <stddef.h>
 #include <stdint.h>
+
+#include <string>
+#include <iostream>
 
 #define ABORT_BENCHMARK(msg, rv) { printf("\nABORT: %s\n", msg); return rv; }
 
@@ -33,12 +34,16 @@ class Benchmark
 {
   public:
   std::string name;
+  std::ostream & rs;
 
-  Benchmark() {}
-  ~Benchmark() {}
+  Benchmark(std::ostream & rs) : rs(rs) {}
+  virtual ~Benchmark() {}
 
-  virtual void run(size_t samples) = 0;
+  virtual void run(unsigned int seed, size_t samples) = 0;
   virtual void b_func() = 0;
+
+  static void print_config(std::ostream & rs);
+  static void set_config(int shaext, int aesni, int pclmulqdq, int avx, int avx2, int bmi2, int adx, int hacl, int vale);
 };
 
 #endif

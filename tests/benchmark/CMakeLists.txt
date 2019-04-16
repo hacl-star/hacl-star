@@ -8,6 +8,7 @@ option(USE_OPENSSL "Use OpenSSL." ON)
 
 add_library(benchmark STATIC benchmark.cpp)
 target_include_directories(benchmark PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(benchmark PRIVATE evercrypt)
 
 add_executable(runbenchmark
   runbenchmark.cpp
