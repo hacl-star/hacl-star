@@ -2,6 +2,7 @@ module Hacl.Argmax.Paillier
 
 open FStar.Calc
 open FStar.Mul
+open FStar.Math.Lemmas
 
 open Hacl.Argmax.Common
 
@@ -32,18 +33,97 @@ let encf #n g x y =
   assume(isunit r);
   r
 
+// It is possible to get it checking every element of the preimage.
+// encf is bijection for proper g
+val encf_inv: #n:comp -> g:isg n -> w:fen2u n ->
+  t:(tuple2 (fe n) (fenu n)){ encf g (fst t) (snd t) = w }
+let encf_inv #n _ _ = admit()
+
 val is_res_class: #n:comp -> g:isg n -> w:fen2u n -> x:fe n -> Type0
 let is_res_class #n g w x = exists y. encf g x y = w
 
-// It is possible to get it checking every element of the preimage.
 val res_class: #n:comp -> g:isg n -> w:fen2u n -> x:fe n{is_res_class g w x}
-let res_class #n _ _ = admit()
+let res_class #n g w = fst (encf_inv g w)
 
-val bigl:
-     #n:comp
-  -> u:fen2 n{u % n = 1}
-  -> r:fe n{r = 0 <==> u = 1}
+val res_class_decomposition: #n:comp -> g1:isg n -> g2:isg n ->  w:fen2u n -> Lemma
+  (ensures (res_class g1 w = res_class g2 w *% res_class g1 g2))
+let res_class_decomposition #n g1 g2 w =
+  let (x1,y1) = encf_inv g1 w in
+  let (x2,y2) = encf_inv g2 w in
+  let (x3,y3) = encf_inv g1 g2 in
+  let y2':fen2 n = to_fe y2 in
+  let y3':fen2 n = to_fe y3 in
+
+  nat_times_nat_is_nat x3 x2;
+  nat_times_nat_is_nat n x2;
+
+  // not true, there should be lemmas capturing the notion of exponent
+  // elements being in the finite semiring.
+  assume(x3 * x2 < n);
+  assume(isunit (fexp y3 x2 *% y2));
+
+  let s0 = encf g1 (x3 * x2) (fexp y3 x2 *% y2) in
+
+  let s1: fen2 n = fexp g1 (x3 * x2) in
+  let s2: fen2 n = fexp (fexp y3' x2 *% y2') n in
+  let s3 = s1 *% s2 in
+
+  assert(s0 = fexp g1 (x3 * x2) *% fexp (to_fe (fexp y3 x2 *% y2)) n);
+
+
+  fexp_mul2 (fexp g1 x3) (fexp y3' n) x2;
+  assert(fexp (fexp g1 x3 *% fexp y3' n) x2 = (fexp (fexp g1 x3) x2) *% (fexp (fexp y3' n) x2));
+
+  fexp_exp g1 x3 x2;
+  assert(fexp (fexp g1 x3) x2 = fexp g1 (x3 * x2));
+
+  fexp_exp y3' n x2;
+  assert(fexp (fexp y3' n) x2 = fexp y3' (n * x2));
+
+  fexp_exp y3' x2 n;
+  assert(fexp y3' (n * x2) = fexp (fexp y3' x2) n);
+
+  fexp_mul2 (fexp y3' x2) y2' n;
+  assert(fexp (fexp y3' x2) n *% fexp y2' n = fexp (fexp y3' x2 *% y2') n);
+
+  assert(encf g1 x1 y1 = w /\ encf g2 x2 y2 = w /\ encf g1 x3 y3 = g2);
+  calc (==) {
+    encf g1 x1 y1;
+  == { }
+    encf (encf g1 x3 y3) x2 y2;
+  == { }
+    encf (fexp g1 x3 *% fexp y3' n) x2 y2;
+  == { }
+    (fexp (fexp g1 x3 *% fexp y3' n) x2) *% fexp y2' n;
+  == { }
+    ((fexp (fexp g1 x3) x2) *% (fexp (fexp y3' n) x2)) *% fexp y2' n;
+  == { }
+    (fexp g1 (x3 * x2) *% fexp (fexp y3' n) x2) *% fexp y2' n;
+  == { }
+    (fexp g1 (x3 * x2)) *% ((fexp (fexp y3' n) x2) *% fexp y2' n);
+  == { }
+    (fexp g1 (x3 * x2)) *% (fexp y3' (n * x2) *% fexp y2' n);
+  == { }
+    (fexp g1 (x3 * x2)) *% (fexp (fexp y3' x2) n *% fexp y2' n);
+  == {  }
+    (fexp g1 (x3 * x2)) *% (fexp (fexp y3' x2 *% y2') n);
+  };
+
+
+  //assert(x1 = x3 * x2);
+  assume(x1 = x2 *% x3)
+
+
+val bigl: #n:comp -> u:fen2 n{u > 0} -> r:fe n
 let bigl #n u = (u - 1) / n
+
+val bigl_prop: #n:comp -> u:fen2 n{u > 0} -> Lemma
+  (ensures (let r = bigl u in u % n = 1 ==> (r = 0 <==> u = 1)))
+let bigl_prop #n u =
+  let r = bigl u in
+  assert(u = 1 ==> r = 0);
+  assert(u % n = 1 ==> (r = 0 ==> u = 1));
+  assert(u % n = 1 ==> (r = 0 <==> u = 1))
 
 // euler's totient
 val etot: p:prm -> q:prm -> l:pos
@@ -99,14 +179,10 @@ type ciphertext (n:comp) = c:fen2u n
 
 val encrypt:
      p:public
-  -> r:pos{r < Public?.n p}
+  -> r:fenu (Public?.n p)
   -> m:fe (Public?.n p)
   -> ciphertext (Public?.n p)
-let encrypt pub r m =
-  let res = fexp (Public?.g pub) m *% fexp (to_fe r) (Public?.n pub) in
-  assume(isunit res);
-  res
-
+let encrypt pub r m = encf (Public?.g pub) m r
 
 val decrypt:
      s:secret
@@ -119,9 +195,7 @@ let decrypt sec c =
   let g = Secret?.g sec in
   let lambda = etot p q in
 
-  assume((fexp c lambda) % n = 1);
   let l1:fe n = bigl (fexp c lambda) in
-  assume((fexp g lambda) % n = 1);
   let l2:fe n = bigl (fexp g lambda) in
 
   assume(isunit #n l2);
