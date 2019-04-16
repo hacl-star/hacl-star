@@ -3,6 +3,7 @@ module X64.Print_s
 // Trusted code for producing assembly code
 
 open X64.Machine_s
+open X64.Instruction_s
 open X64.Bytes_Semantics_s
 open X64.Taint_Semantics_s
 open FStar.IO
@@ -137,11 +138,55 @@ let cmp_not(o:ocmp) : ocmp =
 // Sanity check
 let _ = assert (forall o . o == cmp_not (cmp_not o))
 
+let print_pair (dst src:string) (p:printer) =
+  let first, second = p.op_order dst src in
+    first ^ ", " ^ second
+
+let print_instr (ip:instr_print) (p:printer) : string =
+  let Print name kind oprs = ip in
+  let (suffix, oprs) =
+    match kind with
+    | POpcode -> (false, oprs)
+    | PSuffix -> (true, oprs)
+    | PrintPSha256rnds2 ->
+        (false, (if p.sha256rnds2_explicit_xmm0 () then oprs @ [PXmm (Mov128Xmm 0)] else oprs))
+    in
+  let rec get_operands (oprs:list instr_print_operand) : list operand =
+    match oprs with
+    | [] -> []
+    | (P8 o)::oprs -> o::(get_operands oprs)
+    | (P16 o)::oprs -> o::(get_operands oprs)
+    | (P32 o)::oprs -> o::(get_operands oprs)
+    | (P64 o)::oprs -> o::(get_operands oprs)
+    | _::oprs -> get_operands oprs
+    in
+  let (opcode, space) = 
+    match suffix with
+    | false -> (name, " ")
+    | true -> (p.ins_name name (get_operands oprs), "")
+    in
+  let print_operand (po:instr_print_operand) : string =
+    match po with
+    | P8 o -> print_small_operand o p
+    | P16 o -> "!!! UNSUPPORTED OPERAND !!!"
+    | P32 o -> print_operand32 o p
+    | P64 o -> print_operand o p
+    | PXmm o -> print_mov128_op o p
+    | PImm i -> p.const i
+    | PShift o -> print_shift_operand o p
+    in
+  let rec print_operands (oprs:list instr_print_operand) : string =
+    match oprs with
+    | [] -> ""
+    | [o] -> print_operand o
+    | o::oprs -> print_pair (print_operand o) (print_operands oprs) p
+    in
+  match oprs with
+  | [] -> "  " ^ opcode
+  | _ -> "  " ^ opcode ^ space ^ (print_operands oprs)
+
 let print_ins (ins:tainted_ins) (p:printer) =
-  let print_pair (dst src:string) =
-    let first, second = p.op_order dst src in
-      first ^ ", " ^ second
-  in
+  let print_pair (dst src:string) = print_pair dst src p in
   let print_op_pair (dst:operand) (src:operand) (print_dst:operand->printer->string) (print_src:operand->printer-> string) =
     print_pair (print_dst dst p) (print_src src p)
   in
@@ -173,78 +218,24 @@ let print_ins (ins:tainted_ins) (p:printer) =
   let print_vpxor (dst src1:xmm) (src2:mov128_op) =
     print_pair (print_xmm dst p) (print_pair (print_xmm src1 p) (print_mov128_op src2 p))
   in
+  let print_instr (ip:instr_print) : string = print_instr ip p in
   let ins = ins.i in
   match ins with
-  | Cpuid -> "  cpuid"
-  | Mov64 dst src -> p.ins_name   "  mov"   [dst; src] ^ print_ops dst src
-  | MovBe64 dst src -> p.ins_name "  movbe" [dst; src] ^ print_ops dst src
-  | Cmovc64 dst src -> p.ins_name "  cmovc" [dst; src] ^ print_ops dst src  
-  | Add64 dst src -> p.ins_name   "  add"   [dst; src] ^ print_ops dst src
-  | AddLea64 dst src1 src2 -> let name = p.ins_name "  lea" [dst; src1; src2] in
-                             let src = OMem (if OReg? src1 && OConst? src2 then
-                                                MReg (OReg?.r src1) (OConst?.n src2)
-                                             else if OReg? src1 && OReg? src2 then
-                                               MIndex (OReg?.r src1) 1 (OReg?.r src2) 0
-                                             else
-                                               MConst pow2_128) in  // Shouldn't hit this, but if we do, assembler will complain
-                             name ^ print_ops dst src
-  | AddCarry64 dst src -> p.ins_name "  adc" [dst; src] ^ print_ops dst src
-  | Adcx64 dst src -> p.ins_name "  adcx" [dst; src] ^ print_ops dst src
-  | Adox64 dst src -> p.ins_name "  adox" [dst; src] ^ print_ops dst src
-  | Sub64 dst src -> p.ins_name "  sub" [dst; src] ^ print_ops dst src
-  | Sbb64 dst src -> p.ins_name "  sbb" [dst; src] ^ print_ops dst src
-  | Mul64 src -> p.ins_name "  mul" [src] ^ (print_operand src p)
-  | Mulx64 dst_hi dst_lo src ->
-    let dst_s = print_ops dst_hi dst_lo in
-    p.ins_name "  mulx" [dst_hi; dst_lo; src] ^ print_pair dst_s (print_operand src p)
-  | IMul64 dst src -> p.ins_name "  imul" [dst; src] ^ print_ops dst src
+  | Instr outs args havoc_flags i oprs -> print_instr (instr_printer i oprs)
+  | Ins_64_64_preserve i dst src -> print_instr (instr_printer i (dst, (src, ())))
+  | Ins_io64_64 i dst src -> print_instr (instr_printer i (dst, (src, ())))
+  | Ins_io64_64_cf i dst src -> print_instr (instr_printer i (dst, (src, ())))
+  | Ins_ioXmm i dst -> print_instr (instr_printer i (Mov128Xmm dst, ()))
+  | Ins_Xmm_Xmm i dst src -> print_instr (instr_printer i (Mov128Xmm dst, (Mov128Xmm src, ())))
+  | Ins_ioXmm_Xmm i dst src -> print_instr (instr_printer i (Mov128Xmm dst, (Mov128Xmm src, ())))
   | Xor64 dst src -> p.ins_name "  xor" [dst; src] ^ print_ops dst src
-  | And64 dst src -> p.ins_name "  and" [dst; src] ^ print_ops dst src
-  | Shr64 dst amt -> p.ins_name "  shr" [dst; amt] ^ print_shift dst amt
-  | Shl64 dst amt -> p.ins_name "  shl" [dst; amt] ^ print_shift dst amt
   | Push src      -> p.ins_name "  push" [src] ^ print_operand src p
   | Pop dst       -> p.ins_name "  pop"  [dst] ^ print_operand dst p
   | Alloc n       -> p.ins_name "  sub" [OReg Rsp; OConst n] ^ print_ops (OReg Rsp) (OConst n)
   | Dealloc n       -> p.ins_name "  add" [OReg Rsp; OConst n] ^ print_ops (OReg Rsp) (OConst n)
-  | Paddd dst src                -> "  paddd "      ^ print_xmms dst src
-  |VPaddd dst src1 src2          -> "  vpaddd "     ^ print_xmms_3 dst src1 src2
   | Pxor dst src                 -> "  pxor "       ^ print_xmms dst src
   |VPxor dst src1 src2           -> "  vpxor "      ^ print_vpxor dst src1 src2
-  | Pand dst src                 -> "  pand "       ^ print_xmms dst src
-  | Pslld dst amt                -> "  pslld "      ^ print_pair (print_xmm dst p) (print_imm8 amt p)
-  | Psrld dst amt                -> "  psrld "      ^ print_pair (print_xmm dst p) (print_imm8 amt p)
-  | Psrldq dst amt               -> "  psrldq "     ^ print_pair (print_xmm dst p) (print_imm8 amt p)
-  | Palignr dst src amount       -> "  palignr "    ^ print_pair (print_xmms dst src) (print_imm8 amount p)
-  |VPalignr dst src1 src2 amount -> "  vpalignr "   ^ print_pair (print_xmms_3 dst src1 src2) (print_imm8 amount p)  
-  | Shufpd dst src perm          -> "  shufpd "     ^ print_pair (print_xmms dst src) (print_imm8 perm p)
-  |VShufpd dst src1 src2 perm    -> "  vshufpd "    ^ print_pair (print_xmms_3 dst src1 src2) (print_imm8 perm p)
-  | Pshufb dst src               -> "  pshufb "     ^ print_xmms dst src
-  |VPshufb dst src1 src2         -> "  vpshufb "    ^ print_xmms_3 dst src1 src2 
-  | Pshufd dst src count         -> "  pshufd "     ^ print_pair (print_xmms dst src) (print_imm8 count p)
-  | Pcmpeqd dst src              -> "  pcmpeqd "    ^ print_xmms dst src
-  | Pextrq dst src index         -> "  pextrq "     ^ print_pair (print_op_xmm dst src) (print_imm8 index p)
-  | Pinsrd dst src index         -> "  pinsrd "     ^ print_pair (print_xmm_op32 dst src) (print_imm8 index p)
-  | Pinsrq dst src index         -> "  pinsrq "     ^ print_pair (print_xmm_op dst src) (print_imm8 index p)
-  | VPSLLDQ dst src count        -> "  vpslldq "    ^ print_pair (print_xmms dst src) (print_imm8 count p)
-  | Vpsrldq dst src count        -> "  vpsrldq "    ^ print_pair (print_xmms dst src) (print_imm8 count p)
   | MOVDQU dst src               -> "  movdqu "     ^ print_pair (print_mov128_op dst p) (print_mov128_op src p)
-  | Pclmulqdq dst src imm        -> "  pclmulqdq "  ^ print_pair (print_xmms dst src) (print_imm8 imm p)
-  |VPclmulqdq dst src1 src2 imm  -> "  vpclmulqdq " ^ print_pair (print_xmms_3 dst src1 src2) (print_imm8 imm p)  
-  | AESNI_enc dst src            -> "  aesenc "     ^ print_xmms dst src
-  | AESNI_enc_last dst src       -> "  aesenclast " ^ print_xmms dst src
-  |VAESNI_enc dst src1 src2      -> "  vaesenc "     ^ print_xmms_3 dst src1 src2 
-  |VAESNI_enc_last dst src1 src2 -> "  vaesenclast " ^ print_xmms_3 dst src1 src2
-  | AESNI_dec dst src      -> "  aesdec "     ^ print_xmms dst src
-  | AESNI_dec_last dst src -> "  aesdeclast " ^ print_xmms dst src
-  | AESNI_imc dst src      -> "  aesimc "     ^ print_xmms dst src
-  | AESNI_keygen_assist dst src imm -> "  aeskeygenassist " ^ print_pair (print_xmms dst src) (print_imm8 imm p)
-  | SHA256_rnds2 dst src   -> if p.sha256rnds2_explicit_xmm0() then 
-                               "  sha256rnds2 " ^ print_pair (print_xmms dst src) (print_xmm 0 p)
-                             else 
-                               "  sha256rnds2 " ^ print_xmms dst src
-  | SHA256_msg1 dst src    -> "  sha256msg1 "  ^ print_xmms dst src
-  | SHA256_msg2 dst src    -> "  sha256msg2 "  ^ print_xmms dst src
-    
 
 let print_cmp (c:ocmp) (counter:int) (p:printer) : string =
   let print_ops (o1:operand) (o2:operand) : string =

@@ -35,87 +35,34 @@ let check_if_pxor_leakage_free ins ts =
     true, TaintState ts'.regTaint ts.flagsTaint ts.cfFlagsTaint ts'.xmmTaint
   end
 
-val check_if_paddd_leakage_free: (ins:tainted_ins{Paddd? ins.i}) -> (ts:taintState) -> (res:(bool*taintState){let b, ts' = res in b2t b ==>
+val check_if_paddd_leakage_free: (ins:tainted_ins{Ins_ioXmm_Xmm? ins.i}) -> (ts:taintState) -> (res:(bool*taintState){let b, ts' = res in b2t b ==>
      isConstantTime (Ins ins) ts /\ isLeakageFree (Ins ins) ts ts'})
 
 let check_if_paddd_leakage_free ins ts =
-  let Paddd dst src = ins.i in
+  let Ins_ioXmm_Xmm _ dst src = ins.i in
   let taint = merge_taint (xmm_taint ts dst) (xmm_taint ts src) in
   let ts' = set_xmm_taint ts dst taint in
   true, TaintState ts'.regTaint Secret Secret ts'.xmmTaint
 
-val check_if_pslld_leakage_free: (ins:tainted_ins{Pslld? ins.i}) -> (ts:taintState) -> (res:(bool*taintState){let b, ts' = res in b2t b ==>
+val check_if_pslld_leakage_free: (ins:tainted_ins{Ins_ioXmm? ins.i}) -> (ts:taintState) -> (res:(bool*taintState){let b, ts' = res in b2t b ==>
      isConstantTime (Ins ins) ts /\ isLeakageFree (Ins ins) ts ts'})
 
 let check_if_pslld_leakage_free ins ts =
-  let Pslld dst amt = ins.i in
+  let Ins_ioXmm _ dst = ins.i in
   let taint = xmm_taint ts dst in
   let ts' = set_xmm_taint ts dst taint in
   true, TaintState ts'.regTaint ts.flagsTaint ts.cfFlagsTaint ts'.xmmTaint
 
-val check_if_psrld_leakage_free: (ins:tainted_ins{Psrld? ins.i}) -> (ts:taintState) -> (res:(bool*taintState){let b, ts' = res in b2t b ==>
-     isConstantTime (Ins ins) ts /\ isLeakageFree (Ins ins) ts ts'})
-
-let check_if_psrld_leakage_free ins ts =
-  let Psrld dst amt = ins.i in
-  let taint = xmm_taint ts dst in
-  let ts' = set_xmm_taint ts dst taint in
-  true, TaintState ts'.regTaint ts.flagsTaint ts.cfFlagsTaint ts'.xmmTaint
-
-val check_if_psrldq_leakage_free: (ins:tainted_ins{Psrldq? ins.i}) -> (ts:taintState) -> (res:(bool*taintState){let b, ts' = res in b2t b ==>
-     isConstantTime (Ins ins) ts /\ isLeakageFree (Ins ins) ts ts'})
-
-let check_if_psrldq_leakage_free ins ts =
-  let Psrldq dst _ = ins.i in
-  let taint = xmm_taint ts dst in
-  let ts' = set_xmm_taint ts dst taint in
-  true, TaintState ts'.regTaint ts.flagsTaint ts.cfFlagsTaint ts'.xmmTaint
-
-val check_if_shufpd_leakage_free: (ins:tainted_ins{Shufpd? ins.i}) -> (ts:taintState) -> (res:(bool*taintState){let b, ts' = res in b2t b ==>
-     isConstantTime (Ins ins) ts /\ isLeakageFree (Ins ins) ts ts'})
-
-let check_if_shufpd_leakage_free ins ts =
-  let Shufpd dst src _ = ins.i in
-  let taint = merge_taint (xmm_taint ts dst) (xmm_taint ts src) in
-  let ts' = set_xmm_taint ts dst taint in
-  true, TaintState ts'.regTaint Secret Secret ts'.xmmTaint
-
-val check_if_palignr_leakage_free: (ins:tainted_ins{Palignr? ins.i}) -> (ts:taintState) -> (res:(bool*taintState){let b, ts' = res in b2t b ==>
-     isConstantTime (Ins ins) ts /\ isLeakageFree (Ins ins) ts ts'})
-
-let check_if_palignr_leakage_free ins ts =
-  let Palignr dst src _ = ins.i in
-  let taint = merge_taint (xmm_taint ts dst) (xmm_taint ts src) in
-  let ts' = set_xmm_taint ts dst taint in
-  true, TaintState ts'.regTaint Secret Secret ts'.xmmTaint
-
-val check_if_pshufb_leakage_free: (ins:tainted_ins{Pshufb? ins.i}) -> (ts:taintState) -> (res:(bool*taintState){let b, ts' = res in b2t b ==>
-     isConstantTime (Ins ins) ts /\ isLeakageFree (Ins ins) ts ts'})
-
-let check_if_pshufb_leakage_free ins ts =
-  let Pshufb dst src = ins.i in
-  let taint = merge_taint (xmm_taint ts dst) (xmm_taint ts src) in
-  let ts' = set_xmm_taint ts dst taint in
-  true, TaintState ts'.regTaint Secret Secret ts'.xmmTaint
-
-val check_if_pshufd_leakage_free: (ins:tainted_ins{Pshufd? ins.i}) -> (ts:taintState) -> (res:(bool*taintState){let b, ts' = res in b2t b ==>
+val check_if_pshufd_leakage_free: (ins:tainted_ins{Ins_Xmm_Xmm? ins.i}) -> (ts:taintState) -> (res:(bool*taintState){let b, ts' = res in b2t b ==>
      isConstantTime (Ins ins) ts /\ isLeakageFree (Ins ins) ts ts'})
 
 let check_if_pshufd_leakage_free ins ts =
-  let Pshufd dst src _ = ins.i in
-  let taint = merge_taint (xmm_taint ts dst) (xmm_taint ts src) in
+  let Ins_Xmm_Xmm _ dst src = ins.i in
+  let taint = xmm_taint ts src in
   let ts' = set_xmm_taint ts dst taint in
   true, TaintState ts'.regTaint ts.flagsTaint ts.cfFlagsTaint ts'.xmmTaint
 
-val check_if_pcmpeqd_leakage_free: (ins:tainted_ins{Pcmpeqd? ins.i}) -> (ts:taintState) -> (res:(bool*taintState){let b, ts' = res in b2t b ==>
-     isConstantTime (Ins ins) ts /\ isLeakageFree (Ins ins) ts ts'})
-
-let check_if_pcmpeqd_leakage_free ins ts =
-  let Pcmpeqd dst src = ins.i in
-  let taint = merge_taint (xmm_taint ts dst) (xmm_taint ts src) in
-  let ts' = set_xmm_taint ts dst taint in
-  true, TaintState ts'.regTaint ts.flagsTaint ts.cfFlagsTaint ts'.xmmTaint
-
+(* TODO: replace Pextrq, Pinsrd, Pinsrq analysis with more general Instr analysis
 val check_if_pextrq_leakage_free: (ins:tainted_ins{Pextrq? ins.i}) -> (ts:taintState) -> (res:(bool*taintState){let b, ts' = res in b2t b ==>
      isConstantTime (Ins ins) ts /\ isLeakageFree (Ins ins) ts ts'})
 
@@ -223,108 +170,9 @@ let check_if_pinsrq_leakage_free ins ts =
   let ts' = set_xmm_taint ts dst taint in
   Opaque_s.reveal_opaque get_heap_val64_def;
   fixedTime, TaintState ts'.regTaint ts.flagsTaint ts.cfFlagsTaint ts'.xmmTaint
-
-val check_if_vpslldq_leakage_free: (ins:tainted_ins{VPSLLDQ? ins.i}) -> (ts:taintState) -> (res:(bool*taintState){let b, ts' = res in b2t b ==>
-     isConstantTime (Ins ins) ts /\ isLeakageFree (Ins ins) ts ts'})
-
-let check_if_vpslldq_leakage_free ins ts =
-  let VPSLLDQ dst src _ = ins.i in
-  let taint = merge_taint (xmm_taint ts dst) (xmm_taint ts src) in
-  let ts' = set_xmm_taint ts dst taint in
-  true, TaintState ts'.regTaint ts.flagsTaint ts.cfFlagsTaint ts'.xmmTaint
-
-val check_if_pclmuldqd_leakage_free: (ins:tainted_ins{Pclmulqdq? ins.i}) -> (ts:taintState) -> (res:(bool*taintState){let b, ts' = res in b2t b ==>
-     isConstantTime (Ins ins) ts /\ isLeakageFree (Ins ins) ts ts'})
+*)
 
 #set-options "--z3rlimit 40"
-
-let check_if_pclmuldqd_leakage_free ins ts =
-  let Pclmulqdq dst src _ = ins.i in
-  let taint = merge_taint (xmm_taint ts dst) (xmm_taint ts src) in
-  let ts' = set_xmm_taint ts dst taint in
-  true, TaintState ts'.regTaint Secret Secret ts'.xmmTaint
-
-val check_if_aesni_enc_leakage_free: (ins:tainted_ins{AESNI_enc? ins.i}) -> (ts:taintState) -> (res:(bool*taintState){let b, ts' = res in b2t b ==>
-     isConstantTime (Ins ins) ts /\ isLeakageFree (Ins ins) ts ts'})
-
-let check_if_aesni_enc_leakage_free ins ts =
-  let AESNI_enc dst src = ins.i in
-  let taint = merge_taint (xmm_taint ts dst) (xmm_taint ts src) in
-  let ts' = set_xmm_taint ts dst taint in
-  true, TaintState ts'.regTaint Secret Secret ts'.xmmTaint
-
-val check_if_aesni_enc_last_leakage_free: (ins:tainted_ins{AESNI_enc_last? ins.i}) -> (ts:taintState) -> (res:(bool*taintState){let b, ts' = res in b2t b ==>
-     isConstantTime (Ins ins) ts /\ isLeakageFree (Ins ins) ts ts'})
-
-let check_if_aesni_enc_last_leakage_free ins ts =
-  let AESNI_enc_last dst src = ins.i in
-  let taint = merge_taint (xmm_taint ts dst) (xmm_taint ts src) in
-  let ts' = set_xmm_taint ts dst taint in
-  true, TaintState ts'.regTaint Secret Secret ts'.xmmTaint
-
-val check_if_aesni_dec_leakage_free: (ins:tainted_ins{AESNI_dec? ins.i}) -> (ts:taintState) -> (res:(bool*taintState){let b, ts' = res in b2t b ==>
-     isConstantTime (Ins ins) ts /\ isLeakageFree (Ins ins) ts ts'})
-
-let check_if_aesni_dec_leakage_free ins ts =
-  let AESNI_dec dst src = ins.i in
-  let taint = merge_taint (xmm_taint ts dst) (xmm_taint ts src) in
-  let ts' = set_xmm_taint ts dst taint in
-  true, TaintState ts'.regTaint Secret Secret ts'.xmmTaint
-
-val check_if_aesni_dec_last_leakage_free: (ins:tainted_ins{AESNI_dec_last? ins.i}) -> (ts:taintState) -> (res:(bool*taintState){let b, ts' = res in b2t b ==>
-     isConstantTime (Ins ins) ts /\ isLeakageFree (Ins ins) ts ts'})
-
-let check_if_aesni_dec_last_leakage_free ins ts =
-  let AESNI_dec_last dst src = ins.i in
-  let taint = merge_taint (xmm_taint ts dst) (xmm_taint ts src) in
-  let ts' = set_xmm_taint ts dst taint in
-  true, TaintState ts'.regTaint Secret Secret ts'.xmmTaint
-
-val check_if_aesni_imc_leakage_free: (ins:tainted_ins{AESNI_imc? ins.i}) -> (ts:taintState) -> (res:(bool*taintState){let b, ts' = res in b2t b ==>
-     isConstantTime (Ins ins) ts /\ isLeakageFree (Ins ins) ts ts'})
-
-let check_if_aesni_imc_leakage_free ins ts =
-  let AESNI_imc dst src = ins.i in
-  let taint = merge_taint (xmm_taint ts dst) (xmm_taint ts src) in
-  let ts' = set_xmm_taint ts dst taint in
-  true, TaintState ts'.regTaint Secret Secret ts'.xmmTaint
-
-val check_if_aesni_keygen_leakage_free: (ins:tainted_ins{AESNI_keygen_assist? ins.i}) -> (ts:taintState) -> (res:(bool*taintState){let b, ts' = res in b2t b ==>
-     isConstantTime (Ins ins) ts /\ isLeakageFree (Ins ins) ts ts'})
-
-let check_if_aesni_keygen_leakage_free ins ts =
-  let AESNI_keygen_assist dst src _ = ins.i in
-  let taint = merge_taint (xmm_taint ts dst) (xmm_taint ts src) in
-  let ts' = set_xmm_taint ts dst taint in
-  true, TaintState ts'.regTaint Secret Secret ts'.xmmTaint
-
-val check_if_sha256_rnds2_leakage_free: (ins:tainted_ins{SHA256_rnds2? ins.i}) -> (ts:taintState) -> (res:(bool*taintState){let b, ts' = res in b2t b ==>
-     isConstantTime (Ins ins) ts /\ isLeakageFree (Ins ins) ts ts'})
-
-let check_if_sha256_rnds2_leakage_free ins ts =
-  let SHA256_rnds2 dst src = ins.i in
-  let taint = merge_taint (xmm_taint ts dst) (xmm_taint ts src) in
-  let taint = merge_taint (xmm_taint ts 0) taint in
-  let ts' = set_xmm_taint ts dst taint in
-  true, TaintState ts'.regTaint Secret Secret ts'.xmmTaint
-
-val check_if_sha256_msg1_leakage_free: (ins:tainted_ins{SHA256_msg1? ins.i}) -> (ts:taintState) -> (res:(bool*taintState){let b, ts' = res in b2t b ==>
-     isConstantTime (Ins ins) ts /\ isLeakageFree (Ins ins) ts ts'})
-     
-let check_if_sha256_msg1_leakage_free ins ts =
-  let SHA256_msg1 dst src = ins.i in
-  let taint = merge_taint (xmm_taint ts dst) (xmm_taint ts src) in
-  let ts' = set_xmm_taint ts dst taint in
-  true, TaintState ts'.regTaint Secret Secret ts'.xmmTaint
-
-val check_if_sha256_msg2_leakage_free: (ins:tainted_ins{SHA256_msg2? ins.i}) -> (ts:taintState) -> (res:(bool*taintState){let b, ts' = res in b2t b ==>
-     isConstantTime (Ins ins) ts /\ isLeakageFree (Ins ins) ts ts'})
-     
-let check_if_sha256_msg2_leakage_free ins ts =
-  let SHA256_msg2 dst src = ins.i in
-  let taint = merge_taint (xmm_taint ts dst) (xmm_taint ts src) in
-  let ts' = set_xmm_taint ts dst taint in
-  true, TaintState ts'.regTaint Secret Secret ts'.xmmTaint
 
 val check_if_movdqu_leakage_free: (ins:tainted_ins{MOVDQU? ins.i}) -> (ts:taintState) -> (res:(bool*taintState){let b, ts' = res in b2t b ==>
      isConstantTime (Ins ins) ts /\ isLeakageFree (Ins ins) ts ts'})
@@ -437,29 +285,9 @@ let check_if_movdqu_leakage_free ins ts =
 
 let check_if_xmm_ins_consumes_fixed_time ins ts =
   match ins.i with
-    | Paddd dst src -> check_if_paddd_leakage_free ins ts
+    | Ins_ioXmm _ _ -> check_if_pslld_leakage_free ins ts
+    | Ins_Xmm_Xmm _ _ _ -> check_if_pshufd_leakage_free ins ts
+    | Ins_ioXmm_Xmm _ _ _ -> check_if_paddd_leakage_free ins ts
     | Pxor dst src -> check_if_pxor_leakage_free ins ts
-    | Pslld dst amt -> check_if_pslld_leakage_free ins ts
-    | Psrld dst amt -> check_if_psrld_leakage_free ins ts
-    | Psrldq _ _ -> check_if_psrldq_leakage_free ins ts
-    | Palignr _ _ _ -> check_if_palignr_leakage_free ins ts
-    | Shufpd _ _ _ -> check_if_shufpd_leakage_free ins ts
-    | Pshufb dst src -> check_if_pshufb_leakage_free ins ts
-    | Pshufd dst src permutation -> check_if_pshufd_leakage_free ins ts
-    | Pinsrd _ _ _  -> check_if_pinsrd_leakage_free ins ts
-    | Pinsrq _ _ _ -> check_if_pinsrq_leakage_free ins ts
-    | Pcmpeqd _ _ -> check_if_pcmpeqd_leakage_free ins ts
-    | Pextrq _ _ _ -> check_if_pextrq_leakage_free ins ts
-    | VPSLLDQ dst src count -> check_if_vpslldq_leakage_free ins ts
     | MOVDQU dst src -> check_if_movdqu_leakage_free ins ts
-    | Pclmulqdq dst src imm -> check_if_pclmuldqd_leakage_free ins ts
-    | AESNI_enc dst src -> check_if_aesni_enc_leakage_free ins ts
-    | AESNI_enc_last dst src -> check_if_aesni_enc_last_leakage_free ins ts
-    | AESNI_dec dst src -> check_if_aesni_dec_leakage_free ins ts
-    | AESNI_dec_last dst src -> check_if_aesni_dec_last_leakage_free ins ts
-    | AESNI_imc dst src -> check_if_aesni_imc_leakage_free ins ts
-    | AESNI_keygen_assist dst src imm -> check_if_aesni_keygen_leakage_free ins ts
-    | SHA256_rnds2 _ _ -> check_if_sha256_rnds2_leakage_free ins ts
-    | SHA256_msg1 _ _ -> check_if_sha256_msg1_leakage_free ins ts
-    | SHA256_msg2 _ _ -> check_if_sha256_msg2_leakage_free ins ts
     | _ -> (false, ts)

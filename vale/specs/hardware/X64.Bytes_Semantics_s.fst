@@ -8,7 +8,7 @@ open Words_s
 open Words.Two_s
 open Words.Four_s
 open Types_s
-open X64.CryptoInstructions_s
+open X64.Instruction_s
 open FStar.Seq.Base
 module F = FStar.FunctionalExtensionality
 
@@ -25,25 +25,30 @@ type stack =
     mem:Map.t int nat8 ->                       // Stack contents
     stack
   
-type ins:eqtype =
-  | Cpuid      : ins
-  | Mov64      : dst:operand -> src:operand -> ins
-  | MovBe64    : dst:operand -> src:operand -> ins
-  | Cmovc64    : dst:operand -> src:operand -> ins
-  | Add64      : dst:operand -> src:operand -> ins
-  | AddLea64   : dst:operand -> src1:operand -> src2:operand -> ins
-  | AddCarry64 : dst:operand -> src:operand -> ins
-  | Adcx64     : dst:operand -> src:operand -> ins
-  | Adox64     : dst:operand -> src:operand -> ins
-  | Sub64      : dst:operand -> src:operand -> ins
-  | Sbb64      : dst:operand -> src:operand -> ins
-  | Mul64      : src:operand -> ins
-  | Mulx64     : dst_hi:operand -> dst_lo:operand -> src:operand -> ins
-  | IMul64     : dst:operand -> src:operand -> ins
+noeq type ins:eqtype =
+  // Generic instruction (should be able to express most instructions)
+  | Instr :
+      outs:list instr_out ->
+      args:list instr_operand ->
+      havoc_flags:flag_havoc ->
+      i:instr_t outs args havoc_flags ->
+      oprs:instr_operands_t outs args ->
+      ins
+
+  // Temporary partially-generic instructions
+  // TODO: replace these with Instr when Leakage_Ins supports Instr:
+  | Ins_64_64_preserve : i:instr_t [out op64] [op64] PreserveFlags -> dst:operand -> src:operand -> ins
+  | Ins_io64_64 : i:instr_t [inOut op64] [op64] HavocFlags -> dst:operand -> src:operand -> ins
+  | Ins_io64_64_cf : i:instr_t [inOut opFlagsCf; inOut op64] [op64] HavocFlags -> dst:operand -> src:operand -> ins
+  | Ins_ioXmm : i:instr_t [inOut opXmm] [] PreserveFlags -> dst:xmm -> ins
+  | Ins_Xmm_Xmm : i:instr_t [out opXmm] [opXmm] PreserveFlags -> dst:xmm -> src:xmm -> ins
+  | Ins_ioXmm_Xmm : i:instr_t [inOut opXmm] [opXmm] PreserveFlags -> dst:xmm -> src:xmm -> ins
+
+  // TODO: convert these to Instr:
   | Xor64      : dst:operand -> src:operand -> ins
-  | And64      : dst:operand -> src:operand -> ins
-  | Shr64      : dst:operand -> amt:operand -> ins
-  | Shl64      : dst:operand -> amt:operand -> ins
+  | Pxor       : dst:xmm -> src:xmm -> ins
+  | VPxor      : dst:xmm -> src1:xmm -> src2:mov128_op -> ins
+  | MOVDQU     : dst:mov128_op -> src:mov128_op -> ins  // We let the assembler complain about attempts to use two memory ops
 
   // Stack operations
   | Push       : src:operand -> ins
@@ -51,42 +56,6 @@ type ins:eqtype =
   | Alloc      : n:nat -> ins
   | Dealloc    : n:nat -> ins
 
-  | Paddd      : dst:xmm -> src:xmm -> ins
-  |VPaddd      : dst:xmm -> src1:xmm -> src2:xmm -> ins
-  | Pxor       : dst:xmm -> src:xmm -> ins
-  |VPxor       : dst:xmm -> src1:xmm -> src2:mov128_op -> ins
-  | Pand       : dst:xmm -> src:xmm -> ins
-  | Pslld      : dst:xmm -> amt:int -> ins
-  | Psrld      : dst:xmm -> amt:int -> ins
-  | Psrldq     : dst:xmm -> amt:int -> ins
-  | Palignr    : dst:xmm -> src:xmm -> amount:imm8 -> ins
-  |VPalignr    : dst:xmm -> src1:xmm -> src2:xmm -> amount:imm8 -> ins
-  | Shufpd     : dst:xmm -> src:xmm -> permutation:imm8 -> ins
-  |VShufpd     : dst:xmm -> src1:xmm -> src2:xmm -> permutation:imm8 -> ins    
-  | Pshufb     : dst:xmm -> src:xmm -> ins
-  |VPshufb     : dst:xmm -> src1:xmm -> src2:xmm -> ins
-  | Pshufd     : dst:xmm -> src:xmm -> permutation:imm8 -> ins
-  | Pcmpeqd    : dst:xmm -> src:xmm -> ins
-  | Pextrq     : dst:operand -> src:xmm -> index:imm8 -> ins
-  | Pinsrd     : dst:xmm -> src:operand -> index:imm8 -> ins
-  | Pinsrq     : dst:xmm -> src:operand -> index:imm8 -> ins
-  | VPSLLDQ    : dst:xmm -> src:xmm -> count:imm8 -> ins
-  | Vpsrldq    : dst:xmm -> src:xmm -> count:imm8 -> ins
-  | MOVDQU     : dst:mov128_op -> src:mov128_op -> ins  // We let the assembler complain about attempts to use two memory ops
-  | Pclmulqdq  : dst:xmm -> src:xmm -> imm:int -> ins
-  |VPclmulqdq  : dst:xmm -> src1:xmm -> src2:xmm -> imm:int -> ins
-  | AESNI_enc           : dst:xmm -> src:xmm -> ins
-  | AESNI_enc_last      : dst:xmm -> src:xmm -> ins
-  | AESNI_dec           : dst:xmm -> src:xmm -> ins
-  | AESNI_dec_last      : dst:xmm -> src:xmm -> ins
-  | AESNI_imc           : dst:xmm -> src:xmm -> ins
-  | AESNI_keygen_assist : dst:xmm -> src:xmm -> imm8 -> ins
-  | VAESNI_enc          : dst:xmm -> src1:xmm -> src2:xmm -> ins
-  | VAESNI_enc_last     : dst:xmm -> src1:xmm -> src2:xmm -> ins  
-  | SHA256_rnds2 : dst:xmm -> src:xmm -> ins
-  | SHA256_msg1  : dst:xmm -> src:xmm -> ins
-  | SHA256_msg2  : dst:xmm -> src:xmm -> ins
-  
 type ocmp:eqtype =
   | OEq: o1:operand{not (OMem? o1 || OStack? o1)} -> o2:operand{not (OMem? o2 || OStack? o2)} -> ocmp
   | ONe: o1:operand{not (OMem? o1 || OStack? o1)} -> o2:operand{not (OMem? o2 || OStack? o2)} -> ocmp
@@ -352,18 +321,24 @@ let valid_dst_mov128_op (o:mov128_op) (s:state) : bool =
   | Mov128Mem m -> valid_addr128 (eval_maddr m s) s.mem
   | Mov128Stack m -> valid_dst_stack128 (eval_reg Rsp s) (eval_maddr m s) s.stack
 
-let update_operand_preserve_flags' (o:operand) (v:nat64) (s:state) : state =
+let update_operand_preserve_flags'' (o:operand) (v:nat64) (s_orig s:state) : state =
   match o with
   | OConst _ -> {s with ok = false}
   | OReg r -> update_reg' r v s
-  | OMem m -> update_mem (eval_maddr m s) v s // see valid_maddr for how eval_maddr connects to b and i
-  | OStack m -> update_stack (eval_maddr m s) v s 
+  | OMem m -> update_mem (eval_maddr m s_orig) v s // see valid_maddr for how eval_maddr connects to b and i
+  | OStack m -> update_stack (eval_maddr m s_orig) v s 
 
-let update_mov128_op_preserve_flags' (o:mov128_op) (v:quad32) (s:state) : state =
+let update_operand_preserve_flags' (o:operand) (v:nat64) (s:state) : state =
+  update_operand_preserve_flags'' o v s s
+
+let update_mov128_op_preserve_flags'' (o:mov128_op) (v:quad32) (s_orig s:state) : state =
   match o with
   | Mov128Xmm i -> update_xmm' i v s
-  | Mov128Mem m -> update_mem128 (eval_maddr m s) v s
-  | Mov128Stack m -> update_stack128 (eval_maddr m s) v s
+  | Mov128Mem m -> update_mem128 (eval_maddr m s_orig) v s
+  | Mov128Stack m -> update_stack128 (eval_maddr m s_orig) v s
+
+let update_mov128_op_preserve_flags' (o:mov128_op) (v:quad32) (s:state) : state =
+  update_mov128_op_preserve_flags'' o v s s
 
 // Default version havocs flags
 let update_operand' (o:operand) (ins:ins) (v:nat64) (s:state) : state =
@@ -420,24 +395,6 @@ let free_stack' (start finish:int) (st:stack) : stack =
   let new_mem = Map.restrict restricted_domain mem in
   Vale_stack init_rsp new_mem
 
-let is_full_byte_reversal_mask (q:quad32) : bool =
-  q.lo0 = 0x0C0D0E0F &&
-  q.lo1 = 0x08090A0B &&
-  q.hi2 = 0x04050607 &&
-  q.hi3 = 0x00010203
-
-let is_high_dup_reversal_mask (q:quad32) : bool =
-  q.lo0 = 0x0C0D0E0F &&
-  q.lo1 = 0x08090A0B &&
-  q.hi2 = 0x0C0D0E0F &&
-  q.hi3 = 0x08090A0B
-
-let is_lower_upper_byte_reversal_mask (q:quad32) : bool =
-  q.lo0 = 0x04050607 &&
-  q.lo1 = 0x00010203 &&
-  q.hi2 = 0x0C0D0E0F &&
-  q.hi3 = 0x08090A0B
-
 (* Define a stateful monad to simplify defining the instruction semantics *)
 let st (a:Type) = state -> a * state
 
@@ -478,6 +435,15 @@ let check (valid: state -> bool) : st unit =
     return ()
   else
     fail
+
+unfold
+let try_option (#a:Type) (o:option a) (f:a -> st unit) : st unit =
+  match o with
+  | None -> fail
+  | Some x -> f x
+
+let apply_option (#a:Type) (o:option a) (f:a -> st unit) : st unit =
+  try_option o f
 
 unfold
 let run (f:st unit) (s:state) : state = snd (f s)
@@ -542,174 +508,182 @@ let free_stack (start finish:int) : st unit =
   s <-- get;
   set ( { s with stack = free_stack' start finish s.stack} )
 
-(* Factor out common instruction shortcuts *)
-let paddd (src1 src2:quad32) : quad32 =
-  (Mkfour ((src1.lo0 + src2.lo0) % pow2_32)
-          ((src1.lo1 + src2.lo1) % pow2_32)
-          ((src1.hi2 + src2.hi2) % pow2_32)
-          ((src1.hi3 + src2.hi3) % pow2_32))
+let bind_option (#a #b:Type) (v:option a) (f:a -> option b) : option b =
+  match v with
+  | None -> None
+  | Some x -> f x
 
-let palignr (src1 src2:quad32) (amount:int) : option quad32 =
-  if amount = 4 then
-    Some (Mkfour src2.lo1 src2.hi2 src2.hi3 src1.lo0)
-  else if amount = 8 then
-    Some (Mkfour src2.hi2 src2.hi3 src1.lo0 src1.lo1)
-  else None
+[@instr_attr]
+let instr_eval_operand_explicit (i:instr_operand_explicit) (o:instr_operand_t i) (s:state) : option (instr_val_t (IOpEx i)) =
+  match i with
+  | IOp64 -> if valid_src_operand o s then Some (eval_operand o s) else None
+  | IOpXmm -> if valid_src_mov128_op o s then Some (eval_mov128_op o s) else None
 
-let shufpd (src1 src2:quad32) (permutation:int) : quad32 =
-    Mkfour (if permutation % 2 = 0 then src1.lo0 else src1.hi2)
-           (if permutation % 2 = 0 then src1.lo1 else src1.hi3)
-           (if (permutation / 2) % 2 = 0 then src2.lo0 else src2.hi2)
-           (if (permutation / 2) % 2 = 0 then src2.lo1 else src2.hi3)
-           
-let pshufb (src1 src2:quad32) : option quad32 =
-    // We only spec a restricted version sufficient for a handful of standard patterns
-    if is_full_byte_reversal_mask src2 then
-      Some (reverse_bytes_quad32 src1)
-    else if is_high_dup_reversal_mask src2 then
-      Some (Mkfour (reverse_bytes_nat32 src1.hi3)
-                   (reverse_bytes_nat32 src1.hi2)
-                   (reverse_bytes_nat32 src1.hi3)
-                   (reverse_bytes_nat32 src1.hi2))
-    else if is_lower_upper_byte_reversal_mask src2 then
-     Some (Mkfour (reverse_bytes_nat32 src1.lo1)
-                  (reverse_bytes_nat32 src1.lo0)
-                  (reverse_bytes_nat32 src1.hi3)
-                  (reverse_bytes_nat32 src1.hi2))
-    else None
+[@instr_attr]
+let instr_eval_operand_implicit (i:instr_operand_implicit) (s:state) : option (instr_val_t (IOpIm i)) =
+  match i with
+  | IOp64One o -> if valid_src_operand o s then Some (eval_operand o s) else None
+  | IOpXmmOne o -> if valid_src_mov128_op o s then Some (eval_mov128_op o s) else None
+  | IOpFlagsCf -> Some (cf s.flags)
+  | IOpFlagsOf -> Some (overflow s.flags)
 
-let pclmulqdq (src1 src2:quad32) (imm:int) : option quad32 =
-    let Mkfour a0 a1 a2 a3 = src1 in
-    let Mkfour b0 b1 b2 b3 = src2 in
-    let f x0 x1 y0 y1 =
-      let x = Math.Poly2.Bits_s.of_double32 (Mktwo x0 x1) in
-      let y = Math.Poly2.Bits_s.of_double32 (Mktwo y0 y1) in
-      Math.Poly2.Bits_s.to_quad32 (Math.Poly2_s.mul x y)
+[@instr_attr]
+let rec instr_apply_eval_args
+    (outs:list instr_out) (args:list instr_operand)
+    (f:instr_args_t outs args) (oprs:instr_operands_t_args args) (s:state)
+  : option (instr_ret_t outs) =
+  match args with
+  | [] -> f
+  | i::args ->
+    let (v, oprs) =
+      match i with
+      | IOpEx i -> let oprs = coerce oprs in (instr_eval_operand_explicit i (fst oprs) s, snd oprs)
+      | IOpIm i -> (instr_eval_operand_implicit i s, coerce oprs)
+      in
+    let f:arrow (instr_val_t i) (instr_args_t outs args) = coerce f in
+    bind_option v (fun v -> instr_apply_eval_args outs args (f v) oprs s)
+
+[@instr_attr]
+let rec instr_apply_eval_inouts
+    (outs inouts:list instr_out) (args:list instr_operand)
+    (f:instr_inouts_t outs inouts args) (oprs:instr_operands_t inouts args) (s:state)
+  : option (instr_ret_t outs) =
+  match inouts with
+  | [] -> instr_apply_eval_args outs args f oprs s
+  | (Out, i)::inouts ->
+    let oprs =
+      match i with
+      | IOpEx i -> snd #(instr_operand_t i) (coerce oprs)
+      | IOpIm i -> coerce oprs
+      in
+    instr_apply_eval_inouts outs inouts args (coerce f) oprs s
+  | (InOut, i)::inouts ->
+    let (v, oprs) =
+      match i with
+      | IOpEx i -> let oprs = coerce oprs in (instr_eval_operand_explicit i (fst oprs) s, snd oprs)
+      | IOpIm i -> (instr_eval_operand_implicit i s, coerce oprs)
+      in
+    let f:arrow (instr_val_t i) (instr_inouts_t outs inouts args) = coerce f in
+    bind_option v (fun v -> instr_apply_eval_inouts outs inouts args (f v) oprs s)
+
+(*
+Take the all the input operands for an instruction and:
+- check that they are valid
+- evaluate them
+- apply the instruction's evaluator function f to the evaluated operands
+*)
+[@instr_attr]
+let instr_apply_eval
+    (outs:list instr_out) (args:list instr_operand)
+    (f:instr_eval_t outs args) (oprs:instr_operands_t outs args) (s:state)
+  : option (instr_ret_t outs) =
+  instr_apply_eval_inouts outs outs args f oprs s
+
+let state_or_fail (s:state) (b:bool) (s':state) : state =
+  if b then s' else {s with ok = false}
+
+[@instr_attr]
+let rec instr_write_output_explicit
+    (i:instr_operand_explicit) (v:instr_val_t (IOpEx i)) (o:instr_operand_t i) (s_orig s:state)
+  : state =
+  match i with
+  | IOp64 -> state_or_fail s (valid_dst_operand o s_orig) (update_operand_preserve_flags'' o v s_orig s)
+  | IOpXmm -> state_or_fail s (valid_dst_mov128_op o s_orig) (update_mov128_op_preserve_flags'' o v s_orig s)
+
+[@instr_attr]
+let rec instr_write_output_implicit
+    (i:instr_operand_implicit) (v:instr_val_t (IOpIm i)) (s_orig s:state)
+  : state =
+  match i with
+  | IOp64One o -> state_or_fail s (valid_dst_operand o s_orig) (update_operand_preserve_flags'' o v s_orig s)
+  | IOpXmmOne o -> state_or_fail s (valid_dst_mov128_op o s_orig) (update_mov128_op_preserve_flags'' o v s_orig s)
+  | IOpFlagsCf -> {s with flags = update_cf' s.flags v}
+  | IOpFlagsOf -> {s with flags = update_of' s.flags v}
+
+(*
+For each output operand:
+- compute the location of the operand in s_orig
+- check that the operand is valid and update the current state (in order that the operands appear in "outs")
+*)
+[@instr_attr]
+let rec instr_write_outputs
+    (outs:list instr_out) (args:list instr_operand)
+    (vs:instr_ret_t outs) (oprs:instr_operands_t outs args) (s_orig s:state)
+  : state =
+  match outs with
+  | [] -> s
+  | (_, i):: outs ->
+    (
+      let ((v:instr_val_t i), (vs:instr_ret_t outs)) =
+        match outs with
+        | [] -> (vs, ())
+        | _::_ -> let vs = coerce vs in (fst vs, snd vs)
+        in
+      match i with
+      | IOpEx i ->
+        let oprs = coerce oprs in
+        let s = instr_write_output_explicit i v (fst oprs) s_orig s in
+        instr_write_outputs outs args vs (snd oprs) s_orig s
+      | IOpIm i ->
+        let s = instr_write_output_implicit i v s_orig s in
+        instr_write_outputs outs args vs (coerce oprs) s_orig s
+    )
+
+[@instr_attr]
+let eval_instr
+    (outs:list instr_out) (args:list instr_operand) (havoc_flags:flag_havoc)
+    (i:instr_t outs args havoc_flags) (oprs:instr_operands_t outs args) (s0:state)
+  : option state =
+  let vs = instr_apply_eval outs args (instr_eval i) oprs s0 in
+  let s1 =
+    match havoc_flags with
+    | HavocFlags -> {s0 with flags = havoc s0 (Instr outs args havoc_flags i oprs)}
+    | PreserveFlags -> s0
     in
-    match imm with
-    | 0 -> Some (f a0 a1 b0 b1)
-    | 1 -> Some (f a2 a3 b0 b1)
-    | 16 -> Some (f a0 a1 b2 b3)
-    | 17 -> Some (f a2 a3 b2 b3)
-    | _ -> None
-
-let aesni_enc (src1 src2:quad32) : quad32 = 
-  quad32_xor (AES_s.mix_columns_LE (AES_s.sub_bytes (AES_s.shift_rows_LE src1))) src2
-
-let aesni_enc_last  (src1 src2:quad32) : quad32 = 
-  (quad32_xor (AES_s.sub_bytes (AES_s.shift_rows_LE src1)) src2)
+  FStar.Option.mapTot (fun vs -> instr_write_outputs outs args vs oprs s0 s1) vs
 
 (* Core definition of instruction semantics *)
+[@instr_attr]
 let eval_ins (ins:ins) : st unit =
   s <-- get;
   match ins with
-  | Cpuid ->
-    update_reg Rax (cpuid Rax (eval_reg Rax s) (eval_reg Rcx s));; 
-    update_reg Rbx (cpuid Rbx (eval_reg Rax s) (eval_reg Rcx s));;
-    update_reg Rcx (cpuid Rcx (eval_reg Rax s) (eval_reg Rcx s));;
-    update_reg Rdx (cpuid Rdx (eval_reg Rax s) (eval_reg Rcx s))
+  | Instr outs args havoc_flags i oprs ->
+    apply_option (eval_instr outs args havoc_flags i oprs s) set
 
-  | Mov64 dst src ->
+  | Ins_64_64_preserve i dst src ->
     check (valid_src_operand src);;
-    update_operand_preserve_flags dst (eval_operand src s)
-    
-  | MovBe64 dst src ->
-    check (valid_src_operand src);;
-    update_operand_preserve_flags dst (reverse_bytes_nat64 (eval_operand src s))
-        
-  | Cmovc64 dst src ->
-    check (valid_src_operand src);;
-    update_operand_preserve_flags dst (eval_operand (if cf s.flags then src else dst) s)
+    let vOpt = instr_eval i (eval_operand src s) in
+    try_option vOpt (update_operand_preserve_flags dst)
 
-  | Add64 dst src ->
+  | Ins_io64_64 i dst src ->
     check (valid_src_operand src);;
-    let sum = (eval_operand dst s) + (eval_operand src s) in
-    let new_carry = sum >= pow2_64 in
-    update_operand dst ins (sum % pow2_64);;
-    update_cf new_carry
+    let vOpt = instr_eval i (eval_operand dst s) (eval_operand src s) in
+    try_option vOpt (update_operand dst ins)
 
-  | AddLea64 dst src1 src2 ->
-    check (valid_src_operand src1);;
-    check (valid_src_operand src2);;
-    update_operand_preserve_flags dst ((eval_operand src1 s + eval_operand src2 s) % pow2_64)
-
-  | AddCarry64 dst src ->
+  | Ins_io64_64_cf i dst src ->
     check (valid_src_operand src);;
-    let old_carry = if cf(s.flags) then 1 else 0 in
-    let sum = (eval_operand dst s) + (eval_operand src s) + old_carry in
-    let new_carry = sum >= pow2_64 in
-    update_operand dst ins (sum % pow2_64);;
-    update_flags (havoc s ins);;
-    update_cf new_carry  // We specify cf, but underspecify everything else
+    let vOpt = instr_eval i (cf s.flags) (eval_operand dst s) (eval_operand src s) in
+    try_option vOpt (fun (new_carry, v) ->
+      update_operand dst ins v;;
+      update_flags (havoc s ins);; // We specify cf, but underspecify everything else
+      update_cf new_carry)
 
-  | Adcx64 dst src ->
-    check_imm adx_enabled;;
-    check (valid_src_operand src);;
-    let old_carry = if cf(s.flags) then 1 else 0 in
-    let sum = (eval_operand dst s) + (eval_operand src s) + old_carry in
-    let new_carry = sum >= pow2_64 in
-    update_operand_preserve_flags dst (sum % pow2_64);;
-    update_cf new_carry // Explicitly touches only CF
+  | Ins_ioXmm i dst ->
+    let vOpt = instr_eval i (eval_xmm dst s) in
+    try_option vOpt (update_xmm_preserve_flags dst)
 
-  | Adox64 dst src ->
-    check_imm adx_enabled;;
-    check (valid_src_operand src);;
-    let old_carry = if overflow(s.flags) then 1 else 0 in
-    let sum = (eval_operand dst s) + (eval_operand src s) + old_carry in
-    let new_carry = sum >= pow2_64 in
-    update_operand_preserve_flags dst (sum % pow2_64);;
-    update_of new_carry  // Explicitly touches only OF
+  | Ins_Xmm_Xmm i dst src ->
+    let vOpt = instr_eval i (eval_xmm src s) in
+    try_option vOpt (update_xmm_preserve_flags dst)
 
-  | Sub64 dst src ->
-    check (valid_src_operand src);;
-    let diff = eval_operand dst s - eval_operand src s in
-    let new_carry = diff < 0 in
-    update_operand dst ins (diff % pow2_64);;
-    update_cf new_carry
-
-  | Sbb64 dst src ->
-    let old_carry = if cf(s.flags) then 1 else 0 in
-    let diff = eval_operand dst s - (eval_operand src s + old_carry) in
-    let new_carry = diff < 0 in
-    update_operand dst ins (diff % pow2_64);;
-    update_cf new_carry  // We specify cf, but underspecify everything else (which update_operand havocs)
-    
-  | Mul64 src ->
-    check (valid_src_operand src);;
-    let hi = FStar.UInt.mul_div #64 (eval_reg Rax s) (eval_operand src s) in
-    let lo = FStar.UInt.mul_mod #64 (eval_reg Rax s) (eval_operand src s) in
-    update_reg Rax lo;;
-    update_reg Rdx hi;;
-    update_flags (havoc s ins)
-
-  | Mulx64 dst_hi dst_lo src ->
-    check_imm bmi2_enabled;;
-    check (valid_src_operand src);;
-    let hi = FStar.UInt.mul_div #64 (eval_reg Rdx s) (eval_operand src s) in
-    let lo = FStar.UInt.mul_mod #64 (eval_reg Rdx s) (eval_operand src s) in
-    update_operand_preserve_flags dst_lo lo;;
-    update_operand_preserve_flags dst_hi hi
-
-  | IMul64 dst src ->
-    check (valid_src_operand src);;
-    update_operand dst ins (FStar.UInt.mul_mod #64 (eval_operand dst s) (eval_operand src s))
+  | Ins_ioXmm_Xmm i dst src ->
+    let vOpt = instr_eval i (eval_xmm dst s) (eval_xmm src s) in
+    try_option vOpt (update_xmm_preserve_flags dst)
 
   | Xor64 dst src ->
     check (valid_src_operand src);;
     update_operand dst ins (Types_s.ixor (eval_operand dst s) (eval_operand src s));;
     update_cf_of false false
-
-  | And64 dst src ->
-    check (valid_src_operand src);;
-    update_operand dst ins (Types_s.iand (eval_operand dst s) (eval_operand src s))
-
-  | Shr64 dst amt ->
-    check (valid_src_shift_operand amt);;
-    update_operand dst ins (Types_s.ishr (eval_operand dst s) (eval_operand amt s))
-
-  | Shl64 dst amt ->
-    check (valid_src_shift_operand amt);;
-    update_operand dst ins (Types_s.ishl (eval_operand dst s) (eval_operand amt s))
 
   | Push src ->
     check (valid_src_operand src);;
@@ -751,12 +725,6 @@ let eval_ins (ins:ins) : st unit =
 // In the XMM-related instructions below, we generally don't need to check for validity of the operands,
 // since all possibilities are valid, thanks to dependent types
 
-  | Paddd dst src ->
-    update_xmm dst ins (paddd (eval_xmm dst s) (eval_xmm src s))
-
-  |VPaddd dst src1 src2 ->
-    update_xmm dst ins (paddd (eval_xmm src1 s) (eval_xmm src2 s))
-
   | Pxor dst src ->
     update_xmm_preserve_flags dst (quad32_xor (eval_xmm dst s) (eval_xmm src s))
 
@@ -764,189 +732,9 @@ let eval_ins (ins:ins) : st unit =
     check (valid_src_mov128_op src2);;
     update_xmm_preserve_flags dst (quad32_xor (eval_xmm src1 s) (eval_mov128_op src2 s))
 
-  | Pand dst src ->
-    update_xmm_preserve_flags dst (four_map2 (fun di si -> iand di si) (eval_xmm dst s) (eval_xmm src s))
-
-  | Pslld dst amt ->
-    check_imm (0 <= amt && amt < 32);;
-    update_xmm_preserve_flags dst (four_map (fun i -> ishl i amt) (eval_xmm dst s))
-
-  | Psrld dst amt ->
-    check_imm (0 <= amt && amt < 32);;
-    update_xmm_preserve_flags dst (four_map (fun i -> ishr i amt) (eval_xmm dst s))
-
-  | Psrldq dst amt ->
-    check_imm (0 <= amt && amt < 16);;
-    let src_q = eval_xmm dst s in
-    let src_bytes = le_quad32_to_bytes src_q in
-    let abs_amt = if 0 <= amt && amt <= (length src_bytes) then amt else 0 in // F* can't use the check_imm above
-    let zero_pad = Seq.create abs_amt 0 in
-    let remaining_bytes = slice src_bytes abs_amt (length src_bytes) in
-    let dst_q = le_bytes_to_quad32 (append zero_pad remaining_bytes) in
-    update_xmm_preserve_flags dst dst_q
-
-  | Palignr dst src amount ->
-    // We only spec a restricted version sufficient for a handful of standard patterns
-    check_imm (amount = 4 || amount = 8);;
-    (match (palignr (eval_xmm dst s) (eval_xmm src s) amount) with
-     | Some result -> update_xmm dst ins result
-     | None -> fail)
-     
-  |VPalignr dst src1 src2 amount ->
-    // We only spec a restricted version sufficient for a handful of standard patterns
-    check_imm (amount = 4 || amount = 8);;
-    (match (palignr (eval_xmm src1 s) (eval_xmm src2 s) amount) with
-     | Some result -> update_xmm dst ins result
-     | None -> fail)  
-     
-  | Shufpd dst src permutation ->
-    check_imm (0 <= permutation && permutation < 4);;
-    update_xmm dst ins (shufpd (eval_xmm dst s) (eval_xmm src s) permutation)
-    
-  |VShufpd dst src1 src2 permutation ->
-    check_imm (0 <= permutation && permutation < 4);;
-    update_xmm dst ins (shufpd (eval_xmm src1 s) (eval_xmm src2 s) permutation)
-    
-  | Pshufb dst src ->
-    (match pshufb (eval_xmm dst s) (eval_xmm src s) with
-     | Some result -> update_xmm dst ins result
-     | None -> fail)
-     
-  |VPshufb dst src1 src2 ->
-    (match pshufb (eval_xmm src1 s) (eval_xmm src2 s) with
-     | Some result -> update_xmm dst ins result
-     | None -> fail)
-     
-  | Pshufd dst src permutation ->
-    let bits:bits_of_byte = byte_to_twobits permutation in
-    let src_val = eval_xmm src s in
-    let permuted_xmm = Mkfour
-         (select_word src_val bits.lo0)
-         (select_word src_val bits.lo1)
-         (select_word src_val bits.hi2)
-         (select_word src_val bits.hi3)
-    in
-    update_xmm_preserve_flags dst permuted_xmm
-
-  | Pcmpeqd dst src ->
-    let src_q = eval_xmm src s in
-    let dst_q = eval_xmm dst s in
-    let eq_result (b:bool):nat32 = if b then 0xFFFFFFFF else 0 in
-    let eq_val = Mkfour
-        (eq_result (src_q.lo0 = dst_q.lo0))
-        (eq_result (src_q.lo1 = dst_q.lo1))
-        (eq_result (src_q.hi2 = dst_q.hi2))
-        (eq_result (src_q.hi3 = dst_q.hi3))
-    in
-    update_xmm_preserve_flags dst eq_val
-
-  | Pextrq dst src index ->
-    let src_q = eval_xmm src s in
-    let src_two = four_to_two_two src_q in
-    let extracted_nat64 = two_to_nat 32 (two_select src_two (index % 2)) in
-    update_operand_preserve_flags dst extracted_nat64
-
-  | Pinsrd dst src index ->
-    check (valid_src_operand src);;
-    let dst_q = eval_xmm dst s in
-    update_xmm_preserve_flags dst  (insert_nat32 dst_q ((eval_operand src s) % pow2_32) (index % 4))
-
-  | Pinsrq dst src index ->
-    check (valid_src_operand src);;
-    let dst_q = eval_xmm dst s in
-    update_xmm_preserve_flags dst (insert_nat64 dst_q (eval_operand src s) (index % 2))
-
-  | VPSLLDQ dst src count ->
-    check_imm (count = 4 || count = 8);;  // We only spec the two very special cases we need
-    let src_q = eval_xmm src s in
-    let shifted_xmm = 
-        if count = 4 then Mkfour 0 src_q.lo0 src_q.lo1 src_q.hi2 
-        else Mkfour 0 0 src_q.lo0 src_q.lo1
-    in
-    update_xmm_preserve_flags dst shifted_xmm
-
-  | Vpsrldq dst src count ->
-    check_imm (count = 8);;  // We only spec the one very special case we need
-    let src_q = eval_xmm src s in
-    let shifted_xmm = Mkfour src_q.hi2 src_q.hi3 0 0 in
-    update_xmm_preserve_flags dst shifted_xmm
-
   | MOVDQU dst src ->
     check (valid_src_mov128_op src);;
     update_mov128_op_preserve_flags dst (eval_mov128_op src s)
-
-  | Pclmulqdq dst src imm ->
-    check_imm pclmulqdq_enabled;;
-    (match pclmulqdq (eval_xmm dst s) (eval_xmm src s) imm with
-     | Some result -> update_xmm dst ins result
-     | None -> fail)
-     
-  |VPclmulqdq dst src1 src2 imm ->
-    check_imm pclmulqdq_enabled;;
-    (match pclmulqdq (eval_xmm src1 s) (eval_xmm src2 s) imm with
-     | Some result -> update_xmm dst ins result
-     | None -> fail)
-     
-  | AESNI_enc dst src ->
-    check_imm aesni_enabled;;
-    update_xmm dst ins (aesni_enc (eval_xmm dst s) (eval_xmm src s))
-    
-  | VAESNI_enc dst src1 src2 ->
-    check_imm aesni_enabled;;
-    update_xmm dst ins (aesni_enc (eval_xmm src1 s) (eval_xmm src2 s))
-    
-  | AESNI_enc_last dst src ->
-    check_imm aesni_enabled;;
-    update_xmm dst ins (aesni_enc_last (eval_xmm dst s) (eval_xmm src s))
-
-  | VAESNI_enc_last dst src1 src2 ->
-    check_imm aesni_enabled;;
-    update_xmm dst ins (aesni_enc_last (eval_xmm src1 s) (eval_xmm src2 s))
-
-  | AESNI_dec dst src ->
-    check_imm aesni_enabled;;
-    let dst_q = eval_xmm dst s in
-    let src_q = eval_xmm src s in
-    update_xmm dst ins (quad32_xor (AES_s.inv_mix_columns_LE (AES_s.inv_sub_bytes (AES_s.inv_shift_rows_LE dst_q))) src_q)
-
-  | AESNI_dec_last dst src ->
-    check_imm aesni_enabled;;
-    let dst_q = eval_xmm dst s in
-    let src_q = eval_xmm src s in
-    update_xmm dst ins (quad32_xor (AES_s.inv_sub_bytes (AES_s.inv_shift_rows_LE dst_q)) src_q)
-
-  | AESNI_imc dst src ->
-    check_imm aesni_enabled;;
-    let src_q = eval_xmm src s in
-    update_xmm dst ins (AES_s.inv_mix_columns_LE src_q)
-
-  | AESNI_keygen_assist dst src imm ->
-    check_imm aesni_enabled;;
-    let src_q = eval_xmm src s in
-    update_xmm dst ins (Mkfour (AES_s.sub_word src_q.lo1)
-                               (ixor (AES_s.rot_word_LE (AES_s.sub_word src_q.lo1)) imm)
-                               (AES_s.sub_word src_q.hi3)
-                               (ixor (AES_s.rot_word_LE (AES_s.sub_word src_q.hi3)) imm))
-
-  | SHA256_rnds2 dst src ->
-    check_imm sha_enabled;;
-    let src1_q = eval_xmm dst s in
-    let src2_q = eval_xmm src s in
-    let wk_q  = eval_xmm 0 s in    
-    update_xmm_preserve_flags dst (sha256_rnds2_spec src1_q src2_q wk_q)
-
-  | SHA256_msg1 dst src ->
-    check_imm sha_enabled;;
-    let src1 = eval_xmm dst s in
-    let src2 = eval_xmm src s in
-    update_xmm_preserve_flags dst (sha256_msg1_spec src1 src2)
-
-  | SHA256_msg2 dst src ->
-    check_imm sha_enabled;;
-    let src1 = eval_xmm dst s in
-    let src2 = eval_xmm src s in
-    update_xmm_preserve_flags dst (sha256_msg2_spec src1 src2)
-
 
 (*
  * These functions return an option state
