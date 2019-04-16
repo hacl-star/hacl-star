@@ -138,10 +138,8 @@ fun r dst k ->
   let has_pclmulqdq = EverCrypt.AutoConfig2.has_pclmulqdq () in
   if EverCrypt.TargetConfig.x64 && (has_aesni && has_pclmulqdq) then (
     let ek = B.malloc r 0uy (ekv_len a) in
-    push_frame();
-    let ek' = B.alloca #UInt8.t 0uy (ekv_len a) in
-    let keys_b = B.sub ek' 0ul (key_offset a) in
-    let hkeys_b = B.sub ek' (key_offset a) 128ul in
+    let keys_b = B.sub ek 0ul (key_offset a) in
+    let hkeys_b = B.sub ek (key_offset a) 128ul in
     aes_gcm_key_expansion a k keys_b;
     aes_gcm_keyhash_init a
       (let k = G.reveal kv in
@@ -150,7 +148,7 @@ fun r dst k ->
       keys_b hkeys_b;
     let h1 = ST.get() in
 
-    // Since ek has a frozen preorder, we need to prove that we are copying the
+    // We need to prove that we are copying the
     // expanded key into it. In particular, that the hashed part corresponds to the spec
     let lemma_aux_hkeys () : Lemma
       (let k = G.reveal kv in
@@ -178,8 +176,6 @@ fun r dst k ->
 
     in lemma_aux_hkeys ();
 
-    MB.blit ek' 0ul ek 0ul (ekv_len a);
-    pop_frame();
     let h2 = ST.get() in
     assert (Seq.equal (B.as_seq h2 ek)  (expand #a (G.reveal kv)));
     B.modifies_only_not_unused_in B.loc_none h0 h2;
@@ -226,14 +222,8 @@ fun s iv ad ad_len plain plain_len cipher tag ->
       AES_s.is_aes_key_LE (vale_alg_of_alg a) k_w);
 
     push_frame();
-    // Cannot pass a frozen buffer to a function that expects a regular
-    // buffer. (Or can we? Prove compatibility of preorders?). In any case, we
-    // just allocate a temporary on the stack and blit.
-    let tmp_keys = B.alloca 0uy (key_offset a) in
-    MB.blit ek 0ul tmp_keys 0ul (key_offset a);
-
-    let hkeys_b = B.alloca 0uy 128ul in
-    MB.blit ek (key_offset a) hkeys_b 0ul 128ul;
+    let keys_b = B.sub ek 0ul (key_offset a) in
+    let hkeys_b = B.sub ek (key_offset a) 128ul in
 
     let h0 = get() in
 
@@ -306,7 +296,7 @@ fun s iv ad ad_len plain plain_len cipher tag ->
       tmp_iv
       cipher
       tag
-      tmp_keys
+      keys_b
       hkeys_b;
 
     let h1 = get() in
@@ -380,14 +370,8 @@ fun s iv ad ad_len cipher cipher_len tag dst ->
         AES_s.is_aes_key_LE (vale_alg_of_alg a) k_w);
 
       push_frame();
-      // Cannot pass a frozen buffer to a function that expects a regular
-      // buffer. (Or can we? Prove compatibility of preorders?). In any case, we
-      // just allocate a temporary on the stack and blit.
-      let tmp_keys = B.alloca 0uy (key_offset a) in
-      MB.blit ek 0ul tmp_keys 0ul (key_offset a);
-
-      let hkeys_b = B.alloca 0uy 128ul in
-      MB.blit ek (key_offset a) hkeys_b 0ul 128ul;      
+      let keys_b = B.sub ek 0ul (key_offset a) in
+      let hkeys_b = B.sub ek (key_offset a) 128ul in
 
       // The iv is modified by Vale, which the API does not allow. Hence
       // we allocate a temporary buffer and blit the contents of the iv
@@ -462,7 +446,7 @@ fun s iv ad ad_len cipher cipher_len tag dst ->
         tmp_iv
         dst
         tag
-        tmp_keys 
+        keys_b
         hkeys_b in
 
       let h1 = get() in
