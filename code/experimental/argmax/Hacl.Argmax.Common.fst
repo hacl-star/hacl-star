@@ -122,6 +122,18 @@ let rec fexp #n g e =
      then fexp (g *% g) (e / 2)
      else fexp (g *% g) ((e - 1) / 2) *% g
 
+val fexp_mul1: #n:big -> g:fe n -> e1:nat -> e2:nat -> Lemma
+  (fexp g e1 *% fexp g e2 = fexp g (e1 + e2))
+let fexp_mul1 #n _ _ _ = admit()
+
+val fexp_mul2: #n:big -> g1:fe n -> g2:fe n -> e:nat -> Lemma
+  (fexp (g1 *% g2) e = fexp g1 e *% fexp g2 e)
+let fexp_mul2 #n _ _ _ = admit()
+
+val fexp_exp: #n:big -> g:fe n -> e1:nat -> e2:nat -> Lemma
+  (ensures ((fexp #n (fexp #n g e1) e2) = (fexp #n g (e1 * e2))))
+let fexp_exp #n _ _ _ = admit()
+
 (* GCD and LCM *)
 
 type divides (a:pos) (b:pos) = cexists (fun (c:pos) -> a * c == b)
