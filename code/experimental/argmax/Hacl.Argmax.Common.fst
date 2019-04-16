@@ -4,6 +4,7 @@ open FStar.Math.Lemmas
 open FStar.Math.Lib
 open FStar.Constructive
 open FStar.Mul
+open FStar.Calc
 
 
 (* Primes and composite numbers *)
@@ -39,15 +40,78 @@ let ( *% ) #n n1 n2 = (n1 * n2) % n
 val sqr: #n:big -> fe n -> fe n
 let sqr #n a = a *% a
 
+val mul_one: #n:big -> a:fe n -> Lemma
+  (ensures (a *% 1 = a /\ 1 *% a = a))
+  [SMTPat (1 *% a); SMTPat (a *% 1)]
+let mul_one #n a = ()
+
 val mul_comm: #n:big -> a:fe n -> b:fe n -> Lemma
   (ensures (a *% b = b *% a))
   [SMTPat (a *% b)]
 let mul_comm #n a b = ()
 
-val mul_one: #n:big -> a:fe n -> Lemma
-  (ensures (a *% 1 = a /\ 1 *% a = a))
-  [SMTPat (1 *% a); SMTPat (a *% 1)]
-let mul_one #n a = ()
+val modulo_mul_distributivity: a:int -> b:int -> n:pos ->
+    Lemma ((a * b) % n = ((a % n) * (b % n)) % n)
+let rec modulo_mul_distributivity a b n =
+  lemma_mod_mul_distr_l a b n;
+  lemma_mod_mul_distr_r (a % n) b n
+
+val mod_twice: x:int -> n:pos -> Lemma
+  ((x % n) % n = x % n)
+let mod_twice _ _ = ()
+
+val mul3_modulo_out_l: #n:big -> a:fe n -> b:fe n -> c:fe n -> Lemma
+  ((a *% b) *% c = ((a * b) * c) % n)
+let mul3_modulo_out_l #n a b c =
+  calc (==) {
+   (a *% b) *% c;
+  == { }
+   ( (a * b) % n ) *% c;
+  == { }
+   ( ((a * b) % n) * c ) % n;
+  == { modulo_mul_distributivity ((a * b) % n) c n }
+   ( (((a * b) % n) % n) * (c % n) ) % n;
+  == { mod_twice (a * b) n }
+   ( ((a * b) % n) * (c % n)) % n;
+  == { modulo_mul_distributivity (a * b) c n }
+   ( (a * b) * c ) % n;
+  }
+
+val mul3_modulo_out_r: #n:big -> a:fe n -> b:fe n -> c:fe n -> Lemma
+  (a *% (b *% c) = (a * (b * c)) % n)
+let mul3_modulo_out_r #n a b c = mul3_modulo_out_l #n b c a
+
+val mul_assoc: #n:big -> a:fe n -> b:fe n -> c:fe n -> Lemma
+  (ensures ((a *% b) *% c = a *% (b *% c)))
+  [SMTPat ((a *% b) *% c); SMTPat (a *% (b *% c))]
+let mul_assoc #n a b c =
+  calc (==) {
+    (a *% b) *% c;
+  == { mul3_modulo_out_l a b c }
+    ((a * b) * c) % n;
+  == { assert((a*b)*c = a*(b*c)) }
+    (a * (b * c)) % n;
+  == { mul3_modulo_out_r a b c }
+    (a *% (b *% c));
+  }
+
+val mul4_assoc: #n:big -> a:fe n -> b:fe n -> c:fe n -> d:fe n -> Lemma
+  ((a *% b) *% (c *% d) = (a *% c) *% (b *% d))
+let mul4_assoc #n a b c d =
+  calc (==) {
+    (a *% b) *% (c *% d);
+  == { }
+    a *% (b *% (c *% d));
+  == { }
+    a *% ((b *% c) *% d);
+  == { }
+    a *% ((c *% b) *% d);
+  == { }
+    a *% (c *% (b *% d));
+  == { }
+    (a *% c) *% (b *% d);
+  }
+
 
 val fexp: #n:big -> fe n -> e:nat -> Tot (fe n) (decreases e)
 let rec fexp #n g e =
@@ -76,6 +140,8 @@ let rec gcd a b =
 val lcm: pos -> pos -> pos
 let lcm a b = abs ((a / (gcd a b)) * b)
 
+(* Inverses *)
+
 val isunit: #n:big -> a:fe n -> Type0
 let isunit #n a = exists x. a *% x = 1
 
@@ -85,8 +151,4 @@ let finv #n a = admit()
 val finv_comm2: #n:comp -> x:fe n{isunit x} -> y:fe n{isunit y} -> Lemma
   (ensures (isunit #n (x *% y) /\ finv (x *% y) = finv x *% finv y))
   [SMTPat (finv x *% finv y); SMTPat (finv (x *% y))]
-let finv_comm2 #n x y =
-  // tactics?
-  assume(forall (a:fe n) b c d. (a *% b) *% (c *% d) = (a *% c) *% (b *% d));
-  assert((x *% y) *% (finv x *% finv y) = 1);
-  admit()
+let finv_comm2 #n x y = admit()
