@@ -4524,7 +4524,7 @@ procedure {:quick} {:public} AES_GCM_decrypt_6mult(
         validSrcAddrs128(mem,  inp,  in_b, len, memTaint, Secret);
         validDstAddrs128(mem, outp, out_b, len, memTaint, Secret);
         validDstAddrs128(mem, rbp, scratch_b, 8, memTaint, Secret);
-        validSrcAddrs128(mem, Xip, hkeys_b, 10, memTaint, Secret);
+        validSrcAddrs128(mem, Xip, hkeys_b, 8, memTaint, Secret);
 
         buffers_disjoint128(iv_b, keys_b);
         buffers_disjoint128(iv_b, scratch_b);

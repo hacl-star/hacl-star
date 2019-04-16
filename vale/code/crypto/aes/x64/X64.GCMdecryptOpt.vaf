@@ -443,7 +443,7 @@ procedure {:quick} gcm_blocks_auth(
 
         validSrcAddrs128(mem,     auth_ptr,     auth_b, auth_len, memTaint, Secret);
         validSrcAddrs128(mem,   abytes_ptr,   abytes_b,        1, memTaint, Secret);
-        validSrcAddrs128(mem,          Xip,    hkeys_b,       10, memTaint, Secret);
+        validSrcAddrs128(mem,          Xip,    hkeys_b,        8, memTaint, Secret);
 
             auth_ptr + 0x10*auth_len < pow2_64;
 
@@ -599,7 +599,7 @@ procedure {:quick} gcm_blocks(
         validDstAddrs128(mem,   out128_ptr,   out128_b,   len128, memTaint, Secret);
         validDstAddrs128(mem,    inout_ptr,    inout_b,        1, memTaint, Secret);
         validDstAddrs128(mem,  scratch_ptr,  scratch_b,        8, memTaint, Secret);
-        validSrcAddrs128(mem,          Xip,    hkeys_b,       10, memTaint, Secret);
+        validSrcAddrs128(mem,          Xip,    hkeys_b,        8, memTaint, Secret);
 
         buffer_disjoints128(iv_b, list(keys_b, scratch_b, in128x6_b, out128x6_b, hkeys_b, in128_b, out128_b, inout_b));
 
@@ -904,7 +904,7 @@ procedure {:quick exportOnly} gcm_blocks_wrapped(
         validDstAddrs128(mem,   out128_ptr,   out128_b,   len128, memTaint, Secret);
         validDstAddrs128(mem,    inout_ptr,    inout_b,        1, memTaint, Secret);
         validDstAddrs128(mem,  scratch_ptr,  scratch_b,        8, memTaint, Secret);
-        validSrcAddrs128(mem,          Xip,    hkeys_b,       10, memTaint, Secret);
+        validSrcAddrs128(mem,          Xip,    hkeys_b,        8, memTaint, Secret);
 
         buffer_disjoints128(iv_b, list(keys_b, scratch_b, in128x6_b, out128x6_b, hkeys_b, in128_b, out128_b, inout_b));
 
@@ -1073,7 +1073,31 @@ procedure {:quick exportOnly}{:public}{:exportSpecs} gcm_blocks_decrypt_stdcall(
         rsp == init_rsp(stack);
         
         // Valid buffers and pointers
-        valid_src_stack64s(rsp + (if win then 40 else 8), 13, stack);
+        !win ==> valid_src_stack64(rsp + 8 + 0, stack);
+        !win ==> valid_src_stack64(rsp + 8 + 8, stack);
+        !win ==> valid_src_stack64(rsp + 8 + 16, stack);
+        !win ==> valid_src_stack64(rsp + 8 + 24, stack);
+        !win ==> valid_src_stack64(rsp + 8 + 32, stack);
+        !win ==> valid_src_stack64(rsp + 8 + 40, stack);
+        !win ==> valid_src_stack64(rsp + 8 + 48, stack);
+        !win ==> valid_src_stack64(rsp + 8 + 56, stack);
+        !win ==> valid_src_stack64(rsp + 8 + 64, stack);        
+        !win ==> valid_src_stack64(rsp + 8 + 72, stack);
+        !win ==> valid_src_stack64(rsp + 8 + 80, stack);
+        
+        win ==> valid_src_stack64(rsp + 40 + 0, stack);
+        win ==> valid_src_stack64(rsp + 40 + 8, stack);
+        win ==> valid_src_stack64(rsp + 40 + 16, stack);
+        win ==> valid_src_stack64(rsp + 40 + 24, stack);
+        win ==> valid_src_stack64(rsp + 40 + 32, stack);
+        win ==> valid_src_stack64(rsp + 40 + 40, stack);
+        win ==> valid_src_stack64(rsp + 40 + 48, stack);
+        win ==> valid_src_stack64(rsp + 40 + 56, stack);
+        win ==> valid_src_stack64(rsp + 40 + 64, stack);        
+        win ==> valid_src_stack64(rsp + 40 + 72, stack);
+        win ==> valid_src_stack64(rsp + 40 + 80, stack);        
+        win ==> valid_src_stack64(rsp + 40 + 88, stack);
+        win ==> valid_src_stack64(rsp + 40 + 96, stack);
 
         auth_len == auth_num;
         auth_num_bytes == auth_bytes;
@@ -1090,7 +1114,7 @@ procedure {:quick exportOnly}{:public}{:exportSpecs} gcm_blocks_decrypt_stdcall(
         validDstAddrs128(mem,   out128_ptr,   out128_b,   len128, memTaint, Secret);
         validDstAddrs128(mem,    inout_ptr,    inout_b,        1, memTaint, Secret);
         validDstAddrs128(mem,  scratch_ptr,  scratch_b,        8, memTaint, Secret);
-        validSrcAddrs128(mem,          xip,    hkeys_b,       10, memTaint, Secret);
+        validSrcAddrs128(mem,          xip,    hkeys_b,        8, memTaint, Secret);
         validDstAddrs128(mem,      tag_ptr,      tag_b,        1, memTaint, Secret);        
 
         buffer_disjoints128(tag_b, list(out128x6_b, out128_b, inout_b, iv_b, scratch_b));
@@ -1123,7 +1147,6 @@ procedure {:quick exportOnly}{:public}{:exportSpecs} gcm_blocks_decrypt_stdcall(
         buffer_length(in128_b) == len128;
         buffer_length(inout_b) == 1;
 
-        0 < cipher_num_bytes;
         8 * cipher_num_bytes < pow2_32;
         4096 * (buffer_length(in128x6_b)) * 16 < pow2_32;
         256 * buffer_length(in128_b) < pow2_32;
@@ -1134,7 +1157,7 @@ procedure {:quick exportOnly}{:public}{:exportSpecs} gcm_blocks_decrypt_stdcall(
 
         // len128x6 is # of 128-bit blocks that come in 6-block chunks
         len128x6 % 6 == 0;
-        len128x6 >= 18;
+        len128x6 > 0 ==> len128x6 >= 18;
         12 + len128x6 + 6 < pow2_32;
 
         4096 * (len128x6 + len128 + 1) * 16 < pow2_32;
@@ -1143,11 +1166,7 @@ procedure {:quick exportOnly}{:public}{:exportSpecs} gcm_blocks_decrypt_stdcall(
         auth_len * (128/8) <= auth_num_bytes < auth_len * (128/8) + 128/8;
 
         // GCTR reqs
-        aesni_enabled;
-        alg = AES_128;
-        is_aes_key_LE(alg, key);
-        buffer128_as_seq(mem, keys_b) == key_to_round_keys_LE(alg, key);
-        validSrcAddrs128(mem, keys_ptr, keys_b, nr(alg) + 1, memTaint, Secret);
+        aes_reqs(alg, key, buffer128_as_seq(mem, keys_b), keys_b, keys_ptr, mem, memTaint);
 
         // GCM reqs
         pclmulqdq_enabled;
