@@ -179,8 +179,8 @@ let decrypt cs sk input tag aad counter =
 
 (** KEM Encrypt a payload to a specific Group or Participant *)
 val encrypt_single:
-    cs: ciphersuite
-  -> e: entropy
+    e: entropy
+  -> cs: ciphersuite
   -> pk: key_public_s cs
   -> input: bytes{length input <= max_size_t
            /\ length input + size_key_dh cs + AEAD.size_block (aead_of_cs cs) <= max_size_t
@@ -188,7 +188,7 @@ val encrypt_single:
   -> context: lbytes 32 ->
   Tot (entropy & (option (lbytes (size_key_dh cs + length input + AEAD.size_tag (aead_of_cs cs)))))
 
-let encrypt_single cs e pk input context =
+let encrypt_single e cs pk input context =
   match encap cs e pk context with
   | e', None -> e', None
   | e', Some (key, epk) ->
@@ -200,16 +200,16 @@ let encrypt_single cs e pk input context =
 val decrypt_single:
     cs: ciphersuite
   -> sk: key_private_s cs
-  -> input: bytes {size_key_dh cs <= length input /\ length input + AEAD.size_block (aead_of_cs cs) <= max_size_t}
-  -> tag: tag_s cs
+  -> input: bytes {size_key_dh cs + AEAD.size_tag (aead_of_cs cs) <= length input /\ length input + AEAD.size_block (aead_of_cs cs) <= max_size_t}
   -> context: lbytes 32 ->
-  Tot (option (lbytes (length input - size_key_dh cs)))
+  Tot (option (lbytes (length input - size_key_dh cs - AEAD.size_tag (aead_of_cs cs))))
 
 #reset-options "--z3rlimit 100"
 
-let decrypt_single cs sk input tag context =
+let decrypt_single cs sk input context =
   let epk = sub #uint8 #(length input) input 0 (size_key_dh cs) in
-  let ciphertext = sub #uint8 #(length input) input (size_key_dh cs) ((length input) - size_key_dh cs) in
+  let ciphertext = sub #uint8 #(length input) input (size_key_dh cs) ((length input) - size_key_dh cs - AEAD.size_tag (aead_of_cs cs)) in
+  let tag = sub #uint8 #(length input) input (length input - AEAD.size_tag (aead_of_cs cs)) (AEAD.size_tag (aead_of_cs cs)) in
   match decap cs sk epk context with
   | None -> None
   | Some key -> decrypt cs key ciphertext tag lbytes_empty (u32 0)

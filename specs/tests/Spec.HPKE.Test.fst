@@ -83,13 +83,11 @@ let test2 () =
   let test2_sk = of_list test1_sk in
   let test2_pk = Spec.DH.secret_to_public (Spec.HPKE.curve_of_cs cs) test2_sk in
   let test2_context = create 32 (u8 0) in
-  let test2_input = create 32 (u8 0xFF) in
-  match Spec.HPKE.encrypt_single cs e test2_pk test2_input test2_context with
+  let test2_input = create 128 (u8 0xFF) in
+  match Spec.HPKE.encrypt_single e cs test2_pk test2_input test2_context with
   | e, None -> IO.print_string "\nFailure - Encryption failed"; false
   | e, Some output ->
-    let ciphertext = sub output 0 (length output - (Spec.AEAD.size_tag Spec.AEAD.AEAD_AES128_GCM)) in
-    let mac = sub output (length output - (Spec.AEAD.size_tag Spec.AEAD.AEAD_AES128_GCM)) (Spec.AEAD.size_tag Spec.AEAD.AEAD_AES128_GCM) in
-    match Spec.HPKE.decrypt_single cs test2_sk ciphertext mac test2_context with
+    match Spec.HPKE.decrypt_single cs test2_sk output test2_context with
     | None -> IO.print_string "\nFailure - Decryption failed"; false
     | Some plaintext ->
         Lib.PrintSequence.print_label_lbytes dflag "\nHPKE Computed Plaintext" 32 plaintext;
