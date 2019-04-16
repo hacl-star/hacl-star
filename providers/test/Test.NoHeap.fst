@@ -8,7 +8,10 @@ open FStar.HyperStack.ST
 open LowStar.BufferOps
 
 /// A module that contains stack-only tests, suitable for both C and Wasm. Other
-/// tests that may make arbitrary use of the heap are in Test and Test.Hash *)
+/// tests that may make arbitrary use of the heap are in Test and Test.Hash.
+///
+/// .. note::
+///   Tests in this module are *VERIFIED*. Please keep it this way.
 
 let vec8 = L.lbuffer UInt8.t
 
