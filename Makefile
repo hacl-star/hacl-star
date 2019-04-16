@@ -123,8 +123,8 @@ ci:
 	NOSHORTLOG=1 $(MAKE) wasm
 
 wasm:
-	tools/blast-staticconfig.sh hacl-only
-	EVERCRYPT_CONFIG=hacl-only $(MAKE) dist/wasm/Makefile.basic
+	tools/blast-staticconfig.sh wasm
+	EVERCRYPT_CONFIG=wasm $(MAKE) dist/wasm/Makefile.basic
 
 # Not reusing the -staged automatic target so as to export MIN_TEST
 min-test:
@@ -639,7 +639,7 @@ HAND_WRITTEN_OPTIONAL_FILES = \
 # When extracting our libraries, we purposely don't distribute tests
 #
 # See Makefile.include for the definition of VALE_BUNDLES
-DEFAULT_FLAGS		=\
+DEFAULT_FLAGS_NO_TESTS	=\
   $(addprefix -library ,$(HACL_HAND_WRITTEN_C)) \
   -bundle Hacl.Spec.*,Spec.*[rename=Hacl_Spec] \
   -bundle Hacl.Poly1305.Field32xN.Lemmas[rename=Hacl_Lemmas] \
@@ -648,7 +648,6 @@ DEFAULT_FLAGS		=\
   -add-include '"libintvector.h"' \
   -add-include '"evercrypt_targetconfig.h"' \
   -drop EverCrypt.TargetConfig \
-  -bundle Test,Test.*,Hacl.Test.* \
   -bundle EverCrypt.BCrypt \
   -bundle EverCrypt.OpenSSL \
   -bundle MerkleTree.Spec,MerkleTree.Spec.*,MerkleTree.New.High,MerkleTree.New.High.* \
@@ -671,24 +670,20 @@ DEFAULT_FLAGS		=\
   -fparentheses -fno-shadow -fcurly-braces \
   -bundle WasmSupport
 
+DEFAULT_FLAGS = $(DEFAULT_FLAGS_NO_TESTS) -bundle Test,Test.*,Hacl.Test.*
+
 # Should be fixed by having KreMLin better handle imported names
 WASM_STANDALONE=Prims LowStar.Endianness C.Endianness \
-  C.String TestLib
+  C.String TestLib C
 
-# Notes: we disable MerkleTree (function pointers not supported)
+# Notes: only the functions reachable via Test.NoHeap are currently enabled.
 WASM_FLAGS	=\
   $(patsubst %,-bundle %,$(WASM_STANDALONE)) \
+  -no-prefix Test.NoHeap \
+  -bundle Test.NoHeap= \
   -bundle FStar.* \
-  -bundle Hacl.Hash.MD5+Hacl.Hash.Core.MD5+Hacl.Hash.SHA1+Hacl.Hash.Core.SHA1+Hacl.Hash.SHA2+Hacl.Hash.Core.SHA2+Hacl.Hash.Core.SHA2.Constants=Hacl.Hash.*[rename=Hacl_Hash] \
-  -bundle Hacl.Impl.SHA3+Hacl.SHA3=[rename=Hacl_SHA3] \
-  -bundle Hacl.Poly1305_32=Hacl.Poly1305.*,Hacl.Impl.Poly1305,Hacl.Impl.Poly1305.*[rename=Hacl_Poly1305] \
-  -bundle Hacl.Impl.Chacha20=Hacl.Impl.Chacha20.*[rename=Hacl_Chacha20] \
-  -bundle Hacl.Curve25519_51=Hacl.Impl.Curve25519.*[rename=Hacl_Curve25519] \
-  -bundle Hacl.Impl.Chacha20Poly1305=Hacl.Impl.Chacha20Poly1305.*[rename=Hacl_Chacha20Poly1305] \
-  -bundle 'EverCrypt.Spec.*' \
-  -bundle 'MerkleTree.*' \
-  -bundle 'Test,Test.*,WindowsHack' \
-  -bundle EverCrypt.Hash+EverCrypt.Hash.Incremental=[rename=EverCrypt_Hash] \
+  -bundle EverCrypt.*,Hacl.*,MerkleTree.*[rename=EverCrypt] \
+  -bundle LowStar.* \
   -bundle '\*[rename=Misc]' \
   -minimal -wasm
 
@@ -749,6 +744,7 @@ dist/coco/Makefile.basic: \
     -bundle '\*[rename=EverCrypt_Misc]'
 
 dist/wasm/Makefile.basic: KRML_EXTRA=$(WASM_FLAGS)
+dist/wasm/Makefile.basic: DEFAULT_FLAGS=$(DEFAULT_FLAGS_NO_TESTS)
 
 # OpenSSL and BCrypt disabled
 ifeq ($(EVERCRYPT_CONFIG),everest)
