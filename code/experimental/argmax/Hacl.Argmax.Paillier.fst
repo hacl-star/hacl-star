@@ -33,6 +33,10 @@ let encf #n g x y =
   assume(isunit r);
   r
 
+val encf_inj: #n:comp -> g:isg n -> x1:fe n -> y1:fenu n -> x2:fe n -> y2:fenu n -> Lemma
+  (encf g x1 y1 = encf g x2 y2 ==> x1 = y2 /\ x2 = y2)
+let encf_inj #n _ _ _ _= admit()
+
 // It is possible to get it checking every element of the preimage.
 // encf is bijection for proper g
 val encf_inv: #n:comp -> g:isg n -> w:fen2u n ->
@@ -57,20 +61,6 @@ let res_class_decomposition #n g1 g2 w =
   nat_times_nat_is_nat x3 x2;
   nat_times_nat_is_nat n x2;
 
-  // not true, there should be lemmas capturing the notion of exponent
-  // elements being in the finite semiring.
-  assume(x3 * x2 < n);
-  assume(isunit (fexp y3 x2 *% y2));
-
-  let s0 = encf g1 (x3 * x2) (fexp y3 x2 *% y2) in
-
-  let s1: fen2 n = fexp g1 (x3 * x2) in
-  let s2: fen2 n = fexp (fexp y3' x2 *% y2') n in
-  let s3 = s1 *% s2 in
-
-  assert(s0 = fexp g1 (x3 * x2) *% fexp (to_fe (fexp y3 x2 *% y2)) n);
-
-
   fexp_mul2 (fexp g1 x3) (fexp y3' n) x2;
   assert(fexp (fexp g1 x3 *% fexp y3' n) x2 = (fexp (fexp g1 x3) x2) *% (fexp (fexp y3' n) x2));
 
@@ -85,6 +75,19 @@ let res_class_decomposition #n g1 g2 w =
 
   fexp_mul2 (fexp y3' x2) y2' n;
   assert(fexp (fexp y3' x2) n *% fexp y2' n = fexp (fexp y3' x2 *% y2') n);
+
+  // not true, there should be lemmas capturing the notion of exponent
+  // elements being in the finite semiring.
+  assume(x3 * x2 < n);
+  assume(isunit (fexp y3 x2 *% y2));
+
+  assert(encf g1 (x3 * x2) (fexp y3 x2 *% y2) =
+        fexp g1 (x3 * x2) *% fexp (to_fe #(n*n) (fexp y3 x2 *% y2)) n);
+
+
+  // This property is easy to show, but it requires even more lemmas about
+  // how exponentiation works.
+  assume(fexp y3' x2 *% y2' = to_fe (fexp y3 x2 *% y2));
 
   assert(encf g1 x1 y1 = w /\ encf g2 x2 y2 = w /\ encf g1 x3 y3 = g2);
   calc (==) {
@@ -107,10 +110,14 @@ let res_class_decomposition #n g1 g2 w =
     (fexp g1 (x3 * x2)) *% (fexp (fexp y3' x2) n *% fexp y2' n);
   == {  }
     (fexp g1 (x3 * x2)) *% (fexp (fexp y3' x2 *% y2') n);
+  == {  }
+    (fexp g1 (x3 * x2)) *% (fexp (to_fe (fexp y3 x2 *% y2)) n);
+  == { }
+    encf g1 (x3 * x2) (fexp y3 x2 *% y2);
   };
 
-
-  //assert(x1 = x3 * x2);
+  encf_inj g1 x1 y1 (x3*x2) (fexp y3 x2 *% y2);
+  assert(x1 = x3 * x2);
   assume(x1 = x2 *% x3)
 
 
