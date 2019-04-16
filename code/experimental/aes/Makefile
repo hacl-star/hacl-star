@@ -48,7 +48,7 @@ AES_NI_FILES= $(HACL_HOME)/lib/Lib.IntTypes.fst \
 	Hacl.AES_128.NI.fst
 
 
-KREMLIN_ARGS:=-funroll-loops 8 -warn-error +9 -I $(HACL_HOME)/lib/ -I $(KREMLIN_HOME)/kremlib -I $(HACL_HOME)/specs -I . -ccopt '-march=native' -fbuiltin-uint128 -drop FStar.UInt128 -fnocompound-literals -fc89-scope -fparentheses -fcurly-braces
+KREMLIN_ARGS:=-funroll-loops 8 -wasm -warn-error +9 -I $(HACL_HOME)/lib/ -I $(KREMLIN_HOME)/kremlib -I $(HACL_HOME)/specs -I . -ccopt '-march=native' -fbuiltin-uint128 -drop FStar.UInt128 -fnocompound-literals -fc89-scope -fparentheses -fcurly-braces
 
 aes128-bitslice-c/out.krml: $(AES_BS_FILES)
 	 $(KREMLIN) $(KREMLIN_ARGS) -tmpdir aes128-bitslice-c $(AES_BS_FILES) -skip-translation

@@ -191,9 +191,9 @@ let sbox : (b:ilbuffer uint8 (size 256){
 
 
 // ENCRYPTION
-inline_for_extraction
+inline_for_extraction noextract
 let op_Array_Access #t #u #v a b = index #t #u #v a b
-inline_for_extraction
+inline_for_extraction noextract
 let op_Array_Assignment #t #u a b c = upd #t #u a b c
 
 // Our implementation is not constant time...
