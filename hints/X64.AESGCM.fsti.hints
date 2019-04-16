@@ -1,5 +1,5 @@
 [
-  "ú§sÝR5\u0014¬‚ª-Å\u0006Î,È",
+  "\u0013Žpõ\u001a\u0002©ûêt\u0015šì›Ûª",
   [
     [
       "X64.AESGCM.aes_reqs_offset",
@@ -8,7 +8,7 @@
       0,
       [ "@query" ],
       0,
-      "b4cc9bb8d95557714affde628a177eac"
+      "fc1f8193bff180e89a1d12bfdd269127"
     ],
     [
       "X64.AESGCM.va_lemma_AES_GCM_encrypt_6mult",
@@ -17,7 +17,7 @@
       0,
       [ "@query", "equation_X64.AESGCM.aes_reqs_offset" ],
       0,
-      "35a58dbd0d4f6c57dc596d1e3c1bdc38"
+      "a60e42dfabee92b776a82b17d99bef5d"
     ],
     [
       "X64.AESGCM.va_wp_AES_GCM_encrypt_6mult",
@@ -26,7 +26,7 @@
       0,
       [ "@query", "equation_X64.AESGCM.aes_reqs_offset" ],
       0,
-      "e3a1e0fc6b5760f83afb8f23c74cc1f8"
+      "0786a29b49a9b358fcab61e6431d920e"
     ],
     [
       "X64.AESGCM.va_wpProof_AES_GCM_encrypt_6mult",
@@ -38,7 +38,37 @@
         "refinement_interpretation_Tm_refine_8d65e998a07dd53ec478e27017d9dba5"
       ],
       0,
-      "aa83f876765235a36a92251896506f9d"
+      "3d7b9b109dd161aece186258a38345a3"
+    ],
+    [
+      "X64.AESGCM.va_lemma_AES_GCM_decrypt_6mult",
+      1,
+      1,
+      0,
+      [ "@query", "equation_X64.AESGCM.aes_reqs_offset" ],
+      0,
+      "10030479af3f728597fab8ac6e6d1dba"
+    ],
+    [
+      "X64.AESGCM.va_wp_AES_GCM_decrypt_6mult",
+      1,
+      1,
+      0,
+      [ "@query", "equation_X64.AESGCM.aes_reqs_offset" ],
+      0,
+      "b6e716a638c259ddd39a1221fc3fe127"
+    ],
+    [
+      "X64.AESGCM.va_wpProof_AES_GCM_decrypt_6mult",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.squash",
+        "refinement_interpretation_Tm_refine_8d65e998a07dd53ec478e27017d9dba5"
+      ],
+      0,
+      "3cd5b40d482f368d56fd3012e0a0d888"
     ]
   ]
 ]

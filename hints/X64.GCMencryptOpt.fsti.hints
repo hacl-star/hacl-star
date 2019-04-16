@@ -1,5 +1,5 @@
 [
-  "ñ\u0001÷”s”sfûYÊ¿z„\rí",
+  "ã\u0002Ô°\u0001Û<'\u000e8Æ\u0011U˜ 8",
   [
     [
       "X64.GCMencryptOpt.aes_reqs",
@@ -8,7 +8,97 @@
       0,
       [ "@query" ],
       0,
-      "b7ab315bca779d0de5ed5202b19cd2a0"
+      "0fb99e0c0512a9732a207379387bab0e"
+    ],
+    [
+      "X64.GCMencryptOpt.va_lemma_save_registers",
+      1,
+      1,
+      0,
+      [ "@query", "projection_inverse_BoxInt_proj_0" ],
+      0,
+      "2910644b83c24e421e23f5991107e5fc"
+    ],
+    [
+      "X64.GCMencryptOpt.va_wp_save_registers",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565",
+        "Prims_pretyping_f8666440faa91836cc5a13998af863fc", "bool_inversion",
+        "equality_tok_X64.Machine_s.Rax@tok",
+        "equality_tok_X64.Machine_s.Rsp@tok",
+        "equation_X64.Vale.Decls.va_if",
+        "equation_X64.Vale.Decls.va_upd_flags",
+        "equation_X64.Vale.Decls.va_upd_reg",
+        "equation_X64.Vale.Decls.va_upd_stack",
+        "equation_X64.Vale.State.update_reg",
+        "function_token_typing_Prims.__cache_version_number__",
+        "interpretation_Tm_abs_22a134f24e3314afa2ea9349b9946c0f",
+        "interpretation_Tm_abs_4c38b0060188c6de6108d610edc201a1",
+        "proj_equation_X64.Vale.State.Mkstate_ok",
+        "proj_equation_X64.Vale.State.Mkstate_stack",
+        "projection_inverse_BoxInt_proj_0",
+        "projection_inverse_X64.Vale.State.Mkstate_ok",
+        "typing_X64.Vale.State.__proj__Mkstate__item__ok", "unit_typing"
+      ],
+      0,
+      "67ef96c5f2a8f4aa13d2879cfa28cfa9"
+    ],
+    [
+      "X64.GCMencryptOpt.va_wpProof_save_registers",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.squash",
+        "refinement_interpretation_Tm_refine_8d65e998a07dd53ec478e27017d9dba5"
+      ],
+      0,
+      "76a584719f80c419dbcde82ca53ab1d9"
+    ],
+    [
+      "X64.GCMencryptOpt.va_lemma_restore_registers",
+      1,
+      1,
+      0,
+      [ "@query", "projection_inverse_BoxInt_proj_0" ],
+      0,
+      "2331e92fbb110c588be0e3c97804d099"
+    ],
+    [
+      "X64.GCMencryptOpt.va_wp_restore_registers",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565",
+        "Prims_pretyping_f8666440faa91836cc5a13998af863fc", "bool_inversion",
+        "equation_X64.Vale.Decls.va_if",
+        "function_token_typing_Prims.__cache_version_number__",
+        "interpretation_Tm_abs_22a134f24e3314afa2ea9349b9946c0f",
+        "interpretation_Tm_abs_4c38b0060188c6de6108d610edc201a1",
+        "proj_equation_X64.Vale.State.Mkstate_ok",
+        "projection_inverse_BoxInt_proj_0",
+        "typing_X64.Vale.State.__proj__Mkstate__item__ok", "unit_typing"
+      ],
+      0,
+      "0e83446a07463926cd6dc73671ab5200"
+    ],
+    [
+      "X64.GCMencryptOpt.va_wpProof_restore_registers",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.squash",
+        "refinement_interpretation_Tm_refine_8d65e998a07dd53ec478e27017d9dba5"
+      ],
+      0,
+      "c0ca1691dd8ae22bef9800c056f4d97c"
     ],
     [
       "X64.GCMencryptOpt.va_req_gcm_blocks_stdcall",
@@ -25,7 +115,7 @@
         "unit_typing"
       ],
       0,
-      "d4e543569bbfea19c254876d33b1f8c5"
+      "59119fe4bbd8b8d9fb472f7e698c06ac"
     ],
     [
       "X64.GCMencryptOpt.va_ens_gcm_blocks_stdcall",
@@ -69,7 +159,7 @@
         "typing_tok_Interop.Types.TUInt128@tok", "unit_typing"
       ],
       0,
-      "4a6ca44dabb5a723c190439b53c98434"
+      "d41abd9ba275130bb0752582a1faf828"
     ],
     [
       "X64.GCMencryptOpt.va_lemma_gcm_blocks_stdcall",
@@ -111,7 +201,7 @@
         "typing_tok_Interop.Types.TUInt128@tok"
       ],
       0,
-      "a53d6950b3e3aa4ecadb5627c32ae49e"
+      "030a18dd6965b2aba39d617311649933"
     ],
     [
       "X64.GCMencryptOpt.va_wp_gcm_blocks_stdcall",
@@ -193,7 +283,7 @@
         "typing_tok_X64.Machine_s.Rbx@tok", "unit_typing"
       ],
       0,
-      "02758f7cdcc43e90add6e7af0302fa85"
+      "e0fb566ae52d352a65b0604e30c05660"
     ],
     [
       "X64.GCMencryptOpt.va_wpProof_gcm_blocks_stdcall",
@@ -205,7 +295,7 @@
         "refinement_interpretation_Tm_refine_8d65e998a07dd53ec478e27017d9dba5"
       ],
       0,
-      "2816223a7be46abef8e383362d9be6ec"
+      "e7e254bd968d7feed0e5928e2dff5ff6"
     ]
   ]
 ]

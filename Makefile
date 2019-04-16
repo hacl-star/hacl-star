@@ -452,6 +452,9 @@ obj/Vale.Stdcalls.GCMencrypt.fst.checked: \
 obj/Vale.Stdcalls.GCMencryptOpt.fst.checked: \
   FSTAR_FLAGS=$(VALE_FSTAR_FLAGS)
 
+obj/Vale.Stdcalls.GCMdecryptOpt.fst.checked: \
+  FSTAR_FLAGS=$(VALE_FSTAR_FLAGS)
+
 obj/GCMencryptOpt_stdcalls.fst.checked: \
   FSTAR_FLAGS=$(VALE_FSTAR_FLAGS)
 
