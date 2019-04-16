@@ -169,7 +169,7 @@ else
 endif
 
 ifneq ($(OS),Windows_NT)
-ifneq ($(shell realpath $$(pwd)),$(shell realpath $$HACL_HOME))
+ifneq ($(shell realpath $$(pwd)),$(shell realpath $(HACL_HOME)))
   $(error HACL_HOME, currently set to $(HACL_HOME), does not seem to point to the current directory)
 endif
 endif
@@ -690,7 +690,7 @@ WASM_FLAGS	=\
 COMPACT_FLAGS	=\
   -bundle Hacl.Hash.MD5+Hacl.Hash.Core.MD5+Hacl.Hash.SHA1+Hacl.Hash.Core.SHA1+Hacl.Hash.SHA2+Hacl.Hash.Core.SHA2+Hacl.Hash.Core.SHA2.Constants=Hacl.Hash.*[rename=Hacl_Hash] \
   -bundle Hacl.Impl.SHA3+Hacl.SHA3=[rename=Hacl_SHA3] \
-  -bundle Hacl.Poly1305_32+Hacl.Poly1305_128+Hacl.Poly1305_256=Hacl.Poly1305.*,Hacl.Impl.Poly1305,Hacl.Impl.Poly1305.*[rename=Hacl_Poly1305] \
+  -bundle Hacl.Impl.Poly1305.*[rename=Unused_Poly1305] \
   -bundle Hacl.Impl.Chacha20=Hacl.Impl.Chacha20.*[rename=Hacl_Chacha20] \
   -bundle Hacl.Curve25519_51+Hacl.Curve25519_64=Hacl.Impl.Curve25519.*[rename=Hacl_Curve25519] \
   -bundle Hacl.Impl.Chacha20Poly1305=Hacl.Impl.Chacha20Poly1305.*[rename=Hacl_Chacha20Poly1305] \

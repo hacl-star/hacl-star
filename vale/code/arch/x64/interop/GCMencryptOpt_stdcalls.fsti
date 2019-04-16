@@ -57,8 +57,8 @@ let length_aux5 (b:uint8_p) : Lemma
     let db = get_downview b in
     DV.length_eq db
 
-inline_for_extraction
-val gcm128_encrypt_opt_stdcall:
+inline_for_extraction noextract
+let encrypt_opt_stdcall_st (a: algorithm { a = AES_128 \/ a = AES_256 }) =
   key:Ghost.erased (Seq.seq nat32) ->
   plain_b:uint8_p ->
   plain_len:uint64 ->
@@ -100,18 +100,18 @@ val gcm128_encrypt_opt_stdcall:
       B.length out_b = B.length plain_b /\
       B.length hkeys_b = 128 /\
       B.length tag_b == 16 /\
-      B.length keys_b = 176 /\
+      B.length keys_b = AES_stdcalls.key_offset a /\
 
       4096 * (UInt64.v plain_len + 16) < pow2_32 /\
       4096 * (UInt64.v auth_len) < pow2_32 /\
 
       aesni_enabled /\ pclmulqdq_enabled /\
-      is_aes_key_LE AES_128 (Ghost.reveal key) /\
+      is_aes_key_LE a (Ghost.reveal key) /\
       (Seq.equal (B.as_seq h0 keys_b)
-        (seq_nat8_to_seq_uint8 (le_seq_quad32_to_bytes (key_to_round_keys_LE AES_128 (Ghost.reveal key))))) /\
+        (seq_nat8_to_seq_uint8 (le_seq_quad32_to_bytes (key_to_round_keys_LE a (Ghost.reveal key))))) /\
 
       hkeys_reqs_pub (le_bytes_to_seq_quad32 (seq_uint8_to_seq_nat8 (B.as_seq h0 hkeys_b)))
-	(reverse_bytes_quad32 (aes_encrypt_LE AES_128 (Ghost.reveal key) (Mkfour 0 0 0 0)))
+	(reverse_bytes_quad32 (aes_encrypt_LE a (Ghost.reveal key) (Mkfour 0 0 0 0)))
     )
     (ensures fun h0 _ h1 ->
       B.modifies (B.loc_union (B.loc_buffer tag_b)
@@ -121,7 +121,10 @@ val gcm128_encrypt_opt_stdcall:
       (let iv = seq_uint8_to_seq_nat8 (B.as_seq h0 iv_b) in
        let plain = seq_uint8_to_seq_nat8 (B.as_seq h0 plain_b) in
        let auth = seq_uint8_to_seq_nat8 (B.as_seq h0 auth_b) in
-       let cipher, tag = gcm_encrypt_LE AES_128 (seq_nat32_to_seq_nat8_LE (Ghost.reveal key)) iv plain auth in
+       let cipher, tag = gcm_encrypt_LE a (seq_nat32_to_seq_nat8_LE (Ghost.reveal key)) iv plain auth in
        Seq.equal (seq_uint8_to_seq_nat8 (B.as_seq h1 out_b)) cipher /\
        Seq.equal (seq_uint8_to_seq_nat8 (B.as_seq h1 tag_b)) tag)
   )
+
+inline_for_extraction
+val gcm128_encrypt_opt_stdcall: encrypt_opt_stdcall_st AES_128

@@ -278,7 +278,6 @@ let rec log2 n =
 val log2_bound:
   n:nat{n > 0} -> c:nat{n < pow2 c} ->
   Lemma (log2 n <= c-1)
-        [SMTPat (n < pow2 c)]
 let rec log2_bound n c =
   if n = 1 then ()
   else log2_bound (n / 2) (c - 1)
@@ -294,18 +293,14 @@ val log2c:
 let log2c n =
   if n = 0 then 0 else (log2 n + 1)
 
-// joonwonc: below smt patterns are crucial to increase the proof speed.
 val log2c_div:
   n:nat{n > 0} ->
   Lemma (log2c (n / 2) = log2c n - 1)
-        [SMTPatOr [[SMTPat (log2c (n / 2))];
-                  [SMTPat (log2c n - 1)]]]
 let rec log2c_div n = ()
 
 val log2c_bound:
   n:nat -> c:nat{n < pow2 c} ->
   Lemma (log2c n <= c)
-        [SMTPat (n < pow2 c)]
 let rec log2c_bound n c =
   if n = 0 then ()
   else log2c_bound (n / 2) (c - 1)
@@ -363,13 +358,15 @@ val mt_hashes_inv_log_converted_:
   j:nat{j > 0 && j < pow2 (32 - lv)} ->
   fhs:hash_ss{S.length fhs = 32 /\ mt_hashes_lth_inv lv j fhs} ->
   Lemma (requires (mt_hashes_inv lv j fhs))
-        (ensures (mt_hashes_lth_inv_log_converted_ lv j fhs;
+        (ensures (log2c_bound j (32 - lv);
+                 mt_hashes_lth_inv_log_converted_ lv j fhs;
                  mt_hashes_inv_log j (S.slice fhs lv (lv + log2c j))))
         (decreases j)
 #push-options "--z3rlimit 40"
 let rec mt_hashes_inv_log_converted_ lv j fhs =
   if j = 1 then ()
-  else (mt_hashes_lth_inv_log_converted_ (lv + 1) (j / 2) fhs;
+  else (log2c_bound (j / 2) (32 - (lv + 1));
+       mt_hashes_lth_inv_log_converted_ (lv + 1) (j / 2) fhs;
        mt_hashes_inv_log_converted_ (lv + 1) (j / 2) fhs)
 #pop-options
 
@@ -377,9 +374,10 @@ val mt_hashes_inv_log_converted:
   j:nat{j > 0 && j < pow2 32} ->
   fhs:hash_ss{S.length fhs = 32 /\ mt_hashes_lth_inv 0 j fhs} ->
   Lemma (requires (mt_hashes_inv 0 j fhs))
-        (ensures (mt_hashes_lth_inv_log_converted_ 0 j fhs;
+        (ensures (log2c_bound j 32;
+                 mt_hashes_lth_inv_log_converted_ 0 j fhs;
                  mt_hashes_inv_log j (S.slice fhs 0 (log2c j))))
-let rec mt_hashes_inv_log_converted j fhs =
+let mt_hashes_inv_log_converted j fhs =
   mt_hashes_inv_log_converted_ 0 j fhs
 
 val hash_seq_lift: 
@@ -440,6 +438,7 @@ val mt_hashes_next_rel_lift_odd:
                    (S.upd (hash_seq_spec nhs)
                           (S.length nhs) (HRaw (S.last hs)))))
 let mt_hashes_next_rel_lift_odd j hs nhs =
+  log2c_div j;
   hash_seq_lift_index hs;
   hash_seq_lift_index nhs
 
@@ -451,6 +450,7 @@ val mt_hashes_next_rel_next_even:
         (ensures (S.equal (hash_seq_spec nhs)
                           (mt_next_lv #(log2c j) (hash_seq_spec hs))))
 let mt_hashes_next_rel_next_even j hs nhs =
+  log2c_div j;
   mt_hashes_next_rel_lift_even j hs nhs;
   MTS.mt_next_rel_next_lv (log2c j)
     (hash_seq_spec hs) (hash_seq_spec nhs)
@@ -489,6 +489,7 @@ val hash_seq_spec_full_even_next:
                         (hash_seq_spec_full hs acc actd))))
 #reset-options "--z3rlimit 40"
 let hash_seq_spec_full_even_next j hs nhs acc actd =
+  log2c_div j;
   mt_hashes_next_rel_lift_even j hs nhs;
   if actd 
   then begin 
@@ -517,6 +518,7 @@ val hash_seq_spec_full_odd_next:
                         (hash_seq_spec_full hs acc actd))))
 #reset-options "--z3rlimit 80"
 let hash_seq_spec_full_odd_next j hs nhs acc actd nacc =
+  log2c_div j;
   mt_hashes_next_rel_lift_odd j hs nhs;
   if actd
   then begin
@@ -582,6 +584,7 @@ val mt_base:
   mt:merkle_tree{mt_wf_elts mt} ->
   olds:hash_ss{S.length olds = 32 /\ mt_olds_inv 0 (MT?.i mt) olds} ->
   GTot (bhs:hash_seq{S.length bhs = MT?.j mt})
+#reset-options "--z3rlimit 10"
 let mt_base mt olds =
   S.head (merge_hs olds (MT?.hs mt))
 
@@ -604,6 +607,7 @@ let mt_inv mt olds =
   let rhs = MT?.rhs mt in
   let fhs = merge_hs olds hs in
   let rt = MT?.mroot mt in
+  log2c_bound j 32;
   mt_olds_hs_inv 0 i j olds hs /\
   (if j > 0 && MT?.rhs_ok mt
   then (mt_olds_hs_lth_inv_ok 0 i j olds hs;
