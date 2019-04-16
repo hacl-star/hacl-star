@@ -6,8 +6,11 @@ open Lib.IntTypes
 open Lib.RawIntTypes
 open Lib.Sequence
 open Lib.ByteSequence
+
 open Spec.SPARKLE
 
+
+let dflag: bool = true
 
 inline_for_extraction
 let vsize_plaintext1: size_nat = 3
@@ -29,7 +32,7 @@ let test () =
   IO.print_string "\n\nTEST 1\n\n";
   let computed1 = create 32 (u8 0) in
   let flag1 = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) expected1 computed1 in
-  Lib.PrintSequence.print_label_lbytes #(length computed1) "1. Result" computed1;
-  Lib.PrintSequence.print_label_lbytes #(length expected1) "1. Expected" expected1;
+  Lib.PrintSequence.print_label_lbytes dflag "1. Result" (length computed1) computed1;
+  Lib.PrintSequence.print_label_lbytes dflag "1. Expected" (length expected1) expected1;
   if flag1 then IO.print_string "\nSuccess !\n"
   else IO.print_string "\nFailure !\n"
