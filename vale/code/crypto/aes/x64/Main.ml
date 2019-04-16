@@ -16,4 +16,6 @@ let _ =
       ("gcm256_decrypt",           (fun win -> X64_GCMdecrypt.va_code_gcm_decrypt2_stdcall win AES_s.AES_256));
       ("gcm128_encrypt_opt",       (fun win -> X64_GCMencryptOpt.va_code_gcm_blocks_stdcall win AES_s.AES_128));
       ("gcm256_encrypt_opt",       (fun win -> X64_GCMencryptOpt.va_code_gcm_blocks_stdcall win AES_s.AES_256));
+      ("gcm128_decrypt_opt",       (fun win -> X64_GCMdecryptOpt.va_code_gcm_blocks_decrypt_stdcall win AES_s.AES_128));
+      ("gcm256_decrypt_opt",       (fun win -> X64_GCMdecryptOpt.va_code_gcm_blocks_decrypt_stdcall win AES_s.AES_256));
     ]
