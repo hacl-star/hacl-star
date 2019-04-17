@@ -151,6 +151,7 @@ procedure{:instruction mk_taint_ins2(S.Ins_io64_64_cf(I.ins_AddCarry64), dst, sr
 {
 }
 
+#reset-options "--initial_fuel 5 --max_fuel 5 --max_ifuel 2 --z3rlimit 20 --z3cliopt smt.arith.nl=true"
 procedure{:instruction mk_taint_ins2(make_instr(I.ins_Adcx64), dst, src)}{:fast_instruction}{:quick exportOnly}{:public} Adcx64Wrap(inout dst:dst_opr64, src:opr64)
     requires adx_enabled;
     modifies
@@ -161,6 +162,7 @@ procedure{:instruction mk_taint_ins2(make_instr(I.ins_Adcx64), dst, src)}{:fast_
 {
 }
 
+#reset-options "--initial_fuel 5 --max_fuel 5 --max_ifuel 2 --z3rlimit 20"
 procedure{:instruction mk_taint_ins2(make_instr(I.ins_Adox64), dst, src)}{:fast_instruction}{:quick exportOnly}{:public} Adox64Wrap(inout dst:dst_opr64, src:opr64)
     requires adx_enabled;
     modifies
