@@ -205,6 +205,9 @@ let decrypt_st (a: supported_alg) =
         B.(loc_disjoint (footprint h0 s) (loc_buffer dst)) /\
         B.(loc_disjoint (footprint h0 s) (loc_buffer cipher)) /\
         MB.(all_live h0 [ buf iv; buf ad; buf cipher; buf tag; buf dst ]) /\
+        B.disjoint tag dst /\ B.disjoint tag cipher /\
+        B.disjoint tag ad /\
+        B.disjoint cipher ad /\ B.disjoint dst ad /\
         (B.disjoint cipher dst \/ cipher == dst))
     (ensures fun h0 err h1 ->
       let cipher_tag = B.as_seq h0 cipher `S.append` B.as_seq h0 tag in

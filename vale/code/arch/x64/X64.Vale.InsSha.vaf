@@ -40,12 +40,15 @@ open X64.Machine_s
 open X64.Vale
 open X64.Vale.State
 open X64.Vale.StateLemmas
+open X64.Vale.InsLemmas
+open X64.Taint_Semantics
 open X64.Vale.Decls
 open X64.CryptoInstructions_s
 open Spec.Hash.PadFinish
 open Spec.Hash.Definitions
 open Spec.SHA2
 open X64.CPU_Features_s
+module I = X64.Instructions_s
 module S = X64.Bytes_Semantics_s
 module TS = X64.Taint_Semantics_s
 module P = X64.Print_s
@@ -56,46 +59,46 @@ friend X64.Vale.Decls
 //#reset-options "--initial_fuel 2 --max_fuel 2 --max_ifuel 2 --initial_ifuel 2 --z3rlimit 60"
 #endverbatim
 
-procedure{:instruction Ins(TS.TaintedIns(tuple(S.SHA256_rnds2(dst, src)), Public))}{:quick exportOnly}{:typecheck false}{:public} 
+procedure{:instruction mk_ins(make_instr(I.ins_SHA256_rnds2, Mov128Xmm(dst), Mov128Xmm(src)), Public)}{:quick exportOnly}{:typecheck false}{:public} 
           SHA256_rnds2(inout dst:xmm, src:xmm, ghost t:counter, ghost block:block_w, ghost hash_orig:hash256)
-  reads xmm0;
-  requires 
-    sha_enabled;
-    t + 1 < size_k_w_256;
-    xmm0.lo0 == add_wrap(word_to_nat32(index(k, t)),   ws_opaque(block, t));
-    xmm0.lo1 == add_wrap(word_to_nat32(index(k, t+1)), ws_opaque(block, t + 1));
-    make_hash(src, dst)      == repeat_range(0, t,   shuffle_core_opaque(block), hash_orig);
-  ensures
-    make_hash(dst, old(src)) == repeat_range(0, t+2, shuffle_core_opaque(block), hash_orig);
+    reads xmm0;
+    requires 
+        sha_enabled;
+        t + 1 < size_k_w_256;
+        xmm0.lo0 == add_wrap(word_to_nat32(index(k, t)),   ws_opaque(block, t));
+        xmm0.lo1 == add_wrap(word_to_nat32(index(k, t+1)), ws_opaque(block, t + 1));
+        make_hash(src, dst)      == repeat_range(0, t,   shuffle_core_opaque(block), hash_orig);
+    ensures
+        make_hash(dst, old(src)) == repeat_range(0, t+2, shuffle_core_opaque(block), hash_orig);
 {
     lemma_sha256_rnds2(old(src), old(dst), old(xmm0), t, block, hash_orig);
 }
 
-procedure{:instruction Ins(TS.TaintedIns(tuple(S.SHA256_msg1(dst, src)), Public))}{:quick exportOnly}{:typecheck false}{:public} 
+procedure{:instruction mk_ins(make_instr(I.ins_SHA256_msg1, Mov128Xmm(dst), Mov128Xmm(src)), Public)}{:quick exportOnly}{:typecheck false}{:public} 
           SHA256_msg1(inout dst:xmm, src:xmm, ghost t:counter, ghost block:block_w)
-  requires 
-    sha_enabled;
-    16 <= t < size_k_w_256;
-    dst == ws_quad32(t-16, block);
-    src.lo0 == ws_opaque(block, t-12);
-  ensures
-    dst == ws_partial(t, block);
+    requires 
+        sha_enabled;
+        16 <= t < size_k_w_256;
+        dst == ws_quad32(t-16, block);
+        src.lo0 == ws_opaque(block, t-12);
+    ensures
+        dst == ws_partial(t, block);
 {
     lemma_sha256_msg1(old(dst), old(src), t, block);
 }
 
-procedure{:instruction Ins(TS.TaintedIns(tuple(S.SHA256_msg2(dst, src)), Public))}{:quick exportOnly}{:typecheck false}{:public} 
+procedure{:instruction mk_ins(make_instr(I.ins_SHA256_msg2, Mov128Xmm(dst), Mov128Xmm(src)), Public)}{:quick exportOnly}{:typecheck false}{:public} 
           SHA256_msg2(inout dst:xmm, src:xmm, ghost t:counter, ghost block:block_w)
-  requires 
-    sha_enabled;
-    16 <= t < size_k_w_256 - 3;
-    let step1 := ws_partial(t, block) in
-    let t_minus_7 := ws_quad32(t-7, block) in
-    dst == add_wrap_quad32(step1,t_minus_7);
-    src.hi2 == ws_opaque(block, t-2);
-    src.hi3 == ws_opaque(block, t-1);
-  ensures
-    dst == ws_quad32(t, block);
+    requires 
+        sha_enabled;
+        16 <= t < size_k_w_256 - 3;
+        let step1 := ws_partial(t, block) in
+        let t_minus_7 := ws_quad32(t-7, block) in
+        dst == add_wrap_quad32(step1,t_minus_7);
+        src.hi2 == ws_opaque(block, t-2);
+        src.hi3 == ws_opaque(block, t-1);
+    ensures
+        dst == ws_quad32(t, block);
 {
     lemma_sha256_msg2(old(dst), old(src), t, block);
 }

@@ -275,6 +275,7 @@ val taint_at (memTaint:M.memtaint) (addr:int) : taint
 [@va_qattr] unfold let va_is_src_xmm (x:xmm) (s:va_state) = True
 [@va_qattr] unfold let va_is_dst_xmm (x:xmm) (s:va_state) = True
 [@va_qattr] unfold let va_is_src_opr128 (o:va_operand128) (s:va_state) = valid_operand128 o s
+[@va_qattr] unfold let va_is_dst_opr128 (o:va_operand128) (s:va_state) = valid_operand128 o s
 
 (* Getters *)
 [@va_qattr] unfold let va_get_ok (s:va_state) : bool = s.ok

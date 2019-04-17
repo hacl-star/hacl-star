@@ -34,8 +34,11 @@ open X64.Machine_s
 open X64.Vale
 open X64.Vale.State
 open X64.Vale.StateLemmas
+open X64.Vale.InsLemmas
+open X64.Taint_Semantics
 open X64.Vale.Decls
 open X64.CPU_Features_s
+module I = X64.Instructions_s
 module S = X64.Bytes_Semantics_s
 module TS = X64.Taint_Semantics_s
 module P = X64.Print_s
@@ -46,7 +49,7 @@ friend X64.Vale.Decls
 #endverbatim
 
 procedure{:quick exportOnly}{:public}
-    {:instruction Ins(TS.TaintedIns(tuple(S.Pclmulqdq(dst, src, (if dstHi then 1 else 0) + (if srcHi then 16 else 0))), Public))}
+    {:instruction Ins(TS.TaintedIns(S.Ins_ioXmm_Xmm(I.ins_Pclmulqdq((if dstHi then 1 else 0) + (if srcHi then 16 else 0)), dst, src), Public))}
     Pclmulqdq(inout dst:xmm, src:xmm, inline dstHi:bool, inline srcHi:bool)
     requires pclmulqdq_enabled;
     modifies efl;
@@ -58,7 +61,7 @@ procedure{:quick exportOnly}{:public}
 }
 
 procedure{:quick exportOnly}{:public}
-    {:instruction Ins(TS.TaintedIns(tuple(S.VPclmulqdq(dst, src1, src2, (if src1Hi then 1 else 0) + (if src2Hi then 16 else 0))), Public))}
+    {:instruction mk_ins(make_instr(I.ins_VPclmulqdq((if src1Hi then 1 else 0) + (if src2Hi then 16 else 0)), Mov128Xmm(dst), Mov128Xmm(src1), Mov128Xmm(src2)), Public)}
     VPclmulqdq(out dst:xmm, src1:xmm, src2:xmm, inline src1Hi:bool, inline src2Hi:bool)
     requires pclmulqdq_enabled;
     modifies efl;
@@ -69,7 +72,7 @@ procedure{:quick exportOnly}{:public}
 {
 }
 
-procedure{:instruction Ins(TS.TaintedIns(tuple(S.AESNI_enc(dst, src)), Public))}{:quick exportOnly}{:public}
+procedure{:instruction Ins(TS.TaintedIns(S.Ins_ioXmm_Xmm(I.ins_AESNI_enc, dst, src), Public))}{:quick exportOnly}{:public}
     AESNI_enc(inout dst:xmm, src:xmm)
     requires aesni_enabled;
     modifies efl;
@@ -78,7 +81,7 @@ procedure{:instruction Ins(TS.TaintedIns(tuple(S.AESNI_enc(dst, src)), Public))}
 {
 }
 
-procedure{:instruction Ins(TS.TaintedIns(tuple(S.VAESNI_enc(dst, src1, src2)), Public))}{:quick exportOnly}{:public}
+procedure{:instruction mk_ins(make_instr(I.ins_VAESNI_enc, Mov128Xmm(dst), Mov128Xmm(src1), Mov128Xmm(src2)), Public)}{:quick exportOnly}{:public}
     VAESNI_enc(inout dst:xmm, src1:xmm, src2:xmm)
     requires aesni_enabled;
     modifies efl;
@@ -87,7 +90,7 @@ procedure{:instruction Ins(TS.TaintedIns(tuple(S.VAESNI_enc(dst, src1, src2)), P
 {
 }
 
-procedure{:instruction Ins(TS.TaintedIns(tuple(S.AESNI_enc_last(dst, src)), Public))}{:quick exportOnly}{:public}
+procedure{:instruction Ins(TS.TaintedIns(S.Ins_ioXmm_Xmm(I.ins_AESNI_enc_last, dst, src), Public))}{:quick exportOnly}{:public}
     AESNI_enc_last(inout dst:xmm, src:xmm)
     requires aesni_enabled;
     modifies efl;
@@ -96,7 +99,7 @@ procedure{:instruction Ins(TS.TaintedIns(tuple(S.AESNI_enc_last(dst, src)), Publ
 {
 }
 
-procedure{:instruction Ins(TS.TaintedIns(tuple(S.VAESNI_enc_last(dst, src1, src2)), Public))}{:quick exportOnly}{:public}
+procedure{:instruction mk_ins(make_instr(I.ins_VAESNI_enc_last, Mov128Xmm(dst), Mov128Xmm(src1), Mov128Xmm(src2)), Public)}{:quick exportOnly}{:public}
     VAESNI_enc_last(inout dst:xmm, src1:xmm, src2:xmm)
     requires aesni_enabled;
     modifies efl;
@@ -105,7 +108,7 @@ procedure{:instruction Ins(TS.TaintedIns(tuple(S.VAESNI_enc_last(dst, src1, src2
 {
 }
 
-procedure{:instruction Ins(TS.TaintedIns(tuple(S.AESNI_dec(dst, src)), Public))}{:quick exportOnly}
+procedure{:instruction Ins(TS.TaintedIns(S.Ins_ioXmm_Xmm(I.ins_AESNI_dec, dst, src), Public))}{:quick exportOnly}
     AESNI_dec(inout dst:xmm, src:xmm)
     requires aesni_enabled;
     modifies efl;
@@ -114,7 +117,7 @@ procedure{:instruction Ins(TS.TaintedIns(tuple(S.AESNI_dec(dst, src)), Public))}
 {
 }
 
-procedure{:instruction Ins(TS.TaintedIns(tuple(S.AESNI_dec_last(dst, src)), Public))}{:quick exportOnly}
+procedure{:instruction Ins(TS.TaintedIns(S.Ins_ioXmm_Xmm(I.ins_AESNI_dec_last, dst, src), Public))}{:quick exportOnly}
     AESNI_dec_last(inout dst:xmm, src:xmm)
     requires aesni_enabled;
     modifies efl;
@@ -123,7 +126,7 @@ procedure{:instruction Ins(TS.TaintedIns(tuple(S.AESNI_dec_last(dst, src)), Publ
 {
 }
 
-procedure{:instruction Ins(TS.TaintedIns(tuple(S.AESNI_imc(dst, src)), Public))}{:quick exportOnly}
+procedure{:instruction Ins(TS.TaintedIns(S.Ins_Xmm_Xmm(I.ins_AESNI_imc, dst, src), Public))}{:quick exportOnly}
     AESNI_imc(inout dst:xmm, src:xmm)
     requires aesni_enabled;
     modifies efl;
@@ -132,7 +135,7 @@ procedure{:instruction Ins(TS.TaintedIns(tuple(S.AESNI_imc(dst, src)), Public))}
 {
 }
 
-procedure{:instruction Ins(TS.TaintedIns(tuple(S.AESNI_keygen_assist(dst, src, imm)), Public))}{:quick exportOnly}{:public}
+procedure{:instruction Ins(TS.TaintedIns(S.Ins_Xmm_Xmm(I.ins_AESNI_keygen_assist(imm), dst, src), Public))}{:quick exportOnly}{:public}
     AESNI_keygen_assist(inout dst:xmm, src:xmm, inline imm:imm8)
     requires aesni_enabled;
     modifies efl;
