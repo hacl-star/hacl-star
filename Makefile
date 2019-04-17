@@ -124,7 +124,9 @@ ci:
 
 wasm:
 	tools/blast-staticconfig.sh wasm
-	EVERCRYPT_CONFIG=wasm $(MAKE) dist/wasm/Makefile.basic
+	EVERCRYPT_CONFIG=wasm $(MAKE) wasm-staged
+
+wasm-unstaged: dist/wasm/Makefile.basic
 
 # Not reusing the -staged automatic target so as to export MIN_TEST
 min-test:
@@ -680,7 +682,7 @@ WASM_STANDALONE=Prims LowStar.Endianness C.Endianness \
 WASM_FLAGS	=\
   $(patsubst %,-bundle %,$(WASM_STANDALONE)) \
   -no-prefix Test.NoHeap \
-  -bundle Test.NoHeap= \
+  -bundle Test.NoHeap=Test,Test.* \
   -bundle FStar.* \
   -bundle EverCrypt.*,Hacl.*,MerkleTree.*[rename=EverCrypt] \
   -bundle LowStar.* \
