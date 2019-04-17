@@ -1,5 +1,5 @@
 [
-  "§≤&K¨*o≠ep'A∫¡>„",
+  "`\u001fq“ÕŒ≥“ù1\u000f,¿gC◊",
   [
     [
       "X64.Bytes_Semantics_s.uint64",
@@ -8,408 +8,325 @@
       0,
       [ "@query", "assumption_FStar.UInt64.t__uu___haseq" ],
       0,
-      "f0bbe4fcff3cdd741f44794d5c688bf7"
+      "d3ded4b16b29c6f8491866202fc13543"
     ],
     [
-      "X64.Bytes_Semantics_s.ins",
+      "X64.Bytes_Semantics_s.__proj__Instr__item__outs",
       1,
       1,
       0,
       [
         "@MaxIFuel_assumption", "@query",
-        "Prims_pretyping_ae567c2fb75be05905677af440075565",
-        "assumption_X64.Machine_s.mov128_op__uu___haseq",
-        "assumption_X64.Machine_s.operand__uu___haseq",
-        "equation_Prims.eqtype", "equation_Prims.nat",
-        "equation_X64.Machine_s.imm8", "equation_X64.Machine_s.xmm",
-        "function_token_typing_Prims.__cache_version_number__",
-        "function_token_typing_Prims.int",
-        "haseqTm_refine_ba523126f67e00e7cd55f0b92f16681d",
-        "haseqTm_refine_ed0c82b529ba35f1d88d0cb19afaf666",
-        "haseqTm_refine_f0a4eeefab9c63f31c350a802a4d45dd",
-        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
-        "typing_X64.Machine_s.xmm"
-      ],
-      0,
-      "b583aa57b49d1f094c13560f90be0fab"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__Mov64__item__dst",
-      1,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.Mov64",
+        "disc_equation_X64.Bytes_Semantics_s.Instr",
         "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_3ca963089c53581b53a02a86473f0bd7"
+        "refinement_interpretation_Tm_refine_898c8efbfa8fd56d2f568677e9406192"
       ],
       0,
-      "1d54638f84d1447190c0b2be2de99167"
+      "a72c10926b2bfe3889b158c649500078"
     ],
     [
-      "X64.Bytes_Semantics_s.__proj__Mov64__item__src",
+      "X64.Bytes_Semantics_s.__proj__Instr__item__args",
       1,
       1,
       0,
       [
         "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.Mov64",
+        "disc_equation_X64.Bytes_Semantics_s.Instr",
         "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_3ca963089c53581b53a02a86473f0bd7"
+        "refinement_interpretation_Tm_refine_898c8efbfa8fd56d2f568677e9406192"
       ],
       0,
-      "80ba6aa0fc354cb5449695600bbfa5be"
+      "02df0b41f72c89aea9617d5eac2656af"
     ],
     [
-      "X64.Bytes_Semantics_s.__proj__MovBe64__item__dst",
+      "X64.Bytes_Semantics_s.__proj__Instr__item__havoc_flags",
       1,
       1,
       0,
       [
         "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.MovBe64",
+        "disc_equation_X64.Bytes_Semantics_s.Instr",
         "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_39d41e8037957c0996268168f35b9114"
+        "refinement_interpretation_Tm_refine_898c8efbfa8fd56d2f568677e9406192"
       ],
       0,
-      "4d7b1af634786948b157f13891e161fb"
+      "4fec9bf9917e875669143aa411784702"
     ],
     [
-      "X64.Bytes_Semantics_s.__proj__MovBe64__item__src",
+      "X64.Bytes_Semantics_s.__proj__Instr__item__i",
       1,
       1,
       0,
       [
         "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.MovBe64",
+        "disc_equation_X64.Bytes_Semantics_s.Instr",
+        "proj_equation_X64.Bytes_Semantics_s.Instr_args",
+        "proj_equation_X64.Bytes_Semantics_s.Instr_havoc_flags",
+        "proj_equation_X64.Bytes_Semantics_s.Instr_outs",
         "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_39d41e8037957c0996268168f35b9114"
+        "projection_inverse_X64.Bytes_Semantics_s.Instr_args",
+        "projection_inverse_X64.Bytes_Semantics_s.Instr_havoc_flags",
+        "projection_inverse_X64.Bytes_Semantics_s.Instr_outs",
+        "refinement_interpretation_Tm_refine_898c8efbfa8fd56d2f568677e9406192"
       ],
       0,
-      "cd46115be4840b005fe831fb0e4f67aa"
+      "99102f92f239fef599c868bf7d4fea07"
     ],
     [
-      "X64.Bytes_Semantics_s.__proj__Cmovc64__item__dst",
+      "X64.Bytes_Semantics_s.__proj__Instr__item__oprs",
       1,
       1,
       0,
       [
         "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.Cmovc64",
+        "disc_equation_X64.Bytes_Semantics_s.Instr",
+        "proj_equation_X64.Bytes_Semantics_s.Instr_args",
+        "proj_equation_X64.Bytes_Semantics_s.Instr_outs",
         "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_35b0fb37957103585e896761ce8f350b"
+        "projection_inverse_X64.Bytes_Semantics_s.Instr_args",
+        "projection_inverse_X64.Bytes_Semantics_s.Instr_outs",
+        "refinement_interpretation_Tm_refine_898c8efbfa8fd56d2f568677e9406192"
       ],
       0,
-      "02ce8e4e99abe604281263d3a5c5baec"
+      "cdb469b6d30686f79f6378dc1ab45b88"
     ],
     [
-      "X64.Bytes_Semantics_s.__proj__Cmovc64__item__src",
+      "X64.Bytes_Semantics_s.__proj__Ins_64_64_preserve__item__i",
       1,
       1,
       0,
       [
         "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.Cmovc64",
+        "disc_equation_X64.Bytes_Semantics_s.Ins_64_64_preserve",
         "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_35b0fb37957103585e896761ce8f350b"
+        "refinement_interpretation_Tm_refine_30b242821110b7869201226d616e34de"
       ],
       0,
-      "21e7c5cfd21a6fc24697eea81b2bf0bf"
+      "f472c494d21ac6b0fedb0ac803116301"
     ],
     [
-      "X64.Bytes_Semantics_s.__proj__Add64__item__dst",
+      "X64.Bytes_Semantics_s.__proj__Ins_64_64_preserve__item__dst",
       1,
       1,
       0,
       [
         "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.Add64",
+        "disc_equation_X64.Bytes_Semantics_s.Ins_64_64_preserve",
         "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_687599772d3529aec2d9e88b681a85db"
+        "refinement_interpretation_Tm_refine_30b242821110b7869201226d616e34de"
       ],
       0,
-      "d3dc3db75e6cdf8bcb0d7b9252a2b742"
+      "d803dc7da250a7741292e55850fd3387"
     ],
     [
-      "X64.Bytes_Semantics_s.__proj__Add64__item__src",
+      "X64.Bytes_Semantics_s.__proj__Ins_64_64_preserve__item__src",
       1,
       1,
       0,
       [
         "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.Add64",
+        "disc_equation_X64.Bytes_Semantics_s.Ins_64_64_preserve",
         "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_687599772d3529aec2d9e88b681a85db"
+        "refinement_interpretation_Tm_refine_30b242821110b7869201226d616e34de"
       ],
       0,
-      "35e8b687e54b4e6f0b0f306400fef6ef"
+      "55571ddff9337222193a0b95b77f3207"
     ],
     [
-      "X64.Bytes_Semantics_s.__proj__AddLea64__item__dst",
+      "X64.Bytes_Semantics_s.__proj__Ins_io64_64__item__i",
       1,
       1,
       0,
       [
         "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.AddLea64",
+        "disc_equation_X64.Bytes_Semantics_s.Ins_io64_64",
         "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_b306dc11038989184bb26c3f9a6dc901"
+        "refinement_interpretation_Tm_refine_e775a64afee8d5199b3ea1baf56027d7"
       ],
       0,
-      "f80ebeacdc26c1f71c3db07854207acc"
+      "f3ddd71d12996f125194c643b7ed3853"
     ],
     [
-      "X64.Bytes_Semantics_s.__proj__AddLea64__item__src1",
+      "X64.Bytes_Semantics_s.__proj__Ins_io64_64__item__dst",
       1,
       1,
       0,
       [
         "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.AddLea64",
+        "disc_equation_X64.Bytes_Semantics_s.Ins_io64_64",
         "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_b306dc11038989184bb26c3f9a6dc901"
+        "refinement_interpretation_Tm_refine_e775a64afee8d5199b3ea1baf56027d7"
       ],
       0,
-      "f2768e4fd5525eb85836362c1e52b2da"
+      "777b62f34c9be35d57f0716a45bc213a"
     ],
     [
-      "X64.Bytes_Semantics_s.__proj__AddLea64__item__src2",
+      "X64.Bytes_Semantics_s.__proj__Ins_io64_64__item__src",
       1,
       1,
       0,
       [
         "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.AddLea64",
+        "disc_equation_X64.Bytes_Semantics_s.Ins_io64_64",
         "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_b306dc11038989184bb26c3f9a6dc901"
+        "refinement_interpretation_Tm_refine_e775a64afee8d5199b3ea1baf56027d7"
       ],
       0,
-      "5434d784ec6f32b4f4cbac1a81f4eeaf"
+      "e292d12283ac11ce3d5da5716ef9489a"
     ],
     [
-      "X64.Bytes_Semantics_s.__proj__AddCarry64__item__dst",
+      "X64.Bytes_Semantics_s.__proj__Ins_io64_64_cf__item__i",
       1,
       1,
       0,
       [
         "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.AddCarry64",
+        "disc_equation_X64.Bytes_Semantics_s.Ins_io64_64_cf",
         "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_80490d27f18cf3b09d1679290735a750"
+        "refinement_interpretation_Tm_refine_8f862805aa0ccb2053a78f834cb873c7"
       ],
       0,
-      "03a19b4993c6d869ee81be54974a7d4b"
+      "790598fb7e323904556a24e033639f36"
     ],
     [
-      "X64.Bytes_Semantics_s.__proj__AddCarry64__item__src",
+      "X64.Bytes_Semantics_s.__proj__Ins_io64_64_cf__item__dst",
       1,
       1,
       0,
       [
         "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.AddCarry64",
+        "disc_equation_X64.Bytes_Semantics_s.Ins_io64_64_cf",
         "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_80490d27f18cf3b09d1679290735a750"
+        "refinement_interpretation_Tm_refine_8f862805aa0ccb2053a78f834cb873c7"
       ],
       0,
-      "52f09fc8de17eefb374e43216a57a36e"
+      "f33d30e54d320a946d8e529b3ad5c584"
     ],
     [
-      "X64.Bytes_Semantics_s.__proj__Adcx64__item__dst",
+      "X64.Bytes_Semantics_s.__proj__Ins_io64_64_cf__item__src",
       1,
       1,
       0,
       [
         "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.Adcx64",
+        "disc_equation_X64.Bytes_Semantics_s.Ins_io64_64_cf",
         "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_2eb4f6a334b20832cc276db83b68510f"
+        "refinement_interpretation_Tm_refine_8f862805aa0ccb2053a78f834cb873c7"
       ],
       0,
-      "6238e2fb6c47617e6a4ad0c687bc92c8"
+      "75cbdbcba26f50aa61ca88f805b9758f"
     ],
     [
-      "X64.Bytes_Semantics_s.__proj__Adcx64__item__src",
+      "X64.Bytes_Semantics_s.__proj__Ins_ioXmm__item__i",
       1,
       1,
       0,
       [
         "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.Adcx64",
+        "disc_equation_X64.Bytes_Semantics_s.Ins_ioXmm",
         "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_2eb4f6a334b20832cc276db83b68510f"
+        "refinement_interpretation_Tm_refine_b479e84c79b306b5cb491660de0e261b"
       ],
       0,
-      "ba5a932cfe0b0444bca50db1d44bcc4f"
+      "bfdc7a5865380f51be13d9f070449b8b"
     ],
     [
-      "X64.Bytes_Semantics_s.__proj__Adox64__item__dst",
+      "X64.Bytes_Semantics_s.__proj__Ins_ioXmm__item__dst",
       1,
       1,
       0,
       [
         "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.Adox64",
+        "disc_equation_X64.Bytes_Semantics_s.Ins_ioXmm",
         "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_3802d677313a91cc4306ddffb19e0486"
+        "refinement_interpretation_Tm_refine_b479e84c79b306b5cb491660de0e261b"
       ],
       0,
-      "f1aea08a9b84ea75004a1b2931f6f662"
+      "3fdbfd15ff8b229343fd1ef99556d5e7"
     ],
     [
-      "X64.Bytes_Semantics_s.__proj__Adox64__item__src",
+      "X64.Bytes_Semantics_s.__proj__Ins_Xmm_Xmm__item__i",
       1,
       1,
       0,
       [
         "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.Adox64",
+        "disc_equation_X64.Bytes_Semantics_s.Ins_Xmm_Xmm",
         "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_3802d677313a91cc4306ddffb19e0486"
+        "refinement_interpretation_Tm_refine_66d62899947a22dcfbbe3678c9c7726b"
       ],
       0,
-      "288e5b201becc063b162341a81956832"
+      "65cd5b86e46c9d9678784d54d0ff1f85"
     ],
     [
-      "X64.Bytes_Semantics_s.__proj__Sub64__item__dst",
+      "X64.Bytes_Semantics_s.__proj__Ins_Xmm_Xmm__item__dst",
       1,
       1,
       0,
       [
         "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.Sub64",
+        "disc_equation_X64.Bytes_Semantics_s.Ins_Xmm_Xmm",
         "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_47b2d6f5d987f09876b05ed3e74c3057"
+        "refinement_interpretation_Tm_refine_66d62899947a22dcfbbe3678c9c7726b"
       ],
       0,
-      "abd6d4e30db6eb70e2d18d2e6c716517"
+      "20f66eb22e3bc49681915055815315e6"
     ],
     [
-      "X64.Bytes_Semantics_s.__proj__Sub64__item__src",
+      "X64.Bytes_Semantics_s.__proj__Ins_Xmm_Xmm__item__src",
       1,
       1,
       0,
       [
         "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.Sub64",
+        "disc_equation_X64.Bytes_Semantics_s.Ins_Xmm_Xmm",
         "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_47b2d6f5d987f09876b05ed3e74c3057"
+        "refinement_interpretation_Tm_refine_66d62899947a22dcfbbe3678c9c7726b"
       ],
       0,
-      "dd88f22ab8ea6a1c2f242ed0266e28b3"
+      "b3e22b8fb9c19359ff18edf49364137c"
     ],
     [
-      "X64.Bytes_Semantics_s.__proj__Sbb64__item__dst",
+      "X64.Bytes_Semantics_s.__proj__Ins_ioXmm_Xmm__item__i",
       1,
       1,
       0,
       [
         "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.Sbb64",
+        "disc_equation_X64.Bytes_Semantics_s.Ins_ioXmm_Xmm",
         "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_311b5decefc5609a32eb1c5913bd2255"
+        "refinement_interpretation_Tm_refine_eb734078e17773e1b9d6ac5d76b749c5"
       ],
       0,
-      "f70b75c52c8b19a4b8f934c3bbdb3e6d"
+      "09faf1497dd9015ba2891ce7d20ba972"
     ],
     [
-      "X64.Bytes_Semantics_s.__proj__Sbb64__item__src",
+      "X64.Bytes_Semantics_s.__proj__Ins_ioXmm_Xmm__item__dst",
       1,
       1,
       0,
       [
         "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.Sbb64",
+        "disc_equation_X64.Bytes_Semantics_s.Ins_ioXmm_Xmm",
         "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_311b5decefc5609a32eb1c5913bd2255"
+        "refinement_interpretation_Tm_refine_eb734078e17773e1b9d6ac5d76b749c5"
       ],
       0,
-      "a4c08ec355ed66dbbe8af3cffe27903c"
+      "690d395b46a6b11d4f2d5b38d19c7cec"
     ],
     [
-      "X64.Bytes_Semantics_s.__proj__Mul64__item__src",
+      "X64.Bytes_Semantics_s.__proj__Ins_ioXmm_Xmm__item__src",
       1,
       1,
       0,
       [
         "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.Mul64",
+        "disc_equation_X64.Bytes_Semantics_s.Ins_ioXmm_Xmm",
         "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_040ca6c10f727f4c0e2cdabc779a561f"
+        "refinement_interpretation_Tm_refine_eb734078e17773e1b9d6ac5d76b749c5"
       ],
       0,
-      "698b7ae6e0c7a8efb58a3fe0c38d8abe"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__Mulx64__item__dst_hi",
-      1,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.Mulx64",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_6059160ef1037b83884eecdf31f0cc25"
-      ],
-      0,
-      "38207fcb4e7f3750b57aeedd0ad1620d"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__Mulx64__item__dst_lo",
-      1,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.Mulx64",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_6059160ef1037b83884eecdf31f0cc25"
-      ],
-      0,
-      "b6bd38a7f139d26d6cf6a81368ae20b8"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__Mulx64__item__src",
-      1,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.Mulx64",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_6059160ef1037b83884eecdf31f0cc25"
-      ],
-      0,
-      "7871f5f9d1916653a955d4d2ff389263"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__IMul64__item__dst",
-      1,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.IMul64",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_6d1e5ee47583916f6525f1f977b6f583"
-      ],
-      0,
-      "0460a77949640388d09f14b8517f90c3"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__IMul64__item__src",
-      1,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.IMul64",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_6d1e5ee47583916f6525f1f977b6f583"
-      ],
-      0,
-      "aca417fa10b74f48dc37e4365f309662"
+      "4b938faf3d9738797b983e7925ddf027"
     ],
     [
       "X64.Bytes_Semantics_s.__proj__Xor64__item__dst",
@@ -423,7 +340,7 @@
         "refinement_interpretation_Tm_refine_24f7da08e9fd6be616b2630d2dafe593"
       ],
       0,
-      "f2e33494f56ad46564463b8fd0e04def"
+      "0702f32cdec50ce994acc1922cf8557d"
     ],
     [
       "X64.Bytes_Semantics_s.__proj__Xor64__item__src",
@@ -437,217 +354,7 @@
         "refinement_interpretation_Tm_refine_24f7da08e9fd6be616b2630d2dafe593"
       ],
       0,
-      "8c17e690e54bf5544415641ee23c1f6d"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__And64__item__dst",
-      1,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.And64",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_c10685298724d1935e1b5c32e1b8ea46"
-      ],
-      0,
-      "8c56cedf07d6b4a0a222d758b8b9fb01"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__And64__item__src",
-      1,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.And64",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_c10685298724d1935e1b5c32e1b8ea46"
-      ],
-      0,
-      "a265496c6d3836851c24decfc7d13964"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__Shr64__item__dst",
-      1,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.Shr64",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_d9482d620b21a86b3a6759d2f92d0463"
-      ],
-      0,
-      "7c5563c0dfafe5f1ff31ae439008060b"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__Shr64__item__amt",
-      1,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.Shr64",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_d9482d620b21a86b3a6759d2f92d0463"
-      ],
-      0,
-      "97a3d07e27ac53744e8745b3e72dae43"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__Shl64__item__dst",
-      1,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.Shl64",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_946a3ab29b234fd8168c0c13a949f07c"
-      ],
-      0,
-      "5426e2380b0afa1aa59331d3a57f9844"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__Shl64__item__amt",
-      1,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.Shl64",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_946a3ab29b234fd8168c0c13a949f07c"
-      ],
-      0,
-      "dda6bcabaf306f917f8035324306161d"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__Push__item__src",
-      1,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.Push",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_26fedcce845b73c6cb90ed924476b773"
-      ],
-      0,
-      "aca886187525a02895dde2f674a10a88"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__Pop__item__dst",
-      1,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.Pop",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_363da2645ac2376123f00f5767100763"
-      ],
-      0,
-      "6107be3c1fb6936c232020656ea861d0"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__Alloc__item__n",
-      1,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.Alloc",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_480980e395e6b21cb37524da4cb847e6"
-      ],
-      0,
-      "177690d2c3f01bcc0f94cb02d787ed98"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__Dealloc__item__n",
-      1,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.Dealloc",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_f3a6219a07178efa2a5cc36cb8f82d8b"
-      ],
-      0,
-      "d1ca3c582941a06388670cec4bd25ae2"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__Paddd__item__dst",
-      1,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.Paddd",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_ef96719172504d65e5292db5371ec018"
-      ],
-      0,
-      "42907acd200897cf051a6afc4eb2ed84"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__Paddd__item__src",
-      1,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.Paddd",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_ef96719172504d65e5292db5371ec018"
-      ],
-      0,
-      "0ec27571becd15b634b186954259e608"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__VPaddd__item__dst",
-      1,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.VPaddd",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_9800d5f14d38ef7e259cf5b6da6a1082"
-      ],
-      0,
-      "2907ce01767fe8536b4d143f5a682e39"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__VPaddd__item__src1",
-      1,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.VPaddd",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_9800d5f14d38ef7e259cf5b6da6a1082"
-      ],
-      0,
-      "524942b2f264a323463486e2d1a3c822"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__VPaddd__item__src2",
-      1,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.VPaddd",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_9800d5f14d38ef7e259cf5b6da6a1082"
-      ],
-      0,
-      "bada66fa51249a0812d40213d4b8b21f"
+      "eb78b2a3abda98d06d23dd3ca1427e46"
     ],
     [
       "X64.Bytes_Semantics_s.__proj__Pxor__item__dst",
@@ -661,7 +368,7 @@
         "refinement_interpretation_Tm_refine_8310f2a9c760f99c4229745b3cfcef22"
       ],
       0,
-      "b843c51fd2ab45f5b9b5ab192c849d09"
+      "3eea00f641f1d774a40a98427f6a0f36"
     ],
     [
       "X64.Bytes_Semantics_s.__proj__Pxor__item__src",
@@ -675,7 +382,7 @@
         "refinement_interpretation_Tm_refine_8310f2a9c760f99c4229745b3cfcef22"
       ],
       0,
-      "84d1e72c4c2d43c13daf73c150d40ec5"
+      "ae52ac3e70046578d6d38b3b949f477e"
     ],
     [
       "X64.Bytes_Semantics_s.__proj__VPxor__item__dst",
@@ -689,7 +396,7 @@
         "refinement_interpretation_Tm_refine_2ed249ba55111f4eaa6a2345cb01058c"
       ],
       0,
-      "703a7f6e38ba4dd397ef5d20d57fcdb3"
+      "cebd706fe9b3c57d34a8703edf1f11d9"
     ],
     [
       "X64.Bytes_Semantics_s.__proj__VPxor__item__src1",
@@ -703,7 +410,7 @@
         "refinement_interpretation_Tm_refine_2ed249ba55111f4eaa6a2345cb01058c"
       ],
       0,
-      "d90e66648507236b6b0954028ead0cf1"
+      "7b2d20b051b66a00370642adb954ea20"
     ],
     [
       "X64.Bytes_Semantics_s.__proj__VPxor__item__src2",
@@ -717,665 +424,7 @@
         "refinement_interpretation_Tm_refine_2ed249ba55111f4eaa6a2345cb01058c"
       ],
       0,
-      "fc79da91f57470a2a4b5653316e026b5"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__Pand__item__dst",
-      1,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.Pand",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_5a8bc262a0313286240c30aa17812a0e"
-      ],
-      0,
-      "6759f6a3f90bc1464804c1dee0d7a1cf"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__Pand__item__src",
-      1,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.Pand",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_5a8bc262a0313286240c30aa17812a0e"
-      ],
-      0,
-      "1ff2e5762d4e7efdef25c617a1841965"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__Pslld__item__dst",
-      1,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.Pslld",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_fa887156e467f3e40421ba679edd361a"
-      ],
-      0,
-      "c0f06afbdcab8695344163bac62be733"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__Pslld__item__amt",
-      1,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.Pslld",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_fa887156e467f3e40421ba679edd361a"
-      ],
-      0,
-      "79a5dd5ac78fff3df9ec13a8019aaf6f"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__Psrld__item__dst",
-      1,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.Psrld",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_deecd634a08c34cc7919c7236f826c37"
-      ],
-      0,
-      "e20c1e5bd1822c3ffb93c4a2b218bfc9"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__Psrld__item__amt",
-      1,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.Psrld",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_deecd634a08c34cc7919c7236f826c37"
-      ],
-      0,
-      "3aabcccd3a15c2ce1394adcae8c26da7"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__Psrldq__item__dst",
-      1,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.Psrldq",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_14bc3c240d6f320a384e5116a403fb28"
-      ],
-      0,
-      "8433d8ce91c89ee30a5a5bc520985b2c"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__Psrldq__item__amt",
-      1,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.Psrldq",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_14bc3c240d6f320a384e5116a403fb28"
-      ],
-      0,
-      "7bb3b8833b7c0187d2ff53b2632eee07"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__Palignr__item__dst",
-      1,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.Palignr",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_220e1a2486e8e0d06e953b12f031c83b"
-      ],
-      0,
-      "fad27286d8da2596371e6dab693e3f42"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__Palignr__item__src",
-      1,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.Palignr",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_220e1a2486e8e0d06e953b12f031c83b"
-      ],
-      0,
-      "c1e880f7bea6b43be9a0613f4af4395f"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__Palignr__item__amount",
-      1,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.Palignr",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_220e1a2486e8e0d06e953b12f031c83b"
-      ],
-      0,
-      "64917f8cbea848d1935fa3f733ba73fc"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__VPalignr__item__dst",
-      1,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.VPalignr",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_70c4eceb8ae22a034c663b9d9f51a10c"
-      ],
-      0,
-      "aa0b5b58a09bbe31e42d11510ae3c013"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__VPalignr__item__src1",
-      1,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.VPalignr",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_70c4eceb8ae22a034c663b9d9f51a10c"
-      ],
-      0,
-      "0267ef74346abb88b43fc18e4ef4e5a0"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__VPalignr__item__src2",
-      1,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.VPalignr",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_70c4eceb8ae22a034c663b9d9f51a10c"
-      ],
-      0,
-      "9b28d82de4c904776d9a1bda8d549e03"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__VPalignr__item__amount",
-      1,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.VPalignr",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_70c4eceb8ae22a034c663b9d9f51a10c"
-      ],
-      0,
-      "67785091738c51a27ebec85aea5e7402"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__Shufpd__item__dst",
-      1,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.Shufpd",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_6f71e8ad2b76d60d6386a4666cb2d6c9"
-      ],
-      0,
-      "518f5edd9371fc075a95f53bf013e5dc"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__Shufpd__item__src",
-      1,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.Shufpd",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_6f71e8ad2b76d60d6386a4666cb2d6c9"
-      ],
-      0,
-      "aec679e25953f528daa15b6947f54899"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__Shufpd__item__permutation",
-      1,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.Shufpd",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_6f71e8ad2b76d60d6386a4666cb2d6c9"
-      ],
-      0,
-      "9f0da92cd76bfc8cc11addbd5df4881e"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__VShufpd__item__dst",
-      1,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.VShufpd",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_ddb692a2a5d89b725de6fa0df81f48ab"
-      ],
-      0,
-      "5901179d86faeed8a8fcd88abacbd36b"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__VShufpd__item__src1",
-      1,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.VShufpd",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_ddb692a2a5d89b725de6fa0df81f48ab"
-      ],
-      0,
-      "12ba7bea5a4494d16f686df983cfa8d5"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__VShufpd__item__src2",
-      1,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.VShufpd",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_ddb692a2a5d89b725de6fa0df81f48ab"
-      ],
-      0,
-      "31206d9722740ad11b5c868e210aaf35"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__VShufpd__item__permutation",
-      1,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.VShufpd",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_ddb692a2a5d89b725de6fa0df81f48ab"
-      ],
-      0,
-      "a86ce20d65fde1cbb86fa6b842b79b6b"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__Pshufb__item__dst",
-      1,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.Pshufb",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_eb0698a941b2f4e6d1326eef3e380e1e"
-      ],
-      0,
-      "8ff99ba1e836b274c22f5e35bc06a608"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__Pshufb__item__src",
-      1,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.Pshufb",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_eb0698a941b2f4e6d1326eef3e380e1e"
-      ],
-      0,
-      "32e2a678ee588878b50351cf98471082"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__VPshufb__item__dst",
-      1,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.VPshufb",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_678cd1fcf15a925c37cfffbb45865fa3"
-      ],
-      0,
-      "0fcf81c43ff416cc5cc87ccef91f5d2e"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__VPshufb__item__src1",
-      1,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.VPshufb",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_678cd1fcf15a925c37cfffbb45865fa3"
-      ],
-      0,
-      "832e4c70bbd4acdb9b3a82fde95f7199"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__VPshufb__item__src2",
-      1,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.VPshufb",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_678cd1fcf15a925c37cfffbb45865fa3"
-      ],
-      0,
-      "9711028af28f415ebfbc4a25c4daf3b5"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__Pshufd__item__dst",
-      1,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.Pshufd",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_3052e68e0327010cb11b30d3ab952353"
-      ],
-      0,
-      "b14e2cf0aac00782381fb3ff940bfc83"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__Pshufd__item__src",
-      1,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.Pshufd",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_3052e68e0327010cb11b30d3ab952353"
-      ],
-      0,
-      "a3b396bebae064928e3af149c5de9578"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__Pshufd__item__permutation",
-      1,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.Pshufd",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_3052e68e0327010cb11b30d3ab952353"
-      ],
-      0,
-      "45dd631f1392fc90796a864267c83a8c"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__Pcmpeqd__item__dst",
-      1,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.Pcmpeqd",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_35d2e5241b1e88617151a308413f50f1"
-      ],
-      0,
-      "d639405fa8d08e53877f9a3a0151609b"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__Pcmpeqd__item__src",
-      1,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.Pcmpeqd",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_35d2e5241b1e88617151a308413f50f1"
-      ],
-      0,
-      "18427fcfc5fc8037f71a73c4812881ea"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__Pextrq__item__dst",
-      1,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.Pextrq",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_ae3586a20ad46ffb9a2f9804bbafc401"
-      ],
-      0,
-      "b1801f3a8c0f9484c4dfab3d76c4a6a0"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__Pextrq__item__src",
-      1,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.Pextrq",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_ae3586a20ad46ffb9a2f9804bbafc401"
-      ],
-      0,
-      "16a50bcecd469f4744287c26f7ce39f2"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__Pextrq__item__index",
-      1,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.Pextrq",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_ae3586a20ad46ffb9a2f9804bbafc401"
-      ],
-      0,
-      "4470ffad8957635bea231502d6944511"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__Pinsrd__item__dst",
-      1,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.Pinsrd",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_3e455907a2cbcc504f25d96e8a0ff792"
-      ],
-      0,
-      "8fa8165dd80dd885cafc6540218e7546"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__Pinsrd__item__src",
-      1,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.Pinsrd",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_3e455907a2cbcc504f25d96e8a0ff792"
-      ],
-      0,
-      "d545f50ba77300da9d67446c8956673b"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__Pinsrd__item__index",
-      1,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.Pinsrd",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_3e455907a2cbcc504f25d96e8a0ff792"
-      ],
-      0,
-      "6cbb6cf9a871f83d7358f3734dc26ac4"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__Pinsrq__item__dst",
-      1,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.Pinsrq",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_9c7483c3dea81e83f80bfe51a43a4a81"
-      ],
-      0,
-      "d292cb2c873ff2254bbef1cfe7f289e8"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__Pinsrq__item__src",
-      1,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.Pinsrq",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_9c7483c3dea81e83f80bfe51a43a4a81"
-      ],
-      0,
-      "6abaf5f05f0ff0e4836a2acf9daedef4"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__Pinsrq__item__index",
-      1,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.Pinsrq",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_9c7483c3dea81e83f80bfe51a43a4a81"
-      ],
-      0,
-      "3ab5867ac6e2d936ec16256690a218ba"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__VPSLLDQ__item__dst",
-      1,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.VPSLLDQ",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_a7d01af2d0ad14d745f128c5699f2295"
-      ],
-      0,
-      "fea827352fd43b709d374f4b9794884f"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__VPSLLDQ__item__src",
-      1,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.VPSLLDQ",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_a7d01af2d0ad14d745f128c5699f2295"
-      ],
-      0,
-      "4b7716c7384026c982d7aaf88ace8a88"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__VPSLLDQ__item__count",
-      1,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.VPSLLDQ",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_a7d01af2d0ad14d745f128c5699f2295"
-      ],
-      0,
-      "a4286a38ed16bccd7aabe0ee48ebbf94"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__Vpsrldq__item__dst",
-      1,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.Vpsrldq",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_9c605eb8c10b3ac2dd3fb29fd956258c"
-      ],
-      0,
-      "c4b9c3f037fd742b2ea756adfef80eeb"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__Vpsrldq__item__src",
-      1,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.Vpsrldq",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_9c605eb8c10b3ac2dd3fb29fd956258c"
-      ],
-      0,
-      "f79c2dd1106b1f96216a2081564c497c"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__Vpsrldq__item__count",
-      1,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.Vpsrldq",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_9c605eb8c10b3ac2dd3fb29fd956258c"
-      ],
-      0,
-      "29d9891b74af3f2280c35a8c87b38c47"
+      "e5742e2080ebc5f5bac5cc6b968fa9d3"
     ],
     [
       "X64.Bytes_Semantics_s.__proj__MOVDQU__item__dst",
@@ -1389,7 +438,7 @@
         "refinement_interpretation_Tm_refine_1706bbe6a7cbb774bf2de11b07ed93c8"
       ],
       0,
-      "871988a52f6a082c74333051bbdfcda3"
+      "1744ca24cc69cbfea96ffd36463a71e9"
     ],
     [
       "X64.Bytes_Semantics_s.__proj__MOVDQU__item__src",
@@ -1403,455 +452,63 @@
         "refinement_interpretation_Tm_refine_1706bbe6a7cbb774bf2de11b07ed93c8"
       ],
       0,
-      "c3fbaccb7acdcecb25b92b2098a65c67"
+      "fb6fc4ff3563a86cab33c62dc186337f"
     ],
     [
-      "X64.Bytes_Semantics_s.__proj__Pclmulqdq__item__dst",
+      "X64.Bytes_Semantics_s.__proj__Push__item__src",
       1,
       1,
       0,
       [
         "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.Pclmulqdq",
+        "disc_equation_X64.Bytes_Semantics_s.Push",
         "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_ea7605fc44982d7deb74e1cf36c51696"
+        "refinement_interpretation_Tm_refine_26fedcce845b73c6cb90ed924476b773"
       ],
       0,
-      "1b10213fd139af6e5dba72836fa08b4d"
+      "2aa6022f06c14b88c10214220f6861d8"
     ],
     [
-      "X64.Bytes_Semantics_s.__proj__Pclmulqdq__item__src",
+      "X64.Bytes_Semantics_s.__proj__Pop__item__dst",
       1,
       1,
       0,
       [
         "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.Pclmulqdq",
+        "disc_equation_X64.Bytes_Semantics_s.Pop",
         "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_ea7605fc44982d7deb74e1cf36c51696"
+        "refinement_interpretation_Tm_refine_363da2645ac2376123f00f5767100763"
       ],
       0,
-      "1aa6db3f7d55caf03f381e4fedf33181"
+      "ed55245cd2d5d10ea3d72ed830e62b49"
     ],
     [
-      "X64.Bytes_Semantics_s.__proj__Pclmulqdq__item__imm",
+      "X64.Bytes_Semantics_s.__proj__Alloc__item__n",
       1,
       1,
       0,
       [
         "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.Pclmulqdq",
+        "disc_equation_X64.Bytes_Semantics_s.Alloc",
         "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_ea7605fc44982d7deb74e1cf36c51696"
+        "refinement_interpretation_Tm_refine_480980e395e6b21cb37524da4cb847e6"
       ],
       0,
-      "692cd72ec4cd7602d6eeb1bef36578cf"
+      "a41d34497958391e9aa2ac06223e5db6"
     ],
     [
-      "X64.Bytes_Semantics_s.__proj__VPclmulqdq__item__dst",
+      "X64.Bytes_Semantics_s.__proj__Dealloc__item__n",
       1,
       1,
       0,
       [
         "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.VPclmulqdq",
+        "disc_equation_X64.Bytes_Semantics_s.Dealloc",
         "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_d14393e816a45d94ddbb9c633574f02f"
+        "refinement_interpretation_Tm_refine_f3a6219a07178efa2a5cc36cb8f82d8b"
       ],
       0,
-      "d74fb8b6d421cd3039b66e90c226183e"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__VPclmulqdq__item__src1",
-      1,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.VPclmulqdq",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_d14393e816a45d94ddbb9c633574f02f"
-      ],
-      0,
-      "24ef59742c121ca655b36c8ecad3bb42"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__VPclmulqdq__item__src2",
-      1,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.VPclmulqdq",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_d14393e816a45d94ddbb9c633574f02f"
-      ],
-      0,
-      "73dfe236ae84ee1d7d592b4502b4b7fa"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__VPclmulqdq__item__imm",
-      1,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.VPclmulqdq",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_d14393e816a45d94ddbb9c633574f02f"
-      ],
-      0,
-      "d22902bf78f64663d5a62cd65e558fa7"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__AESNI_enc__item__dst",
-      1,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.AESNI_enc",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_c762fc0ac9dd789aed182e2aac30936b"
-      ],
-      0,
-      "c78c87f3a40b1e7326d9e0619cf8a94a"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__AESNI_enc__item__src",
-      1,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.AESNI_enc",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_c762fc0ac9dd789aed182e2aac30936b"
-      ],
-      0,
-      "15f296d9418d11e7b6c0fc8910a7edc7"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__AESNI_enc_last__item__dst",
-      1,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.AESNI_enc_last",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_9a00906d460a71223da8eb39a384abdb"
-      ],
-      0,
-      "26077472363cb0cdc00213499332db67"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__AESNI_enc_last__item__src",
-      1,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.AESNI_enc_last",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_9a00906d460a71223da8eb39a384abdb"
-      ],
-      0,
-      "1802a01c0e2c4e41523866b18bbb1fed"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__AESNI_dec__item__dst",
-      1,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.AESNI_dec",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_bcf26577464a144e9225c022a9785af5"
-      ],
-      0,
-      "9652488569f063086f949d5e61ee73aa"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__AESNI_dec__item__src",
-      1,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.AESNI_dec",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_bcf26577464a144e9225c022a9785af5"
-      ],
-      0,
-      "9599f6c01b6fe56815b80e125bad92c8"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__AESNI_dec_last__item__dst",
-      1,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.AESNI_dec_last",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_967f0e0963700ca0d4523dfedab93e2d"
-      ],
-      0,
-      "e433c8960a0be79f4073363170efd0c4"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__AESNI_dec_last__item__src",
-      1,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.AESNI_dec_last",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_967f0e0963700ca0d4523dfedab93e2d"
-      ],
-      0,
-      "86f2240c25833246be9d286b93ad6795"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__AESNI_imc__item__dst",
-      1,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.AESNI_imc",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_079fd3991117d9b903c6c5bec0ce95da"
-      ],
-      0,
-      "8eb7d452dab32aeb66efdad9a604e520"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__AESNI_imc__item__src",
-      1,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.AESNI_imc",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_079fd3991117d9b903c6c5bec0ce95da"
-      ],
-      0,
-      "ab523351ca1ddf636851ab6635a142b8"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__AESNI_keygen_assist__item__dst",
-      1,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.AESNI_keygen_assist",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_765b6b32a1985250fb8794c37a53127c"
-      ],
-      0,
-      "f5c27c569bce0debf8cd1d813b9e5d7c"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__AESNI_keygen_assist__item__src",
-      1,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.AESNI_keygen_assist",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_765b6b32a1985250fb8794c37a53127c"
-      ],
-      0,
-      "d35b6230204fdb6c83c511b7ec628e03"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__AESNI_keygen_assist__item___2",
-      1,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.AESNI_keygen_assist",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_765b6b32a1985250fb8794c37a53127c"
-      ],
-      0,
-      "0be3d40953610f70a01232cbda642148"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__VAESNI_enc__item__dst",
-      1,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.VAESNI_enc",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_67e1f8e99e5acf04cb60a6dee87e1f10"
-      ],
-      0,
-      "2bd03008e050ce7b9659e65f716b7e5f"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__VAESNI_enc__item__src1",
-      1,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.VAESNI_enc",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_67e1f8e99e5acf04cb60a6dee87e1f10"
-      ],
-      0,
-      "1f74df404a11e66e6f223f15d268ce0e"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__VAESNI_enc__item__src2",
-      1,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.VAESNI_enc",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_67e1f8e99e5acf04cb60a6dee87e1f10"
-      ],
-      0,
-      "87c0453d5074876e2ac6936e9e501400"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__VAESNI_enc_last__item__dst",
-      1,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.VAESNI_enc_last",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_04c42a29c68131856793e8c03ce63fe7"
-      ],
-      0,
-      "f32795ec8867b160e000171b916c7027"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__VAESNI_enc_last__item__src1",
-      1,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.VAESNI_enc_last",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_04c42a29c68131856793e8c03ce63fe7"
-      ],
-      0,
-      "d9fba26c81d589e26cb73891ee80bf66"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__VAESNI_enc_last__item__src2",
-      1,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.VAESNI_enc_last",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_04c42a29c68131856793e8c03ce63fe7"
-      ],
-      0,
-      "15139300a6baeec4e4da7cadc3334ef0"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__SHA256_rnds2__item__dst",
-      1,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.SHA256_rnds2",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_f6e74da0746ec004d571c324e50a2a4e"
-      ],
-      0,
-      "00bb6eefc7e2956873cb3d6febb5da9c"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__SHA256_rnds2__item__src",
-      1,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.SHA256_rnds2",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_f6e74da0746ec004d571c324e50a2a4e"
-      ],
-      0,
-      "ca1df0adc5672b87f999c8d9a36ede47"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__SHA256_msg1__item__dst",
-      1,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.SHA256_msg1",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_01d5e144b596ad3a89f862e4be3c8821"
-      ],
-      0,
-      "715a8864f2e2bf00cd943e0e62f81138"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__SHA256_msg1__item__src",
-      1,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.SHA256_msg1",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_01d5e144b596ad3a89f862e4be3c8821"
-      ],
-      0,
-      "5159f7327c6080574ba3ce82049e1e1c"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__SHA256_msg2__item__dst",
-      1,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.SHA256_msg2",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_1f37af1e32a921002eb87a181a362f4f"
-      ],
-      0,
-      "cb3c2a67c9ebe143cf21f34d3ddba792"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__SHA256_msg2__item__src",
-      1,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.SHA256_msg2",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_1f37af1e32a921002eb87a181a362f4f"
-      ],
-      0,
-      "fcce52781d9e3904389b4a11869fa545"
+      "96d06060a51ee63af73c924a5f6bd2d3"
     ],
     [
       "X64.Bytes_Semantics_s.ocmp",
@@ -1860,7 +517,7 @@
       0,
       [ "@query", "assumption_X64.Machine_s.operand__uu___haseq" ],
       0,
-      "b9fef0d06d946b00e7b3bee47c42e6c7"
+      "23ceeab2147056ae84ffc7b9061f7d5d"
     ],
     [
       "X64.Bytes_Semantics_s.__proj__OEq__item__o1",
@@ -1874,7 +531,7 @@
         "refinement_interpretation_Tm_refine_80efb4ae640e649d6df14a9a7d6b968f"
       ],
       0,
-      "e4a9d4d095bc8e966caa1acd13ca1577"
+      "9667a2fb85fcaa8a43301a35098a4d42"
     ],
     [
       "X64.Bytes_Semantics_s.__proj__OEq__item__o2",
@@ -1888,7 +545,7 @@
         "refinement_interpretation_Tm_refine_80efb4ae640e649d6df14a9a7d6b968f"
       ],
       0,
-      "faa6f56c58b3a012146dfaf6f6bacd69"
+      "a7118f5546284d9a417c0bb7f7134ef2"
     ],
     [
       "X64.Bytes_Semantics_s.__proj__ONe__item__o1",
@@ -1902,7 +559,7 @@
         "refinement_interpretation_Tm_refine_a3e7f663d488e362422d71dae87a31e0"
       ],
       0,
-      "150a41b5be15015a503e3515d70688a0"
+      "d95a9ea927e344d847b2a497d1406e0b"
     ],
     [
       "X64.Bytes_Semantics_s.__proj__ONe__item__o2",
@@ -1916,7 +573,7 @@
         "refinement_interpretation_Tm_refine_a3e7f663d488e362422d71dae87a31e0"
       ],
       0,
-      "2bacb55b1937ce71e86b6a1a55b8f3e3"
+      "382bdf4b80a2469892c6f8cd660458bf"
     ],
     [
       "X64.Bytes_Semantics_s.__proj__OLe__item__o1",
@@ -1930,7 +587,7 @@
         "refinement_interpretation_Tm_refine_380b1de1f4628a5cb470c15b3065f0c3"
       ],
       0,
-      "71fbe56b9eb4641d3fd540d5f840df13"
+      "0aa94d43a01e0a06c8e8a5f71252714b"
     ],
     [
       "X64.Bytes_Semantics_s.__proj__OLe__item__o2",
@@ -1944,7 +601,7 @@
         "refinement_interpretation_Tm_refine_380b1de1f4628a5cb470c15b3065f0c3"
       ],
       0,
-      "6ba48944f7e66130b3b99ba58e7c195b"
+      "fc1a1b26975a9b2e427ec70310ed54a9"
     ],
     [
       "X64.Bytes_Semantics_s.__proj__OGe__item__o1",
@@ -1958,7 +615,7 @@
         "refinement_interpretation_Tm_refine_833f7c3eb5fcf7c2f7d65bcdf168d2fa"
       ],
       0,
-      "2a9a36e584112eb463ec4595835f549e"
+      "f417caca051c2871fd67cd31eab5b0b3"
     ],
     [
       "X64.Bytes_Semantics_s.__proj__OGe__item__o2",
@@ -1972,7 +629,7 @@
         "refinement_interpretation_Tm_refine_833f7c3eb5fcf7c2f7d65bcdf168d2fa"
       ],
       0,
-      "7ca180fc30ad93b76db28f0637c7c13a"
+      "164d45900ea872f4adfb481eafb35bbe"
     ],
     [
       "X64.Bytes_Semantics_s.__proj__OLt__item__o1",
@@ -1986,7 +643,7 @@
         "refinement_interpretation_Tm_refine_2725edd961aaeda7b53e63a8933b1ecd"
       ],
       0,
-      "d5c4c21feca89f9b28d36928335f8759"
+      "bb55dd6084bff1c8a4c9cbee4e6e628e"
     ],
     [
       "X64.Bytes_Semantics_s.__proj__OLt__item__o2",
@@ -2000,7 +657,7 @@
         "refinement_interpretation_Tm_refine_2725edd961aaeda7b53e63a8933b1ecd"
       ],
       0,
-      "1fbbe624f5e80f0eb3a256415ea34242"
+      "ba4c454aef4b16439b9f57987553a44c"
     ],
     [
       "X64.Bytes_Semantics_s.__proj__OGt__item__o1",
@@ -2014,7 +671,7 @@
         "refinement_interpretation_Tm_refine_ca85ebdd1de78c629e2bcc6a84acf951"
       ],
       0,
-      "1205352482f2563ffe94d4cbe1298f1f"
+      "80cc4ae9e445935c319c16322d9e3769"
     ],
     [
       "X64.Bytes_Semantics_s.__proj__OGt__item__o2",
@@ -2028,7 +685,7 @@
         "refinement_interpretation_Tm_refine_ca85ebdd1de78c629e2bcc6a84acf951"
       ],
       0,
-      "a612abdcc21db537518472a0fa346a5f"
+      "f3a4d3a67c5409595f3c2b79d73f7e74"
     ],
     [
       "X64.Bytes_Semantics_s.codes",
@@ -2043,7 +700,7 @@
         "typing_X64.Bytes_Semantics_s.code"
       ],
       0,
-      "07b688dd289eddba3def433353da9255"
+      "006021917ceb7ed5cd9af96fdf534f5f"
     ],
     [
       "X64.Bytes_Semantics_s.eval_maddr",
@@ -2058,7 +715,7 @@
         "fuel_guarded_inversion_X64.Machine_s.maddr"
       ],
       0,
-      "7c32c82e7e9b484f8d262d72073b6da3"
+      "1bab3764355a9f0c2bda6fe1c5fb2ab4"
     ],
     [
       "X64.Bytes_Semantics_s.eval_operand",
@@ -2074,7 +731,7 @@
         "fuel_guarded_inversion_X64.Machine_s.operand"
       ],
       0,
-      "7e9ed48bc666b70da28cc18e49b49342"
+      "8d8bbaeff3f02979294acc56da1c76e4"
     ],
     [
       "X64.Bytes_Semantics_s.eval_mov128_op",
@@ -2089,7 +746,7 @@
         "fuel_guarded_inversion_X64.Machine_s.mov128_op"
       ],
       0,
-      "73c781ac4c577eddce7f4b8c406f147c"
+      "097dc72d42efdbbc4badd0e9fa77f9fe"
     ],
     [
       "X64.Bytes_Semantics_s.eval_ocmp",
@@ -2115,7 +772,7 @@
         "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "4e143f455841c7cf2a9fe59bd208fa3d"
+      "aa7e94ca38498131235de34821f60ec6"
     ],
     [
       "X64.Bytes_Semantics_s.mod_8",
@@ -2124,7 +781,7 @@
       0,
       [ "@query" ],
       0,
-      "1bd0789cbecc7d9b18c51e98870eacfd"
+      "d58b7de3caef9935322883bc7369607f"
     ],
     [
       "X64.Bytes_Semantics_s.valid_src_operand",
@@ -2140,7 +797,7 @@
         "fuel_guarded_inversion_X64.Machine_s.operand"
       ],
       0,
-      "83d72028b25c61f5e3baabffa4e345b7"
+      "6f4baf7e077bf1527f67918a2a029412"
     ],
     [
       "X64.Bytes_Semantics_s.valid_src_mov128_op",
@@ -2155,7 +812,7 @@
         "fuel_guarded_inversion_X64.Machine_s.mov128_op"
       ],
       0,
-      "bb4f8fd9b7860636af182b859ae8001f"
+      "a448848b54f637fe349f62c5aa798327"
     ],
     [
       "X64.Bytes_Semantics_s.valid_ocmp",
@@ -2173,7 +830,7 @@
         "fuel_guarded_inversion_X64.Bytes_Semantics_s.ocmp"
       ],
       0,
-      "eef15c1a9b3bcabfb2d04d10e0c6522f"
+      "c862d2df376906d071c3734ca5f70b2a"
     ],
     [
       "X64.Bytes_Semantics_s.valid_dst_operand",
@@ -2189,7 +846,7 @@
         "fuel_guarded_inversion_X64.Machine_s.operand"
       ],
       0,
-      "1049cc12e027aec9d2f52fc722601cec"
+      "20416d36c9efe38821f35b0c1976054f"
     ],
     [
       "X64.Bytes_Semantics_s.valid_dst_mov128_op",
@@ -2204,10 +861,10 @@
         "fuel_guarded_inversion_X64.Machine_s.mov128_op"
       ],
       0,
-      "3e56e7b5239c36756c1a28897e0810a5"
+      "635042c7b89469d103622957a28dae0d"
     ],
     [
-      "X64.Bytes_Semantics_s.update_operand_preserve_flags'",
+      "X64.Bytes_Semantics_s.update_operand_preserve_flags''",
       1,
       1,
       1,
@@ -2220,10 +877,10 @@
         "fuel_guarded_inversion_X64.Machine_s.operand"
       ],
       0,
-      "2d6d2b6f5391bf04035069e828e82433"
+      "9fc39f3b56bf575c22d2169f83905aef"
     ],
     [
-      "X64.Bytes_Semantics_s.update_mov128_op_preserve_flags'",
+      "X64.Bytes_Semantics_s.update_mov128_op_preserve_flags''",
       1,
       1,
       1,
@@ -2235,7 +892,7 @@
         "fuel_guarded_inversion_X64.Machine_s.mov128_op"
       ],
       0,
-      "f52ddda46439cc44f9de1994bf2e2309"
+      "3fccba7d82da5c14ea87611dd8cf99bf"
     ],
     [
       "X64.Bytes_Semantics_s.update_rsp'",
@@ -2253,7 +910,7 @@
         "refinement_interpretation_Tm_refine_5514fbe9e08dfda40f950a7b9f1b2b98"
       ],
       0,
-      "34b1ad8a10c89561a0401558e282e470"
+      "aff3c39d07e0e19df016a19be1eec84f"
     ],
     [
       "X64.Bytes_Semantics_s.update_cf'",
@@ -2274,7 +931,7 @@
         "typing_X64.Bytes_Semantics_s.cf"
       ],
       0,
-      "5d17efe7dd919190a0c59ba104864c42"
+      "409278a7a6450f4ea892d13cdc3d3d94"
     ],
     [
       "X64.Bytes_Semantics_s.update_of'",
@@ -2295,16 +952,289 @@
         "typing_X64.Bytes_Semantics_s.overflow"
       ],
       0,
-      "be0779bcd3b2e97c88f33dabe11f0ec9"
+      "6de0b13952449c6f53c076fb6e8d5bf8"
     ],
     [
-      "X64.Bytes_Semantics_s.paddd",
+      "X64.Bytes_Semantics_s.try_option",
       1,
       1,
       0,
-      [ "@query" ],
+      [
+        "@MaxIFuel_assumption", "@query", "bool_inversion",
+        "disc_equation_FStar.Pervasives.Native.None",
+        "disc_equation_FStar.Pervasives.Native.Some",
+        "lemma_FStar.Pervasives.invertOption",
+        "typing_FStar.Pervasives.Native.uu___is_None",
+        "typing_FStar.Pervasives.Native.uu___is_Some"
+      ],
       0,
-      "c32e670a3916356422b0525e29f6cf7c"
+      "19f1359dfb899325ebde4a5a0846a760"
+    ],
+    [
+      "X64.Bytes_Semantics_s.bind_option",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "bool_inversion",
+        "disc_equation_FStar.Pervasives.Native.None",
+        "disc_equation_FStar.Pervasives.Native.Some",
+        "lemma_FStar.Pervasives.invertOption",
+        "typing_FStar.Pervasives.Native.uu___is_None",
+        "typing_FStar.Pervasives.Native.uu___is_Some"
+      ],
+      0,
+      "5228523d10a5dff211eba4bf9ae7fea8"
+    ],
+    [
+      "X64.Bytes_Semantics_s.instr_eval_operand_explicit",
+      1,
+      1,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "constructor_distinct_X64.Instruction_s.IOp64",
+        "constructor_distinct_X64.Instruction_s.IOpEx",
+        "constructor_distinct_X64.Instruction_s.IOpXmm",
+        "disc_equation_X64.Instruction_s.IOp64",
+        "disc_equation_X64.Instruction_s.IOpXmm",
+        "equation_X64.Instruction_s.instr_operand_t",
+        "equation_X64.Instruction_s.instr_val_t",
+        "fuel_guarded_inversion_X64.Instruction_s.instr_operand_explicit",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_X64.Instruction_s.IOpEx__0"
+      ],
+      0,
+      "7eefa28c5cd7d441c81648e89a42a950"
+    ],
+    [
+      "X64.Bytes_Semantics_s.instr_eval_operand_implicit",
+      1,
+      1,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "constructor_distinct_X64.Instruction_s.IOp64One",
+        "constructor_distinct_X64.Instruction_s.IOpIm",
+        "constructor_distinct_X64.Instruction_s.IOpXmmOne",
+        "disc_equation_X64.Instruction_s.IOp64One",
+        "disc_equation_X64.Instruction_s.IOpFlagsCf",
+        "disc_equation_X64.Instruction_s.IOpFlagsOf",
+        "disc_equation_X64.Instruction_s.IOpXmmOne",
+        "equation_X64.Instruction_s.instr_val_t",
+        "fuel_guarded_inversion_X64.Bytes_Semantics_s.state",
+        "fuel_guarded_inversion_X64.Instruction_s.instr_operand_implicit",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_X64.Instruction_s.IOp64One__0",
+        "projection_inverse_X64.Instruction_s.IOpIm__0",
+        "projection_inverse_X64.Instruction_s.IOpXmmOne__0",
+        "typing_X64.Bytes_Semantics_s.__proj__Mkstate__item__flags",
+        "typing_X64.Bytes_Semantics_s.cf",
+        "typing_X64.Bytes_Semantics_s.eval_mov128_op",
+        "typing_X64.Bytes_Semantics_s.eval_operand",
+        "typing_X64.Bytes_Semantics_s.overflow"
+      ],
+      0,
+      "7c26a1daf3d4922da5674361cedf6606"
+    ],
+    [
+      "X64.Bytes_Semantics_s.instr_apply_eval_args",
+      1,
+      1,
+      1,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_X64.Instruction_s.instr_args_t.fuel_instrumented",
+        "@fuel_correspondence_X64.Instruction_s.instr_operands_t_args.fuel_instrumented",
+        "@fuel_irrelevance_X64.Instruction_s.instr_args_t.fuel_instrumented",
+        "@fuel_irrelevance_X64.Instruction_s.instr_operands_t_args.fuel_instrumented",
+        "@query", "binder_x_0c46cafd0d4c43feea0ec945edee26ec_0",
+        "binder_x_57c9ca80d56ac1ce280485954e46792e_1",
+        "binder_x_f9bb7854025c2d966c9b773626d2676d_2",
+        "constructor_distinct_Prims.Cons", "constructor_distinct_Prims.Nil",
+        "constructor_distinct_X64.Instruction_s.IOpEx",
+        "constructor_distinct_X64.Instruction_s.IOpIm",
+        "disc_equation_Prims.Cons", "disc_equation_Prims.Nil",
+        "disc_equation_X64.Instruction_s.IOpEx",
+        "disc_equation_X64.Instruction_s.IOpIm",
+        "equation_X64.Instruction_s.instr_out",
+        "equation_with_fuel_X64.Instruction_s.instr_args_t.fuel_instrumented",
+        "equation_with_fuel_X64.Instruction_s.instr_operands_t_args.fuel_instrumented",
+        "fuel_guarded_inversion_Prims.list",
+        "fuel_guarded_inversion_X64.Instruction_s.instr_operand",
+        "projection_inverse_Prims.Cons_hd",
+        "projection_inverse_Prims.Cons_tl", "projection_inverse_Prims.Nil_a",
+        "projection_inverse_X64.Instruction_s.IOpEx__0",
+        "projection_inverse_X64.Instruction_s.IOpIm__0",
+        "subterm_ordering_Prims.Cons"
+      ],
+      0,
+      "c7e504f66924d6642059ac5458228754"
+    ],
+    [
+      "X64.Bytes_Semantics_s.instr_apply_eval_inouts",
+      1,
+      1,
+      1,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_X64.Instruction_s.instr_inouts_t.fuel_instrumented",
+        "@fuel_correspondence_X64.Instruction_s.instr_operands_t.fuel_instrumented",
+        "@fuel_irrelevance_X64.Instruction_s.instr_inouts_t.fuel_instrumented",
+        "@fuel_irrelevance_X64.Instruction_s.instr_operands_t.fuel_instrumented",
+        "@query",
+        "X64.Instruction_s_pretyping_d0ada7b4345467e8cc9363a726e7763c",
+        "binder_x_0c46cafd0d4c43feea0ec945edee26ec_0",
+        "binder_x_0c46cafd0d4c43feea0ec945edee26ec_1",
+        "binder_x_4e18ccee255583b941e7cd9c9a96ba96_3",
+        "binder_x_54415ccc74a38da742d20543f87e102f_4",
+        "binder_x_57c9ca80d56ac1ce280485954e46792e_2",
+        "constructor_distinct_Prims.Cons", "constructor_distinct_Prims.Nil",
+        "constructor_distinct_X64.Instruction_s.IOpEx",
+        "constructor_distinct_X64.Instruction_s.IOpIm",
+        "constructor_distinct_X64.Instruction_s.InOut",
+        "constructor_distinct_X64.Instruction_s.Out", "data_elim_Prims.Cons",
+        "data_typing_intro_X64.Instruction_s.Out@tok",
+        "disc_equation_Prims.Cons", "disc_equation_Prims.Nil",
+        "disc_equation_X64.Instruction_s.IOpEx",
+        "disc_equation_X64.Instruction_s.IOpIm",
+        "disc_equation_X64.Instruction_s.InOut",
+        "disc_equation_X64.Instruction_s.Out",
+        "equality_tok_X64.Instruction_s.InOut@tok",
+        "equality_tok_X64.Instruction_s.Out@tok",
+        "equation_X64.Instruction_s.instr_out",
+        "equation_with_fuel_X64.Instruction_s.instr_inouts_t.fuel_instrumented",
+        "equation_with_fuel_X64.Instruction_s.instr_operands_t.fuel_instrumented",
+        "fuel_guarded_inversion_FStar.Pervasives.Native.tuple2",
+        "fuel_guarded_inversion_Prims.list",
+        "fuel_guarded_inversion_X64.Instruction_s.instr_operand",
+        "fuel_guarded_inversion_X64.Instruction_s.instr_operand_inout",
+        "kinding_X64.Instruction_s.instr_operand@tok",
+        "kinding_X64.Instruction_s.instr_operand_inout@tok",
+        "proj_equation_FStar.Pervasives.Native.Mktuple2__1",
+        "proj_equation_Prims.Cons_hd",
+        "projection_inverse_FStar.Pervasives.Native.Mktuple2__1",
+        "projection_inverse_FStar.Pervasives.Native.Mktuple2__2",
+        "projection_inverse_Prims.Cons_hd",
+        "projection_inverse_Prims.Cons_tl", "projection_inverse_Prims.Nil_a",
+        "projection_inverse_X64.Instruction_s.IOpEx__0",
+        "projection_inverse_X64.Instruction_s.IOpIm__0",
+        "subterm_ordering_Prims.Cons",
+        "typing_FStar.Pervasives.Native.__proj__Mktuple2__item___1"
+      ],
+      0,
+      "ea05d0715413b55a0475bdeda8e995c5"
+    ],
+    [
+      "X64.Bytes_Semantics_s.instr_write_output_explicit",
+      1,
+      1,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "binder_x_385ef18fdb5b43ccd74fa8b546798fef_0",
+        "binder_x_6fcde6ad8cce5100a63797d44a0044ab_1",
+        "binder_x_a88a28bb67f6448587ca6309eea85b7a_2",
+        "constructor_distinct_X64.Instruction_s.IOpEx",
+        "disc_equation_X64.Instruction_s.IOp64",
+        "disc_equation_X64.Instruction_s.IOpXmm",
+        "equation_X64.Instruction_s.instr_operand_t",
+        "equation_X64.Instruction_s.instr_val_t",
+        "fuel_guarded_inversion_X64.Instruction_s.instr_operand_explicit",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_X64.Instruction_s.IOpEx__0"
+      ],
+      0,
+      "6c43d6d27a4ac2c3a15ce7f36f9c29ba"
+    ],
+    [
+      "X64.Bytes_Semantics_s.instr_write_output_implicit",
+      1,
+      1,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "binder_x_7b2e7dcb17554d7b2eb2a871fe070bf5_0",
+        "binder_x_f739f8d4720cbb4e029c74caceb1b3af_1",
+        "constructor_distinct_X64.Instruction_s.IOp64One",
+        "constructor_distinct_X64.Instruction_s.IOpIm",
+        "constructor_distinct_X64.Instruction_s.IOpXmmOne",
+        "disc_equation_X64.Instruction_s.IOp64One",
+        "disc_equation_X64.Instruction_s.IOpFlagsCf",
+        "disc_equation_X64.Instruction_s.IOpFlagsOf",
+        "disc_equation_X64.Instruction_s.IOpXmmOne",
+        "equation_X64.Instruction_s.instr_val_t",
+        "fuel_guarded_inversion_X64.Instruction_s.instr_operand_implicit",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_X64.Instruction_s.IOp64One__0",
+        "projection_inverse_X64.Instruction_s.IOpIm__0",
+        "projection_inverse_X64.Instruction_s.IOpXmmOne__0"
+      ],
+      0,
+      "3437796749bb8f4a0e6ec918f19d84a3"
+    ],
+    [
+      "X64.Bytes_Semantics_s.instr_write_outputs",
+      1,
+      1,
+      1,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_X64.Instruction_s.instr_operands_t.fuel_instrumented",
+        "@fuel_correspondence_X64.Instruction_s.instr_ret_t.fuel_instrumented",
+        "@fuel_irrelevance_X64.Instruction_s.instr_operands_t.fuel_instrumented",
+        "@fuel_irrelevance_X64.Instruction_s.instr_ret_t.fuel_instrumented",
+        "@query",
+        "X64.Instruction_s_pretyping_d0ada7b4345467e8cc9363a726e7763c",
+        "binder_x_0c46cafd0d4c43feea0ec945edee26ec_0",
+        "binder_x_57c9ca80d56ac1ce280485954e46792e_1",
+        "binder_x_834afaa8014a20be9da98cb92b8994b8_2",
+        "constructor_distinct_Prims.Cons", "constructor_distinct_Prims.Nil",
+        "constructor_distinct_X64.Instruction_s.IOpEx",
+        "data_typing_intro_X64.Instruction_s.Out@tok",
+        "disc_equation_Prims.Cons", "disc_equation_Prims.Nil",
+        "disc_equation_X64.Instruction_s.IOpEx",
+        "disc_equation_X64.Instruction_s.IOpIm",
+        "equation_X64.Instruction_s.instr_out",
+        "equation_X64.Instruction_s.instr_val_t",
+        "equation_with_fuel_X64.Instruction_s.instr_operands_t.fuel_instrumented",
+        "equation_with_fuel_X64.Instruction_s.instr_ret_t.fuel_instrumented",
+        "fuel_guarded_inversion_Prims.list",
+        "fuel_guarded_inversion_X64.Instruction_s.instr_operand",
+        "fuel_guarded_inversion_X64.Instruction_s.instr_operand_explicit",
+        "fuel_guarded_inversion_X64.Instruction_s.instr_operand_implicit",
+        "projection_inverse_FStar.Pervasives.Native.Mktuple2__1",
+        "projection_inverse_FStar.Pervasives.Native.Mktuple2__2",
+        "projection_inverse_Prims.Cons_a",
+        "projection_inverse_Prims.Cons_hd",
+        "projection_inverse_Prims.Cons_tl", "projection_inverse_Prims.Nil_a",
+        "projection_inverse_X64.Instruction_s.IOpEx__0",
+        "projection_inverse_X64.Instruction_s.IOpIm__0",
+        "subterm_ordering_Prims.Cons", "unit_typing"
+      ],
+      0,
+      "4e0b534d7a6770999763618cf51cec73"
+    ],
+    [
+      "X64.Bytes_Semantics_s.eval_instr",
+      1,
+      1,
+      1,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_X64.Instruction_s.instr_inouts_t.fuel_instrumented",
+        "@fuel_irrelevance_X64.Instruction_s.instr_inouts_t.fuel_instrumented",
+        "@query", "disc_equation_X64.Instruction_s.HavocFlags",
+        "disc_equation_X64.Instruction_s.PreserveFlags",
+        "equation_X64.Instruction_s.instr_eval_t",
+        "equation_X64.Instruction_s.instr_out",
+        "equation_with_fuel_X64.Instruction_s.instr_inouts_t.fuel_instrumented",
+        "fuel_guarded_inversion_Prims.list",
+        "fuel_guarded_inversion_X64.Instruction_s.flag_havoc",
+        "typing_X64.Instruction_s.instr_eval"
+      ],
+      0,
+      "6875908018ec3cb9469eecb243442972"
     ],
     [
       "X64.Bytes_Semantics_s.eval_ins",
@@ -2312,135 +1242,26 @@
       1,
       1,
       [
-        "@MaxFuel_assumption", "@MaxIFuel_assumption",
-        "@fuel_correspondence_Prims.pow2.fuel_instrumented",
-        "@fuel_irrelevance_Prims.pow2.fuel_instrumented", "@query",
-        "Prims_interpretation_Tm_arrow_a26b6f0ab7c6505137c6de4ce0011041",
-        "Prims_pretyping_ae567c2fb75be05905677af440075565",
-        "X64.Machine_s_pretyping_b7c45855ed90996ceceb34aa61de24e7",
-        "b2t_def", "bool_inversion", "bool_typing",
-        "data_elim_X64.Bytes_Semantics_s.Mkstate",
-        "data_typing_intro_X64.Machine_s.Rbx@tok",
-        "disc_equation_FStar.Pervasives.Native.None",
-        "disc_equation_FStar.Pervasives.Native.Some",
-        "disc_equation_X64.Bytes_Semantics_s.AESNI_dec",
-        "disc_equation_X64.Bytes_Semantics_s.AESNI_dec_last",
-        "disc_equation_X64.Bytes_Semantics_s.AESNI_enc",
-        "disc_equation_X64.Bytes_Semantics_s.AESNI_enc_last",
-        "disc_equation_X64.Bytes_Semantics_s.AESNI_imc",
-        "disc_equation_X64.Bytes_Semantics_s.AESNI_keygen_assist",
-        "disc_equation_X64.Bytes_Semantics_s.Adcx64",
-        "disc_equation_X64.Bytes_Semantics_s.Add64",
-        "disc_equation_X64.Bytes_Semantics_s.AddCarry64",
-        "disc_equation_X64.Bytes_Semantics_s.AddLea64",
-        "disc_equation_X64.Bytes_Semantics_s.Adox64",
+        "@MaxIFuel_assumption", "@query",
         "disc_equation_X64.Bytes_Semantics_s.Alloc",
-        "disc_equation_X64.Bytes_Semantics_s.And64",
-        "disc_equation_X64.Bytes_Semantics_s.Cmovc64",
-        "disc_equation_X64.Bytes_Semantics_s.Cpuid",
         "disc_equation_X64.Bytes_Semantics_s.Dealloc",
-        "disc_equation_X64.Bytes_Semantics_s.IMul64",
+        "disc_equation_X64.Bytes_Semantics_s.Ins_64_64_preserve",
+        "disc_equation_X64.Bytes_Semantics_s.Ins_Xmm_Xmm",
+        "disc_equation_X64.Bytes_Semantics_s.Ins_io64_64",
+        "disc_equation_X64.Bytes_Semantics_s.Ins_io64_64_cf",
+        "disc_equation_X64.Bytes_Semantics_s.Ins_ioXmm",
+        "disc_equation_X64.Bytes_Semantics_s.Ins_ioXmm_Xmm",
+        "disc_equation_X64.Bytes_Semantics_s.Instr",
         "disc_equation_X64.Bytes_Semantics_s.MOVDQU",
-        "disc_equation_X64.Bytes_Semantics_s.Mov64",
-        "disc_equation_X64.Bytes_Semantics_s.MovBe64",
-        "disc_equation_X64.Bytes_Semantics_s.Mul64",
-        "disc_equation_X64.Bytes_Semantics_s.Mulx64",
-        "disc_equation_X64.Bytes_Semantics_s.Paddd",
-        "disc_equation_X64.Bytes_Semantics_s.Palignr",
-        "disc_equation_X64.Bytes_Semantics_s.Pand",
-        "disc_equation_X64.Bytes_Semantics_s.Pclmulqdq",
-        "disc_equation_X64.Bytes_Semantics_s.Pcmpeqd",
-        "disc_equation_X64.Bytes_Semantics_s.Pextrq",
-        "disc_equation_X64.Bytes_Semantics_s.Pinsrd",
-        "disc_equation_X64.Bytes_Semantics_s.Pinsrq",
         "disc_equation_X64.Bytes_Semantics_s.Pop",
-        "disc_equation_X64.Bytes_Semantics_s.Pshufb",
-        "disc_equation_X64.Bytes_Semantics_s.Pshufd",
-        "disc_equation_X64.Bytes_Semantics_s.Pslld",
-        "disc_equation_X64.Bytes_Semantics_s.Psrld",
-        "disc_equation_X64.Bytes_Semantics_s.Psrldq",
         "disc_equation_X64.Bytes_Semantics_s.Push",
         "disc_equation_X64.Bytes_Semantics_s.Pxor",
-        "disc_equation_X64.Bytes_Semantics_s.SHA256_msg1",
-        "disc_equation_X64.Bytes_Semantics_s.SHA256_msg2",
-        "disc_equation_X64.Bytes_Semantics_s.SHA256_rnds2",
-        "disc_equation_X64.Bytes_Semantics_s.Sbb64",
-        "disc_equation_X64.Bytes_Semantics_s.Shl64",
-        "disc_equation_X64.Bytes_Semantics_s.Shr64",
-        "disc_equation_X64.Bytes_Semantics_s.Shufpd",
-        "disc_equation_X64.Bytes_Semantics_s.Sub64",
-        "disc_equation_X64.Bytes_Semantics_s.VAESNI_enc",
-        "disc_equation_X64.Bytes_Semantics_s.VAESNI_enc_last",
-        "disc_equation_X64.Bytes_Semantics_s.VPSLLDQ",
-        "disc_equation_X64.Bytes_Semantics_s.VPaddd",
-        "disc_equation_X64.Bytes_Semantics_s.VPalignr",
-        "disc_equation_X64.Bytes_Semantics_s.VPclmulqdq",
-        "disc_equation_X64.Bytes_Semantics_s.VPshufb",
         "disc_equation_X64.Bytes_Semantics_s.VPxor",
-        "disc_equation_X64.Bytes_Semantics_s.VShufpd",
-        "disc_equation_X64.Bytes_Semantics_s.Vpsrldq",
         "disc_equation_X64.Bytes_Semantics_s.Xor64",
-        "equality_tok_X64.Machine_s.Rax@tok",
-        "equality_tok_X64.Machine_s.Rdx@tok",
-        "equation_FStar.FunctionalExtensionality.restricted_t",
-        "equation_FStar.UInt.fits", "equation_FStar.UInt.max_int",
-        "equation_FStar.UInt.min_int", "equation_FStar.UInt.size",
-        "equation_FStar.UInt.uint_t", "equation_Prims.eqtype",
-        "equation_Prims.nat", "equation_Types_s.quad32",
-        "equation_Words_s.nat32", "equation_Words_s.nat64",
-        "equation_Words_s.nat8", "equation_Words_s.natN",
-        "equation_X64.Bytes_Semantics_s.cf",
-        "equation_X64.Bytes_Semantics_s.eval_operand",
-        "equation_X64.Bytes_Semantics_s.overflow",
-        "equation_X64.Bytes_Semantics_s.palignr",
-        "equation_X64.Bytes_Semantics_s.pclmulqdq",
-        "equation_X64.Bytes_Semantics_s.pshufb",
-        "equation_X64.Bytes_Semantics_s.regs_t",
-        "equation_X64.Bytes_Semantics_s.xmms_t",
-        "equation_X64.Machine_s.imm8", "equation_X64.Machine_s.xmm",
-        "fuel_guarded_inversion_X64.Bytes_Semantics_s.ins",
-        "fuel_guarded_inversion_X64.Bytes_Semantics_s.state",
-        "function_token_typing_Prims.__cache_version_number__",
-        "function_token_typing_Prims.int",
-        "function_token_typing_Words_s.nat8",
-        "haseqTm_refine_5514fbe9e08dfda40f950a7b9f1b2b98",
-        "haseqTm_refine_ba523126f67e00e7cd55f0b92f16681d", "int_typing",
-        "interpretation_Tm_abs_5ddf544b15726955644c2e2b7b9e7d8e",
-        "interpretation_Tm_abs_66926e89e50e2ac69caf858cc1113f07",
-        "lemma_FStar.Pervasives.invertOption",
-        "lemma_FStar.Seq.Base.lemma_create_len",
-        "lemma_FStar.Seq.Base.lemma_len_append",
-        "lemma_FStar.Seq.Base.lemma_len_slice",
-        "lemma_FStar.Seq.Properties.slice_length",
-        "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_Addition",
-        "primitive_Prims.op_AmpAmp", "primitive_Prims.op_Equality",
-        "primitive_Prims.op_LessThan", "primitive_Prims.op_LessThanOrEqual",
-        "primitive_Prims.op_Subtraction",
-        "proj_equation_X64.Bytes_Semantics_s.Mkstate_flags",
-        "proj_equation_X64.Bytes_Semantics_s.Mkstate_regs",
-        "proj_equation_X64.Bytes_Semantics_s.Mkstate_xmms",
-        "projection_inverse_BoxBool_proj_0",
-        "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
-        "refinement_interpretation_Tm_refine_5514fbe9e08dfda40f950a7b9f1b2b98",
-        "refinement_interpretation_Tm_refine_a347709bfeba48709474ad26f4f6be87",
-        "refinement_interpretation_Tm_refine_aebc5aa9049e78f605051015a3436e68",
-        "refinement_interpretation_Tm_refine_b0ec1ad4c766f179179881d04d9cace4",
-        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
-        "refinement_interpretation_Tm_refine_ed0c82b529ba35f1d88d0cb19afaf666",
-        "token_correspondence_X64.Bytes_Semantics_s.__proj__Mkstate__item__regs",
-        "token_correspondence_X64.Bytes_Semantics_s.__proj__Mkstate__item__xmms",
-        "typing_FStar.Seq.Base.create", "typing_FStar.Seq.Base.length",
-        "typing_FStar.UInt.fits", "typing_Types_s.quad32",
-        "typing_X64.Bytes_Semantics_s.eval_operand",
-        "typing_X64.Bytes_Semantics_s.palignr",
-        "typing_X64.Bytes_Semantics_s.pclmulqdq",
-        "typing_X64.Bytes_Semantics_s.pshufb",
-        "typing_tok_X64.Machine_s.Rax@tok",
-        "typing_tok_X64.Machine_s.Rdx@tok"
+        "fuel_guarded_inversion_X64.Bytes_Semantics_s.ins"
       ],
       0,
-      "3f1572cfddb828929bd8f4d2483d3309"
+      "bd690a4d43881f8cdf8fbb625e38a2e3"
     ],
     [
       "X64.Bytes_Semantics_s.eval_code",
@@ -2469,7 +1290,7 @@
         "typing_tok_X64.Bytes_Semantics_s.Cpuid@tok"
       ],
       0,
-      "16cb5d525f39c7296801aed9f90973c0"
+      "a7677b396c1fd7d548419ab0dd483bac"
     ],
     [
       "X64.Bytes_Semantics_s.eval_code",
@@ -2495,7 +1316,7 @@
         "subterm_ordering_Prims.Cons"
       ],
       0,
-      "f05b1376629b5e406cf20f9b95b325b7"
+      "ff79cd6f4a5f8df23f6a70143ee48716"
     ],
     [
       "X64.Bytes_Semantics_s.eval_code",
@@ -2519,7 +1340,7 @@
         "well-founded-ordering-on-nat"
       ],
       0,
-      "b2688d61d051c382d9c34b7af46051e2"
+      "765be42746bce1db3eeedc582b23f171"
     ],
     [
       "X64.Bytes_Semantics_s.uint64",
@@ -2528,408 +1349,325 @@
       0,
       [ "@query", "assumption_FStar.UInt64.t__uu___haseq" ],
       0,
-      "09e07da7fea6c10a19768790ec2478b1"
+      "2ad99804e64cae9b2ac8eb12d74a5dcb"
     ],
     [
-      "X64.Bytes_Semantics_s.ins",
-      1,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "Prims_pretyping_ae567c2fb75be05905677af440075565",
-        "assumption_X64.Machine_s.mov128_op__uu___haseq",
-        "assumption_X64.Machine_s.operand__uu___haseq",
-        "equation_Prims.eqtype", "equation_Prims.nat",
-        "equation_X64.Machine_s.imm8", "equation_X64.Machine_s.xmm",
-        "function_token_typing_Prims.__cache_version_number__",
-        "function_token_typing_Prims.int",
-        "haseqTm_refine_ba523126f67e00e7cd55f0b92f16681d",
-        "haseqTm_refine_ed0c82b529ba35f1d88d0cb19afaf666",
-        "haseqTm_refine_f0a4eeefab9c63f31c350a802a4d45dd",
-        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
-        "typing_X64.Machine_s.xmm"
-      ],
-      0,
-      "0c4c2edb416a07a0d1f24c8f933e57eb"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__Mov64__item__dst",
+      "X64.Bytes_Semantics_s.__proj__Instr__item__outs",
       2,
       1,
       0,
       [
         "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.Mov64",
+        "disc_equation_X64.Bytes_Semantics_s.Instr",
         "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_3ca963089c53581b53a02a86473f0bd7"
+        "refinement_interpretation_Tm_refine_898c8efbfa8fd56d2f568677e9406192"
       ],
       0,
-      "a4f19d8c7a00b43b4a5be753bd244c36"
+      "a4c29789123cdd25e129eb3ff7b7a2de"
     ],
     [
-      "X64.Bytes_Semantics_s.__proj__Mov64__item__src",
+      "X64.Bytes_Semantics_s.__proj__Instr__item__args",
       2,
       1,
       0,
       [
         "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.Mov64",
+        "disc_equation_X64.Bytes_Semantics_s.Instr",
         "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_3ca963089c53581b53a02a86473f0bd7"
+        "refinement_interpretation_Tm_refine_898c8efbfa8fd56d2f568677e9406192"
       ],
       0,
-      "33b3f0b9133f56cbb194713a047fa63a"
+      "93486a7f03a70ea76b00f28f10bae81a"
     ],
     [
-      "X64.Bytes_Semantics_s.__proj__MovBe64__item__dst",
+      "X64.Bytes_Semantics_s.__proj__Instr__item__havoc_flags",
       2,
       1,
       0,
       [
         "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.MovBe64",
+        "disc_equation_X64.Bytes_Semantics_s.Instr",
         "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_39d41e8037957c0996268168f35b9114"
+        "refinement_interpretation_Tm_refine_898c8efbfa8fd56d2f568677e9406192"
       ],
       0,
-      "d9ff69edcde31608c46c575bbae1ffcb"
+      "ecf9a922b41e8d79d98f9fdcb205f515"
     ],
     [
-      "X64.Bytes_Semantics_s.__proj__MovBe64__item__src",
+      "X64.Bytes_Semantics_s.__proj__Instr__item__i",
       2,
       1,
       0,
       [
         "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.MovBe64",
+        "disc_equation_X64.Bytes_Semantics_s.Instr",
+        "proj_equation_X64.Bytes_Semantics_s.Instr_args",
+        "proj_equation_X64.Bytes_Semantics_s.Instr_havoc_flags",
+        "proj_equation_X64.Bytes_Semantics_s.Instr_outs",
         "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_39d41e8037957c0996268168f35b9114"
+        "projection_inverse_X64.Bytes_Semantics_s.Instr_args",
+        "projection_inverse_X64.Bytes_Semantics_s.Instr_havoc_flags",
+        "projection_inverse_X64.Bytes_Semantics_s.Instr_outs",
+        "refinement_interpretation_Tm_refine_898c8efbfa8fd56d2f568677e9406192"
       ],
       0,
-      "1ac524647c937bc49470f7d5f8351516"
+      "b992cc512deb3ca0c48f3671f745240f"
     ],
     [
-      "X64.Bytes_Semantics_s.__proj__Cmovc64__item__dst",
+      "X64.Bytes_Semantics_s.__proj__Instr__item__oprs",
       2,
       1,
       0,
       [
         "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.Cmovc64",
+        "disc_equation_X64.Bytes_Semantics_s.Instr",
+        "proj_equation_X64.Bytes_Semantics_s.Instr_args",
+        "proj_equation_X64.Bytes_Semantics_s.Instr_outs",
         "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_35b0fb37957103585e896761ce8f350b"
+        "projection_inverse_X64.Bytes_Semantics_s.Instr_args",
+        "projection_inverse_X64.Bytes_Semantics_s.Instr_outs",
+        "refinement_interpretation_Tm_refine_898c8efbfa8fd56d2f568677e9406192"
       ],
       0,
-      "d465e74bb03436d4e009c6db487de76a"
+      "5185fe12f2a5d804244d33ef73b1d499"
     ],
     [
-      "X64.Bytes_Semantics_s.__proj__Cmovc64__item__src",
+      "X64.Bytes_Semantics_s.__proj__Ins_64_64_preserve__item__i",
       2,
       1,
       0,
       [
         "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.Cmovc64",
+        "disc_equation_X64.Bytes_Semantics_s.Ins_64_64_preserve",
         "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_35b0fb37957103585e896761ce8f350b"
+        "refinement_interpretation_Tm_refine_30b242821110b7869201226d616e34de"
       ],
       0,
-      "d85e3badcd7b52fd33ecbd268f692e9a"
+      "54a07279d47da961d3befc8e629d3e3f"
     ],
     [
-      "X64.Bytes_Semantics_s.__proj__Add64__item__dst",
+      "X64.Bytes_Semantics_s.__proj__Ins_64_64_preserve__item__dst",
       2,
       1,
       0,
       [
         "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.Add64",
+        "disc_equation_X64.Bytes_Semantics_s.Ins_64_64_preserve",
         "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_687599772d3529aec2d9e88b681a85db"
+        "refinement_interpretation_Tm_refine_30b242821110b7869201226d616e34de"
       ],
       0,
-      "802422fae82390e4d87c254dfe7e3538"
+      "9400cfb919036f8066bc93bf3bddc192"
     ],
     [
-      "X64.Bytes_Semantics_s.__proj__Add64__item__src",
+      "X64.Bytes_Semantics_s.__proj__Ins_64_64_preserve__item__src",
       2,
       1,
       0,
       [
         "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.Add64",
+        "disc_equation_X64.Bytes_Semantics_s.Ins_64_64_preserve",
         "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_687599772d3529aec2d9e88b681a85db"
+        "refinement_interpretation_Tm_refine_30b242821110b7869201226d616e34de"
       ],
       0,
-      "5171b016fbce0dbf25a535ca51e6c0e4"
+      "964e6aec548fc95e2d9ad7528c8ba5d7"
     ],
     [
-      "X64.Bytes_Semantics_s.__proj__AddLea64__item__dst",
+      "X64.Bytes_Semantics_s.__proj__Ins_io64_64__item__i",
       2,
       1,
       0,
       [
         "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.AddLea64",
+        "disc_equation_X64.Bytes_Semantics_s.Ins_io64_64",
         "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_b306dc11038989184bb26c3f9a6dc901"
+        "refinement_interpretation_Tm_refine_e775a64afee8d5199b3ea1baf56027d7"
       ],
       0,
-      "ad08365d29449ebcdcb7338183c20d80"
+      "64a86b321994f6b6f94fc627e0bebd41"
     ],
     [
-      "X64.Bytes_Semantics_s.__proj__AddLea64__item__src1",
+      "X64.Bytes_Semantics_s.__proj__Ins_io64_64__item__dst",
       2,
       1,
       0,
       [
         "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.AddLea64",
+        "disc_equation_X64.Bytes_Semantics_s.Ins_io64_64",
         "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_b306dc11038989184bb26c3f9a6dc901"
+        "refinement_interpretation_Tm_refine_e775a64afee8d5199b3ea1baf56027d7"
       ],
       0,
-      "c794815ddd733bc7c927bcbef610c616"
+      "7d3d59e3c471857f7773702ef2d1692f"
     ],
     [
-      "X64.Bytes_Semantics_s.__proj__AddLea64__item__src2",
+      "X64.Bytes_Semantics_s.__proj__Ins_io64_64__item__src",
       2,
       1,
       0,
       [
         "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.AddLea64",
+        "disc_equation_X64.Bytes_Semantics_s.Ins_io64_64",
         "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_b306dc11038989184bb26c3f9a6dc901"
+        "refinement_interpretation_Tm_refine_e775a64afee8d5199b3ea1baf56027d7"
       ],
       0,
-      "4277ce4d1d7bc174c1b7657328fab45c"
+      "48dcaa14a6a56f86131b85841ddef5f3"
     ],
     [
-      "X64.Bytes_Semantics_s.__proj__AddCarry64__item__dst",
+      "X64.Bytes_Semantics_s.__proj__Ins_io64_64_cf__item__i",
       2,
       1,
       0,
       [
         "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.AddCarry64",
+        "disc_equation_X64.Bytes_Semantics_s.Ins_io64_64_cf",
         "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_80490d27f18cf3b09d1679290735a750"
+        "refinement_interpretation_Tm_refine_8f862805aa0ccb2053a78f834cb873c7"
       ],
       0,
-      "88e885e1ebfbdc95787ebb1c8a80d281"
+      "4a1c5457bcb247843e6503feb81eb692"
     ],
     [
-      "X64.Bytes_Semantics_s.__proj__AddCarry64__item__src",
+      "X64.Bytes_Semantics_s.__proj__Ins_io64_64_cf__item__dst",
       2,
       1,
       0,
       [
         "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.AddCarry64",
+        "disc_equation_X64.Bytes_Semantics_s.Ins_io64_64_cf",
         "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_80490d27f18cf3b09d1679290735a750"
+        "refinement_interpretation_Tm_refine_8f862805aa0ccb2053a78f834cb873c7"
       ],
       0,
-      "3cddfb13a0207726fa296fbd9ab9962a"
+      "1326ccb6c0e57bc48e2c2a55814110bb"
     ],
     [
-      "X64.Bytes_Semantics_s.__proj__Adcx64__item__dst",
+      "X64.Bytes_Semantics_s.__proj__Ins_io64_64_cf__item__src",
       2,
       1,
       0,
       [
         "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.Adcx64",
+        "disc_equation_X64.Bytes_Semantics_s.Ins_io64_64_cf",
         "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_2eb4f6a334b20832cc276db83b68510f"
+        "refinement_interpretation_Tm_refine_8f862805aa0ccb2053a78f834cb873c7"
       ],
       0,
-      "193fa9ebfc913f1246c1542d8d8dcd39"
+      "6f9ab03534a1498618d8a0adb421e842"
     ],
     [
-      "X64.Bytes_Semantics_s.__proj__Adcx64__item__src",
+      "X64.Bytes_Semantics_s.__proj__Ins_ioXmm__item__i",
       2,
       1,
       0,
       [
         "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.Adcx64",
+        "disc_equation_X64.Bytes_Semantics_s.Ins_ioXmm",
         "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_2eb4f6a334b20832cc276db83b68510f"
+        "refinement_interpretation_Tm_refine_b479e84c79b306b5cb491660de0e261b"
       ],
       0,
-      "e1cd9deb2c47e92534b9094ecdec443b"
+      "77207073da990beea3ef85371092a389"
     ],
     [
-      "X64.Bytes_Semantics_s.__proj__Adox64__item__dst",
+      "X64.Bytes_Semantics_s.__proj__Ins_ioXmm__item__dst",
       2,
       1,
       0,
       [
         "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.Adox64",
+        "disc_equation_X64.Bytes_Semantics_s.Ins_ioXmm",
         "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_3802d677313a91cc4306ddffb19e0486"
+        "refinement_interpretation_Tm_refine_b479e84c79b306b5cb491660de0e261b"
       ],
       0,
-      "45e8a05b6540f6966270187ad64d5e83"
+      "4dd9dc9e78408a758ad5e331c25c4677"
     ],
     [
-      "X64.Bytes_Semantics_s.__proj__Adox64__item__src",
+      "X64.Bytes_Semantics_s.__proj__Ins_Xmm_Xmm__item__i",
       2,
       1,
       0,
       [
         "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.Adox64",
+        "disc_equation_X64.Bytes_Semantics_s.Ins_Xmm_Xmm",
         "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_3802d677313a91cc4306ddffb19e0486"
+        "refinement_interpretation_Tm_refine_66d62899947a22dcfbbe3678c9c7726b"
       ],
       0,
-      "fd683bb3856ef9366a598ca999a0f22e"
+      "2ca5db8be58dc44d3dce8f0ff0499e17"
     ],
     [
-      "X64.Bytes_Semantics_s.__proj__Sub64__item__dst",
+      "X64.Bytes_Semantics_s.__proj__Ins_Xmm_Xmm__item__dst",
       2,
       1,
       0,
       [
         "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.Sub64",
+        "disc_equation_X64.Bytes_Semantics_s.Ins_Xmm_Xmm",
         "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_47b2d6f5d987f09876b05ed3e74c3057"
+        "refinement_interpretation_Tm_refine_66d62899947a22dcfbbe3678c9c7726b"
       ],
       0,
-      "040facaabc7e123a78f4753f9b5561e8"
+      "b4db1d6d1e3f19c8714511ba1b6c7b94"
     ],
     [
-      "X64.Bytes_Semantics_s.__proj__Sub64__item__src",
+      "X64.Bytes_Semantics_s.__proj__Ins_Xmm_Xmm__item__src",
       2,
       1,
       0,
       [
         "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.Sub64",
+        "disc_equation_X64.Bytes_Semantics_s.Ins_Xmm_Xmm",
         "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_47b2d6f5d987f09876b05ed3e74c3057"
+        "refinement_interpretation_Tm_refine_66d62899947a22dcfbbe3678c9c7726b"
       ],
       0,
-      "741227ad3017383896e8f9c67ad26f8a"
+      "002e6f2301a47e6da386b4d624e5c00c"
     ],
     [
-      "X64.Bytes_Semantics_s.__proj__Sbb64__item__dst",
+      "X64.Bytes_Semantics_s.__proj__Ins_ioXmm_Xmm__item__i",
       2,
       1,
       0,
       [
         "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.Sbb64",
+        "disc_equation_X64.Bytes_Semantics_s.Ins_ioXmm_Xmm",
         "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_311b5decefc5609a32eb1c5913bd2255"
+        "refinement_interpretation_Tm_refine_eb734078e17773e1b9d6ac5d76b749c5"
       ],
       0,
-      "a7c1a6ce00c5d01f581df9cc4263fe53"
+      "00160ee6b965899ea3c11e10b9249580"
     ],
     [
-      "X64.Bytes_Semantics_s.__proj__Sbb64__item__src",
+      "X64.Bytes_Semantics_s.__proj__Ins_ioXmm_Xmm__item__dst",
       2,
       1,
       0,
       [
         "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.Sbb64",
+        "disc_equation_X64.Bytes_Semantics_s.Ins_ioXmm_Xmm",
         "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_311b5decefc5609a32eb1c5913bd2255"
+        "refinement_interpretation_Tm_refine_eb734078e17773e1b9d6ac5d76b749c5"
       ],
       0,
-      "a7c8b146f71d5aa40adec2c4d78a16b6"
+      "08b5f081932a3e8a2f31a032666dfe88"
     ],
     [
-      "X64.Bytes_Semantics_s.__proj__Mul64__item__src",
+      "X64.Bytes_Semantics_s.__proj__Ins_ioXmm_Xmm__item__src",
       2,
       1,
       0,
       [
         "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.Mul64",
+        "disc_equation_X64.Bytes_Semantics_s.Ins_ioXmm_Xmm",
         "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_040ca6c10f727f4c0e2cdabc779a561f"
+        "refinement_interpretation_Tm_refine_eb734078e17773e1b9d6ac5d76b749c5"
       ],
       0,
-      "a7616921b3a507a7475e8512a4cd8c79"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__Mulx64__item__dst_hi",
-      2,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.Mulx64",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_6059160ef1037b83884eecdf31f0cc25"
-      ],
-      0,
-      "ee7772e9f38fa2081bf689a0f835b12d"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__Mulx64__item__dst_lo",
-      2,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.Mulx64",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_6059160ef1037b83884eecdf31f0cc25"
-      ],
-      0,
-      "0ea6b59dcf4c4aff2cd954a624df6cf4"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__Mulx64__item__src",
-      2,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.Mulx64",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_6059160ef1037b83884eecdf31f0cc25"
-      ],
-      0,
-      "f8000f6dd5bd0f24172086318115d062"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__IMul64__item__dst",
-      2,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.IMul64",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_6d1e5ee47583916f6525f1f977b6f583"
-      ],
-      0,
-      "1fa663d1f010b0d027f92a8afb6603af"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__IMul64__item__src",
-      2,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.IMul64",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_6d1e5ee47583916f6525f1f977b6f583"
-      ],
-      0,
-      "a0d430cd71c1f4ec69dc2fcf5a263139"
+      "c3c6188e1cb10c8e24a4caa9ead0b98e"
     ],
     [
       "X64.Bytes_Semantics_s.__proj__Xor64__item__dst",
@@ -2943,7 +1681,7 @@
         "refinement_interpretation_Tm_refine_24f7da08e9fd6be616b2630d2dafe593"
       ],
       0,
-      "7930d3f427e78e5bfc9ad93e002b27fa"
+      "5bd69ae83ee45549dac02fe26363792b"
     ],
     [
       "X64.Bytes_Semantics_s.__proj__Xor64__item__src",
@@ -2957,217 +1695,7 @@
         "refinement_interpretation_Tm_refine_24f7da08e9fd6be616b2630d2dafe593"
       ],
       0,
-      "f0675c31fe5ef54fde1b87d8cc71e954"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__And64__item__dst",
-      2,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.And64",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_c10685298724d1935e1b5c32e1b8ea46"
-      ],
-      0,
-      "cef65b4778ab3c2bc82fbf466d5998b3"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__And64__item__src",
-      2,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.And64",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_c10685298724d1935e1b5c32e1b8ea46"
-      ],
-      0,
-      "dc701a80ae6b96ba5c8d02d9b666686a"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__Shr64__item__dst",
-      2,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.Shr64",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_d9482d620b21a86b3a6759d2f92d0463"
-      ],
-      0,
-      "4256a2e4ce0dc8057db4a025337c16bc"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__Shr64__item__amt",
-      2,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.Shr64",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_d9482d620b21a86b3a6759d2f92d0463"
-      ],
-      0,
-      "86edb32662b384af53c4993b28a430f4"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__Shl64__item__dst",
-      2,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.Shl64",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_946a3ab29b234fd8168c0c13a949f07c"
-      ],
-      0,
-      "c5a1519f27da96d70ac2c25b39122727"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__Shl64__item__amt",
-      2,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.Shl64",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_946a3ab29b234fd8168c0c13a949f07c"
-      ],
-      0,
-      "a48e7e1065fa38a63884f7da99850ee3"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__Push__item__src",
-      2,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.Push",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_26fedcce845b73c6cb90ed924476b773"
-      ],
-      0,
-      "20962ecc771163dd1fb51429bdb79c85"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__Pop__item__dst",
-      2,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.Pop",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_363da2645ac2376123f00f5767100763"
-      ],
-      0,
-      "6aa88ad103440ae2db47693bbe8f99f8"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__Alloc__item__n",
-      2,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.Alloc",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_480980e395e6b21cb37524da4cb847e6"
-      ],
-      0,
-      "f4204ae49e796a91ac599f7113c79a15"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__Dealloc__item__n",
-      2,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.Dealloc",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_f3a6219a07178efa2a5cc36cb8f82d8b"
-      ],
-      0,
-      "f7b38e3f8dff241c9c297f357bb38ed6"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__Paddd__item__dst",
-      2,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.Paddd",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_ef96719172504d65e5292db5371ec018"
-      ],
-      0,
-      "18bcd3ae0e414acb8cc1771436eeed4e"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__Paddd__item__src",
-      2,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.Paddd",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_ef96719172504d65e5292db5371ec018"
-      ],
-      0,
-      "f9227ec9bc9e40aeb7ce0167eb009941"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__VPaddd__item__dst",
-      2,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.VPaddd",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_9800d5f14d38ef7e259cf5b6da6a1082"
-      ],
-      0,
-      "f4915f7324d6008764aac865d9744911"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__VPaddd__item__src1",
-      2,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.VPaddd",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_9800d5f14d38ef7e259cf5b6da6a1082"
-      ],
-      0,
-      "f46ed1e396bf9f92cf9d87df04d2f1ef"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__VPaddd__item__src2",
-      2,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.VPaddd",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_9800d5f14d38ef7e259cf5b6da6a1082"
-      ],
-      0,
-      "7516dd27752071aa795d99dbe4ff2402"
+      "4055de744b4b7542b2b640a6b3ed5c4a"
     ],
     [
       "X64.Bytes_Semantics_s.__proj__Pxor__item__dst",
@@ -3181,7 +1709,7 @@
         "refinement_interpretation_Tm_refine_8310f2a9c760f99c4229745b3cfcef22"
       ],
       0,
-      "d4759122369913cf794813715a500042"
+      "161e0897b38f5d1061f9d868a1708dfa"
     ],
     [
       "X64.Bytes_Semantics_s.__proj__Pxor__item__src",
@@ -3195,7 +1723,7 @@
         "refinement_interpretation_Tm_refine_8310f2a9c760f99c4229745b3cfcef22"
       ],
       0,
-      "2a2cde3a04c67118c6deea2296435902"
+      "39d2239cd3b05a046f3d3fcaa7f1b8ee"
     ],
     [
       "X64.Bytes_Semantics_s.__proj__VPxor__item__dst",
@@ -3209,7 +1737,7 @@
         "refinement_interpretation_Tm_refine_2ed249ba55111f4eaa6a2345cb01058c"
       ],
       0,
-      "68ab68c74977cdde681d8aca14b64242"
+      "16ecb372ced3e610a985cf12e05cdfe0"
     ],
     [
       "X64.Bytes_Semantics_s.__proj__VPxor__item__src1",
@@ -3223,7 +1751,7 @@
         "refinement_interpretation_Tm_refine_2ed249ba55111f4eaa6a2345cb01058c"
       ],
       0,
-      "eb7c30e80bb0de485a342f9c3e4783b9"
+      "802e09e8793b47d88f41b081d4927d75"
     ],
     [
       "X64.Bytes_Semantics_s.__proj__VPxor__item__src2",
@@ -3237,665 +1765,7 @@
         "refinement_interpretation_Tm_refine_2ed249ba55111f4eaa6a2345cb01058c"
       ],
       0,
-      "b822787cef878a124efb0865e6fe95ac"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__Pand__item__dst",
-      2,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.Pand",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_5a8bc262a0313286240c30aa17812a0e"
-      ],
-      0,
-      "8963f72ef125c9d39f2b7b7cce1907a7"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__Pand__item__src",
-      2,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.Pand",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_5a8bc262a0313286240c30aa17812a0e"
-      ],
-      0,
-      "d9b1c19b0d87d4560b8a752f2b1a4ec7"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__Pslld__item__dst",
-      2,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.Pslld",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_fa887156e467f3e40421ba679edd361a"
-      ],
-      0,
-      "c6b95b2c2a98d0490265b863dd5ba30a"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__Pslld__item__amt",
-      2,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.Pslld",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_fa887156e467f3e40421ba679edd361a"
-      ],
-      0,
-      "2ca75fc82dc6b724e823f3820e0e0423"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__Psrld__item__dst",
-      2,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.Psrld",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_deecd634a08c34cc7919c7236f826c37"
-      ],
-      0,
-      "3fcf2786bb99d143e80f8427f74b6301"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__Psrld__item__amt",
-      2,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.Psrld",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_deecd634a08c34cc7919c7236f826c37"
-      ],
-      0,
-      "d5ea7b1895d4bef49a2fda4177d7d514"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__Psrldq__item__dst",
-      2,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.Psrldq",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_14bc3c240d6f320a384e5116a403fb28"
-      ],
-      0,
-      "a40f53270fa550feecaa71f09bf278f9"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__Psrldq__item__amt",
-      2,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.Psrldq",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_14bc3c240d6f320a384e5116a403fb28"
-      ],
-      0,
-      "110ed30fdded9301e9503e9a3b33c145"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__Palignr__item__dst",
-      2,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.Palignr",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_220e1a2486e8e0d06e953b12f031c83b"
-      ],
-      0,
-      "021a953b5176de03e8b1e2aa3f7a1024"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__Palignr__item__src",
-      2,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.Palignr",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_220e1a2486e8e0d06e953b12f031c83b"
-      ],
-      0,
-      "c2f2b4a2ed6874b45e2d0792f3a91071"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__Palignr__item__amount",
-      2,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.Palignr",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_220e1a2486e8e0d06e953b12f031c83b"
-      ],
-      0,
-      "7942813f8ac9cae4b6048bc09d2eb1df"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__VPalignr__item__dst",
-      2,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.VPalignr",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_70c4eceb8ae22a034c663b9d9f51a10c"
-      ],
-      0,
-      "2fad771b575c916a883eb4b457f28614"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__VPalignr__item__src1",
-      2,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.VPalignr",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_70c4eceb8ae22a034c663b9d9f51a10c"
-      ],
-      0,
-      "f9f7644fc15e9a4bcf8a92ee0adbe486"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__VPalignr__item__src2",
-      2,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.VPalignr",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_70c4eceb8ae22a034c663b9d9f51a10c"
-      ],
-      0,
-      "3d9a3311496a2b3a22ef5c4209c5c946"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__VPalignr__item__amount",
-      2,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.VPalignr",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_70c4eceb8ae22a034c663b9d9f51a10c"
-      ],
-      0,
-      "9d8a4674d50bc2605ee8fa2809ee5723"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__Shufpd__item__dst",
-      2,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.Shufpd",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_6f71e8ad2b76d60d6386a4666cb2d6c9"
-      ],
-      0,
-      "b37f8565eabeebd02bdfb1961234ffb0"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__Shufpd__item__src",
-      2,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.Shufpd",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_6f71e8ad2b76d60d6386a4666cb2d6c9"
-      ],
-      0,
-      "140137e6b0eeb90c3c0711f810f7d3d6"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__Shufpd__item__permutation",
-      2,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.Shufpd",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_6f71e8ad2b76d60d6386a4666cb2d6c9"
-      ],
-      0,
-      "bbce3c97e84788d38f9fd15ad34f038d"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__VShufpd__item__dst",
-      2,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.VShufpd",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_ddb692a2a5d89b725de6fa0df81f48ab"
-      ],
-      0,
-      "39b5f8eb744d0575d615967b866d8aac"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__VShufpd__item__src1",
-      2,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.VShufpd",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_ddb692a2a5d89b725de6fa0df81f48ab"
-      ],
-      0,
-      "f02635f92dccb9af320924b8e4e58221"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__VShufpd__item__src2",
-      2,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.VShufpd",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_ddb692a2a5d89b725de6fa0df81f48ab"
-      ],
-      0,
-      "061ed9058c407705bf589812bcc75cea"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__VShufpd__item__permutation",
-      2,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.VShufpd",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_ddb692a2a5d89b725de6fa0df81f48ab"
-      ],
-      0,
-      "30831da632cfbc9100e400a8f863a829"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__Pshufb__item__dst",
-      2,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.Pshufb",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_eb0698a941b2f4e6d1326eef3e380e1e"
-      ],
-      0,
-      "1294ceddf3f049071f204b9fed2bb7aa"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__Pshufb__item__src",
-      2,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.Pshufb",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_eb0698a941b2f4e6d1326eef3e380e1e"
-      ],
-      0,
-      "99582c48f01b2871f73ddd67c3406a54"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__VPshufb__item__dst",
-      2,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.VPshufb",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_678cd1fcf15a925c37cfffbb45865fa3"
-      ],
-      0,
-      "b985742062e36d982630bf2e8fe467ba"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__VPshufb__item__src1",
-      2,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.VPshufb",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_678cd1fcf15a925c37cfffbb45865fa3"
-      ],
-      0,
-      "51076f0fda59375c215c79ab78fdc914"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__VPshufb__item__src2",
-      2,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.VPshufb",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_678cd1fcf15a925c37cfffbb45865fa3"
-      ],
-      0,
-      "9a2c90351a380002779a5a3bce637b10"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__Pshufd__item__dst",
-      2,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.Pshufd",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_3052e68e0327010cb11b30d3ab952353"
-      ],
-      0,
-      "fabc0ad20aed2b737b30ce5b9e516e2f"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__Pshufd__item__src",
-      2,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.Pshufd",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_3052e68e0327010cb11b30d3ab952353"
-      ],
-      0,
-      "7412c7c57f66d6751127bef71cfbe86c"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__Pshufd__item__permutation",
-      2,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.Pshufd",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_3052e68e0327010cb11b30d3ab952353"
-      ],
-      0,
-      "6c52256fba49be6568134381134afeba"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__Pcmpeqd__item__dst",
-      2,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.Pcmpeqd",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_35d2e5241b1e88617151a308413f50f1"
-      ],
-      0,
-      "d58b91e52802859e7ce185cfd795fb79"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__Pcmpeqd__item__src",
-      2,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.Pcmpeqd",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_35d2e5241b1e88617151a308413f50f1"
-      ],
-      0,
-      "37dcd7bbf5f5794f70689db41346ced3"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__Pextrq__item__dst",
-      2,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.Pextrq",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_ae3586a20ad46ffb9a2f9804bbafc401"
-      ],
-      0,
-      "9357c60d411db26d0beccc501a2c6b30"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__Pextrq__item__src",
-      2,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.Pextrq",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_ae3586a20ad46ffb9a2f9804bbafc401"
-      ],
-      0,
-      "6f509e8c569c398ee087ab384eddbd9a"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__Pextrq__item__index",
-      2,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.Pextrq",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_ae3586a20ad46ffb9a2f9804bbafc401"
-      ],
-      0,
-      "6cf7a70e402c1e9eff3a7227dd1368bd"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__Pinsrd__item__dst",
-      2,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.Pinsrd",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_3e455907a2cbcc504f25d96e8a0ff792"
-      ],
-      0,
-      "82839f7656266b4e16fca11b674c31a4"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__Pinsrd__item__src",
-      2,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.Pinsrd",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_3e455907a2cbcc504f25d96e8a0ff792"
-      ],
-      0,
-      "05165a9934626fd9a4a561cf7a2c3315"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__Pinsrd__item__index",
-      2,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.Pinsrd",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_3e455907a2cbcc504f25d96e8a0ff792"
-      ],
-      0,
-      "405bfc589a014c6b9a3af64c4e7bafbd"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__Pinsrq__item__dst",
-      2,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.Pinsrq",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_9c7483c3dea81e83f80bfe51a43a4a81"
-      ],
-      0,
-      "ad01ed5cb04b4f36963d96ead55a54dc"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__Pinsrq__item__src",
-      2,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.Pinsrq",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_9c7483c3dea81e83f80bfe51a43a4a81"
-      ],
-      0,
-      "2db0784e04dea87b6c1d9fe51ba1058d"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__Pinsrq__item__index",
-      2,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.Pinsrq",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_9c7483c3dea81e83f80bfe51a43a4a81"
-      ],
-      0,
-      "6435a9387ff0db74b4a20cdbd3e996f7"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__VPSLLDQ__item__dst",
-      2,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.VPSLLDQ",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_a7d01af2d0ad14d745f128c5699f2295"
-      ],
-      0,
-      "5683a606db5c5e4451ef16d346465c33"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__VPSLLDQ__item__src",
-      2,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.VPSLLDQ",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_a7d01af2d0ad14d745f128c5699f2295"
-      ],
-      0,
-      "6d690838c478f11bcc4824a998d1e55f"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__VPSLLDQ__item__count",
-      2,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.VPSLLDQ",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_a7d01af2d0ad14d745f128c5699f2295"
-      ],
-      0,
-      "c84faa4ba3d70fb139ab117ce196cb56"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__Vpsrldq__item__dst",
-      2,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.Vpsrldq",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_9c605eb8c10b3ac2dd3fb29fd956258c"
-      ],
-      0,
-      "78b9dd6230ba82d0ab4d74f2c17bec5d"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__Vpsrldq__item__src",
-      2,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.Vpsrldq",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_9c605eb8c10b3ac2dd3fb29fd956258c"
-      ],
-      0,
-      "7531619a2fc987d4632bd4ba24b5bcc8"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__Vpsrldq__item__count",
-      2,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.Vpsrldq",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_9c605eb8c10b3ac2dd3fb29fd956258c"
-      ],
-      0,
-      "50f1cf70a72f6995f30b098194676b9c"
+      "397ef957af71dc24e73203c30af7e42e"
     ],
     [
       "X64.Bytes_Semantics_s.__proj__MOVDQU__item__dst",
@@ -3909,7 +1779,7 @@
         "refinement_interpretation_Tm_refine_1706bbe6a7cbb774bf2de11b07ed93c8"
       ],
       0,
-      "9983dd6d9d8707e8e8510810fddb4437"
+      "5629935ddd616f949a63bb8bf6a5d02c"
     ],
     [
       "X64.Bytes_Semantics_s.__proj__MOVDQU__item__src",
@@ -3923,455 +1793,63 @@
         "refinement_interpretation_Tm_refine_1706bbe6a7cbb774bf2de11b07ed93c8"
       ],
       0,
-      "1362d44b241454bf660823eebd0aa6e4"
+      "362bcf194524034b27ac715e595cab21"
     ],
     [
-      "X64.Bytes_Semantics_s.__proj__Pclmulqdq__item__dst",
+      "X64.Bytes_Semantics_s.__proj__Push__item__src",
       2,
       1,
       0,
       [
         "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.Pclmulqdq",
+        "disc_equation_X64.Bytes_Semantics_s.Push",
         "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_ea7605fc44982d7deb74e1cf36c51696"
+        "refinement_interpretation_Tm_refine_26fedcce845b73c6cb90ed924476b773"
       ],
       0,
-      "8b999bee4484718e88262723facc80c6"
+      "f670ba4a689bf732fd286c6dc4790c98"
     ],
     [
-      "X64.Bytes_Semantics_s.__proj__Pclmulqdq__item__src",
+      "X64.Bytes_Semantics_s.__proj__Pop__item__dst",
       2,
       1,
       0,
       [
         "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.Pclmulqdq",
+        "disc_equation_X64.Bytes_Semantics_s.Pop",
         "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_ea7605fc44982d7deb74e1cf36c51696"
+        "refinement_interpretation_Tm_refine_363da2645ac2376123f00f5767100763"
       ],
       0,
-      "a8ca728585bad79bc4a441298c1188f3"
+      "c187c770bd3ed86045686d8d9d0795d2"
     ],
     [
-      "X64.Bytes_Semantics_s.__proj__Pclmulqdq__item__imm",
+      "X64.Bytes_Semantics_s.__proj__Alloc__item__n",
       2,
       1,
       0,
       [
         "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.Pclmulqdq",
+        "disc_equation_X64.Bytes_Semantics_s.Alloc",
         "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_ea7605fc44982d7deb74e1cf36c51696"
+        "refinement_interpretation_Tm_refine_480980e395e6b21cb37524da4cb847e6"
       ],
       0,
-      "af66707ee0279f92fb9a6c7eb96a540f"
+      "b4b0e14bb6e3f7333f247f4485adee93"
     ],
     [
-      "X64.Bytes_Semantics_s.__proj__VPclmulqdq__item__dst",
+      "X64.Bytes_Semantics_s.__proj__Dealloc__item__n",
       2,
       1,
       0,
       [
         "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.VPclmulqdq",
+        "disc_equation_X64.Bytes_Semantics_s.Dealloc",
         "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_d14393e816a45d94ddbb9c633574f02f"
+        "refinement_interpretation_Tm_refine_f3a6219a07178efa2a5cc36cb8f82d8b"
       ],
       0,
-      "42dd651575f114e1b767f2581e794fee"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__VPclmulqdq__item__src1",
-      2,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.VPclmulqdq",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_d14393e816a45d94ddbb9c633574f02f"
-      ],
-      0,
-      "24c3cc45d9798a95fddf72533306f4e7"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__VPclmulqdq__item__src2",
-      2,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.VPclmulqdq",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_d14393e816a45d94ddbb9c633574f02f"
-      ],
-      0,
-      "acc99fc8b5e974f89207ef6ce99f1465"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__VPclmulqdq__item__imm",
-      2,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.VPclmulqdq",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_d14393e816a45d94ddbb9c633574f02f"
-      ],
-      0,
-      "43df08c1fcd9cdad6ca0f39afc99086d"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__AESNI_enc__item__dst",
-      2,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.AESNI_enc",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_c762fc0ac9dd789aed182e2aac30936b"
-      ],
-      0,
-      "3e567c08a7c9c222b5ccfc6edab8301d"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__AESNI_enc__item__src",
-      2,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.AESNI_enc",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_c762fc0ac9dd789aed182e2aac30936b"
-      ],
-      0,
-      "6985616d20ff2b38584f878976f7df44"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__AESNI_enc_last__item__dst",
-      2,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.AESNI_enc_last",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_9a00906d460a71223da8eb39a384abdb"
-      ],
-      0,
-      "2b3553e229df17488e4af402745a9b6c"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__AESNI_enc_last__item__src",
-      2,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.AESNI_enc_last",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_9a00906d460a71223da8eb39a384abdb"
-      ],
-      0,
-      "a67ec686a8d858ee8f5697bcc3e18642"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__AESNI_dec__item__dst",
-      2,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.AESNI_dec",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_bcf26577464a144e9225c022a9785af5"
-      ],
-      0,
-      "8aa225d8c05b097e946bc4537abdaf9f"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__AESNI_dec__item__src",
-      2,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.AESNI_dec",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_bcf26577464a144e9225c022a9785af5"
-      ],
-      0,
-      "011c53d064cdc4090a735c61c7581f8e"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__AESNI_dec_last__item__dst",
-      2,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.AESNI_dec_last",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_967f0e0963700ca0d4523dfedab93e2d"
-      ],
-      0,
-      "126961e917162bafa9426782a627a110"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__AESNI_dec_last__item__src",
-      2,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.AESNI_dec_last",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_967f0e0963700ca0d4523dfedab93e2d"
-      ],
-      0,
-      "4d7d4e5d15c75ff70a0e5812d1a3cc23"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__AESNI_imc__item__dst",
-      2,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.AESNI_imc",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_079fd3991117d9b903c6c5bec0ce95da"
-      ],
-      0,
-      "abfac6aad1cadcdbbb916790866c52ad"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__AESNI_imc__item__src",
-      2,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.AESNI_imc",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_079fd3991117d9b903c6c5bec0ce95da"
-      ],
-      0,
-      "153baf50c80da1e901cc6d64b6ddbeab"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__AESNI_keygen_assist__item__dst",
-      2,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.AESNI_keygen_assist",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_765b6b32a1985250fb8794c37a53127c"
-      ],
-      0,
-      "ebf609e3729cf2215121d6670f381a4f"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__AESNI_keygen_assist__item__src",
-      2,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.AESNI_keygen_assist",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_765b6b32a1985250fb8794c37a53127c"
-      ],
-      0,
-      "da4ce2a08e96aa08a2c8c4ef9976d7bc"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__AESNI_keygen_assist__item___2",
-      2,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.AESNI_keygen_assist",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_765b6b32a1985250fb8794c37a53127c"
-      ],
-      0,
-      "030d2a7ec626f92a42e08a3d035eedb3"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__VAESNI_enc__item__dst",
-      2,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.VAESNI_enc",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_67e1f8e99e5acf04cb60a6dee87e1f10"
-      ],
-      0,
-      "fb75df9dde1a92862977a96448008c8d"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__VAESNI_enc__item__src1",
-      2,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.VAESNI_enc",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_67e1f8e99e5acf04cb60a6dee87e1f10"
-      ],
-      0,
-      "7c8f83fdff9527a959476d506eca56eb"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__VAESNI_enc__item__src2",
-      2,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.VAESNI_enc",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_67e1f8e99e5acf04cb60a6dee87e1f10"
-      ],
-      0,
-      "daee54e39121e353d503230c771c1e43"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__VAESNI_enc_last__item__dst",
-      2,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.VAESNI_enc_last",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_04c42a29c68131856793e8c03ce63fe7"
-      ],
-      0,
-      "e585cffad3642942a7eee5bc3fbfcb67"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__VAESNI_enc_last__item__src1",
-      2,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.VAESNI_enc_last",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_04c42a29c68131856793e8c03ce63fe7"
-      ],
-      0,
-      "b7b25b2339cc9325b5e901e251d110a0"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__VAESNI_enc_last__item__src2",
-      2,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.VAESNI_enc_last",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_04c42a29c68131856793e8c03ce63fe7"
-      ],
-      0,
-      "d7fd62374edd4c5c6d36cc0ba39079d3"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__SHA256_rnds2__item__dst",
-      2,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.SHA256_rnds2",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_f6e74da0746ec004d571c324e50a2a4e"
-      ],
-      0,
-      "ccda980264c5bdb23c4be90e6cf85857"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__SHA256_rnds2__item__src",
-      2,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.SHA256_rnds2",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_f6e74da0746ec004d571c324e50a2a4e"
-      ],
-      0,
-      "3aa0ed221c315b1b4a7f96ef19f5cc9c"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__SHA256_msg1__item__dst",
-      2,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.SHA256_msg1",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_01d5e144b596ad3a89f862e4be3c8821"
-      ],
-      0,
-      "49bece69dc29235878523dcc767a1175"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__SHA256_msg1__item__src",
-      2,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.SHA256_msg1",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_01d5e144b596ad3a89f862e4be3c8821"
-      ],
-      0,
-      "5dc1dd5f218a28805245c8cef332110a"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__SHA256_msg2__item__dst",
-      2,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.SHA256_msg2",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_1f37af1e32a921002eb87a181a362f4f"
-      ],
-      0,
-      "d23f1a78e57d4a70ab5048dc71bc33ce"
-    ],
-    [
-      "X64.Bytes_Semantics_s.__proj__SHA256_msg2__item__src",
-      2,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_X64.Bytes_Semantics_s.SHA256_msg2",
-        "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_1f37af1e32a921002eb87a181a362f4f"
-      ],
-      0,
-      "1768321fe06232e03cedab921e5aecad"
+      "1a10da33e20c3e9f4554f25d8009d9c3"
     ],
     [
       "X64.Bytes_Semantics_s.ocmp",
@@ -4380,7 +1858,7 @@
       0,
       [ "@query", "assumption_X64.Machine_s.operand__uu___haseq" ],
       0,
-      "c43d480592c1408113f427d09f02be63"
+      "13fd3efd992c2368bf30c8b89c16813e"
     ],
     [
       "X64.Bytes_Semantics_s.__proj__OEq__item__o1",
@@ -4394,7 +1872,7 @@
         "refinement_interpretation_Tm_refine_80efb4ae640e649d6df14a9a7d6b968f"
       ],
       0,
-      "3c56eee2c51bdf230e53c4e880f3d749"
+      "71539c16e76a4213e3170113fefa7d36"
     ],
     [
       "X64.Bytes_Semantics_s.__proj__OEq__item__o2",
@@ -4408,7 +1886,7 @@
         "refinement_interpretation_Tm_refine_80efb4ae640e649d6df14a9a7d6b968f"
       ],
       0,
-      "3e4c48f134c4b5e663e28be48cca3200"
+      "5c76dd711b35142da2afd21fe68b7669"
     ],
     [
       "X64.Bytes_Semantics_s.__proj__ONe__item__o1",
@@ -4422,7 +1900,7 @@
         "refinement_interpretation_Tm_refine_a3e7f663d488e362422d71dae87a31e0"
       ],
       0,
-      "e23ea5cacb522745dcce1063180c0d35"
+      "73bdbd37e2b8f4cf4f6561efd9683fad"
     ],
     [
       "X64.Bytes_Semantics_s.__proj__ONe__item__o2",
@@ -4436,7 +1914,7 @@
         "refinement_interpretation_Tm_refine_a3e7f663d488e362422d71dae87a31e0"
       ],
       0,
-      "1d33df00df2819861068c680c9ab3acc"
+      "29216220b352af256d8973afb790bed0"
     ],
     [
       "X64.Bytes_Semantics_s.__proj__OLe__item__o1",
@@ -4450,7 +1928,7 @@
         "refinement_interpretation_Tm_refine_380b1de1f4628a5cb470c15b3065f0c3"
       ],
       0,
-      "3d4023909fed358f5bd5678aaddd6383"
+      "44f25477c490ce7b22867039c0ef9940"
     ],
     [
       "X64.Bytes_Semantics_s.__proj__OLe__item__o2",
@@ -4464,7 +1942,7 @@
         "refinement_interpretation_Tm_refine_380b1de1f4628a5cb470c15b3065f0c3"
       ],
       0,
-      "4964769c2435c3dc256889d35a6f7045"
+      "9f0d7e664b725e98dde22e8989a64d45"
     ],
     [
       "X64.Bytes_Semantics_s.__proj__OGe__item__o1",
@@ -4478,7 +1956,7 @@
         "refinement_interpretation_Tm_refine_833f7c3eb5fcf7c2f7d65bcdf168d2fa"
       ],
       0,
-      "2f6f315736cb1c07d9de4010cd0386e0"
+      "6f4e90aeb7ab74ead311c7bf3839648d"
     ],
     [
       "X64.Bytes_Semantics_s.__proj__OGe__item__o2",
@@ -4492,7 +1970,7 @@
         "refinement_interpretation_Tm_refine_833f7c3eb5fcf7c2f7d65bcdf168d2fa"
       ],
       0,
-      "f041c3336410d25d41c64d165b777ff1"
+      "640e87566deefcaddafe7b114fb5e8ed"
     ],
     [
       "X64.Bytes_Semantics_s.__proj__OLt__item__o1",
@@ -4506,7 +1984,7 @@
         "refinement_interpretation_Tm_refine_2725edd961aaeda7b53e63a8933b1ecd"
       ],
       0,
-      "2f71afabf3f27f0c8fb6d89e1cdcf21a"
+      "a15c2626027a5b45cb5b0b9f4f0ec55d"
     ],
     [
       "X64.Bytes_Semantics_s.__proj__OLt__item__o2",
@@ -4520,7 +1998,7 @@
         "refinement_interpretation_Tm_refine_2725edd961aaeda7b53e63a8933b1ecd"
       ],
       0,
-      "40afa46eb9e21223dbb76d46024a0c04"
+      "046634f645a9de35e650b12175f8efdb"
     ],
     [
       "X64.Bytes_Semantics_s.__proj__OGt__item__o1",
@@ -4534,7 +2012,7 @@
         "refinement_interpretation_Tm_refine_ca85ebdd1de78c629e2bcc6a84acf951"
       ],
       0,
-      "5ae6c651b5b9013dbacc834fef27b5c9"
+      "f82aee6ac1083e07d52f250976626b59"
     ],
     [
       "X64.Bytes_Semantics_s.__proj__OGt__item__o2",
@@ -4548,7 +2026,7 @@
         "refinement_interpretation_Tm_refine_ca85ebdd1de78c629e2bcc6a84acf951"
       ],
       0,
-      "63b7efd8f2a2ce977057fa35f045b36b"
+      "4afac7ac9aaf2dcfa16a9f620eecec9a"
     ],
     [
       "X64.Bytes_Semantics_s.codes",
@@ -4563,7 +2041,7 @@
         "typing_X64.Bytes_Semantics_s.code"
       ],
       0,
-      "292bd828824f0b5e4714e27734859924"
+      "f6ab420cf77cd40d68fc16d61d9e0ce3"
     ],
     [
       "X64.Bytes_Semantics_s.eval_maddr",
@@ -4578,7 +2056,7 @@
         "fuel_guarded_inversion_X64.Machine_s.maddr"
       ],
       0,
-      "29488aa85eb47ca1107c8f4d0742fe47"
+      "c7cdf83acd0315cbfdbddd547746aada"
     ],
     [
       "X64.Bytes_Semantics_s.eval_operand",
@@ -4594,7 +2072,7 @@
         "fuel_guarded_inversion_X64.Machine_s.operand"
       ],
       0,
-      "8fc16e601e57471ecd05193005df0f0c"
+      "de3762fedb735a236a6a6c15b541b9bd"
     ],
     [
       "X64.Bytes_Semantics_s.eval_mov128_op",
@@ -4609,7 +2087,7 @@
         "fuel_guarded_inversion_X64.Machine_s.mov128_op"
       ],
       0,
-      "3d032751249d21947d6d187511d5f23a"
+      "d1d35b0537f721b3da020ff716428c70"
     ],
     [
       "X64.Bytes_Semantics_s.eval_ocmp",
@@ -4635,7 +2113,7 @@
         "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "fc22b7278df509dfa5f7369808897116"
+      "867f9d20dd7be9a075e84ca3b6b10a08"
     ],
     [
       "X64.Bytes_Semantics_s.mod_8",
@@ -4644,7 +2122,7 @@
       0,
       [ "@query" ],
       0,
-      "119b58dc8ad4c1f6ec611ab7e57144f4"
+      "860b4561cb123a22a269af6816503404"
     ],
     [
       "X64.Bytes_Semantics_s.valid_src_operand",
@@ -4660,7 +2138,7 @@
         "fuel_guarded_inversion_X64.Machine_s.operand"
       ],
       0,
-      "6d2d8360b162b4959c7f0fee424dae58"
+      "e7a03d1ba7f099d4073081cabdd98e99"
     ],
     [
       "X64.Bytes_Semantics_s.valid_src_mov128_op",
@@ -4675,7 +2153,7 @@
         "fuel_guarded_inversion_X64.Machine_s.mov128_op"
       ],
       0,
-      "2176eabba27a375b1d89fee7724cc9b1"
+      "17dd50dee4c012f58afb11e11150746c"
     ],
     [
       "X64.Bytes_Semantics_s.valid_ocmp",
@@ -4693,7 +2171,7 @@
         "fuel_guarded_inversion_X64.Bytes_Semantics_s.ocmp"
       ],
       0,
-      "1611b433c3a6859020db2733d5faa136"
+      "21aa9ae4bf69dd5c255b2cd1e73af0ba"
     ],
     [
       "X64.Bytes_Semantics_s.valid_dst_operand",
@@ -4709,7 +2187,7 @@
         "fuel_guarded_inversion_X64.Machine_s.operand"
       ],
       0,
-      "c9f9b951146a95d6b22de5291cdeed31"
+      "7bcdfba76c3502e998de5094b124ae54"
     ],
     [
       "X64.Bytes_Semantics_s.valid_dst_mov128_op",
@@ -4724,10 +2202,10 @@
         "fuel_guarded_inversion_X64.Machine_s.mov128_op"
       ],
       0,
-      "b8052ad0815c2401f58966a332fe5ce9"
+      "038d1923e740fe87c9415d6e7ec25887"
     ],
     [
-      "X64.Bytes_Semantics_s.update_operand_preserve_flags'",
+      "X64.Bytes_Semantics_s.update_operand_preserve_flags''",
       2,
       1,
       1,
@@ -4740,10 +2218,10 @@
         "fuel_guarded_inversion_X64.Machine_s.operand"
       ],
       0,
-      "2e55c3bc4956214fb610eb823cc336c4"
+      "92728202ec4af0cec34aacb978df4c98"
     ],
     [
-      "X64.Bytes_Semantics_s.update_mov128_op_preserve_flags'",
+      "X64.Bytes_Semantics_s.update_mov128_op_preserve_flags''",
       2,
       1,
       1,
@@ -4755,7 +2233,7 @@
         "fuel_guarded_inversion_X64.Machine_s.mov128_op"
       ],
       0,
-      "7b90ed2bf58533f57b13775f85cbbdf2"
+      "29ae97f8f3a111b25d0f9724c68799f6"
     ],
     [
       "X64.Bytes_Semantics_s.update_rsp'",
@@ -4773,7 +2251,7 @@
         "refinement_interpretation_Tm_refine_5514fbe9e08dfda40f950a7b9f1b2b98"
       ],
       0,
-      "fdd91f66bfca719534a7983aec197ac4"
+      "832c892c71c579d8fcb6a773a02752a8"
     ],
     [
       "X64.Bytes_Semantics_s.update_cf'",
@@ -4794,7 +2272,7 @@
         "typing_X64.Bytes_Semantics_s.cf"
       ],
       0,
-      "b4ffa8b8bd699c4dd65600cb12335b4e"
+      "23e573bb390b2e58e8eda8067b69903c"
     ],
     [
       "X64.Bytes_Semantics_s.update_of'",
@@ -4815,16 +2293,289 @@
         "typing_X64.Bytes_Semantics_s.overflow"
       ],
       0,
-      "80ef3e5639e6e1db3e235a5c5edc7809"
+      "0e65a0ff3ae327ffcbc52d7133026fda"
     ],
     [
-      "X64.Bytes_Semantics_s.paddd",
+      "X64.Bytes_Semantics_s.try_option",
       2,
       1,
       0,
-      [ "@query" ],
+      [
+        "@MaxIFuel_assumption", "@query", "bool_inversion",
+        "disc_equation_FStar.Pervasives.Native.None",
+        "disc_equation_FStar.Pervasives.Native.Some",
+        "lemma_FStar.Pervasives.invertOption",
+        "typing_FStar.Pervasives.Native.uu___is_None",
+        "typing_FStar.Pervasives.Native.uu___is_Some"
+      ],
       0,
-      "c3b5a8231bae30b608285890e80bcdfb"
+      "dd0cc45af34de54c8dce771d22b63fc2"
+    ],
+    [
+      "X64.Bytes_Semantics_s.bind_option",
+      2,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "bool_inversion",
+        "disc_equation_FStar.Pervasives.Native.None",
+        "disc_equation_FStar.Pervasives.Native.Some",
+        "lemma_FStar.Pervasives.invertOption",
+        "typing_FStar.Pervasives.Native.uu___is_None",
+        "typing_FStar.Pervasives.Native.uu___is_Some"
+      ],
+      0,
+      "b8c010818ab051d1cb68afdb7cf5c4a8"
+    ],
+    [
+      "X64.Bytes_Semantics_s.instr_eval_operand_explicit",
+      2,
+      1,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "constructor_distinct_X64.Instruction_s.IOp64",
+        "constructor_distinct_X64.Instruction_s.IOpEx",
+        "constructor_distinct_X64.Instruction_s.IOpXmm",
+        "disc_equation_X64.Instruction_s.IOp64",
+        "disc_equation_X64.Instruction_s.IOpXmm",
+        "equation_X64.Instruction_s.instr_operand_t",
+        "equation_X64.Instruction_s.instr_val_t",
+        "fuel_guarded_inversion_X64.Instruction_s.instr_operand_explicit",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_X64.Instruction_s.IOpEx__0"
+      ],
+      0,
+      "02dc36ee290026de37ff8e6b00193cf2"
+    ],
+    [
+      "X64.Bytes_Semantics_s.instr_eval_operand_implicit",
+      2,
+      1,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "constructor_distinct_X64.Instruction_s.IOp64One",
+        "constructor_distinct_X64.Instruction_s.IOpIm",
+        "constructor_distinct_X64.Instruction_s.IOpXmmOne",
+        "disc_equation_X64.Instruction_s.IOp64One",
+        "disc_equation_X64.Instruction_s.IOpFlagsCf",
+        "disc_equation_X64.Instruction_s.IOpFlagsOf",
+        "disc_equation_X64.Instruction_s.IOpXmmOne",
+        "equation_X64.Instruction_s.instr_val_t",
+        "fuel_guarded_inversion_X64.Bytes_Semantics_s.state",
+        "fuel_guarded_inversion_X64.Instruction_s.instr_operand_implicit",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_X64.Instruction_s.IOp64One__0",
+        "projection_inverse_X64.Instruction_s.IOpIm__0",
+        "projection_inverse_X64.Instruction_s.IOpXmmOne__0",
+        "typing_X64.Bytes_Semantics_s.__proj__Mkstate__item__flags",
+        "typing_X64.Bytes_Semantics_s.cf",
+        "typing_X64.Bytes_Semantics_s.eval_mov128_op",
+        "typing_X64.Bytes_Semantics_s.eval_operand",
+        "typing_X64.Bytes_Semantics_s.overflow"
+      ],
+      0,
+      "0e9498da007b5f563ce34feb06e28a8d"
+    ],
+    [
+      "X64.Bytes_Semantics_s.instr_apply_eval_args",
+      2,
+      1,
+      1,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_X64.Instruction_s.instr_args_t.fuel_instrumented",
+        "@fuel_correspondence_X64.Instruction_s.instr_operands_t_args.fuel_instrumented",
+        "@fuel_irrelevance_X64.Instruction_s.instr_args_t.fuel_instrumented",
+        "@fuel_irrelevance_X64.Instruction_s.instr_operands_t_args.fuel_instrumented",
+        "@query", "binder_x_0c46cafd0d4c43feea0ec945edee26ec_0",
+        "binder_x_57c9ca80d56ac1ce280485954e46792e_1",
+        "binder_x_f9bb7854025c2d966c9b773626d2676d_2",
+        "constructor_distinct_Prims.Cons", "constructor_distinct_Prims.Nil",
+        "constructor_distinct_X64.Instruction_s.IOpEx",
+        "constructor_distinct_X64.Instruction_s.IOpIm",
+        "disc_equation_Prims.Cons", "disc_equation_Prims.Nil",
+        "disc_equation_X64.Instruction_s.IOpEx",
+        "disc_equation_X64.Instruction_s.IOpIm",
+        "equation_X64.Instruction_s.instr_out",
+        "equation_with_fuel_X64.Instruction_s.instr_args_t.fuel_instrumented",
+        "equation_with_fuel_X64.Instruction_s.instr_operands_t_args.fuel_instrumented",
+        "fuel_guarded_inversion_Prims.list",
+        "fuel_guarded_inversion_X64.Instruction_s.instr_operand",
+        "projection_inverse_Prims.Cons_hd",
+        "projection_inverse_Prims.Cons_tl", "projection_inverse_Prims.Nil_a",
+        "projection_inverse_X64.Instruction_s.IOpEx__0",
+        "projection_inverse_X64.Instruction_s.IOpIm__0",
+        "subterm_ordering_Prims.Cons"
+      ],
+      0,
+      "738de6a7fdea9a6f4075801f4fe75122"
+    ],
+    [
+      "X64.Bytes_Semantics_s.instr_apply_eval_inouts",
+      2,
+      1,
+      1,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_X64.Instruction_s.instr_inouts_t.fuel_instrumented",
+        "@fuel_correspondence_X64.Instruction_s.instr_operands_t.fuel_instrumented",
+        "@fuel_irrelevance_X64.Instruction_s.instr_inouts_t.fuel_instrumented",
+        "@fuel_irrelevance_X64.Instruction_s.instr_operands_t.fuel_instrumented",
+        "@query",
+        "X64.Instruction_s_pretyping_d0ada7b4345467e8cc9363a726e7763c",
+        "binder_x_0c46cafd0d4c43feea0ec945edee26ec_0",
+        "binder_x_0c46cafd0d4c43feea0ec945edee26ec_1",
+        "binder_x_4e18ccee255583b941e7cd9c9a96ba96_3",
+        "binder_x_54415ccc74a38da742d20543f87e102f_4",
+        "binder_x_57c9ca80d56ac1ce280485954e46792e_2",
+        "constructor_distinct_Prims.Cons", "constructor_distinct_Prims.Nil",
+        "constructor_distinct_X64.Instruction_s.IOpEx",
+        "constructor_distinct_X64.Instruction_s.IOpIm",
+        "constructor_distinct_X64.Instruction_s.InOut",
+        "constructor_distinct_X64.Instruction_s.Out", "data_elim_Prims.Cons",
+        "data_typing_intro_X64.Instruction_s.Out@tok",
+        "disc_equation_Prims.Cons", "disc_equation_Prims.Nil",
+        "disc_equation_X64.Instruction_s.IOpEx",
+        "disc_equation_X64.Instruction_s.IOpIm",
+        "disc_equation_X64.Instruction_s.InOut",
+        "disc_equation_X64.Instruction_s.Out",
+        "equality_tok_X64.Instruction_s.InOut@tok",
+        "equality_tok_X64.Instruction_s.Out@tok",
+        "equation_X64.Instruction_s.instr_out",
+        "equation_with_fuel_X64.Instruction_s.instr_inouts_t.fuel_instrumented",
+        "equation_with_fuel_X64.Instruction_s.instr_operands_t.fuel_instrumented",
+        "fuel_guarded_inversion_FStar.Pervasives.Native.tuple2",
+        "fuel_guarded_inversion_Prims.list",
+        "fuel_guarded_inversion_X64.Instruction_s.instr_operand",
+        "fuel_guarded_inversion_X64.Instruction_s.instr_operand_inout",
+        "kinding_X64.Instruction_s.instr_operand@tok",
+        "kinding_X64.Instruction_s.instr_operand_inout@tok",
+        "proj_equation_FStar.Pervasives.Native.Mktuple2__1",
+        "proj_equation_Prims.Cons_hd",
+        "projection_inverse_FStar.Pervasives.Native.Mktuple2__1",
+        "projection_inverse_FStar.Pervasives.Native.Mktuple2__2",
+        "projection_inverse_Prims.Cons_hd",
+        "projection_inverse_Prims.Cons_tl", "projection_inverse_Prims.Nil_a",
+        "projection_inverse_X64.Instruction_s.IOpEx__0",
+        "projection_inverse_X64.Instruction_s.IOpIm__0",
+        "subterm_ordering_Prims.Cons",
+        "typing_FStar.Pervasives.Native.__proj__Mktuple2__item___1"
+      ],
+      0,
+      "1440d8307e6ece432a397553f3d9ecdc"
+    ],
+    [
+      "X64.Bytes_Semantics_s.instr_write_output_explicit",
+      2,
+      1,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "binder_x_385ef18fdb5b43ccd74fa8b546798fef_0",
+        "binder_x_6fcde6ad8cce5100a63797d44a0044ab_1",
+        "binder_x_a88a28bb67f6448587ca6309eea85b7a_2",
+        "constructor_distinct_X64.Instruction_s.IOpEx",
+        "disc_equation_X64.Instruction_s.IOp64",
+        "disc_equation_X64.Instruction_s.IOpXmm",
+        "equation_X64.Instruction_s.instr_operand_t",
+        "equation_X64.Instruction_s.instr_val_t",
+        "fuel_guarded_inversion_X64.Instruction_s.instr_operand_explicit",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_X64.Instruction_s.IOpEx__0"
+      ],
+      0,
+      "abb9427f27dde5ebc69329be3ef36308"
+    ],
+    [
+      "X64.Bytes_Semantics_s.instr_write_output_implicit",
+      2,
+      1,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "binder_x_7b2e7dcb17554d7b2eb2a871fe070bf5_0",
+        "binder_x_f739f8d4720cbb4e029c74caceb1b3af_1",
+        "constructor_distinct_X64.Instruction_s.IOp64One",
+        "constructor_distinct_X64.Instruction_s.IOpIm",
+        "constructor_distinct_X64.Instruction_s.IOpXmmOne",
+        "disc_equation_X64.Instruction_s.IOp64One",
+        "disc_equation_X64.Instruction_s.IOpFlagsCf",
+        "disc_equation_X64.Instruction_s.IOpFlagsOf",
+        "disc_equation_X64.Instruction_s.IOpXmmOne",
+        "equation_X64.Instruction_s.instr_val_t",
+        "fuel_guarded_inversion_X64.Instruction_s.instr_operand_implicit",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_X64.Instruction_s.IOp64One__0",
+        "projection_inverse_X64.Instruction_s.IOpIm__0",
+        "projection_inverse_X64.Instruction_s.IOpXmmOne__0"
+      ],
+      0,
+      "43090df898b54229b6c8eebf2d9265ee"
+    ],
+    [
+      "X64.Bytes_Semantics_s.instr_write_outputs",
+      2,
+      1,
+      1,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_X64.Instruction_s.instr_operands_t.fuel_instrumented",
+        "@fuel_correspondence_X64.Instruction_s.instr_ret_t.fuel_instrumented",
+        "@fuel_irrelevance_X64.Instruction_s.instr_operands_t.fuel_instrumented",
+        "@fuel_irrelevance_X64.Instruction_s.instr_ret_t.fuel_instrumented",
+        "@query",
+        "X64.Instruction_s_pretyping_d0ada7b4345467e8cc9363a726e7763c",
+        "binder_x_0c46cafd0d4c43feea0ec945edee26ec_0",
+        "binder_x_57c9ca80d56ac1ce280485954e46792e_1",
+        "binder_x_834afaa8014a20be9da98cb92b8994b8_2",
+        "constructor_distinct_Prims.Cons", "constructor_distinct_Prims.Nil",
+        "constructor_distinct_X64.Instruction_s.IOpEx",
+        "data_typing_intro_X64.Instruction_s.Out@tok",
+        "disc_equation_Prims.Cons", "disc_equation_Prims.Nil",
+        "disc_equation_X64.Instruction_s.IOpEx",
+        "disc_equation_X64.Instruction_s.IOpIm",
+        "equation_X64.Instruction_s.instr_out",
+        "equation_X64.Instruction_s.instr_val_t",
+        "equation_with_fuel_X64.Instruction_s.instr_operands_t.fuel_instrumented",
+        "equation_with_fuel_X64.Instruction_s.instr_ret_t.fuel_instrumented",
+        "fuel_guarded_inversion_Prims.list",
+        "fuel_guarded_inversion_X64.Instruction_s.instr_operand",
+        "fuel_guarded_inversion_X64.Instruction_s.instr_operand_explicit",
+        "fuel_guarded_inversion_X64.Instruction_s.instr_operand_implicit",
+        "projection_inverse_FStar.Pervasives.Native.Mktuple2__1",
+        "projection_inverse_FStar.Pervasives.Native.Mktuple2__2",
+        "projection_inverse_Prims.Cons_a",
+        "projection_inverse_Prims.Cons_hd",
+        "projection_inverse_Prims.Cons_tl", "projection_inverse_Prims.Nil_a",
+        "projection_inverse_X64.Instruction_s.IOpEx__0",
+        "projection_inverse_X64.Instruction_s.IOpIm__0",
+        "subterm_ordering_Prims.Cons", "unit_typing"
+      ],
+      0,
+      "b9dae46e31da9baeea3847d3e12c1eb7"
+    ],
+    [
+      "X64.Bytes_Semantics_s.eval_instr",
+      2,
+      1,
+      1,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_X64.Instruction_s.instr_inouts_t.fuel_instrumented",
+        "@fuel_irrelevance_X64.Instruction_s.instr_inouts_t.fuel_instrumented",
+        "@query", "disc_equation_X64.Instruction_s.HavocFlags",
+        "disc_equation_X64.Instruction_s.PreserveFlags",
+        "equation_X64.Instruction_s.instr_eval_t",
+        "equation_X64.Instruction_s.instr_out",
+        "equation_with_fuel_X64.Instruction_s.instr_inouts_t.fuel_instrumented",
+        "fuel_guarded_inversion_Prims.list",
+        "fuel_guarded_inversion_X64.Instruction_s.flag_havoc",
+        "typing_X64.Instruction_s.instr_eval"
+      ],
+      0,
+      "780796cc0e02a8b135becf084c227055"
     ],
     [
       "X64.Bytes_Semantics_s.eval_ins",
@@ -4832,135 +2583,26 @@
       1,
       1,
       [
-        "@MaxFuel_assumption", "@MaxIFuel_assumption",
-        "@fuel_correspondence_Prims.pow2.fuel_instrumented",
-        "@fuel_irrelevance_Prims.pow2.fuel_instrumented", "@query",
-        "Prims_interpretation_Tm_arrow_a26b6f0ab7c6505137c6de4ce0011041",
-        "Prims_pretyping_ae567c2fb75be05905677af440075565",
-        "X64.Machine_s_pretyping_b7c45855ed90996ceceb34aa61de24e7",
-        "b2t_def", "bool_inversion", "bool_typing",
-        "data_elim_X64.Bytes_Semantics_s.Mkstate",
-        "data_typing_intro_X64.Machine_s.Rbx@tok",
-        "disc_equation_FStar.Pervasives.Native.None",
-        "disc_equation_FStar.Pervasives.Native.Some",
-        "disc_equation_X64.Bytes_Semantics_s.AESNI_dec",
-        "disc_equation_X64.Bytes_Semantics_s.AESNI_dec_last",
-        "disc_equation_X64.Bytes_Semantics_s.AESNI_enc",
-        "disc_equation_X64.Bytes_Semantics_s.AESNI_enc_last",
-        "disc_equation_X64.Bytes_Semantics_s.AESNI_imc",
-        "disc_equation_X64.Bytes_Semantics_s.AESNI_keygen_assist",
-        "disc_equation_X64.Bytes_Semantics_s.Adcx64",
-        "disc_equation_X64.Bytes_Semantics_s.Add64",
-        "disc_equation_X64.Bytes_Semantics_s.AddCarry64",
-        "disc_equation_X64.Bytes_Semantics_s.AddLea64",
-        "disc_equation_X64.Bytes_Semantics_s.Adox64",
+        "@MaxIFuel_assumption", "@query",
         "disc_equation_X64.Bytes_Semantics_s.Alloc",
-        "disc_equation_X64.Bytes_Semantics_s.And64",
-        "disc_equation_X64.Bytes_Semantics_s.Cmovc64",
-        "disc_equation_X64.Bytes_Semantics_s.Cpuid",
         "disc_equation_X64.Bytes_Semantics_s.Dealloc",
-        "disc_equation_X64.Bytes_Semantics_s.IMul64",
+        "disc_equation_X64.Bytes_Semantics_s.Ins_64_64_preserve",
+        "disc_equation_X64.Bytes_Semantics_s.Ins_Xmm_Xmm",
+        "disc_equation_X64.Bytes_Semantics_s.Ins_io64_64",
+        "disc_equation_X64.Bytes_Semantics_s.Ins_io64_64_cf",
+        "disc_equation_X64.Bytes_Semantics_s.Ins_ioXmm",
+        "disc_equation_X64.Bytes_Semantics_s.Ins_ioXmm_Xmm",
+        "disc_equation_X64.Bytes_Semantics_s.Instr",
         "disc_equation_X64.Bytes_Semantics_s.MOVDQU",
-        "disc_equation_X64.Bytes_Semantics_s.Mov64",
-        "disc_equation_X64.Bytes_Semantics_s.MovBe64",
-        "disc_equation_X64.Bytes_Semantics_s.Mul64",
-        "disc_equation_X64.Bytes_Semantics_s.Mulx64",
-        "disc_equation_X64.Bytes_Semantics_s.Paddd",
-        "disc_equation_X64.Bytes_Semantics_s.Palignr",
-        "disc_equation_X64.Bytes_Semantics_s.Pand",
-        "disc_equation_X64.Bytes_Semantics_s.Pclmulqdq",
-        "disc_equation_X64.Bytes_Semantics_s.Pcmpeqd",
-        "disc_equation_X64.Bytes_Semantics_s.Pextrq",
-        "disc_equation_X64.Bytes_Semantics_s.Pinsrd",
-        "disc_equation_X64.Bytes_Semantics_s.Pinsrq",
         "disc_equation_X64.Bytes_Semantics_s.Pop",
-        "disc_equation_X64.Bytes_Semantics_s.Pshufb",
-        "disc_equation_X64.Bytes_Semantics_s.Pshufd",
-        "disc_equation_X64.Bytes_Semantics_s.Pslld",
-        "disc_equation_X64.Bytes_Semantics_s.Psrld",
-        "disc_equation_X64.Bytes_Semantics_s.Psrldq",
         "disc_equation_X64.Bytes_Semantics_s.Push",
         "disc_equation_X64.Bytes_Semantics_s.Pxor",
-        "disc_equation_X64.Bytes_Semantics_s.SHA256_msg1",
-        "disc_equation_X64.Bytes_Semantics_s.SHA256_msg2",
-        "disc_equation_X64.Bytes_Semantics_s.SHA256_rnds2",
-        "disc_equation_X64.Bytes_Semantics_s.Sbb64",
-        "disc_equation_X64.Bytes_Semantics_s.Shl64",
-        "disc_equation_X64.Bytes_Semantics_s.Shr64",
-        "disc_equation_X64.Bytes_Semantics_s.Shufpd",
-        "disc_equation_X64.Bytes_Semantics_s.Sub64",
-        "disc_equation_X64.Bytes_Semantics_s.VAESNI_enc",
-        "disc_equation_X64.Bytes_Semantics_s.VAESNI_enc_last",
-        "disc_equation_X64.Bytes_Semantics_s.VPSLLDQ",
-        "disc_equation_X64.Bytes_Semantics_s.VPaddd",
-        "disc_equation_X64.Bytes_Semantics_s.VPalignr",
-        "disc_equation_X64.Bytes_Semantics_s.VPclmulqdq",
-        "disc_equation_X64.Bytes_Semantics_s.VPshufb",
         "disc_equation_X64.Bytes_Semantics_s.VPxor",
-        "disc_equation_X64.Bytes_Semantics_s.VShufpd",
-        "disc_equation_X64.Bytes_Semantics_s.Vpsrldq",
         "disc_equation_X64.Bytes_Semantics_s.Xor64",
-        "equality_tok_X64.Machine_s.Rax@tok",
-        "equality_tok_X64.Machine_s.Rdx@tok",
-        "equation_FStar.FunctionalExtensionality.restricted_t",
-        "equation_FStar.UInt.fits", "equation_FStar.UInt.max_int",
-        "equation_FStar.UInt.min_int", "equation_FStar.UInt.size",
-        "equation_FStar.UInt.uint_t", "equation_Prims.eqtype",
-        "equation_Prims.nat", "equation_Types_s.quad32",
-        "equation_Words_s.nat32", "equation_Words_s.nat64",
-        "equation_Words_s.nat8", "equation_Words_s.natN",
-        "equation_X64.Bytes_Semantics_s.cf",
-        "equation_X64.Bytes_Semantics_s.eval_operand",
-        "equation_X64.Bytes_Semantics_s.overflow",
-        "equation_X64.Bytes_Semantics_s.palignr",
-        "equation_X64.Bytes_Semantics_s.pclmulqdq",
-        "equation_X64.Bytes_Semantics_s.pshufb",
-        "equation_X64.Bytes_Semantics_s.regs_t",
-        "equation_X64.Bytes_Semantics_s.xmms_t",
-        "equation_X64.Machine_s.imm8", "equation_X64.Machine_s.xmm",
-        "fuel_guarded_inversion_X64.Bytes_Semantics_s.ins",
-        "fuel_guarded_inversion_X64.Bytes_Semantics_s.state",
-        "function_token_typing_Prims.__cache_version_number__",
-        "function_token_typing_Prims.int",
-        "function_token_typing_Words_s.nat8",
-        "haseqTm_refine_5514fbe9e08dfda40f950a7b9f1b2b98",
-        "haseqTm_refine_ba523126f67e00e7cd55f0b92f16681d", "int_typing",
-        "interpretation_Tm_abs_5ddf544b15726955644c2e2b7b9e7d8e",
-        "interpretation_Tm_abs_66926e89e50e2ac69caf858cc1113f07",
-        "lemma_FStar.Pervasives.invertOption",
-        "lemma_FStar.Seq.Base.lemma_create_len",
-        "lemma_FStar.Seq.Base.lemma_len_append",
-        "lemma_FStar.Seq.Base.lemma_len_slice",
-        "lemma_FStar.Seq.Properties.slice_length",
-        "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_Addition",
-        "primitive_Prims.op_AmpAmp", "primitive_Prims.op_Equality",
-        "primitive_Prims.op_LessThan", "primitive_Prims.op_LessThanOrEqual",
-        "primitive_Prims.op_Subtraction",
-        "proj_equation_X64.Bytes_Semantics_s.Mkstate_flags",
-        "proj_equation_X64.Bytes_Semantics_s.Mkstate_regs",
-        "proj_equation_X64.Bytes_Semantics_s.Mkstate_xmms",
-        "projection_inverse_BoxBool_proj_0",
-        "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
-        "refinement_interpretation_Tm_refine_5514fbe9e08dfda40f950a7b9f1b2b98",
-        "refinement_interpretation_Tm_refine_a347709bfeba48709474ad26f4f6be87",
-        "refinement_interpretation_Tm_refine_aebc5aa9049e78f605051015a3436e68",
-        "refinement_interpretation_Tm_refine_b0ec1ad4c766f179179881d04d9cace4",
-        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
-        "refinement_interpretation_Tm_refine_ed0c82b529ba35f1d88d0cb19afaf666",
-        "token_correspondence_X64.Bytes_Semantics_s.__proj__Mkstate__item__regs",
-        "token_correspondence_X64.Bytes_Semantics_s.__proj__Mkstate__item__xmms",
-        "typing_FStar.Seq.Base.create", "typing_FStar.Seq.Base.length",
-        "typing_FStar.UInt.fits", "typing_Types_s.quad32",
-        "typing_X64.Bytes_Semantics_s.eval_operand",
-        "typing_X64.Bytes_Semantics_s.palignr",
-        "typing_X64.Bytes_Semantics_s.pclmulqdq",
-        "typing_X64.Bytes_Semantics_s.pshufb",
-        "typing_tok_X64.Machine_s.Rax@tok",
-        "typing_tok_X64.Machine_s.Rdx@tok"
+        "fuel_guarded_inversion_X64.Bytes_Semantics_s.ins"
       ],
       0,
-      "27299467da5c842fa01f8aa20cd7ba76"
+      "a9ef46d7d83332b7a17621e1378eeb77"
     ],
     [
       "X64.Bytes_Semantics_s.eval_code",
@@ -4989,7 +2631,7 @@
         "typing_tok_X64.Bytes_Semantics_s.Cpuid@tok"
       ],
       0,
-      "6759fc5d140d6bc7cc364152872fe778"
+      "87b87841389dc0f24e48a56e81f3a354"
     ],
     [
       "X64.Bytes_Semantics_s.eval_code",
@@ -5015,7 +2657,7 @@
         "subterm_ordering_Prims.Cons"
       ],
       0,
-      "9808aa73033170897deca40d3871686d"
+      "2fabe80388dd46b31690c1645b9c746c"
     ],
     [
       "X64.Bytes_Semantics_s.eval_code",
@@ -5039,7 +2681,7 @@
         "well-founded-ordering-on-nat"
       ],
       0,
-      "8e41223af7afd8f94fa81afea7fe7ffe"
+      "fe42037570aeb557a8f8906781f8ef3e"
     ]
   ]
 ]
