@@ -8,7 +8,7 @@ open FStar.Mul
 open Hacl.Spec.Poly1305.Vec
 include Hacl.Spec.Poly1305.Field32xN
 
-#reset-options "--z3rlimit 20 --using_facts_from '* -FStar.Seq' --max_fuel 0 --max_ifuel 0"
+#reset-options "--z3rlimit 50 --using_facts_from '* -FStar.Seq' --max_fuel 0 --max_ifuel 0"
 
 val lemma_prime: unit ->
   Lemma (pow2 130 % prime = 5)
@@ -156,6 +156,7 @@ let smul_felem5_eval_lemma_i #w #m1 #m2 u1 f2 i =
   smul_lemma vu1 (v tf20) (v tf21) (v tf22) (v tf23) (v tf24)
 #pop-options
 
+// 2019.04.05 SZ: this proof is fragile; use [calc]? 
 val smul_add_felem5_fits_lemma_i:
     #w:lanes
   -> #m1:scale32
@@ -1502,6 +1503,8 @@ val load_felem5_lemma_i:
     as_nat5 f % prime == (uint64xN_v hi).[i] * pow2 64 + (uint64xN_v lo).[i])
 let load_felem5_lemma_i #w lo hi i =
   assert (as_tup64_i (load_felem5 #w lo hi) i == load_tup64_lemma (vec_v lo).[i] (vec_v hi).[i])
+
+#set-options "--max_fuel 1"
 
 val lemma_store_felem_lo: f:tup64_5 -> lo:uint64 ->
   Lemma

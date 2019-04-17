@@ -9,7 +9,6 @@ FSTAR_INCLUDE_DIRS = \
   $(HACL_KREMLIN) \
   $(KREMLIN_HOME)/kremlib \
   $(HACL_HOME)/lib \
-  $(HACL_HOME)/lib/fst \
   $(HACL_HOME)/lib/c
 
 FSTAR_INCLUDES = $(addprefix --include ,$(FSTAR_INCLUDE_DIRS))
@@ -38,26 +37,25 @@ INCLUDE_DIRS = \
 CFLAGS += $(addprefix -I ,$(INCLUDE_DIRS)) -Wall -Wextra -Werror \
   -Wno-parentheses -Wno-unused-parameter -Wno-unused-variable -Wno-infinite-recursion
 
-OBJS = $(HACL_HOME)/lib/c/Lib_PrintBuffer.o $(OUT_DIR)/Loops.o
+OBJS = $(HACL_HOME)/lib/c/Lib_PrintBuffer.o $(OUT_DIR)/Tutorial.o
 
 HACL_LIBS = \
-  $(HACL_HOME)/lib/fst/Lib.IntTypes.fst \
-  $(HACL_HOME)/lib/fst/Lib.RawIntTypes.fst \
-  $(HACL_HOME)/lib/fst/Lib.Loops.fst \
-  $(HACL_HOME)/lib/fst/Lib.Buffer.fst
+  $(HACL_HOME)/lib/Lib.IntTypes.fst \
+  $(HACL_HOME)/lib/Lib.RawIntTypes.fst \
+  $(HACL_HOME)/lib/Lib.Loops.fst \
+  $(HACL_HOME)/lib/Lib.Buffer.fst
 
-$(OUT_DIR)/out.krml: $(HACL_LIBS) Loops.fst
+$(OUT_DIR)/out.krml: $(HACL_LIBS) Tutorial.fst
 	$(KREMLIN) -tmpdir $(OUT_DIR) \
-	-I $(HACL_HOME)/lib -I $(HACL_HOME)/lib/fst \
+	-I $(HACL_HOME)/lib \
 	-skip-translation $^
 
-$(OUT_DIR)/Loops.c: $(OUT_DIR)/out.krml
+$(OUT_DIR)/Tutorial.c: $(OUT_DIR)/out.krml
 	$(KREMLIN) \
-	  -add-include '"c/Lib_PrintBuffer.h"' \
 	  -add-include '"kremlin/internal/compat.h"' \
 	  -skip-compilation \
 	  -bundle 'Lib.*' \
-	  -no-prefix 'Loops' \
+	  -no-prefix 'Tutorial' \
 	  -tmpdir $(OUT_DIR) \
 	  $^
 

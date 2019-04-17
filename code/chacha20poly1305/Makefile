@@ -2,7 +2,6 @@ FSTAR_HOME   ?= ../../../FStar
 KREMLIN_HOME ?= ../../../kremlin
 HACL_HOME    ?= ../..
 
-CACHE_DIR     = .cache
 OUTPUT_DIR    = .output
 HINT_DIR      = .hints
 GENERATED_DIR = chacha20poly1305-c
@@ -11,6 +10,10 @@ OUT_DIR	      = chacha20poly1305-c
 .PHONY: all test stage1 stage2 clean clean-c distclean
 
 all: test
+
+
+hack.exe:
+	$(CC) -O3 -march=native -mtune=native -funroll-loops -I $(KREMLIN_HOME)/include -I $(KREMLIN_HOME)/kremlib -I $(KREMLIN_HOME)/kremlib/dist/generic -I $(HACL_HOME)/lib -I chacha20poly1305-c -Wall -Wextra -Werror -Wno-parentheses -Wno-unused-parameter -Wno-unused-variable -Wno-incompatible-pointer-types -o chacha20poly1305-c/test.exe chacha20poly1305-c/Hacl_Chacha20Poly1305.c chacha20poly1305-test.c $(HACL_HOME)/lib/c/Lib_PrintBuffer.c -L /opt/kremlin/kremlib/dist/generic -lkremlib
 
 test:
 	rm -f .depend && $(MAKE) .depend
@@ -27,13 +30,12 @@ FSTAR_INCLUDE_DIRS = \
   $(KREMLIN_HOME)/kremlib \
   $(HACL_HOME)/specs \
   $(HACL_HOME)/lib \
-  $(HACL_HOME)/lib/fst \
-  $(HACL_HOME)/lib/c \
   $(HACL_HOME)/code/poly1305 \
   $(HACL_HOME)/code/chacha20
 
 FSTAR_FLAGS = $(OTHERFLAGS) --cmi \
-  --cache_checked_modules --cache_dir $(CACHE_DIR) --odir $(OUTPUT_DIR) \
+  --cache_checked_modules --odir $(OUTPUT_DIR) \
+  --already_cached "'Prims+FStar+LowStar+C+Spec.Loops+TestLib+Lib+Hacl.Impl.Poly1305'" \
   $(addprefix --include ,$(FSTAR_INCLUDE_DIRS))
 
 FSTAR = $(FSTAR_HOME)/bin/fstar.exe $(FSTAR_FLAGS)
@@ -42,7 +44,6 @@ ENABLE_HINTS = --use_hints --use_hint_hashes --record_hints --query_stats
 
 ROOTS = Hacl.Chacha20Poly1305.fst
 
-
 .PRECIOUS: %.krml
 
 .depend:
@@ -50,26 +51,13 @@ ROOTS = Hacl.Chacha20Poly1305.fst
 
 include .depend
 
-# Admit SMT queries for modules in FStar, LowStar, C, and Lib
-$(CACHE_DIR)/FStar.%.checked: | .depend
-	$(FSTAR) $< --admit_smt_queries true && \
-	touch $@
+$(HINT_DIR):
+	mkdir -p $@
 
-$(CACHE_DIR)/LowStar.%.checked: | .depend
-	$(FSTAR) $< --admit_smt_queries true && \
-	touch $@
-
-$(CACHE_DIR)/C.%.checked: | .depend
-	$(FSTAR) $< --admit_smt_queries true && \
-	touch $@
-
-$(CACHE_DIR)/Lib.%.checked: | .depend
-	$(FSTAR) $< --admit_smt_queries true && \
-	touch $@
-
-$(CACHE_DIR)/%.checked: | .depend
-	$(FSTAR) $< $(ENABLE_HINTS) --hint_file $(HINT_DIR)/$(notdir $<).hints && \
-	touch $@
+%.checked: | .depend $(HINT_DIR)
+	$(info $*)
+	$(FSTAR) $< $(ENABLE_HINTS) --hint_file $(HINT_DIR)/$(notdir $*).hints && \
+	touch -c $@
 
 $(OUTPUT_DIR)/%.krml: | .depend
 	$(FSTAR) --codegen Kremlin \
@@ -126,6 +114,7 @@ ALL_GENERATED_FILES = $(addprefix $(GENERATED_DIR)/,$(ALL_OUR_FILES))
 
 ALL_SOURCES = \
   $(ALL_GENERATED_FILES) \
+  chacha20poly1305-test.c \
   $(HACL_HOME)/lib/c/Lib_PrintBuffer.c
 
 ALL_OBJS = $(patsubst %.c,%.o,$(ALL_SOURCES))
@@ -184,4 +173,4 @@ clean-c:
 	rm -rf $(GENERATED_DIR)/{*.{c,h},Makefile.include}
 
 distclean: clean
-	rm -rf $(OUT_DIR) $(CACHE_DIR) $(OUTPUT_DIR)
+	rm -rf $(OUT_DIR) $(OUTPUT_DIR) *.checked

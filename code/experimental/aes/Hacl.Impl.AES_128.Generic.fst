@@ -266,6 +266,8 @@ val aes128_init_:
   (requires (fun h -> live h ctx /\ live h nonce /\ live h key))
   (ensures (fun h0 b h1 -> modifies (loc ctx) h0 h1))
 
+#set-options "--max_fuel 0 --max_ifuel 1 --z3rlimit 20"
+
 let aes128_init_ #m ctx key nonce =
   let kex = get_kex ctx in
   let n = get_nonce ctx in

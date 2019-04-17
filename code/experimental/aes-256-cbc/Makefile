@@ -27,7 +27,6 @@ FSTAR_INCLUDE_DIRS = \
   $(KREMLIN_HOME)/kremlib \
   $(HACL_HOME)/specs \
   $(HACL_HOME)/lib \
-  $(HACL_HOME)/lib/fst \
   $(HACL_HOME)/lib/c
 
 FSTAR_FLAGS = $(OTHERFLAGS) --cmi \
@@ -136,7 +135,7 @@ INCLUDE_DIRS = \
 # TODO: remove -Wno-incompatible-pointer-types when issue with --cmi is fixed
 CFLAGS += -O3 -march=native -mtune=native -funroll-loops
 CFLAGS += $(addprefix -I ,$(INCLUDE_DIRS)) -Wall -Wextra -Werror \
-  -Wno-parentheses -Wno-unused-parameter -Wno-unused-variable \
+  -Wno-parentheses -Wno-unused-parameter -Wno-unused-function -Wno-unused-variable \
   -Wno-incompatible-pointer-types
 
 # GNU Make manual section 4.14

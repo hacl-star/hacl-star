@@ -196,6 +196,9 @@ let max_size_t = maxint U32
 unfold inline_for_extraction
 type size_nat = n:nat{n <= max_size_t}
 
+unfold inline_for_extraction
+type size_pos = n:pos{n <= max_size_t}
+
 inline_for_extraction
 let size (n:size_nat) : size_t = uint #U32 #PUB n
 

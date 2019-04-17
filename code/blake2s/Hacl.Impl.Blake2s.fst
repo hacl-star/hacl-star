@@ -17,7 +17,7 @@ module Spec = Spec.Blake2
 #set-options "--z3rlimit 50 --max_ifuel 0 --max_fuel 0"
 
 (* Define algorithm parameters *)
-type word_t = Spec.word_t Spec.Blake2S
+type word_t = normalize_term (Spec.word_t Spec.Blake2S)
 type vector_wp = lbuffer word_t (size Spec.size_block_w)
 type block_wp = lbuffer word_t (size Spec.size_block_w)
 type block_p = lbuffer uint8 (size (Spec.size_block Spec.Blake2S))
