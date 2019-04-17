@@ -292,7 +292,7 @@ let test_ghash expected text_len text aad_len aad k i =
   IO.print_string " ================================ GHASH ";
   IO.print_string (UInt8.to_string (u8_to_UInt8 (u8 i)));
   IO.print_string " ================================\n";
-  let k = Spec.AES.aes_key_block0 k 12 (create 12 (u8 0)) in
+  let k = Spec.AES.aes128_ctr_key_block0 k 12 (create 12 (u8 0)) in
   let output = AEAD.ghash text aad k (create 16 (u8 0)) in
   let result = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) output expected in
   if result then IO.print_string "Success!\n"
@@ -307,7 +307,7 @@ let test_ghash expected text_len text aad_len aad k i =
 
 let test () =
     IO.print_string "\nComputed hash key: ";
-    List.iter (fun a -> IO.print_uint8 (u8_to_UInt8 a);  IO.print_string ":") (to_list (Spec.AES.aes_key_block0 (of_list test2_key) 12 (create 12 (u8 0))));
+    List.iter (fun a -> IO.print_uint8 (u8_to_UInt8 a);  IO.print_string ":") (to_list (Spec.AES.aes128_ctr_key_block0 (of_list test2_key) 12 (create 12 (u8 0))));
     IO.print_string "\n";
     IO.print_string "\nExpected hash key: ";
     List.iter (fun a -> IO.print_uint8 (u8_to_UInt8 a);  IO.print_string ":") (test2_hash_key);

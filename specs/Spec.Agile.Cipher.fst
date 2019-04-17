@@ -14,7 +14,7 @@ type cipher_alg =
 
 let state (a:cipher_alg) = 
   match a with
-  | AES128 -> Spec.AES.aes_state
+  | AES128 -> Spec.AES.aes_ctr_state Spec.AES.AES128
   | CHACHA20 -> Spec.Chacha20.state
 
 let key_len (a:cipher_alg) =
@@ -39,16 +39,16 @@ let nonce_len (a:cipher_alg) =
 
 let init (a:cipher_alg) (k:lbytes (key_len a)) (n_len:nonce_len a)  (n:lbytes n_len) : state a =
   match a with
-  | AES128 -> Spec.AES.aes_init k n_len n
-  | CHACHA20 -> Spec.Chacha20.chacha20_init k n
+  | AES128 -> Spec.AES.aes_ctr_init Spec.AES.AES128 k n_len n
+  | CHACHA20 -> Spec.Chacha20.chacha20_init k n 0
 
 let set_counter (a:cipher_alg) (s:state a) (n:size_nat) : state a =
   match a with
-  | AES128 -> Spec.AES.aes_set_counter s n
+  | AES128 -> Spec.AES.aes_ctr_set_counter Spec.AES.AES128 s n
   | CHACHA20 -> Spec.Chacha20.chacha20_set_counter s n
 
 let key_block (a:cipher_alg) (s:state a) : lbytes (block_len a) = 
   match a with
-  | AES128 -> Spec.AES.aes_key_block s
+  | AES128 -> Spec.AES.aes_ctr_current_key_block Spec.AES.AES128 s
   | CHACHA20 -> Spec.Chacha20.chacha20_key_block s
 

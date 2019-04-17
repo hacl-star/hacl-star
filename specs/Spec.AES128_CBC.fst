@@ -19,19 +19,19 @@ type block = lbytes size_block
 type iv = lbytes size_iv
 
 
-val cbc_encrypt_block: iv -> key -> block -> Tot block
+val cbc_encrypt_block: iv -> AES.aes_xkey AES.AES128 -> block -> Tot block
 let cbc_encrypt_block iv key block =
   let aes_input = map2 (^.) iv block in
-  AES.aes128_encrypt_block key aes_input
+  AES.aes_encrypt_block AES.AES128 key aes_input
 
 
-val cbc_decrypt_block: iv -> key -> block -> Tot block
+val cbc_decrypt_block: iv -> AES.aes_xkey AES.AES128 -> block -> Tot block
 let cbc_decrypt_block iv key block =
-  let aes_output = AES.aes128_encrypt_block key block in
+  let aes_output = AES.aes_decrypt_block AES.AES128 key block in
   map2 (^.) iv aes_output
 
 
-val cbc_encrypt_last: iv -> key -> input:bytes{length input < size_block} -> FStar.All.ML block
+val cbc_encrypt_last: iv -> AES.aes_xkey AES.AES128 -> input:bytes{length input < size_block} -> FStar.All.ML block
 let cbc_encrypt_last iv key input =
   let len = length input in
   let block = create size_block (u8 (size_block - len)) in
@@ -55,7 +55,7 @@ let rec unpadPKCS b idx =
       Some plaintext)
   else None
 
-val cbc_decrypt_last: iv -> key -> block -> FStar.All.ML (option bytes)
+val cbc_decrypt_last: iv -> AES.aes_xkey AES.AES128 -> block -> FStar.All.ML (option bytes)
 let cbc_decrypt_last iv k b =
   let plain_block = cbc_decrypt_block iv k b in
   IO.print_string "\ndecrypt_last (block): \n";
@@ -74,18 +74,21 @@ let aes128_cbc_encrypt input k iv =
   let len = length input in
   let n = len / size_block in
   let rem = len % size_block in
+  let xkey = AES.aes_key_expansion AES.AES128 k in
   let last_iv, ciphertext = generate_blocks size_block n (fun _ -> block) (fun i iv ->
     let block_i = sub #uint8 #len input (i * size_block) size_block in
-    let cipher_block = cbc_encrypt_block iv k block_i in
+    let cipher_block = cbc_encrypt_block iv xkey block_i in
     cipher_block, cipher_block) iv in
   if rem <> 0 then (
     let last = sub #uint8 #len input (n * size_block) rem in
-    let last_cipher_block = cbc_encrypt_last last_iv k last in
+    let last_cipher_block = cbc_encrypt_last last_iv xkey last in
+    let ciphertext : lbytes (n * size_block) = ciphertext in
     ciphertext @| last_cipher_block)
   else (
     let padding = create size_block (u8 size_block) in
-    let last_cipher_block = cbc_encrypt_block last_iv k padding in
-    ciphertext @| last_cipher_block)
+    let last_cipher_block = cbc_encrypt_block last_iv xkey padding in
+    let ciphertext : lbytes (n * size_block) = ciphertext in
+    (ciphertext @| last_cipher_block))
 
 
 val aes128_cbc_decrypt:
@@ -99,15 +102,13 @@ val aes128_cbc_decrypt:
 let aes128_cbc_decrypt ciphertext k iv =
   let clen : size_nat = length ciphertext in
   let n : size_nat = clen / size_block in
+  let xkey = AES.aes_dec_key_expansion AES.AES128 k in
   let last_iv, plaintext = generate_blocks size_block (n - 1) (fun _ -> block) (fun i iv ->
     let cblock_i = sub #uint8 #clen ciphertext (i * size_block) size_block in
-    let plain_block = cbc_decrypt_block iv k cblock_i in
+    let plain_block = cbc_decrypt_block iv xkey cblock_i in
     cblock_i, plain_block) iv in
-  IO.print_string "\nComputed plaintext (blocks): \n";
-  List.iter (fun a -> IO.print_uint8 (u8_to_UInt8 a);  IO.print_string ":") (to_list plaintext);
-  IO.print_string "\n";
-let last_cipher_block = sub #uint8 #clen ciphertext ((n - 1) * size_block) size_block in
-  match cbc_decrypt_last last_iv k last_cipher_block with
+  let last_cipher_block = sub #uint8 #clen ciphertext ((n - 1) * size_block) size_block in
+  match cbc_decrypt_last last_iv xkey last_cipher_block with
   | None -> None
   | Some last_plain_block ->
     Some (Seq.Base.append plaintext last_plain_block)

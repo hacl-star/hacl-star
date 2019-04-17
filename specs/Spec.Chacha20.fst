@@ -121,6 +121,10 @@ let chacha20_key_block0 (k:key) (n:nonce) : Tot block =
   let st = chacha20_core 0 st in
   uints_to_bytes_le st
 
+let chacha20_key_block (st:state) : Tot block =
+  let st = chacha20_core 0 st in
+  uints_to_bytes_le st
+
 let xor_block (k:state) (b:block) : block  =
   let ib = uints_from_bytes_le b in
   let ob = map2 (^.) ib k in
