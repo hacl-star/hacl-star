@@ -12,7 +12,8 @@ target_link_libraries(benchmark PRIVATE evercrypt)
 
 add_executable(runbenchmark
   runbenchmark.cpp
-  bench_hash.cpp)
+  bench_hash.cpp
+  bench_aead.cpp)
 target_include_directories(runbenchmark PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(runbenchmark PRIVATE benchmark evercrypt)
 

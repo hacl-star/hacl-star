@@ -1,6 +1,9 @@
+#include <unistd.h>
+
 #include <benchmark.h>
 
 #include "bench_hash.h"
+#include "bench_aead.h"
 
 int main(int argc, char const **argv)
 {
@@ -14,6 +17,7 @@ int main(int argc, char const **argv)
   Benchmark::set_config(1, 1, 1, 1, 1, 1, 1, 1, 1);
 
   bench_hash(seed, samples);
+  bench_aead(seed, samples);
 
   return 0;
 }

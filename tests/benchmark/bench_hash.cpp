@@ -1,14 +1,15 @@
-#include <vector>
 #include <stdexcept>
 #include <sstream>
 #include <iostream>
 #include <fstream>
+#include <set>
 
 #include <time.h>
 #include <benchmark.h>
 
 extern "C" {
 #include <EverCrypt_Hash.h>
+#include <Hacl_Hash.h>
 }
 
 #ifdef HAVE_OPENSSL
@@ -18,18 +19,22 @@ extern "C" {
 
 class HashBenchmark : public Benchmark
 {
-  private:
-    static constexpr auto header = "Algorithm, Size [b], CPU Time (incl) [sec], CPU Time (excl) [sec], Avg Cycles/Hash, Min Cycles/Hash, Max Cycles/Hash, Avg Cycles/Byte";
-
   protected:
+    cycles cbegin, cend, cdiff, ctotal = 0, cmax = 0, cmin = -1;
+    size_t tbegin, tend, tdiff, ttotal = 0;
+    size_t toverall;
+
     uint8_t *src, *dst;
     size_t src_sz;
 
   public:
-    HashBenchmark(std::ostream & rs, size_t src_sz, int type, int N, std::string const & prefix) : Benchmark(rs), src(0), src_sz(src_sz)
+    static constexpr auto header = "Algorithm, Size [b], CPU Time (incl) [sec], CPU Time (excl) [sec], Avg Cycles/Hash, Min Cycles/Hash, Max Cycles/Hash, Avg Cycles/Byte";
+
+    HashBenchmark(size_t src_sz, int type, int N, std::string const & prefix) : Benchmark(), src(0), src_sz(src_sz)
     {
       if (src_sz == 0)
         throw std::logic_error("Need src_sz > 0");
+
       src = new uint8_t[src_sz];
       b_randomize((char*)src, src_sz);
 
@@ -39,7 +44,7 @@ class HashBenchmark : public Benchmark
       s << prefix << " ";
       s << (type==0 ? "MD5" : (type==1 ? "SHA1" : (type == 2 ? "SHA2\\_" : "Unknown")));
       if (type==2) s << N;
-      name = s.str();
+      set_name(s.str());
     }
 
     virtual ~HashBenchmark()
@@ -48,17 +53,12 @@ class HashBenchmark : public Benchmark
       src_sz = 0;
     }
 
-    static void print_header(std::ostream & rs) { rs << header << "\n"; }
-
     virtual void b_func() = 0;
 
-    virtual void run(unsigned int seed, size_t samples)
+    virtual void run()
     {
       srand(seed);
-
-      cycles cbegin, cend, cdiff, ctotal = 0, cmax = 0, cmin = -1;
-      size_t tbegin, tend, tdiff, ttotal = 0;
-      size_t toverall = clock();
+      toverall = clock();
 
       for (int i = 0; i < samples; i++)
       {
@@ -76,13 +76,17 @@ class HashBenchmark : public Benchmark
       }
 
       toverall = clock() - toverall;
+    }
 
+    virtual void report(std::ostream & rs)
+    {
       rs << "\"" << name.c_str() << "\""
         << "," << src_sz
         << "," << toverall/(double)CLOCKS_PER_SEC
         << "," << ttotal/(double)CLOCKS_PER_SEC
         << "," << ctotal/(double)samples
-        << "," << cmin << cmax
+        << "," << cmin
+        << "," << cmax
         << "," << (ctotal/(double)src_sz)/(double)samples
         << "\n";
     }
@@ -93,7 +97,7 @@ class HaclHash : public HashBenchmark
 {
   static void (*fun)(uint8_t *input, uint32_t input_len, uint8_t *dst);
   public:
-    HaclHash(std::ostream & rs, size_t src_sz) : HashBenchmark(rs, src_sz, type, N, "HaCl") {}
+    HaclHash(size_t src_sz) : HashBenchmark(src_sz, type, N, "HaCl") {}
     virtual ~HaclHash() {}
     virtual void b_func() { fun(src, src_sz, dst); }
 };
@@ -112,7 +116,7 @@ class EverCryptHash : public HashBenchmark
 {
   const static int id;
   public:
-    EverCryptHash(std::ostream & rs, size_t src_sz) : HashBenchmark(rs, src_sz, type, N, "EverCrypt") {}
+    EverCryptHash(size_t src_sz) : HashBenchmark(src_sz, type, N, "EverCrypt") {}
     virtual ~EverCryptHash() {}
     virtual void b_func() { EverCrypt_Hash_hash(id, dst, src, src_sz); }
 };
@@ -133,7 +137,7 @@ class OpenSSLHash : public HashBenchmark
   static unsigned char* (*fun)(const unsigned char *d, size_t n, unsigned char *md);
 
   public:
-    OpenSSLHash(std::ostream & rs, size_t src_sz) : HashBenchmark(rs, src_sz, type, N, "OpenSSL") {}
+    OpenSSLHash(size_t src_sz) : HashBenchmark(src_sz, type, N, "OpenSSL") {}
     virtual ~OpenSSLHash() {}
     virtual void b_func() { fun((unsigned char*)src, src_sz, (unsigned char*)dst); }
 };
@@ -152,44 +156,70 @@ int bench_hash(unsigned int seed, size_t num_samples)
 {
   size_t data_sizes[] = { 1024, 2048, 4096, 8192 };
 
-
-
   for (size_t ds: data_sizes)
   {
-    std::stringstream filename;
-    filename << "bench_hash_" << ds << ".csv";
-    std::cout << "-- " << filename.str() << "...\n";
-    std::ofstream rs(filename.str(), std::ios::out | std::ios::trunc);
+    std::set<Benchmark*> todo = {
+      new HaclMD5(ds),
+      new HaclSHA1(ds),
+      new HaclHash<2, 224>(ds),
+      new HaclHash<2, 256>(ds),
+      new HaclHash<2, 384>(ds),
+      new HaclHash<2, 512>(ds),
 
-    Benchmark::print_config(rs);
-    HashBenchmark::print_header(rs);
-
-    std::vector<HashBenchmark*> todo = {
-      new HaclMD5(rs, ds),
-      new HaclSHA1(rs, ds),
-      new HaclHash<2, 224>(rs, ds),
-      new HaclHash<2, 256>(rs, ds),
-      new HaclHash<2, 384>(rs, ds),
-      new HaclHash<2, 512>(rs, ds),
-
-      new EverCryptMD5(rs, ds),
-      new EverCryptSHA1(rs, ds),
-      new EverCryptHash<2, 224>(rs, ds),
-      new EverCryptHash<2, 256>(rs, ds),
-      new EverCryptHash<2, 384>(rs, ds),
-      new EverCryptHash<2, 512>(rs, ds),
+      new EverCryptMD5(ds),
+      new EverCryptSHA1(ds),
+      new EverCryptHash<2, 224>(ds),
+      new EverCryptHash<2, 256>(ds),
+      new EverCryptHash<2, 384>(ds),
+      new EverCryptHash<2, 512>(ds),
 
       #ifdef HAVE_OPENSSL
-      new OpenSSLMD5(rs, ds),
-      new OpenSSLSHA1(rs, ds),
-      new OpenSSLHash<2, 224>(rs, ds),
-      new OpenSSLHash<2, 256>(rs, ds),
-      new OpenSSLHash<2, 384>(rs, ds),
-      new OpenSSLHash<2, 512>(rs, ds),
+      new OpenSSLMD5(ds),
+      new OpenSSLSHA1(ds),
+      new OpenSSLHash<2, 224>(ds),
+      new OpenSSLHash<2, 256>(ds),
+      new OpenSSLHash<2, 384>(ds),
+      new OpenSSLHash<2, 512>(ds),
       #endif
-      };
+    };
 
-    for (Benchmark* b: todo)
-      b->run(seed, num_samples);
+    std::stringstream num_benchmarks;
+    num_benchmarks << todo.size();
+
+    std::stringstream filename;
+    filename << "bench_hash_" << ds << ".csv";
+
+    b_run(seed, num_samples, HashBenchmark::header, filename.str(), todo);
+
+
+    std::stringstream title;
+    title << "Hash performance on " << ds << " bytes of data";
+
+    std::stringstream plot_filename;
+    plot_filename << "bench_hash_" << ds << ".svg";
+
+    b_make_plot(seed, num_samples,
+                "config",
+                "svg",
+                title.str(),
+                "avg cycles/hash",
+                filename.str(),
+                plot_filename.str(),
+                "",
+                "   using 5:xticlabels(1) with boxes title columnheader, \
+                 '' using ($0-1):5:xticlabels(1):(sprintf(\"%0.2f\", $5)) with labels font \"Courier,8\" rotate by 90 left");
+
+    plot_filename.str("");
+    plot_filename << "bench_hash_" << ds << "_candlesticks.svg";
+
+    b_make_plot(seed, num_samples,
+                "config",
+                "svg",
+                title.str(),
+                "cycles/hash",
+                filename.str(),
+                plot_filename.str(),
+                "set xrange[0:" + num_benchmarks.str() + "+1]",
+                "using 0:5:6:7:5:xticlabels(1) with candlesticks whiskerbars .25");
   }
 }
