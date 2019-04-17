@@ -34,7 +34,7 @@ let encf #n g x y =
   r
 
 val encf_inj: #n:comp -> g:isg n -> x1:fe n -> y1:fenu n -> x2:fe n -> y2:fenu n -> Lemma
-  (encf g x1 y1 = encf g x2 y2 ==> x1 = y2 /\ x2 = y2)
+  (encf g x1 y1 = encf g x2 y2 ==> (x1 = x2 /\ y1 = y2))
 let encf_inj #n _ _ _ _= admit()
 
 // It is possible to get it checking every element of the preimage.
@@ -49,6 +49,8 @@ let is_res_class #n g w x = exists y. encf g x y = w
 val res_class: #n:comp -> g:isg n -> w:fen2u n -> x:fe n{is_res_class g w x}
 let res_class #n g w = fst (encf_inv g w)
 
+#set-options "--z3rlimit 50 --initial_fuel 5 --max_fuel 5 --initial_ifuel 2 --max_ifuel 2"
+
 val res_class_decomposition: #n:comp -> g1:isg n -> g2:isg n ->  w:fen2u n -> Lemma
   (ensures (res_class g1 w = res_class g2 w *% res_class g1 g2))
 let res_class_decomposition #n g1 g2 w =
@@ -57,39 +59,49 @@ let res_class_decomposition #n g1 g2 w =
   let (x3,y3) = encf_inv g1 g2 in
   let y2':fen2 n = to_fe y2 in
   let y3':fen2 n = to_fe y3 in
+  assert(encf g1 x1 y1 = w /\ encf g2 x2 y2 = w /\ encf g1 x3 y3 = g2);
 
   nat_times_nat_is_nat x3 x2;
   nat_times_nat_is_nat n x2;
 
-  fexp_mul2 (fexp g1 x3) (fexp y3' n) x2;
-  assert(fexp (fexp g1 x3 *% fexp y3' n) x2 = (fexp (fexp g1 x3) x2) *% (fexp (fexp y3' n) x2));
+  let l1 (): Lemma (fexp (fexp g1 x3 *% fexp y3' n) x2 =
+                    (fexp (fexp g1 x3) x2) *% (fexp (fexp y3' n) x2)) =
+    fexp_mul2 (fexp g1 x3) (fexp y3' n) x2 in
 
-  fexp_exp g1 x3 x2;
-  assert(fexp (fexp g1 x3) x2 = fexp g1 (x3 * x2));
+  let l2 (): Lemma (fexp (fexp g1 x3) x2 = fexp g1 (x3 * x2)) =
+    fexp_exp g1 x3 x2 in
 
-  fexp_exp y3' n x2;
-  assert(fexp (fexp y3' n) x2 = fexp y3' (n * x2));
+  let l3 (): Lemma (fexp (fexp y3' n) x2 = fexp y3' (n * x2)) =
+    fexp_exp y3' n x2 in
 
-  fexp_exp y3' x2 n;
-  assert(fexp y3' (n * x2) = fexp (fexp y3' x2) n);
+  let l4 (): Lemma (fexp y3' (n * x2) = fexp (fexp y3' x2) n) =
+    fexp_exp y3' x2 n in
 
-  fexp_mul2 (fexp y3' x2) y2' n;
-  assert(fexp (fexp y3' x2) n *% fexp y2' n = fexp (fexp y3' x2 *% y2') n);
+  let l5 (): Lemma (fexp (fexp y3' x2) n *% fexp y2' n = fexp (fexp y3' x2 *% y2') n) =
+    fexp_mul2 (fexp y3' x2) y2' n in
 
-  // not true, there should be lemmas capturing the notion of exponent
-  // elements being in the finite semiring.
-  assume(x3 * x2 < n);
-  assume(isunit (fexp y3 x2 *% y2));
-
-  assert(encf g1 (x3 * x2) (fexp y3 x2 *% y2) =
-        fexp g1 (x3 * x2) *% fexp (to_fe #(n*n) (fexp y3 x2 *% y2)) n);
-
+  calc (==) {
+    (fexp y3 x2 *% y2) *% (fexp (finv y3) x2 *% finv y2);
+  == { mul4_assoc (fexp y3 x2) y2 (fexp (finv y3) x2) (finv y2) }
+    (fexp y3 x2 *% fexp (finv y3) x2) *% (y2 *% finv y2);
+  == { fexp_mul2 y3 (finv y3) x2 }
+    (fexp (y3 *% finv y3) x2) *% (y2 *% finv y2);
+  == { }
+    (fexp 1 x2) *% 1;
+  == { }
+    1;
+  };
+  assert(isunit (fexp y3 x2 *% y2));
 
   // This property is easy to show, but it requires even more lemmas about
   // how exponentiation works.
-  assume(fexp y3' x2 *% y2' = to_fe (fexp y3 x2 *% y2));
+  let l6 (): Lemma (fexp y3' x2 *% y2' = to_fe (fexp y3 x2 *% y2)) =
+    admit () in
 
-  assert(encf g1 x1 y1 = w /\ encf g2 x2 y2 = w /\ encf g1 x3 y3 = g2);
+  let l7 (): Lemma (encf g1 (x3 *% x2) (fexp y3 x2 *% y2) =
+                    fexp g1 (x3 *% x2) *% fexp (to_fe #(n*n) (fexp y3 x2 *% y2)) n) =
+    () in
+
   calc (==) {
     encf g1 x1 y1;
   == { }
@@ -98,28 +110,36 @@ let res_class_decomposition #n g1 g2 w =
     encf (fexp g1 x3 *% fexp y3' n) x2 y2;
   == { }
     (fexp (fexp g1 x3 *% fexp y3' n) x2) *% fexp y2' n;
-  == { }
-    ((fexp (fexp g1 x3) x2) *% (fexp (fexp y3' n) x2)) *% fexp y2' n;
-  == { }
-    (fexp g1 (x3 * x2) *% fexp (fexp y3' n) x2) *% fexp y2' n;
-  == { }
-    (fexp g1 (x3 * x2)) *% ((fexp (fexp y3' n) x2) *% fexp y2' n);
-  == { }
-    (fexp g1 (x3 * x2)) *% (fexp y3' (n * x2) *% fexp y2' n);
-  == { }
-    (fexp g1 (x3 * x2)) *% (fexp (fexp y3' x2) n *% fexp y2' n);
-  == {  }
-    (fexp g1 (x3 * x2)) *% (fexp (fexp y3' x2 *% y2') n);
-  == {  }
-    (fexp g1 (x3 * x2)) *% (fexp (to_fe (fexp y3 x2 *% y2)) n);
-  == { }
-    encf g1 (x3 * x2) (fexp y3 x2 *% y2);
   };
 
-  encf_inj g1 x1 y1 (x3*x2) (fexp y3 x2 *% y2);
-  assert(x1 = x3 * x2);
-  assume(x1 = x2 *% x3)
+  //calc (==) {
+  //  (fexp (fexp g1 x3 *% fexp y3' n) x2) *% fexp y2' n;
+  //== { l1 () }
+  //  ((fexp (fexp g1 x3) x2) *% (fexp (fexp y3' n) x2)) *% fexp y2' n;
+  //== { l2 () }
+  //  (fexp g1 (x3 * x2) *% fexp (fexp y3' n) x2) *% fexp y2' n;
+  //== { }
+  //  (fexp g1 (x3 * x2)) *% ((fexp (fexp y3' n) x2) *% fexp y2' n);
+  //== { l3 () }
+  //  (fexp g1 (x3 * x2)) *% (fexp y3' (n * x2) *% fexp y2' n);
+  //== { l4 () }
+  //  (fexp g1 (x3 * x2)) *% (fexp (fexp y3' x2) n *% fexp y2' n);
+  //== { l5 () }
+  //  (fexp g1 (x3 * x2)) *% (fexp (fexp y3' x2 *% y2') n);
+  //== { l6 () }
+  //  (fexp g1 (x3 * x2)) *% (fexp (to_fe (fexp y3 x2 *% y2)) n);
+  //== { l7 () }
+  //  encf g1 (x3 * x2) (fexp y3 x2 *% y2);
+  //};
 
+  assume(encf g1 x1 y1 = encf g1 (x3 *% x2) (fexp y3 x2 *% y2));
+
+  encf_inj g1 x1 y1 (x3 *% x2) (fexp y3 x2 *% y2);
+
+  assert(x1 = x3 *% x2)
+
+
+#reset-options
 
 val bigl: #n:comp -> u:fen2 n{u > 0} -> r:fe n
 let bigl #n u = (u - 1) / n
