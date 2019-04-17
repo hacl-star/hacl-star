@@ -160,6 +160,7 @@ procedure{:instruction mk_taint_ins2(make_instr(I.ins_Adcx64), dst, src)}{:fast_
         dst == old(add_wrap64(add_wrap64(dst, src), (if cf(efl) then 1 else 0)));
         efl == update_cf(old(efl), old(dst + src + (if cf(efl) then 1 else 0)) >= pow2_64);
 {
+    assert old(add_wrap64(add_wrap64(dst, src), (if cf(efl) then 1 else 0)) == (dst + src + (if cf(efl) then 1 else 0)) % pow2_64); // REVIEW: shouldn't be necessary
 }
 
 #reset-options "--initial_fuel 5 --max_fuel 5 --max_ifuel 2 --z3rlimit 20"
