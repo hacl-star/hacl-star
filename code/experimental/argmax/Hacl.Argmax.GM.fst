@@ -1,6 +1,7 @@
 module Hacl.Argmax.GM
 
 open FStar.Mul
+open FStar.Math.Lemmas
 
 open Hacl.Argmax.Common
 
@@ -11,6 +12,9 @@ let is_sq #n a = exists s . b2t(sqr s = a)
 
 val is_nonsq: #n:big -> a:fe n -> Type0
 let is_nonsq #n a = forall s. b2t(sqr s <> a)
+
+val nonsq_is_nonzero: #n:big -> b:fe n{is_nonsq b} -> Lemma (b <> 0)
+let nonsq_is_nonzero #n b = ()
 
 // Legendre/Jacobi symbol
 val leg_symbol: #n:big -> a:fe n -> res:int
@@ -53,8 +57,8 @@ let can_split_mul_sq #n a b =
 
 val mul_sq_nonsq: #n:comp -> a:fe n{is_sq a} -> b:fe n{is_nonsq b} -> Lemma
   (ensures (is_nonsq (a *% b)))
-  [SMTPat (a *% b)]
 let mul_sq_nonsq #n a b =
+  nonsq_is_nonzero b;
   assert(~(exists s. b2t (sqr s = b)));
   assert((exists s. b2t (sqr s = b)) ==> false);
   can_split_mul_sq a b;
@@ -88,14 +92,12 @@ type ciphertext (n:comp) = c:fe n{c > 0 && leg_symbol c <> 0}
 
 val encrypt:
      p:public
-  -> r:fe (Public?.n p){sqr r <> 0}
+  -> r:fe (Public?.n p){sqr r > 0 /\ sqr r *% (Public?.y p) > 0}
   -> m:bool
   -> c:ciphertext (Public?.n p)
 let encrypt p r m =
-  let extra = if m then Public?.y p else 1 in
-  let c = sqr r *% extra in
-  assert(m <==> is_nonsq c);
-  c
+  let r' = sqr r in
+  if m then r' *% (Public?.y p) else r'
 
 val decrypt: s:secret -> c:ciphertext (Public?.n (s2p s)) -> m:bool
 let decrypt s c =
@@ -103,8 +105,12 @@ let decrypt s c =
   let v2 = leg_symbol #(Secret?.q s) (to_fe c) in
   v1 = 1 && v2 = 1
 
-val enc_dec_id: s:secret -> r:fe (Public?.n (s2p s)){sqr r <> 0} -> m:bool -> Lemma
-  (decrypt s (encrypt (s2p s) r m) = m)
+val enc_dec_id:
+     s:secret
+  -> r:fe (Public?.n (s2p s)){sqr r > 0 /\ sqr r *% (Secret?.y s) > 0}
+  -> m:bool
+  -> Lemma
+  (ensures (decrypt s (encrypt (s2p s) r m) = m))
 let enc_dec_id sec r m =
   let pub = s2p sec in
   let p = Secret?.p sec in
