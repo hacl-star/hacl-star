@@ -6,6 +6,7 @@ open FStar.List.Tot.Base
 open X64.Machine_s
 open X64.Bytes_Semantics_s
 module S = X64.Bytes_Semantics_s
+open X64.Instruction_s
 
 // syntax for map accesses, m.[key] and m.[key] <- value
 type map (key:eqtype) (value:Type) = Map.t key value
@@ -18,6 +19,7 @@ noeq type traceState = {
   memTaint: memTaint_t;
 }
 
+// TODO: To remove once taint_match_ins and update_taint_ins are completely implemented
 // Extract a list of destinations written to and a list of sources read from
 let extract_operands (i:ins) : (list operand * list operand) =
   match i with
@@ -30,9 +32,6 @@ let extract_operands (i:ins) : (list operand * list operand) =
   | S.Alloc _ | S.Dealloc _ -> [OReg Rsp], [OReg Rsp]
   | _ -> [], []
 
-(*
- * AR: do we need the two lists with ins? Can't we always call extract_operands where we need them?
- *)
 type tainted_ins : eqtype = 
   | TaintedIns: i:ins -> t:taint -> tainted_ins
 
@@ -80,65 +79,143 @@ let taint_match (o:operand) (t:taint) (memTaint:memTaint_t) (s:state) : bool =
     | OMem m -> match_n (eval_maddr m s) 8 memTaint t
     | OStack m -> t = Public // everything on the stack should be public
 
-let rec taint_match_list (o:list operand) (t:taint) (memTaint:memTaint_t) (s:state) : bool =
-  match o with
-  | [] -> true
-  | hd::tl -> (taint_match hd t memTaint s) && taint_match_list tl t memTaint s
-
-let update_taint (memTaint:memTaint_t) (dst:operand) (t:taint) (s:state) : memTaint_t =
-  match dst with
-    | OConst _ | OReg _ | OStack _ -> memTaint
-    | OMem m -> update_n (eval_maddr m s) 8 memTaint t
-
-let rec update_taint_list (memTaint:memTaint_t) (dst:list operand) (t:taint) (s:state)
-  : Tot (memTaint_t) (decreases %[dst])
-  = match dst with
-    | [] -> memTaint
-    | hd :: tl -> update_taint_list (update_taint memTaint hd t s) tl t s
-
 let taint_match128 (op:mov128_op) (t:taint) (memTaint:memTaint_t) (s:state) : bool =
   match op with
   | Mov128Xmm _ -> true
   | Mov128Stack _ -> t = Public // Everything on the stack should be public
   | Mov128Mem addr -> match_n (eval_maddr addr s) 16 memTaint t
 
+let taint_match_operand_explicit
+  (i:instr_operand_explicit)
+  (o:instr_operand_t i)
+  (t:taint)
+  (memTaint:memTaint_t)
+  (s:state) : bool =
+  match i with
+  | IOp64 -> taint_match o t memTaint s
+  | IOpXmm -> taint_match128 o t memTaint s
+
+let taint_match_operand_implicit
+  (i:instr_operand_implicit)
+  (t:taint)
+  (memTaint:memTaint_t)
+  (s:state) : bool =
+  match i with
+  | IOp64One o -> taint_match o t memTaint s
+  | IOpXmmOne o -> taint_match128 o t memTaint s
+  // We only check for memory operands in trusted semantics. Taint tracking for other operands will occur in the verified taint analysis
+  | IOpFlagsCf -> true
+  | IOpFlagsOf -> true
+
+let rec taint_match_args
+  (args:list instr_operand)
+  (oprs:instr_operands_t_args args)
+  (t:taint)
+  (memTaint:memTaint_t)
+  (s:state) : bool =
+  match args with
+  | [] -> true
+  | i::args ->
+    match i with
+    | IOpEx i -> let oprs = coerce oprs in
+                taint_match_operand_explicit i (fst oprs) t memTaint s &&
+                 taint_match_args args (snd oprs) t memTaint s
+    | IOpIm i -> taint_match_operand_implicit i t memTaint s &&
+                 taint_match_args args (coerce oprs) t memTaint s
+
+let rec taint_match_inouts 
+  (inouts:list instr_out) 
+  (args:list instr_operand)
+  (oprs:instr_operands_t inouts args)
+  (t:taint)
+  (memTaint:memTaint_t)
+  (s:state) : bool =
+  match inouts with
+  | [] -> taint_match_args args oprs t memTaint s
+  | (Out, i)::inouts -> 
+    let oprs =
+      match i with
+      | IOpEx i -> snd #(instr_operand_t i) (coerce oprs)
+      | IOpIm i -> coerce oprs
+    in taint_match_inouts inouts args oprs t memTaint s
+  | (InOut, i)::inouts -> 
+    let (v, oprs) =
+      match i with
+      | IOpEx i -> let oprs = coerce oprs in
+              (taint_match_operand_explicit i (fst oprs) t memTaint s), snd oprs
+      | IOpIm i -> taint_match_operand_implicit i t memTaint s, coerce oprs
+    in v && taint_match_inouts inouts args oprs t memTaint s
+
+let taint_match_ins (ins:ins) (t:taint) (memTaint:memTaint_t) (s:state) : bool =
+  match ins with
+  | Instr outs args _ _ oprs -> taint_match_inouts outs args oprs t memTaint s
+  // TODO: Implement this for the other instructions
+  | _ -> true
+
+let update_taint (memTaint:memTaint_t) (dst:operand) (t:taint) (s:state) : memTaint_t =
+  match dst with
+    | OConst _ | OReg _ | OStack _ -> memTaint
+    | OMem m -> update_n (eval_maddr m s) 8 memTaint t
+
 let update_taint128 op t (memTaint:memTaint_t) (s:state) : memTaint_t =
   match op with
   | Mov128Xmm _ | Mov128Stack _ -> memTaint
   | Mov128Mem addr -> update_n (eval_maddr addr s) 16 memTaint t
 
-// Special treatment for movdqu
-let taint_eval_movdqu (ins:tainted_ins{S.MOVDQU? ins.i}) (ts:traceState) : GTot traceState =
-  let t = ins.t in
-  let S.MOVDQU dst src = ins.i in
-  let s = run (check (taint_match128 src t ts.memTaint)) ts.state in
-  let memTaint = update_taint128 dst t ts.memTaint s in
-  let s = run (eval_ins (S.MOVDQU dst src)) s in
-  {state = s; trace = ts.trace; memTaint = memTaint}
+let update_taint_operand_explicit
+  (i:instr_operand_explicit)
+  (o:instr_operand_t i)
+  (t:taint)
+  (memTaint:memTaint_t)
+  (s:state) : memTaint_t =
+  match i with
+  | IOp64 -> update_taint memTaint o t s
+  | IOpXmm -> update_taint128 o t memTaint s
+
+let update_taint_operand_implicit
+  (i:instr_operand_implicit)
+  (t:taint)
+  (memTaint:memTaint_t)
+  (s:state) : memTaint_t =
+  match i with
+  | IOp64One o -> update_taint memTaint o t s
+  | IOpXmmOne o -> update_taint128 o t memTaint s
+  // We only check for memory operands in trusted semantics. Taint tracking for other operands will occur in the verified taint analysis
+  | IOpFlagsCf -> memTaint
+  | IOpFlagsOf -> memTaint
+
+let rec update_taint_outputs
+  (outs:list instr_out) 
+  (args:list instr_operand)
+  (oprs:instr_operands_t outs args)
+  (t:taint)
+  (memTaint:memTaint_t)
+  (s:state) : memTaint_t =
+  match outs with
+  | [] -> memTaint
+  | (_, i)::outs -> 
+    let memTaint, oprs =
+      match i with
+      | IOpEx i -> let oprs = coerce oprs in
+          update_taint_operand_explicit i (fst oprs) t memTaint s, snd oprs
+      | IOpIm i -> update_taint_operand_implicit i t memTaint s, coerce oprs
+   in
+   update_taint_outputs outs args oprs t memTaint s
+
+let update_taint_ins (ins:ins) (t:taint) (memTaint:memTaint_t) (s:state) : memTaint_t =
+  match ins with
+  | Instr outs args _ _ oprs -> update_taint_outputs outs args oprs t memTaint s
+  // TODO: Implement this for the other instructions
+  | _ -> memTaint
 
 let taint_eval_ins (ins:tainted_ins) (ts: traceState) : GTot traceState =
   let t = ins.t in
   let i = ins.i in
-  let dsts, srcs = extract_operands i in
-  
-  if S.MOVDQU? i then taint_eval_movdqu ins ts
-  else begin
-    let s = run (check (taint_match_list srcs t ts.memTaint)) ts.state in
-    let memTaint =
-//      if S.Mulx64? i then begin
-//        let S.Mulx64 dst_hi dst_lo src = i in
-//        let lo = FStar.UInt.mul_mod #64 (eval_reg Rdx s) (eval_operand src s) in
-//        let s' = update_operand_preserve_flags' dst_lo lo s in
-//        let memTaint = update_taint ts.memTaint dst_lo t s in
-//        update_taint memTaint dst_hi t s'
-//      end
-//      else
-        update_taint_list ts.memTaint dsts t s
-    in
-    (* Execute the instruction *)
-    let s = run (eval_ins i) s in
-    {state = s; trace = ts.trace; memTaint = memTaint}
-  end
+  let s = run (check (taint_match_ins i t ts.memTaint)) ts.state in
+  let memTaint = update_taint_ins i t ts.memTaint s in
+  // TODO: Update trace
+  let s = run (eval_ins i) s in
+  {state = s; trace = ts.trace; memTaint = memTaint}
 
 type tainted_ocmp : eqtype = | TaintedOCmp: o:ocmp -> ot:taint -> tainted_ocmp
 
