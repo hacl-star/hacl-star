@@ -67,22 +67,6 @@ let test_one_hash vec =
     pop_frame()
     end
 
-inline_for_extraction noextract
-let test_many #a (label: C.String.t)
-  (f: a -> Stack unit (fun _ -> True) (fun _ _ _ -> True)) (vec: L.lbuffer a):
-  Stack unit (fun _ -> True) (fun _ _ _ -> True)
-=
-  C.String.print label;
-  let L.LB len vs = vec in
-  let f (i:UInt32.t{FStar.UInt32.(0 <= v i /\ v i < v len)}): Stack unit
-    (requires fun h -> True)
-    (ensures fun h0 _ h1 -> True)
-  =
-    B.recall vs;
-    f vs.(i)
-  in
-  C.Loops.for 0ul len (fun _ _ -> True) f
-
 let test_hash = test_many !$"Hashes" test_one_hash
 
 /// HMAC

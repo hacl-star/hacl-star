@@ -32,7 +32,7 @@ friend Lib.IntTypes
 
 /// Poly1305
 
-let test_poly1305_one (v: Test.Vectors.Poly1305.vector): St unit =
+let test_poly1305_one (v: Test.Vectors.Poly1305.vector): Stack unit (fun _ -> True) (fun _ _ _ -> True) =
   let open Test.Vectors.Poly1305 in
   let Vector tag tag_len key key_len input input_len = v in
   push_frame ();
@@ -57,23 +57,12 @@ let test_poly1305_one (v: Test.Vectors.Poly1305.vector): St unit =
   end;
   pop_frame ()
 
-let rec test_poly1305_loop (i: U32.t): St unit =
-  let open Test.Vectors.Poly1305 in
-  if i `U32.gte` vectors_len then
-    ()
-  else begin
-    B.recall vectors;
-    assert (U32.v i < B.length vectors);
-    test_poly1305_one (B.index vectors i);
-    test_poly1305_loop (i `U32.add_mod` 1ul)
-  end
-
-let test_poly1305 () : St unit =
-  test_poly1305_loop 0ul
+let test_poly1305 () : Stack unit (fun _ -> True) (fun _ _ _ -> True) =
+  Test.NoHeap.test_many !$"poly1305" test_poly1305_one Test.Vectors.Poly1305.(LB vectors_len vectors)
 
 /// Curve25519
 
-let test_curve25519_one (v: Test.Vectors.Curve25519.vector): St unit =
+let test_curve25519_one (v: Test.Vectors.Curve25519.vector): Stack unit (fun _ -> True) (fun _ _ _ -> True) =
   let open Test.Vectors.Curve25519 in
   let Vector result result_len public public_len private_ private__len valid = v in
   push_frame ();
@@ -93,19 +82,8 @@ let test_curve25519_one (v: Test.Vectors.Curve25519.vector): St unit =
     TestLib.compare_and_print !$"Curve25519" result dst 32ul;
   pop_frame ()
 
-let rec test_curve25519_loop (i: U32.t): St unit =
-  let open Test.Vectors.Curve25519 in
-  if i `U32.gte` vectors_len then
-    ()
-  else begin
-    B.recall vectors;
-    assert (U32.v i < B.length vectors);
-    test_curve25519_one (B.index vectors i);
-    test_curve25519_loop (i `U32.add_mod` 1ul)
-  end
-
-let test_curve25519 (): St unit =
-  test_curve25519_loop 0ul
+let test_curve25519 () : Stack unit (fun _ -> True) (fun _ _ _ -> True) =
+  Test.NoHeap.test_many !$"curve25519" test_curve25519_one Test.Vectors.Curve25519.(LB vectors_len vectors)
 
 /// ChaCha20-Poly1305
 
@@ -117,7 +95,7 @@ type block_cipher_vector = block_cipher * vec8 * vec8 * vec8
 
 module HST = FStar.HyperStack.ST
 
-val test_aes_ecb: block_cipher_vector -> St unit
+val test_aes_ecb: block_cipher_vector -> Stack unit (fun _ -> True) (fun _ _ _ -> True)
 let test_aes_ecb v =
   let wh = AC.wants_hacl () in
   let wv = AC.wants_vale () in
@@ -137,7 +115,7 @@ let test_aes_ecb v =
       let s0 = TestLib.cpucycles () in
       let h0 = HST.get () in
       [@inline_let] // to isolate the "assume False" into a delimited scope
-      let f () : HST.ST unit (requires (fun h -> h == h0)) (ensures (fun _ _ h -> B.modifies (B.loc_buffer cipher') h0 h)) =
+      let f () : HST.Stack unit (requires (fun h -> h == h0)) (ensures (fun _ _ h -> B.modifies (B.loc_buffer cipher') h0 h)) =
         match block with
         | AES128 ->
           let k = assume False; EverCrypt.aes128_create key in
@@ -159,17 +137,8 @@ let test_aes_ecb v =
 
 /// Test drivers
 
-val test_cipher_loop: lbuffer block_cipher_vector -> St unit
-let rec test_cipher_loop (LB len vs) =
-  let open FStar.Integers in
-  B.recall vs;
-  if len > 0ul then
-    let v = vs.(0ul) in
-    test_aes_ecb v;
-    B.recall vs;
-    test_cipher_loop (LB (len - 1ul) (B.offset vs 1ul))
-
-let test_cipher () : St unit = test_cipher_loop block_cipher_vectors_low
+let test_cipher () : Stack unit (fun _ -> True) (fun _ _ _ -> True) =
+  Test.NoHeap.test_many !$"cipher" test_aes_ecb block_cipher_vectors_low
 
 let aead_key_length32 (al: Spec.AEAD.alg) : Tot (x: U32.t { U32.v x == Spec.AEAD.key_length al } ) =
   let open Spec.AEAD in
