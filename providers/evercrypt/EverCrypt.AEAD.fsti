@@ -114,6 +114,7 @@ let create_in_st (a: alg) =
           // Sanity
           is_supported_alg a /\
           not (B.g_is_null s) /\
+          invariant h1 s /\
 
           // Memory stuff
           B.(modifies (loc_buffer dst) h0 h1) /\

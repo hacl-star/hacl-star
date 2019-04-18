@@ -290,7 +290,6 @@ let test_aead_st alg key key_len iv iv_len aad aad_len tag tag_len plaintext pla
     | Success ->
       let h1 = HST.get () in
       let st = B.index st 0ul in
-      assume (EverCrypt.AEAD.invariant h1 st); // should be a postcondition of create_in
       assert (B.loc_disjoint (B.loc_buffer iv) (EverCrypt.AEAD.footprint h1 st));
       push_frame ();
       let plaintext'    = B.alloca 0uy plaintext_len in
