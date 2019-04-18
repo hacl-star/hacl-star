@@ -127,6 +127,7 @@ wasm:
 	EVERCRYPT_CONFIG=wasm $(MAKE) wasm-staged
 
 wasm-unstaged: dist/wasm/Makefile.basic
+	cd $(dir $<) && node main.js
 
 # Not reusing the -staged automatic target so as to export MIN_TEST
 min-test:
