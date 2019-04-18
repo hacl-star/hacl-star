@@ -334,43 +334,19 @@ val lemma_repeat_blocks_multi:
 val generate_blocks:
     #t:Type0
   -> len:size_nat
-  -> n:nat
-  -> a:(i:nat{i <= n} -> Type)
-  -> f:(i:nat{i < n} -> a i -> a (i + 1) & s:seq t{length s == len})
+  -> max:nat
+  -> n:nat{n <= max}
+  -> a:(i:nat{i <= max} -> Type)
+  -> f:(i:nat{i < max} -> a i -> a (i + 1) & s:seq t{length s == len})
   -> init:a 0 ->
   Tot (a n & s:seq t{ length s == n * len})
-
-val eq_generate_blocks0:
-    #t:Type0
-  -> len:size_nat
-  -> n:nat
-  -> a:(i:nat{i <= n} -> Type)
-  -> f:(i:nat{i < n} -> a i -> a (i + 1) & s:seq t{length s == len})
-  -> init:a 0 ->
-  Lemma (generate_blocks #t len 0 a f init ==
-	 (init,Seq.empty))
-
-
-val unfold_generate_blocks:
-    #t:Type0
-  -> len:size_nat
-  -> n:nat
-  -> a:(i:nat{i <= n} -> Type)
-  -> f:(i:nat{i < n} -> a i -> a (i + 1) & s:seq t{length s == len})
-  -> init:a 0
-  -> i:nat{i < n} ->
-  Lemma (generate_blocks #t len (i+1) a f init ==
-	   (let (acc,s) = generate_blocks #t len i a f init in
-	    let (acc',s') = f i acc in
-	    (acc',Seq.append s s')))
-
 
 
 (* The following functions allow us to bridge between unbounded and bounded sequences *)
 val map_blocks_multi:
     #a:Type0
   -> blocksize:size_nat{blocksize > 0}
-  -> n:size_nat{n > 0}
+  -> n:nat
   -> inp:seq a{length inp == n * blocksize}
   -> f:(i:nat{i < length inp / blocksize} -> lseq a blocksize -> lseq a blocksize) ->
   Tot (out:seq a {length out == length inp})
@@ -384,6 +360,33 @@ val map_blocks:
   -> f:(i:nat{i < length inp / blocksize} -> lseq a blocksize -> lseq a blocksize)
   -> g:(i:nat{i == length inp / blocksize} -> len:size_nat{len < blocksize} -> s:lseq a len -> lseq a len) ->
   Tot (out:seq a {length out == length inp})
+
+
+val eq_generate_blocks0:
+    #t:Type0
+  -> len:size_nat
+  -> n:nat
+  -> a:(i:nat{i <= n} -> Type)
+  -> f:(i:nat{i < n} -> a i -> a (i + 1) & s:seq t{length s == len})
+  -> init:a 0 ->
+  Lemma (generate_blocks #t len n 0 a f init ==
+	 (init,Seq.empty))
+
+
+val unfold_generate_blocks:
+    #t:Type0
+  -> len:size_nat
+  -> n:nat
+  -> a:(i:nat{i <= n} -> Type)
+  -> f:(i:nat{i < n} -> a i -> a (i + 1) & s:seq t{length s == len})
+  -> init:a 0
+  -> i:nat{i < n} ->
+  Lemma (generate_blocks #t len n (i+1) a f init ==
+	   (let (acc,s) = generate_blocks #t len n i a f init in
+	    let (acc',s') = f i acc in
+	    (acc',Seq.append s s')))
+
+
 
 (*
 #set-options "--z3rlimit 400 --max_ifuel 1"

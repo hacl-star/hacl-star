@@ -922,7 +922,6 @@ val fill_blocks:
       (requires fun h1 ->
       	(v i + 1) * v len <= max_size_t /\
         modifies (footprint (v i) |+| loc (gsub output 0ul (i *! len))) h0 h1)
-//        modifies (B.loc_union (footprint (v i)) (loc output)) h0 h1)
       (ensures  fun h1 _ h2 ->
         (let block = gsub output (i *! len) len in
         let s, b = spec h0 (v i) (refl h1 (v i)) in
@@ -933,9 +932,9 @@ val fill_blocks:
     (requires fun h -> h0 == h /\ live h output)
     (ensures  fun _ _ h1 ->
       B.modifies (B.loc_union (footprint (v n)) (loc output)) h0 h1 /\
-     (let s, o = Seq.generate_blocks (v len) (v n) a_spec (spec h0) (refl h0 0) in
+     (let s, o = Seq.generate_blocks (v len) (v n) (v n) a_spec (spec h0) (refl h0 0) in
       refl h1 (v n) == s /\
-      as_seq #_ #t h1 (gsub output (size 0) (n *! len)) == o))
+      as_seq #_ #t h1 output == o))
 
 (** Fill a buffer with a total function *)
 inline_for_extraction
@@ -1059,12 +1058,12 @@ val map_blocks_multi:
     #t:buftype
   -> #a:Type0
   -> h0: mem
-  -> len:size_t{v len > 0}
-  -> blocksize:size_t{v blocksize > 0 /\ v len % v blocksize == 0}
-  -> inp:lbuffer_t t a len
-  -> output:lbuffer a len
-  -> spec_f:(mem -> GTot (i:nat{i < v len / v blocksize} -> Seq.lseq a (v blocksize) -> Seq.lseq a (v blocksize)))
-  -> impl_f:(i:size_t{v i < v len / v blocksize} -> Stack unit
+  -> blocksize:size_t{v blocksize > 0} 
+  -> nb:size_t{v nb * v blocksize <= max_size_t}
+  -> inp:lbuffer_t t a (nb *! blocksize)
+  -> output:lbuffer a (nb *! blocksize)
+  -> spec_f:(mem -> GTot (i:nat{i < v nb} -> Seq.lseq a (v blocksize) -> Seq.lseq a (v blocksize)))
+  -> impl_f:(i:size_t{v i < v nb} -> Stack unit
       (requires fun h1 ->
 	(v i + 1) * v blocksize <= max_size_t /\
         modifies (loc (gsub output 0ul (i *! blocksize))) h0 h1)
@@ -1077,7 +1076,8 @@ val map_blocks_multi:
   -> Stack unit
     (requires fun h -> h0 == h /\ live h output /\ live h inp /\ eq_or_disjoint inp output)
     (ensures  fun _ _ h1 -> modifies1 output h0 h1 /\
-	as_seq h1 output == Seq.map_blocks_multi (v blocksize) (length inp / v blocksize) (as_seq h0 inp) (spec_f h0))
+	as_seq h1 output == Seq.map_blocks_multi (v blocksize) (v nb) 
+			    (as_seq h0 inp) (spec_f h0))
 
 inline_for_extraction noextract
 val map_blocks:
