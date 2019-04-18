@@ -337,7 +337,7 @@ let rec test_aead_loop (LB len vs) =
     let alg, (LB key_len key), (LB iv_len iv), (LB aad_len aad),
       (LB tag_len tag), (LB plaintext_len plaintext), (LB ciphertext_len ciphertext) = v
     in
-    assume (B.disjoint plaintext aad); // required by EverCrypt.AEAD.encrypt_st
+    assume (B.disjoint plaintext aad); // required by EverCrypt.AEAD.encrypt_st, and currently we cannot have the tactic automatically prove it
     test_aead_st (alg_of_alg alg) key key_len iv iv_len aad aad_len tag tag_len plaintext
       plaintext_len ciphertext ciphertext_len;
     B.recall vs;
@@ -364,7 +364,6 @@ let rec test_chacha20poly1305_loop (i: U32.t): St unit =
       B.recall output;
       let tag = B.sub output input_len 16ul in
       let output = B.sub output 0ul input_len in
-      assume (B.disjoint input aad); // required by EverCrypt.AEAD.encrypt_st
       test_aead_st Spec.AEAD.CHACHA20_POLY1305 key key_len nonce nonce_len aad aad_len tag 16ul
         input input_len output input_len
     end;
@@ -384,7 +383,6 @@ let rec test_aes128_gcm_loop (i: U32.t): St unit =
     let Vector output output_len tag tag_len input input_len aad aad_len nonce nonce_len key key_len =
       vectors.(i)
     in
-    assume (B.disjoint input aad); // required by EverCrypt.AEAD.encrypt_st
     test_aead_st Spec.AEAD.AES128_GCM key key_len nonce nonce_len aad aad_len tag tag_len
       input input_len output output_len;
     test_aes128_gcm_loop (i `U32.add_mod` 1ul)
