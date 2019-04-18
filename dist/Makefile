@@ -37,6 +37,7 @@ else ifeq ($(OS),Windows_NT)
   AR		= $(MARCH)-w64-mingw32-ar
   VARIANT	= -mingw
   SO		= dll
+  CFLAGS	+= -fno-asynchronous-unwind-tables
 endif
 
 # 2. Parameters we want to compile with, for the generated Makefile
