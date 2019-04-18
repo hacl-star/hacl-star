@@ -3,6 +3,7 @@ module Hacl.Argmax.Paillier
 open FStar.Calc
 open FStar.Mul
 open FStar.Math.Lemmas
+open FStar.Tactics
 
 open Hacl.Argmax.Common
 
@@ -36,10 +37,14 @@ let nplus1inbase #n = admit()
 val encf: #n:comp -> g:isg n -> x:fe n -> y:fenu n -> fen2 n
 let encf #n g x y = fexp g x *% fexp (to_fe y) n
 
+//assert(true) by (dump "");
 val encf_unit: #n:comp -> g:isg n -> x:fe n -> y:fenu n -> Lemma
   (isunit (encf #n g x y))
 let encf_unit #n g x y =
-  if x = 0 then fexp_one1 g else g_pow_isunit g x;
+  if x = 0
+    then (fexp_one1 g; assert(isunit (fexp g x)))
+    else (g_pow_isunit g x; assert(isunit (fexp g x)));
+  assert(isunit (fexp g x));
 
   let y' = to_fe #(n*n) y in
   isunit_in_nsquare #n y;
@@ -236,7 +241,7 @@ let s2p sec =
 
 (* Enc/Dec *)
 
-type ciphertext (n:comp) = c:fen2u n
+type ciphertext (n:comp) = c:fen2 n
 
 // TODO get rid of assumes in the enc/dec, move it to lemmas
 
@@ -245,9 +250,7 @@ val encrypt:
   -> r:fenu (Public?.n p)
   -> m:fe (Public?.n p)
   -> ciphertext (Public?.n p)
-let encrypt pub r m =
-  encf_unit #(Public?.n pub) (Public?.g pub) m r;
-  encf (Public?.g pub) m r
+let encrypt pub r m = encf (Public?.g pub) m r
 
 val decrypt:
      s:secret
@@ -263,9 +266,7 @@ let decrypt sec c =
   let l1:fe n = bigl (fexp c lambda) in
   let l2:fe n = bigl (fexp g lambda) in
 
-  assume(isunit #n l2);
-  // TODO get rid of it, replace with "incorrect" finv
-  let m = l1 *% finv l2 in
+  let m = l1 *% finv0 l2 in
   m
 
 (* Functional correctness *)
@@ -274,6 +275,7 @@ val decrypts_into_res_class:
      s:secret
   -> c:ciphertext (Public?.n (s2p s))
   -> Lemma
+     (requires (isunit c))
      (ensures (decrypt s c = res_class (Secret?.g s) c))
 let decrypts_into_res_class sec c =
   let p = Secret?.p sec in
@@ -285,7 +287,6 @@ let decrypts_into_res_class sec c =
   let r_c = res_class #n np1 c in
   let r_g = res_class #n np1 g in
   let r_z = res_class #n g c in
-
 
   assume(fexp c lambda > 0);
   let l1:fe n = bigl (fexp c lambda) in
