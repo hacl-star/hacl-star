@@ -66,6 +66,10 @@ ifeq (,$(wildcard $(VALE_HOME)/bin/vale.exe))
 endif
 endif
 
+ifneq ($(shell cat $(VALE_HOME)/bin/.vale_version | tr -d '\r'),$(shell cat vale/.vale_version | tr -d '\r'))
+  $(error this repository wants Vale $(shell cat vale/.vale_version) but in $$VALE_HOME I found $(shell cat $(VALE_HOME)/bin/.vale_version))
+endif
+
 # Backwards-compat, remove
 ifneq (,$(MLCRYPTO_HOME))
 OPENSSL_HOME 	:= $(MLCRYPTO_HOME)/openssl

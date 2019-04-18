@@ -26,7 +26,6 @@
 
 #include "timing.h"
 #include "EverCrypt.h"
-#include "EverCrypt_AutoConfig.h"
 
 #define HEADER_FORMAT   "  %-24s :  "
 
