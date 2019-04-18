@@ -33,6 +33,7 @@ else ifeq ($(UNAME),Linux)
   SO 		= so
   LDFLAGS	+= -Xlinker -z -Xlinker noexecstack -Xlinker --unresolved-symbols=report-all
 else ifeq ($(OS),Windows_NT)
+  CFLAGS        += -fno-asynchronous-unwind-tables
   CC		= $(MARCH)-w64-mingw32-gcc
   AR		= $(MARCH)-w64-mingw32-ar
   VARIANT	= -mingw
