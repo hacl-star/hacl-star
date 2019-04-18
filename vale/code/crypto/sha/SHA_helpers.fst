@@ -414,6 +414,7 @@ let lemma_add_wrap_quad32_is_add_mod_quad32 (q0 q1:quad32) :
   FStar.Classical.forall_intro_2 lemma_add_wrap_is_add_mod;
   ()
 
+#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 30"
 // Top-level proof for the SHA256_msg1 instruction
 let lemma_sha256_msg1 (dst src:quad32) (t:counter) (block:block_w) : Lemma
   (requires 16 <= t /\ t < size_k_w(SHA2_256) /\
@@ -428,6 +429,7 @@ let lemma_sha256_msg1 (dst src:quad32) (t:counter) (block:block_w) : Lemma
   lemma_add_wrap_quad32_is_add_mod_quad32 init sigma0_out;
   reveal_opaque ws_partial_def;
   ()
+#reset-options "--max_fuel 0 --max_ifuel 0"
   
 
 let lemma_add_mod_ws_rearrangement (a b c d:UInt32.t) :
@@ -716,26 +718,98 @@ let update_multi_one (h:hash256) (b:bytes_blocks {length b = block_length}) : Le
 
 #pop-options
 
-(*+ TODO +*)
+#reset-options "--max_fuel 1 --max_ifuel 0 --z3cliopt smt.arith.nl=true"
+let lemma_be_to_n_4 (s:seq4 nat8) : Lemma
+  (FStar.Kremlin.Endianness.be_to_n (seq_nat8_to_seq_uint8 s) == be_bytes_to_nat32 s)
+  =
+  let open FStar.Mul in
+  let open Words.Four_s in
+  assert (pow2 8 = 0x100);
+  assert (pow2 16 = 0x10000);
+  assert_norm (pow2 24 = 0x1000000);
+  let x = seq_nat8_to_seq_uint8 s in
+  let f = FStar.Kremlin.Endianness.be_to_n in
+  calc (==) {
+    f x;
+    == {}
+    FStar.UInt8.v (last x) + pow2 8 * f (slice x 0 3);
+    == {}
+    index s 3 + pow2 8 * f (slice x 0 3);
+    == {}
+    index s 3 + pow2 8 * index s 2 + pow2 16 * f (slice x 0 2);
+    == {}
+    index s 3 + pow2 8 * index s 2 + pow2 16 * index s 1 + pow2 24 * f (slice x 0 1);
+    == {}
+    index s 3 + pow2 8 * index s 2 + pow2 16 * index s 1 + pow2 24 * index s 0 + pow2 32 * f (slice x 0 0);
+    == {}
+    index s 3 + pow2 8 * index s 2 + pow2 16 * index s 1 + pow2 24 * index s 0;
+    == {}
+    four_to_nat_unfold 8 (seq_to_four_BE s);
+    == {}
+    be_bytes_to_nat32 s;
+  }
+#reset-options "--max_fuel 0 --max_ifuel 0"
+
 let lemma_endian_relation (quads qs:seq quad32) (input2:seq UInt8.t) : Lemma
   (requires length qs == 4 /\ length input2 == 64 /\
             qs == reverse_bytes_nat32_quad32_seq quads /\
             input2 == seq_nat8_to_seq_uint8 (le_seq_quad32_to_bytes quads))
   (ensures  quads_to_block qs == words_of_bytes SHA2_256 block_word_length input2)
   =
-  // calc {
-  //   quads_to_block (reverse_bytes_nat32_quad32_seq quads)
-  //   seq_nat32_to_seq_U32 (seq_four_to_seq_LE (reverse_bytes_nat32_quad32_seq quads))
-  //   seq_nat32_to_seq_U32 (seq_four_to_seq_LE (four_map reverse_bytes_nat32 q))
-  reveal_opaque reverse_bytes_nat32_def;
-  //   seq_nat32_to_seq_U32 (seq_four_to_seq_LE (four_map (fun n -> be_bytes_to_nat32 (reverse_seq (nat32_to_be_bytes n))) q))
-
-  //   words_of_bytes SHA2_256 16 (seq_nat8_to_seq_U8 (seq_nat32_to_seq_nat8_LE (seq_four_to_seq_LE b)))
-  reveal_opaque le_seq_quad32_to_bytes_def;
-  //   words_of_bytes SHA2_256 16 (seq_nat8_to_seq_U8 (le_seq_quad32_to_bytes quads))
-  //   words_of_bytes SHA2_256 size__w (seq_nat8_to_seq_U8 (le_seq_quad32_to_bytes quads))
-  // }
-  admit()
+  let fi (i:nat{i < length (quads_to_block qs)}) : Lemma
+    ((quads_to_block qs).[i] == (words_of_bytes SHA2_256 block_word_length input2).[i])
+    =
+    let open FStar.Mul in
+    let open Words.Four_s in
+    let open Collections.Seqs_s in
+    let ni = (seq_four_to_seq_LE quads).[i] in
+    let b = slice input2 (4 * i) (4 * i + 4) in
+    FStar.Kremlin.Endianness.lemma_be_to_n_is_bounded b;
+    calc (==) {
+      b;
+      == {}
+      slice input2 (4 * i) (4 * i + 4);
+      == {}
+      slice (seq_nat8_to_seq_uint8 (le_seq_quad32_to_bytes quads)) (4 * i) (4 * i + 4);
+      == {Opaque_s.reveal_opaque le_seq_quad32_to_bytes_def}
+      slice (seq_nat8_to_seq_uint8 (seq_nat32_to_seq_nat8_LE (seq_four_to_seq_LE quads))) (4 * i) (4 * i + 4);
+      equal {}
+      seq_nat8_to_seq_uint8 (slice (seq_nat32_to_seq_nat8_LE (seq_four_to_seq_LE quads)) (4 * i) (4 * i + 4));
+      == {}
+      seq_nat8_to_seq_uint8 (slice (seq_four_to_seq_LE (seq_map (nat_to_four 8) (seq_four_to_seq_LE quads))) (4 * i) (4 * i + 4));
+      == {slice_commutes_seq_four_to_seq_LE (seq_map (nat_to_four 8) (seq_four_to_seq_LE quads)) i (i + 1)}
+      seq_nat8_to_seq_uint8 (seq_four_to_seq_LE (slice (seq_map (nat_to_four 8) (seq_four_to_seq_LE quads)) i (i + 1)));
+      equal {}
+      seq_nat8_to_seq_uint8 (four_to_seq_LE (nat_to_four 8 (seq_four_to_seq_LE quads).[i]));
+    };
+    calc (==) {
+      (words_of_bytes SHA2_256 block_word_length input2).[i];
+      == {}
+      (FStar.Kremlin.Endianness.seq_uint32_of_be block_word_length input2).[i];
+      == {FStar.Kremlin.Endianness.offset_uint32_be input2 block_word_length i}
+      FStar.Kremlin.Endianness.uint32_of_be b;
+      == {}
+      UInt32.uint_to_t (FStar.Kremlin.Endianness.be_to_n b);
+      == {} // see calc above
+      UInt32.uint_to_t (FStar.Kremlin.Endianness.be_to_n (seq_nat8_to_seq_uint8 (four_to_seq_LE (nat_to_four 8 ni))));
+      == {}
+      nat32_to_word (FStar.Kremlin.Endianness.be_to_n (seq_nat8_to_seq_uint8 (four_to_seq_LE (nat_to_four 8 ni))));
+      == {lemma_be_to_n_4 (four_to_seq_LE (nat_to_four 8 ni))}
+      nat32_to_word (be_bytes_to_nat32 (four_to_seq_LE (nat_to_four 8 ni)));
+      == {}
+      nat32_to_word (be_bytes_to_nat32 (reverse_seq (nat32_to_be_bytes ni)));
+      == {Opaque_s.reveal_opaque reverse_bytes_nat32_def}
+      nat32_to_word (reverse_bytes_nat32 ni);
+      == {}
+      nat32_to_word (reverse_bytes_nat32 (seq_four_to_seq_LE quads).[i]);
+      == {}
+      nat32_to_word (seq_four_to_seq_LE qs).[i];
+      == {}
+      (quads_to_block qs).[i];
+    }
+    in
+  FStar.Classical.forall_intro fi;
+  assert (equal (quads_to_block qs) (words_of_bytes SHA2_256 block_word_length input2))
 
 let lemma_mod_transform (quads:seq quad32) : Lemma
   (requires length quads % 4 == 0)
