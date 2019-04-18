@@ -16,7 +16,7 @@ let xmm_taint (ts:taintState) (x:xmm) = ts.xmmTaint x
 let set_xmm_taint (ts:taintState) (xmm_v:xmm) (taint:taint) : taintState =
   TaintState ts.regTaint ts.flagsTaint ts.cfFlagsTaint 
     (FunctionalExtensionality.on xmm (fun x -> if x = xmm_v then taint else ts.xmmTaint x))
-
+(*
 #reset-options "--initial_ifuel 2 --max_ifuel 2 --initial_fuel 4 --max_fuel 4 --z3rlimit 80"
 
 val check_if_pxor_leakage_free: (ins:tainted_ins{Pxor? ins.i}) -> (ts:taintState) -> (res:(bool*taintState){let b, ts' = res in b2t b ==>
@@ -282,12 +282,13 @@ let lemma_movdqu_same_public (ts:taintState) (ins:tainted_ins{MOVDQU? ins.i}) (s
 let check_if_movdqu_leakage_free ins ts =
   Classical.forall_intro_3 (lemma_movdqu_same_public ts ins);
   check_if_movdqu_leakage_free_aux ins ts
-
-let check_if_xmm_ins_consumes_fixed_time ins ts =
-  match ins.i with
+*)
+let check_if_xmm_ins_consumes_fixed_time ins ts = false, ts
+(*  match ins.i with
     | Ins_ioXmm _ _ -> check_if_pslld_leakage_free ins ts
     | Ins_Xmm_Xmm _ _ _ -> check_if_pshufd_leakage_free ins ts
     | Ins_ioXmm_Xmm _ _ _ -> check_if_paddd_leakage_free ins ts
     | Pxor dst src -> check_if_pxor_leakage_free ins ts
     | MOVDQU dst src -> check_if_movdqu_leakage_free ins ts
     | _ -> (false, ts)
+*)

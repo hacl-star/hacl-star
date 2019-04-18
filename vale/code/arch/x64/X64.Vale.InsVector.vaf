@@ -63,6 +63,21 @@ let lemma_valid_taint_match o s = match o with
     in Classical.forall_intro_2 (fun b i -> (fun b -> Classical.move_requires (aux b)) b i)
   | _ -> ()
 
+val lemma_valid_taint_match128: (t:tainted_operand128) -> (s:state) -> Lemma
+  (requires valid_operand128 t s)
+  (ensures TS.taint_match128 (t_op_to_op128 t) (get_taint128 t) s.memTaint (state_to_S s).TS.state)
+  [SMTPat (TS.taint_match128 (t_op_to_op128 t) (get_taint128 t) s.memTaint (state_to_S s).TS.state)]
+
+let lemma_valid_taint_match128 o s = match o with
+  | TMem128 m t ->
+    let addr = eval_maddr m s in
+    let aux (b:buffer128) (i:int) : Lemma
+      (requires valid_maddr128 addr s.mem s.memTaint b i t)
+      (ensures TS.taint_match128 (t_op_to_op128 o) (get_taint128 o) s.memTaint (state_to_S s).TS.state) = 
+      X64.Memory.lemma_valid_taint128 b s.memTaint s.mem i t
+    in Classical.forall_intro_2 (fun b i -> (fun b -> Classical.move_requires (aux b)) b i)
+  | _ -> ()
+
 #endverbatim
 
 #reset-options "--initial_fuel 2 --max_fuel 4 --max_ifuel 2 --z3rlimit 50"
@@ -120,9 +135,9 @@ procedure{:instruction Ins(TS.TaintedIns(tuple(S.Pxor(dst, src)), Public))}{:qui
 {
 }
 
-#reset-options "--initial_fuel 1 --max_fuel 1 --max_ifuel 1 --z3rlimit 50"
+#reset-options "--initial_fuel 4 --max_fuel 4 --max_ifuel 2 --z3rlimit 50"
 
-procedure{:instruction mk_ins(make_instr(I.ins_Pand, Mov128Xmm(dst), t_op_to_op128(src)), Public)}{:quick exportOnly}{:public}
+procedure{:instruction mk_taint128_ins2(make_instr(I.ins_Pand), TReg128(dst), src)}{:quick exportOnly}{:public}
     Pand(inout dst:xmm, src:opr128)
     ensures
         dst == four_map2((lambda di:nat32, si:nat32 :: iand32(di, si)), old(dst), old(src));

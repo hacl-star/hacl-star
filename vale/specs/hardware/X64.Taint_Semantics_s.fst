@@ -73,18 +73,21 @@ private let rec update_n (addr:int) (n:nat) (memTaint:memTaint_t) (t:taint)
 
 
 (* Checks if the taint of an operand matches the ins annotation *)
+[@instr_attr]
 let taint_match (o:operand) (t:taint) (memTaint:memTaint_t) (s:state) : bool =
   match o with
     | OConst _ | OReg _ -> true
     | OMem m -> match_n (eval_maddr m s) 8 memTaint t
     | OStack m -> t = Public // everything on the stack should be public
 
+[@instr_attr]
 let taint_match128 (op:mov128_op) (t:taint) (memTaint:memTaint_t) (s:state) : bool =
   match op with
   | Mov128Xmm _ -> true
   | Mov128Stack _ -> t = Public // Everything on the stack should be public
   | Mov128Mem addr -> match_n (eval_maddr addr s) 16 memTaint t
 
+[@instr_attr]
 let taint_match_operand_explicit
   (i:instr_operand_explicit)
   (o:instr_operand_t i)
@@ -95,6 +98,7 @@ let taint_match_operand_explicit
   | IOp64 -> taint_match o t memTaint s
   | IOpXmm -> taint_match128 o t memTaint s
 
+[@instr_attr]
 let taint_match_operand_implicit
   (i:instr_operand_implicit)
   (t:taint)
@@ -107,6 +111,7 @@ let taint_match_operand_implicit
   | IOpFlagsCf -> true
   | IOpFlagsOf -> true
 
+[@instr_attr]
 let rec taint_match_args
   (args:list instr_operand)
   (oprs:instr_operands_t_args args)
@@ -123,6 +128,7 @@ let rec taint_match_args
     | IOpIm i -> taint_match_operand_implicit i t memTaint s &&
                  taint_match_args args (coerce oprs) t memTaint s
 
+[@instr_attr]
 let rec taint_match_inouts 
   (inouts:list instr_out) 
   (args:list instr_operand)
@@ -146,22 +152,26 @@ let rec taint_match_inouts
       | IOpIm i -> taint_match_operand_implicit i t memTaint s, coerce oprs
     in v && taint_match_inouts inouts args oprs t memTaint s
 
+[@instr_attr]
 let taint_match_ins (ins:ins) (t:taint) (memTaint:memTaint_t) (s:state) : bool =
   match ins with
   | Instr outs args _ _ oprs -> taint_match_inouts outs args oprs t memTaint s
   // TODO: Implement this for the other instructions
   | _ -> true
 
+[@instr_attr]
 let update_taint (memTaint:memTaint_t) (dst:operand) (t:taint) (s:state) : memTaint_t =
   match dst with
     | OConst _ | OReg _ | OStack _ -> memTaint
     | OMem m -> update_n (eval_maddr m s) 8 memTaint t
 
+[@instr_attr]
 let update_taint128 op t (memTaint:memTaint_t) (s:state) : memTaint_t =
   match op with
   | Mov128Xmm _ | Mov128Stack _ -> memTaint
   | Mov128Mem addr -> update_n (eval_maddr addr s) 16 memTaint t
 
+[@instr_attr]
 let update_taint_operand_explicit
   (i:instr_operand_explicit)
   (o:instr_operand_t i)
@@ -172,6 +182,7 @@ let update_taint_operand_explicit
   | IOp64 -> update_taint memTaint o t s
   | IOpXmm -> update_taint128 o t memTaint s
 
+[@instr_attr]
 let update_taint_operand_implicit
   (i:instr_operand_implicit)
   (t:taint)
@@ -184,6 +195,7 @@ let update_taint_operand_implicit
   | IOpFlagsCf -> memTaint
   | IOpFlagsOf -> memTaint
 
+[@instr_attr]
 let rec update_taint_outputs
   (outs:list instr_out) 
   (args:list instr_operand)
@@ -202,6 +214,7 @@ let rec update_taint_outputs
    in
    update_taint_outputs outs args oprs t memTaint s
 
+[@instr_attr]
 let update_taint_ins (ins:ins) (t:taint) (memTaint:memTaint_t) (s:state) : memTaint_t =
   match ins with
   | Instr outs args _ _ oprs -> update_taint_outputs outs args oprs t memTaint s

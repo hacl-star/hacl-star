@@ -70,9 +70,19 @@ let get_taint (t:tainted_operand) : taint =
   | TMem _ t -> t
   | TStack _ -> Public
 
+let get_taint128 (t:tainted_operand128) : taint =
+  match t with
+  | TReg128 _ -> Public
+  | TMem128 _ t -> t
+
 let extract_taint (o1 o2:tainted_operand) : taint =
   if TMem? o1 then TMem?.t o1
   else if TMem? o2 then TMem?.t o2
+  else Public
+
+let extract_taint128 (o1 o2:tainted_operand128) : taint =
+  if TMem128? o1 then TMem128?.t o1
+  else if TMem128? o2 then TMem128?.t o2
   else Public
 
 let extract_taint3 (o1 o2 o3:tainted_operand) : taint =

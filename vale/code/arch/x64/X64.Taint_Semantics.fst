@@ -44,3 +44,10 @@ let mk_taint_ins3 (i:operand->operand->operand->S.ins)
   Ins (TaintedIns (i o1_basic o2_basic o3_basic)
                   (extract_taint3 o1 o2 o3))
 
+let mk_taint128_ins2 (i:mov128_op->mov128_op->S.ins)
+                     (o1 o2:va_operand128)
+                    : tainted_code
+  =
+  let o1_basic = t_op_to_op128 o1 in
+  let o2_basic = t_op_to_op128 o2 in
+  Ins (TaintedIns (i o1_basic o2_basic) (extract_taint128 o1 o2))

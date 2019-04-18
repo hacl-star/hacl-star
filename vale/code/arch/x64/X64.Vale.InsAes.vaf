@@ -45,7 +45,7 @@ module P = X64.Print_s
 
 friend X64.Vale.StateLemmas
 friend X64.Vale.Decls
-#reset-options "--initial_fuel 2 --max_fuel 2 --z3rlimit 20"
+#reset-options "--initial_fuel 4 --max_fuel 4 --z3rlimit 20"
 #endverbatim
 
 procedure{:quick exportOnly}{:public}

@@ -88,7 +88,7 @@ let check_if_ins_consumes_fixed_time ins ts =
   b, ts'
   )
 *)
-
+(*
 let frame_update_heap_x (ptr:int) (j:int) (v:nat64) (mem:S.heap) : Lemma
   (requires j < ptr \/ j >= ptr + 8)
   (ensures (let new_mem = S.update_heap64 ptr v mem in
@@ -509,9 +509,9 @@ let lemma_pop_same_public (ts:taintState) (ins:tainted_ins{S.Pop? ins.i}) (s1:tr
 val lemma_ins_same_public: (ts:taintState) -> (ins:tainted_ins{not (is_xmm_ins ins)}) -> (s1:traceState) -> (s2:traceState) -> (fuel:nat) -> Lemma
 (let b, ts' = check_if_ins_consumes_fixed_time ins ts in
   (b2t b ==> isExplicitLeakageFreeGivenStates (Ins ins) fuel ts ts' s1 s2))
-
-let lemma_ins_same_public ts ins s1 s2 fuel =
-  match ins.i with
+*)
+let lemma_ins_same_public ts ins s1 s2 fuel = ()
+(*  match ins.i with
   | S.Ins_64_64_preserve _ _ _ -> lemma_mov_same_public ts ins s1 s2 fuel
   | S.Ins_io64_64 _ _ _ -> lemma_and_same_public ts ins s1 s2 fuel
   | S.Ins_io64_64_cf _ _ _ -> lemma_addcarry_same_public ts ins s1 s2 fuel
@@ -520,7 +520,7 @@ let lemma_ins_same_public ts ins s1 s2 fuel =
   | S.Pop _ -> lemma_pop_same_public ts ins s1 s2 fuel
   | S.Alloc _ -> ()
   | S.Dealloc _ -> ()
-
+*)
 let lemma_ins_leakage_free ts ins =
   let b, ts' = check_if_ins_consumes_fixed_time ins ts in
   let p s1 s2 fuel = b2t b ==> isExplicitLeakageFreeGivenStates (Ins ins) fuel ts ts' s1 s2 in
