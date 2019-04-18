@@ -1,12 +1,14 @@
 project(benchmark LANGUAGES C CXX ASM)
-cmake_minimum_required(VERSION 3.12)
+cmake_minimum_required(VERSION 3.6)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+set(CMAKE_LEGACY_CYGWIN_WIN32 0) # Remove when CMake >= 3.8.4 is required
 
 option(USE_HACL "Use HaCl." ON)
 option(USE_VALE "Use Vale." ON)
 option(USE_BCRYPT "Use BCrypt." OFF)
 option(USE_OPENSSL "Use OpenSSL." ON)
+option(USE_RFC7748 "Use the RFC 7748 reference implementation" ON)
 
 add_subdirectory(libevercrypt)
 
@@ -17,18 +19,25 @@ target_link_libraries(benchmark PRIVATE evercrypt)
 add_executable(runbenchmark
   runbenchmark.cpp
   bench_hash.cpp
-  bench_aead.cpp)
+  bench_aead.cpp
+  bench_curve25519.cpp
+  bench_ed25519.cpp)
 target_include_directories(runbenchmark PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(runbenchmark PRIVATE benchmark evercrypt)
 
+if("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
+  target_compile_definitions(benchmark PRIVATE _DEBUG)
+  target_compile_definitions(runbenchmark PRIVATE _DEBUG)
+endif()
+
 if(USE_HACL)
-message("-- Using HaCl (via EverCrypt)")
-target_compile_definitions(runbenchmark PRIVATE HAVE_HACL)
+  message("-- Using HaCl (via EverCrypt)")
+  target_compile_definitions(runbenchmark PRIVATE HAVE_HACL)
 endif(USE_HACL)
 
 if(USE_VALE)
-message("-- Using Vale (via EverCrypt)")
-target_compile_definitions(runbenchmark PRIVATE HAVE_VALE)
+  message("-- Using Vale (via EverCrypt)")
+  target_compile_definitions(runbenchmark PRIVATE HAVE_VALE)
 endif(USE_VALE)
 
 if(USE_BCRYPT)
@@ -55,3 +64,10 @@ if(USE_OPENSSL)
     target_link_libraries(runbenchmark PRIVATE dl pthread)
   endif(NOT ${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
 endif(USE_OPENSSL)
+
+if(USE_RFC7748)
+  add_subdirectory(librfc7748)
+  target_compile_definitions(runbenchmark PRIVATE HAVE_RFC7748)
+  target_link_libraries(runbenchmark PRIVATE rfc7748)
+  target_include_directories(runbenchmark PRIVATE ${RFC7748_DIR})
+endif(USE_RFC7748)

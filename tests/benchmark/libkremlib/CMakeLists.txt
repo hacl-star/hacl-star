@@ -1,5 +1,5 @@
 project(libkremlib LANGUAGES C ASM)
-cmake_minimum_required(VERSION 3.12)
+cmake_minimum_required(VERSION 3.6)
 
 set(KREMLIB_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../../../kremlin/kremlib/dist/generic CACHE PATH "Where to find the KreMLib sources.")
 get_filename_component(KREMLIB_DIR ${KREMLIB_DIR} REALPATH)
@@ -9,23 +9,7 @@ set(KREMLIN_INC ${CMAKE_CURRENT_SOURCE_DIR}/../../../../kremlin/include CACHE PA
 get_filename_component(KREMLIN_INC ${KREMLIN_INC} ABSOLUTE)
 message("-- Using KreMLin at ${KREMLIN_INC}")
 
-add_library(kremlib STATIC)
-target_include_directories(kremlib PUBLIC ${KREMLIN_INC} ${KREMLIB_DIR})
-target_compile_options(kremlib PRIVATE
-  -std=c11 -fwrapv
-  -Wall -Wextra -Werror
-  -Wno-unused-variable -Wno-unused-but-set-variable -Wno-unknown-warning-option
-  -Wno-infinite-recursion -Wno-unused-parameter
-  )
-target_compile_definitions(kremlib PRIVATE _BSD_SOURCE _DEFAULT_SOURCE)
-
-if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
-  target_compile_definitions(kremlib PUBLIC __USE_MINGW_ANSI_STDIO)
-else(CMAKE_SYSTEM_NAME STREQUAL "Windows")
-  target_compile_options(kremlib PUBLIC -fPIC)
-endif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
-
-target_sources(kremlib PRIVATE
+add_library(kremlib STATIC
   ${KREMLIB_DIR}/c.c
   ${KREMLIB_DIR}/c_string.c
   ${KREMLIB_DIR}/FStar_BitVector.c
@@ -49,6 +33,20 @@ target_sources(kremlib PRIVATE
   ${KREMLIB_DIR}/fstar_uint8.c
   ${KREMLIB_DIR}/prims.c
   ${KREMLIB_DIR}/testlib.c)
+target_include_directories(kremlib PUBLIC ${KREMLIN_INC} ${KREMLIB_DIR})
+target_compile_options(kremlib PRIVATE
+  -std=c11 -fwrapv
+  -Wall -Wextra -Werror
+  -Wno-unused-variable -Wno-unused-but-set-variable -Wno-unknown-warning-option
+  -Wno-infinite-recursion -Wno-unused-parameter
+  )
+target_compile_definitions(kremlib PRIVATE _BSD_SOURCE _DEFAULT_SOURCE)
+
+if(CMAKE_SYSTEM_NAME STREQUAL "CYGWIN")
+  target_compile_definitions(kremlib PUBLIC __USE_MINGW_ANSI_STDIO)
+else()
+  target_compile_options(kremlib PUBLIC -fPIC)
+endif()
 
 if(CMAKE_COMPILER_IS_MSVC)
 target_sources(kremlib PRIVATE ${KREMLIB_DIR}/fstar_uint128_msvc.c)
