@@ -171,42 +171,6 @@ let rec test_cipher_loop (LB len vs) =
 
 let test_cipher () : St unit = test_cipher_loop block_cipher_vectors_low
 
-let chacha20_vector = vec8 * vec8 * U32.t * vec8 * vec8
-
-val test_chacha20_loop: lbuffer chacha20_vector -> St unit
-
-#push-options "--z3rlimit 16"
-
-let rec test_chacha20_loop (LB len vs) =
-  let open FStar.Integers in
-  B.recall vs;
-  if len > 0ul then begin
-    let (LB key_len key), (LB iv_len iv), ctr, (LB plain_len plain), (LB cipher_len cipher) = vs.(0ul) in
-    if not (
-      cipher_len `U32.gt` 0ul &&
-      cipher_len = plain_len &&
-      key_len = 32ul &&
-      iv_len = 12ul &&
-      (4294967295ul `U32.sub` ctr) `U32.gte` (plain_len `U32.div` 64ul)
-    )
-    then
-      C.String.print !$"Warning: skipping a chacha20 test because bounds do not hold\n"
-    else begin
-      B.recall plain;
-      B.recall key;
-      B.recall iv;
-      push_frame ();
-      let cipher' = B.alloca 0uy cipher_len in
-      let h0 = HST.get () in
-      EverCrypt.Cipher.chacha20 plain_len cipher' plain key iv ctr;
-      B.recall cipher;
-      TestLib.compare_and_print !$"of ChaCha20 message" cipher cipher' cipher_len;
-      pop_frame ()
-    end;
-    B.recall vs;
-    test_chacha20_loop (LB (len - 1ul) (B.offset vs 1ul))
-  end
-
 #pop-options
 
 let test_chacha20 () : St unit = test_chacha20_loop chacha20_vectors_low

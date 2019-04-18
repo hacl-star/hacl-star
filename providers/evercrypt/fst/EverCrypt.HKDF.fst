@@ -37,7 +37,7 @@ val hkdf_expand_loop:
     tagLength a + pow2 32 + blockLength a <= maxLength a /\
     v i < 255 /\
     v len <= (255 - v i) * tagLength a } ->
-  ST unit
+  Stack unit
   (requires fun h0 ->
     live h0 okm /\ live h0 prk /\ live h0 hashed)
   (ensures  fun h0 r h1 ->

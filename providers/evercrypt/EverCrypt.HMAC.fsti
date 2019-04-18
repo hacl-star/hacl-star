@@ -40,7 +40,7 @@ let compute_st (a: ha) =
   keylen: UInt32.t{ UInt32.v keylen = length key } ->
   data: uint8_p{ length data + block_length a < pow2 32 } ->
   datalen: UInt32.t{ UInt32.v datalen = length data } ->
-  ST unit
+  Stack unit
   (requires fun h0 -> live h0 tag /\ live h0 key /\ live h0 data)
   (ensures fun h0 _ h1 ->
     live h1 tag /\

@@ -135,7 +135,7 @@ val part1:
     // length data + block_length a <= max_input_length a /\ (*always true*)
     disjoint data s2} ->
   len: UInt32.t {length data = v len} ->
-  ST unit
+  Stack unit
     (requires fun h0 ->
       loc_disjoint (footprint acc h0) (loc_buffer s2) /\
       loc_disjoint (footprint acc h0) (loc_buffer data) /\
@@ -186,7 +186,7 @@ let part1 a (acc: state a) key data len =
     acc blocks lb;
   let h2 = ST.get() in
   assert_norm(block_length a + v len < max_input_length a);
-  assert (repr acc h2 == hash0 S.(as_seq h0 key @| as_seq h0 blocks));
+  assert (repr acc h2 `Seq.equal` hash0 S.(as_seq h0 key @| as_seq h0 blocks));
   Hash.update_last
     #(Ghost.hide a)
     acc last (Int.Cast.Full.uint32_to_uint64 (block_len a + len));
@@ -195,7 +195,7 @@ let part1 a (acc: state a) key data len =
     block_length a + v len);
   assert (v (Int.Cast.Full.uint32_to_uint64 (block_len a + len)) = v (block_len a + len));
   assert (S.equal (as_seq h0 last) (as_seq h2 last));
-  assert (repr acc h3 ==
+  assert (repr acc h3 `Seq.equal`
     compress_many (hash0 (S.append (as_seq h0 key) (as_seq h0 blocks)))
       (S.append (as_seq h0 last) (Spec.Hash.PadFinish.pad a (v (block_len a + len)))));
   // assert(LowStar.Buffer.live h3 key);
@@ -208,14 +208,14 @@ let part1 a (acc: state a) key data len =
     let blocks1 = as_seq h1 blocks in
     let acc1 = repr acc h1 in
     //lemma_compress (acc0 #a) key1;
-    assert(acc1 == hash0 key1);
+    assert(acc1 `Seq.equal` hash0 key1);
     let v2 = S.(key1 @| blocks1) in
     let acc2 = repr acc h2 in
     // assert (Seq.length key1 % p = 0);
     // assert (Seq.length blocks1 % p = 0);
     // assert (Seq.length v2 % p = 0);
     // lemma_hash2 (acc0 #a) key1 blocks1;
-    assert(acc2 == hash0 #a v2);
+    assert(acc2 `Seq.equal` hash0 #a v2);
     let data1 = as_seq h1 data in
     let last1 = as_seq h1 last in
     let suffix1 = Spec.Hash.PadFinish.pad a (p + v len) in
@@ -226,11 +226,11 @@ let part1 a (acc: state a) key data len =
     Math.Lemmas.lemma_mod_plus (v ll + ls) (1 + v len / p) p;
     assert((v ll + ls) % p = 0);
     //lemma_hash2 (acc0 #a) v2 S.(last1 @| suffix1);
-    assert(acc3 == hash0 #a S.(v2 @| (last1 @| suffix1)));
+    assert(acc3 `Seq.equal` hash0 #a S.(v2 @| (last1 @| suffix1)));
     Seq.append_assoc v2 last1 suffix1;
     Seq.append_assoc key1 blocks1 last1;
-    assert(acc3 == hash0 #a S.((key1 @| data1) @| suffix1));
-    assert(extract acc3 == EverCrypt.Hash.spec a S.(key1 @| data1));
+    assert(acc3 `Seq.equal` hash0 #a S.((key1 @| data1) @| suffix1));
+    assert(extract acc3 `Seq.equal` EverCrypt.Hash.spec a S.(key1 @| data1));
     let h1 = h4 in
     let s2 = key in
     assert (      modifies (loc_union (footprint acc h0) (loc_buffer s2)) h0 h1)
@@ -243,7 +243,7 @@ val part2:
   mac: uint8_pl (hash_length a) ->
   opad: uint8_pl (block_length a) ->
   tag: uint8_pl (hash_length a) ->
-  ST unit
+  Stack unit
     (requires fun h0 ->
       invariant acc h0 /\
       live h0 mac /\ live h0 opad /\ live h0 tag /\
@@ -315,7 +315,7 @@ val hmac_core:
     // length data + block_length a <= max_input_length a /\ (*always true*)
     disjoint data key } ->
   datalen: UInt32.t {v datalen = length data} ->
-  ST unit
+  Stack unit
   (requires fun h0 ->
     loc_disjoint (footprint acc h0) (loc_buffer tag) /\
     loc_disjoint (footprint acc h0) (loc_buffer key) /\
