@@ -26,7 +26,7 @@ let (!$) = C.String.((!$))
 
 let hash_vector = H.alg * C.String.t * vec8 * UInt32.t
 
-#set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 200"
+#set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 300"
 
 val test_one_hash: hash_vector -> St unit
 let test_one_hash vec =
