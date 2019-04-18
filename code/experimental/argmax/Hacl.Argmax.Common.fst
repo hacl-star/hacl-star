@@ -407,7 +407,7 @@ let finv0 #n a = admit()
 val finv: #n:big -> a:fe n{isunit a} -> b:fe n{b *% a = one}
 let finv #n a = match finv0 a with | Some x -> x
 
-val finv_unique: #n:big -> a:fe n -> b:fe n{b *% a = one} -> Lemma
+val finv_unique: #n:big -> a:fe n -> b:fe n{a *% b = one} -> Lemma
   (isunit a /\ b = finv a)
 let finv_unique #n a b =
   let z = finv a in
