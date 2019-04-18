@@ -1054,7 +1054,7 @@ procedure {:quick exportOnly} gcm_blocks_wrapped(
 
 }
 
-procedure {:quick} save_registers(inline win:bool)
+procedure {:quick} {:public} save_registers(inline win:bool)
     requires
         rsp == init_rsp(stack);
     reads
@@ -1123,7 +1123,7 @@ procedure {:quick} save_registers(inline win:bool)
 }
 
 
-procedure {:quick} restore_registers(inline win:bool, ghost old_rsp:nat,
+procedure {:quick} {:public} restore_registers(inline win:bool, ghost old_rsp:nat,
         ghost old_xmm6:quad32, ghost old_xmm7:quad32, ghost old_xmm8:quad32, ghost old_xmm9:quad32, ghost old_xmm10:quad32, ghost old_xmm11:quad32, ghost old_xmm12:quad32, ghost old_xmm13:quad32, ghost old_xmm14:quad32, ghost old_xmm15:quad32)
     requires
         old_rsp == init_rsp(stack);

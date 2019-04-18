@@ -120,6 +120,14 @@ test-ml: $(subst .,_,$(patsubst %.fst,test-ml-%,$(notdir $(wildcard specs/tests/
 ci:
 	NOSHORTLOG=1 $(MAKE) vale-fst
 	FSTAR_DEPEND_FLAGS="--warn_error +285" NOSHORTLOG=1 $(MAKE) all-unstaged test-unstaged
+	NOSHORTLOG=1 $(MAKE) wasm
+
+wasm:
+	tools/blast-staticconfig.sh wasm
+	EVERCRYPT_CONFIG=wasm $(MAKE) wasm-staged
+
+wasm-unstaged: dist/wasm/Makefile.basic
+	cd $(dir $<) && node main.js
 
 # Not reusing the -staged automatic target so as to export MIN_TEST
 min-test:
@@ -224,6 +232,7 @@ VALE_FSTS = $(call to-obj-dir,$(VAF_AS_FSTS))
 # The complete set of F* files, both hand-written and Vale-generated. Note that
 # this is only correct in the second stage of the build.
 FSTAR_ROOTS = $(wildcard $(addsuffix /*.fsti,$(ALL_HACL_DIRS)) $(addsuffix /*.fst,$(ALL_HACL_DIRS))) \
+  $(FSTAR_HOME)/ulib/LowStar.Endianness.fst \
   $(wildcard obj/*.fst) $(wildcard obj/*.fsti) # these two empty during the first stage
 
 # We currently force regeneration of three depend files. This is long.
@@ -275,6 +284,8 @@ else ifeq ($(MAKECMDGOALS),all)
 else ifeq (,$(filter-out %-staged,$(MAKECMDGOALS)))
   SKIPDEPEND=1
 else ifeq (,$(filter-out %-verify,$(MAKECMDGOALS)))
+  SKIPDEPEND=1
+else ifeq ($(MAKECMDGOALS),wasm)
   SKIPDEPEND=1
 else ifeq ($(MAKECMDGOALS),ci)
   SKIPDEPEND=1
@@ -450,6 +461,9 @@ obj/Vale.Stdcalls.GCMencrypt.fst.checked: \
   FSTAR_FLAGS=$(VALE_FSTAR_FLAGS)
 
 obj/Vale.Stdcalls.GCMencryptOpt.fst.checked: \
+  FSTAR_FLAGS=$(VALE_FSTAR_FLAGS)
+
+obj/Vale.Stdcalls.GCMdecryptOpt.fst.checked: \
   FSTAR_FLAGS=$(VALE_FSTAR_FLAGS)
 
 obj/GCMencryptOpt_stdcalls.fst.checked: \
@@ -631,7 +645,7 @@ HAND_WRITTEN_OPTIONAL_FILES = \
 # When extracting our libraries, we purposely don't distribute tests
 #
 # See Makefile.include for the definition of VALE_BUNDLES
-DEFAULT_FLAGS		=\
+DEFAULT_FLAGS_NO_TESTS	=\
   $(addprefix -library ,$(HACL_HAND_WRITTEN_C)) \
   -bundle Hacl.Spec.*,Spec.*[rename=Hacl_Spec] \
   -bundle Hacl.Poly1305.Field32xN.Lemmas[rename=Hacl_Lemmas] \
@@ -640,7 +654,6 @@ DEFAULT_FLAGS		=\
   -add-include '"libintvector.h"' \
   -add-include '"evercrypt_targetconfig.h"' \
   -drop EverCrypt.TargetConfig \
-  -bundle Test,Test.*,Hacl.Test.* \
   -bundle EverCrypt.BCrypt \
   -bundle EverCrypt.OpenSSL \
   -bundle MerkleTree.Spec,MerkleTree.Spec.*,MerkleTree.New.High,MerkleTree.New.High.* \
@@ -660,7 +673,25 @@ DEFAULT_FLAGS		=\
   -add-include '"curve25519-inline.h"' \
   -no-prefix 'MerkleTree.New.Low' \
   -no-prefix 'MerkleTree.New.Low.Serialization' \
-  -fparentheses -fno-shadow -fcurly-braces
+  -fparentheses -fno-shadow -fcurly-braces \
+  -bundle WasmSupport
+
+DEFAULT_FLAGS = $(DEFAULT_FLAGS_NO_TESTS) -bundle Test,Test.*,Hacl.Test.*
+
+# Should be fixed by having KreMLin better handle imported names
+WASM_STANDALONE=Prims LowStar.Endianness C.Endianness \
+  C.String TestLib C
+
+# Notes: only the functions reachable via Test.NoHeap are currently enabled.
+WASM_FLAGS	=\
+  $(patsubst %,-bundle %,$(WASM_STANDALONE)) \
+  -no-prefix Test.NoHeap \
+  -bundle Test.NoHeap=Test,Test.* \
+  -bundle FStar.* \
+  -bundle EverCrypt.*,Hacl.*,MerkleTree.*[rename=EverCrypt] \
+  -bundle LowStar.* \
+  -bundle '\*[rename=Misc]' \
+  -minimal -wasm
 
 COMPACT_FLAGS	=\
   -bundle Hacl.Hash.MD5+Hacl.Hash.Core.MD5+Hacl.Hash.SHA1+Hacl.Hash.Core.SHA1+Hacl.Hash.SHA2+Hacl.Hash.Core.SHA2+Hacl.Hash.Core.SHA2.Constants=Hacl.Hash.*[rename=Hacl_Hash] \
@@ -717,6 +748,9 @@ dist/coco/Makefile.basic: \
     -bundle EverCrypt= \
     -bundle EverCrypt.Hacl \
     -bundle '\*[rename=EverCrypt_Misc]'
+
+dist/wasm/Makefile.basic: KRML_EXTRA=$(WASM_FLAGS)
+dist/wasm/Makefile.basic: DEFAULT_FLAGS=$(DEFAULT_FLAGS_NO_TESTS)
 
 # OpenSSL and BCrypt disabled
 ifeq ($(EVERCRYPT_CONFIG),everest)

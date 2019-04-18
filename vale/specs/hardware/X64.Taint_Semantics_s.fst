@@ -21,25 +21,10 @@ noeq type traceState = {
 // Extract a list of destinations written to and a list of sources read from
 let extract_operands (i:ins) : (list operand * list operand) =
   match i with
-  | S.Mov64 dst src -> [dst], [src]
-  | S.MovBe64 dst src -> [dst], [src]
-  | S.Cmovc64 dst src -> [dst], [src; dst]
-  | S.Add64 dst src -> [dst], [dst; src]
-  | S.AddLea64 dst src1 src2 -> [dst], [dst; src1; src2]
-  | S.AddCarry64 dst src -> [dst], [dst; src]
-  | S.Adcx64 dst src -> [dst], [dst; src]
-  | S.Adox64 dst src -> [dst], [dst; src]
-  | S.Sub64 dst src -> [dst], [dst; src]
-  | S.Sbb64 dst src -> [dst], [dst; src]
-  | S.Mul64 src -> [OReg Rax; OReg Rdx], [OReg Rax; src]
-  | S.Mulx64 dst_hi dst_lo src -> [dst_hi; dst_lo], [OReg Rdx; src]
-  | S.IMul64 dst src -> [dst], [dst; src]
+  | S.Ins_64_64_preserve i dst src -> [dst], [src]
+  | S.Ins_io64_64_cf i dst src -> [dst], [dst; src]
+  | S.Ins_io64_64 i dst src -> [dst], [dst; src]
   | S.Xor64 dst src -> [dst], [dst; src]
-  | S.And64 dst src -> [dst], [dst; src]
-  | S.Shr64 dst amt -> [dst], [dst; amt]
-  | S.Shl64 dst amt -> [dst], [dst; amt]
-  | S.Pinsrd _ src _ | S.Pinsrq _ src _ -> [], [src]
-  | S.Pextrq dst _ _ -> [dst], []
   | S.Push src -> [], [src]
   | S.Pop dst -> [dst], [OStack (MReg Rsp 0)]
   | S.Alloc _ | S.Dealloc _ -> [OReg Rsp], [OReg Rsp]
@@ -140,14 +125,15 @@ let taint_eval_ins (ins:tainted_ins) (ts: traceState) : GTot traceState =
   else begin
     let s = run (check (taint_match_list srcs t ts.memTaint)) ts.state in
     let memTaint =
-      if S.Mulx64? i then begin
-        let S.Mulx64 dst_hi dst_lo src = i in
-        let lo = FStar.UInt.mul_mod #64 (eval_reg Rdx s) (eval_operand src s) in
-        let s' = update_operand_preserve_flags' dst_lo lo s in
-        let memTaint = update_taint ts.memTaint dst_lo t s in
-        update_taint memTaint dst_hi t s'
-      end
-      else update_taint_list ts.memTaint dsts t s
+//      if S.Mulx64? i then begin
+//        let S.Mulx64 dst_hi dst_lo src = i in
+//        let lo = FStar.UInt.mul_mod #64 (eval_reg Rdx s) (eval_operand src s) in
+//        let s' = update_operand_preserve_flags' dst_lo lo s in
+//        let memTaint = update_taint ts.memTaint dst_lo t s in
+//        update_taint memTaint dst_hi t s'
+//      end
+//      else
+        update_taint_list ts.memTaint dsts t s
     in
     (* Execute the instruction *)
     let s = run (eval_ins i) s in
@@ -224,13 +210,7 @@ and taint_eval_while c fuel s0 =
 let is_xmm_ins (ins:tainted_ins) =
   let i = ins.i in
   match i with
-    | S.VPaddd _ _ _ | S.Paddd _ _ | S.Pxor _ _ | S.Pand _ _ | S.VPxor _ _ _ | S.Pslld _ _ | S.Psrld _ _ | S.Psrldq _ _ 
-    | S.Palignr _ _ _ | S.VPalignr _ _ _ _ | S.Shufpd _ _ _ | S.VShufpd _ _ _ _ | S.Pshufb _ _ | S.VPshufb _ _ _
-    | S.Pshufd _ _ _ | S.Pcmpeqd _ _ | S.Pextrq _ _ _ | S.Pinsrd _ _ _ | S.Pinsrq _ _ _
-    | S.VPSLLDQ _ _ _ | S.Vpsrldq _ _ _ | S.MOVDQU _ _
-    | S.Pclmulqdq _ _ _ | S.VPclmulqdq _ _ _ _ 
-    | S.AESNI_enc _ _ | S.AESNI_enc_last _ _ | S.VAESNI_enc _ _ _ | S.VAESNI_enc_last _ _ _
-    | S.AESNI_dec _ _ | S.AESNI_dec_last _ _ | S.AESNI_imc _ _
-    | S.AESNI_keygen_assist _ _ _ 
-    | S.SHA256_rnds2 _ _ | S.SHA256_msg1 _ _ | S.SHA256_msg2 _ _ -> true
+    | S.Instr _ _ _ _ _ | S.Ins_ioXmm _ _ | S.Ins_Xmm_Xmm _ _ _ | S.Ins_ioXmm_Xmm _ _ _
+    | S.Pxor _ _ | S.VPxor _ _ _
+    | S.MOVDQU _ _ -> true
     | _ -> false

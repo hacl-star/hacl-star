@@ -3,11 +3,20 @@ module X64.Taint_Semantics
 open X64.Taint_Semantics_s
 open X64.Vale.Decls
 open X64.Machine_s
+open X64.Instruction_s
 module S = X64.Bytes_Semantics_s
 module L = FStar.List.Tot
 
-let mk_taint_ins0 (i:S.ins { i == X64.Bytes_Semantics_s.Cpuid}) =
-  Ins (TaintedIns i Public)
+
+let mk_ins (i:S.ins) (t:taint) : Pure tainted_code
+  (requires True)
+  (ensures fun c ->
+    c == Ins (TaintedIns i t) /\
+    i == normal i /\
+    S.eval_ins i == normal (S.eval_ins i)
+  )
+  =
+  Ins (TaintedIns i t)
 
 let mk_taint_ins1 (i:operand->S.ins)
                   (o:va_operand)

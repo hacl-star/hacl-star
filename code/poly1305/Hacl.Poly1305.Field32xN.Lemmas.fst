@@ -276,6 +276,7 @@ val lemma_fmul5_pow26:
     (ensures
       (let (r0, r1, r2, r3, r4) = r in
       (pow26 * as_nat5 r) % prime == as_nat5 (r4 *! u64 5, r0, r1, r2, r3) % prime))
+#reset-options "--z3rlimit 500 --using_facts_from '* -FStar.Seq' --max_fuel 0 --max_ifuel 0"
 let lemma_fmul5_pow26 r =
   let (r0, r1, r2, r3, r4) = r in
   assert (pow26 * as_nat5 r ==

@@ -40,6 +40,7 @@ open X64.Vale.InsLemmas
 open X64.Taint_Semantics
 open X64.Memory
 open X64.Stack_i
+module I = X64.Instructions_s
 module S = X64.Bytes_Semantics_s
 module TS = X64.Taint_Semantics_s
 
@@ -97,7 +98,7 @@ procedure{:operand} Mem128_in(base:reg64, inline offset:int, inline t:taint, gho
         mem;
     extern;
 
-procedure{:instruction Ins(TS.TaintedIns(tuple(S.Paddd(dst, src)), Public))}{:quick exportOnly}{:public}
+procedure{:instruction Ins(TS.TaintedIns(S.Ins_ioXmm_Xmm(I.ins_Paddd, dst, src), Public))}{:quick exportOnly}{:public}
           Paddd(inout dst:xmm, src:xmm)
     modifies efl;
     ensures
@@ -105,7 +106,7 @@ procedure{:instruction Ins(TS.TaintedIns(tuple(S.Paddd(dst, src)), Public))}{:qu
 {
 }
 
-procedure{:instruction Ins(TS.TaintedIns(tuple(S.VPaddd(dst, src1, src2)), Public))}{:quick exportOnly}{:public}
+procedure{:instruction mk_ins(make_instr(I.ins_VPaddd, Mov128Xmm(dst), Mov128Xmm(src1), Mov128Xmm(src2)), Public)}{:quick exportOnly}{:public}
           VPaddd(out dst:xmm, src1:xmm, src2:xmm)
     modifies efl;
     ensures
@@ -119,7 +120,10 @@ procedure{:instruction Ins(TS.TaintedIns(tuple(S.Pxor(dst, src)), Public))}{:qui
 {
 }
 
-procedure{:instruction Ins(TS.TaintedIns(tuple(S.Pand(dst, src)), Public))}{:quick exportOnly}{:public} Pand(inout dst:xmm, src:xmm)
+#reset-options "--initial_fuel 1 --max_fuel 1 --max_ifuel 1 --z3rlimit 50"
+
+procedure{:instruction mk_ins(make_instr(I.ins_Pand, Mov128Xmm(dst), t_op_to_op128(src)), Public)}{:quick exportOnly}{:public}
+    Pand(inout dst:xmm, src:opr128)
     ensures
         dst == four_map2((lambda di:nat32, si:nat32 :: iand32(di, si)), old(dst), old(src));
 {
@@ -131,30 +135,7 @@ procedure{:instruction Ins(TS.TaintedIns(tuple(S.VPxor(dst, src1, t_op_to_op128(
 {
 }
 
-procedure{:instruction Ins(TS.TaintedIns(tuple(S.VPxor(dst, src1, Mov128Mem(MReg(get_reg(src2), offset)))), t))}{:quick exportOnly}{:public} 
-   VPxor_buffer(out dst:xmm, 
-                src1:xmm, 
-                src2:reg_opr64,
-                inline offset:int,
-                inline t:taint,
-                ghost b:buffer128,
-                ghost index:int)
-  reads
-    mem; memTaint;
-  requires
-    valid_src_addr(mem, b, index);
-    valid_taint_buf128(b, mem, memTaint, t);
-    src2 + offset == buffer_addr(b, mem) + 16 * index;
-  ensures
-    dst == old(quad32_xor(src1, buffer128_read(b, index, mem)));
-    valid_taint_buf128(b, mem, memTaint, t);  // REVIEW: Why is this needed?
-{
-    low_lemma_valid_mem128(b, #nat(index), mem);
-    low_lemma_load_mem128(b, #nat(index), mem);
-    lemma_valid_taint128(b, #memTaint_t(memTaint), mem, #nat(index), t);
-}
-
-procedure{:instruction Ins(TS.TaintedIns(tuple(S.Pslld(dst, amt)), Public))}{:quick exportOnly}{:public} Pslld(inout dst:xmm, inline amt:int)
+procedure{:instruction Ins(TS.TaintedIns(S.Ins_ioXmm(I.ins_Pslld(amt), dst), Public))}{:quick exportOnly}{:public} Pslld(inout dst:xmm, inline amt:int)
     requires
         0 <= amt < 32;
     ensures
@@ -162,7 +143,7 @@ procedure{:instruction Ins(TS.TaintedIns(tuple(S.Pslld(dst, amt)), Public))}{:qu
 {
 }
 
-procedure{:instruction Ins(TS.TaintedIns(tuple(S.Psrld(dst, amt)), Public))}{:quick exportOnly}{:public} Psrld(inout dst:xmm, inline amt:int)
+procedure{:instruction Ins(TS.TaintedIns(S.Ins_ioXmm(I.ins_Psrld(amt), dst), Public))}{:quick exportOnly}{:public} Psrld(inout dst:xmm, inline amt:int)
     requires
         0 <= amt < 32;
     ensures
@@ -170,7 +151,7 @@ procedure{:instruction Ins(TS.TaintedIns(tuple(S.Psrld(dst, amt)), Public))}{:qu
 {
 }
 
-procedure{:instruction Ins(TS.TaintedIns(tuple(S.Psrldq(dst, amt)), Public))}{:quick exportOnly} Psrldq(inout dst:xmm, inline amt:int)
+procedure{:instruction Ins(TS.TaintedIns(S.Ins_ioXmm(I.ins_Psrldq(amt), dst), Public))}{:quick exportOnly} Psrldq(inout dst:xmm, inline amt:int)
     requires
         0 <= amt < 16;
     ensures
@@ -182,7 +163,7 @@ procedure{:instruction Ins(TS.TaintedIns(tuple(S.Psrldq(dst, amt)), Public))}{:q
 }
 
 
-procedure{:instruction Ins(TS.TaintedIns(tuple(S.Palignr(dst, src, 4)), Public))}{:quick exportOnly}{:public}
+procedure{:instruction Ins(TS.TaintedIns(S.Ins_ioXmm_Xmm(I.ins_Palignr(4), dst, src), Public))}{:quick exportOnly}{:public}
           Palignr4(inout dst:xmm, src:xmm)
     modifies efl;
     ensures
@@ -190,7 +171,7 @@ procedure{:instruction Ins(TS.TaintedIns(tuple(S.Palignr(dst, src, 4)), Public))
 {
 }
 
-procedure{:instruction Ins(TS.TaintedIns(tuple(S.Palignr(dst, src, 8)), Public))}{:quick exportOnly}{:public}
+procedure{:instruction Ins(TS.TaintedIns(S.Ins_ioXmm_Xmm(I.ins_Palignr(8), dst, src), Public))}{:quick exportOnly}{:public}
           Palignr8(inout dst:xmm, src:xmm)
     modifies efl;
     ensures
@@ -198,7 +179,7 @@ procedure{:instruction Ins(TS.TaintedIns(tuple(S.Palignr(dst, src, 8)), Public))
 {
 }
 
-procedure{:instruction Ins(TS.TaintedIns(tuple(S.VPalignr(dst, src1, src2, 8)), Public))}{:quick exportOnly}{:public}
+procedure{:instruction mk_ins(make_instr(I.ins_VPalignr(8), Mov128Xmm(dst), Mov128Xmm(src1), Mov128Xmm(src2)), Public)}{:quick exportOnly}{:public}
           VPalignr8(out dst:xmm, src1:xmm, src2:xmm)
     modifies efl;
     ensures
@@ -206,7 +187,7 @@ procedure{:instruction Ins(TS.TaintedIns(tuple(S.VPalignr(dst, src1, src2, 8)), 
 {
 }
 
-procedure{:instruction Ins(TS.TaintedIns(tuple(S.Shufpd(dst, src, permutation)), Public))}{:quick exportOnly}{:public}
+procedure{:instruction Ins(TS.TaintedIns(S.Ins_ioXmm_Xmm(I.ins_Shufpd(permutation), dst, src), Public))}{:quick exportOnly}{:public}
           Shufpd(inout dst:xmm, src:xmm, inline permutation:imm8)
     requires permutation < 4;
     modifies efl;
@@ -219,7 +200,7 @@ procedure{:instruction Ins(TS.TaintedIns(tuple(S.Shufpd(dst, src, permutation)),
 {
 }
 
-procedure{:instruction Ins(TS.TaintedIns(tuple(S.VShufpd(dst, src1, src2, permutation)), Public))}{:quick exportOnly}{:public}
+procedure{:instruction mk_ins(make_instr(I.ins_VShufpd(permutation), Mov128Xmm(dst), Mov128Xmm(src1), Mov128Xmm(src2)), Public)}{:quick exportOnly}{:public}
           VShufpd(out dst:xmm, src1:xmm, src2:xmm, inline permutation:imm8)
     requires permutation < 4;
     modifies efl;
@@ -232,7 +213,7 @@ procedure{:instruction Ins(TS.TaintedIns(tuple(S.VShufpd(dst, src1, src2, permut
 {
 }
 
-procedure{:instruction Ins(TS.TaintedIns(tuple(S.Pshufb(dst, src)), Public))}{:quick exportOnly}{:public}
+procedure{:instruction Ins(TS.TaintedIns(S.Ins_ioXmm_Xmm(I.ins_Pshufb, dst, src), Public))}{:quick exportOnly}{:public}
           Pshufb(inout dst:xmm, src:xmm)
     requires
         src == Mkfour(0x0C0D0E0F, 0x08090A0B, 0x04050607, 0x00010203);
@@ -242,7 +223,7 @@ procedure{:instruction Ins(TS.TaintedIns(tuple(S.Pshufb(dst, src)), Public))}{:q
 {
 }
 
-procedure{:instruction Ins(TS.TaintedIns(tuple(S.VPshufb(dst, src1, src2)), Public))}{:quick exportOnly}{:public}
+procedure{:instruction mk_ins(make_instr(I.ins_VPshufb, Mov128Xmm(dst), Mov128Xmm(src1), Mov128Xmm(src2)), Public)}{:quick exportOnly}{:public}
           VPshufb(out dst:xmm, src1:xmm, src2:xmm)
     requires
         src2 == Mkfour(0x0C0D0E0F, 0x08090A0B, 0x04050607, 0x00010203);
@@ -252,7 +233,7 @@ procedure{:instruction Ins(TS.TaintedIns(tuple(S.VPshufb(dst, src1, src2)), Publ
 {
 }
 
-procedure{:instruction Ins(TS.TaintedIns(tuple(S.Pshufb(dst, src)), Public))}{:quick exportOnly}{:public}
+procedure{:instruction Ins(TS.TaintedIns(S.Ins_ioXmm_Xmm(I.ins_Pshufb, dst, src), Public))}{:quick exportOnly}{:public}
           PshufbStable(inout dst:xmm, src:xmm)
     requires
         src == Mkfour(0x00010203, 0x04050607, 0x08090A0B, 0x0C0D0E0F);
@@ -266,7 +247,7 @@ procedure{:instruction Ins(TS.TaintedIns(tuple(S.Pshufb(dst, src)), Public))}{:q
 {
 }
 
-procedure{:instruction Ins(TS.TaintedIns(tuple(S.Pshufb(dst, src)), Public))}{:quick exportOnly}{:public}
+procedure{:instruction Ins(TS.TaintedIns(S.Ins_ioXmm_Xmm(I.ins_Pshufb, dst, src), Public))}{:quick exportOnly}{:public}
           PshufbDup(inout dst:xmm, src:xmm)
     requires
         src == Mkfour(0x0C0D0E0F, 0x08090A0B, 0x0C0D0E0F, 0x08090A0B);
@@ -279,7 +260,7 @@ procedure{:instruction Ins(TS.TaintedIns(tuple(S.Pshufb(dst, src)), Public))}{:q
 {
 }
 
-procedure{:instruction Ins(TS.TaintedIns(tuple(S.Pshufb(dst, src)), Public))}{:quick exportOnly}{:public}
+procedure{:instruction Ins(TS.TaintedIns(S.Ins_ioXmm_Xmm(I.ins_Pshufb, dst, src), Public))}{:quick exportOnly}{:public}
           Pshufb64(inout dst:xmm, src:xmm)
     requires
         src == Mkfour(0x04050607, 0x00010203, 0x0C0D0E0F, 0x08090A0B);
@@ -293,7 +274,7 @@ procedure{:instruction Ins(TS.TaintedIns(tuple(S.Pshufb(dst, src)), Public))}{:q
 }
 
 /*
-procedure{:instruction Ins(TS.TaintedIns(tuple(S.Pshufb(dst, src)), Public))}{:quick exportOnly}
+procedure{:instruction Ins(TS.TaintedIns(S.Ins_ioXmm_Xmm(I.ins_Pshufb, dst, src), Public))}{:quick exportOnly}
           Pshufb(inout dst:xmm, src:xmm)
     requires
         src == Mkfour(0x0C0D0E0F, 0x08090A0B, 0x04050607, 0x00010203) ||
@@ -317,7 +298,7 @@ procedure{:instruction Ins(TS.TaintedIns(tuple(S.Pshufb(dst, src)), Public))}{:q
 }
 */
 
-procedure{:instruction Ins(TS.TaintedIns(tuple(S.Pshufd(dst, src, permutation)), Public))}{:quick exportOnly}{:public}
+procedure{:instruction Ins(TS.TaintedIns(S.Ins_Xmm_Xmm(I.ins_Pshufd(permutation), dst, src), Public))}{:quick exportOnly}{:public}
           Pshufd(inout dst:xmm, src:xmm, inline permutation:imm8)
     ensures
         dst == old(Mkfour(
@@ -328,7 +309,7 @@ procedure{:instruction Ins(TS.TaintedIns(tuple(S.Pshufd(dst, src, permutation)),
 {
 }
 
-procedure{:instruction Ins(TS.TaintedIns(tuple(S.Pcmpeqd(dst, src)), Public))}{:quick exportOnly}{:public}
+procedure{:instruction Ins(TS.TaintedIns(S.Ins_ioXmm_Xmm(I.ins_Pcmpeqd, dst, src), Public))}{:quick exportOnly}{:public}
           Pcmpeqd(inout dst:xmm, src:xmm)
     ensures
         dst == old(Mkfour(
@@ -339,7 +320,7 @@ procedure{:instruction Ins(TS.TaintedIns(tuple(S.Pcmpeqd(dst, src)), Public))}{:
 {
 }
 
-procedure{:instruction Ins(TS.TaintedIns(tuple(S.Pextrq(t_op_to_op(dst), src, index)), Public))}{:quick exportOnly}{:public}
+procedure{:instruction mk_ins(make_instr(I.ins_Pextrq(index), t_op_to_op(dst), Mov128Xmm(src)), Public)}{:quick exportOnly}{:public}
           Pextrq(out dst:dst_opr64, src:xmm, inline index:imm8)
     requires
         index < 2;
@@ -350,7 +331,7 @@ procedure{:instruction Ins(TS.TaintedIns(tuple(S.Pextrq(t_op_to_op(dst), src, in
     reveal hi64_def;
 }
 
-procedure{:instruction Ins(TS.TaintedIns(tuple(S.Pinsrd(dst, t_op_to_op(src), index)), get_taint(src)))}{:quick exportOnly}{:public}
+procedure{:instruction mk_ins(make_instr(I.ins_Pinsrd(index), Mov128Xmm(dst), t_op_to_op(src)), get_taint(src))}{:quick exportOnly}{:public}
           Pinsrd(inout dst:xmm, src:opr64, inline index:imm8)
     requires
         src < pow2_32;
@@ -372,7 +353,9 @@ procedure {:quick exportOnly}{:public}
     Pinsrd(dst, tmp, index);
 }
 
-procedure{:instruction Ins(TS.TaintedIns(tuple(S.Pinsrq(dst, t_op_to_op(src), index)), get_taint(src)))}{:quick exportOnly}{:public}
+// TODO: get rid of this fuel
+#reset-options "--initial_fuel 2 --max_fuel 4 --max_ifuel 2 --z3rlimit 50"
+procedure{:instruction mk_ins(make_instr(I.ins_Pinsrq(index), Mov128Xmm(dst), t_op_to_op(src)), get_taint(src))}{:quick exportOnly}{:public}
           Pinsrq(inout dst:xmm, src:opr64, inline index:imm8)
     requires
         index < 2;
@@ -382,6 +365,7 @@ procedure{:instruction Ins(TS.TaintedIns(tuple(S.Pinsrq(dst, t_op_to_op(src), in
     reveal insert_nat64;
     assert dst == insert_nat64(old(dst), src, #nat1(index));
 }
+#reset-options "--initial_fuel 1 --max_fuel 1 --max_ifuel 1 --z3rlimit 50"
 
 procedure {:quick exportOnly}{:public}
           PinsrqImm(inout dst:xmm, inline immediate:nat64, inline index:imm8, out tmp:reg_opr64)
@@ -394,23 +378,26 @@ procedure {:quick exportOnly}{:public}
     Pinsrq(dst, tmp, index);
 }
 
-procedure{:instruction Ins(TS.TaintedIns(tuple(S.VPSLLDQ(dst, src, 4)), Public))}{:quick exportOnly}{:public} VPSLLDQ4(out dst:xmm, src:xmm)
+procedure{:instruction Ins(TS.TaintedIns(S.Ins_Xmm_Xmm(I.ins_VPslldq(4), dst, src), Public))}{:quick exportOnly}{:public} VPSLLDQ4(out dst:xmm, src:xmm)
     ensures
         dst == old(Mkfour(0, src.lo0, src.lo1, src.hi2));
 {
 }
 
-procedure{:instruction Ins(TS.TaintedIns(tuple(S.VPSLLDQ(dst, src, 8)), Public))}{:quick exportOnly}{:public} Vpslldq8(out dst:xmm, src:xmm)
+procedure{:instruction Ins(TS.TaintedIns(S.Ins_Xmm_Xmm(I.ins_VPslldq(8), dst, src), Public))}{:quick exportOnly}{:public} Vpslldq8(out dst:xmm, src:xmm)
     ensures
         dst == old(Mkfour(0, 0, src.lo0, src.lo1));
 {
 }
 
-procedure{:instruction Ins(TS.TaintedIns(tuple(S.Vpsrldq(dst, src, 8)), Public))}{:quick exportOnly}{:public} Vpsrldq8(out dst:xmm, src:xmm)
+procedure{:instruction Ins(TS.TaintedIns(S.Ins_Xmm_Xmm(I.ins_VPsrldq(8), dst, src), Public))}{:quick exportOnly}{:public} Vpsrldq8(out dst:xmm, src:xmm)
     ensures
         dst == old(Mkfour(src.hi2, src.hi3, 0, 0));
 {
 }
+
+// TODO: get rid of this fuel
+#reset-options "--initial_fuel 2 --max_fuel 4 --max_ifuel 2 --z3rlimit 50"
 
 procedure{:instruction Ins(TS.TaintedIns(tuple(S.MOVDQU(Mov128Xmm(dst),Mov128Xmm(src))), Public))}{:quick exportOnly}{:public} Mov128(inout dst:xmm, src:xmm)
     ensures
@@ -442,7 +429,7 @@ procedure{:instruction Ins(TS.TaintedIns(tuple(S.MOVDQU(Mov128Xmm(dst), Mov128Me
     lemma_valid_taint128(b, #memTaint_t(memTaint), mem, #nat(index), t);
 }
 
-procedure{:instruction mk_taint_ins2(S.MovBe64, dst, TMem(MReg(get_reg(src), offset), t))}{:quick exportOnly}{:public} LoadBe64_buffer128(
+procedure{:instruction mk_taint_ins2(make_instr(I.ins_MovBe64), dst, TMem(MReg(get_reg(src), offset), t))}{:quick exportOnly}{:public} LoadBe64_buffer128(
     out dst:reg_opr64,
         src:reg_opr64,
         inline offset:int,
@@ -494,7 +481,7 @@ procedure{:instruction Ins(TS.TaintedIns(tuple(S.MOVDQU(Mov128Mem(MReg(get_reg(d
     same_memTaint128(b, old(mem), mem, old(#memTaint_t(memTaint)), #memTaint_t(memTaint));
 }
 
-procedure{:instruction mk_taint_ins2(S.Mov64, TMem(MReg(get_reg(dst), offset), t), src)}{:quick exportOnly}{:public} Store64_buffer128(
+procedure{:instruction mk_taint_ins2(S.Ins_64_64_preserve(I.ins_Mov64), TMem(MReg(get_reg(dst), offset), t), src)}{:quick exportOnly}{:public} Store64_buffer128(
         dst:reg_opr64,
         src:reg_opr64,
         inline offset:int,
