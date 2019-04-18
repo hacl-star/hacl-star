@@ -13,10 +13,16 @@ type fenu (n:comp) = r:fe n{isunit r}
 type fen2 (n:comp) = fe (n * n)
 type fen2u n = r:fen2 n{isunit r}
 
+val isunit_in_nsquare: #n:comp -> a:fe n{isunit a} -> Lemma
+  (isunit (to_fe #(n*n) a))
+let isunit_in_nsquare #n a = admit()
+
 val in_base: #n:comp -> g:fe (n*n) -> Type0
-let in_base #n g = exists (a:pos). b2t(fexp g (n * a) = 1)
+let in_base #n g =
+  g <> 0 /\ isunit g /\ (mult_order g % n = 0) /\ (mult_order g / n >= 1)
 
 type isg (n:comp) = g:fen2u n{in_base #n g}
+
 
 // N plus one, for SMTPat not to throw warnings
 val np1: #n:comp -> fen2 n
@@ -27,15 +33,23 @@ val nplus1inbase: #n:comp -> Lemma
   [SMTPat (np1 #n)]
 let nplus1inbase #n = admit()
 
-val encf: #n:comp -> g:isg n -> x:fe n -> y:fenu n -> fen2u n
-let encf #n g x y =
-  let r:fen2 n = fexp g x *% fexp (to_fe y) n in
-  assume(isunit r);
-  r
+val encf: #n:comp -> g:isg n -> x:fe n -> y:fenu n -> fen2 n
+let encf #n g x y = fexp g x *% fexp (to_fe y) n
+
+val encf_unit: #n:comp -> g:isg n -> x:fe n -> y:fenu n -> Lemma
+  (ensures (isunit (encf g x y)))
+let encf_unit #n g x y =
+  if x = 0 then fexp_one1 g else g_pow_isunit g x;
+
+  let y' = to_fe #(n*n) y in
+  isunit_in_nsquare #n y;
+  g_pow_isunit y' n;
+
+  isunit_prod (fexp g x) (fexp y' n)
 
 val encf_inj: #n:comp -> g:isg n -> x1:fe n -> y1:fenu n -> x2:fe n -> y2:fenu n -> Lemma
   (encf g x1 y1 = encf g x2 y2 ==> (x1 = x2 /\ y1 = y2))
-let encf_inj #n _ _ _ _= admit()
+let encf_inj #n _ _ _ _ = admit()
 
 // It is possible to get it checking every element of the preimage.
 // encf is bijection for proper g
