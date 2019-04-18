@@ -289,7 +289,7 @@ let aes_dec_key_expansion (v:variant) (key:aes_key v): aes_xkey v =
   let ekey_ex : aes_xkey v = aes_key_expansion v key in
   let k0 = sub ekey_ex 0 16 in
   let kn = sub ekey_ex ((num_rounds v) * 16) 16 in
-  let _,key_ex = generate_blocks 16 (num_rounds v + 1) 
+  let _,key_ex = generate_blocks 16 (num_rounds v + 1) (num_rounds v + 1) 
 		(fun i -> unit)
 		(fun i a -> 
 		  let b = sub ekey_ex ((num_rounds v - i) * 16) 16 in

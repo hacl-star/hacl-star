@@ -205,9 +205,9 @@ let uints_to_bytes_le_inner #t #l #len b i () =
 
 let uints_to_bytes_le #t #l #len ul =
   let a_spec (i:size_nat{i <= len}) = unit in
-  let _, o = generate_blocks (numbytes t) len a_spec
+  let _, o = generate_blocks (numbytes t) len len a_spec
     (uints_to_bytes_le_inner #t #l #len ul) () in
-  o
+  o 
 
 val uints_to_bytes_be_inner: #t:inttype -> #l:secrecy_level
   -> #len:size_nat{len * numbytes t < pow2 32}
@@ -219,7 +219,7 @@ let uints_to_bytes_be_inner #t #l #len b i () =
 
 let uints_to_bytes_be #t #l #len ul =
   let a_spec (i:size_nat{i <= len}) = unit in
-  let _, o = generate_blocks (numbytes t) len a_spec
+  let _, o = generate_blocks (numbytes t) len len a_spec
     (uints_to_bytes_be_inner #t #l #len ul) () in
   o
 
