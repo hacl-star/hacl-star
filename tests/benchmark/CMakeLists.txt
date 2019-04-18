@@ -1,10 +1,14 @@
-project(libbenchmark LANGUAGES C CXX ASM)
+project(benchmark LANGUAGES C CXX ASM)
 cmake_minimum_required(VERSION 3.12)
 
-add_subdirectory(libevercrypt)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+option(USE_HACL "Use HaCl." ON)
+option(USE_VALE "Use Vale." ON)
 option(USE_BCRYPT "Use BCrypt." OFF)
 option(USE_OPENSSL "Use OpenSSL." ON)
+
+add_subdirectory(libevercrypt)
 
 add_library(benchmark STATIC benchmark.cpp)
 target_include_directories(benchmark PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
@@ -16,6 +20,16 @@ add_executable(runbenchmark
   bench_aead.cpp)
 target_include_directories(runbenchmark PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(runbenchmark PRIVATE benchmark evercrypt)
+
+if(USE_HACL)
+message("-- Using HaCl (via EverCrypt)")
+target_compile_definitions(runbenchmark PRIVATE HAVE_HACL)
+endif(USE_HACL)
+
+if(USE_VALE)
+message("-- Using Vale (via EverCrypt)")
+target_compile_definitions(runbenchmark PRIVATE HAVE_VALE)
+endif(USE_VALE)
 
 if(USE_BCRYPT)
   find_library(BCRYPT_LIB bcrypt.dll)

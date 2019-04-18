@@ -159,12 +159,14 @@ int bench_hash(unsigned int seed, size_t num_samples)
   for (size_t ds: data_sizes)
   {
     std::set<Benchmark*> todo = {
+      #ifdef HAVE_HACL
       new HaclMD5(ds),
       new HaclSHA1(ds),
       new HaclHash<2, 224>(ds),
       new HaclHash<2, 256>(ds),
       new HaclHash<2, 384>(ds),
       new HaclHash<2, 512>(ds),
+      #endif
 
       new EverCryptMD5(ds),
       new EverCryptSHA1(ds),
@@ -199,21 +201,18 @@ int bench_hash(unsigned int seed, size_t num_samples)
     plot_filename << "bench_hash_" << ds << ".svg";
 
     b_make_plot(seed, num_samples,
-                "config",
                 "svg",
                 title.str(),
                 "avg cycles/hash",
                 filename.str(),
                 plot_filename.str(),
-                "",
-                "   using 5:xticlabels(1) with boxes title columnheader, \
-                 '' using ($0-1):5:xticlabels(1):(sprintf(\"%0.2f\", $5)) with labels font \"Courier,8\" rotate by 90 left");
+                "set xrange[-1:" + num_benchmarks.str() + "]",
+                "using 5:xticlabels(1) with boxes title columnheader, '' using ($0-1):5:xticlabels(1):(sprintf(\"%0.0f\", $5)) with labels font \"Courier,8\" offset char 0,.5");
 
     plot_filename.str("");
     plot_filename << "bench_hash_" << ds << "_candlesticks.svg";
 
     b_make_plot(seed, num_samples,
-                "config",
                 "svg",
                 title.str(),
                 "cycles/hash",

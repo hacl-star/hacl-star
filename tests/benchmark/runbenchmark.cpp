@@ -14,7 +14,7 @@ int main(int argc, char const **argv)
 
   //EverCrypt_AutoConfig2_disable_vale();
 
-  Benchmark::set_config(1, 1, 1, 1, 1, 1, 1, 1, 1);
+  Benchmark::set_runtime_config(1, 1, 1, 1, 1, 1, 1, 1, 1);
 
   bench_hash(seed, samples);
   bench_aead(seed, samples);

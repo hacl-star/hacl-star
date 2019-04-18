@@ -43,6 +43,8 @@ class Benchmark
     unsigned int seed;
     size_t samples;
 
+    static void escape(char c, std::string & str);
+
   public:
     Benchmark();
     Benchmark(std::string & name);
@@ -55,8 +57,9 @@ class Benchmark
     virtual void b_func() = 0;
     virtual void report(std::ostream & rs) = 0;
 
-    static std::string get_config();
-    static void set_config(int shaext, int aesni, int pclmulqdq, int avx, int avx2, int bmi2, int adx, int hacl, int vale);
+    static std::string get_runtime_config();
+    static void set_runtime_config(int shaext, int aesni, int pclmulqdq, int avx, int avx2, int bmi2, int adx, int hacl, int vale);
+    static std::pair<std::string, std::string> & get_build_config(bool escaped=false);
 
     void set_name(const std::string & name);
     std::string get_name() const { return name; }
@@ -70,7 +73,6 @@ extern void b_run(unsigned int seed,
 
 extern void b_make_plot(unsigned int seed,
                         size_t samples,
-                        const std::string & build_config,
                         const std::string & terminal,
                         const std::string & title,
                         const std::string & units,
