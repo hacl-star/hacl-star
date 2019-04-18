@@ -123,7 +123,7 @@ val hkdf_extract :
   salt    : uint8_p { disjoint salt prk /\ HMAC.keysized a (length salt)} ->
   saltlen : uint8_l salt ->
   ikm     : uint8_p { length ikm + blockLength a < pow2 32 /\ disjoint ikm prk } ->
-  ikmlen  : uint8_l ikm -> ST unit
+  ikmlen  : uint8_l ikm -> Stack unit
   (requires (fun h0 ->
     live h0 prk /\ live h0 salt /\ live h0 ikm ))
   (ensures  (fun h0 r h1 ->
@@ -143,7 +143,7 @@ val hkdf_expand :
     HMAC.keysized a (v prklen) /\
     tagLength a + v infolen + 1 + blockLength a < pow2 32 /\
     v len <= 255 * tagLength a } ->
-  ST unit
+  Stack unit
   (requires (fun h0 -> live h0 okm /\ live h0 prk /\ live h0 info))
   (ensures  (fun h0 r h1 ->
     live h1 okm /\ LowStar.Modifies.(modifies (loc_buffer okm) h0 h1) /\

@@ -166,22 +166,6 @@ let rec test_cipher (LB len vs) =
     B.recall vs;
     test_cipher (LB (len - 1ul) (B.offset vs 1ul))
 
-let chacha20_vector = vec8 * vec8 * U32.t * vec8 * vec8
-
-val test_chacha20: lbuffer chacha20_vector -> St unit
-let rec test_chacha20 (LB len vs) =
-  let open FStar.Integers in
-  B.recall vs;
-  if len > 0ul then begin
-    push_frame ();
-    let (LB key_len key), (LB iv_len iv), ctr, (LB plain_len plain), (LB cipher_len cipher) = vs.(0ul) in
-    let cipher' = B.alloca 0uy cipher_len in
-    EverCrypt.Cipher.chacha20 plain_len cipher' plain key iv ctr;
-    TestLib.compare_and_print !$"of ChaCha20 message" cipher cipher' cipher_len;
-    pop_frame ();
-    B.recall vs;
-    test_chacha20 (LB (len - 1ul) (B.offset vs 1ul))
-  end
 
 let test_aead_st alg key key_len iv iv_len aad aad_len tag tag_len plaintext plaintext_len
   ciphertext ciphertext_len: St unit
@@ -309,7 +293,7 @@ let main (): St C.exit_code =
       [SMTPat (Heap.equal_dom h1 h2)]
     = ()
   in
-    
+
   EverCrypt.AutoConfig2.init ();
 
   let open EverCrypt in

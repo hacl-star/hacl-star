@@ -255,7 +255,7 @@ val create: a:alg -> ST (state a)
 *)
 val init: #a:e_alg -> (
   let a = Ghost.reveal a in
-  s: state a -> ST unit
+  s: state a -> Stack unit
   (requires invariant s)
   (ensures fun h0 _ h1 ->
     invariant s h1 /\
