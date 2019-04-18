@@ -19,7 +19,7 @@ open Spec.Hash.Definitions
 
 open Test.Lowstarize
 
-// This contains hashes, hmac, hkdf.
+// This contains hashes, hmac, hkdf, chacha20
 open Test.NoHeap
 
 (* the following two are necessary to connect with EverCrypt.Cipher and EverCrypt.Curve25519 *)
@@ -171,10 +171,6 @@ let rec test_cipher_loop (LB len vs) =
 
 let test_cipher () : St unit = test_cipher_loop block_cipher_vectors_low
 
-#pop-options
-
-let test_chacha20 () : St unit = test_chacha20_loop chacha20_vectors_low
-
 let aead_key_length32 (al: Spec.AEAD.alg) : Tot (x: U32.t { U32.v x == Spec.AEAD.key_length al } ) =
   let open Spec.AEAD in
   match al with
@@ -190,10 +186,13 @@ let aead_max_length32 (al: Spec.AEAD.supported_alg) : Tot (x: U32.t { U32.v x ==
   let open Spec.AEAD in
   match al with
   | CHACHA20_POLY1305 -> 4294967295ul `U32.sub` 16ul
-  | AES128_GCM | AES256_GCM -> 1048575ul `U32.sub` 16ul
+  | AES128_GCM | AES256_GCM -> [@inline_let] let _ = assert_norm (pow2 20 == 1048576) in 1048575ul `U32.sub` 16ul
 
 let aead_tag_length32 (al: Spec.AEAD.alg) : Tot (x: U32.t { U32.v x == Spec.AEAD.tag_length al /\ (Spec.AEAD.is_supported_alg al ==> U32.v x <= Spec.AEAD.max_length al) } ) =
   let open Spec.AEAD in
+  [@inline_let] let _ =
+    assert_norm (pow2 20 == 1048576)
+  in
   match al with
   | AES128_CCM8       ->  8ul
   | AES256_CCM8       ->  8ul
@@ -414,7 +413,7 @@ let test_all_body (print: C.String.t -> St unit) : St unit =
     print !$"  >>>>>>>>> Poly1305\n";
     test_poly1305 ();
     print !$"  >>>>>>>>> Chacha20\n";
-    test_chacha20 ();
+    test_chacha20 chacha20_vectors_low;
     print !$"  >>>>>>>>> AEAD (ChachaPoly vectors)\n";
     test_chacha20poly1305 ()
 
