@@ -397,15 +397,19 @@ let mod_ops_props2 #n a b c v =
 
 (* Inverses *)
 
+// euler's totient
+val phi: big -> pos
+let phi n = if isprm n then n-1 else admit()
+
 val isunit: #n:big -> a:fe n -> Type0
 let isunit #n a = exists b. a *% b = 1
 
 val finv0: #n:big -> a:fe n ->
-  Tot (b:option (fe n){isunit a <==> (Some? b /\ Some?.v b *% a = one)})
-let finv0 #n a = admit()
+  Tot (b:fe n{isunit a <==> b *% a = one})
+let finv0 #n a = admit(); fexp a (phi n - 1)
 
 val finv: #n:big -> a:fe n{isunit a} -> b:fe n{b *% a = one}
-let finv #n a = match finv0 a with | Some x -> x
+let finv #n a = finv0 a
 
 val finv_unique: #n:big -> a:fe n -> b:fe n{a *% b = one} -> Lemma
   (isunit a /\ b = finv a)
@@ -466,6 +470,11 @@ let inv_as_gcd2 #n a =
   mod_prop n (u*a) 1;
   assert ((u * a) - 1 = ((u*a)/n)*n);
   assert ((u * a) - ((u*a)/n)*n = 1);
+  assert ((u * a) + (-((u*a)/n)*n) = 1);
+  let l1 (x:int): Lemma (-(x*n) = (-x)*n) = () in
+  l1 ((u*a)/n);
+  assert (-((u*a)/n)*n = (-(u*a)/n)*n);
+  assert ((u * a) + (-((u*a)/n)*n) = 1);
   assert ((u * a) + (-(u*a)/n)*n = 1);
   ex_eucl_lemma3 a n u (-(u*a)/n);
   assert (gcd a n = 1)
