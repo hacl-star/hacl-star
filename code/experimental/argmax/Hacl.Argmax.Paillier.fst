@@ -37,7 +37,7 @@ val encf: #n:comp -> g:isg n -> x:fe n -> y:fenu n -> fen2 n
 let encf #n g x y = fexp g x *% fexp (to_fe y) n
 
 val encf_unit: #n:comp -> g:isg n -> x:fe n -> y:fenu n -> Lemma
-  (ensures (isunit (encf g x y)))
+  (isunit (encf #n g x y))
 let encf_unit #n g x y =
   if x = 0 then fexp_one1 g else g_pow_isunit g x;
 
@@ -55,7 +55,21 @@ let encf_inj #n _ _ _ _ = admit()
 // encf is bijection for proper g
 val encf_inv: #n:comp -> g:isg n -> w:fen2u n ->
   t:(tuple2 (fe n) (fenu n)){ encf g (fst t) (snd t) = w }
-let encf_inv #n _ _ = admit()
+let encf_inv #n g w =
+  if w = g
+  then begin
+    let x:fe (n*n) = one in
+    let y:fe n = one in
+    let y':fe (n*n) = one in
+
+    fexp_one1 g;
+    assert(fexp g one = g);
+    fexp_one2 #(n*n) y;
+    assert(fexp y' n = one);
+    assert(fexp g one *% fexp y' n = g);
+    assert(encf g x y = g);
+    Mktuple2 x y
+  end else admit() // it's hard to invert it
 
 val is_res_class: #n:comp -> g:isg n -> w:fen2u n -> x:fe n -> Type0
 let is_res_class #n g w x = exists y. encf g x y = w
@@ -152,8 +166,16 @@ let res_class_decomposition #n g1 g2 w =
 
   assert(x1 = x3 *% x2)
 
-
 #reset-options
+
+
+val res_class_inverse: #n:comp -> g1:isg n -> g2:isg n -> Lemma
+  (isunit (res_class g1 g2) /\
+   finv (res_class g1 g2) = res_class g2 g1)
+let res_class_inverse #n g1 g2 =
+  res_class_decomposition g1 g2 g1;
+  assert(res_class g1 g1 = one);
+  finv_unique (res_class g1 g2) (res_class g2 g1)
 
 val bigl: #n:comp -> u:fen2 n{u > 0} -> r:fe n
 let bigl #n u = (u - 1) / n
@@ -223,7 +245,9 @@ val encrypt:
   -> r:fenu (Public?.n p)
   -> m:fe (Public?.n p)
   -> ciphertext (Public?.n p)
-let encrypt pub r m = encf (Public?.g pub) m r
+let encrypt pub r m =
+  encf_unit #(Public?.n pub) (Public?.g pub) m r;
+  encf (Public?.g pub) m r
 
 val decrypt:
      s:secret
@@ -240,6 +264,7 @@ let decrypt sec c =
   let l2:fe n = bigl (fexp g lambda) in
 
   assume(isunit #n l2);
+  // TODO get rid of it, replace with "incorrect" finv
   let m = l1 *% finv l2 in
   m
 
@@ -256,16 +281,22 @@ let decrypts_into_res_class sec c =
   let n = p * q in
   let g = Secret?.g sec in
   let lambda = etot p q in
-  let lambda' = to_fe lambda in
+  let lambda': fe n = to_fe lambda in
   let r_c = res_class #n np1 c in
   let r_g = res_class #n np1 g in
   let r_z = res_class #n g c in
 
-  assume((fexp c lambda) % n = 1);
+
+  assume(fexp c lambda > 0);
   let l1:fe n = bigl (fexp c lambda) in
-  assume((fexp g lambda) % n = 1);
+  assume(fexp g lambda > 0);
   let l2:fe n = bigl (fexp g lambda) in
   assume(isunit l2);
+
+  assume((fexp c lambda) % n = 1);
+  assume((fexp g lambda) % n = 1);
+  bigl_prop (fexp c lambda);
+  bigl_prop (fexp g lambda);
 
   bigl_lemma1 p q c;
   assert(l1 = lambda' *% r_c);
@@ -283,7 +314,7 @@ let decrypts_into_res_class sec c =
 
   assume(isunit #n lambda');
 
-  let lem1 (): Lemma (finv l2 = finv lambda' *% finv r_g) = finv_comm2 lambda' r_g in
+  let lem1 (): Lemma (finv l2 = finv lambda' *% finv r_g) = isunit_prod lambda' r_g in
 
   calc (==) {
     m;
