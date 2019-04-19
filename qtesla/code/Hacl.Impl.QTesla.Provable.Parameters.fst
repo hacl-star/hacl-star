@@ -16,6 +16,7 @@ unfold let to_elem = I64.int_to_t
 unfold let to_uelem = UI64.uint_to_t
 module IElem = FStar.Int64
 unfold let elem_n = IElem.n
+unfold let elem_nbytes = numbytes U64
 unfold let elem_v = IElem.v
 unfold let uelem_v = UI64.v
 

@@ -778,7 +778,7 @@ let test_correctness v_ =
     pop_frame();
     resVal
 
-#reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0 --admit_smt_queries true"
+#reset-options "--z3rlimit 300 --max_fuel 0 --max_ifuel 0 --admit_smt_queries true"
 
 val qtesla_sign_do_while:
     randomness: lbuffer uint8 crypto_seedbytes
@@ -983,7 +983,7 @@ let qtesla_verify mallocated mlen m smlen sm pk =
     let z = poly_create () in
     let z_ntt = poly_create() in
 
-    decode_sig c z smlen sm; 
+    decode_sig c z (sub sm (size 0) crypto_bytes); 
     if test_z z <> 0l then ( pop_frame(); -2l ) else (
     decode_pk pk_t seed pk;
     poly_uniform a seed;

@@ -13,6 +13,7 @@ unfold let to_elem = I32.int_to_t
 unfold let to_uelem = UI32.uint_to_t
 module IElem = FStar.Int32
 unfold let elem_n = IElem.n
+unfold let elem_nbytes = numbytes U32
 unfold let elem_v = IElem.v
 unfold let uelem_v = UI32.v
 
