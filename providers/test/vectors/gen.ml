@@ -5,7 +5,7 @@
 ocamlfind ocamlopt -package yojson gen.ml -linkpkg -o gen.exe && \
   ./gen.exe -module Test.Vectors.Poly1305 poly1305_test_vectors.json && \
   ./gen.exe -module Test.Vectors.Curve25519 curve25519_test_vectors.json && \
-  ./gen.exe -module Test.Vectors.Chacha20Poly1305 aead_chacha20poly1305_test_vectors.json \
+  ./gen.exe -module Test.Vectors.Chacha20Poly1305 aead_chacha20poly1305_test_vectors.json && \
   ./gen.exe -module Test.Vectors.Aes128Gcm aead_aes128gcm_test_vectors.json && \
   ./gen.exe -module Test.Vectors.Aes128 aes128_test_vectors.json
 
@@ -19,11 +19,16 @@ let avoid f =
   else
     f
 
-let generate_hex_field oc i f hex =
+let generate_hex_field oc i f hex has_aad =
   let l = String.length hex / 2 in
+  let disj, disj_recall  =
+    if f = "input" && has_aad
+    then Printf.sprintf " /\\ B.disjoint b aad%d" i, Printf.sprintf "   B.recall aad%d;"  i
+    else "", ""
+  in
   Printf.fprintf oc
-    "let %s%d: (b: B.buffer UInt8.t { B.length b = %d /\\ B.recallable b }) =\n  \
-       [@inline_let] let l = [ " f i l;
+    "let %s%d: (b: B.buffer UInt8.t { B.length b = %d /\\ B.recallable b%s }) =\n  \
+       %s[@inline_let] let l = [ " f i l disj disj_recall;
   if String.length hex mod 2 <> 0 then
     failwith (Printf.sprintf "data in entry %d field %s end on a half-byte boundary" i f);
   for i = 0 to l - 1 do
@@ -55,6 +60,11 @@ let syntax_of_json module_ json =
   let hex_fields = ref [] in
   let bool_fields = ref [] in
 
+  (* if there is a field called aad, then we should add a
+       disjointness postcondition to any field called input that would
+       follow aad *)
+  let has_aad = ref false in
+
   List.iteri (fun i vec ->
     let fields = match vec with
       | `Assoc fields -> fields
@@ -66,9 +76,11 @@ let syntax_of_json module_ json =
         match hex with
         | `String hex ->
             (* Just trusting the first entry to have the right fields. *)
-            if i = 0 then
-              hex_fields := f :: !hex_fields;
-            generate_hex_field oc i f hex
+            if i = 0 then begin
+                hex_fields := f :: !hex_fields;
+                if f = "aad" then has_aad := true;
+              end;
+            generate_hex_field oc i f hex !has_aad
 
         | `Bool b ->
             if i = 0 then
@@ -79,10 +91,17 @@ let syntax_of_json module_ json =
     ) fields
   ) vectors;
 
+  let has_aad = !has_aad in
+  
   Printf.fprintf oc "noeq\ntype vector = | Vector:\n";
   List.iter (fun f ->
+    let disj =
+      if f = "aad" && has_aad (* the list of fields got reversed, so aad will now appear after input *)
+      then " /\\ B.disjoint input aad"
+      else ""
+    in
     let f = avoid f in
-    Printf.fprintf oc "  %s: B.buffer UInt8.t { B.recallable %s } ->\n" f f;
+    Printf.fprintf oc "  %s: B.buffer UInt8.t { B.recallable %s%s } ->\n" f f disj;
     Printf.fprintf oc "  %s_len: UInt32.t { B.length %s = UInt32.v %s_len } ->\n" f f f
   ) !hex_fields;
   List.iter (fun f ->
