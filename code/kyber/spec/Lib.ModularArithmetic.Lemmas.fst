@@ -1,4 +1,4 @@
-module Spec.Kyber.Arithmetic
+module Lib.ModularArithmetic.Lemmas
 
 open Lib.IntTypes
 open Lib.Sequence
@@ -9,90 +9,28 @@ open FStar.Math.Lemmas
 open FStar.Classical
 open FStar.Tactics
 
-open Spec.Kyber.Params
-open Spec.Kyber.Lemmas
-open Spec.Powtwo.Lemmas
-
+open Lib.ModularArithmetic
 module Seq = Lib.Sequence
 module Loops = Lib.LoopCombinators
 
 
-#reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq'"
 
+#reset-options "--z3rlimit 200 --max_fuel 2 --max_ifuel 2 --using_facts_from '* -FStar.Seq'"
 
-type field q = x:nat{x<q}
-type set n q = p:lseq (field q) n
-
-inline_for_extraction
-val modular_add: #q:nat -> x:field q -> y:field q -> z:field q
-
-let modular_add #q x y =
-  (x + y) % q
-
-inline_for_extraction
-let (+%) #q = modular_add #q
-
-inline_for_extraction
-val modular_add_lemma: #q:nat -> x:field q-> y:field q-> Lemma (ensures (modular_add x y = (x + y) % q))
-  [SMTPat (modular_add x y)]
-
-let modular_add_lemma #q x y = ()
-
-inline_for_extraction
-val modular_add_associativity_lemma: #q:nat -> x:field q -> y:field q -> z:field q -> Lemma (ensures modular_add (modular_add x y) z = modular_add x (modular_add y z)) (*[SMTPat (modular_add x (modular_add y z))]*)
 
 let modular_add_associativity_lemma #q x y z =
   lemma_mod_add_distr z (x+y) q;
   lemma_mod_add_distr x (y+z) q
 
 
-inline_for_extraction
-val modular_sub: #q:nat -> x:field q -> y:field q -> z:field q
-
-let modular_sub #q x y =
-  (x +(q - y)) % q
-
-
-inline_for_extraction
-let (-%) #q = modular_sub #q
-
-inline_for_extraction
-val modular_sub_lemma: #q:nat -> x:field q -> y:field q -> Lemma (ensures (modular_sub x y = (x - y) % q))
- [SMTPat (modular_sub x y)]
-
-let modular_sub_lemma #q x y = ()
-
-inline_for_extraction
-val modular_mul: #q:nat -> x:field q -> y:field q -> z:field q
-
-let modular_mul #q x y =
-  (x * y) % q
-
-inline_for_extraction
-let ( *% ) #q = modular_mul #q
-
-inline_for_extraction
-val modular_mul_lemma: #q:nat -> x:field q -> y:field q-> Lemma (ensures (modular_mul x y = (x * y) % q))
-  [SMTPat (modular_mul x y)]
-
-let modular_mul_lemma #q x y = ()
-
-inline_for_extraction
-val modular_mul_one_lemma: #q:nat{q>1} -> x:field q -> Lemma (ensures (modular_mul 1 x = x))
-
 let modular_mul_one_lemma #q x = ()
-#reset-options "--z3rlimit 200 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq'"
 
-inline_for_extraction
-val modular_mul_associativity_lemma: #q:nat -> x:field q -> y:field q -> z:field q -> Lemma (ensures modular_mul (modular_mul x y) z = modular_mul x (modular_mul y z)) (*[SMTPat (modular_mul x (modular_mul y z))]*)
+#reset-options "--z3rlimit 200 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq'"
 
 let modular_mul_associativity_lemma #q x y z =
   lemma_mod_mul_distr_l (x*y) z q;
   paren_mul_right x y z;
   lemma_mod_mul_distr_r x (y*z) q
-
-inline_for_extraction
-val modular_mul_add_distrib_lemma: #q:nat -> x:field q -> y:field q -> z:field q -> Lemma ((x+%y)*%z = x*%z +% y*%z)
 
 let modular_mul_add_distrib_lemma #q x y z =
   calc (==) {
@@ -106,25 +44,10 @@ let modular_mul_add_distrib_lemma #q x y z =
     }
 
 
-inline_for_extraction
-val modular_exp: #q:nat{q>1} -> x:field q-> n:nat -> Tot (z:field q) (decreases n)
-
-let rec modular_exp # q x n =
-  if n=0 then 1 else x *% (modular_exp x (n-1))
-
-let (^%) #q = modular_exp #q
-
-
-#reset-options "--z3rlimit 200 --max_fuel 2 --max_ifuel 2 --using_facts_from '* -FStar.Seq'"
-
-inline_for_extraction
-val modular_exp_lemma_expand: #q:nat{q>1} -> x:field q -> y:field q -> n:nat -> Lemma (ensures modular_exp (x *% y) n = (modular_exp x n) *% (modular_exp y n)) (decreases n) (*[SMTPat (modular_exp (x*%y) n)]
-*)
-
-val modular_exp_lemma_zero: #q:nat{q>1} -> x:field q -> Lemma (ensures modular_exp x 0 = 1)
-
 let modular_exp_lemma_zero #q x = 
   assert_norm(modular_exp x 0 = 1)
+
+#reset-options "--z3rlimit 200 --max_fuel 2 --max_ifuel 2 --using_facts_from '* -FStar.Seq'"
 
 let rec modular_exp_lemma_expand #q x y n = 
   if n = 0 then
@@ -149,7 +72,6 @@ let rec modular_exp_lemma_expand #q x y n =
 
 #reset-options "--z3rlimit 200 --max_fuel 1 --max_ifuel 1 --using_facts_from '* -FStar.Seq'"
 
-val modular_exp_morphism_lemma: #q:nat{q>1} -> x:field q -> n:nat -> m:nat -> Lemma (ensures modular_exp x (n+m) = modular_mul (modular_exp x n) (modular_exp x m)) (decreases m)
 
 let rec modular_exp_morphism_lemma #q x n m =
   if (m=0) then ()
@@ -171,8 +93,6 @@ let rec modular_exp_morphism_lemma #q x n m =
 
 #reset-options "--z3rlimit 200 --max_fuel 2 --max_ifuel 2 --using_facts_from '* -FStar.Seq'"    
 
-inline_for_extraction
-val modular_exp_lemma_one1: #q:nat{q>1} -> x:field q -> Lemma (ensures ((modular_exp x 1) = x))
 
 let modular_exp_lemma_one1 #q x = 
   assert(x *% 1 = x);
@@ -181,8 +101,6 @@ let modular_exp_lemma_one1 #q x =
   assert( x *% modular_exp x 0 = x *% 1);
   assert(modular_exp #q x 1 = x)
 
-inline_for_extraction
-val modular_exp_lemma_one2: #q:nat{q>1} -> n:nat -> Lemma (ensures ((modular_exp #q 1 n) = 1)) (decreases n)
 
 let rec modular_exp_lemma_one2 #q n = 
   if n=0 then modular_exp_lemma_zero #q 1
@@ -196,17 +114,11 @@ let rec modular_exp_lemma_one2 #q n =
 
 #reset-options "--z3rlimit 200 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq'"    
 
-inline_for_extraction
-val modular_exp_lemma_inv: #q:nat{q>1} -> x:field q -> y:field q{x*%y = 1} -> n:nat -> Lemma (ensures ((modular_exp x n) *% (modular_exp y n) = 1)) [SMTPat ((modular_exp x n) *% (modular_exp y n))]
-
-
 let modular_exp_lemma_inv #q x y n = 
   modular_exp_lemma_expand x y n;
   modular_exp_lemma_one2 #q n
 
 #reset-options "--z3rlimit 200 --max_fuel 1 --max_ifuel 1 --using_facts_from '* -FStar.Seq'"    
-
-val modular_exp_exp_lemma: #q:nat{q>1} -> x:field q -> n:nat -> m:nat -> Lemma (ensures modular_exp x (n*m) = modular_exp (modular_exp x n) m) (decreases m)
 
 let rec modular_exp_exp_lemma #q x n m =
   if m = 0 then ()
@@ -224,9 +136,6 @@ let rec modular_exp_exp_lemma #q x n m =
       }
 
 
-inline_for_extraction
-val modular_sum_n: #n:size_nat -> #q:pos -> l:set n q -> Tot (s:field q) (decreases n) 
-
 let rec modular_sum_n #n #q l =
   if n=0 then 0
   else
@@ -236,8 +145,17 @@ let rec modular_sum_n #n #q l =
  
 #reset-options "--z3rlimit 200 --max_fuel 2 --max_ifuel 2 --using_facts_from '* -FStar.Seq'"    
 
+
 inline_for_extraction
-val simpl_seq_sub_sub_lemma: #a:Type -> #len:size_nat -> l:lseq a len -> start1:size_nat -> n1:size_nat{start1+n1<=len} -> start2:size_nat -> n2:size_nat{start2+n2<=n1} -> Lemma(sub (sub l start1 n1) start2 n2 == sub l (start1+start2) n2) 
+val simpl_seq_sub_sub_lemma: 
+  #a:Type 
+  -> #len:size_nat 
+  -> l:lseq a len 
+  -> start1:size_nat 
+  -> n1:size_nat{start1+n1<=len} 
+  -> start2:size_nat 
+  -> n2:size_nat{start2+n2<=n1} 
+  -> Lemma(sub (sub l start1 n1) start2 n2 == sub l (start1+start2) n2) 
 
 let simpl_seq_sub_sub_lemma #a #len l start1 n1 start2 n2 =
   let s = sub (sub l start1 n1) start2 n2 in
@@ -247,7 +165,12 @@ let simpl_seq_sub_sub_lemma #a #len l start1 n1 start2 n2 =
   eq_elim s (sub l (start1+start2) n2)
 
 inline_for_extraction
-val modular_sum_n_simple_lemma: #n:size_nat{n>=1} -> #q:nat{q>0} -> l:set n q -> Lemma(ensures modular_sum_n l = modular_sum_n (sub l 0 (n-1)) +% l.[n-1]) (decreases n)
+val modular_sum_n_simple_lemma: 
+  #n:size_nat{n>=1} 
+  -> #q:nat{q>0} 
+  -> l:set n q 
+  -> Lemma (ensures modular_sum_n l = modular_sum_n (sub l 0 (n-1)) +% l.[n-1]) 
+	  (decreases n)
 
 let rec modular_sum_n_simple_lemma #n #q l =
   if n = 1 then ()
@@ -269,7 +192,15 @@ let rec modular_sum_n_simple_lemma #n #q l =
     }
 
 inline_for_extraction
-val map_sub_commutativity_lemma: #n:size_nat -> #q1:nat -> #q2:nat -> l:set n q1 -> f:(field q1 -> field q2) -> i:size_nat -> len:size_nat{i+len<=n} ->Lemma (ensures sub (Seq.map f l) i len == Seq.map f (sub l i len))
+val map_sub_commutativity_lemma: 
+  #n:size_nat 
+  -> #q1:nat 
+  -> #q2:nat 
+  -> l:set n q1
+  -> f:(field q1 -> field q2) 
+  -> i:size_nat 
+  -> len:size_nat{i+len<=n} 
+  -> Lemma (ensures sub (Seq.map f l) i len == Seq.map f (sub l i len))
 
 let rec map_sub_commutativity_lemma #n #q1 #q2 l f i len =
   assert(forall (k:nat{k<len}). (sub (Seq.map f l) i len).[k] = (Seq.map f l).[i+k]);
@@ -279,9 +210,6 @@ let rec map_sub_commutativity_lemma #n #q1 #q2 l f i len =
   eq_intro (sub (Seq.map f l) i len) (Seq.map f (sub l i len));
   eq_elim (sub (Seq.map f l) i len) (Seq.map f (sub l i len))
   
-
-inline_for_extraction 
-val modular_sum_n_mult_distrib_l_lemma: #n:size_nat -> #q:nat -> l:set n q-> k:field q-> Lemma (ensures k *% modular_sum_n l = modular_sum_n (Seq.map (fun x -> k*%x) l)) (decreases n)
 
 let rec modular_sum_n_mult_distrib_l_lemma #n #q l k =
   if n=0 then ()
@@ -303,9 +231,6 @@ let rec modular_sum_n_mult_distrib_l_lemma #n #q l k =
 #reset-options "--z3rlimit 200 --max_fuel 2 --max_ifuel 2 --using_facts_from '* -FStar.Seq'"    
 
 
-inline_for_extraction 
-val modular_sum_n_mult_distrib_r_lemma: #n:size_nat -> #q:nat -> l:set n q-> k:field q-> Lemma (ensures (modular_sum_n l) *% k = modular_sum_n (Seq.map (fun x -> x *% k) l)) (decreases n)
-
 let rec modular_sum_n_mult_distrib_r_lemma #n #q l k =
   if n=0 then ()
   else 
@@ -324,9 +249,60 @@ let rec modular_sum_n_mult_distrib_r_lemma #n #q l k =
 	}
 
 
+#reset-options "--z3rlimit 200 --max_fuel 1 --max_ifuel 1 --using_facts_from '* -FStar.Seq'"
+
+let rec modular_sum_n_all_zero #n #q l =
+  if n = 0 then ()
+  else (
+    assert(modular_sum_n l = l.[0] +% modular_sum_n (sub l 1 (n-1)));
+    modular_sum_n_all_zero (Lib.Sequence.sub l 1 (n-1));
+    assert(modular_sum_n l = l.[0] +% 0))
+
+
+let rec modular_sum_n_one_non_zero_coeff #n #q k l =
+  if k = 0 then begin
+    modular_sum_n_all_zero (sub l 1 (n-1));
+    assert (modular_sum_n l = l.[0] +% modular_sum_n (sub l 1 (n-1)));
+    assert (modular_sum_n l = l.[0]) end
+  else begin
+    assert(modular_sum_n l = l.[0] +% modular_sum_n (sub l 1 (n-1)));
+    assert(l.[0]=0);
+    modular_sum_n_one_non_zero_coeff (k-1) (sub l 1 (n-1));
+    assert(modular_sum_n (sub l 1 (n-1)) = l.[k]);
+    assert(modular_sum_n l = 0 +% l.[k]);
+    modulo_distributivity 0 l.[k] q
+  end
+  
+
+let rec modular_sum_n_all_1_is_n_mod_q #n #q l =
+  let _lemma (a:pos) : Lemma ((1+(a-1)) % q = a % q) =
+    ()
+  in
+  if n = 0 then () 
+  else begin
+    assert(modular_sum_n #n #q l = l.[0] +% (modular_sum_n #(n-1) #q (sub l 1 (n-1))));
+    modular_sum_n_all_1_is_n_mod_q #(n-1) #q (sub l 1 (n-1));
+    assert(1%q = 1);
+    assert(modular_sum_n l = (1%q) +% ((n-1) % q));
+    modulo_distributivity 1 (n-1) q;
+    assert(modular_sum_n l = (1 + (n-1)) %q);
+    _lemma n;
+    assert(modular_sum_n l = n % q)
+  end
+
+
+
 #reset-options "--z3rlimit 200 --max_fuel 2 --max_ifuel 2 --using_facts_from '* -FStar.Seq'"    
 
-val modular_fubini_lemma_: #n1:size_nat -> #n2:size_nat -> #q:nat{q>0} -> l1: set n1 q -> l2: set n2 q -> Lemma (ensures modular_sum_n (Seq.map (fun x -> modular_sum_n (Seq.map (fun y -> x *% y) l2)) l1) = modular_sum_n (Seq.map (fun y -> modular_sum_n (Seq.map (fun x -> x *% y) l1)) l2))
+(**fubini lemma *)
+
+val modular_fubini_lemma_: 
+  #n1:size_nat 
+  -> #n2:size_nat 
+  -> #q:nat{q>0} 
+  -> l1: set n1 q 
+  -> l2: set n2 q
+  -> Lemma (ensures modular_sum_n (Seq.map (fun x -> modular_sum_n (Seq.map (fun y -> x *% y) l2)) l1) = modular_sum_n (Seq.map (fun y -> modular_sum_n (Seq.map (fun x -> x *% y) l1)) l2))
 
 let modular_fubini_lemma_ #n1 #n2 #q l1 l2 =
   let s1 = Seq.map (fun x -> modular_sum_n (Seq.map (fun y -> x *% y) l2)) l1 in
@@ -360,14 +336,29 @@ let modular_fubini_lemma_ #n1 #n2 #q l1 l2 =
 
 #reset-options "--z3rlimit 200 --max_fuel 2 --max_ifuel 2 --using_facts_from '* -FStar.Seq'"    
 
-val dummy_modular_fubini_sublemma: #n:size_nat{n>0} -> #q1:nat -> #q2:nat -> g:(field q1 -> field q2) -> l:set n q1 -> Lemma((Seq.map g l).[0] = g l.[0])
+val dummy_modular_fubini_sublemma: 
+  #n:size_nat{n>0} 
+  -> #q1:nat 
+  -> #q2:nat 
+  -> g:(field q1 -> field q2) 
+  -> l:set n q1 
+  -> Lemma((Seq.map g l).[0] = g l.[0])
 
 let dummy_modular_fubini_sublemma #n #q1 #q2 g l = 
   ()
  
 #reset-options "--z3rlimit 200 --max_fuel 2 --max_ifuel 2 --using_facts_from '* -FStar.Seq'"    
 
-val modular_fubini_sublemma0: #n1:size_nat{n1>0} -> #n2:size_nat{n2>0} -> #q1:nat -> #q2:nat -> #q3:pos -> f: (field q1 -> field q2 -> field q3) -> l1: set n1 q1 -> l2: set n2 q2 -> Lemma(ensures (modular_sum_n (Seq.map (fun y -> f l1.[0] y) l2)) +% (modular_sum_n (Seq.map (fun x -> modular_sum_n (Seq.map (fun y -> f x y) (sub l2 1 (n2-1)))) (sub l1 1 (n1-1))) +% modular_sum_n (Seq.map (fun x -> f x l2.[0]) (sub l1 1 (n1-1)))) = (modular_sum_n (Seq.map (fun y -> f l1.[0] y) (sub l2 1 (n2-1))) +% modular_sum_n (Seq.map (fun x -> modular_sum_n (Seq.map (fun y -> f x y) (sub l2 1 (n2-1)))) (sub l1 1 (n1-1)))) +% (f l1.[0] l2.[0] +% modular_sum_n (Seq.map (fun x -> f x l2.[0]) (sub l1 1 (n1-1))))) 
+val modular_fubini_sublemma0: 
+  #n1:size_nat{n1>0} 
+  -> #n2:size_nat{n2>0} 
+  -> #q1:nat 
+  -> #q2:nat
+  -> #q3:pos
+  -> f: (field q1 -> field q2 -> field q3) 
+  -> l1: set n1 q1 
+  -> l2: set n2 q2 
+  -> Lemma(ensures (modular_sum_n (Seq.map (fun y -> f l1.[0] y) l2)) +% (modular_sum_n (Seq.map (fun x -> modular_sum_n (Seq.map (fun y -> f x y) (sub l2 1 (n2-1)))) (sub l1 1 (n1-1))) +% modular_sum_n (Seq.map (fun x -> f x l2.[0]) (sub l1 1 (n1-1)))) = (modular_sum_n (Seq.map (fun y -> f l1.[0] y) (sub l2 1 (n2-1))) +% modular_sum_n (Seq.map (fun x -> modular_sum_n (Seq.map (fun y -> f x y) (sub l2 1 (n2-1)))) (sub l1 1 (n1-1)))) +% (f l1.[0] l2.[0] +% modular_sum_n (Seq.map (fun x -> f x l2.[0]) (sub l1 1 (n1-1))))) 
 
 let modular_fubini_sublemma0 #n1 #n2 #q1 #q2 #q3 f l1 l2 = 
   calc (==) {
@@ -389,7 +380,16 @@ let modular_fubini_sublemma0 #n1 #n2 #q1 #q2 #q3 f l1 l2 =
 #reset-options "--z3rlimit 200 --max_fuel 2 --max_ifuel 2 --using_facts_from '* -FStar.Seq'"    
 
 
-val modular_fubini_sublemma1: #n1:size_nat -> #n2:size_nat{n2>0} -> #q1:nat -> #q2:nat -> #q3:pos -> f: (field q1 -> field q2 -> field q3) -> l1: set n1 q1 -> l2: set n2 q2 -> Lemma(ensures modular_sum_n (Seq.map (fun x -> modular_sum_n (Seq.map (fun y -> f x y) l2)) l1) = modular_sum_n (Seq.map (fun x -> modular_sum_n (Seq.map (fun y -> f x y) (sub l2 1 (n2-1)))) l1) +% modular_sum_n (Seq.map (fun x -> f x l2.[0]) l1)) (decreases n1)
+val modular_fubini_sublemma1: 
+  #n1:size_nat 
+  -> #n2:size_nat{n2>0} 
+  -> #q1:nat 
+  -> #q2:nat 
+  -> #q3:pos
+  -> f: (field q1 -> field q2 -> field q3)
+  -> l1: set n1 q1
+  -> l2: set n2 q2
+  -> Lemma(ensures modular_sum_n (Seq.map (fun x -> modular_sum_n (Seq.map (fun y -> f x y) l2)) l1) = modular_sum_n (Seq.map (fun x -> modular_sum_n (Seq.map (fun y -> f x y) (sub l2 1 (n2-1)))) l1) +% modular_sum_n (Seq.map (fun x -> f x l2.[0]) l1)) (decreases n1)
 
 
 
@@ -436,22 +436,8 @@ by (tadmit ())*)
      }
      end
      
-    
-val modular_sum_n_all_zero: #n:size_nat -> #q:nat{q>0} -> l:set n q{forall (k:nat{k<n}). l.[k] = 0} -> Lemma (ensures (modular_sum_n l = 0)) (decreases n)
-
-let rec modular_sum_n_all_zero #n #q l =
-  if n = 0 then ()
-  else (
-    assert(modular_sum_n l = l.[0] +% modular_sum_n (sub l 1 (n-1)));
-    modular_sum_n_all_zero (Lib.Sequence.sub l 1 (n-1));
-    assert(modular_sum_n l = l.[0] +% 0))
-
-
-  
 
 #reset-options "--z3rlimit 200 --max_fuel 2 --max_ifuel 2 --using_facts_from '* -FStar.Seq'"    
-inline_for_extraction
-val modular_fubini_lemma: #n1:size_nat -> #n2:size_nat -> #q1:nat -> #q2:nat -> #q3:pos -> f: (field q1 -> field q2 -> field q3) -> l1: set n1 q1 -> l2: set n2 q2 -> s1: set n1 q3 -> s2: set n2 q3 -> Lemma (requires s1 == Seq.map (fun x -> modular_sum_n (Seq.map (fun y -> f x y) l2)) l1 /\ s2 == Seq.map (fun y -> modular_sum_n (Seq.map (fun x -> f x y) l1)) l2) (ensures modular_sum_n s1 = modular_sum_n s2) (decreases n2)
 
 let rec modular_fubini_lemma #n1 #n2 #q1 #q2 #q3 f l1 l2 s1 s2 =
  (* let s1 = Seq.map (fun x -> modular_sum_n (Seq.map (fun y -> f x y) l2)) l1 in
@@ -476,20 +462,6 @@ let rec modular_fubini_lemma #n1 #n2 #q1 #q2 #q3 f l1 l2 s1 s2 =
 #reset-options "--z3rlimit 200 --max_fuel 1 --max_ifuel 1 --using_facts_from '* -FStar.Seq'"    
 	
   
-val extended_gcd: x:pos -> y:nat -> Tot (res:(int & int & pos){let (u, v, g) = res in u * x + v * y = g}) (decreases y)
-
-let rec extended_gcd x y =
-  if y = 0 then (1,0,x)
-  else
-    let q = x / y in
-    let (u, v, g) = extended_gcd y (x - q * y) in
-    (v, u - q * v, g)
-
-val gcd: x:pos -> y:nat -> Tot (g:pos)
-
-let gcd x y = let (_,_,g) = extended_gcd x y in g
-#reset-options "--z3rlimit 200 --max_fuel 1 --max_ifuel 1 --using_facts_from '* -FStar.Seq'"    
-
 
 val extended_gcd_simple_lemma: x:pos -> y:pos -> Lemma (let (u1,v1,g1) = extended_gcd x y in let (u2,v2,g2)= extended_gcd y (x%y) in (u1,v1,g1) == (v2, u2 - (x/y) * v2, g2))
 
@@ -497,7 +469,6 @@ let extended_gcd_simple_lemma x y = ()
 
 #reset-options "--z3rlimit 200 --max_fuel 1 --max_ifuel 1 --using_facts_from '* -FStar.Seq'"    
 
-val gcd_lemma: x:pos -> y:nat -> p:pos{x % p = 0 /\ y % p = 0} -> Lemma (ensures (gcd x y) % p = 0) (decreases y)
 
 let rec gcd_lemma x y p =
   if y = 0 then ()
@@ -519,7 +490,6 @@ let rec gcd_lemma x y p =
 
 #reset-options "--z3rlimit 200 --max_fuel 1 --max_ifuel 1 --using_facts_from '* -FStar.Seq'"    
 
-val gcd_lemma2: x:pos -> y:nat -> Lemma (ensures (let g = gcd x y in x % g = 0 /\ y % g = 0)) (decreases y)
 
 let rec gcd_lemma2 x y =
   let g = gcd x y in
@@ -529,11 +499,11 @@ let rec gcd_lemma2 x y =
     gcd_lemma2 y (x%y);
     extended_gcd_simple_lemma x y;
     assert(y % g = 0 /\ (x%y) %g = 0);
+    assert(x = (x/y)*y + (x%y));
     lemma_mod_mul_distr_r (x/y) y g;
     modulo_distributivity ((x/y) * y) (x%y) g
     end
 
-val gcd_lemma3: x:pos -> y:nat -> u:int -> v:int -> w:pos{x*u + y*v = w} -> Lemma (ensures (let g = gcd x y in w % g = 0))
 
 let gcd_lemma3 x y u v w =
   let g = gcd x y in
@@ -543,12 +513,7 @@ let gcd_lemma3 x y u v w =
   lemma_mod_mul_distr_l y v g
 
 
-#reset-options "--z3rlimit 300 --max_fuel 1 --max_ifuel 1 --using_facts_from '* -FStar.Seq'"    
 
-val is_invertible: #q:nat{q>1} -> x:field q -> Type0
-
-let is_invertible #q x =
-  exists (y:field q). x *% y = 1
 
 #reset-options "--z3rlimit 300 --max_fuel 1 --max_ifuel 1 --using_facts_from '* -FStar.Seq'"    
 
@@ -596,7 +561,6 @@ let gcd_lemma_invertible_2 #q x =
   
 #reset-options "--z3rlimit 300 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq'"    
 
-val gcd_lemma_invertible: #q:nat{q>1} -> x:field q -> Lemma (gcd q x = 1 <==> is_invertible x)
 
 
 //let split_lemma (p : squash 'a) (q : squash 'b) : Lemma ('a /\ 'b) = ()
@@ -608,7 +572,10 @@ let gcd_lemma_invertible #q x =
   assert(gcd q x = 1 <==> is_invertible x) by (apply_lemma (quote(split_lemma)); let _ = implies_intro () in apply_lemma(`gcd_lemma_invertible_1); let _ = implies_intro () in apply_lemma(`gcd_lemma_invertible_2); qed())
 
 
-val invert_mod: #q:nat{q>1} -> x:field q{is_invertible x} -> y:field q{x *% y = 1}
+let lemma_invertible_witness #q x y =
+  gcd_lemma_invertible_ x y;
+  gcd_lemma_invertible x
+  
 
 let invert_mod #q x =
   let (u, v, _) = extended_gcd q x in
@@ -619,9 +586,26 @@ let invert_mod #q x =
   lemma_mod_mul_distr_l v x q;
   v % q
 
-val is_prime: q:nat{q>1} -> Type0
 
-let is_prime q = forall (p:field q{p>0}). (q % p = 0 ==> p = 1)
+#reset-options "--z3rlimit 300 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq'"    
+
+val lemma_invert_unicity_: #q:nat{q>1} -> x:field q -> y1:field q{x *% y1 = 1} -> y2:field q{x *% y2 = 1} -> Lemma (y1 = y2)
+
+let lemma_invert_unicity_ #q x y1 y2 = 
+  assert (1 = (y2 *% x));
+  assert(1 *% y1 = (y2 *% x) *% y1);
+  modular_mul_one_lemma y1;
+  assert (y1 = (y2 *% x) *% y1);
+  modular_mul_associativity_lemma y2 x y1;
+  assert (y1 = y2 *% (x *% y1));
+  assert (y1 = y2 *% 1);
+  modular_mul_one_lemma y2
+  
+
+let lemma_invert_unicity #q x y =
+  lemma_invertible_witness x y;
+  lemma_invert_unicity_ x y (invert_mod x)
+
 
 #reset-options "--z3rlimit 300 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq'"    
 
@@ -655,19 +639,82 @@ let lemma_q_prime_zq_field_2 q =
 
 #reset-options "--z3rlimit 300 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq'"    
 
-val lemma_q_prime_zq_field: q:nat{q>1} -> Lemma (is_prime q <==> (forall (x:field q{x>0}). is_invertible x))
 
 
 let lemma_q_prime_zq_field q =
   assert(is_prime q ==> (forall (x:field q{x>0}). is_invertible x)) by (let _ = FStar.Tactics.implies_intro () in apply_lemma (`lemma_q_prime_zq_field_1));
   assert((forall (x:field q{x>0}). is_invertible x) ==> is_prime q) by (let _ = FStar.Tactics.implies_intro () in apply_lemma (`lemma_q_prime_zq_field_2))
 
-val lemma_is_prime_params_q: unit -> Lemma (is_prime params_q)
-
-let lemma_is_prime_params_q () =
-  let customprop (p:field params_q{p>1}) = (params_q % p <> 0) in
-  let f (p:field params_q{p>1}) : Lemma (customprop p) =
-    assert(params_q % p <> 0) in
-  FStar.Classical.forall_intro f  
 
 
+(*
+used to compute additive_order, left commented, may need improvement
+
+#reset-options "--z3rlimit 500 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq'"
+
+val additive_order:
+  #m:pos
+  -> a:field m
+  -> Tot (p:pos{p <= m /\ (a * p) % m = 0 /\ (forall(i:nat{i<p}). (a * i) % m = 0 ==> i=0)})
+
+let additive_order #m a =
+  let g = gcd m a in
+  let res = m / gcd m a in
+  assert (1<=g);
+  lemma_mult_le_left m 1 g;
+  lemma_div_le m (m*g) g;
+  cancel_mul_div m g;
+  assert (res <= m);
+  let customprop (i:nat{i<res}) : Type0 = ((a * i) % m = 0 ==> i = 0) in
+  let customlemma (i:nat{i<res}) : Lemma (customprop i) =
+    if (a*i) % m <> 0 then ()
+    else begin
+    let b = (a*i) / m in
+    let (u,v,g) = extended_gcd m a in
+    assert( a*i = b*m );
+    assert(a * v + m * u = g); 
+    assert(v*a = g - m * u);
+    assert ((v*a)*i = (g-m*u)*i);
+    FStar.Math.Lemmas.paren_mul_right v a i;
+    assert (v*(a*i) = (g-m*u)*i);
+    FStar.Math.Lemmas.distributivity_sub_left g (m*u) i;
+    assert (v*(b*m) = (g*i)-(m*u)*i);
+    FStar.Math.Lemmas.paren_mul_right v b m;
+    FStar.Math.Lemmas.paren_mul_right m u i;
+    assert ((v*b)*m = (g*i)-m*(u*i));
+    assert ((v*b)*m + m*(u*i) = g*i);
+    FStar.Math.Lemmas.swap_mul m (u*i);
+    FStar.Math.Lemmas.distributivity_add_left (v*b) (u*i) m;
+    assert ((v*b+u*i)*m = g*i);
+    cancel_mul_mod (v*b+u*i) m;
+    assert ((g*i)%m = 0);
+    gcd_lemma2 m a;
+    assert (m = g * res);
+    mod_mul_div_exact (g*i) g res;
+    cancel_mul_div i g;
+    assert (i%res = 0);
+    modulo_lemma i res
+    end
+  in
+  FStar.Classical.forall_intro customlemma;
+  assert (a * res * g = a * (m/g)*g);
+  FStar.Math.Lemmas.paren_mul_right a (m/g) g;
+  assert (a * res * g = a * ((m/g)*g));
+  gcd_lemma2 m a;
+  assert ((m/g)*g = m /\ (a/g) * g = a);
+  calc (==) {
+    a * res;
+      = {}
+    ((a/g) * g) * res;
+      = {paren_mul_right (a/g) g res}
+    (a/g)*(g*res);
+      = {swap_mul g res; ()}
+    (a/g)*(res*g);
+      = {}
+    (a/g)*m;
+  };
+  cancel_mul_mod (a/g) m;
+  assert ((a*res) % m = 0);
+  res
+  
+*)
