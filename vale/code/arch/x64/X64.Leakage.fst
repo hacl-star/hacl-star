@@ -5,7 +5,6 @@ open X64.Taint_Semantics_s
 open X64.Leakage_s
 open X64.Leakage_Helpers
 open X64.Leakage_Ins
-open X64.Leakage_Ins_Xmm
 
 #reset-options "--initial_ifuel 0 --max_ifuel 1 --initial_fuel 1 --max_fuel 1"
 let combine_reg_taints (regs1 regs2:reg_taint) : reg_taint =
@@ -173,8 +172,7 @@ let rec check_if_block_consumes_fixed_time (block:tainted_codes) (ts:taintState)
 
 and check_if_code_consumes_fixed_time (code:tainted_code) (ts:taintState) : bool * taintState =
   match code with
-  | Ins ins -> if is_xmm_ins ins then check_if_xmm_ins_consumes_fixed_time ins ts
-        else check_if_ins_consumes_fixed_time ins ts
+  | Ins ins -> check_if_ins_consumes_fixed_time ins ts
 
   | Block block -> check_if_block_consumes_fixed_time block ts
 
@@ -327,7 +325,7 @@ val lemma_loop_explicit_leakage_free: (ts:taintState) -> (code:tainted_code{Whil
 
 #reset-options "--initial_ifuel 2 --max_ifuel 2 --initial_fuel 1 --max_fuel 2 --z3rlimit 300"
  let rec lemma_code_explicit_leakage_free ts code s1 s2 fuel = match code with
-  | Ins ins -> if is_xmm_ins ins then () else lemma_ins_leakage_free ts ins
+  | Ins ins -> lemma_ins_leakage_free ts ins
   | Block block -> lemma_block_explicit_leakage_free ts block s1 s2 fuel
   | IfElse ifCond ifTrue ifFalse ->
     let b_fin, ts_fin = check_if_code_consumes_fixed_time code ts in

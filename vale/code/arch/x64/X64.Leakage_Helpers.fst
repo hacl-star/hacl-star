@@ -55,6 +55,11 @@ val lemma_operands_imply_op: (ts:taintState) -> (ops:list operand{Cons? ops}) ->
 let lemma_operands_imply_op ts ops = match ops with
 | hd :: tl -> ()
 
+let ins_consumes_fixed_time (ins : tainted_ins) (ts:taintState) (res:bool*taintState) =
+  let b, ts' = res in
+  ((b2t b) ==> isConstantTime (Ins ins) ts)
+
+
 (*val lemma_operand_obs_list: (ts:taintState) -> (ops:list operand) -> (s1:traceState) -> (s2:traceState) -> Lemma  ((operands_do_not_use_secrets ops ts /\ publicValuesAreSame ts s1 s2) ==>
   (operand_obs_list s1 ops) == (operand_obs_list s2 ops))
 
@@ -70,10 +75,6 @@ let rec sources_taint srcs ts taint = match srcs with
 let rec set_taints dsts ts taint = match dsts with
   | [] -> ts
   | hd :: tl -> set_taints tl (set_taint hd ts taint) taint
-
-let ins_consumes_fixed_time (ins : tainted_ins) (ts:taintState) (res:bool*taintState) =
-  let b, ts' = res in
-  ((b2t b) ==> isConstantTime (Ins ins) ts)
 
 val lemma_taint_sources: (ins:tainted_ins) -> (ts:taintState) -> Lemma
 (let i = ins.i in

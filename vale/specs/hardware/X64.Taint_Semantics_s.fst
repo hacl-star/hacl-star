@@ -31,8 +31,88 @@ let operand_obs (s:traceState) (o:operand) : list observation =
       | MReg reg _ -> [MemAccess (eval_reg reg s.state)]
       | MIndex base _ index _ -> [MemAccessOffset (eval_reg base s.state) (eval_reg index s.state)]
 
-// TODO: Implement observations
-let ins_obs (ins:tainted_ins) (s:traceState) : (list observation) = []
+[@instr_attr]
+let operand_obs128 (s:traceState) (op:mov128_op) : list observation =
+  match op with
+  | Mov128Xmm _ -> []
+  | Mov128Stack m | Mov128Mem m -> 
+      match m with
+      | MConst _ -> []
+      | MReg reg _ -> [MemAccess (eval_reg reg s.state)]
+      | MIndex base _ index _ -> [MemAccessOffset (eval_reg base s.state) (eval_reg index s.state)]
+
+[@instr_attr]
+let obs_operand_explicit
+  (i:instr_operand_explicit)
+  (o:instr_operand_t i)
+  (s:traceState) : list observation =
+  match i with
+  | IOp64 -> operand_obs s o
+  | IOpXmm -> operand_obs128 s o
+
+[@instr_attr]
+let obs_operand_implicit
+  (i:instr_operand_implicit)
+  (s:traceState) : list observation =
+  match i with
+  | IOp64One o -> operand_obs s o
+  | IOpXmmOne o -> operand_obs128 s o
+  | IOpFlagsCf | IOpFlagsOf -> []
+
+[@instr_attr]
+let rec obs_args
+  (args:list instr_operand)
+  (oprs:instr_operands_t_args args)
+  (s:traceState) : list observation =
+  match args with
+  | [] -> []
+  | i::args ->
+    match i with
+    | IOpEx i -> let oprs = coerce oprs in
+                 obs_operand_explicit i (fst oprs) s @
+                 obs_args args (snd oprs) s
+    | IOpIm i -> obs_operand_implicit i s @
+                 obs_args args (coerce oprs) s
+
+[@instr_attr]
+let rec obs_inouts 
+  (inouts:list instr_out) 
+  (args:list instr_operand)
+  (oprs:instr_operands_t inouts args)
+  (s:traceState) : list observation =
+  match inouts with
+  | [] -> obs_args args oprs s
+  | (Out, i)::inouts -> 
+    let oprs =
+      match i with
+      | IOpEx i -> snd #(instr_operand_t i) (coerce oprs)
+      | IOpIm i -> coerce oprs
+    in obs_inouts inouts args oprs s
+  | (InOut, i)::inouts -> 
+    let (v, oprs) =
+      match i with
+      | IOpEx i -> let oprs = coerce oprs in
+              (obs_operand_explicit i (fst oprs) s), snd oprs
+      | IOpIm i -> obs_operand_implicit i s, coerce oprs
+    in v @ obs_inouts inouts args oprs s
+
+[@instr_attr]
+let ins_obs (ins:ins) (s:traceState) : list observation =
+  match ins with
+  | Instr outs args _ _ oprs -> obs_inouts outs args oprs s
+
+  | Xor64 dst src -> operand_obs s dst @ operand_obs s src
+  // Only register operands, that will be tracked in the verified taint analysis
+  | Pxor _ _ -> []
+  | VPxor _ _ src2 -> operand_obs128 s src2
+
+  | Push src -> operand_obs s src
+  | Pop dst -> operand_obs s dst
+  | Alloc _ | Dealloc _ -> []
+
+
+  // TODO: Remove once partially-generic + MOVDQU instructions removed
+  | _ -> []
 
 [@"opaque_to_smt"]
 private let rec match_n (addr:int) (n:nat) (memTaint:memTaint_t) (t:taint)
@@ -257,7 +337,7 @@ val taint_eval_while: c:tainted_code{While? c} -> fuel:nat -> s:traceState -> GT
    Returns None if eval_code returns None *)
 let rec taint_eval_code c fuel s =
   match c with
-    | Ins ins -> let obs = ins_obs ins s in
+    | Ins ins -> let obs = ins_obs ins.i s in
       Some ({taint_eval_ins ins s with trace = obs @ s.trace})
 
     | Block l -> taint_eval_codes l fuel s
@@ -295,12 +375,3 @@ and taint_eval_while c fuel s0 =
     | None -> None
     | Some s1 -> if not s1.state.ok then Some s1
       else taint_eval_while c (fuel - 1) s1
-
-(* Used to split the analysis between instructions added for xmm, and other insns *)
-let is_xmm_ins (ins:tainted_ins) =
-  let i = ins.i in
-  match i with
-    | S.Instr _ _ _ _ _ | S.Ins_ioXmm _ _ | S.Ins_Xmm_Xmm _ _ _ | S.Ins_ioXmm_Xmm _ _ _
-    | S.Pxor _ _ | S.VPxor _ _ _
-    | S.MOVDQU _ _ -> true
-    | _ -> false
