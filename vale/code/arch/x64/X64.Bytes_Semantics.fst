@@ -270,13 +270,7 @@ let eval_ins_bs_domains (ins:ins) (s0:state) : Lemma
 let eval_ins_domains ins s0 =
   let t = ins.TS.t in
   let i = ins.TS.i in
-  let dsts, srcs = TS.extract_operands i in
-  let s = 
-    if MOVDQU? i then 
-      let MOVDQU dst src = ins.TS.i in
-      run (check (TS.taint_match128 src t s0.TS.memTaint)) s0.TS.state
-    else run (check (TS.taint_match_list srcs t s0.TS.memTaint)) s0.TS.state
-  in
+  let s = run (check (TS.taint_match_ins i t s0.TS.memTaint)) s0.TS.state in  
   eval_ins_bs_domains i s
 
 #set-options "--z3rlimit 30 --max_ifuel 2"
@@ -290,11 +284,5 @@ let eval_ins_bs_same_unspecified (ins:ins) (s0:state) : Lemma
 let eval_ins_same_unspecified ins s0 =
   let t = ins.TS.t in
   let i = ins.TS.i in
-  let dsts, srcs = TS.extract_operands i in
-  let s = 
-    if MOVDQU? i then 
-      let MOVDQU dst src = i in
-      run (check (TS.taint_match128 src t s0.TS.memTaint)) s0.TS.state
-    else run (check (TS.taint_match_list srcs t s0.TS.memTaint)) s0.TS.state
-  in
+  let s = run (check (TS.taint_match_ins i t s0.TS.memTaint)) s0.TS.state in  
   eval_ins_bs_same_unspecified i s

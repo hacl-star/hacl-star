@@ -55,12 +55,13 @@ val lemma_operands_imply_op: (ts:taintState) -> (ops:list operand{Cons? ops}) ->
 let lemma_operands_imply_op ts ops = match ops with
 | hd :: tl -> ()
 
-val lemma_operand_obs_list: (ts:taintState) -> (ops:list operand) -> (s1:traceState) -> (s2:traceState) -> Lemma  ((operands_do_not_use_secrets ops ts /\ publicValuesAreSame ts s1 s2) ==>
+(*val lemma_operand_obs_list: (ts:taintState) -> (ops:list operand) -> (s1:traceState) -> (s2:traceState) -> Lemma  ((operands_do_not_use_secrets ops ts /\ publicValuesAreSame ts s1 s2) ==>
   (operand_obs_list s1 ops) == (operand_obs_list s2 ops))
 
 let rec lemma_operand_obs_list ts ops s1 s2 = match ops with
   | [] -> ()
   | hd :: tl -> lemma_operand_obs_list ts tl s1 s2
+
 
 let rec sources_taint srcs ts taint = match srcs with
   | [] -> taint
@@ -80,7 +81,7 @@ val lemma_taint_sources: (ins:tainted_ins) -> (ts:taintState) -> Lemma
 forall src. List.Tot.Base.mem src s /\ Public? (sources_taint s ts ins.t) ==> Public? (operand_taint src ts ins.t))
 
 let lemma_taint_sources ins ts = ()
-
+*)
 #set-options "--z3rlimit 20"
 
 val lemma_public_op_are_same:

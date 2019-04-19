@@ -19,19 +19,6 @@ noeq type traceState = {
   memTaint: memTaint_t;
 }
 
-// TODO: To remove once taint_match_ins and update_taint_ins are completely implemented
-// Extract a list of destinations written to and a list of sources read from
-let extract_operands (i:ins) : (list operand * list operand) =
-  match i with
-  | S.Ins_64_64_preserve i dst src -> [dst], [src]
-  | S.Ins_io64_64_cf i dst src -> [dst], [dst; src]
-  | S.Ins_io64_64 i dst src -> [dst], [dst; src]
-  | S.Xor64 dst src -> [dst], [dst; src]
-  | S.Push src -> [], [src]
-  | S.Pop dst -> [dst], [OStack (MReg Rsp 0)]
-  | S.Alloc _ | S.Dealloc _ -> [OReg Rsp], [OReg Rsp]
-  | _ -> [], []
-
 type tainted_ins : eqtype = 
   | TaintedIns: i:ins -> t:taint -> tainted_ins
 
@@ -44,14 +31,8 @@ let operand_obs (s:traceState) (o:operand) : list observation =
       | MReg reg _ -> [MemAccess (eval_reg reg s.state)]
       | MIndex base _ index _ -> [MemAccessOffset (eval_reg base s.state) (eval_reg index s.state)]
 
-let rec operand_obs_list (s:traceState) (o:list operand) : list observation =
-  match o with
-  | [] -> []
-  | hd::tl -> operand_obs s hd @ (operand_obs_list s tl)
-
-let ins_obs (ins:tainted_ins) (s:traceState) : (list observation) =
-  let (dsts, srcs) = extract_operands ins.i in
-  operand_obs_list s dsts @ operand_obs_list s srcs
+// TODO: Implement observations
+let ins_obs (ins:tainted_ins) (s:traceState) : (list observation) = []
 
 [@"opaque_to_smt"]
 private let rec match_n (addr:int) (n:nat) (memTaint:memTaint_t) (t:taint)
@@ -156,7 +137,18 @@ let rec taint_match_inouts
 let taint_match_ins (ins:ins) (t:taint) (memTaint:memTaint_t) (s:state) : bool =
   match ins with
   | Instr outs args _ _ oprs -> taint_match_inouts outs args oprs t memTaint s
-  // TODO: Implement this for the other instructions
+
+  | Xor64 dst src -> taint_match dst t memTaint s && taint_match src t memTaint s
+  // Only register operands, that will be tracked in the verified taint analysis
+  | Pxor _ _ -> true
+  | VPxor _ _ src2 -> taint_match128 src2 t memTaint s
+
+  | Push src -> taint_match src t memTaint s
+  | Pop _ -> taint_match (OStack (MReg Rsp 0)) t memTaint s
+  | Alloc _ | Dealloc _ -> true
+
+
+  // TODO: Remove once partially-generic + MOVDQU instructions removed
   | _ -> true
 
 [@instr_attr]
@@ -218,15 +210,23 @@ let rec update_taint_outputs
 let update_taint_ins (ins:ins) (t:taint) (memTaint:memTaint_t) (s:state) : memTaint_t =
   match ins with
   | Instr outs args _ _ oprs -> update_taint_outputs outs args oprs t memTaint s
-  // TODO: Implement this for the other instructions
+
+  | Xor64 dst _ -> update_taint memTaint dst t s
+  | Pxor _ _ | VPxor _ _ _ -> memTaint
+
+  | Push _ | Alloc _ | Dealloc _ -> memTaint
+  | Pop dst -> update_taint memTaint dst t s
+
+  // TODO: Remove once MOVDQU + partially generic insns are removed
   | _ -> memTaint
 
+[@instr_attr]
 let taint_eval_ins (ins:tainted_ins) (ts: traceState) : GTot traceState =
   let t = ins.t in
   let i = ins.i in
   let s = run (check (taint_match_ins i t ts.memTaint)) ts.state in
   let memTaint = update_taint_ins i t ts.memTaint s in
-  // TODO: Update trace
+
   let s = run (eval_ins i) s in
   {state = s; trace = ts.trace; memTaint = memTaint}
 

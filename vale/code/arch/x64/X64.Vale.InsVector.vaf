@@ -144,7 +144,7 @@ procedure{:instruction mk_taint128_ins2(make_instr(I.ins_Pand), TReg128(dst), sr
 {
 }
 
-procedure{:instruction Ins(TS.TaintedIns(tuple(S.VPxor(dst, src1, t_op_to_op128(src2))), Public))}{:quick exportOnly}{:public} VPxor(out dst:xmm, src1:xmm, src2:opr128)
+procedure{:instruction Ins(TS.TaintedIns(tuple(S.VPxor(dst, src1, t_op_to_op128(src2))), get_taint128(src2)))}{:quick exportOnly}{:public} VPxor(out dst:xmm, src1:xmm, src2:opr128)
   ensures
     dst == old(quad32_xor(src1, src2));
 {
