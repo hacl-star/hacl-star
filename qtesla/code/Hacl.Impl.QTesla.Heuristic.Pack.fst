@@ -45,7 +45,7 @@ private inline_for_extraction noextract
 val encode_pk_ptSet:
     snapshot: HS.mem
   -> pk: lbuffer uint8 crypto_publickeybytes
-  -> i: size_t{i <. crypto_publickeybytes /. (size UI32.n /. size 8)}
+  -> i: size_t{UI32.v i < UI32.v crypto_publickeybytes / 4} //. (size UI32.n /. size 8)}
   -> value: I32.t
   -> Unsafe unit // Despite the name of the effect, Nik assures us this is a correct use!
     (requires fun h -> valid_pk pk snapshot h)
@@ -73,70 +73,89 @@ val encode_pk_tGet:
   -> j: size_t{v j < v params_n}
   -> Unsafe elem
     (requires fun h -> valid_t t snapshot h)
-    (ensures fun _ _ h1 -> valid_t t snapshot h1)
+    (ensures fun _ e h1 -> valid_t t snapshot h1 /\ 0 <= I32.v e)
 
 let encode_pk_tGet snapshot t j = 
     let h = ST.get () in
     reveal_valid_t t snapshot h;
-    t.(j)
+    admit();t.(j)
 
 private inline_for_extraction noextract
 val encode_pk_loopBody:
     pk: lbuffer uint8 crypto_publickeybytes
   -> t: poly_k
-  -> i: size_t{v i + 22 < v (crypto_publickeybytes /. (size UI32.n /. size 8))}
+  -> i: size_t{v i + 22 < v crypto_publickeybytes / 4} ///. (size UI32.n /. size 8))}
   -> j: size_t{v j + 31 < v params_n}
   -> Stack unit
     (requires fun h -> live h pk /\ live h t /\ disjoint pk t)
     (ensures fun h0 _ h1 -> modifies1 pk h0 h1)
 
-#reset-options "--z3rlimit 500 --max_fuel 0 --max_ifuel 0 --admit_smt_queries true"
+let valid_t_valid_pk (t:poly_k) (pk: lbuffer uint8 crypto_publickeybytes) (h0 h1:HS.mem)
+  : Lemma (requires (valid_t t h0 h1 /\ live h0 pk))
+          (ensures valid_pk pk h0 h1)
+  = reveal_valid_t t h0 h1;
+    reveal_valid_pk pk h0 h1
+
+#reset-options "--z3rlimit 1000 --max_fuel 0 --max_ifuel 0 \
+                --z3cliopt 'smt.qi.eager_threshold=100' \
+                --log_queries --query_stats"
+
+let inc (i: size_t{v i + 22 < v crypto_publickeybytes / 4})
+        (j: size_t{v j <= 22})
+   : Tot (k:size_t{v k < v crypto_publickeybytes / 4})
+   = i +. j
+
+let incj (j: size_t{v j + 31 < v params_n})
+         (offset:size_t{v offset <= 31})
+   : Tot (k:size_t{v k < v params_n})
+   = j +. offset
 
 let encode_pk_loopBody pk t i j =
-    push_frame();
+//    push_frame();
     
     let h0 = ST.get () in
     reveal_valid_t t h0 h0;
     assert(valid_t t h0 h0);
     [@inline_let] let tj = encode_pk_tGet h0 t in
-    let tj0  = tj (j)          in let tj1 = tj (j+.size 1)   in let tj2  = tj (j+.size 2)  in let tj3  = tj (j+.size 3) in 
-    let tj4  = tj (j+.size 4)  in let tj5 = tj (j+.size 5)   in let tj6  = tj (j+.size 6)  in let tj7  = tj (j+.size 7) in
-    let tj8  = tj (j+.size 8)  in let tj9 = tj (j+.size 9)   in let tj10 = tj (j+.size 10) in let tj11 = tj (j+.size 11) in 
-    let tj12 = tj (j+.size 12) in let tj13 = tj (j+.size 13) in let tj14 = tj (j+.size 14) in let tj15 = tj (j+.size 15) in 
-    let tj16 = tj (j+.size 16) in let tj17 = tj (j+.size 17) in let tj18 = tj (j+.size 18) in let tj19 = tj (j+.size 19) in 
-    let tj20 = tj (j+.size 20) in let tj21 = tj (j+.size 21) in let tj22 = tj (j+.size 22) in let tj23 = tj (j+.size 23) in 
-    let tj24 = tj (j+.size 24) in let tj25 = tj (j+.size 25) in let tj26 = tj (j+.size 26) in let tj27 = tj (j+.size 27) in 
-    let tj28 = tj (j+.size 28) in let tj29 = tj (j+.size 29) in let tj30 = tj (j+.size 30) in let tj31 = tj (j+.size 31) in 
+    let tj0  = tj (j)          in let tj1 = tj (j `incj` size 1)   in let tj2  = tj (j `incj` size 2)  in let tj3  = tj (j `incj` size 3) in 
+    let tj4  = tj (j `incj` size 4)  in let tj5 = tj (j `incj` size 5)   in let tj6  = tj (j `incj` size 6)  in let tj7  = tj (j `incj` size 7) in
+    let tj8  = tj (j `incj` size 8)  in let tj9 = tj (j `incj` size 9)   in let tj10 = tj (j `incj` size 10) in let tj11 = tj (j `incj` size 11) in 
+    let tj12 = tj (j `incj` size 12) in let tj13 = tj (j `incj` size 13) in let tj14 = tj (j `incj` size 14) in let tj15 = tj (j `incj` size 15) in 
+    let tj16 = tj (j `incj` size 16) in let tj17 = tj (j `incj` size 17) in let tj18 = tj (j `incj` size 18) in let tj19 = tj (j `incj` size 19) in 
+    let tj20 = tj (j `incj` size 20) in let tj21 = tj (j `incj` size 21) in let tj22 = tj (j `incj` size 22) in let tj23 = tj (j `incj` size 23) in 
+    let tj24 = tj (j `incj` size 24) in let tj25 = tj (j `incj` size 25) in let tj26 = tj (j `incj` size 26) in let tj27 = tj (j `incj` size 27) in 
+    let tj28 = tj (j `incj` size 28) in let tj29 = tj (j `incj` size 29) in let tj30 = tj (j `incj` size 30) in let tj31 = tj (j `incj` size 31) in 
     let h1 = ST.get () in
-    reveal_valid_t t h0 h1;
-    assert(valid_t t h0 h1);
+    valid_t_valid_pk t pk h0 h1;
+    // reveal_valid_t t h0 h1;a
+    // assert(valid_t t h0 h1);
 
-    reveal_valid_pk pk h1 h1;
-    assert(valid_pk pk h1 h1);
+    // reveal_valid_pk pk h1 h1;
+    // assert(valid_pk pk h1 h1);
     // In the reference code, "pt = (uint32_t*)pk" where pk is (unsigned char *). We can't recast buffers to have different
     // element types in F*. (BufferView does this, but only as ghost predicates for proving theorems.)
     // Instead, we curry encode_pk_ptSet above with pk as its first parameter to provide a function that looks a lot
     // like the integer assignment in the reference code, and it extracts down to store32_le in C.
-    [@inline_let] let pt = encode_pk_ptSet h1 pk in
+    [@inline_let] let pt = encode_pk_ptSet h0 pk in
     pt (i)          (tj0              |^ (tj1  <<^ 23ul)); 
-    pt (i+.size 1)  ((tj1  >>^ 9ul)   |^ (tj2  <<^ 14ul)); pt (i+.size 2)   ((tj2  >>^ 18ul)  |^ (tj3  <<^  5ul) |^ (tj4 <<^ 28ul)); 
-    pt (i+.size 3)  ((tj4  >>^  4ul)  |^ (tj5  <<^ 19ul));
-    pt (i+.size 4)  ((tj5  >>^ 13ul)  |^ (tj6  <<^ 10ul)); pt (i+.size 5)   ((tj6  >>^ 22ul)  |^ (tj7  <<^  1ul) |^ (tj8 <<^ 24ul));
-    pt (i+.size 6)  ((tj8  >>^  8ul)  |^ (tj9  <<^ 15ul)); pt (i+.size 7)   ((tj9  >>^ 17ul)  |^ (tj10 <<^ 6ul) |^ (tj11 <<^ 29ul));
-    pt (i+.size 8)  ((tj11 >>^  3ul)  |^ (tj12 <<^ 20ul));
-    pt (i+.size 9)  ((tj12 >>^ 12ul)  |^ (tj13 <<^ 11ul)); pt (i+.size 10)  ((tj13 >>^ 21ul)  |^ (tj14 <<^  2ul) |^ (tj15 <<^ 25ul));
-    pt (i+.size 11) ((tj15 >>^  7ul)  |^ (tj16 <<^ 16ul)); pt (i+.size 12)  ((tj16 >>^ 16ul)  |^ (tj17 <<^  7ul) |^ (tj18 <<^ 30ul));
-    pt (i+.size 13) ((tj18 >>^  2ul)  |^ (tj19 <<^ 21ul));
-    pt (i+.size 14) ((tj19 >>^ 11ul)  |^ (tj20 <<^ 12ul)); pt (i+.size 15)  ((tj20 >>^ 20ul)  |^ (tj21 <<^  3ul) |^ (tj22 <<^ 26ul));
-    pt (i+.size 16) ((tj22 >>^  6ul)  |^ (tj23 <<^ 17ul)); pt (i+.size 17)  ((tj23 >>^ 15ul)  |^ (tj24 <<^  8ul) |^ (tj25 <<^ 31ul));
-    pt (i+.size 18) ((tj25 >>^  1ul)  |^ (tj26 <<^ 22ul)); 
-    pt (i+.size 19) ((tj26 >>^ 10ul)  |^ (tj27 <<^ 13ul)); pt (i+.size 20)  ((tj27 >>^ 19ul)  |^ (tj28 <<^  4ul) |^ (tj29 <<^ 27ul)); 
-    pt (i+.size 21) ((tj29 >>^  5ul)  |^ (tj30 <<^ 18ul));
-    pt (i+.size 22) ((tj30 >>^ 14ul)  |^ (tj31 <<^  9ul));
+    pt (i `inc` size 1)  ((tj1  >>^ 9ul)   |^ (tj2  <<^ 14ul)); pt (i `inc` size 2)   ((tj2  >>^ 18ul)  |^ (tj3  <<^  5ul) |^ (tj4 <<^ 28ul)); 
+    pt (i `inc` size 3)  ((tj4  >>^  4ul)  |^ (tj5  <<^ 19ul));
+    pt (i `inc` size 4)  ((tj5  >>^ 13ul)  |^ (tj6  <<^ 10ul)); pt (i `inc` size 5)   ((tj6  >>^ 22ul)  |^ (tj7  <<^  1ul) |^ (tj8 <<^ 24ul));
+    pt (i `inc` size 6)  ((tj8  >>^  8ul)  |^ (tj9  <<^ 15ul)); pt (i `inc` size 7)   ((tj9  >>^ 17ul)  |^ (tj10 <<^ 6ul) |^ (tj11 <<^ 29ul));
+    pt (i `inc` size 8)  ((tj11 >>^  3ul)  |^ (tj12 <<^ 20ul));
+    pt (i `inc` size 9)  ((tj12 >>^ 12ul)  |^ (tj13 <<^ 11ul)); pt (i `inc` size 10)  ((tj13 >>^ 21ul)  |^ (tj14 <<^  2ul) |^ (tj15 <<^ 25ul));
+    pt (i `inc` size 11) ((tj15 >>^  7ul)  |^ (tj16 <<^ 16ul)); pt (i `inc` size 12)  ((tj16 >>^ 16ul)  |^ (tj17 <<^  7ul) |^ (tj18 <<^ 30ul));
+    pt (i `inc` size 13) ((tj18 >>^  2ul)  |^ (tj19 <<^ 21ul));
+    pt (i `inc` size 14) ((tj19 >>^ 11ul)  |^ (tj20 <<^ 12ul)); pt (i `inc` size 15)  ((tj20 >>^ 20ul)  |^ (tj21 <<^  3ul) |^ (tj22 <<^ 26ul));
+    pt (i `inc` size 16) ((tj22 >>^  6ul)  |^ (tj23 <<^ 17ul)); pt (i `inc` size 17)  ((tj23 >>^ 15ul)  |^ (tj24 <<^  8ul) |^ (tj25 <<^ 31ul));
+    pt (i `inc` size 18) ((tj25 >>^  1ul)  |^ (tj26 <<^ 22ul)); 
+    pt (i `inc` size 19) ((tj26 >>^ 10ul)  |^ (tj27 <<^ 13ul)); pt (i `inc` size 20)  ((tj27 >>^ 19ul)  |^ (tj28 <<^  4ul) |^ (tj29 <<^ 27ul)); 
+    pt (i `inc` size 21) ((tj29 >>^  5ul)  |^ (tj30 <<^ 18ul));
+    pt (i `inc` size 22) ((tj30 >>^ 14ul)  |^ (tj31 <<^  9ul));
     let h2 = ST.get () in
-    reveal_valid_pk pk h1 h2;
-    assert(valid_pk pk h1 h2); 
-    pop_frame()
+    reveal_valid_pk pk h0 h2
+//    pop_frame()
+    
 
 #reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0"
 
