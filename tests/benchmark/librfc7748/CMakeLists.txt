@@ -13,3 +13,8 @@ add_library(rfc7748 STATIC
 target_include_directories(rfc7748 PUBLIC ${RFC7748_DIR})
 target_compile_options(rfc7748 PRIVATE)
 target_compile_definitions(rfc7748 PRIVATE _BSD_SOURCE _DEFAULT_SOURCE)
+
+if(ASAN)
+target_compile_options(rfc7748 PRIVATE -g -fsanitize=undefined,address -fno-omit-frame-pointer -fno-sanitize-recover=all -fno-sanitize=function)
+target_link_options(rfc7748 PRIVATE -g -fsanitize=address)
+endif()

@@ -43,12 +43,16 @@ class HashBenchmark : public Benchmark
 
     virtual ~HashBenchmark()
     {
-      delete(src);
-      delete(dst);
+      delete[](src);
+      delete[](dst);
       src_sz = 0;
     }
 
-    virtual void bench_setup(const BenchmarkSettings & s) { randomize((char*)src, src_sz); }
+    virtual void bench_setup(const BenchmarkSettings & s)
+    {
+      Benchmark::bench_setup(s);
+      randomize((char*)src, src_sz);
+    }
 
     virtual void report(std::ostream & rs, const BenchmarkSettings & s)
     {

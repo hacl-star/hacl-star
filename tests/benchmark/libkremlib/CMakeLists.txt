@@ -53,3 +53,8 @@ target_sources(kremlib PRIVATE ${KREMLIB_DIR}/fstar_uint128_msvc.c)
 else(CMAKE_COMPILER_IS_MSVC)
 target_sources(kremlib PRIVATE ${KREMLIB_DIR}/fstar_uint128.c)
 endif(CMAKE_COMPILER_IS_MSVC)
+
+if(ASAN)
+target_compile_options(kremlib PRIVATE -g -fsanitize=undefined,address -fno-omit-frame-pointer -fno-sanitize-recover=all -fno-sanitize=function)
+target_link_options(kremlib PRIVATE -g -fsanitize=address)
+endif()

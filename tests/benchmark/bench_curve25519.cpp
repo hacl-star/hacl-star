@@ -35,6 +35,7 @@ class Curve25519Benchmark: public Benchmark
 
     virtual void bench_setup(const BenchmarkSettings & s)
     {
+      Benchmark::bench_setup(s);
       randomize(our_secret, 32);
       randomize(their_public, 32);
     }
@@ -111,15 +112,19 @@ class OpenSSL: public Curve25519Benchmark
 
     virtual void bench_setup(const BenchmarkSettings & s)
     {
-      ctx = EVP_PKEY_CTX_new_id(EVP_PKEY_X25519, NULL);
-      EVP_PKEY_keygen_init(ctx);
-      EVP_PKEY_keygen(ctx, &ours);
-      EVP_PKEY_CTX_free(ctx);
+      Curve25519Benchmark::bench_setup(s);
 
-      EVP_PKEY_CTX *their_ctx = EVP_PKEY_CTX_new_id(EVP_PKEY_X25519, NULL);
-      EVP_PKEY_keygen_init(their_ctx);
-      EVP_PKEY_keygen(their_ctx, &theirs);
-      EVP_PKEY_CTX_free(their_ctx);
+      ours = EVP_PKEY_new();
+      EVP_PKEY_CTX *our_key_ctx = EVP_PKEY_CTX_new_id(NID_X25519, NULL);
+      if (EVP_PKEY_keygen_init(our_key_ctx) <= 0) throw std::logic_error("failed");
+      if (EVP_PKEY_keygen(our_key_ctx, &ours) <= 0) throw std::logic_error("failed");
+	    EVP_PKEY_CTX_free(our_key_ctx);
+
+      theirs = EVP_PKEY_new();
+      EVP_PKEY_CTX *their_key_ctx = EVP_PKEY_CTX_new_id(NID_X25519, NULL);
+      if (EVP_PKEY_keygen_init(their_key_ctx) <= 0) throw std::logic_error("failed");
+      if (EVP_PKEY_keygen(their_key_ctx, &theirs) <= 0) throw std::logic_error("failed");
+      EVP_PKEY_CTX_free(their_key_ctx);
 
       ctx = EVP_PKEY_CTX_new(ours, NULL);
 
@@ -142,10 +147,13 @@ class OpenSSL: public Curve25519Benchmark
     }
     virtual void bench_cleanup(const BenchmarkSettings & s)
     {
-        EVP_PKEY_free(ours);
-        EVP_PKEY_free(theirs);
+      EVP_PKEY_free(theirs);
+      EVP_PKEY_free(ours);
+      EVP_PKEY_CTX_free(ctx);
+
+      Curve25519Benchmark::bench_cleanup(s);
     }
-    virtual ~OpenSSL() {  EVP_PKEY_CTX_free(ctx); }
+    virtual ~OpenSSL() {}
 };
 #endif
 
@@ -164,7 +172,7 @@ void bench_curve25519(const BenchmarkSettings & s)
     new Hacl64(),
     #endif
     #ifdef HAVE_OPENSSL
-    new OpenSSL(),
+    new OpenSSL()
     #endif
     };
 

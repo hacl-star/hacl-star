@@ -71,3 +71,8 @@ set_source_files_properties(${EVERCRYPT_SRC_DIR}/Hacl_Poly1305.c
 )
 
 target_link_libraries(evercrypt PUBLIC kremlib)
+
+if(ASAN)
+target_compile_options(evercrypt PRIVATE -g -fsanitize=undefined,address -fno-omit-frame-pointer -fno-sanitize-recover=all -fno-sanitize=function)
+target_link_options(evercrypt PRIVATE -g -fsanitize=address)
+endif()

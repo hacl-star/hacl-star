@@ -37,12 +37,13 @@ class DSABenchmark: public Benchmark
 
     virtual ~DSABenchmark()
     {
-      delete(msg);
-      delete(signature);
+      delete[](msg);
+      delete[](signature);
     }
 
     virtual void bench_setup(const BenchmarkSettings & s)
     {
+      Benchmark::bench_setup(s);
       randomize(our_secret, 32);
       randomize(their_secret, 32);
       randomize(msg, msg_len);
@@ -67,7 +68,6 @@ class HaclSign: public DSABenchmark
 {
   public:
     HaclSign(size_t msg_len) : DSABenchmark(msg_len, "HaCl") {}
-    virtual void bench_setup(const BenchmarkSettings & s) {}
     virtual void bench_func()
       { Hacl_Ed25519_sign(signature, our_secret, msg, msg_len); }
     virtual ~HaclSign() {}
@@ -83,7 +83,10 @@ class HaclSignExpanded: public DSABenchmark
   public:
     HaclSignExpanded(size_t msg_len) : DSABenchmark(msg_len, "HaCl (expanded)") {}
     virtual void bench_setup(const BenchmarkSettings & s)
-      { Hacl_Ed25519_expand_keys(expanded_keys, our_secret); }
+    {
+      DSABenchmark::bench_setup(s);
+      Hacl_Ed25519_expand_keys(expanded_keys, our_secret);
+    }
     virtual void bench_func()
       { Hacl_Ed25519_sign_expanded(signature, expanded_keys, msg, msg_len); }
     virtual ~HaclSignExpanded() {}
@@ -95,6 +98,7 @@ class HaclVerify: public DSABenchmark
     HaclVerify(size_t msg_len) : DSABenchmark(msg_len, "HaCl (verify)") {}
     virtual void bench_setup(const BenchmarkSettings & s)
     {
+        DSABenchmark::bench_setup(s);
         Hacl_Ed25519_secret_to_public(our_public, our_secret);
         Hacl_Ed25519_sign(signature, our_secret, msg, msg_len);
     }
@@ -125,6 +129,9 @@ class OpenSSLSign: public DSABenchmark
     OpenSSLSign(size_t msg_len) : DSABenchmark(msg_len, "OpenSSL") {}
     virtual void bench_setup(const BenchmarkSettings & s)
     {
+      DSABenchmark::bench_setup(s);
+
+      ours = EVP_PKEY_new();
       EVP_PKEY_CTX *pkctx = EVP_PKEY_CTX_new_id(EVP_PKEY_ED25519, NULL);
       EVP_PKEY_keygen_init(pkctx);
       EVP_PKEY_keygen(pkctx, &ours);
@@ -144,8 +151,14 @@ class OpenSSLSign: public DSABenchmark
       EVP_DigestSign(mdctx, signature, &sig_len, msg, msg_len);
       #endif
     }
-    virtual ~OpenSSLSign()
-      { EVP_MD_CTX_free(mdctx); }
+    virtual void bench_cleanup(const BenchmarkSettings & s)
+    {
+      EVP_MD_CTX_free(mdctx);
+      EVP_PKEY_free(ours);
+
+      DSABenchmark::bench_cleanup(s);
+    }
+    virtual ~OpenSSLSign() {}
 };
 
 class OpenSSLVerify: public DSABenchmark
@@ -159,6 +172,9 @@ class OpenSSLVerify: public DSABenchmark
     OpenSSLVerify(size_t msg_len) : DSABenchmark(msg_len, "OpenSSL (verify)") {}
     virtual void bench_setup(const BenchmarkSettings & s)
     {
+      DSABenchmark::bench_setup(s);
+
+      ours = EVP_PKEY_new();
       EVP_PKEY_CTX *pkctx = EVP_PKEY_CTX_new_id(EVP_PKEY_ED25519, NULL);
       EVP_PKEY_keygen_init(pkctx);
       EVP_PKEY_keygen(pkctx, &ours);
@@ -183,8 +199,14 @@ class OpenSSLVerify: public DSABenchmark
       EVP_DigestVerify(mdctx, signature, sig_len, msg, msg_len);
       #endif
     }
-    virtual ~OpenSSLVerify()
-      { EVP_MD_CTX_free(mdctx); }
+    virtual void bench_cleanup(const BenchmarkSettings & s)
+    {
+      EVP_MD_CTX_free(mdctx);
+      EVP_PKEY_free(ours);
+
+      DSABenchmark::bench_cleanup(s);
+    }
+    virtual ~OpenSSLVerify() {}
 };
 #endif
 

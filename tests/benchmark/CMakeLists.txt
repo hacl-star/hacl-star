@@ -10,6 +10,8 @@ option(USE_BCRYPT "Use BCrypt." OFF)
 option(USE_OPENSSL "Use OpenSSL." ON)
 option(USE_RFC7748 "Use the RFC 7748 reference implementation" ON)
 
+option(ASAN "Enable clang address sanitizer" OFF)
+
 add_subdirectory(libevercrypt)
 
 add_library(benchmark STATIC benchmark.cpp)
@@ -57,7 +59,6 @@ if(USE_OPENSSL)
   find_path(OPENSSL_INC openssl/crypto.h) # search default paths
   message("-- Using OpenSSL at ${OPENSSL_LIB} with headers at ${OPENSSL_INC}")
   target_compile_definitions(runbenchmark PRIVATE HAVE_OPENSSL)
-  target_sources(runbenchmark PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/my_openssl.c)
   target_link_libraries(runbenchmark PRIVATE ${OPENSSL_LIB})
   target_include_directories(runbenchmark PRIVATE ${OPENSSL_INC})
   if(NOT ${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
@@ -71,3 +72,10 @@ if(USE_RFC7748)
   target_link_libraries(runbenchmark PRIVATE rfc7748)
   target_include_directories(runbenchmark PRIVATE ${RFC7748_DIR})
 endif(USE_RFC7748)
+
+if(ASAN)
+target_compile_options(benchmark PRIVATE -g -fsanitize=undefined,address -fno-omit-frame-pointer -fno-sanitize-recover=all -fno-sanitize=function)
+target_link_options(benchmark PRIVATE -g -fsanitize=address)
+target_compile_options(runbenchmark PRIVATE -g -fsanitize=undefined,address -fno-omit-frame-pointer -fno-sanitize-recover=all -fno-sanitize=function)
+target_link_options(runbenchmark PRIVATE -g -fsanitize=address)
+endif()
