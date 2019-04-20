@@ -5,6 +5,7 @@ open FStar.Mul
 open FStar.Math.Lemmas
 open FStar.Classical
 open FStar.Squash
+open FStar.Tactics
 
 open Hacl.Argmax.Common
 
@@ -25,34 +26,37 @@ let in_base #n g =
 
 type isg (n:comp) = g:fen2u n{in_base #n g}
 
-
 // N plus one, for SMTPat not to throw warnings
 val np1: #n:comp -> fen2 n
 let np1 #n = 1 + n
 
 val nplus1inbase: #n:comp -> Lemma
   (ensures (in_base (np1 #n) /\ isunit (np1 #n)))
-  [SMTPat (np1 #n)]
 let nplus1inbase #n = admit()
 
 val encf: #n:comp -> g:isg n -> x:fe n -> y:fenu n -> fen2 n
 let encf #n g x y = fexp g x *% fexp (to_fe y) n
+
+#set-options "--z3rlimit 100"
 
 // TODO fails sometimes, need to simplify the proof
 //assert(true) by (dump "");
 val encf_unit: #n:comp -> g:isg n -> x:fe n -> y:fenu n -> Lemma
   (isunit (encf #n g x y))
 let encf_unit #n g x y =
-  if x = 0
-    then (fexp_one1 g; assert(isunit (fexp g x)))
-    else (g_pow_isunit g x; assert(isunit (fexp g x)));
+  if x = 0 then fexp_one1 g else g_pow_isunit g x;
   assert(isunit (fexp g x));
 
-  let y' = to_fe #(n*n) y in
+  let y': fe (n*n) = to_fe y in
   isunit_in_nsquare #n y;
+
   g_pow_isunit y' n;
+  // This is what g_pow_isunit proves, though assert lags a bit (?)
+  assert(isunit (fexp y' n));
 
   isunit_prod (fexp g x) (fexp y' n)
+
+#reset-options
 
 val encf_inj: #n:comp -> g:isg n -> x1:fe n -> y1:fenu n -> x2:fe n -> y2:fenu n -> Lemma
   (encf g x1 y1 = encf g x2 y2 ==> (x1 = x2 /\ y1 = y2))
@@ -92,8 +96,8 @@ let res_class_decomposition #n g1 g2 w =
   let (x1,y1) = encf_inv g1 w in
   let (x2,y2) = encf_inv g2 w in
   let (x3,y3) = encf_inv g1 g2 in
-  let y2':fen2 n = to_fe y2 in
-  let y3':fen2 n = to_fe y3 in
+  let y2':fen2 n = to_fe #(n*n) y2 in
+  let y3':fen2 n = to_fe #(n*n) y3 in
   assert(encf g1 x1 y1 = w /\ encf g2 x2 y2 = w /\ encf g1 x3 y3 = g2);
 
   nat_times_nat_is_nat x3 x2;
@@ -196,60 +200,254 @@ let bigl_prop #n u =
   assert(u % n = 1 ==> (r = 0 <==> u = 1))
 
 // euler's totient
-val etot: p:prm -> q:prm -> l:pos
-let etot p q = lcm (p-1) (q-1)
+val etot: p:prm -> q:prm -> l:fe (p*q)
+let etot p q = lcm_less_mul (p-1) (q-1); lcm (p-1) (q-1)
 
-val fltpq: p:prm -> q:prm -> w:fen2 (p*q) -> Lemma
-  (ensures (let n = p*q in fexp w (etot p q) % n = 1))
-  [SMTPat (fexp w (etot p q))]
+// Because gcd (etot p q) (p*q) =
+val etot_unit: p:prm -> q:prm -> Lemma
+  (isunit #(p*q) (etot p q))
+let etot_unit p q =
+  let n = p*q in
+  let lambda = etot p q in
+  division_mul_after (p-1) (q-1) (gcd (p-1) (q-1));
+  assert (lcm (p-1) (q-1) = ((p-1)*(q-1))/(gcd (p-1) (q-1)));
+  assert (gcd n lambda = gcd n (lcm (p-1) (q-1)));
+  // TODO
+  admit()
+
+val fltpq: p:prm -> q:prm -> w:fen2u (p*q) -> Lemma
+  (ensures (let n = p*q in
+            fexp w (etot p q) % n = 1 &&
+            fexp w (etot p q) > 0))
 let fltpq _ _ _ = admit()
 
+val carmichael_thm: p:prm -> q:prm -> w:fen2u (p*q) -> Lemma
+  (ensures (let l = etot p q in
+            let n = p * q in
+            fexp w (n*l) = one))
+let carmichael_thm _ _ _ = admit()
+
+// p225 after definition 1
+val root_of_unity_form: #n:comp -> x:nat -> Lemma
+  (fexp (np1 #n) x = 1 +% ((to_fe x) *% n))
+let root_of_unity_form #n _ = admit()
+
+val multiplication_order_lemma_strict: a:int -> b:int -> p:pos ->
+    Lemma (a < b <==> a * p < b * p)
+let multiplication_order_lemma_strict a b p = ()
+
+val kn_mod_n2: #n:comp -> k:fe (n*n) -> Lemma
+  (k *% n = (k % n) * n)
+let kn_mod_n2 #n k =
+  pos_times_pos_is_pos n n;
+  let n2:pos = n * n in
+  distributivity_add_left ((k/n)*n2) (k%n) n;
+  assert(((k/n)*n + (k%n)) * n = (k/n)*n2 + (k%n)*n);
+  assert((((k/n)*n + (k%n)) * n)%n2 = ((k/n)*n2 + (k%n)*n)%n2);
+  modulo_distributivity ((k/n)*n2) ((k%n)*n) n2;
+  cancel_mul_mod (k/n) n2;
+  lemma_mod_twice ((k%n)*n) n;
+  modulo_range_lemma k n;
+  assert(k%n < n);
+  multiplication_order_lemma_strict (k%n) n n;
+  assert((k%n)*n < n*n);
+  modulo_lemma ((k%n)*n) n2
+
+val x_mod_n_limits: #n:comp -> x:nat -> Lemma
+   (to_fe #(n*n) (1 + (x % n) * n) == 1 + (x % n) * n)
+let x_mod_n_limits #n x =
+  assert(1 + (x%n)*n < n*n);
+  modulo_lemma (1+(x%n)*n) (n*n)
+
+val roots_of_unity_mod_n: #n:comp -> x:nat -> Lemma
+  (fexp (np1 #n) x = 1 + (x % n) * n)
+let roots_of_unity_mod_n #n x =
+  let n2 = n*n in
+  root_of_unity_form #n x;
+  x_mod_n_limits #n x;
+  assert(to_fe #(n*n) (1 + (x % n) * n) == 1 + (x % n) * n);
+  calc (==) {
+    1 +% ((to_fe #n2 x) *% n);
+  == { to_fe_add' 1 (to_fe #n2 x *% n) }
+    to_fe (1 + ((to_fe #n2 x) *% n));
+  == { to_fe_mul' (to_fe #n2 x) n }
+    to_fe (1 + to_fe #n2 (to_fe #n2 x * n));
+  == { }
+    to_fe (1 + (x % n2 * n) % n2);
+  == { kn_mod_n2 #n (x % n2) }
+    to_fe (1 + ((x % n2) % n) * n);
+  == { modulo_modulo_lemma x n n }
+    to_fe #(n*n) (1 + (x % n) * n);
+  == { }
+    1 + (x % n) * n;
+  }
+
+
+val w_lambda_representation: p:prm -> q:prm -> w:fen2u (p*q) -> Lemma
+  (let n = p * q in
+   nplus1inbase #n;
+   let a = res_class np1 w in
+   let lm:fe n = etot p q in
+   fexp w lm = 1 + ((a*lm)%n)*n)
+let w_lambda_representation p q w =
+  let n:comp = p * q in
+  let lambda:pos = etot p q in
+  nplus1inbase #n;
+  let (a,b) = encf_inv (np1 #n) w in
+  let b': fen2u n = isunit_in_nsquare b; to_fe b in
+  assert (w = fexp (np1 #n) a *% fexp b' n);
+
+  pos_times_pos_is_pos n lambda;
+  nat_times_nat_is_nat a lambda;
+
+  roots_of_unity_mod_n #n (a * lambda);
+  assert (fexp (np1 #n) (a * lambda) = 1 + ((a*lambda) % n)*n);
+
+  calc (==) {
+    fexp w lambda;
+  == { fexp_mul2 (fexp (np1 #n) a) (fexp b' n) lambda }
+    (fexp (fexp np1 a) lambda) *% (fexp (fexp b' n) lambda);
+  == { fexp_exp b' n lambda }
+    (fexp (fexp np1 a) lambda) *% (fexp b' (n*lambda));
+  == { carmichael_thm p q b' }
+    fexp (fexp np1 a) lambda *% one;
+  == { mul_one (fexp (fexp (np1 #n) a) lambda) }
+    fexp (fexp np1 a) lambda;
+  == { fexp_exp (np1 #n) a lambda }
+    fexp (np1 #n) (a * lambda);
+  == { }
+    1 + ((a*lambda)%n)*n;
+  }
+
 // lemma 10 p227
-val bigl_lemma1: p:prm -> q:prm -> w:fen2u (p*q) -> Lemma
+val bigl_w_l_lemma: p:prm -> q:prm -> w:fen2u (p*q) -> Lemma
   (ensures (let n = p * q in
+            nplus1inbase #n;
             let x = res_class np1 w in
-            let lm = etot p q in
-            bigl (fexp w lm) = to_fe lm *% x))
-let bigl_lemma1 _ _ _ = admit()
+            let lm:fe n = etot p q in
+            fltpq p q w;
+            bigl (fexp w lm) = lm *% x))
+let bigl_w_l_lemma p q w =
+  let n:comp = p * q in
+  let lambda:fe n = etot p q in
+  nplus1inbase #n;
+  let a:fe n = res_class (np1 #n) w in
+  w_lambda_representation p q w;
+
+  let d:fen2 n = (1 + ((a * lambda) % n) * n) in
+  assert(d > 0);
+
+  calc (==) {
+    bigl #n d;
+  == { }
+    (((a * lambda) % n) * n) / n;
+  == { cancel_mul_div ((a * lambda) % n) n }
+    (a * lambda) % n;
+  == { to_fe_mul #n a lambda }
+    to_fe #n a *% to_fe #n lambda;
+  == { to_fe_idemp #n a }
+    a *% to_fe lambda;
+  == { to_fe_idemp #n lambda }
+    a *% lambda;
+  }
 
 val l1_div_l2: p:prm -> q:prm -> w:fen2 (p*q) -> g:isg (p*q) -> fe (p*q)
 let l1_div_l2 p q w g =
   let n = p * q in
-  let lambda = etot p q in
-  let l1:fe n = bigl (fexp w lambda) in
+  let lambda: fe n = etot p q in
+  let l1arg = fexp w lambda in
+  // If w is not guaranteed to be unit, then we could
+  // possibly get 0, which is not a proper input to L.
+  //
+  // TODO decryption of non-units is nonstandard and should
+  // be re-considered at some point.
+  let l1:fe n = if l1arg = 0 then 0 else bigl l1arg in
+  g_pow_isunit g lambda; isunit_nonzero (fexp g lambda);
   let l2:fe n = bigl (fexp g lambda) in
 
   l1 *% finv0 l2
 
-#reset-options
+
+val l1_div_l2_of_unit_w: p:prm -> q:prm -> w:fen2u (p*q) -> g:isg (p*q) -> Lemma
+  (let lambda = etot p q in
+   isunit (fexp w lambda) /\ (fexp w lambda > 0) /\
+   isunit (fexp g lambda) /\ (fexp g lambda > 0) /\
+   (isunit_nonzero (fexp g lambda);
+    isunit (bigl (fexp g lambda))))
+let l1_div_l2_of_unit_w p q w g =
+  let n = p * q in
+  let lambda:fe n = etot p q in
+  let exp_is_unit (a:fen2u n): Lemma (isunit (fexp a lambda)) =
+    begin
+    g_pow_isunit a lambda;
+    isunit_nonzero (fexp a lambda);
+    assert (isunit (fexp a lambda))
+    end in
+
+  exp_is_unit w;
+  exp_is_unit g;
+  isunit_nonzero (fexp g lambda);
+
+  let bigl_is_unit (): Lemma (isunit (bigl (fexp g lambda))) =
+    begin
+    nplus1inbase #n;
+    bigl_w_l_lemma p q g;
+    assert (bigl (fexp g lambda) = lambda *% res_class np1 g);
+    etot_unit p q;
+    res_class_inverse np1 g;
+    isunit_prod lambda (res_class np1 g)
+    end in
+
+  bigl_is_unit ()
+
+
+val fexp_w_lambda_is_one_mod_n: p:prm -> q:prm -> w:fen2u (p*q) -> Lemma
+  (let lambda = etot p q in fexp w lambda % (p*q) = 1)
+let fexp_w_lambda_is_one_mod_n p q w =
+  let n:comp = p * q in
+  assert (1 % n = 1);
+  let lambda:fe n = etot p q in
+  nplus1inbase #n;
+  let a:fe n = res_class (np1 #n) w in
+  w_lambda_representation p q w;
+  assert (fexp w lambda = 1 + ((a*lambda)%n)*n);
+  assert (fexp w lambda % n = (1 + (((a*lambda)%n)*n))%n);
+  modulo_distributivity 1 (((a*lambda)%n)*n) n;
+  assert (fexp w lambda % n = (1%n + (((a*lambda)%n)*n)%n)%n);
+  cancel_mul_mod ((a*lambda)%n) n;
+  assert ((((a*lambda)%n)*n)%n = 0);
+  assert (fexp w lambda % n = (1%n)%n);
+  lemma_mod_twice 1 n;
+  assert (fexp w lambda % n = 1)
+
+
 
 val l1_div_l2_is_wg: p:prm -> q:prm -> w:fen2u (p*q) -> g:isg (p*q) -> Lemma
   (l1_div_l2 p q w g = res_class g w)
 let l1_div_l2_is_wg p q w g =
   let n = p * q in
-  let lambda = etot p q in
-  let lambda': fe n = to_fe lambda in
+  let lambda: fe n = etot p q in
 
+  nplus1inbase #n;
   let r_w = res_class #n np1 w in
   let r_g = res_class #n np1 g in
   let r_z = res_class #n g w in
 
 
-  assume(fexp w lambda > 0);
+  l1_div_l2_of_unit_w p q w g;
   let l1:fe n = bigl (fexp w lambda) in
-  assume(fexp g lambda > 0);
   let l2:fe n = bigl (fexp g lambda) in
-  assume(isunit l2);
 
-  assume((fexp w lambda) % n = 1);
-  assume((fexp g lambda) % n = 1);
+  fexp_w_lambda_is_one_mod_n p q w;
+  fexp_w_lambda_is_one_mod_n p q g;
+
   bigl_prop (fexp w lambda);
   bigl_prop (fexp g lambda);
 
-  bigl_lemma1 p q w;
-  assert (l1 = lambda' *% r_w);
-  bigl_lemma1 p q g;
-  assert (l2 = lambda' *% r_g);
+  bigl_w_l_lemma p q w;
+  assert (l1 = lambda *% r_w);
+  bigl_w_l_lemma p q g;
+  assert (l2 = lambda *% r_g);
 
   res_class_decomposition (np1 #n) g w;
   assert (r_w = r_g *% r_z);
@@ -259,16 +457,16 @@ let l1_div_l2_is_wg p q w g =
   finv_mul r_w r_g r_z;
   assert (r_w *% finv r_g = r_z);
 
-  assume(isunit #n lambda');
-  let lem1 (): Lemma (isunit l2 /\ finv l2 = finv lambda' *% finv r_g) =
-    isunit_prod lambda' r_g in
+  etot_unit p q;
+  let lem1 (): Lemma (isunit l2 /\ finv l2 = finv lambda *% finv r_g) =
+    isunit_prod lambda r_g in
 
   calc (==) {
     l1 *% finv l2;
    == { lem1 () }
-    (lambda' *% r_w) *% (finv lambda' *% finv r_g);
-   == { mul4_assoc lambda' r_w (finv lambda') (finv r_g) }
-    (lambda' *% finv lambda') *% (r_w *% finv r_g);
+    (lambda *% r_w) *% (finv lambda *% finv r_g);
+   == { mul4_assoc lambda r_w (finv lambda) (finv r_g) }
+    (lambda *% finv lambda) *% (r_w *% finv r_g);
    == { }
     one *% (r_w *% finv r_g);
    == { }
@@ -324,7 +522,7 @@ val enc_is_unit:
   -> m:fe (Public?.n p)
   -> Lemma
   (isunit (encrypt p r m))
-let enc_is_unit p r m = admit()
+let enc_is_unit pub r m = encf_unit (Public?.g pub) m r
 
 val decrypts_into_res_class:
      s:secret
@@ -335,8 +533,6 @@ val decrypts_into_res_class:
 let decrypts_into_res_class sec c =
   l1_div_l2_is_wg (Secret?.p sec) (Secret?.q sec) c (Secret?.g sec)
 
-
-#reset-options
 
 val ex_ys: #n:comp -> g:isg n -> x1:fe n -> x2:fe n -> y1:fenu n -> y2:fenu n -> bool
 let ex_ys #n g x1 x2 y1 y2 = encf g x1 y1 = encf g x2 y2
@@ -364,10 +560,10 @@ let ex_pair x p =
     ex2
     (fun a b -> let ab = Mktuple2 a b in assert(p (fst ab) (snd ab)))
 
-val encf_inj2: #n:comp -> g:isg n -> x1:fe n -> x2:fe n -> Lemma
+val encf_inj_pair: #n:comp -> g:isg n -> x1:fe n -> x2:fe n -> Lemma
   (requires (exists y1 y2. encf g x1 y1 = encf g x2 y2))
   (ensures (x1 = x2))
-let encf_inj2 #n g x1 x2 =
+let encf_inj_pair #n g x1 x2 =
   let ex_pair' y1 y2 = (encf g x1 y1 = encf g x2 y2) in
 
   let goal:Type = x1 = x2 in
@@ -403,4 +599,4 @@ let enc_dec_id sec r m =
   assert(exists y1. encf g m y1 = c);
   assert(exists y2. encf g m' y2 = c);
   assert(exists y1 y2. encf g m y1 = encf g m' y2);
-  encf_inj2 g m m'
+  encf_inj_pair g m m'

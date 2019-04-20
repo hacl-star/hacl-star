@@ -33,11 +33,11 @@ type fe n = x:int{field_el #n x}
 val to_fe: #n:big -> a:int -> r:fe n
 let to_fe #n a = lemma_mod_lt a n; a % n
 
-(* Simplest functions and properties *)
+val to_fe_idemp: #n:big -> a:fe n -> Lemma
+  (to_fe #n a = a)
+let to_fe_idemp #n a = ()
 
-val mod_twice: x:int -> n:pos -> Lemma
-  ((x % n) % n = x % n)
-let mod_twice _ _ = ()
+(* Simplest functions and properties *)
 
 val modulo_mul_distributivity: a:int -> b:int -> n:pos ->
     Lemma ((a * b) % n = ((a % n) * (b % n)) % n)
@@ -65,31 +65,13 @@ let ( *% ) #n n1 n2 = (n1 * n2) % n
 val sqr: #n:big -> fe n -> fe n
 let sqr #n a = a *% a
 
-val to_fe_neg: #n:big -> a:fe n -> Lemma
-  (to_fe #n (-a) = neg (to_fe #n a))
-let to_fe_neg #n a = ()
-
-val to_fe_add: #n:big -> a:fe n -> b:fe n -> Lemma
-  (to_fe #n (a + b) = to_fe a +% to_fe b)
-let to_fe_add #n a b = modulo_distributivity a b n
-
-val to_fe_sub: #n:big -> a:fe n -> b:fe n -> Lemma
-  (to_fe #n (a - b) = to_fe a -% to_fe b)
-let to_fe_sub #n a b =
-  modulo_distributivity a (-b) n;
-  to_fe_neg b
-
-val to_fe_mul: #n:big -> a:fe n -> b:fe n -> Lemma
-  (to_fe #n (a * b) = to_fe a *% to_fe b)
-let to_fe_mul #n a b = modulo_mul_distributivity a b n
-
 val minus_is_neg: a:nat -> n:big -> Lemma
   ((-(a % n)) % n = neg (to_fe #n a))
 let minus_is_neg a n = ()
 
-val modulo_minus: #n:big -> a:nat -> Lemma
+val to_fe_neg: #n:big -> a:nat -> Lemma
   ((-a)%n = neg (to_fe #n a))
-let modulo_minus #n a =
+let to_fe_neg #n a =
   lemma_div_mod a n;
   assert(a = (a/n)*n + a%n);
   assert(-a = -(a/n)*n -(a%n));
@@ -98,13 +80,99 @@ let modulo_minus #n a =
   assert((-a)%n = ((-(a/n)*n)%n + (-(a%n))%n)%n);
   cancel_mul_mod (-(a/n)) n;
   assert((-a)%n = ((-(a%n))%n)%n);
-  mod_twice (-(a%n)) n;
+  lemma_mod_twice (-(a%n)) n;
   assert((-a)%n = (-(a%n))%n);
   minus_is_neg a n
+
+val to_fe_add: #n:big -> a:nat -> b:nat -> Lemma
+  (to_fe #n (a + b) = to_fe a +% to_fe b)
+let to_fe_add #n a b = modulo_distributivity a b n
+
+val to_fe_add': #n:big -> a:fe n -> b:fe n -> Lemma
+  (to_fe #n (a + b) = a +% b)
+let to_fe_add' #n a b = to_fe_add #n a b
+
+val to_fe_sub: #n:big -> a:nat -> b:nat -> Lemma
+  (to_fe #n (a - b) = to_fe a -% to_fe b)
+let to_fe_sub #n a b =
+  modulo_distributivity a (-b) n;
+  to_fe_neg #n b
+
+val to_fe_sub': #n:big -> a:fe n -> b:fe n -> Lemma
+  (to_fe #n (a - b) = a -% b)
+let to_fe_sub' #n a b =
+  to_fe_idemp a;
+  to_fe_idemp b;
+  to_fe_sub #n a b;
+  assert (to_fe #n (a - b) = to_fe a -% to_fe b)
+
+val to_fe_mul: #n:big -> a:nat -> b:nat -> Lemma
+  (to_fe #n (a * b) = to_fe a *% to_fe b)
+let to_fe_mul #n a b = modulo_mul_distributivity a b n
+
+val to_fe_mul': #n:big -> a:fe n -> b:fe n -> Lemma
+  (to_fe #n (a * b) = a *% b)
+let to_fe_mul' #n a b = to_fe_mul #n a b
+
+val add_move_to_right: #n:big -> a:fe n -> b:fe n -> c:fe n -> Lemma
+  (requires (a -% b = c))
+  (ensures (a = c +% b))
+let add_move_to_right #n a b c =
+  to_fe_sub' a b;
+  assert ((a - b) % n = c % n);
+  modulo_add n b (a-b) c;
+  assert ((a - b + b) % n = (c + b) % n);
+  assert (a % n = (c + b) % n)
 
 val add_comm: #n:big -> a:fe n -> b:fe n -> Lemma
   (a +% b = b +% a)
 let add_comm #n _ _ = ()
+
+val neg_zero: #n:big -> Lemma
+  (neg (to_fe #n 0) = 0)
+let neg_zero #n = ()
+
+val add_sub_zero: #n:big -> a:fe n -> Lemma
+  (a +% 0 = a /\ a -% 0 = a)
+let add_sub_zero #n a = ()
+
+val mod_prop: n:big -> a:int -> b:int -> Lemma
+  (requires (a % n = b))
+  (ensures (a - b = (a / n) * n))
+let mod_prop n a b =
+  lemma_div_mod a n;
+  assert(a % n = a - n * (a / n));
+  assert(b = a - n * (a / n));
+  assert(a - b = (a / n) * n)
+
+val mod_ops_props1: #n:big -> a:fe n -> b:fe n -> c:fe n -> Lemma
+  ((a +% b = c ==> (a + b) - c = ((a+b)/n) * n) /\
+   (a *% b = c ==> (a * b) - c = ((a*b)/n) * n))
+let mod_ops_props1 #n a b c =
+  assert (a +% b = c ==> (mod_prop n (a+b) c; (a + b) - c = ((a+b)/n) * n));
+  assert (a *% b = c ==> (mod_prop n (a*b) c; (a * b) - c = ((a*b)/n) * n))
+
+val mod_as_multiple: #n:big -> a:fe n -> b:fe n -> v:fe n -> Lemma
+  (requires (a - b = v * n))
+  (ensures (a = b))
+let mod_as_multiple #n a b v =
+  calc (==) {
+    (a - b) % n;
+   == { }
+    to_fe #n (a - b);
+   == { to_fe_sub #n a b }
+    (to_fe #n a -% to_fe #n b);
+   == { to_fe_idemp #n b }
+    (to_fe #n a -% b);
+  };
+
+  cancel_mul_mod v n;
+  assert (to_fe #n (v * n) = 0);
+
+  assert (a -% b = 0);
+
+  add_move_to_right a b 0;
+  add_sub_zero b
 
 val mul_one: #n:big -> a:fe n -> Lemma
   (ensures (a *% one = a /\ one *% a = a))
@@ -121,8 +189,8 @@ let mul_neg #n a b =
       (a * (n - b)) % n;                  == { distributivity_sub_right a n b }
       ((a * n) + (-(a * b))) % n;         == { modulo_distributivity (a * n) (-(a*b)) n }
       ((a * n) % n + (-(a * b)) % n) % n; == { multiple_modulo_lemma a n }
-      ((-(a * b)) % n) % n;               == { mod_twice (-(a*b)) n }
-      (-(a * b)) % n;                     == { modulo_minus #n (a*b) }
+      ((-(a * b)) % n) % n;               == { lemma_mod_twice (-(a*b)) n }
+      (-(a * b)) % n;                     == { to_fe_neg #n (a*b) }
       neg (to_fe #n (a*b));
     }
 
@@ -169,7 +237,7 @@ let mul3_modulo_out_l #n a b c =
    ( ((a * b) % n) * c ) % n;
   == { modulo_mul_distributivity ((a * b) % n) c n }
    ( (((a * b) % n) % n) * (c % n) ) % n;
-  == { mod_twice (a * b) n }
+  == { lemma_mod_twice (a * b) n }
    ( ((a * b) % n) * (c % n)) % n;
   == { modulo_mul_distributivity (a * b) c n }
    ( (a * b) * c ) % n;
@@ -279,6 +347,38 @@ val nexp_exp: #n:big -> g:fe n -> e1:nat -> e2:nat -> Lemma
   ((nexp #n (nexp #n g e1) e2) = (nexp #n g (e1 * e2)))
 let nexp_exp #n _ _ _ = admit()
 
+// To subgroup
+val to_fe_nexp1: #n:big -> k:big{n % k = 0 && n / k > 1 } -> g:fe n -> e:nat -> Lemma
+  (to_fe #(n/k) (nexp g e) = nexp (to_fe #(n/k) g) e)
+let rec to_fe_nexp1 #n k g e = match e with
+  | 0 -> ()
+  | 1 -> ()
+  | _ -> begin
+    let m = n / k in
+    lemma_div_mod n k;
+    assert (n = k * m);
+    modulo_modulo_lemma (g * nexp g (e-1)) m k;
+    assert (((g * nexp g (e-1)) % n) % m = (g * nexp g (e-1)) % m);
+    assert ((g *% nexp g (e-1)) % m = (g * nexp g (e-1)) % m);
+    assert (to_fe #m (g *% nexp g (e-1)) = to_fe #m (g * nexp g (e-1)));
+    to_fe_nexp1 #n k g (e-1);
+    to_fe_mul #m g (nexp g (e-1))
+  end
+
+//// To a bigger modulus
+//val to_fe_nexp2: #n:big -> #m:big{m > n} -> g:fe n -> e:nat -> Lemma
+//  (to_fe #m (nexp g e) = nexp (to_fe #m g) e)
+//let rec to_fe_nexp2 #n #m g e = match e with
+//  | 0 -> ()
+//  | 1 -> ()
+//  | _ -> begin
+//    modulo_lemma (
+//    assume (((g * nexp g (e-1)) % n) % m = (g * nexp g (e-1)) % m);
+//    assert ((g *% nexp g (e-1)) % m = (g * nexp g (e-1)) % m);
+//    assert (to_fe #m (g *% nexp g (e-1)) = to_fe #m (g * nexp g (e-1)));
+//    to_fe_nexp2 #n #m g (e-1);
+//    to_fe_mul #m g (nexp g (e-1))
+//  end
 
 // Define fexp' for composite n and for unit g.
 val fexp: #n:big -> fe n -> e:nat -> Tot (fe n) (decreases e)
@@ -342,7 +442,11 @@ let fexp_exp #n g e1 e2 =
 
 (* GCD and LCM *)
 
-type divides (a:pos) (b:pos) = exists (c:pos). a * c = b
+type divides (a:pos) (b:pos) = b % a = 0
+
+val divides_multiple: a:pos -> b:pos{divides a b} -> k:pos -> Lemma
+  (divides a (k*b))
+let divides_multiple a b k = modulo_mul_distributivity k b a
 
 type is_gcd (a:pos) (b:pos) (gcd:pos) =
     (forall (d:pos). divides d a /\ divides d b ==> divides d gcd)
@@ -377,49 +481,31 @@ val ex_eucl_lemma3: a:pos -> b:pos -> u:int -> v:int -> Lemma
 let ex_eucl_lemma3 a b u v = ex_eucl_lemma2 a b 1 u v
 
 val lcm: pos -> pos -> pos
-let lcm a b = abs ((a / gcd a b) * b)
+let lcm a b = (a / gcd a b) * b
 
-val mod_prop: n:big -> a:int -> b:int -> Lemma
-  (requires (a % n = b))
-  (ensures (a - b = (a / n) * n))
-let mod_prop n a b =
-  lemma_div_mod a n;
-  assert(a % n = a - n * (a / n));
-  assert(b = a - n * (a / n));
-  assert(a - b = (a / n) * n)
+val division_mul_after: a:pos -> b:pos -> g:pos{divides g a} -> Lemma
+  ((a / g) * b = (a * b) / g)
+let division_mul_after a b g =
+  assert (a % g = 0);
+  assert (g * (a / g) = a);
+  assert (g * ((a / g)*b) = a*b);
 
-val mod_ops_props1: #n:big -> a:fe n -> b:fe n -> c:fe n -> Lemma
-  ((a +% b = c ==> (a + b) - c = ((a+b)/n) * n) /\
-   (a *% b = c ==> (a * b) - c = ((a*b)/n) * n))
-let mod_ops_props1 #n a b c =
-  assert (a +% b = c ==> (mod_prop n (a+b) c; (a + b) - c = ((a+b)/n) * n));
-  assert (a *% b = c ==> (mod_prop n (a*b) c; (a * b) - c = ((a*b)/n) * n))
+  divides_multiple g a b;
+  assert ((a * b) % g = 0);
+  assert (g * ((a * b) / g) = a*b)
 
-val mod_ops_props2: #n:big -> a:fe n -> b:fe n -> c:fe n -> v:fe n -> Lemma
-  (((a + b) - c = v * n ==> a +% b = c) /\
-   ((a * b) - c = v * n ==> a *% b = c))
-let mod_ops_props2 #n a b c v =
+val division_post_size: a:pos -> b:pos -> Lemma
+  (a / b <= a)
+let division_post_size a b = admit()
 
-  multiple_modulo_lemma v n;
-  assert((v * n) % n = 0);
-
-  assert((a * b) - c = v * n ==> ((a * b) - c) % n = (v * n) % n);
-  //assert((a * b) - c = v * n ==> ((a * b) - c) % n = 0);
-  //assert((a * b) - c = v * n ==> (a * b) % n = c % n);
-  //admit();
-  //assert((a * b) - c = v * n ==> (a * b) % n = c);
-
-//  admit();
-//
-//  let l1 (): Lemma ((a + b) - c = v * n ==> (a +% b) = c) =
-//    (assert((a + b) - c = v * n ==> ((a + b) - c) % n = 0);
-//     assert((a + b) - c = v * n ==> (a + b) % n = c % n);
-//     assert((a + b) - c = v * n ==> (a + b) % n = c)) in
-//
-//  admit();
-
-
-  admit()
+val lcm_less_mul: a:pos -> b:pos -> Lemma
+  (lcm a b <= a * b)
+let lcm_less_mul a b =
+  let g:pos = gcd a b in
+  assert (lcm a b = (a / g) * b);
+  division_mul_after a b g;
+  assert (lcm a b = (a * b) / g);
+  division_post_size (a * b) g
 
 (* Inverses *)
 
@@ -480,7 +566,7 @@ let inv_as_gcd1 #n a =
   assert((((-v)*n)%n) = 0);
   assert ((u*a)%n = (1%n + 0)%n);
   assert ((u*a)%n = (1%n)%n);
-  mod_twice 1 n;
+  lemma_mod_twice 1 n;
   assert ((u*a)%n = (1%n));
   assert ((u*a)%n = 1);
   modulo_mul_distributivity u a n;
@@ -544,9 +630,17 @@ let rec g_pow_order_reduc #n g x =
     fexp_one2 #n (x/r)
   end
 
-val g_pow_isunit: #n:comp -> g:fe n{isunit g /\ g > 0}  -> x:pos -> Lemma
-  (isunit (fexp g x))
+val isunit_nonzero: #n:comp -> g:fe n{isunit g} -> Lemma (g > 0)
+let isunit_nonzero #n g =
+  assert (g = 0 ==> (forall x. g * x = 0));
+  assert (g = 0 ==> (forall x. (g * x) % n = 0))
+
+val g_pow_isunit: #n:comp -> g:fe n{isunit g}  -> x:pos -> Lemma
+  (let r = mult_order g in
+   isunit (fexp g x) /\
+   finv (fexp g x) = fexp g (r - (x % r)))
 let g_pow_isunit #n g x =
+  isunit_nonzero #n g;
   let r = mult_order g in
   let x' = x % r in
   modulo_range_lemma x r;
