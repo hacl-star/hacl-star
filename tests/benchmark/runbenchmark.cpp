@@ -95,7 +95,7 @@ int main(int argc, char const **argv)
     Benchmark::initialize();
     BenchmarkSettings & s = parse_args(argc, argv);
 
-    Benchmark::set_runtime_config(1, 1, 1, 1, 1, 1, 1, 1, 1);
+    std::cout << "Config: " << Benchmark::get_runtime_config() << "\n";
 
     while (!s.families_to_run.empty())
     {

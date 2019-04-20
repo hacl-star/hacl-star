@@ -7,8 +7,10 @@
 
 extern "C" {
 #include <EverCrypt_Hash.h>
+#ifdef HAVE_HACL
 #include <Hacl_Hash.h>
 #include <Hacl_SHA3.h>
+#endif
 }
 
 #ifdef HAVE_OPENSSL

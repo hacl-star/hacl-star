@@ -14,6 +14,8 @@ extern "C" {
 void Benchmark::initialize()
 {
   srand(0);
+
+  Benchmark::set_runtime_config(1, 1, 1, 1, 1, 1, 1, 1, 1);
 }
 
 void Benchmark::randomize(char *buf, size_t buf_sz)
