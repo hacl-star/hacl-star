@@ -3,7 +3,8 @@ module Hacl.Argmax.Paillier
 open FStar.Calc
 open FStar.Mul
 open FStar.Math.Lemmas
-open FStar.Tactics
+open FStar.Classical
+open FStar.Squash
 
 open Hacl.Argmax.Common
 
@@ -37,6 +38,7 @@ let nplus1inbase #n = admit()
 val encf: #n:comp -> g:isg n -> x:fe n -> y:fenu n -> fen2 n
 let encf #n g x y = fexp g x *% fexp (to_fe y) n
 
+// TODO fails sometimes, need to simplify the proof
 //assert(true) by (dump "");
 val encf_unit: #n:comp -> g:isg n -> x:fe n -> y:fenu n -> Lemma
   (isunit (encf #n g x y))
@@ -210,14 +212,70 @@ val bigl_lemma1: p:prm -> q:prm -> w:fen2u (p*q) -> Lemma
             bigl (fexp w lm) = to_fe lm *% x))
 let bigl_lemma1 _ _ _ = admit()
 
-val bigl_lemma2: p:prm -> q:prm -> w:fen2u (p*q) -> g:isg (p*q) -> Lemma
-  (ensures (let n = p * q in
-            let a = res_class #n np1 w in
-            let b = res_class #n np1 g in
-            let c = res_class #n g w in
-            isunit b /\ a *% finv b = c
-            ))
-let bigl_lemma2 _ _ _ _ = admit()
+val l1_div_l2: p:prm -> q:prm -> w:fen2 (p*q) -> g:isg (p*q) -> fe (p*q)
+let l1_div_l2 p q w g =
+  let n = p * q in
+  let lambda = etot p q in
+  let l1:fe n = bigl (fexp w lambda) in
+  let l2:fe n = bigl (fexp g lambda) in
+
+  l1 *% finv0 l2
+
+#reset-options
+
+val l1_div_l2_is_wg: p:prm -> q:prm -> w:fen2u (p*q) -> g:isg (p*q) -> Lemma
+  (l1_div_l2 p q w g = res_class g w)
+let l1_div_l2_is_wg p q w g =
+  let n = p * q in
+  let lambda = etot p q in
+  let lambda': fe n = to_fe lambda in
+
+  let r_w = res_class #n np1 w in
+  let r_g = res_class #n np1 g in
+  let r_z = res_class #n g w in
+
+
+  assume(fexp w lambda > 0);
+  let l1:fe n = bigl (fexp w lambda) in
+  assume(fexp g lambda > 0);
+  let l2:fe n = bigl (fexp g lambda) in
+  assume(isunit l2);
+
+  assume((fexp w lambda) % n = 1);
+  assume((fexp g lambda) % n = 1);
+  bigl_prop (fexp w lambda);
+  bigl_prop (fexp g lambda);
+
+  bigl_lemma1 p q w;
+  assert (l1 = lambda' *% r_w);
+  bigl_lemma1 p q g;
+  assert (l2 = lambda' *% r_g);
+
+  res_class_decomposition (np1 #n) g w;
+  assert (r_w = r_g *% r_z);
+
+  res_class_inverse np1 g;
+
+  finv_mul r_w r_g r_z;
+  assert (r_w *% finv r_g = r_z);
+
+  assume(isunit #n lambda');
+  let lem1 (): Lemma (isunit l2 /\ finv l2 = finv lambda' *% finv r_g) =
+    isunit_prod lambda' r_g in
+
+  calc (==) {
+    l1 *% finv l2;
+   == { lem1 () }
+    (lambda' *% r_w) *% (finv lambda' *% finv r_g);
+   == { mul4_assoc lambda' r_w (finv lambda') (finv r_g) }
+    (lambda' *% finv lambda') *% (r_w *% finv r_g);
+   == { }
+    one *% (r_w *% finv r_g);
+   == { }
+    r_w *% finv r_g;
+   == { }
+    r_z;
+  }
 
 
 (* Keys *)
@@ -256,20 +314,17 @@ val decrypt:
      s:secret
   -> c:ciphertext (Public?.n (s2p s))
   -> m:fe (Public?.n (s2p s))
-let decrypt sec c =
-  let p = Secret?.p sec in
-  let q = Secret?.q sec in
-  let n = p * q in
-  let g = Secret?.g sec in
-  let lambda = etot p q in
-
-  let l1:fe n = bigl (fexp c lambda) in
-  let l2:fe n = bigl (fexp g lambda) in
-
-  let m = l1 *% finv0 l2 in
-  m
+let decrypt sec c = l1_div_l2 (Secret?.p sec) (Secret?.q sec) c (Secret?.g sec)
 
 (* Functional correctness *)
+
+val enc_is_unit:
+     p:public
+  -> r:fenu (Public?.n p)
+  -> m:fe (Public?.n p)
+  -> Lemma
+  (isunit (encrypt p r m))
+let enc_is_unit p r m = admit()
 
 val decrypts_into_res_class:
      s:secret
@@ -278,57 +333,74 @@ val decrypts_into_res_class:
      (requires (isunit c))
      (ensures (decrypt s c = res_class (Secret?.g s) c))
 let decrypts_into_res_class sec c =
-  let p = Secret?.p sec in
-  let q = Secret?.q sec in
-  let n = p * q in
+  l1_div_l2_is_wg (Secret?.p sec) (Secret?.q sec) c (Secret?.g sec)
+
+
+#reset-options
+
+val ex_ys: #n:comp -> g:isg n -> x1:fe n -> x2:fe n -> y1:fenu n -> y2:fenu n -> bool
+let ex_ys #n g x1 x2 y1 y2 = encf g x1 y1 = encf g x2 y2
+
+
+type y_pair (#n:comp) : Type = tuple2 (fenu n) (fenu n)
+
+val exists_elim_pair (goal:Type) (#a:Type) (#p:(a -> a -> Type))
+  (_:squash (exists (x:a) (y:a). p x y))
+  (_:(x:a -> y:a{p x y} -> GTot (squash goal))) :Lemma goal
+let exists_elim_pair goal #a #p have f =
+  let joined1: squash (x:a & (exists (y:a). p x y)) = join_squash have in
+  bind_squash #_ #goal joined1 (fun (| x, pf1 |) ->
+    let joined2: squash (y:a & p x y) = join_squash (return_squash pf1) in
+    bind_squash joined2 (fun (|y, pf2|) -> return_squash pf2; f x y))
+
+val ex_pair: x:Type -> p:(x -> x -> bool) -> Lemma
+  (requires (exists a b. p a b))
+  (ensures (exists ab. p (fst ab) (snd ab)))
+let ex_pair x p =
+  let ex2: squash (exists (a:x) (b:x). p a b) = () in
+  let goal = exists ab. p (fst ab) (snd ab) in
+  exists_elim_pair
+    goal
+    ex2
+    (fun a b -> let ab = Mktuple2 a b in assert(p (fst ab) (snd ab)))
+
+val encf_inj2: #n:comp -> g:isg n -> x1:fe n -> x2:fe n -> Lemma
+  (requires (exists y1 y2. encf g x1 y1 = encf g x2 y2))
+  (ensures (x1 = x2))
+let encf_inj2 #n g x1 x2 =
+  let ex_pair' y1 y2 = (encf g x1 y1 = encf g x2 y2) in
+
+  let goal:Type = x1 = x2 in
+  ex_pair (fenu n) ex_pair';
+  let predicate (ys:y_pair):Type = ex_pair' (fst ys) (snd ys) in
+
+  assert(exists (ys:y_pair #n). predicate ys);
+  let ex: squash (exists (ys:y_pair #n). predicate ys) = () in
+
+  let proof (ys:y_pair #n{predicate ys}): GTot (squash goal) =
+    encf_inj g x1 (fst ys) x2 (snd ys) in
+
+  exists_elim goal #(y_pair #n) #predicate ex proof
+
+val enc_dec_id:
+     s:secret
+  -> r:fenu (Public?.n (s2p s))
+  -> m:fe (Public?.n (s2p s))
+  -> Lemma
+  (ensures (decrypt s (encrypt (s2p s) r m) = m))
+let enc_dec_id sec r m =
+  let pub = s2p sec in
+  let n = Public?.n pub in
   let g = Secret?.g sec in
-  let lambda = etot p q in
-  let lambda': fe n = to_fe lambda in
-  let r_c = res_class #n np1 c in
-  let r_g = res_class #n np1 g in
-  let r_z = res_class #n g c in
+  enc_is_unit pub r m;
+  let c: fen2u n = encrypt (s2p sec) r m in
+  assert(exists y1. encf g m y1 = c);
+  let m' = decrypt sec c in
+  let r_c = res_class g c in
+  decrypts_into_res_class sec c;
+  assert(r_c = m');
 
-  assume(fexp c lambda > 0);
-  let l1:fe n = bigl (fexp c lambda) in
-  assume(fexp g lambda > 0);
-  let l2:fe n = bigl (fexp g lambda) in
-  assume(isunit l2);
-
-  assume((fexp c lambda) % n = 1);
-  assume((fexp g lambda) % n = 1);
-  bigl_prop (fexp c lambda);
-  bigl_prop (fexp g lambda);
-
-  bigl_lemma1 p q c;
-  assert(l1 = lambda' *% r_c);
-  bigl_lemma1 p q g;
-  assert(l2 = lambda' *% r_g);
-
-  let m = l1 *% finv l2 in
-
-  assert(decrypt sec c = m);
-
-  bigl_lemma2 p q c g;
-  // [g]_{1+n} = [1+n]_g^{-1}
-  assert(isunit r_g);
-  assert(r_c *% finv r_g = r_z);
-
-  assume(isunit #n lambda');
-
-  let lem1 (): Lemma (finv l2 = finv lambda' *% finv r_g) = isunit_prod lambda' r_g in
-
-  calc (==) {
-    m;
-   == { }
-    l1 *% finv l2;
-   == { lem1 () }
-    (lambda' *% r_c) *% (finv lambda' *% finv r_g);
-   == { mul4_assoc lambda' r_c (finv lambda') (finv r_g) }
-    (lambda' *% finv lambda') *% (r_c *% finv r_g);
-   == { }
-    1 *% (r_c *% finv r_g);
-   == { }
-    r_c *% finv r_g;
-   == { }
-    r_z;
-  }
+  assert(exists y1. encf g m y1 = c);
+  assert(exists y2. encf g m' y2 = c);
+  assert(exists y1 y2. encf g m y1 = encf g m' y2);
+  encf_inj2 g m m'

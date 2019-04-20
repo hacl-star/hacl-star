@@ -420,6 +420,14 @@ let finv_unique #n a b =
             (z *% a) *% b; =={} one *% b; =={} b;
   }
 
+val finv_mul: #n:big -> a:fe n -> b:fe n{isunit b} -> c:fe n -> Lemma
+  (requires (a = b *% c))
+  (ensures (a *% finv b = c))
+let finv_mul #n a b c =
+  assert (a *% finv b = (b *% c) *% finv b);
+  mul_comm (b *% c) (finv b);
+  mul_assoc (finv b) b c
+
 val isunit_prod: #n:big -> a:fe n{isunit a} -> b:fe n{isunit b} -> Lemma
   (ensures (isunit (a *% b) /\ finv (a *% b) = finv a *% finv b))
 let isunit_prod #n a b =
