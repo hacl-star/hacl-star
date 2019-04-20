@@ -255,6 +255,104 @@ class OldValeDecrypt : public AEADBenchmark
 
 #ifdef HAVE_OPENSSL
 // See https://github.com/openssl/openssl/blob/master/demos/evp/aesgcm.c
+
+template<size_t key_size_bits, size_t tag_len>
+class OpenSSLEncrypt : public AEADBenchmark
+{
+  protected:
+    EVP_CIPHER_CTX *ctx;
+    int outlen;
+
+  public:
+    OpenSSLEncrypt(size_t msg_len) :
+      AEADBenchmark(key_size_bits, tag_len, msg_len, "EverCrypt")
+      {
+        switch(key_size_bits) {
+          case 128: set_name("OpenSSL\\nAES128\\nGCM"); break;
+          case 256: set_name("OpenSSL\\nAES256\\nGCM"); break;
+          default: throw new std::logic_error("Unknown algorithm");
+        }
+      }
+    virtual void bench_setup(const BenchmarkSettings & s)
+    {
+       ctx = EVP_CIPHER_CTX_new();
+       /* Set cipher type and mode */
+       switch(key_size_bits) {
+          case 128: EVP_EncryptInit_ex(ctx, EVP_aes_128_gcm(), NULL, NULL, NULL); break;
+          case 256: EVP_EncryptInit_ex(ctx, EVP_aes_256_gcm(), NULL, NULL, NULL); break;
+       }
+       /* Set IV length if default 96 bits is not appropriate */
+       if ((EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_AEAD_SET_IVLEN, 12, NULL) <= 0) ||
+           (EVP_EncryptInit_ex(ctx, NULL, NULL, key, iv)  <= 0))
+           throw std::logic_error("OpenSSL encryption initialization failed");
+    }
+    virtual void bench_func()
+    {
+      #ifdef _DEBUG
+      if (
+      #endif
+          (ad_len > 0 && EVP_EncryptUpdate(ctx, NULL, &outlen, ad, ad_len) <= 0) ||
+          (EVP_EncryptUpdate(ctx, cipher, &outlen, plain, msg_len) <= 0) ||
+          (EVP_EncryptFinal_ex(ctx, cipher, &outlen) <= 0)
+      #ifdef _DEBUG
+      ) throw std::logic_error("OpenSSL encryption failed E")
+      #endif
+      ;
+    }
+    virtual ~OpenSSLEncrypt() { EVP_CIPHER_CTX_free(ctx); }
+};
+
+template<size_t key_size_bits, size_t tag_len>
+class OpenSSLDecrypt : public AEADBenchmark
+{
+  protected:
+    EVP_CIPHER_CTX *ctx;
+    int outlen;
+
+  public:
+    OpenSSLDecrypt(size_t msg_len) :
+      AEADBenchmark(key_size_bits, tag_len, msg_len, "EverCrypt")
+      {
+        switch(key_size_bits) {
+          case 128: set_name("OpenSSL\\nAES128\\nGCM"); break;
+          case 256: set_name("OpenSSL\\nAES256\\nGCM"); break;
+          default: throw new std::logic_error("Unknown algorithm");
+        }
+      }
+    virtual void bench_setup(const BenchmarkSettings & s)
+    {
+       ctx = EVP_CIPHER_CTX_new();
+       /* Set cipher type and mode */
+       switch(key_size_bits) {
+          case 128: EVP_DecryptInit_ex(ctx, EVP_aes_128_gcm(), NULL, NULL, NULL); break;
+          case 256: EVP_DecryptInit_ex(ctx, EVP_aes_256_gcm(), NULL, NULL, NULL); break;
+       }
+       /* Set IV length if default 96 bits is not appropriate */
+       if ((EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_AEAD_SET_IVLEN, 12, NULL) <= 0) ||
+           (EVP_EncryptInit_ex(ctx, NULL, NULL, key, iv) <= 0) ||
+           (ad_len > 0 && EVP_EncryptUpdate(ctx, NULL, &outlen, ad, ad_len) <= 0) ||
+           (EVP_EncryptUpdate(ctx, cipher, &outlen, plain, msg_len) <= 0) ||
+           (EVP_EncryptFinal_ex(ctx, cipher, &outlen) <= 0) ||
+           (EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_AEAD_GET_TAG, 16, tag) <= 0) ||
+           (EVP_DecryptInit_ex(ctx, NULL, NULL, key, iv) <= 0))
+           throw std::logic_error("OpenSSL decryption initialization failed");
+    }
+    virtual void bench_func()
+    {
+      #ifdef _DEBUG
+      if (
+      #endif
+          ((ad_len > 0) && EVP_DecryptUpdate(ctx, NULL, &outlen, ad, ad_len) <= 0) ||
+          EVP_DecryptUpdate(ctx, plain, &outlen, cipher, msg_len)  <= 0 ||
+          EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_AEAD_SET_TAG, tag_len, (void *)tag)  <= 0 ||
+          EVP_DecryptFinal_ex(ctx, plain, &outlen) <= 0
+      #ifdef _DEBUG
+        ) throw std::logic_error("OpenSSL tag validation failed")
+      #endif
+      ;
+    }
+    virtual ~OpenSSLDecrypt() { EVP_CIPHER_CTX_free(ctx); }
+};
 #endif
 
 void bench_aead_encrypt(const BenchmarkSettings & s)
@@ -298,6 +396,8 @@ void bench_aead_encrypt(const BenchmarkSettings & s)
       #endif
 
       #ifdef HAVE_OPENSSL
+      new OpenSSLEncrypt<128, 16>(ds),
+      new OpenSSLEncrypt<256, 16>(ds),
       #endif
       };
 
@@ -372,6 +472,8 @@ void bench_aead_decrypt(const BenchmarkSettings & s)
       #endif
 
       #ifdef HAVE_OPENSSL
+      new OpenSSLDecrypt<128, 16>(ds),
+      new OpenSSLDecrypt<256, 16>(ds),
       #endif
       };
 
