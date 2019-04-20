@@ -25,12 +25,6 @@ type comp = n:big{iscomp n}
 val one: pos
 let one = 1
 
-(* Basic algebra *)
-
-val mod_twice: x:int -> n:pos -> Lemma
-  ((x % n) % n = x % n)
-let mod_twice _ _ = ()
-
 val field_el: #n:big -> a:int -> bool
 let field_el #n a = a >= 0 && a < n
 
@@ -38,6 +32,22 @@ type fe n = x:int{field_el #n x}
 
 val to_fe: #n:big -> a:int -> r:fe n
 let to_fe #n a = lemma_mod_lt a n; a % n
+
+(* Simplest functions and properties *)
+
+val mod_twice: x:int -> n:pos -> Lemma
+  ((x % n) % n = x % n)
+let mod_twice _ _ = ()
+
+val modulo_mul_distributivity: a:int -> b:int -> n:pos ->
+    Lemma ((a * b) % n = ((a % n) * (b % n)) % n)
+let rec modulo_mul_distributivity a b n =
+  lemma_mod_mul_distr_l a b n;
+  lemma_mod_mul_distr_r (a % n) b n
+
+
+(* Basic algebra *)
+
 
 type binop = #n:big -> fe n -> fe n -> fe n
 val ( +% ): binop
@@ -55,13 +65,42 @@ let ( *% ) #n n1 n2 = (n1 * n2) % n
 val sqr: #n:big -> fe n -> fe n
 let sqr #n a = a *% a
 
-val minus_is_neg: #n:big -> a:nat -> Lemma
-  (ensures ((-a%n) % n = neg (to_fe #n a)))
-let minus_is_neg #n a = ()
+val to_fe_neg: #n:big -> a:fe n -> Lemma
+  (to_fe #n (-a) = neg (to_fe #n a))
+let to_fe_neg #n a = ()
 
-val minus_is_neg2: #n:big -> a:fe n -> Lemma
-  (ensures (((-a)%n) = neg a))
-let minus_is_neg2 #n a = ()
+val to_fe_add: #n:big -> a:fe n -> b:fe n -> Lemma
+  (to_fe #n (a + b) = to_fe a +% to_fe b)
+let to_fe_add #n a b = modulo_distributivity a b n
+
+val to_fe_sub: #n:big -> a:fe n -> b:fe n -> Lemma
+  (to_fe #n (a - b) = to_fe a -% to_fe b)
+let to_fe_sub #n a b =
+  modulo_distributivity a (-b) n;
+  to_fe_neg b
+
+val to_fe_mul: #n:big -> a:fe n -> b:fe n -> Lemma
+  (to_fe #n (a * b) = to_fe a *% to_fe b)
+let to_fe_mul #n a b = modulo_mul_distributivity a b n
+
+val minus_is_neg: a:nat -> n:big -> Lemma
+  ((-(a % n)) % n = neg (to_fe #n a))
+let minus_is_neg a n = ()
+
+val modulo_minus: #n:big -> a:nat -> Lemma
+  ((-a)%n = neg (to_fe #n a))
+let modulo_minus #n a =
+  lemma_div_mod a n;
+  assert(a = (a/n)*n + a%n);
+  assert(-a = -(a/n)*n -(a%n));
+  assert((-a)%n = (-(a/n)*n -(a%n))%n);
+  modulo_distributivity (-(a/n)*n) (-(a%n)) n;
+  assert((-a)%n = ((-(a/n)*n)%n + (-(a%n))%n)%n);
+  cancel_mul_mod (-(a/n)) n;
+  assert((-a)%n = ((-(a%n))%n)%n);
+  mod_twice (-(a%n)) n;
+  assert((-a)%n = (-(a%n))%n);
+  minus_is_neg a n
 
 val add_comm: #n:big -> a:fe n -> b:fe n -> Lemma
   (a +% b = b +% a)
@@ -75,7 +114,6 @@ let mul_one #n a = ()
 val mul_neg: #n:big -> a:fe n -> b:fe n -> Lemma
   (a *% (neg b) = neg (a *% b))
 let mul_neg #n a b =
-  admit ();
   if b = 0 || a = 0 then ()
   else
     calc (==) {
@@ -83,15 +121,10 @@ let mul_neg #n a b =
       (a * (n - b)) % n;                  == { distributivity_sub_right a n b }
       ((a * n) + (-(a * b))) % n;         == { modulo_distributivity (a * n) (-(a*b)) n }
       ((a * n) % n + (-(a * b)) % n) % n; == { multiple_modulo_lemma a n }
-      ((-a * b) % n) % n;                 == { mod_twice (-(a*b)) n }
-      (-(a * b)) % n;
-    };
-    if a*b = 0 then assert ((-(a * b)) % n = 0)
-    else if a*b < n then begin
-      let c: fe n = a*b in
-      minus_is_neg2 c;
-      assert ((-c)%n = neg c)
-    end else admit()
+      ((-(a * b)) % n) % n;               == { mod_twice (-(a*b)) n }
+      (-(a * b)) % n;                     == { modulo_minus #n (a*b) }
+      neg (to_fe #n (a*b));
+    }
 
 val mul_comm: #n:big -> a:fe n -> b:fe n -> Lemma
   (ensures (a *% b = b *% a))
@@ -124,13 +157,6 @@ val mul_sub_distr_l: #n:big -> a:fe n -> b:fe n -> c:fe n -> Lemma
 let mul_sub_distr_l #n a b c =
   mul_sub_distr_r c a b;
   mul_comm (a -% b) c
-
-val modulo_mul_distributivity: a:int -> b:int -> n:pos ->
-    Lemma ((a * b) % n = ((a % n) * (b % n)) % n)
-let rec modulo_mul_distributivity a b n =
-  lemma_mod_mul_distr_l a b n;
-  lemma_mod_mul_distr_r (a % n) b n
-
 
 val mul3_modulo_out_l: #n:big -> a:fe n -> b:fe n -> c:fe n -> Lemma
   ((a *% b) *% c = ((a * b) * c) % n)
