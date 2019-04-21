@@ -73,9 +73,6 @@ KREMLIN=$(KREMLIN_EXE)
 # We use -drop (deprecated) only to avoid creating unnecessary .c,.h files
 $(GENERATED_DIR)/Makefile.include: $(ALL_KRML_FILES) | .depend
 	$(KREMLIN) $(KREMLIN_TESTLIB) -skip-compilation \
-	-no-prefix 'Hacl.Argmax.Common' \
-	-no-prefix 'Hacl.Argmax.GM' \
-	-no-prefix 'Hacl.Argmax.Paillier' \
 	-no-prefix 'Hacl.Test.Argmax' \
 	-bundle 'Lib.*' \
 	-bundle 'Spec.*' \
@@ -118,6 +115,7 @@ ALL_OBJS = $(patsubst %.c,%.o,$(ALL_SOURCES))
 INCLUDE_DIRS = \
   $(KREMLIN_HOME)/include \
   $(KREMLIN_HOME)/kremlib \
+  $(KREMLIN_HOME)/kremlib/c \
   $(KREMLIN_HOME)/kremlib/dist/generic \
   $(HACL_HOME)/lib
 
