@@ -578,23 +578,12 @@ val inv_as_gcd2: #n:big -> a:fe n{a>0} -> Lemma
   (requires (isunit a))
   (ensures (gcd a n = 1))
 let inv_as_gcd2 #n a =
-  let u = finv a in
+  let u:fe n = finv a in
 
-  assert (isunit a);
-  assert ((u *% a) = 1);
-  assert ((u * a)%n = 1);
-  assert ((u * a)%n = 1);
   mod_prop n (u*a) 1;
-  assert ((u * a) - 1 = ((u*a)/n)*n);
-  assert ((u * a) - ((u*a)/n)*n = 1);
   assert ((u * a) + (-((u*a)/n)*n) = 1);
-  let l1 (x:int): Lemma (-(x*n) = (-x)*n) = () in
-  l1 ((u*a)/n);
-  assert (-((u*a)/n)*n = (-(u*a)/n)*n);
-  assert ((u * a) + (-((u*a)/n)*n) = 1);
-  assert ((u * a) + (-(u*a)/n)*n = 1);
-  ex_eucl_lemma3 a n u (-(u*a)/n);
-  assert (gcd a n = 1)
+  neg_mul_left ((u*a)/n) n;
+  ex_eucl_lemma3 a n u (-(u*a)/n)
 
 val inv_as_gcd: #n:big -> a:fe n{a>0} -> Lemma
   (isunit a <==> gcd a n = 1)
