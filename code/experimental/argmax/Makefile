@@ -8,6 +8,7 @@ OUTPUT_DIR    = .output
 HINT_DIR      = .hints
 GENERATED_DIR = argmax-c
 OUT_DIR       = argmax-c
+OCAML_DIR     = argmax-ocaml
 
 .PHONY: all test stage1 stage2 clean clean-c distclean
 
@@ -39,6 +40,18 @@ FSTAR = $(FSTAR_EXE) $(FSTAR_FLAGS)
 
 ENABLE_HINTS = --use_hints --use_hint_hashes --record_hints --query_stats
 
+OCAML_TEST = Hacl.Ocaml.Argmax.Functest.fst
+# nix-shell sets the $OCAMLPATH so we don't need to overcomplicate anything here
+OCAMLOPT ?= ocamlfind opt -package fstarlib -linkpkg -g
+
+ocaml: $(OCAML_TEST)
+	echo "Extracting ocaml"
+	mkdir -p $(OCAML_DIR)
+	$(FSTAR_EXE) $(addprefix --include ,$(FSTAR_INCLUDE_DIRS)) \
+		--odir $(OCAML_DIR) --codegen OCaml $(OCAML_TEST)
+	$(OCAMLOPT) $(OCAML_DIR)/Hacl_Ocaml_Argmax_Functest.ml -o $(OCAML_DIR)/functest.exe
+	./$(OCAML_DIR)/functest.exe
+
 ROOTS = Hacl.Test.Argmax.fst
 
 .PRECIOUS: %.krml
@@ -61,14 +74,12 @@ $(OUTPUT_DIR)/%.krml: | .depend
 	  $(notdir $(subst .checked,,$<)) && \
 	touch $@
 
-# 2. Generation of .c files
+# Generation of .c files
 
 KREMLIN_TESTLIB=-add-include '"TestLib.h"' $(KREMLIB)/dist/generic/testlib.c
 
 # No extra flags by default
 KREMLIN=$(KREMLIN_EXE)
-
-# 2. Generation of .c files
 
 # We use -drop (deprecated) only to avoid creating unnecessary .c,.h files
 $(GENERATED_DIR)/Makefile.include: $(ALL_KRML_FILES) | .depend
@@ -144,6 +155,8 @@ $(OUT_DIR)/test.exe: $(ALL_OBJS) | $(OUT_DIR)
 .PRECIOUS: %.o
 
 endif # STAGE=2
+
+
 
 
 # Targets for interactive mode
