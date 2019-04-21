@@ -1,12 +1,13 @@
-# Hacl* libraries assume that user has f* and kremlin built from the
+# Hacl* libraries assume that user has F* and kremlin built from the
 # source somewhere in the system, and that FSTAR_HOME and KREMLIN_HOME
 # point to these directories directly. Another option would be to install
-# f*, kremlin and z3 system-wide, but this is slightly tricker to do
+# F*, kremlin and z3 system-wide, but this is slightly tricker to do
 # -- though we then definitely know which version is installed, and
 # the absence of artifacts produced by makefiles make it easier to
 # reason about different problems.
 #
 #
+# #### Dirty installation
 #
 # The dirty installation on nixos will require opam to be installed
 # globally (or via nix-env). Init it, install the switch required,
@@ -15,8 +16,9 @@
 # related targets, prepare-ocaml installs required opam libraries, others
 # clone and build big dependencies (f*, kremlin, z3).
 #
-# This shell file provides libraries that are required by the impure
-# opam installation. Important notice: some opam packages like sqlite3-conf
+# This shell file provides more libraries than it is required by the impure
+# opam installation, so just use nix-shell -p <libraries from gmp pkgconfig
+# from the first block>. Important notice: some opam packages like sqlite3-conf
 # or zlib-conf use pkg-config in order to detect a library. Pkgconfig
 # will only see them if it's included in the environment with the
 # libraries that one needs, so pkgconfig is included in this shell.
@@ -24,7 +26,7 @@
 # is not recommended:
 # https://nixos.wiki/wiki/FAQ/I_installed_a_library_but_my_compiler_is_not_finding_it._Why%3F
 #
-# So, enter this shell using nix-shell shell.nix, and then run 'make prepare-ocaml'.
+# So, after nix-shell -p, run 'make prepare-ocaml'.
 # Set the two _HOME variables. Go to your custom directory with F* and build it
 # using make, and do the same for kremlin. Make sure you clean up
 # intermediate files produced by make (git clean -fx, git reset HEAD --hard).
@@ -33,23 +35,63 @@
 # so one can use this convention and not set the variables at all.
 #
 #
-# The pure installation is WIP and here's a related important repository:
+# #### Pure installation
+#
+# The pure installation is supposed to be much simpler, and it relies on the
+# following repository:
+#
 # https://github.com/blipp/nix-everest
 #
 # One can install big dependencies from it using nix-env and export
 # FSTAR_HOME and KREMLIN_HOME variables in ~/.bashrc setting these
-# to paths in /nix/store, and (hopefully) all hacl* builds will work as
-# expected.
+# to paths in /nix/store like this:
+#
+# export FSTAR_HOME=$(nix-env -q --out-path --no-name fstar-master)
+# export KREMLIN_HOME=$(nix-env -q --out-path --no-name kremlin-master)
+#
+# and (hopefully) all hacl* builds will work as expected.
+#
+# Entering this shell will provide hacl-star with all the necessary
+# packages to compile. Make sure you unset your opam initialisation in
+# ~/.bashrc so that nixpkgs ocaml comes first, as versions must match.
 
-with import <nixpkgs> {}; {
-  ocamlEnv = pkgsi686Linux.stdenv.mkDerivation {
-    name = "ocamlEnv";
+let
+  pkgs = import <nixpkgs> {};
+  #nixeverest_repo = builtins.fetchGit {
+  #  url = https://github.com/blipp/nix-everest;
+  #  rev = "52618c9d4b999810103b765837c75c3324693aa3";
+  #} + "/nixexprs/default.nix";
+  #nixeverest = import nixeverest_repo {};
+  nixeverest = import ~/code/nix-everest/nixexprs/default.nix {};
+in
+{
+  ocamlEnv = pkgs.pkgsi686Linux.stdenv.mkDerivation {
+    name = "hacl-star-env";
     buildInputs = with pkgs; [
       gmp
       zlib
       sqlite
       m4
       pkgconfig
+
+      ocamlPackages.ocaml
+      ocamlPackages.batteries
+      ocamlPackages.fileutils
+      #ocamlPackages.fix
+      #ocamlPackages.menhir
+      ocamlPackages.findlib
+      #ocamlPackages.pprint
+      ocamlPackages.ppx_deriving_yojson
+      #ocamlPackages.process
+      #ocamlPackages.ocaml_sqlite3
+      ocamlPackages.stdint
+      #ocamlPackages.ulex
+      #ocamlPackages.wasm
+      #ocamlPackages.yojson
+      ocamlPackages.zarith
+
+      nixeverest.fstar-master
+      nixeverest.kremlin-master
     ];
   };
 }
