@@ -65,21 +65,25 @@ let
   nixeverest = import ~/code/nix-everest/nixexprs/default.nix {};
 in
 {
-  ocamlEnv = pkgs.pkgsi686Linux.stdenv.mkDerivation {
+  ocamlEnv = pkgs.stdenv.mkDerivation {
     name = "hacl-star-env";
     buildInputs = with pkgs; [
+      # These are libraries that you need to build dependencies,
+      # not used for hacl-star directly
       gmp
       zlib
       sqlite
       m4
       pkgconfig
 
+      # Ocaml and related libraries
       ocamlPackages.ocaml
+      ocamlPackages.findlib
+
       ocamlPackages.batteries
       ocamlPackages.fileutils
       #ocamlPackages.fix
       #ocamlPackages.menhir
-      ocamlPackages.findlib
       #ocamlPackages.pprint
       ocamlPackages.ppx_deriving_yojson
       #ocamlPackages.process
@@ -90,6 +94,7 @@ in
       #ocamlPackages.yojson
       ocamlPackages.zarith
 
+      # Included, as fstar-master also provides ocaml library
       nixeverest.fstar-master
       nixeverest.kremlin-master
     ];
