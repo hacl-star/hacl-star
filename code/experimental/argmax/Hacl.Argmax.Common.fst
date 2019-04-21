@@ -25,6 +25,9 @@ type comp = n:big{iscomp n}
 val one: pos
 let one = 1
 
+val one_mod_n: n:big -> Lemma (1 % n = 1)
+let one_mod_n _ = ()
+
 val field_el: #n:big -> a:int -> bool
 let field_el #n a = a >= 0 && a < n
 
@@ -119,10 +122,13 @@ val add_move_to_right: #n:big -> a:fe n -> b:fe n -> c:fe n -> Lemma
   (ensures (a = c +% b))
 let add_move_to_right #n a b c =
   to_fe_sub' a b;
+  assert (to_fe #n (a - b) = a -% b);
   assert ((a - b) % n = c % n);
   modulo_add n b (a-b) c;
   assert ((a - b + b) % n = (c + b) % n);
-  assert (a % n = (c + b) % n)
+  assert (a % n = (c + b) % n);
+  to_fe_idemp a;
+  to_fe_add' c b
 
 val add_comm: #n:big -> a:fe n -> b:fe n -> Lemma
   (a +% b = b +% a)
@@ -554,28 +560,19 @@ let inv_as_gcd1 #n a =
   let (g,u,v) = ex_eucl a n in
   assert (gcd a n = g);
 
-  assert (g = 1);
-  assert (u*a + v*n = 1);
-  assert (u*a - 1 = -v*n);
-  assert (u*a - 1 = (-v)*n);
-  assert (u*a = 1 + (-v)*n);
   assert (((u*a)%n = (1 + (-v)*n)%n));
   modulo_distributivity 1 ((-v)*n) n;
   assert ((u*a)%n = (1%n + ((-v)*n)%n)%n);
   multiple_modulo_lemma (-v) n;
-  assert((((-v)*n)%n) = 0);
-  assert ((u*a)%n = (1%n + 0)%n);
   assert ((u*a)%n = (1%n)%n);
   lemma_mod_twice 1 n;
-  assert ((u*a)%n = (1%n));
+  one_mod_n n;
   assert ((u*a)%n = 1);
   modulo_mul_distributivity u a n;
-  assert (((u%n)*(a%n))%n = 1);
   assert (((to_fe #n u)*(a%n))%n = 1);
   modulo_lemma a n;
-  assert(a%n = a);
   assert ((to_fe #n u *% a) = 1);
-  assert (isunit a)
+  finv_unique #n (to_fe u) a
 
 val inv_as_gcd2: #n:big -> a:fe n{a>0} -> Lemma
   (requires (isunit a))

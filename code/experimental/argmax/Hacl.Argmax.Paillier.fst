@@ -405,7 +405,7 @@ val fexp_w_lambda_is_one_mod_n: p:prm -> q:prm -> w:fen2u (p*q) -> Lemma
   (let lambda = etot p q in fexp w lambda % (p*q) = 1)
 let fexp_w_lambda_is_one_mod_n p q w =
   let n:comp = p * q in
-  assert (1 % n = 1);
+  one_mod_n n;
   let lambda:fe n = etot p q in
   nplus1inbase #n;
   let a:fe n = res_class (np1 #n) w in
