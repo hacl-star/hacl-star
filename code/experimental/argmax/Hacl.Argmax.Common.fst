@@ -25,6 +25,9 @@ type comp = n:big{iscomp n}
 val one: pos
 let one = 1
 
+val zero_mod_n: n:big -> Lemma (0 % n = 0)
+let zero_mod_n _ = ()
+
 val one_mod_n: n:big -> Lemma (1 % n = 1)
 let one_mod_n _ = ()
 
@@ -116,6 +119,22 @@ let to_fe_mul #n a b = modulo_mul_distributivity a b n
 val to_fe_mul': #n:big -> a:fe n -> b:fe n -> Lemma
   (to_fe #n (a * b) = a *% b)
 let to_fe_mul' #n a b = to_fe_mul #n a b
+
+val minus_one_square: n:big -> Lemma
+  (to_fe #n (n - 1) *% (n - 1) = 1)
+let minus_one_square n =
+  to_fe_mul #n (n - 1) (n - 1);
+  assert ((n-1)*(n-1) = (n * n - 2 * n) + 1);
+  modulo_distributivity (n * n - 2 * n) 1 n;
+  modulo_distributivity (n * n) (-2 * n) n;
+  assert (((n-1)*(n-1))%n = (((n*n)%n + ((-2)*n)%n)%n + 1%n)%n);
+  cancel_mul_mod n n;
+  cancel_mul_mod (-2) n;
+  assert (((n-1)*(n-1))%n = ((0 + 0)%n + 1%n)%n);
+  zero_mod_n n;
+  assert (((n-1)*(n-1))%n = (1%n)%n);
+  lemma_mod_twice 1 n;
+  one_mod_n n
 
 val add_move_to_right: #n:big -> a:fe n -> b:fe n -> c:fe n -> Lemma
   (requires (a -% b = c))
