@@ -49,7 +49,7 @@ ocaml: $(OCAML_TEST)
 	mkdir -p $(OCAML_DIR)
 	$(FSTAR_EXE) $(addprefix --include ,$(FSTAR_INCLUDE_DIRS)) \
 		--odir $(OCAML_DIR) --codegen OCaml $(OCAML_TEST)
-	$(OCAMLOPT) $(OCAML_DIR)/Hacl_Ocaml_Argmax_Functest.ml -o $(OCAML_DIR)/functest.exe
+	cd $(OCAML_DIR); $(OCAMLOPT) Hacl_Argmax_Common.ml Hacl_Argmax_GM.ml Hacl_Argmax_Paillier.ml Hacl_Ocaml_Argmax_Functest.ml -o functest.exe
 	./$(OCAML_DIR)/functest.exe
 
 ROOTS = Hacl.Test.Argmax.fst
@@ -175,7 +175,7 @@ endif # STAGE=2
 SHELL=/bin/bash
 
 clean:
-	rm -rf $(GENERATED_DIR) $(OUT_DIR)/*.exe $(OUT_DIR)/*.a
+	rm -rf $(GENERATED_DIR) $(OCAML_DIR) $(OUT_DIR)/*.exe $(OUT_DIR)/*.a
 	rm -rf include/*.o include/*.d
 
 clean-c:
