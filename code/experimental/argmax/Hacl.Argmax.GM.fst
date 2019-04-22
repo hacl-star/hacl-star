@@ -88,8 +88,12 @@ let leg_of_fe_sqr #p a = is_leg_symbol (sqr a)
 val leg_symbol_mul1: #p:prm -> a:fe p -> b:fe p -> Lemma
   (ensures (leg_symbol (a *% b) p = leg_symbol a p * leg_symbol b p))
 let leg_symbol_mul1 #p a b =
+
+  let goal = leg_symbol (a *% b) p = leg_symbol a p * leg_symbol b p in
+
   to_fe_idemp a;
   to_fe_idemp b;
+  to_fe_idemp (a *% b);
   fexp_mul2 a b ((p-1)/2);
 
   assert (fexp (a *% b) ((p-1)/2) = fexp a ((p-1)/2) *% fexp b ((p-1)/2));
@@ -102,16 +106,16 @@ let leg_symbol_mul1 #p a b =
 
   // conceptually easy, though we must check all the cases
 
-  if l1 = -1 then
-    assert (fexp a ((p-1)/2) = p - 1);
-  if l2 = -1 then
-    assert (fexp b ((p-1)/2) = p - 1);
-
-  //if l1 = -1 && l2 = -1 then
-  //  (minus_one_square p;
-  //   assert (fexp a ((p-1)/2) *% fexp b ((p-1)/2) = 1));
-
-  admit()
+  if l1 = 0 then mul_zero (fexp b ((p-1)/2)) else
+  if l2 = 0 then mul_zero (fexp a ((p-1)/2)) else
+  if l1 = -1 && l2 = -1 then begin
+    to_fe_idemp #p (p-1);
+    minus_one_square p;
+    assert (fexp (a *% b) ((p-1)/2) = 1)
+  end
+  else if l1 = 1 && l2 = -1 then mul_one #p (fexp b ((p-1)/2))
+  else if l1 = -1 && l2 = 1 then mul_one #p (fexp a ((p-1)/2))
+  else mul_one #p (fexp a ((p-1)/2))
 
 val leg_symbol_mul2: p:prm -> a:nat -> b:nat -> Lemma
   (ensures (leg_symbol (a * b) p = leg_symbol a p * leg_symbol b p))
