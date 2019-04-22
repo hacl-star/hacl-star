@@ -320,7 +320,7 @@ let lemma_mul4 r f0 f1 f2 f3 c0 c1 c2 c3 o01 o02 o03 o12 o13 o14 o23 o24 o25 o34
   assert_norm (pow2 256 * pow2 64 * pow2 64 * pow2 64 == pow2 448);
   assert_norm (pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 = pow2 448)
 
-#set-options "--z3rlimit 50"
+#set-options "--z3rlimit 100"
 
 val lemma_mul4_expand:
     f:felem4

@@ -10,7 +10,7 @@ open Hacl.Spec.Curve25519.Field51.Lemmas
 
 #reset-options "--z3rlimit 50  --using_facts_from '* -FStar.Seq'"
 
-inline_for_extraction
+inline_for_extraction noextract
 val fadd5:
     f1:felem5{felem_fits5 f1 (1, 2, 1, 1, 1)}
   -> f2:felem5{felem_fits5 f2 (1, 2, 1, 1, 1)}
@@ -29,7 +29,7 @@ let fadd5 (f10, f11, f12, f13, f14) (f20, f21, f22, f23, f24) =
     ((as_nat5 (f10, f11, f12, f13, f14)) % prime) (as_nat5 (f20, f21, f22, f23, f24)) prime;
   out
 
-inline_for_extraction
+inline_for_extraction noextract
 val fadd_zero:
     f1:felem5{felem_fits5 f1 (1, 2, 1, 1, 1)}
   -> out:felem5{felem_fits5 out (9, 10, 9, 9, 9) /\
@@ -43,7 +43,7 @@ let fadd_zero (f10, f11, f12, f13, f14) =
   lemma_add_zero (f10, f11, f12, f13, f14);
   (o0, o1, o2, o3, o4)
 
-inline_for_extraction
+inline_for_extraction noextract
 val fsub5:
     f1:felem5{felem_fits5 f1 (1, 2, 1, 1, 1)}
   -> f2:felem5{felem_fits5 f2 (1, 2, 1, 1, 1)}
@@ -78,7 +78,7 @@ val lemma_fsub:
       out == fsub5 (f10, f11, f12, f13, f14) (f20, f21, f22, f23, f24))
 let lemma_fsub f1 f2 = ()
 
-inline_for_extraction
+inline_for_extraction noextract
 val mul_wide64:
     #m1:scale64
   -> #m2:scale64
@@ -90,7 +90,7 @@ let mul_wide64 #m1 #m2 x y =
   assert (v x * v y <= m1 * m2 * max51 * max51);
   mul64_wide x y
 
-inline_for_extraction
+inline_for_extraction noextract
 val smul_felem5:
     #m1:scale64
   -> #m2:scale64_5
@@ -115,7 +115,7 @@ let smul_felem5 #m1 #m2 u1 (f20, f21, f22, f23, f24) =
   lemma_smul_felem5 u1 (f20, f21, f22, f23, f24);
   out
 
-inline_for_extraction
+inline_for_extraction noextract
 val mul_add_wide128:
     #m1:scale64
   -> #m2:scale64
@@ -127,7 +127,7 @@ val mul_add_wide128:
 let mul_add_wide128 #m1 #m2 #m3 x y z =
   z +! mul_wide64 #m1 #m2 x y
 
-inline_for_extraction
+inline_for_extraction noextract
 val smul_add_felem5:
     #m1:scale64
   -> #m2:scale64_5
@@ -156,7 +156,7 @@ let smul_add_felem5 #m1 #m2 #m3 u1 (f20, f21, f22, f23, f24) (o0, o1, o2, o3, o4
   lemma_smul_add_felem5 u1 (f20, f21, f22, f23, f24) (o0, o1, o2, o3, o4);
   out
 
-inline_for_extraction
+inline_for_extraction noextract
 val precomp_r19:
     f2:felem5{felem_fits5 f2 (9, 10, 9, 9, 9)}
   -> r19:felem5{felem_fits5 r19 (171, 190, 171, 171, 171)}
@@ -173,7 +173,7 @@ let precomp_r19 (f20, f21, f22, f23, f24) =
   let r194 = f24 *! u64 19 in
   (r190, r191, r192, r193, r194)
 
-inline_for_extraction
+inline_for_extraction noextract
 val mul_felem5:
     f1:felem5{felem_fits5 f1 (9, 10, 9, 9, 9)}
   -> r:felem5{felem_fits5 r (9, 10, 9, 9, 9)}
@@ -193,7 +193,7 @@ let mul_felem5 (f10, f11, f12, f13, f14) (r0, r1, r2, r3, r4) (r190, r191, r192,
   lemma_fmul5 (f10, f11, f12, f13, f14) (r0, r1, r2, r3, r4);
   (o0, o1, o2, o3, o4)
 
-inline_for_extraction
+inline_for_extraction noextract
 val carry51:
     l:uint64
   -> cin:uint64
@@ -207,7 +207,7 @@ let carry51 l cin =
   lemma_carry51 l cin;
   (l' &. mask51, l' >>. 51ul)
 
-inline_for_extraction
+inline_for_extraction noextract
 val carry51_wide:
     #m:scale64{m < 8192}
   -> l:uint128{felem_wide_fits1 l m}
@@ -243,7 +243,7 @@ val lemma_mul_inv:
 let lemma_mul_inv f cin =
   assert_norm (pow51 = pow2 51)
 
-inline_for_extraction
+inline_for_extraction noextract
 val carry_wide5:
     inp:felem_wide5{felem_wide_fits5 inp (6579, 4797, 3340, 1881, 423)}
   -> Pure felem5
@@ -266,7 +266,7 @@ let carry_wide5 (i0, i1, i2, i3, i4) =
   lemma_mul_inv (tmp0', tmp1, tmp2, tmp3, tmp4) c5;
   (tmp0', tmp1', tmp2, tmp3, tmp4)
 
-inline_for_extraction
+inline_for_extraction noextract
 val fmul5:
     f1:felem5{felem_fits5 f1 (9, 10, 9, 9, 9)}
   -> f2:felem5{felem_fits5 f2 (9, 10, 9, 9, 9)}
@@ -278,7 +278,7 @@ let fmul5 (f10, f11, f12, f13, f14) (f20, f21, f22, f23, f24) =
     mul_felem5 (f10, f11, f12, f13, f14) (f20, f21, f22, f23, f24) (tmp0, tmp1, tmp2, tmp3, tmp4) in
   carry_wide5 (tmp_w0, tmp_w1, tmp_w2, tmp_w3, tmp_w4)
 
-inline_for_extraction
+inline_for_extraction noextract
 val fmul25:
     f1:felem5{felem_fits5 f1 (9, 10, 9, 9, 9)}
   -> f2:felem5{felem_fits5 f2 (9, 10, 9, 9, 9)}
@@ -301,7 +301,7 @@ let fmul25 (f10, f11, f12, f13, f14) (f20, f21, f22, f23, f24) (f30, f31, f32, f
   let (o20,o21,o22,o23,o24) = carry_wide5 (tmp_w20, tmp_w21, tmp_w22, tmp_w23, tmp_w24) in
   ((o10,o11,o12,o13,o14), (o20,o21,o22,o23,o24))
 
-inline_for_extraction
+inline_for_extraction noextract
 val fmul15:
     f1:felem5{felem_fits5 f1 (9, 10, 9, 9, 9)}
   -> f2:uint64{felem_fits1 f2 1}
@@ -318,7 +318,7 @@ let fmul15 (f10, f11, f12, f13, f14) f2 =
   FStar.Math.Lemmas.lemma_mod_mul_distr_l (as_nat5 (f10, f11, f12, f13, f14)) (uint_v f2) prime;
   res
 
-// inline_for_extraction
+// inline_for_extraction noextract
 // val fsqr_felem5:
 //     f:felem5{felem_fits5 f (9, 10, 9, 9, 9)}
 //   -> out:felem_wide5{felem_wide_fits5 out (6579, 4797, 3340, 1881, 423)}
@@ -336,7 +336,7 @@ let fmul15 (f10, f11, f12, f13, f14) f2 =
 
 #set-options "--z3rlimit 150 --max_fuel 0"
 
-inline_for_extraction
+inline_for_extraction noextract
 val fsqr_felem5:
     f:felem5{felem_fits5 f (9, 10, 9, 9, 9)}
   -> Pure felem_wide5
@@ -365,7 +365,7 @@ let fsqr_felem5 (f0, f1, f2, f3, f4) =
   lemma_fmul_fsqr5 (f0, f1, f2, f3, f4);
   (s0, s1, s2, s3, s4)
 
-inline_for_extraction
+inline_for_extraction noextract
 val fsqr5:
     f:felem5{felem_fits5 f (9, 10, 9, 9, 9)}
   -> out:felem5{mul_inv_t out /\ feval out == fmul (feval f) (feval f)}
@@ -373,7 +373,7 @@ let fsqr5 (f0, f1, f2, f3, f4) =
   let (o0, o1, o2, o3, o4) = fsqr_felem5 (f0, f1, f2, f3, f4) in
   carry_wide5 (o0, o1, o2, o3, o4)
 
-inline_for_extraction
+inline_for_extraction noextract
 val fsqr25:
     f1:felem5{felem_fits5 f1 (9, 10, 9, 9, 9)}
   -> f2:felem5{felem_fits5 f2 (9, 10, 9, 9, 9)}
@@ -393,7 +393,7 @@ let fsqr25 (f10, f11, f12, f13, f14) (f20, f21, f22, f23, f24) =
 
 #set-options "--z3rlimit 100 --max_fuel 2"
 
-inline_for_extraction
+inline_for_extraction noextract
 val carry_felem5_full:
     inp:felem5{mul_inv_t inp}
   -> out:felem5{feval out == feval inp /\ felem_fits5 out (1, 1, 1, 1, 1)}
@@ -412,7 +412,7 @@ let carry_felem5_full (f0, f1, f2, f3, f4) =
   let tmp1' = tmp1 +! c5 in
   (tmp0', tmp1', tmp2, tmp3, tmp4)
 
-inline_for_extraction
+inline_for_extraction noextract
 val subtract_p5:
     f:felem5{felem_fits5 f (1, 1, 1, 1, 1)}
   -> Pure felem5
@@ -438,7 +438,7 @@ let subtract_p5 (f0, f1, f2, f3, f4) =
   lemma_subtract_p (f0, f1, f2, f3, f4) (f0', f1', f2', f3', f4');
   (f0', f1', f2', f3', f4')
 
-inline_for_extraction
+inline_for_extraction noextract
 val store_felem5:
     f:felem5{mul_inv_t f}
   -> Pure (uint64 & uint64 & uint64 & uint64)

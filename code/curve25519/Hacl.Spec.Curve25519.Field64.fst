@@ -9,7 +9,7 @@ open Hacl.Spec.Curve25519.Field64.Definition
 open Hacl.Spec.Curve25519.Field64.Lemmas
 module SC = Hacl.Spec.Curve25519.Field64.Core
 
-#reset-options "--z3rlimit 100  --using_facts_from '* -FStar.Seq'"
+#reset-options "--z3rlimit 200  --using_facts_from '* -FStar.Seq'"
 
 inline_for_extraction noextract
 val carry_pass_store:
@@ -151,7 +151,7 @@ let lemma_carry_pass_store1 f =
   else
     lemma_carry_pass_store1_1 f
 
-inline_for_extraction
+inline_for_extraction noextract
 val subtract_p4:
     f:felem4
   -> Pure felem4

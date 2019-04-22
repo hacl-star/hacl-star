@@ -91,7 +91,7 @@ let mul_inv_t (h:mem) (f:felem) : GTot Type0 =
   let f = as_felem h f in
   mul_inv_t f
 
-inline_for_extraction
+inline_for_extraction noextract
 val create_felem: unit
   -> StackInline felem
     (requires fun _ -> True)
@@ -100,7 +100,7 @@ val create_felem: unit
       as_nat h1 f == 0)
 let create_felem () = create 5ul (u64 0)
 
-inline_for_extraction
+inline_for_extraction noextract
 val set_zero:
   f:felem -> Stack unit
   (requires fun h -> live h f)
@@ -114,7 +114,7 @@ let set_zero f =
   f.(3ul) <- u64 0;
   f.(4ul) <- u64 0
 
-inline_for_extraction
+inline_for_extraction noextract
 val set_one:
   f:felem -> Stack unit
   (requires fun h -> live h f)
@@ -128,7 +128,7 @@ let set_one f =
   f.(3ul) <- u64 0;
   f.(4ul) <- u64 0
 
-inline_for_extraction
+inline_for_extraction noextract
 val copy_felem:
     f1:felem
   -> f2:felem
@@ -422,7 +422,7 @@ let fsqr2 out f =
   out.(8ul) <- o23;
   out.(9ul) <- o24
 
-inline_for_extraction
+inline_for_extraction noextract
 val load_felem:
     f:felem
   -> u64s:lbuffer uint64 4ul

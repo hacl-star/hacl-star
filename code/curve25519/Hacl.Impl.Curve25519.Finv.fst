@@ -27,7 +27,7 @@ let fsquare_times_inv #s h f =
   | M51 -> F51.felem_fits h f (1, 2, 1, 1, 1)
   | M64 -> True
 
-inline_for_extraction
+inline_for_extraction noextract
 val fsqr_s:
     #s:field_spec
   -> out:felem s
@@ -56,7 +56,7 @@ let fmuls_pre #s h f1 f2 =
   | M51 -> F51.felem_fits h f1 (1, 2, 1, 1, 1) /\ F51.felem_fits h f2 (1, 2, 1, 1, 1)
   | M64 -> True
 
-inline_for_extraction
+inline_for_extraction noextract
 val fmul_s:
     #s:field_spec
   -> out:felem s
