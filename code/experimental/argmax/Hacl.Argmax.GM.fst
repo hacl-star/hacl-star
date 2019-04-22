@@ -5,18 +5,40 @@ open FStar.Math.Lemmas
 
 open Hacl.Argmax.Common
 
-(* Quadratic reciprocity *)
 
-val is_sq: #n:big -> a:fe n -> Type0
-let is_sq #n a = exists s . b2t(sqr s = a)
+(* Squares and nonsquares *)
 
-val is_nonsq: #n:big -> a:fe n -> Type0
-let is_nonsq #n a = forall s. b2t(sqr s <> a)
+val is_sqr: #n:big -> a:fe n -> Type0
+let is_sqr #n a = exists s . b2t(sqr s = a)
 
-val nonsq_is_nonzero: #n:big -> b:fe n{is_nonsq b} -> Lemma (b <> 0)
+val is_nonsqr: #n:big -> a:fe n -> Type0
+let is_nonsqr #n a = forall s. b2t(sqr s <> a)
+
+val nonsq_is_nonzero: #n:big -> b:fe n{is_nonsqr b} -> Lemma (b <> 0)
 let nonsq_is_nonzero #n b = ()
 
-// Legendre/Jacobi symbol
+val squares_of_one: #p:prm -> a:fe p -> Lemma
+  (requires (sqr a = 1))
+  (ensures (a = 1 \/ a = p-1))
+let squares_of_one #p _ = admit()
+
+// https://en.wikipedia.org/wiki/Quadratic_residue#Composite_modulus_not_a_prime_power
+// * residue => forall p^k residue
+// * not residue => not (forall p^k residue)
+// * not (forall p^k residue) => not residue (contraposition (1))
+// * forall p^k residue => residue (contraposition (2))
+val nonsq_mul_comp: p:prm -> q:prm -> a:fe (p * q) -> Lemma
+  (requires (is_nonsqr #p (to_fe a)))
+  (ensures (is_nonsqr a))
+let nonsq_mul_comp _ _ _ = admit()
+
+val sq_mul_comp: p:prm -> q:prm -> a:fe (p * q) -> Lemma
+  (requires (is_sqr a))
+  (ensures (is_sqr #p (to_fe a) /\ is_sqr #q (to_fe a)))
+let sq_mul_comp _ _ _ = admit()
+
+(* Legendre symbol *)
+
 val leg_symbol: a:nat -> p:prm -> res:int
 let leg_symbol a p =
   let res = fexp (to_fe #p a) ((p-1)/2) in
@@ -28,13 +50,31 @@ let leg_symbol_modulo a p = lemma_mod_twice a p
 
 val leg_symbol_range: #p:prm -> a:fe p -> Lemma
   (ensures (let l = leg_symbol a p in (l = 1 \/ l = 0 \/ l = -1)))
-let leg_symbol_range #p _ = admit()
+let leg_symbol_range #p a =
+  let l = leg_symbol a p in
+  assert (p >= 3);
+  assert ((p-1)/2 <> 0);
+  to_fe_idemp #p a;
+  if a = 0
+  then begin
+    fexp_zero #p ((p-1)/2);
+    lemma_mod_twice a p;
+    assert (l = 0)
+  end else begin
+    flt #p a;
+    lemma_div_exact (p-1) 2;
+    fexp_exp a ((p-1)/2) 2;
+    fexp_two_is_sqr #p (fexp a ((p-1)/2));
+    assert (sqr (fexp a ((p-1)/2)) = 1);
+    squares_of_one #p (fexp a ((p-1)/2));
+    assert (l = 1 \/ l = -1)
+  end
 
 val is_leg_symbol: #p:prm -> a:fe p -> Lemma
   (ensures (let l = leg_symbol a p in
               (l = 1 \/ l = 0 \/ l = -1) /\
-              (l = 1 <==> (is_sq a /\ a <> 0)) /\
-              (l = (-1) <==> (is_nonsq a /\ a <> 0)) /\
+              (l = 1 <==> (is_sqr a /\ a <> 0)) /\
+              (l = (-1) <==> (is_nonsqr a /\ a <> 0)) /\
               (l = 0 <==> a = 0)
               ))
 let is_leg_symbol #p _ = admit()
@@ -84,60 +124,18 @@ let leg_symbol_mul2 p a b =
   leg_symbol_modulo b p;
   to_fe_mul #p a b
 
-//val leg_symbol_prop2: p:prm -> q:prm -> a:nat -> Lemma
-//  (ensures (leg_symbol a (p*q) = leg_symbol a p * leg_symbol a q))
-//let leg_symbol_prop2 _ _ _ = admit()
-
-val can_split_mul_sq: #n:comp -> a:fe n{is_sq a} -> b:fe n{b <> a && b <> 0} -> Lemma
-  (ensures (is_sq (a *% b) ==> is_sq b))
-let can_split_mul_sq #n a b = admit()
-//  if a = 0 then admit() else
-//  assert(forall (x: fe n). leg_symbol x = 1 <==> (is_sq x /\ x <> 0));
-//  assert(is_sq (a *% b) ==> leg_symbol (a *% b) = 1);
-//  assert(is_sq (a *% b) ==> leg_symbol a * leg_symbol b = 1);
-//  assert(leg_symbol a = 1 \/ leg_symbol a = (-1));
-//  assert(leg_symbol b = 1 \/ leg_symbol b = (-1));
-//  assert(is_sq (a *% b) ==> (leg_symbol a = 1 /\ leg_symbol b = 1) \/
-//                           (leg_symbol a = (-1) /\ leg_symbol b = (-1)));
-//  assert(is_sq (a *% b) ==> (is_sq a /\ is_sq b) \/
-//                           (is_nonsq a /\ is_nonsq b));
-//  assert(is_sq (a *% b) ==> is_sq b)
-
-val mul_sq_nonsq: #n:comp -> a:fe n{is_sq a} -> b:fe n{is_nonsq b} -> Lemma
-  (ensures (is_nonsq (a *% b)))
-let mul_sq_nonsq #n a b =
-  nonsq_is_nonzero b;
-  assert(~(exists s. b2t (sqr s = b)));
-  assert((exists s. b2t (sqr s = b)) ==> false);
-  can_split_mul_sq a b;
-  assert(is_sq (a *% b) ==> is_sq b)
-
-// https://en.wikipedia.org/wiki/Quadratic_residue#Composite_modulus_not_a_prime_power
-// * residue => forall p^k residue
-// * not residue => not (forall p^k residue)
-// * not (forall p^k residue) => not residue (contraposition (1))
-// * forall p^k residue => residue (contraposition (2))
-val nonsq_mul_comp: p:prm -> q:prm -> a:fe (p * q) -> Lemma
-  (requires (is_nonsq #p (to_fe a)))
-  (ensures (is_nonsq a))
-let nonsq_mul_comp _ _ _ = admit()
-
-val sq_mul_comp: p:prm -> q:prm -> a:fe (p * q) -> Lemma
-  (requires (is_sq a))
-  (ensures (is_sq #p (to_fe a) /\ is_sq #q (to_fe a)))
-let sq_mul_comp _ _ _ = admit()
 
 (* Keys *)
 
 type secret =
   | Secret: p:prm
          -> q:prm{q <> p}
-         -> y:fe (p * q){is_nonsq (to_fe #p y) /\ is_nonsq (to_fe #q y)}
+         -> y:fe (p * q){is_nonsqr (to_fe #p y) /\ is_nonsqr (to_fe #q y)}
          -> secret
 
 type public =
   | Public: n:comp
-         -> y:fe n{is_nonsq y}
+         -> y:fe n{is_nonsqr y}
          -> public
 
 val s2p: secret -> public
