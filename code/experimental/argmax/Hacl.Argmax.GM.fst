@@ -41,13 +41,13 @@ let is_leg_symbol #p _ = admit()
 
 #reset-options
 
-val leg_of_fe_sqr: #p:prm -> a:fe p{a <> 0 /\ sqr a <> 0} -> Lemma
+val leg_of_fe_sqr: #p:prm -> a:fe p{sqr a <> 0} -> Lemma
   (leg_symbol (sqr a) p = 1)
 let leg_of_fe_sqr #p a = is_leg_symbol (sqr a)
 
-val leg_symbol_prop1: #p:prm -> a:fe p -> b:fe p -> Lemma
+val leg_symbol_mul1: #p:prm -> a:fe p -> b:fe p -> Lemma
   (ensures (leg_symbol (a *% b) p = leg_symbol a p * leg_symbol b p))
-let leg_symbol_prop1 #p a b =
+let leg_symbol_mul1 #p a b =
   to_fe_idemp a;
   to_fe_idemp b;
   fexp_mul2 a b ((p-1)/2);
@@ -72,6 +72,17 @@ let leg_symbol_prop1 #p a b =
   //   assert (fexp a ((p-1)/2) *% fexp b ((p-1)/2) = 1));
 
   admit()
+
+val leg_symbol_mul2: p:prm -> a:nat -> b:nat -> Lemma
+  (ensures (leg_symbol (a * b) p = leg_symbol a p * leg_symbol b p))
+let leg_symbol_mul2 p a b =
+  let a' = to_fe #p a in
+  let b' = to_fe #p b in
+  leg_symbol_mul1 a' b';
+  leg_symbol_modulo (a * b) p;
+  leg_symbol_modulo a p;
+  leg_symbol_modulo b p;
+  to_fe_mul #p a b
 
 //val leg_symbol_prop2: p:prm -> q:prm -> a:nat -> Lemma
 //  (ensures (leg_symbol a (p*q) = leg_symbol a p * leg_symbol a q))
@@ -155,7 +166,22 @@ let decrypt s c =
   let v = leg_symbol c (Secret?.p s) in
   if v = 1 then false else true
 
-#reset-options
+(* Correctness *)
+
+val sqr_mod_p_is_sqr: p:prm -> q:prm -> r:fe (p*q){(r * r) % p <> 0} -> Lemma
+  (leg_symbol (sqr r) p = 1)
+let sqr_mod_p_is_sqr p q r =
+  let n = p * q in
+  to_fe_mul #n r r;
+  assert (sqr r = to_fe #n (r * r));
+  leg_symbol_modulo (sqr r) p;
+  assert (leg_symbol (sqr r) p = leg_symbol (((r * r)%n)%p) p);
+  modulo_modulo_lemma (r * r) p q;
+  leg_symbol_modulo (r * r) p;
+  to_fe_mul #p r r;
+  let r':fe p = to_fe r in
+  assert (leg_symbol (sqr r) p = leg_symbol (sqr r') p);
+  leg_of_fe_sqr r'
 
 val enc_dec_id:
      s:secret
@@ -171,39 +197,44 @@ let enc_dec_id sec r m =
   let y: fe n = Public?.y pub in
   let c: ciphertext n = encrypt pub r m in
 
-//  let c': fe p = to_fe #p c in
-//  //let y': fe p = to_fe #p y in
-//  //let rsq': fe p = to_fe #p (sqr r) in
-//
-//  let v = leg_symbol c p in
-//  is_leg_symbol c';
-//  //let m' = decrypt sec c in
-//
-//  //// it happens with negligible prob., though how to express it?
-//  //assume (c' <> 0);
-//
-//  if m
-//  then begin
-//    //nat_times_nat_is_nat (sqr r) y;
-//    //modulo_modulo_lemma (sqr r * y) p q;
-//    //leg_symbol_modulo (sqr r *% y) p;
-//    ////assert (leg_symbol (sqr r *% y) p = leg_symbol (sqr r * y) p);
-//    //leg_symbol_prop1 p (sqr r) y;
-//    //assert (leg_symbol (sqr r *% y) p = leg_symbol (sqr r) p * leg_symbol y p);
-//    //assert (v = leg_symbol (sqr r) p * leg_symbol y p);
-// //   to_fe_mul #p (sqr r) y;
-// //   assert (to_fe #p (r' *% y) =
-// //   //assert (leg_symbol (sqr r) = 1);
-//    admit()
-//  end else (sq_mul_comp p q c; assert (v = 1));
+  let c': fe p = to_fe #p c in
 
-  admit()
+  // All these values are public, and p divides them with negligible prob
+  // though how to express it without assumes?
+  assume (c % p <> 0);
+  assume (r * r % p <> 0);
+  assume (y % p <> 0);
 
-  //assert(m ==> leg_symbol c = (-1));
-  //assert(m ==> (v1 = (-1) /\ v2 = 1) \/ (v1 = 1 /\ v2 = (-1)));
-  //assert(m ==> d = false);
+  let m' = decrypt sec c in
 
-  //nonsq_mul_comp p q c;
-  //assert(not m ==> leg_symbol c = 1);
-  //assert(not m ==> (v1 = 1 /\ v2 = 1));
-  //assert(not m ==> d = true)
+  let v = leg_symbol c' p in
+
+  let mul_one (a:int): Lemma (1 * a = a) = () in
+
+  let lemma_m_false (): Lemma (requires (not m)) (ensures (not m')) = begin
+    sq_mul_comp p q c;
+    is_leg_symbol c';
+    leg_symbol_modulo c p
+    end in
+
+  let lemma_m_true (): Lemma (requires m) (ensures m') = begin
+    nat_times_nat_is_nat (sqr r) y;
+    leg_symbol_modulo (sqr r *% y) p;
+    modulo_modulo_lemma (sqr r * y) p q;
+    leg_symbol_modulo (sqr r * y) p;
+    leg_symbol_mul2 p (sqr r) y;
+    leg_symbol_modulo (sqr r) p;
+
+    sqr_mod_p_is_sqr p q r;
+
+    mul_one (leg_symbol y p);
+
+    assert (leg_symbol (sqr r *% y) p = leg_symbol y p);
+
+    is_leg_symbol #p (to_fe #p y);
+    leg_symbol_modulo y p;
+
+    assert (leg_symbol y p = -1)
+    end in
+
+  if m then lemma_m_true () else lemma_m_false ()
