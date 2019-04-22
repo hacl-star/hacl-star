@@ -8,6 +8,79 @@ open FStar.Mul
 open FStar.Calc
 
 
+(* Divisibisity *)
+
+type divides (a:pos) (b:pos) = b % a = 0
+
+val modulo_mul_distributivity: a:int -> b:int -> n:pos ->
+    Lemma ((a * b) % n = ((a % n) * (b % n)) % n)
+let rec modulo_mul_distributivity a b n =
+  lemma_mod_mul_distr_l a b n;
+  lemma_mod_mul_distr_r (a % n) b n
+
+val divides_multiple: a:pos -> b:pos{divides a b} -> k:pos -> Lemma
+  (divides a (k*b))
+let divides_multiple a b k = modulo_mul_distributivity k b a
+
+type is_gcd (a:pos) (b:pos) (gcd:pos) =
+    (forall (d:pos). divides d a /\ divides d b ==> divides d gcd)
+    /\ divides gcd a
+    /\ divides gcd b
+
+val ex_eucl:
+     a:pos
+  -> b:pos
+  -> r:tuple3 pos int int{ let (g,u,v) = r in is_gcd a b g /\ a * u + b * v = g }
+let rec ex_eucl a b =
+  admit();
+  let (g,s,t) = ex_eucl (b % a) a in
+  (g, t - (b / a) * s, s)
+
+val gcd: a:pos -> b:pos -> Tot (r:pos{is_gcd a b r}) (decreases b)
+let gcd a b = Mktuple3?._1 (ex_eucl a b)
+
+val ex_eucl_lemma1: a:pos -> b:pos -> g:pos -> u:int -> v:int -> Lemma
+  (requires (a * u + b * v = g))
+  (ensures (exists k. g = k * gcd a b))
+let ex_eucl_lemma1 a b g u v = admit()
+
+val ex_eucl_lemma2: a:pos -> b:pos -> g:pos -> u:int -> v:int -> Lemma
+  (requires (a * u + b * v = g /\ divides g a /\ divides g b))
+  (ensures (gcd a b = g))
+let ex_eucl_lemma2 a b g u v = admit()
+
+val ex_eucl_lemma3: a:pos -> b:pos -> u:int -> v:int -> Lemma
+  (requires (a * u + b * v = 1))
+  (ensures (gcd a b = 1))
+let ex_eucl_lemma3 a b u v = ex_eucl_lemma2 a b 1 u v
+
+val lcm: pos -> pos -> pos
+let lcm a b = (a / gcd a b) * b
+
+val division_mul_after: a:pos -> b:pos -> g:pos{divides g a} -> Lemma
+  ((a / g) * b = (a * b) / g)
+let division_mul_after a b g =
+  assert (a % g = 0);
+  assert (g * (a / g) = a);
+  assert (g * ((a / g)*b) = a*b);
+
+  divides_multiple g a b;
+  assert ((a * b) % g = 0);
+  assert (g * ((a * b) / g) = a*b)
+
+val division_post_size: a:pos -> b:pos -> Lemma
+  (a >= a / b)
+let division_post_size a b = division_definition_lemma_1 a b a
+
+val lcm_less_mul: a:pos -> b:pos -> Lemma
+  (lcm a b <= a * b)
+let lcm_less_mul a b =
+  let g:pos = gcd a b in
+  assert (lcm a b = (a / g) * b);
+  division_mul_after a b g;
+  assert (lcm a b = (a * b) / g);
+  division_post_size (a * b) g
+
 (* Numbers and elements *)
 
 type big = x:int{x > 1}
@@ -15,7 +88,7 @@ type big = x:int{x > 1}
 val isprm: p:big -> bool
 let isprm p = (p % 2 = 1 && p >= 3 && magic())
 
-type prm = n:big{isprm n}
+type prm = p:big{isprm p /\ (forall (x:nat{x>1&&x<p}). ~(divides x p)) }
 
 val iscomp: n:big -> Type0
 let iscomp n = exists (p:prm) (q:prm). n = p * q
@@ -45,11 +118,6 @@ let to_fe_idemp #n a = ()
 
 (* Simplest functions and properties *)
 
-val modulo_mul_distributivity: a:int -> b:int -> n:pos ->
-    Lemma ((a * b) % n = ((a % n) * (b % n)) % n)
-let rec modulo_mul_distributivity a b n =
-  lemma_mod_mul_distr_l a b n;
-  lemma_mod_mul_distr_r (a % n) b n
 
 
 (* Basic algebraic operations *)
@@ -176,20 +244,13 @@ let mod_ops_props1 #n a b c =
   assert (a +% b = c ==> (mod_prop n (a+b) c; (a + b) - c = ((a+b)/n) * n));
   assert (a *% b = c ==> (mod_prop n (a*b) c; (a * b) - c = ((a*b)/n) * n))
 
-// Fails sometimes, simplify?
 val mod_as_multiple: #n:big -> a:fe n -> b:fe n -> v:fe n -> Lemma
   (requires (a - b = v * n))
   (ensures (a = b))
 let mod_as_multiple #n a b v =
-  calc (==) {
-    (a - b) % n;
-   == { }
-    to_fe #n (a - b);
-   == { to_fe_sub #n a b }
-    (to_fe #n a -% to_fe #n b);
-   == { to_fe_idemp #n b }
-    (to_fe #n a -% b);
-  };
+  to_fe_sub #n a b;
+  to_fe_idemp #n b;
+  assert ((a - b) % n = to_fe #n a -% b);
 
   cancel_mul_mod v n;
   assert (to_fe #n (v * n) = 0);
@@ -230,7 +291,14 @@ let mul_comm #n a b = ()
 
 val mul_add_distr_r: #n:big -> a:fe n -> b:fe n -> c:fe n -> Lemma
   (a *% (b +% c) = a *% b +% a *% c)
-let mul_add_distr_r #n _ _ _ = admit()
+let mul_add_distr_r #n a b c =
+  to_fe_add' #n b c;
+  to_fe_idemp a;
+  to_fe_mul #n a (b+c);
+  distributivity_add_right a b c;
+  to_fe_add #n (a * b) (a * c);
+  to_fe_mul' a b;
+  to_fe_mul' a c
 
 val mul_add_distr_l: #n:big -> a:fe n -> b:fe n -> c:fe n -> Lemma
   ((a +% b) *% c = a *% c +% b *% c)
@@ -300,19 +368,11 @@ let mul_assoc #n a b c =
 val mul4_assoc: #n:big -> a:fe n -> b:fe n -> c:fe n -> d:fe n -> Lemma
   ((a *% b) *% (c *% d) = (a *% c) *% (b *% d))
 let mul4_assoc #n a b c d =
-  calc (==) {
-    (a *% b) *% (c *% d);
-  == { }
-    a *% (b *% (c *% d));
-  == { }
-    a *% ((b *% c) *% d);
-  == { }
-    a *% ((c *% b) *% d);
-  == { }
-    a *% (c *% (b *% d));
-  == { }
-    (a *% c) *% (b *% d);
-  }
+  mul_assoc a b (c *% d);
+  mul_assoc b c d;
+  mul_comm b c;
+  mul_assoc c b d;
+  mul_assoc a c (b *% d)
 
 // Naive exp
 val nexp: #n:big -> fe n -> e:nat -> Tot (fe n) (decreases e)
@@ -353,34 +413,25 @@ let rec nexp_mul1 #n g e1 e2 = match e2 with
 
 val nexp_mul2: #n:big -> g1:fe n -> g2:fe n -> e:nat -> Lemma
   (ensures (nexp (g1 *% g2) e = nexp g1 e *% nexp g2 e))
-  (decreases g2)
-let rec nexp_mul2 #n g1 g2 e = match g2 with
-  | 0 -> (assert (g1 *% 0 = 0); assert (nexp g1 e *% 0 = 0))
-  | 1 -> begin
-    assert(g2 = one);
-    assert (g1 *% g2 = g1);
-    nexp_eq_arg1 (g1 *% g2) g1 e;
-    assert(nexp (g1 *% g2) e = nexp g1 e)
-    end
+  (decreases e)
+let rec nexp_mul2 #n g1 g2 e = match e with
+  | 0 -> ()
+  | 1 -> mul_one #n one
   | _ -> begin
-    nexp_mul2 g1 (g2 -% one) e;
-    calc (==) {
-      g1 *% (g2 -% one);
-    == { mul_sub_distr_r g1 g2 one }
-      (g1 *% g2) -% g1;
-    };
-    admit();
-//    calc (==) {
-//      nexp g1 e *% nexp (g2 -% one) e;
-//    == { }
-//
-//    };
-    admit()
-    end
+    nexp_mul2 #n g1 g2 (e-1);
+    mul4_assoc g1 g2 (nexp g1 (e-1)) (nexp g2 (e-1))
+  end
 
 val nexp_exp: #n:big -> g:fe n -> e1:nat -> e2:nat -> Lemma
-  ((nexp #n (nexp #n g e1) e2) = (nexp #n g (e1 * e2)))
-let nexp_exp #n _ _ _ = admit()
+  (ensures ((nexp (nexp g e1) e2) = (nexp g (e1 * e2))))
+  (decreases e2)
+let rec nexp_exp #n g e1 e2 = match e2 with
+  | 0 -> if (nexp g e1) = 0 then () else nexp_zero #n (nexp g e1)
+  | _ -> begin
+    nexp_mul1 g e1 (e1 * e2 - e1);
+    distributivity_sub_right e1 e2 1;
+    nexp_exp #n g e1 (e2 - 1)
+  end
 
 // To subgroup
 val to_fe_nexp1: #n:big -> k:big{n % k = 0 && n / k > 1 } -> g:fe n -> e:nat -> Lemma
@@ -399,21 +450,6 @@ let rec to_fe_nexp1 #n k g e = match e with
     to_fe_nexp1 #n k g (e-1);
     to_fe_mul #m g (nexp g (e-1))
   end
-
-//// To a bigger modulus
-//val to_fe_nexp2: #n:big -> #m:big{m > n} -> g:fe n -> e:nat -> Lemma
-//  (to_fe #m (nexp g e) = nexp (to_fe #m g) e)
-//let rec to_fe_nexp2 #n #m g e = match e with
-//  | 0 -> ()
-//  | 1 -> ()
-//  | _ -> begin
-//    modulo_lemma (
-//    assume (((g * nexp g (e-1)) % n) % m = (g * nexp g (e-1)) % m);
-//    assert ((g *% nexp g (e-1)) % m = (g * nexp g (e-1)) % m);
-//    assert (to_fe #m (g *% nexp g (e-1)) = to_fe #m (g * nexp g (e-1)));
-//    to_fe_nexp2 #n #m g (e-1);
-//    to_fe_mul #m g (nexp g (e-1))
-//  end
 
 // Define fexp' for composite n and for unit g.
 val fexp: #n:big -> fe n -> e:nat -> Tot (fe n) (decreases e)
@@ -483,76 +519,10 @@ let fexp_exp #n g e1 e2 =
   fexp_eq_nexp g (e1 * e2);
   nexp_exp g e1 e2
 
+// Probably needs slightly more lemma to prove then there are here
 val flt: #p:prm -> a:fe p{a>0} -> Lemma
   (fexp a (p-1) = 1)
 let flt #p _ = admit()
-
-(* GCD and LCM *)
-
-type divides (a:pos) (b:pos) = b % a = 0
-
-val divides_multiple: a:pos -> b:pos{divides a b} -> k:pos -> Lemma
-  (divides a (k*b))
-let divides_multiple a b k = modulo_mul_distributivity k b a
-
-type is_gcd (a:pos) (b:pos) (gcd:pos) =
-    (forall (d:pos). divides d a /\ divides d b ==> divides d gcd)
-    /\ divides gcd a
-    /\ divides gcd b
-
-val ex_eucl:
-     a:pos
-  -> b:pos
-  -> r:tuple3 pos int int{ let (g,u,v) = r in is_gcd a b g /\ a * u + b * v = g }
-let rec ex_eucl a b =
-  admit();
-  let (g,s,t) = ex_eucl (b % a) a in
-  (g, t - (b / a) * s, s)
-
-val gcd: a:pos -> b:pos -> Tot (r:pos{is_gcd a b r}) (decreases b)
-let gcd a b = Mktuple3?._1 (ex_eucl a b)
-
-val ex_eucl_lemma1: a:pos -> b:pos -> g:pos -> u:int -> v:int -> Lemma
-  (requires (a * u + b * v = g))
-  (ensures (exists k. g = k * gcd a b))
-let ex_eucl_lemma1 a b g u v = admit()
-
-val ex_eucl_lemma2: a:pos -> b:pos -> g:pos -> u:int -> v:int -> Lemma
-  (requires (a * u + b * v = g /\ divides g a /\ divides g b))
-  (ensures (gcd a b = g))
-let ex_eucl_lemma2 a b g u v = admit()
-
-val ex_eucl_lemma3: a:pos -> b:pos -> u:int -> v:int -> Lemma
-  (requires (a * u + b * v = 1))
-  (ensures (gcd a b = 1))
-let ex_eucl_lemma3 a b u v = ex_eucl_lemma2 a b 1 u v
-
-val lcm: pos -> pos -> pos
-let lcm a b = (a / gcd a b) * b
-
-val division_mul_after: a:pos -> b:pos -> g:pos{divides g a} -> Lemma
-  ((a / g) * b = (a * b) / g)
-let division_mul_after a b g =
-  assert (a % g = 0);
-  assert (g * (a / g) = a);
-  assert (g * ((a / g)*b) = a*b);
-
-  divides_multiple g a b;
-  assert ((a * b) % g = 0);
-  assert (g * ((a * b) / g) = a*b)
-
-val division_post_size: a:pos -> b:pos -> Lemma
-  (a / b <= a)
-let division_post_size a b = admit()
-
-val lcm_less_mul: a:pos -> b:pos -> Lemma
-  (lcm a b <= a * b)
-let lcm_less_mul a b =
-  let g:pos = gcd a b in
-  assert (lcm a b = (a / g) * b);
-  division_mul_after a b g;
-  assert (lcm a b = (a * b) / g);
-  division_post_size (a * b) g
 
 (* Inverses *)
 
@@ -563,6 +533,12 @@ let phi n = if isprm n then n-1 else admit()
 val isunit: #n:big -> a:fe n -> Type0
 let isunit #n a = exists b. a *% b = 1
 
+val isunit_nonzero: #n:comp -> g:fe n{isunit g} -> Lemma (g <> 0)
+let isunit_nonzero #n g =
+  assert (g = 0 ==> (forall x. g * x = 0));
+  assert (g = 0 ==> (forall x. (g * x) % n = 0))
+
+// Based on euler's theorem
 val finv0: #n:big -> a:fe n ->
   Tot (b:fe n{isunit a <==> b *% a = one})
 let finv0 #n a = admit(); fexp a (phi n - 1)
@@ -632,12 +608,13 @@ let inv_as_gcd #n a =
   move_requires inv_as_gcd1 a;
   move_requires inv_as_gcd2 a
 
+// Could be some naive algorithm, not used in the real code.
 val mult_order:
      #n:big
   -> g:fe n{isunit g}
   -> r:pos{ fexp g r = one /\
             (forall (x:pos{x<r}). fexp g x <> one) /\
-            (g <> 0 ==> r >= 1)
+            (r >= 1)
             }
 let mult_order #n g = admit()
 
@@ -656,11 +633,6 @@ let rec g_pow_order_reduc #n g x =
     assert(fexp g r = one);
     fexp_one2 #n (x/r)
   end
-
-val isunit_nonzero: #n:comp -> g:fe n{isunit g} -> Lemma (g > 0)
-let isunit_nonzero #n g =
-  assert (g = 0 ==> (forall x. g * x = 0));
-  assert (g = 0 ==> (forall x. (g * x) % n = 0))
 
 val g_pow_isunit: #n:comp -> g:fe n{isunit g}  -> x:pos -> Lemma
   (let r = mult_order g in

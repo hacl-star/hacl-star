@@ -17,11 +17,15 @@ let is_nonsqr #n a = forall s. b2t(sqr s <> a)
 val nonsq_is_nonzero: #n:big -> b:fe n{is_nonsqr b} -> Lemma (b <> 0)
 let nonsq_is_nonzero #n b = ()
 
+// This is a well-known fact, since we either have exactly two roots or none.
 val squares_of_one: #p:prm -> a:fe p -> Lemma
   (requires (sqr a = 1))
   (ensures (a = 1 \/ a = p-1))
 let squares_of_one #p _ = admit()
 
+// These two lemmas cover quadratic residuosity modulo composite number
+//
+// For instance:
 // https://en.wikipedia.org/wiki/Quadratic_residue#Composite_modulus_not_a_prime_power
 // * residue => forall p^k residue
 // * not residue => not (forall p^k residue)
