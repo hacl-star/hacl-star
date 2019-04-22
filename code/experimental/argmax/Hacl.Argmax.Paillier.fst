@@ -5,7 +5,6 @@ open FStar.Mul
 open FStar.Math.Lemmas
 open FStar.Classical
 open FStar.Squash
-open FStar.Tactics
 
 open Hacl.Argmax.Common
 
@@ -37,14 +36,11 @@ let nplus1inbase #n = admit()
 val encf: #n:comp -> g:isg n -> x:fe n -> y:fenu n -> fen2 n
 let encf #n g x y = fexp g x *% fexp (to_fe y) n
 
-#set-options "--z3rlimit 100"
-
-// TODO fails sometimes, need to simplify the proof
-//assert(true) by (dump "");
 val encf_unit: #n:comp -> g:isg n -> x:fe n -> y:fenu n -> Lemma
-  (isunit (encf #n g x y))
+  (isunit #(n*n) (encf #n g x y))
 let encf_unit #n g x y =
-  if x = 0 then fexp_one1 g else g_pow_isunit g x;
+
+  if x = 0 then (fexp_zero2 g; one_isunit n) else g_pow_isunit g x;
   assert(isunit (fexp g x));
 
   let y': fe (n*n) = to_fe y in
@@ -56,7 +52,6 @@ let encf_unit #n g x y =
 
   isunit_prod (fexp g x) (fexp y' n)
 
-#reset-options
 
 val encf_inj: #n:comp -> g:isg n -> x1:fe n -> y1:fenu n -> x2:fe n -> y2:fenu n -> Lemma
   (encf g x1 y1 = encf g x2 y2 ==> (x1 = x2 /\ y1 = y2))
