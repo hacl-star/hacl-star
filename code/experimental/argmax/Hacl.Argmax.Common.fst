@@ -8,12 +8,12 @@ open FStar.Mul
 open FStar.Calc
 
 
-(* Primes and composite numbers *)
+(* Numbers and elements *)
 
 type big = x:int{x > 1}
 
 val isprm: p:big -> bool
-let isprm _ = magic()
+let isprm p = (p % 2 = 1 && p >= 3 && magic())
 
 type prm = n:big{isprm n}
 
@@ -52,8 +52,7 @@ let rec modulo_mul_distributivity a b n =
   lemma_mod_mul_distr_r (a % n) b n
 
 
-(* Basic algebra *)
-
+(* Basic algebraic operations *)
 
 type binop = #n:big -> fe n -> fe n -> fe n
 val ( +% ): binop
@@ -177,6 +176,7 @@ let mod_ops_props1 #n a b c =
   assert (a +% b = c ==> (mod_prop n (a+b) c; (a + b) - c = ((a+b)/n) * n));
   assert (a *% b = c ==> (mod_prop n (a*b) c; (a * b) - c = ((a*b)/n) * n))
 
+// Fails sometimes, simplify?
 val mod_as_multiple: #n:big -> a:fe n -> b:fe n -> v:fe n -> Lemma
   (requires (a - b = v * n))
   (ensures (a = b))
@@ -322,6 +322,12 @@ val nexp_eq_arg1: #n:big -> g1:fe n -> g2:fe n -> e:nat -> Lemma
   (ensures (nexp g1 e = nexp g2 e))
 let nexp_eq_arg1 #n _ _ _ = ()
 
+val nexp_zero: #n:big -> e:pos -> Lemma
+  (nexp #n 0 e = 0)
+let rec nexp_zero #n e = match e with
+  | 1 -> ()
+  | _ -> nexp_zero #n (e-1)
+
 val nexp_one1: #n:big -> g:fe n -> Lemma
   (ensures (nexp g one = g))
   [SMTPat (nexp g one)]
@@ -431,6 +437,10 @@ let rec fexp_eq_nexp #n g e = match e with
       nexp_exp g 2 ((e-1)/2)
     end
 
+val fexp_two_is_sqr: #n:big -> g:fe n -> Lemma
+  (fexp g 2 = sqr g)
+let fexp_two_is_sqr #n _ = ()
+
 val fexp_one1: #n:big -> g:fe n -> Lemma
   (ensures (fexp g one = g))
   [SMTPat (fexp g one)]
@@ -439,7 +449,11 @@ let fexp_one1 #n _ = ()
 val fexp_one2: #n:big -> e:nat -> Lemma
   (ensures (fexp #n one e = one))
   [SMTPat (fexp #n one e)]
-let rec fexp_one2 #n e = fexp_eq_nexp #n one e; nexp_one2 #n e
+let fexp_one2 #n e = fexp_eq_nexp #n one e; nexp_one2 #n e
+
+val fexp_zero: #n:big -> e:pos -> Lemma
+  (fexp #n 0 e = 0)
+let fexp_zero #n e = fexp_eq_nexp #n 0 e; nexp_zero #n e
 
 val fexp_mul1: #n:big -> g:fe n -> e1:nat -> e2:nat -> Lemma
   (fexp g e1 *% fexp g e2 = fexp g (e1 + e2))
@@ -464,6 +478,10 @@ let fexp_exp #n g e1 e2 =
   fexp_eq_nexp (nexp g e1) e2;
   fexp_eq_nexp g (e1 * e2);
   nexp_exp g e1 e2
+
+val flt: #p:prm -> a:fe p{a>0} -> Lemma
+  (fexp a (p-1) = 1)
+let flt #p _ = admit()
 
 (* GCD and LCM *)
 
