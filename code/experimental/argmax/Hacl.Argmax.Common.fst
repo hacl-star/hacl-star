@@ -199,6 +199,10 @@ let mod_as_multiple #n a b v =
   add_move_to_right a b 0;
   add_sub_zero b
 
+val mul_zero: #n:big -> a:fe n -> Lemma
+  (ensures (a *% 0 = 0 /\ 0 *% a = 0))
+let mul_zero #n a = ()
+
 val mul_one: #n:big -> a:fe n -> Lemma
   (ensures (a *% one = a /\ one *% a = a))
   [SMTPat (one *% a); SMTPat (a *% one)]
