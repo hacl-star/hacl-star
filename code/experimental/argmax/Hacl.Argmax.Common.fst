@@ -33,6 +33,7 @@ val ex_eucl:
   -> r:tuple3 pos int int{ let (g,u,v) = r in is_gcd a b g /\ a * u + b * v = g }
 let rec ex_eucl a b =
   admit();
+  if a = 0 then (b, 0, 1) else
   let (g,s,t) = ex_eucl (b % a) a in
   (g, t - (b / a) * s, s)
 
@@ -94,6 +95,10 @@ val iscomp: n:big -> Type0
 let iscomp n = exists (p:prm) (q:prm). n = p * q
 
 type comp = n:big{iscomp n}
+
+// In some cases F* can't decide the existential description
+val mkcomp: p:prm -> q:prm -> comp
+let mkcomp p q = p * q
 
 val one: pos
 let one = 1
@@ -491,9 +496,13 @@ val fexp_one2: #n:big -> e:nat -> Lemma
   [SMTPat (fexp #n one e)]
 let fexp_one2 #n e = fexp_eq_nexp #n one e; nexp_one2 #n e
 
-val fexp_zero: #n:big -> e:pos -> Lemma
+val fexp_zero1: #n:big -> e:pos -> Lemma
   (fexp #n 0 e = 0)
-let fexp_zero #n e = fexp_eq_nexp #n 0 e; nexp_zero #n e
+let fexp_zero1 #n e = fexp_eq_nexp #n 0 e; nexp_zero #n e
+
+val fexp_zero2: #n:big -> g:fe n{g <> 0} -> Lemma
+  (fexp #n g 0 = 1)
+let fexp_zero2 #n _ = ()
 
 val fexp_mul1: #n:big -> g:fe n -> e1:nat -> e2:nat -> Lemma
   (fexp g e1 *% fexp g e2 = fexp g (e1 + e2))
@@ -533,15 +542,21 @@ let phi n = if isprm n then n-1 else admit()
 val isunit: #n:big -> a:fe n -> Type0
 let isunit #n a = exists b. a *% b = 1
 
-val isunit_nonzero: #n:comp -> g:fe n{isunit g} -> Lemma (g <> 0)
+val isunit_nonzero: #n:big -> g:fe n{isunit g} -> Lemma (g <> 0)
 let isunit_nonzero #n g =
   assert (g = 0 ==> (forall x. g * x = 0));
   assert (g = 0 ==> (forall x. (g * x) % n = 0))
 
+val one_isunit: n:big -> Lemma (isunit #n 1)
+let one_isunit _ = ()
+
 // Based on euler's theorem
 val finv0: #n:big -> a:fe n ->
   Tot (b:fe n{isunit a <==> b *% a = one})
-let finv0 #n a = admit(); fexp a (phi n - 1)
+let finv0 #n a =
+  admit();
+  let (g,u,_) = ex_eucl a n in
+  if g = 1 then u else 0
 
 val finv: #n:big -> a:fe n{isunit a} -> b:fe n{b *% a = one}
 let finv #n a = finv0 a
@@ -618,7 +633,7 @@ val mult_order:
             }
 let mult_order #n g = admit()
 
-val g_pow_order_reduc: #n:comp -> g:fe n{isunit g /\ g > 0} -> x:pos -> Lemma
+val g_pow_order_reduc: #n:big -> g:fe n{isunit g /\ g > 0} -> x:pos -> Lemma
   (ensures (fexp g x = fexp g (x % mult_order g)))
   (decreases x)
 let rec g_pow_order_reduc #n g x =
@@ -634,11 +649,11 @@ let rec g_pow_order_reduc #n g x =
     fexp_one2 #n (x/r)
   end
 
-val g_pow_isunit: #n:comp -> g:fe n{isunit g}  -> x:pos -> Lemma
+val g_pow_inverse: #n:big -> g:fe n{isunit g} -> x:pos -> Lemma
   (let r = mult_order g in
    isunit (fexp g x) /\
    finv (fexp g x) = fexp g (r - (x % r)))
-let g_pow_isunit #n g x =
+let g_pow_inverse #n g x =
   isunit_nonzero #n g;
   let r = mult_order g in
   let x' = x % r in
@@ -651,3 +666,8 @@ let g_pow_isunit #n g x =
   assert(fexp g x' *% fexp g (r - x') = one);
   assert(fexp g x *% fexp g (r - x') = one);
   finv_unique (fexp g x) (fexp g (r - x'))
+
+val g_pow_isunit: #n:big -> g:fe n -> x:pos -> Lemma
+  (requires (isunit g))
+  (ensures (isunit (fexp g x)))
+let g_pow_isunit #n g x = g_pow_inverse g x

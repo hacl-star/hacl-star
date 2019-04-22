@@ -61,7 +61,7 @@ let leg_symbol_range #p a =
   to_fe_idemp #p a;
   if a = 0
   then begin
-    fexp_zero #p ((p-1)/2);
+    fexp_zero1 #p ((p-1)/2);
     lemma_mod_twice a p;
     assert (l = 0)
   end else begin
