@@ -3,35 +3,20 @@ module EverCrypt.HMAC
 
 /// 18-03-03 Do we get specialized extraction of HMAC?
 
+open Spec.HMAC
 open EverCrypt.Hash
 open Spec.Hash.Definitions
 
-let ha = a:alg {a = SHA1 \/ a = SHA2_256 \/ a = SHA2_384 \/ a = SHA2_512}
-
-noextract
-let lbytes (l:nat) = b:bytes {Seq.length b = l}
-
-noextract
-let keysized (a:alg) (l:nat) =
-  l < max_input_length a /\
-  l + block_length a < pow2 32
-
-(* ghost specification; its algorithmic definition is given in the .fst *)
-val hmac:
-  a: alg -> //18-07-09 can't mix refinements and erasure??
-  key: bytes{ keysized a (Seq.length key) } ->
-  data: bytes{ Seq.length data + block_length a < max_input_length a } ->
-  GTot (lbytes (hash_length a))
-
 open FStar.HyperStack.ST
 open LowStar.Buffer
-open EverCrypt.Helpers
 
 #reset-options "--max_fuel 0  --z3rlimit 20"
 (* implementation, relying on 3 variants of SHA2 supported by HACL*;
    we tolerate overlaps between tag and data.
    (we used to require [disjoint data tag])
 *)
+
+open EverCrypt.Helpers
 
 inline_for_extraction
 let compute_st (a: ha) =

@@ -8,50 +8,12 @@ module S = FStar.Seq
 open EverCrypt.Helpers
 open FStar.Integers
 open Spec.Hash.Lemmas
+open Spec.HMAC
+friend Spec.HMAC
 
 let _: squash (inversion alg) = allow_inversion alg
 
 #set-options "--max_fuel 0 --max_ifuel 0"
-
-let wrap (a:alg) (key: bytes{S.length key < max_input_length a}): GTot (lbytes (block_length a))
-=
-  let key0 = if S.length key <= block_length a then key else spec a key in
-  let paddingLength = block_length a - S.length key0 in
-  S.append key0 (S.create paddingLength 0uy)
-
-let wrap_lemma (a:alg) (key: bytes{Seq.length key < max_input_length a}): Lemma
-  (requires S.length key > block_length a)
-  (ensures wrap a key == (
-    let key0 = EverCrypt.Hash.spec a key in
-    let paddingLength = block_length a - S.length key0 in
-    S.append key0 (S.create paddingLength 0uy))) = ()
-
-// better than Integer's [^^] to tame polymorphism in the proof?
-inline_for_extraction
-let xor8 (x y: uint8_t): uint8_t = x ^^ y
-
-let xor (x: uint8_t) (v: bytes): GTot (lbytes (S.length v)) =
-  Spec.Loops.seq_map (xor8 x) v
-
-#push-options "--max_fuel 1"
-let rec xor_lemma (x: uint8_t) (v: bytes) : Lemma (requires True)
-  (ensures (xor x v == Spec.Loops.seq_map2 xor8 (S.create (S.length v) x) v))
-  (decreases (S.length v)) =
-  let l = S.length v in
-  if l = 0 then () else (
-    let xs  = S.create l x in
-    let xs' = S.create (l-1) x in
-    S.lemma_eq_intro (S.tail xs) xs';
-    xor_lemma x (S.tail v))
-#pop-options
-
-let hmac a key data =
-  let k = wrap a key in
-  let h1 = EverCrypt.Hash.spec a S.(xor 0x36uy k @| data) in
-  assert_norm (pow2 32 < pow2 61);
-  assert_norm (pow2 32 < pow2 125);
-  let h2 = EverCrypt.Hash.spec a S.(xor 0x5cuy k @| h1) in
-  h2
 
 
 /// Agile implementation
@@ -346,10 +308,10 @@ val xor_bytes_inplace:
   (requires fun h0 -> disjoint a b /\ live h0 a /\ live h0 b)
   (ensures fun h0 _ h1 ->
     modifies (loc_buffer a) h0 h1 /\
-    as_seq h1 a == Spec.Loops.seq_map2 xor8 (as_seq h0 a) (as_seq h0 b))
+    as_seq h1 a == Spec.Loops.seq_map2 FStar.UInt8.logxor (as_seq h0 a) (as_seq h0 b))
 inline_for_extraction
 let xor_bytes_inplace a b len =
-  C.Loops.in_place_map2 a b len xor8
+  C.Loops.in_place_map2 a b len FStar.UInt8.logxor
 
 // TODO small improvements: part1 and part2 could return their tags in
 // mac, so that we can reuse the pad.
