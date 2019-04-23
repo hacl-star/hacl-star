@@ -91,10 +91,7 @@ let isprm p = (p % 2 = 1 && p >= 3 && magic())
 
 type prm = p:big{isprm p /\ (forall (x:nat{x>1&&x<p}). ~(divides x p)) }
 
-val iscomp: n:big -> Type0
-let iscomp n = exists (p:prm) (q:prm). n = p * q
-
-type comp = n:big{iscomp n}
+type comp = n:big{ exists (p:prm) (q:prm). n = p * q }
 
 // In some cases F* can't decide the existential description
 val mkcomp: p:prm -> q:prm -> comp
@@ -103,7 +100,7 @@ let mkcomp p q = p * q
 val one: pos
 let one = 1
 
-val zero_mod_n: n:big -> Lemma (0 % n = 0)
+val zero_mod_n: n:pos -> Lemma (0 % n = 0)
 let zero_mod_n _ = ()
 
 val one_mod_n: n:big -> Lemma (1 % n = 1)
@@ -117,12 +114,13 @@ type fe n = x:int{field_el #n x}
 val to_fe: #n:big -> a:int -> r:fe n
 let to_fe #n a = lemma_mod_lt a n; a % n
 
+val to_fe_bigger_and_back: #n:big -> m:big{m>=n} -> a:fe n -> Lemma
+  (to_fe #n (to_fe #m a) = a)
+let to_fe_bigger_and_back #n m a = ()
+
 val to_fe_idemp: #n:big -> a:fe n -> Lemma
   (to_fe #n a = a)
 let to_fe_idemp #n a = ()
-
-(* Simplest functions and properties *)
-
 
 
 (* Basic algebraic operations *)
@@ -646,25 +644,30 @@ let rec g_pow_order_reduc #n g x =
     fexp_one2 #n (x/r)
   end
 
-val g_pow_inverse: #n:big -> g:fe n{isunit g} -> x:pos -> Lemma
+val g_pow_inverse: #n:big -> g:fe n{isunit g} -> x:nat -> Lemma
   (let r = mult_order g in
    isunit (fexp g x) /\
    finv (fexp g x) = fexp g (r - (x % r)))
 let g_pow_inverse #n g x =
   isunit_nonzero #n g;
   let r = mult_order g in
-  let x' = x % r in
-  modulo_range_lemma x r;
-  let inv_e = r - x' in
-  assert(inv_e >= 0 && inv_e <= r);
-  assert(fexp g r = one);
-  g_pow_order_reduc g x;
-  fexp_mul1 g x' inv_e;
-  assert(fexp g x' *% fexp g (r - x') = one);
-  assert(fexp g x *% fexp g (r - x') = one);
-  finv_unique (fexp g x) (fexp g (r - x'))
+  if x = 0
+  then begin
+    fexp_zero2 g;
+    zero_mod_n r
+  end else
+    let x' = x % r in
+    modulo_range_lemma x r;
+    let inv_e = r - x' in
+    assert(inv_e >= 0 && inv_e <= r);
+    assert(fexp g r = one);
+    g_pow_order_reduc g x;
+    fexp_mul1 g x' inv_e;
+    assert(fexp g x' *% fexp g (r - x') = one);
+    assert(fexp g x *% fexp g (r - x') = one);
+    finv_unique (fexp g x) (fexp g (r - x'))
 
-val g_pow_isunit: #n:big -> g:fe n -> x:pos -> Lemma
+val g_pow_isunit: #n:big -> g:fe n -> x:nat -> Lemma
   (requires (isunit g))
   (ensures (isunit (fexp g x)))
 let g_pow_isunit #n g x = g_pow_inverse g x
