@@ -535,10 +535,6 @@ let flt #p _ = admit()
 
 (* Inverses *)
 
-// euler's totient
-val phi: big -> pos
-let phi n = if isprm n then n-1 else admit()
-
 val isunit: #n:big -> a:fe n -> Type0
 let isunit #n a = exists b. a *% b = 1
 
@@ -550,12 +546,13 @@ let isunit_nonzero #n g =
 val one_isunit: n:big -> Lemma (isunit #n 1)
 let one_isunit _ = ()
 
-// Based on euler's theorem
 val finv0: #n:big -> a:fe n ->
   Tot (b:fe n{isunit a <==> b *% a = one})
 let finv0 #n a =
-  admit();
+  if a = 0 then 0 else
   let (g,u,_) = ex_eucl a n in
+  // Requires inv_as_gcd1 to be rewritten w/o depending on finv
+  admit();
   if g = 1 then u else 0
 
 val finv: #n:big -> a:fe n{isunit a} -> b:fe n{b *% a = one}
