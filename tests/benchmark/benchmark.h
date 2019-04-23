@@ -57,6 +57,7 @@ class Benchmark
     static std::string get_runtime_config();
     static void set_runtime_config(int shaext, int aesni, int pclmulqdq, int avx, int avx2, int bmi2, int adx, int hacl, int vale);
     static std::pair<std::string, std::string> & get_build_config(bool escaped=false);
+    static std::string get_cpu_string();
 
     static void initialize();
     static void randomize(char *buf, size_t buf_sz);

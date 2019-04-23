@@ -56,5 +56,5 @@ endif(CMAKE_COMPILER_IS_MSVC)
 
 if(ASAN)
 target_compile_options(kremlib PRIVATE -g -fsanitize=undefined,address -fno-omit-frame-pointer -fno-sanitize-recover=all -fno-sanitize=function)
-target_link_options(kremlib PRIVATE -g -fsanitize=address)
+target_link_libraries(kremlib PRIVATE -g -fsanitize=address)
 endif()

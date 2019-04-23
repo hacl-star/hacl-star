@@ -59,14 +59,6 @@ BenchmarkSettings & parse_args(int argc, char const ** argv)
       arg_fams.remove("sha2_512");
     }
 
-    if (std::find(arg_fams.begin(), arg_fams.end(), "sha2") != arg_fams.end())
-    {
-      arg_fams.remove("sha2_224");
-      arg_fams.remove("sha2_256");
-      arg_fams.remove("sha2_384");
-      arg_fams.remove("sha2_512");
-    }
-
     for (std::string a : arg_fams)
       r.families_to_run.push_back(a);
   }

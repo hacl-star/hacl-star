@@ -8,7 +8,6 @@ message("-- Using EverCrypt at ${EVERCRYPT_SRC_DIR}")
 include(${CMAKE_CURRENT_SOURCE_DIR}/../libkremlib/CMakeLists.txt)
 
 add_library(evercrypt SHARED STATIC
-  ${EVERCRYPT_SRC_DIR}/EverCrypt.c
   ${EVERCRYPT_SRC_DIR}/EverCrypt_AEAD.c
   ${EVERCRYPT_SRC_DIR}/EverCrypt_AutoConfig2.c
   ${EVERCRYPT_SRC_DIR}/EverCrypt_Chacha20Poly1305.c
@@ -62,8 +61,9 @@ endif()
 if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
   target_compile_options(evercrypt PUBLIC -fPIC -fstack-check)
-  target_link_options(evercrypt PUBLIC LINKER:-z,noexecstack LINKER:--unresolved-symbols=report-all)
+  target_link_libraries(evercrypt PUBLIC "-Xlinker -z -Xlinker noexecstack" "-Xlinker --unresolved-symbols=report-all")
 elseif(CMAKE_SYSTEM_NAME STREQUAL "CYGWIN")
+  target_compile_options(evercrypt PUBLIC -fno-asynchronous-unwind-tables)
 endif()
 
 # Hacl_Poly1305_128.o: CFLAGS += -mavx
@@ -75,5 +75,5 @@ target_link_libraries(evercrypt PUBLIC kremlib)
 
 if(ASAN)
 target_compile_options(evercrypt PRIVATE -g -fsanitize=undefined,address -fno-omit-frame-pointer -fno-sanitize-recover=all -fno-sanitize=function)
-target_link_options(evercrypt PRIVATE -g -fsanitize=address)
+target_link_libraries(evercrypt PRIVATE -g -fsanitize=address)
 endif()

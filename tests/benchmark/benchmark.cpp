@@ -63,8 +63,32 @@ std::string Benchmark::get_runtime_config()
   rs << " " << (EverCrypt_AutoConfig2_has_adx() ? "+" : "-") << "ADX";
   rs << " " << (EverCrypt_AutoConfig2_wants_hacl() ? "+" : "-") << "HACL";
   rs << " " << (EverCrypt_AutoConfig2_wants_vale() ? "+" : "-") << "VALE";
+
   return rs.str();
 }
+
+std::string Benchmark::get_cpu_string()
+{
+  std::string r = "Unknown CPU.";
+  #ifndef WIN32
+    FILE* pipe = popen("grep \"model name\" /proc/cpuinfo -m 1", "r");
+    if (pipe)
+    {
+      char buffer[1024];
+      r = "";
+      try
+      {
+        while (fgets(buffer, 1024, pipe) != NULL)
+          r += buffer;
+      }
+      catch (...) {}
+      pclose(pipe);
+    }
+  #endif
+
+  return r;
+}
+
 
 std::pair<std::string, std::string> & Benchmark::get_build_config(bool escaped)
 {
@@ -171,6 +195,7 @@ void Benchmark::run_batch(const BenchmarkSettings & s,
   rs << "// Config: " << Benchmark::get_runtime_config() << " seed=" << s.seed << " samples=" << s.samples << "\n";
   rs << "// " << Benchmark::get_build_config(false).first << "\n";
   rs << "// " << Benchmark::get_build_config(false).second << "\n";
+  rs << "// " << Benchmark::get_cpu_string() << "\n";
   rs << data_header << "\n";
 
   while (!benchmarks.empty())
