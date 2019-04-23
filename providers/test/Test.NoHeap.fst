@@ -78,7 +78,7 @@ let supported_hmac_algorithm a =
   | MD5 | SHA2_224 -> false
   | _ -> true
 
-let keysized (a:H.alg) (l: UInt32.t): Tot (b:bool{b ==> EverCrypt.HMAC.keysized a (UInt32.v l) }) =
+let keysized (a:H.alg) (l: UInt32.t): Tot (b:bool{b ==> Spec.HMAC.keysized a (UInt32.v l) }) =
   EverCrypt.Hash.uint32_fits_maxLength a l;
   assert (v l < Spec.Hash.Definitions.max_input_length a);
   assert_norm (v 0xfffffffful = pow2 32 - 1);
@@ -96,7 +96,7 @@ let test_one_hmac vec =
   else if supported_hmac_algorithm ha then
     begin
     push_frame();
-    assert (EverCrypt.HMAC.keysized ha (v keylen));
+    assert (Spec.HMAC.keysized ha (v keylen));
     assert (v datalen + H.blockLength ha < pow2 32);
     B.recall key;
     B.recall data;
@@ -131,7 +131,7 @@ let test_one_hkdf vec =
     failwith !$"infolen is too large\n"
   else if supported_hmac_algorithm ha then begin
     push_frame();
-    assert (EverCrypt.HMAC.keysized ha (v saltlen));
+    assert (Spec.HMAC.keysized ha (v saltlen));
     assert (v ikmlen + H.blockLength ha < pow2 32);
     assert (H.tagLength ha
       + v infolen + 1 + H.blockLength ha < pow2 32);
