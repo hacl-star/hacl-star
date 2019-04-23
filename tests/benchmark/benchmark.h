@@ -35,6 +35,8 @@ class Benchmark
     static void escape(char c, std::string & str);
     static std::string escape(const std::string & str);
 
+    std::vector<cycles> samples;
+
   public:
     Benchmark();
     Benchmark(const std::string & name);

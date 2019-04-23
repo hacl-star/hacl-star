@@ -45,6 +45,7 @@ BenchmarkSettings & parse_args(int argc, char const ** argv)
     r.families_to_run.push_back("hash");
     r.families_to_run.push_back("aead");
     r.families_to_run.push_back("curve25519");
+    r.families_to_run.push_back("ed25519");
   }
   else
   {

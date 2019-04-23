@@ -33,8 +33,7 @@ add_library(evercrypt SHARED STATIC
   ${EVERCRYPT_SRC_DIR}/Hacl_Poly1305_256.c
   ${EVERCRYPT_SRC_DIR}/Hacl_SHA3.c
   ${EVERCRYPT_SRC_DIR}/Lib_PrintBuffer.c
-  ${EVERCRYPT_SRC_DIR}/Lib_RandomBuffer.c
-  ${EVERCRYPT_SRC_DIR}/Vale.c)
+  ${EVERCRYPT_SRC_DIR}/Lib_RandomBuffer.c)
 target_compile_options(evercrypt PRIVATE -Wno-parentheses -std=gnu11 -march=native -mtune=native)
 target_include_directories(evercrypt PUBLIC ${EVERCRYPT_SRC_DIR})
 

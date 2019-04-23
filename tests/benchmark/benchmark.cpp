@@ -168,6 +168,8 @@ void Benchmark::run(const BenchmarkSettings & s)
     if (cdiff < cmin) cmin = cdiff;
     if (cdiff > cmax) cmax = cdiff;
 
+    samples.push_back(cdiff);
+
     bench_cleanup(s);
   }
 
