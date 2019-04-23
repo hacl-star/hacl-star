@@ -454,6 +454,13 @@ let rec to_fe_nexp1 #n k g e = match e with
     to_fe_mul #m g (nexp g (e-1))
   end
 
+//val to_fe_mul: #n:big -> a:nat -> b:nat -> Lemma
+//  (to_fe #n (a * b) = to_fe a *% to_fe b)
+//let to_fe_mul #n a b = modulo_mul_distributivity a b n
+
+val to_fe_nexp2: #n:big -> k:big{ k > n } -> g:fe n -> e:nat -> Lemma
+  (to_fe #(n/k) (nexp g e) = nexp (to_fe #(n/k) g) e)
+
 // Define fexp' for composite n and for unit g.
 val fexp: #n:big -> fe n -> e:nat -> Tot (fe n) (decreases e)
 let rec fexp #n g e =
