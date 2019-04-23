@@ -11,8 +11,9 @@ module GM = Hacl.Argmax.GM
 module P = Hacl.Argmax.Paillier
 module U64 = FStar.UInt64
 
-val print_nat: c:nat{c < pow2 64} -> ML unit
+val print_nat: c:nat -> ML unit
 let print_nat c =
+  assume (c < pow2 64);
   let c': uint_t 64 = c in
   print_uint64 (U64.uint_to_t c)
 
@@ -21,7 +22,7 @@ let print_bool b = print_string (if b then "true" else "false")
 
 val run_test_gm:
      p:prm
-  -> q:prm{q <> p /\ p*q < pow2 64}
+  -> q:prm{q <> p}
   -> y:fe (p * q){GM.is_nonsqr (to_fe #p y) /\ GM.is_nonsqr (to_fe #q y)}
   -> r:fe (p * q){sqr r > 0 /\ sqr r *% y > 0}
   -> ML unit
@@ -56,7 +57,6 @@ let test_gm () =
   let with_asserted_vals (p0:big) (q0:big{q0<>p0}) (y0:pos) (r0:pos) = begin
     let p:prm = to_prime p0 in
     let q:prm = to_prime q0 in
-    assume (p * q < pow2 64);
     let y:fe (p*q) = (assume (y0 < p * q); y0) in
     assume (GM.is_nonsqr #p (to_fe #p y) /\ GM.is_nonsqr #q (to_fe #q y));
     let r:fe (p*q) = (assume (r0 < p * q); r0) in
@@ -116,8 +116,41 @@ let test_paillier () =
 
   print_string "\nPaillier test done\n"
 
+val compare_paillier: unit -> ML unit
+let compare_paillier () =
+  let p:prm = (assume(isprm 293); 293) in
+  let q:prm = (assume(isprm 433); 433) in
+
+  let n:comp = mkcomp p q in
+  assert (n = 126869);
+  let g:P.fen2 n = n + 1 in
+  assume (isunit g /\ P.in_base #n g);
+
+  let sec = P.Secret p q g in
+  let pub = P.s2p sec in
+
+  let r:fe n = 74384 in
+  assume (isunit r);
+
+  let m:fe n = 10100 in
+
+  print_string "\nPaillier compare:\n";
+  print_nat m;
+  print_string " --enc-> ";
+  let c = P.encrypt pub r m in
+  print_nat c;
+
+  print_string " --dec-> ";
+  let m' = P.decrypt sec c in
+  print_nat m';
+
+  print_string "\nEncryption must be equal to: ";
+  print_nat 935906717;
+
+  print_string "\nPaillier compare done\n"
 
 val main: unit
 let main =
   test_gm ();
-  test_paillier ()
+  test_paillier ();
+  compare_paillier ()

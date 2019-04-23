@@ -479,6 +479,7 @@ type secret =
          -> g:isg (p*q)
          -> secret
 
+// TODO get rid of "comp" here
 type public =
   | Public: n:comp
          -> g:isg n
