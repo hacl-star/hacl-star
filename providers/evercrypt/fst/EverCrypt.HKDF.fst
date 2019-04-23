@@ -5,6 +5,8 @@ module EverCrypt.HKDF
 module ST = FStar.HyperStack.ST
 open FStar.HyperStack.All
 
+open FStar.Seq
+
 open FStar.Mul
 open FStar.HyperStack
 open FStar.HyperStack.ST
@@ -14,14 +16,16 @@ open FStar.Integers
 
 open EverCrypt.Hash
 
-type alg = EverCrypt.HMAC.ha
+open Spec.Hash.Definitions
+open Spec.HKDF
+friend Spec.HKDF
 
 // [hashed] holds the HMAC text,
 // of the form | tagLen a | infolen | 1 |;
 // its prefix is overwritten by HMAC at each iteration.
 
 val hkdf_expand_loop:
-  a       : alg -> (
+  a       : EverCrypt.HMAC.supported_alg -> (
   okm     : uint8_p ->
   prk     : uint8_p ->
   prklen  : uint8_l prk ->
@@ -29,7 +33,7 @@ val hkdf_expand_loop:
   len     : uint8_l okm  ->
   hashed  : uint8_pl (tagLength a + v infolen + 1) ->
   i       : UInt8.t {
-    HMAC.keysized a (length prk) /\
+    Spec.HMAC.keysized a (length prk) /\
     disjoint okm prk /\
     disjoint hashed okm /\
     disjoint hashed prk /\
@@ -80,7 +84,7 @@ let rec hkdf_expand_loop a okm prk prklen infolen len hashed i =
       // Seq.lemma_eq_intro (as_seq h1 counter) ctr1;
       // assert(tag2 == HMAC.hmac a v_prk (as_seq h1 hashed1));
       Seq.lemma_eq_intro (as_seq h1 info_counter) text;
-      assert(tag2 == HMAC.hmac a prk text)  ))
+      assert(tag2 == Spec.HMAC.hmac a prk text)  ))
   else (
     HMAC.compute a tag prk prklen hashed (tlen + infolen + 1ul);
     ( let h2 = ST.get() in
@@ -92,7 +96,7 @@ let rec hkdf_expand_loop a okm prk prklen infolen len hashed i =
       let text = tag1 @| info @| ctr1 in
       // assert(tag2 == HMAC.hmac (Ghost.hide a) prk (as_seq h1 hashed));
       Seq.lemma_eq_intro (as_seq h1 hashed) text ;
-      assert(tag2 == HMAC.hmac a prk text )));
+      assert(tag2 == Spec.HMAC.hmac a prk text )));
 
   // copy it to the result; iterate if required
   let h2 = ST.get() in

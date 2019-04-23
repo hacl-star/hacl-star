@@ -5,13 +5,13 @@ module S = FStar.Seq
 open Spec.Hash.Definitions
 open FStar.Integers
 
-let wrap (a:ha) (key: bytes{S.length key < max_input_length a}): Tot (lbytes (block_length a))
+let wrap (a:hash_alg) (key: bytes{S.length key < max_input_length a}): Tot (lbytes (block_length a))
 =
   let key0 = if S.length key <= block_length a then key else Spec.Hash.hash a key in
   let paddingLength = block_length a - S.length key0 in
   S.append key0 (S.create paddingLength 0uy)
 
-let wrap_lemma (a:ha) (key: bytes{Seq.length key < max_input_length a}): Lemma
+let wrap_lemma (a:hash_alg) (key: bytes{Seq.length key < max_input_length a}): Lemma
   (requires S.length key > block_length a)
   (ensures wrap a key == (
     let key0 = EverCrypt.Hash.spec a key in

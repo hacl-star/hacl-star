@@ -31,7 +31,7 @@ module ST = FStar.HyperStack.ST
 
 inline_for_extraction
 val wrap_key:
-  a: ha ->
+  a: hash_alg ->
   output: uint8_pl (block_length a) ->
   key: uint8_p {length key < max_input_length a /\ disjoint output key} ->
   len: UInt32.t {v len = length key} ->
@@ -52,7 +52,7 @@ unfold
 let tag_len a = Hacl.Hash.Definitions.hash_len a
 
 inline_for_extraction
-let helper_smtpat (a: ha) (len: uint32_t{ v len < max_input_length a }):
+let helper_smtpat (a: hash_alg) (len: uint32_t{ v len < max_input_length a }):
   x:uint32_t { x <= block_len a } =
   if len <= block_len a then len else tag_len a
 
@@ -390,7 +390,7 @@ let hmac_core a acc tag key data len =
 
 
 inline_for_extraction noextract
-val mk_compute: a: ha -> compute_st a
+val mk_compute: a: hash_alg -> compute_st a
 
 inline_for_extraction noextract
 let mk_compute a mac key keylen data datalen =

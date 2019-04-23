@@ -19,7 +19,7 @@ open LowStar.Buffer
 open EverCrypt.Helpers
 
 inline_for_extraction
-let compute_st (a: ha) =
+let compute_st (a: hash_alg) =
   tag: uint8_pl (hash_length a) ->
   key: uint8_p{ keysized a (length key) /\ disjoint key tag } ->
   keylen: UInt32.t{ UInt32.v keylen = length key } ->
@@ -52,9 +52,15 @@ val compute_sha2_384: compute_st SHA2_384
 *)
 val compute_sha2_512: compute_st SHA2_512
 
+let is_supported_alg = function
+| SHA1 | SHA2_256 | SHA2_384 | SHA2_512 -> true
+| _ -> false
+
+let supported_alg = a:hash_alg { is_supported_alg a }
+
 // The agile version that dynamically dispatches between the above four.
 (** @type: true
 *)
-val compute: a: ha -> compute_st a
+val compute: a: supported_alg -> compute_st a
 
 //18-07-13 pick uniform names? hash{spec} vs compute{hmac}
