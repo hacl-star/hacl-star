@@ -116,6 +116,7 @@ let poly1305_encode_blocks #s f b =
   load_felems_le f b;
   set_bit128 f
 
+#push-options "--z3rlimit 200"
 inline_for_extraction noextract
 val poly1305_encode_last:
     #s:field_spec
@@ -140,7 +141,7 @@ let poly1305_encode_last #s f len b =
   load_felem_le f tmp;
   let h1 = ST.get () in
   lemma_feval_is_fas_nat h1 f;
-  assert (forall (i:nat). i < width s ==> (feval h1 f).[i] == (fas_nat h1 f).[i]);
+  assert (forall (i:nat). {:pattern (i < width s) } i < width s ==> (feval h1 f).[i] == (fas_nat h1 f).[i]);
   assert (feval h1 f == LSeq.create (width s) (BSeq.nat_from_bytes_le (as_seq h0 tmp)));
   LSeq.eq_intro
     (LSeq.create (width s) (BSeq.nat_from_bytes_le (as_seq h0 tmp)))
@@ -149,6 +150,7 @@ let poly1305_encode_last #s f len b =
   assert (F32xN.felem_less #(width s) h1 f (pow2 (v len * 8)));
   set_bit f (len *! 8ul);
   pop_frame()
+#pop-options
 
 inline_for_extraction noextract
 val poly1305_encode_r:
@@ -172,7 +174,7 @@ let poly1305_encode_r #s p b =
   load_precompute_r p lo hi
 
 inline_for_extraction noextract
-let mk_poly1305_init #s ctx key =
+let poly1305_init #s ctx key =
   let acc = get_acc ctx in
   let pre = get_precomp_r ctx in
 
@@ -486,19 +488,20 @@ let poly1305_update32 ctx len text =
   poly1305_update1 #M32 len text pre acc
 
 inline_for_extraction noextract
-val mk_poly1305_update_128_256: #s:field_spec { s = M128 || s = M256 } -> poly1305_update_st s
-let mk_poly1305_update_128_256 #s ctx len text =
+val poly1305_update_128_256: #s:field_spec { s = M128 || s = M256 } -> poly1305_update_st s
+let poly1305_update_128_256 #s ctx len text =
   let pre = get_precomp_r ctx in
   let acc = get_acc ctx in
   poly1305_update_ #s len text pre acc
 
 inline_for_extraction noextract
-let mk_poly1305_update #s =
+let poly1305_update #s =
   match s with
   | M32 -> poly1305_update32
-  | _ -> mk_poly1305_update_128_256 #s
+  | _ -> poly1305_update_128_256 #s
 
-let mk_poly1305_finish #s tag key ctx =
+inline_for_extraction noextract
+let poly1305_finish #s tag key ctx =
   let acc = get_acc ctx in
   let ks = sub key 16ul 16ul in
 
@@ -518,6 +521,7 @@ let mk_poly1305_finish #s tag key ctx =
 
 #set-options "--z3rlimit 150"
 
+inline_for_extraction noextract
 let mk_poly1305_mac #s poly1305_init poly1305_update poly1305_finish tag len text key =
   push_frame ();
   let ctx = create (nlimb s +. precomplen s) (limb_zero s) in

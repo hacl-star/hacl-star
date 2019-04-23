@@ -48,7 +48,7 @@ let poly1305_init_st (s: field_spec) =
       (as_get_acc h1 ctx, as_get_r h1 ctx) == S.poly1305_init (as_seq h0 key))
 
 inline_for_extraction noextract
-val mk_poly1305_init: #s:field_spec -> poly1305_init_st s
+val poly1305_init: #s:field_spec -> poly1305_init_st s
 
 inline_for_extraction noextract
 let poly1305_update_st (s: field_spec) =
@@ -67,7 +67,7 @@ let poly1305_update_st (s: field_spec) =
       S.poly_update #(width s) (as_seq h0 text) (as_get_acc h0 ctx) (as_get_r h0 ctx))
 
 inline_for_extraction noextract
-val mk_poly1305_update: #s:field_spec -> poly1305_update_st s
+val poly1305_update: #s:field_spec -> poly1305_update_st s
 
 inline_for_extraction noextract
 let poly1305_finish_st (s: field_spec) =
@@ -84,7 +84,7 @@ let poly1305_finish_st (s: field_spec) =
       as_seq h1 tag == S.finish (as_seq h0 key) (Lib.Sequence.index (as_get_acc h0 ctx) 0))
 
 inline_for_extraction noextract
-val mk_poly1305_finish: #s:field_spec -> poly1305_finish_st s
+val poly1305_finish: #s:field_spec -> poly1305_finish_st s
 
 inline_for_extraction noextract
 let poly1305_mac_st (s: field_spec) =
