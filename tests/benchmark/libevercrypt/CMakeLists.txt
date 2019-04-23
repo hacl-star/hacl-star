@@ -8,6 +8,7 @@ message("-- Using EverCrypt at ${EVERCRYPT_SRC_DIR}")
 include(${CMAKE_CURRENT_SOURCE_DIR}/../libkremlib/CMakeLists.txt)
 
 add_library(evercrypt SHARED STATIC
+  ${EVERCRYPT_SRC_DIR}/EverCrypt.c
   ${EVERCRYPT_SRC_DIR}/EverCrypt_AEAD.c
   ${EVERCRYPT_SRC_DIR}/EverCrypt_AutoConfig2.c
   ${EVERCRYPT_SRC_DIR}/EverCrypt_Chacha20Poly1305.c
@@ -65,10 +66,10 @@ elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
 elseif(CMAKE_SYSTEM_NAME STREQUAL "CYGWIN")
 endif()
 
-# Hacl_Poly1305.o: CFLAGS += -mavx -mavx2
-set_source_files_properties(${EVERCRYPT_SRC_DIR}/Hacl_Poly1305.c
-    PROPERTIES COMPILE_FLAGS "-mavx -mavx2"
-)
+# Hacl_Poly1305_128.o: CFLAGS += -mavx
+# Hacl_Poly1305_256.o: CFLAGS += -mavx -mavx2
+set_source_files_properties(${EVERCRYPT_SRC_DIR}/Hacl_Poly1305_128.c PROPERTIES COMPILE_FLAGS "-mavx")
+set_source_files_properties(${EVERCRYPT_SRC_DIR}/Hacl_Poly1305_256.c PROPERTIES COMPILE_FLAGS "-mavx -mavx2")
 
 target_link_libraries(evercrypt PUBLIC kremlib)
 
