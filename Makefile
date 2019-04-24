@@ -349,10 +349,12 @@ vale-fst: $(VALE_FSTS)
 
 # A litany of file-specific options, replicating exactly what was in SConstruct
 # before. TODO simplification would be good.
+USE_EXTRACTED_INTERFACES?=true
+
 VALE_FSTAR_FLAGS_NOSMT=--z3cliopt smt.arith.nl=false \
   --z3cliopt smt.QI.EAGER_THRESHOLD=100 --z3cliopt smt.CASE_SPLIT=3 \
   --max_fuel 1 --max_ifuel 1 \
-  --initial_ifuel 0 --use_extracted_interfaces true
+  --initial_ifuel 0 --use_extracted_interfaces $(USE_EXTRACTED_INTERFACES)
 
 VALE_FSTAR_FLAGS=$(VALE_FSTAR_FLAGS_NOSMT) \
   --smtencoding.elim_box true --smtencoding.l_arith_repr native \
@@ -463,6 +465,9 @@ obj/Fsqr_inline.fst.checked: \
 
 obj/Vale.Stdcalls.GCMencrypt.fst.checked: \
   FSTAR_FLAGS=$(VALE_FSTAR_FLAGS)
+
+obj/Vale.Stdcalls.GCMencryptOpt.fst.checked: \
+  USE_EXTRACTED_INTERFACES=false
 
 obj/Vale.Stdcalls.GCMencryptOpt.fst.checked: \
   FSTAR_FLAGS=$(VALE_FSTAR_FLAGS)
