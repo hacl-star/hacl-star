@@ -20,9 +20,6 @@ val hash_256: hash_st SHA2_256
 val hash_384: hash_st SHA2_384
 val hash_512: hash_st SHA2_512
 
-// Interface that exposes a sha2-512 signature suitable for calling from HACL-lib code.
-module BF = Arch.BufferFriend
-
 open Lib.IntTypes
 open Lib.Sequence
 open Lib.Buffer

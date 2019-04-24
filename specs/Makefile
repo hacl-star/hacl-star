@@ -1,13 +1,14 @@
-FSTAR_HOME=$(HACL_HOME)/../FStar
-
+FSTAR_HOME=../../FStar
+HACL_HOME=..
 include ../Makefile.include
 
 .PHONY=all test
 
 FSTAR_INCLUDES+= \
-	--include $(HACL_HOME)/lib/ml \
-	--include $(HACL_HOME)/lib \
-	--include $(HACL_HOME)/specs/lemmas \
+	--include ../lib/ml \
+	--include ../../kremlin/kremlib \
+	--include ../lib \
+	--include ../specs/lemmas \
 	--expose_interfaces
 
 SPEC_FILES=	Spec.Chacha20.fst \
