@@ -231,7 +231,7 @@ class OldValeDecrypt : public AEADBenchmark
 
   public:
     OldValeDecrypt(size_t msg_len) :
-      AEADBenchmark(key_size_bits, tag_len, msg_len, "EverCrypt")
+      AEADBenchmark(key_size_bits, tag_len, msg_len)
       {
         switch(key_size_bits) {
           case 128: set_name("Vale (old)", "AES128\\nGCM"); break;

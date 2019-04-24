@@ -27,14 +27,14 @@ for c in $CONFIGS; do
         (mkdir -p $OCONF-$CC; tar xfz $OPENSSL.tar.gz -C $OCONF-$CC; pushd $OCONF-$CC/$OPENSSL; CC=$CC CXX=$CXX ./config $OFLAGS; make $PAR; popd) > build.log 2>&1
       fi
       if [ ! -d evercrypt-$OCONF-$CC ]; then
-        echo "Configuring $CC with $OCONF-$CC"
+        echo "Configuring evercrypt-$CC with $OCONF-$CC"
         mkdir -p evercrypt-$OCONF-$CC
-        (pushd evercrypt-$OCONF-$CC; cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=$CC -DCMAKE_CXX_COMPILER=$CXX -DUSE_OPENSSL=ON -DOPENSSL_LIB=$OCONF-$CC/$OPENSSL/libcrypto.a -DOPENSSL_INC=$OCONF-$CC/$OPENSSL/include .. 2>&1; popd) > evercrypt-$OCONF-$CC/configure.log
+        (pushd evercrypt-$OCONF-$CC; cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=$CC -DCMAKE_CXX_COMPILER=$CXX -DUSE_OPENSSL=ON -DOPENSSL_LIB=../$OCONF-$CC/$OPENSSL/libcrypto.a -DOPENSSL_INC=../$OCONF-$CC/$OPENSSL/include .. 2>&1; popd) > evercrypt-$OCONF-$CC/configure.log
       fi
       pushd evercrypt-$OCONF-$CC > /dev/null
-      echo "(Re-)building EverCrypt with $CC and $OCONF-$CC"
+      echo "(Re-)building evercrypt-$CC using $OCONF-$CC"
       make $PAR > build.log 2>&1
-      echo "Running benchmarks for $CC with $OCONF-$CC"
+      echo "Running benchmarks for evercrypt-$CC using $OCONF-$CC"
       (./runbenchmark -n $SAMPLES) > run.log 2>&1
       popd > /dev/null
     done
