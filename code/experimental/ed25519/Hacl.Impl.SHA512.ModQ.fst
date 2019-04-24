@@ -21,9 +21,10 @@ val sha512_pre_msg:
     (ensures fun h0 _ h1 -> modifies (loc hash) h0 h1)
 let sha512_pre_msg h prefix len input =
   push_frame ();
+  assert_norm(pow2 32 <= pow2 125 - 1);
   let pre_msg = create (len +. 32ul) (u8 0) in
   concat2 32ul prefix len input pre_msg;
-  Hacl.SHA512.hash h (len +. 32ul) pre_msg;
+  Hacl.Hash.SHA2.hash_512 pre_msg (len +. 32ul) h;
   pop_frame ()
 
 //FIX
@@ -41,8 +42,9 @@ val sha512_pre_pre2_msg:
 let sha512_pre_pre2_msg h prefix prefix2 len input =
   push_frame ();
   let pre_msg = create (len +. 64ul) (u8 0) in
+  assert_norm(pow2 32 <= pow2 125 - 1);
   concat3 32ul prefix 32ul prefix2 len input pre_msg;
-  Hacl.SHA512.hash h (len +. 64ul) pre_msg;
+  Hacl.Hash.SHA2.hash_512 pre_msg (len +. 64ul) h;
   pop_frame ()
 
 val sha512_modq_pre:

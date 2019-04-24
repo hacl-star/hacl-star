@@ -27,8 +27,8 @@ type buftype =
 inline_for_extraction
 let buffer_t (ty:buftype) (a:Type0) =
   match ty with
-  | IMMUT -> ib:IB.ibuffer a{B.frameOf ib == HyperStack.root}
-  | MUT -> b:B.buffer a{B.frameOf b <> HyperStack.root}
+  | IMMUT -> ib:IB.ibuffer a//{B.frameOf ib == HyperStack.root}
+  | MUT -> b:B.buffer a//{B.frameOf b <> HyperStack.root}
 
 (** Mutable buffer *)
 unfold let buffer (a:Type0) = buffer_t MUT a
@@ -41,12 +41,6 @@ let length (#t:buftype) (#a:Type0) (b:buffer_t t a) =
   | MUT -> B.length (b <: buffer a)
   | IMMUT -> IB.length (b <: ibuffer a)
 
-let mut_immut_disjoint #t #t' (b: buffer_t MUT t) (ib: buffer_t IMMUT t') (h: HS.mem):
-  Lemma
-    (requires (B.live h b /\ B.live h ib))
-    (ensures (B.disjoint b ib))
-=
-  IB.buffer_immutable_buffer_disjoint b ib h
 
 inline_for_extraction
 let lbuffer_t (ty:buftype) (a:Type0) (len:size_t) =
@@ -96,6 +90,15 @@ val modifies_trans: l1:B.loc ->  l2:B.loc -> h0:mem -> h1:mem -> h2:mem
 (** Disjointness clause for Buffers *)
 let disjoint (#t1 #t2:buftype) (#a1 #a2:Type0) (b1:buffer_t t1 a1) (b2:buffer_t t2 a2) =
   B.loc_disjoint (loc b1) (loc b2)
+
+let mut_immut_disjoint #t #t' (b: buffer_t MUT t) (ib: buffer_t IMMUT t') (h: HS.mem):
+  Lemma
+    (requires (B.live h b /\ B.live h ib))
+    (ensures (disjoint b ib))
+    [SMTPat (disjoint b ib); SMTPat (B.live h b); SMTPat (B.live h ib)]
+=
+  IB.buffer_immutable_buffer_disjoint b ib h
+
 
 (** Modifies nothing *)
 let modifies0 (h1 h2:HS.mem) =
@@ -1058,7 +1061,7 @@ val map_blocks_multi:
     #t:buftype
   -> #a:Type0
   -> h0: mem
-  -> blocksize:size_t{v blocksize > 0} 
+  -> blocksize:size_t{v blocksize > 0}
   -> nb:size_t{v nb * v blocksize <= max_size_t}
   -> inp:lbuffer_t t a (nb *! blocksize)
   -> output:lbuffer a (nb *! blocksize)
@@ -1076,7 +1079,7 @@ val map_blocks_multi:
   -> Stack unit
     (requires fun h -> h0 == h /\ live h output /\ live h inp /\ eq_or_disjoint inp output)
     (ensures  fun _ _ h1 -> modifies1 output h0 h1 /\
-	as_seq h1 output == Seq.map_blocks_multi (v blocksize) (v nb) 
+	as_seq h1 output == Seq.map_blocks_multi (v blocksize) (v nb)
 			    (as_seq h0 inp) (spec_f h0))
 
 inline_for_extraction noextract

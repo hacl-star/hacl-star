@@ -5,7 +5,7 @@ open Lib.IntTypes
 open Lib.Sequence
 open Lib.ByteSequence
 open Lib.RawIntTypes
-open Spec.SHA2
+open Spec.Hash.Definitions
 open Spec.Curve25519
 
 
@@ -33,7 +33,7 @@ let q: n:nat{n < pow2 256} =
   assert_norm(pow2 252 + 27742317777372353535851937790883648493 < pow2 255 - 19);
   (pow2 252 + 27742317777372353535851937790883648493) // Group order
 
-let _:_:unit{max_input SHA2_512 > pow2 32} = assert_norm (max_input SHA2_512 > pow2 32)
+let _:_:unit{max_input_length SHA2_512 > pow2 32} = assert_norm (max_input_length SHA2_512 > pow2 32)
 
 let g_x : elem = 15112221349535400772501151409588531511454012693041857206046113283949847762202
 let g_y : elem = 46316835694926478169428394003475163141307993866256225615783033603165251855960
@@ -48,7 +48,7 @@ let modp_inv (x:elem) : Tot elem =
   x **% (prime - 2)
 
 let sha512_modq (len:size_nat) (s:lbytes len) : n:nat{n < pow2 256} =
-  nat_from_bytes_le (hash512 s) % q
+  nat_from_bytes_le (Spec.Hash.hash SHA2_512 s) % q
 
 
 let point_add (p:ext_point) (q:ext_point) : Tot ext_point =
@@ -85,7 +85,7 @@ let point_double (p:ext_point) : Tot ext_point =
 
 let ith_bit (k:lbytes 32) (i:size_nat{i < 256}) =
   let q = i / 8 in let r = size (i % 8) in
-  (k.[q] >>. r) &. u8 1
+  (index #uint8 #32 k q >>. r) &. u8 1
 
 let cswap2 (sw:uint8) (x:ext_point) (xp1:ext_point) =
   if uint_to_nat sw = 1 then (xp1, x) else (x, xp1)
@@ -136,13 +136,13 @@ let point_decompress (s:lbytes 32) : Tot (option ext_point) =
   | _ -> None
 
 let secret_expand (secret:lbytes 32) : (lbytes 32 & lbytes 32) =
-  let h = hash512 secret in
-  let h_low : lbytes 32 = slice h 0 32 in
-  let h_high : lbytes 32 = slice h 32 64 in
-  let h_low0 : uint8  = h_low.[0] in
-  let h_low31 = h_low.[31] in
-  let h_low = h_low.[ 0] <- h_low.[0] &. u8 0xf8 in
-  let h_low = h_low.[31] <- (h_low.[31] &. u8 127) |. u8 64 in
+  let h = Spec.Hash.hash SHA2_512 secret in
+  let h_low : lbytes 32 = slice #uint8 #64 h 0 32 in
+  let h_high : lbytes 32 = slice #uint8 #64 h 32 64 in
+  let h_low0 : uint8  = index #uint8 #32 h_low 0 in
+  let h_low31 = index #uint8 #32 h_low 31 in
+  let h_low = h_low.[ 0] <- index #uint8 #32 h_low 0 &. u8 0xf8 in
+  let h_low = h_low.[31] <- (index #uint8 #32 h_low 31 &. u8 127) |. u8 64 in
   h_low, h_high
 
 let secret_to_public (secret:lbytes 32) =
@@ -169,10 +169,12 @@ let sign secret msg =
   let len = length msg in
   let a, prefix = secret_expand secret in
   let a' = point_compress (point_mul a g) in
-  let r = sha512_modq (32 + len) (prefix @| msg) in
+  let r = sha512_modq (32 + len) (concat #uint8 #32 #(length msg) prefix msg) in
   let r' = point_mul (nat_to_bytes_le 32 r) g in
   let rs = point_compress r' in
-  let h = sha512_modq (64 + len) (concat (concat rs a') msg) in
+  let h = sha512_modq (64 + len)
+    (concat #uint8 #64 #(length msg) (concat #uint8 #32 #32 rs a') msg)
+  in
   let s = (r + (h * nat_from_bytes_le a) % q) % q in
   concat #uint8 #32 #32 rs (nat_to_bytes_le 32 s)
 
@@ -188,15 +190,17 @@ let verify public msg signature =
   match a' with
   | None -> false
   | Some a' -> (
-    let rs = slice signature 0 32 in
+    let rs = slice #uint8 #64 signature 0 32 in
     let r' = point_decompress rs in
     match r' with
     | None -> false
     | Some r' -> (
-      let s = nat_from_bytes_le (slice signature 32 64) in
+      let s = nat_from_bytes_le (slice #uint8 #64 signature 32 64) in
       if s >= q then false
       else (
-        let h = sha512_modq (64 + len) (concat (concat rs public) msg) in
+        let h = sha512_modq (64 + len)
+	  (concat #uint8 #64 #(length msg) (concat #uint8 #32 #32 rs public) msg)
+	in
         let sB = point_mul (nat_to_bytes_le 32 s) g in
         let hA = point_mul (nat_to_bytes_le 32 h) a' in
         point_equal sB (point_add r' hA)

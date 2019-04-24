@@ -5,40 +5,40 @@ open Lib.IntTypes
 open Lib.Sequence
 open Lib.ByteSequence
 
-module H = Spec.Hash
+module H = Spec.Hash.Definitions
 
 val wrap_key:
-    a: H.algorithm
-  -> key:bytes{length key <= H.max_input a} ->
-  Tot (lbytes (H.size_block a))
+    a: H.hash_alg
+  -> key:bytes{length key < H.max_input_length a} ->
+  Tot (lbytes (H.block_length a))
 
 val init:
-    a: H.algorithm
-  -> key: lbytes (H.size_block a) ->
-  Tot (H.state a)
+    a: H.hash_alg
+  -> key: lbytes (H.block_length a) ->
+  Tot (H.words_state a)
 
 val update_block:
-    a: H.algorithm
-  -> data: lbytes (H.size_block a)
-  -> H.state a ->
-  Tot (H.state a)
+    a: H.hash_alg
+  -> data: lbytes (H.block_length a)
+  -> H.words_state a ->
+  Tot (H.words_state a)
 
 val update_last:
-    a: H.algorithm
-  -> prev: nat
-  -> len: nat{len < H.size_block a /\ len + prev <= H.max_input a}
+    a: H.hash_alg
+  -> prev: nat{prev % H.block_length a = 0}
+  -> len: nat{len < H.block_length a /\ len + prev < H.max_input_length a}
   -> last: lbytes len
-  -> H.state a ->
-  Tot (H.state a)
+  -> H.words_state a ->
+  Tot (H.words_state a)
 
 val finish:
-    a: H.algorithm
-  -> key: lbytes (H.size_block a)
-  -> H.state a ->
-  Tot (lbytes (H.size_hash a))
+    a: H.hash_alg
+  -> key: lbytes (H.block_length a)
+  -> H.words_state a ->
+  Tot (lbytes (H.hash_length a))
 
 val hmac:
-    a: H.algorithm
-  -> key:bytes{length key <= H.max_input a}
-  -> input:bytes{length key + length input + H.size_block a <= H.max_input a} ->
-  Tot (lbytes (H.size_hash a))
+    a: H.hash_alg
+  -> key:bytes{length key < H.max_input_length a}
+  -> input:bytes{length key + length input + H.block_length a < H.max_input_length a} ->
+  Tot (lbytes (H.hash_length a))
