@@ -60,15 +60,6 @@ let size_to_uint64 x = FStar.Int.Cast.uint32_to_uint64 x
 
 let byte_to_uint8 x = x
 
-let nat_to_uint #t #l x =
-  match t with
-  | U1 -> u8 x
-  | U8 -> u8 x
-  | U16 -> u16 x
-  | U32 -> u32 x
-  | U64 -> u64 x
-  | U128 -> UInt128.uint_to_t x
-
 let cast #t #l t' l' u  =
   match t, t' with
   | U1, U1 -> u
