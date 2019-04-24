@@ -425,7 +425,23 @@ let set_autoconfig (p: platform) : St unit =
   (if p <> HACL (Some AVX) then AC.disable_avx ());
   (if p <> HACL (Some AVX2) then AC.disable_avx2 ());
   (if p <> OpenSSL then AC.disable_openssl ());
-  (if p <> BCrypt then AC.disable_bcrypt ())
+  (if p <> BCrypt then AC.disable_bcrypt ());
+  let wants_vale = AC.wants_vale () in
+  let wants_hacl = AC.wants_hacl () in
+  let wants_avx = AC.has_avx () in
+  let wants_avx2 = AC.has_avx2 () in
+  let wants_openssl = AC.wants_openssl () in
+  let wants_bcrypt = AC.wants_bcrypt () in
+  if not (
+    (wants_vale = (p = Vale)) &&
+    (wants_hacl = (HACL? p)) &&
+    (wants_avx = (p = (HACL (Some AVX)))) &&
+    (wants_avx2 = (p = (HACL (Some AVX2)))) &&
+    (wants_openssl = (p = OpenSSL)) &&
+    (wants_bcrypt = (p = BCrypt))
+  )
+  then
+    C.Failure.failwith !$"autoconfig is inconsistent"
 
 inline_for_extraction
 noextract
