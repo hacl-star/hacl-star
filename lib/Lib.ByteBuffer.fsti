@@ -155,3 +155,29 @@ let uint32s_to_bytes_le len = uints_to_bytes_le #U32 #SEC len
 
 inline_for_extraction
 let uint32s_from_bytes_le #len = uints_from_bytes_le #U32 #SEC #len
+
+inline_for_extraction
+val uint_at_index_le:
+    #t:inttype{~(t == U1)}
+  -> #l:secrecy_level
+  -> #len:size_t{v len * numbytes t <= max_size_t}
+  -> i:lbuffer (uint_t U8 l) (len *! size (numbytes t)) 
+  -> idx:size_t{v idx < v len} -> 
+  Stack (uint_t t l)
+        (requires fun h0 -> live h0 i)
+        (ensures  fun h0 r h1 ->
+          h0 == h1 /\
+          r == BS.uint_at_index_le #t #l #(v len) (as_seq h0 i) (v idx))
+
+inline_for_extraction
+val uint_at_index_be:
+    #t:inttype{~(t == U1)}
+  -> #l:secrecy_level
+  -> #len:size_t{v len * numbytes t <= max_size_t}
+  -> i:lbuffer (uint_t U8 l) (len *! size (numbytes t)) 
+  -> idx:size_t{v idx < v len} -> 
+  Stack (uint_t t l)
+        (requires fun h0 -> live h0 i)
+        (ensures  fun h0 r h1 ->
+          h0 == h1 /\
+          r == BS.uint_at_index_be #t #l #(v len) (as_seq h0 i) (v idx))

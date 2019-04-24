@@ -7,7 +7,7 @@ open Lib.Sequence
 open Lib.RawIntTypes
 open Lib.LoopCombinators
 
-#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 1"
+#reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 1"
 
 /// BEGIN constant-time sequence equality
 
@@ -114,7 +114,7 @@ let nat_from_intseq_le = nat_from_intseq_le_
 let nat_from_bytes_be = nat_from_intseq_be #U8
 let nat_from_bytes_le = nat_from_intseq_le #U8
 
-#set-options "--max_fuel 1"
+#reset-options "--max_fuel 1"
 
 val nat_to_intseq_be_:
     #t:inttype -> #l:secrecy_level
@@ -159,12 +159,15 @@ let nat_to_intseq_le = nat_to_intseq_le_
 let nat_to_bytes_be = nat_to_intseq_be_ #U8
 let nat_to_bytes_le = nat_to_intseq_le_ #U8
 
+#reset-options "--z3rlimit 200"
 val index_nat_to_bytes_le:
     #l:secrecy_level
   -> len:size_nat
   -> n:nat{n < pow2 (8 * len)}
   -> i:nat{i < len}
   -> Lemma (Seq.index (nat_to_bytes_le #l len n) i == uint #U8 #l (n / pow2 (8 * i) % pow2 8))
+
+
 let rec index_nat_to_bytes_le #l len n i =
   if i = 0 then ()
   else
@@ -230,6 +233,12 @@ let uints_from_bytes_le #t #l #len b =
 let uints_from_bytes_be #t #l #len b =
   Lib.Sequence.createi #(uint_t t l) len
     (fun i -> uint_from_bytes_be (sub b (i * numbytes t) (numbytes t)))
+
+let uint_at_index_le #t #l #len b i = 
+  uint_from_bytes_le (sub b (i * numbytes t) (numbytes t))
+
+let uint_at_index_be #t #l #len b i = 
+  uint_from_bytes_be (sub b (i * numbytes t) (numbytes t))
 
 val nat_from_intseq_le_slice_lemma0:
   #t:inttype -> #l:secrecy_level -> #len:size_nat{len > 0} -> b:lseq (uint_t t l) len -> i:size_nat{0 < i /\ i <= len} ->
