@@ -95,7 +95,7 @@ let mut_immut_disjoint #t #t' (b: buffer_t MUT t) (ib: buffer_t IMMUT t') (h: HS
   Lemma
     (requires (B.live h b /\ B.live h ib))
     (ensures (disjoint b ib))
-    [SMTPat (disjoint b ib); SMTPat (B.live h b); SMTPat (B.live h ib)]
+    [SMTPat (B.loc_disjoint (loc b) (loc ib)); SMTPat (B.live h b); SMTPat (B.live h ib)]
 =
   IB.buffer_immutable_buffer_disjoint b ib h
 
