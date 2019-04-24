@@ -28,10 +28,6 @@ let k_w      (a: sha2_alg) = m:S.seq (word a) {S.length m = size_k_w a}
 let block_w  (a: sha2_alg) = m:S.seq (word a) {S.length m = block_word_length}
 let counter = nat
 
-inline_for_extraction
-let word_lognot: a:sha2_alg -> Tot ((word a) -> Tot (word a)) = function
-  | SHA2_224 | SHA2_256 -> lognot #U32 #SEC
-  | SHA2_384 | SHA2_512 -> lognot #U64 #SEC
 inline_for_extraction noextract
 type ops = {
   c0: size_t; c1: size_t; c2: size_t;
@@ -63,6 +59,13 @@ let op0: a:sha2_alg -> Tot ops = function
   | SHA2_256 -> op224_256
   | SHA2_384 -> op384_512
   | SHA2_512 -> op384_512
+
+let ( +. ) #t #l a b = add_mod #t #l a b
+let ( &. ) #t #l a b = logand #t #l a b
+let ( ^. ) #t #l a b = logxor #t #l a b
+let ( >>>. ) #t #l a b = rotate_right #t #l a b
+let ( >>. ) #t #l a b = shift_right #t #l a b
+let ( ~. ) #t #l a = lognot #t #l a
 
 
 (* Definition of the SHA2 word functions *)
