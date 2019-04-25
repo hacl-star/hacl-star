@@ -27,8 +27,8 @@ type buftype =
 inline_for_extraction
 let buffer_t (ty:buftype) (a:Type0) =
   match ty with
-  | IMMUT -> ib:IB.ibuffer a//{B.frameOf ib == HyperStack.root}
-  | MUT -> b:B.buffer a//{B.frameOf b <> HyperStack.root}
+  | IMMUT -> ib:IB.ibuffer a
+  | MUT -> b:B.buffer a
 
 (** Mutable buffer *)
 unfold let buffer (a:Type0) = buffer_t MUT a
