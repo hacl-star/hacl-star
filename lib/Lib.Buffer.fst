@@ -507,7 +507,7 @@ val snd_lemma: #a:Type -> #b:Type -> x:(a & b) -> y:b{let (f,s) = x in y == s} -
 	       Lemma (y == snd x)
 let snd_lemma #a #b x y = ()	     
 
-#reset-options "--z3rlimit 500 --max_fuel 1 --max_ifuel 3"
+#reset-options "--z3rlimit 800 --max_fuel 2 --max_ifuel 3"
 let map_blocks_multi #t #a h0 blocksize nb inp output spec_f impl_f =
   let h0 = ST.get() in
   assert(Sequence.length (as_seq h0 inp) == v nb * v blocksize);
