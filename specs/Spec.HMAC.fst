@@ -1,78 +1,51 @@
 module Spec.HMAC
 
-open FStar.Mul
+module S = Lib.Sequence
+
+open Spec.Hash.Definitions
+open FStar.Integers
 open Lib.IntTypes
-open Lib.Sequence
-open Lib.ByteSequence
+
+let wrap (a:hash_alg) (key: bytes{S.length key < max_input_length a}): Tot (lbytes (block_length a))
+=
+  let key0 = if S.length key <= block_length a then key else Spec.Hash.hash a key in
+  let paddingLength = block_length a - S.length key0 in
+  S.concat #uint8 #(S.length key0) #paddingLength key0 (S.create paddingLength (u8 0))
+
+let wrap_lemma (a:hash_alg) (key: bytes{S.length key < max_input_length a}): Lemma
+  (requires S.length key > block_length a)
+  (ensures wrap a key == (
+    let key0 = Spec.Hash.hash a key in
+    let paddingLength = block_length a - S.length key0 in
+    S.concat #uint8 #(S.length key0) #paddingLength key0 (S.create paddingLength (u8 0)))) = ()
+
+let xor (x: uint8) (v: bytes): Tot (lbytes (S.length v)) =
+  Spec.Loops.seq_map (logxor x) v
 
 
-module H = Spec.Hash.Definitions
+#push-options "--max_fuel 1"
 
+let rec xor_lemma (x: uint8) (v: bytes{S.length v <= max_size_t}) : Lemma
+  (ensures (xor x v == Spec.Loops.seq_map2 logxor (S.create (S.length v) x) v))
+  (decreases (S.length v)) =
+  let l = S.length v in
+  if l = 0 then () else (
+    let xs  = S.create #uint8 l x in
+    let xs' = S.create (l-1) x in
+    S.eq_intro (S.sub xs 1 (l - 1)) xs';
+    xor_lemma x (S.sub #uint8 #l v 1 (l - 1)))
 
-(* Key wrapping function *)
-let wrap_key (a:H.hash_alg) (key:bytes{length key < H.max_input_length a}) =
-  let block = create (H.block_length a) (u8 0) in
-  let len = length key in
-  if len <= H.block_length a then
-    update_slice block 0 len key
-  else begin
-    let nkey = Spec.Hash.hash a key in
-    update_slice block 0 (H.hash_length a) nkey
-  end
+#pop-options
+#push-options "--max_fuel 0 --max_ifuel 0"
 
-let init (a:H.hash_alg) (okey:lbytes (H.block_length a)) =
-
-  (* Define ipad and opad *)
-  let ipad = create (H.block_length a) (u8 0x36) in
-
-  (* Step 2: xor "result of step 1" with ipad *)
-  let s2 = map2 (fun x y -> logxor x y) ipad okey in
-
-  (* Step 3a: feed s2 to the inner hash function *)
-  Spec.Hash.update a (Spec.Hash.init a) s2
-
-
-let update_block (a:H.hash_alg) block chash = Spec.Hash.update a chash block
-
-let update_last (a:H.hash_alg) prev len last hash =
-  Spec.Hash.Incremental.update_last a hash prev last
-
-#set-options "--max_ifuel 1 --max_fuel 0"
-
-let small_block_hash_length (a: H.hash_alg) : Lemma (ensures (
-  H.block_length a + H.hash_length a < H.max_input_length a
-)) =
-  let open FStar.Mul in
-  assert_norm(8 * 16 + 8 * 8 < pow2 61);
-  assert_norm(pow2 61 < pow2 125)
-
-let finish (a:H.hash_alg) (key:lbytes (H.block_length a)) (hash:H.words_state a) =
-
-  (* Define opad *)
-  let opad = create (H.block_length a) (u8 0x5c) in
-
-  (* Step 4: apply H to "result of step 3" *)
-  let s4 = Spec.Hash.PadFinish.finish a hash in
-
-  (* Step 5: xor "result of step 1" with opad *)
-  let s5 = map2 (fun x y -> logxor x y) opad key in
-
-  (* Step 6: append "result of step 4" to "result of step 5" *)
-  (* Step 7: apply H to "result of step 6" *)
-  small_block_hash_length a;
-  Spec.Hash.hash a (concat #uint8 #(H.block_length a) #(H.hash_length a) s5 s4)
-
-#reset-options "--z3rlimit 20 --max_fuel 0 --max_ifuel 0"
-
-let hmac
-  (a:H.hash_alg)
-  (key:bytes{length key < H.max_input_length a})
-  (input:bytes{length key + length input + H.block_length a < H.max_input_length a}) =
-  let klen = length key in
-  let ilen = length input in
-  let okey = wrap_key a key in
-  let hash0 = init a okey in
-  let hash1 = repeati_blocks (H.block_length a) input
-    (fun i -> update_block a)
-    (fun i -> update_last a ((i + 1) * (H.block_length a))) hash0 in
-  finish a okey hash1
+let hmac a key data =
+  let k = wrap a key in
+  assert_norm(max_size_t + block_length a < pow2 61);
+  assert_norm(max_size_t + block_length a < pow2 125);
+  let h1 =
+    Spec.Hash.hash a (S.concat #uint8 #(S.length k) #(S.length data) (xor (u8 0x36) k) data)
+  in
+  assert_norm (pow2 32 < pow2 61);
+  assert_norm (pow2 32 < pow2 125);
+  let h2 = Spec.Hash.hash a (S.concat #uint8 #(S.length k) #(S.length h1) (xor (u8 0x5c) k) h1) in
+  h2
