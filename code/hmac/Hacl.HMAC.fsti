@@ -14,9 +14,16 @@ open Spec.HMAC
 open Spec.Hash.Definitions
 open FStar.HyperStack.ST
 
-#reset-options "--max_fuel 0  --z3rlimit 20"
+#set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 20"
 
 open EverCrypt.Helpers
+
+let key_and_data_fits (a: hash_alg): Lemma
+  (ensures (block_length a + pow2 32 < max_input_length a))
+=
+  let open FStar.Integers in
+  assert_norm (8 * 16 + pow2 32 < pow2 61);
+  assert_norm (pow2 61 < pow2 125)
 
 inline_for_extraction
 let compute_st (a: hash_alg) =

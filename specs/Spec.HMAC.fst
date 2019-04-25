@@ -28,7 +28,7 @@ let rec xor_lemma (x: UInt8.t) (v: bytes) : Lemma (requires True)
     xor_lemma x (S.tail v))
 #pop-options
 
-#push-options "--max_fuel 0 --max_ifuel 0"
+#push-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 20"
 let hmac a key data =
   let k = wrap a key in
   let h1 = EverCrypt.Hash.spec a S.(xor 0x36uy k @| data) in

@@ -1,17 +1,16 @@
 module EverCrypt.HKDF
 
+module B = LowStar.Buffer
+
 open FStar.Integers
 open EverCrypt.Helpers
-open EverCrypt.Hash
 
 open Spec.HKDF
 open Spec.Hash.Definitions
 
 /// IMPLEMENTATION
 
-//open FStar.Ghost
-open FStar.HyperStack.All
-open LowStar.Buffer
+open FStar.HyperStack.ST
 
 //18-03-05 TODO drop hkdf_ prefix? conflicts with spec name
 
@@ -19,17 +18,23 @@ open LowStar.Buffer
 *)
 val hkdf_extract :
   a       : EverCrypt.HMAC.supported_alg ->
-  prk     : uint8_pl (tagLength a) ->
-  salt    : uint8_p { disjoint salt prk /\ Spec.HMAC.keysized a (length salt)} ->
+  prk     : uint8_pl (hash_length a) ->
+  salt    : uint8_p { B.disjoint salt prk /\ Spec.HMAC.keysized a (B.length salt)} ->
   saltlen : uint8_l salt ->
-  ikm     : uint8_p { length ikm + blockLength a < pow2 32 /\ disjoint ikm prk } ->
+  ikm     : uint8_p { B.length ikm + block_length a < pow2 32 /\ B.disjoint ikm prk } ->
   ikmlen  : uint8_l ikm -> Stack unit
   (requires (fun h0 ->
-    live h0 prk /\ live h0 salt /\ live h0 ikm ))
+    B.live h0 prk /\ B.live h0 salt /\ B.live h0 ikm ))
   (ensures  (fun h0 r h1 ->
-    live h1 prk /\ LowStar.Modifies.(modifies (loc_buffer prk) h0 h1) /\
-    length ikm + blockLength a < maxLength a /\
-    as_seq h1 prk == Spec.HMAC.hmac a (as_seq h0 salt) (as_seq h0 ikm)))
+    Hacl.HMAC.key_and_data_fits a;
+    LowStar.Modifies.(modifies (loc_buffer prk) h0 h1) /\
+    B.as_seq h1 prk == Spec.HMAC.hmac a (B.as_seq h0 salt) (B.as_seq h0 ikm)))
+
+let hash_block_length_fits (a: hash_alg): Lemma
+  (ensures (hash_length a + pow2 32 + block_length a < max_input_length a))
+=
+  assert_norm (8 * 16 + 8 * 8 + pow2 32 < pow2 61);
+  assert_norm (pow2 61 < pow2 125)
 
 (** @type: true
 *)
@@ -39,13 +44,13 @@ val hkdf_expand :
   prk     : uint8_p -> prklen  : uint8_l prk ->
   info    : uint8_p -> infolen : uint8_l info ->
   len     : uint8_l okm {
-    disjoint okm prk /\
+    B.disjoint okm prk /\
     Spec.HMAC.keysized a (v prklen) /\
-    tagLength a + v infolen + 1 + blockLength a < pow2 32 /\
-    v len <= 255 * tagLength a } ->
+    hash_length a + v infolen + 1 + block_length a < pow2 32 /\
+    v len <= 255 * hash_length a } ->
   Stack unit
-  (requires (fun h0 -> live h0 okm /\ live h0 prk /\ live h0 info))
+  (requires (fun h0 -> B.live h0 okm /\ B.live h0 prk /\ B.live h0 info))
   (ensures  (fun h0 r h1 ->
-    live h1 okm /\ LowStar.Modifies.(modifies (loc_buffer okm) h0 h1) /\
-    tagLength a + pow2 32 + blockLength a < maxLength a /\ // required for v len below
-    as_seq h1 okm = expand a (as_seq h0 prk) (as_seq h0 info) (v len) ))
+    hash_block_length_fits a;
+    LowStar.Modifies.(modifies (loc_buffer okm) h0 h1) /\
+    B.as_seq h1 okm == expand a (B.as_seq h0 prk) (B.as_seq h0 info) (v len) ))

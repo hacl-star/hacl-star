@@ -84,12 +84,6 @@ fun output key len ->
     assert (B.as_seq h1 output == wrap a (B.as_seq h0 key))
   end
 
-let key_and_data_fits (a: hash_alg): Lemma
-  (ensures (block_length a + pow2 32 < max_input_length a))
-=
-  assert_norm (8 * 16 + pow2 32 < pow2 61);
-  assert_norm (pow2 61 < pow2 125)
-
 /// This implementation is optimized. First, it reuses an existing hash state
 /// ``s`` rather than allocating a new one. Second, it writes out the result of
 /// the hash directly in its parameter ``key`` rather than taking a destination
