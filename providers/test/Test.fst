@@ -356,6 +356,7 @@ let test_dh () : St unit =
   // TODO supposed to use tactics now?
   ()
 
+#reset-options "--z3rlimit 40"
 inline_for_extraction
 noextract
 let test_all_body (print: C.String.t -> St unit) : St unit =
@@ -383,6 +384,7 @@ let test_all_body (print: C.String.t -> St unit) : St unit =
     test_chacha20 chacha20_vectors_low;
     print !$"  >>>>>>>>> AEAD (ChachaPoly vectors)\n";
     test_chacha20poly1305 ()
+#reset-options
 
 type hacl_opt = | AVX | AVX2
 
