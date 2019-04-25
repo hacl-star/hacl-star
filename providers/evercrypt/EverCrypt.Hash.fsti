@@ -264,6 +264,8 @@ val init: #a:e_alg -> (
     footprint s h0 == footprint s h1 /\
     preserves_freeable s h0 h1))
 
+val update_multi_256: Hacl.Hash.Definitions.update_multi_st SHA2_256
+
 // Note: this function relies implicitly on the fact that we are running with
 // code/lib/kremlin and that we know that machine integers and secret integers
 // are the same. In the long run, we should standardize on a secret integer type
@@ -286,8 +288,6 @@ val update:
     invariant s h1 /\
     repr s h1 == compress (repr s h0) (B.as_seq h0 block) /\
     preserves_freeable s h0 h1))
-
-val update_multi_256: Hacl.Hash.Definitions.update_multi_st SHA2_256
 
 // Note that we pass the data length in bytes (rather than blocks).
 (** @type: true
