@@ -212,6 +212,7 @@ void Benchmark::run_batch(const BenchmarkSettings & s,
   strftime(time_buf, sizeof(time_buf), time_fmt, timeinfo);
 
   std::cout << "-- " << data_filename << "...\n";
+  std::cout.flush();
   std::ofstream rs(data_filename, std::ios::out | std::ios::trunc);
 
   rs << "// Date: " << time_buf << "\n";
@@ -258,6 +259,7 @@ void Benchmark::make_plot(const BenchmarkSettings & s,
   std::string gnuplot_filename = plot_filename;
   gnuplot_filename.replace(plot_filename.length()-3, 3, "plt");
   std::cout << "-- " << gnuplot_filename << "...\n";
+  std::cout.flush();
 
   std::ofstream of(gnuplot_filename, std::ios::out | std::ios::trunc);
   of << "set terminal " << terminal << "\n";
@@ -278,6 +280,7 @@ void Benchmark::make_plot(const BenchmarkSettings & s,
   of.close();
 
   std::cout << "-- " << plot_filename << "...\n";
+  std::cout.flush();
   int r = system((std::string("gnuplot ") + gnuplot_filename).c_str());
   if (r != 0)
     throw std::logic_error("Plot generation failed");

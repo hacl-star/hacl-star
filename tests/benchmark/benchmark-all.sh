@@ -12,7 +12,7 @@ SAMPLES=1000
 # EVERCRYPT_DIST=$HACL_HOME/dist/
 
 KREMLIN_INC=~/everest/kremlin-include
-KREMLIB_DIR=~/everest/kremlib-dist
+KREMLIB_DIR=~/everest/kremlib-dist/generic
 RFC7748_DIR=~/everest/rfc7748_src
 EVERCRYPT_DIST=~/everest/hacl-dist/
 
@@ -35,7 +35,7 @@ for c in $CONFIGS; do
           wget https://www.openssl.org/source/$OPENSSL.tar.gz --no-check-certificate
         fi
         echo "Building $OCONF-$CC"
-        (mkdir -p $OCONF-$CC; tar xfz $OPENSSL.tar.gz -C $OCONF-$CC; pushd $OCONF-$CC/$OPENSSL; CC=$CC CXX=$CXX ./config $OFLAGS; make $PAR; popd) > build.log 2>&1
+        (mkdir -p $OCONF-$CC; tar xfz $OPENSSL.tar.gz -C $OCONF-$CC; pushd $OCONF-$CC/$OPENSSL; CC=$CC CXX=$CXX ./config $OFLAGS > configure.log 2>&1; make $PAR > build.log 2>&1; popd)
       fi
       if [ ! -d evercrypt-$OCONF-$CC ]; then
         echo "Configuring evercrypt-$CC with $OCONF-$CC"
