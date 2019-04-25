@@ -124,6 +124,8 @@ let test_one_hkdf vec =
     failwith !$"Wrong output length\n"
   else if not (keysized ha saltlen) then
     failwith !$"Saltlen is not keysized\n"
+  else if not (keysized ha prklen) then
+    failwith !$"Prklen is not keysized\n"
   else if not (ikmlen <= 0xfffffffful - Hacl.Hash.Definitions.block_len ha) then
     failwith !$"ikmlen is too large\n"
   else if not (infolen <= 0xfffffffful -
@@ -133,8 +135,8 @@ let test_one_hkdf vec =
     push_frame();
     assert (Spec.HMAC.keysized ha (v saltlen));
     assert (v ikmlen + H.blockLength ha < pow2 32);
-    assert (H.tagLength ha
-      + v infolen + 1 + H.blockLength ha < pow2 32);
+    assert Spec.Hash.Definitions.(hash_length ha
+      + v infolen + 1 + block_length ha < pow2 32);
     B.recall salt;
     B.recall ikm;
     B.recall info;

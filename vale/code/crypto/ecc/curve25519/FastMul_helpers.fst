@@ -263,7 +263,7 @@ let lemma_dbl_pow2_six (z0 z1 z2 z3 z4 z5:nat) :
   =
   ()
 
-#reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0 --using_facts_from 'FStar.Pervasives Prims Words_s Fast_defs' --log_queries --query_stats"
+#reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0 --using_facts_from 'FStar.Pervasives Prims Words_s Fast_defs'"
 val lemma_sqr (a:int) (a0 a1 a2 a3
                r8 r9 r10 r11 r12 r13 rax rcx
                r8' r9' r10' r11' r12' r13' r14'
