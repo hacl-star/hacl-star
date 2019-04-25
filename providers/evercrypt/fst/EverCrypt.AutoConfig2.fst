@@ -92,6 +92,7 @@ let recall () =
 #set-options "--z3rlimit 50"
 let init () =
   // TODO: use an && here once macros are improved
+  let h0 = ST.get () in
   if EverCrypt.TargetConfig.x64 then
     if SC.vale then begin
       if Cpuid_stdcalls.check_aesni () <> 0UL then begin
@@ -118,8 +119,19 @@ let init () =
         B.recall cpu_has_adx;
         B.upd cpu_has_adx 0ul true
       end
-    end
-
+    end;
+  let h1 = ST.get () in
+  assert (B.modifies (fp ()) h0 h1);
+  B.recall user_wants_hacl;
+  B.upd user_wants_hacl 0ul SC.hacl;
+  B.recall user_wants_vale;
+  B.upd user_wants_vale 0ul SC.vale;
+  B.recall user_wants_bcrypt;
+  B.upd user_wants_bcrypt 0ul SC.bcrypt;
+  B.recall user_wants_openssl;
+  B.upd user_wants_openssl 0ul SC.openssl;
+  let h2 = ST.get () in
+  assert (B.modifies (fp ()) h1 h2)
 
 inline_for_extraction noextract
 let mk_disabler (f: eternal_pointer bool { B.loc_includes (fp ()) (B.loc_buffer f) }): disabler = fun () ->
