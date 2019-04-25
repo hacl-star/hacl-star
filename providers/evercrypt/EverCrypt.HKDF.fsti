@@ -49,6 +49,3 @@ val hkdf_expand :
     live h1 okm /\ LowStar.Modifies.(modifies (loc_buffer okm) h0 h1) /\
     tagLength a + pow2 32 + blockLength a < maxLength a /\ // required for v len below
     as_seq h1 okm = expand a (as_seq h0 prk) (as_seq h0 info) (v len) ))
-
-
-/// HIGH-LEVEL WRAPPERS (TBC)
