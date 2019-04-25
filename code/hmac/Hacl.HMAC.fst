@@ -285,3 +285,7 @@ let mk_compute a hash alloca init update_multi update_last finish dst key key_le
   pop_frame ();
   (**) let h7 = ST.get () in
   (**) LowStar.Monotonic.Buffer.modifies_fresh_frame_popped h0 h1 (B.loc_buffer dst) h6 h7
+
+let compute_sha2_256: compute_st SHA2_256 =
+  let open Hacl.Hash.SHA2 in
+  mk_compute SHA2_256 hash_256 alloca_256 init_256 update_multi_256 update_last_256 finish_256
