@@ -129,16 +129,16 @@ let poly1305 dst src len key =
 
   if EverCrypt.TargetConfig.x64 && avx2 then begin
     Hacl.Poly1305_256.poly1305_mac dst len src key;
-    Hacl.Spec.Poly1305.Vec.poly1305_vec_is_poly1305 #4 (B.as_seq h0 src) (B.as_seq h0 key)
+    Hacl.Spec.Poly1305.Equiv.poly1305_vec_is_poly1305 #4 (B.as_seq h0 src) (B.as_seq h0 key)
 
   end else if EverCrypt.TargetConfig.x64 && avx then begin
     Hacl.Poly1305_128.poly1305_mac dst len src key;
-    Hacl.Spec.Poly1305.Vec.poly1305_vec_is_poly1305 #2 (B.as_seq h0 src) (B.as_seq h0 key)
+    Hacl.Spec.Poly1305.Equiv.poly1305_vec_is_poly1305 #2 (B.as_seq h0 src) (B.as_seq h0 key)
 
   end else if EverCrypt.TargetConfig.x64 then begin
     poly1305_vale dst src len key
 
   end else begin
     Hacl.Poly1305_32.poly1305_mac dst len src key;
-    Hacl.Spec.Poly1305.Vec.poly1305_vec_is_poly1305 #1 (B.as_seq h0 src) (B.as_seq h0 key)
+    Hacl.Spec.Poly1305.Equiv.poly1305_vec_is_poly1305 #1 (B.as_seq h0 src) (B.as_seq h0 key)
   end
