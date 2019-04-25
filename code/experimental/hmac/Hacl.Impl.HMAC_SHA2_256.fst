@@ -89,19 +89,6 @@ val update_last:
 let update_last state prev last len =
   Hash.update_last_256 state prev last len
 
-
-(*val update:
-    state: lbuffer uint32 (size (Spec.Hash.Definitions.hash_word_length a))
-  -> input: buffer uint8
-  -> len: size_t{ v len == length input
-               /\ v len < Spec.Hash.Definitions.max_input_length a} ->
-  Stack unit
-  (requires (fun h -> live h state /\ live h input /\ disjoint state input))
-  (ensures  (fun h0 _ h1 -> modifies1 state h0 h1))
-
-let update state input len = Hash.update_multi_256 state input len*)
-
-
 #set-options "--z3rlimit 50"
 
 val finish:
