@@ -120,6 +120,8 @@ let block_len_as_len (a: hash_alg):
   | MD5 | SHA1 | SHA2_224 | SHA2_256 -> uint32_to_uint64 (D.block_len a)
   | SHA2_384 | SHA2_512 -> uint64_to_uint128 (uint32_to_uint64 (D.block_len a))
 
+#set-options "--z3rlimit 20"
+
 inline_for_extraction noextract
 let part1 a init update_multi update_last finish s key data len =
   (**) key_and_data_fits a;
