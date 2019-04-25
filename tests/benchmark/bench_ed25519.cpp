@@ -11,7 +11,6 @@ extern "C" {
 
 #ifdef HAVE_OPENSSL
 #include <openssl/evp.h>
-#include <openssl/ec.h>
 #endif
 
 #define SIGNATURE_LENGTH 64

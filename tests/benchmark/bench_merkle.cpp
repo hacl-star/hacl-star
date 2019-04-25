@@ -384,7 +384,11 @@ void bench_merkle_verify(const BenchmarkSettings & s)
 
 void bench_merkle(const BenchmarkSettings & s)
 {
-  bench_merkle_insert(s);
-  bench_merkle_get_path(s);
-  bench_merkle_verify(s);
+  // These are too slow...
+  BenchmarkSettings s_local = s;
+  s_local.samples = s.samples / 10;
+
+  bench_merkle_insert(s_local);
+  bench_merkle_get_path(s_local);
+  bench_merkle_verify(s_local);
 }
