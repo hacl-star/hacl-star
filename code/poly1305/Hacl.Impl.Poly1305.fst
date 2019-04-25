@@ -116,6 +116,7 @@ let poly1305_encode_blocks #s f b =
   load_felems_le f b;
   set_bit128 f
 
+#push-options "--z3rlimit 200"
 inline_for_extraction noextract
 val poly1305_encode_last:
     #s:field_spec
@@ -146,9 +147,10 @@ let poly1305_encode_last #s f len b =
     (LSeq.create (width s) (BSeq.nat_from_bytes_le (as_seq h0 tmp)))
     (LSeq.create (width s) (BSeq.nat_from_bytes_le (as_seq h0 b)));
   assert (BSeq.nat_from_bytes_le (as_seq h0 b) < pow2 (v len * 8));
-  assert (F32xN.felem_less #(width s) h1 f (pow2 (v len * 8)));
+  //assert (F32xN.felem_less #(width s) h1 f (pow2 (v len * 8)));
   set_bit f (len *! 8ul);
   pop_frame()
+#pop-options
 
 inline_for_extraction noextract
 val poly1305_encode_r:
