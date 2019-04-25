@@ -8,4 +8,4 @@ let lowstar_poly : lowstar_poly_t  =
     dom
     (W.mk_prediction code_poly dom [] (poly_lemma code_poly IA.win))
 
-let poly1305 = as_normal_t #lowstar_poly_t lowstar_poly
+let x64_poly1305 = as_normal_t #lowstar_poly_t lowstar_poly

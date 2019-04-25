@@ -234,6 +234,20 @@ procedure{:instruction mk_ins(make_instr(I.ins_VPshufb, Mov128Xmm(dst), Mov128Xm
 }
 
 procedure{:instruction Ins(TS.TaintedIns(S.Ins_ioXmm_Xmm(I.ins_Pshufb, dst, src), Public))}{:quick exportOnly}{:public}
+          PshufbStable(inout dst:xmm, src:xmm)
+    requires
+        src == Mkfour(0x00010203, 0x04050607, 0x08090A0B, 0x0C0D0E0F);
+    modifies efl;
+    ensures
+        dst == old(Mkfour(reverse_bytes_nat32(dst.lo0),
+                          reverse_bytes_nat32(dst.lo1),
+                          reverse_bytes_nat32(dst.hi2),
+                          reverse_bytes_nat32(dst.hi3)));
+        dst == old(reverse_bytes_nat32_quad32(dst));
+{
+}
+
+procedure{:instruction Ins(TS.TaintedIns(S.Ins_ioXmm_Xmm(I.ins_Pshufb, dst, src), Public))}{:quick exportOnly}{:public}
           PshufbDup(inout dst:xmm, src:xmm)
     requires
         src == Mkfour(0x0C0D0E0F, 0x08090A0B, 0x0C0D0E0F, 0x08090A0B);
@@ -513,6 +527,18 @@ procedure {:quick exportOnly}{:public} InitPshufbMask(inout dst:xmm, out tmp:reg
     assert two_to_nat32(Mktwo(0x04050607, 0x00010203)) == 0x0001020304050607; // OBSERVE
     PinsrqImm(dst, 0x08090A0B0C0D0E0F, 0, tmp);
     PinsrqImm(dst, 0x0001020304050607, 1, tmp);
+    reveal insert_nat64;
+}
+
+procedure {:quick exportOnly}{:public} InitPshufbStableMask(inout dst:xmm, out tmp:reg_opr64)
+    modifies efl;
+    ensures
+        dst == Mkfour(0x00010203, 0x04050607, 0x08090A0B, 0x0C0D0E0F);
+{
+    assert two_to_nat32(Mktwo(0x08090A0B, 0x0C0D0E0F)) == 0x0C0D0E0F08090A0B; // OBSERVE
+    assert two_to_nat32(Mktwo(0x00010203, 0x04050607)) == 0x0405060700010203; // OBSERVE
+    PinsrqImm(dst, 0x0405060700010203, 0, tmp);
+    PinsrqImm(dst, 0x0C0D0E0F08090A0B, 1, tmp);
     reveal insert_nat64;
 }
 

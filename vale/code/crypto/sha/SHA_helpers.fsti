@@ -141,7 +141,7 @@ let k_reqs (k_seq:seq quad32) : prop0 =
     (k_seq.[i]).lo1 == word_to_nat32 (k.[4 `op_Multiply` i + 1]) /\
     (k_seq.[i]).hi2 == word_to_nat32 (k.[4 `op_Multiply` i + 2]) /\
     (k_seq.[i]).hi3 == word_to_nat32 (k.[4 `op_Multiply` i + 3]))
-  
+
 let quads_to_block (qs:seq quad32) : block_w
   =
   let nat32_seq = Words.Seq_s.seq_four_to_seq_LE qs in
@@ -200,7 +200,7 @@ let rec update_multi_quads (s:seq quad32) (hash_orig:hash256) : Tot (hash256) (d
 val lemma_update_multi_equiv_vale (hash hash':hash256) (quads:seq quad32) (r_quads:seq quad32)
   (nat8s:seq nat8) (blocks:seq byte) :
   Lemma (requires length quads % 4 == 0 /\
-                  r_quads == reverse_bytes_quad32_seq quads /\
+                  r_quads == reverse_bytes_nat32_quad32_seq quads /\
                   nat8s == le_seq_quad32_to_bytes quads /\
                   blocks == seq_nat8_to_seq_uint8 nat8s /\
                   hash' == update_multi_quads r_quads hash)        
@@ -212,12 +212,12 @@ val lemma_update_multi_equiv_vale (hash hash':hash256) (quads:seq quad32) (r_qua
 val lemma_update_multi_quads (s:seq quad32) (hash_orig:hash256) (bound:nat) : Lemma
     (requires bound + 4 <= length s)
     (ensures (let prefix_LE = slice s 0 bound in
-              let prefix_BE = reverse_bytes_quad32_seq prefix_LE in
+              let prefix_BE = reverse_bytes_nat32_quad32_seq prefix_LE in
               let h_prefix = update_multi_quads prefix_BE hash_orig in
               let block_quads_LE = slice s bound (bound + 4) in
-              let block_quads_BE = reverse_bytes_quad32_seq block_quads_LE in
+              let block_quads_BE = reverse_bytes_nat32_quad32_seq block_quads_LE in
               let input_LE = slice s 0 (bound+4) in
-              let input_BE = reverse_bytes_quad32_seq input_LE in
+              let input_BE = reverse_bytes_nat32_quad32_seq input_LE in
               let h = update_block h_prefix (quads_to_block block_quads_BE) in
               h == update_multi_quads input_BE hash_orig))
 

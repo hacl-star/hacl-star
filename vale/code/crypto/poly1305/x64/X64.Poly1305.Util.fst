@@ -21,7 +21,7 @@ let poly1305_heap_blocks h pad r s k =
   else
     0
 
-let reveal_poly1305_heap_blocks (h:int) (pad:int) (r:int) (s) (k) =
+let reveal_poly1305_heap_blocks h pad r s k =
   ()
 
 let rec lemma_poly1305_heap_hash_blocks_alt h pad r m b n =
@@ -35,24 +35,15 @@ let rec lemma_poly1305_heap_hash_blocks_alt h pad r m b n =
     ()
   )
 
-// let rec lemma_poly1305_heap_hash_blocks' (h:int) (pad:int) (r:int) (m:mem) (i:int) (len:nat)
-//   (k:int{i <= k /\ (k - i) % 16 == 0 /\ k <= i + len /\
-//     (forall j . {:pattern (m `Map.contains` j)} i <= j /\ j < i + (len + 15) / 16 * 16 && (j - i) % 8 = 0 ==> m `Map.contains` j)}) :
-//   Lemma (requires True)
-//         (ensures (poly1305_heap_blocks h pad r m i k == poly1305_hash_blocks h pad r (heapletTo128 m i len) i k))
-//   (decreases (k-i)) =
-//     let heapb = poly1305_heap_blocks h pad r m i k in
-//     let hashb = poly1305_hash_blocks h pad r (heapletTo128 m i len) i k in
-//     if i = k then
-//       assert(heapb == hashb)
-//     else
-//       let kk = k - 16 in
-//       assert (i >= 0 ==> precedes (kk - i) (k-i));
-//       assert (i < 0 ==> precedes (kk - i) (k-i));
-//       lemma_poly1305_heap_hash_blocks' h pad r m i len kk
-
 let reveal_modp () =
   FStar.Pervasives.reveal_opaque (`%modp) modp
 
 let reveal_mod2_128 () =
   FStar.Pervasives.reveal_opaque (`%mod2_128) mod2_128
+
+let rec lemma_equal_blocks h pad r inp1 inp2 k =
+  if k > 0 then lemma_equal_blocks h pad r inp1 inp2 (k - 1)
+
+let rec lemma_append_blocks h pad r inp1 inp2 inp k1 k2 =
+  if k2 > 0 then lemma_append_blocks h pad r inp1 inp2 inp k1 (k2 - 1) else
+  if k1 > 0 then lemma_append_blocks h pad r inp1 inp2 inp (k1 - 1) k2

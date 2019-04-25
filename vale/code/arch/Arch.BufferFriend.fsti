@@ -71,3 +71,17 @@ val nat_from_bytes_le_is_le_bytes_to_nat64 (b:BS.bytes) : Lemma
     BS.nat_from_bytes_le b == le_bytes_to_nat64 (Words.Seq_s.seq_uint8_to_seq_nat8 (of_bytes b))
   )
 
+// useful with norm_spec [iota; zeta; primops; delta_only [`%le_to_n_indexed_rec; `%pow2]]
+let rec le_to_n_indexed_rec (b:FE.bytes) (i:nat{i <= length b}) : nat =
+  if i = 0 then 0
+  else UInt8.v (index b (length b - i)) + pow2 8 * le_to_n_indexed_rec b (i - 1)
+
+let le_to_n_indexed (b:FE.bytes) : nat =
+  le_to_n_indexed_rec b (length b)
+
+val lemma_le_to_n_indexed_rec (b:FE.bytes) (i:nat{i <= length b}) : Lemma
+  (ensures le_to_n_indexed_rec b i == FE.le_to_n (slice b (length b - i) (length b)))
+
+val lemma_le_to_n_indexed (b:FE.bytes) : Lemma
+  (ensures le_to_n_indexed b == FE.le_to_n b)
+
