@@ -1,6 +1,8 @@
 include "../../../arch/x64/X64.Vale.InsBasic.vaf"
 include "../../../arch/x64/X64.Vale.InsMem.vaf"
 include "../../../arch/x64/X64.Vale.InsVector.vaf"
+include "../../../arch/x64/X64.Vale.InsStack.vaf"
+include "../../../lib/util/x64/X64.Stack.vaf"
 include "X64.AES.vaf"
 include "../../../thirdPartyPorts/Intel/aes/x64/X64.AESCTRplain.vaf"
 include{:fstar}{:open} "Opaque_s"
@@ -42,11 +44,13 @@ open X64.Poly1305.Math
 open Words.Two_s
 open X64.Machine_s
 open X64.Memory
+open X64.Stack_i
 open X64.Vale.State
 open X64.Vale.Decls
 open X64.Vale.InsBasic
 open X64.Vale.InsMem
 open X64.Vale.InsVector
+open X64.Vale.InsStack
 open X64.Vale.InsAes
 open X64.Vale.QuickCode
 open X64.Vale.QuickCodes
@@ -590,4 +594,162 @@ procedure {:quick}{:public} gctr_bytes(
     } else {
         gctr_bytes_extra(alg, old(icb), in_b, out_b, key, round_keys, keys_b, old(in_ptr), old(out_ptr), old(num_bytes));
     }
+}
+
+
+procedure {:quick}{:public}{:exportSpecs} gctr_bytes_stdcall(
+    inline win:bool,
+    inline alg:algorithm,
+
+    ghost in_b:buffer128,
+    ghost num_bytes:nat64,
+    ghost out_b:buffer128,
+    ghost keys_b:buffer128,
+    ghost ctr_b:buffer128,
+
+    ghost key:seq(nat32)
+  )
+  reads memTaint;
+  modifies
+     rax; rbx; rcx; rdx; rdi; rsi; rsp; rbp; r8; r9; r10; r11; r12; r13; r14; r15; 
+     xmm0; xmm1; xmm2; xmm3; xmm4; xmm5; xmm6; xmm7; xmm8; xmm9; xmm10; xmm11; xmm12; xmm13; xmm14; xmm15;
+     mem; efl; stack;
+  lets
+    in_ptr    := if win then rcx else rdi;
+    out_ptr   := if win then r8 else rdx;
+    keys_ptr  := if win then r9 else rcx;
+    ctr_ptr   := if win then load_stack64(rsp + 32 + 8 + 0, stack) else r8;
+
+  requires
+    rsp == init_rsp(stack);
+    win ==> valid_src_stack64(rsp + 32 + 8 + 0, stack);
+
+    num_bytes == (if win then rdx else rsi);
+
+    buffers_disjoint128(in_b, out_b);
+    buffers_disjoint128(keys_b, out_b);
+    buffers_disjoint128(in_b, keys_b) || in_b == keys_b;
+    buffer_disjoints128(ctr_b, list(in_b, out_b, keys_b));
+
+    validSrcAddrs128(mem,   in_ptr,   in_b, bytes_to_quad_size(num_bytes), memTaint, Secret);
+    validDstAddrs128(mem,  out_ptr,  out_b, bytes_to_quad_size(num_bytes), memTaint, Secret);
+    validSrcAddrs128(mem, keys_ptr, keys_b,                   nr(alg) + 1, memTaint, Secret);
+    validSrcAddrs128(mem,  ctr_ptr,  ctr_b,                             1, memTaint, Secret);
+
+    in_ptr  + 16 * bytes_to_quad_size(num_bytes) < pow2_64;
+    out_ptr + 16 * bytes_to_quad_size(num_bytes) < pow2_64;
+    buffer_length(in_b) == bytes_to_quad_size(num_bytes);
+    buffer_length(in_b) == buffer_length(out_b);
+    buffer_length(ctr_b) == 1;
+    256 * buffer_length(in_b) < pow2_32;
+    4096 * num_bytes < pow2_32;
+
+    0 < num_bytes;
+
+    // AES reqs
+    aesni_enabled;
+    alg = AES_128 || alg = AES_256;
+    is_aes_key_LE(alg, key);
+    buffer128_as_seq(mem, keys_b) == key_to_round_keys_LE(alg, key);
+
+  ensures
+    modifies_buffer128(out_b, old(mem), mem);
+    let plain  := slice_work_around(le_seq_quad32_to_bytes(buffer128_as_seq(mem,  in_b)), old(num_bytes));
+    let cipher := slice_work_around(le_seq_quad32_to_bytes(buffer128_as_seq(mem, out_b)), old(num_bytes));
+    cipher == gctr_encrypt_LE(old(buffer128_read(ctr_b, 0, mem)), make_gctr_plain_LE(plain), alg, key);
+
+    rsp == old(rsp);
+ 
+    // Windows:
+    win ==> rbx == old(rbx);
+    win ==> rbp == old(rbp);
+    win ==> rdi == old(rdi);
+    win ==> rsi == old(rsi);
+    win ==> r12 == old(r12);
+    win ==> r13 == old(r13);
+    win ==> r14 == old(r14);
+    win ==> r15 == old(r15);
+ 
+    win ==> xmm6  == old(xmm6);
+    win ==> xmm7  == old(xmm7);
+    win ==> xmm8  == old(xmm8);
+    win ==> xmm9  == old(xmm9);
+    win ==> xmm10 == old(xmm10);
+    win ==> xmm11 == old(xmm11);
+    win ==> xmm12 == old(xmm12);
+    win ==> xmm13 == old(xmm13);
+    win ==> xmm14 == old(xmm14);
+    win ==> xmm15 == old(xmm15);
+ 
+    // Linux:
+    !win ==> rbx == old(rbx);
+    !win ==> rbp == old(rbp);
+    !win ==> r12 == old(r12);
+    !win ==> r13 == old(r13);
+    !win ==> r14 == old(r14);
+    !win ==> r15 == old(r15);
+{
+    Push(r15);
+    Push(r14);
+    Push(r13);
+    Push(r12);
+    Push(rsi);
+    Push(rdi);
+    Push(rbp);
+    Push(rbx);
+
+    inline if (win) {
+        PushXmm(xmm15, rax);
+        PushXmm(xmm14, rax);
+        PushXmm(xmm13, rax);
+        PushXmm(xmm12, rax);
+        PushXmm(xmm11, rax);
+        PushXmm(xmm10, rax);
+        PushXmm(xmm9,  rax);
+        PushXmm(xmm8,  rax);
+        PushXmm(xmm7,  rax);
+        PushXmm(xmm6,  rax);
+    }
+
+    inline if (win) {
+      // Load ptr for ctr_b
+      Load64_stack(rax, rsp, 224 + 32 + 8 + 0);
+      Load128_buffer(xmm7, rax, 0, Secret, ctr_b, 0);
+
+      Mov64(rax, rcx);
+      Mov64(rbx, r8);
+      Mov64(rcx, rdx);
+      Mov64(r8, r9);
+
+    } else {
+      Load128_buffer(xmm7, r8, 0, Secret, ctr_b, 0);
+      Mov64(rax, rdi);
+      Mov64(rbx, rdx);
+      Mov64(r8, rcx);
+      Mov64(rcx, rsi);
+
+    }
+    gctr_bytes(alg, in_b, out_b, key, old(buffer128_as_seq(mem, keys_b)), keys_b); 
+
+    inline if (win) {
+        PopXmm(xmm6,  rax, old(xmm6));
+        PopXmm(xmm7,  rax, old(xmm7));
+        PopXmm(xmm8,  rax, old(xmm8));
+        PopXmm(xmm9,  rax, old(xmm9));
+        PopXmm(xmm10, rax, old(xmm10));
+        PopXmm(xmm11, rax, old(xmm11));
+        PopXmm(xmm12, rax, old(xmm12));
+        PopXmm(xmm13, rax, old(xmm13));
+        PopXmm(xmm14, rax, old(xmm14));
+        PopXmm(xmm15, rax, old(xmm15));
+    }
+
+    Pop(rbx);
+    Pop(rbp);
+    Pop(rdi);
+    Pop(rsi);
+    Pop(r12);
+    Pop(r13);
+    Pop(r14);
+    Pop(r15);
 }
