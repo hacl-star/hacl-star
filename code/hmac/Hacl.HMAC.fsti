@@ -1,18 +1,20 @@
-(** Agile HMAC *)
-module EverCrypt.HMAC
+module Hacl.HMAC
+
+/// A generic, meta-programmed HMAC module. This one provides one concrete
+/// instantiation, namely HMAC-SHA2-256 instantiated with the HACL*
+/// implementation. In the future, this module may provide more implementations
+/// of HMAC, using optimized HACL versions of SHA2-256. For more algorithms, and
+/// for an assembly-optimized HMAC version that may call into Vale, see
+/// EverCrypt.HMAC.
 
 module B = LowStar.Buffer
+module D = Hacl.Hash.Definitions
 
 open Spec.HMAC
 open Spec.Hash.Definitions
-
 open FStar.HyperStack.ST
 
 #reset-options "--max_fuel 0  --z3rlimit 20"
-(* implementation, relying on 3 variants of SHA2 supported by HACL*;
-   we tolerate overlaps between tag and data.
-   (we used to require [disjoint data tag])
-*)
 
 open EverCrypt.Helpers
 
@@ -31,32 +33,15 @@ let compute_st (a: hash_alg) =
     assert_norm (pow2 32 < pow2 125 - 1);
     B.as_seq h1 tag == hmac a (B.as_seq h0 key) (B.as_seq h0 data)))
 
-// Four monomorphized variants, for callers who already know which algorithm they want.
-(** @type: true
-*)
-val compute_sha1: compute_st SHA1
+inline_for_extraction noextract
+val mk_compute:
+  a: hash_alg ->
+  hash: D.hash_st a ->
+  alloca: D.alloca_st a ->
+  init: D.init_st a ->
+  update_multi: D.update_multi_st a ->
+  update_last: D.update_last_st a ->
+  finish: D.finish_st a ->
+  compute_st a
 
-(** @type: true
-*)
 val compute_sha2_256: compute_st SHA2_256
-
-(** @type: true
-*)
-val compute_sha2_384: compute_st SHA2_384
-
-(** @type: true
-*)
-val compute_sha2_512: compute_st SHA2_512
-
-let is_supported_alg = function
-| SHA1 | SHA2_256 | SHA2_384 | SHA2_512 -> true
-| _ -> false
-
-let supported_alg = a:hash_alg { is_supported_alg a }
-
-// The agile version that dynamically dispatches between the above four.
-(** @type: true
-*)
-val compute: a: supported_alg -> compute_st a
-
-//18-07-13 pick uniform names? hash{spec} vs compute{hmac}

@@ -11,20 +11,15 @@ let wrap (a:hash_alg) (key: bytes{S.length key < max_input_length a}): Tot (lbyt
   let paddingLength = block_length a - S.length key0 in
   S.append key0 (S.create paddingLength 0uy)
 
-let wrap_lemma (a:hash_alg) (key: bytes{Seq.length key < max_input_length a}): Lemma
-  (requires S.length key > block_length a)
-  (ensures wrap a key == (
-    let key0 = EverCrypt.Hash.spec a key in
-    let paddingLength = block_length a - S.length key0 in
-    S.append key0 (S.create paddingLength 0uy))) = ()
-
 let xor (x: UInt8.t) (v: bytes): Tot (lbytes (S.length v)) =
   Spec.Loops.seq_map (FStar.UInt8.logxor x) v
 
 #push-options "--max_fuel 1"
 let rec xor_lemma (x: UInt8.t) (v: bytes) : Lemma (requires True)
   (ensures (xor x v == Spec.Loops.seq_map2 FStar.UInt8.logxor (S.create (S.length v) x) v))
-  (decreases (S.length v)) =
+  (decreases (S.length v))
+  [ SMTPat (xor x v) ]
+=
   let l = S.length v in
   if l = 0 then () else (
     let xs  = S.create l x in

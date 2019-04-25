@@ -127,8 +127,6 @@ let init #a s =
 friend SHA_helpers
 
 // A new switch between HACL and Vale; can be used in place of Hacl.Hash.SHA2.update_256
-inline_for_extraction noextract
-val update_multi_256: Hacl.Hash.Definitions.update_multi_st SHA2_256
 let update_multi_256 s blocks n =
   let has_shaext = AC.has_shaext () in
   if SC.vale && has_shaext then begin
@@ -296,7 +294,6 @@ let copy #a s_src s_dst =
       B.blit p_src 0ul p_dst 0ul 8ul
 
 // A full one-shot hash that relies on vale at each multiplexing point
-val hash_256: Hacl.Hash.Definitions.hash_st SHA2_256
 let hash_256 input input_len dst =
   Hacl.Hash.MD.mk_hash SHA2_256 Hacl.Hash.SHA2.alloca_256 update_multi_256
     update_last_256 Hacl.Hash.SHA2.finish_256 input input_len dst

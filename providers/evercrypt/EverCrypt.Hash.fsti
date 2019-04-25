@@ -308,6 +308,8 @@ val update_multi:
     repr s h1 == compress_many (repr s h0) (B.as_seq h0 blocks) /\
     preserves_freeable s h0 h1))
 
+val update_multi_256: Hacl.Hash.Definitions.update_multi_st SHA2_256
+
 // 18-03-05 note the *new* length-passing convention!
 // 18-03-03 it is best to let the caller keep track of lengths.
 // 18-03-03 the last block is *never* complete so there is room for the 1st byte of padding.
@@ -340,6 +342,8 @@ val update_last:
     M.(modifies (footprint s h0) h0 h1) /\
     footprint s h0 == footprint s h1 /\
     preserves_freeable s h0 h1))
+
+val update_last_256: Hacl.Hash.Definitions.update_last_st SHA2_256
 
 (** @type: true
 *)
@@ -390,6 +394,8 @@ val copy:
       preserves_freeable s_dst h0 h1 /\
       invariant s_dst h1 /\
       repr s_dst h1 == repr s_src h0))
+
+val hash_256: Hacl.Hash.Definitions.hash_st SHA2_256
 
 (** @type: true
 *)
