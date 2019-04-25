@@ -30,7 +30,7 @@ class AEADBenchmark : public Benchmark
     std::string algorithm;
 
   public:
-    static constexpr auto header = "Provider, Algorithm, Size [b], CPU Time (incl) [sec], CPU Time (excl) [sec], Avg Cycles/Op, Min Cycles/Op, Max Cycles/Op, Avg Cycles/Byte";
+    static std::string column_headers() { return "\"Provider\", \"Algorithm\", \"Size [b]\"" + Benchmark::column_headers() + ", \"Avg Cycles/Byte\""; }
 
     AEADBenchmark(size_t key_sz_bits, size_t tag_len, size_t msg_len) : Benchmark()
     {
@@ -73,18 +73,13 @@ class AEADBenchmark : public Benchmark
       randomize((char*)plain, msg_len);
     }
 
-    virtual void report(std::ostream & rs, const BenchmarkSettings & s)
+    virtual void report(std::ostream & rs, const BenchmarkSettings & s) const
     {
       rs << "\"" << name << "\""
         << "," << "\"" << algorithm << "\""
-        << "," << msg_len
-        << "," << toverall/(double)CLOCKS_PER_SEC
-        << "," << ttotal/(double)CLOCKS_PER_SEC
-        << "," << ctotal/(double)s.samples
-        << "," << cmin
-        << "," << cmax
-        << "," << (ctotal/(double)msg_len)/(double)s.samples
-        << "\n";
+        << "," << msg_len;
+      Benchmark::report(rs, s);
+      rs << "," << (ctotal/(double)msg_len)/(double)s.samples << "\n";
     }
 };
 
@@ -323,15 +318,15 @@ class OpenSSLEncrypt : public AEADBenchmark
     virtual void bench_func()
     {
       #ifdef _DEBUG
-      if (
-      #endif
-          (ad_len > 0 && EVP_EncryptUpdate(ctx, NULL, &outlen, ad, ad_len) <= 0) ||
+      if ((ad_len > 0 && EVP_EncryptUpdate(ctx, NULL, &outlen, ad, ad_len) <= 0) ||
           (EVP_EncryptUpdate(ctx, cipher, &outlen, plain, msg_len) <= 0) ||
-          (EVP_EncryptFinal_ex(ctx, cipher, &outlen) <= 0)
-      #ifdef _DEBUG
-      ) throw std::logic_error("OpenSSL encryption failed E")
+          (EVP_EncryptFinal_ex(ctx, cipher, &outlen) <= 0))
+          throw std::logic_error("OpenSSL encryption failed E");
+      #else
+      if (ad_len > 0) EVP_EncryptUpdate(ctx, NULL, &outlen, ad, ad_len);
+      EVP_EncryptUpdate(ctx, cipher, &outlen, plain, msg_len);
+      EVP_EncryptFinal_ex(ctx, cipher, &outlen);
       #endif
-      ;
     }
     virtual ~OpenSSLEncrypt() { EVP_CIPHER_CTX_free(ctx); }
 };
@@ -371,14 +366,16 @@ class OpenSSLDecrypt : public AEADBenchmark
     virtual void bench_func()
     {
       #ifdef _DEBUG
-      if (
-      #endif
-          ((ad_len > 0) && EVP_DecryptUpdate(ctx, NULL, &outlen, ad, ad_len) <= 0) ||
+      if (((ad_len > 0) && EVP_DecryptUpdate(ctx, NULL, &outlen, ad, ad_len) <= 0) ||
           EVP_DecryptUpdate(ctx, plain, &outlen, cipher, msg_len)  <= 0 ||
           EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_AEAD_SET_TAG, tag_len, (void *)tag)  <= 0 ||
-          EVP_DecryptFinal_ex(ctx, plain, &outlen) <= 0
-      #ifdef _DEBUG
-        ) throw std::logic_error("OpenSSL tag validation failed")
+          EVP_DecryptFinal_ex(ctx, plain, &outlen) <= 0)
+          throw std::logic_error("OpenSSL tag validation failed")
+      #else
+      if (ad_len > 0) EVP_DecryptUpdate(ctx, NULL, &outlen, ad, ad_len);
+      EVP_DecryptUpdate(ctx, plain, &outlen, cipher, msg_len);
+      EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_AEAD_SET_TAG, tag_len, (void *)tag);
+      EVP_DecryptFinal_ex(ctx, plain, &outlen);
       #endif
       ;
     }
@@ -407,13 +404,13 @@ void bench_aead_encrypt(const BenchmarkSettings & s)
 
     if (plot_specs_cycles.empty())
     {
-      plot_specs_cycles.push_back(std::make_pair(data_filename.str(), "using 6:xticlabels(sprintf(\"%s\\n%s\", strcol(1), strcol(2))) title '" + dsstr.str() + " b'"));
-      plot_specs_bytes.push_back(std::make_pair(data_filename.str(), "using 9:xticlabels(1) title '" + dsstr.str() + " b'"));
+      plot_specs_cycles.push_back(std::make_pair(data_filename.str(), "using 'Avg':xticlabels(strcol('Algorithm')) title '" + dsstr.str() + " b'"));
+      plot_specs_bytes.push_back(std::make_pair(data_filename.str(), "using 'Avg Cycles/Byte':xticlabels(strcol('Algorithm')) title '" + dsstr.str() + " b'"));
     }
     else
     {
-      plot_specs_cycles.push_back(std::make_pair(data_filename.str(), "using 6 title '" + dsstr.str() + " b'"));
-      plot_specs_bytes.push_back(std::make_pair(data_filename.str(), "using 9 title '" + dsstr.str() + " b'"));
+      plot_specs_cycles.push_back(std::make_pair(data_filename.str(), "using 'Avg' title '" + dsstr.str() + " b'"));
+      plot_specs_bytes.push_back(std::make_pair(data_filename.str(), "using 'Avg Cycles/Byte' title '" + dsstr.str() + " b'"));
     }
 
     std::list<Benchmark*> todo = {
@@ -437,13 +434,16 @@ void bench_aead_encrypt(const BenchmarkSettings & s)
       #endif
       };
 
-      Benchmark::run_batch(s, AEADBenchmark::header, data_filename.str(), todo);
+      Benchmark::run_batch(s, AEADBenchmark::column_headers(), data_filename.str(), todo);
+
+      std::string evercrypt_only = "< grep -e \"^\\\"EverCrypt\" -e \"^\\\"Provider\" " + data_filename.str();
+      std::string openssl_only = "< grep -e \"^\\\"OpenSSL\" -e \"^\\\"Provider\" " + data_filename.str();
 
       Benchmark::plot_spec_t plot_specs_ds_cycles = {
-        std::make_pair("< grep \"EverCrypt\" " + data_filename.str(), "using 6:xticlabels(sprintf(\"%s\", strcol(2))) title 'EverCrypt'"),
-        std::make_pair("", "using 0:6:xticlabels(3):(sprintf(\"%0.0f\", $6)) with labels font \"Courier,8\" offset char -2,.5 center notitle"),
-        std::make_pair("< grep \"OpenSSL\" " + data_filename.str(), "using 6:xticlabels(sprintf(\"%s\", strcol(2))) title 'OpenSSL'"),
-        std::make_pair("", "using 0:6:xticlabels(3):(sprintf(\"%0.0f\", $6)) with labels font \"Courier,8\" offset char +2,.5 center notitle"),
+        std::make_pair(evercrypt_only, "using 'Avg':xticlabels(strcol('Algorithm')) title 'EverCrypt'"),
+        std::make_pair("", "using 0:'Avg':xticlabels(strcol('Algorithm')):(sprintf(\"%0.0f\", column('Avg'))) with labels font \"Courier,8\" offset char -2,.5 center notitle"),
+        std::make_pair(openssl_only, "using 'Avg' title 'OpenSSL'"),
+        std::make_pair("", "using 0:'Avg':xticlabels(strcol('Algorithm')):(sprintf(\"%0.0f\", column('Avg'))) with labels font \"Courier,8\" offset char +2,.5 center notitle"),
        };
 
       std::stringstream extras;
@@ -464,10 +464,10 @@ void bench_aead_encrypt(const BenchmarkSettings & s)
                       extras.str());
 
       Benchmark::plot_spec_t plot_specs_ds_bytes = {
-        std::make_pair("< grep \"EverCrypt\" " + data_filename.str(), "using 9:xticlabels(sprintf(\"%s\", strcol(2))) title 'EverCrypt'"),
-        std::make_pair("", "using 0:9:xticlabels(3):(sprintf(\"%0.2f\", $9)) with labels font \"Courier,8\" offset char -2,.5 center notitle"),
-        std::make_pair("< grep \"OpenSSL\" " + data_filename.str(), "using 9:xticlabels(sprintf(\"%s\", strcol(2))) title 'OpenSSL'"),
-        std::make_pair("", "using 0:9:xticlabels(3):(sprintf(\"%0.2f\", $9)) with labels font \"Courier,8\" offset char +2,.5 center notitle"),
+        std::make_pair(evercrypt_only, "using 'Avg Cycles/Byte':xticlabels(strcol('Algorithm')) title 'EverCrypt'"),
+        std::make_pair("", "using 0:'Avg Cycles/Byte':xticlabels(strcol('Algorithm')):(sprintf(\"%0.2f\", column('Avg Cycles/Byte'))) with labels font \"Courier,8\" offset char -2,.5 center notitle"),
+        std::make_pair(openssl_only, "using 'Avg Cycles/Byte' title 'OpenSSL'"),
+        std::make_pair("", "using 0:'Avg Cycles/Byte':xticlabels(strcol('Algorithm')):(sprintf(\"%0.2f\", column('Avg Cycles/Byte'))) with labels font \"Courier,8\" offset char +2,.5 center notitle"),
       };
 
       Benchmark::make_plot(s,
@@ -478,6 +478,23 @@ void bench_aead_encrypt(const BenchmarkSettings & s)
                       plot_specs_ds_bytes,
                       "bench_aead_all_encrypt_" + dsstr.str() + "_bytes.svg",
                       extras.str());
+
+      Benchmark::plot_spec_t plot_specs_ds_candlesticks = {
+        std::make_pair(evercrypt_only, "using 0:'Q25':'Min':'Max':'Q75':xticlabels(strcol('Algorithm')) title 'EverCrypt' with candlesticks whiskerbars .25"),
+        std::make_pair(openssl_only, "using 0:'Q25':'Min':'Max':'Q75':xticlabels(strcol('Algorithm')) title 'OpenSSL' with candlesticks whiskerbars .25")
+      };
+
+      extras << "set boxwidth .25\n";
+      extras << "set style fill empty\n";
+
+      Benchmark::make_plot(s,
+                      "svg",
+                      "AEAD Encryption performance (message length " + dsstr.str() + " bytes)",
+                      "",
+                      "Avg. performance [CPU cycles/encryption]",
+                      plot_specs_ds_candlesticks,
+                      "bench_aead_all_encrypt_" + dsstr.str() + "_candlesticks.svg",
+                      extras.str());
   }
 
   std::stringstream extras;
@@ -486,7 +503,6 @@ void bench_aead_encrypt(const BenchmarkSettings & s)
   extras << "set style histogram clustered gap 3 title\n";
   extras << "set style data histograms\n";
   extras << "set bmargin 5\n";
-  extras << "set xrange [0:]\n";
 
   Benchmark::make_plot(s,
                        "svg",
@@ -524,13 +540,13 @@ void bench_aead_decrypt(const BenchmarkSettings & s)
 
     if (plot_specs_cycles.empty())
     {
-      plot_specs_cycles.push_back(std::make_pair(data_filename.str(), "using 6:xticlabels(sprintf(\"%s\\n%s\", strcol(1), strcol(2))) title '" + dsstr.str() + " b'"));
-      plot_specs_bytes.push_back(std::make_pair(data_filename.str(), "using 9:xticlabels(1) title '" + dsstr.str() + " b'"));
+      plot_specs_cycles.push_back(std::make_pair(data_filename.str(), "using 'Avg':xticlabels(strcol('Algorithm')) title '" + dsstr.str() + " b'"));
+      plot_specs_bytes.push_back(std::make_pair(data_filename.str(), "using 'Avg Cycles/Byte':xticlabels(strcol('Algorithm')) title '" + dsstr.str() + " b'"));
     }
     else
     {
-      plot_specs_cycles.push_back(std::make_pair(data_filename.str(), "using 6 title '" + dsstr.str() + " b'"));
-      plot_specs_bytes.push_back(std::make_pair(data_filename.str(), "using 9 title '" + dsstr.str() + " b'"));
+      plot_specs_cycles.push_back(std::make_pair(data_filename.str(), "using 'Avg' title '" + dsstr.str() + " b'"));
+      plot_specs_bytes.push_back(std::make_pair(data_filename.str(), "using 'Avg Cycles/Byte' title '" + dsstr.str() + " b'"));
     }
 
     std::list<Benchmark*> todo = {
@@ -554,13 +570,16 @@ void bench_aead_decrypt(const BenchmarkSettings & s)
       #endif
       };
 
-      Benchmark::run_batch(s, AEADBenchmark::header, data_filename.str(), todo);
+      Benchmark::run_batch(s, AEADBenchmark::column_headers(), data_filename.str(), todo);
+
+      std::string evercrypt_only = "< grep -e \"^\\\"EverCrypt\" -e \"^\\\"Provider\" " + data_filename.str();
+      std::string openssl_only = "< grep -e \"^\\\"OpenSSL\" -e \"^\\\"Provider\" " + data_filename.str();
 
       Benchmark::plot_spec_t plot_specs_ds_cycles = {
-        std::make_pair("< grep \"EverCrypt\" " + data_filename.str(), "using 6:xticlabels(sprintf(\"%s\", strcol(2))) title 'EverCrypt'"),
-        std::make_pair("", "using 0:6:xticlabels(3):(sprintf(\"%0.0f\", $6)) with labels font \"Courier,8\" offset char -2,.5 center notitle"),
-        std::make_pair("< grep \"OpenSSL\" " + data_filename.str(), "using 6:xticlabels(sprintf(\"%s\", strcol(2))) title 'OpenSSL'"),
-        std::make_pair("", "using 0:6:xticlabels(3):(sprintf(\"%0.0f\", $6)) with labels font \"Courier,8\" offset char +2,.5 center notitle"),
+        std::make_pair(evercrypt_only, "using 'Avg':xticlabels(strcol('Algorithm')) title 'EverCrypt'"),
+        std::make_pair("", "using 0:'Avg':xticlabels(strcol('Algorithm')):(sprintf(\"%0.0f\", column('Avg'))) with labels font \"Courier,8\" offset char -2,.5 center notitle"),
+        std::make_pair(openssl_only, "using 'Avg' title 'OpenSSL'"),
+        std::make_pair("", "using 0:'Avg':xticlabels(strcol('Algorithm')):(sprintf(\"%0.0f\", column('Avg'))) with labels font \"Courier,8\" offset char +2,.5 center notitle"),
        };
 
       std::stringstream extras;
@@ -573,7 +592,7 @@ void bench_aead_decrypt(const BenchmarkSettings & s)
 
       Benchmark::make_plot(s,
                       "svg",
-                      "AEAD DEcryption performance (message length " + dsstr.str() + " bytes)",
+                      "AEAD Decryption performance (message length " + dsstr.str() + " bytes)",
                       "",
                       "Avg. performance [CPU cycles/decryption]",
                       plot_specs_ds_cycles,
@@ -581,10 +600,10 @@ void bench_aead_decrypt(const BenchmarkSettings & s)
                       extras.str());
 
       Benchmark::plot_spec_t plot_specs_ds_bytes = {
-        std::make_pair("< grep \"EverCrypt\" " + data_filename.str(), "using 9:xticlabels(sprintf(\"%s\", strcol(2))) title 'EverCrypt'"),
-        std::make_pair("", "using 0:9:xticlabels(3):(sprintf(\"%0.2f\", $9)) with labels font \"Courier,8\" offset char -2,.5 center notitle"),
-        std::make_pair("< grep \"OpenSSL\" " + data_filename.str(), "using 9:xticlabels(sprintf(\"%s\", strcol(2))) title 'OpenSSL'"),
-        std::make_pair("", "using 0:9:xticlabels(3):(sprintf(\"%0.2f\", $9)) with labels font \"Courier,8\" offset char +2,.5 center notitle"),
+        std::make_pair(evercrypt_only, "using 'Avg Cycles/Byte':xticlabels(strcol('Algorithm')) title 'EverCrypt'"),
+        std::make_pair("", "using 0:'Avg Cycles/Byte':xticlabels(strcol('Algorithm')):(sprintf(\"%0.2f\", column('Avg Cycles/Byte'))) with labels font \"Courier,8\" offset char -2,.5 center notitle"),
+        std::make_pair(openssl_only, "using 'Avg Cycles/Byte' title 'OpenSSL'"),
+        std::make_pair("", "using 0:'Avg Cycles/Byte':xticlabels(strcol('Algorithm')):(sprintf(\"%0.2f\", column('Avg Cycles/Byte'))) with labels font \"Courier,8\" offset char +2,.5 center notitle"),
       };
 
       Benchmark::make_plot(s,
@@ -595,6 +614,23 @@ void bench_aead_decrypt(const BenchmarkSettings & s)
                       plot_specs_ds_bytes,
                       "bench_aead_all_decrypt_" + dsstr.str() + "_bytes.svg",
                       extras.str());
+
+      Benchmark::plot_spec_t plot_specs_ds_candlesticks = {
+        std::make_pair(evercrypt_only, "using 0:'Q25':'Min':'Max':'Q75':xticlabels(strcol('Algorithm')) title 'EverCrypt' with candlesticks whiskerbars .25"),
+        std::make_pair(openssl_only, "using 0:'Q25':'Min':'Max':'Q75':xticlabels(strcol('Algorithm')) title 'OpenSSL' with candlesticks whiskerbars .25")
+      };
+
+      extras << "set boxwidth .25\n";
+      extras << "set style fill empty\n";
+
+      Benchmark::make_plot(s,
+                      "svg",
+                      "AEAD Decryption performance (message length " + dsstr.str() + " bytes)",
+                      "",
+                      "Avg. performance [CPU cycles/decryption]",
+                      plot_specs_ds_candlesticks,
+                      "bench_aead_all_decrypt_" + dsstr.str() + "_candlesticks.svg",
+                      extras.str());
   }
 
   std::stringstream extras;
@@ -603,7 +639,6 @@ void bench_aead_decrypt(const BenchmarkSettings & s)
   extras << "set style histogram clustered gap 3 title\n";
   extras << "set style data histograms\n";
   extras << "set bmargin 5\n";
-  extras << "set xrange [0:]\n";
 
   Benchmark::make_plot(s,
                        "svg",

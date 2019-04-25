@@ -4,16 +4,17 @@
 
 #include <cstddef>
 #include <cstdint>
-#include <ctime>
 
 #include <string>
 #include <iostream>
 #include <list>
 #include <vector>
+#include <chrono>
 
 #define ABORT_BENCHMARK(msg, rv) { printf("\nABORT: %s\n", msg); return rv; }
 
 typedef uint64_t cycles;
+typedef std::chrono::high_resolution_clock Clock;
 
 class BenchmarkSettings
 {
@@ -27,8 +28,8 @@ class Benchmark
 {
   protected:
     cycles cbegin, cend, cdiff, ctotal = 0, cmax = 0, cmin = -1;
-    size_t tbegin, tend, tdiff, ttotal = 0;
-    size_t toverall;
+    Clock::time_point tbegin, tend, tinclbegin;
+    Clock::duration tdiff, tincl, texcl;
 
     std::string name;
 
@@ -42,16 +43,18 @@ class Benchmark
     Benchmark(const std::string & name);
     virtual ~Benchmark() {}
 
-    virtual void pre(const BenchmarkSettings & s) { srand(s.seed); toverall = clock();}
+    virtual void pre(const BenchmarkSettings & s) { srand(s.seed); tinclbegin = Clock::now(); texcl = Clock::duration::zero(); }
     virtual void run(const BenchmarkSettings & s);
     virtual void bench_setup(const BenchmarkSettings & s) {};
     virtual void bench_func() = 0;
     virtual void bench_cleanup(const BenchmarkSettings & s) {};
-    virtual void post(const BenchmarkSettings & s) { toverall = clock() - toverall; }
-    virtual void report(std::ostream & rs, const BenchmarkSettings & s) = 0;
+    virtual void post(const BenchmarkSettings & s) { tincl = Clock::now() - tinclbegin; }
+    virtual void report(std::ostream & rs, const BenchmarkSettings & s) const;
 
     void set_name(const std::string & name);
     std::string get_name() const { return name; }
+
+    static std::string column_headers() { return ",\"CPUincl\",\"CPUexcl\",\"Min\",\"Q25\",\"Avg\",\"Med\",\"Q75\",\"Max\""; }
 
 
     // Global tools, just in here for the namespace

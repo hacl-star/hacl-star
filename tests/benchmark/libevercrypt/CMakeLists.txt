@@ -1,7 +1,7 @@
 project(evercrypt LANGUAGES C ASM)
 cmake_minimum_required(VERSION 3.6)
 
-set(EVERCRYPT_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../../dist/compact-c89 CACHE PATH "Where to find the EverCrypt sources.")
+set(EVERCRYPT_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../../dist/compact-gcc CACHE PATH "Where to find the EverCrypt sources.")
 get_filename_component(EVERCRYPT_SRC_DIR ${EVERCRYPT_SRC_DIR} ABSOLUTE)
 message("-- Using EverCrypt at ${EVERCRYPT_SRC_DIR}")
 
@@ -55,6 +55,13 @@ if(CMAKE_SYSTEM_PROCESSOR STREQUAL "x86_64")
     ${EVERCRYPT_SRC_DIR}/curve25519-x86_64-${VARIANT}
     ${EVERCRYPT_SRC_DIR}/poly1305-x86_64-${VARIANT}
     ${EVERCRYPT_SRC_DIR}/sha256-x86_64-${VARIANT})
+endif()
+
+if(EXISTS ${EVERCRYPT_SRC_DIR}/MerkleTree.c)
+  target_sources(evercrypt PRIVATE ${EVERCRYPT_SRC_DIR}/MerkleTree.c)
+endif()
+if(EXISTS ${EVERCRYPT_SRC_DIR}/LowStar.c)
+  target_sources(evercrypt PRIVATE ${EVERCRYPT_SRC_DIR}/LowStar.c)
 endif()
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")

@@ -25,7 +25,7 @@ class DSABenchmark: public Benchmark
       uint8_t *signature, *msg;
 
   public:
-    static constexpr auto header = "Algorithm, Size [b], CPU Time (incl) [sec], CPU Time (excl) [sec], Avg Cycles/Op, Min Cycles/Op, Max Cycles/Op, Avg Cycles/Byte";
+    static std::string column_headers() { return "\"Algorithm\",\"Size [b]\"" + Benchmark::column_headers() + ",\"Avg Cycles/Byte\""; }
 
     DSABenchmark(size_t msg_len, std::string const & prefix) :
       Benchmark(prefix),
@@ -49,17 +49,11 @@ class DSABenchmark: public Benchmark
       randomize(msg, msg_len);
     }
 
-    virtual void report(std::ostream & rs, const BenchmarkSettings & s)
+    virtual void report(std::ostream & rs, const BenchmarkSettings & s) const
     {
-      rs << "\"" << name.c_str() << "\""
-        << "," << msg_len
-        << "," << toverall/(double)CLOCKS_PER_SEC
-        << "," << ttotal/(double)CLOCKS_PER_SEC
-        << "," << ctotal/(double)s.samples
-        << "," << cmin
-        << "," << cmax
-        << "," << (ctotal/(double)msg_len)/(double)s.samples
-        << "\n";
+      rs << "\"" << name.c_str() << "\"" << "," << msg_len;
+      Benchmark::report(rs, s);
+      rs << "," << (ctotal/(double)msg_len)/(double)s.samples << "\n";
     }
 };
 
@@ -67,7 +61,7 @@ class DSABenchmark: public Benchmark
 class HaclSign: public DSABenchmark
 {
   public:
-    HaclSign(size_t msg_len) : DSABenchmark(msg_len, "HaCl") {}
+    HaclSign(size_t msg_len) : DSABenchmark(msg_len, "HaCl (sign)") {}
     virtual void bench_func()
       { Hacl_Ed25519_sign(signature, our_secret, msg, msg_len); }
     virtual ~HaclSign() {}
@@ -126,7 +120,7 @@ class OpenSSLSign: public DSABenchmark
     EVP_PKEY *ours = NULL;
 
   public:
-    OpenSSLSign(size_t msg_len) : DSABenchmark(msg_len, "OpenSSL") {}
+    OpenSSLSign(size_t msg_len) : DSABenchmark(msg_len, "OpenSSL (sign)") {}
     virtual void bench_setup(const BenchmarkSettings & s)
     {
       DSABenchmark::bench_setup(s);
@@ -216,8 +210,7 @@ void bench_ed25519(const BenchmarkSettings & s)
 
   for (size_t ds: data_sizes)
   {
-    std::stringstream data_filename;
-    data_filename << "bench_ed25519_" << ds << ".csv";
+    std::string data_filename = "bench_ed25519_" + std::to_string(ds) + ".csv";
 
     std::list<Benchmark*> todo = {
       #ifdef HAVE_HACL
@@ -232,39 +225,44 @@ void bench_ed25519(const BenchmarkSettings & s)
       #endif
       };
 
-    Benchmark::run_batch(s, DSABenchmark::header, data_filename.str(), todo);
-
-    std::stringstream title;
-    title << "Ed25519 performance (message size=" << ds << " bytes)";
-
-    std::stringstream plot_filename;
-    plot_filename << "bench_ed25519_" << ds << "_cycles.svg";
+    Benchmark::run_batch(s, DSABenchmark::column_headers(), data_filename, todo);
 
     Benchmark::plot_spec_t plot_spec_cycles =
-      { std::make_pair(data_filename.str(), "using 5:xticlabels(1) with boxes title columnheader, '' using ($0-1):5:xticlabels(1):(sprintf(\"%0.0f\", $5)) with labels font \"Courier,8\" offset char 0,.5") };
-
-    Benchmark::plot_spec_t plot_spec_bytes =
-      { std::make_pair(data_filename.str(), "using 8:xticlabels(1) with boxes title columnheader, '' using ($0-1):8:xticlabels(1):(sprintf(\"%0.0f\", $5)) with labels font \"Courier,8\" offset char 0,.5") };
+      { std::make_pair(data_filename, "using 'Avg':xticlabels(strcol('Algorithm')) with boxes title columnheader"),
+        std::make_pair("", "using 0:'Avg':xticlabels(strcol('Algorithm')):(sprintf(\"%0.0f\", column('Avg'))) with labels font \"Courier,8\" offset char 0,.5") };
 
     Benchmark::make_plot(s,
                          "svg",
-                         title.str(),
+                         "Ed25519 performance (message size=" + std::to_string(ds) + " bytes)",
                          "",
                          "Avg. performance [CPU cycles/operation]",
                          plot_spec_cycles,
-                         plot_filename.str(),
+                         "bench_ed25519_" + std::to_string(ds) + "_cycles.svg",
                          "");
 
-    plot_filename.str("");
-    plot_filename << "bench_ed25519_" << ds << "_bytes.svg";
+    Benchmark::plot_spec_t plot_spec_bytes =
+      { std::make_pair(data_filename, "using 'Avg Cycles/Byte':xticlabels(strcol('Algorithm')) with boxes title columnheader"),
+        std::make_pair("", "using 0:'Avg Cycles/Byte':xticlabels(strcol('Algorithm')):(sprintf(\"%0.0f\", column('Avg Cycles/Byte'))) with labels font \"Courier,8\" offset char 0,.5") };
 
     Benchmark::make_plot(s,
                          "svg",
-                         title.str(),
+                         "Ed25519 performance (message size=" + std::to_string(ds) + " bytes)",
                          "",
                          "Avg. performance [CPU cycles/byte]",
                          plot_spec_bytes,
-                         plot_filename.str(),
+                         "bench_ed25519_" + std::to_string(ds) + "_bytes.svg",
                          "");
+
+    Benchmark::plot_spec_t plot_spec_candlesticks =
+      { std::make_pair(data_filename, "using 0:'Q25':'Min':'Max':'Q75':xticlabels(strcol('Algorithm')) with candlesticks whiskerbars .25") };
+
+    Benchmark::make_plot(s,
+                         "svg",
+                         "Ed25519 performance (message size=" + std::to_string(ds) + " bytes)",
+                         "",
+                         "Avg. performance [CPU cycles/operation]",
+                         plot_spec_candlesticks,
+                         "bench_ed25519_" + std::to_string(ds) + "_candlesticks.svg",
+                         "set boxwidth 0.25\nset xrange[-.5:4.5]\nset style fill empty\n");
   }
 }

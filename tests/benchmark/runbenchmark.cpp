@@ -10,6 +10,7 @@
 #include "bench_aead.h"
 #include "bench_curve25519.h"
 #include "bench_ed25519.h"
+#include "bench_merkle.h"
 
 #include <openssl/crypto.h>
 
@@ -46,6 +47,7 @@ BenchmarkSettings & parse_args(int argc, char const ** argv)
     r.families_to_run.push_back("aead");
     r.families_to_run.push_back("curve25519");
     r.families_to_run.push_back("ed25519");
+    r.families_to_run.push_back("merkle");
   }
   else
   {
@@ -106,6 +108,8 @@ int main(int argc, char const **argv)
       ADD_BENCH(curve25519);
 
       ADD_BENCH(ed25519);
+
+      ADD_BENCH(merkle);
 
       std::cout << "Unsupported benchmark '" << b << "'.\n";
     }

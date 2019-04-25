@@ -3,6 +3,7 @@
 #include <sstream>
 #include <list>
 #include <vector>
+#include <algorithm>
 
 extern "C" {
 #include <EverCrypt_AutoConfig2.h>
@@ -152,28 +153,48 @@ void Benchmark::run(const BenchmarkSettings & s)
 {
   pre(s);
 
+  samples.reserve(s.samples);
+
   for (int i = 0; i < s.samples; i++)
   {
     bench_setup(s);
 
-    tbegin = clock();
+    tbegin = Clock::now();
     cbegin = cpucycles_begin();
     bench_func();
     cend = cpucycles_end();
-    tend = clock();
+    tend = Clock::now();;
     cdiff = cend-cbegin;
-    tdiff = difftime(tend, tbegin);
+    tdiff = tend - tbegin;
     ctotal += cdiff;
-    ttotal += tdiff;
+    texcl += tdiff;
     if (cdiff < cmin) cmin = cdiff;
     if (cdiff > cmax) cmax = cdiff;
 
-    samples.push_back(cdiff);
-
     bench_cleanup(s);
+    samples.push_back(cdiff);
   }
 
   post(s);
+
+  std::sort(samples.begin(), samples.end());
+}
+
+void Benchmark::report(std::ostream & rs, const BenchmarkSettings & s) const
+{
+  size_t n = samples.size();
+  double median = (n % 2 == 1 ? (double)samples[n/2] : (samples[n/2] + samples[(n+1)/2])/(double)2.0);
+  double q25 = (double)samples[n/4];
+  double q75 = (double)samples[(3*n)/4];
+
+  rs << "," << std::chrono::duration_cast<std::chrono::nanoseconds>(tincl).count()
+    << "," << std::chrono::duration_cast<std::chrono::nanoseconds>(texcl).count()
+    << "," << cmin
+    << "," << q25
+    << "," << ctotal/(double)s.samples
+    << "," << median
+    << "," << q75
+    << "," << cmax;
 }
 
 static const char time_fmt[] = "%b %d %Y %H:%M:%S";

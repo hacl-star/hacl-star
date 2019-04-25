@@ -7,6 +7,7 @@ set datafile commentschars \"//\" \n\
 set xtics norotate \n\
 set boxwidth 0.5 \n\
 set style fill solid\n\
-set bmargin 3"
+set bmargin 3 \n\
+set yrange[0:]"
 
 #endif

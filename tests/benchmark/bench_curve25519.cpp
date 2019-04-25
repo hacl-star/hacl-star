@@ -27,7 +27,7 @@ class Curve25519Benchmark: public Benchmark
     X25519_KEY shared_secret, our_secret, their_public;
 
   public:
-    static constexpr auto header = "Algorithm, CPU Time (incl) [sec], CPU Time (excl) [sec], Avg Cycles/Derivation, Min Cycles/Derivation, Max Cycles/Derivation";
+    static std::string column_headers() { return "\"Algorithm\"" + Benchmark::column_headers(); }
 
     Curve25519Benchmark(std::string const & prefix) : Benchmark(prefix) {}
 
@@ -40,15 +40,11 @@ class Curve25519Benchmark: public Benchmark
       randomize(their_public, 32);
     }
 
-    virtual void report(std::ostream & rs, const BenchmarkSettings & s)
+    virtual void report(std::ostream & rs, const BenchmarkSettings & s) const
     {
-      rs << "\"" << name.c_str() << "\""
-        << "," << toverall/(double)CLOCKS_PER_SEC
-        << "," << ttotal/(double)CLOCKS_PER_SEC
-        << "," << ctotal/(double)s.samples
-        << "," << cmin
-        << "," << cmax
-        << "\n";
+      rs << "\"" << name.c_str() << "\"";
+      Benchmark::report(rs, s);
+      rs << "\n";
     }
 };
 
@@ -159,8 +155,7 @@ class OpenSSL: public Curve25519Benchmark
 
 void bench_curve25519(const BenchmarkSettings & s)
 {
-  std::stringstream data_filename;
-  data_filename << "bench_curve25519.csv";
+  std::string data_filename = "bench_curve25519.csv";
 
   std::list<Benchmark*> todo = {
     new EverCrypt(),
@@ -179,13 +174,11 @@ void bench_curve25519(const BenchmarkSettings & s)
   std::stringstream num_benchmarks;
   num_benchmarks << todo.size();
 
-  Benchmark::run_batch(s, Curve25519Benchmark::header, data_filename.str(), todo);
+  Benchmark::run_batch(s, Curve25519Benchmark::column_headers(), data_filename, todo);
 
   Benchmark::plot_spec_t plot_spec_cycles =
-    { std::make_pair(data_filename.str(), "using 4:xticlabels(1) with boxes title columnheader, '' using ($0-1):4:xticlabels(1):(sprintf(\"%0.0f\", $5)) with labels font \"Courier,8\" offset char 0,.5") };
-
-  Benchmark::plot_spec_t plot_spec_candlesticks =
-    { std::make_pair(data_filename.str(), "using 0:4:5:6:4:xticlabels(1) with candlesticks whiskerbars .25") };
+    { std::make_pair(data_filename, "using 'Avg':xticlabels(strcol('Algorithm')) with boxes title columnheader"),
+      std::make_pair("", "using 0:'Avg':xticlabels(strcol('Algorithm')):(sprintf(\"%0.0f\", column('Avg'))) with labels font \"Courier,8\" offset char 0,.5") };
 
   Benchmark::make_plot(s,
                        "svg",
@@ -194,7 +187,10 @@ void bench_curve25519(const BenchmarkSettings & s)
                        "Avg. performance [CPU cycles/derivation]",
                        plot_spec_cycles,
                        "bench_curve25519_cycles.svg",
-                       "set xtics norotate");
+                       "");
+
+  Benchmark::plot_spec_t plot_spec_candlesticks =
+    { std::make_pair(data_filename, "using 0:'Q25':'Min':'Max':'Q75':xticlabels(strcol('Algorithm')) with candlesticks whiskerbars .25") };
 
   Benchmark::make_plot(s,
                        "svg",
@@ -203,5 +199,5 @@ void bench_curve25519(const BenchmarkSettings & s)
                        "Avg. performance [CPU cycles/derivation]",
                        plot_spec_candlesticks,
                        "bench_curve25519_candlesticks.svg",
-                       "set xrange[.5:" + num_benchmarks.str() + "+.5]");
+                       "set boxwidth 0.25\nset xrange[-.5:" + num_benchmarks.str() + "-.5]\nset style fill empty\n");
 }
