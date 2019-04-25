@@ -131,3 +131,10 @@ let nat_from_bytes_le_is_le_bytes_to_nat64 b =
     == {BS.nat_from_bytes_le_slice_lemma #LI.SEC #8 b 4}
     BS.nat_from_bytes_le b <: int;
   }
+
+let rec lemma_le_to_n_indexed_rec b i =
+  FE.reveal_le_to_n (slice b (length b - i) (length b));
+  if i > 0 then lemma_le_to_n_indexed_rec b (i - 1)
+
+let rec lemma_le_to_n_indexed b =
+  lemma_le_to_n_indexed_rec b (length b)
