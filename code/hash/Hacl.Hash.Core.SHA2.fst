@@ -155,7 +155,6 @@ let index_be (a: sha2_alg) (b: block_b a) (i: U32.t):
        M.(modifies loc_none h0 h1) /\
        r == S.index (words_of_bytes a #(B.length b / word_length a) (B.as_seq h0 b)) (U32.v i)))
 =
-  admit();
   match a with
   | SHA2_224 | SHA2_256 -> Lib.ByteBuffer.uint_at_index_be #U32 #SEC #(size block_word_length) b i
   | SHA2_384 | SHA2_512 -> Lib.ByteBuffer.uint_at_index_be #U64 #SEC #(size block_word_length) b i

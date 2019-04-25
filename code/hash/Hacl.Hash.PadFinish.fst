@@ -42,7 +42,6 @@ val store_len: a:hash_alg -> len:len_t a -> b:B.buffer uint8 ->
 
 inline_for_extraction
 let store_len a len b =
-  admit();
   match a with
   | MD5 ->
       Lib.ByteBuffer.uint_to_bytes_le b (secret len)
@@ -238,7 +237,6 @@ let hash_word_len (a: hash_alg): n:U32.t { U32.v n = hash_word_length a } =
 
 noextract inline_for_extraction
 let finish a s dst =
-  admit();
   match a with
   | MD5 -> Lib.ByteBuffer.uints_to_bytes_le #U32 #SEC (hash_word_len a) dst (B.sub s 0ul (hash_word_len a))
   | _ -> Lib.ByteBuffer.uints_to_bytes_be #(word_t a) #SEC (hash_word_len a) dst (B.sub s 0ul (hash_word_len a))
