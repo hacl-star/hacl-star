@@ -31,10 +31,10 @@ let rec xor_lemma (x: UInt8.t) (v: bytes) : Lemma (requires True)
 #push-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 20"
 let hmac a key data =
   let k = wrap a key in
-  let h1 = EverCrypt.Hash.spec a S.(xor 0x36uy k @| data) in
+  let h1 = Spec.Hash.hash a S.(xor 0x36uy k @| data) in
   assert_norm (pow2 32 < pow2 61);
   assert_norm (pow2 32 < pow2 125);
-  let h2 = EverCrypt.Hash.spec a S.(xor 0x5cuy k @| h1) in
+  let h2 = Spec.Hash.hash a S.(xor 0x5cuy k @| h1) in
   h2
 
 

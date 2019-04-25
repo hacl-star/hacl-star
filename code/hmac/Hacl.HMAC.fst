@@ -196,7 +196,7 @@ val part2:
       B.as_seq h1 dst `Seq.equal`
         Spec.Hash.hash a (S.append (B.as_seq h0 key) (B.as_seq h0 data)))
 
-#set-options "--z3rlimit 40"
+#set-options "--z3rlimit 60"
 inline_for_extraction noextract
 let part2 a init update_multi update_last finish s dst key data len =
   (**) key_and_data_fits a;
