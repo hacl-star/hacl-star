@@ -507,6 +507,11 @@ class BCryptDecryptBM : public AEADBenchmark
 
 #endif
 
+std::string candlestick_template()
+{
+  return std::make_pair(evercrypt_only, "using 0:'Q25':'Min':'Max':'Q75':xticlabels(strcol('Algorithm')) title 'EverCrypt' with candlesticks whiskerbars .25"),
+}
+
 void bench_aead_encrypt(const BenchmarkSettings & s)
 {
   size_t data_sizes[] = { 1024, 2048, 4096, 8192, 16384, 32768, 65536 };
@@ -524,8 +529,8 @@ void bench_aead_encrypt(const BenchmarkSettings & s)
 
     if (plot_specs_cycles.empty())
     {
-      plot_specs_cycles.push_back(std::make_pair(data_filename.str(), "using 'Avg':xticlabels(strcol('Algorithm')) title '" + dsstr.str() + " b'"));
-      plot_specs_bytes.push_back(std::make_pair(data_filename.str(), "using 'Avg Cycles/Byte':xticlabels(strcol('Algorithm')) title '" + dsstr.str() + " b'"));
+      plot_specs_cycles.push_back(std::make_pair(data_filename.str(), "using 'Avg':xticlabels(strcol('Provider').\"\\n\".strcol('Algorithm')) title '" + dsstr.str() + " b'"));
+      plot_specs_bytes.push_back(std::make_pair(data_filename.str(), "using 'Avg Cycles/Byte':xticlabels(strcol('Provider').\"\\n\".strcol('Algorithm')) title '" + dsstr.str() + " b'"));
     }
     else
     {
@@ -687,8 +692,8 @@ void bench_aead_decrypt(const BenchmarkSettings & s)
 
     if (plot_specs_cycles.empty())
     {
-      plot_specs_cycles.push_back(std::make_pair(data_filename.str(), "using 'Avg':xticlabels(strcol('Algorithm')) title '" + dsstr.str() + " b'"));
-      plot_specs_bytes.push_back(std::make_pair(data_filename.str(), "using 'Avg Cycles/Byte':xticlabels(strcol('Algorithm')) title '" + dsstr.str() + " b'"));
+      plot_specs_cycles.push_back(std::make_pair(data_filename.str(), "using 'Avg':xticlabels(strcol('Provider').\"\\n\".strcol('Algorithm')) title '" + dsstr.str() + " b'"));
+      plot_specs_bytes.push_back(std::make_pair(data_filename.str(), "using 'Avg Cycles/Byte':xticlabels(strcol('Provider').\"\\n\".strcol('Algorithm')) title '" + dsstr.str() + " b'"));
     }
     else
     {
