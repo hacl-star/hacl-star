@@ -57,12 +57,12 @@ val poly1305_do_core_padded:
     (ensures (fun h0 _ h1 -> modifies (loc ctx) h0 h1 /\
       Poly.state_inv_t h1 ctx /\
       // Additional framing for r_elem
-      Seq.index (Poly.as_get_r h0 ctx) 0 == Seq.index (Poly.as_get_r h1 ctx) 0 /\
-      (let r = Seq.index (Poly.as_get_r h0 ctx) 0 in
-      let acc = Seq.index (Poly.as_get_acc h0 ctx) 0 in
+      Poly.as_get_r h0 ctx == Poly.as_get_r h1 ctx /\
+      (let r = Poly.as_get_r h0 ctx in
+      let acc = Poly.as_get_acc h0 ctx in
       let acc = Spec.poly1305_padded r (v aadlen) (as_seq h0 aad) (Seq.create 16 (u8 0)) acc in
       let acc = Spec.poly1305_padded r (v mlen) (as_seq h0 m) (Seq.create 16 (u8 0)) acc in
-      Seq.index (Poly.as_get_acc h1 ctx) 0 == acc)))
+      Poly.as_get_acc h1 ctx == acc)))
 
 #set-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0"
 
@@ -145,8 +145,8 @@ val poly1305_do_core_finish:
       disjoint ctx k /\ disjoint ctx out /\ disjoint ctx block /\
       disjoint block k /\ disjoint block out)
     (ensures (fun h0 _ h1 -> modifies (loc out |+| loc ctx) h0 h1 /\
-      (let r = Seq.index (Poly.as_get_r h0 ctx) 0 in
-       let acc = Seq.index (Poly.as_get_acc h0 ctx) 0 in      
+      (let r = Poly.as_get_r h0 ctx in
+       let acc = Poly.as_get_acc h0 ctx in
        let acc = SpecPoly.update1 r 16 (as_seq h0 block) acc in
        let tag = SpecPoly.finish (as_seq h0 k) acc in
        Seq.equal (as_seq h1 out) tag)))

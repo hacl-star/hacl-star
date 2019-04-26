@@ -31,7 +31,9 @@ let lemma_mul_assos_3 a b c = ()
 val lemma_mul_assos_4:
   a:nat -> b:nat -> c:nat -> d:nat ->
   Lemma (a * b * c * d == a * (b * c * d))
-let lemma_mul_assos_4 a b c d = ()
+let lemma_mul_assos_4 a b c d =
+  assert ((a * b * c) * d == (a * (b * c)) * d);
+  FStar.Math.Lemmas.paren_mul_right a (b * c) d
 
 val lemma_mul_assos_5:
   a:nat -> b:nat -> c:nat -> d:nat -> e:nat ->
