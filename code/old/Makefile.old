@@ -2,7 +2,7 @@ all: extract-c ct verify
 
 # The bignum directory is not included because it is independently
 # checked by curve25519 and poly1305 with specific parameters
-DIRECTORIES=ed25519 experimental/aesgcm
+DIRECTORIES=experimental/aesgcm
 TOOSLOW=experimental
 
 %-c: %
