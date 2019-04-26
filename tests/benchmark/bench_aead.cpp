@@ -507,9 +507,40 @@ class BCryptDecryptBM : public AEADBenchmark
 
 #endif
 
-std::string candlestick_template()
+Benchmark::plot_spec_t histogram_template(const std::string & column, const std::string & filter, const std::string & data_filename)
 {
-  return std::make_pair(evercrypt_only, "using 0:'Q25':'Min':'Max':'Q75':xticlabels(strcol('Algorithm')) title 'EverCrypt' with candlesticks whiskerbars .25"),
+  std::string filtered = "< grep -e \"^\\\"" + filter + "\" -e \"^\\\"Provider\" " + data_filename;
+  return {
+    std::make_pair(filtered, "using '"+column+"':xticlabels(strcol('Algorithm')) title '" + filter + "'"),
+    std::make_pair("", "using 0:'"+column+"':xticlabels(strcol('Algorithm')):(sprintf(\"%0.0f\", column('"+column+"'))) with labels font \"Courier,8\"")
+  };
+}
+
+std::pair<std::string, std::string> candlestick_template(const std::string & filter, const std::string & data_filename)
+{
+  std::string filtered = "< grep -e \"^\\\"" + filter + "\" -e \"^\\\"Provider\" " + data_filename;
+  return std::make_pair(filtered, "using 0:'Q25':'Min':'Max':'Q75':xticlabels(strcol('Algorithm')) title '" + filter + "' with candlesticks whiskerbars .25");
+}
+
+void add_plotspec(Benchmark::plot_spec_t & a, const Benchmark::plot_spec_t & b)
+{
+  a.insert(a.end(), b.begin(), b.end());
+}
+
+void add_label_offsets(Benchmark::plot_spec_t & plot_spec)
+{
+  switch (plot_spec.size())
+  {
+  case 6:
+    plot_spec[1].second += " offset -2,.5 center notitle";
+    plot_spec[3].second += " offset  0,.5 center notitle";
+    plot_spec[5].second += " offset +2,.5 center notitle";
+    break;
+  case 4:
+    plot_spec[1].second += " offset -2,.5 center notitle";
+    plot_spec[3].second += " offset +2,.5 center notitle";
+    break;
+  }
 }
 
 void bench_aead_encrypt(const BenchmarkSettings & s)
@@ -566,26 +597,15 @@ void bench_aead_encrypt(const BenchmarkSettings & s)
 
       Benchmark::run_batch(s, AEADBenchmark::column_headers(), data_filename.str(), todo);
 
-      std::string evercrypt_only = "< grep -e \"^\\\"EverCrypt\" -e \"^\\\"Provider\" " + data_filename.str();
+      Benchmark::plot_spec_t plot_specs_ds_cycles;
+      add_plotspec(plot_specs_ds_cycles, histogram_template("Avg", "EverCrypt", data_filename.str()));
       #ifdef HAVE_OPENSSL
-      std::string openssl_only = "< grep -e \"^\\\"OpenSSL\" -e \"^\\\"Provider\" " + data_filename.str();
+      add_plotspec(plot_specs_ds_cycles, histogram_template("Avg", "OpenSSL", data_filename.str()));
       #endif
       #ifdef HAVE_BCRYPT
-      std::string bcrypt_only = "< grep -e \"^\\\"BCrypt\" -e \"^\\\"Provider\" " + data_filename.str();
+      add_plotspec(plot_specs_ds_cycles, histogram_template("Avg", "BCrypt", data_filename.str()));
       #endif
-
-      Benchmark::plot_spec_t plot_specs_ds_cycles = {
-        std::make_pair(evercrypt_only, "using 'Avg':xticlabels(strcol('Algorithm')) title 'EverCrypt'"),
-        std::make_pair("", "using 0:'Avg':xticlabels(strcol('Algorithm')):(sprintf(\"%0.0f\", column('Avg'))) with labels font \"Courier,8\" offset char -2,.5 center notitle"),
-        #ifdef HAVE_OPENSSL
-        std::make_pair(openssl_only, "using 'Avg' title 'OpenSSL'"),
-        std::make_pair("", "using 0:'Avg':xticlabels(strcol('Algorithm')):(sprintf(\"%0.0f\", column('Avg'))) with labels font \"Courier,8\" offset char +2,.5 center notitle"),
-        #endif
-        #ifdef HAVE_BCRYPT
-        std::make_pair(bcrypt_only, "using 'Avg' title 'BCrypt'"),
-        std::make_pair("", "using 0:'Avg':xticlabels(strcol('Algorithm')):(sprintf(\"%0.0f\", column('Avg'))) with labels font \"Courier,8\" offset char +2,.5 center notitle"),
-        #endif
-       };
+      add_label_offsets(plot_specs_ds_cycles);
 
       std::stringstream extras;
       extras << "set boxwidth 0.8\n";
@@ -604,18 +624,15 @@ void bench_aead_encrypt(const BenchmarkSettings & s)
                       "bench_aead_all_encrypt_" + dsstr.str() + "_cycles.svg",
                       extras.str());
 
-      Benchmark::plot_spec_t plot_specs_ds_bytes = {
-        std::make_pair(evercrypt_only, "using 'Avg Cycles/Byte':xticlabels(strcol('Algorithm')) title 'EverCrypt'"),
-        std::make_pair("", "using 0:'Avg Cycles/Byte':xticlabels(strcol('Algorithm')):(sprintf(\"%0.2f\", column('Avg Cycles/Byte'))) with labels font \"Courier,8\" offset char -2,.5 center notitle"),
-        #ifdef HAVE_OPENSSL
-        std::make_pair(openssl_only, "using 'Avg Cycles/Byte' title 'OpenSSL'"),
-        std::make_pair("", "using 0:'Avg Cycles/Byte':xticlabels(strcol('Algorithm')):(sprintf(\"%0.2f\", column('Avg Cycles/Byte'))) with labels font \"Courier,8\" offset char +2,.5 center notitle"),
-        #endif
-        #ifdef HAVE_BCRYPT
-        std::make_pair(bcrypt_only, "using 'Avg Cycles/Byte' title 'BCrypt'"),
-        std::make_pair("", "using 0:'Avg Cycles/Byte':xticlabels(strcol('Algorithm')):(sprintf(\"%0.2f\", column('Avg Cycles/Byte'))) with labels font \"Courier,8\" offset char +2,.5 center notitle"),
-        #endif
-      };
+      Benchmark::plot_spec_t plot_specs_ds_bytes;
+      add_plotspec(plot_specs_ds_bytes, histogram_template("Avg Cycles/Byte", "EverCrypt", data_filename.str()));
+      #ifdef HAVE_OPENSSL
+      add_plotspec(plot_specs_ds_bytes, histogram_template("Avg Cycles/Byte", "OpenSSL", data_filename.str()));
+      #endif
+      #ifdef HAVE_BCRYPT
+      add_plotspec(plot_specs_ds_bytes, histogram_template("Avg Cycles/Byte", "BCrypt", data_filename.str()));
+      #endif
+      add_label_offsets(plot_specs_ds_bytes);
 
       Benchmark::make_plot(s,
                       "svg",
@@ -627,12 +644,12 @@ void bench_aead_encrypt(const BenchmarkSettings & s)
                       extras.str());
 
       Benchmark::plot_spec_t plot_specs_ds_candlesticks = {
-        std::make_pair(evercrypt_only, "using 0:'Q25':'Min':'Max':'Q75':xticlabels(strcol('Algorithm')) title 'EverCrypt' with candlesticks whiskerbars .25"),
+        candlestick_template("EverCrypt", data_filename.str()),
         #ifdef HAVE_OPENSSL
-        std::make_pair(openssl_only, "using 0:'Q25':'Min':'Max':'Q75':xticlabels(strcol('Algorithm')) title 'OpenSSL' with candlesticks whiskerbars .25")
+        candlestick_template("OpenSSL", data_filename.str()),
         #endif
         #ifdef HAVE_BCRYPT
-        std::make_pair(bcrypt_only, "using 0:'Q25':'Min':'Max':'Q75':xticlabels(strcol('Algorithm')) title 'BCrypt' with candlesticks whiskerbars .25")
+        candlestick_template("BCrypt", data_filename.str()),
         #endif
       };
 
@@ -790,12 +807,12 @@ void bench_aead_decrypt(const BenchmarkSettings & s)
                       extras.str());
 
       Benchmark::plot_spec_t plot_specs_ds_candlesticks = {
-        std::make_pair(evercrypt_only, "using 0:'Q25':'Min':'Max':'Q75':xticlabels(strcol('Algorithm')) title 'EverCrypt' with candlesticks whiskerbars .25"),
+        candlestick_template("EverCrypt", data_filename.str()),
         #ifdef HAVE_OPENSSL
-        std::make_pair(openssl_only, "using 0:'Q25':'Min':'Max':'Q75':xticlabels(strcol('Algorithm')) title 'OpenSSL' with candlesticks whiskerbars .25")
+        candlestick_template("OpenSSL", data_filename.str()),
         #endif
         #ifdef HAVE_BCRYPT
-        std::make_pair(bcrypt_only, "using 0:'Q25':'Min':'Max':'Q75':xticlabels(strcol('Algorithm')) title 'BCrypt' with candlesticks whiskerbars .25")
+        candlestick_template("BCrypt", data_filename.str()),
         #endif
       };
 
