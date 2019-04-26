@@ -109,7 +109,7 @@ procedure{:quick} MulAdd_unroll(
         rax;
         Ii; T1; T2; Hkey; Z0; Z1; Z2; Z3; Xi;
     requires
-        pclmulqdq_enabled;
+        pclmulqdq_enabled && avx_enabled;
         length(data) == 6;
         Z3 == reverse_bytes_quad32(data[5]);
         buffers_disjoint128(hkeys_b, scratch_b);
@@ -283,7 +283,7 @@ procedure{:quick} Reduce(ghost f:poly)
         efl;
         Ii; Hkey; Z0; Z1; Z2; Z3; Xi;
     requires
-        pclmulqdq_enabled;
+        pclmulqdq_enabled && avx_enabled;
         shift(of_quad32(Hkey), (-64)) == c;
         degree(f) < 64;
         degree(g) == 128;
@@ -329,7 +329,7 @@ procedure{:quick}{:public} GhashUnroll6x(
         rax;
         Ii; T1; T2; Hkey; Z0; Z1; Z2; Z3; Xi;
     requires
-        pclmulqdq_enabled;
+        pclmulqdq_enabled && avx_enabled;
         length(data) == 6;
         Z3 == reverse_bytes_quad32(data[5]);
         buffers_disjoint128(hkeys_b, scratch_b);

@@ -47,6 +47,7 @@ procedure{:public}{:quick} ShiftLeft128_1(ghost a:poly)
         efl;
         xmm1; xmm2;
     requires
+        avx_enabled;
         degree(a) < 128;
         xmm1 == to_quad32(a);
     ensures
@@ -55,7 +56,7 @@ procedure{:public}{:quick} ShiftLeft128_1(ghost a:poly)
     Mov128(xmm2, xmm1);
     Psrld(xmm2, 31);
     Pslld(xmm1, 1);
-    VPSLLDQ4(xmm2, xmm2);
+    VPslldq4(xmm2, xmm2);
     Pxor(xmm1, xmm2);
 
     lemma_shift_left_1(a);
@@ -66,6 +67,7 @@ procedure{:quick} ShiftLeft2_128_1(ghost lo:poly, ghost hi:poly)
         efl; r12;
         xmm1; xmm2; xmm3; xmm4; xmm5;
     requires
+        avx_enabled;
         degree(hi) < 127;
         degree(lo) <= 127;
         xmm1 == to_quad32(lo);
@@ -95,8 +97,8 @@ procedure{:quick} ShiftLeft2_128_1(ghost lo:poly, ghost hi:poly)
 
     // ra012 := ra << 32
     // rb012 := rb << 32
-    VPSLLDQ4(xmm5, xmm3);
-    VPSLLDQ4(xmm4, xmm4);
+    VPslldq4(xmm5, xmm3);
+    VPslldq4(xmm4, xmm4);
 
     // ra3 := ra >> 96
     PinsrdImm(xmm3, 0, 0, r12);
@@ -119,7 +121,7 @@ procedure{:quick} ClmulRev64(ghost a:poly, ghost b:poly, inline dstHi:bool, inli
         efl;
         xmm1; xmm2;
     requires
-        pclmulqdq_enabled;
+        pclmulqdq_enabled && avx_enabled;
         degree(a) <= 63;
         degree(b) <= 63;
         reverse(a, 63) == of_double32(if dstHi then quad32_double_hi(xmm1) else quad32_double_lo(xmm1));
@@ -251,7 +253,7 @@ procedure{:quick} ClmulRev128(ghost ab:poly, ghost cd:poly) returns(ghost lo:pol
         efl; r12;
         xmm1; xmm2; xmm3; xmm4; xmm5;
     requires
-        pclmulqdq_enabled;
+        pclmulqdq_enabled && avx_enabled;
         degree(ab) <= 127;
         degree(cd) <= 127;
         xmm1 == to_quad32(reverse(ab, 127));
@@ -290,7 +292,7 @@ procedure{:quick}{:public} ReduceMulRev128(ghost a:poly, ghost b:poly)
         efl; r12;
         xmm1; xmm2; xmm3; xmm4; xmm5; xmm6;
     requires
-        pclmulqdq_enabled;
+        pclmulqdq_enabled && avx_enabled;
         degree(a) <= 127;
         degree(b) <= 127;
         xmm1 == to_quad32(reverse(a, 127));
@@ -338,7 +340,7 @@ procedure{:quick}{:public} Gf128MulRev128()
         efl; r12;
         xmm1; xmm2; xmm3; xmm4; xmm5; xmm6;
     requires
-        pclmulqdq_enabled;
+        pclmulqdq_enabled && avx_enabled;
     ensures
         of_quad32(xmm1) == gf128_mul_rev(a, b);
 {

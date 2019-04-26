@@ -10,6 +10,7 @@ include{:fstar}{:open} "X64.Machine_s"
 include{:fstar}{:open} "X64.Vale.State"
 include{:fstar}{:open} "X64.Vale.Decls"
 include{:fstar}{:open} "X64.Vale.QuickCode"
+include{:fstar}{:open} "X64.CPU_Features_s"
 include{:/*TODO*/fstar}{:open Seq} "FStar.Seq.Base"
 
 module X64.Vale.InsVector
@@ -30,6 +31,7 @@ open X64.Vale.QuickCode
 open X64.Vale.QuickCodes
 open X64.Vale.InsBasic
 open X64.Vale.InsMem
+open X64.CPU_Features_s
 #endverbatim
 
 #verbatim
@@ -109,6 +111,7 @@ procedure{:instruction Ins(TS.TaintedIns(S.Ins_ioXmm_Xmm(I.ins_Paddd, dst, src),
 procedure{:instruction mk_ins(make_instr(I.ins_VPaddd, Mov128Xmm(dst), Mov128Xmm(src1), Mov128Xmm(src2)), Public)}{:quick exportOnly}{:public}
           VPaddd(out dst:xmm, src1:xmm, src2:xmm)
     modifies efl;
+    requires avx_enabled;
     ensures
         dst == old(add_wrap_quad32(src1, src2));
 {
@@ -130,8 +133,9 @@ procedure{:instruction mk_ins(make_instr(I.ins_Pand, Mov128Xmm(dst), t_op_to_op1
 }
 
 procedure{:instruction Ins(TS.TaintedIns(tuple(S.VPxor(dst, src1, t_op_to_op128(src2))), Public))}{:quick exportOnly}{:public} VPxor(out dst:xmm, src1:xmm, src2:opr128)
-  ensures
-    dst == old(quad32_xor(src1, src2));
+    requires avx_enabled;
+    ensures
+        dst == old(quad32_xor(src1, src2));
 {
 }
 
@@ -182,6 +186,7 @@ procedure{:instruction Ins(TS.TaintedIns(S.Ins_ioXmm_Xmm(I.ins_Palignr(8), dst, 
 procedure{:instruction mk_ins(make_instr(I.ins_VPalignr(8), Mov128Xmm(dst), Mov128Xmm(src1), Mov128Xmm(src2)), Public)}{:quick exportOnly}{:public}
           VPalignr8(out dst:xmm, src1:xmm, src2:xmm)
     modifies efl;
+    requires avx_enabled;
     ensures
         dst == old(Mkfour(src2.hi2, src2.hi3, src1.lo0, src1.lo1));
 {
@@ -202,7 +207,9 @@ procedure{:instruction Ins(TS.TaintedIns(S.Ins_ioXmm_Xmm(I.ins_Shufpd(permutatio
 
 procedure{:instruction mk_ins(make_instr(I.ins_VShufpd(permutation), Mov128Xmm(dst), Mov128Xmm(src1), Mov128Xmm(src2)), Public)}{:quick exportOnly}{:public}
           VShufpd(out dst:xmm, src1:xmm, src2:xmm, inline permutation:imm8)
-    requires permutation < 4;
+    requires
+        avx_enabled;
+        permutation < 4;
     modifies efl;
     ensures
         dst == old(Mkfour(
@@ -226,6 +233,7 @@ procedure{:instruction Ins(TS.TaintedIns(S.Ins_ioXmm_Xmm(I.ins_Pshufb, dst, src)
 procedure{:instruction mk_ins(make_instr(I.ins_VPshufb, Mov128Xmm(dst), Mov128Xmm(src1), Mov128Xmm(src2)), Public)}{:quick exportOnly}{:public}
           VPshufb(out dst:xmm, src1:xmm, src2:xmm)
     requires
+        avx_enabled;
         src2 == Mkfour(0x0C0D0E0F, 0x08090A0B, 0x04050607, 0x00010203);
     modifies efl;
     ensures
@@ -378,19 +386,22 @@ procedure {:quick exportOnly}{:public}
     Pinsrq(dst, tmp, index);
 }
 
-procedure{:instruction Ins(TS.TaintedIns(S.Ins_Xmm_Xmm(I.ins_VPslldq(4), dst, src), Public))}{:quick exportOnly}{:public} VPSLLDQ4(out dst:xmm, src:xmm)
+procedure{:instruction Ins(TS.TaintedIns(S.Ins_Xmm_Xmm(I.ins_VPslldq(4), dst, src), Public))}{:quick exportOnly}{:public} VPslldq4(out dst:xmm, src:xmm)
+    requires avx_enabled;
     ensures
         dst == old(Mkfour(0, src.lo0, src.lo1, src.hi2));
 {
 }
 
 procedure{:instruction Ins(TS.TaintedIns(S.Ins_Xmm_Xmm(I.ins_VPslldq(8), dst, src), Public))}{:quick exportOnly}{:public} Vpslldq8(out dst:xmm, src:xmm)
+    requires avx_enabled;
     ensures
         dst == old(Mkfour(0, 0, src.lo0, src.lo1));
 {
 }
 
 procedure{:instruction Ins(TS.TaintedIns(S.Ins_Xmm_Xmm(I.ins_VPsrldq(8), dst, src), Public))}{:quick exportOnly}{:public} Vpsrldq8(out dst:xmm, src:xmm)
+    requires avx_enabled;
     ensures
         dst == old(Mkfour(src.hi2, src.hi3, 0, 0));
 {

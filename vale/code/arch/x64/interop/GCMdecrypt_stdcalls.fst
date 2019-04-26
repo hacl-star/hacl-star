@@ -54,7 +54,7 @@ val gcm128_decrypt_stdcall':
       4096 * (UInt64.v cipher_num) < pow2_32 /\
       4096 * (UInt64.v auth_num) < pow2_32 /\
       
-      aesni_enabled /\ pclmulqdq_enabled /\
+      aesni_enabled /\ pclmulqdq_enabled /\ avx_enabled /\
       is_aes_key_LE AES_128 (Ghost.reveal key) /\
       (Seq.equal (B.as_seq h0 keys_b)
         (seq_nat8_to_seq_uint8 (le_seq_quad32_to_bytes (key_to_round_keys_LE AES_128 (Ghost.reveal key)))))
@@ -176,7 +176,7 @@ val gcm256_decrypt_stdcall':
       4096 * (UInt64.v cipher_num) < pow2_32 /\
       4096 * (UInt64.v auth_num) < pow2_32 /\
       
-      aesni_enabled /\ pclmulqdq_enabled /\
+      aesni_enabled /\ pclmulqdq_enabled /\ avx_enabled /\
       is_aes_key_LE AES_256 (Ghost.reveal key) /\
       (Seq.equal (B.as_seq h0 keys_b)
         (seq_nat8_to_seq_uint8 (le_seq_quad32_to_bytes (key_to_round_keys_LE AES_256 (Ghost.reveal key)))))

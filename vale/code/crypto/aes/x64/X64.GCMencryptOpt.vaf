@@ -91,7 +91,7 @@ let aes_reqs
   (alg:algorithm) (key:seq nat32) (round_keys:seq quad32) (keys_b:buffer128)
   (key_ptr:int) (mem:memory) (memTaint:memtaint) : prop0
   =
-  aesni_enabled /\
+  aesni_enabled /\ avx_enabled /\
   (alg = AES_128 \/ alg = AES_256) /\
   is_aes_key_LE alg key /\
   length(round_keys) == nr(alg) + 1 /\
@@ -348,7 +348,7 @@ procedure {:quick} gcm_auth_bytes(
         validSrcAddrs128(mem, auth_ptr,  auth_b,  auth_len, memTaint, Secret);
         auth_ptr  + 16 * auth_len  < pow2_64;
         buffer_length(auth_b) == auth_len;
-        pclmulqdq_enabled;
+        pclmulqdq_enabled && avx_enabled;
 
         mask == Mkfour(0x0C0D0E0F, 0x08090A0B, 0x04050607, 0x00010203);
     ensures
@@ -1262,6 +1262,7 @@ procedure {:quick exportOnly}{:public}{:exportSpecs}{:frame false} gcm_blocks_st
     requires
         // Manual framing
         this.ok;
+        aesni_enabled && pclmulqdq_enabled && avx_enabled;
 
         rsp == init_rsp(stack);
         
@@ -1359,14 +1360,12 @@ procedure {:quick exportOnly}{:public}{:exportSpecs}{:frame false} gcm_blocks_st
         auth_len * (128/8) <= auth_num_bytes < auth_len * (128/8) + 128/8;
 
         // GCTR reqs
-        aesni_enabled;
         alg = AES_128 || alg = AES_256;
         is_aes_key_LE(alg, key);
         buffer128_as_seq(mem, keys_b) == key_to_round_keys_LE(alg, key);
         validSrcAddrs128(mem, keys_ptr, keys_b, nr(alg) + 1, memTaint, Secret);
 
         // GCM reqs
-        pclmulqdq_enabled;
         hkeys_reqs_pub(s128(mem, hkeys_b), reverse_bytes_quad32(aes_encrypt_LE(alg, key, Mkfour(0,0,0,0))));
 
     ensures

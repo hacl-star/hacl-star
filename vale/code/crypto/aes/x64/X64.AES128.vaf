@@ -57,7 +57,7 @@ procedure{:quick} KeyExpansionRound(
     requires/ensures
         validDstAddrs128(mem, rdx, dst, 11, memTaint, Secret);
     requires
-        aesni_enabled;
+        aesni_enabled && avx_enabled;
         0 <= round < 10;
         rcon == aes_rcon(round);
         is_aes_key_LE(AES_128, key);
@@ -69,11 +69,11 @@ procedure{:quick} KeyExpansionRound(
 {
     AESNI_keygen_assist(xmm2, xmm1, rcon);
     Pshufd(xmm2, xmm2, 255);
-    VPSLLDQ4(xmm3, xmm1);
+    VPslldq4(xmm3, xmm1);
     Pxor(xmm1,xmm3);
-    VPSLLDQ4(xmm3, xmm1);
+    VPslldq4(xmm3, xmm1);
     Pxor(xmm1,xmm3);
-    VPSLLDQ4(xmm3, xmm1);
+    VPslldq4(xmm3, xmm1);
     Pxor(xmm1,xmm3);
     Pxor(xmm1,xmm2);
     Store128_buffer(rdx, xmm1, 16 * (round + 1), Secret, dst, round + 1);
@@ -94,7 +94,7 @@ procedure{:quick exportOnly}{:recursive}{:decrease n} KeyExpansionRoundUnrolledR
     requires/ensures
         validDstAddrs128(mem, rdx, dst, 11, memTaint, Secret);
     requires
-        aesni_enabled;
+        aesni_enabled && avx_enabled;
         0 <= n <= 10;
         is_aes_key_LE(AES_128, key);
         key == quad32_to_seq(xmm1);
@@ -127,7 +127,7 @@ procedure{:quick}{:public} KeyExpansion128Stdcall(
         key_expansion_ptr := if win then rdx else rsi;
         key := quad32_to_seq(buffer128_read(input_key_b, 0, mem));
     requires/ensures
-        aesni_enabled;
+        aesni_enabled && avx_enabled;
         buffers_disjoint128(input_key_b, output_key_expansion_b);
         validSrcAddrs128(mem, key_ptr, input_key_b, 1, memTaint, Secret);
         validDstAddrs128(mem, key_expansion_ptr, output_key_expansion_b, 11, memTaint, Secret);

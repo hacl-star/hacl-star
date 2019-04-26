@@ -44,6 +44,8 @@ procedure{:public}{:quick exportOnly} VPolyAdd(out dst:xmm, src1:xmm, src2:opr12
         a2 := of_quad32(src2);
     modifies
         efl;
+    requires
+        avx_enabled;
     ensures
         of_quad32(dst) == add(a1, a2);
 {
@@ -69,6 +71,8 @@ procedure{:public}{:quick exportOnly} VHigh64ToLow(out dst:xmm, src:xmm)
         a := of_quad32(src);
     modifies
         efl;
+    requires
+        avx_enabled;
     ensures
         of_quad32(dst) == shift(a, (-64));
 {
@@ -83,6 +87,8 @@ procedure{:public}{:quick exportOnly} VLow64ToHigh(out dst:xmm, src:xmm)
         a := of_quad32(src);
     modifies
         efl;
+    requires
+        avx_enabled;
     ensures
         of_quad32(dst) == shift(mask(a, 64), 64);
 {
@@ -98,6 +104,8 @@ procedure{:public}{:quick exportOnly} VSwap(out dst:xmm, src:xmm)
         a := of_quad32(src);
     modifies
         efl;
+    requires
+        avx_enabled;
     ensures
         of_quad32(dst) == swap(a, 64);
 {
@@ -113,7 +121,7 @@ procedure{:public}{:quick exportOnly} VPolyMul(out dst:xmm, src1:xmm, src2:xmm, 
     modifies
         efl;
     requires
-        pclmulqdq_enabled;
+        pclmulqdq_enabled && avx_enabled;
     ensures
         of_quad32(dst) == mul(
             if src1Hi then shift(a1, (-64)) else mask(a1, 64),
