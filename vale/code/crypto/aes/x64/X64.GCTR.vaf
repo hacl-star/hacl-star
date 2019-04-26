@@ -560,8 +560,6 @@ procedure {:quick}{:public} gctr_bytes(
         out_ptr + 16 * bytes_to_quad_size(num_bytes) < pow2_64;
         buffer_length(in_b) == buffer_length(out_b) /\ buffer_length(out_b) == bytes_to_quad_size(num_bytes) /\ 256 * buffer_length(in_b) < pow2_32 /\ 4096 * num_bytes < pow2_32;
 
-        0 < num_bytes;
-
         // AES reqs
         aesni_enabled;
         alg = AES_128 || alg = AES_256;
@@ -643,8 +641,6 @@ procedure {:quick}{:public}{:exportSpecs} gctr_bytes_stdcall(
     buffer_length(ctr_b) == 1;
     256 * buffer_length(in_b) < pow2_32;
     4096 * num_bytes < pow2_32;
-
-    0 < num_bytes;
 
     // AES reqs
     aesni_enabled;
