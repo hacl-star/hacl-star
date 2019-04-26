@@ -317,6 +317,7 @@ let poly_eq_lemma1 #w text acc0 r =
   Loops.repeati_def (len0 / size_block) repeat_bf_t0 acc0
 
 #push-options "--z3rlimit 200"
+#push-options "--max_fuel 2"
 val poly_eq_lemma2:
     #w:lanes
   -> text:bytes
