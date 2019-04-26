@@ -42,7 +42,7 @@ plot \
 
 set key right outside
 set ylabel "Avg. performance [cycles/byte]"
-set yrange [0:30]
+set yrange [0:2]
 
 set title "EverCrypt AEAD Performance (message size 65536 bytes)"
 set output 'bench_meta_aead_evercrypt.svg'
