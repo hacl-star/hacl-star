@@ -17,6 +17,15 @@ extern "C" {
 #include <openssl/evp.h>
 #endif
 
+#ifdef HAVE_BCRYPT
+#include <windows.h>
+#include <bcrypt.h>
+
+#ifndef NT_SUCCESS
+#define NT_SUCCESS(Status) (((NTSTATUS)(Status)) >= 0)
+#endif
+#endif
+
 class AEADBenchmark : public Benchmark
 {
   protected:
@@ -93,7 +102,7 @@ void type2name_evercrypt(AEADBenchmark & b, int type)
       case Spec_AEAD_AES256_CCM: b.set_name("EverCrypt", "AES256\\nCCM"); break;
       case Spec_AEAD_AES128_CCM8: b.set_name("EverCrypt", "AES128\\nCCM8"); break;
       case Spec_AEAD_AES256_CCM8: b.set_name("EverCrypt", "AES256\\nCCM8"); break;
-      default: throw new std::logic_error("Unknown AEAD algorithm");
+      default: throw std::logic_error("Unknown AEAD algorithm");
     }
 }
 
@@ -183,7 +192,7 @@ class OldValeEncrypt : public AEADBenchmark
         switch(key_size_bits) {
           case 128: set_name("Vale (old)", "AES128\\nGCM"); break;
           case 256: set_name("Vale (old)", "AES256\\nGCM"); break;
-          default: throw new std::logic_error("Unknown algorithm");
+          default: throw std::logic_error("Unknown algorithm");
         }
       }
     virtual void bench_setup(const BenchmarkSettings & s)
@@ -231,7 +240,7 @@ class OldValeDecrypt : public AEADBenchmark
         switch(key_size_bits) {
           case 128: set_name("Vale (old)", "AES128\\nGCM"); break;
           case 256: set_name("Vale (old)", "AES256\\nGCM"); break;
-          default: throw new std::logic_error("Unknown algorithm");
+          default: throw std::logic_error("Unknown algorithm");
         }
       }
     virtual void bench_setup(const BenchmarkSettings & s)
@@ -277,18 +286,18 @@ class OldValeDecrypt : public AEADBenchmark
 #ifdef HAVE_OPENSSL
 // See https://github.com/openssl/openssl/blob/master/demos/evp/aesgcm.c
 
-static void type2name(AEADBenchmark & b, int type, size_t key_size_bits, size_t tag_len)
+static void openssl_type2name(AEADBenchmark & b, int type, size_t key_size_bits, size_t tag_len)
 {
   switch (type) {
     case 0:
       switch(key_size_bits) {
         case 128: b.set_name("OpenSSL", "AES128\\nGCM"); break;
         case 256: b.set_name("OpenSSL", "AES256\\nGCM"); break;
-        default: throw new std::logic_error("Unknown algorithm");
+        default: throw std::logic_error("Unknown algorithm");
       }
       break;
     case 1: b.set_name("OpenSSL", "Chacha20\\nPoly1305"); break;
-    default: throw new std::logic_error("Unknown algorithm");
+    default: throw std::logic_error("Unknown algorithm");
   }
 }
 
@@ -304,7 +313,7 @@ class OpenSSLEncrypt : public AEADBenchmark
     OpenSSLEncrypt(size_t msg_len) :
       AEADBenchmark(key_size_bits, tag_len, msg_len)
       {
-        type2name(*this, type, key_size_bits, tag_len);
+        openssl_type2name(*this, type, key_size_bits, tag_len);
         ctx = EVP_CIPHER_CTX_new();
       }
     virtual void bench_setup(const BenchmarkSettings & s)
@@ -347,7 +356,7 @@ class OpenSSLDecrypt : public AEADBenchmark
     OpenSSLDecrypt(size_t msg_len) :
       AEADBenchmark(key_size_bits, tag_len, msg_len)
       {
-        type2name(*this, type, key_size_bits, tag_len);
+        openssl_type2name(*this, type, key_size_bits, tag_len);
         ctx = EVP_CIPHER_CTX_new();
       }
     virtual void bench_setup(const BenchmarkSettings & s)
@@ -385,6 +394,117 @@ class OpenSSLDecrypt : public AEADBenchmark
 template<> const EVP_CIPHER *OpenSSLDecrypt<0, 128, 16>::evp_cipher = EVP_aes_128_gcm();
 template<> const EVP_CIPHER *OpenSSLDecrypt<0, 256, 16>::evp_cipher = EVP_aes_256_gcm();
 template<> const EVP_CIPHER *OpenSSLDecrypt<1, 256, 16>::evp_cipher = EVP_chacha20_poly1305();
+#endif
+
+#ifdef HAVE_BCRYPT
+static void bcrypt_type2name(AEADBenchmark & b, size_t key_size_bits, size_t tag_len)
+{
+  switch(key_size_bits) {
+    case 128: b.set_name("BCrypt", "AES128\\nGCM"); break;
+    case 256: b.set_name("BCrypt", "AES256\\nGCM"); break;
+    default: throw std::logic_error("Unknown algorithm");
+  }
+}
+
+#ifndef BCRYPT_AES_GCM_ALG_HANDLE
+#define BCRYPT_AES_GCM_ALG_HANDLE ((BCRYPT_ALG_HANDLE) 0x000001e1)
+#endif
+
+template<size_t key_size_bits, size_t tag_len>
+class BCryptEncryptBM : public AEADBenchmark
+{
+  protected:
+    BCRYPT_ALG_HANDLE hAlg = NULL;
+    BCRYPT_KEY_HANDLE hKey = NULL;
+    BCRYPT_AUTHENTICATED_CIPHER_MODE_INFO Info;
+    ULONG outlen;
+
+  public:
+    BCryptEncryptBM(size_t msg_len) :
+      AEADBenchmark(key_size_bits, tag_len, msg_len)
+      {
+        bcrypt_type2name(*this, key_size_bits, tag_len);
+      }
+    virtual void bench_setup(const BenchmarkSettings & s)
+    {
+      AEADBenchmark::bench_setup(s);
+      if(!NT_SUCCESS(BCryptGenerateSymmetricKey(BCRYPT_AES_GCM_ALG_HANDLE, &hKey, NULL, 0, key, key_size_bits/8, 0)))
+        throw std::logic_error("BCrypt key setup failed");
+
+      BCRYPT_INIT_AUTH_MODE_INFO(Info);
+      Info.pbAuthData = (PUCHAR) ad;
+      Info.cbAuthData = ad_len;
+      Info.pbTag = tag;
+      Info.cbTag = 16;
+      Info.pbNonce = iv;
+      Info.cbNonce = 12;
+    }
+    virtual void bench_func()
+    {
+      #ifdef _DEBUG
+      if (!NT_SUCCESS(
+      #endif
+        BCryptEncrypt(hKey, plain, msg_len, &Info, iv, 12, cipher, msg_len, &outlen, 0)
+      #ifdef _DEBUG
+        )) throw std::logic_error("BCrypt encryption failed")
+      #endif
+      ;
+    }
+    virtual ~BCryptEncryptBM()
+    {
+      BCryptDestroyKey(hKey);
+    }
+};
+
+template<size_t key_size_bits, size_t tag_len>
+class BCryptDecryptBM : public AEADBenchmark
+{
+  protected:
+    BCRYPT_ALG_HANDLE hAlg = NULL;
+    BCRYPT_KEY_HANDLE hKey = NULL;
+    BCRYPT_AUTHENTICATED_CIPHER_MODE_INFO Info;
+    ULONG outlen;
+
+  public:
+    BCryptDecryptBM(size_t msg_len) :
+      AEADBenchmark(key_size_bits, tag_len, msg_len)
+      {
+        bcrypt_type2name(*this, key_size_bits, tag_len);
+      }
+    virtual void bench_setup(const BenchmarkSettings & s)
+    {
+      AEADBenchmark::bench_setup(s);
+      if(!NT_SUCCESS(BCryptGenerateSymmetricKey(BCRYPT_AES_GCM_ALG_HANDLE, &hKey, NULL, 0, key, key_size_bits/8, 0)))
+        throw std::logic_error("BCrypt key setup failed");
+
+      BCRYPT_INIT_AUTH_MODE_INFO(Info);
+      Info.pbAuthData = (PUCHAR) ad;
+      Info.cbAuthData = ad_len;
+      Info.pbTag = tag;
+      Info.cbTag = 16;
+      Info.pbNonce = iv;
+      Info.cbNonce = 12;
+
+      if (!NT_SUCCESS(BCryptEncrypt(hKey, plain, msg_len, &Info, iv, 12, cipher, msg_len, &outlen, 0)))
+        throw std::logic_error("BCrypt encryption failed");
+    }
+    virtual void bench_func()
+    {
+      #ifdef _DEBUG
+      if (!NT_SUCCESS(
+      #endif
+        BCryptDecrypt(hKey, cipher, msg_len, &Info, iv, 12, plain, msg_len, &outlen, 0)
+      #ifdef _DEBUG
+        )) throw std::logic_error("BCrypt decryption failed")
+      #endif
+        ;
+    }
+    virtual ~BCryptDecryptBM()
+    {
+      BCryptDestroyKey(hKey);
+    }
+};
+
 #endif
 
 void bench_aead_encrypt(const BenchmarkSettings & s)
@@ -432,18 +552,34 @@ void bench_aead_encrypt(const BenchmarkSettings & s)
       new OpenSSLEncrypt<0, 256, 16>(ds),
       new OpenSSLEncrypt<1, 256, 16>(ds),
       #endif
+
+      #ifdef HAVE_BCRYPT
+      new BCryptEncryptBM<128, 16>(ds),
+      new BCryptEncryptBM<256, 16>(ds),
+      #endif
       };
 
       Benchmark::run_batch(s, AEADBenchmark::column_headers(), data_filename.str(), todo);
 
       std::string evercrypt_only = "< grep -e \"^\\\"EverCrypt\" -e \"^\\\"Provider\" " + data_filename.str();
+      #ifdef HAVE_OPENSSL
       std::string openssl_only = "< grep -e \"^\\\"OpenSSL\" -e \"^\\\"Provider\" " + data_filename.str();
+      #endif
+      #ifdef HAVE_BCRYPT
+      std::string bcrypt_only = "< grep -e \"^\\\"BCrypt\" -e \"^\\\"Provider\" " + data_filename.str();
+      #endif
 
       Benchmark::plot_spec_t plot_specs_ds_cycles = {
         std::make_pair(evercrypt_only, "using 'Avg':xticlabels(strcol('Algorithm')) title 'EverCrypt'"),
         std::make_pair("", "using 0:'Avg':xticlabels(strcol('Algorithm')):(sprintf(\"%0.0f\", column('Avg'))) with labels font \"Courier,8\" offset char -2,.5 center notitle"),
+        #ifdef HAVE_OPENSSL
         std::make_pair(openssl_only, "using 'Avg' title 'OpenSSL'"),
         std::make_pair("", "using 0:'Avg':xticlabels(strcol('Algorithm')):(sprintf(\"%0.0f\", column('Avg'))) with labels font \"Courier,8\" offset char +2,.5 center notitle"),
+        #endif
+        #ifdef HAVE_BCRYPT
+        std::make_pair(bcrypt_only, "using 'Avg' title 'BCrypt'"),
+        std::make_pair("", "using 0:'Avg':xticlabels(strcol('Algorithm')):(sprintf(\"%0.0f\", column('Avg'))) with labels font \"Courier,8\" offset char +2,.5 center notitle"),
+        #endif
        };
 
       std::stringstream extras;
@@ -466,8 +602,14 @@ void bench_aead_encrypt(const BenchmarkSettings & s)
       Benchmark::plot_spec_t plot_specs_ds_bytes = {
         std::make_pair(evercrypt_only, "using 'Avg Cycles/Byte':xticlabels(strcol('Algorithm')) title 'EverCrypt'"),
         std::make_pair("", "using 0:'Avg Cycles/Byte':xticlabels(strcol('Algorithm')):(sprintf(\"%0.2f\", column('Avg Cycles/Byte'))) with labels font \"Courier,8\" offset char -2,.5 center notitle"),
+        #ifdef HAVE_OPENSSL
         std::make_pair(openssl_only, "using 'Avg Cycles/Byte' title 'OpenSSL'"),
         std::make_pair("", "using 0:'Avg Cycles/Byte':xticlabels(strcol('Algorithm')):(sprintf(\"%0.2f\", column('Avg Cycles/Byte'))) with labels font \"Courier,8\" offset char +2,.5 center notitle"),
+        #endif
+        #ifdef HAVE_BCRYPT
+        std::make_pair(bcrypt_only, "using 'Avg Cycles/Byte' title 'BCrypt'"),
+        std::make_pair("", "using 0:'Avg Cycles/Byte':xticlabels(strcol('Algorithm')):(sprintf(\"%0.2f\", column('Avg Cycles/Byte'))) with labels font \"Courier,8\" offset char +2,.5 center notitle"),
+        #endif
       };
 
       Benchmark::make_plot(s,
@@ -481,7 +623,12 @@ void bench_aead_encrypt(const BenchmarkSettings & s)
 
       Benchmark::plot_spec_t plot_specs_ds_candlesticks = {
         std::make_pair(evercrypt_only, "using 0:'Q25':'Min':'Max':'Q75':xticlabels(strcol('Algorithm')) title 'EverCrypt' with candlesticks whiskerbars .25"),
+        #ifdef HAVE_OPENSSL
         std::make_pair(openssl_only, "using 0:'Q25':'Min':'Max':'Q75':xticlabels(strcol('Algorithm')) title 'OpenSSL' with candlesticks whiskerbars .25")
+        #endif
+        #ifdef HAVE_BCRYPT
+        std::make_pair(bcrypt_only, "using 0:'Q25':'Min':'Max':'Q75':xticlabels(strcol('Algorithm')) title 'BCrypt' with candlesticks whiskerbars .25")
+        #endif
       };
 
       extras << "set boxwidth .25\n";
@@ -568,18 +715,34 @@ void bench_aead_decrypt(const BenchmarkSettings & s)
       new OpenSSLDecrypt<0, 256, 16>(ds),
       new OpenSSLDecrypt<1, 256, 16>(ds),
       #endif
+
+      #ifdef HAVE_BCRYPT
+      new BCryptDecryptBM<128, 16>(ds),
+      new BCryptDecryptBM<256, 16>(ds),
+      #endif
       };
 
       Benchmark::run_batch(s, AEADBenchmark::column_headers(), data_filename.str(), todo);
 
       std::string evercrypt_only = "< grep -e \"^\\\"EverCrypt\" -e \"^\\\"Provider\" " + data_filename.str();
+      #ifdef HAVE_OPENSSL
       std::string openssl_only = "< grep -e \"^\\\"OpenSSL\" -e \"^\\\"Provider\" " + data_filename.str();
+      #endif
+      #ifdef HAVE_BCRYPT
+      std::string bcrypt_only = "< grep -e \"^\\\"BCrypt\" -e \"^\\\"Provider\" " + data_filename.str();
+      #endif
 
       Benchmark::plot_spec_t plot_specs_ds_cycles = {
         std::make_pair(evercrypt_only, "using 'Avg':xticlabels(strcol('Algorithm')) title 'EverCrypt'"),
         std::make_pair("", "using 0:'Avg':xticlabels(strcol('Algorithm')):(sprintf(\"%0.0f\", column('Avg'))) with labels font \"Courier,8\" offset char -2,.5 center notitle"),
+        #ifdef HAVE_OPENSSL
         std::make_pair(openssl_only, "using 'Avg' title 'OpenSSL'"),
         std::make_pair("", "using 0:'Avg':xticlabels(strcol('Algorithm')):(sprintf(\"%0.0f\", column('Avg'))) with labels font \"Courier,8\" offset char +2,.5 center notitle"),
+        #endif
+        #ifdef HAVE_BCRYPT
+        std::make_pair(bcrypt_only, "using 'Avg' title 'BCrypt'"),
+        std::make_pair("", "using 0:'Avg':xticlabels(strcol('Algorithm')):(sprintf(\"%0.0f\", column('Avg'))) with labels font \"Courier,8\" offset char +2,.5 center notitle"),
+        #endif
        };
 
       std::stringstream extras;
@@ -602,8 +765,14 @@ void bench_aead_decrypt(const BenchmarkSettings & s)
       Benchmark::plot_spec_t plot_specs_ds_bytes = {
         std::make_pair(evercrypt_only, "using 'Avg Cycles/Byte':xticlabels(strcol('Algorithm')) title 'EverCrypt'"),
         std::make_pair("", "using 0:'Avg Cycles/Byte':xticlabels(strcol('Algorithm')):(sprintf(\"%0.2f\", column('Avg Cycles/Byte'))) with labels font \"Courier,8\" offset char -2,.5 center notitle"),
+        #ifdef HAVE_OPENSSL
         std::make_pair(openssl_only, "using 'Avg Cycles/Byte' title 'OpenSSL'"),
         std::make_pair("", "using 0:'Avg Cycles/Byte':xticlabels(strcol('Algorithm')):(sprintf(\"%0.2f\", column('Avg Cycles/Byte'))) with labels font \"Courier,8\" offset char +2,.5 center notitle"),
+        #endif
+        #ifdef HAVE_BCRYPT
+        std::make_pair(bcrypt_only, "using 'Avg Cycles/Byte' title 'BCrypt'"),
+        std::make_pair("", "using 0:'Avg Cycles/Byte':xticlabels(strcol('Algorithm')):(sprintf(\"%0.2f\", column('Avg Cycles/Byte'))) with labels font \"Courier,8\" offset char +2,.5 center notitle"),
+        #endif
       };
 
       Benchmark::make_plot(s,
@@ -617,7 +786,12 @@ void bench_aead_decrypt(const BenchmarkSettings & s)
 
       Benchmark::plot_spec_t plot_specs_ds_candlesticks = {
         std::make_pair(evercrypt_only, "using 0:'Q25':'Min':'Max':'Q75':xticlabels(strcol('Algorithm')) title 'EverCrypt' with candlesticks whiskerbars .25"),
+        #ifdef HAVE_OPENSSL
         std::make_pair(openssl_only, "using 0:'Q25':'Min':'Max':'Q75':xticlabels(strcol('Algorithm')) title 'OpenSSL' with candlesticks whiskerbars .25")
+        #endif
+        #ifdef HAVE_BCRYPT
+        std::make_pair(bcrypt_only, "using 0:'Q25':'Min':'Max':'Q75':xticlabels(strcol('Algorithm')) title 'BCrypt' with candlesticks whiskerbars .25")
+        #endif
       };
 
       extras << "set boxwidth .25\n";

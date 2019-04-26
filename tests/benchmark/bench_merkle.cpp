@@ -44,7 +44,7 @@ class MerkleInsert : public Benchmark
       {
         #ifdef _DEBUG
         if (!mt_insert_pre(tree, hashes[i]))
-          throw new std::logic_error("precondition violation");
+          throw std::logic_error("precondition violation");
         #endif
         mt_insert(tree, hashes[i]);
       }
@@ -99,7 +99,7 @@ class MerklePathExtraction : public Benchmark
            *(hashes[i] + j) = rand() % 8;
         #ifdef _DEBUG
         if (!mt_insert_pre(tree, hashes[i]))
-          throw new std::logic_error("precondition violation");
+          throw std::logic_error("precondition violation");
         #endif
         mt_insert(tree, hash);
       }
@@ -118,8 +118,8 @@ class MerklePathExtraction : public Benchmark
       for (uint64_t i = 0; i < num_nodes; i++)
       {
         #ifdef _DEBUG
-        if (!mt_get_path_pre(tree, i, path, root))
-          throw new std::logic_error("precondition violation");
+        if (!mt_get_path_pre(tree, i, paths[i], roots[i]))
+          throw std::logic_error("precondition violation");
         #endif
         mt_get_path(tree, i, paths[i], roots[i]);
       }
@@ -179,7 +179,7 @@ class MerklePathVerification : public Benchmark
            *(hashes[i] + j) = rand() % 8;
         #ifdef _DEBUG
         if (!mt_insert_pre(tree, hashes[i]))
-          throw new std::logic_error("precondition violation");
+          throw std::logic_error("precondition violation");
         #endif
         mt_insert(tree, hash);
       }
@@ -194,7 +194,7 @@ class MerklePathVerification : public Benchmark
 
         #ifdef _DEBUG
         if (!mt_get_path_pre(tree, i, paths[i], roots[i]))
-          throw new std::logic_error("precondition violation");
+          throw std::logic_error("precondition violation");
         #endif
         js[i] = mt_get_path(tree, i, paths[i], roots[i]);
       }
@@ -206,13 +206,13 @@ class MerklePathVerification : public Benchmark
       {
         #ifdef _DEBUG
         if (!mt_verify(tree, i, js[i], paths[i], roots[i]))
-          throw new std::logic_error("precondition violation");
+          throw std::logic_error("precondition violation");
         bool ok =
         #endif
           mt_verify(tree, i, js[i], paths[i], roots[i]);
         #ifdef _DEBUG
         if (!ok)
-          throw new std::logic_error("postcondition violation");
+          throw std::logic_error("postcondition violation");
         #endif
       }
     }

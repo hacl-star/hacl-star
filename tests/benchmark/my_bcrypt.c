@@ -59,7 +59,7 @@ static uint32_t bcrypt_rng_init(void)
     0
 #endif
   );
-  
+
   if (!NT_SUCCESS(st)) {
     return 0;
   }
@@ -203,7 +203,7 @@ uint32_t EverCrypt_BCrypt_aes128_gcm_decrypt(uint8_t *key, uint8_t *iv, uint8_t 
                                          uint8_t *plaintext, uint32_t plaintext_len, uint8_t *ciphertext, uint8_t *tag)
 {
   BCRYPT_KEY_HANDLE hKey = bcrypt_create(BCRYPT_AES_GCM_ALG_HANDLE, key, 16);
-  if(hKey == NULL) return 0;  
+  if(hKey == NULL) return 0;
   uint32_t ret = bcrypt_aead(hKey, 0, iv, aad, aad_len, plaintext, plaintext_len, ciphertext, tag);
   bcrypt_free(hKey);
   return ret;
@@ -215,7 +215,7 @@ void EverCrypt_BCrypt_aes256_gcm_encrypt(uint8_t *key, uint8_t *iv, uint8_t *aad
   BCRYPT_KEY_HANDLE hKey = bcrypt_create(BCRYPT_AES_GCM_ALG_HANDLE, key, 32);
   if(NULL == hKey || 1 != bcrypt_aead(hKey, 1, iv, aad, aad_len, plaintext, plaintext_len, ciphertext, tag))
     handleErrors();
-  bcrypt_free(hKey);  
+  bcrypt_free(hKey);
 }
 
 uint32_t EverCrypt_BCrypt_aes256_gcm_decrypt(uint8_t *key, uint8_t *iv, uint8_t *aad, uint32_t aad_len,

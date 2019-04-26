@@ -12,7 +12,7 @@
 #include "bench_ed25519.h"
 #include "bench_merkle.h"
 
-#include <openssl/crypto.h>
+//#include <openssl/crypto.h>
 
 BenchmarkSettings & parse_args(int argc, char const ** argv)
 {
@@ -114,7 +114,7 @@ int main(int argc, char const **argv)
       std::cout << "Unsupported benchmark '" << b << "'.\n";
     }
 
-    CRYPTO_cleanup_all_ex_data();
+    // CRYPTO_cleanup_all_ex_data();
 
     return 0;
   }

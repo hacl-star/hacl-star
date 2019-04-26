@@ -2,7 +2,7 @@
 
 OPENSSL=openssl-1.1.1b
 PAR=-j20
-CONFIGS="gcc-7,g++-7,compact-gcc gcc-8,g++-8,compact-gcc clang-7,clang++-7,compact clang-8,clang++-8,compact"
+CONFIGS="gcc-7,g++-7,compact-gcc gcc-8,g++-8,compact-gcc clang-7,clang++-7,compact-gcc clang-8,clang++-8,compact-gcc"
 OPENSSL_CONFIGS="openssl-default, openssl-no-asm,no-asm"
 SAMPLES=1000
 
@@ -35,7 +35,7 @@ for c in $CONFIGS; do
           wget https://www.openssl.org/source/$OPENSSL.tar.gz --no-check-certificate
         fi
         echo "Building $OCONF-$CC"
-        (mkdir -p $OCONF-$CC; tar xfz $OPENSSL.tar.gz -C $OCONF-$CC; pushd $OCONF-$CC/$OPENSSL; CC=$CC CXX=$CXX ./config $OFLAGS > configure.log 2>&1; make $PAR > build.log 2>&1; popd)
+        (mkdir -p $OCONF-$CC; tar xfz $OPENSSL.tar.gz -C $OCONF-$CC; pushd $OCONF-$CC/$OPENSSL; CC=$CC CXX=$CXX ./config $OFLAGS > configure.log 2>&1; make $PAR > build.log 2>&1; popd > /dev/null)
       fi
       if [ ! -d evercrypt-$OCONF-$CC ]; then
         echo "Configuring evercrypt-$CC with $OCONF-$CC"
@@ -50,7 +50,7 @@ for c in $CONFIGS; do
             -DRFC7748_DIR=$RFC7748_DIR \
             -DUSE_OPENSSL=ON -DOPENSSL_LIB=../$OCONF-$CC/$OPENSSL/libcrypto.a -DOPENSSL_INC=../$OCONF-$CC/$OPENSSL/include \
             .. \
-            2>&1; popd) > evercrypt-$OCONF-$CC/configure.log
+            2>&1; popd > /dev/null) > evercrypt-$OCONF-$CC/configure.log
       fi
       pushd evercrypt-$OCONF-$CC > /dev/null
       echo "(Re-)building evercrypt-$CC using $OCONF-$CC"
