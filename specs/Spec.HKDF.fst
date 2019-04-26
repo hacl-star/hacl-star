@@ -29,9 +29,9 @@ let hkdf_extract a salt ikm =
 
 val hkdf_round0:
     a: Hash.hash_alg
-  -> prk: bytes{length prk <= Hash.max_input_length a}
-  -> info: bytes{length info + Hash.hash_length a + 1 <= max_size_t (* BB. FIXME, this is required by create *)
-              /\ length prk + length info + 1 + Hash.hash_length a + Hash.block_length a <= Hash.max_input_length a} ->
+  -> prk: bytes{length prk  + Hash.block_length a < max_size_t}
+  -> info: bytes{length info + Hash.hash_length a + 1 < max_size_t (* BB. FIXME, this is required by create *)
+              /\ length prk + length info + 1 + Hash.hash_length a + Hash.block_length a < max_size_t} ->
   Tot (lbytes (Hash.hash_length a))
 
 let hkdf_round0 a prk info =
@@ -39,14 +39,15 @@ let hkdf_round0 a prk info =
   let input = create (ilen + 1) (u8 0) in
   let input = update_sub input 0 ilen info in
   let input = input.[ilen] <- u8 1 in
+  assert_norm(pow2 32 < pow2 61 /\ pow2 32 < pow2 125);
   HMAC.hmac a prk input
 
 
 val hkdf_round:
     a: Hash.hash_alg
   -> prk: bytes{length prk <= Hash.max_input_length a}
-  -> info: bytes{length info + Hash.hash_length a + 1 <= max_size_t (* BB. FIXME, this is required by create *)
-              /\ length prk + length info + 1 + Hash.hash_length a + Hash.block_length a < Hash.max_input_length a}
+  -> info: bytes{length info + Hash.hash_length a + 1 < max_size_t (* BB. FIXME, this is required by create *)
+              /\ length prk + length info + 1 + Hash.hash_length a + Hash.block_length a < max_size_t}
   -> i:nat{1 < i /\ i <= 255}
   -> ti:lbytes (Hash.hash_length a) ->
   Tot (lbytes (Hash.hash_length a))
@@ -57,6 +58,7 @@ let hkdf_round a prk info i ti =
   let input = update_sub input 0 (Hash.hash_length a) ti in
   let input = update_sub input (Hash.hash_length a) ilen info in
   let input = input.[(Hash.hash_length a) + ilen] <- u8 i in
+  assert_norm(pow2 32 < pow2 61 /\ pow2 32 < pow2 125);
   HMAC.hmac a prk input
 
 #set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
