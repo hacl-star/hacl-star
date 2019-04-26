@@ -22,7 +22,7 @@ val h : a_len:size_nat{0 < a_len /\ a_len <=max_size_t - 2 *$line_size}
 let h a_len a nn =
   let null_list = [] in
   let null_key : lbytes 0 = assert_norm (List.Tot.length null_list = 0); of_list #uint8 null_list in
-  Spec.Blake2b.blake2b a_len a 0 null_key nn
+  Spec.Blake2.blake2b a 0 null_key nn
 
 (** Concats the parameters for Argon2i and hashes them to provide the initial buffer *)
 val concat_and_hash :

@@ -29,7 +29,6 @@ FSTAR_INCLUDE_DIRS = \
   $(KREMLIN_HOME)/kremlib \
   $(HACL_HOME)/specs \
   $(HACL_HOME)/lib \
-  $(HACL_HOME)/lib/fst \
   $(HACL_HOME)/lib/c
 
 FSTAR_INCLUDES = $(addprefix --include ,$(FSTAR_INCLUDE_DIRS))
@@ -76,7 +75,7 @@ $(CACHE_DIR)/Lib.RawIntTypes.fst.checked: $(CACHE_DIR)/Lib.IntTypes.fst.checked
 $(CACHE_DIR)/Lib.RawIntTypes.fst.checked: | .depend
 	$(FSTARR) $< \
 	  --expose_interfaces \
-	  $(HACL_HOME)/lib/fst/Lib.IntTypes.fst \
+	  $(HACL_HOME)/lib/Lib.IntTypes.fst \
 	  $(ENABLE_HINTS) --hint_file $(HINT_DIR)/$(notdir $<).hints && \
 	touch $@
 
@@ -109,7 +108,7 @@ $(OUTPUT_DIR)/Lib_RawIntTypes.krml: $(OUTPUT_DIR)/Lib_IntTypes.krml
 $(OUTPUT_DIR)/Lib_RawIntTypes.krml: | .depend
 	$(FSTAR) --codegen Kremlin --lax \
 	  --expose_interfaces \
-	  $(HACL_HOME)/lib/fst/Lib.IntTypes.fst \
+	  $(HACL_HOME)/lib/Lib.IntTypes.fst \
 	  --extract_module $(basename $(notdir $(subst .checked,,$<))) \
 	  $(notdir $(subst .checked,,$<)) && \
 	touch $@
@@ -117,8 +116,8 @@ $(OUTPUT_DIR)/Lib_RawIntTypes.krml: | .depend
 $(OUTPUT_DIR)/Lib_Loops.krml: | .depend $(OUTPUT_DIR)/Lib_RawIntTypes.krml
 	$(FSTAR) --codegen Kremlin --lax \
 	  --expose_interfaces \
-	  $(HACL_HOME)/lib/fst/Lib.IntTypes.fst \
-	  $(HACL_HOME)/lib/fst/Lib.RawIntTypes.fst \
+	  $(HACL_HOME)/lib/Lib.IntTypes.fst \
+	  $(HACL_HOME)/lib/Lib.RawIntTypes.fst \
 	  --extract_module $(basename $(notdir $(subst .checked,,$<))) \
 	  $(notdir $(subst .checked,,$<)) && \
 	touch $@
@@ -126,9 +125,9 @@ $(OUTPUT_DIR)/Lib_Loops.krml: | .depend $(OUTPUT_DIR)/Lib_RawIntTypes.krml
 $(OUTPUT_DIR)/%.krml: | .depend $(OUTPUT_DIR)/Lib_RawIntTypes.krml
 	$(FSTAR) --codegen Kremlin --lax \
 	  --expose_interfaces \
-	  $(HACL_HOME)/lib/fst/Lib.IntTypes.fst \
-	  $(HACL_HOME)/lib/fst/Lib.RawIntTypes.fst \
-	  $(HACL_HOME)/lib/fst/Lib.ByteBuffer.fst \
+	  $(HACL_HOME)/lib/Lib.IntTypes.fst \
+	  $(HACL_HOME)/lib/Lib.RawIntTypes.fst \
+	  $(HACL_HOME)/lib/Lib.ByteBuffer.fst \
 	  $(HACL_HOME)/lib/c/Lib.Loops.fst \
 	  --extract_module $(basename $(notdir $(subst .checked,,$<))) \
 	  $(notdir $(subst .checked,,$<)) && \
@@ -148,7 +147,7 @@ $(GENERATED_DIR)/Makefile.include: $(ALL_KRML_FILES) | .depend
 	-bundle 'Hacl.RSAPSS=Hacl.Impl.*,Hacl.RSAPSS' \
 	-library 'Hacl.SHA256,C,FStar' \
 	-drop 'LowStar,Spec,Prims,Lib,C.Loops.*' \
-	-add-include '"c/Lib_Print.h"' \
+	-add-include '"c/Lib_PrintBuffer.h"' \
 	-tmpdir $(GENERATED_DIR) \
 	$^
 
@@ -177,7 +176,7 @@ ALL_GENERATED_FILES = $(addprefix $(GENERATED_DIR)/,$(ALL_OUR_FILES))
 
 ALL_SOURCES = \
   $(ALL_GENERATED_FILES) \
-  $(HACL_HOME)/lib/c/Lib_Print.c \
+  $(HACL_HOME)/lib/c/Lib_PrintBuffer.c \
   include/Hacl_SHA256.c \
   $(HACL_HOME)/snapshots/hacl-c/Hacl_SHA2_256.c
 

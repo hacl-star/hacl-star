@@ -1,44 +1,21 @@
 module Spec.HMAC
 
-open FStar.Mul
+open Spec.Hash.Definitions
 open Lib.IntTypes
-open Lib.Sequence
-open Lib.ByteSequence
 
-module H = Spec.Hash
+let is_supported_alg = function
+  | SHA1 | SHA2_256 | SHA2_384 | SHA2_512 -> true
+  | _ -> false
 
-val wrap_key:
-    a: H.algorithm
-  -> key:bytes{length key <= H.max_input a} ->
-  Tot (lbytes (H.size_block a))
+let lbytes (l:nat) = b:bytes {Seq.length b = l}
 
-val init:
-    a: H.algorithm
-  -> key: lbytes (H.size_block a) ->
-  Tot (H.state a)
+let keysized (a:hash_alg) (l:nat) =
+  l < max_input_length a /\
+  l + block_length a < pow2 32
 
-val update_block:
-    a: H.algorithm
-  -> data: lbytes (H.size_block a)
-  -> H.state a ->
-  Tot (H.state a)
-
-val update_last:
-    a: H.algorithm
-  -> prev: nat
-  -> len: nat{len < H.size_block a /\ len + prev <= H.max_input a}
-  -> last: lbytes len
-  -> H.state a ->
-  Tot (H.state a)
-
-val finish:
-    a: H.algorithm
-  -> key: lbytes (H.size_block a)
-  -> H.state a ->
-  Tot (lbytes (H.size_hash a))
-
+(* ghost specification; its algorithmic definition is given in the .fst *)
 val hmac:
-    a: H.algorithm
-  -> key:bytes{length key <= H.max_input a}
-  -> input:bytes{length key + length input + H.size_block a <= H.max_input a} ->
-  Tot (lbytes (H.size_hash a))
+  a: hash_alg -> //18-07-09 can't mix refinements and erasure??
+  key: bytes{ keysized a (Seq.length key) } ->
+  data: bytes{ Seq.length data + block_length a < max_size_t } ->
+  Tot (lbytes (hash_length a))

@@ -10,6 +10,8 @@ open Lib.LoopCombinators
 module AES = Spec.AES
 module GF = Spec.GF128
 
+#set-options "--z3rlimit 25 --max_fuel 1"
+
 (* Constants *)
 let size_key: size_nat = 16
 let size_block: size_nat = 16
@@ -19,6 +21,7 @@ let size_tag: size_nat = size_block
 (* Types *)
 type key = lbytes size_key
 type nonce = lbytes size_nonce
+type tag = lbytes size_tag
 
 
 inline_for_extraction
@@ -48,7 +51,7 @@ let ghash text aad gf_key tag_key =
   tag
 
 val gcm:
-    k: key
+    k: AES.aes_key AES.AES128
   -> n: nonce
   -> m: bytes{length m <= max_size_t /\ length m + padlen (length m) <= max_size_t}
   -> aad: bytes {length aad <= max_size_t /\ length aad + padlen (length aad) <= max_size_t} ->
@@ -57,13 +60,11 @@ val gcm:
 
 let gcm k n m aad =
   let nlen = length n in
-  let tag_key = AES.aes_key_block1 k nlen n in
-  let gf_key = AES.aes_key_block0 k size_nonce (create size_nonce (u8 0)) in
+  let tag_key = AES.aes_ctr_key_block1 AES.AES128 k nlen n in
+  let gf_key = AES.aes_ctr_key_block0 AES.AES128 k size_nonce (create size_nonce (u8 0)) in
   let mac = ghash m aad gf_key tag_key in
   mac
 
-
-#reset-options "--z3rlimit 15"
 
 val aead_encrypt:
     k: key
@@ -76,7 +77,7 @@ let aead_encrypt k n m aad =
   let mlen = length m in
   let nonce = create size_nonce (u8 0) in
   let nonce = update_sub nonce 0 size_nonce n in
-  let c = AES.aes128_encrypt_bytes k size_nonce nonce 2 m in
+  let c = AES.aes128_ctr_encrypt_bytes k size_nonce nonce 2 m in
   let mac = gcm k nonce c aad in
   let result = create (mlen + size_block) (u8 0) in
   let result = update_slice result 0 mlen c in
@@ -87,19 +88,16 @@ let aead_encrypt k n m aad =
 val aead_decrypt:
     k: key
   -> n: nonce
-  -> c: bytes{size_block <= length c /\ length c <= max_size_t}
+  -> c: bytes{length c + size_block <= max_size_t}
+  -> mac: tag
   -> aad: bytes{length aad <= max_size_t /\ length aad + padlen (length aad) <= max_size_t} ->
-  Tot (option (lbytes (length c - size_block)))
+  Tot (option (lbytes (length c)))
 
-let aead_decrypt k n c aad =
+let aead_decrypt k n c tag aad =
   let clen = length c in
   let nonce = create size_nonce (u8 0) in
   let nonce = update_sub nonce 0 size_nonce n in
-  let encrypted_plaintext = sub #uint8 #clen c 0 (clen - size_block) in
-  let associated_mac = sub #uint8 #clen c (clen - size_block) size_block in
-  let computed_mac = gcm k nonce encrypted_plaintext aad in
-  let result = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) computed_mac associated_mac in
-  let zeros = create (clen - size_block) (u8 0) in
-  if result then
-    Some (AES.aes128_encrypt_bytes k size_nonce nonce 2 encrypted_plaintext)
+  let computed_tag = gcm k nonce c aad in
+  if lbytes_eq computed_tag tag then
+    Some (AES.aes128_ctr_encrypt_bytes k size_nonce nonce 2 c)
   else None

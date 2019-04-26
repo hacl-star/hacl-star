@@ -82,7 +82,7 @@ let ctest pow2_i modBits n pkeyBits e skeyBits d pTLen p qTLen q r2 rBlindTLen r
   rsa_pss_sign pow2_i modBits pkeyBits skeyBits pLen qLen skey rBlind0 saltLen salt msgLen msg sgnt;
   let check_sgnt = Lib.ByteBuffer.lbytes_eq #nTLen sgnt sgnt_expected in
   let verify_sgnt = rsa_pss_verify pow2_i modBits pkeyBits pkey saltLen sgnt msgLen msg in
-  Lib.Print.print_compare_display nTLen sgnt sgnt_expected;
+  Lib.PrintBuffer.print_compare_display nTLen sgnt sgnt_expected;
   let res = check_sgnt && verify_sgnt in
   pop_frame ();
   res

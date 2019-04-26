@@ -1,46 +1,67 @@
+FSTAR_HOME ?= ../../FStar
+HACL_HOME  ?= ..
+
+HINT_DIR  = .hints
+
 include ../Makefile.include
 
-CACHE_DIR     = .cache
-OUTPUT_DIR    = .output
-HINT_DIR      = .hints
+.PHONY: all verify clean
 
-all: verify
+all:
+	rm -f .depend && $(MAKE) .depend
+	$(MAKE) verify
+	$(MAKE) -C tutorial
 
 FSTAR_INCLUDE_DIRS = \
   $(KREMLIN_HOME)/kremlib \
   $(HACL_HOME)/lib \
-  $(HACL_HOME)/lib/fst
+  $(HACL_HOME)/specs # For Spec.AES used in Lib.IntVector
 
-FSTAR_INCLUDES = $(addprefix --include ,$(FSTAR_INCLUDE_DIRS))
+FSTAR_FLAGS = --cmi \
+  --cache_checked_modules \
+  --already_cached "'Prims+FStar+LowStar+C+Spec.Loops+TestLib'" \
+  $(addprefix --include ,$(FSTAR_INCLUDE_DIRS))
 
-FSTAR = $(FSTAR_HOME)/bin/fstar.exe $(OTHERFLAGS) \
-  --cache_checked_modules --cache_dir $(CACHE_DIR) \
-  --odir $(OUTPUT_DIR) $(FSTAR_INCLUDES)
+FSTAR = $(FSTAR_HOME)/bin/fstar.exe $(FSTAR_FLAGS) $(OTHERFLAGS)
 
-FILES = $(addprefix fst/, \
-	Lib.IntTypes.fst \
-	Lib.RawIntTypes.fst \
-	Lib.Sequence.fst \
-	Lib.ByteSequence.fst \
-	Lib.Buffer.fst \
-	Lib.ByteBuffer.fst)
+ENABLE_HINTS = --use_hints --use_hint_hashes --record_hints --query_stats
 
-FIXME = $(addprefix fst/, \
-	Lib.IntVector.fst \
-	Lib.LoopCombinators.fst)
+ALL_SOURCES = $(wildcard *.fst) $(wildcard *.fsti) tutorial/Tutorial.fst
 
-%.fst-v: %.fst
-	$(FSTAR) $(FSTAR_INCLUDES) --use_hints $<
+FIXME = 
 
-%.fsti-v: %.fsti
-	$(FSTAR) $(FSTAR_INCLUDES) --use_hints $<
+ROOTS = $(filter-out $(FIXME),$(ALL_SOURCES))
 
-%.fst-h: %.fst
-	$(FSTAR) $(FSTAR_INCLUDES) --record_hints $<
+.depend:
+	$(info $(ROOTS))
+	$(FSTAR) --dep full $(ROOTS) --extract '* -Prims -LowStar -FStar +FStar.Kremlin.Endianness -Lib.IntVector' > $@
 
-%.fsti-h: %.fsti
-	$(FSTAR) $(FSTAR_INCLUDES) --record_hints $<
+include .depend
 
+$(HINT_DIR):
+	mkdir -p $@
 
-verify: $(addsuffix -v, $(FILES))
-hints: $(addsuffix -h, $(FILES))
+%.checked: | .depend $(HINT_DIR)
+	$(FSTAR) $< $(ENABLE_HINTS) --hint_file $(HINT_DIR)/$(notdir $*).hints && \
+	touch -c $@
+
+verify: $(addsuffix .checked, $(ROOTS))
+
+# Targets for interactive mode
+
+%.fst-in:
+	@echo $(FSTAR_FLAGS) \
+	  $(ENABLE_HINTS) --hint_file $(HINT_DIR)/$(basename $@).fst.hints
+
+%.fsti-in:
+	@echo $(FSTAR_FLAGS) \
+	  $(ENABLE_HINTS) --hint_file $(HINT_DIR)/$(basename $@).fsti.hints
+
+# Clean targets
+
+SHELL=/bin/bash
+
+clean:
+	rm -rf *.checked
+
+distclean: clean

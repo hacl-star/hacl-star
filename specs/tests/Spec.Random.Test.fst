@@ -5,16 +5,21 @@ open Lib.RawIntTypes
 open Lib.Sequence
 open Lib.ByteSequence
 
-open Lib.Random
+open Lib.RandomSequence
+
+let dflag: bool = true
 
 let test () =
   let len: size_nat = 32 in
-  let output = generate len in
-  IO.print_string "\nBuffer after [generate len]: \n";
-  List.iter (fun a -> IO.print_uint8 (u8_to_UInt8 a)) (as_list output);
-  IO.print_string "\n"
-  (* let result = write len output in *)
-  (* IO.print_string "\nBuffer after [write len output]: "; *)
-  (* List.iter (fun a -> IO.print_uint8 (u8_to_UInt8 a)) (as_list output); *)
-  (* if result then IO.print_string "\nRandom write: Success!\n" *)
-  (* else IO.print_string "\nRandom write: Failure :(\n" *)
+  let e, output = crypto_random Lib.RandomSequence.entropy0 len in
+  Lib.PrintSequence.print_label_lbytes dflag "\nResult [crypto_random len]" 32 output;
+  IO.print_newline ();
+  (match unsound_crypto_random1 len with
+  | None -> IO.print_string "\nError: crypto_random Failed !\n"
+  | Some output ->
+    Lib.PrintSequence.print_label_lbytes dflag "\nResult [unsound_crypto_random1 len]" 32 output;
+    IO.print_newline ()
+  );
+  let output = unsound_crypto_random2 len in
+  Lib.PrintSequence.print_label_lbytes dflag "\nResult [unsound_crypto_random2 len]" 32 output;
+  IO.print_newline ()

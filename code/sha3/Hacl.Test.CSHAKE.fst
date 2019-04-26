@@ -7,25 +7,26 @@ open LowStar.Buffer
 
 open Lib.IntTypes
 open Lib.Buffer
+open Lib.PrintBuffer
 open Hacl.SHA3
 
 #reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq'"
 
-let lbytes len = lbuffer uint8 len
-
 val test_cshake128:
-     msg_len:size_t
-  -> msg:lbytes (size_v msg_len)
+     msg_len:size_t{v msg_len > 0}
+  -> msg:ilbuffer uint8 msg_len
   -> ctr:uint16
   -> out_len:size_t{size_v out_len > 0}
-  -> expected:lbytes (v out_len)
+  -> expected:ilbuffer uint8 out_len
   -> Stack unit
     (requires fun h -> live h msg /\ live h expected)
     (ensures  fun h0 r h1 -> True)
 let test_cshake128 msg_len msg ctr out_len expected =
   push_frame ();
   let test = create out_len (u8 0) in
-  cshake128_frodo msg_len msg ctr out_len test;
+  let msg' = create msg_len (u8 0) in
+  copy msg' msg;
+  cshake128_frodo msg_len msg' ctr out_len test;
   print_compare_display out_len test expected;
   pop_frame ()
 
@@ -36,7 +37,7 @@ let u8 n = u8 n
 //
 // Test1_cSHAKE128
 //
-let test1_plaintext: b:lbytes 16{ recallable b } =
+let test1_plaintext: b:ilbuffer uint8 16ul{ recallable b } =
   [@ inline_let]
   let l:list uint8 =
     normalize_term (List.Tot.map u8
@@ -45,7 +46,7 @@ let test1_plaintext: b:lbytes 16{ recallable b } =
   assert_norm (List.Tot.length l == 16);
   createL_global l
 
-let test1_expected: b:lbytes 64{ recallable b } =
+let test1_expected: b:ilbuffer uint8 64ul{ recallable b } =
   [@ inline_let]
   let l:list uint8 =
     normalize_term (List.Tot.map u8
@@ -62,6 +63,6 @@ let main () =
   C.String.print (C.String.of_literal "\nTEST 1. SHA3\n");
   recall test1_expected;
   recall test1_plaintext;
-  test_cshake128 (size 16) test1_plaintext (u16 2) (size 64) test1_expected;
+  test_cshake128 16ul test1_plaintext (u16 2) 64ul test1_expected;
 
   C.EXIT_SUCCESS

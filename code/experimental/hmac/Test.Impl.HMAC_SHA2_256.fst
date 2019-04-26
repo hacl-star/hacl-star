@@ -10,21 +10,21 @@ open Lib.IntTypes
 open Lib.Buffer
 open Lib.ByteBuffer
 open Lib.LoopCombinators
-open Lib.Print
+open Lib.PrintBuffer
 
 
 module Spec = Spec.SHA2
 
 module Hash = Hacl.SHA2_256
 
-inline_for_extraction let size_hash: size_nat= 32
+inline_for_extraction let size_hash: size_t = 32ul
 
 ///
 /// Test 1
 ///
 
 inline_for_extraction let test1_size_plaintext = 8ul
-let test1_plaintext: b:lbytes (v test1_size_plaintext){ recallable b } =
+let test1_plaintext: b:ilbuffer uint8 test1_size_plaintext{ recallable b } =
   [@ inline_let]
   let l:list uint8 =
     normalize_term (List.Tot.map u8 [
@@ -35,7 +35,7 @@ let test1_plaintext: b:lbytes (v test1_size_plaintext){ recallable b } =
   createL_global l
 
 
-let test1_expected: b:lbytes size_hash =
+let test1_expected: b:ilbuffer uint8 size_hash =
   [@ inline_let]
   let l:list uint8 =
     normalize_term (List.Tot.map u8 [
@@ -53,7 +53,7 @@ let test1_expected: b:lbytes size_hash =
 ///
 
 inline_for_extraction let test2_size_key = 4ul
-let test2_key: b:lbytes (v test2_size_key){ recallable b } =
+let test2_key: b:ilbuffer uint8 test2_size_key{ recallable b } =
   [@ inline_let]
   let l:list uint8 =
     normalize_term (List.Tot.map u8 [
@@ -65,7 +65,7 @@ let test2_key: b:lbytes (v test2_size_key){ recallable b } =
 
 
 inline_for_extraction let test2_size_plaintext = 28ul
-let test2_plaintext: b:lbytes (v test2_size_plaintext){ recallable b } =
+let test2_plaintext: b:ilbuffer uint8 test2_size_plaintext{ recallable b } =
   [@ inline_let]
   let l:list uint8 =
     normalize_term (List.Tot.map u8 [
@@ -79,7 +79,7 @@ let test2_plaintext: b:lbytes (v test2_size_plaintext){ recallable b } =
   createL_global l
 
 
-let test2_expected: b:lbytes size_hash =
+let test2_expected: b:ilbuffer uint8 size_hash =
   [@ inline_let]
   let l:list uint8 =
     normalize_term (List.Tot.map u8 [
@@ -96,7 +96,7 @@ let test2_expected: b:lbytes size_hash =
 /// Test 3
 ///
 
-let test3_expected: b:lbytes size_hash =
+let test3_expected: b:ilbuffer uint8 size_hash =
   [@ inline_let]
   let l:list uint8 =
     normalize_term (List.Tot.map u8 [
@@ -115,7 +115,7 @@ let test3_expected: b:lbytes size_hash =
 ///
 
 inline_for_extraction let test4_size_key = 25ul
-let test4_key: b:lbytes (v test4_size_key){ recallable b } =
+let test4_key: b:ilbuffer uint8 test4_size_key{ recallable b } =
   [@ inline_let]
   let l:list uint8 =
     normalize_term (List.Tot.map u8 [
@@ -128,7 +128,7 @@ let test4_key: b:lbytes (v test4_size_key){ recallable b } =
   assert_norm (List.Tot.length l == 25);
   createL_global l
 
-let test4_expected: b:lbytes size_hash =
+let test4_expected: b:ilbuffer uint8 size_hash =
   [@ inline_let]
   let l:list uint8 =
     normalize_term (List.Tot.map u8 [
@@ -147,7 +147,7 @@ let test4_expected: b:lbytes size_hash =
 ///
 
 inline_for_extraction let test5_size_plaintext = 20ul
-let test5_plaintext: b:lbytes (v test5_size_plaintext){ recallable b } =
+let test5_plaintext: b:ilbuffer uint8 test5_size_plaintext{ recallable b } =
   [@ inline_let]
   let l:list uint8 =
     normalize_term (List.Tot.map u8 [
@@ -160,7 +160,7 @@ let test5_plaintext: b:lbytes (v test5_size_plaintext){ recallable b } =
   createL_global l
 
 
-let test5_expected: b:lbytes 16 =
+let test5_expected: b:ilbuffer uint8 16ul =
   [@ inline_let]
   let l:list uint8 =
     normalize_term (List.Tot.map u8 [
@@ -176,7 +176,7 @@ let test5_expected: b:lbytes 16 =
 ///
 
 inline_for_extraction let test6_size_plaintext = 54ul
-let test6_plaintext: b:lbytes (v test6_size_plaintext){ recallable b } =
+let test6_plaintext: b:ilbuffer uint8 test6_size_plaintext{ recallable b } =
   [@ inline_let]
   let l:list uint8 =
     normalize_term (List.Tot.map u8 [
@@ -193,7 +193,7 @@ let test6_plaintext: b:lbytes (v test6_size_plaintext){ recallable b } =
   createL_global l
 
 
-let test6_expected: b:lbytes size_hash =
+let test6_expected: b:ilbuffer uint8 size_hash =
   [@ inline_let]
   let l:list uint8 =
     normalize_term (List.Tot.map u8 [
@@ -203,7 +203,7 @@ let test6_expected: b:lbytes size_hash =
       0x05; 0x46; 0x04; 0x0f; 0x0e; 0xe3; 0x7f; 0x54
     ])
   in
-  assert_norm (List.Tot.length l == size_hash);
+  assert_norm (List.Tot.length l == v size_hash);
   createL_global l
 
 
@@ -212,7 +212,7 @@ let test6_expected: b:lbytes size_hash =
 ///
 
 inline_for_extraction let test7_size_plaintext = 152ul
-let test7_plaintext: b:lbytes (v test7_size_plaintext){ recallable b } =
+let test7_plaintext: b:ilbuffer uint8 test7_size_plaintext{ recallable b } =
   [@ inline_let]
   let l:list uint8 =
     normalize_term (List.Tot.map u8 [
@@ -241,7 +241,7 @@ let test7_plaintext: b:lbytes (v test7_size_plaintext){ recallable b } =
   createL_global l
 
 
-let test7_expected: b:lbytes size_hash =
+let test7_expected: b:ilbuffer uint8 size_hash =
   [@ inline_let]
   let l:list uint8 =
     normalize_term (List.Tot.map u8 [
@@ -251,7 +251,7 @@ let test7_expected: b:lbytes size_hash =
       0x8a; 0x7f; 0x51; 0x53; 0x5c; 0x3a; 0x35; 0xe2
     ])
   in
-  assert_norm (List.Tot.length l == size_hash);
+  assert_norm (List.Tot.length l == v size_hash);
   createL_global l
 
 
@@ -261,61 +261,63 @@ let test7_expected: b:lbytes size_hash =
 
 val main: unit -> St C.exit_code
 let main () =
+  push_frame ();
 
   C.String.print (C.String.of_literal "TEST 1. \n");
-  let test1_result = create #_ #size_hash (size size_hash) (u8 0x00) in
+  let test1_result = create size_hash (u8 0x00) in
   let test1_size_key: size_t = 20ul in
-  let test1_key = create #uint8 #20 test1_size_key (u8 0x0b) in
+  let test1_key = create test1_size_key (u8 0x0b) in
   Hacl.HMAC_SHA2_256.hmac test1_result test1_key test1_size_key test1_plaintext test1_size_plaintext;
-  let r1 = result_compare_display (size size_hash) test1_result test1_expected in
+  let r1 = result_compare_display size_hash test1_result test1_expected in
 
 
   C.String.print (C.String.of_literal "TEST 2. \n");
-  let test2_result = create #_ #size_hash (size size_hash) (u8 0x00) in
+  let test2_result = create size_hash (u8 0x00) in
   Hacl.HMAC_SHA2_256.hmac test2_result test2_key test2_size_key test2_plaintext test2_size_plaintext;
-  let r2 = result_compare_display (size size_hash) test2_result test2_expected in
+  let r2 = result_compare_display size_hash test2_result test2_expected in
 
 
   C.String.print (C.String.of_literal "TEST 3. \n");
-  let test3_result = create #_ #size_hash (size size_hash) (u8 0x00) in
+  let test3_result = create size_hash (u8 0x00) in
   let test3_size_key: size_t = 20ul in
-  let test3_key = create #uint8 #20 test3_size_key (u8 0xaa) in
+  let test3_key = create test3_size_key (u8 0xaa) in
   let test3_size_plaintext: size_t = 50ul in
-  let test3_plaintext = create #uint8 #50 test3_size_plaintext (u8 0xdd) in
+  let test3_plaintext = create test3_size_plaintext (u8 0xdd) in
   Hacl.HMAC_SHA2_256.hmac test3_result test3_key test3_size_key test3_plaintext test3_size_plaintext;
-  let r3 = result_compare_display (size size_hash) test3_result test3_expected in
+  let r3 = result_compare_display size_hash test3_result test3_expected in
 
 
   C.String.print (C.String.of_literal "TEST 4. \n");
-  let test4_result = create #_ #size_hash (size size_hash) (u8 0x00) in
+  let test4_result = create size_hash (u8 0x00) in
   let test4_size_plaintext: size_t = 50ul in
-  let test4_plaintext = create #uint8 #50 test4_size_plaintext (u8 0xcd) in
+  let test4_plaintext = create test4_size_plaintext (u8 0xcd) in
   Hacl.HMAC_SHA2_256.hmac test4_result test4_key test4_size_key test4_plaintext test4_size_plaintext;
-  let r4 = result_compare_display (size size_hash) test4_result test4_expected in
+  let r4 = result_compare_display size_hash test4_result test4_expected in
 
 
   C.String.print (C.String.of_literal "TEST 5. \n");
-  let test5_result = create #_ #size_hash (size size_hash) (u8 0x00) in
+  let test5_result = create size_hash (u8 0x00) in
   let test5_size_key: size_t = 20ul in
-  let test5_key = create #uint8 #20 test5_size_key (u8 0x0c) in
+  let test5_key = create test5_size_key (u8 0x0c) in
   Hacl.HMAC_SHA2_256.hmac test5_result test5_key test5_size_key test5_plaintext test5_size_plaintext;
   let r5 = result_compare_display (size 16) test5_result test5_expected in
 
 
   C.String.print (C.String.of_literal "TEST 6. \n");
-  let test6_result = create #_ #size_hash (size size_hash) (u8 0x00) in
+  let test6_result = create size_hash (u8 0x00) in
   let test6_size_key: size_t = 131ul in
-  let test6_key = create #uint8 #131 test6_size_key (u8 0xaa) in
+  let test6_key = create test6_size_key (u8 0xaa) in
   Hacl.HMAC_SHA2_256.hmac test6_result test6_key test6_size_key test6_plaintext test6_size_plaintext;
-  let r6 = result_compare_display (size size_hash) test6_result test6_expected in
+  let r6 = result_compare_display size_hash test6_result test6_expected in
 
 
   C.String.print (C.String.of_literal "TEST 7. \n");
-  let test7_result = create #_ #size_hash (size size_hash) (u8 0x00) in
+  let test7_result = create size_hash (u8 0x00) in
   let test7_size_key: size_t = 131ul in
-  let test7_key = create #uint8 #131 test7_size_key (u8 0xaa) in
+  let test7_key = create test7_size_key (u8 0xaa) in
   Hacl.HMAC_SHA2_256.hmac test7_result test7_key test7_size_key test7_plaintext test7_size_plaintext;
-  let r7 = result_compare_display (size size_hash) test7_result test7_expected in
+  let r7 = result_compare_display size_hash test7_result test7_expected in
+  pop_frame ();
 
   if r1 && r2 && r3 && r4 && r5 && r6 && r7 then begin
     C.String.print (C.String.of_literal "Composite Result: Success !\n");

@@ -10,23 +10,6 @@ open Spec.SHA3.Constants
 
 #reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
 
-let keccak_rotc:lseq rotc_t 24 =
-  assert_norm (List.Tot.length rotc_list == 24);
-  of_list rotc_list
-
-let pilns_t = x:size_nat{x < 25}
-
-let sizes_v (x:piln_t) : pilns_t = size_v x
-
-let keccak_piln: lseq pilns_t 24 =
-  let piln_list = List.Tot.map sizes_v piln_list in
-  assert_norm (List.Tot.length piln_list == 24);
-  of_list piln_list
-
-let keccak_rndc: lseq (uint_t U64 PUB) 24 =
-  assert_norm (List.Tot.length rndc_list == 24);
-  of_list rndc_list
-
 unfold
 type state = lseq uint64 25
 
@@ -65,7 +48,7 @@ let state_theta (s:state) : Tot state =
 
 let state_pi_rho_inner (i:size_nat{i < 24}) (current, s) : (uint64 & state) =
   let r = keccak_rotc.[i] in
-  let _Y = keccak_piln.[i] in
+  let _Y = v keccak_piln.[i] in
   let temp = s.[_Y] in
   let s = s.[_Y] <- rotl current r in
   let current = temp in
@@ -192,12 +175,12 @@ let squeeze
   let outBlocks = outputByteLen / rateInBytes in
   let a (i:nat{i <= outBlocks}) = state in
   let s, output =
-    generate_blocks rateInBytes outBlocks a
+    generate_blocks rateInBytes outBlocks outBlocks a
       (squeeze_inner rateInBytes outputByteLen) s
   in
   let remOut = outputByteLen % rateInBytes in
   let block = storeState remOut s in
-  output @| block
+  (to_lseq output) @| block
 
 
 val keccak:

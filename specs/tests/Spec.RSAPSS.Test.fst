@@ -21,7 +21,7 @@ let ctest modBits nLen n eLen e dLen d msgLen msg sLen salt sgnt_expected num =
   let pkey = Mk_rsa_pubkey n e in
   let skey = Mk_rsa_privkey pkey d in
   let sgnt_computed = rsapss_sign #sLen #msgLen modBits skey salt msg in
-  let check = eq_bytes #nLen sgnt_computed sgnt_expected in
+  let check = lbytes_eq #nLen sgnt_computed sgnt_expected in
   let verify = rsapss_verify #msgLen modBits pkey sLen msg sgnt_expected in
 
   IO.print_string ("\n Test "); IO.print_string (UInt8.to_string (num));

@@ -10,21 +10,21 @@ open Lib.IntTypes
 open Lib.Buffer
 open Lib.ByteBuffer
 open Lib.LoopCombinators
-open Lib.Print
+open Lib.PrintBuffer
 
 
 module Spec = Spec.SHA2
 
 module Hash = Hacl.SHA2_256
 
-inline_for_extraction let size_hash: size_nat= 32
+inline_for_extraction let size_hash: size_t = 32ul
 
 ///
 /// Test 1
 ///
 
 inline_for_extraction let test1_size_ikm = 22ul
-let test1_ikm: b:lbytes (v test1_size_ikm){ recallable b } =
+let test1_ikm: b:ilbuffer uint8 test1_size_ikm{ recallable b } =
   [@ inline_let]
   let l:list uint8 =
     normalize_term (List.Tot.map u8 [
@@ -38,7 +38,7 @@ let test1_ikm: b:lbytes (v test1_size_ikm){ recallable b } =
 
 
 inline_for_extraction let test1_size_salt = 13ul
-let test1_salt: b:lbytes (v test1_size_salt){ recallable b } =
+let test1_salt: b:ilbuffer uint8 test1_size_salt{ recallable b } =
   [@ inline_let]
   let l:list uint8 =
     normalize_term (List.Tot.map u8 [
@@ -51,7 +51,7 @@ let test1_salt: b:lbytes (v test1_size_salt){ recallable b } =
 
 
 inline_for_extraction let test1_size_info = 10ul
-let test1_info: b:lbytes (v test1_size_info){ recallable b } =
+let test1_info: b:ilbuffer uint8 test1_size_info{ recallable b } =
   [@ inline_let]
   let l:list uint8 =
     normalize_term (List.Tot.map u8 [
@@ -63,8 +63,8 @@ let test1_info: b:lbytes (v test1_size_info){ recallable b } =
   createL_global l
 
 
-inline_for_extraction let test1_size_expected_prk = 32
-let test1_expected_prk: b:lbytes test1_size_expected_prk =
+inline_for_extraction let test1_size_expected_prk = 32ul
+let test1_expected_prk: b:ilbuffer uint8 test1_size_expected_prk =
   [@ inline_let]
   let l:list uint8 =
     normalize_term (List.Tot.map u8 [
@@ -78,8 +78,8 @@ let test1_expected_prk: b:lbytes test1_size_expected_prk =
   createL_global l
 
 
-inline_for_extraction let test1_size_expected_okm = 42
-let test1_expected_okm: b:lbytes test1_size_expected_okm =
+inline_for_extraction let test1_size_expected_okm = 42ul
+let test1_expected_okm: b:ilbuffer uint8 test1_size_expected_okm =
   [@ inline_let]
   let l:list uint8 =
     normalize_term (List.Tot.map u8 [
@@ -100,7 +100,7 @@ let test1_expected_okm: b:lbytes test1_size_expected_okm =
 ///
 
 inline_for_extraction let test2_size_ikm = 80ul
-let test2_ikm: b:lbytes (v test2_size_ikm){ recallable b } =
+let test2_ikm: b:ilbuffer uint8 test2_size_ikm{ recallable b } =
   [@ inline_let]
   let l:list uint8 =
     normalize_term (List.Tot.map u8 [
@@ -121,7 +121,7 @@ let test2_ikm: b:lbytes (v test2_size_ikm){ recallable b } =
 
 
 inline_for_extraction let test2_size_salt = 80ul
-let test2_salt: b:lbytes (v test2_size_salt){ recallable b } =
+let test2_salt: b:ilbuffer uint8 test2_size_salt{ recallable b } =
   [@ inline_let]
   let l:list uint8 =
     normalize_term (List.Tot.map u8 [
@@ -142,7 +142,7 @@ let test2_salt: b:lbytes (v test2_size_salt){ recallable b } =
 
 
 inline_for_extraction let test2_size_info = 80ul
-let test2_info: b:lbytes (v test2_size_info){ recallable b } =
+let test2_info: b:ilbuffer uint8 test2_size_info{ recallable b } =
   [@ inline_let]
   let l:list uint8 =
     normalize_term (List.Tot.map u8 [
@@ -162,8 +162,8 @@ let test2_info: b:lbytes (v test2_size_info){ recallable b } =
   createL_global l
 
 
-inline_for_extraction let test2_size_expected_prk = 32
-let test2_expected_prk: b:lbytes test2_size_expected_prk =
+inline_for_extraction let test2_size_expected_prk = 32ul
+let test2_expected_prk: b:ilbuffer uint8 test2_size_expected_prk =
   [@ inline_let]
   let l:list uint8 =
     normalize_term (List.Tot.map u8 [
@@ -177,8 +177,8 @@ let test2_expected_prk: b:lbytes test2_size_expected_prk =
   createL_global l
 
 
-inline_for_extraction let test2_size_expected_okm = 82
-let test2_expected_okm: b:lbytes test2_size_expected_okm =
+inline_for_extraction let test2_size_expected_okm = 82ul
+let test2_expected_okm: b:ilbuffer uint8 test2_size_expected_okm =
   [@ inline_let]
   let l:list uint8 =
     normalize_term (List.Tot.map u8 [
@@ -204,7 +204,7 @@ let test2_expected_okm: b:lbytes test2_size_expected_okm =
 ///
 
 inline_for_extraction let test3_size_ikm = 22ul
-let test3_ikm: b:lbytes (v test3_size_ikm){ recallable b } =
+let test3_ikm: b:ilbuffer uint8 test3_size_ikm{ recallable b } =
   [@ inline_let]
   let l:list uint8 =
     normalize_term (List.Tot.map u8 [
@@ -218,15 +218,15 @@ let test3_ikm: b:lbytes (v test3_size_ikm){ recallable b } =
 
 
 inline_for_extraction let test3_size_salt = 0ul
-let test3_salt: b:lbytes (v test3_size_salt) = createL_global []
+let test3_salt: b:ilbuffer uint8 test3_size_salt = createL_global []
 
 
 inline_for_extraction let test3_size_info = 0ul
-let test3_info: b:lbytes (v test3_size_info) = createL_global []
+let test3_info: b:ilbuffer uint8 test3_size_info = createL_global []
 
 
-inline_for_extraction let test3_size_expected_prk = 32
-let test3_expected_prk: b:lbytes test3_size_expected_prk =
+inline_for_extraction let test3_size_expected_prk = 32ul
+let test3_expected_prk: b:ilbuffer uint8 test3_size_expected_prk =
   [@ inline_let]
   let l:list uint8 =
     normalize_term (List.Tot.map u8 [
@@ -240,8 +240,8 @@ let test3_expected_prk: b:lbytes test3_size_expected_prk =
   createL_global l
 
 
-inline_for_extraction let test3_size_expected_okm = 42
-let test3_expected_okm: b:lbytes test3_size_expected_okm =
+inline_for_extraction let test3_size_expected_okm = 42ul
+let test3_expected_okm: b:ilbuffer uint8 test3_size_expected_okm =
   [@ inline_let]
   let l:list uint8 =
     normalize_term (List.Tot.map u8 [
@@ -263,33 +263,36 @@ let test3_expected_okm: b:lbytes test3_size_expected_okm =
 
 val main: unit -> St C.exit_code
 let main () =
+  push_frame ();
+  admit();
 
   C.String.print (C.String.of_literal "TEST 1. \n");
-  let test1_result_prk = create #_ #size_hash (size size_hash) (u8 0x00) in
-  let test1_result_okm = create #_ #size_hash (size test1_size_expected_okm) (u8 0x00) in
+  let test1_result_prk = create size_hash (u8 0x00) in
+  let test1_result_okm = create test1_size_expected_okm (u8 0x00) in
   Hacl.HKDF_SHA2_256.hkdf_extract test1_result_prk test1_salt test1_size_salt test1_ikm test1_size_ikm;
-  let r1a = result_compare_display (size size_hash) test1_result_prk test1_expected_prk in
-  Hacl.HKDF_SHA2_256.hkdf_expand test1_result_okm test1_result_prk (size size_hash) test1_info test1_size_info test1_size_expected_okm;
+  let r1a = result_compare_display size_hash test1_result_prk test1_expected_prk in
+  Hacl.HKDF_SHA2_256.hkdf_expand test1_result_okm test1_result_prk size_hash test1_info test1_size_info test1_size_expected_okm;
   let r1b = result_compare_display test1_size_expected_okm test1_result_okm test1_expected_okm in
 
 
   C.String.print (C.String.of_literal "TEST 2. \n");
-  let test2_result_prk = create #_ #size_hash (size size_hash) (u8 0x00) in
-  let test2_result_okm = create #_ #size_hash (size test2_size_expected_okm) (u8 0x00) in
+  let test2_result_prk = create size_hash (u8 0x00) in
+  let test2_result_okm = create test2_size_expected_okm (u8 0x00) in
   Hacl.HKDF_SHA2_256.hkdf_extract test2_result_prk test2_salt test2_size_salt test2_ikm test2_size_ikm;
-  let r2a = result_compare_display (size size_hash) test2_result_prk test2_expected_prk in
-  Hacl.HKDF_SHA2_256.hkdf_expand test2_result_okm test2_result_prk (size size_hash) test2_info test2_size_info test2_size_expected_okm;
+  let r2a = result_compare_display size_hash test2_result_prk test2_expected_prk in
+  Hacl.HKDF_SHA2_256.hkdf_expand test2_result_okm test2_result_prk size_hash test2_info test2_size_info test2_size_expected_okm;
   let r2b = result_compare_display test2_size_expected_okm test2_result_okm test2_expected_okm in
 
 
   C.String.print (C.String.of_literal "TEST 3. \n");
-  let test3_result_prk = create #_ #size_hash (size size_hash) (u8 0x00) in
-  let test3_result_okm = create #_ #size_hash (size test3_size_expected_okm) (u8 0x00) in
+  let test3_result_prk = create size_hash (u8 0x00) in
+  let test3_result_okm = create test3_size_expected_okm (u8 0x00) in
   Hacl.HKDF_SHA2_256.hkdf_extract test3_result_prk test3_salt test3_size_salt test3_ikm test3_size_ikm;
-  let r3a = result_compare_display (size size_hash) test3_result_prk test3_expected_prk in
-  Hacl.HKDF_SHA2_256.hkdf_expand test3_result_okm test3_result_prk (size size_hash) test3_info test3_size_info test3_size_expected_okm;
+  let r3a = result_compare_display size_hash test3_result_prk test3_expected_prk in
+  Hacl.HKDF_SHA2_256.hkdf_expand test3_result_okm test3_result_prk size_hash test3_info test3_size_info test3_size_expected_okm;
   let r3b = result_compare_display test3_size_expected_okm test3_result_okm test3_expected_okm in
 
+  pop_frame ();
 
   if r1a && r1b && r2a && r2b && r3a && r3b then begin
     C.String.print (C.String.of_literal "Composite Result: Success !\n");

@@ -1,13 +1,14 @@
-FSTAR_HOME=$(HACL_HOME)/../FStar
-
+FSTAR_HOME=../../FStar
+HACL_HOME=..
 include ../Makefile.include
 
 .PHONY=all test
 
 FSTAR_INCLUDES+= \
-	--include $(HACL_HOME)/lib \
-	--include $(HACL_HOME)/lib/fst \
-	--include $(HACL_HOME)/specs/lemmas \
+	--include ../lib/ml \
+	--include ../../kremlin/kremlib \
+	--include ../lib \
+	--include ../specs/lemmas \
 	--expose_interfaces
 
 SPEC_FILES=	Spec.Chacha20.fst \
@@ -18,22 +19,19 @@ SPEC_FILES=	Spec.Chacha20.fst \
 		Spec.Curve448.fst \
 		Spec.Salsa20.fst \
 		Spec.Ed25519.fst \
-		Spec.Chacha20_vec.fst \
 		Spec.GaloisField.fst \
 		Spec.GF128.fst \
 		Spec.AES.fst \
-		Spec.AESGCM.fst \
 		Spec.SHA2.fst \
-		Spec.SHA2.Constants.fst \
-		Spec.SHA2.New.fst \
+		Spec.SHA3.fst \
 		Spec.HMAC.fst \
 		Spec.HKDF.fst \
-		Spec.ECIES.fst \
-		Spec.HSalsa20.fst
+		Spec.HPKE.fst \
+		Spec.HPKE.CFRG.fst
 
-LIBS = Lib.IntTypes.fst Lib.RawIntTypes.fst Lib.NatMod.fst Lib.LoopCombinators.fst Lib.Sequence.fst Lib.ByteSequence.fst
-LIBS_FILES= $(addprefix ../lib/fst/, $(LIBS))
-LIBS_ML = Lib_IntTypes.ml Lib_RawIntTypes.ml Lib_NatMod.ml Lib_LoopCombinators.ml Lib_Sequence.ml Lib_ByteSequence.ml
+LIBS = Lib.IntTypes.fst Lib.RawIntTypes.fst Lib.NatMod.fst Lib.LoopCombinators.fst Lib.Sequence.fst Lib.ByteSequence.fst Lib.PrintSequence.fst # Lib.IntVector.fst
+LIBS_FILES= $(addprefix ../lib/, $(LIBS))
+LIBS_ML = Lib_IntTypes.ml Lib_RawIntTypes.ml Lib_NatMod.ml Lib_LoopCombinators.ml Lib_Sequence.ml Lib_ByteSequence.ml Lib_PrintSequence.ml # Lib_IntVector.ml
 LIBS_EX = $(addprefix --extract_module , $(LIBS:.fst=))
 
 #
@@ -48,7 +46,7 @@ all: test
 test: test-unified-target test-individual-target
 
 test-unified-target: Chacha20.exe Curve25519.exe Curve448.exe SHA2.exe Blake2.exe
-test-individual-target: Poly1305.exe Chacha20Poly1305.exe Ed25519.exe hmac.exe hkdf.exe argon2i.exe kyber.exe aes.exe gf128.exe aes128gcm.exe rsapss.exe sha3.exe
+test-individual-target: Poly1305.exe Chacha20Poly1305.exe Ed25519.exe hmac.exe hkdf.exe argon2i.exe kyber.exe aes.exe gf128.exe aes128gcm.exe rsapss.exe sha3.exe hpke.exe
 
 clean:
 	rm -rf *.cmi *.cmo *.cmx *.o *~ *.out *.exe *-ml
@@ -63,6 +61,14 @@ clean:
 	@echo 'let _ = test()' >> $*-ml/Spec_$*_Test.ml
 	$(OCAMLOPT) -I $*-ml $(addprefix $*-ml/, $(LIBS_ML))  $*-ml/Spec_$*.ml $*-ml/Spec_$*_Test.ml -o $*.exe
 	./$*.exe
+
+# Under CI
+dh.exe: $(LIBS_FILES) Spec.Curve25519.fst Spec.Curve448.fst Spec.DH.fst tests/Spec.DH.Test.fst
+	mkdir -p dh-ml
+	$(FSTAR) --codegen OCaml --lax $(LIBS_EX) --extract_module Spec.Curve25519 --extract_module Spec.Curve448 --extract_module Spec.DH --extract_module Spec.DH.Test --odir dh-ml $^
+	@echo 'let _ = test()' >> dh-ml/Spec_DH_Test.ml
+	$(OCAMLOPT) -I dh-ml $(addprefix dh-ml/, $(LIBS_ML)) dh-ml/Spec_Curve25519.ml dh-ml/Spec_Curve448.ml dh-ml/Spec_DH.ml dh-ml/Spec_DH_Test.ml -o dh.exe
+	./dh.exe
 
 # Under CI
 Salsa20.exe: $(LIBS_FILES) Spec.CTR.fst Spec.Salsa20.fst tests/Spec.Salsa20.Test.fst
@@ -120,6 +126,26 @@ aes128cbc.exe: $(LIBS_FILES) Spec.GaloisField.fst Spec.AES.fst Spec.AES128_CBC.f
 	$(OCAMLOPT) -I aes128cbc-ml $(OCAML_INCLUDES) $(addprefix aes128cbc-ml/, $(LIBS_ML)) aes128cbc-ml/Spec_GaloisField.ml aes128cbc-ml/Spec_AES.ml aes128cbc-ml/Spec_AES128_CBC.ml aes128cbc-ml/Spec_AES128_CBC_Test.ml -o aes128cbc.exe
 	./aes128cbc.exe
 
+# Not Under CI
+aes256.exe: $(LIBS_FILES) Spec.AES256.fst tests/Spec.AES256.Test.fst
+	mkdir -p aes256-ml
+	$(FSTAR) --codegen OCaml --lax $(LIBS_EX) --extract_module Spec.AES256 --extract_module Spec.AES256.Test --odir aes256-ml $^
+	@echo 'let _ = test()' >> aes256-ml/Spec_AES256_Test.ml
+	$(OCAMLOPT) -I aes256-ml $(OCAML_INCLUDES) $(addprefix aes256-ml/, $(LIBS_ML)) aes256-ml/Spec_AES256.ml aes256-ml/Spec_AES256_Test.ml -o aes256.exe
+	./aes256.exe
+
+# Not Under CI
+aes256cbc.exe: $(LIBS_FILES) Spec.AES256_CBC.fst tests/Spec.AES256_CBC.Test.fst
+	mkdir -p aes256cbc-ml
+	$(FSTAR) --codegen OCaml --lax $(LIBS_EX) --extract_module Spec.AES256 \
+		--extract_module Spec.AES256_CBC --extract_module Spec.AES256_CBC.Test \
+		--odir aes256cbc-ml $^
+	@echo 'let _ = test()' >> aes256cbc-ml/Spec_AES256_CBC_Test.ml
+	$(OCAMLOPT) -I aes256cbc-ml $(OCAML_INCLUDES) $(addprefix aes256cbc-ml/, $(LIBS_ML)) \
+		aes256cbc-ml/Spec_AES256.ml aes256cbc-ml/Spec_AES256_CBC.ml \
+		aes256cbc-ml/Spec_AES256_CBC_Test.ml -o aes256cbc.exe
+	./aes256cbc.exe
+
 # Under CI
 kyber.exe: $(LIBS_FILES) Spec.Kyber.fst
 	mkdir -p kyber-ml
@@ -158,6 +184,22 @@ hkdf.exe: $(LIBS_FILES) Spec.SHA2.fst Spec.Hash.fst Spec.HMAC.fst Spec.HKDF.fst 
 	$(OCAMLOPT) -I hkdf-ml $(OCAML_INCLUDES) $(addprefix hkdf-ml/, $(LIBS_ML)) hkdf-ml/Spec_SHA2.ml hkdf-ml/Spec_Hash.ml hkdf-ml/Spec_HMAC.ml hkdf-ml/Spec_HKDF.ml hkdf-ml/Spec_HKDF_Test.ml -o hkdf.exe
 	./hkdf.exe
 
+hpke.exe: $(LIBS_FILES) Spec.SHA2.fst Spec.Hash.fst Spec.HMAC.fst Spec.HKDF.fst Spec.Curve25519.fst Spec.Curve448.fst Spec.DH.fst Spec.GaloisField.fst Spec.AES.fst Spec.GF128.fst Spec.AES128_GCM.fst Spec.Chacha20.fst Spec.Poly1305.fst Spec.Chacha20Poly1305.fst Spec.AEAD.fst Spec.HPKE.fst tests/Spec.HPKE.Test.fst
+	mkdir -p hpke-ml
+	cp $(HACL_HOME)/lib/ml/Lib_RandomSequence.ml hpke-ml
+	$(FSTAR) --codegen OCaml --lax $(LIBS_EX) --extract_module Spec.SHA2 --extract_module Spec.Hash --extract_module Spec.HMAC --extract_module Spec.HKDF --extract_module Spec.Curve25519 --extract_module Spec.Curve448 --extract_module Spec.DH --extract_module Spec.GaloisField --extract_module Spec.AES --extract_module Spec.GF128 --extract_module Spec.AES128_GCM --extract_module Spec.Chacha20 --extract_module Spec.Poly1305 --extract_module Spec.Chacha20Poly1305 --extract_module Spec.AEAD --extract_module Spec.HPKE --extract_module Spec.HPKE.Test --odir hpke-ml $^
+	@echo 'let _ = test()' >> hpke-ml/Spec_HPKE_Test.ml
+	$(OCAMLOPT) -package cryptokit -I hpke-ml $(OCAML_INCLUDES) $(addprefix hpke-ml/, $(LIBS_ML)) hpke-ml/Lib_RandomSequence.ml hpke-ml/Spec_SHA2.ml hpke-ml/Spec_Hash.ml hpke-ml/Spec_HMAC.ml hpke-ml/Spec_HKDF.ml hpke-ml/Spec_Curve25519.ml hpke-ml/Spec_Curve448.ml hpke-ml/Spec_DH.ml hpke-ml/Spec_GaloisField.ml hpke-ml/Spec_AES.ml hpke-ml/Spec_GF128.ml hpke-ml/Spec_AES128_GCM.ml hpke-ml/Spec_Chacha20.ml hpke-ml/Spec_Poly1305.ml hpke-ml/Spec_Chacha20Poly1305.ml hpke-ml/Spec_AEAD.ml hpke-ml/Spec_HPKE.ml hpke-ml/Spec_HPKE_Test.ml -o hpke.exe
+	./hpke.exe
+
+hpkecfrg.exe: $(LIBS_FILES) Spec.SHA2.fst Spec.Hash.fst Spec.HMAC.fst Spec.HKDF.fst Spec.Curve25519.fst Spec.Curve448.fst Spec.DH.fst Spec.GaloisField.fst Spec.AES.fst Spec.GF128.fst Spec.AES128_GCM.fst Spec.Chacha20.fst Spec.Poly1305.fst Spec.Chacha20Poly1305.fst Spec.AEAD.fst Spec.HPKE.CFRG.fst tests/Spec.HPKE.CFRG.Test.fst
+	mkdir -p hpkecfrg-ml
+	cp $(HACL_HOME)/lib/ml/Lib_RandomSequence.ml hpkecfrg-ml
+	$(FSTAR) --codegen OCaml --lax $(LIBS_EX) --extract_module Spec.SHA2 --extract_module Spec.Hash --extract_module Spec.HMAC --extract_module Spec.HKDF --extract_module Spec.Curve25519 --extract_module Spec.Curve448 --extract_module Spec.DH --extract_module Spec.GaloisField --extract_module Spec.AES --extract_module Spec.GF128 --extract_module Spec.AES128_GCM --extract_module Spec.Chacha20 --extract_module Spec.Poly1305 --extract_module Spec.Chacha20Poly1305 --extract_module Spec.AEAD --extract_module Spec.HPKE.CFRG --extract_module Spec.HPKE.CFRG.Test --odir hpkecfrg-ml $^
+	@echo 'let _ = test()' >> hpkecfrg-ml/Spec_HPKE_CFRG_Test.ml
+	$(OCAMLOPT) -package cryptokit -I hpkecfrg-ml $(OCAML_INCLUDES) $(addprefix hpkecfrg-ml/, $(LIBS_ML)) hpkecfrg-ml/Lib_RandomSequence.ml hpkecfrg-ml/Spec_SHA2.ml hpkecfrg-ml/Spec_Hash.ml hpkecfrg-ml/Spec_HMAC.ml hpkecfrg-ml/Spec_HKDF.ml hpkecfrg-ml/Spec_Curve25519.ml hpkecfrg-ml/Spec_Curve448.ml hpkecfrg-ml/Spec_DH.ml hpkecfrg-ml/Spec_GaloisField.ml hpkecfrg-ml/Spec_AES.ml hpkecfrg-ml/Spec_GF128.ml hpkecfrg-ml/Spec_AES128_GCM.ml hpkecfrg-ml/Spec_Chacha20.ml hpkecfrg-ml/Spec_Poly1305.ml hpkecfrg-ml/Spec_Chacha20Poly1305.ml hpkecfrg-ml/Spec_AEAD.ml hpkecfrg-ml/Spec_HPKE_CFRG.ml hpkecfrg-ml/Spec_HPKE_CFRG_Test.ml -o hpkecfrg.exe
+	./hpkecfrg.exe
+
 # Under CI
 sha3.exe: $(LIBS_FILES) Spec.SHA3.Constants.fst Spec.SHA3.fst tests/Spec.SHA3.Test.fst
 	mkdir -p sha3-ml
@@ -169,9 +211,9 @@ sha3.exe: $(LIBS_FILES) Spec.SHA3.Constants.fst Spec.SHA3.fst tests/Spec.SHA3.Te
 # NOT Under CI
 argon2i.exe: $(LIBS_FILES) Spec.Argon2i.fst tests/Spec.Argon2i.Test.fst
 	mkdir -p argon2i-ml
-	$(FSTAR) --codegen OCaml --lax $(LIBS_EX) --extract_module Spec.Blake2b --extract_module Spec.Argon2i --extract_module Spec.Argon2i.Test --odir argon2i-ml $^
+	$(FSTAR) --codegen OCaml --lax $(LIBS_EX) --extract_module Spec.Blake2 --extract_module Spec.Argon2i --extract_module Spec.Argon2i.Test --odir argon2i-ml $^
 	@echo 'let _ = test()' >> argon2i-ml/Spec_Argon2i_Test.ml
-	$(OCAMLOPT) -I argon2i-ml $(OCAML_INCLUDES) $(addprefix argon2i-ml/, $(LIBS_ML)) argon2i-ml/Spec_Blake2b.ml argon2i-ml/Spec_Argon2i.ml argon2i-ml/Spec_Argon2i_Test.ml -o argon2i.exe
+	$(OCAMLOPT) -I argon2i-ml $(OCAML_INCLUDES) $(addprefix argon2i-ml/, $(LIBS_ML)) argon2i-ml/Spec_Blake2.ml argon2i-ml/Spec_Argon2i.ml argon2i-ml/Spec_Argon2i_Test.ml -o argon2i.exe
 	./argon2i.exe
 
 # Under CI
@@ -233,9 +275,9 @@ pbkdf2.exe: $(LIBS_FILES) Spec.SHA2.fst Spec.Hash.fst Spec.HMAC.fst Spec.PBKDF2.
 # NOT Under CI
 random.exe: $(LIBS_FILES) tests/Spec.Random.Test.fst
 	mkdir -p random-ml
-	$(FSTAR) --codegen OCaml --lax --extract_module Lib.IntTypes --extract_module Lib.RawIntTypes --extract_module Lib.LoopCombinators --extract_module Lib.Sequence --extract_module Lib.ByteSequence --extract_module Spec.Random.Test --odir random-ml $^
+	$(FSTAR) --codegen OCaml --lax --extract_module Lib.IntTypes --extract_module Lib.RawIntTypes --extract_module Lib.LoopCombinators --extract_module Lib.Sequence --extract_module Lib.ByteSequence --extract_module Lib.PrintSequence --extract_module Spec.Random.Test --odir random-ml $^
 	@echo 'let _ = test()' >> random-ml/Spec_Random_Test.ml
-	$(OCAMLOPT) -package cryptokit -I random-ml -I ../lib/ml ../lib/ml/Lib_Random.ml random-ml/Lib_IntTypes.ml random-ml/Lib_RawIntTypes.ml random-ml/Lib_Sequence.ml random-ml/Lib_ByteSequence.ml random-ml/Spec_Random_Test.ml -o random.exe
+	$(OCAMLOPT) -package cryptokit -I random-ml -I ../lib/ml random-ml/Lib_IntTypes.ml random-ml/Lib_RawIntTypes.ml random-ml/Lib_LoopCombinators.ml random-ml/Lib_Sequence.ml ../lib/ml/Lib_RandomSequence.ml random-ml/Lib_ByteSequence.ml random-ml/Lib_PrintSequence.ml random-ml/Spec_Random_Test.ml -o random.exe
 	./random.exe
 
 # NOT Under CI

@@ -33,6 +33,14 @@ inline_for_extraction let size_word (a:alg) : size_nat = numbytes (wt a)
 inline_for_extraction let size_block (a:alg) : size_nat = size_block_w * (size_word a)
 inline_for_extraction let size_const_iv : size_nat = 8
 inline_for_extraction let size_const_sigma : size_nat = 160
+inline_for_extraction let max_key (a:alg) =
+  match a with
+  | Blake2S -> 32
+  | Blake2B -> 64
+inline_for_extraction let max_output (a:alg) =
+  match a with
+  | Blake2S -> 32
+  | Blake2B -> 64
 
 
 (* Definition of base types *)
@@ -59,7 +67,7 @@ inline_for_extraction
 let nat_to_limb (a:alg) (x:nat{x <= max_limb a}) : xl:limb_t a{uint_v xl == x} =
   match (wt a) with
   | U32 -> u64 x
-  | U64 -> u128 x
+  | U64 -> admit(); u128 x
 
 inline_for_extraction
 let word_to_limb (a:alg) (x:word_t a{uint_v x <= max_limb a}) : xl:limb_t a{uint_v xl == uint_v x} =
@@ -156,6 +164,7 @@ let list_sigma: list_sigma_t =
   assert_norm(List.Tot.length l == 160);
   l
 
+inline_for_extraction
 let const_sigma:lseq sigma_elt_t size_const_sigma =
   assert_norm (List.Tot.length list_sigma == size_const_sigma);
   of_list list_sigma
@@ -345,8 +354,8 @@ let blake2_update_block a prev d s =
 
 val blake2_init_hash:
     a:alg
-  -> kk:size_nat{kk <= 32}
-  -> nn:size_nat{1 <= nn /\ nn <= 32} ->
+  -> kk:size_nat{kk <= max_key a}
+  -> nn:size_nat{1 <= nn /\ nn <= max_output a} ->
   Tot (hash_ws a)
 
 let blake2_init_hash a kk nn =
@@ -357,9 +366,9 @@ let blake2_init_hash a kk nn =
 
 val blake2_init:
     a:alg
-  -> kk:size_nat{kk <= 32}
+  -> kk:size_nat{kk <= max_key a}
   -> k:lbytes kk
-  -> nn:size_nat{1 <= nn /\ nn <= 32} ->
+  -> nn:size_nat{1 <= nn /\ nn <= max_output a} ->
   Tot (hash_ws a)
 
 let blake2_init a kk k nn =
@@ -382,15 +391,15 @@ val blake2_update_last:
 let blake2_update_last a prev len last s =
   let last_block = create (size_block a) (u8 0) in
   let last_block = update_sub last_block 0 len last in
-  let last_uint32s = uints_from_bytes_le last_block in
-  blake2_compress a s last_uint32s (nat_to_limb a prev) true
+  let last_uints = uints_from_bytes_le last_block in
+  blake2_compress a s last_uints (nat_to_limb a prev) true
 
 
 val blake2_update:
     a:alg
   -> s:hash_ws a
   -> d:bytes
-  -> kk:size_nat{kk <= 32 /\ (if kk = 0 then length d <= max_limb a else length d + (size_block a) <= max_limb a)} ->
+  -> kk:size_nat{kk <= max_key a /\ (if kk = 0 then length d <= max_limb a else length d + (size_block a) <= max_limb a)} ->
   Tot (hash_ws a)
 
 let spec_update_block
@@ -417,7 +426,7 @@ let blake2_update a s d kk =
 val blake2_finish:
     a:alg
   -> s:hash_ws a
-  -> nn:size_nat{1 <= nn /\ nn <= 32} ->
+  -> nn:size_nat{1 <= nn /\ nn <= max_output a} ->
   Tot (lbytes nn)
 
 let blake2_finish a s nn =
@@ -428,9 +437,9 @@ let blake2_finish a s nn =
 val blake2:
     a:alg
   -> d:bytes
-  -> kk:size_nat{kk <= 32 /\ (if kk = 0 then length d <= max_limb a else length d + (size_block a) <= max_limb a)}
+  -> kk:size_nat{kk <= max_key a /\ (if kk = 0 then length d <= max_limb a else length d + (size_block a) <= max_limb a)}
   -> k:lbytes kk
-  -> nn:size_nat{1 <= nn /\ nn <= 32} ->
+  -> nn:size_nat{1 <= nn /\ nn <= max_output a} ->
   Tot (lbytes nn)
 
 let blake2 a d kk k nn =
@@ -451,9 +460,9 @@ let blake2s d kk k n = blake2 Blake2S d kk k n
 
 val blake2b:
     d:bytes
-  -> kk:size_nat{kk <= 32 /\ (if kk = 0 then length d < pow2 128 else length d + 128  < pow2 128)}
+  -> kk:size_nat{kk <= 64 /\ (if kk = 0 then length d < pow2 128 else length d + 128  < pow2 128)}
   -> k:lbytes kk
-  -> nn:size_nat{1 <= nn /\ nn <= 32} ->
+  -> nn:size_nat{1 <= nn /\ nn <= 64} ->
   Tot (lbytes nn)
 
 let blake2b d kk k n = blake2 Blake2B d kk k n

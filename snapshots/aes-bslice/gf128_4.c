@@ -192,7 +192,7 @@ static inline void poly4(elem_t acc0, elem_t acc1, elem_t acc2, elem_t acc3,
     fmul_pre(acc1,pre);
     fmul_pre(acc2,pre);
     fmul_pre(acc3,pre);
-    //fmul4(acc0,acc1,acc2,acc3,pre);
+//    fmul4(acc0,acc1,acc2,acc3,pre);
     fadd(acc0,tmp0);
     fadd(acc1,tmp1);
     fadd(acc2,tmp2);

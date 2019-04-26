@@ -29,14 +29,6 @@ let size_block (a:algorithm) : Tot size_nat =
   | SHA2_384 -> 128
   | SHA2_512 -> 128
 
-(* inline_for_extraction *)
-(* let size_hash (a:algorithm) : Tot size_nat = *)
-(*   match a with *)
-(*   | SHA2_224 -> 28 *)
-(*   | SHA2_256 -> 32 *)
-(*   | SHA2_384 -> 48 *)
-(*   | SHA2_512 -> 64 *)
-
 inline_for_extraction
 let max_input (a:algorithm) : Tot nat =
   match a with

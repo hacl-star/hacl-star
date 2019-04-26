@@ -47,7 +47,7 @@ let dh a k0 k1 =
     | DH_Curve25519 -> scalarmult a k0 k1
     | DH_Curve448 -> scalarmult a k0 k1
   in
-  let result : bool = lbytes_eq (create (size_key a) (u8 0)) secret in
+  let result : bool = not (lbytes_eq (create (size_key a) (u8 0)) secret) in
   if result then Some secret else None
 
 

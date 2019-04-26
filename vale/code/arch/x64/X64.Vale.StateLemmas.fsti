@@ -2,21 +2,32 @@ module X64.Vale.StateLemmas
 open X64.Machine_s
 open X64.Vale.State
 open FStar.FunctionalExtensionality
-module S = X64.Semantics_s
 module BS = X64.Bytes_Semantics_s
-module ME = X64.Memory_s
+module ME = X64.Memory
+module MS = X64.Memory_Sems
+module VSS = X64.Stack_Sems
 module TS = X64.Taint_Semantics_s
+open Prop_s
 
-unfold let ok' s = s.ME.state.BS.ok
-unfold let regs' s = s.ME.state.BS.regs
-unfold let xmms' s = s.ME.state.BS.xmms
-unfold let flags' s = s.ME.state.BS.flags
-unfold let mem' = ME.Mkstate'?.mem
+unfold let ok' s = s.BS.ok
+unfold let regs' s = s.BS.regs
+unfold let xmms' s = s.BS.xmms
+unfold let flags' s = s.BS.flags
+unfold let mem' s = s.BS.mem
+unfold let stack' s = s.BS.stack
 unfold let trace' = TS.MktraceState?.trace
 unfold let memTaint' = TS.MktraceState?.memTaint
 
-val state_to_S : s:state -> GTot TS.traceState
-val state_of_S : s:TS.traceState -> GTot state
+val same_domain: sv:state -> s:TS.traceState -> prop0
+
+val same_domain_eval_ins (c:TS.tainted_code{Ins? c}) (f:nat) (s0:TS.traceState) (sv:state) : Lemma
+  (requires same_domain sv s0)
+  (ensures (let s1 = TS.taint_eval_code c f s0 in
+     same_domain sv (Some?.v s1))
+  )
+
+val state_to_S : s:state -> GTot (s':TS.traceState{same_domain s s'})
+val state_of_S : sv:state -> (s:TS.traceState{same_domain sv s}) -> GTot state
 
 val lemma_to_ok : s:state -> Lemma
   (ensures s.ok == ok' (state_to_S s).TS.state)
@@ -26,80 +37,56 @@ val lemma_to_flags : s:state -> Lemma
   (ensures s.flags == flags' (state_to_S s).TS.state)
   [SMTPat s.flags]
 
-val lemma_to_mem : s:state -> Lemma
-  (ensures s.mem == mem' (state_to_S s).TS.state)
-  [SMTPat s.mem]
-
 val lemma_to_reg : s:state -> r:reg -> Lemma
-  (ensures s.regs r == regs' (state_to_S s).TS.state r)
-  [SMTPat (s.regs r)]
+  (ensures Regs.sel r s.regs == regs' (state_to_S s).TS.state r)
+  [SMTPat (Regs.sel r s.regs)]
 
 val lemma_to_xmm : s:state -> x:xmm -> Lemma
-  (ensures s.xmms x == xmms' (state_to_S s).TS.state x)
-  [SMTPat (s.xmms x)]
+  (ensures Xmms.sel x s.xmms == xmms' (state_to_S s).TS.state x)
+  [SMTPat (Xmms.sel x s.xmms)]
+
+val lemma_to_mem : s:state -> Lemma
+  (ensures MS.get_heap s.mem == mem' (state_to_S s).TS.state)
+
+val lemma_to_stack : s:state -> Lemma
+  (ensures VSS.stack_to_s s.stack == stack' (state_to_S s).TS.state)
 
 val lemma_to_trace : s:state -> Lemma
   (ensures [] == trace' (state_to_S s))
   [SMTPat (state_to_S s)]
 
 val lemma_to_memTaint : s:state -> Lemma
-  (ensures s.memTaint == memTaint' (state_to_S s))
+  (ensures s.memTaint === memTaint' (state_to_S s))
   [SMTPat s.memTaint]
 
 val lemma_to_eval_operand : s:state -> o:operand -> Lemma
-  (ensures eval_operand o s == S.eval_operand o (state_to_S s).TS.state)
+  (requires valid_src_operand o s)
+  (ensures eval_operand o s == BS.eval_operand o (state_to_S s).TS.state)
   [SMTPat (eval_operand o s)]
 
 val lemma_to_eval_xmm : s:state -> x:xmm -> Lemma
-  (ensures eval_xmm x s == S.eval_xmm x (state_to_S s).TS.state)
+  (ensures eval_xmm x s == BS.eval_xmm x (state_to_S s).TS.state)
   [SMTPat (eval_xmm x s)]
 
+val lemma_to_eval_operand128 : s:state -> o:mov128_op -> Lemma
+  (requires valid_src_operand128 o s)
+  (ensures eval_operand128 o s == BS.eval_mov128_op o (state_to_S s).TS.state)
+  [SMTPat (eval_operand128 o s)]
+
 val lemma_to_valid_operand : s:state -> o:operand -> Lemma
-  (ensures valid_operand o s ==> S.valid_operand o (state_to_S s).TS.state)
-  [SMTPat (valid_operand o s)]
+  (ensures valid_src_operand o s ==> BS.valid_src_operand o (state_to_S s).TS.state)
+  [SMTPat (valid_src_operand o s)]
 
 val lemma_of_to : s:state -> Lemma
-  (ensures s == state_of_S (state_to_S s))
-  [SMTPat (state_of_S (state_to_S s))]
+  (ensures s == state_of_S s (state_to_S s))
+  [SMTPat (state_of_S s (state_to_S s))]
 
-val lemma_to_of : s:TS.traceState -> Lemma
-  (ensures state_to_S (state_of_S s) == {s with TS.trace = []})
-  [SMTPat (state_to_S (state_of_S s))]
+val lemma_to_of_eval_ins: (c:TS.tainted_code) -> (s0:state) -> Lemma
+  (requires Ins? c)
+  (ensures (
+    let Some sM = TS.taint_eval_code c 0 (state_to_S s0) in
+    same_domain_eval_ins c 0 (state_to_S s0) s0;
+    (state_to_S (state_of_S s0 sM) == {sM with TS.trace = []})
+  ))
 
 unfold let op_String_Access (#a:eqtype) (#b:Type) (x:Map.t a b) (y:a) : Tot b = Map.sel x y
-
-val lemma_valid_taint64: (b:X64.Memory.buffer64) ->
-                         (memTaint:X64.Memory.memtaint) ->
-                         (mem:X64.Memory.mem) ->
-                         (i:nat{i < X64.Memory.buffer_length b}) ->
-                         (t:taint) -> Lemma
-  (requires X64.Memory.valid_taint_buf64 b mem memTaint t /\ X64.Memory.buffer_readable mem b)
-  (ensures memTaint.[X64.Memory.buffer_addr b mem + 8 `op_Multiply` i] == t)
-
-val lemma_valid_taint128: (b:X64.Memory.buffer128) ->
-                         (memTaint:X64.Memory.memtaint) ->
-                         (mem:X64.Memory.mem) ->
-                         (i:nat{i < X64.Memory.buffer_length b}) ->
-                         (t:taint) -> Lemma
-  (requires X64.Memory.valid_taint_buf128 b mem memTaint t /\ X64.Memory.buffer_readable mem b)
-  (ensures memTaint.[X64.Memory.buffer_addr b mem + 16 `op_Multiply` i] == t /\
-           memTaint.[X64.Memory.buffer_addr b mem + 16 `op_Multiply` i + 8] == t)
-
-
-val same_memTaint64: (b:X64.Memory.buffer64) ->
-                   (mem0:X64.Memory.mem) ->
-                   (mem1:X64.Memory.mem) ->
-                   (memtaint0:X64.Memory.memtaint) ->
-                   (memtaint1:X64.Memory.memtaint) -> Lemma
-  (requires (X64.Memory.modifies (X64.Memory.loc_buffer b) mem0 mem1 /\
-    (forall p. Map.sel memtaint0 p == Map.sel memtaint1 p)))
-  (ensures memtaint0 == memtaint1)
-
-val same_memTaint128: (b:X64.Memory.buffer128) ->
-                   (mem0:X64.Memory.mem) ->
-                   (mem1:X64.Memory.mem) ->
-                   (memtaint0:X64.Memory.memtaint) ->
-                   (memtaint1:X64.Memory.memtaint) -> Lemma
-  (requires (X64.Memory.modifies (X64.Memory.loc_buffer b) mem0 mem1 /\
-    (forall p. Map.sel memtaint0 p == Map.sel memtaint1 p)))
-  (ensures memtaint0 == memtaint1)

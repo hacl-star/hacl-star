@@ -15,13 +15,8 @@ open GCTR_s
 open FStar.Math.Lemmas
 open Collections.Seqs
 
-let slice_work_around (s:seq 'a) (i:int) =
-  if 0 <= i && i <= length s then slice s 0 i
-  else slice s 0 0
-
-let index_work_around_quad32 (s:seq quad32) (i:int) =
-  if 0 <= i && i < length s then index s i
-  else Mkfour 0 0 0 0
+let reveal_le_bytes_to_seq_quad32 () =
+  FStar.Pervasives.reveal_opaque (`%le_bytes_to_seq_quad32) le_bytes_to_seq_quad32
 
 let extra_bytes_helper (n:nat) : Lemma
   (requires n % 16 <> 0)
@@ -31,7 +26,10 @@ let extra_bytes_helper (n:nat) : Lemma
 
 #reset-options "--smtencoding.elim_box true --z3rlimit 25 --max_ifuel 1 --initial_fuel 0 --max_fuel 1"
 let bytes_to_quad_size_no_extra_bytes num_bytes = ()
-let no_extra_bytes_helper s num_bytes = ()
+
+let no_extra_bytes_helper s num_bytes =
+  assert (slice (le_seq_quad32_to_bytes s) 0 num_bytes == le_seq_quad32_to_bytes s); // TODO: this shouldn't be necessary
+  ()
 
 let le_seq_quad32_to_bytes_tail_prefix (s:seq quad32) (num_bytes:nat) =
   let num_extra = num_bytes % 16 in
@@ -154,7 +152,7 @@ let insert_0_is_padding (q:quad32) :
 
 #reset-options "--z3cliopt smt.QI.EAGER_THRESHOLD=100 --z3cliopt smt.CASE_SPLIT=3 --z3cliopt smt.arith.nl=true --max_fuel 2 --initial_fuel 2 --max_ifuel 0 --smtencoding.elim_box true --smtencoding.nl_arith_repr native --z3rlimit 10"
 let le_quad32_to_bytes_sel (q : quad32) (i:nat{i < 16}) =
-  reveal_opaque (le_quad32_to_bytes_def);
+  FStar.Pervasives.reveal_opaque (`%le_quad32_to_bytes) le_quad32_to_bytes;
   let Mkfour q0 q1 q2 q3 = q in
   assert (index (Words.Seq_s.four_to_seq_LE q) 0 == q0);
   assert (index (Words.Seq_s.four_to_seq_LE q) 1 == q1);
@@ -220,7 +218,7 @@ let le_quad32_to_bytes_sel (q : quad32) (i:nat{i < 16}) =
                 (fun x -> nat_to_four 8 (index (four_to_seq_LE q) x)))
                 (n / 4))
                    (n % 4)) i == four_select (nat_to_four 8 q3) (i % 4));
-  assert_by_tactic (i < 16 ==> index (le_quad32_to_bytes_def q) i =
+  assert_by_tactic (i < 16 ==> index (le_quad32_to_bytes q) i =
                    (index (init (length (init (length (four_to_seq_LE q))
                           (fun x -> nat_to_four 8 (index (four_to_seq_LE q) x))) *
                                                                       4)
@@ -229,16 +227,16 @@ let le_quad32_to_bytes_sel (q : quad32) (i:nat{i < 16}) =
                                         (fun x -> nat_to_four 8 (index (four_to_seq_LE q) x)))
                             (n / 4))
                           (n % 4))) i))
-                       (fun () -> norm[primops; delta_only ["Types_s.le_quad32_to_bytes_def";
+                       (fun () -> norm[primops; delta_only ["Types_s.le_quad32_to_bytes";
                           "Collections.Seqs_s.seq_map"; "Collections.Seqs_s.compose";
                             "Words.Seq_s.seq_four_to_seq_LE"]]; dump " after norm2");
-  assert(i < 4 ==> index (le_quad32_to_bytes_def q) i == four_select (nat_to_four 8 q0) i);
-  assert(4 <= i /\ i < 8 ==> index (le_quad32_to_bytes_def q) i == four_select (nat_to_four 8 q1) (i % 4));
-  assert(8 <= i /\ i < 12 ==> index (le_quad32_to_bytes_def q) i == four_select (nat_to_four 8 q2) (i % 4));
-  assert(12 <= i /\ i < 16 ==> index (le_quad32_to_bytes_def q) i == four_select (nat_to_four 8 q3) (i % 4))
+  assert(i < 4 ==> index (le_quad32_to_bytes q) i == four_select (nat_to_four 8 q0) i);
+  assert(4 <= i /\ i < 8 ==> index (le_quad32_to_bytes q) i == four_select (nat_to_four 8 q1) (i % 4));
+  assert(8 <= i /\ i < 12 ==> index (le_quad32_to_bytes q) i == four_select (nat_to_four 8 q2) (i % 4));
+  assert(12 <= i /\ i < 16 ==> index (le_quad32_to_bytes q) i == four_select (nat_to_four 8 q3) (i % 4))
 
 
-#reset-options "--smtencoding.elim_box true --z3rlimit 40 --z3refresh --initial_ifuel 0 --max_ifuel 1 --initial_fuel 1 --max_fuel 1"
+#reset-options "--smtencoding.elim_box true --z3rlimit 60 --z3refresh --initial_ifuel 0 --max_ifuel 1 --initial_fuel 1 --max_fuel 1"
 let lemma_pad_to_32_bits_helper (s s'':seq4 nat8) (n:nat) : Lemma
   (requires
     n <= 2 /\
@@ -287,8 +285,9 @@ let lemma_mod_n_8_lower1 (q:quad32) (n:nat) : Lemma
   (requires n <= 4)
   (ensures lo64 q % pow2 (8 * n) == q.lo0 % pow2 (8 * n))
   =
+  reveal_opaque lo64_def;
   let Mkfour _ _ _ _ = q in // avoid ifuel
-  let f (n:nat{n <= 4}) = lo64 q % pow2 (8 * n) == q.lo0 % pow2 (8 * n) in
+  let f (n:nat{n <= 4}) = lo64_def q % pow2 (8 * n) == q.lo0 % pow2 (8 * n) in
   assert_norm (f 0);
   assert_norm (f 1);
   assert_norm (f 2);
@@ -300,8 +299,9 @@ let lemma_mod_n_8_lower2_helper (q:quad32) (n:nat) : Lemma
   (requires n <= 2)
   (ensures lo64 q % pow2 (8 * (4 + n)) == q.lo0 + 0x100000000 * (q.lo1 % pow2 (8 * n)))
   =
+  reveal_opaque lo64_def;
   let Mkfour _ _ _ _ = q in // avoid ifuel
-  let f (n:nat{n <= 4}) = lo64 q % pow2 (8 * (4 + n)) == q.lo0 + 0x100000000 * (q.lo1 % pow2 (8 * n)) in
+  let f (n:nat{n <= 4}) = lo64_def q % pow2 (8 * (4 + n)) == q.lo0 + 0x100000000 * (q.lo1 % pow2 (8 * n)) in
   assert_norm (f 2);
   assert_norm (f 1);
   assert_norm (f 0);
@@ -311,9 +311,10 @@ let lemma_mod_n_8_lower2 (q:quad32) (n:nat) : Lemma
   (requires n <= 4)
   (ensures lo64 q % pow2 (8 * (4 + n)) == q.lo0 + 0x100000000 * (q.lo1 % pow2 (8 * n)))
   =
+  reveal_opaque lo64_def;
   if n <= 2 then lemma_mod_n_8_lower2_helper q n else
   let Mkfour _ _ _ _ = q in // avoid ifuel
-  let f (n:nat{n <= 4}) = lo64 q % pow2 (8 * (4 + n)) == q.lo0 + 0x100000000 * (q.lo1 % pow2 (8 * n)) in
+  let f (n:nat{n <= 4}) = lo64_def q % pow2 (8 * (4 + n)) == q.lo0 + 0x100000000 * (q.lo1 % pow2 (8 * n)) in
   assert_norm (f 4);
   assert_norm (f 3);
   ()
@@ -322,6 +323,8 @@ let lemma_mod_n_8_upper1 (q:quad32) (n:nat) : Lemma
   (requires n <= 4)
   (ensures hi64 q % pow2 (8 * n) == q.hi2 % pow2 (8 * n))
   =
+  reveal_opaque hi64_def;
+  reveal_opaque lo64_def;
   let Mkfour _ _ q2 q3 = q in
   lemma_mod_n_8_lower1 (Mkfour q2 q3 0 0) n
 
@@ -329,6 +332,8 @@ let lemma_mod_n_8_upper2 (q:quad32) (n:nat) : Lemma
   (requires n <= 4)
   (ensures hi64 q % pow2 (8 * (4 + n)) == q.hi2 + 0x100000000 * (q.hi3 % pow2 (8 * n)))
   =
+  reveal_opaque hi64_def;
+  reveal_opaque lo64_def;
   let Mkfour _ _ q2 q3 = q in
   lemma_mod_n_8_lower2 (Mkfour q2 q3 0 0) n
 
@@ -407,10 +412,10 @@ let lemma_slices_le_quad32_to_bytes (q:quad32) : Lemma
     q.hi3 == four_to_nat 8 (seq_to_four_LE (slice s 12 16))
   ))
   =
-  reveal_opaque le_quad32_to_bytes_def;
+  FStar.Pervasives.reveal_opaque (`%le_quad32_to_bytes) le_quad32_to_bytes;
   ()
 
-let lemma_slices_le_bytes_to_quad32 (s:seqn 16 nat8) : Lemma
+let lemma_slices_le_bytes_to_quad32 (s:seq16 nat8) : Lemma
   (ensures (
     let q = le_bytes_to_quad32 s in
     q.lo0 == four_to_nat 8 (seq_to_four_LE (slice s 0 4)) /\
@@ -436,6 +441,7 @@ let pad_to_128_bits_lower (q:quad32) (num_bytes:int) =
   let s = le_quad32_to_bytes q in
   let s' = slice s 0 n in
   let q' = insert_nat64 (insert_nat64 q 0 1) new_lo 0 in
+  reveal_opaque insert_nat64;
   let s'' = pad_to_128_bits s' in
   let q'' = le_bytes_to_quad32 s'' in
 
@@ -484,6 +490,7 @@ let pad_to_128_bits_upper (q:quad32) (num_bytes:int) =
   let s = le_quad32_to_bytes q in
   let s' = slice s 0 n in
   let q' = insert_nat64 q new_hi 1 in
+  reveal_opaque insert_nat64;
   let s'' = pad_to_128_bits s' in
   let q'' = le_bytes_to_quad32 s'' in
 

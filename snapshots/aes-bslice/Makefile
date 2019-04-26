@@ -16,12 +16,16 @@ gf128_4_test.exe: gf128_4.c gf128_test.c
 	$(CC) $(CCOPTS) gf128_4.c gf128_test.c -o gf128_4_test.exe
 	./gf128_4_test.exe
 
+gf128_4x_test.exe: gf128_4x.c gf128_test.c
+	$(CC) $(CCOPTS) gf128_4x.c gf128_test.c -o gf128_4x_test.exe
+	./gf128_4x_test.exe
+
 gf128_u128_test.exe: gf128_u128.c gf128_test.c
 	$(CC) $(CCOPTS) gf128_u128.c gf128_test.c -o gf128_u128_test.exe
 	./gf128_u128_test.exe
 
 gf128_bear_test.exe: gf128_bear_ctmul64.c gf128_test.c
-	$(CC) $(CCOPTS) gf128.c gf128_test.c -o gf128_bear_test.exe
+	$(CC) $(CCOPTS) gf128_bear_ctmul64.c gf128_test.c -o gf128_bear_test.exe
 	./gf128_bear_test.exe
 
 gf128_ni_test.exe: gf128_ni.c gf128_test.c
