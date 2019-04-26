@@ -41,7 +41,15 @@ let lemma_mul_assos_5 a b c d e = ()
 val lemma_mul_assos_6:
   a:nat -> b:nat -> c:nat -> d:nat -> e:nat -> f:nat ->
   Lemma (a * b * c * d * e * f == a * (b * c * d * e * f))
-let lemma_mul_assos_6 a b c d e f = ()
+let lemma_mul_assos_6 a b c d e f =
+  let open FStar.Calc in
+  calc (==) {
+      a * b * c * d * e * f;
+    == { lemma_mul_assos_5 a b c d e }
+      (a * (b * c * d * e)) * f;
+    == { FStar.Math.Lemmas.paren_mul_right a (b * c * d * e) f }
+      a * (b * c * d * e * f);
+  }
 
 val lemma_mul5_distr_l:
   a:nat -> b:nat -> c:nat -> d:nat -> e:nat -> f:nat ->
@@ -156,7 +164,7 @@ let smul_felem5_eval_lemma_i #w #m1 #m2 u1 f2 i =
   smul_lemma vu1 (v tf20) (v tf21) (v tf22) (v tf23) (v tf24)
 #pop-options
 
-// 2019.04.05 SZ: this proof is fragile; use [calc]? 
+// 2019.04.05 SZ: this proof is fragile; use [calc]?
 val smul_add_felem5_fits_lemma_i:
     #w:lanes
   -> #m1:scale32
