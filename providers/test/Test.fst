@@ -386,7 +386,7 @@ let test_all_body (print: C.String.t -> St unit) : St unit =
     test_chacha20poly1305 ()
 #reset-options
 
-type hacl_opt = | AVX | AVX2
+type hacl_opt = | AVX2
 
 inline_for_extraction
 type platform = | Vale | HACL of option hacl_opt | OpenSSL | BCrypt
@@ -395,12 +395,12 @@ inline_for_extraction
 noextract
 let config_ok (p: platform) : St bool =
   match p with
-  | Vale -> EverCrypt.StaticConfig.vale
+  | Vale ->
+    EverCrypt.StaticConfig.vale
   | HACL v -> 
     if EverCrypt.StaticConfig.hacl
     then begin match v with
     | Some AVX2 -> AC.has_avx2 ()
-    | Some AVX -> AC.has_avx ()
     | _ -> true
     end
     else false
@@ -413,7 +413,6 @@ let print_platform (p: platform) : St unit =
   match p with
   | Vale -> C.String.print !$"VALE"
   | HACL None -> C.String.print !$"HACL"
-  | HACL (Some AVX) -> C.String.print !$"HACL AVX"
   | HACL (Some AVX2) -> C.String.print !$"HACL AVX2"
   | OpenSSL -> C.String.print !$"OpenSSL"
   | BCrypt -> C.String.print !$"BCrypt"
@@ -424,20 +423,17 @@ let set_autoconfig (p: platform) : St unit =
   AC.init ();
   (if p <> Vale then AC.disable_vale ());
   (if not (HACL? p) then AC.disable_hacl ());
-  (if p <> HACL (Some AVX) then AC.disable_avx ());
   (if p <> HACL (Some AVX2) then AC.disable_avx2 ());
   (if p <> OpenSSL then AC.disable_openssl ());
   (if p <> BCrypt then AC.disable_bcrypt ());
   let wants_vale = AC.wants_vale () in
   let wants_hacl = AC.wants_hacl () in
-  let wants_avx = AC.has_avx () in
   let wants_avx2 = AC.has_avx2 () in
   let wants_openssl = AC.wants_openssl () in
   let wants_bcrypt = AC.wants_bcrypt () in
   if not (
     (wants_vale = (p = Vale)) &&
     (wants_hacl = (HACL? p)) &&
-    (wants_avx = (p = (HACL (Some AVX)))) &&
     (wants_avx2 = (p = (HACL (Some AVX2)))) &&
     (wants_openssl = (p = OpenSSL)) &&
     (wants_bcrypt = (p = BCrypt))
@@ -460,7 +456,6 @@ let test_all_on_platform (p: platform) : St unit =
 let test_all () : St unit =
   test_all_on_platform Vale;
   test_all_on_platform (HACL None);
-  test_all_on_platform (HACL (Some AVX));
   test_all_on_platform (HACL (Some AVX2));
   test_all_on_platform OpenSSL;
   test_all_on_platform BCrypt
