@@ -62,7 +62,7 @@ class HaclSign: public DSABenchmark
   public:
     HaclSign(size_t msg_len) : DSABenchmark(msg_len, "HaCl (sign)") {}
     virtual void bench_func()
-      { Hacl_Ed25519_sign(signature, our_secret, msg, msg_len); }
+      { Hacl_Ed25519_sign(signature, our_secret, msg_len, msg); }
     virtual ~HaclSign() {}
 };
 
@@ -81,7 +81,7 @@ class HaclSignExpanded: public DSABenchmark
       Hacl_Ed25519_expand_keys(expanded_keys, our_secret);
     }
     virtual void bench_func()
-      { Hacl_Ed25519_sign_expanded(signature, expanded_keys, msg, msg_len); }
+      { Hacl_Ed25519_sign_expanded(signature, expanded_keys, msg_len, msg); }
     virtual ~HaclSignExpanded() {}
 };
 
@@ -93,14 +93,14 @@ class HaclVerify: public DSABenchmark
     {
         DSABenchmark::bench_setup(s);
         Hacl_Ed25519_secret_to_public(our_public, our_secret);
-        Hacl_Ed25519_sign(signature, our_secret, msg, msg_len);
+        Hacl_Ed25519_sign(signature, our_secret, msg_len, msg);
     }
     virtual void bench_func()
     {
       #ifdef _DEBUG
       if (!
       #endif
-        Hacl_Ed25519_verify(our_public, msg, msg_len, signature)
+        Hacl_Ed25519_verify(our_public, msg_len, msg, signature)
       #ifdef _DEBUG
       ) throw std::logic_error("Signature verification failed")
       #endif
