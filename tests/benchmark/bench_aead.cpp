@@ -754,18 +754,15 @@ void bench_aead_decrypt(const BenchmarkSettings & s)
       std::string bcrypt_only = "< grep -e \"^\\\"BCrypt\" -e \"^\\\"Provider\" " + data_filename.str();
       #endif
 
-      Benchmark::plot_spec_t plot_specs_ds_cycles = {
-        std::make_pair(evercrypt_only, "using 'Avg':xticlabels(strcol('Algorithm')) title 'EverCrypt'"),
-        std::make_pair("", "using 0:'Avg':xticlabels(strcol('Algorithm')):(sprintf(\"%0.0f\", column('Avg'))) with labels font \"Courier,8\" offset char -2,.5 center notitle"),
-        #ifdef HAVE_OPENSSL
-        std::make_pair(openssl_only, "using 'Avg' title 'OpenSSL'"),
-        std::make_pair("", "using 0:'Avg':xticlabels(strcol('Algorithm')):(sprintf(\"%0.0f\", column('Avg'))) with labels font \"Courier,8\" offset char +2,.5 center notitle"),
-        #endif
-        #ifdef HAVE_BCRYPT
-        std::make_pair(bcrypt_only, "using 'Avg' title 'BCrypt'"),
-        std::make_pair("", "using 0:'Avg':xticlabels(strcol('Algorithm')):(sprintf(\"%0.0f\", column('Avg'))) with labels font \"Courier,8\" offset char +2,.5 center notitle"),
-        #endif
-       };
+      Benchmark::plot_spec_t plot_specs_ds_cycles;
+      add_plotspec(plot_specs_ds_cycles, histogram_template("Avg", 0, "EverCrypt", data_filename.str()));
+      #ifdef HAVE_OPENSSL
+      add_plotspec(plot_specs_ds_cycles, histogram_template("Avg", 0, "OpenSSL", data_filename.str()));
+      #endif
+      #ifdef HAVE_BCRYPT
+      add_plotspec(plot_specs_ds_cycles, histogram_template("Avg", 0, "BCrypt", data_filename.str()));
+      #endif
+      add_label_offsets(plot_specs_ds_cycles);
 
       std::stringstream extras;
       extras << "set boxwidth 0.8\n";
@@ -784,18 +781,15 @@ void bench_aead_decrypt(const BenchmarkSettings & s)
                       "bench_aead_all_decrypt_" + dsstr.str() + "_cycles.svg",
                       extras.str());
 
-      Benchmark::plot_spec_t plot_specs_ds_bytes = {
-        std::make_pair(evercrypt_only, "using 'Avg Cycles/Byte':xticlabels(strcol('Algorithm')) title 'EverCrypt'"),
-        std::make_pair("", "using 0:'Avg Cycles/Byte':xticlabels(strcol('Algorithm')):(sprintf(\"%0.2f\", column('Avg Cycles/Byte'))) with labels font \"Courier,8\" offset char -2,.5 center notitle"),
-        #ifdef HAVE_OPENSSL
-        std::make_pair(openssl_only, "using 'Avg Cycles/Byte' title 'OpenSSL'"),
-        std::make_pair("", "using 0:'Avg Cycles/Byte':xticlabels(strcol('Algorithm')):(sprintf(\"%0.2f\", column('Avg Cycles/Byte'))) with labels font \"Courier,8\" offset char +2,.5 center notitle"),
-        #endif
-        #ifdef HAVE_BCRYPT
-        std::make_pair(bcrypt_only, "using 'Avg Cycles/Byte' title 'BCrypt'"),
-        std::make_pair("", "using 0:'Avg Cycles/Byte':xticlabels(strcol('Algorithm')):(sprintf(\"%0.2f\", column('Avg Cycles/Byte'))) with labels font \"Courier,8\" offset char +2,.5 center notitle"),
-        #endif
-      };
+        Benchmark::plot_spec_t plot_specs_ds_bytes;
+      add_plotspec(plot_specs_ds_bytes, histogram_template("Avg Cycles/Byte", 2, "EverCrypt", data_filename.str()));
+      #ifdef HAVE_OPENSSL
+      add_plotspec(plot_specs_ds_bytes, histogram_template("Avg Cycles/Byte", 2, "OpenSSL", data_filename.str()));
+      #endif
+      #ifdef HAVE_BCRYPT
+      add_plotspec(plot_specs_ds_bytes, histogram_template("Avg Cycles/Byte", 2, "BCrypt", data_filename.str()));
+      #endif
+      add_label_offsets(plot_specs_ds_bytes);
 
       Benchmark::make_plot(s,
                       "svg",
