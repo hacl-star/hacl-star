@@ -8,6 +8,8 @@ open Lib.Buffer
 
 #reset-options "--max_fuel 0 --max_ifuel 0"
 
+open Spec.Hash.Definitions
+
 //FIX
 val sha512_pre_msg:
     hash:lbuffer uint8 64ul
@@ -22,8 +24,9 @@ val sha512_pre_msg:
 let sha512_pre_msg h prefix len input =
   push_frame ();
   let pre_msg = create (len +. 32ul) (u8 0) in
-  concat2 32ul prefix len input pre_msg;
-  Hacl.SHA512.hash h (len +. 32ul) pre_msg;
+  concat2 32ul prefix len input pre_msg;  
+  assume(length pre_msg < max_input_length SHA2_512);
+  Hacl.Hash.SHA2.hash_512_lib (len +. 32ul) pre_msg h;
   pop_frame ()
 
 //FIX
@@ -42,7 +45,8 @@ let sha512_pre_pre2_msg h prefix prefix2 len input =
   push_frame ();
   let pre_msg = create (len +. 64ul) (u8 0) in
   concat3 32ul prefix 32ul prefix2 len input pre_msg;
-  Hacl.SHA512.hash h (len +. 64ul) pre_msg;
+  assume(length pre_msg < max_input_length SHA2_512);
+  Hacl.Hash.SHA2.hash_512_lib (len +. 64ul) pre_msg h;
   pop_frame ()
 
 val sha512_modq_pre:

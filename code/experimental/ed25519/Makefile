@@ -1,6 +1,5 @@
-FSTAR_HOME   ?= ../../../../FStar
-KREMLIN_HOME ?= ../../../kremlin
-HACL_HOME    ?= ../../..
+HACL_HOME=../../..
+include $(HACL_HOME)/Makefile.common
 
 OUTPUT_DIR    = .output
 HINT_DIR      = .hints
@@ -25,11 +24,11 @@ FSTAR_INCLUDE_DIRS = \
   $(HACL_KREMLIN) \
   $(KREMLIN_HOME)/kremlib \
   $(HACL_HOME)/specs \
+  $(HACL_HOME)/specs/derived \
   $(HACL_HOME)/lib \
   $(HACL_HOME)/lib/c \
   $(HACL_HOME)/code/curve25519 \
-  $(HACL_HOME)/code/curve25519/lemmas \
-  $(HACL_HOME)/specs/lemmas
+  $(VALE_DIRS)
 
 FSTAR_FLAGS = $(OTHERFLAGS) --cmi \
   --cache_checked_modules --odir $(OUTPUT_DIR) \
@@ -41,7 +40,6 @@ FSTAR = $(FSTAR_HOME)/bin/fstar.exe $(FSTAR_FLAGS)
 ENABLE_HINTS = --use_hints --use_hint_hashes --record_hints --query_stats
 
 ROOTS = Hacl.Ed25519.fst
-#Hacl.Ed25519.fst
 #Hacl.Test.Ed25519.fst
 
 .PRECIOUS: %.krml
@@ -54,8 +52,8 @@ $(HINT_DIR):
 
 include .depend
 
-$(HINT_DIR):
-	mkdir -p $@
+# $(HINT_DIR):
+# 	mkdir -p $@
 
 %.checked: | .depend $(HINT_DIR)
 	$(FSTAR) $< $(ENABLE_HINTS) --hint_file $(HINT_DIR)/$(notdir $*).hints && \
@@ -84,7 +82,7 @@ $(GENERATED_DIR)/Makefile.include: $(ALL_KRML_FILES) | .depend
 	-bundle 'Spec.*' \
 	-bundle 'C=C.Endianness' \
 	-bundle 'Hacl.Ed25519=Hacl.Impl.*,Hacl.Bignum25519,Hacl.Ed25519' \
-	-library 'Hacl.SHA512,C,FStar' \
+	-library 'C,FStar' \
 	-drop 'LowStar,Spec,Prims,Lib,C.Loops.*,Hacl.Spec.*,Hacl.Impl.Curve25519.Fields,Hacl.Impl.Curve25519.Field64,Hacl.Impl.Curve25519.Field64.*' \
 	-add-include '"c/Lib_PrintBuffer.h"' \
 	-tmpdir $(GENERATED_DIR) \
@@ -115,8 +113,6 @@ ALL_GENERATED_FILES = $(addprefix $(GENERATED_DIR)/,$(ALL_OUR_FILES))
 
 ALL_SOURCES = \
   $(ALL_GENERATED_FILES) \
-  include/Hacl_SHA512.c \
-  $(HACL_HOME)/snapshots/hacl-c/Hacl_SHA2_512.c \
   $(HACL_HOME)/lib/c/Lib_PrintBuffer.c \
   Hacl.Benchmark.Ed25519.c
 
