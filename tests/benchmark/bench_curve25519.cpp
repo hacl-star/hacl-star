@@ -153,6 +153,38 @@ class OpenSSL: public Curve25519Benchmark
 };
 #endif
 
+
+#ifdef HAVE_FIAT_CURVE
+#include "curve25519-fiat64.h"
+
+class Fiat: public Curve25519Benchmark
+{
+  // Using code from https://git.zx2c4.com/kbench9000/tree/curve25519-fiat64.c?h=jd/curve-comparison
+  protected:
+    size_t skeylen;
+
+  public:
+    Fiat() : Curve25519Benchmark("Fiat") {}
+
+    virtual void bench_setup(const BenchmarkSettings & s)
+    {
+      Curve25519Benchmark::bench_setup(s);
+
+    }
+    virtual void bench_func()
+    {
+
+    }
+    virtual void bench_cleanup(const BenchmarkSettings & s)
+    {
+
+
+      Curve25519Benchmark::bench_cleanup(s);
+    }
+    virtual ~Fiat() {}
+};
+#endif
+
 void bench_curve25519(const BenchmarkSettings & s)
 {
   std::string data_filename = "bench_curve25519.csv";

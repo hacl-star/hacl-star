@@ -514,7 +514,7 @@ static std::string filter(const std::string & data_filename, const std::string &
 
 void bench_aead_encrypt(const BenchmarkSettings & s)
 {
-  size_t data_sizes[] = { 1024, 2048, 4096, 8192, 16384, 32768, 65536 };
+  size_t data_sizes[] = { 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536 };
 
   Benchmark::PlotSpec plot_specs_cycles;
   Benchmark::PlotSpec plot_specs_bytes;
@@ -525,7 +525,7 @@ void bench_aead_encrypt(const BenchmarkSettings & s)
     dsstr << ds;
 
     std::stringstream data_filename;
-    data_filename << "bench_aead_" << ds << ".csv";
+    data_filename << "bench_aead_encrypt_" << ds << ".csv";
 
     if (plot_specs_cycles.empty())
     {
@@ -660,7 +660,7 @@ void bench_aead_encrypt(const BenchmarkSettings & s)
 
 void bench_aead_decrypt(const BenchmarkSettings & s)
 {
-  size_t data_sizes[] = { 1024, 2048, 4096, 8192, 16384, 32768, 65536 };
+  size_t data_sizes[] = { 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536 };
 
   Benchmark::PlotSpec plot_specs_cycles;
   Benchmark::PlotSpec plot_specs_bytes;
@@ -671,7 +671,7 @@ void bench_aead_decrypt(const BenchmarkSettings & s)
     dsstr << ds;
 
     std::stringstream data_filename;
-    data_filename << "bench_aead_" << ds << ".csv";
+    data_filename << "bench_aead_decrypt_" << ds << ".csv";
 
     if (plot_specs_cycles.empty())
     {
