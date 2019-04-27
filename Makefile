@@ -704,6 +704,7 @@ COMPACT_FLAGS	=\
   -bundle Hacl.Impl.Chacha20=Hacl.Impl.Chacha20.*[rename=Hacl_Chacha20] \
   -bundle Hacl.Curve25519_51+Hacl.Curve25519_64=Hacl.Impl.Curve25519.*[rename=Hacl_Curve25519] \
   -bundle Hacl.Impl.Chacha20Poly1305=Hacl.Impl.Chacha20Poly1305.*[rename=Hacl_Chacha20Poly1305] \
+  -bundle 'Hacl.Ed25519=Hacl.Impl.*,Hacl.Bignum25519,Hacl.Ed25519' \
   -bundle LowStar.* \
   -bundle Prims,C.Failure,C,C.String,C.Loops,Spec.Loops,C.Endianness,FStar.*[rename=Hacl_Kremlib] \
   -bundle 'EverCrypt.Spec.*' \
@@ -728,8 +729,7 @@ old-%:
 
 # This is all legacy. Some notes:
 HACL_OLD_FILES=\
-  code/old/experimental/aesgcm/aesgcm-c/Hacl_AES.c \
-  code/old/ed25519/ed25519-c/Hacl_Ed25519.c
+  code/old/experimental/aesgcm/aesgcm-c/Hacl_AES.c
 
 dist/compact/Makefile.basic: KRML_EXTRA=$(COMPACT_FLAGS)
 
