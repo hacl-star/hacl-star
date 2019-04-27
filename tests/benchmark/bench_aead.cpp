@@ -507,48 +507,17 @@ class BCryptDecryptBM : public AEADBenchmark
 
 #endif
 
-Benchmark::plot_spec_t histogram_template(const std::string & column, size_t fractional_digits, const std::string & filter, const std::string & data_filename)
+static std::string filter(const std::string & data_filename, const std::string & keyword)
 {
-  std::string filtered = "< grep -e \"^\\\"" + filter + "\" -e \"^\\\"Provider\" " + data_filename;
-  return {
-    std::make_pair(filtered, "using '"+column+"':xticlabels(strcol('Algorithm')) title '" + filter + "'"),
-    std::make_pair("", "using 0:'"+column+"':xticlabels(strcol('Algorithm')):(sprintf(\"%0." + std::to_string(fractional_digits) + "f\", column('"+column+"'))) with labels font \"Courier,8\"")
-  };
-}
-
-std::pair<std::string, std::string> candlestick_template(const std::string & filter, const std::string & data_filename)
-{
-  std::string filtered = "< grep -e \"^\\\"" + filter + "\" -e \"^\\\"Provider\" " + data_filename;
-  return std::make_pair(filtered, "using 0:'Q25':'Min':'Max':'Q75':xticlabels(strcol('Algorithm')) title '" + filter + "' with candlesticks whiskerbars .25");
-}
-
-void add_plotspec(Benchmark::plot_spec_t & a, const Benchmark::plot_spec_t & b)
-{
-  a.insert(a.end(), b.begin(), b.end());
-}
-
-void add_label_offsets(Benchmark::plot_spec_t & plot_spec)
-{
-  switch (plot_spec.size())
-  {
-  case 6:
-    plot_spec[1].second += " offset -2,.5 center notitle";
-    plot_spec[3].second += " offset  0,.5 center notitle";
-    plot_spec[5].second += " offset +2,.5 center notitle";
-    break;
-  case 4:
-    plot_spec[1].second += " offset -2,.5 center notitle";
-    plot_spec[3].second += " offset +2,.5 center notitle";
-    break;
-  }
+  return "< grep -e \"^\\\"" + keyword + "\" -e \"^\\\"Provider\" " + data_filename;
 }
 
 void bench_aead_encrypt(const BenchmarkSettings & s)
 {
   size_t data_sizes[] = { 1024, 2048, 4096, 8192, 16384, 32768, 65536 };
 
-  Benchmark::plot_spec_t plot_specs_cycles;
-  Benchmark::plot_spec_t plot_specs_bytes;
+  Benchmark::PlotSpec plot_specs_cycles;
+  Benchmark::PlotSpec plot_specs_bytes;
 
   for (size_t ds: data_sizes)
   {
@@ -597,15 +566,14 @@ void bench_aead_encrypt(const BenchmarkSettings & s)
 
       Benchmark::run_batch(s, AEADBenchmark::column_headers(), data_filename.str(), todo);
 
-      Benchmark::plot_spec_t plot_specs_ds_cycles;
-      add_plotspec(plot_specs_ds_cycles, histogram_template("Avg", 0, "EverCrypt", data_filename.str()));
+      Benchmark::PlotSpec plot_specs_ds_cycles;
+      plot_specs_ds_cycles += Benchmark::histogram_line(filter(data_filename.str(), "EverCrypt"), "EverCrypt", "Avg", "strcol('Algorithm')", 0, -2);
       #ifdef HAVE_OPENSSL
-      add_plotspec(plot_specs_ds_cycles, histogram_template("Avg", 0, "OpenSSL", data_filename.str()));
+      plot_specs_ds_cycles += Benchmark::histogram_line(filter(data_filename.str(), "OpenSSL"), "OpenSSL", "Avg", "strcol('Algorithm')", 0, +2);
       #endif
       #ifdef HAVE_BCRYPT
-      add_plotspec(plot_specs_ds_cycles, histogram_template("Avg", 0, "BCrypt", data_filename.str()));
+      plot_specs_ds_cycles += Benchmark::histogram_line(filter(data_filename.str(), "BCrypt"), "BCrypt", "Avg", "strcol('Algorithm')", 0, +2);
       #endif
-      add_label_offsets(plot_specs_ds_cycles);
 
       std::stringstream extras;
       extras << "set boxwidth 0.8\n";
@@ -624,15 +592,14 @@ void bench_aead_encrypt(const BenchmarkSettings & s)
                       "bench_aead_all_encrypt_" + dsstr.str() + "_cycles.svg",
                       extras.str());
 
-      Benchmark::plot_spec_t plot_specs_ds_bytes;
-      add_plotspec(plot_specs_ds_bytes, histogram_template("Avg Cycles/Byte", 2, "EverCrypt", data_filename.str()));
+      Benchmark::PlotSpec plot_specs_ds_bytes;
+      plot_specs_ds_bytes += Benchmark::histogram_line(filter(data_filename.str(), "EverCrypt"), "EverCrypt", "Avg Cycles/Byte", "strcol('Algorithm')", 2, -2);
       #ifdef HAVE_OPENSSL
-      add_plotspec(plot_specs_ds_bytes, histogram_template("Avg Cycles/Byte", 2, "OpenSSL", data_filename.str()));
+      plot_specs_ds_bytes += Benchmark::histogram_line(filter(data_filename.str(), "OpenSSL"), "OpenSSL", "Avg Cycles/Byte", "strcol('Algorithm')", 2, +2);
       #endif
       #ifdef HAVE_BCRYPT
-      add_plotspec(plot_specs_ds_bytes, histogram_template("Avg Cycles/Byte", 2, "BCrypt", data_filename.str()));
+      plot_specs_ds_bytes += Benchmark::histogram_line(filter(data_filename.str(), "BCrypt"), "BCrypt", "Avg Cycles/Byte", "strcol('Algorithm')", 2, +2);
       #endif
-      add_label_offsets(plot_specs_ds_bytes);
 
       Benchmark::make_plot(s,
                       "svg",
@@ -643,15 +610,14 @@ void bench_aead_encrypt(const BenchmarkSettings & s)
                       "bench_aead_all_encrypt_" + dsstr.str() + "_bytes.svg",
                       extras.str());
 
-      Benchmark::plot_spec_t plot_specs_ds_candlesticks = {
-        candlestick_template("EverCrypt", data_filename.str()),
-        #ifdef HAVE_OPENSSL
-        candlestick_template("OpenSSL", data_filename.str()),
-        #endif
-        #ifdef HAVE_BCRYPT
-        candlestick_template("BCrypt", data_filename.str()),
-        #endif
-      };
+      Benchmark::PlotSpec plot_specs_ds_candlesticks;
+      plot_specs_ds_candlesticks += Benchmark::candlestick_line(filter(data_filename.str(), "EverCrypt"), "EverCrypt", "strcol('Algorithm')"),
+      #ifdef HAVE_OPENSSL
+      plot_specs_ds_candlesticks += Benchmark::candlestick_line(filter(data_filename.str(), "OpenSSL"), "OpenSSL", "strcol('Algorithm')"),
+      #endif
+      #ifdef HAVE_BCRYPT
+      plot_specs_ds_candlesticks += Benchmark::candlestick_line(filter(data_filename.str(), "BCrypt"), "BCrypt", "strcol('Algorithm')"),
+      #endif
 
       extras << "set boxwidth .25\n";
       extras << "set style fill empty\n";
@@ -696,8 +662,8 @@ void bench_aead_decrypt(const BenchmarkSettings & s)
 {
   size_t data_sizes[] = { 1024, 2048, 4096, 8192, 16384, 32768, 65536 };
 
-  Benchmark::plot_spec_t plot_specs_cycles;
-  Benchmark::plot_spec_t plot_specs_bytes;
+  Benchmark::PlotSpec plot_specs_cycles;
+  Benchmark::PlotSpec plot_specs_bytes;
 
   for (size_t ds: data_sizes)
   {
@@ -746,23 +712,14 @@ void bench_aead_decrypt(const BenchmarkSettings & s)
 
       Benchmark::run_batch(s, AEADBenchmark::column_headers(), data_filename.str(), todo);
 
-      std::string evercrypt_only = "< grep -e \"^\\\"EverCrypt\" -e \"^\\\"Provider\" " + data_filename.str();
+      Benchmark::PlotSpec plot_specs_ds_cycles;
+      plot_specs_ds_cycles += Benchmark::histogram_line(filter(data_filename.str(), "EverCrypt"), "EverCrypt", "Avg", "strcol('Algorithm')", 0, -1);
       #ifdef HAVE_OPENSSL
-      std::string openssl_only = "< grep -e \"^\\\"OpenSSL\" -e \"^\\\"Provider\" " + data_filename.str();
+      plot_specs_ds_cycles += Benchmark::histogram_line(filter(data_filename.str(), "OpenSSL"), "OpenSSL", "Avg", "strcol('Algorithm')", 0, -1);
       #endif
       #ifdef HAVE_BCRYPT
-      std::string bcrypt_only = "< grep -e \"^\\\"BCrypt\" -e \"^\\\"Provider\" " + data_filename.str();
+      plot_specs_ds_cycles += Benchmark::histogram_line(filter(data_filename.str(), "BCrypt"), "BCrypt", "Avg", "strcol('Algorithm')", 0, -1);
       #endif
-
-      Benchmark::plot_spec_t plot_specs_ds_cycles;
-      add_plotspec(plot_specs_ds_cycles, histogram_template("Avg", 0, "EverCrypt", data_filename.str()));
-      #ifdef HAVE_OPENSSL
-      add_plotspec(plot_specs_ds_cycles, histogram_template("Avg", 0, "OpenSSL", data_filename.str()));
-      #endif
-      #ifdef HAVE_BCRYPT
-      add_plotspec(plot_specs_ds_cycles, histogram_template("Avg", 0, "BCrypt", data_filename.str()));
-      #endif
-      add_label_offsets(plot_specs_ds_cycles);
 
       std::stringstream extras;
       extras << "set boxwidth 0.8\n";
@@ -781,15 +738,14 @@ void bench_aead_decrypt(const BenchmarkSettings & s)
                       "bench_aead_all_decrypt_" + dsstr.str() + "_cycles.svg",
                       extras.str());
 
-        Benchmark::plot_spec_t plot_specs_ds_bytes;
-      add_plotspec(plot_specs_ds_bytes, histogram_template("Avg Cycles/Byte", 2, "EverCrypt", data_filename.str()));
+      Benchmark::PlotSpec plot_specs_ds_bytes;
+      plot_specs_ds_bytes += Benchmark::histogram_line(filter(data_filename.str(), "EverCrypt"), "EverCrypt", "Avg Cycles/Byte", "strcol('Algorithm')", 2, -2);
       #ifdef HAVE_OPENSSL
-      add_plotspec(plot_specs_ds_bytes, histogram_template("Avg Cycles/Byte", 2, "OpenSSL", data_filename.str()));
+      plot_specs_ds_bytes += Benchmark::histogram_line(filter(data_filename.str(), "OpenSSL"), "OpenSSL", "Avg Cycles/Byte", "strcol('Algorithm')", 2, +2);
       #endif
       #ifdef HAVE_BCRYPT
-      add_plotspec(plot_specs_ds_bytes, histogram_template("Avg Cycles/Byte", 2, "BCrypt", data_filename.str()));
+      plot_specs_ds_bytes += Benchmark::histogram_line(filter(data_filename.str(), "BCrypt"), "BCrypt", "Avg Cycles/Byte", "strcol('Algorithm')", 2, +2);
       #endif
-      add_label_offsets(plot_specs_ds_bytes);
 
       Benchmark::make_plot(s,
                       "svg",
@@ -800,15 +756,14 @@ void bench_aead_decrypt(const BenchmarkSettings & s)
                       "bench_aead_all_decrypt_" + dsstr.str() + "_bytes.svg",
                       extras.str());
 
-      Benchmark::plot_spec_t plot_specs_ds_candlesticks = {
-        candlestick_template("EverCrypt", data_filename.str()),
-        #ifdef HAVE_OPENSSL
-        candlestick_template("OpenSSL", data_filename.str()),
-        #endif
-        #ifdef HAVE_BCRYPT
-        candlestick_template("BCrypt", data_filename.str()),
-        #endif
-      };
+      Benchmark::PlotSpec plot_specs_ds_candlesticks;
+      plot_specs_ds_candlesticks += Benchmark::candlestick_line(filter(data_filename.str(), "EverCrypt"), "EverCrypt", "strcol('Algorithm')"),
+      #ifdef HAVE_OPENSSL
+      plot_specs_ds_candlesticks += Benchmark::candlestick_line(filter(data_filename.str(), "OpenSSL"), "OpenSSL", "strcol('Algorithm')"),
+      #endif
+      #ifdef HAVE_BCRYPT
+      plot_specs_ds_candlesticks += Benchmark::candlestick_line(filter(data_filename.str(), "BCrypt"), "BCrypt", "strcol('Algorithm')"),
+      #endif
 
       extras << "set boxwidth .25\n";
       extras << "set style fill empty\n";

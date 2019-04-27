@@ -137,10 +137,20 @@ typedef OpenSSLHash<0, 128> OpenSSLMD5;
 typedef OpenSSLHash<1, 160> OpenSSLSHA1;
 #endif
 
+static std::string filter(const std::string & data_filename, const std::string & keyword)
+{
+  return "< grep -e \"^\\\"" + keyword + "\" -e \"^\\\"Provider\" " + data_filename;
+}
+
 void bench_hash_plots(const BenchmarkSettings & s, const std::string & alg, const std::string & num_benchmarks, const std::string & data_filename)
 {
   std::stringstream title;
   title << alg << " performance";
+
+  Benchmark::Benchmark::PlotSpec plot_specs_cycles;
+  plot_specs_cycles += Benchmark::histogram_line(filter(data_filename, "EverCrypt"), "EverCrypt", "Avg", "strcol('Size [b]')", 0, true, -1.25, 1.0);
+  plot_specs_cycles += Benchmark::histogram_line(filter(data_filename, "HaCl"), "HaCl", "Avg", "strcol('Size [b]')", 0, true, +0, 1.0);
+  plot_specs_cycles += Benchmark::histogram_line(filter(data_filename, "OpenSSL"), "OpenSSL", "Avg", "strcol('Size [b]')", 0, true, +1.25, 1.0);
 
   std::stringstream extras;
   extras << "set boxwidth 0.8\n";
@@ -148,36 +158,6 @@ void bench_hash_plots(const BenchmarkSettings & s, const std::string & alg, cons
   extras << "set style histogram clustered gap 3 title\n";
   extras << "set style data histograms\n";
   extras << "set bmargin 5\n";
-
-  std::string evercrypt_only = "< grep -e \"^\\\"EverCrypt\" -e \"^\\\"Provider\" " + data_filename;
-  std::string hacl_only = "< grep -e \"^\\\"HaCl\" -e \"^\\\"Provider\" " + data_filename;
-  std::string openssl_only = "< grep -e \"^\\\"OpenSSL\" -e \"^\\\"Provider\" " + data_filename;
-
-  Benchmark::plot_spec_t plot_specs_cycles = {
-    std::make_pair(evercrypt_only, "using 'Avg':xticlabels(strcol('Size [b]')) title \"EverCrypt\""),
-    std::make_pair("", "using 0:'Avg':xticlabels(strcol('Size [b]')):(sprintf(\"%0.0f\", column('Avg'))) with labels font \"Courier,8\" offset char -1.25,1 rotate by 90 notitle"),
-    #ifdef HAVE_HACL
-    std::make_pair(hacl_only,  "using 'Avg' title \"HaCl\""),
-    std::make_pair("", "using 0:'Avg':xticlabels(strcol('Size [b]')):(sprintf(\"%0.0f\", column('Avg'))) with labels font \"Courier,8\" offset char +0.00,1 rotate by 90 notitle"),
-    #endif
-    #ifdef HAVE_OPENSSL
-    std::make_pair(openssl_only, "using 'Avg' title \"OpenSSL\""),
-    std::make_pair("", "using 0:'Avg':xticlabels(strcol('Size [b]')):(sprintf(\"%0.0f\", column('Avg'))) with labels font \"Courier,8\" offset char +1.25,1 rotate by 90 notitle")
-    #endif
-   };
-
-  Benchmark::plot_spec_t plot_specs_bytes = {
-    std::make_pair(evercrypt_only, "using 'Avg Cycles/Byte':xticlabels(strcol('Size [b]')) title \"EverCrypt\""),
-    std::make_pair("", "using 0:'Avg Cycles/Byte':xticlabels('Size [b]'):(sprintf(\"%0.2f\", column('Avg Cycles/Byte'))) with labels font \"Courier,8\" offset char -1.25,1 rotate by 90 notitle"),
-    #ifdef HAVE_HACL
-    std::make_pair(hacl_only, "using 'Avg Cycles/Byte' title \"HaCl\""),
-    std::make_pair("", "using 0:'Avg Cycles/Byte':xticlabels('Size [b]'):(sprintf(\"%0.2f\", column('Avg Cycles/Byte'))) with labels font \"Courier,8\" offset char +0.00,1 rotate by 90 notitle"),
-    #endif
-    #ifdef HAVE_OPENSSL
-    std::make_pair(openssl_only, "using 'Avg Cycles/Byte' title \"OpenSSL\""),
-    std::make_pair("", "using 0:'Avg Cycles/Byte':xticlabels('Size [b]'):(sprintf(\"%0.2f\", column('Avg Cycles/Byte'))) with labels font \"Courier,8\" offset char +1.25,1 rotate by 90 notitle")
-    #endif
-   };
 
   Benchmark::make_plot(s,
                        "svg",
@@ -188,6 +168,12 @@ void bench_hash_plots(const BenchmarkSettings & s, const std::string & alg, cons
                        "bench_hash_" + alg + "_cyles.svg",
                        extras.str(),
                        true);
+
+
+  Benchmark::Benchmark::PlotSpec plot_specs_bytes;
+  plot_specs_bytes += Benchmark::histogram_line(filter(data_filename, "EverCrypt"), "EverCrypt", "Avg Cycles/Byte", "strcol('Size [b]')", 2, true, -1.25, 1.0);
+  plot_specs_bytes += Benchmark::histogram_line(filter(data_filename, "HaCl"), "HaCl", "Avg Cycles/Byte", "strcol('Size [b]')", 2, true, +0, 1.0);
+  plot_specs_bytes += Benchmark::histogram_line(filter(data_filename, "OpenSSL"), "OpenSSL", "Avg Cycles/Byte", "strcol('Size [b]')", 2, true, +1.25, 1.0);
 
   extras << "set key top right inside\n";
 
@@ -202,18 +188,14 @@ void bench_hash_plots(const BenchmarkSettings & s, const std::string & alg, cons
                        true);
 
 
-  Benchmark::plot_spec_t plot_specs_cycles_candlesticks = {
-    std::make_pair(evercrypt_only, "using 0:'Q25':'Min':'Max':'Q75':xticlabels(strcol('Size [b]')) title \"EverCrypt\" with candlesticks whiskerbars .5 lt 1"),
-    std::make_pair("", "using 0:'Med':'Med':'Med':'Med' with candlesticks notitle lt 1"),
-    #ifdef HAVE_HACL
-    std::make_pair(hacl_only, "using 0:'Q25':'Min':'Max':'Q75':xticlabels(strcol('Size [b]')) title \"HaCl\" with candlesticks whiskerbars .5 lt 2"),
-    std::make_pair("", "using 0:'Med':'Med':'Med':'Med' with candlesticks notitle lt 2"),
-    #endif
-    #ifdef HAVE_OPENSSL
-    std::make_pair(openssl_only, "using 0:'Q25':'Min':'Max':'Q75':xticlabels(strcol('Size [b]')) title \"OpenSSL\" with candlesticks whiskerbars .5 lt 3"),
-    std::make_pair("", "using 0:'Med':'Med':'Med':'Med' with candlesticks notitle lt 3"),
-    #endif
-  };
+  Benchmark::Benchmark::PlotSpec plot_specs_cycles_candlesticks;
+  plot_specs_cycles_candlesticks += Benchmark::candlestick_line(filter(data_filename, "EverCrypt"), "EverCrypt", "strcol('Size [b]')");
+  #ifdef HAVE_HACL
+  plot_specs_cycles_candlesticks += Benchmark::candlestick_line(filter(data_filename, "HaCl"), "HaCl", "strcol('Size [b]')");
+  #endif
+  #ifdef HAVE_OPENSSL
+  plot_specs_cycles_candlesticks += Benchmark::candlestick_line(filter(data_filename, "OpenSSL"), "OpenSSL", "strcol('Size [b]')");
+  #endif
 
   extras << "set boxwidth 0.25\n";
   extras << "set style fill empty\n";
@@ -454,7 +436,7 @@ void bench_hash(const BenchmarkSettings & s)
   bench_sha1(s);
   bench_sha2(s);
 
-  Benchmark::plot_spec_t plot_specs_cycles = {
+  Benchmark::Benchmark::PlotSpec plot_specs_cycles = {
     std::make_pair("bench_hash_MD5.csv",      "using 'Avg':xticlabels(strcol('Provider')) title 'MD5'"),
     std::make_pair("bench_hash_SHA1.csv",     "using 'Avg' title 'SHA1'"),
     std::make_pair("bench_hash_SHA2_224.csv", "using 'Avg' title 'SHA2-224'"),
@@ -463,7 +445,7 @@ void bench_hash(const BenchmarkSettings & s)
     std::make_pair("bench_hash_SHA2_512.csv", "using 'Avg' title 'SHA2-512'")
   };
 
-  Benchmark::plot_spec_t plot_specs_bytes = {
+  Benchmark::Benchmark::PlotSpec plot_specs_bytes = {
     std::make_pair("bench_hash_MD5.csv",      "using 'Avg Cycles/Byte':xticlabels(strcol('Provider')) title 'MD5'"),
     std::make_pair("bench_hash_SHA1.csv",     "using 'Avg Cycles/Byte' title 'SHA1'"),
     std::make_pair("bench_hash_SHA2_224.csv", "using 'Avg Cycles/Byte' title 'SHA2-224'"),
@@ -521,14 +503,10 @@ void bench_hash(const BenchmarkSettings & s)
     extras << "set style data histograms\n";
     extras << "set xrange[-.5:5.5]";
 
-    std::string evercrypt_only = "< grep -e \"^\\\"EverCrypt\" -e \"^\\\"Provider\" " + data_filename;
-    std::string hacl_only = "< grep -e \"^\\\"HaCl\" -e \"^\\\"Provider\" " + data_filename;
-    std::string openssl_only = "< grep -e \"^\\\"OpenSSL\" -e \"^\\\"Provider\" " + data_filename;
-
-    Benchmark::plot_spec_t plot_specs_bytes_by_alg = {
-      std::make_pair(hacl_only, "using 'Avg Cycles/Byte':xticlabels(strcol('Algorithm')) title \"HaCl\""),
-      std::make_pair(evercrypt_only, "using 'Avg Cycles/Byte' title \"EverCrypt\""),
-      std::make_pair(openssl_only, "using 'Avg Cycles/Byte' title \"OpenSSL\"")
+    Benchmark::Benchmark::PlotSpec plot_specs_bytes_by_alg = {
+      std::make_pair(filter(data_filename, "HaCl"), "using 'Avg Cycles/Byte':xticlabels(strcol('Algorithm')) title \"HaCl\""),
+      std::make_pair(filter(data_filename, "EverCrypt"), "using 'Avg Cycles/Byte' title \"EverCrypt\""),
+      std::make_pair(filter(data_filename, "OpenSSL"), "using 'Avg Cycles/Byte' title \"OpenSSL\"")
     };
 
     Benchmark::make_plot(s,

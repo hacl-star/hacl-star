@@ -176,28 +176,29 @@ void bench_curve25519(const BenchmarkSettings & s)
 
   Benchmark::run_batch(s, Curve25519Benchmark::column_headers(), data_filename, todo);
 
-  Benchmark::plot_spec_t plot_spec_cycles =
-    { std::make_pair(data_filename, "using 'Avg':xticlabels(strcol('Algorithm')) with boxes title columnheader"),
-      std::make_pair("", "using 0:'Avg':xticlabels(strcol('Algorithm')):(sprintf(\"%0.0f\", column('Avg'))) with labels font \"Courier,8\" offset char 0,.5") };
+  std::stringstream extras;
+  extras << "set style histogram clustered gap 1 title\n";
+  extras << "set style data histograms\n";
+  extras << "set xrange[-.5:" + num_benchmarks.str() + "-.5]\n";
 
   Benchmark::make_plot(s,
                        "svg",
                        "Curve25519 performance",
                        "",
                        "Avg. performance [CPU cycles/derivation]",
-                       plot_spec_cycles,
+                       Benchmark::histogram_line(data_filename, "", "Avg", "strcol('Algorithm')", 0),
                        "bench_curve25519_cycles.svg",
-                       "");
+                       extras.str());
 
-  Benchmark::plot_spec_t plot_spec_candlesticks =
-    { std::make_pair(data_filename, "using 0:'Q25':'Min':'Max':'Q75':xticlabels(strcol('Algorithm')) with candlesticks whiskerbars .25") };
+  extras << "set boxwidth 0.25\n";
+  extras << "set style fill empty\n";
 
   Benchmark::make_plot(s,
                        "svg",
                        "Curve25519 performance",
                        "",
                        "Avg. performance [CPU cycles/derivation]",
-                       plot_spec_candlesticks,
+                       Benchmark::candlestick_line(data_filename, "", "strcol('Algorithm')"),
                        "bench_curve25519_candlesticks.svg",
-                       "set boxwidth 0.25\nset xrange[-.5:" + num_benchmarks.str() + "-.5]\nset style fill empty\n");
+                       extras.str());
 }

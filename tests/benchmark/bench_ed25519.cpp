@@ -222,46 +222,46 @@ void bench_ed25519(const BenchmarkSettings & s)
       new OpenSSLSign(ds),
       new OpenSSLVerify(ds),
       #endif
-      };
+    };
+
+    std::stringstream num_benchmarks;
+    num_benchmarks << todo.size();
 
     Benchmark::run_batch(s, DSABenchmark::column_headers(), data_filename, todo);
 
-    Benchmark::plot_spec_t plot_spec_cycles =
-      { std::make_pair(data_filename, "using 'Avg':xticlabels(strcol('Algorithm')) with boxes title columnheader"),
-        std::make_pair("", "using 0:'Avg':xticlabels(strcol('Algorithm')):(sprintf(\"%0.0f\", column('Avg'))) with labels font \"Courier,8\" offset char 0,.5") };
+    std::stringstream extras;
+    extras << "set style histogram clustered gap 1 title\n";
+    extras << "set style data histograms\n";
+    extras << "set xrange[-.5:" + num_benchmarks.str() + "-.5]\n";
 
     Benchmark::make_plot(s,
                          "svg",
                          "Ed25519 performance (message size=" + std::to_string(ds) + " bytes)",
                          "",
                          "Avg. performance [CPU cycles/operation]",
-                         plot_spec_cycles,
+                         Benchmark::histogram_line(data_filename, "", "Avg", "strcol('Algorithm')", 0),
                          "bench_ed25519_" + std::to_string(ds) + "_cycles.svg",
-                         "");
-
-    Benchmark::plot_spec_t plot_spec_bytes =
-      { std::make_pair(data_filename, "using 'Avg Cycles/Byte':xticlabels(strcol('Algorithm')) with boxes title columnheader"),
-        std::make_pair("", "using 0:'Avg Cycles/Byte':xticlabels(strcol('Algorithm')):(sprintf(\"%0.0f\", column('Avg Cycles/Byte'))) with labels font \"Courier,8\" offset char 0,.5") };
+                         extras.str());
 
     Benchmark::make_plot(s,
                          "svg",
                          "Ed25519 performance (message size=" + std::to_string(ds) + " bytes)",
                          "",
                          "Avg. performance [CPU cycles/byte]",
-                         plot_spec_bytes,
+                         Benchmark::histogram_line(data_filename, "", "Avg Cycles/Byte", "strcol('Algorithm')", 2),
                          "bench_ed25519_" + std::to_string(ds) + "_bytes.svg",
-                         "");
+                         extras.str());
 
-    Benchmark::plot_spec_t plot_spec_candlesticks =
-      { std::make_pair(data_filename, "using 0:'Q25':'Min':'Max':'Q75':xticlabels(strcol('Algorithm')) with candlesticks whiskerbars .25") };
+    extras << "set boxwidth 0.25\n";
+    extras << "set style fill empty\n";
 
     Benchmark::make_plot(s,
                          "svg",
                          "Ed25519 performance (message size=" + std::to_string(ds) + " bytes)",
                          "",
                          "Avg. performance [CPU cycles/operation]",
-                         plot_spec_candlesticks,
+                         Benchmark::candlestick_line(data_filename, "", "strcol('Algorithm')"),
                          "bench_ed25519_" + std::to_string(ds) + "_candlesticks.svg",
-                         "set boxwidth 0.25\nset xrange[-.5:4.5]\nset style fill empty\n");
+                         extras.str());
   }
 }

@@ -237,6 +237,31 @@ void Benchmark::run_batch(const BenchmarkSettings & s,
   rs.close();
 }
 
+Benchmark::PlotSpec Benchmark::histogram_line(const std::string & data_filename, const std::string & title, const std::string & column, const std::string & xlabels, unsigned label_digits, bool label_rotate, double label_offset_x, double label_offset_y)
+{
+  std::string t = "title columnheader";
+  if (title != "")
+    t = "title '" + title + "'";
+  return
+    {
+      std::make_pair(data_filename, "using '" + column + "':xticlabels(" + xlabels + ") " + t),
+      std::make_pair("", "using 0:'" + column + "':xticlabels(" + xlabels + "):(sprintf(\"%0." + std::to_string(label_digits) +
+                         "f\", column('" + column + "'))) with labels notitle " + (label_rotate?"rotate":"") +
+                         " font \"Courier,8\" offset char " + std::to_string(label_offset_x) + "," + std::to_string(label_offset_y))
+    };
+}
+
+Benchmark::PlotSpec Benchmark::candlestick_line(const std::string & data_filename, const std::string & title, const std::string & xlabels)
+{
+  std::string t = "notitle";
+  if (title != "")
+    t = "title '" + title + "'";
+  return
+    {
+      std::make_pair(data_filename, "using 0:'Q25':'Min':'Max':'Q75':xticlabels(" + xlabels + ") with candlesticks " + t + " whiskerbars .25"),
+      // median line? // std::make_pair("", "using 0:'Med':'Med':'Med':'Med' with candlesticks lt -1 notitle")
+    };
+}
 
 void make_plot_labels(std::ofstream & of, const BenchmarkSettings & s)
 {
@@ -251,7 +276,7 @@ void Benchmark::make_plot(const BenchmarkSettings & s,
                           const std::string & title,
                           const std::string & xtitle,
                           const std::string & ytitle,
-                          const std::vector<std::pair<std::string, std::string> > & plot_specs,
+                          const PlotSpec & plot_specs,
                           const std::string & plot_filename,
                           const std::string & plot_extras,
                           bool add_key)
