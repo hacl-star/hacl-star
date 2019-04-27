@@ -250,6 +250,7 @@ let poly_update_multi_lemma #w text acc0 r =
 //   (poly #w text acc0 r == poly_update1 text acc0 r)
 //
 
+#push-options "--z3rlimit 200"
 val poly_eq_lemma1:
     #w:lanes
   -> text:bytes
@@ -315,6 +316,7 @@ let poly_eq_lemma1 #w text acc0 r =
   in aux (len0 / size_block);
   assert (acc1 == Loops.repeati (len0 / size_block) repeat_bf_t0 acc0);
   Loops.repeati_def (len0 / size_block) repeat_bf_t0 acc0
+#pop-options
 
 #push-options "--z3rlimit 200"
 #push-options "--max_fuel 2"
