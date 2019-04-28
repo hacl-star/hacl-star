@@ -113,8 +113,7 @@ ALL_GENERATED_FILES = $(addprefix $(GENERATED_DIR)/,$(ALL_OUR_FILES))
 
 ALL_SOURCES = \
   $(ALL_GENERATED_FILES) \
-  $(HACL_HOME)/lib/c/Lib_PrintBuffer.c \
-  Hacl.Benchmark.Ed25519.c
+  $(HACL_HOME)/lib/c/Lib_PrintBuffer.c
 
 ALL_OBJS = $(patsubst %.c,%.o,$(ALL_SOURCES))
 
@@ -148,8 +147,7 @@ $(OUT_DIR)/test.exe: $(ALL_OBJS) | $(OUT_DIR)
 	$(CC) $(CFLAGS) -o $@ $^ -L $(KREMLIN_HOME)/kremlib/dist/generic -lkremlib
 
 ALL_SOURCES_HACL = \
-  ed25519-hacl/Hacl_Ed25519.c \
-  Hacl.Benchmark.Ed25519.c
+  ed25519-hacl/Hacl_Ed25519.c
 
 ALL_OBJS_HACL = $(patsubst %.c,%.o,$(ALL_SOURCES_HACL))
 
