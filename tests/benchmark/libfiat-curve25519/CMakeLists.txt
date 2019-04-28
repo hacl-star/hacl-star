@@ -12,8 +12,14 @@ add_library(fiat-curve25519 SHARED STATIC
   ${FIAT_CURVE25519_SRC_DIR}/ladderstep.c
   ${FIAT_CURVE25519_SRC_DIR}/scalarmult.c
   ${FIAT_CURVE25519_SRC_DIR}/liblow/cmovznz.c)
-target_compile_options(fiat-curve25519 PRIVATE -Wno-parentheses -std=gnu11 -march=native -mtune=native -Wno-attributes -flto)
+target_compile_options(fiat-curve25519 PRIVATE -Wno-parentheses -std=gnu11 -march=native -mtune=native -Wno-attributes)
 target_include_directories(fiat-curve25519 PUBLIC ${FIAT_CURVE25519_SRC_DIR} ${FIAT_CURVE25519_SRC_DIR}/liblow)
+
+if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+  target_compile_options(fiat-curve25519 PRIVATE -fbracket-depth=512)
+else()
+  target_compile_options(fiat-curve25519 PRIVATE -flto)
+endif()
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
@@ -24,6 +30,6 @@ elseif(CMAKE_SYSTEM_NAME STREQUAL "CYGWIN")
 endif()
 
 if(ASAN)
-target_compile_options(fiat-curve25519 PRIVATE -g -fsanitize=undefined,address -fno-omit-frame-pointer -fno-sanitize-recover=all -fno-sanitize=function)
-target_link_libraries(fiat-curve25519 PRIVATE -g -fsanitize=address)
+  target_compile_options(fiat-curve25519 PRIVATE -g -fsanitize=undefined,address -fno-omit-frame-pointer -fno-sanitize-recover=all -fno-sanitize=function)
+  target_link_libraries(fiat-curve25519 PRIVATE -g -fsanitize=address)
 endif()
