@@ -7,19 +7,6 @@ extern "C" {
 #include <EverCrypt_Curve25519.h>
 }
 
-#ifdef HAVE_HACL
-#include <Hacl_Curve25519.h>
-#endif
-
-#ifdef HAVE_OPENSSL
-#include <openssl/evp.h>
-#include <openssl/ec.h>
-#endif
-
-#ifdef HAVE_RFC7748
-#include <rfc7748_precomputed.h>
-#endif
-
 class Curve25519Benchmark: public Benchmark
 {
   protected:
@@ -63,6 +50,7 @@ class EverCrypt: public Curve25519Benchmark
 };
 
 #ifdef HAVE_RFC7748
+#include <rfc7748_precomputed.h>
 extern void x25519_shared_secret_x64(uint8_t* sec, uint8_t* priv, uint8_t* pub);
 
 class RFC7748: public Curve25519Benchmark
@@ -76,10 +64,12 @@ class RFC7748: public Curve25519Benchmark
 #endif
 
 #ifdef HAVE_HACL
+#include <Hacl_Curve25519.h>
+
 class Hacl51: public Curve25519Benchmark
 {
   public:
-    Hacl51() : Curve25519Benchmark("HaCl (51)") {}
+    Hacl51() : Curve25519Benchmark("HaCl\\n(Radix 51)") {}
     virtual void bench_func()
       { Hacl_Curve25519_51_ecdh(shared_secret, our_secret, their_public); }
     virtual ~Hacl51() {}
@@ -88,7 +78,7 @@ class Hacl51: public Curve25519Benchmark
 class Hacl64: public Curve25519Benchmark
 {
   public:
-    Hacl64() : Curve25519Benchmark("Hacl (64)") {}
+    Hacl64() : Curve25519Benchmark("HaCl\\n(Radix 64)") {}
     virtual void bench_func()
       { Hacl_Curve25519_64_ecdh(shared_secret, our_secret, their_public); }
     virtual ~Hacl64() {}
@@ -96,7 +86,33 @@ class Hacl64: public Curve25519Benchmark
 #endif
 
 #ifdef HAVE_OPENSSL
+#include <openssl/evp.h>
+#include <openssl/ec.h>
+
+extern "C" {
+extern int X25519(uint8_t out_shared_key[32], const uint8_t private_key[32], const uint8_t peer_public_value[32]);
+}
+
 class OpenSSL: public Curve25519Benchmark
+{
+  public:
+    OpenSSL() : Curve25519Benchmark("OpenSSL") {}
+    virtual void bench_func()
+    {
+      #ifdef _DEBUG
+      if (
+      #endif
+        X25519(shared_secret, our_secret, their_public)
+      #ifdef _DEBUG
+        <= 0)
+        throw std::logic_error("OpenSSL X25519 failed")
+      #endif
+      ;
+    }
+    virtual ~OpenSSL() {}
+};
+
+class OpenSSLEVP: public Curve25519Benchmark
 {
   protected:
     size_t skeylen;
@@ -104,7 +120,7 @@ class OpenSSL: public Curve25519Benchmark
     EVP_PKEY *ours = NULL, *theirs = NULL;
 
   public:
-    OpenSSL() : Curve25519Benchmark("OpenSSL") {}
+    OpenSSLEVP() : Curve25519Benchmark("OpenSSL\\n(EVP)") {}
 
     virtual void bench_setup(const BenchmarkSettings & s)
     {
@@ -149,39 +165,20 @@ class OpenSSL: public Curve25519Benchmark
 
       Curve25519Benchmark::bench_cleanup(s);
     }
-    virtual ~OpenSSL() {}
+    virtual ~OpenSSLEVP() {}
 };
 #endif
 
 
-#ifdef HAVE_FIAT_CURVE
-#include "curve25519-fiat64.h"
+#ifdef HAVE_FIAT_CURVE25519
+#include "fiat-curve25519.h"
 
 class Fiat: public Curve25519Benchmark
 {
-  // Using code from https://git.zx2c4.com/kbench9000/tree/curve25519-fiat64.c?h=jd/curve-comparison
-  protected:
-    size_t skeylen;
-
   public:
     Fiat() : Curve25519Benchmark("Fiat") {}
-
-    virtual void bench_setup(const BenchmarkSettings & s)
-    {
-      Curve25519Benchmark::bench_setup(s);
-
-    }
     virtual void bench_func()
-    {
-
-    }
-    virtual void bench_cleanup(const BenchmarkSettings & s)
-    {
-
-
-      Curve25519Benchmark::bench_cleanup(s);
-    }
-    virtual ~Fiat() {}
+      { crypto_scalarmult(shared_secret, our_secret, their_public); }
 };
 #endif
 
@@ -199,7 +196,11 @@ void bench_curve25519(const BenchmarkSettings & s)
     new Hacl64(),
     #endif
     #ifdef HAVE_OPENSSL
-    new OpenSSL()
+    new OpenSSL(),
+    new OpenSSLEVP(),
+    #endif
+    #ifdef HAVE_FIAT_CURVE25519
+    new Fiat()
     #endif
     };
 
@@ -212,6 +213,7 @@ void bench_curve25519(const BenchmarkSettings & s)
   extras << "set style histogram clustered gap 1 title\n";
   extras << "set style data histograms\n";
   extras << "set xrange[-.5:" + num_benchmarks.str() + "-.5]\n";
+  extras << "set bmargin 4\n";
 
   Benchmark::make_plot(s,
                        "svg",
