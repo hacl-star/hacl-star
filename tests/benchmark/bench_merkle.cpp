@@ -1,6 +1,7 @@
 #include <sys/time.h>
 
 #include <sstream>
+#include <algorithm>
 
 #include <benchmark.h>
 
@@ -240,7 +241,7 @@ class MerklePathVerification : public Benchmark
 
 void bench_merkle_insert(const BenchmarkSettings & s)
 {
-  size_t data_sizes[] = { 1024, 2048, 4096, 8192, 16384, 32768, 65536 };
+  size_t data_sizes[] = { 1024, 2048, 4096, 8192, 16384, 32768, 65536, 131072, 262144, 524288, 1048576 };
   std::string data_filename = "bench_merkle_insert.csv";
 
   std::list<Benchmark*> todo;
@@ -266,9 +267,10 @@ void bench_merkle_insert(const BenchmarkSettings & s)
                   extras.str());
 
   std::string X = "(column('Nodes')/column('CPUexcl')*1000000000*" + std::to_string(s.samples) + ")";
+  std::string lbls = "sprintf(\"%dk\", column('Nodes')/1024)";
   Benchmark::PlotSpec plot_specs_timed = {
-    std::make_pair(data_filename, "using " + X + ":xticlabels(strcol('Nodes')) with boxes"),
-    std::make_pair("", "using 0:" + X + ":xticlabels(strcol('Nodes')):(sprintf(\"%0.0f\", " + X + ")) with labels font \"Courier,8\" offset char 0,.5 center notitle"),
+    std::make_pair(data_filename, "using " + X + ":xticlabels(" + lbls + ") with boxes"),
+    std::make_pair("", "using 0:" + X + ":xticlabels(" + lbls + "):(sprintf(\"%0.0f\", " + X + ")) with labels font \"Courier,8\" offset char 0,.5 center notitle"),
   };
 
   Benchmark::make_plot(s,
@@ -283,7 +285,7 @@ void bench_merkle_insert(const BenchmarkSettings & s)
 
 void bench_merkle_get_path(const BenchmarkSettings & s)
 {
-  size_t data_sizes[] = { 1024, 2048, 4096, 8192, 16384, 32768 };
+  size_t data_sizes[] = { 1024, 2048, 4096, 8192, 16384, 32768, 65536, 131072, 262144, 524288, 1048576 };
   std::string data_filename = "bench_merkle_get_path.csv";
 
   std::list<Benchmark*> todo;
@@ -309,9 +311,10 @@ void bench_merkle_get_path(const BenchmarkSettings & s)
                   extras.str());
 
   std::string X = "(column('Nodes')/column('CPUexcl')*1000000000*" + std::to_string(s.samples) + ")";
+  std::string lbls = "sprintf(\"%dk\", column('Nodes')/1024)";
   Benchmark::PlotSpec plot_specs_timed = {
-    std::make_pair(data_filename, "using " + X + ":xticlabels(strcol('Nodes')) with boxes"),
-    std::make_pair("", "using 0:" + X + ":xticlabels(strcol('Nodes')):(sprintf(\"%0.0f\", " + X + ")) with labels font \"Courier,8\" offset char 0,.5 center notitle"),
+    std::make_pair(data_filename, "using " + X + ":xticlabels(" + lbls + ") with boxes"),
+    std::make_pair("", "using 0:" + X + ":xticlabels(" + lbls + "):(sprintf(\"%0.0f\", " + X + ")) with labels font \"Courier,8\" offset char 0,.5 center notitle"),
   };
 
   Benchmark::make_plot(s,
@@ -326,7 +329,7 @@ void bench_merkle_get_path(const BenchmarkSettings & s)
 
 void bench_merkle_verify(const BenchmarkSettings & s)
 {
-  size_t data_sizes[] = { 1024, 2048, 4096, 8192, 16384, 32768, 65536 };
+  size_t data_sizes[] = { 1024, 2048, 4096, 8192, 16384, 32768, 65536, 131072, 262144, 524288, 1048576 };
   std::string data_filename = "bench_merkle_verify.csv";
 
   std::list<Benchmark*> todo;
@@ -352,9 +355,10 @@ void bench_merkle_verify(const BenchmarkSettings & s)
                   extras.str());
 
   std::string X = "(column('Nodes')/column('CPUexcl')*1000000000*" + std::to_string(s.samples) + ")";
+  std::string lbls = "sprintf(\"%dk\", column('Nodes')/1024)";
   Benchmark::PlotSpec plot_specs_timed = {
-    std::make_pair(data_filename, "using " + X + ":xticlabels(strcol('Nodes')) with boxes"),
-    std::make_pair("", "using 0:" + X + ":xticlabels(strcol('Nodes')):(sprintf(\"%0.0f\", " + X + ")) with labels font \"Courier,8\" offset char 0,.5 center notitle"),
+    std::make_pair(data_filename, "using " + X + ":xticlabels(" + lbls + ") with boxes"),
+    std::make_pair("", "using 0:" + X + ":xticlabels(" + lbls + "):(sprintf(\"%0.0f\", " + X + ")) with labels font \"Courier,8\" offset char 0,.5 center notitle"),
   };
 
   Benchmark::make_plot(s,
@@ -369,9 +373,9 @@ void bench_merkle_verify(const BenchmarkSettings & s)
 
 void bench_merkle(const BenchmarkSettings & s)
 {
-  // These are too slow...
+  // These amortize over a number of tree nodes, so shouldn't need many samples.
   BenchmarkSettings s_local = s;
-  s_local.samples = s.samples / 10;
+  s_local.samples = std::max(s.samples / 100, 1ul);
 
   bench_merkle_insert(s_local);
   bench_merkle_get_path(s_local);

@@ -182,10 +182,15 @@ void Benchmark::run(const BenchmarkSettings & s)
 
 void Benchmark::report(std::ostream & rs, const BenchmarkSettings & s) const
 {
-  size_t n = samples.size();
-  double median = (n % 2 == 1 ? (double)samples[n/2] : (samples[n/2] + samples[(n+1)/2])/(double)2.0);
-  double q25 = (double)samples[n/4];
-  double q75 = (double)samples[(3*n)/4];
+  double q25 = cmin, median = 0.0, q75 = cmax;
+
+  if (samples.size() > 4)
+  {
+    size_t n = samples.size();
+    median = (n % 2 == 1 ? (double)samples[n/2] : (samples[n/2] + samples[(n+1)/2])/(double)2.0);
+    q25 = (double)samples[n/4];
+    q75 = (double)samples[(3*n)/4];
+  }
 
   rs << "," << std::chrono::duration_cast<std::chrono::nanoseconds>(tincl).count()
     << "," << std::chrono::duration_cast<std::chrono::nanoseconds>(texcl).count()
