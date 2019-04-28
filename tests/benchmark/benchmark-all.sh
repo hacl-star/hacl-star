@@ -35,7 +35,12 @@ for c in $CONFIGS; do
           wget https://www.openssl.org/source/$OPENSSL.tar.gz --no-check-certificate
         fi
         echo "Building $OCONF-$CC"
-        (mkdir -p $OCONF-$CC; tar xfz $OPENSSL.tar.gz -C $OCONF-$CC; pushd $OCONF-$CC/$OPENSSL; CC=$CC CXX=$CXX ./config $OFLAGS > configure.log 2>&1; make $PAR > build.log 2>&1; popd > /dev/null)
+        (mkdir -p $OCONF-$CC;
+          tar xfz $OPENSSL.tar.gz -C $OCONF-$CC;
+          pushd $OCONF-$CC/$OPENSSL;
+          CC=$CC CXX=$CXX ./config CFLAGS="-O3 -march=native -mtune=native" $OFLAGS > configure.log 2>&1;
+          make $PAR > build.log 2>&1;
+          popd > /dev/null)
       fi
       if [ ! -d evercrypt-$OCONF-$CC ]; then
         echo "Configuring evercrypt-$CC with $OCONF-$CC"
