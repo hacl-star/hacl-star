@@ -375,7 +375,7 @@ void bench_merkle(const BenchmarkSettings & s)
 {
   // These amortize over a number of tree nodes, so shouldn't need many samples.
   BenchmarkSettings s_local = s;
-  s_local.samples = std::max(s.samples / 100, 1ul);
+  s_local.samples = std::max<size_t>(s.samples / 100, 1ul);
 
   bench_merkle_insert(s_local);
   bench_merkle_get_path(s_local);

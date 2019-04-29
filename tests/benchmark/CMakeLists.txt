@@ -13,6 +13,7 @@ option(USE_FIAT_CURVE25519 "Use the Fiat Curve25519 implementation" ON)
 
 option(ASAN "Enable clang address sanitizer" OFF)
 
+
 add_subdirectory(libevercrypt)
 
 add_library(benchmark STATIC benchmark.cpp)

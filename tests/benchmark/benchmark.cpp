@@ -284,8 +284,12 @@ void Benchmark::make_plot(const BenchmarkSettings & s,
                           const PlotSpec & plot_specs,
                           const std::string & plot_filename,
                           const std::string & plot_extras,
+                          const std::vector<std::string> & sub_histo_titles,
+                          size_t num_in_sub_histo,
                           bool add_key)
 {
+  int sub_histo = 0;
+  std::vector<std::string>::const_iterator next_sht = sub_histo_titles.begin();
   std::string gnuplot_filename = plot_filename;
   gnuplot_filename.replace(plot_filename.length()-3, 3, "plt");
   std::cout << "-- " << gnuplot_filename << "...\n";
@@ -305,6 +309,8 @@ void Benchmark::make_plot(const BenchmarkSettings & s,
   for (size_t i = 0; i < plot_specs.size(); i++)
   {
     if (i != 0) of << ", \\\n";
+    if (num_in_sub_histo != 0 && i % num_in_sub_histo == 0)
+      of << "newhistogram '" << *next_sht++ << "' at " << sub_histo++ << ", \\\n";
     of << "'" << plot_specs[i].first << "' " << plot_specs[i].second;
   }
   of.close();

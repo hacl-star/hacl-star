@@ -122,6 +122,8 @@ class Benchmark
                           const PlotSpec & plot_specs,
                           const std::string & plot_filename,
                           const std::string & plot_extras,
+                          const std::vector<std::string> & sub_histo_titles = {},
+                          size_t num_in_sub_histo = 0,
                           bool add_key = false);
 };
 
