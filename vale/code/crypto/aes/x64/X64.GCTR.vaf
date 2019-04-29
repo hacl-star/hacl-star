@@ -531,21 +531,23 @@ procedure {:quick}{:public} gctr_bytes_no_extra(
 
 
 #reset-options "--z3rlimit 20"
-procedure {:quick}{:public} gctr_bytes(
+procedure {:quick} gctr_bytes(
     inline alg:algorithm,
     ghost in_b:buffer128,
     ghost out_b:buffer128,
+    ghost inout_b:buffer128,
     ghost key:seq(nat32),
     ghost round_keys:seq(quad32),
     ghost keys_b:buffer128
     )
-    lets in_ptr @= rax; out_ptr @= rbx; num_bytes @= rcx; icb @= xmm7;
+    lets in_ptr @= rax; out_ptr @= rbx; num_blocks @= rcx; icb @= xmm7;
+         inout_ptr @= r13; plain_num_bytes @= rsi; tmp @= rbp;
 
     reads
-        r8; memTaint;
+        r8; inout_ptr; plain_num_bytes; memTaint;
 
     modifies
-        rax; rbx; num_bytes; rdx; rdi; r9; r10; r11; r12; 
+        rax; rbx; num_blocks; rdx; rdi; tmp; r9; r10; r11; r12; 
         xmm0; xmm1; xmm2; xmm3; xmm4; xmm5; xmm6; icb; xmm8; xmm9; xmm10;
         xmm12; xmm13; xmm14; xmm15;
         mem; efl;
@@ -553,12 +555,18 @@ procedure {:quick}{:public} gctr_bytes(
     requires
         // GCTR reqs
         buffers_disjoint128(in_b, out_b);
+        buffers_disjoint128(in_b, inout_b);
+        buffers_disjoint128(inout_b, out_b);
         buffers_disjoint128(keys_b, out_b);
-        validSrcAddrs128(mem, in_ptr, in_b, bytes_to_quad_size(num_bytes), memTaint, Secret);
-        validDstAddrs128(mem, out_ptr, out_b, bytes_to_quad_size(num_bytes), memTaint, Secret);
-        in_ptr  + 16 * bytes_to_quad_size(num_bytes) < pow2_64;
-        out_ptr + 16 * bytes_to_quad_size(num_bytes) < pow2_64;
-        buffer_length(in_b) == buffer_length(out_b) /\ buffer_length(out_b) == bytes_to_quad_size(num_bytes) /\ 256 * buffer_length(in_b) < pow2_32 /\ 4096 * num_bytes < pow2_32;
+        validSrcAddrs128(mem, in_ptr, in_b, num_blocks, memTaint, Secret);
+        validDstAddrs128(mem, out_ptr, out_b, num_blocks, memTaint, Secret);
+        validDstAddrs128(mem, inout_ptr, inout_b, 1, memTaint, Secret);
+        in_ptr  + 16 * num_blocks < pow2_64;
+        out_ptr + 16 * num_blocks < pow2_64;
+        buffer_length(in_b) == buffer_length(out_b) /\ buffer_length(out_b) == num_blocks /\ 256 * buffer_length(in_b) < pow2_32 /\ 4096 * num_blocks * 16 < pow2_32;
+        buffer_length(inout_b) == 1;
+
+        num_blocks * 128/8 <= plain_num_bytes < num_blocks * 128/8 + 128/8;
 
         // AES reqs
         aesni_enabled;
@@ -570,31 +578,37 @@ procedure {:quick}{:public} gctr_bytes(
         validSrcAddrs128(mem, r8, keys_b, nr(alg) + 1, memTaint, Secret);
         buffer128_as_seq(mem, keys_b) == round_keys;
     ensures
-        modifies_buffer128(out_b, old(mem), mem);
-        validSrcAddrs128(mem, old(out_ptr), out_b, old(bytes_to_quad_size(num_bytes)), memTaint, Secret);
-        let plain  := slice_work_around(le_seq_quad32_to_bytes(buffer128_as_seq(mem,  in_b)), old(num_bytes));
-        let cipher := slice_work_around(le_seq_quad32_to_bytes(buffer128_as_seq(mem, out_b)), old(num_bytes));
-        cipher == gctr_encrypt_LE(old(icb), make_gctr_plain_LE(plain), alg, key);
+        modifies_buffer128_2(out_b, inout_b, old(mem), mem);
+        validSrcAddrs128(mem, old(out_ptr), out_b, old(num_blocks), memTaint, Secret);
+        let plain_quads := append(old(s128(mem, in_b)), old(s128(mem, inout_b)));
+        let plain_bytes := slice_work_around(le_seq_quad32_to_bytes(plain_quads), old(plain_num_bytes));
+        let cipher_quads := append(s128(mem, out_b), s128(mem, inout_b));
+        let cipher_bytes := slice_work_around(le_seq_quad32_to_bytes(cipher_quads), old(plain_num_bytes));
+
+        cipher_bytes == gctr_encrypt_LE(old(icb), make_gctr_plain_LE(plain_bytes), alg, key);
 {
-    lemma_poly_bits64();
-    Mov64(r11, num_bytes);
-    And64(r11, 15);
-    assert r11 == num_bytes % 16;
-    Shr64(num_bytes, 4);
-    ghost var num_blocks := old(num_bytes) / 16;
-    assert rcx == num_blocks;
-
+    Mov64(tmp, num_blocks);
+    IMul64(tmp, 16);    // # of bytes in even 128-bit blocks
     gctr_core_opt(alg, in_b, out_b, key, round_keys, keys_b);
-    assert icb == inc32(old(icb), num_blocks);
+    assert gctr_partial(alg, old(num_blocks), s128(mem, in_b), s128(mem, out_b), key, old(icb));
+    assert icb == inc32(old(icb), old(num_blocks));
 
-    if (r11 == 0) {
-        gctr_bytes_no_extra(alg, old(icb), in_b, out_b, key, round_keys, keys_b, old(in_ptr), old(out_ptr), old(num_bytes));
-    } else {
-        gctr_bytes_extra(alg, old(icb), in_b, out_b, key, round_keys, keys_b, old(in_ptr), old(out_ptr), old(num_bytes));
+    gctr_bytes_no_extra(alg, old(icb), in_b, out_b, key, round_keys, keys_b, old(in_ptr), old(out_ptr), old(num_blocks * 16 /* == 128/8 */));
+
+    if (plain_num_bytes > tmp) {
+        Load128_buffer(xmm1, inout_ptr, 0, Secret, inout_b, 0);
+        assert equal(create(1, xmm1), s128(mem, inout_b));
+        gctr_register(alg, key, round_keys, keys_b);
+        Store128_buffer(inout_ptr, xmm1, 0, Secret, inout_b, 0);
     }
+    gctr_bytes_helper(alg, key, 
+                      old(s128(mem,  in_b)), old(s128(mem, inout_b)),
+                          s128(mem, out_b) ,     s128(mem, inout_b),
+                      old(plain_num_bytes), old(icb));
+                                
 }
 
-
+/*
 procedure {:quick}{:public}{:exportSpecs} gctr_bytes_stdcall(
     inline win:bool,
     inline alg:algorithm,
@@ -749,3 +763,4 @@ procedure {:quick}{:public}{:exportSpecs} gctr_bytes_stdcall(
     Pop(r14);
     Pop(r15);
 }
+*/
