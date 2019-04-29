@@ -110,7 +110,7 @@ all-unstaged: compile-compact compile-compact-msvc compile-compact-gcc \
 	FSTAR_DEPEND_FLAGS="--warn_error +285" $(MAKE) $*-unstaged
 
 test: test-staged
-test-unstaged: test-handwritten test-c test-ml
+test-unstaged: test-handwritten test-c test-ml test-benchmark
 
 # Any file in code/tests is taken to contain an `int main()` function.
 # Test should be renamed into Test.EverCrypt
@@ -119,6 +119,11 @@ test-c: $(subst .,_,$(patsubst %.fst,test-c-%,$(notdir $(wildcard code/tests/*.f
 
 # Any file in specs/tests is taken to contain a `val test: unit -> bool` function.
 test-ml: $(subst .,_,$(patsubst %.fst,test-ml-%,$(notdir $(wildcard specs/tests/*.fst))))
+
+test-benchmark: tests/benchmark/build/runbenchmark
+
+tests/benchmark/build/runbenchmark: all-unstaged
+	$(MAKE) -C tests/benchmark all
 
 # Not reusing the -staged automatic target so as to export NOSHORTLOG
 ci:
@@ -480,7 +485,7 @@ obj/GCMencryptOpt_stdcalls.fst.checked: \
 
 obj/GCM.fst.checked: \
   FSTAR_FLAGS=$(VALE_FSTAR_FLAGS)
-  
+
 
 hints:
 	mkdir -p $@
