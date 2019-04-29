@@ -1,22 +1,22 @@
 module Spec.Ed25519
 
 open FStar.Mul
-open Lib.IntTypes
-open Lib.Sequence
-open Lib.ByteSequence
 open Lib.RawIntTypes
 open Spec.SHA2
 open Spec.Curve25519
-open Spec.Hash.Definitions
+module HA = Spec.Hash.Definitions
+open Lib.IntTypes
+open Lib.Sequence
+open Lib.ByteSequence
 
-let lbytes = Lib.ByteSequence.lbytes
-let hash512 = Spec.Hash.hash SHA2_512
 #reset-options "--max_fuel 0 --z3rlimit 100"
 
 ///
 /// Constants
 ///
 
+inline_for_extraction 
+let hash512 = Spec.Hash.hash Spec.Hash.Definitions.SHA2_512
 inline_for_extraction
 let size_signature: size_nat = 64
 
@@ -35,7 +35,7 @@ let q: n:nat{n < pow2 256} =
   assert_norm(pow2 252 + 27742317777372353535851937790883648493 < pow2 255 - 19);
   (pow2 252 + 27742317777372353535851937790883648493) // Group order
 
-let _:_:unit{max_input_length SHA2_512 > pow2 32} = assert_norm (max_input_length SHA2_512 > pow2 32)
+let _:_:unit{HA.max_input_length HA.SHA2_512 > pow2 32} = assert_norm (HA.max_input_length HA.SHA2_512 > pow2 32)
 
 let g_x : elem = 15112221349535400772501151409588531511454012693041857206046113283949847762202
 let g_y : elem = 46316835694926478169428394003475163141307993866256225615783033603165251855960
@@ -85,7 +85,7 @@ let point_double (p:ext_point) : Tot ext_point =
   let z3 = f *% g in
   (x3, y3, z3, t3)
 
-let ith_bit (k:lbytes 32) (i:size_nat{i < 256}) =
+let ith_bit (k:lbytes 32) (i:size_nat{i < 256}) : uint8 =
   let q = i / 8 in let r = size (i % 8) in
   (k.[q] >>. r) &. u8 1
 
@@ -138,7 +138,7 @@ let point_decompress (s:lbytes 32) : Tot (option ext_point) =
   | _ -> None
 
 let secret_expand (secret:lbytes 32) : (lbytes 32 & lbytes 32) =
-  let h = hash512 secret in
+  let h : lbytes 64 = hash512 secret in
   let h_low : lbytes 32 = slice h 0 32 in
   let h_high : lbytes 32 = slice h 32 64 in
   let h_low0 : uint8  = h_low.[0] in
@@ -201,7 +201,7 @@ let verify public msg signature =
         let h = sha512_modq (64 + len) (concat (concat rs public) msg) in
         let sB = point_mul (nat_to_bytes_le 32 s) g in
         let hA = point_mul (nat_to_bytes_le 32 h) a' in
-        point_equal sB (point_add r' hA)
+	point_equal sB (point_add r' hA)
       )
     )
   )
