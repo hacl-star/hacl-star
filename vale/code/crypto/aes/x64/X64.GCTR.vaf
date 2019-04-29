@@ -608,7 +608,6 @@ procedure {:quick} gctr_bytes(
                                 
 }
 
-/*
 procedure {:quick}{:public}{:exportSpecs} gctr_bytes_stdcall(
     inline win:bool,
     inline alg:algorithm,
@@ -616,8 +615,10 @@ procedure {:quick}{:public}{:exportSpecs} gctr_bytes_stdcall(
     ghost in_b:buffer128,
     ghost num_bytes:nat64,
     ghost out_b:buffer128,
+    ghost inout_b:buffer128,
     ghost keys_b:buffer128,
     ghost ctr_b:buffer128,
+    ghost num_blocks:nat64,
 
     ghost key:seq(nat32)
   )
@@ -629,32 +630,42 @@ procedure {:quick}{:public}{:exportSpecs} gctr_bytes_stdcall(
   lets
     in_ptr    := if win then rcx else rdi;
     out_ptr   := if win then r8 else rdx;
-    keys_ptr  := if win then r9 else rcx;
-    ctr_ptr   := if win then load_stack64(rsp + 32 + 8 + 0, stack) else r8;
+    inout_ptr  := if win then r9 else rcx;
+    keys_ptr   := if win then load_stack64(rsp + 32 + 8 + 0, stack) else r8;
+    ctr_ptr   := if win then load_stack64(rsp + 32 + 8 + 8, stack) else r9;
 
   requires
     rsp == init_rsp(stack);
     win ==> valid_src_stack64(rsp + 32 + 8 + 0, stack);
-
+    win ==> valid_src_stack64(rsp + 32 + 8 + 8, stack);
+    win ==> valid_src_stack64(rsp + 32 + 8 + 16, stack);
+    !win ==> valid_src_stack64(rsp + 8 + 0, stack);
+    
     num_bytes == (if win then rdx else rsi);
+    num_blocks == (if win then load_stack64(rsp + 32 + 8 + 16, stack) else load_stack64(rsp + 8, stack));
 
     buffers_disjoint128(in_b, out_b);
     buffers_disjoint128(keys_b, out_b);
     buffers_disjoint128(in_b, keys_b) || in_b == keys_b;
     buffer_disjoints128(ctr_b, list(in_b, out_b, keys_b));
+    buffer_disjoints128(inout_b, list(in_b, out_b, keys_b, ctr_b));
 
     validSrcAddrs128(mem,   in_ptr,   in_b, bytes_to_quad_size(num_bytes), memTaint, Secret);
     validDstAddrs128(mem,  out_ptr,  out_b, bytes_to_quad_size(num_bytes), memTaint, Secret);
+    validDstAddrs128(mem,inout_ptr,inout_b,                             1, memTaint, Secret);
     validSrcAddrs128(mem, keys_ptr, keys_b,                   nr(alg) + 1, memTaint, Secret);
     validSrcAddrs128(mem,  ctr_ptr,  ctr_b,                             1, memTaint, Secret);
 
-    in_ptr  + 16 * bytes_to_quad_size(num_bytes) < pow2_64;
-    out_ptr + 16 * bytes_to_quad_size(num_bytes) < pow2_64;
-    buffer_length(in_b) == bytes_to_quad_size(num_bytes);
+    in_ptr  + 16 * num_blocks < pow2_64;
+    out_ptr + 16 * num_blocks < pow2_64;
+    buffer_length(in_b) == num_blocks;
     buffer_length(in_b) == buffer_length(out_b);
     buffer_length(ctr_b) == 1;
+    buffer_length(inout_b) == 1;
     256 * buffer_length(in_b) < pow2_32;
-    4096 * num_bytes < pow2_32;
+    4096 * num_blocks * 16 < pow2_32;
+
+    num_blocks * 128/8 <= num_bytes < num_blocks * 128/8 + 128/8;
 
     // AES reqs
     aesni_enabled;
@@ -663,10 +674,12 @@ procedure {:quick}{:public}{:exportSpecs} gctr_bytes_stdcall(
     buffer128_as_seq(mem, keys_b) == key_to_round_keys_LE(alg, key);
 
   ensures
-    modifies_buffer128(out_b, old(mem), mem);
-    let plain  := slice_work_around(le_seq_quad32_to_bytes(buffer128_as_seq(mem,  in_b)), old(num_bytes));
-    let cipher := slice_work_around(le_seq_quad32_to_bytes(buffer128_as_seq(mem, out_b)), old(num_bytes));
-    cipher == gctr_encrypt_LE(old(buffer128_read(ctr_b, 0, mem)), make_gctr_plain_LE(plain), alg, key);
+    modifies_buffer128_2(out_b, inout_b, old(mem), mem);
+    let plain_quads := append(old(s128(mem, in_b)), old(s128(mem, inout_b)));
+    let plain_bytes := slice_work_around(le_seq_quad32_to_bytes(plain_quads), old(num_bytes));
+    let cipher_quads := append(s128(mem, out_b), s128(mem, inout_b));
+    let cipher_bytes := slice_work_around(le_seq_quad32_to_bytes(cipher_quads), old(num_bytes));
+    cipher_bytes == gctr_encrypt_LE(old(buffer128_read(ctr_b, 0, mem)), make_gctr_plain_LE(plain_bytes), alg, key);
 
     rsp == old(rsp);
  
@@ -723,23 +736,25 @@ procedure {:quick}{:public}{:exportSpecs} gctr_bytes_stdcall(
 
     inline if (win) {
       // Load ptr for ctr_b
-      Load64_stack(rax, rsp, 224 + 32 + 8 + 0);
+      Load64_stack(rax, rsp, 224 + 32 + 8 + 8);
       Load128_buffer(xmm7, rax, 0, Secret, ctr_b, 0);
 
       Mov64(rax, rcx);
       Mov64(rbx, r8);
-      Mov64(rcx, rdx);
-      Mov64(r8, r9);
+      Mov64(rsi, rdx);
+      Mov64(r13, r9);
+      Load64_stack(r8, rsp, 224 + 32 + 8 + 0);
+      Load64_stack(rcx, rsp, 224 + 32 + 8 + 16);
 
     } else {
-      Load128_buffer(xmm7, r8, 0, Secret, ctr_b, 0);
+      Load128_buffer(xmm7, r9, 0, Secret, ctr_b, 0);
       Mov64(rax, rdi);
       Mov64(rbx, rdx);
-      Mov64(r8, rcx);
-      Mov64(rcx, rsi);
+      Mov64(r13, rcx);
+      Load64_stack(rcx, rsp, 64+ 8);
 
     }
-    gctr_bytes(alg, in_b, out_b, key, old(buffer128_as_seq(mem, keys_b)), keys_b); 
+    gctr_bytes(alg, in_b, out_b, inout_b, key, old(buffer128_as_seq(mem, keys_b)), keys_b); 
 
     inline if (win) {
         PopXmm(xmm6,  rax, old(xmm6));
@@ -763,4 +778,3 @@ procedure {:quick}{:public}{:exportSpecs} gctr_bytes_stdcall(
     Pop(r14);
     Pop(r15);
 }
-*/

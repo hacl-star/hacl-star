@@ -43,8 +43,8 @@ let tuint64 = TD_Base TUInt64
             
 [@__reduce__] noextract
 let (dom: list td{List.length dom <= 20}) =
-  let y = [t128_no_mod; tuint64; t128_mod; t128_no_mod; t128_no_mod] in
-  assert_norm (List.length y = 5);
+  let y = [t128_no_mod; tuint64; t128_mod; t128_mod; t128_no_mod; t128_no_mod; tuint64] in
+  assert_norm (List.length y = 7);
   y
 
 (* Need to rearrange the order of arguments *)
@@ -55,13 +55,15 @@ let gctr128_pre : (Ghost.erased (Seq.seq nat32)) -> VSig.vale_pre dom =
     (in_b:b128)
     (num_bytes:uint64)
     (out_b:b128)
+    (inout_b:b128)
     (keys_b:b128)
     (ctr_b:b128)
+    (num_blocks:uint64)
     (va_s0:V.va_state) ->
       GC.va_req_gctr_bytes_stdcall c va_s0 IA.win AES_128 
         (as_vale_buffer in_b) (UInt64.v num_bytes)
-        (as_vale_buffer out_b) (as_vale_buffer keys_b)
-        (as_vale_buffer ctr_b) (Ghost.reveal s)
+        (as_vale_buffer out_b) (as_vale_buffer inout_b) (as_vale_buffer keys_b)
+        (as_vale_buffer ctr_b) (UInt64.v num_blocks) (Ghost.reveal s)
 
 (* Need to rearrange the order of arguments *)
 [@__reduce__] noextract
@@ -71,15 +73,17 @@ let gctr128_post : (Ghost.erased (Seq.seq nat32)) -> VSig.vale_post dom =
     (in_b:b128)
     (num_bytes:uint64)
     (out_b:b128)
+    (inout_b:b128)
     (keys_b:b128)
     (ctr_b:b128)
+    (num_blocks:uint64)
     (va_s0:V.va_state)
     (va_s1:V.va_state)
     (f:V.va_fuel) ->
       GC.va_ens_gctr_bytes_stdcall c va_s0 IA.win AES_128 
         (as_vale_buffer in_b) (UInt64.v num_bytes)
-        (as_vale_buffer out_b) (as_vale_buffer keys_b)
-        (as_vale_buffer ctr_b) (Ghost.reveal s) va_s1 f
+        (as_vale_buffer out_b) (as_vale_buffer inout_b) (as_vale_buffer keys_b)
+        (as_vale_buffer ctr_b) (UInt64.v num_blocks) (Ghost.reveal s) va_s1 f
 
 #set-options "--z3rlimit 20"
 
@@ -91,27 +95,31 @@ let gctr128_lemma'
     (in_b:b128)
     (num_bytes:uint64)
     (out_b:b128)
+    (inout_b:b128)
     (keys_b:b128)
     (ctr_b:b128)
+    (num_blocks:uint64)
     (va_s0:V.va_state)
  : Ghost (V.va_state & V.va_fuel)
      (requires
-       gctr128_pre s code in_b num_bytes out_b keys_b ctr_b va_s0)
+       gctr128_pre s code in_b num_bytes out_b inout_b keys_b ctr_b num_blocks va_s0)
      (ensures (fun (va_s1, f) ->
        V.eval_code code va_s0 f va_s1 /\
        VSig.vale_calling_conventions_stdcall va_s0 va_s1 /\
-       gctr128_post s code in_b num_bytes out_b keys_b ctr_b va_s0 va_s1 f /\
+       gctr128_post s code in_b num_bytes out_b inout_b keys_b ctr_b num_blocks va_s0 va_s1 f /\
        ME.buffer_writeable (as_vale_buffer in_b) /\ 
        ME.buffer_writeable (as_vale_buffer keys_b) /\ 
        ME.buffer_writeable (as_vale_buffer ctr_b) /\        
+       ME.buffer_writeable (as_vale_buffer inout_b) /\        
        ME.buffer_writeable (as_vale_buffer out_b)
  )) = 
    let va_s1, f = GC.va_lemma_gctr_bytes_stdcall code va_s0 IA.win AES_128 
         (as_vale_buffer in_b) (UInt64.v num_bytes)
-        (as_vale_buffer out_b) (as_vale_buffer keys_b)
-        (as_vale_buffer ctr_b) (Ghost.reveal s) in
+        (as_vale_buffer out_b) (as_vale_buffer inout_b) (as_vale_buffer keys_b)
+        (as_vale_buffer ctr_b) (UInt64.v num_blocks) (Ghost.reveal s) in
    Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt8 ME.TUInt128 in_b;
    Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt8 ME.TUInt128 out_b;
+   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt8 ME.TUInt128 inout_b;
    Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt8 ME.TUInt128 keys_b;
    Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt8 ME.TUInt128 ctr_b;   
    va_s1, f                                   
@@ -152,13 +160,15 @@ let gctr256_pre : (Ghost.erased (Seq.seq nat32)) -> VSig.vale_pre dom =
     (in_b:b128)
     (num_bytes:uint64)
     (out_b:b128)
+    (inout_b:b128)
     (keys_b:b128)
     (ctr_b:b128)
+    (num_blocks:uint64)
     (va_s0:V.va_state) ->
       GC.va_req_gctr_bytes_stdcall c va_s0 IA.win AES_256
         (as_vale_buffer in_b) (UInt64.v num_bytes)
-        (as_vale_buffer out_b) (as_vale_buffer keys_b)
-        (as_vale_buffer ctr_b) (Ghost.reveal s)
+        (as_vale_buffer out_b) (as_vale_buffer inout_b) (as_vale_buffer keys_b)
+        (as_vale_buffer ctr_b) (UInt64.v num_blocks) (Ghost.reveal s)
 
 (* Need to rearrange the order of arguments *)
 [@__reduce__] noextract
@@ -168,15 +178,17 @@ let gctr256_post : (Ghost.erased (Seq.seq nat32)) -> VSig.vale_post dom =
     (in_b:b128)
     (num_bytes:uint64)
     (out_b:b128)
+    (inout_b:b128)
     (keys_b:b128)
     (ctr_b:b128)
+    (num_blocks:uint64)
     (va_s0:V.va_state)
     (va_s1:V.va_state)
     (f:V.va_fuel) ->
       GC.va_ens_gctr_bytes_stdcall c va_s0 IA.win AES_256
         (as_vale_buffer in_b) (UInt64.v num_bytes)
-        (as_vale_buffer out_b) (as_vale_buffer keys_b)
-        (as_vale_buffer ctr_b) (Ghost.reveal s) va_s1 f
+        (as_vale_buffer out_b) (as_vale_buffer inout_b) (as_vale_buffer keys_b)
+        (as_vale_buffer ctr_b) (UInt64.v num_blocks) (Ghost.reveal s) va_s1 f
 
 #set-options "--z3rlimit 20"
 
@@ -188,27 +200,31 @@ let gctr256_lemma'
     (in_b:b128)
     (num_bytes:uint64)
     (out_b:b128)
+    (inout_b:b128)
     (keys_b:b128)
     (ctr_b:b128)
+    (num_blocks:uint64)
     (va_s0:V.va_state)
  : Ghost (V.va_state & V.va_fuel)
      (requires
-       gctr256_pre s code in_b num_bytes out_b keys_b ctr_b va_s0)
+       gctr256_pre s code in_b num_bytes out_b inout_b keys_b ctr_b num_blocks va_s0)
      (ensures (fun (va_s1, f) ->
        V.eval_code code va_s0 f va_s1 /\
        VSig.vale_calling_conventions_stdcall va_s0 va_s1 /\
-       gctr256_post s code in_b num_bytes out_b keys_b ctr_b va_s0 va_s1 f /\
+       gctr256_post s code in_b num_bytes out_b inout_b keys_b ctr_b num_blocks va_s0 va_s1 f /\
        ME.buffer_writeable (as_vale_buffer in_b) /\ 
        ME.buffer_writeable (as_vale_buffer keys_b) /\ 
        ME.buffer_writeable (as_vale_buffer ctr_b) /\        
+       ME.buffer_writeable (as_vale_buffer inout_b) /\        
        ME.buffer_writeable (as_vale_buffer out_b)
  )) = 
    let va_s1, f = GC.va_lemma_gctr_bytes_stdcall code va_s0 IA.win AES_256
         (as_vale_buffer in_b) (UInt64.v num_bytes)
-        (as_vale_buffer out_b) (as_vale_buffer keys_b)
-        (as_vale_buffer ctr_b) (Ghost.reveal s) in
+        (as_vale_buffer out_b) (as_vale_buffer inout_b) (as_vale_buffer keys_b)
+        (as_vale_buffer ctr_b) (UInt64.v num_blocks) (Ghost.reveal s) in
    Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt8 ME.TUInt128 in_b;
    Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt8 ME.TUInt128 out_b;
+   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt8 ME.TUInt128 inout_b;
    Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt8 ME.TUInt128 keys_b;
    Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt8 ME.TUInt128 ctr_b;   
    va_s1, f                                   
