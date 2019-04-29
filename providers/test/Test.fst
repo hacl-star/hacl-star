@@ -296,31 +296,46 @@ let rec test_aead_loop (LB len vs) =
 let test_aead () : St unit =
   test_aead_loop aead_vectors_low
 
-let rec test_chacha20poly1305_loop (i: U32.t): St unit =
-  let open Test.Vectors.Chacha20Poly1305 in
-  if i `U32.gte` vectors_len then
-    ()
+#push-options "--z3rlimit 32"
+
+let test_chacha20poly1305_one (v: Test.Vectors.Chacha20Poly1305.vector): Stack unit (fun _ -> True) (fun _ _ _ -> True) =
+  let Test.Vectors.Chacha20Poly1305.Vector cipher_and_tag cipher_and_tag_len plain plain_len aad aad_len nonce nonce_len key key_len = v in
+  if not (
+    key_len = 32ul &&
+    nonce_len = 12ul &&
+    0ul `U32.lt` plain_len &&
+    (4294967295ul `U32.sub` 16ul) `U32.gte` plain_len &&
+    (plain_len `U32.div` 64ul) `U32.lte` (4294967295ul `U32.sub` aad_len) &&
+    cipher_and_tag_len = plain_len `U32.add` 16ul
+  ) then
+    C.String.print !$"Warning: skipping a chacha20poly1305 instance because bounds do not hold"
   else begin
-    B.recall vectors;
-    assert (U32.v i < B.length vectors);
-    let Vector output output_len input input_len aad aad_len nonce nonce_len key key_len =
-      vectors.(i)
-    in
-    if not (output_len `U32.gte` input_len && output_len `U32.sub` input_len `U32.gte` 16ul)
+    B.recall plain;
+    B.recall cipher_and_tag;
+    B.recall aad;
+    B.recall nonce;
+    B.recall key;
+    HST.push_frame ();
+    let tmp = B.alloca 0uy (plain_len `U32.add` 16ul) in
+    let tmp_msg' = B.sub tmp 0ul plain_len in
+    let tag' = B.sub tmp plain_len 16ul in
+    EverCrypt.Chacha20Poly1305.aead_encrypt key nonce aad_len aad plain_len plain tmp_msg' tag';
+    TestLib.compare_and_print !$"chacha20poly1305 cipher and tag" cipher_and_tag tmp cipher_and_tag_len;
+    let cipher = B.sub cipher_and_tag 0ul plain_len in
+    let tag = B.sub cipher_and_tag plain_len 16ul in
+    let res = EverCrypt.Chacha20Poly1305.aead_decrypt key nonce aad_len aad plain_len tmp_msg' cipher tag in
+    if res = 0ul
     then
-      C.String.print !$"Warning: skipping a chacha20poly1305 instance because bounds do not hold/algo unsupported etc.\n"
-    else begin
-      B.recall output;
-      let tag = B.sub output input_len 16ul in
-      let output = B.sub output 0ul input_len in
-      test_aead_st Spec.AEAD.CHACHA20_POLY1305 key key_len nonce nonce_len aad aad_len tag 16ul
-        input input_len output input_len
-    end;
-    test_chacha20poly1305_loop (i `U32.add_mod` 1ul)
+      TestLib.compare_and_print !$"chacha20poly1305 plain" plain tmp_msg' plain_len
+    else
+      C.Failure.failwith !$"Failure: chacha20poly1305 aead_decrypt returned nonzero value";
+    HST.pop_frame ()
   end
 
-let test_chacha20poly1305 () : St unit =
-  test_chacha20poly1305_loop 0ul
+#pop-options
+
+let test_chacha20poly1305 () : Stack unit (fun _ -> True) (fun _ _ _ -> True) =
+  Test.NoHeap.test_many !$"chacha20poly1305" test_chacha20poly1305_one Test.Vectors.Chacha20Poly1305.(LB vectors_len vectors)
 
 let rec test_aes128_gcm_loop (i: U32.t): St unit =
   let open Test.Vectors.Aes128Gcm in
