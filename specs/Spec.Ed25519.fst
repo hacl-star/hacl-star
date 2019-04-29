@@ -7,8 +7,10 @@ open Lib.ByteSequence
 open Lib.RawIntTypes
 open Spec.SHA2
 open Spec.Curve25519
+open Spec.Hash.Definitions
 
-
+let lbytes = Lib.ByteSequence.lbytes
+let hash512 = Spec.Hash.hash SHA2_512
 #reset-options "--max_fuel 0 --z3rlimit 100"
 
 ///
@@ -33,7 +35,7 @@ let q: n:nat{n < pow2 256} =
   assert_norm(pow2 252 + 27742317777372353535851937790883648493 < pow2 255 - 19);
   (pow2 252 + 27742317777372353535851937790883648493) // Group order
 
-let _:_:unit{max_input SHA2_512 > pow2 32} = assert_norm (max_input SHA2_512 > pow2 32)
+let _:_:unit{max_input_length SHA2_512 > pow2 32} = assert_norm (max_input_length SHA2_512 > pow2 32)
 
 let g_x : elem = 15112221349535400772501151409588531511454012693041857206046113283949847762202
 let g_y : elem = 46316835694926478169428394003475163141307993866256225615783033603165251855960
