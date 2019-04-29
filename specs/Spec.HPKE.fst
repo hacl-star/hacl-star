@@ -9,6 +9,7 @@ open Lib.RandomSequence
 
 module DH = Spec.DH
 module AEAD = Spec.AEAD
+module HA = Spec.Hash.Definitions
 module Hash = Spec.Hash
 module HKDF = Spec.HKDF
 
@@ -21,19 +22,19 @@ let pow2_35_less_than_pow2_125 : _:unit{pow2 32 * pow2 3 <= pow2 125 - 1} = asse
 
 /// Types
 
-type ciphersuite = DH.algorithm & AEAD.algorithm & a:Hash.algorithm{a == Hash.SHA2_256 \/ a == Hash.SHA2_512}
+type ciphersuite = DH.algorithm & AEAD.algorithm & a:HA.hash_alg{a == HA.SHA2_256 \/ a == HA.SHA2_512}
 
 val id_of_cs: cs:ciphersuite -> Tot (lbytes 1)
 let id_of_cs cs =
   match cs with
-  | DH.DH_Curve25519, AEAD.AEAD_AES128_GCM,        Hash.SHA2_256 -> create 1 (u8 0)
-  | DH.DH_Curve25519, AEAD.AEAD_AES128_GCM,        Hash.SHA2_512 -> create 1 (u8 1)
-  | DH.DH_Curve25519, AEAD.AEAD_Chacha20_Poly1305, Hash.SHA2_256 -> create 1 (u8 2)
-  | DH.DH_Curve25519, AEAD.AEAD_Chacha20_Poly1305, Hash.SHA2_512 -> create 1 (u8 3)
-  | DH.DH_Curve448,   AEAD.AEAD_AES128_GCM,        Hash.SHA2_256 -> create 1 (u8 4)
-  | DH.DH_Curve448,   AEAD.AEAD_AES128_GCM,        Hash.SHA2_512 -> create 1 (u8 5)
-  | DH.DH_Curve448,   AEAD.AEAD_Chacha20_Poly1305, Hash.SHA2_256 -> create 1 (u8 6)
-  | DH.DH_Curve448,   AEAD.AEAD_Chacha20_Poly1305, Hash.SHA2_512 -> create 1 (u8 7)
+  | DH.DH_Curve25519, AEAD.AEAD_AES128_GCM,        HA.SHA2_256 -> create 1 (u8 0)
+  | DH.DH_Curve25519, AEAD.AEAD_AES128_GCM,        HA.SHA2_512 -> create 1 (u8 1)
+  | DH.DH_Curve25519, AEAD.AEAD_Chacha20_Poly1305, HA.SHA2_256 -> create 1 (u8 2)
+  | DH.DH_Curve25519, AEAD.AEAD_Chacha20_Poly1305, HA.SHA2_512 -> create 1 (u8 3)
+  | DH.DH_Curve448,   AEAD.AEAD_AES128_GCM,        HA.SHA2_256 -> create 1 (u8 4)
+  | DH.DH_Curve448,   AEAD.AEAD_AES128_GCM,        HA.SHA2_512 -> create 1 (u8 5)
+  | DH.DH_Curve448,   AEAD.AEAD_Chacha20_Poly1305, HA.SHA2_256 -> create 1 (u8 6)
+  | DH.DH_Curve448,   AEAD.AEAD_Chacha20_Poly1305, HA.SHA2_512 -> create 1 (u8 7)
 
 let curve_of_cs (cs:ciphersuite) : DH.algorithm =
   let (c,a,h) = cs in c
@@ -41,7 +42,7 @@ let curve_of_cs (cs:ciphersuite) : DH.algorithm =
 let aead_of_cs (cs:ciphersuite) : AEAD.algorithm =
   let (c,a,h) = cs in a
 
-let hash_of_cs (cs:ciphersuite) : Hash.algorithm =
+let hash_of_cs (cs:ciphersuite) : HA.hash_alg =
   let (c,a,h) = cs in h
 
 
@@ -96,7 +97,7 @@ type tag_s (cs:ciphersuite) = lbytes (size_tag cs)
 
 /// Cryptographic Primitives
 
-#reset-options "--z3rlimit 100 --max_fuel 0"
+#reset-options "--z3rlimit 30 --max_fuel 0 --max_ifuel 0"
 
 val encap:
     cs: ciphersuite
@@ -111,11 +112,13 @@ let encap cs e pk context =
   match DH.dh (curve_of_cs cs) esk pk with
   | None -> e', None
   | Some secret ->
+    let ha = hash_of_cs cs in
     let salt = epk @| pk in
-    let extracted = HKDF.hkdf_extract (hash_of_cs cs) salt secret in
+    let extracted = HKDF.hkdf_extract ha salt secret in
     let info = (id_of_cs cs) @| label_key @| context in
-    let key = HKDF.hkdf_expand (hash_of_cs cs) extracted info (size_key cs) in
+    let key = HKDF.hkdf_expand ha extracted info (size_key cs) in
     e', Some (key, epk)
+
 
 
 val decap:
@@ -213,3 +216,4 @@ let decrypt_single cs sk input context =
   match decap cs sk epk context with
   | None -> None
   | Some key -> decrypt cs key ciphertext tag lbytes_empty (u32 0)
+

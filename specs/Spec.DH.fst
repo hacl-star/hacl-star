@@ -18,6 +18,10 @@ let size_key (a:algorithm) : Tot size_nat =
   | DH_Curve25519 -> 32
   | DH_Curve448 -> 56
 
+val size_key_lemma: a: algorithm -> Lemma
+  (size_key a >= 32 /\ size_key a <= 56)
+  [SMTPat (size_key a)]
+let size_key_lemma a = ()
 
 /// Types
 

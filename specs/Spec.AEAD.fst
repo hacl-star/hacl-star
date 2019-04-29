@@ -18,6 +18,12 @@ let size_key (a:algorithm) : Tot size_nat =
   | AEAD_AES128_GCM -> 16
   | AEAD_Chacha20_Poly1305 -> 32
 
+val size_key_lemma: a: algorithm -> Lemma
+  (size_key a >= 16 /\ size_key a <= 32)
+  [SMTPat (size_key a)]
+let size_key_lemma a = ()
+
+
 inline_for_extraction
 let size_block (a:algorithm) : Tot size_nat =
   match a with
@@ -36,6 +42,10 @@ let size_nonce (a:algorithm) : Tot size_nat =
   | AEAD_AES128_GCM -> 12 // Spec.AES128_GCM.size_nonce
   | AEAD_Chacha20_Poly1305 -> 12 // Spec.Chacha20Poly1305.size_nonce
 
+val size_nonce_lemma: a: algorithm -> Lemma
+  (size_nonce a >= 12 /\ size_nonce a <= 12)
+  [SMTPat (size_nonce a)]
+let size_nonce_lemma a = ()
 
 inline_for_extraction
 let padlen (a:algorithm) (x:size_nat) : size_nat =

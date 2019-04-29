@@ -49,6 +49,12 @@ let max_input_length: hash_alg -> Tot nat = function
   | SHA2_224 | SHA2_256 -> pow2 61
   | SHA2_384 | SHA2_512 -> pow2 125
 
+val max_input_length_lemma: a: hash_alg -> Lemma
+  (max_input_length a >= pow2 61 /\ max_input_length a <= pow2 125)
+  [SMTPat (max_input_length a)]
+let max_input_length_lemma a = assert_norm (pow2 61 < pow2 125)
+
+
 (* A type that can hold a maximum length, in bits. *)
 inline_for_extraction
 let len_int_type: hash_alg -> inttype = function
@@ -108,6 +114,11 @@ let block_length a =
   let open FStar.Mul in
   word_length a * block_word_length
 
+val block_length_lemma: a: hash_alg -> Lemma
+  (block_length a >= 64 /\ block_length a <= 128)
+  [SMTPat (block_length a)]
+let block_length_lemma a = ()
+
 (* Number of words for intermediate hash, i.e. the working state. *)
 inline_for_extraction noextract
 let state_word_length a =
@@ -134,6 +145,11 @@ noextract
 let hash_length a =
   let open FStar.Mul in
   word_length a * hash_word_length a
+
+val hash_length_lemma: a: hash_alg -> Lemma
+  (hash_length a >= 16 /\ hash_length a <= 64)
+  [SMTPat (hash_length a)]
+let hash_length_lemma a = ()
 
 
 (** Padding *)
