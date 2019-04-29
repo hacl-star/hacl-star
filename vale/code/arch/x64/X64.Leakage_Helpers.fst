@@ -3,6 +3,7 @@ open X64.Bytes_Semantics_s
 open X64.Machine_s
 open X64.Taint_Semantics_s
 open X64.Leakage_s
+open X64.Instruction_s
 
 let merge_taint (t1:taint) (t2:taint) :taint =
   if Secret? t1 || Secret? t2 then Secret
@@ -14,7 +15,78 @@ let operand_taint (op:operand) ts taint =
     | OConst _ -> Public
     | OReg reg -> ts.regTaint reg
     | OMem _ -> taint
-    | OStack _ -> Secret // Secret for now
+    // TODO: This should be Public
+    | OStack _ -> Secret
+
+let operand_taint128 (op:mov128_op) (ts:taintState) (t:taint) : taint =
+  match op with
+  | Mov128Xmm x -> ts.xmmTaint x
+  | Mov128Mem _ -> t
+  // TODO: This should be Public
+  | Mov128Stack _ -> Secret
+
+[@instr_attr]
+let operand_taint_explicit
+  (i:instr_operand_explicit)
+  (o:instr_operand_t i)
+  (ts:taintState)
+  (t:taint) : taint =
+  match i with
+  | IOp64 -> operand_taint o ts t
+  | IOpXmm -> operand_taint128 o ts t
+
+[@instr_attr]
+let operand_taint_implicit
+  (i:instr_operand_implicit)
+  (ts:taintState)
+  (t:taint) : taint =
+  match i with
+  | IOp64One o -> operand_taint o ts t
+  | IOpXmmOne o -> operand_taint128 o ts t
+  | IOpFlagsCf -> ts.cfFlagsTaint
+  // TODO: Should be ts.ofFlagsTaint
+  | IOpFlagsOf -> Secret
+
+[@instr_attr]
+let rec args_taint
+  (args:list instr_operand)
+  (oprs:instr_operands_t_args args)
+  (ts:taintState)
+  (t:taint) : taint =
+  match args with
+  | [] -> Public
+  | i::args ->
+    match i with
+    | IOpEx i -> let oprs = coerce oprs in merge_taint
+                (operand_taint_explicit i (fst oprs) ts t)
+                (args_taint args (snd oprs) ts t)
+    | IOpIm i -> merge_taint
+            (operand_taint_implicit i ts t)
+            (args_taint args (coerce oprs) ts t)
+
+[@instr_attr]
+let rec inouts_taint
+  (inouts:list instr_out) 
+  (args:list instr_operand)
+  (oprs:instr_operands_t inouts args)
+  (ts:taintState)
+  (t:taint) : taint =
+  match inouts with
+  | [] -> args_taint args oprs ts t
+  | (Out, i)::inouts ->
+    let oprs =
+      match i with
+      | IOpEx i -> snd #(instr_operand_t i) (coerce oprs)
+      | IOpIm i -> coerce oprs
+    in inouts_taint inouts args oprs ts t
+  | (InOut, i)::inouts -> 
+    let (v, oprs) =
+      match i with
+      | IOpEx i -> let oprs = coerce oprs in
+              (operand_taint_explicit i (fst oprs) ts t), snd oprs
+      | IOpIm i -> operand_taint_implicit i ts t, coerce oprs
+    in merge_taint v (inouts_taint inouts args oprs ts t)
+
 
 let maddr_does_not_use_secrets addr ts =
   match addr with
