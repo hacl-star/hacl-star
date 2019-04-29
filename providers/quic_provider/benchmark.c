@@ -49,9 +49,9 @@ do {                                                                    \
         CODE;                                                           \
     }                                                                   \
                                                                         \
-    printf( "%9lu KiB/s,  %9lu cycles/byte\n",                          \
+    printf( "%9lu KiB/s,  %9f cycles/byte\n",                          \
                      ii * BUFSIZE / 1024,                               \
-                     ( timing_hardclock() - tsc ) / ( jj * BUFSIZE ) ); \
+                     (float)(timing_hardclock() - tsc ) /(float)( jj * BUFSIZE ) ); \
 } while( 0 )
 
 #define TIME_PUBLIC( TITLE, TYPE, CODE )                                \
@@ -84,35 +84,51 @@ do {                                                                    \
 typedef void (*aead_enc)(uint8_t *key, uint8_t *iv, uint8_t *ad, uint32_t adlen, uint8_t *plain, uint32_t len, uint8_t *cipher, uint8_t *tag);
 typedef uint32_t (*aead_dec)(uint8_t *key, uint8_t *iv, uint8_t *ad, uint32_t adlen, uint8_t *plain, uint32_t len, uint8_t *cipher, uint8_t *tag);
 
-void bench_aead(EverCrypt_aead_alg a, const unsigned char *alg, size_t plain_len)
+void bench_aead(Spec_AEAD_alg a, const unsigned char *alg, size_t plain_len)
 {
   unsigned char tag[16], key[32], iv[12];
   unsigned char *plain = malloc(65536);
   unsigned char *cipher = malloc(65536);
-  EverCrypt_aead_state s = EverCrypt_aead_create(a, key);
+  EverCrypt_AEAD_state_s *s;
+  EverCrypt_AEAD_create_in(a, &s, key);
 
   char title[128];
   sprintf(title, "ENC %s[%5d]", alg, plain_len);
 
   TIME_AND_TSC(title, plain_len,
-    EverCrypt_aead_encrypt(s, iv, "", 0, plain, plain_len, cipher, tag);
+    EverCrypt_AEAD_encrypt(s, iv, "", 0, plain, plain_len, cipher, tag);
   );
 
-  /*
   sprintf(title, "DEC %s[%5d]", alg, plain_len);
 
   TIME_AND_TSC(title, plain_len,
-    dec(key, iv, "", 0, plain, plain_len, cipher, tag);
+    EverCrypt_AEAD_decrypt(s, iv, "", 0, cipher, plain_len, tag, plain);
   );
-  */
 
-  EverCrypt_aead_free(s);
+  EverCrypt_AEAD_free(s);
   free(plain);
   free(cipher);
 }
 
-void run(EverCrypt_AutoConfig_cfg cfg)
+
+void bench_hash(Spec_Hash_Definitions_hash_alg a, const unsigned char *alg, size_t plain_len)
 {
+  unsigned char *plain = malloc(plain_len);
+
+  char title[128];
+  uint8_t hash[64];
+  sprintf(title, "HASH %s[%5d]", alg, plain_len);
+
+  TIME_AND_TSC(title, plain_len,
+    EverCrypt_Hash_hash(a, hash, plain, plain_len)
+  );
+
+  free(plain);
+}
+
+void run() //EverCrypt_AutoConfig_cfg cfg)
+{
+  /*
   switch(cfg.preferred)
   {
     case EverCrypt_AutoConfig_Hacl:
@@ -130,23 +146,36 @@ void run(EverCrypt_AutoConfig_cfg cfg)
   }
 
   EverCrypt_AutoConfig_init(cfg);
+  */
+  EverCrypt_AutoConfig2_init();
   size_t i;
 
   for(i=4; i<=65536; i<<=1)
-    bench_aead(EverCrypt_AES128_GCM, "AES128-GCM", i);
+    bench_aead(Spec_AEAD_AES128_GCM, "AES128-GCM", i);
 
   for(i=4; i<=65536; i<<=1)
-    bench_aead(EverCrypt_AES256_GCM, "AES256-GCM", i);
+    bench_aead(Spec_AEAD_AES256_GCM, "AES256-GCM", i);
 
   for(i=4; i<=65536; i<<=1)
-    bench_aead(EverCrypt_CHACHA20_POLY1305, "CHA20-P1305", i);
+    bench_aead(Spec_AEAD_CHACHA20_POLY1305, "CHA20-P1305", i);
 
+  for(i=4; i<=65536; i<<=1)
+    bench_hash(Spec_Hash_Definitions_SHA2_256, "SHA256", i);
+  for(i=4; i<=65536; i<<=1)
+    bench_hash(Spec_Hash_Definitions_SHA2_384, "SHA384", i);
+  for(i=4; i<=65536; i<<=1)
+    bench_hash(Spec_Hash_Definitions_SHA2_512, "SHA512", i);
+  for(i=4; i<=65536; i<<=1)
+    bench_hash(Spec_Hash_Definitions_SHA1, "SHA1", i);
+  for(i=4; i<=65536; i<<=1)
+    bench_hash(Spec_Hash_Definitions_MD5, "MD5", i);
 }
 
 int main(int argc, char **argv)
 {
-  EverCrypt_AutoConfig_cfg cfg = { .tag = EverCrypt_AutoConfig_Prefer };
+//  EverCrypt_AutoConfig_cfg cfg = { .tag = EverCrypt_AutoConfig_Prefer };
 
+/*
   if(argc <= 1)
   {
     for(uint8_t i=0; i<4; i++)
@@ -169,7 +198,8 @@ int main(int argc, char **argv)
     cfg.preferred = alg;
     run(cfg);
   }
-
+*/
+  run();
   return 0;
 }
 
