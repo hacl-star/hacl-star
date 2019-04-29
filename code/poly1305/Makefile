@@ -1,6 +1,6 @@
 FSTAR_HOME   ?= ../../../../FStar
 KREMLIN_HOME ?= ../../../../kremlin
-HACL_HOME    ?= ../../..
+HACL_HOME    = ../..
 
 OUTPUT_DIR    = .output
 HINT_DIR      = .hints

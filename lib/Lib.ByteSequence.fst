@@ -114,7 +114,7 @@ let nat_from_intseq_le = nat_from_intseq_le_
 let nat_from_bytes_be = nat_from_intseq_be #U8
 let nat_from_bytes_le = nat_from_intseq_le #U8
 
-#reset-options "--max_fuel 1"
+#reset-options "--max_fuel 2 --z3rlimit 200"
 
 val nat_to_intseq_be_:
     #t:inttype -> #l:secrecy_level

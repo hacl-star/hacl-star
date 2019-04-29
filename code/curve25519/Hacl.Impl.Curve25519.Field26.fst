@@ -152,7 +152,7 @@ val fsub:
       modifies (loc out) h0 h1)
 [@ CInline]
 let fsub out f1 f2 =
-  out.(0ul) <- f1.(0ul) +. u64 0x3ffff68 -. f2.(0ul);
+  out.(0ul) <- f1.(0ul) +. u64 0x3ffff68 -. f2.(0ul); (* BUG *)
   out.(1ul) <- f1.(1ul) +. u64 0x3ffffff -. f2.(1ul);
   out.(2ul) <- f1.(2ul) +. u64 0x3ffffff -. f2.(2ul);
   out.(3ul) <- f1.(3ul) +. u64 0x3ffffff -. f2.(3ul);

@@ -82,7 +82,7 @@ let len_len: a:hash_alg -> Tot (n:size_t{v n = len_length a}) = function
 (** Working state of the algorithms. *)
 
 (* Internally, hash functions operate on a series of machine words. *)
-inline_for_extraction
+unfold inline_for_extraction
 let word_t: hash_alg -> Tot inttype = function
   | MD5 | SHA1
   | SHA2_224 | SHA2_256 -> U32

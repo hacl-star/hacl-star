@@ -12,10 +12,7 @@ open Spec.Hash.Definitions
 
 (** Padding *)
 
-let pad (a:hash_alg)
-  (total_len:nat{total_len < max_input_length a}):
-  Tot (b:bytes{(S.length b + total_len) % block_length a = 0})
-=
+let pad a : pad_t a = fun total_len ->
   let open FStar.Mul in
   let firstbyte = S.create 1 (u8 0x80) in
   let zeros = S.create (pad0_length a total_len) (u8 0) in
@@ -33,6 +30,6 @@ let pad (a:hash_alg)
 (** Extracting the hash, which we call "finish" *)
 
 (* Unflatten the hash from the sequence of words to bytes up to the correct size *)
-let finish (a:hash_alg) (hashw:words_state a): Tot (hash:lbytes (hash_length a)) =
+let finish (a:hash_alg) : finish_t a = fun hashw -> 
   let hash_final_w = S.slice hashw 0 (hash_word_length a) in
   bytes_of_words a #(hash_word_length a) hash_final_w

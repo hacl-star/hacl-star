@@ -16,7 +16,7 @@ module HS = FStar.HyperStack
 module Seq = Lib.Sequence
 module ByteSeq = Lib.ByteSequence
 
-#reset-options "--z3rlimit 150 --max_fuel 0 --max_ifuel 0"
+#reset-options "--z3rlimit 500 --max_fuel 2 --max_ifuel 2"
 
 let modifies_preserves_live #t #a b l h0 h1 = ()
 let modifies_includes l1 l2 h0 h1 = ()
@@ -166,7 +166,7 @@ let loop2 #b0 #blen0 #b1 #blen1 h0 n acc0 acc1 spec impl =
   let inv h i = loop2_inv #b0 #blen0 #b1 #blen1 h0 n acc0 acc1 spec i h in
   Lib.Loops.for (size 0) n inv impl
 
-#set-options "--max_fuel 0"
+#set-options "--max_fuel 2"
 
 let salloc1 #a #res h len x footprint spec spec_inv impl =
   let h0 = ST.get() in
