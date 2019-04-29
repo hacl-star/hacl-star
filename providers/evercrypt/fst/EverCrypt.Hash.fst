@@ -140,13 +140,19 @@ let update_multi_256 s blocks n =
   end else
     Hacl.Hash.SHA2.update_multi_256 s blocks n
 
+inline_for_extraction noextract
+let update_multi_224 s blocks n =
+  let h0 = ST.get () in
+  Spec.SHA2.Lemmas.update_multi_224_256 (B.as_seq h0 s) (B.as_seq h0 blocks);
+  update_multi_256 s blocks n
+
 // Need to unroll the definition of update_multi once to prove that it's update
 #push-options "--max_fuel 1"
 let update #a s block =
   match !*s with
   | MD5_s p -> Hacl.Hash.MD5.update p block
   | SHA1_s p -> Hacl.Hash.SHA1.update p block
-  | SHA2_224_s p -> Hacl.Hash.SHA2.update_224 p block
+  | SHA2_224_s p -> update_multi_224 p block 1ul
   | SHA2_256_s p -> update_multi_256 p block 1ul
   | SHA2_384_s p -> Hacl.Hash.SHA2.update_384 p block
   | SHA2_512_s p -> Hacl.Hash.SHA2.update_512 p block
@@ -162,7 +168,7 @@ let update_multi #a s blocks len =
       Hacl.Hash.SHA1.update_multi p blocks n
   | SHA2_224_s p ->
       let n = len / block_len SHA2_224 in
-      Hacl.Hash.SHA2.update_multi_224 p blocks n
+      update_multi_224 p blocks n
   | SHA2_256_s p ->
       let n = len / block_len SHA2_256 in
       update_multi_256 p blocks n
@@ -177,6 +183,18 @@ let update_multi #a s blocks len =
 // update_last that is capable of calling Vale under the hood
 let update_last_256 s prev_len input input_len =
   Hacl.Hash.MD.mk_update_last SHA2_256 update_multi_256 Hacl.Hash.SHA2.pad_256 s prev_len input input_len
+
+let update_last_224 s prev_len input input_len =
+  [@inline_let]
+  let l x y:
+    Lemma
+      (ensures (Spec.Hash.update_multi SHA2_224 x y == Spec.Hash.update_multi SHA2_256 x y))
+    [ SMTPat (Spec.Hash.update_multi SHA2_224 x y); SMTPat (Spec.Hash.update_multi SHA2_256 x y) ]
+  =
+    Spec.SHA2.Lemmas.update_multi_224_256 x y
+  in
+  update_last_256 s prev_len input input_len
+
 
 // Splitting out these proof bits; the proof is highly unreliable when all six
 // cases are done together in a single match
@@ -230,7 +248,7 @@ let update_last #a s last total_len =
   | SHA1_s p ->
       update_last_64 a Hacl.Hash.SHA1.update_last p last total_len
   | SHA2_224_s p ->
-      update_last_64 a Hacl.Hash.SHA2.update_last_224 p last total_len
+      update_last_64 a update_last_224 p last total_len
   | SHA2_256_s p ->
       update_last_64 a update_last_256 p last total_len
   | SHA2_384_s p ->
@@ -297,11 +315,15 @@ let hash_256 input input_len dst =
   Hacl.Hash.MD.mk_hash SHA2_256 Hacl.Hash.SHA2.alloca_256 update_multi_256
     update_last_256 Hacl.Hash.SHA2.finish_256 input input_len dst
 
+let hash_224 input input_len dst =
+  Hacl.Hash.MD.mk_hash SHA2_224 Hacl.Hash.SHA2.alloca_224 update_multi_224
+    update_last_224 Hacl.Hash.SHA2.finish_224 input input_len dst
+
 let hash a dst input len =
   match a with
   | MD5 -> Hacl.Hash.MD5.hash input len dst
   | SHA1 -> Hacl.Hash.SHA1.hash input len dst
-  | SHA2_224 -> Hacl.Hash.SHA2.hash_224 input len dst
+  | SHA2_224 -> hash_224 input len dst
   | SHA2_256 -> hash_256 input len dst
   | SHA2_384 -> Hacl.Hash.SHA2.hash_384 input len dst
   | SHA2_512 -> Hacl.Hash.SHA2.hash_512 input len dst
