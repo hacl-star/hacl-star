@@ -120,9 +120,7 @@ test-c: $(subst .,_,$(patsubst %.fst,test-c-%,$(notdir $(wildcard code/tests/*.f
 # Any file in specs/tests is taken to contain a `val test: unit -> bool` function.
 test-ml: $(subst .,_,$(patsubst %.fst,test-ml-%,$(notdir $(wildcard specs/tests/*.fst))))
 
-test-benchmark: tests/benchmark/build/runbenchmark
-
-tests/benchmark/build/runbenchmark: all-unstaged
+test-benchmark: all-unstaged
 	$(MAKE) -C tests/benchmark all
 
 # Not reusing the -staged automatic target so as to export NOSHORTLOG
