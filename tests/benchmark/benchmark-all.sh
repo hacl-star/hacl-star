@@ -6,8 +6,18 @@ CONFIGS="gcc-7,g++-7,compact-gcc gcc-8,g++-8,compact-gcc clang-7,clang++-7,compa
 OPENSSL_CONFIGS="openssl-default, openssl-no-asm,no-asm"
 SAMPLES=1000
 
+OPENSSL_CONFIG="./config"
+OPENSSL_CFLAGS="-O3 -march=native -mtune=native"
+
+if [ "$(expr substr $(uname -s) 1 6)" == "CYGWIN" ]; then
+  OPENSSL_CONFIG="./Configure mingw64"
+  OPENSSL_CFLAGS+=" -fno-asynchronous-unwind-tables"
+  CONFIGS="x86_64-w64-mingw32-gcc,x86_64-w64-mingw32-g++,compact-gcc"
+  CMAKE_EXTRA="-DCMAKE_AR=/usr/bin/x86_64-w64-mingw32-ar.exe -DUSE_BCRYPT=ON"
+fi
+
 # KREMLIN_INC=$KREMLIN_HOME/include
-# KREMLIB_DIR=$KREMLIN_HOME/kremlib/dist
+# KREMLIB_DIR=$KREMLIN_HOME/kremlib/dist/generic
 # RFC7748_DIR=$HACL_HOME/tests/rfc7748_src
 # EVERCRYPT_DIST=$HACL_HOME/dist/
 
@@ -38,7 +48,7 @@ for c in $CONFIGS; do
         (mkdir -p $OCONF-$CC;
           tar xfz $OPENSSL.tar.gz -C $OCONF-$CC;
           pushd $OCONF-$CC/$OPENSSL;
-          CC=$CC CXX=$CXX ./config CFLAGS="-O3 -march=native -mtune=native" $OFLAGS > configure.log 2>&1;
+          CC=$CC CXX=$CXX $OPENSSL_CONFIG CFLAGS="$OPENSSL_CFLAGS" $OFLAGS > configure.log 2>&1;
           make $PAR > build.log 2>&1;
           popd > /dev/null)
       fi
@@ -54,6 +64,7 @@ for c in $CONFIGS; do
             -DKREMLIB_DIR=$KREMLIB_DIR \
             -DRFC7748_DIR=$RFC7748_DIR \
             -DUSE_OPENSSL=ON -DOPENSSL_LIB=../$OCONF-$CC/$OPENSSL/libcrypto.a -DOPENSSL_INC=../$OCONF-$CC/$OPENSSL/include \
+            $CMAKE_EXTRA \
             .. \
             2>&1; popd > /dev/null) > evercrypt-$OCONF-$CC/configure.log
       fi
