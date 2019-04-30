@@ -5,6 +5,8 @@
 #include <vector>
 #include <algorithm>
 
+#include <math.h>
+
 extern "C" {
 #include <EverCrypt_AutoConfig2.h>
 }
@@ -182,24 +184,34 @@ void Benchmark::run(const BenchmarkSettings & s)
 
 void Benchmark::report(std::ostream & rs, const BenchmarkSettings & s) const
 {
-  double q25 = cmin, median = 0.0, q75 = cmax;
+  double q25 = cmin, median = 0.0, q75 = cmax, avg = 0.0, stddev = 0.0;
+  size_t n = samples.size();
 
   if (samples.size() > 4)
   {
-    size_t n = samples.size();
     median = (n % 2 == 1 ? (double)samples[n/2] : (samples[n/2] + samples[(n+1)/2])/(double)2.0);
+    avg = ctotal/(double)s.samples;
     q25 = (double)samples[n/4];
     q75 = (double)samples[(3*n)/4];
   }
+
+  double sum_squares = 0.0;
+  for (size_t i = 0; i < samples.size(); i++)
+  {
+    double q = samples[i] - avg;
+    sum_squares += q*q;
+  }
+  stddev = sqrt(sum_squares/(double)(n-1));
 
   rs << "," << std::chrono::duration_cast<std::chrono::nanoseconds>(tincl).count()
     << "," << std::chrono::duration_cast<std::chrono::nanoseconds>(texcl).count()
     << "," << cmin
     << "," << q25
-    << "," << ctotal/(double)s.samples
+    << "," << avg
     << "," << median
     << "," << q75
-    << "," << cmax;
+    << "," << cmax
+    << "," << stddev;
 }
 
 static const char time_fmt[] = "%b %d %Y %H:%M:%S";

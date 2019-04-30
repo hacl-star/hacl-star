@@ -54,7 +54,7 @@ class Benchmark
     void set_name(const std::string & name);
     std::string get_name() const { return name; }
 
-    static std::string column_headers() { return ",\"CPUincl\",\"CPUexcl\",\"Min\",\"Q25\",\"Avg\",\"Med\",\"Q75\",\"Max\""; }
+    static std::string column_headers() { return ",\"CPUincl\",\"CPUexcl\",\"Min\",\"Q25\",\"Avg\",\"Med\",\"Q75\",\"Max\".\"StdDev\""; }
 
     // Global tools, just in here for the namespace
 
