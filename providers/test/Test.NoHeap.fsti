@@ -37,4 +37,10 @@ val test_hkdf: vs:L.lbuffer hkdf_vector -> Stack unit (fun _ -> True) (fun _ _ _
 let chacha20_vector = vec8 & vec8 & UInt32.t & vec8 & vec8
 val test_chacha20: L.lbuffer chacha20_vector -> Stack unit (fun _ -> True) (fun _ _ _ -> True)
 
+val test_poly1305 (_: unit) : Stack unit (fun _ -> True) (fun _ _ _ -> True)
+
+val test_curve25519 (_: unit) : Stack unit (fun _ -> True) (fun _ _ _ -> True)
+
+val test_chacha20poly1305 (_: unit) : Stack unit (fun _ -> True) (fun _ _ _ -> True)
+
 val main: unit -> Stack Int32.t (fun _ -> True) (fun _ _ _ -> True)
