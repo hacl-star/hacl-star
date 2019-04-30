@@ -514,7 +514,7 @@ static std::string filter(const std::string & data_filename, const std::string &
 
 void bench_aead_encrypt(const BenchmarkSettings & s)
 {
-  size_t data_sizes[] = { 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536 };
+  size_t data_sizes[] = { 64, 128, 256, 512, 1024, 1056, 2048, 4096, 8192, 16384, 32768, 65536 };
 
   Benchmark::PlotSpec plot_specs_cycles;
   Benchmark::PlotSpec plot_specs_bytes;
@@ -660,7 +660,7 @@ void bench_aead_encrypt(const BenchmarkSettings & s)
 
 void bench_aead_decrypt(const BenchmarkSettings & s)
 {
-  size_t data_sizes[] = { 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536 };
+  size_t data_sizes[] = { 64, 128, 256, 512, 1024, 1056, 2048, 4096, 8192, 16384, 32768, 65536 };
 
   Benchmark::PlotSpec plot_specs_cycles;
   Benchmark::PlotSpec plot_specs_bytes;

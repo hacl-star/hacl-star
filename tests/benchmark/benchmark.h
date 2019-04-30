@@ -20,7 +20,7 @@ class BenchmarkSettings
 {
   public:
     unsigned int seed = 0;
-    size_t samples = 10000;
+    size_t warmup_samples = 100, samples = 10000;
     std::list<std::string> families_to_run;
 };
 

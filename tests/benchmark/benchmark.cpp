@@ -157,6 +157,13 @@ void Benchmark::run(const BenchmarkSettings & s)
 
   samples.reserve(s.samples);
 
+  for (int i = 0; i < s.warmup_samples; i++)
+  {
+    bench_setup(s);
+    bench_func();
+    bench_cleanup(s);
+  }
+
   for (int i = 0; i < s.samples; i++)
   {
     bench_setup(s);
