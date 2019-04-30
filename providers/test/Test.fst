@@ -374,10 +374,313 @@ let test_dh () : St unit =
   // TODO supposed to use tactics now?
   ()
 
-#reset-options "--z3rlimit 40"
+inline_for_extraction
+noeq
+type features = {
+  features_avx: bool;
+  features_avx2: bool;
+  features_bmi2: bool;
+  features_adx: bool;
+  features_aesni: bool;
+  features_shaext: bool;
+}
+
+inline_for_extraction
+let f_concat (f1 f2: features) : Tot features =
+  [@inline_let]
+  let avx = f1.features_avx || f2.features_avx in
+  [@inline_let]
+  let avx2 = f1.features_avx2 || f2.features_avx2 in
+  [@inline_let]
+  let bmi2 = f1.features_bmi2 || f2.features_bmi2 in
+  [@inline_let]
+  let adx = f1.features_adx || f2.features_adx in
+  [@inline_let]
+  let aesni = f1.features_aesni || f2.features_aesni in
+  [@inline_let]
+  let shaext = f1.features_shaext || f2.features_shaext in
+  {
+    features_avx = avx;
+    features_avx2 = avx2;
+    features_bmi2 = bmi2;
+    features_adx = adx;
+    features_aesni = aesni;
+    features_shaext = shaext;
+  }
+
+inline_for_extraction
+let f_none : features = {
+  features_avx = false;
+  features_avx2 = false;
+  features_bmi2 = false;
+  features_adx = false;
+  features_aesni = false;
+  features_shaext = false;
+}
+
+inline_for_extraction
+let f_avx : features = // [@inline_let] ({ f_none with features_avx = true; })
+{
+  features_avx = true;
+  features_avx2 = false;
+  features_bmi2 = false;
+  features_adx = false;
+  features_aesni = false;
+  features_shaext = false;
+}
+
+inline_for_extraction
+let f_avx2 : features = // [@inline_let] ({ f_none with features_avx2 = true; })
+{
+  features_avx = false;
+  features_avx2 = true;
+  features_bmi2 = false;
+  features_adx = false;
+  features_aesni = false;
+  features_shaext = false;
+}
+
+inline_for_extraction
+let f_bmi2 : features = // [@inline_let] ({ f_none with features_bmi2 = true; })
+{
+  features_avx = false;
+  features_avx2 = false;
+  features_bmi2 = true;
+  features_adx = false;
+  features_aesni = false;
+  features_shaext = false;
+}
+
+inline_for_extraction
+let f_adx : features = // [@inline_let] ({ f_none with features_adx = true; })
+{
+  features_avx = false;
+  features_avx2 = false;
+  features_bmi2 = false;
+  features_adx = true;
+  features_aesni = false;
+  features_shaext = false;
+}
+
+inline_for_extraction
+let f_aesni : features = // [@inline_let] ({ f_none with features_aesni = true; })
+{
+  features_avx = false;
+  features_avx2 = false;
+  features_bmi2 = false;
+  features_adx = false;
+  features_aesni = true;
+  features_shaext = false;
+}
+
+inline_for_extraction
+let f_shaext : features = // [@inline_let] ({ f_none with features_shaext = true; })
+{
+  features_avx = false;
+  features_avx2 = false;
+  features_bmi2 = false;
+  features_adx = false;
+  features_aesni = false;
+  features_shaext = true;
+}
+
+inline_for_extraction
+type impl = | Hacl | Vale | OpenSSL | BCrypt
+
+inline_for_extraction
+let config = (impl & features)
+
+inline_for_extraction
+let check_static_config (c: config) : Stack bool (fun _ -> True) (fun _ _ _ -> True) =
+  match c with
+  | (i, f) ->
+    AC.init ();
+    let no_avx = not (AC.has_avx ()) in
+    let no_avx2 = not (AC.has_avx2 ()) in
+    let no_bmi2 = not (AC.has_bmi2 ()) in
+    let no_adx = not (AC.has_adx ()) in
+    let no_aesni = not (AC.has_aesni ()) in
+    let no_shaext = not (AC.has_shaext ()) in
+    if
+      (f.features_avx && no_avx) ||
+      (f.features_avx2 && no_avx2) ||
+      (f.features_bmi2 && no_bmi2) ||
+      (f.features_adx && no_adx) ||
+      (f.features_aesni && no_aesni) ||
+      (f.features_shaext && no_shaext)
+    then
+      false
+    else
+      match i with
+      | Hacl -> SC.hacl
+      | Vale -> SC.vale
+      | OpenSSL -> SC.openssl
+      | BCrypt -> SC.bcrypt
+
+#push-options "--z3rlimit 16"
+
+inline_for_extraction
+let set_config (c: config) : Stack unit (fun _ -> True) (fun _ _ _ -> True) =
+  match c with
+  | (i, f) ->
+    (if i <> Hacl then AC.disable_hacl ());
+    (if i <> Vale then AC.disable_vale ());
+    (if i <> OpenSSL then AC.disable_openssl ());
+    (if i <> BCrypt then AC.disable_bcrypt ());
+    (if not f.features_avx then AC.disable_avx ());
+    (if not f.features_avx2 then AC.disable_avx2 ());
+    (if not f.features_bmi2 then AC.disable_bmi2 ());
+    (if not f.features_adx then AC.disable_adx ());
+    (if not f.features_aesni then AC.disable_aesni ());
+    (if not f.features_shaext then AC.disable_shaext ())
+
+#pop-options
+
+inline_for_extraction
+let print_config (c: config) : Stack unit (fun _ -> True) (fun _ _ _ -> True) =
+  match c with
+  | (i, f) ->
+    begin match i with
+    | Hacl -> C.String.print !$"HACL"
+    | Vale -> C.String.print !$"Vale"
+    | OpenSSL -> C.String.print !$"OpenSSL"
+    | BCrypt -> C.String.print !$"BCrypt"
+    end;
+    (if f.features_avx then C.String.print !$" avx");
+    (if f.features_avx2 then C.String.print !$" avx2");
+    (if f.features_bmi2 then C.String.print !$" bmi2");
+    (if f.features_adx then C.String.print !$" adx");
+    (if f.features_aesni then C.String.print !$" aesni");
+    (if f.features_shaext then C.String.print !$" shaext")
+
 inline_for_extraction
 noextract
-let test_all_body (print: C.String.t -> St unit) : St unit =
+type test_set = ((C.String.t -> St unit) -> St unit) -> St unit
+
+inline_for_extraction
+noextract
+let ts_nil : test_set = fun _ -> ()
+
+inline_for_extraction
+noextract
+let ts_one (c: config) : Tot test_set =
+  fun test ->
+    if check_static_config c
+    then begin
+      set_config c;
+      test (fun s -> print_config c; C.String.print s)
+    end else begin
+      print_config c;
+      C.String.print !$" SKIP because not in static config\n"
+    end
+
+inline_for_extraction
+noextract
+let ts_append (ts1 ts2: test_set) : Tot test_set =
+  fun test ->
+    ts1 test;
+    ts2 test
+
+inline_for_extraction
+noextract
+let ts_snoc (ts: test_set) (c: config)  : Tot test_set =
+  ts `ts_append` ts_one c
+
+inline_for_extraction
+noextract
+let ts_cons (c: config) (ts: test_set) : Tot test_set =
+  ts_one c `ts_append` ts
+
+inline_for_extraction
+noextract
+let external_test_set =
+  ts_nil
+  `ts_snoc` (OpenSSL, f_none)
+  `ts_snoc` (BCrypt, f_none)
+
+inline_for_extraction
+noextract
+let poly1305_test_set =
+  (Hacl, f_avx2) `ts_cons` (
+  (Hacl, f_avx) `ts_cons` (
+  (Hacl, f_none) `ts_cons` (
+  (Vale, f_none) `ts_cons` (
+  external_test_set))))
+
+inline_for_extraction
+noextract
+let curve25519_test_set =
+  (Hacl, f_bmi2 `f_concat` f_adx) `ts_cons` (
+  (Hacl, f_none) `ts_cons`
+  external_test_set)
+
+inline_for_extraction
+noextract
+let aead_gcm_test_set =
+  (Vale, f_aesni `f_concat` f_avx) `ts_cons` (
+  ts_nil)
+
+inline_for_extraction
+noextract
+let chacha20poly1305_test_set =
+  (Hacl, f_none) `ts_cons`
+  external_test_set
+
+inline_for_extraction
+noextract
+let hash_test_set =
+  (Vale, f_none) `ts_cons` (
+  (Vale, f_shaext) `ts_cons` (
+  (Hacl, f_none) `ts_cons` (
+  external_test_set)))
+
+inline_for_extraction
+noextract
+let mk_test_set_with_none_avx_avx2 (i: impl) : Tot test_set =
+  (i, f_none) `ts_cons` (
+  (i, f_avx) `ts_cons` (
+  (i, f_avx2) `ts_cons`
+  ts_nil))
+
+inline_for_extraction
+noextract
+let default_test_set =
+  mk_test_set_with_none_avx_avx2 Vale `ts_append`
+  mk_test_set_with_none_avx_avx2 Hacl `ts_append`
+  external_test_set
+
+(* Test bodies *)
+
+inline_for_extraction
+noextract
+let test_poly1305_body (print: C.String.t -> St unit) : St unit =
+    print !$"  >>>>>>>>> Poly1305\n";
+    test_poly1305 ()
+
+inline_for_extraction
+noextract
+let test_curve25519_body (print: C.String.t -> St unit) : St unit =
+    print !$"  >>>>>>>>> Curve25519\n";
+    test_curve25519 ()
+
+inline_for_extraction
+noextract
+let test_aead_gcm_body (print: C.String.t -> St unit) : St unit =
+    print !$"  >>>>>>>>> AEAD (old vectors)\n";
+    test_aead ();
+    print !$"  >>>>>>>>> AEAD (AES128_GCM vectors)\n";
+    test_aes128_gcm ();
+    print !$"  >>>>>>>>> Cipher\n";
+    test_cipher ()
+
+inline_for_extraction
+let test_chacha20poly1305_body (print: C.String.t -> St unit) : St unit =
+    print !$"  >>>>>>>>> AEAD (ChachaPoly vectors)\n";
+    test_chacha20poly1305 ()
+
+inline_for_extraction
+noextract
+let test_hash_body (print: C.String.t -> St unit) : St unit =
     print !$"  >>>>>>>>> Hash (Test.Hash)\n";
     Test.Hash.main ();
     print !$"  >>>>>>>>> Hash (Test.NoHeap)\n";
@@ -385,115 +688,33 @@ let test_all_body (print: C.String.t -> St unit) : St unit =
     print !$"  >>>>>>>>> Hmac (Test.NoHeap)\n";
     test_hmac hmac_vectors_low;
     print !$"  >>>>>>>>> HKDF (Test.NoHeap)\n";
-    test_hkdf hkdf_vectors_low;
+    test_hkdf hkdf_vectors_low
+
+inline_for_extraction
+noextract
+let test_default_body (print: C.String.t -> St unit) : St unit =
     print !$"  >>>>>>>>> FINITE-FIELD DIFFIE-HELLMAN\n";
     test_dh ();
-    print !$"  >>>>>>>>> AEAD (old vectors)\n";
-    test_aead ();
-    print !$"  >>>>>>>>> AEAD (AES128_GCM vectors)\n";
-    test_aes128_gcm ();
-    print !$"  >>>>>>>>> Cipher\n";
-    test_cipher ();
-    print !$"  >>>>>>>>> Curve25519\n";
-    test_curve25519 ();
-    print !$"  >>>>>>>>> Poly1305\n";
-    test_poly1305 ();
     print !$"  >>>>>>>>> Chacha20\n";
-    test_chacha20 chacha20_vectors_low;
-    print !$"  >>>>>>>>> AEAD (ChachaPoly vectors)\n";
-    test_chacha20poly1305 ()
-#reset-options
+    test_chacha20 chacha20_vectors_low
 
-inline_for_extraction
-type platform = | Vale | HACL | OpenSSL | BCrypt
+(* Summary *)
 
-inline_for_extraction
-noextract
-let static_config_ok (p: platform) : St bool =
-  match p with
-  | Vale -> EverCrypt.StaticConfig.vale
-  | HACL -> EverCrypt.StaticConfig.hacl
-  | OpenSSL -> EverCrypt.StaticConfig.openssl
-  | BCrypt -> EverCrypt.StaticConfig.bcrypt
-
-inline_for_extraction
-noextract
-let print_config (p: platform) (avx avx2: bool) : St unit =
-  begin match p with
-  | Vale -> C.String.print !$"VALE "
-  | HACL -> C.String.print !$"HACL "
-  | OpenSSL -> C.String.print !$"OpenSSL "
-  | BCrypt -> C.String.print !$"BCrypt "
-  end;
-  (if avx then C.String.print !$"AVX ");
-  (if avx2 then C.String.print !$"AVX2 ")
-
-#push-options "--z3rlimit 16"
-
-inline_for_extraction
-noextract
-let test_all_on_config (p: platform) (avx avx2: bool) : St unit =
-  C.String.print !$"=================================================\n";
-  print_config p avx avx2;
-  C.String.print !$"\n";
-  AC.init ();
-  let has_avx = AC.has_avx () in
-  let has_avx2 = AC.has_avx2 () in
-  if avx && not has_avx
-  then
-    C.String.print !$"skipping, AVX wanted but not present\n"
-  else if avx2 && not has_avx2
-  then
-    C.String.print !$"skipping, AVX2 wanted but not present\n"
-  else if not (static_config_ok p)
-  then
-    C.String.print !$"skipping, not in static config\n"
-  else begin
-    (if p <> Vale then AC.disable_vale ());
-    (if p <> HACL then AC.disable_hacl ());
-    (if p <> OpenSSL then AC.disable_openssl ());
-    (if p <> BCrypt then AC.disable_bcrypt ());
-    (if not avx then AC.disable_avx ());
-    (if not avx2 then AC.disable_avx2 ());
-    let wants_vale = AC.wants_vale () in
-    let wants_hacl = AC.wants_hacl () in
-    let wants_openssl = AC.wants_openssl () in
-    let wants_bcrypt = AC.wants_bcrypt () in 
-    let wants_avx = AC.has_avx () in
-    let wants_avx2 = AC.has_avx2 () in
-    if not (
-      (wants_vale = (p = Vale)) &&
-      (wants_hacl = (p = HACL)) &&
-      (wants_openssl = (p = OpenSSL)) &&
-      (wants_bcrypt = (p = BCrypt)) &&
-      (wants_avx = avx) &&
-      (wants_avx2 = avx2)
-    )
-    then
-      C.Failure.failwith !$"autoconfig is inconsistent"
-    else
-      test_all_body (fun s -> print_config p avx avx2; C.String.print s)
-  end
-
-#pop-options
-
-inline_for_extraction
-noextract
-let test_all_on_platform_avx (p: platform) (avx: bool) : St unit =
-  test_all_on_config p avx false;
-  test_all_on_config p avx true
-
-inline_for_extraction
-noextract
-let test_all_on_platform (p: platform) : St unit =
-  test_all_on_platform_avx p false;
-  test_all_on_platform_avx p true
+let print_sep () : St unit =
+  C.String.print !$"=====================\n"
 
 let test_all () : St unit =
-  test_all_on_platform Vale;
-  test_all_on_platform HACL;
-  test_all_on_platform OpenSSL;
-  test_all_on_platform BCrypt
+  poly1305_test_set         test_poly1305_body;
+  print_sep ();
+  curve25519_test_set       test_curve25519_body;
+  print_sep ();
+  aead_gcm_test_set         test_aead_gcm_body;
+  print_sep ();
+  chacha20poly1305_test_set test_chacha20poly1305_body;
+  print_sep ();
+  hash_test_set             test_hash_body;
+  print_sep ();
+  default_test_set          test_default_body
 
 let main (): St C.exit_code =
   let equal_heap_dom_lemma (h1 h2:Heap.heap)

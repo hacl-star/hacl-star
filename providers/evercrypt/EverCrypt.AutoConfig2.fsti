@@ -69,6 +69,8 @@ let disabler = unit -> Stack unit
   BCrypt) the client can disable a provider entirely. *)
 val disable_avx2: disabler
 val disable_avx: disabler
+val disable_bmi2: disabler
+val disable_adx: disabler
 val disable_shaext: disabler
 val disable_aesni: disabler
 val disable_pclmulqdq: disabler
