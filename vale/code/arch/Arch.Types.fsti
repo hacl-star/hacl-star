@@ -202,6 +202,21 @@ val be_bytes_to_quad32_to_bytes (q:quad32) :
   Lemma (be_bytes_to_quad32 (be_quad32_to_bytes q) == q)
   [SMTPat (be_bytes_to_quad32 (be_quad32_to_bytes q))]
 
+// Reverse each nat32 in the quad, but leave the nat32s in their original order
+let reverse_bytes_nat32_quad32 (q:quad32) : quad32 =
+  Words.Four_s.four_map reverse_bytes_nat32 q
+
+val lemma_reverse_reverse_bytes_nat32_quad32 (s:quad32) :
+  Lemma (reverse_bytes_nat32_quad32 (reverse_bytes_nat32_quad32 s) == s)
+  [SMTPat (reverse_bytes_nat32_quad32 (reverse_bytes_nat32_quad32 s))]
+
+let reverse_bytes_nat32_quad32_seq (q:seq quad32) : seq quad32 =
+  seq_map reverse_bytes_nat32_quad32 q
+  
+val lemma_reverse_reverse_bytes_nat32_quad32_seq (s:seq quad32) :
+  Lemma (reverse_bytes_nat32_quad32_seq (reverse_bytes_nat32_quad32_seq s) == s)
+  [SMTPat (reverse_bytes_nat32_quad32_seq (reverse_bytes_nat32_quad32_seq s))]
+  
 let reverse_bytes_quad32_seq (s:seq quad32) : seq quad32 =
   seq_map reverse_bytes_quad32 s
 

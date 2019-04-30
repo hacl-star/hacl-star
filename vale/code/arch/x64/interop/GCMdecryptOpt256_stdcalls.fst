@@ -129,7 +129,7 @@ val gcm256_decrypt_opt':
       UInt64.v auth_num * (128/8) <= UInt64.v auth_bytes /\
       UInt64.v auth_bytes < UInt64.v auth_num * (128/8) + 128/8 /\
 
-      aesni_enabled /\ pclmulqdq_enabled /\
+      aesni_enabled /\ pclmulqdq_enabled /\ avx_enabled /\
       is_aes_key_LE AES_256 (Ghost.reveal key) /\
       (let db = get_downview keys_b in
       length_aux2 keys_b;
@@ -344,7 +344,7 @@ val gcm256_decrypt_opt_alloca:
       4096 * (UInt64.v cipher_len + 16) < pow2_32 /\
       4096 * (UInt64.v auth_len) < pow2_32 /\
 
-      aesni_enabled /\ pclmulqdq_enabled /\
+      aesni_enabled /\ pclmulqdq_enabled /\ avx_enabled /\
       is_aes_key_LE AES_256 (Ghost.reveal key) /\
       (Seq.equal (B.as_seq h0 keys_b)
          (seq_nat8_to_seq_uint8 (le_seq_quad32_to_bytes (key_to_round_keys_LE AES_256 (Ghost.reveal key))))) /\

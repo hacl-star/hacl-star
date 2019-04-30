@@ -55,7 +55,11 @@
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
+<<<<<<< HEAD
       "55602cc1466705634c3bb81a0f1fb5dc"
+=======
+      "41f98885b675fbf1947e213f79ec11b0"
+>>>>>>> fstar-master
     ],
     [
       "Hacl.Impl.Chacha20Poly1305.aead_encrypt_chacha_poly",
@@ -177,7 +181,11 @@
         "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
+<<<<<<< HEAD
       "eead862950f68b9b02f11382ddea7318"
+=======
+      "91932036f1aaab5964fc42824c501485"
+>>>>>>> fstar-master
     ],
     [
       "Hacl.Impl.Chacha20Poly1305.aead_decrypt_chacha_poly",
@@ -187,12 +195,13 @@
       [
         "@MaxIFuel_assumption", "@query", "equality_tok_Lib.Buffer.MUT@tok",
         "equality_tok_Lib.IntTypes.PUB@tok",
-        "equality_tok_Lib.IntTypes.U32@tok", "equation_Lib.Buffer.as_seq",
-        "equation_Lib.IntTypes.uint8", "equation_Lib.IntTypes.uint_v",
-        "equation_Lib.Sequence.length", "equation_Lib.Sequence.lseq",
-        "equation_Prims.nat", "equation_Spec.Chacha20Poly1305.size_block",
+        "equality_tok_Lib.IntTypes.U32@tok",
+        "equation_Hacl.Spec.Poly1305.Vec.size_key",
+        "equation_Lib.Buffer.as_seq", "equation_Lib.IntTypes.uint8",
+        "equation_Lib.IntTypes.uint_v", "equation_Lib.Sequence.length",
+        "equation_Lib.Sequence.lseq", "equation_Prims.nat",
+        "equation_Spec.Chacha20Poly1305.size_block",
         "equation_Spec.Poly1305.size_block",
-        "equation_Spec.Poly1305.size_key",
         "function_token_typing_Lib.IntTypes.uint8",
         "primitive_Prims.op_Addition", "primitive_Prims.op_Division",
         "projection_inverse_BoxInt_proj_0",
@@ -200,12 +209,16 @@
         "refinement_interpretation_Tm_refine_7af8c0c820f0fddc486a546dd953faa1",
         "refinement_interpretation_Tm_refine_a023f390483b324d20370f23ed0795dc",
         "refinement_interpretation_Tm_refine_d8d83307254a8900dd20598654272e42",
-        "typing_Lib.Buffer.as_seq", "typing_Lib.IntTypes.uint_v",
-        "typing_Spec.Poly1305.size_key", "typing_tok_Lib.Buffer.MUT@tok",
+        "typing_Hacl.Spec.Poly1305.Vec.size_key", "typing_Lib.Buffer.as_seq",
+        "typing_Lib.IntTypes.uint_v", "typing_tok_Lib.Buffer.MUT@tok",
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
+<<<<<<< HEAD
       "28b69927c6d962e29f74623b251dcc33"
+=======
+      "b658ee292c841d97be2ab4ed423831fc"
+>>>>>>> fstar-master
     ],
     [
       "Hacl.Impl.Chacha20Poly1305.aead_decrypt_chacha_poly",
@@ -389,7 +402,11 @@
         "typing_Spec.Poly1305.size_key", "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
+<<<<<<< HEAD
       "0ce2304fca91b17a5ef8ff31851ec61c"
+=======
+      "81364250c44f3a94604dd2aca0bfb199"
+>>>>>>> fstar-master
     ]
   ]
 ]

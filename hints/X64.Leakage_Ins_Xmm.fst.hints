@@ -86,7 +86,7 @@
         "function_token_typing_X64.Leakage_s.__proj__TaintState__item__regTaint",
         "function_token_typing_X64.Leakage_s.__proj__TaintState__item__xmmTaint",
         "interpretation_Tm_abs_1aa87ea4de26c5f807351c79780462e0",
-        "interpretation_Tm_abs_49111d3ead3624faac5305b1716a2421",
+        "interpretation_Tm_abs_43918b1939ad3e5b5ff1258e63680b46",
         "interpretation_Tm_abs_4a1a6682764b8be475443da6650b9908",
         "interpretation_Tm_abs_66926e89e50e2ac69caf858cc1113f07",
         "interpretation_Tm_abs_728e959e62c634798059835f229c48f4",
@@ -153,6 +153,7 @@
         "typing_Tm_abs_728e959e62c634798059835f229c48f4",
         "typing_Tm_abs_fe44d2820bd291cbabc93d338ef2fb23",
         "typing_X64.Bytes_Semantics_s.__proj__Mkstate__item__ok",
+        "typing_X64.CPU_Features_s.avx_enabled",
         "typing_X64.Leakage_Ins_Xmm.xmm_taint", "typing_X64.Machine_s.xmm",
         "typing_X64.Taint_Semantics_s.__proj__MktraceState__item__memTaint",
         "typing_X64.Taint_Semantics_s.__proj__MktraceState__item__state",
@@ -166,7 +167,11 @@
         "typing_X64.Taint_Semantics_s.taint_eval_ins", "unit_typing"
       ],
       0,
+<<<<<<< HEAD
       "26789f83ddec3601c2bd0ce76bee6d2b"
+=======
+      "d0878ed5715cf805115e88adb68784f4"
+>>>>>>> fstar-master
     ],
     [
       "X64.Leakage_Ins_Xmm.check_if_paddd_leakage_free",
@@ -287,7 +292,7 @@
         "function_token_typing_X64.Leakage_s.__proj__TaintState__item__xmmTaint",
         "int_inversion",
         "interpretation_Tm_abs_1aa87ea4de26c5f807351c79780462e0",
-        "interpretation_Tm_abs_49111d3ead3624faac5305b1716a2421",
+        "interpretation_Tm_abs_43918b1939ad3e5b5ff1258e63680b46",
         "interpretation_Tm_abs_4a1a6682764b8be475443da6650b9908",
         "interpretation_Tm_abs_66926e89e50e2ac69caf858cc1113f07",
         "interpretation_Tm_abs_728e959e62c634798059835f229c48f4",
@@ -381,7 +386,11 @@
         "unit_typing"
       ],
       0,
+<<<<<<< HEAD
       "f147dd6d2a667ba3af1cacd1b0fcc8b3"
+=======
+      "6c8ce4f96450d3760f5879fdb0f9dca1"
+>>>>>>> fstar-master
     ],
     [
       "X64.Leakage_Ins_Xmm.check_if_pslld_leakage_free",
@@ -497,7 +506,7 @@
         "function_token_typing_X64.Leakage_s.__proj__TaintState__item__xmmTaint",
         "int_inversion",
         "interpretation_Tm_abs_1aa87ea4de26c5f807351c79780462e0",
-        "interpretation_Tm_abs_49111d3ead3624faac5305b1716a2421",
+        "interpretation_Tm_abs_43918b1939ad3e5b5ff1258e63680b46",
         "interpretation_Tm_abs_4a1a6682764b8be475443da6650b9908",
         "interpretation_Tm_abs_66926e89e50e2ac69caf858cc1113f07",
         "interpretation_Tm_abs_728e959e62c634798059835f229c48f4",
@@ -586,7 +595,11 @@
         "unit_typing"
       ],
       0,
+<<<<<<< HEAD
       "57c4e084d240dc92ec8db032ffbe5588"
+=======
+      "36a5de160817772d9916c04b0abda9ea"
+>>>>>>> fstar-master
     ],
     [
       "X64.Leakage_Ins_Xmm.check_if_pshufd_leakage_free",
@@ -700,7 +713,7 @@
         "function_token_typing_X64.Leakage_s.__proj__TaintState__item__xmmTaint",
         "int_inversion",
         "interpretation_Tm_abs_1aa87ea4de26c5f807351c79780462e0",
-        "interpretation_Tm_abs_49111d3ead3624faac5305b1716a2421",
+        "interpretation_Tm_abs_43918b1939ad3e5b5ff1258e63680b46",
         "interpretation_Tm_abs_4a1a6682764b8be475443da6650b9908",
         "interpretation_Tm_abs_66926e89e50e2ac69caf858cc1113f07",
         "interpretation_Tm_abs_728e959e62c634798059835f229c48f4",
@@ -790,7 +803,11 @@
         "typing_tok_X64.Instruction_s.PreserveFlags@tok", "unit_typing"
       ],
       0,
+<<<<<<< HEAD
       "cd962744b1646a710f54446462c1acea"
+=======
+      "74133b70fbcd5df395dd3b96bc9509a0"
+>>>>>>> fstar-master
     ],
     [
       "X64.Leakage_Ins_Xmm.mov128_does_not_use_secret",
@@ -805,7 +822,11 @@
         "fuel_guarded_inversion_X64.Machine_s.mov128_op"
       ],
       0,
+<<<<<<< HEAD
       "cb063cee3211fd4faf9265188ec4a391"
+=======
+      "a5e5d601888ff66dd9f5364531e5843c"
+>>>>>>> fstar-master
     ],
     [
       "X64.Leakage_Ins_Xmm.check_if_movdqu_leakage_free_aux",
@@ -828,7 +849,11 @@
         "typing_X64.Taint_Semantics_s.__proj__TaintedIns__item__i"
       ],
       0,
+<<<<<<< HEAD
       "65c241dacb155ca5a12212c26b399d23"
+=======
+      "6525743d1ff5d02dca6386156d081d80"
+>>>>>>> fstar-master
     ],
     [
       "X64.Leakage_Ins_Xmm.frame_update_heap128_x",
@@ -837,7 +862,11 @@
       2,
       [ "@query" ],
       0,
+<<<<<<< HEAD
       "6f014f0d07d9428c85790e943634c880"
+=======
+      "5cb9ebbd3dca9c1837453ada24f90263"
+>>>>>>> fstar-master
     ],
     [
       "X64.Leakage_Ins_Xmm.lemma_movdqu_same_public_aux",
@@ -869,7 +898,7 @@
         "constructor_distinct_X64.Machine_s.OReg",
         "constructor_distinct_X64.Machine_s.Public",
         "constructor_distinct_X64.Machine_s.Secret",
-        "data_elim_X64.Bytes_Semantics_s.MOVDQU",
+        "data_elim_Words_s.Mkfour", "data_elim_X64.Bytes_Semantics_s.MOVDQU",
         "data_elim_X64.Bytes_Semantics_s.Mkstate",
         "data_elim_X64.Leakage_s.TaintState",
         "data_elim_X64.Machine_s.MIndex", "data_elim_X64.Machine_s.MReg",
@@ -951,13 +980,14 @@
         "function_token_typing_Prims.int",
         "function_token_typing_X64.Bytes_Semantics_s.__proj__Mkstate__item__regs",
         "function_token_typing_X64.Bytes_Semantics_s.__proj__Mkstate__item__xmms",
+        "function_token_typing_X64.Bytes_Semantics_s.get_heap_val128_def",
         "function_token_typing_X64.Bytes_Semantics_s.op_String_Access",
         "function_token_typing_X64.Leakage_s.__proj__TaintState__item__regTaint",
         "function_token_typing_X64.Leakage_s.__proj__TaintState__item__xmmTaint",
         "int_inversion", "int_typing",
         "interpretation_Tm_abs_1aa87ea4de26c5f807351c79780462e0",
         "interpretation_Tm_abs_4371d80c10148151a6be8a394bec7d26",
-        "interpretation_Tm_abs_49111d3ead3624faac5305b1716a2421",
+        "interpretation_Tm_abs_43918b1939ad3e5b5ff1258e63680b46",
         "interpretation_Tm_abs_4a1a6682764b8be475443da6650b9908",
         "interpretation_Tm_abs_66926e89e50e2ac69caf858cc1113f07",
         "interpretation_Tm_abs_728e959e62c634798059835f229c48f4",
@@ -969,6 +999,7 @@
         "kinding_X64.Taint_Semantics_s.tainted_ocmp@tok",
         "lemma_FStar.FunctionalExtensionality.feq_on_domain",
         "lemma_FStar.List.Tot.Properties.append_l_nil",
+        "lemma_X64.Bytes_Semantics.correct_update_get128",
         "primitive_Prims.op_AmpAmp", "primitive_Prims.op_BarBar",
         "primitive_Prims.op_Equality",
         "primitive_Prims.op_GreaterThanOrEqual",
@@ -1041,6 +1072,7 @@
         "typing_Tm_abs_66926e89e50e2ac69caf858cc1113f07",
         "typing_Tm_abs_728e959e62c634798059835f229c48f4",
         "typing_Tm_abs_fe44d2820bd291cbabc93d338ef2fb23",
+        "typing_X64.Bytes_Semantics_s.__proj__Mkstate__item__mem",
         "typing_X64.Bytes_Semantics_s.__proj__Mkstate__item__ok",
         "typing_X64.Bytes_Semantics_s.eval_maddr",
         "typing_X64.Bytes_Semantics_s.eval_mov128_op",
@@ -1063,7 +1095,11 @@
         "unit_typing"
       ],
       0,
+<<<<<<< HEAD
       "3904525bdc37c1a765dd06eee3d06647"
+=======
+      "45f8bc8483fa13c25b761bf1c14065f5"
+>>>>>>> fstar-master
     ],
     [
       "X64.Leakage_Ins_Xmm.lemma_movdqu_same_public",
@@ -1076,7 +1112,11 @@
         "projection_inverse_FStar.Pervasives.Native.Mktuple2__2"
       ],
       0,
+<<<<<<< HEAD
       "839006834e088434c710cb0b73c18770"
+=======
+      "d509be26180a09292a04a71e0050ac48"
+>>>>>>> fstar-master
     ],
     [
       "X64.Leakage_Ins_Xmm.check_if_movdqu_leakage_free",
@@ -1127,7 +1167,11 @@
         "typing_X64.Taint_Semantics_s.extract_operands"
       ],
       0,
+<<<<<<< HEAD
       "1a8ae160310bd99456ced22cf972ee5c"
+=======
+      "72f0cba3929ac99f631984b57669b148"
+>>>>>>> fstar-master
     ],
     [
       "X64.Leakage_Ins_Xmm.check_if_xmm_ins_consumes_fixed_time",
@@ -1141,7 +1185,11 @@
         "typing_X64.Taint_Semantics_s.is_xmm_ins"
       ],
       0,
+<<<<<<< HEAD
       "892f531347e8d6b8ba775c2d8eb3b3a5"
+=======
+      "59e47143e68f7b57e23d21a9605b9c00"
+>>>>>>> fstar-master
     ]
   ]
 ]

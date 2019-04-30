@@ -1,5 +1,5 @@
 [
-  "‹:8\"WøXŠ°¤Åƒ‚¼\rÂ",
+  "·¦1\u001cØT>L¢Å\u0000\u0012(’5°",
   [
     [
       "Lib.LoopCombinators.repeat_left",
@@ -18,7 +18,7 @@
         "refinement_interpretation_Tm_refine_bfd27ef7426b2a0c6302bf816720e659"
       ],
       0,
-      "a43be7f87f846e8d1dc89a63c449749d"
+      "b1c01788f9132d5e8e5fc99e70841163"
     ],
     [
       "Lib.LoopCombinators.repeat_left_all_ml",
@@ -37,7 +37,7 @@
         "refinement_interpretation_Tm_refine_bfd27ef7426b2a0c6302bf816720e659"
       ],
       0,
-      "76149935805b4c253823cc2f28b00165"
+      "263ddc5f6160a17e97f8f98367e7803a"
     ],
     [
       "Lib.LoopCombinators.repeat_right",
@@ -56,7 +56,7 @@
         "refinement_interpretation_Tm_refine_bfd27ef7426b2a0c6302bf816720e659"
       ],
       0,
-      "b6f2c28d92baf555b120278d3298da97"
+      "ff6b8d8e1458d24790b60d3885916650"
     ],
     [
       "Lib.LoopCombinators.repeat_right_plus",
@@ -75,7 +75,45 @@
         "refinement_interpretation_Tm_refine_bfd27ef7426b2a0c6302bf816720e659"
       ],
       0,
-      "29939771a894b704aa88ad9feb967ad0"
+      "0e89afe49727fc3096bcc4e192044b4d"
+    ],
+    [
+      "Lib.LoopCombinators.unfold_repeat_right",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565",
+        "equation_Prims.nat",
+        "function_token_typing_Prims.__cache_version_number__",
+        "int_inversion", "primitive_Prims.op_Addition",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_5d68b4aedab07e9543c96792e76744c9",
+        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "refinement_interpretation_Tm_refine_bfd27ef7426b2a0c6302bf816720e659"
+      ],
+      0,
+      "84c4719818321add88bf9ec8a264349c"
+    ],
+    [
+      "Lib.LoopCombinators.eq_repeat_right",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565",
+        "equation_Prims.nat",
+        "function_token_typing_Prims.__cache_version_number__",
+        "int_inversion", "primitive_Prims.op_Addition",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_5d68b4aedab07e9543c96792e76744c9",
+        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "refinement_interpretation_Tm_refine_bfd27ef7426b2a0c6302bf816720e659"
+      ],
+      0,
+      "4a87e5fbf3ea31df6d428d23dc7df759"
     ],
     [
       "Lib.LoopCombinators.repeat_left_right",
@@ -94,7 +132,7 @@
         "refinement_interpretation_Tm_refine_bfd27ef7426b2a0c6302bf816720e659"
       ],
       0,
-      "fcba82ec74fc200e9598d308b701a879"
+      "e41941dd76e1bada8b5dcc7897e30959"
     ],
     [
       "Lib.LoopCombinators.repeat_gen",
@@ -112,7 +150,7 @@
         "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-      "1758f69dca99e4c359ed72497b359255"
+      "3419b205b7aa73af5622d68ec1c0286e"
     ],
     [
       "Lib.LoopCombinators.unfold_repeat_gen",
@@ -130,7 +168,25 @@
         "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-      "3540b400e5ae8d6a64f6bff32f2cdb4d"
+      "d4893a0c63faa38168af736fd17a7533"
+    ],
+    [
+      "Lib.LoopCombinators.eq_repeat_gen0",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565",
+        "equation_Prims.nat",
+        "function_token_typing_Prims.__cache_version_number__",
+        "int_inversion", "primitive_Prims.op_Addition",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_5514fbe9e08dfda40f950a7b9f1b2b98",
+        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
+      ],
+      0,
+      "e976a482361e17016667f864b76d5c2c"
     ],
     [
       "Lib.LoopCombinators.unfold_repeati",
@@ -148,7 +204,7 @@
         "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-      "6769ce014f96a42564124217bd9709c5"
+      "21086125151c64f2d9792d0cc166b96e"
     ],
     [
       "Lib.LoopCombinators.eq_repeati0",
@@ -160,7 +216,19 @@
         "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-      "b24616b4284473e17b15878cdc454067"
+      "d3aecf5a44acdf373db9b72643c38924"
+    ],
+    [
+      "Lib.LoopCombinators.repeati_def",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
+        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
+      ],
+      0,
+      "ee9aa0ee82e7701e358b0afced280b9d"
     ],
     [
       "Lib.LoopCombinators.unfold_repeat",
@@ -177,7 +245,7 @@
         "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-      "b0aacd04ce57dd3a289a4f83c5803604"
+      "8527f7f0d52da3976473a73e70f483d4"
     ],
     [
       "Lib.LoopCombinators.repeatable",
@@ -195,7 +263,7 @@
         "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-      "a1f99ad06074963555a90149ac579029"
+      "ec974f46cf57372ec6c1cfcf36f1d98b"
     ],
     [
       "Lib.LoopCombinators.repeat_range_inductive",
@@ -207,7 +275,7 @@
         "refinement_interpretation_Tm_refine_5d68b4aedab07e9543c96792e76744c9"
       ],
       0,
-      "21aa096b8a5b4440f237ed6981a074a0"
+      "c4d4e2c56a1cd44c233e67fa686620d0"
     ],
     [
       "Lib.LoopCombinators.repeati_inductive",
@@ -219,7 +287,7 @@
         "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-      "e16c07538a66a7ad4b7e19700d7cf53e"
+      "e6aef8195a9accb438c9ca23a5c3c13c"
     ],
     [
       "Lib.LoopCombinators.repeati_inductive_repeat_gen",
@@ -231,7 +299,7 @@
         "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-      "337de4c37ec5b146e460855c07fa6ece"
+      "ef3dc3ebd5b0afc285993b2ec47ae0e3"
     ],
     [
       "Lib.LoopCombinators.preserves_predicate",
@@ -249,7 +317,7 @@
         "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-      "28676f7d9ee88b89b707d25507243b94"
+      "09adad0db85fc69e5db0e6c9406537e7"
     ],
     [
       "Lib.LoopCombinators.preserves_predicate",
@@ -266,7 +334,7 @@
         "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-      "03173d546b47b3781a1d7e1402e01143"
+      "f860424c867b550d47ebf43b138a11bc"
     ],
     [
       "Lib.LoopCombinators.repeat_gen_inductive",
@@ -284,7 +352,7 @@
         "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-      "5311a261b9108dc11eb9fe779bc7a87c"
+      "8a720713828968db35ae0424c971023f"
     ],
     [
       "Lib.LoopCombinators.preserves",
@@ -302,7 +370,7 @@
         "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-      "f8645344d4aaf46bd40742a5b12dcea6"
+      "a0a960ee00386f410a10d0c0541b1da6"
     ],
     [
       "Lib.LoopCombinators.repeati_inductive'",
@@ -314,7 +382,7 @@
         "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-      "f79e8d7a79a73773c3718273bb06e3c9"
+      "c9f7390f59194ed3fdfdaebb43722578"
     ]
   ]
 ]

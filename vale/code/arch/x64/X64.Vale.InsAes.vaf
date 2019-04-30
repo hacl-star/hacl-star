@@ -63,7 +63,7 @@ procedure{:quick exportOnly}{:public}
 procedure{:quick exportOnly}{:public}
     {:instruction mk_ins(make_instr(I.ins_VPclmulqdq((if src1Hi then 1 else 0) + (if src2Hi then 16 else 0)), Mov128Xmm(dst), Mov128Xmm(src1), Mov128Xmm(src2)), Public)}
     VPclmulqdq(out dst:xmm, src1:xmm, src2:xmm, inline src1Hi:bool, inline src2Hi:bool)
-    requires pclmulqdq_enabled;
+    requires pclmulqdq_enabled && avx_enabled;
     modifies efl;
     ensures
         dst == old(to_quad32(mul(
@@ -83,7 +83,7 @@ procedure{:instruction Ins(TS.TaintedIns(S.Ins_ioXmm_Xmm(I.ins_AESNI_enc, dst, s
 
 procedure{:instruction mk_ins(make_instr(I.ins_VAESNI_enc, Mov128Xmm(dst), Mov128Xmm(src1), Mov128Xmm(src2)), Public)}{:quick exportOnly}{:public}
     VAESNI_enc(inout dst:xmm, src1:xmm, src2:xmm)
-    requires aesni_enabled;
+    requires aesni_enabled && avx_enabled;
     modifies efl;
     ensures
         dst == old(quad32_xor(mix_columns_LE(sub_bytes(shift_rows_LE(src1))), src2));
@@ -101,7 +101,7 @@ procedure{:instruction Ins(TS.TaintedIns(S.Ins_ioXmm_Xmm(I.ins_AESNI_enc_last, d
 
 procedure{:instruction mk_ins(make_instr(I.ins_VAESNI_enc_last, Mov128Xmm(dst), Mov128Xmm(src1), Mov128Xmm(src2)), Public)}{:quick exportOnly}{:public}
     VAESNI_enc_last(inout dst:xmm, src1:xmm, src2:xmm)
-    requires aesni_enabled;
+    requires aesni_enabled && avx_enabled;
     modifies efl;
     ensures
         dst == old(quad32_xor(sub_bytes(shift_rows_LE(src1)), src2));

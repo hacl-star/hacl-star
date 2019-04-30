@@ -61,7 +61,7 @@ let aes_reqs
   (alg:algorithm) (key:seq nat32) (round_keys:seq quad32) (keys_b:buffer128)
   (key_ptr:int) (mem:memory) (memTaint:memtaint) : prop0
   =
-  aesni_enabled /\
+  aesni_enabled /\ avx_enabled /\
   alg = AES_128 /\
   //(alg = AES_128 || alg = AES_256) /\
   is_aes_key_LE alg key /\
@@ -144,6 +144,7 @@ procedure {:quick} Handle_ctr32(
         efl;
 
     requires
+        avx_enabled;
         T1 == reverse_bytes_quad32(ctr_BE);
     ensures
         inout1 == quad32_xor(reverse_bytes_quad32(inc32lite(ctr_BE, 1)), rndkey);
@@ -894,6 +895,7 @@ procedure {:quick} Loop6x_save_output(
 
     requires
         // Valid ptrs and buffers
+        avx_enabled;
         validDstAddrsOffset128(mem, outp - 0x60, out_b, count*6, 6, memTaint, Secret);
 
     ensures

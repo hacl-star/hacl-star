@@ -200,7 +200,10 @@ let test_aead_st alg key key_len iv iv_len aad aad_len tag tag_len plaintext pla
 
   let wh = AC.wants_hacl () in
   let wo = AC.wants_openssl () in
-
+  if not (AC.has_avx ())
+  then
+    C.String.print !$"skipping test_aead_st, avx not present\n"
+  else
   if alg = Spec.AEAD.CHACHA20_POLY1305 && (not wh) && (not wo) then
     C.String.print !$"Warning: skipping test_aead_st/chachapoly poly1305 because HACL and OpenSSL both disabled\n"
   else if not (
@@ -356,6 +359,7 @@ let test_dh () : St unit =
   // TODO supposed to use tactics now?
   ()
 
+#reset-options "--z3rlimit 40"
 inline_for_extraction
 noextract
 let test_all_body (print: C.String.t -> St unit) : St unit =
@@ -383,83 +387,96 @@ let test_all_body (print: C.String.t -> St unit) : St unit =
     test_chacha20 chacha20_vectors_low;
     print !$"  >>>>>>>>> AEAD (ChachaPoly vectors)\n";
     test_chacha20poly1305 ()
-
-type hacl_opt = | AVX | AVX2
+#reset-options
 
 inline_for_extraction
-type platform = | Vale | HACL of option hacl_opt | OpenSSL | BCrypt
+type platform = | Vale | HACL | OpenSSL | BCrypt
 
 inline_for_extraction
 noextract
-let config_ok (p: platform) : St bool =
+let static_config_ok (p: platform) : St bool =
   match p with
   | Vale -> EverCrypt.StaticConfig.vale
-  | HACL v -> 
-    if EverCrypt.StaticConfig.hacl
-    then begin match v with
-    | Some AVX2 -> AC.has_avx2 ()
-    | Some AVX -> AC.has_avx ()
-    | _ -> true
-    end
-    else false
+  | HACL -> EverCrypt.StaticConfig.hacl
   | OpenSSL -> EverCrypt.StaticConfig.openssl
   | BCrypt -> EverCrypt.StaticConfig.bcrypt
 
 inline_for_extraction
 noextract
-let print_platform (p: platform) : St unit =
-  match p with
-  | Vale -> C.String.print !$"VALE"
-  | HACL None -> C.String.print !$"HACL"
-  | HACL (Some AVX) -> C.String.print !$"HACL AVX"
-  | HACL (Some AVX2) -> C.String.print !$"HACL AVX2"
-  | OpenSSL -> C.String.print !$"OpenSSL"
-  | BCrypt -> C.String.print !$"BCrypt"
+let print_config (p: platform) (avx avx2: bool) : St unit =
+  begin match p with
+  | Vale -> C.String.print !$"VALE "
+  | HACL -> C.String.print !$"HACL "
+  | OpenSSL -> C.String.print !$"OpenSSL "
+  | BCrypt -> C.String.print !$"BCrypt "
+  end;
+  (if avx then C.String.print !$"AVX ");
+  (if avx2 then C.String.print !$"AVX2 ")
+
+#push-options "--z3rlimit 16"
 
 inline_for_extraction
 noextract
-let set_autoconfig (p: platform) : St unit =
+let test_all_on_config (p: platform) (avx avx2: bool) : St unit =
+  C.String.print !$"=================================================\n";
+  print_config p avx avx2;
+  C.String.print !$"\n";
   AC.init ();
-  (if p <> Vale then AC.disable_vale ());
-  (if not (HACL? p) then AC.disable_hacl ());
-  (if p <> HACL (Some AVX) then AC.disable_avx ());
-  (if p <> HACL (Some AVX2) then AC.disable_avx2 ());
-  (if p <> OpenSSL then AC.disable_openssl ());
-  (if p <> BCrypt then AC.disable_bcrypt ());
-  let wants_vale = AC.wants_vale () in
-  let wants_hacl = AC.wants_hacl () in
-  let wants_avx = AC.has_avx () in
-  let wants_avx2 = AC.has_avx2 () in
-  let wants_openssl = AC.wants_openssl () in
-  let wants_bcrypt = AC.wants_bcrypt () in
-  if not (
-    (wants_vale = (p = Vale)) &&
-    (wants_hacl = (HACL? p)) &&
-    (wants_avx = (p = (HACL (Some AVX)))) &&
-    (wants_avx2 = (p = (HACL (Some AVX2)))) &&
-    (wants_openssl = (p = OpenSSL)) &&
-    (wants_bcrypt = (p = BCrypt))
-  )
+  let has_avx = AC.has_avx () in
+  let has_avx2 = AC.has_avx2 () in
+  if avx && not has_avx
   then
-    C.Failure.failwith !$"autoconfig is inconsistent"
+    C.String.print !$"skipping, AVX wanted but not present\n"
+  else if avx2 && not has_avx2
+  then
+    C.String.print !$"skipping, AVX2 wanted but not present\n"
+  else if not (static_config_ok p)
+  then
+    C.String.print !$"skipping, not in static config\n"
+  else begin
+    (if p <> Vale then AC.disable_vale ());
+    (if p <> HACL then AC.disable_hacl ());
+    (if p <> OpenSSL then AC.disable_openssl ());
+    (if p <> BCrypt then AC.disable_bcrypt ());
+    (if not avx then AC.disable_avx ());
+    (if not avx2 then AC.disable_avx2 ());
+    let wants_vale = AC.wants_vale () in
+    let wants_hacl = AC.wants_hacl () in
+    let wants_openssl = AC.wants_openssl () in
+    let wants_bcrypt = AC.wants_bcrypt () in 
+    let wants_avx = AC.has_avx () in
+    let wants_avx2 = AC.has_avx2 () in
+    if not (
+      (wants_vale = (p = Vale)) &&
+      (wants_hacl = (p = HACL)) &&
+      (wants_openssl = (p = OpenSSL)) &&
+      (wants_bcrypt = (p = BCrypt)) &&
+      (wants_avx = avx) &&
+      (wants_avx2 = avx2)
+    )
+    then
+      C.Failure.failwith !$"autoconfig is inconsistent"
+    else
+      test_all_body (fun s -> print_config p avx avx2; C.String.print s)
+  end
+
+#pop-options
+
+inline_for_extraction
+noextract
+let test_all_on_platform_avx (p: platform) (avx: bool) : St unit =
+  test_all_on_config p avx false;
+  test_all_on_config p avx true
 
 inline_for_extraction
 noextract
 let test_all_on_platform (p: platform) : St unit =
-  print_platform p;
-  C.String.print !$"=================================================\n";
-  AC.init ();
-  if not (config_ok p)
-  then C.String.print !$"skipping, not in static config or has_...\n"
-  else begin
-    test_all_body (fun s -> set_autoconfig p; print_platform p; C.String.print s)
-  end
+  test_all_on_platform_avx p false;
+  test_all_on_platform_avx p true
 
 let test_all () : St unit =
   test_all_on_platform Vale;
-  test_all_on_platform (HACL None);
-  test_all_on_platform (HACL (Some AVX));
-  test_all_on_platform (HACL (Some AVX2));
+  test_all_on_platform HACL;
   test_all_on_platform OpenSSL;
   test_all_on_platform BCrypt
 

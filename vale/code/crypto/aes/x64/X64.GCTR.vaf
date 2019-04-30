@@ -271,7 +271,7 @@ procedure {:quick} gctr_core_opt(
         buffer_length(in_b) == buffer_length(out_b) /\ 256 * buffer_length(in_b) < pow2_32;
 
         // AES reqs
-        aesni_enabled;
+        aesni_enabled && avx_enabled;
         alg = AES_128 || alg = AES_256;
         is_aes_key_LE(alg, key);
         length(round_keys) == nr(alg) + 1;
@@ -569,7 +569,7 @@ procedure {:quick} gctr_bytes(
         num_blocks * 128/8 <= plain_num_bytes < num_blocks * 128/8 + 128/8;
 
         // AES reqs
-        aesni_enabled;
+        aesni_enabled && avx_enabled;
         alg = AES_128 || alg = AES_256;
         is_aes_key_LE(alg, key);
         length(round_keys) == nr(alg) + 1;

@@ -505,7 +505,7 @@ val fmul_r2_normalize50:
       felem_fits5 acc (2, 3, 2, 2, 2) /\
       felem_fits5 r (1, 1, 1, 1, 1) /\
       felem_fits5 r2 (1, 2, 1, 1, 1) /\
-      feval5 r2 == S.compute_r2 (feval5 r))
+      feval5 r2 == S.compute_r2 (feval5 r).[0])
     (ensures (fun a ->
       let fr21 = create2 (feval5 r2).[0] (feval5 r).[0] in
       feval5 a == S.fmul (feval5 acc) fr21 /\
@@ -589,11 +589,11 @@ val fmul_r2_normalize5_lemma:
       felem_fits5 acc (2, 3, 2, 2, 2) /\
       felem_fits5 r (1, 1, 1, 1, 1) /\
       felem_fits5 r2 (1, 2, 1, 1, 1) /\
-      feval5 r2 == S.compute_r2 (feval5 r))
+      feval5 r2 == S.compute_r2 (feval5 r).[0])
     (ensures (
       let out = fmul_r2_normalize5 acc r r2 in
       acc_inv_t out /\
-      (feval5 out).[0] == S.normalize_2 (feval5 acc) (feval5 r)))
+      (feval5 out).[0] == S.normalize_2 (feval5 acc) (feval5 r).[0]))
   [SMTPat (fmul_r2_normalize5 acc r r2)]
 let fmul_r2_normalize5_lemma acc r r2 =
   let a = fmul_r2_normalize50 acc r r2 in
@@ -635,7 +635,7 @@ val fmul_r4_normalize50:
       felem_fits5 r4 (1, 2, 1, 1, 1) /\
       feval5 r2 == S.fmul (feval5 r) (feval5 r) /\
       feval5 r3 == S.fmul (feval5 r2) (feval5 r) /\
-      feval5 r4 == S.compute_r4 (feval5 r))
+      feval5 r4 == S.compute_r4 (feval5 r).[0])
     (ensures (fun out ->
       let fr4321 = create4 (feval5 r4).[0] (feval5 r3).[0] (feval5 r2).[0] (feval5 r).[0] in
       feval5 out == S.fmul (feval5 acc) fr4321 /\
@@ -804,11 +804,11 @@ val fmul_r4_normalize5_lemma:
       felem_fits5 r (1, 1, 1, 1, 1) /\
       felem_fits5 r4 (1, 2, 1, 1, 1) /\
       r_5 == precomp_r5 r /\
-      feval5 r4 == S.compute_r4 (feval5 r))
+      feval5 r4 == S.compute_r4 (feval5 r).[0])
     (ensures (
       let out = fmul_r4_normalize5 acc r r_5 r4 in
       acc_inv_t out /\
-      (feval5 out).[0] == S.normalize_4 (feval5 acc) (feval5 r)))
+      (feval5 out).[0] == S.normalize_4 (feval5 acc) (feval5 r).[0]))
   [SMTPat (fmul_r4_normalize5 acc r r_5 r4)]
 let fmul_r4_normalize5_lemma acc fr fr_5 fr4 =
   let fr2 = fmul_r5 fr fr fr_5 in
@@ -846,6 +846,54 @@ let load_felem5_lemma #w lo hi =
     load_felem5_lemma_i #w lo hi 2;
     load_felem5_lemma_i #w lo hi 3;
     eq_intro (feval5 f) res
+
+val load_acc5_2_lemma:
+    f:felem5 2{felem_fits5 f (1, 2, 1, 1, 1)}
+  -> e:felem5 2{felem_fits5 e (1, 1, 1, 1, 1)}
+  -> Lemma
+    (let res = load_acc5_2 f e in
+    felem_fits5 res (2, 3, 2, 2, 2) /\
+    feval5 res == S.fadd (create2 (feval5 f).[0] 0) (feval5 e))
+    [SMTPat (load_acc5_2 f e)]
+let load_acc5_2_lemma f e =
+  let (f0, f1, f2, f3, f4) = f in
+  let r0 = vec_set f0 1ul (u64 0) in
+  let r1 = vec_set f1 1ul (u64 0) in
+  let r2 = vec_set f2 1ul (u64 0) in
+  let r3 = vec_set f3 1ul (u64 0) in
+  let r4 = vec_set f4 1ul (u64 0) in
+  let r = (r0, r1, r2, r3, r4) in
+  assert ((feval5 r).[0] == (feval5 f).[0]);
+  assert ((feval5 r).[1] == 0);
+  eq_intro (feval5 r) (create2 (feval5 f).[0] 0)
+
+inline_for_extraction noextract
+val load_acc5_4_lemma:
+    f:felem5 4{felem_fits5 f (1, 2, 1, 1, 1)}
+  -> e:felem5 4{felem_fits5 e (1, 1, 1, 1, 1)}
+  -> Lemma
+    (let res = load_acc5_4 f e in
+    felem_fits5 res (2, 3, 2, 2, 2) /\
+    feval5 res == S.fadd (create4 (feval5 f).[0] 0 0 0) (feval5 e))
+    [SMTPat (load_acc5_4 f e)]
+let load_acc5_4_lemma f e =
+  let (f0, f1, f2, f3, f4) = f in
+  let (r0, r1, r2, r3, r4) = (zero 4, zero 4, zero 4, zero 4, zero 4) in
+  let r = (r0, r1, r2, r3, r4) in
+  assert ((feval5 r).[1] == 0);
+  assert ((feval5 r).[2] == 0);
+  assert ((feval5 r).[3] == 0);
+  let r0 = vec_set r0 0ul (vec_get f0 0ul) in
+  let r1 = vec_set r1 0ul (vec_get f1 0ul) in
+  let r2 = vec_set r2 0ul (vec_get f2 0ul) in
+  let r3 = vec_set r3 0ul (vec_get f3 0ul) in
+  let r4 = vec_set r4 0ul (vec_get f4 0ul) in
+  let r = (r0, r1, r2, r3, r4) in
+  assert ((feval5 r).[0] == (feval5 f).[0]);
+  assert ((feval5 r).[1] == 0);
+  assert ((feval5 r).[2] == 0);
+  assert ((feval5 r).[3] == 0);
+  eq_intro (feval5 r) (create4 (feval5 f).[0] 0 0 0)
 
 val store_felem5_lemma:
     #w:lanes

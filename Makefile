@@ -349,10 +349,12 @@ vale-fst: $(VALE_FSTS)
 
 # A litany of file-specific options, replicating exactly what was in SConstruct
 # before. TODO simplification would be good.
+USE_EXTRACTED_INTERFACES?=true
+
 VALE_FSTAR_FLAGS_NOSMT=--z3cliopt smt.arith.nl=false \
   --z3cliopt smt.QI.EAGER_THRESHOLD=100 --z3cliopt smt.CASE_SPLIT=3 \
   --max_fuel 1 --max_ifuel 1 \
-  --initial_ifuel 0 --use_extracted_interfaces true
+  --initial_ifuel 0 --use_extracted_interfaces $(USE_EXTRACTED_INTERFACES)
 
 VALE_FSTAR_FLAGS=$(VALE_FSTAR_FLAGS_NOSMT) \
   --smtencoding.elim_box true --smtencoding.l_arith_repr native \
@@ -463,6 +465,9 @@ obj/Fsqr_inline.fst.checked: \
 
 obj/Vale.Stdcalls.GCMencrypt.fst.checked: \
   FSTAR_FLAGS=$(VALE_FSTAR_FLAGS)
+
+obj/Vale.Stdcalls.GCMencryptOpt.fst.checked: \
+  USE_EXTRACTED_INTERFACES=false
 
 obj/Vale.Stdcalls.GCMencryptOpt.fst.checked: \
   FSTAR_FLAGS=$(VALE_FSTAR_FLAGS)
@@ -704,6 +709,7 @@ COMPACT_FLAGS	=\
   -bundle Hacl.Impl.Chacha20=Hacl.Impl.Chacha20.*[rename=Hacl_Chacha20] \
   -bundle Hacl.Curve25519_51+Hacl.Curve25519_64=Hacl.Impl.Curve25519.*[rename=Hacl_Curve25519] \
   -bundle Hacl.Impl.Chacha20Poly1305=Hacl.Impl.Chacha20Poly1305.*[rename=Hacl_Chacha20Poly1305] \
+  -bundle 'Hacl.Ed25519=Hacl.Impl.Ed25519.*,Hacl.Impl.BignumQ.Mul,Hacl.Impl.Load56,Hacl.Impl.SHA512.ModQ,Hacl.Impl.Store56,Hacl.Bignum25519' \
   -bundle LowStar.* \
   -bundle Prims,C.Failure,C,C.String,C.Loops,Spec.Loops,C.Endianness,FStar.*[rename=Hacl_Kremlib] \
   -bundle 'EverCrypt.Spec.*' \
@@ -728,8 +734,7 @@ old-%:
 
 # This is all legacy. Some notes:
 HACL_OLD_FILES=\
-  code/old/experimental/aesgcm/aesgcm-c/Hacl_AES.c \
-  code/old/ed25519/ed25519-c/Hacl_Ed25519.c
+  code/old/experimental/aesgcm/aesgcm-c/Hacl_AES.c
 
 dist/compact/Makefile.basic: KRML_EXTRA=$(COMPACT_FLAGS)
 

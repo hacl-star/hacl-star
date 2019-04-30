@@ -94,7 +94,7 @@ let aes_reqs
   (alg:algorithm) (key:seq nat32) (round_keys:seq quad32) (keys_b:buffer128)
   (key_ptr:int) (mem:memory) (memTaint:memtaint) : prop0
   =
-  aesni_enabled /\
+  aesni_enabled /\ avx_enabled /\
   (alg = AES_128 \/ alg = AES_256) /\
   is_aes_key_LE alg key /\
   length(round_keys) == nr(alg) + 1 /\
@@ -359,7 +359,7 @@ procedure {:quick} gcm_auth_bytes(
         validSrcAddrs128(mem, auth_ptr,  auth_b,  auth_len, memTaint, Secret);
         auth_ptr  + 16 * auth_len  < pow2_64;
         buffer_length(auth_b) == auth_len;
-        pclmulqdq_enabled;
+        pclmulqdq_enabled && avx_enabled;
 
         mask == Mkfour(0x0C0D0E0F, 0x08090A0B, 0x04050607, 0x00010203);
     ensures

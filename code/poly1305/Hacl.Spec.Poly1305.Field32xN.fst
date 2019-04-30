@@ -374,6 +374,35 @@ let load_felem5 #w lo hi =
   (f0, f1, f2, f3, f4)
 
 inline_for_extraction noextract
+val load_acc5_2:
+    f:felem5 2
+  -> e:felem5 2
+  -> out:felem5 2
+let load_acc5_2 (f0, f1, f2, f3, f4) (e0, e1, e2, e3, e4) =
+  let f0 = vec_set f0 1ul (u64 0) in
+  let f1 = vec_set f1 1ul (u64 0) in
+  let f2 = vec_set f2 1ul (u64 0) in
+  let f3 = vec_set f3 1ul (u64 0) in
+  let f4 = vec_set f4 1ul (u64 0) in
+  let (f0, f1, f2, f3, f4) = fadd5 (f0, f1, f2, f3, f4) (e0, e1, e2, e3, e4) in
+  (f0, f1, f2, f3, f4)
+
+inline_for_extraction noextract
+val load_acc5_4:
+    f:felem5 4
+  -> e:felem5 4
+  -> out:felem5 4
+let load_acc5_4 (f0, f1, f2, f3, f4) (e0, e1, e2, e3, e4) =
+  let (r0, r1, r2, r3, r4) = (zero 4, zero 4, zero 4, zero 4, zero 4) in
+  let r0 = vec_set r0 0ul (vec_get f0 0ul) in
+  let r1 = vec_set r1 0ul (vec_get f1 0ul) in
+  let r2 = vec_set r2 0ul (vec_get f2 0ul) in
+  let r3 = vec_set r3 0ul (vec_get f3 0ul) in
+  let r4 = vec_set r4 0ul (vec_get f4 0ul) in
+  let (f0, f1, f2, f3, f4) = fadd5 (r0, r1, r2, r3, r4) (e0, e1, e2, e3, e4) in
+  (f0, f1, f2, f3, f4)
+
+inline_for_extraction noextract
 val store_felem5:
     #w:lanes
   -> f:felem5 w

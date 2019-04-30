@@ -729,6 +729,7 @@ let eval_ins (ins:ins) : st unit =
     update_xmm_preserve_flags dst (quad32_xor (eval_xmm dst s) (eval_xmm src s))
 
   |VPxor dst src1 src2 ->
+    check_imm avx_enabled;;
     check (valid_src_mov128_op src2);;
     update_xmm_preserve_flags dst (quad32_xor (eval_xmm src1 s) (eval_mov128_op src2 s))
 

@@ -376,6 +376,7 @@ let rec stack_of_args_stack_args'_aux
         frame_update_valid_heap fixed v stack ptr
      )
      
+#push-options "--max_fuel 1 --max_ifuel 0 --z3rlimit 100 --z3refresh"
 let rec stack_of_args_stack_args'
     (max_arity:nat)
     (n:nat)
@@ -384,9 +385,10 @@ let rec stack_of_args_stack_args'
     (let mem = Map.const_on Set.empty 0 in
     stack_args' max_arity n args init_rsp (IX64.stack_of_args max_arity n init_rsp args mem))
     =
-    let rec aux (args:IX64.arg_list) (accu:Map.t int Words_s.nat8) : Lemma (
+    let rec aux (args:IX64.arg_list) (accu:Map.t int Words_s.nat8) : Lemma (ensures (
       stack_args' max_arity (List.length args) args init_rsp 
-        (IX64.stack_of_args max_arity (List.length args) init_rsp args accu))
+        (IX64.stack_of_args max_arity (List.length args) init_rsp args accu)))
+      (decreases (List.length args))
       = match args with
       | [] -> ()
       | hd::tl ->
@@ -409,6 +411,7 @@ let rec stack_of_args_stack_args'
         
 
     in aux args (Map.const_on Set.empty 0)
+#pop-options
 
 let core_create_lemma_stack_args
     (#max_arity:nat)
