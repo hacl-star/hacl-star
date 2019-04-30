@@ -11,6 +11,180 @@ let rec has_mem_operand = function
   | [] -> false
   | a::q -> if OMem? a then true else has_mem_operand q
 
+let rec check_if_consumes_fixed_time_args
+    (args:list instr_operand) (oprs:instr_operands_t_args args) (ts:taintState)
+  : Pure bool
+    (requires True)
+    (ensures fun b -> b ==> (forall (s1 s2:traceState).{:pattern (constTimeInvariant ts s1 s2)}
+      constTimeInvariant ts s1 s2 ==> obs_args args oprs s1 == obs_args args oprs s2))
+  =
+  match args with
+  | [] -> true
+  | (IOpEx i)::args ->
+    let ((o:instr_operand_t i), (oprs:instr_operands_t_args args)) = coerce oprs in
+    let b' =
+      match i with
+      | IOp64 ->
+        let o = match coerce o with | OMem _ | OStack _ -> o | _ -> o in // REVIEW: this avoids extra ifuel, but it leads to a lot of duplicate code
+        operand_does_not_use_secrets o ts
+      | IOpXmm ->
+        let o = match coerce o with | Mov128Mem _ | Mov128Stack _ | _ -> o in
+        operand128_does_not_use_secrets o ts
+      in
+    let b'' = check_if_consumes_fixed_time_args args oprs ts in
+    b' && b''
+  | (IOpIm i)::args ->
+    let b' =
+      match i with
+      | IOp64One o ->
+        let o = match coerce o with | OMem _ | OStack _ -> o | _ -> o in
+        operand_does_not_use_secrets o ts
+      | IOpXmmOne o ->
+        let o = match coerce o with | Mov128Mem _ | Mov128Stack _ | _ -> o in
+        operand128_does_not_use_secrets o ts
+      | IOpFlagsCf -> true
+      | IOpFlagsOf -> true
+      in
+    let b'' = check_if_consumes_fixed_time_args args (coerce oprs) ts in
+    b' && b''
+
+let rec check_if_consumes_fixed_time_outs
+    (outs:list instr_out) (args:list instr_operand) (oprs:instr_operands_t outs args) (ts:taintState)
+  : Pure bool
+    (requires True)
+    (ensures fun b -> b ==> (forall (s1 s2:traceState).{:pattern (constTimeInvariant ts s1 s2)}
+      constTimeInvariant ts s1 s2 ==> obs_inouts outs args oprs s1 == obs_inouts outs args oprs s2))
+  =
+  match outs with
+  | [] -> check_if_consumes_fixed_time_args args oprs ts
+  | (_, IOpEx i)::outs ->
+    let ((o:instr_operand_t i), (oprs:instr_operands_t outs args)) = coerce oprs in
+    let b' =
+      match i with
+      | IOp64 ->
+        let o = match coerce o with | OMem _ | OStack _ -> o | _ -> o in
+        operand_does_not_use_secrets o ts
+      | IOpXmm ->
+        let o = match coerce o with | Mov128Mem _ | Mov128Stack _ | _ -> o in
+        operand128_does_not_use_secrets o ts
+      in
+    let b'' = check_if_consumes_fixed_time_outs outs args oprs ts in
+    b' && b''
+  | (_, IOpIm i)::outs ->
+    let b' =
+      match i with
+      | IOp64One o ->
+        let o = match coerce o with | OMem _ | OStack _ -> o | _ -> o in
+        operand_does_not_use_secrets o ts
+      | IOpXmmOne o ->
+        let o = match coerce o with | Mov128Mem _ | Mov128Stack _ | _ -> o in
+        operand128_does_not_use_secrets o ts
+      | IOpFlagsCf -> true
+      | IOpFlagsOf -> true
+      in
+    let b'' = check_if_consumes_fixed_time_outs outs args (coerce oprs) ts in
+    b' && b''
+
+#reset-options "--z3rlimit 100"
+let rec lemma_args_taint
+    (outs:list instr_out) (args:list instr_operand)
+    (f:instr_args_t outs args) (oprs:instr_operands_t_args args)
+    (ts:taintState) (t_ins:taint) (s1 s2:traceState)
+  : Lemma
+    (requires
+      constTimeInvariant ts s1 s2 /\
+      taint_match_args args oprs t_ins s1.memTaint s1.state /\
+      taint_match_args args oprs t_ins s2.memTaint s2.state /\
+      Some? (S.instr_apply_eval_args outs args f oprs s1.state) /\
+      Some? (S.instr_apply_eval_args outs args f oprs s2.state) /\
+      check_if_consumes_fixed_time_args args oprs ts /\
+      args_taint args oprs ts t_ins == Public)
+    (ensures
+      S.instr_apply_eval_args outs args f oprs s1.state ==
+      S.instr_apply_eval_args outs args f oprs s2.state)
+  =
+  match args with
+  | [] -> ()
+  | i::args ->
+    let i = (match i with | IOpIm (IOpXmmOne _) | IOpIm (IOp64One _) | _ -> i) in // REVIEW: hack to avoid extra ifuel
+    let (v1, v2, oprs) : option (instr_val_t i) & option (instr_val_t i) & instr_operands_t_args args =
+      match i with
+      | IOpEx i ->
+        let oprs = coerce oprs in (
+          S.instr_eval_operand_explicit i (fst oprs) s1.state,
+          S.instr_eval_operand_explicit i (fst oprs) s2.state,
+          snd oprs)
+      | IOpIm i ->
+        let oprs = coerce oprs in (
+          S.instr_eval_operand_implicit i s1.state,
+          S.instr_eval_operand_implicit i s2.state,
+          oprs)
+      in
+    let f:arrow (instr_val_t i) (instr_args_t outs args) = coerce f in
+    Opaque_s.reveal_opaque S.get_heap_val32_def;
+    Opaque_s.reveal_opaque S.get_heap_val64_def;
+    Opaque_s.reveal_opaque S.get_heap_val128_def;
+    assert (v1 == v2);
+    let Some v = v1 in
+    lemma_args_taint outs args (f v) oprs ts t_ins s1 s2
+
+let rec lemma_inouts_taint
+    (outs inouts:list instr_out) (args:list instr_operand)
+    (f:instr_inouts_t outs inouts args) (oprs:instr_operands_t inouts args)
+    (ts:taintState) (t_ins:taint) (s1 s2:traceState)
+  : Lemma
+    (requires
+      constTimeInvariant ts s1 s2 /\
+      taint_match_inouts inouts args oprs t_ins s1.memTaint s1.state /\
+      taint_match_inouts inouts args oprs t_ins s2.memTaint s2.state /\
+      Some? (S.instr_apply_eval_inouts outs inouts args f oprs s1.state) /\
+      Some? (S.instr_apply_eval_inouts outs inouts args f oprs s2.state) /\
+      check_if_consumes_fixed_time_outs inouts args oprs ts /\
+      inouts_taint inouts args oprs ts t_ins == Public)
+    (ensures
+      S.instr_apply_eval_inouts outs inouts args f oprs s1.state ==
+      S.instr_apply_eval_inouts outs inouts args f oprs s2.state)
+  =
+  match inouts with
+  | [] -> lemma_args_taint outs args f oprs ts t_ins s1 s2
+  | (Out, i)::inouts ->
+    let oprs =
+      match i with
+      | IOpEx i -> snd #(instr_operand_t i) (coerce oprs)
+      | IOpIm i -> coerce oprs
+      in
+    lemma_inouts_taint outs inouts args (coerce f) oprs ts t_ins s1 s2
+  | (InOut, i)::inouts ->
+    let i = (match i with | IOpIm (IOpXmmOne _) | IOpIm (IOp64One _) | _ -> i) in // REVIEW: hack to avoid extra ifuel
+    let (v1, v2, oprs) : option (instr_val_t i) & option (instr_val_t i) & instr_operands_t inouts args =
+      match i with
+      | IOpEx i ->
+        let oprs = coerce oprs in (
+          S.instr_eval_operand_explicit i (fst oprs) s1.state,
+          S.instr_eval_operand_explicit i (fst oprs) s2.state,
+          snd oprs)
+      | IOpIm i ->
+        let oprs = coerce oprs in (
+          S.instr_eval_operand_implicit i s1.state,
+          S.instr_eval_operand_implicit i s2.state,
+          oprs)
+      in
+    let f:arrow (instr_val_t i) (instr_inouts_t outs inouts args) = coerce f in
+    Opaque_s.reveal_opaque S.get_heap_val32_def;
+    Opaque_s.reveal_opaque S.get_heap_val64_def;
+    Opaque_s.reveal_opaque S.get_heap_val128_def;
+    assert (v1 == v2);
+    let Some v = v1 in
+    lemma_inouts_taint outs inouts args (f v) oprs ts t_ins s1 s2
+
+let check_if_instr_consumes_fixed_time (ins:tainted_ins) (ts:taintState) : Pure (bool & taintState)
+  (requires S.Instr? ins.i)
+  (ensures ins_consumes_fixed_time ins ts)
+  =
+  let S.Instr outs args havoc_flags iins oprs = ins.i in
+  let b = check_if_consumes_fixed_time_outs outs args oprs ts in
+  (b, ts)
+
 #reset-options "--initial_ifuel 2 --max_ifuel 2 --initial_fuel 4 --max_fuel 4 --z3rlimit 80"
 
 let check_if_ins_consumes_fixed_time ins ts =

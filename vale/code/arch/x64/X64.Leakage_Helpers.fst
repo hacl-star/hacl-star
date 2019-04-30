@@ -102,6 +102,11 @@ let operand_does_not_use_secrets op ts =
   | OConst _ | OReg _ -> true 
   | OMem m | OStack m -> maddr_does_not_use_secrets m ts
 
+let operand128_does_not_use_secrets (op:mov128_op) (ts:taintState) : bool =
+  match op with
+  | Mov128Xmm _ -> true 
+  | Mov128Mem m | Mov128Stack m -> maddr_does_not_use_secrets m ts
+
 val lemma_operand_obs:  (ts:taintState) ->  (dst:operand) -> (s1 : traceState) -> (s2:traceState) -> Lemma ((operand_does_not_use_secrets dst ts) /\ publicValuesAreSame ts s1 s2 ==> (operand_obs s1 dst) = (operand_obs s2 dst))
 
 #reset-options "--initial_ifuel 2 --max_ifuel 2 --initial_fuel 4 --max_fuel 4 --z3rlimit 20"
