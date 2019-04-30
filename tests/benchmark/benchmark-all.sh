@@ -1,5 +1,25 @@
 #!/bin/bash
 
+nob_cpus() {
+	echo "[+] Setting non-boot CPUs to status $1"
+	for i in /sys/devices/system/cpu/*/online; do
+		echo "$1" > "$i"
+	done
+}
+
+noturbo() {
+	echo "[+] Setting no-turbo to status $1"
+	if [[ -e /sys/devices/system/cpu/intel_pstate/no_turbo ]]; then
+		echo "$1" > /sys/devices/system/cpu/intel_pstate/no_turbo
+	else
+		local val
+		[[ $1 == 0 ]] && val=0x850089
+		[[ $1 == 1 ]] && val=0x4000850089
+		[[ -n $val ]] || return 0
+		wrmsr -a 0x1a0 $val
+	fi
+}
+
 OPENSSL=openssl-1.1.1b
 PAR=-j20
 CONFIGS="gcc-7,g++-7,compact-gcc gcc-8,g++-8,compact-gcc clang-7,clang++-7,compact-gcc clang-8,clang++-8,compact-gcc"
@@ -14,6 +34,11 @@ if [ "$(expr substr $(uname -s) 1 6)" == "CYGWIN" ]; then
   OPENSSL_CFLAGS+=" -fno-asynchronous-unwind-tables"
   CONFIGS="x86_64-w64-mingw32-gcc,x86_64-w64-mingw32-g++,compact-gcc"
   CMAKE_EXTRA="-DCMAKE_AR=/usr/bin/x86_64-w64-mingw32-ar.exe -DUSE_BCRYPT=ON"
+else
+  if [ "`whoami`" != "root" ]; then
+    echo Need root access to disable cpus and turbos!
+    exit 1
+  fi
 fi
 
 # KREMLIN_INC=$KREMLIN_HOME/include
@@ -72,6 +97,9 @@ for c in $CONFIGS; do
       echo "(Re-)building evercrypt-$CC using $OCONF-$CC"
       make $PAR >> build.log 2>&1
       echo "Running benchmarks for evercrypt-$CC using $OCONF-$CC"
+      trap "nob_cpus 1; noturbo 0;" INT TERM EXIT
+        noturbo 1
+        nob_cpus 0
       (./runbenchmark -n $SAMPLES) >> run.log 2>&1
       popd > /dev/null
     done
