@@ -36,7 +36,7 @@ if [ "$(expr substr $(uname -s) 1 6)" == "CYGWIN" ]; then
   CMAKE_EXTRA="-DCMAKE_AR=/usr/bin/x86_64-w64-mingw32-ar.exe -DUSE_BCRYPT=ON"
 else
   if [ "`whoami`" != "root" ]; then
-    echo Need root access to disable cpus and turbos!
+    echo Need root access to disable CPUs and Turbo Boost!
     exit 1
   fi
 fi
