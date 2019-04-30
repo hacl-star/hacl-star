@@ -4,7 +4,7 @@ open FStar.Mul
 open Lib.IntTypes
 open Lib.LoopCombinators
 
-#set-options "--z3rlimit 15"
+#set-options "--z3rlimit 30 --max_ifuel 0 --max_fuel 0"
 
 let index #a #len s n = Seq.index s n
 
@@ -76,12 +76,16 @@ let createi_step (a:Type) (len:size_nat) (init:(i:nat{i < len} -> a)) (i:nat{i <
   assert (createi_pred a len init i si ==> (forall (j:nat). j < i ==> index si j == init j));
   Seq.snoc si (init i)
 
+#push-options "--max_fuel 1"
+
 let createi #a len init_f =
   repeat_gen_inductive len
     (createi_a a len init_f)
     (createi_pred a len init_f)
     (createi_step a len init_f)
     (of_list [])
+
+#pop-options
 
 inline_for_extraction
 let mapi_inner (#a:Type) (#b:Type) (#len:size_nat)
@@ -224,8 +228,6 @@ let map_blocks_inner #a (bs:size_nat{bs > 0}) (nb:nat)
 			(i:nat{i < nb}) () =
   (), f i (Seq.slice inp (i*bs) ((i+1)*bs))
 
-#set-options "--z3rlimit 200 --max_ifuel 2"
-
 let map_blocks_multi #a blocksize nb inp f =
   assert (length inp == nb * blocksize);
   assert (length inp / blocksize == nb * blocksize / blocksize);
@@ -245,7 +247,6 @@ let map_blocks #a blocksize inp f g =
     Seq.append bs (g nb rem last)
   else bs
 
-#set-options "--z3rlimit 50 --max_ifuel 2"
 let eq_generate_blocks0 #t len n a f acc0 =
   let a0  = (acc0, (Seq.empty <: s:seq t{length s == 0 * len}))  in
   assert (generate_blocks #t len n 0 a f acc0 ==
@@ -260,6 +261,33 @@ let unfold_generate_blocks #t len n a f acc0 i =
   unfold_repeat_gen (i+1) (generate_blocks_a t len n a) (generate_blocks_inner t len n a f) a0 i;
   ()
 
+private
+val mod_prop: n:pos -> a:nat -> b:nat{a * n <= b /\ b < (a + 1) * n} ->
+  Lemma (b - a * n == b % n)
+let mod_prop n a b =
+  FStar.Math.Lemmas.modulo_lemma (b - a * n) n;
+  FStar.Math.Lemmas.lemma_mod_sub b n a
+
+#push-options "--z3rlimit 100"
+
+let rec index_generate_blocks #t len max n f i =
+  assert (0 < n);
+  let a_spec (i:nat{i <= max}) = unit in
+  let _,s = generate_blocks #t len max (n-1) a_spec f () in
+  let _,s' = f (n-1) () in
+  let _,s1 = generate_blocks #t len max n a_spec f () in
+  unfold_generate_blocks #t len max a_spec f () (n-1);
+  assert (s1 == Seq.append s s');
+  if i < (n-1) * len then
+    begin
+    Seq.lemma_index_app1 s s' i;
+    index_generate_blocks #t len max (n-1) f i
+    end
+  else
+    begin
+    Seq.lemma_index_app2 s s' i;
+    mod_prop len (n-1) i
+    end
 
 (***** The following lemmas are work in progress: Do not rely on them ****)
 
@@ -293,8 +321,6 @@ let generate_blocks1_lemma #t len a f acc0 =
 
 
 let map_blocks_multi1_lemma #a blocksize inp f =  admit()
-
-
 
 (*
 let map_blocks #a bs inp f g =

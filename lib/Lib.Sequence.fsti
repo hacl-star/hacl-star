@@ -339,7 +339,7 @@ val generate_blocks:
   -> a:(i:nat{i <= max} -> Type)
   -> f:(i:nat{i < max} -> a i -> a (i + 1) & s:seq t{length s == len})
   -> init:a 0 ->
-  Tot (a n & s:seq t{ length s == n * len})
+  Tot (a n & s:seq t{length s == n * len})
 
 
 (* The following functions allow us to bridge between unbounded and bounded sequences *)
@@ -372,7 +372,6 @@ val eq_generate_blocks0:
   Lemma (generate_blocks #t len n 0 a f init ==
 	 (init,Seq.empty))
 
-
 val unfold_generate_blocks:
     #t:Type0
   -> len:size_nat
@@ -386,7 +385,18 @@ val unfold_generate_blocks:
 	    let (acc',s') = f i acc in
 	    (acc',Seq.append s s')))
 
-
+val index_generate_blocks:
+    #t:Type0
+  -> len:size_nat{0 < len}
+  -> max:nat
+  -> n:pos{n <= max}
+  -> f:(i:nat{i < max} -> unit -> unit & s:seq t{length s == len})
+  -> i:nat{i < n * len}
+  -> Lemma (let j: j:nat{j < max} = i / len in
+           let a_spec (i:nat{i <= max}) = unit in
+           let _,s1 = generate_blocks #t len max n a_spec f () in
+           let _,s2 = f j () in
+           Seq.index s1 i == Seq.index s2 (i % len))
 
 (*
 #set-options "--z3rlimit 400 --max_ifuel 1"
