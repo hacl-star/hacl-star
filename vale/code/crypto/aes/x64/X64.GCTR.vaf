@@ -668,7 +668,7 @@ procedure {:quick}{:public}{:exportSpecs} gctr_bytes_stdcall(
     num_blocks * 128/8 <= num_bytes < num_blocks * 128/8 + 128/8;
 
     // AES reqs
-    aesni_enabled;
+    aesni_enabled && avx_enabled;
     alg = AES_128 || alg = AES_256;
     is_aes_key_LE(alg, key);
     buffer128_as_seq(mem, keys_b) == key_to_round_keys_LE(alg, key);
