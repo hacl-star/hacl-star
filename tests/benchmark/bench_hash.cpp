@@ -577,14 +577,14 @@ void bench_hash(const BenchmarkSettings & s)
                          extras.str());
 
 
-    std::vector<std::string> algs = { "MD5", "SHA1", "SHA2-224", "SHA2-256", "SHA2-384", "SHA2-512" };
+    std::vector<std::string> fils = { "MD5", "SHA1", "SHA2_224", "SHA2_256", "SHA2_384", "SHA2_512" };
     std::string data_filename = "bench_hash_all_" + std::to_string(ds) + ".csv";
     std::ofstream outf(data_filename, std::ios::out | std::ios::trunc);
     outf << "\"Provider\",\"Algorithm\",\"Size [b]\"" + Benchmark::column_headers() + ",\"Avg Cycles/Byte\"\n";
     outf.close();
-    for (std::string alg : algs)
+    for (std::string fil : fils)
     {
-      int r = system(("grep \"," + std::to_string(ds) + ",\" bench_hash_" + alg + ".csv >> bench_hash_all_" + std::to_string(ds) + ".csv").c_str());
+      int r = system(("grep \"," + std::to_string(ds) + ",\" bench_hash_" + fil + ".csv >> bench_hash_all_" + std::to_string(ds) + ".csv").c_str());
       if (r != 0)
         throw std::logic_error("Plot generation failed");
     }
@@ -600,7 +600,7 @@ void bench_hash(const BenchmarkSettings & s)
 
     bool first = true;
 
-    std::vector<std::string> fils = { "MD5", "SHA1", "SHA2_224", "SHA2_256", "SHA2_384", "SHA2_512" };
+    std::vector<std::string> algs = { "MD5", "SHA1", "SHA2-224", "SHA2-256", "SHA2-384", "SHA2-512" };
     size_t num_in_histo = 0;
     for (int i = 0; i < algs.size(); i++)
     {
