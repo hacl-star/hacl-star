@@ -75,12 +75,17 @@ class Hacl51: public Curve25519Benchmark
     virtual ~Hacl51() {}
 };
 
+// extern "C" {
+// extern void curve25519_evercrypt64(uint8_t *shared, uint8_t *my_priv, uint8_t *their_pub);
+// }
+
 class Hacl64: public Curve25519Benchmark
 {
   public:
     Hacl64() : Curve25519Benchmark("HaCl\\n(Radix 64)") {}
     virtual void bench_func()
       { Hacl_Curve25519_64_ecdh(shared_secret, our_secret, their_public); }
+      // { curve25519_evercrypt64(shared_secret, our_secret, their_public); }
     virtual ~Hacl64() {}
 };
 #endif

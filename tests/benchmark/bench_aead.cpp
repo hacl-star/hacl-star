@@ -567,16 +567,16 @@ void bench_aead_encrypt(const BenchmarkSettings & s)
       Benchmark::run_batch(s, AEADBenchmark::column_headers(), data_filename.str(), todo);
 
       Benchmark::PlotSpec plot_specs_ds_cycles;
-      plot_specs_ds_cycles += Benchmark::histogram_line(filter(data_filename.str(), "EverCrypt"), "EverCrypt", "Avg", "strcol('Algorithm')", 0, -2);
+      plot_specs_ds_cycles += Benchmark::histogram_line(filter(data_filename.str(), "EverCrypt"), "EverCrypt", "Avg", "strcol('Algorithm')", 0, false);
       #ifdef HAVE_OPENSSL
-      plot_specs_ds_cycles += Benchmark::histogram_line(filter(data_filename.str(), "OpenSSL"), "OpenSSL", "Avg", "strcol('Algorithm')", 0, +2);
+      plot_specs_ds_cycles += Benchmark::histogram_line(filter(data_filename.str(), "OpenSSL"), "OpenSSL", "Avg", "strcol('Algorithm')", 0, false);
       #endif
       #ifdef HAVE_BCRYPT
-      plot_specs_ds_cycles += Benchmark::histogram_line(filter(data_filename.str(), "BCrypt"), "BCrypt", "Avg", "strcol('Algorithm')", 0, +2);
+      plot_specs_ds_cycles += Benchmark::histogram_line(filter(data_filename.str(), "BCrypt"), "BCrypt", "Avg", "strcol('Algorithm')", 0, false);
       #endif
+      Benchmark::add_label_offsets(plot_specs_ds_cycles);
 
       std::stringstream extras;
-      extras << "set boxwidth 0.8\n";
       extras << "set key top left inside\n";
       extras << "set style histogram clustered gap 3 title\n";
       extras << "set style data histograms\n";
@@ -593,13 +593,14 @@ void bench_aead_encrypt(const BenchmarkSettings & s)
                       extras.str());
 
       Benchmark::PlotSpec plot_specs_ds_bytes;
-      plot_specs_ds_bytes += Benchmark::histogram_line(filter(data_filename.str(), "EverCrypt"), "EverCrypt", "Avg Cycles/Byte", "strcol('Algorithm')", 2, -2);
+      plot_specs_ds_bytes += Benchmark::histogram_line(filter(data_filename.str(), "EverCrypt"), "EverCrypt", "Avg Cycles/Byte", "strcol('Algorithm')", 2, false);
       #ifdef HAVE_OPENSSL
-      plot_specs_ds_bytes += Benchmark::histogram_line(filter(data_filename.str(), "OpenSSL"), "OpenSSL", "Avg Cycles/Byte", "strcol('Algorithm')", 2, +2);
+      plot_specs_ds_bytes += Benchmark::histogram_line(filter(data_filename.str(), "OpenSSL"), "OpenSSL", "Avg Cycles/Byte", "strcol('Algorithm')", 2, false);
       #endif
       #ifdef HAVE_BCRYPT
-      plot_specs_ds_bytes += Benchmark::histogram_line(filter(data_filename.str(), "BCrypt"), "BCrypt", "Avg Cycles/Byte", "strcol('Algorithm')", 2, +2);
+      plot_specs_ds_bytes += Benchmark::histogram_line(filter(data_filename.str(), "BCrypt"), "BCrypt", "Avg Cycles/Byte", "strcol('Algorithm')", 2, false);
       #endif
+      Benchmark::add_label_offsets(plot_specs_ds_bytes);
 
       Benchmark::make_plot(s,
                       "svg",
@@ -633,7 +634,6 @@ void bench_aead_encrypt(const BenchmarkSettings & s)
   }
 
   std::stringstream extras;
-  extras << "set boxwidth 0.8\n";
   extras << "set key top left inside\n";
   extras << "set style histogram clustered gap 3 title\n";
   extras << "set style data histograms\n";
@@ -713,16 +713,16 @@ void bench_aead_decrypt(const BenchmarkSettings & s)
       Benchmark::run_batch(s, AEADBenchmark::column_headers(), data_filename.str(), todo);
 
       Benchmark::PlotSpec plot_specs_ds_cycles;
-      plot_specs_ds_cycles += Benchmark::histogram_line(filter(data_filename.str(), "EverCrypt"), "EverCrypt", "Avg", "strcol('Algorithm')", 0, -1);
+      plot_specs_ds_cycles += Benchmark::histogram_line(filter(data_filename.str(), "EverCrypt"), "EverCrypt", "Avg", "strcol('Algorithm')", 0, false);
       #ifdef HAVE_OPENSSL
-      plot_specs_ds_cycles += Benchmark::histogram_line(filter(data_filename.str(), "OpenSSL"), "OpenSSL", "Avg", "strcol('Algorithm')", 0, -1);
+      plot_specs_ds_cycles += Benchmark::histogram_line(filter(data_filename.str(), "OpenSSL"), "OpenSSL", "Avg", "strcol('Algorithm')", 0, false);
       #endif
       #ifdef HAVE_BCRYPT
-      plot_specs_ds_cycles += Benchmark::histogram_line(filter(data_filename.str(), "BCrypt"), "BCrypt", "Avg", "strcol('Algorithm')", 0, -1);
+      plot_specs_ds_cycles += Benchmark::histogram_line(filter(data_filename.str(), "BCrypt"), "BCrypt", "Avg", "strcol('Algorithm')", 0, false);
       #endif
+      Benchmark::add_label_offsets(plot_specs_ds_cycles);
 
       std::stringstream extras;
-      extras << "set boxwidth 0.8\n";
       extras << "set key top left inside\n";
       extras << "set style histogram clustered gap 3 title\n";
       extras << "set style data histograms\n";
@@ -739,13 +739,14 @@ void bench_aead_decrypt(const BenchmarkSettings & s)
                       extras.str());
 
       Benchmark::PlotSpec plot_specs_ds_bytes;
-      plot_specs_ds_bytes += Benchmark::histogram_line(filter(data_filename.str(), "EverCrypt"), "EverCrypt", "Avg Cycles/Byte", "strcol('Algorithm')", 2, -2);
+      plot_specs_ds_bytes += Benchmark::histogram_line(filter(data_filename.str(), "EverCrypt"), "EverCrypt", "Avg Cycles/Byte", "strcol('Algorithm')", 2, false);
       #ifdef HAVE_OPENSSL
-      plot_specs_ds_bytes += Benchmark::histogram_line(filter(data_filename.str(), "OpenSSL"), "OpenSSL", "Avg Cycles/Byte", "strcol('Algorithm')", 2, +2);
+      plot_specs_ds_bytes += Benchmark::histogram_line(filter(data_filename.str(), "OpenSSL"), "OpenSSL", "Avg Cycles/Byte", "strcol('Algorithm')", 2, false);
       #endif
       #ifdef HAVE_BCRYPT
-      plot_specs_ds_bytes += Benchmark::histogram_line(filter(data_filename.str(), "BCrypt"), "BCrypt", "Avg Cycles/Byte", "strcol('Algorithm')", 2, +2);
+      plot_specs_ds_bytes += Benchmark::histogram_line(filter(data_filename.str(), "BCrypt"), "BCrypt", "Avg Cycles/Byte", "strcol('Algorithm')", 2, false);
       #endif
+      Benchmark::add_label_offsets(plot_specs_ds_bytes);
 
       Benchmark::make_plot(s,
                       "svg",
@@ -779,7 +780,6 @@ void bench_aead_decrypt(const BenchmarkSettings & s)
   }
 
   std::stringstream extras;
-  extras << "set boxwidth 0.8\n";
   extras << "set key top left inside\n";
   extras << "set style histogram clustered gap 3 title\n";
   extras << "set style data histograms\n";

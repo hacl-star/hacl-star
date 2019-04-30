@@ -203,19 +203,19 @@ void bench_hash_plots(const BenchmarkSettings & s, const std::string & alg, cons
   title << alg << " performance";
 
   Benchmark::Benchmark::PlotSpec plot_specs_cycles;
-  plot_specs_cycles += Benchmark::histogram_line(filter(data_filename, "EverCrypt"), "EverCrypt", "Avg", "strcol('Size [b]')", 0, true, -1.25, 1.0);
+  plot_specs_cycles += Benchmark::histogram_line(filter(data_filename, "EverCrypt"), "EverCrypt", "Avg", "strcol('Size [b]')", 0, true);
   #ifdef HAVE_HACL
-  plot_specs_cycles += Benchmark::histogram_line(filter(data_filename, "HaCl"), "HaCl", "Avg", "strcol('Size [b]')", 0, true, +0, 1.0);
+  plot_specs_cycles += Benchmark::histogram_line(filter(data_filename, "HaCl"), "HaCl", "Avg", "strcol('Size [b]')", 0, true);
   #endif
   #ifdef HAVE_OPENSSL
-  plot_specs_cycles += Benchmark::histogram_line(filter(data_filename, "OpenSSL"), "OpenSSL", "Avg", "strcol('Size [b]')", 0, true, +1.25, 1.0);
+  plot_specs_cycles += Benchmark::histogram_line(filter(data_filename, "OpenSSL"), "OpenSSL", "Avg", "strcol('Size [b]')", 0, true);
   #endif
   #ifdef HAVE_BCRYPT
-  plot_specs_cycles += Benchmark::histogram_line(filter(data_filename, "BCrypt"), "BCrypt", "Avg", "strcol('Size [b]')", 0, true, +1.25, 1.0);
+  plot_specs_cycles += Benchmark::histogram_line(filter(data_filename, "BCrypt"), "BCrypt", "Avg", "strcol('Size [b]')", 0, true);
   #endif
+  Benchmark::add_label_offsets(plot_specs_cycles, 1.0);
 
   std::stringstream extras;
-  extras << "set boxwidth 0.8\n";
   extras << "set key top left inside\n";
   extras << "set style histogram clustered gap 3 title\n";
   extras << "set style data histograms\n";
@@ -234,16 +234,17 @@ void bench_hash_plots(const BenchmarkSettings & s, const std::string & alg, cons
 
 
   Benchmark::Benchmark::PlotSpec plot_specs_bytes;
-  plot_specs_bytes += Benchmark::histogram_line(filter(data_filename, "EverCrypt"), "EverCrypt", "Avg Cycles/Byte", "strcol('Size [b]')", 2, true, -1.25, 1.0);
+  plot_specs_bytes += Benchmark::histogram_line(filter(data_filename, "EverCrypt"), "EverCrypt", "Avg Cycles/Byte", "strcol('Size [b]')", 2, true);
   #ifdef HAVE_HACL
-  plot_specs_bytes += Benchmark::histogram_line(filter(data_filename, "HaCl"), "HaCl", "Avg Cycles/Byte", "strcol('Size [b]')", 2, true, +0, 1.0);
+  plot_specs_bytes += Benchmark::histogram_line(filter(data_filename, "HaCl"), "HaCl", "Avg Cycles/Byte", "strcol('Size [b]')", 2, true);
   #endif
   #ifdef HAVE_OPENSSL
-  plot_specs_bytes += Benchmark::histogram_line(filter(data_filename, "OpenSSL"), "OpenSSL", "Avg Cycles/Byte", "strcol('Size [b]')", 2, true, +1.25, 1.0);
+  plot_specs_bytes += Benchmark::histogram_line(filter(data_filename, "OpenSSL"), "OpenSSL", "Avg Cycles/Byte", "strcol('Size [b]')", 2, true);
   #endif
   #ifdef HAVE_BCRYPT
-  plot_specs_bytes += Benchmark::histogram_line(filter(data_filename, "BCrypt"), "BCrypt", "Avg Cycles/Byte", "strcol('Size [b]')", 2, true, +1.25, 1.0);
+  plot_specs_bytes += Benchmark::histogram_line(filter(data_filename, "BCrypt"), "BCrypt", "Avg Cycles/Byte", "strcol('Size [b]')", 2, true);
   #endif
+  Benchmark::add_label_offsets(plot_specs_bytes, 1.0);
 
   extras << "set key top right inside\n";
 
@@ -590,7 +591,6 @@ void bench_hash(const BenchmarkSettings & s)
     }
 
     extras.str("");
-    extras << "set boxwidth .9\n";
     extras << "set xtics norotate\n";
     extras << "set key top right\n";
     extras << "set style histogram clustered gap 2 title offset 0,-1.5\n";

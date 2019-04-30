@@ -106,9 +106,9 @@ class Benchmark
                                    const std::string & column,
                                    const std::string & xlabels,
                                    unsigned label_digits,
-                                   bool label_rotate = false,
-                                   double label_offset_x = 0.0,
-                                   double label_offset_y = 0.5);
+                                   bool label_rotate = false);
+
+    static void add_label_offsets(PlotSpec & ps, double label_offset_y = 0.5);
 
     static PlotSpec candlestick_line(const std::string & data_filename,
                                      const std::string & title,

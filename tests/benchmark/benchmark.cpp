@@ -261,7 +261,7 @@ void Benchmark::run_batch(const BenchmarkSettings & s,
   rs.close();
 }
 
-Benchmark::PlotSpec Benchmark::histogram_line(const std::string & data_filename, const std::string & title, const std::string & column, const std::string & xlabels, unsigned label_digits, bool label_rotate, double label_offset_x, double label_offset_y)
+Benchmark::PlotSpec Benchmark::histogram_line(const std::string & data_filename, const std::string & title, const std::string & column, const std::string & xlabels, unsigned label_digits, bool label_rotate)
 {
   std::string t = "title columnheader";
   if (title != "")
@@ -271,8 +271,29 @@ Benchmark::PlotSpec Benchmark::histogram_line(const std::string & data_filename,
       std::make_pair(data_filename, "using '" + column + "':xticlabels(" + xlabels + ") " + t),
       std::make_pair("", "using 0:'" + column + "':xticlabels(" + xlabels + "):(sprintf(\"%0." + std::to_string(label_digits) +
                          "f\", column('" + column + "'))) with labels notitle " + (label_rotate?"rotate":"") +
-                         " font \"Courier,8\" offset char " + std::to_string(label_offset_x) + "," + std::to_string(label_offset_y))
+                         " font \"Courier,8\"")
     };
+}
+
+void Benchmark::add_label_offsets(Benchmark::PlotSpec & ps, double label_offset_y)
+{
+  std::vector<double> x;
+  x.resize(ps.size(), 0.0);
+
+  if (ps.size() % 2 != 0)
+    throw std::logic_error("Labels assumed at every other line.");
+
+  switch (ps.size())
+  {
+  case 4: x[1] = -2.0; x[3] = +2.0; break;
+  case 6: x[1] = -1.3; x[3] = +0.0; x[5] = +1.3; break;
+  default: break;
+  }
+
+  for (size_t i = 1; i < ps.size(); i+=2)
+  {
+    ps[i].second += " offset char " + std::to_string(x[i]) + "," + std::to_string(label_offset_y);
+  }
 }
 
 Benchmark::PlotSpec Benchmark::candlestick_line(const std::string & data_filename, const std::string & title, const std::string & xlabels)
