@@ -650,11 +650,11 @@ procedure {:quick}{:public}{:exportSpecs} gctr_bytes_stdcall(
     buffer_disjoints128(ctr_b, list(in_b, out_b, keys_b));
     buffer_disjoints128(inout_b, list(in_b, out_b, keys_b, ctr_b));
 
-    validSrcAddrs128(mem,   in_ptr,   in_b, bytes_to_quad_size(num_bytes), memTaint, Secret);
-    validDstAddrs128(mem,  out_ptr,  out_b, bytes_to_quad_size(num_bytes), memTaint, Secret);
-    validDstAddrs128(mem,inout_ptr,inout_b,                             1, memTaint, Secret);
-    validSrcAddrs128(mem, keys_ptr, keys_b,                   nr(alg) + 1, memTaint, Secret);
-    validSrcAddrs128(mem,  ctr_ptr,  ctr_b,                             1, memTaint, Secret);
+    validSrcAddrs128(mem,   in_ptr,   in_b,  num_blocks, memTaint, Secret);
+    validDstAddrs128(mem,  out_ptr,  out_b,  num_blocks, memTaint, Secret);
+    validDstAddrs128(mem,inout_ptr,inout_b,           1, memTaint, Secret);
+    validSrcAddrs128(mem, keys_ptr, keys_b, nr(alg) + 1, memTaint, Secret);
+    validSrcAddrs128(mem,  ctr_ptr,  ctr_b,           1, memTaint, Secret);
 
     in_ptr  + 16 * num_blocks < pow2_64;
     out_ptr + 16 * num_blocks < pow2_64;

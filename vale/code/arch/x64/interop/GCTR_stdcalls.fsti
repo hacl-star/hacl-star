@@ -31,7 +31,7 @@ let gctr_bytes_st (a: algorithm { a = AES_128 \/ a = AES_256 }) =
    (requires fun h0 ->
      B.disjoint in_b out_b /\
      B.disjoint keys_b out_b /\
-     (B.disjoint in_b keys_b \/ in_b == keys_b) /\
+     B.disjoint in_b keys_b /\
      B.disjoint ctr_b in_b /\
      B.disjoint ctr_b out_b /\
      B.disjoint ctr_b keys_b /\
