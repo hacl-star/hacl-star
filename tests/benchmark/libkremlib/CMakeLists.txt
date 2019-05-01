@@ -42,6 +42,10 @@ target_compile_options(kremlib PRIVATE
   )
 target_compile_definitions(kremlib PRIVATE _BSD_SOURCE _DEFAULT_SOURCE)
 
+if (NOT "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+  target_compile_options(kremlib PRIVATE -flto)
+endif()
+
 if(CMAKE_SYSTEM_NAME STREQUAL "CYGWIN")
   target_compile_definitions(kremlib PUBLIC __USE_MINGW_ANSI_STDIO)
 else()
@@ -49,12 +53,12 @@ else()
 endif()
 
 if(CMAKE_COMPILER_IS_MSVC)
-target_sources(kremlib PRIVATE ${KREMLIB_DIR}/fstar_uint128_msvc.c)
+  target_sources(kremlib PRIVATE ${KREMLIB_DIR}/fstar_uint128_msvc.c)
 else(CMAKE_COMPILER_IS_MSVC)
-target_sources(kremlib PRIVATE ${KREMLIB_DIR}/fstar_uint128.c)
+  target_sources(kremlib PRIVATE ${KREMLIB_DIR}/fstar_uint128.c)
 endif(CMAKE_COMPILER_IS_MSVC)
 
 if(ASAN)
-target_compile_options(kremlib PRIVATE -g -fsanitize=undefined,address -fno-omit-frame-pointer -fno-sanitize-recover=all -fno-sanitize=function)
-target_link_libraries(kremlib PRIVATE -g -fsanitize=address)
+  target_compile_options(kremlib PRIVATE -g -fsanitize=undefined,address -fno-omit-frame-pointer -fno-sanitize-recover=all -fno-sanitize=function)
+  target_link_libraries(kremlib PRIVATE -g -fsanitize=address)
 endif()

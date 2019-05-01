@@ -14,7 +14,11 @@ target_include_directories(rfc7748 PUBLIC ${RFC7748_DIR})
 target_compile_options(rfc7748 PRIVATE -march=native -mtune=native)
 target_compile_definitions(rfc7748 PRIVATE _BSD_SOURCE _DEFAULT_SOURCE)
 
+if (NOT "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+  target_compile_options(rfc7748 PRIVATE -flto)
+endif()
+
 if(ASAN)
-target_compile_options(rfc7748 PRIVATE -g -fsanitize=undefined,address -fno-omit-frame-pointer -fno-sanitize-recover=all -fno-sanitize=function)
-target_link_libraries(rfc7748 PRIVATE -g -fsanitize=address)
+  target_compile_options(rfc7748 PRIVATE -g -fsanitize=undefined,address -fno-omit-frame-pointer -fno-sanitize-recover=all -fno-sanitize=function)
+  target_link_libraries(rfc7748 PRIVATE -g -fsanitize=address)
 endif()

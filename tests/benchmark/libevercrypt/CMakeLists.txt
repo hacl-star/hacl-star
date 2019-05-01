@@ -37,6 +37,10 @@ add_library(evercrypt SHARED STATIC
 target_compile_options(evercrypt PRIVATE -Wno-parentheses -std=gnu11 -march=native -mtune=native)
 target_include_directories(evercrypt PUBLIC ${EVERCRYPT_SRC_DIR})
 
+if (NOT "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+  target_compile_options(evercrypt PRIVATE -flto)
+endif()
+
 if(CMAKE_SYSTEM_PROCESSOR STREQUAL "x86_64")
   if(CMAKE_COMPILER_IS_MSVC)
   set(VARIANT "msvc.asm")
