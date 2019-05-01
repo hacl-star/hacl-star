@@ -121,6 +121,20 @@ let set_taint (dst:operand) ts taint : Tot taintState =
   | OReg r -> TaintState (FunctionalExtensionality.on reg (fun x -> if x = r then taint else ts.regTaint x)) ts.flagsTaint ts.cfFlagsTaint ts.xmmTaint
   | OMem m | OStack m -> ts (* Ensured by taint semantics *)
 
+let set_taint128 (dst:mov128_op) (ts:taintState) (t:taint) : taintState =
+  match dst with
+  | Mov128Xmm r -> TaintState ts.regTaint ts.flagsTaint ts.cfFlagsTaint
+      (FunctionalExtensionality.on xmm (fun x -> if x = r then t else ts.xmmTaint x))
+  | Mov128Mem _ | Mov128Stack _-> ts
+
+let set_taint_cf_and_flags (ts:taintState) (t:taint) : taintState =
+  let TaintState rs flags cf xmms = ts in
+  TaintState rs (merge_taint t flags) t xmms
+
+let set_taint_of_and_flags (ts:taintState) (t:taint) : taintState =
+  let TaintState rs flags cf xmms = ts in
+  TaintState rs (merge_taint t flags) cf xmms
+
 let rec operands_do_not_use_secrets ops ts = match ops with
   | [] -> true
   | hd :: tl -> operand_does_not_use_secrets hd ts && (operands_do_not_use_secrets tl ts)
@@ -178,7 +192,7 @@ let lemma_public_op_are_same ts op s1 s2 =
     let a1 = eval_maddr m s1.state in
     let a2 = eval_maddr m s2.state in
     assert (a1 == a2);
-    assert (forall a. (a >= a1 /\ a < a1 + 8) ==> s1.state.mem.[a] == s2.state.mem.[a]);
+//    assert (forall a. (a >= a1 /\ a < a1 + 8) ==> s1.state.mem.[a] == s2.state.mem.[a]);
     Opaque_s.reveal_opaque get_heap_val64_def
   | OStack m -> ()
 

@@ -19,18 +19,19 @@ let publicCfFlagValuesAreSame (ts:taintState) (s1:traceState) (s2:traceState) =
 Public? ts.cfFlagsTaint ==> (cf s1.state.flags = cf s2.state.flags)
 
 let publicRegisterValuesAreSame (ts:taintState) (s1:traceState) (s2:traceState) =
-  forall r.
-      ts.regTaint r = Public
-    ==> (s1.state.regs r = s2.state.regs r)
+  forall r.{:pattern ts.regTaint r \/ s1.state.regs r \/ s2.state.regs r}
+    ts.regTaint r = Public ==>
+    (s1.state.regs r = s2.state.regs r)
 
 let publicMemValuesAreSame (s1:traceState) (s2:traceState) =
-  forall x. (Public? (s1.memTaint.[x]) || Public? (s2.memTaint.[x])) ==> 
+  forall x.{:pattern s1.memTaint.[x] \/ s2.memTaint.[x] \/ s1.state.mem.[x] \/ s2.state.mem.[x]}
+    (Public? (s1.memTaint.[x]) || Public? (s2.memTaint.[x])) ==>
     (s1.state.mem.[x] == s2.state.mem.[x])
 
 let publicXmmValuesAreSame (ts:taintState) (s1:traceState) (s2:traceState) =
-  forall r.
-      ts.xmmTaint r = Public
-    ==> (s1.state.xmms r = s2.state.xmms r)
+  forall r.{:pattern ts.xmmTaint r \/ s1.state.xmms r \/ s2.state.xmms r}
+    ts.xmmTaint r = Public ==>
+    (s1.state.xmms r = s2.state.xmms r)
 
 let publicValuesAreSame (ts:taintState) (s1:traceState) (s2:traceState) =
    publicRegisterValuesAreSame ts s1 s2

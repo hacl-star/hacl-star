@@ -177,6 +177,189 @@ let rec lemma_inouts_taint
     let Some v = v1 in
     lemma_inouts_taint outs inouts args (f v) oprs ts t_ins s1 s2
 
+let instr_set_taint_explicit
+    (i:instr_operand_explicit) (o:instr_operand_t i) (ts:taintState) (t:taint)
+  : taintState =
+  match i with
+  | IOp64 -> set_taint o ts t
+  | IOpXmm -> set_taint128 o ts t
+
+[@instr_attr]
+let instr_set_taint_implicit (i:instr_operand_implicit) (ts:taintState) (t:taint) : taintState =
+  match i with
+  | IOp64One o -> set_taint o ts t
+  | IOpXmmOne o -> set_taint128 o ts t
+  | IOpFlagsCf -> set_taint_cf_and_flags ts t
+  | IOpFlagsOf -> set_taint_of_and_flags ts t
+
+let rec instr_set_taints
+    (outs:list instr_out) (args:list instr_operand)
+    (oprs:instr_operands_t outs args) (ts:taintState) (t:taint)
+  : taintState =
+  match outs with
+  | [] -> ts
+  | (_, i)::outs ->
+    (
+      match i with
+      | IOpEx i ->
+        let oprs:instr_operand_t i & instr_operands_t outs args = coerce oprs in
+        instr_set_taints outs args (snd oprs) (instr_set_taint_explicit i (fst oprs) ts t) t
+      | IOpIm i -> instr_set_taints outs args (coerce oprs) (instr_set_taint_implicit i ts t) t
+    )
+
+let rec lemma_instr_write_outputs_ok
+    (outs:list instr_out) (args:list instr_operand)
+    (vs:instr_ret_t outs) (oprs:instr_operands_t outs args) (s_orig s:S.state)
+  : Lemma
+    (requires (S.instr_write_outputs outs args vs oprs s_orig s).S.ok)
+    (ensures s.S.ok)
+  =
+  match outs with
+  | [] -> ()
+  | (_, i)::outs ->
+    (
+      let ((v:instr_val_t i), (vs:instr_ret_t outs)) =
+        match outs with
+        | [] -> (vs, ())
+        | _::_ -> let vs = coerce vs in (fst vs, snd vs)
+        in
+      match i with
+      | IOpEx i ->
+          let oprs:instr_operand_t i & instr_operands_t outs args = coerce oprs in
+          let s' = S.instr_write_output_explicit i v (fst oprs) s_orig s in
+          lemma_instr_write_outputs_ok outs args vs (snd oprs) s_orig s'
+      | IOpIm i ->
+          let s' = S.instr_write_output_implicit i v s_orig s in
+          lemma_instr_write_outputs_ok outs args vs (coerce oprs) s_orig s'
+    )
+
+[@"opaque_to_smt"]
+let update_heap32_val (ptr:int) (v:Types_s.nat32) (i:int) : Types_s.nat8 =
+  let open Words_s in
+  let open Words.Four_s in
+  let v = nat_to_four 8 v in
+  match (i - ptr) with
+  | 0 -> v.lo0
+  | 1 -> v.lo1
+  | 2 -> v.hi2
+  | 3 -> v.hi3
+  | _ -> 0
+
+let valid_addr32 (ptr:int) (mem:S.heap) : bool =
+  S.valid_addr (ptr + 0) mem &&
+  S.valid_addr (ptr + 1) mem &&
+  S.valid_addr (ptr + 2) mem &&
+  S.valid_addr (ptr + 3) mem
+
+let lemma_update_heap32_val (ptr:int) (v:Types_s.nat32) (mem:S.heap) (i:int) : Lemma
+  (requires True)
+  (ensures (S.update_heap32 ptr v mem).[i] ==
+    (if ptr <= i && i < ptr + 4 then update_heap32_val ptr v i else mem.[i]))
+  [SMTPat ((S.update_heap32 ptr v mem).[i])]
+  =
+  Opaque_s.reveal_opaque S.update_heap32_def;
+  FStar.Pervasives.reveal_opaque (`%update_heap32_val) update_heap32_val
+
+let lemma_update_heap32_domain (ptr:int) (v:Types_s.nat32) (mem:S.heap) : Lemma
+  (requires valid_addr32 ptr mem)
+  (ensures Map.domain (S.update_heap32 ptr v mem) == Map.domain mem)
+  [SMTPat (S.update_heap32 ptr v mem)]
+  =
+  Opaque_s.reveal_opaque S.update_heap32_def;
+  assert (Set.equal (Map.domain (S.update_heap32 ptr v mem)) (Map.domain mem))
+
+[@"opaque_to_smt"]
+let update_heap64_val (ptr:int) (v:nat64) (i:int) : Types_s.nat8 =
+  let open Words_s in
+  let open Words.Two_s in
+  let open Words.Four_s in
+  let v = nat_to_two 32 v in
+  let lo = nat_to_four 8 v.lo in
+  let hi = nat_to_four 8 v.hi in
+  match (i - ptr) with
+  | 0 -> lo.lo0
+  | 1 -> lo.lo1
+  | 2 -> lo.hi2
+  | 3 -> lo.hi3
+  | 4 -> hi.lo0
+  | 5 -> hi.lo1
+  | 6 -> hi.hi2
+  | 7 -> hi.hi3
+  | _ -> 0
+
+let lemma_update_heap64_val (ptr:int) (v:nat64) (mem:S.heap) (i:int) : Lemma
+  (requires True)
+  (ensures (S.update_heap64 ptr v mem).[i] ==
+    (if ptr <= i && i < ptr + 8 then update_heap64_val ptr v i else mem.[i]))
+  [SMTPat ((S.update_heap64 ptr v mem).[i])]
+  =
+  Opaque_s.reveal_opaque S.update_heap64_def;
+  FStar.Pervasives.reveal_opaque (`%update_heap64_val) update_heap64_val
+
+let lemma_update_heap64_domain (ptr:int) (v:nat64) (mem:S.heap) : Lemma
+  (requires S.valid_addr64 ptr mem)
+  (ensures Map.domain (S.update_heap64 ptr v mem) == Map.domain mem)
+  [SMTPat (S.update_heap64 ptr v mem)]
+  =
+  Opaque_s.reveal_opaque S.update_heap64_def;
+  assert (Set.equal (Map.domain (S.update_heap64 ptr v mem)) (Map.domain mem))
+
+#reset-options "--z3rlimit 200"
+let rec lemma_instr_set_taints
+    (outs:list instr_out) (args:list instr_operand)
+    (vs:instr_ret_t outs) (oprs:instr_operands_t outs args) (ts_orig ts:taintState) (t:taint)
+    (s1_orig s1 s2_orig s2:traceState)
+  : Lemma
+    (requires (
+      let s1' = {s1 with state = S.instr_write_outputs outs args vs oprs s1_orig.state s1.state} in
+      let s2' = {s1 with state = S.instr_write_outputs outs args vs oprs s2_orig.state s2.state} in
+      s1'.state.S.ok /\ s2'.state.S.ok /\
+      Set.equal (Map.domain s1_orig.state.S.mem) (Map.domain s1.state.S.mem) /\
+      Set.equal (Map.domain s2_orig.state.S.mem) (Map.domain s2.state.S.mem) /\
+      check_if_consumes_fixed_time_outs outs args oprs ts_orig /\
+      publicValuesAreSame ts_orig s1_orig s2_orig /\
+      publicValuesAreSame ts s1 s2
+    ))
+    (ensures (
+      let s1' = {s1 with state = S.instr_write_outputs outs args vs oprs s1_orig.state s1.state} in
+      let s2' = {s1 with state = S.instr_write_outputs outs args vs oprs s2_orig.state s2.state} in
+      let ts' = instr_set_taints outs args oprs ts t in
+      publicValuesAreSame ts' s1' s2'
+    ))
+  =
+  match outs with
+  | [] -> ()
+  | (_, i)::outs ->
+    (
+      let ((v:instr_val_t i), (vs:instr_ret_t outs)) =
+        match outs with
+        | [] -> (vs, ())
+        | _::_ -> let vs = coerce vs in (fst vs, snd vs)
+        in
+      match i with
+      | IOpEx i ->
+        let (o, oprs):instr_operand_t i & instr_operands_t outs args = coerce oprs in
+        let o =
+          match i with
+          | IOp64 -> (match coerce o with OMem _ | _ -> o)
+          | IOpXmm -> (match coerce o with Mov128Mem _ | _ -> o)
+          in
+        let s1' = {s1 with state = S.instr_write_output_explicit i v o s1_orig.state s1.state} in
+        let s2' = {s2 with state = S.instr_write_output_explicit i v o s2_orig.state s2.state} in
+        lemma_instr_write_outputs_ok outs args vs oprs s1_orig.state s1'.state;
+        lemma_instr_write_outputs_ok outs args vs oprs s2_orig.state s2'.state;
+        let ts' = instr_set_taint_explicit i o ts t in
+        lemma_instr_set_taints outs args vs oprs ts_orig ts' t s1_orig s1' s2_orig s2'
+      | IOpIm i ->
+        let i = match i with IOp64One (OMem _) | IOpXmmOne (Mov128Mem _) | _ -> i in
+        let s1' = {s1 with state = S.instr_write_output_implicit i v s1_orig.state s1.state} in
+        let s2' = {s2 with state = S.instr_write_output_implicit i v s2_orig.state s2.state} in
+        lemma_instr_write_outputs_ok outs args vs (coerce oprs) s1_orig.state s1'.state;
+        lemma_instr_write_outputs_ok outs args vs (coerce oprs) s2_orig.state s2'.state;
+        let ts' = instr_set_taint_implicit i ts t in
+        lemma_instr_set_taints outs args vs (coerce oprs) ts_orig ts' t s1_orig s1' s2_orig s2'
+    )
+
 let check_if_instr_consumes_fixed_time (ins:tainted_ins) (ts:taintState) : Pure (bool & taintState)
   (requires S.Instr? ins.i)
   (ensures ins_consumes_fixed_time ins ts)
