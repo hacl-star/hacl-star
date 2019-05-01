@@ -14,6 +14,15 @@ option(USE_LIBCURVE25519 "Use the library Curve25519 implementations" ON)
 
 option(ASAN "Enable clang address sanitizer" OFF)
 
+add_compile_options(-march=native -mtune=native)
+if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+  add_compile_options(-fbracket-depth=512)
+else()
+  add_compile_options(-flto)
+  if(CMAKE_SYSTEM_NAME STREQUAL "CYGWIN")
+    add_compile_options(-ffat-lto-objects)
+  endif()
+endif()
 
 add_subdirectory(libevercrypt)
 

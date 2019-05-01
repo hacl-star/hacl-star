@@ -34,12 +34,8 @@ add_library(evercrypt SHARED STATIC
   ${EVERCRYPT_SRC_DIR}/Hacl_SHA3.c
   ${EVERCRYPT_SRC_DIR}/Lib_PrintBuffer.c
   ${EVERCRYPT_SRC_DIR}/Lib_RandomBuffer.c)
-target_compile_options(evercrypt PRIVATE -Wno-parentheses -std=gnu11 -march=native -mtune=native)
+target_compile_options(evercrypt PRIVATE -Wno-parentheses -std=gnu11)
 target_include_directories(evercrypt PUBLIC ${EVERCRYPT_SRC_DIR})
-
-if (NOT "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-  target_compile_options(evercrypt PRIVATE -flto)
-endif()
 
 if(CMAKE_SYSTEM_PROCESSOR STREQUAL "x86_64")
   if(CMAKE_COMPILER_IS_MSVC)

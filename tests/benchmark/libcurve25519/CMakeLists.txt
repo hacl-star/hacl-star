@@ -12,16 +12,7 @@ add_library(libcurve25519 SHARED STATIC
   curve25519-hacl51.c
   curve25519-openssl.c
   curve25519-precomp.c)
-target_compile_options(libcurve25519 PRIVATE -O3 -march=native -mtune=native -flto)
 target_include_directories(libcurve25519 PUBLIC ${LIBCURVE25519_SRC_DIR})
-
-if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-  target_compile_options(libcurve25519 PRIVATE -fbracket-depth=512)
-else()
-  if(CMAKE_SYSTEM_NAME STREQUAL "CYGWIN")
-    target_compile_options(libcurve25519 PRIVATE -ffat-lto-objects)
-  endif()
-endif()
 
 if(NOT CMAKE_SYSTEM_NAME STREQUAL "CYGWIN")
 target_sources(libcurve25519 PRIVATE

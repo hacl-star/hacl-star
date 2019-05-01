@@ -12,17 +12,8 @@ add_library(fiat-curve25519 SHARED STATIC
   ${FIAT_CURVE25519_SRC_DIR}/ladderstep.c
   ${FIAT_CURVE25519_SRC_DIR}/scalarmult.c
   ${FIAT_CURVE25519_SRC_DIR}/liblow/cmovznz.c)
-target_compile_options(fiat-curve25519 PRIVATE -Wno-parentheses -std=gnu11 -march=native -mtune=native -Wno-attributes)
+target_compile_options(fiat-curve25519 PRIVATE -Wno-parentheses -std=gnu11 -Wno-attributes)
 target_include_directories(fiat-curve25519 PUBLIC ${FIAT_CURVE25519_SRC_DIR} ${FIAT_CURVE25519_SRC_DIR}/liblow)
-
-if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-  target_compile_options(fiat-curve25519 PRIVATE -fbracket-depth=512)
-else()
-  target_compile_options(fiat-curve25519 PRIVATE -flto)
-  if(CMAKE_SYSTEM_NAME STREQUAL "CYGWIN")
-    target_compile_options(fiat-curve25519 PRIVATE -ffat-lto-objects)
-  endif()
-endif()
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")

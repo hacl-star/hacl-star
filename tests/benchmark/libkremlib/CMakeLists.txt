@@ -42,10 +42,6 @@ target_compile_options(kremlib PRIVATE
   )
 target_compile_definitions(kremlib PRIVATE _BSD_SOURCE _DEFAULT_SOURCE)
 
-if (NOT "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-  target_compile_options(kremlib PRIVATE -flto)
-endif()
-
 if(CMAKE_SYSTEM_NAME STREQUAL "CYGWIN")
   target_compile_definitions(kremlib PUBLIC __USE_MINGW_ANSI_STDIO)
 else()
