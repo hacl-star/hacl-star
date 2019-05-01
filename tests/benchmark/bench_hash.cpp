@@ -557,7 +557,7 @@ void bench_hash(const BenchmarkSettings & s)
     extras << "set key on\n";
     extras << "set style histogram clustered gap 3 title\n";
     extras << "set style data histograms\n";
-    extras << "set xrange [-.5:2.5]";
+    //extras << "set xrange [-.5:2.5]";
 
     Benchmark::make_plot(s,
                          "svg",

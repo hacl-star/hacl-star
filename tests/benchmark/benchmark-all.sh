@@ -30,6 +30,12 @@ OPENSSL_CONFIG="./config"
 OPENSSL_CFLAGS="-O3 -march=native -mtune=native"
 
 if [ "$(expr substr $(uname -s) 1 6)" == "CYGWIN" ]; then
+  nob_cpus() {
+    :
+    }
+  noturbo() {
+    :
+    }
   OPENSSL_CONFIG="./Configure mingw64"
   OPENSSL_CFLAGS+=" -fno-asynchronous-unwind-tables"
   CONFIGS="x86_64-w64-mingw32-gcc,x86_64-w64-mingw32-g++,compact-gcc"

@@ -10,6 +10,7 @@ option(USE_BCRYPT "Use BCrypt." OFF)
 option(USE_OPENSSL "Use OpenSSL." ON)
 option(USE_RFC7748 "Use the RFC 7748 reference implementation" ON)
 option(USE_FIAT_CURVE25519 "Use the Fiat Curve25519 implementation" ON)
+option(USE_LIBCURVE25519 "Use the library Curve25519 implementations" ON)
 
 option(ASAN "Enable clang address sanitizer" OFF)
 
@@ -79,6 +80,12 @@ if(USE_RFC7748)
   target_link_libraries(runbenchmark PRIVATE rfc7748)
   target_include_directories(runbenchmark PRIVATE ${RFC7748_DIR})
 endif(USE_RFC7748)
+
+if(USE_LIBCURVE25519)
+  add_subdirectory(libcurve25519)
+  target_compile_definitions(runbenchmark PRIVATE HAVE_LIBCURVE25519)
+  target_link_libraries(runbenchmark PRIVATE libcurve25519)
+endif()
 
 if(USE_FIAT_CURVE25519)
   add_subdirectory(libfiat-curve25519)

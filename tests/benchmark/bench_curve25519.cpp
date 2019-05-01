@@ -7,6 +7,8 @@ extern "C" {
 #include <EverCrypt_Curve25519.h>
 }
 
+#include <libcurve25519.h>
+
 class Curve25519Benchmark: public Benchmark
 {
   protected:
@@ -187,6 +189,31 @@ class Fiat: public Curve25519Benchmark
 };
 #endif
 
+#ifdef HAVE_LIBCURVE25519
+#define STRINGIFY(x) #x
+#define TOSTRING(x) STRINGIFY(x)
+
+#define DEFINE(name)                                              \
+  class name : public Curve25519Benchmark                         \
+  {                                                               \
+  public:                                                         \
+    name() : Curve25519Benchmark(TOSTRING(name)) {}               \
+    virtual void bench_func()                                     \
+    {                                                             \
+      curve25519_##name(shared_secret, our_secret, their_public); \
+    }                                                             \
+  };
+
+DEFINE(donna64)
+DEFINE(evercrypt64)
+DEFINE(hacl51)
+DEFINE(fiat64)
+DEFINE(amd64)
+DEFINE(precomp_bmi2)
+DEFINE(precomp_adx)
+DEFINE(openssl)
+#endif
+
 void bench_curve25519(const BenchmarkSettings & s)
 {
   std::string data_filename = "bench_curve25519.csv";
@@ -205,7 +232,17 @@ void bench_curve25519(const BenchmarkSettings & s)
     new OpenSSLEVP(),
     #endif
     #ifdef HAVE_FIAT_CURVE25519
-    new Fiat()
+    new Fiat(),
+    #endif
+    #ifdef HAVE_LIBCURVE25519
+    new donna64(),
+    new evercrypt64(),
+    new hacl51(),
+    new fiat64(),
+    new amd64(),
+    new precomp_bmi2(),
+    new precomp_adx(),
+    new openssl(),
     #endif
     };
 
@@ -219,13 +256,17 @@ void bench_curve25519(const BenchmarkSettings & s)
   extras << "set style data histograms\n";
   extras << "set xrange[-.5:" + num_benchmarks.str() + "-.5]\n";
   extras << "set bmargin 4\n";
+  extras << "set xtics font 'Times,6pt' rotate\n";
+
+  Benchmark::PlotSpec ps = Benchmark::histogram_line(data_filename, "", "Avg", "strcol('Algorithm')", 0, true);
+  Benchmark::add_label_offsets(ps, 1.0);
 
   Benchmark::make_plot(s,
                        "svg",
                        "Curve25519 performance",
                        "",
                        "Avg. performance [CPU cycles/derivation]",
-                       Benchmark::histogram_line(data_filename, "", "Avg", "strcol('Algorithm')", 0),
+                       ps,
                        "bench_curve25519_cycles.svg",
                        extras.str());
 
