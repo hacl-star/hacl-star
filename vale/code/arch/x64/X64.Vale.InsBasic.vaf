@@ -101,7 +101,7 @@ procedure{:quick exportOnly}{:typecheck false}{:public} AssertQuickType(ghost p:
     u := tuple();
 }
 
-procedure{:instruction mk_taint_ins2(S.Ins_64_64_preserve(I.ins_Mov64), dst, src)}{:fast_instruction}{:quick exportOnly}{:public} Mov64(inout dst:dst_opr64, src:opr64)
+procedure{:instruction mk_taint_ins2(make_instr(I.ins_Mov64), dst, src)}{:fast_instruction}{:quick exportOnly}{:public} Mov64(inout dst:dst_opr64, src:opr64)
     ensures
         dst == old(src);
 {
@@ -142,7 +142,7 @@ procedure{:instruction mk_taint_ins3(make_instr(I.ins_AddLea64), dst, src1, src2
 {
 }
 
-procedure{:instruction mk_taint_ins2(S.Ins_io64_64_cf(I.ins_AddCarry64), dst, src)}{:fast_instruction}{:quick exportOnly}{:public} Adc64Wrap(inout dst:dst_opr64, src:opr64)
+procedure{:instruction mk_taint_ins2(make_instr(I.ins_AddCarry64), dst, src)}{:fast_instruction}{:quick exportOnly}{:public} Adc64Wrap(inout dst:dst_opr64, src:opr64)
     modifies
         efl;
     ensures
@@ -193,7 +193,7 @@ procedure{:instruction mk_taint_ins2(make_instr(I.ins_Sub64), dst, src)}{:quick 
 {
 }
 
-procedure{:instruction mk_taint_ins2(S.Ins_io64_64_cf(I.ins_Sbb64), dst, src)}{:fast_instruction}{:quick exportOnly}{:public} Sbb64(inout dst:dst_opr64, src:opr64)
+procedure{:instruction mk_taint_ins2(make_instr(I.ins_Sbb64), dst, src)}{:fast_instruction}{:quick exportOnly}{:public} Sbb64(inout dst:dst_opr64, src:opr64)
     modifies
         efl;
     ensures
@@ -239,7 +239,7 @@ procedure{:instruction mk_taint_ins3(make_instr(I.ins_Mulx64), dst_hi, dst_lo, s
 ghost procedure lemma_mul_nat(ghost x:nat, ghost y:nat) extern;
 ghost procedure lemma_mul_in_bounds(ghost a:nat64, ghost b:nat64) extern;
 
-procedure{:instruction mk_taint_ins2(S.Ins_io64_64(I.ins_IMul64), dst, src)}{:fast_instruction}{:quick exportOnly}{:public} IMul64(inout dst:dst_opr64, src:opr64)
+procedure{:instruction mk_taint_ins2(make_instr(I.ins_IMul64), dst, src)}{:fast_instruction}{:quick exportOnly}{:public} IMul64(inout dst:dst_opr64, src:opr64)
     requires
         dst * src < pow2_64;
     modifies
@@ -262,7 +262,7 @@ procedure{:instruction mk_taint_ins2(S.Xor64, dst, src)}{:quick exportOnly}{:pub
 {
 }
 
-procedure{:instruction mk_taint_ins2(S.Ins_io64_64(I.ins_And64), dst, src)}{:quick exportOnly}{:public} And64(inout dst:dst_opr64, src:opr64)
+procedure{:instruction mk_taint_ins2(make_instr(I.ins_And64), dst, src)}{:quick exportOnly}{:public} And64(inout dst:dst_opr64, src:opr64)
     modifies
         efl;
     ensures
@@ -270,7 +270,7 @@ procedure{:instruction mk_taint_ins2(S.Ins_io64_64(I.ins_And64), dst, src)}{:qui
 {
 }
 
-procedure{:instruction mk_taint_ins2(S.Ins_io64_64(I.ins_Shl64), dst, amt)}{:quick exportOnly}{:public} Shl64(inout dst:dst_opr64, amt:shift_amt64)
+procedure{:instruction mk_taint_ins2(make_instr(I.ins_Shl64), dst, amt)}{:quick exportOnly}{:public} Shl64(inout dst:dst_opr64, amt:shift_amt64)
     modifies
         efl;
 //    requires
@@ -280,7 +280,7 @@ procedure{:instruction mk_taint_ins2(S.Ins_io64_64(I.ins_Shl64), dst, amt)}{:qui
 {
 }
 
-procedure{:instruction mk_taint_ins2(S.Ins_io64_64(I.ins_Shr64), dst, amt)}{:fast_instruction}{:quick exportOnly}{:public} Shr64(inout dst:dst_opr64, amt:shift_amt64)
+procedure{:instruction mk_taint_ins2(make_instr(I.ins_Shr64), dst, amt)}{:fast_instruction}{:quick exportOnly}{:public} Shr64(inout dst:dst_opr64, amt:shift_amt64)
     modifies
         efl;
     ensures
