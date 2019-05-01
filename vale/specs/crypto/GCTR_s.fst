@@ -11,8 +11,8 @@ open FStar.Mul
 open AES_s
 open FStar.Seq
 
-// length plain < pow2_32 / 4096 <= spec max of 2**39 - 256;
-let is_gctr_plain_LE (p:seq nat8) : prop0 = 4096 * length p < pow2_32
+// length plain <= spec max of 2**39 - 256;
+let is_gctr_plain_LE (p:seq nat8) : prop0 = length p <= pow2 39 - 256
 type gctr_plain_LE:eqtype = p:seq nat8 { is_gctr_plain_LE p }
 type gctr_plain_internal_LE:eqtype = p:seq quad32
 

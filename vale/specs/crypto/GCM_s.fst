@@ -18,8 +18,8 @@ unfold type gcm_auth_LE = gctr_plain_LE
 let gcm_encrypt_LE_def (alg:algorithm) (key:aes_key alg) (iv:seq16 nat8) (plain:seq nat8) (auth:seq nat8) :
   Pure (tuple2 (seq nat8) (seq nat8))
     (requires
-      4096 * length plain < pow2_32 /\
-      4096 * length auth < pow2_32
+      length plain <= pow2 39 - 256 /\
+      length auth <= pow2 39 - 256
     )
     (ensures fun (c, t) -> True)
   =
@@ -30,7 +30,9 @@ let gcm_encrypt_LE_def (alg:algorithm) (key:aes_key alg) (iv:seq16 nat8) (plain:
 
   let c = gctr_encrypt_LE (inc32 j0_BE 1) plain alg key_LE in
 
-  let lengths_BE = Mkfour (8 * length plain) 0 (8 * length auth) 0 in
+  // Sets the first 64-bit number to 8 * length plain, and the second to 8* length auth
+  assert_norm (8 * (pow2 39 - 256) < pow2_64);
+  let lengths_BE = insert_nat64 (insert_nat64 (Mkfour 0 0 0 0) (8 * length auth) 1) (8 * length plain) 0 in
   let lengths_LE = reverse_bytes_quad32 lengths_BE in
 
   let zero_padded_c_LE = le_bytes_to_seq_quad32 (pad_to_128_bits c) in
@@ -38,6 +40,7 @@ let gcm_encrypt_LE_def (alg:algorithm) (key:aes_key alg) (iv:seq16 nat8) (plain:
 
   let hash_input_LE = append zero_padded_a_LE (append zero_padded_c_LE (create 1 lengths_LE)) in
   let s_LE = ghash_LE h_LE hash_input_LE in
+  assert_norm (pow2_32 <= pow2 39 - 256);
   let t = gctr_encrypt_LE j0_BE (le_quad32_to_bytes s_LE) alg key_LE in
 
   (c, t)
@@ -50,8 +53,8 @@ let gcm_encrypt_LE (alg:algorithm) (key:seq nat8) (iv:seq16 nat8) (plain:seq nat
   Pure (tuple2 (seq nat8) (seq nat8))
     (requires
       is_aes_key alg key /\
-      4096 * length plain < pow2_32 /\
-      4096 * length auth < pow2_32
+      length plain <= pow2 39 - 256 /\
+      length auth <= pow2 39 - 256
     )
     (ensures fun (c, t) -> True)
   =
@@ -60,8 +63,8 @@ let gcm_encrypt_LE (alg:algorithm) (key:seq nat8) (iv:seq16 nat8) (plain:seq nat
 let gcm_decrypt_LE_def (alg:algorithm) (key:aes_key alg) (iv:seq16 nat8) (cipher:seq nat8) (auth:seq nat8) (tag:seq nat8) :
   Pure (tuple2 (seq nat8) (bool))
     (requires
-      4096 * length cipher < pow2_32 /\
-      4096 * length auth < pow2_32
+      length cipher <= pow2 39 - 256 /\
+      length auth <= pow2 39 - 256
     )
     (ensures fun (p, t) -> True)
   =
@@ -72,7 +75,8 @@ let gcm_decrypt_LE_def (alg:algorithm) (key:aes_key alg) (iv:seq16 nat8) (cipher
 
   let p = gctr_encrypt_LE (inc32 j0_BE 1) cipher alg key_LE in   // TODO: Rename gctr_encrypt_LE to gctr_LE
 
-  let lengths_BE = Mkfour (8 * length cipher) 0 (8 * length auth) 0 in
+  assert_norm (8 * (pow2 39 - 256) < pow2_64);
+  let lengths_BE = insert_nat64 (insert_nat64 (Mkfour 0 0 0 0) (8 * length auth) 1) (8 * length cipher) 0 in
   let lengths_LE = reverse_bytes_quad32 lengths_BE in
 
   let zero_padded_c_LE = le_bytes_to_seq_quad32 (pad_to_128_bits cipher) in
@@ -80,6 +84,7 @@ let gcm_decrypt_LE_def (alg:algorithm) (key:aes_key alg) (iv:seq16 nat8) (cipher
 
   let hash_input_LE = append zero_padded_a_LE (append zero_padded_c_LE (create 1 lengths_LE)) in
   let s_LE = ghash_LE h_LE hash_input_LE in
+  assert_norm (pow2_32 <= pow2 39 - 256);
   let t = gctr_encrypt_LE j0_BE (le_quad32_to_bytes s_LE) alg key_LE in
 
   (p, t = tag)
@@ -88,8 +93,8 @@ let gcm_decrypt_LE (alg:algorithm) (key:seq nat8) (iv:seq16 nat8) (cipher:seq na
   Pure (tuple2 (seq nat8) (bool))
     (requires
       is_aes_key alg key /\
-      4096 * length cipher < pow2_32 /\
-      4096 * length auth < pow2_32
+      length cipher <= pow2 39 - 256 /\
+      length auth <= pow2 39 - 256
     )
     (ensures fun (p, t) -> True)
   =
