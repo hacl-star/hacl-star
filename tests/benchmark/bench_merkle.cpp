@@ -266,7 +266,7 @@ void bench_merkle_insert(const BenchmarkSettings & s)
                   "bench_merkle_insert_cycles.svg",
                   extras.str());
 
-  std::string X = "(column('Nodes')/column('CPUexcl')*1000000000*" + std::to_string(s.samples) + ")";
+  std::string X = "((" + std::to_string(s.samples) + " * column('Nodes'))/(column('CPUexcl')/1000000000))";
   std::string lbls = "sprintf(\"%dk\", column('Nodes')/1024)";
   Benchmark::PlotSpec plot_specs_timed = {
     std::make_pair(data_filename, "using " + X + ":xticlabels(" + lbls + ") with boxes"),
@@ -310,7 +310,7 @@ void bench_merkle_get_path(const BenchmarkSettings & s)
                   "bench_merkle_get_path_cycles.svg",
                   extras.str());
 
-  std::string X = "(column('Nodes')/column('CPUexcl')*1000000000*" + std::to_string(s.samples) + ")";
+  std::string X = "((" + std::to_string(s.samples) + " * column('Nodes'))/(column('CPUexcl')/1000000000))";
   std::string lbls = "sprintf(\"%dk\", column('Nodes')/1024)";
   Benchmark::PlotSpec plot_specs_timed = {
     std::make_pair(data_filename, "using " + X + ":xticlabels(" + lbls + ") with boxes"),
@@ -354,7 +354,7 @@ void bench_merkle_verify(const BenchmarkSettings & s)
                   "bench_merkle_verify_cycles.svg",
                   extras.str());
 
-  std::string X = "(column('Nodes')/column('CPUexcl')*1000000000*" + std::to_string(s.samples) + ")";
+  std::string X = "((" + std::to_string(s.samples) + " * column('Nodes'))/(column('CPUexcl')/1000000000))";
   std::string lbls = "sprintf(\"%dk\", column('Nodes')/1024)";
   Benchmark::PlotSpec plot_specs_timed = {
     std::make_pair(data_filename, "using " + X + ":xticlabels(" + lbls + ") with boxes"),
@@ -375,8 +375,8 @@ void bench_merkle(const BenchmarkSettings & s)
 {
   // These amortize over a number of tree nodes, so shouldn't need many samples.
   BenchmarkSettings s_local = s;
-  s_local.samples = std::max<size_t>(s.samples / 100, 1ul);
-  s_local.warmup_samples = 1;
+  s_local.samples = std::max<size_t>(s.samples / 1000, 1ul);
+  s_local.warmup_samples = 0;
 
   bench_merkle_insert(s_local);
   bench_merkle_get_path(s_local);

@@ -164,6 +164,9 @@ void Benchmark::run(const BenchmarkSettings & s)
     bench_cleanup(s);
   }
 
+  ctotal = 0.0;
+  texcl = Clock::duration::zero();
+
   for (int i = 0; i < s.samples; i++)
   {
     bench_setup(s);
