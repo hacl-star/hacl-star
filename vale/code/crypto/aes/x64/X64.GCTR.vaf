@@ -154,7 +154,7 @@ procedure {:quick} gctr_core(
         validDstAddrsOffset128(mem, out_ptr, out_b, block_offset, len, memTaint, Secret);
         in_ptr  + 16 * len < pow2_64;
         out_ptr + 16 * len < pow2_64;
-        buffer_length(in_b) == buffer_length(out_b) /\ 256 * buffer_length(in_b) < pow2_32;
+        buffer_length(in_b) == buffer_length(out_b) /\ buffer_length(in_b) * 16 < pow2_32;
         mask == Mkfour(0x0C0D0E0F, 0x08090A0B, 0x04050607, 0x00010203);
 
         // GCTR
@@ -268,7 +268,7 @@ procedure {:quick} gctr_core_opt(
         validDstAddrs128(mem, out_ptr, out_b, len, memTaint, Secret);
         in_ptr  + 16 * len < pow2_64;
         out_ptr + 16 * len < pow2_64;
-        buffer_length(in_b) == buffer_length(out_b) /\ 256 * buffer_length(in_b) < pow2_32;
+        buffer_length(in_b) == buffer_length(out_b) /\ buffer_length(in_b) * 16 < pow2_32;
 
         // AES reqs
         aesni_enabled && avx_enabled;
@@ -341,7 +341,7 @@ procedure {:quick}{:public} gctr_bytes_extra_work(
         validDstAddrs128(mem, orig_out_ptr, out_b, bytes_to_quad_size(num_bytes), memTaint, Secret);
         orig_in_ptr  + 16 * bytes_to_quad_size(num_bytes) < pow2_64;
         orig_out_ptr + 16 * bytes_to_quad_size(num_bytes) < pow2_64;
-        buffer_length(in_b) == buffer_length(out_b) /\ buffer_length(out_b) == bytes_to_quad_size(num_bytes) /\ 256 * buffer_length(in_b) < pow2_32 /\ 4096 * num_bytes < pow2_32;
+        buffer_length(in_b) == buffer_length(out_b) /\ buffer_length(out_b) == bytes_to_quad_size(num_bytes) /\ buffer_length(in_b) * 16 < pow2_32 /\ num_bytes < pow2_32;
 
         // AES reqs
         aesni_enabled;
@@ -419,7 +419,7 @@ procedure {:quick}{:public} gctr_bytes_extra(
         validDstAddrs128(mem, orig_out_ptr, out_b, bytes_to_quad_size(num_bytes), memTaint, Secret);
         orig_in_ptr  + 16 * bytes_to_quad_size(num_bytes) < pow2_64;
         orig_out_ptr + 16 * bytes_to_quad_size(num_bytes) < pow2_64;
-        buffer_length(in_b) == buffer_length(out_b) /\ buffer_length(out_b) == bytes_to_quad_size(num_bytes) /\ 256 * buffer_length(in_b) < pow2_32 /\ 4096 * num_bytes < pow2_32;
+        buffer_length(in_b) == buffer_length(out_b) /\ buffer_length(out_b) == bytes_to_quad_size(num_bytes) /\ buffer_length(in_b) * 16 < pow2_32 /\  num_bytes < pow2_32;
 
         // AES reqs
         aesni_enabled;
@@ -492,7 +492,7 @@ procedure {:quick}{:public} gctr_bytes_no_extra(
         validDstAddrs128(mem, orig_out_ptr, out_b, bytes_to_quad_size(num_bytes), memTaint, Secret);
         orig_in_ptr  + 16 * bytes_to_quad_size(num_bytes) < pow2_64;
         orig_out_ptr + 16 * bytes_to_quad_size(num_bytes) < pow2_64;
-        buffer_length(in_b) == buffer_length(out_b) /\ buffer_length(out_b) == bytes_to_quad_size(num_bytes) /\ 256 * buffer_length(in_b) < pow2_32 /\ 4096 * num_bytes < pow2_32;
+        buffer_length(in_b) == buffer_length(out_b) /\ buffer_length(out_b) == bytes_to_quad_size(num_bytes) /\ buffer_length(in_b) * 16 < pow2_32 /\ num_bytes < pow2_32;
 
         // AES reqs
         alg = AES_128 || alg = AES_256;
@@ -563,7 +563,7 @@ procedure {:quick} gctr_bytes(
         validDstAddrs128(mem, inout_ptr, inout_b, 1, memTaint, Secret);
         in_ptr  + 16 * num_blocks < pow2_64;
         out_ptr + 16 * num_blocks < pow2_64;
-        buffer_length(in_b) == buffer_length(out_b) /\ buffer_length(out_b) == num_blocks /\ 256 * buffer_length(in_b) < pow2_32 /\ 4096 * num_blocks * 16 < pow2_32;
+        buffer_length(in_b) == buffer_length(out_b) /\ buffer_length(out_b) == num_blocks /\ buffer_length(in_b) * 16 < pow2_32 /\ num_blocks * 16 < pow2_32;
         buffer_length(inout_b) == 1;
 
         num_blocks * 128/8 <= plain_num_bytes < num_blocks * 128/8 + 128/8;
@@ -662,8 +662,7 @@ procedure {:quick}{:public}{:exportSpecs} gctr_bytes_stdcall(
     buffer_length(in_b) == buffer_length(out_b);
     buffer_length(ctr_b) == 1;
     buffer_length(inout_b) == 1;
-    256 * buffer_length(in_b) < pow2_32;
-    4096 * num_blocks * 16 < pow2_32;
+    num_blocks * 16 < pow2_32;
 
     num_blocks * 128/8 <= num_bytes < num_blocks * 128/8 + 128/8;
 
