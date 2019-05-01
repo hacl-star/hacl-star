@@ -778,7 +778,20 @@ let test_correctness v_ =
     pop_frame();
     resVal
 
-#reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0 --admit_smt_queries true"
+#reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0" // --admit_smt_queries true"
+
+let buf = t:buftype & a:Type0 & buffer_t t a 
+[@BigOps.__reduce__] unfold
+let bb (#t:buftype) (#a:Type0) (b:buffer_t t a) : buf = (| t, a, b |)
+[@BigOps.__reduce__] unfold
+let disjoint_buf (b0 b1: buf) =
+  let (| _, _, b0 |) = b0 in
+  let (| _, _, b1 |) = b1 in
+  disjoint b0 b1
+[@BigOps.__reduce__] unfold
+let live_buf (h:HS.mem) (b: buf) =
+  let (| _, _, b |) = b in
+  live h b
 
 val qtesla_sign_do_while:
     randomness: lbuffer uint8 crypto_seedbytes
@@ -792,33 +805,29 @@ val qtesla_sign_do_while:
   -> m : lbuffer uint8 mlen
   -> sm: lbuffer uint8 (crypto_bytes +. mlen)
   -> Stack bool
-    (requires fun h -> live h randomness /\ live h randomness_input /\ live h nonce /\ live h a /\ live h s /\ live h e /\ 
-                    live h smlen /\ live h m /\ live h sm /\
-
-                    disjoint randomness randomness_input /\ disjoint randomness nonce /\ disjoint randomness a /\ 
-                    disjoint randomness s /\ disjoint randomness e /\ disjoint randomness smlen /\ disjoint randomness m /\ 
-                    disjoint randomness sm /\
-
-                    disjoint randomness_input nonce /\ disjoint randomness_input a /\ disjoint randomness_input s /\
-                    disjoint randomness_input e /\ disjoint randomness_input smlen /\ disjoint randomness_input m /\
-                    disjoint randomness_input sm /\
-
-                    disjoint nonce a /\ disjoint nonce s /\ disjoint nonce e /\ disjoint nonce smlen /\ disjoint nonce m /\
-                    disjoint nonce sm /\
-
-                    disjoint a s /\ disjoint a e /\ disjoint a smlen /\ disjoint a m /\ disjoint a sm /\
-
-                    disjoint s e /\ disjoint s smlen /\ disjoint s m /\ disjoint s sm /\
-
-                    disjoint e smlen /\ disjoint e m /\ disjoint e sm /\
-
-                    disjoint smlen m /\ disjoint smlen sm /\ disjoint m sm /\
-                    
-                    FStar.Int.fits (I32.v (bget h nonce 0) + 1) I32.n)
+    (requires fun h -> 
+      let bufs =
+        [bb randomness; 
+         bb randomness_input;
+         bb nonce;
+         bb a;
+         bb s;
+         bb e;
+         bb smlen;
+         bb m;
+         bb sm]      
+      in
+      BigOps.big_and (live_buf h) bufs /\
+      BigOps.pairwise_and disjoint_buf bufs /\
+      FStar.Int.fits (I32.v (bget h nonce 0) + 1) I32.n)
     (ensures fun h0 _ h1 -> modifies3 nonce smlen sm h0 h1)
+
+#reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0 --log_queries --query_stats --print_z3_statistics \
+                --using_facts_from '* -LowStar.Monotonic.Buffer.unused_in_not_unused_in_disjoint_2 -FStar.Monotonic.Heap.equal_dom'"
 
 let qtesla_sign_do_while randomness randomness_input nonce a s e smlen mlen m sm =
     push_frame();
+    let h0 = ST.get() in
     let c = create crypto_c_bytes (u8 0) in
     let pos_list = create params_h 0ul in
     let sign_list = create params_h 0s in
@@ -829,7 +838,26 @@ let qtesla_sign_do_while randomness randomness_input nonce a s e smlen mlen m sm
     let v_:poly_k = poly_k_create () in 
     let ec:poly_k = poly_k_create () in
     let rsp = create (size 1) 0l in
-
+    //NS: to prove the assume below, we need to use 
+    // LowStar.Monotonic.Buffer.unused_in_not_unused_in_disjoint_2
+    //but that's really expensive in this context
+    //It's probably worth factoring out a proof of this fact below
+    //until we can improve that lemma
+    assume (FStar.BigOps.pairwise_and 
+                  disjoint_buf 
+                  [bb c; bb pos_list; bb sign_list;
+                   bb y; bb y_ntt; bb sc; bb z; bb v_; bb ec; 
+                   bb rsp;
+                   bb randomness; 
+                   bb randomness_input;
+                   bb nonce;
+                   bb a;
+                   bb s;
+                   bb e;
+                   bb smlen;
+                   bb m;
+                   bb sm]);
+    
     nonce.(size 0) <- I32.(nonce.(size 0) +^ 1l);
     sample_y y randomness (nonce.(size 0));
     // TODO: ntt transformation only happens here in provable parameter sets because poly_mul assumes
@@ -846,8 +874,11 @@ let qtesla_sign_do_while randomness randomness_input nonce a s e smlen mlen m sm
     hash_H c v_ (sub randomness_input (crypto_randombytes +. crypto_seedbytes) crypto_hmbytes);
     encode_c pos_list sign_list c;
     sparse_mul sc s pos_list sign_list;
+    let h = ST.get () in
+    //NS: I'm not sure how this is meant to be established
+    assume (forall i .{:pattern elem_v (bget h y i)}
+               i < v params_n ==> is_elem_int (elem_v (bget h y i) + elem_v (bget h sc i)));
     poly_add z y sc;
-
     let res = 
     if test_rejection z
     then (false)
@@ -860,31 +891,46 @@ let qtesla_sign_do_while randomness randomness_input nonce a s e smlen mlen m sm
          (fun k ->
              let sk_offset:size_t = (params_n *. (k +. (size 1))) in
              let sublen:size_t = crypto_secretkeybytes -. sk_offset in
-             sparse_mul (index_poly ec k) (sub e (params_n *. k) params_n) pos_list sign_list;
+             let ec_k = (index_poly ec k) in
+             let e_k = (sub e (params_n *. k) params_n) in
+             //NS: Not sure why this is not provable
+             assume (disjoint ec_k e_k);
+             sparse_mul ec_k e_k pos_list sign_list;
              poly_sub_correct (index_poly v_ k) (index_poly v_ k) (index_poly ec k);
              rsp.(size 0) <- test_correctness (index_poly v_ k);
              let rspVal = rsp.(size 0) in rspVal <> 0l
          ) in
-
          if (let rspVal = rsp.(size 0) in rspVal <> 0l)
          then (false)
          else (
               let h3 = ST.get () in
               for 0ul mlen
               (fun h _ -> live h sm /\ live h m /\ modifies1 sm h3 h)
-              (fun i -> sm.(crypto_bytes +. i) <- m.(i) );
+              (fun i -> let ix = crypto_bytes +. i in
+                     assert (length sm == v (crypto_bytes +. mlen));
+                     //NS: This seems to be a glitch in Lib.IntTypes
+                     //    this kind of fact ought to be provable, but
+                     //    here it fails, I think, because ifuel=0 ... but i'm not sure about that
+                     assume (v crypto_bytes + v mlen == v (crypto_bytes +. mlen));
+                     assert (v i < v mlen);
+                     sm.(ix) <- m.(i) );
 
               smlen.(size 0) <- crypto_bytes +. mlen;
-
+              //NS: Something seems wrong here conceptually. The size bounds do not seem correct
+              assume (v crypto_bytes = v crypto_bytes + v mlen);
               encode_sig sm c z;
 
               true
               )
         ) in
     pop_frame(); 
+    let hn = ST.get() in
+    //NS: I would suggest trying to decompose this modifies clause and
+    //    proving it at various intermediate states, as we did in another example
+    assume (modifies3 nonce smlen sm h0 hn);
     res
 
-//#reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0"
+#reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0 --admit_smt_queries true"
 
 val qtesla_sign:
     smlen : lbuffer size_t 1ul // smlen only valid on output; does _not_ indicate allocated size of sm on input
