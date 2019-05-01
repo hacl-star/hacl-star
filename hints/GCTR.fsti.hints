@@ -1,5 +1,5 @@
 [
-  "˚˚Ø¯!\u0000πZˆó@mÅÕnà",
+  "|\u007fhÃ\u00061÷OôÖP¯ËD\u0004¿",
   [
     [
       "GCTR.inc32lite",
@@ -24,7 +24,7 @@
         "typing_Words_s.__proj__Mkfour__item__lo0"
       ],
       0,
-      "1a3ec93cd5ad2283032b4b653beefbbd"
+      "44f663d9da1f8922d7d3ded4957523da"
     ],
     [
       "GCTR.partial_seq_agreement",
@@ -36,7 +36,7 @@
         "refinement_interpretation_Tm_refine_6d2333afbb8ce899cd8937b56b09e98d"
       ],
       0,
-      "fc97431f5a0c307989b8032e0a4b638d"
+      "617373eecfbc0e01bfec16509093da2d"
     ],
     [
       "GCTR.gctr_encrypt_block_offset",
@@ -49,7 +49,7 @@
         "refinement_interpretation_Tm_refine_8d65e998a07dd53ec478e27017d9dba5"
       ],
       0,
-      "6c6cadf65264019d58703fdaf5339d52"
+      "a4f99ee54d75a05efbf303c8605bab73"
     ],
     [
       "GCTR.gctr_encrypt_empty",
@@ -81,7 +81,7 @@
         "typing_Types_s.le_seq_quad32_to_bytes"
       ],
       0,
-      "0e9bcc4960167ed727fad61c8bb1306e"
+      "b76a9b7a225d01b4089cdf3858d6ef21"
     ],
     [
       "GCTR.aes_encrypt_BE",
@@ -90,7 +90,7 @@
       0,
       [ "@query" ],
       0,
-      "f5af65fa13d0042f2aec6d8b1b80377a"
+      "2dda642d068259b2cfc5e2553d4725de"
     ],
     [
       "GCTR.gctr_registers_def",
@@ -99,7 +99,7 @@
       0,
       [ "@query" ],
       0,
-      "fbb0c3481fd74e20ab862347eef4090f"
+      "f9a09bafeb6ecda29e71291f3d7b8c09"
     ],
     [
       "GCTR.gctr_partial",
@@ -111,7 +111,7 @@
         "refinement_interpretation_FStar.Seq.Base_Tm_refine_6d2333afbb8ce899cd8937b56b09e98d"
       ],
       0,
-      "9171707374b810e9af41ed2254407df0"
+      "50bfd0d47776bb0802f2619340b67695"
     ],
     [
       "GCTR.gctr_partial_opaque_init",
@@ -129,7 +129,7 @@
         "token_correspondence_GCTR.gctr_partial"
       ],
       0,
-      "8bb4e4bc67b91cea90af945a8fe3f8fb"
+      "ef563eb4fe8031791d615fd447ed783a"
     ],
     [
       "GCTR.lemma_gctr_partial_append",
@@ -167,7 +167,7 @@
         "token_correspondence_GCTR.gctr_partial"
       ],
       0,
-      "d3772dffaf4c30d127b39b5345b6e3f3"
+      "421af0012ec61ef89628f4e399d52d8b"
     ],
     [
       "GCTR.gctr_partial_opaque_ignores_postfix",
@@ -202,7 +202,7 @@
         "token_correspondence_GCTR.gctr_partial"
       ],
       0,
-      "eb19eef9cb100e591398571101a555c9"
+      "966fe6818585efd82c8451a88a2a2b86"
     ],
     [
       "GCTR.gctr_partial_extend6",
@@ -215,7 +215,7 @@
         "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-      "dac9e54865d5ec2bee901166f5966caf"
+      "0c707163d5f2f6186c647fbec3228e14"
     ],
     [
       "GCTR.gctr_partial_completed",
@@ -228,7 +228,7 @@
         "refinement_interpretation_Tm_refine_8d65e998a07dd53ec478e27017d9dba5"
       ],
       0,
-      "82d8bf79afeba89be9f1c7c322011708"
+      "3952a7ed131583296c03b4068d005399"
     ],
     [
       "GCTR.gctr_partial_opaque_completed",
@@ -241,7 +241,7 @@
         "refinement_interpretation_Tm_refine_8d65e998a07dd53ec478e27017d9dba5"
       ],
       0,
-      "d70038450a5ec31f45d734dc70d55d59"
+      "9303190901f98dfb0dfcc01efcb0b49a"
     ],
     [
       "GCTR.gctr_partial_to_full_basic",
@@ -257,7 +257,7 @@
         "refinement_interpretation_Tm_refine_8d65e998a07dd53ec478e27017d9dba5"
       ],
       0,
-      "97ea3cfff8c75d753b946acffeab6689"
+      "6d81c391edbda20ce7d5ca8f817506da"
     ],
     [
       "GCTR.gctr_partial_to_full_advanced",
@@ -285,7 +285,7 @@
         "typing_Types_s.le_seq_quad32_to_bytes", "unit_typing"
       ],
       0,
-      "c47c890540e8b9a1cc7c119cc8d7d35d"
+      "7161dfd424c51bb626e0051eca4fdecf"
     ],
     [
       "GCTR.gctr_encrypt_one_block",
@@ -301,7 +301,34 @@
         "refinement_interpretation_Tm_refine_8d65e998a07dd53ec478e27017d9dba5"
       ],
       0,
-      "abd216f7dae84236fee6a870c5a2194e"
+      "cf2de3d7013eede5c177e731c6bbde2c"
+    ],
+    [
+      "GCTR.gctr_bytes_helper",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565",
+        "Prims_pretyping_f8666440faa91836cc5a13998af863fc", "b2t_def",
+        "eq2-interp", "equation_Prims.nat", "equation_Prims.squash",
+        "equation_Types_s.quad32", "equation_Words_s.nat32",
+        "function_token_typing_Prims.__cache_version_number__",
+        "function_token_typing_Words_s.nat32", "int_inversion",
+        "kinding_Words_s.four@tok", "l_and-interp",
+        "lemma_FStar.Seq.Base.lemma_len_append",
+        "lemma_Types_s.le_seq_quad32_to_bytes_length",
+        "primitive_Prims.op_Addition", "primitive_Prims.op_LessThan",
+        "primitive_Prims.op_LessThanOrEqual",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_8d65e998a07dd53ec478e27017d9dba5",
+        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "typing_FStar.Seq.Base.append", "unit_typing"
+      ],
+      0,
+      "afcc0db2fc760a464c814cfdfc5eaf49"
     ]
   ]
 ]

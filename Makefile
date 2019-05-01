@@ -66,6 +66,10 @@ ifeq (,$(wildcard $(VALE_HOME)/bin/vale.exe))
 endif
 endif
 
+ifneq ($(shell cat $(VALE_HOME)/bin/.vale_version | tr -d '\r'),$(shell cat vale/.vale_version | tr -d '\r'))
+  $(error this repository wants Vale $(shell cat vale/.vale_version) but in $$VALE_HOME I found $(shell cat $(VALE_HOME)/bin/.vale_version))
+endif
+
 # Backwards-compat, remove
 ifneq (,$(MLCRYPTO_HOME))
 OPENSSL_HOME 	:= $(MLCRYPTO_HOME)/openssl
@@ -120,6 +124,14 @@ test-ml: $(subst .,_,$(patsubst %.fst,test-ml-%,$(notdir $(wildcard specs/tests/
 ci:
 	NOSHORTLOG=1 $(MAKE) vale-fst
 	FSTAR_DEPEND_FLAGS="--warn_error +285" NOSHORTLOG=1 $(MAKE) all-unstaged test-unstaged
+	NOSHORTLOG=1 $(MAKE) wasm
+
+wasm:
+	tools/blast-staticconfig.sh wasm
+	EVERCRYPT_CONFIG=wasm $(MAKE) wasm-staged
+
+wasm-unstaged: dist/wasm/Makefile.basic
+	cd $(dir $<) && node main.js
 
 # Not reusing the -staged automatic target so as to export MIN_TEST
 min-test:
@@ -224,6 +236,7 @@ VALE_FSTS = $(call to-obj-dir,$(VAF_AS_FSTS))
 # The complete set of F* files, both hand-written and Vale-generated. Note that
 # this is only correct in the second stage of the build.
 FSTAR_ROOTS = $(wildcard $(addsuffix /*.fsti,$(ALL_HACL_DIRS)) $(addsuffix /*.fst,$(ALL_HACL_DIRS))) \
+  $(FSTAR_HOME)/ulib/LowStar.Endianness.fst \
   $(wildcard obj/*.fst) $(wildcard obj/*.fsti) # these two empty during the first stage
 
 # We currently force regeneration of three depend files. This is long.
@@ -275,6 +288,8 @@ else ifeq ($(MAKECMDGOALS),all)
 else ifeq (,$(filter-out %-staged,$(MAKECMDGOALS)))
   SKIPDEPEND=1
 else ifeq (,$(filter-out %-verify,$(MAKECMDGOALS)))
+  SKIPDEPEND=1
+else ifeq ($(MAKECMDGOALS),wasm)
   SKIPDEPEND=1
 else ifeq ($(MAKECMDGOALS),ci)
   SKIPDEPEND=1
@@ -334,10 +349,12 @@ vale-fst: $(VALE_FSTS)
 
 # A litany of file-specific options, replicating exactly what was in SConstruct
 # before. TODO simplification would be good.
+USE_EXTRACTED_INTERFACES?=true
+
 VALE_FSTAR_FLAGS_NOSMT=--z3cliopt smt.arith.nl=false \
   --z3cliopt smt.QI.EAGER_THRESHOLD=100 --z3cliopt smt.CASE_SPLIT=3 \
   --max_fuel 1 --max_ifuel 1 \
-  --initial_ifuel 0 --use_extracted_interfaces true
+  --initial_ifuel 0 --use_extracted_interfaces $(USE_EXTRACTED_INTERFACES)
 
 VALE_FSTAR_FLAGS=$(VALE_FSTAR_FLAGS_NOSMT) \
   --smtencoding.elim_box true --smtencoding.l_arith_repr native \
@@ -448,6 +465,9 @@ obj/Fsqr_inline.fst.checked: \
 
 obj/Vale.Stdcalls.GCMencrypt.fst.checked: \
   FSTAR_FLAGS=$(VALE_FSTAR_FLAGS)
+
+obj/Vale.Stdcalls.GCMencryptOpt.fst.checked: \
+  USE_EXTRACTED_INTERFACES=false
 
 obj/Vale.Stdcalls.GCMencryptOpt.fst.checked: \
   FSTAR_FLAGS=$(VALE_FSTAR_FLAGS)
@@ -634,7 +654,7 @@ HAND_WRITTEN_OPTIONAL_FILES = \
 # When extracting our libraries, we purposely don't distribute tests
 #
 # See Makefile.include for the definition of VALE_BUNDLES
-DEFAULT_FLAGS		=\
+DEFAULT_FLAGS_NO_TESTS	=\
   $(addprefix -library ,$(HACL_HAND_WRITTEN_C)) \
   -bundle Hacl.Spec.*,Spec.*[rename=Hacl_Spec] \
   -bundle Hacl.Poly1305.Field32xN.Lemmas[rename=Hacl_Lemmas] \
@@ -643,7 +663,6 @@ DEFAULT_FLAGS		=\
   -add-include '"libintvector.h"' \
   -add-include '"evercrypt_targetconfig.h"' \
   -drop EverCrypt.TargetConfig \
-  -bundle Test,Test.*,Hacl.Test.* \
   -bundle EverCrypt.BCrypt \
   -bundle EverCrypt.OpenSSL \
   -bundle MerkleTree.Spec,MerkleTree.Spec.*,MerkleTree.New.High,MerkleTree.New.High.* \
@@ -663,7 +682,25 @@ DEFAULT_FLAGS		=\
   -add-include '"curve25519-inline.h"' \
   -no-prefix 'MerkleTree.New.Low' \
   -no-prefix 'MerkleTree.New.Low.Serialization' \
-  -fparentheses -fno-shadow -fcurly-braces
+  -fparentheses -fno-shadow -fcurly-braces \
+  -bundle WasmSupport
+
+DEFAULT_FLAGS = $(DEFAULT_FLAGS_NO_TESTS) -bundle Test,Test.*,Hacl.Test.*
+
+# Should be fixed by having KreMLin better handle imported names
+WASM_STANDALONE=Prims LowStar.Endianness C.Endianness \
+  C.String TestLib C
+
+# Notes: only the functions reachable via Test.NoHeap are currently enabled.
+WASM_FLAGS	=\
+  $(patsubst %,-bundle %,$(WASM_STANDALONE)) \
+  -no-prefix Test.NoHeap \
+  -bundle Test.NoHeap=Test,Test.* \
+  -bundle FStar.* \
+  -bundle EverCrypt.*,Hacl.*,MerkleTree.*[rename=EverCrypt] \
+  -bundle LowStar.* \
+  -bundle '\*[rename=Misc]' \
+  -minimal -wasm
 
 COMPACT_FLAGS	=\
   -bundle Hacl.Hash.MD5+Hacl.Hash.Core.MD5+Hacl.Hash.SHA1+Hacl.Hash.Core.SHA1+Hacl.Hash.SHA2+Hacl.Hash.Core.SHA2+Hacl.Hash.Core.SHA2.Constants=Hacl.Hash.*[rename=Hacl_Hash] \
@@ -672,6 +709,7 @@ COMPACT_FLAGS	=\
   -bundle Hacl.Impl.Chacha20=Hacl.Impl.Chacha20.*[rename=Hacl_Chacha20] \
   -bundle Hacl.Curve25519_51+Hacl.Curve25519_64=Hacl.Impl.Curve25519.*[rename=Hacl_Curve25519] \
   -bundle Hacl.Impl.Chacha20Poly1305=Hacl.Impl.Chacha20Poly1305.*[rename=Hacl_Chacha20Poly1305] \
+  -bundle 'Hacl.Ed25519=Hacl.Impl.Ed25519.*,Hacl.Impl.BignumQ.Mul,Hacl.Impl.Load56,Hacl.Impl.SHA512.ModQ,Hacl.Impl.Store56,Hacl.Bignum25519' \
   -bundle LowStar.* \
   -bundle Prims,C.Failure,C,C.String,C.Loops,Spec.Loops,C.Endianness,FStar.*[rename=Hacl_Kremlib] \
   -bundle 'EverCrypt.Spec.*' \
@@ -696,8 +734,7 @@ old-%:
 
 # This is all legacy. Some notes:
 HACL_OLD_FILES=\
-  code/old/experimental/aesgcm/aesgcm-c/Hacl_AES.c \
-  code/old/ed25519/ed25519-c/Hacl_Ed25519.c
+  code/old/experimental/aesgcm/aesgcm-c/Hacl_AES.c
 
 dist/compact/Makefile.basic: KRML_EXTRA=$(COMPACT_FLAGS)
 
@@ -720,6 +757,9 @@ dist/coco/Makefile.basic: \
     -bundle EverCrypt= \
     -bundle EverCrypt.Hacl \
     -bundle '\*[rename=EverCrypt_Misc]'
+
+dist/wasm/Makefile.basic: KRML_EXTRA=$(WASM_FLAGS)
+dist/wasm/Makefile.basic: DEFAULT_FLAGS=$(DEFAULT_FLAGS_NO_TESTS)
 
 # OpenSSL and BCrypt disabled
 ifeq ($(EVERCRYPT_CONFIG),everest)

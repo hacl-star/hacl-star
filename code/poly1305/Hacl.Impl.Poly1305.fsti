@@ -19,9 +19,9 @@ inline_for_extraction noextract
 let poly1305_ctx (s:field_spec) = lbuffer (limb s) (nlimb s +. precomplen s)
 
 noextract
-val as_get_acc: #s:field_spec -> h:mem -> ctx:poly1305_ctx s -> GTot (S.elem (width s))
+val as_get_acc: #s:field_spec -> h:mem -> ctx:poly1305_ctx s -> GTot S.pfelem
 noextract
-val as_get_r: #s:field_spec -> h:mem -> ctx:poly1305_ctx s -> GTot (S.elem (width s))
+val as_get_r: #s:field_spec -> h:mem -> ctx:poly1305_ctx s -> GTot S.pfelem
 noextract
 val state_inv_t: #s:field_spec -> h:mem -> ctx:poly1305_ctx s -> Type0
 
@@ -48,7 +48,7 @@ let poly1305_init_st (s: field_spec) =
       (as_get_acc h1 ctx, as_get_r h1 ctx) == S.poly1305_init (as_seq h0 key))
 
 inline_for_extraction noextract
-val mk_poly1305_init: #s:field_spec -> poly1305_init_st s
+val poly1305_init: #s:field_spec -> poly1305_init_st s
 
 inline_for_extraction noextract
 let poly1305_update_st (s: field_spec) =
@@ -63,11 +63,11 @@ let poly1305_update_st (s: field_spec) =
       modifies (loc ctx) h0 h1 /\
       state_inv_t #s h1 ctx /\
       as_get_r h0 ctx == as_get_r h1 ctx /\
-      Lib.Sequence.index (as_get_acc h1 ctx) 0 ==
+      as_get_acc h1 ctx ==
       S.poly_update #(width s) (as_seq h0 text) (as_get_acc h0 ctx) (as_get_r h0 ctx))
 
 inline_for_extraction noextract
-val mk_poly1305_update: #s:field_spec -> poly1305_update_st s
+val poly1305_update: #s:field_spec -> poly1305_update_st s
 
 inline_for_extraction noextract
 let poly1305_finish_st (s: field_spec) =
@@ -81,10 +81,10 @@ let poly1305_finish_st (s: field_spec) =
       state_inv_t #s h ctx)
     (ensures  fun h0 _ h1 ->
       modifies (loc tag |+| loc ctx) h0 h1 /\
-      as_seq h1 tag == S.finish (as_seq h0 key) (Lib.Sequence.index (as_get_acc h0 ctx) 0))
+      as_seq h1 tag == S.finish (as_seq h0 key) (as_get_acc h0 ctx))
 
 inline_for_extraction noextract
-val mk_poly1305_finish: #s:field_spec -> poly1305_finish_st s
+val poly1305_finish: #s:field_spec -> poly1305_finish_st s
 
 inline_for_extraction noextract
 let poly1305_mac_st (s: field_spec) =

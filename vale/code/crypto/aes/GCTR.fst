@@ -707,3 +707,83 @@ let gctr_encrypt_one_block (icb_BE plain:quad32) (alg:algorithm) (key:seq nat32)
   let x = quad32_xor plain encrypted_icb in
   append_empty_r (create 1 x);                 // This is the missing piece
   ()
+
+
+
+let lemma_length_simplifier (s bytes t:seq quad32) (num_bytes:nat) : Lemma
+  (requires t == (if num_bytes > (length s) * 16 then append s bytes else s) /\
+            (num_bytes <= (length s) * 16 ==> num_bytes == (length s * 16)) /\
+            length s * 16 <= num_bytes /\
+            num_bytes < length s * 16 + 16 /\
+            length bytes == 1
+            )
+  (ensures slice (le_seq_quad32_to_bytes t) 0 num_bytes == 
+           slice (le_seq_quad32_to_bytes (append s bytes)) 0 num_bytes)
+  =
+  if num_bytes > (length s) * 16 then (
+    ()
+  ) else (
+    calc (==) {
+        slice (le_seq_quad32_to_bytes (append s bytes)) 0 num_bytes;
+          == { append_distributes_le_seq_quad32_to_bytes s bytes }
+        slice (append (le_seq_quad32_to_bytes s) (le_seq_quad32_to_bytes bytes)) 0 num_bytes;
+          == { Collections.Seqs.lemma_slice_first_exactly_in_append (le_seq_quad32_to_bytes s) (le_seq_quad32_to_bytes bytes) }
+        le_seq_quad32_to_bytes s;
+          == { assert (length (le_seq_quad32_to_bytes s) == num_bytes) }
+        slice (le_seq_quad32_to_bytes s) 0 num_bytes;
+    };
+    ()
+  )
+
+let gctr_bytes_helper (alg:algorithm) (key:seq nat32)
+                      (p128 p_bytes c128 c_bytes:seq quad32)
+                      (p_num_bytes:nat)
+                      (iv_BE:quad32) : Lemma
+  (requires 4096 * (length p128) * 16 < pow2_32 /\
+           length p128 * 16 <= p_num_bytes /\
+           p_num_bytes < length p128 * 16 + 16 /\
+           length p128 == length c128 /\
+           length p_bytes == 1 /\
+           length c_bytes == 1 /\
+           is_aes_key_LE alg key /\
+
+          // Ensured by gctr_core_opt
+          gctr_partial alg (length p128) p128 c128 key iv_BE /\
+          (p_num_bytes > length p128 * 16 ==>
+           index c_bytes 0 == gctr_encrypt_block (inc32 iv_BE (length p128)) (index p_bytes 0) alg key 0))
+  (ensures (let plain_raw_quads = append p128 p_bytes in
+            let plain_bytes = slice (le_seq_quad32_to_bytes plain_raw_quads) 0 p_num_bytes in
+            let cipher_raw_quads = append c128 c_bytes in
+            let cipher_bytes = slice (le_seq_quad32_to_bytes cipher_raw_quads) 0 p_num_bytes in
+            is_gctr_plain_LE plain_bytes /\
+            cipher_bytes == gctr_encrypt_LE iv_BE plain_bytes alg key))
+  =
+  let icb_BE_inc = inc32 iv_BE (length p128) in
+  assert (gctr_encrypt_block icb_BE_inc (index p_bytes 0) alg key 0 ==
+          gctr_encrypt_block iv_BE (index p_bytes 0) alg key  (length p128));  
+  reveal_opaque aes_encrypt_LE_def;          
+  //assert (gctr_partial alg 1 p_bytes c_bytes key icb_BE_inc);
+  reveal_opaque gctr_partial;
+  
+  if p_num_bytes = length p128 * 16 then (
+    gctr_partial_completed alg p128 c128 key iv_BE;
+    gctr_partial_to_full_basic iv_BE p128 alg key c128;
+    assert (le_seq_quad32_to_bytes c128 == gctr_encrypt_LE iv_BE (le_seq_quad32_to_bytes p128) alg key);
+    assert (equal (slice (le_seq_quad32_to_bytes p128) 0 p_num_bytes) (le_seq_quad32_to_bytes p128));
+    assert (equal (slice (le_seq_quad32_to_bytes c128) 0 p_num_bytes) (le_seq_quad32_to_bytes c128));
+    ()
+  ) else (    
+    lemma_gctr_partial_append alg (length p128) 1 p128 c128 p_bytes c_bytes key iv_BE icb_BE_inc;
+    let plain = append p128 p_bytes in
+    let cipher = append c128 c_bytes in
+    let num_blocks = p_num_bytes / 16 in
+    //gctr_partial_completed alg plain cipher key iv_BE;
+    gctr_partial_completed alg p128 c128 key iv_BE;
+    assert (equal (slice plain  0 num_blocks) p128);
+    assert (equal (slice cipher 0 num_blocks) c128);
+    gctr_partial_to_full_advanced iv_BE (append p128 p_bytes) (append c128 c_bytes) alg key p_num_bytes
+  );
+  lemma_length_simplifier p128 p_bytes (if p_num_bytes > length p128 * 16 then append p128 p_bytes else p128) p_num_bytes;
+  lemma_length_simplifier c128 c_bytes (if p_num_bytes > length c128 * 16 then append c128 c_bytes else c128) p_num_bytes;
+  ()
+  

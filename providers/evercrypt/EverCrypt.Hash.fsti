@@ -255,7 +255,7 @@ val create: a:alg -> ST (state a)
 *)
 val init: #a:e_alg -> (
   let a = Ghost.reveal a in
-  s: state a -> ST unit
+  s: state a -> Stack unit
   (requires invariant s)
   (ensures fun h0 _ h1 ->
     invariant s h1 /\
@@ -263,6 +263,11 @@ val init: #a:e_alg -> (
     M.(modifies (footprint s h0) h0 h1) /\
     footprint s h0 == footprint s h1 /\
     preserves_freeable s h0 h1))
+
+val update_multi_256: Hacl.Hash.Definitions.update_multi_st SHA2_256
+
+inline_for_extraction noextract
+val update_multi_224: Hacl.Hash.Definitions.update_multi_st SHA2_224
 
 // Note: this function relies implicitly on the fact that we are running with
 // code/lib/kremlin and that we know that machine integers and secret integers
@@ -307,6 +312,11 @@ val update_multi:
     invariant s h1 /\
     repr s h1 == compress_many (repr s h0) (B.as_seq h0 blocks) /\
     preserves_freeable s h0 h1))
+
+val update_last_256: Hacl.Hash.Definitions.update_last_st SHA2_256
+
+inline_for_extraction noextract
+val update_last_224: Hacl.Hash.Definitions.update_last_st SHA2_224
 
 // 18-03-05 note the *new* length-passing convention!
 // 18-03-03 it is best to let the caller keep track of lengths.
@@ -390,6 +400,9 @@ val copy:
       preserves_freeable s_dst h0 h1 /\
       invariant s_dst h1 /\
       repr s_dst h1 == repr s_src h0))
+
+val hash_256: Hacl.Hash.Definitions.hash_st SHA2_256
+val hash_224: Hacl.Hash.Definitions.hash_st SHA2_224
 
 (** @type: true
 *)

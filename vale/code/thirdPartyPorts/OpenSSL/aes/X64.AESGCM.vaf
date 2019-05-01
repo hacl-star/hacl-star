@@ -83,7 +83,7 @@ let aes_reqs_offset
   (alg:algorithm) (key:seq nat32) (round_keys:seq quad32) (keys_b:buffer128)
   (key_ptr:int) (mem:memory) (memTaint:memtaint) : prop0
   =
-  aesni_enabled /\
+  aesni_enabled /\ avx_enabled /\
   (alg = AES_128 || alg = AES_256) /\
   is_aes_key_LE alg key /\
   length(round_keys) == nr(alg) + 1 /\
@@ -300,6 +300,7 @@ procedure {:quick} Handle_ctr32(
         efl;
 
     requires
+        avx_enabled;
         T1 == reverse_bytes_quad32(ctr_BE);
         validSrcAddrs128(mem, Xip - 0x20, hkeys_b, 8, memTaint, Secret);
     ensures
@@ -1803,6 +1804,7 @@ procedure {:quick} Loop6x_save_output(
         mem; efl;
 
     requires
+        avx_enabled;
         // Valid ptrs and buffers
         validDstAddrsOffset128(mem, outp - 0x60, out_b, count*6, 6, memTaint, Secret);
 
@@ -3642,6 +3644,7 @@ procedure {:quick} Encrypt_save_and_shuffle_output(
         mem; efl;
 
     requires
+        avx_enabled;
         // Valid ptrs and buffers
         validDstAddrsOffset128(mem, outp - 0x60, out_b, count*6, 6, memTaint, Secret);
 
@@ -3759,14 +3762,10 @@ procedure {:quick} GCM_finalize(
         efl;
 
     requires
+        pclmulqdq_enabled && avx_enabled;
         // Valid buffers and pointers
         validDstAddrs128(mem, rbp, scratch_b, 8, memTaint, Secret);
         validSrcAddrs128(mem, Xip - 0x20, hkeys_b, 8, memTaint, Secret);
-
-        // GCM reqs
-        pclmulqdq_enabled;
-
-    ensures
 {
 //	 vmovdqu	0x30(%rbp),$Z2		# I[4]
     Load128_buffer(Z2, rbp, 0x30, Secret, scratch_b, 3);   // # I[4]
@@ -4437,6 +4436,7 @@ procedure {:quick} DecryptPrelude(
         mem; efl;
 
     requires
+        avx_enabled;
         // Valid buffers and pointers
         validSrcAddrs128(mem,  inp,  in_b, 6, memTaint, Secret);
         validDstAddrs128(mem, rbp, scratch_b, 8, memTaint, Secret);

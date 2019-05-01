@@ -14,10 +14,11 @@ let blocklen = 16ul
 
 type poly1305_ctx = lbuffer (Lib.IntVector.vec_t U64 2) 25ul
 
-noextract unfold
-let op_String_Access #a #len = Lib.Sequence.index #a #len
+let poly1305_init: poly1305_init_st M128 = poly1305_init #M128
 
-let poly1305_init: poly1305_init_st M128 = mk_poly1305_init #M128
+[@ CInline ]
+private
+let poly1305_update: poly1305_update_st M128 = poly1305_update #M128
 
 val poly1305_update_blocks:
     ctx:poly1305_ctx
@@ -30,13 +31,13 @@ val poly1305_update_blocks:
     (ensures  fun h0 _ h1 ->
       modifies (loc ctx) h0 h1 /\
       state_inv_t #M128 h1 ctx /\
-      (as_get_acc #M128 h1 ctx).[0] ==
-      S.poly_update (as_seq h0 text) (as_get_acc h0 ctx) (as_get_r #M128 h0 ctx))
+      as_get_acc #M128 h1 ctx ==
+      S.poly_update #2 (as_seq h0 text) (as_get_acc #M128 h0 ctx) (as_get_r #M128 h0 ctx))
 let poly1305_update_blocks ctx len text =
-  mk_poly1305_update #M128 ctx len text
+  poly1305_update ctx len text
 
 let poly1305_update_padded: poly1305_update_st M128 =
-  mk_poly1305_update #M128
+  poly1305_update
 
 val poly1305_update_last:
     ctx:poly1305_ctx
@@ -49,13 +50,13 @@ val poly1305_update_last:
     (ensures  fun h0 _ h1 ->
       modifies (loc ctx) h0 h1 /\
       state_inv_t #M128 h1 ctx /\
-      (as_get_acc #M128 h1 ctx).[0] ==
-      S.poly_update (as_seq h0 text) (as_get_acc h0 ctx) (as_get_r #M128 h0 ctx))
+      as_get_acc #M128 h1 ctx ==
+      S.poly_update #2 (as_seq h0 text) (as_get_acc #M128 h0 ctx) (as_get_r #M128 h0 ctx))
 let poly1305_update_last ctx len text =
-  mk_poly1305_update #M128 ctx len text
+  poly1305_update ctx len text
 
 let poly1305_finish: poly1305_finish_st M128 =
-  mk_poly1305_finish #M128
+  poly1305_finish #M128
 
 let poly1305_mac: poly1305_mac_st M128 =
-  mk_poly1305_mac #M128 poly1305_init poly1305_update_padded poly1305_finish
+  mk_poly1305_mac #M128 poly1305_init poly1305_update poly1305_finish

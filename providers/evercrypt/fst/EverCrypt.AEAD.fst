@@ -62,10 +62,10 @@ let invariant_s #a h (Ek i kv ek) =
   match i with
   | Vale_AES128_GCM ->
       a = AES128_GCM /\
-      EverCrypt.TargetConfig.x64 /\ X64.CPU_Features_s.(aesni_enabled /\ pclmulqdq_enabled)
+      EverCrypt.TargetConfig.x64 /\ X64.CPU_Features_s.(aesni_enabled /\ pclmulqdq_enabled /\ avx_enabled)
   | Vale_AES256_GCM ->
       a = AES256_GCM /\
-      EverCrypt.TargetConfig.x64 /\ X64.CPU_Features_s.(aesni_enabled /\ pclmulqdq_enabled)
+      EverCrypt.TargetConfig.x64 /\ X64.CPU_Features_s.(aesni_enabled /\ pclmulqdq_enabled /\ avx_enabled)
   | Hacl_CHACHA20_POLY1305 ->
       a = CHACHA20_POLY1305 /\
       True)
@@ -136,7 +136,8 @@ fun r dst k ->
   let kv: G.erased (kv a) = G.hide (B.as_seq h0 k) in
   let has_aesni = EverCrypt.AutoConfig2.has_aesni () in
   let has_pclmulqdq = EverCrypt.AutoConfig2.has_pclmulqdq () in
-  if EverCrypt.TargetConfig.x64 && (has_aesni && has_pclmulqdq) then (
+  let has_avx = EverCrypt.AutoConfig2.has_avx() in
+  if EverCrypt.TargetConfig.x64 && (has_aesni && has_pclmulqdq && has_avx) then (
     let ek = B.malloc r 0uy (ekv_len a) in
     let keys_b = B.sub ek 0ul (key_offset a) in
     let hkeys_b = B.sub ek (key_offset a) 128ul in

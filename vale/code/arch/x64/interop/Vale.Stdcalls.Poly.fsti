@@ -41,8 +41,8 @@ let tuint64 = TD_Base TUInt64
 
 [@__reduce__] noextract
 let dom: IX64.arity_ok_stdcall td =
-  let y = [t64_mod; t64_no_mod; tuint64] in
-  assert_norm (List.length y = 3);
+  let y = [t64_mod; t64_no_mod; tuint64; tuint64] in
+  assert_norm (List.length y = 4);
   y
 
 (* Need to rearrange the order of arguments *)
@@ -52,9 +52,10 @@ let poly_pre : VSig.vale_pre dom =
     (ctx_b:b64)
     (inp_b:b64)
     (len:uint64)
+    (finish:uint64)
     (va_s0:V.va_state) ->
-      PO.va_req_poly1305 c va_s0 IA.win
-        (as_vale_buffer ctx_b) (as_vale_buffer inp_b) (UInt64.v len)
+      PO.va_req_Poly1305 c va_s0 IA.win
+        (as_vale_buffer ctx_b) (as_vale_buffer inp_b) (UInt64.v len) (UInt64.v finish)
 
 (* Need to rearrange the order of arguments *)
 [@__reduce__] noextract
@@ -63,11 +64,12 @@ let poly_post : VSig.vale_post dom =
     (ctx_b:b64)
     (inp_b:b64)
     (len:uint64)
+    (finish:uint64)
     (va_s0:V.va_state)
     (va_s1:V.va_state)
     (f:V.va_fuel) ->
-      PO.va_ens_poly1305 c va_s0 IA.win
-        (as_vale_buffer ctx_b) (as_vale_buffer inp_b) (UInt64.v len)
+      PO.va_ens_Poly1305 c va_s0 IA.win
+        (as_vale_buffer ctx_b) (as_vale_buffer inp_b) (UInt64.v len) (UInt64.v finish)
         va_s1 f
 
 module VS = X64.Vale.State
@@ -81,27 +83,28 @@ let poly_lemma'
     (ctx_b:b64)
     (inp_b:b64)
     (len:uint64)
+    (finish:uint64)
     (va_s0:V.va_state)
  : Ghost (V.va_state & V.va_fuel)
      (requires
-       poly_pre code ctx_b inp_b len va_s0)
+       poly_pre code ctx_b inp_b len finish va_s0)
      (ensures (fun (va_s1, f) ->
        V.eval_code code va_s0 f va_s1 /\
        VSig.vale_calling_conventions_stdcall va_s0 va_s1 /\
-       poly_post code ctx_b inp_b len va_s0 va_s1 f /\
-       ME.buffer_writeable (as_vale_buffer ctx_b) /\ 
-       ME.buffer_writeable (as_vale_buffer inp_b) 
- )) = 
-   let va_s1, f = PO.va_lemma_poly1305 code va_s0 IA.win (as_vale_buffer ctx_b) (as_vale_buffer inp_b) (UInt64.v len) in
-   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt8 ME.TUInt64 ctx_b;   
-   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt8 ME.TUInt64 inp_b;   
+       poly_post code ctx_b inp_b len finish va_s0 va_s1 f /\
+       ME.buffer_writeable (as_vale_buffer ctx_b) /\
+       ME.buffer_writeable (as_vale_buffer inp_b)
+ )) =
+   let va_s1, f = PO.va_lemma_Poly1305 code va_s0 IA.win (as_vale_buffer ctx_b) (as_vale_buffer inp_b) (UInt64.v len) (UInt64.v finish) in
+   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt8 ME.TUInt64 ctx_b;
+   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt8 ME.TUInt64 inp_b;
    va_s1, f
 
 (* Prove that poly_lemma' has the required type *)
 noextract
 let poly_lemma = as_t #(VSig.vale_sig_stdcall poly_pre poly_post) poly_lemma'
 noextract
-let code_poly = PO.va_code_poly1305 IA.win
+let code_poly = PO.va_code_Poly1305 IA.win
 
 (* Here's the type expected for the poly wrapper *)
 [@__reduce__] noextract
@@ -116,4 +119,4 @@ let lowstar_poly_t =
     (W.mk_prediction code_poly dom [] (poly_lemma code_poly IA.win))
 
 [@ (CCConv "stdcall") ]
-val poly1305 : normal lowstar_poly_t
+val x64_poly1305 : normal lowstar_poly_t

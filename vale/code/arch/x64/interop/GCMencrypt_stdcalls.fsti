@@ -73,7 +73,7 @@ val gcm128_encrypt:
       4096 * (UInt64.v plain_num) < pow2_32 /\
       4096 * (UInt64.v auth_num) < pow2_32 /\
       
-      aesni_enabled /\ pclmulqdq_enabled /\
+      aesni_enabled /\ pclmulqdq_enabled /\ avx_enabled /\
       is_aes_key_LE AES_128 (Ghost.reveal key) /\
       (let db = get_downview keys_b in
       length_aux keys_b;
@@ -135,7 +135,7 @@ val gcm256_encrypt:
       4096 * (UInt64.v plain_num) < pow2_32 /\
       4096 * (UInt64.v auth_num) < pow2_32 /\
       
-      aesni_enabled /\ pclmulqdq_enabled /\
+      aesni_enabled /\ pclmulqdq_enabled /\ avx_enabled /\
       is_aes_key_LE AES_256 (Ghost.reveal key) /\
       (let db = get_downview keys_b in
       length_aux2 keys_b;

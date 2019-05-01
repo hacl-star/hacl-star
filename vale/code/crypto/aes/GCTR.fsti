@@ -198,3 +198,27 @@ val gctr_encrypt_one_block (icb_BE plain:quad32) (alg:algorithm) (key:seq nat32)
     gctr_encrypt_LE icb_BE (le_quad32_to_bytes plain) alg key ==
       le_seq_quad32_to_bytes (create 1 (quad32_xor plain (aes_encrypt_BE alg key icb_BE)))
   )
+
+val gctr_bytes_helper (alg:algorithm) (key:seq nat32)
+                      (p128 p_bytes c128 c_bytes:seq quad32)
+                      (p_num_bytes:nat)
+                      (iv_BE:quad32) : Lemma
+  (requires 4096 * (length p128) * 16 < pow2_32 /\
+           length p128 * 16 <= p_num_bytes /\
+           p_num_bytes < length p128 * 16 + 16 /\
+           length p128 == length c128 /\
+           length p_bytes == 1 /\
+           length c_bytes == 1 /\
+           is_aes_key_LE alg key /\
+
+          // Ensured by gctr_core_opt
+          gctr_partial alg (length p128) p128 c128 key iv_BE /\
+          (p_num_bytes > length p128 * 16 ==>
+           index c_bytes 0 == gctr_encrypt_block (inc32 iv_BE (length p128)) (index p_bytes 0) alg key 0))
+  (ensures (let plain_raw_quads = append p128 p_bytes in
+            let plain_bytes = slice (le_seq_quad32_to_bytes plain_raw_quads) 0 p_num_bytes in
+            let cipher_raw_quads = append c128 c_bytes in
+            let cipher_bytes = slice (le_seq_quad32_to_bytes cipher_raw_quads) 0 p_num_bytes in
+            is_gctr_plain_LE plain_bytes /\
+            cipher_bytes == gctr_encrypt_LE iv_BE plain_bytes alg key))
+  
