@@ -7,16 +7,21 @@ module EverCrypt.TargetConfig
 /// no implementation at link-time.
 
 [@ CIfDef ]
+inline_for_extraction
 val x64: bool
 
 [@ CIfDef ]
+inline_for_extraction
 val x86: bool
 
 [@ CIfDef ]
+inline_for_extraction
 val aarch32: bool
 
 [@ CIfDef ]
+inline_for_extraction
 val aarch64: bool
 
 [@ CIfDef ]
+inline_for_extraction
 val gcc: bool
