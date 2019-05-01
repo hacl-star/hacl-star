@@ -181,7 +181,7 @@ class OpenSSLEVP: public Curve25519Benchmark
 class Fiat: public Curve25519Benchmark
 {
   public:
-    Fiat() : Curve25519Benchmark("Fiat") {}
+    Fiat() : Curve25519Benchmark("Fiat\\n(sp2019latest)") {}
     virtual void bench_func()
       { crypto_scalarmult(shared_secret, our_secret, their_public); }
 };
@@ -327,9 +327,8 @@ void bench_curve25519(const BenchmarkSettings & s)
   std::stringstream extras;
   extras << "set style histogram clustered gap 1 title\n";
   extras << "set style data histograms\n";
-  extras << "set xrange[-.5:" + num_benchmarks.str() + "-.5]\n";
-  extras << "set bmargin 4\n";
-  extras << "set xtics font 'Times,6pt' rotate\n";
+  extras << "set bmargin 5\n";
+  extras << "set xtics font 'Times,10pt' rotate\n";
 
   Benchmark::PlotSpec ps = Benchmark::histogram_line(data_filename, "", "Avg", "strcol('Algorithm')", 0, true);
   Benchmark::add_label_offsets(ps, 1.0);
