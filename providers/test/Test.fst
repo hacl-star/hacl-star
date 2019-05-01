@@ -39,17 +39,11 @@ type block_cipher_vector = block_cipher * vec8 * vec8 * vec8
 
 module HST = FStar.HyperStack.ST
 
-val test_aes_ecb: block_cipher_vector -> Stack unit (fun _ -> True) (fun _ _ _ -> True)
-let test_aes_ecb v =
-  let wh = AC.wants_hacl () in
-  let wv = AC.wants_vale () in
-  if (not wh) && (not wv) then
-    C.String.print !$"Warning: not testing aes_ecb because Vale & Hacl are \
-      disabled, no implementation\n"
-  else begin
+val test_one_aes_ecb : block_cipher -> block_cipher_vector -> Stack unit (fun _ -> True) (fun _ _ _ -> True)
+let test_one_aes_ecb block0 v =
     let block, (LB key_len key), (LB plain_len plain), (LB cipher_len cipher) = v in
-    if block = AES256 && not wh
-    then C.String.print !$"Warning: not testing aes256 because Hacl is disabled\n"
+    if block <> block0
+    then ()
     else if not (cipher_len = 16ul)
     then
       C.String.print !$"Warning: skipping a test_aes_ecb instance because bounds do not hold\n"
@@ -77,12 +71,11 @@ let test_aes_ecb v =
       TestLib.compare_and_print !$"of AES128 block" cipher cipher' 16ul;
       pop_frame()
     end
-  end
 
 /// Test drivers
 
-let test_cipher () : Stack unit (fun _ -> True) (fun _ _ _ -> True) =
-  Test.NoHeap.test_many !$"cipher" test_aes_ecb block_cipher_vectors_low
+let test_aes_ecb (block0: block_cipher) : Stack unit (fun _ -> True) (fun _ _ _ -> True) =
+  Test.NoHeap.test_many !$"cipher" (test_one_aes_ecb block0) block_cipher_vectors_low
 
 let aead_key_length32 (al: Spec.AEAD.alg) : Tot (x: U32.t { U32.v x == Spec.AEAD.key_length al } ) =
   let open Spec.AEAD in
@@ -141,16 +134,7 @@ let test_aead_st alg key key_len iv iv_len aad aad_len tag tag_len plaintext pla
   ))
   (ensures (fun _ _ _ -> True))
 =
-
-  let wh = AC.wants_hacl () in
-  let wo = AC.wants_openssl () in
-  if not (AC.has_avx ())
-  then
-    C.String.print !$"skipping test_aead_st, avx not present\n"
-  else
-  if alg = Spec.AEAD.CHACHA20_POLY1305 && (not wh) && (not wo) then
-    C.String.print !$"Warning: skipping test_aead_st/chachapoly poly1305 because HACL and OpenSSL both disabled\n"
-  else if not (
+  if not (
     Spec.AEAD.is_supported_alg alg
   )
   then
@@ -219,8 +203,8 @@ let alg_of_alg = function
 | AES_128_GCM -> Spec.AEAD.AES128_GCM
 | AES_256_GCM -> Spec.AEAD.AES256_GCM
 
-val test_aead_loop: lbuffer aead_vector -> St unit
-let rec test_aead_loop (LB len vs) =
+val test_aead_loop: Test.Vectors.cipher -> lbuffer aead_vector -> St unit
+let rec test_aead_loop alg0 (LB len vs) =
   if len = 0ul then ()
   else begin
     let open FStar.Integers in
@@ -230,15 +214,17 @@ let rec test_aead_loop (LB len vs) =
     let alg, (LB key_len key), (LB iv_len iv), (LB aad_len aad),
       (LB tag_len tag), (LB plaintext_len plaintext), (LB ciphertext_len ciphertext) = v
     in
-    assume (B.disjoint plaintext aad); // required by EverCrypt.AEAD.encrypt_st, and currently we cannot have the tactic automatically prove it
-    test_aead_st (alg_of_alg alg) key key_len iv iv_len aad aad_len tag tag_len plaintext
-      plaintext_len ciphertext ciphertext_len;
+    if alg = alg0 then begin
+      assume (B.disjoint plaintext aad); // required by EverCrypt.AEAD.encrypt_st, and currently we cannot have the tactic automatically prove it
+      test_aead_st (alg_of_alg alg) key key_len iv iv_len aad aad_len tag tag_len plaintext
+        plaintext_len ciphertext ciphertext_len
+    end;
     B.recall vs;
-    test_aead_loop (LB (len - 1ul) (B.offset vs 1ul))
+    test_aead_loop alg0 (LB (len - 1ul) (B.offset vs 1ul))
   end
 
-let test_aead () : St unit =
-  test_aead_loop aead_vectors_low
+let test_aead (alg0: Test.Vectors.cipher) : St unit =
+  test_aead_loop alg0 aead_vectors_low
 
 let rec test_aes128_gcm_loop (i: U32.t): St unit =
   let open Test.Vectors.Aes128Gcm in
@@ -496,26 +482,19 @@ let ts_cons (c: config) (ts: test_set) : Tot test_set =
 
 inline_for_extraction
 noextract
-let external_test_set =
-  ts_nil
-  `ts_snoc` (OpenSSL, f_none)
-  `ts_snoc` (BCrypt, f_none)
-
-inline_for_extraction
-noextract
 let poly1305_test_set =
   (Hacl, f_avx2) `ts_cons` (
   (Hacl, f_avx) `ts_cons` (
   (Hacl, f_none) `ts_cons` (
   (Vale, f_none) `ts_cons` (
-  external_test_set))))
+  ts_nil))))
 
 inline_for_extraction
 noextract
 let curve25519_test_set =
   (Hacl, f_bmi2 `f_concat` f_adx) `ts_cons` (
   (Hacl, f_none) `ts_cons`
-  external_test_set)
+  ts_nil)
 
 inline_for_extraction
 noextract
@@ -527,7 +506,7 @@ inline_for_extraction
 noextract
 let chacha20poly1305_test_set =
   (Hacl, f_none) `ts_cons`
-  external_test_set
+  ts_nil
 
 inline_for_extraction
 noextract
@@ -535,22 +514,26 @@ let hash_test_set =
   (Vale, f_none) `ts_cons` (
   (Vale, f_shaext) `ts_cons` (
   (Hacl, f_none) `ts_cons` (
-  external_test_set)))
+  ts_nil)))
 
 inline_for_extraction
 noextract
-let mk_test_set_with_none_avx_avx2 (i: impl) : Tot test_set =
-  (i, f_none) `ts_cons` (
-  (i, f_avx) `ts_cons` (
-  (i, f_avx2) `ts_cons`
+let chacha20_test_set =
+  (Hacl, f_none) `ts_cons`
+  ts_nil
+
+inline_for_extraction
+noextract
+let aes128_ecb_test_set =
+  (Vale, f_aesni) `ts_cons` (
+  (Hacl, f_none) `ts_cons` (
   ts_nil))
 
 inline_for_extraction
 noextract
-let default_test_set =
-  mk_test_set_with_none_avx_avx2 Vale `ts_append`
-  mk_test_set_with_none_avx_avx2 Hacl `ts_append`
-  external_test_set
+let aes256_ecb_test_set =
+  (Hacl, f_none) `ts_cons` (
+  ts_nil)
 
 (* Test bodies *)
 
@@ -569,17 +552,19 @@ let test_curve25519_body (print: C.String.t -> St unit) : St unit =
 inline_for_extraction
 noextract
 let test_aead_gcm_body (print: C.String.t -> St unit) : St unit =
-    print !$"  >>>>>>>>> AEAD (old vectors)\n";
-    test_aead ();
+    print !$"  >>>>>>>>> AEAD (AES128_GCM old vectors)\n";
+    test_aead AES_128_GCM;
+    print !$"  >>>>>>>>> AEAD (AES256_GCM old vectors)\n";
+    test_aead AES_256_GCM;
     print !$"  >>>>>>>>> AEAD (AES128_GCM vectors)\n";
-    test_aes128_gcm ();
-    print !$"  >>>>>>>>> Cipher\n";
-    test_cipher ()
+    test_aes128_gcm ()
 
 inline_for_extraction
 let test_chacha20poly1305_body (print: C.String.t -> St unit) : St unit =
     print !$"  >>>>>>>>> AEAD (ChachaPoly vectors)\n";
-    test_chacha20poly1305 ()
+    test_chacha20poly1305 ();
+    print !$"  >>>>>>>>> AEAD (ChachaPoly old vectors)\n";
+    test_aead CHACHA20_POLY1305
 
 inline_for_extraction
 noextract
@@ -595,11 +580,21 @@ let test_hash_body (print: C.String.t -> St unit) : St unit =
 
 inline_for_extraction
 noextract
-let test_default_body (print: C.String.t -> St unit) : St unit =
-    print !$"  >>>>>>>>> FINITE-FIELD DIFFIE-HELLMAN\n";
-    test_dh ();
+let test_chacha20_body (print: C.String.t -> St unit) : St unit =
     print !$"  >>>>>>>>> Chacha20\n";
     test_chacha20 chacha20_vectors_low
+
+inline_for_extraction
+noextract
+let test_aes128_ecb_body (print: C.String.t -> St unit) : St unit =
+    print !$"  >>>>>>>>> AES128_ECB\n";
+    test_aes_ecb AES128
+
+inline_for_extraction
+noextract
+let test_aes256_ecb_body (print: C.String.t -> St unit) : St unit =
+    print !$"  >>>>>>>>> AES256_ECB\n";
+    test_aes_ecb AES256
 
 (* Summary *)
 
@@ -617,7 +612,11 @@ let test_all () : St unit =
   print_sep ();
   hash_test_set             test_hash_body;
   print_sep ();
-  default_test_set          test_default_body
+  chacha20_test_set         test_chacha20_body;
+  print_sep ();
+  aes128_ecb_test_set       test_aes128_ecb_body;
+  print_sep ();
+  aes256_ecb_test_set       test_aes256_ecb_body
 
 let main (): St C.exit_code =
   let equal_heap_dom_lemma (h1 h2:Heap.heap)
