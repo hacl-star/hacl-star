@@ -304,5 +304,8 @@ let main () =
   test_hmac hmac_vectors_low;
   test_hkdf hkdf_vectors_low;
   test_chacha20 chacha20_vectors_low;
+  test_poly1305 ();
+  test_curve25519 ();
+  test_chacha20poly1305 ();
   C.String.print !$"End WASM tests\n";
   0l
