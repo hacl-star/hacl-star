@@ -104,8 +104,18 @@ let operand_does_not_use_secrets op ts =
 
 let operand128_does_not_use_secrets (op:mov128_op) (ts:taintState) : bool =
   match op with
-  | Mov128Xmm _ -> true 
+  | Mov128Xmm _ -> true
   | Mov128Mem m | Mov128Stack m -> maddr_does_not_use_secrets m ts
+
+let operand_taint_allowed (o:operand) (t_operand t_data:taint) : bool =
+  match o with
+  | OConst _ | OReg _ -> true
+  | OMem _ | OStack _ -> t_operand = Secret || t_data = Public
+
+let operand128_taint_allowed (o:mov128_op) (t_operand t_data:taint) : bool =
+  match o with
+  | Mov128Xmm _ -> true
+  | Mov128Mem _ | Mov128Stack _ -> t_operand = Secret || t_data = Public
 
 val lemma_operand_obs:  (ts:taintState) ->  (dst:operand) -> (s1 : traceState) -> (s2:traceState) -> Lemma ((operand_does_not_use_secrets dst ts) /\ publicValuesAreSame ts s1 s2 ==> (operand_obs s1 dst) = (operand_obs s2 dst))
 
