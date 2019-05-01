@@ -6,32 +6,36 @@ get_filename_component(LIBCURVE25519_SRC_DIR ${LIBCURVE25519_SRC_DIR} ABSOLUTE)
 message("-- Using Curve25519 implementations at ${LIBCURVE25519_SRC_DIR}")
 
 add_library(libcurve25519 SHARED STATIC
-  curve25519-amd64.c
   curve25519-donna64.c
   curve25519-evercrypt64.c
   curve25519-fiat64.c
   curve25519-hacl51.c
   curve25519-openssl.c
-  curve25519-precomp.c
-  curve25519-amd64-asm.S)
+  curve25519-precomp.c)
 target_compile_options(libcurve25519 PRIVATE -O3 -march=native -mtune=native)
 target_include_directories(libcurve25519 PUBLIC ${LIBCURVE25519_SRC_DIR})
 
-# if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-#   target_compile_options(libcurve25519 PRIVATE -fbracket-depth=512)
-# else()
-#   target_compile_options(libcurve25519 PRIVATE -flto)
-#   if(CMAKE_SYSTEM_NAME STREQUAL "CYGWIN")
-#     target_compile_options(libcurve25519 PRIVATE -ffat-lto-objects)
-#   endif()
-# endif()
+if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+  target_compile_options(libcurve25519 PRIVATE -fbracket-depth=512)
+else()
+  target_compile_options(libcurve25519 PRIVATE -flto)
+  if(CMAKE_SYSTEM_NAME STREQUAL "CYGWIN")
+    target_compile_options(libcurve25519 PRIVATE -ffat-lto-objects)
+  endif()
+endif()
+
+if(NOT CMAKE_SYSTEM_NAME STREQUAL "CYGWIN")
+target_sources(libcurve25519 PRIVATE
+  curve25519-amd64.c
+  curve25519-amd64-asm.S)
+endif()
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
   target_compile_options(libcurve25519 PRIVATE -fPIC -fstack-check)
   target_link_libraries(libcurve25519 PRIVATE "-Xlinker -z -Xlinker noexecstack" "-Xlinker --unresolved-symbols=report-all")
 elseif(CMAKE_SYSTEM_NAME STREQUAL "CYGWIN")
-  target_compile_options(libcurve25519 PRIVATE -fno-asynchronous-unwind-tables)
+  # target_compile_options(libcurve25519 PRIVATE -fno-asynchronous-unwind-tables)
 endif()
 
 if(ASAN)

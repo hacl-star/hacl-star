@@ -103,7 +103,7 @@ static __always_inline void fsub (uint64_t* arg0, uint64_t* arg1, uint64_t* arg2
     "  movq %%r9, 8(%%rdi);"
     "  movq %%r10, 16(%%rdi);"
     "  movq %%r11, 24(%%rdi);"
-  : 
+  :
   : "r" (arg0_r), "r" (arg1_r), "r" (arg2_r)
   : "%rax", "%rcx", "%r8", "%r9", "%r10", "%r11", "memory", "cc"
   );
@@ -220,7 +220,7 @@ static __always_inline void fmul (uint64_t* arg2, uint64_t* arg1, uint64_t* arg3
     "  add %%rax, %%r8;"
     "  movq %%r8, 0(%%rdi);"
   : "+r" (arg0_r), "+r" (arg1_r), "+r" (arg2_r), "+r" (arg3_r)
-  : 
+  :
   : "%rax", "%r8", "%r9", "%r10", "%r11", "%r12", "%r13", "%r14", "%r15", "memory", "cc"
   );
 }
@@ -436,7 +436,7 @@ static __always_inline void fmul2 (uint64_t* arg2, uint64_t* arg1, uint64_t* arg
     "  add %%rax, %%r8;"
     "  movq %%r8, 32(%%rdi);"
   : "+r" (arg0_r), "+r" (arg1_r), "+r" (arg2_r), "+r" (arg3_r)
-  : 
+  :
   : "%rax", "%r8", "%r9", "%r10", "%r11", "%r12", "%r13", "%r14", "%r15", "memory", "cc"
   );
 }
@@ -633,7 +633,7 @@ static __always_inline void fsqr (uint64_t* arg2, uint64_t* arg1, uint64_t* arg0
     "  add %%rax, %%r8;"
     "  movq %%r8, 0(%%rdi);"
   : "+r" (arg0_r), "+r" (arg1_r), "+r" (arg2_r)
-  : 
+  :
   : "%rax", "%rbx", "%rcx", "%r8", "%r9", "%r10", "%r11", "%r12", "%r13", "%r14", "%r15", "memory", "cc"
   );
 }
@@ -806,7 +806,7 @@ static __always_inline void fsqr2 (uint64_t* arg2, uint64_t* arg1, uint64_t* arg
     "  add %%rax, %%r8;"
     "  movq %%r8, 32(%%rdi);"
   : "+r" (arg0_r), "+r" (arg1_r), "+r" (arg2_r)
-  : 
+  :
   : "%rax", "%rbx", "%rcx", "%r8", "%r9", "%r10", "%r11", "%r12", "%r13", "%r14", "%r15", "memory", "cc"
   );
 }

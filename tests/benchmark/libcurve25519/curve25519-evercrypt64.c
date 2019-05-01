@@ -1,3 +1,4 @@
+#include "libcurve25519_inline.h"
 
 #include "curve25519-vale-inline.h"
 enum { CURVE25519_POINT_SIZE = 32 };

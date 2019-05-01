@@ -450,10 +450,9 @@ class BCryptEncryptBM : public AEADBenchmark
       #endif
       ;
     }
-    virtual ~BCryptEncryptBM()
-    {
-      BCryptDestroyKey(hKey);
-    }
+    virtual void bench_cleanup(const BenchmarkSettings & s)
+      { BCryptDestroyKey(hKey); }
+    virtual ~BCryptEncryptBM() { }
 };
 
 template<size_t key_size_bits, size_t tag_len>
@@ -499,10 +498,9 @@ class BCryptDecryptBM : public AEADBenchmark
       #endif
         ;
     }
-    virtual ~BCryptDecryptBM()
-    {
-      BCryptDestroyKey(hKey);
-    }
+    virtual void bench_cleanup(const BenchmarkSettings & s)
+      { BCryptDestroyKey(hKey); }
+    virtual ~BCryptDecryptBM() {}
 };
 
 #endif

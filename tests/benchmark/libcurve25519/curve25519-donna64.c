@@ -6,6 +6,8 @@
  * Original author: Adam Langley <agl@imperialviolet.org>
  */
 
+#include "libcurve25519_inline.h"
+
 #include <stdint.h>
 #include <stdbool.h>
 #include <string.h>

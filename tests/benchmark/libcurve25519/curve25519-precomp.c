@@ -5,6 +5,8 @@
  * Copyright (C) 2018 Samuel Neves <sneves@dei.uc.pt>. All Rights Reserved.
  */
 
+#include "libcurve25519_inline.h"
+
 #include <stdint.h>
 #include <stdbool.h>
 #include <string.h>

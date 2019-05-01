@@ -7,8 +7,6 @@ extern "C" {
 #include <EverCrypt_Curve25519.h>
 }
 
-#include <libcurve25519.h>
-
 class Curve25519Benchmark: public Benchmark
 {
   protected:
@@ -190,6 +188,8 @@ class Fiat: public Curve25519Benchmark
 #endif
 
 #ifdef HAVE_LIBCURVE25519
+#include <libcurve25519.h>
+
 #define STRINGIFY(x) #x
 #define TOSTRING(x) STRINGIFY(x)
 
@@ -208,10 +208,78 @@ DEFINE(donna64)
 DEFINE(evercrypt64)
 DEFINE(hacl51)
 DEFINE(fiat64)
-DEFINE(amd64)
 DEFINE(precomp_bmi2)
 DEFINE(precomp_adx)
 DEFINE(openssl)
+#if !defined(__MINGW32__) && !defined(__MINGW64__)
+DEFINE(amd64)
+#endif
+#endif
+
+#ifdef HAVE_BCRYPT
+// Via https://github.com/project-everest/hacl-star/blob/master/test/openssl-engine/BCryptEngine.c
+#include <windows.h>
+#include <bcrypt.h>
+
+#ifndef NT_SUCCESS
+#define NT_SUCCESS(Status) (((NTSTATUS)(Status)) >= 0)
+#endif
+
+#define BCRYPT_ECDH_ALGORITHM   L"ECDH"
+#define BCRYPT_ECC_CURVE_NAME   L"ECCCurveName"
+#define BCRYPT_ECC_CURVE_25519  L"curve25519"
+
+class BCrypt: public Curve25519Benchmark
+{
+  BCRYPT_ALG_HANDLE hAlg = NULL;
+  BCRYPT_KEY_HANDLE our_key, their_key;
+  BCRYPT_SECRET_HANDLE shared_secret;
+
+  #define X25519_BITS   255
+  #define X25519_KEYLEN 32
+
+  public:
+    BCrypt() : Curve25519Benchmark("BCrypt")
+    {
+      if (!NT_SUCCESS(BCryptOpenAlgorithmProvider(&hAlg, BCRYPT_ECDH_ALGORITHM, NULL, 0)))
+        throw std::logic_error("BCryptOpenAlgorithmProvider failed");
+      if (!NT_SUCCESS(BCryptSetProperty(hAlg, BCRYPT_ECC_CURVE_NAME, (PUCHAR) BCRYPT_ECC_CURVE_25519, sizeof(BCRYPT_ECC_CURVE_25519), 0)))
+        throw std::logic_error("BCryptSetProperty failed");
+    }
+    virtual void bench_setup(const BenchmarkSettings & s)
+    {
+      if (!NT_SUCCESS(BCryptGenerateKeyPair(hAlg, &our_key, X25519_BITS, 0)) ||
+          !NT_SUCCESS(BCryptFinalizeKeyPair(our_key, 0)))
+        throw std::logic_error("BCryptFinalizeKeyPair failed");
+      if (!NT_SUCCESS(BCryptGenerateKeyPair(hAlg, &their_key, X25519_BITS, 0)) ||
+          !NT_SUCCESS(BCryptFinalizeKeyPair(their_key, 0)))
+        throw std::logic_error("BCryptFinalizeKeyPair failed");
+    }
+    virtual void bench_func()
+    {
+      #ifdef _DEBUG
+      if (!NT_SUCCESS(
+      #endif
+      BCryptSecretAgreement(our_key, their_key, &shared_secret, 0)
+      #ifdef _DEBUG
+        )) throw std::logic_error("BCryptSecretAgreement failed")
+      #endif
+      ;
+    }
+    virtual void bench_cleanup(const BenchmarkSettings & s)
+    {
+      if (!NT_SUCCESS(BCryptDestroySecret(shared_secret)))
+        throw std::logic_error("BCryptDestroySecret failed");
+      if (!NT_SUCCESS(BCryptDestroyKey(our_key)) ||
+          !NT_SUCCESS(BCryptDestroyKey(their_key)))
+        throw std::logic_error("BCryptDestroyKey failed");
+    }
+    virtual ~BCrypt()
+    {
+      BCryptCloseAlgorithmProvider(&hAlg, 0);
+    }
+};
+
 #endif
 
 void bench_curve25519(const BenchmarkSettings & s)
@@ -239,10 +307,15 @@ void bench_curve25519(const BenchmarkSettings & s)
     new evercrypt64(),
     new hacl51(),
     new fiat64(),
-    new amd64(),
     new precomp_bmi2(),
     new precomp_adx(),
     new openssl(),
+    #if !defined(__MINGW32__) && !defined(__MINGW64__)
+    new amd64(),
+    #endif
+    #endif
+    #ifdef HAVE_BCRYPT
+    new BCrypt(),
     #endif
     };
 
