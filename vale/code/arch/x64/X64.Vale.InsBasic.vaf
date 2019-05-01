@@ -251,7 +251,8 @@ procedure{:instruction mk_taint_ins2(make_instr(I.ins_IMul64), dst, src)}{:fast_
     lemma_mul_in_bounds(old(dst), old(src));
 }
 
-procedure{:instruction mk_taint_ins2(S.Xor64, dst, src)}{:quick exportOnly}{:public} Xor64(inout dst:dst_opr64, src:opr64)
+//TODO: procedure{:instruction mk_taint_ins2(S.Xor64, dst, src)}{:quick exportOnly}{:public} Xor64(inout dst:dst_opr64, src:opr64)
+procedure{:instruction mk_taint_ins2(make_instr(I.ins_Xor64), dst, src)}{:quick exportOnly}{:public} Xor64(inout dst:dst_opr64, src:opr64)
     modifies
         efl;
     ensures

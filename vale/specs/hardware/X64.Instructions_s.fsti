@@ -84,8 +84,14 @@ val ins_Cpuid :
 let check_avx (#a:Type0) (x:option a) : option a =
   if avx_enabled then x else None
 
+let eval_Movdqu (src:quad32) : option quad32 = Some src
+val ins_Movdqu : instr_dep [out opXmm] [opXmm] PreserveFlags eval_Movdqu
+
 let eval_Pxor (dst src:quad32) : option quad32 = Some (quad32_xor dst src)
 val ins_Pxor : instr_dep [inOut opXmm] [opXmm] PreserveFlags eval_Pxor
+
+let eval_VPxor (src1 src2:quad32) : option quad32 = check_avx (eval_Pxor src1 src2)
+val ins_VPxor : instr_dep [out opXmm] [opXmm; opXmm] PreserveFlags eval_VPxor
 
 let eval_Pand (dst src:quad32) : option quad32 = Some (four_map2 (fun di si -> iand di si) dst src)
 val ins_Pand : instr_dep [inOut opXmm] [opXmm] PreserveFlags eval_Pand

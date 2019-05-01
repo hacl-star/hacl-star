@@ -36,21 +36,22 @@ noeq type ins:eqtype =
       ins
 
   // Temporary partially-generic instructions
-  // TODO: replace these with Instr when Leakage_Ins supports Instr:
+  // TODO: delete these; they have been replaced with with Instr
   | Ins_64_64_preserve : i:instr_t [out op64] [op64] PreserveFlags -> dst:operand -> src:operand -> ins
   | Ins_io64_64 : i:instr_t [inOut op64] [op64] HavocFlags -> dst:operand -> src:operand -> ins
   | Ins_io64_64_cf : i:instr_t [inOut opFlagsCf; inOut op64] [op64] HavocFlags -> dst:operand -> src:operand -> ins
   | Ins_ioXmm : i:instr_t [inOut opXmm] [] PreserveFlags -> dst:xmm -> ins
   | Ins_Xmm_Xmm : i:instr_t [out opXmm] [opXmm] PreserveFlags -> dst:xmm -> src:xmm -> ins
   | Ins_ioXmm_Xmm : i:instr_t [inOut opXmm] [opXmm] PreserveFlags -> dst:xmm -> src:xmm -> ins
+  | MOVDQU     : dst:mov128_op -> src:mov128_op -> ins  // We let the assembler complain about attempts to use two memory ops
 
-  // TODO: convert these to Instr:
+  // REVIEW: these aren't being used right now; Instr is being used (but it would be nice to have a special case for "xor r, r")
   | Xor64      : dst:operand -> src:operand -> ins
   | Pxor       : dst:xmm -> src:xmm -> ins
   | VPxor      : dst:xmm -> src1:xmm -> src2:mov128_op -> ins
-  | MOVDQU     : dst:mov128_op -> src:mov128_op -> ins  // We let the assembler complain about attempts to use two memory ops
 
   // Stack operations
+  // TODO: taint analysis for these
   | Push       : src:operand -> ins
   | Pop        : dst:operand -> ins
   | Alloc      : n:nat -> ins
