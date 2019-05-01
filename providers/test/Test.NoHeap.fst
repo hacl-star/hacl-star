@@ -201,7 +201,7 @@ let test_one_poly1305 (v: Test.Vectors.Poly1305.vector): Stack unit (fun _ -> Tr
   push_frame ();
   if not (4294967295ul `U32.sub` 16ul `U32.gte` input_len)
   then
-      C.String.print !$"Warning: skipping a test_poly1305 instance because bounds do not hold\n"
+      C.Failure.failwith !$"Error: skipping a test_poly1305 instance because bounds do not hold\n"
   else begin
     B.recall key;
     B.recall tag;
@@ -256,15 +256,16 @@ let test_curve25519 () : Stack unit (fun _ -> True) (fun _ _ _ -> True) =
 
 let test_one_chacha20poly1305 (v: Test.Vectors.Chacha20Poly1305.vector): Stack unit (fun _ -> True) (fun _ _ _ -> True) =
   let Test.Vectors.Chacha20Poly1305.Vector cipher_and_tag cipher_and_tag_len plain plain_len aad aad_len nonce nonce_len key key_len = v in
-  if not (
-    key_len = 32ul &&
-    nonce_len = 12ul &&
-    0ul `U32.lt` plain_len &&
-    (4294967295ul `U32.sub` 16ul) `U32.gte` plain_len &&
-    (plain_len `U32.div` 64ul) `U32.lte` (4294967295ul `U32.sub` aad_len) &&
-    cipher_and_tag_len = plain_len `U32.add` 16ul
-  ) then
-    C.String.print !$"Warning: skipping a chacha20poly1305 instance because bounds do not hold"
+  if not (key_len = 32ul)
+  then C.Failure.failwith !$"chacha20poly1305: not (key_len = 32ul)"
+  else if not (nonce_len = 12ul)
+  then C.Failure.failwith !$"chacha20poly1305: not (nonce_len = 12ul)"
+  else if not ((4294967295ul `U32.sub` 16ul) `U32.gte` plain_len)
+  then C.Failure.failwith !$"chacha20poly1305: not ((4294967295ul `U32.sub` 16ul) `U32.gte` plain_len)"
+  else if not ((plain_len `U32.div` 64ul) `U32.lte` (4294967295ul `U32.sub` aad_len))
+  then C.Failure.failwith !$"chacha20poly1305: not ((plain_len `U32.div` 64ul) `U32.lte` (4294967295ul `U32.sub` aad_len))"
+  else if not (cipher_and_tag_len = plain_len `U32.add` 16ul)
+  then C.Failure.failwith !$"chacha20poly1305: not (cipher_and_tag_len = plain_len `U32.add` 16ul)"
   else begin
     B.recall plain;
     B.recall cipher_and_tag;
