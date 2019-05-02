@@ -6,12 +6,17 @@ module EverCrypt.TargetConfig
 /// target, we would get a reference in the C code to a function for which we have
 /// no implementation at link-time.
 
+inline_for_extraction
 let x64 = false
 
+inline_for_extraction
 let x86 = true
 
+inline_for_extraction
 let aarch32 = false
 
+inline_for_extraction
 let aarch64 = false
 
+inline_for_extraction
 let gcc = false

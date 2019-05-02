@@ -3,6 +3,7 @@ module Test.NoHeap
 module H = EverCrypt.Hash
 module B = LowStar.Buffer
 module L = Test.Lowstarize
+module U32 = FStar.UInt32
 
 open FStar.HyperStack.ST
 open FStar.Integers
@@ -190,6 +191,108 @@ let test_chacha20 = test_many !$"CHACHA20" test_one_chacha20
 
 /// Using generated vectors in the vectors/ directory
 /// =================================================
+
+/// Poly1305
+/// --------
+
+let test_one_poly1305 (v: Test.Vectors.Poly1305.vector): Stack unit (fun _ -> True) (fun _ _ _ -> True) =
+  let open Test.Vectors.Poly1305 in
+  let Vector tag tag_len key key_len input input_len = v in
+  push_frame ();
+  if not (4294967295ul `U32.sub` 16ul `U32.gte` input_len)
+  then
+      C.String.print !$"Warning: skipping a test_poly1305 instance because bounds do not hold\n"
+  else begin
+    B.recall key;
+    B.recall tag;
+    B.recall input;
+    let h0 = get () in
+    let dst = B.alloca 0uy 16ul in
+    let h1 = get () in
+    B.recall input;
+    B.recall key;
+    B.recall tag;
+    if key_len = 32ul then
+      EverCrypt.Poly1305.poly1305 dst input input_len key;
+    B.recall tag;
+    if tag_len = 16ul then
+      TestLib.compare_and_print !$"Poly1305" tag dst 16ul
+  end;
+  pop_frame ()
+
+let test_poly1305 () : Stack unit (fun _ -> True) (fun _ _ _ -> True) =
+  test_many !$"poly1305" test_one_poly1305 Test.Vectors.Poly1305.(LB vectors_len vectors)
+
+/// Curve25519
+/// ----------
+
+let test_one_curve25519 (v: Test.Vectors.Curve25519.vector): Stack unit (fun _ -> True) (fun _ _ _ -> True) =
+  let open Test.Vectors.Curve25519 in
+  let Vector result result_len public public_len private_ private__len valid = v in
+  push_frame ();
+  B.recall result;
+  B.recall public;
+  B.recall private_;
+  let h0 = get () in
+  let dst = B.alloca 0uy 32ul in
+  let h1 = get () in
+  B.recall result;
+  B.recall public;
+  B.recall private_;
+  if public_len = 32ul && private__len = 32ul then
+    EverCrypt.Curve25519.ecdh dst private_ public;
+  B.recall result;
+  if result_len = 32ul && valid then
+    TestLib.compare_and_print !$"Curve25519" result dst 32ul;
+  pop_frame ()
+
+let test_curve25519 () : Stack unit (fun _ -> True) (fun _ _ _ -> True) =
+  test_many !$"curve25519" test_one_curve25519 Test.Vectors.Curve25519.(LB vectors_len vectors)
+
+/// Chacha20-Poly1305
+/// -----------------
+
+#push-options "--z3rlimit 32"
+
+let test_one_chacha20poly1305 (v: Test.Vectors.Chacha20Poly1305.vector): Stack unit (fun _ -> True) (fun _ _ _ -> True) =
+  let Test.Vectors.Chacha20Poly1305.Vector cipher_and_tag cipher_and_tag_len plain plain_len aad aad_len nonce nonce_len key key_len = v in
+  if not (
+    key_len = 32ul &&
+    nonce_len = 12ul &&
+    0ul `U32.lt` plain_len &&
+    (4294967295ul `U32.sub` 16ul) `U32.gte` plain_len &&
+    (plain_len `U32.div` 64ul) `U32.lte` (4294967295ul `U32.sub` aad_len) &&
+    cipher_and_tag_len = plain_len `U32.add` 16ul
+  ) then
+    C.String.print !$"Warning: skipping a chacha20poly1305 instance because bounds do not hold"
+  else begin
+    B.recall plain;
+    B.recall cipher_and_tag;
+    B.recall aad;
+    B.recall nonce;
+    B.recall key;
+    push_frame ();
+    let tmp = B.alloca 0uy (plain_len `U32.add` 16ul) in
+    let tmp_msg' = B.sub tmp 0ul plain_len in
+    let tag' = B.sub tmp plain_len 16ul in
+    EverCrypt.Chacha20Poly1305.aead_encrypt key nonce aad_len aad plain_len plain tmp_msg' tag';
+    TestLib.compare_and_print !$"chacha20poly1305 cipher and tag" cipher_and_tag tmp cipher_and_tag_len;
+    let cipher = B.sub cipher_and_tag 0ul plain_len in
+    let tag = B.sub cipher_and_tag plain_len 16ul in
+    let res = EverCrypt.Chacha20Poly1305.aead_decrypt key nonce aad_len aad plain_len tmp_msg' cipher tag in
+    if res = 0ul
+    then
+      TestLib.compare_and_print !$"chacha20poly1305 plain" plain tmp_msg' plain_len
+    else
+      C.Failure.failwith !$"Failure: chacha20poly1305 aead_decrypt returned nonzero value";
+    pop_frame ()
+  end
+
+#pop-options
+
+let test_chacha20poly1305 () : Stack unit (fun _ -> True) (fun _ _ _ -> True) =
+  test_many !$"chacha20poly1305" test_one_chacha20poly1305 Test.Vectors.Chacha20Poly1305.(LB vectors_len vectors)
+
 
 /// A main for WASM tests only (ignored by Test)
 /// ============================================
