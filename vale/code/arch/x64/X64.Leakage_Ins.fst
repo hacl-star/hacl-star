@@ -479,7 +479,7 @@ let check_if_instr_consumes_fixed_time (ins:tainted_ins) (ts:taintState) : Pure 
   (requires S.Instr? ins.i)
   (ensures ins_consumes_fixed_time ins ts)
   =
-  let S.Instr outs args havoc_flags iins oprs = ins.i in
+  let S.Instr (S.InstrType outs args havoc_flags iins) oprs = ins.i in
   let t = inouts_taint outs args oprs ts ins.t in
   let b = check_if_consumes_fixed_time_outs outs args oprs ts ins.t t in
   let TaintState rs flags cf xmms = ts in
@@ -492,7 +492,7 @@ let check_if_instr_consumes_fixed_time (ins:tainted_ins) (ts:taintState) : Pure 
 
 let check_if_ins_consumes_fixed_time ins ts =
   match ins.i with
-  | S.Instr _ _ _ _ _ -> check_if_instr_consumes_fixed_time ins ts
+  | S.Instr _ _ -> check_if_instr_consumes_fixed_time ins ts
   | _ ->
   false, ts
   (* Verifying, but too slow. Need to refactor
@@ -1019,7 +1019,7 @@ let lemma_instr_leakage_free (ts:taintState) (ins:tainted_ins) : Lemma
       (ensures is_explicit_leakage_free_rhs code fuel ts ts' s1 s2)
       [SMTPat (is_explicit_leakage_free_rhs code fuel ts ts' s1 s2)]
       =
-      let S.Instr outs args havoc_flags i oprs = ins.i in
+      let S.Instr (S.InstrType outs args havoc_flags i) oprs = ins.i in
       let t_ins = ins.t in
       let t_out = inouts_taint outs args oprs ts ins.t in
       let Some vs1 = S.instr_apply_eval outs args (instr_eval i) oprs s1.state in
@@ -1059,7 +1059,7 @@ let lemma_instr_leakage_free (ts:taintState) (ins:tainted_ins) : Lemma
 let lemma_ins_leakage_free ts ins =
   let b, ts' = check_if_ins_consumes_fixed_time ins ts in
   match ins.i with
-  | S.Instr _ _ _ _ _ -> lemma_instr_leakage_free ts ins
+  | S.Instr _ _ -> lemma_instr_leakage_free ts ins
   | _ ->
   let p s1 s2 fuel = b2t b ==> isExplicitLeakageFreeGivenStates (Ins ins) fuel ts ts' s1 s2 in
   let my_lemma s1 s2 fuel : Lemma(p s1 s2 fuel) = lemma_ins_same_public ts ins s1 s2 fuel in

@@ -98,7 +98,7 @@ unfold let va_int = int
 let va_int_at_least (k:int) = i:int{i >= k}
 let va_int_at_most (k:int) = i:int{i <= k}
 let va_int_range (k1 k2:int) = i:int{k1 <= i /\ i <= k2}
-val ins : eqtype
+val ins : Type0
 val ocmp : eqtype
 unfold let va_code = precode ins ocmp
 unfold let va_codes = list va_code

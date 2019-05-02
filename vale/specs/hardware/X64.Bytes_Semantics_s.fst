@@ -25,14 +25,19 @@ type stack =
     mem:Map.t int nat8 ->                       // Stack contents
     stack
   
-noeq type ins:eqtype =
-  // Generic instruction (should be able to express most instructions)
-  | Instr :
+noeq type instr_type =
+  | InstrType :
       outs:list instr_out ->
       args:list instr_operand ->
       havoc_flags:flag_havoc ->
       i:instr_t outs args havoc_flags ->
-      oprs:instr_operands_t outs args ->
+      instr_type
+
+noeq type ins =
+  // Generic instruction (should be able to express most instructions)
+  | Instr :
+      i:instr_type ->
+      oprs:instr_operands_t i.outs i.args ->
       ins
 
   // Temporary partially-generic instructions
@@ -65,8 +70,8 @@ type ocmp:eqtype =
   | OLt: o1:operand{not (OMem? o1 || OStack? o1)} -> o2:operand{not (OMem? o2 || OStack? o2)} -> ocmp
   | OGt: o1:operand{not (OMem? o1 || OStack? o1)} -> o2:operand{not (OMem? o2 || OStack? o2)} -> ocmp
 
-type code:eqtype = precode ins ocmp
-type codes:eqtype = list code
+type code = precode ins ocmp
+type codes = list code
 type regs_t = F.restricted_t reg (fun _ -> nat64)
 type xmms_t = F.restricted_t xmm (fun _ -> quad32)
 
@@ -638,7 +643,7 @@ let eval_instr
   let vs = instr_apply_eval outs args (instr_eval i) oprs s0 in
   let s1 =
     match havoc_flags with
-    | HavocFlags -> {s0 with flags = havoc s0 (Instr outs args havoc_flags i oprs)}
+    | HavocFlags -> {s0 with flags = havoc s0 (Instr (InstrType outs args havoc_flags i) oprs)}
     | PreserveFlags -> s0
     in
   FStar.Option.mapTot (fun vs -> instr_write_outputs outs args vs oprs s0 s1) vs
@@ -648,7 +653,7 @@ let eval_instr
 let eval_ins (ins:ins) : st unit =
   s <-- get;
   match ins with
-  | Instr outs args havoc_flags i oprs ->
+  | Instr (InstrType outs args havoc_flags i) oprs ->
     apply_option (eval_instr outs args havoc_flags i oprs s) set
 
   | Ins_64_64_preserve i dst src ->

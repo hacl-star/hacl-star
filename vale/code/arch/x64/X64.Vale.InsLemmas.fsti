@@ -54,5 +54,5 @@ let make_instr
     (#outs:list instr_out) (#args:list instr_operand) (#havoc_flags:flag_havoc)
     (i:instr_t outs args havoc_flags)
   : make_instr_t outs args =
-  make_instr_outs outs args (fun oprs -> S.Instr outs args havoc_flags i oprs)
+  make_instr_outs outs args (fun oprs -> S.Instr (S.InstrType outs args havoc_flags i) oprs)
 

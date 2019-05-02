@@ -44,7 +44,7 @@ let get128_aux (ptr:int) (heap:heap) (v:quad32) (k:nat{k < 16}) : Lemma
   FStar.Pervasives.reveal_opaque (`%le_quad32_to_bytes) le_quad32_to_bytes;
   four_to_nat_8_injective ()
 
-#set-options "--max_fuel 1 --initial_fuel 1 --z3rlimit 100"
+#reset-options "--max_fuel 1 --initial_fuel 1 --z3rlimit 200"
 
 let bv_upd_update_heap64 b heap i v mem =
   let dv = IB.get_downview b.IB.bsrc in

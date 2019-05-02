@@ -19,7 +19,8 @@ noeq type traceState = {
   memTaint: memTaint_t;
 }
 
-type tainted_ins : eqtype = 
+noeq
+type tainted_ins =
   | TaintedIns: i:ins -> t:taint -> tainted_ins
 
 let operand_obs (s:traceState) (o:operand) : list observation =
@@ -99,7 +100,7 @@ let rec obs_inouts
 [@instr_attr]
 let ins_obs (ins:ins) (s:traceState) : list observation =
   match ins with
-  | Instr outs args _ _ oprs -> obs_inouts outs args oprs s
+  | Instr (InstrType outs args _ _) oprs -> obs_inouts outs args oprs s
 
   | Xor64 dst src -> operand_obs s dst @ operand_obs s src
   // Only register operands, that will be tracked in the verified taint analysis
@@ -216,7 +217,7 @@ let rec taint_match_inouts
 [@instr_attr]
 let taint_match_ins (ins:ins) (t:taint) (memTaint:memTaint_t) (s:state) : bool =
   match ins with
-  | Instr outs args _ _ oprs -> taint_match_inouts outs args oprs t memTaint s
+  | Instr (InstrType outs args _ _) oprs -> taint_match_inouts outs args oprs t memTaint s
 
   | Xor64 dst src -> taint_match dst t memTaint s && taint_match src t memTaint s
   // Only register operands, that will be tracked in the verified taint analysis
@@ -289,7 +290,7 @@ let rec update_taint_outputs
 [@instr_attr]
 let update_taint_ins (ins:ins) (t:taint) (memTaint:memTaint_t) (s:state) : memTaint_t =
   match ins with
-  | Instr outs args _ _ oprs -> update_taint_outputs outs args oprs t memTaint s
+  | Instr (InstrType outs args _ _) oprs -> update_taint_outputs outs args oprs t memTaint s
 
   | Xor64 dst _ -> update_taint memTaint dst t s
   | Pxor _ _ | VPxor _ _ _ -> memTaint
@@ -323,8 +324,8 @@ let taint_eval_ocmp (ts:traceState) (c:tainted_ocmp) : GTot (traceState * bool) 
   let s = run (check (valid_ocmp c.o);; check (taint_match (get_fst_ocmp c.o) t ts.memTaint);; check (taint_match (get_snd_ocmp c.o) t ts.memTaint)) ts.state in
     {ts with state = s}, eval_ocmp s c.o
 
-type tainted_code:eqtype = precode tainted_ins tainted_ocmp
-type tainted_codes:eqtype = list tainted_code
+type tainted_code = precode tainted_ins tainted_ocmp
+type tainted_codes = list tainted_code
 
 val taint_eval_code: c:tainted_code -> fuel:nat -> s:traceState -> GTot (option traceState)
 (decreases %[fuel; c; 1])

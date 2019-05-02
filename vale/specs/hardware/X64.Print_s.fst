@@ -221,7 +221,7 @@ let print_ins (ins:tainted_ins) (p:printer) =
   let print_instr (ip:instr_print) : string = print_instr ip p in
   let ins = ins.i in
   match ins with
-  | Instr outs args havoc_flags i oprs -> print_instr (instr_printer i oprs)
+  | Instr (InstrType outs args havoc_flags i) oprs -> print_instr (instr_printer i oprs)
   | Ins_64_64_preserve i dst src -> print_instr (instr_printer i (dst, (src, ())))
   | Ins_io64_64 i dst src -> print_instr (instr_printer i (dst, (src, ())))
   | Ins_io64_64_cf i dst src -> print_instr (instr_printer i (dst, (src, ())))
