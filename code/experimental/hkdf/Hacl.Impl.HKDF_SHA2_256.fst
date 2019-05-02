@@ -102,7 +102,7 @@ let hkdf_round output prk plen info ilen i ti =
   pop_frame ()
 
 
-#reset-options "--z3rlimit 500"
+#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 1000"
 
 val hkdf_expand:
     output: buffer uint8
@@ -136,6 +136,8 @@ let hkdf_expand output prk plen info ilen len =
     (fun i ->
        let ti0 = sub t ((i -. 2ul) *. hash_len) hash_len in
        let ti1 = sub t ((i -. 1ul) *. hash_len) hash_len in
+       assert(disjoint ti1 prk);
+       assert(disjoint ti1 ti0);
        hkdf_round ti1 prk plen info ilen i ti0
     );
   let res = sub t (size 0) len in
