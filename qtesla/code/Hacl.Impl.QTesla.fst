@@ -214,37 +214,6 @@ let poly_uniform a seed =
                  dmsp.(size 0) <- dmsp.(size 0) +. u16 1;
                  pos.(size 0) <- size 0 )
             else ();
-(*
-            let bufSize:size_t = (nblocks.(size 0)) *. shake128_rate in
-
-            let pos0 = pos.(size 0) in
-            assume(v pos0 + numbytes U32 <= v (shake128_rate *. params_genA));
-            let subbuff = sub buf pos0 (size (numbytes U32)) in
-            let bufPosAsUint:uint32 = uint_from_bytes_le subbuff in
-            let val1:uint32 = bufPosAsUint &. mask in
-            pos.(size 0) <- pos0 +. nbytes;
-
-            let pos0 = pos.(size 0) in
-            assume(v pos0 + numbytes U32 <= v (shake128_rate *. params_genA));
-            let subbuff = sub buf pos0 (size (numbytes U32)) in
-            let bufPosAsUint:uint32 = uint_from_bytes_le subbuff in
-            let val2:uint32 = bufPosAsUint &. mask in
-            pos.(size 0) <- pos0 +. nbytes;
-
-            let pos0 = pos.(size 0) in
-            assume(v pos0 + numbytes U32 <= v (shake128_rate *. params_genA));
-            let subbuff = sub buf pos0 (size (numbytes U32)) in
-            let bufPosAsUint:uint32 = uint_from_bytes_le subbuff in
-            let val3:uint32 = bufPosAsUint &. mask in
-            pos.(size 0) <- pos0 +. nbytes;
-
-            let pos0 = pos.(size 0) in
-            assume(v pos0 + numbytes U32 <= v (shake128_rate *. params_genA));
-            let subbuff = sub buf pos0 (size (numbytes U32)) in
-            let bufPosAsUint:uint32 = uint_from_bytes_le subbuff in
-            let val4:uint32 = bufPosAsUint &. mask in
-            pos.(size 0) <- pos0 +. nbytes;            
-*)
 
             let h1 = ST.get () in assume(v (bget h1 pos 0) + numbytes U32 <= v (shake128_rate *. params_genA));
             let val1 = poly_uniform_valFromBuffer pos buf mask in
@@ -254,32 +223,6 @@ let poly_uniform a seed =
             let val3 = poly_uniform_valFromBuffer pos buf mask in
             let h1 = ST.get () in assume(v (bget h1 pos 0) + numbytes U32 <= v (shake128_rate *. params_genA));
             let val4 = poly_uniform_valFromBuffer pos buf mask in
-
-            (*[@inline_let] let params_q = elem_to_uint32 params_q in
-            let iVal = i.(size 0) in
-            if (val1 <. params_q && iVal <. (params_k *. params_n))
-            then ( assume(FStar.Int.fits (UI32.v val1 * I64.v params_r2_invn * Int64.v params_qinv) I64.n);
-                   a.(iVal) <- reduce I64.((uint32_to_int64 val1) *^ params_r2_invn);
-                   i.(size 0) <- iVal +. size 1 )
-            else (); 
-            let iVal = i.(size 0) in
-            if (val2 <. params_q && iVal <. (params_k *. params_n))
-            then ( assume(FStar.Int.fits (UI32.v val2 * I64.v params_r2_invn * Int64.v params_qinv) I64.n);
-                   a.(iVal) <- reduce I64.((uint32_to_int64 val2) *^ params_r2_invn);
-                   i.(size 0) <- iVal +. size 1 )
-            else ();
-            let iVal = i.(size 0) in
-            if (val3 <. params_q && iVal <. (params_k *. params_n))
-            then ( assume(FStar.Int.fits (UI32.v val3 * I64.v params_r2_invn * Int64.v params_qinv) I64.n);
-                   a.(iVal) <- reduce I64.((uint32_to_int64 val3) *^ params_r2_invn);
-                   i.(size 0) <- iVal +. size 1 )
-            else ();
-            let iVal = i.(size 0) in
-            if (val4 <. params_q && iVal <. (params_k *. params_n))
-            then ( assume(FStar.Int.fits (UI32.v val4 * I64.v params_r2_invn * Int64.v params_qinv) I64.n);
-                   a.(iVal) <- reduce I64.((uint32_to_int64 val4) *^ params_r2_invn);
-                   i.(size 0) <- iVal +. size 1 )
-            else ()*)
 
             assume(FStar.Int.fits (UI32.v val1 * I64.v params_r2_invn * Int64.v params_qinv) I64.n);
             poly_uniform_setA a i val1;
