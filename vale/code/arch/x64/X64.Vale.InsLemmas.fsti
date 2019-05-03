@@ -4,6 +4,7 @@ open X64.Machine_s
 open X64.Instruction_s
 open X64.Vale.State
 open X64.Vale.Decls
+module BC = X64.Bytes_Code_s
 module S = X64.Bytes_Semantics_s
 
 val lemma_valid_taint64_operand (m:maddr) (t:taint) (s:va_state) : Lemma
@@ -54,5 +55,5 @@ let make_instr
     (#outs:list instr_out) (#args:list instr_operand) (#havoc_flags:flag_havoc)
     (i:instr_t outs args havoc_flags)
   : make_instr_t outs args =
-  make_instr_outs outs args (fun oprs -> S.Instr (S.InstrType outs args havoc_flags i) oprs)
+  make_instr_outs outs args (fun oprs -> BC.Instr (BC.InstrType outs args havoc_flags i) oprs S.AnnotateNone)
 

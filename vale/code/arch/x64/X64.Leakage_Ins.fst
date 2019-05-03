@@ -1,6 +1,7 @@
 module X64.Leakage_Ins
 open X64.Machine_s
 open X64.Instruction_s
+module BC = X64.Bytes_Code_s
 module S = X64.Bytes_Semantics_s
 open X64.Taint_Semantics_s
 open X64.Leakage_s
@@ -476,10 +477,10 @@ let rec lemma_instr_set_taints_public
     )
 
 let check_if_instr_consumes_fixed_time (ins:tainted_ins) (ts:taintState) : Pure (bool & taintState)
-  (requires S.Instr? ins.i)
+  (requires BC.Instr? ins.i)
   (ensures ins_consumes_fixed_time ins ts)
   =
-  let S.Instr (S.InstrType outs args havoc_flags iins) oprs = ins.i in
+  let BC.Instr (BC.InstrType outs args havoc_flags iins) oprs _ = ins.i in
   let t = inouts_taint outs args oprs ts ins.t in
   let b = check_if_consumes_fixed_time_outs outs args oprs ts ins.t t in
   let TaintState rs flags cf xmms = ts in
@@ -492,7 +493,7 @@ let check_if_instr_consumes_fixed_time (ins:tainted_ins) (ts:taintState) : Pure 
 
 let check_if_ins_consumes_fixed_time ins ts =
   match ins.i with
-  | S.Instr _ _ -> check_if_instr_consumes_fixed_time ins ts
+  | BC.Instr _ _ _ -> check_if_instr_consumes_fixed_time ins ts
   | _ ->
   false, ts
   (* Verifying, but too slow. Need to refactor
@@ -525,9 +526,9 @@ let check_if_ins_consumes_fixed_time ins ts =
               | OStack m -> false, ts
         end
 *)
-   | S.Push src -> if Secret? (ts'.regTaint Rsp) || Secret? (operand_taint src ts' Public) then false, ts
+   | BC.Push src -> if Secret? (ts'.regTaint Rsp) || Secret? (operand_taint src ts' Public) then false, ts
      else fixedTime, ts'
-   | S.Pop dst -> 
+   | BC.Pop dst -> 
      // Pop should be a public instruction
      if Secret? (ts'.regTaint Rsp) || Secret? (ins.t) then false, ts 
      else fixedTime, ts'
@@ -551,12 +552,12 @@ let frame_update_heap_x (ptr:int) (j:int) (v:nat64) (mem:S.heap) : Lemma
 
 #set-options "--z3rlimit 80"
 
-let lemma_push_same_public_aux (ts:taintState) (ins:tainted_ins{S.Push? ins.i}) (s1:traceState) (s2:traceState)
+let lemma_push_same_public_aux (ts:taintState) (ins:tainted_ins{BC.Push? ins.i}) (s1:traceState) (s2:traceState)
                                (fuel:nat) (b:bool) (ts':taintState)
   :Lemma (requires ((b, ts') == check_if_ins_consumes_fixed_time ins ts /\ b /\
                     is_explicit_leakage_free_lhs (Ins ins) fuel ts ts' s1 s2))
          (ensures  (is_explicit_leakage_free_rhs (Ins ins) fuel ts ts' s1 s2))
-  = let S.Push src, t = ins.i, ins.t in
+  = let BC.Push src, t = ins.i, ins.t in
     let dsts, srcs = extract_operands ins.i in
 
     let r1 = taint_eval_code (Ins ins) fuel s1 in
@@ -599,19 +600,19 @@ let lemma_push_same_public_aux (ts:taintState) (ins:tainted_ins{S.Push? ins.i}) 
         
     in Classical.forall_intro (Classical.move_requires aux)
 
-let lemma_push_same_public (ts:taintState) (ins:tainted_ins{S.Push? ins.i}) (s1:traceState) (s2:traceState)
+let lemma_push_same_public (ts:taintState) (ins:tainted_ins{BC.Push? ins.i}) (s1:traceState) (s2:traceState)
                            (fuel:nat)
   :Lemma (let b, ts' = check_if_ins_consumes_fixed_time ins ts in
           (b2t b ==> isExplicitLeakageFreeGivenStates (Ins ins) fuel ts ts' s1 s2))
   = let b, ts' = check_if_ins_consumes_fixed_time ins ts in
     Classical.move_requires (lemma_push_same_public_aux ts ins s1 s2 fuel b) ts'
 
-let lemma_pop_same_public_aux (ts:taintState) (ins:tainted_ins{S.Pop? ins.i}) (s1:traceState) (s2:traceState)
+let lemma_pop_same_public_aux (ts:taintState) (ins:tainted_ins{BC.Pop? ins.i}) (s1:traceState) (s2:traceState)
                                (fuel:nat) (b:bool) (ts':taintState)
   :Lemma (requires ((b, ts') == check_if_ins_consumes_fixed_time ins ts /\ b /\
                     is_explicit_leakage_free_lhs (Ins ins) fuel ts ts' s1 s2))
          (ensures  (is_explicit_leakage_free_rhs (Ins ins) fuel ts ts' s1 s2)) =
-    let S.Pop dst, t = ins.i, ins.t in
+    let BC.Pop dst, t = ins.i, ins.t in
     let dsts, srcs = extract_operands ins.i in
 
     let r1 = taint_eval_code (Ins ins) fuel s1 in
@@ -661,7 +662,7 @@ let lemma_pop_same_public_aux (ts:taintState) (ins:tainted_ins{S.Pop? ins.i}) (s
     in Classical.forall_intro (Classical.move_requires aux)
 
 
-let lemma_pop_same_public (ts:taintState) (ins:tainted_ins{S.Pop? ins.i}) (s1:traceState) (s2:traceState) 
+let lemma_pop_same_public (ts:taintState) (ins:tainted_ins{BC.Pop? ins.i}) (s1:traceState) (s2:traceState) 
   (fuel:nat)
   :Lemma (let b, ts' = check_if_ins_consumes_fixed_time ins ts in
   (b2t b ==> isExplicitLeakageFreeGivenStates (Ins ins) fuel ts ts' s1 s2))
@@ -675,15 +676,15 @@ val lemma_ins_same_public: (ts:taintState) -> (ins:tainted_ins{not (is_xmm_ins i
 *)
 let lemma_ins_same_public ts ins s1 s2 fuel = ()
 (*  match ins.i with
-  | S.Push _ -> lemma_push_same_public ts ins s1 s2 fuel
-  | S.Pop _ -> lemma_pop_same_public ts ins s1 s2 fuel
-  | S.Alloc _ -> ()
-  | S.Dealloc _ -> ()
+  | BC.Push _ -> lemma_push_same_public ts ins s1 s2 fuel
+  | BC.Pop _ -> lemma_pop_same_public ts ins s1 s2 fuel
+  | BC.Alloc _ -> ()
+  | BC.Dealloc _ -> ()
 *)
 
 #reset-options "--initial_ifuel 1 --max_ifuel 1 --initial_fuel 1 --max_fuel 1 --z3rlimit 100"
 let lemma_instr_leakage_free (ts:taintState) (ins:tainted_ins) : Lemma
-  (requires S.Instr? ins.i)
+  (requires BC.Instr? ins.i)
   (ensures (
     let (b, ts') = check_if_instr_consumes_fixed_time ins ts in
     b2t b ==> isConstantTime (Ins ins) ts /\ isLeakageFree (Ins ins) ts ts'
@@ -698,7 +699,7 @@ let lemma_instr_leakage_free (ts:taintState) (ins:tainted_ins) : Lemma
       (ensures is_explicit_leakage_free_rhs code fuel ts ts' s1 s2)
       [SMTPat (is_explicit_leakage_free_rhs code fuel ts ts' s1 s2)]
       =
-      let S.Instr (S.InstrType outs args havoc_flags i) oprs = ins.i in
+      let BC.Instr (BC.InstrType outs args havoc_flags i) oprs _ = ins.i in
       let t_ins = ins.t in
       let t_out = inouts_taint outs args oprs ts ins.t in
       let Some vs1 = S.instr_apply_eval outs args (instr_eval i) oprs s1.state in
@@ -738,7 +739,7 @@ let lemma_instr_leakage_free (ts:taintState) (ins:tainted_ins) : Lemma
 let lemma_ins_leakage_free ts ins =
   let b, ts' = check_if_ins_consumes_fixed_time ins ts in
   match ins.i with
-  | S.Instr _ _ -> lemma_instr_leakage_free ts ins
+  | BC.Instr _ _ _ -> lemma_instr_leakage_free ts ins
   | _ ->
   let p s1 s2 fuel = b2t b ==> isExplicitLeakageFreeGivenStates (Ins ins) fuel ts ts' s1 s2 in
   let my_lemma s1 s2 fuel : Lemma(p s1 s2 fuel) = lemma_ins_same_public ts ins s1 s2 fuel in
