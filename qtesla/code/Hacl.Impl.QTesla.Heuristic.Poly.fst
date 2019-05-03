@@ -396,12 +396,13 @@ let poly_sub_correct result x y =
     );
     pop_frame()
 
+// This function is sometimes used with result and x the same, so we can't assume they are disjoint.
 val poly_sub_reduce:
     result: poly
   -> x: poly
   -> y: poly
   -> Stack unit
-    (requires fun h -> live h result /\ live h x /\ live h y /\ disjoint result x /\ disjoint result y)
+    (requires fun h -> live h result /\ live h x /\ live h y /\ disjoint result y)
     (ensures fun h0 _ h1 -> modifies1 result h0 h1)
 
 let poly_sub_reduce result x y =

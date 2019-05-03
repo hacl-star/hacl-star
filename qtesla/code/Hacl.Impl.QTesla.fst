@@ -725,7 +725,7 @@ let test_correctness v_ =
 
 let buf = t:buftype & a:Type0 & buffer_t t a 
 [@BigOps.__reduce__] unfold
-let bb (#t:buftype) (#a:Type0) (b:buffer_t t a) : buf = (| t, a, b |)
+noextract let bb (#t:buftype) (#a:Type0) (b:buffer_t t a) : buf = (| t, a, b |)
 [@BigOps.__reduce__] unfold
 let disjoint_buf (b0 b1: buf) =
   let (| _, _, b0 |) = b0 in
@@ -736,6 +736,103 @@ let live_buf (h:HS.mem) (b: buf) =
   let (| _, _, b |) = b in
   live h b
 
+private inline_for_extraction noextract
+val qtesla_sign_compute_v:
+    nonce: I32.t
+  -> randomness: lbuffer uint8 crypto_seedbytes
+  -> v_: poly_k
+  -> y: poly
+  -> a: poly_k
+  -> Stack unit
+    (requires fun h -> let bufs = [bb randomness; bb v_; bb y; bb a] in 
+                    BigOps.big_and (live_buf h) bufs /\ BigOps.pairwise_and disjoint_buf bufs)
+    (ensures fun h0 _ h1 -> modifies1 v_ h0 h1)
+
+let qtesla_sign_compute_v nonce randomness v_ y a =
+    push_frame();
+    let y_ntt:poly = poly_create () in
+    // ntt transformation only happens here in provable parameter sets because poly_mul assumes
+    // both arguments are in ntt form. Heuristic parameter sets only assume the first parameter is in
+    // ntt form. In this combined codebase poly_mul always assumes both arguments are in NTT form, so
+    // we always convert y.
+    poly_ntt y_ntt y;
+    let h1 = ST.get () in
+    for 0ul params_k
+        (fun h _ -> live h v_ /\ live h a /\ live h y_ntt /\ modifies1 v_ h1 h)
+        (fun k ->
+            poly_mul (index_poly v_ k) (index_poly a k) y_ntt
+        );
+    pop_frame()
+
+private inline_for_extraction noextract
+val qtesla_sign_compute_c_z:
+    v_: poly_k
+  -> randomness_input: lbuffer uint8 (crypto_randombytes +. crypto_seedbytes +. crypto_hmbytes)
+  -> s: lbuffer sparse_elem params_n
+  -> y: poly
+  -> c: lbuffer uint8 crypto_c_bytes
+  -> z: poly
+  -> pos_list: lbuffer UI32.t params_h
+  -> sign_list: lbuffer I16.t params_h
+  -> Stack unit
+    (requires fun h -> let bufs = [bb v_; bb randomness_input; bb s; bb y; bb c; bb z; bb pos_list; bb sign_list] in
+                    BigOps.big_and (live_buf h) bufs /\ BigOps.pairwise_and disjoint_buf bufs)
+    (ensures fun h0 _ h1 -> modifies4 c z pos_list sign_list h0 h1)
+
+let qtesla_sign_compute_c_z v_ randomness_input s y c z pos_list sign_list =
+    push_frame();
+    let sc:poly = poly_create () in
+
+    hash_H c v_ (sub randomness_input (crypto_randombytes +. crypto_seedbytes) crypto_hmbytes);
+    encode_c pos_list sign_list c;
+    sparse_mul sc s pos_list sign_list;
+    let h = ST.get () in
+    //NS: I'm not sure how this is meant to be established
+    assume (forall i .{:pattern elem_v (bget h y i)}
+               i < v params_n ==> is_elem_int (elem_v (bget h y i) + elem_v (bget h sc i)));
+    poly_add z y sc;
+    pop_frame()
+
+private inline_for_extraction noextract
+val qtesla_sign_update_v:
+    v_: poly_k
+  -> e: lbuffer sparse_elem (params_n *. params_k)
+  -> pos_list: lbuffer UI32.t params_h
+  -> sign_list: lbuffer I16.t params_h
+  -> Stack (r:I32.t{r == 0l \/ r == 1l})
+    (requires fun h -> let bufs = [bb v_; bb e; bb pos_list; bb sign_list] in
+                    FStar.BigOps.big_and (live_buf h) bufs /\ FStar.BigOps.pairwise_and disjoint_buf bufs)
+    (ensures fun h0 _ h1 -> modifies1 v_ h0 h1)
+
+let qtesla_sign_update_v v_ e pos_list sign_list =
+    push_frame();
+    let rsp = create (size 1) 0l in
+
+    let h0 = ST.get () in
+    let _, _ =
+    interruptible_for (size 0) params_k
+         (fun h _ _ -> live h v_ /\ live h e /\ live h rsp /\
+                    modifies2 v_ rsp h0 h)
+         (fun k ->
+             push_frame();
+             let ec:poly_k = poly_k_create () in
+
+             let ec_k = index_poly ec k in
+             let e_k = sub e (params_n *. k) params_n in
+             //NS: Not sure why this is not provable
+             assume (disjoint ec_k e_k);
+             sparse_mul ec_k e_k pos_list sign_list;
+             poly_sub_correct (index_poly v_ k) (index_poly v_ k) (index_poly ec k);
+             rsp.(size 0) <- test_correctness (index_poly v_ k);
+             let rspVal = rsp.(size 0) in 
+             pop_frame(); 
+             rspVal <> 0l
+         ) in
+   let rspVal = rsp.(size 0) in
+   pop_frame();
+   rspVal
+
+private inline_for_extraction noextract
 val qtesla_sign_do_while:
     randomness: lbuffer uint8 crypto_seedbytes
   -> randomness_input: lbuffer uint8 (crypto_randombytes +. crypto_seedbytes +. crypto_hmbytes)
@@ -744,7 +841,7 @@ val qtesla_sign_do_while:
   -> s: lbuffer sparse_elem params_n
   -> e: lbuffer sparse_elem (params_n *. params_k)
   -> smlen : lbuffer size_t 1ul // smlen only valid on output; does _not_ indicate allocated size of sm on input
-  -> mlen : size_t
+  -> mlen : size_t{v mlen > 0 /\ v crypto_bytes + v mlen < modulus U32}
   -> m : lbuffer uint8 mlen
   -> sm: lbuffer uint8 (crypto_bytes +. mlen)
   -> Stack bool
@@ -765,33 +862,32 @@ val qtesla_sign_do_while:
       FStar.Int.fits (I32.v (bget h nonce 0) + 1) I32.n)
     (ensures fun h0 _ h1 -> modifies3 nonce smlen sm h0 h1)
 
-#reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0 --log_queries --query_stats --print_z3_statistics \
-                --using_facts_from '* -LowStar.Monotonic.Buffer.unused_in_not_unused_in_disjoint_2 -FStar.Monotonic.Heap.equal_dom'"
+// -LowStar.Monotonic.Buffer.unused_in_not_unused_in_disjoint_2
+#reset-options "--z3rlimit 1000 --max_fuel 0 --max_ifuel 0 \
+                --using_facts_from '*  -FStar.Monotonic.Heap.equal_dom -LowStar.Monotonic.Buffer.unused_in_not_unused_in_disjoint_2'"
+//                --using_facts_from '*  -FStar.Monotonic.Heap.equal_dom'"
+//                --using_facts_from '* -LowStar.Monotonic.Buffer.unused_in_not_unused_in_disjoint_2'"
+// --log_queries --query_stats --print_z3_statistics 
 
 let qtesla_sign_do_while randomness randomness_input nonce a s e smlen mlen m sm =
+    let hInit = ST.get () in
     push_frame();
-    let h0 = ST.get() in
     let c = create crypto_c_bytes (u8 0) in
+    let z:poly = poly_create () in
+    let y:poly = poly_create () in
+    let v_:poly_k = poly_k_create () in 
+    let rsp = create (size 1) 0l in
     let pos_list = create params_h 0ul in
     let sign_list = create params_h 0s in
-    let y:poly = poly_create () in
-    let y_ntt:poly = poly_create () in
-    let sc:poly = poly_create () in
-    let z:poly = poly_create () in 
-    let v_:poly_k = poly_k_create () in 
-    let ec:poly_k = poly_k_create () in
-    let rsp = create (size 1) 0l in
-    //NS: to prove the assume below, we need to use 
+
+    //TODO NS: to prove the assume below, we need to use 
     // LowStar.Monotonic.Buffer.unused_in_not_unused_in_disjoint_2
     //but that's really expensive in this context
     //It's probably worth factoring out a proof of this fact below
     //until we can improve that lemma
     assume (FStar.BigOps.pairwise_and 
                   disjoint_buf 
-                  [bb c; bb pos_list; bb sign_list;
-                   bb y; bb y_ntt; bb sc; bb z; bb v_; bb ec; 
-                   bb rsp;
-                   bb randomness; 
+                  [bb randomness;
                    bb randomness_input;
                    bb nonce;
                    bb a;
@@ -799,94 +895,90 @@ let qtesla_sign_do_while randomness randomness_input nonce a s e smlen mlen m sm
                    bb e;
                    bb smlen;
                    bb m;
-                   bb sm]);
+                   bb sm;
+                   bb c;
+                   bb z;
+                   bb y;
+                   bb v_;
+                   bb rsp;
+                   bb pos_list;
+                   bb sign_list]);
+
+    let h0 = ST.get () in
+    assert(modifies0 h0 h0);
     
     nonce.(size 0) <- I32.(nonce.(size 0) +^ 1l);
-    sample_y y randomness (nonce.(size 0));
-    // TODO: ntt transformation only happens here in provable parameter sets because poly_mul assumes
-    // both arguments are in ntt form. Heuristic parameter sets only assume the first parameter is in
-    // ntt form.
-    poly_ntt y_ntt y;
-    let h1 = ST.get () in
-    for 0ul params_k
-        (fun h _ -> live h v_ /\ live h a /\ live h y_ntt /\ modifies1 v_ h1 h)
-        (fun k ->
-            poly_mul (index_poly v_ k) (index_poly a k) y_ntt
-        );
+    sample_y y randomness nonce.(size 0);
 
-    hash_H c v_ (sub randomness_input (crypto_randombytes +. crypto_seedbytes) crypto_hmbytes);
-    encode_c pos_list sign_list c;
-    sparse_mul sc s pos_list sign_list;
-    let h = ST.get () in
-    //NS: I'm not sure how this is meant to be established
-    assume (forall i .{:pattern elem_v (bget h y i)}
-               i < v params_n ==> is_elem_int (elem_v (bget h y i) + elem_v (bget h sc i)));
-    poly_add z y sc;
+    let h1 = ST.get () in
+    assert(modifies2 y nonce h0 h1);
+
+    qtesla_sign_compute_v nonce.(size 0) randomness v_ y a;
+
+    let h2 = ST.get () in
+    assert(modifies3 v_ y nonce h0 h2);
+
+    qtesla_sign_compute_c_z v_ randomness_input s y c z pos_list sign_list;
+    let h3 = ST.get () in
+    assert(modifies (loc c |+| loc z |+| loc v_ |+| loc y |+| loc nonce |+| loc pos_list |+| loc sign_list) h0 h3);
+
     let res = 
     if test_rejection z
     then (false)
     else (
-         let h2 = ST.get () in
-         let _, _ = 
-         interruptible_for (size 0) params_k
-         (fun h _ _ -> live h ec /\ live h e /\ live h pos_list /\ live h sign_list /\ live h v_ /\ live h rsp /\
-                    modifies3 ec v_ rsp h2 h)
-         (fun k ->
-             let sk_offset:size_t = (params_n *. (k +. (size 1))) in
-             let sublen:size_t = crypto_secretkeybytes -. sk_offset in
-             let ec_k = (index_poly ec k) in
-             let e_k = (sub e (params_n *. k) params_n) in
-             //NS: Not sure why this is not provable
-             assume (disjoint ec_k e_k);
-             sparse_mul ec_k e_k pos_list sign_list;
-             poly_sub_correct (index_poly v_ k) (index_poly v_ k) (index_poly ec k);
-             rsp.(size 0) <- test_correctness (index_poly v_ k);
-             let rspVal = rsp.(size 0) in rspVal <> 0l
-         ) in
-         if (let rspVal = rsp.(size 0) in rspVal <> 0l)
+         let rspVal = qtesla_sign_update_v v_ e pos_list sign_list in
+         if (rspVal <> 0l)
          then (false)
          else (
-              let h3 = ST.get () in
+              let h4 = ST.get () in
               for 0ul mlen
-              (fun h _ -> live h sm /\ live h m /\ modifies1 sm h3 h)
+              (fun h _ -> live h sm /\ live h m /\ modifies1 sm h4 h)
               (fun i -> let ix = crypto_bytes +. i in
                      assert (length sm == v (crypto_bytes +. mlen));
-                     //NS: This seems to be a glitch in Lib.IntTypes
-                     //    this kind of fact ought to be provable, but
-                     //    here it fails, I think, because ifuel=0 ... but i'm not sure about that
-                     assume (v crypto_bytes + v mlen == v (crypto_bytes +. mlen));
                      assert (v i < v mlen);
                      sm.(ix) <- m.(i) );
 
+              let h5 = ST.get () in
+              assert(modifies (loc sm |+| loc c |+| loc z |+| loc v_ |+| loc y |+| loc nonce |+| loc pos_list |+| loc sign_list) h0 h5);
+
               smlen.(size 0) <- crypto_bytes +. mlen;
-              //NS: Something seems wrong here conceptually. The size bounds do not seem correct
-              assume (v crypto_bytes = v crypto_bytes + v mlen);
-              encode_sig sm c z;
+              let h6 = ST.get () in
+              assert(modifies (loc smlen |+| loc sm |+| loc c |+| loc z |+| loc v_ |+| loc y |+| loc nonce |+| loc pos_list |+| loc sign_list) h0 h6);
+              
+              encode_sig (sub sm (size 0) crypto_bytes) c z;
+              let h7 = ST.get () in
+              assert(modifies (loc smlen |+| loc sm |+| loc c |+| loc z |+| loc v_ |+| loc y |+| loc nonce |+| loc pos_list |+| loc sign_list) h0 h7);
 
               true
               )
         ) in
+    let h8 = ST.get () in
+    assert(modifies (loc smlen |+| loc sm |+| loc c |+| loc z |+| loc v_ |+| loc y |+| loc nonce |+| loc pos_list |+| loc sign_list) h0 h8);
     pop_frame(); 
     let hn = ST.get() in
-    //NS: I would suggest trying to decompose this modifies clause and
-    //    proving it at various intermediate states, as we did in another example
-    assume (modifies3 nonce smlen sm h0 hn);
+    // TODO: Asserting this requires FStar.Monotonic.Heap.equal_dom to be included, but this lemma really slows the
+    // proof down.
+    assume (modifies3 nonce smlen sm hInit hn);
     res
 
-#reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0 --admit_smt_queries true"
+#reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0" // --admit_smt_queries true"
 
 val qtesla_sign:
     smlen : lbuffer size_t 1ul // smlen only valid on output; does _not_ indicate allocated size of sm on input
-  -> mlen : size_t
+  -> mlen : size_t{v mlen > 0 /\ v crypto_bytes + v mlen < modulus U32}
   -> m : lbuffer uint8 mlen
   -> sm: lbuffer uint8 (crypto_bytes +. mlen)
   -> sk : lbuffer uint8 crypto_secretkeybytes
   -> Stack unit
-    (requires fun h -> live h sm /\ live h m /\ live h sk /\ 
-                    disjoint R.state smlen /\ disjoint R.state m /\ disjoint R.state sm /\ disjoint R.state sk /\
-                    disjoint smlen m /\ disjoint smlen sm /\ disjoint smlen sk /\
-                    disjoint sm m /\ disjoint sm sk /\ disjoint m sk)
+    (requires fun h -> let bufs = [bb smlen; bb m; bb sm; bb sk] in
+                    BigOps.big_and (live_buf h) bufs /\
+                    BigOps.pairwise_and disjoint_buf bufs /\
+                    disjoint R.state smlen /\ disjoint R.state m /\ disjoint R.state sm /\ disjoint R.state sk)
     (ensures fun h0 _ h1 -> modifies3 R.state sm smlen h0 h1)
+
+// --log_queries --query_stats --print_z3_statistics 
+#reset-options "--z3rlimit 300 --max_fuel 0 --max_ifuel 0 \
+                --using_facts_from '* -LowStar.Monotonic.Buffer.unused_in_not_unused_in_disjoint_2'"
 
 let qtesla_sign smlen mlen m sm sk =
     recall R.state;
@@ -900,21 +992,54 @@ let qtesla_sign smlen mlen m sm sk =
     let e = create (params_n *. params_k) (to_sparse_elem 0) in
     let nonce = create (size 1) 0l in
 
+    // TODO: requires expensive LowStar.Monotonic.Buffer.unused_in_not_unused_in_disjoint_2 lemma
+    assume (FStar.BigOps.pairwise_and 
+                  disjoint_buf 
+                  [bb smlen;
+                   bb m;
+                   bb sm;
+                   bb sk;
+                   bb randomness;
+                   bb randomness_input;
+                   bb nonce;
+                   bb a;
+                   bb s;
+                   bb e;
+                   bb seeds]);
+
+    let h0 = ST.get () in
+    assert(modifies0 h0 h0);
     decode_sk seeds s e sk;
+
+    let h1 = ST.get () in
+    assert(modifies3 seeds s e h0 h1);
     
     R.randombytes_ crypto_randombytes (sub randomness_input crypto_randombytes crypto_randombytes);
     update_sub randomness_input (size 0) crypto_seedbytes (sub seeds crypto_seedbytes crypto_seedbytes);
     params_SHAKE mlen m crypto_hmbytes (sub randomness_input (crypto_randombytes +. crypto_seedbytes) crypto_hmbytes);
     params_SHAKE (crypto_randombytes +. crypto_seedbytes +. crypto_hmbytes) randomness_input crypto_seedbytes randomness;
 
+    let h2 = ST.get () in
+    assert(modifies (loc seeds |+| loc s |+| loc e |+| loc randomness |+| loc randomness_input |+| loc R.state) h0 h2);
+
     poly_uniform a (sub seeds (size 0) crypto_randombytes);
 
-    let h0 = ST.get () in
+    let h3 = ST.get () in
+    assert(modifies (loc seeds |+| loc s |+| loc e |+| loc randomness |+| loc randomness_input |+| loc R.state |+| loc a) h0 h3);
+
     do_while
-        (fun h _ -> live h smlen /\ live h m /\ live h sm /\ live h s /\ live h e /\
-                 live h randomness /\ live h randomness_input /\ live h a /\ live h seeds /\ live h nonce /\
-                 modifies3 nonce smlen sm h0 h)
-        (fun _ -> qtesla_sign_do_while randomness randomness_input nonce a s e smlen mlen m sm);
+        (fun h _ -> let bufs = [bb smlen; bb m; bb sm; bb s; bb e; bb randomness; bb randomness_input; bb a; bb nonce] in
+                 FStar.BigOps.big_and (live_buf h) bufs /\ modifies3 nonce smlen sm h3 h)
+        (fun _ -> 
+            let h4 = ST.get () in
+            assume(FStar.Int.fits (I32.v (bget h4 nonce 0) + 1) I32.n);
+            qtesla_sign_do_while randomness randomness_input nonce a s e smlen mlen m sm
+        );
+
+    let h5 = ST.get () in
+    assert(modifies (loc seeds |+| loc s |+| loc e |+| loc randomness |+| loc randomness_input |+| loc R.state |+| loc a |+|
+                     loc nonce |+| loc smlen |+| loc sm) h0 h5);
+    
     pop_frame()
 
 #reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0"
@@ -937,77 +1062,174 @@ let test_z z =
     then 1l
     else 0l
 
+private inline_for_extraction noextract
+val qtesla_verify_decode_pk_compute_w:
+    pk: lbuffer uint8 crypto_publickeybytes
+  -> c: lbuffer uint8 crypto_c_bytes
+  -> z: poly
+  -> w: poly_k
+  -> Stack unit
+    (requires fun h -> let bufs = [bb pk; bb c; bb z; bb w] in
+                    BigOps.big_and (live_buf h) bufs /\ BigOps.pairwise_and disjoint_buf bufs)
+    (ensures fun h0 _ h1 -> modifies1 w h0 h1)
+
+//  --log_queries --query_stats --print_z3_statistics 
+#reset-options "--z3rlimit 300 --max_fuel 0 --max_ifuel 1 \
+                --using_facts_from '* -LowStar.Monotonic.Buffer.unused_in_not_unused_in_disjoint_2'"
+
+let qtesla_verify_decode_pk_compute_w pk c z w =
+    push_frame();
+    let seed = create crypto_seedbytes (u8 0) in
+    let pos_list = create params_h 0ul in
+    let sign_list = create params_h 0s in
+    let pk_t = create (params_n *. params_k) 0l in
+    let z_ntt = poly_create () in
+    let tc = poly_k_create () in
+    let a = poly_k_create () in
+
+    let h0 = ST.get () in
+    assert(modifies0 h0 h0);
+
+    // TODO: requires expensive LowStar.Monotonic.Buffer.unused_in_not_unused_in_disjoint_2 lemma
+    assume (FStar.BigOps.pairwise_and 
+                  disjoint_buf
+                  [bb pk;
+                   bb c;
+                   bb z;
+                   bb w;
+                   bb seed;
+                   bb pos_list;
+                   bb sign_list;
+                   bb pk_t;
+                   bb z_ntt;
+                   bb tc;
+                   bb a]);
+
+    decode_pk pk_t seed pk;
+    poly_uniform a seed;
+    encode_c pos_list sign_list c;
+    poly_ntt z_ntt z; 
+
+    let h1 = ST.get () in
+    // All buffers in this stack frame.
+    assert(modifies (loc pk_t |+| loc seed |+| loc a |+| loc pos_list |+| loc sign_list |+| loc z_ntt) h0 h1);
+
+    for 0ul params_k
+    (fun h _ -> live h w /\ live h a /\ live h z_ntt /\ live h tc /\ live h pk_t /\ live h pos_list /\ live h sign_list /\
+             modifies2 w tc h1 h)
+    (fun k ->
+        poly_mul (index_poly w k) (index_poly a k) z_ntt;
+        let tc_k = index_poly tc k in
+        let pk_t_k = sub pk_t (k *. params_n) params_n in
+        assert(disjoint tc pk_t);
+        //loc_disjoint_includes (loc tc) (loc pk_t) (loc tc_k) (loc pk_t_k);
+        let h = ST.get () in
+        // TODO: No idea why the prover can't prove these subbuffers are disjoint.
+        assume(let bufs = [bb tc_k; bb pk_t_k; bb pos_list; bb sign_list] in
+               FStar.BigOps.pairwise_and disjoint_buf bufs);
+        //sparse_mul32 (index_poly tc k) (sub pk_t (k *. params_n) params_n) pos_list sign_list;
+        assume(forall i . {:pattern v (bget h pos_list i)} v (bget h pos_list i) < v params_n);
+        sparse_mul32 tc_k pk_t_k pos_list sign_list;
+        poly_sub_reduce (index_poly w k) (index_poly w k) (index_poly tc k)
+    );
+
+    let h2 = ST.get () in
+    assert(modifies (loc w |+| loc tc |+| loc pk_t |+| loc seed |+| loc a |+| loc pos_list |+| loc sign_list |+| loc z_ntt) h0 h2);
+
+    pop_frame()
+
+#reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 1" //  --log_queries --query_stats --print_z3_statistics"
+
+private inline_for_extraction noextract
+val qtesla_verify_valid_z:
+    smlen : size_t{v smlen >= v crypto_bytes}
+  -> sm : lbuffer uint8 smlen
+  -> pk : lbuffer uint8 crypto_publickeybytes
+  -> c : lbuffer uint8 crypto_c_bytes
+  -> z : poly
+  -> Stack bool
+    (requires fun h -> let bufs = [bb sm; bb pk; bb c; bb z] in
+                    FStar.BigOps.big_and (live_buf h) bufs /\ FStar.BigOps.pairwise_and disjoint_buf bufs)
+    (ensures fun h0 _ h1 -> modifies0 h0 h1)
+
+let qtesla_verify_valid_z smlen sm pk c z =
+    push_frame();
+
+    let hm = create crypto_hmbytes (u8 0) in
+    let w = create (params_n *. params_k) (to_elem 0) in // poly_k_create () in
+    let c_sig = create crypto_c_bytes (u8 0) in
+
+    let h0 = ST.get () in
+    assert(modifies0 h0 h0);
+    
+    qtesla_verify_decode_pk_compute_w pk c z w;
+    let h1 = ST.get () in
+    assert(modifies3 c z w h0 h1);
+
+    assert(v (smlen -. crypto_bytes) == v smlen - v crypto_bytes);
+    params_SHAKE (smlen -. crypto_bytes) (sub sm crypto_bytes (smlen -. crypto_bytes)) crypto_hmbytes hm;
+    let h2 = ST.get () in
+    assert(modifies4 hm c z w h0 h2);
+    hash_H c_sig w hm;
+    let h3 = ST.get () in
+    assert(modifies (loc c_sig |+| loc hm |+| loc c |+| loc z |+| loc w) h0 h3);
+
+    // TODO perf: lbytes_eq iterates over the entire buffer no matter what, which we don't need. memcmp would be fine since
+    // this is all public data. Not yet determined if there's a construct which extracts as memcmp.
+    // So we may do unnecessary work but it's still correct.
+    let r = lbytes_eq c c_sig in
+    pop_frame();
+    r
+
 val qtesla_verify:
-    mallocated : size_t
-  -> mlen : lbuffer size_t 1ul
-  -> m : lbuffer uint8 mallocated
-  -> smlen : size_t
+    mlen : lbuffer size_t 1ul
+  -> smlen : size_t{FStar.Int.fits (v crypto_bytes + v smlen) I32.n}
+  -> m : lbuffer uint8 (smlen -. crypto_bytes)
   -> sm : lbuffer uint8 smlen
   -> pk : lbuffer uint8 crypto_publickeybytes
   -> Stack (r:I32.t{r == 0l \/ r == (-1l) \/ r == (-2l) \/ r == (-3l)})
-    (requires fun h -> live h m /\ live h mlen /\ live h sm /\ live h pk /\
-                    disjoint mlen m /\ disjoint mlen sm /\ disjoint mlen pk /\
-                    disjoint m sm /\ disjoint m pk /\
-                    disjoint sm pk)
+    (requires fun h -> let bufs = [bb mlen; bb m; bb sm; bb pk] in
+                    FStar.BigOps.big_and (live_buf h) bufs /\ FStar.BigOps.pairwise_and disjoint_buf bufs)
     (ensures fun h0 _ h1 -> modifies2 mlen m h0 h1)
 
-#reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0 --admit_smt_queries true"
-
-let qtesla_verify mallocated mlen m smlen sm pk =
+let qtesla_verify mlen smlen m sm pk =
 
     // Can't return from the middle of a function in F*, so instead we use this if-then-else structure where
     // the else is the entire rest of the function after the return statement.
     if smlen <. crypto_bytes then ( -1l ) else (
     push_frame();
     let c = create crypto_c_bytes (u8 0) in
-    let c_sig = create crypto_c_bytes (u8 0) in
-    let seed = create crypto_seedbytes (u8 0) in
-    let hm = create crypto_hmbytes (u8 0) in
-    let pos_list = create params_h 0ul in
-    let sign_list = create params_h 0s in
-    let pk_t = create (params_n *. params_k) 0l in
-    let w = poly_k_create () in
-    let a = poly_k_create () in
-    let tc = poly_k_create () in
     let z = poly_create () in
-    let z_ntt = poly_create() in
-
-    decode_sig c z (sub sm (size 0) crypto_bytes); 
-    if test_z z <> 0l then ( pop_frame(); -2l ) else (
-    decode_pk pk_t seed pk;
-    poly_uniform a seed;
-    encode_c pos_list sign_list c;
-    poly_ntt z_ntt z; 
 
     let h0 = ST.get () in
-    for 0ul params_k
-    (fun h _ -> live h w /\ live h a /\ live h z_ntt /\ live h tc /\ live h pk_t /\ live h pos_list /\ live h sign_list /\
-             modifies2 w tc h0 h)
-    (fun k ->
-        poly_mul (index_poly w k) (index_poly a k) z_ntt;
-        sparse_mul32 (index_poly tc k) (sub pk_t (k *. params_n) params_n) pos_list sign_list;
-        poly_sub_reduce (index_poly w k) (index_poly w k) (index_poly tc k)
-    );
-
-    params_SHAKE (smlen -. crypto_bytes) (sub sm crypto_bytes (smlen -. crypto_bytes)) crypto_hmbytes hm;
-    hash_H c_sig w hm;
-
-    // lbytes_eq iterates over the entire buffer no matter what, which we don't need. memcmp would be fine since
-    // this is all public data. Not yet determined if there's a construct which extracts as memcmp.
-    // So we may do unnecessary work but it's still correct.
-    if not (lbytes_eq c c_sig) then ( pop_frame(); -3l ) else (
+    assert(modifies0 h0 h0);
+    
+    decode_sig c z (sub sm (size 0) crypto_bytes); 
+    let h1 = ST.get () in
+    assert(modifies2 c z h0 h1);
+    if test_z z <> 0l then ( pop_frame(); -2l ) else (
+    if not (qtesla_verify_valid_z smlen sm pk c z) then ( pop_frame(); -3l ) else (
     [@inline_let] let mlenVal = smlen -. crypto_bytes in
     mlen.(size 0) <- mlenVal;
-    let h1 = ST.get () in
+    let h5 = ST.get () in
+    assert(modifies3 mlen c z h0 h5);
     for 0ul mlenVal
-    (fun h _ -> live h m /\ live h sm /\ modifies1 m h1 h)
-    (fun i -> m.(i) <- sm.(crypto_bytes +. i) );
+    (fun h _ -> live h m /\ live h sm /\ modifies1 m h5 h)
+    (fun i -> 
+        assert(v mlenVal <= v smlen);
+        assert(FStar.Int.fits (v crypto_bytes + v i) I32.n);
+        [@inline_let] let smIndex = crypto_bytes +. i in
+        assert(v smIndex == v crypto_bytes + v i);
+        assert(v mlenVal == v smlen - v crypto_bytes);
+        assert(v smIndex < v smlen);
+        m.(i) <- sm.(crypto_bytes +. i) );
 
+    let h6 = ST.get () in
+    assert(modifies4 m mlen c z h0 h6);
+    
     pop_frame();
     0l
     )))
-
-#reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0"
 
 /// NIST required API wrappers
 
@@ -1019,7 +1241,7 @@ val crypto_sign:
     sm : buffer uint8
   -> smlen : lbuffer UI64.t 1ul
   -> m : buffer uint8
-  -> mlen : UI64.t{length m = v mlen /\ length sm = v crypto_bytes + UI64.v mlen}
+  -> mlen : UI64.t{length m = v mlen /\ length sm = v crypto_bytes + UI64.v mlen /\ v mlen > 0 /\ v crypto_bytes + v mlen < modulus U32}
   -> sk : lbuffer uint8 crypto_secretkeybytes
   -> Stack (r:I32.t{r == 0l})
     (requires fun h -> live h sm /\ live h smlen /\ live h m /\ live h sk /\
@@ -1044,7 +1266,8 @@ val crypto_sign_open:
     m : buffer uint8
   -> mlen : lbuffer UI64.t 1ul
   -> sm : buffer uint8
-  -> smlen : UI64.t{length sm = v smlen /\ length m = UI64.v smlen - v crypto_bytes}
+  -> smlen : UI64.t{length sm = v smlen /\ length m = UI64.v smlen - v crypto_bytes /\ 
+                   FStar.Int.fits (v crypto_bytes + v smlen) Int32.n}
   -> pk : lbuffer uint8 crypto_publickeybytes
   -> Stack (r:I32.t{r == 0l \/ r == (-1l) \/ r == (-2l) \/ r == (-3l)})
     (requires fun h -> live h m /\ live h mlen /\ live h sm /\ live h pk /\
@@ -1057,7 +1280,7 @@ let crypto_sign_open m mlen sm smlen pk =
     push_frame();
     let smlen = Lib.RawIntTypes.size_from_UInt32 (uint64_to_uint32 smlen) in
     let mlen_sizet = create (size 1) (size 0) in
-    let res = qtesla_verify (smlen -. crypto_bytes) mlen_sizet m smlen sm pk in
+    let res = qtesla_verify mlen_sizet smlen m sm pk in
     let mlen_sizet = mlen_sizet.(size 0) in
     mlen.(size 0) <- uint32_to_uint64 mlen_sizet;
     pop_frame();
