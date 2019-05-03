@@ -5,6 +5,7 @@ open FStar.List.Tot.Base
 
 open X64.Machine_s
 open X64.Bytes_Semantics_s
+module BC = X64.Bytes_Code_s
 module S = X64.Bytes_Semantics_s
 open X64.Instruction_s
 
@@ -100,10 +101,10 @@ let rec obs_inouts
 [@instr_attr]
 let ins_obs (ins:ins) (s:traceState) : list observation =
   match ins with
-  | Instr (InstrType outs args _ _) oprs -> obs_inouts outs args oprs s
-  | Push src -> operand_obs s src
-  | Pop dst -> operand_obs s dst
-  | Alloc _ | Dealloc _ -> []
+  | BC.Instr (BC.InstrType outs args _ _) oprs _ -> obs_inouts outs args oprs s
+  | BC.Push src -> operand_obs s src
+  | BC.Pop dst -> operand_obs s dst
+  | BC.Alloc _ | BC.Dealloc _ -> []
 
 [@"opaque_to_smt"]
 private let rec match_n (addr:int) (n:nat) (memTaint:memTaint_t) (t:taint)
@@ -207,10 +208,10 @@ let rec taint_match_inouts
 [@instr_attr]
 let taint_match_ins (ins:ins) (t:taint) (memTaint:memTaint_t) (s:state) : bool =
   match ins with
-  | Instr (InstrType outs args _ _) oprs -> taint_match_inouts outs args oprs t memTaint s
-  | Push src -> taint_match src t memTaint s
-  | Pop _ -> taint_match (OStack (MReg Rsp 0)) t memTaint s
-  | Alloc _ | Dealloc _ -> true
+  | BC.Instr (BC.InstrType outs args _ _) oprs _ -> taint_match_inouts outs args oprs t memTaint s
+  | BC.Push src -> taint_match src t memTaint s
+  | BC.Pop _ -> taint_match (OStack (MReg Rsp 0)) t memTaint s
+  | BC.Alloc _ | BC.Dealloc _ -> true
 
 [@instr_attr]
 let update_taint (memTaint:memTaint_t) (dst:operand) (t:taint) (s:state) : memTaint_t =
@@ -270,9 +271,9 @@ let rec update_taint_outputs
 [@instr_attr]
 let update_taint_ins (ins:ins) (t:taint) (memTaint:memTaint_t) (s:state) : memTaint_t =
   match ins with
-  | Instr (InstrType outs args _ _) oprs -> update_taint_outputs outs args oprs t memTaint s
-  | Push _ | Alloc _ | Dealloc _ -> memTaint
-  | Pop dst -> update_taint memTaint dst t s
+  | BC.Instr (BC.InstrType outs args _ _) oprs _ -> update_taint_outputs outs args oprs t memTaint s
+  | BC.Push _ | BC.Alloc _ | BC.Dealloc _ -> memTaint
+  | BC.Pop dst -> update_taint memTaint dst t s
 
 [@instr_attr]
 let taint_eval_ins (ins:tainted_ins) (ts: traceState) : GTot traceState =
@@ -287,10 +288,10 @@ let taint_eval_ins (ins:tainted_ins) (ts: traceState) : GTot traceState =
 type tainted_ocmp : eqtype = | TaintedOCmp: o:ocmp -> ot:taint -> tainted_ocmp
 
 let get_fst_ocmp (o:ocmp) = match o with
-  | S.OEq o1 _ | S.ONe o1 _ | S.OLe o1 _ | S.OGe o1 _ | S.OLt o1 _ | S.OGt o1 _ -> o1
+  | BC.OEq o1 _ | BC.ONe o1 _ | BC.OLe o1 _ | BC.OGe o1 _ | BC.OLt o1 _ | BC.OGt o1 _ -> o1
 
 let get_snd_ocmp (o:ocmp) = match o with
-  | S.OEq _ o2 | S.ONe _ o2 | S.OLe _ o2 | S.OGe _ o2 | S.OLt _ o2 | S.OGt _ o2 -> o2
+  | BC.OEq _ o2 | BC.ONe _ o2 | BC.OLe _ o2 | BC.OGe _ o2 | BC.OLt _ o2 | BC.OGt _ o2 -> o2
 
 let taint_eval_ocmp (ts:traceState) (c:tainted_ocmp) : GTot (traceState * bool) =
   let t = c.ot in

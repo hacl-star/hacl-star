@@ -45,6 +45,7 @@ open X64.Vale.InsBasic
 open X64.Vale.InsVector
 open X64.Vale.InsLemmas
 module I = X64.Instructions_s
+module BC = X64.Bytes_Code_s
 module S = X64.Bytes_Semantics_s
 module TS = X64.Taint_Semantics_s
 module P = X64.Print_s
@@ -65,7 +66,7 @@ procedure{:operand} Stack_in(base:reg64, inline offset:int) returns(o:opr)
     extern;
 
 
-procedure{:instruction Ins(TS.TaintedIns(tuple(S.Pop(t_op_to_op(dst))), Public))}
+procedure{:instruction Ins(TS.TaintedIns(tuple(BC.Pop(t_op_to_op(dst))), Public))}
          {:fast_instruction}{:quick exportOnly}{:public}
     Pop(out dst: dst_opr64)
     modifies rsp; stack;
@@ -81,7 +82,7 @@ procedure{:instruction Ins(TS.TaintedIns(tuple(S.Pop(t_op_to_op(dst))), Public))
 
 }
 
-procedure{:instruction Ins(TS.TaintedIns(tuple(S.Push(t_op_to_op(src))), Public))}
+procedure{:instruction Ins(TS.TaintedIns(tuple(BC.Push(t_op_to_op(src))), Public))}
          {:fast_instruction}{:quick exportOnly}{:public}
     Push(src: reg_opr64)
     reads
