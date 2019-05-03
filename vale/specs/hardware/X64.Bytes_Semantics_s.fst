@@ -24,7 +24,7 @@ type stack =
     initial_rsp:nat64{initial_rsp >= 4096} ->  // Initial rsp pointer when entering the function
     mem:Map.t int nat8 ->                       // Stack contents
     stack
-  
+
 noeq type instr_type =
   | InstrType :
       outs:list instr_out ->
@@ -39,22 +39,6 @@ noeq type ins =
       i:instr_type ->
       oprs:instr_operands_t i.outs i.args ->
       ins
-
-  // Temporary partially-generic instructions
-  // TODO: delete these; they have been replaced with with Instr
-  | Ins_64_64_preserve : i:instr_t [out op64] [op64] PreserveFlags -> dst:operand -> src:operand -> ins
-  | Ins_io64_64 : i:instr_t [inOut op64] [op64] HavocFlags -> dst:operand -> src:operand -> ins
-  | Ins_io64_64_cf : i:instr_t [inOut opFlagsCf; inOut op64] [op64] HavocFlags -> dst:operand -> src:operand -> ins
-  | Ins_ioXmm : i:instr_t [inOut opXmm] [] PreserveFlags -> dst:xmm -> ins
-  | Ins_Xmm_Xmm : i:instr_t [out opXmm] [opXmm] PreserveFlags -> dst:xmm -> src:xmm -> ins
-  | Ins_ioXmm_Xmm : i:instr_t [inOut opXmm] [opXmm] PreserveFlags -> dst:xmm -> src:xmm -> ins
-  | MOVDQU     : dst:mov128_op -> src:mov128_op -> ins  // We let the assembler complain about attempts to use two memory ops
-
-  // REVIEW: these aren't being used right now; Instr is being used (but it would be nice to have a special case for "xor r, r")
-  | Xor64      : dst:operand -> src:operand -> ins
-  | Pxor       : dst:xmm -> src:xmm -> ins
-  | VPxor      : dst:xmm -> src1:xmm -> src2:mov128_op -> ins
-
   // Stack operations
   // TODO: taint analysis for these
   | Push       : src:operand -> ins
@@ -656,41 +640,6 @@ let eval_ins (ins:ins) : st unit =
   | Instr (InstrType outs args havoc_flags i) oprs ->
     apply_option (eval_instr outs args havoc_flags i oprs s) set
 
-  | Ins_64_64_preserve i dst src ->
-    check (valid_src_operand src);;
-    let vOpt = instr_eval i (eval_operand src s) in
-    try_option vOpt (update_operand_preserve_flags dst)
-
-  | Ins_io64_64 i dst src ->
-    check (valid_src_operand src);;
-    let vOpt = instr_eval i (eval_operand dst s) (eval_operand src s) in
-    try_option vOpt (update_operand dst ins)
-
-  | Ins_io64_64_cf i dst src ->
-    check (valid_src_operand src);;
-    let vOpt = instr_eval i (cf s.flags) (eval_operand dst s) (eval_operand src s) in
-    try_option vOpt (fun (new_carry, v) ->
-      update_operand dst ins v;;
-      update_flags (havoc s ins);; // We specify cf, but underspecify everything else
-      update_cf new_carry)
-
-  | Ins_ioXmm i dst ->
-    let vOpt = instr_eval i (eval_xmm dst s) in
-    try_option vOpt (update_xmm_preserve_flags dst)
-
-  | Ins_Xmm_Xmm i dst src ->
-    let vOpt = instr_eval i (eval_xmm src s) in
-    try_option vOpt (update_xmm_preserve_flags dst)
-
-  | Ins_ioXmm_Xmm i dst src ->
-    let vOpt = instr_eval i (eval_xmm dst s) (eval_xmm src s) in
-    try_option vOpt (update_xmm_preserve_flags dst)
-
-  | Xor64 dst src ->
-    check (valid_src_operand src);;
-    update_operand dst ins (Types_s.ixor (eval_operand dst s) (eval_operand src s));;
-    update_cf_of false false
-
   | Push src ->
     check (valid_src_operand src);;
     // Evaluate value on initial state
@@ -727,21 +676,6 @@ let eval_ins (ins:ins) : st unit =
     update_rsp new_rsp;;
     // The deallocated stack memory should now be considered invalid
     free_stack old_rsp new_rsp
-
-// In the XMM-related instructions below, we generally don't need to check for validity of the operands,
-// since all possibilities are valid, thanks to dependent types
-
-  | Pxor dst src ->
-    update_xmm_preserve_flags dst (quad32_xor (eval_xmm dst s) (eval_xmm src s))
-
-  |VPxor dst src1 src2 ->
-    check_imm avx_enabled;;
-    check (valid_src_mov128_op src2);;
-    update_xmm_preserve_flags dst (quad32_xor (eval_xmm src1 s) (eval_mov128_op src2 s))
-
-  | MOVDQU dst src ->
-    check (valid_src_mov128_op src);;
-    update_mov128_op_preserve_flags dst (eval_mov128_op src s)
 
 (*
  * These functions return an option state

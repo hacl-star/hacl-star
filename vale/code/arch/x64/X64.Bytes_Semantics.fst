@@ -230,25 +230,6 @@ let rec instr_write_outputs_bs_domains
         instr_write_outputs_bs_domains outs args vs (coerce oprs) s_orig s'
     )
 
-#set-options "--z3rlimit 30 --max_ifuel 2"
-
-// TODO: get rid of this when we've removed most cases from the ins datatype
-let eval_ins_bs_domains_Ins (ins) (s0:state) : Lemma
-  (requires
-    Ins_64_64_preserve? ins \/
-    Ins_io64_64? ins \/
-    Ins_io64_64_cf? ins \/
-    Ins_ioXmm? ins \/
-    Ins_Xmm_Xmm? ins \/
-    Ins_ioXmm_Xmm? ins
-  )
-  (ensures (
-    let s1 = run (eval_ins ins) s0 in
-    Set.equal (Map.domain s0.mem) (Map.domain s1.mem)
-  ))
-  =
-  ()
-
 #set-options "--z3rlimit 30 --max_ifuel 1"
 
 let eval_ins_bs_domains (ins:ins) (s0:state) : Lemma
@@ -257,12 +238,6 @@ let eval_ins_bs_domains (ins:ins) (s0:state) : Lemma
   =
   let s1 = run (eval_ins ins) s0 in
   match ins with
-  | Ins_64_64_preserve _ _ _  -> eval_ins_bs_domains_Ins ins s0
-  | Ins_io64_64 _ _ _ -> eval_ins_bs_domains_Ins ins s0
-  | Ins_io64_64_cf _ _ _ -> eval_ins_bs_domains_Ins ins s0
-  | Ins_ioXmm _ _ -> eval_ins_bs_domains_Ins ins s0
-  | Ins_Xmm_Xmm _ _ _ -> eval_ins_bs_domains_Ins ins s0
-  | Ins_ioXmm_Xmm _ _ _ -> eval_ins_bs_domains_Ins ins s0
   | _ -> assert (Set.equal (Map.domain s0.mem) (Map.domain s1.mem))
 
 #set-options "--z3rlimit 30"

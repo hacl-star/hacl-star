@@ -101,19 +101,9 @@ let rec obs_inouts
 let ins_obs (ins:ins) (s:traceState) : list observation =
   match ins with
   | Instr (InstrType outs args _ _) oprs -> obs_inouts outs args oprs s
-
-  | Xor64 dst src -> operand_obs s dst @ operand_obs s src
-  // Only register operands, that will be tracked in the verified taint analysis
-  | Pxor _ _ -> []
-  | VPxor _ _ src2 -> operand_obs128 s src2
-
   | Push src -> operand_obs s src
   | Pop dst -> operand_obs s dst
   | Alloc _ | Dealloc _ -> []
-
-
-  // TODO: Remove once partially-generic + MOVDQU instructions removed
-  | _ -> []
 
 [@"opaque_to_smt"]
 private let rec match_n (addr:int) (n:nat) (memTaint:memTaint_t) (t:taint)
@@ -218,19 +208,9 @@ let rec taint_match_inouts
 let taint_match_ins (ins:ins) (t:taint) (memTaint:memTaint_t) (s:state) : bool =
   match ins with
   | Instr (InstrType outs args _ _) oprs -> taint_match_inouts outs args oprs t memTaint s
-
-  | Xor64 dst src -> taint_match dst t memTaint s && taint_match src t memTaint s
-  // Only register operands, that will be tracked in the verified taint analysis
-  | Pxor _ _ -> true
-  | VPxor _ _ src2 -> taint_match128 src2 t memTaint s
-
   | Push src -> taint_match src t memTaint s
   | Pop _ -> taint_match (OStack (MReg Rsp 0)) t memTaint s
   | Alloc _ | Dealloc _ -> true
-
-
-  // TODO: Remove once partially-generic + MOVDQU instructions removed
-  | _ -> true
 
 [@instr_attr]
 let update_taint (memTaint:memTaint_t) (dst:operand) (t:taint) (s:state) : memTaint_t =
@@ -291,15 +271,8 @@ let rec update_taint_outputs
 let update_taint_ins (ins:ins) (t:taint) (memTaint:memTaint_t) (s:state) : memTaint_t =
   match ins with
   | Instr (InstrType outs args _ _) oprs -> update_taint_outputs outs args oprs t memTaint s
-
-  | Xor64 dst _ -> update_taint memTaint dst t s
-  | Pxor _ _ | VPxor _ _ _ -> memTaint
-
   | Push _ | Alloc _ | Dealloc _ -> memTaint
   | Pop dst -> update_taint memTaint dst t s
-
-  // TODO: Remove once MOVDQU + partially generic insns are removed
-  | _ -> memTaint
 
 [@instr_attr]
 let taint_eval_ins (ins:tainted_ins) (ts: traceState) : GTot traceState =
