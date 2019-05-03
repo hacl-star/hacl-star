@@ -488,13 +488,41 @@ let check_if_instr_consumes_fixed_time (ins:tainted_ins) (ts:taintState) : Pure 
   let ts = TaintState rs flags cf xmms in
   (b, instr_set_taints outs args oprs ts t)
 
+let check_if_alloc_consumes_fixed_time (ins:tainted_ins) (ts:taintState) : Pure (bool & taintState)
+  (requires S.Alloc? ins.i)
+  (ensures ins_consumes_fixed_time ins ts)
+  = true, ts
+
+let check_if_dealloc_consumes_fixed_time (ins:tainted_ins) (ts:taintState) : Pure (bool & taintState)
+  (requires S.Dealloc? ins.i)
+  (ensures ins_consumes_fixed_time ins ts)
+  = true, ts
+  
 #reset-options "--initial_ifuel 2 --max_ifuel 2 --initial_fuel 4 --max_fuel 4 --z3rlimit 80"
+
+// Should likely revisit once stack is in publicValuesAreSame
+let check_if_push_consumes_fixed_time (ins:tainted_ins) (ts:taintState) : Pure (bool & taintState)
+  (requires S.Push? ins.i)
+  (ensures ins_consumes_fixed_time ins ts)
+  = 
+  let S.Push src = ins.i in
+  operand_does_not_use_secrets src ts, ts
+
+let check_if_pop_consumes_fixed_time (ins:tainted_ins) (ts:taintState) : Pure (bool & taintState)
+  (requires S.Pop? ins.i)
+  (ensures ins_consumes_fixed_time ins ts)
+  = 
+  let S.Pop dst = ins.i in
+  // TODO: Should be Public in both cases once allStackValuesArePublic enables
+  operand_does_not_use_secrets dst ts && Secret? ins.t, (set_taint dst ts Secret)
 
 let check_if_ins_consumes_fixed_time ins ts =
   match ins.i with
   | S.Instr _ _ -> check_if_instr_consumes_fixed_time ins ts
-  | _ ->
-  false, ts
+  | S.Push _ -> check_if_push_consumes_fixed_time ins ts
+  | S.Pop _ -> check_if_pop_consumes_fixed_time ins ts
+  | S.Alloc _ -> check_if_alloc_consumes_fixed_time ins ts
+  | S.Dealloc _ -> check_if_dealloc_consumes_fixed_time ins ts
   (* Verifying, but too slow. Need to refactor
   
   let i = ins.i in
@@ -739,8 +767,4 @@ let lemma_ins_leakage_free ts ins =
   let b, ts' = check_if_ins_consumes_fixed_time ins ts in
   match ins.i with
   | S.Instr _ _ -> lemma_instr_leakage_free ts ins
-  | _ ->
-  let p s1 s2 fuel = b2t b ==> isExplicitLeakageFreeGivenStates (Ins ins) fuel ts ts' s1 s2 in
-  let my_lemma s1 s2 fuel : Lemma(p s1 s2 fuel) = lemma_ins_same_public ts ins s1 s2 fuel in
-  let open FStar.Classical in
-  forall_intro_3 my_lemma
+  | _ -> ()
