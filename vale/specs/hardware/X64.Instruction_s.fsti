@@ -133,6 +133,14 @@ determine the semantics.
 *)
 val instr_t (outs:list instr_out) (args:list instr_operand) (havoc_flags:flag_havoc) : Type0
 
+noeq type instr_t_record =
+  | InstrTypeRecord :
+      #outs:list instr_out ->
+      #args:list instr_operand ->
+      #havoc_flags:flag_havoc ->
+      i:instr_t outs args havoc_flags ->
+      instr_t_record
+
 val instr_eval
     (#outs:list instr_out) (#args:list instr_operand) (#havoc_flags:flag_havoc)
     (i:instr_t outs args havoc_flags)

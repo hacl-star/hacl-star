@@ -480,7 +480,7 @@ let check_if_instr_consumes_fixed_time (ins:tainted_ins) (ts:taintState) : Pure 
   (requires BC.Instr? ins.i)
   (ensures ins_consumes_fixed_time ins ts)
   =
-  let BC.Instr (BC.InstrType outs args havoc_flags iins) oprs _ = ins.i in
+  let BC.Instr (InstrTypeRecord #outs #args #havoc_flags iins) oprs _ = ins.i in
   let t = inouts_taint outs args oprs ts ins.t in
   let b = check_if_consumes_fixed_time_outs outs args oprs ts ins.t t in
   let TaintState rs flags cf xmms = ts in
@@ -489,10 +489,30 @@ let check_if_instr_consumes_fixed_time (ins:tainted_ins) (ts:taintState) : Pure 
   let ts = TaintState rs flags cf xmms in
   (b, instr_set_taints outs args oprs ts t)
 
+let coerce_to_normal (#a:Type0) (x:a) : y:(normal a){x == y} = x
+
+let check_if_xor_consumes_fixed_time (ins:tainted_ins) (ts:taintState) : Pure (bool & taintState)
+  (requires BC.Instr? ins.i /\ S.AnnotateXor64? (BC.Instr?.annotation ins.i))
+  (ensures ins_consumes_fixed_time ins ts)
+  =
+  let BC.Instr (InstrTypeRecord #outs #args #havoc_flags iins) oprs (S.AnnotateXor64 eq) = ins.i in
+  let oprs:normal (instr_operands_t [inOut op64; out opFlagsCf; out opFlagsOf] [op64]) =
+    coerce_to_normal #(instr_operands_t [inOut op64; out opFlagsCf; out opFlagsOf] [op64]) oprs in
+  let (o1, (o2, ())) = oprs in
+  if o1 = o2 then
+    let t = Public in
+    let b = check_if_consumes_fixed_time_outs outs args oprs ts ins.t t in
+    let TaintState rs _ _ xmms = ts in
+    let ts = TaintState rs Secret Public xmms in
+    (b, instr_set_taints outs args oprs ts t)
+  else
+    check_if_instr_consumes_fixed_time ins ts
+
 #reset-options "--initial_ifuel 2 --max_ifuel 2 --initial_fuel 4 --max_fuel 4 --z3rlimit 80"
 
 let check_if_ins_consumes_fixed_time ins ts =
   match ins.i with
+  | BC.Instr _ _ (S.AnnotateXor64 _) -> check_if_xor_consumes_fixed_time ins ts
   | BC.Instr _ _ _ -> check_if_instr_consumes_fixed_time ins ts
   | _ ->
   false, ts
@@ -699,7 +719,7 @@ let lemma_instr_leakage_free (ts:taintState) (ins:tainted_ins) : Lemma
       (ensures is_explicit_leakage_free_rhs code fuel ts ts' s1 s2)
       [SMTPat (is_explicit_leakage_free_rhs code fuel ts ts' s1 s2)]
       =
-      let BC.Instr (BC.InstrType outs args havoc_flags i) oprs _ = ins.i in
+      let BC.Instr (InstrTypeRecord #outs #args #havoc_flags i) oprs _ = ins.i in
       let t_ins = ins.t in
       let t_out = inouts_taint outs args oprs ts ins.t in
       let Some vs1 = S.instr_apply_eval outs args (instr_eval i) oprs s1.state in
@@ -736,9 +756,28 @@ let lemma_instr_leakage_free (ts:taintState) (ins:tainted_ins) : Lemma
     ()
   )
 
+#reset-options "--initial_ifuel 1 --max_ifuel 1 --initial_fuel 4 --max_fuel 4 --z3rlimit 40"
+let lemma_xor_leakage_free (ts:taintState) (ins:tainted_ins) : Lemma
+  (requires BC.Instr? ins.i /\ S.AnnotateXor64? (BC.Instr?.annotation ins.i))
+  (ensures (
+    let (b, ts') = check_if_xor_consumes_fixed_time ins ts in
+    b2t b ==> isConstantTime (Ins ins) ts /\ isLeakageFree (Ins ins) ts ts'
+  ))
+  =
+  let BC.Instr (InstrTypeRecord #outs #args #havoc_flags iins) oprs (S.AnnotateXor64 eq) = ins.i in
+  let oprs:normal (instr_operands_t [inOut op64; out opFlagsCf; out opFlagsOf] [op64]) =
+    coerce_to_normal #(instr_operands_t [inOut op64; out opFlagsCf; out opFlagsOf] [op64]) oprs in
+  let (o1, (o2, ())) = oprs in
+  if o1 = o2 then
+    FStar.Classical.forall_intro_with_pat (fun n -> Types_s.ixor n n) Arch.Types.lemma_BitwiseXorCancel64
+  else
+    lemma_instr_leakage_free ts ins
+
+#reset-options "--initial_ifuel 1 --max_ifuel 1 --initial_fuel 1 --max_fuel 1 --z3rlimit 20"
 let lemma_ins_leakage_free ts ins =
   let b, ts' = check_if_ins_consumes_fixed_time ins ts in
   match ins.i with
+  | BC.Instr _ _ (S.AnnotateXor64 _) -> lemma_xor_leakage_free ts ins
   | BC.Instr _ _ _ -> lemma_instr_leakage_free ts ins
   | _ ->
   let p s1 s2 fuel = b2t b ==> isExplicitLeakageFreeGivenStates (Ins ins) fuel ts ts' s1 s2 in

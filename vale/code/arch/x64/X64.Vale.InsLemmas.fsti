@@ -55,5 +55,12 @@ let make_instr
     (#outs:list instr_out) (#args:list instr_operand) (#havoc_flags:flag_havoc)
     (i:instr_t outs args havoc_flags)
   : make_instr_t outs args =
-  make_instr_outs outs args (fun oprs -> BC.Instr (BC.InstrType outs args havoc_flags i) oprs S.AnnotateNone)
+  make_instr_outs outs args (fun oprs -> BC.Instr (InstrTypeRecord i) oprs S.AnnotateNone)
+
+[@instr_attr]
+let make_instr_annotate
+    (#outs:list instr_out) (#args:list instr_operand) (#havoc_flags:flag_havoc)
+    (i:instr_t outs args havoc_flags) (ann:S.instr_annotation (InstrTypeRecord i))
+  : make_instr_t outs args =
+  make_instr_outs outs args (fun oprs -> BC.Instr (InstrTypeRecord i) oprs ann)
 

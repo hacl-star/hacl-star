@@ -21,16 +21,15 @@ let op_String_Access = Map.sel
 let op_String_Assignment = Map.upd
 
 //TODO: [@"opaque_to_smt"]
-let equals_instr (#a1 #a2:Type0) (x1:a1) (x2:a2) : Type0 =
-  squash (x1 === x2)
+let equals_instr (x1 x2:instr_t_record) : Type0 =
+  squash (x1 == x2)
 
-noeq type instr_annotation (i:BC.instr_type) =
-  | AnnotateNone : instr_annotation i
-  | AnnotateXor64 : equals_instr i.BC.i ins_Xor64 -> instr_annotation i
-  | AnnotatePxor : equals_instr i.BC.i ins_Pxor -> instr_annotation i
-  | AnnotateVPxor : equals_instr i.BC.i ins_VPxor -> instr_annotation i
+noeq type instr_annotation (it:instr_t_record) =
+  | AnnotateNone : instr_annotation it
+  | AnnotateXor64 : equals_instr it (InstrTypeRecord ins_Xor64) -> instr_annotation it
+  | AnnotatePxor : equals_instr it (InstrTypeRecord ins_Pxor) -> instr_annotation it
+  | AnnotateVPxor : equals_instr it (InstrTypeRecord ins_VPxor) -> instr_annotation it
 
-let intr_type = BC.instr_type
 let ins = BC.instruction_t instr_annotation
 let ocmp = BC.ocmp
 let code = BC.code_t instr_annotation
@@ -608,10 +607,10 @@ let rec instr_write_outputs
 
 [@instr_attr]
 let eval_instr
-    (it:BC.instr_type) (oprs:instr_operands_t it.BC.outs it.BC.args) (ann:instr_annotation it)
+    (it:instr_t_record) (oprs:instr_operands_t it.outs it.args) (ann:instr_annotation it)
     (s0:state)
   : option state =
-  let BC.InstrType outs args havoc_flags i = it in
+  let InstrTypeRecord #outs #args #havoc_flags i = it in
   let vs = instr_apply_eval outs args (instr_eval i) oprs s0 in
   let s1 =
     match havoc_flags with

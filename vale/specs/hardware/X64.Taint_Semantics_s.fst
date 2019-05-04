@@ -101,7 +101,7 @@ let rec obs_inouts
 [@instr_attr]
 let ins_obs (ins:ins) (s:traceState) : list observation =
   match ins with
-  | BC.Instr (BC.InstrType outs args _ _) oprs _ -> obs_inouts outs args oprs s
+  | BC.Instr (InstrTypeRecord #outs #args _) oprs _ -> obs_inouts outs args oprs s
   | BC.Push src -> operand_obs s src
   | BC.Pop dst -> operand_obs s dst
   | BC.Alloc _ | BC.Dealloc _ -> []
@@ -208,7 +208,7 @@ let rec taint_match_inouts
 [@instr_attr]
 let taint_match_ins (ins:ins) (t:taint) (memTaint:memTaint_t) (s:state) : bool =
   match ins with
-  | BC.Instr (BC.InstrType outs args _ _) oprs _ -> taint_match_inouts outs args oprs t memTaint s
+  | BC.Instr (InstrTypeRecord #outs #args _) oprs _ -> taint_match_inouts outs args oprs t memTaint s
   | BC.Push src -> taint_match src t memTaint s
   | BC.Pop _ -> taint_match (OStack (MReg Rsp 0)) t memTaint s
   | BC.Alloc _ | BC.Dealloc _ -> true
@@ -271,7 +271,7 @@ let rec update_taint_outputs
 [@instr_attr]
 let update_taint_ins (ins:ins) (t:taint) (memTaint:memTaint_t) (s:state) : memTaint_t =
   match ins with
-  | BC.Instr (BC.InstrType outs args _ _) oprs _ -> update_taint_outputs outs args oprs t memTaint s
+  | BC.Instr (InstrTypeRecord #outs #args _) oprs _ -> update_taint_outputs outs args oprs t memTaint s
   | BC.Push _ | BC.Alloc _ | BC.Dealloc _ -> memTaint
   | BC.Pop dst -> update_taint memTaint dst t s
 

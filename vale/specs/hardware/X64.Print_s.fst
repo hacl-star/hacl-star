@@ -222,7 +222,7 @@ let print_ins (ins:tainted_ins) (p:printer) =
   let print_instr (ip:instr_print) : string = print_instr ip p in
   let ins = ins.i in
   match ins with
-  | Instr (InstrType outs args havoc_flags i) oprs _ -> print_instr (instr_printer i oprs)
+  | Instr (InstrTypeRecord i) oprs _ -> print_instr (instr_printer i oprs)
   | Push src      -> p.ins_name "  push" [src] ^ print_operand src p
   | Pop dst       -> p.ins_name "  pop"  [dst] ^ print_operand dst p
   | Alloc n       -> p.ins_name "  sub" [OReg Rsp; OConst n] ^ print_ops (OReg Rsp) (OConst n)

@@ -3,20 +3,12 @@ module X64.Bytes_Code_s
 open X64.Machine_s
 open X64.Instruction_s
 
-noeq type instr_type =
-  | InstrType :
-      outs:list instr_out ->
-      args:list instr_operand ->
-      havoc_flags:flag_havoc ->
-      i:instr_t outs args havoc_flags ->
-      instr_type
-
-type instr_annotation_t = instr_type -> Type0
+type instr_annotation_t = instr_t_record -> Type0
 
 noeq type instruction_t (a:instr_annotation_t) =
   // Generic instruction (should be able to express most instructions)
   | Instr :
-      i:instr_type ->
+      i:instr_t_record ->
       oprs:instr_operands_t i.outs i.args ->
       annotation:a i ->
       instruction_t a
