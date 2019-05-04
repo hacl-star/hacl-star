@@ -44,8 +44,7 @@ let operand_taint_implicit
   | IOp64One o -> operand_taint o ts t
   | IOpXmmOne o -> operand_taint128 o ts t
   | IOpFlagsCf -> ts.cfFlagsTaint
-  // TODO: Should be ts.ofFlagsTaint
-  | IOpFlagsOf -> Secret
+  | IOpFlagsOf -> ts.ofFlagsTaint
 
 [@instr_attr]
 let rec args_taint
@@ -128,22 +127,22 @@ let lemma_operand_obs ts dst s1 s2 = match dst with
 let set_taint (dst:operand) ts taint : Tot taintState =
   match dst with
   | OConst _ -> ts  (* Shouldn't actually happen *)
-  | OReg r -> TaintState (FunctionalExtensionality.on reg (fun x -> if x = r then taint else ts.regTaint x)) ts.flagsTaint ts.cfFlagsTaint ts.xmmTaint
+  | OReg r -> TaintState (FunctionalExtensionality.on reg (fun x -> if x = r then taint else ts.regTaint x)) ts.flagsTaint ts.cfFlagsTaint ts.ofFlagsTaint ts.xmmTaint
   | OMem m | OStack m -> ts (* Ensured by taint semantics *)
 
 let set_taint128 (dst:mov128_op) (ts:taintState) (t:taint) : taintState =
   match dst with
-  | Mov128Xmm r -> TaintState ts.regTaint ts.flagsTaint ts.cfFlagsTaint
+  | Mov128Xmm r -> TaintState ts.regTaint ts.flagsTaint ts.cfFlagsTaint ts.ofFlagsTaint
       (FunctionalExtensionality.on xmm (fun x -> if x = r then t else ts.xmmTaint x))
   | Mov128Mem _ | Mov128Stack _-> ts
 
 let set_taint_cf_and_flags (ts:taintState) (t:taint) : taintState =
-  let TaintState rs flags cf xmms = ts in
-  TaintState rs (merge_taint t flags) t xmms
+  let TaintState rs flags cf ovf xmms = ts in
+  TaintState rs (merge_taint t flags) t ovf xmms
 
 let set_taint_of_and_flags (ts:taintState) (t:taint) : taintState =
-  let TaintState rs flags cf xmms = ts in
-  TaintState rs (merge_taint t flags) cf xmms
+  let TaintState rs flags cf ovf xmms = ts in
+  TaintState rs (merge_taint t flags) cf t xmms
 
 let rec operands_do_not_use_secrets ops ts = match ops with
   | [] -> true
@@ -221,6 +220,8 @@ val publicFlagValuesAreAsExpected: (tsAnalysis:taintState) -> (tsExpected:taintS
 
 val publicCfFlagValuesAreAsExpected: (tsAnalysis:taintState) -> (tsExpected:taintState) -> b:bool{b <==> (Public? tsExpected.cfFlagsTaint ==> Public? tsAnalysis.cfFlagsTaint)}
 
+val publicOfFlagValuesAreAsExpected: (tsAnalysis:taintState) -> (tsExpected:taintState) -> b:bool{b <==> (Public? tsExpected.ofFlagsTaint ==> Public? tsAnalysis.ofFlagsTaint)}
+
 val publicRegisterValuesAreAsExpected: (tsAnalysis:taintState) -> (tsExpected:taintState) -> b:bool{b <==> (forall r. (Public? (tsExpected.regTaint r) ==> Public? (tsAnalysis.regTaint r)))}
 
 val publicTaintsAreAsExpected: (tsAnalysis:taintState) -> (tsExpected:taintState) -> b:bool
@@ -230,6 +231,9 @@ let publicFlagValuesAreAsExpected (tsAnalysis:taintState) (tsExpected:taintState
 
 let publicCfFlagValuesAreAsExpected (tsAnalysis:taintState) (tsExpected:taintState) =
   (tsExpected.cfFlagsTaint = Public && tsAnalysis.cfFlagsTaint = Public) || (tsExpected.cfFlagsTaint = Secret)
+
+let publicOfFlagValuesAreAsExpected (tsAnalysis:taintState) (tsExpected:taintState) =
+  (tsExpected.ofFlagsTaint = Public && tsAnalysis.ofFlagsTaint = Public) || (tsExpected.ofFlagsTaint = Secret)
 
 let registerAsExpected (r:reg) (tsAnalysis:taintState) (tsExpected:taintState) =
   (tsExpected.regTaint r = Public && tsAnalysis.regTaint r = Public) || (tsExpected.regTaint r = Secret)
@@ -255,4 +259,5 @@ let publicRegisterValuesAreAsExpected (tsAnalysis:taintState) (tsExpected:taintS
 let publicTaintsAreAsExpected (tsAnalysis:taintState) (tsExpected:taintState) =
     publicFlagValuesAreAsExpected tsAnalysis tsExpected
   && publicCfFlagValuesAreAsExpected tsAnalysis tsExpected
+  && publicOfFlagValuesAreAsExpected tsAnalysis tsExpected
 && publicRegisterValuesAreAsExpected tsAnalysis tsExpected

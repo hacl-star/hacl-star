@@ -64,10 +64,11 @@ let eq_xmms (xmms1 xmms2:xmms_taint) : (b:bool{b <==> (xmms1 == xmms2)})  =
   b
 
 let eq_taintStates (ts1 ts2:taintState) : (b:bool{b <==> ts1 == ts2}) =
-    eq_registers ts1.regTaint ts2.regTaint && ts1.flagsTaint = ts2.flagsTaint && ts1.cfFlagsTaint = ts2.cfFlagsTaint && eq_xmms ts1.xmmTaint ts2.xmmTaint
+    eq_registers ts1.regTaint ts2.regTaint && ts1.flagsTaint = ts2.flagsTaint && ts1.cfFlagsTaint = ts2.cfFlagsTaint && ts1.ofFlagsTaint = ts2.ofFlagsTaint && eq_xmms ts1.xmmTaint ts2.xmmTaint
 
 let taintstate_monotone (ts ts':taintState) = ( forall r. Public? (ts'.regTaint r) ==> Public? (ts.regTaint r)) /\ (Public? (ts'.flagsTaint) ==> Public? (ts.flagsTaint)) /\
   (Public? (ts'.cfFlagsTaint) ==> Public? (ts.cfFlagsTaint)) /\
+  (Public? (ts'.ofFlagsTaint) ==> Public? (ts.ofFlagsTaint)) /\
   (forall x. Public? (ts'.xmmTaint x) ==> Public? (ts.xmmTaint x))
 
 let taintstate_monotone_trans (ts1:taintState) (ts2:taintState) (ts3:taintState)
@@ -91,6 +92,7 @@ let combine_taint_states (ts1:taintState) (ts2:taintState) : (ts:taintState{tain
   TaintState (combine_reg_taints ts1.regTaint ts2.regTaint)
     (merge_taint ts1.flagsTaint ts2.flagsTaint)
     (merge_taint ts1.cfFlagsTaint ts2.cfFlagsTaint)
+    (merge_taint ts1.ofFlagsTaint ts2.ofFlagsTaint)
     (combine_xmm_taints ts1.xmmTaint ts2.xmmTaint)
 
 let count_public_register (regs:reg_taint) (r:reg) = if Public? (regs r) then 1 else 0
@@ -117,6 +119,8 @@ let count_flagTaint (ts:taintState) : nat = if Public? ts.flagsTaint then 1 else
 
 let count_cfFlagTaint (ts:taintState) : nat = if Public? ts.cfFlagsTaint then 1 else 0
 
+let count_ofFlagTaint (ts:taintState) : nat = if Public? ts.ofFlagsTaint then 1 else 0
+
 let count_public_xmm (xmms:xmms_taint) (x:xmm) : nat = if Public? (xmms x) then 1 else 0
 
 let count_public_xmms (xmms:xmms_taint) : nat =
@@ -141,6 +145,7 @@ let count_publics (ts:taintState) : nat =
   count_public_registers ts.regTaint +
   count_flagTaint ts +
   count_cfFlagTaint ts +
+  count_ofFlagTaint ts +
   count_public_xmms ts.xmmTaint
 
 #set-options "--z3rlimit 50"
@@ -153,6 +158,7 @@ let monotone_decreases_count (ts ts':taintState) : Lemma
   assert (forall r. count_public_register ts'.regTaint r <= count_public_register ts.regTaint r);
   assert (forall r. count_public_xmm ts'.xmmTaint r <= count_public_xmm ts.xmmTaint r);
   assert (count_cfFlagTaint ts' <= count_cfFlagTaint ts);
+  assert (count_ofFlagTaint ts' <= count_ofFlagTaint ts);
   assert (count_flagTaint ts' <= count_flagTaint ts)
 #pop-options
 

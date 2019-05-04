@@ -483,10 +483,11 @@ let check_if_instr_consumes_fixed_time (ins:tainted_ins) (ts:taintState) : Pure 
   let BC.Instr (InstrTypeRecord #outs #args #havoc_flags iins) oprs _ = ins.i in
   let t = inouts_taint outs args oprs ts ins.t in
   let b = check_if_consumes_fixed_time_outs outs args oprs ts ins.t t in
-  let TaintState rs flags cf xmms = ts in
+  let TaintState rs flags cf ovf xmms = ts in
   let flags = match havoc_flags with | HavocFlags -> Secret | PreserveFlags -> flags in
   let cf = match havoc_flags with | HavocFlags -> Secret | PreserveFlags -> cf in
-  let ts = TaintState rs flags cf xmms in
+  let ovf = match havoc_flags with | HavocFlags -> Secret | PreserveFlags -> ovf in
+  let ts = TaintState rs flags cf ovf xmms in
   (b, instr_set_taints outs args oprs ts t)
 
 let coerce_to_normal (#a:Type0) (x:a) : y:(normal a){x == y} = x
@@ -502,8 +503,8 @@ let check_if_xor_consumes_fixed_time (ins:tainted_ins) (ts:taintState) : Pure (b
   if o1 = o2 then
     let t = Public in
     let b = check_if_consumes_fixed_time_outs outs args oprs ts ins.t t in
-    let TaintState rs _ _ xmms = ts in
-    let ts = TaintState rs Secret Public xmms in
+    let TaintState rs _ _ _ xmms = ts in
+    let ts = TaintState rs Secret Public Public xmms in
     (b, instr_set_taints outs args oprs ts t)
   else
     check_if_instr_consumes_fixed_time ins ts
@@ -560,20 +561,6 @@ let check_if_ins_consumes_fixed_time ins ts =
   else
   let ts' = set_taints dsts ts taint in
   let b, ts' = match i with
-(*
-    | S.Xor64 dst src ->
-        (* Special case for Xor : xor-ing an operand with itself erases secret data *)
-        if dst = src then
-              let ts' = set_taint dst ts' Public in
-              fixedTime, TaintState ts'.regTaint Secret Secret ts'.xmmTaint
-        else
-            begin match dst with
-              | OConst _ -> false, (TaintState ts'.regTaint Secret Secret ts'.xmmTaint) (* Should not happen *)
-              | OReg r -> fixedTime, (TaintState ts'.regTaint Secret Secret ts'.xmmTaint)
-              | OMem m -> fixedTime, (TaintState ts'.regTaint Secret Secret ts'.xmmTaint)
-              | OStack m -> false, ts
-        end
-*)
    | BC.Push src -> if Secret? (ts'.regTaint Rsp) || Secret? (operand_taint src ts' Public) then false, ts
      else fixedTime, ts'
    | BC.Pop dst -> 
@@ -582,9 +569,9 @@ let check_if_ins_consumes_fixed_time ins ts =
      else fixedTime, ts'
     | _ ->
       match dsts with
-      | [OConst _] -> false, (TaintState ts'.regTaint Secret Secret ts'.xmmTaint) (* Should not happen *)
-      | [OReg r] -> fixedTime, (TaintState ts'.regTaint Secret Secret ts'.xmmTaint)
-      | [OMem m] ->  fixedTime, (TaintState ts'.regTaint Secret Secret ts'.xmmTaint)
+      | [OConst _] -> false, (TaintState ts'.regTaint Secret Secret Secret ts'.xmmTaint) (* Should not happen *)
+      | [OReg r] -> fixedTime, (TaintState ts'.regTaint Secret Secret Secret ts'.xmmTaint)
+      | [OMem m] ->  fixedTime, (TaintState ts'.regTaint Secret Secret Secret ts'.xmmTaint)
       | [OStack m] -> false, ts
       | [] -> false, ts'  (* AR: this case was missing, Unhandled yet *)
   in
@@ -762,10 +749,11 @@ let lemma_instr_leakage_free (ts:taintState) (ins:tainted_ins) : Lemma
         | HavocFlags -> {s2 with state = {s2.state with S.flags = S.havoc s2.state ins.i}}
         | PreserveFlags -> s2
         in
-      let TaintState rs flags cf xmms = ts in
+      let TaintState rs flags cf ovf xmms = ts in
       let flags = match havoc_flags with | HavocFlags -> Secret | PreserveFlags -> flags in
       let cf = match havoc_flags with | HavocFlags -> Secret | PreserveFlags -> cf in
-      let ts_havoc = TaintState rs flags cf xmms in
+      let ovf = match havoc_flags with | HavocFlags -> Secret | PreserveFlags -> ovf in
+      let ts_havoc = TaintState rs flags cf ovf xmms in
 
       if t_out = Secret then
       (
