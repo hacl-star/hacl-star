@@ -78,7 +78,8 @@ let get_last_slice_workaround (s:seq quad32) (start_pos end_pos:int)  =
 // GHash
 ///////////////////////////
 
-procedure {:quick} compute_Y0()
+procedure compute_Y0()
+    {:quick}
     modifies xmm1; efl;
     ensures xmm1 == Mkfour(0, 0, 0, 0);
 {
@@ -86,7 +87,8 @@ procedure {:quick} compute_Y0()
     lemma_quad32_xor();
 }
 
-procedure{:quick} ReduceMul128_LE(ghost a:poly, ghost b:poly)
+procedure ReduceMul128_LE(ghost a:poly, ghost b:poly)
+    {:quick}
     lets mask @= xmm8;
     reads mask;
     modifies
@@ -107,7 +109,9 @@ procedure{:quick} ReduceMul128_LE(ghost a:poly, ghost b:poly)
     Pshufb(xmm1, mask);
 }
 
-procedure {:quick}{:public} compute_ghash_incremental_register()
+procedure compute_ghash_incremental_register()
+    {:public}
+    {:quick}
     lets input @= xmm2; io @= xmm1; mask @= xmm8; h @= xmm11;
     requires 
         pclmulqdq_enabled && avx_enabled;
@@ -127,9 +131,9 @@ procedure {:quick}{:public} compute_ghash_incremental_register()
     reveal ghash_incremental_def;
 }
 
-procedure {:quick} {:public} compute_ghash_incremental(
-    ghost in_b:buffer128
-    )
+procedure compute_ghash_incremental(ghost in_b:buffer128)
+    {:public}
+    {:quick}
     lets in_ptr @= rax; len @= rcx; io @= xmm1; mask @= xmm8; h @= xmm11;
     reads
         in_ptr; len; h; mask;
@@ -193,9 +197,8 @@ procedure {:quick} {:public} compute_ghash_incremental(
     }
 }
 
-procedure {:quick} compute_ghash_incremental_partial(
-    ghost in_b:buffer128
-    )
+procedure compute_ghash_incremental_partial(ghost in_b:buffer128)
+    {:quick}
     lets in_ptr @= rax; len @= rcx; io @= xmm1; mask @= xmm8; h @= xmm11;
     reads
         in_ptr; len; h; mask;
@@ -262,14 +265,15 @@ procedure {:quick} compute_ghash_incremental_partial(
 
 #reset-options "--z3rlimit 10"
 // Purely proof work to show that when there are no extra bytes, there's no work left to do
-procedure {:quick exportOnly}{:public} ghash_incremental_bytes_no_extra(
-    ghost in_b:buffer128,
-    ghost old_io:quad32,
-    ghost old_in_ptr:nat64,
-    ghost num_bytes:nat64,
-    ghost io:quad32,
-    ghost h:quad32
-    )
+procedure ghash_incremental_bytes_no_extra(
+        ghost in_b:buffer128,
+        ghost old_io:quad32,
+        ghost old_in_ptr:nat64,
+        ghost num_bytes:nat64,
+        ghost io:quad32,
+        ghost h:quad32)
+    {:public}
+    {:quick exportOnly}
     reads mem; memTaint;
     requires
         // GHash reqs
@@ -290,15 +294,15 @@ procedure {:quick exportOnly}{:public} ghash_incremental_bytes_no_extra(
         num_bytes > 0 ==> length(input_quads) > 0 /\
                           io == ghash_incremental(h, old_io, input_quads);
 {
-    ghost var num_blocks := num_bytes / 16;
+    let num_blocks := num_bytes / 16;
 
     // Precondition variables
-    ghost var input := slice_work_around(buffer128_as_seq(mem, in_b), num_blocks);
+    let input := slice_work_around(buffer128_as_seq(mem, in_b), num_blocks);
 
     // Postcondition variables
-    ghost var input_bytes := slice_work_around(le_seq_quad32_to_bytes(buffer128_as_seq(mem, in_b)), num_bytes);
-    ghost var padded_bytes := pad_to_128_bits(input_bytes);
-    ghost var input_quads := le_bytes_to_seq_quad32(padded_bytes);
+    let input_bytes := slice_work_around(le_seq_quad32_to_bytes(buffer128_as_seq(mem, in_b)), num_bytes);
+    let padded_bytes := pad_to_128_bits(input_bytes);
+    let input_quads := le_bytes_to_seq_quad32(padded_bytes);
 
     // We want to show: input_quads == input
 
@@ -328,7 +332,8 @@ procedure {:quick exportOnly}{:public} ghash_incremental_bytes_no_extra(
  *     but Vale currently doesn't support switch statements
  */
 #reset-options "--z3rlimit 40"
-procedure {:quick} compute_pad_to_128_bits()
+procedure compute_pad_to_128_bits()
+    {:quick}
     lets io @= xmm2; num_bytes @= rax; tmp @= rcx; mask @= rdx;
 
     reads num_bytes;
@@ -352,7 +357,7 @@ procedure {:quick} compute_pad_to_128_bits()
         Shl64(mask, tmp);
         Sub64(mask, 1);
         Pextrq(tmp, io, 0);
-        ghost var old_lower128 := tmp;
+        let old_lower128 := tmp;
         And64(tmp, mask);
         lemma_bytes_and_mod(old_lower128, num_bytes); // ==>
         assert tmp == old_lower128 % (pow2(num_bytes * 8));
@@ -375,7 +380,7 @@ procedure {:quick} compute_pad_to_128_bits()
         Shl64(mask, tmp);
         Sub64(mask, 1);
         Pextrq(tmp, io, 1);
-        ghost var old_upper128 := tmp;
+        let old_upper128 := tmp;
         And64(tmp, mask);
         lemma_bytes_and_mod(old_upper128, #nat64(num_bytes - 8)); // ==>
         // assert num_bytes - 8 >= 0 /\ tmp == old_upper128 % (pow2((num_bytes - 8) * 8));
@@ -389,11 +394,12 @@ procedure {:quick} compute_pad_to_128_bits()
 }
 
 #reset-options "--z3rlimit 10"
-procedure {:quick}{:public} ghash_incremental_bytes_register(
+procedure ghash_incremental_bytes_register(
         ghost total_bytes:nat,
         ghost old_hash:quad32,
-        ghost completed_quads:seq(quad32)
-    )
+        ghost completed_quads:seq(quad32))
+    {:public}
+    {:quick}
     lets num_bytes @= rax; io @= xmm1; input_quad @= xmm2; mask @= xmm8; h @= xmm11;
 
     reads
@@ -429,10 +435,10 @@ procedure {:quick}{:public} ghash_incremental_bytes_register(
         total_bytes > 0 ==> length(input_quads) > 0 /\
                           io == ghash_incremental(reverse_bytes_quad32(h), old_hash, input_quads);
 {
-    ghost var final_quad := xmm2;
+    let final_quad := xmm2;
 
     compute_pad_to_128_bits();
-    ghost var final_quad_padded := xmm2;
+    let final_quad_padded := xmm2;
 
     compute_ghash_incremental_register();
 
@@ -440,12 +446,13 @@ procedure {:quick}{:public} ghash_incremental_bytes_register(
 }
 
 #reset-options "--z3rlimit 10"
-procedure {:quick}{:public} ghash_incremental_bytes_extra(
-    ghost in_b:buffer128,
-    ghost orig_in_ptr:nat64,
-    ghost old_io:quad32,
-    ghost orig_num_bytes:nat64
-    )
+procedure ghash_incremental_bytes_extra(
+        ghost in_b:buffer128,
+        ghost orig_in_ptr:nat64,
+        ghost old_io:quad32,
+        ghost orig_num_bytes:nat64)
+    {:public}
+    {:quick}
     lets in_ptr @= r9; num_bytes @= rax; io @= xmm1; mask @= xmm8; h @= xmm11;
 
     reads
@@ -486,13 +493,13 @@ procedure {:quick}{:public} ghash_incremental_bytes_extra(
         orig_num_bytes > 0 ==> length(input_quads) > 0 /\
                           io == ghash_incremental(reverse_bytes_quad32(h), old_io, input_quads);
 {
-    ghost var num_blocks := orig_num_bytes / 16;
+    let num_blocks := orig_num_bytes / 16;
 
     Load128_buffer(xmm2, in_ptr, 0, Secret, in_b, num_blocks);
-    ghost var final_quad := xmm2;
+    let final_quad := xmm2;
 
     compute_pad_to_128_bits();
-    ghost var final_quad_padded := xmm2;
+    let final_quad_padded := xmm2;
 
     compute_ghash_incremental_register();
 
@@ -500,9 +507,9 @@ procedure {:quick}{:public} ghash_incremental_bytes_extra(
 }
 
 #reset-options "--z3rlimit 10"
-procedure {:quick}{:public} ghash_incremental_bytes(
-    ghost in_b:buffer128
-    )
+procedure ghash_incremental_bytes(ghost in_b:buffer128)
+    {:public}
+    {:quick}
     lets in_ptr @= rax; num_bytes @= r11; io @= xmm1; mask @= xmm8; h @= xmm11;
 
     reads
@@ -533,7 +540,7 @@ procedure {:quick}{:public} ghash_incremental_bytes(
         num_bytes > 0 ==> length(input_quads) > 0 /\
             io == ghash_incremental(reverse_bytes_quad32(h), old(io), input_quads);
 {
-    ghost var num_blocks := old(num_bytes) / 16;
+    let num_blocks := old(num_bytes) / 16;
 
     lemma_poly_bits64();
 
@@ -556,9 +563,8 @@ procedure {:quick}{:public} ghash_incremental_bytes(
     }
 }
 
-procedure {:quick} ghash_core(
-    ghost in_b:buffer128
-    )
+procedure ghash_core(ghost in_b:buffer128)
+    {:quick}
     lets in_ptr @= rax; len @= rcx; output @= xmm1; mask @= xmm8; h @= xmm11;
 
     reads

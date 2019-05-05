@@ -18,15 +18,18 @@ open X64.Vale.QuickCodes
 #set-options "--z3rlimit 20"
 #endverbatim
 
-procedure {:quick}{:exportSpecs}{:public} test(inline win:bool,
-    ghost arg0:buffer64,
-    ghost arg1:buffer64,
-    ghost arg2:buffer64,
-    ghost arg3:buffer64,
-    ghost arg4:buffer64,
-    ghost arg5:buffer64,
-    ghost arg6:buffer64,
-    ghost arg7:buffer64)    
+procedure test(inline win:bool,
+        ghost arg0:buffer64,
+        ghost arg1:buffer64,
+        ghost arg2:buffer64,
+        ghost arg3:buffer64,
+        ghost arg4:buffer64,
+        ghost arg5:buffer64,
+        ghost arg6:buffer64,
+        ghost arg7:buffer64)    
+    {:public}
+    {:quick}
+    {:exportSpecs}
     requires
         rsp == init_rsp(stack);
         win ==> valid_src_stack64(rsp + 32 + 8 + 0, stack);

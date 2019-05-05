@@ -57,7 +57,8 @@ open X64.Poly1305.Math
 open X64.Poly1305.Util
 #endverbatim
 
-procedure{:quick} Poly1305_multiply(ghost r1:nat64) returns(ghost hh:int)
+procedure Poly1305_multiply(ghost r1:nat64) returns(ghost hh:int)
+    {:quick}
     lets
         d1 @= r8; d2 @= r9; d3 @= r10; r0 @= r11; s1 @= r13; h0 @= r14; h1 @= rbx; h2 @= rbp;
         n := pow2_64;
@@ -141,7 +142,8 @@ procedure{:quick} Poly1305_multiply(ghost r1:nat64) returns(ghost hh:int)
     lemma_poly_multiply(n, p, r, h, r0, r1, old(h0), old(h1), old(h2), s1, gd0, gd1, gd2, hh);
 }
 
-procedure{:quick} Poly1305_reduce() returns(ghost hh:int)
+procedure Poly1305_reduce() returns(ghost hh:int)
+    {:quick}
     lets
         d3 @= r10; h0 @= r14; h1 @= rbx; h2 @= rbp;
         n := 0x1_0000_0000_0000_0000;
@@ -173,7 +175,8 @@ procedure{:quick} Poly1305_reduce() returns(ghost hh:int)
     lemma_poly_reduce(n, p, hd, old(d3), h10, rax, hh);
 }
 
-procedure{:quick} Poly1305_iteration(ghost r1:nat64) returns(ghost hh:int)
+procedure Poly1305_iteration(ghost r1:nat64) returns(ghost hh:int)
+    {:quick}
     lets
         d1 @= r8; d2 @= r9; d3 @= r10; r0 @= r11; s1 @= r13; h0 @= r14; h1 @= rbx; h2 @= rbp;
         n := 0x1_0000_0000_0000_0000;
@@ -197,12 +200,10 @@ procedure{:quick} Poly1305_iteration(ghost r1:nat64) returns(ghost hh:int)
         h2 < 5;
 {
 //    Previous version used a forall statement, which isn't yet supported for F*
-//    forall x:nat, xb, y:nat, yb :| x < xb && y < yb :: x * y < xb * yb
+//    forall(x:nat, xb, y:nat, yb) x < xb && y < yb implies x * y < xb * yb by
 //    {
 //        lemma_mul_strict_upper_bound(x, xb, y, yb);
 //    }
-    // TODO:  This version leads Z3 off into the weeds and times out with F* (but not Dafny)
-    //assume forall x:nat, xb, y:nat, yb { x*y, xb*yb } :: x < xb && y < yb ==> x * y < xb * yb;
 
     lemma_mul_strict_upper_bound(h2, 7, r0, n / 16);
     lemma_mul_strict_upper_bound(h0, n, r1, n / 16);
@@ -212,18 +213,20 @@ procedure{:quick} Poly1305_iteration(ghost r1:nat64) returns(ghost hh:int)
     lemma_mul_strict_upper_bound(h1, n, s1, n / 8);
     lemma_mul_strict_upper_bound(h2, 7, s1, 5 * n / 64);
 
-    (ghost var hd) := Poly1305_multiply(r1);
+    let hd := Poly1305_multiply(r1);
     hh := Poly1305_reduce();
     reveal_modp();
     assert hh == (n * n) * h2 + n * h1 + h0 /\ (h * r) % p == hh % p;
 }
 
-procedure{:quick} Poly1305_blocks(
-    ghost r:int,
-    ghost h_in:int,
-    ghost ctx_b:buffer64,
-    ghost inp_b:buffer64)
-    returns(ghost h:int)
+procedure Poly1305_blocks(
+        ghost r:int,
+        ghost h_in:int,
+        ghost ctx_b:buffer64,
+        ghost inp_b:buffer64)
+    returns(
+        ghost h:int)
+    {:quick}
     lets
         ctx @= rdi; inp @= rsi; len @= rdx; padbit @= rcx; d1 @= r8; d2 @= r9; d3 @= r10;
         r0 @= r11; r1 @= r12; s1 @= r13; h0 @= r14; h1 @= rbx; h2 @= rbp;
@@ -375,7 +378,8 @@ procedure{:quick} Poly1305_blocks(
 #reset-options "--z3rlimit 40"
 
 // last 1..15 bytes, in case len is not a multiple of 16
-procedure{:quick} Poly1305_last_block()
+procedure Poly1305_last_block()
+    {:quick}
     lets
         h0 @= r14; h1 @= rbx; h2 @= rbp; r0 @= r11; s1 @= r13; nExtra @= r15;
         n := 0x1_0000_0000_0000_0000;
@@ -464,14 +468,15 @@ procedure{:quick} Poly1305_last_block()
     let h := hBlocks + (inpLast % padLast) + padLast;
     assert h == h2 * (n * n) + h1 * n + h0 by { reveal lowerUpper192; reveal lowerUpper128; }
     assert r == r1 * n + r0 by { reveal lowerUpper128; }
-    (ghost var hLast) := Poly1305_iteration(r1);
+    let hLast := Poly1305_iteration(r1);
     assert hLast == lowerUpper192_opaque(lowerUpper128_opaque(h0, h1), h2) by { reveal lowerUpper192; reveal lowerUpper128; }
     lemma_poly_demod(p, hBlocks, (inpLast % padLast) + padLast, r);
     assert modp(hLast) == modp((modp(hBlocks) + padLast + (inpLast % padLast)) * r) by { reveal_modp(); }
 }
 
 // h := (h % p) % 2^128;
-procedure{:quick} Poly1305_reduce_last()
+procedure Poly1305_reduce_last()
+    {:quick}
     lets
         h0 @= r14; h1 @= rbx; h2 @= rbp;
         h := lowerUpper192_opaque(lowerUpper128_opaque(h0, h1), h2);
@@ -515,7 +520,8 @@ procedure{:quick} Poly1305_reduce_last()
 }
 
 // h := (h + key_s) % 2^128
-procedure{:quick} poly1305_add_key_s()
+procedure Poly1305_add_key_s()
+    {:quick}
     lets
         h0 @= r14; h1 @= rbx; key_s0 @= rax; key_s1 @= rdx;
         h_in := lowerUpper128_opaque(h0, h1);
@@ -542,13 +548,15 @@ let reveal_logand128 (x y:nat128) : Lemma
 #endverbatim
 ghost procedure reveal_logand128(ghost x:nat128, ghost y:nat128) extern;
 
-procedure{:quick} Poly1305_impl(
-    ghost key_r:nat128,
-    ghost key_s:nat128,
-    ghost ctx_b:buffer64,
-    ghost inp_b:buffer64,
-    ghost finish:nat64)
-    returns(ghost h:int)
+procedure Poly1305_impl(
+        ghost key_r:nat128,
+        ghost key_s:nat128,
+        ghost ctx_b:buffer64,
+        ghost inp_b:buffer64,
+        ghost finish:nat64)
+    returns(
+        ghost h:int)
+    {:quick}
     lets
         ctx @= rdi; inp @= rsi; len @= rdx; r0 @= r11; r1 @= r12; h0 @= r14; h1 @= rbx; h2 @= rbp;
         n := pow2_64;
@@ -660,7 +668,7 @@ procedure{:quick} Poly1305_impl(
 
         Load64_buffer(rax, ctx, 40, Public, ctx_b, 5);
         Load64_buffer(rdx, ctx, 48, Public, ctx_b, 6);
-        poly1305_add_key_s();
+        Poly1305_add_key_s();
         h := lowerUpper128_opaque(h0, h1);
 
         assert h == poly1305_hash_all(modp(h_in), key_r, key_s, seqTo128(buffer64_as_seq(mem, inp_b)), len_in)
@@ -673,12 +681,15 @@ procedure{:quick} Poly1305_impl(
 // Note that this reads 16-byte chunks directly from the input buffer,
 // so (len + 15) / 16 * 16 bytes must be readable, even though only len bytes
 // affect the result.
-procedure{:quick}{:public}{:exportSpecs} Poly1305(
-    inline win:bool,
-    ghost ctx_b:buffer64,
-    ghost inp_b:buffer64,
-    ghost len_in:nat64,
-    ghost finish_in:nat64)
+procedure Poly1305(
+        inline win:bool,
+        ghost ctx_b:buffer64,
+        ghost inp_b:buffer64,
+        ghost len_in:nat64,
+        ghost finish_in:nat64)
+    {:public}
+    {:quick}
+    {:exportSpecs}
     lets
         ctx @= rdi; inp @= rsi; len @= rdx; finish @= rcx;
         h0 @= r14; h1 @= rbx; h2 @= rbp;
@@ -777,7 +788,7 @@ procedure{:quick}{:public}{:exportSpecs} Poly1305(
     Store64_buffer(ctx, r15, 128, Public, ctx_b, 16);
     Store64_buffer(ctx, finish, 184, Public, ctx_b, 23);
 
-    (ghost var h') := Poly1305_impl(key_r, key_s, ctx_b, inp_b, finish_in);
+    let h' := Poly1305_impl(key_r, key_s, ctx_b, inp_b, finish_in);
 
     Store64_buffer(ctx, h0,  0, Public, ctx_b, 0);
     Store64_buffer(ctx, h1,  8, Public, ctx_b, 1);

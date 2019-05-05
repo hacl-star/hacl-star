@@ -65,7 +65,8 @@ open GHash
 open OptPublic
 #endverbatim
 
-procedure{:quick} ShiftKey1_128(ghost f:poly)
+procedure ShiftKey1_128(ghost f:poly)
+    {:quick}
     lets
         xh @= xmm3; xoffset @= xmm4; xhighbit @= xmm5;
         h := of_quad32(xh);
@@ -101,7 +102,8 @@ procedure{:quick} ShiftKey1_128(ghost f:poly)
     VPolyAdd(xmm1, xmm1, xh);
 }
 
-procedure{:quick} ShiftKey1_gf128_power(ghost h:poly, ghost n:nat)
+procedure ShiftKey1_gf128_power(ghost h:poly, ghost n:nat)
+    {:quick}
     lets
         xh @= xmm3; xoffset @= xmm4; xhighbit @= xmm5;
         hn := of_quad32(xh);
@@ -126,10 +128,8 @@ procedure{:quick} ShiftKey1_gf128_power(ghost h:poly, ghost n:nat)
     lemma_gf128_power(h, n);
 }
 
-procedure{:quick} Gf128_powers(
-    ghost h:poly,
-    ghost hkeys_b:buffer128
-    )
+procedure Gf128_powers(ghost h:poly, ghost hkeys_b:buffer128)
+    {:quick}
     reads
         memTaint;
         rcx;
@@ -216,12 +216,15 @@ procedure{:quick} Gf128_powers(
 
 
 
-procedure{:quick}{:public}{:exportSpecs} Keyhash_init(
-    inline win:bool,
-    inline alg:algorithm,
-    ghost key:seq(nat32),
-    ghost roundkeys_b:buffer128,
-    ghost hkeys_b:buffer128)
+procedure Keyhash_init(
+        inline win:bool,
+        inline alg:algorithm,
+        ghost key:seq(nat32),
+        ghost roundkeys_b:buffer128,
+        ghost hkeys_b:buffer128)
+    {:public}
+    {:quick}
+    {:exportSpecs}
     reads
         rsi; rdi; memTaint;
     modifies

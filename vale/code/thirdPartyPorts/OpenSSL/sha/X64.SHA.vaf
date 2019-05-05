@@ -58,9 +58,8 @@ open X64.CPU_Features_s
 
 #reset-options "--z3rlimit 20"
 
-procedure {:quick} preamble(
-        ghost ctx_b:buffer128
-    )
+procedure preamble(ghost ctx_b:buffer128)
+    {:quick}
     lets
         ctx @= rdi; tmp_reg @= rax;
         Wi @= xmm0; abef @= xmm1; cdgh @= xmm2; 
@@ -86,8 +85,8 @@ procedure {:quick} preamble(
     // At the C level, ctx_b is an array of 8 32-bit values: ABCDEFGH
     // We load these out of memory using litte-endian loads, 
     // but SHA spec is big endian, so we need to do some swaps
-    ghost var abcd := buffer128_read(ctx_b, 0, mem);
-    ghost var efgh := buffer128_read(ctx_b, 1, mem);
+    let abcd := buffer128_read(ctx_b, 0, mem);
+    let efgh := buffer128_read(ctx_b, 1, mem);
     Load128_buffer(abef, ctx,  0, Secret, ctx_b, 0);  // abef := LSB: ABCD 
     Load128_buffer(cdgh, ctx, 16, Secret, ctx_b, 1);  // cdgh := LSB: EFGH
     InitPshufbStableMask(tmp_xmm, tmp_reg);
@@ -104,11 +103,11 @@ procedure {:quick} preamble(
 }
 
 #reset-options "--z3rlimit 40"
-procedure {:quick} loop_rounds_0_15(
+procedure loop_rounds_0_15(
         ghost in_b:buffer128,
         ghost k_b:buffer128,
-        ghost offset:nat
-    )
+        ghost offset:nat)
+    {:quick}
     lets
         inp @= rsi; tbl @= rcx;
         Wi @= xmm0; abef @= xmm1; cdgh @= xmm2; 
@@ -148,16 +147,16 @@ procedure {:quick} loop_rounds_0_15(
         
 {
     // Create a ghost message block to pass to all of the sha256* instructions and lemmas
-    ghost var input_LE := slice_workaround(buffer128_as_seq(mem, in_b), offset, offset+4);
-    ghost var input_BE := reverse_bytes_nat32_quad32_seq(input_LE);
-    ghost var block:block_w := quads_to_block(input_BE);
+    let input_LE := slice_workaround(buffer128_as_seq(mem, in_b), offset, offset+4);
+    let input_BE := reverse_bytes_nat32_quad32_seq(input_LE);
+    let block:block_w := quads_to_block(input_BE);
     lemma_quads_to_block(input_BE);
 
     // Prove that the original hash input starts the repeat_range_spec base case
-    ghost var hash_orig := make_hash(abef, cdgh);
+    let hash_orig := make_hash(abef, cdgh);
     lemma_repeat_range_0_vale(block, hash_orig);
 
-    ghost var ks := buffer128_as_seq(mem, k_b);
+    let ks := buffer128_as_seq(mem, k_b);
 
     // Load 4 128-bit message chunks == 16 32-bit chunks
     Load128_buffer(msg0, inp,  0, Secret, in_b, offset+0);
@@ -221,12 +220,12 @@ procedure {:quick} loop_rounds_0_15(
     SHA256_rnds2(abef, cdgh, 14, block, hash_orig);
 }
 
-procedure {:quick} loop_rounds_16_51_body(
+procedure loop_rounds_16_51_body(
         inline i:nat,
         ghost k_b:buffer128,
         ghost block:block_w,
-        ghost hash_orig:hash256
-    )
+        ghost hash_orig:hash256)
+    {:quick}
     lets
         tbl @= rcx;
         Wi @= xmm0; abef @= xmm1; cdgh @= xmm2; 
@@ -260,7 +259,7 @@ procedure {:quick} loop_rounds_16_51_body(
         msg3 == ws_partial(4*(i+3), block);
         msg0 == ws_quad32(4*(i), block);
 {
-    ghost var ks := buffer128_as_seq(mem, k_b);
+    let ks := buffer128_as_seq(mem, k_b);
     Load128_buffer(Wi, tbl, 16*i, Secret, k_b, i);  // Load K values from memory
     assert Wi == index_work_around_quad32(ks, i);
     
@@ -278,7 +277,8 @@ procedure {:quick} loop_rounds_16_51_body(
 // TODO: OpenSSL does this without any moves by renaming variables.  
 //       We can do the same once Vale quick-mode supports that,
 //       or we can rewrite the procedure above in non-quick mode
-procedure {:quick} msg_shift()
+procedure msg_shift()
+    {:quick}
     lets
         msg0 @= xmm3; msg1 @= xmm4; msg2 @= xmm5; msg3 @= xmm6;
         Wi @= xmm0; tmp_xmm @= xmm7;
@@ -299,12 +299,12 @@ procedure {:quick} msg_shift()
 }
 
 // REVIEW: Vale wouldn't let me make this an exportOnly, so I duplicated it below :(
-procedure {:recursive} loop_rounds_16_51_recursive(
+procedure loop_rounds_16_51_recursive(
         inline i:nat,
         ghost k_b:buffer128,
         ghost block:block_w,
-        ghost hash_orig:hash256
-    )
+        ghost hash_orig:hash256)
+    {:recursive}
     lets
         tbl @= rcx;
         Wi @= xmm0; abef @= xmm1; cdgh @= xmm2; 
@@ -345,11 +345,11 @@ procedure {:recursive} loop_rounds_16_51_recursive(
     msg_shift();
 }
 
-procedure {:quick exportOnly} loop_rounds_16_51(
+procedure loop_rounds_16_51(
         ghost k_b:buffer128,
         ghost block:block_w,
-        ghost hash_orig:hash256
-    )
+        ghost hash_orig:hash256)
+    {:quick exportOnly}
     lets
         tbl @= rcx;
         Wi @= xmm0; abef @= xmm1; cdgh @= xmm2; 
@@ -385,10 +385,10 @@ procedure {:quick exportOnly} loop_rounds_16_51(
     loop_rounds_16_51_recursive(12, k_b, block, hash_orig);
 }
 
-procedure {:quick} loop_rounds_52_64(
+procedure loop_rounds_52_64(
         ghost k_b:buffer128,
-        ghost block:block_w
-        )
+        ghost block:block_w)
+    {:quick}
     lets
         tbl @= rcx; num @= rdx;
         Wi @= xmm0; abef @= xmm1; cdgh @= xmm2; 
@@ -421,9 +421,9 @@ procedure {:quick} loop_rounds_52_64(
         let hash_orig := make_hash(abef_save, cdgh_save) in
         make_hash(abef, cdgh) == update_block(hash_orig, block);
 {
-    ghost var hash_orig := make_hash(abef_save, cdgh_save);
+    let hash_orig := make_hash(abef_save, cdgh_save);
 
-    ghost var ks := buffer128_as_seq(mem, k_b);
+    let ks := buffer128_as_seq(mem, k_b);
     Load128_buffer(Wi, tbl, 16*13, Secret, k_b, 13);  // Load K values from memory
     assert Wi == index_work_around_quad32(ks, 13);
     Paddd(Wi, msg0);
@@ -453,8 +453,8 @@ procedure {:quick} loop_rounds_52_64(
     SHA256_rnds2(abef, cdgh, 4*15+2, block, hash_orig);
     //assert make_hash(abef, cdgh) == shuffle(SHA2_256, hash_orig, block);
 
-    ghost var abef_shuffle := abef;
-    ghost var cdgh_shuffle := cdgh;
+    let abef_shuffle := abef;
+    let cdgh_shuffle := cdgh;
 
     Paddd(cdgh, cdgh_save);
     Paddd(abef, abef_save);
@@ -463,12 +463,12 @@ procedure {:quick} loop_rounds_52_64(
 }
 
 
-procedure {:quick} loop_rounds(
+procedure loop_rounds(
         ghost in_b:buffer128,
         ghost k_b:buffer128,
         ghost offset:nat,
-        ghost hash_orig:hash256
-    )
+        ghost hash_orig:hash256)
+    {:quick}
     lets
         num @= rdx; inp @= rsi; tbl @= rcx;
         Wi @= xmm0; abef @= xmm1; cdgh @= xmm2; 
@@ -508,11 +508,11 @@ procedure {:quick} loop_rounds(
 
 {
     // Create a ghost message block to pass to all of the sha256* instructions and lemmas
-    ghost var input_LE := slice_workaround(buffer128_as_seq(mem, in_b), offset, offset+4);
-    ghost var input_BE := reverse_bytes_nat32_quad32_seq(input_LE);
-    ghost var block:block_w := quads_to_block(input_BE);
+    let input_LE := slice_workaround(buffer128_as_seq(mem, in_b), offset, offset+4);
+    let input_BE := reverse_bytes_nat32_quad32_seq(input_LE);
+    let block:block_w := quads_to_block(input_BE);
 
-    ghost var hash_init := make_hash(abef, cdgh);
+    let hash_init := make_hash(abef, cdgh);
 
     loop_rounds_0_15(in_b, k_b, offset);
     loop_rounds_16_51(k_b, block, hash_init);
@@ -522,10 +522,10 @@ procedure {:quick} loop_rounds(
 }
 
 #reset-options "--z3rlimit 40"
-procedure {:quick} loop(
+procedure loop(
         ghost in_b:buffer128,
-        ghost k_b:buffer128
-    )
+        ghost k_b:buffer128)
+    {:quick}
     lets
         num @= rdx; inp @= rsi; tbl @= rcx;
         Wi @= xmm0; abef @= xmm1; cdgh @= xmm2; 
@@ -554,7 +554,7 @@ procedure {:quick} loop(
         let input_BE := reverse_bytes_nat32_quad32_seq(input_LE) in
         make_hash(abef, cdgh) == update_multi_quads(input_BE, old(make_hash(abef, cdgh)));
 {
-    ghost var hash_orig:hash256 := make_hash(abef, cdgh);
+    let hash_orig:hash256 := make_hash(abef, cdgh);
 
     ghost var count:nat := 0;
     while (num > 0) 
@@ -584,9 +584,9 @@ procedure {:quick} loop(
     }
 }
 
-procedure {:quick} epilogue(
-        ghost ctx_b:buffer128
-    )
+procedure epilogue(
+        ghost ctx_b:buffer128)
+    {:quick}
     lets
         ctx @= rdi;
         abef @= xmm1; cdgh @= xmm2; 
@@ -621,17 +621,17 @@ procedure {:quick} epilogue(
 
     Store128_buffer(ctx, abef, 0, Secret, ctx_b, 0);
     Store128_buffer(ctx, cdgh, 16, Secret, ctx_b, 1);
-    ghost var abcd := buffer128_read(ctx_b, 0, mem);
-    ghost var efgh := buffer128_read(ctx_b, 1, mem);
+    let abcd := buffer128_read(ctx_b, 0, mem);
+    let efgh := buffer128_read(ctx_b, 1, mem);
     assert equal(#(seq(SHA_helpers.word))(make_hash(old(abef), old(cdgh))), #(seq(SHA_helpers.word))(make_ordered_hash(abcd, efgh)));
 }
 
 
-procedure {:quick} sha_update(
+procedure sha_update(
         ghost ctx_b:buffer128,
         ghost in_b:buffer128,
-        ghost k_b:buffer128
-    )
+        ghost k_b:buffer128)
+    {:quick}
     lets
         tmp_reg @= rax; tbl @= rcx; num @= rdx; ctx @= rdi; inp @= rsi; 
         Wi @= xmm0; abef @= xmm1; cdgh @= xmm2; 
@@ -673,11 +673,11 @@ procedure {:quick} sha_update(
 }
 
 #reset-options "--z3rlimit 80 --z3refresh"
-procedure {:quick} sha_update_bytes(
+procedure sha_update_bytes(
         ghost ctx_b:buffer128,
         ghost in_b:buffer128,
-        ghost k_b:buffer128
-    )
+        ghost k_b:buffer128)
+    {:quick}
     lets
         tmp_reg @= rax; tbl @= rcx; num @= rdx; ctx @= rdi; inp @= rsi; 
         Wi @= xmm0; abef @= xmm1; cdgh @= xmm2; 
@@ -714,12 +714,12 @@ procedure {:quick} sha_update_bytes(
         modifies_buffer128(ctx_b, old(mem), mem);
 {
     sha_update(ctx_b, in_b, k_b);
-    ghost var old_ctx:seq(four(nat32)) := old(buffer128_as_seq(mem, ctx_b));
-    ghost var new_ctx:seq(four(nat32)) :=     buffer128_as_seq(mem, ctx_b);
+    let old_ctx:seq(four(nat32)) := old(buffer128_as_seq(mem, ctx_b));
+    let new_ctx:seq(four(nat32)) :=     buffer128_as_seq(mem, ctx_b);
     lemma_hash_to_bytes(old_ctx);
     lemma_hash_to_bytes(new_ctx);
-    ghost var hash_in  := le_bytes_to_hash(le_seq_quad32_to_bytes(old_ctx));
-    ghost var hash_out := le_bytes_to_hash(le_seq_quad32_to_bytes(new_ctx));
+    let hash_in  := le_bytes_to_hash(le_seq_quad32_to_bytes(old_ctx));
+    let hash_out := le_bytes_to_hash(le_seq_quad32_to_bytes(new_ctx));
 
     // Lots of OBSERVE below
     assert {:quick_type} length(old_ctx) == 2;
@@ -729,21 +729,23 @@ procedure {:quick} sha_update_bytes(
     assert     buffer128_read(ctx_b, 0, mem)  == index(new_ctx, 0);
     assert     buffer128_read(ctx_b, 1, mem)  == index(new_ctx, 1);
 
-    ghost var input_LE := slice_workaround(buffer128_as_seq(mem, in_b), 0, 4*old(num));
-    ghost var input_BE := reverse_bytes_nat32_quad32_seq(input_LE);
+    let input_LE := slice_workaround(buffer128_as_seq(mem, in_b), 0, 4*old(num));
+    let input_BE := reverse_bytes_nat32_quad32_seq(input_LE);
     assert hash_out == update_multi_quads(input_BE, hash_in);
     lemma_update_multi_equiv_vale(hash_in, hash_out, input_LE, input_BE, le_seq_quad32_to_bytes(input_LE),
                                   seq_nat8_to_seq_uint8(le_seq_quad32_to_bytes(input_LE)));
 }
 
 #reset-options "--z3rlimit 40"
-procedure {:quick}{:exportSpecs}{:public} sha_update_bytes_stdcall(
+procedure sha_update_bytes_stdcall(
         inline win:bool,
         ghost ctx_b:buffer128, 
         ghost in_b:buffer128, 
         ghost num_val:nat64,
-        ghost k_b:buffer128
-    )
+        ghost k_b:buffer128)
+    {:public}
+    {:quick}
+    {:exportSpecs}
     lets 
         ctx_ptr        := if win then rcx else rdi;
          in_ptr        := if win then rdx else rsi;
@@ -891,10 +893,8 @@ procedure {:quick}{:exportSpecs}{:public} sha_update_bytes_stdcall(
         Pop(r15);
     }
     
-    ghost var hash_in  := old(le_bytes_to_hash(le_seq_quad32_to_bytes(buffer128_as_seq(mem, ctx_b))));
-    ghost var input_LE := seq_nat8_to_seq_uint8(le_seq_quad32_to_bytes(buffer128_as_seq(mem, in_b)));
+    let hash_in  := old(le_bytes_to_hash(le_seq_quad32_to_bytes(buffer128_as_seq(mem, ctx_b))));
+    let input_LE := seq_nat8_to_seq_uint8(le_seq_quad32_to_bytes(buffer128_as_seq(mem, in_b)));
     lemma_update_multi_opaque_vale_is_update_multi(hash_in, input_LE);
 }
-
-
 
