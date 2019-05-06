@@ -54,3 +54,32 @@ test-hkdf_sha2_256.exe: hkdf_sha2_256-c/Hacl_HKDF_SHA2_256.c hkdf_sha2_256-c/Tes
 clean:
 	rm -rf *~ *.exe *.exe.dSYM *.checked.lax
 	rm -rf hkdf_sha2_256-c
+
+
+CACHE_DIR     = .cache
+OUTPUT_DIR    = .output
+HINT_DIR      = .hints
+FSTAR_INCLUDE_DIRS = \
+  $(HACL_KREMLIN) \
+  $(KREMLIN_HOME)/kremlib \
+  $(HACL_HOME)/specs \
+  $(HACL_HOME)/lib \
+  $(HACL_HOME)/lib/c \
+  $(HACL_HOME)/code/hash \
+  $(HACL_HOME)/code/hmac
+
+
+FSTAR_FLAGS = $(OTHERFLAGS) --cmi \
+  --cache_checked_modules --cache_dir $(CACHE_DIR) --odir $(OUTPUT_DIR) \
+  $(addprefix --include ,$(FSTAR_INCLUDE_DIRS))
+
+
+# 5. Targets for interactive mode
+
+%.fst-in:
+	@echo $(FSTAR_FLAGS) \
+	  $(ENABLE_HINTS) --hint_file $(HINT_DIR)/$(basename $@).fst.hints
+
+%.fsti-in:
+	@echo $(FSTAR_FLAGS) \
+	  $(ENABLE_HINTS) --hint_file $(HINT_DIR)/$(basename $@).fsti.hints

@@ -41,7 +41,7 @@ val store_len: a:hash_alg -> len:len_t a -> b:B.buffer uint8 ->
       | _ -> B.as_seq h1 b == Lib.ByteSequence.uint_to_bytes_be (secret len))))
 
 inline_for_extraction
-let store_len a len b = 
+let store_len a len b =
   match a with
   | MD5 ->
       Lib.ByteBuffer.uint_to_bytes_le b (secret len)
@@ -168,7 +168,7 @@ let pad_3 (a: hash_alg) (len: len_t a) (dst: B.buffer uint8):
         (match a with
 	| MD5 -> Lib.ByteSequence.uint_to_bytes_le (secret (nat_to_len a FStar.Mul.(len_v a len * 8)))
 	| _ -> Lib.ByteSequence.uint_to_bytes_be (secret (nat_to_len a FStar.Mul.(len_v a len * 8))))))
-= 
+=
   begin match a with
   | MD5 | SHA1 | SHA2_224 | SHA2_256 ->
       (**) FStar.UInt.shift_left_value_lemma #64 (U64.v len) 3;
@@ -179,7 +179,7 @@ let pad_3 (a: hash_alg) (len: len_t a) (dst: B.buffer uint8):
       (**) assert FStar.Mul.(FStar.UInt.shift_left #64 (len_v a len) 3 < pow2 64);
       (**) assert FStar.Mul.(U64.(v (shift_left len 3ul)) = U64.v len * 8);
       store_len a U64.(shift_left len 3ul) dst
-  | SHA2_384 | SHA2_512 -> 
+  | SHA2_384 | SHA2_512 ->
       (**) FStar.UInt.shift_left_value_lemma #128 (U128.v len) 3;
       (**) assert (len_v a len <= pow2 125 - 1);
       (**) assert_norm FStar.Mul.((pow2 125 - 1) * 8 < pow2 128);
