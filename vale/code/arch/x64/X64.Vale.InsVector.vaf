@@ -398,8 +398,8 @@ procedure Pextrq(out dst:dst_opr64, in src:xmm, inline index:imm8)
     ensures
         dst == (if index = 0 then lo64(src) else hi64(src));
 {
-    reveal lo64_def;
-    reveal hi64_def;
+    Opaque_s.reveal_opaque(lo64_def);
+    Opaque_s.reveal_opaque(hi64_def);
 }
 
 procedure Pinsrd(inout dst:xmm, in src:opr64, inline index:imm8)
@@ -438,7 +438,7 @@ procedure Pinsrq(inout dst:xmm, in src:opr64, inline index:imm8)
     ensures
         dst == insert_nat64_opaque(old(dst), src, #nat1(index));
 {
-    reveal insert_nat64;
+    Opaque_s.reveal_opaque(insert_nat64);
     assert dst == insert_nat64(old(dst), src, #nat1(index));
 }
 #reset-options "--initial_fuel 1 --max_fuel 1 --max_ifuel 1 --z3rlimit 50"
@@ -610,7 +610,7 @@ procedure InitPshufbMask(inout dst:xmm, out tmp:reg_opr64)
     assert two_to_nat32(Mktwo(0x04050607, 0x00010203)) == 0x0001020304050607; // OBSERVE
     PinsrqImm(dst, 0x08090A0B0C0D0E0F, 0, tmp);
     PinsrqImm(dst, 0x0001020304050607, 1, tmp);
-    reveal insert_nat64;
+    Opaque_s.reveal_opaque(insert_nat64);
 }
 
 procedure InitPshufbStableMask(inout dst:xmm, out tmp:reg_opr64)
@@ -624,7 +624,7 @@ procedure InitPshufbStableMask(inout dst:xmm, out tmp:reg_opr64)
     assert two_to_nat32(Mktwo(0x00010203, 0x04050607)) == 0x0405060700010203; // OBSERVE
     PinsrqImm(dst, 0x0405060700010203, 0, tmp);
     PinsrqImm(dst, 0x0C0D0E0F08090A0B, 1, tmp);
-    reveal insert_nat64;
+    Opaque_s.reveal_opaque(insert_nat64);
 }
 
 procedure InitPshufbDupMask(inout dst:xmm, out tmp:reg_opr64)
@@ -637,7 +637,7 @@ procedure InitPshufbDupMask(inout dst:xmm, out tmp:reg_opr64)
     assert two_to_nat32(Mktwo(0x0C0D0E0F, 0x08090A0B)) == 0x08090A0B0C0D0E0F; // OBSERVE
     PinsrqImm(dst, 0x08090A0B0C0D0E0F, 0, tmp);
     PinsrqImm(dst, 0x08090A0B0C0D0E0F, 1, tmp);
-    reveal insert_nat64;
+    Opaque_s.reveal_opaque(insert_nat64);
 }
 
 procedure InitPshufb64Mask(inout dst:xmm, out tmp:reg_opr64)
@@ -651,7 +651,7 @@ procedure InitPshufb64Mask(inout dst:xmm, out tmp:reg_opr64)
     assert two_to_nat32(Mktwo(0x04050607, 0x00010203)) == 0x0001020304050607; // OBSERVE
     PinsrqImm(dst, 0x0001020304050607, 0, tmp);
     PinsrqImm(dst, 0x08090A0B0C0D0E0F, 1, tmp);
-    reveal insert_nat64;
+    Opaque_s.reveal_opaque(insert_nat64);
 }
 
 // TODO: Lots of room to optimize this using bitwise operations

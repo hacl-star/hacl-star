@@ -141,8 +141,8 @@ ghost procedure finish_aes_encrypt_le(ghost alg:algorithm, ghost input_LE:quad32
     ensures
         aes_encrypt_le(alg, key, input_LE) == cipher_opaque(alg, input_LE, key_to_round_keys_LE(alg, key));
 {
-    reveal aes_encrypt_LE_def;
-    reveal cipher;
+    Opaque_s.reveal_opaque(aes_encrypt_LE_def);
+    Opaque_s.reveal_opaque(cipher);
 }
 
 #token +. precedence +
@@ -172,7 +172,7 @@ procedure Load_one_msb()
     ZeroXmm(T2);
     assert two_to_nat32(Mktwo(0, 0x1000000)) == 0x100000000000000; // OBSERVE
     PinsrqImm(T2, 0x100000000000000, 1, constp);
-    reveal insert_nat64;
+    Opaque_s.reveal_opaque(insert_nat64);
 }
 
 procedure Load_0xc2_msb(out dst:xmm)
@@ -553,7 +553,7 @@ procedure Loop6x_preamble(
     VPolyMul(T1, Ii, Hkey, false, true);
     VAESNI_enc(inout5, inout5, T2);
 
-    reveal rounds;
+    Opaque_s.reveal_opaque(rounds);
     commute_sub_bytes_shift_rows_forall();
 }
 
@@ -685,7 +685,7 @@ procedure Loop6x_step1(
 //	  vaesenc	$rndkey,$inout5,$inout5
     VAESNI_enc(inout5, inout5, rndkey);
 
-    reveal rounds;
+    Opaque_s.reveal_opaque(rounds);
     commute_sub_bytes_shift_rows_forall();
     lemma_reverse_bytes_quad32_64(old(buffer128_read(in0_b, in0_count*6+in0_offset, mem)), old(buffer128_read(scratch_b, stack_offset, mem)), buffer128_read(scratch_b, stack_offset, mem));
 
@@ -806,7 +806,7 @@ procedure Loop6x_plain(
 //	  vaesenc	$rndkey,$inout5,$inout5
     VAESNI_enc(inout5, inout5, rndkey);
 
-    reveal rounds;
+    Opaque_s.reveal_opaque(rounds);
     commute_sub_bytes_shift_rows_forall();
 }
 
@@ -946,7 +946,7 @@ procedure Loop6x_step2(
 //	  vaesenc	$rndkey,$inout5,$inout5
     VAESNI_enc(inout5, inout5, rndkey);
 
-    reveal rounds;
+    Opaque_s.reveal_opaque(rounds);
     commute_sub_bytes_shift_rows_forall();
     lemma_reverse_bytes_quad32_64(old(buffer128_read(in0_b, in0_count*6+in0_offset, mem)), old(buffer128_read(scratch_b, stack_offset, mem)), buffer128_read(scratch_b, stack_offset, mem));
 
@@ -1087,7 +1087,7 @@ procedure Loop6x_step3(
 //	  vaesenc	$rndkey,$inout5,$inout5
     VAESNI_enc(inout5, inout5, rndkey);
 
-    reveal rounds;
+    Opaque_s.reveal_opaque(rounds);
     commute_sub_bytes_shift_rows_forall();
     lemma_reverse_bytes_quad32_64(old(buffer128_read(in0_b, in0_count*6+in0_offset, mem)), old(buffer128_read(scratch_b, stack_offset, mem)), buffer128_read(scratch_b, stack_offset, mem));
 
@@ -1222,7 +1222,7 @@ procedure Loop6x_step4(
 //	vpxor		$T1,$Z2,$Z2
     VPolyAdd(Z2, Z2, T1);
 
-    reveal rounds;
+    Opaque_s.reveal_opaque(rounds);
     commute_sub_bytes_shift_rows_forall();
     lemma_reverse_bytes_quad32_64(old(buffer128_read(in0_b, in0_count*6+in0_offset, mem)), old(buffer128_read(scratch_b, stack_offset, mem)), buffer128_read(scratch_b, stack_offset, mem));
 
@@ -1352,7 +1352,7 @@ procedure Loop6x_step5(
 //      vaesenc	$rndkey,$inout5,$inout5
     VAESNI_enc(inout5, inout5, rndkey);
 
-    reveal rounds;
+    Opaque_s.reveal_opaque(rounds);
     commute_sub_bytes_shift_rows_forall();
     lemma_reverse_bytes_quad32_64(old(buffer128_read(in0_b, in0_count*6+in0_offset, mem)), old(buffer128_read(scratch_b, stack_offset, mem)), buffer128_read(scratch_b, stack_offset, mem));
 }
@@ -1447,7 +1447,7 @@ procedure Loop6x_round8(
 
     VAESNI_enc(inout5, inout5, T1);
 
-    reveal rounds;
+    Opaque_s.reveal_opaque(rounds);
     commute_sub_bytes_shift_rows_forall();
 }
 
@@ -1536,7 +1536,7 @@ procedure Loop6x_round9(
     Load128_buffer(T1, key, 0xa0-0x80, Secret, keys_b, 10); 
 
 
-    reveal rounds;
+    Opaque_s.reveal_opaque(rounds);
     commute_sub_bytes_shift_rows_forall();
 
     inline if (alg = AES_256) {
@@ -1619,7 +1619,7 @@ procedure Loop6x_round9(
     VPxor(Z3, T1, Mem128(inp, 0x40, Secret, in_b, count*6 + 4));
     VPxor(Hkey, T1, Mem128(inp, 0x50, Secret, in_b, count*6 + 5));
 
-//    reveal rounds;
+//    Opaque_s.reveal_opaque(rounds);
 //    commute_sub_bytes_shift_rows_forall();
 }
 
@@ -2345,7 +2345,7 @@ procedure Loop6x(
         assert to_quad32(of_quad32(Xi)) == to_quad32(of_quad32(reverse_bytes_quad32(ghash_incremental(h_LE, y_prev, data))));
         assert Xi == reverse_bytes_quad32(ghash_incremental(h_LE, y_prev, data));
     }
-    reveal gctr_registers_def;
+    Opaque_s.reveal_opaque(gctr_registers_def);
 }
 
 
@@ -2593,7 +2593,7 @@ procedure Loop6x_decrypt(
         assert to_quad32(of_quad32(Xi)) == to_quad32(of_quad32(reverse_bytes_quad32(ghash_incremental(h_LE, y_prev, data))));
         assert Xi == reverse_bytes_quad32(ghash_incremental(h_LE, y_prev, data));
     }
-    reveal gctr_registers_def;
+    Opaque_s.reveal_opaque(gctr_registers_def);
 }
 
 #reset-options "--z3rlimit 700"
@@ -2831,7 +2831,7 @@ procedure Loop6x_loop_decrypt(
         iter := #nat(iter + 1);
         ctr := inc32(ctr, 6);
     }
-    reveal gctr_registers_def;
+    Opaque_s.reveal_opaque(gctr_registers_def);
     y_new := y_cur;
 }
 
@@ -3083,7 +3083,7 @@ procedure Loop6x_loop(
         iter := #nat(iter + 1);
         ctr := inc32(ctr, 6);
     }
-    reveal gctr_registers_def;
+    Opaque_s.reveal_opaque(gctr_registers_def);
     y_new := y_cur;
 }
 
@@ -3229,7 +3229,7 @@ procedure AESNI_ctr32_6x_loop_body(
     VAESNI_enc(inout4, inout4, rndkey);
     VAESNI_enc(inout5, inout5, rndkey);
 
-    reveal rounds;
+    Opaque_s.reveal_opaque(rounds);
     commute_sub_bytes_shift_rows_forall();
     Load128_buffer(rndkey, key, 16*(rnd+2)-0x80, Secret, keys_b, rnd+2);
 }
@@ -3378,7 +3378,7 @@ procedure AESNI_ctr32_6x_round9(
     VAESNI_enc(inout5, inout5, rndkey);
     VPxor(Hkey, Hkey, Mem128(inp, 0x50, Secret, in_b, count*6 + 5));
 
-    reveal rounds;
+    Opaque_s.reveal_opaque(rounds);
     commute_sub_bytes_shift_rows_forall();
 
     AddLea64(inp, inp, 0x60);

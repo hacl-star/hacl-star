@@ -192,12 +192,12 @@ procedure gcm_block_bytes(
     Mov128(xmm0, icb);
     Pshufb(xmm0, mask);
     AESEncryptBlock(alg, reverse_bytes_quad32(icb), key, round_keys, keys_b);
-    reveal aes_encrypt_LE_def;
+    Opaque_s.reveal_opaque(aes_encrypt_LE_def);
 
     Pxor(xmm6, xmm0);
     Store128_buffer(out_ptr, xmm6, 0, Secret, out_b, 0);
 
-    reveal gctr_partial;
+    Opaque_s.reveal_opaque(gctr_partial);
 }
 
 
@@ -315,7 +315,7 @@ procedure gcm_blocks128(
         Mov128(xmm0, icb);
         Pshufb(xmm0, mask);
         AESEncryptBlock(alg, reverse_bytes_quad32(icb), key, round_keys, keys_b);
-        reveal aes_encrypt_LE_def;
+        Opaque_s.reveal_opaque(aes_encrypt_LE_def);
 
         Pxor(xmm3, xmm0);
         Store128_buffer(r10, xmm3, 0, Secret, out_b, rdx);
@@ -327,7 +327,7 @@ procedure gcm_blocks128(
         Inc32(icb, one);
     }
     assert equal(slice_work_around(plain_quads, len), plain_quads);       // OBSERVE
-    reveal gctr_partial;
+    Opaque_s.reveal_opaque(gctr_partial);
 }
 
 

@@ -215,7 +215,7 @@ procedure Poly1305_iteration(ghost r1:nat64) returns(ghost hh:int)
 
     let hd := Poly1305_multiply(r1);
     hh := Poly1305_reduce();
-    reveal_modp();
+    reveal modp;
     assert hh == (n * n) * h2 + n * h1 + h0 /\ (h * r) % p == hh % p;
 }
 
@@ -305,7 +305,7 @@ procedure Poly1305_blocks(
     h := h_in;
     assert modp(h) == poly1305_heap_blocks(modp(h_in), padbit * (n * n), r, buffer64_as_seq(mem, inp_b), 0) by
     {
-        reveal_modp();
+        reveal modp;
         reveal_poly1305_heap_blocks(modp(h_in), padbit * (n * n), r, buffer64_as_seq(mem, inp_b), 0);
     }
 
@@ -366,7 +366,7 @@ procedure Poly1305_blocks(
         {
             reveal_poly1305_heap_blocks(modp(h_in), padbit * (nn * nn), r, buffer64_as_seq(mem, inp_b), word_index);
             reveal_poly1305_heap_blocks(modp(h_in), padbit * (nn * nn), r, buffer64_as_seq(mem, inp_b), word_index - 2);
-            reveal_modp();
+            reveal modp;
             lemma_poly_demod(p, hp, hq - hp, r);
         }
     }
@@ -444,7 +444,7 @@ procedure Poly1305_last_block()
 
         assert padLast == lowerUpper128_opaque(0, rdx) by {
             lemma_power2_add64(#nat64(8 * nExtra - 64));
-            reveal lowerUpper128;
+            Opaque_s.reveal_opaque(lowerUpper128);
         }
 
         // inpLast := (inpLast % padLast)
@@ -466,12 +466,12 @@ procedure Poly1305_last_block()
     }
 
     let h := hBlocks + (inpLast % padLast) + padLast;
-    assert h == h2 * (n * n) + h1 * n + h0 by { reveal lowerUpper192; reveal lowerUpper128; }
-    assert r == r1 * n + r0 by { reveal lowerUpper128; }
+    assert h == h2 * (n * n) + h1 * n + h0 by { Opaque_s.reveal_opaque(lowerUpper192); Opaque_s.reveal_opaque(lowerUpper128); }
+    assert r == r1 * n + r0 by { Opaque_s.reveal_opaque(lowerUpper128); }
     let hLast := Poly1305_iteration(r1);
-    assert hLast == lowerUpper192_opaque(lowerUpper128_opaque(h0, h1), h2) by { reveal lowerUpper192; reveal lowerUpper128; }
+    assert hLast == lowerUpper192_opaque(lowerUpper128_opaque(h0, h1), h2) by { Opaque_s.reveal_opaque(lowerUpper192); Opaque_s.reveal_opaque(lowerUpper128); }
     lemma_poly_demod(p, hBlocks, (inpLast % padLast) + padLast, r);
-    assert modp(hLast) == modp((modp(hBlocks) + padLast + (inpLast % padLast)) * r) by { reveal_modp(); }
+    assert modp(hLast) == modp((modp(hBlocks) + padLast + (inpLast % padLast)) * r) by { reveal modp; }
 }
 
 // h := (h % p) % 2^128;
@@ -497,7 +497,7 @@ procedure Poly1305_reduce_last()
     Adc64Wrap(r10, 0);
 
     assert h + 5 == lowerUpper192_opaque(lowerUpper128_opaque(r8, r9), r10)
-        by { reveal lowerUpper128; reveal lowerUpper192; }
+        by { Opaque_s.reveal_opaque(lowerUpper128); Opaque_s.reveal_opaque(lowerUpper192); }
     lemma_reduce128(h, old(h2), old(h1), old(h0), h + 5, r10, r9, r8);
 
     Shr64(r10, 2);
@@ -617,12 +617,12 @@ procedure Poly1305_impl(
     Store64_buffer(ctx, r1, 32, Public, ctx_b, 4);
 
     let r:nat128 := lowerUpper128_opaque(r0, r1);
-    assert r == r0 + n * r1 by { reveal lowerUpper128; }
+    assert r == r0 + n * r1 by { Opaque_s.reveal_opaque(lowerUpper128); }
 
     let mask:nat128 := 0x0ffffffc_0ffffffc_0ffffffc_0fffffff; // REVIEW: why do we need to put this constant in a variable?
     assert r == iand128(key_r, mask) by
     {
-        reveal lowerUpper128;
+        Opaque_s.reveal_opaque(lowerUpper128);
         lemma_lowerUpper128_and(key_r, key_r0, key_r1, mask,
             0x0fff_fffc_0fff_ffff, 0x0fff_fffc_0fff_fffc, r, r0, r1);
     }
@@ -636,10 +636,10 @@ procedure Poly1305_impl(
     Store64_buffer(ctx, len, 64, Public, ctx_b, 8);
 
     Mov64(rcx, 1);
-    assert h_in == h2_in * (n * n) + h1_in * n + h0_in by { reveal lowerUpper128; reveal lowerUpper192; }
+    assert h_in == h2_in * (n * n) + h1_in * n + h0_in by { Opaque_s.reveal_opaque(lowerUpper128); Opaque_s.reveal_opaque(lowerUpper192); }
     h := Poly1305_blocks(r, h_in, ctx_b, inp_b);
     assert h == lowerUpper192_opaque(lowerUpper128_opaque(h0, h1), h2)
-        by { reveal lowerUpper192; reveal lowerUpper128; }
+        by { Opaque_s.reveal_opaque(lowerUpper192); Opaque_s.reveal_opaque(lowerUpper128); }
     lemma_poly1305_heap_hash_blocks_alt(modp(h_in), n * n, r, mem, inp_b, old(len) / 16);
 
     Load64_buffer(rax, ctx, 184, Public, ctx_b, 23);
@@ -657,7 +657,7 @@ procedure Poly1305_impl(
             Load64_buffer(r9, inp, 8, Public, inp_b, (len_in / 16) * 2 + 1);
             let a := seqTo128_app(buffer64_as_seq(mem, inp_b), len_in / 16);
             assert lowerUpper128_opaque(r8, r9) == a
-                by { reveal lowerUpper128; }
+                by { Opaque_s.reveal_opaque(lowerUpper128); }
             Poly1305_last_block();
             h := lowerUpper192_opaque(lowerUpper128_opaque(h0, h1), h2);
         }
@@ -672,7 +672,7 @@ procedure Poly1305_impl(
         h := lowerUpper128_opaque(h0, h1);
 
         assert h == poly1305_hash_all(modp(h_in), key_r, key_s, seqTo128(buffer64_as_seq(mem, inp_b)), len_in)
-            by { reveal_mod2_128(); reveal_modp(); }
+            by { reveal mod2_128; reveal modp; }
     }
 }
 

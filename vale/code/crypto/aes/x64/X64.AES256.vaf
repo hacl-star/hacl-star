@@ -86,7 +86,7 @@ procedure KeyExpansionRoundEven256(
 
     //assert xmm1 == simd_round_key_256(old(xmm1), old(xmm3), rcon, round + 1);
     lemma_simd_round_key(old(xmm1), old(xmm3), rcon, round + 1);
-    reveal expand_key_256_def;
+    Opaque_s.reveal_opaque(expand_key_256_def);
     //assert xmm1 == round_key_256_rcon(old(xmm1), old(xmm3), rcon, round + 1);
 }
 
@@ -130,7 +130,7 @@ procedure KeyExpansionRoundOdd256(
     //assert xmm1 == simd_round_key_256(old(xmm1), old(xmm3), rcon, round + 1);
     lemma_simd_round_key(old(xmm3), old(xmm1), 0, round + 1);
     lemma_round_key_256_rcon_odd(old(xmm3), old(xmm1), 0, round + 1);
-    reveal expand_key_256_def;
+    Opaque_s.reveal_opaque(expand_key_256_def);
 }
 
 procedure KeyExpansionRoundUnrolledRecursive256(
@@ -215,10 +215,10 @@ procedure KeyExpansion256Stdcall(
     Store128_buffer(rdx, xmm1, 0, Secret, output_key_expansion_b, 0);
     Store128_buffer(rdx, xmm3, 16, Secret, output_key_expansion_b, 1);
 
-    reveal expand_key_256_def;
+    Opaque_s.reveal_opaque(expand_key_256_def);
     KeyExpansionRoundUnrolledRecursive256(key, output_key_expansion_b, 14);
     lemma_expand_key_256(key, 15);
-    reveal key_to_round_keys_LE_def;
+    Opaque_s.reveal_opaque(key_to_round_keys_LE_def);
 
     // Clear secrets out of registers
     Pxor(xmm1, xmm1);

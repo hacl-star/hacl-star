@@ -81,7 +81,7 @@ procedure KeyExpansionRound(
 
     // assert xmm1 == simd_round_key_128(old(xmm1), rcon);
     lemma_simd_round_key(old(xmm1), rcon);
-    reveal expand_key_128_def;
+    Opaque_s.reveal_opaque(expand_key_128_def);
 }
 
 procedure KeyExpansionRoundUnrolledRecursive(
@@ -110,7 +110,7 @@ procedure KeyExpansionRoundUnrolledRecursive(
         forall(j){buffer128_read(dst, j, mem)} 0 <= j <= n ==>
             buffer128_read(dst, j, mem) == expand_key_128(key, j);
 {
-    reveal expand_key_128_def;
+    Opaque_s.reveal_opaque(expand_key_128_def);
     inline if (0 < n <= 10) {
         KeyExpansionRoundUnrolledRecursive(key, dst, n - 1);
         KeyExpansionRound(#nat64(n - 1), #nat8(aes_rcon(n - 1)), dst, key);
@@ -155,7 +155,7 @@ procedure KeyExpansion128Stdcall(
     Store128_buffer(rdx, xmm1, 0, Secret, output_key_expansion_b, 0);
     KeyExpansionRoundUnrolledRecursive(key, output_key_expansion_b, 10);
     lemma_expand_key_128(key, 11);
-    reveal key_to_round_keys_LE_def;
+    Opaque_s.reveal_opaque(key_to_round_keys_LE_def);
 
     // Clear secrets out of registers
     Pxor(xmm1, xmm1);

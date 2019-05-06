@@ -82,8 +82,8 @@ ghost procedure finish_aes_encrypt_le(ghost alg:algorithm, ghost input_LE:quad32
     ensures
         aes_encrypt_le(alg, key, input_LE) == cipher_opaque(alg, input_LE, key_to_round_keys_LE(alg, key));
 {
-    reveal aes_encrypt_LE_def;
-    reveal cipher;
+    Opaque_s.reveal_opaque(aes_encrypt_LE_def);
+    Opaque_s.reveal_opaque(cipher);
 }
 
 // TODO: Write one procedure that unrolls to these variants?
@@ -121,7 +121,7 @@ procedure aes_round_4way(
         ctr3 == rounds_opaque(init3, round_keys, n);
         ctr4 == rounds_opaque(init4, round_keys, n);
 {
-    reveal rounds;
+    Opaque_s.reveal_opaque(rounds);
     commute_sub_bytes_shift_rows_forall();
     AESNI_enc(ctr1, round_key);
     AESNI_enc(ctr2, round_key);

@@ -201,7 +201,7 @@ procedure gcm_one_pass_blocks(
         Mov128(xmm0, icb);
         Pshufb(xmm0, mask);
         AESEncryptBlock(alg, reverse_bytes_quad32(icb), key, round_keys, keys_b); // Clobbers xmm0 and xmm2
-        reveal aes_encrypt_LE_def;
+        Opaque_s.reveal_opaque(aes_encrypt_LE_def);
 
         Pxor(xmm3, xmm0);
         Store128_buffer(r10, xmm3, 0, Secret, out_b, rdx);
@@ -211,7 +211,7 @@ procedure gcm_one_pass_blocks(
         Add64(r9, 16);
         Add64(r10, 16);
         Inc32(icb, one);
-        reveal ghash_incremental_def;
+        Opaque_s.reveal_opaque(ghash_incremental_def);
     }
 }
 
@@ -314,7 +314,7 @@ procedure gcm_one_pass(
         let cipher := slice_work_around(le_seq_quad32_to_bytes(buffer128_as_seq(old(mem), in_b)), old(num_bytes));
         let cipher_padded_bytes := pad_to_128_bits(cipher);
         let cipher_padded_quads := le_bytes_to_seq_quad32(cipher_padded_bytes);
-        assert length(cipher_padded_quads) > 0 by {reveal_le_bytes_to_seq_quad32();}
+        assert length(cipher_padded_quads) > 0 by {reveal le_bytes_to_seq_quad32;}
     }
 
     // Handle the else case:
@@ -463,7 +463,7 @@ procedure gcm_core_part1(
     y_cipher := xmm1;
     let plain := slice_work_around(le_seq_quad32_to_bytes(buffer128_as_seq(mem, out_b)), old(cipher_num_bytes));
     gcm_encrypt_LE_fst_helper(icb_enc, iv_BE, cipher, auth, plain, alg, key);
-    reveal_le_bytes_to_seq_quad32();
+    reveal le_bytes_to_seq_quad32;
 }
 
 

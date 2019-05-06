@@ -201,7 +201,7 @@ procedure gcm_one_pass_blocks(
         Mov128(xmm0, icb);
         Pshufb(xmm0, mask);
         AESEncryptBlock(alg, reverse_bytes_quad32(icb), key, round_keys, keys_b);
-        reveal aes_encrypt_LE_def;
+        Opaque_s.reveal_opaque(aes_encrypt_LE_def);
 
         Load128_buffer(xmm2, r9, 0, Secret, in_b, block_offset + rdx);
         Pxor(xmm2, xmm0);
@@ -546,7 +546,7 @@ procedure gcm_core_part1(
     y_cipher := xmm1;
     let cipher := slice_work_around(le_seq_quad32_to_bytes(buffer128_as_seq(mem, out_b)), old(plain_num_bytes));
     gcm_encrypt_LE_fst_helper(icb_enc, iv_BE, plain, auth, cipher, alg, key);
-    reveal_le_bytes_to_seq_quad32();
+    reveal le_bytes_to_seq_quad32;
 }
 
 #reset-options "--z3rlimit 10"
