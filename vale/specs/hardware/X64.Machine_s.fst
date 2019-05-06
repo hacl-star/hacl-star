@@ -49,7 +49,8 @@ type mov128_op:eqtype =
   | Mov128Mem: m:maddr -> mov128_op
   | Mov128Stack: m:maddr -> mov128_op
 
-type precode (t_ins:eqtype) (t_ocmp:eqtype):eqtype =
+noeq
+type precode (t_ins:Type0) (t_ocmp:eqtype) : Type0 =
   | Ins: ins:t_ins -> precode t_ins t_ocmp
   | Block: block:list (precode t_ins t_ocmp) -> precode t_ins t_ocmp
   | IfElse: ifCond:t_ocmp -> ifTrue:precode t_ins t_ocmp -> ifFalse:precode t_ins t_ocmp -> precode t_ins t_ocmp

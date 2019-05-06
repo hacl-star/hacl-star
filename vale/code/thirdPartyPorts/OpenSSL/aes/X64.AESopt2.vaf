@@ -79,22 +79,22 @@ open GHash
 #token *. precedence *
 #token %. precedence *
 #token ~~ precedence !
-function operator( +. ) (a:poly, b:poly):poly := add;
-function operator( *. ) (a:poly, b:poly):poly := mul;
-function operator( %. ) (a:poly, b:poly):poly := mod;
-function operator( ~~ ) (a:quad32):poly := of_quad32;
+function operator(+.) (a:poly, b:poly):poly := add;
+function operator(*.) (a:poly, b:poly):poly := mul;
+function operator(%.) (a:poly, b:poly):poly := mod;
+function operator(~~) (a:quad32):poly := of_quad32;
 function operator([]) #[a:Type(0)](s:FStar.Seq.Base.seq(a), i:int):a extern;
 #verbatim{:interface}
 let va_subscript_FStar__Seq__Base__seq = Seq.index
 #endverbatim
 
-procedure{:quick} MulAdd_unroll(
-    ghost hkeys_b:buffer128,
-    ghost scratch_b:buffer128,
-    ghost h:poly,
-    ghost prev:poly,
-    ghost data:seq(quad32)
-    )
+procedure MulAdd_unroll(
+        ghost hkeys_b:buffer128,
+        ghost scratch_b:buffer128,
+        ghost h:poly,
+        ghost prev:poly,
+        ghost data:seq(quad32))
+    {:quick}
     lets
         Xip @= r9;
         Ii @= xmm0; T1 @= xmm1; T2 @= xmm2; Hkey @= xmm3;
@@ -155,7 +155,7 @@ procedure{:quick} MulAdd_unroll(
 
     Load128_buffer(Hkey, Xip, (-0x10), Secret, hkeys_b, 1);
     VPolyAdd(Z2, Z2, Z1);
-    ghost var z0 := ~~T1;
+    let z0 := ~~T1;
     // assert z == z0 +. shift(~~Z2, 64) +. shift(~~Z3, 128);
 
     // 2
@@ -268,7 +268,8 @@ procedure{:quick} MulAdd_unroll(
     // assert z == ~~Z0 +. shift(~~Z2, 64) +. shift(~~Z3, 128);
 }
 
-procedure{:quick} Reduce(ghost f:poly)
+procedure Reduce(ghost f:poly)
+    {:quick}
     lets
         Ii @= xmm0; Hkey @= xmm3;
         Z0 @= xmm4; Z1 @= xmm5; Z2 @= xmm6; Z3 @= xmm7;
@@ -306,13 +307,14 @@ procedure{:quick} Reduce(ghost f:poly)
     lemma_reduce_rev(a0, a1, a2, f, 64);
 }
 
-procedure{:quick}{:public} GhashUnroll6x(
-    ghost hkeys_b:buffer128,
-    ghost scratch_b:buffer128,
-    ghost h_LE:quad32,
-    ghost y_prev:quad32,
-    ghost data:seq(quad32)
-    )
+procedure GhashUnroll6x(
+        ghost hkeys_b:buffer128,
+        ghost scratch_b:buffer128,
+        ghost h_LE:quad32,
+        ghost y_prev:quad32,
+        ghost data:seq(quad32))
+    {:public}
+    {:quick}
     lets
         Xip @= r9;
         Ii @= xmm0; T1 @= xmm1; T2 @= xmm2; Hkey @= xmm3;

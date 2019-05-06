@@ -55,12 +55,14 @@ module P = X64.Print_s
 
 friend X64.Vale.StateLemmas
 friend X64.Vale.Decls
-//#reset-options "--initial_fuel 4 --max_fuel 4 --max_ifuel 2 --z3rlimit 20"
-//#reset-options "--initial_fuel 2 --max_fuel 2 --max_ifuel 2 --initial_ifuel 2 --z3rlimit 60"
+#reset-options "--initial_fuel 4 --max_fuel 4 --max_ifuel 2 --z3rlimit 20"
 #endverbatim
 
-procedure{:instruction mk_ins(make_instr(I.ins_SHA256_rnds2, Mov128Xmm(dst), Mov128Xmm(src)), Public)}{:quick exportOnly}{:typecheck false}{:public} 
-          SHA256_rnds2(inout dst:xmm, src:xmm, ghost t:counter, ghost block:block_w, ghost hash_orig:hash256)
+procedure SHA256_rnds2(inout dst:xmm, in src:xmm, ghost t:counter, ghost block:block_w, ghost hash_orig:hash256)
+    {:public}
+    {:quick exportOnly}
+    {:instruction mk_ins(make_instr(I.ins_SHA256_rnds2, Mov128Xmm(dst), Mov128Xmm(src)), Public)}
+    {:typecheck false}
     reads xmm0;
     requires 
         sha_enabled;
@@ -74,8 +76,11 @@ procedure{:instruction mk_ins(make_instr(I.ins_SHA256_rnds2, Mov128Xmm(dst), Mov
     lemma_sha256_rnds2(old(src), old(dst), old(xmm0), t, block, hash_orig);
 }
 
-procedure{:instruction mk_ins(make_instr(I.ins_SHA256_msg1, Mov128Xmm(dst), Mov128Xmm(src)), Public)}{:quick exportOnly}{:typecheck false}{:public} 
-          SHA256_msg1(inout dst:xmm, src:xmm, ghost t:counter, ghost block:block_w)
+procedure SHA256_msg1(inout dst:xmm, in src:xmm, ghost t:counter, ghost block:block_w)
+    {:public}
+    {:quick exportOnly}
+    {:instruction mk_ins(make_instr(I.ins_SHA256_msg1, Mov128Xmm(dst), Mov128Xmm(src)), Public)}
+    {:typecheck false}
     requires 
         sha_enabled;
         16 <= t < size_k_w_256;
@@ -87,8 +92,11 @@ procedure{:instruction mk_ins(make_instr(I.ins_SHA256_msg1, Mov128Xmm(dst), Mov1
     lemma_sha256_msg1(old(dst), old(src), t, block);
 }
 
-procedure{:instruction mk_ins(make_instr(I.ins_SHA256_msg2, Mov128Xmm(dst), Mov128Xmm(src)), Public)}{:quick exportOnly}{:typecheck false}{:public} 
-          SHA256_msg2(inout dst:xmm, src:xmm, ghost t:counter, ghost block:block_w)
+procedure SHA256_msg2(inout dst:xmm, in src:xmm, ghost t:counter, ghost block:block_w)
+    {:public}
+    {:quick exportOnly}
+    {:instruction mk_ins(make_instr(I.ins_SHA256_msg2, Mov128Xmm(dst), Mov128Xmm(src)), Public)}
+    {:typecheck false}
     requires 
         sha_enabled;
         16 <= t < size_k_w_256 - 3;

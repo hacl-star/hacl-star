@@ -26,9 +26,11 @@ val update_of (flags:int) (new_of:bool) : (new_flags:int { overflow new_flags ==
 unfold let va_subscript (#a:eqtype) (#b:Type) (x:Map.t a b) (y:a) : Tot b = Map.sel x y
 unfold let va_update = Map.upd
 unfold let va_make_opaque = Opaque_s.make_opaque
-unfold let va_reveal_opaque = Opaque_s.reveal_opaque
 unfold let va_hd = Cons?.hd
 //unfold let va_tl = Cons?.tl // F* inlines "let ... = va_tl ..." more than we'd like; revised definition below suppresses this
+
+// REVIEW: FStar.Pervasives.reveal_opaque doesn't include zeta, so it fails for recursive functions
+let va_reveal_opaque (s:string) = norm_spec [zeta; delta_only [s]]
 
 // hide 'if' so that x and y get fully normalized
 let va_if (#a:Type) (b:bool) (x:(_:unit{b}) -> GTot a) (y:(_:unit{~b}) -> GTot a) : GTot a =
@@ -70,9 +72,19 @@ let get_taint (t:tainted_operand) : taint =
   | TMem _ t -> t
   | TStack _ -> Public
 
+let get_taint128 (t:tainted_operand128) : taint =
+  match t with
+  | TReg128 _ -> Public
+  | TMem128 _ t -> t
+
 let extract_taint (o1 o2:tainted_operand) : taint =
   if TMem? o1 then TMem?.t o1
   else if TMem? o2 then TMem?.t o2
+  else Public
+
+let extract_taint128 (o1 o2:tainted_operand128) : taint =
+  if TMem128? o1 then TMem128?.t o1
+  else if TMem128? o2 then TMem128?.t o2
   else Public
 
 let extract_taint3 (o1 o2 o3:tainted_operand) : taint =
@@ -88,7 +100,7 @@ unfold let va_int = int
 let va_int_at_least (k:int) = i:int{i >= k}
 let va_int_at_most (k:int) = i:int{i <= k}
 let va_int_range (k1 k2:int) = i:int{k1 <= i /\ i <= k2}
-val ins : eqtype
+val ins : Type0
 val ocmp : eqtype
 unfold let va_code = precode ins ocmp
 unfold let va_codes = list va_code

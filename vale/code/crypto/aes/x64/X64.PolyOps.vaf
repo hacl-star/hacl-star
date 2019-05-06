@@ -38,7 +38,9 @@ open X64.Vale.QuickCodes
 open X64.CPU_Features_s
 #endverbatim
 
-procedure{:public}{:quick exportOnly} VPolyAdd(out dst:xmm, src1:xmm, src2:opr128)
+procedure VPolyAdd(out dst:xmm, in src1:xmm, in src2:opr128)
+    {:public}
+    {:quick exportOnly}
     lets
         a1 := of_quad32(src1);
         a2 := of_quad32(src2);
@@ -53,7 +55,9 @@ procedure{:public}{:quick exportOnly} VPolyAdd(out dst:xmm, src1:xmm, src2:opr12
     VPxor(dst, src1, src2);
 }
 
-procedure{:public}{:quick exportOnly} PolyAnd(inout dst:xmm, src:xmm)
+procedure PolyAnd(inout dst:xmm, in src:xmm)
+    {:public}
+    {:quick exportOnly}
     lets
         a1 := of_quad32(dst);
         a2 := of_quad32(src);
@@ -66,7 +70,9 @@ procedure{:public}{:quick exportOnly} PolyAnd(inout dst:xmm, src:xmm)
     Pand(dst, src);
 }
 
-procedure{:public}{:quick exportOnly} VHigh64ToLow(out dst:xmm, src:xmm)
+procedure VHigh64ToLow(out dst:xmm, in src:xmm)
+    {:public}
+    {:quick exportOnly}
     lets
         a := of_quad32(src);
     modifies
@@ -82,7 +88,9 @@ procedure{:public}{:quick exportOnly} VHigh64ToLow(out dst:xmm, src:xmm)
     lemma_of_to_quad32(shift(a, (-64)));
 }
 
-procedure{:public}{:quick exportOnly} VLow64ToHigh(out dst:xmm, src:xmm)
+procedure VLow64ToHigh(out dst:xmm, in src:xmm)
+    {:public}
+    {:quick exportOnly}
     lets
         a := of_quad32(src);
     modifies
@@ -99,7 +107,9 @@ procedure{:public}{:quick exportOnly} VLow64ToHigh(out dst:xmm, src:xmm)
     lemma_of_to_quad32(shift(mask(a, 64), 64));
 }
 
-procedure{:public}{:quick exportOnly} VSwap(out dst:xmm, src:xmm)
+procedure VSwap(out dst:xmm, in src:xmm)
+    {:public}
+    {:quick exportOnly}
     lets
         a := of_quad32(src);
     modifies
@@ -114,7 +124,9 @@ procedure{:public}{:quick exportOnly} VSwap(out dst:xmm, src:xmm)
     lemma_of_to_quad32(swap(a, 64));
 }
 
-procedure{:public}{:quick exportOnly} VPolyMul(out dst:xmm, src1:xmm, src2:xmm, inline src1Hi:bool, inline src2Hi:bool)
+procedure VPolyMul(out dst:xmm, in src1:xmm, in src2:xmm, inline src1Hi:bool, inline src2Hi:bool)
+    {:public}
+    {:quick exportOnly}
     lets
         a1 := of_quad32(src1);
         a2 := of_quad32(src2);

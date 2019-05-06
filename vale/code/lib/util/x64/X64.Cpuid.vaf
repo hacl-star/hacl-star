@@ -31,7 +31,9 @@ open X64.CPU_Features_s
 open Util.Meta
 #endverbatim
 
-procedure{:public}{:quick} check_aesni_support()
+procedure check_aesni_support()
+    {:public}
+    {:quick}
     modifies rax; rbx; rcx; rdx; r9; efl;
     ensures rax != 0 ==> aesni_enabled && pclmulqdq_enabled;
             rbx == old(rbx);
@@ -62,7 +64,9 @@ procedure{:public}{:quick} check_aesni_support()
     Mov64(rbx, r9);     // Callee-restore
 }
 
-procedure{:public}{:quick} check_sha_support()
+procedure check_sha_support()
+    {:public}
+    {:quick}
     modifies rax; rbx; rcx; rdx; r9; efl;
     ensures rax != 0 ==> sha_enabled;
             rbx == old(rbx);
@@ -81,8 +85,9 @@ procedure{:public}{:quick} check_sha_support()
     Mov64(rbx, r9);     // Callee-restore
 }
 
-
-procedure{:public}{:quick} check_adx_bmi2_support()
+procedure check_adx_bmi2_support()
+    {:public}
+    {:quick}
     modifies rax; rbx; rcx; rdx; r9; efl;
     ensures rax != 0 ==> adx_enabled && bmi2_enabled;
             rbx == old(rbx);
@@ -113,7 +118,9 @@ procedure{:public}{:quick} check_adx_bmi2_support()
     Mov64(rbx, r9);     // Callee-restore
 }
 
-procedure{:public}{:quick} check_avx_support()
+procedure check_avx_support()
+    {:public}
+    {:quick}
     modifies rax; rbx; rcx; rdx; r9; efl;
     ensures rax != 0 ==> avx_enabled;
             rbx == old(rbx);
@@ -135,7 +142,9 @@ procedure{:public}{:quick} check_avx_support()
     Mov64(rbx, r9);     // Callee-restore
 }
 
-procedure{:public}{:quick} check_avx2_support()
+procedure check_avx2_support()
+    {:public}
+    {:quick}
     modifies rax; rbx; rcx; rdx; r9; efl;
     ensures rax != 0 ==> avx2_enabled;
             rbx == old(rbx);

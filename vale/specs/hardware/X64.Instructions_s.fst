@@ -48,7 +48,11 @@ let ins_Shl64 = make_ins (fun dst amt -> print_s "shl" [P64 dst; PShift amt])
 
 let ins_Cpuid = make_ins (print "cpuid" [])
 
+let ins_Movdqu = make_ins (fun dst src -> print "movdqu" [PXmm dst; PXmm src])
+
 let ins_Pxor = make_ins (fun dst src -> print "pxor" [PXmm dst; PXmm src])
+
+let ins_VPxor = make_ins (fun dst src1 src2 -> print "vpxor" [PXmm dst; PXmm src1; PXmm src2])
 
 let ins_Pand = make_ins (fun dst src -> print "pand" [PXmm dst; PXmm src])
 

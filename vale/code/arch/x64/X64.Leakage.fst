@@ -5,7 +5,6 @@ open X64.Taint_Semantics_s
 open X64.Leakage_s
 open X64.Leakage_Helpers
 open X64.Leakage_Ins
-open X64.Leakage_Ins_Xmm
 
 #reset-options "--initial_ifuel 0 --max_ifuel 1 --initial_fuel 1 --max_fuel 1"
 let combine_reg_taints (regs1 regs2:reg_taint) : reg_taint =
@@ -65,10 +64,11 @@ let eq_xmms (xmms1 xmms2:xmms_taint) : (b:bool{b <==> (xmms1 == xmms2)})  =
   b
 
 let eq_taintStates (ts1 ts2:taintState) : (b:bool{b <==> ts1 == ts2}) =
-    eq_registers ts1.regTaint ts2.regTaint && ts1.flagsTaint = ts2.flagsTaint && ts1.cfFlagsTaint = ts2.cfFlagsTaint && eq_xmms ts1.xmmTaint ts2.xmmTaint
+    eq_registers ts1.regTaint ts2.regTaint && ts1.flagsTaint = ts2.flagsTaint && ts1.cfFlagsTaint = ts2.cfFlagsTaint && ts1.ofFlagsTaint = ts2.ofFlagsTaint && eq_xmms ts1.xmmTaint ts2.xmmTaint
 
 let taintstate_monotone (ts ts':taintState) = ( forall r. Public? (ts'.regTaint r) ==> Public? (ts.regTaint r)) /\ (Public? (ts'.flagsTaint) ==> Public? (ts.flagsTaint)) /\
   (Public? (ts'.cfFlagsTaint) ==> Public? (ts.cfFlagsTaint)) /\
+  (Public? (ts'.ofFlagsTaint) ==> Public? (ts.ofFlagsTaint)) /\
   (forall x. Public? (ts'.xmmTaint x) ==> Public? (ts.xmmTaint x))
 
 let taintstate_monotone_trans (ts1:taintState) (ts2:taintState) (ts3:taintState)
@@ -92,6 +92,7 @@ let combine_taint_states (ts1:taintState) (ts2:taintState) : (ts:taintState{tain
   TaintState (combine_reg_taints ts1.regTaint ts2.regTaint)
     (merge_taint ts1.flagsTaint ts2.flagsTaint)
     (merge_taint ts1.cfFlagsTaint ts2.cfFlagsTaint)
+    (merge_taint ts1.ofFlagsTaint ts2.ofFlagsTaint)
     (combine_xmm_taints ts1.xmmTaint ts2.xmmTaint)
 
 let count_public_register (regs:reg_taint) (r:reg) = if Public? (regs r) then 1 else 0
@@ -118,6 +119,8 @@ let count_flagTaint (ts:taintState) : nat = if Public? ts.flagsTaint then 1 else
 
 let count_cfFlagTaint (ts:taintState) : nat = if Public? ts.cfFlagsTaint then 1 else 0
 
+let count_ofFlagTaint (ts:taintState) : nat = if Public? ts.ofFlagsTaint then 1 else 0
+
 let count_public_xmm (xmms:xmms_taint) (x:xmm) : nat = if Public? (xmms x) then 1 else 0
 
 let count_public_xmms (xmms:xmms_taint) : nat =
@@ -142,6 +145,7 @@ let count_publics (ts:taintState) : nat =
   count_public_registers ts.regTaint +
   count_flagTaint ts +
   count_cfFlagTaint ts +
+  count_ofFlagTaint ts +
   count_public_xmms ts.xmmTaint
 
 #set-options "--z3rlimit 50"
@@ -154,6 +158,7 @@ let monotone_decreases_count (ts ts':taintState) : Lemma
   assert (forall r. count_public_register ts'.regTaint r <= count_public_register ts.regTaint r);
   assert (forall r. count_public_xmm ts'.xmmTaint r <= count_public_xmm ts.xmmTaint r);
   assert (count_cfFlagTaint ts' <= count_cfFlagTaint ts);
+  assert (count_ofFlagTaint ts' <= count_ofFlagTaint ts);
   assert (count_flagTaint ts' <= count_flagTaint ts)
 #pop-options
 
@@ -173,8 +178,7 @@ let rec check_if_block_consumes_fixed_time (block:tainted_codes) (ts:taintState)
 
 and check_if_code_consumes_fixed_time (code:tainted_code) (ts:taintState) : bool * taintState =
   match code with
-  | Ins ins -> if is_xmm_ins ins then check_if_xmm_ins_consumes_fixed_time ins ts
-        else check_if_ins_consumes_fixed_time ins ts
+  | Ins ins -> check_if_ins_consumes_fixed_time ins ts
 
   | Block block -> check_if_block_consumes_fixed_time block ts
 
@@ -327,7 +331,7 @@ val lemma_loop_explicit_leakage_free: (ts:taintState) -> (code:tainted_code{Whil
 
 #reset-options "--initial_ifuel 2 --max_ifuel 2 --initial_fuel 1 --max_fuel 2 --z3rlimit 300"
  let rec lemma_code_explicit_leakage_free ts code s1 s2 fuel = match code with
-  | Ins ins -> if is_xmm_ins ins then () else lemma_ins_leakage_free ts ins
+  | Ins ins -> lemma_ins_leakage_free ts ins
   | Block block -> lemma_block_explicit_leakage_free ts block s1 s2 fuel
   | IfElse ifCond ifTrue ifFalse ->
     let b_fin, ts_fin = check_if_code_consumes_fixed_time code ts in

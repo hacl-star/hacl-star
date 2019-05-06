@@ -476,7 +476,7 @@ let mapi #a #b h0 clen out spec_f f inp =
       lemma_eq_disjoint clen clen out inp i h0 h1;
       let xi = inp.(i) in f i xi)
 
-#reset-options "--z3rlimit 800 --max_fuel 2 --max_ifuel 3"
+#reset-options "--z3rlimit 100 --max_fuel 1 --initial_ifuel 1 --max_ifuel 1 --using_facts_from '* -LowStar.Monotonic.Buffer.loc_disjoint_includes_r -LowStar.Monotonic.Buffer.loc_disjoint_sym_'"
 
 let map_blocks_multi #t #a h0 blocksize nb inp output spec_f impl_f =
   let h0 = ST.get() in

@@ -82,22 +82,22 @@ ghost procedure finish_aes_encrypt_le(ghost alg:algorithm, ghost input_LE:quad32
     ensures
         aes_encrypt_le(alg, key, input_LE) == cipher_opaque(alg, input_LE, key_to_round_keys_LE(alg, key));
 {
-    reveal aes_encrypt_LE_def;
-    reveal cipher;
+    Opaque_s.reveal_opaque(aes_encrypt_LE_def);
+    Opaque_s.reveal_opaque(cipher);
 }
 
 // TODO: Write one procedure that unrolls to these variants?
 // These procedures help walk F* through the recursive definition of rounds
-procedure {:quick exportOnly} aes_round_4way(
-    ghost alg:algorithm,
-    ghost n:pos,
-    round_key:xmm,
-    ghost init1:quad32,
-    ghost init2:quad32,
-    ghost init3:quad32,
-    ghost init4:quad32,
-    ghost round_keys:seq(quad32)
-    )
+procedure aes_round_4way(
+        ghost alg:algorithm,
+        ghost n:pos,
+        in round_key:xmm,
+        ghost init1:quad32,
+        ghost init2:quad32,
+        ghost init3:quad32,
+        ghost init4:quad32,
+        ghost round_keys:seq(quad32))
+    {:quick exportOnly}
     lets
         ctr1 @= xmm2; ctr2 @= xmm12; ctr3 @= xmm13; ctr4 @= xmm14; // Counters being fed to AES
     modifies
@@ -121,7 +121,7 @@ procedure {:quick exportOnly} aes_round_4way(
         ctr3 == rounds_opaque(init3, round_keys, n);
         ctr4 == rounds_opaque(init4, round_keys, n);
 {
-    reveal rounds;
+    Opaque_s.reveal_opaque(rounds);
     commute_sub_bytes_shift_rows_forall();
     AESNI_enc(ctr1, round_key);
     AESNI_enc(ctr2, round_key);
@@ -129,15 +129,15 @@ procedure {:quick exportOnly} aes_round_4way(
     AESNI_enc(ctr4, round_key);
 }
 
-procedure {:quick} aes_2rounds_4way(
-    ghost alg:algorithm,
-    ghost n:pos,
-    ghost init1:quad32,
-    ghost init2:quad32,
-    ghost init3:quad32,
-    ghost init4:quad32,
-    ghost round_keys:seq(quad32)
-    )
+procedure aes_2rounds_4way(
+        ghost alg:algorithm,
+        ghost n:pos,
+        ghost init1:quad32,
+        ghost init2:quad32,
+        ghost init3:quad32,
+        ghost init4:quad32,
+        ghost round_keys:seq(quad32))
+    {:quick}
     lets
         rk1 @= xmm3; rk2 @= xmm4;                                   // Round keys
         ctr1 @= xmm2; ctr2 @= xmm12; ctr3 @= xmm13; ctr4 @= xmm14; // Counters being fed to AES
@@ -165,15 +165,15 @@ procedure {:quick} aes_2rounds_4way(
     aes_round_4way(alg, n + 1, rk2,  init1, init2, init3, init4, round_keys);
 }
 
-procedure {:quick} aes_3rounds_4way(
-    ghost alg:algorithm,
-    ghost n:pos,
-    ghost init1:quad32,
-    ghost init2:quad32,
-    ghost init3:quad32,
-    ghost init4:quad32,
-    ghost round_keys:seq(quad32)
-    )
+procedure aes_3rounds_4way(
+        ghost alg:algorithm,
+        ghost n:pos,
+        ghost init1:quad32,
+        ghost init2:quad32,
+        ghost init3:quad32,
+        ghost init4:quad32,
+        ghost round_keys:seq(quad32))
+    {:quick}
     lets
         rk2 @= xmm4; rk3 @= xmm5; rk4 @= xmm6;                     // Round keys
         ctr1 @= xmm2; ctr2 @= xmm12; ctr3 @= xmm13; ctr4 @= xmm14; // Counters being fed to AES
@@ -203,15 +203,15 @@ procedure {:quick} aes_3rounds_4way(
     aes_round_4way(alg, n + 2, rk4,  init1, init2, init3, init4, round_keys);
 }
 
-procedure {:quick} aes_4rounds_4way(
-    ghost alg:algorithm,
-    ghost n:pos,
-    ghost init1:quad32,
-    ghost init2:quad32,
-    ghost init3:quad32,
-    ghost init4:quad32,
-    ghost round_keys:seq(quad32)
-    )
+procedure aes_4rounds_4way(
+        ghost alg:algorithm,
+        ghost n:pos,
+        ghost init1:quad32,
+        ghost init2:quad32,
+        ghost init3:quad32,
+        ghost init4:quad32,
+        ghost round_keys:seq(quad32))
+    {:quick}
     lets
         rk1 @= xmm3; rk2 @= xmm4; rk3 @= xmm5; rk4 @= xmm6;        // Round keys
         ctr1 @= xmm2; ctr2 @= xmm12; ctr3 @= xmm13; ctr4 @= xmm14; // Counters being fed to AES
@@ -243,16 +243,17 @@ procedure {:quick} aes_4rounds_4way(
     aes_round_4way(alg, n + 3, rk4,  init1, init2, init3, init4, round_keys);
 }
 
-procedure {:quick}{:public} aes_ctr_encrypt(
-    inline alg:algorithm,  // Intel simply passes number of rounds (nr) as a dynamic parameter.  Saves code space but adds extra instructions to the fast path.  Maybe branch predictor is good enough for it not to matter
-    ghost key:seq(nat32),
-    ghost round_keys:seq(quad32),
-    ghost keys_b:buffer128,
-    ghost in1:quad32,
-    ghost in2:quad32,
-    ghost in3:quad32,
-    ghost in4:quad32
-    )
+procedure aes_ctr_encrypt(
+        inline alg:algorithm,  // Intel simply passes number of rounds (nr) as a dynamic parameter.  Saves code space but adds extra instructions to the fast path.  Maybe branch predictor is good enough for it not to matter
+        ghost key:seq(nat32),
+        ghost round_keys:seq(quad32),
+        ghost keys_b:buffer128,
+        ghost in1:quad32,
+        ghost in2:quad32,
+        ghost in3:quad32,
+        ghost in4:quad32)
+    {:public}
+    {:quick}
     lets
         key_ptr @= r8;
         rk1 @= xmm3; rk2 @= xmm4; rk3 @= xmm5; rk4 @= xmm6;        // Round keys
@@ -354,13 +355,13 @@ procedure {:quick}{:public} aes_ctr_encrypt(
     finish_aes_encrypt_le(alg, in4, key);
 }
 
-procedure {:quick} aes_ctr_ghash(
-    ghost old_out_ptr:nat64,
-    ghost old_num_quad_blocks:nat64,
-    ghost count:nat,
-    ghost out_b:buffer128,
-    ghost hash_init:quad32
-    )
+procedure aes_ctr_ghash(
+        ghost old_out_ptr:nat64,
+        ghost old_num_quad_blocks:nat64,
+        ghost count:nat,
+        ghost out_b:buffer128,
+        ghost hash_init:quad32)
+    {:quick}
     lets
         rk1 @= xmm3; rk2 @= xmm4; rk3 @= xmm5; rk4 @= xmm6;        // Round keys
         ctr1 @= xmm2; ctr2 @= xmm12; ctr3 @= xmm13; ctr4 @= xmm14; // Counters being fed to AES
@@ -387,22 +388,22 @@ procedure {:quick} aes_ctr_ghash(
         hash == ghash_incremental(reverse_bytes_quad32(h), hash_init, slice_work_around(buffer128_as_seq(mem, out_b), 4*(count+1)));
 {
     // Compute GHash on the four outputs
-    ghost var h_in_0 := ctr1;
+    let h_in_0 := ctr1;
     compute_ghash_incremental_register();
-    ghost var hash0 := hash;
+    let hash0 := hash;
 
     Mov128(ctr1, ctr2);
-    ghost var h_in_1 := ctr1;
+    let h_in_1 := ctr1;
     compute_ghash_incremental_register();
-    ghost var hash1 := hash;
+    let hash1 := hash;
 
     Mov128(ctr1, ctr3);
-    ghost var h_in_2 := ctr1;
+    let h_in_2 := ctr1;
     compute_ghash_incremental_register();
-    ghost var hash2 := hash;
+    let hash2 := hash;
 
     Mov128(ctr1, ctr4);
-    ghost var h_in_3 := ctr1;
+    let h_in_3 := ctr1;
     compute_ghash_incremental_register();
     lemma_ghash_registers(reverse_bytes_quad32(h), hash_init, old(hash), hash0, hash1, hash2, hash, h_in_0, h_in_1, h_in_2, h_in_3, buffer128_as_seq(mem, out_b), 4*count);
 
@@ -410,24 +411,24 @@ procedure {:quick} aes_ctr_ghash(
 
 #reset-options "--z3rlimit 800"
 // Intel's LOOP_4
-procedure{:quick} aes_ctr_loop_body(
-    inline alg:algorithm,  // Intel simply passes number of rounds (nr) as a dynamic parameter.  Saves code space but adds extra instructions to the fast path.  Maybe branch predictor is good enough for it not to matter
-    ghost old_plain_ptr:nat64,
-    ghost old_out_ptr:nat64,
-    ghost old_num_quad_blocks:nat64,
-    ghost count:nat,
-    ghost plain_b:buffer128,
-    ghost out_b:buffer128,
+procedure aes_ctr_loop_body(
+        inline alg:algorithm,  // Intel simply passes number of rounds (nr) as a dynamic parameter.  Saves code space but adds extra instructions to the fast path.  Maybe branch predictor is good enough for it not to matter
+        ghost old_plain_ptr:nat64,
+        ghost old_out_ptr:nat64,
+        ghost old_num_quad_blocks:nat64,
+        ghost count:nat,
+        ghost plain_b:buffer128,
+        ghost out_b:buffer128,
 
-    ghost key:seq(nat32),
-    ghost round_keys:seq(quad32),
-    ghost keys_b:buffer128,
+        ghost key:seq(nat32),
+        ghost round_keys:seq(quad32),
+        ghost keys_b:buffer128,
 
-    ghost icb_BE:quad32,
-    ghost iv:quad32,
+        ghost icb_BE:quad32,
+        ghost iv:quad32,
 
-    ghost hash_init:quad32
-    )
+        ghost hash_init:quad32)
+    {:quick}
     lets
         plain_ptr @= r9; num_quad_blocks @= rdx; out_ptr @= r10; key_ptr @= r8; iv_lower64 @= rdi;
         const2_1 @= xmm9; const4_3 @= xmm10; mask64 @= xmm0; four @= xmm15;
@@ -540,10 +541,10 @@ procedure{:quick} aes_ctr_loop_body(
 
     // Begin AES block encrypt by xor'ing four blocks of counters with the key block 0
     // At this point, we're computing aes_encrypt_LE of bswap(inc32(icb_BE, 4*count + 0..3)) == aes_encrypt_BE of inc32(icb_BE, 4*count + 0..3)
-    ghost var in1 := ctr1;
-    ghost var in2 := ctr2;
-    ghost var in3 := ctr3;
-    ghost var in4 := ctr4;
+    let in1 := ctr1;
+    let in2 := ctr2;
+    let in3 := ctr3;
+    let in4 := ctr4;
 
     Pxor(ctr1, rk1);
     Pxor(ctr2, rk1);
@@ -585,14 +586,15 @@ procedure{:quick} aes_ctr_loop_body(
     Add64(out_ptr, 64);
 }
 
-procedure {:quick}{:public} aes_counter_loop(
-    inline alg:algorithm,
-    ghost plain_b:buffer128,
-    ghost out_b:buffer128,
-    ghost key:seq(nat32),
-    ghost round_keys:seq(quad32),
-    ghost keys_b:buffer128
-    )
+procedure aes_counter_loop(
+        inline alg:algorithm,
+        ghost plain_b:buffer128,
+        ghost out_b:buffer128,
+        ghost key:seq(nat32),
+        ghost round_keys:seq(quad32),
+        ghost keys_b:buffer128)
+    {:public}
+    {:quick}
     lets
         plain_ptr @= r9; num_quad_blocks @= rdx; out_ptr @= r10; key_ptr @= r8; iv_lower64 @= rdi;
         const2_1 @= xmm9; const4_3 @= xmm10; iv @= xmm7; mask64 @= xmm0; four @= xmm15;
@@ -684,8 +686,8 @@ procedure {:quick}{:public} aes_counter_loop(
     PinsrdImm(four, 4, 2, rax);
 
     ghost var count:nat := 0;
-    ghost var icb_BE:quad32 := reverse_bytes_quad32(iv);
-    ghost var old_iv:quad32 := iv;
+    let icb_BE:quad32 := reverse_bytes_quad32(iv);
+    let old_iv:quad32 := iv;
     
     while (num_quad_blocks > 0) 
         invariant 
