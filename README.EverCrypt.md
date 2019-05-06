@@ -43,7 +43,10 @@ libraries that rely on hand-tuned assembly code.
 
 Portions of EverCrypt are being used in [Firefox](https://bugzilla.mozilla.org/show_bug.cgi?id=1387183), the Windows kernel,
 the [Tezos blockchain](https://www.reddit.com/r/tezos/comments/8hrsz2/tezos_switches_cryptographic_libraries_from/),
-and the [Wireguard VPN](https://lwn.net/Articles/770750/).
+and the [Wireguard VPN](https://lwn.net/Articles/770750/).  
+
+EverCrypt is developed as part of [Project Everest](https://project-everest.github.io/), 
+which aims to build and deploy a verified HTTPS stack.
 
 # Algorithms Supported by EverCrypt
 
