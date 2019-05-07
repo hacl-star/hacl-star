@@ -5,6 +5,8 @@
 #include <vector>
 #include <algorithm>
 
+#include <math.h>
+
 extern "C" {
 #include <EverCrypt_AutoConfig2.h>
 }
@@ -155,6 +157,16 @@ void Benchmark::run(const BenchmarkSettings & s)
 
   samples.reserve(s.samples);
 
+  for (int i = 0; i < s.warmup_samples; i++)
+  {
+    bench_setup(s);
+    bench_func();
+    bench_cleanup(s);
+  }
+
+  ctotal = 0.0;
+  texcl = Clock::duration::zero();
+
   for (int i = 0; i < s.samples; i++)
   {
     bench_setup(s);
@@ -182,19 +194,34 @@ void Benchmark::run(const BenchmarkSettings & s)
 
 void Benchmark::report(std::ostream & rs, const BenchmarkSettings & s) const
 {
+  double q25 = cmin, median = 0.0, q75 = cmax, avg = 0.0, stddev = 0.0;
   size_t n = samples.size();
-  double median = (n % 2 == 1 ? (double)samples[n/2] : (samples[n/2] + samples[(n+1)/2])/(double)2.0);
-  double q25 = (double)samples[n/4];
-  double q75 = (double)samples[(3*n)/4];
+
+  if (samples.size() > 4)
+  {
+    median = (n % 2 == 1 ? (double)samples[n/2] : (samples[n/2] + samples[(n+1)/2])/(double)2.0);
+    avg = ctotal/(double)s.samples;
+    q25 = (double)samples[n/4];
+    q75 = (double)samples[(3*n)/4];
+  }
+
+  double sum_squares = 0.0;
+  for (size_t i = 0; i < samples.size(); i++)
+  {
+    double q = samples[i] - avg;
+    sum_squares += q*q;
+  }
+  stddev = sqrt(sum_squares/(double)(n-1));
 
   rs << "," << std::chrono::duration_cast<std::chrono::nanoseconds>(tincl).count()
     << "," << std::chrono::duration_cast<std::chrono::nanoseconds>(texcl).count()
     << "," << cmin
     << "," << q25
-    << "," << ctotal/(double)s.samples
+    << "," << avg
     << "," << median
     << "," << q75
-    << "," << cmax;
+    << "," << cmax
+    << "," << stddev;
 }
 
 static const char time_fmt[] = "%b %d %Y %H:%M:%S";
@@ -237,6 +264,52 @@ void Benchmark::run_batch(const BenchmarkSettings & s,
   rs.close();
 }
 
+Benchmark::PlotSpec Benchmark::histogram_line(const std::string & data_filename, const std::string & title, const std::string & column, const std::string & xlabels, unsigned label_digits, bool label_rotate)
+{
+  std::string t = "title columnheader";
+  if (title != "")
+    t = "title '" + title + "'";
+  return
+    {
+      std::make_pair(data_filename, "using '" + column + "':xticlabels(" + xlabels + ") " + t),
+      std::make_pair("", "using 0:'" + column + "':xticlabels(" + xlabels + "):(sprintf(\"%0." + std::to_string(label_digits) +
+                         "f\", column('" + column + "'))) with labels notitle " + (label_rotate?"rotate":"") +
+                         " font \"Courier,8\"")
+    };
+}
+
+void Benchmark::add_label_offsets(Benchmark::PlotSpec & ps, double label_offset_y)
+{
+  std::vector<double> x;
+  x.resize(ps.size(), 0.0);
+
+  if (ps.size() % 2 != 0)
+    throw std::logic_error("Labels assumed at every other line.");
+
+  switch (ps.size())
+  {
+  case 4: x[1] = -2.0; x[3] = +2.0; break;
+  case 6: x[1] = -1.3; x[3] = +0.0; x[5] = +1.3; break;
+  default: break;
+  }
+
+  for (size_t i = 1; i < ps.size(); i+=2)
+  {
+    ps[i].second += " offset char " + std::to_string(x[i]) + "," + std::to_string(label_offset_y);
+  }
+}
+
+Benchmark::PlotSpec Benchmark::candlestick_line(const std::string & data_filename, const std::string & title, const std::string & xlabels)
+{
+  std::string t = "notitle";
+  if (title != "")
+    t = "title '" + title + "'";
+  return
+    {
+      std::make_pair(data_filename, "using 0:'Q25':'Min':'Max':'Q75':xticlabels(" + xlabels + ") with candlesticks " + t + " whiskerbars .25"),
+      // median line? // std::make_pair("", "using 0:'Med':'Med':'Med':'Med' with candlesticks lt -1 notitle")
+    };
+}
 
 void make_plot_labels(std::ofstream & of, const BenchmarkSettings & s)
 {
@@ -251,11 +324,15 @@ void Benchmark::make_plot(const BenchmarkSettings & s,
                           const std::string & title,
                           const std::string & xtitle,
                           const std::string & ytitle,
-                          const std::vector<std::pair<std::string, std::string> > & plot_specs,
+                          const PlotSpec & plot_specs,
                           const std::string & plot_filename,
                           const std::string & plot_extras,
+                          const std::vector<std::string> & sub_histo_titles,
+                          size_t num_in_sub_histo,
                           bool add_key)
 {
+  int sub_histo = 0;
+  std::vector<std::string>::const_iterator next_sht = sub_histo_titles.begin();
   std::string gnuplot_filename = plot_filename;
   gnuplot_filename.replace(plot_filename.length()-3, 3, "plt");
   std::cout << "-- " << gnuplot_filename << "...\n";
@@ -275,6 +352,8 @@ void Benchmark::make_plot(const BenchmarkSettings & s,
   for (size_t i = 0; i < plot_specs.size(); i++)
   {
     if (i != 0) of << ", \\\n";
+    if (num_in_sub_histo != 0 && i % num_in_sub_histo == 0)
+      of << "newhistogram '" << *next_sht++ << "' at " << sub_histo++ << ", \\\n";
     of << "'" << plot_specs[i].first << "' " << plot_specs[i].second;
   }
   of.close();

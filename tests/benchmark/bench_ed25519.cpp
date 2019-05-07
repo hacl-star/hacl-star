@@ -62,7 +62,7 @@ class HaclSign: public DSABenchmark
   public:
     HaclSign(size_t msg_len) : DSABenchmark(msg_len, "HaCl (sign)") {}
     virtual void bench_func()
-      { Hacl_Ed25519_sign(signature, our_secret, msg, msg_len); }
+      { Hacl_Ed25519_sign(signature, our_secret, msg_len, msg); }
     virtual ~HaclSign() {}
 };
 
@@ -81,7 +81,7 @@ class HaclSignExpanded: public DSABenchmark
       Hacl_Ed25519_expand_keys(expanded_keys, our_secret);
     }
     virtual void bench_func()
-      { Hacl_Ed25519_sign_expanded(signature, expanded_keys, msg, msg_len); }
+      { Hacl_Ed25519_sign_expanded(signature, expanded_keys, msg_len, msg); }
     virtual ~HaclSignExpanded() {}
 };
 
@@ -93,14 +93,14 @@ class HaclVerify: public DSABenchmark
     {
         DSABenchmark::bench_setup(s);
         Hacl_Ed25519_secret_to_public(our_public, our_secret);
-        Hacl_Ed25519_sign(signature, our_secret, msg, msg_len);
+        Hacl_Ed25519_sign(signature, our_secret, msg_len, msg);
     }
     virtual void bench_func()
     {
       #ifdef _DEBUG
       if (!
       #endif
-        Hacl_Ed25519_verify(our_public, msg, msg_len, signature)
+        Hacl_Ed25519_verify(our_public, msg_len, msg, signature)
       #ifdef _DEBUG
       ) throw std::logic_error("Signature verification failed")
       #endif
@@ -222,46 +222,46 @@ void bench_ed25519(const BenchmarkSettings & s)
       new OpenSSLSign(ds),
       new OpenSSLVerify(ds),
       #endif
-      };
+    };
+
+    std::stringstream num_benchmarks;
+    num_benchmarks << todo.size();
 
     Benchmark::run_batch(s, DSABenchmark::column_headers(), data_filename, todo);
 
-    Benchmark::plot_spec_t plot_spec_cycles =
-      { std::make_pair(data_filename, "using 'Avg':xticlabels(strcol('Algorithm')) with boxes title columnheader"),
-        std::make_pair("", "using 0:'Avg':xticlabels(strcol('Algorithm')):(sprintf(\"%0.0f\", column('Avg'))) with labels font \"Courier,8\" offset char 0,.5") };
+    std::stringstream extras;
+    extras << "set style histogram clustered gap 1 title\n";
+    extras << "set style data histograms\n";
+    extras << "set xrange[-.5:" + num_benchmarks.str() + "-.5]\n";
 
     Benchmark::make_plot(s,
                          "svg",
                          "Ed25519 performance (message size=" + std::to_string(ds) + " bytes)",
                          "",
                          "Avg. performance [CPU cycles/operation]",
-                         plot_spec_cycles,
+                         Benchmark::histogram_line(data_filename, "", "Avg", "strcol('Algorithm')", 0),
                          "bench_ed25519_" + std::to_string(ds) + "_cycles.svg",
-                         "");
-
-    Benchmark::plot_spec_t plot_spec_bytes =
-      { std::make_pair(data_filename, "using 'Avg Cycles/Byte':xticlabels(strcol('Algorithm')) with boxes title columnheader"),
-        std::make_pair("", "using 0:'Avg Cycles/Byte':xticlabels(strcol('Algorithm')):(sprintf(\"%0.0f\", column('Avg Cycles/Byte'))) with labels font \"Courier,8\" offset char 0,.5") };
+                         extras.str());
 
     Benchmark::make_plot(s,
                          "svg",
                          "Ed25519 performance (message size=" + std::to_string(ds) + " bytes)",
                          "",
                          "Avg. performance [CPU cycles/byte]",
-                         plot_spec_bytes,
+                         Benchmark::histogram_line(data_filename, "", "Avg Cycles/Byte", "strcol('Algorithm')", 2),
                          "bench_ed25519_" + std::to_string(ds) + "_bytes.svg",
-                         "");
+                         extras.str());
 
-    Benchmark::plot_spec_t plot_spec_candlesticks =
-      { std::make_pair(data_filename, "using 0:'Q25':'Min':'Max':'Q75':xticlabels(strcol('Algorithm')) with candlesticks whiskerbars .25") };
+    extras << "set boxwidth 0.25\n";
+    extras << "set style fill empty\n";
 
     Benchmark::make_plot(s,
                          "svg",
                          "Ed25519 performance (message size=" + std::to_string(ds) + " bytes)",
                          "",
                          "Avg. performance [CPU cycles/operation]",
-                         plot_spec_candlesticks,
+                         Benchmark::candlestick_line(data_filename, "", "strcol('Algorithm')"),
                          "bench_ed25519_" + std::to_string(ds) + "_candlesticks.svg",
-                         "set boxwidth 0.25\nset xrange[-.5:4.5]\nset style fill empty\n");
+                         extras.str());
   }
 }
