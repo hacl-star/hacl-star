@@ -167,6 +167,7 @@ let map_blocks #a bs inp f g =
 
 *)
 
+#push-options "--max_ifuel 1"
 val repeati_blocks_f:
     #a:Type0
   -> #b:Type0
@@ -181,6 +182,7 @@ let repeati_blocks_f #a #b bs inp f nb i acc =
   assert ((i+1) * bs <= nb * bs);
   let block = seq_sub inp (i * bs) bs in
   f i block acc
+#pop-options  
 
 let repeati_blocks #a #b bs inp f g init =
   let len = length inp in
@@ -219,25 +221,14 @@ let generate_blocks #t len max n a f acc0 =
   let a0  = (acc0, (Seq.empty <: s:seq t{length s == 0 * len}))  in
   repeat_gen n (generate_blocks_a t len max a) (generate_blocks_inner t len max a f) a0
 
-val fixed_a: t:Type0 -> i:nat -> Type0
-let fixed_a t i = t
+let map_blocks_multi #a bs nb inp f =
+  repeat_gen nb (map_blocks_a a bs nb)
+    (map_blocks_f #a bs nb inp f) Seq.empty
 
-let map_blocks_inner #a (bs:size_nat{bs > 0}) (nb:nat) 
-			(inp:seq a{length inp = nb * bs}) 
-			(f:(i:nat{i < nb} -> lseq a bs -> lseq a bs)) 
-			(i:nat{i < nb}) () =
-  (), f i (Seq.slice inp (i*bs) ((i+1)*bs))
-
-let map_blocks_multi #a blocksize nb inp f =
-  assert (length inp == nb * blocksize);
-  assert (length inp / blocksize == nb * blocksize / blocksize);
-  Math.Lemmas.multiple_division_lemma nb blocksize;
-  assert (length inp / blocksize == nb);
-  snd (generate_blocks #a blocksize nb nb (fixed_a unit) (map_blocks_inner blocksize nb inp f) ())
-
+let lemma_map_blocks_multi #a bs nb inp f = ()
 
 let map_blocks #a blocksize inp f g =
-  let len = length inp in 
+  let len = length inp in
   let nb = len / blocksize in
   let rem = len % blocksize in
   let blocks = Seq.slice inp 0 (nb * blocksize) in
@@ -246,6 +237,8 @@ let map_blocks #a blocksize inp f g =
   if (rem > 0) then
     Seq.append bs (g nb rem last)
   else bs
+
+let lemma_map_blocks #a blocksize inp f g = ()
 
 let eq_generate_blocks0 #t len n a f acc0 =
   let a0  = (acc0, (Seq.empty <: s:seq t{length s == 0 * len}))  in
@@ -269,7 +262,7 @@ let mod_prop n a b =
   FStar.Math.Lemmas.lemma_mod_sub b n a
 
 #push-options "--z3rlimit 100"
-
+#push-options "--max_ifuel 1"
 let rec index_generate_blocks #t len max n f i =
   assert (0 < n);
   let a_spec (i:nat{i <= max}) = unit in
@@ -288,6 +281,7 @@ let rec index_generate_blocks #t len max n f i =
     Seq.lemma_index_app2 s s' i;
     mod_prop len (n-1) i
     end
+#pop-options
 
 (***** The following lemmas are work in progress: Do not rely on them ****)
 

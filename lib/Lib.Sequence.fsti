@@ -341,8 +341,23 @@ val generate_blocks:
   -> init:a 0 ->
   Tot (a n & s:seq t{length s == n * len})
 
-
 (* The following functions allow us to bridge between unbounded and bounded sequences *)
+
+let map_blocks_a (a:Type) (bs:size_nat) (max:nat) (i:nat{i <= max}) = s:seq a{length s == i * bs}
+
+let map_blocks_f
+  (#a:Type0)
+  (bs:size_nat{bs > 0})
+  (nb:nat)
+  (inp:seq a{length inp == nb * bs})
+  (f:(i:nat{i < length inp / bs} -> lseq a bs -> lseq a bs))
+  (i:nat{i < nb})
+  (acc:map_blocks_a a bs nb i) : map_blocks_a a bs nb (i + 1)
+=
+  Math.Lemmas.multiple_division_lemma nb bs;
+  let block = Seq.slice inp (i*bs) ((i+1)*bs) in
+  Seq.append acc (f i block)
+
 val map_blocks_multi:
     #a:Type0
   -> blocksize:size_nat{blocksize > 0}
@@ -351,8 +366,17 @@ val map_blocks_multi:
   -> f:(i:nat{i < length inp / blocksize} -> lseq a blocksize -> lseq a blocksize) ->
   Tot (out:seq a {length out == length inp})
 
+val lemma_map_blocks_multi:
+    #a:Type0
+  -> bs:size_nat{bs > 0}
+  -> n:nat
+  -> inp:seq a{length inp == n * bs}
+  -> f:(i:nat{i < length inp / bs} -> lseq a bs -> lseq a bs) ->
+  Lemma (
+    map_blocks_multi #a bs n inp f ==
+    Lib.LoopCombinators.repeat_gen n (map_blocks_a a bs n)
+      (map_blocks_f #a bs n inp f) Seq.empty)
 
-(* The following functions allow us to bridge between unbounded and bounded sequences *)
 val map_blocks:
     #a:Type0
   -> blocksize:size_nat{blocksize > 0}
@@ -361,6 +385,22 @@ val map_blocks:
   -> g:(i:nat{i == length inp / blocksize} -> len:size_nat{len < blocksize} -> s:lseq a len -> lseq a len) ->
   Tot (out:seq a {length out == length inp})
 
+val lemma_map_blocks:
+    #a:Type0
+  -> bs:size_nat{bs > 0}
+  -> inp:seq a
+  -> f:(i:nat{i < length inp / bs} -> lseq a bs -> lseq a bs)
+  -> g:(i:nat{i == length inp / bs} -> len:size_nat{len < bs} -> s:lseq a len -> lseq a len) ->
+  Lemma (
+    let len = length inp in
+    let nb = len / bs in
+    let rem = len % bs in
+    let blocks = Seq.slice inp 0 (nb * bs) in
+    let last = Seq.slice inp (nb * bs) len in
+    let acc = Lib.LoopCombinators.repeat_gen nb (map_blocks_a a bs nb)
+      (map_blocks_f #a bs nb blocks f) Seq.empty in
+    let res = if rem > 0 then Seq.append acc (g nb rem last) else acc in
+    map_blocks #a bs inp f g == res)
 
 val eq_generate_blocks0:
     #t:Type0

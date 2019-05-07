@@ -1055,7 +1055,7 @@ val mapi:
       as_seq h1 o == Seq.mapi (spec_f h0) (as_seq h i))
 
 
-#set-options "--z3rlimit 200"
+#set-options "--z3rlimit 150 --max_fuel 1 --max_ifuel 1"
 inline_for_extraction noextract
 val map_blocks_multi:
     #t:buftype
