@@ -47,15 +47,15 @@ else
   fi
 fi
 
-# KREMLIN_INC=$KREMLIN_HOME/include
-# KREMLIB_DIR=$KREMLIN_HOME/kremlib/dist/generic
-# RFC7748_DIR=$HACL_HOME/tests/rfc7748_src
-# EVERCRYPT_DIST=$HACL_HOME/dist/
+KREMLIN_INC=$KREMLIN_HOME/include
+KREMLIB_DIR=$KREMLIN_HOME/kremlib/dist/generic
+RFC7748_DIR=$HACL_HOME/tests/rfc7748_src
+EVERCRYPT_DIST=$HACL_HOME/dist/
 
-KREMLIN_INC=~/everest/kremlin-include
-KREMLIB_DIR=~/everest/kremlib-dist/generic
-RFC7748_DIR=~/everest/rfc7748_src
-EVERCRYPT_DIST=~/everest/hacl-dist/
+# KREMLIN_INC=~/everest/kremlin-include
+# KREMLIB_DIR=~/everest/kremlib-dist/generic
+# RFC7748_DIR=~/everest/rfc7748_src
+# EVERCRYPT_DIST=~/everest/hacl-dist/
 
 for c in $CONFIGS; do
   IFS=","
