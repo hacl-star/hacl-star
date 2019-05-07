@@ -46,7 +46,7 @@ let test_one_aes_ecb block0 v =
     then ()
     else if not (cipher_len = 16ul)
     then
-      C.String.print !$"Warning: skipping a test_aes_ecb instance because bounds do not hold\n"
+      C.Failure.failwith !$"Error: skipping a test_aes_ecb instance because bounds do not hold\n"
     else begin
       push_frame();
       let cipher' = B.alloca 0uy 16ul in
@@ -88,11 +88,12 @@ let aead_key_length32 (al: Spec.AEAD.alg) : Tot (x: U32.t { U32.v x == Spec.AEAD
   | AES256_CCM        -> 32ul
   | AES256_CCM8       -> 32ul
 
-let aead_max_length32 (al: Spec.AEAD.supported_alg) : Tot (x: U32.t { U32.v x == Spec.AEAD.max_length al }) =
+let aead_max_length32 (al: Spec.AEAD.alg) : Tot (x: U32.t { Spec.AEAD.is_supported_alg al ==> U32.v x == Spec.AEAD.max_length al }) =
   let open Spec.AEAD in
   match al with
   | CHACHA20_POLY1305 -> 4294967295ul `U32.sub` 16ul
   | AES128_GCM | AES256_GCM -> [@inline_let] let _ = assert_norm (pow2 20 == 1048576) in 1048575ul `U32.sub` 16ul
+  | _ -> 0ul // dummy
 
 let aead_tag_length32 (al: Spec.AEAD.alg) : Tot (x: U32.t { U32.v x == Spec.AEAD.tag_length al /\ (Spec.AEAD.is_supported_alg al ==> U32.v x <= Spec.AEAD.max_length al) } ) =
   let open Spec.AEAD in
@@ -134,26 +135,28 @@ let test_aead_st alg key key_len iv iv_len aad aad_len tag tag_len plaintext pla
   ))
   (ensures (fun _ _ _ -> True))
 =
+  let max_len = aead_max_length32 alg in
+  let _ = assert_norm (pow2 31 == 2147483648) in
   if not (
     Spec.AEAD.is_supported_alg alg
   )
   then
-    C.String.print !$"Warning: skipping a test_aead_st instance because algo unsupported etc.\n"
-  else if not (
-    let max_len = aead_max_length32 alg in 
-    let _ = assert_norm (pow2 31 == 2147483648) in
-    key_len = aead_key_length32 alg &&
-    plaintext_len `U32.gt` 0ul &&
-    tag_len `U32.gt` 0ul &&
-    tag_len = aead_tag_length32 alg &&
-    ciphertext_len = plaintext_len &&
-    iv_len = aead_iv_length32 alg &&
-    aad_len `U32.lte` max_len &&
-    aad_len `U32.lte` 2147483648ul &&
-    (max_len `U32.sub` tag_len) `U32.gte` ciphertext_len
-  )
-  then
-    C.String.print !$"Warning: skipping a test_aead_st instance because bounds do not hold\n"
+    C.Failure.failwith !$"Error: skipping a test_aead_st instance because algo unsupported etc.\n"
+  else
+  if not (key_len = aead_key_length32 alg)
+  then C.Failure.failwith !$"test_aead_st: not (key_len = aead_key_length32 alg)"
+  else if not (tag_len = aead_tag_length32 alg)
+  then C.Failure.failwith !$"test_aead_st: not (tag_len = aead_tag_length32 alg)"
+  else if not (ciphertext_len = plaintext_len)
+  then C.Failure.failwith !$"test_aead_st: not (ciphertext_len = plaintext_len)"
+  else if not (iv_len = aead_iv_length32 alg)
+  then C.Failure.failwith !$"test_aead_st: not (iv_len = aead_iv_length32 alg)"
+  else if not (aad_len `U32.lte` max_len)
+  then C.Failure.failwith !$"test_aead_st: not (aad_len `U32.lte` max_len)"
+  else if not (aad_len `U32.lte` 2147483648ul)
+  then C.Failure.failwith !$"test_aead_st: not (aad_len `U32.lte` 2147483648ul)"
+  else if not ((max_len `U32.sub` tag_len) `U32.gte` ciphertext_len)
+  then C.Failure.failwith !$"test_aead_st: not ((max_len `U32.sub` tag_len) `U32.gte` ciphertext_len)"
   else begin
     push_frame();
     B.recall key;
@@ -169,9 +172,15 @@ let test_aead_st alg key key_len iv iv_len aad aad_len tag tag_len plaintext pla
       let st = B.index st 0ul in
       assert (B.loc_disjoint (B.loc_buffer iv) (EverCrypt.AEAD.footprint h1 st));
       push_frame ();
-      let plaintext'    = B.alloca 0uy plaintext_len in
-      let ciphertext'   = B.alloca 0uy ciphertext_len in
+      let plaintext_blen = if plaintext_len = 0ul then 1ul else plaintext_len in
+      let plaintext'    = B.alloca 0uy plaintext_blen in
+      let plaintext'    = B.sub plaintext' 0ul plaintext_len in
+      let ciphertext_blen = if ciphertext_len = 0ul then 1ul else ciphertext_len in
+      let ciphertext'   = B.alloca 0uy ciphertext_blen in
+      let ciphertext'   = B.sub ciphertext' 0ul ciphertext_len in
+      let tag_blen = if tag_len = 0ul then 1ul else tag_len in
       let tag' = B.alloca 0uy tag_len in
+      let tag' = B.sub tag' 0ul tag_len in
       let h2 = HST.get () in
       EverCrypt.AEAD.frame_invariant B.loc_none st h1 h2;
 
