@@ -76,17 +76,17 @@ for c in $CONFIGS; do
           wget https://www.openssl.org/source/$OPENSSL.tar.gz --no-check-certificate
         fi
         echo "Building $OCONF-$CC"
-        (mkdir -p $OCONF-$CC;
-          tar xfz $OPENSSL.tar.gz -C $OCONF-$CC;
-          pushd $OCONF-$CC/$OPENSSL;
-          CC=$CC CXX=$CXX $OPENSSL_CONFIG CFLAGS="$OPENSSL_CFLAGS" $OFLAGS > configure.log 2>&1;
-          make $PAR > build.log 2>&1;
+        (mkdir -p $OCONF-$CC &&
+          tar xfz $OPENSSL.tar.gz -C $OCONF-$CC &&
+          pushd $OCONF-$CC/$OPENSSL &&
+          CC=$CC CXX=$CXX $OPENSSL_CONFIG CFLAGS="$OPENSSL_CFLAGS" $OFLAGS > configure.log 2>&1 &&
+          make $PAR > build.log 2>&1 &&
           popd > /dev/null)
       fi
       if [ ! -d evercrypt-$OCONF-$CC ]; then
         echo "Configuring evercrypt-$CC with $OCONF-$CC"
         mkdir -p evercrypt-$OCONF-$CC
-        (pushd evercrypt-$OCONF-$CC; \
+        (pushd evercrypt-$OCONF-$CC && \
           cmake -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_C_COMPILER=$CC \
             -DCMAKE_CXX_COMPILER=$CXX \
@@ -97,7 +97,7 @@ for c in $CONFIGS; do
             -DUSE_OPENSSL=ON -DOPENSSL_LIB=../$OCONF-$CC/$OPENSSL/libcrypto.a -DOPENSSL_INC=../$OCONF-$CC/$OPENSSL/include \
             $CMAKE_EXTRA \
             .. \
-            2>&1; popd > /dev/null) > evercrypt-$OCONF-$CC/configure.log
+            2>&1 && popd > /dev/null) > evercrypt-$OCONF-$CC/configure.log
       fi
       pushd evercrypt-$OCONF-$CC > /dev/null
       echo "(Re-)building evercrypt-$CC using $OCONF-$CC"

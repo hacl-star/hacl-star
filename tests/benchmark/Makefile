@@ -10,9 +10,9 @@ endif
 
 .PHONY: build/runbenchmark # Always runs, so CMake figures out all dependencies.
 build/runbenchmark:
-	mkdir -p $(dir $@) ; \
-	cd $(dir $@) ; \
-	cmake -DCMAKE_BUILD_TYPE=Release $(CMAKE_DEFS) .. ; \
-	$(MAKE) runbenchmark ; \
-	./runbenchmark -n 10 ; \
+	mkdir -p $(dir $@) && \
+	cd $(dir $@) && \
+	cmake -DCMAKE_BUILD_TYPE=Release $(CMAKE_DEFS) .. &&  \
+	$(MAKE) runbenchmark && \
+	./runbenchmark -n 10 && \
 	cd ..
