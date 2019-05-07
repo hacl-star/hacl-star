@@ -220,23 +220,11 @@ let update_stack128' (ptr:int) (v:quad32) (s:stack) : stack =
 
 let update_stack (ptr:int) (v:nat64) (s:state) : state =
   let Vale_stack init_rsp mem = s.stack in
-  // We can only write the stack between the current stack pointer and
-  // the initial stack pointer. Everything above is read-only
-  if (ptr >= s.regs Rsp && ptr + 8 <= init_rsp) then (
-    {s with stack = update_stack' ptr v s.stack}
-  ) else 
-    // If we are in this case, a previous check set the ok field to false
-    s
+  {s with stack = update_stack' ptr v s.stack}
 
 let update_stack128 (ptr:int) (v:quad32) (s:state) : state =
   let Vale_stack init_rsp mem = s.stack in
-  // We can only write the stack between the current stack pointer and
-  // the initial stack pointer. Everything above is read-only
-  if (ptr >= s.regs Rsp && ptr + 16 <= init_rsp) then (
-    {s with stack = update_stack128' ptr v s.stack}
-  ) else 
-    // If we are in this case, a previous check set the ok field to false  
-    s
+  {s with stack = update_stack128' ptr v s.stack}
 
 unfold
 let valid_src_stack64 (ptr:int) (st:stack) : bool =
