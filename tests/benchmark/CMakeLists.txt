@@ -1,5 +1,5 @@
 project(benchmark LANGUAGES C CXX ASM)
-cmake_minimum_required(VERSION 3.6)
+cmake_minimum_required(VERSION 3.5)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_LEGACY_CYGWIN_WIN32 0) # Remove when CMake >= 3.8.4 is required

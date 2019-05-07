@@ -1,5 +1,5 @@
 project(libkremlib LANGUAGES C ASM)
-cmake_minimum_required(VERSION 3.6)
+cmake_minimum_required(VERSION 3.5)
 
 set(KREMLIB_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../../../kremlin/kremlib/dist/generic CACHE PATH "Where to find the KreMLib sources.")
 get_filename_component(KREMLIB_DIR ${KREMLIB_DIR} REALPATH)

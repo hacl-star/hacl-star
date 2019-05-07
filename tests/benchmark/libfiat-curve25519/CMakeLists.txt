@@ -1,5 +1,5 @@
 project(fiat-curve25519 LANGUAGES C ASM)
-cmake_minimum_required(VERSION 3.6)
+cmake_minimum_required(VERSION 3.5)
 
 set(FIAT_CURVE25519_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR} CACHE PATH "Where to find the Fiat Curve25519 sources.")
 get_filename_component(FIAT_CURVE25519_SRC_DIR ${FIAT_CURVE25519_SRC_DIR} ABSOLUTE)
