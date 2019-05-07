@@ -405,7 +405,7 @@ val chacha20_core_lemma: #w:lanes
   -> s0:state w ->
   Lemma (transpose_state (chacha20_core ctr s0) ==
 	map (Scalar.chacha20_core (w * ctr)) (transpose_state s0))
-  [SMTPat (transpose_state (chacha20_core ctr s0))]
+  //[SMTPat (transpose_state (chacha20_core ctr s0))]
 let chacha20_core_lemma #w ctr s0 =
   let lp = transpose_state (chacha20_core ctr s0) in
   let rp = map (Scalar.chacha20_core (w * ctr)) (transpose_state s0) in
@@ -432,123 +432,155 @@ let chacha20_core_lemma #w ctr s0 =
 
 (* Up to this point is verified *)
 
-val chacha20_init_lemma: #w:lanes -> k:key -> n:nonce -> ctr0:counter{ctr0+3 <= max_size_t} ->
-    Lemma (transpose_state (chacha20_init #w k n ctr0) ==
-	   map (Scalar.chacha20_init k n) (create4 ctr0 (ctr0+1) (ctr0+2) (ctr0+3)))
-let chacha20_init_lemma #w k n ctro = ()
+val chacha20_init_lemma:
+    #w:lanes
+  -> k:key
+  -> n:nonce
+  -> ctr0:counter{ctr0 + w <= max_size_t} ->
+  Lemma (
+    transpose_state (chacha20_init #w k n ctr0) ==
+      map (Scalar.chacha20_init k n) (createi #size_nat w (fun i -> ctr0 + i)))
+let chacha20_init_lemma #w k n ctr0 = admit()
 
-val xor_block_lemma: #w:lanes -> k:state w -> b:blocks w ->
-    Lemma (ensures (
-		let res = xor_block k b in
-		res == map_blocks_multi size_block w b
-		  (fun i -> Scalar.xor_block (transpose_state k).[i])))
-	   [SMTPat (xor_block k b)]
+val load_blocks_lemma_i:
+    #w:lanes
+  -> b:blocks w
+  -> i:nat{i < w} ->
+  Lemma (
+    (transpose_state (transpose (load_blocks #w b))).[i] ==
+      uints_from_bytes_le (sub b (i * 64) 64))
+let load_blocks_lemma_i #w b i = admit()
+
+val store_blocks_lemma_i:
+    #w:lanes
+  -> st:state w
+  -> i:nat{i < w} ->
+  Lemma (
+    sub (store_blocks #w st) (i * 64) 64 ==
+      uints_to_bytes_le (transpose_state (transpose st)).[i])
+let store_blocks_lemma_i #w st i = admit()
+
+val lemma_map_transpose_xor_i:
+    #w:lanes
+  -> a:state w
+  -> b:state w
+  -> i:nat{i < w} ->
+  Lemma (
+    (transpose_state (transpose (map2 (^|) a b))).[i] ==
+    map2 (^.) (transpose_state (transpose a)).[i] (transpose_state (transpose b)).[i])
+let lemma_map_transpose_xor_i #w a b i = admit()
+
+val lemma_transpose_twice_i:
+    #w:lanes
+  -> a:state w
+  -> i:nat{i < w} ->
+  Lemma ((transpose_state (transpose (transpose a))).[i] == (transpose_state a).[i])
+let lemma_transpose_twice_i #w a i = admit()
+
+val xor_block_lemma_i:
+    #w:lanes
+  -> k:state w
+  -> b:blocks w
+  -> i:nat{i < w} ->
+  Lemma (
+    sub (xor_block k b) (i * 64) 64 ==
+      Scalar.xor_block (transpose_state k).[i] (sub b (i * 64) 64))
+let xor_block_lemma_i #w k b i =
+  let ib = load_blocks b in
+  load_blocks_lemma_i #w b i;
+  assert (
+    (transpose_state (transpose ib)).[i] ==
+      uints_from_bytes_le (sub b (i * 64) 64));
+  let kb = transpose k in
+  let ob = map2 (^|) ib kb in
+  lemma_map_transpose_xor_i #w ib kb i;
+  assert (
+    (transpose_state (transpose ob)).[i] ==
+      map2 (^.) (transpose_state (transpose ib)).[i] (transpose_state (transpose kb)).[i]);
+  lemma_transpose_twice_i #w k i;
+  assert (
+    (transpose_state (transpose ob)).[i] ==
+      map2 (^.) (transpose_state (transpose ib)).[i] (transpose_state k).[i]);
+  let res = store_blocks ob in
+  store_blocks_lemma_i #w ob i;
+  assert (
+    sub res (i * 64) 64 ==
+      uints_to_bytes_le (transpose_state (transpose ob)).[i])
+
+val xor_block_lemma:
+    #w:lanes
+  -> k:state w
+  -> b:blocks w ->
+  Lemma (
+    xor_block k b ==
+      map_blocks_multi size_block w b (fun i -> Scalar.xor_block (transpose_state k).[i]))
 let xor_block_lemma #w k b = admit()
+  // let ib = load_blocks b in
+  // let kb = transpose k in
+  // let ob = map2 (^|) ib kb in
+  // store_blocks ob
 
-#set-options "--z3rlimit 50"
-val chacha20_encrypt_block_lemma: #w:lanes -> st0:state w -> incr:counter{w * incr <= max_size_t} -> b:blocks w ->
-	Lemma (ensures (
-		let res = chacha20_encrypt_block st0 incr b in
-		let spec = map_blocks_multi size_block w b
-		       (fun i -> Scalar.chacha20_encrypt_block (transpose_state st0).[i] (w * incr)) in
-		res == spec))
+val chacha20_encrypt_block_lemma_i:
+    #w:lanes
+  -> st0:state w
+  -> incr:counter{w * incr <= max_size_t}
+  -> b:blocks w
+  -> i:nat{i < w} ->
+  Lemma (
+    sub (chacha20_encrypt_block st0 incr b) (i * 64) 64 ==
+      Scalar.chacha20_encrypt_block (transpose_state st0).[i] (w * incr) (sub b (i * 64) 64))
+let chacha20_encrypt_block_lemma_i #w st0 incr b i =
+  let k = chacha20_core incr st0 in
+  chacha20_core_lemma #w incr st0;
+  assert (
+    (transpose_state k).[i] ==
+      Scalar.chacha20_core (w * incr) (transpose_state st0).[i]);
+  let res = xor_block k b in
+  xor_block_lemma_i k b i;
+  assert (
+    sub (xor_block k b) (i * 64) 64 ==
+      Scalar.xor_block (transpose_state k).[i] (sub b (i * 64) 64))
 
-#set-options "--z3rlimit 200 --max_ifuel 2"
-let chacha20_encrypt_block_lemma #w st0 incr b =
-  assert (chacha20_encrypt_block #w st0 incr b ==
-	  xor_block (chacha20_core incr st0) b);
-  match w with
-  | 1 -> assert (length b == 64);
-        assert (equal (chacha20_encrypt_block st0 incr b)
-		      (map_blocks_multi size_block w b
-			(fun i -> Scalar.chacha20_encrypt_block (transpose_state st0).[i] (w * incr))))
-  | 4 -> assert (length b == 256);
-        assert (equal (chacha20_encrypt_block st0 incr b)
-		      (map_blocks_multi size_block w b
-		      (fun i -> Scalar.chacha20_encrypt_block (transpose_state st0).[i] (w * incr))))
-  | 8 -> assert (length b == 512);
-        assert (equal (chacha20_encrypt_block st0 incr b)
-		      (map_blocks_multi size_block w b
-		      (fun i -> Scalar.chacha20_encrypt_block (transpose_state st0).[i] (w * incr))))
+val chacha20_encrypt_block_lemma:
+    #w:lanes
+  -> st0:state w
+  -> incr:counter{w * incr <= max_size_t}
+  -> b:blocks w ->
+  Lemma (
+    chacha20_encrypt_block st0 incr b ==
+      map_blocks_multi size_block w b
+        (fun i -> Scalar.chacha20_encrypt_block (transpose_state st0).[i] (w * incr)))
+let chacha20_encrypt_block_lemma #w st0 incr b = admit()
+  // let k = chacha20_core incr st0 in
+  // xor_block k b
 
-val chacha20_encrypt_last_lemma: #w:lanes -> st0:state w -> incr:counter{w * incr <= max_size_t} -> (len:size_nat{len < w * size_block}) -> b:lbytes len ->
-	Lemma (ensures (
-		let res = chacha20_encrypt_last st0 incr len b in
-		res == map_blocks size_block b
-		  (fun i -> Scalar.chacha20_encrypt_block (transpose_state st0).[i] (w*incr))
-		  (fun i -> Scalar.chacha20_encrypt_last (transpose_state st0).[i] (w*incr))))
+val chacha20_encrypt_last_lemma:
+    #w:lanes
+  -> st0:state w
+  -> incr:counter{w * incr <= max_size_t}
+  -> len:size_nat{len < w * size_block}
+  -> b:lbytes len ->
+  Lemma (
+    chacha20_encrypt_last st0 incr len b ==
+      map_blocks size_block b
+	(fun i -> Scalar.chacha20_encrypt_block (transpose_state st0).[i] (w * incr))
+	(fun i -> Scalar.chacha20_encrypt_last (transpose_state st0).[i] (w * incr)))
+let chacha20_encrypt_last_lemma #w st0 incr len b = admit()
 
-let chacha20_encrypt_last_lemma #w st0 incr len b =
-  assert (chacha20_encrypt_last #w st0 incr len b ==
-	  Seq.slice (chacha20_encrypt_block st0 incr
-		    (update_sub (create (w * size_block) (u8 0)) 0 len b)) 0 len);
-  let blocks = len / size_block in
-  let rem = len % size_block in
-  match w with
-  | 1 -> assert (len < 64);
-        assert (forall (i:nat). i < size_block * blocks ==>
-		  Seq.index (chacha20_encrypt_last st0 incr len b) i ==
-		  Seq.index (map_blocks size_block b
-			(fun i -> Scalar.chacha20_encrypt_block (transpose_state st0).[i] (w * incr))
-			(fun i -> Scalar.chacha20_encrypt_last (transpose_state st0).[i] (w * incr))) i);
-        assert (forall (i:nat). (i >= size_block * blocks /\ i < len) ==>
-		  Seq.index (chacha20_encrypt_last st0 incr len b) i ==
-		  Seq.index (Scalar.chacha20_encrypt_last (transpose_state st0).[blocks] (w * incr) rem
-							  (Seq.slice b (blocks * size_block) len)) (i % size_block));
-	admit();
-        assert (forall (i:nat). (i >= size_block * blocks /\ i < len) ==>
-		  Seq.index (chacha20_encrypt_last st0 incr len b) i ==
-		  Seq.index (map_blocks size_block b
-			(fun i -> Scalar.chacha20_encrypt_block (transpose_state st0).[i] (w * incr))
-			(fun i -> Scalar.chacha20_encrypt_last (transpose_state st0).[i] (w * incr))) i);
+val chacha20_encrypt_bytes_lemma:
+    #w:lanes
+  -> k:key
+  -> n:nonce
+  -> c:counter
+  -> msg:bytes{length msg/size_block + c <= max_size_t} ->
+  Lemma (chacha20_encrypt_bytes #w k n c msg == Scalar.chacha20_encrypt_bytes k n c msg)
+let chacha20_encrypt_bytes_lemma #w k n c msg = admit()
 
-	admit()
-  | _ -> admit()
-
-
-(*
-        assert (forall (i:nat). i / size_block < blocks ==>
-		      Seq.index (chacha20_encrypt_last st0 incr len b) i ==`
-		      Seq.index (map_blocks size_block b
-			(fun i -> Scalar.chacha20_encrypt_block (transpose_state st0).[i] (w * incr))
-			(fun i -> Scalar.chacha20_encrypt_last (transpose_state st0).[i] (w * incr))) i);
-	admit()
-*)
-
-
-let chacha20_update_lemma (st0: Scalar.state) (msg: bytes{length msg / size_block + v st0.[12] <= max_size_t}) =
-  let len = length msg in
-  let blocks = len / (4*size_block) in
-  let rem = len % (4*size_block) in
-
-
-  admit();
-  assert (Scalar.chacha20_update st0 msg ==
-	  map_blocks size_block msg
-	    (Scalar.chacha20_encrypt_block st0)
-	    (Scalar.chacha20_encrypt_last st0));
-  assert (forall (i:nat). i < 4 * size_block * blocks ==>
-	 Seq.index
-	  (map_blocks size_block msg
-	    (Scalar.chacha20_encrypt_block st0)
-	    (Scalar.chacha20_encrypt_last st0)) i ==
-	 Seq.index (Scalar.chacha20_encrypt_block st0 (i/size_block) (Seq.slice msg (i*size_block) ((i+1)*size_block))) (i % size_block));
-  assert (Seq.equal
-	  (map_blocks size_block msg
-	    (Scalar.chacha20_encrypt_block st0)
-	    (Scalar.chacha20_encrypt_last st0))
-	  (map_blocks (4*size_block) msg
-	    (fun i b4 ->
-	      map_blocks_multi size_block 4 b4
-		(fun j b -> Scalar.chacha20_encrypt_block (Scalar.add_counter j st0) (4*i) b))
-            (fun i l b4 ->
-	      map_blocks size_block b4
-		(fun j b -> Scalar.chacha20_encrypt_block (Scalar.add_counter j st0) (4*i) b)
-		(fun j l b -> Scalar.chacha20_encrypt_last (Scalar.add_counter j st0) (4*i) l b))))
-
-
-val chacha20_encrypt_bytes_lemma: #w:lanes ->
-    k:key -> n:nonce -> c:counter ->
-    msg:bytes{length msg/size_block + c <= max_size_t} ->
-    Lemma (chacha20_encrypt_bytes #w k n c msg ==
-    Scalar.chacha20_encrypt_bytes k n c msg)
+val chacha20_decrypt_bytes_lemma:
+    #w:lanes
+  -> k:key
+  -> n:nonce
+  -> c:counter
+  -> cipher:bytes{length cipher / size_block + c <= max_size_t} ->
+  Lemma (chacha20_decrypt_bytes #w k n c cipher == Scalar.chacha20_decrypt_bytes k n c cipher)
+let chacha20_decrypt_bytes_lemma #w k n c cipher = admit()
