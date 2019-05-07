@@ -234,7 +234,8 @@ let create_initial_trusted_state
     {
       TS.state = s0;
       TS.trace = [];
-      TS.memTaint = create_memtaint mem (args_b8 args) (mk_taint args init_taint)
+      TS.memTaint = create_memtaint mem (args_b8 args) (mk_taint args init_taint);
+      TS.stackTaint = Map.const MS.Public
     },
     mem
 

@@ -1,10 +1,13 @@
 module X64.Stack_i
 
 open X64.Machine_s
+open X64.Memory
+open Prop_s
 
 val stack: Type u#0
 
 val valid_src_stack64 : ptr:int -> h:stack -> GTot bool
+val valid_taint_stack64: ptr:int -> t:taint -> stackTaint:memtaint -> GTot prop0
 val load_stack64 : ptr:int -> h:stack -> GTot nat64
 val store_stack64 : ptr:int -> v:nat64 -> h:stack -> GTot stack
 val free_stack64 : start:int -> finish:int -> h:stack -> GTot stack

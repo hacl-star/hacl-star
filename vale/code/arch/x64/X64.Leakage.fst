@@ -154,6 +154,7 @@ let monotone_decreases_count (ts ts':taintState) : Lemma
   assert (forall r. count_public_xmm ts'.xmmTaint r <= count_public_xmm ts.xmmTaint r);
   assert (count_cfFlagTaint ts' <= count_cfFlagTaint ts);
   assert (count_flagTaint ts' <= count_flagTaint ts)
+  
 #pop-options
 
 val check_if_block_consumes_fixed_time: (block:tainted_codes) -> (ts:taintState) -> Tot (bool * taintState)

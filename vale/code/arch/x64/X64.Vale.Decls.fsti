@@ -40,7 +40,7 @@ type tainted_operand:eqtype =
 | TConst: n:int -> tainted_operand
 | TReg: r:reg -> tainted_operand
 | TMem: m:maddr -> t:taint -> tainted_operand
-| TStack: m:maddr -> tainted_operand
+| TStack: m:maddr -> t:taint -> tainted_operand
 
 
 [@va_qattr]
@@ -54,7 +54,7 @@ unfold let t_op_to_op (t:tainted_operand) : operand =
   | TConst n -> OConst n
   | TReg r -> OReg r
   | TMem m _ -> OMem m
-  | TStack m -> OStack m
+  | TStack m _ -> OStack m
   
 
 [@va_qattr]
@@ -68,7 +68,7 @@ let get_taint (t:tainted_operand) : taint =
   | TConst _ -> Public
   | TReg _ -> Public
   | TMem _ t -> t
-  | TStack _ -> Public
+  | TStack _ t -> t
 
 let get_taint128 (t:tainted_operand128) : taint =
   match t with
@@ -76,8 +76,8 @@ let get_taint128 (t:tainted_operand128) : taint =
   | TMem128 _ t -> t
 
 let extract_taint (o1 o2:tainted_operand) : taint =
-  if TMem? o1 then TMem?.t o1
-  else if TMem? o2 then TMem?.t o2
+  if TMem? o1 || TStack? o1 then get_taint o1
+  else if TMem? o2 || TStack? o2 then get_taint o2
   else Public
 
 let extract_taint128 (o1 o2:tainted_operand128) : taint =
@@ -86,9 +86,9 @@ let extract_taint128 (o1 o2:tainted_operand128) : taint =
   else Public
 
 let extract_taint3 (o1 o2 o3:tainted_operand) : taint =
-  if TMem? o1 then TMem?.t o1
-  else if TMem? o2 then TMem?.t o2
-  else if TMem? o3 then TMem?.t o3
+  if TMem? o1 || TStack? o1 then get_taint o1
+  else if TMem? o2 || TStack? o2 then get_taint o2
+  else if TMem? o3 || TStack? o3 then get_taint o3
   else Public
 
 (* Type aliases *)
@@ -169,7 +169,9 @@ let valid_mem_operand128 (addr:int) (t:taint) (s_mem:M.mem) (s_memTaint:M.memtai
 [@va_qattr]
 let valid_operand (t:tainted_operand) (s:state) : prop0 =
   X64.Vale.State.valid_src_operand (t_op_to_op t) s /\
-  (match t with TMem m t -> valid_mem_operand (eval_maddr m s) t s.mem s.memTaint | _ -> True)
+  (match t with TMem m t -> valid_mem_operand (eval_maddr m s) t s.mem s.memTaint
+         | TStack m t -> S.valid_taint_stack64 (eval_maddr m s) t s.stackTaint
+         | _ -> True)
 
 [@va_qattr]
 let valid_operand128 (t:tainted_operand128) (s:state) : prop0 =
@@ -230,11 +232,11 @@ val va_opr_lemma_Mem (s:va_state) (base:va_operand) (offset:int) (b:M.buffer64) 
   )
 
 [@va_qattr]
-unfold let va_opr_code_Stack (o:va_operand) (offset:int) : va_operand =
+unfold let va_opr_code_Stack (o:va_operand) (offset:int) (t:taint) : va_operand =
   match o with
-  | TConst n -> TStack (MConst (n + offset))
-  | TReg r -> TStack (MReg r offset)
-  | _ -> TStack (MConst 42)
+  | TConst n -> TStack (MConst (n + offset)) t
+  | TReg r -> TStack (MReg r offset) t
+  | _ -> TStack (MConst 42) t
 
 val va_opr_lemma_Stack (s:va_state) (base:va_operand) (offset:int) : Lemma
   (requires
@@ -303,6 +305,8 @@ val taint_at (memTaint:M.memtaint) (addr:int) : taint
 [@va_qattr] let va_upd_mem (mem:M.mem) (s:state) : state = { s with mem = mem }
 [@va_qattr] let va_upd_stack (stack:S.stack) (s:state) : state = { s with stack = stack }
 [@va_qattr] let va_upd_memTaint (memTaint:M.memtaint) (s:state) : state = { s with memTaint = memTaint }
+[@va_qattr] let va_upd_stackTaint (stackTaint:M.memtaint) (s:state) : state = { s with stackTaint = stackTaint }
+
 
 (* Framing: va_update_foo means the two states are the same except for foo *)
 [@va_qattr] unfold let va_update_ok (sM:va_state) (sK:va_state) : va_state = va_upd_ok sM.ok sK
@@ -314,6 +318,7 @@ val taint_at (memTaint:M.memtaint) (addr:int) : taint
 [@va_qattr] unfold let va_update_mem (sM:va_state) (sK:va_state) : va_state = va_upd_mem sM.mem sK
 [@va_qattr] unfold let va_update_stack (sM:va_state) (sK:va_state) : va_state = va_upd_stack sM.stack sK
 [@va_qattr] unfold let va_update_memTaint (sM:va_state) (sK:va_state) : va_state = va_upd_memTaint sM.memTaint sK
+[@va_qattr] unfold let va_update_stackTaint (sM:va_state) (sK:va_state) : va_state = va_upd_stackTaint sM.stackTaint sK
 
 [@va_qattr]
 let va_update_operand (o:va_operand) (sM:va_state) (sK:va_state) : va_state =
@@ -704,6 +709,6 @@ unfold let memTaint_type = Map.t int taint
 [@va_qattr]
 let max_one_mem (o1 o2:va_operand) : prop0 =
   match (o1, o2) with
-  | (TMem _ _, TMem _ _) | (TMem _ _, TStack _) | (TStack _, TMem _ _) | (TStack _, TStack _) -> False
+  | (TMem _ _, TMem _ _) | (TMem _ _, TStack _ _) | (TStack _ _, TMem _ _) | (TStack _ _, TStack _ _) -> False
   | _ -> True
 

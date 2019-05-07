@@ -15,6 +15,7 @@ type mod_t =
 | Mod_mem: mod_t
 | Mod_stack: mod_t
 | Mod_memTaint: mod_t
+| Mod_stackTaint: mod_t
 unfold let mods_t = list mod_t
 
 [@va_qattr "opaque_to_smt"]
@@ -28,6 +29,7 @@ let mod_eq (x y:mod_t) : Pure bool (requires True) (ensures fun b -> b == (x = y
   | Mod_mem -> (match y with Mod_mem -> true | _ -> false)
   | Mod_stack -> (match y with Mod_stack -> true | _ -> false)
   | Mod_memTaint -> (match y with Mod_memTaint -> true | _ -> false)
+  | Mod_stackTaint -> (match y with Mod_stackTaint -> true | _ -> false)
 
 [@va_qattr]
 let update_state_mod (m:mod_t) (sM sK:state) : state =
@@ -40,6 +42,7 @@ let update_state_mod (m:mod_t) (sM sK:state) : state =
   | Mod_mem -> va_update_mem sM sK
   | Mod_stack -> va_update_stack sM sK
   | Mod_memTaint -> va_update_memTaint sM sK
+  | Mod_stackTaint -> va_update_stackTaint sM sK
 
 [@va_qattr]
 let rec update_state_mods (mods:mods_t) (sM sK:state) : state =
@@ -61,7 +64,7 @@ let va_mod_dst_opr64 (o:va_operand) : mod_t =
   | TConst n -> Mod_None
   | TReg r -> Mod_reg r
   | TMem _ _ -> Mod_None // TODO: support destination memory operands
-  | TStack _ -> Mod_None // TODO: support destination stack operands
+  | TStack _ _ -> Mod_None // TODO: support destination stack operands
 
 [@va_qattr qmodattr]
 let va_mod_reg_opr64 (o:va_reg_operand) : mod_t =

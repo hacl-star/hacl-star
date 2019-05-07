@@ -2,10 +2,13 @@ module X64.Stack_i
 
 module BS = X64.Bytes_Semantics_s
 open X64.Bytes_Semantics
+module TS = X64.Taint_Semantics_s
 
 let stack = BS.stack
 
 let valid_src_stack64 i st = BS.valid_src_stack64 i st
+let valid_taint_stack64 ptr t stackTaint = forall (i:nat{i < 8}).
+  {:pattern (Map.sel stackTaint (ptr + i))} Map.sel stackTaint (ptr + i) = t
 let load_stack64 i st = BS.eval_stack i st
 let store_stack64 i v h = BS.update_stack' i v h
 let free_stack64 start finish h = BS.free_stack' start finish h

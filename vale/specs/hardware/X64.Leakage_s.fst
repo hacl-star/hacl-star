@@ -33,11 +33,19 @@ let publicXmmValuesAreSame (ts:taintState) (s1:traceState) (s2:traceState) =
     ts.xmmTaint r = Public ==>
     (s1.state.xmms r = s2.state.xmms r)
 
+let publicStackValuesAreSame (s1:traceState) (s2:traceState) =
+  let Vale_stack _ stack1 = s1.state.stack in
+  let Vale_stack _ stack2 = s2.state.stack in
+  forall x.{:pattern s1.stackTaint.[x] \/ s2.stackTaint.[x] \/ stack1.[x] \/ stack2.[x]}
+    (Public? (s1.stackTaint.[x]) || Public? (s2.stackTaint.[x])) ==>
+     stack1.[x] == stack2.[x]
+
 let publicValuesAreSame (ts:taintState) (s1:traceState) (s2:traceState) =
    publicRegisterValuesAreSame ts s1 s2
   /\ publicFlagValuesAreSame ts s1 s2
   /\ publicCfFlagValuesAreSame ts s1 s2
   /\ publicMemValuesAreSame s1 s2
+  /\ publicStackValuesAreSame s1 s2
   /\ publicXmmValuesAreSame ts s1 s2
 
 let constTimeInvariant (ts:taintState) (s:traceState) (s':traceState) =

@@ -33,6 +33,7 @@ let state_to_S (s:state) : GTot TS.traceState =
   };
   TS.trace = [];
   TS.memTaint = s.memTaint;
+  TS.stackTaint = s.stackTaint;
   }
 
 let state_of_S (sv:state) (s:TS.traceState{same_domain sv s}) : GTot state =
@@ -45,6 +46,7 @@ let state_of_S (sv:state) (s:TS.traceState{same_domain sv s}) : GTot state =
     mem = MS.get_hs sv.mem mem;
     stack = VSS.stack_from_s stack;
     memTaint = s.TS.memTaint;
+    stackTaint = s.TS.stackTaint;
   }
 
 let lemma_to_ok s = ()
@@ -56,6 +58,7 @@ let lemma_to_mem s = ()
 let lemma_to_stack s = ()
 let lemma_to_trace s = ()
 let lemma_to_memTaint s = ()
+let lemma_to_stackTaint s = ()
 
 #set-options "--max_ifuel 2 --initial_ifuel 2"
 let lemma_to_eval_operand s o = match o with

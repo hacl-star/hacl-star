@@ -17,6 +17,7 @@ unfold let mem' s = s.BS.mem
 unfold let stack' s = s.BS.stack
 unfold let trace' = TS.MktraceState?.trace
 unfold let memTaint' = TS.MktraceState?.memTaint
+unfold let stackTaint' = TS.MktraceState?.stackTaint
 
 val same_domain: sv:state -> s:TS.traceState -> prop0
 
@@ -58,6 +59,10 @@ val lemma_to_trace : s:state -> Lemma
 val lemma_to_memTaint : s:state -> Lemma
   (ensures s.memTaint === memTaint' (state_to_S s))
   [SMTPat s.memTaint]
+
+val lemma_to_stackTaint : s:state -> Lemma
+  (ensures s.stackTaint === stackTaint' (state_to_S s))
+  [SMTPat s.stackTaint]
 
 val lemma_to_eval_operand : s:state -> o:operand -> Lemma
   (requires valid_src_operand o s)

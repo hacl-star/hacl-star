@@ -10,7 +10,7 @@ open X64.Bytes_Semantics
 
 let rec has_mem_operand = function
   | [] -> false
-  | a::q -> if OMem? a then true else has_mem_operand q
+  | a::q -> if OMem? a || OStack? a then true else has_mem_operand q
 
 let rec check_if_consumes_fixed_time_args
     (args:list instr_operand) (oprs:instr_operands_t_args args) (ts:taintState)
@@ -95,8 +95,8 @@ let rec lemma_args_taint
   : Lemma
     (requires
       constTimeInvariant ts s1 s2 /\
-      taint_match_args args oprs t_ins s1.memTaint s1.state /\
-      taint_match_args args oprs t_ins s2.memTaint s2.state /\
+      taint_match_args args oprs t_ins s1.memTaint s1.stackTaint s1.state /\
+      taint_match_args args oprs t_ins s2.memTaint s2.stackTaint s2.state /\
       Some? (S.instr_apply_eval_args outs args f oprs s1.state) /\
       Some? (S.instr_apply_eval_args outs args f oprs s2.state) /\
       check_if_consumes_fixed_time_args args oprs ts /\
@@ -137,8 +137,8 @@ let rec lemma_inouts_taint
   : Lemma
     (requires
       constTimeInvariant ts s1 s2 /\
-      taint_match_inouts inouts args oprs t_ins s1.memTaint s1.state /\
-      taint_match_inouts inouts args oprs t_ins s2.memTaint s2.state /\
+      taint_match_inouts inouts args oprs t_ins s1.memTaint s1.stackTaint s1.state /\
+      taint_match_inouts inouts args oprs t_ins s2.memTaint s2.stackTaint s2.state /\
       Some? (S.instr_apply_eval_inouts outs inouts args f oprs s1.state) /\
       Some? (S.instr_apply_eval_inouts outs inouts args f oprs s2.state) /\
       check_if_consumes_fixed_time_outs inouts args oprs ts t_ins Public /\
@@ -327,15 +327,19 @@ let rec lemma_instr_set_taints_secret
       publicValuesAreSame ts s1 s2
     ))
     (ensures (
+      let memTaint1, stackTaint1 = update_taint_outputs outs args oprs t_ins s1.memTaint s1.stackTaint s1_orig.state in
       let s1' = {
         state = S.instr_write_outputs outs args vs1 oprs s1_orig.state s1.state;
         trace = s1.trace;
-        memTaint = update_taint_outputs outs args oprs t_ins s1.memTaint s1_orig.state;
+        memTaint = memTaint1;
+        stackTaint = stackTaint1;
       } in
+      let memTaint2, stackTaint2 = update_taint_outputs outs args oprs t_ins s2.memTaint s2.stackTaint s2_orig.state in
       let s2' = {
         state = S.instr_write_outputs outs args vs2 oprs s2_orig.state s2.state;
         trace = s2.trace;
-        memTaint = update_taint_outputs outs args oprs t_ins s2.memTaint s2_orig.state;
+        memTaint = memTaint2;
+        stackTaint = stackTaint2;
       } in
       let ts' = instr_set_taints outs args oprs ts t_out in
       publicValuesAreSame ts' s1' s2'
@@ -363,15 +367,19 @@ let rec lemma_instr_set_taints_secret
           | IOp64 -> (match coerce o with OMem _ | _ -> o)
           | IOpXmm -> (match coerce o with Mov128Mem _ | _ -> o)
           in
+        let memTaint1, stackTaint1 = update_taint_operand_explicit i o t_ins s1.memTaint s1.stackTaint s1_orig.state in
         let s1' = {
           state = S.instr_write_output_explicit i v1 o s1_orig.state s1.state;
           trace = s1.trace;
-          memTaint = update_taint_operand_explicit i o t_ins s1.memTaint s1_orig.state;
+          memTaint = memTaint1;
+          stackTaint = stackTaint1;
         } in
+        let memTaint2, stackTaint2 = update_taint_operand_explicit i o t_ins s2.memTaint s2.stackTaint s2_orig.state in
         let s2' = {
           state = S.instr_write_output_explicit i v2 o s2_orig.state s2.state;
           trace = s2.trace;
-          memTaint = update_taint_operand_explicit i o t_ins s2.memTaint s2_orig.state;
+          memTaint = memTaint2;
+          stackTaint = stackTaint2;
         } in
         lemma_instr_write_outputs_ok outs args vs1 oprs s1_orig.state s1'.state;
         lemma_instr_write_outputs_ok outs args vs2 oprs s2_orig.state s2'.state;
@@ -379,15 +387,19 @@ let rec lemma_instr_set_taints_secret
         lemma_instr_set_taints_secret outs args vs1 vs2 oprs ts_orig ts' t_ins t_out s1_orig s1' s2_orig s2'
       | IOpIm i ->
         let i = match i with IOp64One (OMem _) | IOpXmmOne (Mov128Mem _) | _ -> i in
+        let memTaint1, stackTaint1 = update_taint_operand_implicit i t_ins s1.memTaint s1.stackTaint s1_orig.state in
         let s1' = {
           state = S.instr_write_output_implicit i v1 s1_orig.state s1.state;
           trace = s1.trace;
-          memTaint = update_taint_operand_implicit i t_ins s1.memTaint s1_orig.state;
+          memTaint = memTaint1;
+          stackTaint = stackTaint1;
         } in
+        let memTaint2, stackTaint2 = update_taint_operand_implicit i t_ins s2.memTaint s2.stackTaint s2_orig.state in
         let s2' = {
           state = S.instr_write_output_implicit i v2 s2_orig.state s2.state;
           trace = s2.trace;
-          memTaint = update_taint_operand_implicit i t_ins s2.memTaint s2_orig.state;
+          memTaint = memTaint2;
+          stackTaint = stackTaint2;
         } in
         lemma_instr_write_outputs_ok outs args vs1 (coerce oprs) s1_orig.state s1'.state;
         lemma_instr_write_outputs_ok outs args vs2 (coerce oprs) s2_orig.state s2'.state;
@@ -413,15 +425,19 @@ let rec lemma_instr_set_taints_public
       publicValuesAreSame ts s1 s2
     ))
     (ensures (
+      let memTaint1, stackTaint1 = update_taint_outputs outs args oprs t_ins s1.memTaint s1.stackTaint s1_orig.state in
       let s1' = {
         state = S.instr_write_outputs outs args vs oprs s1_orig.state s1.state;
         trace = s1.trace;
-        memTaint = update_taint_outputs outs args oprs t_ins s1.memTaint s1_orig.state;
+        memTaint = memTaint1;
+        stackTaint = stackTaint1;
       } in
+      let memTaint2, stackTaint2 = update_taint_outputs outs args oprs t_ins s2.memTaint s2.stackTaint s2_orig.state in
       let s2' = {
         state = S.instr_write_outputs outs args vs oprs s2_orig.state s2.state;
         trace = s2.trace;
-        memTaint = update_taint_outputs outs args oprs t_ins s2.memTaint s2_orig.state;
+        memTaint = memTaint2;
+        stackTaint = stackTaint2;
       } in
       let ts' = instr_set_taints outs args oprs ts t_out in
       publicValuesAreSame ts' s1' s2'
@@ -444,15 +460,19 @@ let rec lemma_instr_set_taints_public
           | IOp64 -> (match coerce o with OMem _ | _ -> o)
           | IOpXmm -> (match coerce o with Mov128Mem _ | _ -> o)
           in
+        let memTaint1, stackTaint1 = update_taint_operand_explicit i o t_ins s1.memTaint s1.stackTaint s1_orig.state in
         let s1' = {
           state = S.instr_write_output_explicit i v o s1_orig.state s1.state;
           trace = s1.trace;
-          memTaint = update_taint_operand_explicit i o t_ins s1.memTaint s1_orig.state;
+          memTaint = memTaint1;
+          stackTaint = stackTaint1;
         } in
+        let memTaint2, stackTaint2 = update_taint_operand_explicit i o t_ins s2.memTaint s2.stackTaint s2_orig.state in
         let s2' = {
           state = S.instr_write_output_explicit i v o s2_orig.state s2.state;
           trace = s2.trace;
-          memTaint = update_taint_operand_explicit i o t_ins s2.memTaint s2_orig.state;
+          memTaint = memTaint2;
+          stackTaint = stackTaint2;
         } in
         lemma_instr_write_outputs_ok outs args vs oprs s1_orig.state s1'.state;
         lemma_instr_write_outputs_ok outs args vs oprs s2_orig.state s2'.state;
@@ -460,15 +480,19 @@ let rec lemma_instr_set_taints_public
         lemma_instr_set_taints_public outs args vs oprs ts_orig ts' t_ins t_out s1_orig s1' s2_orig s2'
       | IOpIm i ->
         let i = match i with IOp64One (OMem _) | IOpXmmOne (Mov128Mem _) | _ -> i in
+        let memTaint1, stackTaint1 = update_taint_operand_implicit i t_ins s1.memTaint s1.stackTaint s1_orig.state in
         let s1' = {
           state = S.instr_write_output_implicit i v s1_orig.state s1.state;
           trace = s1.trace;
-          memTaint = update_taint_operand_implicit i t_ins s1.memTaint s1_orig.state;
+          memTaint = memTaint1;
+          stackTaint = stackTaint1;
         } in
+        let memTaint2, stackTaint2 = update_taint_operand_implicit i t_ins s2.memTaint s2.stackTaint s2_orig.state in
         let s2' = {
           state = S.instr_write_output_implicit i v s2_orig.state s2.state;
           trace = s2.trace;
-          memTaint = update_taint_operand_implicit i t_ins s2.memTaint s2_orig.state;
+          memTaint = memTaint2;
+          stackTaint = stackTaint2;
         } in
         lemma_instr_write_outputs_ok outs args vs (coerce oprs) s1_orig.state s1'.state;
         lemma_instr_write_outputs_ok outs args vs (coerce oprs) s2_orig.state s2'.state;
@@ -514,8 +538,7 @@ let check_if_pop_consumes_fixed_time (ins:tainted_ins) (ts:taintState) : Pure (b
   (ensures ins_consumes_fixed_time ins ts)
   = 
   let BC.Pop dst = ins.i in
-  // TODO: Should be Public in both cases once allStackValuesArePublic enables
-  operand_does_not_use_secrets dst ts && Secret? ins.t, (set_taint dst ts Secret)
+  operand_does_not_use_secrets dst ts && Public? ins.t, (set_taint dst ts Public)
 
 let check_if_ins_consumes_fixed_time ins ts =
   match ins.i with

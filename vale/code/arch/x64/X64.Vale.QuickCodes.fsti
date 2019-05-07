@@ -380,12 +380,13 @@ let va_state_match (s0:state) (s1:state) : Pure Type0
   s0.flags == s1.flags /\
   s0.mem == s1.mem /\
   s0.stack == s1.stack /\
-  s0.memTaint == s1.memTaint
+  s0.memTaint == s1.memTaint /\
+  s0.stackTaint == s1.stackTaint
 
 [@va_qattr]
 unfold let wp_sound_pre (#a:Type0) (#cs:codes) (qcs:quickCodes a cs) (mods:mods_t) (s0:state) (k:state -> state -> a -> Type0) : Type0 =
-  forall (ok:bool) (regs:Regs.t) (xmms:Xmms.t) (flags:nat64) (mem:mem) (stack:stack) (memTaint:memtaint).
-    let s0' = {ok = ok; regs = regs; xmms = xmms; flags = flags; mem = mem; stack=stack; memTaint = memTaint} in
+  forall (ok:bool) (regs:Regs.t) (xmms:Xmms.t) (flags:nat64) (mem:mem) (stack:stack) (memTaint:memtaint) (stackTaint:memtaint).
+    let s0' = {ok = ok; regs = regs; xmms = xmms; flags = flags; mem = mem; stack=stack; memTaint = memTaint; stackTaint = stackTaint} in
     s0 == s0' ==> wp cs qcs mods (k (state_eta s0')) (state_eta s0')
 
 unfold let wp_sound_post (#a:Type0) (#cs:codes) (qcs:quickCodes a cs) (mods:mods_t) (s0:state) (k:state -> state -> a -> Type0) ((sN:state), (fN:fuel), (gN:a)) : Type0 =
@@ -400,8 +401,8 @@ val wp_sound_wrap (#a:Type0) (cs:codes) (qcs:quickCodes a cs) (mods:mods_t) (s0:
 
 [@va_qattr]
 unfold let wp_sound_code_pre (#a:Type0) (#c:code) (qc:quickCode a c) (s0:state) (k:state -> state -> a -> Type0) : Type0 =
-  forall (ok:bool) (regs:Regs.t) (xmms:Xmms.t) (flags:nat64) (mem:mem) (stack:stack) (memTaint:memtaint).
-    let s0' = {ok = ok; regs = regs; xmms = xmms; flags = flags; mem = mem; stack = stack; memTaint = memTaint} in
+  forall (ok:bool) (regs:Regs.t) (xmms:Xmms.t) (flags:nat64) (mem:mem) (stack:stack) (memTaint:memtaint) (stackTaint:memtaint).
+    let s0' = {ok = ok; regs = regs; xmms = xmms; flags = flags; mem = mem; stack = stack; memTaint = memTaint; stackTaint = stackTaint} in
     s0 == s0' ==> QProc?.wp qc (state_eta s0') (k (state_eta s0'))
 
 unfold let wp_sound_code_post (#a:Type0) (#c:code) (qc:quickCode a c) (s0:state) (k:state -> state -> a -> Type0) ((sN:state), (fN:fuel), (gN:a)) : Type0 =
@@ -420,21 +421,21 @@ val wp_sound_code_wrap (#a:Type0) (c:code) (qc:quickCode a c) (s0:state) (k:stat
 [@va_qattr]
 let wp_final_k (#a:Type0) (update:state -> state) (post:state -> state -> Type0) (k:state -> a -> Type0) (sN:state) (g:a) : Type0 =
   va_state_match sN (update sN) /\ post sN sN /\
-    (forall (ok':bool) (regs':Regs.t) (xmms':Xmms.t) (flags':nat64) (mem':mem) (stack':stack) (memTaint':memtaint).
-      let sN' = state_eta ({ok = ok'; regs = regs'; xmms = xmms'; flags = flags'; mem = mem'; stack = stack'; memTaint = memTaint'}) in
+    (forall (ok':bool) (regs':Regs.t) (xmms':Xmms.t) (flags':nat64) (mem':mem) (stack':stack) (memTaint':memtaint) (stackTaint':memtaint).
+      let sN' = state_eta ({ok = ok'; regs = regs'; xmms = xmms'; flags = flags'; mem = mem'; stack = stack'; memTaint = memTaint'; stackTaint = stackTaint'}) in
       post sN sN' ==> k sN' g)
 
 // For efficiency, introduce shorter names (e.g. ok, mem) for components of initial state s0.
 [@va_qattr]
 let wp_wrap (#a:Type0) (cs:codes) (qcs:quickCodes a cs) (mods:mods_t) (update:state -> state -> state) (post:state -> state -> Type0) (k:state -> a -> Type0) (s0:state) : Type0 =
-  forall (ok:bool) (regs:Regs.t) (xmms:Xmms.t) (flags:nat64) (mem:mem) (stack:stack) (memTaint:memtaint).
-    let s0' = {ok = ok; regs = regs; xmms = xmms; flags = flags; mem = mem; stack = stack; memTaint = memTaint} in
+  forall (ok:bool) (regs:Regs.t) (xmms:Xmms.t) (flags:nat64) (mem:mem) (stack:stack) (memTaint:memtaint) (stackTaint:memtaint).
+    let s0' = {ok = ok; regs = regs; xmms = xmms; flags = flags; mem = mem; stack = stack; memTaint = memTaint; stackTaint = stackTaint} in
     s0 == s0' ==> wp cs qcs mods (wp_final_k (update (state_eta s0')) post k) (state_eta s0')
 
 [@va_qattr]
 let wp_wrap_code (#a:Type0) (c:code) (qc:quickCode a c) (update:state -> state -> state) (post:state -> state -> Type0) (k:state -> a -> Type0) (s0:state) : Type0 =
-  forall (ok:bool) (regs:Regs.t) (xmms:Xmms.t) (flags:nat64) (mem:mem) (stack:stack) (memTaint:memtaint).
-    let s0' = {ok = ok; regs = regs; xmms = xmms; flags = flags; mem = mem; stack = stack; memTaint = memTaint} in
+  forall (ok:bool) (regs:Regs.t) (xmms:Xmms.t) (flags:nat64) (mem:mem) (stack:stack) (memTaint:memtaint) (stackTaint:memtaint).
+    let s0' = {ok = ok; regs = regs; xmms = xmms; flags = flags; mem = mem; stack = stack; memTaint = memTaint; stackTaint = stackTaint} in
     s0 == s0' ==> QProc?.wp qc (state_eta s0') (wp_final_k (update (state_eta s0')) post k)
 
 unfold let wp_GHOST (#a:Type0) (c:code) (s0:state) (update:state -> state -> state) (fk:(state -> a -> Type0) -> Type0) (p:state * fuel * a -> Type0) : Type0 =
@@ -461,6 +462,7 @@ unfold let normal_steps : list string =
     `%Mkstate?.mem;
     `%Mkstate?.stack;
     `%Mkstate?.memTaint;
+    `%Mkstate?.stackTaint;
     `%QProc?.wp;
     `%QProc?.mods;
     `%OConst?;

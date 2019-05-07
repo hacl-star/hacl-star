@@ -14,16 +14,12 @@ let operand_taint (op:operand) ts taint =
   match op with
     | OConst _ -> Public
     | OReg reg -> ts.regTaint reg
-    | OMem _ -> taint
-    // TODO: This should be Public
-    | OStack _ -> Secret
+    | OMem _ | OStack _ -> taint
 
 let operand_taint128 (op:mov128_op) (ts:taintState) (t:taint) : taint =
   match op with
   | Mov128Xmm x -> ts.xmmTaint x
-  | Mov128Mem _ -> t
-  // TODO: This should be Public
-  | Mov128Stack _ -> Secret
+  | Mov128Mem _ | Mov128Stack _ -> t
 
 [@instr_attr]
 let operand_taint_explicit
@@ -191,31 +187,19 @@ val lemma_public_op_are_same:
    -> Lemma (requires (operand_does_not_use_secrets op ts   /\
                       Public? (operand_taint op ts Public) /\
 		      publicValuesAreSame ts s1 s2         /\
-		      taint_match op Public s1.memTaint s1.state /\
-		      taint_match op Public s2.memTaint s2.state))
+		      taint_match op Public s1.memTaint s1.stackTaint s1.state /\
+		      taint_match op Public s2.memTaint s2.stackTaint s2.state))
            (ensures eval_operand op s1.state == eval_operand op s2.state)
 let lemma_public_op_are_same ts op s1 s2 =
   match op with
   | OConst _ -> ()
   | OReg _ -> ()
-  | OMem m ->
+  | OMem m | OStack m ->
     let a1 = eval_maddr m s1.state in
     let a2 = eval_maddr m s2.state in
     assert (a1 == a2);
 //    assert (forall a. (a >= a1 /\ a < a1 + 8) ==> s1.state.mem.[a] == s2.state.mem.[a]);
     Opaque_s.reveal_opaque get_heap_val64_def
-  | OStack m -> ()
-
-val lemma_public_op_are_same2: 
-  (ts:taintState) -> (op:operand) -> (s1:traceState) -> (s2:traceState) -> 
-  Lemma (requires operand_does_not_use_secrets op ts /\ 
-                  Public? (operand_taint op ts Secret) /\ 
-                  publicValuesAreSame ts s1 s2 /\ 
-                  taint_match op Public s1.memTaint s1.state /\ 
-                  taint_match op Public s2.memTaint s2.state)
-        (ensures eval_operand op s1.state == eval_operand op s2.state)
-
-let lemma_public_op_are_same2 ts op s1 s2 = ()
 
 val publicFlagValuesAreAsExpected: (tsAnalysis:taintState) -> (tsExpected:taintState) -> b:bool{b <==> (Public? tsExpected.flagsTaint ==> Public? tsAnalysis.flagsTaint)}
 
