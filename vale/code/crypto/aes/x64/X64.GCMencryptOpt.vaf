@@ -748,7 +748,7 @@ procedure {:quick} gcm_blocks(
     auth_in := append(auth_in, s128(mem, out128_b));
 //    assert y_cipher128 == ghash_incremental0(h, y_0, auth_in);
 
-    Add64(rcx, Stack(rsp, offset + 24));    // rcx == len128x6 + len128
+    Add64(rcx, Stack(rsp, offset + 24, Public));    // rcx == len128x6 + len128
     //IMul64(rcx, 128/8);  // rcx *= 128/8;   rcx == # bytes of plain
     IMul64(rcx, 16);  // rcx *= 128/8;   rcx == # bytes of plain
     Load64_stack(r13, rsp, offset + 64);  // r13 := plain_num_bytes
@@ -1068,6 +1068,7 @@ procedure {:quick} {:public} save_registers(inline win:bool)
         valid_stack_slot64s(rsp, 8 + (if win then 10*2 else 0), stack, Public, stackTaint);
 
         modifies_stack(rsp, old(rsp), old(stack), stack);
+        modifies_stacktaint(rsp, old(rsp), old(stackTaint), stackTaint);
 
         win ==> load_stack64(rsp + 0x00, stack) == hi64(xmm6);
         win ==> load_stack64(rsp + 0x08, stack) == lo64(xmm6);

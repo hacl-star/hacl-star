@@ -61,7 +61,7 @@ friend X64.Stack_i
 
 #reset-options "--initial_fuel 2 --max_fuel 4 --max_ifuel 2 --z3rlimit 50"
 
-procedure{:operand} Stack_in(base:reg64, inline offset:int) returns(o:opr)
+procedure{:operand} Stack_in(base:reg64, inline offset:int, inline t:taint) returns(o:opr)
     reads
         stack;
     extern;

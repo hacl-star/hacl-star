@@ -759,7 +759,7 @@ procedure {:quick} gcm_blocks(
     auth_in := append(auth_in, old(s128(mem, in128_b)));
 //    assert y_cipher128 == ghash_incremental0(h, y_0, auth_in);
 
-    Add64(rcx, Stack(rsp, offset + 24));    // rcx == len128x6 + len128
+    Add64(rcx, Stack(rsp, offset + 24, Public));    // rcx == len128x6 + len128
     //IMul64(rcx, 128/8);  // rcx *= 128/8;   rcx == # bytes of plain
     IMul64(rcx, 16);  // rcx *= 128/8;   rcx == # bytes of plain
     Load64_stack(r13, rsp, offset + 64);  // r13 := plain_num_bytes

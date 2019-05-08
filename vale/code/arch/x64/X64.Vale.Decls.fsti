@@ -238,10 +238,10 @@ unfold let va_opr_code_Stack (o:va_operand) (offset:int) (t:taint) : va_operand 
   | TReg r -> TStack (MReg r offset) t
   | _ -> TStack (MConst 42) t
 
-val va_opr_lemma_Stack (s:va_state) (base:va_operand) (offset:int) : Lemma
+val va_opr_lemma_Stack (s:va_state) (base:va_operand) (offset:int) (t:taint) : Lemma
   (requires
     TReg? base /\
-    S.valid_src_stack64 (eval_operand (t_op_to_op base) s + offset) s.stack
+    S.valid_stack_slot64 (eval_operand (t_op_to_op base) s + offset) s.stack t s.stackTaint
   )
   (ensures True)
 
