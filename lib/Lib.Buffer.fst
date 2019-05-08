@@ -476,7 +476,7 @@ let mapi #a #b h0 clen out spec_f f inp =
       lemma_eq_disjoint clen clen out inp i h0 h1;
       let xi = inp.(i) in f i xi)
 
-#reset-options "--z3rlimit 100 --max_fuel 1 --initial_ifuel 1 --max_ifuel 1 --using_facts_from '* -LowStar.Monotonic.Buffer.loc_disjoint_includes_r -LowStar.Monotonic.Buffer.loc_disjoint_sym_'"
+#reset-options "--z3refresh --z3rlimit 100 --max_fuel 1 --initial_ifuel 1 --max_ifuel 1 --using_facts_from '* -LowStar.Monotonic.Buffer.loc_disjoint_includes_r -LowStar.Monotonic.Buffer.loc_disjoint_sym_'"
 
 let map_blocks_multi #t #a h0 blocksize nb inp output spec_f impl_f =
   let h0 = ST.get() in
@@ -499,8 +499,8 @@ let map_blocks_multi #t #a h0 blocksize nb inp output spec_f impl_f =
   [@ inline_let]
   let m = Sequence.map_blocks_multi (v blocksize) (v nb) (as_seq h0 inp) (spec_f h0) in
   assert (modifies1 output h0 h1); 
-  assert (as_seq h1 output == snd g);
-  assert (m == snd g)
+  assert (as_seq h1 output `FStar.Seq.equal` snd g);
+  assert (m `FStar.Seq.equal` snd g)
 
 #reset-options "--z3rlimit 900 --max_fuel 0 --max_ifuel 2"
 let map_blocks #t #a h0 len blocksize inp output spec_f spec_l impl_f impl_l =
