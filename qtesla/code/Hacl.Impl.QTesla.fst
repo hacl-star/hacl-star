@@ -32,6 +32,7 @@ open Hacl.Impl.QTesla.Globals
 open Hacl.Impl.QTesla.Pack
 open Hacl.Impl.QTesla.Poly
 open Hacl.Impl.QTesla.Gauss
+open Hacl.Impl.QTesla.Lemmas
 
 module B  = LowStar.Buffer
 module ST = FStar.HyperStack.ST
@@ -53,11 +54,29 @@ private let _RADIX32 = size params_radix32
 // it's important to do this. In one case the return value is compared against a quantity that isn't even close
 // to exceeding the maximum value of a signed int32, much less an int64, and in all other cases ends up getting
 // immediately cast back into a signed type.
-val abs_: value: I32.t -> Tot I32.t
+val abs_: value: I32.t -> Tot (x:I32.t{I32.v x == FStar.Math.Lib.abs (I32.v value)})
 let abs_ value = 
     assert_norm(v (_RADIX32 -. size 1) < I32.n);
     let mask = I32.(value >>^ (_RADIX32 -. size 1)) in
-    assume(FStar.Int.fits (elem_v (mask ^^ value) - elem_v mask) I32.n);
+    lemma_int32_sar_n_minus_1 value;
+    assert_norm(I32.n - 1 == v (_RADIX32 -. size 1));
+    //assert((I32.v value >= 0) ==> (I32.v mask == 0));
+    assert((I32.v value >= 0) ==> (mask == 0l));
+    assert((I32.v value < 0) ==> (mask == (-1l)));
+    //assume(mask == 0l \/ mask == (-1l));
+    //assume(FStar.Int.fits (elem_v (mask ^^ value) - elem_v mask) I32.n);
+    // Proof sketch:
+    // If value >= 0: |value| == value
+    // 1. mask == 0
+    // 2. mask ^ value == value
+    // 3. (mask ^ value) - mask == value - mask == value - 0 == value
+    // 4. value == |value|
+    // If value < 0: |value| == -value
+    // 1. mask == -1
+    // 2. mask ^ value == |value| - 1 (definition of signed bitwise OR)
+    // 3. (mask ^ value) - mask == |value| - 1 - mask == |value| - 1 - (-1) == |value|
+    // 4. |value|
+    lemma_int32_bitwise_or value;
     I32.((mask ^^ value) -^ mask)
 
 val check_ES:
@@ -96,18 +115,18 @@ let check_ES p bound =
 
   let h1 = ST.get () in
   for (size 0) params_h
-      (fun h _ -> live h p /\ live h sum /\ live h limit /\ live h temp /\ live h mask /\ live h list /\
+      (fun h j -> live h sum /\ live h limit /\ live h temp /\ live h mask /\ live h list /\
                modifies (loc mask |+| loc temp |+| loc list |+| loc sum |+| loc limit) h1 h /\
-               v (bget h limit 0) <= v params_n)
+               v (bget h limit 0) == v params_n - j)
       (fun j ->
           let loopMax = (limit.(size 0)) -. size 1 in
           let h2 = ST.get () in
+          assert(v loopMax < v params_n);
           for 0ul loopMax
-          (fun h _ -> live h p /\ live h sum /\ live h limit /\ live h temp /\ live h mask /\ live h list /\
-                   modifies3 mask temp list h2 h /\ v (bget h limit 0) <= v params_n)
+          (fun h _ -> live h p /\ live h sum /\ live h temp /\ live h mask /\ live h list /\
+                   modifies3 mask temp list h2 h)
           (fun i ->
               let h3 = ST.get () in
-              assume(v i < v params_n - 1);
               assume(FStar.Int.fits (I32.v (bget h3 list (v i + 1)) - I32.v (bget h3 list (v i))) I32.n);
               assert_norm(v (_RADIX32 -. size 1) < 32);
               mask.(size 0) <- ((list.(i +. size 1)) -^ (list.(i))) >>^ (_RADIX32 -. size 1);
@@ -120,7 +139,6 @@ let check_ES p bound =
 
           let listIndex = limit.(size 0) -. size 1 in
           let h4 = ST.get () in
-          assume(v ((bget h4 limit 0) -. size 1) < v params_n);
           let listAmt = list.(listIndex) in
           let h5 = ST.get () in
           assume(FStar.UInt.fits (UI32.v (bget h5 sum 0) + UI32.v (int32_to_uint32 listAmt)) UI32.n);
@@ -327,7 +345,7 @@ let qtesla_keygen_ randomness pk sk =
   let h6 = ST.get () in
   encode_pk pk t (sub rndsubbuffer (size 0) crypto_seedbytes);
   let h7 = ST.get () in
-  pop_frame(); //admit();
+  pop_frame();
   0l
 
 #reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0"

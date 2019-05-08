@@ -13,6 +13,7 @@ open Lib.ByteBuffer
 open Hacl.Impl.QTesla.Params
 
 module UI32 = FStar.UInt32
+module I32 = FStar.Int32
 module I64 = FStar.Int64
 
 #reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0"
@@ -34,6 +35,20 @@ val lemma_elem_product_fits_int64: x:elem_base -> y:elem_base -> Lemma
   (ensures elem_product_fits_int64 x y /\ FStar.Int.fits (elem_v x * elem_v y * I64.v params_qinv) 64)
 
 let lemma_elem_product_fits_int64 x y = admit()
+
+val lemma_int32_sar_n_minus_1: x:I32.t -> Lemma
+//  (ensures (x >=^ 0l) <==> I32.(x >>^ (UI32.uint_to_t (I32.n - 1)) == 0l) /\
+//           (x <^ 0l) <==> I32.(x >>^ (UI32.uint_to_t (I32.n - 1)) == (-1l)))
+  (ensures ((I32.v x >= 0) <==> I32.v I32.(x >>^ (UI32.uint_to_t (I32.n - 1))) == 0) /\
+           ((I32.v x < 0) <==> I32.v I32.(x >>^ (UI32.uint_to_t (I32.n - 1))) == (-1)))
+
+let lemma_int32_sar_n_minus_1 x = admit()
+
+val lemma_int32_bitwise_or: x:I32.t -> Lemma
+  (ensures I32.v (0l ^^ x) == I32.v x /\
+           I32.v ((-1l) ^^ x) == (-1) * I32.v x - 1)
+
+let lemma_int32_bitwise_or x = admit()
 
 (*
 val lemma_logand_value_max: x:I64.t -> n:nat -> Lemma
