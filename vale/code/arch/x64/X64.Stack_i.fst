@@ -77,6 +77,8 @@ let store_taint_stack64 ptr t stackTaint = TS.update_n ptr 8 stackTaint t
 
 let lemma_valid_taint_stack64 ptr t stackTaint = ()
 
+let lemma_valid_taint_stack64_reveal ptr t stackTaint = ()
+
 let lemma_correct_store_load_taint_stack64 ptr t stackTaint = ()
 
 let lemma_frame_store_load_taint_stack64 ptr t stackTaint i t' = ()

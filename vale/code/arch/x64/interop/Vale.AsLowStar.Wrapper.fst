@@ -293,6 +293,7 @@ let core_create_lemma_state
     let tr_s = fst (IX64.create_initial_trusted_state max_arity arg_reg args I.down_mem h0) in
     let sl_s = SL.state_to_S va_s in
     assert (tr_s.TS.memTaint == va_s.VS.memTaint);
+    assert (tr_s.TS.stackTaint == va_s.VS.stackTaint);
     SL.lemma_to_ok va_s;
     SL.lemma_to_flags va_s;
     SL.lemma_to_mem va_s;
@@ -445,6 +446,7 @@ let core_create_lemma_stack_args
              + init_rsp
           in 
           Vale.AsLowStar.MemoryHelpers.mk_stack_reveal stack_f;
+          SI.lemma_valid_taint_stack64_reveal ptr MS.Public va_s.VS.stackTaint;
           let aux2 () : Lemma (IX64.arg_as_nat64 hd == LSig.arg_as_nat64 hd va_s) =
             match hd with
             | (| TD_Buffer src bt _, x |) ->

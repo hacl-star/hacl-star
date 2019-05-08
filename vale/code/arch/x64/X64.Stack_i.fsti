@@ -89,6 +89,10 @@ val lemma_valid_taint_stack64: (ptr:int) -> (t:taint) -> (stackTaint:memtaint) -
   (requires valid_taint_stack64 ptr t stackTaint)
   (ensures forall i. i >= ptr /\ i < ptr + 8 ==> Map.sel stackTaint i == t)
 
+val lemma_valid_taint_stack64_reveal: (ptr:int) -> (t:taint) -> (stackTaint:memtaint) -> Lemma
+  (requires forall i. i >= ptr /\ i < ptr + 8 ==> Map.sel stackTaint i == t)
+  (ensures valid_taint_stack64 ptr t stackTaint)
+
 val lemma_correct_store_load_taint_stack64: (ptr:int) -> (t:taint) -> (stackTaint:memtaint) -> Lemma
   (valid_taint_stack64 ptr t (store_taint_stack64 ptr t stackTaint))
   [SMTPat (valid_taint_stack64 ptr t (store_taint_stack64 ptr t stackTaint))]
