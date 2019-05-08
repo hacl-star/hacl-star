@@ -35,20 +35,20 @@ module TS = X64.Taint_Semantics_s
 friend X64.Vale.StateLemmas
 friend X64.Vale.Decls
 
-//TODO: Find a better place for this.
 val lemma_valid_taint_match: (t:tainted_operand) -> (s:state) -> Lemma
   (requires valid_operand t s)
-  (ensures TS.taint_match (t_op_to_op t) (get_taint t) s.memTaint (state_to_S s).TS.state)
-  [SMTPat (TS.taint_match (t_op_to_op t) (get_taint t) s.memTaint (state_to_S s).TS.state)]
+  (ensures TS.taint_match (t_op_to_op t) (get_taint t) s.memTaint s.stackTaint (state_to_S s).TS.state)
+  [SMTPat (TS.taint_match (t_op_to_op t) (get_taint t) s.memTaint s.stackTaint (state_to_S s).TS.state)]
 
 let lemma_valid_taint_match o s = match o with
   | TMem m t ->
     let addr = eval_maddr m s in
     let aux (b:buffer64) (i:int) : Lemma
       (requires valid_maddr addr s.mem s.memTaint b i t)
-      (ensures TS.taint_match (t_op_to_op o) (get_taint o) s.memTaint (state_to_S s).TS.state) = 
+      (ensures TS.taint_match (t_op_to_op o) (get_taint o) s.memTaint s.stackTaint (state_to_S s).TS.state) = 
       X64.Memory.lemma_valid_taint64 b s.memTaint s.mem i t
     in Classical.forall_intro_2 (fun b i -> (fun b -> Classical.move_requires (aux b)) b i)
+  | TStack m t -> lemma_valid_taint_stack64 (eval_maddr m s) t s.stackTaint
   | _ -> ()
 
 #endverbatim
@@ -79,6 +79,7 @@ var{:state flags()} efl:nat64;
 var{:state mem()} mem:memory;
 var{:state stack()} stack:stack_t;
 var{:state memTaint()} memTaint:memtaint;
+var{:state stackTaint()} stackTaint:memtaint;
 
 operand_type reg64:nat64 :=
 | inout rax | inout rbx | inout rcx | inout rdx

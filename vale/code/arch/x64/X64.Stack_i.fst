@@ -7,8 +7,6 @@ module TS = X64.Taint_Semantics_s
 let stack = BS.stack
 
 let valid_src_stack64 i st = BS.valid_src_stack64 i st
-let valid_taint_stack64 ptr t stackTaint = forall (i:nat{i < 8}).
-  {:pattern (Map.sel stackTaint (ptr + i))} Map.sel stackTaint (ptr + i) = t
 let load_stack64 i st = BS.eval_stack i st
 let store_stack64 i v h = BS.update_stack' i v h
 let free_stack64 start finish h = BS.free_stack' start finish h
@@ -64,3 +62,21 @@ let lemma_compose_free_stack64 start inter finish h =
 let lemma_same_init_rsp_free_stack64 start finish h = ()
 
 let lemma_same_init_rsp_store_stack64 ptr v h = ()
+
+let valid_taint_stack64 ptr t stackTaint = 
+  Map.sel stackTaint ptr = t &&
+  Map.sel stackTaint (ptr + 1) = t &&
+  Map.sel stackTaint (ptr + 2) = t &&
+  Map.sel stackTaint (ptr + 3) = t &&
+  Map.sel stackTaint (ptr + 4) = t &&
+  Map.sel stackTaint (ptr + 5) = t &&
+  Map.sel stackTaint (ptr + 6) = t &&
+  Map.sel stackTaint (ptr + 7) = t
+
+let store_taint_stack64 ptr t stackTaint = TS.update_n ptr 8 stackTaint t
+
+let lemma_valid_taint_stack64 ptr t stackTaint = ()
+
+let lemma_correct_store_load_taint_stack64 ptr t stackTaint = ()
+
+let lemma_frame_store_load_taint_stack64 ptr t stackTaint i t' = ()

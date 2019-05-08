@@ -33,7 +33,7 @@ procedure {:quick exportOnly}{:public} callee_save_registers(inline win:bool)
         rsp == init_rsp(stack); // This function should only be called in the prolog, at the very beginning of the function
     reads rbx; rbp; rdi; rsi; r12; r13; r14; r15; 
           xmm6; xmm7; xmm8; xmm9; xmm10; xmm11; xmm12; xmm13; xmm14; xmm15;
-    modifies stack; rsp; rax;
+    modifies stack; rsp; rax; stackTaint;
     ensures
         forall i :: (old(valid_src_stack64(i, stack)) && rsp + (if win then 224 else 64)  <= i) ==> load_stack64(i, stack) == old(load_stack64(i, stack));
 
@@ -103,7 +103,7 @@ procedure {:quick}{:public} callee_restore_registers(
         ghost old_xmm15:quad32
         )
     requires
-        forall i :: rsp <= i <= rsp + (if win then 216 else 56) ==> valid_src_stack64(i, stack);
+        forall i :: rsp <= i <= rsp + (if win then 216 else 56) ==> valid_stack_slot64(i, stack, Public, stackTaint);
         rsp >= init_rsp(stack) - 4096;
         rsp + (if win then 224 else 64) <= init_rsp(stack);
         
@@ -127,7 +127,7 @@ procedure {:quick}{:public} callee_restore_registers(
         win ==> lo64(old_xmm14) == load_stack64(rsp + 200, stack);
         win ==> hi64(old_xmm15) == load_stack64(rsp + 208, stack);
         win ==> lo64(old_xmm15) == load_stack64(rsp + 216, stack);
-    reads
+    reads stackTaint;
     modifies
         rax; rbx; rbp; rdi; rsi; r12; r13; r14; r15;
         xmm6; xmm7; xmm8; xmm9; xmm10; xmm11; xmm12; xmm13; xmm14; xmm15;

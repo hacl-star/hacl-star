@@ -108,7 +108,7 @@ let ins_obs (ins:ins) (s:traceState) : list observation =
   | BC.Alloc _ | BC.Dealloc _ -> []
 
 [@"opaque_to_smt"]
-private let rec match_n (addr:int) (n:nat) (memTaint:memTaint_t) (t:taint)
+let rec match_n (addr:int) (n:nat) (memTaint:memTaint_t) (t:taint)
   : Tot (b:bool{b <==> (forall i.{:pattern (memTaint `Map.sel` i)}
                            (i >= addr /\ i < addr + n) ==> memTaint.[i] == t)})
     (decreases n)
@@ -117,7 +117,7 @@ private let rec match_n (addr:int) (n:nat) (memTaint:memTaint_t) (t:taint)
     else match_n (addr + 1) (n - 1) memTaint t
 
 [@"opaque_to_smt"]
-private let rec update_n (addr:int) (n:nat) (memTaint:memTaint_t) (t:taint)
+let rec update_n (addr:int) (n:nat) (memTaint:memTaint_t) (t:taint)
   : Tot (m:memTaint_t{(forall i.{:pattern (m `Map.sel` i)}
                            ((i >= addr /\ i < addr + n) ==> m.[i] == t) /\
 	                   ((i < addr \/ i >= addr + n) ==> m.[i] == memTaint.[i]))})

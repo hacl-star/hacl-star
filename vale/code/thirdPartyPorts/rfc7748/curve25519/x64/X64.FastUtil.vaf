@@ -266,7 +266,7 @@ procedure{:quick}{:public}{:exportSpecs} fast_add1_stdcall(
     reads memTaint;
     modifies
         rax; rbx; rcx; rdx; rsi; rdi; rbp; rsp; r8; r9; r10; r11; r12; r13; r14; r15;    
-        efl; mem; stack;
+        efl; mem; stack; stackTaint;
     requires
         rsp == init_rsp(stack);
 
@@ -975,7 +975,7 @@ procedure{:quick}{:public}{:exportSpecs} cswap2_stdcall(
     reads memTaint;
     modifies
         rax; rbx; rcx; rdx; rsi; rdi; rbp; rsp; r8; r9; r10; r11; r12; r13; r14; r15;        
-        efl; mem; stack;
+        efl; mem; stack; stackTaint;
     requires
         rsp == init_rsp(stack);
         bit_in <= 1;

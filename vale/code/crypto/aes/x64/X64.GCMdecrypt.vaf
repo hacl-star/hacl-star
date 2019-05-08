@@ -833,7 +833,7 @@ procedure {:quick} gcm_decrypt_stdcall(
         rax; rbx; rcx; rdx; r8; r9; r10; r11; r12; r13; r14; r15; 
         xmm0; xmm1; xmm2; xmm3; xmm4; xmm5; xmm6; xmm7; xmm8; xmm9; xmm10; xmm11; xmm12; xmm13; xmm14; xmm15;
         rbp; rdi; rsi;
-        mem; efl; rsp; stack;
+        mem; efl; rsp; stack; stackTaint;
     lets
         args_ptr := if win then rcx else rdi;
 
@@ -1015,7 +1015,7 @@ procedure {:quick}{:public}{:exportSpecs} gcm_decrypt2_stdcall(
     modifies
         rax; rbx; rcx; rdx; rdi; rsi; rsp; rbp; r8; r9; r10; r11; r12; r13; r14; r15; 
         xmm0; xmm1; xmm2; xmm3; xmm4; xmm5; xmm6; xmm7; xmm8; xmm9; xmm10; xmm11; xmm12; xmm13; xmm14; xmm15;
-        mem; efl; stack;
+        mem; efl; stack; stackTaint;
     lets
         cipher_ptr       := if win then rcx else rdi;
         auth_ptr         := if win then r8  else rdx;
@@ -1032,12 +1032,12 @@ procedure {:quick}{:public}{:exportSpecs} gcm_decrypt2_stdcall(
         buffers_disjoint128(out_b, tag_b);
 
         rsp == init_rsp(stack);
-        win ==> valid_src_stack64(rsp + 32 + 8 + 0, stack);
-        win ==> valid_src_stack64(rsp + 32 + 8 + 8, stack);
-        win ==> valid_src_stack64(rsp + 32 + 8 + 16, stack);
-        win ==> valid_src_stack64(rsp + 32 + 8 + 24, stack);
-        !win ==> valid_src_stack64(rsp + 8 + 0, stack);
-        !win ==> valid_src_stack64(rsp + 8 + 8, stack);        
+        win ==> valid_stack_slot64(rsp + 32 + 8 + 0, stack, Public, stackTaint);
+        win ==> valid_stack_slot64(rsp + 32 + 8 + 8, stack, Public, stackTaint);
+        win ==> valid_stack_slot64(rsp + 32 + 8 + 16, stack, Public, stackTaint);
+        win ==> valid_stack_slot64(rsp + 32 + 8 + 24, stack, Public, stackTaint);
+        !win ==> valid_stack_slot64(rsp + 8 + 0, stack, Public, stackTaint);
+        !win ==> valid_stack_slot64(rsp + 8 + 8, stack, Public, stackTaint);
 
         cipher_num_bytes == (if win then rdx else rsi);
         auth_num_bytes == (if win then r9 else rcx);

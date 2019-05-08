@@ -297,6 +297,7 @@ val taint_at (memTaint:M.memtaint) (addr:int) : taint
 [@va_qattr] unfold let va_get_mem (s:va_state) : M.mem = s.mem
 [@va_qattr] unfold let va_get_stack (s:va_state) : S.stack = s.stack
 [@va_qattr] unfold let va_get_memTaint (s:va_state) : M.memtaint = s.memTaint
+[@va_qattr] unfold let va_get_stackTaint (s:va_state) : M.memtaint = s.stackTaint
 
 [@va_qattr] let va_upd_ok (ok:bool) (s:state) : state = { s with ok = ok }
 [@va_qattr] let va_upd_flags (flags:nat64) (s:state) : state = { s with flags = flags }

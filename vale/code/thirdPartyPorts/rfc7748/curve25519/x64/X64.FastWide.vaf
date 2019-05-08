@@ -139,7 +139,7 @@ procedure{:quick}{:public}{:exportSpecs} fmul_stdcall(
     reads memTaint;
     modifies
         rax; rbx; rcx; rdx; rsi; rdi; rbp; rsp; r8; r9; r10; r11; r12; r13; r14; r15;         
-        efl; mem; stack;
+        efl; mem; stack; stackTaint;
     requires
         rsp == init_rsp(stack);
         adx_enabled && bmi2_enabled;
@@ -336,7 +336,7 @@ procedure{:quick}{:public}{:exportSpecs} fmul2_stdcall(
     reads memTaint;
     modifies
         rax; rbx; rcx; rdx; rsi; rdi; rbp; rsp; r8; r9; r10; r11; r12; r13; r14; r15;             
-        efl; mem; stack;
+        efl; mem; stack; stackTaint;
     requires
         rsp == init_rsp(stack);
         adx_enabled && bmi2_enabled;
@@ -516,7 +516,7 @@ procedure{:quick}{:public}{:exportSpecs} fsqr_stdcall(
     reads memTaint;
     modifies
         rax; rbx; rcx; rdx; rsi; rdi; rbp; rsp; r8; r9; r10; r11; r12; r13; r14; r15;
-        efl; mem; stack;
+        efl; mem; stack; stackTaint;
     requires
         rsp == init_rsp(stack);
         adx_enabled && bmi2_enabled;
@@ -680,7 +680,7 @@ procedure{:quick}{:public}{:exportSpecs} fsqr2_stdcall(
     reads memTaint;
     modifies
         rax; rbx; rcx; rdx; rsi; rdi; rbp; rsp; r8; r9; r10; r11; r12; r13; r14; r15;
-        efl; mem; stack;
+        efl; mem; stack; stackTaint;
     requires
         rsp == init_rsp(stack);
         adx_enabled && bmi2_enabled;

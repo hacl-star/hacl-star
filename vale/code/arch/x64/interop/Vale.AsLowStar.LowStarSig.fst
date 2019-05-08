@@ -167,7 +167,7 @@ let rec stack_args (max_arity:nat)
              + 8
              + VS.eval_reg MS.Rsp s
            in
-           SI.valid_src_stack64 ptr s.VS.stack /\
+           SI.valid_stack_slot64 ptr s.VS.stack MS.Public s.VS.stackTaint /\
            SI.load_stack64 ptr s.VS.stack == arg_as_nat64 hd s)
 
 [@__reduce__]
@@ -267,4 +267,5 @@ let create_initial_vale_state
       flags = IA.init_flags;
       mem = as_vale_mem mem;
       memTaint = TS.(t_state.memTaint);
+      stackTaint = TS.(t_state.stackTaint);
       stack = as_vale_stack t_state.TS.state.BS.stack}

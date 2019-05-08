@@ -418,7 +418,7 @@ procedure {:quick} gcm_blocks_auth(
 
     reads
         auth_ptr; auth_num_bytes; scratch_ptr; 
-        rsp; mem; memTaint; stack;
+        rsp; mem; memTaint; stack; stackTaint;
     modifies
         rax; rcx; rdx;
         r8; r9; r11; r12; r13; r14; r15;
@@ -427,8 +427,8 @@ procedure {:quick} gcm_blocks_auth(
 
     requires
         // Valid buffers and pointers
-        valid_src_stack64(rsp + offset + 0, stack);
-        valid_src_stack64(rsp + offset + 64, stack);        
+        valid_stack_slot64(rsp + offset + 0, stack, Public, stackTaint);
+        valid_stack_slot64(rsp + offset + 64, stack, Public, stackTaint);        
 
         validSrcAddrs128(mem,     auth_ptr,     auth_b, auth_len, memTaint, Secret);
         validSrcAddrs128(mem,   abytes_ptr,   abytes_b,        1, memTaint, Secret);
@@ -559,7 +559,7 @@ procedure {:quick} gcm_blocks(
         plain_num_bytes := load_stack64(rsp + offset + 64, stack);
 
     reads
-        rsp; memTaint; stack;
+        rsp; memTaint; stack; stackTaint;
 
     modifies
         rax; rbx; rcx; rdx; rdi; rsi; scratch_ptr;
@@ -569,15 +569,15 @@ procedure {:quick} gcm_blocks(
 
     requires
         // Valid buffers and pointers
-        valid_src_stack64(rsp + offset + 0, stack);
-        valid_src_stack64(rsp + offset + 8, stack);
-        valid_src_stack64(rsp + offset + 16, stack);
-        valid_src_stack64(rsp + offset + 24, stack);
-        valid_src_stack64(rsp + offset + 32, stack);
-        valid_src_stack64(rsp + offset + 40, stack);
-        valid_src_stack64(rsp + offset + 48, stack);
-        valid_src_stack64(rsp + offset + 56, stack);
-        valid_src_stack64(rsp + offset + 64, stack);        
+        valid_stack_slot64(rsp + offset + 0, stack, Public, stackTaint);
+        valid_stack_slot64(rsp + offset + 8, stack, Public, stackTaint);
+        valid_stack_slot64(rsp + offset + 16, stack, Public, stackTaint);
+        valid_stack_slot64(rsp + offset + 24, stack, Public, stackTaint);
+        valid_stack_slot64(rsp + offset + 32, stack, Public, stackTaint);
+        valid_stack_slot64(rsp + offset + 40, stack, Public, stackTaint);
+        valid_stack_slot64(rsp + offset + 48, stack, Public, stackTaint);
+        valid_stack_slot64(rsp + offset + 56, stack, Public, stackTaint);
+        valid_stack_slot64(rsp + offset + 64, stack, Public, stackTaint);
 
         validSrcAddrs128(mem,     auth_ptr,     auth_b, auth_len, memTaint, Secret);
         validSrcAddrs128(mem,   abytes_ptr,   abytes_b,        1, memTaint, Secret);
@@ -863,7 +863,7 @@ procedure {:quick exportOnly} gcm_blocks_wrapped(
         plain_num_bytes := load_stack64(rsp + offset + 64, stack);
 
     reads
-        rsp; memTaint; stack;
+        rsp; memTaint; stack; stackTaint;
 
     modifies
         rax; rbx; rcx; rdx; rdi; rsi; scratch_ptr;
@@ -873,15 +873,15 @@ procedure {:quick exportOnly} gcm_blocks_wrapped(
 
     requires
         // Valid buffers and pointers
-        valid_src_stack64(rsp + offset + 0, stack);
-        valid_src_stack64(rsp + offset + 8, stack);
-        valid_src_stack64(rsp + offset + 16, stack);
-        valid_src_stack64(rsp + offset + 24, stack);
-        valid_src_stack64(rsp + offset + 32, stack);
-        valid_src_stack64(rsp + offset + 40, stack);
-        valid_src_stack64(rsp + offset + 48, stack);
-        valid_src_stack64(rsp + offset + 56, stack);
-        valid_src_stack64(rsp + offset + 64, stack);        
+        valid_stack_slot64(rsp + offset + 0, stack, Public, stackTaint);
+        valid_stack_slot64(rsp + offset + 8, stack, Public, stackTaint);
+        valid_stack_slot64(rsp + offset + 16, stack, Public, stackTaint);
+        valid_stack_slot64(rsp + offset + 24, stack, Public, stackTaint);
+        valid_stack_slot64(rsp + offset + 32, stack, Public, stackTaint);
+        valid_stack_slot64(rsp + offset + 40, stack, Public, stackTaint);
+        valid_stack_slot64(rsp + offset + 48, stack, Public, stackTaint);
+        valid_stack_slot64(rsp + offset + 56, stack, Public, stackTaint);
+        valid_stack_slot64(rsp + offset + 64, stack, Public, stackTaint);        
 
         validSrcAddrs128(mem,     auth_ptr,     auth_b, auth_len, memTaint, Secret);
         validSrcAddrs128(mem,   abytes_ptr,   abytes_b,        1, memTaint, Secret);
@@ -1061,11 +1061,11 @@ procedure {:quick} {:public} save_registers(inline win:bool)
         rbx; rbp; rdi; rsi; r12; r13; r14; r15;
         xmm6; xmm7; xmm8; xmm9; xmm10; xmm11; xmm12; xmm13; xmm14; xmm15;
     modifies
-        rax; rsp; stack; efl;
+        rax; rsp; stack; efl; stackTaint;
     ensures
         rsp == old(rsp) - 8 * (8 + (if win then 10*2 else 0));
         init_rsp(stack) == old(init_rsp(stack));
-        valid_src_stack64s(rsp, 8 + (if win then 10*2 else 0), stack);
+        valid_stack_slot64s(rsp, 8 + (if win then 10*2 else 0), stack, Public, stackTaint);
 
         modifies_stack(rsp, old(rsp), old(stack), stack);
 
@@ -1127,7 +1127,7 @@ procedure {:quick} {:public} restore_registers(inline win:bool, ghost old_rsp:na
         ghost old_xmm6:quad32, ghost old_xmm7:quad32, ghost old_xmm8:quad32, ghost old_xmm9:quad32, ghost old_xmm10:quad32, ghost old_xmm11:quad32, ghost old_xmm12:quad32, ghost old_xmm13:quad32, ghost old_xmm14:quad32, ghost old_xmm15:quad32)
     requires
         old_rsp == init_rsp(stack);
-        valid_src_stack64s(rsp, 8 + (if win then 10*2 else 0), stack);
+        valid_stack_slot64s(rsp, 8 + (if win then 10*2 else 0), stack, Public, stackTaint);
         rsp == old_rsp - 8 * (8 + (if win then 10*2 else 0));
 
         win ==> load_stack64(rsp + 0x00, stack) == hi64(old_xmm6);
@@ -1154,7 +1154,7 @@ procedure {:quick} {:public} restore_registers(inline win:bool, ghost old_rsp:na
     modifies
         rax; rbx; rbp; rdi; rsi; r12; r13; r14; r15;
         xmm6; xmm7; xmm8; xmm9; xmm10; xmm11; xmm12; xmm13; xmm14; xmm15;
-        stack; rsp; efl;
+        stack; rsp; efl; stackTaint;
     ensures
         rsp == old_rsp;
         init_rsp(stack) == old(init_rsp(stack));
@@ -1258,7 +1258,7 @@ procedure {:quick exportOnly}{:public}{:exportSpecs}{:frame false} gcm_blocks_st
     modifies
         rax; rbx; rcx; rdx; rdi; rsi; rsp; rbp; r8; r9; r10; r11; r12; r13; r14; r15; 
         xmm0; xmm1; xmm2; xmm3; xmm4; xmm5; xmm6; xmm7; xmm8; xmm9; xmm10; xmm11; xmm12; xmm13; xmm14; xmm15;
-        mem; efl; stack;
+        mem; efl; stack; stackTaint;
     requires
         // Manual framing
         this.ok;
@@ -1267,31 +1267,31 @@ procedure {:quick exportOnly}{:public}{:exportSpecs}{:frame false} gcm_blocks_st
         rsp == init_rsp(stack);
         
         // Valid buffers and pointers
-        !win ==> valid_src_stack64(rsp + 8 + 0, stack);
-        !win ==> valid_src_stack64(rsp + 8 + 8, stack);
-        !win ==> valid_src_stack64(rsp + 8 + 16, stack);
-        !win ==> valid_src_stack64(rsp + 8 + 24, stack);
-        !win ==> valid_src_stack64(rsp + 8 + 32, stack);
-        !win ==> valid_src_stack64(rsp + 8 + 40, stack);
-        !win ==> valid_src_stack64(rsp + 8 + 48, stack);
-        !win ==> valid_src_stack64(rsp + 8 + 56, stack);
-        !win ==> valid_src_stack64(rsp + 8 + 64, stack);        
-        !win ==> valid_src_stack64(rsp + 8 + 72, stack);
-        !win ==> valid_src_stack64(rsp + 8 + 80, stack);
+        !win ==> valid_stack_slot64(rsp + 8 + 0, stack, Public, stackTaint);
+        !win ==> valid_stack_slot64(rsp + 8 + 8, stack, Public, stackTaint);
+        !win ==> valid_stack_slot64(rsp + 8 + 16, stack, Public, stackTaint);
+        !win ==> valid_stack_slot64(rsp + 8 + 24, stack, Public, stackTaint);
+        !win ==> valid_stack_slot64(rsp + 8 + 32, stack, Public, stackTaint);
+        !win ==> valid_stack_slot64(rsp + 8 + 40, stack, Public, stackTaint);
+        !win ==> valid_stack_slot64(rsp + 8 + 48, stack, Public, stackTaint);
+        !win ==> valid_stack_slot64(rsp + 8 + 56, stack, Public, stackTaint);
+        !win ==> valid_stack_slot64(rsp + 8 + 64, stack, Public, stackTaint);  
+        !win ==> valid_stack_slot64(rsp + 8 + 72, stack, Public, stackTaint);
+        !win ==> valid_stack_slot64(rsp + 8 + 80, stack, Public, stackTaint);
         
-        win ==> valid_src_stack64(rsp + 40 + 0, stack);
-        win ==> valid_src_stack64(rsp + 40 + 8, stack);
-        win ==> valid_src_stack64(rsp + 40 + 16, stack);
-        win ==> valid_src_stack64(rsp + 40 + 24, stack);
-        win ==> valid_src_stack64(rsp + 40 + 32, stack);
-        win ==> valid_src_stack64(rsp + 40 + 40, stack);
-        win ==> valid_src_stack64(rsp + 40 + 48, stack);
-        win ==> valid_src_stack64(rsp + 40 + 56, stack);
-        win ==> valid_src_stack64(rsp + 40 + 64, stack);        
-        win ==> valid_src_stack64(rsp + 40 + 72, stack);
-        win ==> valid_src_stack64(rsp + 40 + 80, stack);        
-        win ==> valid_src_stack64(rsp + 40 + 88, stack);
-        win ==> valid_src_stack64(rsp + 40 + 96, stack);
+        win ==> valid_stack_slot64(rsp + 40 + 0, stack, Public, stackTaint);
+        win ==> valid_stack_slot64(rsp + 40 + 8, stack, Public, stackTaint);
+        win ==> valid_stack_slot64(rsp + 40 + 16, stack, Public, stackTaint);
+        win ==> valid_stack_slot64(rsp + 40 + 24, stack, Public, stackTaint);
+        win ==> valid_stack_slot64(rsp + 40 + 32, stack, Public, stackTaint);
+        win ==> valid_stack_slot64(rsp + 40 + 40, stack, Public, stackTaint);
+        win ==> valid_stack_slot64(rsp + 40 + 48, stack, Public, stackTaint);
+        win ==> valid_stack_slot64(rsp + 40 + 56, stack, Public, stackTaint);
+        win ==> valid_stack_slot64(rsp + 40 + 64, stack, Public, stackTaint);  
+        win ==> valid_stack_slot64(rsp + 40 + 72, stack, Public, stackTaint);
+        win ==> valid_stack_slot64(rsp + 40 + 80, stack, Public, stackTaint);  
+        win ==> valid_stack_slot64(rsp + 40 + 88, stack, Public, stackTaint);
+        win ==> valid_stack_slot64(rsp + 40 + 96, stack, Public, stackTaint);
 
         auth_len == auth_num;
         auth_num_bytes == auth_bytes;
