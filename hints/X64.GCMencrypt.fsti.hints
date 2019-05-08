@@ -1,5 +1,5 @@
 [
-  "Z—Ð¡\t7°\u001a\u000fÆ\nâÞ¬z\u0005",
+  "5\u000fÍEåéf÷±È´WN’¤Ý",
   [
     [
       "X64.GCMencrypt.va_req_gcm_encrypt2_stdcall",
@@ -16,7 +16,7 @@
         "unit_typing"
       ],
       0,
-      "58b6d564f8ffb6f25c33cf03f8a89990"
+      "549017284f2255bc03e201584478778d"
     ],
     [
       "X64.GCMencrypt.va_ens_gcm_encrypt2_stdcall",
@@ -76,7 +76,7 @@
         "typing_tok_Interop.Types.TUInt128@tok", "unit_typing"
       ],
       0,
-      "cdbdb8b85cb7b7fa44f614eda823ca84"
+      "aeec4353d48e1915c313d48a52fe44b8"
     ],
     [
       "X64.GCMencrypt.va_lemma_gcm_encrypt2_stdcall",
@@ -94,6 +94,7 @@
         "constructor_distinct_Interop.Types.TUInt128", "eq2-interp",
         "equality_tok_AES_s.AES_128@tok", "equality_tok_AES_s.AES_256@tok",
         "equality_tok_Interop.Types.TUInt128@tok",
+        "equality_tok_X64.Machine_s.Rdx@tok",
         "equality_tok_X64.Machine_s.Secret@tok", "equation_AES_s.is_aes_key",
         "equation_AES_s.is_aes_key_LE",
         "equation_Arch.Types.be_quad32_to_bytes",
@@ -117,11 +118,12 @@
         "kinding_Words_s.four@tok", "lemma_FStar.Seq.Base.lemma_init_len",
         "proj_equation_X64.Vale.State.Mkstate_mem",
         "proj_equation_X64.Vale.State.Mkstate_memTaint",
+        "proj_equation_X64.Vale.State.Mkstate_regs",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_1629e6d74d6b72d40889c586810cf96f",
         "refinement_interpretation_Tm_refine_36f208f2b1019ab7b5d9be73f4c89349",
         "refinement_interpretation_Tm_refine_37e29e1c3dd347eb60f455ae3b4c7ac1",
         "refinement_interpretation_Tm_refine_5514fbe9e08dfda40f950a7b9f1b2b98",
+        "refinement_interpretation_Tm_refine_5aaeeb683342f8486a261ec83554b0ed",
         "refinement_interpretation_Tm_refine_a0cd7d06c5da6444b6b51b319febde8e",
         "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
         "refinement_interpretation_Tm_refine_d1f295a68bb616ae63ab7b3087e3ebcc",
@@ -131,11 +133,14 @@
         "typing_Tm_abs_e17010ae1f40f6860845e34b0c21d194",
         "typing_Types_s.reverse_bytes_quad32",
         "typing_Words.Seq_s.four_to_seq_BE", "typing_X64.Memory.buffer_read",
+        "typing_X64.Vale.Regs.sel",
         "typing_X64.Vale.State.__proj__Mkstate__item__mem",
-        "typing_tok_Interop.Types.TUInt128@tok"
+        "typing_X64.Vale.State.__proj__Mkstate__item__regs",
+        "typing_tok_Interop.Types.TUInt128@tok",
+        "typing_tok_X64.Machine_s.Rdx@tok"
       ],
       0,
-      "1281b59415cffdf42317e77cd5471186"
+      "0287a9e5dc53e1927f4905ca22568388"
     ],
     [
       "X64.GCMencrypt.va_wp_gcm_encrypt2_stdcall",
@@ -213,7 +218,7 @@
         "typing_tok_X64.Machine_s.Rbx@tok"
       ],
       0,
-      "d58151997553795c8077e221052f291f"
+      "61ebf69c96f25873e8c28c74e2f41b03"
     ],
     [
       "X64.GCMencrypt.va_wpProof_gcm_encrypt2_stdcall",
@@ -225,7 +230,7 @@
         "refinement_interpretation_Tm_refine_8d65e998a07dd53ec478e27017d9dba5"
       ],
       0,
-      "2bfb2be1dcb1ea6962bcc75778ac5fc7"
+      "5770c31827ad7451ab694fdfa0a59ae1"
     ]
   ]
 ]
