@@ -29,7 +29,7 @@ procedure Copy16(inline t:taint, ghost bsrc:buffer64, ghost bdst:buffer64)
         valid_taint_buf64(bsrc, mem, memTaint, t);
         valid_taint_buf64(bdst, mem, memTaint, t);
     ensures
-        forall i :: 0 <= i && i < 2 ==> buffer64_read(bdst, i, mem) == buffer64_read(bsrc, i, mem);
+        forall(i) 0 <= i && i < 2 ==> buffer64_read(bdst, i, mem) == buffer64_read(bsrc, i, mem);
         modifies_mem(loc_buffer(bdst), old(mem), mem);
     reads
         rsi; rdi; memTaint;
@@ -48,10 +48,10 @@ procedure Copy16(inline t:taint, ghost bsrc:buffer64, ghost bdst:buffer64)
 procedure Copy64()
     requires/ensures
         rsi + 64 <= rdi;
-        forall i {Map.contains(mem, i)}:: rsi <= i < rsi + 64 && (i - rsi) % 8 == 0 ==> Map.contains(mem, i);
-        forall i {Map.contains(mem, i)}:: rdi <= i < rdi + 64 && (i - rdi) % 8 == 0 ==> Map.contains(mem, i);
+        forall(i){Map.contains(mem, i)} rsi <= i < rsi + 64 && (i - rsi) % 8 == 0 ==> Map.contains(mem, i);
+        forall(i){Map.contains(mem, i)} rdi <= i < rdi + 64 && (i - rdi) % 8 == 0 ==> Map.contains(mem, i);
     ensures
-        forall i :: 0 <= i && i < 64 && i % 8 == 0 ==> mem[rdi + i] == mem[rsi + i];
+        forall(i) 0 <= i && i < 64 && i % 8 == 0 ==> mem[rdi + i] == mem[rsi + i];
     reads
         rsi; rdi;
     modifies
@@ -80,10 +80,10 @@ procedure Copy64()
 procedure Copy128()
     requires/ensures
         rsi + 128 <= rdi;
-        forall i {Map.contains(mem, i)}:: rsi <= i < rsi + 128 && (i - rsi) % 8 == 0 ==> Map.contains(mem, i);
-        forall i {Map.contains(mem, i)}:: rdi <= i < rdi + 128 && (i - rdi) % 8 == 0 ==> Map.contains(mem, i);
+        forall(i){Map.contains(mem, i)} rsi <= i < rsi + 128 && (i - rsi) % 8 == 0 ==> Map.contains(mem, i);
+        forall(i){Map.contains(mem, i)} rdi <= i < rdi + 128 && (i - rdi) % 8 == 0 ==> Map.contains(mem, i);
     ensures
-        forall i :: 0 <= i && i < 128 && i % 8 == 0 ==> mem[rdi + i] == mem[rsi + i];
+        forall(i) 0 <= i && i < 128 && i % 8 == 0 ==> mem[rdi + i] == mem[rsi + i];
     reads
         rsi; rdi;
     modifies

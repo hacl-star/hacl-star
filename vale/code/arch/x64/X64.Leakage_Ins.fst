@@ -506,14 +506,34 @@ let check_if_instr_consumes_fixed_time (ins:tainted_ins) (ts:taintState) : Pure 
   (requires BC.Instr? ins.i)
   (ensures ins_consumes_fixed_time ins ts)
   =
-  let BC.Instr (BC.InstrType outs args havoc_flags iins) oprs _ = ins.i in
+  let BC.Instr (InstrTypeRecord #outs #args #havoc_flags iins) oprs _ = ins.i in
   let t = inouts_taint outs args oprs ts ins.t in
   let b = check_if_consumes_fixed_time_outs outs args oprs ts ins.t t in
-  let TaintState rs flags cf xmms = ts in
+  let TaintState rs flags cf ovf xmms = ts in
   let flags = match havoc_flags with | HavocFlags -> Secret | PreserveFlags -> flags in
   let cf = match havoc_flags with | HavocFlags -> Secret | PreserveFlags -> cf in
-  let ts = TaintState rs flags cf xmms in
+  let ovf = match havoc_flags with | HavocFlags -> Secret | PreserveFlags -> ovf in
+  let ts = TaintState rs flags cf ovf xmms in
   (b, instr_set_taints outs args oprs ts t)
+
+let coerce_to_normal (#a:Type0) (x:a) : y:(normal a){x == y} = x
+
+let check_if_xor_consumes_fixed_time (ins:tainted_ins) (ts:taintState) : Pure (bool & taintState)
+  (requires BC.Instr? ins.i /\ S.AnnotateXor64? (BC.Instr?.annotation ins.i))
+  (ensures ins_consumes_fixed_time ins ts)
+  =
+  let BC.Instr (InstrTypeRecord #outs #args #havoc_flags iins) oprs (S.AnnotateXor64 eq) = ins.i in
+  let oprs:normal (instr_operands_t [inOut op64; out opFlagsCf; out opFlagsOf] [op64]) =
+    coerce_to_normal #(instr_operands_t [inOut op64; out opFlagsCf; out opFlagsOf] [op64]) oprs in
+  let (o1, (o2, ())) = oprs in
+  if o1 = o2 then
+    let t = Public in
+    let b = check_if_consumes_fixed_time_outs outs args oprs ts ins.t t in
+    let TaintState rs _ _ _ xmms = ts in
+    let ts = TaintState rs Secret Public Public xmms in
+    (b, instr_set_taints outs args oprs ts t)
+  else
+    check_if_instr_consumes_fixed_time ins ts
 
 let check_if_alloc_consumes_fixed_time (ins:tainted_ins) (ts:taintState) : Pure (bool & taintState)
   (requires BC.Alloc? ins.i)
@@ -545,6 +565,7 @@ let check_if_pop_consumes_fixed_time (ins:tainted_ins) (ts:taintState) : Pure (b
 
 let check_if_ins_consumes_fixed_time ins ts =
   match ins.i with
+  | BC.Instr _ _ (S.AnnotateXor64 _) -> check_if_xor_consumes_fixed_time ins ts
   | BC.Instr _ _ _ -> check_if_instr_consumes_fixed_time ins ts
   | BC.Push _ -> check_if_push_consumes_fixed_time ins ts
   | BC.Pop _ -> check_if_pop_consumes_fixed_time ins ts
@@ -568,7 +589,7 @@ let lemma_instr_leakage_free (ts:taintState) (ins:tainted_ins) : Lemma
       (ensures is_explicit_leakage_free_rhs code fuel ts ts' s1 s2)
       [SMTPat (is_explicit_leakage_free_rhs code fuel ts ts' s1 s2)]
       =
-      let BC.Instr (BC.InstrType outs args havoc_flags i) oprs _ = ins.i in
+      let BC.Instr (InstrTypeRecord #outs #args #havoc_flags i) oprs _ = ins.i in
       let t_ins = ins.t in
       let t_out = inouts_taint outs args oprs ts ins.t in
       let Some vs1 = S.instr_apply_eval outs args (instr_eval i) oprs s1.state in
@@ -583,10 +604,11 @@ let lemma_instr_leakage_free (ts:taintState) (ins:tainted_ins) : Lemma
         | HavocFlags -> {s2 with state = {s2.state with S.flags = S.havoc s2.state ins.i}}
         | PreserveFlags -> s2
         in
-      let TaintState rs flags cf xmms = ts in
+      let TaintState rs flags cf ovf xmms = ts in
       let flags = match havoc_flags with | HavocFlags -> Secret | PreserveFlags -> flags in
       let cf = match havoc_flags with | HavocFlags -> Secret | PreserveFlags -> cf in
-      let ts_havoc = TaintState rs flags cf xmms in
+      let ovf = match havoc_flags with | HavocFlags -> Secret | PreserveFlags -> ovf in
+      let ts_havoc = TaintState rs flags cf ovf xmms in
 
       if t_out = Secret then
       (
@@ -726,9 +748,29 @@ let lemma_pop_leakage_free (ts:taintState) (ins:tainted_ins) : Lemma
   )
 
 
+#reset-options "--initial_ifuel 1 --max_ifuel 1 --initial_fuel 4 --max_fuel 4 --z3rlimit 40"
+let lemma_xor_leakage_free (ts:taintState) (ins:tainted_ins) : Lemma
+  (requires BC.Instr? ins.i /\ S.AnnotateXor64? (BC.Instr?.annotation ins.i))
+  (ensures (
+    let (b, ts') = check_if_xor_consumes_fixed_time ins ts in
+    b2t b ==> isConstantTime (Ins ins) ts /\ isLeakageFree (Ins ins) ts ts'
+  ))
+  =
+  let BC.Instr (InstrTypeRecord #outs #args #havoc_flags iins) oprs (S.AnnotateXor64 eq) = ins.i in
+  let oprs:normal (instr_operands_t [inOut op64; out opFlagsCf; out opFlagsOf] [op64]) =
+    coerce_to_normal #(instr_operands_t [inOut op64; out opFlagsCf; out opFlagsOf] [op64]) oprs in
+  let (o1, (o2, ())) = oprs in
+  if o1 = o2 then
+    FStar.Classical.forall_intro_with_pat (fun n -> Types_s.ixor n n) Arch.Types.lemma_BitwiseXorCancel64
+  else
+    lemma_instr_leakage_free ts ins
+
+#reset-options "--initial_ifuel 1 --max_ifuel 1 --initial_fuel 1 --max_fuel 1 --z3rlimit 20"
+
 let lemma_ins_leakage_free ts ins =
   let b, ts' = check_if_ins_consumes_fixed_time ins ts in
   match ins.i with
+  | BC.Instr _ _ (S.AnnotateXor64 _) -> lemma_xor_leakage_free ts ins
   | BC.Instr _ _ _ -> lemma_instr_leakage_free ts ins
   | BC.Alloc _ -> ()
   | BC.Dealloc _ -> lemma_dealloc_leakage_free ts ins

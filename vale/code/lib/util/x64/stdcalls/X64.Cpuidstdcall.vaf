@@ -27,7 +27,10 @@ open X64.Cpuid
 #endverbatim
 
 
-procedure {:quick}{:exportSpecs}{:public} check_aesni_stdcall(inline win:bool)
+procedure check_aesni_stdcall(inline win:bool)
+    {:public}
+    {:quick}
+    {:exportSpecs}
     requires
     ensures
         rsp == old(rsp);
@@ -70,7 +73,10 @@ procedure {:quick}{:exportSpecs}{:public} check_aesni_stdcall(inline win:bool)
 }
 
 
-procedure {:quick}{:exportSpecs}{:public} check_sha_stdcall(inline win:bool)
+procedure check_sha_stdcall(inline win:bool)
+    {:public}
+    {:quick}
+    {:exportSpecs}
     requires
     ensures
         rsp == old(rsp);
@@ -112,7 +118,10 @@ procedure {:quick}{:exportSpecs}{:public} check_sha_stdcall(inline win:bool)
         check_sha_support();
 }
 
-procedure {:quick}{:exportSpecs}{:public} check_adx_bmi2_stdcall(inline win:bool)
+procedure check_adx_bmi2_stdcall(inline win:bool)
+    {:public}
+    {:quick}
+    {:exportSpecs}
     requires
     ensures
         rsp == old(rsp);
@@ -154,7 +163,10 @@ procedure {:quick}{:exportSpecs}{:public} check_adx_bmi2_stdcall(inline win:bool
         check_adx_bmi2_support();
 }
 
-procedure {:quick}{:exportSpecs}{:public} check_avx_stdcall(inline win:bool)
+procedure check_avx_stdcall(inline win:bool)
+    {:public}
+    {:quick}
+    {:exportSpecs}
     requires
     ensures
         rsp == old(rsp);
@@ -196,7 +208,10 @@ procedure {:quick}{:exportSpecs}{:public} check_avx_stdcall(inline win:bool)
         check_avx_support();
 }
 
-procedure {:quick}{:exportSpecs}{:public} check_avx2_stdcall(inline win:bool)
+procedure check_avx2_stdcall(inline win:bool)
+    {:public}
+    {:quick}
+    {:exportSpecs}
     requires
     ensures
         rsp == old(rsp);

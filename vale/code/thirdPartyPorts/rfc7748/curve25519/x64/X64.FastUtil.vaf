@@ -52,9 +52,8 @@ ghost procedure assert_by_tactic(ghost p:prop, ghost t:tactic) extern;
 
 #reset-options "--z3rlimit 600"
 
-procedure{:quick} fast_mul1(
-    ghost dst_b:buffer64,
-    ghost inA_b:buffer64)
+procedure fast_mul1(ghost dst_b:buffer64, ghost inA_b:buffer64)
+    {:quick}
     lets
         dst_ptr @= rdi;
         inA_ptr @= rsi;
@@ -93,7 +92,7 @@ procedure{:quick} fast_mul1(
 {
     xor_lemmas();
     
-    Mulx64( r9,  r8, Mem(inA_ptr,  0, inA_b, 0, Secret));  /* A[0]*B */ lemma_prod_bounds(r9, r8, b, a0); ghost var old_r8 := r8;
+    Mulx64( r9,  r8, Mem(inA_ptr,  0, inA_b, 0, Secret));  /* A[0]*B */ lemma_prod_bounds(r9, r8, b, a0); let old_r8 := r8;
     Store64_buffer(dst_ptr, r8,  0, Secret, dst_b, 0);  
     Xor64(r8, r8);
     Mulx64(r11, r10, Mem(inA_ptr,  8, inA_b, 1, Secret));  /* A[1]*B */ lemma_prod_bounds(r11, r10, b, a1); 
@@ -107,7 +106,7 @@ procedure{:quick} fast_mul1(
     Store64_buffer(dst_ptr, r14, 24, Secret, dst_b, 3);  
     Adcx64Wrap(rax, r8);
     
-    ghost var carry_bit := bool_bit(cf(efl));
+    let carry_bit := bool_bit(cf(efl));
     assert carry_bit == 0;      // PASSES
     assert_by_tactic(a * b == pow2_four(b*a0, b*a1, b*a2, b*a3), int_canon);   // PASSES
 }
@@ -115,10 +114,10 @@ procedure{:quick} fast_mul1(
 /*
 #reset-options "--z3rlimit 40"
 
-procedure{:quick}{:public}{:exportSpecs} fast_mul1_stdcall(
-    inline win:bool,
-    ghost dst_b:buffer64,
-    ghost inA_b:buffer64)
+procedure fast_mul1_stdcall(inline win:bool, ghost dst_b:buffer64, ghost inA_b:buffer64)
+    {:public}
+    {:quick}
+    {:exportSpecs}
     lets
         dst_ptr @= rdi; inA_ptr @= rsi; b @= rdx;
         dst_in := (if win then rcx else rdi);
@@ -188,10 +187,10 @@ procedure{:quick}{:public}{:exportSpecs} fast_mul1_stdcall(
 */
 
 #reset-options "--z3rlimit 600"
-procedure{:quick}{:public}{:exportSpecs} fast_add1(
-    ghost dst_b:buffer64,
-    ghost inA_b:buffer64,
-    ghost inB:nat64)
+procedure fast_add1(ghost dst_b:buffer64, ghost inA_b:buffer64, ghost inB:nat64)
+    {:public}
+    {:quick}
+    {:exportSpecs}
     lets
         dst_ptr @= rdi;
         inA_ptr @= rsi;
@@ -253,12 +252,14 @@ procedure{:quick}{:public}{:exportSpecs} fast_add1(
 
 #reset-options "--z3rlimit 40"
 
-procedure{:quick}{:public}{:exportSpecs} fast_add1_stdcall(
-    inline win:bool,
-    ghost dst_b:buffer64,
-    ghost inA_b:buffer64,
-    ghost inB_in:nat64
-    )
+procedure fast_add1_stdcall(
+        inline win:bool,
+        ghost dst_b:buffer64,
+        ghost inA_b:buffer64,
+        ghost inB_in:nat64)
+    {:public}
+    {:quick}
+    {:exportSpecs}
     lets
         dst_ptr @= rdi; inA_ptr @= rsi; b @= rdx;
         dst_in := (if win then rcx else rdi);
@@ -336,9 +337,8 @@ procedure{:quick}{:public}{:exportSpecs} fast_add1_stdcall(
 }
 
 #reset-options "--z3rlimit 1200"
-procedure{:quick} fast_sub1(
-    ghost dst_b:buffer64,
-    ghost inA_b:buffer64)
+procedure fast_sub1(ghost dst_b:buffer64, ghost inA_b:buffer64)
+    {:quick}
     lets
         dst_ptr @= rdi;
         inA_ptr @= rsi;
@@ -394,7 +394,7 @@ procedure{:quick} fast_sub1(
     Sbb64(r11, 0);         
     Store64_buffer(dst_ptr, r11, 24, Secret, dst_b, 3);  
 
-    ghost var c := cf(efl);
+    let c := cf(efl);
     Adc64Wrap(rax, rax);   // Extract the carry bit
     assert rax == bool_bit(c);
 
@@ -405,10 +405,10 @@ procedure{:quick} fast_sub1(
 
 /*
 #reset-options "--z3rlimit 40"
-procedure{:quick}{:public}{:exportSpecs} fast_sub1_stdcall(
-    inline win:bool,
-    ghost dst_b:buffer64,
-    ghost inA_b:buffer64)
+procedure fast_sub1_stdcall(inline win:bool, ghost dst_b:buffer64, ghost inA_b:buffer64)
+    {:public}
+    {:quick}
+    {:exportSpecs}
     lets
         dst_ptr @= rdi; inA_ptr @= rsi; b @= rdx;
         dst_in := (if win then rcx else rdi);
@@ -474,10 +474,8 @@ procedure{:quick}{:public}{:exportSpecs} fast_sub1_stdcall(
 */
 
 #reset-options "--z3rlimit 600"
-procedure{:quick} fast_add(
-    ghost dst_b:buffer64,
-    ghost inA_b:buffer64,
-    ghost inB_b:buffer64)
+procedure fast_add(ghost dst_b:buffer64, ghost inA_b:buffer64, ghost inB_b:buffer64)
+    {:quick}
     lets
         dst_ptr @= rdi;
         inA_ptr @= rsi;
@@ -546,11 +544,14 @@ procedure{:quick} fast_add(
 }
 
 /*
-procedure{:quick}{:public}{:exportSpecs} fast_add_stdcall(
-    inline win:bool,
-    ghost dst_b:buffer64,
-    ghost inA_b:buffer64,
-    ghost inB_b:buffer64)
+procedure fast_add_stdcall(
+        inline win:bool,
+        ghost dst_b:buffer64,
+        ghost inA_b:buffer64,
+        ghost inB_b:buffer64)
+    {:public}
+    {:quick}
+    {:exportSpecs}
     lets
         dst_ptr @= rdi; inA_ptr @= rsi; inB_ptr @= rcx;
         dst_in := (if win then rcx else rdi);
@@ -626,10 +627,8 @@ procedure{:quick}{:public}{:exportSpecs} fast_add_stdcall(
 */
 
 #reset-options "--z3rlimit 600"
-procedure{:quick} fast_sub(
-    ghost dst_b:buffer64,
-    ghost inA_b:buffer64,
-    ghost inB_b:buffer64)
+procedure fast_sub(ghost dst_b:buffer64, ghost inA_b:buffer64, ghost inB_b:buffer64)
+    {:quick}
     lets
         dst_ptr @= rdi;
         inA_ptr @= rsi;
@@ -700,7 +699,7 @@ procedure{:quick} fast_sub(
     Sbb64(r11, Mem(inB_ptr,24, inB_b, 3, Secret));         /* A[3] - B[3] */
     Store64_buffer(dst_ptr, r11, 24, Secret, dst_b, 3);  
 
-    ghost var c := cf(efl);
+    let c := cf(efl);
     Adc64Wrap(rax, rax);   // Extract the carry bit
     assert rax == bool_bit(c);
 
@@ -710,11 +709,14 @@ procedure{:quick} fast_sub(
 }
 
 /*
-procedure{:quick}{:public}{:exportSpecs} fast_sub_stdcall(
-    inline win:bool,
-    ghost dst_b:buffer64,
-    ghost inA_b:buffer64,
-    ghost inB_b:buffer64)
+procedure fast_sub_stdcall(
+        inline win:bool,
+        ghost dst_b:buffer64,
+        ghost inA_b:buffer64,
+        ghost inB_b:buffer64)
+    {:public}
+    {:quick}
+    {:exportSpecs}
     lets
         dst_ptr @= rdi; inA_ptr @= rsi; inB_ptr @= rcx;
         dst_in := (if win then rcx else rdi);
@@ -790,10 +792,8 @@ procedure{:quick}{:public}{:exportSpecs} fast_sub_stdcall(
 */
 
 #reset-options "--z3rlimit 40"
-procedure{:quick} cswap_single(
-    inline offset:nat,
-    ghost p0_b:buffer64,
-    ghost p1_b:buffer64)
+procedure cswap_single(inline offset:nat, ghost p0_b:buffer64, ghost p1_b:buffer64)
+    {:quick}
     lets
         p0_ptr @= rdi;
         p1_ptr @= rsi;
@@ -824,7 +824,7 @@ procedure{:quick} cswap_single(
 
         modifies_buffer_2(p0_b, p1_b, old(mem), mem);
 
-        forall i:nat :: //{:pattern (Seq.index (M.buffer_as_seq h2 b) i)}
+        forall(i:nat) //{:pattern (Seq.index (M.buffer_as_seq h2 b) i)}
                         0 <= i < 8
                      && i != offset
                     ==> buffer64_read(p0_b, i, mem)
@@ -846,10 +846,10 @@ procedure{:quick} cswap_single(
     Store64_buffer(p1_ptr, tmp1,  0 + offset * 8, Secret, p1_b, 0 + offset);
 }
 
-procedure{:quick}{:public}{:exportSpecs} cswap2(
-    ghost p0_b:buffer64,
-    ghost p1_b:buffer64,
-    ghost bit_in:nat64)
+procedure cswap2(ghost p0_b:buffer64, ghost p1_b:buffer64, ghost bit_in:nat64)
+    {:public}
+    {:quick}
+    {:exportSpecs}
     lets
         p0_ptr @= rdi;
         p1_ptr @= rsi;
@@ -944,11 +944,14 @@ procedure{:quick}{:public}{:exportSpecs} cswap2(
     cswap_single(7, p0_b, p1_b);
 }
 
-procedure{:quick}{:public}{:exportSpecs} cswap2_stdcall(
-    inline win:bool,
-    ghost p0_b:buffer64,
-    ghost p1_b:buffer64,
-    ghost bit_in:nat64)
+procedure cswap2_stdcall(
+        inline win:bool,
+        ghost p0_b:buffer64,
+        ghost p1_b:buffer64,
+        ghost bit_in:nat64)
+    {:public}
+    {:quick}
+    {:exportSpecs}
     lets
         p0_ptr @= rdi; p1_ptr @= rsi; bit @= rdx;
         p0_in := (if win then rcx else rdi);

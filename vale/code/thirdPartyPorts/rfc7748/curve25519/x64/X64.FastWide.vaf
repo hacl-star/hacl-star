@@ -58,11 +58,14 @@ open X64.FastHybrid
 
 #reset-options "--z3rlimit 60"
 
-procedure{:quick}{:public}{:exportSpecs} fmul(
-    ghost tmp_b:buffer64,
-    ghost inA_b:buffer64,
-    ghost dst_b:buffer64,
-    ghost inB_b:buffer64)
+procedure fmul(
+        ghost tmp_b:buffer64,
+        ghost inA_b:buffer64,
+        ghost dst_b:buffer64,
+        ghost inB_b:buffer64)
+    {:public}
+    {:quick}
+    {:exportSpecs}
     lets
         tmp_ptr @= rdi; inA_ptr @= rsi; dst_ptr @= rdx; inB_ptr @= rcx;
         tmp_in := rdi;
@@ -124,12 +127,15 @@ procedure{:quick}{:public}{:exportSpecs} fmul(
 }
 
 
-procedure{:quick}{:public}{:exportSpecs} fmul_stdcall(
-    inline win:bool,
-    ghost tmp_b:buffer64,
-    ghost inA_b:buffer64,
-    ghost dst_b:buffer64,
-    ghost inB_b:buffer64)
+procedure fmul_stdcall(
+        inline win:bool,
+        ghost tmp_b:buffer64,
+        ghost inA_b:buffer64,
+        ghost dst_b:buffer64,
+        ghost inB_b:buffer64)
+    {:public}
+    {:quick}
+    {:exportSpecs}
     lets
         tmp_ptr @= rdi; inA_ptr @= rsi; dst_ptr @= rdx; inB_ptr @= rcx;
         tmp_in := (if win then rcx else rdi);
@@ -232,11 +238,14 @@ procedure{:quick}{:public}{:exportSpecs} fmul_stdcall(
 }
 
 #reset-options "--z3rlimit 60"
-procedure{:quick}{:public}{:exportSpecs} fmul2(
-    ghost tmp_b:buffer64,
-    ghost inA_b:buffer64,
-    ghost dst_b:buffer64,
-    ghost inB_b:buffer64)
+procedure fmul2(
+        ghost tmp_b:buffer64,
+        ghost inA_b:buffer64,
+        ghost dst_b:buffer64,
+        ghost inB_b:buffer64)
+    {:public}
+    {:quick}
+    {:exportSpecs}
     lets
         tmp_ptr @= rdi; inA_ptr @= rsi; dst_ptr @= rdx; inB_ptr @= rcx;
         tmp_in := rdi;
@@ -321,12 +330,15 @@ procedure{:quick}{:public}{:exportSpecs} fmul2(
     carry_wide(4, dst_b, tmp_b);
 }
 
-procedure{:quick}{:public}{:exportSpecs} fmul2_stdcall(
-    inline win:bool,
-    ghost tmp_b:buffer64,
-    ghost inA_b:buffer64,
-    ghost dst_b:buffer64,
-    ghost inB_b:buffer64)
+procedure fmul2_stdcall(
+        inline win:bool,
+        ghost tmp_b:buffer64,
+        ghost inA_b:buffer64,
+        ghost dst_b:buffer64,
+        ghost inB_b:buffer64)
+    {:public}
+    {:quick}
+    {:exportSpecs}
     lets
         tmp_ptr @= rdi; inA_ptr @= rsi; dst_ptr @= rdx; inB_ptr @= rcx;
         tmp_in := (if win then rcx else rdi);
@@ -449,10 +461,10 @@ procedure{:quick}{:public}{:exportSpecs} fmul2_stdcall(
     Pop(r12);
 }
 
-procedure{:quick}{:public}{:exportSpecs} fsqr(
-    ghost tmp_b:buffer64,
-    ghost inA_b:buffer64,
-    ghost dst_b:buffer64)
+procedure fsqr(ghost tmp_b:buffer64, ghost inA_b:buffer64, ghost dst_b:buffer64)
+    {:public}
+    {:quick}
+    {:exportSpecs}
     lets
         tmp_ptr @= rdi; inA_ptr @= rsi; dst_ptr @= rdx; 
         tmp_in := rdi;
@@ -503,11 +515,14 @@ procedure{:quick}{:public}{:exportSpecs} fsqr(
 }
 
 
-procedure{:quick}{:public}{:exportSpecs} fsqr_stdcall(
-    inline win:bool,
-    ghost tmp_b:buffer64,
-    ghost inA_b:buffer64,
-    ghost dst_b:buffer64)
+procedure fsqr_stdcall(
+        inline win:bool,
+        ghost tmp_b:buffer64,
+        ghost inA_b:buffer64,
+        ghost dst_b:buffer64)
+    {:public}
+    {:quick}
+    {:exportSpecs}
     lets
         tmp_ptr @= rdi; inA_ptr @= rsi; dst_ptr @= rdx; 
         tmp_in := (if win then rcx else rdi);
@@ -600,10 +615,10 @@ procedure{:quick}{:public}{:exportSpecs} fsqr_stdcall(
     Pop(r15);
 }
 
-procedure{:quick}{:public}{:exportSpecs} fsqr2(
-    ghost tmp_b:buffer64,
-    ghost inA_b:buffer64,
-    ghost dst_b:buffer64)
+procedure fsqr2(ghost tmp_b:buffer64, ghost inA_b:buffer64, ghost dst_b:buffer64)
+    {:public}
+    {:quick}
+    {:exportSpecs}
     lets
         tmp_ptr @= rdi; inA_ptr @= rsi; dst_ptr @= rdx; 
         tmp_in := rdi;
@@ -667,11 +682,14 @@ procedure{:quick}{:public}{:exportSpecs} fsqr2(
 }
 
 
-procedure{:quick}{:public}{:exportSpecs} fsqr2_stdcall(
-    inline win:bool,
-    ghost tmp_b:buffer64,
-    ghost inA_b:buffer64,
-    ghost dst_b:buffer64)
+procedure fsqr2_stdcall(
+        inline win:bool,
+        ghost tmp_b:buffer64,
+        ghost inA_b:buffer64,
+        ghost dst_b:buffer64)
+    {:public}
+    {:quick}
+    {:exportSpecs}
     lets
         tmp_ptr @= rdi; inA_ptr @= rsi; dst_ptr @= rdx; 
         tmp_in := (if win then rcx else rdi);
@@ -777,11 +795,13 @@ procedure{:quick}{:public}{:exportSpecs} fsqr2_stdcall(
 
 
 /*
-procedure{:quick}{:public} fsqr_loop_stdcall(
-    inline win:bool,
-    ghost dst_b:buffer64,
-    ghost inA_b:buffer64,
-    ghost tmp_b:buffer64)
+procedure fsqr_loop_stdcall(
+        inline win:bool,
+        ghost dst_b:buffer64,
+        ghost inA_b:buffer64,
+        ghost tmp_b:buffer64)
+    {:public}
+    {:quick}
     lets
         tmp_ptr @= rdi; inA_ptr @= rsi; dst_ptr @= rdx; count @= rbx; saved_dst_ptr @= rbp;
         tmp_in := (if win then rcx else rdi);
@@ -875,7 +895,7 @@ procedure{:quick}{:public} fsqr_loop_stdcall(
 
     Sub64(count, 1);
 
-    ghost var pre_loop_mem := mem;
+    let pre_loop_mem := mem;
     while (count > 0) 
         invariant
             0 <= count < old(count_in);

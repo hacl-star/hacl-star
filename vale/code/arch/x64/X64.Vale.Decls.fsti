@@ -26,9 +26,11 @@ val update_of (flags:int) (new_of:bool) : (new_flags:int { overflow new_flags ==
 unfold let va_subscript (#a:eqtype) (#b:Type) (x:Map.t a b) (y:a) : Tot b = Map.sel x y
 unfold let va_update = Map.upd
 unfold let va_make_opaque = Opaque_s.make_opaque
-unfold let va_reveal_opaque = Opaque_s.reveal_opaque
 unfold let va_hd = Cons?.hd
 //unfold let va_tl = Cons?.tl // F* inlines "let ... = va_tl ..." more than we'd like; revised definition below suppresses this
+
+// REVIEW: FStar.Pervasives.reveal_opaque doesn't include zeta, so it fails for recursive functions
+let va_reveal_opaque (s:string) = norm_spec [zeta; delta_only [s]]
 
 // hide 'if' so that x and y get fully normalized
 let va_if (#a:Type) (b:bool) (x:(_:unit{b}) -> GTot a) (y:(_:unit{~b}) -> GTot a) : GTot a =

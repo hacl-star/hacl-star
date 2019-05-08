@@ -87,11 +87,12 @@ ghost procedure finish_aes_encrypt_le(ghost alg:algorithm, ghost input_LE:quad32
     ensures
         aes_encrypt_le(alg, key, input_LE) == cipher_opaque(alg, input_LE, key_to_round_keys_LE(alg, key));
 {
-    reveal aes_encrypt_LE_def;
-    reveal cipher;
+    Opaque_s.reveal_opaque(aes_encrypt_LE_def);
+    Opaque_s.reveal_opaque(cipher);
 }
 
-procedure {:quick exportOnly} Load_two_lsb(inout dst:xmm)
+procedure Load_two_lsb(inout dst:xmm)
+    {:quick exportOnly}
     lets constp @= r11; 
     modifies constp; efl;
     ensures  dst == Mkfour(2, 0, 0, 0);
@@ -103,7 +104,8 @@ procedure {:quick exportOnly} Load_two_lsb(inout dst:xmm)
 }
 
 // Version with concrete values succeeds.
-//procedure {:quick} Load_one_lsb()
+//procedure Load_one_lsb()
+//    {:quick}
 //    lets constp @= r11; dst @= xmm1;
 //    modifies constp; dst; efl;
 //    ensures  dst == Mkfour(1, 0, 0, 0);
@@ -111,10 +113,11 @@ procedure {:quick exportOnly} Load_two_lsb(inout dst:xmm)
 //    ZeroXmm(dst);
 //    assert two_to_nat32(Mktwo(1, 0)) == 0x1; // OBSERVE
 //    PinsrqImm(dst, 1, 0, constp);
-//    reveal insert_nat64;
+//    Opaque_s.reveal_opaque(insert_nat64);
 //}
 
-procedure {:quick exportOnly} Load_one_lsb(inout dst:xmm)
+procedure Load_one_lsb(inout dst:xmm)
+    {:quick exportOnly}
     lets constp @= r11; 
     modifies constp; efl;
     ensures  dst == Mkfour(1, 0, 0, 0);
@@ -126,9 +129,8 @@ procedure {:quick exportOnly} Load_one_lsb(inout dst:xmm)
 }
 
 #reset-options "--z3rlimit 20"
-procedure {:quick} Handle_ctr32(
-    ghost ctr_BE:quad32
-    )
+procedure Handle_ctr32(ghost ctr_BE:quad32)
+    {:quick}
     lets
         Ii @= xmm0; T1 @= xmm1; T2 @= xmm2;
         Z1 @= xmm5; Z2 @= xmm6; 
@@ -178,14 +180,13 @@ procedure {:quick} Handle_ctr32(
 }
 
 #reset-options "--z3rlimit 20"
-procedure {:quick} Loop6x_ctr_update(
-    inline alg:algorithm,  
-    ghost key_words:seq(nat32),
-    ghost round_keys:seq(quad32),
-    ghost keys_b:buffer128,
-
-    ghost ctr_BE:quad32
-    )
+procedure Loop6x_ctr_update(
+        inline alg:algorithm,  
+        ghost key_words:seq(nat32),
+        ghost round_keys:seq(quad32),
+        ghost keys_b:buffer128,
+        ghost ctr_BE:quad32)
+    {:quick}
     lets
 //      inp @= rdi; outp @= rsi; len @= rdx; key @= rcx; ivp @= r8; Xip @= r9;
         key @= rcx; 
@@ -252,16 +253,16 @@ procedure {:quick} Loop6x_ctr_update(
 }
 
 #reset-options ""
-procedure {:quick} Loop6x_preamble(
-    inline alg:algorithm,  // OpenSSL includes the number of rounds (nr) as a dynamic parameter (stored with the key).  Saves code space but adds extra instructions to the fast path.  Maybe branch predictor is good enough for it not to matter
-    ghost iv_b:buffer128,
+procedure Loop6x_preamble(
+        inline alg:algorithm,  // OpenSSL includes the number of rounds (nr) as a dynamic parameter (stored with the key).  Saves code space but adds extra instructions to the fast path.  Maybe branch predictor is good enough for it not to matter
+        ghost iv_b:buffer128,
 
-    ghost key_words:seq(nat32),
-    ghost round_keys:seq(quad32),
-    ghost keys_b:buffer128,
+        ghost key_words:seq(nat32),
+        ghost round_keys:seq(quad32),
+        ghost keys_b:buffer128,
 
-    ghost ctr_BE:quad32
-    )
+        ghost ctr_BE:quad32)
+    {:quick}
     lets
 //      inp @= rdi; outp @= rsi; len @= rdx; key @= rcx; ivp @= r8; Xip @= r9;
         key @= rcx; ivp @= r8; 
@@ -360,27 +361,27 @@ procedure {:quick} Loop6x_preamble(
     //Load128_buffer(rndkey, key, 0x20-0x80, Secret, keys_b, 2);      // OpenSSL had this here.  I moved it to one of the Loop6x_step calls
     VAESNI_enc(inout5, inout5, T2);
 
-    reveal rounds;
+    Opaque_s.reveal_opaque(rounds);
     commute_sub_bytes_shift_rows_forall();
 
 }
 
 #reset-options ""
 
-procedure {:quick} Loop6x_plain(
-    inline alg:algorithm,  // OpenSSL includes the number of rounds (nr) as a dynamic parameter (stored with the key).  Saves code space but adds extra instructions to the fast path.  Maybe branch predictor is good enough for it not to matter
-    inline rnd:nat,
-    ghost key_words:seq(nat32),
-    ghost round_keys:seq(quad32),
-    ghost keys_b:buffer128,
+procedure Loop6x_plain(
+        inline alg:algorithm,  // OpenSSL includes the number of rounds (nr) as a dynamic parameter (stored with the key).  Saves code space but adds extra instructions to the fast path.  Maybe branch predictor is good enough for it not to matter
+        inline rnd:nat,
+        ghost key_words:seq(nat32),
+        ghost round_keys:seq(quad32),
+        ghost keys_b:buffer128,
 
-    ghost init0:quad32,
-    ghost init1:quad32,
-    ghost init2:quad32,
-    ghost init3:quad32,
-    ghost init4:quad32,
-    ghost init5:quad32
-    )
+        ghost init0:quad32,
+        ghost init1:quad32,
+        ghost init2:quad32,
+        ghost init3:quad32,
+        ghost init4:quad32,
+        ghost init5:quad32)
+    {:quick}
     lets
 //      inp @= rdi; outp @= rsi; len @= rdx; key @= rcx; ivp @= r8; Xip @= r9;
         key @= rcx; 
@@ -425,31 +426,31 @@ procedure {:quick} Loop6x_plain(
     VAESNI_enc(inout4, inout4, rndkey);
     VAESNI_enc(inout5, inout5, rndkey);
 
-    reveal rounds;
+    Opaque_s.reveal_opaque(rounds);
     commute_sub_bytes_shift_rows_forall();
 }
 
 
-procedure {:quick} Loop6x_step(
-    inline alg:algorithm,  // OpenSSL includes the number of rounds (nr) as a dynamic parameter (stored with the key).  Saves code space but adds extra instructions to the fast path.  Maybe branch predictor is good enough for it not to matter
-    inline rnd:nat,
-    inline in0_offset:nat,
-    inline stack_offset:nat,
-    ghost count:nat,
-    ghost in0_b:buffer128,
-    ghost stack_b:buffer128,
+procedure Loop6x_step(
+        inline alg:algorithm,  // OpenSSL includes the number of rounds (nr) as a dynamic parameter (stored with the key).  Saves code space but adds extra instructions to the fast path.  Maybe branch predictor is good enough for it not to matter
+        inline rnd:nat,
+        inline in0_offset:nat,
+        inline stack_offset:nat,
+        ghost count:nat,
+        ghost in0_b:buffer128,
+        ghost stack_b:buffer128,
 
-    ghost key_words:seq(nat32),
-    ghost round_keys:seq(quad32),
-    ghost keys_b:buffer128,
+        ghost key_words:seq(nat32),
+        ghost round_keys:seq(quad32),
+        ghost keys_b:buffer128,
 
-    ghost init0:quad32,
-    ghost init1:quad32,
-    ghost init2:quad32,
-    ghost init3:quad32,
-    ghost init4:quad32,
-    ghost init5:quad32
-    )
+        ghost init0:quad32,
+        ghost init1:quad32,
+        ghost init2:quad32,
+        ghost init3:quad32,
+        ghost init4:quad32,
+        ghost init5:quad32)
+    {:quick}
     lets
 //      inp @= rdi; outp @= rsi; len @= rdx; key @= rcx; ivp @= r8; Xip @= r9;
         key @= rcx; 
@@ -520,30 +521,30 @@ procedure {:quick} Loop6x_step(
 
     VAESNI_enc(inout5, inout5, rndkey);
 
-    reveal rounds;
+    Opaque_s.reveal_opaque(rounds);
     commute_sub_bytes_shift_rows_forall();
     lemma_reverse_bytes_quad32_64(old(buffer128_read(in0_b, (count-2)*6+in0_offset, mem)), old(buffer128_read(stack_b, stack_offset, mem)), buffer128_read(stack_b, stack_offset, mem));
 
 }
 
 
-procedure {:quick} Loop6x_round8(
-    inline alg:algorithm,  // OpenSSL includes the number of rounds (nr) as a dynamic parameter (stored with the key).  Saves code space but adds extra instructions to the fast path.  Maybe branch predictor is good enough for it not to matter
-    ghost count:nat,
-    ghost in0_b:buffer128,
-    ghost stack_b:buffer128,
+procedure Loop6x_round8(
+        inline alg:algorithm,  // OpenSSL includes the number of rounds (nr) as a dynamic parameter (stored with the key).  Saves code space but adds extra instructions to the fast path.  Maybe branch predictor is good enough for it not to matter
+        ghost count:nat,
+        ghost in0_b:buffer128,
+        ghost stack_b:buffer128,
 
-    ghost key_words:seq(nat32),
-    ghost round_keys:seq(quad32),
-    ghost keys_b:buffer128,
+        ghost key_words:seq(nat32),
+        ghost round_keys:seq(quad32),
+        ghost keys_b:buffer128,
 
-    ghost init0:quad32,
-    ghost init1:quad32,
-    ghost init2:quad32,
-    ghost init3:quad32,
-    ghost init4:quad32,
-    ghost init5:quad32
-    )
+        ghost init0:quad32,
+        ghost init1:quad32,
+        ghost init2:quad32,
+        ghost init3:quad32,
+        ghost init4:quad32,
+        ghost init5:quad32)
+    {:quick}
     lets
 //      inp @= rdi; outp @= rsi; len @= rdx; key @= rcx; ivp @= r8; Xip @= r9;
         key @= rcx; 
@@ -605,27 +606,27 @@ procedure {:quick} Loop6x_round8(
 
     VAESNI_enc(inout5, inout5, T1);
 
-    reveal rounds;
+    Opaque_s.reveal_opaque(rounds);
     commute_sub_bytes_shift_rows_forall();
 }
 
-procedure {:quick} Loop6x_round9(
-    inline alg:algorithm,  // OpenSSL includes the number of rounds (nr) as a dynamic parameter (stored with the key).  Saves code space but adds extra instructions to the fast path.  Maybe branch predictor is good enough for it not to matter
-    ghost count:nat,
-    ghost in_b:buffer128,
-    ghost stack_b:buffer128,
+procedure Loop6x_round9(
+        inline alg:algorithm,  // OpenSSL includes the number of rounds (nr) as a dynamic parameter (stored with the key).  Saves code space but adds extra instructions to the fast path.  Maybe branch predictor is good enough for it not to matter
+        ghost count:nat,
+        ghost in_b:buffer128,
+        ghost stack_b:buffer128,
 
-    ghost key_words:seq(nat32),
-    ghost round_keys:seq(quad32),
-    ghost keys_b:buffer128,
+        ghost key_words:seq(nat32),
+        ghost round_keys:seq(quad32),
+        ghost keys_b:buffer128,
 
-    ghost init0:quad32,
-    ghost init1:quad32,
-    ghost init2:quad32,
-    ghost init3:quad32,
-    ghost init4:quad32,
-    ghost init5:quad32
-    )
+        ghost init0:quad32,
+        ghost init1:quad32,
+        ghost init2:quad32,
+        ghost init3:quad32,
+        ghost init4:quad32,
+        ghost init5:quad32)
+    {:quick}
     lets
 //      outp @= rsi; len @= rdx; key @= rcx; ivp @= r8; Xip @= r9;
         inp @= rdi; key @= rcx; 
@@ -694,11 +695,12 @@ procedure {:quick} Loop6x_round9(
     VPxor(Z3, T1, Mem128(inp, 0x40, Secret, in_b, count*6 + 4));
     VPxor(Hkey, T1, Mem128(inp, 0x50, Secret, in_b, count*6 + 5));
 
-    reveal rounds;
+    Opaque_s.reveal_opaque(rounds);
     commute_sub_bytes_shift_rows_forall();
 }
 
-procedure {:quick} load_one_msb()
+procedure load_one_msb()
+    {:quick}
     lets constp @= r11; T2 @= xmm2; 
     modifies constp; T2; efl;
     ensures  T2 == Mkfour(0, 0, 0, 0x1000000);
@@ -706,41 +708,41 @@ procedure {:quick} load_one_msb()
     ZeroXmm(T2);
     assert two_to_nat32(Mktwo(0, 0x1000000)) == 0x100000000000000; // OBSERVE
     PinsrqImm(T2, 0x100000000000000, 1, constp);
-    reveal insert_nat64;
+    Opaque_s.reveal_opaque(insert_nat64);
 }
 
 #reset-options "--z3rlimit 30"
-procedure {:quick} Loop6x_final(
-    inline alg:algorithm,  
-    ghost iv_b:buffer128,
-    ghost stack_b:buffer128,
+procedure Loop6x_final(
+        inline alg:algorithm,  
+        ghost iv_b:buffer128,
+        ghost stack_b:buffer128,
 
-    ghost key_words:seq(nat32),
-    ghost round_keys:seq(quad32),
-    ghost keys_b:buffer128,
+        ghost key_words:seq(nat32),
+        ghost round_keys:seq(quad32),
+        ghost keys_b:buffer128,
 
-    ghost ctr_orig:quad32,
+        ghost ctr_orig:quad32,
 
-    ghost init0:quad32,
-    ghost init1:quad32,
-    ghost init2:quad32,
-    ghost init3:quad32,
-    ghost init4:quad32,
-    ghost init5:quad32,
-    ghost ctr0:quad32,
-    ghost ctr1:quad32,
-    ghost ctr2:quad32,
-    ghost ctr3:quad32,
-    ghost ctr4:quad32,
-    ghost ctr5:quad32,
-    ghost plain0:quad32,
-    ghost plain1:quad32,
-    ghost plain2:quad32,
-    ghost plain3:quad32,
-    ghost plain4:quad32,
-    ghost plain5:quad32,
-    ghost inb:quad32
-    )
+        ghost init0:quad32,
+        ghost init1:quad32,
+        ghost init2:quad32,
+        ghost init3:quad32,
+        ghost init4:quad32,
+        ghost init5:quad32,
+        ghost ctr0:quad32,
+        ghost ctr1:quad32,
+        ghost ctr2:quad32,
+        ghost ctr3:quad32,
+        ghost ctr4:quad32,
+        ghost ctr5:quad32,
+        ghost plain0:quad32,
+        ghost plain1:quad32,
+        ghost plain2:quad32,
+        ghost plain3:quad32,
+        ghost plain4:quad32,
+        ghost plain5:quad32,
+        ghost inb:quad32)
+    {:quick}
     lets
 //      inp @= rdi; outp @= rsi; len @= rdx; key @= rcx; ivp @= r8; Xip @= r9;
         inp @= rdi; outp @= rsi; key @= rcx; ivp @= r8;
@@ -873,10 +875,8 @@ procedure {:quick} Loop6x_final(
 }
 
 #reset-options ""
-procedure {:quick} Loop6x_save_output(
-    ghost count:nat,
-    ghost out_b:buffer128
-    )
+procedure Loop6x_save_output(ghost count:nat, ghost out_b:buffer128)
+    {:quick}
     lets
         outp @= rsi;  
         Ii @= xmm0; T1 @= xmm1; T2 @= xmm2; Hkey @= xmm3;
@@ -932,28 +932,29 @@ procedure {:quick} Loop6x_save_output(
 }
 
 #reset-options "--z3rlimit 20"
-procedure {:quick} Loop6x_partial(
-    inline alg:algorithm,  
-    ghost count:nat,        // Number of 6x128-bit blocks processed so far
-    ghost iv_b:buffer128,
-    ghost in0_b:buffer128,
-    ghost in_b:buffer128,
-    ghost stack_b:buffer128,
+procedure Loop6x_partial(
+        inline alg:algorithm,  
+        ghost count:nat,        // Number of 6x128-bit blocks processed so far
+        ghost iv_b:buffer128,
+        ghost in0_b:buffer128,
+        ghost in_b:buffer128,
+        ghost stack_b:buffer128,
 
-    ghost key_words:seq(nat32),
-    ghost round_keys:seq(quad32),
-    ghost keys_b:buffer128,
+        ghost key_words:seq(nat32),
+        ghost round_keys:seq(quad32),
+        ghost keys_b:buffer128,
 
-    //ghost ctr_BE_orig:quad32,
-    ghost ctr_BE:quad32
-    ) returns (
-    ghost init0:quad32,
-    ghost init1:quad32,
-    ghost init2:quad32,
-    ghost init3:quad32,
-    ghost init4:quad32,
-    ghost init5:quad32
-    )
+        //ghost ctr_BE_orig:quad32,
+        ghost ctr_BE:quad32
+        )
+    returns(
+        ghost init0:quad32,
+        ghost init1:quad32,
+        ghost init2:quad32,
+        ghost init3:quad32,
+        ghost init4:quad32,
+        ghost init5:quad32)
+    {:quick}
     lets
 //      inp @= rdi; outp @= rsi; len @= rdx; key @= rcx; ivp @= r8; Xip @= r9;
         inp @= rdi; key @= rcx; ivp @= r8; 
@@ -1084,24 +1085,24 @@ procedure {:quick} Loop6x_partial(
 }
 
 #reset-options "--z3rlimit 30"
-procedure {:quick} Loop6x(
-    inline alg:algorithm,  
-    ghost count:nat,        // Number of 6x128-bit blocks processed so far
-    ghost iv_b:buffer128,
-    ghost in0_b:buffer128,
-    ghost in_b:buffer128,
-    ghost out_b:buffer128,
-    ghost stack_b:buffer128,
+procedure Loop6x(
+        inline alg:algorithm,  
+        ghost count:nat,        // Number of 6x128-bit blocks processed so far
+        ghost iv_b:buffer128,
+        ghost in0_b:buffer128,
+        ghost in_b:buffer128,
+        ghost out_b:buffer128,
+        ghost stack_b:buffer128,
 
-    ghost plain_quads:seq(quad32),
+        ghost plain_quads:seq(quad32),
 
-    ghost key_words:seq(nat32),
-    ghost round_keys:seq(quad32),
-    ghost keys_b:buffer128,
+        ghost key_words:seq(nat32),
+        ghost round_keys:seq(quad32),
+        ghost keys_b:buffer128,
 
-    ghost ctr_BE_orig:quad32,
-    ghost ctr_BE:quad32
-    )
+        ghost ctr_BE_orig:quad32,
+        ghost ctr_BE:quad32)
+    {:quick}
     lets
 //      inp @= rdi; outp @= rsi; len @= rdx; key @= rcx; ivp @= r8; Xip @= r9;
         inp @= rdi; outp @= rsi; len @= rdx; key @= rcx; ivp @= r8; 
@@ -1245,8 +1246,7 @@ procedure {:quick} Loop6x(
         buffer128_read(stack_b, 6, mem) == old(reverse_bytes_quad32(buffer128_read(in0_b, (count-2)*6 + 1, mem)));
         buffer128_read(stack_b, 7, mem) == old(reverse_bytes_quad32(buffer128_read(in0_b, (count-2)*6 + 0, mem)));
 {
-    (ghost var init0), (ghost var init1), (ghost var init2), 
-    (ghost var init3), (ghost var init4), (ghost var init5) := 
+    let (init0, init1, init2, init3, init4, init5) := 
         Loop6x_partial(alg, count, iv_b, in0_b, in_b, stack_b, key_words, round_keys, keys_b, ctr_BE);
 
     Loop6x_final(alg, iv_b, stack_b, key_words, round_keys, keys_b, 
@@ -1271,9 +1271,9 @@ procedure {:quick} Loop6x(
     if (len > 0) {
         Loop6x_save_output(count, out_b);
 
-        ghost var plain := old(buffer128_as_seq(mem, in_b));
-        ghost var cipher := buffer128_as_seq(mem, out_b);
-        ghost var bound := count*6;
+        let plain := old(buffer128_as_seq(mem, in_b));
+        let cipher := buffer128_as_seq(mem, out_b);
+        let bound := count*6;
         gctr_partial_opaque_ignores_postfix(alg, #nat32(bound), plain_quads, plain_quads, old(buffer128_as_seq(mem, out_b)), 
                                             cipher, key_words, ctr_BE_orig);
         gctr_partial_extend6(alg, bound, plain_quads, cipher, key_words, ctr_BE_orig);
@@ -1283,23 +1283,23 @@ procedure {:quick} Loop6x(
 
 /*
 #reset-options "--z3rlimit 600"
-procedure {:quick exportOnly} Loop6x_loop(
-    inline alg:algorithm,  
-    ghost count:nat,        // Number of 6x128-bit blocks processed so far
-    ghost iv_b:buffer128,
-    ghost in0_b:buffer128,
-    ghost in_b:buffer128,
-    ghost out_b:buffer128,
-    ghost stack_b:buffer128,
-    ghost plain_quads:seq(quad32),
+procedure Loop6x_loop(
+        inline alg:algorithm,  
+        ghost count:nat,        // Number of 6x128-bit blocks processed so far
+        ghost iv_b:buffer128,
+        ghost in0_b:buffer128,
+        ghost in_b:buffer128,
+        ghost out_b:buffer128,
+        ghost stack_b:buffer128,
+        ghost plain_quads:seq(quad32),
 
-    ghost key_words:seq(nat32),
-    ghost round_keys:seq(quad32),
-    ghost keys_b:buffer128,
+        ghost key_words:seq(nat32),
+        ghost round_keys:seq(quad32),
+        ghost keys_b:buffer128,
 
-    ghost ctr_BE_orig:quad32,
-    ghost ctr_BE:quad32
-    )
+        ghost ctr_BE_orig:quad32,
+        ghost ctr_BE:quad32)
+    {:quick exportOnly}
     lets
 //      inp @= rdi; outp @= rsi; len @= rdx; key @= rcx; ivp @= r8; Xip @= r9;
         inp @= rdi; outp @= rsi; len @= rdx; key @= rcx; ivp @= r8; 
@@ -1514,14 +1514,14 @@ procedure {:quick exportOnly} Loop6x_loop(
 
         
 #reset-options "--z3rlimit 40"
-procedure {:quick} AESNI_ctr32_6x_preamble(
-    inline alg:algorithm,  // OpenSSL includes the number of rounds (nr) as a dynamic parameter (stored with the key).  Saves code space but adds extra instructions to the fast path.  Maybe branch predictor is good enough for it not to matter
-    ghost key_words:seq(nat32),
-    ghost round_keys:seq(quad32),
-    ghost keys_b:buffer128,
+procedure AESNI_ctr32_6x_preamble(
+        inline alg:algorithm,  // OpenSSL includes the number of rounds (nr) as a dynamic parameter (stored with the key).  Saves code space but adds extra instructions to the fast path.  Maybe branch predictor is good enough for it not to matter
+        ghost key_words:seq(nat32),
+        ghost round_keys:seq(quad32),
+        ghost keys_b:buffer128,
 
-    ghost ctr_orig:quad32
-    )
+        ghost ctr_orig:quad32)
+    {:quick}
     lets
 //      inp @= rdi; outp @= rsi; len @= rdx; key @= rcx; ivp @= r8; Xip @= r9;
         key @= rcx; 
@@ -1597,20 +1597,20 @@ procedure {:quick} AESNI_ctr32_6x_preamble(
 }
 
 #reset-options ""
-procedure {:quick} AESNI_ctr32_6x_loop_body(
-    inline alg:algorithm,
-    inline rnd:nat,
-    ghost key_words:seq(nat32),
-    ghost round_keys:seq(quad32),
-    ghost keys_b:buffer128,
+procedure AESNI_ctr32_6x_loop_body(
+        inline alg:algorithm,
+        inline rnd:nat,
+        ghost key_words:seq(nat32),
+        ghost round_keys:seq(quad32),
+        ghost keys_b:buffer128,
 
-    ghost init0:quad32,
-    ghost init1:quad32,
-    ghost init2:quad32,
-    ghost init3:quad32,
-    ghost init4:quad32,
-    ghost init5:quad32
-    )
+        ghost init0:quad32,
+        ghost init1:quad32,
+        ghost init2:quad32,
+        ghost init3:quad32,
+        ghost init4:quad32,
+        ghost init5:quad32)
+    {:quick}
     lets
         key @= rcx; 
         inout0 @= xmm9; inout1 @= xmm10; inout2 @= xmm11; inout3 @= xmm12;
@@ -1654,25 +1654,26 @@ procedure {:quick} AESNI_ctr32_6x_loop_body(
     VAESNI_enc(inout4, inout4, rndkey);
     VAESNI_enc(inout5, inout5, rndkey);
 
-    reveal rounds;
+    Opaque_s.reveal_opaque(rounds);
     commute_sub_bytes_shift_rows_forall();
     Load128_buffer(rndkey, key, 16*(rnd+2)-0x80, Secret, keys_b, rnd+2);
 }
 
-procedure {:recursive} {:quick exportOnly} AESNI_ctr32_6x_loop_recursive(
-    inline alg:algorithm,
-    inline rnd:nat,
-    ghost key_words:seq(nat32),
-    ghost round_keys:seq(quad32),
-    ghost keys_b:buffer128,
+procedure AESNI_ctr32_6x_loop_recursive(
+        inline alg:algorithm,
+        inline rnd:nat,
+        ghost key_words:seq(nat32),
+        ghost round_keys:seq(quad32),
+        ghost keys_b:buffer128,
 
-    ghost init0:quad32,
-    ghost init1:quad32,
-    ghost init2:quad32,
-    ghost init3:quad32,
-    ghost init4:quad32,
-    ghost init5:quad32
-    )
+        ghost init0:quad32,
+        ghost init1:quad32,
+        ghost init2:quad32,
+        ghost init3:quad32,
+        ghost init4:quad32,
+        ghost init5:quad32)
+    {:quick exportOnly}
+    {:recursive}
     lets
         key @= rcx; 
         inout0 @= xmm9; inout1 @= xmm10; inout2 @= xmm11; inout3 @= xmm12;
@@ -1717,22 +1718,22 @@ procedure {:recursive} {:quick exportOnly} AESNI_ctr32_6x_loop_recursive(
                              init0, init1, init2, init3, init4, init5);
 }
 
-procedure {:quick} AESNI_ctr32_6x_round9(
-    inline alg:algorithm,
-    ghost count:nat,
-    ghost in_b:buffer128,
+procedure AESNI_ctr32_6x_round9(
+        inline alg:algorithm,
+        ghost count:nat,
+        ghost in_b:buffer128,
 
-    ghost key_words:seq(nat32),
-    ghost round_keys:seq(quad32),
-    ghost keys_b:buffer128,
+        ghost key_words:seq(nat32),
+        ghost round_keys:seq(quad32),
+        ghost keys_b:buffer128,
 
-    ghost init0:quad32,
-    ghost init1:quad32,
-    ghost init2:quad32,
-    ghost init3:quad32,
-    ghost init4:quad32,
-    ghost init5:quad32
-    )
+        ghost init0:quad32,
+        ghost init1:quad32,
+        ghost init2:quad32,
+        ghost init3:quad32,
+        ghost init4:quad32,
+        ghost init5:quad32)
+    {:quick}
     lets
         inp @= rdi; key @= rcx; 
         T2 @= xmm2; Hkey @= xmm3;
@@ -1798,40 +1799,40 @@ procedure {:quick} AESNI_ctr32_6x_round9(
     VAESNI_enc(inout5, inout5, rndkey);
     VPxor(Hkey, Hkey, Mem128(inp, 0x50, Secret, in_b, count*6 + 5));
 
-    reveal rounds;
+    Opaque_s.reveal_opaque(rounds);
     commute_sub_bytes_shift_rows_forall();
 
     AddLea64(inp, inp, 0x60);
 }
 
-procedure {:quick} AESNI_ctr32_6x_final(
-    inline alg:algorithm,
-    ghost count:nat,
-    ghost out_b:buffer128,
+procedure AESNI_ctr32_6x_final(
+        inline alg:algorithm,
+        ghost count:nat,
+        ghost out_b:buffer128,
 
-    ghost key_words:seq(nat32),
-    ghost round_keys:seq(quad32),
-    ghost keys_b:buffer128,
+        ghost key_words:seq(nat32),
+        ghost round_keys:seq(quad32),
+        ghost keys_b:buffer128,
 
-    ghost init0:quad32,
-    ghost init1:quad32,
-    ghost init2:quad32,
-    ghost init3:quad32,
-    ghost init4:quad32,
-    ghost init5:quad32,
-    ghost ctr0:quad32,
-    ghost ctr1:quad32,
-    ghost ctr2:quad32,
-    ghost ctr3:quad32,
-    ghost ctr4:quad32,
-    ghost ctr5:quad32,
-    ghost plain0:quad32,
-    ghost plain1:quad32,
-    ghost plain2:quad32,
-    ghost plain3:quad32,
-    ghost plain4:quad32,
-    ghost plain5:quad32
-    )
+        ghost init0:quad32,
+        ghost init1:quad32,
+        ghost init2:quad32,
+        ghost init3:quad32,
+        ghost init4:quad32,
+        ghost init5:quad32,
+        ghost ctr0:quad32,
+        ghost ctr1:quad32,
+        ghost ctr2:quad32,
+        ghost ctr3:quad32,
+        ghost ctr4:quad32,
+        ghost ctr5:quad32,
+        ghost plain0:quad32,
+        ghost plain1:quad32,
+        ghost plain2:quad32,
+        ghost plain3:quad32,
+        ghost plain4:quad32,
+        ghost plain5:quad32)
+    {:quick}
     lets
         outp @= rsi; key @= rcx; 
         T2 @= xmm2; Hkey @= xmm3;
@@ -1930,21 +1931,21 @@ procedure {:quick} AESNI_ctr32_6x_final(
 }
 
 #reset-options "--z3rlimit 20"
-procedure {:quick} AESNI_ctr32_6x(
-    inline alg:algorithm,  
-    ghost count:nat,
-    ghost in_b:buffer128,
-    ghost out_b:buffer128,
+procedure AESNI_ctr32_6x(
+        inline alg:algorithm,  
+        ghost count:nat,
+        ghost in_b:buffer128,
+        ghost out_b:buffer128,
     
-    ghost plain_quads:seq(quad32),
+        ghost plain_quads:seq(quad32),
 
-    ghost key_words:seq(nat32),
-    ghost round_keys:seq(quad32),
-    ghost keys_b:buffer128,
+        ghost key_words:seq(nat32),
+        ghost round_keys:seq(quad32),
+        ghost keys_b:buffer128,
 
-    ghost ctr_BE:quad32,
-    ghost ctr_BE_orig:quad32
-    )
+        ghost ctr_BE:quad32,
+        ghost ctr_BE_orig:quad32)
+    {:quick}
     lets
 //      inp @= rdi; outp @= rsi; len @= rdx; key @= rcx; ivp @= r8; Xip @= r9;
         inp @= rdi; outp @= rsi; key @= rcx; 
@@ -2005,12 +2006,12 @@ procedure {:quick} AESNI_ctr32_6x(
         gctr_partial_opaque(alg, 6*(count+1), plain_quads, buffer128_as_seq(mem, out_b), key_words, ctr_BE_orig);
 {
     assert {:quick_type} length(round_keys) == nr(alg)+1;
-    ghost var init0 := quad32_xor(reverse_bytes_quad32(inc32lite(ctr_BE, 0)), index(round_keys, 0));
-    ghost var init1 := quad32_xor(reverse_bytes_quad32(inc32lite(ctr_BE, 1)), index(round_keys, 0));
-    ghost var init2 := quad32_xor(reverse_bytes_quad32(inc32lite(ctr_BE, 2)), index(round_keys, 0));
-    ghost var init3 := quad32_xor(reverse_bytes_quad32(inc32lite(ctr_BE, 3)), index(round_keys, 0));
-    ghost var init4 := quad32_xor(reverse_bytes_quad32(inc32lite(ctr_BE, 4)), index(round_keys, 0));
-    ghost var init5 := quad32_xor(reverse_bytes_quad32(inc32lite(ctr_BE, 5)), index(round_keys, 0));
+    let init0 := quad32_xor(reverse_bytes_quad32(inc32lite(ctr_BE, 0)), index(round_keys, 0));
+    let init1 := quad32_xor(reverse_bytes_quad32(inc32lite(ctr_BE, 1)), index(round_keys, 0));
+    let init2 := quad32_xor(reverse_bytes_quad32(inc32lite(ctr_BE, 2)), index(round_keys, 0));
+    let init3 := quad32_xor(reverse_bytes_quad32(inc32lite(ctr_BE, 3)), index(round_keys, 0));
+    let init4 := quad32_xor(reverse_bytes_quad32(inc32lite(ctr_BE, 4)), index(round_keys, 0));
+    let init5 := quad32_xor(reverse_bytes_quad32(inc32lite(ctr_BE, 5)), index(round_keys, 0));
 
     AESNI_ctr32_6x_preamble(alg, key_words, round_keys, keys_b, ctr_BE);
     AESNI_ctr32_6x_loop_recursive(alg, 7, key_words, round_keys, keys_b, init0, init1, init2, init3, init4, init5); 
@@ -2029,9 +2030,9 @@ procedure {:quick} AESNI_ctr32_6x(
                         buffer128_read(in_b, count*6 + 4, mem),
                         buffer128_read(in_b, count*6 + 5, mem));
 
-    ghost var plain := old(buffer128_as_seq(mem, in_b));
-    ghost var cipher := buffer128_as_seq(mem, out_b);
-    ghost var bound := count*6;
+    let plain := old(buffer128_as_seq(mem, in_b));
+    let cipher := buffer128_as_seq(mem, out_b);
+    let bound := count*6;
     gctr_partial_opaque_ignores_postfix(alg, #nat32(bound), plain_quads, plain_quads, old(buffer128_as_seq(mem, out_b)), 
                                         cipher, key_words, ctr_BE_orig);
     gctr_partial_extend6(alg, bound, plain_quads, cipher, key_words, ctr_BE_orig);
@@ -2039,15 +2040,15 @@ procedure {:quick} AESNI_ctr32_6x(
 }
 
 #reset-options "--z3rlimit 20"
-procedure {:quick} Ctr32_ghash_6_prelude(
-    inline alg:algorithm,  
-    ghost stack_b:buffer128,
+procedure Ctr32_ghash_6_prelude(
+        inline alg:algorithm,  
+        ghost stack_b:buffer128,
 
-    ghost key_words:seq(nat32),
-    ghost round_keys:seq(quad32),
-    ghost keys_b:buffer128,
-    ghost ctr_orig:quad32
-    )
+        ghost key_words:seq(nat32),
+        ghost round_keys:seq(quad32),
+        ghost keys_b:buffer128,
+        ghost ctr_orig:quad32)
+    {:quick}
     lets
 //      inp @= rdi; outp @= rsi; len @= rdx; key @= rcx; ivp @= r8; Xip @= r9;
         key @= rcx; 
@@ -2108,10 +2109,8 @@ procedure {:quick} Ctr32_ghash_6_prelude(
 }
 
 #reset-options ""
-procedure {:quick} Encrypt_save_and_shuffle_output(
-    ghost count:nat,
-    ghost out_b:buffer128
-    )
+procedure Encrypt_save_and_shuffle_output(ghost count:nat, ghost out_b:buffer128)
+    {:quick}
     lets
         outp @= rsi;  
         Ii @= xmm0; T1 @= xmm1; 
@@ -2170,19 +2169,19 @@ procedure {:quick} Encrypt_save_and_shuffle_output(
 }
 
 #reset-options "--z3rlimit 30"
-procedure {:quick} AES_GCM_encrypt(
-    inline alg:algorithm,  
-    ghost iv_b:buffer128,
-    ghost in_b:buffer128,
-    ghost out_b:buffer128,
-    ghost stack_b:buffer128,
+procedure AES_GCM_encrypt(
+        inline alg:algorithm,  
+        ghost iv_b:buffer128,
+        ghost in_b:buffer128,
+        ghost out_b:buffer128,
+        ghost stack_b:buffer128,
 
-    ghost key_words:seq(nat32),
-    ghost round_keys:seq(quad32),
-    ghost keys_b:buffer128
-    ) returns (
-    ghost ctr_BE:quad32
-    )
+        ghost key_words:seq(nat32),
+        ghost round_keys:seq(quad32),
+        ghost keys_b:buffer128)
+    returns(
+        ghost ctr_BE:quad32)
+    {:quick}
     lets
 //      inp @= rdi; outp @= rsi; len @= rdx; key @= rcx; ivp @= r8; Xip @= r9;
         inp @= rdi; outp @= rsi; len @= rdx; key @= rcx; ivp @= r8; 
@@ -2246,9 +2245,9 @@ procedure {:quick} AES_GCM_encrypt(
         
         le_seq_quad32_to_bytes(buffer128_as_seq(mem, out_b)) == gctr_encrypt_LE(ctr_BE, le_seq_quad32_to_bytes(old(buffer128_as_seq(mem, in_b))), alg, key_words);
 {
-    ghost var plain_quads := buffer128_as_seq(mem, in_b);
+    let plain_quads := buffer128_as_seq(mem, in_b);
     Load128_buffer(T1, ivp, 0, Secret, iv_b, 0);    // # input counter value
-    ghost var iv_LE := T1;
+    let iv_LE := T1;
     //assert iv_LE == old(buffer128_read(iv_b, 0, mem));
 
     Add64(key, 0x80);           // # size optimization 
@@ -2256,10 +2255,10 @@ procedure {:quick} AES_GCM_encrypt(
     // TODO: Replace all of this with a single PinsrdImm(T1, 0x02000000, 3, counter)
     InitPshufbMask(Ii, r12);    // # borrow $Ii for .Lbswap_mask
     VPshufb(T1, T1, Ii);
-    ghost var iv_BE := T1;
+    let iv_BE := T1;
     //assert iv_BE == reverse_bytes_quad32(iv_LE);
     PinsrdImm(T1, 2, 0, counter);       // Directly set the counter in T1.lo0 (and counter) to 2, rather than read the existing value as OpenSSL does
-    //ghost var ctr_BE := T1;
+    //let ctr_BE := T1;
     ctr_BE := T1;
     //assert ctr_BE == Mkfour(2, iv_BE.lo1, iv_BE.hi2, iv_BE.hi3);
     VPshufb(T1, T1, Ii);
@@ -2286,14 +2285,14 @@ procedure {:quick} AES_GCM_encrypt(
 
     Ctr32_ghash_6_prelude(alg, stack_b, key_words, round_keys, keys_b, inc32(ctr_BE, 12));
     Mov64(counter, 14);
-    ghost var mid_len := len;
+    let mid_len := len;
     assert mid_len == old(len) - 12;
     Loop6x_loop(alg, 2, iv_b, out_b, in_b, out_b, stack_b, old(buffer128_as_seq(mem, in_b)), key_words, round_keys, keys_b, ctr_BE, inc32(ctr_BE, 12)); 
-    ghost var out_snapshot := buffer128_as_seq(mem, out_b);
+    let out_snapshot := buffer128_as_seq(mem, out_b);
 
     InitPshufbMask(Ii, r12);    // # borrow $Ii for .Lbswap_mask
     assert {:quick_type} old(len) / 6 >= 3;
-    ghost var offset_in := #nat((old(len) / 6) - 1);
+    let offset_in := #nat((old(len) / 6) - 1);
     Encrypt_save_and_shuffle_output(offset_in, out_b); 
 
     gctr_partial_opaque_ignores_postfix(alg, #nat32(12+mid_len - 6), old(buffer128_as_seq(mem, in_b)), old(buffer128_as_seq(mem, in_b)), out_snapshot, buffer128_as_seq(mem, out_b),key_words, ctr_BE);

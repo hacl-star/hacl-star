@@ -15,9 +15,6 @@ open GCTR_s
 open FStar.Math.Lemmas
 open Collections.Seqs
 
-let reveal_le_bytes_to_seq_quad32 () =
-  FStar.Pervasives.reveal_opaque (`%le_bytes_to_seq_quad32) le_bytes_to_seq_quad32
-
 let extra_bytes_helper (n:nat) : Lemma
   (requires n % 16 <> 0)
   (ensures bytes_to_quad_size n == n / 16 + 1)

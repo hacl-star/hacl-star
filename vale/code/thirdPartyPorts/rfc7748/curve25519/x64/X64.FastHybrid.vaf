@@ -54,9 +54,8 @@ const int_canon:tactic extern;
 ghost procedure assert_by_tactic(ghost p:prop, ghost t:tactic) extern;
 
 #reset-options "--z3rlimit 600"
-procedure{:quick} fast_mul1(  
-    inline offset:nat,
-    ghost inA_b:buffer64)
+procedure fast_mul1(inline offset:nat, ghost inA_b:buffer64)
+    {:quick}
     lets
         inA_ptr @= rsi;
         b @= rdx;
@@ -110,7 +109,7 @@ procedure{:quick} fast_mul1(
     Adcx64Wrap(d3, tmp2);
     Adcx64Wrap(carry, tmp0);
 
-    ghost var carry_bit := bool_bit(cf(efl));
+    let carry_bit := bool_bit(cf(efl));
     assert carry_bit == 0;      // PASSES
     assert_by_tactic(a * b == pow2_four(b*a0, b*a1, b*a2, b*a3), int_canon);   // PASSES
     
@@ -118,9 +117,8 @@ procedure{:quick} fast_mul1(
 
 /*
 #reset-options "--z3rlimit 600"
-procedure{:quick} fast_add_after_mul1(
-    ghost dst_b:buffer64,
-    ghost inB_b:buffer64)
+procedure fast_add_after_mul1(ghost dst_b:buffer64, ghost inB_b:buffer64)
+    {:quick}
     lets
         dst_ptr @= rdi;
         inB_ptr @= rcx;
@@ -183,8 +181,8 @@ procedure{:quick} fast_add_after_mul1(
 */
 
 #reset-options "--z3rlimit 600"
-procedure{:quick} fast_add_after_mul1_regs(
-    ghost inB_b:buffer64)
+procedure fast_add_after_mul1_regs(ghost inB_b:buffer64)
+    {:quick}
     lets
         inB_ptr @= rsi;
 
@@ -244,9 +242,8 @@ procedure{:quick} fast_add_after_mul1_regs(
 }
 
 #reset-options "--z3rlimit 600" 
-procedure{:quick} fast_mul1_add(  
-    inline offset:nat,
-    ghost inA_b:buffer64)
+procedure fast_mul1_add(inline offset:nat, ghost inA_b:buffer64)
+    {:quick}
     lets
         inA_ptr @= rsi;
         b @= rdx;
@@ -298,47 +295,47 @@ procedure{:quick} fast_mul1_add(
 
     
     Mulx64( tmp0,  d0, Mem(inA_ptr, 32 + offset*8, inA_b, 4 + offset, Secret));  /* A[4]*B */ lemma_prod_bounds(tmp0, d0, b, a4); 
-    ghost var ba4_hi := tmp0;
-    ghost var ba4_lo := d0;
+    let ba4_hi := tmp0;
+    let ba4_lo := d0;
     
     Xor64(zero, zero);  // Create a zero and clear the flags
 
     Adox64Wrap(d0, Mem(inA_ptr, 0 + offset*8, inA_b, 0 + offset, Secret));
 
     Mulx64(tmp1, d1, Mem(inA_ptr,  40 + offset*8, inA_b, 5 + offset, Secret));  /* A[5]*B */ lemma_prod_bounds(tmp1, d1, b, a5); 
-    ghost var ba5_hi := tmp1;
-    ghost var ba5_lo := d1;
+    let ba5_hi := tmp1;
+    let ba5_lo := d1;
     Adcx64Wrap(d1, tmp0);
-    ghost var s1 := d1;
+    let s1 := d1;
 
     Adox64Wrap(d1, Mem(inA_ptr, 8 + offset*8, inA_b, 1 + offset, Secret));
 
     Mulx64(tmp0, d2, Mem(inA_ptr, 48 + offset*8, inA_b, 6 + offset, Secret));  /* A[6]*B */ lemma_prod_bounds(tmp0, d2, b, a6); 
-    ghost var ba6_hi := tmp0;
-    ghost var ba6_lo := d2;
+    let ba6_hi := tmp0;
+    let ba6_lo := d2;
     Adcx64Wrap(d2, tmp1);
-    ghost var s2 := d2;
+    let s2 := d2;
     
     Adox64Wrap(d2, Mem(inA_ptr, 16 + offset*8, inA_b, 2 + offset, Secret));
 
     Mulx64(carry, d3, Mem(inA_ptr, 56 + offset*8, inA_b, 7 + offset, Secret));  /* A[7]*B */ lemma_prod_bounds(carry, d3, b, a7); 
-    ghost var ba7_hi := carry;
-    ghost var ba7_lo := d3;
+    let ba7_hi := carry;
+    let ba7_lo := d3;
     Adcx64Wrap(d3, tmp0);
-    ghost var s3 := d3;
+    let s3 := d3;
 
     Adox64Wrap(d3, Mem(inA_ptr, 24 + offset*8, inA_b, 3 + offset, Secret));
 
     Adcx64Wrap(carry, zero);
-    ghost var s4 := carry;
+    let s4 := carry;
     Adox64Wrap(carry, zero);
 
-    ghost var carry_bit := bool_bit(cf(efl));
+    let carry_bit := bool_bit(cf(efl));
     assert carry_bit == 0;      // PASSES
     lemma_fast_mul1(a', old(b), a4, a5, a6, a7, 
                     ba4_hi, ba4_lo, ba5_hi, ba5_lo, ba6_hi, ba6_lo, ba7_hi, ba7_lo,
                     s1, s2, s3, s4);
-    ghost var d := pow2_five(ba4_lo, s1, s2, s3, s4);
+    let d := pow2_five(ba4_lo, s1, s2, s3, s4);
     lemma_addition(a, d, 
                    a0, a1, a2, a3, 
                    ba4_lo, s1, s2, s3, s4,
@@ -347,7 +344,8 @@ procedure{:quick} fast_mul1_add(
 
 
 #reset-options "--z3rlimit 60"
-procedure{:quick} store4(ghost dst_b:buffer64)
+procedure store4(ghost dst_b:buffer64)
+    {:quick}
     lets
         dst_ptr @= rdi;
         d0 @= r8;
@@ -373,7 +371,8 @@ procedure{:quick} store4(ghost dst_b:buffer64)
 }
 
 #reset-options "--z3rlimit 20"
-procedure {:quick exportOnly} carry_times_38(inout tmp:dst_opr64)
+procedure carry_times_38(inout tmp:dst_opr64)
+    {:quick exportOnly}
     lets
         carry @= rax;
     modifies carry;
@@ -390,7 +389,8 @@ procedure {:quick exportOnly} carry_times_38(inout tmp:dst_opr64)
 }
 
 #reset-options "--z3rlimit 100"
-procedure{:quick} carry_pass(inline use_cf:bool, inline offset:nat, ghost dst_b:buffer64)
+procedure carry_pass(inline use_cf:bool, inline offset:nat, ghost dst_b:buffer64)
+    {:quick}
     lets
         dst_ptr @= rdi;
         carry @= rax;
@@ -443,11 +443,11 @@ procedure{:quick} carry_pass(inline use_cf:bool, inline offset:nat, ghost dst_b:
     Adcx64Wrap(a3, zero);
     Store64_buffer(dst_ptr, a3, 24 + offset*8, Secret, dst_b, 3 + offset);  
     assert pow2_five(a0, a1, a2, a3, bool_bit(cf(efl))) == old(pow2_four(a0, a1, a2, a3) + carry_in * 38);
-    ghost var sum := old(pow2_four(a0, a1, a2, a3) + carry_in * 38);
-    ghost var new_carry := bool_bit(cf(efl));
+    let sum := old(pow2_four(a0, a1, a2, a3) + carry_in * 38);
+    let new_carry := bool_bit(cf(efl));
     assert new_carry == bool_bit(sum >= pow2_256);
     lemma_carry_prime(old(a0), old(a1), old(a2), old(a3), a0, a1, a2, a3, old(carry_in), new_carry);
-    ghost var a0' := a0;
+    let a0' := a0;
 
     Mov64(carry, 0);
     Cmovc64(carry, tmp);
@@ -458,10 +458,9 @@ procedure{:quick} carry_pass(inline use_cf:bool, inline offset:nat, ghost dst_b:
 
 
 #reset-options "--z3rlimit 600"
-procedure{:quick} {:public} carry_wide(
-    inline offset:nat,
-    ghost dst_b:buffer64,
-    ghost inA_b:buffer64)
+procedure carry_wide(inline offset:nat, ghost dst_b:buffer64, ghost inA_b:buffer64)
+    {:public}
+    {:quick}
     lets
         dst_ptr @= rdi;
         inA_ptr @= rsi;
@@ -514,26 +513,25 @@ procedure{:quick} {:public} carry_wide(
     Mov64(rdx, 38);
 
     fast_mul1_add(offset*2, inA_b);   // Gives d+carry == a' * 38 + a
-    ghost var d0_mid := tmp0;
-    ghost var d1_mid := tmp1;
-    ghost var d2_mid := tmp2;
-    ghost var d3_mid := tmp3;
-    ghost var carry_mid := rax;
+    let d0_mid := tmp0;
+    let d1_mid := tmp1;
+    let d2_mid := tmp2;
+    let d3_mid := tmp3;
+    let carry_mid := rax;
     carry_pass(false, offset, dst_b); // Gives d % prime == old (d + carry * pow2_256) % prime
 
-    ghost var d0 := buffer64_read(dst_b, 0 + offset, mem);
-    ghost var d1 := buffer64_read(dst_b, 1 + offset, mem);
-    ghost var d2 := buffer64_read(dst_b, 2 + offset, mem);
-    ghost var d3 := buffer64_read(dst_b, 3 + offset, mem);
+    let d0 := buffer64_read(dst_b, 0 + offset, mem);
+    let d1 := buffer64_read(dst_b, 1 + offset, mem);
+    let d2 := buffer64_read(dst_b, 2 + offset, mem);
+    let d3 := buffer64_read(dst_b, 3 + offset, mem);
     lemma_carry_wide(a0, a1, a2, a3, a4, a5, a6, a7, d0_mid, d1_mid, d2_mid, d3_mid, carry_mid, d0, d1, d2, d3);
     //store4(dst_b);
 }
 
 /*
-procedure{:quick}{:public} carry_wide_stdcall(
-    inline win:bool,
-    ghost dst_b:buffer64,
-    ghost inA_b:buffer64)
+procedure carry_wide_stdcall(inline win:bool, ghost dst_b:buffer64, ghost inA_b:buffer64)
+    {:public}
+    {:quick}
     lets
         dst_ptr @= rdi; inA_ptr @= rsi; 
         dst_in := (if win then rcx else rdi);
@@ -601,7 +599,8 @@ procedure{:quick}{:public} carry_wide_stdcall(
 */
 
 #reset-options "--z3rlimit 600"
-procedure{:quick} carry_sub_pass()
+procedure carry_sub_pass()
+    {:quick}
     lets
         carry @= rax;
         tmp @= rcx;
@@ -627,10 +626,10 @@ procedure{:quick} carry_sub_pass()
     Sbb64(a2, 0);          
     Sbb64(a3, 0);          
 
-    ghost var old_carry := old(bool_bit(cf(efl)));
+    let old_carry := old(bool_bit(cf(efl)));
     assert pow2_four(a0, a1, a2, a3) - bool_bit(cf(efl))*pow2_256 == old(pow2_four(a0, a1, a2, a3) - old_carry * 38);
-    ghost var sum:int := old(pow2_four(a0, a1, a2, a3) - old_carry * 38);
-    ghost var new_carry := bool_bit(cf(efl));
+    let sum:int := old(pow2_four(a0, a1, a2, a3) - old_carry * 38);
+    let new_carry := bool_bit(cf(efl));
     assert new_carry == bool_bit(sum < 0);
     lemma_carry_sub_prime(old(a0), old(a1), old(a2), old(a3), a0, a1, a2, a3, old_carry, new_carry);
     //assert pow2_four(#nat(a0 - new_carry * 38), a1, a2, a3) % prime == old(pow2_four(a0, a1, a2, a3) - old_carry * pow2_256) % prime;
@@ -643,9 +642,8 @@ procedure{:quick} carry_sub_pass()
 }
 
 #reset-options "--z3rlimit 600"
-procedure{:quick} fast_add(
-    ghost inA_b:buffer64,
-    ghost inB_b:buffer64)
+procedure fast_add(ghost inA_b:buffer64, ghost inB_b:buffer64)
+    {:quick}
     lets
         inA_ptr @= rsi;
         inB_ptr @= rdx;
@@ -699,9 +697,8 @@ procedure{:quick} fast_add(
 }
 
 #reset-options "--z3rlimit 600"
-procedure{:quick} fast_sub(
-    ghost inA_b:buffer64,
-    ghost inB_b:buffer64)
+procedure fast_sub(ghost inA_b:buffer64, ghost inB_b:buffer64)
+    {:quick}
     lets
         inA_ptr @= rsi;
         inB_ptr @= rdx;
@@ -760,10 +757,10 @@ procedure{:quick} fast_sub(
 
 
 #reset-options "--z3rlimit 60"
-procedure{:quick}{:public}{:exportSpecs} fadd(
-    ghost dst_b:buffer64,
-    ghost inA_b:buffer64,
-    ghost inB_b:buffer64)
+procedure fadd(ghost dst_b:buffer64, ghost inA_b:buffer64, ghost inB_b:buffer64)
+    {:public}
+    {:quick}
+    {:exportSpecs}
     lets
         dst_ptr @= rdi;
         inA_ptr @= rsi;
@@ -821,11 +818,14 @@ procedure{:quick}{:public}{:exportSpecs} fadd(
     carry_pass(true, 0, dst_b);
 }
 
-procedure{:quick}{:public}{:exportSpecs} fadd_stdcall(
-    inline win:bool,
-    ghost dst_b:buffer64,
-    ghost inA_b:buffer64,
-    ghost inB_b:buffer64)
+procedure fadd_stdcall(
+        inline win:bool,
+        ghost dst_b:buffer64,
+        ghost inA_b:buffer64,
+        ghost inB_b:buffer64)
+    {:public}
+    {:quick}
+    {:exportSpecs}
     lets
         dst_ptr @= rdi; inA_ptr @= rsi; inB_ptr @= rdx;
         dst_in := (if win then rcx else rdi);
@@ -912,10 +912,10 @@ procedure{:quick}{:public}{:exportSpecs} fadd_stdcall(
 }
 
 #reset-options "--z3rlimit 60"
-procedure{:quick}{:public}{:exportSpecs} fsub(
-    ghost dst_b:buffer64,
-    ghost inA_b:buffer64,
-    ghost inB_b:buffer64)
+procedure fsub(ghost dst_b:buffer64, ghost inA_b:buffer64, ghost inB_b:buffer64)
+    {:public}
+    {:quick}
+    {:exportSpecs}
     lets
         dst_ptr @= rdi;
         inA_ptr @= rsi;
@@ -971,11 +971,14 @@ procedure{:quick}{:public}{:exportSpecs} fsub(
     store4(dst_b);
 }
 
-procedure{:quick}{:public}{:exportSpecs} fsub_stdcall(
-    inline win:bool,
-    ghost dst_b:buffer64,
-    ghost inA_b:buffer64,
-    ghost inB_b:buffer64)
+procedure fsub_stdcall(
+        inline win:bool,
+        ghost dst_b:buffer64,
+        ghost inA_b:buffer64,
+        ghost inB_b:buffer64)
+    {:public}
+    {:quick}
+    {:exportSpecs}
     lets
         dst_ptr @= rdi; inA_ptr @= rsi; inB_ptr @= rdx;
         dst_in := (if win then rcx else rdi);
@@ -1062,10 +1065,10 @@ procedure{:quick}{:public}{:exportSpecs} fsub_stdcall(
 }
 
 #reset-options "--z3rlimit 600"
-procedure{:quick}{:public}{:exportSpecs} fmul1(
-    ghost dst_b:buffer64,
-    ghost inA_b:buffer64,
-    ghost inB:nat64)
+procedure fmul1(ghost dst_b:buffer64, ghost inA_b:buffer64, ghost inB:nat64)
+    {:public}
+    {:quick}
+    {:exportSpecs}
     lets
         dst_ptr @= rdi;
         inA_ptr @= rsi;
@@ -1119,11 +1122,14 @@ procedure{:quick}{:public}{:exportSpecs} fmul1(
     //store4(dst_b);
 }
 
-procedure{:quick}{:public}{:exportSpecs} fmul1_stdcall(
-    inline win:bool,
-    ghost dst_b:buffer64,
-    ghost inA_b:buffer64,
-    ghost inB_in:nat64)
+procedure fmul1_stdcall(
+        inline win:bool,
+        ghost dst_b:buffer64,
+        ghost inA_b:buffer64,
+        ghost inB_in:nat64)
+    {:public}
+    {:quick}
+    {:exportSpecs}
     lets
         dst_ptr @= rdi; inA_ptr @= rsi; b @= rdx;
         dst_in := (if win then rcx else rdi);
