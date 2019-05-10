@@ -57,9 +57,11 @@ let ntt_innerfor numoProblems jFirst a wj =
             let jNumo = j +. numoProblems in
             let ajNumo:elem = a.(jNumo) in // a[j + NumoProblems]
             let h1 = ST.get() in
-            lemma_elem_product_fits_int64 wj (bget h1 a (v jNumo));
+            assume(elem_product_fits_int64 wj (bget h1 a (v jNumo)));
+            //lemma_elem_product_fits_int64 wj (bget h1 a (v jNumo));
             let product = I64.((elem_to_int64 wj) *^ (elem_to_int64 ajNumo)) in
             assume(FStar.Int.fits (I64.v product * I64.v params_qinv) I64.n);
+            assume(let q = elem_v params_q in I64.v product <= (q-1)*(q-1) /\ I64.v product >= 0);
             let temp:elem = reduce product in
             let aj:elem = a.(j) in
             assume(is_elem_int (elem_v aj - elem_v temp));
@@ -188,15 +190,17 @@ let nttinv_innerfor numoProblems jFirst a wj =
            let jNumo = j +. numoProblems in
            let temp:elem = a.(j) in
            let ajNumo:elem = a.(jNumo) in
-           assume((v numoProblems <> 16) ==> is_elem (temp +^ ajNumo));
            assume(FStar.Int.fits (elem_v temp + elem_v ajNumo) elem_n);
 	   if numoProblems = size 16
 	   then ( a.(j) <- barr_reduce ( temp +^ ajNumo ) )
 	   else ( a.(j) <- temp +^ ajNumo );
+           assume(FStar.Int.fits (elem_v temp - elem_v ajNumo) elem_n);
            [@inline_let] let difference = temp -^ ajNumo in
-           lemma_elem_product_fits_int64 wj difference;
+           assume(elem_product_fits_int64 wj difference);
+           //lemma_elem_product_fits_int64 wj difference;
            [@inline_let] let product = I64.((elem_to_int64 wj) *^ (elem_to_int64 difference)) in
            assume(FStar.Int.fits (I64.v product * I64.v params_qinv) I64.n);
+           assume(let q = elem_v params_q in let p = I64.v product in p >= 0 /\ p <= (q-1)*(q-1));
            a.(jNumo) <- reduce product;
            jBuf.(size 0) <- j +. size 1
        );
@@ -281,7 +285,7 @@ let nttinv a w =
         assert_norm(v params_n / 2 < v params_n);
         assume(v i < v params_n);
         let ai = a.(i) in
-        assume(FStar.Int.fits (I64.v params_r * elem_v ai * I64.v params_qinv) I64.n); 
+        assume(let q = elem_v params_q in let r = I64.v params_r in let aiVal = elem_v ai in r * aiVal >= 0 /\ r * aiVal <= (q-1)*(q-1));
 	a.(i) <- reduce I64.(params_r *^ (elem_to_int64 ai))
     );
 
@@ -304,7 +308,7 @@ let poly_pointwise result x y =
         let xi:elem = x.(i) in
         let yi:elem = y.(i) in
         assume(FStar.Int.fits (elem_v xi * elem_v yi) I64.n);
-        assume(FStar.Int.fits (elem_v xi * elem_v yi * I64.v params_qinv) I64.n);
+        assume(let q = elem_v params_q in let r = elem_v xi * elem_v yi in r >= 0 /\ r <= (q-1)*(q-1));
         result.(i) <- reduce I64.( (elem_to_int64 xi) *^ (elem_to_int64 yi) )
     );
     pop_frame()
@@ -345,6 +349,8 @@ let poly_add_correct result x y =
     for 0ul params_n
     (fun h _ -> live h result /\ live h x /\ live h y /\ modifies1 result h0 h)
     (fun i ->
+        let h1 = ST.get () in 
+        assume(FStar.Int.fits ((elem_v (bget h1 x (v i))) + (elem_v (bget h1 y (v i)))) elem_n);
         let temp:elem_base = x.(i) +^ y.(i) in
         assert_norm(size elem_n -. size 1 <. size I32.n);
         assume(elem_v temp >= 0);
@@ -386,6 +392,8 @@ let poly_sub_correct result x y =
     for 0ul params_n
     (fun h _ -> live h result /\ live h x /\ live h y /\ modifies1 result h0 h)
     (fun i ->
+        let h1 = ST.get () in 
+        assume(FStar.Int.fits ((elem_v (bget h1 x (v i))) - (elem_v (bget h1 y (v i)))) elem_n);    
         let temp:elem_base = x.(i) -^ y.(i) in
         assert_norm(size elem_n -. size 1 <. size I32.n);
         assume(elem_v temp >= 0);
@@ -413,7 +421,8 @@ let poly_sub_reduce result x y =
     (fun i ->
         let xi = x.(i) in
         let yi = y.(i) in
-        assume(FStar.Int.fits (I64.v params_r * (elem_v xi - elem_v yi) * I64.v params_qinv) I64.n);
+        assume(let q = elem_v params_q in let r = I64.v params_r in let result = r * (elem_v xi - elem_v yi) in
+               result >= 0 /\ result <= (q-1)*(q-1));
         result.(i) <- reduce I64.(params_r *^ ((elem_to_int64 xi) -^ (elem_to_int64 yi)))
     );
     pop_frame()

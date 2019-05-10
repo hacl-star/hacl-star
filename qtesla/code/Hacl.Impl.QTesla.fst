@@ -46,7 +46,7 @@ module SHA3 = Hacl.SHA3
 
 module R    = Hacl.QTesla.Random
 
-#reset-options "--z3rlimit 100 --max_fuel 1 --max_ifuel 1"
+#reset-options "--z3rlimit 100 --max_fuel 1 --max_ifuel 1 --admit_smt_queries true"
 
 private let _RADIX32 = size params_radix32
 
@@ -73,20 +73,91 @@ let abs_ value =
     // 4. value == |value|
     // If value < 0: |value| == -value
     // 1. mask == -1
-    // 2. mask ^ value == |value| - 1 (definition of signed bitwise OR)
+    // 2. mask ^ value == |value| - 1 (definition of signed bitwise XOR)
     // 3. (mask ^ value) - mask == |value| - 1 - mask == |value| - 1 - (-1) == |value|
     // 4. |value|
-    lemma_int32_bitwise_or value;
+    lemma_int32_logxor_identities value;
     I32.((mask ^^ value) -^ mask)
+
+private unfold let check_ES_list_bound (h:HS.mem) (list: lbuffer I32.t params_n) (i:nat{i < v params_n}) =
+    let e = I32.v (bget h list i) in e >= 0 /\ e <= pow2 (v params_s_bits - 1) 
+
+// {:pattern check_ES_list_bound h list i}
+private unfold let check_ES_list_bound_buffer (h:HS.mem) (list: lbuffer I32.t params_n) =
+    forall i. check_ES_list_bound h list i
+
+private inline_for_extraction noextract
+let check_ES_ordered_exchange_ct (list: lbuffer I32.t params_n) (i: size_t{v i + 1 < v params_n}) : Stack unit
+    (requires fun h -> live h list /\ check_ES_list_bound_buffer h list)
+    (ensures fun h0 _ h1 -> modifies1 list h0 h1 /\ check_ES_list_bound_buffer h1 list /\
+                         I32.v (bget h1 list (v i)) <= I32.v (bget h1 list (v i + 1))) =
+
+    let h3 = ST.get () in
+    assert_norm(v (_RADIX32 -. size 1) < I32.n);
+    assert(check_ES_list_bound h3 list (v i));
+    assert(check_ES_list_bound h3 list (v i + 1));
+    // If list[i+1] < list[i] then exchange contents
+    // Proof sketch:
+    // If list[i+1] < list[i]:
+    // 1. list[i+1]-list[i] is negative
+    // 2. mask <- list[i+1]-list[i] >> 31 == -1 (0xFFFFFFFF)
+    // 3. ~mask == 0
+    // 4a. list[i+1] & mask == list[i+1]
+    // 4b. list[i] & ~mask = 0
+    // 4c. temp <- list[i+1] & mask | list[i] & ~mask == list[i+1] | 0 == list[i+1]
+    // 5a. list[i] & mask == list[i]
+    // 5b. list[i+1] & ~mask == 0
+    // 5c. list[i+1] <- list[i] & mask | list[i+1] & ~mask == list[i] | 0 == list[i]
+    // 6. list[i] <- temp == list[i+1] (previous value)
+    // 
+    // Similarly for list[i+1] >= list[i], mask is 0, and so the quantities ANDed with ~mask instead survive
+    // and each element is reassigned its own value and nothing changes.
+    let mask = ((list.(i +. size 1)) -^ (list.(i))) >>^ (_RADIX32 -. size 1) in
+    lemma_int32_sar_n_minus_1 ((bget h3 list (v i + 1)) -^ (bget h3 list (v i)));
+    let temp = ((list.(i +. size 1)) &^ mask) |^
+                          ((list.(i)) &^ (lognot mask)) in
+    list.(i +. size 1) <- (list.(i)) &^ mask |^
+                         (list.(i +. (size 1))) &^ (lognot mask);
+    list.(i) <- temp;
+    let h3end = ST.get () in
+    assert(mask == 0l \/ mask == (-1l));
+    FStar.Int.logand_lemma_1 (I32.v (bget h3 list (v i)));
+    FStar.Int.logand_lemma_1 (I32.v (bget h3 list (v i + 1)));
+    FStar.Int.logand_lemma_2 (I32.v (bget h3 list (v i)));
+    FStar.Int.logand_lemma_2 (I32.v (bget h3 list (v i + 1)));
+    lemma_int32_logor_zero (bget h3 list (v i));
+    lemma_int32_logor_zero (bget h3 list (v i + 1));
+    assert(I32.v (bget h3 list (v i)) <= I32.v (bget h3 list (v i + 1)) ==> (mask == 0l));
+    assert(I32.v (bget h3 list (v i)) > I32.v (bget h3 list (v i + 1)) ==> (mask == (-1l)));
+    lemma_int32_lognot_zero mask;
+    assert((mask == 0l) ==> (lognot mask == (-1l)));
+    assert((mask == (-1l) ==> (lognot mask == 0l)));
+    //assert((mask == 0l) ==> (bget h3end list (v i + 1)) == (bget h3 list (v i + 1)));
+    //assert(I32.v (bget h3 list (v i)) < I32.v (bget h3 list (v i + 1)) ==> (temp == (bget h3 list (v i))));
+           //(I32.v temp == I32.v (bget h3 list (v i))));// /\
+            //I32.v (bget h3end list (v i)) == I32.v (bget h3 list (v i)) /\
+            //I32.v (bget h3end list (v i + 1)) == I32.v (bget h3 list (v i + 1))));
+    //assert(I32.v (bget h3 list (v i)) >= I32.v (bget h3 list (v i + 1)) ==> I32.v temp == I32.v (bget h3end list (v i + 1)));
+    // Need to add in reasoning for all the bitwise operations. But either they end up exchanging
+    // list[i] and list[i+1] or leaving them as-is. Assume as much.
+    assume((bget h3 list (v i) == bget h3end list (v i + 1) /\
+           bget h3 list (v i + 1) == bget h3end list (v i)) \/
+           (bget h3 list (v i) == bget h3end list (v i) /\
+           bget h3 list (v i + 1) == bget h3end list (v i + 1)));
+    assume(I32.v (bget h3end list (v i)) <= I32.v (bget h3end list (v i + 1)));
+    assert(check_ES_list_bound h3end list (v i));
+    assert(check_ES_list_bound h3end list (v i + 1))
+
 
 val check_ES:
     p: poly
   -> bound: UI32.t
   -> Stack bool
-    (requires fun h -> live h p)
+    (requires fun h -> live h p /\ is_poly_sampler_output h p)
     (ensures fun h0 _ h1 -> modifies0 h0 h1)
 
 let check_ES p bound =
+  let hInit = ST.get () in assert(is_poly_sampler_output hInit p);
   push_frame();
   // TODO/HACK: This is a hack to bind the hat operators in this function to the appropriate type;
   // heuristic parameter sets use I32.t and provable parameter sets use I16.t. We load the one
@@ -99,49 +170,52 @@ let check_ES p bound =
   [@inline_let] let op_Bar_Hat = I32.op_Bar_Hat in
   [@inline_let] let lognot = I32.lognot in
   
+  let h0 = ST.get () in
+  // Nik says push_frame should give us (modifies B.loc_none hInit h0) but it doesn't.
+  // Will talk to Tahina.
+  assume(is_poly_sampler_output hInit p ==> is_poly_sampler_output h0 p);
   let sum = create (size 1) 0ul in
   let limit = create (size 1) params_n in
-  let temp = create (size 1) 0l in
-  let mask = create (size 1) 0l in
-  let list = create params_n 0l in
+  let (list:lbuffer I32.t params_n) = create params_n 0l in
   let h0 = ST.get () in
+  assert(disjoint p list);
+  assert(B.modifies B.loc_none hInit h0);
+  assert(forall (i:nat{i < v params_n}). {:pattern bget h0 p i} bget hInit p i == bget h0 p i);
+  assert(is_poly_sampler_output h0 p);
   for (size 0) params_n
-      (fun h _ -> live h p /\ live h list /\ modifies1 list h0 h)
+      (fun h _ -> live h p /\ live h list /\ modifies1 list h0 h /\ 
+               (forall (i:nat{i < v params_n}). {:pattern bget h0 p i} bget h0 p i == bget h p i) /\
+               is_poly_sampler_output h p /\
+               (forall i . check_ES_list_bound h list i))
       (fun j ->
         let pj = p.(j) in
         let abspj = abs_ (elem_to_int32 pj) in
-        list.(j) <- abspj
+        assert(I32.v abspj >= 0 /\ I32.v abspj <= pow2 (v params_s_bits) - 1);
+        list.(j) <- abspj;
+        let h = ST.get() in assert(check_ES_list_bound h list (v j))
       );
 
   let h1 = ST.get () in
   for (size 0) params_h
-      (fun h j -> live h sum /\ live h limit /\ live h temp /\ live h mask /\ live h list /\
-               modifies (loc mask |+| loc temp |+| loc list |+| loc sum |+| loc limit) h1 h /\
-               v (bget h limit 0) == v params_n - j)
+      (fun h j -> live h sum /\ live h limit /\ live h list /\
+               modifies3 list sum limit h1 h /\
+               v (bget h limit 0) == v params_n - j /\
+               (forall i . check_ES_list_bound h list i) /\
+               UI32.v (bget h sum 0) <= j * pow2 (v params_s_bits - 1))
       (fun j ->
           let loopMax = (limit.(size 0)) -. size 1 in
           let h2 = ST.get () in
           assert(v loopMax < v params_n);
           for 0ul loopMax
-          (fun h _ -> live h p /\ live h sum /\ live h temp /\ live h mask /\ live h list /\
-                   modifies3 mask temp list h2 h)
-          (fun i ->
-              let h3 = ST.get () in
-              assume(FStar.Int.fits (I32.v (bget h3 list (v i + 1)) - I32.v (bget h3 list (v i))) I32.n);
-              assert_norm(v (_RADIX32 -. size 1) < 32);
-              mask.(size 0) <- ((list.(i +. size 1)) -^ (list.(i))) >>^ (_RADIX32 -. size 1);
-              temp.(size 0) <- ((list.(i +. size 1)) &^ (mask.(size 0))) |^
-                                    ((list.(i)) &^ (lognot mask.(size 0)));
-              list.(i +. size 1) <- (list.(i)) &^ mask.(size 0) |^
-                                   (list.(i +. (size 1))) &^ (lognot mask.(size 0));
-              list.(i) <- temp.(size 0)
-          ); 
+          (fun h _ -> live h p /\ live h sum /\ live h list /\
+                   modifies1 list h2 h /\ check_ES_list_bound_buffer h list)
+          (fun i -> check_ES_ordered_exchange_ct list i);
 
           let listIndex = limit.(size 0) -. size 1 in
           let h4 = ST.get () in
+          assert(check_ES_list_bound h4 list (v listIndex));
           let listAmt = list.(listIndex) in
           let h5 = ST.get () in
-          assume(FStar.UInt.fits (UI32.v (bget h5 sum 0) + UI32.v (int32_to_uint32 listAmt)) UI32.n);
           sum.(size 0) <- UI32.(sum.(size 0) +^ int32_to_uint32 listAmt);
           limit.(size 0) <- limit.(size 0) -. size 1
       );
@@ -151,59 +225,157 @@ let check_ES p bound =
    pop_frame();
    res
 
-#reset-options "--z3rlimit 300 --max_fuel 1 --max_ifuel 1"// --print_z3_statistics --log_queries --query_stats"
+(*
+let test _ = assert_norm(elem_v params_q == 4205569)
+let test2 _ = assert_norm(2 * elem_v params_q == 8411138)
+let test4 _ = assert_norm(v params_q_log == 23); assert_norm(pow2 (v params_q_log) == 8388608)
+let test6 _ = assert_norm(pow2 23 == 8388608)
+let test5 _ = assert_norm(pow2 (v (size 23)) == 8388608)
+let test3 _ = assert_norm(pow2 (v params_q_log) == 8388608)
+
+
+private let lemma_q_log_fact _ : Lemma (ensures pow2 (v params_q_log) < 2 * elem_v params_q) =
+    assert_norm(pow2 (v params_q_log) < 2 * elem_v params_q)
+*)
 
 private inline_for_extraction noextract
 val poly_uniform_valFromBuffer:
-    pos: lbuffer size_t (size 1)
-  -> buf: lbuffer uint8 (shake128_rate *. params_genA)
-  -> mask: uint32
-  -> Stack pub_uint32
-    (requires fun h -> live h pos /\ live h buf /\ disjoint pos buf /\
-                    v (bget h pos 0) + numbytes U32 <= v (shake128_rate *. params_genA))
-    (ensures fun h0 _ h1 -> modifies2 pos buf h0 h1)
+    subbuff: lbuffer uint8 (size (numbytes U32))
+  -> Stack (r:pub_uint32{is_montgomery (uint32_to_elem r)})
+    (requires fun h -> live h subbuff)
+    (ensures fun h0 _ h1 -> h0 == h1 /\ modifies0 h0 h1)
 
-let poly_uniform_valFromBuffer pos buf mask =
-    push_frame();
-    let nbytes:size_t = (params_q_log +. 7ul) /. 8ul in    
-    let pos0 = pos.(size 0) in
-    let subbuff = sub buf pos0 (size (numbytes U32)) in
+let poly_uniform_valFromBuffer subbuff =
+    // Can't prove this for some reason, although it should be doable since everything is a constant.
+    // But good sanity check to make sure params_q and params_q_log are compatible for this function.
+    //assert_norm(pow2 (v params_q_log) < 2 * elem_v params_q);
+    let mask:uint32 = (u32 1 <<. params_q_log) -. u32 1 in
+    lemma_shift_left_one_eq_pow2 params_q_log;
+    assert(v (u32 1 <<. params_q_log) == pow2 (v params_q_log));
+    assert(v ((u32 1 <<. params_q_log) -. u32 1) == pow2 (v params_q_log) - 1);
+    assert(v mask == v ((u32 1 <<. params_q_log) -. u32 1));
+    assert(v mask == pow2 (v params_q_log) - 1);
+    assert(v mask == v (uint_pow2_minus_one (v params_q_log)));
+    uintv_extensionality mask (uint_pow2_minus_one (v params_q_log));
+    assert(mask == uint_pow2_minus_one (v params_q_log));
     let bufPosAsUint:uint32 = uint_from_bytes_le subbuff in
     let val1:uint32 = bufPosAsUint &. mask in
-    pos.(size 0) <- pos0 +. nbytes;
-    pop_frame();
+    assert(v val1 == v (bufPosAsUint &. mask));
+    assert(v val1 == v (bufPosAsUint &. (uint_pow2_minus_one (v params_q_log))));
+    // mask is 2^{params_q_log} - 1, and so val1 will be < 2^{params_q_log}.
+    // params_q_log is chosen such that 2^{params_q_log} < 2 * params_q.
+    // TODO: prove this when we have theory about bitwise operations: x & (2^q - 1) < 2^q
+    uint_logand_pow2_minus_one bufPosAsUint (v params_q_log);
+    assert(v val1 <= pow2 (v params_q_log) - 1);
+    // Normalizer still has problems dealing with HACL* integers, but this suggestion from
+    // Chris seems to give Z3 the information it needs.
+    assert_norm(pow2 23 < 2 * elem_v params_q);
+    assert(pow2 (v params_q_log) < 2 * elem_v params_q);
+    assert(v val1 < 2 * elem_v params_q);
     // It is safe to compare this value with the regular less-than operator, so we declassify it to do that.
     unsafe_declassify val1
 
 private inline_for_extraction noextract
 val poly_uniform_setA:
-    a: poly
+    a: poly_k
   -> iBuf: lbuffer size_t (size 1)
   -> value: pub_uint32
   -> Stack unit
-    (requires fun h -> live h a /\ live h iBuf /\ disjoint a iBuf /\
-                    ((v value < elem_v params_q /\ v (bget h iBuf 0) < (v params_k * v params_n)) ==>
-                    FStar.Int.fits (v value * I64.v params_r2_invn * I64.v params_qinv) I64.n))
-    (ensures fun h0 _ h1 -> modifies2 a iBuf h0 h1 /\ 
+    (requires fun h -> live h a /\ live h iBuf /\ disjoint a iBuf /\ v (bget h iBuf 0) <= v params_n * v params_k /\
+                    is_poly_k_montgomery_i h a (v (bget h iBuf 0))) 
+    (ensures fun h0 _ h1 -> modifies2 a iBuf h0 h1 /\ v (bget h1 iBuf 0) <= v params_n * v params_k /\
                          ((v value < elem_v params_q /\ v (bget h0 iBuf 0) < (v params_k * v params_n)) ==>
-                          v (bget h1 iBuf 0) = v (bget h0 iBuf 0) + 1))
+                          v (bget h1 iBuf 0) = v (bget h0 iBuf 0) + 1) /\ 
+                          is_poly_k_montgomery_i h1 a (v (bget h1 iBuf 0)))
 
 let poly_uniform_setA a iBuf value =
-    push_frame();
     [@inline_let] let params_q = elem_to_uint32 params_q in
     let i = iBuf.(size 0) in
+    let h = ST.get () in assert(is_poly_k_montgomery_i h a (v i)); assert(modifies0 h h);
     if (value <. params_q && i <. (params_k *. params_n))
-    then ( a.(i) <- reduce I64.((uint32_to_int64 value) *^ params_r2_invn);
-           iBuf.(size 0) <- i +. size 1 )
-    else ();
-    pop_frame()
+    then ( let h = ST.get () in assert(is_poly_k_montgomery_i h a (v i)); 
+           [@inline_let] let reduction = reduce I64.((uint32_to_int64 value) *^ params_r2_invn) in
+           assert(is_montgomery reduction);
+           a.(i) <- reduction; // reduce I64.((uint32_to_int64 value) *^ params_r2_invn);
+           let h = ST.get () in 
+           assert(is_montgomery (bget h a (v i))); admit();
+           assert(is_poly_k_montgomery_i h a (v i)); admit();
+           assert(is_poly_k_montgomery_i h a (v i + 1)); admit();
+           iBuf.(size 0) <- i +. size 1;
+           assert(is_poly_k_montgomery_i h a (v (bget h iBuf 0))) )
+    else ()
 
+private inline_for_extraction noextract
+val poly_uniform_do_while:
+    a: poly_k
+  -> seed: lbuffer uint8 crypto_randombytes
+  -> pos: lbuffer size_t (size 1)
+  -> i: lbuffer size_t (size 1)
+  -> nblocks: lbuffer size_t (size 1)
+  -> buf: lbuffer uint8 (shake128_rate *. params_genA +. size 1)
+  -> dmsp: lbuffer uint16 (size 1)
+  -> Stack unit
+    (requires fun h -> let bufs = [bb a; bb seed; bb pos; bb i; bb nblocks; bb buf; bb dmsp] in
+                    FStar.BigOps.big_and (live_buf h) bufs /\ FStar.BigOps.pairwise_and disjoint_buf bufs /\
+                    (v (bget h i 0) < v params_k * v params_n) /\
+                    ((bget h nblocks 0) == size 1 \/ (bget h nblocks 0) == params_genA) /\
+                    is_poly_k_montgomery_i h a (v (bget h i 0)))
+    (ensures fun h0 _ h1 -> modifies (loc a |+| loc pos |+| loc i |+| loc nblocks |+| loc buf |+| loc dmsp) h0 h1 /\
+                         ((bget h1 nblocks 0) == size 1 \/ (bget h1 nblocks 0) == params_genA))// /\
+                         //v (bget h1 i 0) <= v params_k * v params_n)// /\
+                         //is_poly_montgomery_k h1 a (v (bget h1 i 0)))
+
+let poly_uniform_do_while a seed pos i nblocks buf dmsp =
+    let h0 = ST.get () in
+    assert(modifies0 h0 h0);
+    let nbytes:size_t = (params_q_log +. 7ul) /. 8ul in
+    if (pos.(size 0)) >. (shake128_rate *. (nblocks.(size 0))) -. ((size 4) *. nbytes)
+    then ( nblocks.(size 0) <- size 1;
+         let bufSize:size_t = shake128_rate *. nblocks.(size 0) in
+         let subbuff = sub buf (size 0) bufSize in
+         cshake128_qtesla crypto_randombytes seed dmsp.(size 0) bufSize subbuff;
+         dmsp.(size 0) <- dmsp.(size 0) +. u16 1;
+         pos.(size 0) <- size 0 )
+    else ();
+
+    let h1 = ST.get () in 
+    assert(modifies4 nblocks buf dmsp pos h0 h1);
+
+    let pos0 = pos.(size 0) in
+    let val1 = poly_uniform_valFromBuffer (sub buf pos0 (size (numbytes U32))) in
+    pos.(size 0) <- pos.(size 0) +. nbytes;
+    let pos0 = pos.(size 0) in
+    let val2 = poly_uniform_valFromBuffer (sub buf pos0 (size (numbytes U32))) in
+    pos.(size 0) <- pos.(size 0) +. nbytes;
+    let pos0 = pos.(size 0) in
+    let val3 = poly_uniform_valFromBuffer (sub buf pos0 (size (numbytes U32))) in
+    pos.(size 0) <- pos.(size 0) +. nbytes;
+    let pos0 = pos.(size 0) in
+    let val4 = poly_uniform_valFromBuffer (sub buf pos0 (size (numbytes U32))) in
+    pos.(size 0) <- pos.(size 0) +. nbytes;
+
+    let h2 = ST.get () in
+    assert(modifies4 nblocks buf dmsp pos h0 h2);
+    //assert(is_poly_montgomery_k h2 a (v (bget h2 i 0)));
+
+    poly_uniform_setA a i val1;
+    //let hi = ST.get () in assert(is_poly_montgomery_k hi a (v (bget hi i 0)));
+    poly_uniform_setA a i val2;
+    //let hi = ST.get () in assert(is_poly_montgomery_k hi a (v (bget hi i 0)));
+    poly_uniform_setA a i val3;
+    //let hi = ST.get () in assert(is_poly_montgomery_k hi a (v (bget hi i 0)));
+    poly_uniform_setA a i val4;
+    //let hi = ST.get () in assert(is_poly_montgomery_k hi a (v (bget hi i 0)));
+
+    let h3 = ST.get () in
+    assert(modifies (loc nblocks |+| loc buf |+| loc dmsp |+| loc pos |+| loc a |+| loc i) h0 h3)
+    
 val poly_uniform:
-    a: poly
+    a: poly_k
   -> seed: lbuffer uint8 crypto_randombytes
   -> Stack unit
     (requires fun h -> live h a /\ live h seed /\ disjoint a seed)
-    (ensures fun h0 _ h1 -> modifies1 a h0 h1)
+    (ensures fun h0 _ h1 -> modifies1 a h0 h1 /\ is_poly_montgomery h1 a)
     
 let poly_uniform a seed =
     push_frame();
@@ -211,50 +383,26 @@ let poly_uniform a seed =
     let i = create (size 1) (size 0) in
     let nbytes:size_t = (params_q_log +. 7ul) /. 8ul in
     let nblocks = create (size 1) params_genA in
-    let mask:uint32 = (u32 1 <<. params_q_log) -. u32 1 in
-    let buf = create (shake128_rate *. params_genA) (u8 0) in
+    // BUG (kkane): If nbytes is 3 and 1 isn't added to the size of buf, then there is a one byte overrun read
+    // when extracting val4 above. Since buf is a stack-allocated variable the read should be into something else
+    // on the stack (so it won't crash), which then gets masked out (so it doesn't affect the result). 
+    // This may be one of the few memory safety violations in the history of the world that doesn't cause a problem. 
+    // But F* sees the violation and so we allocate an extra byte of space which we can safely read into.
+    let buf = create (shake128_rate *. params_genA +. size 1) (u8 0) in
     let dmsp = create (size 1) (u16 0) in
-    cshake128_qtesla crypto_randombytes seed (dmsp.(size 0)) (shake128_rate *. params_genA) buf;
+    cshake128_qtesla crypto_randombytes seed (dmsp.(size 0)) (shake128_rate *. params_genA) (sub buf (size 0) (shake128_rate *. params_genA));
     dmsp.(size 0) <- dmsp.(size 0) +. (u16 1);
 
     let h0 = ST.get () in
     LL.while
         (fun h -> live h a /\ live h pos /\ live h i /\ live h nblocks /\ live h buf /\ live h dmsp /\ live h seed /\
-               modifies (loc dmsp |+| loc pos |+| loc a |+| loc i |+| loc nblocks |+| loc buf) h0 h)
+               modifies (loc dmsp |+| loc pos |+| loc a |+| loc i |+| loc nblocks |+| loc buf) h0 h /\
+               ((bget h nblocks 0) == size 1 \/ (bget h nblocks 0) == params_genA))
         (fun h -> v (bget h i 0) < v params_k * v params_n)
         (fun _ -> i.(size 0) <. (params_k *. params_n) )
-        (fun _ ->
-            if (pos.(size 0)) >. (shake128_rate *. (nblocks.(size 0))) -. ((size 4) *. nbytes)
-            then ( nblocks.(size 0) <- size 1;
-	         let bufSize:size_t = shake128_rate *. nblocks.(size 0) in
-                 let subbuff = sub buf (size 0) bufSize in
-                 cshake128_qtesla crypto_randombytes seed dmsp.(size 0) bufSize subbuff;
-                 dmsp.(size 0) <- dmsp.(size 0) +. u16 1;
-                 pos.(size 0) <- size 0 )
-            else ();
-
-            let h1 = ST.get () in assume(v (bget h1 pos 0) + numbytes U32 <= v (shake128_rate *. params_genA));
-            let val1 = poly_uniform_valFromBuffer pos buf mask in
-            let h1 = ST.get () in assume(v (bget h1 pos 0) + numbytes U32 <= v (shake128_rate *. params_genA));
-            let val2 = poly_uniform_valFromBuffer pos buf mask in
-            let h1 = ST.get () in assume(v (bget h1 pos 0) + numbytes U32 <= v (shake128_rate *. params_genA));
-            let val3 = poly_uniform_valFromBuffer pos buf mask in
-            let h1 = ST.get () in assume(v (bget h1 pos 0) + numbytes U32 <= v (shake128_rate *. params_genA));
-            let val4 = poly_uniform_valFromBuffer pos buf mask in
-
-            assume(FStar.Int.fits (UI32.v val1 * I64.v params_r2_invn * Int64.v params_qinv) I64.n);
-            poly_uniform_setA a i val1;
-            assume(FStar.Int.fits (UI32.v val2 * I64.v params_r2_invn * Int64.v params_qinv) I64.n);
-            poly_uniform_setA a i val2;
-            assume(FStar.Int.fits (UI32.v val3 * I64.v params_r2_invn * Int64.v params_qinv) I64.n);
-            poly_uniform_setA a i val3;
-            assume(FStar.Int.fits (UI32.v val4 * I64.v params_r2_invn * Int64.v params_qinv) I64.n);
-            poly_uniform_setA a i val4
-        );
+        (fun _ -> poly_uniform_do_while a seed pos i nblocks buf dmsp);
 
     pop_frame()
-
-#reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0"
 
 private inline_for_extraction noextract
 let randomness_extended_size = (params_k +. size 3) *. crypto_seedbytes
@@ -293,7 +441,8 @@ val qtesla_keygen_:
                     disjoint randomness pk /\ disjoint randomness sk /\ disjoint pk sk)
     (ensures fun h0 _ h1 -> modifies2 pk sk h0 h1)
 
-#reset-options "--z3rlimit 300 --max_fuel 0 --max_ifuel 0 --z3cliopt 'smt.qi.eager_threshold=100'"
+//#reset-options "--z3rlimit 300 --max_fuel 0 --max_ifuel 0 --z3cliopt 'smt.qi.eager_threshold=100'"
+
 let qtesla_keygen_ randomness pk sk =
   push_frame();
   let randomness_extended = create randomness_extended_size (u8 0) in
@@ -348,7 +497,7 @@ let qtesla_keygen_ randomness pk sk =
   pop_frame();
   0l
 
-#reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0"
+//#reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0"
 
 val qtesla_keygen:
     pk: lbuffer uint8 crypto_publickeybytes
@@ -494,7 +643,7 @@ val encode_c:
                     disjoint pos_list c_bin /\ disjoint sign_list c_bin)
     (ensures fun h0 _ h1 -> modifies2 pos_list sign_list h0 h1)
 
-#reset-options "--z3rlimit 300 --max_fuel 0 --max_ifuel 0"
+//#reset-options "--z3rlimit 300 --max_fuel 0 --max_ifuel 0"
 
 // This function looks identical between the I and p-III sets.
 let encode_c pos_list sign_list c_bin =
@@ -739,20 +888,7 @@ let test_correctness v_ =
     pop_frame();
     resVal
 
-#reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0" // --admit_smt_queries true"
-
-let buf = t:buftype & a:Type0 & buffer_t t a 
-[@BigOps.__reduce__] unfold
-noextract let bb (#t:buftype) (#a:Type0) (b:buffer_t t a) : buf = (| t, a, b |)
-[@BigOps.__reduce__] unfold
-let disjoint_buf (b0 b1: buf) =
-  let (| _, _, b0 |) = b0 in
-  let (| _, _, b1 |) = b1 in
-  disjoint b0 b1
-[@BigOps.__reduce__] unfold
-let live_buf (h:HS.mem) (b: buf) =
-  let (| _, _, b |) = b in
-  live h b
+//#reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0"
 
 private inline_for_extraction noextract
 val qtesla_sign_compute_v:
@@ -881,8 +1017,8 @@ val qtesla_sign_do_while:
     (ensures fun h0 _ h1 -> modifies3 nonce smlen sm h0 h1)
 
 // -LowStar.Monotonic.Buffer.unused_in_not_unused_in_disjoint_2
-#reset-options "--z3rlimit 1000 --max_fuel 0 --max_ifuel 0 \
-                --using_facts_from '*  -FStar.Monotonic.Heap.equal_dom -LowStar.Monotonic.Buffer.unused_in_not_unused_in_disjoint_2'"
+//#reset-options "--z3rlimit 1000 --max_fuel 0 --max_ifuel 0 \
+//                --using_facts_from '*  -FStar.Monotonic.Heap.equal_dom -LowStar.Monotonic.Buffer.unused_in_not_unused_in_disjoint_2'"
 //                --using_facts_from '*  -FStar.Monotonic.Heap.equal_dom'"
 //                --using_facts_from '* -LowStar.Monotonic.Buffer.unused_in_not_unused_in_disjoint_2'"
 // --log_queries --query_stats --print_z3_statistics 
@@ -979,7 +1115,7 @@ let qtesla_sign_do_while randomness randomness_input nonce a s e smlen mlen m sm
     assume (modifies3 nonce smlen sm hInit hn);
     res
 
-#reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0" // --admit_smt_queries true"
+//#reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0"
 
 val qtesla_sign:
     smlen : lbuffer size_t 1ul // smlen only valid on output; does _not_ indicate allocated size of sm on input
@@ -995,8 +1131,8 @@ val qtesla_sign:
     (ensures fun h0 _ h1 -> modifies3 R.state sm smlen h0 h1)
 
 // --log_queries --query_stats --print_z3_statistics 
-#reset-options "--z3rlimit 300 --max_fuel 0 --max_ifuel 0 \
-                --using_facts_from '* -LowStar.Monotonic.Buffer.unused_in_not_unused_in_disjoint_2'"
+//#reset-options "--z3rlimit 300 --max_fuel 0 --max_ifuel 0  --admit_smt_queries true \
+//                --using_facts_from '* -LowStar.Monotonic.Buffer.unused_in_not_unused_in_disjoint_2'"
 
 let qtesla_sign smlen mlen m sm sk =
     recall R.state;
@@ -1060,7 +1196,7 @@ let qtesla_sign smlen mlen m sm sk =
     
     pop_frame()
 
-#reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0"
+//#reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0"
 
 val test_z:
     z : poly
@@ -1092,8 +1228,8 @@ val qtesla_verify_decode_pk_compute_w:
     (ensures fun h0 _ h1 -> modifies1 w h0 h1)
 
 //  --log_queries --query_stats --print_z3_statistics 
-#reset-options "--z3rlimit 300 --max_fuel 0 --max_ifuel 1 \
-                --using_facts_from '* -LowStar.Monotonic.Buffer.unused_in_not_unused_in_disjoint_2'"
+//#reset-options "--z3rlimit 300 --max_fuel 0 --max_ifuel 1 \
+//                --using_facts_from '* -LowStar.Monotonic.Buffer.unused_in_not_unused_in_disjoint_2'"
 
 let qtesla_verify_decode_pk_compute_w pk c z w =
     push_frame();
@@ -1156,7 +1292,7 @@ let qtesla_verify_decode_pk_compute_w pk c z w =
 
     pop_frame()
 
-#reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 1" //  --log_queries --query_stats --print_z3_statistics"
+//#reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 1" //  --log_queries --query_stats --print_z3_statistics"
 
 private inline_for_extraction noextract
 val qtesla_verify_valid_z:

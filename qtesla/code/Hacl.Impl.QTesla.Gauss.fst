@@ -603,7 +603,7 @@ val sample_gauss_poly:
   -> nonce: uint32
   -> Stack unit
     (requires fun h -> live h z /\ live h seed /\ disjoint z seed)
-    (ensures fun h0 _ h1 -> modifies1 z h0 h1) 
+    (ensures fun h0 _ h1 -> modifies1 z h0 h1 /\ is_poly_sampler_output h1 z) 
 
 let sample_gauss_poly z seed nonce =
     push_frame();
@@ -623,4 +623,6 @@ let sample_gauss_poly z seed nonce =
 	kmxGauss (sub z chunk _CHUNK_SIZE) seed dmsp.(size 0);
 	dmsp.(size 0) <- dmsp.(size 0) +. u32 1
     );
-    pop_frame()
+    pop_frame();
+    let h1 = ST.get () in assume(is_poly_sampler_output h1 z)
+

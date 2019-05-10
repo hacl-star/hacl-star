@@ -66,10 +66,11 @@ let nttinv_innerfor numoProblems jFirst a wj =
            assume(FStar.Int.fits (elem_v temp + elem_v ajNumo) elem_n);
            assume(is_elem (temp +^ ajNumo));
            a.(j) <- temp +^ ajNumo; // TODO (kkane): This line is where I differs from III-size and III-speed.
+           assume(FStar.Int.fits (elem_v temp - elem_v ajNumo) elem_n);
            [@inline_let] let difference = temp -^ ajNumo in
            lemma_elem_product_fits_int64 wj difference;
            [@inline_let] let product = I64.((elem_to_int64 wj) *^ (elem_to_int64 difference)) in
-           assume(FStar.Int.fits (I64.v product * I64.v params_qinv) I64.n);
+           assume(let q = elem_v params_q in I64.v product >= 0 /\ I64.v product <= (q-1)*(q-1));
            a.(jNumo) <- reduce product;
            jBuf.(size 0) <- j +. size 1
        );
@@ -153,7 +154,8 @@ let nttinv a w =
         assert_norm(v params_n / 2 < v params_n);
         assume(v i < v params_n);
         let ai = a.(i) in
-        assume(FStar.Int.fits (I64.v params_r * elem_v ai * I64.v params_qinv) I64.n); 
+        assume(let q = elem_v params_q in let r = I64.v params_r in let result = r * elem_v ai in
+               result >= 0 /\ result <= (q-1)*(q-1));
 	a.(i) <- reduce I64.(params_r *^ (elem_to_int64 ai))
     );
 
