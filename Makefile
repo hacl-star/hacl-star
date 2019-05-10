@@ -157,7 +157,7 @@ clean:
 include Makefile.common
 
 IMPORT_FSTAR_TYPES := $(VALE_HOME)/bin/importFStarTypes.exe
-PYTHON3 := $(shell tools/findpython3.sh)
+PYTHON3 ?= $(shell tools/findpython3.sh)
 ifeq ($(OS),Windows_NT)
   MONO =
 else
