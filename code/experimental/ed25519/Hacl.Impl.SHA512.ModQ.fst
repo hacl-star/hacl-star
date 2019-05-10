@@ -25,7 +25,7 @@ let sha512_pre_msg h prefix len input =
   push_frame ();
   let pre_msg = create (len +. 32ul) (u8 0) in
   concat2 32ul prefix len input pre_msg;  
-  assume(length pre_msg < max_input_length SHA2_512);
+  assert_norm (pow2 32 - 1 < max_input_length SHA2_512);
   Hacl.Hash.SHA2.hash_512_lib (len +. 32ul) pre_msg h;
   pop_frame ()
 
@@ -45,7 +45,7 @@ let sha512_pre_pre2_msg h prefix prefix2 len input =
   push_frame ();
   let pre_msg = create (len +. 64ul) (u8 0) in
   concat3 32ul prefix 32ul prefix2 len input pre_msg;
-  assume(length pre_msg < max_input_length SHA2_512);
+  assert_norm (pow2 32 - 1 < max_input_length SHA2_512);
   Hacl.Hash.SHA2.hash_512_lib (len +. 64ul) pre_msg h;
   pop_frame ()
 

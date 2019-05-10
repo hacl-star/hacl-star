@@ -246,10 +246,14 @@ let part2 a init update_multi update_last finish s dst key data len =
     }
   end
 
+let block_len_positive (a: hash_alg): Lemma (D.block_len a > 0ul) = ()
+let hash_lt_block (a: hash_alg): Lemma (hash_length a < block_length a) = ()
 
-#set-options "--z3rlimit 200"
+#set-options "--z3rlimit 50"
 inline_for_extraction noextract
 let mk_compute a hash alloca init update_multi update_last finish dst key key_len data data_len =
+  block_len_positive a;
+  hash_lt_block a;
   (**) let h0 = ST.get() in
   push_frame ();
   (**) let h1 = ST.get () in
@@ -265,14 +269,18 @@ let mk_compute a hash alloca init update_multi update_last finish dst key key_le
   let opad = B.alloca 0x5cuy l in
   xor_bytes_inplace opad key_block l;
   (**) let h4 = ST.get () in
-  (**) assert (B.as_seq h4 opad `Seq.equal` S.(xor 0x5cuy (wrap a (B.as_seq h0 key))));
+  (**) assert B.(modifies (loc_buffer key_block `loc_union` loc_buffer ipad
+    `loc_union` loc_buffer opad) h1 h4);
+  (**) S.lemma_eq_intro (B.as_seq h4 ipad) (S.(xor 0x36uy (wrap a (B.as_seq h0 key))));
+  (**) S.lemma_eq_intro (B.as_seq h4 opad) (S.(xor 0x5cuy (wrap a (B.as_seq h0 key))));
+  (**) S.lemma_eq_intro (B.as_seq h4 data) (B.as_seq h0 data);
 
   let s = alloca () in
   part1 a init update_multi update_last finish s ipad data data_len;
   (**) key_and_data_fits a;
   (**) let h5 = ST.get () in
-  (**) assert (S.slice (B.as_seq h5 ipad) 0 (hash_length a) `S.equal`
-    Spec.Hash.hash a S.(append (xor 0x36uy (wrap a (B.as_seq h0 key))) (B.as_seq h0 data)));
+  (**) S.lemma_eq_intro (S.slice (B.as_seq h5 ipad) 0 (hash_length a))
+      (Spec.Hash.hash a S.(append (xor 0x36uy (wrap a (B.as_seq h0 key))) (B.as_seq h0 data)));
   let hash1 = B.sub ipad 0ul (D.hash_len a) in
   part2 a init update_multi update_last finish s dst opad hash1 (D.hash_len a);
   (**) let h6 = ST.get () in
@@ -280,6 +288,8 @@ let mk_compute a hash alloca init update_multi update_last finish dst key key_le
     hmac a (B.as_seq h0 key) (B.as_seq h0 data));
   pop_frame ();
   (**) let h7 = ST.get () in
+  (**) assert B.(modifies (loc_buffer key_block `loc_union` loc_buffer ipad `loc_union`
+    loc_buffer opad `loc_union` loc_buffer s) h1 h2);
   (**) LowStar.Monotonic.Buffer.modifies_fresh_frame_popped h0 h1 (B.loc_buffer dst) h6 h7
 
 let compute_sha2_256: compute_st SHA2_256 =

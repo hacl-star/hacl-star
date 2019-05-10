@@ -5,6 +5,7 @@ open X64.Vale.State
 open X64.Vale.StateLemmas
 open FStar.UInt
 module P = X64.Print_s
+module BC = X64.Bytes_Code_s
 module BS = X64.Bytes_Semantics_s
 module TS = X64.Taint_Semantics_s
 
@@ -42,12 +43,12 @@ let va_opr_lemma_Mem128 s base offset t b index =
 
 let taint_at memTaint addr = Map.sel memTaint addr
 
-let va_cmp_eq o1 o2 = TS.TaintedOCmp (BS.OEq (t_op_to_op o1) (t_op_to_op o2)) Public
-let va_cmp_ne o1 o2 = TS.TaintedOCmp (BS.ONe (t_op_to_op o1) (t_op_to_op o2)) Public
-let va_cmp_le o1 o2 = TS.TaintedOCmp (BS.OLe (t_op_to_op o1) (t_op_to_op o2)) Public
-let va_cmp_ge o1 o2 = TS.TaintedOCmp (BS.OGe (t_op_to_op o1) (t_op_to_op o2)) Public
-let va_cmp_lt o1 o2 = TS.TaintedOCmp (BS.OLt (t_op_to_op o1) (t_op_to_op o2)) Public
-let va_cmp_gt o1 o2 = TS.TaintedOCmp (BS.OGt (t_op_to_op o1) (t_op_to_op o2)) Public
+let va_cmp_eq o1 o2 = TS.TaintedOCmp (BC.OEq (t_op_to_op o1) (t_op_to_op o2)) Public
+let va_cmp_ne o1 o2 = TS.TaintedOCmp (BC.ONe (t_op_to_op o1) (t_op_to_op o2)) Public
+let va_cmp_le o1 o2 = TS.TaintedOCmp (BC.OLe (t_op_to_op o1) (t_op_to_op o2)) Public
+let va_cmp_ge o1 o2 = TS.TaintedOCmp (BC.OGe (t_op_to_op o1) (t_op_to_op o2)) Public
+let va_cmp_lt o1 o2 = TS.TaintedOCmp (BC.OLt (t_op_to_op o1) (t_op_to_op o2)) Public
+let va_cmp_gt o1 o2 = TS.TaintedOCmp (BC.OGt (t_op_to_op o1) (t_op_to_op o2)) Public
 
 let eval_code = Lemmas.eval_code
 let eval_while_inv = Lemmas.eval_while_inv

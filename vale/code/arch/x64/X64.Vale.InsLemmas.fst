@@ -21,9 +21,3 @@ let instr_norm_lemma (#a:Type) (x:a) : Lemma
   =
   ()
 
-(*
-let make_instr #outs #args #havoc_flags i oprs =
-  let ins = S.Instr outs args havoc_flags i oprs in
-  instr_norm_lemma (S.eval_ins ins);
-  ins
-*)

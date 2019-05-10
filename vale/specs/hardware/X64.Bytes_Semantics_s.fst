@@ -9,8 +9,10 @@ open Words.Two_s
 open Words.Four_s
 open Types_s
 open X64.Instruction_s
+open X64.Instructions_s
 open FStar.Seq.Base
 module F = FStar.FunctionalExtensionality
+module BC = X64.Bytes_Code_s
 
 type uint64:eqtype = UInt64.t
 
@@ -18,54 +20,28 @@ type heap = Map.t int nat8
 let op_String_Access = Map.sel
 let op_String_Assignment = Map.upd
 
+//TODO: [@"opaque_to_smt"]
+let equals_instr (x1 x2:instr_t_record) : Type0 =
+  squash (x1 == x2)
+
+noeq type instr_annotation (it:instr_t_record) =
+  | AnnotateNone : instr_annotation it
+  | AnnotateXor64 : equals_instr it (InstrTypeRecord ins_Xor64) -> instr_annotation it
+  | AnnotatePxor : equals_instr it (InstrTypeRecord ins_Pxor) -> instr_annotation it
+  | AnnotateVPxor : equals_instr it (InstrTypeRecord ins_VPxor) -> instr_annotation it
+
+let ins = BC.instruction_t instr_annotation
+let ocmp = BC.ocmp
+let code = BC.code_t instr_annotation
+let codes = BC.codes_t instr_annotation
+
 noeq
 type stack =
   | Vale_stack: 
     initial_rsp:nat64{initial_rsp >= 4096} ->  // Initial rsp pointer when entering the function
     mem:Map.t int nat8 ->                       // Stack contents
     stack
-  
-noeq type ins:eqtype =
-  // Generic instruction (should be able to express most instructions)
-  | Instr :
-      outs:list instr_out ->
-      args:list instr_operand ->
-      havoc_flags:flag_havoc ->
-      i:instr_t outs args havoc_flags ->
-      oprs:instr_operands_t outs args ->
-      ins
 
-  // Temporary partially-generic instructions
-  // TODO: replace these with Instr when Leakage_Ins supports Instr:
-  | Ins_64_64_preserve : i:instr_t [out op64] [op64] PreserveFlags -> dst:operand -> src:operand -> ins
-  | Ins_io64_64 : i:instr_t [inOut op64] [op64] HavocFlags -> dst:operand -> src:operand -> ins
-  | Ins_io64_64_cf : i:instr_t [inOut opFlagsCf; inOut op64] [op64] HavocFlags -> dst:operand -> src:operand -> ins
-  | Ins_ioXmm : i:instr_t [inOut opXmm] [] PreserveFlags -> dst:xmm -> ins
-  | Ins_Xmm_Xmm : i:instr_t [out opXmm] [opXmm] PreserveFlags -> dst:xmm -> src:xmm -> ins
-  | Ins_ioXmm_Xmm : i:instr_t [inOut opXmm] [opXmm] PreserveFlags -> dst:xmm -> src:xmm -> ins
-
-  // TODO: convert these to Instr:
-  | Xor64      : dst:operand -> src:operand -> ins
-  | Pxor       : dst:xmm -> src:xmm -> ins
-  | VPxor      : dst:xmm -> src1:xmm -> src2:mov128_op -> ins
-  | MOVDQU     : dst:mov128_op -> src:mov128_op -> ins  // We let the assembler complain about attempts to use two memory ops
-
-  // Stack operations
-  | Push       : src:operand -> ins
-  | Pop        : dst:operand -> ins
-  | Alloc      : n:nat -> ins
-  | Dealloc    : n:nat -> ins
-
-type ocmp:eqtype =
-  | OEq: o1:operand{not (OMem? o1 || OStack? o1)} -> o2:operand{not (OMem? o2 || OStack? o2)} -> ocmp
-  | ONe: o1:operand{not (OMem? o1 || OStack? o1)} -> o2:operand{not (OMem? o2 || OStack? o2)} -> ocmp
-  | OLe: o1:operand{not (OMem? o1 || OStack? o1)} -> o2:operand{not (OMem? o2 || OStack? o2)} -> ocmp
-  | OGe: o1:operand{not (OMem? o1 || OStack? o1)} -> o2:operand{not (OMem? o2 || OStack? o2)} -> ocmp
-  | OLt: o1:operand{not (OMem? o1 || OStack? o1)} -> o2:operand{not (OMem? o2 || OStack? o2)} -> ocmp
-  | OGt: o1:operand{not (OMem? o1 || OStack? o1)} -> o2:operand{not (OMem? o2 || OStack? o2)} -> ocmp
-
-type code:eqtype = precode ins ocmp
-type codes:eqtype = list code
 type regs_t = F.restricted_t reg (fun _ -> nat64)
 type xmms_t = F.restricted_t xmm (fun _ -> quad32)
 
@@ -78,7 +54,7 @@ noeq type state = {
   stack:stack;
 }
 
-assume val havoc : state -> ins -> nat64
+assume val havoc (s:state) (i:ins) : nat64
 
 unfold let eval_reg (r:reg) (s:state) : nat64 = s.regs r
 unfold let eval_xmm (i:xmm) (s:state) : quad32 = s.xmms i
@@ -141,12 +117,12 @@ let eval_mov128_op (o:mov128_op) (s:state) : quad32 =
 
 let eval_ocmp (s:state) (c:ocmp) :bool =
   match c with
-  | OEq o1 o2 -> eval_operand o1 s = eval_operand o2 s
-  | ONe o1 o2 -> eval_operand o1 s <> eval_operand o2 s
-  | OLe o1 o2 -> eval_operand o1 s <= eval_operand o2 s
-  | OGe o1 o2 -> eval_operand o1 s >= eval_operand o2 s
-  | OLt o1 o2 -> eval_operand o1 s < eval_operand o2 s
-  | OGt o1 o2 -> eval_operand o1 s > eval_operand o2 s
+  | BC.OEq o1 o2 -> eval_operand o1 s = eval_operand o2 s
+  | BC.ONe o1 o2 -> eval_operand o1 s <> eval_operand o2 s
+  | BC.OLe o1 o2 -> eval_operand o1 s <= eval_operand o2 s
+  | BC.OGe o1 o2 -> eval_operand o1 s >= eval_operand o2 s
+  | BC.OLt o1 o2 -> eval_operand o1 s < eval_operand o2 s
+  | BC.OGt o1 o2 -> eval_operand o1 s > eval_operand o2 s
 
 let update_reg' (r:reg) (v:nat64) (s:state) : state =
   { s with regs = F.on_dom reg (fun r' -> if r' = r then v else s.regs r') }
@@ -289,12 +265,12 @@ let valid_src_shift_operand (o:operand) (s:state) : bool =
 
 let valid_ocmp (c:ocmp) (s:state) :bool =
   match c with
-  | OEq o1 o2 -> valid_src_operand o1 s && valid_src_operand o2 s
-  | ONe o1 o2 -> valid_src_operand o1 s && valid_src_operand o2 s
-  | OLe o1 o2 -> valid_src_operand o1 s && valid_src_operand o2 s
-  | OGe o1 o2 -> valid_src_operand o1 s && valid_src_operand o2 s
-  | OLt o1 o2 -> valid_src_operand o1 s && valid_src_operand o2 s
-  | OGt o1 o2 -> valid_src_operand o1 s && valid_src_operand o2 s
+  | BC.OEq o1 o2 -> valid_src_operand o1 s && valid_src_operand o2 s
+  | BC.ONe o1 o2 -> valid_src_operand o1 s && valid_src_operand o2 s
+  | BC.OLe o1 o2 -> valid_src_operand o1 s && valid_src_operand o2 s
+  | BC.OGe o1 o2 -> valid_src_operand o1 s && valid_src_operand o2 s
+  | BC.OLt o1 o2 -> valid_src_operand o1 s && valid_src_operand o2 s
+  | BC.OGt o1 o2 -> valid_src_operand o1 s && valid_src_operand o2 s
 
 unfold
 let valid_dst_stack64 (rsp:nat64) (ptr:int) (st:stack) : bool =
@@ -631,13 +607,14 @@ let rec instr_write_outputs
 
 [@instr_attr]
 let eval_instr
-    (outs:list instr_out) (args:list instr_operand) (havoc_flags:flag_havoc)
-    (i:instr_t outs args havoc_flags) (oprs:instr_operands_t outs args) (s0:state)
+    (it:instr_t_record) (oprs:instr_operands_t it.outs it.args) (ann:instr_annotation it)
+    (s0:state)
   : option state =
+  let InstrTypeRecord #outs #args #havoc_flags i = it in
   let vs = instr_apply_eval outs args (instr_eval i) oprs s0 in
   let s1 =
     match havoc_flags with
-    | HavocFlags -> {s0 with flags = havoc s0 (Instr outs args havoc_flags i oprs)}
+    | HavocFlags -> {s0 with flags = havoc s0 (BC.Instr it oprs ann)}
     | PreserveFlags -> s0
     in
   FStar.Option.mapTot (fun vs -> instr_write_outputs outs args vs oprs s0 s1) vs
@@ -647,45 +624,9 @@ let eval_instr
 let eval_ins (ins:ins) : st unit =
   s <-- get;
   match ins with
-  | Instr outs args havoc_flags i oprs ->
-    apply_option (eval_instr outs args havoc_flags i oprs s) set
+  | BC.Instr it oprs ann -> apply_option (eval_instr it oprs ann s) set
 
-  | Ins_64_64_preserve i dst src ->
-    check (valid_src_operand src);;
-    let vOpt = instr_eval i (eval_operand src s) in
-    try_option vOpt (update_operand_preserve_flags dst)
-
-  | Ins_io64_64 i dst src ->
-    check (valid_src_operand src);;
-    let vOpt = instr_eval i (eval_operand dst s) (eval_operand src s) in
-    try_option vOpt (update_operand dst ins)
-
-  | Ins_io64_64_cf i dst src ->
-    check (valid_src_operand src);;
-    let vOpt = instr_eval i (cf s.flags) (eval_operand dst s) (eval_operand src s) in
-    try_option vOpt (fun (new_carry, v) ->
-      update_operand dst ins v;;
-      update_flags (havoc s ins);; // We specify cf, but underspecify everything else
-      update_cf new_carry)
-
-  | Ins_ioXmm i dst ->
-    let vOpt = instr_eval i (eval_xmm dst s) in
-    try_option vOpt (update_xmm_preserve_flags dst)
-
-  | Ins_Xmm_Xmm i dst src ->
-    let vOpt = instr_eval i (eval_xmm src s) in
-    try_option vOpt (update_xmm_preserve_flags dst)
-
-  | Ins_ioXmm_Xmm i dst src ->
-    let vOpt = instr_eval i (eval_xmm dst s) (eval_xmm src s) in
-    try_option vOpt (update_xmm_preserve_flags dst)
-
-  | Xor64 dst src ->
-    check (valid_src_operand src);;
-    update_operand dst ins (Types_s.ixor (eval_operand dst s) (eval_operand src s));;
-    update_cf_of false false
-
-  | Push src ->
+  | BC.Push src ->
     check (valid_src_operand src);;
     // Evaluate value on initial state
     let new_src = eval_operand src s in
@@ -696,7 +637,7 @@ let eval_ins (ins:ins) : st unit =
     // Store the element at the new stack pointer
     update_operand_preserve_flags (OStack (MConst new_rsp)) new_src
 
-  | Pop dst ->
+  | BC.Pop dst ->
     let stack_op = OStack (MReg Rsp 0) in
     // Ensure that we can read at the initial stack pointer
     check (valid_src_operand stack_op);;
@@ -711,31 +652,16 @@ let eval_ins (ins:ins) : st unit =
     // Finally, update the stack pointer
     update_rsp new_rsp
 
-  | Alloc n ->
+  | BC.Alloc n ->
     // We already check in update_rsp that the new stack pointer is valid
     update_rsp (eval_reg Rsp s - n)
   
-  | Dealloc n ->
+  | BC.Dealloc n ->
     let old_rsp = eval_reg Rsp s in
     let new_rsp = old_rsp + n in
     update_rsp new_rsp;;
     // The deallocated stack memory should now be considered invalid
     free_stack old_rsp new_rsp
-
-// In the XMM-related instructions below, we generally don't need to check for validity of the operands,
-// since all possibilities are valid, thanks to dependent types
-
-  | Pxor dst src ->
-    update_xmm_preserve_flags dst (quad32_xor (eval_xmm dst s) (eval_xmm src s))
-
-  |VPxor dst src1 src2 ->
-    check_imm avx_enabled;;
-    check (valid_src_mov128_op src2);;
-    update_xmm_preserve_flags dst (quad32_xor (eval_xmm src1 s) (eval_mov128_op src2 s))
-
-  | MOVDQU dst src ->
-    check (valid_src_mov128_op src);;
-    update_mov128_op_preserve_flags dst (eval_mov128_op src s)
 
 (*
  * These functions return an option state

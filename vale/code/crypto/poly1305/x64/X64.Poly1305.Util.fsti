@@ -69,14 +69,6 @@ unfold let buffers_disjoint (b1 b2:buffer64) =
 let readable_words (len:nat) =
   ((len + 15) / 16) `op_Multiply` 2 // 2 == 16 for rounding /8 for 8-byte words
 
-// TODO: remove this when Vale supports new reveal_opaque directly
-val reveal_modp (_:unit) : Lemma
-  (forall (x:int).{:pattern (modp x)} modp x == x % (pow2_128 * 4 - 5))
-
-// TODO: remove this when Vale supports new reveal_opaque directly
-val reveal_mod2_128 (_:unit) : Lemma
-  (forall (x:int).{:pattern (mod2_128 x)} mod2_128 x == x % pow2_128)
-
 val lemma_equal_blocks (h pad r:int) (inp1 inp2:int -> nat128) (k:nat) : Lemma
   (requires
     (forall (i:int).{:pattern (inp1 i)} 0 <= i /\ i < k ==> inp1 i == inp2 i)

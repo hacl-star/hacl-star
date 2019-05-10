@@ -19,7 +19,7 @@ open Spec.Hash.Definitions
 
 open Test.Lowstarize
 
-// This contains hashes, hmac, hkdf, chacha20
+// This contains hashes, hmac, hkdf, chacha20, poly1305, curve25519, chacha20poly1305
 open Test.NoHeap
 
 (* the following two are necessary to connect with EverCrypt.Cipher and EverCrypt.Curve25519 *)
@@ -30,62 +30,6 @@ friend Lib.IntTypes
 
 // #push-options "--z3rlimit 50 --max_fuel 1 --max_ifuel 0"
 
-/// Poly1305
-
-let test_poly1305_one (v: Test.Vectors.Poly1305.vector): Stack unit (fun _ -> True) (fun _ _ _ -> True) =
-  let open Test.Vectors.Poly1305 in
-  let Vector tag tag_len key key_len input input_len = v in
-  push_frame ();
-  if not (4294967295ul `U32.sub` 16ul `U32.gte` input_len)
-  then
-      C.String.print !$"Warning: skipping a test_poly1305 instance because bounds do not hold\n"
-  else begin
-    B.recall key;
-    B.recall tag;
-    B.recall input;
-    let h0 = get () in
-    let dst = B.alloca 0uy 16ul in
-    let h1 = get () in
-    B.recall input;
-    B.recall key;
-    B.recall tag;
-    if key_len = 32ul then
-      EverCrypt.Poly1305.poly1305 dst input input_len key;
-    B.recall tag;
-    if tag_len = 16ul then
-      TestLib.compare_and_print !$"Poly1305" tag dst 16ul
-  end;
-  pop_frame ()
-
-let test_poly1305 () : Stack unit (fun _ -> True) (fun _ _ _ -> True) =
-  Test.NoHeap.test_many !$"poly1305" test_poly1305_one Test.Vectors.Poly1305.(LB vectors_len vectors)
-
-/// Curve25519
-
-let test_curve25519_one (v: Test.Vectors.Curve25519.vector): Stack unit (fun _ -> True) (fun _ _ _ -> True) =
-  let open Test.Vectors.Curve25519 in
-  let Vector result result_len public public_len private_ private__len valid = v in
-  push_frame ();
-  B.recall result;
-  B.recall public;
-  B.recall private_;
-  let h0 = get () in
-  let dst = B.alloca 0uy 32ul in
-  let h1 = get () in
-  B.recall result;
-  B.recall public;
-  B.recall private_;
-  if public_len = 32ul && private__len = 32ul then
-    EverCrypt.Curve25519.ecdh dst private_ public;
-  B.recall result;
-  if result_len = 32ul && valid then
-    TestLib.compare_and_print !$"Curve25519" result dst 32ul;
-  pop_frame ()
-
-let test_curve25519 () : Stack unit (fun _ -> True) (fun _ _ _ -> True) =
-  Test.NoHeap.test_many !$"curve25519" test_curve25519_one Test.Vectors.Curve25519.(LB vectors_len vectors)
-
-/// ChaCha20-Poly1305
 
 let aead_vector = cipher * vec8 * vec8 * vec8 * vec8 * vec8 * vec8
 
@@ -95,20 +39,14 @@ type block_cipher_vector = block_cipher * vec8 * vec8 * vec8
 
 module HST = FStar.HyperStack.ST
 
-val test_aes_ecb: block_cipher_vector -> Stack unit (fun _ -> True) (fun _ _ _ -> True)
-let test_aes_ecb v =
-  let wh = AC.wants_hacl () in
-  let wv = AC.wants_vale () in
-  if (not wh) && (not wv) then
-    C.String.print !$"Warning: not testing aes_ecb because Vale & Hacl are \
-      disabled, no implementation\n"
-  else begin
+val test_one_aes_ecb : block_cipher -> block_cipher_vector -> Stack unit (fun _ -> True) (fun _ _ _ -> True)
+let test_one_aes_ecb block0 v =
     let block, (LB key_len key), (LB plain_len plain), (LB cipher_len cipher) = v in
-    if block = AES256 && not wh
-    then C.String.print !$"Warning: not testing aes256 because Hacl is disabled\n"
+    if block <> block0
+    then ()
     else if not (cipher_len = 16ul)
     then
-      C.String.print !$"Warning: skipping a test_aes_ecb instance because bounds do not hold\n"
+      C.Failure.failwith !$"Error: skipping a test_aes_ecb instance because bounds do not hold\n"
     else begin
       push_frame();
       let cipher' = B.alloca 0uy 16ul in
@@ -133,12 +71,11 @@ let test_aes_ecb v =
       TestLib.compare_and_print !$"of AES128 block" cipher cipher' 16ul;
       pop_frame()
     end
-  end
 
 /// Test drivers
 
-let test_cipher () : Stack unit (fun _ -> True) (fun _ _ _ -> True) =
-  Test.NoHeap.test_many !$"cipher" test_aes_ecb block_cipher_vectors_low
+let test_aes_ecb (block0: block_cipher) : Stack unit (fun _ -> True) (fun _ _ _ -> True) =
+  Test.NoHeap.test_many !$"cipher" (test_one_aes_ecb block0) block_cipher_vectors_low
 
 let aead_key_length32 (al: Spec.AEAD.alg) : Tot (x: U32.t { U32.v x == Spec.AEAD.key_length al } ) =
   let open Spec.AEAD in
@@ -151,11 +88,12 @@ let aead_key_length32 (al: Spec.AEAD.alg) : Tot (x: U32.t { U32.v x == Spec.AEAD
   | AES256_CCM        -> 32ul
   | AES256_CCM8       -> 32ul
 
-let aead_max_length32 (al: Spec.AEAD.supported_alg) : Tot (x: U32.t { U32.v x == Spec.AEAD.max_length al }) =
+let aead_max_length32 (al: Spec.AEAD.alg) : Tot (x: U32.t { Spec.AEAD.is_supported_alg al ==> U32.v x == Spec.AEAD.max_length al }) =
   let open Spec.AEAD in
   match al with
   | CHACHA20_POLY1305 -> 4294967295ul `U32.sub` 16ul
   | AES128_GCM | AES256_GCM -> [@inline_let] let _ = assert_norm (pow2 20 == 1048576) in 1048575ul `U32.sub` 16ul
+  | _ -> 0ul // dummy
 
 let aead_tag_length32 (al: Spec.AEAD.alg) : Tot (x: U32.t { U32.v x == Spec.AEAD.tag_length al /\ (Spec.AEAD.is_supported_alg al ==> U32.v x <= Spec.AEAD.max_length al) } ) =
   let open Spec.AEAD in
@@ -197,35 +135,28 @@ let test_aead_st alg key key_len iv iv_len aad aad_len tag tag_len plaintext pla
   ))
   (ensures (fun _ _ _ -> True))
 =
-
-  let wh = AC.wants_hacl () in
-  let wo = AC.wants_openssl () in
-  if not (AC.has_avx ())
-  then
-    C.String.print !$"skipping test_aead_st, avx not present\n"
-  else
-  if alg = Spec.AEAD.CHACHA20_POLY1305 && (not wh) && (not wo) then
-    C.String.print !$"Warning: skipping test_aead_st/chachapoly poly1305 because HACL and OpenSSL both disabled\n"
-  else if not (
+  let max_len = aead_max_length32 alg in
+  let _ = assert_norm (pow2 31 == 2147483648) in
+  if not (
     Spec.AEAD.is_supported_alg alg
   )
   then
-    C.String.print !$"Warning: skipping a test_aead_st instance because algo unsupported etc.\n"
-  else if not (
-    let max_len = aead_max_length32 alg in 
-    let _ = assert_norm (pow2 31 == 2147483648) in
-    key_len = aead_key_length32 alg &&
-    plaintext_len `U32.gt` 0ul &&
-    tag_len `U32.gt` 0ul &&
-    tag_len = aead_tag_length32 alg &&
-    ciphertext_len = plaintext_len &&
-    iv_len = aead_iv_length32 alg &&
-    aad_len `U32.lte` max_len &&
-    aad_len `U32.lte` 2147483648ul &&
-    (max_len `U32.sub` tag_len) `U32.gte` ciphertext_len
-  )
-  then
-    C.String.print !$"Warning: skipping a test_aead_st instance because bounds do not hold\n"
+    C.Failure.failwith !$"Error: skipping a test_aead_st instance because algo unsupported etc.\n"
+  else
+  if not (key_len = aead_key_length32 alg)
+  then C.Failure.failwith !$"test_aead_st: not (key_len = aead_key_length32 alg)"
+  else if not (tag_len = aead_tag_length32 alg)
+  then C.Failure.failwith !$"test_aead_st: not (tag_len = aead_tag_length32 alg)"
+  else if not (ciphertext_len = plaintext_len)
+  then C.Failure.failwith !$"test_aead_st: not (ciphertext_len = plaintext_len)"
+  else if not (iv_len = aead_iv_length32 alg)
+  then C.Failure.failwith !$"test_aead_st: not (iv_len = aead_iv_length32 alg)"
+  else if not (aad_len `U32.lte` max_len)
+  then C.Failure.failwith !$"test_aead_st: not (aad_len `U32.lte` max_len)"
+  else if not (aad_len `U32.lte` 2147483648ul)
+  then C.Failure.failwith !$"test_aead_st: not (aad_len `U32.lte` 2147483648ul)"
+  else if not ((max_len `U32.sub` tag_len) `U32.gte` ciphertext_len)
+  then C.Failure.failwith !$"test_aead_st: not ((max_len `U32.sub` tag_len) `U32.gte` ciphertext_len)"
   else begin
     push_frame();
     B.recall key;
@@ -241,9 +172,15 @@ let test_aead_st alg key key_len iv iv_len aad aad_len tag tag_len plaintext pla
       let st = B.index st 0ul in
       assert (B.loc_disjoint (B.loc_buffer iv) (EverCrypt.AEAD.footprint h1 st));
       push_frame ();
-      let plaintext'    = B.alloca 0uy plaintext_len in
-      let ciphertext'   = B.alloca 0uy ciphertext_len in
+      let plaintext_blen = if plaintext_len = 0ul then 1ul else plaintext_len in
+      let plaintext'    = B.alloca 0uy plaintext_blen in
+      let plaintext'    = B.sub plaintext' 0ul plaintext_len in
+      let ciphertext_blen = if ciphertext_len = 0ul then 1ul else ciphertext_len in
+      let ciphertext'   = B.alloca 0uy ciphertext_blen in
+      let ciphertext'   = B.sub ciphertext' 0ul ciphertext_len in
+      let tag_blen = if tag_len = 0ul then 1ul else tag_len in
       let tag' = B.alloca 0uy tag_len in
+      let tag' = B.sub tag' 0ul tag_len in
       let h2 = HST.get () in
       EverCrypt.AEAD.frame_invariant B.loc_none st h1 h2;
 
@@ -275,8 +212,8 @@ let alg_of_alg = function
 | AES_128_GCM -> Spec.AEAD.AES128_GCM
 | AES_256_GCM -> Spec.AEAD.AES256_GCM
 
-val test_aead_loop: lbuffer aead_vector -> St unit
-let rec test_aead_loop (LB len vs) =
+val test_aead_loop: Test.Vectors.cipher -> lbuffer aead_vector -> St unit
+let rec test_aead_loop alg0 (LB len vs) =
   if len = 0ul then ()
   else begin
     let open FStar.Integers in
@@ -286,41 +223,17 @@ let rec test_aead_loop (LB len vs) =
     let alg, (LB key_len key), (LB iv_len iv), (LB aad_len aad),
       (LB tag_len tag), (LB plaintext_len plaintext), (LB ciphertext_len ciphertext) = v
     in
-    assume (B.disjoint plaintext aad); // required by EverCrypt.AEAD.encrypt_st, and currently we cannot have the tactic automatically prove it
-    test_aead_st (alg_of_alg alg) key key_len iv iv_len aad aad_len tag tag_len plaintext
-      plaintext_len ciphertext ciphertext_len;
-    B.recall vs;
-    test_aead_loop (LB (len - 1ul) (B.offset vs 1ul))
-  end
-
-let test_aead () : St unit =
-  test_aead_loop aead_vectors_low
-
-let rec test_chacha20poly1305_loop (i: U32.t): St unit =
-  let open Test.Vectors.Chacha20Poly1305 in
-  if i `U32.gte` vectors_len then
-    ()
-  else begin
-    B.recall vectors;
-    assert (U32.v i < B.length vectors);
-    let Vector output output_len input input_len aad aad_len nonce nonce_len key key_len =
-      vectors.(i)
-    in
-    if not (output_len `U32.gte` input_len && output_len `U32.sub` input_len `U32.gte` 16ul)
-    then
-      C.String.print !$"Warning: skipping a chacha20poly1305 instance because bounds do not hold/algo unsupported etc.\n"
-    else begin
-      B.recall output;
-      let tag = B.sub output input_len 16ul in
-      let output = B.sub output 0ul input_len in
-      test_aead_st Spec.AEAD.CHACHA20_POLY1305 key key_len nonce nonce_len aad aad_len tag 16ul
-        input input_len output input_len
+    if alg = alg0 then begin
+      assume (B.disjoint plaintext aad); // required by EverCrypt.AEAD.encrypt_st, and currently we cannot have the tactic automatically prove it
+      test_aead_st (alg_of_alg alg) key key_len iv iv_len aad aad_len tag tag_len plaintext
+        plaintext_len ciphertext ciphertext_len
     end;
-    test_chacha20poly1305_loop (i `U32.add_mod` 1ul)
+    B.recall vs;
+    test_aead_loop alg0 (LB (len - 1ul) (B.offset vs 1ul))
   end
 
-let test_chacha20poly1305 () : St unit =
-  test_chacha20poly1305_loop 0ul
+let test_aead (alg0: Test.Vectors.cipher) : St unit =
+  test_aead_loop alg0 aead_vectors_low
 
 let rec test_aes128_gcm_loop (i: U32.t): St unit =
   let open Test.Vectors.Aes128Gcm in
@@ -359,10 +272,312 @@ let test_dh () : St unit =
   // TODO supposed to use tactics now?
   ()
 
-#reset-options "--z3rlimit 40"
+inline_for_extraction
+noeq
+type features = {
+  features_avx: bool;
+  features_avx2: bool;
+  features_bmi2: bool;
+  features_adx: bool;
+  features_aesni: bool;
+  features_shaext: bool;
+}
+
+inline_for_extraction
+let f_concat (f1 f2: features) : Tot features =
+  [@inline_let]
+  let avx = f1.features_avx || f2.features_avx in
+  [@inline_let]
+  let avx2 = f1.features_avx2 || f2.features_avx2 in
+  [@inline_let]
+  let bmi2 = f1.features_bmi2 || f2.features_bmi2 in
+  [@inline_let]
+  let adx = f1.features_adx || f2.features_adx in
+  [@inline_let]
+  let aesni = f1.features_aesni || f2.features_aesni in
+  [@inline_let]
+  let shaext = f1.features_shaext || f2.features_shaext in
+  {
+    features_avx = avx;
+    features_avx2 = avx2;
+    features_bmi2 = bmi2;
+    features_adx = adx;
+    features_aesni = aesni;
+    features_shaext = shaext;
+  }
+
+inline_for_extraction
+let f_none : features = {
+  features_avx = false;
+  features_avx2 = false;
+  features_bmi2 = false;
+  features_adx = false;
+  features_aesni = false;
+  features_shaext = false;
+}
+
+inline_for_extraction
+let f_avx : features = // [@inline_let] ({ f_none with features_avx = true; })
+{
+  features_avx = true;
+  features_avx2 = false;
+  features_bmi2 = false;
+  features_adx = false;
+  features_aesni = false;
+  features_shaext = false;
+}
+
+inline_for_extraction
+let f_avx2 : features = // [@inline_let] ({ f_none with features_avx2 = true; })
+{
+  features_avx = false;
+  features_avx2 = true;
+  features_bmi2 = false;
+  features_adx = false;
+  features_aesni = false;
+  features_shaext = false;
+}
+
+inline_for_extraction
+let f_bmi2 : features = // [@inline_let] ({ f_none with features_bmi2 = true; })
+{
+  features_avx = false;
+  features_avx2 = false;
+  features_bmi2 = true;
+  features_adx = false;
+  features_aesni = false;
+  features_shaext = false;
+}
+
+inline_for_extraction
+let f_adx : features = // [@inline_let] ({ f_none with features_adx = true; })
+{
+  features_avx = false;
+  features_avx2 = false;
+  features_bmi2 = false;
+  features_adx = true;
+  features_aesni = false;
+  features_shaext = false;
+}
+
+inline_for_extraction
+let f_aesni : features = // [@inline_let] ({ f_none with features_aesni = true; })
+{
+  features_avx = false;
+  features_avx2 = false;
+  features_bmi2 = false;
+  features_adx = false;
+  features_aesni = true;
+  features_shaext = false;
+}
+
+inline_for_extraction
+let f_shaext : features = // [@inline_let] ({ f_none with features_shaext = true; })
+{
+  features_avx = false;
+  features_avx2 = false;
+  features_bmi2 = false;
+  features_adx = false;
+  features_aesni = false;
+  features_shaext = true;
+}
+
+inline_for_extraction
+type impl = | Hacl | Vale | OpenSSL | BCrypt
+
+inline_for_extraction
+let config = (impl & features)
+
+inline_for_extraction
+let check_static_config (c: config) : Stack bool (fun _ -> True) (fun _ _ _ -> True) =
+  match c with
+  | (i, f) ->
+    AC.init ();
+    let no_avx = not (AC.has_avx ()) in
+    let no_avx2 = not (AC.has_avx2 ()) in
+    let no_bmi2 = not (AC.has_bmi2 ()) in
+    let no_adx = not (AC.has_adx ()) in
+    let no_aesni = not (AC.has_aesni ()) in
+    let no_shaext = not (AC.has_shaext ()) in
+    if
+      (f.features_avx && no_avx) ||
+      (f.features_avx2 && no_avx2) ||
+      (f.features_bmi2 && no_bmi2) ||
+      (f.features_adx && no_adx) ||
+      (f.features_aesni && no_aesni) ||
+      (f.features_shaext && no_shaext)
+    then
+      false
+    else
+      match i with
+      | Hacl -> SC.hacl
+      | Vale -> SC.vale
+      | OpenSSL -> SC.openssl
+      | BCrypt -> SC.bcrypt
+
+#push-options "--z3rlimit 16"
+
+inline_for_extraction
+let set_config (c: config) : Stack unit (fun _ -> True) (fun _ _ _ -> True) =
+  match c with
+  | (i, f) ->
+    (if i <> Hacl then AC.disable_hacl ());
+    (if i <> Vale then AC.disable_vale ());
+    (if i <> OpenSSL then AC.disable_openssl ());
+    (if i <> BCrypt then AC.disable_bcrypt ());
+    (if not f.features_avx then AC.disable_avx ());
+    (if not f.features_avx2 then AC.disable_avx2 ());
+    (if not f.features_bmi2 then AC.disable_bmi2 ());
+    (if not f.features_adx then AC.disable_adx ());
+    (if not f.features_aesni then AC.disable_aesni ());
+    (if not f.features_shaext then AC.disable_shaext ())
+
+#pop-options
+
+inline_for_extraction
+let print_config (c: config) : Stack unit (fun _ -> True) (fun _ _ _ -> True) =
+  match c with
+  | (i, f) ->
+    begin match i with
+    | Hacl -> C.String.print !$"HACL"
+    | Vale -> C.String.print !$"Vale"
+    | OpenSSL -> C.String.print !$"OpenSSL"
+    | BCrypt -> C.String.print !$"BCrypt"
+    end;
+    (if f.features_avx then C.String.print !$" avx");
+    (if f.features_avx2 then C.String.print !$" avx2");
+    (if f.features_bmi2 then C.String.print !$" bmi2");
+    (if f.features_adx then C.String.print !$" adx");
+    (if f.features_aesni then C.String.print !$" aesni");
+    (if f.features_shaext then C.String.print !$" shaext")
+
 inline_for_extraction
 noextract
-let test_all_body (print: C.String.t -> St unit) : St unit =
+type test_set = ((C.String.t -> St unit) -> St unit) -> St unit
+
+inline_for_extraction
+noextract
+let ts_nil : test_set = fun _ -> ()
+
+inline_for_extraction
+noextract
+let ts_one (c: config) : Tot test_set =
+  fun test ->
+    if check_static_config c
+    then begin
+      set_config c;
+      test (fun s -> print_config c; C.String.print s)
+    end else begin
+      print_config c;
+      C.String.print !$" SKIP because not in static config\n"
+    end
+
+inline_for_extraction
+noextract
+let ts_append (ts1 ts2: test_set) : Tot test_set =
+  fun test ->
+    ts1 test;
+    ts2 test
+
+inline_for_extraction
+noextract
+let ts_snoc (ts: test_set) (c: config)  : Tot test_set =
+  ts `ts_append` ts_one c
+
+inline_for_extraction
+noextract
+let ts_cons (c: config) (ts: test_set) : Tot test_set =
+  ts_one c `ts_append` ts
+
+inline_for_extraction
+noextract
+let poly1305_test_set =
+  (Hacl, f_avx2) `ts_cons` (
+  (Hacl, f_avx) `ts_cons` (
+  (Hacl, f_none) `ts_cons` (
+  (Vale, f_none) `ts_cons` (
+  ts_nil))))
+
+inline_for_extraction
+noextract
+let curve25519_test_set =
+  (Hacl, f_bmi2 `f_concat` f_adx) `ts_cons` (
+  (Hacl, f_none) `ts_cons`
+  ts_nil)
+
+inline_for_extraction
+noextract
+let aead_gcm_test_set =
+  (Vale, f_aesni `f_concat` f_avx) `ts_cons` (
+  ts_nil)
+
+inline_for_extraction
+noextract
+let chacha20poly1305_test_set =
+  (Hacl, f_none) `ts_cons`
+  ts_nil
+
+inline_for_extraction
+noextract
+let hash_test_set =
+  (Vale, f_none) `ts_cons` (
+  (Vale, f_shaext) `ts_cons` (
+  (Hacl, f_none) `ts_cons` (
+  ts_nil)))
+
+inline_for_extraction
+noextract
+let chacha20_test_set =
+  (Hacl, f_none) `ts_cons`
+  ts_nil
+
+inline_for_extraction
+noextract
+let aes128_ecb_test_set =
+  (Vale, f_aesni) `ts_cons` (
+  (Hacl, f_none) `ts_cons` (
+  ts_nil))
+
+inline_for_extraction
+noextract
+let aes256_ecb_test_set =
+  (Hacl, f_none) `ts_cons` (
+  ts_nil)
+
+(* Test bodies *)
+
+inline_for_extraction
+noextract
+let test_poly1305_body (print: C.String.t -> St unit) : St unit =
+    print !$"  >>>>>>>>> Poly1305\n";
+    test_poly1305 ()
+
+inline_for_extraction
+noextract
+let test_curve25519_body (print: C.String.t -> St unit) : St unit =
+    print !$"  >>>>>>>>> Curve25519\n";
+    test_curve25519 ()
+
+inline_for_extraction
+noextract
+let test_aead_gcm_body (print: C.String.t -> St unit) : St unit =
+    print !$"  >>>>>>>>> AEAD (AES128_GCM old vectors)\n";
+    test_aead AES_128_GCM;
+    print !$"  >>>>>>>>> AEAD (AES256_GCM old vectors)\n";
+    test_aead AES_256_GCM;
+    print !$"  >>>>>>>>> AEAD (AES128_GCM vectors)\n";
+    test_aes128_gcm ()
+
+inline_for_extraction
+let test_chacha20poly1305_body (print: C.String.t -> St unit) : St unit =
+    print !$"  >>>>>>>>> AEAD (ChachaPoly vectors)\n";
+    test_chacha20poly1305 ();
+    print !$"  >>>>>>>>> AEAD (ChachaPoly old vectors)\n";
+    test_aead CHACHA20_POLY1305
+
+inline_for_extraction
+noextract
+let test_hash_body (print: C.String.t -> St unit) : St unit =
     print !$"  >>>>>>>>> Hash (Test.Hash)\n";
     Test.Hash.main ();
     print !$"  >>>>>>>>> Hash (Test.NoHeap)\n";
@@ -370,115 +585,47 @@ let test_all_body (print: C.String.t -> St unit) : St unit =
     print !$"  >>>>>>>>> Hmac (Test.NoHeap)\n";
     test_hmac hmac_vectors_low;
     print !$"  >>>>>>>>> HKDF (Test.NoHeap)\n";
-    test_hkdf hkdf_vectors_low;
-    print !$"  >>>>>>>>> FINITE-FIELD DIFFIE-HELLMAN\n";
-    test_dh ();
-    print !$"  >>>>>>>>> AEAD (old vectors)\n";
-    test_aead ();
-    print !$"  >>>>>>>>> AEAD (AES128_GCM vectors)\n";
-    test_aes128_gcm ();
-    print !$"  >>>>>>>>> Cipher\n";
-    test_cipher ();
-    print !$"  >>>>>>>>> Curve25519\n";
-    test_curve25519 ();
-    print !$"  >>>>>>>>> Poly1305\n";
-    test_poly1305 ();
+    test_hkdf hkdf_vectors_low
+
+inline_for_extraction
+noextract
+let test_chacha20_body (print: C.String.t -> St unit) : St unit =
     print !$"  >>>>>>>>> Chacha20\n";
-    test_chacha20 chacha20_vectors_low;
-    print !$"  >>>>>>>>> AEAD (ChachaPoly vectors)\n";
-    test_chacha20poly1305 ()
-#reset-options
-
-inline_for_extraction
-type platform = | Vale | HACL | OpenSSL | BCrypt
+    test_chacha20 chacha20_vectors_low
 
 inline_for_extraction
 noextract
-let static_config_ok (p: platform) : St bool =
-  match p with
-  | Vale -> EverCrypt.StaticConfig.vale
-  | HACL -> EverCrypt.StaticConfig.hacl
-  | OpenSSL -> EverCrypt.StaticConfig.openssl
-  | BCrypt -> EverCrypt.StaticConfig.bcrypt
+let test_aes128_ecb_body (print: C.String.t -> St unit) : St unit =
+    print !$"  >>>>>>>>> AES128_ECB\n";
+    test_aes_ecb AES128
 
 inline_for_extraction
 noextract
-let print_config (p: platform) (avx avx2: bool) : St unit =
-  begin match p with
-  | Vale -> C.String.print !$"VALE "
-  | HACL -> C.String.print !$"HACL "
-  | OpenSSL -> C.String.print !$"OpenSSL "
-  | BCrypt -> C.String.print !$"BCrypt "
-  end;
-  (if avx then C.String.print !$"AVX ");
-  (if avx2 then C.String.print !$"AVX2 ")
+let test_aes256_ecb_body (print: C.String.t -> St unit) : St unit =
+    print !$"  >>>>>>>>> AES256_ECB\n";
+    test_aes_ecb AES256
 
-#push-options "--z3rlimit 16"
+(* Summary *)
 
-inline_for_extraction
-noextract
-let test_all_on_config (p: platform) (avx avx2: bool) : St unit =
-  C.String.print !$"=================================================\n";
-  print_config p avx avx2;
-  C.String.print !$"\n";
-  AC.init ();
-  let has_avx = AC.has_avx () in
-  let has_avx2 = AC.has_avx2 () in
-  if avx && not has_avx
-  then
-    C.String.print !$"skipping, AVX wanted but not present\n"
-  else if avx2 && not has_avx2
-  then
-    C.String.print !$"skipping, AVX2 wanted but not present\n"
-  else if not (static_config_ok p)
-  then
-    C.String.print !$"skipping, not in static config\n"
-  else begin
-    (if p <> Vale then AC.disable_vale ());
-    (if p <> HACL then AC.disable_hacl ());
-    (if p <> OpenSSL then AC.disable_openssl ());
-    (if p <> BCrypt then AC.disable_bcrypt ());
-    (if not avx then AC.disable_avx ());
-    (if not avx2 then AC.disable_avx2 ());
-    let wants_vale = AC.wants_vale () in
-    let wants_hacl = AC.wants_hacl () in
-    let wants_openssl = AC.wants_openssl () in
-    let wants_bcrypt = AC.wants_bcrypt () in 
-    let wants_avx = AC.has_avx () in
-    let wants_avx2 = AC.has_avx2 () in
-    if not (
-      (wants_vale = (p = Vale)) &&
-      (wants_hacl = (p = HACL)) &&
-      (wants_openssl = (p = OpenSSL)) &&
-      (wants_bcrypt = (p = BCrypt)) &&
-      (wants_avx = avx) &&
-      (wants_avx2 = avx2)
-    )
-    then
-      C.Failure.failwith !$"autoconfig is inconsistent"
-    else
-      test_all_body (fun s -> print_config p avx avx2; C.String.print s)
-  end
-
-#pop-options
-
-inline_for_extraction
-noextract
-let test_all_on_platform_avx (p: platform) (avx: bool) : St unit =
-  test_all_on_config p avx false;
-  test_all_on_config p avx true
-
-inline_for_extraction
-noextract
-let test_all_on_platform (p: platform) : St unit =
-  test_all_on_platform_avx p false;
-  test_all_on_platform_avx p true
+let print_sep () : St unit =
+  C.String.print !$"=====================\n"
 
 let test_all () : St unit =
-  test_all_on_platform Vale;
-  test_all_on_platform HACL;
-  test_all_on_platform OpenSSL;
-  test_all_on_platform BCrypt
+  poly1305_test_set         test_poly1305_body;
+  print_sep ();
+  curve25519_test_set       test_curve25519_body;
+  print_sep ();
+  aead_gcm_test_set         test_aead_gcm_body;
+  print_sep ();
+  chacha20poly1305_test_set test_chacha20poly1305_body;
+  print_sep ();
+  hash_test_set             test_hash_body;
+  print_sep ();
+  chacha20_test_set         test_chacha20_body;
+  print_sep ();
+  aes128_ecb_test_set       test_aes128_ecb_body;
+  print_sep ();
+  aes256_ecb_test_set       test_aes256_ecb_body
 
 let main (): St C.exit_code =
   let equal_heap_dom_lemma (h1 h2:Heap.heap)

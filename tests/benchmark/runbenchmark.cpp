@@ -34,7 +34,14 @@ BenchmarkSettings & parse_args(int argc, char const ** argv)
       else if (strcmp(argv[i], "-s") == 0)
         r.seed = strtoul(argv[++i], NULL, 10);
       else if (strcmp(argv[i], "-n") == 0)
+      {
         r.samples = strtoul(argv[++i], NULL, 10);
+        if (r.samples == 0)
+        {
+          std::cout << "Error: need more than 0 samples.\n";
+          exit(1);
+        }
+      }
     }
     else
       arg_fams.push_back(argv[i]);

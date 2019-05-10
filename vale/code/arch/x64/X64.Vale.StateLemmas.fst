@@ -16,7 +16,7 @@ let same_domain sv s = MS.same_domain sv.mem s.TS.state.BS.mem
 
 let same_domain_eval_ins c f s0 sv = match c with
   | Ins ins -> 
-      let obs = TS.ins_obs ins s0 in 
+      let obs = TS.ins_obs ins.TS.i s0 in 
       let s1 = {TS.taint_eval_ins ins s0 with TS.trace = obs @ s0.TS.trace} in
       X64.Bytes_Semantics.eval_ins_domains ins s0;
       MS.lemma_same_domains sv.mem s0.TS.state.BS.mem s1.TS.state.BS.mem

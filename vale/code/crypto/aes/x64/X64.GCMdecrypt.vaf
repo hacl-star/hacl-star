@@ -84,14 +84,14 @@ open X64.CPU_Features_s
 ///////////////////////////
 
 #reset-options "--z3rlimit 30"
-procedure {:quick} gcm_one_pass_blocks(
-    inline alg:algorithm,
-    ghost in_b:buffer128,
-    ghost out_b:buffer128,
-    ghost key:seq(nat32),
-    ghost round_keys:seq(quad32),
-    ghost keys_b:buffer128
-    )
+procedure gcm_one_pass_blocks(
+        inline alg:algorithm,
+        ghost in_b:buffer128,
+        ghost out_b:buffer128,
+        ghost key:seq(nat32),
+        ghost round_keys:seq(quad32),
+        ghost keys_b:buffer128)
+    {:quick}
     lets in_ptr @= rax; out_ptr @= rbx; len @= rcx; icb @= xmm7; mask @= xmm8; hash @= xmm1; one @= xmm10; h @= xmm11;
 
     reads
@@ -182,7 +182,7 @@ procedure {:quick} gcm_one_pass_blocks(
             rdx == 0 ==> hash == old(hash);
             rdx > 0 ==> hash == ghash_incremental(reverse_bytes_quad32(h), old(hash), slice_work_around(buffer128_as_seq(mem, in_b), rdx));
 
-//            forall j :: 0 <= j < rdx ==>
+//            forall(j) 0 <= j < rdx ==>
 //                        buffer128_read(out_b, j, mem) ==
 //                        quad32_xor(index_workaround(buffer128_as_seq(mem, in_b), j), aes_encrypt_LE(AES_128, key, inc32(old(icb), j)));
 
@@ -201,7 +201,7 @@ procedure {:quick} gcm_one_pass_blocks(
         Mov128(xmm0, icb);
         Pshufb(xmm0, mask);
         AESEncryptBlock(alg, reverse_bytes_quad32(icb), key, round_keys, keys_b); // Clobbers xmm0 and xmm2
-        reveal aes_encrypt_LE_def;
+        Opaque_s.reveal_opaque(aes_encrypt_LE_def);
 
         Pxor(xmm3, xmm0);
         Store128_buffer(r10, xmm3, 0, Secret, out_b, rdx);
@@ -211,20 +211,20 @@ procedure {:quick} gcm_one_pass_blocks(
         Add64(r9, 16);
         Add64(r10, 16);
         Inc32(icb, one);
-        reveal ghash_incremental_def;
+        Opaque_s.reveal_opaque(ghash_incremental_def);
     }
 }
 
 
 #reset-options "--z3rlimit 30"
-procedure {:quick} gcm_one_pass(
-    inline alg:algorithm,
-    ghost in_b:buffer128,
-    ghost out_b:buffer128,
-    ghost key:seq(nat32),
-    ghost round_keys:seq(quad32),
-    ghost keys_b:buffer128
-    )
+procedure gcm_one_pass(
+        inline alg:algorithm,
+        ghost in_b:buffer128,
+        ghost out_b:buffer128,
+        ghost key:seq(nat32),
+        ghost round_keys:seq(quad32),
+        ghost keys_b:buffer128)
+    {:quick}
     lets in_ptr @= rax; out_ptr @= rbx; num_bytes @= rcx; icb @= xmm7; mask @= xmm8; hash @= xmm1; one @= xmm10; h @= xmm11;
 
     reads
@@ -284,7 +284,7 @@ procedure {:quick} gcm_one_pass(
         And64(rsi, 15);
         assert rsi == num_bytes % 16;
         Shr64(num_bytes, 4);
-        ghost var num_blocks := old(num_bytes) / 16;
+        let num_blocks := old(num_bytes) / 16;
         assert rcx == num_blocks;
 
         gcm_one_pass_blocks(alg, in_b, out_b, key, round_keys, keys_b);
@@ -314,32 +314,32 @@ procedure {:quick} gcm_one_pass(
         let cipher := slice_work_around(le_seq_quad32_to_bytes(buffer128_as_seq(old(mem), in_b)), old(num_bytes));
         let cipher_padded_bytes := pad_to_128_bits(cipher);
         let cipher_padded_quads := le_bytes_to_seq_quad32(cipher_padded_bytes);
-        assert length(cipher_padded_quads) > 0 by {reveal_le_bytes_to_seq_quad32();}
+        assert length(cipher_padded_quads) > 0 by {reveal le_bytes_to_seq_quad32;}
     }
 
     // Handle the else case:
-    ghost var cipher := buffer128_as_seq(old(mem),  in_b);
-    ghost var plain  := buffer128_as_seq(mem,      out_b);
+    let cipher := buffer128_as_seq(old(mem),  in_b);
+    let plain  := buffer128_as_seq(mem,      out_b);
     gctr_encrypt_empty(old(icb), cipher, plain, alg, key);
 
 }
 
 #reset-options "--z3rlimit 30"
-procedure {:quick} gcm_core_part1(
-    inline alg:algorithm,
-    ghost iv_BE:quad32,
-    ghost cipher_b:buffer128,
-    ghost auth_b:buffer128,
-    ghost out_b:buffer128,
-    ghost key:seq(nat32),
-    ghost round_keys:seq(quad32),
-    ghost keys_b:buffer128
-    ) returns (
-    ghost h:quad32,
-    ghost y_0:quad32,
-    ghost y_auth:quad32,
-    ghost y_cipher:quad32
-    )
+procedure gcm_core_part1(
+        inline alg:algorithm,
+        ghost iv_BE:quad32,
+        ghost cipher_b:buffer128,
+        ghost auth_b:buffer128,
+        ghost out_b:buffer128,
+        ghost key:seq(nat32),
+        ghost round_keys:seq(quad32),
+        ghost keys_b:buffer128)
+    returns(
+        ghost h:quad32,
+        ghost y_0:quad32,
+        ghost y_auth:quad32,
+        ghost y_cipher:quad32)
+    {:quick}
 
     lets cipher_ptr @= r14; out_ptr @= rbx; keys_ptr @= r8; auth_ptr @= rax;
     cipher_num_bytes @= r13; auth_num_bytes @= r11; mask @= xmm8;
@@ -443,11 +443,11 @@ procedure {:quick} gcm_core_part1(
     ghash_incremental_bytes(auth_b);
     y_auth := xmm1;
 
-//    ghost var auth_bytes := slice_work_around(le_seq_quad32_to_bytes(buffer128_as_seq(mem, auth_b)), auth_num_bytes);
-//    ghost var auth_padded_bytes := pad_to_128_bits(auth_bytes);
-//    ghost var auth_padded_quads := le_bytes_to_seq_quad32(auth_padded_bytes);
-    ghost var cipher := slice_work_around(le_seq_quad32_to_bytes(buffer128_as_seq(old(mem), cipher_b)), old(cipher_num_bytes));
-    ghost var auth   := slice_work_around(le_seq_quad32_to_bytes(buffer128_as_seq(old(mem), auth_b)),   old(auth_num_bytes));
+//    let auth_bytes := slice_work_around(le_seq_quad32_to_bytes(buffer128_as_seq(mem, auth_b)), auth_num_bytes);
+//    let auth_padded_bytes := pad_to_128_bits(auth_bytes);
+//    let auth_padded_quads := le_bytes_to_seq_quad32(auth_padded_bytes);
+    let cipher := slice_work_around(le_seq_quad32_to_bytes(buffer128_as_seq(old(mem), cipher_b)), old(cipher_num_bytes));
+    let auth   := slice_work_around(le_seq_quad32_to_bytes(buffer128_as_seq(old(mem), auth_b)),   old(auth_num_bytes));
 //
 //    assert y_0 == Mkfour(0,0,0,0);
 //    assert y_auth   == ghash_incremental0(reverse_bytes_quad32(h), y_0, auth_padded_quads);
@@ -456,22 +456,22 @@ procedure {:quick} gcm_core_part1(
     Mov64(rax, cipher_ptr);
     //Mov64(rbx, out_ptr);
     Mov64(rcx, cipher_num_bytes);
-    ghost var icb_enc := iv;
+    let icb_enc := iv;
 
     assert icb_enc == inc32 (Mkfour(1,iv_BE.lo1,iv_BE.hi2,iv_BE.hi3), 1);     // Passes -- REVIEW: Seems to be necessary for it to pass at the end of the procedure; unclear why that could possibly be the case
     gcm_one_pass(alg, cipher_b, out_b, key, round_keys, keys_b);
     y_cipher := xmm1;
-    ghost var plain := slice_work_around(le_seq_quad32_to_bytes(buffer128_as_seq(mem, out_b)), old(cipher_num_bytes));
+    let plain := slice_work_around(le_seq_quad32_to_bytes(buffer128_as_seq(mem, out_b)), old(cipher_num_bytes));
     gcm_encrypt_LE_fst_helper(icb_enc, iv_BE, cipher, auth, plain, alg, key);
-    reveal_le_bytes_to_seq_quad32();
+    reveal le_bytes_to_seq_quad32;
 }
 
 
 #reset-options "--z3rlimit 10"
-procedure {:quick} gcm_make_length_quad()
+procedure gcm_make_length_quad()
+    {:quick}
     lets plain_num_bytes @= r13; auth_num_bytes @= r11; mask @= xmm8;
     reads plain_num_bytes; auth_num_bytes; mask;
-
     modifies xmm2; rax; efl;
     requires
         mask == Mkfour(0x0C0D0E0F, 0x08090A0B, 0x04050607, 0x00010203);
@@ -496,16 +496,16 @@ procedure {:quick} gcm_make_length_quad()
 }
 
 #reset-options "--z3rlimit 30"
-procedure {:quick} gcm_core(
-    inline alg:algorithm,
-    ghost iv_BE:quad32,
-    ghost cipher_b:buffer128,
-    ghost auth_b:buffer128,
-    ghost out_b:buffer128,
-    ghost key:seq(nat32),
-    ghost round_keys:seq(quad32),
-    ghost keys_b:buffer128
-    )
+procedure gcm_core(
+        inline alg:algorithm,
+        ghost iv_BE:quad32,
+        ghost cipher_b:buffer128,
+        ghost auth_b:buffer128,
+        ghost out_b:buffer128,
+        ghost key:seq(nat32),
+        ghost round_keys:seq(quad32),
+        ghost keys_b:buffer128)
+    {:quick}
 
     lets cipher_ptr @= r14; out_ptr @= rbx; keys_ptr @= r8; auth_ptr @= rax;
     cipher_num_bytes @= r13; auth_num_bytes @= r11; mask @= xmm8;
@@ -567,20 +567,20 @@ procedure {:quick} gcm_core(
         //le_quad32_to_bytes(xmm1) == gcm_encrypt_LE(alg, seq_nat32_to_seq_nat8_LE(key), be_quad32_to_bytes(iv_BE), cipher, auth)._2;
         le_quad32_to_bytes(xmm1) == gcm_decrypt_LE_tag(alg, seq_nat32_to_seq_nat8_LE(key), be_quad32_to_bytes(iv_BE), cipher, auth);
 {
-    (ghost var h), (ghost var y_0), (ghost var y_auth), (ghost var y_cipher) := gcm_core_part1(alg, iv_BE, cipher_b, auth_b, out_b, key, round_keys, keys_b);
+    let (h, y_0, y_auth, y_cipher) := gcm_core_part1(alg, iv_BE, cipher_b, auth_b, out_b, key, round_keys, keys_b);
 
     gcm_make_length_quad();
-    ghost var length_quad32 := xmm2;
+    let length_quad32 := xmm2;
 
     compute_ghash_incremental_register();
-    ghost var y_final := xmm1;
+    let y_final := xmm1;
 
     // Invoke lemma showing that incremental hashing works
-    ghost var auth_bytes := slice_work_around(le_seq_quad32_to_bytes(buffer128_as_seq(old(mem), auth_b)), old(auth_num_bytes));
-    ghost var auth_padded_quads := le_bytes_to_seq_quad32(pad_to_128_bits(auth_bytes));
+    let auth_bytes := slice_work_around(le_seq_quad32_to_bytes(buffer128_as_seq(old(mem), auth_b)), old(auth_num_bytes));
+    let auth_padded_quads := le_bytes_to_seq_quad32(pad_to_128_bits(auth_bytes));
 
-    ghost var cipher := slice_work_around(le_seq_quad32_to_bytes(buffer128_as_seq(old(mem), cipher_b)), old(cipher_num_bytes));
-    ghost var cipher_padded_quads := le_bytes_to_seq_quad32(pad_to_128_bits(cipher));
+    let cipher := slice_work_around(le_seq_quad32_to_bytes(buffer128_as_seq(old(mem), cipher_b)), old(cipher_num_bytes));
+    let cipher_padded_quads := le_bytes_to_seq_quad32(pad_to_128_bits(cipher));
     lemma_hash_append3(reverse_bytes_quad32(h), y_0, y_auth, y_cipher, y_final,
                        auth_padded_quads, //buffer128_as_seq(mem, auth_b),
                        cipher_padded_quads, //buffer128_as_seq(mem, out_b),
@@ -591,28 +591,28 @@ procedure {:quick} gcm_core(
     // Encrypt the hash value with gctr_register; result goes in xmm1
     gctr_register(alg, key, round_keys, keys_b); // Encrypt using j0 and xmm0 = hash_value
 
-    ghost var plain := slice_work_around(le_seq_quad32_to_bytes(buffer128_as_seq(mem, out_b)), old(cipher_num_bytes));
+    let plain := slice_work_around(le_seq_quad32_to_bytes(buffer128_as_seq(mem, out_b)), old(cipher_num_bytes));
 
     le_seq_quad32_to_bytes_of_singleton(xmm1);
 
     //gcm_encrypt_LE_snd_helper(iv_BE, length_quad32, y_final, xmm1, cipher, auth_bytes, plain, alg, key);
 }
 
-procedure {:quick} gcm_decrypt_stdcall_inner_inner(
-    inline alg:algorithm,
-    ghost args_b:buffer64,
-    ghost iv_BE:quad32,
+procedure gcm_decrypt_stdcall_inner_inner(
+        inline alg:algorithm,
+        ghost args_b:buffer64,
+        ghost iv_BE:quad32,
 
-    ghost cipher_b:buffer128,
-    ghost auth_b:buffer128,
-    ghost iv_b:buffer128,
-    ghost out_b:buffer128,
-    ghost tag_b:buffer128,
+        ghost cipher_b:buffer128,
+        ghost auth_b:buffer128,
+        ghost iv_b:buffer128,
+        ghost out_b:buffer128,
+        ghost tag_b:buffer128,
 
-    ghost key:seq(nat32),
-    ghost round_keys:seq(quad32),
-    ghost keys_b:buffer128
-    )
+        ghost key:seq(nat32),
+        ghost round_keys:seq(quad32),
+        ghost keys_b:buffer128)
+    {:quick}
     reads memTaint;
     modifies
         rax; rbx; rcx; rdx; rsi; r8; r9; r10; r11; r12; r13; r14; r15; xmm0; xmm1; xmm2; xmm3; xmm4; xmm5; xmm6; xmm7; xmm8; xmm10; xmm11;
@@ -700,31 +700,31 @@ procedure {:quick} gcm_decrypt_stdcall_inner_inner(
 
     gcm_core(alg, iv_BE, cipher_b, auth_b, out_b, key, round_keys, keys_b);
 
-    ghost var auth   := slice_work_around(le_seq_quad32_to_bytes(buffer128_as_seq(old(mem), auth_b)),   old(auth_num_bytes));
-    ghost var cipher := slice_work_around(le_seq_quad32_to_bytes(buffer128_as_seq(old(mem), cipher_b)), old(cipher_num_bytes));
-    ghost var plain  := slice_work_around(le_seq_quad32_to_bytes(buffer128_as_seq(mem,      out_b)),    old(cipher_num_bytes));
-    ghost var alleged_tag := le_quad32_to_bytes(buffer128_read(tag_b, 0, old(mem)));
+    let auth   := slice_work_around(le_seq_quad32_to_bytes(buffer128_as_seq(old(mem), auth_b)),   old(auth_num_bytes));
+    let cipher := slice_work_around(le_seq_quad32_to_bytes(buffer128_as_seq(old(mem), cipher_b)), old(cipher_num_bytes));
+    let plain  := slice_work_around(le_seq_quad32_to_bytes(buffer128_as_seq(mem,      out_b)),    old(cipher_num_bytes));
+    let alleged_tag := le_quad32_to_bytes(buffer128_read(tag_b, 0, old(mem)));
     lemma_gcm_encrypt_decrypt_equiv(alg, key, iv_BE, plain, cipher, auth, alleged_tag);
 }
 
 
 
 #reset-options "--z3rlimit 20"
-procedure {:quick} gcm_decrypt_stdcall_inner(
-    inline alg:algorithm,
-    ghost args_b:buffer64,
-    ghost iv_BE:quad32,
+procedure gcm_decrypt_stdcall_inner(
+        inline alg:algorithm,
+        ghost args_b:buffer64,
+        ghost iv_BE:quad32,
 
-    ghost cipher_b:buffer128,
-    ghost auth_b:buffer128,
-    ghost iv_b:buffer128,
-    ghost out_b:buffer128,
-    ghost tag_b:buffer128,
+        ghost cipher_b:buffer128,
+        ghost auth_b:buffer128,
+        ghost iv_b:buffer128,
+        ghost out_b:buffer128,
+        ghost tag_b:buffer128,
 
-    ghost key:seq(nat32),
-    ghost round_keys:seq(quad32),
-    ghost keys_b:buffer128
-    )
+        ghost key:seq(nat32),
+        ghost round_keys:seq(quad32),
+        ghost keys_b:buffer128)
+    {:quick}
     reads memTaint;
     modifies
         rax; rbx; rcx; rdx; rsi; r8; r9; r10; r11; r12; r13; r14; r15; xmm0; xmm1; xmm2; xmm3; xmm4; xmm5; xmm6; xmm7; xmm8; xmm10; xmm11;
@@ -802,32 +802,32 @@ procedure {:quick} gcm_decrypt_stdcall_inner(
     Load128_buffer(xmm0, r15, 0, Secret, tag_b, 0);
     assert xmm0 == buffer128_read(tag_b, 0, mem);       // OBSERVE?
     assert xmm0 == buffer128_read(tag_b, 0, old(mem));  // OBSERVE?
-    ghost var alleged_tag_quad := xmm0;
-    ghost var computed_tag := xmm1;
+    let alleged_tag_quad := xmm0;
+    let computed_tag := xmm1;
 
     XmmEqual();
-    ghost var auth   := slice_work_around(le_seq_quad32_to_bytes(buffer128_as_seq(old(mem), auth_b)),  old(auth_num_bytes));
-    ghost var cipher  := slice_work_around(le_seq_quad32_to_bytes(buffer128_as_seq(old(mem), cipher_b)), old(cipher_num_bytes));
+    let auth   := slice_work_around(le_seq_quad32_to_bytes(buffer128_as_seq(old(mem), auth_b)),  old(auth_num_bytes));
+    let cipher  := slice_work_around(le_seq_quad32_to_bytes(buffer128_as_seq(old(mem), cipher_b)), old(cipher_num_bytes));
     decrypt_helper(alg, seq_nat32_to_seq_nat8_LE(key), be_quad32_to_bytes(iv_BE), cipher, auth, rax, alleged_tag_quad, computed_tag);
 }
 
 #reset-options "--z3rlimit 200"
-procedure {:quick} gcm_decrypt_stdcall(
-    inline win:bool,
-    inline alg:algorithm,
-    ghost args_b:buffer64,
-    ghost iv_BE:quad32,
+procedure gcm_decrypt_stdcall(
+        inline win:bool,
+        inline alg:algorithm,
+        ghost args_b:buffer64,
+        ghost iv_BE:quad32,
 
-    ghost cipher_b:buffer128,
-    ghost auth_b:buffer128,
-    ghost iv_b:buffer128,
-    ghost out_b:buffer128,
-    ghost tag_b:buffer128,
+        ghost cipher_b:buffer128,
+        ghost auth_b:buffer128,
+        ghost iv_b:buffer128,
+        ghost out_b:buffer128,
+        ghost tag_b:buffer128,
 
-    ghost key:seq(nat32),
-    ghost round_keys:seq(quad32),
-    ghost keys_b:buffer128
-    )
+        ghost key:seq(nat32),
+        ghost round_keys:seq(quad32),
+        ghost keys_b:buffer128)
+    {:quick}
     reads memTaint;
     modifies
         rax; rbx; rcx; rdx; r8; r9; r10; r11; r12; r13; r14; r15; 
@@ -996,21 +996,23 @@ procedure {:quick} gcm_decrypt_stdcall(
 #endverbatim
 
 // Take arguments in registers and the stack, instead of via an in-memory struct
-procedure {:quick}{:public}{:exportSpecs} gcm_decrypt2_stdcall(
-    inline win:bool,
-    inline alg:algorithm,
+procedure gcm_decrypt2_stdcall(
+        inline win:bool,
+        inline alg:algorithm,
 
-    ghost cipher_b:buffer128,
-    ghost cipher_num_bytes:nat64,
-    ghost auth_b:buffer128,
-    ghost auth_num_bytes:nat64,
-    ghost iv_b:buffer128,
-    ghost keys_b:buffer128,    
-    ghost out_b:buffer128,
-    ghost tag_b:buffer128,
+        ghost cipher_b:buffer128,
+        ghost cipher_num_bytes:nat64,
+        ghost auth_b:buffer128,
+        ghost auth_num_bytes:nat64,
+        ghost iv_b:buffer128,
+        ghost keys_b:buffer128,    
+        ghost out_b:buffer128,
+        ghost tag_b:buffer128,
 
-    ghost key:seq(nat32)
-    )
+        ghost key:seq(nat32))
+    {:exportSpecs}
+    {:public}
+    {:quick}
     reads memTaint;
     modifies
         rax; rbx; rcx; rdx; rdi; rsi; rsp; rbp; r8; r9; r10; r11; r12; r13; r14; r15; 
@@ -1169,18 +1171,18 @@ procedure {:quick}{:public}{:exportSpecs} gcm_decrypt2_stdcall(
 
     gcm_core(alg, reverse_bytes_quad32(buffer128_read(iv_b, 0, old(mem))), cipher_b, auth_b, out_b, key, buffer128_as_seq(old(mem), keys_b), keys_b);
 
-    ghost var auth   := slice_work_around(le_seq_quad32_to_bytes(buffer128_as_seq(old(mem), auth_b)),   old(auth_num_bytes));
-    ghost var cipher := slice_work_around(le_seq_quad32_to_bytes(buffer128_as_seq(old(mem), cipher_b)), old(cipher_num_bytes));
-    ghost var plain  := slice_work_around(le_seq_quad32_to_bytes(buffer128_as_seq(mem,      out_b)),    old(cipher_num_bytes));
-    ghost var alleged_tag := le_quad32_to_bytes(buffer128_read(tag_b, 0, old(mem)));
+    let auth   := slice_work_around(le_seq_quad32_to_bytes(buffer128_as_seq(old(mem), auth_b)),   old(auth_num_bytes));
+    let cipher := slice_work_around(le_seq_quad32_to_bytes(buffer128_as_seq(old(mem), cipher_b)), old(cipher_num_bytes));
+    let plain  := slice_work_around(le_seq_quad32_to_bytes(buffer128_as_seq(mem,      out_b)),    old(cipher_num_bytes));
+    let alleged_tag := le_quad32_to_bytes(buffer128_read(tag_b, 0, old(mem)));
     lemma_gcm_encrypt_decrypt_equiv(alg, key, reverse_bytes_quad32(buffer128_read(iv_b, 0, old(mem))), plain, cipher, auth, alleged_tag);
 
     // Auth tag is in xmm1; compare it to the value in memory
     Load128_buffer(xmm0, r15, 0, Secret, tag_b, 0);
     assert xmm0 == buffer128_read(tag_b, 0, mem);       // OBSERVE?
     assert xmm0 == buffer128_read(tag_b, 0, old(mem));  // OBSERVE?
-    ghost var alleged_tag_quad := xmm0;
-    ghost var computed_tag := xmm1;
+    let alleged_tag_quad := xmm0;
+    let computed_tag := xmm1;
 
     XmmEqual();
     decrypt_helper(alg, seq_nat32_to_seq_nat8_LE(key), be_quad32_to_bytes(reverse_bytes_quad32(buffer128_read(iv_b, 0, old(mem)))), cipher, auth, rax, buffer128_read(tag_b, 0, old(mem)), computed_tag);

@@ -17,10 +17,10 @@ open X64.Vale.QuickCodes
 #set-options "--z3rlimit 20"
 #endverbatim
 
-procedure {:quick}{:exportSpecs}{:public} memcpy(
-  inline win:bool,
-  ghost dst:buffer64,
-  ghost src:buffer64)
+procedure memcpy(inline win:bool, ghost dst:buffer64, ghost src:buffer64)
+    {:public}
+    {:exportSpecs}
+    {:quick}
     requires
         locs_disjoint(list(loc_buffer(dst), loc_buffer(src)));
         buffer_readable(mem, dst);
@@ -64,7 +64,7 @@ procedure {:quick}{:exportSpecs}{:public} memcpy(
         win ==>  xmm15 == old(xmm15);
 
         buffer_as_seq(mem, dst) == buffer_as_seq(mem, src);
-    //    forall i :: 0 <= i && i < 2 ==> buffer64_read(dst, i, mem) == buffer64_read(src, i, mem);
+    //    forall(i) 0 <= i && i < 2 ==> buffer64_read(dst, i, mem) == buffer64_read(src, i, mem);
         modifies_mem(loc_buffer(dst), old(mem), mem);        
     reads memTaint;
     modifies
