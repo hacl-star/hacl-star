@@ -100,7 +100,7 @@ all:
 	$(MAKE) all-staged
 
 all-unstaged: compile-compact compile-compact-msvc compile-compact-gcc \
-  compile-evercrypt-external-headers compile-compact-c89 compile-coco
+  compile-evercrypt-external-headers compile-compact-c89 compile-ccf
 
 # Automatic staging.
 %-staged:
@@ -157,7 +157,7 @@ clean:
 include Makefile.common
 
 IMPORT_FSTAR_TYPES := $(VALE_HOME)/bin/importFStarTypes.exe
-PYTHON3 := $(shell tools/findpython3.sh)
+PYTHON3 ?= $(shell tools/findpython3.sh)
 ifeq ($(OS),Windows_NT)
   MONO =
 else
@@ -754,10 +754,15 @@ dist/compact-c89/Makefile.basic: \
 dist/compact-c89/Makefile.basic: \
   HACL_OLD_FILES:=$(subst -c,-c89,$(HACL_OLD_FILES))
 
-dist/coco/Makefile.basic: \
+# Customizations for CCF:
+# - disable the legacy EverCrypt namespace -- this is mostly for Merkle Trees
+#   (and hashes, too)
+# - enclaves only use 64-bit GCC/Clang -- assume unsigned __int128
+dist/ccf/Makefile.basic: \
   KRML_EXTRA=$(COMPACT_FLAGS) \
+    -fbuiltin-uint128 \
     -bundle EverCrypt.AutoConfig2= \
-    -bundle EverCrypt= \
+    -bundle EverCrypt \
     -bundle EverCrypt.Hacl \
     -bundle '\*[rename=EverCrypt_Misc]'
 
