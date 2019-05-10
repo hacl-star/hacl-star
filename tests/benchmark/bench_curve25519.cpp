@@ -7,19 +7,6 @@ extern "C" {
 #include <EverCrypt_Curve25519.h>
 }
 
-#ifdef HAVE_HACL
-#include <Hacl_Curve25519.h>
-#endif
-
-#ifdef HAVE_OPENSSL
-#include <openssl/evp.h>
-#include <openssl/ec.h>
-#endif
-
-#ifdef HAVE_RFC7748
-#include <rfc7748_precomputed.h>
-#endif
-
 class Curve25519Benchmark: public Benchmark
 {
   protected:
@@ -63,6 +50,7 @@ class EverCrypt: public Curve25519Benchmark
 };
 
 #ifdef HAVE_RFC7748
+#include <rfc7748_precomputed.h>
 extern void x25519_shared_secret_x64(uint8_t* sec, uint8_t* priv, uint8_t* pub);
 
 class RFC7748: public Curve25519Benchmark
@@ -76,27 +64,60 @@ class RFC7748: public Curve25519Benchmark
 #endif
 
 #ifdef HAVE_HACL
+#include <Hacl_Curve25519.h>
+
 class Hacl51: public Curve25519Benchmark
 {
   public:
-    Hacl51() : Curve25519Benchmark("HaCl (51)") {}
+    Hacl51() : Curve25519Benchmark("HaCl\\n(Radix 51)") {}
     virtual void bench_func()
       { Hacl_Curve25519_51_ecdh(shared_secret, our_secret, their_public); }
     virtual ~Hacl51() {}
 };
 
+// extern "C" {
+// extern void curve25519_evercrypt64(uint8_t *shared, uint8_t *my_priv, uint8_t *their_pub);
+// }
+
 class Hacl64: public Curve25519Benchmark
 {
   public:
-    Hacl64() : Curve25519Benchmark("Hacl (64)") {}
+    Hacl64() : Curve25519Benchmark("HaCl\\n(Radix 64)") {}
     virtual void bench_func()
       { Hacl_Curve25519_64_ecdh(shared_secret, our_secret, their_public); }
+      // { curve25519_evercrypt64(shared_secret, our_secret, their_public); }
     virtual ~Hacl64() {}
 };
 #endif
 
 #ifdef HAVE_OPENSSL
+#include <openssl/evp.h>
+#include <openssl/ec.h>
+
+extern "C" {
+extern int X25519(uint8_t out_shared_key[32], const uint8_t private_key[32], const uint8_t peer_public_value[32]);
+}
+
 class OpenSSL: public Curve25519Benchmark
+{
+  public:
+    OpenSSL() : Curve25519Benchmark("OpenSSL") {}
+    virtual void bench_func()
+    {
+      #ifdef _DEBUG
+      if (
+      #endif
+        X25519(shared_secret, our_secret, their_public)
+      #ifdef _DEBUG
+        <= 0)
+        throw std::logic_error("OpenSSL X25519 failed")
+      #endif
+      ;
+    }
+    virtual ~OpenSSL() {}
+};
+
+class OpenSSLEVP: public Curve25519Benchmark
 {
   protected:
     size_t skeylen;
@@ -104,7 +125,7 @@ class OpenSSL: public Curve25519Benchmark
     EVP_PKEY *ours = NULL, *theirs = NULL;
 
   public:
-    OpenSSL() : Curve25519Benchmark("OpenSSL") {}
+    OpenSSLEVP() : Curve25519Benchmark("OpenSSL\\n(EVP)") {}
 
     virtual void bench_setup(const BenchmarkSettings & s)
     {
@@ -149,8 +170,116 @@ class OpenSSL: public Curve25519Benchmark
 
       Curve25519Benchmark::bench_cleanup(s);
     }
-    virtual ~OpenSSL() {}
+    virtual ~OpenSSLEVP() {}
 };
+#endif
+
+
+#ifdef HAVE_FIAT_CURVE25519
+#include "fiat-curve25519.h"
+
+class Fiat: public Curve25519Benchmark
+{
+  public:
+    Fiat() : Curve25519Benchmark("Fiat\\n(sp2019latest)") {}
+    virtual void bench_func()
+      { crypto_scalarmult(shared_secret, our_secret, their_public); }
+};
+#endif
+
+#ifdef HAVE_LIBCURVE25519
+#include <libcurve25519.h>
+
+#define STRINGIFY(x) #x
+#define TOSTRING(x) STRINGIFY(x)
+
+#define DEFINE(name)                                              \
+  class name : public Curve25519Benchmark                         \
+  {                                                               \
+  public:                                                         \
+    name() : Curve25519Benchmark(TOSTRING(name)) {}               \
+    virtual void bench_func()                                     \
+    {                                                             \
+      curve25519_##name(shared_secret, our_secret, their_public); \
+    }                                                             \
+  };
+
+DEFINE(donna64)
+DEFINE(evercrypt64)
+DEFINE(hacl51)
+DEFINE(fiat64)
+DEFINE(precomp_bmi2)
+DEFINE(precomp_adx)
+DEFINE(openssl)
+#if !defined(__MINGW32__) && !defined(__MINGW64__)
+DEFINE(amd64)
+#endif
+#endif
+
+#ifdef HAVE_BCRYPT
+// Via https://github.com/project-everest/hacl-star/blob/master/test/openssl-engine/BCryptEngine.c
+#include <windows.h>
+#include <bcrypt.h>
+
+#ifndef NT_SUCCESS
+#define NT_SUCCESS(Status) (((NTSTATUS)(Status)) >= 0)
+#endif
+
+#define BCRYPT_ECDH_ALGORITHM   L"ECDH"
+#define BCRYPT_ECC_CURVE_NAME   L"ECCCurveName"
+#define BCRYPT_ECC_CURVE_25519  L"curve25519"
+
+class BCrypt: public Curve25519Benchmark
+{
+  BCRYPT_ALG_HANDLE hAlg = NULL;
+  BCRYPT_KEY_HANDLE our_key, their_key;
+  BCRYPT_SECRET_HANDLE shared_secret;
+
+  #define X25519_BITS   255
+  #define X25519_KEYLEN 32
+
+  public:
+    BCrypt() : Curve25519Benchmark("BCrypt")
+    {
+      if (!NT_SUCCESS(BCryptOpenAlgorithmProvider(&hAlg, BCRYPT_ECDH_ALGORITHM, NULL, 0)))
+        throw std::logic_error("BCryptOpenAlgorithmProvider failed");
+      if (!NT_SUCCESS(BCryptSetProperty(hAlg, BCRYPT_ECC_CURVE_NAME, (PUCHAR) BCRYPT_ECC_CURVE_25519, sizeof(BCRYPT_ECC_CURVE_25519), 0)))
+        throw std::logic_error("BCryptSetProperty failed");
+    }
+    virtual void bench_setup(const BenchmarkSettings & s)
+    {
+      if (!NT_SUCCESS(BCryptGenerateKeyPair(hAlg, &our_key, X25519_BITS, 0)) ||
+          !NT_SUCCESS(BCryptFinalizeKeyPair(our_key, 0)))
+        throw std::logic_error("BCryptFinalizeKeyPair failed");
+      if (!NT_SUCCESS(BCryptGenerateKeyPair(hAlg, &their_key, X25519_BITS, 0)) ||
+          !NT_SUCCESS(BCryptFinalizeKeyPair(their_key, 0)))
+        throw std::logic_error("BCryptFinalizeKeyPair failed");
+    }
+    virtual void bench_func()
+    {
+      #ifdef _DEBUG
+      if (!NT_SUCCESS(
+      #endif
+      BCryptSecretAgreement(our_key, their_key, &shared_secret, 0)
+      #ifdef _DEBUG
+        )) throw std::logic_error("BCryptSecretAgreement failed")
+      #endif
+      ;
+    }
+    virtual void bench_cleanup(const BenchmarkSettings & s)
+    {
+      if (!NT_SUCCESS(BCryptDestroySecret(shared_secret)))
+        throw std::logic_error("BCryptDestroySecret failed");
+      if (!NT_SUCCESS(BCryptDestroyKey(our_key)) ||
+          !NT_SUCCESS(BCryptDestroyKey(their_key)))
+        throw std::logic_error("BCryptDestroyKey failed");
+    }
+    virtual ~BCrypt()
+    {
+      BCryptCloseAlgorithmProvider(&hAlg, 0);
+    }
+};
+
 #endif
 
 void bench_curve25519(const BenchmarkSettings & s)
@@ -167,7 +296,26 @@ void bench_curve25519(const BenchmarkSettings & s)
     new Hacl64(),
     #endif
     #ifdef HAVE_OPENSSL
-    new OpenSSL()
+    new OpenSSL(),
+    new OpenSSLEVP(),
+    #endif
+    #ifdef HAVE_FIAT_CURVE25519
+    new Fiat(),
+    #endif
+    #ifdef HAVE_LIBCURVE25519
+    new donna64(),
+    new evercrypt64(),
+    new hacl51(),
+    new fiat64(),
+    new precomp_bmi2(),
+    new precomp_adx(),
+    new openssl(),
+    #if !defined(__MINGW32__) && !defined(__MINGW64__)
+    new amd64(),
+    #endif
+    #endif
+    #ifdef HAVE_BCRYPT
+    new BCrypt(),
     #endif
     };
 
@@ -176,28 +324,33 @@ void bench_curve25519(const BenchmarkSettings & s)
 
   Benchmark::run_batch(s, Curve25519Benchmark::column_headers(), data_filename, todo);
 
-  Benchmark::plot_spec_t plot_spec_cycles =
-    { std::make_pair(data_filename, "using 'Avg':xticlabels(strcol('Algorithm')) with boxes title columnheader"),
-      std::make_pair("", "using 0:'Avg':xticlabels(strcol('Algorithm')):(sprintf(\"%0.0f\", column('Avg'))) with labels font \"Courier,8\" offset char 0,.5") };
+  std::stringstream extras;
+  extras << "set style histogram clustered gap 1 title\n";
+  extras << "set style data histograms\n";
+  extras << "set bmargin 5\n";
+  extras << "set xtics font 'Times,10pt' rotate\n";
+
+  Benchmark::PlotSpec ps = Benchmark::histogram_line(data_filename, "", "Avg", "strcol('Algorithm')", 0, true);
+  Benchmark::add_label_offsets(ps, 1.0);
 
   Benchmark::make_plot(s,
                        "svg",
                        "Curve25519 performance",
                        "",
                        "Avg. performance [CPU cycles/derivation]",
-                       plot_spec_cycles,
+                       ps,
                        "bench_curve25519_cycles.svg",
-                       "");
+                       extras.str());
 
-  Benchmark::plot_spec_t plot_spec_candlesticks =
-    { std::make_pair(data_filename, "using 0:'Q25':'Min':'Max':'Q75':xticlabels(strcol('Algorithm')) with candlesticks whiskerbars .25") };
+  extras << "set boxwidth 0.25\n";
+  extras << "set style fill empty\n";
 
   Benchmark::make_plot(s,
                        "svg",
                        "Curve25519 performance",
                        "",
                        "Avg. performance [CPU cycles/derivation]",
-                       plot_spec_candlesticks,
+                       Benchmark::candlestick_line(data_filename, "", "strcol('Algorithm')"),
                        "bench_curve25519_candlesticks.svg",
-                       "set boxwidth 0.25\nset xrange[-.5:" + num_benchmarks.str() + "-.5]\nset style fill empty\n");
+                       extras.str());
 }

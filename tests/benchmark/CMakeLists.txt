@@ -9,14 +9,27 @@ option(USE_VALE "Use Vale." ON)
 option(USE_BCRYPT "Use BCrypt." OFF)
 option(USE_OPENSSL "Use OpenSSL." ON)
 option(USE_RFC7748 "Use the RFC 7748 reference implementation" ON)
+option(USE_FIAT_CURVE25519 "Use the Fiat Curve25519 implementation" ON)
+option(USE_LIBCURVE25519 "Use the library Curve25519 implementations" ON)
 
 option(ASAN "Enable clang address sanitizer" OFF)
+
+add_compile_options(-march=native -mtune=native)
+if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+  add_compile_options(-fbracket-depth=512)
+else()
+  add_compile_options(-flto)
+  if(CMAKE_SYSTEM_NAME STREQUAL "CYGWIN")
+    add_compile_options(-ffat-lto-objects)
+  endif()
+endif()
 
 add_subdirectory(libevercrypt)
 
 add_library(benchmark STATIC benchmark.cpp)
 target_include_directories(benchmark PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(benchmark PRIVATE evercrypt)
+target_compile_options(benchmark PRIVATE -march=native -mtune=native)
 
 add_executable(runbenchmark
   runbenchmark.cpp
@@ -27,6 +40,7 @@ add_executable(runbenchmark
   bench_merkle.cpp)
 target_include_directories(runbenchmark PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(runbenchmark PRIVATE benchmark evercrypt)
+target_compile_options(runbenchmark PRIVATE -march=native -mtune=native)
 
 if("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
   target_compile_definitions(benchmark PRIVATE _DEBUG)
@@ -62,9 +76,11 @@ if(USE_OPENSSL)
   target_compile_definitions(runbenchmark PRIVATE HAVE_OPENSSL)
   target_link_libraries(runbenchmark PRIVATE ${OPENSSL_LIB})
   target_include_directories(runbenchmark PRIVATE ${OPENSSL_INC})
-  if(NOT ${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
+  if("${CMAKE_SYSTEM_NAME}" STREQUAL "CYGWIN")
+    target_link_libraries(runbenchmark PRIVATE Ws2_32)
+  else()
     target_link_libraries(runbenchmark PRIVATE dl pthread)
-  endif(NOT ${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
+  endif()
 endif(USE_OPENSSL)
 
 if(USE_RFC7748)
@@ -73,6 +89,18 @@ if(USE_RFC7748)
   target_link_libraries(runbenchmark PRIVATE rfc7748)
   target_include_directories(runbenchmark PRIVATE ${RFC7748_DIR})
 endif(USE_RFC7748)
+
+if(USE_LIBCURVE25519)
+  add_subdirectory(libcurve25519)
+  target_compile_definitions(runbenchmark PRIVATE HAVE_LIBCURVE25519)
+  target_link_libraries(runbenchmark PRIVATE libcurve25519)
+endif()
+
+if(USE_FIAT_CURVE25519)
+  add_subdirectory(libfiat-curve25519)
+  target_compile_definitions(runbenchmark PRIVATE HAVE_FIAT_CURVE25519)
+  target_link_libraries(runbenchmark PRIVATE fiat-curve25519)
+endif()
 
 if(ASAN)
   target_compile_options(benchmark PRIVATE -g -fsanitize=undefined,address -fno-omit-frame-pointer -fno-sanitize-recover=all -fno-sanitize=function)

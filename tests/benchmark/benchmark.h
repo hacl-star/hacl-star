@@ -20,7 +20,7 @@ class BenchmarkSettings
 {
   public:
     unsigned int seed = 0;
-    size_t samples = 10000;
+    size_t warmup_samples = 100, samples = 10000;
     std::list<std::string> families_to_run;
 };
 
@@ -54,8 +54,7 @@ class Benchmark
     void set_name(const std::string & name);
     std::string get_name() const { return name; }
 
-    static std::string column_headers() { return ",\"CPUincl\",\"CPUexcl\",\"Min\",\"Q25\",\"Avg\",\"Med\",\"Q75\",\"Max\""; }
-
+    static std::string column_headers() { return ",\"CPUincl\",\"CPUexcl\",\"Min\",\"Q25\",\"Avg\",\"Med\",\"Q75\",\"Max\",\"StdDev\""; }
 
     // Global tools, just in here for the namespace
 
@@ -90,16 +89,41 @@ class Benchmark
                           const std::string & data_filename,
                           std::list<Benchmark*> & benchmarks);
 
-    typedef std::vector<std::pair<std::string, std::string> > plot_spec_t;
+
+    class PlotSpec : public std::vector<std::pair<std::string, std::string> >
+    {
+      public:
+        PlotSpec() {}
+        PlotSpec(std::initializer_list<std::pair<std::string, std::string> > other)
+          { this->insert(this->end(), other.begin(), other.end()); }
+        ~PlotSpec() {}
+
+        PlotSpec & operator+=(const PlotSpec & other) { this->insert(this->end(), other.begin(), other.end()); return *this; }
+    };
+
+    static PlotSpec histogram_line(const std::string & data_filename,
+                                   const std::string & title,
+                                   const std::string & column,
+                                   const std::string & xlabels,
+                                   unsigned label_digits,
+                                   bool label_rotate = false);
+
+    static void add_label_offsets(PlotSpec & ps, double label_offset_y = 0.5);
+
+    static PlotSpec candlestick_line(const std::string & data_filename,
+                                     const std::string & title,
+                                     const std::string & xlabels);
 
     static void make_plot(const BenchmarkSettings & s,
                           const std::string & terminal,
                           const std::string & title,
                           const std::string & xtitle,
                           const std::string & ytitle,
-                          const plot_spec_t & plot_specs,
+                          const PlotSpec & plot_specs,
                           const std::string & plot_filename,
                           const std::string & plot_extras,
+                          const std::vector<std::string> & sub_histo_titles = {},
+                          size_t num_in_sub_histo = 0,
                           bool add_key = false);
 };
 

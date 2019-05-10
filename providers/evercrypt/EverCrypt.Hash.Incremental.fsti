@@ -27,7 +27,7 @@ type state a =
 
 let footprint #a (s: state a) h =
   let State hash_state buf_ _ = s in
-  B.(loc_union (loc_buffer buf_) (Hash.footprint hash_state h))
+  B.(loc_union (loc_addr_of_buffer buf_) (Hash.footprint hash_state h))
 
 let freeable #a (s: state a) h =
   let State hash_state buf _ = s in
@@ -171,3 +171,19 @@ let finish_st (a: Hash.alg) =
 (** @type: true
 *)
 val finish: a:Hash.alg -> finish_st a
+
+(** @type: true
+*)
+val free: 
+  a:Hash.alg ->
+  s:state a -> 
+  ST unit
+  (requires fun h0 ->
+    let State hash_state buf_ _ = s in
+    freeable s h0 /\
+    B.live h0 buf_ /\
+    B.(loc_disjoint (loc_buffer buf_) (Hash.footprint hash_state h0)) /\
+    Hash.invariant hash_state h0)
+  (ensures fun h0 _ h1 ->
+    B.modifies (footprint s h0) h0 h1)
+

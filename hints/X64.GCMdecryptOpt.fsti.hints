@@ -1,5 +1,5 @@
 [
-  "T@U‚Q\tx(øv\bè\f‰ºΩ",
+  "å3øÈ‰äÏ˚K|\u001b1˝€†Ò",
   [
     [
       "X64.GCMdecryptOpt.aes_reqs",
@@ -8,7 +8,7 @@
       0,
       [ "@query" ],
       0,
-      "cd2b84d7db17562f3071efc9833ca304"
+      "538c8bb3f046c066415bbc2642491ee4"
     ],
     [
       "X64.GCMdecryptOpt.va_req_gcm_blocks_decrypt_stdcall",
@@ -36,7 +36,7 @@
         "typing_tok_X64.Machine_s.Rsp@tok", "unit_typing"
       ],
       0,
-      "f53d18a0118d0205b6498ffd4a99f48b"
+      "4e6eae68b6d09a01bd036519eaf63a48"
     ],
     [
       "X64.GCMdecryptOpt.va_ens_gcm_blocks_decrypt_stdcall",
@@ -90,7 +90,7 @@
         "typing_tok_Interop.Types.TUInt128@tok", "unit_typing"
       ],
       0,
-      "2151dfc371dba8fbdbb0e9cf6f0182f6"
+      "71f6670bbb5ef69803282278ba09121f"
     ],
     [
       "X64.GCMdecryptOpt.va_lemma_gcm_blocks_decrypt_stdcall",
@@ -122,15 +122,16 @@
         "lemma_Types_s.le_seq_quad32_to_bytes_length",
         "lemma_X64.Memory.buffer_length_buffer_as_seq",
         "primitive_Prims.op_Addition", "primitive_Prims.op_LessThanOrEqual",
+        "primitive_Prims.op_Subtraction",
         "proj_equation_X64.Vale.State.Mkstate_mem",
         "proj_equation_X64.Vale.State.Mkstate_memTaint",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_1ae9b8bf8a57a6112eebd8ad958a8948",
         "refinement_interpretation_Tm_refine_5514fbe9e08dfda40f950a7b9f1b2b98",
         "refinement_interpretation_Tm_refine_694a36c83b435e2b3361cd7ee9d608fa",
         "refinement_interpretation_Tm_refine_aebc5aa9049e78f605051015a3436e68",
         "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "refinement_interpretation_Tm_refine_ed0ad3082c84930fccb9dbd2128740e5",
         "refinement_interpretation_Tm_refine_fbd1322eaad6b0eab99798f0e8856c8e",
         "typing_AES_s.key_to_round_keys_LE", "typing_FStar.Seq.Base.append",
         "typing_Types_s.le_seq_quad32_to_bytes",
@@ -139,7 +140,7 @@
         "typing_tok_Interop.Types.TUInt128@tok"
       ],
       0,
-      "cf42c49f2d890ef0c05a2a6d407ff0ad"
+      "ab37925f2aae33cb66c2a22b908600bc"
     ],
     [
       "X64.GCMdecryptOpt.va_wp_gcm_blocks_decrypt_stdcall",
@@ -181,7 +182,6 @@
         "equation_X64.Vale.Decls.va_upd_mem",
         "equation_X64.Vale.Decls.va_upd_reg",
         "equation_X64.Vale.Decls.va_upd_stack",
-        "equation_X64.Vale.Decls.va_upd_stackTaint",
         "equation_X64.Vale.Decls.va_upd_xmm",
         "equation_X64.Vale.Decls.validSrcAddrs128",
         "equation_X64.Vale.State.update_reg",
@@ -191,6 +191,8 @@
         "function_token_typing_Words_s.nat32",
         "function_token_typing_Words_s.nat64",
         "function_token_typing_Words_s.nat8", "int_inversion", "int_typing",
+        "interpretation_Tm_abs_388460a8c29fc4f77163ff98a3b66e32",
+        "interpretation_Tm_abs_efed28e5237cc814be518263d6481a87",
         "kinding_Words_s.four@tok", "lemma_FStar.Seq.Base.lemma_len_append",
         "lemma_FStar.Seq.Base.lemma_len_slice",
         "lemma_Types_s.le_seq_quad32_to_bytes_length",
@@ -204,6 +206,7 @@
         "projection_inverse_BoxInt_proj_0",
         "projection_inverse_X64.Vale.State.Mkstate_mem",
         "projection_inverse_X64.Vale.State.Mkstate_ok",
+        "refinement_interpretation_Tm_refine_4c6411da037541583c16876f5cc7dfe4",
         "refinement_interpretation_Tm_refine_5514fbe9e08dfda40f950a7b9f1b2b98",
         "refinement_interpretation_Tm_refine_694a36c83b435e2b3361cd7ee9d608fa",
         "refinement_interpretation_Tm_refine_aebc5aa9049e78f605051015a3436e68",
@@ -233,16 +236,18 @@
         "typing_Tm_abs_f2d9151f2409cc45b06dacac5fbcd989",
         "typing_Tm_abs_ffb610db4a28cad4a0445059179d0638",
         "typing_Types_s.le_seq_quad32_to_bytes",
-        "typing_X64.Memory.buffer_as_seq", "typing_X64.Vale.Decls.va_if",
+        "typing_X64.Memory.buffer_as_seq", "typing_X64.Stack_i.init_rsp",
+        "typing_X64.Vale.Decls.va_if",
         "typing_X64.Vale.State.__proj__Mkstate__item__mem",
         "typing_X64.Vale.State.__proj__Mkstate__item__ok",
+        "typing_X64.Vale.State.__proj__Mkstate__item__stack",
         "typing_X64.Vale.State.update_reg",
         "typing_tok_Interop.Types.TUInt128@tok",
         "typing_tok_X64.Machine_s.Rax@tok",
         "typing_tok_X64.Machine_s.Rbx@tok", "unit_typing"
       ],
       0,
-      "2c9e00e89777f5b20030342b34183601"
+      "174537b4b6f9c3c698095baa217a9fca"
     ],
     [
       "X64.GCMdecryptOpt.va_wpProof_gcm_blocks_decrypt_stdcall",
@@ -254,7 +259,7 @@
         "refinement_interpretation_Tm_refine_8d65e998a07dd53ec478e27017d9dba5"
       ],
       0,
-      "98b99597db26cf40931a4843bdbc5647"
+      "157d55a14395ed4aaf283b03184d7936"
     ]
   ]
 ]

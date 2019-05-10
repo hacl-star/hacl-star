@@ -1,5 +1,5 @@
 [
-  "S)’È\u0016~!ø-^\u0010‚ì|ï\u001d",
+  "÷]g÷\u001aé\n¨Þ«P\rð\r\u001bN",
   [
     [
       "X64.Stack_i.lemma_store_stack_same_valid64",
@@ -70,7 +70,7 @@
         "typing_X64.Stack_i.valid_src_stack64"
       ],
       0,
-      "d2e3585b1a7b1a2c779b376be19b10b9"
+      "e28d87c60560aa6be043d3a94e18da07"
     ],
     [
       "X64.Stack_i.lemma_free_stack_same_valid64",
@@ -103,7 +103,7 @@
         "typing_X64.Stack_i.valid_src_stack64"
       ],
       0,
-      "98322ce493731db8b90a62625787b2d4"
+      "a553c42c31bca2c9d11a4fb29ff1411c"
     ],
     [
       "X64.Stack_i.lemma_store_new_valid64",
@@ -169,7 +169,7 @@
         "typing_X64.Bytes_Semantics_s.update_heap64"
       ],
       0,
-      "61f205038face5a43e0ba5918957c289"
+      "606e61ca841957355445959bbd227cab"
     ],
     [
       "X64.Stack_i.lemma_correct_store_load_stack64",
@@ -184,7 +184,7 @@
         "projection_inverse_X64.Bytes_Semantics_s.Vale_stack_mem"
       ],
       0,
-      "e6dda6f54d48c0c8b42122613535d7c8"
+      "36527c2ef898374479b8afe311f95ab4"
     ],
     [
       "X64.Stack_i.lemma_frame_store_load_stack64",
@@ -204,7 +204,7 @@
         "token_correspondence_X64.Bytes_Semantics_s.get_heap_val64_def"
       ],
       0,
-      "0c7d1e554d5c3323c41a11b1fb9dd743"
+      "e1e37a9a0ae988d3449a41dd69861edf"
     ],
     [
       "X64.Stack_i.lemma_free_stack_same_load64",
@@ -243,7 +243,7 @@
         "typing_X64.Stack_i.valid_src_stack64"
       ],
       0,
-      "17125ed05ddeeb3a0c7e5b0052b4ba65"
+      "2a0b91b5342f9365d7431c3a2ee01b09"
     ],
     [
       "X64.Stack_i.lemma_compose_free_stack64",
@@ -274,7 +274,7 @@
         "typing_FStar.Map.restrict", "typing_Vale.Set.remove_between"
       ],
       0,
-      "f049c3604fafbc21e599c2bea71adb43"
+      "1fda8dcbde5f1fb464547ca5640108bb"
     ],
     [
       "X64.Stack_i.lemma_same_init_rsp_free_stack64",
@@ -283,7 +283,7 @@
       0,
       [ "@query" ],
       0,
-      "5602cd29577f2467b2906db12a5103c1"
+      "b8f6ff1bb03c0397caa2bbb0a55ece04"
     ],
     [
       "X64.Stack_i.lemma_same_init_rsp_free_stack64",
@@ -301,7 +301,7 @@
         "projection_inverse_X64.Bytes_Semantics_s.Vale_stack_initial_rsp"
       ],
       0,
-      "79144583311293d24650bb989fca1b22"
+      "ffdc581e1e3df2201ca6abe564754fd3"
     ],
     [
       "X64.Stack_i.lemma_same_init_rsp_store_stack64",
@@ -310,7 +310,7 @@
       0,
       [ "@query" ],
       0,
-      "f07843e557c00d97bac6551bf591feeb"
+      "a5d082eafb05852ffefe0756c83b4847"
     ],
     [
       "X64.Stack_i.lemma_same_init_rsp_store_stack64",
@@ -325,91 +325,7 @@
         "projection_inverse_X64.Bytes_Semantics_s.Vale_stack_initial_rsp"
       ],
       0,
-      "986a1234a3ac99a25d763cc28527711b"
-    ],
-    [
-      "X64.Stack_i.lemma_valid_taint_stack64",
-      1,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query", "b2t_def",
-        "equation_X64.Stack_i.valid_taint_stack64", "int_inversion",
-        "primitive_Prims.op_AmpAmp", "primitive_Prims.op_Equality",
-        "projection_inverse_BoxBool_proj_0"
-      ],
-      0,
-      "bdc638af8e51616055a1174969bef1d2"
-    ],
-    [
-      "X64.Stack_i.lemma_valid_taint_stack64_reveal",
-      1,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "X64.Machine_s_pretyping_e51d9612683cb053e6b8236fad2673ca",
-        "b2t_def", "equality_tok_X64.Machine_s.Public@tok",
-        "equation_X64.Stack_i.valid_taint_stack64", "int_typing",
-        "primitive_Prims.op_AmpAmp", "primitive_Prims.op_Equality",
-        "projection_inverse_BoxBool_proj_0",
-        "projection_inverse_BoxInt_proj_0",
-        "typing_tok_X64.Machine_s.Public@tok"
-      ],
-      0,
-      "9385ec1eb1c16842e3be281f0e348317"
-    ],
-    [
-      "X64.Stack_i.lemma_correct_store_load_taint_stack64",
-      1,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "Prims_pretyping_ae567c2fb75be05905677af440075565",
-        "X64.Machine_s_pretyping_e51d9612683cb053e6b8236fad2673ca",
-        "b2t_def", "equality_tok_X64.Machine_s.Public@tok",
-        "equation_Prims.nat", "equation_X64.Machine_s.memTaint_t",
-        "equation_X64.Memory.memtaint",
-        "equation_X64.Stack_i.store_taint_stack64",
-        "equation_X64.Stack_i.valid_taint_stack64",
-        "function_token_typing_Prims.__cache_version_number__",
-        "int_inversion", "int_typing", "primitive_Prims.op_AmpAmp",
-        "primitive_Prims.op_Equality", "projection_inverse_BoxBool_proj_0",
-        "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_55c0b335f5121f8337daf6aff9df4280",
-        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
-        "typing_X64.Taint_Semantics_s.update_n",
-        "typing_tok_X64.Machine_s.Public@tok"
-      ],
-      0,
-      "befbed4b5b0c2309b10e3e31175dca36"
-    ],
-    [
-      "X64.Stack_i.lemma_frame_store_load_taint_stack64",
-      1,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "Prims_pretyping_ae567c2fb75be05905677af440075565",
-        "X64.Machine_s_pretyping_e51d9612683cb053e6b8236fad2673ca",
-        "b2t_def", "bool_inversion", "bool_typing",
-        "equality_tok_X64.Machine_s.Public@tok", "equation_Prims.nat",
-        "equation_X64.Machine_s.memTaint_t", "equation_X64.Memory.memtaint",
-        "equation_X64.Stack_i.store_taint_stack64",
-        "equation_X64.Stack_i.valid_taint_stack64",
-        "function_token_typing_Prims.__cache_version_number__",
-        "int_inversion", "int_typing", "primitive_Prims.op_AmpAmp",
-        "primitive_Prims.op_Equality", "projection_inverse_BoxBool_proj_0",
-        "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_55c0b335f5121f8337daf6aff9df4280",
-        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
-        "typing_X64.Taint_Semantics_s.update_n",
-        "typing_tok_X64.Machine_s.Public@tok"
-      ],
-      0,
-      "82285b71b54e2c0de60c6ec69b7d1949"
+      "68b4e41a6cd0e5a184233ec813c2d230"
     ]
   ]
 ]

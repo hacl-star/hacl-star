@@ -250,7 +250,7 @@ let poly_update_multi_lemma #w text acc0 r =
 //   (poly #w text acc0 r == poly_update1 text acc0 r)
 //
 
-#push-options "--z3rlimit 200"
+#push-options "--z3rlimit 300"
 val poly_eq_lemma1:
     #w:lanes
   -> text:bytes
