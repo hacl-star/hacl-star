@@ -309,7 +309,7 @@ let lemma_update_heap64_domain (ptr:int) (v:nat64) (mem:S.heap) : Lemma
   Opaque_s.reveal_opaque S.update_heap64_def;
   assert (Set.equal (Map.domain (S.update_heap64 ptr v mem)) (Map.domain mem))
 
-#reset-options "--z3rlimit 500"
+#reset-options "--z3rlimit 1000"
 let rec lemma_instr_set_taints_secret
     (outs:list instr_out) (args:list instr_operand)
     (vs1 vs2:instr_ret_t outs) (oprs:instr_operands_t outs args) (ts_orig ts:taintState) (t_ins t_out:taint)
@@ -554,14 +554,14 @@ let check_if_push_consumes_fixed_time (ins:tainted_ins) (ts:taintState) : Pure (
   let BC.Push src = ins.i in
   let t_ins = ins.t in
   let t_out = operand_taint src ts t_ins in
-  Public? (ts.regTaint Rsp) && operand_does_not_use_secrets src ts && (t_out = Public || t_ins = Secret), ts
+  Public? (ts.regTaint rRsp) && operand_does_not_use_secrets src ts && (t_out = Public || t_ins = Secret), ts
 
 let check_if_pop_consumes_fixed_time (ins:tainted_ins) (ts:taintState) : Pure (bool & taintState)
   (requires BC.Pop? ins.i)
   (ensures ins_consumes_fixed_time ins ts)
   = 
   let BC.Pop dst = ins.i in
-  Public? (ts.regTaint Rsp) && operand_does_not_use_secrets dst ts, set_taint dst ts ins.t
+  Public? (ts.regTaint rRsp) && operand_does_not_use_secrets dst ts, set_taint dst ts ins.t
 
 let check_if_ins_consumes_fixed_time ins ts =
   match ins.i with
@@ -687,8 +687,8 @@ let lemma_push_leakage_free (ts:taintState) (ins:tainted_ins) : Lemma
       let S.Vale_stack _ stack2 = s2.state.S.stack in
       let S.Vale_stack _ stack1' = s1'.state.S.stack in
       let S.Vale_stack _ stack2' = s2'.state.S.stack in
-      let ptr1 = S.eval_reg Rsp s1.state - 8 in
-      let ptr2 = S.eval_reg Rsp s2.state - 8 in
+      let ptr1 = S.eval_reg rRsp s1.state - 8 in
+      let ptr2 = S.eval_reg rRsp s2.state - 8 in
       let v1 = S.eval_operand src s1.state in
       let v2 = S.eval_operand src s2.state in
       assert (ptr1 == ptr2);
@@ -725,7 +725,7 @@ let lemma_pop_leakage_free (ts:taintState) (ins:tainted_ins) : Lemma
       let t_ins = ins.t in
       let s1' = Some?.v (taint_eval_code code fuel s1) in
       let s2' = Some?.v (taint_eval_code code fuel s2) in
-      let stack_op = OStack (MReg Rsp 0) in
+      let stack_op = OStack (MReg rRsp 0) in
       let v1 = S.eval_operand stack_op s1.state in
       let v2 = S.eval_operand stack_op s2.state in
       if ins.t = Secret then (

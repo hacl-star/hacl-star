@@ -223,22 +223,22 @@ let registerAsExpected (r:reg) (tsAnalysis:taintState) (tsExpected:taintState) =
   (tsExpected.regTaint r = Public && tsAnalysis.regTaint r = Public) || (tsExpected.regTaint r = Secret)
 
 let publicRegisterValuesAreAsExpected (tsAnalysis:taintState) (tsExpected:taintState) =
-  registerAsExpected Rax tsAnalysis tsExpected &&
-  registerAsExpected Rbx tsAnalysis tsExpected &&
-  registerAsExpected Rcx tsAnalysis tsExpected &&
-  registerAsExpected Rdx tsAnalysis tsExpected &&
-  registerAsExpected Rsi tsAnalysis tsExpected &&
-  registerAsExpected Rdi tsAnalysis tsExpected &&
-  registerAsExpected Rbp tsAnalysis tsExpected &&
-  registerAsExpected Rsp tsAnalysis tsExpected &&
-  registerAsExpected R8 tsAnalysis tsExpected &&
-  registerAsExpected R9 tsAnalysis tsExpected &&
-  registerAsExpected R10 tsAnalysis tsExpected &&
-  registerAsExpected R11 tsAnalysis tsExpected &&
-  registerAsExpected R12 tsAnalysis tsExpected &&
-  registerAsExpected R13 tsAnalysis tsExpected &&
-  registerAsExpected R14 tsAnalysis tsExpected &&
-  registerAsExpected R15 tsAnalysis tsExpected
+  registerAsExpected rRax tsAnalysis tsExpected &&
+  registerAsExpected rRbx tsAnalysis tsExpected &&
+  registerAsExpected rRcx tsAnalysis tsExpected &&
+  registerAsExpected rRdx tsAnalysis tsExpected &&
+  registerAsExpected rRsi tsAnalysis tsExpected &&
+  registerAsExpected rRdi tsAnalysis tsExpected &&
+  registerAsExpected rRbp tsAnalysis tsExpected &&
+  registerAsExpected rRsp tsAnalysis tsExpected &&
+  registerAsExpected rR8 tsAnalysis tsExpected &&
+  registerAsExpected rR9 tsAnalysis tsExpected &&
+  registerAsExpected rR10 tsAnalysis tsExpected &&
+  registerAsExpected rR11 tsAnalysis tsExpected &&
+  registerAsExpected rR12 tsAnalysis tsExpected &&
+  registerAsExpected rR13 tsAnalysis tsExpected &&
+  registerAsExpected rR14 tsAnalysis tsExpected &&
+  registerAsExpected rR15 tsAnalysis tsExpected
 
 let publicTaintsAreAsExpected (tsAnalysis:taintState) (tsExpected:taintState) =
     publicFlagValuesAreAsExpected tsAnalysis tsExpected

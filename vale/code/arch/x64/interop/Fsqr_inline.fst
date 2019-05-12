@@ -69,7 +69,7 @@ let fsqr_post : VSig.vale_post fsqr_dom =
 
 let fsqr_regs_modified: MS.reg -> bool = fun (r:MS.reg) ->
   let open MS in
-  if r = Rax || r = Rbx || r = Rcx || r = Rdx || r = Rdi || r = Rsi || r = R8 || r = R9 || r = R10 || r = R11 || r = R12 || r = R13 || r = R14 || r = R15 then true
+  if r = rRax || r = rRbx || r = rRcx || r = rRdx || r = rRdi || r = rRsi || r = rR8 || r = rR9 || r = rR10 || r = rR11 || r = rR12 || r = rR13 || r = rR14 || r = rR15 then true
   else false
 
 let fsqr_xmms_modified = fun _ -> false
@@ -112,15 +112,15 @@ let fsqr_lemma = as_t #(VSig.vale_sig fsqr_regs_modified fsqr_xmms_modified fsqr
 let code_fsqr = FW.va_code_fsqr ()
 
 let of_reg (r:MS.reg) : option (IX64.reg_nat 3) = match r with
-  | MS.Rdi -> Some 0
-  | MS.Rsi -> Some 1
-  | MS.Rdx -> Some 2
+  | 5 -> Some 0 // rdi
+  | 4 -> Some 1 // rsi
+  | 3 -> Some 2 // rdx
   | _ -> None
 
-let of_arg (i:IX64.reg_nat 3) = match i with
-  | 0 -> MS.Rdi
-  | 1 -> MS.Rsi
-  | 2 -> MS.Rdx
+let of_arg (i:IX64.reg_nat 3) : MS.reg = match i with
+  | 0 -> MS.rRdi
+  | 1 -> MS.rRsi
+  | 2 -> MS.rRdx
 
 let arg_reg : IX64.arg_reg_relation 3 = IX64.Rel of_reg of_arg
 

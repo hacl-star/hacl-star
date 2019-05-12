@@ -45,7 +45,7 @@ let vale_calling_conventions
   (xmms_modified:MS.xmm -> bool) =
   let open MS in
   s1.VS.ok /\
-  vale_save_reg MS.Rsp s0 s1 /\
+  vale_save_reg MS.rRsp s0 s1 /\
   (forall (r:MS.reg).
     not (regs_modified r) ==> vale_save_reg r s0 s1) /\
   (forall (x:MS.xmm).

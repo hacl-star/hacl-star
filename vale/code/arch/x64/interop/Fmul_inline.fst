@@ -71,7 +71,7 @@ let fmul_post : VSig.vale_post fmul_dom =
 
 let fmul_regs_modified: MS.reg -> bool = fun (r:MS.reg) ->
   let open MS in
-  if r = Rax || r = Rcx || r = Rdx || r = Rdi || r = Rsi || r = R8 || r = R9 || r = R10 || r = R11 || r = R12 || r = R13 || r = R14 || r = R15 then true
+  if r = rRax || r = rRcx || r = rRdx || r = rRdi || r = rRsi || r = rR8 || r = rR9 || r = rR10 || r = rR11 || r = rR12 || r = rR13 || r = rR14 || r = rR15 then true
   else false
 
 let fmul_xmms_modified = fun _ -> false
@@ -118,17 +118,17 @@ let fmul_lemma = as_t #(VSig.vale_sig fmul_regs_modified fmul_xmms_modified fmul
 let code_fmul = FW.va_code_fmul ()
 
 let fmul_of_reg (r:MS.reg) : option (IX64.reg_nat 4) = match r with
-  | MS.Rdi -> Some 0
-  | MS.Rsi -> Some 1
-  | MS.Rdx -> Some 2
-  | MS.Rcx -> Some 3
+  | 5 -> Some 0 // rdi
+  | 4 -> Some 1 // rsi
+  | 3 -> Some 2 // rdx
+  | 2 -> Some 3 // rcx
   | _ -> None
 
-let fmul_of_arg (i:IX64.reg_nat 4) = match i with
-  | 0 -> MS.Rdi
-  | 1 -> MS.Rsi
-  | 2 -> MS.Rdx
-  | 3 -> MS.Rcx
+let fmul_of_arg (i:IX64.reg_nat 4) : MS.reg = match i with
+  | 0 -> MS.rRdi
+  | 1 -> MS.rRsi
+  | 2 -> MS.rRdx
+  | 3 -> MS.rRcx
 
 let fmul_arg_reg : IX64.arg_reg_relation 4 = IX64.Rel fmul_of_reg fmul_of_arg
 
@@ -333,7 +333,7 @@ let fmul1_post : VSig.vale_post fmul1_dom =
 
 let fmul1_regs_modified: MS.reg -> bool = fun (r:MS.reg) ->
   let open MS in
-  if r = Rax || r = Rcx || r = Rdx || r = R8 || r = R9 || r = R10 || r = R11 || r = R12 || r = R13 then true
+  if r = rRax || r = rRcx || r = rRdx || r = rR8 || r = rR9 || r = rR10 || r = rR11 || r = rR12 || r = rR13 then true
   else false
 
 let fmul1_xmms_modified = fun _ -> false
@@ -371,15 +371,15 @@ let fmul1_lemma = as_t #(VSig.vale_sig fmul1_regs_modified fmul1_xmms_modified f
 let code_fmul1 = FH.va_code_fmul1 ()
 
 let of_reg (r:MS.reg) : option (IX64.reg_nat 3) = match r with
-  | MS.Rdi -> Some 0
-  | MS.Rsi -> Some 1
-  | MS.Rdx -> Some 2
+  | 5 -> Some 0 // rdi
+  | 4 -> Some 1 // rsi
+  | 3 -> Some 2 // rdx
   | _ -> None
 
 let of_arg (i:IX64.reg_nat 3) = match i with
-  | 0 -> MS.Rdi
-  | 1 -> MS.Rsi
-  | 2 -> MS.Rdx
+  | 0 -> MS.rRdi
+  | 1 -> MS.rRsi
+  | 2 -> MS.rRdx
 
 let arg_reg : IX64.arg_reg_relation 3 = IX64.Rel of_reg of_arg
 

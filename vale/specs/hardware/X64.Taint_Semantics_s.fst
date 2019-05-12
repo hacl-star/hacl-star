@@ -215,7 +215,7 @@ let taint_match_ins (ins:ins) (t:taint) (memTaint:memTaint_t) (stackTaint:memTai
   match ins with
   | BC.Instr (InstrTypeRecord #outs #args _) oprs _ -> taint_match_inouts outs args oprs t memTaint stackTaint s
   | BC.Push src -> taint_match src t memTaint stackTaint s
-  | BC.Pop _ -> taint_match (OStack (MReg Rsp 0)) t memTaint stackTaint s
+  | BC.Pop _ -> taint_match (OStack (MReg rRsp 0)) t memTaint stackTaint s
   | BC.Alloc _ | BC.Dealloc _ -> true
 
 [@instr_attr]
@@ -283,7 +283,7 @@ let update_taint_ins (ins:ins) (t:taint) (memTaint:memTaint_t) (stackTaint:memTa
   match ins with
   | BC.Instr (InstrTypeRecord #outs #args _) oprs _ -> update_taint_outputs outs args oprs t memTaint stackTaint s
   | BC.Alloc _ | BC.Dealloc _ -> memTaint, stackTaint
-  | BC.Push _ -> update_taint memTaint stackTaint (OStack (MReg Rsp (-8))) t s
+  | BC.Push _ -> update_taint memTaint stackTaint (OStack (MReg rRsp (-8))) t s
   | BC.Pop dst -> update_taint memTaint stackTaint dst t s
 
 [@instr_attr]

@@ -279,13 +279,13 @@ val taint_at (memTaint:M.memtaint) (addr:int) : taint
 
 (* Predicates *)
 [@va_qattr] unfold let va_is_src_opr64 (o:va_operand) (s:va_state) = valid_operand o s
-[@va_qattr] let va_is_dst_opr64 (o:va_operand) (s:va_state) = match (t_op_to_op o) with OReg Rsp -> false | OReg _ -> true | _ -> false
+[@va_qattr] let va_is_dst_opr64 (o:va_operand) (s:va_state) = match (t_op_to_op o) with OReg r -> not (r = rRsp ) | _ -> false
 [@va_qattr] unfold let va_is_dst_dst_opr64 (o:va_dst_operand) (s:va_state) = va_is_dst_opr64 o s
 [@va_qattr] unfold let va_is_src_reg (r:reg) (s:va_state) = True
 [@va_qattr] unfold let va_is_dst_reg (r:reg) (s:va_state) = True
 [@va_qattr] unfold let va_is_src_shift_amt64 (o:va_operand) (s:va_state) = valid_operand o s /\ (va_eval_shift_amt64 s o) < 64
 [@va_qattr] unfold let va_is_src_reg_opr64 (o:va_operand) (s:va_state) = OReg? (t_op_to_op o)
-[@va_qattr] unfold let va_is_dst_reg_opr64 (o:va_operand) (s:va_state) = OReg? (t_op_to_op o) /\ not (Rsp? (OReg?.r (t_op_to_op o)))
+[@va_qattr] unfold let va_is_dst_reg_opr64 (o:va_operand) (s:va_state) = OReg? (t_op_to_op o) /\ not (rRsp = (OReg?.r (t_op_to_op o)))
 [@va_qattr] unfold let va_is_src_xmm (x:xmm) (s:va_state) = True
 [@va_qattr] unfold let va_is_dst_xmm (x:xmm) (s:va_state) = True
 [@va_qattr] unfold let va_is_src_opr128 (o:va_operand128) (s:va_state) = valid_operand128 o s

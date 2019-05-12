@@ -94,7 +94,7 @@ let print_modified_registers
   (regs_mod:reg -> bool) 
   (args:list td) =
   // This register was already specified as output
-  let output_register a = Some? ret_val && a = Rax in
+  let output_register a = Some? ret_val && a = rRax in
   let rec input_register (i:nat) (a:reg) : Tot bool (decreases (n-i)) = 
     if i >= n then false
     else
@@ -108,7 +108,7 @@ let print_modified_registers
     if not (regs_mod a) || input_register 0 a || output_register a then aux q
     // Register not modified or already specified in inputs, we add it
     else "\"%" ^ P.print_reg_name a ^ "\", " ^ aux q
-  in aux [Rax; Rbx; Rcx; Rdx; Rsi; Rdi; Rbp; Rsp; R8; R9; R10; R11; R12; R13; R14; R15]
+  in aux [rRax; rRbx; rRcx; rRdx; rRsi; rRdi; rRbp; rRsp; rR8; rR9; rR10; rR11; rR12; rR13; rR14; rR15]
 
 (* This is a copy from X64.Print_s, and should remain in sync. The difference is that
    each line should be in quotes, and end by a semicolon in inline assembly *)

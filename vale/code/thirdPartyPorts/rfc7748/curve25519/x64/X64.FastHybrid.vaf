@@ -379,7 +379,7 @@ procedure carry_times_38(inout tmp:dst_opr64)
     reads efl;
     requires 
         carry == 0;
-        @tmp != TReg(Rax);
+        @tmp != TReg(rRax);
     ensures 
         carry == bool_bit(cf(efl)) * 38;
         tmp == 38;
@@ -598,7 +598,7 @@ procedure carry_wide_stdcall(inline win:bool, ghost dst_b:buffer64, ghost inA_b:
 }
 */
 
-#reset-options "--z3rlimit 600"
+#reset-options "--z3rlimit 600 --z3seed 2"
 procedure carry_sub_pass()
     {:quick}
     lets

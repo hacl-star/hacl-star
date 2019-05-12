@@ -263,27 +263,27 @@ let valid_ocmp (c:ocmp) (s:state) :bool =
 unfold
 let valid_dst_stack64 (rsp:nat64) (ptr:int) (st:stack) : bool =
   let Vale_stack init_rsp mem = st in
-    // We are allowed to store anywhere between Rsp and the initial stack pointer
+    // We are allowed to store anywhere between rRsp and the initial stack pointer
   ptr >= rsp && ptr + 8 <= init_rsp
 
 unfold
 let valid_dst_stack128 (rsp:nat64) (ptr:int) (st:stack) : bool =
   let Vale_stack init_rsp mem = st in
-    // We are allowed to store anywhere between Rsp and the initial stack pointer
+    // We are allowed to store anywhere between rRsp and the initial stack pointer
     ptr >= rsp && ptr + 16 <= init_rsp
 
 let valid_dst_operand (o:operand) (s:state) : bool =
   match o with
   | OConst n -> false
-  | OReg r -> not (Rsp? r)
+  | OReg r -> not (rRsp = r)
   | OMem m -> valid_addr64 (eval_maddr m s) s.mem
-  | OStack m -> valid_dst_stack64 (eval_reg Rsp s) (eval_maddr m s) s.stack
+  | OStack m -> valid_dst_stack64 (eval_reg rRsp s) (eval_maddr m s) s.stack
 
 let valid_dst_mov128_op (o:mov128_op) (s:state) : bool =
   match o with
   | Mov128Xmm i -> true (* We leave it to the printer/assembler to object to invalid XMM indices *)
   | Mov128Mem m -> valid_addr128 (eval_maddr m s) s.mem
-  | Mov128Stack m -> valid_dst_stack128 (eval_reg Rsp s) (eval_maddr m s) s.stack
+  | Mov128Stack m -> valid_dst_stack128 (eval_reg rRsp s) (eval_maddr m s) s.stack
 
 let update_operand_preserve_flags'' (o:operand) (v:nat64) (s_orig s:state) : state =
   match o with
@@ -312,7 +312,7 @@ let update_rsp' (new_rsp:int) (s:state) : state =
   let Vale_stack init_rsp mem = s.stack in
   // Only modify the stack pointer if the new value is valid, that is in the current stack frame, and in the same page
   if new_rsp >= init_rsp - 4096 && new_rsp <= init_rsp then
-    update_reg' Rsp new_rsp s
+    update_reg' rRsp new_rsp s
   else
     s
 
@@ -619,20 +619,20 @@ let eval_ins (ins:ins) : st unit =
     // Evaluate value on initial state
     let new_src = eval_operand src s in
     // Compute the new stack pointer
-    let new_rsp = eval_reg Rsp s - 8 in
+    let new_rsp = eval_reg rRsp s - 8 in
     // Actually modify the stack pointer
     update_rsp new_rsp;;
     // Store the element at the new stack pointer
     update_operand_preserve_flags (OStack (MConst new_rsp)) new_src
 
   | BC.Pop dst ->
-    let stack_op = OStack (MReg Rsp 0) in
+    let stack_op = OStack (MReg rRsp 0) in
     // Ensure that we can read at the initial stack pointer
     check (valid_src_operand stack_op);;
     // Get the element currently on top of the stack
     let new_dst = eval_operand stack_op s in
     // Compute the new stack pointer
-    let new_rsp = (eval_reg Rsp s + 8) % pow2_64 in
+    let new_rsp = (eval_reg rRsp s + 8) % pow2_64 in
     // Store it in the dst operand
     update_operand_preserve_flags dst new_dst;;
     // Free the memory that is popped
@@ -642,10 +642,10 @@ let eval_ins (ins:ins) : st unit =
 
   | BC.Alloc n ->
     // We already check in update_rsp that the new stack pointer is valid
-    update_rsp (eval_reg Rsp s - n)
+    update_rsp (eval_reg rRsp s - n)
   
   | BC.Dealloc n ->
-    let old_rsp = eval_reg Rsp s in
+    let old_rsp = eval_reg rRsp s in
     let new_rsp = old_rsp + n in
     update_rsp new_rsp;;
     // The deallocated stack memory should now be considered invalid

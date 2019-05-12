@@ -22,7 +22,7 @@ let calling_conventions
   let s0 = s0.TS.state in
   let s1 = s1.TS.state in
   s1.BS.ok /\
-  s0.BS.regs MS.Rsp == s1.BS.regs MS.Rsp /\
+  s0.BS.regs MS.rRsp == s1.BS.regs MS.rRsp /\
   (forall (r:MS.reg). {:pattern (s0.BS.regs r)}
     not (regs_modified r) ==> s0.BS.regs r == s1.BS.regs r) /\
   (forall (x:MS.xmm). {:pattern (s0.BS.xmms x)} 
@@ -47,8 +47,8 @@ type arg_reg_relation' (n:nat) =
          of_arg:(reg_nat n -> MS.reg){
            // This function should be injective
            injective of_arg /\ 
-           // Rsp is not a valid register to store paramters
-           (forall (i:reg_nat n). of_arg i <> MS.Rsp) /\
+           // rRsp is not a valid register to store paramters
+           (forall (i:reg_nat n). of_arg i <> MS.rRsp) /\
            // of_reg should always return Some when the register corresponds to an of_arg 
            (forall (i:reg_nat n).
               Some? (of_reg (of_arg i)) /\ Some?.v (of_reg (of_arg i)) = i)} ->
@@ -100,7 +100,7 @@ let rec register_of_args (max_arity:nat)
                          (arg_reg:arg_reg_relation max_arity)
                          (n:nat)
                          (args:arg_list{List.Tot.length args = n})
-                         (regs:registers) : GTot (regs':registers{regs MS.Rsp == regs' MS.Rsp}) =
+                         (regs:registers) : GTot (regs':registers{regs MS.rRsp == regs' MS.rRsp}) =
     match args with
     | [] -> regs
     | hd::tl ->
@@ -217,7 +217,7 @@ let create_initial_trusted_state
     let regs = register_of_args max_arity arg_reg (List.Tot.length args) args IA.init_regs in
     let regs = FunctionalExtensionality.on reg regs in
     let xmms = FunctionalExtensionality.on xmm IA.init_xmms in
-    let init_rsp = regs Rsp in
+    let init_rsp = regs rRsp in
     // Create an initial empty stack
     let stack = Map.const_on Set.empty 0 in
     // Spill additional arguments on the stack
@@ -244,9 +244,9 @@ let prediction_pre_rel_t (c:TS.tainted_code) (args:arg_list) =
     h0:mem_roots args ->
     prop
 
-let return_val_t (sn:TS.traceState) = r:UInt64.t{UInt64.v r == BS.eval_reg MS.Rax sn.TS.state}
+let return_val_t (sn:TS.traceState) = r:UInt64.t{UInt64.v r == BS.eval_reg MS.rRax sn.TS.state}
 let return_val (sn:TS.traceState) : return_val_t sn =
-  UInt64.uint_to_t (BS.eval_reg MS.Rax sn.TS.state)
+  UInt64.uint_to_t (BS.eval_reg MS.rRax sn.TS.state)
 
 let prediction_post_rel_t (c:TS.tainted_code) (args:arg_list) =
     h0:mem_roots args ->
@@ -626,18 +626,18 @@ let register_of_arg_i (i:reg_nat (if IA.win then 4 else 6)) : MS.reg =
   let open MS in
   if IA.win then
     match i with
-    | 0 -> Rcx
-    | 1 -> Rdx
-    | 2 -> R8
-    | 3 -> R9
+    | 0 -> rRcx
+    | 1 -> rRdx
+    | 2 -> rR8
+    | 3 -> rR9
   else
     match i with
-    | 0 -> Rdi
-    | 1 -> Rsi
-    | 2 -> Rdx
-    | 3 -> Rcx
-    | 4 -> R8
-    | 5 -> R9
+    | 0 -> rRdi
+    | 1 -> rRsi
+    | 2 -> rRdx
+    | 3 -> rRcx
+    | 4 -> rR8
+    | 5 -> rR9
 
 //A partial inverse of the above function
 [@__reduce__]
@@ -646,19 +646,19 @@ let arg_of_register (r:MS.reg)
   = let open MS in
     if IA.win then
        match r with
-       | Rcx -> Some 0
-       | Rdx -> Some 1
-       | R8 -> Some 2
-       | R9 -> Some 3
+       | 2 -> Some 0 // rcx
+       | 3 -> Some 1 // rdx
+       | 8 -> Some 2 // r8
+       | 9 -> Some 3 // r9
        | _ -> None
     else
        match r with
-       | Rdi -> Some 0
-       | Rsi -> Some 1
-       | Rdx -> Some 2
-       | Rcx -> Some 3
-       | R8 -> Some 4
-       | R9 -> Some 5
+       | 5 -> Some 0 // rdi
+       | 4 -> Some 1 // rsi
+       | 3 -> Some 2 // rdx
+       | 2 -> Some 3 // rcx
+       | 8 -> Some 4 // r8
+       | 9 -> Some 5 // r9
        | _ -> None
 
 let max_stdcall : nat = if IA.win then 4 else 6
@@ -671,12 +671,12 @@ let regs_modified_stdcall:MS.reg -> bool = fun (r:MS.reg) ->
   let open MS in
   if IA.win then (
     // These registers are callee-saved on Windows
-    if r = Rbx || r = Rbp || r = Rdi || r = Rsi || r = Rsp || r = R12 || r = R13 || r = R14 || r = R15 then false
+    if r = rRbx || r = rRbp || r = rRdi || r = rRsi || r = rRsp || r = rR12 || r = rR13 || r = rR14 || r = rR15 then false
     // All the other ones may be modified
     else true
   ) else (
     // These registers are callee-saved on Linux
-    if r = Rbx || r = Rbp || r = R12 || r = R13 || r = R14 || r = R15 then false
+    if r = rRbx || r = rRbp || r = rR12 || r = rR13 || r = rR14 || r = rR15 then false
     // All the other ones may be modified
     else true
   )

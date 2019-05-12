@@ -346,7 +346,7 @@ let rec regs_match (regs:list reg) (r0:Regs.t) (r1:Regs.t) : Type0 =
 [@va_qattr]
 let all_regs_match (r0:Regs.t) (r1:Regs.t) : Type0
   =
-  let regs = [Rax; Rbx; Rcx; Rdx; Rsi; Rdi; Rbp; Rsp; R8; R9; R10; R11; R12; R13; R14; R15] in
+  let regs = [0; 1; 2; 3; 4; 5; 6; 7; 8; 9; 10; 11; 12; 13; 14; 15] in
   regs_match regs r0 r1
 
 [@va_qattr]
