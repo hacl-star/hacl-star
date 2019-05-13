@@ -75,7 +75,6 @@ let gcm_blocks_helper_enc (alg:algorithm) (key:seq nat32)
                    (p_num_bytes:nat)
                    (iv_BE:quad32) : Lemma
   (requires // Required by gcm_blocks
-           (length p128x6 + length p128 + 1) * 16 < pow2_32 /\
            length p128x6 * 16 + length p128 * 16 <= p_num_bytes /\
            p_num_bytes < length p128x6 * 16 + length p128 * 16 + 16 /\
            length p128x6 == length c128x6 /\
@@ -201,7 +200,6 @@ let gcm_blocks_helper (alg:algorithm) (key:seq nat32)
                    (p_num_bytes a_num_bytes:nat)
                    (iv_BE h enc_hash length_quad:quad32) : Lemma
   (requires // Required by gcm_blocks
-           (length p128x6 + length p128 + 1) * 16 < pow2_32 /\
            length p128x6 * 16 + length p128 * 16 <= p_num_bytes /\
            p_num_bytes < length p128x6 * 16 + length p128 * 16 + 16 /\
            length a128 * 16 <= a_num_bytes /\
@@ -598,7 +596,6 @@ let gcm_blocks_helper_dec_simplified (alg:algorithm) (key:seq nat32)
                    (p_num_bytes:nat)
                    (iv_BE:quad32) : Lemma
   (requires // Required by gcm_blocks
-           (length p128x6 + length p128 + 1) * 16 < pow2_32 /\
            length p128x6 * 16 + length p128 * 16 <= p_num_bytes /\
            p_num_bytes < length p128x6 * 16 + length p128 * 16 + 16 /\
            length p128x6 == length c128x6 /\
@@ -692,7 +689,6 @@ let gcm_blocks_dec_helper (alg:algorithm) (key:seq nat32)
                    (p_num_bytes a_num_bytes:nat)
                    (iv_BE h enc_hash length_quad:quad32) : Lemma
   (requires // Required by gcm_blocks
-           (length p128x6 + length p128 + 1) * 16 < pow2_32 /\
            length p128x6 * 16 + length p128 * 16 <= p_num_bytes /\
            p_num_bytes < length p128x6 * 16 + length p128 * 16 + 16 /\
            length a128 * 16 <= a_num_bytes /\
@@ -942,7 +938,6 @@ let gcm_blocks_dec_helper_simplified (alg:algorithm) (key:seq nat32)
                    (p_num_bytes a_num_bytes:nat)
                    (iv_BE h enc_hash length_quad:quad32) : Lemma
   (requires // Required by gcm_blocks
-           (length p128x6 + length p128 + 1) * 16 < pow2_32 /\
            length p128x6 * 16 + length p128 * 16 <= p_num_bytes /\
            p_num_bytes < length p128x6 * 16 + length p128 * 16 + 16 /\
            length a128 * 16 <= a_num_bytes /\

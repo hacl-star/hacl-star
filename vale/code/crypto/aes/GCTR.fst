@@ -165,7 +165,7 @@ let gctr_partial_opaque_completed (alg:algorithm) (plain cipher:seq quad32) (key
   (requires
     is_aes_key_LE alg key /\
     length plain == length cipher /\
-    length plain * 16 < pow2_32 /\
+    length plain < pow2_32 /\
     gctr_partial_opaque alg (length cipher) plain cipher key icb
   )
   (ensures cipher == gctr_encrypt_recursive icb plain alg key 0)
