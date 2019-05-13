@@ -569,7 +569,10 @@ procedure gcm_make_length_quad()
     ZeroXmm(xmm2);
     Mov64(rax, auth_num_bytes);
     IMul64(rax, 8);
-    Pinsrd(xmm2, rax, 2);
+    Pinsrq(xmm2, rax, 1);
+    Mov64(rax, plain_num_bytes);
+    IMul64(rax, 8);
+    Pinsrq(xmm2, rax, 0);
     // assert xmm2 == Mkfour(#nat32(8 * plain_num_bytes), 0, #nat32(8 * auth_num_bytes), 0);     // Passes when lets above are removed
 
     Pshufb(xmm2, xmm8);

@@ -48,8 +48,6 @@ let gcm_encrypt_LE_fst_helper (iv_enc iv_BE:quad32) (plain auth cipher:seq nat8)
 let gcm_encrypt_LE_snd_helper (iv_BE length_quad32 hash mac:quad32) (plain auth cipher:seq nat8) (alg:algorithm) (key:seq nat32) : Lemma
   (requires
     is_aes_key_LE alg key /\
-    0 <= 8 * length plain /\ 8 * length plain < pow2_32 /\ // REVIEW
-    0 <= 8 * length auth /\ 8 * length auth < pow2_32 /\   // REVIEW
     length plain < pow2_32 /\
     length auth < pow2_32 /\
     cipher == fst (gcm_encrypt_LE alg (seq_nat32_to_seq_nat8_LE key) (be_quad32_to_bytes iv_BE) plain auth) /\
@@ -88,7 +86,7 @@ let gcm_blocks_helper_enc (alg:algorithm) (key:seq nat32)
            is_aes_key_LE alg key /\
 
            // Ensured by gcm_blocks
-           8 * p_num_bytes < pow2_32 /\ 
+           p_num_bytes < pow2_32 /\ 
           (let ctr_BE_2:quad32 = Mkfour 2 iv_BE.lo1 iv_BE.hi2 iv_BE.hi3 in
            let plain:seq quad32 = 
              if p_num_bytes > (length p128x6 + length p128) * 16 then
@@ -219,7 +217,7 @@ let gcm_blocks_helper (alg:algorithm) (key:seq nat32)
            h = aes_encrypt_LE alg key (Mkfour 0 0 0 0) /\
 
            // Ensured by gcm_blocks
-           8 * p_num_bytes < pow2_32 /\ 8 * a_num_bytes < pow2_32 /\
+           p_num_bytes < pow2_32 /\ a_num_bytes < pow2_32 /\
            length_quad == reverse_bytes_quad32
              (insert_nat64_opaque (insert_nat64_opaque (Mkfour 0 0 0 0) (8 * a_num_bytes) 1) (8 * p_num_bytes) 0) /\
           (let ctr_BE_1:quad32 = Mkfour 1 iv_BE.lo1 iv_BE.hi2 iv_BE.hi3 in
@@ -499,7 +497,7 @@ let gcm_blocks_helper_simplified (alg:algorithm) (key:seq nat32)
            h = aes_encrypt_LE alg key (Mkfour 0 0 0 0) /\
 
            // Ensured by gcm_blocks
-           8 * p_num_bytes < pow2_32 /\ 8 * a_num_bytes < pow2_32 /\
+           p_num_bytes < pow2_32 /\ a_num_bytes < pow2_32 /\
            length_quad == reverse_bytes_quad32 
              (insert_nat64_opaque (insert_nat64_opaque (Mkfour 0 0 0 0) (8 * a_num_bytes) 1) (8 * p_num_bytes) 0) /\
           (let ctr_BE_1:quad32 = Mkfour 1 iv_BE.lo1 iv_BE.hi2 iv_BE.hi3 in
@@ -611,7 +609,7 @@ let gcm_blocks_helper_dec_simplified (alg:algorithm) (key:seq nat32)
            is_aes_key_LE alg key /\
 
            // Ensured by gcm_blocks
-           8 * p_num_bytes < pow2_32 /\ 
+           p_num_bytes < pow2_32 /\ 
           (let ctr_BE_2:quad32 = Mkfour 2 iv_BE.lo1 iv_BE.hi2 iv_BE.hi3 in
            let plain:seq quad32 = 
              if p_num_bytes > (length p128x6 + length p128) * 16 then
@@ -710,7 +708,7 @@ let gcm_blocks_dec_helper (alg:algorithm) (key:seq nat32)
            h = aes_encrypt_LE alg key (Mkfour 0 0 0 0) /\
 
            // Ensured by gcm_blocks
-           8 * p_num_bytes < pow2_32 /\ 8 * a_num_bytes < pow2_32 /\
+           p_num_bytes < pow2_32 /\ a_num_bytes < pow2_32 /\
            length_quad == reverse_bytes_quad32
              (insert_nat64_opaque (insert_nat64_opaque (Mkfour 0 0 0 0) (8 * a_num_bytes) 1) (8 * p_num_bytes) 0) /\
           (let ctr_BE_1:quad32 = Mkfour 1 iv_BE.lo1 iv_BE.hi2 iv_BE.hi3 in
@@ -960,7 +958,7 @@ let gcm_blocks_dec_helper_simplified (alg:algorithm) (key:seq nat32)
            h = aes_encrypt_LE alg key (Mkfour 0 0 0 0) /\
 
            // Ensured by gcm_blocks
-           8 * p_num_bytes < pow2_32 /\ 8 * a_num_bytes < pow2_32 /\
+           p_num_bytes < pow2_32 /\ a_num_bytes < pow2_32 /\
            length_quad == reverse_bytes_quad32
              (insert_nat64_opaque (insert_nat64_opaque (Mkfour 0 0 0 0) (8 * a_num_bytes) 1) (8 * p_num_bytes) 0) /\
           (let ctr_BE_1:quad32 = Mkfour 1 iv_BE.lo1 iv_BE.hi2 iv_BE.hi3 in

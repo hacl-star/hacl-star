@@ -1014,8 +1014,7 @@ procedure gcm_blocks_wrapped(
 
     // Hashing results
     let h:quad32 := reverse_bytes_quad32(buffer128_read(hkeys_b, 2, mem));
-    let length_quad:quad32 := reverse_bytes_quad32(Mkfour(#nat32(8 * old(plain_num_bytes)), 0, 
-                                                   #nat32(8 * old(auth_num_bytes)), 0));
+    let length_quad:quad32 := reverse_bytes_quad32(insert_nat64_opaque(insert_nat64_opaque(Mkfour(0, 0, 0, 0), #nat64(8 * old(auth_num_bytes)), 1), #nat64(8 * old(plain_num_bytes)), 0));
 
     let raw_auth_quads:seq(quad32) := if (old(auth_num_bytes) > old(auth_len * 128/8)) then 
                             append(old(s128(mem, auth_b)), old(s128(mem, abytes_b)))
@@ -1050,8 +1049,7 @@ procedure gcm_blocks_wrapped(
                                  reverse_bytes_quad32(old(buffer128_read(iv_b, 0, mem))),
                                  reverse_bytes_quad32(buffer128_read(hkeys_b, 2, mem)),
                                  xmm1, 
-                                 reverse_bytes_quad32(Mkfour(#nat32(8 * old(plain_num_bytes)), 0, 
-                                                      #nat32(8 * old(auth_num_bytes)), 0)));
+                                 reverse_bytes_quad32(insert_nat64_opaque(insert_nat64_opaque(Mkfour(0, 0, 0, 0), #nat64(8 * old(auth_num_bytes)), 1), #nat64(8 * old(plain_num_bytes)), 0)));
 
 }
 
