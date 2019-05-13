@@ -33,7 +33,7 @@
         "typing_Lib.Sequence.length", "typing_tok_Lib.IntTypes.SEC@tok"
       ],
       0,
-      "2be7b06a4e1e98d871c46b944b6f4f63"
+      "c1c4e88bdf06c99812156d1fc51babbe"
     ],
     [
       "Poly1305.Equiv.lemma_poly1305_equiv_rec",
@@ -54,12 +54,12 @@
         "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_5a4fe33be2b93c781e552e491bb9dd31",
         "refinement_interpretation_Tm_refine_8d65e998a07dd53ec478e27017d9dba5",
-        "refinement_interpretation_Tm_refine_ad1910c801737ac219a10e11d90a8960",
         "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "refinement_interpretation_Tm_refine_f9fd21fdd2ba28fc0d20dbaf933925cb",
         "typing_Spec.Poly1305.size_key", "unit_typing"
       ],
       0,
-      "d329f037da66f1f7a14ee9bcafb63b17"
+      "8f8aaf7e2c3f15b9ccf7a2e7673f7033"
     ],
     [
       "Poly1305.Equiv.lemma_poly1305_equiv_rec",
@@ -115,7 +115,7 @@
         "well-founded-ordering-on-nat"
       ],
       0,
-      "5a0ee9b5a73281fed352ef27b9f88963"
+      "2f13a95e5ec79a084a742a82eb00a19f"
     ],
     [
       "Poly1305.Equiv.lemma_poly1305_equiv_last",
@@ -159,7 +159,7 @@
         "typing_Spec.Poly1305.prime"
       ],
       0,
-      "8aebca6cc0e9e2457c660b9572a79bce"
+      "3335f92512b279c48816965f1ada0a04"
     ],
     [
       "Poly1305.Equiv.lemma_poly1305_equiv_r",
@@ -219,7 +219,7 @@
         "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "489d4823ff97baf5aac427c08fd0cdec"
+      "fde293b746aa87ce89cdf9cfaa53eed2"
     ],
     [
       "Poly1305.Equiv.lemma_poly1305_equiv",
@@ -262,7 +262,7 @@
         "typing_Spec.Poly1305.size_key", "typing_tok_Lib.IntTypes.SEC@tok"
       ],
       0,
-      "f6526388af61910eda441a59cba5b1d2"
+      "ac3dd0548b51b9ab678d9ca77b588db6"
     ],
     [
       "Poly1305.Equiv.lemma_poly1305_equiv",
@@ -287,20 +287,21 @@
         "equation_Poly1305.Spec_s.poly1305_hash",
         "equation_Poly1305.Spec_s.poly1305_hash_all", "equation_Prims.nat",
         "equation_Prims.pos", "equation_Spec.Poly1305.felem",
-        "equation_Spec.Poly1305.finish", "equation_Spec.Poly1305.fmul",
-        "equation_Spec.Poly1305.from_felem", "equation_Spec.Poly1305.key",
-        "equation_Spec.Poly1305.poly", "equation_Spec.Poly1305.poly1305",
+        "equation_Spec.Poly1305.finish", "equation_Spec.Poly1305.from_felem",
+        "equation_Spec.Poly1305.key", "equation_Spec.Poly1305.poly",
+        "equation_Spec.Poly1305.poly1305",
         "equation_Spec.Poly1305.poly1305_init",
         "equation_Spec.Poly1305.poly_update1_rem",
         "equation_Spec.Poly1305.prime", "equation_Spec.Poly1305.size_block",
         "equation_Spec.Poly1305.size_key", "equation_Spec.Poly1305.to_felem",
-        "equation_Spec.Poly1305.update1", "equation_Spec.Poly1305.zero",
+        "equation_Spec.Poly1305.zero",
         "equation_with_fuel_Prims.pow2.fuel_instrumented",
         "function_token_typing_Lib.IntTypes.uint8",
         "function_token_typing_Poly1305.Equiv.block_fun",
         "function_token_typing_Prims.__cache_version_number__",
         "int_inversion", "int_typing",
         "lemma_FStar.Seq.Base.lemma_len_slice",
+        "lemma_FStar.Seq.Properties.slice_is_empty",
         "lemma_Lib.IntTypes.pow2_values", "primitive_Prims.op_Addition",
         "primitive_Prims.op_Equality", "primitive_Prims.op_LessThanOrEqual",
         "primitive_Prims.op_Modulus", "primitive_Prims.op_Multiply",
@@ -316,13 +317,15 @@
         "refinement_interpretation_Tm_refine_6b6f32ef09567ab14ca5cd162e7e88c9",
         "refinement_interpretation_Tm_refine_a12cfe3a1654ad9c9f5c6a8fa6dcbbf1",
         "refinement_interpretation_Tm_refine_aebc5aa9049e78f605051015a3436e68",
+        "refinement_interpretation_Tm_refine_b913a3f691ca99086652e0a655e72f17",
         "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
         "refinement_interpretation_Tm_refine_ca2558c2ed0f7d9995d3a0230fefb3bf",
+        "refinement_interpretation_Tm_refine_cd046bc4a887ee7e1b05946e0bf5772b",
         "refinement_interpretation_Tm_refine_d8d83307254a8900dd20598654272e42",
         "refinement_interpretation_Tm_refine_f048236b5f8051f83b495ea5eaa6127b",
-        "typing_Lib.Sequence.length", "typing_Lib.Sequence.slice",
-        "typing_Spec.Poly1305.prime", "typing_Spec.Poly1305.size_block",
-        "typing_Spec.Poly1305.size_key"
+        "typing_FStar.Seq.Base.empty", "typing_Lib.Sequence.length",
+        "typing_Lib.Sequence.slice", "typing_Spec.Poly1305.prime",
+        "typing_Spec.Poly1305.size_block", "typing_Spec.Poly1305.size_key"
       ],
       0,
       "41cc294c69ba6731354b465349f40bc2"

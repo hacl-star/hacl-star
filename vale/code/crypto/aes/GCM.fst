@@ -675,7 +675,7 @@ let gcm_decrypt_LE_tag (alg:algorithm) (key:seq nat8) (iv:seq16 nat8) (cipher:se
   let h_LE = aes_encrypt_LE alg key_LE (Mkfour 0 0 0 0) in
   let j0_BE = Mkfour 1 iv_BE.lo1 iv_BE.hi2 iv_BE.hi3 in
 
-  let lengths_BE = insert_nat64 (insert_nat64 (Mkfour 0 0 0 0) (8 * length auth) 1) (8 * length cipher) 0 in
+  let lengths_BE = insert_nat64_opaque (insert_nat64_opaque (Mkfour 0 0 0 0) (8 * length auth) 1) (8 * length cipher) 0 in
   let lengths_LE = reverse_bytes_quad32 lengths_BE in
 
   let zero_padded_c_LE = le_bytes_to_seq_quad32 (pad_to_128_bits cipher) in
@@ -1047,6 +1047,7 @@ let decrypt_helper
   (ensures  (rax = 0) == snd (gcm_decrypt_LE alg key iv cipher auth (le_quad32_to_bytes alleged_tag_quad)))
   =
   reveal_opaque (gcm_decrypt_LE_def alg key iv cipher auth (le_quad32_to_bytes alleged_tag_quad));
+  reveal_opaque insert_nat64;
   (*
   let b = snd (gcm_decrypt_LE alg key iv cipher auth (le_quad32_to_bytes alleged_tag_quad)) in
   let (_, ct) = gcm_decrypt_LE alg key iv cipher auth (le_quad32_to_bytes alleged_tag_quad) in
