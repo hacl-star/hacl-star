@@ -100,55 +100,55 @@ let same_mem_get_heap_val128 ptr mem1 mem2 =
 (* All the following lemmas prove that the domain of the bytes memory map remains invariant
 through execution *)
 
-let update_operand_flags_same_domains (dst:operand) (v:nat64) (s_orig s:state) : Lemma
+let update_operand_flags_same_domains (dst:operand) (v:nat64) (s_orig s:machine_state) : Lemma
   (let s1 = update_operand_preserve_flags'' dst v s_orig s in
-  Set.equal (Map.domain s.mem) (Map.domain s_orig.mem) ==>
-  Set.equal (Map.domain s.mem) (Map.domain s1.mem))
+  Set.equal (Map.domain s.ms_mem) (Map.domain s_orig.ms_mem) ==>
+  Set.equal (Map.domain s.ms_mem) (Map.domain s1.ms_mem))
   [SMTPat (update_operand_preserve_flags'' dst v s_orig s)]
   =
   match dst with
   | OMem _ -> reveal_opaque update_heap64_def
   | _ -> ()
 
-let update_operand_same_domains (dst:operand) (ins:ins) (v:nat64) (s:state) : Lemma
+let update_operand_same_domains (dst:operand) (ins:ins) (v:nat64) (s:machine_state) : Lemma
   (let s1 = update_operand' dst ins v s in
-  Set.equal (Map.domain s.mem) (Map.domain s1.mem))
+  Set.equal (Map.domain s.ms_mem) (Map.domain s1.ms_mem))
   [SMTPat (update_operand' dst ins v s)]
   =
   update_operand_flags_same_domains dst v s s
 
 #set-options "--z3rlimit 20"
-let update_operand128_flags_same_domains (o:mov128_op) (v:quad32) (s_orig s:state) : Lemma
+let update_operand128_flags_same_domains (o:mov128_op) (v:quad32) (s_orig s:machine_state) : Lemma
   (let s1 = update_mov128_op_preserve_flags'' o v s_orig s in
-  Set.equal (Map.domain s.mem) (Map.domain s_orig.mem) ==>
-  Set.equal (Map.domain s.mem) (Map.domain s1.mem))
+  Set.equal (Map.domain s.ms_mem) (Map.domain s_orig.ms_mem) ==>
+  Set.equal (Map.domain s.ms_mem) (Map.domain s1.ms_mem))
   [SMTPat (update_mov128_op_preserve_flags'' o v s_orig s)]
   =
   match o with
   | Mov128Mem m ->
       let ptr = eval_maddr m s_orig in
-      if not (valid_addr128 ptr s.mem) then ()
+      if not (valid_addr128 ptr s.ms_mem) then ()
       else
         // This line is unusued, but needed
         let s1 = update_mem128 ptr v s in
         reveal_opaque update_heap32_def;
-        let mem = update_heap32 ptr v.lo0 s.mem in
-        assert (Set.equal (Map.domain s.mem) (Map.domain mem));
+        let mem = update_heap32 ptr v.lo0 s.ms_mem in
+        assert (Set.equal (Map.domain s.ms_mem) (Map.domain mem));
         let mem = update_heap32 (ptr+4) v.lo1 mem in
-        assert (Set.equal (Map.domain s.mem) (Map.domain mem));
+        assert (Set.equal (Map.domain s.ms_mem) (Map.domain mem));
         let mem = update_heap32 (ptr+8) v.hi2 mem in
-        assert (Set.equal (Map.domain s.mem) (Map.domain mem));
+        assert (Set.equal (Map.domain s.ms_mem) (Map.domain mem));
         let mem = update_heap32 (ptr+12) v.hi3 mem in
-        assert (Set.equal (Map.domain s.mem) (Map.domain mem))
+        assert (Set.equal (Map.domain s.ms_mem) (Map.domain mem))
   | _ -> ()
 
 (* The following lemmas prove that the unspecified heap remains invariant through execution *)
 
 #push-options "--max_fuel 0 --max_ifuel 1 --initial_ifuel 1"
-let update_operand_flags_same_unspecified (dst:operand) (v:nat64) (s_orig s:state) : Lemma
+let update_operand_flags_same_unspecified (dst:operand) (v:nat64) (s_orig s:machine_state) : Lemma
   (let s1 = update_operand_preserve_flags'' dst v s_orig s in
-  Set.equal (Map.domain s.mem) (Map.domain s_orig.mem) ==>
-  (forall x.{:pattern (s.mem.[x])} not (Map.contains s1.mem x && Map.contains s.mem x) ==> s1.mem.[x] == s.mem.[x]))
+  Set.equal (Map.domain s.ms_mem) (Map.domain s_orig.ms_mem) ==>
+  (forall x.{:pattern (s.ms_mem.[x])} not (Map.contains s1.ms_mem x && Map.contains s.ms_mem x) ==> s1.ms_mem.[x] == s.ms_mem.[x]))
   [SMTPat (update_operand_preserve_flags'' dst v s_orig s)]
   =
   match dst with
@@ -156,9 +156,9 @@ let update_operand_flags_same_unspecified (dst:operand) (v:nat64) (s_orig s:stat
   | _ -> ()
 #pop-options
 
-let update_operand_same_unspecified (dst:operand) (ins:ins) (v:nat64) (s:state) : Lemma
+let update_operand_same_unspecified (dst:operand) (ins:ins) (v:nat64) (s:machine_state) : Lemma
   (let s1 = update_operand' dst ins v s in
-  forall x.{:pattern (s.mem.[x])} not (Map.contains s1.mem x && Map.contains s.mem x) ==> s1.mem.[x] == s.mem.[x])
+  forall x.{:pattern (s.ms_mem.[x])} not (Map.contains s1.ms_mem x && Map.contains s.ms_mem x) ==> s1.ms_mem.[x] == s.ms_mem.[x])
   [SMTPat (update_operand' dst ins v s)]
   =
   update_operand_flags_same_unspecified dst v s s
@@ -175,21 +175,21 @@ let update_heap32_same_unspecified (ptr:int) (v:nat32) (h:heap) : Lemma
   =
   reveal_opaque update_heap32_def
 
-let update_operand128_flags_same_unspecified (o:mov128_op) (v:quad32) (s_orig s:state) : Lemma
+let update_operand128_flags_same_unspecified (o:mov128_op) (v:quad32) (s_orig s:machine_state) : Lemma
   (let s1 = update_mov128_op_preserve_flags'' o v s_orig s in
-  Set.equal (Map.domain s.mem) (Map.domain s_orig.mem) ==>
-  (forall x.{:pattern (s.mem.[x])} not (Map.contains s1.mem x && Map.contains s.mem x) ==> s1.mem.[x] == s.mem.[x]))
+  Set.equal (Map.domain s.ms_mem) (Map.domain s_orig.ms_mem) ==>
+  (forall x.{:pattern (s.ms_mem.[x])} not (Map.contains s1.ms_mem x && Map.contains s.ms_mem x) ==> s1.ms_mem.[x] == s.ms_mem.[x]))
   [SMTPat (update_mov128_op_preserve_flags'' o v s_orig s)]
   =
   match o with
   | Mov128Mem m ->
       let ptr = eval_maddr m s_orig in
-      if not (valid_addr128 ptr s.mem) then ()
+      if not (valid_addr128 ptr s.ms_mem) then ()
       else
         // This line is unusued, but needed
         let s1 = update_mem128 ptr v s in
-        update_heap32_same_unspecified ptr v.lo0 s.mem;
-        let mem = update_heap32 ptr v.lo0 s.mem in
+        update_heap32_same_unspecified ptr v.lo0 s.ms_mem;
+        let mem = update_heap32 ptr v.lo0 s.ms_mem in
         update_heap32_same_unspecified (ptr+4) v.lo1 mem;
         let mem = update_heap32 (ptr+4) v.lo1 mem in
         update_heap32_same_unspecified (ptr+8) v.hi2 mem;  
@@ -201,13 +201,13 @@ let update_operand128_flags_same_unspecified (o:mov128_op) (v:quad32) (s_orig s:
 
 let rec instr_write_outputs_bs_domains
     (outs:list instr_out) (args:list instr_operand)
-    (vs:instr_ret_t outs) (oprs:instr_operands_t outs args) (s_orig s:state)
+    (vs:instr_ret_t outs) (oprs:instr_operands_t outs args) (s_orig s:machine_state)
   : Lemma
-    (requires Set.equal (Map.domain s_orig.mem) (Map.domain s.mem))
+    (requires Set.equal (Map.domain s_orig.ms_mem) (Map.domain s.ms_mem))
     (ensures (
       let s1 = instr_write_outputs outs args vs oprs s_orig s in
-      Set.equal (Map.domain s.mem) (Map.domain s1.mem) /\
-      (forall (x:int).{:pattern (s.mem.[x])} not (Map.contains s1.mem x) ==> s1.mem.[x] == s.mem.[x])
+      Set.equal (Map.domain s.ms_mem) (Map.domain s1.ms_mem) /\
+      (forall (x:int).{:pattern (s.ms_mem.[x])} not (Map.contains s1.ms_mem x) ==> s1.ms_mem.[x] == s.ms_mem.[x])
     ))
     [SMTPat (instr_write_outputs outs args vs oprs s_orig s)]
   =
@@ -232,26 +232,26 @@ let rec instr_write_outputs_bs_domains
 
 #set-options "--z3rlimit 30 --max_ifuel 1"
 
-let eval_ins_bs_domains (ins:ins) (s0:state) : Lemma
+let eval_ins_bs_domains (ins:ins) (s0:machine_state) : Lemma
   (let s1 = run (eval_ins ins) s0 in
-  Set.equal (Map.domain s0.mem) (Map.domain s1.mem))
+  Set.equal (Map.domain s0.ms_mem) (Map.domain s1.ms_mem))
   =
   let s1 = run (eval_ins ins) s0 in
   match ins with
-  | _ -> assert (Set.equal (Map.domain s0.mem) (Map.domain s1.mem))
+  | _ -> assert (Set.equal (Map.domain s0.ms_mem) (Map.domain s1.ms_mem))
 
 #set-options "--z3rlimit 30"
 
 let eval_ins_domains ins s0 =
   let t = ins.TS.t in
   let i = ins.TS.i in
-  let s = run (check (TS.taint_match_ins i t s0.TS.memTaint s0.TS.stackTaint)) s0.TS.state in  
+  let s = run (check (TS.taint_match_ins i t s0.ms_memTaint s0.ms_stackTaint)) s0 in  
   eval_ins_bs_domains i s
 
 #set-options "--z3rlimit 30 --max_ifuel 2"
-let eval_ins_bs_same_unspecified (ins:ins) (s0:state) : Lemma
+let eval_ins_bs_same_unspecified (ins:ins) (s0:machine_state) : Lemma
   (let s1 = run (eval_ins ins) s0 in
-   forall x. not (Map.contains s1.mem x) ==> s1.mem.[x] == s0.mem.[x])
+   forall x. not (Map.contains s1.ms_mem x) ==> s1.ms_mem.[x] == s0.ms_mem.[x])
   =
   ()
 #set-options "--z3rlimit 30 --max_ifuel 1"
@@ -259,5 +259,5 @@ let eval_ins_bs_same_unspecified (ins:ins) (s0:state) : Lemma
 let eval_ins_same_unspecified ins s0 =
   let t = ins.TS.t in
   let i = ins.TS.i in
-  let s = run (check (TS.taint_match_ins i t s0.TS.memTaint s0.TS.stackTaint)) s0.TS.state in  
+  let s = run (check (TS.taint_match_ins i t s0.ms_memTaint s0.ms_stackTaint)) s0 in  
   eval_ins_bs_same_unspecified i s

@@ -39,25 +39,31 @@ noeq
 type stack =
   | Vale_stack: 
     initial_rsp:nat64{initial_rsp >= 4096} ->  // Initial rsp pointer when entering the function
-    mem:Map.t int nat8 ->                       // Stack contents
+    stack_mem:Map.t int nat8 ->                // Stack contents
     stack
 
 type regs_t = F.restricted_t reg (fun _ -> nat64)
 type xmms_t = F.restricted_t xmm (fun _ -> quad32)
 
-noeq type state = {
-  ok: bool;
-  regs: regs_t;
-  xmms: xmms_t;
-  flags: nat64;
-  mem: heap;
-  stack:stack;
+noeq
+type machine_state = {
+  ms_ok: bool;
+  ms_regs: regs_t;
+  ms_xmms: xmms_t;
+  ms_flags: nat64;
+  ms_mem: heap;
+  ms_memTaint: memTaint_t;
+  ms_stack: stack;
+  ms_stackTaint: memTaint_t;
+  ms_trace: list observation;
 }
 
-assume val havoc (s:state) (i:ins) : nat64
+assume val havoc_any (#a:Type) (x:a) : nat64
+let havoc_state_ins (s:machine_state) (i:ins) : nat64 =
+  havoc_any (s.ms_regs, s.ms_xmms, s.ms_flags, s.ms_mem, s.ms_stack, ins)
 
-unfold let eval_reg (r:reg) (s:state) : nat64 = s.regs r
-unfold let eval_xmm (i:xmm) (s:state) : quad32 = s.xmms i
+unfold let eval_reg (r:reg) (s:machine_state) : nat64 = s.ms_regs r
+unfold let eval_xmm (i:xmm) (s:machine_state) : quad32 = s.ms_xmms i
 
 let get_heap_val64_def (ptr:int) (mem:heap) : nat64 =
   two_to_nat 32
@@ -84,8 +90,8 @@ let get_heap_val128_def (ptr:int) (mem:heap) : quad32 = Mkfour
   (get_heap_val32 (ptr+12) mem)
 let get_heap_val128 = make_opaque get_heap_val128_def
 
-unfold let eval_mem (ptr:int) (s:state) : nat64 = get_heap_val64 ptr s.mem
-unfold let eval_mem128 (ptr:int) (s:state) : quad32 = get_heap_val128 ptr s.mem
+unfold let eval_mem (ptr:int) (s:machine_state) : nat64 = get_heap_val64 ptr s.ms_mem
+unfold let eval_mem128 (ptr:int) (s:machine_state) : quad32 = get_heap_val128 ptr s.ms_mem
 
 unfold let eval_stack (ptr:int) (s:stack) : nat64 = 
   let Vale_stack _ mem = s in
@@ -95,27 +101,27 @@ unfold let eval_stack128 (ptr:int) (s:stack) : quad32 =
   get_heap_val128 ptr mem
 
 [@va_qattr]
-let eval_maddr (m:maddr) (s:state) : int =
+let eval_maddr (m:maddr) (s:machine_state) : int =
   let open FStar.Mul in
     match m with
     | MConst n -> n
     | MReg reg offset -> (eval_reg reg s) + offset
     | MIndex base scale index offset -> (eval_reg base s) + scale * (eval_reg index s) + offset
 
-let eval_operand (o:operand) (s:state) : nat64 =
+let eval_operand (o:operand) (s:machine_state) : nat64 =
   match o with
   | OConst n -> int_to_nat64 n
   | OReg r -> eval_reg r s
   | OMem m -> eval_mem (eval_maddr m s) s
-  | OStack m -> eval_stack (eval_maddr m s) s.stack
+  | OStack m -> eval_stack (eval_maddr m s) s.ms_stack
 
-let eval_mov128_op (o:mov128_op) (s:state) : quad32 =
+let eval_mov128_op (o:mov128_op) (s:machine_state) : quad32 =
   match o with
   | Mov128Xmm i -> eval_xmm i s
   | Mov128Mem m -> eval_mem128 (eval_maddr m s) s
-  | Mov128Stack m -> eval_stack128 (eval_maddr m s) s.stack
+  | Mov128Stack m -> eval_stack128 (eval_maddr m s) s.ms_stack
 
-let eval_ocmp (s:state) (c:ocmp) :bool =
+let eval_ocmp (s:machine_state) (c:ocmp) :bool =
   match c with
   | BC.OEq o1 o2 -> eval_operand o1 s = eval_operand o2 s
   | BC.ONe o1 o2 -> eval_operand o1 s <> eval_operand o2 s
@@ -124,11 +130,11 @@ let eval_ocmp (s:state) (c:ocmp) :bool =
   | BC.OLt o1 o2 -> eval_operand o1 s < eval_operand o2 s
   | BC.OGt o1 o2 -> eval_operand o1 s > eval_operand o2 s
 
-let update_reg' (r:reg) (v:nat64) (s:state) : state =
-  { s with regs = F.on_dom reg (fun r' -> if r' = r then v else s.regs r') }
+let update_reg' (r:reg) (v:nat64) (s:machine_state) : machine_state =
+  { s with ms_regs = F.on_dom reg (fun r' -> if r' = r then v else s.ms_regs r') }
 
-let update_xmm' (x:xmm) (v:quad32) (s:state) : state =
-  { s with xmms = F.on_dom xmm (fun x' -> if x' = x then v else s.xmms x') }
+let update_xmm' (x:xmm) (v:quad32) (s:machine_state) : machine_state =
+  { s with ms_xmms = F.on_dom xmm (fun x' -> if x' = x then v else s.ms_xmms x') }
 
 val mod_8: (n:nat{n < pow2_64}) -> nat8
 let mod_8 n = n % 0x100
@@ -157,16 +163,18 @@ let update_heap64_def (ptr:int) (v:nat64) (mem:heap) : heap =
   mem
 let update_heap64 = make_opaque update_heap64_def
 
-let update_heap128 (ptr:int) (v:quad32) (mem:heap) =
+let update_heap128_def (ptr:int) (v:quad32) (mem:heap) =
   let mem = update_heap32 ptr v.lo0 mem in
   let mem = update_heap32 (ptr+4) v.lo1 mem in
   let mem = update_heap32 (ptr+8) v.hi2 mem in
   let mem = update_heap32 (ptr+12) v.hi3 mem in
   mem
+let update_heap128 = make_opaque update_heap128_def
 
 let valid_addr (ptr:int) (mem:heap) : bool =
   Map.contains mem ptr
 
+[@"opaque_to_smt"]
 let valid_addr64 (ptr:int) (mem:heap) =
   valid_addr ptr mem &&
   valid_addr (ptr+1) mem &&
@@ -177,6 +185,7 @@ let valid_addr64 (ptr:int) (mem:heap) =
   valid_addr (ptr+6) mem &&
   valid_addr (ptr+7) mem
 
+[@"opaque_to_smt"]
 let valid_addr128 (ptr:int) (mem:heap) =
   valid_addr ptr mem &&
   valid_addr (ptr+1) mem &&
@@ -195,14 +204,14 @@ let valid_addr128 (ptr:int) (mem:heap) =
   valid_addr (ptr+14) mem &&
   valid_addr (ptr+15) mem
 
-let update_mem (ptr:int) (v:nat64) (s:state) : state =
-  if valid_addr64 ptr s.mem then
-  { s with mem = update_heap64 ptr v s.mem }
+let update_mem (ptr:int) (v:nat64) (s:machine_state) : machine_state =
+  if valid_addr64 ptr s.ms_mem then
+  { s with ms_mem = update_heap64 ptr v s.ms_mem }
   else s
   
-let update_mem128 (ptr:int) (v:quad32) (s:state) : state =
-  if valid_addr128 ptr s.mem then
-  { s with mem = update_heap128 ptr v s.mem }
+let update_mem128 (ptr:int) (v:quad32) (s:machine_state) : machine_state =
+  if valid_addr128 ptr s.ms_mem then
+  { s with ms_mem = update_heap128 ptr v s.ms_mem }
   else s
 
 unfold
@@ -217,13 +226,13 @@ let update_stack128' (ptr:int) (v:quad32) (s:stack) : stack =
   let mem = update_heap128 ptr v mem in
   Vale_stack init_rsp mem
 
-let update_stack (ptr:int) (v:nat64) (s:state) : state =
-  let Vale_stack init_rsp mem = s.stack in
-  {s with stack = update_stack' ptr v s.stack}
+let update_stack (ptr:int) (v:nat64) (s:machine_state) : machine_state =
+  let Vale_stack init_rsp mem = s.ms_stack in
+  {s with ms_stack = update_stack' ptr v s.ms_stack}
 
-let update_stack128 (ptr:int) (v:quad32) (s:state) : state =
-  let Vale_stack init_rsp mem = s.stack in
-  {s with stack = update_stack128' ptr v s.stack}
+let update_stack128 (ptr:int) (v:quad32) (s:machine_state) : machine_state =
+  let Vale_stack init_rsp mem = s.ms_stack in
+  {s with ms_stack = update_stack128' ptr v s.ms_stack}
 
 unfold
 let valid_src_stack64 (ptr:int) (st:stack) : bool =
@@ -235,23 +244,23 @@ let valid_src_stack128 (ptr:int) (st:stack) : bool =
   let Vale_stack init_rsp mem = st in
   valid_addr128 ptr mem
 
-let valid_src_operand (o:operand) (s:state) : bool =
+let valid_src_operand (o:operand) (s:machine_state) : bool =
   match o with
   | OConst n -> true
   | OReg r -> true
-  | OMem m -> valid_addr64 (eval_maddr m s) s.mem
-  | OStack m -> valid_src_stack64 (eval_maddr m s) s.stack
+  | OMem m -> valid_addr64 (eval_maddr m s) s.ms_mem
+  | OStack m -> valid_src_stack64 (eval_maddr m s) s.ms_stack
 
-let valid_src_mov128_op (o:mov128_op) (s:state) : bool =
+let valid_src_mov128_op (o:mov128_op) (s:machine_state) : bool =
   match o with
-  | Mov128Xmm i -> true (* We leave it to the printer/assembler to object to invalid XMM indices *)
-  | Mov128Mem m -> valid_addr128 (eval_maddr m s) s.mem
-  | Mov128Stack m -> valid_src_stack128 (eval_maddr m s) s.stack
+  | Mov128Xmm i -> true // We leave it to the printer/assembler to object to invalid XMM indices
+  | Mov128Mem m -> valid_addr128 (eval_maddr m s) s.ms_mem
+  | Mov128Stack m -> valid_src_stack128 (eval_maddr m s) s.ms_stack
   
-let valid_src_shift_operand (o:operand) (s:state) : bool =
+let valid_src_shift_operand (o:operand) (s:machine_state) : bool =
   valid_src_operand o s && (eval_operand o s) < 64
 
-let valid_ocmp (c:ocmp) (s:state) :bool =
+let valid_ocmp (c:ocmp) (s:machine_state) :bool =
   match c with
   | BC.OEq o1 o2 -> valid_src_operand o1 s && valid_src_operand o2 s
   | BC.ONe o1 o2 -> valid_src_operand o1 s && valid_src_operand o2 s
@@ -272,51 +281,51 @@ let valid_dst_stack128 (rsp:nat64) (ptr:int) (st:stack) : bool =
     // We are allowed to store anywhere between rRsp and the initial stack pointer
     ptr >= rsp && ptr + 16 <= init_rsp
 
-let valid_dst_operand (o:operand) (s:state) : bool =
+let valid_dst_operand (o:operand) (s:machine_state) : bool =
   match o with
   | OConst n -> false
   | OReg r -> not (rRsp = r)
-  | OMem m -> valid_addr64 (eval_maddr m s) s.mem
-  | OStack m -> valid_dst_stack64 (eval_reg rRsp s) (eval_maddr m s) s.stack
+  | OMem m -> valid_addr64 (eval_maddr m s) s.ms_mem
+  | OStack m -> valid_dst_stack64 (eval_reg rRsp s) (eval_maddr m s) s.ms_stack
 
-let valid_dst_mov128_op (o:mov128_op) (s:state) : bool =
+let valid_dst_mov128_op (o:mov128_op) (s:machine_state) : bool =
   match o with
-  | Mov128Xmm i -> true (* We leave it to the printer/assembler to object to invalid XMM indices *)
-  | Mov128Mem m -> valid_addr128 (eval_maddr m s) s.mem
-  | Mov128Stack m -> valid_dst_stack128 (eval_reg rRsp s) (eval_maddr m s) s.stack
+  | Mov128Xmm i -> true // We leave it to the printer/assembler to object to invalid XMM indices
+  | Mov128Mem m -> valid_addr128 (eval_maddr m s) s.ms_mem
+  | Mov128Stack m -> valid_dst_stack128 (eval_reg rRsp s) (eval_maddr m s) s.ms_stack
 
-let update_operand_preserve_flags'' (o:operand) (v:nat64) (s_orig s:state) : state =
+let update_operand_preserve_flags'' (o:operand) (v:nat64) (s_orig s:machine_state) : machine_state =
   match o with
-  | OConst _ -> {s with ok = false}
+  | OConst _ -> {s with ms_ok = false}
   | OReg r -> update_reg' r v s
   | OMem m -> update_mem (eval_maddr m s_orig) v s // see valid_maddr for how eval_maddr connects to b and i
   | OStack m -> update_stack (eval_maddr m s_orig) v s 
 
-let update_operand_preserve_flags' (o:operand) (v:nat64) (s:state) : state =
+let update_operand_preserve_flags' (o:operand) (v:nat64) (s:machine_state) : machine_state =
   update_operand_preserve_flags'' o v s s
 
-let update_mov128_op_preserve_flags'' (o:mov128_op) (v:quad32) (s_orig s:state) : state =
+let update_mov128_op_preserve_flags'' (o:mov128_op) (v:quad32) (s_orig s:machine_state) : machine_state =
   match o with
   | Mov128Xmm i -> update_xmm' i v s
   | Mov128Mem m -> update_mem128 (eval_maddr m s_orig) v s
   | Mov128Stack m -> update_stack128 (eval_maddr m s_orig) v s
 
-let update_mov128_op_preserve_flags' (o:mov128_op) (v:quad32) (s:state) : state =
+let update_mov128_op_preserve_flags' (o:mov128_op) (v:quad32) (s:machine_state) : machine_state =
   update_mov128_op_preserve_flags'' o v s s
 
 // Default version havocs flags
-let update_operand' (o:operand) (ins:ins) (v:nat64) (s:state) : state =
-  { (update_operand_preserve_flags' o v s) with flags = havoc s ins }
+let update_operand' (o:operand) (ins:ins) (v:nat64) (s:machine_state) : machine_state =
+  { (update_operand_preserve_flags' o v s) with ms_flags = havoc_state_ins s ins }
 
-let update_rsp' (new_rsp:int) (s:state) : state =
-  let Vale_stack init_rsp mem = s.stack in
+let update_rsp' (new_rsp:int) (s:machine_state) : machine_state =
+  let Vale_stack init_rsp mem = s.ms_stack in
   // Only modify the stack pointer if the new value is valid, that is in the current stack frame, and in the same page
   if new_rsp >= init_rsp - 4096 && new_rsp <= init_rsp then
     update_reg' rRsp new_rsp s
   else
     s
 
-(* REVIEW: Will we regret exposing a mod here?  Should flags be something with more structure? *)
+// REVIEW: Will we regret exposing a mod here?  Should flags be something with more structure?
 let cf (flags:nat64) : bool =
   flags % 2 = 1
 
@@ -359,31 +368,31 @@ let free_stack' (start finish:int) (st:stack) : stack =
   let new_mem = Map.restrict restricted_domain mem in
   Vale_stack init_rsp new_mem
 
-(* Define a stateful monad to simplify defining the instruction semantics *)
-let st (a:Type) = state -> a * state
+// Define a stateful monad to simplify defining the instruction semantics
+let st (a:Type) = machine_state -> a & machine_state
 
 unfold
-let return (#a:Type) (x:a) :st a =
-  fun s -> x, s
+let return (#a:Type) (x:a) : st a =
+  fun s -> (x, s)
 
 unfold
-let bind (#a:Type) (#b:Type) (m:st a) (f:a -> st b) :st b =
+let bind (#a:Type) (#b:Type) (m:st a) (f:a -> st b) : st b =
 fun s0 ->
-  let x, s1 = m s0 in
-  let y, s2 = f x s1 in
-  y, {s2 with ok=s0.ok && s1.ok && s2.ok}
+  let (x, s1) = m s0 in
+  let (y, s2) = f x s1 in
+  (y, {s2 with ms_ok = s0.ms_ok && s1.ms_ok && s2.ms_ok})
 
 unfold
-let get :st state =
-  fun s -> s, s
+let get : st machine_state =
+  fun s -> (s, s)
 
 unfold
-let set (s:state) :st unit =
-  fun _ -> (), s
+let set (s:machine_state) : st unit =
+  fun _ -> ((), s)
 
 unfold
-let fail :st unit =
-  fun s -> (), {s with ok=false}
+let fail : st unit =
+  fun s -> ((), {s with ms_ok = false})
 
 unfold
 let check_imm (valid:bool) : st unit =
@@ -393,7 +402,7 @@ let check_imm (valid:bool) : st unit =
     fail
 
 unfold
-let check (valid: state -> bool) : st unit =
+let check (valid: machine_state -> bool) : st unit =
   s <-- get;
   if valid s then
     return ()
@@ -410,24 +419,24 @@ let apply_option (#a:Type) (o:option a) (f:a -> st unit) : st unit =
   try_option o f
 
 unfold
-let run (f:st unit) (s:state) : state = snd (f s)
+let run (f:st unit) (s:machine_state) : machine_state = snd (f s)
 
-(* Monadic update operations *)
+// Monadic update operations
 unfold
-let update_operand_preserve_flags (dst:operand) (v:nat64) :st unit =
+let update_operand_preserve_flags (dst:operand) (v:nat64) : st unit =
   check (valid_dst_operand dst);;
   s <-- get;
   set (update_operand_preserve_flags' dst v s)
 
 unfold
-let update_mov128_op_preserve_flags (dst:mov128_op) (v:quad32) :st unit =
+let update_mov128_op_preserve_flags (dst:mov128_op) (v:quad32) : st unit =
   check (valid_dst_mov128_op dst);;
   s <-- get;
   set (update_mov128_op_preserve_flags' dst v s)
 
 // Default version havocs flags
 unfold
-let update_operand (dst:operand) (ins:ins) (v:nat64) :st unit =
+let update_operand (dst:operand) (ins:ins) (v:nat64) : st unit =
   check (valid_dst_operand dst);;
   s <-- get;
   set (update_operand' dst ins v s)
@@ -435,42 +444,42 @@ let update_operand (dst:operand) (ins:ins) (v:nat64) :st unit =
 unfold
 let update_rsp (i:int) : st unit =
   // Only modify the stack pointer if the new value is valid, that is in the current stack frame, and in the same page
- check (fun s -> i >= s.stack.initial_rsp - 4096);;
- check (fun s -> i <= s.stack.initial_rsp);;
+ check (fun s -> i >= s.ms_stack.initial_rsp - 4096);;
+ check (fun s -> i <= s.ms_stack.initial_rsp);;
  s <-- get;
  set (update_rsp' i s)
 
-let update_reg (r:reg) (v:nat64) :st unit =
+let update_reg (r:reg) (v:nat64) : st unit =
   s <-- get;
   set (update_reg' r v s)
 
-let update_xmm (x:xmm)  (ins:ins) (v:quad32) :st unit =
+let update_xmm (x:xmm)  (ins:ins) (v:quad32) : st unit =
   s <-- get;
-  set (  { (update_xmm' x v s) with flags = havoc s ins } )
+  set (  { (update_xmm' x v s) with ms_flags = havoc_state_ins s ins } )
 
-let update_xmm_preserve_flags (x:xmm) (v:quad32) :st unit =
+let update_xmm_preserve_flags (x:xmm) (v:quad32) : st unit =
   s <-- get;
   set ( update_xmm' x v s )
 
-let update_flags (new_flags:nat64) :st unit =
+let update_flags (new_flags:nat64) : st unit =
   s <-- get;
-  set ( { s with flags = new_flags } )
+  set ( { s with ms_flags = new_flags } )
 
-let update_cf (new_cf:bool) :st unit =
+let update_cf (new_cf:bool) : st unit =
   s <-- get;
-  set ( { s with flags = update_cf' s.flags new_cf } )
+  set ( { s with ms_flags = update_cf' s.ms_flags new_cf } )
 
-let update_of (new_of:bool) :st unit =
+let update_of (new_of:bool) : st unit =
   s <-- get;
-  set ( { s with flags = update_of' s.flags new_of } )
+  set ( { s with ms_flags = update_of' s.ms_flags new_of } )
 
-let update_cf_of (new_cf new_of:bool) :st unit =
+let update_cf_of (new_cf new_of:bool) : st unit =
   s <-- get;
-  set ( { s with flags = update_cf' (update_of' s.flags new_of) new_cf } )
+  set ( { s with ms_flags = update_cf' (update_of' s.ms_flags new_of) new_cf } )
 
 let free_stack (start finish:int) : st unit =
   s <-- get;
-  set ( { s with stack = free_stack' start finish s.stack} )
+  set ( { s with ms_stack = free_stack' start finish s.ms_stack} )
 
 let bind_option (#a #b:Type) (v:option a) (f:a -> option b) : option b =
   match v with
@@ -478,23 +487,23 @@ let bind_option (#a #b:Type) (v:option a) (f:a -> option b) : option b =
   | Some x -> f x
 
 [@instr_attr]
-let instr_eval_operand_explicit (i:instr_operand_explicit) (o:instr_operand_t i) (s:state) : option (instr_val_t (IOpEx i)) =
+let instr_eval_operand_explicit (i:instr_operand_explicit) (o:instr_operand_t i) (s:machine_state) : option (instr_val_t (IOpEx i)) =
   match i with
   | IOp64 -> if valid_src_operand o s then Some (eval_operand o s) else None
   | IOpXmm -> if valid_src_mov128_op o s then Some (eval_mov128_op o s) else None
 
 [@instr_attr]
-let instr_eval_operand_implicit (i:instr_operand_implicit) (s:state) : option (instr_val_t (IOpIm i)) =
+let instr_eval_operand_implicit (i:instr_operand_implicit) (s:machine_state) : option (instr_val_t (IOpIm i)) =
   match i with
   | IOp64One o -> if valid_src_operand o s then Some (eval_operand o s) else None
   | IOpXmmOne o -> if valid_src_mov128_op o s then Some (eval_mov128_op o s) else None
-  | IOpFlagsCf -> Some (cf s.flags)
-  | IOpFlagsOf -> Some (overflow s.flags)
+  | IOpFlagsCf -> Some (cf s.ms_flags)
+  | IOpFlagsOf -> Some (overflow s.ms_flags)
 
 [@instr_attr]
 let rec instr_apply_eval_args
     (outs:list instr_out) (args:list instr_operand)
-    (f:instr_args_t outs args) (oprs:instr_operands_t_args args) (s:state)
+    (f:instr_args_t outs args) (oprs:instr_operands_t_args args) (s:machine_state)
   : option (instr_ret_t outs) =
   match args with
   | [] -> f
@@ -510,7 +519,7 @@ let rec instr_apply_eval_args
 [@instr_attr]
 let rec instr_apply_eval_inouts
     (outs inouts:list instr_out) (args:list instr_operand)
-    (f:instr_inouts_t outs inouts args) (oprs:instr_operands_t inouts args) (s:state)
+    (f:instr_inouts_t outs inouts args) (oprs:instr_operands_t inouts args) (s:machine_state)
   : option (instr_ret_t outs) =
   match inouts with
   | [] -> instr_apply_eval_args outs args f oprs s
@@ -539,30 +548,30 @@ Take the all the input operands for an instruction and:
 [@instr_attr]
 let instr_apply_eval
     (outs:list instr_out) (args:list instr_operand)
-    (f:instr_eval_t outs args) (oprs:instr_operands_t outs args) (s:state)
+    (f:instr_eval_t outs args) (oprs:instr_operands_t outs args) (s:machine_state)
   : option (instr_ret_t outs) =
   instr_apply_eval_inouts outs outs args f oprs s
 
-let state_or_fail (s:state) (b:bool) (s':state) : state =
-  if b then s' else {s with ok = false}
+let state_or_fail (s:machine_state) (b:bool) (s':machine_state) : machine_state =
+  if b then s' else {s with ms_ok = false}
 
 [@instr_attr]
 let rec instr_write_output_explicit
-    (i:instr_operand_explicit) (v:instr_val_t (IOpEx i)) (o:instr_operand_t i) (s_orig s:state)
-  : state =
+    (i:instr_operand_explicit) (v:instr_val_t (IOpEx i)) (o:instr_operand_t i) (s_orig s:machine_state)
+  : machine_state =
   match i with
   | IOp64 -> state_or_fail s (valid_dst_operand o s_orig) (update_operand_preserve_flags'' o v s_orig s)
   | IOpXmm -> state_or_fail s (valid_dst_mov128_op o s_orig) (update_mov128_op_preserve_flags'' o v s_orig s)
 
 [@instr_attr]
 let rec instr_write_output_implicit
-    (i:instr_operand_implicit) (v:instr_val_t (IOpIm i)) (s_orig s:state)
-  : state =
+    (i:instr_operand_implicit) (v:instr_val_t (IOpIm i)) (s_orig s:machine_state)
+  : machine_state =
   match i with
   | IOp64One o -> state_or_fail s (valid_dst_operand o s_orig) (update_operand_preserve_flags'' o v s_orig s)
   | IOpXmmOne o -> state_or_fail s (valid_dst_mov128_op o s_orig) (update_mov128_op_preserve_flags'' o v s_orig s)
-  | IOpFlagsCf -> {s with flags = update_cf' s.flags v}
-  | IOpFlagsOf -> {s with flags = update_of' s.flags v}
+  | IOpFlagsCf -> {s with ms_flags = update_cf' s.ms_flags v}
+  | IOpFlagsOf -> {s with ms_flags = update_of' s.ms_flags v}
 
 (*
 For each output operand:
@@ -572,11 +581,11 @@ For each output operand:
 [@instr_attr]
 let rec instr_write_outputs
     (outs:list instr_out) (args:list instr_operand)
-    (vs:instr_ret_t outs) (oprs:instr_operands_t outs args) (s_orig s:state)
-  : state =
+    (vs:instr_ret_t outs) (oprs:instr_operands_t outs args) (s_orig s:machine_state)
+  : machine_state =
   match outs with
   | [] -> s
-  | (_, i):: outs ->
+  | (_, i)::outs ->
     (
       let ((v:instr_val_t i), (vs:instr_ret_t outs)) =
         match outs with
@@ -596,18 +605,18 @@ let rec instr_write_outputs
 [@instr_attr]
 let eval_instr
     (it:instr_t_record) (oprs:instr_operands_t it.outs it.args) (ann:instr_annotation it)
-    (s0:state)
-  : option state =
+    (s0:machine_state)
+  : option machine_state =
   let InstrTypeRecord #outs #args #havoc_flags i = it in
   let vs = instr_apply_eval outs args (instr_eval i) oprs s0 in
   let s1 =
     match havoc_flags with
-    | HavocFlags -> {s0 with flags = havoc s0 (BC.Instr it oprs ann)}
+    | HavocFlags -> {s0 with ms_flags = havoc_state_ins s0 (BC.Instr it oprs ann)}
     | PreserveFlags -> s0
     in
   FStar.Option.mapTot (fun vs -> instr_write_outputs outs args vs oprs s0 s1) vs
 
-(* Core definition of instruction semantics *)
+// Core definition of instruction semantics
 [@instr_attr]
 let eval_ins (ins:ins) : st unit =
   s <-- get;
@@ -652,13 +661,13 @@ let eval_ins (ins:ins) : st unit =
     free_stack old_rsp new_rsp
 
 (*
- * These functions return an option state
- * None case arises when the while loop runs out of fuel
- *)
+These functions return an option state
+None case arises when the while loop runs out of fuel
+*)
 // TODO: IfElse and While should havoc the flags
-val eval_code:  c:code           -> fuel:nat -> s:state -> Tot (option state) (decreases %[fuel; c])
-val eval_codes: l:codes          -> fuel:nat -> s:state -> Tot (option state) (decreases %[fuel; l])
-val eval_while: b:ocmp -> c:code -> fuel:nat -> s:state -> Tot (option state) (decreases %[fuel; c])
+val eval_code:  c:code           -> fuel:nat -> s:machine_state -> Tot (option machine_state) (decreases %[fuel; c])
+val eval_codes: l:codes          -> fuel:nat -> s:machine_state -> Tot (option machine_state) (decreases %[fuel; l])
+val eval_while: b:ocmp -> c:code -> fuel:nat -> s:machine_state -> Tot (option machine_state) (decreases %[fuel; c])
 
 let rec eval_code c fuel s =
   match c with
@@ -683,5 +692,5 @@ and eval_while b c fuel s0 =
     match eval_code c (fuel - 1) s0 with
     | None -> None
     | Some s1 ->
-      if s1.ok then eval_while b c (fuel - 1) s1  // success: continue to next iteration
+      if s1.ms_ok then eval_while b c (fuel - 1) s1  // success: continue to next iteration
       else Some s1  // failure: propagate failure immediately

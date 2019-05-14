@@ -8,7 +8,7 @@ friend X64.Vale.Decls
 
 let lemma_valid_taint64_operand m t s =
   let open X64.Taint_Semantics_s in
-  let tainted_mem:X64.Memory.memtaint = (state_to_S s).memTaint in
+  let tainted_mem:X64.Memory.memtaint = (state_to_S s).S.ms_memTaint in
   let real_mem:X64.Memory.mem = s.mem in
   Util.Meta.exists_elim2
     (Map.sel tainted_mem (eval_maddr m s) == t)

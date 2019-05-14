@@ -16,10 +16,10 @@ let overflow (flags:int) : bool = BS.overflow (int_to_nat64 flags)
 let update_cf (flags:int) (new_cf:bool) = BS.update_cf' (int_to_nat64 flags) new_cf
 let update_of (flags:int) (new_of:bool) = BS.update_of' (int_to_nat64 flags) new_of
 
-let state_eq_S (s1 s2:TS.traceState) =
-  s1 == {s2 with TS.trace = s1.TS.trace}
+let state_eq_S (s1 s2:BS.machine_state) =
+  s1 == {s2 with BS.ms_trace = s1.BS.ms_trace}
 
-let state_eq_opt (s1 s2:option TS.traceState) =
+let state_eq_opt (s1 s2:option BS.machine_state) =
   match (s1, s2) with
   | (Some s1, Some s2) -> state_eq_S s1 s2
   | _ -> s1 == s2
@@ -41,10 +41,10 @@ let eval_ins (c:code) (s0:state) : Ghost ((sM:state) * (f0:fuel))
 let eval_ocmp (s:state) (c:ocmp) : GTot bool = snd (TS.taint_eval_ocmp (state_to_S s) c)
 
 let valid_ocmp (c:ocmp) (s:state) : GTot bool =
-  BS.valid_ocmp c.TS.o (state_to_S s).TS.state
+  BS.valid_ocmp c.TS.o (state_to_S s)
 
 let ensure_valid_ocmp (c:ocmp) (s:state) : GTot state = 
-  let ts:TS.traceState = fst (TS.taint_eval_ocmp (state_to_S s) c) in
+  let ts:BS.machine_state = fst (TS.taint_eval_ocmp (state_to_S s) c) in
   state_of_S s ts
 
 val lemma_cmp_eq : s:state -> o1:operand{not (OMem? o1 || OStack? o1)} -> o2:operand{not (OMem? o2 || OStack? o2)} -> t:taint -> Lemma

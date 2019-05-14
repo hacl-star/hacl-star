@@ -262,10 +262,11 @@ let create_initial_vale_state
     let t_state, mem = IX64.create_initial_trusted_state max_arity arg_reg args Interop.down_mem h0 in
     let open VS in
     { ok = true;
-      regs = X64.Vale.Regs.of_fun t_state.TS.state.BS.regs;
-      xmms = X64.Vale.Xmms.of_fun t_state.TS.state.BS.xmms;
+      regs = X64.Vale.Regs.of_fun t_state.BS.ms_regs;
+      xmms = X64.Vale.Xmms.of_fun t_state.BS.ms_xmms;
       flags = IA.init_flags;
       mem = as_vale_mem mem;
-      memTaint = TS.(t_state.memTaint);
-      stackTaint = TS.(t_state.stackTaint);
-      stack = as_vale_stack t_state.TS.state.BS.stack}
+      memTaint = t_state.BS.ms_memTaint;
+      stack = as_vale_stack t_state.BS.ms_stack;
+      stackTaint = t_state.BS.ms_stackTaint;
+    }

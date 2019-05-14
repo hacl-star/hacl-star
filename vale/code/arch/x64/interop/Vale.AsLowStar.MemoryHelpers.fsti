@@ -38,7 +38,7 @@ val state_eq_down_mem (va_s1:V.va_state) (s1:_)
         VL.state_eq_opt (Some (SL.state_to_S va_s1)) 
                         (Some s1))
       (ensures (
-         I.down_mem (as_mem va_s1.VS.mem) == s1.TS.state.BS.mem))
+         I.down_mem (as_mem va_s1.VS.mem) == s1.BS.ms_mem))
 
 val relate_modifies (args:list arg) (m0 m1 : ME.mem)
   : Lemma 

@@ -12,41 +12,39 @@ module F = FStar.FunctionalExtensionality
 
 #reset-options "--initial_fuel 2 --max_fuel 2"
 
-let same_domain sv s = MS.same_domain sv.mem s.TS.state.BS.mem
+let same_domain sv s = MS.same_domain sv.mem s.BS.ms_mem
 
 let same_domain_eval_ins c f s0 sv = match c with
   | Ins ins -> 
       let obs = TS.ins_obs ins.TS.i s0 in 
-      let s1 = {TS.taint_eval_ins ins s0 with TS.trace = obs @ s0.TS.trace} in
-      X64.Bytes_Semantics.eval_ins_domains ins s0;
-      MS.lemma_same_domains sv.mem s0.TS.state.BS.mem s1.TS.state.BS.mem
+      let s1 = {TS.taint_eval_ins ins ({s0 with BS.ms_trace = []}) with BS.ms_trace = obs @ s0.BS.ms_trace} in
+      X64.Bytes_Semantics.eval_ins_domains ins ({s0 with BS.ms_trace = []});
+      MS.lemma_same_domains sv.mem s0.BS.ms_mem s1.BS.ms_mem
 
-let state_to_S (s:state) : GTot TS.traceState =
+let state_to_S (s:state) : GTot BS.machine_state =
   {
-  TS.state = {
-    BS.ok = s.ok;
-    BS.regs = F.on_dom reg (fun r -> Regs.sel r s.regs);
-    BS.xmms = F.on_dom xmm (fun x -> Xmms.sel x s.xmms);
-    BS.flags = int_to_nat64 s.flags;
-    BS.mem = MS.get_heap s.mem;
-    BS.stack = VSS.stack_to_s s.stack;
-  };
-  TS.trace = [];
-  TS.memTaint = s.memTaint;
-  TS.stackTaint = s.stackTaint;
+    BS.ms_ok = s.ok;
+    BS.ms_regs = F.on_dom reg (fun r -> Regs.sel r s.regs);
+    BS.ms_xmms = F.on_dom xmm (fun x -> Xmms.sel x s.xmms);
+    BS.ms_flags = int_to_nat64 s.flags;
+    BS.ms_mem = MS.get_heap s.mem;
+    BS.ms_memTaint = s.memTaint;
+    BS.ms_stack = VSS.stack_to_s s.stack;
+    BS.ms_stackTaint = s.stackTaint;
+    BS.ms_trace = [];
   }
 
-let state_of_S (sv:state) (s:TS.traceState{same_domain sv s}) : GTot state =
-  let { BS.ok = ok; BS.regs = regs; BS.xmms = xmms; BS.flags = flags; BS.mem = mem; BS.stack = stack} = s.TS.state in
+let state_of_S (sv:state) (s:BS.machine_state{same_domain sv s}) : GTot state =
+  let { BS.ms_ok = ok; BS.ms_regs = regs; BS.ms_xmms = xmms; BS.ms_flags = flags; BS.ms_mem = mem; BS.ms_stack = stack} = s in
   {
     ok = ok;
     regs = Regs.of_fun regs;
     xmms = Xmms.of_fun xmms;
     flags = flags;
     mem = MS.get_hs sv.mem mem;
+    memTaint = s.BS.ms_memTaint;
     stack = VSS.stack_from_s stack;
-    memTaint = s.TS.memTaint;
-    stackTaint = s.TS.stackTaint;
+    stackTaint = s.BS.ms_stackTaint;
   }
 
 let lemma_to_ok s = ()
@@ -87,7 +85,7 @@ let lemma_to_valid_operand s o = match o with
   | OMem m -> let addr = eval_maddr m s in
     let aux () : Lemma
     (requires valid_src_operand o s)
-    (ensures BS.valid_src_operand o (state_to_S s).TS.state) =
+    (ensures BS.valid_src_operand o (state_to_S s)) =
     MS.bytes_valid addr s.mem in
     Classical.move_requires aux ()
   | OStack m -> ()
@@ -105,8 +103,8 @@ let lemma_to_of_eval_ins c s0 =
   same_domain_eval_ins c 0 s0' s0;
   let s' = state_of_S s0 sM in
   let s'' = state_to_S s' in
-  let { BS.ok = ok; BS.regs = regs; BS.xmms = xmms; BS.flags = flags; BS.mem = heap; BS.stack = stack} = sM.TS.state in
-  let { BS.ok = ok''; BS.regs = regs''; BS.xmms = xmms''; BS.flags = flags''; BS.mem = heap''; BS.stack = stack''} = s''.TS.state in
+  let { BS.ms_ok = ok; BS.ms_regs = regs; BS.ms_xmms = xmms; BS.ms_flags = flags; BS.ms_mem = heap; BS.ms_stack = stack} = sM in
+  let { BS.ms_ok = ok''; BS.ms_regs = regs''; BS.ms_xmms = xmms''; BS.ms_flags = flags''; BS.ms_mem = heap''; BS.ms_stack = stack''} = s'' in
   assert (feq regs regs'');
   assert (feq xmms xmms'');
   X64.Bytes_Semantics.eval_ins_same_unspecified ins s0';

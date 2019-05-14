@@ -11,21 +11,21 @@ friend X64.Vale.StateLemmas
 #reset-options "--initial_fuel 2 --max_fuel 2 --z3rlimit 20"
 
 val eval_code_eq_all (c:code) (f:fuel) : Lemma
-  (ensures (forall (s1 s2:TS.traceState).{:pattern (TS.taint_eval_code c f s1); (TS.taint_eval_code c f s2)}
+  (ensures (forall (s1 s2:BS.machine_state).{:pattern (TS.taint_eval_code c f s1); (TS.taint_eval_code c f s2)}
     state_eq_S s1 s2 ==>
     state_eq_opt (TS.taint_eval_code c f s1) (TS.taint_eval_code c f s2)
   ))
   (decreases %[f; c; 1])
 
 val eval_codes_eq_all (cs:codes) (f:fuel) : Lemma
-  (ensures (forall (s1 s2:TS.traceState).{:pattern (TS.taint_eval_codes cs f s1); (TS.taint_eval_codes cs f s2)}
+  (ensures (forall (s1 s2:BS.machine_state).{:pattern (TS.taint_eval_codes cs f s1); (TS.taint_eval_codes cs f s2)}
     state_eq_S s1 s2 ==>
     state_eq_opt (TS.taint_eval_codes cs f s1) (TS.taint_eval_codes cs f s2)
   ))
   (decreases %[f; cs])
 
 val eval_while_eq_all (c:code) (f:fuel) : Lemma
-  (ensures (forall (s1 s2:TS.traceState).{:pattern (TS.taint_eval_while c f s1); (TS.taint_eval_while c f s2)}
+  (ensures (forall (s1 s2:BS.machine_state).{:pattern (TS.taint_eval_while c f s1); (TS.taint_eval_while c f s2)}
     While? c /\ state_eq_S s1 s2 ==>
     state_eq_opt (TS.taint_eval_while c f s1) (TS.taint_eval_while c f s2)
   ))
@@ -47,36 +47,36 @@ and eval_while_eq_all c f =
   | While _ c_body -> eval_code_eq_all c_body (f - 1); eval_while_eq_all c (f - 1)
   | _ -> ()
 
-let eval_code_eq (c:code) (f:fuel) (s1 s2:TS.traceState) : Lemma
+let eval_code_eq (c:code) (f:fuel) (s1 s2:BS.machine_state) : Lemma
   (requires state_eq_S s1 s2)
   (ensures state_eq_opt (TS.taint_eval_code c f s1) (TS.taint_eval_code c f s2))
   [SMTPat (TS.taint_eval_code c f s1); SMTPat (TS.taint_eval_code c f s2)]
   =
   eval_code_eq_all c f
 
-let eval_codes_eq (cs:codes) (f:fuel) (s1 s2:TS.traceState) : Lemma
+let eval_codes_eq (cs:codes) (f:fuel) (s1 s2:BS.machine_state) : Lemma
   (requires state_eq_S s1 s2)
   (ensures state_eq_opt (TS.taint_eval_codes cs f s1) (TS.taint_eval_codes cs f s2))
   [SMTPat (TS.taint_eval_codes cs f s1); SMTPat (TS.taint_eval_codes cs f s2)]
   =
   eval_codes_eq_all cs f
 
-let eval_while_eq (c:code) (f:fuel) (s1 s2:TS.traceState) : Lemma
+let eval_while_eq (c:code) (f:fuel) (s1 s2:BS.machine_state) : Lemma
   (requires While? c /\ state_eq_S s1 s2)
   (ensures state_eq_opt (TS.taint_eval_while c f s1) (TS.taint_eval_while c f s2))
   [SMTPat (TS.taint_eval_while c f s1); SMTPat (TS.taint_eval_while c f s2)]
   =
   eval_while_eq_all c f
 
-let eval_code_ts (c:code) (s0:TS.traceState) (f0:fuel) (s1:TS.traceState) : Type0 =
+let eval_code_ts (c:code) (s0:BS.machine_state) (f0:fuel) (s1:BS.machine_state) : Type0 =
   state_eq_opt (TS.taint_eval_code c f0 s0) (Some s1)
 
-val increase_fuel (c:code) (s0:TS.traceState) (f0:fuel) (sN:TS.traceState) (fN:fuel) : Lemma
+val increase_fuel (c:code) (s0:BS.machine_state) (f0:fuel) (sN:BS.machine_state) (fN:fuel) : Lemma
   (requires eval_code_ts c s0 f0 sN /\ f0 <= fN)
   (ensures eval_code_ts c s0 fN sN)
   (decreases %[f0; c])
 
-val increase_fuels (c:codes) (s0:TS.traceState) (f0:fuel) (sN:TS.traceState) (fN:fuel) : Lemma
+val increase_fuels (c:codes) (s0:BS.machine_state) (f0:fuel) (sN:BS.machine_state) (fN:fuel) : Lemma
   (requires eval_code_ts (Block c) s0 f0 sN /\ f0 <= fN)
   (ensures eval_code_ts (Block c) s0 fN sN)
   (decreases %[f0; c])
@@ -86,19 +86,19 @@ let rec increase_fuel c s0 f0 sN fN =
   | Ins ins -> ()
   | Block l -> increase_fuels l s0 f0 sN fN
   | IfElse b t f ->
-      let _, b0 = TS.taint_eval_ocmp s0 b in
+      let (_, b0) = TS.taint_eval_ocmp s0 b in
       if b0 then increase_fuel t s0 f0 sN fN else increase_fuel f s0 f0 sN fN
   | While b c ->
-      let s1, b0 = TS.taint_eval_ocmp s0 b in
+      let (s1, b0) = TS.taint_eval_ocmp s0 b in
       if not b0 then ()
       else
       (
-        let s1 = {s1 with TS.trace=BranchPredicate(true)::s1.TS.trace} in
+        let s1 = {s1 with BS.ms_trace = BranchPredicate(true)::s1.BS.ms_trace} in
         match TS.taint_eval_code c (f0 - 1) s1 with
         | None -> ()
         | Some s2 ->
             increase_fuel c s1 (f0 - 1) s2 (fN - 1);
-            if s2.TS.state.BS.ok then increase_fuel (While b c) s2 (f0 - 1) sN (fN - 1)
+            if s2.BS.ms_ok then increase_fuel (While b c) s2 (f0 - 1) sN (fN - 1)
             else ()
       )
 

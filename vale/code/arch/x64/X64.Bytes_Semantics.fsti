@@ -62,10 +62,10 @@ val same_mem_get_heap_val128 (ptr:int) (mem1 mem2:heap) : Lemma
   (requires get_heap_val128 ptr mem1 == get_heap_val128 ptr mem2)
   (ensures forall i. i >= ptr /\ i < ptr + 16 ==> mem1.[i] == mem2.[i])
 
-val eval_ins_domains (ins:TS.tainted_ins) (s0:TS.traceState) : Lemma
+val eval_ins_domains (ins:TS.tainted_ins) (s0:machine_state) : Lemma
   (let s1 = TS.taint_eval_ins ins s0 in
-  Set.equal (Map.domain s0.TS.state.mem) (Map.domain s1.TS.state.mem))
+  Set.equal (Map.domain s0.ms_mem) (Map.domain s1.ms_mem))
 
-val eval_ins_same_unspecified (ins:TS.tainted_ins) (s0:TS.traceState) : Lemma
+val eval_ins_same_unspecified (ins:TS.tainted_ins) (s0:machine_state) : Lemma
   (let Some s1 = TS.taint_eval_code (Ins ins) 0 s0 in
-   forall x. not (Map.contains s1.TS.state.mem x) ==> s1.TS.state.mem.[x] == s0.TS.state.mem.[x])
+   forall x. not (Map.contains s1.ms_mem x) ==> s1.ms_mem.[x] == s0.ms_mem.[x])

@@ -18,14 +18,19 @@ let store_stack128 i v h = BS.update_stack128' i v h
 let init_rsp h = h.BS.initial_rsp
 
 (* Lemmas *)
-let lemma_store_stack_same_valid64 ptr v h i = Opaque_s.reveal_opaque BS.update_heap64_def
+let lemma_store_stack_same_valid64 ptr v h i =
+  FStar.Pervasives.reveal_opaque (`%BS.valid_addr64) BS.valid_addr64;
+  Opaque_s.reveal_opaque BS.update_heap64_def
 
 let lemma_free_stack_same_valid64 start finish ptr h =
+  FStar.Pervasives.reveal_opaque (`%BS.valid_addr64) BS.valid_addr64;
   let BS.Vale_stack _ mem = h in
   let domain = Map.domain mem in
   Classical.forall_intro (Vale.Set.remove_between_reveal domain start finish)
 
-let lemma_store_new_valid64 ptr v h = Opaque_s.reveal_opaque BS.update_heap64_def
+let lemma_store_new_valid64 ptr v h =
+  FStar.Pervasives.reveal_opaque (`%BS.valid_addr64) BS.valid_addr64;
+  Opaque_s.reveal_opaque BS.update_heap64_def
 
 let lemma_correct_store_load_stack64 ptr v h =
   let BS.Vale_stack _ mem = h in
@@ -37,6 +42,7 @@ let lemma_frame_store_load_stack64 ptr v h i =
   Opaque_s.reveal_opaque BS.get_heap_val64_def
   
 let lemma_free_stack_same_load64 start finish ptr h =
+  FStar.Pervasives.reveal_opaque (`%BS.valid_addr64) BS.valid_addr64;
   let BS.Vale_stack _ mem = h in
   let domain = Map.domain mem in
   Classical.forall_intro (Vale.Set.remove_between_reveal domain start finish);

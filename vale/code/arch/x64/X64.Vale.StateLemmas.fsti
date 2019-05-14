@@ -9,48 +9,48 @@ module VSS = X64.Stack_Sems
 module TS = X64.Taint_Semantics_s
 open Prop_s
 
-unfold let ok' s = s.BS.ok
-unfold let regs' s = s.BS.regs
-unfold let xmms' s = s.BS.xmms
-unfold let flags' s = s.BS.flags
-unfold let mem' s = s.BS.mem
-unfold let stack' s = s.BS.stack
-unfold let trace' = TS.MktraceState?.trace
-unfold let memTaint' = TS.MktraceState?.memTaint
-unfold let stackTaint' = TS.MktraceState?.stackTaint
+unfold let ok' s = s.BS.ms_ok
+unfold let regs' s = s.BS.ms_regs
+unfold let xmms' s = s.BS.ms_xmms
+unfold let flags' s = s.BS.ms_flags
+unfold let mem' s = s.BS.ms_mem
+unfold let memTaint' s = s.BS.ms_memTaint
+unfold let stack' s = s.BS.ms_stack
+unfold let stackTaint' s = s.BS.ms_stackTaint
+unfold let trace' s = s.BS.ms_trace
 
-val same_domain: sv:state -> s:TS.traceState -> prop0
+val same_domain: sv:state -> s:BS.machine_state -> prop0
 
-val same_domain_eval_ins (c:TS.tainted_code{Ins? c}) (f:nat) (s0:TS.traceState) (sv:state) : Lemma
+val same_domain_eval_ins (c:TS.tainted_code{Ins? c}) (f:nat) (s0:BS.machine_state) (sv:state) : Lemma
   (requires same_domain sv s0)
   (ensures (let s1 = TS.taint_eval_code c f s0 in
      same_domain sv (Some?.v s1))
   )
 
-val state_to_S : s:state -> GTot (s':TS.traceState{same_domain s s'})
-val state_of_S : sv:state -> (s:TS.traceState{same_domain sv s}) -> GTot state
+val state_to_S : s:state -> GTot (s':BS.machine_state{same_domain s s'})
+val state_of_S : sv:state -> (s:BS.machine_state{same_domain sv s}) -> GTot state
 
 val lemma_to_ok : s:state -> Lemma
-  (ensures s.ok == ok' (state_to_S s).TS.state)
+  (ensures s.ok == ok' (state_to_S s))
   [SMTPat s.ok]
 
 val lemma_to_flags : s:state -> Lemma
-  (ensures s.flags == flags' (state_to_S s).TS.state)
+  (ensures s.flags == flags' (state_to_S s))
   [SMTPat s.flags]
 
 val lemma_to_reg : s:state -> r:reg -> Lemma
-  (ensures Regs.sel r s.regs == regs' (state_to_S s).TS.state r)
+  (ensures Regs.sel r s.regs == regs' (state_to_S s) r)
   [SMTPat (Regs.sel r s.regs)]
 
 val lemma_to_xmm : s:state -> x:xmm -> Lemma
-  (ensures Xmms.sel x s.xmms == xmms' (state_to_S s).TS.state x)
+  (ensures Xmms.sel x s.xmms == xmms' (state_to_S s) x)
   [SMTPat (Xmms.sel x s.xmms)]
 
 val lemma_to_mem : s:state -> Lemma
-  (ensures MS.get_heap s.mem == mem' (state_to_S s).TS.state)
+  (ensures MS.get_heap s.mem == mem' (state_to_S s))
 
 val lemma_to_stack : s:state -> Lemma
-  (ensures VSS.stack_to_s s.stack == stack' (state_to_S s).TS.state)
+  (ensures VSS.stack_to_s s.stack == stack' (state_to_S s))
 
 val lemma_to_trace : s:state -> Lemma
   (ensures [] == trace' (state_to_S s))
@@ -66,20 +66,20 @@ val lemma_to_stackTaint : s:state -> Lemma
 
 val lemma_to_eval_operand : s:state -> o:operand -> Lemma
   (requires valid_src_operand o s)
-  (ensures eval_operand o s == BS.eval_operand o (state_to_S s).TS.state)
+  (ensures eval_operand o s == BS.eval_operand o (state_to_S s))
   [SMTPat (eval_operand o s)]
 
 val lemma_to_eval_xmm : s:state -> x:xmm -> Lemma
-  (ensures eval_xmm x s == BS.eval_xmm x (state_to_S s).TS.state)
+  (ensures eval_xmm x s == BS.eval_xmm x (state_to_S s))
   [SMTPat (eval_xmm x s)]
 
 val lemma_to_eval_operand128 : s:state -> o:mov128_op -> Lemma
   (requires valid_src_operand128 o s)
-  (ensures eval_operand128 o s == BS.eval_mov128_op o (state_to_S s).TS.state)
+  (ensures eval_operand128 o s == BS.eval_mov128_op o (state_to_S s))
   [SMTPat (eval_operand128 o s)]
 
 val lemma_to_valid_operand : s:state -> o:operand -> Lemma
-  (ensures valid_src_operand o s ==> BS.valid_src_operand o (state_to_S s).TS.state)
+  (ensures valid_src_operand o s ==> BS.valid_src_operand o (state_to_S s))
   [SMTPat (valid_src_operand o s)]
 
 val lemma_of_to : s:state -> Lemma
@@ -91,7 +91,7 @@ val lemma_to_of_eval_ins: (c:TS.tainted_code) -> (s0:state) -> Lemma
   (ensures (
     let Some sM = TS.taint_eval_code c 0 (state_to_S s0) in
     same_domain_eval_ins c 0 (state_to_S s0) s0;
-    (state_to_S (state_of_S s0 sM) == {sM with TS.trace = []})
+    (state_to_S (state_of_S s0 sM) == {sM with BS.ms_trace = []})
   ))
 
 unfold let op_String_Access (#a:eqtype) (#b:Type) (x:Map.t a b) (y:a) : Tot b = Map.sel x y

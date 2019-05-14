@@ -16,17 +16,17 @@ module List = FStar.List.Tot
 ////////////////////////////////////////////////////////////////////////////////
 
 let calling_conventions 
-  (s0 s1:TS.traceState)
+  (s0 s1:BS.machine_state)
   (regs_modified: MS.reg -> bool)
   (xmms_modified: MS.xmm -> bool) =
-  let s0 = s0.TS.state in
-  let s1 = s1.TS.state in
-  s1.BS.ok /\
-  s0.BS.regs MS.rRsp == s1.BS.regs MS.rRsp /\
-  (forall (r:MS.reg). {:pattern (s0.BS.regs r)}
-    not (regs_modified r) ==> s0.BS.regs r == s1.BS.regs r) /\
-  (forall (x:MS.xmm). {:pattern (s0.BS.xmms x)} 
-    not (xmms_modified x) ==> s0.BS.xmms x == s1.BS.xmms x)
+  let s0 = s0 in
+  let s1 = s1 in
+  s1.BS.ms_ok /\
+  s0.BS.ms_regs MS.rRsp == s1.BS.ms_regs MS.rRsp /\
+  (forall (r:MS.reg). {:pattern (s0.BS.ms_regs r)}
+    not (regs_modified r) ==> s0.BS.ms_regs r == s1.BS.ms_regs r) /\
+  (forall (x:MS.xmm). {:pattern (s0.BS.ms_xmms x)} 
+    not (xmms_modified x) ==> s0.BS.ms_xmms x == s1.BS.ms_xmms x)
 
 let reg_nat (n:nat) = i:nat{i < n}
 let arity_ok n 'a = l:list 'a { List.Tot.length l <= n }
@@ -211,7 +211,7 @@ let create_initial_trusted_state
       (arg_reg:arg_reg_relation max_arity)
       (args:arg_list)
       (down_mem: down_mem_t)
-  : state_builder_t max_arity args (TS.traceState & mem) =
+  : state_builder_t max_arity args (BS.machine_state & mem) =
   fun h0 ->
     let open MS in
     let regs = register_of_args max_arity arg_reg (List.Tot.length args) args IA.init_regs in
@@ -223,36 +223,33 @@ let create_initial_trusted_state
     // Spill additional arguments on the stack
     let stack = stack_of_args max_arity (List.Tot.length args) init_rsp args stack in
     let mem:mem = mk_mem args h0 in
-    let (s0:BS.state) = {
-      BS.ok = true;
-      BS.regs = regs;
-      BS.xmms = xmms;
-      BS.flags = IA.init_flags;
-      BS.mem = down_mem mem;
-      BS.stack = BS.Vale_stack init_rsp stack;
+    let (s0:BS.machine_state) = {
+      BS.ms_ok = true;
+      BS.ms_regs = regs;
+      BS.ms_xmms = xmms;
+      BS.ms_flags = IA.init_flags;
+      BS.ms_mem = down_mem mem;
+      BS.ms_memTaint = create_memtaint mem (args_b8 args) (mk_taint args init_taint);
+      BS.ms_stack = BS.Vale_stack init_rsp stack;
+      BS.ms_stackTaint = Map.const MS.Public;
+      BS.ms_trace = [];
     } in
-    {
-      TS.state = s0;
-      TS.trace = [];
-      TS.memTaint = create_memtaint mem (args_b8 args) (mk_taint args init_taint);
-      TS.stackTaint = Map.const MS.Public
-    },
-    mem
+    (s0, mem)
 
 ////////////////////////////////////////////////////////////////////////////////
 let prediction_pre_rel_t (c:TS.tainted_code) (args:arg_list) =
     h0:mem_roots args ->
     prop
 
-let return_val_t (sn:TS.traceState) = r:UInt64.t{UInt64.v r == BS.eval_reg MS.rRax sn.TS.state}
-let return_val (sn:TS.traceState) : return_val_t sn =
-  UInt64.uint_to_t (BS.eval_reg MS.rRax sn.TS.state)
+let return_val_t (sn:BS.machine_state) = r:UInt64.t{UInt64.v r == BS.eval_reg MS.rRax sn}
+let return_val (sn:BS.machine_state) : return_val_t sn =
+  UInt64.uint_to_t (BS.eval_reg MS.rRax sn)
 
 let prediction_post_rel_t (c:TS.tainted_code) (args:arg_list) =
     h0:mem_roots args ->
-    s0:TS.traceState ->
+    s0:BS.machine_state ->
     (UInt64.t & nat & mem) ->
-    sn:TS.traceState ->
+    sn:BS.machine_state ->
     prop
 
 [@__reduce__]
@@ -264,7 +261,7 @@ let prediction_pre
     (args:arg_list)
     (pre_rel: prediction_pre_rel_t c args)
     (h0:mem_roots args)
-    (s0:TS.traceState)
+    (s0:BS.machine_state)
     =
   pre_rel h0 /\
   s0 == fst (create_initial_trusted_state n arg_reg args down_mem h0)
@@ -279,7 +276,7 @@ let prediction_post
     (args:arg_list)
     (post_rel: prediction_post_rel_t c args)
     (h0:mem_roots args)
-    (s0:TS.traceState)
+    (s0:BS.machine_state)
     (rax_fuel_mem:(UInt64.t & nat & mem)) =
   let rax, fuel, final_mem = rax_fuel_mem in
   Some? (TS.taint_eval_code c fuel s0) /\ (
@@ -288,7 +285,7 @@ let prediction_post
     FStar.HyperStack.ST.equal_domains h0 h1 /\
     B.modifies (loc_modified_args args) h0 h1 /\
     mem_roots_p h1 args /\
-    down_mem (mk_mem args h1) == s1.TS.state.BS.mem /\
+    down_mem (mk_mem args h1) == s1.BS.ms_mem /\
     calling_conventions s0 s1 regs_modified xmms_modified /\
     rax == return_val s1 /\
     post_rel h0 s0 rax_fuel_mem s1
@@ -305,7 +302,7 @@ let prediction
     (pre_rel:prediction_pre_rel_t c args)
     (post_rel:prediction_post_rel_t c args) =
   h0:mem_roots args{pre_rel h0} ->
-  s0:TS.traceState ->
+  s0:BS.machine_state ->
   Ghost (UInt64.t & nat & mem)
     (requires prediction_pre n arg_reg down_mem c args pre_rel h0 s0)
     (ensures prediction_post n regs_modified xmms_modified down_mem c args post_rel h0 s0)

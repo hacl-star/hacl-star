@@ -292,24 +292,24 @@ let core_create_lemma_state
   = let va_s = LSig.create_initial_vale_state #max_arity #arg_reg args h0 in
     let tr_s = fst (IX64.create_initial_trusted_state max_arity arg_reg args I.down_mem h0) in
     let sl_s = SL.state_to_S va_s in
-    assert (tr_s.TS.memTaint == va_s.VS.memTaint);
-    assert (tr_s.TS.stackTaint == va_s.VS.stackTaint);
+    assert (tr_s.BS.ms_memTaint == va_s.VS.memTaint);
+    assert (tr_s.BS.ms_stackTaint == va_s.VS.stackTaint);
     SL.lemma_to_ok va_s;
     SL.lemma_to_flags va_s;
     SL.lemma_to_mem va_s;
     SL.lemma_to_stack va_s;
-    let aux_reg (r:MS.reg) : Lemma (tr_s.TS.state.BS.regs r == sl_s.TS.state.BS.regs r)
+    let aux_reg (r:MS.reg) : Lemma (tr_s.BS.ms_regs r == sl_s.BS.ms_regs r)
       = SL.lemma_to_reg va_s r
     in
-    let aux_xmm (x:MS.xmm) : Lemma (tr_s.TS.state.BS.xmms x == sl_s.TS.state.BS.xmms x)
+    let aux_xmm (x:MS.xmm) : Lemma (tr_s.BS.ms_xmms x == sl_s.BS.ms_xmms x)
       = SL.lemma_to_xmm va_s x
     in
     Classical.forall_intro aux_reg;
     Classical.forall_intro aux_xmm;
-    assert (FunctionalExtensionality.feq tr_s.TS.state.BS.regs sl_s.TS.state.BS.regs);
-    assert (FunctionalExtensionality.feq tr_s.TS.state.BS.xmms sl_s.TS.state.BS.xmms);
+    assert (FunctionalExtensionality.feq tr_s.BS.ms_regs sl_s.BS.ms_regs);
+    assert (FunctionalExtensionality.feq tr_s.BS.ms_xmms sl_s.BS.ms_xmms);
     Vale.AsLowStar.MemoryHelpers.get_heap_mk_mem_reveal args h0;
-    Vale.AsLowStar.MemoryHelpers.mk_stack_reveal tr_s.TS.state.BS.stack
+    Vale.AsLowStar.MemoryHelpers.mk_stack_reveal tr_s.BS.ms_stack
 
 let rec stack_args' (max_arity:nat)
                     (n:nat)
@@ -341,7 +341,9 @@ let frame_update_get_heap (ptr:int) (v:MS.nat64) (mem:BS.heap) (j:int) : Lemma
 let frame_update_valid_heap (ptr:int) (v:MS.nat64) (mem:BS.heap) (j:int) : Lemma
   (requires ptr >= j + 8)
   (ensures BS.valid_addr64 j mem == BS.valid_addr64 j (BS.update_heap64 ptr v mem))
-  = Opaque_s.reveal_opaque BS.update_heap64_def
+  =
+  FStar.Pervasives.reveal_opaque (`%BS.valid_addr64) BS.valid_addr64;
+  Opaque_s.reveal_opaque BS.update_heap64_def
 
 let rec stack_of_args_stack_args'_aux
     (max_arity:nat)
@@ -386,11 +388,16 @@ let rec stack_of_args_stack_args'
     (let mem = Map.const_on Set.empty 0 in
     stack_args' max_arity n args init_rsp (IX64.stack_of_args max_arity n init_rsp args mem))
     =
+    FStar.Pervasives.reveal_opaque (`%BS.valid_addr64) BS.valid_addr64;
+    FStar.Pervasives.reveal_opaque (`%BS.valid_addr128) BS.valid_addr128;
     let rec aux (args:IX64.arg_list) (accu:Map.t int Words_s.nat8) : Lemma (ensures (
       stack_args' max_arity (List.length args) args init_rsp 
         (IX64.stack_of_args max_arity (List.length args) init_rsp args accu)))
       (decreases (List.length args))
-      = match args with
+      =
+      FStar.Pervasives.reveal_opaque (`%BS.valid_addr64) BS.valid_addr64;
+      FStar.Pervasives.reveal_opaque (`%BS.valid_addr128) BS.valid_addr128;
+      match args with
       | [] -> ()
       | hd::tl ->
         aux tl accu;
@@ -477,7 +484,7 @@ let core_create_lemma
   ))
   = let va_s = LSig.create_initial_vale_state #max_arity #arg_reg args h0 in
     let t_state = fst (IX64.create_initial_trusted_state max_arity arg_reg args I.down_mem h0) in
-    let t_stack = t_state.TS.state.BS.stack in  
+    let t_stack = t_state.BS.ms_stack in  
     core_create_lemma_mem_correspondance #max_arity #arg_reg args h0;
     core_create_lemma_disjointness args;
     core_create_lemma_readable #max_arity #arg_reg args h0;
@@ -488,9 +495,9 @@ let core_create_lemma
     core_create_lemma_state #max_arity #arg_reg args h0
 
 let eval_code_ts (c:TS.tainted_code)
-                 (s0:TS.traceState)
+                 (s0:BS.machine_state)
                  (f0:nat)
-                 (s1:TS.traceState) : Type0 =
+                 (s1:BS.machine_state) : Type0 =
   VL.state_eq_opt (TS.taint_eval_code c f0 s0) (Some s1)
 
 let eval_code_rel (c:TS.tainted_code)
@@ -538,9 +545,9 @@ let prediction_post_rel
           (args:IX64.arg_list)
    : IX64.prediction_post_rel_t code args
    = fun (h0:mem_roots args)
-       (_s0:TS.traceState)
+       (_s0:BS.machine_state)
        (rax_fuel_mem:(UInt64.t & nat & ME.mem))
-       (s1:TS.traceState) ->
+       (s1:BS.machine_state) ->
     let rax, fuel, mem = rax_fuel_mem in
     exists h1.
       h1 == hs_of_mem (as_mem mem) /\
@@ -613,7 +620,7 @@ let vale_lemma_as_prediction
        Vale.AsLowStar.MemoryHelpers.modifies_same_roots 
          (VSig.mloc_modified_args args) va_s0.VS.mem final_mem;
        Vale.AsLowStar.MemoryHelpers.state_eq_down_mem va_s1 s1;
-       assert (I.down_mem (as_mem final_mem) == s1.TS.state.BS.mem);
+       assert (I.down_mem (as_mem final_mem) == s1.BS.ms_mem);
        mem_correspondence_refl args va_s1;
        assert (VSig.readable args VS.(va_s1.mem));
        assert (disjoint_or_eq args);

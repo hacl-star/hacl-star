@@ -5,15 +5,15 @@ open X64.Machine_s
 open X64.Memory
 module S = X64.Bytes_Semantics_s
 
-val same_domain: (h:mem) -> (m:S.heap) -> prop0
+val same_domain (h:mem) (m:S.heap) : prop0
 
-val lemma_same_domains: (h:mem) -> (m1:S.heap) -> (m2:S.heap) -> Lemma
+val lemma_same_domains (h:mem) (m1:S.heap) (m2:S.heap) : Lemma
   (requires same_domain h m1 /\ Set.equal (Map.domain m1) (Map.domain m2))
   (ensures same_domain h m2)
 
-val get_heap: (h:mem) -> GTot (m:S.heap{same_domain h m})
+val get_heap (h:mem) : GTot (m:S.heap{same_domain h m})
 
-val get_hs: (h:mem) -> (m:S.heap{same_domain h m}) -> GTot (h':mem)
+val get_hs (h:mem) (m:S.heap{same_domain h m}) : GTot (h':mem)
 
 val get_hs_heap: (h:mem) -> Lemma (get_hs h (get_heap h) == h)
   [SMTPat (get_hs h (get_heap h))]

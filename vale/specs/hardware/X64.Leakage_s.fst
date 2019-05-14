@@ -8,23 +8,23 @@ module F = FStar.FunctionalExtensionality
 type reg_taint = F.restricted_t reg (fun _ -> taint)
 type xmms_taint = F.restricted_t xmm (fun _ -> taint)
 
-noeq type taintState =
-  | TaintState: regTaint: reg_taint -> flagsTaint: taint -> cfFlagsTaint: taint -> ofFlagsTaint: taint ->
-  xmmTaint: xmms_taint -> taintState
+noeq type analysis_taints =
+  | AnalysisTaints: regTaint: reg_taint -> flagsTaint: taint -> cfFlagsTaint: taint -> ofFlagsTaint: taint ->
+      xmmTaint: xmms_taint -> analysis_taints
 
-let publicFlagValuesAreSame (ts:taintState) (s1:traceState) (s2:traceState) =
-  ts.flagsTaint = Public ==> (s1.state.flags = s2.state.flags)
+let publicFlagValuesAreSame (ts:analysis_taints) (s1:machine_state) (s2:machine_state) =
+  ts.flagsTaint = Public ==> (s1.ms_flags = s2.ms_flags)
 
-let publicCfFlagValuesAreSame (ts:taintState) (s1:traceState) (s2:traceState) =
-Public? ts.cfFlagsTaint ==> (cf s1.state.flags = cf s2.state.flags)
+let publicCfFlagValuesAreSame (ts:analysis_taints) (s1:machine_state) (s2:machine_state) =
+  Public? ts.cfFlagsTaint ==> (cf s1.ms_flags = cf s2.ms_flags)
 
-let publicOfFlagValuesAreSame (ts:taintState) (s1:traceState) (s2:traceState) =
-Public? ts.ofFlagsTaint ==> (overflow s1.state.flags = overflow s2.state.flags)
+let publicOfFlagValuesAreSame (ts:analysis_taints) (s1:machine_state) (s2:machine_state) =
+  Public? ts.ofFlagsTaint ==> (overflow s1.ms_flags = overflow s2.ms_flags)
 
-let publicRegisterValuesAreSame (ts:taintState) (s1:traceState) (s2:traceState) =
-  forall r.{:pattern ts.regTaint r \/ s1.state.regs r \/ s2.state.regs r}
+let publicRegisterValuesAreSame (ts:analysis_taints) (s1:machine_state) (s2:machine_state) =
+  forall r.{:pattern ts.regTaint r \/ s1.ms_regs r \/ s2.ms_regs r}
     ts.regTaint r = Public ==>
-    (s1.state.regs r = s2.state.regs r)
+    (s1.ms_regs r = s2.ms_regs r)
 
 let publicMemValueIsSame
   (mem1 mem2:heap) 
@@ -33,14 +33,14 @@ let publicMemValueIsSame
   (Public? (memTaint1.[x]) || Public? (memTaint2.[x])) ==>
      mem1.[x] == mem2.[x]
 
-let publicMemValuesAreSame (s1:traceState) (s2:traceState) =
-  forall x.{:pattern s1.memTaint.[x] \/ s2.memTaint.[x] \/ s1.state.mem.[x] \/ s2.state.mem.[x]}
-    publicMemValueIsSame s1.state.mem s2.state.mem s1.memTaint s2.memTaint x
+let publicMemValuesAreSame (s1:machine_state) (s2:machine_state) =
+  forall x.{:pattern s1.ms_memTaint.[x] \/ s2.ms_memTaint.[x] \/ s1.ms_mem.[x] \/ s2.ms_mem.[x]}
+    publicMemValueIsSame s1.ms_mem s2.ms_mem s1.ms_memTaint s2.ms_memTaint x
 
-let publicXmmValuesAreSame (ts:taintState) (s1:traceState) (s2:traceState) =
-  forall r.{:pattern ts.xmmTaint r \/ s1.state.xmms r \/ s2.state.xmms r}
+let publicXmmValuesAreSame (ts:analysis_taints) (s1:machine_state) (s2:machine_state) =
+  forall r.{:pattern ts.xmmTaint r \/ s1.ms_xmms r \/ s2.ms_xmms r}
     ts.xmmTaint r = Public ==>
-    (s1.state.xmms r = s2.state.xmms r)
+    (s1.ms_xmms r = s2.ms_xmms r)
 
 let publicStackValueIsSame
   (stack1 stack2:heap) 
@@ -50,13 +50,13 @@ let publicStackValueIsSame
      stack1.[x] == stack2.[x]
 
 
-let publicStackValuesAreSame (s1:traceState) (s2:traceState) =
-  let Vale_stack _ stack1 = s1.state.stack in
-  let Vale_stack _ stack2 = s2.state.stack in
-  forall x.{:pattern s1.stackTaint.[x] \/ s2.stackTaint.[x] \/ stack1.[x] \/ stack2.[x]}
-    publicStackValueIsSame stack1 stack2 s1.stackTaint s2.stackTaint x
+let publicStackValuesAreSame (s1:machine_state) (s2:machine_state) =
+  let Vale_stack _ stack1 = s1.ms_stack in
+  let Vale_stack _ stack2 = s2.ms_stack in
+  forall x.{:pattern s1.ms_stackTaint.[x] \/ s2.ms_stackTaint.[x] \/ stack1.[x] \/ stack2.[x]}
+    publicStackValueIsSame stack1 stack2 s1.ms_stackTaint s2.ms_stackTaint x
 
-let publicValuesAreSame (ts:taintState) (s1:traceState) (s2:traceState) =
+let publicValuesAreSame (ts:analysis_taints) (s1:machine_state) (s2:machine_state) =
    publicRegisterValuesAreSame ts s1 s2
   /\ publicFlagValuesAreSame ts s1 s2
   /\ publicCfFlagValuesAreSame ts s1 s2
@@ -65,45 +65,45 @@ let publicValuesAreSame (ts:taintState) (s1:traceState) (s2:traceState) =
   /\ publicStackValuesAreSame s1 s2
   /\ publicXmmValuesAreSame ts s1 s2
 
-let constTimeInvariant (ts:taintState) (s:traceState) (s':traceState) =
+let constTimeInvariant (ts:analysis_taints) (s:machine_state) (s':machine_state) =
     publicValuesAreSame ts s s'
-  /\ s.trace = s'.trace
+  /\ s.ms_trace = s'.ms_trace
 
 
-let isConstantTimeGivenStates (code:tainted_code) (fuel:nat) (ts:taintState) (s1:traceState) (s2:traceState) =
+let isConstantTimeGivenStates (code:tainted_code) (fuel:nat) (ts:analysis_taints) (s1:machine_state) (s2:machine_state) =
   let r1 = taint_eval_code code fuel s1 in
   let r2 = taint_eval_code code fuel s2 in
   ( (Some? r1) /\ (Some? r2)
-   /\ s1.state.ok /\ (Some?.v r1).state.ok
-   /\ s2.state.ok /\ (Some?.v r2).state.ok
+   /\ s1.ms_ok /\ (Some?.v r1).ms_ok
+   /\ s2.ms_ok /\ (Some?.v r2).ms_ok
    /\ constTimeInvariant ts s1 s2
-  ) ==> (Some?.v r1).trace = (Some?.v r2).trace
+  ) ==> (Some?.v r1).ms_trace = (Some?.v r2).ms_trace
 
-let isConstantTime (code:tainted_code) (ts:taintState) =
+let isConstantTime (code:tainted_code) (ts:analysis_taints) =
   forall s1 s2 fuel.
       isConstantTimeGivenStates code fuel ts s1 s2
 
 let is_explicit_leakage_free_lhs (code:tainted_code) (fuel:nat)
-                                 (ts:taintState) (ts':taintState) (s1:traceState) (s2:traceState)
-  = s1.state.ok /\ s2.state.ok /\ constTimeInvariant ts s1 s2 /\
+                                 (ts:analysis_taints) (ts':analysis_taints) (s1:machine_state) (s2:machine_state)
+  = s1.ms_ok /\ s2.ms_ok /\ constTimeInvariant ts s1 s2 /\
     (let r1 = taint_eval_code code fuel s1 in
      let r2 = taint_eval_code code fuel s2 in
-     Some? r1 /\ Some? r2 /\ (Some?.v r1).state.ok /\ (Some?.v r2).state.ok)
+     Some? r1 /\ Some? r2 /\ (Some?.v r1).ms_ok /\ (Some?.v r2).ms_ok)
 
 let is_explicit_leakage_free_rhs (code:tainted_code) (fuel:nat)
-                                 (ts:taintState) (ts':taintState) (s1:traceState) (s2:traceState)
+                                 (ts:analysis_taints) (ts':analysis_taints) (s1:machine_state) (s2:machine_state)
   = let r1 = taint_eval_code code fuel s1 in
     let r2 = taint_eval_code code fuel s2 in
     Some? r1 /\ Some? r2 /\ publicValuesAreSame ts' (Some?.v r1) (Some?.v r2)
 
 let isExplicitLeakageFreeGivenStates (code:tainted_code) (fuel:nat)
-                                     (ts:taintState) (ts':taintState) (s1:traceState) (s2:traceState)
+                                     (ts:analysis_taints) (ts':analysis_taints) (s1:machine_state) (s2:machine_state)
   = is_explicit_leakage_free_lhs code fuel ts ts' s1 s2 ==> is_explicit_leakage_free_rhs code fuel ts ts' s1 s2
 
-let isExplicitLeakageFree (code:tainted_code) (ts:taintState) (ts':taintState) =
+let isExplicitLeakageFree (code:tainted_code) (ts:analysis_taints) (ts':analysis_taints) =
   forall s1 s2 fuel.
     isExplicitLeakageFreeGivenStates code fuel ts ts' s1 s2
 
-let isLeakageFree (code:tainted_code) (ts:taintState) (ts':taintState) =
+let isLeakageFree (code:tainted_code) (ts:analysis_taints) (ts':analysis_taints) =
     isConstantTime code ts
   /\ isExplicitLeakageFree code ts ts'
