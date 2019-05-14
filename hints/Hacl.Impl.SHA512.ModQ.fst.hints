@@ -78,6 +78,8 @@
         "lemma_Lib.IntTypes.pow2_values",
         "lemma_LowStar.Monotonic.Buffer.fresh_frame_modifies",
         "lemma_LowStar.Monotonic.Buffer.lemma_live_equal_mem_domains",
+        "lemma_LowStar.Monotonic.Buffer.length_null_1",
+        "lemma_LowStar.Monotonic.Buffer.length_null_2",
         "lemma_LowStar.Monotonic.Buffer.live_loc_not_unused_in",
         "lemma_LowStar.Monotonic.Buffer.loc_disjoint_includes_r",
         "lemma_LowStar.Monotonic.Buffer.loc_disjoint_sym_",
@@ -106,6 +108,7 @@
         "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_15f212e0c465aac088e37479ad56b108",
         "refinement_interpretation_Tm_refine_2011e81e05d092e08833cbfdaea77df9",
+        "refinement_interpretation_Tm_refine_3e7d6cbf9a788b81a5dd3182e0f2ca67",
         "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
         "refinement_interpretation_Tm_refine_6e8ad83eb4d3eac39e0e02f7f17b8c7e",
         "refinement_interpretation_Tm_refine_8c926ea73c50caec3089cec6c4e58115",
@@ -133,7 +136,7 @@
         "typing_FStar.Set.singleton", "typing_FStar.Set.union",
         "typing_FStar.UInt.fits", "typing_FStar.UInt32.v",
         "typing_Lib.Buffer.length", "typing_Lib.Buffer.loc",
-        "typing_Lib.IntTypes.uint_v",
+        "typing_Lib.IntTypes.add", "typing_Lib.IntTypes.uint_v",
         "typing_LowStar.Buffer.trivial_preorder",
         "typing_LowStar.Monotonic.Buffer.address_liveness_insensitive_locs",
         "typing_LowStar.Monotonic.Buffer.as_addr",
@@ -147,7 +150,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "d8f89e78ee4cfe2f586807e602bb9f95"
+      "ec099f21b06b2b7b81db0932b4c1309b"
     ],
     [
       "Hacl.Impl.SHA512.ModQ.sha512_pre_pre2_msg",
@@ -300,7 +303,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "8a57d21fe321aa61c80af2db00b49eb6"
+      "ba4e1e26b5fc6580b373758942adda73"
     ],
     [
       "Hacl.Impl.SHA512.ModQ.sha512_modq_pre",
@@ -440,7 +443,7 @@
         "typing_tok_Lib.Buffer.MUT@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "2fdf1c47ce32c4b8e37ebeb4ddb81617"
+      "2e23651aa703dc0657b5d400d71c4c1d"
     ],
     [
       "Hacl.Impl.SHA512.ModQ.sha512_modq_pre_pre2",
@@ -580,7 +583,7 @@
         "typing_tok_Lib.Buffer.MUT@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "288421bb9d6ec16416a46ffb33e8f91b"
+      "abdc895d1e8b3e9863148c9bf98ffe41"
     ]
   ]
 ]

@@ -165,7 +165,7 @@ let gctr_partial_opaque_completed (alg:algorithm) (plain cipher:seq quad32) (key
   (requires
     is_aes_key_LE alg key /\
     length plain == length cipher /\
-    256 * (length plain) < pow2_32 /\
+    length plain < pow2_32 /\
     gctr_partial_opaque alg (length cipher) plain cipher key icb
   )
   (ensures cipher == gctr_encrypt_recursive icb plain alg key 0)
@@ -739,7 +739,7 @@ let gctr_bytes_helper (alg:algorithm) (key:seq nat32)
                       (p128 p_bytes c128 c_bytes:seq quad32)
                       (p_num_bytes:nat)
                       (iv_BE:quad32) : Lemma
-  (requires 4096 * (length p128) * 16 < pow2_32 /\
+  (requires length p128 * 16 < pow2_32 /\
            length p128 * 16 <= p_num_bytes /\
            p_num_bytes < length p128 * 16 + 16 /\
            length p128 == length c128 /\

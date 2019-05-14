@@ -113,16 +113,12 @@ val gcm256_decrypt_opt':
       B.length tag_b == 16 /\
       B.length keys_b = 240 /\
 
-      8 * (UInt64.v cipher_num) < pow2_32 /\
-      4096 * (UInt64.v len128x6) * 16 < pow2_32 /\
-      4096 * (UInt64.v len128_num) < pow2_32 /\
-      4096 * (UInt64.v auth_bytes) < pow2_32 /\
+      UInt64.v cipher_num < pow2_32 /\
+      UInt64.v auth_bytes < pow2_32 /\
 
       UInt64.v len128x6 % 6 == 0 /\
       (UInt64.v len128x6 > 0 ==> UInt64.v len128x6 >= 18) /\
       12 + UInt64.v len128x6 + 6 < pow2_32 /\
-
-      4096 * (UInt64.v len128x6 + UInt64.v len128_num + 1) * 16 < pow2_32 /\
 
       UInt64.v len128x6 * (128/8) + UInt64.v len128_num * (128/8) <= UInt64.v cipher_num /\
       UInt64.v cipher_num < UInt64.v len128x6 * (128/8) + UInt64.v len128_num * (128/8) + 128/8 /\
@@ -147,8 +143,8 @@ val gcm256_decrypt_opt':
                   (B.loc_union (B.loc_buffer out128x6_b)
                   (B.loc_union (B.loc_buffer out128_b)
                   (B.loc_buffer inout_b))))) h0 h1 /\
-      (8 * (UInt64.v cipher_num) < pow2_32 /\
-       8 * (UInt64.v auth_bytes) < pow2_32 /\ (
+      ((UInt64.v cipher_num) < pow2_32 /\
+       (UInt64.v auth_bytes) < pow2_32 /\ (
        let in128x6_d = get_downview in128x6_b in
        length_aux3 in128x6_b (UInt64.v len128x6);
        let in128x6_u = UV.mk_buffer in128x6_d Views.up_view128 in
@@ -186,8 +182,8 @@ val gcm256_decrypt_opt':
        let auth_bytes = slice_work_around (le_seq_quad32_to_bytes auth_in) (UInt64.v auth_bytes) in
       (length_div tag_b;
        let expected_tag = le_quad32_to_bytes (low_buffer_read TUInt8 TUInt128 h0 tag_b 0) in
-      4096 * (Seq.length cipher_bytes) < pow2_32 /\
-      4096 * (Seq.length auth_bytes) < pow2_32 /\
+      (Seq.length cipher_bytes) < pow2_32 /\
+      (Seq.length auth_bytes) < pow2_32 /\
       is_aes_key AES_256 (seq_nat32_to_seq_nat8_LE (Ghost.reveal key)) /\
       (let plain, result = gcm_decrypt_LE AES_256 (seq_nat32_to_seq_nat8_LE (Ghost.reveal key)) (be_quad32_to_bytes iv_BE) cipher_bytes auth_bytes expected_tag in
       Seq.equal plain plain_bytes /\
@@ -341,8 +337,8 @@ val gcm256_decrypt_opt_alloca:
       B.length inout_b = 16 /\
       B.length abytes_b = 16 /\
 
-      4096 * (UInt64.v cipher_len + 16) < pow2_32 /\
-      4096 * (UInt64.v auth_len) < pow2_32 /\
+      UInt64.v cipher_len < pow2_32 /\
+      UInt64.v auth_len < pow2_32 /\
 
       aesni_enabled /\ pclmulqdq_enabled /\ avx_enabled /\
       is_aes_key_LE AES_256 (Ghost.reveal key) /\
@@ -357,8 +353,8 @@ val gcm256_decrypt_opt_alloca:
                   (B.loc_union (B.loc_buffer scratch_b)
                   (B.loc_union (B.loc_buffer out_b)
                   (B.loc_buffer inout_b)))) h0 h1 /\
-      8 * (UInt64.v cipher_len) < pow2_32 /\
-      8 * (UInt64.v auth_len) < pow2_32 /\
+      (UInt64.v cipher_len) < pow2_32 /\
+      (UInt64.v auth_len) < pow2_32 /\
       (let cipher_d = get_downview cipher_b in
        length_aux3 cipher_b (UInt64.v cipher_len / 16);       
        let cipher_u = UV.mk_buffer cipher_d Views.up_view128 in
@@ -384,8 +380,8 @@ val gcm256_decrypt_opt_alloca:
        let auth_in = Seq.append (UV.as_seq h0 auth_u) (UV.as_seq h0 abytes_u) in
        let auth_bytes = slice_work_around (le_seq_quad32_to_bytes auth_in) (UInt64.v auth_len) in
        let expected_tag = seq_uint8_to_seq_nat8 (B.as_seq h0 tag_b) in
-      4096 * (Seq.length cipher_bytes) < pow2_32 /\
-      4096 * (Seq.length auth_bytes) < pow2_32 /\
+      (Seq.length cipher_bytes) < pow2_32 /\
+      (Seq.length auth_bytes) < pow2_32 /\
       (let plain, result = gcm_decrypt_LE AES_256 (seq_nat32_to_seq_nat8_LE (Ghost.reveal key)) iv cipher_bytes auth_bytes expected_tag in
       Seq.equal plain plain_bytes /\
       (UInt64.v c = 0) == result
@@ -930,8 +926,8 @@ let gcm256_decrypt_opt_stdcall key cipher_b cipher_len auth_b auth_len iv_b out_
        let auth_in = Seq.append (UV.as_seq h1 auth_u) (UV.as_seq h1 abytes_u) in
        let auth_bytes = slice_work_around (le_seq_quad32_to_bytes auth_in) (UInt64.v auth_len) in
        let expected_tag = seq_uint8_to_seq_nat8 (B.as_seq h0 tag_b) in
-       4096 * (Seq.length cipher_bytes) < pow2_32 /\
-       4096 * (Seq.length auth_bytes) < pow2_32 /\
+       (Seq.length cipher_bytes) < pow2_32 /\
+       (Seq.length auth_bytes) < pow2_32 /\
        (let plain, result = gcm_decrypt_LE AES_256 (seq_nat32_to_seq_nat8_LE (Ghost.reveal key)) iv cipher_bytes auth_bytes expected_tag in
        Seq.equal plain plain_bytes /\
        (UInt64.v c = 0) == result

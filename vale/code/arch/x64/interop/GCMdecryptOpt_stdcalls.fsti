@@ -102,9 +102,6 @@ let decrypt_opt_stdcall_st (a: algorithm { a = AES_128 \/ a = AES_256 }) =
       B.length tag_b == 16 /\
       B.length keys_b = AES_stdcalls.key_offset a /\
 
-      4096 * (UInt64.v cipher_len + 16) < pow2_32 /\
-      4096 * (UInt64.v auth_len) < pow2_32 /\
-
       aesni_enabled /\ pclmulqdq_enabled /\ avx_enabled /\
       is_aes_key_LE a (Ghost.reveal key) /\
       (Seq.equal (B.as_seq h0 keys_b)

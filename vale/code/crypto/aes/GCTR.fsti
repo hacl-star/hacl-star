@@ -15,7 +15,7 @@ open FStar.Math.Lemmas
 open Collections.Seqs
 
 let make_gctr_plain_LE (p:seq nat8) : seq nat8 =
-  if 4096 * length p < pow2_32 then p else empty
+  if length p < pow2_32 then p else empty
 
 let inc32lite (cb:quad32) (i:int) : quad32 =
   if 0 <= i && i < pow2_32 then
@@ -150,7 +150,7 @@ val gctr_partial_completed (alg:algorithm) (plain cipher:seq quad32) (key:seq na
   (requires
     is_aes_key_LE alg key /\
     length plain == length cipher /\
-    256 * (length plain) < pow2_32 /\
+    length plain < pow2_32 /\
     gctr_partial alg (length cipher) plain cipher key icb
   )
   (ensures cipher == gctr_encrypt_recursive icb plain alg key 0)
@@ -159,7 +159,7 @@ val gctr_partial_opaque_completed (alg:algorithm) (plain cipher:seq quad32) (key
   (requires
     is_aes_key_LE alg key /\
     length plain == length cipher /\
-    256 * (length plain) < pow2_32 /\
+    length plain < pow2_32 /\
     gctr_partial_opaque alg (length cipher) plain cipher key icb
   )
   (ensures cipher == gctr_encrypt_recursive icb plain alg key 0)
@@ -168,7 +168,7 @@ val gctr_partial_to_full_basic (icb_BE:quad32) (plain:seq quad32) (alg:algorithm
   (requires
     is_aes_key_LE alg key /\
     cipher == gctr_encrypt_recursive icb_BE plain alg key 0 /\
-    4096 * (length plain) * 16 < pow2_32
+    length plain * 16 < pow2_32
   )
   (ensures le_seq_quad32_to_bytes cipher == gctr_encrypt_LE icb_BE (le_seq_quad32_to_bytes plain) alg key)
 
@@ -180,7 +180,7 @@ val gctr_partial_to_full_advanced (icb_BE:quad32) (plain:seq quad32) (cipher:seq
     1 <= num_bytes /\
     num_bytes < 16 * length plain /\
     16 * (length plain - 1) < num_bytes /\
-    num_bytes % 16 <> 0 /\ 4096 * num_bytes < pow2_32 /\
+    num_bytes % 16 <> 0 /\ num_bytes < pow2_32 /\
     length plain == length cipher /\
     ( let num_blocks = num_bytes / 16 in
       slice cipher 0 num_blocks == gctr_encrypt_recursive icb_BE (slice plain 0 num_blocks) alg key 0 /\
@@ -203,7 +203,7 @@ val gctr_bytes_helper (alg:algorithm) (key:seq nat32)
                       (p128 p_bytes c128 c_bytes:seq quad32)
                       (p_num_bytes:nat)
                       (iv_BE:quad32) : Lemma
-  (requires 4096 * (length p128) * 16 < pow2_32 /\
+  (requires length p128 * 16 < pow2_32 /\
            length p128 * 16 <= p_num_bytes /\
            p_num_bytes < length p128 * 16 + 16 /\
            length p128 == length c128 /\

@@ -92,14 +92,11 @@ let aead_max_length32 (al: Spec.AEAD.alg) : Tot (x: U32.t { Spec.AEAD.is_support
   let open Spec.AEAD in
   match al with
   | CHACHA20_POLY1305 -> 4294967295ul `U32.sub` 16ul
-  | AES128_GCM | AES256_GCM -> [@inline_let] let _ = assert_norm (pow2 20 == 1048576) in 1048575ul `U32.sub` 16ul
+  | AES128_GCM | AES256_GCM -> 4294967295ul
   | _ -> 0ul // dummy
 
 let aead_tag_length32 (al: Spec.AEAD.alg) : Tot (x: U32.t { U32.v x == Spec.AEAD.tag_length al /\ (Spec.AEAD.is_supported_alg al ==> U32.v x <= Spec.AEAD.max_length al) } ) =
   let open Spec.AEAD in
-  [@inline_let] let _ =
-    assert_norm (pow2 20 == 1048576)
-  in
   match al with
   | AES128_CCM8       ->  8ul
   | AES256_CCM8       ->  8ul
