@@ -78,13 +78,7 @@ let rec obs_inouts
   (s:machine_state) : list observation =
   match inouts with
   | [] -> obs_args args oprs s
-  | (Out, i)::inouts -> 
-    let oprs =
-      match i with
-      | IOpEx i -> snd #(instr_operand_t i) (coerce oprs)
-      | IOpIm i -> coerce oprs
-    in obs_inouts inouts args oprs s
-  | (InOut, i)::inouts -> 
+  | (_, i)::inouts -> 
     let (v, oprs) =
       match i with
       | IOpEx i -> let oprs = coerce oprs in
