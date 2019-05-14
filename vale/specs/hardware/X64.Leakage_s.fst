@@ -26,15 +26,35 @@ let publicRegisterValuesAreSame (ts:taintState) (s1:traceState) (s2:traceState) 
     ts.regTaint r = Public ==>
     (s1.state.regs r = s2.state.regs r)
 
+let publicMemValueIsSame
+  (mem1 mem2:heap) 
+  (memTaint1 memTaint2:Map.t int taint)
+  (x:int) =
+  (Public? (memTaint1.[x]) || Public? (memTaint2.[x])) ==>
+     mem1.[x] == mem2.[x]
+
 let publicMemValuesAreSame (s1:traceState) (s2:traceState) =
   forall x.{:pattern s1.memTaint.[x] \/ s2.memTaint.[x] \/ s1.state.mem.[x] \/ s2.state.mem.[x]}
-    (Public? (s1.memTaint.[x]) || Public? (s2.memTaint.[x])) ==>
-    (s1.state.mem.[x] == s2.state.mem.[x])
+    publicMemValueIsSame s1.state.mem s2.state.mem s1.memTaint s2.memTaint x
 
 let publicXmmValuesAreSame (ts:taintState) (s1:traceState) (s2:traceState) =
   forall r.{:pattern ts.xmmTaint r \/ s1.state.xmms r \/ s2.state.xmms r}
     ts.xmmTaint r = Public ==>
     (s1.state.xmms r = s2.state.xmms r)
+
+let publicStackValueIsSame
+  (stack1 stack2:heap) 
+  (stackTaint1 stackTaint2:Map.t int taint)
+  (x:int)
+  = (Public? (stackTaint1.[x]) || Public? (stackTaint2.[x])) ==>
+     stack1.[x] == stack2.[x]
+
+
+let publicStackValuesAreSame (s1:traceState) (s2:traceState) =
+  let Vale_stack _ stack1 = s1.state.stack in
+  let Vale_stack _ stack2 = s2.state.stack in
+  forall x.{:pattern s1.stackTaint.[x] \/ s2.stackTaint.[x] \/ stack1.[x] \/ stack2.[x]}
+    publicStackValueIsSame stack1 stack2 s1.stackTaint s2.stackTaint x
 
 let publicValuesAreSame (ts:taintState) (s1:traceState) (s2:traceState) =
    publicRegisterValuesAreSame ts s1 s2
@@ -42,6 +62,7 @@ let publicValuesAreSame (ts:taintState) (s1:traceState) (s2:traceState) =
   /\ publicCfFlagValuesAreSame ts s1 s2
   /\ publicOfFlagValuesAreSame ts s1 s2
   /\ publicMemValuesAreSame s1 s2
+  /\ publicStackValuesAreSame s1 s2
   /\ publicXmmValuesAreSame ts s1 s2
 
 let constTimeInvariant (ts:taintState) (s:traceState) (s':traceState) =

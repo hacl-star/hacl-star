@@ -47,13 +47,13 @@ val ins_Sbb64 : instr_dep [inOut opFlagsCf; inOut op64] [op64] HavocFlags eval_S
 
 let eval_Mul64 (rax src:nat64) : option (nat64 & nat64) =
   Some (FStar.UInt.mul_div #64 rax src, FStar.UInt.mul_mod #64 rax src)
-val ins_Mul64 : instr_dep [out (one64Reg Rdx); inOut (one64Reg Rax)] [op64] HavocFlags eval_Mul64
+val ins_Mul64 : instr_dep [out (one64Reg rRdx); inOut (one64Reg rRax)] [op64] HavocFlags eval_Mul64
 
 let eval_Mulx64 (rdx src:nat64) : option (nat64 & nat64) =
   let hi = FStar.UInt.mul_div #64 rdx src in
   let lo = FStar.UInt.mul_mod #64 rdx src in
   if bmi2_enabled then Some (hi, lo) else None
-val ins_Mulx64 : instr_dep [out op64; out op64] [one64Reg Rdx; op64] PreserveFlags eval_Mulx64
+val ins_Mulx64 : instr_dep [out op64; out op64] [one64Reg rRdx; op64] PreserveFlags eval_Mulx64
 
 let eval_IMul64 (dst src:nat64) : option nat64 =
   Some (FStar.UInt.mul_mod #64 dst src)
@@ -75,10 +75,10 @@ let eval_Shl64 (dst amt:nat64) : option nat64 =
 val ins_Shl64 : instr_dep [inOut op64] [op64] HavocFlags eval_Shl64
 
 let eval_Cpuid (rax rcx:nat64) : option (nat64 & (nat64 & (nat64 & nat64))) =
-  Some (cpuid Rax rax rcx, (cpuid Rbx rax rcx, (cpuid Rcx rax rcx, cpuid Rdx rax rcx)))
+  Some (cpuid rRax rax rcx, (cpuid rRbx rax rcx, (cpuid rRcx rax rcx, cpuid rRdx rax rcx)))
 val ins_Cpuid :
   instr_dep
-    [inOut (one64Reg Rax); out (one64Reg Rbx); inOut (one64Reg Rcx); out (one64Reg Rdx)]
+    [inOut (one64Reg rRax); out (one64Reg rRbx); inOut (one64Reg rRcx); out (one64Reg rRdx)]
     [] PreserveFlags eval_Cpuid
 
 let check_avx (#a:Type0) (x:option a) : option a =

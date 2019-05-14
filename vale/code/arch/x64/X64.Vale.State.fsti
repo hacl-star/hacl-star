@@ -16,6 +16,7 @@ noeq type state = {
   mem: mem;
   stack:stack;
   memTaint: memtaint;
+  stackTaint: memtaint;
 }
 
 [@va_qattr]
@@ -113,4 +114,5 @@ let state_eq (s0:state) (s1:state) : prop0 =
   s0.flags == s1.flags /\
   s0.mem == s1.mem /\
   s0.stack == s1.stack /\
-  s0.memTaint == s1.memTaint
+  s0.memTaint == s1.memTaint /\
+  s0.stackTaint == s1.stackTaint

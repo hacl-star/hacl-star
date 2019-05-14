@@ -165,9 +165,9 @@ let rec stack_args (max_arity:nat)
            let ptr = ((n - max_arity) - 1) * 8
              + (if IA.win then 32 else 0)
              + 8
-             + VS.eval_reg MS.Rsp s
+             + VS.eval_reg MS.rRsp s
            in
-           SI.valid_src_stack64 ptr s.VS.stack /\
+           SI.valid_stack_slot64 ptr s.VS.stack MS.Public s.VS.stackTaint /\
            SI.load_stack64 ptr s.VS.stack == arg_as_nat64 hd s)
 
 [@__reduce__]
@@ -216,7 +216,7 @@ let vale_pre_hyp
       VSig.readable args VS.(s0.mem) /\
       register_args max_arity arg_reg (List.length args) args s0 /\
       stack_args max_arity (List.length args) args s0 /\
-      VS.eval_reg MS.Rsp s0 == SI.init_rsp s0.VS.stack /\
+      VS.eval_reg MS.rRsp s0 == SI.init_rsp s0.VS.stack /\
       taint_hyp args s0
 
 [@__reduce__]
@@ -249,7 +249,7 @@ let to_low_post
     (f:va_fuel).
        mem_correspondence args hs_mem0 s0 /\
        mem_correspondence args hs_mem1 s1 /\
-       UInt64.v res == VS.eval_reg MS.Rax s1 /\
+       UInt64.v res == VS.eval_reg MS.rRax s1 /\
        elim_nil post s0 s1 f)
 
 [@__reduce__]
@@ -267,4 +267,5 @@ let create_initial_vale_state
       flags = IA.init_flags;
       mem = as_vale_mem mem;
       memTaint = TS.(t_state.memTaint);
+      stackTaint = TS.(t_state.stackTaint);
       stack = as_vale_stack t_state.TS.state.BS.stack}

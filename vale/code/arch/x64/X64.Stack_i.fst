@@ -2,6 +2,7 @@ module X64.Stack_i
 
 module BS = X64.Bytes_Semantics_s
 open X64.Bytes_Semantics
+module TS = X64.Taint_Semantics_s
 
 let stack = BS.stack
 
@@ -61,3 +62,23 @@ let lemma_compose_free_stack64 start inter finish h =
 let lemma_same_init_rsp_free_stack64 start finish h = ()
 
 let lemma_same_init_rsp_store_stack64 ptr v h = ()
+
+let valid_taint_stack64 ptr t stackTaint = 
+  Map.sel stackTaint ptr = t &&
+  Map.sel stackTaint (ptr + 1) = t &&
+  Map.sel stackTaint (ptr + 2) = t &&
+  Map.sel stackTaint (ptr + 3) = t &&
+  Map.sel stackTaint (ptr + 4) = t &&
+  Map.sel stackTaint (ptr + 5) = t &&
+  Map.sel stackTaint (ptr + 6) = t &&
+  Map.sel stackTaint (ptr + 7) = t
+
+let store_taint_stack64 ptr t stackTaint = TS.update_n ptr 8 stackTaint t
+
+let lemma_valid_taint_stack64 ptr t stackTaint = ()
+
+let lemma_valid_taint_stack64_reveal ptr t stackTaint = ()
+
+let lemma_correct_store_load_taint_stack64 ptr t stackTaint = ()
+
+let lemma_frame_store_load_taint_stack64 ptr t stackTaint i t' = ()

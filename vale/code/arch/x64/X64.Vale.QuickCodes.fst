@@ -18,6 +18,7 @@ let state_mod_eq (m:mod_t) (s1 s2:state) =
   | Mod_mem -> s1.mem == s2.mem
   | Mod_stack -> s1.stack == s2.stack
   | Mod_memTaint -> s1.memTaint == s2.memTaint
+  | Mod_stackTaint -> s1.stackTaint == s2.stackTaint
 
 let rec update_state_mods_refl (mods:mods_t) (s:state) : Lemma
   (ensures state_eq (update_state_mods mods s s) s)
@@ -84,6 +85,7 @@ let update_state_mods_to (mods:mods_t) (s' s:state) : Lemma
   f1 (Mod_mem);
   f1 (Mod_stack);
   f1 (Mod_memTaint);
+  f1 (Mod_stackTaint);
   ()
 
 let update_state_mods_trans (mods:mods_t) (s0 s1 s2:state) : Lemma

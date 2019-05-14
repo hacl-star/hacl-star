@@ -23,22 +23,22 @@ let combine_xmm_taints_monotone (xmms1 xmms2:xmms_taint) : Lemma
 = ()
 
 let eq_registers (regs1 regs2:reg_taint) : (b:bool{b <==> regs1 == regs2}) =
-  let b = regs1 Rax = regs2 Rax &&
-  regs1 Rbx = regs2 Rbx &&
-  regs1 Rcx = regs2 Rcx &&
-  regs1 Rdx = regs2 Rdx &&
-  regs1 Rsi = regs2 Rsi &&
-  regs1 Rdi = regs2 Rdi &&
-  regs1 Rbp = regs2 Rbp &&
-  regs1 Rsp = regs2 Rsp &&
-  regs1 R8 = regs2 R8 &&
-  regs1 R9 = regs2 R9 &&
-  regs1 R10 = regs2 R10 &&
-  regs1 R11 = regs2 R11 &&
-  regs1 R12 = regs2 R12 &&
-  regs1 R13 = regs2 R13 &&
-  regs1 R14 = regs2 R14 &&
-  regs1 R15 = regs2 R15 in
+  let b = regs1 rRax = regs2 rRax &&
+  regs1 rRbx = regs2 rRbx &&
+  regs1 rRcx = regs2 rRcx &&
+  regs1 rRdx = regs2 rRdx &&
+  regs1 rRsi = regs2 rRsi &&
+  regs1 rRdi = regs2 rRdi &&
+  regs1 rRbp = regs2 rRbp &&
+  regs1 rRsp = regs2 rRsp &&
+  regs1 rR8 = regs2 rR8 &&
+  regs1 rR9 = regs2 rR9 &&
+  regs1 rR10 = regs2 rR10 &&
+  regs1 rR11 = regs2 rR11 &&
+  regs1 rR12 = regs2 rR12 &&
+  regs1 rR13 = regs2 rR13 &&
+  regs1 rR14 = regs2 rR14 &&
+  regs1 rR15 = regs2 rR15 in
   assert (FStar.FunctionalExtensionality.feq regs1 regs2 <==> b);
   b
 
@@ -98,22 +98,22 @@ let combine_taint_states (ts1:taintState) (ts2:taintState) : (ts:taintState{tain
 let count_public_register (regs:reg_taint) (r:reg) = if Public? (regs r) then 1 else 0
 
 let count_public_registers (regs:reg_taint) : nat =
-  count_public_register regs Rax +
-  count_public_register regs Rbx +
-  count_public_register regs Rcx +
-  count_public_register regs Rdx +
-  count_public_register regs Rsi +
-  count_public_register regs Rdi +
-  count_public_register regs Rbp +
-  count_public_register regs Rsp +
-  count_public_register regs R8 +
-  count_public_register regs R9 +
-  count_public_register regs R10 +
-  count_public_register regs R11 +
-  count_public_register regs R12 +
-  count_public_register regs R13 +
-  count_public_register regs R14 +
-  count_public_register regs R15
+  count_public_register regs rRax +
+  count_public_register regs rRbx +
+  count_public_register regs rRcx +
+  count_public_register regs rRdx +
+  count_public_register regs rRsi +
+  count_public_register regs rRdi +
+  count_public_register regs rRbp +
+  count_public_register regs rRsp +
+  count_public_register regs rR8 +
+  count_public_register regs rR9 +
+  count_public_register regs rR10 +
+  count_public_register regs rR11 +
+  count_public_register regs rR12 +
+  count_public_register regs rR13 +
+  count_public_register regs rR14 +
+  count_public_register regs rR15
 
 let count_flagTaint (ts:taintState) : nat = if Public? ts.flagsTaint then 1 else 0
 
@@ -160,6 +160,7 @@ let monotone_decreases_count (ts ts':taintState) : Lemma
   assert (count_cfFlagTaint ts' <= count_cfFlagTaint ts);
   assert (count_ofFlagTaint ts' <= count_ofFlagTaint ts);
   assert (count_flagTaint ts' <= count_flagTaint ts)
+  
 #pop-options
 
 val check_if_block_consumes_fixed_time: (block:tainted_codes) -> (ts:taintState) -> Tot (bool * taintState)

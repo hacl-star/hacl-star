@@ -70,7 +70,7 @@ let add1_post : VSig.vale_post dom =
 
 let add1_regs_modified: MS.reg -> bool = fun (r:MS.reg) ->
   let open MS in
-  if r = Rax || r = Rdx || r = R8 || r = R9 || r = R10 || r = R11 then true
+  if r = rRax || r = rRdx || r = rR8 || r = rR9 || r = rR10 || r = rR11 then true
   else false
 
 let add1_xmms_modified = fun _ -> false
@@ -108,15 +108,15 @@ let add1_lemma = as_t #(VSig.vale_sig add1_regs_modified add1_xmms_modified add1
 let code_add1 = FU.va_code_fast_add1 ()
 
 let of_reg (r:MS.reg) : option (IX64.reg_nat 3) = match r with
-  | MS.Rdi -> Some 0
-  | MS.Rsi -> Some 1
-  | MS.Rdx -> Some 2
+  | 5 -> Some 0 // rdi
+  | 4 -> Some 1 // rsi
+  | 3 -> Some 2 // rdx
   | _ -> None
 
-let of_arg (i:IX64.reg_nat 3) = match i with
-  | 0 -> MS.Rdi
-  | 1 -> MS.Rsi
-  | 2 -> MS.Rdx
+let of_arg (i:IX64.reg_nat 3) : MS.reg = match i with
+  | 0 -> MS.rRdi
+  | 1 -> MS.rRsi
+  | 2 -> MS.rRdx
 
 let arg_reg : IX64.arg_reg_relation 3 = IX64.Rel of_reg of_arg
 
@@ -198,7 +198,7 @@ let fadd_post : VSig.vale_post fadd_dom =
 
 let fadd_regs_modified: MS.reg -> bool = fun (r:MS.reg) ->
   let open MS in
-  if r = Rax || r = Rcx || r = Rdx || r = R8 || r = R9 || r = R10 || r = R11 then true
+  if r = rRax || r = rRcx || r = rRdx || r = rR8 || r = rR9 || r = rR10 || r = rR11 then true
   else false
 
 let fadd_xmms_modified = fun _ -> false
@@ -314,7 +314,7 @@ let fsub_post : VSig.vale_post fsub_dom =
 
 let fsub_regs_modified: MS.reg -> bool = fun (r:MS.reg) ->
   let open MS in
-  if r = Rax || r = Rcx || r = R8 || r = R9 || r = R10 || r = R11 then true
+  if r = rRax || r = rRcx || r = rR8 || r = rR9 || r = rR10 || r = rR11 then true
   else false
 
 let fsub_xmms_modified = fun _ -> false

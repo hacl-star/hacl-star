@@ -513,3 +513,8 @@ let finish a s prev dst =
   | SHA2_256 -> finish_sha256 s prev dst
   | SHA2_384 -> finish_sha384 s prev dst
   | SHA2_512 -> finish_sha512 s prev dst
+
+let free a s =
+  let State hash_state buf _ = s in
+  Hash.free #(Ghost.hide a) hash_state;
+  B.free buf

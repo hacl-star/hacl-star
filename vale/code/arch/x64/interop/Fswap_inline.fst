@@ -68,7 +68,7 @@ let cswap_post : VSig.vale_post cswap_dom =
 
 let cswap_regs_modified: MS.reg -> bool = fun (r:MS.reg) ->
   let open MS in
-  if r = Rdx || r = R8 || r = R9 || r = R10 then true
+  if r = rRdx || r = rR8 || r = rR9 || r = rR10 then true
   else false
 
 let cswap_xmms_modified = fun _ -> false
@@ -107,15 +107,15 @@ let cswap_lemma = as_t #(VSig.vale_sig cswap_regs_modified cswap_xmms_modified c
 let code_cswap = FU.va_code_cswap2 ()
 
 let of_reg (r:MS.reg) : option (IX64.reg_nat 3) = match r with
-  | MS.Rdi -> Some 0
-  | MS.Rsi -> Some 1
-  | MS.Rdx -> Some 2
+  | 5 -> Some 0 // rdi
+  | 4 -> Some 1 // rsi
+  | 3 -> Some 2 // rdx
   | _ -> None
 
-let of_arg (i:IX64.reg_nat 3) = match i with
-  | 0 -> MS.Rdi
-  | 1 -> MS.Rsi
-  | 2 -> MS.Rdx
+let of_arg (i:IX64.reg_nat 3) : MS.reg = match i with
+  | 0 -> MS.rRdi
+  | 1 -> MS.rRsi
+  | 2 -> MS.rRdx
 
 let arg_reg : IX64.arg_reg_relation 3 = IX64.Rel of_reg of_arg
 

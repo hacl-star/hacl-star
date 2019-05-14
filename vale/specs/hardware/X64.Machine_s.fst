@@ -11,23 +11,26 @@ let int_to_nat64 (i:int) : n:nat64{0 <= i && i < pow2_64 ==> i == n} =
 unfold let nat128 = Words_s.nat128
 unfold let quad32 = Types_s.quad32
 
-type reg:eqtype =
-  | Rax
-  | Rbx
-  | Rcx
-  | Rdx
-  | Rsi
-  | Rdi
-  | Rbp
-  | Rsp
-  | R8
-  | R9
-  | R10
-  | R11
-  | R12
-  | R13
-  | R14
-  | R15
+type reg:eqtype = i:int{0 <= i /\ i < 16}
+type xmm:eqtype = i:int{0 <= i /\ i < 16}
+type imm8:eqtype = i:int{0 <= i && i < 256}
+
+[@va_qattr] unfold let rRax : reg = 0
+[@va_qattr] unfold let rRbx : reg = 1
+[@va_qattr] unfold let rRcx : reg = 2
+[@va_qattr] unfold let rRdx : reg = 3
+[@va_qattr] unfold let rRsi : reg = 4
+[@va_qattr] unfold let rRdi : reg = 5
+[@va_qattr] unfold let rRbp : reg = 6
+[@va_qattr] unfold let rRsp : reg = 7
+[@va_qattr] unfold let rR8  : reg = 8
+[@va_qattr] unfold let rR9  : reg = 9
+[@va_qattr] unfold let rR10 : reg = 10
+[@va_qattr] unfold let rR11 : reg = 11
+[@va_qattr] unfold let rR12 : reg = 12
+[@va_qattr] unfold let rR13 : reg = 13
+[@va_qattr] unfold let rR14 : reg = 14
+[@va_qattr] unfold let rR15 : reg = 15
 
 type maddr:eqtype =
   | MConst: n:int -> maddr
@@ -40,9 +43,6 @@ type operand:eqtype =
   | OReg: r:reg -> operand
   | OMem: m:maddr -> operand
   | OStack: m:maddr -> operand
-
-type imm8:eqtype = i:int{0 <= i && i < 256}
-type xmm:eqtype = i:int{0 <= i /\ i < 16}
 
 type mov128_op:eqtype =
   | Mov128Xmm: x:xmm -> mov128_op

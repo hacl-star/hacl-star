@@ -1,6 +1,8 @@
 module X64.Stack_i
 
 open X64.Machine_s
+open X64.Memory
+open Prop_s
 
 val stack: Type u#0
 
@@ -77,3 +79,40 @@ val lemma_same_init_rsp_free_stack64: (start:int) ->  (finish:int) -> (h:stack) 
 val lemma_same_init_rsp_store_stack64: (ptr:int) -> (v:nat64) -> (h:stack) -> Lemma
   (init_rsp (store_stack64 ptr v h) == init_rsp h)
   [SMTPat (init_rsp (store_stack64 ptr v h))]
+
+// Taint for the stack
+
+val valid_taint_stack64: ptr:int -> t:taint -> stackTaint:memtaint -> GTot prop0
+val store_taint_stack64: ptr:int -> t:taint -> stackTaint:memtaint -> GTot memtaint
+
+val lemma_valid_taint_stack64: (ptr:int) -> (t:taint) -> (stackTaint:memtaint) -> Lemma
+  (requires valid_taint_stack64 ptr t stackTaint)
+  (ensures forall i. i >= ptr /\ i < ptr + 8 ==> Map.sel stackTaint i == t)
+
+val lemma_valid_taint_stack64_reveal: (ptr:int) -> (t:taint) -> (stackTaint:memtaint) -> Lemma
+  (requires forall i. i >= ptr /\ i < ptr + 8 ==> Map.sel stackTaint i == t)
+  (ensures valid_taint_stack64 ptr t stackTaint)
+
+val lemma_correct_store_load_taint_stack64: (ptr:int) -> (t:taint) -> (stackTaint:memtaint) -> Lemma
+  (valid_taint_stack64 ptr t (store_taint_stack64 ptr t stackTaint))
+  [SMTPat (valid_taint_stack64 ptr t (store_taint_stack64 ptr t stackTaint))]
+
+val lemma_frame_store_load_taint_stack64: (ptr:int) -> (t:taint) -> (stackTaint:memtaint) -> (i:int) -> (t':taint) -> Lemma
+  (requires i >= ptr + 8 \/ i + 8 <= ptr)
+  (ensures valid_taint_stack64 i t' stackTaint == valid_taint_stack64 i t' (store_taint_stack64 ptr t stackTaint))
+  [SMTPat (valid_taint_stack64 i t' (store_taint_stack64 ptr t stackTaint))]
+
+
+let valid_stack_slot64 (ptr:int) (h:stack) (t:taint) (stackTaint:memtaint) =
+  valid_src_stack64 ptr h /\ valid_taint_stack64 ptr t stackTaint
+
+let valid_stack_slot64s (base num_slots:nat) (h:stack) (t:taint) (stackTaint:memtaint) : Prop_s.prop0 =
+  forall addr . {:pattern (valid_src_stack64 addr h) \/ (valid_taint_stack64 addr t stackTaint) \/
+    (valid_stack_slot64 addr h t stackTaint)}
+    (base <= addr) && (addr < base + num_slots `op_Multiply` 8) && (addr - base) % 8 = 0 ==>
+      valid_src_stack64 addr h /\ valid_taint_stack64 addr t stackTaint
+
+let modifies_stacktaint (lo_rsp hi_rsp:nat) (h h':memtaint) : Prop_s.prop0 =
+  forall addr t. {:pattern (valid_taint_stack64 addr t h') }
+    (addr + 8 <= lo_rsp || addr >= hi_rsp) ==>
+      valid_taint_stack64 addr t h == valid_taint_stack64 addr t h'

@@ -214,7 +214,7 @@ let rec lemma_register_args'_aux
       (requires
         register_args' max_arity arg_reg n args regs1 /\
         (forall r. (forall (i:IX64.reg_nat max_arity{i >= n}). r <> (arg_reg.IX64.of_arg i)) /\
-              r <> MS.Rsp ==>
+              r <> MS.rRsp ==>
               regs1 r == regs2 r))
       (ensures register_args' max_arity arg_reg n args regs2)
   = match args with
@@ -293,6 +293,7 @@ let core_create_lemma_state
     let tr_s = fst (IX64.create_initial_trusted_state max_arity arg_reg args I.down_mem h0) in
     let sl_s = SL.state_to_S va_s in
     assert (tr_s.TS.memTaint == va_s.VS.memTaint);
+    assert (tr_s.TS.stackTaint == va_s.VS.stackTaint);
     SL.lemma_to_ok va_s;
     SL.lemma_to_flags va_s;
     SL.lemma_to_mem va_s;
@@ -422,7 +423,7 @@ let core_create_lemma_stack_args
       (ensures (let va_s = LSig.create_initial_vale_state #max_arity #arg_reg args h0 in
                 LSig.stack_args max_arity (List.length args) args va_s))
   = let va_s = LSig.create_initial_vale_state #max_arity #arg_reg args h0 in
-    let init_rsp = IA.init_regs MS.Rsp in    
+    let init_rsp = IA.init_regs MS.rRsp in    
     let stack = Map.const_on Set.empty 0 in
     let stack_map = IX64.stack_of_args max_arity (List.Tot.length args) init_rsp args stack in
     let stack_f = BS.Vale_stack init_rsp stack_map in 
@@ -445,6 +446,7 @@ let core_create_lemma_stack_args
              + init_rsp
           in 
           Vale.AsLowStar.MemoryHelpers.mk_stack_reveal stack_f;
+          SI.lemma_valid_taint_stack64_reveal ptr MS.Public va_s.VS.stackTaint;
           let aux2 () : Lemma (IX64.arg_as_nat64 hd == LSig.arg_as_nat64 hd va_s) =
             match hd with
             | (| TD_Buffer src bt _, x |) ->

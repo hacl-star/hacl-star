@@ -10,7 +10,7 @@ open X64.Bytes_Semantics
 
 let rec has_mem_operand = function
   | [] -> false
-  | a::q -> if OMem? a then true else has_mem_operand q
+  | a::q -> if OMem? a || OStack? a then true else has_mem_operand q
 
 let rec check_if_consumes_fixed_time_args
     (args:list instr_operand) (oprs:instr_operands_t_args args) (ts:taintState)
@@ -95,8 +95,8 @@ let rec lemma_args_taint
   : Lemma
     (requires
       constTimeInvariant ts s1 s2 /\
-      taint_match_args args oprs t_ins s1.memTaint s1.state /\
-      taint_match_args args oprs t_ins s2.memTaint s2.state /\
+      taint_match_args args oprs t_ins s1.memTaint s1.stackTaint s1.state /\
+      taint_match_args args oprs t_ins s2.memTaint s2.stackTaint s2.state /\
       Some? (S.instr_apply_eval_args outs args f oprs s1.state) /\
       Some? (S.instr_apply_eval_args outs args f oprs s2.state) /\
       check_if_consumes_fixed_time_args args oprs ts /\
@@ -137,8 +137,8 @@ let rec lemma_inouts_taint
   : Lemma
     (requires
       constTimeInvariant ts s1 s2 /\
-      taint_match_inouts inouts args oprs t_ins s1.memTaint s1.state /\
-      taint_match_inouts inouts args oprs t_ins s2.memTaint s2.state /\
+      taint_match_inouts inouts args oprs t_ins s1.memTaint s1.stackTaint s1.state /\
+      taint_match_inouts inouts args oprs t_ins s2.memTaint s2.stackTaint s2.state /\
       Some? (S.instr_apply_eval_inouts outs inouts args f oprs s1.state) /\
       Some? (S.instr_apply_eval_inouts outs inouts args f oprs s2.state) /\
       check_if_consumes_fixed_time_outs inouts args oprs ts t_ins Public /\
@@ -309,7 +309,7 @@ let lemma_update_heap64_domain (ptr:int) (v:nat64) (mem:S.heap) : Lemma
   Opaque_s.reveal_opaque S.update_heap64_def;
   assert (Set.equal (Map.domain (S.update_heap64 ptr v mem)) (Map.domain mem))
 
-#reset-options "--z3rlimit 500"
+#reset-options "--z3rlimit 1000"
 let rec lemma_instr_set_taints_secret
     (outs:list instr_out) (args:list instr_operand)
     (vs1 vs2:instr_ret_t outs) (oprs:instr_operands_t outs args) (ts_orig ts:taintState) (t_ins t_out:taint)
@@ -327,15 +327,19 @@ let rec lemma_instr_set_taints_secret
       publicValuesAreSame ts s1 s2
     ))
     (ensures (
+      let memTaint1, stackTaint1 = update_taint_outputs outs args oprs t_ins s1.memTaint s1.stackTaint s1_orig.state in
       let s1' = {
         state = S.instr_write_outputs outs args vs1 oprs s1_orig.state s1.state;
         trace = s1.trace;
-        memTaint = update_taint_outputs outs args oprs t_ins s1.memTaint s1_orig.state;
+        memTaint = memTaint1;
+        stackTaint = stackTaint1;
       } in
+      let memTaint2, stackTaint2 = update_taint_outputs outs args oprs t_ins s2.memTaint s2.stackTaint s2_orig.state in
       let s2' = {
         state = S.instr_write_outputs outs args vs2 oprs s2_orig.state s2.state;
         trace = s2.trace;
-        memTaint = update_taint_outputs outs args oprs t_ins s2.memTaint s2_orig.state;
+        memTaint = memTaint2;
+        stackTaint = stackTaint2;
       } in
       let ts' = instr_set_taints outs args oprs ts t_out in
       publicValuesAreSame ts' s1' s2'
@@ -360,34 +364,42 @@ let rec lemma_instr_set_taints_secret
         let (o, oprs):instr_operand_t i & instr_operands_t outs args = coerce oprs in
         let o =
           match i with
-          | IOp64 -> (match coerce o with OMem _ | _ -> o)
-          | IOpXmm -> (match coerce o with Mov128Mem _ | _ -> o)
+          | IOp64 -> (match coerce o with OMem _ | OStack _ | _ -> o)
+          | IOpXmm -> (match coerce o with Mov128Mem _ | Mov128Stack _ | _ -> o)
           in
+        let memTaint1, stackTaint1 = update_taint_operand_explicit i o t_ins s1.memTaint s1.stackTaint s1_orig.state in
         let s1' = {
           state = S.instr_write_output_explicit i v1 o s1_orig.state s1.state;
           trace = s1.trace;
-          memTaint = update_taint_operand_explicit i o t_ins s1.memTaint s1_orig.state;
+          memTaint = memTaint1;
+          stackTaint = stackTaint1;
         } in
+        let memTaint2, stackTaint2 = update_taint_operand_explicit i o t_ins s2.memTaint s2.stackTaint s2_orig.state in
         let s2' = {
           state = S.instr_write_output_explicit i v2 o s2_orig.state s2.state;
           trace = s2.trace;
-          memTaint = update_taint_operand_explicit i o t_ins s2.memTaint s2_orig.state;
+          memTaint = memTaint2;
+          stackTaint = stackTaint2;
         } in
         lemma_instr_write_outputs_ok outs args vs1 oprs s1_orig.state s1'.state;
         lemma_instr_write_outputs_ok outs args vs2 oprs s2_orig.state s2'.state;
         let ts' = instr_set_taint_explicit i o ts t_out in
         lemma_instr_set_taints_secret outs args vs1 vs2 oprs ts_orig ts' t_ins t_out s1_orig s1' s2_orig s2'
       | IOpIm i ->
-        let i = match i with IOp64One (OMem _) | IOpXmmOne (Mov128Mem _) | _ -> i in
+        let i = match i with IOp64One (OMem _) | IOpXmmOne (Mov128Mem _) | IOp64One (OStack _) | IOpXmmOne (Mov128Stack _) | _ -> i in
+        let memTaint1, stackTaint1 = update_taint_operand_implicit i t_ins s1.memTaint s1.stackTaint s1_orig.state in
         let s1' = {
           state = S.instr_write_output_implicit i v1 s1_orig.state s1.state;
           trace = s1.trace;
-          memTaint = update_taint_operand_implicit i t_ins s1.memTaint s1_orig.state;
+          memTaint = memTaint1;
+          stackTaint = stackTaint1;
         } in
+        let memTaint2, stackTaint2 = update_taint_operand_implicit i t_ins s2.memTaint s2.stackTaint s2_orig.state in
         let s2' = {
           state = S.instr_write_output_implicit i v2 s2_orig.state s2.state;
           trace = s2.trace;
-          memTaint = update_taint_operand_implicit i t_ins s2.memTaint s2_orig.state;
+          memTaint = memTaint2;
+          stackTaint = stackTaint2;
         } in
         lemma_instr_write_outputs_ok outs args vs1 (coerce oprs) s1_orig.state s1'.state;
         lemma_instr_write_outputs_ok outs args vs2 (coerce oprs) s2_orig.state s2'.state;
@@ -396,6 +408,7 @@ let rec lemma_instr_set_taints_secret
     )
 
 #reset-options "--z3rlimit 500"
+
 let rec lemma_instr_set_taints_public
     (outs:list instr_out) (args:list instr_operand)
     (vs:instr_ret_t outs) (oprs:instr_operands_t outs args) (ts_orig ts:taintState) (t_ins t_out:taint)
@@ -413,15 +426,19 @@ let rec lemma_instr_set_taints_public
       publicValuesAreSame ts s1 s2
     ))
     (ensures (
+      let memTaint1, stackTaint1 = update_taint_outputs outs args oprs t_ins s1.memTaint s1.stackTaint s1_orig.state in
       let s1' = {
         state = S.instr_write_outputs outs args vs oprs s1_orig.state s1.state;
         trace = s1.trace;
-        memTaint = update_taint_outputs outs args oprs t_ins s1.memTaint s1_orig.state;
+        memTaint = memTaint1;
+        stackTaint = stackTaint1;
       } in
+      let memTaint2, stackTaint2 = update_taint_outputs outs args oprs t_ins s2.memTaint s2.stackTaint s2_orig.state in
       let s2' = {
         state = S.instr_write_outputs outs args vs oprs s2_orig.state s2.state;
         trace = s2.trace;
-        memTaint = update_taint_outputs outs args oprs t_ins s2.memTaint s2_orig.state;
+        memTaint = memTaint2;
+        stackTaint = stackTaint2;
       } in
       let ts' = instr_set_taints outs args oprs ts t_out in
       publicValuesAreSame ts' s1' s2'
@@ -441,40 +458,49 @@ let rec lemma_instr_set_taints_public
         let (o, oprs):instr_operand_t i & instr_operands_t outs args = coerce oprs in
         let o =
           match i with
-          | IOp64 -> (match coerce o with OMem _ | _ -> o)
-          | IOpXmm -> (match coerce o with Mov128Mem _ | _ -> o)
+          | IOp64 -> (match coerce o with OMem _ | OStack _ | _ -> o)
+          | IOpXmm -> (match coerce o with Mov128Mem _ | Mov128Stack _ | _ -> o)
           in
+        let memTaint1, stackTaint1 = update_taint_operand_explicit i o t_ins s1.memTaint s1.stackTaint s1_orig.state in
         let s1' = {
           state = S.instr_write_output_explicit i v o s1_orig.state s1.state;
           trace = s1.trace;
-          memTaint = update_taint_operand_explicit i o t_ins s1.memTaint s1_orig.state;
+          memTaint = memTaint1;
+          stackTaint = stackTaint1;
         } in
+        let memTaint2, stackTaint2 = update_taint_operand_explicit i o t_ins s2.memTaint s2.stackTaint s2_orig.state in
         let s2' = {
           state = S.instr_write_output_explicit i v o s2_orig.state s2.state;
           trace = s2.trace;
-          memTaint = update_taint_operand_explicit i o t_ins s2.memTaint s2_orig.state;
+          memTaint = memTaint2;
+          stackTaint = stackTaint2;
         } in
         lemma_instr_write_outputs_ok outs args vs oprs s1_orig.state s1'.state;
         lemma_instr_write_outputs_ok outs args vs oprs s2_orig.state s2'.state;
         let ts' = instr_set_taint_explicit i o ts t_out in
         lemma_instr_set_taints_public outs args vs oprs ts_orig ts' t_ins t_out s1_orig s1' s2_orig s2'
       | IOpIm i ->
-        let i = match i with IOp64One (OMem _) | IOpXmmOne (Mov128Mem _) | _ -> i in
+        let i = match i with IOp64One (OMem _) | IOpXmmOne (Mov128Mem _) | IOp64One (OStack _) | IOpXmmOne (Mov128Stack _) | _ -> i in
+        let memTaint1, stackTaint1 = update_taint_operand_implicit i t_ins s1.memTaint s1.stackTaint s1_orig.state in
         let s1' = {
           state = S.instr_write_output_implicit i v s1_orig.state s1.state;
           trace = s1.trace;
-          memTaint = update_taint_operand_implicit i t_ins s1.memTaint s1_orig.state;
+          memTaint = memTaint1;
+          stackTaint = stackTaint1;
         } in
+        let memTaint2, stackTaint2 = update_taint_operand_implicit i t_ins s2.memTaint s2.stackTaint s2_orig.state in
         let s2' = {
           state = S.instr_write_output_implicit i v s2_orig.state s2.state;
           trace = s2.trace;
-          memTaint = update_taint_operand_implicit i t_ins s2.memTaint s2_orig.state;
+          memTaint = memTaint2;
+          stackTaint = stackTaint2;
         } in
         lemma_instr_write_outputs_ok outs args vs (coerce oprs) s1_orig.state s1'.state;
         lemma_instr_write_outputs_ok outs args vs (coerce oprs) s2_orig.state s2'.state;
         let ts' = instr_set_taint_implicit i ts t_out in
         lemma_instr_set_taints_public outs args vs (coerce oprs) ts_orig ts' t_ins t_out s1_orig s1' s2_orig s2'
     )
+
 
 let check_if_instr_consumes_fixed_time (ins:tainted_ins) (ts:taintState) : Pure (bool & taintState)
   (requires BC.Instr? ins.i)
@@ -521,21 +547,21 @@ let check_if_dealloc_consumes_fixed_time (ins:tainted_ins) (ts:taintState) : Pur
   
 #reset-options "--initial_ifuel 2 --max_ifuel 2 --initial_fuel 4 --max_fuel 4 --z3rlimit 80"
 
-// Should likely revisit once stack is in publicValuesAreSame
 let check_if_push_consumes_fixed_time (ins:tainted_ins) (ts:taintState) : Pure (bool & taintState)
   (requires BC.Push? ins.i)
   (ensures ins_consumes_fixed_time ins ts)
   = 
   let BC.Push src = ins.i in
-  operand_does_not_use_secrets src ts, ts
+  let t_ins = ins.t in
+  let t_out = operand_taint src ts t_ins in
+  Public? (ts.regTaint rRsp) && operand_does_not_use_secrets src ts && (t_out = Public || t_ins = Secret), ts
 
 let check_if_pop_consumes_fixed_time (ins:tainted_ins) (ts:taintState) : Pure (bool & taintState)
   (requires BC.Pop? ins.i)
   (ensures ins_consumes_fixed_time ins ts)
   = 
   let BC.Pop dst = ins.i in
-  // TODO: Should be Public in both cases once allStackValuesArePublic enables
-  operand_does_not_use_secrets dst ts && Secret? ins.t, (set_taint dst ts Secret)
+  Public? (ts.regTaint rRsp) && operand_does_not_use_secrets dst ts, set_taint dst ts ins.t
 
 let check_if_ins_consumes_fixed_time ins ts =
   match ins.i with
@@ -545,177 +571,6 @@ let check_if_ins_consumes_fixed_time ins ts =
   | BC.Pop _ -> check_if_pop_consumes_fixed_time ins ts
   | BC.Alloc _ -> check_if_alloc_consumes_fixed_time ins ts
   | BC.Dealloc _ -> check_if_dealloc_consumes_fixed_time ins ts
-  (* Verifying, but too slow. Need to refactor
-  
-  let i = ins.i in
-  let dsts, srcs = extract_operands i in
-  let ftSrcs = operands_do_not_use_secrets srcs ts in
-  let ftDsts = operands_do_not_use_secrets dsts ts in
-  let fixedTime = ftSrcs && ftDsts in
-
-  Classical.forall_intro_2 (fun x y -> lemma_operand_obs_list ts dsts x y);
-  Classical.forall_intro_2 (fun x y -> lemma_operand_obs_list ts srcs x y);
-  assert (fixedTime ==> (isConstantTime (Ins ins) ts));
-  let taint = sources_taint srcs ts ins.t in
-  if has_mem_operand dsts && taint <> ins.t then false, ts
-  else
-  let ts' = set_taints dsts ts taint in
-  let b, ts' = match i with
-   | BC.Push src -> if Secret? (ts'.regTaint Rsp) || Secret? (operand_taint src ts' Public) then false, ts
-     else fixedTime, ts'
-   | BC.Pop dst -> 
-     // Pop should be a public instruction
-     if Secret? (ts'.regTaint Rsp) || Secret? (ins.t) then false, ts 
-     else fixedTime, ts'
-    | _ ->
-      match dsts with
-      | [OConst _] -> false, (TaintState ts'.regTaint Secret Secret Secret ts'.xmmTaint) (* Should not happen *)
-      | [OReg r] -> fixedTime, (TaintState ts'.regTaint Secret Secret Secret ts'.xmmTaint)
-      | [OMem m] ->  fixedTime, (TaintState ts'.regTaint Secret Secret Secret ts'.xmmTaint)
-      | [OStack m] -> false, ts
-      | [] -> false, ts'  (* AR: this case was missing, Unhandled yet *)
-  in
-  b, ts'
-*)
-(*
-let frame_update_heap_x (ptr:int) (j:int) (v:nat64) (mem:S.heap) : Lemma
-  (requires j < ptr \/ j >= ptr + 8)
-  (ensures (let new_mem = S.update_heap64 ptr v mem in
-    mem.[j] == new_mem.[j])) = frame_update_heap ptr v mem
-
-#reset-options "--initial_ifuel 2 --max_ifuel 2 --initial_fuel 4 --max_fuel 4 --z3rlimit 400"
-
-#set-options "--z3rlimit 80"
-
-let lemma_push_same_public_aux (ts:taintState) (ins:tainted_ins{BC.Push? ins.i}) (s1:traceState) (s2:traceState)
-                               (fuel:nat) (b:bool) (ts':taintState)
-  :Lemma (requires ((b, ts') == check_if_ins_consumes_fixed_time ins ts /\ b /\
-                    is_explicit_leakage_free_lhs (Ins ins) fuel ts ts' s1 s2))
-         (ensures  (is_explicit_leakage_free_rhs (Ins ins) fuel ts ts' s1 s2))
-  = let BC.Push src, t = ins.i, ins.t in
-    let dsts, srcs = extract_operands ins.i in
-
-    let r1 = taint_eval_code (Ins ins) fuel s1 in
-    let r2 = taint_eval_code (Ins ins) fuel s2 in
-
-    let s1' = Some?.v r1 in
-    let s2' = Some?.v r2 in
-
-    // We only need to help Z3 proving that public mem values are identical 
-    // after executing this instruction
-
-    let aux (x:int) : Lemma
-      (requires Public? s1'.memTaint.[x] || Public? s2'.memTaint.[x])
-      (ensures s1'.state.S.mem.[x] == s2'.state.S.mem.[x]) =
-        let ptr1 = ((S.eval_reg Rsp s1.state) - 8) % pow2_64 in
-        let ptr2 = ((S.eval_reg Rsp s2.state) - 8) % pow2_64 in
-        // Rsp is ensured to be Public if the taint analysis is successful
-        assert (ptr1 == ptr2);
-        let v1 = S.eval_operand src s1.state in
-        let v2 = S.eval_operand src s2.state in
-        // The instruction is executed after checking the taints of sources
-        let s1b = S.run (S.check (taint_match_list srcs t s1.memTaint)) s1.state in
-        let s2b = S.run (S.check (taint_match_list srcs t s2.memTaint)) s2.state in
-        if x < ptr1 || x >= ptr1 + 8 then (
-          // If we're outside the modified area, nothing changed, the property still holds
-          frame_update_heap_x ptr1 x v1 s1b.S.mem;
-          frame_update_heap_x ptr1 x v2 s2b.S.mem
-        ) else (
-          if Secret? t then ()
-          else (
-            Opaque_s.reveal_opaque S.get_heap_val64_def;
-            // If x is modified by Public values, values are identical            
-            assert (v1 == v2);
-            correct_update_get ptr1 v1 s1b.S.mem;
-            correct_update_get ptr1 v2 s2b.S.mem;
-            // If values are identical, the bytes also are identical
-            same_mem_get_heap_val ptr1 s1'.state.S.mem s2'.state.S.mem
-          )
-        )
-        
-    in Classical.forall_intro (Classical.move_requires aux)
-
-let lemma_push_same_public (ts:taintState) (ins:tainted_ins{BC.Push? ins.i}) (s1:traceState) (s2:traceState)
-                           (fuel:nat)
-  :Lemma (let b, ts' = check_if_ins_consumes_fixed_time ins ts in
-          (b2t b ==> isExplicitLeakageFreeGivenStates (Ins ins) fuel ts ts' s1 s2))
-  = let b, ts' = check_if_ins_consumes_fixed_time ins ts in
-    Classical.move_requires (lemma_push_same_public_aux ts ins s1 s2 fuel b) ts'
-
-let lemma_pop_same_public_aux (ts:taintState) (ins:tainted_ins{BC.Pop? ins.i}) (s1:traceState) (s2:traceState)
-                               (fuel:nat) (b:bool) (ts':taintState)
-  :Lemma (requires ((b, ts') == check_if_ins_consumes_fixed_time ins ts /\ b /\
-                    is_explicit_leakage_free_lhs (Ins ins) fuel ts ts' s1 s2))
-         (ensures  (is_explicit_leakage_free_rhs (Ins ins) fuel ts ts' s1 s2)) =
-    let BC.Pop dst, t = ins.i, ins.t in
-    let dsts, srcs = extract_operands ins.i in
-
-    let r1 = taint_eval_code (Ins ins) fuel s1 in
-    let r2 = taint_eval_code (Ins ins) fuel s2 in
-
-    let s1' = Some?.v r1 in
-    let s2' = Some?.v r2 in
-
-    let op = OMem (MReg Rsp 0) in
-
-    let v1 = S.eval_operand op s1.state in
-    let v2 = S.eval_operand op s2.state in
-    let aux_value () : Lemma (v1 == v2) = Opaque_s.reveal_opaque S.get_heap_val64_def in
-    aux_value();
-
-    // We only need to help Z3 proving that public mem values are identical 
-    // after executing this instruction
-
-    let aux (x:int) : Lemma
-      (requires Public? s1'.memTaint.[x] || Public? s2'.memTaint.[x])
-      (ensures s1'.state.S.mem.[x] == s2'.state.S.mem.[x]) =
-        match dst with
-        | OConst _ | OReg _ -> ()
-        | OMem m -> begin
-        let ptr1 = S.eval_maddr m s1.state in
-        let ptr2 = S.eval_maddr m s2.state in
-        // Rsp is ensured to be Public if the taint analysis is successful
-        assert (ptr1 == ptr2);
-        // The instruction is executed after checking the taints of sources
-        let s1b = S.run (S.check (taint_match_list srcs t s1.memTaint)) s1.state in
-        let s2b = S.run (S.check (taint_match_list srcs t s2.memTaint)) s2.state in
-        if x < ptr1 || x >= ptr1 + 8 then (
-          // If we're outside the modified area, nothing changed, the property still holds
-          frame_update_heap_x ptr1 x v1 s1b.S.mem;
-          frame_update_heap_x ptr1 x v2 s2b.S.mem
-        ) else (
-          if Secret? t then ()
-          else (
-            correct_update_get ptr1 v1 s1b.S.mem;
-            correct_update_get ptr1 v2 s2b.S.mem;
-            // If values are identical, the bytes also are identical
-            same_mem_get_heap_val ptr1 s1'.state.S.mem s2'.state.S.mem
-          )
-        )
-        end
-        
-    in Classical.forall_intro (Classical.move_requires aux)
-
-
-let lemma_pop_same_public (ts:taintState) (ins:tainted_ins{BC.Pop? ins.i}) (s1:traceState) (s2:traceState) 
-  (fuel:nat)
-  :Lemma (let b, ts' = check_if_ins_consumes_fixed_time ins ts in
-  (b2t b ==> isExplicitLeakageFreeGivenStates (Ins ins) fuel ts ts' s1 s2))
-  = let b, ts' = check_if_ins_consumes_fixed_time ins ts in
-    Classical.move_requires (lemma_pop_same_public_aux ts ins s1 s2 fuel b) ts'
-
-#reset-options "--initial_ifuel 2 --max_ifuel 2 --initial_fuel 4 --max_fuel 4 --z3rlimit 20"
-val lemma_ins_same_public: (ts:taintState) -> (ins:tainted_ins{not (is_xmm_ins ins)}) -> (s1:traceState) -> (s2:traceState) -> (fuel:nat) -> Lemma
-(let b, ts' = check_if_ins_consumes_fixed_time ins ts in
-  (b2t b ==> isExplicitLeakageFreeGivenStates (Ins ins) fuel ts ts' s1 s2))
-*)
-let lemma_ins_same_public ts ins s1 s2 fuel = ()
-(*  match ins.i with
-  | BC.Push _ -> lemma_push_same_public ts ins s1 s2 fuel
-  | BC.Pop _ -> lemma_pop_same_public ts ins s1 s2 fuel
-  | BC.Alloc _ -> ()
-  | BC.Dealloc _ -> ()
-*)
 
 #reset-options "--initial_ifuel 1 --max_ifuel 1 --initial_fuel 1 --max_fuel 1 --z3rlimit 100"
 let lemma_instr_leakage_free (ts:taintState) (ins:tainted_ins) : Lemma
@@ -772,6 +627,127 @@ let lemma_instr_leakage_free (ts:taintState) (ins:tainted_ins) : Lemma
     ()
   )
 
+let lemma_dealloc_leakage_free (ts:taintState) (ins:tainted_ins) : Lemma
+  (requires BC.Dealloc? ins.i)
+  (ensures (
+    let (b, ts') = check_if_dealloc_consumes_fixed_time ins ts in
+    b2t b ==> isConstantTime (Ins ins) ts /\ isLeakageFree (Ins ins) ts ts'
+  ))
+  =
+  let (b, ts') = check_if_dealloc_consumes_fixed_time ins ts in
+  if b then
+  (
+    let code = Ins ins in
+    let lem (s1 s2:traceState) (fuel:nat) : Lemma
+      (requires is_explicit_leakage_free_lhs code fuel ts ts' s1 s2)
+      (ensures is_explicit_leakage_free_rhs code fuel ts ts' s1 s2)
+      [SMTPat (is_explicit_leakage_free_rhs code fuel ts ts' s1 s2)]
+      =
+      let BC.Dealloc n = ins.i in
+      let t_ins = ins.t in
+      let s1' = Some?.v (taint_eval_code code fuel s1) in
+      let s2' = Some?.v (taint_eval_code code fuel s2) in
+      let S.Vale_stack _ stack1 = s1.state.S.stack in
+      let S.Vale_stack _ stack2 = s2.state.S.stack in
+      let S.Vale_stack _ stack1' = s1'.state.S.stack in
+      let S.Vale_stack _ stack2' = s2'.state.S.stack in
+      let aux (x:int) : Lemma
+        (requires publicStackValueIsSame stack1 stack2 s1.stackTaint s2.stackTaint x)
+        (ensures publicStackValueIsSame stack1' stack2' s1'.stackTaint s2'.stackTaint x)
+        = 
+        Classical.forall_intro (fun s -> Vale.Set.lemma_sel_restrict s stack1 x);
+        Classical.forall_intro (fun s -> Vale.Set.lemma_sel_restrict s stack2 x)
+      in Classical.forall_intro (Classical.move_requires aux)
+    in
+    ()
+  )
+
+let lemma_push_leakage_free (ts:taintState) (ins:tainted_ins) : Lemma
+  (requires BC.Push? ins.i)
+  (ensures (
+    let (b, ts') = check_if_push_consumes_fixed_time ins ts in
+    b2t b ==> isConstantTime (Ins ins) ts /\ isLeakageFree (Ins ins) ts ts'
+  ))
+  =
+  let (b, ts') = check_if_push_consumes_fixed_time ins ts in
+  if b then
+  (
+    let code = Ins ins in
+    let lem (s1 s2:traceState) (fuel:nat) : Lemma
+      (requires is_explicit_leakage_free_lhs code fuel ts ts' s1 s2)
+      (ensures is_explicit_leakage_free_rhs code fuel ts ts' s1 s2)
+      [SMTPat (is_explicit_leakage_free_rhs code fuel ts ts' s1 s2)]
+      =
+      let BC.Push src = ins.i in
+      let t_ins = ins.t in
+      let t_out = operand_taint src ts t_ins in
+      let s1' = Some?.v (taint_eval_code code fuel s1) in
+      let s2' = Some?.v (taint_eval_code code fuel s2) in
+      let S.Vale_stack _ stack1 = s1.state.S.stack in
+      let S.Vale_stack _ stack2 = s2.state.S.stack in
+      let S.Vale_stack _ stack1' = s1'.state.S.stack in
+      let S.Vale_stack _ stack2' = s2'.state.S.stack in
+      let ptr1 = S.eval_reg rRsp s1.state - 8 in
+      let ptr2 = S.eval_reg rRsp s2.state - 8 in
+      let v1 = S.eval_operand src s1.state in
+      let v2 = S.eval_operand src s2.state in
+      assert (ptr1 == ptr2);
+      if t_out = Secret then ()
+      else (
+        let aux () : Lemma  (v1 == v2)
+          = match src with
+          | OConst _ | OReg _ -> ()
+          | OMem _ | OStack _ -> Opaque_s.reveal_opaque S.get_heap_val64_def
+        in
+        aux()
+      )
+    in
+    ()
+  )
+
+let lemma_pop_leakage_free (ts:taintState) (ins:tainted_ins) : Lemma
+  (requires BC.Pop? ins.i)
+  (ensures (
+    let (b, ts') = check_if_pop_consumes_fixed_time ins ts in
+    b2t b ==> isConstantTime (Ins ins) ts /\ isLeakageFree (Ins ins) ts ts'
+  ))
+  =
+  let (b, ts') = check_if_pop_consumes_fixed_time ins ts in
+  if b then
+  (
+    let code = Ins ins in
+    let lem (s1 s2:traceState) (fuel:nat) : Lemma
+      (requires is_explicit_leakage_free_lhs code fuel ts ts' s1 s2)
+      (ensures is_explicit_leakage_free_rhs code fuel ts ts' s1 s2)
+      [SMTPat (is_explicit_leakage_free_rhs code fuel ts ts' s1 s2)]
+      =
+      let BC.Pop dst = ins.i in
+      let t_ins = ins.t in
+      let s1' = Some?.v (taint_eval_code code fuel s1) in
+      let s2' = Some?.v (taint_eval_code code fuel s2) in
+      let stack_op = OStack (MReg rRsp 0) in
+      let v1 = S.eval_operand stack_op s1.state in
+      let v2 = S.eval_operand stack_op s2.state in
+      if ins.t = Secret then (
+        match dst with
+        | OReg _ -> ()
+        | OMem m -> ()
+        | OStack _ -> ()
+      ) else (
+        Opaque_s.reveal_opaque S.get_heap_val64_def;      
+        assert (v1 == v2);
+        match dst with
+        | OReg _ -> ()
+        | OMem m -> ()
+        | OStack _ -> ()
+      );
+      Classical.forall_intro_3 (fun s x (stack1:S.heap) -> Vale.Set.lemma_sel_restrict s stack1 x);
+      Classical.forall_intro_3 (fun s x (stack2:S.heap) -> Vale.Set.lemma_sel_restrict s stack2 x)      
+      in
+    ()
+  )
+
+
 #reset-options "--initial_ifuel 1 --max_ifuel 1 --initial_fuel 4 --max_fuel 4 --z3rlimit 40"
 let lemma_xor_leakage_free (ts:taintState) (ins:tainted_ins) : Lemma
   (requires BC.Instr? ins.i /\ S.AnnotateXor64? (BC.Instr?.annotation ins.i))
@@ -790,9 +766,13 @@ let lemma_xor_leakage_free (ts:taintState) (ins:tainted_ins) : Lemma
     lemma_instr_leakage_free ts ins
 
 #reset-options "--initial_ifuel 1 --max_ifuel 1 --initial_fuel 1 --max_fuel 1 --z3rlimit 20"
+
 let lemma_ins_leakage_free ts ins =
   let b, ts' = check_if_ins_consumes_fixed_time ins ts in
   match ins.i with
   | BC.Instr _ _ (S.AnnotateXor64 _) -> lemma_xor_leakage_free ts ins
   | BC.Instr _ _ _ -> lemma_instr_leakage_free ts ins
-  | _ -> ()
+  | BC.Alloc _ -> ()
+  | BC.Dealloc _ -> lemma_dealloc_leakage_free ts ins
+  | BC.Push _ -> lemma_push_leakage_free ts ins
+  | BC.Pop _ -> lemma_pop_leakage_free ts ins

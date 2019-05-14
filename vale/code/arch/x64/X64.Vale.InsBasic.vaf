@@ -35,20 +35,20 @@ module TS = X64.Taint_Semantics_s
 friend X64.Vale.StateLemmas
 friend X64.Vale.Decls
 
-//TODO: Find a better place for this.
 val lemma_valid_taint_match: (t:tainted_operand) -> (s:state) -> Lemma
   (requires valid_operand t s)
-  (ensures TS.taint_match (t_op_to_op t) (get_taint t) s.memTaint (state_to_S s).TS.state)
-  [SMTPat (TS.taint_match (t_op_to_op t) (get_taint t) s.memTaint (state_to_S s).TS.state)]
+  (ensures TS.taint_match (t_op_to_op t) (get_taint t) s.memTaint s.stackTaint (state_to_S s).TS.state)
+  [SMTPat (TS.taint_match (t_op_to_op t) (get_taint t) s.memTaint s.stackTaint (state_to_S s).TS.state)]
 
 let lemma_valid_taint_match o s = match o with
   | TMem m t ->
     let addr = eval_maddr m s in
     let aux (b:buffer64) (i:int) : Lemma
       (requires valid_maddr addr s.mem s.memTaint b i t)
-      (ensures TS.taint_match (t_op_to_op o) (get_taint o) s.memTaint (state_to_S s).TS.state) = 
+      (ensures TS.taint_match (t_op_to_op o) (get_taint o) s.memTaint s.stackTaint (state_to_S s).TS.state) = 
       X64.Memory.lemma_valid_taint64 b s.memTaint s.mem i t
     in Classical.forall_intro_2 (fun b i -> (fun b -> Classical.move_requires (aux b)) b i)
+  | TStack m t -> lemma_valid_taint_stack64 (eval_maddr m s) t s.stackTaint
   | _ -> ()
 
 #endverbatim
@@ -59,26 +59,27 @@ type memory:Type(1) := X64.Memory.mem;
 type stack_t:Type(1) := X64.Stack_i.stack;
 
 var ok:bool {:state ok()};
-var rax:nat64 {:state reg(Rax)};
-var rbx:nat64 {:state reg(Rbx)};
-var rcx:nat64 {:state reg(Rcx)};
-var rdx:nat64 {:state reg(Rdx)};
-var rsi:nat64 {:state reg(Rsi)};
-var rdi:nat64 {:state reg(Rdi)};
-var rbp:nat64 {:state reg(Rbp)};
-var rsp:nat64 {:state reg(Rsp)};
-var r8:nat64  {:state reg(R8)};
-var r9:nat64  {:state reg(R9)};
-var r10:nat64 {:state reg(R10)};
-var r11:nat64 {:state reg(R11)};
-var r12:nat64 {:state reg(R12)};
-var r13:nat64 {:state reg(R13)};
-var r14:nat64 {:state reg(R14)};
-var r15:nat64 {:state reg(R15)};
+var rax:nat64 {:state reg(rRax)};
+var rbx:nat64 {:state reg(rRbx)};
+var rcx:nat64 {:state reg(rRcx)};
+var rdx:nat64 {:state reg(rRdx)};
+var rsi:nat64 {:state reg(rRsi)};
+var rdi:nat64 {:state reg(rRdi)};
+var rbp:nat64 {:state reg(rRbp)};
+var rsp:nat64 {:state reg(rRsp)};
+var r8:nat64  {:state reg(rR8)};
+var r9:nat64  {:state reg(rR9)};
+var r10:nat64 {:state reg(rR10)};
+var r11:nat64 {:state reg(rR11)};
+var r12:nat64 {:state reg(rR12)};
+var r13:nat64 {:state reg(rR13)};
+var r14:nat64 {:state reg(rR14)};
+var r15:nat64 {:state reg(rR15)};
 var efl:nat64 {:state flags()};
 var mem:memory {:state mem()};
 var stack:stack_t {:state stack()};
 var memTaint:memtaint {:state memTaint()};
+var stackTaint:memtaint {:state stackTaint()};
 
 operand_type reg64:nat64 :=
 | inout rax | inout rbx | inout rcx | inout rdx
@@ -89,7 +90,7 @@ operand_type reg64:nat64 :=
 operand_type shift_amt64:nat64 := in rcx | const;
 operand_type reg_opr64:nat64 := reg64;
 operand_type Mem(in base:reg64, inline offset:int, ghost b:buffer64, ghost index:int, inline t:taint):int;
-operand_type Stack(in base:reg64, inline offset:int):int;
+operand_type Stack(in base:reg64, inline offset:int, inline t:taint):int;
 operand_type dst_opr64:nat64 @ va_operand := reg_opr64 | Mem | Stack;
 operand_type opr64:nat64 @ va_operand := dst_opr64 | const;
 
