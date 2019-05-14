@@ -221,7 +221,7 @@ procedure gcm_blocks128(
         validDstAddrs128(mem, out_ptr, out_b, len, memTaint, Secret);
         in_ptr  + 16 * len < pow2_64;
         out_ptr + 16 * len < pow2_64;
-        buffer_length(in_b) == buffer_length(out_b) /\ 256 * buffer_length(in_b) < pow2_32;
+        buffer_length(in_b) == buffer_length(out_b) /\ buffer_length(in_b) < pow2_32;
         len == buffer_length(in_b);
         mask == Mkfour(0x0C0D0E0F, 0x08090A0B, 0x04050607, 0x00010203);
         len < pow2_32;
@@ -440,7 +440,7 @@ procedure gcm_blocks_auth(
 
         buffer_length(auth_b) == auth_len;
         buffer_length(abytes_b) == 1;
-        4096 * auth_num_bytes < pow2_32;
+        auth_num_bytes < pow2_32;
         Xip + 0x20 < pow2_64;
 
         buffer_addr(keys_b, mem) + 0x80 < pow2_64;
@@ -619,10 +619,8 @@ procedure gcm_blocks(
         buffer_length(in128x6_b) == len128x6;
         buffer_length(in128_b) == len128;
         buffer_length(inout_b) == 1;
-        8 * plain_num_bytes < pow2_32;
-        4096 * (buffer_length(in128x6_b)) * 16 < pow2_32;
-        256 * buffer_length(in128_b) < pow2_32;
-        4096 * auth_num_bytes < pow2_32;
+        plain_num_bytes < pow2_32;
+        auth_num_bytes < pow2_32;
         Xip + 0x20 < pow2_64;
 
         buffer_addr(keys_b, mem) + 0x80 < pow2_64;
@@ -651,8 +649,8 @@ procedure gcm_blocks(
                                loc_buffer(inout_b))))), old(mem), mem);
 
         // Semantics
-        8 * old(plain_num_bytes) < pow2_32;
-        8 * old(auth_num_bytes) < pow2_32;
+        old(plain_num_bytes) < pow2_32;
+        old(auth_num_bytes) < pow2_32;
 
         let iv_LE := old(buffer128_read(iv_b, 0, mem));
         let iv_BE := reverse_bytes_quad32(iv_LE);
@@ -923,10 +921,8 @@ procedure gcm_blocks_wrapped(
         buffer_length(in128_b) == len128;
         buffer_length(inout_b) == 1;
 
-        8 * plain_num_bytes < pow2_32;
-        4096 * (buffer_length(in128x6_b)) * 16 < pow2_32;
-        256 * buffer_length(in128_b) < pow2_32;
-        4096 * auth_num_bytes < pow2_32;
+        plain_num_bytes < pow2_32;
+        auth_num_bytes < pow2_32;
         Xip + 0x20 < pow2_64;
 
         buffer_addr(keys_b, mem) + 0x80 < pow2_64;
@@ -936,8 +932,6 @@ procedure gcm_blocks_wrapped(
         len128x6 > 0 ==> len128x6 >= 18;
         12 + len128x6 + 6 < pow2_32;
 
-        4096 * (len128x6 + len128 + 1) * 16 < pow2_32;
-        
         len128x6 * (128/8) + len128 * (128/8) <= plain_num_bytes < len128x6 * (128/8) + len128 * (128/8) + 128/8;
         auth_len * (128/8) <= auth_num_bytes < auth_len * (128/8) + 128/8;
 
@@ -958,8 +952,8 @@ procedure gcm_blocks_wrapped(
                                loc_buffer(inout_b))))), old(mem), mem);
 
         // Semantics
-        8 * old(plain_num_bytes) < pow2_32;
-        8 * old(auth_num_bytes) < pow2_32;
+        old(plain_num_bytes) < pow2_32;
+        old(auth_num_bytes) < pow2_32;
 
         let iv_LE := old(buffer128_read(iv_b, 0, mem));
         let iv_BE := reverse_bytes_quad32(iv_LE);
@@ -971,8 +965,8 @@ procedure gcm_blocks_wrapped(
         let cipher_raw_quads := append(append(s128(mem, out128x6_b), s128(mem, out128_b)), s128(mem, inout_b));
         let cipher_bytes := slice_work_around(le_seq_quad32_to_bytes(cipher_raw_quads), old(plain_num_bytes));
         
-        4096 * length(auth_bytes)  < pow2_32 /\
-        4096 * length(plain_bytes) < pow2_32 /\
+        length(auth_bytes)  < pow2_32 /\
+        length(plain_bytes) < pow2_32 /\
         cipher_bytes == 
             gcm_encrypt_LE(alg, seq_nat32_to_seq_nat8_LE(key), be_quad32_to_bytes(iv_BE), 
                            plain_bytes, auth_bytes)._1 /\
@@ -1351,10 +1345,8 @@ procedure gcm_blocks_stdcall(
         buffer_length(in128_b) == len128;
         buffer_length(inout_b) == 1;
 
-        8 * plain_num_bytes < pow2_32;
-        4096 * (buffer_length(in128x6_b)) * 16 < pow2_32;
-        256 * buffer_length(in128_b) < pow2_32;
-        4096 * auth_num_bytes < pow2_32;
+        plain_num_bytes < pow2_32;
+        auth_num_bytes < pow2_32;
         xip + 0x20 < pow2_64;
 
         buffer_addr(keys_b, mem) + 0x80 < pow2_64;
@@ -1363,8 +1355,6 @@ procedure gcm_blocks_stdcall(
         len128x6 % 6 == 0;
         len128x6 > 0 ==> len128x6 >= 18;
         12 + len128x6 + 6 < pow2_32;
-
-        4096 * (len128x6 + len128 + 1) * 16 < pow2_32;
 
         len128x6 * (128/8) + len128 * (128/8) <= plain_num_bytes < len128x6 * (128/8) + len128 * (128/8) + 128/8;
         auth_len * (128/8) <= auth_num_bytes < auth_len * (128/8) + 128/8;
@@ -1391,8 +1381,8 @@ procedure gcm_blocks_stdcall(
                                loc_buffer(inout_b)))))), old(mem), mem);
 
         // Semantics
-        8 * old(plain_num_bytes) < pow2_32;
-        8 * old(auth_num_bytes) < pow2_32;
+        old(plain_num_bytes) < pow2_32;
+        old(auth_num_bytes) < pow2_32;
 
         let iv_LE := old(buffer128_read(iv_b, 0, mem));
         let iv_BE := reverse_bytes_quad32(iv_LE);
@@ -1404,8 +1394,8 @@ procedure gcm_blocks_stdcall(
         let cipher_raw_quads := append(append(s128(mem, out128x6_b), s128(mem, out128_b)), s128(mem, inout_b));
         let cipher_bytes := slice_work_around(le_seq_quad32_to_bytes(cipher_raw_quads), old(plain_num_bytes));
         
-        4096 * length(auth_bytes)  < pow2_32 /\
-        4096 * length(plain_bytes) < pow2_32 /\
+        length(auth_bytes)  < pow2_32 /\
+        length(plain_bytes) < pow2_32 /\
         is_aes_key(alg, seq_nat32_to_seq_nat8_LE(key)) /\
         cipher_bytes == 
             gcm_encrypt_LE(alg, seq_nat32_to_seq_nat8_LE(key), be_quad32_to_bytes(iv_BE), 
