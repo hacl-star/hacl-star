@@ -24,6 +24,7 @@ let correct_update_get ptr v mem =
   reveal_opaque update_heap64_def
 
 let same_domain_update ptr v mem =
+  FStar.Pervasives.reveal_opaque (`%valid_addr64) valid_addr64;
   reveal_opaque update_heap64_def;
   let mem2 = update_heap64 ptr v mem in
   assert (Set.equal (Map.domain mem) (Map.domain mem2))
@@ -47,6 +48,7 @@ let update_heap32_get_heap32 ptr mem =
   assert (Map.equal mem (update_heap32 ptr (get_heap_val32 ptr mem) mem))
 
 let frame_update_heap128 ptr v mem =
+  Opaque_s.reveal_opaque update_heap128_def;
   let mem1 = update_heap32 ptr v.lo0 mem in
   frame_update_heap32 ptr v.lo0 mem;
   let mem2 = update_heap32 (ptr+4) v.lo1 mem1 in
@@ -64,6 +66,7 @@ let correct_update_get32 (ptr:int) (v:nat32) (mem:heap) : Lemma
 #reset-options "--z3rlimit 30 --using_facts_from 'Prims Opaque_s X64.Bytes_Semantics_s Words_s Types_s'"
 
 let correct_update_get128 ptr v mem =
+  Opaque_s.reveal_opaque update_heap128_def;
   reveal_opaque get_heap_val32_def;
   reveal_opaque update_heap32_def;
   reveal_opaque get_heap_val128_def;
@@ -83,6 +86,8 @@ let correct_update_get128 ptr v mem =
 #reset-options "--z3rlimit 10 --max_fuel 2 --initial_fuel 2 --max_ifuel 1 --initial_ifuel 1"
 
 let same_domain_update128 ptr v mem =
+  FStar.Pervasives.reveal_opaque (`%valid_addr128) valid_addr128;
+  Opaque_s.reveal_opaque update_heap128_def;
   let memf = update_heap128 ptr v mem in
   reveal_opaque update_heap32_def;
   // These two lines are apparently needed
@@ -106,6 +111,7 @@ let update_operand_flags_same_domains (dst:operand) (v:nat64) (s_orig s:machine_
   Set.equal (Map.domain s.ms_mem) (Map.domain s1.ms_mem))
   [SMTPat (update_operand_preserve_flags'' dst v s_orig s)]
   =
+  FStar.Pervasives.reveal_opaque (`%valid_addr64) valid_addr64;
   match dst with
   | OMem _ -> reveal_opaque update_heap64_def
   | _ -> ()
@@ -124,6 +130,8 @@ let update_operand128_flags_same_domains (o:mov128_op) (v:quad32) (s_orig s:mach
   Set.equal (Map.domain s.ms_mem) (Map.domain s1.ms_mem))
   [SMTPat (update_mov128_op_preserve_flags'' o v s_orig s)]
   =
+  FStar.Pervasives.reveal_opaque (`%valid_addr128) valid_addr128;
+  Opaque_s.reveal_opaque update_heap128_def;
   match o with
   | Mov128Mem m ->
       let ptr = eval_maddr m s_orig in
@@ -181,6 +189,8 @@ let update_operand128_flags_same_unspecified (o:mov128_op) (v:quad32) (s_orig s:
   (forall x.{:pattern (s.ms_mem.[x])} not (Map.contains s1.ms_mem x && Map.contains s.ms_mem x) ==> s1.ms_mem.[x] == s.ms_mem.[x]))
   [SMTPat (update_mov128_op_preserve_flags'' o v s_orig s)]
   =
+  FStar.Pervasives.reveal_opaque (`%valid_addr128) valid_addr128;
+  Opaque_s.reveal_opaque update_heap128_def;
   match o with
   | Mov128Mem m ->
       let ptr = eval_maddr m s_orig in
@@ -259,5 +269,6 @@ let eval_ins_bs_same_unspecified (ins:ins) (s0:machine_state) : Lemma
 let eval_ins_same_unspecified ins s0 =
   let t = ins.TS.t in
   let i = ins.TS.i in
-  let s = run (check (TS.taint_match_ins i t s0.ms_memTaint s0.ms_stackTaint)) s0 in  
+  let s0 = {s0 with ms_trace = []} in
+  let s = run (check (TS.taint_match_ins i t s0.ms_memTaint s0.ms_stackTaint)) s0 in
   eval_ins_bs_same_unspecified i s
