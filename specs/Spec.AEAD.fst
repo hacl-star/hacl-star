@@ -38,8 +38,8 @@ friend GCTR
 let gcm_encrypt_tag_length alg key iv plain auth: Lemma
   (requires
     AES_s.is_aes_key alg key /\
-    4096 * S.length plain < Words_s.pow2_32 /\
-    4096 * S.length auth < Words_s.pow2_32)
+    S.length plain < Words_s.pow2_32 /\
+    S.length auth < Words_s.pow2_32)
   (ensures (
     let c, t = GCM_s.gcm_encrypt_LE alg key iv plain auth in
     S.length t = 16))
@@ -49,8 +49,8 @@ let gcm_encrypt_tag_length alg key iv plain auth: Lemma
 let gcm_encrypt_cipher_length alg key iv plain auth: Lemma
   (requires
     AES_s.is_aes_key alg key /\
-    4096 * S.length plain < Words_s.pow2_32 /\
-    4096 * S.length auth < Words_s.pow2_32)
+    S.length plain < Words_s.pow2_32 /\
+    S.length auth < Words_s.pow2_32)
   (ensures (
     let c, t = GCM_s.gcm_encrypt_LE alg key iv plain auth in
     S.length c = S.length plain))
@@ -74,8 +74,6 @@ let encrypt #a kv iv ad plain =
       // data", potato, potato
       let ad_nat = Words.Seq_s.seq_uint8_to_seq_nat8 ad in
       let plain_nat = Words.Seq_s.seq_uint8_to_seq_nat8 plain in
-      assert (max_length a = pow2 20 - 1 - 16);
-      assert_norm (4096 * (pow2 20 - 1 - 16) < Words_s.pow2_32);
       let cipher_nat, tag_nat =
         GCM_s.gcm_encrypt_LE (vale_alg_of_alg a) kv_nat iv_nat plain_nat ad_nat
       in
@@ -91,8 +89,8 @@ let encrypt #a kv iv ad plain =
 let gcm_decrypt_cipher_length alg key iv plain auth tag: Lemma
   (requires
     AES_s.is_aes_key alg key /\
-    4096 * S.length plain < Words_s.pow2_32 /\
-    4096 * S.length auth < Words_s.pow2_32)
+    S.length plain < Words_s.pow2_32 /\
+    S.length auth < Words_s.pow2_32)
   (ensures (
     let c, t = GCM_s.gcm_decrypt_LE alg key iv plain auth tag in
     S.length c = S.length plain))
@@ -109,8 +107,6 @@ let decrypt #a kv iv ad cipher =
       Spec.Chacha20Poly1305.aead_decrypt kv iv cipher tag ad
 
   | AES128_GCM | AES256_GCM ->
-      assert (max_length a = pow2 20 - 1 - 16);
-      assert_norm (4096 * (pow2 20 - 1 - 16) < Words_s.pow2_32);
       let kv_nat = Words.Seq_s.seq_uint8_to_seq_nat8 kv in
       let iv_nat = Words.Seq_s.seq_uint8_to_seq_nat8 iv in
       let iv_nat = S.append iv_nat (S.create 4 0) in

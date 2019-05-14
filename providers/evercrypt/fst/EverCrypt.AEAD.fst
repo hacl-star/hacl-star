@@ -281,11 +281,6 @@ fun s iv ad ad_len plain plain_len cipher tag ->
 
     in lemma_hkeys_reqs ();
 
-    // These asserts prove that 4096 * (len {plain, ad}) are smaller than pow2_32
-    assert (max_length a = pow2 20 - 1 - 16);
-    assert_norm (4096 * (pow2 20 - 1) < Words_s.pow2_32);
-    assert_norm (4096 * (pow2 20 - 1 - 16) < Words_s.pow2_32);
-
     aes_gcm_encrypt a
       (let k = G.reveal kv in
       let k_nat = Words.Seq_s.seq_uint8_to_seq_nat8 k in
@@ -315,8 +310,6 @@ fun s iv ad ad_len plain plain_len cipher tag ->
       // data", potato, potato
       let ad_nat = Words.Seq_s.seq_uint8_to_seq_nat8 (B.as_seq h0 ad) in
       let plain_nat = Words.Seq_s.seq_uint8_to_seq_nat8 (B.as_seq h0 plain) in
-      assert (max_length a = pow2 20 - 1 - 16);
-      assert_norm (4096 * (pow2 20 - 1 - 16) < Words_s.pow2_32);
       let cipher_nat, tag_nat =
         GCM_s.gcm_encrypt_LE (vale_alg_of_alg a) kv_nat iv_nat plain_nat ad_nat
       in
@@ -403,13 +396,6 @@ fun s iv ad ad_len cipher cipher_len tag dst ->
 
       in lemma_iv_eq ();
 
-      // These asserts prove that 4096 * (len {cipher, ad}) are smaller than pow2_32
-      assert (max_length AES128_GCM = pow2 20 - 1 - 16);
-      assert (max_length AES256_GCM = pow2 20 - 1 - 16);
-      assert_norm (4096 * (pow2 20 - 1) < Words_s.pow2_32);
-      assert_norm (4096 * (pow2 20 - 1 - 16) < Words_s.pow2_32);
-
-
       let h0 = get() in
 
       // There is no SMTPat on le_bytes_to_seq_quad32_to_bytes and the converse,
@@ -466,9 +452,6 @@ fun s iv ad ad_len cipher cipher_len tag dst ->
         let ad_nat = Words.Seq_s.seq_uint8_to_seq_nat8 (B.as_seq h0 ad) in
         let cipher_nat = Words.Seq_s.seq_uint8_to_seq_nat8 (B.as_seq h0 cipher) in
         let tag_nat = Words.Seq_s.seq_uint8_to_seq_nat8 (B.as_seq h0 tag) in
-        assert (max_length AES128_GCM = pow2 20 - 1 - 16);
-        assert (max_length AES256_GCM = pow2 20 - 1 - 16);
-        assert_norm (4096 * (pow2 20 - 1 - 16) < Words_s.pow2_32);
         let plain_nat, success =
           GCM_s.gcm_decrypt_LE (vale_alg_of_alg a) kv_nat iv_nat cipher_nat ad_nat tag_nat
         in
