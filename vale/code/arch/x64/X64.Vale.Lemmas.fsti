@@ -6,8 +6,8 @@ module BC = X64.Bytes_Code_s
 module BS = X64.Bytes_Semantics_s
 module TS = X64.Taint_Semantics_s
 
-unfold let code = TS.tainted_code
-unfold let codes = TS.tainted_codes
+unfold let code = BS.code
+unfold let codes = BS.codes
 unfold let ocmp = BS.ocmp
 unfold let fuel = nat
 

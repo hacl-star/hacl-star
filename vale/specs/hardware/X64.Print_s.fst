@@ -240,14 +240,14 @@ let print_cmp (c:ocmp) (counter:int) (p:printer) : string =
   | OLt o1 o2 -> print_ops o1 o2 ^ "  jb " ^ "L" ^ string_of_int counter ^ "\n"
   | OGt o1 o2 -> print_ops o1 o2 ^ "  ja " ^ "L" ^ string_of_int counter ^ "\n"
 
-let rec print_block (b:tainted_codes) (n:int) (p:printer) : string * int =
+let rec print_block (b:codes) (n:int) (p:printer) : string * int =
   match b with
   | Nil -> "", n
   | head :: tail ->
     let head_str, n' = print_code head n p in
     let rest, n'' = print_block tail n' p in
     head_str ^ rest, n''
-and print_code (c:tainted_code) (n:int) (p:printer) : string * int =
+and print_code (c:code) (n:int) (p:printer) : string * int =
   match c with
   | Ins ins -> (print_ins ins p ^ "\n", n)
   | Block b -> print_block b n p
@@ -274,7 +274,7 @@ and print_code (c:tainted_code) (n:int) (p:printer) : string * int =
 let print_header (p:printer) =
   print_string (p.header())
 
-let print_proc (name:string) (code:tainted_code) (label:int) (p:printer) : FStar.All.ML int =
+let print_proc (name:string) (code:code) (label:int) (p:printer) : FStar.All.ML int =
   let proc = p.proc_name name in
   let code_str, final_label = print_code code label p in
   let ret = p.ret name in

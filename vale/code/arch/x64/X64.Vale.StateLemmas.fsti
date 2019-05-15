@@ -21,7 +21,7 @@ unfold let trace' s = s.BS.ms_trace
 
 val same_domain: sv:state -> s:BS.machine_state -> prop0
 
-val same_domain_eval_ins (c:TS.tainted_code{Ins? c}) (f:nat) (s0:BS.machine_state) (sv:state) : Lemma
+val same_domain_eval_ins (c:BS.code{Ins? c}) (f:nat) (s0:BS.machine_state) (sv:state) : Lemma
   (requires same_domain sv s0)
   (ensures (let s1 = TS.taint_eval_code c f s0 in
      same_domain sv (Some?.v s1))
@@ -86,7 +86,7 @@ val lemma_of_to : s:state -> Lemma
   (ensures s == state_of_S s (state_to_S s))
   [SMTPat (state_of_S s (state_to_S s))]
 
-val lemma_to_of_eval_ins: (c:TS.tainted_code) -> (s0:state) -> Lemma
+val lemma_to_of_eval_ins: (c:BS.code) -> (s0:state) -> Lemma
   (requires Ins? c)
   (ensures (
     let Some sM = TS.taint_eval_code c 0 (state_to_S s0) in

@@ -237,7 +237,7 @@ let create_initial_trusted_state
     (s0, mem)
 
 ////////////////////////////////////////////////////////////////////////////////
-let prediction_pre_rel_t (c:TS.tainted_code) (args:arg_list) =
+let prediction_pre_rel_t (c:BS.code) (args:arg_list) =
     h0:mem_roots args ->
     prop
 
@@ -245,7 +245,7 @@ let return_val_t (sn:BS.machine_state) = r:UInt64.t{UInt64.v r == BS.eval_reg MS
 let return_val (sn:BS.machine_state) : return_val_t sn =
   UInt64.uint_to_t (BS.eval_reg MS.rRax sn)
 
-let prediction_post_rel_t (c:TS.tainted_code) (args:arg_list) =
+let prediction_post_rel_t (c:BS.code) (args:arg_list) =
     h0:mem_roots args ->
     s0:BS.machine_state ->
     (UInt64.t & nat & mem) ->
@@ -257,7 +257,7 @@ let prediction_pre
     (n:nat)
     (arg_reg:arg_reg_relation n)
     (down_mem:down_mem_t)
-    (c:TS.tainted_code)
+    (c:BS.code)
     (args:arg_list)
     (pre_rel: prediction_pre_rel_t c args)
     (h0:mem_roots args)
@@ -272,7 +272,7 @@ let prediction_post
     (regs_modified:MS.reg -> bool)
     (xmms_modified:MS.xmm -> bool)
     (down_mem:down_mem_t)
-    (c:TS.tainted_code)
+    (c:BS.code)
     (args:arg_list)
     (post_rel: prediction_post_rel_t c args)
     (h0:mem_roots args)
@@ -297,7 +297,7 @@ let prediction
     (regs_modified:MS.reg -> bool)
     (xmms_modified:MS.xmm -> bool)
     (down_mem:down_mem_t)
-    (c:TS.tainted_code)
+    (c:BS.code)
     (args:arg_list)
     (pre_rel:prediction_pre_rel_t c args)
     (post_rel:prediction_post_rel_t c args) =
@@ -325,7 +325,7 @@ let as_lowstar_sig_post
     (regs_modified:MS.reg -> bool)
     (xmms_modified:MS.xmm -> bool)
     (down_mem:down_mem_t)
-    (c:TS.tainted_code)
+    (c:BS.code)
     (args:arg_list)
     (h0:mem_roots args)
     (#pre_rel:_)
@@ -354,7 +354,7 @@ let as_lowstar_sig_post_weak
     (regs_modified:MS.reg -> bool)
     (xmms_modified:MS.xmm -> bool)    
     (down_mem:down_mem_t)
-    (c:TS.tainted_code)
+    (c:BS.code)
     (args:arg_list)
     (h0:mem_roots args)
     (#pre_rel:_)
@@ -378,7 +378,7 @@ let as_lowstar_sig_post_weak
      post_rel h0 s0 (return_val s1, fuel, final_mem) s1))
 
 [@__reduce__]
-let as_lowstar_sig (c:TS.tainted_code) =
+let as_lowstar_sig (c:BS.code) =
     n:nat ->
     arg_reg:arg_reg_relation n ->
     regs_modified:(MS.reg -> bool) ->
@@ -392,14 +392,14 @@ let as_lowstar_sig (c:TS.tainted_code) =
         (requires (fun h0 -> mem_roots_p h0 args /\ pre_rel h0))
         (ensures fun h0 ret h1 -> as_lowstar_sig_post n arg_reg regs_modified xmms_modified down_mem c args h0 predict ret h1)
 
-val wrap_variadic (c:TS.tainted_code) : as_lowstar_sig c
+val wrap_variadic (c:BS.code) : as_lowstar_sig c
 
 [@__reduce__]
 let (++) (#t:td) (x:td_as_type t) (args:list arg) = (| t, x |) :: args
 
 [@__reduce__]
 let rec rel_gen_t
-      (c:TS.tainted_code)
+      (c:BS.code)
       (td:list td)
       (args:arg_list{List.length args + List.length td <= 20})
       (f: arg_list -> Type) =
@@ -426,7 +426,7 @@ let rec prediction_t
       (regs_modified:MS.reg -> bool)
       (xmms_modified:MS.xmm -> bool)
       (down_mem:down_mem_t)
-      (c:TS.tainted_code)
+      (c:BS.code)
       (dom:list td)
       (args:arg_list{List.length dom + List.length args <= 20})
       (pre_rel:rel_gen_t c dom args (prediction_pre_rel_t c))
@@ -457,7 +457,7 @@ let elim_predict_t_nil
       (#regs_modified:MS.reg -> bool)
       (#xmms_modified:MS.xmm -> bool)
       (#down_mem:down_mem_t)
-      (#c:TS.tainted_code)
+      (#c:BS.code)
       (#args:arg_list)
       (#pre_rel:_)
       (#post_rel:_)
@@ -472,7 +472,7 @@ let elim_predict_t_cons
       (#regs_modified:MS.reg -> bool)
       (#xmms_modified:MS.xmm -> bool)
       (#down_mem:down_mem_t)
-      (#c:TS.tainted_code)
+      (#c:BS.code)
       (hd:td)
       (tl:list td)
       (#args:arg_list{List.length args + List.length tl <= 19})
@@ -492,7 +492,7 @@ let rec as_lowstar_sig_t
       (regs_modified:MS.reg -> bool)
       (xmms_modified:MS.xmm -> bool)
       (down_mem:down_mem_t)
-      (c:TS.tainted_code)
+      (c:BS.code)
       (dom:list td)
       (args:arg_list{List.length args + List.length dom <= 20})
       (pre_rel:rel_gen_t c dom args (prediction_pre_rel_t c))
@@ -530,7 +530,7 @@ val wrap'
     (regs_modified:MS.reg -> bool)
     (xmms_modified:MS.xmm -> bool)    
     (down_mem:down_mem_t)
-    (c:TS.tainted_code)
+    (c:BS.code)
     (dom:list td{List.length dom <= 20})
     (#pre_rel:rel_gen_t c dom [] (prediction_pre_rel_t c))
     (#post_rel:rel_gen_t c dom [] (prediction_post_rel_t c))
@@ -545,7 +545,7 @@ let rec as_lowstar_sig_t_weak'
       (regs_modified:MS.reg -> bool)
       (xmms_modified:MS.xmm -> bool)
       (down_mem:down_mem_t)
-      (c:TS.tainted_code)
+      (c:BS.code)
       (dom:list td)
       (args:list arg{List.length args + List.length dom <= 20})
       (pre_rel:rel_gen_t c dom args (prediction_pre_rel_t c))
@@ -583,7 +583,7 @@ val wrap_weak'
     (regs_modified:MS.reg -> bool)
     (xmms_modified:MS.xmm -> bool)
     (down_mem:down_mem_t)
-    (c:TS.tainted_code)
+    (c:BS.code)
     (dom:list td{List.length dom <= 20})
     (#pre_rel:rel_gen_t c dom [] (prediction_pre_rel_t c))
     (#post_rel:rel_gen_t c dom [] (prediction_post_rel_t c))
@@ -598,7 +598,7 @@ let as_lowstar_sig_t_weak
       (regs_modified:MS.reg -> bool)
       (xmms_modified:MS.xmm -> bool)
       (down_mem:down_mem_t)
-      (c:TS.tainted_code)
+      (c:BS.code)
       (dom:list td)
       (args:list arg{List.length args + List.length dom <= n})
       (pre_rel:rel_gen_t c dom args (prediction_pre_rel_t c))
@@ -612,7 +612,7 @@ val wrap_weak
     (regs_modified:MS.reg -> bool)
     (xmms_modified:MS.xmm -> bool)
     (down_mem:down_mem_t)
-    (c:TS.tainted_code)
+    (c:BS.code)
     (dom:arity_ok n td)
     (#pre_rel:rel_gen_t c dom [] (prediction_pre_rel_t c))
     (#post_rel:rel_gen_t c dom [] (prediction_post_rel_t c))

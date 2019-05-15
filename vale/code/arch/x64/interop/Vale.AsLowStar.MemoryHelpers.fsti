@@ -159,7 +159,7 @@ val immbuffer_addr_reveal
 val fuel_eq : squash (V.va_fuel == nat)
 
 val decls_eval_code_reveal
-  (c:TS.tainted_code)
+  (c:BS.code)
   (va_s0 va_s1:_)
   (f:V.va_fuel) : Lemma
   (requires (V.eval_code c va_s0 f va_s1))

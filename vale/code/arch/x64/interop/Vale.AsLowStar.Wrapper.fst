@@ -494,13 +494,13 @@ let core_create_lemma
     Vale.AsLowStar.MemoryHelpers.core_create_lemma_taint_hyp #max_arity #arg_reg args h0;
     core_create_lemma_state #max_arity #arg_reg args h0
 
-let eval_code_ts (c:TS.tainted_code)
+let eval_code_ts (c:BS.code)
                  (s0:BS.machine_state)
                  (f0:nat)
                  (s1:BS.machine_state) : Type0 =
   VL.state_eq_opt (TS.taint_eval_code c f0 s0) (Some s1)
 
-let eval_code_rel (c:TS.tainted_code)
+let eval_code_rel (c:BS.code)
                   (va_s0 va_s1:_) (f:V.va_fuel)
   : Lemma
      (requires (V.eval_code c va_s0 f va_s1))
@@ -595,7 +595,7 @@ let vale_lemma_as_prediction
           (post:VSig.vale_post_tl [])
           (v:VSig.vale_sig_tl regs_modified xmms_modified args (coerce code) pre post)
    = fun h0 s0 ->
-       let c_code : TS.tainted_code = coerce code in
+       let c_code : BS.code = coerce code in
        let va_s0 = LSig.create_initial_vale_state #max_arity #arg_reg args h0 in
        core_create_lemma #max_arity #arg_reg args h0;
        assert (SL.state_to_S va_s0 == s0);

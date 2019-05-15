@@ -10,7 +10,7 @@ module L = FStar.List.Tot
 let normal_term_spec (#a:Type) (x:a) : Lemma (normal x == x) =
   ()
 
-let mk_ins (i:S.ins) : Pure tainted_code
+let mk_ins (i:S.ins) : Pure S.code
   (requires True)
   (ensures fun c ->
     c == Ins i /\

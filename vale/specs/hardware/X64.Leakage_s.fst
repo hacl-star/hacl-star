@@ -70,7 +70,7 @@ let constTimeInvariant (ts:analysis_taints) (s:machine_state) (s':machine_state)
   /\ s.ms_trace = s'.ms_trace
 
 
-let isConstantTimeGivenStates (code:tainted_code) (fuel:nat) (ts:analysis_taints) (s1:machine_state) (s2:machine_state) =
+let isConstantTimeGivenStates (code:code) (fuel:nat) (ts:analysis_taints) (s1:machine_state) (s2:machine_state) =
   let r1 = taint_eval_code code fuel s1 in
   let r2 = taint_eval_code code fuel s2 in
   ( (Some? r1) /\ (Some? r2)
@@ -79,31 +79,31 @@ let isConstantTimeGivenStates (code:tainted_code) (fuel:nat) (ts:analysis_taints
    /\ constTimeInvariant ts s1 s2
   ) ==> (Some?.v r1).ms_trace = (Some?.v r2).ms_trace
 
-let isConstantTime (code:tainted_code) (ts:analysis_taints) =
+let isConstantTime (code:code) (ts:analysis_taints) =
   forall s1 s2 fuel.
       isConstantTimeGivenStates code fuel ts s1 s2
 
-let is_explicit_leakage_free_lhs (code:tainted_code) (fuel:nat)
+let is_explicit_leakage_free_lhs (code:code) (fuel:nat)
                                  (ts:analysis_taints) (ts':analysis_taints) (s1:machine_state) (s2:machine_state)
   = s1.ms_ok /\ s2.ms_ok /\ constTimeInvariant ts s1 s2 /\
     (let r1 = taint_eval_code code fuel s1 in
      let r2 = taint_eval_code code fuel s2 in
      Some? r1 /\ Some? r2 /\ (Some?.v r1).ms_ok /\ (Some?.v r2).ms_ok)
 
-let is_explicit_leakage_free_rhs (code:tainted_code) (fuel:nat)
+let is_explicit_leakage_free_rhs (code:code) (fuel:nat)
                                  (ts:analysis_taints) (ts':analysis_taints) (s1:machine_state) (s2:machine_state)
   = let r1 = taint_eval_code code fuel s1 in
     let r2 = taint_eval_code code fuel s2 in
     Some? r1 /\ Some? r2 /\ publicValuesAreSame ts' (Some?.v r1) (Some?.v r2)
 
-let isExplicitLeakageFreeGivenStates (code:tainted_code) (fuel:nat)
+let isExplicitLeakageFreeGivenStates (code:code) (fuel:nat)
                                      (ts:analysis_taints) (ts':analysis_taints) (s1:machine_state) (s2:machine_state)
   = is_explicit_leakage_free_lhs code fuel ts ts' s1 s2 ==> is_explicit_leakage_free_rhs code fuel ts ts' s1 s2
 
-let isExplicitLeakageFree (code:tainted_code) (ts:analysis_taints) (ts':analysis_taints) =
+let isExplicitLeakageFree (code:code) (ts:analysis_taints) (ts':analysis_taints) =
   forall s1 s2 fuel.
     isExplicitLeakageFreeGivenStates code fuel ts ts' s1 s2
 
-let isLeakageFree (code:tainted_code) (ts:analysis_taints) (ts':analysis_taints) =
+let isLeakageFree (code:code) (ts:analysis_taints) (ts':analysis_taints) =
     isConstantTime code ts
   /\ isExplicitLeakageFree code ts ts'

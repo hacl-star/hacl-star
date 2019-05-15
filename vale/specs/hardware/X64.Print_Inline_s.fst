@@ -126,14 +126,14 @@ let print_cmp (c:ocmp) (counter:int) (p:P.printer) : string =
   | OGt o1 o2 -> "    \"" ^ print_ops o1 o2 ^ "  ja " ^ "L" ^ string_of_int counter ^ ";\"\n"
 
 
-let rec print_block (b:tainted_codes) (n:int) (p:P.printer) : string * int =
+let rec print_block (b:codes) (n:int) (p:P.printer) : string * int =
   match b with
   | Nil -> "", n
   | head :: tail ->
     let head_str, n' = print_code head n p in
     let rest, n'' = print_block tail n' p in
     head_str ^ rest, n''
-and print_code (c:tainted_code) (n:int) (p:P.printer) : string * int =
+and print_code (c:code) (n:int) (p:P.printer) : string * int =
   match c with
   | Ins ins -> ("    \"" ^ P.print_ins ins p ^ ";\"\n", n)
   | Block b -> print_block b n p
@@ -164,7 +164,7 @@ let print_inline
   (ret_val:option string) 
   (n:nat)
   (args:list td{List.length args = n})
-  (code:tainted_code)
+  (code:code)
   (of_arg:reg_nat (List.length args) -> reg)
   (regs_mod:reg -> bool)
   : FStar.All.ML int =

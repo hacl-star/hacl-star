@@ -300,14 +300,11 @@ let taint_eval_ocmp (ts:machine_state) (c:ocmp) : GTot (machine_state * bool) =
     in
   (s, eval_ocmp s c)
 
-type tainted_code = precode ins ocmp
-type tainted_codes = list tainted_code
-
-val taint_eval_code (c:tainted_code) (fuel:nat) (s:machine_state) : GTot (option machine_state)
+val taint_eval_code (c:S.code) (fuel:nat) (s:machine_state) : GTot (option machine_state)
   (decreases %[fuel; c; 1])
-val taint_eval_codes (l:tainted_codes) (fuel:nat) (s:machine_state) : GTot (option machine_state)
+val taint_eval_codes (l:S.codes) (fuel:nat) (s:machine_state) : GTot (option machine_state)
   (decreases %[fuel; l])
-val taint_eval_while (c:tainted_code{While? c}) (fuel:nat) (s:machine_state) : GTot (option machine_state)
+val taint_eval_while (c:S.code{While? c}) (fuel:nat) (s:machine_state) : GTot (option machine_state)
   (decreases %[fuel; c; 0])
 
 (* Adds the observations to the eval_code.
