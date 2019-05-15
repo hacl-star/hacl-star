@@ -61,15 +61,15 @@ let lemma_norm_mods (mods:mods_t) (sM sK:state) : Lemma
 [@va_qattr qmodattr]
 let va_mod_dst_opr64 (o:va_operand) : mod_t =
   match o with
-  | TConst n -> Mod_None
-  | TReg r -> Mod_reg r
-  | TMem _ _ -> Mod_None // TODO: support destination memory operands
-  | TStack _ _ -> Mod_None // TODO: support destination stack operands
+  | OConst n -> Mod_None
+  | OReg r -> Mod_reg r
+  | OMem _ -> Mod_None // TODO: support destination memory operands
+  | OStack _ -> Mod_None // TODO: support destination stack operands
 
 [@va_qattr qmodattr]
 let va_mod_reg_opr64 (o:va_reg_operand) : mod_t =
   match o with
-  | TReg r -> Mod_reg r
+  | OReg r -> Mod_reg r
 
 [@va_qattr qmodattr] let va_mod_xmm (x:xmm) : mod_t = Mod_xmm x
 

@@ -14,12 +14,13 @@ module F = FStar.FunctionalExtensionality
 
 let same_domain sv s = MS.same_domain sv.mem s.BS.ms_mem
 
-let same_domain_eval_ins c f s0 sv = match c with
+let same_domain_eval_ins c f s0 sv =
+  match c with
   | Ins ins -> 
-      let obs = TS.ins_obs ins.TS.i s0 in 
-      let s1 = {TS.taint_eval_ins ins ({s0 with BS.ms_trace = []}) with BS.ms_trace = obs @ s0.BS.ms_trace} in
-      X64.Bytes_Semantics.eval_ins_domains ins ({s0 with BS.ms_trace = []});
-      MS.lemma_same_domains sv.mem s0.BS.ms_mem s1.BS.ms_mem
+    let obs = TS.ins_obs ins s0 in 
+    let s1 = {TS.taint_eval_ins ins ({s0 with BS.ms_trace = []}) with BS.ms_trace = obs @ s0.BS.ms_trace} in
+    X64.Bytes_Semantics.eval_ins_domains ins ({s0 with BS.ms_trace = []});
+    MS.lemma_same_domains sv.mem s0.BS.ms_mem s1.BS.ms_mem
 
 let state_to_S (s:state) : GTot BS.machine_state =
   {
@@ -59,36 +60,40 @@ let lemma_to_memTaint s = ()
 let lemma_to_stackTaint s = ()
 
 #set-options "--max_ifuel 2 --initial_ifuel 2"
-let lemma_to_eval_operand s o = match o with
+let lemma_to_eval_operand s o =
+  match o with
   | OConst _ | OReg _ -> ()
-  | OMem m ->
+  | OMem (m, _) ->
     let addr = eval_maddr m s in
     MS.equiv_load_mem addr s.mem
-  | OStack m -> ()
+  | OStack (m, _) -> ()
 
 #reset-options "--initial_fuel 2 --max_fuel 2"
 
 let lemma_to_eval_xmm s x = ()
 
 #set-options "--max_ifuel 2 --initial_ifuel 2"
-let lemma_to_eval_operand128 s o = match o with
-  | Mov128Xmm _ -> ()
-  | Mov128Mem m ->
+let lemma_to_eval_operand128 s o =
+  match o with
+  | OReg128 _ -> ()
+  | OMem128 (m, _) ->
     let addr = eval_maddr m s in
     MS.equiv_load_mem128 addr s.mem
-  | Mov128Stack m -> () 
+  | OStack128 (m, _) -> () 
 
 #reset-options "--initial_fuel 2 --max_fuel 2"
 
-let lemma_to_valid_operand s o = match o with
+let lemma_to_valid_operand s o =
+  match o with
   | OConst _ | OReg _ -> ()
-  | OMem m -> let addr = eval_maddr m s in
+  | OMem (m, _) -> let addr = eval_maddr m s in
     let aux () : Lemma
-    (requires valid_src_operand o s)
-    (ensures BS.valid_src_operand o (state_to_S s)) =
-    MS.bytes_valid addr s.mem in
+      (requires valid_src_operand o s)
+      (ensures BS.valid_src_operand o (state_to_S s)) =
+      MS.bytes_valid addr s.mem
+      in
     Classical.move_requires aux ()
-  | OStack m -> ()
+  | OStack (m, _) -> ()
 
 let lemma_to_valid_taint s o t = ()
 

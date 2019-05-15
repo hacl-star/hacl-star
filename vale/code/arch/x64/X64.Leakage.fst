@@ -185,8 +185,8 @@ and check_if_code_consumes_fixed_time (code:tainted_code) (ts:analysis_taints) :
 
   | IfElse ifCond ifTrue ifFalse ->
     let cond_taint = ifCond.ot in
-    let o1 = operand_taint (get_fst_ocmp ifCond.o) ts Public in
-    let o2 = operand_taint (get_snd_ocmp ifCond.o) ts Public in
+    let o1 = operand_taint (get_fst_ocmp ifCond.o) ts in
+    let o2 = operand_taint (get_snd_ocmp ifCond.o) ts in
     let predTaint = merge_taint (merge_taint o1 o2) cond_taint in
     if (Secret? predTaint) then (false, ts)
     else
@@ -209,8 +209,8 @@ and check_if_code_consumes_fixed_time (code:tainted_code) (ts:analysis_taints) :
 and check_if_loop_consumes_fixed_time c (ts:analysis_taints) : (bool * analysis_taints) =
   let While pred body = c in
   let cond_taint = pred.ot in
-  let o1 = operand_taint (get_fst_ocmp pred.o) ts Public in
-  let o2 = operand_taint (get_snd_ocmp pred.o) ts Public in
+  let o1 = operand_taint (get_fst_ocmp pred.o) ts in
+  let o2 = operand_taint (get_snd_ocmp pred.o) ts in
   let predTaint = merge_taint (merge_taint o1 o2) cond_taint in
   if (Secret? predTaint) then false, ts
   else

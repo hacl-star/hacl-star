@@ -324,7 +324,7 @@ val ins_AESNI_keygen_assist (imm:nat8) :
 let eval_SHA256_rnds2 (src1 src2 wk:quad32) : option quad32 =
   if sha_enabled then Some (sha256_rnds2_spec src1 src2 wk) else None
 val ins_SHA256_rnds2 :
-  instr_dep [inOut opXmm] [opXmm; oneXmm (Mov128Xmm 0)] PreserveFlags eval_SHA256_rnds2
+  instr_dep [inOut opXmm] [opXmm; oneXmm (OReg128 0)] PreserveFlags eval_SHA256_rnds2
 
 let eval_SHA256_msg1 (src1 src2:quad32) : option quad32 =
   if sha_enabled then Some (sha256_msg1_spec src1 src2) else None

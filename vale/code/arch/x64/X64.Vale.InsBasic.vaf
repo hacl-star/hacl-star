@@ -34,23 +34,6 @@ module TS = X64.Taint_Semantics_s
 
 friend X64.Vale.StateLemmas
 friend X64.Vale.Decls
-
-val lemma_valid_taint_match: (t:tainted_operand) -> (s:state) -> Lemma
-  (requires valid_operand t s)
-  (ensures TS.taint_match (t_op_to_op t) (get_taint t) s.memTaint s.stackTaint (state_to_S s))
-  [SMTPat (TS.taint_match (t_op_to_op t) (get_taint t) s.memTaint s.stackTaint (state_to_S s))]
-
-let lemma_valid_taint_match o s = match o with
-  | TMem m t ->
-    let addr = eval_maddr m s in
-    let aux (b:buffer64) (i:int) : Lemma
-      (requires valid_maddr addr s.mem s.memTaint b i t)
-      (ensures TS.taint_match (t_op_to_op o) (get_taint o) s.memTaint s.stackTaint (state_to_S s)) = 
-      X64.Memory.lemma_valid_taint64 b s.memTaint s.mem i t
-    in Classical.forall_intro_2 (fun b i -> (fun b -> Classical.move_requires (aux b)) b i)
-  | TStack m t -> lemma_valid_taint_stack64 (eval_maddr m s) t s.stackTaint
-  | _ -> ()
-
 #endverbatim
 
 #reset-options "--initial_fuel 5 --max_fuel 5 --max_ifuel 2 --z3rlimit 20"
@@ -108,7 +91,7 @@ procedure AssertQuickType(ghost p:Type0) returns(ghost u:squash(p))
 procedure Mov64(inout dst:dst_opr64, in src:opr64)
     {:public}
     {:quick exportOnly}
-    {:instruction mk_taint_ins2(make_instr(I.ins_Mov64), dst, src)}
+    {:instruction mk_ins(make_instr(I.ins_Mov64, dst, src))}
     ensures
         dst == old(src);
 {
@@ -117,7 +100,7 @@ procedure Mov64(inout dst:dst_opr64, in src:opr64)
 procedure Cmovc64(inout dst:dst_opr64, in src:opr64)
     {:public}
     {:quick exportOnly}
-    {:instruction mk_taint_ins2(make_instr(I.ins_Cmovc64), dst, src)}
+    {:instruction mk_ins(make_instr(I.ins_Cmovc64, dst, src))}
     reads efl;
     ensures
         if cf(efl) then dst = old(src) else dst = old(dst);
@@ -127,7 +110,7 @@ procedure Cmovc64(inout dst:dst_opr64, in src:opr64)
 procedure Add64(inout dst:dst_opr64, in src:opr64)
     {:public}
     {:quick exportOnly}
-    {:instruction mk_taint_ins2(make_instr(I.ins_Add64), dst, src)}
+    {:instruction mk_ins(make_instr(I.ins_Add64, dst, src))}
     modifies
         efl;
     requires
@@ -140,7 +123,7 @@ procedure Add64(inout dst:dst_opr64, in src:opr64)
 procedure Add64Wrap(inout dst:dst_opr64, in src:opr64)
     {:public}
     {:quick exportOnly}
-    {:instruction mk_taint_ins2(make_instr(I.ins_Add64), dst, src)}
+    {:instruction mk_ins(make_instr(I.ins_Add64, dst, src))}
     modifies
         efl;
     ensures
@@ -152,7 +135,7 @@ procedure Add64Wrap(inout dst:dst_opr64, in src:opr64)
 procedure AddLea64(out dst:dst_opr64, in src1:opr64, in src2:opr64)
     {:public}
     {:quick exportOnly}
-    {:instruction mk_taint_ins3(make_instr(I.ins_AddLea64), dst, src1, src2)}
+    {:instruction mk_ins(make_instr(I.ins_AddLea64, dst, src1, src2))}
     requires
         max_one_mem(@src1, @src2);
         src1 + src2 < pow2_64;
@@ -164,7 +147,7 @@ procedure AddLea64(out dst:dst_opr64, in src1:opr64, in src2:opr64)
 procedure Adc64Wrap(inout dst:dst_opr64, in src:opr64)
     {:public}
     {:quick exportOnly}
-    {:instruction mk_taint_ins2(make_instr(I.ins_AddCarry64), dst, src)}
+    {:instruction mk_ins(make_instr(I.ins_AddCarry64, dst, src))}
     modifies
         efl;
     ensures
@@ -177,7 +160,7 @@ procedure Adc64Wrap(inout dst:dst_opr64, in src:opr64)
 procedure Adcx64Wrap(inout dst:dst_opr64, in src:opr64)
     {:public}
     {:quick exportOnly}
-    {:instruction mk_taint_ins2(make_instr(I.ins_Adcx64), dst, src)}
+    {:instruction mk_ins(make_instr(I.ins_Adcx64, dst, src))}
     requires adx_enabled;
     modifies
         efl;
@@ -192,7 +175,7 @@ procedure Adcx64Wrap(inout dst:dst_opr64, in src:opr64)
 procedure Adox64Wrap(inout dst:dst_opr64, in src:opr64)
     {:public}
     {:quick exportOnly}
-    {:instruction mk_taint_ins2(make_instr(I.ins_Adox64), dst, src)}
+    {:instruction mk_ins(make_instr(I.ins_Adox64, dst, src))}
     requires adx_enabled;
     modifies
         efl;
@@ -205,7 +188,7 @@ procedure Adox64Wrap(inout dst:dst_opr64, in src:opr64)
 procedure Sub64(inout dst:dst_opr64, in src:opr64)
     {:public}
     {:quick exportOnly}
-    {:instruction mk_taint_ins2(make_instr(I.ins_Sub64), dst, src)}
+    {:instruction mk_ins(make_instr(I.ins_Sub64, dst, src))}
     requires
         0 <= dst - src;
     modifies
@@ -218,7 +201,7 @@ procedure Sub64(inout dst:dst_opr64, in src:opr64)
 procedure Sub64Wrap(inout dst:dst_opr64, in src:opr64)
     {:public}
     {:quick exportOnly}
-    {:instruction mk_taint_ins2(make_instr(I.ins_Sub64), dst, src)}
+    {:instruction mk_ins(make_instr(I.ins_Sub64, dst, src))}
     modifies
         efl;
     ensures
@@ -230,7 +213,7 @@ procedure Sub64Wrap(inout dst:dst_opr64, in src:opr64)
 procedure Sbb64(inout dst:dst_opr64, in src:opr64)
     {:public}
     {:quick exportOnly}
-    {:instruction mk_taint_ins2(make_instr(I.ins_Sbb64), dst, src)}
+    {:instruction mk_ins(make_instr(I.ins_Sbb64, dst, src))}
     modifies
         efl;
     ensures
@@ -255,7 +238,7 @@ ghost procedure lemma_fundamental_div_mod(ghost a:nat64, ghost b:nat64) extern;
 procedure Mul64Wrap(in src:opr64)
     {:public}
     {:quick exportOnly}
-    {:instruction mk_taint_ins1(make_instr(I.ins_Mul64), src)}
+    {:instruction mk_ins(make_instr(I.ins_Mul64, src))}
     modifies
         efl;
         rax;
@@ -269,7 +252,7 @@ procedure Mul64Wrap(in src:opr64)
 procedure Mulx64(out dst_hi:dst_opr64, out dst_lo:dst_opr64, in src:opr64)
     {:public}
     {:quick exportOnly}
-    {:instruction mk_taint_ins3(make_instr(I.ins_Mulx64), dst_hi, dst_lo, src)}
+    {:instruction mk_ins(make_instr(I.ins_Mulx64, dst_hi, dst_lo, src))}
     requires bmi2_enabled; @dst_hi != @dst_lo; 
     reads
         rdx;
@@ -285,7 +268,7 @@ ghost procedure lemma_mul_in_bounds(ghost a:nat64, ghost b:nat64) extern;
 procedure IMul64(inout dst:dst_opr64, in src:opr64)
     {:public}
     {:quick exportOnly}
-    {:instruction mk_taint_ins2(make_instr(I.ins_IMul64), dst, src)}
+    {:instruction mk_ins(make_instr(I.ins_IMul64, dst, src))}
     requires
         dst * src < pow2_64;
     modifies
@@ -300,7 +283,7 @@ procedure IMul64(inout dst:dst_opr64, in src:opr64)
 procedure Xor64(inout dst:dst_opr64, in src:opr64)
     {:public}
     {:quick exportOnly}
-    {:instruction mk_taint_ins2(make_instr_annotate(I.ins_Xor64, S.AnnotateXor64()), dst, src)}
+    {:instruction mk_ins(make_instr_annotate(I.ins_Xor64, S.AnnotateXor64(), dst, src))}
     modifies
         efl;
     ensures
@@ -314,7 +297,7 @@ procedure Xor64(inout dst:dst_opr64, in src:opr64)
 procedure And64(inout dst:dst_opr64, in src:opr64)
     {:public}
     {:quick exportOnly}
-    {:instruction mk_taint_ins2(make_instr(I.ins_And64), dst, src)}
+    {:instruction mk_ins(make_instr(I.ins_And64, dst, src))}
     modifies
         efl;
     ensures
@@ -325,7 +308,7 @@ procedure And64(inout dst:dst_opr64, in src:opr64)
 procedure Shl64(inout dst:dst_opr64, in amt:shift_amt64)
     {:public}
     {:quick exportOnly}
-    {:instruction mk_taint_ins2(make_instr(I.ins_Shl64), dst, amt)}
+    {:instruction mk_ins(make_instr(I.ins_Shl64, dst, amt))}
     modifies
         efl;
 //    requires
@@ -338,7 +321,7 @@ procedure Shl64(inout dst:dst_opr64, in amt:shift_amt64)
 procedure Shr64(inout dst:dst_opr64, in amt:shift_amt64)
     {:public}
     {:quick exportOnly}
-    {:instruction mk_taint_ins2(make_instr(I.ins_Shr64), dst, amt)}
+    {:instruction mk_ins(make_instr(I.ins_Shr64, dst, amt))}
     modifies
         efl;
     ensures
@@ -349,7 +332,7 @@ procedure Shr64(inout dst:dst_opr64, in amt:shift_amt64)
 procedure Cpuid_AES()
     {:public}
     {:quick exportOnly}
-    {:instruction mk_ins(make_instr(I.ins_Cpuid), Public)}
+    {:instruction mk_ins(make_instr(I.ins_Cpuid))}
     requires rax = 1;
     modifies rax; rbx; rcx; rdx;
     ensures
@@ -362,7 +345,7 @@ procedure Cpuid_AES()
 procedure Cpuid_Sha()
     {:public}
     {:quick exportOnly}
-    {:instruction mk_ins(make_instr(I.ins_Cpuid), Public)}
+    {:instruction mk_ins(make_instr(I.ins_Cpuid))}
     requires
         rax = 7;
         rcx = 0;
@@ -375,7 +358,7 @@ procedure Cpuid_Sha()
 procedure Cpuid_Adx_Bmi2()
     {:public}
     {:quick exportOnly}
-    {:instruction mk_ins(make_instr(I.ins_Cpuid), Public)}
+    {:instruction mk_ins(make_instr(I.ins_Cpuid))}
     requires
         rax = 7;
         rcx = 0;
@@ -390,7 +373,7 @@ procedure Cpuid_Adx_Bmi2()
 procedure Cpuid_Avx()
     {:public}
     {:quick exportOnly}
-    {:instruction mk_ins(make_instr(I.ins_Cpuid), Public)}
+    {:instruction mk_ins(make_instr(I.ins_Cpuid))}
     requires rax = 1;
     modifies rax; rbx; rcx; rdx;
     ensures (iand64(rcx, 0x10000000) > 0) == avx_enabled;
@@ -401,7 +384,7 @@ procedure Cpuid_Avx()
 procedure Cpuid_Avx2()
     {:public}
     {:quick exportOnly}
-    {:instruction mk_ins(make_instr(I.ins_Cpuid), Public)}
+    {:instruction mk_ins(make_instr(I.ins_Cpuid))}
     requires
         rax = 7;
         rcx = 0;

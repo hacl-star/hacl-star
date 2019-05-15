@@ -54,7 +54,7 @@ procedure Load64_buffer(
         ghost b:buffer64, ghost index:int)
     {:public}
     {:quick exportOnly}
-    {:instruction mk_taint_ins2(make_instr(I.ins_Mov64), dst, TMem(MReg(get_reg(src), offset), t))}
+    {:instruction mk_ins(make_instr(I.ins_Mov64, dst, OMem(tuple(MReg(get_reg(src), offset), t))))}
     reads
         mem; memTaint;
     requires
@@ -76,7 +76,7 @@ procedure Store64_buffer(
         ghost b:buffer64, ghost index:int)
     {:public}
     {:quick exportOnly}
-    {:instruction mk_ins(make_instr(I.ins_Mov64, OMem(MReg(get_reg(dst), offset)), t_op_to_op(src)), t)}
+    {:instruction mk_ins(make_instr(I.ins_Mov64, OMem(tuple(MReg(get_reg(dst), offset), t)), src))}
     reads memTaint;
     modifies
         mem;
@@ -100,7 +100,7 @@ procedure LoadBe64_buffer(
         ghost b:buffer64, ghost index:int)
     {:public}
     {:quick exportOnly}
-    {:instruction mk_taint_ins2(make_instr(I.ins_MovBe64), dst, TMem(MReg(get_reg(src), offset), t))}
+    {:instruction mk_ins(make_instr(I.ins_MovBe64, dst, OMem(tuple(MReg(get_reg(src), offset), t))))}
     reads
         mem; memTaint;
     requires
@@ -122,7 +122,7 @@ procedure StoreBe64_buffer(
         ghost b:buffer64, ghost index:int)
     {:public}
     {:quick exportOnly}
-    {:instruction mk_ins(make_instr(I.ins_MovBe64, OMem(MReg(get_reg(dst), offset)), t_op_to_op(src)), t)}
+    {:instruction mk_ins(make_instr(I.ins_MovBe64, OMem(tuple(MReg(get_reg(dst), offset), t)), src))}
     reads memTaint;
     modifies
         mem;

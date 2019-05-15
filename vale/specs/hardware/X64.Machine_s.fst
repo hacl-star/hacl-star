@@ -37,17 +37,24 @@ type maddr:eqtype =
   | MReg: r:reg -> offset:int -> maddr
   | MIndex: base:reg -> scale:int -> index:reg -> offset:int -> maddr
 
+type taint:eqtype =
+  | Public
+  | Secret
+
+type tmaddr:eqtype = maddr & taint
+
 [@va_qattr]
 type operand:eqtype =
   | OConst: n:int -> operand
   | OReg: r:reg -> operand
-  | OMem: m:maddr -> operand
-  | OStack: m:maddr -> operand
+  | OMem: m:tmaddr -> operand
+  | OStack: m:tmaddr -> operand
 
-type mov128_op:eqtype =
-  | Mov128Xmm: x:xmm -> mov128_op
-  | Mov128Mem: m:maddr -> mov128_op
-  | Mov128Stack: m:maddr -> mov128_op
+[@va_qattr]
+type operand128:eqtype =
+  | OReg128: x:xmm -> operand128
+  | OMem128: m:tmaddr -> operand128
+  | OStack128: m:tmaddr -> operand128
 
 noeq
 type precode (t_ins:Type0) (t_ocmp:eqtype) : Type0 =
@@ -55,10 +62,6 @@ type precode (t_ins:Type0) (t_ocmp:eqtype) : Type0 =
   | Block: block:list (precode t_ins t_ocmp) -> precode t_ins t_ocmp
   | IfElse: ifCond:t_ocmp -> ifTrue:precode t_ins t_ocmp -> ifFalse:precode t_ins t_ocmp -> precode t_ins t_ocmp
   | While: whileCond:t_ocmp -> whileBody:precode t_ins t_ocmp -> precode t_ins t_ocmp
-
-type taint:eqtype =
-  | Public
-  | Secret
 
 type observation:eqtype =
   | BranchPredicate: pred:bool -> observation

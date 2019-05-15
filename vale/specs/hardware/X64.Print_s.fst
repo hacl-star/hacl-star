@@ -88,7 +88,7 @@ let print_operand (o:operand) (p:printer) =
       if 0 <= n && n < pow2_64 then p.const n
       else "!!! INVALID constant: " ^ string_of_int n ^ " !!!"
   | OReg r -> print_reg r p
-  | OMem m | OStack m -> print_maddr m "qword" print_reg p
+  | OMem (m, _) | OStack (m, _) -> print_maddr m "qword" print_reg p
 
 let print_operand32 (o:operand) (p:printer) =
   match o with
@@ -96,7 +96,7 @@ let print_operand32 (o:operand) (p:printer) =
       if 0 <= n && n < pow2_32 then p.const n
       else "!!! INVALID constant: " ^ string_of_int n ^ " !!!"
   | OReg r -> print_reg32 r p
-  | OMem m | OStack m -> print_maddr m "dword" print_reg32 p
+  | OMem (m, _) | OStack (m, _) -> print_maddr m "dword" print_reg32 p
 
 let print_small_operand (o:operand) (p:printer) =
   match o with
@@ -112,10 +112,10 @@ let print_imm8 (i:int) (p:printer) =
 let print_xmm (x:xmm) (p:printer) =
   p.reg_prefix() ^ "xmm" ^ string_of_int x
 
-let print_mov128_op (o:mov128_op) (p:printer) =
+let print_mov128_op (o:operand128) (p:printer) =
   match o with
-  | Mov128Xmm x -> print_xmm x p
-  | Mov128Mem m | Mov128Stack m -> print_maddr m "xmmword" print_reg p
+  | OReg128 x -> print_xmm x p
+  | OMem128 (m, _) | OStack128 (m, _) -> print_maddr m "xmmword" print_reg p
 
 assume val print_any: 'a -> string
 
@@ -150,7 +150,7 @@ let print_instr (ip:instr_print) (p:printer) : string =
     | POpcode -> (false, oprs)
     | PSuffix -> (true, oprs)
     | PrintPSha256rnds2 ->
-        (false, (if p.sha256rnds2_explicit_xmm0 () then oprs @ [PXmm (Mov128Xmm 0)] else oprs))
+        (false, (if p.sha256rnds2_explicit_xmm0 () then oprs @ [PXmm (OReg128 0)] else oprs))
     in
   let rec get_operands (oprs:list instr_print_operand) : list operand =
     match oprs with
@@ -186,7 +186,7 @@ let print_instr (ip:instr_print) (p:printer) : string =
   | [] -> "  " ^ opcode
   | _ -> "  " ^ opcode ^ space ^ (print_operands oprs)
 
-let print_ins (ins:tainted_ins) (p:printer) =
+let print_ins (ins:ins) (p:printer) =
   let print_pair (dst src:string) = print_pair dst src p in
   let print_op_pair (dst:operand) (src:operand) (print_dst:operand->printer->string) (print_src:operand->printer-> string) =
     print_pair (print_dst dst p) (print_src src p)
@@ -216,15 +216,14 @@ let print_ins (ins:tainted_ins) (p:printer) =
   let print_xmms_3 (dst src1 src2:xmm) =
     print_pair (print_xmm dst p) (print_xmms src1 src2)
   in
-  let print_vpxor (dst src1:xmm) (src2:mov128_op) =
+  let print_vpxor (dst src1:xmm) (src2:operand128) =
     print_pair (print_xmm dst p) (print_pair (print_xmm src1 p) (print_mov128_op src2 p))
   in
   let print_instr (ip:instr_print) : string = print_instr ip p in
-  let ins = ins.i in
   match ins with
   | Instr (InstrTypeRecord i) oprs _ -> print_instr (instr_printer i oprs)
-  | Push src      -> p.ins_name "  push" [src] ^ print_operand src p
-  | Pop dst       -> p.ins_name "  pop"  [dst] ^ print_operand dst p
+  | Push src _     -> p.ins_name "  push" [src] ^ print_operand src p
+  | Pop dst _      -> p.ins_name "  pop"  [dst] ^ print_operand dst p
   | Alloc n       -> p.ins_name "  sub" [OReg rRsp; OConst n] ^ print_ops (OReg rRsp) (OConst n)
   | Dealloc n       -> p.ins_name "  add" [OReg rRsp; OConst n] ^ print_ops (OReg rRsp) (OConst n)
 

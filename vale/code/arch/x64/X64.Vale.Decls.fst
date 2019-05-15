@@ -20,7 +20,7 @@ let cf = Lemmas.cf
 let overflow = Lemmas.overflow
 let update_cf (flags:int) (new_cf:bool) = Lemmas.update_cf flags new_cf
 let update_of (flags:int) (new_of:bool) = Lemmas.update_of flags new_of
-let ins = TS.tainted_ins
+let ins = BS.ins
 type ocmp = TS.tainted_ocmp
 type va_fuel = nat
 let va_fuel_default () = 0
@@ -28,7 +28,7 @@ let va_fuel_default () = 0
 let va_opr_lemma_Mem s base offset b index t =
   let t = va_opr_code_Mem base offset t in
   M.lemma_valid_mem64 b index s.mem;
-  let TMem m t = t in
+  let OMem (m, t) = t in
   assert (valid_maddr (eval_maddr m s) s.mem s.memTaint b index t);
   M.lemma_load_mem64 b index s.mem
 
@@ -37,18 +37,18 @@ let va_opr_lemma_Stack s base offset t = ()
 let va_opr_lemma_Mem128 s base offset t b index =
   let t = va_opr_code_Mem128 base offset t in
   M.lemma_valid_mem128 b index s.mem;
-  let TMem128 m t = t in
+  let OMem128 (m, t) = t in
   assert (valid_maddr128 (eval_maddr m s) s.mem s.memTaint b index t);
   M.lemma_load_mem128 b index s.mem
 
 let taint_at memTaint addr = Map.sel memTaint addr
 
-let va_cmp_eq o1 o2 = TS.TaintedOCmp (BC.OEq (t_op_to_op o1) (t_op_to_op o2)) Public
-let va_cmp_ne o1 o2 = TS.TaintedOCmp (BC.ONe (t_op_to_op o1) (t_op_to_op o2)) Public
-let va_cmp_le o1 o2 = TS.TaintedOCmp (BC.OLe (t_op_to_op o1) (t_op_to_op o2)) Public
-let va_cmp_ge o1 o2 = TS.TaintedOCmp (BC.OGe (t_op_to_op o1) (t_op_to_op o2)) Public
-let va_cmp_lt o1 o2 = TS.TaintedOCmp (BC.OLt (t_op_to_op o1) (t_op_to_op o2)) Public
-let va_cmp_gt o1 o2 = TS.TaintedOCmp (BC.OGt (t_op_to_op o1) (t_op_to_op o2)) Public
+let va_cmp_eq o1 o2 = TS.TaintedOCmp (BC.OEq o1 o2) Public
+let va_cmp_ne o1 o2 = TS.TaintedOCmp (BC.ONe o1 o2) Public
+let va_cmp_le o1 o2 = TS.TaintedOCmp (BC.OLe o1 o2) Public
+let va_cmp_ge o1 o2 = TS.TaintedOCmp (BC.OGe o1 o2) Public
+let va_cmp_lt o1 o2 = TS.TaintedOCmp (BC.OLt o1 o2) Public
+let va_cmp_gt o1 o2 = TS.TaintedOCmp (BC.OGt o1 o2) Public
 
 let eval_code = Lemmas.eval_code
 let eval_while_inv = Lemmas.eval_while_inv

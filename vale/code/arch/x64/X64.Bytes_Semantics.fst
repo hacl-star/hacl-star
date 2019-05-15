@@ -124,16 +124,16 @@ let update_operand_same_domains (dst:operand) (ins:ins) (v:nat64) (s:machine_sta
   update_operand_flags_same_domains dst v s s
 
 #set-options "--z3rlimit 20"
-let update_operand128_flags_same_domains (o:mov128_op) (v:quad32) (s_orig s:machine_state) : Lemma
-  (let s1 = update_mov128_op_preserve_flags'' o v s_orig s in
-  Set.equal (Map.domain s.ms_mem) (Map.domain s_orig.ms_mem) ==>
-  Set.equal (Map.domain s.ms_mem) (Map.domain s1.ms_mem))
+let update_operand128_flags_same_domains (o:operand128) (v:quad32) (s_orig s:machine_state) : Lemma
+  ( let s1 = update_mov128_op_preserve_flags'' o v s_orig s in
+    Set.equal (Map.domain s.ms_mem) (Map.domain s_orig.ms_mem) ==>
+    Set.equal (Map.domain s.ms_mem) (Map.domain s1.ms_mem))
   [SMTPat (update_mov128_op_preserve_flags'' o v s_orig s)]
   =
   FStar.Pervasives.reveal_opaque (`%valid_addr128) valid_addr128;
   Opaque_s.reveal_opaque update_heap128_def;
   match o with
-  | Mov128Mem m ->
+  | OMem128 (m, _) ->
       let ptr = eval_maddr m s_orig in
       if not (valid_addr128 ptr s.ms_mem) then ()
       else
@@ -183,7 +183,7 @@ let update_heap32_same_unspecified (ptr:int) (v:nat32) (h:heap) : Lemma
   =
   reveal_opaque update_heap32_def
 
-let update_operand128_flags_same_unspecified (o:mov128_op) (v:quad32) (s_orig s:machine_state) : Lemma
+let update_operand128_flags_same_unspecified (o:operand128) (v:quad32) (s_orig s:machine_state) : Lemma
   (let s1 = update_mov128_op_preserve_flags'' o v s_orig s in
   Set.equal (Map.domain s.ms_mem) (Map.domain s_orig.ms_mem) ==>
   (forall x.{:pattern (s.ms_mem.[x])} not (Map.contains s1.ms_mem x && Map.contains s.ms_mem x) ==> s1.ms_mem.[x] == s.ms_mem.[x]))
@@ -192,7 +192,7 @@ let update_operand128_flags_same_unspecified (o:mov128_op) (v:quad32) (s_orig s:
   FStar.Pervasives.reveal_opaque (`%valid_addr128) valid_addr128;
   Opaque_s.reveal_opaque update_heap128_def;
   match o with
-  | Mov128Mem m ->
+  | OMem128 (m, _) ->
       let ptr = eval_maddr m s_orig in
       if not (valid_addr128 ptr s.ms_mem) then ()
       else
@@ -252,10 +252,8 @@ let eval_ins_bs_domains (ins:ins) (s0:machine_state) : Lemma
 
 #set-options "--z3rlimit 30"
 
-let eval_ins_domains ins s0 =
-  let t = ins.TS.t in
-  let i = ins.TS.i in
-  let s = run (check (TS.taint_match_ins i t s0.ms_memTaint s0.ms_stackTaint)) s0 in  
+let eval_ins_domains i s0 =
+  let s = run (check (TS.taint_match_ins i s0.ms_memTaint s0.ms_stackTaint)) s0 in  
   eval_ins_bs_domains i s
 
 #set-options "--z3rlimit 30 --max_ifuel 2"
@@ -266,9 +264,7 @@ let eval_ins_bs_same_unspecified (ins:ins) (s0:machine_state) : Lemma
   ()
 #set-options "--z3rlimit 30 --max_ifuel 1"
 
-let eval_ins_same_unspecified ins s0 =
-  let t = ins.TS.t in
-  let i = ins.TS.i in
+let eval_ins_same_unspecified i s0 =
   let s0 = {s0 with ms_trace = []} in
-  let s = run (check (TS.taint_match_ins i t s0.ms_memTaint s0.ms_stackTaint)) s0 in
+  let s = run (check (TS.taint_match_ins i s0.ms_memTaint s0.ms_stackTaint)) s0 in
   eval_ins_bs_same_unspecified i s

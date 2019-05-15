@@ -37,5 +37,5 @@ val buffer_addr_is_nat64 (#t:_) (x:ME.buffer t) (s:VS.state)
            ME.buffer_addr x VS.(s.mem) < pow2 64)
 
 val code_equiv : squash (V.va_code == TS.tainted_code)
-val ins_equiv : squash (V.ins == TS.tainted_ins)
+val ins_equiv : squash (V.ins == X64.Bytes_Semantics_s.ins)
 val ocmp_equiv : squash (V.ocmp == TS.tainted_ocmp)

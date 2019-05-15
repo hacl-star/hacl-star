@@ -28,6 +28,6 @@ module V = X64.Vale.Decls
 module TS = X64.Taint_Semantics_s
 friend X64.Vale.Decls
 
-let code_equiv : squash (V.va_code == TS.tainted_code) = ()
-let ins_equiv : squash (V.ins == TS.tainted_ins) = ()
-let ocmp_equiv : squash (V.ocmp == TS.tainted_ocmp) = ()
+let code_equiv = ()
+let ins_equiv = ()
+let ocmp_equiv = ()

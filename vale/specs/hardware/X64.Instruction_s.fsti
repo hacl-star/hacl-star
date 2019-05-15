@@ -22,7 +22,7 @@ type instr_operand_explicit = // flexible operand
   | IOpXmm : instr_operand_explicit
 type instr_operand_implicit = // hard-coded operand
   | IOp64One : operand -> instr_operand_implicit
-  | IOpXmmOne : mov128_op -> instr_operand_implicit
+  | IOpXmmOne : operand128 -> instr_operand_implicit
   | IOpFlagsCf : instr_operand_implicit
   | IOpFlagsOf : instr_operand_implicit
 type instr_operand =
@@ -42,7 +42,7 @@ let arrow (a b:Type) = a -> b
 [@instr_attr] unfold let opXmm = IOpEx IOpXmm
 [@instr_attr] unfold let one64 (o:operand) = IOpIm (IOp64One o)
 [@instr_attr] unfold let one64Reg (r:reg) = IOpIm (IOp64One (OReg r))
-[@instr_attr] unfold let oneXmm (o:mov128_op) = IOpIm (IOpXmmOne o)
+[@instr_attr] unfold let oneXmm (o:operand128) = IOpIm (IOpXmmOne o)
 [@instr_attr] unfold let opFlagsCf = IOpIm IOpFlagsCf
 [@instr_attr] unfold let opFlagsOf = IOpIm IOpFlagsOf
 
@@ -87,7 +87,7 @@ let instr_eval_t (outs:list instr_out) (args:list instr_operand) : Type0 =
 let instr_operand_t (arg:instr_operand_explicit) : Type0 =
   match arg with
   | IOp64 -> operand
-  | IOpXmm -> mov128_op
+  | IOpXmm -> operand128
 
 [@instr_attr]
 let rec instr_operands_t_args (args:list instr_operand) : Type0 =
@@ -113,7 +113,7 @@ type instr_print_operand =
   | P16 : operand -> instr_print_operand
   | P32 : operand -> instr_print_operand
   | P64 : operand -> instr_print_operand
-  | PXmm : mov128_op -> instr_print_operand
+  | PXmm : operand128 -> instr_print_operand
   | PImm : int -> instr_print_operand
   | PShift : operand -> instr_print_operand
 type instr_print_kind =

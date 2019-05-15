@@ -79,9 +79,13 @@ let valid_taint_stack64 ptr t stackTaint =
   Map.sel stackTaint (ptr + 6) = t &&
   Map.sel stackTaint (ptr + 7) = t
 
+let valid_taint_stack128 ptr t stackTaint = 
+  valid_taint_stack64 ptr t stackTaint /\ valid_taint_stack64 (ptr + 8) t stackTaint
+
 let store_taint_stack64 ptr t stackTaint = TS.update_n ptr 8 stackTaint t
 
 let lemma_valid_taint_stack64 ptr t stackTaint = ()
+let lemma_valid_taint_stack128 ptr t stackTaint = ()
 
 let lemma_valid_taint_stack64_reveal ptr t stackTaint = ()
 

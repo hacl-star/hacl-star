@@ -73,7 +73,7 @@ val lemma_to_eval_xmm : s:state -> x:xmm -> Lemma
   (ensures eval_xmm x s == BS.eval_xmm x (state_to_S s))
   [SMTPat (eval_xmm x s)]
 
-val lemma_to_eval_operand128 : s:state -> o:mov128_op -> Lemma
+val lemma_to_eval_operand128 : s:state -> o:operand128 -> Lemma
   (requires valid_src_operand128 o s)
   (ensures eval_operand128 o s == BS.eval_mov128_op o (state_to_S s))
   [SMTPat (eval_operand128 o s)]

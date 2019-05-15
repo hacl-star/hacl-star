@@ -379,7 +379,7 @@ procedure carry_times_38(inout tmp:dst_opr64)
     reads efl;
     requires 
         carry == 0;
-        @tmp != TReg(rRax);
+        @tmp != OReg(rRax);
     ensures 
         carry == bool_bit(cf(efl)) * 38;
         tmp == 38;

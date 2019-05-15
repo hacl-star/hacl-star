@@ -17,6 +17,7 @@ let ins_AddLea64 =
       | (OReg r1, OReg r2) -> MIndex r1 1 r2 0
       | _ -> MConst pow2_128 // Shouldn't hit this, but if we do, assembler will complain
       in
+    let m = (m, Public) in // taint is not actually printed; we're just using OMem for its printer
     // TODO: what's the right suffix here?
     // print_s "lea" [P64 dst; P64 (OMem m)])
     print "lea" [P64 dst; P64 (OMem m)])
