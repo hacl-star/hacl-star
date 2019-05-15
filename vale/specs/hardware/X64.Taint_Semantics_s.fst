@@ -284,25 +284,23 @@ let taint_eval_ins (i:ins) (ts:machine_state) : GTot machine_state =
   let s = run (eval_ins i) s in
   {s with ms_memTaint = memTaint; ms_stackTaint = stackTaint}
 
-type tainted_ocmp : eqtype = | TaintedOCmp: o:ocmp -> ot:taint -> tainted_ocmp
-
 let get_fst_ocmp (o:ocmp) = match o with
   | BC.OEq o1 _ | BC.ONe o1 _ | BC.OLe o1 _ | BC.OGe o1 _ | BC.OLt o1 _ | BC.OGt o1 _ -> o1
 
 let get_snd_ocmp (o:ocmp) = match o with
   | BC.OEq _ o2 | BC.ONe _ o2 | BC.OLe _ o2 | BC.OGe _ o2 | BC.OLt _ o2 | BC.OGt _ o2 -> o2
 
-let taint_eval_ocmp (ts:machine_state) (c:tainted_ocmp) : GTot (machine_state * bool) =
+let taint_eval_ocmp (ts:machine_state) (c:ocmp) : GTot (machine_state * bool) =
   let s =
     run (
-      check (valid_ocmp c.o);;
-      check (taint_match (get_fst_ocmp c.o) ts.ms_memTaint ts.ms_stackTaint);;
-      check (taint_match (get_snd_ocmp c.o) ts.ms_memTaint ts.ms_stackTaint))
+      check (valid_ocmp c);;
+      check (taint_match (get_fst_ocmp c) ts.ms_memTaint ts.ms_stackTaint);;
+      check (taint_match (get_snd_ocmp c) ts.ms_memTaint ts.ms_stackTaint))
     ts
     in
-  (s, eval_ocmp s c.o)
+  (s, eval_ocmp s c)
 
-type tainted_code = precode ins tainted_ocmp
+type tainted_code = precode ins ocmp
 type tainted_codes = list tainted_code
 
 val taint_eval_code (c:tainted_code) (fuel:nat) (s:machine_state) : GTot (option machine_state)

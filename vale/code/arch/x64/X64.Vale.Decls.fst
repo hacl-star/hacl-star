@@ -21,7 +21,7 @@ let overflow = Lemmas.overflow
 let update_cf (flags:int) (new_cf:bool) = Lemmas.update_cf flags new_cf
 let update_of (flags:int) (new_of:bool) = Lemmas.update_of flags new_of
 let ins = BS.ins
-type ocmp = TS.tainted_ocmp
+type ocmp = BS.ocmp
 type va_fuel = nat
 let va_fuel_default () = 0
 
@@ -43,12 +43,12 @@ let va_opr_lemma_Mem128 s base offset t b index =
 
 let taint_at memTaint addr = Map.sel memTaint addr
 
-let va_cmp_eq o1 o2 = TS.TaintedOCmp (BC.OEq o1 o2) Public
-let va_cmp_ne o1 o2 = TS.TaintedOCmp (BC.ONe o1 o2) Public
-let va_cmp_le o1 o2 = TS.TaintedOCmp (BC.OLe o1 o2) Public
-let va_cmp_ge o1 o2 = TS.TaintedOCmp (BC.OGe o1 o2) Public
-let va_cmp_lt o1 o2 = TS.TaintedOCmp (BC.OLt o1 o2) Public
-let va_cmp_gt o1 o2 = TS.TaintedOCmp (BC.OGt o1 o2) Public
+let va_cmp_eq o1 o2 = BC.OEq o1 o2
+let va_cmp_ne o1 o2 = BC.ONe o1 o2
+let va_cmp_le o1 o2 = BC.OLe o1 o2
+let va_cmp_ge o1 o2 = BC.OGe o1 o2
+let va_cmp_lt o1 o2 = BC.OLt o1 o2
+let va_cmp_gt o1 o2 = BC.OGt o1 o2
 
 let eval_code = Lemmas.eval_code
 let eval_while_inv = Lemmas.eval_while_inv

@@ -140,7 +140,7 @@ and print_code (c:tainted_code) (n:int) (p:P.printer) : string * int =
   | IfElse cond true_code false_code ->
     let n1 = n in
     let n2 = n + 1 in
-    let cmp = print_cmp (P.cmp_not cond.o) n1 p in
+    let cmp = print_cmp (P.cmp_not cond) n1 p in
     let true_str, n' = print_code true_code (n + 2) p in
     let jmp = "    \"  jmp L" ^ string_of_int n2 ^ ";\"\n" in
     let label1 = "    \"L" ^ string_of_int n1 ^ ":\"\n" in
@@ -154,7 +154,7 @@ and print_code (c:tainted_code) (n:int) (p:P.printer) : string * int =
     let label1 = "    \"" ^ p.P.align() ^ " 16\nL" ^ string_of_int n1 ^ ":\"\n" in
     let body_str, n' = print_code body (n + 2) p in
     let label2 = "    \"" ^ p.P.align() ^ " 16\nL" ^ string_of_int n2 ^ ":\"\n" in
-    let cmp = print_cmp cond.o n1 p in
+    let cmp = print_cmp cond n1 p in
     jmp ^ label1 ^ body_str ^ label2 ^ cmp, n'
 
 

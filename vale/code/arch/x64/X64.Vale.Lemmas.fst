@@ -112,19 +112,19 @@ and increase_fuels c s0 f0 sN fN =
       increase_fuels t s1 f0 sN fN
     )
 
-let lemma_cmp_eq s o1 o2 t = ()
-let lemma_cmp_ne s o1 o2 t = ()
-let lemma_cmp_le s o1 o2 t = ()
-let lemma_cmp_ge s o1 o2 t = ()
-let lemma_cmp_lt s o1 o2 t = ()
-let lemma_cmp_gt s o1 o2 t = ()
+let lemma_cmp_eq s o1 o2 = ()
+let lemma_cmp_ne s o1 o2 = ()
+let lemma_cmp_le s o1 o2 = ()
+let lemma_cmp_ge s o1 o2 = ()
+let lemma_cmp_lt s o1 o2 = ()
+let lemma_cmp_gt s o1 o2 = ()
 
-let lemma_valid_cmp_eq s o1 o2 t = ()
-let lemma_valid_cmp_ne s o1 o2 t = ()
-let lemma_valid_cmp_le s o1 o2 t = ()
-let lemma_valid_cmp_ge s o1 o2 t = ()
-let lemma_valid_cmp_lt s o1 o2 t = ()
-let lemma_valid_cmp_gt s o1 o2 t = ()
+let lemma_valid_cmp_eq s o1 o2 = ()
+let lemma_valid_cmp_ne s o1 o2 = ()
+let lemma_valid_cmp_le s o1 o2 = ()
+let lemma_valid_cmp_ge s o1 o2 = ()
+let lemma_valid_cmp_lt s o1 o2 = ()
+let lemma_valid_cmp_gt s o1 o2 = ()
 
 let compute_merge_total (f0:fuel) (fM:fuel) =
   if f0 > fM then f0 else fM
