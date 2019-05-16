@@ -119,3 +119,7 @@ let decrypt #a kv iv ad cipher =
       gcm_decrypt_cipher_length (vale_alg_of_alg a) kv_nat iv_nat cipher_nat ad_nat tag_nat;
       let plain = Words.Seq_s.seq_nat8_to_seq_uint8 plain_nat in
       if success then Some plain else None
+
+// Admitted until we prove correctness of individual algorithms
+let correctness #a k n aad p =
+  admit()

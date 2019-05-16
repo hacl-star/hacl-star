@@ -114,5 +114,8 @@ let ekv (a: supported_alg) = lbytes (ekv_length a)
 val expand: #(a: supported_alg) -> kv a -> ekv a
 val encrypt: #(a: supported_alg) -> kv a -> iv a -> ad a -> p:plain a -> encrypted p
 val decrypt: #(a: supported_alg) -> kv a -> iv a -> ad a ->
-  c:cipher a { S.length c <= max_length a } ->
+  c:cipher a { S.length c <= max_length a + tag_length a} ->
   option (decrypted c)
+
+val correctness: #a:supported_alg -> k:kv a -> n:iv a -> aad:ad a -> p:plain a ->
+  Lemma (decrypt k n aad (encrypt k n aad p) == Some p)
