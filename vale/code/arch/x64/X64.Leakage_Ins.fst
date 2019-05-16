@@ -3,10 +3,21 @@ open X64.Machine_s
 open X64.Instruction_s
 module BC = X64.Bytes_Code_s
 module S = X64.Bytes_Semantics_s
-open X64.Taint_Semantics_s
 open X64.Leakage_s
 open X64.Leakage_Helpers
 open X64.Bytes_Semantics
+
+unfold let op_String_Access = Map.sel
+unfold let op_String_Assignment = Map.upd
+
+unfold let obs_args = S.obs_args
+unfold let obs_inouts = S.obs_inouts
+unfold let taint_match_args = S.taint_match_args
+unfold let taint_match_inouts = S.taint_match_inouts
+unfold let update_taint_operand_explicit = S.update_taint_operand_explicit
+unfold let update_taint_operand_implicit = S.update_taint_operand_implicit
+unfold let update_taint_outputs = S.update_taint_outputs
+unfold let machine_eval_code = S.machine_eval_code
 
 let rec check_if_consumes_fixed_time_args
     (args:list instr_operand) (oprs:instr_operands_t_args args) (ts:analysis_taints)
@@ -712,8 +723,8 @@ let lemma_dealloc_leakage_free (ts:analysis_taints) (ins:S.ins) : Lemma
       [SMTPat (is_explicit_leakage_free_rhs code fuel ts ts' s1 s2)]
       =
       let BC.Dealloc n = ins in
-      let s1' = Some?.v (taint_eval_code code fuel s1) in
-      let s2' = Some?.v (taint_eval_code code fuel s2) in
+      let s1' = Some?.v (machine_eval_code code fuel s1) in
+      let s2' = Some?.v (machine_eval_code code fuel s2) in
       let S.Vale_stack _ stack1 = s1.S.ms_stack in
       let S.Vale_stack _ stack2 = s2.S.ms_stack in
       let S.Vale_stack _ stack1' = s1'.S.ms_stack in
@@ -747,8 +758,8 @@ let lemma_push_leakage_free (ts:analysis_taints) (ins:S.ins) : Lemma
       =
       let BC.Push src t_stk = ins in
       let t_out = operand_taint src ts in
-      let s1' = Some?.v (taint_eval_code code fuel s1) in
-      let s2' = Some?.v (taint_eval_code code fuel s2) in
+      let s1' = Some?.v (machine_eval_code code fuel s1) in
+      let s2' = Some?.v (machine_eval_code code fuel s2) in
       let S.Vale_stack _ stack1 = s1.S.ms_stack in
       let S.Vale_stack _ stack2 = s2.S.ms_stack in
       let S.Vale_stack _ stack1' = s1'.S.ms_stack in
@@ -788,8 +799,8 @@ let lemma_pop_leakage_free (ts:analysis_taints) (ins:S.ins) : Lemma
       [SMTPat (is_explicit_leakage_free_rhs code fuel ts ts' s1 s2)]
       =
       let BC.Pop dst t_stk = ins in
-      let s1' = Some?.v (taint_eval_code code fuel s1) in
-      let s2' = Some?.v (taint_eval_code code fuel s2) in
+      let s1' = Some?.v (machine_eval_code code fuel s1) in
+      let s2' = Some?.v (machine_eval_code code fuel s2) in
       let stack_op = OStack (MReg rRsp 0, Public) in
       let v1 = S.eval_operand stack_op s1 in
       let v2 = S.eval_operand stack_op s2 in

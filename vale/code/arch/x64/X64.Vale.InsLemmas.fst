@@ -9,7 +9,6 @@ friend X64.Vale.StateLemmas
 friend X64.Vale.Decls
 
 let lemma_valid_taint64_operand m t s =
-  let open X64.Taint_Semantics_s in
   let tainted_mem:X64.Memory.memtaint = (state_to_S s).S.ms_memTaint in
   let real_mem:X64.Memory.mem = s.mem in
   Util.Meta.exists_elim2
@@ -24,7 +23,7 @@ let lemma_valid_taint_match64 o s =
     let addr = eval_maddr m s in
     let aux (b:buffer64) (i:int) : Lemma
       (requires valid_maddr addr s.mem s.memTaint b i t)
-      (ensures TS.taint_match o s.memTaint s.stackTaint (state_to_S s))
+      (ensures S.taint_match o s.memTaint s.stackTaint (state_to_S s))
       =
       X64.Memory.lemma_valid_taint64 b s.memTaint s.mem i t
       in
@@ -38,7 +37,7 @@ let lemma_valid_taint_match128 o s =
     let addr = eval_maddr m s in
     let aux (b:buffer128) (i:int) : Lemma
       (requires valid_maddr128 addr s.mem s.memTaint b i t)
-      (ensures TS.taint_match128 o s.memTaint s.stackTaint (state_to_S s))
+      (ensures S.taint_match128 o s.memTaint s.stackTaint (state_to_S s))
       =
       X64.Memory.lemma_valid_taint128 b s.memTaint s.mem i t
       in

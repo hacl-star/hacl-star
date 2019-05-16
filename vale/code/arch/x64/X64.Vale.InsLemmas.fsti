@@ -7,8 +7,6 @@ open X64.Vale.StateLemmas
 open X64.Vale.Decls
 module BC = X64.Bytes_Code_s
 module S = X64.Bytes_Semantics_s
-module TS = X64.Taint_Semantics_s
-
 let has_taint128 (o:operand128) (t:taint) : bool =
   match o with
   | OMem128 (_, t') | OStack128 (_, t') -> t = t'
@@ -21,13 +19,13 @@ val lemma_valid_taint64_operand (m:maddr) (t:taint) (s:va_state) : Lemma
 
 val lemma_valid_taint_match64 (o:operand) (s:state) : Lemma
   (requires valid_operand o s)
-  (ensures TS.taint_match o s.memTaint s.stackTaint (state_to_S s))
-  [SMTPat (TS.taint_match o s.memTaint s.stackTaint (state_to_S s))]
+  (ensures S.taint_match o s.memTaint s.stackTaint (state_to_S s))
+  [SMTPat (S.taint_match o s.memTaint s.stackTaint (state_to_S s))]
 
 val lemma_valid_taint_match128 (o:operand128) (s:state) : Lemma
   (requires valid_operand128 o s)
-  (ensures TS.taint_match128 o s.memTaint s.stackTaint (state_to_S s))
-  [SMTPat (TS.taint_match128 o s.memTaint s.stackTaint (state_to_S s))]
+  (ensures S.taint_match128 o s.memTaint s.stackTaint (state_to_S s))
+  [SMTPat (S.taint_match128 o s.memTaint s.stackTaint (state_to_S s))]
 
 [@instr_attr]
 let rec make_instr_t_args (args:list instr_operand) : Type0 =

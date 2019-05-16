@@ -8,7 +8,6 @@ module DV = LowStar.BufferView.Down
 module HS = FStar.HyperStack
 module ME = X64.Memory
 module SI = X64.Stack_i
-module TS = X64.Taint_Semantics_s
 module MS = X64.Machine_s
 module IA = Interop.Assumptions
 module I = Interop
@@ -421,6 +420,7 @@ let rec stack_of_args_stack_args'
     in aux args (Map.const_on Set.empty 0)
 #pop-options
 
+#reset-options "--z3rlimit 20"
 let core_create_lemma_stack_args
     (#max_arity:nat)
     (#arg_reg:IX64.arg_reg_relation max_arity)
@@ -498,7 +498,7 @@ let eval_code_ts (c:BS.code)
                  (s0:BS.machine_state)
                  (f0:nat)
                  (s1:BS.machine_state) : Type0 =
-  VL.state_eq_opt (TS.taint_eval_code c f0 s0) (Some s1)
+  VL.state_eq_opt (BS.machine_eval_code c f0 s0) (Some s1)
 
 let eval_code_rel (c:BS.code)
                   (va_s0 va_s1:_) (f:V.va_fuel)
@@ -606,7 +606,7 @@ let vale_lemma_as_prediction
        let va_s1, f = VSig.elim_vale_sig_nil v va_s0 in
        assert (V.eval_code code va_s0 f va_s1);
        eval_code_rel (c_code) va_s0 va_s1 f;
-       let Some s1 = TS.taint_eval_code (c_code) (coerce f) s0 in
+       let Some s1 = BS.machine_eval_code (c_code) (coerce f) s0 in
        assert (VL.state_eq_opt (Some (SL.state_to_S va_s1)) (Some s1));
        assert (VSig.vale_calling_conventions va_s0 va_s1 regs_modified xmms_modified);
        assert (IX64.calling_conventions s0 s1 regs_modified xmms_modified);

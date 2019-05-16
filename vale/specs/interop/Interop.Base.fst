@@ -7,7 +7,6 @@ module IB = LowStar.ImmutableBuffer
 module BS = X64.Bytes_Semantics_s
 module BV = LowStar.BufferView
 module HS = FStar.HyperStack
-module TS = X64.Taint_Semantics_s
 module MS = X64.Machine_s
 module P = Prop_s
 module HS = FStar.HyperStack

@@ -6,7 +6,6 @@ open X64.Machine_s
 open X64.Instruction_s
 open X64.Bytes_Code_s
 open X64.Bytes_Semantics_s
-open X64.Taint_Semantics_s
 open FStar.IO
 
 noeq type printer = {

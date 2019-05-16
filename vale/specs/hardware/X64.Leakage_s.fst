@@ -1,7 +1,6 @@
 module X64.Leakage_s
 
 open X64.Machine_s
-open X64.Taint_Semantics_s
 open X64.Bytes_Semantics_s
 module F = FStar.FunctionalExtensionality
 
@@ -71,8 +70,8 @@ let constTimeInvariant (ts:analysis_taints) (s:machine_state) (s':machine_state)
 
 
 let isConstantTimeGivenStates (code:code) (fuel:nat) (ts:analysis_taints) (s1:machine_state) (s2:machine_state) =
-  let r1 = taint_eval_code code fuel s1 in
-  let r2 = taint_eval_code code fuel s2 in
+  let r1 = machine_eval_code code fuel s1 in
+  let r2 = machine_eval_code code fuel s2 in
   ( (Some? r1) /\ (Some? r2)
    /\ s1.ms_ok /\ (Some?.v r1).ms_ok
    /\ s2.ms_ok /\ (Some?.v r2).ms_ok
@@ -86,14 +85,14 @@ let isConstantTime (code:code) (ts:analysis_taints) =
 let is_explicit_leakage_free_lhs (code:code) (fuel:nat)
                                  (ts:analysis_taints) (ts':analysis_taints) (s1:machine_state) (s2:machine_state)
   = s1.ms_ok /\ s2.ms_ok /\ constTimeInvariant ts s1 s2 /\
-    (let r1 = taint_eval_code code fuel s1 in
-     let r2 = taint_eval_code code fuel s2 in
+    (let r1 = machine_eval_code code fuel s1 in
+     let r2 = machine_eval_code code fuel s2 in
      Some? r1 /\ Some? r2 /\ (Some?.v r1).ms_ok /\ (Some?.v r2).ms_ok)
 
 let is_explicit_leakage_free_rhs (code:code) (fuel:nat)
                                  (ts:analysis_taints) (ts':analysis_taints) (s1:machine_state) (s2:machine_state)
-  = let r1 = taint_eval_code code fuel s1 in
-    let r2 = taint_eval_code code fuel s2 in
+  = let r1 = machine_eval_code code fuel s1 in
+    let r2 = machine_eval_code code fuel s2 in
     Some? r1 /\ Some? r2 /\ publicValuesAreSame ts' (Some?.v r1) (Some?.v r2)
 
 let isExplicitLeakageFreeGivenStates (code:code) (fuel:nat)

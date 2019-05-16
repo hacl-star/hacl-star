@@ -1,6 +1,5 @@
 module X64.Taint_Semantics
 
-open X64.Taint_Semantics_s
 open X64.Vale.Decls
 open X64.Machine_s
 open X64.Instruction_s
@@ -15,9 +14,9 @@ let mk_ins (i:S.ins) : Pure S.code
   (ensures fun c ->
     c == Ins i /\
     i == normal i /\
-    S.eval_ins i == normal (S.eval_ins i)
+    S.untainted_eval_ins i == normal (S.untainted_eval_ins i)
   )
   =
-  normal_term_spec (S.eval_ins i);
+  normal_term_spec (S.untainted_eval_ins i);
   Ins i
 

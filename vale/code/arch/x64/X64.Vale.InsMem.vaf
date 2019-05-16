@@ -29,7 +29,6 @@ open X64.Vale.StateLemmas
 open X64.Vale.InsLemmas
 module I = X64.Instructions_s
 module S = X64.Bytes_Semantics_s
-module TS = X64.Taint_Semantics_s
 module P = X64.Print_s
 open X64.Taint_Semantics
 

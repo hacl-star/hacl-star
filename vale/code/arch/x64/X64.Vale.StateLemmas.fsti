@@ -6,7 +6,6 @@ module BS = X64.Bytes_Semantics_s
 module ME = X64.Memory
 module MS = X64.Memory_Sems
 module VSS = X64.Stack_Sems
-module TS = X64.Taint_Semantics_s
 open Prop_s
 
 unfold let ok' s = s.BS.ms_ok
@@ -23,7 +22,7 @@ val same_domain: sv:state -> s:BS.machine_state -> prop0
 
 val same_domain_eval_ins (c:BS.code{Ins? c}) (f:nat) (s0:BS.machine_state) (sv:state) : Lemma
   (requires same_domain sv s0)
-  (ensures (let s1 = TS.taint_eval_code c f s0 in
+  (ensures (let s1 = BS.machine_eval_code c f s0 in
      same_domain sv (Some?.v s1))
   )
 
@@ -89,7 +88,7 @@ val lemma_of_to : s:state -> Lemma
 val lemma_to_of_eval_ins: (c:BS.code) -> (s0:state) -> Lemma
   (requires Ins? c)
   (ensures (
-    let Some sM = TS.taint_eval_code c 0 (state_to_S s0) in
+    let Some sM = BS.machine_eval_code c 0 (state_to_S s0) in
     same_domain_eval_ins c 0 (state_to_S s0) s0;
     (state_to_S (state_of_S s0 sM) == {sM with BS.ms_trace = []})
   ))

@@ -2,8 +2,6 @@ module X64.Stack_i
 
 module BS = X64.Bytes_Semantics_s
 open X64.Bytes_Semantics
-module TS = X64.Taint_Semantics_s
-
 let stack = BS.stack
 
 let valid_src_stack64 i st = BS.valid_src_stack64 i st
@@ -82,7 +80,7 @@ let valid_taint_stack64 ptr t stackTaint =
 let valid_taint_stack128 ptr t stackTaint = 
   valid_taint_stack64 ptr t stackTaint /\ valid_taint_stack64 (ptr + 8) t stackTaint
 
-let store_taint_stack64 ptr t stackTaint = TS.update_n ptr 8 stackTaint t
+let store_taint_stack64 ptr t stackTaint = BS.update_n ptr 8 stackTaint t
 
 let lemma_valid_taint_stack64 ptr t stackTaint = ()
 let lemma_valid_taint_stack128 ptr t stackTaint = ()

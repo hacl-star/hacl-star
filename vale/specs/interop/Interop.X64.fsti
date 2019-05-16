@@ -6,7 +6,6 @@ module BS = X64.Bytes_Semantics_s
 module UV = LowStar.BufferView.Up
 module DV = LowStar.BufferView.Down
 module HS = FStar.HyperStack
-module TS = X64.Taint_Semantics_s
 module MS = X64.Machine_s
 module IA = Interop.Assumptions
 module List = FStar.List.Tot
@@ -279,8 +278,8 @@ let prediction_post
     (s0:BS.machine_state)
     (rax_fuel_mem:(UInt64.t & nat & mem)) =
   let rax, fuel, final_mem = rax_fuel_mem in
-  Some? (TS.taint_eval_code c fuel s0) /\ (
-    let s1 = Some?.v (TS.taint_eval_code c fuel s0) in
+  Some? (BS.machine_eval_code c fuel s0) /\ (
+    let s1 = Some?.v (BS.machine_eval_code c fuel s0) in
     let h1 = hs_of_mem final_mem in
     FStar.HyperStack.ST.equal_domains h0 h1 /\
     B.modifies (loc_modified_args args) h0 h1 /\

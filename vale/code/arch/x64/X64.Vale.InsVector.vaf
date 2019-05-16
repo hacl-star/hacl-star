@@ -44,8 +44,6 @@ open X64.Memory
 open X64.Stack_i
 module I = X64.Instructions_s
 module S = X64.Bytes_Semantics_s
-module TS = X64.Taint_Semantics_s
-
 friend X64.Vale.StateLemmas // TODO: this shouldn't be here
 friend X64.Vale.Decls
 #endverbatim

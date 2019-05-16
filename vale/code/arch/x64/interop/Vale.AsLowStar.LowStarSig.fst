@@ -8,7 +8,6 @@ module DV = LowStar.BufferView.Down
 module HS = FStar.HyperStack
 module ME = X64.Memory
 module SI = X64.Stack_i
-module TS = X64.Taint_Semantics_s
 module MS = X64.Machine_s
 module IA = Interop.Assumptions
 module V = X64.Vale.Decls

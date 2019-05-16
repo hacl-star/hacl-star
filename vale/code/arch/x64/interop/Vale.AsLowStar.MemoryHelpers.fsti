@@ -10,7 +10,6 @@ module ME = X64.Memory
 module MES = X64.Memory_Sems
 module SI = X64.Stack_i
 module VSS = X64.Stack_Sems
-module TS = X64.Taint_Semantics_s
 module MS = X64.Machine_s
 module IA = Interop.Assumptions
 module V = X64.Vale.Decls

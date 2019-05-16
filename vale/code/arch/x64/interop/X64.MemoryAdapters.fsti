@@ -9,8 +9,6 @@ module SI = X64.Stack_i
 module IB = Interop.Base
 module VS = X64.Vale.State
 module V = X64.Vale.Decls
-module TS = X64.Taint_Semantics_s
-
 val as_vale_buffer (#src #t:_) (i:IB.buf_t src t) : GTot (ME.buffer t)
 val as_vale_immbuffer (#src #t:_) (i:IB.ibuf_t src t) : GTot (ME.buffer t)
 

@@ -1,10 +1,14 @@
 module X64.Leakage
 open X64.Machine_s
 module S = X64.Bytes_Semantics_s
-open X64.Taint_Semantics_s
 open X64.Leakage_s
 open X64.Leakage_Helpers
 open X64.Leakage_Ins
+
+unfold let machine_eval_ocmp = S.machine_eval_ocmp
+unfold let machine_eval_code = S.machine_eval_code
+unfold let machine_eval_codes = S.machine_eval_codes
+unfold let machine_eval_while = S.machine_eval_while
 
 #reset-options "--initial_ifuel 0 --max_ifuel 1 --initial_fuel 1 --max_fuel 1"
 let combine_reg_taints (regs1 regs2:reg_taint) : reg_taint =
@@ -184,15 +188,15 @@ and check_if_code_consumes_fixed_time (code:S.code) (ts:analysis_taints) : bool 
   | Block block -> check_if_block_consumes_fixed_time block ts
 
   | IfElse ifCond ifTrue ifFalse ->
-    let o1 = operand_taint (get_fst_ocmp ifCond) ts in
-    let o2 = operand_taint (get_snd_ocmp ifCond) ts in
+    let o1 = operand_taint (S.get_fst_ocmp ifCond) ts in
+    let o2 = operand_taint (S.get_snd_ocmp ifCond) ts in
     let predTaint = merge_taint o1 o2 in
     if (Secret? predTaint) then (false, ts)
     else
-      let o1Public = operand_does_not_use_secrets (get_fst_ocmp ifCond) ts in
+      let o1Public = operand_does_not_use_secrets (S.get_fst_ocmp ifCond) ts in
       if (not o1Public) then (false, ts)
       else
-      let o2Public = operand_does_not_use_secrets (get_snd_ocmp ifCond) ts in
+      let o2Public = operand_does_not_use_secrets (S.get_snd_ocmp ifCond) ts in
       if (not o2Public) then (false, ts)
       else
       let validIfTrue, tsIfTrue = check_if_code_consumes_fixed_time ifTrue ts in
@@ -207,15 +211,15 @@ and check_if_code_consumes_fixed_time (code:S.code) (ts:analysis_taints) : bool 
 
 and check_if_loop_consumes_fixed_time c (ts:analysis_taints) : (bool * analysis_taints) =
   let While pred body = c in
-  let o1 = operand_taint (get_fst_ocmp pred) ts in
-  let o2 = operand_taint (get_snd_ocmp pred) ts in
+  let o1 = operand_taint (S.get_fst_ocmp pred) ts in
+  let o2 = operand_taint (S.get_snd_ocmp pred) ts in
   let predTaint = merge_taint o1 o2 in
   if (Secret? predTaint) then false, ts
   else
-    let o1Public = operand_does_not_use_secrets (get_fst_ocmp pred) ts in
+    let o1Public = operand_does_not_use_secrets (S.get_fst_ocmp pred) ts in
     if (not o1Public) then (false, ts)
     else
-    let o2Public = operand_does_not_use_secrets (get_snd_ocmp pred) ts in
+    let o2Public = operand_does_not_use_secrets (S.get_snd_ocmp pred) ts in
     if (not o2Public) then (false, ts)
     else
     let fixedTime, next_ts = check_if_code_consumes_fixed_time body ts in
@@ -232,13 +236,13 @@ and check_if_loop_consumes_fixed_time c (ts:analysis_taints) : (bool * analysis_
 
 val monotone_ok_eval: (code:S.code) -> (fuel:nat) -> (s:S.machine_state) -> Lemma
  (requires True)
- (ensures (let s' = taint_eval_code code fuel s in
+ (ensures (let s' = machine_eval_code code fuel s in
     Some? s' /\ (Some?.v s').S.ms_ok ==> s.S.ms_ok))
  (decreases %[code; 0])
 
 val monotone_ok_eval_block: (codes:S.codes) -> (fuel:nat) -> (s:S.machine_state) -> Lemma
  (requires True)
- (ensures (let s' = taint_eval_codes codes fuel s in
+ (ensures (let s' = machine_eval_codes codes fuel s in
     Some? s' /\ (Some?.v s').S.ms_ok ==> s.S.ms_ok))
  (decreases %[codes;1])
 
@@ -247,13 +251,13 @@ let rec monotone_ok_eval code fuel s = match code with
   | Ins ins -> ()
   | Block block -> monotone_ok_eval_block block fuel s
   | IfElse ifCond ifTrue ifFalse ->
-    let st, b = taint_eval_ocmp s ifCond in
+    let st, b = machine_eval_ocmp s ifCond in
     let st = {st with S.ms_trace = BranchPredicate(b)::s.S.ms_trace} in
     if b then monotone_ok_eval ifTrue fuel st else monotone_ok_eval ifFalse fuel st
   | While cond body ->
     if fuel = 0 then ()
     else
-    let st, b = taint_eval_ocmp s cond in
+    let st, b = machine_eval_ocmp s cond in
     if not b then ()
     else
     let st = {st with S.ms_trace = BranchPredicate(b)::s.S.ms_trace} in
@@ -264,7 +268,7 @@ and monotone_ok_eval_block block fuel s =
   match block with
   | [] -> ()
   | hd :: tl ->
-    let s' = taint_eval_code hd fuel s in
+    let s' = machine_eval_code hd fuel s in
     if None? s' then () else
     monotone_ok_eval_block tl fuel (Some?.v s');
     monotone_ok_eval hd fuel s
@@ -273,18 +277,18 @@ val monotone_ok_eval_while: (code:S.code{While? code}) -> (fuel:nat) -> (s:S.mac
   (requires True)
   (ensures (
       let While cond body = code in
-      let (s1, b1) = taint_eval_ocmp s cond in
-      let r1 = taint_eval_code code fuel s in
+      let (s1, b1) = machine_eval_ocmp s cond in
+      let r1 = machine_eval_code code fuel s in
       Some? r1 /\ (Some?.v r1).S.ms_ok ==> s1.S.ms_ok))
 
 let monotone_ok_eval_while code fuel s =
   let While cond body = code in
-  let (s1, b) = taint_eval_ocmp s cond in
-  let r1 = taint_eval_while code fuel s in
+  let (s1, b) = machine_eval_ocmp s cond in
+  let r1 = machine_eval_while code fuel s in
   if fuel = 0 then ()
   else if not b then ()
   else let s0 = {s1 with S.ms_trace = BranchPredicate(true)::s1.S.ms_trace} in
-  let s_opt = taint_eval_code body (fuel - 1) s0 in
+  let s_opt = machine_eval_code body (fuel - 1) s0 in
   match s_opt with
     | None -> ()
     | Some s -> if not s.S.ms_ok then ()
@@ -334,9 +338,9 @@ let rec lemma_code_explicit_leakage_free ts code s1 s2 fuel = match code with
   | Block block -> lemma_block_explicit_leakage_free ts block s1 s2 fuel
   | IfElse ifCond ifTrue ifFalse ->
     let b_fin, ts_fin = check_if_code_consumes_fixed_time code ts in
-    let st1, b1 = taint_eval_ocmp s1 ifCond in
+    let st1, b1 = machine_eval_ocmp s1 ifCond in
     let st1 = {st1 with S.ms_trace = BranchPredicate(b1)::s1.S.ms_trace} in
-    let st2, b2 = taint_eval_ocmp s2 ifCond in
+    let st2, b2 = machine_eval_ocmp s2 ifCond in
     let st2 = {st2 with S.ms_trace = BranchPredicate(b2)::s2.S.ms_trace} in
     assert (b2t b_fin ==> constTimeInvariant ts s1 s2 /\ st1.S.ms_ok /\ st2.S.ms_ok ==> constTimeInvariant ts st1 st2);
     monotone_ok_eval ifTrue fuel st1;
@@ -352,8 +356,8 @@ and lemma_block_explicit_leakage_free ts block s1 s2 fuel = match block with
   | hd :: tl ->
     let b, ts' = check_if_code_consumes_fixed_time hd ts in
     lemma_code_explicit_leakage_free ts hd s1 s2 fuel;
-    let s'1 = taint_eval_code hd fuel s1 in
-    let s'2 = taint_eval_code hd fuel s2 in
+    let s'1 = machine_eval_code hd fuel s1 in
+    let s'2 = machine_eval_code hd fuel s2 in
     if None? s'1 || None? s'2 then ()
     else
     let s'1 = Some?.v s'1 in
@@ -366,11 +370,11 @@ and lemma_loop_explicit_leakage_free ts code s1 s2 fuel =
   if fuel = 0 then ()
   else
   let b_fin, ts_fin = check_if_code_consumes_fixed_time code ts in
-  let r1 = taint_eval_code code fuel s1 in
-  let r2 = taint_eval_code code fuel s2 in
+  let r1 = machine_eval_code code fuel s1 in
+  let r2 = machine_eval_code code fuel s2 in
   let While cond body = code in
-  let (st1, b1) = taint_eval_ocmp s1 cond in
-  let (st2, b2) = taint_eval_ocmp s2 cond in
+  let (st1, b1) = machine_eval_ocmp s1 cond in
+  let (st2, b2) = machine_eval_ocmp s2 cond in
 
   assert (b2t b_fin ==> constTimeInvariant ts s1 s2 /\ st1.S.ms_ok /\ st2.S.ms_ok ==> b1 = b2);
   assert (b2t b_fin ==> constTimeInvariant ts s1 s2 /\ st1.S.ms_ok /\ st2.S.ms_ok ==> constTimeInvariant ts st1 st2);
@@ -395,8 +399,8 @@ and lemma_loop_explicit_leakage_free ts code s1 s2 fuel =
   lemma_code_explicit_leakage_free ts body st'1 st'2 (fuel-1);
   monotone_ok_eval body (fuel-1) st'1;
   monotone_ok_eval body (fuel-1) st'2;
-  let st1 = taint_eval_code body (fuel - 1) st'1 in
-  let st2 = taint_eval_code body (fuel - 1) st'2 in
+  let st1 = machine_eval_code body (fuel - 1) st'1 in
+  let st2 = machine_eval_code body (fuel - 1) st'2 in
   assert (None? st1 ==> r1 == st1);
   assert (None? st2 ==> r2 == st2);
   if (None? st1 || None? st2) then ()

@@ -4,7 +4,6 @@ open Interop.Base
 module B = LowStar.Buffer
 module BS = X64.Bytes_Semantics_s
 module HS = FStar.HyperStack
-module TS = X64.Taint_Semantics_s
 module IA = Interop.Assumptions
 module ST = FStar.HyperStack.ST
 
@@ -19,7 +18,7 @@ let wrap_variadic c n arg_reg regs_modified xmms_modified down_mem args #pre_rel
         let va_s0, mem_s0 =
           create_initial_trusted_state n arg_reg args down_mem h0' in
         let (rax, fuel, final_mem) = predict h0 va_s0 in
-        let Some va_s1 = TS.taint_eval_code c fuel va_s0 in
+        let Some va_s1 = BS.machine_eval_code c fuel va_s0 in
         let final_hs = hs_of_mem final_mem in
         (rax, fuel, final_mem), hs_of_mem final_mem
       ) in

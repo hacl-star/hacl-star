@@ -6,8 +6,6 @@ module MS = X64.Memory_Sems
 module ME = X64.Memory
 module VST = X64.Stack_i
 module VSS = X64.Stack_Sems
-module TS = X64.Taint_Semantics_s
-
 module F = FStar.FunctionalExtensionality
 
 #reset-options "--initial_fuel 2 --max_fuel 2"
@@ -17,8 +15,8 @@ let same_domain sv s = MS.same_domain sv.mem s.BS.ms_mem
 let same_domain_eval_ins c f s0 sv =
   match c with
   | Ins ins -> 
-    let obs = TS.ins_obs ins s0 in 
-    let s1 = {TS.taint_eval_ins ins ({s0 with BS.ms_trace = []}) with BS.ms_trace = obs @ s0.BS.ms_trace} in
+    let obs = BS.ins_obs ins s0 in 
+    let s1 = {BS.machine_eval_ins ins ({s0 with BS.ms_trace = []}) with BS.ms_trace = obs @ s0.BS.ms_trace} in
     X64.Bytes_Semantics.eval_ins_domains ins ({s0 with BS.ms_trace = []});
     MS.lemma_same_domains sv.mem s0.BS.ms_mem s1.BS.ms_mem
 
@@ -104,7 +102,7 @@ let lemma_of_to s =
 let lemma_to_of_eval_ins c s0 =
   let s0' = state_to_S s0 in
   let Ins ins = c in
-  let Some sM = TS.taint_eval_code c 0 s0' in
+  let Some sM = BS.machine_eval_code c 0 s0' in
   same_domain_eval_ins c 0 s0' s0;
   let s' = state_of_S s0 sM in
   let s'' = state_to_S s' in

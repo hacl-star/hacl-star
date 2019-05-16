@@ -243,22 +243,22 @@ let rec instr_write_outputs_bs_domains
 #set-options "--z3rlimit 30 --max_ifuel 1"
 
 let eval_ins_bs_domains (ins:ins) (s0:machine_state) : Lemma
-  (let s1 = run (eval_ins ins) s0 in
+  (let s1 = run (untainted_eval_ins ins) s0 in
   Set.equal (Map.domain s0.ms_mem) (Map.domain s1.ms_mem))
   =
-  let s1 = run (eval_ins ins) s0 in
+  let s1 = run (untainted_eval_ins ins) s0 in
   match ins with
   | _ -> assert (Set.equal (Map.domain s0.ms_mem) (Map.domain s1.ms_mem))
 
 #set-options "--z3rlimit 30"
 
 let eval_ins_domains i s0 =
-  let s = run (check (TS.taint_match_ins i s0.ms_memTaint s0.ms_stackTaint)) s0 in  
+  let s = run (check (taint_match_ins i s0.ms_memTaint s0.ms_stackTaint)) s0 in  
   eval_ins_bs_domains i s
 
 #set-options "--z3rlimit 30 --max_ifuel 2"
 let eval_ins_bs_same_unspecified (ins:ins) (s0:machine_state) : Lemma
-  (let s1 = run (eval_ins ins) s0 in
+  (let s1 = run (untainted_eval_ins ins) s0 in
    forall x. not (Map.contains s1.ms_mem x) ==> s1.ms_mem.[x] == s0.ms_mem.[x])
   =
   ()
@@ -266,5 +266,5 @@ let eval_ins_bs_same_unspecified (ins:ins) (s0:machine_state) : Lemma
 
 let eval_ins_same_unspecified i s0 =
   let s0 = {s0 with ms_trace = []} in
-  let s = run (check (TS.taint_match_ins i s0.ms_memTaint s0.ms_stackTaint)) s0 in
+  let s = run (check (taint_match_ins i s0.ms_memTaint s0.ms_stackTaint)) s0 in
   eval_ins_bs_same_unspecified i s

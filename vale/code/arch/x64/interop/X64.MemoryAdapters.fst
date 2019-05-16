@@ -25,7 +25,6 @@ let stack_eq = ()
 let buffer_addr_is_nat64 (#t:_) (x:ME.buffer t) (s:VS.state) = ()
 
 module V = X64.Vale.Decls
-module TS = X64.Taint_Semantics_s
 friend X64.Vale.Decls
 
 let code_equiv = ()

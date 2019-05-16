@@ -4,8 +4,6 @@ open X64.Vale.State
 open X64.Vale.StateLemmas
 module BC = X64.Bytes_Code_s
 module BS = X64.Bytes_Semantics_s
-module TS = X64.Taint_Semantics_s
-
 unfold let code = BS.code
 unfold let codes = BS.codes
 unfold let ocmp = BS.ocmp
@@ -25,7 +23,7 @@ let state_eq_opt (s1 s2:option BS.machine_state) =
   | _ -> s1 == s2
 
 let eval_code (c:code) (s0:state) (f0:fuel) (s1:state) : Type0 =
-  state_eq_opt (TS.taint_eval_code c f0 (state_to_S s0)) (Some (state_to_S s1))
+  state_eq_opt (BS.machine_eval_code c f0 (state_to_S s0)) (Some (state_to_S s1))
 
 let eval_ins (c:code) (s0:state) : Ghost ((sM:state) * (f0:fuel))
   (requires Ins? c)
@@ -33,18 +31,18 @@ let eval_ins (c:code) (s0:state) : Ghost ((sM:state) * (f0:fuel))
     eval_code c s0 f0 sM
   ) =
   let f0 = 0 in
-  let (Some sM) = TS.taint_eval_code c f0 (state_to_S s0) in
+  let (Some sM) = BS.machine_eval_code c f0 (state_to_S s0) in
   same_domain_eval_ins c f0 (state_to_S s0) s0;
   lemma_to_of_eval_ins c s0;
   (state_of_S s0 sM, f0)
 
-let eval_ocmp (s:state) (c:ocmp) : GTot bool = snd (TS.taint_eval_ocmp (state_to_S s) c)
+let eval_ocmp (s:state) (c:ocmp) : GTot bool = snd (BS.machine_eval_ocmp (state_to_S s) c)
 
 let valid_ocmp (c:ocmp) (s:state) : GTot bool =
   BS.valid_ocmp c (state_to_S s)
 
 let ensure_valid_ocmp (c:ocmp) (s:state) : GTot state = 
-  let ts:BS.machine_state = fst (TS.taint_eval_ocmp (state_to_S s) c) in
+  let ts:BS.machine_state = fst (BS.machine_eval_ocmp (state_to_S s) c) in
   state_of_S s ts
 
 val lemma_cmp_eq (s:state) (o1:operand{not (OMem? o1 || OStack? o1)}) (o2:operand{not (OMem? o2 || OStack? o2)}) : Lemma

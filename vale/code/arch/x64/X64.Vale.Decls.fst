@@ -7,8 +7,6 @@ open FStar.UInt
 module P = X64.Print_s
 module BC = X64.Bytes_Code_s
 module BS = X64.Bytes_Semantics_s
-module TS = X64.Taint_Semantics_s
-
 #reset-options "--max_fuel 0 --max_ifuel 0 --smtencoding.elim_box true --smtencoding.l_arith_repr boxwrap --smtencoding.nl_arith_repr boxwrap --z3cliopt smt.arith.nl=true --using_facts_from 'Prims FStar.UInt Words_s FStar.UInt64'"
 let lemma_mul_in_bounds (x y:nat64) : Lemma (requires x `op_Multiply` y < pow2_64) (ensures FStar.UInt.mul_mod #64 x y == x `op_Multiply` y) = ()
 

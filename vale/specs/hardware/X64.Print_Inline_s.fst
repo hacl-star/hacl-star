@@ -3,7 +3,6 @@ module X64.Print_Inline_s
 open X64.Machine_s
 open X64.Bytes_Code_s
 open X64.Bytes_Semantics_s
-open X64.Taint_Semantics_s
 open FStar.IO
 open Interop.Base
 open Interop.X64
