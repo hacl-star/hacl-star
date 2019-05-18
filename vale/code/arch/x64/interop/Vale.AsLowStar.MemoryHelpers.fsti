@@ -1,26 +1,26 @@
 module Vale.AsLowStar.MemoryHelpers
-open X64.MemoryAdapters
-open Interop.Base
+open Vale.X64.MemoryAdapters
+open Vale.Interop.Base
 module B = LowStar.Buffer
-module BS = X64.Bytes_Semantics_s
+module BS = Vale.X64.Machine_Semantics_s
 module DV = LowStar.BufferView.Down
 module UV = LowStar.BufferView.Up
 module HS = FStar.HyperStack
-module ME = X64.Memory
-module MES = X64.Memory_Sems
-module SI = X64.Stack_i
-module VSS = X64.Stack_Sems
-module MS = X64.Machine_s
-module IA = Interop.Assumptions
-module V = X64.Vale.Decls
-module VS = X64.Vale.State
-module IX64 = Interop.X64
+module ME = Vale.X64.Memory
+module MES = Vale.X64.Memory_Sems
+module SI = Vale.X64.Stack_i
+module VSS = Vale.X64.Stack_Sems
+module MS = Vale.X64.Machine_s
+module IA = Vale.Interop.Assumptions
+module V = Vale.X64.Decls
+module VS = Vale.X64.State
+module IX64 = Vale.Interop.X64
 module VSig = Vale.AsLowStar.ValeSig
 module LSig = Vale.AsLowStar.LowStarSig
-module SL = X64.Vale.StateLemmas
-module VL = X64.Vale.Lemmas
+module SL = Vale.X64.StateLemmas
+module VL = Vale.X64.Lemmas
 module ST = FStar.HyperStack.ST
-module I = Interop
+module I = Vale.Interop
 open FStar.Mul
 
 val as_vale_buffer_len (#src #t:base_typ) (x:buf_t src t)
@@ -274,7 +274,7 @@ val immbuffer_as_seq_reveal_tuint128
   [SMTPat (V.buffer128_as_seq va_s.VS.mem (as_vale_immbuffer x))]
 
 val bounded_buffer_addrs (src t:base_typ) (h:HS.mem) (b:buf_t src t{B.live h b}) (s:ME.mem) : Lemma
-  (ME.buffer_addr #t (as_vale_buffer b) s + DV.length (get_downview b) < Words_s.pow2_64)
+  (ME.buffer_addr #t (as_vale_buffer b) s + DV.length (get_downview b) < Vale.Def.Words_s.pow2_64)
 
 val same_down_up_buffer_length (src:base_typ) (b:buf_t src src) : Lemma
   (B.length b == DV.length (get_downview b) / view_n src)

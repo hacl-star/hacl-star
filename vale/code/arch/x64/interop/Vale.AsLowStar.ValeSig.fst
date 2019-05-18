@@ -1,17 +1,17 @@
 module Vale.AsLowStar.ValeSig
-open Interop.Base
+open Vale.Interop.Base
 module B = LowStar.Buffer
-module BS = X64.Bytes_Semantics_s
+module BS = Vale.X64.Machine_Semantics_s
 module BV = LowStar.BufferView
 module HS = FStar.HyperStack
-module ME = X64.Memory
-module MS = X64.Machine_s
-module IA = Interop.Assumptions
-module V = X64.Vale.Decls
-module VS = X64.Vale.State
-module IX64 = Interop.X64
+module ME = Vale.X64.Memory
+module MS = Vale.X64.Machine_s
+module IA = Vale.Interop.Assumptions
+module V = Vale.X64.Decls
+module VS = Vale.X64.State
+module IX64 = Vale.Interop.X64
 module List = FStar.List.Tot
-open X64.MemoryAdapters
+open Vale.X64.MemoryAdapters
 
 [@__reduce__]
 let vale_pre_tl (dom:list td) =

@@ -4,15 +4,10 @@
 # EVERCRYPT_CONFIG.
 
 VALE_BUNDLES=\
-  -bundle 'Vale.Stdcalls.*,Interop,Interop.*,Fadd_stdcalls,Cpuid_stdcalls,Fswap_stdcalls,Fmul_stdcalls,Fsqr_stdcalls,Fsub_stdcalls,Poly_stdcalls,Sha_stdcalls,GCMencrypt_stdcalls,GCMencryptOpt_stdcalls,AES_stdcalls,AEShash_stdcalls,GCMencryptOpt256_stdcalls,GCMdecrypt_stdcalls[rename=Vale]' \
-  -bundle 'Fadd_inline,Fmul_inline,Fsqr_inline,Fswap_inline[rename=Vale_Inline]' \
+  -bundle 'Vale.Stdcalls.*,Vale.Interop,Vale.Interop.*,Vale.Wrapper.X64.*[rename=Vale]' \
+  -bundle 'Vale.Inline.X64.*[rename=Vale_Inline]' \
   -bundle FStar.Tactics.CanonCommMonoid,FStar.Tactics.CanonCommSemiring,FStar.Tactics.CanonCommSwaps[rename=Unused] \
-  -bundle FastUtil_helpers,FastHybrid_helpers,FastSqr_helpers,FastMul_helpers[rename=Unused2] \
-  -bundle Opaque_s,Map16,Test.Vale_memcpy,Fast_defs,Interop_Printer,Memcpy[rename=Unused3] \
-  -bundle X64.*,Arch.*,Words.*,Vale.*,Collections.*,Collections,SHA_helpers[rename=Unused4] \
-  -bundle Prop_s,Types_s,Words_s,Views,AES_s,Workarounds,Math.*,Interop,TypesNative_s[rename=Unused5] \
-  -bundle GF128_s,GF128,Poly1305.*,GCTR,GCTR_s,GHash_s,GCM_helpers,GHash[rename=Unused6] \
-  -bundle AES_helpers,AES256_helpers,GCM_s,GCM,Interop_assumptions[rename=Unused7]
+  -bundle Vale.*[rename=Unused2]
 
 # Other configs are possible, e.g. everest or hacl-vale, by exporting
 # EVERCRYPT_CONFIG manually.

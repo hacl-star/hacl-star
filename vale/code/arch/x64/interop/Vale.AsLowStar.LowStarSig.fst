@@ -1,18 +1,18 @@
 module Vale.AsLowStar.LowStarSig
-open X64.MemoryAdapters
-open Interop.Base
+open Vale.X64.MemoryAdapters
+open Vale.Interop.Base
 module B = LowStar.Buffer
-module BS = X64.Bytes_Semantics_s
+module BS = Vale.X64.Machine_Semantics_s
 module UV = LowStar.BufferView.Up
 module DV = LowStar.BufferView.Down
 module HS = FStar.HyperStack
-module ME = X64.Memory
-module SI = X64.Stack_i
-module MS = X64.Machine_s
-module IA = Interop.Assumptions
-module V = X64.Vale.Decls
-module VS = X64.Vale.State
-module IX64 = Interop.X64
+module ME = Vale.X64.Memory
+module SI = Vale.X64.Stack_i
+module MS = Vale.X64.Machine_s
+module IA = Vale.Interop.Assumptions
+module V = Vale.X64.Decls
+module VS = Vale.X64.State
+module IX64 = Vale.Interop.X64
 module VSig = Vale.AsLowStar.ValeSig
 open FStar.Mul
 
@@ -57,11 +57,11 @@ let view_of_base_typ (t:ME.base_typ)
   : UV.view UInt8.t (base_typ_as_type t)
   = let open ME in
     match t with
-    | TUInt8 -> Views.up_view8
-    | TUInt16 -> Views.up_view16
-    | TUInt32 -> Views.up_view32
-    | TUInt64 -> Views.up_view64
-    | TUInt128 -> Views.up_view128
+    | TUInt8 -> Vale.Interop.Views.up_view8
+    | TUInt16 -> Vale.Interop.Views.up_view16
+    | TUInt32 -> Vale.Interop.Views.up_view32
+    | TUInt64 -> Vale.Interop.Views.up_view64
+    | TUInt128 -> Vale.Interop.Views.up_view128
 
 //////////////////////////////////////////////////////////////////////////////////////////
 //lowstar_sig pre post:
@@ -69,7 +69,7 @@ let view_of_base_typ (t:ME.base_typ)
 //////////////////////////////////////////////////////////////////////////////////////////
 let hprop = HS.mem -> prop
 let hsprop = HS.mem -> VS.state -> prop
-module IB = Interop.Base
+module IB = Vale.Interop.Base
 
 [@__reduce__]
 let mem_correspondence_1
@@ -258,11 +258,11 @@ let create_initial_vale_state
        (args:IX64.arg_list)
   : IX64.state_builder_t max_arity args V.va_state =
   fun h0 ->
-    let t_state, mem = IX64.create_initial_trusted_state max_arity arg_reg args Interop.down_mem h0 in
+    let t_state, mem = IX64.create_initial_trusted_state max_arity arg_reg args Vale.Interop.down_mem h0 in
     let open VS in
     { ok = true;
-      regs = X64.Vale.Regs.of_fun t_state.BS.ms_regs;
-      xmms = X64.Vale.Xmms.of_fun t_state.BS.ms_xmms;
+      regs = Vale.X64.Regs.of_fun t_state.BS.ms_regs;
+      xmms = Vale.X64.Xmms.of_fun t_state.BS.ms_xmms;
       flags = IA.init_flags;
       mem = as_vale_mem mem;
       memTaint = t_state.BS.ms_memTaint;

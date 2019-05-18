@@ -1,0 +1,699 @@
+include "Vale.X64.InsBasic.vaf"
+include "Vale.X64.InsMem.vaf"
+include{:fstar}{:open} "Vale.Def.Words_s"
+include{:fstar}{:open} "Vale.Def.Words.Seq_s"
+include{:fstar}{:open} "Vale.Def.Words.Two_s"
+include{:fstar}{:open} "Vale.Def.Words.Four_s"
+include{:fstar}{:open} "Vale.Def.Types_s"
+include{:fstar}{:open} "Vale.Arch.Types"
+include{:fstar}{:open} "Vale.X64.Machine_s"
+include{:fstar}{:open} "Vale.X64.State"
+include{:fstar}{:open} "Vale.X64.Decls"
+include{:fstar}{:open} "Vale.X64.QuickCode"
+include{:fstar}{:open} "Vale.X64.CPU_Features_s"
+include{:/*TODO*/fstar}{:open Seq} "FStar.Seq.Base"
+
+module Vale.X64.InsVector
+
+#verbatim{:interface}
+open Vale.Def.Words_s
+open Vale.Def.Words.Seq_s
+open Vale.Def.Words.Two_s
+open Vale.Def.Words.Four_s
+open Vale.Def.Types_s
+open Vale.Arch.Types
+open Vale.X64.Machine_s
+open Vale.X64.Memory
+open Vale.X64.Stack_i
+open Vale.X64.State
+open Vale.X64.Decls
+open Vale.X64.QuickCode
+open Vale.X64.QuickCodes
+open Vale.X64.InsBasic
+open Vale.X64.InsMem
+open Vale.X64.CPU_Features_s
+#endverbatim
+
+#verbatim
+open Vale.Def.Opaque_s
+open Vale.X64
+open Vale.X64.StateLemmas
+open Vale.X64.InsLemmas
+open Vale.X64.Taint_Semantics
+open Vale.X64.Memory
+open Vale.X64.Stack_i
+module I = Vale.X64.Instructions_s
+module S = Vale.X64.Machine_Semantics_s
+friend Vale.X64.StateLemmas // TODO: this shouldn't be here
+friend Vale.X64.Decls
+#endverbatim
+
+#reset-options "--initial_fuel 2 --max_fuel 4 --max_ifuel 2 --z3rlimit 50"
+
+var xmm0:quad32  {:state xmm(0)};
+var xmm1:quad32  {:state xmm(1)};
+var xmm2:quad32  {:state xmm(2)};
+var xmm3:quad32  {:state xmm(3)};
+var xmm4:quad32  {:state xmm(4)};
+var xmm5:quad32  {:state xmm(5)};
+var xmm6:quad32  {:state xmm(6)};
+var xmm7:quad32  {:state xmm(7)};
+var xmm8:quad32  {:state xmm(8)};
+var xmm9:quad32  {:state xmm(9)};
+var xmm10:quad32 {:state xmm(10)};
+var xmm11:quad32 {:state xmm(11)};
+var xmm12:quad32 {:state xmm(12)};
+var xmm13:quad32 {:state xmm(13)};
+var xmm14:quad32 {:state xmm(14)};
+var xmm15:quad32 {:state xmm(15)};
+
+operand_type xmm:quad32 @ nat4 :=
+| inout xmm0 | inout xmm1 | inout xmm2 | inout xmm3
+| inout xmm4 | inout xmm5 | inout xmm6 | inout xmm7
+| inout xmm8 | inout xmm9 | inout xmm10 | inout xmm11
+| inout xmm12 | inout xmm13 | inout xmm14 | inout xmm15
+;
+operand_type Mem128(in base:reg64, inline offset:int, inline t:taint, ghost b:buffer128, ghost index:int):quad32;
+operand_type opr128:quad32 := xmm | Mem128;
+
+procedure Mem128_in(in base:reg64, inline offset:int, inline t:taint, ghost b:buffer128, ghost index:int) returns(o:opr)
+    {:operand}
+    reads
+        mem;
+    extern;
+
+procedure Paddd(inout dst:xmm, in src:xmm)
+    {:public}
+    {:quick exportOnly}
+    {:instruction mk_ins(make_instr(I.ins_Paddd, OReg128(dst), OReg128(src)))}
+    modifies efl;
+    ensures
+        dst == old(add_wrap_quad32(dst, src));
+{
+}
+
+procedure VPaddd(out dst:xmm, in src1:xmm, in src2:xmm)
+    {:public}
+    {:quick exportOnly}
+    {:instruction mk_ins(make_instr(I.ins_VPaddd, OReg128(dst), OReg128(src1), OReg128(src2)))}
+    modifies efl;
+    requires avx_enabled;
+    ensures
+        dst == old(add_wrap_quad32(src1, src2));
+{
+}
+
+procedure Pxor(inout dst:xmm, in src:xmm)
+    {:public}
+    {:quick exportOnly}
+    {:instruction mk_ins(make_instr(I.ins_Pxor, OReg128(dst), OReg128(src)))}
+    ensures
+        dst == old(quad32_xor(dst, src));
+{
+}
+
+#reset-options "--initial_fuel 4 --max_fuel 4 --max_ifuel 3 --z3rlimit 50"
+
+procedure Pand(inout dst:xmm, in src:opr128)
+    {:public}
+    {:quick exportOnly}
+    {:instruction mk_ins(make_instr(I.ins_Pand, OReg128(dst), src))}
+    ensures
+        dst == four_map2(fun(di:nat32, si:nat32) iand32(di, si), old(dst), old(src));
+{
+}
+
+procedure VPxor(out dst:xmm, in src1:xmm, in src2:opr128)
+    {:public}
+    {:quick exportOnly}
+    {:instruction mk_ins(make_instr(I.ins_VPxor, OReg128(dst), OReg128(src1), src2))}
+    requires avx_enabled;
+    ensures
+        dst == old(quad32_xor(src1, src2));
+{
+}
+
+procedure Pslld(inout dst:xmm, inline amt:int)
+    {:public}
+    {:quick exportOnly}
+    {:instruction mk_ins(make_instr(I.ins_Pslld(amt), OReg128(dst)))}
+    requires
+        0 <= amt < 32;
+    ensures
+        dst == four_map(fun (i:nat32) ishl32(i, amt), old(dst));
+{
+}
+
+procedure Psrld(inout dst:xmm, inline amt:int)
+    {:public}
+    {:quick exportOnly}
+    {:instruction mk_ins(make_instr(I.ins_Psrld(amt), OReg128(dst)))}
+    requires
+        0 <= amt < 32;
+    ensures
+        dst == four_map(fun(i:nat32) ishr32(i, amt), old(dst));
+{
+}
+
+procedure Psrldq(inout dst:xmm, inline amt:int)
+    {:quick exportOnly}
+    {:instruction mk_ins(make_instr(I.ins_Psrldq(amt), OReg128(dst)))}
+    requires
+        0 <= amt < 16;
+    ensures
+        let src_bytes := le_quad32_to_bytes(old(dst));
+        let zero_pad := Seq.create(#nat(amt), #nat8(0));
+        let remaining_bytes := Seq.slice(src_bytes, #nat(amt), Seq.length(src_bytes));
+        dst == le_bytes_to_quad32(Seq.append(zero_pad, remaining_bytes));
+{
+}
+
+
+procedure Palignr4(inout dst:xmm, in src:xmm)
+    {:public}
+    {:quick exportOnly}
+    {:instruction mk_ins(make_instr(I.ins_Palignr(4), OReg128(dst), OReg128(src)))}
+    modifies efl;
+    ensures
+        dst == old(Mkfour(src.lo1, src.hi2, src.hi3, dst.lo0));
+{
+}
+
+procedure Palignr8(inout dst:xmm, in src:xmm)
+    {:public}
+    {:quick exportOnly}
+    {:instruction mk_ins(make_instr(I.ins_Palignr(8), OReg128(dst), OReg128(src)))}
+    modifies efl;
+    ensures
+        dst == old(Mkfour(src.hi2, src.hi3, dst.lo0, dst.lo1));
+{
+}
+
+procedure VPalignr8(out dst:xmm, in src1:xmm, in src2:xmm)
+    {:public}
+    {:quick exportOnly}
+    {:instruction mk_ins(make_instr(I.ins_VPalignr(8), OReg128(dst), OReg128(src1), OReg128(src2)))}
+    modifies efl;
+    requires avx_enabled;
+    ensures
+        dst == old(Mkfour(src2.hi2, src2.hi3, src1.lo0, src1.lo1));
+{
+}
+
+procedure Shufpd(inout dst:xmm, in src:xmm, inline permutation:imm8)
+    {:public}
+    {:quick exportOnly}
+    {:instruction mk_ins(make_instr(I.ins_Shufpd(permutation), OReg128(dst), OReg128(src)))}
+    requires permutation < 4;
+    modifies efl;
+    ensures
+        dst == old(Mkfour(
+                    (if permutation = 0 || permutation = 2 then dst.lo0 else dst.hi2),
+                    (if permutation = 0 || permutation = 2 then dst.lo1 else dst.hi3),
+                    (if permutation = 0 || permutation = 1 then src.lo0 else src.hi2),
+                    (if permutation = 0 || permutation = 1 then src.lo1 else src.hi3)));
+{
+}
+
+procedure VShufpd(out dst:xmm, in src1:xmm, in src2:xmm, inline permutation:imm8)
+    {:public}
+    {:quick exportOnly}
+    {:instruction mk_ins(make_instr(I.ins_VShufpd(permutation), OReg128(dst), OReg128(src1), OReg128(src2)))}
+    requires
+        avx_enabled;
+        permutation < 4;
+    modifies efl;
+    ensures
+        dst == old(Mkfour(
+                    (if permutation = 0 || permutation = 2 then src1.lo0 else src1.hi2),
+                    (if permutation = 0 || permutation = 2 then src1.lo1 else src1.hi3),
+                    (if permutation = 0 || permutation = 1 then src2.lo0 else src2.hi2),
+                    (if permutation = 0 || permutation = 1 then src2.lo1 else src2.hi3)));
+{
+}
+
+procedure Pshufb(inout dst:xmm, in src:xmm)
+    {:public}
+    {:quick exportOnly}
+    {:instruction mk_ins(make_instr(I.ins_Pshufb, OReg128(dst), OReg128(src)))}
+    requires
+        src == Mkfour(0x0C0D0E0F, 0x08090A0B, 0x04050607, 0x00010203);
+    modifies efl;
+    ensures
+        dst == reverse_bytes_quad32(old(dst));
+{
+}
+
+procedure VPshufb(out dst:xmm, in src1:xmm, in src2:xmm)
+    {:public}
+    {:quick exportOnly}
+    {:instruction mk_ins(make_instr(I.ins_VPshufb, OReg128(dst), OReg128(src1), OReg128(src2)))}
+    requires
+        avx_enabled;
+        src2 == Mkfour(0x0C0D0E0F, 0x08090A0B, 0x04050607, 0x00010203);
+    modifies efl;
+    ensures
+        dst == reverse_bytes_quad32(old(src1));
+{
+}
+
+procedure PshufbStable(inout dst:xmm, in src:xmm)
+    {:public}
+    {:quick exportOnly}
+    {:instruction mk_ins(make_instr(I.ins_Pshufb, OReg128(dst), OReg128(src)))}
+    requires
+        src == Mkfour(0x00010203, 0x04050607, 0x08090A0B, 0x0C0D0E0F);
+    modifies efl;
+    ensures
+        dst == old(Mkfour(reverse_bytes_nat32(dst.lo0),
+                          reverse_bytes_nat32(dst.lo1),
+                          reverse_bytes_nat32(dst.hi2),
+                          reverse_bytes_nat32(dst.hi3)));
+        dst == old(reverse_bytes_nat32_quad32(dst));
+{
+}
+
+procedure PshufbDup(inout dst:xmm, in src:xmm)
+    {:public}
+    {:quick exportOnly}
+    {:instruction mk_ins(make_instr(I.ins_Pshufb, OReg128(dst), OReg128(src)))}
+    requires
+        src == Mkfour(0x0C0D0E0F, 0x08090A0B, 0x0C0D0E0F, 0x08090A0B);
+    modifies efl;
+    ensures
+        dst == old(Mkfour(reverse_bytes_nat32(dst.hi3),
+                          reverse_bytes_nat32(dst.hi2),
+                          reverse_bytes_nat32(dst.hi3),
+                          reverse_bytes_nat32(dst.hi2)));
+{
+}
+
+procedure Pshufb64(inout dst:xmm, in src:xmm)
+    {:public}
+    {:quick exportOnly}
+    {:instruction mk_ins(make_instr(I.ins_Pshufb, OReg128(dst), OReg128(src)))}
+    requires
+        src == Mkfour(0x04050607, 0x00010203, 0x0C0D0E0F, 0x08090A0B);
+    modifies efl;
+    ensures
+        dst == old(Mkfour(reverse_bytes_nat32(dst.lo1),
+                          reverse_bytes_nat32(dst.lo0),
+                          reverse_bytes_nat32(dst.hi3),
+                          reverse_bytes_nat32(dst.hi2)));
+{
+}
+
+/*
+procedure Pshufb(inout dst:xmm, in src:xmm)
+    {:quick exportOnly}
+    {:instruction mk_ins(make_instr(I.ins_Pshufb, OReg128(dst), OReg128(src)))}
+    requires
+        src == Mkfour(0x0C0D0E0F, 0x08090A0B, 0x04050607, 0x00010203) ||
+        src == Mkfour(0x0C0D0E0F, 0x08090A0B, 0x0C0D0E0F, 0x08090A0B) ||
+        src == Mkfour(0x04050607, 0x00010203, 0x0C0D0E0F, 0x08090A0B);
+    modifies efl;
+    ensures
+        src == Mkfour(0x0C0D0E0F, 0x08090A0B, 0x04050607, 0x00010203) ==>
+            dst == reverse_bytes_quad32(old(dst));
+        src == Mkfour(0x0C0D0E0F, 0x08090A0B, 0x0C0D0E0F, 0x08090A0B) ==>
+            dst == Mkfour(reverse_bytes_nat32(dst.hi3),
+                          reverse_bytes_nat32(dst.hi2),
+                          reverse_bytes_nat32(dst.hi3),
+                          reverse_bytes_nat32(dst.hi2));
+        src == Mkfour(0x04050607, 0x00010203, 0x0C0D0E0F, 0x08090A0B) ==>
+            dst == Mkfour(reverse_bytes_nat32(dst.lo1),
+                          reverse_bytes_nat32(dst.lo0),
+                          reverse_bytes_nat32(dst.hi3),
+                          reverse_bytes_nat32(dst.hi2));
+{
+}
+*/
+
+procedure Pshufd(inout dst:xmm, in src:xmm, inline permutation:imm8)
+    {:public}
+    {:quick exportOnly}
+    {:instruction mk_ins(make_instr(I.ins_Pshufd(permutation), OReg128(dst), OReg128(src)))}
+    ensures
+        dst == old(Mkfour(
+            select_word(src, byte_to_twobits(permutation).lo0),
+            select_word(src, byte_to_twobits(permutation).lo1),
+            select_word(src, byte_to_twobits(permutation).hi2),
+            select_word(src, byte_to_twobits(permutation).hi3)));
+{
+}
+
+procedure Pcmpeqd(inout dst:xmm, in src:xmm)
+    {:public}
+    {:quick exportOnly}
+    {:instruction mk_ins(make_instr(I.ins_Pcmpeqd, OReg128(dst), OReg128(src)))}
+    ensures
+        dst == old(Mkfour(
+            if src.lo0 = dst.lo0 then 0xFFFFFFFF else 0,
+            if src.lo1 = dst.lo1 then 0xFFFFFFFF else 0,
+            if src.hi2 = dst.hi2 then 0xFFFFFFFF else 0,
+            if src.hi3 = dst.hi3 then 0xFFFFFFFF else 0));
+{
+}
+
+procedure Pextrq(out dst:dst_opr64, in src:xmm, inline index:imm8)
+    {:public}
+    {:quick exportOnly}
+    {:instruction mk_ins(make_instr(I.ins_Pextrq(index), dst, OReg128(src)))}
+    requires
+        index < 2;
+    ensures
+        dst == (if index = 0 then lo64(src) else hi64(src));
+{
+    Vale.Def.Opaque_s.reveal_opaque(lo64_def);
+    Vale.Def.Opaque_s.reveal_opaque(hi64_def);
+}
+
+procedure Pinsrd(inout dst:xmm, in src:opr64, inline index:imm8)
+    {:public}
+    {:quick exportOnly}
+    {:instruction mk_ins(make_instr(I.ins_Pinsrd(index), OReg128(dst), src))}
+    requires
+        src < pow2_32;
+        index < 4;
+    ensures
+        dst == insert_nat32(old(dst), #nat32(old(src)), #nat2(index));
+{
+}
+
+procedure PinsrdImm(inout dst:xmm, inline immediate:nat32, inline index:imm8, out tmp:reg_opr64)
+    {:public}
+    {:quick exportOnly}
+    requires
+        index < 4;
+    ensures
+        dst == insert_nat32(old(dst), immediate, #nat2(index));
+        tmp == immediate;
+{
+    Mov64(tmp, immediate);
+    Pinsrd(dst, tmp, index);
+}
+
+// TODO: get rid of this fuel
+#reset-options "--initial_fuel 2 --max_fuel 4 --max_ifuel 3 --z3rlimit 50"
+procedure Pinsrq(inout dst:xmm, in src:opr64, inline index:imm8)
+    {:public}
+    {:quick exportOnly}
+    {:instruction mk_ins(make_instr(I.ins_Pinsrq(index), OReg128(dst), src))}
+    requires
+        index < 2;
+    ensures
+        dst == insert_nat64_opaque(old(dst), src, #nat1(index));
+{
+    Vale.Def.Opaque_s.reveal_opaque(insert_nat64);
+    assert dst == insert_nat64(old(dst), src, #nat1(index));
+}
+
+procedure PinsrqImm(inout dst:xmm, inline immediate:nat64, inline index:imm8, out tmp:reg_opr64)
+    {:public}
+    {:quick exportOnly}
+    requires
+        index < 2;
+    ensures
+        dst == insert_nat64_opaque(old(dst), immediate, #nat1(index));
+{
+    Mov64(tmp, immediate);
+    Pinsrq(dst, tmp, index);
+}
+
+#reset-options "--initial_fuel 2 --max_fuel 4 --max_ifuel 2 --z3rlimit 50"
+procedure VPslldq4(out dst:xmm, in src:xmm)
+    {:public}
+    {:quick exportOnly}
+    {:instruction mk_ins(make_instr(I.ins_VPslldq(4), OReg128(dst), OReg128(src)))}
+    requires avx_enabled;
+    ensures
+        dst == old(Mkfour(0, src.lo0, src.lo1, src.hi2));
+{
+}
+
+procedure Vpslldq8(out dst:xmm, in src:xmm)
+    {:public}
+    {:quick exportOnly}
+    {:instruction mk_ins(make_instr(I.ins_VPslldq(8), OReg128(dst), OReg128(src)))}
+    requires avx_enabled;
+    ensures
+        dst == old(Mkfour(0, 0, src.lo0, src.lo1));
+{
+}
+
+procedure Vpsrldq8(out dst:xmm, in src:xmm)
+    {:public}
+    {:quick exportOnly}
+    {:instruction mk_ins(make_instr(I.ins_VPsrldq(8), OReg128(dst), OReg128(src)))}
+    requires avx_enabled;
+    ensures
+        dst == old(Mkfour(src.hi2, src.hi3, 0, 0));
+{
+}
+
+procedure Mov128(inout dst:xmm, in src:xmm)
+    {:public}
+    {:quick exportOnly}
+    {:instruction mk_ins(make_instr(I.ins_Movdqu, OReg128(dst), OReg128(src)))}
+    ensures
+        dst == old(src);
+{
+}
+
+procedure Load128_buffer(
+        out dst:xmm, in src:reg_opr64, inline offset:int, inline t:taint,
+        ghost b:buffer128, ghost index:int)
+    {:public}
+    {:quick exportOnly}
+    {:instruction mk_ins(make_instr(I.ins_Movdqu, OReg128(dst), OMem128(tuple(MReg(get_reg(src), offset), t))))}
+    reads
+        mem; memTaint;
+    requires
+        valid_src_addr(mem, b, index);
+        valid_taint_buf128(b, mem, memTaint, t);
+        src + offset == buffer_addr(b, mem) + 16 * index;
+    ensures
+        dst == buffer128_read(b, index, mem);
+        valid_taint_buf128(b, mem, memTaint, t);  // REVIEW: Why is this needed?
+{
+    low_lemma_valid_mem128(b, #nat(index), mem);
+    low_lemma_load_mem128(b, #nat(index), mem);
+    lemma_valid_taint128(b, #memTaint_t(memTaint), mem, #nat(index), t);
+}
+
+procedure LoadBe64_buffer128(
+        out dst:reg_opr64, in src:reg_opr64, inline offset:int, inline t:taint, inline upper:bool,
+        ghost b:buffer128, ghost index:int)
+    {:public}
+    {:quick exportOnly}
+    {:instruction mk_ins(make_instr(I.ins_MovBe64, dst, OMem(tuple(MReg(get_reg(src), offset), t))))}
+    reads
+        mem; memTaint;
+    requires
+        valid_src_addr(mem, b, index);
+        valid_taint_buf128(b, mem, memTaint, t);
+        src + offset == buffer_addr(b, mem) + 16 * index + (if upper then 8 else 0);
+    ensures
+        dst == reverse_bytes_nat64(if upper then hi64(buffer128_read(b, index, mem)) else lo64(buffer128_read(b, index, mem)));
+        valid_taint_buf128(b, mem, memTaint, t);
+{
+    low_lemma_valid_mem128_64(b, #nat(index), mem);
+    low_lemma_load_mem128_lo64(b, #nat(index), mem);
+    low_lemma_load_mem128_hi64(b, #nat(index), mem);
+    lemma_valid_taint128(b, #memTaint_t(memTaint), mem, #nat(index), t);
+}
+
+procedure Store128_buffer(
+        in dst:reg_opr64, in src:xmm, inline offset:int, inline t:taint, ghost b:buffer128, ghost index:int)
+    {:public}
+    {:quick exportOnly}
+    {:instruction mk_ins(make_instr(I.ins_Movdqu, OMem128(tuple(MReg(get_reg(dst), offset), t)), OReg128(src)))}
+    reads
+        memTaint;
+    modifies
+        mem;
+    requires
+        valid_dst_addr(mem, b, index);
+        valid_taint_buf128(b, mem, memTaint, t);
+        dst + offset == buffer_addr(b, mem) + 16 * index;
+    ensures
+        modifies_mem(loc_buffer(b), old(mem), mem);
+        valid_taint_buf128(b, mem, memTaint, t);
+        mem == old(buffer128_write(b, index, src, mem));
+{
+    low_lemma_valid_mem128(b, #nat(index), old(mem));
+    low_lemma_store_mem128(b, #nat(index), old(src), old(mem));
+    lemma_valid_taint128(b, old(#memTaint_t(memTaint)), old(mem), #nat(index), t);
+    same_memTaint128(b, old(mem), mem, old(#memTaint_t(memTaint)), #memTaint_t(memTaint));
+}
+
+procedure Store64_buffer128(
+        in dst:reg_opr64, in src:reg_opr64, inline offset:int, inline t:taint, inline upper:bool,
+        ghost b:buffer128, ghost index:int)
+    {:public}
+    {:quick exportOnly}
+    {:instruction mk_ins(make_instr(I.ins_Mov64, OMem(tuple(MReg(get_reg(dst), offset), t)), src))}
+    reads
+        memTaint;
+    modifies
+        mem;
+    requires
+        valid_dst_addr(mem, b, index);
+        valid_taint_buf128(b, mem, memTaint, t);
+        dst + offset == buffer_addr(b, mem) + 16 * index + (if upper then 8 else 0);
+    ensures
+        modifies_mem(loc_buffer(b), old(mem), mem);
+        valid_taint_buf128(b, mem, memTaint, t);
+        mem == old(buffer128_write(b, index, insert_nat64_opaque(old(buffer128_read(b, index, mem)), src, if upper then 1 else 0), mem));
+{
+    low_lemma_valid_mem128_64(b, #nat(index), old(mem));
+    low_lemma_store_mem128_lo64(b, #nat(index), old(src), old(mem));
+    low_lemma_store_mem128_hi64(b, #nat(index), old(src), old(mem));
+    lemma_valid_taint128(b, old(#memTaint_t(memTaint)), old(mem), #nat(index), t);
+    same_memTaint128(b, old(mem), mem, old(#memTaint_t(memTaint)), #memTaint_t(memTaint));
+}
+
+procedure ZeroXmm(inout dst:xmm)
+    {:public}
+    {:quick exportOnly}
+    modifies efl;
+    ensures
+        dst == Mkfour(0, 0, 0, 0);
+{
+    Pxor(dst, dst);
+    Vale.Arch.Types.lemma_quad32_xor();
+}
+
+procedure InitPshufbMask(inout dst:xmm, out tmp:reg_opr64)
+    {:public}
+    {:quick exportOnly}
+    modifies efl;
+    ensures
+        dst == Mkfour(0x0C0D0E0F, 0x08090A0B, 0x04050607, 0x00010203);
+{
+    assert two_to_nat32(Mktwo(0x0C0D0E0F, 0x08090A0B)) == 0x08090A0B0C0D0E0F; // OBSERVE
+    assert two_to_nat32(Mktwo(0x04050607, 0x00010203)) == 0x0001020304050607; // OBSERVE
+    PinsrqImm(dst, 0x08090A0B0C0D0E0F, 0, tmp);
+    PinsrqImm(dst, 0x0001020304050607, 1, tmp);
+    Vale.Def.Opaque_s.reveal_opaque(insert_nat64);
+}
+
+procedure InitPshufbStableMask(inout dst:xmm, out tmp:reg_opr64)
+    {:public}
+    {:quick exportOnly}
+    modifies efl;
+    ensures
+        dst == Mkfour(0x00010203, 0x04050607, 0x08090A0B, 0x0C0D0E0F);
+{
+    assert two_to_nat32(Mktwo(0x08090A0B, 0x0C0D0E0F)) == 0x0C0D0E0F08090A0B; // OBSERVE
+    assert two_to_nat32(Mktwo(0x00010203, 0x04050607)) == 0x0405060700010203; // OBSERVE
+    PinsrqImm(dst, 0x0405060700010203, 0, tmp);
+    PinsrqImm(dst, 0x0C0D0E0F08090A0B, 1, tmp);
+    Vale.Def.Opaque_s.reveal_opaque(insert_nat64);
+}
+
+procedure InitPshufbDupMask(inout dst:xmm, out tmp:reg_opr64)
+    {:public}
+    {:quick exportOnly}
+    modifies efl;
+    ensures
+        dst == Mkfour(0x0C0D0E0F, 0x08090A0B, 0x0C0D0E0F, 0x08090A0B);
+{
+    assert two_to_nat32(Mktwo(0x0C0D0E0F, 0x08090A0B)) == 0x08090A0B0C0D0E0F; // OBSERVE
+    PinsrqImm(dst, 0x08090A0B0C0D0E0F, 0, tmp);
+    PinsrqImm(dst, 0x08090A0B0C0D0E0F, 1, tmp);
+    Vale.Def.Opaque_s.reveal_opaque(insert_nat64);
+}
+
+procedure InitPshufb64Mask(inout dst:xmm, out tmp:reg_opr64)
+    {:public}
+    {:quick exportOnly}
+    modifies efl;
+    ensures
+        dst == Mkfour(0x04050607, 0x00010203, 0x0C0D0E0F, 0x08090A0B);
+{
+    assert two_to_nat32(Mktwo(0x0C0D0E0F, 0x08090A0B)) == 0x08090A0B0C0D0E0F; // OBSERVE
+    assert two_to_nat32(Mktwo(0x04050607, 0x00010203)) == 0x0001020304050607; // OBSERVE
+    PinsrqImm(dst, 0x0001020304050607, 0, tmp);
+    PinsrqImm(dst, 0x08090A0B0C0D0E0F, 1, tmp);
+    Vale.Def.Opaque_s.reveal_opaque(insert_nat64);
+}
+
+// TODO: Lots of room to optimize this using bitwise operations
+procedure XmmEqual()
+    {:public}
+    {:quick}
+    lets x1 @= xmm0; x2 @= xmm1; tmp @= rdx; result @= rax;
+    reads x2;
+    modifies x1; tmp; result; efl;
+    ensures
+        if old(x1 = x2) then result = 0 else result > 0;
+{
+    Pcmpeqd(x1, x2);
+    Pextrq(tmp, x1, 0);
+    let tmp1 := tmp;
+    lemma_equality_check_helper(x1);
+    if (tmp == 0xFFFFFFFFFFFFFFFF) {
+        //assert old(x1.lo0 == x2.lo0 /\ x1.lo1 == x2.lo1);
+        Mov64(result, 0);
+    } else {
+        //assert old(x1.lo0 != x2.lo0) \/ (x1.lo1 != x2.lo1);
+        Mov64(result, 1);
+    }
+    let result1 := result;
+    Pextrq(tmp, x1, 1);
+    let tmp2 := tmp;
+    if (tmp == 0xFFFFFFFFFFFFFFFF) {
+        //assert old(x1.hi2 == x2.hi2 /\ x1.hi3 == x2.hi3);
+        Mov64(tmp, 0);
+    } else {
+        //assert old(x1.hi2 != x2.hi2) \/ (x1.hi3 != x2.hi3);
+        Mov64(tmp, 1);
+    }
+    Add64(result, tmp);
+//    assert tmp1 == lo64(x1);
+//    assert tmp2 == hi64(x1);
+//    assert result1 == (if tmp1 = 0xFFFFFFFFFFFFFFFF then 0 else 1);
+//    assert tmp == (if tmp2 = 0xFFFFFFFFFFFFFFFF then 0 else 1);
+//    assert result == tmp + result1;
+    lemma_equality_check_helper_2(old(x1), old(x2), x1, tmp1, result1, tmp2, tmp, result);
+}
+
+/*  REVIEW: This version goes through with --ONE, but fails without it for reasons that are unclear
+#reset-options "--z3rlimit 150 --z3refresh"
+procedure XmmEqual(inout x1:xmm, x2:xmm, out tmp:reg_opr64, out result:reg_opr64)
+    {:quick exportOnly}
+    modifies efl;
+    ensures
+//        if old(x1 = x2) then result = 0 else result > 0;
+{
+    Pcmpeqd(x1, x2);
+    Pextrq(tmp, x1, 0);
+    let tmp1 := tmp;
+    lemma_equality_check_helper(x1);
+    if (tmp == 0xFFFFFFFFFFFFFFFF) {
+        assert old(x1.lo0 == x2.lo0 /\ x1.lo1 == x2.lo1);
+        Mov64(result, 0);
+    } else {
+        assert old(not(x1.lo0 = x2.lo0) \/ not(x1.lo1 = x2.lo1));
+        Mov64(result, 1);
+    }
+    let result1 := result;
+    Pextrq(tmp, x1, 1);
+    let tmp2 := tmp;
+    if (tmp == 0xFFFFFFFFFFFFFFFF) {
+        assert old(x1.hi2 == x2.hi2 /\ x1.hi3 == x2.hi3);
+        Mov64(tmp, 0);
+    } else {
+        assert old(not(x1.hi2 = x2.hi2) \/ not(x1.hi3 = x2.hi3));
+        Mov64(tmp, 1);
+    }
+    Add64(result, tmp);
+    assert tmp1 == lo64(x1);
+    assert tmp2 == hi64(x1);
+    assert result1 == (if tmp1 = 0xFFFFFFFFFFFFFFFF then 0 else 1);
+//    assert tmp == (if tmp2 = 0xFFFFFFFFFFFFFFFF then 0 else 1);
+//    assert result == tmp + result1;
+    lemma_equality_check_helper_2(old(x1), old(x2), x1, tmp1, result1, tmp2, tmp, result);
+}
+*/

@@ -1,23 +1,23 @@
 module Vale.AsLowStar.Wrapper
-open X64.MemoryAdapters
-open Interop.Base
+open Vale.X64.MemoryAdapters
+open Vale.Interop.Base
 module B = LowStar.Buffer
-module BS = X64.Bytes_Semantics_s
+module BS = Vale.X64.Machine_Semantics_s
 module UV = LowStar.BufferView.Up
 module DV = LowStar.BufferView.Down
 module HS = FStar.HyperStack
-module ME = X64.Memory
-module SI = X64.Stack_i
-module MS = X64.Machine_s
-module IA = Interop.Assumptions
-module I = Interop
-module V = X64.Vale.Decls
-module VS = X64.Vale.State
-module IX64 = Interop.X64
+module ME = Vale.X64.Memory
+module SI = Vale.X64.Stack_i
+module MS = Vale.X64.Machine_s
+module IA = Vale.Interop.Assumptions
+module I = Vale.Interop
+module V = Vale.X64.Decls
+module VS = Vale.X64.State
+module IX64 = Vale.Interop.X64
 module VSig = Vale.AsLowStar.ValeSig
 module LSig = Vale.AsLowStar.LowStarSig
-module SL = X64.Vale.StateLemmas
-module VL = X64.Vale.Lemmas
+module SL = Vale.X64.StateLemmas
+module VL = Vale.X64.Lemmas
 module ST = FStar.HyperStack.ST
 open FStar.Mul
 open FStar.Calc
@@ -314,7 +314,7 @@ let rec stack_args' (max_arity:nat)
                     (n:nat)
                     (args:list arg{List.Tot.length args = n})
                     (rsp:int)
-                    (stack:Map.t int Words_s.nat8)
+                    (stack:Map.t int Vale.Def.Words_s.nat8)
                     : prop =
     match args with
     | [] -> True
@@ -334,15 +334,15 @@ let frame_update_get_heap (ptr:int) (v:MS.nat64) (mem:BS.heap) (j:int) : Lemma
   (requires ptr >= j + 8)
   (ensures BS.get_heap_val64 j mem == BS.get_heap_val64 j (BS.update_heap64 ptr v mem))
   =
-  Opaque_s.reveal_opaque BS.get_heap_val64_def;
-  Opaque_s.reveal_opaque BS.update_heap64_def
+  Vale.Def.Opaque_s.reveal_opaque BS.get_heap_val64_def;
+  Vale.Def.Opaque_s.reveal_opaque BS.update_heap64_def
   
 let frame_update_valid_heap (ptr:int) (v:MS.nat64) (mem:BS.heap) (j:int) : Lemma
   (requires ptr >= j + 8)
   (ensures BS.valid_addr64 j mem == BS.valid_addr64 j (BS.update_heap64 ptr v mem))
   =
   FStar.Pervasives.reveal_opaque (`%BS.valid_addr64) BS.valid_addr64;
-  Opaque_s.reveal_opaque BS.update_heap64_def
+  Vale.Def.Opaque_s.reveal_opaque BS.update_heap64_def
 
 let rec stack_of_args_stack_args'_aux
     (max_arity:nat)
@@ -350,7 +350,7 @@ let rec stack_of_args_stack_args'_aux
     (n:nat)
     (args:IX64.arg_list{List.Tot.length args = n})
     (rsp:int) 
-    (stack:Map.t int Words_s.nat8)
+    (stack:Map.t int Vale.Def.Words_s.nat8)
     (v:MS.nat64)
     : Lemma
   (requires stack_args' max_arity n args rsp stack /\ n_init >= n)
@@ -389,7 +389,7 @@ let rec stack_of_args_stack_args'
     =
     FStar.Pervasives.reveal_opaque (`%BS.valid_addr64) BS.valid_addr64;
     FStar.Pervasives.reveal_opaque (`%BS.valid_addr128) BS.valid_addr128;
-    let rec aux (args:IX64.arg_list) (accu:Map.t int Words_s.nat8) : Lemma (ensures (
+    let rec aux (args:IX64.arg_list) (accu:Map.t int Vale.Def.Words_s.nat8) : Lemma (ensures (
       stack_args' max_arity (List.length args) args init_rsp 
         (IX64.stack_of_args max_arity (List.length args) init_rsp args accu)))
       (decreases (List.length args))
@@ -412,8 +412,8 @@ let rec stack_of_args_stack_args'
           let v = IX64.arg_as_nat64 hd in // We will store the arg hd
           let h_final = BS.update_heap64 ptr v accu' in
           stack_of_args_stack_args'_aux max_arity (n-1) (n-1) tl init_rsp accu' v;
-          X64.Bytes_Semantics.correct_update_get ptr v accu';
-          Opaque_s.reveal_opaque BS.update_heap64_def
+          Vale.X64.Bytes_Semantics.correct_update_get ptr v accu';
+          Vale.Def.Opaque_s.reveal_opaque BS.update_heap64_def
         )
         
 

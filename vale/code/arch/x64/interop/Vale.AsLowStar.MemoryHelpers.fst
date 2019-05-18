@@ -1,19 +1,20 @@
 module Vale.AsLowStar.MemoryHelpers
-open X64.MemoryAdapters
-open Interop.Base
+open Vale.X64.MemoryAdapters
+open Vale.Interop.Base
 module B = LowStar.Buffer
 module UV = LowStar.BufferView.Up
 module DV = LowStar.BufferView.Down
-module ME = X64.Memory
+module ME = Vale.X64.Memory
 module VSig = Vale.AsLowStar.ValeSig
+module IX64 = Vale.Interop.X64
 
-friend X64.Memory
-friend X64.Memory_Sems
-friend X64.Stack_i
-friend X64.Stack_Sems
-friend X64.Vale.Decls
-friend X64.Vale.StateLemmas
-friend X64.MemoryAdapters
+friend Vale.X64.Memory
+friend Vale.X64.Memory_Sems
+friend Vale.X64.Stack_i
+friend Vale.X64.Stack_Sems
+friend Vale.X64.Decls
+friend Vale.X64.StateLemmas
+friend Vale.X64.MemoryAdapters
 
 let as_vale_buffer_len (#src #t:base_typ) (x:buf_t src t)
    = let db = get_downview x in
@@ -157,7 +158,7 @@ let same_buffer_same_upviews #src #bt b h0 h1 =
     in Classical.forall_intro aux;
     Seq.lemma_eq_intro s0 s1;
     DV.length_eq dv;
-    BufferViewHelpers.lemma_uv_equal (LSig.view_of_base_typ bt) dv h0 h1
+    Vale.Lib.BufferViewHelpers.lemma_uv_equal (LSig.view_of_base_typ bt) dv h0 h1
 
 let same_immbuffer_same_upviews #src #bt b h0 h1 =
     let dv = get_downview b in 
@@ -171,4 +172,4 @@ let same_immbuffer_same_upviews #src #bt b h0 h1 =
     in Classical.forall_intro aux;
     Seq.lemma_eq_intro s0 s1;
     DV.length_eq dv;
-    BufferViewHelpers.lemma_uv_equal (LSig.view_of_base_typ bt) dv h0 h1
+    Vale.Lib.BufferViewHelpers.lemma_uv_equal (LSig.view_of_base_typ bt) dv h0 h1

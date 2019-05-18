@@ -48,16 +48,16 @@ let poly1305_vale
     // Initial hash (0) is located at bytes [ 0; 24 )
     assert (forall (i:int).{:pattern (Seq.index (B.as_seq h1 ctx) i)} 0 <= i /\ i < 24 ==>
       Seq.index (Seq.slice (B.as_seq h1 ctx) 0 24) i == 0uy);
-    X64.Poly1305.CallingFromLowStar.lemma_hash_init h1 h1 ctx true;
-    Poly_stdcalls.x64_poly1305 ctx src (FStar.Int.Cast.Full.uint32_to_uint64 len) 1UL;
+    Vale.Poly1305.CallingFromLowStar.lemma_hash_init h1 h1 ctx true;
+    Vale.Wrapper.X64.Poly.x64_poly1305 ctx src (FStar.Int.Cast.Full.uint32_to_uint64 len) 1UL;
     let h2 = ST.get () in
-    X64.Poly1305.CallingFromLowStar.lemma_call_poly1305 h1 h2 ctx src
-      (Arch.BufferFriend.to_bytes (B.as_seq h1 src))
-      (Arch.BufferFriend.to_bytes (B.as_seq h1 key));
-    Poly1305.Equiv.lemma_poly1305_equiv (Arch.BufferFriend.to_bytes (B.as_seq h1 src))
-      (Arch.BufferFriend.to_bytes (B.as_seq h1 key));
-    Arch.BufferFriend.lemma_le_to_n_is_nat_from_bytes (S.slice (B.as_seq h2 ctx) 0 16);
-    Arch.BufferFriend.lemma_n_to_le_is_nat_to_bytes 16 (FStar.Endianness.le_to_n (S.slice (B.as_seq h2 ctx) 0 16));
+    Vale.Poly1305.CallingFromLowStar.lemma_call_poly1305 h1 h2 ctx src
+      (Vale.Arch.BufferFriend.to_bytes (B.as_seq h1 src))
+      (Vale.Arch.BufferFriend.to_bytes (B.as_seq h1 key));
+    Vale.Poly1305.Equiv.lemma_poly1305_equiv (Vale.Arch.BufferFriend.to_bytes (B.as_seq h1 src))
+      (Vale.Arch.BufferFriend.to_bytes (B.as_seq h1 key));
+    Vale.Arch.BufferFriend.lemma_le_to_n_is_nat_from_bytes (S.slice (B.as_seq h2 ctx) 0 16);
+    Vale.Arch.BufferFriend.lemma_n_to_le_is_nat_to_bytes 16 (FStar.Endianness.le_to_n (S.slice (B.as_seq h2 ctx) 0 16));
     FStar.Endianness.n_to_le_le_to_n 16 (S.slice (B.as_seq h2 ctx) 0 16);
     assert (S.slice (B.as_seq h2 ctx) 0 16 `S.equal`
       Spec.Poly1305.poly1305 (B.as_seq h1 src) (B.as_seq h1 key));
@@ -72,45 +72,45 @@ let poly1305_vale
     // Initial hash (0) is located at bytes [ 0; 24 )
     assert (forall (i:int).{:pattern (Seq.index (B.as_seq h1 ctx) i)} 0 <= i /\ i < 24 ==>
       Seq.index (Seq.slice (B.as_seq h1 ctx) 0 24) i == 0uy);
-    X64.Poly1305.CallingFromLowStar.lemma_hash_init h1 h1 ctx true;
-    Poly_stdcalls.x64_poly1305 ctx src16 (FStar.Int.Cast.Full.uint32_to_uint64 len16) 0UL;
+    Vale.Poly1305.CallingFromLowStar.lemma_hash_init h1 h1 ctx true;
+    Vale.Wrapper.X64.Poly.x64_poly1305 ctx src16 (FStar.Int.Cast.Full.uint32_to_uint64 len16) 0UL;
     let h1' = ST.get () in
-    X64.Poly1305.CallingFromLowStar.lemma_call_poly1305 h1 h1' ctx src16
-      (Arch.BufferFriend.to_bytes (B.as_seq h1 src16))
-      (Arch.BufferFriend.to_bytes (B.as_seq h1 key));
+    Vale.Poly1305.CallingFromLowStar.lemma_call_poly1305 h1 h1' ctx src16
+      (Vale.Arch.BufferFriend.to_bytes (B.as_seq h1 src16))
+      (Vale.Arch.BufferFriend.to_bytes (B.as_seq h1 key));
     // Call Vale: last 0..15 bytes
     B.blit key 0ul ctx 24ul 32ul;
     let h1'' = ST.get () in
     assert (forall (i:int).{:pattern (Seq.index (B.as_seq h1'' ctx) i)} 0 <= i /\ i < 24 ==>
       Seq.index (Seq.slice (B.as_seq h1'' ctx) 0 24) i ==
       Seq.index (Seq.slice (B.as_seq h1' ctx) 0 24) i);
-    X64.Poly1305.CallingFromLowStar.lemma_hash_init h1' h1'' ctx false;
-    Poly_stdcalls.x64_poly1305 ctx tmp (FStar.Int.Cast.Full.uint32_to_uint64 n_extra) 1UL;
+    Vale.Poly1305.CallingFromLowStar.lemma_hash_init h1' h1'' ctx false;
+    Vale.Wrapper.X64.Poly.x64_poly1305 ctx tmp (FStar.Int.Cast.Full.uint32_to_uint64 n_extra) 1UL;
     let h2 = ST.get () in
     let proof : squash (S.slice (B.as_seq h2 ctx) 0 16 `S.equal` Spec.Poly1305.poly1305 (B.as_seq h1 src) (B.as_seq h1 key)) =
       let open FStar.Seq.Base in
-      let open Poly1305.Spec_s in
-      let open Words_s in
-      let open X64.Poly1305.Util in
+      let open Vale.Poly1305.Spec_s in
+      let open Vale.Def.Words_s in
+      let open Vale.Poly1305.Util in
       let tmps = B.sub tmp 0ul n_extra in
-      let src' = Arch.BufferFriend.to_bytes (B.as_seq h1 src) in
-      let src16' = Arch.BufferFriend.to_bytes (B.as_seq h1 src16) in
-      let tmps' = Arch.BufferFriend.to_bytes (B.as_seq h1'' tmps) in
-      let key' = Arch.BufferFriend.to_bytes (B.as_seq h1'' key) in
-      let key_r:nat128 = Poly1305.Equiv.nat_from_bytes_le (slice key' 0 16) in
-      let key_s:nat128 = Poly1305.Equiv.nat_from_bytes_le (slice key' 16 32) in
+      let src' = Vale.Arch.BufferFriend.to_bytes (B.as_seq h1 src) in
+      let src16' = Vale.Arch.BufferFriend.to_bytes (B.as_seq h1 src16) in
+      let tmps' = Vale.Arch.BufferFriend.to_bytes (B.as_seq h1'' tmps) in
+      let key' = Vale.Arch.BufferFriend.to_bytes (B.as_seq h1'' key) in
+      let key_r:nat128 = Vale.Poly1305.Equiv.nat_from_bytes_le (slice key' 0 16) in
+      let key_s:nat128 = Vale.Poly1305.Equiv.nat_from_bytes_le (slice key' 16 32) in
       let n = 0x10000000000000000 in
-      let inp1:int -> nat128 = Poly1305.Equiv.block_fun src16' in
-      let inp2:int -> nat128 = Poly1305.Equiv.block_fun (append src16' tmps') in
+      let inp1:int -> nat128 = Vale.Poly1305.Equiv.block_fun src16' in
+      let inp2:int -> nat128 = Vale.Poly1305.Equiv.block_fun (append src16' tmps') in
       assert (equal src' (append src16' tmps'));
       lemma_equal_blocks 0 (n * n) (make_r key_r) inp1 inp2 (UInt32.v n_blocks);
-      Poly1305.Equiv.lemma_poly1305_equiv
-        (Arch.BufferFriend.to_bytes (B.as_seq h1 src))
-        (Arch.BufferFriend.to_bytes (B.as_seq h1 key));
-      Arch.BufferFriend.lemma_le_to_n_is_nat_from_bytes (S.slice (B.as_seq h2 ctx) 0 16);
-      Arch.BufferFriend.lemma_n_to_le_is_nat_to_bytes 16 (FStar.Endianness.le_to_n (S.slice (B.as_seq h2 ctx) 0 16));
+      Vale.Poly1305.Equiv.lemma_poly1305_equiv
+        (Vale.Arch.BufferFriend.to_bytes (B.as_seq h1 src))
+        (Vale.Arch.BufferFriend.to_bytes (B.as_seq h1 key));
+      Vale.Arch.BufferFriend.lemma_le_to_n_is_nat_from_bytes (S.slice (B.as_seq h2 ctx) 0 16);
+      Vale.Arch.BufferFriend.lemma_n_to_le_is_nat_to_bytes 16 (FStar.Endianness.le_to_n (S.slice (B.as_seq h2 ctx) 0 16));
       FStar.Endianness.n_to_le_le_to_n 16 (S.slice (B.as_seq h2 ctx) 0 16);
-      X64.Poly1305.CallingFromLowStar.lemma_call_poly1305 h1'' h2 ctx tmp tmps' key';
+      Vale.Poly1305.CallingFromLowStar.lemma_call_poly1305 h1'' h2 ctx tmp tmps' key';
       ()
     in
     ()

@@ -17,7 +17,7 @@ val scalarmult:
   -> i:lbuffer uint8 32ul
   -> Stack unit
     (requires fun h0 ->
-      (s = M64 ==> X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled)) /\
+      (s = M64 ==> Vale.X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled)) /\
       live h0 o /\ live h0 k /\ live h0 i /\
       disjoint o i /\ disjoint o k)
     (ensures  fun h0 _ h1 -> modifies (loc o) h0 h1 /\
@@ -30,7 +30,7 @@ val secret_to_public:
   -> i:lbuffer uint8 32ul
   -> Stack unit
     (requires fun h0 ->
-      (s = M64 ==> X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled)) /\
+      (s = M64 ==> Vale.X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled)) /\
       live h0 o /\ live h0 i /\ disjoint o i)
     (ensures  fun h0 _ h1 -> modifies (loc o) h0 h1 /\
       as_seq h1 o == S.secret_to_public (as_seq h0 i))

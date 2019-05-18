@@ -21,13 +21,13 @@ let getter (flag: bool) = unit -> Stack bool
     B.(modifies loc_none h0 h1) /\
     (b ==> flag)))
 
-val has_shaext: getter X64.CPU_Features_s.sha_enabled
-val has_aesni: getter X64.CPU_Features_s.aesni_enabled
-val has_pclmulqdq: getter X64.CPU_Features_s.pclmulqdq_enabled
-val has_avx2: getter X64.CPU_Features_s.avx2_enabled
-val has_avx: getter X64.CPU_Features_s.avx_enabled
-val has_bmi2: getter X64.CPU_Features_s.bmi2_enabled
-val has_adx: getter X64.CPU_Features_s.adx_enabled
+val has_shaext: getter Vale.X64.CPU_Features_s.sha_enabled
+val has_aesni: getter Vale.X64.CPU_Features_s.aesni_enabled
+val has_pclmulqdq: getter Vale.X64.CPU_Features_s.pclmulqdq_enabled
+val has_avx2: getter Vale.X64.CPU_Features_s.avx2_enabled
+val has_avx: getter Vale.X64.CPU_Features_s.avx_enabled
+val has_bmi2: getter Vale.X64.CPU_Features_s.bmi2_enabled
+val has_adx: getter Vale.X64.CPU_Features_s.adx_enabled
 
 val wants_vale: unit ->
   Stack bool (requires fun _ -> True) (ensures fun h0 _ h1 -> B.(modifies loc_none h0 h1))

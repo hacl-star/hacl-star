@@ -25,7 +25,7 @@ val fsquare_times_inv: #s:field_spec -> h:mem -> f:felem s -> Type0
 let fsquare_times_inv #s h f =
   match s with
   | M51 -> F51.felem_fits h f (1, 2, 1, 1, 1)
-  | M64 -> X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled)
+  | M64 -> Vale.X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled)
 
 inline_for_extraction noextract
 val fsqr_s:
@@ -54,7 +54,7 @@ val fmuls_pre: #s:field_spec -> h:mem -> f1:felem s -> f2:felem s -> Type0
 let fmuls_pre #s h f1 f2 =
   match s with
   | M51 -> F51.felem_fits h f1 (1, 2, 1, 1, 1) /\ F51.felem_fits h f2 (1, 2, 1, 1, 1)
-  | M64 -> X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled)
+  | M64 -> Vale.X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled)
 
 inline_for_extraction noextract
 val fmul_s:

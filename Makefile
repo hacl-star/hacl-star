@@ -258,7 +258,7 @@ ifndef MAKE_RESTARTS
 	@if ! [ -f .didhelp ]; then echo "💡 Did you know? If your dependency graph didn't change (e.g. no files added or removed, no reference to a new module in your code), run NODEPEND=1 make <your-target> to skip dependency graph regeneration!"; touch .didhelp; fi
 	$(call run-with-log,\
 	  $(FSTAR_NO_FLAGS) --dep $* $(notdir $(FSTAR_ROOTS)) --warn_error '-285' $(FSTAR_DEPEND_FLAGS) \
-	    --extract '* -Prims -LowStar -Lib.Buffer -Hacl -FStar +FStar.Kremlin.Endianness -EverCrypt -MerkleTree -Vale.Tactics -FastHybrid_helpers -FastMul_helpers -FastSqr_helpers -FastUtil_helpers -TestLib -EverCrypt -MerkleTree -Test -Vale_memcpy -Vale.AsLowStar.Test -Lib.IntVector' > $@ && \
+	    --extract '* -Prims -LowStar -Lib.Buffer -Hacl -FStar +FStar.Kremlin.Endianness -EverCrypt -MerkleTree -Vale.Lib.Tactics -Vale.Curve25519.FastHybrid_helpers -Vale.Curve25519.FastMul_helpers -Vale.Curve25519.FastSqr_helpers -Vale.Curve25519.FastUtil_helpers -TestLib -EverCrypt -MerkleTree -Test -Vale_memcpy -Vale.AsLowStar.Test -Lib.IntVector' > $@ && \
 	  $(SED) -i 's!$(HACL_HOME)/obj/\(.*.checked\)!obj/\1!;s!/bin/../ulib/!/ulib/!g' $@ \
 	  ,[FSTAR-DEPEND ($*)],$(call to-obj-dir,$@))
 
@@ -326,10 +326,10 @@ endif
 	  $(MONO) $(IMPORT_FSTAR_TYPES) $(addprefix -in ,$^) -out $@ \
 	  ,[VALE-TYPES] $(notdir $*),$(call to-obj-dir,$@))
 
-# Always pass Operator.vaf as an -include to Vale, except for the file itself.
-VALE_FLAGS = -include $(HACL_HOME)/vale/code/lib/util/Operator.vaf
+# Always pass Vale.Lib.Operator.vaf as an -include to Vale, except for the file itself.
+VALE_FLAGS = -include $(HACL_HOME)/vale/code/lib/util/Vale.Lib.Operator.vaf
 
-obj/Operator.fst: VALE_FLAGS=
+obj/Vale.Lib.Operator.fst: VALE_FLAGS=
 
 # Since valedepend generates "foo.fsti: foo.fst", ensure that the fsti is
 # more recent than the fst (we don't know in what order vale.exe writes
@@ -398,39 +398,39 @@ $(addsuffix .checked,$(VALE_FSTS)): \
   FSTAR_FLAGS=$(VALE_FSTAR_FLAGS) --use_two_phase_tc false
 
 # Then a series of individual overrides.
-obj/Interop.fst.checked: \
+obj/Vale.Interop.fst.checked: \
   FSTAR_FLAGS=$(shell echo $(VALE_FSTAR_FLAGS_NOSMT) | \
     sed 's/--use_extracted_interfaces true//; \
       s/--z3cliopt smt.QI.EAGER_THRESHOLD=100//') \
       --smtencoding.elim_box true
 
-obj/BufferViewHelpers.fst.checked: \
+obj/Vale.Lib.BufferViewHelpers.fst.checked: \
   FSTAR_FLAGS=$(shell echo $(VALE_FSTAR_FLAGS_NOSMT) | \
     sed 's/--z3cliopt smt.arith.nl=false//;')
 
-obj/Views.fst.checked: \
+obj/Vale.Interop.Views.fst.checked: \
   FSTAR_FLAGS=$(shell echo $(VALE_FSTAR_FLAGS) | \
     sed 's/--smtencoding.nl_arith_repr wrapped/--smtencoding.nl_arith_repr native/;')
 
-obj/Collections.Lists.fst.checked: \
+obj/Vale.Lib.Lists.fst.checked: \
   FSTAR_FLAGS=$(shell echo $(VALE_FSTAR_FLAGS) | \
     sed 's/--z3cliopt smt.QI.EAGER_THRESHOLD=100//')
 
-obj/X64.Bytes_Semantics.fst.checked: \
+obj/Vale.X64.Bytes_Semantics.fst.checked: \
   FSTAR_FLAGS=$(shell echo $(VALE_FSTAR_FLAGS) | \
     sed 's/--smtencoding.nl_arith_repr wrapped//; \
       s/--smtencoding.nl_arith_repr native//')
 
-obj/X64.BufferViewStore.fst.checked: \
+obj/Vale.X64.BufferViewStore.fst.checked: \
   FSTAR_FLAGS=$(VALE_FSTAR_FLAGS)
 
-obj/X64.Memory.fst.checked: \
+obj/Vale.X64.Memory.fst.checked: \
   FSTAR_FLAGS=$(shell echo $(VALE_FSTAR_FLAGS_NOSMT) | \
     sed 's/--use_extracted_interfaces true//; \
       s/--z3cliopt smt.arith.nl=false//') \
       --smtencoding.elim_box true
 
-obj/X64.Memory_Sems.fst.checked: \
+obj/Vale.X64.Memory_Sems.fst.checked: \
   FSTAR_FLAGS=$(shell echo $(VALE_FSTAR_FLAGS_NOSMT) | \
     sed 's/--use_extracted_interfaces true//; \
       s/--z3cliopt smt.arith.nl=false//') \
@@ -442,46 +442,46 @@ obj/Vale.AsLowStar.Wrapper.fst.checked: \
 obj/Vale.AsLowStar.Test.fst.checked: \
   FSTAR_FLAGS=$(VALE_FSTAR_FLAGS)
 
-obj/Sha_stdcalls.fst.checked: \
+obj/Vale.Wrapper.X64.Sha.fst.checked: \
   FSTAR_FLAGS=$(VALE_FSTAR_FLAGS)
 
-obj/Simplify_Sha.fst.checked: \
+obj/Vale.SHA.Simplify_Sha.fst.checked: \
   FSTAR_FLAGS=$(VALE_FSTAR_FLAGS)
 
-obj/Fsub_stdcalls.fst.checked: \
+obj/Vale.Wrapper.X64.Fsub.fst.checked: \
   FSTAR_FLAGS=$(VALE_FSTAR_FLAGS)
 
-obj/Fmul_stdcalls.fst.checked: \
+obj/Vale.Wrapper.X64.Fmul.fst.checked: \
   FSTAR_FLAGS=$(VALE_FSTAR_FLAGS)
 
-obj/Fsqr_stdcalls.fst.checked: \
+obj/Vale.Wrapper.X64.Fsqr.fst.checked: \
   FSTAR_FLAGS=$(VALE_FSTAR_FLAGS)
 
-obj/Fadd_inline.fst.checked: \
+obj/Vale.Inline.X64.Fadd_inline.fst.checked: \
   FSTAR_FLAGS=$(VALE_FSTAR_FLAGS)
 
-obj/Fmul_inline.fst.checked: \
+obj/Vale.Inline.X64.Fmul_inline.fst.checked: \
   FSTAR_FLAGS=$(VALE_FSTAR_FLAGS)
 
-obj/Fsqr_inline.fst.checked: \
+obj/Vale.Inline.X64.Fsqr_inline.fst.checked: \
   FSTAR_FLAGS=$(VALE_FSTAR_FLAGS)
 
-obj/Vale.Stdcalls.GCMencrypt.fst.checked: \
+obj/Vale.Stdcalls.X64.GCMencrypt.fst.checked: \
   FSTAR_FLAGS=$(VALE_FSTAR_FLAGS)
 
-obj/Vale.Stdcalls.GCMencryptOpt.fst.checked: \
+obj/Vale.Stdcalls.X64.GCMencryptOpt.fst.checked: \
   USE_EXTRACTED_INTERFACES=false
 
-obj/Vale.Stdcalls.GCMencryptOpt.fst.checked: \
+obj/Vale.Stdcalls.X64.GCMencryptOpt.fst.checked: \
   FSTAR_FLAGS=$(VALE_FSTAR_FLAGS)
 
-obj/Vale.Stdcalls.GCMdecryptOpt.fst.checked: \
+obj/Vale.Stdcalls.X64.GCMdecryptOpt.fst.checked: \
   FSTAR_FLAGS=$(VALE_FSTAR_FLAGS)
 
-obj/GCMencryptOpt_stdcalls.fst.checked: \
+obj/Vale.Wrapper.X64.GCMencryptOpt.fst.checked: \
   FSTAR_FLAGS=$(VALE_FSTAR_FLAGS)
 
-obj/GCM.fst.checked: \
+obj/Vale.AES.GCM.fst.checked: \
   FSTAR_FLAGS=$(VALE_FSTAR_FLAGS)
 
 
@@ -672,15 +672,15 @@ DEFAULT_FLAGS_NO_TESTS	=\
   $(VALE_BUNDLES) \
   -library 'Vale.Stdcalls.*' \
   -static-header 'Vale_Inline' \
-  -library 'Fadd_inline' \
-  -library 'Fmul_inline' \
-  -library 'Fswap_inline' \
-  -library 'Fsqr_inline' \
+  -library 'Vale.Inline.X64.Fadd_inline' \
+  -library 'Vale.Inline.X64.Fmul_inline' \
+  -library 'Vale.Inline.X64.Fswap_inline' \
+  -library 'Vale.Inline.X64.Fsqr_inline' \
   -no-prefix 'Vale.Stdcalls.*' \
-  -no-prefix 'Fadd_inline' \
-  -no-prefix 'Fmul_inline' \
-  -no-prefix 'Fswap_inline' \
-  -no-prefix 'Fsqr_inline' \
+  -no-prefix 'Vale.Inline.X64.Fadd_inline' \
+  -no-prefix 'Vale.Inline.X64.Fmul_inline' \
+  -no-prefix 'Vale.Inline.X64.Fswap_inline' \
+  -no-prefix 'Vale.Inline.X64.Fsqr_inline' \
   -no-prefix 'EverCrypt.Vale' \
   -add-include '"curve25519-inline.h"' \
   -no-prefix 'MerkleTree.New.Low' \

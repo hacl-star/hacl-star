@@ -124,7 +124,7 @@ let init #a s =
   | SHA2_384_s p -> Hacl.Hash.SHA2.init_384 p
   | SHA2_512_s p -> Hacl.Hash.SHA2.init_512 p
 
-friend SHA_helpers
+friend Vale.SHA.SHA_helpers
 
 // A new switch between HACL and Vale; can be used in place of Hacl.Hash.SHA2.update_256
 let update_multi_256 s blocks n =
@@ -136,7 +136,7 @@ let update_multi_256 s blocks n =
     IB.recall_contents k224_256 Spec.SHA2.Constants.k224_256;
     IB.buffer_immutable_buffer_disjoint s k224_256 (ST.get ());
     IB.buffer_immutable_buffer_disjoint blocks k224_256 (ST.get ());
-    Sha_stdcalls.sha256_update s blocks n k224_256
+    Vale.Wrapper.X64.Sha.sha256_update s blocks n k224_256
   end else
     Hacl.Hash.SHA2.update_multi_256 s blocks n
 

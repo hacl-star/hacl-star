@@ -1,14 +1,14 @@
 module Vale.AsLowStar.Test
-open Interop.Base
-module ME = X64.Memory
-module IA = Interop.Assumptions
-module V = X64.Vale.Decls
-module IX64 = Interop.X64
+open Vale.Interop.Base
+module ME = Vale.X64.Memory
+module IA = Vale.Interop.Assumptions
+module V = Vale.X64.Decls
+module IX64 = Vale.Interop.X64
 module VSig = Vale.AsLowStar.ValeSig
 module LSig = Vale.AsLowStar.LowStarSig
 module W = Vale.AsLowStar.Wrapper
-module VS = X64.Vale.State
-module MS = X64.Machine_s
+module VS = Vale.X64.State
+module MS = Vale.X64.Machine_s
 (* A little utility to trigger normalization in types *)
 let as_t (#a:Type) (x:normal a) : a = x
 let as_normal_t (#a:Type) (x:a) : normal a = x
@@ -38,22 +38,22 @@ assume val v: VSig.vale_sig_stdcall pre post
 assume val c: V.va_code
 
 [@__reduce__]
-let call_c_t = IX64.as_lowstar_sig_t_weak_stdcall Interop.down_mem c dom [] _ _ (W.mk_prediction c dom [] (v c IA.win))
+let call_c_t = IX64.as_lowstar_sig_t_weak_stdcall Vale.Interop.down_mem c dom [] _ _ (W.mk_prediction c dom [] (v c IA.win))
 
 
 let call_c : call_c_t = IX64.wrap_weak_stdcall
-  Interop.down_mem c  dom (W.mk_prediction c dom [] (v c IA.win))
+  Vale.Interop.down_mem c  dom (W.mk_prediction c dom [] (v c IA.win))
 
 let call_c_normal_t : normal call_c_t = as_normal_t #call_c_t call_c
 //You can ask emacs to show you the type of call_c_normal_t ...
 
 ////////////////////////////////////////////////////////////////////////////////
 //Now memcpy
-module VM = Test.Vale_memcpy
+module VM = Vale.Test.X64.Vale_memcpy
 
 [@__reduce__]
 let vm_dom = [t64_mod; t64_imm]
-open X64.MemoryAdapters
+open Vale.X64.MemoryAdapters
 (* Need to rearrange the order of arguments *)
 [@__reduce__]
 let vm_pre : VSig.vale_pre vm_dom =
@@ -73,7 +73,7 @@ let vm_post : VSig.vale_post  vm_dom =
     (f:V.va_fuel) ->
       VM.va_ens_memcpy c va_s0 IA.win (as_vale_buffer dst) (as_vale_immbuffer src) va_s1 f
 
-module VS = X64.Vale.State
+module VS = Vale.X64.State
 #set-options "--print_effect_args --z3rlimit 20"
 
 (* The vale lemma doesn't quite suffice to prove the modifies clause
@@ -111,7 +111,7 @@ let code_memcpy = VM.va_code_memcpy IA.win
 [@__reduce__]
 let lowstar_memcpy_t =
   IX64.as_lowstar_sig_t_weak_stdcall
-    Interop.down_mem
+    Vale.Interop.down_mem
     code_memcpy
     vm_dom
     []
@@ -122,7 +122,7 @@ let lowstar_memcpy_t =
 (* And here's the memcpy wrapper itself *)
 let lowstar_memcpy : lowstar_memcpy_t  =
   IX64.wrap_weak_stdcall
-    Interop.down_mem
+    Vale.Interop.down_mem
     code_memcpy
     vm_dom
     (W.mk_prediction code_memcpy vm_dom [] (vm_lemma code_memcpy IA.win))
@@ -135,7 +135,7 @@ module IB = LowStar.ImmutableBuffer
 module MB = LowStar.Monotonic.Buffer
 open FStar.HyperStack.ST
 
-module M = X64.Memory
+module M = Vale.X64.Memory
 
 let test (x:b64) = assert (V.buffer_length (as_vale_buffer x) == B.length x / 8)
 let itest (x:ib64) = assert (V.buffer_length (as_vale_immbuffer x) == B.length x / 8)
@@ -164,16 +164,16 @@ let memcpy_test
   = IB.inhabited_immutable_buffer_is_distinct_from_buffer (UInt8.uint_to_t 0) src dst;
     let x, _ = lowstar_memcpy_normal_t dst src () in //This is a call to the interop wrapper
     let h1 = get () in
-    // let v = Views.up_view64 in
+    // let v = Vale.Interop.Views.up_view64 in
     // assert (DV.length_eq (get_downview dst);
     //         DV.length_eq (get_downview src);
     //         Seq.equal (LBV.as_seq h1 (LBV.mk_buffer (get_downview dst) v))
     //                   (LBV.as_seq h1 (LBV.mk_buffer (get_downview src) v)));
-    // lbv_as_seq_eq dst src Views.up_view64 h1; //And a lemma to rephrase the Vale postcondition 
+    // lbv_as_seq_eq dst src Vale.Interop.Views.up_view64 h1; //And a lemma to rephrase the Vale postcondition 
     x                                      //with equalities of buffer views
                                            //back to equalities of buffers
 
-module VC = X64.Cpuidstdcall
+module VC = Vale.Lib.X64.Cpuidstdcall
 
 [@__reduce__]
 let empty_list #a : l:list a {List.length l = 0} = []
@@ -229,7 +229,7 @@ let code_aesni = VC.va_code_check_aesni_stdcall IA.win
 [@__reduce__]
 let lowstar_aesni_t =
   IX64.as_lowstar_sig_t_weak_stdcall
-    Interop.down_mem
+    Vale.Interop.down_mem
     (coerce code_aesni)
     aesni_dom
     empty_list
@@ -240,7 +240,7 @@ let lowstar_aesni_t =
 (* And here's the check_aesni wrapper itself *)
 let lowstar_aesni : lowstar_aesni_t  =
   IX64.wrap_weak_stdcall
-    Interop.down_mem
+    Vale.Interop.down_mem
     (coerce code_aesni)
     aesni_dom
     (W.mk_prediction code_aesni aesni_dom [] (aesni_lemma code_aesni IA.win))
@@ -248,7 +248,7 @@ let lowstar_aesni : lowstar_aesni_t  =
 let lowstar_aesni_normal_t //: normal lowstar_aesni_t
   = as_normal_t #lowstar_aesni_t lowstar_aesni
 
-open X64.CPU_Features_s
+open Vale.X64.CPU_Features_s
 
 #set-options "--print_full_names"
 
@@ -262,7 +262,7 @@ let aesni_test ()
   x
    
 
-module TA = Test.Args
+module TA = Vale.Test.X64.Args
 
 [@__reduce__]
 let (ta_dom:list td{List.length ta_dom <= 20}) =
@@ -372,7 +372,7 @@ let code_ta = TA.va_code_test IA.win
 [@__reduce__]
 let lowstar_ta_t =
   IX64.as_lowstar_sig_t_weak_stdcall
-    Interop.down_mem
+    Vale.Interop.down_mem
     (coerce code_ta)
     ta_dom
     []
@@ -383,7 +383,7 @@ let lowstar_ta_t =
 (* And here's the check_aesni wrapper itself *)
 let lowstar_ta : lowstar_ta_t  =
   IX64.wrap_weak_stdcall
-    Interop.down_mem
+    Vale.Interop.down_mem
     (coerce code_ta)
     ta_dom
     (W.mk_prediction code_ta ta_dom [] (ta_lemma code_ta IA.win))

@@ -66,7 +66,7 @@ let uints_from_bytes_le_lemma128_2 b = ()
 
 let uint_to_bytes_le_lemma128 r = ()
 
-module BF = Arch.BufferFriend
+module BF = Vale.Arch.BufferFriend
 
 #set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
 let uints_to_bytes_le_lemma64_1 lo hi =
@@ -76,7 +76,7 @@ let uints_to_bytes_le_lemma64_1 lo hi =
   // let b1 = BSeq.uints_to_bytes_le hi in
   // calc (==) {
   //   nat_to_bytes_le 16 (uint_v hi.[0] * pow2 64 + uint_v lo.[0])
-  // (==) { Arch.BufferFriend }
+  // (==) { Vale.Arch.BufferFriend }
   //   let lo = uints_from_bytes_le (uints_to_bytes_le lo) in
   //   let hi = uints_from_bytes_le (uints_to_bytes_le hi) in
   //   nat_to_bytes_le 16 (uint_v hi.[0] * pow2 64 + uint_v lo.[0])
@@ -87,7 +87,7 @@ let uints_to_bytes_le_lemma64_1 lo hi =
   //   nat_to_bytes_le 16 (uint_v hi.[0] * pow2 64 + uint_v lo.[0])
   // (==) { lemma_uints_from_bytes_le_lemma_64_1 (concat b0 b1) }
   //   nat_to_bytes_le (nat_from_bytes_le 16 (concat b0 b1));
-  // (==) { Arch.BufferFriend }
+  // (==) { Vale.Arch.BufferFriend }
   //   n_to_le (le_to_n 16 b)
   // (==) { FStar.Endianness }
   //   b

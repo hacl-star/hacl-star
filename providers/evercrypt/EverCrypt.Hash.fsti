@@ -33,7 +33,7 @@ type broken_alg = a:alg {a = MD5 \/ a = SHA1}
 /// based on those.
 type alg13 = a:alg { a=SHA2_256 \/ a=SHA2_384 \/ a=SHA2_512 }
 
-/// Alternative names from Cédric, to be aligned with naming conventions.
+/// Alternative names from C??dric, to be aligned with naming conventions.
 noextract unfold
 let tagLength = Spec.Hash.Definitions.hash_length
 noextract unfold

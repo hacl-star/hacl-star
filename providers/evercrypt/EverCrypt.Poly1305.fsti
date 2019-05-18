@@ -6,7 +6,7 @@ module B = LowStar.Buffer
 module U32 = FStar.UInt32
 module ST = FStar.HyperStack.ST
 
-module BF = Arch.BufferFriend
+module BF = Vale.Arch.BufferFriend
 
 open FStar.HyperStack.ST
 
