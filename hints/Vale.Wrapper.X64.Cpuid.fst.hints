@@ -1,110 +1,110 @@
 [
-  "Ûö\u001eäHÚõñ\u0007\u0014©¶)D®ù",
+  "À†QŒı\u0006M1*TÇ\u000e\u0006\u0007´C",
   [
     [
-      "Cpuid_stdcalls.check_aesni",
+      "Vale.Wrapper.X64.Cpuid.check_aesni",
       1,
       1,
       0,
       [
         "@MaxIFuel_assumption", "@query", "bool_inversion", "eq2-interp",
-        "equation_Interop.Base.coerce", "equation_Prims.eq2",
-        "equation_Prims.squash", "equation_Vale.Stdcalls.Cpuid.code_aesni",
-        "equation_X64.Cpuidstdcall.va_ens_check_aesni_stdcall",
-        "equation_X64.Cpuidstdcall.va_req_check_aesni_stdcall",
-        "equation_X64.Vale.Decls.va_require_total",
-        "equation_X64.Vale.Decls.valid_stack_slots",
-        "fuel_guarded_inversion_X64.Vale.State.state",
-        "function_token_typing_X64.MemoryAdapters.mem_eq",
+        "equation_Prims.eq2", "equation_Prims.squash",
+        "equation_Vale.Interop.Base.coerce",
+        "equation_Vale.Lib.X64.Cpuidstdcall.va_ens_check_aesni_stdcall",
+        "equation_Vale.Lib.X64.Cpuidstdcall.va_req_check_aesni_stdcall",
+        "equation_Vale.Stdcalls.X64.Cpuid.code_aesni",
+        "equation_Vale.X64.Decls.va_require_total",
+        "fuel_guarded_inversion_Vale.X64.State.state",
+        "function_token_typing_Vale.X64.MemoryAdapters.mem_eq",
         "refinement_interpretation_Tm_refine_8d65e998a07dd53ec478e27017d9dba5",
-        "typing_Interop.Assumptions.win"
+        "typing_Vale.Interop.Assumptions.win"
       ],
       0,
-      "4a49691a2aaabf26b1372cf7c08acdf6"
+      "b5d00ebe31a4546206b6383ee7e47594"
     ],
     [
-      "Cpuid_stdcalls.check_sha",
+      "Vale.Wrapper.X64.Cpuid.check_sha",
       1,
       1,
       0,
       [
         "@MaxIFuel_assumption", "@query", "bool_inversion", "eq2-interp",
-        "equation_Interop.Base.coerce", "equation_Prims.eq2",
-        "equation_Prims.squash", "equation_Vale.Stdcalls.Cpuid.code_sha",
-        "equation_X64.Cpuidstdcall.va_ens_check_sha_stdcall",
-        "equation_X64.Cpuidstdcall.va_req_check_sha_stdcall",
-        "equation_X64.Vale.Decls.va_require_total",
-        "equation_X64.Vale.Decls.valid_stack_slots",
-        "fuel_guarded_inversion_X64.Vale.State.state",
-        "function_token_typing_X64.MemoryAdapters.mem_eq",
+        "equation_Prims.eq2", "equation_Prims.squash",
+        "equation_Vale.Interop.Base.coerce",
+        "equation_Vale.Lib.X64.Cpuidstdcall.va_ens_check_sha_stdcall",
+        "equation_Vale.Lib.X64.Cpuidstdcall.va_req_check_sha_stdcall",
+        "equation_Vale.Stdcalls.X64.Cpuid.code_sha",
+        "equation_Vale.X64.Decls.va_require_total",
+        "fuel_guarded_inversion_Vale.X64.State.state",
+        "function_token_typing_Vale.X64.MemoryAdapters.mem_eq",
         "refinement_interpretation_Tm_refine_8d65e998a07dd53ec478e27017d9dba5",
-        "typing_Interop.Assumptions.win"
+        "typing_Vale.Interop.Assumptions.win"
       ],
       0,
-      "900fdc860dbcef2583688139fc82c145"
+      "03728fd1a18d398f44f9f977fbb67a86"
     ],
     [
-      "Cpuid_stdcalls.check_adx_bmi2",
+      "Vale.Wrapper.X64.Cpuid.check_adx_bmi2",
       1,
       1,
       0,
       [
         "@MaxIFuel_assumption", "@query", "bool_inversion", "eq2-interp",
-        "equation_Interop.Base.coerce", "equation_Prims.eq2",
-        "equation_Prims.squash", "equation_Vale.Stdcalls.Cpuid.code_adx",
-        "equation_X64.Cpuidstdcall.va_ens_check_adx_bmi2_stdcall",
-        "equation_X64.Cpuidstdcall.va_req_check_adx_bmi2_stdcall",
-        "equation_X64.Vale.Decls.va_require_total",
-        "equation_X64.Vale.Decls.valid_stack_slots",
-        "fuel_guarded_inversion_X64.Vale.State.state",
-        "function_token_typing_X64.MemoryAdapters.mem_eq",
+        "equation_Prims.eq2", "equation_Prims.squash",
+        "equation_Vale.Interop.Base.coerce",
+        "equation_Vale.Lib.X64.Cpuidstdcall.va_ens_check_adx_bmi2_stdcall",
+        "equation_Vale.Lib.X64.Cpuidstdcall.va_req_check_adx_bmi2_stdcall",
+        "equation_Vale.Stdcalls.X64.Cpuid.code_adx",
+        "equation_Vale.X64.Decls.va_require_total",
+        "fuel_guarded_inversion_Vale.X64.State.state",
+        "function_token_typing_Vale.X64.MemoryAdapters.mem_eq",
         "refinement_interpretation_Tm_refine_8d65e998a07dd53ec478e27017d9dba5",
-        "typing_Interop.Assumptions.win"
+        "typing_Vale.Interop.Assumptions.win"
       ],
       0,
-      "457ca0752850fc7abc104018ec5d5485"
+      "73709ad9d0bf099b9fcde49b7a5c0b4d"
     ],
     [
-      "Cpuid_stdcalls.check_avx",
+      "Vale.Wrapper.X64.Cpuid.check_avx",
       1,
       1,
       0,
       [
         "@MaxIFuel_assumption", "@query", "bool_inversion", "eq2-interp",
-        "equation_Interop.Base.coerce", "equation_Prims.eq2",
-        "equation_Prims.squash", "equation_Vale.Stdcalls.Cpuid.code_avx",
-        "equation_X64.Cpuidstdcall.va_ens_check_avx_stdcall",
-        "equation_X64.Cpuidstdcall.va_req_check_avx_stdcall",
-        "equation_X64.Vale.Decls.va_require_total",
-        "equation_X64.Vale.Decls.valid_stack_slots",
-        "fuel_guarded_inversion_X64.Vale.State.state",
-        "function_token_typing_X64.MemoryAdapters.mem_eq",
+        "equation_Prims.eq2", "equation_Prims.squash",
+        "equation_Vale.Interop.Base.coerce",
+        "equation_Vale.Lib.X64.Cpuidstdcall.va_ens_check_avx_stdcall",
+        "equation_Vale.Lib.X64.Cpuidstdcall.va_req_check_avx_stdcall",
+        "equation_Vale.Stdcalls.X64.Cpuid.code_avx",
+        "equation_Vale.X64.Decls.va_require_total",
+        "fuel_guarded_inversion_Vale.X64.State.state",
+        "function_token_typing_Vale.X64.MemoryAdapters.mem_eq",
         "refinement_interpretation_Tm_refine_8d65e998a07dd53ec478e27017d9dba5",
-        "typing_Interop.Assumptions.win"
+        "typing_Vale.Interop.Assumptions.win"
       ],
       0,
-      "c095c782bc63c9975de2bb576ab5757a"
+      "5ead69987edda250265700b180d4f103"
     ],
     [
-      "Cpuid_stdcalls.check_avx2",
+      "Vale.Wrapper.X64.Cpuid.check_avx2",
       1,
       1,
       0,
       [
         "@MaxIFuel_assumption", "@query", "bool_inversion", "eq2-interp",
-        "equation_Interop.Base.coerce", "equation_Prims.eq2",
-        "equation_Prims.squash", "equation_Vale.Stdcalls.Cpuid.code_avx2",
-        "equation_X64.Cpuidstdcall.va_ens_check_avx2_stdcall",
-        "equation_X64.Cpuidstdcall.va_req_check_avx2_stdcall",
-        "equation_X64.Vale.Decls.va_require_total",
-        "equation_X64.Vale.Decls.valid_stack_slots",
-        "fuel_guarded_inversion_X64.Vale.State.state",
-        "function_token_typing_X64.MemoryAdapters.mem_eq",
+        "equation_Prims.eq2", "equation_Prims.squash",
+        "equation_Vale.Interop.Base.coerce",
+        "equation_Vale.Lib.X64.Cpuidstdcall.va_ens_check_avx2_stdcall",
+        "equation_Vale.Lib.X64.Cpuidstdcall.va_req_check_avx2_stdcall",
+        "equation_Vale.Stdcalls.X64.Cpuid.code_avx2",
+        "equation_Vale.X64.Decls.va_require_total",
+        "fuel_guarded_inversion_Vale.X64.State.state",
+        "function_token_typing_Vale.X64.MemoryAdapters.mem_eq",
         "refinement_interpretation_Tm_refine_8d65e998a07dd53ec478e27017d9dba5",
-        "typing_Interop.Assumptions.win"
+        "typing_Vale.Interop.Assumptions.win"
       ],
       0,
-      "70eb1a20608c09eb71a141d53466dd50"
+      "126a3b84c74dfce2bb3e893c9a5b26c3"
     ]
   ]
 ]

@@ -1,8 +1,8 @@
 [
-  "ÏÙç\u0005Uö∏7≤Û[∑˛htÈ",
+  "\u001c,DT~tl\u0007\u0010Æô;j/f\u0000",
   [
     [
-      "Collections.Lists.singleton_list_rev",
+      "Vale.Lib.Lists.singleton_list_rev",
       1,
       2,
       0,
@@ -19,10 +19,10 @@
         "projection_inverse_Prims.Cons_tl", "projection_inverse_Prims.Nil_a"
       ],
       0,
-      "af7e6da0edd0370a70b2af01e308030f"
+      "2cb67b0648f8016a24adc841f8ede728"
     ],
     [
-      "Collections.Lists.list_cons_is_append",
+      "Vale.Lib.Lists.list_cons_is_append",
       1,
       2,
       0,
@@ -38,10 +38,10 @@
         "projection_inverse_Prims.Cons_tl", "projection_inverse_Prims.Nil_a"
       ],
       0,
-      "39b318816f33caa996d2e55420f6618b"
+      "c9fea8d7a3b4a8db194b64db3b27008e"
     ],
     [
-      "Collections.Lists.singleton_list_seq",
+      "Vale.Lib.Lists.singleton_list_seq",
       1,
       2,
       0,
@@ -78,12 +78,12 @@
         "typing_FStar.Seq.Properties.seq_of_list"
       ],
       0,
-      "88a17bf1c416243fdc0518bf37361160"
+      "cbcd1e120b0f48212832de02ef783886"
     ],
     [
-      "Collections.Lists.list_append_length",
+      "Vale.Lib.Lists.list_append_length",
       1,
-      2,
+      1,
       1,
       [
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
@@ -107,15 +107,15 @@
         "projection_inverse_Prims.Cons_a",
         "projection_inverse_Prims.Cons_hd",
         "projection_inverse_Prims.Cons_tl", "projection_inverse_Prims.Nil_a",
-        "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
         "subterm_ordering_Prims.Cons", "typing_FStar.List.Tot.Base.append",
         "typing_FStar.List.Tot.Base.length"
       ],
       0,
-      "57df8d44e82b51a723d7ffaeec02ffd2"
+      "9dccda023ae34fa8224eb962beb77a38"
     ],
     [
-      "Collections.Lists.list_append_index",
+      "Vale.Lib.Lists.list_append_index",
       1,
       1,
       0,
@@ -128,10 +128,10 @@
         "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-      "9b16862c482ce55322cd24f931306c5f"
+      "2c0494419e8217a78b2eddd1e6d5d1ee"
     ],
     [
-      "Collections.Lists.list_append_index",
+      "Vale.Lib.Lists.list_append_index",
       2,
       1,
       0,
@@ -142,10 +142,10 @@
         "refinement_interpretation_Tm_refine_8d65e998a07dd53ec478e27017d9dba5"
       ],
       0,
-      "353f644b9d9eb2d727f335f93533b320"
+      "cb5f39903b1b89c07e7402c05e8b8bf9"
     ],
     [
-      "Collections.Lists.list_append_index",
+      "Vale.Lib.Lists.list_append_index",
       3,
       1,
       1,
@@ -187,10 +187,10 @@
         "typing_FStar.List.Tot.Base.append", "unit_inversion", "unit_typing"
       ],
       0,
-      "d10a7408d2b1c17da18285da37fefd09"
+      "02384f698bc003cf1b2d90d0b6ce66e9"
     ],
     [
-      "Collections.Lists.append_list_seq",
+      "Vale.Lib.Lists.append_list_seq",
       1,
       1,
       0,
@@ -198,11 +198,15 @@
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_FStar.List.Tot.Base.append.fuel_instrumented",
         "@fuel_correspondence_FStar.List.Tot.Base.length.fuel_instrumented",
-        "@query", "binder_x_0a56e3de562c08d8ab59f4ac6f626a98_2",
+        "@query", "Prims_pretyping_ae567c2fb75be05905677af440075565",
+        "binder_x_0a56e3de562c08d8ab59f4ac6f626a98_2",
         "binder_x_0a56e3de562c08d8ab59f4ac6f626a98_3",
-        "binder_x_fe28d8bcde588226b4e538b35321de05_1", "equation_Prims.nat",
+        "binder_x_fe28d8bcde588226b4e538b35321de05_1",
+        "constructor_distinct_BoxInt", "constructor_distinct_Prims.Cons",
+        "constructor_distinct_Tm_unit", "equation_Prims.nat",
         "equation_with_fuel_FStar.List.Tot.Base.append.fuel_instrumented",
         "equation_with_fuel_FStar.List.Tot.Base.length.fuel_instrumented",
+        "function_token_typing_Prims.__cache_version_number__",
         "int_inversion", "int_typing", "lemma_FStar.Seq.Base.lemma_eq_elim",
         "lemma_FStar.Seq.Base.lemma_eq_intro",
         "lemma_FStar.Seq.Base.lemma_index_app1",
@@ -212,19 +216,26 @@
         "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
+        "projection_inverse_Prims.Cons_a",
+        "projection_inverse_Prims.Cons_hd",
+        "projection_inverse_Prims.Cons_tl",
         "refinement_interpretation_Tm_refine_03127b5d59ee3055620018693b4264e8",
         "refinement_interpretation_Tm_refine_077f96a26e25091aa1dec79eae038c4e",
         "refinement_interpretation_Tm_refine_36f208f2b1019ab7b5d9be73f4c89349",
+        "refinement_interpretation_Tm_refine_5b76b1c4682092d8298d5677347b4a58",
+        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
         "refinement_interpretation_Tm_refine_d2d1ea66f2b3a92c2deb42edcbb784ce",
         "refinement_interpretation_Tm_refine_db59103f408f0a591a3241cae254c96e",
-        "typing_FStar.List.Tot.Base.append", "typing_FStar.Seq.Base.append",
+        "typing_FStar.List.Tot.Base.append",
+        "typing_FStar.List.Tot.Base.length", "typing_FStar.Seq.Base.append",
+        "typing_FStar.Seq.Base.length",
         "typing_FStar.Seq.Properties.seq_of_list"
       ],
       0,
-      "dd43d122d91a139768b062bc4651d617"
+      "4e5d5c34903b5bc80740905af27ecfa9"
     ],
     [
-      "Collections.Lists.from_list_le",
+      "Vale.Lib.Lists.from_list_le",
       1,
       1,
       1,
@@ -237,10 +248,10 @@
         "projection_inverse_Prims.Cons_tl", "subterm_ordering_Prims.Cons"
       ],
       0,
-      "9149675e2b33c48864b26f39cf9c983e"
+      "977654cb977b15607aa82953e224bd23"
     ],
     [
-      "Collections.Lists.lemma_from_list_le",
+      "Vale.Lib.Lists.lemma_from_list_le",
       1,
       1,
       0,
@@ -254,10 +265,10 @@
         "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "24bf7b5812cc2d8a2d14ca8cac930b93"
+      "ea8d7685d7d219171815c44f410c65ab"
     ],
     [
-      "Collections.Lists.lemma_from_list_le",
+      "Vale.Lib.Lists.lemma_from_list_le",
       2,
       1,
       0,
@@ -271,23 +282,23 @@
         "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "1f67e2baf8683d3cd7deae8c87a34696"
+      "4946163fa4fd2b9344b5d1535ec570c5"
     ],
     [
-      "Collections.Lists.lemma_from_list_le",
+      "Vale.Lib.Lists.lemma_from_list_le",
       3,
       1,
       1,
       [
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
-        "@fuel_correspondence_Collections.Lists.from_list_le.fuel_instrumented",
         "@fuel_correspondence_FStar.List.Tot.Base.length.fuel_instrumented",
         "@fuel_correspondence_FStar.List.Tot.Base.rev_acc.fuel_instrumented",
         "@fuel_correspondence_FStar.UInt.from_vec.fuel_instrumented",
-        "@fuel_irrelevance_Collections.Lists.from_list_le.fuel_instrumented",
+        "@fuel_correspondence_Vale.Lib.Lists.from_list_le.fuel_instrumented",
         "@fuel_irrelevance_FStar.List.Tot.Base.length.fuel_instrumented",
-        "@fuel_irrelevance_FStar.UInt.from_vec.fuel_instrumented", "@query",
-        "Prims_pretyping_ae567c2fb75be05905677af440075565",
+        "@fuel_irrelevance_FStar.UInt.from_vec.fuel_instrumented",
+        "@fuel_irrelevance_Vale.Lib.Lists.from_list_le.fuel_instrumented",
+        "@query", "Prims_pretyping_ae567c2fb75be05905677af440075565",
         "Prims_pretyping_f537159ed795b314b4e58c260361ae86",
         "binder_x_47e04024252030d43f7aef842c456923_0", "bool_inversion",
         "bool_typing", "constructor_distinct_Prims.Cons",
@@ -297,10 +308,10 @@
         "equation_FStar.List.Tot.Base.op_At",
         "equation_FStar.List.Tot.Base.rev", "equation_FStar.UInt.uint_t",
         "equation_Prims.eqtype", "equation_Prims.nat",
-        "equation_with_fuel_Collections.Lists.from_list_le.fuel_instrumented",
         "equation_with_fuel_FStar.List.Tot.Base.length.fuel_instrumented",
         "equation_with_fuel_FStar.List.Tot.Base.rev_acc.fuel_instrumented",
         "equation_with_fuel_FStar.UInt.from_vec.fuel_instrumented",
+        "equation_with_fuel_Vale.Lib.Lists.from_list_le.fuel_instrumented",
         "fuel_guarded_inversion_Prims.list",
         "function_token_typing_Prims.__cache_version_number__",
         "function_token_typing_Prims.bool",
@@ -338,19 +349,19 @@
         "refinement_interpretation_Tm_refine_cd046bc4a887ee7e1b05946e0bf5772b",
         "refinement_interpretation_Tm_refine_d2d1ea66f2b3a92c2deb42edcbb784ce",
         "subterm_ordering_Prims.Cons",
-        "token_correspondence_Collections.Lists.from_list_le.fuel_instrumented",
         "token_correspondence_FStar.List.Tot.Base.length.fuel_instrumented",
         "typing_FStar.List.Tot.Base.length",
         "typing_FStar.List.Tot.Base.rev",
         "typing_FStar.List.Tot.Base.rev_acc", "typing_FStar.Seq.Base.create",
+        "typing_FStar.Seq.Base.length", "typing_FStar.Seq.Base.slice",
         "typing_FStar.Seq.Properties.seq_of_list",
         "typing_FStar.UInt.from_vec"
       ],
       0,
-      "49ed987ba0499f9db38b8dfae490cd3d"
+      "d54aa6263d131fd0e8a7c64eda5b0d5b"
     ],
     [
-      "Collections.Lists.lemma_from_list_be",
+      "Vale.Lib.Lists.lemma_from_list_be",
       1,
       1,
       0,
@@ -364,16 +375,16 @@
         "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "25c432cfafaffcdb9f013c5b69044a82"
+      "5cd01c85113b80dd96ab12047d210a48"
     ],
     [
-      "Collections.Lists.lemma_from_list_be",
+      "Vale.Lib.Lists.lemma_from_list_be",
       2,
       1,
       0,
-      [ "@query", "equation_Collections.Lists.from_list_be" ],
+      [ "@query", "equation_Vale.Lib.Lists.from_list_be" ],
       0,
-      "de9424b87fb0732f6615b8dcbed2bbd5"
+      "66608ec2e302f0b3ef7c17b224fbd02e"
     ]
   ]
 ]

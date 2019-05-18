@@ -1,34 +1,34 @@
 [
-  ">¸\u0014û-\u0017Äæ(\u0010ê\u000f\u001e\u000eÚw",
+  "±ÓAdv(q¸Ì(²ŸÞ¤¨À",
   [
     [
-      "FastHybrid_helpers.uu___1",
+      "Vale.Curve25519.FastHybrid_helpers.uu___1",
       1,
       1,
       0,
       [ "@query" ],
       0,
-      "f3cd67fb161c09ea6fca0bc4a354c948"
+      "0d5d4e65604f8bad6cfef4fd47b2a865"
     ],
     [
-      "FastHybrid_helpers.lemma_mul_pow256_add",
+      "Vale.Curve25519.FastHybrid_helpers.lemma_mul_pow256_add",
       1,
       1,
-      0,
+      1,
       [ "@query" ],
       0,
-      "ddba589c739826fa3d87c4de09b132ff"
+      "488e9000ef44668fee065784666110d5"
     ],
     [
-      "FastHybrid_helpers.lemma_carry_prime",
+      "Vale.Curve25519.FastHybrid_helpers.lemma_carry_prime",
       1,
       1,
       0,
       [
         "@MaxIFuel_assumption", "@query",
         "Prims_pretyping_ae567c2fb75be05905677af440075565",
-        "equation_Fast_defs.bit", "equation_Prims.nat",
-        "equation_Words_s.nat64", "equation_Words_s.natN",
+        "equation_Prims.nat", "equation_Vale.Curve25519.Fast_defs.bit",
+        "equation_Vale.Def.Words_s.nat64", "equation_Vale.Def.Words_s.natN",
         "function_token_typing_Prims.__cache_version_number__",
         "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_5514fbe9e08dfda40f950a7b9f1b2b98",
@@ -36,10 +36,10 @@
         "refinement_interpretation_Tm_refine_d62476c3a5813525c06af050ff95c3ee"
       ],
       0,
-      "07bfb12fb0c0e74d1e625802aebe8391"
+      "da1c530dbb2d5fb7e7c98b453b910ea9"
     ],
     [
-      "FastHybrid_helpers.lemma_fast_mul1",
+      "Vale.Curve25519.FastHybrid_helpers.lemma_fast_mul1",
       1,
       1,
       0,
@@ -47,9 +47,10 @@
         "@MaxIFuel_assumption", "@query",
         "Prims_pretyping_ae567c2fb75be05905677af440075565",
         "equation_FStar.Tactics.CanonCommMonoid.var",
-        "equation_Fast_defs.add_carry", "equation_Fast_defs.bit",
         "equation_Prims.eqtype", "equation_Prims.nat",
-        "equation_Words_s.nat64", "equation_Words_s.natN",
+        "equation_Vale.Curve25519.Fast_defs.add_carry",
+        "equation_Vale.Curve25519.Fast_defs.bit",
+        "equation_Vale.Def.Words_s.nat64", "equation_Vale.Def.Words_s.natN",
         "function_token_typing_Prims.__cache_version_number__",
         "int_inversion", "int_typing", "projection_inverse_BoxInt_proj_0",
         "projection_inverse_FStar.Pervasives.Native.Mktuple2__2",
@@ -60,10 +61,10 @@
         "typing_FStar.Tactics.CanonCommMonoid.var"
       ],
       0,
-      "0f98a7bfdb459290c8ecfa0348b2d916"
+      "099dad731d1ef16e279c21519b55c89c"
     ],
     [
-      "FastHybrid_helpers.lemma_addition",
+      "Vale.Curve25519.FastHybrid_helpers.lemma_addition",
       1,
       1,
       0,
@@ -71,9 +72,10 @@
         "@MaxIFuel_assumption", "@query",
         "Prims_pretyping_ae567c2fb75be05905677af440075565",
         "equation_FStar.Tactics.CanonCommMonoid.var",
-        "equation_Fast_defs.add_carry", "equation_Fast_defs.bit",
         "equation_Prims.eqtype", "equation_Prims.nat",
-        "equation_Words_s.nat64", "equation_Words_s.natN",
+        "equation_Vale.Curve25519.Fast_defs.add_carry",
+        "equation_Vale.Curve25519.Fast_defs.bit",
+        "equation_Vale.Def.Words_s.nat64", "equation_Vale.Def.Words_s.natN",
         "function_token_typing_Prims.__cache_version_number__",
         "int_inversion", "int_typing", "projection_inverse_BoxInt_proj_0",
         "projection_inverse_FStar.Pervasives.Native.Mktuple2__2",
@@ -84,7 +86,7 @@
         "typing_FStar.Tactics.CanonCommMonoid.var"
       ],
       0,
-      "15131a714ae255e32a84c6811b935757"
+      "e5a2dcf285d080c279cf7aa542c2d3d5"
     ]
   ]
 ]
