@@ -17,7 +17,7 @@ unfold let quad32 = quad32
 
 val cf : (flags:int) -> bool
 val overflow (flags:int) : bool
-val update_cf (flags:int) (new_cf:bool) : (new_flags:int { cf new_flags == new_cf /\ 
+val update_cf (flags:int) (new_cf:bool) : (new_flags:int { cf new_flags == new_cf /\
                                                        overflow new_flags == overflow flags} )
 val update_of (flags:int) (new_of:bool) : (new_flags:int { overflow new_flags == new_of /\
                                                        cf new_flags == cf flags })

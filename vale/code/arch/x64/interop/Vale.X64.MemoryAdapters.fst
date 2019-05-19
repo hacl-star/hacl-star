@@ -12,11 +12,11 @@ module DV = LowStar.BufferView.Down
 friend Vale.X64.Memory
 friend Vale.X64.Stack_i
 
-let as_vale_buffer #src #t i = 
+let as_vale_buffer #src #t i =
   DV.length_eq (get_downview i);
   IB.mut_to_b8 src i
 
-let as_vale_immbuffer #src #t i = 
+let as_vale_immbuffer #src #t i =
   DV.length_eq (get_downview i);
   IB.imm_to_b8 src i
 

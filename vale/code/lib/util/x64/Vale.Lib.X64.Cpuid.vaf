@@ -16,11 +16,11 @@ open Vale.X64.QuickCode
 open Vale.X64.QuickCodes
 open Vale.X64.CPU_Features_s
 
-//let pow2_values (u:unit) : Lemma 
+//let pow2_values (u:unit) : Lemma
 //  (pow2 29 == 0x20000000 /\
 //   pow2 25 == 0x2000000 /\
 //   pow2  1 == 0x2)
-//  = 
+//  =
 //  assert_norm (pow2 29 == 0x20000000);
 //  assert_norm (0x2000000 == pow2 25);
 //  assert_norm (0x2 == pow2 1);
@@ -48,7 +48,7 @@ procedure check_aesni_support()
     And64(rax, 0x2000000);
     Vale.Lib.Meta.assert_norm(0x2000000 == pow2(25));
     Vale.Lib.Meta.assert_norm(0x2 == pow2(1));
-    
+
     Shr64(rax, 24);
     lemma_ishr_pow2_diff64(1, 25); // ==> shr(pow2(25), 24) == pow2(1)
     lemma_ishr_zero64(24);         // ==> shr(0, 24) == 0
@@ -77,7 +77,7 @@ procedure check_sha_support()
     Mov64(rax, 7);
     Mov64(rcx, 0);
     Cpuid_Sha();
-    lemma_iand_pow2_64(rbx, 29); 
+    lemma_iand_pow2_64(rbx, 29);
     And64(rbx,0x20000000);
     Vale.Lib.Meta.assert_norm(0x20000000 == pow2(29));
     Mov64(rax, rbx);
@@ -98,15 +98,15 @@ procedure check_adx_bmi2_support()
     Mov64(rax, 7);
     Mov64(rcx, 0);
     Cpuid_Adx_Bmi2();
-    lemma_iand_pow2_64(rbx, 8); 
-    lemma_iand_pow2_64(rbx, 19); 
+    lemma_iand_pow2_64(rbx, 8);
+    lemma_iand_pow2_64(rbx, 19);
     Mov64(rax, rbx);    // Save a copy
 
     And64(rax, 0x80000);
 
     Vale.Lib.Meta.assert_norm(0x100 == pow2(8));
     Vale.Lib.Meta.assert_norm(0x80000 == pow2(19));
-    
+
     Shr64(rax, 11);
     lemma_ishr_pow2_diff64(8, 19); // ==> shr(pow2(19), 11) == pow2(8)
     lemma_ishr_zero64(11);         // ==> shr(0, 11) == 0
@@ -134,7 +134,7 @@ procedure check_avx_support()
     Mov64(rax, rcx);
     And64(rax, 0x10000000);
     Vale.Lib.Meta.assert_norm(0x10000000 == pow2(28));
-    
+
     Shr64(rax, 27);
     lemma_ishr_pow2_diff64(1, 28); // ==> shr(pow2(25), 24) == pow2(1)
     lemma_ishr_zero64(27);         // ==> shr(0, 24) == 0
@@ -155,7 +155,7 @@ procedure check_avx2_support()
     Mov64(rax, 7);
     Mov64(rcx, 0);
     Cpuid_Avx2();
-    lemma_iand_pow2_64(rbx, 5); 
+    lemma_iand_pow2_64(rbx, 5);
     And64(rbx,0x20);
     Vale.Lib.Meta.assert_norm(0x20 == pow2(5));
     Mov64(rax, rbx);

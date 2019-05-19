@@ -13,20 +13,20 @@ open Vale.SHA.Simplify_Sha
 
 let length_aux (b:uint8_p) : Lemma
   (requires B.length b = 176)
-  (ensures DV.length (get_downview b) % 16 = 0) = 
+  (ensures DV.length (get_downview b) % 16 = 0) =
     let db = get_downview b in
     DV.length_eq db
 
 let length_aux2 (b:uint8_p) : Lemma
   (requires B.length b = 240)
-  (ensures DV.length (get_downview b) % 16 = 0) = 
+  (ensures DV.length (get_downview b) % 16 = 0) =
     let db = get_downview b in
     DV.length_eq db
 
 
 let length_aux5 (b:uint8_p) : Lemma
   (requires B.length b = 128)
-  (ensures DV.length (get_downview b) % 16 = 0) = 
+  (ensures DV.length (get_downview b) % 16 = 0) =
     let db = get_downview b in
     DV.length_eq db
 

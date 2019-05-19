@@ -21,7 +21,7 @@ let inverses32 (u:unit) =
   reveal_opaque put32_def;
   Classical.forall_intro (four_to_seq_to_four_LE #nat8);
   Classical.forall_intro (seq_to_four_to_seq_LE #nat8)
-  
+
 #reset-options "--z3rlimit 20"
 let inverses64 (u:unit) =
   reveal_opaque get64_def;

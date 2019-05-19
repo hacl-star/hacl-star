@@ -111,7 +111,7 @@ let rec mem_correspondence (args:list arg) : hsprop =
     | TD_ImmBuffer src bt _ ->
       fun h s ->
         mem_imm_correspondence_1 src bt x h s /\
-        mem_correspondence tl h s        
+        mem_correspondence tl h s
     | TD_Base _ ->
       mem_correspondence tl
 
@@ -134,7 +134,7 @@ let arg_as_nat64 (a:arg) (s:VS.state) : GTot ME.nat64 =
   | TD_ImmBuffer src bt _ ->
      buffer_addr_is_nat64 (as_vale_immbuffer #src #bt x) s;
      ME.buffer_addr (as_vale_immbuffer #src #bt x) VS.(s.mem)
-    
+
 
 [@__reduce__]
 let rec register_args (max_arity:nat)
@@ -160,7 +160,7 @@ let rec stack_args (max_arity:nat)
       fun s ->
         stack_args max_arity (n - 1) tl s /\
         (if n <= max_arity then True // This arg is passed in registers
-         else 
+         else
            let ptr = ((n - max_arity) - 1) * 8
              + (if IA.win then 32 else 0)
              + 8
@@ -196,7 +196,7 @@ let taint_hyp_arg (m:ME.mem) (tm:MS.memTaint_t) (a:arg) =
          (as_vale_immbuffer #src #TUInt128 x)
          m
          tm
-         tnt         
+         tnt
     | _ ->
       True
 

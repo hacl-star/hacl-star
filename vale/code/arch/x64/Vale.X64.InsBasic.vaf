@@ -251,7 +251,7 @@ procedure Mulx64(out dst_hi:dst_opr64, out dst_lo:dst_opr64, in src:opr64)
     {:public}
     {:quick exportOnly}
     {:instruction mk_ins(make_instr(I.ins_Mulx64, dst_hi, dst_lo, src))}
-    requires bmi2_enabled; @dst_hi != @dst_lo; 
+    requires bmi2_enabled; @dst_hi != @dst_lo;
     reads
         rdx;
     ensures
@@ -361,7 +361,7 @@ procedure Cpuid_Adx_Bmi2()
         rax = 7;
         rcx = 0;
     modifies rax; rbx; rcx; rdx;
-    ensures 
+    ensures
         (iand64(rbx, 0x100) > 0) == bmi2_enabled;
         (iand64(rbx, 0x80000) > 0) == adx_enabled;
 {

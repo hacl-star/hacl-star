@@ -105,7 +105,7 @@ let sha_lemma'
        VSig.vale_calling_conventions_stdcall va_s0 va_s1 /\
        sha_post code va_s0 va_s1 f))
  = VC.va_lemma_check_sha_stdcall code va_s0 IA.win
- 
+
 (* Prove that vm_lemma' has the required type *)
 noextract
 let sha_lemma = as_t #(VSig.vale_sig_stdcall sha_pre sha_post) sha_lemma'

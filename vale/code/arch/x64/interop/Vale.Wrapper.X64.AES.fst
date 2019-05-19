@@ -55,7 +55,7 @@ let aes256_key_expansion_stdcall input_b output_b =
   let lemma_aux () : Lemma
     (let key = seq_nat8_to_seq_nat32_LE (seq_uint8_to_seq_nat8 (B.as_seq h0 input_b)) in
       Seq.equal (B.as_seq h1 output_b)
-         (seq_nat8_to_seq_uint8 (le_seq_quad32_to_bytes (key_to_round_keys_LE AES_256 key))))    
+         (seq_nat8_to_seq_uint8 (le_seq_quad32_to_bytes (key_to_round_keys_LE AES_256 key))))
      = let key = seq_nat8_to_seq_nat32_LE (seq_uint8_to_seq_nat8 (B.as_seq h0 input_b)) in
        let db = get_downview output_b in
        length_aux2 output_b;

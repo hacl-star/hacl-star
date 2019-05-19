@@ -62,7 +62,7 @@ let rec args_taint
 
 [@instr_attr]
 let rec inouts_taint
-  (inouts:list instr_out) 
+  (inouts:list instr_out)
   (args:list instr_operand)
   (oprs:instr_operands_t inouts args)
   (ts:analysis_taints)
@@ -75,7 +75,7 @@ let rec inouts_taint
       | IOpEx i -> snd #(instr_operand_t i) (coerce oprs)
       | IOpIm i -> coerce oprs
     in inouts_taint inouts args oprs ts
-  | (InOut, i)::inouts -> 
+  | (InOut, i)::inouts ->
     let (v, oprs) =
       match i with
       | IOpEx i ->
@@ -95,7 +95,7 @@ let maddr_does_not_use_secrets (addr:maddr) (ts:analysis_taints) : bool =
 
 let operand_does_not_use_secrets (op:operand) (ts:analysis_taints) : bool =
   match op with
-  | OConst _ | OReg _ -> true 
+  | OConst _ | OReg _ -> true
   | OMem (m, _) | OStack (m, _) -> maddr_does_not_use_secrets m ts
 
 let operand128_does_not_use_secrets (op:operand128) (ts:analysis_taints) : bool =

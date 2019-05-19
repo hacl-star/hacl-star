@@ -48,7 +48,7 @@ let add_wrap_quad32 (q0 q1:quad32) : quad32 =
   Mkfour (add_wrap q0.lo0 q1.lo0)
          (add_wrap q0.lo1 q1.lo1)
          (add_wrap q0.hi2 q1.hi2)
-         (add_wrap q0.hi3 q1.hi3) 
+         (add_wrap q0.hi3 q1.hi3)
 
 val lemma_BitwiseXorCommutative (x y:nat32) : Lemma (x *^ y == y *^ x)
 val lemma_BitwiseXorWithZero (n:nat32) : Lemma (n *^ 0 == n)
@@ -86,14 +86,14 @@ unfold let quad32_to_seq (q:quad32) : seq nat32 = four_to_seq_LE q
 
 let insert_nat64_opaque = Vale.Def.Opaque_s.make_opaque insert_nat64
 
-val lemma_insert_nat64_properties (q:quad32) (n:nat64) : 
+val lemma_insert_nat64_properties (q:quad32) (n:nat64) :
   Lemma ( (let q' = insert_nat64_opaque q n 0 in
             q'.hi2 == q.hi2 /\
             q'.hi3 == q.hi3) /\
            (let q' = insert_nat64_opaque q n 1 in
             q'.lo0 == q.lo0 /\
             q'.lo1 == q.lo1))
-  [SMTPat (insert_nat64_opaque q n)]            
+  [SMTPat (insert_nat64_opaque q n)]
 
 val lemma_insert_nat64_nat32s (q:quad32) (n0 n1:nat32) :
   Lemma ( insert_nat64_opaque q (two_to_nat32 (Mktwo n0 n1)) 0 ==
@@ -145,7 +145,7 @@ val push_pop_xmm (x y:quad32) : Lemma
   (let x' = insert_nat64_opaque (insert_nat64_opaque y (hi64 x) 1) (lo64 x) 0 in
    x == x')
 
-val lemma_insrq_extrq_relations (x y:quad32) :  
+val lemma_insrq_extrq_relations (x y:quad32) :
   Lemma (let z = insert_nat64_opaque x (lo64 y) 0 in
          z == Mkfour y.lo0 y.lo1 x.hi2 x.hi3 /\
         (let z = insert_nat64_opaque x (hi64 y) 1 in
@@ -157,7 +157,7 @@ val le_bytes_to_nat64_to_bytes (s:nat64) :
 val le_nat64_to_bytes_to_nat64 (s:seq nat8 { length s == 8 }) :
   Lemma (le_nat64_to_bytes (le_bytes_to_nat64 s) == s)
 
-val le_bytes_to_seq_quad32_empty: unit -> 
+val le_bytes_to_seq_quad32_empty: unit ->
   Lemma (forall s . {:pattern (length (le_bytes_to_seq_quad32 s)) } length s == 0 ==> length (le_bytes_to_seq_quad32 s) == 0)
 
 val le_bytes_to_seq_quad32_to_bytes_one_quad (b:quad32) :
@@ -212,11 +212,11 @@ val lemma_reverse_reverse_bytes_nat32_quad32 (s:quad32) :
 
 let reverse_bytes_nat32_quad32_seq (q:seq quad32) : seq quad32 =
   seq_map reverse_bytes_nat32_quad32 q
-  
+
 val lemma_reverse_reverse_bytes_nat32_quad32_seq (s:seq quad32) :
   Lemma (reverse_bytes_nat32_quad32_seq (reverse_bytes_nat32_quad32_seq s) == s)
   [SMTPat (reverse_bytes_nat32_quad32_seq (reverse_bytes_nat32_quad32_seq s))]
-  
+
 let reverse_bytes_quad32_seq (s:seq quad32) : seq quad32 =
   seq_map reverse_bytes_quad32 s
 
@@ -226,9 +226,9 @@ val lemma_reverse_reverse_bytes_quad32_seq (s:seq quad32) :
 
 open FStar.Mul
 
-val lemma_le_seq_quad32_to_bytes_length (s:seq quad32) : 
+val lemma_le_seq_quad32_to_bytes_length (s:seq quad32) :
   Lemma(length (le_seq_quad32_to_bytes s) == (length s) * 16)
-  
+
 
 val slice_commutes_seq_four_to_seq_LE (#a:Type) (s:seq (four a)) (n:nat{n <= length s}) (n':nat{ n <= n' /\ n' <= length s}) :
   Lemma(slice (seq_four_to_seq_LE s) (n * 4) (n' * 4) ==

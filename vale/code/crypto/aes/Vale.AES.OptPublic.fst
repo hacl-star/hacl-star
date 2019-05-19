@@ -19,7 +19,7 @@ let rec g_power (a:poly) (n:nat) : poly =
 let gf128_power (h:poly) (n:nat) : poly = shift_gf128_key_1 (g_power h n)
 
 let hkeys_reqs_pub (hkeys:seq quad32) (h_BE:quad32) : Vale.Def.Prop_s.prop0
-  = 
+  =
   let h = of_quad32 (reverse_bytes_quad32 (reverse_bytes_quad32 h_BE)) in
   length hkeys >= 8 /\
   of_quad32 (index hkeys 0) == gf128_power h 1 /\
@@ -29,7 +29,7 @@ let hkeys_reqs_pub (hkeys:seq quad32) (h_BE:quad32) : Vale.Def.Prop_s.prop0
   of_quad32 (index hkeys 4) == gf128_power h 4 /\
   index hkeys 5 == Mkfour 0 0 0 0 /\ // Not needed but we want injectivity
   of_quad32 (index hkeys 6) == gf128_power h 5 /\
-  of_quad32 (index hkeys 7) == gf128_power h 6 
+  of_quad32 (index hkeys 7) == gf128_power h 6
 
 #set-options "--z3rlimit 20 --max_fuel 0 --max_ifuel 0"
 
@@ -54,15 +54,15 @@ let get_hkeys_reqs h_BE =
   Seq.lemma_seq_of_list_induction (tl (tl (tl l)));
   Seq.lemma_seq_of_list_induction (tl (tl (tl (tl l))));
   Seq.lemma_seq_of_list_induction (tl (tl (tl (tl (tl l)))));
-  Seq.lemma_seq_of_list_induction (tl (tl (tl (tl (tl (tl l))))));  
-  Seq.lemma_seq_of_list_induction (tl (tl (tl (tl (tl (tl (tl l))))))); 
-  Seq.lemma_seq_of_list_induction (tl (tl (tl (tl (tl (tl (tl (tl l)))))))); 
+  Seq.lemma_seq_of_list_induction (tl (tl (tl (tl (tl (tl l))))));
+  Seq.lemma_seq_of_list_induction (tl (tl (tl (tl (tl (tl (tl l)))))));
+  Seq.lemma_seq_of_list_induction (tl (tl (tl (tl (tl (tl (tl (tl l))))))));
   lemma_of_to_quad32 (gf128_power h 1);
   lemma_of_to_quad32 (gf128_power h 2);
   lemma_of_to_quad32 (gf128_power h 3);
   lemma_of_to_quad32 (gf128_power h 4);
   lemma_of_to_quad32 (gf128_power h 5);
-  lemma_of_to_quad32 (gf128_power h 6);  
+  lemma_of_to_quad32 (gf128_power h 6);
   assert (hkeys_reqs_pub s h_BE);
   s
 
@@ -72,12 +72,12 @@ let lemma_of_quad32_inj (q q':quad32) : Lemma
   (requires of_quad32 q == of_quad32 q')
   (ensures q == q')
   = lemma_to_of_quad32 q; lemma_to_of_quad32 q'
-    
+
 let get_hkeys_reqs_injective h_BE s1 s2 =
   lemma_of_quad32_inj (Seq.index s1 0) (Seq.index s2 0);
   lemma_of_quad32_inj (Seq.index s1 1) (Seq.index s2 1);
   lemma_of_quad32_inj (Seq.index s1 3) (Seq.index s2 3);
   lemma_of_quad32_inj (Seq.index s1 4) (Seq.index s2 4);
   lemma_of_quad32_inj (Seq.index s1 6) (Seq.index s2 6);
-  lemma_of_quad32_inj (Seq.index s1 7) (Seq.index s2 7);  
+  lemma_of_quad32_inj (Seq.index s1 7) (Seq.index s2 7);
   assert (Seq.equal s1 s2)

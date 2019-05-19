@@ -26,7 +26,7 @@ let publicRegisterValuesAreSame (ts:analysis_taints) (s1:machine_state) (s2:mach
     (s1.ms_regs r = s2.ms_regs r)
 
 let publicMemValueIsSame
-  (mem1 mem2:heap) 
+  (mem1 mem2:heap)
   (memTaint1 memTaint2:Map.t int taint)
   (x:int) =
   (Public? (memTaint1.[x]) || Public? (memTaint2.[x])) ==>
@@ -42,7 +42,7 @@ let publicXmmValuesAreSame (ts:analysis_taints) (s1:machine_state) (s2:machine_s
     (s1.ms_xmms r = s2.ms_xmms r)
 
 let publicStackValueIsSame
-  (stack1 stack2:heap) 
+  (stack1 stack2:heap)
   (stackTaint1 stackTaint2:Map.t int taint)
   (x:int)
   = (Public? (stackTaint1.[x]) || Public? (stackTaint2.[x])) ==>

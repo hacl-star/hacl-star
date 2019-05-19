@@ -41,7 +41,7 @@ val lemma_gf128_power (h:poly) (n:nat) : Lemma
   (gf128_power h n == shift_key_1 128 gf128_modulus_low_terms (g_power h n))
 
 let hkeys_reqs_priv (hkeys:seq quad32) (h_BE:quad32) : Vale.Def.Prop_s.prop0
-  = 
+  =
   let h = of_quad32 (reverse_bytes_quad32 (reverse_bytes_quad32 h_BE)) in
   length hkeys >= 8 /\
   index hkeys 2 == h_BE /\
@@ -51,7 +51,7 @@ let hkeys_reqs_priv (hkeys:seq quad32) (h_BE:quad32) : Vale.Def.Prop_s.prop0
   of_quad32 (index hkeys 4) == gf128_power h 4 /\
   index hkeys 5 = Mkfour 0 0 0 0 /\
   of_quad32 (index hkeys 6) == gf128_power h 5 /\
-  of_quad32 (index hkeys 7) == gf128_power h 6 
+  of_quad32 (index hkeys 7) == gf128_power h 6
 
 val lemma_hkeys_reqs_pub_priv (hkeys:seq quad32) (h_BE:quad32) : Lemma
   (hkeys_reqs_pub hkeys h_BE <==> hkeys_reqs_priv hkeys h_BE)
@@ -159,7 +159,7 @@ val lemma_hash_append3 (h y_init y_mid1 y_mid2 y_final:quad32) (s1 s2 s3:seq qua
 
 val ghash_incremental_bytes_pure_no_extra (old_io io h:quad32) (in_quads:seq quad32) (num_bytes:nat64) : Lemma
   (requires io = ghash_incremental0 h old_io in_quads)
-  (ensures  length in_quads == (num_bytes / 16) /\ 
+  (ensures  length in_quads == (num_bytes / 16) /\
             num_bytes % 16 == 0 ==>
             (let input_bytes = slice (le_seq_quad32_to_bytes in_quads) 0 num_bytes in
              let padded_bytes = pad_to_128_bits input_bytes in
@@ -219,8 +219,8 @@ val lemma_ghash_registers (h y_init y0 y1 y2 y3 y4 r0 r1 r2 r3:quad32) (input:se
 
 (*
 val lemma_slice_extension (s:seq quad32) (bound:int) (q:quad32) : Lemma
-  (requires 0 <= bound /\ bound + 1 <= length s /\ 
+  (requires 0 <= bound /\ bound + 1 <= length s /\
             index_work_around_quad32 (slice_work_around s (bound + 1)) bound == q)
   (ensures equal (slice_work_around s (bound + 1))
                  (append (slice_work_around s bound) (create 1 q)))
-*)   
+*)

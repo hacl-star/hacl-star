@@ -13,7 +13,7 @@ val two_to_seq_to_two_LE (#a:Type) (x:seq2 a) :
 val seq_to_two_to_seq_LE (#a:Type) (x:two a) :
   Lemma (seq_to_two_LE (two_to_seq_LE x) == x)
   [SMTPat (seq_to_two_LE (two_to_seq_LE x))]
-  
+
 val seq_to_seq_four_to_seq_LE  (#a:Type) (x:seq (four a)) :
   Lemma (seq_to_seq_four_LE (seq_four_to_seq_LE x) == x)
   [SMTPat (seq_to_seq_four_LE (seq_four_to_seq_LE x))]

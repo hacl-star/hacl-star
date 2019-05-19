@@ -24,7 +24,7 @@ val gcm128_decrypt_stdcall':
   out_b:uint8_p ->
   tag_b:uint8_p ->
   keys_b:uint8_p ->
-  Stack UInt64.t 
+  Stack UInt64.t
     (requires fun h0 ->
       B.disjoint cipher_b out_b /\ B.disjoint auth_b out_b /\
       B.disjoint keys_b out_b /\ B.disjoint tag_b out_b /\
@@ -33,15 +33,15 @@ val gcm128_decrypt_stdcall':
       (B.disjoint cipher_b iv_b \/ cipher_b == iv_b) /\
       (B.disjoint cipher_b tag_b \/ cipher_b == tag_b) /\
       (B.disjoint cipher_b keys_b \/ cipher_b == keys_b) /\
-      (B.disjoint auth_b iv_b \/ auth_b == iv_b) /\      
+      (B.disjoint auth_b iv_b \/ auth_b == iv_b) /\
       (B.disjoint auth_b tag_b \/ auth_b == tag_b) /\
       (B.disjoint auth_b keys_b \/ auth_b == keys_b) /\
-      (B.disjoint iv_b out_b \/ iv_b == out_b) /\      
+      (B.disjoint iv_b out_b \/ iv_b == out_b) /\
       (B.disjoint iv_b tag_b \/ iv_b == tag_b) /\
-      (B.disjoint iv_b keys_b \/ iv_b == keys_b) /\     
-      (B.disjoint tag_b keys_b \/ tag_b == keys_b) /\     
-      
-      B.live h0 keys_b /\ B.live h0 cipher_b /\ B.live h0 iv_b /\ 
+      (B.disjoint iv_b keys_b \/ iv_b == keys_b) /\
+      (B.disjoint tag_b keys_b \/ tag_b == keys_b) /\
+
+      B.live h0 keys_b /\ B.live h0 cipher_b /\ B.live h0 iv_b /\
       B.live h0 out_b /\ B.live h0 tag_b /\ B.live h0 auth_b /\
 
       B.length cipher_b = 16 * bytes_to_quad_size (UInt64.v cipher_num) /\
@@ -53,7 +53,7 @@ val gcm128_decrypt_stdcall':
 
       4096 * (UInt64.v cipher_num) < pow2_32 /\
       4096 * (UInt64.v auth_num) < pow2_32 /\
-      
+
       aesni_enabled /\ pclmulqdq_enabled /\ avx_enabled /\
       is_aes_key_LE AES_128 (Ghost.reveal key) /\
       (Seq.equal (B.as_seq h0 keys_b)
@@ -85,20 +85,20 @@ let gcm128_decrypt_stdcall' key cipher_b cipher_num auth_b auth_num iv_b out_b t
   DV.length_eq (get_downview iv_b);
   DV.length_eq (get_downview out_b);
   DV.length_eq (get_downview tag_b);
-  DV.length_eq (get_downview keys_b); 
+  DV.length_eq (get_downview keys_b);
 
   math_aux (B.length cipher_b);
   math_aux (B.length auth_b);
   math_aux (B.length iv_b);
   math_aux (B.length keys_b);
-  
+
   as_vale_buffer_len #TUInt8 #TUInt128 cipher_b;
   as_vale_buffer_len #TUInt8 #TUInt128 auth_b;
   as_vale_buffer_len #TUInt8 #TUInt128 iv_b;
   as_vale_buffer_len #TUInt8 #TUInt128 out_b;
   as_vale_buffer_len #TUInt8 #TUInt128 tag_b;
   as_vale_buffer_len #TUInt8 #TUInt128 keys_b;
-  
+
   Classical.forall_intro (bounded_buffer_addrs TUInt8 TUInt128 h0 cipher_b);
   Classical.forall_intro (bounded_buffer_addrs TUInt8 TUInt128 h0 auth_b);
   Classical.forall_intro (bounded_buffer_addrs TUInt8 TUInt128 h0 out_b);
@@ -113,7 +113,7 @@ let gcm128_decrypt_stdcall' key cipher_b cipher_num auth_b auth_num iv_b out_b t
       let ub = UV.mk_buffer db Vale.Interop.Views.up_view128 in
       le_bytes_to_seq_quad32_to_bytes (key_to_round_keys_LE AES_128 (Ghost.reveal key));
       assert (Seq.equal (le_bytes_to_seq_quad32 (seq_uint8_to_seq_nat8 (B.as_seq h0 keys_b)))
-         (key_to_round_keys_LE AES_128 (Ghost.reveal key)));   
+         (key_to_round_keys_LE AES_128 (Ghost.reveal key)));
       calc (==) {
         le_bytes_to_seq_quad32 (seq_uint8_to_seq_nat8 (B.as_seq h0 keys_b));
         (==) { lemma_seq_nat8_le_seq_quad32_to_bytes_uint32 keys_b h0 }
@@ -129,7 +129,7 @@ let gcm128_decrypt_stdcall' key cipher_b cipher_num auth_b auth_num iv_b out_b t
 
   lemma_seq_nat8_le_seq_quad32_to_bytes_uint32 cipher_b h0;
   lemma_seq_nat8_le_seq_quad32_to_bytes_uint32 auth_b h0;
-  lemma_seq_nat8_le_seq_quad32_to_bytes_uint32 out_b h1;  
+  lemma_seq_nat8_le_seq_quad32_to_bytes_uint32 out_b h1;
   gcm_simplify2 tag_b h0;
   gcm_simplify3 iv_b h0;
 
@@ -155,15 +155,15 @@ val gcm256_decrypt_stdcall':
       (B.disjoint cipher_b iv_b \/ cipher_b == iv_b) /\
       (B.disjoint cipher_b tag_b \/ cipher_b == tag_b) /\
       (B.disjoint cipher_b keys_b \/ cipher_b == keys_b) /\
-      (B.disjoint auth_b iv_b \/ auth_b == iv_b) /\      
+      (B.disjoint auth_b iv_b \/ auth_b == iv_b) /\
       (B.disjoint auth_b tag_b \/ auth_b == tag_b) /\
       (B.disjoint auth_b keys_b \/ auth_b == keys_b) /\
-      (B.disjoint iv_b out_b \/ iv_b == out_b) /\      
+      (B.disjoint iv_b out_b \/ iv_b == out_b) /\
       (B.disjoint iv_b tag_b \/ iv_b == tag_b) /\
-      (B.disjoint iv_b keys_b \/ iv_b == keys_b) /\     
-      (B.disjoint tag_b keys_b \/ tag_b == keys_b) /\     
-      
-      B.live h0 keys_b /\ B.live h0 cipher_b /\ B.live h0 iv_b /\ 
+      (B.disjoint iv_b keys_b \/ iv_b == keys_b) /\
+      (B.disjoint tag_b keys_b \/ tag_b == keys_b) /\
+
+      B.live h0 keys_b /\ B.live h0 cipher_b /\ B.live h0 iv_b /\
       B.live h0 out_b /\ B.live h0 tag_b /\ B.live h0 auth_b /\
 
       B.length cipher_b = 16 * bytes_to_quad_size (UInt64.v cipher_num) /\
@@ -175,7 +175,7 @@ val gcm256_decrypt_stdcall':
 
       4096 * (UInt64.v cipher_num) < pow2_32 /\
       4096 * (UInt64.v auth_num) < pow2_32 /\
-      
+
       aesni_enabled /\ pclmulqdq_enabled /\ avx_enabled /\
       is_aes_key_LE AES_256 (Ghost.reveal key) /\
       (Seq.equal (B.as_seq h0 keys_b)
@@ -207,7 +207,7 @@ let gcm256_decrypt_stdcall' key cipher_b cipher_num auth_b auth_num iv_b out_b t
   DV.length_eq (get_downview iv_b);
   DV.length_eq (get_downview out_b);
   DV.length_eq (get_downview tag_b);
-  DV.length_eq (get_downview keys_b); 
+  DV.length_eq (get_downview keys_b);
 
   math_aux (B.length cipher_b);
   math_aux (B.length auth_b);
@@ -220,7 +220,7 @@ let gcm256_decrypt_stdcall' key cipher_b cipher_num auth_b auth_num iv_b out_b t
   as_vale_buffer_len #TUInt8 #TUInt128 out_b;
   as_vale_buffer_len #TUInt8 #TUInt128 tag_b;
   as_vale_buffer_len #TUInt8 #TUInt128 keys_b;
-  
+
   Classical.forall_intro (bounded_buffer_addrs TUInt8 TUInt128 h0 cipher_b);
   Classical.forall_intro (bounded_buffer_addrs TUInt8 TUInt128 h0 auth_b);
   Classical.forall_intro (bounded_buffer_addrs TUInt8 TUInt128 h0 out_b);
@@ -235,7 +235,7 @@ let gcm256_decrypt_stdcall' key cipher_b cipher_num auth_b auth_num iv_b out_b t
       let ub = UV.mk_buffer db Vale.Interop.Views.up_view128 in
       le_bytes_to_seq_quad32_to_bytes (key_to_round_keys_LE AES_256 (Ghost.reveal key));
       assert (Seq.equal (le_bytes_to_seq_quad32 (seq_uint8_to_seq_nat8 (B.as_seq h0 keys_b)))
-         (key_to_round_keys_LE AES_256 (Ghost.reveal key)));   
+         (key_to_round_keys_LE AES_256 (Ghost.reveal key)));
       calc (==) {
         le_bytes_to_seq_quad32 (seq_uint8_to_seq_nat8 (B.as_seq h0 keys_b));
         (==) { lemma_seq_nat8_le_seq_quad32_to_bytes_uint32 keys_b h0 }
@@ -245,14 +245,14 @@ let gcm256_decrypt_stdcall' key cipher_b cipher_num auth_b auth_num iv_b out_b t
       }
 
   in lemma_uv_key ();
-  
+
   let x, _ = gcm256_decrypt key cipher_b cipher_num auth_b auth_num iv_b keys_b out_b tag_b () in
 
   let h1 = get() in
 
   lemma_seq_nat8_le_seq_quad32_to_bytes_uint32 cipher_b h0;
   lemma_seq_nat8_le_seq_quad32_to_bytes_uint32 auth_b h0;
-  lemma_seq_nat8_le_seq_quad32_to_bytes_uint32 out_b h1;  
+  lemma_seq_nat8_le_seq_quad32_to_bytes_uint32 out_b h1;
   gcm_simplify2 tag_b h0;
   gcm_simplify3 iv_b h0;
 
@@ -267,9 +267,9 @@ let math_cast_aux (n:UInt64.t) : Lemma
   = FStar.Math.Lemmas.small_mod (UInt64.v n) (pow2 32)
 
 inline_for_extraction
-let bytes_to_quad_size_st (l:UInt32.t{4096 * UInt32.v l < pow2_32}) : Tot 
+let bytes_to_quad_size_st (l:UInt32.t{4096 * UInt32.v l < pow2_32}) : Tot
   (n:UInt32.t{UInt32.v n == 16 * bytes_to_quad_size (UInt32.v l)})
-  = 
+  =
   assert (UInt32.v l - 15 < pow2_32);
   FStar.Math.Lemmas.euclidean_division_definition (UInt32.v l + 15) 16;
   assert (16 * ((UInt32.v l + 15) / 16) < pow2_32);
@@ -295,7 +295,7 @@ let gcm128_decrypt_stdcall key cipher_b cipher_len auth_b auth_len iv_b out_b ta
 
   let cipher_extra = B.sub cipher_extra 0ul cipher_extlength in
   let out_extra = B.sub out_extra 0ul cipher_extlength in
-  let auth_extra = B.sub auth_extra 0ul auth_extlength in  
+  let auth_extra = B.sub auth_extra 0ul auth_extlength in
 
   // Copy the initial contents in these buffers
   B.blit cipher_b 0ul cipher_extra 0ul cipher_len';
@@ -328,7 +328,7 @@ let gcm128_decrypt_stdcall key cipher_b cipher_len auth_b auth_len iv_b out_b ta
   pop_frame();
 
   x
-  
+
 inline_for_extraction
 let gcm256_decrypt_stdcall key cipher_b cipher_len auth_b auth_len iv_b out_b tag_b keys_b =
   push_frame();
@@ -349,7 +349,7 @@ let gcm256_decrypt_stdcall key cipher_b cipher_len auth_b auth_len iv_b out_b ta
 
   let cipher_extra = B.sub cipher_extra 0ul cipher_extlength in
   let out_extra = B.sub out_extra 0ul cipher_extlength in
-  let auth_extra = B.sub auth_extra 0ul auth_extlength in  
+  let auth_extra = B.sub auth_extra 0ul auth_extlength in
 
   // Copy the initial contents in these buffers
   B.blit cipher_b 0ul cipher_extra 0ul cipher_len';

@@ -717,7 +717,7 @@ let lemma_length_simplifier (s bytes t:seq quad32) (num_bytes:nat) : Lemma
             num_bytes < length s * 16 + 16 /\
             length bytes == 1
             )
-  (ensures slice (le_seq_quad32_to_bytes t) 0 num_bytes == 
+  (ensures slice (le_seq_quad32_to_bytes t) 0 num_bytes ==
            slice (le_seq_quad32_to_bytes (append s bytes)) 0 num_bytes)
   =
   if num_bytes > (length s) * 16 then (
@@ -760,11 +760,11 @@ let gctr_bytes_helper (alg:algorithm) (key:seq nat32)
   =
   let icb_BE_inc = inc32 iv_BE (length p128) in
   assert (gctr_encrypt_block icb_BE_inc (index p_bytes 0) alg key 0 ==
-          gctr_encrypt_block iv_BE (index p_bytes 0) alg key  (length p128));  
-  reveal_opaque aes_encrypt_LE_def;          
+          gctr_encrypt_block iv_BE (index p_bytes 0) alg key  (length p128));
+  reveal_opaque aes_encrypt_LE_def;
   //assert (gctr_partial alg 1 p_bytes c_bytes key icb_BE_inc);
   reveal_opaque gctr_partial;
-  
+
   if p_num_bytes = length p128 * 16 then (
     gctr_partial_completed alg p128 c128 key iv_BE;
     gctr_partial_to_full_basic iv_BE p128 alg key c128;
@@ -772,7 +772,7 @@ let gctr_bytes_helper (alg:algorithm) (key:seq nat32)
     assert (equal (slice (le_seq_quad32_to_bytes p128) 0 p_num_bytes) (le_seq_quad32_to_bytes p128));
     assert (equal (slice (le_seq_quad32_to_bytes c128) 0 p_num_bytes) (le_seq_quad32_to_bytes c128));
     ()
-  ) else (    
+  ) else (
     lemma_gctr_partial_append alg (length p128) 1 p128 c128 p_bytes c_bytes key iv_BE icb_BE_inc;
     let plain = append p128 p_bytes in
     let cipher = append c128 c_bytes in
@@ -786,4 +786,4 @@ let gctr_bytes_helper (alg:algorithm) (key:seq nat32)
   lemma_length_simplifier p128 p_bytes (if p_num_bytes > length p128 * 16 then append p128 p_bytes else p128) p_num_bytes;
   lemma_length_simplifier c128 c_bytes (if p_num_bytes > length c128 * 16 then append c128 c_bytes else c128) p_num_bytes;
   ()
-  
+

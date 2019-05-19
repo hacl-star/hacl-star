@@ -160,7 +160,7 @@ let print_instr (ip:instr_print) (p:printer) : string =
     | (P64 o)::oprs -> o::(get_operands oprs)
     | _::oprs -> get_operands oprs
     in
-  let (opcode, space) = 
+  let (opcode, space) =
     match suffix with
     | false -> (name, " ")
     | true -> (p.ins_name name (get_operands oprs), "")

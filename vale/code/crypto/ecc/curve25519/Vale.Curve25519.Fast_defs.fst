@@ -32,7 +32,7 @@ type bit = b:nat { b <= 1 }
 
 let bool_bit (b:bool) : bit = if b then 1 else 0
 
-let mul_nats (x y:nat) : nat = 
+let mul_nats (x y:nat) : nat =
   let prod = x * y in
   Vale.Curve25519.Fast_lemmas_internal.lemma_mul_bounds_le 0 x 0 y;
   prod

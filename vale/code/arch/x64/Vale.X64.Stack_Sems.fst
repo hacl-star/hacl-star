@@ -37,6 +37,6 @@ let free_stack_same_load128 start finish ptr h =
   let S.Vale_stack _ mem' = S.free_stack' start finish h in
   Classical.forall_intro (Vale.Lib.Set.remove_between_reveal (Map.domain mem) start finish);
   Vale.Def.Opaque_s.reveal_opaque S.get_heap_val128_def;
-  Vale.Def.Opaque_s.reveal_opaque S.get_heap_val32_def  
+  Vale.Def.Opaque_s.reveal_opaque S.get_heap_val32_def
 
 let equiv_store_stack128 ptr v h = ()

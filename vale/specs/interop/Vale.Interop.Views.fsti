@@ -50,7 +50,7 @@ let get32_def (s:Seq.lseq U8.t 4) =
 
 let put32_def (x:UInt32.t) : GTot (Seq.lseq U8.t 4) =
   seq_nat8_to_seq_uint8 (four_to_seq_LE (nat_to_four 8 (UInt32.v x)))
-  
+
 let get32 = make_opaque get32_def
 let put32 = make_opaque put32_def
 

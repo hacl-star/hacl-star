@@ -89,17 +89,17 @@ let cswap_lemma'
        VSig.vale_calling_conventions va_s0 va_s1 cswap_regs_modified cswap_xmms_modified /\
        cswap_post code p0 p1 bit va_s0 va_s1 f /\
        ME.buffer_readable VS.(va_s1.mem) (as_vale_buffer p0) /\
-       ME.buffer_readable VS.(va_s1.mem) (as_vale_buffer p1) /\ 
-       ME.buffer_writeable (as_vale_buffer p0) /\ 
-       ME.buffer_writeable (as_vale_buffer p1) /\ 
+       ME.buffer_readable VS.(va_s1.mem) (as_vale_buffer p1) /\
+       ME.buffer_writeable (as_vale_buffer p0) /\
+       ME.buffer_writeable (as_vale_buffer p1) /\
        ME.modifies (ME.loc_union (ME.loc_buffer (as_vale_buffer p0))
                    (ME.loc_union (ME.loc_buffer (as_vale_buffer p1))
                                  ME.loc_none)) va_s0.VS.mem va_s1.VS.mem
- )) = 
+ )) =
    let va_s1, f = FU.va_lemma_cswap2 code va_s0 (as_vale_buffer p0) (as_vale_buffer p1) (UInt64.v bit) in
-   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 p0;   
-   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 p1;   
-   va_s1, f                                   
+   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 p0;
+   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 p1;
+   (va_s1, f)
 
 (* Prove that cswap_lemma' has the required type *)
 let cswap_lemma = as_t #(VSig.vale_sig cswap_regs_modified cswap_xmms_modified cswap_pre cswap_post) cswap_lemma'

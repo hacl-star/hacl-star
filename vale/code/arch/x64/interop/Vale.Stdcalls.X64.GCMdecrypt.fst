@@ -112,24 +112,24 @@ let gcm128_lemma'
        V.eval_code code va_s0 f va_s1 /\
        VSig.vale_calling_conventions_stdcall va_s0 va_s1 /\
        gcm128_post s code cipher_b cipher_num auth_b auth_num iv_b keys_b out_b tag_b va_s0 va_s1 f /\
-       ME.buffer_writeable (as_vale_buffer cipher_b) /\ 
-       ME.buffer_writeable (as_vale_buffer auth_b) /\ 
-       ME.buffer_writeable (as_vale_buffer iv_b) /\ 
-       ME.buffer_writeable (as_vale_buffer out_b) /\ 
-       ME.buffer_writeable (as_vale_buffer tag_b) /\ 
+       ME.buffer_writeable (as_vale_buffer cipher_b) /\
+       ME.buffer_writeable (as_vale_buffer auth_b) /\
+       ME.buffer_writeable (as_vale_buffer iv_b) /\
+       ME.buffer_writeable (as_vale_buffer out_b) /\
+       ME.buffer_writeable (as_vale_buffer tag_b) /\
        ME.buffer_writeable (as_vale_buffer keys_b)
- )) = 
+ )) =
    let va_s1, f = GC.va_lemma_gcm_decrypt2_stdcall code va_s0 IA.win AES_128
        (as_vale_buffer cipher_b) (UInt64.v cipher_num)
         (as_vale_buffer auth_b) (UInt64.v auth_num)
         (as_vale_buffer iv_b) (as_vale_buffer keys_b)
-        (as_vale_buffer out_b) (as_vale_buffer tag_b) (Ghost.reveal s) in   
-   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt8 ME.TUInt128 cipher_b;   
+        (as_vale_buffer out_b) (as_vale_buffer tag_b) (Ghost.reveal s) in
+   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt8 ME.TUInt128 cipher_b;
    Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt8 ME.TUInt128 auth_b;
-   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt8 ME.TUInt128 iv_b;   
+   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt8 ME.TUInt128 iv_b;
    Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt8 ME.TUInt128 out_b;
-   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt8 ME.TUInt128 tag_b;   
-   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt8 ME.TUInt128 keys_b;   
+   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt8 ME.TUInt128 tag_b;
+   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt8 ME.TUInt128 keys_b;
    va_s1, f
 
 (* Prove that gcm128_lemma' has the required type *)
@@ -217,24 +217,24 @@ let gcm256_lemma'
        V.eval_code code va_s0 f va_s1 /\
        VSig.vale_calling_conventions_stdcall va_s0 va_s1 /\
        gcm256_post s code cipher_b cipher_num auth_b auth_num iv_b keys_b out_b tag_b va_s0 va_s1 f /\
-       ME.buffer_writeable (as_vale_buffer cipher_b) /\ 
-       ME.buffer_writeable (as_vale_buffer auth_b) /\ 
-       ME.buffer_writeable (as_vale_buffer iv_b) /\ 
-       ME.buffer_writeable (as_vale_buffer out_b) /\ 
-       ME.buffer_writeable (as_vale_buffer tag_b) /\ 
+       ME.buffer_writeable (as_vale_buffer cipher_b) /\
+       ME.buffer_writeable (as_vale_buffer auth_b) /\
+       ME.buffer_writeable (as_vale_buffer iv_b) /\
+       ME.buffer_writeable (as_vale_buffer out_b) /\
+       ME.buffer_writeable (as_vale_buffer tag_b) /\
        ME.buffer_writeable (as_vale_buffer keys_b)
- )) = 
+ )) =
    let va_s1, f = GC.va_lemma_gcm_decrypt2_stdcall code va_s0 IA.win AES_256
         (as_vale_buffer cipher_b) (UInt64.v cipher_num)
         (as_vale_buffer auth_b) (UInt64.v auth_num)
         (as_vale_buffer iv_b) (as_vale_buffer keys_b)
         (as_vale_buffer out_b) (as_vale_buffer tag_b) (Ghost.reveal s) in
-   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt8 ME.TUInt128 cipher_b;   
+   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt8 ME.TUInt128 cipher_b;
    Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt8 ME.TUInt128 auth_b;
-   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt8 ME.TUInt128 iv_b;   
+   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt8 ME.TUInt128 iv_b;
    Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt8 ME.TUInt128 out_b;
-   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt8 ME.TUInt128 tag_b;   
-   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt8 ME.TUInt128 keys_b;   
+   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt8 ME.TUInt128 tag_b;
+   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt8 ME.TUInt128 keys_b;
    va_s1, f
 
 (* Prove that gcm256_lemma' has the required type *)

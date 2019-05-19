@@ -26,7 +26,7 @@ procedure test(inline win:bool,
         ghost arg4:buffer64,
         ghost arg5:buffer64,
         ghost arg6:buffer64,
-        ghost arg7:buffer64)    
+        ghost arg7:buffer64)
     {:public}
     {:quick}
     {:exportSpecs}
@@ -37,7 +37,7 @@ procedure test(inline win:bool,
         win ==> valid_src_stack64(rsp + 32 + 8 + 16, stack);
         win ==> valid_src_stack64(rsp + 32 + 8 + 24, stack);
         !win ==> valid_src_stack64(rsp + 8 + 0, stack);
-        !win ==> valid_src_stack64(rsp + 8 + 8, stack);                
+        !win ==> valid_src_stack64(rsp + 8 + 8, stack);
 
         buffer_readable(mem, arg0);
         buffer_readable(mem, arg1);
@@ -46,7 +46,7 @@ procedure test(inline win:bool,
         buffer_readable(mem, arg4);
         buffer_readable(mem, arg5);
         buffer_readable(mem, arg6);
-        buffer_readable(mem, arg7);        
+        buffer_readable(mem, arg7);
         win ==> rcx == buffer_addr(arg0, mem);
         win ==> rdx == buffer_addr(arg1, mem);
         win ==> r8 == buffer_addr(arg2, mem);
@@ -54,7 +54,7 @@ procedure test(inline win:bool,
         win ==> load_stack64(rsp + 32 + 8 + 0, stack) == buffer_addr(arg4, mem);
         win ==> load_stack64(rsp + 32 + 8 + 8, stack) == buffer_addr(arg5, mem);
         win ==> load_stack64(rsp + 32 + 8 + 16, stack) == buffer_addr(arg6, mem);
-        win ==> load_stack64(rsp + 32 + 8 + 24, stack) == buffer_addr(arg7, mem);      
+        win ==> load_stack64(rsp + 32 + 8 + 24, stack) == buffer_addr(arg7, mem);
         !win ==> rdi == buffer_addr(arg0, mem);
         !win ==> rsi == buffer_addr(arg1, mem);
         !win ==> rdx == buffer_addr(arg2, mem);
@@ -65,7 +65,7 @@ procedure test(inline win:bool,
         !win ==> load_stack64(rsp + 8 + 8, stack) == buffer_addr(arg7, mem);
     ensures
         rsp == old(rsp);
-        
+
         win ==>  rbx == old(rbx);
         win ==>  rbp == old(rbp);
         win ==>  rdi == old(rdi);

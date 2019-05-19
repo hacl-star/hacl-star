@@ -33,14 +33,14 @@ let default_v_of_typ (t:base_typ) : (base_typ_as_type t) = match t with
   | TUInt128 -> Vale.Def.Words_s.Mkfour #W.nat32 0 0 0 0
 
 
-let imm_to_b8 (src:base_typ) (b:IB.ibuffer (base_typ_as_type src)) : GTot b8 = 
+let imm_to_b8 (src:base_typ) (b:IB.ibuffer (base_typ_as_type src)) : GTot b8 =
   let x:b8' = Buffer b false in
   let s1 = Seq.create 1 (default_v_of_typ src) in
   lemma_seq_neq_intro s1 Seq.empty;
   Classical.exists_intro (fun s -> ~ (x.rel s Seq.empty)) s1;
   x
 
-let mut_to_b8 (src:base_typ) (b:B.buffer (base_typ_as_type src)) : GTot b8 = 
+let mut_to_b8 (src:base_typ) (b:B.buffer (base_typ_as_type src)) : GTot b8 =
   Buffer b true
 
 [@__reduce__]
@@ -235,11 +235,11 @@ let __test : n_dep_arrow [TD_Base TUInt8] (fun (x:UInt8.t) -> y:UInt8.t{x == y})
 ////////////////////////////////////////////////////////////////////////////////
 
 [@__reduce__]
-let disjoint_not_eq 
+let disjoint_not_eq
   (#src1 #src2:base_typ)
-  (#rel1 #rrel1:MB.srel (base_typ_as_type src1)) 
-  (#rel2 #rrel2:MB.srel (base_typ_as_type src2)) 
-  (x:MB.mbuffer (base_typ_as_type src1) rel1 rrel1) 
+  (#rel1 #rrel1:MB.srel (base_typ_as_type src1))
+  (#rel2 #rrel2:MB.srel (base_typ_as_type src2))
+  (x:MB.mbuffer (base_typ_as_type src1) rel1 rrel1)
   (y:MB.mbuffer (base_typ_as_type src2) rel2 rrel2) =
     B.loc_disjoint (B.loc_buffer x) (B.loc_buffer y) /\
     ~ (src1 == src2 /\ rel1 == rel2 /\ rrel1 == rrel2 /\ x == y)
@@ -248,7 +248,7 @@ let disjoint_not_eq
 let disjoint_or_eq_1 (a:arg) (b:arg) =
     match a, b with
     | (| TD_Buffer _ _ {strict_disjointness=true}, xb |), (| TD_Buffer _ _ _, yb |)
-    | (| TD_ImmBuffer _ _ {strict_disjointness=true}, xb |), (| TD_ImmBuffer _ _ _, yb |)     
+    | (| TD_ImmBuffer _ _ {strict_disjointness=true}, xb |), (| TD_ImmBuffer _ _ _, yb |)
     | (| TD_Buffer _ _ _, xb |), (| TD_Buffer _ _ {strict_disjointness=true}, yb |)
     | (| TD_ImmBuffer _ _ _, xb |), (| TD_ImmBuffer _ _ {strict_disjointness=true}, yb |)
     // An immutable buffer and a trivial buffer should not be equal
@@ -358,7 +358,7 @@ let rec args_b8_mem (l:list arg) (y:b8)
       | (| TD_Base _, _ |) ->
         args_b8_mem tl y;
         assert ((exists a. goal tl a) ==> (exists a. goal l a))
-      | (| TD_Buffer bt _ q, x |) ->  
+      | (| TD_Buffer bt _ q, x |) ->
         let aux_1 ()
           : Lemma (requires (y == mut_to_b8 bt x))
                   (ensures (exists a. goal l a)) =
@@ -368,10 +368,10 @@ let rec args_b8_mem (l:list arg) (y:b8)
           : Lemma (requires (mut_to_b8 bt x =!= y))
                   (ensures (L.memP y (args_b8 l) <==> (exists a. goal l a))) =
           args_b8_mem tl y
-        in            
+        in
         FStar.Classical.move_requires aux_1 ();
         FStar.Classical.move_requires aux_2 ()
-      | (| TD_ImmBuffer bt _ q, x |) ->  
+      | (| TD_ImmBuffer bt _ q, x |) ->
         let aux_1 ()
           : Lemma (requires (y == imm_to_b8 bt x))
                   (ensures (exists a. goal l a)) =
@@ -381,9 +381,9 @@ let rec args_b8_mem (l:list arg) (y:b8)
           : Lemma (requires (imm_to_b8 bt x =!= y))
                   (ensures (L.memP y (args_b8 l) <==> (exists a. goal l a))) =
           args_b8_mem tl y
-        in            
+        in
         FStar.Classical.move_requires aux_1 ();
-        FStar.Classical.move_requires aux_2 ()        
+        FStar.Classical.move_requires aux_2 ()
 
 let rec args_b8_disjoint_or_eq (args:list arg)
   : Lemma
@@ -414,7 +414,7 @@ let rec args_b8_live (hs:HS.mem) (args:list arg{all_live hs args})
         assert (args_b8 args == Buffer x true :: args_b8 tl)
       | (| TD_ImmBuffer t _ _, x |) ->
         assert (B.live hs x);
-        assert (args_b8 args == imm_to_b8 t x :: args_b8 tl)        
+        assert (args_b8 args == imm_to_b8 t x :: args_b8 tl)
 
 let liveness_disjointness (args:list arg) (h:mem_roots args)
   : Lemma (list_disjoint_or_eq (args_b8 args) /\

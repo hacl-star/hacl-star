@@ -16,7 +16,7 @@ let sha256_update ctx_b in_b num_val k_b =
   Classical.forall_intro (bounded_buffer_addrs TUInt8 TUInt128 h0 in_b);
   DV.length_eq (get_downview ctx_b);
   DV.length_eq (get_downview k_b);
-  lemma_k_reqs_equiv k_b h0; 
+  lemma_k_reqs_equiv k_b h0;
   math_aux (UInt64.v num_val);
   as_vale_buffer_len #TUInt8 #TUInt128 in_b;
   let x, _ = Vale.Stdcalls.X64.Sha.sha256_update ctx_b in_b num_val k_b () in

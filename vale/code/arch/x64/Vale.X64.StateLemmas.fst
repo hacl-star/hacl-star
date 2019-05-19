@@ -14,8 +14,8 @@ let same_domain sv s = MS.same_domain sv.mem s.BS.ms_mem
 
 let same_domain_eval_ins c f s0 sv =
   match c with
-  | Ins ins -> 
-    let obs = BS.ins_obs ins s0 in 
+  | Ins ins ->
+    let obs = BS.ins_obs ins s0 in
     let s1 = {BS.machine_eval_ins ins ({s0 with BS.ms_trace = []}) with BS.ms_trace = obs @ s0.BS.ms_trace} in
     Vale.X64.Bytes_Semantics.eval_ins_domains ins ({s0 with BS.ms_trace = []});
     MS.lemma_same_domains sv.mem s0.BS.ms_mem s1.BS.ms_mem
@@ -77,7 +77,7 @@ let lemma_to_eval_operand128 s o =
   | OMem128 (m, _) ->
     let addr = eval_maddr m s in
     MS.equiv_load_mem128 addr s.mem
-  | OStack128 (m, _) -> () 
+  | OStack128 (m, _) -> ()
 
 #reset-options "--initial_fuel 2 --max_fuel 2"
 

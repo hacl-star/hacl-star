@@ -9,7 +9,7 @@ open Vale.Def.Words.Four_s
 open Vale.Def.Words.Seq
 
 #set-options "--z3rlimit 100"
-   
+
 let lemma_k_reqs_equiv k_b h =
   let db = get_downview k_b in
   DV.length_eq db;
@@ -22,7 +22,7 @@ let lemma_k_reqs_equiv k_b h =
     (k_seq.[i]).lo1 == word_to_nat32 (k.[4 * i + 1]) /\
     (k_seq.[i]).hi2 == word_to_nat32 (k.[4 * i + 2]) /\
     (k_seq.[i]).hi3 == word_to_nat32 (k.[4 * i + 3]))
-    = 
+    =
     let down_s = DV.as_seq h db in
     let s = B.as_seq h k_b in
 
@@ -41,24 +41,24 @@ let lemma_k_reqs_equiv k_b h =
 
     Vale.Def.Opaque_s.reveal_opaque le_bytes_to_quad32_def;
     // Revealing le_bytes_to_quad32 gives us the following
-    assert (k_seq.[i] == Mkfour 
-                 (four_to_nat 8 (seq_to_four_LE (seq_uint8_to_seq_nat8 
+    assert (k_seq.[i] == Mkfour
+                 (four_to_nat 8 (seq_to_four_LE (seq_uint8_to_seq_nat8
                    (Seq.slice down_s (i*16) (i*16+4)))))
-                 (four_to_nat 8 (seq_to_four_LE (seq_uint8_to_seq_nat8 
+                 (four_to_nat 8 (seq_to_four_LE (seq_uint8_to_seq_nat8
                    (Seq.slice down_s (i*16+4) (i*16+8)))))
-                 (four_to_nat 8 (seq_to_four_LE (seq_uint8_to_seq_nat8 
+                 (four_to_nat 8 (seq_to_four_LE (seq_uint8_to_seq_nat8
                    (Seq.slice down_s (i*16+8) (i*16+12)))))
-                 (four_to_nat 8 (seq_to_four_LE (seq_uint8_to_seq_nat8 
+                 (four_to_nat 8 (seq_to_four_LE (seq_uint8_to_seq_nat8
                    (Seq.slice down_s (i*16+12) (i*16+16))))));
 
     // Gives us that Seq.slice down_s (i*16) (i*16+4) == Vale.Interop.Views.put32 (Seq.index s (4*i)) and same for other indices
     DV.put_sel h db (4*4*i);
     DV.put_sel h db (4*(4*i+1));
     DV.put_sel h db (4*(4*i+2));
-    DV.put_sel h db (4*(4*i+3));    
+    DV.put_sel h db (4*(4*i+3));
 
     Vale.Def.Opaque_s.reveal_opaque Vale.Interop.Views.put32_def;
-    
+
     // Apply the only lemmas without SMTPat to simplify the following patterns:
     // assert (four_to_nat 8 (
     //              seq_to_four_LE (
@@ -71,7 +71,7 @@ let lemma_k_reqs_equiv k_b h =
     seq_to_four_to_seq_LE (nat_to_four 8 (UInt32.v (Seq.index s (4*i+1))));
     seq_to_four_to_seq_LE (nat_to_four 8 (UInt32.v (Seq.index s (4*i+2))));
     seq_to_four_to_seq_LE (nat_to_four 8 (UInt32.v (Seq.index s (4*i+3))))
-    
+
   in Classical.forall_intro aux
 
 open Vale.Lib.Seqs_s
@@ -82,7 +82,7 @@ let same_seq_downview8 (b:B.buffer UInt8.t) (h:HS.mem) : Lemma
   DV.length_eq db;
   let s = B.as_seq h b in
   let sdb = DV.as_seq h db in
-  let aux (i:nat{i < B.length b}) : Lemma (Seq.index sdb i == Seq.index s i) 
+  let aux (i:nat{i < B.length b}) : Lemma (Seq.index sdb i == Seq.index s i)
     = DV.as_seq_sel h db i;
       DV.get_sel h db i;
       Vale.Def.Opaque_s.reveal_opaque Vale.Interop.Views.put8_def
@@ -103,10 +103,10 @@ let lemma_seq_nat8_le_seq_quad32_to_bytes_uint32 b h =
   assert (s' == seq_four_to_seq_LE (seq_map (nat_to_four 8) (seq_four_to_seq_LE s)));
   let s_f = seq_nat8_to_seq_uint8 s' in
   UV.length_eq ub;
-  let aux (i:nat{i < Seq.length s_f}) : Lemma (Seq.index s_init i == Seq.index s_f i) = 
+  let aux (i:nat{i < Seq.length s_f}) : Lemma (Seq.index s_init i == Seq.index s_f i) =
     let i' = i/16 in
     UV.as_seq_sel h ub i';
-    UV.get_sel h ub i'; 
+    UV.get_sel h ub i';
     same_seq_downview8 b h;
     assert (Seq.index s i' == Vale.Interop.Views.get128 (Seq.slice s_init (i' `op_Multiply` 16) (i' `op_Multiply` 16 + 16)));
     Vale.Def.Opaque_s.reveal_opaque Vale.Interop.Views.get128_def;
@@ -133,7 +133,7 @@ let simplify_le_bytes_to_hash_uint32 b h =
   Vale.Def.Opaque_s.reveal_opaque le_seq_quad32_to_bytes_def;
   // After revealing the previous def, the seq_nat8_to_seq_nat32_LE_to_nat8 simplifies
   assert (sf == seq_map nat32_to_word (seq_four_to_seq_LE s));
-  
+
   let aux (i:nat {i < Seq.length sf}) : Lemma (Seq.index sf i = Seq.index s_init i)
     = let i' = i/4 in
       UV.as_seq_sel h ub i';
@@ -142,26 +142,26 @@ let simplify_le_bytes_to_hash_uint32 b h =
       Vale.Def.Opaque_s.reveal_opaque Vale.Interop.Views.get128_def;
       Vale.Def.Opaque_s.reveal_opaque le_bytes_to_quad32_def;
       // Revealing these definitions gives us the following
-      assert (Vale.Interop.Views.get128 (Seq.slice (DV.as_seq h db) 
+      assert (Vale.Interop.Views.get128 (Seq.slice (DV.as_seq h db)
              (i' `op_Multiply` 16) (i' `op_Multiply` 16 + 16))
-             == Mkfour 
-(four_to_nat 8 (seq_to_four_LE (seq_uint8_to_seq_nat8 
+             == Mkfour
+(four_to_nat 8 (seq_to_four_LE (seq_uint8_to_seq_nat8
                                (Seq.slice down_s (i'*16) (i'*16+4)))))
-                               (four_to_nat 8 (seq_to_four_LE (seq_uint8_to_seq_nat8 
+                               (four_to_nat 8 (seq_to_four_LE (seq_uint8_to_seq_nat8
                                (Seq.slice down_s (i'*16+4) (i'*16+8)))))
-                               (four_to_nat 8 (seq_to_four_LE (seq_uint8_to_seq_nat8 
+                               (four_to_nat 8 (seq_to_four_LE (seq_uint8_to_seq_nat8
                                (Seq.slice down_s (i'*16+8) (i'*16+12)))))
-                               (four_to_nat 8 (seq_to_four_LE (seq_uint8_to_seq_nat8 
+                               (four_to_nat 8 (seq_to_four_LE (seq_uint8_to_seq_nat8
                                (Seq.slice down_s (i'*16+12) (i'*16+16))))));
 
       // Gives us that Seq.slice down_s (i*16) (i*16+4) == Vale.Interop.Views.put32 (Seq.index s (4*i)) and same for other indices
       DV.put_sel h db (4*4*i');
       DV.put_sel h db (4*(4*i'+1));
       DV.put_sel h db (4*(4*i'+2));
-      DV.put_sel h db (4*(4*i'+3));    
+      DV.put_sel h db (4*(4*i'+3));
 
       Vale.Def.Opaque_s.reveal_opaque Vale.Interop.Views.put32_def;
-      
+
       // Apply the only lemmas without SMTPat to simplify the following patterns:
       // assert (four_to_nat 8 (
       //              seq_to_four_LE (

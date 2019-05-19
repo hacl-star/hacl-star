@@ -34,15 +34,15 @@ val same_domain_update32 (ptr:int) (v:nat32) (mem:heap) : Lemma
     Map.contains mem ptr /\
     Map.contains mem (ptr+1) /\
     Map.contains mem (ptr+2) /\
-    Map.contains mem (ptr+3))    
+    Map.contains mem (ptr+3))
   (ensures Map.domain mem == Map.domain (update_heap32 ptr v mem))
 
 val update_heap32_get_heap32 (ptr:int) (mem:heap) : Lemma
-  (requires 
+  (requires
     Map.contains mem ptr /\
     Map.contains mem (ptr+1) /\
     Map.contains mem (ptr+2) /\
-    Map.contains mem (ptr+3))    
+    Map.contains mem (ptr+3))
   (ensures (update_heap32 ptr (get_heap_val32 ptr mem) mem == mem))
 
 val frame_update_heap128 (ptr:int) (v:quad32) (mem:heap) : Lemma

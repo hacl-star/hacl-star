@@ -18,13 +18,13 @@ let uint8_p = B.buffer UInt8.t
 
 let length_aux (b:uint8_p) : Lemma
   (requires B.length b = 176)
-  (ensures DV.length (get_downview b) % 16 = 0) = 
+  (ensures DV.length (get_downview b) % 16 = 0) =
     let db = get_downview b in
     DV.length_eq db
 
 let length_aux2 (b:uint8_p) : Lemma
   (requires B.length b = 240)
-  (ensures DV.length (get_downview b) % 16 = 0) = 
+  (ensures DV.length (get_downview b) % 16 = 0) =
     let db = get_downview b in
     DV.length_eq db
 

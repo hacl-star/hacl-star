@@ -38,7 +38,7 @@ let lemma_frame_store_load_stack64 ptr v h i =
   let BS.Vale_stack _ mem = h in
   frame_update_heap ptr v mem;
   Vale.Def.Opaque_s.reveal_opaque BS.get_heap_val64_def
-  
+
 let lemma_free_stack_same_load64 start finish ptr h =
   FStar.Pervasives.reveal_opaque (`%BS.valid_addr64) BS.valid_addr64;
   let BS.Vale_stack _ mem = h in
@@ -62,12 +62,12 @@ let lemma_compose_free_stack64 start inter finish h =
       Vale.Lib.Set.lemma_sel_restrict (Vale.Lib.Set.remove_between domain start finish) mem i
   in Classical.forall_intro aux;
   assert (Map.equal mem1 mem2)
-                    
+
 let lemma_same_init_rsp_free_stack64 start finish h = ()
 
 let lemma_same_init_rsp_store_stack64 ptr v h = ()
 
-let valid_taint_stack64 ptr t stackTaint = 
+let valid_taint_stack64 ptr t stackTaint =
   Map.sel stackTaint ptr = t &&
   Map.sel stackTaint (ptr + 1) = t &&
   Map.sel stackTaint (ptr + 2) = t &&
@@ -77,7 +77,7 @@ let valid_taint_stack64 ptr t stackTaint =
   Map.sel stackTaint (ptr + 6) = t &&
   Map.sel stackTaint (ptr + 7) = t
 
-let valid_taint_stack128 ptr t stackTaint = 
+let valid_taint_stack128 ptr t stackTaint =
   valid_taint_stack64 ptr t stackTaint /\ valid_taint_stack64 (ptr + 8) t stackTaint
 
 let store_taint_stack64 ptr t stackTaint = BS.update_n ptr 8 stackTaint t

@@ -89,23 +89,23 @@ let fmul_lemma'
        VSig.vale_calling_conventions_stdcall va_s0 va_s1 /\
        fmul_post code tmp f1 out f2 va_s0 va_s1 f /\
        ME.buffer_readable VS.(va_s1.mem) (as_vale_buffer out) /\
-       ME.buffer_readable VS.(va_s1.mem) (as_vale_buffer f1) /\ 
-       ME.buffer_readable VS.(va_s1.mem) (as_vale_buffer f2) /\ 
-       ME.buffer_readable VS.(va_s1.mem) (as_vale_buffer tmp) /\ 
-       ME.buffer_writeable (as_vale_buffer out) /\ 
+       ME.buffer_readable VS.(va_s1.mem) (as_vale_buffer f1) /\
+       ME.buffer_readable VS.(va_s1.mem) (as_vale_buffer f2) /\
+       ME.buffer_readable VS.(va_s1.mem) (as_vale_buffer tmp) /\
+       ME.buffer_writeable (as_vale_buffer out) /\
        ME.buffer_writeable (as_vale_buffer f1) /\
-       ME.buffer_writeable (as_vale_buffer f2) /\       
-       ME.buffer_writeable (as_vale_buffer tmp) /\       
+       ME.buffer_writeable (as_vale_buffer f2) /\
+       ME.buffer_writeable (as_vale_buffer tmp) /\
        ME.modifies (ME.loc_union (ME.loc_buffer (as_vale_buffer out))
                    (ME.loc_union (ME.loc_buffer (as_vale_buffer tmp))
                                  ME.loc_none)) va_s0.VS.mem va_s1.VS.mem
- )) = 
+ )) =
    let va_s1, f = FW.va_lemma_fmul_stdcall code va_s0 IA.win (as_vale_buffer tmp) (as_vale_buffer f1) (as_vale_buffer out) (as_vale_buffer f2) in
-   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 out;   
-   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 f1;   
-   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 f2;   
-   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 tmp;       
-   va_s1, f                                   
+   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 out;
+   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 f1;
+   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 f2;
+   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 tmp;
+   (va_s1, f)
 
 (* Prove that fmul_lemma' has the required type *)
 noextract
@@ -169,23 +169,23 @@ let fmul2_lemma'
        VSig.vale_calling_conventions_stdcall va_s0 va_s1 /\
        fmul2_post code tmp f1 out f2 va_s0 va_s1 f /\
        ME.buffer_readable VS.(va_s1.mem) (as_vale_buffer out) /\
-       ME.buffer_readable VS.(va_s1.mem) (as_vale_buffer f1) /\ 
-       ME.buffer_readable VS.(va_s1.mem) (as_vale_buffer f2) /\ 
-       ME.buffer_readable VS.(va_s1.mem) (as_vale_buffer tmp) /\ 
-       ME.buffer_writeable (as_vale_buffer out) /\ 
+       ME.buffer_readable VS.(va_s1.mem) (as_vale_buffer f1) /\
+       ME.buffer_readable VS.(va_s1.mem) (as_vale_buffer f2) /\
+       ME.buffer_readable VS.(va_s1.mem) (as_vale_buffer tmp) /\
+       ME.buffer_writeable (as_vale_buffer out) /\
        ME.buffer_writeable (as_vale_buffer f1) /\
-       ME.buffer_writeable (as_vale_buffer f2) /\       
-       ME.buffer_writeable (as_vale_buffer tmp) /\       
+       ME.buffer_writeable (as_vale_buffer f2) /\
+       ME.buffer_writeable (as_vale_buffer tmp) /\
        ME.modifies (ME.loc_union (ME.loc_buffer (as_vale_buffer out))
                    (ME.loc_union (ME.loc_buffer (as_vale_buffer tmp))
                                  ME.loc_none)) va_s0.VS.mem va_s1.VS.mem
- )) = 
+ )) =
    let va_s1, f = FW.va_lemma_fmul2_stdcall code va_s0 IA.win (as_vale_buffer tmp) (as_vale_buffer f1) (as_vale_buffer out) (as_vale_buffer f2) in
-   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 out;   
-   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 f1;   
-   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 f2;   
-   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 tmp;      
-   va_s1, f                                   
+   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 out;
+   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 f1;
+   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 f2;
+   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 tmp;
+   (va_s1, f)
 
 (* Prove that fmul2_lemma' has the required type *)
 noextract
@@ -252,16 +252,16 @@ let fmul1_lemma'
        VSig.vale_calling_conventions_stdcall va_s0 va_s1 /\
        fmul1_post code out f1 f2 va_s0 va_s1 f /\
        ME.buffer_readable VS.(va_s1.mem) (as_vale_buffer f1) /\
-       ME.buffer_readable VS.(va_s1.mem) (as_vale_buffer out) /\ 
-       ME.buffer_writeable (as_vale_buffer out) /\ 
-       ME.buffer_writeable (as_vale_buffer f1) /\ 
+       ME.buffer_readable VS.(va_s1.mem) (as_vale_buffer out) /\
+       ME.buffer_writeable (as_vale_buffer out) /\
+       ME.buffer_writeable (as_vale_buffer f1) /\
        ME.modifies (ME.loc_union (ME.loc_buffer (as_vale_buffer out))
                                  ME.loc_none) va_s0.VS.mem va_s1.VS.mem
- )) = 
+ )) =
    let va_s1, f = FH.va_lemma_fmul1_stdcall code va_s0 IA.win (as_vale_buffer out) (as_vale_buffer f1) (UInt64.v f2) in
-   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 out;   
-   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 f1;   
-   va_s1, f                                   
+   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 out;
+   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 f1;
+   (va_s1, f)
 
 (* Prove that fmul1_lemma' has the required type *)
 noextract

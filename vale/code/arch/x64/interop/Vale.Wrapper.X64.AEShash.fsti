@@ -39,7 +39,7 @@ let keyhash_init_st (a: algorithm { a = AES_128 \/ a = AES_256 }) =
       B.modifies (B.loc_buffer hkeys_b) h0 h1 /\
 
       hkeys_reqs_pub (le_bytes_to_seq_quad32 (seq_uint8_to_seq_nat8 (B.as_seq h1 hkeys_b)))
-      	(reverse_bytes_quad32 (aes_encrypt_LE a (Ghost.reveal key) (Mkfour 0 0 0 0))))
+        (reverse_bytes_quad32 (aes_encrypt_LE a (Ghost.reveal key) (Mkfour 0 0 0 0))))
 
 inline_for_extraction
 val aes128_keyhash_init_stdcall: keyhash_init_st AES_128

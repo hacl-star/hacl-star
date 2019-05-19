@@ -29,14 +29,14 @@ procedure memcpy(inline win:bool, ghost dst:buffer64, ghost src:buffer64)
         valid_taint_buf64(dst, mem, memTaint, Secret);
         valid_taint_buf64(src, mem, memTaint, Secret);
         buffer_length(src) == 2;
-        buffer_length(dst) == 2;        
+        buffer_length(dst) == 2;
         win ==> rcx == buffer_addr(dst, mem);
         win ==> rdx == buffer_addr(src, mem);
         !win ==> rdi == buffer_addr(dst, mem);
         !win ==> rsi == buffer_addr(src, mem);
     ensures
         rsp == old(rsp);
-    
+
         win ==>  rbx == old(rbx);
         win ==>  rbp == old(rbp);
         win ==>  rdi == old(rdi);
@@ -65,7 +65,7 @@ procedure memcpy(inline win:bool, ghost dst:buffer64, ghost src:buffer64)
 
         buffer_as_seq(mem, dst) == buffer_as_seq(mem, src);
     //    forall(i) 0 <= i && i < 2 ==> buffer64_read(dst, i, mem) == buffer64_read(src, i, mem);
-        modifies_mem(loc_buffer(dst), old(mem), mem);        
+        modifies_mem(loc_buffer(dst), old(mem), mem);
     reads memTaint;
     modifies
         rax; rbx; rcx; rdx; rsi; rdi; rbp; rsp; r8; r9; r10; r11; r12; r13; r14; r15;
@@ -77,7 +77,7 @@ procedure memcpy(inline win:bool, ghost dst:buffer64, ghost src:buffer64)
     Load64_buffer(r9, rdx, 8, Secret, src, 1);
     Store64_buffer(rcx, rax, 0, Secret, dst, 0);
     Store64_buffer(rcx, r9, 8, Secret, dst, 1);
-  
+
   } else {
     Load64_buffer(rax, rsi, 0, Secret, src, 0);
     Load64_buffer(rcx, rsi, 8, Secret, src, 1);

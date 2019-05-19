@@ -112,7 +112,7 @@ procedure compute_ghash_incremental_register()
     {:public}
     {:quick}
     lets input @= xmm2; io @= xmm1; mask @= xmm8; h @= xmm11;
-    requires 
+    requires
         pclmulqdq_enabled && avx_enabled;
         mask == Mkfour(0x0C0D0E0F, 0x08090A0B, 0x04050607, 0x00010203);
     reads
@@ -586,7 +586,7 @@ procedure ghash_core(ghost in_b:buffer128)
 
     ensures
         len == 0 ==> rdx == old(rdx) /\ r9 == old(r9) /\ xmm1 == old(xmm1) /\ output == old(output);
-        len > 0 ==> length(buffer128_as_seq(mem, in_b)) > 0 /\ 
+        len > 0 ==> length(buffer128_as_seq(mem, in_b)) > 0 /\
                     output == ghash_LE(reverse_bytes_quad32(h), #ghash_plain_LE(buffer128_as_seq(mem, in_b)));
 {
     if (len != 0) {

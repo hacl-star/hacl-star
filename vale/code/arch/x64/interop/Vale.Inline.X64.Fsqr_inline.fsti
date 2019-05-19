@@ -13,7 +13,7 @@ val fsqr_inline
   (f1:u256)
   (out:u256)
   : Stack unit
-    (requires fun h -> 
+    (requires fun h ->
     adx_enabled /\ bmi2_enabled /\
     B.live h out /\ B.live h f1 /\ B.live h tmp /\
     (B.disjoint out f1 \/ out == f1) /\
@@ -27,9 +27,9 @@ val fsqr_inline
 val fsqr2_inline
   (tmp:u1024)
   (f1:u512)
-  (out:u512) 
+  (out:u512)
   : Stack unit
-    (requires fun h -> 
+    (requires fun h ->
       adx_enabled /\ bmi2_enabled /\
       B.live h out /\ B.live h f1 /\ B.live h tmp /\
       (B.disjoint out f1 \/ out == f1) /\

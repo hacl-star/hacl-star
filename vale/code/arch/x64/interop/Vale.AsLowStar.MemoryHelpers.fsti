@@ -32,43 +32,43 @@ val as_vale_immbuffer_len (#src #t:base_typ) (x:ibuf_t src t)
            [SMTPat (V.buffer_length (as_vale_immbuffer x))]
 
 val state_eq_down_mem (va_s1:V.va_state) (s1:_)
-  : Lemma 
-      (requires 
-        VL.state_eq_opt (Some (SL.state_to_S va_s1)) 
+  : Lemma
+      (requires
+        VL.state_eq_opt (Some (SL.state_to_S va_s1))
                         (Some s1))
       (ensures (
          I.down_mem (as_mem va_s1.VS.mem) == s1.BS.ms_mem))
 
 val relate_modifies (args:list arg) (m0 m1 : ME.mem)
-  : Lemma 
-      (requires 
+  : Lemma
+      (requires
         ME.modifies (VSig.mloc_modified_args args) m0 m1)
-      (ensures 
-        B.modifies (loc_modified_args args) 
+      (ensures
+        B.modifies (loc_modified_args args)
                    (hs_of_mem (as_mem m0))
                    (hs_of_mem (as_mem m1)))
 
 val reveal_readable (#src #t:_) (x:buf_t src t) (s:ME.mem)
-  : Lemma 
+  : Lemma
       ( List.memP (mut_to_b8 src x) (ptrs_of_mem (as_mem s)) <==>
         ME.buffer_readable s (as_vale_buffer x) )
 
 val reveal_imm_readable (#src #t:_) (x:ibuf_t src t) (s:ME.mem)
-  : Lemma 
+  : Lemma
       ( List.memP (imm_to_b8 src x) (ptrs_of_mem (as_mem s)) <==>
         ME.buffer_readable s (as_vale_immbuffer x) )
 
 val readable_live (#src #t:_) (x:buf_t src t) (s:ME.mem)
-  : Lemma 
+  : Lemma
       ( ME.buffer_readable s (as_vale_buffer x) ==>
         B.live (hs_of_mem (as_mem s)) x)
 
 val readable_imm_live (#src #t:_) (x:ibuf_t src t) (s:ME.mem)
-  : Lemma 
+  : Lemma
       ( ME.buffer_readable s (as_vale_immbuffer x) ==>
         B.live (hs_of_mem (as_mem s)) x)
 
-val buffer_readable_reveal 
+val buffer_readable_reveal
   (#max_arity:_)
   (src bt:base_typ)
   (x:buf_t src bt)
@@ -86,7 +86,7 @@ val get_heap_mk_mem_reveal
 
 
 val mk_stack_reveal (stack:BS.stack) : Lemma
-  (VSS.stack_to_s (as_vale_stack stack) == stack /\ 
+  (VSS.stack_to_s (as_vale_stack stack) == stack /\
    SI.init_rsp (as_vale_stack stack) == stack.BS.initial_rsp)
 
 val buffer_as_seq_reveal
@@ -98,7 +98,7 @@ val buffer_as_seq_reveal
    let db = get_downview x in
    DV.length_eq db;
    let mem = mk_mem args h0 in
-   Seq.equal 
+   Seq.equal
     (LSig.nat_to_uint_seq_t t (ME.buffer_as_seq (as_vale_mem mem) y))
     (UV.as_seq h0 (UV.mk_buffer db (LSig.view_of_base_typ t))))
 
@@ -111,7 +111,7 @@ val immbuffer_as_seq_reveal
    let db = get_downview x in
    DV.length_eq db;
    let mem = mk_mem args h0 in
-   Seq.equal 
+   Seq.equal
     (LSig.nat_to_uint_seq_t t (ME.buffer_as_seq (as_vale_mem mem) y))
     (UV.as_seq h0 (UV.mk_buffer db (LSig.view_of_base_typ t))))
 
@@ -123,7 +123,7 @@ val buffer_as_seq_reveal2
    let db = get_downview x in
    DV.length_eq db;
    let h = hs_of_mem (as_mem va_s.VS.mem) in
-   Seq.equal 
+   Seq.equal
     (LSig.nat_to_uint_seq_t t (ME.buffer_as_seq va_s.VS.mem y))
     (UV.as_seq h (UV.mk_buffer db (LSig.view_of_base_typ t))))
 
@@ -135,7 +135,7 @@ val immbuffer_as_seq_reveal2
    let db = get_downview x in
    DV.length_eq db;
    let h = hs_of_mem (as_mem va_s.VS.mem) in
-   Seq.equal 
+   Seq.equal
     (LSig.nat_to_uint_seq_t t (ME.buffer_as_seq va_s.VS.mem y))
     (UV.as_seq h (UV.mk_buffer db (LSig.view_of_base_typ t))))
 
@@ -209,17 +209,17 @@ let low_buffer_read (src t:base_typ) (h:HS.mem) (b:(buf_t src t){B.live h b}) (i
   let db = get_downview b in
   DV.length_eq db;
   let b_v = UV.mk_buffer db view in
-  UV.length_eq b_v;  
+  UV.length_eq b_v;
   UV.sel h b_v i
 
 val buffer_read_reveal (src t:base_typ) (h:HS.mem) (s:ME.mem) (b:(buf_t src t){B.live h b}) (i:nat{i < DV.length (get_downview b) / view_n t}) : Lemma
   (requires (
    DV.length_eq (get_downview b);
-   Seq.equal 
+   Seq.equal
     (LSig.nat_to_uint_seq_t t (ME.buffer_as_seq s (as_vale_buffer b)))
     (UV.as_seq h (UV.mk_buffer (get_downview b) (LSig.view_of_base_typ t)))))
-  (ensures LSig.nat_to_uint t (ME.buffer_read (as_vale_buffer b) i s) == 
-    low_buffer_read src t h b i ) 
+  (ensures LSig.nat_to_uint t (ME.buffer_read (as_vale_buffer b) i s) ==
+    low_buffer_read src t h b i )
   [SMTPat (low_buffer_read src t h b i); SMTPat (ME.buffer_read (as_vale_buffer b) i s)]
 
 let imm_low_buffer_read (src t:base_typ) (h:HS.mem) (b:(ibuf_t src t){B.live h b}) (i:nat{i < DV.length (get_downview b) / view_n t}) : GTot (base_typ_as_type t) =
@@ -227,26 +227,26 @@ let imm_low_buffer_read (src t:base_typ) (h:HS.mem) (b:(ibuf_t src t){B.live h b
   let db = get_downview b in
   DV.length_eq db;
   let b_v = UV.mk_buffer db view in
-  UV.length_eq b_v;  
+  UV.length_eq b_v;
   UV.sel h b_v i
 
 val imm_buffer_read_reveal (src t:base_typ) (h:HS.mem) (s:ME.mem) (b:(ibuf_t src t){B.live h b}) (i:nat{i < DV.length (get_downview b) / view_n t}) : Lemma
   (requires (
   DV.length_eq (get_downview b);
-  Seq.equal 
+  Seq.equal
     (LSig.nat_to_uint_seq_t t (ME.buffer_as_seq s (as_vale_immbuffer b)))
     (UV.as_seq h (UV.mk_buffer (get_downview b) (LSig.view_of_base_typ t)))))
-  (ensures LSig.nat_to_uint t (ME.buffer_read (as_vale_immbuffer b) i s) == 
-    imm_low_buffer_read src t h b i ) 
+  (ensures LSig.nat_to_uint t (ME.buffer_read (as_vale_immbuffer b) i s) ==
+    imm_low_buffer_read src t h b i )
   [SMTPat (imm_low_buffer_read src t h b i); SMTPat (ME.buffer_read (as_vale_immbuffer b) i s)]
 
 val buffer_as_seq_invert (src t:base_typ) (h:HS.mem) (s:ME.mem) (b:(buf_t src t){B.live h b}) : Lemma
   (requires (
   DV.length_eq (get_downview b);
-  Seq.equal 
+  Seq.equal
     (LSig.nat_to_uint_seq_t t (ME.buffer_as_seq s (as_vale_buffer b)))
     (UV.as_seq h (UV.mk_buffer (get_downview b) (LSig.view_of_base_typ t)))))
-  (ensures ME.buffer_as_seq s (as_vale_buffer b) == 
+  (ensures ME.buffer_as_seq s (as_vale_buffer b) ==
     (LSig.uint_to_nat_seq_t t (UV.as_seq h (UV.mk_buffer (get_downview b) (LSig.view_of_base_typ t)))))
   [SMTPat (UV.as_seq h (UV.mk_buffer (get_downview b) (LSig.view_of_base_typ t)));
    SMTPat (ME.buffer_as_seq s (as_vale_buffer b))]
@@ -257,7 +257,7 @@ val buffer_as_seq_reveal_tuint128
   (va_s:V.va_state) : Lemma
   (let y = as_vale_buffer x in
    let h = hs_of_mem (as_mem va_s.VS.mem) in
-   Seq.equal 
+   Seq.equal
     (LSig.nat_to_uint_seq_t TUInt128 (ME.buffer_as_seq va_s.VS.mem y))
     (V.buffer128_as_seq va_s.VS.mem (as_vale_buffer x)))
   [SMTPat (V.buffer128_as_seq va_s.VS.mem (as_vale_buffer x))]
@@ -268,7 +268,7 @@ val immbuffer_as_seq_reveal_tuint128
   (va_s:V.va_state) : Lemma
   (let y = as_vale_immbuffer x in
    let h = hs_of_mem (as_mem va_s.VS.mem) in
-   Seq.equal 
+   Seq.equal
     (LSig.nat_to_uint_seq_t TUInt128 (ME.buffer_as_seq va_s.VS.mem y))
     (V.buffer128_as_seq va_s.VS.mem (as_vale_immbuffer x)))
   [SMTPat (V.buffer128_as_seq va_s.VS.mem (as_vale_immbuffer x))]
@@ -283,10 +283,10 @@ val down_up_buffer_read_reveal (src:base_typ) (h:HS.mem) (s:ME.mem) (b:(buf_t sr
   (requires (
    DV.length_eq (get_downview b);
    same_down_up_buffer_length src b;
-   Seq.equal 
+   Seq.equal
     (LSig.nat_to_uint_seq_t src (ME.buffer_as_seq s (as_vale_buffer b)))
     (UV.as_seq h (UV.mk_buffer (get_downview b) (LSig.view_of_base_typ src)))))
-  (ensures LSig.nat_to_uint src (ME.buffer_read (as_vale_buffer b) i s) == 
+  (ensures LSig.nat_to_uint src (ME.buffer_read (as_vale_buffer b) i s) ==
     Seq.index (B.as_seq h b) i)
   [SMTPat (ME.buffer_read (as_vale_buffer b) i s); SMTPat (Seq.index (B.as_seq h b) i)]
 

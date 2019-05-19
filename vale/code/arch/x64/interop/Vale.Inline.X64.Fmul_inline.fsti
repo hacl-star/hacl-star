@@ -25,10 +25,10 @@ let as_nat (b:B.buffer UInt64.t{B.length b == 4}) (h:HS.mem) : GTot nat =
 val fmul_inline
   (tmp:u512)
   (f1:u256)
-  (out:u256) 
+  (out:u256)
   (f2:u256)
   : Stack unit
-    (requires fun h -> 
+    (requires fun h ->
       adx_enabled /\ bmi2_enabled /\
       B.live h out /\ B.live h f1 /\ B.live h f2 /\ B.live h tmp /\
       (B.disjoint out f1 \/ out == f1) /\
@@ -45,10 +45,10 @@ val fmul_inline
 val fmul2_inline
   (tmp:u1024)
   (f1:u512)
-  (out:u512) 
+  (out:u512)
   (f2:u512)
   : Stack unit
-    (requires fun h -> 
+    (requires fun h ->
       adx_enabled /\ bmi2_enabled /\
       B.live h out /\ B.live h f1 /\ B.live h f2 /\ B.live h tmp /\
       (B.disjoint out f1 \/ out == f1) /\
@@ -71,7 +71,7 @@ val fmul2_inline
 
 val fmul1_inline
   (out:u256)
-  (f1:u256) 
+  (f1:u256)
   (f2:UInt64.t{UInt64.v f2 < 131072})
   : Stack unit
     (requires fun h ->

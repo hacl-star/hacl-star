@@ -80,7 +80,7 @@ procedure check_sha_stdcall(inline win:bool)
     requires
     ensures
         rsp == old(rsp);
-    
+
         win ==>  rbx == old(rbx);
         win ==>  rbp == old(rbp);
         win ==>  rdi == old(rdi);
@@ -152,7 +152,7 @@ procedure check_adx_bmi2_stdcall(inline win:bool)
         win ==>  xmm15 == old(xmm15);
 
         modifies_none(old(mem), mem);
-        
+
         rax != 0 ==> adx_enabled && bmi2_enabled;
     reads memTaint;
     modifies

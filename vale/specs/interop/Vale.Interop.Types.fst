@@ -38,15 +38,15 @@ let down_view (t:base_typ) : DV.view (base_typ_as_type t) UInt8.t = match t with
   | TUInt16 -> Vale.Interop.Views.down_view16
   | TUInt32 -> Vale.Interop.Views.down_view32
   | TUInt64 -> Vale.Interop.Views.down_view64
-  | TUInt128 -> Vale.Interop.Views.down_view128  
+  | TUInt128 -> Vale.Interop.Views.down_view128
 
 [@__reduce__]
 noeq
 type b8' =
-| Buffer: 
+| Buffer:
   #src:base_typ ->
-  #rrel:MB.srel (base_typ_as_type src) -> 
-  #rel:MB.srel (base_typ_as_type src) -> 
+  #rrel:MB.srel (base_typ_as_type src) ->
+  #rel:MB.srel (base_typ_as_type src) ->
   bsrc:MB.mbuffer (base_typ_as_type src) rrel rel ->
   writeable:bool ->
   b8'
@@ -59,8 +59,8 @@ let disjoint_addr addr1 length1 addr2 length2 =
   addr1 + length1 < addr2 ||
   addr2 + length2 < addr1
 
-let get_downview 
-  (#src:base_typ) 
+let get_downview
+  (#src:base_typ)
   (#rrel #rel:MB.srel (base_typ_as_type src))
   (b:MB.mbuffer (base_typ_as_type src) rrel rel) =
   DV.mk_buffer_view b (down_view src)

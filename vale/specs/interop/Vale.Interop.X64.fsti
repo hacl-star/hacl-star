@@ -14,7 +14,7 @@ module List = FStar.List.Tot
 //The calling convention w.r.t the register mapping
 ////////////////////////////////////////////////////////////////////////////////
 
-let calling_conventions 
+let calling_conventions
   (s0 s1:BS.machine_state)
   (regs_modified: MS.reg -> bool)
   (xmms_modified: MS.xmm -> bool) =
@@ -24,7 +24,7 @@ let calling_conventions
   s0.BS.ms_regs MS.rRsp == s1.BS.ms_regs MS.rRsp /\
   (forall (r:MS.reg). {:pattern (s0.BS.ms_regs r)}
     not (regs_modified r) ==> s0.BS.ms_regs r == s1.BS.ms_regs r) /\
-  (forall (x:MS.xmm). {:pattern (s0.BS.ms_xmms x)} 
+  (forall (x:MS.xmm). {:pattern (s0.BS.ms_xmms x)}
     not (xmms_modified x) ==> s0.BS.ms_xmms x == s1.BS.ms_xmms x)
 
 let reg_nat (n:nat) = i:nat{i < n}
@@ -41,14 +41,14 @@ unfold
 let injective f = forall x y. f x == f y ==> x == y
 
 noeq
-type arg_reg_relation' (n:nat) =  
+type arg_reg_relation' (n:nat) =
   | Rel: of_reg:(MS.reg -> option (reg_nat n)) ->
          of_arg:(reg_nat n -> MS.reg){
            // This function should be injective
-           injective of_arg /\ 
+           injective of_arg /\
            // rRsp is not a valid register to store paramters
            (forall (i:reg_nat n). of_arg i <> MS.rRsp) /\
-           // of_reg should always return Some when the register corresponds to an of_arg 
+           // of_reg should always return Some when the register corresponds to an of_arg
            (forall (i:reg_nat n).
               Some? (of_reg (of_arg i)) /\ Some?.v (of_reg (of_arg i)) = i)} ->
          arg_reg_relation' n
@@ -103,7 +103,7 @@ let rec register_of_args (max_arity:nat)
     match args with
     | [] -> regs
     | hd::tl ->
-      if n > max_arity then 
+      if n > max_arity then
         // This arguments will be passed on the stack
         register_of_args max_arity arg_reg (n-1) tl regs
       else
@@ -309,7 +309,7 @@ let prediction
 noeq
 type as_lowstar_sig_ret =
   | As_lowstar_sig_ret :
-      n:nat ->                 
+      n:nat ->
       args:arg_list ->
       fuel:nat ->
       final_mem:mem ->
@@ -351,7 +351,7 @@ let as_lowstar_sig_post_weak
     (n:nat)
     (arg_reg:arg_reg_relation n)
     (regs_modified:MS.reg -> bool)
-    (xmms_modified:MS.xmm -> bool)    
+    (xmms_modified:MS.xmm -> bool)
     (down_mem:down_mem_t)
     (c:BS.code)
     (args:arg_list)
@@ -381,7 +381,7 @@ let as_lowstar_sig (c:BS.code) =
     n:nat ->
     arg_reg:arg_reg_relation n ->
     regs_modified:(MS.reg -> bool) ->
-    xmms_modified:(MS.xmm -> bool) ->    
+    xmms_modified:(MS.xmm -> bool) ->
     down_mem:down_mem_t ->
     args:arg_list ->
     #pre_rel:_ ->
@@ -527,7 +527,7 @@ val wrap'
     (n:nat)
     (arg_reg:arg_reg_relation n)
     (regs_modified:MS.reg -> bool)
-    (xmms_modified:MS.xmm -> bool)    
+    (xmms_modified:MS.xmm -> bool)
     (down_mem:down_mem_t)
     (c:BS.code)
     (dom:list td{List.length dom <= 20})
@@ -588,7 +588,7 @@ val wrap_weak'
     (#post_rel:rel_gen_t c dom [] (prediction_post_rel_t c))
     (predict:prediction_t n arg_reg regs_modified xmms_modified down_mem c dom [] pre_rel post_rel)
   : as_lowstar_sig_t_weak' n arg_reg regs_modified xmms_modified down_mem c dom [] pre_rel post_rel predict
-  
+
 (* These two functions are the ones that are available from outside the module. The arity_ok restriction ensures that all arguments are passed in registers for inline assembly *)
 [@__reduce__]
 let as_lowstar_sig_t_weak

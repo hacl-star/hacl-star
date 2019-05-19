@@ -148,7 +148,7 @@ let not (b:bool) : bool = if b then false else true
 val lemma_iand_maybe_pow2 (n:pos) (x y:natN (pow2_norm n)) (i:nat{i < n}) : Lemma
   (requires (x == 0 \/ x == pow2 i) /\ (y == 0 \/ y == pow2 i))
   (ensures not (iand x y = 0) <==> not (x = 0) /\ not (y = 0))
-  
+
 val lemma_iand_pow2_64 (x:nat64) (i:nat{i < 64}) : Lemma
   (pow2 i < pow2 64 /\ (iand x (pow2 i) == 0 \/ iand x (pow2 i) == pow2 i))
 
@@ -158,7 +158,7 @@ val lemma_ishr_pow2_diff64 (i:nat{i < 64}) (j:nat) : Lemma
 
 val lemma_ishr_zero64 (i:nat{i < 64}) : Lemma
   (ishr #(pow2 64) 0 i == 0)
-  
+
 val lemma_iand_maybe_pow2_64 (x y:nat64) (i:nat{i < 64}) : Lemma
   (requires (x == 0 \/ x == pow2 i) /\ (y == 0 \/ y == pow2 i))
   (ensures not (iand x y = 0) <==> not (x = 0) /\ not (y = 0))

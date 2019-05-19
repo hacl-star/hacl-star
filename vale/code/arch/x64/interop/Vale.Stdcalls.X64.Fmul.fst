@@ -13,7 +13,7 @@ let fmul_ = as_normal_t #lowstar_fmul_t lowstar_fmul
 
 (* And here's the fmul2 wrapper itself *)
 let lowstar_fmul2 : lowstar_fmul2_t  =
-  assert_norm (List.length fmul_dom + List.length ([]<:list arg) <= 4); 
+  assert_norm (List.length fmul_dom + List.length ([]<:list arg) <= 4);
   IX64.wrap_weak_stdcall
     Vale.Interop.down_mem
     code_fmul2

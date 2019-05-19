@@ -20,7 +20,7 @@ let gcm_simplify2 b h =
   DV.length_eq db;
   assert (DV.length (get_downview b) / 16 = 1);
   let b_v = UV.mk_buffer db view in
-  UV.length_eq b_v;  
+  UV.length_eq b_v;
   UV.get_sel h b_v 0;
   let aux (i:nat{i < B.length b}) : Lemma (Seq.index s_init i == Seq.index s_down i) =
     DV.as_seq_sel h db i;
@@ -142,11 +142,11 @@ val reverse_bytes_four_select (q:quad32) (i:nat{i < 4}) : Lemma
    four_select (nat_to_four 8 q3') (3 - i) = four_select (nat_to_four 8 q0) i /\
    four_select (nat_to_four 8 q2') (3 - i) = four_select (nat_to_four 8 q1) i /\
    four_select (nat_to_four 8 q1') (3 - i) = four_select (nat_to_four 8 q2) i /\
-   four_select (nat_to_four 8 q0') (3 - i) = four_select (nat_to_four 8 q3) i)   
+   four_select (nat_to_four 8 q0') (3 - i) = four_select (nat_to_four 8 q3) i)
 
 
 let reverse_bytes_four_select q i =
-  let Mkfour q0 q1 q2 q3 = q in 
+  let Mkfour q0 q1 q2 q3 = q in
   let Mkfour q0' q1' q2' q3' = reverse_bytes_quad32 q in
   reveal_reverse_bytes_quad32 q;
   Classical.forall_intro (reverse_nat32_four_to_nat q0);
@@ -198,7 +198,7 @@ let aes_simplify1 b h =
   DV.length_eq db;
   assert (DV.length (get_downview b) / 16 = 1);
   let b_v = UV.mk_buffer db view in
-  UV.length_eq b_v;  
+  UV.length_eq b_v;
   UV.get_sel h b_v 0;
   let aux (i:nat{i < B.length b}) : Lemma (Seq.index s_init i == Seq.index s_down i) =
     DV.as_seq_sel h db i;
@@ -226,8 +226,8 @@ let aes_simplify2 b h =
     Vale.Def.Opaque_s.reveal_opaque Vale.Interop.Views.get8_def
   in Classical.forall_intro aux;
   assert (Seq.equal (DV.as_seq h db) (B.as_seq h b));
-  UV.length_eq b_v;  
-  UV.get_sel h b_v 0;  
+  UV.length_eq b_v;
+  UV.get_sel h b_v 0;
   UV.get_sel h b_v 1;
   Vale.Def.Opaque_s.reveal_opaque Vale.Interop.Views.get128_def;
   aes_simplify_aux (seq_uint8_to_seq_nat8 (Seq.slice s_init 0 16));

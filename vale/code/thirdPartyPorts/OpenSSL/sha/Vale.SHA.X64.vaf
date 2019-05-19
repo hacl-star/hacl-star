@@ -62,13 +62,13 @@ procedure preamble(ghost ctx_b:buffer128)
     {:quick}
     lets
         ctx @= rdi; tmp_reg @= rax;
-        Wi @= xmm0; abef @= xmm1; cdgh @= xmm2; 
-        tmp_xmm @= xmm7; bswap @= xmm8; 
+        Wi @= xmm0; abef @= xmm1; cdgh @= xmm2;
+        tmp_xmm @= xmm7; bswap @= xmm8;
     reads
         ctx; mem; memTaint;
     modifies
         tmp_reg;
-        Wi; abef; cdgh; tmp_xmm; bswap; 
+        Wi; abef; cdgh; tmp_xmm; bswap;
         efl;
     requires
         validSrcAddrs128(mem, ctx,  ctx_b,  2, memTaint, Secret);
@@ -83,18 +83,18 @@ procedure preamble(ghost ctx_b:buffer128)
         make_hash(abef, cdgh) == make_ordered_hash(abcd, efgh);
 {
     // At the C level, ctx_b is an array of 8 32-bit values: ABCDEFGH
-    // We load these out of memory using litte-endian loads, 
+    // We load these out of memory using litte-endian loads,
     // but SHA spec is big endian, so we need to do some swaps
     let abcd := buffer128_read(ctx_b, 0, mem);
     let efgh := buffer128_read(ctx_b, 1, mem);
-    Load128_buffer(abef, ctx,  0, Secret, ctx_b, 0);  // abef := LSB: ABCD 
+    Load128_buffer(abef, ctx,  0, Secret, ctx_b, 0);  // abef := LSB: ABCD
     Load128_buffer(cdgh, ctx, 16, Secret, ctx_b, 1);  // cdgh := LSB: EFGH
     InitPshufbStableMask(tmp_xmm, tmp_reg);
 
     Pshufd(Wi, abef, 0x1b);                           //   Wi := LSB: DCBA
     Pshufd(abef, abef, 0xb1);                         // abef := LSB: BADC
     Pshufd(cdgh, cdgh, 0x1b);                         // cdgh := LSB: HGFE
-    
+
     Mov128(bswap, tmp_xmm);     // OpenSSL: offload   // bswap holds mask (why go via tmp?)
     Palignr8(abef, cdgh);                             // abef := LSB: FEBA == abef in big endian
     // OpenSSL uses punpcklqdq here:
@@ -110,13 +110,13 @@ procedure loop_rounds_0_15(
     {:quick}
     lets
         inp @= rsi; tbl @= rcx;
-        Wi @= xmm0; abef @= xmm1; cdgh @= xmm2; 
+        Wi @= xmm0; abef @= xmm1; cdgh @= xmm2;
         msg0 @= xmm3; msg1 @= xmm4; msg2 @= xmm5; msg3 @= xmm6;
         tmp_xmm @= xmm7; abef_save @= xmm9; cdgh_save @= xmm10;
     reads
         tbl; mem; memTaint;
     modifies
-        inp; 
+        inp;
         Wi; abef; cdgh; msg0; msg1; msg2; msg3; tmp_xmm; abef_save; cdgh_save;
         efl;
     requires
@@ -144,7 +144,7 @@ procedure loop_rounds_0_15(
         // tmp_xmm == Don't care
         abef_save == old(abef);
         cdgh_save == old(cdgh);
-        
+
 {
     // Create a ghost message block to pass to all of the sha256* instructions and lemmas
     let input_LE := slice_workaround(buffer128_as_seq(mem, in_b), offset, offset+4);
@@ -165,14 +165,14 @@ procedure loop_rounds_0_15(
     PshufbStable(msg0, tmp_xmm);       // Convert msg0 to big endian
     assert msg0 == index_work_around_quad32(input_BE, 0);   // OBSERVE: TODO: Better trigger for lemma_quads_to_block?
     Load128_buffer(msg3, inp, 48, Secret, in_b, offset+3);
-    
+
     Load128_buffer(Wi, tbl, 0, Secret, k_b, 0);  // Load K values from memory
     assert Wi == index_work_around_quad32(ks, 0);
     Paddd(Wi, msg0);            // Combine the round constant with the message block
 
     PshufbStable(msg1, tmp_xmm);      // Convert msg1 to big endian
     assert msg1 == index_work_around_quad32(input_BE, 1);   // OBSERVE: TODO: Better trigger for lemma_quads_to_block?
-    Mov128(cdgh_save, cdgh);    // Save a copy of the original hash value to add at the end 
+    Mov128(cdgh_save, cdgh);    // Save a copy of the original hash value to add at the end
 
     // Do two rounds of SHA, drawing on state in ABEF, CDGH, and WK in lower64 of XMM0
     SHA256_rnds2(cdgh, abef, 0, block, hash_orig);
@@ -188,7 +188,7 @@ procedure loop_rounds_0_15(
     assert msg2 == index_work_around_quad32(input_BE, 2);   // OBSERVE: TODO: Better trigger for lemma_quads_to_block?
     SHA256_rnds2(cdgh, abef, 4, block, hash_orig);
     Pshufd(Wi, Wi, 0x0e);
-    Add64(inp, 0x40); 
+    Add64(inp, 0x40);
     SHA256_msg1(msg0, msg1, 16, block);     // Do a partial step of message expansion
     SHA256_rnds2(abef, cdgh, 6, block, hash_orig);
 
@@ -228,13 +228,13 @@ procedure loop_rounds_16_51_body(
     {:quick}
     lets
         tbl @= rcx;
-        Wi @= xmm0; abef @= xmm1; cdgh @= xmm2; 
+        Wi @= xmm0; abef @= xmm1; cdgh @= xmm2;
         msg0 @= xmm3; msg1 @= xmm4; msg2 @= xmm5; msg3 @= xmm6;
         tmp_xmm @= xmm7;
     reads
         tbl; mem; memTaint;
     modifies
-        Wi; abef; cdgh; msg0; msg1; msg2; msg3; tmp_xmm; 
+        Wi; abef; cdgh; msg0; msg1; msg2; msg3; tmp_xmm;
         efl;
     requires
         sha_enabled;
@@ -262,7 +262,7 @@ procedure loop_rounds_16_51_body(
     let ks := buffer128_as_seq(mem, k_b);
     Load128_buffer(Wi, tbl, 16*i, Secret, k_b, i);  // Load K values from memory
     assert Wi == index_work_around_quad32(ks, i);
-    
+
     Paddd(Wi, msg0);
     SHA256_msg2(msg1, msg0, 4*(i+1), block);
     SHA256_rnds2(cdgh, abef, 4*i, block, hash_orig);
@@ -274,7 +274,7 @@ procedure loop_rounds_16_51_body(
     SHA256_rnds2(abef, cdgh, 4*i + 2, block, hash_orig);
 }
 
-// TODO: OpenSSL does this without any moves by renaming variables.  
+// TODO: OpenSSL does this without any moves by renaming variables.
 //       We can do the same once Vale quick-mode supports that,
 //       or we can rewrite the procedure above in non-quick mode
 procedure msg_shift()
@@ -307,13 +307,13 @@ procedure loop_rounds_16_51_recursive(
     {:recursive}
     lets
         tbl @= rcx;
-        Wi @= xmm0; abef @= xmm1; cdgh @= xmm2; 
+        Wi @= xmm0; abef @= xmm1; cdgh @= xmm2;
         msg0 @= xmm3; msg1 @= xmm4; msg2 @= xmm5; msg3 @= xmm6;
         tmp_xmm @= xmm7;
     reads
         tbl; mem; memTaint;
     modifies
-        Wi; abef; cdgh; msg0; msg1; msg2; msg3; tmp_xmm; 
+        Wi; abef; cdgh; msg0; msg1; msg2; msg3; tmp_xmm;
         efl;
     requires
         sha_enabled;
@@ -352,13 +352,13 @@ procedure loop_rounds_16_51(
     {:quick exportOnly}
     lets
         tbl @= rcx;
-        Wi @= xmm0; abef @= xmm1; cdgh @= xmm2; 
+        Wi @= xmm0; abef @= xmm1; cdgh @= xmm2;
         msg0 @= xmm3; msg1 @= xmm4; msg2 @= xmm5; msg3 @= xmm6;
         tmp_xmm @= xmm7;
     reads
         tbl; mem; memTaint;
     modifies
-        Wi; abef; cdgh; msg0; msg1; msg2; msg3; tmp_xmm; 
+        Wi; abef; cdgh; msg0; msg1; msg2; msg3; tmp_xmm;
         efl;
     requires
         sha_enabled;
@@ -391,14 +391,14 @@ procedure loop_rounds_52_64(
     {:quick}
     lets
         tbl @= rcx; num @= rdx;
-        Wi @= xmm0; abef @= xmm1; cdgh @= xmm2; 
+        Wi @= xmm0; abef @= xmm1; cdgh @= xmm2;
         msg0 @= xmm3; msg1 @= xmm4; msg2 @= xmm5; msg3 @= xmm6;
         tmp_xmm @= xmm7; bswap @= xmm8; abef_save @= xmm9; cdgh_save @= xmm10;
     reads
         tbl; bswap; abef_save; cdgh_save; mem; memTaint;
     modifies
         num;
-        Wi; abef; cdgh; msg0; msg1; msg2; msg3; tmp_xmm; 
+        Wi; abef; cdgh; msg0; msg1; msg2; msg3; tmp_xmm;
         efl;
     requires
         sha_enabled;
@@ -411,7 +411,7 @@ procedure loop_rounds_52_64(
         let hash_orig := make_hash(abef_save, cdgh_save) in
         make_hash(abef, cdgh) == repeat_range_vale(52, block, hash_orig);
 
-        msg0 == ws_quad32(52, block); 
+        msg0 == ws_quad32(52, block);
         msg1 == add_wrap_quad32(ws_partial(56, block), ws_quad32(49, block));
         msg2 == ws_partial(60, block);
         msg3 == ws_quad32(48, block);
@@ -434,7 +434,7 @@ procedure loop_rounds_52_64(
     Palignr4(tmp_xmm, msg0);
     SHA256_rnds2(abef, cdgh, 4*13+2, block, hash_orig);
     Paddd(msg2, tmp_xmm);
-    
+
     Load128_buffer(Wi, tbl, 16*14, Secret, k_b, 14);  // Load K values from memory
     assert Wi == index_work_around_quad32(ks, 14);
     Paddd(Wi, msg1);
@@ -471,7 +471,7 @@ procedure loop_rounds(
     {:quick}
     lets
         num @= rdx; inp @= rsi; tbl @= rcx;
-        Wi @= xmm0; abef @= xmm1; cdgh @= xmm2; 
+        Wi @= xmm0; abef @= xmm1; cdgh @= xmm2;
         msg0 @= xmm3; msg1 @= xmm4; msg2 @= xmm5; msg3 @= xmm6;
         tmp_xmm @= xmm7; bswap @= xmm8; abef_save @= xmm9; cdgh_save @= xmm10;
     reads
@@ -528,7 +528,7 @@ procedure loop(
     {:quick}
     lets
         num @= rdx; inp @= rsi; tbl @= rcx;
-        Wi @= xmm0; abef @= xmm1; cdgh @= xmm2; 
+        Wi @= xmm0; abef @= xmm1; cdgh @= xmm2;
         msg0 @= xmm3; msg1 @= xmm4; msg2 @= xmm5; msg3 @= xmm6;
         tmp_xmm @= xmm7; bswap @= xmm8; abef_save @= xmm9; cdgh_save @= xmm10;
     reads
@@ -557,7 +557,7 @@ procedure loop(
     let hash_orig:hash256 := make_hash(abef, cdgh);
 
     ghost var count:nat := 0;
-    while (num > 0) 
+    while (num > 0)
         invariant
             sha_enabled;
 
@@ -589,12 +589,12 @@ procedure epilogue(
     {:quick}
     lets
         ctx @= rdi;
-        abef @= xmm1; cdgh @= xmm2; 
-        tmp_xmm @= xmm7; 
+        abef @= xmm1; cdgh @= xmm2;
+        tmp_xmm @= xmm7;
     reads
         ctx; memTaint;
     modifies
-        abef; cdgh; tmp_xmm; 
+        abef; cdgh; tmp_xmm;
         mem; efl;
     requires
         validDstAddrs128(mem, ctx,  ctx_b,  2, memTaint, Secret);
@@ -607,7 +607,7 @@ procedure epilogue(
 
         // Framing
         modifies_buffer128(ctx_b, old(mem), mem);
-{   
+{
     // Initially:
     // abef == LSB: FEBA
     // cdgh == LSB: HGDC
@@ -633,8 +633,8 @@ procedure sha_update(
         ghost k_b:buffer128)
     {:quick}
     lets
-        tmp_reg @= rax; tbl @= rcx; num @= rdx; ctx @= rdi; inp @= rsi; 
-        Wi @= xmm0; abef @= xmm1; cdgh @= xmm2; 
+        tmp_reg @= rax; tbl @= rcx; num @= rdx; ctx @= rdi; inp @= rsi;
+        Wi @= xmm0; abef @= xmm1; cdgh @= xmm2;
         msg0 @= xmm3; msg1 @= xmm4; msg2 @= xmm5; msg3 @= xmm6;
         tmp_xmm @= xmm7; bswap @= xmm8; abef_save @= xmm9; cdgh_save @= xmm10;
     reads
@@ -679,8 +679,8 @@ procedure sha_update_bytes(
         ghost k_b:buffer128)
     {:quick}
     lets
-        tmp_reg @= rax; tbl @= rcx; num @= rdx; ctx @= rdi; inp @= rsi; 
-        Wi @= xmm0; abef @= xmm1; cdgh @= xmm2; 
+        tmp_reg @= rax; tbl @= rcx; num @= rdx; ctx @= rdi; inp @= rsi;
+        Wi @= xmm0; abef @= xmm1; cdgh @= xmm2;
         msg0 @= xmm3; msg1 @= xmm4; msg2 @= xmm5; msg3 @= xmm6;
         tmp_xmm @= xmm7; bswap @= xmm8; abef_save @= xmm9; cdgh_save @= xmm10;
     reads
@@ -739,21 +739,21 @@ procedure sha_update_bytes(
 #reset-options "--z3rlimit 40"
 procedure sha_update_bytes_stdcall(
         inline win:bool,
-        ghost ctx_b:buffer128, 
-        ghost in_b:buffer128, 
+        ghost ctx_b:buffer128,
+        ghost in_b:buffer128,
         ghost num_val:nat64,
         ghost k_b:buffer128)
     {:public}
     {:quick}
     {:exportSpecs}
-    lets 
+    lets
         ctx_ptr        := if win then rcx else rdi;
          in_ptr        := if win then rdx else rsi;
            num         := if win then r8  else rdx;
           k_ptr        := if win then r9  else rcx;
     requires
         rsp == init_rsp(stack);
-        
+
         sha_enabled;
         locs_disjoint(list(loc_buffer(ctx_b), loc_buffer(in_b))) \/ ctx_b == in_b;
         locs_disjoint(list(loc_buffer(ctx_b), loc_buffer(k_b))) \/ ctx_b == k_b;
@@ -892,7 +892,7 @@ procedure sha_update_bytes_stdcall(
         Pop(r14);
         Pop(r15);
     }
-    
+
     let hash_in  := old(le_bytes_to_hash(le_seq_quad32_to_bytes(buffer128_as_seq(mem, ctx_b))));
     let input_LE := seq_nat8_to_seq_uint8(le_seq_quad32_to_bytes(buffer128_as_seq(mem, in_b)));
     lemma_update_multi_opaque_vale_is_update_multi(hash_in, input_LE);

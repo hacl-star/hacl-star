@@ -296,7 +296,7 @@ val lemma_valid_taint128: (b:buffer128) ->
                          (i:nat{i < buffer_length b}) ->
                          (t:taint) -> Lemma
   (requires valid_taint_buf128 b mem memTaint t /\ buffer_readable mem b)
-  (ensures ( 
+  (ensures (
     let ptr = buffer_addr b mem + 16 `op_Multiply` i in
     forall i'. i' >= ptr /\ i' < ptr + 16 ==> Map.sel memTaint i' == t))
 

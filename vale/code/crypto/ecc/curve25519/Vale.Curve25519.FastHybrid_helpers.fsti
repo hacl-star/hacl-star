@@ -10,11 +10,11 @@ open FStar.Calc
 
 let int_canon = fun _ -> canon_semiring int_cr //; dump "Final"
 
-unfold let pow2_63:nat = 0x8000000000000000 
+unfold let pow2_63:nat = 0x8000000000000000
 
 let _ = assert_norm (pow2_63 == pow2 63)
 
-let lemma_mul_pow256_add (x y:nat) : 
+let lemma_mul_pow256_add (x y:nat) :
   Lemma ((x + y * pow2_256) % prime == (x + y * 38) % prime)
   =
   assert_norm (pow2_256 % prime == 38);
@@ -27,12 +27,12 @@ val lemma_carry_prime (a0 a1 a2 a3 a0' a1' a2' a3' carry_in:nat64) (carry:bit) :
   (ensures a0' + carry * 38 < pow2_64 /\
            (pow2_four (a0' + carry * 38) a1' a2' a3') % prime == (pow2_four a0 a1 a2 a3 + carry_in * pow2_256) % prime)
 
-val lemma_fast_mul1 (a:nat) 
-               (b a0 a1 a2 a3 
-                ba0_hi ba0_lo 
-                ba1_hi ba1_lo 
-                ba2_hi ba2_lo 
-                ba3_hi ba3_lo 
+val lemma_fast_mul1 (a:nat)
+               (b a0 a1 a2 a3
+                ba0_hi ba0_lo
+                ba1_hi ba1_lo
+                ba2_hi ba2_lo
+                ba3_hi ba3_lo
                 s1 s2 s3 s4:nat64) : Lemma
   (requires a = pow2_four a0 a1 a2 a3 /\
 

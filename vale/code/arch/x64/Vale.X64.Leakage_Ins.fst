@@ -620,7 +620,7 @@ let check_if_dealloc_consumes_fixed_time (ins:S.ins) (ts:analysis_taints) : Pure
   (ensures ins_consumes_fixed_time ins ts)
   =
   (true, ts)
-  
+
 #reset-options "--initial_ifuel 3 --max_ifuel 3 --initial_fuel 4 --max_fuel 4 --z3rlimit 80"
 
 let check_if_push_consumes_fixed_time (ins:S.ins) (ts:analysis_taints) : Pure (bool & analysis_taints)
@@ -634,7 +634,7 @@ let check_if_push_consumes_fixed_time (ins:S.ins) (ts:analysis_taints) : Pure (b
 let check_if_pop_consumes_fixed_time (ins:S.ins) (ts:analysis_taints) : Pure (bool & analysis_taints)
   (requires BC.Pop? ins)
   (ensures ins_consumes_fixed_time ins ts)
-  = 
+  =
   let BC.Pop dst t_stk = ins in
   let allowed = operand_taint_allowed dst t_stk in
   (Public? (ts.regTaint rRsp) && operand_does_not_use_secrets dst ts && allowed, set_taint dst ts t_stk)
@@ -732,7 +732,7 @@ let lemma_dealloc_leakage_free (ts:analysis_taints) (ins:S.ins) : Lemma
       let aux (x:int) : Lemma
         (requires publicStackValueIsSame stack1 stack2 s1.S.ms_stackTaint s2.S.ms_stackTaint x)
         (ensures publicStackValueIsSame stack1' stack2' s1'.S.ms_stackTaint s2'.S.ms_stackTaint x)
-        = 
+        =
         Classical.forall_intro (fun s -> Vale.Lib.Set.lemma_sel_restrict s stack1 x);
         Classical.forall_intro (fun s -> Vale.Lib.Set.lemma_sel_restrict s stack2 x)
       in Classical.forall_intro (Classical.move_requires aux)
@@ -810,7 +810,7 @@ let lemma_pop_leakage_free (ts:analysis_taints) (ins:S.ins) : Lemma
         | OMem (_, _) -> ()
         | OStack (_, _) -> ()
       ) else (
-        Vale.Def.Opaque_s.reveal_opaque S.get_heap_val64_def;      
+        Vale.Def.Opaque_s.reveal_opaque S.get_heap_val64_def;
         assert (v1 == v2);
         match dst with
         | OReg _ -> ()
@@ -818,7 +818,7 @@ let lemma_pop_leakage_free (ts:analysis_taints) (ins:S.ins) : Lemma
         | OStack (_, _) -> ()
       );
       Classical.forall_intro_3 (fun s x (stack1:S.heap) -> Vale.Lib.Set.lemma_sel_restrict s stack1 x);
-      Classical.forall_intro_3 (fun s x (stack2:S.heap) -> Vale.Lib.Set.lemma_sel_restrict s stack2 x)      
+      Classical.forall_intro_3 (fun s x (stack2:S.heap) -> Vale.Lib.Set.lemma_sel_restrict s stack2 x)
       in
     ()
   )

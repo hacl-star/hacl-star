@@ -38,8 +38,8 @@ let vale_save_reg (r:MS.reg) (s0 s1:V.va_state) =
 let vale_save_xmm (r:MS.xmm) (s0 s1:V.va_state) =
   VS.eval_xmm r s0 == VS.eval_xmm r s1
 
-let vale_calling_conventions 
-  (s0 s1:V.va_state) 
+let vale_calling_conventions
+  (s0 s1:V.va_state)
   (regs_modified:MS.reg -> bool)
   (xmms_modified:MS.xmm -> bool) =
   let open MS in
@@ -88,7 +88,7 @@ let disjoint_or_eq_1 (a:arg) (b:arg) =
     | (| TD_Buffer srcx tx {strict_disjointness=true}, xb |), (| TD_Buffer srcy ty _, yb |)
     | (| TD_Buffer srcx tx _, xb |), (| TD_Buffer srcy ty {strict_disjointness=true}, yb |) ->
       ME.loc_disjoint (ME.loc_buffer (as_vale_buffer #srcx #tx xb)) (ME.loc_buffer (as_vale_buffer #srcy #ty yb))
-    | (| TD_ImmBuffer srcx tx {strict_disjointness=true}, xb |), (| TD_ImmBuffer srcy ty _, yb |) 
+    | (| TD_ImmBuffer srcx tx {strict_disjointness=true}, xb |), (| TD_ImmBuffer srcy ty _, yb |)
     | (| TD_ImmBuffer srcx tx _, xb |), (| TD_ImmBuffer srcy ty {strict_disjointness=true}, yb |) ->
       ME.loc_disjoint (ME.loc_buffer (as_vale_immbuffer #srcx #tx xb)) (ME.loc_buffer (as_vale_immbuffer #srcy #ty yb))
     // An immutable buffer and a trivial buffer should not be equal
@@ -192,5 +192,5 @@ let vale_sig (#dom:list td)
 let vale_sig_stdcall #dom = vale_sig #dom IX64.regs_modified_stdcall IX64.xmms_modified_stdcall
 
 [@__reduce__]
-let vale_calling_conventions_stdcall (s0 s1:VS.state) = 
+let vale_calling_conventions_stdcall (s0 s1:VS.state) =
   vale_calling_conventions s0 s1 IX64.regs_modified_stdcall IX64.xmms_modified_stdcall

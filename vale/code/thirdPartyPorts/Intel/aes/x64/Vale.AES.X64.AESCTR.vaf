@@ -272,11 +272,11 @@ procedure aes_ctr_encrypt(
 
     reads key_ptr; mem; memTaint;
     modifies rk4; rk1; rk2; rk3; ctr1; ctr2; ctr3; ctr4;
-             efl; 
+             efl;
     ensures
         // AES reqs
         aes_reqs(alg, key, round_keys, keys_b, key_ptr, mem, memTaint);
-        
+
         ctr1 == aes_encrypt_le(alg, key, in1);
         ctr2 == aes_encrypt_le(alg, key, in2);
         ctr3 == aes_encrypt_le(alg, key, in3);
@@ -364,12 +364,12 @@ procedure aes_ctr_ghash(
     lets
         rk1 @= xmm3; rk2 @= xmm4; rk3 @= xmm5; rk4 @= xmm6;        // Round keys
         ctr1 @= xmm2; ctr2 @= xmm12; ctr3 @= xmm13; ctr4 @= xmm14; // Counters being fed to AES
-        mask @= xmm8; hash @= xmm1; h @= xmm11; 
+        mask @= xmm8; hash @= xmm1; h @= xmm11;
     requires
         pclmulqdq_enabled && avx_enabled;
         0 <= count < old_num_quad_blocks;
         validDstAddrs128(mem, old_out_ptr,    out_b,   old_num_quad_blocks * 4, memTaint, Secret);
-        
+
         // XMM constants are correct
         mask == Mkfour(0x0C0D0E0F, 0x08090A0B, 0x04050607, 0x00010203);
 
@@ -382,7 +382,7 @@ procedure aes_ctr_ghash(
         ctr4 == index(buffer128_as_seq(mem, out_b), 4*count+3);
 
     reads mask; h; ctr2; ctr3; ctr4; mem; memTaint;
-    modifies hash; rk4; rk1; rk2; rk3; ctr1; r12; efl; 
+    modifies hash; rk4; rk1; rk2; rk3; ctr1; r12; efl;
     ensures
         hash == ghash_incremental(reverse_bytes_quad32(h), hash_init, slice_work_around(buffer128_as_seq(mem, out_b), 4*(count+1)));
 {
@@ -437,7 +437,7 @@ procedure aes_ctr_loop_body(
     requires
         // There's at least one block of four left to do
         0 < num_quad_blocks <= old_num_quad_blocks;
-        
+
         // We've already done count blocks
         count == old_num_quad_blocks - num_quad_blocks;
 
@@ -487,7 +487,7 @@ procedure aes_ctr_loop_body(
         plain_ptr == old(plain_ptr) + 64;
         out_ptr   == old(out_ptr)   + 64;
         num_quad_blocks == old(num_quad_blocks) - 1;
-        
+
         // AES reqs
         aes_reqs(alg, key, round_keys, keys_b, key_ptr, mem, memTaint);
 
@@ -600,7 +600,7 @@ procedure aes_counter_loop(
         rk1 @= xmm3; rk2 @= xmm4; rk3 @= xmm5; rk4 @= xmm6;        // Round keys
         ctr1 @= xmm2; ctr2 @= xmm12; ctr3 @= xmm13; ctr4 @= xmm14; // Counters being fed to AES
         mask @= xmm8; hash @= xmm1; h @= xmm11;
-    
+
     reads mask; key_ptr; memTaint; h;
     modifies
         mask64; four; iv; const2_1; const4_3; rk4; rk1; rk2; rk3; ctr1; ctr2; ctr3; ctr4;
@@ -634,7 +634,7 @@ procedure aes_counter_loop(
 
         plain_ptr == old(plain_ptr) + 64 * old(num_quad_blocks);
         out_ptr   == old(out_ptr)   + 64 * old(num_quad_blocks);
-        
+
         mask == Mkfour(0x0C0D0E0F, 0x08090A0B, 0x04050607, 0x00010203);
 
         // GCTR
@@ -642,7 +642,7 @@ procedure aes_counter_loop(
         iv == old(inc32(iv, 4*num_quad_blocks));
 
         // GHash
-        length(slice_work_around(buffer128_as_seq(mem, out_b), 4*old(num_quad_blocks))) > 0 /\ 
+        length(slice_work_around(buffer128_as_seq(mem, out_b), 4*old(num_quad_blocks))) > 0 /\
         hash == ghash_incremental(reverse_bytes_quad32(h), old(hash), slice_work_around(buffer128_as_seq(mem, out_b), 4*old(num_quad_blocks)));
 {
     // To interface with our existing code, start by reversing the IV
@@ -661,7 +661,7 @@ procedure aes_counter_loop(
     Paddd(const2_1, rk1);       // const2_1 = LSB: r(iv.hi3) | r(iv.hi2) | r(iv.hi3) + 1 | r(iv.h2)
     assert const2_1 == Mkfour(reverse_bytes_nat32(iv.hi3), reverse_bytes_nat32(iv.hi2), add_wrap32(reverse_bytes_nat32(iv.hi3), 1), reverse_bytes_nat32(iv.hi2));
 
-    PinsrdImm(rk1, 3, 2, rax);  
+    PinsrdImm(rk1, 3, 2, rax);
     PinsrdImm(rk1, 2, 0, rax);  // rk1 = LSB: 2 | 0 | 3 | 0
     Paddd(const4_3, rk1);       // const4_3 = LSB: r(iv.hi3) + 2 | r(iv.hi2) | r(iv.hi3) + 3 | r(iv.h2)
 
@@ -687,14 +687,14 @@ procedure aes_counter_loop(
     ghost var count:nat := 0;
     let icb_BE:quad32 := reverse_bytes_quad32(iv);
     let old_iv:quad32 := iv;
-    
-    while (num_quad_blocks > 0) 
-        invariant 
+
+    while (num_quad_blocks > 0)
+        invariant
             0 < old(num_quad_blocks) && 4*old(num_quad_blocks) < pow2_32 - 4;
             0 <= num_quad_blocks <= old(num_quad_blocks);
             count == old(num_quad_blocks) - num_quad_blocks;
             0 <= count <= pow2_32 - 4;
-        
+
             // Framing
             modifies_buffer128(out_b, old(mem), mem);
             buffer128_as_seq(mem, plain_b) == old(buffer128_as_seq(mem, plain_b));  // REVIEW: Shouldn't this follow from above + disjoint?
@@ -716,8 +716,8 @@ procedure aes_counter_loop(
             four == Mkfour(4, 0, 4, 0);
 
             // Counters are correct
-            num_quad_blocks > 0 ==> 4*count < pow2_32 - 4;  
-            num_quad_blocks <= 0 ==> 4*count < pow2_32;  
+            num_quad_blocks > 0 ==> 4*count < pow2_32 - 4;
+            num_quad_blocks <= 0 ==> 4*count < pow2_32;
             const2_1 == Mkfour(old_iv.hi2, reverse_bytes_nat32(add_wrap32(icb_BE.lo0, add_wrap32(#nat32(4 * count), 1))), old_iv.hi2, reverse_bytes_nat32(add_wrap32(icb_BE.lo0, add_wrap32(#nat32(4 * count), 0))));
             const4_3 == Mkfour(old_iv.hi2, reverse_bytes_nat32(add_wrap32(icb_BE.lo0, add_wrap32(#nat32(4 * count), 3))), old_iv.hi2, reverse_bytes_nat32(add_wrap32(icb_BE.lo0, add_wrap32(#nat32(4 * count), 2))));
 

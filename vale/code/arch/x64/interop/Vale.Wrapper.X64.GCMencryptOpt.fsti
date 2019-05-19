@@ -28,13 +28,13 @@ let disjoint_or_eq (b1 b2:uint8_p) = B.disjoint b1 b2 \/ b1 == b2
 
 let length_aux (b:uint8_p) : Lemma
   (requires B.length b = 176)
-  (ensures DV.length (get_downview b) % 16 = 0) = 
+  (ensures DV.length (get_downview b) % 16 = 0) =
     let db = get_downview b in
     DV.length_eq db
 
 let length_aux2 (b:uint8_p) : Lemma
   (requires B.length b = 240)
-  (ensures DV.length (get_downview b) % 16 = 0) = 
+  (ensures DV.length (get_downview b) % 16 = 0) =
     let db = get_downview b in
     DV.length_eq db
 
@@ -82,11 +82,11 @@ let encrypt_opt_stdcall_st (a: algorithm { a = AES_128 \/ a = AES_256 }) =
 
       B.disjoint out_b keys_b /\ B.disjoint out_b hkeys_b /\
       B.disjoint out_b auth_b /\ disjoint_or_eq out_b plain_b /\
-      
+
       B.disjoint plain_b keys_b /\ B.disjoint plain_b hkeys_b /\
       B.disjoint plain_b auth_b /\
 
-      disjoint_or_eq keys_b hkeys_b /\ 
+      disjoint_or_eq keys_b hkeys_b /\
       B.disjoint keys_b auth_b /\ B.disjoint hkeys_b auth_b /\
 
       B.live h0 auth_b /\ B.live h0 keys_b /\
@@ -108,7 +108,7 @@ let encrypt_opt_stdcall_st (a: algorithm { a = AES_128 \/ a = AES_256 }) =
         (seq_nat8_to_seq_uint8 (le_seq_quad32_to_bytes (key_to_round_keys_LE a (Ghost.reveal key))))) /\
 
       hkeys_reqs_pub (le_bytes_to_seq_quad32 (seq_uint8_to_seq_nat8 (B.as_seq h0 hkeys_b)))
-	(reverse_bytes_quad32 (aes_encrypt_LE a (Ghost.reveal key) (Mkfour 0 0 0 0)))
+        (reverse_bytes_quad32 (aes_encrypt_LE a (Ghost.reveal key) (Mkfour 0 0 0 0)))
     )
     (ensures fun h0 _ h1 ->
       B.modifies (B.loc_union (B.loc_buffer tag_b)

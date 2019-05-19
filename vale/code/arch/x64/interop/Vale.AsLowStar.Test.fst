@@ -93,8 +93,8 @@ let vm_lemma'
        VSig.vale_calling_conventions_stdcall va_s0 va_s1 /\
        vm_post code dst src va_s0 va_s1 f /\
        ME.buffer_readable VS.(va_s1.mem) (as_vale_immbuffer src) /\
-       ME.buffer_readable VS.(va_s1.mem) (as_vale_buffer dst) /\ 
-       ME.buffer_writeable (as_vale_buffer dst) /\ 
+       ME.buffer_readable VS.(va_s1.mem) (as_vale_buffer dst) /\
+       ME.buffer_writeable (as_vale_buffer dst) /\
        ME.modifies (ME.loc_union (ME.loc_buffer (as_vale_buffer dst))
                                  ME.loc_none) va_s0.VS.mem va_s1.VS.mem
  ))
@@ -129,7 +129,7 @@ let lowstar_memcpy : lowstar_memcpy_t  =
 
 let lowstar_memcpy_normal_t //: normal lowstar_memcpy_t
   = as_normal_t #lowstar_memcpy_t lowstar_memcpy
-  
+
 module B = LowStar.Buffer
 module IB = LowStar.ImmutableBuffer
 module MB = LowStar.Monotonic.Buffer
@@ -145,7 +145,7 @@ module T = FStar.Tactics
 module LBV = LowStar.BufferView.Up
 module DV = LowStar.BufferView.Down
 
-let memcpy_test 
+let memcpy_test
   (dst:B.buffer UInt8.t{B.length dst % 8 == 0})
   (src:IB.ibuffer UInt8.t{B.length src % 8 == 0})
   : Stack UInt64.t
@@ -169,7 +169,7 @@ let memcpy_test
     //         DV.length_eq (get_downview src);
     //         Seq.equal (LBV.as_seq h1 (LBV.mk_buffer (get_downview dst) v))
     //                   (LBV.as_seq h1 (LBV.mk_buffer (get_downview src) v)));
-    // lbv_as_seq_eq dst src Vale.Interop.Views.up_view64 h1; //And a lemma to rephrase the Vale postcondition 
+    // lbv_as_seq_eq dst src Vale.Interop.Views.up_view64 h1; //And a lemma to rephrase the Vale postcondition
     x                                      //with equalities of buffer views
                                            //back to equalities of buffers
 
@@ -197,8 +197,8 @@ let aesni_post : VSig.vale_post aesni_dom =
       VC.va_ens_check_aesni_stdcall c va_s0 IA.win va_s1 f
 
 [@__reduce__]
-let with_len (l:list 'a) 
-  : Pure (list 'a) 
+let with_len (l:list 'a)
+  : Pure (list 'a)
     (requires True)
     (ensures fun m -> m==l /\ List.length m == normalize_term (List.length l))
   = l
@@ -257,10 +257,10 @@ let aesni_test ()
     (requires fun h0 -> True)
     (ensures fun h0 ret_val h1 -> (UInt64.v ret_val) =!= 0 ==> aesni_enabled /\ pclmulqdq_enabled)
 //  by (T.dump "A") (* in case you want to look at the VC *)
-  = 
+  =
   let x, _ = lowstar_aesni_normal_t () in //This is a call to the interop wrapper
   x
-   
+
 
 module TA = Vale.Test.X64.Args
 
@@ -291,7 +291,7 @@ let ta_pre : VSig.vale_pre ta_dom =
       (as_vale_immbuffer arg4)
       (as_vale_immbuffer arg5)
       (as_vale_immbuffer arg6)
-      (as_vale_immbuffer arg7)      
+      (as_vale_immbuffer arg7)
 
 [@__reduce__]
 let ta_post : VSig.vale_post ta_dom =
@@ -303,7 +303,7 @@ let ta_post : VSig.vale_post ta_dom =
     (arg4:ib64)
     (arg5:ib64)
     (arg6:ib64)
-    (arg7:ib64)  
+    (arg7:ib64)
     (va_s0:V.va_state)
     (va_s1:V.va_state)
     (f:V.va_fuel) ->
@@ -315,9 +315,9 @@ let ta_post : VSig.vale_post ta_dom =
       (as_vale_immbuffer arg4)
       (as_vale_immbuffer arg5)
       (as_vale_immbuffer arg6)
-      (as_vale_immbuffer arg7)      
+      (as_vale_immbuffer arg7)
       va_s1 f
-    
+
 #set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit_factor 4"
 (* The vale lemma doesn't quite suffice to prove the modifies clause
    expected of the interop layer *)
@@ -332,7 +332,7 @@ let ta_lemma'
     (arg4:ib64)
     (arg5:ib64)
     (arg6:ib64)
-    (arg7:ib64)     
+    (arg7:ib64)
     (va_s0:V.va_state)
  : Ghost (V.va_state & V.va_fuel)
      (requires
@@ -348,9 +348,9 @@ let ta_lemma'
        ME.buffer_readable VS.(va_s1.mem) (as_vale_immbuffer arg4) /\
        ME.buffer_readable VS.(va_s1.mem) (as_vale_immbuffer arg5) /\
        ME.buffer_readable VS.(va_s1.mem) (as_vale_immbuffer arg6) /\
-       ME.buffer_readable VS.(va_s1.mem) (as_vale_immbuffer arg7) /\       
+       ME.buffer_readable VS.(va_s1.mem) (as_vale_immbuffer arg7) /\
        ME.modifies ME.loc_none va_s0.VS.mem va_s1.VS.mem))
- = 
+ =
  let va_s1, f = TA.va_lemma_test code va_s0 IA.win
       (as_vale_immbuffer arg0)
       (as_vale_immbuffer arg1)
@@ -390,4 +390,4 @@ let lowstar_ta : lowstar_ta_t  =
 
 let lowstar_ta_normal_t //: normal lowstar_ta_t
   = as_normal_t #lowstar_ta_t lowstar_ta
-  
+

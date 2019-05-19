@@ -7,11 +7,11 @@ module S = Vale.X64.Machine_Semantics_s
 val stack_to_s: (s:stack) -> Tot S.stack
 val stack_from_s: (s:S.stack) -> Tot stack
 
-val lemma_stack_from_to (s:stack) : Lemma 
+val lemma_stack_from_to (s:stack) : Lemma
   (stack_from_s (stack_to_s s) == s)
   [SMTPat (stack_from_s (stack_to_s s))]
 
-val lemma_stack_to_from (s:S.stack) : Lemma 
+val lemma_stack_to_from (s:S.stack) : Lemma
   (stack_to_s (stack_from_s s) == s)
 
 val equiv_valid_src_stack64: (ptr:int) -> (h:stack) -> Lemma

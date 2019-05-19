@@ -83,9 +83,9 @@ let loc_union = M.loc_union
 let loc_buffer #t b = M.loc_buffer b.bsrc
 let loc_disjoint = M.loc_disjoint
 let loc_includes = M.loc_includes
-let modifies s h h' = 
-  M.modifies s h.hs h'.hs /\ 
-  h.ptrs == h'.ptrs /\ 
+let modifies s h h' =
+  M.modifies s h.hs h'.hs /\
+  h.ptrs == h'.ptrs /\
   h.addrs == h'.addrs /\
   HST.equal_domains h.hs h'.hs
 
@@ -300,7 +300,7 @@ let buffer_write #t b i v h =
  end
 
 val addr_in_ptr: (#t:base_typ) -> (addr:int) -> (ptr:buffer t) -> (h:mem) ->
-  GTot (b:bool{ not b <==> 
+  GTot (b:bool{ not b <==>
     (forall i. 0 <= i /\ i < buffer_length ptr ==>
       addr <> (buffer_addr ptr h) + (view_n t) * i)})
 
@@ -353,7 +353,7 @@ let rec find_valid_buffer_aux (t:base_typ) (addr:int) (ps:list b8) (h:mem{sub_li
   = match ps with
     | [] -> None
     | a::q -> if valid_buffer t addr a h then Some a else find_valid_buffer_aux t addr q h
-    
+
 let find_valid_buffer (t:base_typ) (addr:int) (h:mem) = find_valid_buffer_aux t addr h.ptrs h
 
 let rec find_valid_buffer_aux_ps (t:base_typ) (addr:int) (ps:list b8) (h1:mem) (h2:mem{h1.ptrs == h2.ptrs /\ sub_list ps h1.ptrs})
@@ -393,7 +393,7 @@ let rec find_writeable_buffer_aux (t:base_typ) (addr:int) (ps:list b8) (h:mem{su
   = match ps with
     | [] -> None
     | a::q -> if writeable_buffer t addr a h then Some a else find_writeable_buffer_aux t addr q h
-    
+
 let find_writeable_buffer (t:base_typ) (addr:int) (h:mem) = find_writeable_buffer_aux t addr h.ptrs h
 
 let load_mem (t:base_typ) addr (h:mem)
@@ -408,7 +408,7 @@ let load_mem64 ptr h =
   if not (valid_mem64 ptr h) then 0
   else load_mem (TUInt64) ptr h
 
-let length_t_eq (t:base_typ) (b:buffer t) : 
+let length_t_eq (t:base_typ) (b:buffer t) :
   Lemma (DV.length (get_downview b.bsrc) == buffer_length b * (view_n t)) =
   let db = get_downview b.bsrc in
   let ub = UV.mk_buffer db (uint_view t) in
@@ -486,7 +486,7 @@ let lemma_store_mem (t:base_typ) (b:buffer t) (i:nat) (v:base_typ_as_vale_type t
     UV.length_eq (UV.mk_buffer da view);
     UV.length_eq (UV.mk_buffer db view);
     assert (IB.disjoint_or_eq_b8 a b);
-    assert (a == b)  
+    assert (a == b)
 
 let lemma_load_mem64 b i h =
   let addr = buffer_addr b h + 8 * i in
@@ -518,7 +518,7 @@ let lemma_load_mem128 b i h =
     UV.length_eq (UV.mk_buffer db view);
     assert (IB.disjoint_or_eq_b8 a b);
     assert (a == b)
-    
+
 let lemma_store_mem128 b i v h = lemma_store_mem TUInt128 b i v h
 
 open Vale.X64.Machine_s
@@ -578,21 +578,21 @@ val modifies_valid_taint (ty:base_typ) (b:buffer ty) (p:loc) (h h':mem) (memTain
   )
   (ensures valid_taint_buf b h memTaint t <==> valid_taint_buf b h' memTaint t)
 
-let modifies_valid_taint ty b p h h' memTaint t = 
+let modifies_valid_taint ty b p h h' memTaint t =
   let dv = get_downview b.bsrc in
   let imp_left () : Lemma
     (requires valid_taint_buf b h memTaint t)
-    (ensures valid_taint_buf b h' memTaint t) = 
-    let aux (i:nat{i < DV.length dv}) : Lemma (memTaint.[h'.addrs b + i] = t) = 
+    (ensures valid_taint_buf b h' memTaint t) =
+    let aux (i:nat{i < DV.length dv}) : Lemma (memTaint.[h'.addrs b + i] = t) =
       apply_taint_buf b h memTaint t i
     in Classical.forall_intro aux
   in let imp_right () : Lemma
     (requires valid_taint_buf b h' memTaint t)
     (ensures valid_taint_buf b h memTaint t) =
-    let aux (i:nat{i < DV.length dv}) : Lemma (memTaint.[h.addrs b + i] = t) = 
+    let aux (i:nat{i < DV.length dv}) : Lemma (memTaint.[h.addrs b + i] = t) =
       apply_taint_buf b h' memTaint t i
-    in Classical.forall_intro aux    
-  in 
+    in Classical.forall_intro aux
+  in
   (Classical.move_requires imp_left());
   (Classical.move_requires imp_right())
 
@@ -603,17 +603,17 @@ let valid_taint_bufs (mem:mem) (memTaint:memtaint) (ps:list b8) (ts:b8 -> GTot t
   forall b.{:pattern List.memP b ps} List.memP b ps ==> valid_taint_buf b mem memTaint (ts b)
 
 #set-options "--initial_fuel 1 --max_fuel 1 --initial_ifuel 1 --max_ifuel 1"
-let rec write_taint_lemma 
-  (i:nat) 
-  (mem:IB.mem) 
-  (ts:b8 -> GTot taint) 
+let rec write_taint_lemma
+  (i:nat)
+  (mem:IB.mem)
+  (ts:b8 -> GTot taint)
   (b:b8{i <= DV.length (get_downview b.bsrc)})
   (accu:memtaint{forall j. 0 <= j /\ j < i ==> accu.[mem.addrs b+j] = ts b})
    : Lemma
        (ensures (
          let m = IB.write_taint i mem ts b accu in
          let addr = mem.addrs b in
-         (forall j. 0 <= j /\ j < DV.length (get_downview b.bsrc) ==> 
+         (forall j. 0 <= j /\ j < DV.length (get_downview b.bsrc) ==>
            m.[addr+j] = ts b) /\
          (forall j. {:pattern m.[j]} j < addr \/ j >= addr + DV.length (get_downview b.bsrc) ==>
            m.[j] == accu.[j])))

@@ -25,9 +25,9 @@ val lemma_partial_sum (
             s4 == s4' /\
             s5 == s5' /\
             c == c5))
-  (ensures pow2_six a0 (a1 + b0) (a2 + b1) (a3 + b2) (a4 + b3) b4 =          
+  (ensures pow2_six a0 (a1 + b0) (a2 + b1) (a3 + b2) (a4 + b3) b4 =
            pow2_seven a0 s1 s2 s3 s4 s5 c)
- 
+
 val lemma_partial_sum_a2b (
       a0 a1 a2 a3 a4 a5
       b0 b1 b2 b3 b4
@@ -43,7 +43,7 @@ val lemma_partial_sum_a2b (
             s4 == s4' /\
             s5 == s5' /\
             0 == c5))
-  (ensures pow2_seven a0 a1 (a2 + b0) (a3 + b1) (a4 + b2) (a5 + b3) b4 =          
+  (ensures pow2_seven a0 a1 (a2 + b0) (a3 + b1) (a4 + b2) (a5 + b3) b4 =
            pow2_seven a0 a1 s1 s2 s3 s4 s5)
 
 val lemma_partial_sum_a3b (
@@ -61,7 +61,7 @@ val lemma_partial_sum_a3b (
             s4 == s4' /\
             s5 == s5' /\
             0 == c5))
-  (ensures pow2_eight a0 a1 a2 (a3 + b0) (a4 + b1) (a5 + b2) (a6 + b3) b4 =          
+  (ensures pow2_eight a0 a1 a2 (a3 + b0) (a4 + b1) (a5 + b2) (a6 + b3) b4 =
            pow2_eight a0 a1 a2 s1 s2 s3 s4 s5)
 
 val lemma_sum_a1b

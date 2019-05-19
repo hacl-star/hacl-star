@@ -33,7 +33,7 @@ let lemma_dv_equal
     Seq.lemma_eq_intro s0 s1
 
 let lemma_uv_equal
-  (#src:Type) (#dst:Type) 
+  (#src:Type) (#dst:Type)
   (view:UV.view src dst) (b:DV.buffer src) (h0 h1:HS.mem)
   :Lemma (requires (DV.length b % UV.View?.n view == 0 /\ DV.as_seq h0 b == DV.as_seq h1 b))
          (ensures  (let bv = UV.mk_buffer b view in UV.as_seq h0 bv == UV.as_seq h1 bv))
@@ -49,8 +49,8 @@ let lemma_uv_equal
     in Classical.forall_intro aux;
     Seq.lemma_eq_intro s0 s1
 
-// let sel_underlying_buffer_unmodified 
-//   (#src:Type) (#rel #rrel:MB.srel src) (#dst:Type) 
+// let sel_underlying_buffer_unmodified
+//   (#src:Type) (#rel #rrel:MB.srel src) (#dst:Type)
 //   (view:BV.view src dst) (b:MB.mbuffer src rel rrel) (h0 h1:HS.mem) (i:nat) : Lemma
 //   (requires (MB.length b % BV.View?.n view == 0 /\
 //              MB.as_seq h0 b == MB.as_seq h1 b /\

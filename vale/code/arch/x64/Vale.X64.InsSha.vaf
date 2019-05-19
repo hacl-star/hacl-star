@@ -63,7 +63,7 @@ procedure SHA256_rnds2(inout dst:xmm, in src:xmm, ghost t:counter, ghost block:b
     {:instruction mk_ins(make_instr(I.ins_SHA256_rnds2, OReg128(dst), OReg128(src)))}
     {:typecheck false}
     reads xmm0;
-    requires 
+    requires
         sha_enabled;
         t + 1 < size_k_w_256;
         xmm0.lo0 == add_wrap(word_to_nat32(index(k, t)),   ws_opaque(block, t));
@@ -80,7 +80,7 @@ procedure SHA256_msg1(inout dst:xmm, in src:xmm, ghost t:counter, ghost block:bl
     {:quick exportOnly}
     {:instruction mk_ins(make_instr(I.ins_SHA256_msg1, OReg128(dst), OReg128(src)))}
     {:typecheck false}
-    requires 
+    requires
         sha_enabled;
         16 <= t < size_k_w_256;
         dst == ws_quad32(t-16, block);
@@ -96,7 +96,7 @@ procedure SHA256_msg2(inout dst:xmm, in src:xmm, ghost t:counter, ghost block:bl
     {:quick exportOnly}
     {:instruction mk_ins(make_instr(I.ins_SHA256_msg2, OReg128(dst), OReg128(src)))}
     {:typecheck false}
-    requires 
+    requires
         sha_enabled;
         16 <= t < size_k_w_256 - 3;
         let step1 := ws_partial(t, block) in

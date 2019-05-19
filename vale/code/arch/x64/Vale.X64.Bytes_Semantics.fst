@@ -32,7 +32,7 @@ let same_domain_update ptr v mem =
 let same_mem_get_heap_val32 ptr mem1 mem2 =
   reveal_opaque get_heap_val32_def;
   four_to_nat_8_injective ()
-  
+
 let frame_update_heap32 ptr v mem =
   reveal_opaque get_heap_val32_def;
   reveal_opaque update_heap32_def
@@ -62,7 +62,7 @@ let correct_update_get32 (ptr:int) (v:nat32) (mem:heap) : Lemma
   (get_heap_val32 ptr (update_heap32 ptr v mem) == v) =
   reveal_opaque get_heap_val32_def;
   reveal_opaque update_heap32_def
-  
+
 #reset-options "--z3rlimit 30 --using_facts_from 'Prims Vale.Def.Opaque_s Vale.X64.Machine_Semantics_s Vale.Def.Words_s Vale.Def.Types_s'"
 
 let correct_update_get128 ptr v mem =
@@ -100,7 +100,7 @@ let same_mem_get_heap_val128 ptr mem1 mem2 =
   same_mem_get_heap_val32 ptr mem1 mem2;
   same_mem_get_heap_val32 (ptr+4) mem1 mem2;
   same_mem_get_heap_val32 (ptr+8) mem1 mem2;
-  same_mem_get_heap_val32 (ptr+12) mem1 mem2  
+  same_mem_get_heap_val32 (ptr+12) mem1 mem2
 
 (* All the following lemmas prove that the domain of the bytes memory map remains invariant
 through execution *)
@@ -172,7 +172,7 @@ let update_operand_same_unspecified (dst:operand) (ins:ins) (v:nat64) (s:machine
   update_operand_flags_same_unspecified dst v s s
 
 let update_heap32_same_unspecified (ptr:int) (v:nat32) (h:heap) : Lemma
-  (requires 
+  (requires
     valid_addr ptr h /\ valid_addr (ptr+1) h /\
     valid_addr (ptr+2) h /\ valid_addr (ptr+3) h)
   (ensures (
@@ -202,9 +202,9 @@ let update_operand128_flags_same_unspecified (o:operand128) (v:quad32) (s_orig s
         let mem = update_heap32 ptr v.lo0 s.ms_mem in
         update_heap32_same_unspecified (ptr+4) v.lo1 mem;
         let mem = update_heap32 (ptr+4) v.lo1 mem in
-        update_heap32_same_unspecified (ptr+8) v.hi2 mem;  
+        update_heap32_same_unspecified (ptr+8) v.hi2 mem;
         let mem = update_heap32 (ptr+8) v.hi2 mem in
-        update_heap32_same_unspecified (ptr+12) v.hi3 mem;  
+        update_heap32_same_unspecified (ptr+12) v.hi3 mem;
         let mem = update_heap32 (ptr+12) v.hi3 mem in
         ()
   | _ -> ()
@@ -253,7 +253,7 @@ let eval_ins_bs_domains (ins:ins) (s0:machine_state) : Lemma
 #set-options "--z3rlimit 30"
 
 let eval_ins_domains i s0 =
-  let s = run (check (taint_match_ins i s0.ms_memTaint s0.ms_stackTaint)) s0 in  
+  let s = run (check (taint_match_ins i s0.ms_memTaint s0.ms_stackTaint)) s0 in
   eval_ins_bs_domains i s
 
 #set-options "--z3rlimit 30 --max_ifuel 2"

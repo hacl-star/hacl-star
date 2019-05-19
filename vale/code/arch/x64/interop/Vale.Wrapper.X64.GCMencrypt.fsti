@@ -19,13 +19,13 @@ let uint64 = UInt64.t
 
 let length_aux (b:uint8_p) : Lemma
   (requires B.length b = 176)
-  (ensures DV.length (get_downview b) % 16 = 0) = 
+  (ensures DV.length (get_downview b) % 16 = 0) =
     let db = get_downview b in
     DV.length_eq db
 
 let length_aux2 (b:uint8_p) : Lemma
   (requires B.length b = 240)
-  (ensures DV.length (get_downview b) % 16 = 0) = 
+  (ensures DV.length (get_downview b) % 16 = 0) =
     let db = get_downview b in
     DV.length_eq db
 
@@ -49,15 +49,15 @@ val gcm128_encrypt:
       (B.disjoint plain_b iv_b \/ plain_b == iv_b) /\
       (B.disjoint plain_b tag_b \/ plain_b == tag_b) /\
       (B.disjoint plain_b keys_b \/ plain_b == keys_b) /\
-      (B.disjoint auth_b iv_b \/ auth_b == iv_b) /\      
+      (B.disjoint auth_b iv_b \/ auth_b == iv_b) /\
       (B.disjoint auth_b tag_b \/ auth_b == tag_b) /\
       (B.disjoint auth_b keys_b \/ auth_b == keys_b) /\
-      (B.disjoint iv_b out_b \/ iv_b == out_b) /\      
+      (B.disjoint iv_b out_b \/ iv_b == out_b) /\
       (B.disjoint iv_b tag_b \/ iv_b == tag_b) /\
-      (B.disjoint iv_b keys_b \/ iv_b == keys_b) /\     
-      (B.disjoint tag_b keys_b \/ tag_b == keys_b) /\     
-      
-      B.live h0 keys_b /\ B.live h0 plain_b /\ B.live h0 iv_b /\ 
+      (B.disjoint iv_b keys_b \/ iv_b == keys_b) /\
+      (B.disjoint tag_b keys_b \/ tag_b == keys_b) /\
+
+      B.live h0 keys_b /\ B.live h0 plain_b /\ B.live h0 iv_b /\
       B.live h0 out_b /\ B.live h0 tag_b /\ B.live h0 auth_b /\
 
       UInt64.v plain_num % 16 = 0 /\
@@ -72,7 +72,7 @@ val gcm128_encrypt:
 
       4096 * (UInt64.v plain_num) < pow2_32 /\
       4096 * (UInt64.v auth_num) < pow2_32 /\
-      
+
       aesni_enabled /\ pclmulqdq_enabled /\ avx_enabled /\
       is_aes_key_LE AES_128 (Ghost.reveal key) /\
       (let db = get_downview keys_b in
@@ -111,15 +111,15 @@ val gcm256_encrypt:
       (B.disjoint plain_b iv_b \/ plain_b == iv_b) /\
       (B.disjoint plain_b tag_b \/ plain_b == tag_b) /\
       (B.disjoint plain_b keys_b \/ plain_b == keys_b) /\
-      (B.disjoint auth_b iv_b \/ auth_b == iv_b) /\      
+      (B.disjoint auth_b iv_b \/ auth_b == iv_b) /\
       (B.disjoint auth_b tag_b \/ auth_b == tag_b) /\
       (B.disjoint auth_b keys_b \/ auth_b == keys_b) /\
-      (B.disjoint iv_b out_b \/ iv_b == out_b) /\      
+      (B.disjoint iv_b out_b \/ iv_b == out_b) /\
       (B.disjoint iv_b tag_b \/ iv_b == tag_b) /\
-      (B.disjoint iv_b keys_b \/ iv_b == keys_b) /\     
-      (B.disjoint tag_b keys_b \/ tag_b == keys_b) /\     
-      
-      B.live h0 keys_b /\ B.live h0 plain_b /\ B.live h0 iv_b /\ 
+      (B.disjoint iv_b keys_b \/ iv_b == keys_b) /\
+      (B.disjoint tag_b keys_b \/ tag_b == keys_b) /\
+
+      B.live h0 keys_b /\ B.live h0 plain_b /\ B.live h0 iv_b /\
       B.live h0 out_b /\ B.live h0 tag_b /\ B.live h0 auth_b /\
 
       UInt64.v plain_num % 16 = 0 /\
@@ -134,7 +134,7 @@ val gcm256_encrypt:
 
       4096 * (UInt64.v plain_num) < pow2_32 /\
       4096 * (UInt64.v auth_num) < pow2_32 /\
-      
+
       aesni_enabled /\ pclmulqdq_enabled /\ avx_enabled /\
       is_aes_key_LE AES_256 (Ghost.reveal key) /\
       (let db = get_downview keys_b in

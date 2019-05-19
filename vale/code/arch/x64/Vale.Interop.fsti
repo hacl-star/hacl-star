@@ -25,7 +25,7 @@ val addrs_set_lemma (mem:mem) (x:int)
            valid_addr mem x <==>
            (exists (b:b8{List.memP b ptrs}).{:pattern (addrs b)} addrs b <= x /\ x < addrs b + DV.length (get_downview b.bsrc)))
           [SMTPat (Set.mem x (addrs_set mem))]
-  
+
 let addrs_set_mem (mem:mem) (a:b8) (i:int)
   : Lemma
     (requires (let ptrs = ptrs_of_mem mem in
@@ -33,13 +33,13 @@ let addrs_set_mem (mem:mem) (a:b8) (i:int)
                List.memP a ptrs /\ i >= addrs a /\ i < addrs a + DV.length (get_downview a.bsrc)))
     (ensures valid_addr mem i)
   = ()
-  
+
 (* Takes a Low* Hyperstack and a list of buffers and create a vale memory + keep track of the vale addresses *)
 val down_mem: down_mem_t
 
-val same_unspecified_down: 
-  (hs1: HS.mem) -> 
-  (hs2: HS.mem) -> 
+val same_unspecified_down:
+  (hs1: HS.mem) ->
+  (hs2: HS.mem) ->
   (ptrs:list b8{list_disjoint_or_eq ptrs /\ list_live hs1 ptrs /\ list_live hs2 ptrs}) ->
   Lemma (
     let mem1 = mem_of_hs_roots ptrs hs1 in
@@ -50,8 +50,8 @@ val same_unspecified_down:
     forall i. not (valid_addr mem1 i) ==>
          heap1.[i] == heap2.[i])
 
-let get_seq_heap (heap:heap) (addrs:addr_map) (b:b8) 
-  : GTot (Seq.lseq UInt8.t (DV.length (get_downview b.bsrc))) 
+let get_seq_heap (heap:heap) (addrs:addr_map) (b:b8)
+  : GTot (Seq.lseq UInt8.t (DV.length (get_downview b.bsrc)))
   = let length = DV.length (get_downview b.bsrc) in
     let contents (i:nat{i < length}) = UInt8.uint_to_t heap.[addrs b + i] in
     Seq.init length contents

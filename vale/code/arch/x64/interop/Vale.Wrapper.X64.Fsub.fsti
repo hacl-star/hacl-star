@@ -14,11 +14,11 @@ val fsub
   (f1:u256)
   (f2:u256)
   : Stack unit
-    (requires fun h -> 
+    (requires fun h ->
       adx_enabled /\ bmi2_enabled /\
       B.live h f1 /\ B.live h f2 /\ B.live h out /\
-      (B.disjoint out f1 \/ out == f1) /\ 
-      (B.disjoint out f2 \/ out == f2) /\ 
+      (B.disjoint out f1 \/ out == f1) /\
+      (B.disjoint out f2 \/ out == f2) /\
       (B.disjoint f1 f2 \/ f1 == f2))
     (ensures  fun h0 _ h1 ->
       B.modifies (B.loc_buffer out) h0 h1 /\

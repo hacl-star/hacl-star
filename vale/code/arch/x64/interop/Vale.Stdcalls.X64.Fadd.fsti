@@ -89,16 +89,16 @@ let add1_lemma'
        VSig.vale_calling_conventions_stdcall va_s0 va_s1 /\
        add1_post code out f1 f2 va_s0 va_s1 f /\
        ME.buffer_readable VS.(va_s1.mem) (as_vale_buffer f1) /\
-       ME.buffer_readable VS.(va_s1.mem) (as_vale_buffer out) /\ 
-       ME.buffer_writeable (as_vale_buffer out) /\ 
-       ME.buffer_writeable (as_vale_buffer f1) /\ 
+       ME.buffer_readable VS.(va_s1.mem) (as_vale_buffer out) /\
+       ME.buffer_writeable (as_vale_buffer out) /\
+       ME.buffer_writeable (as_vale_buffer f1) /\
        ME.modifies (ME.loc_union (ME.loc_buffer (as_vale_buffer out))
                                  ME.loc_none) va_s0.VS.mem va_s1.VS.mem
- )) = 
+ )) =
    let va_s1, f = FU.va_lemma_fast_add1_stdcall code va_s0 IA.win (as_vale_buffer out) (as_vale_buffer f1) (UInt64.v f2) in
-   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 out;   
-   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 f1;   
-   va_s1, f                                   
+   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 out;
+   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 f1;
+   (va_s1, f)
 
 (* Prove that add1_lemma' has the required type *)
 noextract
@@ -166,19 +166,19 @@ let fadd_lemma'
        VSig.vale_calling_conventions_stdcall va_s0 va_s1 /\
        fadd_post code out f1 f2 va_s0 va_s1 f /\
        ME.buffer_readable VS.(va_s1.mem) (as_vale_buffer out) /\
-       ME.buffer_readable VS.(va_s1.mem) (as_vale_buffer f1) /\ 
-       ME.buffer_readable VS.(va_s1.mem) (as_vale_buffer f2) /\ 
-       ME.buffer_writeable (as_vale_buffer out) /\ 
+       ME.buffer_readable VS.(va_s1.mem) (as_vale_buffer f1) /\
+       ME.buffer_readable VS.(va_s1.mem) (as_vale_buffer f2) /\
+       ME.buffer_writeable (as_vale_buffer out) /\
        ME.buffer_writeable (as_vale_buffer f1) /\
-       ME.buffer_writeable (as_vale_buffer f2) /\       
+       ME.buffer_writeable (as_vale_buffer f2) /\
        ME.modifies (ME.loc_union (ME.loc_buffer (as_vale_buffer out))
                                  ME.loc_none) va_s0.VS.mem va_s1.VS.mem
- )) = 
+ )) =
    let va_s1, f = FH.va_lemma_fadd_stdcall code va_s0 IA.win (as_vale_buffer out) (as_vale_buffer f1) (as_vale_buffer f2) in
-   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 out;   
-   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 f1;   
-   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 f2;   
-   va_s1, f                                   
+   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 out;
+   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 f1;
+   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 f2;
+   (va_s1, f)
 
 (* Prove that add1_lemma' has the required type *)
 noextract

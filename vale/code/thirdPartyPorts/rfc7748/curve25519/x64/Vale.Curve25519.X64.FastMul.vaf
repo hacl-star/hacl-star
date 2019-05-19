@@ -97,7 +97,7 @@ procedure fast_multiply_a0b(
     ensures
         let d0 := buffer64_read(dst_b, 0 + offset*2, mem);
         let d1 := buffer64_read(dst_b, 1 + offset*2, mem);
-        let a0b := d0 + pow2_64 * d1 + pow2_128 * r12 + pow2_192 * r14 + pow2_256 * rax; 
+        let a0b := d0 + pow2_64 * d1 + pow2_128 * r12 + pow2_192 * r14 + pow2_256 * rax;
         a0b == a0 * b;
 
         rax < pow2_64 - 1;
@@ -124,7 +124,7 @@ procedure fast_multiply_a0b(
     let d0 := buffer64_read(dst_b, 0 + offset*2, mem);
     let d1 := buffer64_read(dst_b, 1 + offset*2, mem);
     let overflow0 := overflow(efl);
-    ghost var carry := if overflow(efl) then 1 else 0;          
+    ghost var carry := if overflow(efl) then 1 else 0;
     let a0b0b1 := d0 + pow2_64 * d1 + pow2_128 * (r11 + carry);
 //    simple_helper(a0, b0, b1, d0, r9, a0b1_lo, r11, r10, overflow(efl));
 //    assert a0b0b1 == a0 * (b0 + pow2_64 * b1);   // PASSES in both modes using lemma above
@@ -133,31 +133,31 @@ procedure fast_multiply_a0b(
 //    assert_by_tactic(a0 * (b0 + pow2_64 * b1) == a0 * b0 + pow2_64 * (a0 * b1), int_canon);
 //    assert a0b0b1 == a0 * (b0 + pow2_64 * b1);
 
-    //assert_by_tactic(a0b0b1 == a0 * (b0 + pow2_64 * b1), int_canon);   // FAILS 
+    //assert_by_tactic(a0b0b1 == a0 * (b0 + pow2_64 * b1), int_canon);   // FAILS
     Mulx64(r13, r12, Mem(inB_ptr, 16 + offset*8, inB_b, 2 + offset, Secret));  /* A[0]*B[2] */ let a0b2_lo := r12; lemma_prod_bounds(r13, r12, a0, b2);  Adox64Wrap(r12, r11);
     let overflow1 := overflow(efl);
     Mulx64(rdx, r14, Mem(inB_ptr, 24 + offset*8, inB_b, 3 + offset, Secret));  /* A[0]*B[3] */ let a0b3_lo := r14; lemma_prod_bounds(rdx, r14, a0, b3);  Adox64Wrap(r14, r13);    Mov64(rax, 0);
     let overflow2 := overflow(efl);
     /*******************************************/                  Adox64Wrap(rax, rdx);
 
-    carry := if overflow2 then 1 else 0;      
+    carry := if overflow2 then 1 else 0;
     let carry_new := if overflow(efl) then 1 else 0;
     //let a0b := d0 + pow2_64 * d1 + pow2_128 * r12 + pow2_192 * r14 + pow2_256 * (rdx + carry);
     let a0b := d0 + pow2_64 * d1 + pow2_128 * r12 + pow2_192 * r14 + pow2_256 * rax + pow2_320 * carry_new;
 
-//    a0b_helper(a0, b0, b1, b2, b3, 
+//    a0b_helper(a0, b0, b1, b2, b3,
 //               d0,      r9,
 //               a0b1_lo, r11,
 //               a0b2_lo, r13,
 //               a0b3_lo, rdx,
 //               d1, r12, r14,
 //               overflow0, overflow1, overflow2);
-//    assert a0 * b == a0b;   // PASSES 
+//    assert a0 * b == a0b;   // PASSES
 
-    assert_by_tactic(a0 * b == a0*b0 + pow2_64 * (a0*b1) + pow2_128 * (a0*b2) + pow2_192 * (a0*b3), int_canon);   // PASSES 
+    assert_by_tactic(a0 * b == a0*b0 + pow2_64 * (a0*b1) + pow2_128 * (a0*b2) + pow2_192 * (a0*b3), int_canon);   // PASSES
     assert a0b == a0 * b;   // PASSES (with the assert_by_tactic above)
     //assert_by_tactic(a0b == a0 * b, int_canon);   // FAILS
-    
+
     assert carry_new == 0;
     assert rax < pow2_64 - 1;
 }
@@ -203,12 +203,12 @@ procedure fast_multiply_a1b(
         validDstAddrs64(mem, dst_ptr, dst_b, 8 + offset*2, memTaint, Secret);
         validSrcAddrs64(mem, inA_ptr, inA_b, 4 + offset, memTaint, Secret);
         validSrcAddrs64(mem, inB_ptr, inB_b, 4 + offset, memTaint, Secret);
-        
+
         rax < pow2_64 - 1;
 
         let d0 := buffer64_read(dst_b, 0 + offset*2, mem);
         let d1 := buffer64_read(dst_b, 1 + offset*2, mem);
-        let a0b := d0 + pow2_64 * d1 + pow2_128 * r12 + pow2_192 * r14 + pow2_256 * rax; 
+        let a0b := d0 + pow2_64 * d1 + pow2_128 * r12 + pow2_192 * r14 + pow2_256 * rax;
         a0b == a0 * b;
 
     ensures
@@ -238,28 +238,28 @@ procedure fast_multiply_a1b(
 
     Load64_buffer(rdx, inA_ptr,  8 + offset*8, Secret, inA_b, 1 + offset);     /* A[1] */
 
-    Mulx64( r9,  r8, Mem(inB_ptr,  0 + offset*8, inB_b, 0 + offset, Secret));  /* A[1]*B[0] */ lemma_prod_bounds(r9, r8, a1, b0); 
-    Xor64(r10, r10);  let a1b_0 := r8;      
-    Adcx64Wrap(r8, Mem(dst_ptr,  8 + offset*16, dst_b, 1 + offset*2, Secret));   
+    Mulx64( r9,  r8, Mem(inB_ptr,  0 + offset*8, inB_b, 0 + offset, Secret));  /* A[1]*B[0] */ lemma_prod_bounds(r9, r8, a1, b0);
+    Xor64(r10, r10);  let a1b_0 := r8;
+    Adcx64Wrap(r8, Mem(dst_ptr,  8 + offset*16, dst_b, 1 + offset*2, Secret));
     Store64_buffer(dst_ptr, r8,  8 + offset*16, Secret, dst_b, 1 + offset*2);  // REVIEW: Why not combine the Adcx with the Store?
 
     Mulx64(r11, r10, Mem(inB_ptr,  8 + offset*8, inB_b, 1 + offset, Secret));  /* A[1]*B[1] */ lemma_prod_bounds(r11, r10, a1, b1);  lemma_overflow(r11, r10, r9, bool_bit(overflow(efl)));
     Adox64Wrap(r10,  r9);  let a1b_1 := r10;      // At this point, overflow = 0, r9 < 2^64 - 1, and (r10 is <= 1 (so no new overflow), or r11 < 2^64-2)
-    Adcx64Wrap(r10, r12);                         
-    Store64_buffer(dst_ptr, r10, 16 + offset*16, Secret, dst_b, 2 + offset*2); 
+    Adcx64Wrap(r10, r12);
+    Store64_buffer(dst_ptr, r10, 16 + offset*16, Secret, dst_b, 2 + offset*2);
 
     Mulx64(r13, r12, Mem(inB_ptr, 16 + offset*8, inB_b, 2 + offset, Secret));  /* A[1]*B[2] */ lemma_prod_bounds(r13, r12, a1, b2);  lemma_overflow(r13, r12, r11, bool_bit(overflow(efl)));
     Adox64Wrap(r12, r11);  let a1b_2 := r12;      // At this point, either r13 < 2^64-2 or (r12 <= 1, and (overflow = 0 or r11 < 2^64 - 2)).  RHS of the first or means no overflow
-    Adcx64Wrap(r12, r14); 
-    Mov64( r8, 0); 
+    Adcx64Wrap(r12, r14);
+    Mov64( r8, 0);
 
     Mulx64(rdx, r14, Mem(inB_ptr, 24 + offset*8, inB_b, 3 + offset, Secret));  /* A[1]*B[3] */ lemma_prod_bounds(rdx, r14, a1, b3);  lemma_overflow(rdx, r14, r13, bool_bit(overflow(efl)));
     let old_carry    := bool_bit(cf(efl));
     let old_overflow := bool_bit(overflow(efl));
     Adox64Wrap(r14, r13);  let a1b_3 := r14;      // If rdx = 2^64 - 1, then we know r14 <= 1.  If r13 < 2^64-2, then no new overflow.  Else there wasn't any previous overflow, so r13 can absorb the 1 from r14 without overflowing.
-    Adcx64Wrap(r14, rax);                         
+    Adcx64Wrap(r14, rax);
     Mov64(rax, 0);
-    /*******************************************/  Adox64Wrap(rax, rdx);  let a1b_4 := rax;  let overflow_bit := bool_bit(overflow(efl));  Adcx64Wrap(rax, r8); 
+    /*******************************************/  Adox64Wrap(rax, rdx);  let a1b_4 := rax;  let overflow_bit := bool_bit(overflow(efl));  Adcx64Wrap(rax, r8);
 
     assert overflow_bit == 0;
 
@@ -282,7 +282,7 @@ procedure fast_multiply_a1b(
               a1b, a1b_0, a1b_1, a1b_2, a1b_3, a1b_4,
               b, b0, b1, b2, b3,
               d1, d2, r12, r14, rax,
-              carry_bit); 
+              carry_bit);
     assert pow2_two(a0, a1) * b == a0a1b;   // Conclusion from the lemma
 }
 
@@ -361,30 +361,30 @@ procedure fast_multiply_a2b(
 
     Load64_buffer(rdx, inA_ptr,  16 + offset*8, Secret, inA_b, 2 + offset);     /* A[2] */
 
-    Mulx64( r9,  r8, Mem(inB_ptr,  0 + offset*8, inB_b, 0 + offset, Secret));  /* A[2]*B[0] */ lemma_prod_bounds(r9, r8, a2, b0); 
-    Xor64(r10, r10);  let a2b_0 := r8;      
-    Adcx64Wrap(r8, Mem(dst_ptr,  16 + offset*16, dst_b, 2 + offset*2, Secret));   
+    Mulx64( r9,  r8, Mem(inB_ptr,  0 + offset*8, inB_b, 0 + offset, Secret));  /* A[2]*B[0] */ lemma_prod_bounds(r9, r8, a2, b0);
+    Xor64(r10, r10);  let a2b_0 := r8;
+    Adcx64Wrap(r8, Mem(dst_ptr,  16 + offset*16, dst_b, 2 + offset*2, Secret));
     Store64_buffer(dst_ptr, r8,  16 + offset*16, Secret, dst_b, 2 + offset*2);  // REVIEW: Why not combine the Adcx with the Store?
 
     Mulx64(r11, r10, Mem(inB_ptr,  8 + offset*8, inB_b, 1 + offset, Secret));  /* A[2]*B[1] */ lemma_prod_bounds(r11, r10, a2, b1);  lemma_overflow(r11, r10, r9, bool_bit(overflow(efl)));
-    Adox64Wrap(r10,  r9);  let a2b_1 := r10;  
-    Adcx64Wrap(r10, r12);                         
-    Store64_buffer(dst_ptr, r10, 24 + offset*16, Secret, dst_b, 3 + offset*2); 
+    Adox64Wrap(r10,  r9);  let a2b_1 := r10;
+    Adcx64Wrap(r10, r12);
+    Store64_buffer(dst_ptr, r10, 24 + offset*16, Secret, dst_b, 3 + offset*2);
 
     Mulx64(r13, r12, Mem(inB_ptr, 16 + offset*8, inB_b, 2 + offset, Secret));  /* A[2]*B[2] */ lemma_prod_bounds(r13, r12, a2, b2);  lemma_overflow(r13, r12, r11, bool_bit(overflow(efl)));
-    Adox64Wrap(r12, r11);  let a2b_2 := r12; 
-    Adcx64Wrap(r12, r14); 
-    Mov64( r8, 0); 
+    Adox64Wrap(r12, r11);  let a2b_2 := r12;
+    Adcx64Wrap(r12, r14);
+    Mov64( r8, 0);
 
-    Mulx64(rdx, r14, Mem(inB_ptr, 24 + offset*8, inB_b, 3 + offset, Secret));  /* A[2]*B[3] */ lemma_prod_bounds(rdx, r14, a2, b3);  lemma_overflow(rdx, r14, r13, bool_bit(overflow(efl))); 
+    Mulx64(rdx, r14, Mem(inB_ptr, 24 + offset*8, inB_b, 3 + offset, Secret));  /* A[2]*B[3] */ lemma_prod_bounds(rdx, r14, a2, b3);  lemma_overflow(rdx, r14, r13, bool_bit(overflow(efl)));
     let old_carry    := bool_bit(cf(efl));
     let old_overflow := bool_bit(overflow(efl));
-    Adox64Wrap(r14, r13);  let a2b_3 := r14; 
-    Adcx64Wrap(r14, rax);                         
+    Adox64Wrap(r14, r13);  let a2b_3 := r14;
+    Adcx64Wrap(r14, rax);
     Mov64(rax, 0);
-    /*******************************************/  Adox64Wrap(rax, rdx);  let a2b_4 := rax;    Adcx64Wrap(rax, r8); 
+    /*******************************************/  Adox64Wrap(rax, rdx);  let a2b_4 := rax;    Adcx64Wrap(rax, r8);
 
-    let carry_bit    := bool_bit(cf(efl)); 
+    let carry_bit    := bool_bit(cf(efl));
     let overflow_bit := bool_bit(overflow(efl));
 
     assert overflow_bit == 0;
@@ -405,7 +405,7 @@ procedure fast_multiply_a2b(
               a0a1b, a0a1b_0, a0a1b_1, a0a1b_2, a0a1b_3, a0a1b_4, a0a1b_5,
               a2b, a2b_0, a2b_1, a2b_2, a2b_3, a2b_4,
               b, b0, b1, b2, b3,
-              d2, d3, r12, r14, rax); 
+              d2, d3, r12, r14, rax);
     //assert pow2_three(a0, a1, a2) * b == a0a1a2b;   // Conclusion from the lemma.  // PASSES
 //    assert d0 == a0a1b_0;       // PASSES
 //    assert d1 == a0a1b_1;       // PASSES
@@ -495,33 +495,33 @@ procedure fast_multiply_a3b(
 
     Load64_buffer(rdx, inA_ptr,  24 + offset*8, Secret, inA_b, 3 + offset);     /* A[3] */
 
-    Mulx64( r9,  r8, Mem(inB_ptr,  0 + offset*8, inB_b, 0 + offset, Secret));  /* A[3]*B[0] */ lemma_prod_bounds(r9, r8, a3, b0); 
-    Xor64(r10, r10);  let a3b_0 := r8;      
-    Adcx64Wrap(r8, Mem(dst_ptr,  24 + offset*16, dst_b, 3 + offset*2, Secret));   
+    Mulx64( r9,  r8, Mem(inB_ptr,  0 + offset*8, inB_b, 0 + offset, Secret));  /* A[3]*B[0] */ lemma_prod_bounds(r9, r8, a3, b0);
+    Xor64(r10, r10);  let a3b_0 := r8;
+    Adcx64Wrap(r8, Mem(dst_ptr,  24 + offset*16, dst_b, 3 + offset*2, Secret));
     Store64_buffer(dst_ptr, r8,  24 + offset*16, Secret, dst_b, 3 + offset*2);  // REVIEW: Why not combine the Adcx with the Store?
 
     Mulx64(r11, r10, Mem(inB_ptr,  8 + offset*8, inB_b, 1 + offset, Secret));  /* A[3]*B[1] */ lemma_prod_bounds(r11, r10, a3, b1);  lemma_overflow(r11, r10, r9, bool_bit(overflow(efl)));
-    Adox64Wrap(r10,  r9);  let a3b_1 := r10;  
-    Adcx64Wrap(r10, r12);                         
-    Store64_buffer(dst_ptr, r10, 32 + offset*16, Secret, dst_b, 4 + offset*2); 
+    Adox64Wrap(r10,  r9);  let a3b_1 := r10;
+    Adcx64Wrap(r10, r12);
+    Store64_buffer(dst_ptr, r10, 32 + offset*16, Secret, dst_b, 4 + offset*2);
 
     Mulx64(r13, r12, Mem(inB_ptr, 16 + offset*8, inB_b, 2 + offset, Secret));  /* A[3]*B[2] */ lemma_prod_bounds(r13, r12, a3, b2);  lemma_overflow(r13, r12, r11, bool_bit(overflow(efl)));
-    Adox64Wrap(r12, r11);  let a3b_2 := r12; 
-    Adcx64Wrap(r12, r14); 
-    Store64_buffer(dst_ptr, r12, 40 + offset*16, Secret, dst_b, 5 + offset*2); 
-    Mov64( r8, 0); 
+    Adox64Wrap(r12, r11);  let a3b_2 := r12;
+    Adcx64Wrap(r12, r14);
+    Store64_buffer(dst_ptr, r12, 40 + offset*16, Secret, dst_b, 5 + offset*2);
+    Mov64( r8, 0);
 
-    Mulx64(rdx, r14, Mem(inB_ptr, 24 + offset*8, inB_b, 3 + offset, Secret));  /* A[3]*B[3] */ lemma_prod_bounds(rdx, r14, a3, b3);  lemma_overflow(rdx, r14, r13, bool_bit(overflow(efl))); 
+    Mulx64(rdx, r14, Mem(inB_ptr, 24 + offset*8, inB_b, 3 + offset, Secret));  /* A[3]*B[3] */ lemma_prod_bounds(rdx, r14, a3, b3);  lemma_overflow(rdx, r14, r13, bool_bit(overflow(efl)));
     let old_carry    := bool_bit(cf(efl));
     let old_overflow := bool_bit(overflow(efl));
-    Adox64Wrap(r14, r13);  let a3b_3 := r14; 
-    Adcx64Wrap(r14, rax);                         
-    Store64_buffer(dst_ptr, r14, 48 + offset*16, Secret, dst_b, 6 + offset*2); 
+    Adox64Wrap(r14, r13);  let a3b_3 := r14;
+    Adcx64Wrap(r14, rax);
+    Store64_buffer(dst_ptr, r14, 48 + offset*16, Secret, dst_b, 6 + offset*2);
     Mov64(rax, 0);
-    /*******************************************/  Adox64Wrap(rax, rdx);  let a3b_4 := rax;    Adcx64Wrap(rax, r8); 
-    Store64_buffer(dst_ptr, rax, 56 + offset*16, Secret, dst_b, 7 + offset*2); 
+    /*******************************************/  Adox64Wrap(rax, rdx);  let a3b_4 := rax;    Adcx64Wrap(rax, r8);
+    Store64_buffer(dst_ptr, rax, 56 + offset*16, Secret, dst_b, 7 + offset*2);
 
-    let carry_bit    := bool_bit(cf(efl)); 
+    let carry_bit    := bool_bit(cf(efl));
     let overflow_bit := bool_bit(overflow(efl));
 
     assert overflow_bit == 0;
@@ -546,7 +546,7 @@ procedure fast_multiply_a3b(
               a0a1a2b, a0a1a2b_0, a0a1a2b_1, a0a1a2b_2, a0a1a2b_3, a0a1a2b_4, a0a1a2b_5, a0a1a2b_6,
               a3b, a3b_0, a3b_1, a3b_2, a3b_3, a3b_4,
               b, b0, b1, b2, b3,
-              d3, d4, d5, d6, d7); 
+              d3, d4, d5, d6, d7);
 //    assert pow2_four(a0, a1, a2, a3) * b == a0a1a2a3b;   // Conclusion from the lemma.  // PASSES
 }
 

@@ -33,7 +33,7 @@ procedure callee_save_registers(inline win:bool)
     {:quick exportOnly}
     requires
         rsp == init_rsp(stack); // This function should only be called in the prolog, at the very beginning of the function
-    reads rbx; rbp; rdi; rsi; r12; r13; r14; r15; 
+    reads rbx; rbp; rdi; rsi; r12; r13; r14; r15;
           xmm6; xmm7; xmm8; xmm9; xmm10; xmm11; xmm12; xmm13; xmm14; xmm15;
     modifies stack; rsp; rax; stackTaint;
     ensures
@@ -55,7 +55,7 @@ procedure callee_save_registers(inline win:bool)
         win ==> hi64(xmm8) == load_stack64(rsp + 96, stack);
         win ==> lo64(xmm8) == load_stack64(rsp + 104, stack);
         win ==> hi64(xmm9) == load_stack64(rsp + 112, stack);
-        win ==> lo64(xmm9) == load_stack64(rsp + 120, stack); 
+        win ==> lo64(xmm9) == load_stack64(rsp + 120, stack);
         win ==> hi64(xmm10) == load_stack64(rsp + 128, stack);
         win ==> lo64(xmm10) == load_stack64(rsp + 136, stack);
         win ==> hi64(xmm11) == load_stack64(rsp + 144, stack);
@@ -109,7 +109,7 @@ procedure callee_restore_registers(
         forall(i) rsp <= i <= rsp + (if win then 216 else 56) ==> valid_stack_slot64(i, stack, Public, stackTaint);
         rsp >= init_rsp(stack) - 4096;
         rsp + (if win then 224 else 64) <= init_rsp(stack);
-        
+
         win ==> hi64(old_xmm6) == load_stack64(rsp + 64, stack);
         win ==> lo64(old_xmm6) == load_stack64(rsp + 72, stack);
         win ==> hi64(old_xmm7) == load_stack64(rsp + 80, stack);
@@ -117,7 +117,7 @@ procedure callee_restore_registers(
         win ==> hi64(old_xmm8) == load_stack64(rsp + 96, stack);
         win ==> lo64(old_xmm8) == load_stack64(rsp + 104, stack);
         win ==> hi64(old_xmm9) == load_stack64(rsp + 112, stack);
-        win ==> lo64(old_xmm9) == load_stack64(rsp + 120, stack); 
+        win ==> lo64(old_xmm9) == load_stack64(rsp + 120, stack);
         win ==> hi64(old_xmm10) == load_stack64(rsp + 128, stack);
         win ==> lo64(old_xmm10) == load_stack64(rsp + 136, stack);
         win ==> hi64(old_xmm11) == load_stack64(rsp + 144, stack);

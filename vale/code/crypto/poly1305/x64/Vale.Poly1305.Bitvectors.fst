@@ -93,7 +93,7 @@ let mul_bvshl (u:uint_t 64) :
   Lemma (0x10000000000000000 * u < pow2 128 /\
          (int2bv #128 (0x10000000000000000 `op_Multiply` u) ==
           bvshl (bv_uext #64 #64 (int2bv u)) 64)) =
-  assert_norm ( 0x10000000000000000 * pow2 63 < pow2 128);	    
+  assert_norm ( 0x10000000000000000 * pow2 63 < pow2 128);
   modulo_lemma (0x10000000000000000 * u) (pow2 128);
   assert_by_tactic
     (int2bv #128 (mul_mod #128 0x10000000000000000 (uint_ext #64 #128 u)) ==

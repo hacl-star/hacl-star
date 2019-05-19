@@ -25,7 +25,7 @@ let as_vale_immbuffer_len (#src #t:base_typ) (x:ibuf_t src t)
    = let db = get_downview x in
    DV.length_eq db;
    UV.length_eq (UV.mk_buffer db (ME.uint_view t))
-   
+
 let state_eq_down_mem (va_s1:V.va_state) (s1:_) = ()
 
 let rec loc_eq (args:list arg)
@@ -101,10 +101,10 @@ let imm_buffer_read_reveal src t h s b i =
 let buffer_as_seq_invert src t h s b =
   let db = get_downview b in
   DV.length_eq db;
-  assert (Seq.equal 
+  assert (Seq.equal
     (ME.buffer_as_seq s (as_vale_buffer b))
     (LSig.uint_to_nat_seq_t t (UV.as_seq h (UV.mk_buffer db (LSig.view_of_base_typ t)))))
-    
+
 let buffer_as_seq_reveal_tuint128 src x va_s = ()
 
 let immbuffer_as_seq_reveal_tuint128 src x va_s = ()
@@ -119,7 +119,7 @@ let same_down_up_buffer_length src b =
 val lemma_mult_lt_right: a:pos -> b:nat -> c:nat -> Lemma
   (requires (b < c))
   (ensures  (b * a < c * a))
-let lemma_mult_lt_right a b c = 
+let lemma_mult_lt_right a b c =
   assert (c <> 0);
   if b = 0 then (
     assert (0 * a == 0);
@@ -139,7 +139,7 @@ let down_up_buffer_read_reveal src h s b i =
   lemma_mult_lt_right n i (DV.length db / n);
   FStar.Math.Lemmas.multiply_fractions (DV.length db) n;
   FStar.Math.Lemmas.nat_times_nat_is_nat i n;
-  assert (low_buffer_read src src h b i == 
+  assert (low_buffer_read src src h b i ==
     UV.View?.get up_view (Seq.slice (DV.as_seq h db) (i*n) (i*n + n)));
   DV.put_sel h db (i*n);
   let aux () : Lemma (n * ((i*n)/n) == i*n) =
@@ -147,7 +147,7 @@ let down_up_buffer_read_reveal src h s b i =
   in aux()
 
 let same_buffer_same_upviews #src #bt b h0 h1 =
-    let dv = get_downview b in 
+    let dv = get_downview b in
     let s0 = DV.as_seq h0 dv in
     let s1 = DV.as_seq h1 dv in
     let aux (i:nat{i < DV.length dv}) : Lemma (Seq.index s0 i == Seq.index s1 i) =
@@ -161,7 +161,7 @@ let same_buffer_same_upviews #src #bt b h0 h1 =
     Vale.Lib.BufferViewHelpers.lemma_uv_equal (LSig.view_of_base_typ bt) dv h0 h1
 
 let same_immbuffer_same_upviews #src #bt b h0 h1 =
-    let dv = get_downview b in 
+    let dv = get_downview b in
     let s0 = DV.as_seq h0 dv in
     let s1 = DV.as_seq h1 dv in
     let aux (i:nat{i < DV.length dv}) : Lemma (Seq.index s0 i == Seq.index s1 i) =

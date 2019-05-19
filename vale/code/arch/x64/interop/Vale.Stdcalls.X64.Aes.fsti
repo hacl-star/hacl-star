@@ -81,14 +81,14 @@ let key128_lemma'
        V.eval_code code va_s0 f va_s1 /\
        VSig.vale_calling_conventions_stdcall va_s0 va_s1 /\
        key128_post code input_b output_b va_s0 va_s1 f /\
-       ME.buffer_writeable (as_vale_buffer input_b) /\ 
+       ME.buffer_writeable (as_vale_buffer input_b) /\
        ME.buffer_writeable (as_vale_buffer output_b)
- )) = 
+ )) =
    let va_s1, f = AE.va_lemma_KeyExpansionStdcall code va_s0 IA.win AES_128
      (as_vale_buffer input_b) (as_vale_buffer output_b) in
-   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt8 ME.TUInt128 input_b;   
-   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt8 ME.TUInt128 output_b;   
-   va_s1, f                                   
+   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt8 ME.TUInt128 input_b;
+   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt8 ME.TUInt128 output_b;
+   (va_s1, f)
 
 noextract
 let key128_lemma = as_t #(VSig.vale_sig_stdcall key128_pre key128_post) key128_lemma'
@@ -107,7 +107,7 @@ let lowstar_key128_t =
     _
     _
     (W.mk_prediction code_key128 dom [] (key128_lemma code_key128 IA.win))
-   
+
 
 (* Need to rearrange the order of arguments *)
 [@__reduce__] noextract
@@ -145,14 +145,14 @@ let key256_lemma'
        V.eval_code code va_s0 f va_s1 /\
        VSig.vale_calling_conventions_stdcall va_s0 va_s1 /\
        key256_post code input_b output_b va_s0 va_s1 f /\
-       ME.buffer_writeable (as_vale_buffer input_b) /\ 
+       ME.buffer_writeable (as_vale_buffer input_b) /\
        ME.buffer_writeable (as_vale_buffer output_b)
- )) = 
+ )) =
    let va_s1, f = AE.va_lemma_KeyExpansionStdcall code va_s0 IA.win AES_256
      (as_vale_buffer input_b) (as_vale_buffer output_b) in
-   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt8 ME.TUInt128 input_b;   
-   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt8 ME.TUInt128 output_b;   
-   va_s1, f                                   
+   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt8 ME.TUInt128 input_b;
+   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt8 ME.TUInt128 output_b;
+   (va_s1, f)
 
 noextract
 let key256_lemma = as_t #(VSig.vale_sig_stdcall key256_pre key256_post) key256_lemma'

@@ -47,7 +47,7 @@ let rec lemma_expand_key_128 (key:seq nat32) (size:nat) =
 #push-options "--max_fuel 3 --initial_fuel 3 --max_ifuel 3 --initial_ifuel 3"  // REVIEW: Why do we need this?
 let lemma_simd_round_key (prev:quad32) (rcon:nat32) =
   reveal_opaque quad32_xor_def;
-  reveal_opaque reverse_bytes_nat32_def;  
+  reveal_opaque reverse_bytes_nat32_def;
   commute_rot_word_sub_word prev.hi3;
   Vale.Arch.Types.xor_lemmas ()
 #pop-options
@@ -91,7 +91,7 @@ let finish_cipher_opt (alg:algorithm) (input plain t0 t1 out:quad32) (round_keys
     quad32_xor plain (cipher_opaque alg input round_keys);
   };
   ()
-#pop-options  
+#pop-options
 
 #reset-options "--z3rlimit 20"
 let lemma_add_0x1000000_reverse_mult (n:nat32) (increment:nat) : Lemma
@@ -100,23 +100,23 @@ let lemma_add_0x1000000_reverse_mult (n:nat32) (increment:nat) : Lemma
             r + increment * 0x1000000 == reverse_bytes_nat32 (n + increment)))
   =
   let r = reverse_bytes_nat32 n in
-  assert_norm (Vale.Def.Words.Four_s.nat_to_four 8 (n+increment) == Mkfour ((n+increment) % 0x100) (((n+increment) / 0x100) % 0x100) (((n+increment) / 0x10000) % 0x100) (((n+increment) / 0x1000000) % 0x100)); 
+  assert_norm (Vale.Def.Words.Four_s.nat_to_four 8 (n+increment) == Mkfour ((n+increment) % 0x100) (((n+increment) / 0x100) % 0x100) (((n+increment) / 0x10000) % 0x100) (((n+increment) / 0x1000000) % 0x100));
   assert ((n+increment) / 0x1000000 == n / 0x1000000);
   assert ((n+increment) / 0x10000 == n / 0x10000);
   assert ((n+increment) / 0x100 == n / 0x100);
-  assert      (Vale.Def.Words.Four_s.nat_to_four 8 (n+increment) == Mkfour ((n+increment) % 0x100) ((n / 0x100) % 0x100) ((n / 0x10000) % 0x100) ((n / 0x1000000) % 0x100)); 
-  
-  assert_norm (Vale.Def.Words.Four_s.nat_to_four 8 n     == Mkfour (n % 0x100)     ((n / 0x100) % 0x100) ((n / 0x10000) % 0x100) ((n / 0x1000000) % 0x100)); 
+  assert      (Vale.Def.Words.Four_s.nat_to_four 8 (n+increment) == Mkfour ((n+increment) % 0x100) ((n / 0x100) % 0x100) ((n / 0x10000) % 0x100) ((n / 0x1000000) % 0x100));
+
+  assert_norm (Vale.Def.Words.Four_s.nat_to_four 8 n     == Mkfour (n % 0x100)     ((n / 0x100) % 0x100) ((n / 0x10000) % 0x100) ((n / 0x1000000) % 0x100));
   let s = Vale.Def.Words.Seq_s.four_to_seq_BE (Vale.Def.Words.Four_s.nat_to_four 8 n) in
   let r_s = Vale.Lib.Seqs_s.reverse_seq s in
-  assert_norm (be_bytes_to_nat32 r_s == ((n / 0x1000000) % 0x100) + 
+  assert_norm (be_bytes_to_nat32 r_s == ((n / 0x1000000) % 0x100) +
                                         ((n / 0x10000) % 0x100) * 0x100 +
                                         ((n / 0x100) % 0x100) * 0x10000 +
                                         (n % 0x100) * 0x1000000);
   let s' = Vale.Def.Words.Seq_s.four_to_seq_BE (Vale.Def.Words.Four_s.nat_to_four 8 (n+increment)) in
   let r_s' = Vale.Lib.Seqs_s.reverse_seq s' in
-  
-  assert_norm (be_bytes_to_nat32 r_s' == (((n) / 0x1000000) % 0x100) + 
+
+  assert_norm (be_bytes_to_nat32 r_s' == (((n) / 0x1000000) % 0x100) +
                                         (((n) / 0x10000) % 0x100) * 0x100 +
                                         (((n) / 0x100) % 0x100) * 0x10000 +
                                         ((n+increment) % 0x100) * 0x1000000);
@@ -163,11 +163,11 @@ let lemma_msb_in_bounds (ctr_BE inout5 t1':quad32) (counter:nat) : Lemma
   reveal_reverse_bytes_quad32 ctr6;
   let r5 = reverse_bytes_quad32 ctr5 in
   let r6 = reverse_bytes_quad32 ctr6 in
-  assert (ctr_BE.lo0 + 6 < pow2_32);  
+  assert (ctr_BE.lo0 + 6 < pow2_32);
   assert (ctr6.lo0 == ctr5.lo0 + 1);
   calc (==) {
-    r6; 
-    == {} 
+    r6;
+    == {}
     Mkfour (reverse_bytes_nat32 ctr6.hi3) (reverse_bytes_nat32 ctr6.hi2) (reverse_bytes_nat32 ctr6.lo1) (reverse_bytes_nat32 ctr6.lo0);
     == {}
     Mkfour (reverse_bytes_nat32 ctr5.hi3) (reverse_bytes_nat32 ctr5.hi2) (reverse_bytes_nat32 ctr5.lo1) (reverse_bytes_nat32 ctr6.lo0);
@@ -177,6 +177,6 @@ let lemma_msb_in_bounds (ctr_BE inout5 t1':quad32) (counter:nat) : Lemma
     Mkfour inout5.lo0 inout5.lo1 inout5.hi2 (reverse_bytes_nat32 (ctr5.lo0 + 1));
     == { lemma_add_0x1000000_reverse_mult ctr5.lo0 1 }
     t1';
-  };  
+  };
   ()
-            
+

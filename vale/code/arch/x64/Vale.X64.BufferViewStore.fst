@@ -82,7 +82,7 @@ let bv_upd_update_heap64 b heap i v mem =
                   Seq.lemma_index_slice s_down (base*8) (base*8 + 8) (j % 8)
                 } // True by slice properties
         Seq.index (Seq.slice s_down (base*8) (base*8 + 8)) (j%8);
-        ( == ) { 
+        ( == ) {
           UV.sel_upd uv i base (UInt64.uint_to_t v) h;
           // assert (UV.sel h uv base == UV.sel h' uv base);
           UV.get_sel h uv base;
@@ -105,7 +105,7 @@ let bv_upd_update_heap64 b heap i v mem =
         Seq.index s_f j;
       }
   in let aux2(j:nat{j >= i * 8 /\ j < i * 8 + 8}) : Lemma (Seq.index s_down j == Seq.index s_f j)
-    = UV.sel_upd uv i i (UInt64.uint_to_t v) h; 
+    = UV.sel_upd uv i i (UInt64.uint_to_t v) h;
       // assert (UV.sel h' uv i == UInt64.uint_to_t v);
       UV.get_sel h' uv i;
       // assert (Vale.Interop.Views.get64 (Seq.slice s_down (i*8) (i*8+8)) = UInt64.uint_to_t v);
@@ -128,7 +128,7 @@ let bv_upd_update_heap64 b heap i v mem =
                   Seq.lemma_index_slice s_down (base*8) (base*8 + 8) (j % 8)
                 } // True by slice properties
         Seq.index (Seq.slice s_down (base*8) (base*8 + 8)) (j%8);
-        ( == ) { 
+        ( == ) {
           UV.sel_upd uv i base (UInt64.uint_to_t v) h;
           // assert (UV.sel h uv base == UV.sel h' uv base);
           UV.get_sel h uv base;
@@ -186,7 +186,7 @@ let bv_upd_update_heap128 b heap i v mem =
                   Seq.lemma_index_slice s_down (base*16) (base*16 + 16) (j % 16)
                 } // True by slice properties
         Seq.index (Seq.slice s_down (base*16) (base*16 + 16)) (j%16);
-        ( == ) { 
+        ( == ) {
           UV.sel_upd uv i base v h;
           // assert (UV.sel h uv base == UV.sel h' uv base);
           UV.get_sel h uv base;
@@ -209,7 +209,7 @@ let bv_upd_update_heap128 b heap i v mem =
         Seq.index s_f j;
       }
   in let aux2(j:nat{j >= i * 16 /\ j < i * 16 + 16}) : Lemma (Seq.index s_down j == Seq.index s_f j)
-    = UV.sel_upd uv i i v h; 
+    = UV.sel_upd uv i i v h;
       // assert (UV.sel h' uv i == v);
       UV.get_sel h' uv i;
       // assert (Vale.Interop.Views.get128 (Seq.slice s_down (i*16) (i*16+16)) = v);
@@ -232,7 +232,7 @@ let bv_upd_update_heap128 b heap i v mem =
                   Seq.lemma_index_slice s_down (base*16) (base*16 + 16) (j % 16)
                 } // True by slice properties
         Seq.index (Seq.slice s_down (base*16) (base*16 + 16)) (j%16);
-        ( == ) { 
+        ( == ) {
           UV.sel_upd uv i base v h;
           // assert (UV.sel h uv base == UV.sel h' uv base);
           UV.get_sel h uv base;

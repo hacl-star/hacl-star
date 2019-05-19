@@ -128,7 +128,7 @@ procedure gcm_one_pass_blocks(
         icb == inc32(old_iv, block_offset);
 
         // GHash
-        //block_offset > 0 ==> length(slice_work_around(buffer128_as_seq(mem, out_b), block_offset)) > 0 /\ 
+        //block_offset > 0 ==> length(slice_work_around(buffer128_as_seq(mem, out_b), block_offset)) > 0 /\
         hash == ghash_incremental0(reverse_bytes_quad32(h), old_hash, slice_work_around(buffer128_as_seq(mem, out_b), block_offset));
     ensures
         modifies_buffer128(out_b, old(mem), mem);
@@ -143,7 +143,7 @@ procedure gcm_one_pass_blocks(
 
         // GHash
         len == 0 ==> hash == old(hash) /\ buffer128_as_seq(mem, out_b) == old(buffer128_as_seq(mem, out_b));
-        len > 0 ==> length(slice_work_around(buffer128_as_seq(mem, out_b), block_offset + len)) > 0 /\ 
+        len > 0 ==> length(slice_work_around(buffer128_as_seq(mem, out_b), block_offset + len)) > 0 /\
                     hash == ghash_incremental(reverse_bytes_quad32(h), old_hash, slice_work_around(buffer128_as_seq(mem, out_b), block_offset + len));
 {
     Mov64(rdx, 0);
@@ -233,8 +233,8 @@ procedure gcm_one_pass_blocks_opt(
         r8; h; memTaint;
 
     modifies
-        in_ptr; out_ptr; len; rdx; rdi; r9; r10; r12; 
-        xmm0; xmm1; xmm2; xmm3; xmm4; xmm5; xmm6; icb; mask; xmm9; one; 
+        in_ptr; out_ptr; len; rdx; rdi; r9; r10; r12;
+        xmm0; xmm1; xmm2; xmm3; xmm4; xmm5; xmm6; icb; mask; xmm9; one;
         xmm12; xmm13; xmm14; xmm15;
         mem; efl;
 
@@ -258,7 +258,7 @@ procedure gcm_one_pass_blocks_opt(
         r8 == buffer_addr(keys_b, mem);
         validSrcAddrs128(mem, r8, keys_b, nr(alg) + 1, memTaint, Secret);
         buffer128_as_seq(mem, keys_b) == round_keys;
-            
+
     ensures
         modifies_buffer128(out_b, old(mem), mem);
         validSrcAddrs128(mem, old(out_ptr), out_b, old(len), memTaint, Secret);
@@ -274,7 +274,7 @@ procedure gcm_one_pass_blocks_opt(
 
         // GHash
         old(len == 0) ==> hash == old(hash);
-        old(len > 0) ==> length(buffer128_as_seq(mem, out_b)) > 0 /\ 
+        old(len > 0) ==> length(buffer128_as_seq(mem, out_b)) > 0 /\
                          hash == ghash_incremental(reverse_bytes_quad32(h), old(hash), slice_work_around(buffer128_as_seq(mem, out_b), old(len)));
 {
     // len == # of blocks, so we need to figure out how many sets of four blocks we have
@@ -814,7 +814,7 @@ procedure gcm_encrypt_stdcall(
     {:quick}
     reads memTaint;
     modifies
-        rax; rbx; rcx; rdx; rdi; rsi; rsp; rbp; r8; r9; r10; r11; r12; r13; r14; r15; 
+        rax; rbx; rcx; rdx; rdi; rsi; rsp; rbp; r8; r9; r10; r11; r12; r13; r14; r15;
         xmm0; xmm1; xmm2; xmm3; xmm4; xmm5; xmm6; xmm7; xmm8; xmm9; xmm10; xmm11; xmm12; xmm13; xmm14; xmm15;
         mem; efl; stack; stackTaint;
     lets
@@ -978,7 +978,7 @@ procedure gcm_encrypt2_stdcall(
         ghost auth_b:buffer128,
         ghost auth_num_bytes:nat64,
         ghost iv_b:buffer128,
-        ghost keys_b:buffer128,    
+        ghost keys_b:buffer128,
         ghost out_b:buffer128,
         ghost tag_b:buffer128,
 
@@ -988,7 +988,7 @@ procedure gcm_encrypt2_stdcall(
     {:exportSpecs}
     reads memTaint;
     modifies
-        rax; rbx; rcx; rdx; rdi; rsi; rsp; rbp; r8; r9; r10; r11; r12; r13; r14; r15; 
+        rax; rbx; rcx; rdx; rdi; rsi; rsp; rbp; r8; r9; r10; r11; r12; r13; r14; r15;
         xmm0; xmm1; xmm2; xmm3; xmm4; xmm5; xmm6; xmm7; xmm8; xmm9; xmm10; xmm11; xmm12; xmm13; xmm14; xmm15;
         mem; efl; stack; stackTaint;
     lets

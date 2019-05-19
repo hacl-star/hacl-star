@@ -20,7 +20,7 @@ val init_rsp (h:stack) : (n:nat64{n >= 4096})
 let modifies_stack (lo_rsp hi_rsp:nat) (h h':stack) : Vale.Def.Prop_s.prop0 =
   forall addr . {:pattern (load_stack64 addr h') \/ (valid_src_stack64 addr h') }
     valid_src_stack64 addr h /\ (addr + 8 <= lo_rsp || addr >= hi_rsp) ==>
-      valid_src_stack64 addr h' /\ 
+      valid_src_stack64 addr h' /\
       load_stack64 addr h == load_stack64 addr h'
 
 let valid_src_stack64s (base num_slots:nat) (h:stack) : Vale.Def.Prop_s.prop0 =

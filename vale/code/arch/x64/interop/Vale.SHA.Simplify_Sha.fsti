@@ -13,7 +13,7 @@ module HS = FStar.HyperStack
 open FStar.Mul
 open Vale.AsLowStar.MemoryHelpers
 
-val lemma_k_reqs_equiv 
+val lemma_k_reqs_equiv
   (k_b:ibuf_t TUInt32 TUInt128)
   (h:HS.mem) : Lemma
   (requires IB.live h k_b /\
@@ -23,8 +23,8 @@ val lemma_k_reqs_equiv
     DV.length_eq (get_downview k_b);
     k_reqs (UV.as_seq h (UV.mk_buffer (get_downview k_b) Vale.Interop.Views.up_view128))))
 
-val lemma_seq_nat8_le_seq_quad32_to_bytes_uint32 
-  (b:buf_t TUInt8 TUInt128) 
+val lemma_seq_nat8_le_seq_quad32_to_bytes_uint32
+  (b:buf_t TUInt8 TUInt128)
   (h:HS.mem) : Lemma
   (requires True )
   (ensures (
@@ -37,8 +37,8 @@ val simplify_le_bytes_to_hash_uint32
   (b:buf_t TUInt32 TUInt128)
   (h:HS.mem) : Lemma
   (requires B.live h b /\ B.length b == 8)
-  (ensures 
-  (reveal_word(); 
+  (ensures
+  (reveal_word();
   DV.length_eq (get_downview b);
   Seq.equal
     (le_bytes_to_hash (le_seq_quad32_to_bytes (UV.as_seq h (UV.mk_buffer (get_downview b) Vale.Interop.Views.up_view128))))

@@ -23,7 +23,7 @@ let fmul2 tmp f1 out f2 =
   DV.length_eq (get_downview tmp);
   DV.length_eq (get_downview out);
   DV.length_eq (get_downview f1);
-  DV.length_eq (get_downview f2);  
+  DV.length_eq (get_downview f2);
   let x, _ = Vale.Stdcalls.X64.Fmul.fmul2 tmp f1 out f2 () in
   ()
 

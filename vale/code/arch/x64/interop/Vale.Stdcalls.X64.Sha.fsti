@@ -97,14 +97,14 @@ let sha_lemma'
      (ensures (fun (va_s1, f) ->
        V.eval_code code va_s0 f va_s1 /\
        VSig.vale_calling_conventions_stdcall va_s0 va_s1 /\
-       sha_post code ctx_b in_b num_val k_b va_s0 va_s1 f /\       
-       ME.buffer_writeable (as_vale_buffer ctx_b) /\ 
+       sha_post code ctx_b in_b num_val k_b va_s0 va_s1 f /\
+       ME.buffer_writeable (as_vale_buffer ctx_b) /\
        ME.buffer_writeable (as_vale_buffer in_b)
- )) = 
+ )) =
    let va_s1, f = SH.va_lemma_sha_update_bytes_stdcall code va_s0 IA.win (as_vale_buffer ctx_b) (as_vale_buffer in_b) (UInt64.v num_val) (as_vale_immbuffer k_b) in
-   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt32 ME.TUInt128 ctx_b;   
-   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt8 ME.TUInt128 in_b;  
-   va_s1, f                                   
+   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt32 ME.TUInt128 ctx_b;
+   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt8 ME.TUInt128 in_b;
+   (va_s1, f)
 
 (* Prove that sha_lemma' has the required type *)
 noextract

@@ -11,19 +11,19 @@ friend Spec.SHA2
 
 let sha256_rnds2_spec_update (a b c d e f g h wk : word SHA2_256) =
   let open FStar.UInt32 in   // Interop with UInt-based SHA spec
-  let a' = add_mod (_Ch SHA2_256 e f g) 
-           (add_mod (_Sigma1 SHA2_256 e) 
-           (add_mod wk 
-           (add_mod h 
-           (add_mod (_Maj SHA2_256 a b c) 
+  let a' = add_mod (_Ch SHA2_256 e f g)
+           (add_mod (_Sigma1 SHA2_256 e)
+           (add_mod wk
+           (add_mod h
+           (add_mod (_Maj SHA2_256 a b c)
                     (_Sigma0 SHA2_256 a)))))  in
   let b' = a in
   let c' = b in
   let d' = c in
   let e' = add_mod (_Ch SHA2_256 e f g)
            (add_mod (_Sigma1 SHA2_256 e)
-           (add_mod wk 
-           (add_mod h 
+           (add_mod wk
+           (add_mod h
                     d))) in
   let f' = e in
   let g' = f in
@@ -60,7 +60,7 @@ let sha256_msg1_spec_def (src1 src2:quad32) : quad32 =
            (v (add_mod w1 (_sigma0 SHA2_256 w2)))
            (v (add_mod w2 (_sigma0 SHA2_256 w3)))
            (v (add_mod w3 (_sigma0 SHA2_256 w4)))
-    
+
 let sha256_msg1_spec = make_opaque sha256_msg1_spec_def
 
 let sha256_msg2_spec_def (src1 src2:quad32) : quad32 =

@@ -22,7 +22,7 @@ val bv_upd_update_heap64:
   (mem:IB.mem{MB.live (IB.hs_of_mem mem) b.IB.bsrc}) ->
    Lemma
      (requires IB.correct_down_p mem heap b)
-     (ensures 
+     (ensures
        (let dv = IB.get_downview b.IB.bsrc in
         let bv = UV.mk_buffer dv up_view64 in
         let addrs = IB.addrs_of_mem mem in
@@ -39,7 +39,7 @@ val bv_upd_update_heap128:
   (mem:IB.mem{MB.live (IB.hs_of_mem mem) b.IB.bsrc}) ->
    Lemma
      (requires IB.correct_down_p mem heap b)
-     (ensures 
+     (ensures
        (let dv = IB.get_downview b.IB.bsrc in
         let bv = UV.mk_buffer dv up_view128 in
         let addrs = IB.addrs_of_mem mem in

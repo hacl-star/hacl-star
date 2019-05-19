@@ -30,7 +30,7 @@ val heap_shift (m1 m2:S.heap) (base:int) (n:nat) : Lemma
   (requires (forall i. 0 <= i /\ i < n ==> m1.[base + i] == m2.[base + i]))
   (ensures (forall i. {:pattern (m1.[i])} base <= i /\ i < base + n ==> m1.[i] == m2.[i]))
 
-let heap_shift m1 m2 base n =  
+let heap_shift m1 m2 base n =
   assert (forall i. base <= i /\ i < base + n ==>
     m1.[base + (i - base)] == m2.[base + (i - base)])
 
@@ -98,9 +98,9 @@ let same_mem_get_heap_val64 b j v k h1 h2 mem1 mem2 =
   Classical.forall_intro aux;
   assert (forall i. addr + (8 * k + i) == ptr + i)
 
-let rec written_buffer_down64_aux1 
+let rec written_buffer_down64_aux1
   (b:buffer64{buffer_writeable b})
-  (i:nat{i < buffer_length b}) 
+  (i:nat{i < buffer_length b})
   (v:nat64)
   (h:mem{List.memP b (IB.ptrs_of_mem h)})
   (base:nat{base == buffer_addr b h})
@@ -123,9 +123,9 @@ let rec written_buffer_down64_aux1
       written_buffer_down64_aux1 b i v h base (k+1) h1 mem1 mem2
     end
 
-let rec written_buffer_down64_aux2 
-  (b:buffer64{buffer_writeable b}) 
-  (i:nat{i < buffer_length b}) 
+let rec written_buffer_down64_aux2
+  (b:buffer64{buffer_writeable b})
+  (i:nat{i < buffer_length b})
   (v:nat64)
   (h:mem{List.memP b (IB.ptrs_of_mem h)})
   (base:nat{base == buffer_addr b h})
@@ -210,7 +210,7 @@ let unwritten_buffer_down (t:base_typ) (b:buffer t{buffer_writeable b})
     in
     Classical.forall_intro aux
 
-let store_buffer_down64_mem 
+let store_buffer_down64_mem
   (b:buffer64{buffer_writeable b})
   (i:nat{i < buffer_length b})
   (v:nat64)
@@ -363,7 +363,7 @@ let same_mem_get_heap_val128 b j v k h1 h2 mem1 mem2 =
   assert (forall i. addr + (16 `op_Multiply` k + i) == ptr + i)
 
 let in_bounds128 (h:mem) (b:buffer128) (i:nat{i < buffer_length b}) : Lemma
-  (forall j. j >= h.IB.addrs b + 16 `op_Multiply` i /\ 
+  (forall j. j >= h.IB.addrs b + 16 `op_Multiply` i /\
           j < h.IB.addrs b + 16 `op_Multiply` i + 16 ==>
           j < h.IB.addrs b + DV.length (get_downview b.bsrc)) =
   length_t_eq TUInt128 b
@@ -390,7 +390,7 @@ let bytes_valid128 ptr h =
   I.addrs_set_mem h b (ptr+13);
   I.addrs_set_mem h b (ptr+14);
   I.addrs_set_mem h b (ptr+15)
-  
+
 let equiv_load_mem ptr h =
   let t = TUInt64 in
   let b = get_addr_ptr t ptr h in
@@ -401,7 +401,7 @@ let equiv_load_mem ptr h =
   index64_get_heap_val64 h b heap i;
   lemma_load_mem64 b i h
 
-let low_lemma_valid_mem64 b i h = 
+let low_lemma_valid_mem64 b i h =
   lemma_valid_mem64 b i h;
   bytes_valid (buffer_addr b h + 8 `op_Multiply` i) h
 
@@ -416,7 +416,7 @@ let same_domain_update64 b i v h =
 
 open Vale.X64.BufferViewStore
 
-let low_lemma_store_mem64_aux 
+let low_lemma_store_mem64_aux
   (b:buffer64)
   (heap:S.heap)
   (i:nat{i < buffer_length b})
@@ -434,10 +434,10 @@ let low_lemma_store_mem64_aux
    length_t_eq TUInt64 b;
    bv_upd_update_heap64 b heap i v h;
    let db = get_downview b.bsrc in
-   let bv = UV.mk_buffer db Vale.Interop.Views.up_view64 in   
+   let bv = UV.mk_buffer db Vale.Interop.Views.up_view64 in
    assert (UV.upd h.IB.hs bv i (UInt64.uint_to_t v) == h'.IB.hs)
-   
-val valid_state_store_mem64_aux: (i:nat) -> (v:nat64) -> (h:mem) -> Lemma 
+
+val valid_state_store_mem64_aux: (i:nat) -> (v:nat64) -> (h:mem) -> Lemma
   (requires writeable_mem64 i h)
   (ensures (
     let heap = get_heap h in
@@ -463,7 +463,7 @@ let valid_state_store_mem64_aux i v h =
     Bytes_Semantics.same_domain_update i v heap
   in aux(); aux2();
   Map.lemma_equal_intro mem1 mem2
-  
+
 let low_lemma_store_mem64 b i v h =
   lemma_writeable_mem64 b i h;
   lemma_store_mem64 b i v h;
@@ -473,7 +473,7 @@ let low_lemma_store_mem64 b i v h =
   low_lemma_store_mem64_aux b heap i v h;
   Vale.X64.Bytes_Semantics.frame_update_heap (buffer_addr b h + 8 `op_Multiply` i) v heap;
   in_bounds64 h b i;
-  I.update_buffer_up_mem h b heap heap'  
+  I.update_buffer_up_mem h b heap heap'
 
 let low_lemma_valid_mem128 b i h =
   lemma_valid_mem128 b i h;
@@ -500,13 +500,13 @@ let equiv_load_mem128 ptr h =
 let low_lemma_load_mem128 b i h =
   lemma_valid_mem128 b i h;
   lemma_load_mem128 b i h;
-  equiv_load_mem128_aux (buffer_addr b h + 16 `op_Multiply` i) h  
+  equiv_load_mem128_aux (buffer_addr b h + 16 `op_Multiply` i) h
 
 let same_domain_update128 b i v h =
   low_lemma_valid_mem128 b i h;
   Vale.X64.Bytes_Semantics.same_domain_update128 (buffer_addr b h + 16 `op_Multiply` i) v (get_heap h)
 
-let low_lemma_store_mem128_aux 
+let low_lemma_store_mem128_aux
   (b:buffer128)
   (heap:S.heap)
   (i:nat{i < buffer_length b})
@@ -524,21 +524,21 @@ let low_lemma_store_mem128_aux
    length_t_eq TUInt128 b;
    bv_upd_update_heap128 b heap i v h;
    let db = get_downview b.bsrc in
-   let bv = UV.mk_buffer db Vale.Interop.Views.up_view128 in   
+   let bv = UV.mk_buffer db Vale.Interop.Views.up_view128 in
    assert (UV.upd h.IB.hs bv i v == h'.IB.hs)
 
-val valid_state_store_mem128_aux: (i:int) -> (v:quad32) -> (h:mem) -> Lemma 
+val valid_state_store_mem128_aux: (i:int) -> (v:quad32) -> (h:mem) -> Lemma
   (requires writeable_mem128 i h)
   (ensures (
     let heap = get_heap h in
     let heap' = S.update_heap128 i v heap in
     let h' = store_mem128 i v h in
-    heap' == I.down_mem h' 
+    heap' == I.down_mem h'
   ))
 
-let rec written_buffer_down128_aux1 
+let rec written_buffer_down128_aux1
   (b:buffer128{buffer_writeable b})
-  (i:nat{i < buffer_length b}) 
+  (i:nat{i < buffer_length b})
   (v:quad32)
   (h:mem{List.memP b h.IB.ptrs})
   (base:nat{base == buffer_addr b h})
@@ -561,7 +561,7 @@ let rec written_buffer_down128_aux1
       written_buffer_down128_aux1 b i v h base (k+1) h1 mem1 mem2
     end
 
-let rec written_buffer_down128_aux2 
+let rec written_buffer_down128_aux2
   (b:buffer128{buffer_writeable b})
   (i:nat{i < buffer_length b})
   (v:quad32)
@@ -608,7 +608,7 @@ let written_buffer_down128 (b:buffer128) (i:nat{i < buffer_length b}) (v:quad32)
     written_buffer_down128_aux1 b i v h base 0 h1 mem1 mem2;
     written_buffer_down128_aux2 b i v h base n (i+1) h1 mem1 mem2
 
-let store_buffer_down128_mem 
+let store_buffer_down128_mem
   (b:buffer128{buffer_writeable b})
   (i:nat{i < buffer_length b})
   (v:quad32)
@@ -711,12 +711,12 @@ let low_lemma_store_mem128 b i v h =
   let heap = get_heap h in
   let heap' = S.update_heap128 (buffer_addr b h + 16 `op_Multiply` i) v heap in
   let h' = store_mem128 (buffer_addr b h + 16 `op_Multiply` i) v h in
-  low_lemma_store_mem128_aux b heap i v h;  
+  low_lemma_store_mem128_aux b heap i v h;
   Vale.X64.Bytes_Semantics.frame_update_heap128 (buffer_addr b h + 16 `op_Multiply` i) v heap;
   in_bounds128 h b i;
   I.update_buffer_up_mem h b heap heap'
 
-let low_lemma_valid_mem128_64 b i h = 
+let low_lemma_valid_mem128_64 b i h =
   FStar.Pervasives.reveal_opaque (`%S.valid_addr64) S.valid_addr64;
   FStar.Pervasives.reveal_opaque (`%S.valid_addr128) S.valid_addr128;
   low_lemma_valid_mem128 b i h;
@@ -743,7 +743,7 @@ let low_lemma_load_mem128_hi64 b i h =
 let same_domain_update128_64 b i v h =
   low_lemma_valid_mem128_64 b i h;
   Vale.X64.Bytes_Semantics.same_domain_update (buffer_addr b h + 16 `op_Multiply` i) v (get_heap h);
-  Vale.X64.Bytes_Semantics.same_domain_update (buffer_addr b h + 16 `op_Multiply` i + 8) v (get_heap h)  
+  Vale.X64.Bytes_Semantics.same_domain_update (buffer_addr b h + 16 `op_Multiply` i + 8) v (get_heap h)
 
 open Vale.Def.Types_s
 
@@ -753,7 +753,7 @@ let frame_get_heap32 (ptr:int) (mem1 mem2:S.heap) : Lemma
   Vale.Def.Opaque_s.reveal_opaque S.get_heap_val32_def
 
 let update_heap128_lo (ptr:int) (v:quad32) (mem:S.heap) : Lemma
-  (requires 
+  (requires
     S.valid_addr128 ptr mem /\
     v.hi2 == S.get_heap_val32 (ptr+8) mem /\
     v.hi3 == S.get_heap_val32 (ptr+12) mem
@@ -763,7 +763,7 @@ let update_heap128_lo (ptr:int) (v:quad32) (mem:S.heap) : Lemma
   FStar.Pervasives.reveal_opaque (`%S.valid_addr128) S.valid_addr128;
   Vale.Def.Opaque_s.reveal_opaque S.update_heap128_def;
   let mem0 = S.update_heap32 ptr v.lo0 mem in
-  let mem1 = S.update_heap32 (ptr+4) v.lo1 mem0 in  
+  let mem1 = S.update_heap32 (ptr+4) v.lo1 mem0 in
   Vale.X64.Bytes_Semantics.frame_update_heap32 ptr v.lo0 mem;
   Vale.X64.Bytes_Semantics.frame_update_heap32 (ptr+4) v.lo1 mem0;
   Vale.X64.Bytes_Semantics.same_domain_update32 ptr v.lo0 mem;
@@ -799,4 +799,4 @@ let low_lemma_store_mem128_hi64 b i v h =
   Vale.Def.Opaque_s.reveal_opaque S.update_heap128_def;
   Vale.Def.Opaque_s.reveal_opaque S.update_heap64_def;
   Vale.Def.Opaque_s.reveal_opaque S.update_heap32_def;
-  Vale.Def.Opaque_s.reveal_opaque insert_nat64  
+  Vale.Def.Opaque_s.reveal_opaque insert_nat64

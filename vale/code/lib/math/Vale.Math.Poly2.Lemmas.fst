@@ -112,7 +112,7 @@ let lemma_or_degree a b =
   lemma_index_all ();
   lemma_degree a;
   lemma_degree b;
-  lemma_degree_is (poly_or a b) (FStar.Math.Lib.max (degree a) (degree b)) 
+  lemma_degree_is (poly_or a b) (FStar.Math.Lib.max (degree a) (degree b))
 
 let lemma_mask_degree a n =
   lemma_mask_define a n;

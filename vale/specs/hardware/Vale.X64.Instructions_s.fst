@@ -96,7 +96,7 @@ let ins_VPsrldq count = make_ins (fun dst src -> print "vpsrldq" [PXmm dst; PXmm
 
 let ins_Pclmulqdq imm = make_ins (fun dst src -> print "pclmulqdq" [PXmm dst; PXmm src; PImm imm])
 let ins_VPclmulqdq imm =
-  make_ins (fun dst src1 src2 -> print "vpclmulqdq" [PXmm dst; PXmm src1; PXmm src2; PImm imm])  
+  make_ins (fun dst src1 src2 -> print "vpclmulqdq" [PXmm dst; PXmm src1; PXmm src2; PImm imm])
 
 let ins_AESNI_enc = make_ins (fun dst src -> print "aesenc" [PXmm dst; PXmm src])
 let ins_VAESNI_enc =

@@ -17,7 +17,7 @@ let print_basetype (t:base_typ) = match t with
   | TUInt16 -> "uint16_t"
   | TUInt32 -> "uint32_t"
   | TUInt64 -> "uint64_t"
-  | TUInt128 -> "ERROR"  
+  | TUInt128 -> "ERROR"
 
 // Returns "uint8_t arg2" or "uint64_t* arg0" for instance
 let print_arg (a:td) (i:nat) = match a with
@@ -86,15 +86,15 @@ let print_nonmodified_inputs (n:nat) (of_arg:reg_nat n -> reg) (regs_mod:reg->bo
   in aux (get_nonmodified_input_strings n of_arg regs_mod args 0)
 
 // Print the list of modified registers, + memory and cc
-let print_modified_registers 
+let print_modified_registers
   (n:nat)
-  (ret_val:option string) 
+  (ret_val:option string)
   (of_arg:reg_nat n -> reg)
-  (regs_mod:reg -> bool) 
+  (regs_mod:reg -> bool)
   (args:list td) =
   // This register was already specified as output
   let output_register a = Some? ret_val && a = rRax in
-  let rec input_register (i:nat) (a:reg) : Tot bool (decreases (n-i)) = 
+  let rec input_register (i:nat) (a:reg) : Tot bool (decreases (n-i)) =
     if i >= n then false
     else
       a = of_arg i // This register was already specified for the i-th argument
@@ -102,7 +102,7 @@ let print_modified_registers
   in
   let rec aux = function
   | [] -> "\"memory\", \"cc\"\n"
-  | a::q -> 
+  | a::q ->
     // This register is not modified, or was already specified as input or output: we skip it
     if not (regs_mod a) || input_register 0 a || output_register a then aux q
     // Register not modified or already specified in inputs, we add it
@@ -157,10 +157,10 @@ and print_code (c:code) (n:int) (p:P.printer) : string * int =
     jmp ^ label1 ^ body_str ^ label2 ^ cmp, n'
 
 
-let print_inline 
-  (name:string) 
-  (label:int) 
-  (ret_val:option string) 
+let print_inline
+  (name:string)
+  (label:int)
+  (ret_val:option string)
   (n:nat)
   (args:list td{List.length args = n})
   (code:code)
@@ -169,7 +169,7 @@ let print_inline
   : FStar.All.ML int =
   // Signature: static inline (void | uint64_t) [name] (arg1, arg2???) {
   let header = "static inline " ^ print_rettype ret_val ^ " " ^ name ^ " (" ^ print_args args 0 ^ ") {\n" in
-  
+
   // Arguments in registers: register uint64_t* argi_r asm("reg") = argi;
   let arg_regs = print_register_args n args 0 of_arg in
   let ret_reg = print_register_ret ret_val in

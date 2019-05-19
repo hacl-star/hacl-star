@@ -13,7 +13,7 @@ unfold
 let (.[]) = FStar.Seq.index
 
 #reset-options "--max_fuel 0 --max_ifuel 0"
-  
+
 // Specialize these definitions (from Spec.SHA2.fst) for SHA256
 unfold let size_k_w_256 = 64
 val word:Type0
@@ -41,7 +41,7 @@ let bytes_blocks =
 // Hide various SHA2 definitions
 val ws_opaque (b:block_w) (t:counter{t < size_k_w_256}):nat32
 val shuffle_core_opaque (block:block_w) (hash:hash256) (t:counter{t < size_k_w_256}):hash256
-val update_multi_opaque (hash:hash256) (blocks:bytes_blocks):hash256 
+val update_multi_opaque (hash:hash256) (blocks:bytes_blocks):hash256
 val update_multi_transparent (hash:hash256) (blocks:bytes_blocks):hash256
 
 // Hide some functions that operate on words & bytes
@@ -55,9 +55,9 @@ val nat8_to_byte (b:nat8) : byte
 //unfold let bytes_blocks256 = bytes_blocks SHA2_256
 unfold let repeat_range_vale (max:nat { max < size_k_w_256}) (block:block_w) (hash:hash256) =
   Spec.Loops.repeat_range 0 max (shuffle_core_opaque block) hash
-unfold let lemma_repeat_range_0_vale (block:block_w) (hash:hash256) = 
+unfold let lemma_repeat_range_0_vale (block:block_w) (hash:hash256) =
   Spec.Loops.repeat_range_base 0 (shuffle_core_opaque block) hash
-unfold let update_multi_opaque_vale (hash:hash256) (blocks:bytes) : hash256 = 
+unfold let update_multi_opaque_vale (hash:hash256) (blocks:bytes) : hash256 =
   if length blocks % size_k_w_256 = 0 then let b:bytes_blocks = blocks in update_multi_opaque hash b else hash
 
 
@@ -72,10 +72,10 @@ val make_hash (abef cdgh:quad32) : Pure (hash256)
          hash.[4] == nat32_to_word abef.lo1 /\
          hash.[5] == nat32_to_word abef.lo0 /\
          hash.[6] == nat32_to_word cdgh.lo1 /\
-         hash.[7] == nat32_to_word cdgh.lo0    
+         hash.[7] == nat32_to_word cdgh.lo0
   )
 
-val make_ordered_hash (abcd efgh:quad32): Pure (hash256) 
+val make_ordered_hash (abcd efgh:quad32): Pure (hash256)
   (requires True)
   (ensures fun hash ->
          length hash == 8 /\
@@ -86,14 +86,14 @@ val make_ordered_hash (abcd efgh:quad32): Pure (hash256)
          hash.[4] == nat32_to_word efgh.lo0 /\
          hash.[5] == nat32_to_word efgh.lo1 /\
          hash.[6] == nat32_to_word efgh.hi2 /\
-         hash.[7] == nat32_to_word efgh.hi3      
+         hash.[7] == nat32_to_word efgh.hi3
   )
 
 // Top-level proof for the SHA256_rnds2 instruction
 val lemma_sha256_rnds2 (abef cdgh xmm0:quad32) (t:counter) (block:block_w) (hash_in:hash256) : Lemma
   (requires t + 1 < size_k_w_256 /\
             xmm0.lo0 == add_wrap (word_to_nat32 k.[t])   (ws_opaque block t) /\
-            xmm0.lo1 == add_wrap (word_to_nat32 k.[t+1]) (ws_opaque block (t+1)) /\ 
+            xmm0.lo1 == add_wrap (word_to_nat32 k.[t+1]) (ws_opaque block (t+1)) /\
             make_hash abef cdgh == Spec.Loops.repeat_range 0 t (shuffle_core_opaque block) hash_in
             )
   (ensures make_hash (sha256_rnds2_spec cdgh abef xmm0) abef ==
@@ -106,7 +106,7 @@ let ws_quad32 (t:counter) (block:block_w) : quad32 =
               (ws_opaque block (t+1))
               (ws_opaque block (t+2))
               (ws_opaque block (t+3))
-    else 
+    else
        Mkfour 0 0 0 0
 
 val ws_partial_def (t:counter) (block:block_w) : quad32
@@ -119,7 +119,7 @@ val lemma_sha256_msg1 (dst src:quad32) (t:counter) (block:block_w) : Lemma
             src.lo0 == ws_opaque block (t-12))
   (ensures sha256_msg1_spec dst src == ws_partial t block)
 
-  
+
 // Top-level proof for the SHA256_msg2 instruction
 val lemma_sha256_msg2 (src1 src2:quad32) (t:counter) (block:block_w) : Lemma
   (requires 16 <= t /\ t < size_k_w_256 - 3 /\
@@ -136,7 +136,7 @@ open Vale.Lib.Workarounds
 (* Abbreviations and lemmas for the code itself *)
 let k_reqs (k_seq:seq quad32) : prop0 =
   length k_seq == size_k_w_256 / 4 /\
-  (forall i . {:pattern (index_work_around_quad32 k_seq i)} 0 <= i /\ i < (size_k_w_256/4) ==> 
+  (forall i . {:pattern (index_work_around_quad32 k_seq i)} 0 <= i /\ i < (size_k_w_256/4) ==>
     (k_seq.[i]).lo0 == word_to_nat32 (k.[4 `op_Multiply` i]) /\
     (k_seq.[i]).lo1 == word_to_nat32 (k.[4 `op_Multiply` i + 1]) /\
     (k_seq.[i]).hi2 == word_to_nat32 (k.[4 `op_Multiply` i + 2]) /\
@@ -169,7 +169,7 @@ let lemma_quads_to_block (qs:seq quad32) : Lemma
               (qs.[i]).hi2 == ws_opaque block (4 `op_Multiply` i + 2) /\
               (qs.[i]).hi3 == ws_opaque block (4 `op_Multiply` i + 3) /\
               qs.[i] == ws_quad32 (4 `op_Multiply` i) block))
-  =  
+  =
   //reveal_opaque ws;
   ()
 #pop-options
@@ -179,7 +179,7 @@ val update_block (hash:hash256) (block:block_w): hash256
 
 val update_lemma (src1 src2 src1' src2' h0 h1:quad32) (block:block_w) : Lemma
   (requires (let hash_orig = make_hash h0 h1 in
-             make_hash src1 src2 == 
+             make_hash src1 src2 ==
              Spec.Loops.repeat_range 0 size_k_w_256 (shuffle_core_opaque block) hash_orig /\
              src1' == add_wrap_quad32 src1 h0 /\
              src2' == add_wrap_quad32 src2 h1))
@@ -203,11 +203,11 @@ val lemma_update_multi_equiv_vale (hash hash':hash256) (quads:seq quad32) (r_qua
                   r_quads == reverse_bytes_nat32_quad32_seq quads /\
                   nat8s == le_seq_quad32_to_bytes quads /\
                   blocks == seq_nat8_to_seq_uint8 nat8s /\
-                  hash' == update_multi_quads r_quads hash)        
-        (ensures 
+                  hash' == update_multi_quads r_quads hash)
+        (ensures
            length blocks % size_k_w_256 == 0 /\
            hash' == update_multi_opaque_vale hash blocks)
-        (decreases (length quads)) 
+        (decreases (length quads))
 
 val lemma_update_multi_quads (s:seq quad32) (hash_orig:hash256) (bound:nat) : Lemma
     (requires bound + 4 <= length s)
@@ -222,7 +222,7 @@ val lemma_update_multi_quads (s:seq quad32) (hash_orig:hash256) (bound:nat) : Le
               h == update_multi_quads input_BE hash_orig))
 
 let le_bytes_to_hash (b:seq nat8) : hash256 =
-  if length b <> 32 then   
+  if length b <> 32 then
      (let f (n:nat{n < 8}) : word = nat32_to_word 0 in
      init 8 f)
   else (

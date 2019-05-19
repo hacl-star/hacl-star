@@ -490,7 +490,7 @@ let lemma_hash_append3 (h y_init y_mid1 y_mid2 y_final:quad32) (s1 s2 s3:seq qua
 
 let ghash_incremental_bytes_pure_no_extra (old_io io h:quad32) (in_quads:seq quad32) (num_bytes:nat64) : Lemma
   (requires io = ghash_incremental0 h old_io in_quads)
-  (ensures  length in_quads == (num_bytes / 16) /\ 
+  (ensures  length in_quads == (num_bytes / 16) /\
             num_bytes % 16 == 0 ==>
             (let input_bytes = slice (le_seq_quad32_to_bytes in_quads) 0 num_bytes in
              let padded_bytes = pad_to_128_bits input_bytes in
@@ -574,7 +574,7 @@ let lemma_ghash_registers (h y_init y0 y1 y2 y3 y4 r0 r1 r2 r3:quad32) (input:se
   lemma_hash_append2 h y_init y2 y3 s r2;
   let s = s @| (create 1 r2) in
   lemma_hash_append2 h y_init y3 y4 s r3;
-  let s = s @| (create 1 r3) in  
+  let s = s @| (create 1 r3) in
   assert (equal s (slice input 0 (bound + 4)));
   ()
 
@@ -582,4 +582,4 @@ let lemma_ghash_registers (h y_init y0 y1 y2 y3 y4 r0 r1 r2 r3:quad32) (input:se
 let lemma_slice_extension (s:seq quad32) (bound:int) (q:quad32)
   =
   ()
-*)   
+*)

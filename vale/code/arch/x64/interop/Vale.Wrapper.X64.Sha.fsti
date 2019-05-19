@@ -38,7 +38,7 @@ val sha256_update
   (ensures fun h0 _ h1 ->
     B.modifies (B.loc_buffer ctx_b) h0 h1 /\
    (reveal_word();
-    Seq.equal 
+    Seq.equal
       (B.as_seq h1 ctx_b)
       (update_multi_transparent (B.as_seq h0 ctx_b) (B.as_seq h0 in_b)))
   )

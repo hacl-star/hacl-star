@@ -329,13 +329,13 @@ let lemma_call_poly1305 h0 h1 ctx_b inp_b src key =
   let key_r0 = UInt64.v (MH.low_buffer_read TUInt8 TUInt64 h0 ctx_b 3) in
   let key_r1 = UInt64.v (MH.low_buffer_read TUInt8 TUInt64 h0 ctx_b 4) in
   let key_s0 = UInt64.v (MH.low_buffer_read TUInt8 TUInt64 h0 ctx_b 5) in
-  let key_s1 = UInt64.v (MH.low_buffer_read TUInt8 TUInt64 h0 ctx_b 6) in    
+  let key_s1 = UInt64.v (MH.low_buffer_read TUInt8 TUInt64 h0 ctx_b 6) in
   let h_in = lowerUpper192_opaque (lowerUpper128_opaque h0_in h1_in) h2_in in
   let key_r = lowerUpper128_opaque key_r0 key_r1 in
   let key_s = lowerUpper128_opaque key_s0 key_s1 in
 
-  let h0_out = UInt64.v (MH.low_buffer_read TUInt8 TUInt64 h1 ctx_b 0) in    
-  let h1_out = UInt64.v (MH.low_buffer_read TUInt8 TUInt64 h1 ctx_b 1) in    
+  let h0_out = UInt64.v (MH.low_buffer_read TUInt8 TUInt64 h1 ctx_b 0) in
+  let h1_out = UInt64.v (MH.low_buffer_read TUInt8 TUInt64 h1 ctx_b 1) in
   let h = lowerUpper128_opaque h0_out h1_out in
   let db = get_downview inp_b in
   math_aux inp_b (readable_words len);

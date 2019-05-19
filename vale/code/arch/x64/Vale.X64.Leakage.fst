@@ -78,17 +78,17 @@ let taintstate_monotone (ts ts':analysis_taints) = ( forall r. Public? (ts'.regT
 let taintstate_monotone_trans (ts1:analysis_taints) (ts2:analysis_taints) (ts3:analysis_taints)
   :Lemma (taintstate_monotone ts1 ts2 /\ taintstate_monotone ts2 ts3 ==> taintstate_monotone ts1 ts3) = ()
 
-let isConstant_monotone (ts1:analysis_taints) (ts2:analysis_taints) (code:S.code) (fuel:nat) (s1:S.machine_state) (s2:S.machine_state) 
+let isConstant_monotone (ts1:analysis_taints) (ts2:analysis_taints) (code:S.code) (fuel:nat) (s1:S.machine_state) (s2:S.machine_state)
   :Lemma (isConstantTimeGivenStates code fuel ts2 s1 s2 /\ taintstate_monotone ts1 ts2 ==> isConstantTimeGivenStates code fuel ts1 s1 s2)
   = ()
 
-let isExplicit_monotone (ts:analysis_taints) (ts1:analysis_taints) (ts2:analysis_taints) (code:S.code) 
-  (fuel:nat) (s1:S.machine_state) (s2:S.machine_state) 
+let isExplicit_monotone (ts:analysis_taints) (ts1:analysis_taints) (ts2:analysis_taints) (code:S.code)
+  (fuel:nat) (s1:S.machine_state) (s2:S.machine_state)
   :Lemma (isExplicitLeakageFreeGivenStates code fuel ts ts1 s1 s2 /\ taintstate_monotone ts1 ts2 ==> isExplicitLeakageFreeGivenStates code fuel ts ts2 s1 s2)
   = ()
 
 let isExplicit_monotone2 (ts:analysis_taints) (ts1:analysis_taints) (ts2:analysis_taints)
-  (code:S.code) (fuel:nat) (s1:S.machine_state) (s2:S.machine_state) 
+  (code:S.code) (fuel:nat) (s1:S.machine_state) (s2:S.machine_state)
   :Lemma (isExplicitLeakageFreeGivenStates code fuel ts2 ts s1 s2 /\ taintstate_monotone ts1 ts2 ==> isExplicitLeakageFreeGivenStates code fuel ts1 ts s1 s2)
   = ()
 
@@ -157,14 +157,14 @@ let count_publics (ts:analysis_taints) : nat =
 #push-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 1 --initial_ifuel 1"
 let monotone_decreases_count (ts ts':analysis_taints) : Lemma
   (requires taintstate_monotone ts ts' /\ not (eq_taintStates ts ts'))
-  (ensures count_publics ts' < count_publics ts)  
+  (ensures count_publics ts' < count_publics ts)
   =
   assert (forall r. count_public_register ts'.regTaint r <= count_public_register ts.regTaint r);
   assert (forall r. count_public_xmm ts'.xmmTaint r <= count_public_xmm ts.xmmTaint r);
   assert (count_cfFlagTaint ts' <= count_cfFlagTaint ts);
   assert (count_ofFlagTaint ts' <= count_ofFlagTaint ts);
   assert (count_flagTaint ts' <= count_flagTaint ts)
-  
+
 #pop-options
 
 val check_if_block_consumes_fixed_time: (block:S.codes) -> (ts:analysis_taints) -> Tot (bool * analysis_taints)

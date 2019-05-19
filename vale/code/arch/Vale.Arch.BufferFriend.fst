@@ -33,7 +33,7 @@ let same_seq_downview8 b h =
   DV.length_eq db;
   let s = B.as_seq h b in
   let sdb = DV.as_seq h db in
-  let aux (i:nat{i < B.length b}) : Lemma (Seq.index sdb i == Seq.index s i) 
+  let aux (i:nat{i < B.length b}) : Lemma (Seq.index sdb i == Seq.index s i)
     = DV.as_seq_sel h db i;
       DV.get_sel h db i;
       Vale.Def.Opaque_s.reveal_opaque Vale.Interop.Views.put8_def

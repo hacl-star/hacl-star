@@ -85,14 +85,14 @@ let key128_lemma'
        V.eval_code code va_s0 f va_s1 /\
        VSig.vale_calling_conventions_stdcall va_s0 va_s1 /\
        key128_post s code input_b output_b va_s0 va_s1 f /\
-       ME.buffer_writeable (as_vale_buffer input_b) /\ 
+       ME.buffer_writeable (as_vale_buffer input_b) /\
        ME.buffer_writeable (as_vale_buffer output_b)
- )) = 
+ )) =
    let va_s1, f = GF.va_lemma_Keyhash_init code va_s0 IA.win AES_128 (Ghost.reveal s)
      (as_vale_buffer input_b) (as_vale_buffer output_b) in
-   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt8 ME.TUInt128 input_b;   
-   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt8 ME.TUInt128 output_b;   
-   va_s1, f                                   
+   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt8 ME.TUInt128 input_b;
+   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt8 ME.TUInt128 output_b;
+   (va_s1, f)
 
 noextract
 let key128_lemma (s:Ghost.erased (Seq.seq nat32)) = as_t #(VSig.vale_sig_stdcall (key128_pre s)  (key128_post s)) (key128_lemma' s)
@@ -163,14 +163,14 @@ let key256_lemma'
        V.eval_code code va_s0 f va_s1 /\
        VSig.vale_calling_conventions_stdcall va_s0 va_s1 /\
        key256_post s code input_b output_b va_s0 va_s1 f /\
-       ME.buffer_writeable (as_vale_buffer input_b) /\ 
+       ME.buffer_writeable (as_vale_buffer input_b) /\
        ME.buffer_writeable (as_vale_buffer output_b)
- )) = 
+ )) =
    let va_s1, f = GF.va_lemma_Keyhash_init code va_s0 IA.win AES_256 (Ghost.reveal s)
      (as_vale_buffer input_b) (as_vale_buffer output_b) in
-   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt8 ME.TUInt128 input_b;   
-   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt8 ME.TUInt128 output_b;   
-   va_s1, f                                   
+   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt8 ME.TUInt128 input_b;
+   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt8 ME.TUInt128 output_b;
+   (va_s1, f)
 
 noextract
 let key256_lemma (s:Ghost.erased (Seq.seq nat32)) = as_t #(VSig.vale_sig_stdcall (key256_pre s)  (key256_post s)) (key256_lemma' s)

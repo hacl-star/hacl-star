@@ -98,17 +98,17 @@ procedure fast_sqr_part1(inline offset:nat, ghost inA_b:buffer64)
 
     Load64_buffer(rdx, inA_ptr,  0 + offset*8, Secret, inA_b, 0 + offset);     /* A[0] */
     /* The Xor64 clears the flags used for carry bits; NOTE: Original code uses xorl with r15d, maybe produces smaller code? */
-    Mulx64(r14, r8, Mem(inA_ptr,  8 + offset*8, inA_b, 1 + offset, Secret));  /* A[0]*A[1] */ lemma_prod_bounds(r14,  r8, a0, a1);  Xor64(r15, r15);  
+    Mulx64(r14, r8, Mem(inA_ptr,  8 + offset*8, inA_b, 1 + offset, Secret));  /* A[0]*A[1] */ lemma_prod_bounds(r14,  r8, a0, a1);  Xor64(r15, r15);
 
-    Mulx64(r10, r9, Mem(inA_ptr, 16 + offset*8, inA_b, 2 + offset, Secret));  /* A[0]*A[2] */ lemma_prod_bounds(r10,  r9, a0, a2);  Adcx64Wrap( r9, r14);    
-    
-    Mulx64(rcx,rax, Mem(inA_ptr, 24 + offset*8, inA_b, 3 + offset, Secret));  /* A[0]*A[3] */ lemma_prod_bounds(rcx, rax, a0, a3);  Adcx64Wrap(r10, rax);    
+    Mulx64(r10, r9, Mem(inA_ptr, 16 + offset*8, inA_b, 2 + offset, Secret));  /* A[0]*A[2] */ lemma_prod_bounds(r10,  r9, a0, a2);  Adcx64Wrap( r9, r14);
+
+    Mulx64(rcx,rax, Mem(inA_ptr, 24 + offset*8, inA_b, 3 + offset, Secret));  /* A[0]*A[3] */ lemma_prod_bounds(rcx, rax, a0, a3);  Adcx64Wrap(r10, rax);
 
     Load64_buffer(rdx, inA_ptr,  24 + offset*8, Secret, inA_b, 3 + offset);     /* A[3] */
 
     Mulx64(r12,r11, Mem(inA_ptr,  8 + offset*8, inA_b, 1 + offset, Secret));  /* A[3]*A[1] */ lemma_prod_bounds(r12, r11, a3, a1);  Adcx64Wrap(r11, rcx);
 
-    Mulx64(r13,rax, Mem(inA_ptr, 16 + offset*8, inA_b, 2 + offset, Secret));  /* A[3]*A[2] */ lemma_prod_bounds(r13, rax, a3, a2);  Adcx64Wrap(r12, rax);    
+    Mulx64(r13,rax, Mem(inA_ptr, 16 + offset*8, inA_b, 2 + offset, Secret));  /* A[3]*A[2] */ lemma_prod_bounds(r13, rax, a3, a2);  Adcx64Wrap(r12, rax);
 
     Load64_buffer(rdx, inA_ptr,   8 + offset*8, Secret, inA_b, 1 + offset);     /* A[1] */                                          Adcx64Wrap(r13, r15);  // r15 = 0, r13 < pow2_64 - 1, so this wraps the carry into r13
 
@@ -190,7 +190,7 @@ procedure fast_sqr_part3(inline offset:nat, ghost dst_b:buffer64, ghost inA_b:bu
         let d5 := buffer64_read(dst_b, 5 + offset*2, mem);
         let d6 := buffer64_read(dst_b, 6 + offset*2, mem);
         let d7 := buffer64_read(dst_b, 7 + offset*2, mem);
-        
+
         pow2_nine(d0, d1, d2, d3, d4, d5, d6, d7, bool_bit(cf(efl))) ==
         old(pow2_eight(mul_nats(a0,a0), r8, mul_nats(a1,a1) + r9, r10, mul_nats(a2,a2) + r11, r12, mul_nats(a3,a3) + r13, r14));
 
@@ -212,21 +212,21 @@ procedure fast_sqr_part3(inline offset:nat, ghost dst_b:buffer64, ghost inA_b:bu
 //    "adcq %%rax, %%r13 ;"   "movq %%r13, 48(%0) ;"
 //    "adcq %%rcx, %%r14 ;"   "movq %%r14, 56(%0) ;"
 
-    Load64_buffer(rdx, inA_ptr,  0 + offset*8, Secret, inA_b, 0 + offset);   Mulx64(rcx, rax, rdx);  /* A[0]^2 */                let a0_sqr_hi := rcx; let a0_sqr_lo := rax;  
+    Load64_buffer(rdx, inA_ptr,  0 + offset*8, Secret, inA_b, 0 + offset);   Mulx64(rcx, rax, rdx);  /* A[0]^2 */                let a0_sqr_hi := rcx; let a0_sqr_lo := rax;
     /********************/                               Store64_buffer(dst_ptr, rax,  0 + offset*16, Secret, dst_b, 0 + offset*2);
     Add64Wrap(r8, rcx);                                  Store64_buffer(dst_ptr,  r8,  8 + offset*16, Secret, dst_b, 1 + offset*2);
-    Load64_buffer(rdx, inA_ptr,  8 + offset*8, Secret, inA_b, 1 + offset);   Mulx64(rcx, rax, rdx);  /* A[1]^2 */                let a1_sqr_hi := rcx; let a1_sqr_lo := rax;  
+    Load64_buffer(rdx, inA_ptr,  8 + offset*8, Secret, inA_b, 1 + offset);   Mulx64(rcx, rax, rdx);  /* A[1]^2 */                let a1_sqr_hi := rcx; let a1_sqr_lo := rax;
     Adcx64Wrap( r9, rax);                                Store64_buffer(dst_ptr,  r9, 16 + offset*16, Secret, dst_b, 2 + offset*2);
     Adcx64Wrap(r10, rcx);                                Store64_buffer(dst_ptr, r10, 24 + offset*16, Secret, dst_b, 3 + offset*2);
-    Load64_buffer(rdx, inA_ptr, 16 + offset*8, Secret, inA_b, 2 + offset);   Mulx64(rcx, rax, rdx);  /* A[2]^2 */                let a2_sqr_hi := rcx; let a2_sqr_lo := rax;  
+    Load64_buffer(rdx, inA_ptr, 16 + offset*8, Secret, inA_b, 2 + offset);   Mulx64(rcx, rax, rdx);  /* A[2]^2 */                let a2_sqr_hi := rcx; let a2_sqr_lo := rax;
     Adcx64Wrap(r11, rax);                                Store64_buffer(dst_ptr, r11, 32 + offset*16, Secret, dst_b, 4 + offset*2);
     Adcx64Wrap(r12, rcx);                                Store64_buffer(dst_ptr, r12, 40 + offset*16, Secret, dst_b, 5 + offset*2);
-    Load64_buffer(rdx, inA_ptr, 24 + offset*8, Secret, inA_b, 3 + offset);   Mulx64(rcx, rax, rdx);  /* A[3]^2 */       lemma_prod_bounds(rcx, rax, rdx, rdx);                let a3_sqr_hi := rcx; let a3_sqr_lo := rax;  
+    Load64_buffer(rdx, inA_ptr, 24 + offset*8, Secret, inA_b, 3 + offset);   Mulx64(rcx, rax, rdx);  /* A[3]^2 */       lemma_prod_bounds(rcx, rax, rdx, rdx);                let a3_sqr_hi := rcx; let a3_sqr_lo := rax;
     Adcx64Wrap(r13, rax);                                Store64_buffer(dst_ptr, r13, 48 + offset*16, Secret, dst_b, 6 + offset*2);
     Adcx64Wrap(r14, rcx);                                Store64_buffer(dst_ptr, r14, 56 + offset*16, Secret, dst_b, 7 + offset*2);
 
     lemma_sqr_part3(a, a0, a1, a2, a3, a0_sqr_hi, a0_sqr_lo, a1_sqr_hi, a1_sqr_lo, a2_sqr_hi, a2_sqr_lo, a3_sqr_hi, a3_sqr_lo,
-                    old(r8), old(r9), old(r10), old(r11), old(r12), old(r13), old(r14), 
+                    old(r8), old(r9), old(r10), old(r11), old(r12), old(r13), old(r14),
                     buffer64_read(dst_b, 0 + offset*2, mem),
                     buffer64_read(dst_b, 1 + offset*2, mem),
                     buffer64_read(dst_b, 2 + offset*2, mem),
@@ -238,7 +238,7 @@ procedure fast_sqr_part3(inline offset:nat, ghost dst_b:buffer64, ghost inA_b:bu
                     bool_bit(cf(efl)));
 }
 
-#reset-options "--z3rlimit 600" 
+#reset-options "--z3rlimit 600"
 procedure fast_sqr(inline offset:nat, ghost dst_b:buffer64, ghost inA_b:buffer64)
     {:public}
     {:quick}
@@ -314,7 +314,7 @@ procedure fast_sqr(inline offset:nat, ghost dst_b:buffer64, ghost inA_b:buffer64
     let d5 := buffer64_read(dst_b, 5 + offset*2, mem);
     let d6 := buffer64_read(dst_b, 6 + offset*2, mem);
     let d7 := buffer64_read(dst_b, 7 + offset*2, mem);
-    lemma_sqr(a, a0, a1, a2, a3, 
+    lemma_sqr(a, a0, a1, a2, a3,
               old_r8, old_r9, old_r10, old_r11, old_r12, old_r13, old_rax, old_rcx,
               mid_r8, mid_r9, mid_r10, mid_r11, mid_r12, mid_r13, mid_r14,
               d0, d1, d2, d3, d4, d5, d6, d7, bool_bit(cf(efl)));
@@ -327,7 +327,7 @@ procedure fast_sqr_stdcall(inline win:bool, ghost dst_b:buffer64, ghost inA_b:bu
     {:public}
     {:quick}
     lets
-        dst_ptr @= rdi; inA_ptr @= rsi; 
+        dst_ptr @= rdi; inA_ptr @= rsi;
         dst_in := (if win then rcx else rdi);
         inA_in := (if win then rdx else rsi);
     reads memTaint;
@@ -389,7 +389,7 @@ procedure fast_sqr_stdcall(inline win:bool, ghost dst_b:buffer64, ghost inA_b:bu
     inline if (win) {
         Mov64(dst_ptr, rcx);
         Mov64(inA_ptr, rdx);
-    } 
+    }
 
     fast_sqr(0, dst_b, inA_b);
 
@@ -401,7 +401,7 @@ procedure fast_sqr_stdcall(inline win:bool, ghost dst_b:buffer64, ghost inA_b:bu
 }
 
 /*
-#reset-options "--z3rlimit 60" 
+#reset-options "--z3rlimit 60"
 procedure fast_sqr_loop(inline offset:nat, ghost dst_b:buffer64, ghost inA_b:buffer64)
     {:quick}
     lets
@@ -445,7 +445,7 @@ procedure fast_sqr_loop(inline offset:nat, ghost dst_b:buffer64, ghost inA_b:buf
         validSrcAddrs64(mem, dst_ptr, dst_b, 8 + offset*2, memTaint, Secret);
         modifies_buffer_specific(dst_b, old(mem), mem, 0 + offset*2, 8 + offset*2 - 1);
 {
-    while (count > 0) 
+    while (count > 0)
         invariant
             0 <= count <= old(count);
 
@@ -455,7 +455,7 @@ procedure fast_sqr_loop(inline offset:nat, ghost dst_b:buffer64, ghost inA_b:buf
 
             validDstAddrs64(mem, dst_ptr, dst_b, 8 + offset*2, memTaint, Secret);
             validSrcAddrs64(mem, inA_ptr, inA_b, 4 + offset, memTaint, Secret);
-        
+
             modifies_buffer_specific(dst_b, old(mem), mem, 0 + offset*2, 8 + offset*2 - 1);
         decreases count;
     {
@@ -554,7 +554,7 @@ procedure sqr2_stdcall(inline win:bool, ghost dst_b:buffer64, ghost inA_b:buffer
     {:public}
     {:quick}
     lets
-        dst_ptr @= rdi; inA_ptr @= rsi; 
+        dst_ptr @= rdi; inA_ptr @= rsi;
         dst_in := (if win then rcx else rdi);
         inA_in := (if win then rdx else rsi);
     reads memTaint;
@@ -616,11 +616,11 @@ procedure sqr2_stdcall(inline win:bool, ghost dst_b:buffer64, ghost inA_b:buffer
         Push(rsi);
         Mov64(dst_ptr, rcx);
         Mov64(inA_ptr, rdx);
-    } 
+    }
 
     fast_sqr(0, dst_b, inA_b);
     fast_sqr(4, dst_b, inA_b);
-    
+
     inline if (win) {
         Pop(rsi);
     }

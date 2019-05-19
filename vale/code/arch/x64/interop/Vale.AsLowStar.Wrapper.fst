@@ -81,7 +81,7 @@ let arg_is_registered_root (s:ME.mem) (a:arg) =
   | (| TD_Buffer src bt _, x |) ->
     List.memP (mut_to_b8 src x) (ptrs_of_mem (as_mem s))
   | (| TD_ImmBuffer src bt _, x |) ->
-    List.memP (imm_to_b8 src x) (ptrs_of_mem (as_mem s))    
+    List.memP (imm_to_b8 src x) (ptrs_of_mem (as_mem s))
   | _ -> true
 
 #set-options "--z3rlimit 20"
@@ -165,7 +165,7 @@ let core_create_lemma_mem_correspondance
          LSig.mem_correspondence args h0 va_s))
   =
     let va_s = LSig.create_initial_vale_state #max_arity #arg_reg args h0 in
-    let rec aux (accu:list arg) : Lemma 
+    let rec aux (accu:list arg) : Lemma
       (requires (forall x. List.memP x accu ==> (live_arg h0 x)))
       (ensures LSig.mem_correspondence accu h0 va_s) =
     match accu with
@@ -183,7 +183,7 @@ let core_create_lemma_mem_correspondance
         let db = get_downview x in
         DV.length_eq db;
         let ub = UV.mk_buffer db (LSig.view_of_base_typ bt) in
-        assert (Seq.equal (UV.as_seq h0 ub) (UV.as_seq h0 ub))        
+        assert (Seq.equal (UV.as_seq h0 ub) (UV.as_seq h0 ub))
       | (| TD_Base _, _ |) -> ()
     in
     BigOps.big_and'_forall (live_arg h0) args;
@@ -218,7 +218,7 @@ let rec lemma_register_args'_aux
       (ensures register_args' max_arity arg_reg n args regs2)
   = match args with
     | [] -> ()
-    | hd::tl -> 
+    | hd::tl ->
       lemma_register_args'_aux max_arity arg_reg (n-1) tl regs1 regs2
 
 let rec lemma_register_args'
@@ -321,7 +321,7 @@ let rec stack_args' (max_arity:nat)
     | hd::tl ->
         stack_args' max_arity (n-1) tl rsp stack /\
         (if n <= max_arity then True // This arg is passed in registers
-         else 
+         else
            let ptr = ((n - max_arity) - 1) * 8
              + (if IA.win then 32 else 0)
              + 8
@@ -336,7 +336,7 @@ let frame_update_get_heap (ptr:int) (v:MS.nat64) (mem:BS.heap) (j:int) : Lemma
   =
   Vale.Def.Opaque_s.reveal_opaque BS.get_heap_val64_def;
   Vale.Def.Opaque_s.reveal_opaque BS.update_heap64_def
-  
+
 let frame_update_valid_heap (ptr:int) (v:MS.nat64) (mem:BS.heap) (j:int) : Lemma
   (requires ptr >= j + 8)
   (ensures BS.valid_addr64 j mem == BS.valid_addr64 j (BS.update_heap64 ptr v mem))
@@ -349,12 +349,12 @@ let rec stack_of_args_stack_args'_aux
     (n_init:nat)
     (n:nat)
     (args:IX64.arg_list{List.Tot.length args = n})
-    (rsp:int) 
+    (rsp:int)
     (stack:Map.t int Vale.Def.Words_s.nat8)
     (v:MS.nat64)
     : Lemma
   (requires stack_args' max_arity n args rsp stack /\ n_init >= n)
-  (ensures 
+  (ensures
     (let ptr = (n_init - max_arity) * 8 + (if IA.win then 32 else 0) + 8 + rsp in
     stack_args' max_arity n args rsp (BS.update_heap64 ptr v stack)))
   = match args with
@@ -363,7 +363,7 @@ let rec stack_of_args_stack_args'_aux
       stack_of_args_stack_args'_aux max_arity n_init (n-1) tl rsp stack v;
       if n <= max_arity then ()
       else (
-        let fixed = (n_init - max_arity) * 8 + (if IA.win then 32 else 0) + 8 + rsp in      
+        let fixed = (n_init - max_arity) * 8 + (if IA.win then 32 else 0) + 8 + rsp in
         let ptr = ((n - max_arity) - 1) * 8
           + (if IA.win then 32 else 0)
           + 8
@@ -377,7 +377,7 @@ let rec stack_of_args_stack_args'_aux
         frame_update_get_heap fixed v stack ptr;
         frame_update_valid_heap fixed v stack ptr
      )
-     
+
 #push-options "--max_fuel 1 --max_ifuel 0 --z3rlimit 100 --z3refresh"
 let rec stack_of_args_stack_args'
     (max_arity:nat)
@@ -390,7 +390,7 @@ let rec stack_of_args_stack_args'
     FStar.Pervasives.reveal_opaque (`%BS.valid_addr64) BS.valid_addr64;
     FStar.Pervasives.reveal_opaque (`%BS.valid_addr128) BS.valid_addr128;
     let rec aux (args:IX64.arg_list) (accu:Map.t int Vale.Def.Words_s.nat8) : Lemma (ensures (
-      stack_args' max_arity (List.length args) args init_rsp 
+      stack_args' max_arity (List.length args) args init_rsp
         (IX64.stack_of_args max_arity (List.length args) init_rsp args accu)))
       (decreases (List.length args))
       =
@@ -415,7 +415,7 @@ let rec stack_of_args_stack_args'
           Vale.X64.Bytes_Semantics.correct_update_get ptr v accu';
           Vale.Def.Opaque_s.reveal_opaque BS.update_heap64_def
         )
-        
+
 
     in aux args (Map.const_on Set.empty 0)
 #pop-options
@@ -430,12 +430,12 @@ let core_create_lemma_stack_args
       (ensures (let va_s = LSig.create_initial_vale_state #max_arity #arg_reg args h0 in
                 LSig.stack_args max_arity (List.length args) args va_s))
   = let va_s = LSig.create_initial_vale_state #max_arity #arg_reg args h0 in
-    let init_rsp = IA.init_regs MS.rRsp in    
+    let init_rsp = IA.init_regs MS.rRsp in
     let stack = Map.const_on Set.empty 0 in
     let stack_map = IX64.stack_of_args max_arity (List.Tot.length args) init_rsp args stack in
-    let stack_f = BS.Vale_stack init_rsp stack_map in 
+    let stack_f = BS.Vale_stack init_rsp stack_map in
     let rec aux (accu:IX64.arg_list{List.length accu <= List.length args}) : Lemma
-      (requires 
+      (requires
          stack_args' max_arity (List.length accu) accu init_rsp stack_map)
       (ensures LSig.stack_args max_arity (List.length accu) accu va_s)
     =
@@ -446,19 +446,19 @@ let core_create_lemma_stack_args
         let i = List.length accu in
         if i <= max_arity then ()
         else (
-          let ptr = 
+          let ptr =
             ((i  - max_arity) - 1) * 8
              + (if IA.win then 32 else 0)
              + 8
              + init_rsp
-          in 
+          in
           Vale.AsLowStar.MemoryHelpers.mk_stack_reveal stack_f;
           SI.lemma_valid_taint_stack64_reveal ptr MS.Public va_s.VS.stackTaint;
           let aux2 () : Lemma (IX64.arg_as_nat64 hd == LSig.arg_as_nat64 hd va_s) =
             match hd with
             | (| TD_Buffer src bt _, x |) ->
               Vale.AsLowStar.MemoryHelpers.buffer_addr_reveal src bt x args h0
-            | (| TD_ImmBuffer src bt _, x |) ->              
+            | (| TD_ImmBuffer src bt _, x |) ->
               Vale.AsLowStar.MemoryHelpers.immbuffer_addr_reveal src bt x args h0
             | _ -> ()
           in aux2()
@@ -484,7 +484,7 @@ let core_create_lemma
   ))
   = let va_s = LSig.create_initial_vale_state #max_arity #arg_reg args h0 in
     let t_state = fst (IX64.create_initial_trusted_state max_arity arg_reg args I.down_mem h0) in
-    let t_stack = t_state.BS.ms_stack in  
+    let t_stack = t_state.BS.ms_stack in
     core_create_lemma_mem_correspondance #max_arity #arg_reg args h0;
     core_create_lemma_disjointness args;
     core_create_lemma_readable #max_arity #arg_reg args h0;
@@ -567,7 +567,7 @@ val vale_lemma_as_prediction
           (#max_arity:nat)
           (#arg_reg:IX64.arg_reg_relation max_arity)
           (#regs_modified:MS.reg -> bool)
-          (#xmms_modified:MS.xmm -> bool)          
+          (#xmms_modified:MS.xmm -> bool)
           (code:V.va_code)
           (args:IX64.arg_list)
           (pre:VSig.vale_pre_tl [])
@@ -616,8 +616,8 @@ let vale_lemma_as_prediction
        Vale.AsLowStar.MemoryHelpers.relate_modifies args va_s0.VS.mem va_s1.VS.mem;
        assert (B.modifies (loc_modified_args args) h0 h1);
        Vale.AsLowStar.MemoryHelpers.modifies_equal_domains
-         (VSig.mloc_modified_args args) va_s0.VS.mem final_mem;       
-       Vale.AsLowStar.MemoryHelpers.modifies_same_roots 
+         (VSig.mloc_modified_args args) va_s0.VS.mem final_mem;
+       Vale.AsLowStar.MemoryHelpers.modifies_same_roots
          (VSig.mloc_modified_args args) va_s0.VS.mem final_mem;
        Vale.AsLowStar.MemoryHelpers.state_eq_down_mem va_s1 s1;
        assert (I.down_mem (as_mem final_mem) == s1.BS.ms_mem);
@@ -666,7 +666,7 @@ let rec lowstar_typ
 
 #set-options "--initial_ifuel 1"
 private
-let rec __test__wrap 
+let rec __test__wrap
              (#max_arity:nat)
              (#arg_reg:IX64.arg_reg_relation max_arity)
              (#regs_modified:MS.reg -> bool)
@@ -700,7 +700,7 @@ let rec __test__wrap
     | hd::tl ->
       fun (x:td_as_type hd) ->
         __test__wrap
-          #max_arity 
+          #max_arity
           #arg_reg
           code
           IX64.(x ++ args)

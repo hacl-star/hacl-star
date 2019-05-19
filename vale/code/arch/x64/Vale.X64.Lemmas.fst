@@ -179,9 +179,9 @@ let lemma_whileMerge_total (c:code) (s0:state) (f0:fuel) (sM:state) (fM:fuel) (s
       let Some sZ = BS.machine_eval_code c f (state_to_S sN) in
       let fZ = if f > fM then f else fM in
       increase_fuel (While?.whileBody c) (state_to_S sM) fM (state_to_S sN) fZ;
-      
+
       increase_fuel c (state_to_S sN) f sZ fZ;
-      
+
       assert (state_eq_opt (BS.machine_eval_code c (fZ + 1) (state_to_S sM)) (Some sZ)); // via eval_code for While
       assert (state_eq_opt (BS.machine_eval_code c (fZ + 1) (state_to_S sM)) (BS.machine_eval_code c (fZ + 1 + f0) (state_to_S s0))); // via eval_while_inv, choosing f = fZ + 1
 

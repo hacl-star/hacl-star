@@ -24,7 +24,7 @@ let monomial (n:nat) : poly = append (create n false) one
 let lshift (p:poly) (n:nat) : poly =
   if length p = 0 then p
   else append (create n false) p
- 
+
 let rshift (p:poly) (n:nat) : poly =
   if length p <= n then zero
   else slice p n (length p)

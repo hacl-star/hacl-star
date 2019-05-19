@@ -98,21 +98,21 @@ procedure fast_mul1(inline offset:nat, ghost inA_b:buffer64)
         tmp0 == 0;
 {
     xor_lemmas();
-    
-    Mulx64( tmp0,  d0, Mem(inA_ptr, 0 + 8 * offset, inA_b, 0 + offset, Secret));  /* A[0]*B */ lemma_prod_bounds(tmp0, d0, b, a0); 
-    Mulx64(tmp1, d1, Mem(inA_ptr,  8 + 8 * offset, inA_b, 1 + offset, Secret));  /* A[1]*B */ lemma_prod_bounds(tmp1, d1, b, a1); 
+
+    Mulx64( tmp0,  d0, Mem(inA_ptr, 0 + 8 * offset, inA_b, 0 + offset, Secret));  /* A[0]*B */ lemma_prod_bounds(tmp0, d0, b, a0);
+    Mulx64(tmp1, d1, Mem(inA_ptr,  8 + 8 * offset, inA_b, 1 + offset, Secret));  /* A[1]*B */ lemma_prod_bounds(tmp1, d1, b, a1);
     Add64Wrap(d1, tmp0);
     Mov64(tmp0, 0);
-    Mulx64(tmp2, d2, Mem(inA_ptr, 16 + 8 * offset, inA_b, 2 + offset, Secret));  /* A[2]*B */ lemma_prod_bounds(tmp2, d2, b, a2); 
+    Mulx64(tmp2, d2, Mem(inA_ptr, 16 + 8 * offset, inA_b, 2 + offset, Secret));  /* A[2]*B */ lemma_prod_bounds(tmp2, d2, b, a2);
     Adcx64Wrap(d2, tmp1);
-    Mulx64(carry, d3, Mem(inA_ptr, 24 + 8 * offset, inA_b, 3 + offset, Secret));  /* A[3]*B */ lemma_prod_bounds(carry, d3, b, a3); 
+    Mulx64(carry, d3, Mem(inA_ptr, 24 + 8 * offset, inA_b, 3 + offset, Secret));  /* A[3]*B */ lemma_prod_bounds(carry, d3, b, a3);
     Adcx64Wrap(d3, tmp2);
     Adcx64Wrap(carry, tmp0);
 
     let carry_bit := bool_bit(cf(efl));
     assert carry_bit == 0;      // PASSES
     assert_by_tactic(a * b == pow2_four(b*a0, b*a1, b*a2, b*a3), int_canon);   // PASSES
-    
+
 }
 
 /*
@@ -161,20 +161,20 @@ procedure fast_add_after_mul1(ghost dst_b:buffer64, ghost inB_b:buffer64)
 
     Load64_buffer( r9, inB_ptr,  0, Secret, inB_b, 0);     /* B[0] */
     Add64Wrap(r9, r8);
-    Store64_buffer(dst_ptr,  r9,  0, Secret, dst_b, 0);  
+    Store64_buffer(dst_ptr,  r9,  0, Secret, dst_b, 0);
     Mov64(r9, 0);
 
     Load64_buffer(r11, inB_ptr,  8, Secret, inB_b, 1);     /* B[1] */
     Adcx64Wrap(r11, r10);
-    Store64_buffer(dst_ptr, r11,  8, Secret, dst_b, 1);  
+    Store64_buffer(dst_ptr, r11,  8, Secret, dst_b, 1);
 
     Load64_buffer(r13, inB_ptr, 16, Secret, inB_b, 2);     /* B[2] */
     Adcx64Wrap(r13, r12);
-    Store64_buffer(dst_ptr, r13, 16, Secret, dst_b, 2);  
+    Store64_buffer(dst_ptr, r13, 16, Secret, dst_b, 2);
 
     Load64_buffer(r15, inB_ptr, 24, Secret, inB_b, 3);     /* B[3] */
     Adcx64Wrap(r15, r14);
-    Store64_buffer(dst_ptr, r15, 24, Secret, dst_b, 3);  
+    Store64_buffer(dst_ptr, r15, 24, Secret, dst_b, 3);
 
     Adcx64Wrap(rax, r9);
 }
@@ -223,7 +223,7 @@ procedure fast_add_after_mul1_regs(ghost inB_b:buffer64)
         let d := pow2_five(d0, d1, d2, d3, carry);
         d == old(a + b);
 {
-    Xor64(tmp0, tmp0); 
+    Xor64(tmp0, tmp0);
 
     Load64_buffer( tmp0, inB_ptr,  0, Secret, inB_b, 0);     /* B[0] */
     Adox64Wrap(d0, tmp0);
@@ -241,7 +241,7 @@ procedure fast_add_after_mul1_regs(ghost inB_b:buffer64)
     Adox64Wrap(carry, tmp0);
 }
 
-#reset-options "--z3rlimit 600" 
+#reset-options "--z3rlimit 600"
 procedure fast_mul1_add(inline offset:nat, ghost inA_b:buffer64)
     {:quick}
     lets
@@ -276,7 +276,7 @@ procedure fast_mul1_add(inline offset:nat, ghost inA_b:buffer64)
 
     modifies
         zero;
-        carry; d0; d1; d2; d3; tmp0; tmp1; 
+        carry; d0; d1; d2; d3; tmp0; tmp1;
         efl;
 
     requires
@@ -293,16 +293,16 @@ procedure fast_mul1_add(inline offset:nat, ghost inA_b:buffer64)
 {
     xor_lemmas();
 
-    
-    Mulx64( tmp0,  d0, Mem(inA_ptr, 32 + offset*8, inA_b, 4 + offset, Secret));  /* A[4]*B */ lemma_prod_bounds(tmp0, d0, b, a4); 
+
+    Mulx64( tmp0,  d0, Mem(inA_ptr, 32 + offset*8, inA_b, 4 + offset, Secret));  /* A[4]*B */ lemma_prod_bounds(tmp0, d0, b, a4);
     let ba4_hi := tmp0;
     let ba4_lo := d0;
-    
+
     Xor64(zero, zero);  // Create a zero and clear the flags
 
     Adox64Wrap(d0, Mem(inA_ptr, 0 + offset*8, inA_b, 0 + offset, Secret));
 
-    Mulx64(tmp1, d1, Mem(inA_ptr,  40 + offset*8, inA_b, 5 + offset, Secret));  /* A[5]*B */ lemma_prod_bounds(tmp1, d1, b, a5); 
+    Mulx64(tmp1, d1, Mem(inA_ptr,  40 + offset*8, inA_b, 5 + offset, Secret));  /* A[5]*B */ lemma_prod_bounds(tmp1, d1, b, a5);
     let ba5_hi := tmp1;
     let ba5_lo := d1;
     Adcx64Wrap(d1, tmp0);
@@ -310,15 +310,15 @@ procedure fast_mul1_add(inline offset:nat, ghost inA_b:buffer64)
 
     Adox64Wrap(d1, Mem(inA_ptr, 8 + offset*8, inA_b, 1 + offset, Secret));
 
-    Mulx64(tmp0, d2, Mem(inA_ptr, 48 + offset*8, inA_b, 6 + offset, Secret));  /* A[6]*B */ lemma_prod_bounds(tmp0, d2, b, a6); 
+    Mulx64(tmp0, d2, Mem(inA_ptr, 48 + offset*8, inA_b, 6 + offset, Secret));  /* A[6]*B */ lemma_prod_bounds(tmp0, d2, b, a6);
     let ba6_hi := tmp0;
     let ba6_lo := d2;
     Adcx64Wrap(d2, tmp1);
     let s2 := d2;
-    
+
     Adox64Wrap(d2, Mem(inA_ptr, 16 + offset*8, inA_b, 2 + offset, Secret));
 
-    Mulx64(carry, d3, Mem(inA_ptr, 56 + offset*8, inA_b, 7 + offset, Secret));  /* A[7]*B */ lemma_prod_bounds(carry, d3, b, a7); 
+    Mulx64(carry, d3, Mem(inA_ptr, 56 + offset*8, inA_b, 7 + offset, Secret));  /* A[7]*B */ lemma_prod_bounds(carry, d3, b, a7);
     let ba7_hi := carry;
     let ba7_lo := d3;
     Adcx64Wrap(d3, tmp0);
@@ -332,12 +332,12 @@ procedure fast_mul1_add(inline offset:nat, ghost inA_b:buffer64)
 
     let carry_bit := bool_bit(cf(efl));
     assert carry_bit == 0;      // PASSES
-    lemma_fast_mul1(a', old(b), a4, a5, a6, a7, 
+    lemma_fast_mul1(a', old(b), a4, a5, a6, a7,
                     ba4_hi, ba4_lo, ba5_hi, ba5_lo, ba6_hi, ba6_lo, ba7_hi, ba7_lo,
                     s1, s2, s3, s4);
     let d := pow2_five(ba4_lo, s1, s2, s3, s4);
-    lemma_addition(a, d, 
-                   a0, a1, a2, a3, 
+    lemma_addition(a, d,
+                   a0, a1, a2, a3,
                    ba4_lo, s1, s2, s3, s4,
                    d0, d1, d2, d3, carry);
 }
@@ -355,7 +355,7 @@ procedure store4(ghost dst_b:buffer64)
     reads dst_ptr; d0; d1; d2; d3; memTaint;
     modifies mem;
     requires validDstAddrs64(mem, dst_ptr, dst_b, 4, memTaint, Secret);
-    ensures 
+    ensures
         d0 == buffer64_read(dst_b, 0, mem);
         d1 == buffer64_read(dst_b, 1, mem);
         d2 == buffer64_read(dst_b, 2, mem);
@@ -364,10 +364,10 @@ procedure store4(ghost dst_b:buffer64)
         modifies_buffer(dst_b, old(mem), mem);
         validSrcAddrs64(mem, dst_ptr, dst_b, 4, memTaint, Secret);
 {
-    Store64_buffer(dst_ptr, d0,  0, Secret, dst_b, 0);  
-    Store64_buffer(dst_ptr, d1,  8, Secret, dst_b, 1);  
-    Store64_buffer(dst_ptr, d2, 16, Secret, dst_b, 2);  
-    Store64_buffer(dst_ptr, d3, 24, Secret, dst_b, 3);  
+    Store64_buffer(dst_ptr, d0,  0, Secret, dst_b, 0);
+    Store64_buffer(dst_ptr, d1,  8, Secret, dst_b, 1);
+    Store64_buffer(dst_ptr, d2, 16, Secret, dst_b, 2);
+    Store64_buffer(dst_ptr, d3, 24, Secret, dst_b, 3);
 }
 
 #reset-options "--z3rlimit 20"
@@ -377,10 +377,10 @@ procedure carry_times_38(inout tmp:dst_opr64)
         carry @= rax;
     modifies carry;
     reads efl;
-    requires 
+    requires
         carry == 0;
         @tmp != OReg(rRax);
-    ensures 
+    ensures
         carry == bool_bit(cf(efl)) * 38;
         tmp == 38;
 {
@@ -400,7 +400,7 @@ procedure carry_pass(inline use_cf:bool, inline offset:nat, ghost dst_b:buffer64
         a1 @= r9;
         a2 @= r10;
         a3 @= r11;
-    
+
         carry_in:nat64 := if use_cf then (if cf(efl) then 1 else 0) else carry;
     reads dst_ptr; memTaint;
     modifies
@@ -419,7 +419,7 @@ procedure carry_pass(inline use_cf:bool, inline offset:nat, ghost dst_b:buffer64
         let d1 := buffer64_read(dst_b, 1 + offset, mem);
         let d2 := buffer64_read(dst_b, 2 + offset, mem);
         let d3 := buffer64_read(dst_b, 3 + offset, mem);
-        
+
         pow2_four(d0, d1, d2, d3) % prime == old(pow2_four(a0, a1, a2, a3) + carry_in * pow2_256) % prime;
 
         modifies_buffer_specific(dst_b, old(mem), mem, 0 + offset, 4 + offset - 1);
@@ -435,13 +435,13 @@ procedure carry_pass(inline use_cf:bool, inline offset:nat, ghost dst_b:buffer64
         IMul64(carry, tmp);
     }
 
-    Add64Wrap(a0, carry); 
-    Adcx64Wrap(a1, zero); 
-    Store64_buffer(dst_ptr, a1,  8 + offset*8, Secret, dst_b, 1 + offset);  
+    Add64Wrap(a0, carry);
+    Adcx64Wrap(a1, zero);
+    Store64_buffer(dst_ptr, a1,  8 + offset*8, Secret, dst_b, 1 + offset);
     Adcx64Wrap(a2, zero);
-    Store64_buffer(dst_ptr, a2, 16 + offset*8, Secret, dst_b, 2 + offset);  
+    Store64_buffer(dst_ptr, a2, 16 + offset*8, Secret, dst_b, 2 + offset);
     Adcx64Wrap(a3, zero);
-    Store64_buffer(dst_ptr, a3, 24 + offset*8, Secret, dst_b, 3 + offset);  
+    Store64_buffer(dst_ptr, a3, 24 + offset*8, Secret, dst_b, 3 + offset);
     assert pow2_five(a0, a1, a2, a3, bool_bit(cf(efl))) == old(pow2_four(a0, a1, a2, a3) + carry_in * 38);
     let sum := old(pow2_four(a0, a1, a2, a3) + carry_in * 38);
     let new_carry := bool_bit(cf(efl));
@@ -453,7 +453,7 @@ procedure carry_pass(inline use_cf:bool, inline offset:nat, ghost dst_b:buffer64
     Cmovc64(carry, tmp);
     Add64Wrap(a0, carry);
     assert a0 == a0' + new_carry * 38;
-    Store64_buffer(dst_ptr, a0,  0 + offset*8, Secret, dst_b, 0 + offset);  
+    Store64_buffer(dst_ptr, a0,  0 + offset*8, Secret, dst_b, 0 + offset);
 }
 
 
@@ -533,7 +533,7 @@ procedure carry_wide_stdcall(inline win:bool, ghost dst_b:buffer64, ghost inA_b:
     {:public}
     {:quick}
     lets
-        dst_ptr @= rdi; inA_ptr @= rsi; 
+        dst_ptr @= rdi; inA_ptr @= rsi;
         dst_in := (if win then rcx else rdi);
         inA_in := (if win then rdx else rsi);
     reads memTaint;
@@ -586,7 +586,7 @@ procedure carry_wide_stdcall(inline win:bool, ghost dst_b:buffer64, ghost inA_b:
         Push(rsi);
         Mov64(dst_ptr, rcx);
         Mov64(inA_ptr, rdx);
-    } 
+    }
 
     carry_wide(0, dst_b, inA_b);
 
@@ -621,10 +621,10 @@ procedure carry_sub_pass()
     Mov64(carry, 0);
     carry_times_38(tmp);
 
-    Sub64Wrap(a0, carry);      
-    Sbb64(a1, 0);          
-    Sbb64(a2, 0);          
-    Sbb64(a3, 0);          
+    Sub64Wrap(a0, carry);
+    Sbb64(a1, 0);
+    Sbb64(a2, 0);
+    Sbb64(a3, 0);
 
     let old_carry := old(bool_bit(cf(efl)));
     assert pow2_four(a0, a1, a2, a3) - bool_bit(cf(efl))*pow2_256 == old(pow2_four(a0, a1, a2, a3) - old_carry * 38);
@@ -647,7 +647,7 @@ procedure fast_add(ghost inA_b:buffer64, ghost inB_b:buffer64)
     lets
         inA_ptr @= rsi;
         inB_ptr @= rdx;
-        
+
         d0 @= r8;
         d1 @= r9;
         d2 @= r10;
@@ -746,7 +746,7 @@ procedure fast_sub(ghost inA_b:buffer64, ghost inB_b:buffer64)
 
     Load64_buffer(d2, inA_ptr, 16, Secret, inA_b, 2);     /* A[2] */
     Sbb64(d2, Mem(inB_ptr,16, inB_b, 2, Secret));         /* A[2] - B[2] */
-    
+
     Load64_buffer(d3, inA_ptr, 24, Secret, inA_b, 3);     /* A[3] */
     Sbb64(d3, Mem(inB_ptr,24, inB_b, 3, Secret));         /* A[3] - B[3] */
 
@@ -787,7 +787,7 @@ procedure fadd(ghost dst_b:buffer64, ghost inA_b:buffer64, ghost inB_b:buffer64)
         dst_ptr; inA_ptr; memTaint;
 
     modifies
-        rax; rcx; inB_ptr; 
+        rax; rcx; inB_ptr;
         tmp0; tmp1; tmp2; tmp3;
         mem; efl;
 
@@ -812,7 +812,7 @@ procedure fadd(ghost dst_b:buffer64, ghost inA_b:buffer64, ghost inB_b:buffer64)
         modifies_buffer(dst_b, old(mem), mem);
 {
     fast_add(inA_b, inB_b);
-    assert_by_tactic(  
+    assert_by_tactic(
         pow2_five(tmp0, tmp1, tmp2, tmp3, bool_bit(cf(efl))) ==
         pow2_four(tmp0, tmp1, tmp2, tmp3) + bool_bit(cf(efl)) * pow2_256, int_canon);
     carry_pass(true, 0, dst_b);
@@ -833,7 +833,7 @@ procedure fadd_stdcall(
         inB_in := (if win then r8 else rdx);
     reads memTaint;
     modifies
-        rax; rbx; rcx; rdx; rsi; rdi; rbp; rsp; r8; r9; r10; r11; r12; r13; r14; r15;     
+        rax; rbx; rcx; rdx; rsi; rdi; rbp; rsp; r8; r9; r10; r11; r12; r13; r14; r15;
         efl; mem; stack; stackTaint;
     requires
         rsp == init_rsp(stack);
@@ -901,7 +901,7 @@ procedure fadd_stdcall(
         Mov64(dst_ptr, rcx);
         Mov64(inA_ptr, rdx);
         Mov64(inB_ptr, r8);
-    } 
+    }
 
     fadd(dst_b, inA_b, inB_b);
 
@@ -986,7 +986,7 @@ procedure fsub_stdcall(
         inB_in := (if win then r8 else rdx);
     reads memTaint;
     modifies
-        rax; rbx; rcx; rdx; rsi; rdi; rbp; rsp; r8; r9; r10; r11; r12; r13; r14; r15;         
+        rax; rbx; rcx; rdx; rsi; rdi; rbp; rsp; r8; r9; r10; r11; r12; r13; r14; r15;
         efl; mem; stack; stackTaint;
     requires
         rsp == init_rsp(stack);
@@ -1054,7 +1054,7 @@ procedure fsub_stdcall(
         Mov64(dst_ptr, rcx);
         Mov64(inA_ptr, rdx);
         Mov64(inB_ptr, r8);
-    } 
+    }
 
     fsub(dst_b, inA_b, inB_b);
 
@@ -1101,7 +1101,7 @@ procedure fmul1(ghost dst_b:buffer64, ghost inA_b:buffer64, ghost inB:nat64)
 
         validDstAddrs64(mem, dst_ptr, dst_b, 4, memTaint, Secret);
         validSrcAddrs64(mem, inA_ptr, inA_b, 4, memTaint, Secret);
-        
+
         b < 131072; // < pow2 17
     ensures
         let d0 := buffer64_read(dst_b, 0, mem);
@@ -1136,7 +1136,7 @@ procedure fmul1_stdcall(
         inA_in := (if win then rdx else rsi);
     reads memTaint;
     modifies
-        rax; rbx; rcx; rdx; rsi; rdi; rbp; rsp; r8; r9; r10; r11; r12; r13; r14; r15;             
+        rax; rbx; rcx; rdx; rsi; rdi; rbp; rsp; r8; r9; r10; r11; r12; r13; r14; r15;
         efl; mem; stack; stackTaint;
     requires
         rsp == init_rsp(stack);
@@ -1162,7 +1162,7 @@ procedure fmul1_stdcall(
 
         let a := pow2_four(a0, a1, a2, a3);
         let d := pow2_four(d0, d1, d2, d3);
-                 
+
         d % prime == (old(a) * inB_in) % prime;
 
         //////////////////////////////////////
@@ -1201,7 +1201,7 @@ procedure fmul1_stdcall(
         Mov64(dst_ptr, rcx);
         Mov64(inA_ptr, rdx);
         Mov64(b, r8);
-    } 
+    }
 
     fmul1(dst_b, inA_b, inB_in);
 

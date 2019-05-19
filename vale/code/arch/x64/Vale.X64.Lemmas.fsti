@@ -41,7 +41,7 @@ let eval_ocmp (s:state) (c:ocmp) : GTot bool = snd (BS.machine_eval_ocmp (state_
 let valid_ocmp (c:ocmp) (s:state) : GTot bool =
   BS.valid_ocmp c (state_to_S s)
 
-let ensure_valid_ocmp (c:ocmp) (s:state) : GTot state = 
+let ensure_valid_ocmp (c:ocmp) (s:state) : GTot state =
   let ts:BS.machine_state = fst (BS.machine_eval_ocmp (state_to_S s) c) in
   state_of_S s ts
 

@@ -91,21 +91,21 @@ procedure fast_mul1(ghost dst_b:buffer64, ghost inA_b:buffer64)
         modifies_buffer(dst_b, old(mem), mem);
 {
     xor_lemmas();
-    
+
     Mulx64( r9,  r8, Mem(inA_ptr,  0, inA_b, 0, Secret));  /* A[0]*B */ lemma_prod_bounds(r9, r8, b, a0); let old_r8 := r8;
-    Store64_buffer(dst_ptr, r8,  0, Secret, dst_b, 0);  
+    Store64_buffer(dst_ptr, r8,  0, Secret, dst_b, 0);
     Xor64(r8, r8);
-    Mulx64(r11, r10, Mem(inA_ptr,  8, inA_b, 1, Secret));  /* A[1]*B */ lemma_prod_bounds(r11, r10, b, a1); 
+    Mulx64(r11, r10, Mem(inA_ptr,  8, inA_b, 1, Secret));  /* A[1]*B */ lemma_prod_bounds(r11, r10, b, a1);
     Add64Wrap(r10, r9);
-    Store64_buffer(dst_ptr, r10,  8, Secret, dst_b, 1);  
-    Mulx64(r13, r12, Mem(inA_ptr, 16, inA_b, 2, Secret));  /* A[2]*B */ lemma_prod_bounds(r13, r12, b, a2); 
+    Store64_buffer(dst_ptr, r10,  8, Secret, dst_b, 1);
+    Mulx64(r13, r12, Mem(inA_ptr, 16, inA_b, 2, Secret));  /* A[2]*B */ lemma_prod_bounds(r13, r12, b, a2);
     Adcx64Wrap(r12, r11);
-    Store64_buffer(dst_ptr, r12, 16, Secret, dst_b, 2);  
-    Mulx64(rax, r14, Mem(inA_ptr, 24, inA_b, 3, Secret));  /* A[3]*B */ lemma_prod_bounds(rax, r14, b, a3); 
+    Store64_buffer(dst_ptr, r12, 16, Secret, dst_b, 2);
+    Mulx64(rax, r14, Mem(inA_ptr, 24, inA_b, 3, Secret));  /* A[3]*B */ lemma_prod_bounds(rax, r14, b, a3);
     Adcx64Wrap(r14, r13);
-    Store64_buffer(dst_ptr, r14, 24, Secret, dst_b, 3);  
+    Store64_buffer(dst_ptr, r14, 24, Secret, dst_b, 3);
     Adcx64Wrap(rax, r8);
-    
+
     let carry_bit := bool_bit(cf(efl));
     assert carry_bit == 0;      // PASSES
     assert_by_tactic(a * b == pow2_four(b*a0, b*a1, b*a2, b*a3), int_canon);   // PASSES
@@ -146,7 +146,7 @@ procedure fast_mul1_stdcall(inline win:bool, ghost dst_b:buffer64, ghost inA_b:b
 
         let a := pow2_four(a0, a1, a2, a3);
         let d := pow2_five(d0, d1, d2, d3, rax);
-                 
+
         d == a * old(inB_in);
 
         //////////////////////////////////////
@@ -175,7 +175,7 @@ procedure fast_mul1_stdcall(inline win:bool, ghost dst_b:buffer64, ghost inA_b:b
         Mov64(dst_ptr, rcx);
         Mov64(inA_ptr, rdx);
         Mov64(b, r8);
-    } 
+    }
 
     fast_mul1(dst_b, inA_b);
 
@@ -206,7 +206,7 @@ procedure fast_add1(ghost dst_b:buffer64, ghost inA_b:buffer64, ghost inB:nat64)
         dst_ptr; inA_ptr; memTaint;
 
     modifies
-        rax; b; r8; r9; r10; r11; 
+        rax; b; r8; r9; r10; r11;
         mem; efl;
 
     requires
@@ -236,16 +236,16 @@ procedure fast_add1(ghost dst_b:buffer64, ghost inA_b:buffer64, ghost inB:nat64)
     Xor64(rax, rax);
 
     Add64Wrap(b, Mem(inA_ptr,  0, inA_b, 0, Secret));
-    Store64_buffer(dst_ptr, b,  0, Secret, dst_b, 0);  
+    Store64_buffer(dst_ptr, b,  0, Secret, dst_b, 0);
 
     Adcx64Wrap(r8, Mem(inA_ptr,  8, inA_b, 1, Secret));
-    Store64_buffer(dst_ptr, r8,  8, Secret, dst_b, 1);  
+    Store64_buffer(dst_ptr, r8,  8, Secret, dst_b, 1);
 
     Adcx64Wrap(r9, Mem(inA_ptr, 16, inA_b, 2, Secret));
-    Store64_buffer(dst_ptr, r9, 16, Secret, dst_b, 2);  
+    Store64_buffer(dst_ptr, r9, 16, Secret, dst_b, 2);
 
     Adcx64Wrap(r10, Mem(inA_ptr, 24, inA_b, 3, Secret));
-    Store64_buffer(dst_ptr, r10, 24, Secret, dst_b, 3);  
+    Store64_buffer(dst_ptr, r10, 24, Secret, dst_b, 3);
 
     Adcx64Wrap(rax, r11);
 }
@@ -266,7 +266,7 @@ procedure fast_add1_stdcall(
         inA_in := (if win then rdx else rsi);
     reads memTaint;
     modifies
-        rax; rbx; rcx; rdx; rsi; rdi; rbp; rsp; r8; r9; r10; r11; r12; r13; r14; r15;    
+        rax; rbx; rcx; rdx; rsi; rdi; rbp; rsp; r8; r9; r10; r11; r12; r13; r14; r15;
         efl; mem; stack; stackTaint;
     requires
         rsp == init_rsp(stack);
@@ -290,7 +290,7 @@ procedure fast_add1_stdcall(
 
         let a := pow2_four(a0, a1, a2, a3);
         let d := pow2_five(d0, d1, d2, d3, rax);
-                 
+
         d == a + old(inB_in);
 
         //////////////////////////////////////
@@ -328,7 +328,7 @@ procedure fast_add1_stdcall(
         Mov64(dst_ptr, rcx);
         Mov64(inA_ptr, rdx);
         Mov64(b, r8);
-    } 
+    }
 
     fast_add1(dst_b, inA_b, inB_in);
 
@@ -354,7 +354,7 @@ procedure fast_sub1(ghost dst_b:buffer64, ghost inA_b:buffer64)
         dst_ptr; inA_ptr; b; memTaint;
 
     modifies
-        rax; r8; r9; r10; r11; 
+        rax; r8; r9; r10; r11;
         mem; efl;
 
     requires
@@ -380,19 +380,19 @@ procedure fast_sub1(ghost dst_b:buffer64, ghost inA_b:buffer64)
 
     Load64_buffer( r8, inA_ptr,  0, Secret, inA_b, 0);     /* A[0] */
     Sub64Wrap(r8, b);      /* A[0] - B */
-    Store64_buffer(dst_ptr,  r8,  0, Secret, dst_b, 0);  
+    Store64_buffer(dst_ptr,  r8,  0, Secret, dst_b, 0);
 
     Load64_buffer( r9, inA_ptr,  8, Secret, inA_b, 1);     /* A[1] */
-    Sbb64(r9, 0);          
-    Store64_buffer(dst_ptr, r9,  8, Secret, dst_b, 1);  
+    Sbb64(r9, 0);
+    Store64_buffer(dst_ptr, r9,  8, Secret, dst_b, 1);
 
     Load64_buffer(r10, inA_ptr, 16, Secret, inA_b, 2);     /* A[2] */
-    Sbb64(r10, 0);         
-    Store64_buffer(dst_ptr, r10, 16, Secret, dst_b, 2);  
-    
+    Sbb64(r10, 0);
+    Store64_buffer(dst_ptr, r10, 16, Secret, dst_b, 2);
+
     Load64_buffer(r11, inA_ptr, 24, Secret, inA_b, 3);     /* A[3] */
-    Sbb64(r11, 0);         
-    Store64_buffer(dst_ptr, r11, 24, Secret, dst_b, 3);  
+    Sbb64(r11, 0);
+    Store64_buffer(dst_ptr, r11, 24, Secret, dst_b, 3);
 
     let c := cf(efl);
     Adc64Wrap(rax, rax);   // Extract the carry bit
@@ -464,7 +464,7 @@ procedure fast_sub1_stdcall(inline win:bool, ghost dst_b:buffer64, ghost inA_b:b
         Mov64(dst_ptr, rcx);
         Mov64(inA_ptr, rdx);
         Mov64(b, r8);
-    } 
+    }
     Mov64(rcx, rdx);
 
     fast_sub1(dst_b, inA_b);
@@ -497,7 +497,7 @@ procedure fast_add(ghost dst_b:buffer64, ghost inA_b:buffer64, ghost inB_b:buffe
         dst_ptr; inA_ptr; inB_ptr; memTaint;
 
     modifies
-        rax; r8; r9; r10; r11; r12; 
+        rax; r8; r9; r10; r11; r12;
         mem; efl;
 
     requires
@@ -526,19 +526,19 @@ procedure fast_add(ghost dst_b:buffer64, ghost inA_b:buffer64, ghost inB_b:buffe
 
     Load64_buffer( r9, inB_ptr,  0, Secret, inB_b, 0);     /* B[0] */
     Add64Wrap(r9, Mem(inA_ptr,  0, inA_b, 0, Secret));
-    Store64_buffer(dst_ptr,  r9,  0, Secret, dst_b, 0);  
+    Store64_buffer(dst_ptr,  r9,  0, Secret, dst_b, 0);
 
     Load64_buffer(r10, inB_ptr,  8, Secret, inB_b, 1);     /* B[1] */
     Adcx64Wrap(r10, Mem(inA_ptr,  8, inA_b, 1, Secret));
-    Store64_buffer(dst_ptr, r10,  8, Secret, dst_b, 1);  
+    Store64_buffer(dst_ptr, r10,  8, Secret, dst_b, 1);
 
     Load64_buffer(r11, inB_ptr, 16, Secret, inB_b, 2);     /* B[2] */
     Adcx64Wrap(r11, Mem(inA_ptr, 16, inA_b, 2, Secret));
-    Store64_buffer(dst_ptr, r11, 16, Secret, dst_b, 2);  
+    Store64_buffer(dst_ptr, r11, 16, Secret, dst_b, 2);
 
     Load64_buffer(r12, inB_ptr, 24, Secret, inB_b, 3);     /* B[3] */
     Adcx64Wrap(r12, Mem(inA_ptr, 24, inA_b, 3, Secret));
-    Store64_buffer(dst_ptr, r12, 24, Secret, dst_b, 3);  
+    Store64_buffer(dst_ptr, r12, 24, Secret, dst_b, 3);
 
     Adcx64Wrap(rax, r8);
 }
@@ -650,7 +650,7 @@ procedure fast_sub(ghost dst_b:buffer64, ghost inA_b:buffer64, ghost inB_b:buffe
         dst_ptr; inA_ptr; inB_ptr; memTaint;
 
     modifies
-        rax; r8; r9; r10; r11; 
+        rax; r8; r9; r10; r11;
         mem; efl;
 
     requires
@@ -680,24 +680,24 @@ procedure fast_sub(ghost dst_b:buffer64, ghost inA_b:buffer64, ghost inB_b:buffe
 
     Load64_buffer( r8, inA_ptr,  0, Secret, inA_b, 0);     /* A[0] */
     Sub64Wrap(r8, Mem(inB_ptr, 0, inB_b, 0, Secret));      /* A[0] - B[0] */
-    Store64_buffer(dst_ptr,  r8,  0, Secret, dst_b, 0);  
+    Store64_buffer(dst_ptr,  r8,  0, Secret, dst_b, 0);
 
     //assert r8 - pow2_64 * bool_bit(cf(efl)) == old(a0 - b0);  // PASSES
 
     Load64_buffer( r9, inA_ptr,  8, Secret, inA_b, 1);     /* A[1] */
     Sbb64(r9, Mem(inB_ptr, 8, inB_b, 1, Secret));          /* A[1] - B[1] */
-    Store64_buffer(dst_ptr, r9,  8, Secret, dst_b, 1);  
+    Store64_buffer(dst_ptr, r9,  8, Secret, dst_b, 1);
 
     //assert pow2_two(r8, r9) - pow2_128 * bool_bit(cf(efl)) == old(pow2_two(a0, a1) - pow2_two(b0, b1));  // PASSES
-    
+
     Load64_buffer(r10, inA_ptr, 16, Secret, inA_b, 2);     /* A[2] */
     Sbb64(r10, Mem(inB_ptr,16, inB_b, 2, Secret));         /* A[2] - B[2] */
     //assert pow2_three(r8, r9, r10) - pow2_192 * bool_bit(cf(efl)) == old(pow2_three(a0, a1, a2) - pow2_three(b0, b1, b2));  // FAILS
-    Store64_buffer(dst_ptr, r10, 16, Secret, dst_b, 2);  
-    
+    Store64_buffer(dst_ptr, r10, 16, Secret, dst_b, 2);
+
     Load64_buffer(r11, inA_ptr, 24, Secret, inA_b, 3);     /* A[3] */
     Sbb64(r11, Mem(inB_ptr,24, inB_b, 3, Secret));         /* A[3] - B[3] */
-    Store64_buffer(dst_ptr, r11, 24, Secret, dst_b, 3);  
+    Store64_buffer(dst_ptr, r11, 24, Secret, dst_b, 3);
 
     let c := cf(efl);
     Adc64Wrap(rax, rax);   // Extract the carry bit
@@ -808,7 +808,7 @@ procedure cswap_single(inline offset:nat, ghost p0_b:buffer64, ghost p1_b:buffer
         p0_ptr; p1_ptr; memTaint; efl;
     modifies
         tmp0; tmp1; tmp2;
-        mem; 
+        mem;
 
     requires
         offset < 8;
@@ -877,10 +877,10 @@ procedure cswap2(ghost p0_b:buffer64, ghost p1_b:buffer64, ghost bit_in:nat64)
         old_p1_6 := buffer64_read(p1_b, 6, mem);
         old_p1_7 := buffer64_read(p1_b, 7, mem);
     reads
-        p0_ptr; p1_ptr; memTaint; 
+        p0_ptr; p1_ptr; memTaint;
     modifies
         bit; tmp0; tmp1; tmp2;
-        efl; mem; 
+        efl; mem;
 
     requires
         bit_in == bit;
@@ -977,12 +977,12 @@ procedure cswap2_stdcall(
 
     reads memTaint;
     modifies
-        rax; rbx; rcx; rdx; rsi; rdi; rbp; rsp; r8; r9; r10; r11; r12; r13; r14; r15;        
+        rax; rbx; rcx; rdx; rsi; rdi; rbp; rsp; r8; r9; r10; r11; r12; r13; r14; r15;
         efl; mem; stack; stackTaint;
     requires
         rsp == init_rsp(stack);
         bit_in <= 1;
-        bit_in = (if win then r8  else rdx);        
+        bit_in = (if win then r8  else rdx);
         //adx_enabled && bmi2_enabled;
         buffers_disjoint(p0_b, p1_b) || p1_b == p0_b;
 
@@ -1058,10 +1058,10 @@ procedure cswap2_stdcall(
         Mov64(p0_ptr, rcx);
         Mov64(p1_ptr, rdx);
         Mov64(bit, r8);
-    } 
+    }
 
     cswap2(p0_b, p1_b, bit_in);
-    
+
     inline if (win) {
         Pop(rsi);
         Pop(rdi);

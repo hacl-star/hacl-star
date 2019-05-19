@@ -37,7 +37,7 @@ let codes = BC.codes_t instr_annotation
 
 noeq
 type stack =
-  | Vale_stack: 
+  | Vale_stack:
     initial_rsp:nat64{initial_rsp >= 4096} ->  // Initial rsp pointer when entering the function
     stack_mem:Map.t int nat8 ->                // Stack contents
     stack
@@ -80,7 +80,7 @@ let get_heap_val64_def (ptr:int) (mem:heap) : nat64 =
 let get_heap_val64 = make_opaque get_heap_val64_def
 
 let get_heap_val32_def (ptr:int) (mem:heap) : nat32 =
-  four_to_nat 8 
+  four_to_nat 8
   (Mkfour
     mem.[ptr]
     mem.[ptr+1]
@@ -99,10 +99,10 @@ let get_heap_val128 = make_opaque get_heap_val128_def
 unfold let eval_mem (ptr:int) (s:machine_state) : nat64 = get_heap_val64 ptr s.ms_mem
 unfold let eval_mem128 (ptr:int) (s:machine_state) : quad32 = get_heap_val128 ptr s.ms_mem
 
-unfold let eval_stack (ptr:int) (s:stack) : nat64 = 
+unfold let eval_stack (ptr:int) (s:stack) : nat64 =
   let Vale_stack _ mem = s in
   get_heap_val64 ptr mem
-unfold let eval_stack128 (ptr:int) (s:stack) : quad32 = 
+unfold let eval_stack128 (ptr:int) (s:stack) : quad32 =
   let Vale_stack _ mem = s in
   get_heap_val128 ptr mem
 
@@ -214,7 +214,7 @@ let update_mem (ptr:int) (v:nat64) (s:machine_state) : machine_state =
   if valid_addr64 ptr s.ms_mem then
   { s with ms_mem = update_heap64 ptr v s.ms_mem }
   else s
-  
+
 let update_mem128 (ptr:int) (v:quad32) (s:machine_state) : machine_state =
   if valid_addr128 ptr s.ms_mem then
   { s with ms_mem = update_heap128 ptr v s.ms_mem }
@@ -262,7 +262,7 @@ let valid_src_mov128_op (o:operand128) (s:machine_state) : bool =
   | OReg128 i -> true // We leave it to the printer/assembler to object to invalid XMM indices
   | OMem128 (m, _) -> valid_addr128 (eval_maddr m s) s.ms_mem
   | OStack128 (m, _) -> valid_src_stack128 (eval_maddr m s) s.ms_stack
-  
+
 let valid_src_shift_operand (o:operand) (s:machine_state) : bool =
   valid_src_operand o s && (eval_operand o s) < 64
 
@@ -305,7 +305,7 @@ let update_operand_preserve_flags'' (o:operand) (v:nat64) (s_orig s:machine_stat
   | OConst _ -> {s with ms_ok = false}
   | OReg r -> update_reg' r v s
   | OMem (m, _) -> update_mem (eval_maddr m s_orig) v s // see valid_maddr for how eval_maddr connects to b and i
-  | OStack (m, _) -> update_stack (eval_maddr m s_orig) v s 
+  | OStack (m, _) -> update_stack (eval_maddr m s_orig) v s
 
 let update_operand_preserve_flags' (o:operand) (v:nat64) (s:machine_state) : machine_state =
   update_operand_preserve_flags'' o v s s
@@ -505,7 +505,7 @@ let operand_obs (s:machine_state) (o:operand) : list observation =
 let operand_obs128 (s:machine_state) (op:operand128) : list observation =
   match op with
   | OReg128 _ -> []
-  | OStack128 (m, _) | OMem128 (m, _) -> 
+  | OStack128 (m, _) | OMem128 (m, _) ->
     match m with
     | MConst _ -> []
     | MReg reg _ -> [MemAccess (eval_reg reg s)]
@@ -545,14 +545,14 @@ let rec obs_args
       obs_operand_implicit i s @ obs_args args (coerce oprs) s
 
 [@instr_attr]
-let rec obs_inouts 
-  (inouts:list instr_out) 
+let rec obs_inouts
+  (inouts:list instr_out)
   (args:list instr_operand)
   (oprs:instr_operands_t inouts args)
   (s:machine_state) : list observation =
   match inouts with
   | [] -> obs_args args oprs s
-  | (_, i)::inouts -> 
+  | (_, i)::inouts ->
     let (v, oprs) =
       match i with
       | IOpEx i ->
@@ -585,7 +585,7 @@ let rec update_n (addr:int) (n:nat) (memTaint:memTaint_t) (t:taint)
   : Tot (m:memTaint_t{(
       forall i.{:pattern (m `Map.sel` i)}
         ((i >= addr /\ i < addr + n) ==> m.[i] == t) /\
-	      ((i < addr \/ i >= addr + n) ==> m.[i] == memTaint.[i]))})
+        ((i < addr \/ i >= addr + n) ==> m.[i] == memTaint.[i]))})
     (decreases n)
   =
   if n = 0 then memTaint
@@ -604,7 +604,7 @@ let taint_match (o:operand) (memTaint:memTaint_t) (stackTaint:memTaint_t) (s:mac
   match o with
   | OConst _ | OReg _ -> true
   | OMem (m, t) -> match_n (eval_maddr m s) 8 memTaint t
-  | OStack (m, t) -> match_n (eval_maddr m s) 8 stackTaint t 
+  | OStack (m, t) -> match_n (eval_maddr m s) 8 stackTaint t
 
 [@instr_attr]
 let taint_match128 (op:operand128) (memTaint:memTaint_t) (stackTaint:memTaint_t) (s:machine_state) : bool =
@@ -657,7 +657,7 @@ let rec taint_match_args
       taint_match_args args (coerce oprs) memTaint stackTaint s
 
 [@instr_attr]
-let rec taint_match_inouts 
+let rec taint_match_inouts
   (inouts:list instr_out)
   (args:list instr_operand)
   (oprs:instr_operands_t inouts args)
@@ -667,13 +667,13 @@ let rec taint_match_inouts
   : bool =
   match inouts with
   | [] -> taint_match_args args oprs memTaint stackTaint s
-  | (Out, i)::inouts -> 
+  | (Out, i)::inouts ->
     let oprs =
       match i with
       | IOpEx i -> snd #(instr_operand_t i) (coerce oprs)
       | IOpIm i -> coerce oprs
     in taint_match_inouts inouts args oprs memTaint stackTaint s
-  | (InOut, i)::inouts -> 
+  | (InOut, i)::inouts ->
     let (v, oprs) =
       match i with
       | IOpEx i ->
@@ -697,7 +697,7 @@ let update_taint (op:operand) (memTaint:memTaint_t) (stackTaint:memTaint_t) (s:m
   | OConst _ | OReg _ -> (memTaint, stackTaint)
   | OMem (m, t) -> (update_n (eval_maddr m s) 8 memTaint t, stackTaint)
   | OStack (m, t) -> (memTaint, update_n (eval_maddr m s) 8 stackTaint t)
-    
+
 [@instr_attr]
 let update_taint128 (op:operand128) (memTaint:memTaint_t) (stackTaint:memTaint_t) (s:machine_state)
   : memTaint_t & memTaint_t =
@@ -733,7 +733,7 @@ let rec update_taint_outputs
   : memTaint_t & memTaint_t =
   match outs with
   | [] -> (memTaint, stackTaint)
-  | (_, i)::outs -> 
+  | (_, i)::outs ->
     let ((memTaint, stackTaint), oprs) =
       match i with
       | IOpEx i ->
@@ -917,7 +917,7 @@ let untainted_eval_ins (ins:ins) : st unit =
   | BC.Alloc n ->
     // We already check in update_rsp that the new stack pointer is valid
     update_rsp (eval_reg rRsp s - n)
-  
+
   | BC.Dealloc n ->
     let old_rsp = eval_reg rRsp s in
     let new_rsp = old_rsp + n in

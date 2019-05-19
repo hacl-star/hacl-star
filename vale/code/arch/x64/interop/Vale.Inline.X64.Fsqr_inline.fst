@@ -92,20 +92,20 @@ let fsqr_lemma'
        VSig.vale_calling_conventions va_s0 va_s1 fsqr_regs_modified fsqr_xmms_modified /\
        fsqr_post code tmp f1 out va_s0 va_s1 f /\
        ME.buffer_readable VS.(va_s1.mem) (as_vale_buffer out) /\
-       ME.buffer_readable VS.(va_s1.mem) (as_vale_buffer f1) /\ 
-       ME.buffer_readable VS.(va_s1.mem) (as_vale_buffer tmp) /\ 
-       ME.buffer_writeable (as_vale_buffer out) /\ 
+       ME.buffer_readable VS.(va_s1.mem) (as_vale_buffer f1) /\
+       ME.buffer_readable VS.(va_s1.mem) (as_vale_buffer tmp) /\
+       ME.buffer_writeable (as_vale_buffer out) /\
        ME.buffer_writeable (as_vale_buffer f1) /\
-       ME.buffer_writeable (as_vale_buffer tmp) /\       
+       ME.buffer_writeable (as_vale_buffer tmp) /\
        ME.modifies (ME.loc_union (ME.loc_buffer (as_vale_buffer out))
                    (ME.loc_union (ME.loc_buffer (as_vale_buffer tmp))
                                  ME.loc_none)) va_s0.VS.mem va_s1.VS.mem
- )) = 
+ )) =
    let va_s1, f = FW.va_lemma_fsqr code va_s0 (as_vale_buffer tmp) (as_vale_buffer f1) (as_vale_buffer out) in
-   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 out;   
-   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 f1;   
-   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 tmp;   
-   va_s1, f                                   
+   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 out;
+   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 f1;
+   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 tmp;
+   (va_s1, f)
 
 (* Prove that fsqr_lemma' has the required type *)
 let fsqr_lemma = as_t #(VSig.vale_sig fsqr_regs_modified fsqr_xmms_modified fsqr_pre fsqr_post) fsqr_lemma'
@@ -166,7 +166,7 @@ let fsqr_inline tmp f1 out =
     DV.length_eq (get_downview out);
     as_vale_buffer_len #TUInt64 #TUInt64 tmp;
     as_vale_buffer_len #TUInt64 #TUInt64 f1;
-    as_vale_buffer_len #TUInt64 #TUInt64 out;    
+    as_vale_buffer_len #TUInt64 #TUInt64 out;
     let x, _ = lowstar_fsqr_normal_t tmp f1 out () in
     ()
 
@@ -213,20 +213,20 @@ let fsqr2_lemma'
        VSig.vale_calling_conventions va_s0 va_s1 fsqr_regs_modified fsqr_xmms_modified /\
        fsqr2_post code tmp f1 out va_s0 va_s1 f /\
        ME.buffer_readable VS.(va_s1.mem) (as_vale_buffer out) /\
-       ME.buffer_readable VS.(va_s1.mem) (as_vale_buffer f1) /\ 
-       ME.buffer_readable VS.(va_s1.mem) (as_vale_buffer tmp) /\ 
-       ME.buffer_writeable (as_vale_buffer out) /\ 
+       ME.buffer_readable VS.(va_s1.mem) (as_vale_buffer f1) /\
+       ME.buffer_readable VS.(va_s1.mem) (as_vale_buffer tmp) /\
+       ME.buffer_writeable (as_vale_buffer out) /\
        ME.buffer_writeable (as_vale_buffer f1) /\
-       ME.buffer_writeable (as_vale_buffer tmp) /\       
+       ME.buffer_writeable (as_vale_buffer tmp) /\
        ME.modifies (ME.loc_union (ME.loc_buffer (as_vale_buffer out))
                    (ME.loc_union (ME.loc_buffer (as_vale_buffer tmp))
                                  ME.loc_none)) va_s0.VS.mem va_s1.VS.mem
- )) = 
+ )) =
    let va_s1, f = FW.va_lemma_fsqr2 code va_s0 (as_vale_buffer tmp) (as_vale_buffer f1) (as_vale_buffer out) in
-   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 out;   
-   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 f1;   
-   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 tmp;    
-   va_s1, f                                   
+   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 out;
+   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 f1;
+   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 tmp;
+   (va_s1, f)
 
 (* Prove that fsqr2_lemma' has the required type *)
 let fsqr2_lemma = as_t #(VSig.vale_sig fsqr_regs_modified fsqr_xmms_modified fsqr2_pre fsqr2_post) fsqr2_lemma'
