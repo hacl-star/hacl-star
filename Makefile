@@ -95,7 +95,8 @@ all:
 	tools/blast-staticconfig.sh $(EVERCRYPT_CONFIG)
 	$(MAKE) all-staged
 
-all-unstaged: compile-compact compile-generic compile-compact-msvc compile-compact-gcc \
+all-unstaged: compile-compact compile-generic compile-portable \
+  compile-compact-msvc compile-compact-gcc \
   compile-evercrypt-external-headers compile-compact-c89 # compile-coco
 
 # Automatic staging.
@@ -119,10 +120,10 @@ test-ml: $(subst .,_,$(patsubst %.fst,test-ml-%,$(notdir $(wildcard specs/tests/
 # Not reusing the -staged automatic target so as to export NOSHORTLOG
 ci:
 	KREMLIN_HOME=$(HACL_HOME)/dist/kremlin $(MAKE) -C dist/generic
+	KREMLIN_HOME=$(HACL_HOME)/dist/kremlin $(MAKE) -C dist/portable
 	KREMLIN_HOME=$(HACL_HOME)/dist/kremlin $(MAKE) -C dist/compact-gcc
 	KREMLIN_HOME=$(HACL_HOME)/dist/kremlin $(MAKE) -C dist/compact-msvc
 	KREMLIN_HOME=$(HACL_HOME)/dist/kremlin $(MAKE) -C dist/compact-c89
-	KREMLIN_HOME=$(HACL_HOME)/dist/kremlin $(MAKE) -C dist/compact-gcc
 	KREMLIN_HOME=$(HACL_HOME)/dist/kremlin $(MAKE) -C tests
 	NOSHORTLOG=1 $(MAKE) vale-fst
 	FSTAR_DEPEND_FLAGS="--warn_error +285" NOSHORTLOG=1 $(MAKE) all-unstaged test-unstaged
@@ -669,6 +670,10 @@ DEFAULT_FLAGS		=\
   -fparentheses -fno-shadow -fcurly-braces \
   -bundle EverCrypt
 
+OPT_FLAGS = -ccopts -march=native,-mtune=native
+
+DEFAULT_FLAGS   = $(DEFAULT_FLAGS) $(OPT_FLAGS)
+
 COMPACT_FLAGS	=\
   -bundle Hacl.Hash.MD5+Hacl.Hash.Core.MD5+Hacl.Hash.SHA1+Hacl.Hash.Core.SHA1+Hacl.Hash.SHA2+Hacl.Hash.Core.SHA2+Hacl.Hash.Core.SHA2.Constants=Hacl.Hash.*[rename=Hacl_Hash] \
   -bundle Hacl.Impl.SHA3+Hacl.SHA3=[rename=Hacl_SHA3] \
@@ -702,6 +707,8 @@ old-%:
 HACL_OLD_FILES=\
   code/old/experimental/aesgcm/aesgcm-c/Hacl_AES.c \
   code/old/ed25519/ed25519-c/Hacl_Ed25519.c
+
+dist/portable/Makefile.basic: OPT_FLAGS=
 
 dist/compact/Makefile.basic: KRML_EXTRA=$(COMPACT_FLAGS)
 
