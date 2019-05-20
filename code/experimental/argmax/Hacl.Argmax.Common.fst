@@ -10,7 +10,29 @@ open FStar.Calc
 
 (* Divisibisity *)
 
+type big = x:int{x > 1}
+
+val one: pos
+let one = 1
+
+val zero_mod_n: n:pos -> Lemma (0 % n = 0)
+let zero_mod_n _ = ()
+
+val one_mod_n: n:big -> Lemma (1 % n = 1)
+let one_mod_n _ = ()
+
 type divides (a:pos) (b:pos) = b % a = 0
+
+val isprm: p:big -> Type0
+let isprm p = p % 2 = 1 /\ p >= 3 /\ (forall (x:nat{x>1&&x<p}). ~(divides x p))
+
+type prm = p:big{isprm p}
+
+type comp = n:big{ exists (p:prm) (q:prm). n = p * q }
+
+// In some cases F* can't decide the existential description
+val mkcomp: p:prm -> q:prm -> comp
+let mkcomp p q = p * q
 
 val modulo_mul_distributivity: a:int -> b:int -> n:pos ->
     Lemma ((a * b) % n = ((a % n) * (b % n)) % n)
@@ -82,29 +104,19 @@ let lcm_less_mul a b =
   assert (lcm a b = (a * b) / g);
   division_post_size (a * b) g
 
-(* Numbers and elements *)
+// https://math.stackexchange.com/questions/1319766/is-it-true-that-pq-p-1q-1-1-iff-pq-operatornamelcmp-1-q-1-1
+val gcd_pq_lcm_lemma: p:pos{p>1} -> q:pos{q>1} -> Lemma
+  (gcd (p * q) ((p - 1) * (q - 1)) = 1 <==>
+   gcd (p * q) (lcm (p-1) (q-1)) = 1)
+let gcd_pq_lcm_lemma _ _ = admit()
 
-type big = x:int{x > 1}
+// Is there a constructive proof? Divisibility one is easy enough.
+val gcd_n_square: n:pos -> a:pos-> Lemma
+  (gcd a n = 1 ==> gcd a (n*n) = 1)
+let gcd_n_square n a = admit()
 
-val isprm: p:big -> bool
-let isprm p = (p % 2 = 1 && p >= 3 && magic())
 
-type prm = p:big{isprm p /\ (forall (x:nat{x>1&&x<p}). ~(divides x p)) }
-
-type comp = n:big{ exists (p:prm) (q:prm). n = p * q }
-
-// In some cases F* can't decide the existential description
-val mkcomp: p:prm -> q:prm -> comp
-let mkcomp p q = p * q
-
-val one: pos
-let one = 1
-
-val zero_mod_n: n:pos -> Lemma (0 % n = 0)
-let zero_mod_n _ = ()
-
-val one_mod_n: n:big -> Lemma (1 % n = 1)
-let one_mod_n _ = ()
+(* Algebra *)
 
 val field_el: #n:big -> a:int -> bool
 let field_el #n a = a >= 0 && a < n
@@ -121,9 +133,6 @@ let to_fe_bigger_and_back #n m a = ()
 val to_fe_idemp: #n:big -> a:fe n -> Lemma
   (to_fe #n a = a)
 let to_fe_idemp #n a = ()
-
-
-(* Basic algebraic operations *)
 
 type binop = #n:big -> fe n -> fe n -> fe n
 val ( +% ): binop
