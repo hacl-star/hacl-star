@@ -11,6 +11,9 @@ module GM = Hacl.Argmax.GM
 module P = Hacl.Argmax.Paillier
 module U64 = FStar.UInt64
 
+val to_prime: big -> prm
+let to_prime p = admit(); p
+
 val print_nat: c:nat -> ML unit
 let print_nat c =
   assume (c < pow2 64);
@@ -52,7 +55,6 @@ let run_test_gm p q y r =
 
 val test_gm: unit -> ML unit
 let test_gm () =
-  let to_prime (p:big): prm = (admit(); p) in
 
   let with_asserted_vals (p0:big) (q0:big{q0<>p0}) (y0:pos) (r0:pos) = begin
     let p:prm = to_prime p0 in
@@ -73,24 +75,23 @@ let test_gm () =
   with_asserted_vals 2309 5651 6283665 11200984;
   print_string "\nGM test done\n\n"
 
+val to_g: #n:big -> a:big -> r:P.isg n{r = a}
+let to_g #n a = admit(); a
 
 val test_paillier: unit -> ML unit
 let test_paillier () =
-  let q:prm = (assume(isprm 7); 7) in
-  let p:prm = (assume(isprm 11); 11) in
+  let q:prm = to_prime 7 in
+  let p:prm = to_prime 11 in
   let n:comp = mkcomp p q in
   assert (n = p * q);
   assert (n = 77);
   // filter (\(x,o) -> o `mod` 77 == 0) $ catMaybes $ map (\x -> (x,) <$> order x (77*77)) [1..77*77-1]
   // order of 617 is exactly 77, and gcd 617 (77*77) = 1
-  assert (617 < 77 * 77);
-  let g:P.fen2 n = 617 in
-  assume (isunit g /\ mult_order g = 77);
+  let g:P.isg n = to_g 617 in
   let sec = P.Secret p q g in
   let pub = P.s2p sec in
   let r:fe n = 40 in
-  assert (gcd r n = 1);
-  inv_as_gcd1 #n r;
+  assume (isunit r);
 
   print_string "Paillier:";
 
@@ -118,13 +119,12 @@ let test_paillier () =
 
 val compare_paillier: unit -> ML unit
 let compare_paillier () =
-  let p:prm = (assume(isprm 293); 293) in
-  let q:prm = (assume(isprm 433); 433) in
+  let p:prm = to_prime 293 in
+  let q:prm = to_prime 433 in
 
   let n:comp = mkcomp p q in
   assert (n = 126869);
-  let g:P.fen2 n = n + 1 in
-  assume (isunit g /\ P.in_base #n g);
+  let g:P.isg n = (P.np1_is_g #n; n + 1) in
 
   let sec = P.Secret p q g in
   let pub = P.s2p sec in

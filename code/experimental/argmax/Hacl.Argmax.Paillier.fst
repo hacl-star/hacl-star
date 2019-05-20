@@ -21,7 +21,14 @@ let np1 #n = 1 + n
 
 val isunit_in_nsquare: #n:comp -> a:fe n{isunit a} -> Lemma
   (isunit (to_fe #(n*n) a))
-let isunit_in_nsquare #n a = admit()
+let isunit_in_nsquare #n a =
+  multiplication_order_lemma n 1 n;
+  assert (a < n*n);
+  isunit_nonzero a;
+  inv_as_gcd a;
+  gcd_n_square n a;
+  inv_as_gcd1 #(n*n) a;
+  to_fe_idemp #(n*n) a
 
 val fenu_to_fen2u: #n:comp -> a:fenu n -> b:fen2u n{b = a /\ to_fe #n b = a}
 let fenu_to_fen2u #n a =
@@ -39,23 +46,20 @@ let fenu_to_fen2u #n a =
 val etot: p:prm -> q:prm -> l:fe (p*q)
 let etot p q = lcm_less_mul (p-1) (q-1); lcm (p-1) (q-1)
 
-// Because gcd (etot p q) (p*q) =
 val etot_unit: p:prm -> q:prm -> Lemma
   (isunit #(p*q) (etot p q))
 let etot_unit p q =
-  let n = p*q in
-  let lambda = etot p q in
-  division_mul_after (p-1) (q-1) (gcd (p-1) (q-1));
-  assert (lcm (p-1) (q-1) = ((p-1)*(q-1))/(gcd (p-1) (q-1)));
-  assert (gcd n lambda = gcd n (lcm (p-1) (q-1)));
-  // TODO
-  admit()
+  // Any divisor of p*q has form kp or kq, but (p-1)(q-1) has none
+  // of this form.
+  assume (gcd (p * q) ((p - 1) * (q - 1)) = 1);
+  gcd_pq_lcm_lemma p q;
+  inv_as_gcd1 #(p*q) (etot p q)
 
-val fltpq: p:prm -> q:prm -> w:fen2u (p*q) -> Lemma
+val euler_thm: p:prm -> q:prm -> w:fen2u (p*q) -> Lemma
   (ensures (let n = p*q in
             fexp w (etot p q) % n = 1 &&
             fexp w (etot p q) > 0))
-let fltpq _ _ _ = admit()
+let euler_thm _ _ _ = admit()
 
 val carmichael_thm: p:prm -> q:prm -> w:fen2u (p*q) -> Lemma
   (ensures (let l = etot p q in
@@ -99,8 +103,7 @@ let encf_unit #n g x y =
   if x = 0 then (fexp_zero2 g; one_isunit n) else g_pow_isunit g x;
   assert(isunit (fexp g x));
 
-  let y': fe (n*n) = to_fe y in
-  isunit_in_nsquare #n y;
+  let y': fen2u n = fenu_to_fen2u y in
 
   g_pow_isunit y' n;
   // This is what g_pow_isunit proves, though assert lags a bit (?)
@@ -155,7 +158,7 @@ let encf_inv #n g w =
     assert(fexp g one *% fexp y' n = g);
     assert(encf g x y = g);
     Mktuple2 x y
-  end else admit() // it's hard to invert it
+  end else magic() // it's hard to invert it
 
 val is_res_class: #n:comp -> g:isg n -> w:fen2u n -> x:fe n -> Type0
 let is_res_class #n g w x = exists y. encf g x y = w
@@ -309,7 +312,7 @@ let w_lambda_representation p q w =
   let lambda:pos = etot p q in
   np1_is_g #n;
   let (a,b) = encf_inv (np1 #n) w in
-  let b': fen2u n = isunit_in_nsquare b; to_fe b in
+  let b': fen2u n = fenu_to_fen2u b in
   assert (w = fexp (np1 #n) a *% fexp b' n);
 
   pos_times_pos_is_pos n lambda;
@@ -341,7 +344,7 @@ val bigl_w_l_lemma: p:prm -> q:prm -> w:fen2u (p*q) -> Lemma
             np1_is_g #n;
             let x = res_class np1 w in
             let lm:fe n = etot p q in
-            fltpq p q w;
+            euler_thm p q w;
             bigl (fexp w lm) = lm *% x))
 let bigl_w_l_lemma p q w =
   let n:comp = p * q in
