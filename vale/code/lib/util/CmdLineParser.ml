@@ -60,8 +60,10 @@ let parse_cmdline :
     (* Run taint analysis *)
     let _ = List.iter (fun (name, code) ->
       if Vale_X64_Leakage.check_if_code_is_leakage_free (code windows) then ()
-      else failwith ("method " ^ name ^ " does not satisfy taint analysis")
+      else failwith ("method " ^ name ^ " does not satisfy taint analysis on" ^ if windows then "Windows" else "Linux")
     ) l in
+
+
 
     (* Extract and print assembly code *)
     Vale_X64_Decls.print_header printer;

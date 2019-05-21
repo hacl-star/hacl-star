@@ -633,23 +633,15 @@ procedure XmmEqual()
     Pextrq(tmp, x1, 0);
     let tmp1 := tmp;
     lemma_equality_check_helper(x1);
-    if (tmp == 0xFFFFFFFFFFFFFFFF) {
-        //assert old(x1.lo0 == x2.lo0 /\ x1.lo1 == x2.lo1);
-        Mov64(result, 0);
-    } else {
-        //assert old(x1.lo0 != x2.lo0) \/ (x1.lo1 != x2.lo1);
-        Mov64(result, 1);
-    }
+
+    Nat64Equal(result, tmp);
+
     let result1 := result;
     Pextrq(tmp, x1, 1);
     let tmp2 := tmp;
-    if (tmp == 0xFFFFFFFFFFFFFFFF) {
-        //assert old(x1.hi2 == x2.hi2 /\ x1.hi3 == x2.hi3);
-        Mov64(tmp, 0);
-    } else {
-        //assert old(x1.hi2 != x2.hi2) \/ (x1.hi3 != x2.hi3);
-        Mov64(tmp, 1);
-    }
+
+    Nat64Equal(tmp, tmp);
+
     Add64(result, tmp);
 //    assert tmp1 == lo64(x1);
 //    assert tmp2 == hi64(x1);

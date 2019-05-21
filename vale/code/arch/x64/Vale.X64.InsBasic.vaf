@@ -142,6 +142,20 @@ procedure AddLea64(out dst:dst_opr64, in src1:opr64, in src2:opr64)
 {
 }
 
+procedure Adc64(inout dst:dst_opr64, in src:opr64)
+    {:public}
+    {:quick exportOnly}
+    {:instruction mk_ins(make_instr(I.ins_AddCarry64, dst, src))}
+    modifies
+        efl;
+    requires
+        src + dst + 1 < pow2_64;
+    ensures
+        dst == old(dst + src + (if cf(efl) then 1 else 0));
+        cf(efl) == old(dst + src + (if cf(efl) then 1 else 0)) >= pow2_64;
+{
+}
+
 procedure Adc64Wrap(inout dst:dst_opr64, in src:opr64)
     {:public}
     {:quick exportOnly}
@@ -392,3 +406,13 @@ procedure Cpuid_Avx2()
     cpuid_features();
 }
 
+procedure Nat64Equal(out dst:reg_opr64, inout src:reg_opr64)
+    {:public}
+    {:quick exportOnly}
+    modifies efl;
+    ensures if old(src = 0xFFFFFFFFFFFFFFFF) then dst = 0 else dst = 1;
+{
+    Sub64Wrap(src, 0xFFFFFFFFFFFFFFFF);
+    Mov64(dst, 0);
+    Adc64(dst, 0);
+}
