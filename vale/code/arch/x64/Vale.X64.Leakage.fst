@@ -423,12 +423,21 @@ val lemma_code_leakage_free: (ts:analysis_taints) -> (code:S.code) -> Lemma
 let lemma_code_leakage_free ts code = FStar.Classical.forall_intro_3 (lemma_code_explicit_leakage_free ts code)
 
 #set-options "--z3rlimit 20"
-val check_if_code_is_leakage_free: (code:S.code) -> (ts:analysis_taints) -> (tsExpected:analysis_taints) -> (b:bool{b ==> isLeakageFree code ts tsExpected
+val check_if_code_is_leakage_free': (code:S.code) -> (ts:analysis_taints) -> (tsExpected:analysis_taints) -> (b:bool{b ==> isLeakageFree code ts tsExpected
          /\ b ==> isConstantTime code ts})
 
-let check_if_code_is_leakage_free code ts tsExpected =
+let check_if_code_is_leakage_free' code ts tsExpected =
   let b, ts' = check_if_code_consumes_fixed_time code ts in
   if b then
     publicTaintsAreAsExpected ts' tsExpected
   else
     b
+
+// TODO: Make ts user-specified. Do we need to compare to expected taints again?
+let check_if_code_is_leakage_free code =
+  let ts = AnalysisTaints 
+    (FunctionalExtensionality.on reg (fun _ -> Public))
+    Public Public Public 
+    (FunctionalExtensionality.on xmm (fun _ -> Public)) in
+  let b, ts' = check_if_code_consumes_fixed_time code ts in
+  b

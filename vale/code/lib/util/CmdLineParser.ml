@@ -56,6 +56,14 @@ let parse_cmdline :
       | MASM -> Vale_X64_Decls.masm
     in
     let windows = platform_choice = Win in
+
+    (* Run taint analysis *)
+    let _ = List.iter (fun (name, code) ->
+      if Vale_X64_Leakage.check_if_code_is_leakage_free (code windows) then ()
+      else failwith ("method " ^ name ^ " does not satisfy taint analysis")
+    ) l in
+
+    (* Extract and print assembly code *)
     Vale_X64_Decls.print_header printer;
     let _ = List.fold_left (fun label_count (name, code) ->
                            Vale_X64_Decls.print_proc (proc_name name platform_choice)
