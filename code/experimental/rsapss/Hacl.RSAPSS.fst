@@ -34,7 +34,7 @@ val rsa_pss_sign:
     (requires fun h ->
       live h salt /\ live h msg /\ live h sgnt /\ live h skey /\
       disjoint msg salt /\ disjoint msg sgnt /\ disjoint sgnt salt)
-    (ensures  fun h0 _ h1 -> modifies (loc_buffer sgnt) h0 h1)
+    (ensures  fun h0 _ h1 -> modifies (loc sgnt) h0 h1)
 let rsa_pss_sign pow2_i modBits eBits dBits pLen qLen skey rBlind sLen salt msgLen msg sgnt =
   Hacl.Impl.RSA.rsa_sign pow2_i modBits eBits dBits pLen qLen skey rBlind sLen salt msgLen msg sgnt
 

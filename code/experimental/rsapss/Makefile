@@ -2,15 +2,12 @@ FSTAR_HOME   ?= ../../../../FStar
 KREMLIN_HOME ?= ../../../../kremlin
 HACL_HOME    ?= ../../..
 
-CACHE_DIR     = .cache
 OUTPUT_DIR    = .output
 HINT_DIR      = .hints
 GENERATED_DIR = rsapss-c
-OUT_DIR	      = rsapss-c
+OUT_DIR		  = rsapss-c
 
-KREMLIN_TESTLIB=-add-include '"extracted/TestLib.h"' $(KREMLIB)/c/testlib.c
-
-KREMLIN=$(KREMLIN_HOME)/krml
+.PHONY: all test stage1 stage2 clean clean-c distclean
 
 all: test
 
@@ -31,109 +28,43 @@ FSTAR_INCLUDE_DIRS = \
   $(HACL_HOME)/lib \
   $(HACL_HOME)/lib/c
 
-FSTAR_INCLUDES = $(addprefix --include ,$(FSTAR_INCLUDE_DIRS))
+FSTAR_FLAGS = $(OTHERFLAGS) --cmi \
+  --cache_checked_modules --odir $(OUTPUT_DIR) \
+  --already_cached "'Prims+FStar+LowStar+C+Spec.Loops+TestLib+Lib'" \
+  $(addprefix --include ,$(FSTAR_INCLUDE_DIRS))
 
-FSTAR = $(FSTAR_HOME)/bin/fstar.exe $(OTHERFLAGS) \
-  --cache_checked_modules --cache_dir $(CACHE_DIR) \
-  --odir $(OUTPUT_DIR) $(FSTAR_INCLUDES)
-
-FSTARR = $(FSTAR_HOME)/bin/fstar.exe $(OTHERFLAGS) \
-  --cache_dir $(CACHE_DIR) \
-  --odir $(OUTPUT_DIR) $(FSTAR_INCLUDES)
+FSTAR = $(FSTAR_HOME)/bin/fstar.exe $(FSTAR_FLAGS)
 
 ENABLE_HINTS = --use_hints --use_hint_hashes --record_hints --query_stats
-
-%.fst-in:
-	@echo --cache_checked_modules --cache_dir $(CACHE_DIR) \
-	$(FSTAR_INCLUDES) \
-	$(ENABLE_HINTS) --hint_file $(HINT_DIR)/$(basename $@).fst.hints
-
-%.fsti-in:
-	@echo --cache_checked_modules --cache_dir $(CACHE_DIR) \
-	$(FSTAR_INCLUDES) \
-	$(ENABLE_HINTS) --hint_file $(HINT_DIR)/$(basename $@).fsti.hints
 
 ROOTS = Hacl.Test.RSA.fst
 
 .PRECIOUS: %.krml
+
+$(HINT_DIR):
+	mkdir -p $@
 
 .depend:
 	$(FSTAR) --dep full $(ROOTS) --extract '* -Prims -FStar +FStar.UInt128 -LowStar -Spec' > $@
 
 include .depend
 
-# Admit SMT queries for modules in FStar, LowStar, C, and Spec namespaces
-$(CACHE_DIR)/FStar.%.checked $(CACHE_DIR)/LowStar.%.checked $(CACHE_DIR)/C.%.checked: | .depend
-	$(FSTAR) $< --admit_smt_queries true && \
-	touch $@
+%.checked: | .depend $(HINT_DIR)
+	$(FSTAR) $< $(ENABLE_HINTS) --hint_file $(HINT_DIR)/$(notdir $*).hints && \
+		touch -c $@
 
-$(CACHE_DIR)/prims.fst.checked $(CACHE_DIR)/Spec.Loops.fst.checked $(CACHE_DIR)/Spec.Keccak.fst.checked: | .depend
-	$(FSTAR) $< --admit_smt_queries true && \
-	touch $@
-
-$(CACHE_DIR)/Lib.RawIntTypes.fst.checked: $(CACHE_DIR)/Lib.IntTypes.fst.checked
-$(CACHE_DIR)/Lib.RawIntTypes.fst.checked: | .depend
-	$(FSTARR) $< \
-	  --expose_interfaces \
-	  $(HACL_HOME)/lib/Lib.IntTypes.fst \
-	  $(ENABLE_HINTS) --hint_file $(HINT_DIR)/$(notdir $<).hints && \
-	touch $@
-
-$(CACHE_DIR)/%.checked: | .depend
-	$(FSTAR) $< \
-	  $(ENABLE_HINTS) --hint_file $(HINT_DIR)/$(notdir $<).hints && \
-	touch $@
-
-# We mimick what Kremlin would do when it is driving F* and it is given all
-# .fst in the command-line: it would add `--expose_interfaces` and expose all
-# implementations.
-#
-# We need to additionally expose Lib.Loops and Lib.RawIntTypes for the
-# compilation to succeed and be as if Kremlin was given all files at the
-# same time. This means stale cache files, so we use --lax
-
-$(OUTPUT_DIR)/FStar_%.krml $(OUTPUT_DIR)/LowStar_%.krml $(OUTPUT_DIR)/C%.krml: | .depend
-	$(FSTARR) --codegen Kremlin --lax \
-	  --extract_module $(basename $(notdir $(subst .checked,,$<))) \
-	  $(notdir $(subst .checked,,$<)) && \
-	touch $@
-
-$(OUTPUT_DIR)/prims.krml $(OUTPUT_DIR)/Spec_Loops.krml $(OUTPUT_DIR)/Lib_IntTypes.krml $(OUTPUT_DIR)/Lib_ByteBuffer.krml: | .depend
-	$(FSTARR) --codegen Kremlin --lax \
-	  --extract_module $(basename $(notdir $(subst .checked,,$<))) \
-	  $(notdir $(subst .checked,,$<)) && \
-	touch $@
-
-$(OUTPUT_DIR)/Lib_RawIntTypes.krml: $(OUTPUT_DIR)/Lib_IntTypes.krml
-$(OUTPUT_DIR)/Lib_RawIntTypes.krml: | .depend
-	$(FSTAR) --codegen Kremlin --lax \
-	  --expose_interfaces \
-	  $(HACL_HOME)/lib/Lib.IntTypes.fst \
-	  --extract_module $(basename $(notdir $(subst .checked,,$<))) \
-	  $(notdir $(subst .checked,,$<)) && \
-	touch $@
-
-$(OUTPUT_DIR)/Lib_Loops.krml: | .depend $(OUTPUT_DIR)/Lib_RawIntTypes.krml
-	$(FSTAR) --codegen Kremlin --lax \
-	  --expose_interfaces \
-	  $(HACL_HOME)/lib/Lib.IntTypes.fst \
-	  $(HACL_HOME)/lib/Lib.RawIntTypes.fst \
-	  --extract_module $(basename $(notdir $(subst .checked,,$<))) \
-	  $(notdir $(subst .checked,,$<)) && \
-	touch $@
-
-$(OUTPUT_DIR)/%.krml: | .depend $(OUTPUT_DIR)/Lib_RawIntTypes.krml
-	$(FSTAR) --codegen Kremlin --lax \
-	  --expose_interfaces \
-	  $(HACL_HOME)/lib/Lib.IntTypes.fst \
-	  $(HACL_HOME)/lib/Lib.RawIntTypes.fst \
-	  $(HACL_HOME)/lib/Lib.ByteBuffer.fst \
-	  $(HACL_HOME)/lib/c/Lib.Loops.fst \
+$(OUTPUT_DIR)/%.krml: | .depend
+	echo $(basename $(notdir $(subst .checked,,$<)))
+	$(FSTAR) --codegen Kremlin \
 	  --extract_module $(basename $(notdir $(subst .checked,,$<))) \
 	  $(notdir $(subst .checked,,$<)) && \
 	touch $@
 
 # 2. Generation of .c files
+
+KREMLIN_TESTLIB=-add-include '"TestLib.h"' $(KREMLIB)/dist/generic/testlib.c
+
+KREMLIN  := $(if $(shell PATH=$(PATH) which "krml"),$(shell PATH=$(PATH) which "krml"),$(KREMLIN_HOME)/krml)
 
 # We use -drop (deprecated) only to avoid creating unnecessary .c,.h files
 $(GENERATED_DIR)/Makefile.include: $(ALL_KRML_FILES) | .depend
@@ -171,13 +102,13 @@ include $(GENERATED_DIR)/Makefile.include
 # KreMLin sees the fsti's for the various Lib* and LowStar modules and creates .h/.c
 # files for them in $(GENERATED_DIR). However, we are only interested in the header,
 # and drop these (mostly empty) C files.
-ALL_OUR_FILES 	    = $(filter-out FStar_* Lib.c LowStar.c C.c Hacl_SHA256.c, $(ALL_C_FILES))
+ALL_OUR_FILES		= $(filter-out FStar_* Lib.c LowStar.c C.c Hacl_SHA256.c, $(ALL_C_FILES))
 ALL_GENERATED_FILES = $(addprefix $(GENERATED_DIR)/,$(ALL_OUR_FILES))
 
 ALL_SOURCES = \
   $(ALL_GENERATED_FILES) \
-  $(HACL_HOME)/lib/c/Lib_PrintBuffer.c \
   include/Hacl_SHA256.c \
+  $(HACL_HOME)/lib/c/Lib_PrintBuffer.c \
   $(HACL_HOME)/snapshots/hacl-c/Hacl_SHA2_256.c
 
 ALL_OBJS = $(patsubst %.c,%.o,$(ALL_SOURCES))
@@ -186,6 +117,8 @@ INCLUDE_DIRS = \
   $(KREMLIN_HOME)/include \
   $(KREMLIN_HOME)/kremlib \
   $(HACL_HOME)/lib \
+  $(KREMLIN_HOME)/kremlib/dist/generic \
+  ./include/ \
   $(HACL_HOME)/snapshots/hacl-c
 
 CFLAGS += -O3 -march=native -mtune=native -funroll-loops
@@ -206,26 +139,32 @@ $(OUT_DIR):
 
 $(OUT_DIR)/test.exe: $(ALL_OBJS) | $(OUT_DIR)
 	$(info ALL_SOURCES is $(ALL_SOURCES))
-	$(CC) $(CFLAGS) -o $@ $^ -L $(KREMLIN_HOME)/kremlib/out -lkremlib
+	$(CC) $(CFLAGS) -o $@ $^ -L $(KREMLIN_HOME)/kremlib/dist/generic -lkremlib
 
 .PRECIOUS: %.o
 
 endif # COMPILE
 
-# 5. Clean targets that do not re-trigger anything except perhaps the generation
-# of the .depend file.
+# 5. Targets for interactive mode
+
+%.fst-in:
+	@echo $(FSTAR_FLAGS) \
+	  $(ENABLE_HINTS) --hint_file $(HINT_DIR)/$(basename $@).fst.hints
+
+%.fsti-in:
+	@echo $(FSTAR_FLAGS) \
+	  $(ENABLE_HINTS) --hint_file $(HINT_DIR)/$(basename $@).fsti.hints
+
+# 6. Clean targets
 
 SHELL=/bin/bash
 
-.PHONY: clean
 clean:
 	rm -rf $(GENERATED_DIR) $(OUT_DIR)/*.exe $(OUT_DIR)/*.a
 	rm -rf include/*.o include/*.d
 
-.PHONY: clean-c
 clean-c:
 	rm -rf $(GENERATED_DIR)/{*.{c,h},Makefile.include}
 
-.PHONY: distclean
 distclean: clean
-	rm -rf $(OUT_DIR) $(CACHE_DIR) $(OUTPUT_DIR)
+	rm -rf $(OUT_DIR) $(OUTPUT_DIR) *.checked

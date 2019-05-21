@@ -10,18 +10,19 @@ open Lib.IntTypes
 open Lib.Buffer
 open Lib.RawIntTypes
 
-inline_for_extraction noextract
-let lbytes len = lbuffer uint8 (v len)
 
 inline_for_extraction noextract
-let lbignum len = lbuffer uint64 (v len)
+let lbytes (len : size_t) = lbuffer uint8 len
+
+inline_for_extraction noextract
+let lbignum (len : size_t) = lbuffer uint64 len
 
 inline_for_extraction noextract
 val blocks:
     x:size_t{v x > 0}
   -> m:size_t{v m > 0}
-  -> r:size_t{v r > 0 /\ v x <= v m * v r}
-let blocks x m =
+  -> r:size_t{v r > 0 /\ v x <= v m * v r /\ v r <= v x}
+let blocks x m = admit();
   (x -. 1ul) /. m +. 1ul
 
 inline_for_extraction noextract
@@ -62,7 +63,7 @@ val bn_set_bit:
   -> ind:size_t{v ind / 64 < v len}
   -> Stack unit
     (requires fun h -> live h input)
-    (ensures  fun h0 _ h1 -> modifies (loc_buffer input) h0 h1)
+    (ensures  fun h0 _ h1 -> modifies (loc input) h0 h1)
 [@"c_inline"]
 let bn_set_bit len input ind =
   let i = ind /. 64ul in
