@@ -14,9 +14,9 @@ inline_for_extraction
 let hLen = 32ul
 
 val hash:
-    mHash:lbuffer uint8 (v hLen)
+    mHash:lbuffer uint8 hLen
   -> len:size_t
-  -> m:lbuffer uint8 (v len)
+  -> m:lbuffer uint8 len
   -> Stack unit
     (requires fun h -> live h mHash /\ live h m /\ disjoint m mHash)
-    (ensures  fun h0 _ h1 -> modifies (loc_buffer mHash) h0 h1)
+    (ensures  fun h0 _ h1 -> modifies (loc mHash) h0 h1)

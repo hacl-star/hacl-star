@@ -14,7 +14,7 @@ open Hacl.Impl.Lib
 
 module ST = FStar.HyperStack.ST
 
-#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
+#reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0"
 
 inline_for_extraction noextract
 val text_to_nat_:
@@ -24,10 +24,10 @@ val text_to_nat_:
   -> res:lbignum resLen
   -> Stack unit
     (requires fun h -> live h input /\ live h res /\ disjoint res input)
-    (ensures  fun h0 _ h1 -> modifies (loc_buffer res) h0 h1)
+    (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1)
 let text_to_nat_ len input resLen res =
   let h0 = ST.get () in
-  let inv h1 i = modifies (loc_buffer res) h0 h1 in
+  let inv h1 i = modifies (loc res) h0 h1 in
   Lib.Loops.for 0ul resLen inv
   (fun i ->
     res.(resLen -. i -. 1ul) <- uint_from_bytes_be (sub input (8ul *. i) 8ul)
@@ -39,7 +39,7 @@ val text_to_nat:
   -> res:lbignum (blocks len 8ul){8 * v (blocks len 8ul) < max_size_t}
   -> Stack unit
     (requires fun h -> live h input /\ live h res /\ disjoint res input)
-    (ensures  fun h0 _ h1 -> modifies (loc_buffer res) h0 h1)
+    (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1)
 [@"c_inline"]
 let text_to_nat len input res =
   push_frame ();
@@ -51,7 +51,7 @@ let text_to_nat len input res =
   let tmp = create tmpLen (u8 0) in
   let tmpLen1 = tmpLen -. ind in
   let tmp1 = sub tmp ind tmpLen1 in
-  copy tmp1 len input;
+  copy tmp1 input;
   text_to_nat_ tmpLen tmp num_words res;
   pop_frame ()
 
@@ -63,10 +63,10 @@ val nat_to_text_:
   -> res:lbytes resLen
   -> Stack unit
     (requires fun h -> live h input /\ live h res /\ disjoint res input)
-    (ensures  fun h0 _ h1 -> modifies (loc_buffer res) h0 h1)
+    (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1)
 let nat_to_text_ len input resLen res =
   let h0 = ST.get () in
-  let inv h1 i = modifies (loc_buffer res) h0 h1 in
+  let inv h1 i = modifies (loc res) h0 h1 in
   Lib.Loops.for 0ul len inv
   (fun i ->
     let tmp = input.(len -. i -. 1ul) in
@@ -79,9 +79,9 @@ val nat_to_text:
   -> res:lbytes len
   -> Stack unit
     (requires fun h -> live h input /\ live h res /\ disjoint res input)
-    (ensures  fun h0 _ h1 -> modifies (loc_buffer res) h0 h1)
+    (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1)
 [@"c_inline"]
-let nat_to_text len input res =
+let nat_to_text len input res = admit();
   push_frame ();
   let num_words = blocks len 8ul in
   let tmpLen = 8ul *. num_words in
@@ -92,5 +92,5 @@ let nat_to_text len input res =
   nat_to_text_ num_words input tmpLen tmp;
   let tmpLen1 = tmpLen -. ind in
   let tmp1 = sub tmp ind tmpLen1 in
-  copy res len tmp1;
+  copy res tmp1;
   pop_frame ()
