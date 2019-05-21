@@ -1,4 +1,4 @@
-module Hacl.Argmax.Common
+module Hacl.Spec.HE.Common
 
 open FStar.Math.Lemmas
 open FStar.Math.Lib

@@ -1,9 +1,9 @@
-module Hacl.Argmax.GM
+module Hacl.Spec.HE.GM
 
 open FStar.Mul
 open FStar.Math.Lemmas
 
-open Hacl.Argmax.Common
+open Hacl.Spec.HE.Common
 
 
 (* Squares and nonsquares *)
