@@ -1,4 +1,4 @@
-module Hacl.Test.Argmax
+module Hacl.Test.HE
 
 open FStar.HyperStack.All
 open FStar.Mul

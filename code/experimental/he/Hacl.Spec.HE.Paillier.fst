@@ -1,4 +1,4 @@
-module Hacl.Argmax.Paillier
+module Hacl.Spec.HE.Paillier
 
 open FStar.Calc
 open FStar.Mul
@@ -6,7 +6,7 @@ open FStar.Math.Lemmas
 open FStar.Classical
 open FStar.Squash
 
-open Hacl.Argmax.Common
+open Hacl.Spec.HE.Common
 
 
 (* Internals *)

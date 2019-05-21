@@ -1,14 +1,14 @@
-module Hacl.Ocaml.Argmax.Functest
+module Hacl.Ocaml.HE.Functest
 
 open FStar.All
 open FStar.IO
 open FStar.Mul
 open FStar.UInt
 
-open Hacl.Argmax.Common
+open Hacl.Spec.HE.Common
 
-module GM = Hacl.Argmax.GM
-module P = Hacl.Argmax.Paillier
+module GM = Hacl.Spec.HE.GM
+module P = Hacl.Spec.HE.Paillier
 module U64 = FStar.UInt64
 
 val to_prime: big -> prm

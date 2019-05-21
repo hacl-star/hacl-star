@@ -6,9 +6,9 @@ KREMLIN_EXE  := $(if $(shell PATH=$(PATH) which "krml"),$(shell PATH=$(PATH) whi
 
 OUTPUT_DIR    = .output
 HINT_DIR      = .hints
-GENERATED_DIR = argmax-c
-OUT_DIR       = argmax-c
-OCAML_DIR     = argmax-ocaml
+GENERATED_DIR = he-c
+OUT_DIR       = he-c
+OCAML_DIR     = he-ocaml
 
 .PHONY: all test stage1 stage2 clean clean-c distclean
 
@@ -40,7 +40,7 @@ FSTAR = $(FSTAR_EXE) $(FSTAR_FLAGS)
 
 ENABLE_HINTS = --use_hints --use_hint_hashes --record_hints --query_stats
 
-OCAML_TEST = Hacl.Ocaml.Argmax.Functest.fst
+OCAML_TEST = Hacl.Ocaml.HE.Functest.fst
 # nix-shell sets the $OCAMLPATH so we don't need to overcomplicate anything here
 OCAMLOPT ?= ocamlfind opt -package fstarlib -linkpkg -g
 
@@ -49,10 +49,10 @@ ocaml: $(OCAML_TEST)
 	mkdir -p $(OCAML_DIR)
 	$(FSTAR_EXE) $(addprefix --include ,$(FSTAR_INCLUDE_DIRS)) \
 		--odir $(OCAML_DIR) --codegen OCaml $(OCAML_TEST)
-	cd $(OCAML_DIR); $(OCAMLOPT) Hacl_Argmax_Common.ml Hacl_Argmax_GM.ml Hacl_Argmax_Paillier.ml Hacl_Ocaml_Argmax_Functest.ml -o functest.exe
+	cd $(OCAML_DIR); $(OCAMLOPT) Hacl_Spec_HE_Common.ml Hacl_Spec_HE_GM.ml Hacl_Spec_HE_Paillier.ml Hacl_Ocaml_HE_Functest.ml -o functest.exe
 	./$(OCAML_DIR)/functest.exe
 
-ROOTS = Hacl.Test.Argmax.fst
+ROOTS = Hacl.Test.HE.fst
 
 .PRECIOUS: %.krml
 
@@ -84,7 +84,7 @@ KREMLIN=$(KREMLIN_EXE)
 # We use -drop (deprecated) only to avoid creating unnecessary .c,.h files
 $(GENERATED_DIR)/Makefile.include: $(ALL_KRML_FILES) | .depend
 	$(KREMLIN) $(KREMLIN_TESTLIB) -skip-compilation \
-	-no-prefix 'Hacl.Test.Argmax' \
+	-no-prefix 'Hacl.Test.HE' \
 	-bundle 'Lib.*' \
 	-bundle 'Spec.*' \
 	-bundle 'C=C.Endianness' \
