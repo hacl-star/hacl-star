@@ -1058,7 +1058,7 @@ procedure save_registers(inline win:bool)
     ensures
         rsp == old(rsp) - 8 * (8 + (if win then 10*2 else 0));
         init_rsp(stack) == old(init_rsp(stack));
-        valid_stack_slot64s(rsp, 8 + (if win then 10*2 else 0), stack, Public, stackTaint);
+        valid_stack_slot64s(rsp, 8 + (if win then 10*2 else 0), stack, Secret, stackTaint);
 
         modifies_stack(rsp, old(rsp), old(stack), stack);
         modifies_stacktaint(rsp, old(rsp), old(stackTaint), stackTaint);
@@ -1093,26 +1093,26 @@ procedure save_registers(inline win:bool)
         load_stack64(rsp + 0x30 + (if win then 0xa0 else 0), stack) == r14;
         load_stack64(rsp + 0x38 + (if win then 0xa0 else 0), stack) == r15;
 {
-    Push(r15);
-    Push(r14);
-    Push(r13);
-    Push(r12);
-    Push(rsi);
-    Push(rdi);
-    Push(rbp);
-    Push(rbx);
+    Push_Secret(r15);
+    Push_Secret(r14);
+    Push_Secret(r13);
+    Push_Secret(r12);
+    Push_Secret(rsi);
+    Push_Secret(rdi);
+    Push_Secret(rbp);
+    Push_Secret(rbx);
 
     inline if (win) {
-        PushXmm(xmm15, rax);
-        PushXmm(xmm14, rax);
-        PushXmm(xmm13, rax);
-        PushXmm(xmm12, rax);
-        PushXmm(xmm11, rax);
-        PushXmm(xmm10, rax);
-        PushXmm(xmm9,  rax);
-        PushXmm(xmm8,  rax);
-        PushXmm(xmm7,  rax);
-        PushXmm(xmm6,  rax);
+        PushXmm_Secret(xmm15, rax);
+        PushXmm_Secret(xmm14, rax);
+        PushXmm_Secret(xmm13, rax);
+        PushXmm_Secret(xmm12, rax);
+        PushXmm_Secret(xmm11, rax);
+        PushXmm_Secret(xmm10, rax);
+        PushXmm_Secret(xmm9,  rax);
+        PushXmm_Secret(xmm8,  rax);
+        PushXmm_Secret(xmm7,  rax);
+        PushXmm_Secret(xmm6,  rax);
     }
 }
 
@@ -1127,7 +1127,7 @@ procedure restore_registers(
     {:quick}
     requires
         old_rsp == init_rsp(stack);
-        valid_stack_slot64s(rsp, 8 + (if win then 10*2 else 0), stack, Public, stackTaint);
+        valid_stack_slot64s(rsp, 8 + (if win then 10*2 else 0), stack, Secret, stackTaint);
         rsp == old_rsp - 8 * (8 + (if win then 10*2 else 0));
 
         win ==> load_stack64(rsp + 0x00, stack) == hi64(old_xmm6);
@@ -1182,26 +1182,26 @@ procedure restore_registers(
 
 {
     inline if (win) {
-        PopXmm(xmm6,  rax, old_xmm6);
-        PopXmm(xmm7,  rax, old_xmm7);
-        PopXmm(xmm8,  rax, old_xmm8);
-        PopXmm(xmm9,  rax, old_xmm9);
-        PopXmm(xmm10, rax, old_xmm10);
-        PopXmm(xmm11, rax, old_xmm11);
-        PopXmm(xmm12, rax, old_xmm12);
-        PopXmm(xmm13, rax, old_xmm13);
-        PopXmm(xmm14, rax, old_xmm14);
-        PopXmm(xmm15, rax, old_xmm15);
+        PopXmm_Secret(xmm6,  rax, old_xmm6);
+        PopXmm_Secret(xmm7,  rax, old_xmm7);
+        PopXmm_Secret(xmm8,  rax, old_xmm8);
+        PopXmm_Secret(xmm9,  rax, old_xmm9);
+        PopXmm_Secret(xmm10, rax, old_xmm10);
+        PopXmm_Secret(xmm11, rax, old_xmm11);
+        PopXmm_Secret(xmm12, rax, old_xmm12);
+        PopXmm_Secret(xmm13, rax, old_xmm13);
+        PopXmm_Secret(xmm14, rax, old_xmm14);
+        PopXmm_Secret(xmm15, rax, old_xmm15);
     }
 
-    Pop(rbx);
-    Pop(rbp);
-    Pop(rdi);
-    Pop(rsi);
-    Pop(r12);
-    Pop(r13);
-    Pop(r14);
-    Pop(r15);
+    Pop_Secret(rbx);
+    Pop_Secret(rbp);
+    Pop_Secret(rdi);
+    Pop_Secret(rsi);
+    Pop_Secret(r12);
+    Pop_Secret(r13);
+    Pop_Secret(r14);
+    Pop_Secret(r15);
 }
 
 #reset-options "--z3rlimit 1600"

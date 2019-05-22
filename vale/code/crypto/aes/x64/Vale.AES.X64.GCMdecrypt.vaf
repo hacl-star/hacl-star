@@ -938,52 +938,52 @@ procedure gcm_decrypt_stdcall(
         Mov64(r9, rdi);
     }
 
-    Push(r15);
-    Push(r14);
-    Push(r13);
-    Push(r12);
-    Push(rsi);
-    Push(rdi);
-    Push(rbp);
-    Push(rbx);
+    Push_Secret(r15);
+    Push_Secret(r14);
+    Push_Secret(r13);
+    Push_Secret(r12);
+    Push_Secret(rsi);
+    Push_Secret(rdi);
+    Push_Secret(rbp);
+    Push_Secret(rbx);
 
     inline if (win) {
-        PushXmm(xmm15, rax);
-        PushXmm(xmm14, rax);
-        PushXmm(xmm13, rax);
-        PushXmm(xmm12, rax);
-        PushXmm(xmm11, rax);
-        PushXmm(xmm10, rax);
-        PushXmm(xmm9,  rax);
-        PushXmm(xmm8,  rax);
-        PushXmm(xmm7,  rax);
-        PushXmm(xmm6,  rax);
+        PushXmm_Secret(xmm15, rax);
+        PushXmm_Secret(xmm14, rax);
+        PushXmm_Secret(xmm13, rax);
+        PushXmm_Secret(xmm12, rax);
+        PushXmm_Secret(xmm11, rax);
+        PushXmm_Secret(xmm10, rax);
+        PushXmm_Secret(xmm9,  rax);
+        PushXmm_Secret(xmm8,  rax);
+        PushXmm_Secret(xmm7,  rax);
+        PushXmm_Secret(xmm6,  rax);
     }
 
     gcm_decrypt_stdcall_inner(alg, args_b, iv_BE, cipher_b, auth_b, iv_b, out_b, tag_b, key, round_keys, keys_b);
     Mov64(rdx, rax);        // Save a copy of rax == result
 
     inline if (win) {
-        PopXmm(xmm6,  rax, old(xmm6));
-        PopXmm(xmm7,  rax, old(xmm7));
-        PopXmm(xmm8,  rax, old(xmm8));
-        PopXmm(xmm9,  rax, old(xmm9));
-        PopXmm(xmm10, rax, old(xmm10));
-        PopXmm(xmm11, rax, old(xmm11));
-        PopXmm(xmm12, rax, old(xmm12));
-        PopXmm(xmm13, rax, old(xmm13));
-        PopXmm(xmm14, rax, old(xmm14));
-        PopXmm(xmm15, rax, old(xmm15));
+        PopXmm_Secret(xmm6,  rax, old(xmm6));
+        PopXmm_Secret(xmm7,  rax, old(xmm7));
+        PopXmm_Secret(xmm8,  rax, old(xmm8));
+        PopXmm_Secret(xmm9,  rax, old(xmm9));
+        PopXmm_Secret(xmm10, rax, old(xmm10));
+        PopXmm_Secret(xmm11, rax, old(xmm11));
+        PopXmm_Secret(xmm12, rax, old(xmm12));
+        PopXmm_Secret(xmm13, rax, old(xmm13));
+        PopXmm_Secret(xmm14, rax, old(xmm14));
+        PopXmm_Secret(xmm15, rax, old(xmm15));
     }
 
-    Pop(rbx);
-    Pop(rbp);
-    Pop(rdi);
-    Pop(rsi);
-    Pop(r12);
-    Pop(r13);
-    Pop(r14);
-    Pop(r15);
+    Pop_Secret(rbx);
+    Pop_Secret(rbp);
+    Pop_Secret(rdi);
+    Pop_Secret(rsi);
+    Pop_Secret(r12);
+    Pop_Secret(r13);
+    Pop_Secret(r14);
+    Pop_Secret(r15);
 
     Mov64(rax, rdx);
 }
@@ -1116,26 +1116,26 @@ procedure gcm_decrypt2_stdcall(
         !win ==> r14 == old(r14);
         !win ==> r15 == old(r15);
 {
-    Push(r15);
-    Push(r14);
-    Push(r13);
-    Push(r12);
-    Push(rsi);
-    Push(rdi);
-    Push(rbp);
-    Push(rbx);
+    Push_Secret(r15);
+    Push_Secret(r14);
+    Push_Secret(r13);
+    Push_Secret(r12);
+    Push_Secret(rsi);
+    Push_Secret(rdi);
+    Push_Secret(rbp);
+    Push_Secret(rbx);
 
     inline if (win) {
-        PushXmm(xmm15, rax);
-        PushXmm(xmm14, rax);
-        PushXmm(xmm13, rax);
-        PushXmm(xmm12, rax);
-        PushXmm(xmm11, rax);
-        PushXmm(xmm10, rax);
-        PushXmm(xmm9,  rax);
-        PushXmm(xmm8,  rax);
-        PushXmm(xmm7,  rax);
-        PushXmm(xmm6,  rax);
+        PushXmm_Secret(xmm15, rax);
+        PushXmm_Secret(xmm14, rax);
+        PushXmm_Secret(xmm13, rax);
+        PushXmm_Secret(xmm12, rax);
+        PushXmm_Secret(xmm11, rax);
+        PushXmm_Secret(xmm10, rax);
+        PushXmm_Secret(xmm9,  rax);
+        PushXmm_Secret(xmm8,  rax);
+        PushXmm_Secret(xmm7,  rax);
+        PushXmm_Secret(xmm6,  rax);
     }
 
 
@@ -1192,26 +1192,26 @@ procedure gcm_decrypt2_stdcall(
            (rax = 0) == gcm_decrypt_LE(alg, seq_nat32_to_seq_nat8_LE(key), be_quad32_to_bytes(reverse_bytes_quad32(buffer128_read(iv_b, 0, old(mem)))), cipher, auth, le_quad32_to_bytes(buffer128_read(tag_b, 0, old(mem))))._2);
 
     inline if (win) {
-        PopXmm(xmm6,  rdx, old(xmm6));
-        PopXmm(xmm7,  rdx, old(xmm7));
-        PopXmm(xmm8,  rdx, old(xmm8));
-        PopXmm(xmm9,  rdx, old(xmm9));
-        PopXmm(xmm10, rdx, old(xmm10));
-        PopXmm(xmm11, rdx, old(xmm11));
-        PopXmm(xmm12, rdx, old(xmm12));
-        PopXmm(xmm13, rdx, old(xmm13));
-        PopXmm(xmm14, rdx, old(xmm14));
-        PopXmm(xmm15, rdx, old(xmm15));
+        PopXmm_Secret(xmm6,  rdx, old(xmm6));
+        PopXmm_Secret(xmm7,  rdx, old(xmm7));
+        PopXmm_Secret(xmm8,  rdx, old(xmm8));
+        PopXmm_Secret(xmm9,  rdx, old(xmm9));
+        PopXmm_Secret(xmm10, rdx, old(xmm10));
+        PopXmm_Secret(xmm11, rdx, old(xmm11));
+        PopXmm_Secret(xmm12, rdx, old(xmm12));
+        PopXmm_Secret(xmm13, rdx, old(xmm13));
+        PopXmm_Secret(xmm14, rdx, old(xmm14));
+        PopXmm_Secret(xmm15, rdx, old(xmm15));
     }
 
-    Pop(rbx);
-    Pop(rbp);
-    Pop(rdi);
-    Pop(rsi);
-    Pop(r12);
-    Pop(r13);
-    Pop(r14);
-    Pop(r15);
+    Pop_Secret(rbx);
+    Pop_Secret(rbp);
+    Pop_Secret(rdi);
+    Pop_Secret(rsi);
+    Pop_Secret(r12);
+    Pop_Secret(r13);
+    Pop_Secret(r14);
+    Pop_Secret(r15);
 
 
 }
