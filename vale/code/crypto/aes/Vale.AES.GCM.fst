@@ -15,17 +15,19 @@ open Vale.Def.Words_s
 open Vale.Def.Words.Seq_s
 open FStar.Calc
 
-let gcm_encrypt_LE_fst_helper (iv_enc iv_BE:quad32) (plain auth cipher:seq nat8) (alg:algorithm) (key:seq nat32) : Lemma
+let gcm_encrypt_LE_fst_helper (iv:seq nat8) (iv_enc iv_BE:quad32) (plain auth cipher:seq nat8) (alg:algorithm) (key:seq nat32) : Lemma
   (requires
     is_aes_key_LE alg key /\
+    8 `op_Multiply` length iv == 96 /\
+    iv_BE == be_bytes_to_quad32 (pad_to_128_bits iv) /\
     cipher == gctr_encrypt_LE iv_enc (make_gctr_plain_LE plain) alg key /\
     length plain < pow2_32 /\
     length auth < pow2_32 /\
     iv_enc == inc32 (Mkfour 1 iv_BE.lo1 iv_BE.hi2 iv_BE.hi3) 1
   )
-  (ensures cipher == fst (gcm_encrypt_LE alg (seq_nat32_to_seq_nat8_LE key) (be_quad32_to_bytes iv_BE) plain auth))
+  (ensures cipher == fst (gcm_encrypt_LE alg (seq_nat32_to_seq_nat8_LE key) iv plain auth))
   =
-  reveal_opaque (gcm_encrypt_LE_def alg (seq_nat32_to_seq_nat8_LE key) (be_quad32_to_bytes iv_BE) plain auth)
+  reveal_opaque (gcm_encrypt_LE_def alg (seq_nat32_to_seq_nat8_LE key) iv plain auth)
 (*
   let s_key_LE = seq_nat8_to_seq_nat32_LE (seq_nat32_to_seq_nat8_LE key) in
   let s_iv_BE = be_bytes_to_quad32 (be_quad32_to_bytes iv_BE) in
@@ -45,12 +47,14 @@ let gcm_encrypt_LE_fst_helper (iv_enc iv_BE:quad32) (plain auth cipher:seq nat8)
   ()
 *)
 
-let gcm_encrypt_LE_snd_helper (iv_BE length_quad32 hash mac:quad32) (plain auth cipher:seq nat8) (alg:algorithm) (key:seq nat32) : Lemma
+let gcm_encrypt_LE_snd_helper (iv:seq nat8) (iv_BE length_quad32 hash mac:quad32) (plain auth cipher:seq nat8) (alg:algorithm) (key:seq nat32) : Lemma
   (requires
     is_aes_key_LE alg key /\
+    8 `op_Multiply` length iv == 96 /\
+    iv_BE == be_bytes_to_quad32 (pad_to_128_bits iv) /\
     length plain < pow2_32 /\
     length auth < pow2_32 /\
-    cipher == fst (gcm_encrypt_LE alg (seq_nat32_to_seq_nat8_LE key) (be_quad32_to_bytes iv_BE) plain auth) /\
+    cipher == fst (gcm_encrypt_LE alg (seq_nat32_to_seq_nat8_LE key) iv plain auth) /\
     length_quad32 == reverse_bytes_quad32
       (insert_nat64_opaque (insert_nat64_opaque (Mkfour 0 0 0 0) (8 * length auth) 1) (8 * length plain) 0) /\
     ( let h = aes_encrypt_LE alg key (Mkfour 0 0 0 0) in
@@ -59,10 +63,10 @@ let gcm_encrypt_LE_snd_helper (iv_BE length_quad32 hash mac:quad32) (plain auth 
       hash == ghash_LE h (append auth_padded_quads (append cipher_padded_quads (create 1 length_quad32))) /\
       le_quad32_to_bytes mac == gctr_encrypt_LE (Mkfour 1 iv_BE.lo1 iv_BE.hi2 iv_BE.hi3) (le_quad32_to_bytes hash) alg key)
   )
-  (ensures le_quad32_to_bytes mac == snd (gcm_encrypt_LE alg (seq_nat32_to_seq_nat8_LE key) (be_quad32_to_bytes iv_BE) plain auth))
+  (ensures le_quad32_to_bytes mac == snd (gcm_encrypt_LE alg (seq_nat32_to_seq_nat8_LE key) iv plain auth))
   =
   reveal_opaque insert_nat64;
-  reveal_opaque (gcm_encrypt_LE_def alg (seq_nat32_to_seq_nat8_LE key) (be_quad32_to_bytes iv_BE) plain auth)
+  reveal_opaque (gcm_encrypt_LE_def alg (seq_nat32_to_seq_nat8_LE key) iv plain auth)
   //be_bytes_to_quad32_to_bytes iv_BE;
   //let t = snd (gcm_encrypt_LE alg (seq_nat32_to_seq_nat8_LE key) (be_quad32_to_bytes iv_BE) plain auth) in
   //()
@@ -73,7 +77,7 @@ let gcm_blocks_helper_enc (alg:algorithm) (key:seq nat32)
                    (p128x6 p128 p_bytes c128x6 c128 c_bytes:seq quad32)
                    (auth_bytes:seq nat8)
                    (p_num_bytes:nat)
-                   (iv_BE:quad32) : Lemma
+                   (iv:seq nat8) (iv_BE:quad32) : Lemma
   (requires // Required by gcm_blocks
            length p128x6 * 16 + length p128 * 16 <= p_num_bytes /\
            p_num_bytes < length p128x6 * 16 + length p128 * 16 + 16 /\
@@ -83,6 +87,8 @@ let gcm_blocks_helper_enc (alg:algorithm) (key:seq nat32)
            length c_bytes == 1 /\
            (length auth_bytes) < pow2_32 /\
            is_aes_key_LE alg key /\
+           8 `op_Multiply` length iv == 96 /\
+           iv_BE == be_bytes_to_quad32 (pad_to_128_bits iv) /\
 
            // Ensured by gcm_blocks
            p_num_bytes < pow2_32 /\
@@ -120,7 +126,7 @@ let gcm_blocks_helper_enc (alg:algorithm) (key:seq nat32)
            let plain_bytes = slice (le_seq_quad32_to_bytes plain) 0 p_num_bytes in
            let cipher_bytes = slice (le_seq_quad32_to_bytes cipher) 0 p_num_bytes in
            //cipher_bytes == gctr_encrypt_LE ctr_BE_2 plain_bytes alg key))
-           cipher_bytes == fst (gcm_encrypt_LE alg (seq_nat32_to_seq_nat8_LE key) (be_quad32_to_bytes iv_BE) plain_bytes auth_bytes)))
+           cipher_bytes == fst (gcm_encrypt_LE alg (seq_nat32_to_seq_nat8_LE key) iv plain_bytes auth_bytes)))
   =
   let ctr_BE_2:quad32 = Mkfour 2 iv_BE.lo1 iv_BE.hi2 iv_BE.hi3 in
   let plain:seq quad32 =
@@ -172,7 +178,7 @@ let gcm_blocks_helper_enc (alg:algorithm) (key:seq nat32)
     assert (equal cipher_bytes (le_seq_quad32_to_bytes cipher));
     assert (cipher_bytes == gctr_encrypt_LE ctr_BE_2 plain_bytes alg key)
   );
-  gcm_encrypt_LE_fst_helper ctr_BE_2 iv_BE plain_bytes auth_bytes cipher_bytes alg key;
+  gcm_encrypt_LE_fst_helper iv ctr_BE_2 iv_BE plain_bytes auth_bytes cipher_bytes alg key;
   ()
 
 
@@ -198,7 +204,7 @@ let pad_to_128_bits_multiple_append (x y:seq nat8) : Lemma
 let gcm_blocks_helper (alg:algorithm) (key:seq nat32)
                    (a128 a_bytes p128x6 p128 p_bytes c128x6 c128 c_bytes:seq quad32)
                    (p_num_bytes a_num_bytes:nat)
-                   (iv_BE h enc_hash length_quad:quad32) : Lemma
+                   (iv:seq nat) (iv_BE h enc_hash length_quad:quad32) : Lemma
   (requires // Required by gcm_blocks
            length p128x6 * 16 + length p128 * 16 <= p_num_bytes /\
            p_num_bytes < length p128x6 * 16 + length p128 * 16 + 16 /\
@@ -211,6 +217,8 @@ let gcm_blocks_helper (alg:algorithm) (key:seq nat32)
            length c_bytes == 1 /\
            length a_bytes == 1 /\
            is_aes_key_LE alg key /\
+           8 `op_Multiply` length iv == 96 /\
+           iv_BE == be_bytes_to_quad32 (pad_to_128_bits iv) /\
 
            h = aes_encrypt_LE alg key (Mkfour 0 0 0 0) /\
 
@@ -281,10 +289,10 @@ let gcm_blocks_helper (alg:algorithm) (key:seq nat32)
            length auth_bytes < pow2_32 /\
            length plain_bytes < pow2_32 /\
 
-           cipher_bytes == fst (gcm_encrypt_LE alg (seq_nat32_to_seq_nat8_LE key) (be_quad32_to_bytes iv_BE) plain_bytes auth_bytes) /\
+           cipher_bytes == fst (gcm_encrypt_LE alg (seq_nat32_to_seq_nat8_LE key) iv plain_bytes auth_bytes) /\
            le_quad32_to_bytes enc_hash ==
              snd (gcm_encrypt_LE alg (seq_nat32_to_seq_nat8_LE key)
-                                 (be_quad32_to_bytes iv_BE) plain_bytes auth_bytes)))
+                                 iv plain_bytes auth_bytes)))
   =
   let ctr_BE_1:quad32 = Mkfour 1 iv_BE.lo1 iv_BE.hi2 iv_BE.hi3 in
   let ctr_BE_2:quad32 = Mkfour 2 iv_BE.lo1 iv_BE.hi2 iv_BE.hi3 in
@@ -326,7 +334,7 @@ let gcm_blocks_helper (alg:algorithm) (key:seq nat32)
   let final_quads = append raw_quads (create 1 length_quad) in
   let hash = ghash_LE h final_quads in
 
-  gcm_blocks_helper_enc alg key p128x6 p128 p_bytes c128x6 c128 c_bytes auth_input_bytes p_num_bytes iv_BE;
+  gcm_blocks_helper_enc alg key p128x6 p128 p_bytes c128x6 c128 c_bytes auth_input_bytes p_num_bytes iv iv_BE;
   //assert (cipher_bytes == fst (gcm_encrypt_LE alg (seq_nat32_to_seq_nat8_LE key) (be_quad32_to_bytes iv_BE) plain_bytes auth_input_bytes)); // Passes
 
   calc (==) {
@@ -422,7 +430,7 @@ let gcm_blocks_helper (alg:algorithm) (key:seq nat32)
       append auth_padded_quads' (append cipher_padded_quads' (create 1 length_quad));
     };
     reveal_opaque insert_nat64;
-    gcm_encrypt_LE_snd_helper iv_BE length_quad hash enc_hash plain_bytes auth_input_bytes cipher_bytes alg key;
+    gcm_encrypt_LE_snd_helper iv iv_BE length_quad hash enc_hash plain_bytes auth_input_bytes cipher_bytes alg key;
     ()
   ) else (
     calc (==) {
@@ -443,7 +451,7 @@ let gcm_blocks_helper (alg:algorithm) (key:seq nat32)
       c;
     };
     reveal_opaque insert_nat64;
-    gcm_encrypt_LE_snd_helper iv_BE length_quad hash enc_hash plain_bytes auth_input_bytes cipher_bytes alg key;
+    gcm_encrypt_LE_snd_helper iv iv_BE length_quad hash enc_hash plain_bytes auth_input_bytes cipher_bytes alg key;
     ()
   );
   ()
@@ -477,7 +485,7 @@ let lemma_length_simplifier (s bytes t:seq quad32) (num_bytes:nat) : Lemma
 let gcm_blocks_helper_simplified (alg:algorithm) (key:seq nat32)
                    (a128 a_bytes p128x6 p128 p_bytes c128x6 c128 c_bytes:seq quad32)
                    (p_num_bytes a_num_bytes:nat)
-                   (iv_BE h enc_hash length_quad:quad32) : Lemma
+                   (iv:seq nat8) (iv_BE h enc_hash length_quad:quad32) : Lemma
   (requires // Required by gcm_blocks
            length p128x6 * 16 + length p128 * 16 <= p_num_bytes /\
            p_num_bytes < length p128x6 * 16 + length p128 * 16 + 16 /\
@@ -490,6 +498,8 @@ let gcm_blocks_helper_simplified (alg:algorithm) (key:seq nat32)
            length c_bytes == 1 /\
            length a_bytes == 1 /\
            is_aes_key_LE alg key /\
+           8 `op_Multiply` length iv == 96 /\
+           iv_BE == be_bytes_to_quad32 (pad_to_128_bits iv) /\
 
            h = aes_encrypt_LE alg key (Mkfour 0 0 0 0) /\
 
@@ -548,14 +558,14 @@ let gcm_blocks_helper_simplified (alg:algorithm) (key:seq nat32)
            length auth_bytes < pow2_32 /\
            length plain_bytes < pow2_32 /\
 
-           cipher_bytes == fst (gcm_encrypt_LE alg (seq_nat32_to_seq_nat8_LE key) (be_quad32_to_bytes iv_BE) plain_bytes auth_bytes) /\
+           cipher_bytes == fst (gcm_encrypt_LE alg (seq_nat32_to_seq_nat8_LE key) iv plain_bytes auth_bytes) /\
            le_quad32_to_bytes enc_hash ==
              snd (gcm_encrypt_LE alg (seq_nat32_to_seq_nat8_LE key)
-                                 (be_quad32_to_bytes iv_BE) plain_bytes auth_bytes))
+                                 iv plain_bytes auth_bytes))
 
   )
   =
-  gcm_blocks_helper alg key a128 a_bytes p128x6 p128 p_bytes c128x6 c128 c_bytes p_num_bytes a_num_bytes iv_BE h enc_hash length_quad;
+  gcm_blocks_helper alg key a128 a_bytes p128x6 p128 p_bytes c128x6 c128 c_bytes p_num_bytes a_num_bytes iv iv_BE h enc_hash length_quad;
   let auth_raw_quads = if a_num_bytes > (length a128) * 16 then append a128 a_bytes else a128 in
   let plain_raw_quads =
     if p_num_bytes > (length p128x6 + length p128) * 16 then
@@ -575,17 +585,19 @@ let gcm_blocks_helper_simplified (alg:algorithm) (key:seq nat32)
   ()
 
 
-let lemma_gcm_encrypt_decrypt_equiv (alg:algorithm) (key:seq nat32) (iv_BE:quad32) (plain cipher auth alleged_tag:seq nat8) : Lemma
+let lemma_gcm_encrypt_decrypt_equiv (alg:algorithm) (key:seq nat32) (iv:seq nat8) (iv_BE:quad32) (plain cipher auth alleged_tag:seq nat8) : Lemma
   (requires
     is_aes_key_LE alg key /\
+    8 `op_Multiply` length iv == 96 /\
+    iv_BE == be_bytes_to_quad32 (pad_to_128_bits iv) /\
     length cipher < pow2_32 /\
     length auth < pow2_32 /\
-    plain == fst (gcm_encrypt_LE alg (seq_nat32_to_seq_nat8_LE key) (be_quad32_to_bytes iv_BE) cipher auth)
+    plain == fst (gcm_encrypt_LE alg (seq_nat32_to_seq_nat8_LE key) iv cipher auth)
   )
-  (ensures plain == fst (gcm_decrypt_LE alg (seq_nat32_to_seq_nat8_LE key) (be_quad32_to_bytes iv_BE) cipher auth alleged_tag))
+  (ensures plain == fst (gcm_decrypt_LE alg (seq_nat32_to_seq_nat8_LE key) iv cipher auth alleged_tag))
   =
-  reveal_opaque (gcm_encrypt_LE_def alg (seq_nat32_to_seq_nat8_LE key) (be_quad32_to_bytes iv_BE) cipher auth);
-  reveal_opaque (gcm_decrypt_LE_def alg (seq_nat32_to_seq_nat8_LE key) (be_quad32_to_bytes iv_BE) cipher auth alleged_tag);
+  reveal_opaque (gcm_encrypt_LE_def alg (seq_nat32_to_seq_nat8_LE key) iv cipher auth);
+  reveal_opaque (gcm_decrypt_LE_def alg (seq_nat32_to_seq_nat8_LE key) iv cipher auth alleged_tag);
   ()
 
 
@@ -593,7 +605,7 @@ let gcm_blocks_helper_dec_simplified (alg:algorithm) (key:seq nat32)
                    (p128x6 p128 p_bytes c128x6 c128 c_bytes:seq quad32)
                    (auth_bytes alleged_tag:seq nat8)
                    (p_num_bytes:nat)
-                   (iv_BE:quad32) : Lemma
+                   (iv:seq nat8) (iv_BE:quad32) : Lemma
   (requires // Required by gcm_blocks
            length p128x6 * 16 + length p128 * 16 <= p_num_bytes /\
            p_num_bytes < length p128x6 * 16 + length p128 * 16 + 16 /\
@@ -603,6 +615,8 @@ let gcm_blocks_helper_dec_simplified (alg:algorithm) (key:seq nat32)
            length c_bytes == 1 /\
            (length auth_bytes) < pow2_32 /\
            is_aes_key_LE alg key /\
+           8 `op_Multiply` length iv == 96 /\
+           iv_BE == be_bytes_to_quad32 (pad_to_128_bits iv) /\
 
            // Ensured by gcm_blocks
            p_num_bytes < pow2_32 /\
@@ -632,9 +646,9 @@ let gcm_blocks_helper_dec_simplified (alg:algorithm) (key:seq nat32)
            length auth_bytes < pow2_32 /\
            length plain_bytes < pow2_32 /\
 
-           cipher_bytes == fst (gcm_decrypt_LE alg (seq_nat32_to_seq_nat8_LE key) (be_quad32_to_bytes iv_BE) plain_bytes auth_bytes alleged_tag)))
+           cipher_bytes == fst (gcm_decrypt_LE alg (seq_nat32_to_seq_nat8_LE key) iv plain_bytes auth_bytes alleged_tag)))
   =
-  gcm_blocks_helper_enc alg key p128x6 p128 p_bytes c128x6 c128 c_bytes auth_bytes p_num_bytes iv_BE;
+  gcm_blocks_helper_enc alg key p128x6 p128 p_bytes c128x6 c128 c_bytes auth_bytes p_num_bytes iv iv_BE;
   let plain_raw_quads =
     if p_num_bytes > (length p128x6 + length p128) * 16 then
      append (append p128x6 p128) p_bytes
@@ -652,12 +666,12 @@ let gcm_blocks_helper_dec_simplified (alg:algorithm) (key:seq nat32)
   let plain_bytes = slice (le_seq_quad32_to_bytes plain_raw_quads) 0 p_num_bytes in
   let cipher_raw_quads = append (append c128x6 c128) c_bytes in
   let cipher_bytes = slice (le_seq_quad32_to_bytes cipher_raw_quads) 0 p_num_bytes in
-  assert (cipher_bytes == fst (gcm_encrypt_LE alg (seq_nat32_to_seq_nat8_LE key) (be_quad32_to_bytes iv_BE) plain_bytes auth_bytes));
-  lemma_gcm_encrypt_decrypt_equiv alg key iv_BE cipher_bytes plain_bytes auth_bytes alleged_tag;
+  assert (cipher_bytes == fst (gcm_encrypt_LE alg (seq_nat32_to_seq_nat8_LE key) iv plain_bytes auth_bytes));
+  lemma_gcm_encrypt_decrypt_equiv alg key iv iv_BE cipher_bytes plain_bytes auth_bytes alleged_tag;
   ()
 
 
-let gcm_decrypt_LE_tag (alg:algorithm) (key:seq nat8) (iv:seq16 nat8) (cipher:seq nat8) (auth:seq nat8) :
+let gcm_decrypt_LE_tag (alg:algorithm) (key:seq nat8) (iv:supported_iv_BE) (cipher:seq nat8) (auth:seq nat8) :
   Pure (seq nat8)
     (requires
       is_aes_key alg key /\
@@ -667,9 +681,8 @@ let gcm_decrypt_LE_tag (alg:algorithm) (key:seq nat8) (iv:seq16 nat8) (cipher:se
     (ensures fun t -> True)
   =
   let key_LE = seq_nat8_to_seq_nat32_LE key in
-  let iv_BE = be_bytes_to_quad32 iv in
   let h_LE = aes_encrypt_LE alg key_LE (Mkfour 0 0 0 0) in
-  let j0_BE = Mkfour 1 iv_BE.lo1 iv_BE.hi2 iv_BE.hi3 in
+  let j0_BE = compute_iv_BE h_LE iv in
 
   let lengths_BE = insert_nat64_opaque (insert_nat64_opaque (Mkfour 0 0 0 0) (8 * length auth) 1) (8 * length cipher) 0 in
   let lengths_LE = reverse_bytes_quad32 lengths_BE in
@@ -686,7 +699,7 @@ let gcm_decrypt_LE_tag (alg:algorithm) (key:seq nat8) (iv:seq16 nat8) (cipher:se
 let gcm_blocks_dec_helper (alg:algorithm) (key:seq nat32)
                    (a128 a_bytes p128x6 p128 p_bytes c128x6 c128 c_bytes:seq quad32)
                    (p_num_bytes a_num_bytes:nat)
-                   (iv_BE h enc_hash length_quad:quad32) : Lemma
+                   (iv:seq nat8) (iv_BE h enc_hash length_quad:quad32) : Lemma
   (requires // Required by gcm_blocks
            length p128x6 * 16 + length p128 * 16 <= p_num_bytes /\
            p_num_bytes < length p128x6 * 16 + length p128 * 16 + 16 /\
@@ -699,6 +712,8 @@ let gcm_blocks_dec_helper (alg:algorithm) (key:seq nat32)
            length c_bytes == 1 /\
            length a_bytes == 1 /\
            is_aes_key_LE alg key /\
+           8 `op_Multiply` length iv == 96 /\
+           iv_BE == be_bytes_to_quad32 (pad_to_128_bits iv) /\
 
            h = aes_encrypt_LE alg key (Mkfour 0 0 0 0) /\
 
@@ -770,7 +785,7 @@ let gcm_blocks_dec_helper (alg:algorithm) (key:seq nat32)
            length plain_bytes < pow2_32 /\
 
            le_quad32_to_bytes enc_hash == gcm_decrypt_LE_tag alg (seq_nat32_to_seq_nat8_LE key)
-                                 (be_quad32_to_bytes iv_BE) plain_bytes auth_bytes))
+                                 iv plain_bytes auth_bytes))
   =
   reveal_opaque insert_nat64;
   let ctr_BE_1:quad32 = Mkfour 1 iv_BE.lo1 iv_BE.hi2 iv_BE.hi3 in
@@ -935,7 +950,7 @@ let gcm_blocks_dec_helper (alg:algorithm) (key:seq nat32)
 let gcm_blocks_dec_helper_simplified (alg:algorithm) (key:seq nat32)
                    (a128 a_bytes p128x6 p128 p_bytes c128x6 c128 c_bytes:seq quad32)
                    (p_num_bytes a_num_bytes:nat)
-                   (iv_BE h enc_hash length_quad:quad32) : Lemma
+                   (iv:seq nat8) (iv_BE h enc_hash length_quad:quad32) : Lemma
   (requires // Required by gcm_blocks
            length p128x6 * 16 + length p128 * 16 <= p_num_bytes /\
            p_num_bytes < length p128x6 * 16 + length p128 * 16 + 16 /\
@@ -948,6 +963,8 @@ let gcm_blocks_dec_helper_simplified (alg:algorithm) (key:seq nat32)
            length c_bytes == 1 /\
            length a_bytes == 1 /\
            is_aes_key_LE alg key /\
+           8 `op_Multiply` length iv == 96 /\
+           iv_BE == be_bytes_to_quad32 (pad_to_128_bits iv) /\
 
            h = aes_encrypt_LE alg key (Mkfour 0 0 0 0) /\
 
@@ -1007,9 +1024,9 @@ let gcm_blocks_dec_helper_simplified (alg:algorithm) (key:seq nat32)
            length plain_bytes < pow2_32 /\
 
            le_quad32_to_bytes enc_hash == gcm_decrypt_LE_tag alg (seq_nat32_to_seq_nat8_LE key)
-                                                             (be_quad32_to_bytes iv_BE) plain_bytes auth_bytes))
+                                                             iv plain_bytes auth_bytes))
   =
-  gcm_blocks_dec_helper alg key a128 a_bytes p128x6 p128 p_bytes c128x6 c128 c_bytes p_num_bytes a_num_bytes iv_BE h enc_hash length_quad;
+  gcm_blocks_dec_helper alg key a128 a_bytes p128x6 p128 p_bytes c128x6 c128 c_bytes p_num_bytes a_num_bytes iv iv_BE h enc_hash length_quad;
   let auth_raw_quads = if a_num_bytes > (length a128) * 16 then append a128 a_bytes else a128 in
   let plain_raw_quads =
     if p_num_bytes > (length p128x6 + length p128) * 16 then
@@ -1029,10 +1046,12 @@ let gcm_blocks_dec_helper_simplified (alg:algorithm) (key:seq nat32)
   ()
 
 let decrypt_helper
-  (alg:algorithm) (key:seq nat8) (iv:seq16 nat8) (cipher:seq nat8) (auth:seq nat8)
+  (alg:algorithm) (key:seq nat8) (iv:supported_iv_BE) (cipher:seq nat8) (auth:seq nat8)
   (rax:nat64) (alleged_tag_quad computed_tag:quad32) : Lemma
   (requires
     is_aes_key alg key /\
+    8 `op_Multiply` length iv == 96 /\
+    iv_BE == be_bytes_to_quad32 (pad_to_128_bits iv) /\
     length cipher < pow2_32 /\
     length auth < pow2_32 /\
     (if alleged_tag_quad = computed_tag then rax = 0 else rax > 0) /\

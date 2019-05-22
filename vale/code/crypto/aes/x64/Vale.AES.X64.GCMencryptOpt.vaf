@@ -839,6 +839,7 @@ procedure gcm_blocks_wrapped(
         ghost out128_b:buffer128,
         ghost inout_b:buffer128,
         ghost iv_b:buffer128,
+        ghost iv:seq(nat8),
         ghost scratch_b:buffer128,
         ghost key:seq(nat32),
         ghost round_keys:seq(quad32),
@@ -939,7 +940,10 @@ procedure gcm_blocks_wrapped(
         // GCM reqs
         pclmulqdq_enabled;
         hkeys_reqs_priv(s128(mem, hkeys_b), reverse_bytes_quad32(aes_encrypt_LE(alg, key, Mkfour(0,0,0,0))));
-
+        8 * length(iv) == 96;
+        let iv_LE := old(buffer128_read(iv_b, 0, mem));
+        let iv_BE := reverse_bytes_quad32(iv_LE);
+        iv_BE == be_bytes_to_quad32(pad_to_128_bits(iv));
 
     ensures
         // Framing
