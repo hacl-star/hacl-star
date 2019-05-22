@@ -29,7 +29,7 @@ FSTAR_INCLUDE_DIRS = \
   $(KREMLIN_HOME)/kremlib \
   $(HACL_HOME)/specs \
   $(HACL_HOME)/lib \
-  $(HACL_HOME)/lib/c
+  $(HACL_HOME)/code/experimental/rsapss
 
 FSTAR_FLAGS = $(OTHERFLAGS) --cmi \
   --cache_checked_modules --odir $(OUTPUT_DIR) \
@@ -128,7 +128,8 @@ INCLUDE_DIRS = \
   $(KREMLIN_HOME)/kremlib \
   $(KREMLIN_HOME)/kremlib/c \
   $(KREMLIN_HOME)/kremlib/dist/generic \
-  $(HACL_HOME)/lib
+  $(HACL_HOME)/lib \
+  $(HACL_HOME)/code/experimental/rsapss
 
 # TODO: remove -Wno-incompatible-pointer-types when issue with --cmi is fixed
 CFLAGS += -O3 -march=native -mtune=native -funroll-loops
