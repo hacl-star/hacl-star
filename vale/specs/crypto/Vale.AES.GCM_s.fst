@@ -17,7 +17,7 @@ unfold type gcm_auth_LE = gctr_plain_LE
 
 type supported_iv_BE:eqtype = iv:seq nat8 { 8 * (length iv) < pow2_64 }
 
-let compute_iv (h_LE:quad32) (iv:supported_iv_BE) : quad32
+let compute_iv_BE (h_LE:quad32) (iv:supported_iv_BE) : quad32
   =
   if 8 * (length iv) = 96 then (
     let iv_BE = be_bytes_to_quad32 (pad_to_128_bits iv) in
@@ -28,7 +28,8 @@ let compute_iv (h_LE:quad32) (iv:supported_iv_BE) : quad32
     let length_BE = insert_nat64 (Mkfour 0 0 0 0) (8 * length iv) 0 in
     let length_LE = reverse_bytes_quad32 length_BE in
     let hash_input_LE = append padded_iv_quads (create 1 length_LE) in
-    ghash_LE h_LE hash_input_LE    
+    let hash_output_LE = ghash_LE h_LE hash_input_LE in
+    reverse_bytes_quad32 hash_output_LE
   )
 
 // little-endian, except for iv_BE
@@ -42,7 +43,7 @@ let gcm_encrypt_LE_def (alg:algorithm) (key:aes_key alg) (iv:supported_iv_BE) (p
   =
   let key_LE = seq_nat8_to_seq_nat32_LE key in
   let h_LE = aes_encrypt_LE alg key_LE (Mkfour 0 0 0 0) in
-  let j0_BE = compute_iv h_LE iv in
+  let j0_BE = compute_iv_BE h_LE iv in
 
   let c = gctr_encrypt_LE (inc32 j0_BE 1) plain alg key_LE in
 
@@ -84,7 +85,7 @@ let gcm_decrypt_LE_def (alg:algorithm) (key:aes_key alg) (iv:supported_iv_BE) (c
   =
   let key_LE = seq_nat8_to_seq_nat32_LE key in
   let h_LE = aes_encrypt_LE alg key_LE (Mkfour 0 0 0 0) in
-  let j0_BE = compute_iv h_LE iv in
+  let j0_BE = compute_iv_BE h_LE iv in
 
   let p = gctr_encrypt_LE (inc32 j0_BE 1) cipher alg key_LE in   // TODO: Rename gctr_encrypt_LE to gctr_LE
 
