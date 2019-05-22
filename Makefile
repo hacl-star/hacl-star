@@ -100,7 +100,8 @@ all:
 	$(MAKE) all-staged
 
 all-unstaged: compile-compact compile-compact-msvc compile-compact-gcc \
-  compile-evercrypt-external-headers compile-compact-c89 compile-ccf
+  compile-evercrypt-external-headers compile-compact-c89 compile-ccf \
+  compile-portable
 
 # Automatic staging.
 %-staged:
@@ -688,7 +689,9 @@ DEFAULT_FLAGS_NO_TESTS	=\
   -fparentheses -fno-shadow -fcurly-braces \
   -bundle WasmSupport
 
-DEFAULT_FLAGS = $(DEFAULT_FLAGS_NO_TESTS) -bundle Test,Test.*,Hacl.Test.*
+OPT_FLAGS = -ccopts -march=native,-mtune=native
+
+DEFAULT_FLAGS = $(DEFAULT_FLAGS_NO_TESTS) -bundle Test,Test.*,Hacl.Test.* $(OPT_FLAGS)
 
 # Should be fixed by having KreMLin better handle imported names
 WASM_STANDALONE=Prims LowStar.Endianness C.Endianness \
@@ -767,7 +770,9 @@ dist/ccf/Makefile.basic: \
     -bundle '\*[rename=EverCrypt_Misc]'
 
 dist/wasm/Makefile.basic: KRML_EXTRA=$(WASM_FLAGS)
-dist/wasm/Makefile.basic: DEFAULT_FLAGS=$(DEFAULT_FLAGS_NO_TESTS)
+dist/wasm/Makefile.basic: DEFAULT_FLAGS=$(DEFAULT_FLAGS_NO_TESTS) $(OPT_FLAGS)
+
+dist/portable/Makefile.basic: OPT_FLAGS=-ccopts -mtune=generic
 
 # OpenSSL and BCrypt disabled
 ifeq ($(EVERCRYPT_CONFIG),everest)
