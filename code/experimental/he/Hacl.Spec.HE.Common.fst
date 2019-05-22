@@ -199,6 +199,8 @@ val to_fe_mul': #n:big -> a:fe n -> b:fe n -> Lemma
   (to_fe #n (a * b) = a *% b)
 let to_fe_mul' #n a b = to_fe_mul #n a b
 
+#set-options "--z3rlimit 100"
+
 val minus_one_square: n:big -> Lemma
   (to_fe #n (n - 1) *% (n - 1) = 1)
 let minus_one_square n =
@@ -214,6 +216,8 @@ let minus_one_square n =
   assert (((n-1)*(n-1))%n = (1%n)%n);
   lemma_mod_twice 1 n;
   one_mod_n n
+
+#reset-options
 
 val add_move_to_right: #n:big -> a:fe n -> b:fe n -> c:fe n -> Lemma
   (requires (a -% b = c))
@@ -467,8 +471,8 @@ let rec to_fe_nexp1 #n k g e = match e with
 //  (to_fe #n (a * b) = to_fe a *% to_fe b)
 //let to_fe_mul #n a b = modulo_mul_distributivity a b n
 
-val to_fe_nexp2: #n:big -> k:big{ k > n } -> g:fe n -> e:nat -> Lemma
-  (to_fe #(n/k) (nexp g e) = nexp (to_fe #(n/k) g) e)
+//val to_fe_nexp2: #n:big -> k:big{ k > n } -> g:fe n -> e:nat -> Lemma
+//  (to_fe #(n/k) (nexp g e) = nexp (to_fe #(n/k) g) e)
 
 // Define fexp' for composite n and for unit g.
 val fexp: #n:big -> fe n -> e:nat -> Tot (fe n) (decreases e)
