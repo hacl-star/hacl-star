@@ -895,8 +895,8 @@ procedure fadd_stdcall(
     // Line up the rest of the arguments
     inline if (win) {
         // Store callee-save registers
-        Push(rdi);
-        Push(rsi);
+        Push_Secret(rdi);
+        Push_Secret(rsi);
 
         Mov64(dst_ptr, rcx);
         Mov64(inA_ptr, rdx);
@@ -906,8 +906,8 @@ procedure fadd_stdcall(
     fadd(dst_b, inA_b, inB_b);
 
     inline if (win) {
-        Pop(rsi);
-        Pop(rdi);
+        Pop_Secret(rsi);
+        Pop_Secret(rdi);
     }
 }
 
@@ -1048,8 +1048,8 @@ procedure fsub_stdcall(
     // Line up the rest of the arguments
     inline if (win) {
         // Store callee-save registers
-        Push(rdi);
-        Push(rsi);
+        Push_Secret(rdi);
+        Push_Secret(rsi);
 
         Mov64(dst_ptr, rcx);
         Mov64(inA_ptr, rdx);
@@ -1059,8 +1059,8 @@ procedure fsub_stdcall(
     fsub(dst_b, inA_b, inB_b);
 
     inline if (win) {
-        Pop(rsi);
-        Pop(rdi);
+        Pop_Secret(rsi);
+        Pop_Secret(rdi);
     }
 }
 
@@ -1191,13 +1191,13 @@ procedure fmul1_stdcall(
         rsp == old(rsp);
 {
     // Store callee-save registers
-    Push(rdi);
-    Push(r12);
-    Push(r13);
+    Push_Secret(rdi);
+    Push_Secret(r12);
+    Push_Secret(r13);
 
     // Line up the rest of the arguments
     inline if (win) {
-        Push(rsi);
+        Push_Secret(rsi);
         Mov64(dst_ptr, rcx);
         Mov64(inA_ptr, rdx);
         Mov64(b, r8);
@@ -1206,9 +1206,9 @@ procedure fmul1_stdcall(
     fmul1(dst_b, inA_b, inB_in);
 
     inline if (win) {
-        Pop(rsi);
+        Pop_Secret(rsi);
     }
-    Pop(r13);
-    Pop(r12);
-    Pop(rdi);
+    Pop_Secret(r13);
+    Pop_Secret(r12);
+    Pop_Secret(rdi);
 }

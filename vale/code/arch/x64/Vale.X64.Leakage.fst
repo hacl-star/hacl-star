@@ -433,11 +433,30 @@ let check_if_code_is_leakage_free' code ts tsExpected =
   else
     b
 
-// TODO: Make ts user-specified. Do we need to compare to expected taints again?
-let check_if_code_is_leakage_free code =
-  let ts = AnalysisTaints 
-    (FunctionalExtensionality.on reg (fun _ -> Public))
-    Public Public Public 
-    (FunctionalExtensionality.on xmm (fun _ -> Public)) in
+let check_if_code_is_leakage_free code ts =
   let b, ts' = check_if_code_consumes_fixed_time code ts in
   b
+
+// Only the args should be public
+let mk_analysis_taints win nbr_args : analysis_taints =
+  let regTaint =
+  if win then
+  match nbr_args with
+  | 0 -> fun r -> Secret
+  | 1 -> fun r -> if r = rRcx then Public else Secret
+  | 2 -> fun r -> if r = rRcx || r = rRdx then Public else Secret
+  | 3 -> fun r -> if r = rRcx || r = rRdx || r = rR8 then Public else Secret  
+  | _ -> fun r -> if r = rRcx || r = rRdx || r = rR8 || r = rR9 then Public else Secret
+  else
+  match nbr_args with
+  | 0 -> fun r -> Secret
+  | 1 -> fun r -> if r = rRdi then Public else Secret
+  | 2 -> fun r -> if r = rRdi || r = rRsi then Public else Secret
+  | 3 -> fun r -> if r = rRdi || r = rRsi || r = rRdx then Public else Secret  
+  | 4 -> fun r -> if r = rRdi || r = rRsi || r = rRdx || r = rRcx then Public else Secret
+  | 5 -> fun r -> if r = rRdi || r = rRsi || r = rRdx || r = rRcx || r = rR8 then Public else Secret
+  | _ -> fun r -> if r = rRdi || r = rRsi || r = rRdx || r = rRcx || r = rR8 || r = rR9 then Public else Secret
+  in AnalysisTaints
+    (FunctionalExtensionality.on reg (fun r -> if r = rRsp then Public else regTaint r))
+    Secret Secret Secret
+    (FunctionalExtensionality.on xmm (fun _ -> Secret))

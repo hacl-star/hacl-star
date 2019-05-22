@@ -320,8 +320,8 @@ procedure fast_add1_stdcall(
         rsp == old(rsp);
 {
     // Store callee-save registers
-    Push(rdi);
-    Push(rsi);
+    Push_Secret(rdi);
+    Push_Secret(rsi);
 
     // Line up the rest of the arguments
     inline if (win) {
@@ -332,8 +332,8 @@ procedure fast_add1_stdcall(
 
     fast_add1(dst_b, inA_b, inB_in);
 
-    Pop(rsi);
-    Pop(rdi);
+    Pop_Secret(rsi);
+    Pop_Secret(rdi);
 }
 
 #reset-options "--z3rlimit 1200"
@@ -1053,8 +1053,8 @@ procedure cswap2_stdcall(
     // Line up the rest of the arguments
     inline if (win) {
         // Store callee-save registers
-        Push(rdi);
-        Push(rsi);
+        Push_Secret(rdi);
+        Push_Secret(rsi);
         Mov64(p0_ptr, rcx);
         Mov64(p1_ptr, rdx);
         Mov64(bit, r8);
@@ -1063,8 +1063,8 @@ procedure cswap2_stdcall(
     cswap2(p0_b, p1_b, bit_in);
 
     inline if (win) {
-        Pop(rsi);
-        Pop(rdi);
+        Pop_Secret(rsi);
+        Pop_Secret(rdi);
     }
 
 }

@@ -823,33 +823,33 @@ procedure sha_update_bytes_stdcall(
 {
     // Save registers
     inline if (win) {
-        PushXmm(xmm15, rax);
-        PushXmm(xmm14, rax);
-        PushXmm(xmm13, rax);
-        PushXmm(xmm12, rax);
-        PushXmm(xmm11, rax);
-        PushXmm(xmm10, rax);
-        PushXmm(xmm9,  rax);
-        PushXmm(xmm8,  rax);
-        PushXmm(xmm7,  rax);
-        PushXmm(xmm6,  rax);
-        Push(r15);
-        Push(r14);
-        Push(r13);
-        Push(r12);
-        Push(rsi);
-        Push(rdi);
-        Push(rbp);
-        Push(rbx);
+        PushXmm_Secret(xmm15, rax);
+        PushXmm_Secret(xmm14, rax);
+        PushXmm_Secret(xmm13, rax);
+        PushXmm_Secret(xmm12, rax);
+        PushXmm_Secret(xmm11, rax);
+        PushXmm_Secret(xmm10, rax);
+        PushXmm_Secret(xmm9,  rax);
+        PushXmm_Secret(xmm8,  rax);
+        PushXmm_Secret(xmm7,  rax);
+        PushXmm_Secret(xmm6,  rax);
+        Push_Secret(r15);
+        Push_Secret(r14);
+        Push_Secret(r13);
+        Push_Secret(r12);
+        Push_Secret(rsi);
+        Push_Secret(rdi);
+        Push_Secret(rbp);
+        Push_Secret(rbx);
     } else {
-        Push(r15);
-        Push(r14);
-        Push(r13);
-        Push(r12);
-        Push(rsi);
-        Push(rdi);
-        Push(rbp);
-        Push(rbx);
+        Push_Secret(r15);
+        Push_Secret(r14);
+        Push_Secret(r13);
+        Push_Secret(r12);
+        Push_Secret(rsi);
+        Push_Secret(rdi);
+        Push_Secret(rbp);
+        Push_Secret(rbx);
     }
 
     inline if (win) {
@@ -863,34 +863,34 @@ procedure sha_update_bytes_stdcall(
 
     // Restore registers
     inline if (win) {
-        Pop(rbx);
-        Pop(rbp);
-        Pop(rdi);
-        Pop(rsi);
-        Pop(r12);
-        Pop(r13);
-        Pop(r14);
-        Pop(r15);
+        Pop_Secret(rbx);
+        Pop_Secret(rbp);
+        Pop_Secret(rdi);
+        Pop_Secret(rsi);
+        Pop_Secret(r12);
+        Pop_Secret(r13);
+        Pop_Secret(r14);
+        Pop_Secret(r15);
 
-        PopXmm(xmm6,  rax, old(xmm6));
-        PopXmm(xmm7,  rax, old(xmm7));
-        PopXmm(xmm8,  rax, old(xmm8));
-        PopXmm(xmm9,  rax, old(xmm9));
-        PopXmm(xmm10, rax, old(xmm10));
-        PopXmm(xmm11, rax, old(xmm11));
-        PopXmm(xmm12, rax, old(xmm12));
-        PopXmm(xmm13, rax, old(xmm13));
-        PopXmm(xmm14, rax, old(xmm14));
-        PopXmm(xmm15, rax, old(xmm15));
+        PopXmm_Secret(xmm6,  rax, old(xmm6));
+        PopXmm_Secret(xmm7,  rax, old(xmm7));
+        PopXmm_Secret(xmm8,  rax, old(xmm8));
+        PopXmm_Secret(xmm9,  rax, old(xmm9));
+        PopXmm_Secret(xmm10, rax, old(xmm10));
+        PopXmm_Secret(xmm11, rax, old(xmm11));
+        PopXmm_Secret(xmm12, rax, old(xmm12));
+        PopXmm_Secret(xmm13, rax, old(xmm13));
+        PopXmm_Secret(xmm14, rax, old(xmm14));
+        PopXmm_Secret(xmm15, rax, old(xmm15));
     } else {
-        Pop(rbx);
-        Pop(rbp);
-        Pop(rdi);
-        Pop(rsi);
-        Pop(r12);
-        Pop(r13);
-        Pop(r14);
-        Pop(r15);
+        Pop_Secret(rbx);
+        Pop_Secret(rbp);
+        Pop_Secret(rdi);
+        Pop_Secret(rsi);
+        Pop_Secret(r12);
+        Pop_Secret(r13);
+        Pop_Secret(r14);
+        Pop_Secret(r15);
     }
 
     let hash_in  := old(le_bytes_to_hash(le_seq_quad32_to_bytes(buffer128_as_seq(mem, ctx_b))));
