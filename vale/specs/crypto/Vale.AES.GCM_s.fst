@@ -101,7 +101,7 @@ let gcm_decrypt_LE_def (alg:algorithm) (key:aes_key alg) (iv:supported_iv_BE) (c
 
   (p, t = tag)
 
-let gcm_decrypt_LE (alg:algorithm) (key:seq nat8) (iv:seq16 nat8) (cipher:seq nat8) (auth:seq nat8) (tag:seq nat8) :
+let gcm_decrypt_LE (alg:algorithm) (key:seq nat8) (iv:supported_iv_BE) (cipher:seq nat8) (auth:seq nat8) (tag:seq nat8) :
   Pure (tuple2 (seq nat8) (bool))
     (requires
       is_aes_key alg key /\
