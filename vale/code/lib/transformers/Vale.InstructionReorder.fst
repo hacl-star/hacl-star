@@ -24,6 +24,10 @@ module L = FStar.List.Tot
 /// via a read or via a write) by an instruction.
 ///
 /// This allows us to define read and write sets for instructions.
+///
+/// TODO FIXME WARNING UNSOUND: We completely ignore [HavocFlags]
+/// here. Technically, we need to add both flags to the write sets
+/// whenever there is a flag havoc that happens.
 
 type access_location =
   | ALoc64 : operand -> access_location
