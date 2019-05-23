@@ -76,8 +76,18 @@ let rec aux_read_set1
 let read_set (i:instr_t_record) (oprs:instr_operands_t i.outs i.args) : list access_location =
   aux_read_set1 i.outs i.args oprs
 
-let write_set (i:instr_t_record) (opers:instr_operands_t i.outs i.args) : list access_location =
-  admit ()
+let rec aux_write_set
+    (outs:list instr_out) (args:list instr_operand) (oprs:instr_operands_t outs args) : list access_location =
+  match outs with
+  | [] -> []
+  | (_, IOpEx i) :: outs ->
+    let l, r = coerce #(instr_operand_t i & instr_operands_t outs args) oprs in
+    access_location_of_explicit i l :: aux_write_set outs args r
+  | (_, IOpIm i) :: outs ->
+    aux_write_set outs args (coerce #(instr_operands_t outs args) oprs)
+
+let write_set (i:instr_t_record) (oprs:instr_operands_t i.outs i.args) : list access_location =
+  aux_write_set i.outs i.args oprs
 
 let rw_set_of_ins (i:ins) : rw_set =
   match i with
