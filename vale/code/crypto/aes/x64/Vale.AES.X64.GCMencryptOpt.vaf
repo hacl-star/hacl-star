@@ -839,7 +839,7 @@ procedure gcm_blocks_wrapped(
         ghost out128_b:buffer128,
         ghost inout_b:buffer128,
         ghost iv_b:buffer128,
-        ghost iv:seq(nat8),
+        ghost iv:supported_iv_BE,
         ghost scratch_b:buffer128,
         ghost key:seq(nat32),
         ghost round_keys:seq(quad32),
@@ -940,10 +940,11 @@ procedure gcm_blocks_wrapped(
         // GCM reqs
         pclmulqdq_enabled;
         hkeys_reqs_priv(s128(mem, hkeys_b), reverse_bytes_quad32(aes_encrypt_LE(alg, key, Mkfour(0,0,0,0))));
-        8 * length(iv) == 96;
         let iv_LE := old(buffer128_read(iv_b, 0, mem));
         let iv_BE := reverse_bytes_quad32(iv_LE);
-        iv_BE == be_bytes_to_quad32(pad_to_128_bits(iv));
+        let h_LE  := aes_encrypt_LE(alg, key, Mkfour(0, 0, 0, 0));
+        iv_BE == compute_iv_BE(h_LE, iv);
+        8*length(iv) == 96;
 
     ensures
         // Framing
@@ -970,12 +971,18 @@ procedure gcm_blocks_wrapped(
         length(auth_bytes)  < pow2_32 /\
         length(plain_bytes) < pow2_32 /\
         cipher_bytes ==
-            gcm_encrypt_LE(alg, seq_nat32_to_seq_nat8_LE(key), be_quad32_to_bytes(iv_BE),
+            gcm_encrypt_LE(alg, seq_nat32_to_seq_nat8_LE(key), iv,
                            plain_bytes, auth_bytes)._1 /\
         le_quad32_to_bytes(xmm1) ==
-            gcm_encrypt_LE(alg, seq_nat32_to_seq_nat8_LE(key), be_quad32_to_bytes(iv_BE),
+            gcm_encrypt_LE(alg, seq_nat32_to_seq_nat8_LE(key), iv,
                            plain_bytes, auth_bytes)._2;
 {
+//    let iv_LE := old(buffer128_read(iv_b, 0, mem));
+//    let iv_BE := reverse_bytes_quad32(iv_LE);
+//    //let ctr_BE_1:quad32 := Mkfour(1, iv_BE.lo1, iv_BE.hi2, iv_BE.hi3);
+//    let ctr_BE_2:quad32 := Mkfour(2, iv_BE.lo1, iv_BE.hi2, iv_BE.hi3);
+//    assert ctr_BE_2 == inc32(iv_BE, 1);
+
     gcm_blocks(alg, offset, auth_b, abytes_b, in128x6_b, out128x6_b, in128_b, out128_b, inout_b, iv_b, scratch_b, key, round_keys, keys_b, hkeys_b);
 
 /*
@@ -1042,13 +1049,14 @@ procedure gcm_blocks_wrapped(
                                  old(s128(mem, in128x6_b)), old(s128(mem, in128_b)), old(s128(mem, inout_b)),
                                  s128(mem, out128x6_b), s128(mem, out128_b), s128(mem, inout_b),
                                  old(plain_num_bytes), old(auth_num_bytes),
-                                 reverse_bytes_quad32(old(buffer128_read(iv_b, 0, mem))),
+                                 iv, reverse_bytes_quad32(old(buffer128_read(iv_b, 0, mem))),
                                  reverse_bytes_quad32(buffer128_read(hkeys_b, 2, mem)),
                                  xmm1,
                                  reverse_bytes_quad32(insert_nat64_opaque(insert_nat64_opaque(Mkfour(0, 0, 0, 0), #nat64(8 * old(auth_num_bytes)), 1), #nat64(8 * old(plain_num_bytes)), 0)));
 
 }
 
+/*
 procedure save_registers(inline win:bool)
     {:public}
     {:quick}
@@ -1483,3 +1491,4 @@ procedure gcm_blocks_stdcall(
 
     restore_registers(win, old(rsp), old(xmm6), old(xmm7), old(xmm8), old(xmm9), old(xmm10), old(xmm11), old(xmm12), old(xmm13), old(xmm14), old(xmm15));
 }
+*/
