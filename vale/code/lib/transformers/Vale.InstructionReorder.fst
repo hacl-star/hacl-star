@@ -136,8 +136,8 @@ let rw_exchange_allowed (rw1 rw2 : rw_set) : pbool =
   let (r1, w1), (r2, w2) = rw1, rw2 in
   let (&&.) (x y:pbool) : pbool =
     match x with
-    | ttrue -> y
-    | _ -> x in
+    | Ok () -> y
+    | Err reason -> Err reason in
   let rec for_all (f : 'a -> pbool) (l : list 'a) : pbool =
     match l with
     | [] -> ttrue
@@ -148,7 +148,7 @@ let rw_exchange_allowed (rw1 rw2 : rw_set) : pbool =
     | x :: xs ->
       (for_all (fun y -> (disjoint_access_locations x y)) l2) /+< (r ^ " because ") in
   (disjoint r1 w2 "read set of 1st not disjoint from write set of 2nd") &&.
-  (disjoint r2 w2 "read set of 2nd not disjoint from write set of 1st") &&.
+  (disjoint r2 w1 "read set of 2nd not disjoint from write set of 1st") &&.
   (disjoint w1 w2 "write sets not disjoint")
 
 let ins_exchange_allowed (i1 i2 : ins) : pbool =

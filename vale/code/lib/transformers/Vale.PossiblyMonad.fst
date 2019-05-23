@@ -76,4 +76,4 @@ unfold
 let (/+<) (p:pbool) (r:string) : pbool =
   match p with
   | Ok () -> Ok ()
-  | Err rr -> Err (rr ^ r)
+  | Err rr -> Err (r ^ rr)
