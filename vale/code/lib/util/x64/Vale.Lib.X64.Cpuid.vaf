@@ -40,6 +40,7 @@ procedure check_aesni_support()
 {
     Mov64(r9, rbx);     // Callee-save
 
+    Mov64(rcx, 0);      // Dummy for taint analysis
     Mov64(rax, 1);
     Cpuid_AES();
     lemma_iand_pow2_64(rcx, 25); // ==> rcx & pow2(25) == 0 or pow2(25)
@@ -128,6 +129,7 @@ procedure check_avx_support()
 {
     Mov64(r9, rbx);     // Callee-save
 
+    Mov64(rcx, 0);      // Dummy for taint analysis
     Mov64(rax, 1);
     Cpuid_Avx();
     lemma_iand_pow2_64(rcx, 25); // ==> rcx & pow2(25) == 0 or pow2(25)
