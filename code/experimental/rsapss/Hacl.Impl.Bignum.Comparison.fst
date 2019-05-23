@@ -1,4 +1,4 @@
-module Hacl.Impl.Comparison
+module Hacl.Impl.Bignum.Comparison
 
 open FStar.HyperStack
 open FStar.HyperStack.ST
@@ -9,7 +9,7 @@ open LowStar.Buffer
 open Lib.IntTypes
 open Lib.Buffer
 
-open Hacl.Impl.Lib
+open Hacl.Impl.Bignum.Core
 
 val bn_is_less_:
     aLen:size_t

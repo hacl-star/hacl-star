@@ -9,7 +9,7 @@ open LowStar.Buffer
 open Lib.IntTypes
 open Lib.Buffer
 
-open Hacl.Impl.Lib
+open Hacl.Impl.Bignum.Core
 open Hacl.SHA256
 
 module ST = FStar.HyperStack.ST
