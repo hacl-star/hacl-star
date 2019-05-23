@@ -29,30 +29,67 @@ let disjoint_operands (o1 o2:operand) : pbool =
 
 /// For every instruction, we can define a write-set and a read-set
 
-(* TODO FIXME
-
-   The current version only models 64 bit operands, and completely
-   ignores anything else that is input/output to an instruction.  *)
 type access_location =
-  operand
+  | ALoc64 : operand -> access_location
+  | ALoc128 : operand128 -> access_location
+  | ALocCf : access_location
+  | ALocOf : access_location
 
-type read_set = list access_location
+let access_location_of_explicit (t:instr_operand_explicit) (i:instr_operand_t t) : access_location =
+  match t with
+  | IOp64 -> ALoc64 i
+  | IOpXmm -> ALoc128 i
 
-type write_set = list access_location
+let access_location_of_implicit (t:instr_operand_implicit) : access_location =
+  match t with
+  | IOp64One i -> ALoc64 i
+  | IOpXmmOne i -> ALoc128 i
+  | IOpFlagsCf -> ALocCf
+  | IOpFlagsOf -> ALocOf
 
-type rw_set = read_set * write_set
+type rw_set = (list access_location) * (list access_location)
+
+let rec aux_read_set0 (args:list instr_operand) (oprs:instr_operands_t_args args) =
+  match args with
+  | [] -> []
+  | (IOpEx i) :: args ->
+    let l, r = coerce #(instr_operand_t i & instr_operands_t_args args) oprs in
+    access_location_of_explicit i l :: aux_read_set0 args r
+  | (IOpIm i) :: args ->
+    access_location_of_implicit i :: aux_read_set0 args (coerce #(instr_operands_t_args args) oprs)
+
+let rec aux_read_set1
+    (outs:list instr_out) (args:list instr_operand) (oprs:instr_operands_t outs args) : list access_location =
+  match outs with
+  | [] -> aux_read_set0 args oprs
+  | (Out, IOpEx i) :: outs ->
+    let l, r = coerce #(instr_operand_t i & instr_operands_t outs args) oprs in
+    aux_read_set1 outs args r
+  | (InOut, IOpEx i) :: outs ->
+    let l, r = coerce #(instr_operand_t i & instr_operands_t outs args) oprs in
+    access_location_of_explicit i l :: aux_read_set1 outs args r
+  | (Out, IOpIm i) :: outs ->
+    aux_read_set1 outs args (coerce #(instr_operands_t outs args) oprs)
+  | (InOut, IOpIm i) :: outs ->
+    access_location_of_implicit i :: aux_read_set1 outs args (coerce #(instr_operands_t outs args) oprs)
+
+let read_set (i:instr_t_record) (oprs:instr_operands_t i.outs i.args) : list access_location =
+  aux_read_set1 i.outs i.args oprs
+
+let write_set (i:instr_t_record) (opers:instr_operands_t i.outs i.args) : list access_location =
+  admit ()
 
 let rw_set_of_ins (i:ins) : rw_set =
   match i with
-  | Instr i oprs annot ->
-    admit ()
+  | Instr i oprs _ ->
+    read_set i oprs, write_set i oprs
   | Push src _ ->
     admit ()
   | Pop dst _ ->
     admit ()
   | Alloc _
   | Dealloc _ ->
-    [OReg rRsp], [OReg rRsp]
+    [ALoc64 (OReg rRsp)], [ALoc64 (OReg rRsp)]
 
 /// Given two read/write sets corresponding to two neighboring
 /// instructions, we can say whether exchanging those two instructions
