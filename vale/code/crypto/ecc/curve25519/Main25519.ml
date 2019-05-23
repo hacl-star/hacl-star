@@ -5,7 +5,7 @@ let _ =
       ("sqr",  (fun win -> Vale_Curve25519_X64_FastSqr.va_code_fast_sqr_stdcall win));
       ("sqr2", (fun win -> Vale_Curve25519_X64_FastSqr.va_code_sqr2_stdcall win));
       ("mul1", (fun win -> Vale_Curve25519_X64_FastUtil.va_code_fast_mul1_stdcall win));*)
-      ("add1", (fun win -> Vale_Curve25519_X64_FastUtil.va_code_fast_add1_stdcall win), 3, true);
+      ("add1", (fun win -> Vale_Curve25519_X64_FastUtil.va_code_fast_add1_stdcall win), 3, false);
       (*("add",  (fun win -> Vale_Curve25519_X64_FastUtil.va_code_fast_add_stdcall win));
       ("sub1", (fun win -> Vale_Curve25519_X64_FastUtil.va_code_fast_sub1_stdcall win));
       ("sub",  (fun win -> Vale_Curve25519_X64_FastUtil.va_code_fast_sub_stdcall win)); *)
