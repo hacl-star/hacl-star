@@ -694,7 +694,7 @@ let gcm_decrypt_LE_tag (alg:algorithm) (key:seq nat8) (iv:supported_iv_BE) (ciph
 let gcm_blocks_dec_helper (alg:algorithm) (key:seq nat32)
                    (a128 a_bytes p128x6 p128 p_bytes c128x6 c128 c_bytes:seq quad32)
                    (p_num_bytes a_num_bytes:nat)
-                   (iv:seq nat8) (j0_BE h enc_hash length_quad:quad32) : Lemma
+                   (iv:supported_iv_BE) (j0_BE h enc_hash length_quad:quad32) : Lemma
   (requires // Required by gcm_blocks
            length p128x6 * 16 + length p128 * 16 <= p_num_bytes /\
            p_num_bytes < length p128x6 * 16 + length p128 * 16 + 16 /\
@@ -943,7 +943,7 @@ let gcm_blocks_dec_helper (alg:algorithm) (key:seq nat32)
 let gcm_blocks_dec_helper_simplified (alg:algorithm) (key:seq nat32)
                    (a128 a_bytes p128x6 p128 p_bytes c128x6 c128 c_bytes:seq quad32)
                    (p_num_bytes a_num_bytes:nat)
-                   (iv:seq nat8) (j0_BE h enc_hash length_quad:quad32) : Lemma
+                   (iv:supported_iv_BE) (j0_BE h enc_hash length_quad:quad32) : Lemma
   (requires // Required by gcm_blocks
            length p128x6 * 16 + length p128 * 16 <= p_num_bytes /\
            p_num_bytes < length p128x6 * 16 + length p128 * 16 + 16 /\
