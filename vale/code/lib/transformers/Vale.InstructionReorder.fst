@@ -9,6 +9,8 @@ open Vale.X64.Machine_Semantics_s
 open Vale.X64.Machine_s
 open Vale.X64.Print_s
 
+open Vale.X64.InsLemmas // this one is from [code]; is that ok?; we use it primarily for the sanity checks
+
 /// Open the PossiblyMonad so that we can keep track of failure cases
 /// for easier debugging.
 
@@ -153,7 +155,21 @@ let rw_exchange_allowed (rw1 rw2 : rw_set) : pbool =
 
 let ins_exchange_allowed (i1 i2 : ins) : pbool =
   (rw_exchange_allowed (rw_set_of_ins i1) (rw_set_of_ins i2))
-  /+> (" for instructions " ^ print_ins i1 gcc ^ " and " ^ print_ins i2 gcc)
+  /+> normal (" for instructions " ^ print_ins i1 gcc ^ " and " ^ print_ins i2 gcc)
+
+private abstract
+let sanity_check_1 =
+  assert_norm (!!(
+    ins_exchange_allowed
+      (make_instr ins_Mov64 (OReg rRax) (OConst 100))
+      (make_instr ins_Add64 (OReg rRbx) (OConst 299))))
+
+private abstract
+let sanity_check_2 =
+  assert_norm (not !!(
+    ins_exchange_allowed
+      (make_instr ins_Mov64 (OReg rRax) (OConst 100))
+      (make_instr ins_Add64 (OReg rRax) (OConst 299))))
 
 /// First, we must define what it means for two states to be
 /// equivalent. We currently assume that we can _completely_ ignore
