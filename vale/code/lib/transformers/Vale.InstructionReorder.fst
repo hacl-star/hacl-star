@@ -7,17 +7,25 @@ open Vale.X64.Instruction_s
 open Vale.X64.Instructions_s
 open Vale.X64.Machine_Semantics_s
 open Vale.X64.Machine_s
+open Vale.X64.Print_s
 
 /// Open the PossiblyMonad so that we can keep track of failure cases
 /// for easier debugging.
 
 open Vale.PossiblyMonad
 
-/// We first define what it means for two [operand]s to be
-/// "overlapped".
+/// Finally some convenience module renamings
 
-let overlapped_operands (o1 o2:operand) : pbool =
-  admit ()
+module L = FStar.List.Tot
+
+/// We first define what it means for two [operand]s to be
+/// "disjoint".
+
+let disjoint_operands (o1 o2:operand) : pbool =
+  match o1, o2 with
+  | OConst _, _ | _, OConst _ -> ttrue
+  | OReg r1, OReg r2 -> (r1 <> r2) /- ("same register " ^ print_reg_name r1)
+  | _ -> unimplemented "conservatively not disjoint"
 
 /// For every instruction, we can define a write-set and a read-set
 
@@ -35,17 +43,43 @@ type write_set = list access_location
 type rw_set = read_set * write_set
 
 let rw_set_of_ins (i:ins) : rw_set =
-  admit ()
+  match i with
+  | Instr i oprs annot ->
+    admit ()
+  | Push src _ ->
+    admit ()
+  | Pop dst _ ->
+    admit ()
+  | Alloc _
+  | Dealloc _ ->
+    [OReg rRsp], [OReg rRsp]
 
 /// Given two read/write sets corresponding to two neighboring
 /// instructions, we can say whether exchanging those two instructions
 /// should be allowed.
 
 let rw_exchange_allowed (rw1 rw2 : rw_set) : pbool =
-  admit ()
+  let (r1, w1), (r2, w2) = rw1, rw2 in
+  let (&&.) (x y:pbool) : pbool =
+    match x with
+    | ttrue -> y
+    | _ -> x in
+  let rec for_all (f : 'a -> pbool) (l : list 'a) : pbool =
+    match l with
+    | [] -> ttrue
+    | x :: xs -> f x &&. for_all f xs in
+  let disjoint (l1 l2:list operand) r : pbool =
+    match l1 with
+    | [] -> ttrue
+    | x :: xs ->
+      (for_all (fun y -> (disjoint_operands x y)) l2) /+< (r ^ " because ") in
+  (disjoint r1 w2 "read set of 1st not disjoint from write set of 2nd") &&.
+  (disjoint r2 w2 "read set of 2nd not disjoint from write set of 1st") &&.
+  (disjoint w1 w2 "write sets not disjoint")
 
 let ins_exchange_allowed (i1 i2 : ins) : pbool =
-  rw_exchange_allowed (rw_set_of_ins i1) (rw_set_of_ins i2)
+  (rw_exchange_allowed (rw_set_of_ins i1) (rw_set_of_ins i2))
+  /+> (" for instructions " ^ print_ins i1 gcc ^ " and " ^ print_ins i2 gcc)
 
 /// First, we must define what it means for two states to be
 /// equivalent. We currently assume that we can _completely_ ignore

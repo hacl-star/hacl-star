@@ -47,3 +47,33 @@ type pbool = possibly unit
     holds on to and instead uses it solely as a boolean. *)
 unfold
 let (!!) (x:pbool) = Ok? x
+
+(** [ttrue] is just the same as [true] but for a [pbool] *)
+unfold
+let ttrue : pbool = Ok ()
+
+(** [ffalse] is the same as [false] but is for a [pbool] and thus requires a reason for being false. *)
+unfold
+let ffalse (reason:string) : pbool = Err reason
+
+(** [b /- r] is the same as [b] but as a [pbool] that is set to reason [r] if [b] is false. *)
+unfold
+let (/-) (b:bool) (reason:string) : pbool =
+  if b then
+    ttrue
+  else
+    ffalse reason
+
+(** [p /+> r] is the same as [p] but also appends [r] to the reason if it was false. *)
+unfold
+let (/+>) (p:pbool) (r:string) : pbool =
+  match p with
+  | Ok () -> Ok ()
+  | Err rr -> Err (rr ^ r)
+
+(** [p /+< r] is the same as [p] but also prepends [r] to the reason if it was false. *)
+unfold
+let (/+<) (p:pbool) (r:string) : pbool =
+  match p with
+  | Ok () -> Ok ()
+  | Err rr -> Err (rr ^ r)
