@@ -278,7 +278,7 @@ def fstar_default_args(relative=True):
 fstar_record_hints = ' --record_hints' if record_hints else ''
 
 vale_scons_args = '-disableVerify -omitUnverified' if is_single_vaf else ''
-vale_includes = f'-include {File("code/lib/util/Operator.vaf")}'
+vale_includes = f'-include {File("code/lib/util/Vale.Lib.Operator.vaf")}'
 
 if min_test:
   verify_paths = [
@@ -359,7 +359,7 @@ manual_dependencies = {
 # Table of special-case sources which requires non-default arguments
 #
 verify_options = [
-  ('code/lib/util/Operator.vaf', BuildOptions(fstar_default_args(), vale_includes = '')),
+  ('code/lib/util/Vale.Lib.Operator.vaf', BuildOptions(fstar_default_args(), vale_includes = '')),
 
   # Special treatment for sensitive modules
 
