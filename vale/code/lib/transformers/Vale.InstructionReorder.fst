@@ -107,7 +107,26 @@ let rw_set_of_ins (i:ins) : rw_set =
 /// guaranteed that they are disjoint.
 
 let disjoint_access_locations (a1 a2:access_location) : pbool =
-  unimplemented "conservatively not disjoint"
+  match a1, a2 with
+  | ALocCf, ALocCf -> ffalse "carry flag not disjoint from itself"
+  | ALocOf, ALocOf -> ffalse "overflow flag not disjoint from itself"
+  | ALocCf, _ | ALocOf, _ | _, ALocCf | _, ALocOf -> ttrue
+  | ALoc64 o1, ALoc64 o2 -> (
+      match o1, o2 with
+      | OConst _, _ | _, OConst _ -> ttrue
+      | OReg r1, OReg r2 -> (r1 <> r2) /- ("register " ^ print_reg_name r1 ^ " not disjoint from itself")
+      | _ ->
+        unimplemented "conservatively not disjoint ALoc64s"
+    )
+  | ALoc128 o1, ALoc128 o2 -> (
+      match o1, o2 with
+      | OReg128 r1, OReg128 r2 -> (r1 <> r2) /- ("register " ^ print_xmm r1 gcc ^ " not disjoint from itself")
+      | _ ->
+      unimplemented "conservatively not disjoint ALoc128s"
+    )
+  | ALoc64 o1, ALoc128 o2 | ALoc128 o1, ALoc64 o2 -> (
+      unimplemented "conservatively not disjoint ALoc64 & ALoc128"
+    )
 
 /// Given two read/write sets corresponding to two neighboring
 /// instructions, we can say whether exchanging those two instructions
