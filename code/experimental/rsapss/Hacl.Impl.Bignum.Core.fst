@@ -12,7 +12,7 @@ open Lib.RawIntTypes
 
 
 inline_for_extraction noextract
-let lbytes (len : size_t) = lbuffer uint8 len
+let lbuffer8 (len : size_t) = lbuffer uint8 len
 
 inline_for_extraction noextract
 let lbignum (len : size_t) = lbuffer uint64 len

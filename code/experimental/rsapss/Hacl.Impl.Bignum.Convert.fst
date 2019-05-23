@@ -19,7 +19,7 @@ module ST = FStar.HyperStack.ST
 inline_for_extraction noextract
 val text_to_nat_:
     len:size_t
-  -> input:lbytes len
+  -> input:lbuffer8 len
   -> resLen:size_t{v len = 8 * v resLen}
   -> res:lbignum resLen
   -> Stack unit
@@ -35,7 +35,7 @@ let text_to_nat_ len input resLen res =
 
 val text_to_nat:
     len:size_t{v len > 0}
-  -> input:lbytes len
+  -> input:lbuffer8 len
   -> res:lbignum (blocks len 8ul){8 * v (blocks len 8ul) < max_size_t}
   -> Stack unit
     (requires fun h -> live h input /\ live h res /\ disjoint res input)
@@ -60,7 +60,7 @@ val nat_to_text_:
     len:size_t
   -> input:lbignum len
   -> resLen:size_t{v resLen = 8 * v len}
-  -> res:lbytes resLen
+  -> res:lbuffer8 resLen
   -> Stack unit
     (requires fun h -> live h input /\ live h res /\ disjoint res input)
     (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1)
@@ -76,7 +76,7 @@ let nat_to_text_ len input resLen res =
 val nat_to_text:
     len:size_t{v len > 0}
   -> input:lbignum (blocks len 8ul){8 * v (blocks len 8ul) < max_size_t}
-  -> res:lbytes len
+  -> res:lbuffer8 len
   -> Stack unit
     (requires fun h -> live h input /\ live h res /\ disjoint res input)
     (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1)

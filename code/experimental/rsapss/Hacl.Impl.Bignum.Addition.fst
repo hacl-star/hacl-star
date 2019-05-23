@@ -124,3 +124,20 @@ let bn_add aLen a bLen b res =
   let res = carry.(0ul) in
   pop_frame ();
   res
+
+val bn_add_full:
+    aLen:size_t {v aLen + 1 <= maxint U32}
+  -> a:lbuffer uint64 aLen
+  -> bLen:size_t{v bLen <= v aLen}
+  -> b:lbuffer uint64 bLen
+  -> res:lbuffer uint64 (add aLen 1ul)
+  -> Stack unit
+    (requires fun h -> live h a /\ live h b /\ live h res)
+    (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1)
+[@"c_inline"]
+let bn_add_full aLen a bLen b res =
+  push_frame ();
+  let carry = sub res aLen 1ul in
+  let res_prefix = sub res 0ul aLen in
+  bn_add_ aLen a bLen b carry res_prefix;
+  pop_frame ()

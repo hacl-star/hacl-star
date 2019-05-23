@@ -26,10 +26,10 @@ val rsa_pss_sign:
   -> skey:lbignum (blocks modBits 64ul +. blocks eBits 64ul +. blocks dBits 64ul +. pLen +. qLen)
   -> rBlind:uint64
   -> sLen:size_t{v sLen + v hLen + 8 < max_size_t /\ v (blocks modBits 8ul) - v sLen - v hLen - 2 >= 0}
-  -> salt:lbytes sLen
+  -> salt:lbuffer8 sLen
   -> msgLen:size_t
-  -> msg:lbytes msgLen
-  -> sgnt:lbytes (blocks modBits 8ul)
+  -> msg:lbuffer8 msgLen
+  -> sgnt:lbuffer8 (blocks modBits 8ul)
   -> Stack unit
     (requires fun h ->
       live h salt /\ live h msg /\ live h sgnt /\ live h skey /\
@@ -44,9 +44,9 @@ val rsa_pss_verify:
   -> eBits:size_t{0 < v eBits /\ v eBits <= v modBits /\ v (blocks modBits 64ul) + v (blocks eBits 64ul) < max_size_t}
   -> pkey:lbignum (blocks modBits 64ul +. blocks eBits 64ul)
   -> sLen:size_t{v sLen + v hLen + 8 < max_size_t /\ v (blocks modBits 8ul) - v sLen - v hLen - 2 >= 0}
-  -> sgnt:lbytes (blocks modBits 8ul)
+  -> sgnt:lbuffer8 (blocks modBits 8ul)
   -> msgLen:size_t
-  -> msg:lbytes msgLen
+  -> msg:lbuffer8 msgLen
   -> Stack bool
     (requires fun h -> live h msg /\ live h sgnt /\ live h pkey /\ disjoint msg sgnt)
     (ensures  fun h0 _ h1 -> modifies loc_none h0 h1)
