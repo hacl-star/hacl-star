@@ -20,9 +20,9 @@ inline_for_extraction
 let hLen = 32ul
 
 val hash_sha256:
-    mHash:lbytes hLen
+    mHash:lbuffer8 hLen
   -> len:size_t
-  -> m:lbytes len
+  -> m:lbuffer8 len
   -> Stack unit
     (requires fun h -> live h mHash /\ live h m /\ disjoint m mHash)
     (ensures  fun h0 _ h1 -> modifies (loc mHash) h0 h1)
@@ -35,7 +35,7 @@ val mgf_sha256_:
     mgfseedLen:size_t
   -> accLen:size_t
   -> stLen:size_t{v stLen = v mgfseedLen + 4 + v hLen + v accLen}
-  -> st:lbytes stLen
+  -> st:lbuffer8 stLen
   -> count_max:size_t{v accLen = v count_max * v hLen}
   -> Stack unit
     (requires fun h -> live h st)
@@ -64,9 +64,9 @@ let mgf_sha256_ mgfseedLen accLen stLen st count_max =
 
 val mgf_sha256:
     mgfseedLen:size_t{v mgfseedLen + 4 < max_size_t}
-  -> mgfseed:lbytes mgfseedLen
+  -> mgfseed:lbuffer8 mgfseedLen
   -> maskLen:size_t{0 < v maskLen /\ v mgfseedLen + 4 + v hLen + v (blocks maskLen hLen) * v hLen < pow2 32}
-  -> res:lbytes maskLen
+  -> res:lbuffer8 maskLen
   -> Stack unit
     (requires fun h -> live h mgfseed /\ live h res /\ disjoint res mgfseed)
     (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1)

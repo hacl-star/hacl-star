@@ -26,8 +26,8 @@ let hLen = 32ul
 
 val xor_bytes:
     len:size_t
-  -> b1:lbytes len
-  -> b2:lbytes len
+  -> b1:lbuffer8 len
+  -> b2:lbuffer8 len
   -> Stack unit
     (requires fun h -> live h b1 /\ live h b2 /\ disjoint b1 b2)
     (ensures  fun h0 _ h1 -> modifies (loc b1) h0 h1)
@@ -40,11 +40,11 @@ let xor_bytes len b1 b2 =
 
 val pss_encode:
     sLen:size_t{8 + v hLen + v sLen < max_size_t}
-  -> salt:lbytes sLen
+  -> salt:lbuffer8 sLen
   -> msgLen:size_t
-  -> msg:lbytes msgLen
+  -> msg:lbuffer8 msgLen
   -> emBits:size_t{v emBits > 0 /\ v hLen + v sLen + 2 <= v (blocks emBits 8ul)}
-  -> em:lbytes (blocks emBits 8ul)
+  -> em:lbuffer8 (blocks emBits 8ul)
   -> Stack unit
     (requires fun h ->
       live h salt /\ live h msg /\ live h em /\
@@ -101,9 +101,9 @@ let pss_encode sLen salt msgLen msg emBits em = admit();
 val pss_verify:
     sLen:size_t{8 + v hLen + v sLen < max_size_t}
   -> msgLen:size_t
-  -> msg:lbytes msgLen
+  -> msg:lbuffer8 msgLen
   -> emBits:size_t{v emBits > 0 /\ v hLen + v sLen + 2 <= v (blocks emBits 8ul)}  // <- check the last condition before calling this function!
-  -> em:lbytes (blocks emBits 8ul)
+  -> em:lbuffer8 (blocks emBits 8ul)
   -> Stack bool
     (requires fun h -> live h msg /\ live h em /\ disjoint em msg)
     (ensures  fun h0 _ h1 -> modifies loc_none h0 h1)
@@ -171,10 +171,10 @@ val rsa_sign:
   -> skey:lbignum (blocks modBits 64ul +. blocks eBits 64ul +. blocks dBits 64ul +. pLen +. qLen)
   -> rBlind:uint64
   -> sLen:size_t{v sLen + v hLen + 8 < max_size_t /\ v (blocks modBits 8ul) - v sLen - v hLen - 2 >= 0}
-  -> salt:lbytes sLen
+  -> salt:lbuffer8 sLen
   -> msgLen:size_t
-  -> msg:lbytes msgLen
-  -> sgnt:lbytes (blocks modBits 8ul)
+  -> msg:lbuffer8 msgLen
+  -> sgnt:lbuffer8 (blocks modBits 8ul)
   -> Stack unit
     (requires fun h ->
       live h salt /\ live h msg /\ live h sgnt /\ live h skey /\
@@ -239,9 +239,9 @@ val rsa_verify:
   -> eBits:size_t{0 < v eBits /\ v eBits <= v modBits /\ v (blocks modBits 64ul) + v (blocks eBits 64ul) < max_size_t}
   -> pkey:lbignum (blocks modBits 64ul +. blocks eBits 64ul)
   -> sLen:size_t{v sLen + v hLen + 8 < max_size_t /\ v (blocks modBits 8ul) - v sLen - v hLen - 2 >= 0}
-  -> sgnt:lbytes (blocks modBits 8ul)
+  -> sgnt:lbuffer8 (blocks modBits 8ul)
   -> msgLen:size_t
-  -> msg:lbytes msgLen
+  -> msg:lbuffer8 msgLen
   -> Stack bool
     (requires fun h -> live h msg /\ live h sgnt /\ live h pkey /\ disjoint msg sgnt)
     (ensures  fun h0 _ h1 -> modifies loc_none h0 h1)
