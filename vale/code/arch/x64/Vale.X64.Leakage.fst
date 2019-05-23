@@ -433,9 +433,11 @@ let check_if_code_is_leakage_free' code ts tsExpected =
   else
     b
 
-let check_if_code_is_leakage_free code ts =
+let check_if_code_is_leakage_free code ts public_return =
   let b, ts' = check_if_code_consumes_fixed_time code ts in
-  b
+  if public_return then
+    b && Public? (ts'.regTaint rRax)
+  else b
 
 // Only the args should be public
 let mk_analysis_taints win nbr_args : analysis_taints =

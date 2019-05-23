@@ -22,7 +22,7 @@ let proc_name : string -> platform -> string =
 
 let parse_cmdline :
   (string * (Prims.bool ->
-    (Vale_X64_Decls.ins,Vale_X64_Decls.ocmp) Vale_X64_Machine_s.precode) * int) list -> unit
+    (Vale_X64_Decls.ins,Vale_X64_Decls.ocmp) Vale_X64_Machine_s.precode) * int * bool) list -> unit
   =
   fun l  ->
   let argc = Array.length Sys.argv in
@@ -58,8 +58,8 @@ let parse_cmdline :
     let windows = platform_choice = Win in
 
     (* Run taint analysis *)
-    let _ = List.iter (fun (name, code, nbr_args) ->
-      if Vale_X64_Leakage.check_if_code_is_leakage_free (code windows) (Vale_X64_Leakage.mk_analysis_taints windows (Prims.parse_int (string_of_int nbr_args))) then ()
+    let _ = List.iter (fun (name, code, nbr_args, return_public) ->
+      if Vale_X64_Leakage.check_if_code_is_leakage_free (code windows) (Vale_X64_Leakage.mk_analysis_taints windows (Prims.parse_int (string_of_int nbr_args)) return_public) then ()
       else failwith ("method " ^ name ^ " does not satisfy taint analysis on" ^ if windows then "Windows" else "Linux")
     ) l in
 
@@ -67,7 +67,7 @@ let parse_cmdline :
 
     (* Extract and print assembly code *)
     Vale_X64_Decls.print_header printer;
-    let _ = List.fold_left (fun label_count (name, code, _) ->
+    let _ = List.fold_left (fun label_count (name, code, _, _) ->
                            Vale_X64_Decls.print_proc (proc_name name platform_choice)
                                                        (code windows)
                                                        label_count printer)
