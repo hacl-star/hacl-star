@@ -87,10 +87,13 @@ let rw_set_of_ins (i:ins) : rw_set =
   match i with
   | Instr i oprs _ ->
     read_set i oprs, write_set i oprs
-  | Push src _ ->
-    admit ()
-  | Pop dst _ ->
-    admit ()
+  | Push src t ->
+    [ALoc64 (OReg rRsp); ALoc64 src],
+    [ALoc64 (OReg rRsp); admit ()]
+    (* TODO FIXME: How do we reconcile this with the MConst in the [untainted_eval_ins] write? *)
+  | Pop dst t ->
+    [ALoc64 (OReg rRsp); ALoc64 (OStack (MReg rRsp 0, t))],
+    [ALoc64 (OReg rRsp); ALoc64 dst]
   | Alloc _
   | Dealloc _ ->
     [ALoc64 (OReg rRsp)], [ALoc64 (OReg rRsp)]
