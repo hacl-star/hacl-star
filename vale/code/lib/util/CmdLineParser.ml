@@ -59,7 +59,7 @@ let parse_cmdline :
 
     (* Run taint analysis *)
     let _ = List.iter (fun (name, code, nbr_args, return_public) ->
-      if Vale_X64_Leakage.check_if_code_is_leakage_free (code windows) (Vale_X64_Leakage.mk_analysis_taints windows (Prims.parse_int (string_of_int nbr_args)) return_public) then ()
+      if Vale_X64_Leakage.check_if_code_is_leakage_free (code windows) (Vale_X64_Leakage.mk_analysis_taints windows (Prims.parse_int (string_of_int nbr_args))) return_public then ()
       else failwith ("method " ^ name ^ " does not satisfy taint analysis on" ^ if windows then "Windows" else "Linux")
     ) l in
 
