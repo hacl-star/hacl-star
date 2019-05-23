@@ -1,4 +1,4 @@
-module Hacl.Impl.Convert
+module Hacl.Impl.Bignum.Convert
 
 open FStar.HyperStack
 open FStar.HyperStack.ST
@@ -10,7 +10,7 @@ open Lib.IntTypes
 open Lib.Buffer
 open Lib.ByteBuffer
 
-open Hacl.Impl.Lib
+open Hacl.Impl.Bignum.Core
 
 module ST = FStar.HyperStack.ST
 

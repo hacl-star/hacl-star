@@ -9,8 +9,8 @@ open LowStar.Buffer
 open Lib.IntTypes
 open Lib.Buffer
 
-open Hacl.Impl.Lib
-open Hacl.Impl.Convert
+open Hacl.Impl.Bignum.Core
+open Hacl.Impl.Bignum.Convert
 open Hacl.RSAPSS
 
 module ST = FStar.HyperStack.ST

@@ -10,8 +10,8 @@ open Lib.IntTypes
 open Lib.Buffer
 open Lib.PrintBuffer
 
-open Hacl.Impl.Addition
-open Hacl.Impl.Lib
+open Hacl.Impl.Bignum.Addition
+open Hacl.Impl.Bignum.Core
 
 val testfunc : lbytes 5ul -> lbytes 6ul
 let testfunc _ = admit()

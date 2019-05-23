@@ -9,8 +9,8 @@ open Lib.IntTypes
 open Lib.Buffer
 
 open Hacl.Impl.HE.GM
-open Hacl.Impl.Comparison
-open Hacl.Impl.Addition
+open Hacl.Impl.Bignum.Comparison
+open Hacl.Impl.Bignum.Addition
 
 
 inline_for_extraction unfold noextract

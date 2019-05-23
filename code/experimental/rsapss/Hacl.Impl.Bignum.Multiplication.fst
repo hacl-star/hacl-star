@@ -1,4 +1,4 @@
-module Hacl.Impl.Multiplication
+module Hacl.Impl.Bignum.Multiplication
 
 open FStar.HyperStack
 open FStar.HyperStack.ST
@@ -9,9 +9,9 @@ open LowStar.Buffer
 open Lib.IntTypes
 open Lib.Buffer
 
-open Hacl.Impl.Lib
-open Hacl.Impl.Comparison
-open Hacl.Impl.Addition
+open Hacl.Impl.Bignum.Core
+open Hacl.Impl.Bignum.Comparison
+open Hacl.Impl.Bignum.Addition
 
 module ST = FStar.HyperStack.ST
 
