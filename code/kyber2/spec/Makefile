@@ -3,12 +3,6 @@ HACL_HOME  ?= ../../..
 
 VARIANT    ?= 512
 
-ifeq ($(VARIANT),512)
-  TARGET = test
-else
-  $(error ERROR: VARIANT must be one of 512)
-endif
-
 CACHE_DIR = .cache.$(VARIANT)
 HINT_DIR  = .hints.$(VARIANT)
 OUT_DIR   = kyber2-ml.$(VARIANT)
@@ -19,7 +13,7 @@ include $(HACL_HOME)/Makefile.include
 
 all:
 	rm -f .depend && $(MAKE) .depend
-	$(MAKE) $(TARGET)
+	$(MAKE) test
 
 verify: $(addprefix $(CACHE_DIR)/,Spec.Frodo.KEM.KeyGen.fst.checked Spec.Frodo.KEM.Encaps.fst.checked Spec.Frodo.KEM.Decaps.fst.checked)
 	@echo SUCCESS!
@@ -43,12 +37,7 @@ FSTAR = $(FSTAR_HOME)/bin/fstar.exe $(FSTAR_FLAGS)
 
 ENABLE_HINTS = --use_hints --use_hint_hashes --record_hints --query_stats
 
-ifeq ($(VARIANT),512)
-  ROOTS = Spec.Kyber2.Test.fst
-  #FSTAR += --include test-$(VARIANT)
-else
-  ROOTS = Spec.Kyber2.Kem.fst
-endif
+ROOTS = Spec.Kyber2.Test.fst
 
 .depend:
 	$(FSTAR) --dep full $(ROOTS) --extract '* -Prims -FStar' > $@
