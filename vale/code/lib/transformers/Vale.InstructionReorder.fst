@@ -18,16 +18,10 @@ open Vale.PossiblyMonad
 
 module L = FStar.List.Tot
 
-/// We first define what it means for two [operand]s to be
-/// "disjoint".
-
-let disjoint_operands (o1 o2:operand) : pbool =
-  match o1, o2 with
-  | OConst _, _ | _, OConst _ -> ttrue
-  | OReg r1, OReg r2 -> (r1 <> r2) /- ("same register " ^ print_reg_name r1)
-  | _ -> unimplemented "conservatively not disjoint"
-
-/// For every instruction, we can define a write-set and a read-set
+/// We first need to talk about what locations may be accessed (either
+/// via a read or via a write) by an instruction.
+///
+/// This allows us to define read and write sets for instructions.
 
 type access_location =
   | ALoc64 : operand -> access_location
@@ -101,6 +95,17 @@ let rw_set_of_ins (i:ins) : rw_set =
   | Dealloc _ ->
     [ALoc64 (OReg rRsp)], [ALoc64 (OReg rRsp)]
 
+/// We now need to define what it means for two different access
+/// locations to be "disjoint".
+///
+/// Note that it is safe to say that two operands are not disjoint
+/// even if they are, but the converse is not true. That is, to be
+/// safe, we can say two operands are disjoint only if it is
+/// guaranteed that they are disjoint.
+
+let disjoint_access_locations (a1 a2:access_location) : pbool =
+  unimplemented "conservatively not disjoint"
+
 /// Given two read/write sets corresponding to two neighboring
 /// instructions, we can say whether exchanging those two instructions
 /// should be allowed.
@@ -115,11 +120,11 @@ let rw_exchange_allowed (rw1 rw2 : rw_set) : pbool =
     match l with
     | [] -> ttrue
     | x :: xs -> f x &&. for_all f xs in
-  let disjoint (l1 l2:list operand) r : pbool =
+  let disjoint (l1 l2:list access_location) r : pbool =
     match l1 with
     | [] -> ttrue
     | x :: xs ->
-      (for_all (fun y -> (disjoint_operands x y)) l2) /+< (r ^ " because ") in
+      (for_all (fun y -> (disjoint_access_locations x y)) l2) /+< (r ^ " because ") in
   (disjoint r1 w2 "read set of 1st not disjoint from write set of 2nd") &&.
   (disjoint r2 w2 "read set of 2nd not disjoint from write set of 1st") &&.
   (disjoint w1 w2 "write sets not disjoint")
