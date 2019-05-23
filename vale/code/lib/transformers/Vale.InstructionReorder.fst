@@ -78,7 +78,7 @@ let rec aux_write_set
     let l, r = coerce #(instr_operand_t i & instr_operands_t outs args) oprs in
     access_location_of_explicit i l :: aux_write_set outs args r
   | (_, IOpIm i) :: outs ->
-    aux_write_set outs args (coerce #(instr_operands_t outs args) oprs)
+    access_location_of_implicit i :: aux_write_set outs args (coerce #(instr_operands_t outs args) oprs)
 
 let write_set (i:instr_t_record) (oprs:instr_operands_t i.outs i.args) : list access_location =
   aux_write_set i.outs i.args oprs
