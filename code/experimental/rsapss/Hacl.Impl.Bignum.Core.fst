@@ -14,8 +14,10 @@ open Lib.RawIntTypes
 inline_for_extraction noextract
 let lbuffer8 (len : size_t) = lbuffer uint8 len
 
+let bn_len = s:size_t{v s > 0}
+
 inline_for_extraction noextract
-let lbignum (len : size_t) = lbuffer uint64 len
+let lbignum (len : bn_len) = lbuffer uint64 len
 
 inline_for_extraction noextract
 val blocks:
@@ -43,7 +45,7 @@ let eq_u8 a b = FStar.UInt8.(u8_to_UInt8 a =^ u8_to_UInt8 b)
 
 (* check if input[ind] is equal to 1 *)
 val bn_is_bit_set:
-    len:size_t
+     len:bn_len
   -> input:lbignum len
   -> ind:size_t{v ind / 64 < v len}
   -> Stack bool
@@ -58,7 +60,7 @@ let bn_is_bit_set len input ind =
   eq_u64 tmp (u64 1)
 
 val bn_set_bit:
-    len:size_t
+     len:bn_len
   -> input:lbignum len
   -> ind:size_t{v ind / 64 < v len}
   -> Stack unit
@@ -73,7 +75,7 @@ let bn_set_bit len input ind =
 
 inline_for_extraction noextract
 val bval:
-    len:size_t
+     len:bn_len
   -> b:lbignum len
   -> i:size_t
   -> Stack uint64

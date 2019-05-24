@@ -60,8 +60,8 @@ let mod_inv_u64 n0 =
 
 inline_for_extraction noextract
 val mont_reduction_f:
-    nLen:size_t
-  -> rLen:size_t{v nLen < v rLen /\ v nLen + v rLen < max_size_t}
+     nLen:bn_len
+  -> rLen:bn_len{v nLen < v rLen /\ v nLen + v rLen < max_size_t}
   -> c:lbignum (nLen +. rLen)
   -> n:lbignum nLen
   -> nInv_u64:uint64
@@ -77,8 +77,8 @@ let mont_reduction_f nLen rLen c n nInv_u64 carry i =
 
 inline_for_extraction noextract
 val mont_reduction_:
-    nLen:size_t
-  -> rLen:size_t{v nLen < v rLen /\ v nLen + v rLen < max_size_t}
+     nLen:bn_len
+  -> rLen:bn_len{v nLen < v rLen /\ v nLen + v rLen < max_size_t}
   -> c:lbignum (nLen +. rLen)
   -> n:lbignum nLen
   -> nInv_u64:uint64
@@ -96,8 +96,8 @@ let mont_reduction_ nLen rLen c n nInv_u64 carry =
   )
 
 val mont_reduction_a:
-    nLen:size_t
-  -> rLen:size_t{v nLen < v rLen /\ v nLen + v rLen < max_size_t}
+     nLen:bn_len
+  -> rLen:bn_len{v nLen < v rLen /\ v nLen + v rLen < max_size_t}
   -> c:lbignum (nLen +. rLen)
   -> n:lbignum nLen
   -> nInv_u64:uint64
@@ -112,8 +112,8 @@ let mont_reduction_a nLen rLen c n nInv_u64 =
   pop_frame ()
 
 val mont_reduction:
-    nLen:size_t
-  -> rLen:size_t{v nLen < v rLen /\ v nLen + v rLen < max_size_t}
+     nLen:bn_len
+  -> rLen:bn_len{v nLen < v rLen /\ v nLen + v rLen < max_size_t}
   -> n:lbignum nLen
   -> nInv_u64:uint64
   -> c:lbignum (nLen +. nLen)
@@ -136,8 +136,8 @@ let mont_reduction nLen rLen n nInv_u64 c tmp res =
   copy res tmp1
 
 val to_mont:
-    nLen:size_t
-  -> rLen:size_t{v nLen < v rLen /\ v nLen + v rLen < max_size_t}
+     nLen:bn_len
+  -> rLen:bn_len{v nLen < v rLen /\ v nLen + v rLen < max_size_t}
   -> pow2_i:size_t{v nLen + v nLen + 4 * v pow2_i < max_size_t /\ v nLen <= v pow2_i /\ v rLen < 2 * v pow2_i}
   -> n:lbignum nLen
   -> nInv_u64:uint64
@@ -161,8 +161,8 @@ let to_mont nLen rLen pow2_i n nInv_u64 r2 a st_kara aM =
   mont_reduction nLen rLen n nInv_u64 c tmp aM // aM = c % n
 
 val from_mont:
-    nLen:size_t
-  -> rLen:size_t{v nLen < v rLen /\ v nLen + v rLen < max_size_t}
+     nLen:bn_len
+  -> rLen:bn_len{v nLen < v rLen /\ v nLen + v rLen < max_size_t}
   -> pow2_i:size_t{v nLen + v nLen + 4 * v pow2_i < max_size_t /\ v nLen <= v pow2_i /\ v rLen < 2 * v pow2_i}
   -> n:lbignum nLen
   -> nInv_u64:uint64

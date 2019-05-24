@@ -20,8 +20,8 @@ module ST = FStar.HyperStack.ST
 
 inline_for_extraction noextract
 val bytes_to_bignum_:
-     #len:size_t
-  -> #resLen:size_t{v len = 8 * v resLen}
+     #len:bn_len
+  -> #resLen:bn_len{v len = 8 * v resLen}
   -> input:lbuffer8 len
   -> res:lbignum resLen
   -> Stack unit
@@ -36,7 +36,7 @@ let bytes_to_bignum_ #len #resLen input res =
   )
 
 val bytes_to_bignum:
-     #len:size_t{v len > 0}
+     #len:bn_len
   -> input:lbuffer8 len
   -> res:lbignum (blocks len 8ul){8 * v (blocks len 8ul) < max_size_t}
   -> Stack unit
@@ -59,8 +59,8 @@ let bytes_to_bignum #len input res =
 
 inline_for_extraction noextract
 val bignum_to_bytes_:
-     #len:size_t
-  -> #resLen:size_t{v resLen = 8 * v len}
+     #len:bn_len
+  -> #resLen:bn_len{v resLen = 8 * v len}
   -> input:lbignum len
   -> res:lbuffer8 resLen
   -> Stack unit
@@ -76,7 +76,7 @@ let bignum_to_bytes_ #len #resLen input res =
   )
 
 val bignum_to_bytes:
-     #len:size_t{v len > 0}
+     #len:bn_len{v len > 0}
   -> input:lbignum (blocks len 8ul){8 * v (blocks len 8ul) < max_size_t}
   -> res:lbuffer8 len
   -> Stack unit
@@ -117,10 +117,10 @@ let nat_to_list64_sec x = normalize_term (List.Tot.map secret (nat_to_list64 x))
 
 /// List64 to nat conversion.
 inline_for_extraction noextract
-val list64_to_nat: l:list pub_uint64{ List.Tot.length l > 0 } -> Tot nat
-let rec list64_to_nat l = match l with
+val list64_sec_to_nat: l:list uint64{ List.Tot.length l > 0 } -> Tot nat
+let rec list64_sec_to_nat l = match l with
   | [x] -> v x
-  | x::tl -> v x + list64_to_nat tl * maxint U64
+  | x::tl -> v x + list64_sec_to_nat tl * maxint U64
 
 /// Relatively "small" nats, which fit into 32 GB
 let issnat (n:nat) =
@@ -135,6 +135,18 @@ let nat_bytes_num x = normalize_term (size (List.Tot.length (nat_to_list64_sec x
 noextract
 let example_snat:snat = assert_norm(issnat 12345678901234567890); 12345678901234567890
 
+/// Nat representation of bigint.
+noextract
+val as_snat:
+     #eLen:bn_len
+  -> h:mem
+  -> lbignum eLen
+  -> GTot nat
+let as_snat #eLen h e =
+  let s = as_seq h e in
+  let l = Seq.Properties.seq_to_list s in
+  list64_sec_to_nat l
+
 #reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0"
 
 /// Converts nat to the bignum, for that creates a bignum of exact length required.
@@ -148,10 +160,10 @@ val nat_to_bignum_exact:
      stack_allocated b h0 h1 (Seq.of_list (nat_to_list64_sec input)))
 let nat_to_bignum_exact input = createL (nat_to_list64_sec input)
 
-/// Converts nat to the bignum, but can allocate bigger buffer for the bignum returned.
+/// Converts nat to the bignum, but allows to allocate bigger buffer for the bignum returned.
 inline_for_extraction noextract
 val nat_to_bignum:
-     #k:size_t{v k > 0}
+     #k:bn_len
   -> input:snat { v (nat_bytes_num input) <= v k }
   -> StackInline (lbignum k)
     (requires fun _ -> true)

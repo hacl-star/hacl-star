@@ -18,8 +18,8 @@ module ST = FStar.HyperStack.ST
 #reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq'"
 
 val mul_mod_mont:
-    nLen:size_t
-  -> rLen:size_t{v nLen < v rLen /\ v nLen + v rLen < max_size_t}
+     nLen:bn_len
+  -> rLen:bn_len{v nLen < v rLen /\ v nLen + v rLen < max_size_t}
   -> pow2_i:size_t{v nLen + v nLen + 4 * v pow2_i < max_size_t /\ v nLen <= v pow2_i /\ v rLen < 2 * v pow2_i}
   -> n:lbignum nLen
   -> nInv_u64:uint64
@@ -42,8 +42,8 @@ let mul_mod_mont nLen rLen pow2_i n nInv_u64 st_kara aM bM resM =
   mont_reduction nLen rLen n nInv_u64 c tmp resM // resM = c % n
 
 val mod_exp_:
-    nLen:size_t
-  -> rLen:size_t{v nLen < v rLen /\ v nLen + v rLen < max_size_t}
+     nLen:bn_len
+  -> rLen:bn_len{v nLen < v rLen /\ v nLen + v rLen < max_size_t}
   -> pow2_i:size_t{v nLen + v nLen + 4 * v pow2_i < max_size_t /\ v nLen <= v pow2_i /\ v rLen < 2 * v pow2_i}
   -> n:lbignum nLen
   -> nInv_u64:uint64
@@ -74,10 +74,13 @@ let mod_exp_ nLen rLen pow2_i n nInv_u64 st_kara st_exp bBits bLen b =
 //128 * (v nLen + 1) < max_size_t
 // res = a ^^ b mod n
 val mod_exp:
-    pow2_i:size_t
+     pow2_i:size_t{v pow2_i > 0}
   -> modBits:size_t{v modBits > 0}
-  -> nLen:size_t{0 < v nLen /\ v nLen = v (blocks modBits 64ul) /\
-    5 * v nLen + 4 * v pow2_i < max_size_t /\ v nLen <= v pow2_i /\ v nLen + 1 < 2 * v pow2_i}
+  -> nLen:bn_len{
+       v nLen = v (blocks modBits 64ul) /\
+       5 * v nLen + 4 * v pow2_i < max_size_t /\
+       v nLen <= v pow2_i /\
+       v nLen + 1 < 2 * v pow2_i}
   -> n:lbignum nLen
   -> r2:lbignum nLen
   -> a:lbignum nLen
@@ -86,7 +89,7 @@ val mod_exp:
   -> res:lbignum nLen
   -> Stack unit
     (requires fun h -> live h n /\ live h a /\ live h b /\ live h res /\ live h r2)
-    (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1)
+    (ensures  fun h0 b h1 -> modifies (loc res) h0 h1)
 [@"c_inline"]
 let mod_exp pow2_i modBits nLen n r2 a bBits b res =
   push_frame ();
