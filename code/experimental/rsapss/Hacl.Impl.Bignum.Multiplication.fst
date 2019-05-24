@@ -10,6 +10,7 @@ open Lib.IntTypes
 open Lib.Buffer
 
 open Hacl.Impl.Bignum.Core
+open Hacl.Impl.Bignum.Convert
 open Hacl.Impl.Bignum.Comparison
 open Hacl.Impl.Bignum.Addition
 
@@ -34,8 +35,8 @@ let bn_mul_by_limb_addj_f a_i l c r_ij =
 //res = res + limb * bn * beta_j
 inline_for_extraction noextract
 val bn_mult_by_limb_addj_add:
-     #aLen:size_t
-  -> #resLen:size_t
+     #aLen:bn_len
+  -> #resLen:bn_len
   -> a:lbignum aLen
   -> l:uint64
   -> j:size_t{v aLen + v j < v resLen}
@@ -61,8 +62,8 @@ let bn_mult_by_limb_addj_add #aLen #resLen a l j res carry =
 
 inline_for_extraction noextract
 val bn_mult_by_limb_addj:
-     #aLen:size_t
-  -> #resLen:size_t
+     #aLen:bn_len
+  -> #resLen:bn_len
   -> a:lbignum aLen
   -> l:uint64
   -> j:size_t{v aLen + v j < v resLen}
@@ -86,9 +87,9 @@ let bn_mult_by_limb_addj #aLen #resLen a l j res carry =
 
 inline_for_extraction noextract
 val bn_mult_:
-     #aLen:size_t
-  -> #bLen:size_t
-  -> #resLen:size_t{v resLen = v aLen + v bLen}
+     #aLen:bn_len
+  -> #bLen:bn_len
+  -> #resLen:bn_len{v resLen = v aLen + v bLen}
   -> a:lbignum aLen
   -> b:lbignum bLen
   -> res:lbignum resLen
@@ -109,17 +110,18 @@ let bn_mult_ #aLen #bLen #resLen a b res carry =
 
 // res = a * b
 val bn_mul:
-     #aLen:size_t
-  -> #bLen:size_t{v aLen + v bLen < max_size_t}
+     #aLen:bn_len
+  -> #bLen:bn_len{v aLen + v bLen < max_size_t}
   -> a:lbignum aLen
   -> b:lbignum bLen
   -> res:lbignum (aLen +. bLen)
   -> Stack unit
     (requires fun h ->
       live h a /\ live h b /\ live h res /\ disjoint res a /\ disjoint res b)
-    (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1)
+    (ensures  fun h0 _ h1 ->
+     modifies (loc res) h0 h1 /\ as_snat h1 res == as_snat h0 a * as_snat h0 b)
 [@"c_inline"]
-let bn_mul #aLen #bLen a b res =
+let bn_mul #aLen #bLen a b res = admit();
   push_frame ();
   let resLen = aLen +. bLen in
   memset res (u64 0) resLen;
@@ -133,7 +135,7 @@ type sign =
 
 inline_for_extraction noextract
 val abs:
-    aLen:size_t
+    aLen:bn_len
   -> a:lbignum aLen
   -> b:lbignum aLen
   -> res:lbignum aLen
@@ -150,7 +152,7 @@ let abs aLen a b res =
     Positive end
 
 val add_sign:
-    a0Len:size_t{v a0Len + v a0Len + 1 < max_size_t}
+    a0Len:bn_len{v a0Len + v a0Len + 1 < max_size_t}
   -> c0:lbignum (a0Len +. a0Len)
   -> c1:lbignum (a0Len +. a0Len)
   -> c2:lbignum (a0Len +. a0Len)
@@ -162,7 +164,7 @@ val add_sign:
   -> b2:lbignum a0Len
   -> sa2:sign
   -> sb2:sign
-  -> resLen:size_t{v resLen = v a0Len + v a0Len + 1}
+  -> resLen:bn_len{v resLen = v a0Len + v a0Len + 1}
   -> res:lbignum resLen
   -> Stack unit
     (requires fun h ->
@@ -184,7 +186,7 @@ let add_sign a0Len c0 c1 c2 a0 a1 a2 b0 b1 b2 sa2 sb2 resLen res =
 
 val karatsuba_:
     pow2_i:size_t{4 * v pow2_i < max_size_t}
-  -> aLen:size_t{v aLen + v aLen < max_size_t /\ v pow2_i = v aLen}
+  -> aLen:bn_len{v aLen + v aLen < max_size_t /\ v pow2_i = v aLen}
   -> a:lbignum aLen
   -> b:lbignum aLen
   -> tmp:lbignum (4ul *. pow2_i)
@@ -238,7 +240,7 @@ let rec karatsuba_ pow2_i aLen a b tmp res = admit();
 
 val karatsuba:
     pow2_i:size_t
-  -> aLen:size_t{v aLen + v aLen + 4 * v pow2_i < max_size_t}
+  -> aLen:bn_len{v aLen + v aLen + 4 * v pow2_i < max_size_t}
   -> a:lbignum aLen
   -> b:lbignum aLen
   -> st_kara:lbignum (aLen +. aLen +. 4ul *. pow2_i)

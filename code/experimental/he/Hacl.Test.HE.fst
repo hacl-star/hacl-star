@@ -42,12 +42,12 @@ let test1 _ =
 
   print_strln "Both should be true:";
 
-  let _ = bn_add 1ul list1 1ul list2 list3 in
-  let res = bn_is_less 1ul list4 1ul list3 in
+  let _ = bn_add list1 list2 list3 in
+  let res = bn_is_less list4 list3 in
   print_bool (res = true);
 
-  let _ = bn_add 1ul list1 1ul list2 list3 in
-  let res = bn_is_less 1ul list5 1ul list3 in
+  let _ = bn_add list1 list2 list3 in
+  let res = bn_is_less list5 list3 in
   print_bool (res = false);
 
   pop_frame()
@@ -64,12 +64,12 @@ let test2 _ =
 
   print_strln "Both should be true:";
 
-  let _ = bn_add 2ul list1 2ul list2 list3 in
-  let res = bn_is_less 2ul list4 2ul list3 in
+  let _ = bn_add list1 list2 list3 in
+  let res = bn_is_less list4 list3 in
   print_bool (res = true);
 
-  let _ = bn_add 2ul list1 2ul list2 list3 in
-  let res = bn_is_less 2ul list5 2ul list3 in
+  let _ = bn_add list1 list2 list3 in
+  let res = bn_is_less list5 list3 in
   print_bool (res = false);
 
   pop_frame()

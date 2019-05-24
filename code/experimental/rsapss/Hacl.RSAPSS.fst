@@ -21,8 +21,8 @@ val rsa_pss_sign:
   -> modBits:size_t{0 < v modBits}
   -> eBits:size_t{0 < v eBits /\ v eBits <= v modBits}
   -> dBits:size_t{0 < v dBits /\ v dBits <= v modBits}
-  -> pLen:size_t
-  -> qLen:size_t{v (blocks modBits 64ul) + v (blocks eBits 64ul) + v (blocks dBits 64ul) + v pLen + v qLen < max_size_t}
+  -> pLen:bn_len
+  -> qLen:bn_len{v (blocks modBits 64ul) + v (blocks eBits 64ul) + v (blocks dBits 64ul) + v pLen + v qLen < max_size_t}
   -> skey:lbignum (blocks modBits 64ul +. blocks eBits 64ul +. blocks dBits 64ul +. pLen +. qLen)
   -> rBlind:uint64
   -> sLen:size_t{v sLen + v hLen + 8 < max_size_t /\ v (blocks modBits 8ul) - v sLen - v hLen - 2 >= 0}

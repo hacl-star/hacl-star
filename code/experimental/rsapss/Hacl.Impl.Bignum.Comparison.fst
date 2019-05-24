@@ -12,8 +12,8 @@ open Lib.Buffer
 open Hacl.Impl.Bignum.Core
 
 val bn_is_less_:
-     #aLen:size_t
-  -> #bLen:size_t{v bLen <= v aLen}
+     #aLen:bn_len
+  -> #bLen:bn_len{v bLen <= v aLen}
   -> a:lbignum aLen
   -> b:lbignum bLen
   -> i:size_t{v i <= v aLen}
@@ -31,8 +31,8 @@ let rec bn_is_less_ #aLen #bLen a b i =
   else false
 
 val bn_is_less:
-     #aLen:size_t
-  -> #bLen:size_t{v bLen <= v aLen}
+     #aLen:bn_len
+  -> #bLen:bn_len{v bLen <= v aLen}
   -> a:lbignum aLen
   -> b:lbignum bLen
   -> Stack bool
