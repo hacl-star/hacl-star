@@ -5,8 +5,8 @@ module Vale.Transformers.PossiblyMonad
 /// reason for the error when the error occurs.
 
 type possibly 'a =
-  | Ok of 'a
-  | Err of string
+  | Ok : v:'a -> possibly 'a
+  | Err : reason:string -> possibly 'a
 
 unfold let return (#a:Type) (x:a) : possibly a =
   Ok x
@@ -32,7 +32,7 @@ let loosen (#t1:Type) (#t2:Type{t1 `subtype_of` t2})
     guaranteed statically to be within this tighter type *)
 unfold
 let tighten (#t1:Type) (#t2:Type{t2 `subtype_of` t1})
-    (x:possibly t1{Ok? x ==> Ok?._0 x `has_type` t2}) : possibly t2 =
+    (x:possibly t1{Ok? x ==> Ok?.v x `has_type` t2}) : possibly t2 =
   match x with
   | Ok x' -> Ok x'
   | Err s -> Err s
