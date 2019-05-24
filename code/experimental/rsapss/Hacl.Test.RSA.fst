@@ -70,17 +70,17 @@ let ctest pow2_i modBits n pkeyBits e skeyBits d pTLen p qTLen q r2 rBlindTLen r
   let qNat = sub skey (pkeyLen +. dLen +. pLen) qLen in
 
 
-  bytes_to_bignum (blocks modBits 8ul) n nNat;
-  bytes_to_bignum (blocks pkeyBits 8ul) e eNat;
-  bytes_to_bignum (blocks modBits 8ul) r2 r2Nat;
-  bytes_to_bignum (blocks skeyBits 8ul) d dNat;
-  bytes_to_bignum pTLen p pNat;
-  bytes_to_bignum qTLen q qNat;
+  bytes_to_bignum #(blocks modBits 8ul) n nNat;
+  bytes_to_bignum #(blocks pkeyBits 8ul) e eNat;
+  bytes_to_bignum #(blocks modBits 8ul) r2 r2Nat;
+  bytes_to_bignum #(blocks skeyBits 8ul) d dNat;
+  bytes_to_bignum #pTLen p pNat;
+  bytes_to_bignum #qTLen q qNat;
 
   let pkey = sub skey 0ul pkeyLen in
 
   let rBlindNat = create rBlindLen (u64 0) in
-  bytes_to_bignum rBlindTLen rBlind rBlindNat;
+  bytes_to_bignum #rBlindTLen rBlind rBlindNat;
   let rBlind0 = rBlindNat.(0ul) in
 
   let nTLen = blocks modBits 8ul in
@@ -90,6 +90,10 @@ let ctest pow2_i modBits n pkeyBits e skeyBits d pTLen p qTLen q r2 rBlindTLen r
   let verify_sgnt = rsa_pss_verify pow2_i modBits pkeyBits pkey saltLen sgnt msgLen msg in
   Lib.PrintBuffer.print_compare_display nTLen sgnt sgnt_expected;
   let res = check_sgnt && verify_sgnt in
+  if res then
+    C.String.print (C.String.of_literal "Test succeeded\n")
+  else
+    C.String.print (C.String.of_literal "Test failed\n");
   pop_frame ();
   res
 
