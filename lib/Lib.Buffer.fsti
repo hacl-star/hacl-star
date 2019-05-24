@@ -1079,7 +1079,7 @@ val map_blocks_multi:
   -> Stack unit
     (requires fun h -> h0 == h /\ live h output /\ live h inp /\ eq_or_disjoint inp output)
     (ensures  fun _ _ h1 -> modifies1 output h0 h1 /\
-	as_seq h1 output == Seq.map_blocks_multi (v blocksize) (v nb)
+	as_seq h1 output == Seq.map_blocks_multi (v blocksize) (v nb) (v nb)
 			    (as_seq h0 inp) (spec_f h0))
 
 inline_for_extraction noextract

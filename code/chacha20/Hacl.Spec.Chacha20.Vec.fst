@@ -189,17 +189,16 @@ let transpose (#w:lanes) (st:state w) : state w =
   | 4 -> transpose4 st
   | 8 -> transpose8 st
 
-let store_block0 (#w:lanes) (st:state w) : Tot block1 =
-  let bl = create 64 (u8 0) in
-  repeati (16 / w)
-    (fun i bl -> update_sub bl (i * w * 4) (w * 4) (vec_to_bytes_le st.[i])) bl
-
-let store_blocks_a (i:nat{i <= 16}) = unit
+// let store_block0 (#w:lanes) (st:state w) : Tot block1 =
+//   let bl = create 64 (u8 0) in
+//   repeati (16 / w)
+//     (fun i bl -> update_sub bl (i * w * 4) (w * 4) (vec_to_bytes_le st.[i])) bl
 
 let store_blocks_inner (#w:lanes) (st:state w) (i:nat{i < 16}) (p:unit) : unit & lseq uint8 (w * 4) =
   (), vec_to_bytes_le st.[i]
 
 let store_blocks (#w:lanes) (st:state w) : blocks w =
+  let store_blocks_a (i:nat{i <= 16}) = unit in
   let p,s =
     generate_blocks (w * 4) 16 16
     store_blocks_a
@@ -213,10 +212,10 @@ let load_blocks_inner (#w:lanes) (b:blocks w) (i:nat{i < 16}) =
 let load_blocks (#w:lanes) (b:blocks w) : state w =
   createi 16 (load_blocks_inner #w b)
 
-let chacha20_key_block0 (#w:lanes) (k:key) (n:nonce) : Tot block1 =
-  let st0 = chacha20_init #w k n 0 in
-  let k = chacha20_core 0 st0 in
-  store_block0 k
+// let chacha20_key_block0 (#w:lanes) (k:key) (n:nonce) : Tot block1 =
+//   let st0 = chacha20_init #w k n 0 in
+//   let k = chacha20_core 0 st0 in
+//   store_block0 k
 
 let xor_block (#w:lanes) (k:state w) (b:blocks w) : blocks w  =
   let ib = load_blocks b in
@@ -250,7 +249,7 @@ let chacha20_encrypt_last #w st0 incr len b =
 val chacha20_update:
     #w:lanes
   -> st0: state w
-  -> msg: bytes{length msg / size_block  <= max_size_t}
+  -> msg: bytes{length msg <= max_size_t}
   -> cipher: bytes{length cipher == length msg}
 let chacha20_update #w st0 msg =
   let cipher = msg in
@@ -263,7 +262,7 @@ val chacha20_encrypt_bytes:
   -> k: key
   -> n: nonce
   -> c: counter
-  -> msg: bytes{length msg / size_block <= max_size_t}
+  -> msg: bytes{length msg <= max_size_t}
   -> cipher: bytes{length cipher == length msg}
 
 let chacha20_encrypt_bytes #w key nonce ctr0 msg =
@@ -275,7 +274,7 @@ val chacha20_decrypt_bytes:
   -> k: key
   -> n: nonce
   -> c: counter
-  -> cipher: bytes{length cipher / size_block <= max_size_t}
+  -> cipher: bytes{length cipher <= max_size_t}
   -> msg: bytes{length cipher == length msg}
 
 let chacha20_decrypt_bytes #w key nonce ctr0 cipher =

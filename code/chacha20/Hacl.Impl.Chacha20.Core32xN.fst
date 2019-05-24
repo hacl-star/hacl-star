@@ -50,8 +50,10 @@ val store_state: #w:lanes -> b:lbuffer uint8 (size w *! 64ul) -> st:state w -> S
    		  (ensures (fun h0 _ h1 -> modifies (loc b) h0 h1 /\ as_seq h1 b == Spec.store_blocks (as_seq h0 st)))
 let store_state #w b st =
     let h0 = ST.get() in
+    [@inline_let]
+    let store_blocks_a (i:nat{i <= 16}) = unit in
     fill_blocks h0 (size w *! 4ul) 16ul b
-    (Spec.store_blocks_a)
+    (store_blocks_a)
     (fun h -> fun i -> ())
     (fun i -> LowStar.Monotonic.Buffer.loc_none)
     (fun h -> (Spec.store_blocks_inner (as_seq h0 st)))

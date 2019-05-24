@@ -348,34 +348,51 @@ let map_blocks_a (a:Type) (bs:size_nat) (max:nat) (i:nat{i <= max}) = s:seq a{le
 let map_blocks_f
   (#a:Type0)
   (bs:size_nat{bs > 0})
-  (nb:nat)
-  (inp:seq a{length inp == nb * bs})
-  (f:(i:nat{i < length inp / bs} -> lseq a bs -> lseq a bs))
-  (i:nat{i < nb})
-  (acc:map_blocks_a a bs nb i) : map_blocks_a a bs nb (i + 1)
+  (max:nat)
+  (inp:seq a{length inp == max * bs})
+  (f:(i:nat{i < max} -> lseq a bs -> lseq a bs))
+  (i:nat{i < max})
+  (acc:map_blocks_a a bs max i) : map_blocks_a a bs max (i + 1)
 =
-  Math.Lemmas.multiple_division_lemma nb bs;
+  Math.Lemmas.multiple_division_lemma max bs;
   let block = Seq.slice inp (i*bs) ((i+1)*bs) in
   Seq.append acc (f i block)
 
 val map_blocks_multi:
     #a:Type0
   -> blocksize:size_nat{blocksize > 0}
-  -> n:nat
-  -> inp:seq a{length inp == n * blocksize}
-  -> f:(i:nat{i < length inp / blocksize} -> lseq a blocksize -> lseq a blocksize) ->
-  Tot (out:seq a {length out == length inp})
+  -> max:nat
+  -> n:nat{n <= max}
+  -> inp:seq a{length inp == max * blocksize}
+  -> f:(i:nat{i < max} -> lseq a blocksize -> lseq a blocksize) ->
+  Tot (out:seq a {length out == n * blocksize})
 
 val lemma_map_blocks_multi:
     #a:Type0
   -> bs:size_nat{bs > 0}
-  -> n:nat
-  -> inp:seq a{length inp == n * bs}
-  -> f:(i:nat{i < length inp / bs} -> lseq a bs -> lseq a bs) ->
+  -> max:nat
+  -> n:nat{n <= max}
+  -> inp:seq a{length inp == max * bs}
+  -> f:(i:nat{i < max} -> lseq a bs -> lseq a bs) ->
   Lemma (
-    map_blocks_multi #a bs n inp f ==
-    Lib.LoopCombinators.repeat_gen n (map_blocks_a a bs n)
-      (map_blocks_f #a bs n inp f) Seq.empty)
+    map_blocks_multi #a bs max n inp f ==
+    Lib.LoopCombinators.repeat_gen n (map_blocks_a a bs max)
+      (map_blocks_f #a bs max inp f) Seq.empty)
+
+val index_map_blocks_multi:
+    #a:Type0
+  -> bs:size_nat{bs > 0}
+  -> max:pos
+  -> n:pos{n <= max}
+  -> inp:seq a{length inp == max * bs}
+  -> f:(i:nat{i < max} -> lseq a bs -> lseq a bs)
+  -> i:nat{i < n * bs}
+  -> Lemma (
+    let s1 = map_blocks_multi #a bs max n inp f in
+    FStar.Math.Lemmas.cancel_mul_div n bs;
+    let j: j:nat{j < max} = i / bs in
+    let s2 = f j (Seq.slice inp (j*bs) ((j+1)*bs)) in
+    Seq.index s1 i == Seq.index s2 (i % bs))
 
 val map_blocks:
     #a:Type0
@@ -397,10 +414,37 @@ val lemma_map_blocks:
     let rem = len % bs in
     let blocks = Seq.slice inp 0 (nb * bs) in
     let last = Seq.slice inp (nb * bs) len in
-    let acc = Lib.LoopCombinators.repeat_gen nb (map_blocks_a a bs nb)
-      (map_blocks_f #a bs nb blocks f) Seq.empty in
+    let acc = map_blocks_multi #a bs nb nb blocks f in
     let res = if rem > 0 then Seq.append acc (g nb rem last) else acc in
     map_blocks #a bs inp f g == res)
+
+#set-options "--z3rlimit 100"
+
+val index_map_blocks:
+    #a:Type0
+  -> bs:size_nat{bs > 0}
+  -> inp:seq a
+  -> f:(i:nat{i < length inp / bs} -> lseq a bs -> lseq a bs)
+  -> g:(i:nat{i == length inp / bs} -> len:size_nat{len < bs} -> s:lseq a len -> lseq a len)
+  -> i:nat{i < length inp}
+  -> Lemma (
+    let len = length inp in
+    let nb = len / bs in
+    let rem = len % bs in
+    let blocks = Seq.slice inp 0 (nb * bs) in
+    let last = Seq.slice inp (nb * bs) len in
+
+    let s1 = map_blocks #a bs inp f g in
+    if i < nb * bs then begin
+      FStar.Math.Lemmas.cancel_mul_div nb bs;
+      let j: j:nat{j < nb} = i / bs in
+      let s2 = f j (Seq.slice inp (j*bs) ((j+1)*bs)) in
+      Seq.index s1 i == Seq.index s2 (i % bs) end
+    else begin
+      let s2 : lseq a rem = g nb rem last in
+      FStar.Math.Lemmas.modulo_lemma (i - nb * bs) bs;
+      FStar.Math.Lemmas.lemma_mod_sub i bs nb;
+      Seq.index s1 i == Seq.index s2 (i % bs) end)
 
 val eq_generate_blocks0:
     #t:Type0

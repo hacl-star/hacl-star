@@ -182,7 +182,7 @@ let repeati_blocks_f #a #b bs inp f nb i acc =
   assert ((i+1) * bs <= nb * bs);
   let block = seq_sub inp (i * bs) bs in
   f i block acc
-#pop-options  
+#pop-options
 
 let repeati_blocks #a #b bs inp f g init =
   let len = length inp in
@@ -221,11 +221,38 @@ let generate_blocks #t len max n a f acc0 =
   let a0  = (acc0, (Seq.empty <: s:seq t{length s == 0 * len}))  in
   repeat_gen n (generate_blocks_a t len max a) (generate_blocks_inner t len max a f) a0
 
-let map_blocks_multi #a bs nb inp f =
-  repeat_gen nb (map_blocks_a a bs nb)
-    (map_blocks_f #a bs nb inp f) Seq.empty
+let map_blocks_multi #a bs max nb inp f =
+  repeat_gen nb (map_blocks_a a bs max)
+    (map_blocks_f #a bs max inp f) Seq.empty
 
-let lemma_map_blocks_multi #a bs nb inp f = ()
+let lemma_map_blocks_multi #a bs max nb inp f = ()
+
+private
+val mod_prop: n:pos -> a:nat -> b:nat{a * n <= b /\ b < (a + 1) * n} ->
+  Lemma (b - a * n == b % n)
+let mod_prop n a b =
+  FStar.Math.Lemmas.modulo_lemma (b - a * n) n;
+  FStar.Math.Lemmas.lemma_mod_sub b n a
+
+#reset-options "--z3rlimit 300 --max_fuel 2 --max_ifuel 2"
+let rec index_map_blocks_multi #a bs max n inp f i =
+  lemma_map_blocks_multi #a bs max n inp f;
+  let map_blocks_a = map_blocks_a a bs max in
+  let map_blocks_f = map_blocks_f #a bs max inp f in
+  let acc0 : seq a = Seq.empty in
+  let s1 = repeat_gen n map_blocks_a map_blocks_f acc0 in
+  unfold_repeat_gen n map_blocks_a map_blocks_f acc0 (n-1);
+  let s = repeat_gen (n-1) map_blocks_a map_blocks_f acc0 in
+  assert (s1 == map_blocks_f (n-1) s);
+  let s' = f (n-1) (Seq.slice inp ((n-1)*bs) (n*bs)) in
+  assert (s1 == Seq.append s s');
+  if i < (n-1)*bs then begin
+    Seq.lemma_index_app1 s s' i;
+    index_map_blocks_multi #a bs max (n-1) inp f i end
+  else begin
+    Seq.lemma_index_app2 s s' i;
+    mod_prop bs (n-1) i
+  end
 
 let map_blocks #a blocksize inp f g =
   let len = length inp in
@@ -233,12 +260,43 @@ let map_blocks #a blocksize inp f g =
   let rem = len % blocksize in
   let blocks = Seq.slice inp 0 (nb * blocksize) in
   let last = Seq.slice inp (nb * blocksize) len in
-  let bs = map_blocks_multi #a blocksize nb blocks f in
+  let bs = map_blocks_multi #a blocksize nb nb blocks f in
   if (rem > 0) then
     Seq.append bs (g nb rem last)
   else bs
 
 let lemma_map_blocks #a blocksize inp f g = ()
+
+let index_map_blocks #a bs inp f g i =
+  let len = length inp in
+  let nb = len / bs in
+  let rem = len % bs in
+  let blocks = Seq.slice inp 0 (nb * bs) in
+  let last = Seq.slice inp (nb * bs) len in
+  let s1 = map_blocks #a bs inp f g in
+
+  let s : s:seq a{length s == nb * bs} =
+    map_blocks_multi #a bs nb nb blocks f in
+
+  if rem > 0 then begin
+    let s' = g nb rem last in
+    assert (s1 == Seq.append s s');
+    if i < nb * bs then begin
+      Seq.lemma_index_app1 s s' i;
+      assert (Seq.index s1 i == Seq.index s i);
+      index_map_blocks_multi #a bs nb nb blocks f i;
+      FStar.Math.Lemmas.cancel_mul_div nb bs;
+      let j: j:nat{j < nb} = i / bs in
+      let s2 = f j (Seq.slice blocks (j*bs) ((j+1)*bs)) in
+      assert (Seq.index s i == Seq.index s2 (i % bs)) end
+    else begin
+      Seq.lemma_index_app2 s s' i;
+      assert (Seq.index s1 i == Seq.index s' (i - nb * bs));
+      mod_prop bs nb i;
+      assert (Seq.index s1 i == Seq.index s' (i % bs));
+      let s2 = g nb rem last in
+      assert (Seq.index s1 i == Seq.index s2 (i % bs)) end end
+  else index_map_blocks_multi #a bs nb nb blocks f i
 
 let eq_generate_blocks0 #t len n a f acc0 =
   let a0  = (acc0, (Seq.empty <: s:seq t{length s == 0 * len}))  in
@@ -253,13 +311,6 @@ let unfold_generate_blocks #t len n a f acc0 i =
 	  repeat_gen (i+1) (generate_blocks_a t len n a) (generate_blocks_inner t len n a f) a0);
   unfold_repeat_gen (i+1) (generate_blocks_a t len n a) (generate_blocks_inner t len n a f) a0 i;
   ()
-
-private
-val mod_prop: n:pos -> a:nat -> b:nat{a * n <= b /\ b < (a + 1) * n} ->
-  Lemma (b - a * n == b % n)
-let mod_prop n a b =
-  FStar.Math.Lemmas.modulo_lemma (b - a * n) n;
-  FStar.Math.Lemmas.lemma_mod_sub b n a
 
 #push-options "--z3rlimit 100"
 #push-options "--max_ifuel 1"
