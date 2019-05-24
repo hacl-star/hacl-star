@@ -175,13 +175,19 @@ let sanity_check_2 =
       (make_instr ins_Add64 (OReg rRax) (OConst 299))))
 
 /// First, we must define what it means for two states to be
-/// equivalent. We currently assume that we can _completely_ ignore
-/// the flags. This is a terrible idea, and should be fixed ASAP.
+/// equivalent. Here, we basically say they must be exactly the same.
 ///
-/// WARNING UNSOUND TODO FIXME
+/// TODO: We should figure out a way to handle flags better. Currently
+/// any two instructions that havoc flags cannot be exchanged since
+/// they will not lead to equiv states.
 
 let equiv_states (s1 s2 : machine_state) : GTot Type0 =
-  admit ()
+  (s1.ms_ok == s2.ms_ok) /\
+  (s1.ms_regs == s2.ms_regs) /\
+  (s1.ms_xmms == s2.ms_xmms) /\
+  (s1.ms_flags == s2.ms_flags) /\
+  (s1.ms_mem == s2.ms_mem) /\
+  (s1.ms_stack == s2.ms_stack)
 
 private abstract
 let sanity_check_equiv_states (s1 s2 s3 : machine_state) :
@@ -189,8 +195,7 @@ let sanity_check_equiv_states (s1 s2 s3 : machine_state) :
     (ensures (
         (equiv_states s1 s1) /\
         (equiv_states s1 s2 ==> equiv_states s2 s1) /\
-        (equiv_states s1 s2 /\ equiv_states s2 s3 ==> equiv_states s1 s3))) =
-  admit ()
+        (equiv_states s1 s2 /\ equiv_states s2 s3 ==> equiv_states s1 s3))) = ()
 
 let lemma_eval_code_equiv_states (c : code) (fuel:nat) (s1 s2 : machine_state) :
   Lemma
@@ -235,16 +240,17 @@ let lemma_code_exchange (c1 c2 : code) (fuel:nat) (s1 s2 : machine_state) :
     (requires (
         !!(code_exchange_allowed c1 c2) /\
         (equiv_states s1 s2) /\
-        (Some? (machine_eval_code c1 fuel s1))))
+        (Some? (machine_eval_codes [c1; c2] fuel s1))))
     (ensures (
-        (Some? (machine_eval_code c2 fuel s2)) /\
+        (Some? (machine_eval_codes [c2; c1] fuel s2)) /\
         (let Some s1', Some s2' =
-           machine_eval_code c1 fuel s1,
-           machine_eval_code c2 fuel s2 in
+           machine_eval_codes [c1; c2] fuel s1,
+           machine_eval_codes [c2; c1] fuel s2 in
          equiv_states s1' s2'))) =
   match c1, c2 with
   | Ins i1, Ins i2 ->
-    lemma_instruction_exchange i1 i2 s1 s2
+    lemma_instruction_exchange i1 i2 s1 s2;
+    admit ()
   | _ -> ()
 
 /// Given that we can perform simple swaps between [code]s, we can
@@ -313,10 +319,7 @@ let rec lemma_bubble_to_top (cs : codes) (i:nat{i < L.length cs}) (fuel:nat) (s 
         (equiv_states (Some?.v s_final') s_1))) =
   let s_final' = machine_eval_codes cs fuel s in
   match i with
-  | 0 ->
-    (* XXX: This should not be needed once we have a proper definition
-       of [equiv_states]; proof should just collapse into a [()] *)
-    sanity_check_equiv_states s_1 s_1 s_1
+  | 0 -> ()
   | _ ->
     let tlcs = L.tl cs in
     let Ok tlxs = bubble_to_top (L.tl cs) (i-1) in
@@ -324,8 +327,8 @@ let rec lemma_bubble_to_top (cs : codes) (i:nat{i < L.length cs}) (fuel:nat) (s 
     let Some s_shift = machine_eval_code (L.hd xs) fuel s in
     let Some s_shift_0 = machine_eval_code x fuel s_shift in
     sanity_check_equiv_states s s s;
-    lemma_code_exchange x (L.hd xs) fuel s s;
     admit ();
+    lemma_code_exchange x (L.hd xs) fuel s s;
     let Some s_shift_1 = machine_eval_codes tlxs fuel s_shift_0 in
     admit ();
     admit ();
