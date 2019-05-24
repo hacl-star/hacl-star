@@ -1,4 +1,4 @@
-module Vale.InstructionReorder
+module Vale.Transformers.InstructionReorder
 
 /// Open all the relevant modules from the x64 semantics.
 
@@ -14,7 +14,7 @@ open Vale.X64.InsLemmas // this one is from [code]; is that ok?; we use it prima
 /// Open the PossiblyMonad so that we can keep track of failure cases
 /// for easier debugging.
 
-open Vale.PossiblyMonad
+open Vale.Transformers.PossiblyMonad
 
 /// Finally some convenience module renamings
 
