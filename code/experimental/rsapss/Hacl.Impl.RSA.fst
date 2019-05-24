@@ -218,7 +218,7 @@ let rsa_sign pow2_i modBits eBits dBits pLen qLen skey rBlind sLen salt msgLen m
   let bn1_start = n2Len +. pqLen +. pLen +. qLen +. 1ul in
   let bn1 = sub tmp bn1_start 1ul in
 
-  text_to_nat emLen em m;
+  bytes_to_bignum emLen em m;
   bn1.(0ul) <- u64 1;
   let _ = bn_sub pLen p 1ul bn1 p1 in // p1 = p - 1
   let _ = bn_sub qLen q 1ul bn1 q1 in // q1 = q - 1
@@ -229,7 +229,7 @@ let rsa_sign pow2_i modBits eBits dBits pLen qLen skey rBlind sLen salt msgLen m
   let _ = bn_add dLen' d' dLen d d' in //d' = d' + d
   assume (v nLen = v (blocks modBits 64ul));
   mod_exp pow2_i modBits nLen n r2 m (dLen' *. 64ul) d' s;
-  nat_to_text k s sgnt;
+  bignum_to_bytes k s sgnt;
   pop_frame ()
 
 inline_for_extraction noextract
@@ -266,12 +266,12 @@ let rsa_verify pow2_i modBits eBits pkey sLen sgnt msgLen msg =
 
   let m = sub tmp 0ul nLen in
   let s = sub tmp nLen nLen in
-  text_to_nat k sgnt s;
+  bytes_to_bignum k sgnt s;
 
   let res =
     if (bn_is_less nLen s nLen n) then begin
       mod_exp pow2_i modBits nLen n r2 s eBits e m;
-      nat_to_text emLen m em;
+      bignum_to_bytes emLen m em;
       pss_verify sLen msgLen msg emBits em end
     else false in
   pop_frame ();

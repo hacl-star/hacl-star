@@ -9,14 +9,20 @@ open Lib.IntTypes
 open Lib.Buffer
 
 open Hacl.Impl.HE.GM
+open Hacl.Impl.Bignum.Core
+open Hacl.Impl.Bignum.Convert
 open Hacl.Impl.Bignum.Comparison
 open Hacl.Impl.Bignum.Addition
 
+module B = FStar.Bytes
+
 
 inline_for_extraction unfold noextract
+val print_str: string -> St unit
 let print_str x = C.String.print (C.String.of_literal x)
 
 inline_for_extraction unfold noextract
+val print_strln: string -> St unit
 let print_strln x = print_str (x ^ "\n")
 
 inline_for_extraction unfold noextract
@@ -35,10 +41,8 @@ let toBuffer size l =
 
 val test1: unit -> St unit
 let test1 _ =
-  let list1 =
-    toBuffer 16ul (normalize_term (List.Tot.map u64
-      [0xa5; 0x6e; 0x4a; 0x0e; 0x70; 0x10; 0x17; 0x58; 0x9a; 0x51; 0x87; 0xdc; 0x7e; 0xa8; 0x41; 0xd1]))
-      in
+  admit();
+  let list1 = nat_to_bignum_exact 123456781234567812345678 in
 
   let list2 =
     toBuffer 16ul (normalize_term (List.Tot.map u64
