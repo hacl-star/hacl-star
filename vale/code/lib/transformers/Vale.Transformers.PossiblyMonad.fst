@@ -1,4 +1,4 @@
-module Vale.PossiblyMonad
+module Vale.Transformers.PossiblyMonad
 
 /// Similar to the [maybe] monad in Haskell (which is like the
 /// [option] type in F* and OCaml), but instead, we also store the
