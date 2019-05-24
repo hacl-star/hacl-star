@@ -222,6 +222,7 @@ let lemma_code_exchange (c1 c2 : code) (fuel:nat) (s1 s2 : machine_state) :
   Lemma
     (requires (
         !!(code_exchange_allowed c1 c2) /\
+        (equiv_states s1 s2) /\
         (Some? (machine_eval_code c1 fuel s1))))
     (ensures (
         (Some? (machine_eval_code c2 fuel s2)) /\
@@ -229,7 +230,10 @@ let lemma_code_exchange (c1 c2 : code) (fuel:nat) (s1 s2 : machine_state) :
            machine_eval_code c1 fuel s1,
            machine_eval_code c2 fuel s2 in
          equiv_states s1' s2'))) =
-  admit ()
+  match c1, c2 with
+  | Ins i1, Ins i2 ->
+    lemma_instruction_exchange i1 i2 s1 s2
+  | _ -> ()
 
 /// Given that we can perform simple swaps between [code]s, we can
 /// define a relation that tells us if some [codes] can be transformed
