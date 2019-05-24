@@ -897,7 +897,7 @@ let untainted_eval_ins (ins:ins) : st unit =
     // Actually modify the stack pointer
     update_rsp new_rsp;;
     // Store the element at the new stack pointer
-    update_operand_preserve_flags (OStack (MConst new_rsp, t)) new_src
+    update_operand_preserve_flags (OStack (MReg rRsp (-8), t)) new_src
 
   | BC.Pop dst t ->
     let stack_op = OStack (MReg rRsp 0, t) in
