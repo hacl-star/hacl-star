@@ -192,6 +192,19 @@ let sanity_check_equiv_states (s1 s2 s3 : machine_state) :
         (equiv_states s1 s2 /\ equiv_states s2 s3 ==> equiv_states s1 s3))) =
   admit ()
 
+let lemma_eval_code_equiv_states (c : code) (fuel:nat) (s1 s2 : machine_state) :
+  Lemma
+    (requires (equiv_states s1 s2))
+    (ensures (
+        let s1'', s2'' =
+          machine_eval_code c fuel s1,
+          machine_eval_code c fuel s2 in
+        (Some? s1'' = Some? s2'') /\
+        (Some? s1'' ==> (
+            (let Some s1', Some s2' = s1'', s2'' in
+             equiv_states s1' s2'))))) =
+  admit ()
+
 /// If an exchange is allowed between two instructions based off of
 /// their read/write sets, then both orderings of the two instructions
 /// behave exactly the same, as per the previously defined
@@ -289,7 +302,37 @@ let rec reordering_allowed (c1 c2 : codes) : pbool =
 /// amongst each other, then they behave identically as per the
 /// [equiv_states] relation.
 
-let lemma_reordering (c1 c2 : codes) (fuel:nat) (s1 s2 : machine_state) :
+let rec lemma_bubble_to_top (cs : codes) (i:nat{i < L.length cs}) (fuel:nat) (s : machine_state)
+    (x : _{x == L.index cs i}) (xs : _{Ok xs == bubble_to_top cs i})
+    (s_0 : _{Some s_0 == machine_eval_code x fuel s})
+    (s_1 : _{Some s_1 == machine_eval_codes xs fuel s_0}) :
+  Lemma
+    (ensures (
+        let s_final' = machine_eval_codes cs fuel s in
+        (Some? s_final') /\
+        (equiv_states (Some?.v s_final') s_1))) =
+  let s_final' = machine_eval_codes cs fuel s in
+  match i with
+  | 0 ->
+    (* XXX: This should not be needed once we have a proper definition
+       of [equiv_states]; proof should just collapse into a [()] *)
+    sanity_check_equiv_states s_1 s_1 s_1
+  | _ ->
+    let tlcs = L.tl cs in
+    let Ok tlxs = bubble_to_top (L.tl cs) (i-1) in
+    assert_norm (tlxs == L.tl xs);
+    let Some s_shift = machine_eval_code (L.hd xs) fuel s in
+    let Some s_shift_0 = machine_eval_code x fuel s_shift in
+    sanity_check_equiv_states s s s;
+    lemma_code_exchange x (L.hd xs) fuel s s;
+    admit ();
+    let Some s_shift_1 = machine_eval_codes tlxs fuel s_shift_0 in
+    admit ();
+    admit ();
+    lemma_bubble_to_top tlcs (i-1) fuel s x tlxs s_0 (Some?.v (machine_eval_codes tlxs fuel s_0));
+    admit ()
+
+let rec lemma_reordering (c1 c2 : codes) (fuel:nat) (s1 s2 : machine_state) :
   Lemma
     (requires (
         !!(reordering_allowed c1 c2) /\
@@ -301,4 +344,13 @@ let lemma_reordering (c1 c2 : codes) (fuel:nat) (s1 s2 : machine_state) :
            machine_eval_codes c1 fuel s1,
            machine_eval_codes c2 fuel s2 in
          equiv_states s1' s2'))) =
-  admit ()
+  match c1 with
+  | [] -> ()
+  | h1 :: t1 ->
+    let Ok i = find_code h1 c2 in
+    let Ok t2 = bubble_to_top c2 i in
+    lemma_eval_code_equiv_states h1 fuel s1 s2;
+    lemma_reordering t1 t2 fuel (Some?.v (machine_eval_code h1 fuel s1)) (Some?.v (machine_eval_code h1 fuel s2));
+    let Some s_0 = machine_eval_code h1 fuel s2 in
+    let Some s_1 = machine_eval_codes t2 fuel s_0 in
+    lemma_bubble_to_top c2 i fuel s2 h1 t2 s_0 s_1
