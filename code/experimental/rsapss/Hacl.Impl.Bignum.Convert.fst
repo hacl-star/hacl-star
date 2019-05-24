@@ -97,69 +97,70 @@ let bignum_to_bytes len input res = admit();
   copy res tmp1;
   pop_frame ()
 
-// This version does not work, because of the internal rec I think.
-//
-//inline_for_extraction noextract
-//val nat_to_list64: nat -> list pub_uint64
-//let nat_to_list64 x =
-//  [@inline_let]
-//  let rec go (y: nat) =
-//    if y <= maxint U64
-//    then [uint y]
-//    else uint (y % 64) :: go (y / 64)kin
-//  go x
 
+#reset-options
 
+/// Converts nat to b64 base, lsb first (little endian)
 inline_for_extraction noextract
-val nat_to_list64: nat -> list pub_uint64
-let rec nat_to_list64 y = admit();
+val nat_to_list64: y:nat -> Tot (l:list pub_uint64{List.Tot.length l > 0}) (decreases y)
+let rec nat_to_list64 y =
     if y <= maxint U64
-    then [uint y]
-    else uint (y % 64) :: nat_to_list64 (y / 64)
+    then (let l = (uint y)::[] in assert(List.Tot.length l = 1); l)
+    else uint (y % (maxint U64)) :: nat_to_list64 (y / (maxint U64))
+
+/// Same as nat_to_list64, but converts to the secure 64 ints.
+inline_for_extraction noextract
+val nat_to_list64_sec:
+       x:nat
+    -> l:list uint64{ List.Tot.length l == List.Tot.length (nat_to_list64 x) }
+let nat_to_list64_sec x = normalize_term (List.Tot.map secret (nat_to_list64 x))
+
+/// List64 to nat conversion.
+inline_for_extraction noextract
+val list64_to_nat: l:list pub_uint64{ List.Tot.length l > 0 } -> Tot nat
+let rec list64_to_nat l = match l with
+  | [x] -> v x
+  | x::tl -> v x + list64_to_nat tl * maxint U64
+
+/// Relatively "small" nats, which fit into 32 GB
+let issnat (n:nat) =
+    List.Tot.length (nat_to_list64_sec n) <= max_size_t /\
+    normalize (List.Tot.length (nat_to_list64_sec n) <= max_size_t)
+type snat = n:nat{issnat n}
 
 inline_for_extraction noextract
-val nat_to_list64_sec: nat -> list uint64
-let nat_to_list64_sec x = List.Tot.map secret (nat_to_list64 x)
+val nat_bytes_num: x:snat -> r:size_t { v r = List.Tot.length (nat_to_list64_sec x) }
+let nat_bytes_num x = normalize_term (size (List.Tot.length (nat_to_list64_sec x)))
 
-inline_for_extraction noextract
-val nat_bytes_num: nat -> size_t
-let nat_bytes_num x = admit(); normalize_term (size (List.Tot.length (nat_to_list64_sec x)))
+noextract
+let example_snat:snat = assert_norm(issnat 12345678901234567890); 12345678901234567890
 
+#reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0"
 
+/// Converts nat to the bignum, for that creates a bignum of exact length required.
 inline_for_extraction noextract
 val nat_to_bignum_exact:
-     input:nat
+     input:snat
   -> StackInline (lbignum (nat_bytes_num input))
     (requires fun _ -> true)
-    (ensures  fun h0 b h1 -> modifies (loc b) h0 h1)
-let nat_to_bignum_exact input =
-  [@inline_let]
-  let l: list uint64 = normalize_term (nat_to_list64_sec input) in
-  assume (List.Tot.length l <= max_size_t);
-  assume (normalize (List.Tot.length l <= max_size_t));
-  [@inline_let]
-  let len: size_t = nat_bytes_num input in
-  admit();
-  createL l
+    (ensures  fun h0 b h1 ->
+     live h1 b /\
+     stack_allocated b h0 h1 (Seq.of_list (nat_to_list64_sec input)))
+let nat_to_bignum_exact input = createL (nat_to_list64_sec input)
 
-
+/// Converts nat to the bignum, but can allocate bigger buffer for the bignum returned.
 inline_for_extraction noextract
 val nat_to_bignum:
      #k:size_t{v k > 0}
-  -> input:nat { v (nat_bytes_num input) <= v k }
+  -> input:snat { v (nat_bytes_num input) <= v k }
   -> StackInline (lbignum k)
     (requires fun _ -> true)
-    (ensures  fun h0 b h1 -> modifies (loc b) h0 h1)
+    (ensures  fun h0 b h1 -> live h1 b)
 let nat_to_bignum #k input =
-  admit();
-  push_frame ();
-
   let len: size_t = nat_bytes_num input in
   let created: lbignum len = nat_to_bignum_exact input in
   let res: lbignum k = create k (u64 0) in
   let res_sub: lbignum len = sub res 0ul len in
 
-  let h0 = ST.get () in
   copy res_sub created;
-  pop_frame ();
   res
