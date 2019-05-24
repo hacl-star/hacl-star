@@ -211,12 +211,76 @@ let lemma_instruction_exchange (i1 i2 : ins) (s1 s2 : machine_state) :
   admit ()
 
 /// Given that we can perform simple swaps between instructions, we
-/// can define a relation that tells us if a sequence of instructions
-/// can be transformed into another using only swaps allowed via the
-/// [ins_exchange_allowed] relation.
+/// can do swaps between [code]s.
 
-let reordering_allowed (c1 c2 : codes) : pbool =
+let code_exchange_allowed (c1 c2:code) : pbool =
+  match c1, c2 with
+  | Ins i1, Ins i2 -> ins_exchange_allowed i1 i2
+  | _ -> ffalse "non instruction swaps conservatively disallowed"
+
+let lemma_code_exchange (c1 c2 : code) (fuel:nat) (s1 s2 : machine_state) :
+  Lemma
+    (requires (
+        !!(code_exchange_allowed c1 c2) /\
+        (Some? (machine_eval_code c1 fuel s1))))
+    (ensures (
+        (Some? (machine_eval_code c2 fuel s2)) /\
+        (let Some s1', Some s2' =
+           machine_eval_code c1 fuel s1,
+           machine_eval_code c2 fuel s2 in
+         equiv_states s1' s2'))) =
   admit ()
+
+/// Given that we can perform simple swaps between [code]s, we can
+/// define a relation that tells us if some [codes] can be transformed
+/// into another using only allowed swaps.
+
+(* WARNING UNSOUND We need to figure out a way to check for equality
+   between [code]s *)
+assume val eq_code (c1 c2 : code) : (b:bool{b <==> c1 == c2})
+
+let rec find_code (c1:code) (cs2:codes) : possibly (i:nat{i < L.length cs2 /\ c1 == L.index cs2 i}) =
+  match cs2 with
+  | [] -> Err ("Not found: " ^ fst (print_code c1 0 gcc))
+  | h2 :: t2 ->
+    if eq_code c1 h2 then (
+      return 0
+    ) else (
+      match find_code c1 t2 with
+      | Err reason -> Err reason
+      | Ok i ->
+        return (i+1)
+    )
+
+let rec bubble_to_top (cs:codes) (i:nat{i < L.length cs}) : possibly (cs':codes{
+    let a, b, c = L.split3 cs i in
+    cs' == L.append a c
+  }) =
+  match cs with
+  | [_] -> return []
+  | h :: t ->
+    let x = L.index cs i in
+    if i = 0 then (
+      return t
+    ) else (
+      match bubble_to_top t (i - 1) with
+      | Err reason -> Err reason
+      | Ok res ->
+        match code_exchange_allowed x h with
+        | Err reason -> Err reason
+        | Ok () ->
+          return (h :: res)
+    )
+
+let rec reordering_allowed (c1 c2 : codes) : pbool =
+  match c1, c2 with
+  | [], [] -> ttrue
+  | [], _ | _, [] -> ffalse "disagreeing lengths of codes"
+  | h1 :: t1, _ ->
+    i <-- find_code h1 c2;
+    t2 <-- bubble_to_top c2 i;
+    (* TODO: Also check _inside_ blocks/ifelse/etc rather than just at the highest level *)
+    reordering_allowed t1 t2
 
 /// If there are two sequences of instructions that can be transformed
 /// amongst each other, then they behave identically as per the
