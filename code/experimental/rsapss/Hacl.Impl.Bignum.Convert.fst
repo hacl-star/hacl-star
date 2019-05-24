@@ -20,14 +20,14 @@ module ST = FStar.HyperStack.ST
 
 inline_for_extraction noextract
 val bytes_to_bignum_:
-    len:size_t
+     #len:size_t
+  -> #resLen:size_t{v len = 8 * v resLen}
   -> input:lbuffer8 len
-  -> resLen:size_t{v len = 8 * v resLen}
   -> res:lbignum resLen
   -> Stack unit
     (requires fun h -> live h input /\ live h res /\ disjoint res input)
     (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1)
-let bytes_to_bignum_ len input resLen res =
+let bytes_to_bignum_ #len #resLen input res =
   let h0 = ST.get () in
   let inv h1 i = modifies (loc res) h0 h1 in
   Lib.Loops.for 0ul resLen inv
@@ -36,14 +36,14 @@ let bytes_to_bignum_ len input resLen res =
   )
 
 val bytes_to_bignum:
-    len:size_t{v len > 0}
+     #len:size_t{v len > 0}
   -> input:lbuffer8 len
   -> res:lbignum (blocks len 8ul){8 * v (blocks len 8ul) < max_size_t}
   -> Stack unit
     (requires fun h -> live h input /\ live h res /\ disjoint res input)
     (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1)
 [@"c_inline"]
-let bytes_to_bignum len input res =
+let bytes_to_bignum #len input res =
   push_frame ();
   let num_words = blocks len 8ul in
   let tmpLen = 8ul *. num_words in
@@ -54,19 +54,19 @@ let bytes_to_bignum len input res =
   let tmpLen1 = tmpLen -. ind in
   let tmp1 = sub tmp ind tmpLen1 in
   copy tmp1 input;
-  bytes_to_bignum_ tmpLen tmp num_words res;
+  bytes_to_bignum_ tmp res;
   pop_frame ()
 
 inline_for_extraction noextract
 val bignum_to_bytes_:
-    len:size_t
+     #len:size_t
+  -> #resLen:size_t{v resLen = 8 * v len}
   -> input:lbignum len
-  -> resLen:size_t{v resLen = 8 * v len}
   -> res:lbuffer8 resLen
   -> Stack unit
     (requires fun h -> live h input /\ live h res /\ disjoint res input)
     (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1)
-let bignum_to_bytes_ len input resLen res =
+let bignum_to_bytes_ #len #resLen input res =
   let h0 = ST.get () in
   let inv h1 i = modifies (loc res) h0 h1 in
   Lib.Loops.for 0ul len inv
@@ -76,14 +76,14 @@ let bignum_to_bytes_ len input resLen res =
   )
 
 val bignum_to_bytes:
-    len:size_t{v len > 0}
+     #len:size_t{v len > 0}
   -> input:lbignum (blocks len 8ul){8 * v (blocks len 8ul) < max_size_t}
   -> res:lbuffer8 len
   -> Stack unit
     (requires fun h -> live h input /\ live h res /\ disjoint res input)
     (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1)
 [@"c_inline"]
-let bignum_to_bytes len input res = admit();
+let bignum_to_bytes #len input res = admit();
   push_frame ();
   let num_words = blocks len 8ul in
   let tmpLen = 8ul *. num_words in
@@ -91,7 +91,7 @@ let bignum_to_bytes len input res = admit();
   let ind = if m =. 0ul then 0ul else 8ul -. m in
 
   let tmp = create tmpLen (u8 0) in
-  bignum_to_bytes_ num_words input tmpLen tmp;
+  bignum_to_bytes_ input tmp;
   let tmpLen1 = tmpLen -. ind in
   let tmp1 = sub tmp ind tmpLen1 in
   copy res tmp1;
@@ -105,7 +105,7 @@ inline_for_extraction noextract
 val nat_to_list64: y:nat -> Tot (l:list pub_uint64{List.Tot.length l > 0}) (decreases y)
 let rec nat_to_list64 y =
     if y <= maxint U64
-    then (let l = (uint y)::[] in assert(List.Tot.length l = 1); l)
+    then [uint y]
     else uint (y % (maxint U64)) :: nat_to_list64 (y / (maxint U64))
 
 /// Same as nat_to_list64, but converts to the secure 64 ints.

@@ -43,9 +43,9 @@ let subborrow_u64 carry a b =
 
 inline_for_extraction noextract
 val bn_sub_:
-    aLen:size_t
+     #aLen:size_t
+  -> #bLen:size_t
   -> a:lbuffer uint64 aLen
-  -> bLen:size_t
   -> b:lbuffer uint64 bLen
   -> carry:lbuffer uint64 1ul
   -> res:lbuffer uint64 aLen
@@ -54,7 +54,7 @@ val bn_sub_:
       live h a /\ live h b /\ live h res /\ live h carry)
     (ensures  fun h0 _ h1 ->
       modifies (loc_union (loc carry) (loc res)) h0 h1)
-let bn_sub_ aLen a bLen b carry res =
+let bn_sub_ #aLen #bLen a b carry res =
   let h0 = ST.get () in
   let inv h1 i = modifies (loc_union (loc carry) (loc res)) h0 h1 in
   Lib.Loops.for 0ul aLen inv
@@ -67,35 +67,35 @@ let bn_sub_ aLen a bLen b carry res =
   )
 
 val bn_sub:
-    aLen:size_t
+     #aLen:size_t
+  -> #bLen:size_t{v bLen <= v aLen}
   -> a:lbuffer uint64 aLen
-  -> bLen:size_t{v bLen <= v aLen}
   -> b:lbuffer uint64 bLen
   -> res:lbuffer uint64 aLen
   -> Stack uint64
     (requires fun h -> live h a /\ live h b /\ live h res)
     (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1)
 [@"c_inline"]
-let bn_sub aLen a bLen b res =
+let bn_sub #aLen #bLen a b res =
   push_frame ();
   let carry = create 1ul (u64 0) in
-  bn_sub_ aLen a bLen b carry res;
+  bn_sub_ a b carry res;
   let res = carry.(0ul) in
   pop_frame ();
   res
 
 inline_for_extraction noextract
 val bn_add_:
-    aLen:size_t
+     #aLen:size_t
+  -> #bLen:size_t
   -> a:lbuffer uint64 aLen
-  -> bLen:size_t
   -> b:lbuffer uint64 bLen
   -> carry:lbuffer uint64 1ul
   -> res:lbuffer uint64 aLen
   -> Stack unit
     (requires fun h -> live h a /\ live h b /\ live h res /\ live h carry)
     (ensures  fun h0 _ h1 -> modifies (loc_union (loc carry) (loc res)) h0 h1)
-let bn_add_ aLen a bLen b carry res =
+let bn_add_ #aLen #bLen a b carry res =
   let h0 = ST.get () in
   let inv h1 i = modifies (loc_union (loc carry) (loc res)) h0 h1 in
   Lib.Loops.for 0ul aLen inv
@@ -108,36 +108,36 @@ let bn_add_ aLen a bLen b carry res =
   )
 
 val bn_add:
-    aLen:size_t
+     #aLen:size_t
+  -> #bLen:size_t{v bLen <= v aLen}
   -> a:lbuffer uint64 aLen
-  -> bLen:size_t{v bLen <= v aLen}
   -> b:lbuffer uint64 bLen
   -> res:lbuffer uint64 aLen
   -> Stack uint64
     (requires fun h -> live h a /\ live h b /\ live h res)
     (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1)
 [@"c_inline"]
-let bn_add aLen a bLen b res =
+let bn_add #aLen #bLen a b res =
   push_frame ();
   let carry = create 1ul (u64 0) in
-  bn_add_ aLen a bLen b carry res;
+  bn_add_ a b carry res;
   let res = carry.(0ul) in
   pop_frame ();
   res
 
 val bn_add_full:
-    aLen:size_t {v aLen + 1 <= maxint U32}
+     #aLen:size_t {v aLen + 1 <= maxint U32}
+  -> #bLen:size_t{v bLen <= v aLen}
   -> a:lbuffer uint64 aLen
-  -> bLen:size_t{v bLen <= v aLen}
   -> b:lbuffer uint64 bLen
   -> res:lbuffer uint64 (add aLen 1ul)
   -> Stack unit
     (requires fun h -> live h a /\ live h b /\ live h res)
     (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1)
 [@"c_inline"]
-let bn_add_full aLen a bLen b res =
+let bn_add_full #aLen #bLen a b res =
   push_frame ();
   let carry = sub res aLen 1ul in
   let res_prefix = sub res 0ul aLen in
-  bn_add_ aLen a bLen b carry res_prefix;
+  bn_add_ a b carry res_prefix;
   pop_frame ()

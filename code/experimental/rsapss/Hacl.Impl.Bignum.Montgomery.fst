@@ -73,7 +73,7 @@ val mont_reduction_f:
 let mont_reduction_f nLen rLen c n nInv_u64 carry i =
   let ci = c.(i) in
   let qi = nInv_u64 *. ci in
-  let _ = bn_mult_by_limb_addj_add nLen n qi i (nLen +. rLen) c carry in ()
+  let _ = bn_mult_by_limb_addj_add n qi i c carry in ()
 
 inline_for_extraction noextract
 val mont_reduction_:

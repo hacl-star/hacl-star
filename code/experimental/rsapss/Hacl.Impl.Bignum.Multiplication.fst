@@ -34,17 +34,17 @@ let bn_mul_by_limb_addj_f a_i l c r_ij =
 //res = res + limb * bn * beta_j
 inline_for_extraction noextract
 val bn_mult_by_limb_addj_add:
-    aLen:size_t
+     #aLen:size_t
+  -> #resLen:size_t
   -> a:lbignum aLen
   -> l:uint64
-  -> j:size_t
-  -> resLen:size_t{v aLen + v j < v resLen}
+  -> j:size_t{v aLen + v j < v resLen}
   -> res:lbignum resLen
   -> carry:lbignum 1ul
   -> Stack uint64
     (requires fun h -> live h a /\ live h res /\ live h carry /\ disjoint res a)
     (ensures  fun h0 _ h1 -> modifies (loc_union (loc carry) (loc res)) h0 h1)
-let bn_mult_by_limb_addj_add aLen a l j resLen res carry =
+let bn_mult_by_limb_addj_add #aLen #resLen a l j res carry =
   let h0 = ST.get () in
   let inv h1 i = modifies (loc_union (loc carry) (loc res)) h0 h1 in
   Lib.Loops.for 0ul aLen inv
@@ -57,21 +57,21 @@ let bn_mult_by_limb_addj_add aLen a l j resLen res carry =
   );
   let res1Len = resLen -. (aLen +. j) in
   let res1 = sub res (aLen +. j) res1Len in
-  bn_add res1Len res1 1ul carry res1
+  bn_add res1 carry res1
 
 inline_for_extraction noextract
 val bn_mult_by_limb_addj:
-    aLen:size_t
+     #aLen:size_t
+  -> #resLen:size_t
   -> a:lbignum aLen
   -> l:uint64
-  -> j:size_t
-  -> resLen:size_t{v aLen + v j < v resLen}
+  -> j:size_t{v aLen + v j < v resLen}
   -> res:lbignum resLen
   -> carry:lbignum 1ul
   -> Stack unit
     (requires fun h -> live h a /\ live h res /\ live h carry /\ disjoint res a)
     (ensures  fun h0 _ h1 -> modifies (loc_union (loc carry) (loc res)) h0 h1)
-let bn_mult_by_limb_addj aLen a l j resLen res carry =
+let bn_mult_by_limb_addj #aLen #resLen a l j res carry =
   let h0 = ST.get() in
   let inv h1 i = modifies (loc_union (loc carry) (loc res)) h0 h1 in
   Lib.Loops.for 0ul aLen inv
@@ -86,11 +86,11 @@ let bn_mult_by_limb_addj aLen a l j resLen res carry =
 
 inline_for_extraction noextract
 val bn_mult_:
-    aLen:size_t
+     #aLen:size_t
+  -> #bLen:size_t
+  -> #resLen:size_t{v resLen = v aLen + v bLen}
   -> a:lbignum aLen
-  -> bLen:size_t
   -> b:lbignum bLen
-  -> resLen:size_t{v resLen = v aLen + v bLen}
   -> res:lbignum resLen
   -> carry:lbignum 1ul
   -> Stack unit
@@ -98,20 +98,20 @@ val bn_mult_:
       live h a /\ live h b /\ live h res /\ live h carry /\
       disjoint res a /\ disjoint res b)
     (ensures  fun h0 _ h1 -> modifies (loc_union (loc carry) (loc res)) h0 h1)
-let bn_mult_ aLen a bLen b resLen res carry =
+let bn_mult_ #aLen #bLen #resLen a b res carry =
   let h0 = ST.get() in
   let inv h1 j = modifies (loc_union (loc carry) (loc res)) h0 h1 in
   Lib.Loops.for 0ul bLen inv
   (fun j ->
     carry.(0ul) <- u64 0;
-    bn_mult_by_limb_addj aLen a b.(j) j resLen res carry
+    bn_mult_by_limb_addj a b.(j) j res carry
   )
 
 // res = a * b
 val bn_mul:
-    aLen:size_t
+     #aLen:size_t
+  -> #bLen:size_t{v aLen + v bLen < max_size_t}
   -> a:lbignum aLen
-  -> bLen:size_t{v aLen + v bLen < max_size_t}
   -> b:lbignum bLen
   -> res:lbignum (aLen +. bLen)
   -> Stack unit
@@ -119,12 +119,12 @@ val bn_mul:
       live h a /\ live h b /\ live h res /\ disjoint res a /\ disjoint res b)
     (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1)
 [@"c_inline"]
-let bn_mul aLen a bLen b res =
+let bn_mul #aLen #bLen a b res =
   push_frame ();
   let resLen = aLen +. bLen in
   memset res (u64 0) resLen;
   let carry = create 1ul (u64 0) in
-  bn_mult_ aLen a bLen b resLen res carry;
+  bn_mult_ a b res carry;
   pop_frame ()
 
 type sign =
@@ -141,12 +141,12 @@ val abs:
     (requires fun h -> live h a /\ live h b /\ live h res)
     (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1)
 let abs aLen a b res =
-  if (bn_is_less aLen a aLen b) // a < b
+  if (bn_is_less a b) // a < b
   then begin
-    let _ = bn_sub aLen b aLen a res in
+    let _ = bn_sub b a res in
     Negative end
   else begin
-    let _ = bn_sub aLen a aLen b res in
+    let _ = bn_sub a b res in
     Positive end
 
 val add_sign:
@@ -176,11 +176,11 @@ let add_sign a0Len c0 c1 c2 a0 a1 a2 b0 b1 b2 sa2 sb2 resLen res =
   let c0Len = a0Len +. a0Len in
   // Was here previously: let res1 = sub #_ #(v resLen) #(v c0Len) res 0ul c0Len in
   let res1 = sub res 0ul c0Len in
-  let c = bn_add c0Len c0 c0Len c1 res1 in
+  let c = bn_add c0 c1 res1 in
   res.(c0Len) <- c;
   if ((sa2 = Positive && sb2 = Positive) || (sa2 = Negative && sb2 = Negative))
-  then let _ = bn_sub resLen res c0Len c2 res in ()
-  else let _ = bn_add resLen res c0Len c2 res in ()
+  then let _ = bn_sub res c2 res in ()
+  else let _ = bn_add res c2 res in ()
 
 val karatsuba_:
     pow2_i:size_t{4 * v pow2_i < max_size_t}
@@ -201,7 +201,7 @@ let rec karatsuba_ pow2_i aLen a b tmp res = admit();
   let pow2_i0 = pow2_i /. 2ul in
   assume (v pow2_i = v (pow2_i0 +. pow2_i0));
   if aLen <. 32ul then
-    bn_mul aLen a aLen b res
+    bn_mul a b res
   else begin
     let a0 = sub a 0ul pow2_i0 in
     let b0 = sub b 0ul pow2_i0 in
@@ -233,7 +233,7 @@ let rec karatsuba_ pow2_i aLen a b tmp res = admit();
     //tmp = [a2; b2; c2; tmp1; _]
     let res1Len = pow2_i0 +. pow2_i in
     let res1 = sub res pow2_i0 res1Len in
-    let _ = bn_add res1Len res1 tmp1Len tmp1 res1 in ()
+    let _ = bn_add res1 tmp1 res1 in ()
     end
 
 val karatsuba:
@@ -253,5 +253,5 @@ let karatsuba pow2_i aLen a b st_kara =
   let res = sub st_kara 0ul (aLen +. aLen) in
   let st_mult = sub st_kara (aLen +. aLen) (4ul *. pow2_i) in
   if not (pow2_i =. aLen)
-  then bn_mul aLen a aLen b res
+  then bn_mul a b res
   else karatsuba_ pow2_i aLen a b st_mult res
