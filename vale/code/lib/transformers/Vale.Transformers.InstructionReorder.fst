@@ -47,7 +47,7 @@ let access_location_of_implicit (t:instr_operand_implicit) : access_location =
   | IOpFlagsCf -> ALocCf
   | IOpFlagsOf -> ALocOf
 
-type rw_set = (list access_location) * (list access_location)
+type rw_set = (list access_location) & (list access_location)
 
 let rec aux_read_set0 (args:list instr_operand) (oprs:instr_operands_t_args args) =
   match args with
