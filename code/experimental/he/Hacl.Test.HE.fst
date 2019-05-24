@@ -18,49 +18,66 @@ module B = FStar.Bytes
 
 
 inline_for_extraction unfold noextract
-val print_str: string -> St unit
+val print_str: string -> ST unit (requires fun _ -> true) (ensures fun h0 _ h1 -> h0 == h1)
 let print_str x = C.String.print (C.String.of_literal x)
 
 inline_for_extraction unfold noextract
-val print_strln: string -> St unit
+val print_strln: string -> ST unit (requires fun _ -> true) (ensures fun h0 _ h1 -> h0 == h1)
 let print_strln x = print_str (x ^ "\n")
 
 inline_for_extraction unfold noextract
-val print_bool: b:bool -> St unit
+val print_bool: b:bool -> ST unit (requires fun _ -> true) (ensures fun h0 _ h1 -> h0 == h1)
 let print_bool b =
   C.String.print (if b then C.String.of_literal "true\n" else C.String.of_literal "false\n")
 
-inline_for_extraction unfold noextract
-val toBuffer:
-    size:size_t ->
-    l:list uint64 ->
-    Stack (lbuffer uint64 size) (requires fun h -> true) (ensures fun h0 b h1 -> live h1 b)
-let toBuffer size l =
-  admit();
-  createL (normalize_term l)
-
-val test1: unit -> St unit
+val test1: unit -> Stack unit (requires fun _ -> true) (ensures fun _ _ _ -> true)
 let test1 _ =
-  admit();
-  let list1 = nat_to_bignum_exact 123456781234567812345678 in
+  push_frame();
+  //let nat1:nat = 123456781234567812345678 in
+  let list1:lbignum 1ul = nat_to_bignum_exact 100 in
+  let list2:lbignum 1ul = nat_to_bignum_exact 200 in
+  let list3:lbignum 1ul = nat_to_bignum_exact 0 in
+  let list4:lbignum 1ul = nat_to_bignum_exact 299 in
+  let list5:lbignum 1ul = nat_to_bignum_exact 300 in
 
-  let list2 =
-    toBuffer 16ul (normalize_term (List.Tot.map u64
-      [0x00; 0x11; 0x22; 0x33; 0x44; 0x55; 0x66; 0x77; 0x9a; 0x51; 0x87; 0xdc; 0x7e; 0xa8; 0x41; 0xd1]))
-      in
+  print_strln "Both should be true:";
 
-  let list3 =
-    toBuffer 16ul (normalize_term (List.Tot.map u64
-      [0x00; 0x00; 0x00; 0x00; 0x00; 0x00; 0x00; 0x00; 0x00; 0x00; 0x00; 0x00; 0x00; 0x00; 0x00; 0x00]))
-      in
+  let _ = bn_add 1ul list1 1ul list2 list3 in
+  let res = bn_is_less 1ul list4 1ul list3 in
+  print_bool (res = true);
 
-  let _ = bn_add 16ul list1 16ul list2 list3 in
-  let res = bn_is_less 16ul list1 16ul list3 in
-  print_bool res
+  let _ = bn_add 1ul list1 1ul list2 list3 in
+  let res = bn_is_less 1ul list5 1ul list3 in
+  print_bool (res = false);
+
+  pop_frame()
+
+val test2: unit -> Stack unit (requires fun _ -> true) (ensures fun _ _ _ -> true)
+let test2 _ =
+  push_frame();
+  //let nat1:nat = 123456781234567812345678 in
+  let list1:lbignum 2ul = nat_to_bignum_exact 100000000000000000000 in
+  let list2:lbignum 2ul = nat_to_bignum_exact 200000000000000000000 in
+  let list3:lbignum 2ul = nat_to_bignum_exact 200000000000000000000 in
+  let list4:lbignum 2ul = nat_to_bignum_exact 299000000000000000000 in
+  let list5:lbignum 2ul = nat_to_bignum_exact 300000000000000000000 in
+
+  print_strln "Both should be true:";
+
+  let _ = bn_add 2ul list1 2ul list2 list3 in
+  let res = bn_is_less 2ul list4 2ul list3 in
+  print_bool (res = true);
+
+  let _ = bn_add 2ul list1 2ul list2 list3 in
+  let res = bn_is_less 2ul list5 2ul list3 in
+  print_bool (res = false);
+
+  pop_frame()
 
 val main: unit -> St C.exit_code
 let main () =
-  print_strln "\n ====== Sample: ====== \n";
+  print_strln "\n====== Sample: ======";
   test1 ();
-  print_strln "\n ===================== \n";
+  test2 ();
+  print_strln "=====================";
   C.EXIT_SUCCESS
