@@ -13,5 +13,5 @@ open Lib.PrintBuffer
 open Hacl.Impl.Bignum.Addition
 open Hacl.Impl.Bignum.Core
 
-val testfunc : lbytes 5ul -> lbytes 6ul
+val testfunc : lbuffer8 5ul -> lbuffer8 6ul
 let testfunc _ = admit()
