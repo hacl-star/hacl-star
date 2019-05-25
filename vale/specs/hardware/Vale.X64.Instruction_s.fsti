@@ -21,8 +21,8 @@ type instr_operand_explicit = // flexible operand
   | IOp64 : instr_operand_explicit
   | IOpXmm : instr_operand_explicit
 type instr_operand_implicit = // hard-coded operand
-  | IOp64One : operand -> instr_operand_implicit
-  | IOpXmmOne : operand128 -> instr_operand_implicit
+  | IOp64One : o:operand -> instr_operand_implicit
+  | IOpXmmOne : o:operand128 -> instr_operand_implicit
   | IOpFlagsCf : instr_operand_implicit
   | IOpFlagsOf : instr_operand_implicit
 type instr_operand =

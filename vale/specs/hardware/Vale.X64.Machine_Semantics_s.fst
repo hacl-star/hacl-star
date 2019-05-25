@@ -955,7 +955,8 @@ val machine_eval_while (c:code{While? c}) (fuel:nat) (s:machine_state) : Tot (op
   (decreases %[fuel; c; 0])
 let rec machine_eval_code c fuel s =
   match c with
-  | Ins ins -> let obs = ins_obs ins s in
+  | Ins ins ->
+    let obs = ins_obs ins s in
     // REVIEW: drop trace, then restore trace, to make clear that machine_eval_ins shouldn't depend on trace
     Some ({machine_eval_ins ins ({s with ms_trace = []}) with ms_trace = obs @ s.ms_trace})
   | Block l ->

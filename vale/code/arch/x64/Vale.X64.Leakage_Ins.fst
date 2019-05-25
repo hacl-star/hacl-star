@@ -26,30 +26,24 @@ let rec check_if_consumes_fixed_time_args
     (ensures fun b -> b ==> (forall (s1 s2:S.machine_state).{:pattern (constTimeInvariant ts s1 s2)}
       constTimeInvariant ts s1 s2 ==> obs_args args oprs s1 == obs_args args oprs s2))
   =
+  allow_inversion maddr;
+  allow_inversion tmaddr;
   match args with
   | [] -> true
   | (IOpEx i)::args ->
     let ((o:instr_operand_t i), (oprs:instr_operands_t_args args)) = coerce oprs in
     let b' =
       match i with
-      | IOp64 ->
-        let o = match coerce o with | OMem (_, _) | OStack (_, _) -> o | _ -> o in // REVIEW: this avoids extra ifuel, but it leads to a lot of duplicate code
-        operand_does_not_use_secrets o ts
-      | IOpXmm ->
-        let o = match coerce o with | OMem128 (_, _) | OStack128 (_, _) | _ -> o in
-        operand128_does_not_use_secrets o ts
+      | IOp64 -> operand_does_not_use_secrets o ts
+      | IOpXmm -> operand128_does_not_use_secrets o ts
       in
     let b'' = check_if_consumes_fixed_time_args args oprs ts in
     b' && b''
   | (IOpIm i)::args ->
     let b' =
       match i with
-      | IOp64One o ->
-        let o = match coerce o with | OMem (_, _) | OStack (_, _) -> o | _ -> o in
-        operand_does_not_use_secrets o ts
-      | IOpXmmOne o ->
-        let o = match coerce o with | OMem128 (_, _) | OStack128 (_, _) | _ -> o in
-        operand128_does_not_use_secrets o ts
+      | IOp64One o -> operand_does_not_use_secrets o ts
+      | IOpXmmOne o -> operand128_does_not_use_secrets o ts
       | IOpFlagsCf -> true
       | IOpFlagsOf -> true
       in
@@ -124,6 +118,10 @@ let rec lemma_args_taint
       S.instr_apply_eval_args outs args f oprs s1 ==
       S.instr_apply_eval_args outs args f oprs s2)
   =
+  allow_inversion maddr;
+  allow_inversion tmaddr;
+  allow_inversion operand;
+  allow_inversion operand128;
   match args with
   | [] -> ()
   | i::args ->
@@ -131,17 +129,11 @@ let rec lemma_args_taint
       match i with
       | IOpEx i ->
         let (o, (oprs:instr_operands_t_args args)) = coerce oprs in
-        let o =
-          match i with
-          | IOp64 -> (match coerce o with OMem (_, _) | OStack (_, _) | _ -> o)
-          | IOpXmm -> (match coerce o with OMem128 (_, _) | OStack128 (_, _) | _ -> o)
-          in
         (
           S.instr_eval_operand_explicit i o s1,
           S.instr_eval_operand_explicit i o s2,
           oprs)
       | IOpIm i ->
-        let i = match i with | IOp64One (OMem (_, _)) | IOpXmmOne (OMem128 (_, _)) | IOp64One (OStack (_, _)) | IOpXmmOne (OStack128 (_, _)) | _ -> i in
         let oprs = coerce oprs in (
           S.instr_eval_operand_implicit i s1,
           S.instr_eval_operand_implicit i s2,
@@ -172,6 +164,10 @@ let rec lemma_inouts_taint
       S.instr_apply_eval_inouts outs inouts args f oprs s1 ==
       S.instr_apply_eval_inouts outs inouts args f oprs s2)
   =
+  allow_inversion maddr;
+  allow_inversion tmaddr;
+  allow_inversion operand;
+  allow_inversion operand128;
   match inouts with
   | [] -> lemma_args_taint outs args f oprs ts s1 s2
   | (Out, i)::inouts ->
@@ -182,22 +178,15 @@ let rec lemma_inouts_taint
       in
     lemma_inouts_taint outs inouts args (coerce f) oprs ts s1 s2
   | (InOut, i)::inouts ->
-    let i = (match i with | IOpIm (IOpXmmOne _) | IOpIm (IOp64One _) | _ -> i) in // REVIEW: hack to avoid extra ifuel
     let (v1, v2, oprs) : option (instr_val_t i) & option (instr_val_t i) & instr_operands_t inouts args =
       match i with
       | IOpEx i ->
         let (o, (oprs:instr_operands_t inouts args)) = coerce oprs in
-        let o =
-          match i with
-          | IOp64 -> (match coerce o with OMem (_, _) | OStack (_, _) | _ -> o)
-          | IOpXmm -> (match coerce o with OMem128 (_, _) | OStack128 (_, _) | _ -> o)
-          in
         let oprs = coerce oprs in (
           S.instr_eval_operand_explicit i o s1,
           S.instr_eval_operand_explicit i o s2,
           oprs)
       | IOpIm i ->
-        let i = match i with | IOp64One (OMem (_, _)) | IOpXmmOne (OMem128 (_, _)) | IOp64One (OStack (_, _)) | IOpXmmOne (OStack128 (_, _)) | _ -> i in
         let oprs = coerce oprs in (
           S.instr_eval_operand_implicit i s1,
           S.instr_eval_operand_implicit i s2,
@@ -433,15 +422,12 @@ let lemma_instr_set_taints_explicit
       publicValuesAreSame ts' s1t' s2t'
     ))
   =
+  allow_inversion maddr;
+  allow_inversion tmaddr;
   lemma_preserve_valid64 s1_orig.S.ms_mem s1.S.ms_mem;
   lemma_preserve_valid64 s2_orig.S.ms_mem s2.S.ms_mem;
   lemma_preserve_valid128 s1_orig.S.ms_mem s1.S.ms_mem;
   lemma_preserve_valid128 s2_orig.S.ms_mem s2.S.ms_mem;
-  let o =
-    match i with
-    | IOp64 -> (match coerce o with OMem (_, _) | OStack (_, _) | _ -> o)
-    | IOpXmm -> (match coerce o with OMem128 (_, _) | OStack128 (_, _) | _ -> o)
-    in
   FStar.Pervasives.reveal_opaque (`%S.valid_addr128) S.valid_addr128;
   ()
 
@@ -479,14 +465,14 @@ let lemma_instr_set_taints_implicit
       publicValuesAreSame ts' s1t' s2t'
     ))
   =
+  allow_inversion maddr;
+  allow_inversion tmaddr;
+  allow_inversion operand;
+  allow_inversion operand128;
   lemma_preserve_valid64 s1_orig.S.ms_mem s1.S.ms_mem;
   lemma_preserve_valid64 s2_orig.S.ms_mem s2.S.ms_mem;
   lemma_preserve_valid128 s1_orig.S.ms_mem s1.S.ms_mem;
   lemma_preserve_valid128 s2_orig.S.ms_mem s2.S.ms_mem;
-  let i =
-    match i with
-    | IOp64One (OMem (_, _)) | IOpXmmOne (OMem128 (_, _)) | IOp64One (OStack (_, _)) | IOpXmmOne (OStack128 (_, _)) | _ -> i
-    in
   FStar.Pervasives.reveal_opaque (`%S.valid_addr128) S.valid_addr128;
   ()
 
@@ -541,11 +527,6 @@ let rec lemma_instr_set_taints
       match i with
       | IOpEx i ->
         let (o, oprs):instr_operand_t i & instr_operands_t outs args = coerce oprs in
-        let o =
-          match i with
-          | IOp64 -> (match coerce o with OMem (_, _) | OStack (_, _) | _ -> o)
-          | IOpXmm -> (match coerce o with OMem128 (_, _) | OStack128 (_, _) | _ -> o)
-          in
         let (memTaint1', stackTaint1') =
           update_taint_operand_explicit i o memTaint1 stackTaint1 s1_orig in
         let s1' = S.instr_write_output_explicit i v1 o s1_orig s1 in
@@ -560,7 +541,6 @@ let rec lemma_instr_set_taints
         lemma_instr_set_taints outs args vs1 vs2 oprs ts_orig ts' t_out
           s1_orig s1' s2_orig s2' memTaint1' stackTaint1' memTaint2' stackTaint2'
       | IOpIm i ->
-        let i = match i with IOp64One (OMem (_, _)) | IOpXmmOne (OMem128 (_, _)) | IOp64One (OStack (_, _)) | IOpXmmOne (OStack128 (_, _)) | _ -> i in
         let (memTaint1', stackTaint1') =
           update_taint_operand_implicit i memTaint1 stackTaint1 s1_orig in
         let s1' = S.instr_write_output_implicit i v1 s1_orig s1 in
@@ -798,24 +778,17 @@ let lemma_pop_leakage_free (ts:analysis_taints) (ins:S.ins) : Lemma
       (ensures is_explicit_leakage_free_rhs code fuel ts ts' s1 s2)
       [SMTPat (is_explicit_leakage_free_rhs code fuel ts ts' s1 s2)]
       =
+      allow_inversion maddr;
+      allow_inversion tmaddr;
       let BC.Pop dst t_stk = ins in
       let s1' = Some?.v (machine_eval_code code fuel s1) in
       let s2' = Some?.v (machine_eval_code code fuel s2) in
       let stack_op = OStack (MReg rRsp 0, Public) in
       let v1 = S.eval_operand stack_op s1 in
       let v2 = S.eval_operand stack_op s2 in
-      if t_stk = Secret then (
-        match dst with
-        | OReg _ -> ()
-        | OMem (_, _) -> ()
-        | OStack (_, _) -> ()
-      ) else (
+      if t_stk = Public then (
         Vale.Def.Opaque_s.reveal_opaque S.get_heap_val64_def;
-        assert (v1 == v2);
-        match dst with
-        | OReg _ -> ()
-        | OMem (_, _) -> ()
-        | OStack (_, _) -> ()
+        assert (v1 == v2)
       );
       Classical.forall_intro_3 (fun s x (stack1:S.heap) -> Vale.Lib.Set.lemma_sel_restrict s stack1 x);
       Classical.forall_intro_3 (fun s x (stack2:S.heap) -> Vale.Lib.Set.lemma_sel_restrict s stack2 x)
