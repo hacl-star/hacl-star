@@ -77,25 +77,18 @@ let rec check_if_consumes_fixed_time_outs
     (ensures fun b -> b ==> (forall (s1 s2:S.machine_state).{:pattern (constTimeInvariant ts s1 s2)}
       constTimeInvariant ts s1 s2 ==> obs_inouts outs args oprs s1 == obs_inouts outs args oprs s2))
   =
+  allow_inversion maddr;
+  allow_inversion tmaddr;
+  allow_inversion operand;
+  allow_inversion operand128;
   match outs with
   | [] -> check_if_consumes_fixed_time_args args oprs ts
   | (_, IOpEx i)::outs ->
     let ((o:instr_operand_t i), (oprs:instr_operands_t outs args)) = coerce oprs in
-    let o =
-      match i with
-      | IOp64 -> (match coerce o with | OMem (_, _) | OStack (_, _) -> o | _ -> o)
-      | IOpXmm -> (match coerce o with | OMem128 (_, _) | OStack128 (_, _) | _ -> o)
-      in
     let b' = check_if_consumes_fixed_time_outs_explicit i o ts t_out in
     let b'' = check_if_consumes_fixed_time_outs outs args oprs ts t_out in
     b' && b''
   | (_, IOpIm i)::outs ->
-    let i =
-      match i with
-      | IOp64One o -> IOp64One (match coerce o with | OMem (_, _) | OStack (_, _) -> o | _ -> o)
-      | IOpXmmOne o -> IOpXmmOne (match coerce o with | OMem128 (_, _) | OStack128 (_, _) | _ -> o)
-      | _ -> i
-      in
     let b' = check_if_consumes_fixed_time_outs_implicit i ts t_out in
     let b'' = check_if_consumes_fixed_time_outs outs args (coerce oprs) ts t_out in
     b' && b''
