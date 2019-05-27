@@ -116,7 +116,9 @@ val bn_add:
   -> res:lbignum aLen
   -> Stack uint64
     (requires fun h -> live h a /\ live h b /\ live h res)
-    (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1)
+    (ensures  fun h0 _ h1 ->
+         modifies (loc res) h0 h1 /\
+         as_snat h1 res = as_snat h0 a + as_snat h0 b)
 [@"c_inline"]
 let bn_add #aLen #bLen a b res =
   push_frame ();
@@ -124,6 +126,7 @@ let bn_add #aLen #bLen a b res =
   bn_add_ a b carry res;
   let res = carry.(0ul) in
   pop_frame ();
+  admit();
   res
 
 val bn_add_full:
@@ -138,9 +141,10 @@ val bn_add_full:
          modifies (loc res) h0 h1 /\
          as_snat h1 res = as_snat h0 a + as_snat h0 b)
 [@"c_inline"]
-let bn_add_full #aLen #bLen a b res = admit();
+let bn_add_full #aLen #bLen a b res =
   push_frame ();
   let carry = sub res aLen 1ul in
   let res_prefix = sub res 0ul aLen in
   bn_add_ a b carry res_prefix;
-  pop_frame ()
+  pop_frame ();
+  admit()
