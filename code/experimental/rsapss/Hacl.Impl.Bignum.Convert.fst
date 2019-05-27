@@ -167,7 +167,12 @@ val nat_to_bignum:
   -> input:snat { v (nat_bytes_num input) <= v k }
   -> StackInline (lbignum k)
     (requires fun _ -> true)
-    (ensures  fun h0 b h1 -> live h1 b)
+    (ensures  fun h0 b h1 ->
+     live h1 b /\
+     stack_allocated b h0 h1
+       (Seq.concat (Seq.of_list (nat_to_list64_sec input))
+                   (Seq.create (v k - v (nat_bytes_num input)) (uint 0)))
+    )
 let nat_to_bignum #k input =
   let len: size_t = nat_bytes_num input in
   let created: lbignum len = nat_to_bignum_exact input in
@@ -175,4 +180,7 @@ let nat_to_bignum #k input =
   let res_sub: lbignum len = sub res 0ul len in
 
   copy res_sub created;
+
+  admit();
+
   res

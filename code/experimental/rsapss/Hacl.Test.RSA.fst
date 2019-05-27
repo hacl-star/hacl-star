@@ -13,7 +13,10 @@ open Hacl.Impl.Bignum.Core
 open Hacl.Impl.Bignum.Convert
 open Hacl.RSAPSS
 
+open Hacl.Test.Bignum
+
 module ST = FStar.HyperStack.ST
+
 
 #reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq'"
 
@@ -91,9 +94,9 @@ let ctest pow2_i modBits n pkeyBits e skeyBits d pTLen p qTLen q r2 rBlindTLen r
   Lib.PrintBuffer.print_compare_display nTLen sgnt sgnt_expected;
   let res = check_sgnt && verify_sgnt in
   if res then
-    C.String.print (C.String.of_literal "Test succeeded\n")
+    C.String.print (C.String.of_literal "Test succeeded\n\n")
   else
-    C.String.print (C.String.of_literal "Test failed\n");
+    C.String.print (C.String.of_literal "Test failed\n\n");
   pop_frame ();
   res
 
@@ -740,6 +743,9 @@ let test4_sgnt_expected: b:ilbuffer uint8 256ul{ recallable b } =
 
 val main: unit -> St C.exit_code
 let main () =
+  testBignum ();
+  // some RSA test parameters (bit numbers) are mismatched
+  // and they must be implicit to avoid the mess
   admit();
   let test1 =
     ctest 16ul 1024ul test1_n 24ul test1_e 1024ul test1_d 64ul test1_p 64ul test1_q
@@ -753,7 +759,7 @@ let main () =
   let test4 =
     ctest 32ul 2048ul test4_n 24ul test4_e 2048ul test4_d 128ul test4_p 128ul test4_q
     test4_r2 8ul test4_rBlind 128ul test4_msg 20ul test4_salt test4_sgnt_expected in
-  let test = test1 && test2 && test3 && test4 in
-  if test then C.String.print (C.String.of_literal "SUCCESS\n")
-  else C.String.print (C.String.of_literal "Test failed\n");
+  let testRes = test1 && test2 && test3 && test4 in
+  if testRes then C.String.print (C.String.of_literal "### RSA: Successs\n\n")
+  else C.String.print (C.String.of_literal "### RSA: Failure\n\n");
   C.EXIT_SUCCESS
