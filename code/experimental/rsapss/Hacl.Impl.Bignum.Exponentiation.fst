@@ -8,8 +8,10 @@ open LowStar.Buffer
 
 open Lib.IntTypes
 open Lib.Buffer
+open Lib.Math.Algebra
 
 open Hacl.Impl.Bignum.Core
+open Hacl.Impl.Bignum.Convert
 open Hacl.Impl.Bignum.Montgomery
 open Hacl.Impl.Bignum.Multiplication
 
@@ -88,8 +90,10 @@ val mod_exp:
   -> b:lbignum (blocks bBits 64ul)
   -> res:lbignum nLen
   -> Stack unit
-    (requires fun h -> live h n /\ live h a /\ live h b /\ live h res /\ live h r2)
-    (ensures  fun h0 b h1 -> modifies (loc res) h0 h1)
+    (requires fun h -> live h n /\ live h a /\ live h b /\ live h res /\ live h r2 /\ as_snat h n > 1)
+    (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
+    (let n = as_snat h0 n in
+    to_fe #n (as_snat h1 res) = fexp #n (to_fe (as_snat h0 a)) (as_snat #(blocks bBits 64ul) h0 b)))
 [@"c_inline"]
 let mod_exp pow2_i modBits nLen n r2 a bBits b res =
   push_frame ();
