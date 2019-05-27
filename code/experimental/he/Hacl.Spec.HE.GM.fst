@@ -3,7 +3,7 @@ module Hacl.Spec.HE.GM
 open FStar.Mul
 open FStar.Math.Lemmas
 
-open Hacl.Spec.HE.Common
+open Lib.Math.Algebra
 
 
 (* Squares and nonsquares *)

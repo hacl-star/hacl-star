@@ -1,4 +1,4 @@
-module Hacl.Spec.HE.Common
+module Lib.Math.Algebra
 
 open FStar.Math.Lemmas
 open FStar.Math.Lib
@@ -657,10 +657,8 @@ let rec g_pow_order_reduc #n g x =
   then modulo_lemma x r
   else begin
     lemma_div_mod x r;
-    assert(x = r * (x / r) + x % r);
-    fexp_mul1 g (r * (x/r)) (x%r);
     fexp_exp g r (x/r);
-    assert(fexp g r = one);
+    fexp_mul1 g (r * (x/r)) (x%r);
     fexp_one2 #n (x/r)
   end
 

@@ -190,6 +190,8 @@ let rsa_sign pow2_i modBits eBits dBits pLen qLen skey rBlind sLen salt msgLen m
   let skeyLen = pkeyLen +. dLen +. pLen +. qLen in
 
   let n = sub skey 0ul nLen in
+  let h = ST.get () in
+  assume (as_snat h n > 1);
   let e = sub skey nLen eLen in
   let r2 = sub skey (nLen +. eLen) nLen in
   let d = sub skey pkeyLen dLen in
