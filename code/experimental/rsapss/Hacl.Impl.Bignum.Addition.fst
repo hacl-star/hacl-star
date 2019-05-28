@@ -134,7 +134,7 @@ val bn_add_full:
   -> #bLen:bn_len{v bLen <= v aLen}
   -> a:lbignum aLen
   -> b:lbignum bLen
-  -> res:lbignum (add aLen 1ul)
+  -> res:lbignum (aLen +. 1ul)
   -> Stack unit
     (requires fun h -> live h a /\ live h b /\ live h res)
     (ensures  fun h0 _ h1 ->
