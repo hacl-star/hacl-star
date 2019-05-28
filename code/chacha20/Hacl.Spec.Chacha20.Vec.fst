@@ -176,7 +176,7 @@ let transpose8x8 (vs:uint32xN 8 & uint32xN 8 & uint32xN 8 & uint32xN 8 & uint32x
   let v5''' = cast U32 8 (vec_interleave_high (cast U128 2 v2'') (cast U128 2 v6'')) in
   let v6''' = cast U32 8 (vec_interleave_low (cast U128 2 v3'') (cast U128 2 v7'')) in
   let v7''' = cast U32 8 (vec_interleave_high (cast U128 2 v3'') (cast U128 2 v7'')) in
-  (v0''',v1''',v2''',v3''',v4''',v5''',v6''',v7''')
+  (v0''',v2''',v4''',v6''',v1''',v3''',v5''',v7''')
 
 let transpose8 (st:state 8) : state 8 =
   let (v0,v1,v2,v3,v4,v5,v6,v7) = transpose8x8 (st.[0],st.[1],st.[2],st.[3],st.[4],st.[5],st.[6],st.[7]) in
