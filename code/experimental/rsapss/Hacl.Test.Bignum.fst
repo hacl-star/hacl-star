@@ -12,12 +12,15 @@ open Lib.RawIntTypes
 open Lib.PrintSequence
 open Lib.Loops
 open Lib.Buffer
+open Lib.Math.Algebra
 
 open Hacl.Impl.Bignum.Core
 open Hacl.Impl.Bignum.Convert
 open Hacl.Impl.Bignum.Comparison
 open Hacl.Impl.Bignum.Addition
 open Hacl.Impl.Bignum.Multiplication
+open Hacl.Impl.Bignum.Exponentiation
+open Hacl.Impl.Bignum.Shift
 
 
 inline_for_extraction unfold noextract
@@ -129,7 +132,6 @@ let test_comp _ =
 
   pop_frame()
 
-#reset-options
 
 inline_for_extraction noextract
 val test_add_gen:
@@ -193,7 +195,7 @@ let test_add _ =
 inline_for_extraction noextract
 val test_mult_gen:
      a:snat
-  -> b:snat{b <= a /\ issnat (a+b)}
+  -> b:snat{issnat (a+b)}
   -> Stack unit (requires fun _ -> true) (ensures fun _ _ _ -> true)
 let test_mult_gen a b =
   push_frame();
@@ -227,7 +229,6 @@ let test_mult _ =
   C.String.print (C.String.of_literal "Testing mult\n");
   push_frame();
 
-  admit();
   test_mult_gen 0 0;
   test_mult_gen 1 0;
   test_mult_gen 12345 0;
@@ -239,6 +240,7 @@ let test_mult _ =
   test_mult_gen 1234123432165873264969873219648712 3;
   test_mult_gen 1234123432165873264969873219648712 4;
   test_mult_gen 1234123432165873264969873219648712 5;
+  admit();
   test_mult_gen
     111111111111111111111111111111
     18446744073709551618;
@@ -259,6 +261,143 @@ let test_mult _ =
 
   pop_frame()
 
+#reset-options "--z3rlimit 30"
+
+inline_for_extraction noextract
+val test_shift_gen:
+     a:snat{a > 2}
+  -> p:nat{p < max_size_t}
+  -> Stack unit (requires fun _ -> true) (ensures fun _ _ _ -> true)
+let test_shift_gen a p =
+  push_frame();
+
+  let p' = normalize_term (size p) in
+  let aLen = normalize_term (nat_bytes_num a) in
+  assume (v aLen + 1 < max_size_t);
+  let aBits = aLen *. 64ul in
+
+  let bn_a:lbignum aLen = nat_to_bignum a in
+  let bn_res:lbignum aLen = create aLen (uint 0) in
+  assume (issnat (fexp #a 2 p));
+  assume (v (nat_bytes_num (fexp #a 2 p)) <= v aLen);
+  let bn_expected:lbignum aLen = nat_to_bignum (normalize_term (fexp #a 2 p)) in
+
+  assume (v aBits / 64 <= v aLen);
+
+  bn_pow2_mod_n aBits bn_a p' bn_res;
+  let res = bn_is_equal bn_expected bn_res in
+  if res
+  then print_strln " * Success"
+  else begin
+    print_strln " * Failed";
+    print_lbignum bn_res;
+    print_lbignum bn_expected
+  end;
+  pop_frame()
+
+
+val test_shift: unit -> St unit
+let test_shift _ =
+  C.String.print (C.String.of_literal "Testing shift\n");
+  push_frame();
+
+  test_shift_gen 3 0;
+  test_shift_gen 3 1;
+  test_shift_gen 3 2;
+  test_shift_gen 3 3;
+  test_shift_gen 3 100;
+  test_shift_gen 3 1024;
+  test_shift_gen 3 511;
+  test_shift_gen 3 512;
+  test_shift_gen 3 513;
+  test_shift_gen 3 1000000;
+  test_shift_gen 1000000000000000000000000 0;
+  test_shift_gen 1000000000000000000000000 1;
+  test_shift_gen 1000000000000000000000000 2;
+  test_shift_gen 1000000000000000000000000 3;
+  test_shift_gen 1000000000000000000000000 100;
+  test_shift_gen 1000000000000000000000000 256;
+  test_shift_gen 1000000000000000000000000 511;
+  test_shift_gen 1000000000000000000000000 512;
+  test_shift_gen 1000000000000000000000000 513;
+  test_shift_gen 1000000000000000000000000 1024;
+  test_shift_gen 1000000000000000000000000 1000000;
+
+
+  pop_frame ()
+
+
+inline_for_extraction noextract
+val test_exp_gen:
+     n:snat{ n > 1 }
+  -> a:snat{ a < n }
+  -> b:snat
+  -> Stack unit (requires fun _ -> true) (ensures fun _ _ _ -> true)
+let test_exp_gen n a b =
+  push_frame();
+
+  let nLen = normalize_term (nat_bytes_num n) in
+  let pow2_i = 256ul in
+
+  assume (v (nat_bytes_num a) <= v nLen);
+  assume (v (nat_bytes_num b) <= v nLen);
+  assume (v (nat_bytes_num n) <= v nLen);
+  [@inline_let]
+  let r =  fexp #n a b in
+  assume (issnat r);
+  assume (v (nat_bytes_num r) <= v nLen);
+
+  let bn_a:lbignum nLen = nat_to_bignum a in
+  let bn_b:lbignum nLen = nat_to_bignum b in
+  let bn_n:lbignum nLen = nat_to_bignum n in
+  let bn_res:lbignum nLen = create nLen (uint 0) in
+
+  let bn_expected:lbignum nLen = nat_to_bignum (normalize_term (fexp #n a b)) in
+
+  admit();
+  mod_exp_compact pow2_i bn_n bn_a bn_b bn_res;
+  let res = bn_is_equal bn_expected bn_res in
+  if res
+  then print_strln " * Success"
+  else begin
+    print_strln " * Failed";
+    print_lbignum bn_res;
+    print_lbignum bn_expected
+  end;
+  pop_frame()
+
+
+val test_exp: unit -> St unit
+let test_exp _ =
+  C.String.print (C.String.of_literal "Testing exp\n");
+  push_frame();
+
+  test_exp_gen 100000000000 0 0;
+  test_exp_gen 100000000000 1 0;
+  test_exp_gen 100000000000 12345 0;
+  test_exp_gen 100000000000 10 1;
+  test_exp_gen 100000000000 10 5;
+  test_exp_gen 100000000000 100000 5;
+//  test_exp_gen 1234123432165873264969873219648712 1;
+//  test_exp_gen 1234123432165873264969873219648712 0;
+//  test_exp_gen 1234123432165873264969873219648712 2;
+//  test_exp_gen 1234123432165873264969873219648712 3;
+//  test_exp_gen 1234123432165873264969873219648712 4;
+//  test_exp_gen 1234123432165873264969873219648712 5;
+//  admit();
+//  test_exp_gen
+//    111111111111111111111111111111
+//    18446744073709551618;
+//  test_exp_gen
+//    111111111111123123123111111111111111111
+//    184467440737095553212351618;
+//  test_exp_gen
+//    11111111111112312312311111114973210598732098407321111111111111
+//    18446744073709555321235160918327501928374098320749182318;
+
+  pop_frame ()
+
+
 val testBignum: unit -> St unit
 let testBignum _ =
   C.String.print (C.String.of_literal "Bignum tests: \n");
@@ -266,4 +405,6 @@ let testBignum _ =
   test_comp ();
   test_add ();
   test_mult ();
+  test_shift ();
+  test_exp ();
   C.String.print (C.String.of_literal "Bignum tests are done \n\n")
