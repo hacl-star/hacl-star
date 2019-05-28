@@ -97,6 +97,28 @@ let bignum_to_bytes #len input res = admit();
   copy res tmp1;
   pop_frame ()
 
+// Prints uints64 chunks in little-endian, though inner uint64 chunks
+// in big-endian.
+val bignum_to_bytes_direct:
+     #len:bn_len{8 * v len < max_size_t}
+  -> input:lbignum len
+  -> res:lbuffer8 (8ul *. len)
+  -> Stack unit
+    (requires fun h -> live h input /\ live h res /\ disjoint res input)
+    (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1)
+[@"c_inline"]
+let bignum_to_bytes_direct #len input res =
+  push_frame ();
+
+  let h0 = ST.get () in
+  let inv h1 i = modifies (loc res) h0 h1 in
+  Lib.Loops.for 0ul len inv
+  (fun i ->
+    let tmp = input.(i) in
+    uint_to_bytes_be (sub res (8ul *. i) 8ul) tmp
+  );
+
+  pop_frame ()
 
 #reset-options
 
@@ -106,7 +128,7 @@ val nat_to_list64: y:nat -> Tot (l:list pub_uint64{List.Tot.length l > 0}) (decr
 let rec nat_to_list64 y =
     if y <= maxint U64
     then [uint y]
-    else uint (y % (maxint U64)) :: nat_to_list64 (y / (maxint U64))
+    else uint (y % (modulus U64)) :: nat_to_list64 (y / (modulus U64))
 
 /// Same as nat_to_list64, but converts to the secure 64 ints.
 inline_for_extraction noextract
@@ -120,7 +142,7 @@ inline_for_extraction noextract
 val list64_sec_to_nat: l:list uint64{ List.Tot.length l > 0 } -> Tot nat
 let rec list64_sec_to_nat l = match l with
   | [x] -> v x
-  | x::tl -> v x + list64_sec_to_nat tl * maxint U64
+  | x::tl -> v x + list64_sec_to_nat tl * modulus U64
 
 /// Relatively "small" nats, which fit into 32 GB
 let issnat (n:nat) =
