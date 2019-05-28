@@ -358,19 +358,17 @@ let rec lemma_bubble_to_top (cs : codes) (i:nat{i < L.length cs}) (fuel:nat) (s 
   match i with
   | 0 -> ()
   | _ ->
-    let tlcs = L.tl cs in
-    let Ok tlxs = bubble_to_top (L.tl cs) (i-1) in
-    assert_norm (tlxs == L.tl xs);
-    let Some s_shift = machine_eval_code (L.hd xs) fuel s in
-    let Some s_shift_0 = machine_eval_code x fuel s_shift in
-    sanity_check_equiv_states s s s;
-    admit ();
-    lemma_code_exchange x (L.hd xs) fuel s s;
-    let Some s_shift_1 = machine_eval_codes tlxs fuel s_shift_0 in
-    admit ();
-    admit ();
-    lemma_bubble_to_top tlcs (i-1) fuel s x tlxs s_0 (Some?.v (machine_eval_codes tlxs fuel s_0));
-    admit ()
+    assert !!(code_exchange_allowed x (L.hd cs));
+    lemma_code_exchange x (L.hd cs) fuel s s;
+    let Ok tlxs = bubble_to_top (L.tl cs) (i - 1) in
+    assert (L.tl xs == tlxs);
+    assert (L.hd xs == L.hd cs);
+    let Some s_start = machine_eval_code (L.hd cs) fuel s in
+    let Some s_0' = machine_eval_code x fuel s_start in
+    let s_1' = machine_eval_codes tlxs fuel s_0' in
+    assume (Some? s_1');
+    assume (equiv_states (Some?.v s_1') s_1);
+    lemma_bubble_to_top (L.tl cs) (i - 1) fuel s_start x tlxs s_0' (Some?.v s_1')
 
 let rec lemma_reordering (c1 c2 : codes) (fuel:nat) (s1 s2 : machine_state) :
   Lemma
