@@ -13,6 +13,7 @@ open Lib.Math.Algebra
 open Hacl.Impl.Bignum.Core
 open Hacl.Impl.Bignum.Convert
 open Hacl.Impl.Bignum.Montgomery
+open Hacl.Impl.Bignum.Shift
 open Hacl.Impl.Bignum.Multiplication
 
 module ST = FStar.HyperStack.ST
@@ -68,7 +69,7 @@ let mod_exp_ nLen rLen pow2_i n nInv_u64 st_kara st_exp bBits bLen b =
   let inv h1 i = modifies (loc_union (loc st_exp) (loc st_kara)) h0 h1 in
   Lib.Loops.for 0ul bBits inv
   (fun i ->
-    (if (bn_is_bit_set bLen b i) then
+    (if (bn_is_bit_set b i) then
       mul_mod_mont nLen rLen pow2_i n nInv_u64 st_kara aM accM accM); // acc = (acc * a) % n
     mul_mod_mont nLen rLen pow2_i n nInv_u64 st_kara aM aM aM // a = (a * a) % n
   )
@@ -125,4 +126,41 @@ let mod_exp pow2_i modBits nLen n r2 a bBits b res =
   to_mont nLen rLen pow2_i n nInv_u64 r2 acc st_kara accM;
   mod_exp_ nLen rLen pow2_i n nInv_u64 st_kara st_exp bBits bLen b;
   from_mont nLen rLen pow2_i n nInv_u64 accM tmp res;
+  pop_frame ()
+
+#reset-options
+
+val mod_exp_compact:
+     pow2_i:size_t{v pow2_i > 0}
+  -> #nLen:bn_len{
+       5 * v nLen + 4 * v pow2_i < max_size_t /\
+       v nLen <= v pow2_i /\
+       v nLen + 1 < 2 * v pow2_i}
+  -> n:lbignum nLen
+  -> a:lbignum nLen
+  -> b:lbignum nLen
+  -> res:lbignum nLen
+  -> Stack unit
+    (requires fun h -> live h n /\ live h a /\ live h b /\ live h res /\ as_snat h n > 1)
+    (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
+    (let n = as_snat h0 n in
+    to_fe #n (as_snat h1 res) = fexp #n (to_fe (as_snat h0 a)) (as_snat h0 b)))
+[@"c_inline"]
+let mod_exp_compact pow2_i #nLen n a b res =
+  push_frame ();
+  let modBits = 64ul *. nLen in
+  let bBits = 64ul *. nLen in
+
+  let rLen = nLen +. 1ul in
+  let exp_r = 64ul *. rLen in
+  let exp_r2 = exp_r *. exp_r in
+  let r2:lbignum nLen = create nLen (uint 0) in
+
+  assume (v nLen + 1 < max_size_t);
+  assume (v modBits / 64 < v nLen + 1);
+  assume (v modBits < v exp_r2);
+  bn_pow2_mod_n modBits n exp_r2 r2;
+
+  admit();
+  mod_exp pow2_i modBits nLen n r2 a bBits b res;
   pop_frame ()
