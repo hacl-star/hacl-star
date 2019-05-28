@@ -214,6 +214,15 @@ let equiv_ostates' (s1 : machine_state) (s2' : option machine_state) : GTot Type
 /// exact same thing is evaluated, then the final states are still
 /// equivalent.
 
+let lemma_untainted_eval_ins_equiv_states (i : ins) (s1 s2 : machine_state) :
+  Lemma
+    (requires (equiv_states s1 s1))
+    (ensures (
+        equiv_states
+          (run (untainted_eval_ins i) s1)
+          (run (untainted_eval_ins i) s2))) =
+  admit ()
+
 let lemma_eval_ins_equiv_states (i : ins) (s1 s2 : machine_state) :
   Lemma
     (requires (equiv_states s1 s2))
@@ -221,7 +230,17 @@ let lemma_eval_ins_equiv_states (i : ins) (s1 s2 : machine_state) :
         equiv_states
           (machine_eval_ins i s1)
           (machine_eval_ins i s2))) =
-  admit ()
+  let s10 = run (check (taint_match_ins i s1.ms_memTaint s1.ms_stackTaint)) s1 in
+  let s20 = run (check (taint_match_ins i s2.ms_memTaint s2.ms_stackTaint)) s2 in
+  assume (equiv_states s10 s20);
+  let memTaint1, stackTaint1 = update_taint_ins i s1.ms_memTaint s1.ms_stackTaint s10 in
+  let memTaint2, stackTaint2 = update_taint_ins i s2.ms_memTaint s2.ms_stackTaint s20 in
+  let s11 = run (untainted_eval_ins i) s10 in
+  let s21 = run (untainted_eval_ins i) s20 in
+  lemma_untainted_eval_ins_equiv_states i s10 s20;
+  let s12 = { s11 with ms_memTaint = memTaint1 ; ms_stackTaint = stackTaint1 } in
+  let s22 = { s21 with ms_memTaint = memTaint2 ; ms_stackTaint = stackTaint2 } in
+  assert (equiv_states s12 s22)
 
 let lemma_eval_code_equiv_states (c : code) (fuel:nat) (s1 s2 : machine_state) :
   Lemma
