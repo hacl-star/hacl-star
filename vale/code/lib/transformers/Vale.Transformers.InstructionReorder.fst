@@ -197,6 +197,19 @@ let sanity_check_equiv_states (s1 s2 s3 : machine_state) :
         (equiv_states s1 s2 ==> equiv_states s2 s1) /\
         (equiv_states s1 s2 /\ equiv_states s2 s3 ==> equiv_states s1 s3))) = ()
 
+(** Convenience wrapper around [equiv_states] *)
+unfold
+let equiv_ostates (s1 s2 : option machine_state) : GTot Type0 =
+  (Some? s1 = Some? s2) /\
+  (Some? s1 ==>
+   (equiv_states (Some?.v s1) (Some?.v s2)))
+
+(** A stricter convenience wrapper around [equiv_states] *)
+unfold
+let equiv_ostates' (s1 : machine_state) (s2' : option machine_state) : GTot Type0 =
+  (Some? s2') /\
+  (equiv_states s1 (Some?.v s2'))
+
 let lemma_eval_code_equiv_states (c : code) (fuel:nat) (s1 s2 : machine_state) :
   Lemma
     (requires (equiv_states s1 s2))
@@ -204,10 +217,7 @@ let lemma_eval_code_equiv_states (c : code) (fuel:nat) (s1 s2 : machine_state) :
         let s1'', s2'' =
           machine_eval_code c fuel s1,
           machine_eval_code c fuel s2 in
-        (Some? s1'' = Some? s2'') /\
-        (Some? s1'' ==> (
-            (let Some s1', Some s2' = s1'', s2'' in
-             equiv_states s1' s2'))))) =
+        equiv_ostates s1'' s2'')) =
   admit ()
 
 let rec lemma_eval_codes_equiv_states (cs : codes) (fuel:nat) (s1 s2 : machine_state) :
@@ -217,10 +227,7 @@ let rec lemma_eval_codes_equiv_states (cs : codes) (fuel:nat) (s1 s2 : machine_s
         let s1'', s2'' =
           machine_eval_codes cs fuel s1,
           machine_eval_codes cs fuel s2 in
-        (Some? s1'' = Some? s2'') /\
-        (Some? s1'' ==> (
-            (let Some s1', Some s2' = s1'', s2'' in
-             equiv_states s1' s2'))))) =
+        equiv_ostates s1'' s2'')) =
   match cs with
   | [] -> ()
   | c :: cs ->
@@ -376,8 +383,7 @@ let rec lemma_bubble_to_top (cs : codes) (i:nat{i < L.length cs}) (fuel:nat) (s 
   Lemma
     (ensures (
         let s_final' = machine_eval_codes cs fuel s in
-        (Some? s_final') /\
-        (equiv_states (Some?.v s_final') s_1))) =
+        equiv_ostates' s_1 s_final')) =
   let s_final' = machine_eval_codes cs fuel s in
   match i with
   | 0 -> ()
@@ -390,8 +396,7 @@ let rec lemma_bubble_to_top (cs : codes) (i:nat{i < L.length cs}) (fuel:nat) (s 
     let Some s_start = machine_eval_code (L.hd cs) fuel s in
     let Some s_0' = machine_eval_code x fuel s_start in
     let s_1' = machine_eval_codes tlxs fuel s_0' in
-    assume (Some? s_1');
-    assume (equiv_states (Some?.v s_1') s_1);
+    assume (equiv_ostates' s_1 s_1');
     lemma_bubble_to_top (L.tl cs) (i - 1) fuel s_start x tlxs s_0' (Some?.v s_1')
 
 let rec lemma_reordering (c1 c2 : codes) (fuel:nat) (s1 s2 : machine_state) :
