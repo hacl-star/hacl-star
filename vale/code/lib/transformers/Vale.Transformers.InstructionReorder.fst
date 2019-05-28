@@ -187,7 +187,9 @@ let equiv_states (s1 s2 : machine_state) : GTot Type0 =
   (s1.ms_xmms == s2.ms_xmms) /\
   (s1.ms_flags == s2.ms_flags) /\
   (s1.ms_mem == s2.ms_mem) /\
-  (s1.ms_stack == s2.ms_stack)
+  (s1.ms_memTaint == s2.ms_memTaint) /\
+  (s1.ms_stack == s2.ms_stack) /\
+  (s1.ms_stackTaint == s2.ms_stackTaint)
 
 (** Same as [equiv_states] but uses extensionality to "think harder";
     useful at lower-level details of the proof. *)
@@ -196,7 +198,9 @@ let equiv_states_ext (s1 s2 : machine_state) : GTot Type0 =
   (feq s1.ms_regs s2.ms_regs) /\
   (feq s1.ms_xmms s2.ms_xmms) /\
   (Map.equal s1.ms_mem s2.ms_mem) /\
+  (Map.equal s1.ms_memTaint s2.ms_memTaint) /\
   (Map.equal s1.ms_stack.stack_mem s2.ms_stack.stack_mem) /\
+  (Map.equal s1.ms_stackTaint s2.ms_stackTaint) /\
   (equiv_states s1 s2)
 
 private abstract
@@ -282,6 +286,8 @@ let lemma_eval_ins_equiv_states (i : ins) (s1 s2 : machine_state) :
   assume (equiv_states s10 s20);
   let memTaint1, stackTaint1 = update_taint_ins i s1.ms_memTaint s1.ms_stackTaint s10 in
   let memTaint2, stackTaint2 = update_taint_ins i s2.ms_memTaint s2.ms_stackTaint s20 in
+  assume (memTaint1 == memTaint2);
+  assume (stackTaint1 == stackTaint2);
   let s11 = run (untainted_eval_ins i) s10 in
   let s21 = run (untainted_eval_ins i) s20 in
   lemma_untainted_eval_ins_equiv_states i s10 s20;
