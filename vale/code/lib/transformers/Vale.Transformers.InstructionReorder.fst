@@ -224,6 +224,11 @@ let equiv_ostates' (s1 : machine_state) (s2' : option machine_state) : GTot Type
 /// exact same thing is evaluated, then the final states are still
 /// equivalent.
 
+unfold
+let proof_run (s:machine_state) (f:st unit) : machine_state =
+  let (), s1 = f s in
+  { s1 with ms_ok = s1.ms_ok && s.ms_ok }
+
 let lemma_untainted_eval_ins_equiv_states (i : ins) (s1 s2 : machine_state) :
   Lemma
     (requires (equiv_states s1 s2))
@@ -239,9 +244,27 @@ let lemma_untainted_eval_ins_equiv_states (i : ins) (s1 s2 : machine_state) :
     admit ()
   | Push _ _ ->
     assert_spinoff (equiv_states_ext s1_final s2_final)
-  | Pop _ _ ->
-    admit (); (* TODO FIXME WAT?!!?! *)
-    assert_spinoff (equiv_states_ext s1_final s2_final)
+  | Pop dst t ->
+    let stack_op = OStack (MReg rRsp 0, t) in
+    let s1 = proof_run s1 (check (valid_src_operand stack_op)) in
+    let s2 = proof_run s2 (check (valid_src_operand stack_op)) in
+    // assert (equiv_states s1 s2);
+    let new_dst1 = eval_operand stack_op s1 in
+    let new_dst2 = eval_operand stack_op s2 in
+    // assert (new_dst1 == new_dst2);
+    let new_rsp1 = (eval_reg rRsp s1 + 8) % pow2_64 in
+    let new_rsp2 = (eval_reg rRsp s2 + 8) % pow2_64 in
+    // assert (new_rsp1 == new_rsp2);
+    let s1 = proof_run s1 (update_operand_preserve_flags dst new_dst1) in
+    let s2 = proof_run s2 (update_operand_preserve_flags dst new_dst2) in
+    assert (equiv_states_ext s1 s2);
+    let s1 = proof_run s1 (free_stack (new_rsp1 - 8) new_rsp1) in
+    let s2 = proof_run s2 (free_stack (new_rsp2 - 8) new_rsp2) in
+    // assert (equiv_states s1 s2);
+    let s1 = proof_run s1 (update_rsp new_rsp1) in
+    let s2 = proof_run s2 (update_rsp new_rsp2) in
+    assert (equiv_states_ext s1 s2);
+    assert_spinoff (equiv_states s1_final s2_final)
   | Alloc _ ->
     assert_spinoff (equiv_states_ext s1_final s2_final)
   | Dealloc _ ->
