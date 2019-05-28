@@ -210,6 +210,19 @@ let equiv_ostates' (s1 : machine_state) (s2' : option machine_state) : GTot Type
   (Some? s2') /\
   (equiv_states s1 (Some?.v s2'))
 
+/// If evaluation starts from a set of equivalent states, and the
+/// exact same thing is evaluated, then the final states are still
+/// equivalent.
+
+let lemma_eval_ins_equiv_states (i : ins) (s1 s2 : machine_state) :
+  Lemma
+    (requires (equiv_states s1 s2))
+    (ensures (
+        equiv_states
+          (machine_eval_ins i s1)
+          (machine_eval_ins i s2))) =
+  admit ()
+
 let lemma_eval_code_equiv_states (c : code) (fuel:nat) (s1 s2 : machine_state) :
   Lemma
     (requires (equiv_states s1 s2))
@@ -255,6 +268,18 @@ let filt_state (s:machine_state) =
   { s with
     ms_trace = [] }
 
+let lemma_instruction_exchange' (i1 i2 : ins) (s1 s2 : machine_state) :
+  Lemma
+    (requires (
+        !!(ins_exchange_allowed i1 i2) /\
+        (equiv_states s1 s2)))
+    (ensures (
+        (let s1', s2' =
+           machine_eval_ins i2 (machine_eval_ins i1 s1),
+           machine_eval_ins i1 (machine_eval_ins i2 s2) in
+         equiv_states s1' s2'))) =
+  admit ()
+
 let lemma_instruction_exchange (i1 i2 : ins) (s1 s2 : machine_state) :
   Lemma
     (requires (
@@ -265,7 +290,13 @@ let lemma_instruction_exchange (i1 i2 : ins) (s1 s2 : machine_state) :
            machine_eval_ins i2 (filt_state (machine_eval_ins i1 (filt_state s1))),
            machine_eval_ins i1 (filt_state (machine_eval_ins i2 (filt_state s2))) in
          equiv_states s1' s2'))) =
-  admit ()
+  lemma_eval_ins_equiv_states i1 s1 (filt_state s1);
+  lemma_eval_ins_equiv_states i2 s2 (filt_state s2);
+  lemma_eval_ins_equiv_states i2 (machine_eval_ins i1 (filt_state s1)) (filt_state (machine_eval_ins i1 (filt_state s1)));
+  lemma_eval_ins_equiv_states i1 (machine_eval_ins i2 (filt_state s2)) (filt_state (machine_eval_ins i2 (filt_state s2)));
+  lemma_eval_ins_equiv_states i2 (machine_eval_ins i1 s1) (machine_eval_ins i1 (filt_state s1));
+  lemma_eval_ins_equiv_states i1 (machine_eval_ins i2 s2) (machine_eval_ins i2 (filt_state s2));
+  lemma_instruction_exchange' i1 i2 s1 s2
 
 /// Given that we can perform simple swaps between instructions, we
 /// can do swaps between [code]s.
