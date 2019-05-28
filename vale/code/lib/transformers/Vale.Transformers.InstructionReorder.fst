@@ -189,6 +189,16 @@ let equiv_states (s1 s2 : machine_state) : GTot Type0 =
   (s1.ms_mem == s2.ms_mem) /\
   (s1.ms_stack == s2.ms_stack)
 
+(** Same as [equiv_states] but uses extensionality to "think harder";
+    useful at lower-level details of the proof. *)
+let equiv_states_ext (s1 s2 : machine_state) : GTot Type0 =
+  let open FStar.FunctionalExtensionality in
+  (feq s1.ms_regs s2.ms_regs) /\
+  (feq s1.ms_xmms s2.ms_xmms) /\
+  (Map.equal s1.ms_mem s2.ms_mem) /\
+  (Map.equal s1.ms_stack.stack_mem s2.ms_stack.stack_mem) /\
+  (equiv_states s1 s2)
+
 private abstract
 let sanity_check_equiv_states (s1 s2 s3 : machine_state) :
   Lemma
@@ -222,29 +232,20 @@ let lemma_untainted_eval_ins_equiv_states (i : ins) (s1 s2 : machine_state) :
           (run (untainted_eval_ins i) s1)
           (run (untainted_eval_ins i) s2))) =
   let s1_orig, s2_orig = s1, s2 in
+  let s1_final = run (untainted_eval_ins i) s1 in
+  let s2_final = run (untainted_eval_ins i) s2 in
   match i with
   | Instr it oprs ann ->
     admit ()
-  | Push src t -> (
-      assert (valid_src_operand src s1 == valid_src_operand src s2);
-      let s1 = run (check (valid_src_operand src)) s1 in
-      let s2 = run (check (valid_src_operand src)) s2 in
-      assert (equiv_states s1 s2);
-      let new_src1 = eval_operand src s1 in
-      let new_src2 = eval_operand src s2 in
-      assert (new_src1 = new_src2);
-      let new_rsp1 = eval_reg rRsp s1 - 8 in
-      let new_rsp2 = eval_reg rRsp s2 - 8 in
-      assert (new_rsp1 = new_rsp2);
-      let s1 = run (update_rsp new_rsp1) s1 in
-      let s2 = run (update_rsp new_rsp2) s2 in
-      assume (equiv_states s1 s2); (* TODO FIXME XXX WAT?! *)
-      let s1 = run (update_operand_preserve_flags (OStack (MReg rRsp (-8), t)) new_src1) s1 in
-      let s2 = run (update_operand_preserve_flags (OStack (MReg rRsp (-8), t)) new_src2) s2 in
-      assert (equiv_states s1 s2)
-    )
-  | _ ->
-    admit ()
+  | Push _ _ ->
+    assert_spinoff (equiv_states_ext s1_final s2_final)
+  | Pop _ _ ->
+    admit (); (* TODO FIXME WAT?!!?! *)
+    assert_spinoff (equiv_states_ext s1_final s2_final)
+  | Alloc _ ->
+    assert_spinoff (equiv_states_ext s1_final s2_final)
+  | Dealloc _ ->
+    assert_spinoff (equiv_states_ext s1_final s2_final)
 
 let lemma_eval_ins_equiv_states (i : ins) (s1 s2 : machine_state) :
   Lemma
