@@ -216,12 +216,35 @@ let equiv_ostates' (s1 : machine_state) (s2' : option machine_state) : GTot Type
 
 let lemma_untainted_eval_ins_equiv_states (i : ins) (s1 s2 : machine_state) :
   Lemma
-    (requires (equiv_states s1 s1))
+    (requires (equiv_states s1 s2))
     (ensures (
         equiv_states
           (run (untainted_eval_ins i) s1)
           (run (untainted_eval_ins i) s2))) =
-  admit ()
+  let s1_orig, s2_orig = s1, s2 in
+  match i with
+  | Instr it oprs ann ->
+    admit ()
+  | Push src t -> (
+      assert (valid_src_operand src s1 == valid_src_operand src s2);
+      let s1 = run (check (valid_src_operand src)) s1 in
+      let s2 = run (check (valid_src_operand src)) s2 in
+      assert (equiv_states s1 s2);
+      let new_src1 = eval_operand src s1 in
+      let new_src2 = eval_operand src s2 in
+      assert (new_src1 = new_src2);
+      let new_rsp1 = eval_reg rRsp s1 - 8 in
+      let new_rsp2 = eval_reg rRsp s2 - 8 in
+      assert (new_rsp1 = new_rsp2);
+      let s1 = run (update_rsp new_rsp1) s1 in
+      let s2 = run (update_rsp new_rsp2) s2 in
+      assume (equiv_states s1 s2); (* TODO FIXME XXX WAT?! *)
+      let s1 = run (update_operand_preserve_flags (OStack (MReg rRsp (-8), t)) new_src1) s1 in
+      let s2 = run (update_operand_preserve_flags (OStack (MReg rRsp (-8), t)) new_src2) s2 in
+      assert (equiv_states s1 s2)
+    )
+  | _ ->
+    admit ()
 
 let lemma_eval_ins_equiv_states (i : ins) (s1 s2 : machine_state) :
   Lemma
