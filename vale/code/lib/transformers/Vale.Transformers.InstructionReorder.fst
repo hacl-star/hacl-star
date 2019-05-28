@@ -215,6 +215,15 @@ let lemma_eval_code_equiv_states (c : code) (fuel:nat) (s1 s2 : machine_state) :
 /// behave exactly the same, as per the previously defined
 /// [equiv_states] relation.
 
+(** Filter out observation related stuff from the state.
+
+    REVIEW: Figure out _why_ all the taint analysis related stuff is
+    part of the core semantics of x64, rather than being separated
+    out. *)
+let filt_state (s:machine_state) =
+  { s with
+    ms_trace = [] }
+
 let lemma_instruction_exchange (i1 i2 : ins) (s1 s2 : machine_state) :
   Lemma
     (requires (
@@ -222,8 +231,8 @@ let lemma_instruction_exchange (i1 i2 : ins) (s1 s2 : machine_state) :
         (equiv_states s1 s2)))
     (ensures (
         (let s1', s2' =
-           machine_eval_ins i1 (machine_eval_ins i2 s1),
-           machine_eval_ins i2 (machine_eval_ins i1 s2) in
+           machine_eval_ins i2 (filt_state (machine_eval_ins i1 (filt_state s1))),
+           machine_eval_ins i1 (filt_state (machine_eval_ins i2 (filt_state s2))) in
          equiv_states s1' s2'))) =
   admit ()
 
