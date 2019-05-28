@@ -395,9 +395,11 @@ let rec lemma_bubble_to_top (cs : codes) (i:nat{i < L.length cs}) (fuel:nat) (s 
     assert (L.hd xs == L.hd cs);
     let Some s_start = machine_eval_code (L.hd cs) fuel s in
     let Some s_0' = machine_eval_code x fuel s_start in
-    let s_1' = machine_eval_codes tlxs fuel s_0' in
-    assume (equiv_ostates' s_1 s_1');
-    lemma_bubble_to_top (L.tl cs) (i - 1) fuel s_start x tlxs s_0' (Some?.v s_1')
+    let Some s_0'' = machine_eval_code (L.hd cs) fuel (Some?.v (machine_eval_code x fuel s)) in
+    assert (equiv_states s_0' s_0'');
+    lemma_eval_codes_equiv_states tlxs fuel s_0' s_0'';
+    let Some s_1' = machine_eval_codes tlxs fuel s_0' in
+    lemma_bubble_to_top (L.tl cs) (i - 1) fuel s_start x tlxs s_0' s_1'
 
 let rec lemma_reordering (c1 c2 : codes) (fuel:nat) (s1 s2 : machine_state) :
   Lemma
