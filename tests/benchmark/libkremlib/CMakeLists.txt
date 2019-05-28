@@ -1,11 +1,15 @@
 project(libkremlib LANGUAGES C ASM)
 cmake_minimum_required(VERSION 3.5)
 
-set(KREMLIB_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../../../kremlin/kremlib/dist/generic CACHE PATH "Where to find the KreMLib sources.")
+if (NOT KREMLIB_DIR)
+  set(KREMLIB_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../../../kremlin/kremlib/dist/generic CACHE PATH "Where to find the KreMLib sources.")
+endif()
 get_filename_component(KREMLIB_DIR ${KREMLIB_DIR} REALPATH)
 message("-- Using KreMLib sources at ${KREMLIB_DIR}")
 
-set(KREMLIN_INC ${CMAKE_CURRENT_SOURCE_DIR}/../../../../kremlin/include CACHE PATH "Where to find the KreMLin headers.")
+if (NOT KREMLIN_INC)
+  set(KREMLIN_INC ${CMAKE_CURRENT_SOURCE_DIR}/../../../../kremlin/include CACHE PATH "Where to find the KreMLin headers.")
+endif()
 get_filename_component(KREMLIN_INC ${KREMLIN_INC} ABSOLUTE)
 message("-- Using KreMLin at ${KREMLIN_INC}")
 
