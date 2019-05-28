@@ -256,10 +256,38 @@ let lemma_code_exchange (c1 c2 : code) (fuel:nat) (s1 s2 : machine_state) :
            machine_eval_codes [c1; c2] fuel s1,
            machine_eval_codes [c2; c1] fuel s2 in
          equiv_states s1' s2'))) =
+  let Some s1', Some s2' =
+    machine_eval_codes [c1; c2] fuel s1,
+    machine_eval_codes [c2; c1] fuel s2 in
   match c1, c2 with
   | Ins i1, Ins i2 ->
+    let Some s10 = machine_eval_code c1 fuel s1 in
+    let Some s11 = machine_eval_code c1 fuel (filt_state s1) in
+    // assert_norm (equiv_states s10 s11);
+    // assert_norm (equiv_states (machine_eval_ins i1 (filt_state s1)) s11);
+    let Some s12 = machine_eval_code c2 fuel (machine_eval_ins i1 (filt_state s1)) in
+    // assert_norm (equiv_states s1' s12);
+    let Some s13 = machine_eval_code c2 fuel (filt_state (machine_eval_ins i1 (filt_state s1))) in
+    // assert_norm (equiv_states s12 s13);
+    let s14 = machine_eval_ins i2 (filt_state (machine_eval_ins i1 (filt_state s1))) in
+    // assert_norm (equiv_states s13 s14);
+    assert_norm (equiv_states s1' s14);
+    let Some s20 = machine_eval_code c2 fuel s2 in
+    let Some s21 = machine_eval_code c2 fuel (filt_state s2) in
+    // assert_norm (equiv_states s20 s21);
+    // assert_norm (equiv_states (machine_eval_ins i2 (filt_state s2)) s21);
+    let Some s22 = machine_eval_code c1 fuel (machine_eval_ins i2 (filt_state s2)) in
+    // assert_norm (equiv_states s2' s22);
+    let Some s23 = machine_eval_code c1 fuel (filt_state (machine_eval_ins i2 (filt_state s2))) in
+    // assert_norm (equiv_states s22 s23);
+    let s24 = machine_eval_ins i1 (filt_state (machine_eval_ins i2 (filt_state s2))) in
+    // assert_norm (equiv_states s23 s24);
+    assert_norm (equiv_states s2' s24);
     lemma_instruction_exchange i1 i2 s1 s2;
-    admit ()
+    assert (equiv_states s14 s24);
+    sanity_check_equiv_states s1' s14 s24;
+    sanity_check_equiv_states s1' s24 s2';
+    assert (equiv_states s1' s2')
   | _ -> ()
 
 /// Given that we can perform simple swaps between [code]s, we can
