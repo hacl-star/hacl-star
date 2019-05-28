@@ -210,6 +210,30 @@ let lemma_eval_code_equiv_states (c : code) (fuel:nat) (s1 s2 : machine_state) :
              equiv_states s1' s2'))))) =
   admit ()
 
+let rec lemma_eval_codes_equiv_states (cs : codes) (fuel:nat) (s1 s2 : machine_state) :
+  Lemma
+    (requires (equiv_states s1 s2))
+    (ensures (
+        let s1'', s2'' =
+          machine_eval_codes cs fuel s1,
+          machine_eval_codes cs fuel s2 in
+        (Some? s1'' = Some? s2'') /\
+        (Some? s1'' ==> (
+            (let Some s1', Some s2' = s1'', s2'' in
+             equiv_states s1' s2'))))) =
+  match cs with
+  | [] -> ()
+  | c :: cs ->
+    lemma_eval_code_equiv_states c fuel s1 s2;
+    let s1'', s2'' =
+      machine_eval_code c fuel s1,
+      machine_eval_code c fuel s2 in
+    match s1'' with
+    | None -> ()
+    | _ ->
+      let Some s1, Some s2 = s1'', s2'' in
+      lemma_eval_codes_equiv_states cs fuel s1 s2
+
 /// If an exchange is allowed between two instructions based off of
 /// their read/write sets, then both orderings of the two instructions
 /// behave exactly the same, as per the previously defined
