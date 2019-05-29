@@ -138,7 +138,7 @@ let rw_set_of_ins (i:ins) : rw_set =
 /// safe, we can say two operands are disjoint only if it is
 /// guaranteed that they are disjoint.
 
-let disjoint_access_locations (a1 a2:access_location) : pbool =
+let disjoint_access_location (a1 a2:access_location) : pbool =
   match a1, a2 with
   | ALocCf, ALocCf -> ffalse "carry flag not disjoint from itself"
   | ALocOf, ALocOf -> ffalse "overflow flag not disjoint from itself"
@@ -160,17 +160,40 @@ let disjoint_access_locations (a1 a2:access_location) : pbool =
       unimplemented "conservatively not disjoint ALoc64 & ALoc128"
     )
 
+let lemma_disjoint_access_location_symmetric (a1 a2:access_location) :
+  Lemma
+    (ensures (!!(disjoint_access_location a1 a2) = !!(disjoint_access_location a2 a1))) = ()
+
+let disjoint_access_locations (l1 l2:list access_location) r : pbool =
+  match l1 with
+  | [] -> ttrue
+  | x :: xs ->
+    (for_all (fun y -> (disjoint_access_location x y)) l2) /+< (r ^ " because ")
+
+let rec lemma_disjoint_access_locations_reason l1 l2 r1 r2 :
+  Lemma
+    (!!(disjoint_access_locations l1 l2 r1) = !!(disjoint_access_locations l1 l2 r2)) =
+  match l1 with
+  | [] -> ()
+  | _ :: xs -> lemma_disjoint_access_locations_reason xs l2 r1 r2
+
+let rec lemma_disjoint_access_locations_symmetric l1 l2 r :
+  Lemma
+    (!!(disjoint_access_locations l1 l2 r) = !!(disjoint_access_locations l2 l1 r)) =
+  let b1 = !!(disjoint_access_locations l1 l2 r) in
+  let b2 = !!(disjoint_access_locations l2 l1 r) in
+  match l1 with
+  | [] -> ()
+  | x :: xs ->
+    admit ()
+
 /// Given two read/write sets corresponding to two neighboring
 /// instructions, we can say whether exchanging those two instructions
 /// should be allowed.
 
 let rw_exchange_allowed (rw1 rw2 : rw_set) : pbool =
   let (r1, w1), (r2, w2) = rw1, rw2 in
-  let disjoint (l1 l2:list access_location) r : pbool =
-    match l1 with
-    | [] -> ttrue
-    | x :: xs ->
-      (for_all (fun y -> (disjoint_access_locations x y)) l2) /+< (r ^ " because ") in
+  let disjoint = disjoint_access_locations in
   (disjoint r1 w2 "read set of 1st not disjoint from write set of 2nd") &&.
   (disjoint r2 w1 "read set of 2nd not disjoint from write set of 1st") &&.
   (disjoint w1 w2 "write sets not disjoint")
