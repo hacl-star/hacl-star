@@ -1055,7 +1055,7 @@ val mapi:
       as_seq h1 o == Seq.mapi (spec_f h0) (as_seq h i))
 
 
-#set-options "--z3rlimit 200"
+#set-options "--z3rlimit 150 --max_fuel 1 --max_ifuel 1"
 inline_for_extraction noextract
 val map_blocks_multi:
     #t:buftype
@@ -1079,7 +1079,7 @@ val map_blocks_multi:
   -> Stack unit
     (requires fun h -> h0 == h /\ live h output /\ live h inp /\ eq_or_disjoint inp output)
     (ensures  fun _ _ h1 -> modifies1 output h0 h1 /\
-	as_seq h1 output == Seq.map_blocks_multi (v blocksize) (v nb)
+	as_seq h1 output == Seq.map_blocks_multi (v blocksize) (v nb) (v nb)
 			    (as_seq h0 inp) (spec_f h0))
 
 inline_for_extraction noextract

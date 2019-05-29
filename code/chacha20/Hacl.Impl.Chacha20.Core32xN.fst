@@ -50,15 +50,18 @@ val store_state: #w:lanes -> b:lbuffer uint8 (size w *! 64ul) -> st:state w -> S
    		  (ensures (fun h0 _ h1 -> modifies (loc b) h0 h1 /\ as_seq h1 b == Spec.store_blocks (as_seq h0 st)))
 let store_state #w b st =
     let h0 = ST.get() in
+    [@inline_let]
+    let store_blocks_a (i:nat{i <= 16}) = unit in
     fill_blocks h0 (size w *! 4ul) 16ul b
-    (Spec.store_blocks_a)
+    (store_blocks_a)
     (fun h -> fun i -> ())
     (fun i -> LowStar.Monotonic.Buffer.loc_none)
     (fun h -> (Spec.store_blocks_inner (as_seq h0 st)))
     (fun i -> vec_store_le #U32 #w (sub b (i *! (size w *! 4ul)) (size w *! 4ul)) st.(i));
     let h1 = ST.get() in
     assert (16ul *! (size w *! 4ul) == size w *! 64ul);
-    assume (Lib.Sequence.equal (as_seq h1 b)
+    Seq.slice_length (as_seq h1 b);
+    assert (Lib.Sequence.equal (as_seq h1 b)
 	    (as_seq h1 (gsub b 0ul (size w *! 64ul))))
 
 inline_for_extraction
@@ -89,16 +92,16 @@ val sum_state: #w:lanes -> st:state w -> ost:state w -> ST unit
 let sum_state #w st ost =  map2T (size 16) st ( +| ) st ost
 
 inline_for_extraction
-val transpose_state1: st:state 1 -> ST unit
+val transpose1: st:state 1 -> ST unit
 		  (requires (fun h -> live h st))
    		  (ensures (fun h0 _ h1 -> modifies (loc st) h0 h1 /\ as_seq h1 st == Spec.transpose1 (as_seq h0 st)))
-let transpose_state1 st = ()
+let transpose1 st = ()
 
 inline_for_extraction
-val transpose_state4: st:state 4 -> ST unit
+val transpose4: st:state 4 -> ST unit
 		  (requires (fun h -> live h st))
    		  (ensures (fun h0 _ h1 -> modifies (loc st) h0 h1 /\ as_seq h1 st == Spec.transpose4 (as_seq h0 st)))
-let transpose_state4 st =
+let transpose4 st =
   let h0 = ST.get() in
   let (v0,v1,v2,v3) = Spec.transpose4x4 (st.(0ul),st.(1ul),st.(2ul),st.(3ul)) in
   let (v4,v5,v6,v7) = Spec.transpose4x4 (st.(4ul),st.(5ul),st.(6ul),st.(7ul)) in
@@ -128,10 +131,10 @@ let transpose_state4 st =
 
 
 inline_for_extraction
-val transpose_state8: st:state 8 -> ST unit
+val transpose8: st:state 8 -> ST unit
 		  (requires (fun h -> live h st))
    		  (ensures (fun h0 _ h1 -> modifies (loc st) h0 h1 /\ as_seq h1 st == Spec.transpose8 (as_seq h0 st)))
-let transpose_state8 st =
+let transpose8 st =
   let h0 = ST.get() in
   let (v0,v1,v2,v3,v4,v5,v6,v7) = Spec.transpose8x8 (st.(0ul),st.(1ul),st.(2ul),st.(3ul),st.(4ul),st.(5ul),st.(6ul),st.(7ul)) in
   let (v8,v9,v10,v11,v12,v13,v14,v15) = Spec.transpose8x8 (st.(8ul),st.(9ul),st.(10ul),st.(11ul),st.(12ul),st.(13ul),st.(14ul),st.(15ul)) in
@@ -161,14 +164,14 @@ let transpose_state8 st =
   assert (Lib.Sequence.equal (as_seq h1 st) (Spec.transpose8 (as_seq h0 st)))
 
 inline_for_extraction
-val transpose_state: #w:lanes -> st:state w -> ST unit
+val transpose: #w:lanes -> st:state w -> ST unit
 		  (requires (fun h -> live h st))
    		  (ensures (fun h0 _ h1 -> modifies (loc st) h0 h1 /\ as_seq h1 st == Spec.transpose (as_seq h0 st)))
-let transpose_state #w st =
+let transpose #w st =
   match w with
-  | 1 -> transpose_state1 st
-  | 4 -> transpose_state4 st
-  | 8 -> transpose_state8 st
+  | 1 -> transpose1 st
+  | 4 -> transpose4 st
+  | 8 -> transpose8 st
 
 inline_for_extraction
 val xor_block: #w:lanes -> o:lbuffer uint8 ((4ul *! size w) *! 16ul) -> st:state w -> b:lbuffer uint8 ((4ul *! size w) *! 16ul) -> ST unit
@@ -179,7 +182,7 @@ let xor_block #w o st b =
     push_frame();
     let bl = create_state w in
     load_state bl b;
-    transpose_state st;
+    transpose st;
     map2T (size 16) bl ( ^| ) bl st;
     store_state o bl;
     pop_frame()

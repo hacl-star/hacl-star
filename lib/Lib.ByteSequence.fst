@@ -158,7 +158,7 @@ let nat_to_intseq_le = nat_to_intseq_le_
 let nat_to_bytes_be = nat_to_intseq_be_ #U8
 let nat_to_bytes_le = nat_to_intseq_le_ #U8
 
-#reset-options "--z3rlimit 100 --max_fuel 1 --max_ifuel 0"
+#reset-options "--z3rlimit 200 --max_fuel 1 --max_ifuel 0"
 
 val index_nat_to_intseq_le:
     #t:inttype
@@ -228,6 +228,9 @@ let uints_to_bytes_le #t #l #len ul =
            s.[i % numbytes t])
 *)
 
+let index_uints_to_bytes_le #t #l #len ul i =
+  index_generate_blocks (numbytes t) len len (uints_to_bytes_le_inner #t #l #len ul) i
+
 val uints_to_bytes_be_inner: #t:inttype -> #l:secrecy_level
   -> #len:size_nat{len * numbytes t < pow2 32}
   -> lseq (uint_t t l) len
@@ -245,6 +248,8 @@ let uints_to_bytes_be #t #l #len ul =
 let uints_from_bytes_le #t #l #len b =
   Lib.Sequence.createi #(uint_t t l) len
     (fun i -> uint_from_bytes_le (sub b (i * numbytes t) (numbytes t)))
+
+let index_uints_from_bytes_le #t #l #len b i = ()
 
 let uints_from_bytes_be #t #l #len b =
   Lib.Sequence.createi #(uint_t t l) len
@@ -376,7 +381,7 @@ let rec uints_from_bytes_le_nat_lemma_ #t #l #len b =
 let uints_from_bytes_le_nat_lemma #t #l #len b =
   uints_from_bytes_le_nat_lemma_ #t #l #len b
 
-val index_uints_to_bytes_le:
+val index_uints_to_bytes_le_aux:
     #t:inttype{~(t == U1)}
   -> #l:secrecy_level
   -> len:nat{len * numbytes t < pow2 32}
@@ -385,7 +390,7 @@ val index_uints_to_bytes_le:
   -> Lemma (let s:lseq (uint_t t l) len = nat_to_intseq_le #t #l len n in
            Seq.index (uints_to_bytes_le #t #l #len s) i ==
            Seq.index (nat_to_bytes_le #l (numbytes t) (uint_to_nat s.[i / numbytes t])) (i % numbytes t))
-let index_uints_to_bytes_le #t #l len n i =
+let index_uints_to_bytes_le_aux #t #l len n i =
   let open Lib.Sequence in
   let s: lseq (uint_t t l) len = nat_to_intseq_le #t #l len n in
   index_generate_blocks (numbytes t) len len
@@ -448,7 +453,7 @@ let index_nat_to_intseq_to_bytes_le #t #l len n i =
   }
 
 let uints_to_bytes_le_nat_lemma #t #l len n =
-  Classical.forall_intro (index_uints_to_bytes_le #t #l len n);
+  Classical.forall_intro (index_uints_to_bytes_le_aux #t #l len n);
   Classical.forall_intro (index_nat_to_intseq_to_bytes_le #t #l len n);
   Seq.lemma_eq_intro
     (uints_to_bytes_le #t #l #len (nat_to_intseq_le #t #l len n))
