@@ -180,10 +180,17 @@ let rec lemma_disjoint_access_locations_reason l1 l2 r1 r2 :
 
 let rec lemma_disjoint_access_locations_symmetric l1 l2 r :
   Lemma
-    (!!(disjoint_access_locations l1 l2 r) = !!(disjoint_access_locations l2 l1 r)) =
-  let b1 = !!(disjoint_access_locations l1 l2 r) in
-  let b2 = !!(disjoint_access_locations l2 l1 r) in
-  admit ()
+    (ensures (
+        (!!(disjoint_access_locations l1 l2 r) = !!(disjoint_access_locations l2 l1 r))))
+    (decreases %[L.length l1 + L.length l2]) =
+  match l1, l2 with
+  | [], [] -> ()
+  | [], x :: xs | x :: xs, [] ->
+    lemma_disjoint_access_locations_symmetric xs [] r
+  | x :: xs, y :: ys ->
+    lemma_disjoint_access_locations_symmetric l1 ys r;
+    lemma_disjoint_access_locations_symmetric xs l2 r;
+    lemma_disjoint_access_locations_symmetric xs ys r
 
 /// Given two read/write sets corresponding to two neighboring
 /// instructions, we can say whether exchanging those two instructions
