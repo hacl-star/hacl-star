@@ -151,13 +151,13 @@ let mod_exp_compact pow2_i #nLen n a b res =
   let modBits = 64ul *. nLen in
   let bBits = 64ul *. nLen in
 
-  let rLen = nLen +. 1ul in
+  let rLen = nLen +! 1ul in
   let exp_r = 64ul *. rLen in
   let exp_r2 = exp_r *. exp_r in
   let r2:lbignum nLen = create nLen (uint 0) in
 
   assume (v nLen + 1 < max_size_t);
-  assume (v modBits / 64 < v nLen + 1);
+  assume (v modBits / 64 <= v nLen);
   assume (v modBits < v exp_r2);
   bn_pow2_mod_n modBits n exp_r2 r2;
 
