@@ -1,3 +1,30 @@
+(**
+
+   This module defines a transformer that performs safe instruction
+   reordering.
+
+   Example:
+
+     The following set of instructions can be reordered in any order
+     without any observable change in behavior:
+
+       mov rax, 10
+       mov rbx, 3
+
+   Usage:
+
+     Given two [codes], [reordering_allowed] tells you whether this
+     transformer considers them to be safe permutations of each-other.
+     If so, then by using [lemma_reordering], the transformer shows
+     that both behave identically (i.e., starting from equivalent
+     states, execution of the two [codes] objects should lead to
+     equivalent final states).
+
+     If the reordering is not allowed, then this transformer gives a
+     (human-readable) reason for why it believes that the reordering
+     is not possible.
+
+*)
 module Vale.Transformers.InstructionReorder
 
 /// Open all the relevant modules from the x64 semantics.
