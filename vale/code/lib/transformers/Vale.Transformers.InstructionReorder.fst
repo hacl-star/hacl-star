@@ -398,24 +398,54 @@ let lemma_eval_ins_equiv_states (i : ins) (s1 s2 : machine_state) :
   let s22 = { s21 with ms_memTaint = memTaint2 ; ms_stackTaint = stackTaint2 } in
   assert (equiv_states s12 s22)
 
-let lemma_eval_code_equiv_states (c : code) (fuel:nat) (s1 s2 : machine_state) :
+(** Filter out observation related stuff from the state.
+
+    REVIEW: Figure out _why_ all the taint analysis related stuff is
+    part of the core semantics of x64, rather than being separated
+    out. *)
+let filt_state (s:machine_state) =
+  { s with
+    ms_trace = [] }
+
+let rec lemma_eval_code_equiv_states (c : code) (fuel:nat) (s1 s2 : machine_state) :
   Lemma
     (requires (equiv_states s1 s2))
     (ensures (
         let s1'', s2'' =
           machine_eval_code c fuel s1,
           machine_eval_code c fuel s2 in
-        equiv_ostates s1'' s2'')) =
-  admit ()
+        equiv_ostates s1'' s2''))
+    (decreases %[fuel; c; 1]) =
+  match c with
+  | Ins ins ->
+    lemma_eval_ins_equiv_states ins (filt_state s1) (filt_state s2)
+  | Block l ->
+    lemma_eval_codes_equiv_states l fuel s1 s2
+  | IfElse ifCond ifTrue ifFalse ->
+    let (st1, b1) = machine_eval_ocmp s1 ifCond in
+    let (st2, b2) = machine_eval_ocmp s2 ifCond in
+    assert (equiv_states st1 st2);
+    assert (b1 == b2);
+    let s1' = { st1 with ms_trace = (BranchPredicate b1) :: s1.ms_trace } in
+    let s2' = { st2 with ms_trace = (BranchPredicate b2) :: s2.ms_trace } in
+    assert (equiv_states s1' s2');
+    if b1 then (
+      lemma_eval_code_equiv_states ifTrue fuel s1' s2'
+    ) else (
+      lemma_eval_code_equiv_states ifFalse fuel s1' s2'
+    )
+  | While _ _ ->
+    lemma_eval_while_equiv_states c fuel s1 s2
 
-let rec lemma_eval_codes_equiv_states (cs : codes) (fuel:nat) (s1 s2 : machine_state) :
+and lemma_eval_codes_equiv_states (cs : codes) (fuel:nat) (s1 s2 : machine_state) :
   Lemma
     (requires (equiv_states s1 s2))
     (ensures (
         let s1'', s2'' =
           machine_eval_codes cs fuel s1,
           machine_eval_codes cs fuel s2 in
-        equiv_ostates s1'' s2'')) =
+        equiv_ostates s1'' s2''))
+    (decreases %[fuel; cs]) =
   match cs with
   | [] -> ()
   | c :: cs ->
@@ -429,19 +459,42 @@ let rec lemma_eval_codes_equiv_states (cs : codes) (fuel:nat) (s1 s2 : machine_s
       let Some s1, Some s2 = s1'', s2'' in
       lemma_eval_codes_equiv_states cs fuel s1 s2
 
+and lemma_eval_while_equiv_states (c : code{While? c}) (fuel:nat) (s1 s2:machine_state) :
+  Lemma
+    (requires (equiv_states s1 s2))
+    (ensures (
+        equiv_ostates
+          (machine_eval_while c fuel s1)
+          (machine_eval_while c fuel s2)))
+    (decreases %[fuel; c; 0]) =
+  if fuel = 0 then () else (
+    let While cond body = c in
+    let (s1, b1) = machine_eval_ocmp s1 cond in
+    let (s2, b2) = machine_eval_ocmp s2 cond in
+    assert (equiv_states s1 s2);
+    assert (b1 == b2);
+    if not b1 then () else (
+      let s1 = { s1 with ms_trace = (BranchPredicate true) :: s1.ms_trace } in
+      let s2 = { s2 with ms_trace = (BranchPredicate true) :: s2.ms_trace } in
+      assert (equiv_states s1 s2);
+      let s_opt1 = machine_eval_code body (fuel - 1) s1 in
+      let s_opt2 = machine_eval_code body (fuel - 1) s2 in
+      lemma_eval_code_equiv_states body (fuel - 1) s1 s2;
+      assert (equiv_ostates s_opt1 s_opt2);
+      match s_opt1 with
+      | None -> ()
+      | Some _ ->
+        let Some s1, Some s2 = s_opt1, s_opt2 in
+        if s1.ms_ok then (
+          lemma_eval_while_equiv_states c (fuel - 1) s1 s2
+        ) else ()
+    )
+  )
+
 /// If an exchange is allowed between two instructions based off of
 /// their read/write sets, then both orderings of the two instructions
 /// behave exactly the same, as per the previously defined
 /// [equiv_states] relation.
-
-(** Filter out observation related stuff from the state.
-
-    REVIEW: Figure out _why_ all the taint analysis related stuff is
-    part of the core semantics of x64, rather than being separated
-    out. *)
-let filt_state (s:machine_state) =
-  { s with
-    ms_trace = [] }
 
 let lemma_instruction_exchange' (i1 i2 : ins) (s1 s2 : machine_state) :
   Lemma
