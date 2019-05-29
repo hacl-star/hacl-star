@@ -749,6 +749,71 @@ and lemma_eval_while_equiv_states (c : code{While? c}) (fuel:nat) (s1 s2:machine
 /// point in the file, so only the triangular portions remain (and the
 /// one proof that links the two up into a single diagram as above).
 
+unfold
+let run2 (f1 f2:st unit) (s:machine_state) : machine_state =
+  let open Vale.X64.Machine_Semantics_s in
+  run (f1;; f2;; return ()) s
+
+let commutes (s:machine_state) (f1 f2:st unit) : GTot Type0 =
+  equiv_states
+    (run2 f1 f2 s)
+    (run2 f2 f1 s)
+
+let access_location_val_t (a:access_location) : eqtype =
+  match a with
+  | ALoc64 _ -> nat64
+  | ALoc128 _ -> quad32
+  | ALocCf -> bool
+  | ALocOf -> bool
+
+let eval_access_location (a:access_location) (s:machine_state) : access_location_val_t a =
+  match a with
+  | ALoc64 o -> eval_operand o s
+  | ALoc128 o -> eval_mov128_op o s
+  | ALocCf -> cf s.ms_flags
+  | ALocOf -> overflow s.ms_flags
+
+let unchanged (a:access_location) (f:st unit) (s:machine_state) : GTot Type0 =
+  (eval_access_location a s) == (eval_access_location a (run f s))
+
+let rec unchanged_all (as:list access_location) (f:st unit) (s:machine_state) : GTot Type0 =
+  match as with
+  | [] -> True
+  | x :: xs ->
+    unchanged x f s /\ unchanged_all xs f s
+
+let lemma_unchanged_commutes (i1 i2 : ins) (s : machine_state) :
+  Lemma
+    (requires (
+        let r1, w1 = rw_set_of_ins i1 in
+        let r2, w2 = rw_set_of_ins i2 in
+        unchanged_all r2 (untainted_eval_ins i1) s /\
+        unchanged_all r1 (untainted_eval_ins i2) s))
+    (ensures (
+        commutes s
+          (untainted_eval_ins i1)
+          (untainted_eval_ins i2))) =
+  admit ()
+
+let lemma_untainted_eval_ins_exchange (i1 i2 : ins) (s : machine_state) :
+  Lemma
+    (requires (!!(ins_exchange_allowed i1 i2)))
+    (ensures (commutes s
+                (untainted_eval_ins i1)
+                (untainted_eval_ins i2))) =
+  let f = untainted_eval_ins i1 in
+  match i2 with
+  | Instr it oprs ann ->
+    admit ()
+  | Push src t ->
+    admit ()
+  | Pop dst t ->
+    admit ()
+  | Alloc n ->
+    admit ()
+  | Dealloc n ->
+    admit ()
+
 let lemma_instruction_exchange'_ss (i1 i2 : ins) (s : machine_state) :
   Lemma
     (requires (!!(ins_exchange_allowed i1 i2)))
