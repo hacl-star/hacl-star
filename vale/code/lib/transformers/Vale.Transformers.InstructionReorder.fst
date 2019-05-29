@@ -233,6 +233,89 @@ let proof_run (s:machine_state) (f:st unit) : machine_state =
   let (), s1 = f s in
   { s1 with ms_ok = s1.ms_ok && s.ms_ok }
 
+let rec lemma_instr_apply_eval_args_equiv_states
+    (outs:list instr_out) (args:list instr_operand)
+    (f:instr_args_t outs args) (oprs:instr_operands_t_args args)
+    (s1 s2:machine_state) :
+  Lemma
+    (requires (equiv_states s1 s2))
+    (ensures (
+        (instr_apply_eval_args outs args f oprs s1) ==
+        (instr_apply_eval_args outs args f oprs s2))) =
+  match args with
+  | [] -> ()
+  | i :: args ->
+    let (v, oprs) : option (instr_val_t i) & _ =
+      match i with
+      | IOpEx i -> let oprs = coerce oprs in (instr_eval_operand_explicit i (fst oprs) s1, snd oprs)
+      | IOpIm i -> (instr_eval_operand_implicit i s1, coerce oprs)
+    in
+    let f:arrow (instr_val_t i) (instr_args_t outs args) = coerce f in
+    match v with
+    | None -> ()
+    | Some v ->
+      lemma_instr_apply_eval_args_equiv_states outs args (f v) oprs s1 s2
+
+let rec lemma_instr_apply_eval_inouts_equiv_states
+    (outs inouts:list instr_out) (args:list instr_operand)
+    (f:instr_inouts_t outs inouts args) (oprs:instr_operands_t inouts args)
+    (s1 s2:machine_state) :
+  Lemma
+    (requires (equiv_states s1 s2))
+    (ensures (
+        (instr_apply_eval_inouts outs inouts args f oprs s1) ==
+        (instr_apply_eval_inouts outs inouts args f oprs s2))) =
+  match inouts with
+  | [] ->
+    lemma_instr_apply_eval_args_equiv_states outs args f oprs s1 s2
+  | (Out, i) :: inouts ->
+    let oprs =
+      match i with
+      | IOpEx i -> snd #(instr_operand_t i) (coerce oprs)
+      | IOpIm i -> coerce oprs
+    in
+    lemma_instr_apply_eval_inouts_equiv_states outs inouts args (coerce f) oprs s1 s2
+  | (InOut, i)::inouts ->
+    let (v, oprs) : option (instr_val_t i) & _ =
+      match i with
+      | IOpEx i -> let oprs = coerce oprs in (instr_eval_operand_explicit i (fst oprs) s1, snd oprs)
+      | IOpIm i -> (instr_eval_operand_implicit i s1, coerce oprs)
+    in
+    let f:arrow (instr_val_t i) (instr_inouts_t outs inouts args) = coerce f in
+    match v with
+    | None -> ()
+    | Some v ->
+      lemma_instr_apply_eval_inouts_equiv_states outs inouts args (f v) oprs s1 s2
+
+let lemma_eval_instr_equiv_states
+    (it:instr_t_record) (oprs:instr_operands_t it.outs it.args) (ann:instr_annotation it)
+    (s1 s2:machine_state) :
+  Lemma
+    (requires (equiv_states s1 s2))
+    (ensures (
+        equiv_ostates
+          (eval_instr it oprs ann s1)
+          (eval_instr it oprs ann s2))) =
+  let InstrTypeRecord #outs #args #havoc_flags i = it in
+  let vs1 = instr_apply_eval outs args (instr_eval i) oprs s1 in
+  let vs2 = instr_apply_eval outs args (instr_eval i) oprs s2 in
+  lemma_instr_apply_eval_inouts_equiv_states outs outs args (instr_eval i) oprs s1 s2;
+  assert (vs1 == vs2);
+  let s1_new =
+    match havoc_flags with
+    | HavocFlags -> {s1 with ms_flags = havoc_state_ins s1 (Instr it oprs ann)}
+    | PreserveFlags -> s1
+  in
+  let s2_new =
+    match havoc_flags with
+    | HavocFlags -> {s2 with ms_flags = havoc_state_ins s2 (Instr it oprs ann)}
+    | PreserveFlags -> s2
+  in
+  assert (equiv_states s1_new s2_new);
+  let os1 = FStar.Option.mapTot (fun vs -> instr_write_outputs outs args vs oprs s1 s1_new) vs1 in
+  let os2 = FStar.Option.mapTot (fun vs -> instr_write_outputs outs args vs oprs s2 s2_new) vs2 in
+  assume (equiv_ostates os1 os2)
+
 let lemma_untainted_eval_ins_equiv_states (i : ins) (s1 s2 : machine_state) :
   Lemma
     (requires (equiv_states s1 s2))
@@ -245,7 +328,7 @@ let lemma_untainted_eval_ins_equiv_states (i : ins) (s1 s2 : machine_state) :
   let s2_final = run (untainted_eval_ins i) s2 in
   match i with
   | Instr it oprs ann ->
-    admit ()
+    lemma_eval_instr_equiv_states it oprs ann s1 s2
   | Push _ _ ->
     assert_spinoff (equiv_states_ext s1_final s2_final)
   | Pop dst t ->
