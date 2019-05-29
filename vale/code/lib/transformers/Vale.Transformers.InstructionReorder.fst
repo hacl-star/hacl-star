@@ -216,6 +216,27 @@ let sanity_check_2 =
       (make_instr ins_Mov64 (OReg rRax) (OConst 100))
       (make_instr ins_Add64 (OReg rRax) (OConst 299))))
 
+let lemma_ins_exchange_allowed_symmetric (i1 i2 : ins) :
+  Lemma
+    (requires (
+        !!(ins_exchange_allowed i1 i2)))
+    (ensures (
+        !!(ins_exchange_allowed i2 i1))) =
+  let b1 = !!(ins_exchange_allowed i1 i2) in
+  let b2 = !!(ins_exchange_allowed i2 i1) in
+  assert (b1 == !!(rw_exchange_allowed (rw_set_of_ins i1) (rw_set_of_ins i2)));
+  assert (b2 == !!(rw_exchange_allowed (rw_set_of_ins i2) (rw_set_of_ins i1)));
+  let r1, w1 = rw_set_of_ins i1 in
+  let r2, w2 = rw_set_of_ins i2 in
+  let disjoint = disjoint_access_locations in
+  let aux l1 l2 : (b:bool{forall r. b == !!(disjoint l1 l2 r)}) =
+    FStar.Classical.forall_intro (lemma_disjoint_access_locations_reason l1 l2 "");
+    !!(disjoint l1 l2 "") in
+  assert (b1 == (aux r1 w2 && aux r2 w1 && aux w1 w2));
+  assert (b2 == (aux r2 w1 && aux r1 w2 && aux w2 w1));
+  lemma_disjoint_access_locations_symmetric w1 w2 "";
+  assert (aux w1 w2 = aux w2 w1)
+
 /// First, we must define what it means for two states to be
 /// equivalent. Here, we basically say they must be exactly the same.
 ///
