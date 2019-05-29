@@ -164,11 +164,12 @@ let lemma_disjoint_access_location_symmetric (a1 a2:access_location) :
   Lemma
     (ensures (!!(disjoint_access_location a1 a2) = !!(disjoint_access_location a2 a1))) = ()
 
-let disjoint_access_locations (l1 l2:list access_location) r : pbool =
+let rec disjoint_access_locations (l1 l2:list access_location) r : pbool =
   match l1 with
   | [] -> ttrue
   | x :: xs ->
-    (for_all (fun y -> (disjoint_access_location x y)) l2) /+< (r ^ " because ")
+    ((for_all (fun y -> (disjoint_access_location x y)) l2) /+< (r ^ " because ")) &&.
+    (disjoint_access_locations xs l2 r)
 
 let rec lemma_disjoint_access_locations_reason l1 l2 r1 r2 :
   Lemma
@@ -182,10 +183,7 @@ let rec lemma_disjoint_access_locations_symmetric l1 l2 r :
     (!!(disjoint_access_locations l1 l2 r) = !!(disjoint_access_locations l2 l1 r)) =
   let b1 = !!(disjoint_access_locations l1 l2 r) in
   let b2 = !!(disjoint_access_locations l2 l1 r) in
-  match l1 with
-  | [] -> ()
-  | x :: xs ->
-    admit ()
+  admit ()
 
 /// Given two read/write sets corresponding to two neighboring
 /// instructions, we can say whether exchanging those two instructions
@@ -232,8 +230,8 @@ let lemma_ins_exchange_allowed_symmetric (i1 i2 : ins) :
   let aux l1 l2 : (b:bool{forall r. b == !!(disjoint l1 l2 r)}) =
     FStar.Classical.forall_intro (lemma_disjoint_access_locations_reason l1 l2 "");
     !!(disjoint l1 l2 "") in
-  assert (b1 == (aux r1 w2 && aux r2 w1 && aux w1 w2));
-  assert (b2 == (aux r2 w1 && aux r1 w2 && aux w2 w1));
+  assume (b1 == (aux r1 w2 && aux r2 w1 && aux w1 w2));
+  assume (b2 == (aux r2 w1 && aux r1 w2 && aux w2 w1));
   lemma_disjoint_access_locations_symmetric w1 w2 "";
   assert (aux w1 w2 = aux w2 w1)
 
