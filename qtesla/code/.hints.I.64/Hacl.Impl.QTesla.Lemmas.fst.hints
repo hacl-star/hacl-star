@@ -1,5 +1,5 @@
 [
-  "ufÒí\tyì\u001c\u001e0ÏE˛\u0002f€",
+  "ºÚ÷˛óN2>ó¨t√≠7:p",
   [
     [
       "Hacl.Impl.QTesla.Lemmas.my_logand_pos_le",
@@ -28,7 +28,7 @@
         "typing_FStar.Int.to_uint", "typing_FStar.UInt.logand"
       ],
       0,
-      "ecfba45f05e76953144a9af9344dacc5"
+      "eb2cc31629a767c8246c063072911ec1"
     ],
     [
       "Hacl.Impl.QTesla.Lemmas.lemma_logand32_value_max",
@@ -57,7 +57,7 @@
         "typing_FStar.UInt64.logand", "typing_FStar.UInt64.uint_to_t"
       ],
       0,
-      "6637e42b8ec8dd100efb32e5ada8f3bf"
+      "4407a9277801d7543c04a65c1d93c6d5"
     ],
     [
       "Hacl.Impl.QTesla.Lemmas.lemma_logand32_value_min",
@@ -89,7 +89,7 @@
         "typing_FStar.UInt64.uint_to_t", "typing_FStar.UInt64.v"
       ],
       0,
-      "29a2357b39552ace34b8ffbf72dc5c54"
+      "2d9fcfc738435e4aa2aadc30ca46dd48"
     ],
     [
       "Hacl.Impl.QTesla.Lemmas.shift_right_value_lemma_int64",
@@ -110,7 +110,7 @@
         "typing_FStar.UInt32.v"
       ],
       0,
-      "17da404e3393d1d60291c16aaa48e1a7"
+      "c9272d8302593915300d42b417df9a0f"
     ],
     [
       "Hacl.Impl.QTesla.Lemmas.shift_right_value_lemma_int64",
@@ -151,7 +151,7 @@
         "typing_FStar.UInt32.v", "typing_Prims.pow2"
       ],
       0,
-      "1baa79ffb8b1af7d03106cd3776d284b"
+      "91c59c22b053dec27ae37e35d8b7a420"
     ],
     [
       "Hacl.Impl.QTesla.Lemmas.lemma_int32_sar_n_minus_1",
@@ -185,21 +185,24 @@
         "@MaxIFuel_assumption", "@query",
         "Prims_pretyping_ae567c2fb75be05905677af440075565",
         "Prims_pretyping_f537159ed795b314b4e58c260361ae86", "bool_inversion",
-        "bool_typing", "equation_FStar.Int.nth", "equation_Prims.nat",
-        "equation_Prims.pos",
+        "bool_typing", "equation_FStar.Int.nth", "equation_FStar.Int.zero",
+        "equation_Prims.nat", "equation_Prims.pos",
         "function_token_typing_Prims.__cache_version_number__",
         "int_inversion", "int_typing", "lemma_FStar.Int.logxor_definition",
-        "lemma_FStar.Int.zero_nth_lemma", "primitive_Prims.op_disEquality",
-        "projection_inverse_BoxInt_proj_0",
+        "lemma_FStar.Int.zero_nth_lemma", "lemma_FStar.Int32.vu_inv",
+        "primitive_Prims.op_disEquality", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_044beed7c4e882285765d0f59a64c413",
         "refinement_interpretation_Tm_refine_28da6d93b2fe31f4b75405e2de7e9dec",
+        "refinement_interpretation_Tm_refine_30591d030a25922265d2167b73711f13",
         "refinement_interpretation_Tm_refine_5514fbe9e08dfda40f950a7b9f1b2b98",
         "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
         "refinement_interpretation_Tm_refine_f048236b5f8051f83b495ea5eaa6127b",
         "typing_FStar.Int.nth", "typing_FStar.Int.zero",
+        "typing_FStar.Int32.int_to_t", "typing_FStar.Int32.logxor",
         "typing_FStar.Int32.v"
       ],
       0,
-      "47cb530e1f1fff297fd27765902edc51"
+      "2774ba4ee82fdcce49b7e5626b8d5218"
     ],
     [
       "Hacl.Impl.QTesla.Lemmas.lemma_int32_logor_zero",
@@ -225,7 +228,7 @@
         "typing_FStar.Int.nth", "typing_FStar.Int32.v"
       ],
       0,
-      "4b3df470546f58f89d62652e29c5bb4c"
+      "dfd34eb46417adca5077ad8c0485044d"
     ],
     [
       "Hacl.Impl.QTesla.Lemmas.lemma_int32_lognot_zero",
@@ -250,7 +253,7 @@
         "typing_FStar.Int32.lognot", "typing_FStar.Int32.v"
       ],
       0,
-      "91904bdf2fd553727525a57dec820822"
+      "3f089da1f9e328e31fd0d0906c2210d7"
     ],
     [
       "Hacl.Impl.QTesla.Lemmas.uint_pow2_minus_one",
@@ -272,7 +275,7 @@
         "typing_Prims.pow2"
       ],
       0,
-      "8eb3da0765eeb7086be14bda79d38d3b"
+      "74949272c109be262543eaea43842629"
     ],
     [
       "Hacl.Impl.QTesla.Lemmas.uint_logand_pow2_minus_one",
@@ -288,7 +291,7 @@
         "refinement_interpretation_Tm_refine_f048236b5f8051f83b495ea5eaa6127b"
       ],
       0,
-      "5004435af41a1f8574df601f0f6b9955"
+      "4e32954f3ffe8b94ffc8e7fefbfaf43c"
     ],
     [
       "Hacl.Impl.QTesla.Lemmas.lemma_shift_left_one_eq_pow2",
@@ -314,7 +317,7 @@
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "d107a2879d976a0f278eeb5ad9e3c325"
+      "fe0645be2498b215db704db7965f69f5"
     ]
   ]
 ]

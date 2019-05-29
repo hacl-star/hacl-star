@@ -321,7 +321,7 @@ val poly_add:
   -> y: poly
   -> Stack unit
     (requires fun h -> live h result /\ live h x /\ live h y /\ disjoint result x /\ disjoint result y /\ disjoint x y /\
-                    (forall i . i < v params_n ==> is_elem_int (elem_v (bget h x i) + elem_v (bget h y i))))
+                    (forall (i:nat{i < v params_n}) . is_elem_int (elem_v (bget h x i) + elem_v (bget h y i))))
     (ensures fun h0 _ h1 -> modifies1 result h0 h1)
 
 let poly_add result x y =
@@ -329,8 +329,9 @@ let poly_add result x y =
     let h0 = ST.get() in
     for 0ul params_n
     (fun h _ -> live h result /\ live h x /\ live h y /\ modifies1 result h0 h /\
-             (forall i. i < v params_n ==> is_elem_int (elem_v (bget h x i) + elem_v (bget h y i))))
+             (forall (i:nat{i < v params_n}) . is_elem_int (elem_v (bget h x i) + elem_v (bget h y i))))
     (fun i ->
+        let h = ST.get () in assert(is_elem_int (elem_v (bget h x (v i)) + elem_v (bget h y (v i))));
         result.(i) <- x.(i) +^ y.(i)
     );
     pop_frame()

@@ -46,9 +46,42 @@ module SHA3 = Hacl.SHA3
 
 module R    = Hacl.QTesla.Random
 
-#reset-options "--z3rlimit 100 --max_fuel 1 --max_ifuel 1 --admit_smt_queries true"
+#reset-options "--z3rlimit 100 --max_fuel 1 --max_ifuel 1"
 
 private let _RADIX32 = size params_radix32
+
+private let lemma_abs_by_mask (mask:I32.t{mask == 0l \/ mask == (-1l)}) (value:I32.t) : Lemma
+    (requires FStar.Int.fits (I32.v (I32.(mask ^^ value)) - I32.v mask) I32.n /\
+              ((mask == 0l) <==> (I32.v value >= 0)) /\
+              ((mask == (-1l)) <==> (I32.v value < 0)))
+    (ensures I32.v I32.((mask ^^ value) -^ mask) == FStar.Math.Lib.abs (I32.v value)) = 
+    [@inline_let] let op_Plus_Hat = I32.op_Plus_Hat in
+    [@inline_let] let op_Subtraction_Hat = I32.op_Subtraction_Hat in
+    [@inline_let] let op_Greater_Greater_Hat = I32.op_Greater_Greater_Hat in
+    [@inline_let] let op_Amp_Hat = I32.op_Amp_Hat in
+    [@inline_let] let op_Bar_Hat = I32.op_Bar_Hat in
+    [@inline_let] let op_Star_Hat = I32.op_Star_Hat in
+    [@inline_let] let lognot = I32.lognot in  
+    lemma_int32_logxor_identities value;
+    Int.logxor_commutative (I32.v mask) (I32.v value);
+    assert((mask == 0l) ==> ( (mask ^^ value) == value ));
+    assert((mask == 0l) ==> ( value -^ mask == value ));
+    assert((mask == (-1l)) ==> ( (mask ^^ value) == (-1l) *^ value -^ 1l ));
+    assert((mask == (-1l)) ==> ( ((-1l) *^ value -^ 1l) -^ mask == (-1l) *^ value ))
+
+    //assume(mask == 0l \/ mask == (-1l));
+    //assume(FStar.Int.fits (elem_v (mask ^^ value) - elem_v mask) I32.n);
+    // Proof sketch:
+    // If value >= 0: |value| == value
+    // 1. mask == 0
+    // 2. mask ^ value == value
+    // 3. (mask ^ value) - mask == value - mask == value - 0 == value
+    // 4. value == |value|
+    // If value < 0: |value| == -value
+    // 1. mask == -1
+    // 2. mask ^ value == |value| - 1 (definition of signed bitwise XOR)
+    // 3. (mask ^ value) - mask == |value| - 1 - mask == |value| - 1 - (-1) == |value|
+    // 4. |value|
 
 // Reference implementation returns the unsigned version of the element type. Not sure yet whether or not
 // it's important to do this. In one case the return value is compared against a quantity that isn't even close
@@ -63,20 +96,7 @@ let abs_ value =
     //assert((I32.v value >= 0) ==> (I32.v mask == 0));
     assert((I32.v value >= 0) ==> (mask == 0l));
     assert((I32.v value < 0) ==> (mask == (-1l)));
-    //assume(mask == 0l \/ mask == (-1l));
-    //assume(FStar.Int.fits (elem_v (mask ^^ value) - elem_v mask) I32.n);
-    // Proof sketch:
-    // If value >= 0: |value| == value
-    // 1. mask == 0
-    // 2. mask ^ value == value
-    // 3. (mask ^ value) - mask == value - mask == value - 0 == value
-    // 4. value == |value|
-    // If value < 0: |value| == -value
-    // 1. mask == -1
-    // 2. mask ^ value == |value| - 1 (definition of signed bitwise XOR)
-    // 3. (mask ^ value) - mask == |value| - 1 - mask == |value| - 1 - (-1) == |value|
-    // 4. |value|
-    lemma_int32_logxor_identities value;
+    lemma_abs_by_mask mask value;
     I32.((mask ^^ value) -^ mask)
 
 private unfold let check_ES_list_bound (h:HS.mem) (list: lbuffer I32.t params_n) (i:nat{i < v params_n}) =
@@ -92,6 +112,12 @@ let check_ES_ordered_exchange_ct (list: lbuffer I32.t params_n) (i: size_t{v i +
     (ensures fun h0 _ h1 -> modifies1 list h0 h1 /\ check_ES_list_bound_buffer h1 list /\
                          I32.v (bget h1 list (v i)) <= I32.v (bget h1 list (v i + 1))) =
 
+    [@inline_let] let op_Plus_Hat = I32.op_Plus_Hat in
+    [@inline_let] let op_Subtraction_Hat = I32.op_Subtraction_Hat in
+    [@inline_let] let op_Greater_Greater_Hat = I32.op_Greater_Greater_Hat in
+    [@inline_let] let op_Amp_Hat = I32.op_Amp_Hat in
+    [@inline_let] let op_Bar_Hat = I32.op_Bar_Hat in
+    [@inline_let] let lognot = I32.lognot in
     let h3 = ST.get () in
     assert_norm(v (_RADIX32 -. size 1) < I32.n);
     assert(check_ES_list_bound h3 list (v i));
@@ -121,6 +147,7 @@ let check_ES_ordered_exchange_ct (list: lbuffer I32.t params_n) (i: size_t{v i +
     list.(i) <- temp;
     let h3end = ST.get () in
     assert(mask == 0l \/ mask == (-1l));
+    assert(I32.v mask == Int.zero I32.n \/ I32.v mask == Int.ones I32.n);
     FStar.Int.logand_lemma_1 (I32.v (bget h3 list (v i)));
     FStar.Int.logand_lemma_1 (I32.v (bget h3 list (v i + 1)));
     FStar.Int.logand_lemma_2 (I32.v (bget h3 list (v i)));
@@ -131,7 +158,26 @@ let check_ES_ordered_exchange_ct (list: lbuffer I32.t params_n) (i: size_t{v i +
     assert(I32.v (bget h3 list (v i)) > I32.v (bget h3 list (v i + 1)) ==> (mask == (-1l)));
     lemma_int32_lognot_zero mask;
     assert((mask == 0l) ==> (lognot mask == (-1l)));
-    assert((mask == (-1l) ==> (lognot mask == 0l)));
+    assert((mask == (-1l)) ==> (lognot mask == 0l));
+    assert((mask == (-1l)) ==> ( (temp == (bget h3 list (v i + 1))) /\ 
+                                 ((bget h3end list (v i + 1)) == (bget h3 list (v i))) /\
+                                 ((bget h3end list (v i)) == (bget h3 list (v i + 1))) ));
+
+    assert((mask == 0l) ==> ( ((bget h3 list (v i)) &^ (lognot mask)) == (bget h3 list (v i)) ));
+    assert((mask == 0l) ==> ( ((bget h3 list (v i + 1)) &^ mask) == 0l));
+    assert((mask == 0l) ==> ( ( ((bget h3 list (v i)) &^ (lognot mask)) |^
+                                ((bget h3 list (v i + 1)) &^ mask) ) == (bget h3 list (v i)) ));
+    assert(((bget h3 list (v i)) |^ 0l) == (bget h3 list (v i)));
+    assert(temp == ( ((bget h3 list (v i + 1)) &^ mask) |^
+                     ((bget h3 list (v i)) &^ (lognot mask)) ));
+    assert((mask == 0l) ==> ( ((bget h3 list (v i + 1)) &^ mask) == 0l));
+    assert((mask == 0l) ==> ( ((bget h3 list (v i)) &^ (lognot mask)) == (bget h3 list (v i)) ));
+    assert( (0l |^ (bget h3 list (v i))) == (bget h3 list (v i)) );
+    //assert((mask == 0l) ==> ( ( ((bget h3 list (v i + 1)) &^ mask)  |^
+    //                             ((bget h3 list (v i)) &^ (lognot mask))) == (bget h3 list (v i)) ));
+    assert((mask == 0l) ==> ( (temp == (bget h3 list (v i))) /\ 
+                              ((bget h3end list (v i + 1)) == (bget h3 list (v i + 1))) /\
+                              ((bget h3end list (v i)) == (bget h3 list (v i))) ));
     //assert((mask == 0l) ==> (bget h3end list (v i + 1)) == (bget h3 list (v i + 1)));
     //assert(I32.v (bget h3 list (v i)) < I32.v (bget h3 list (v i + 1)) ==> (temp == (bget h3 list (v i))));
            //(I32.v temp == I32.v (bget h3 list (v i))));// /\
@@ -140,11 +186,11 @@ let check_ES_ordered_exchange_ct (list: lbuffer I32.t params_n) (i: size_t{v i +
     //assert(I32.v (bget h3 list (v i)) >= I32.v (bget h3 list (v i + 1)) ==> I32.v temp == I32.v (bget h3end list (v i + 1)));
     // Need to add in reasoning for all the bitwise operations. But either they end up exchanging
     // list[i] and list[i+1] or leaving them as-is. Assume as much.
-    assume((bget h3 list (v i) == bget h3end list (v i + 1) /\
+    assert((bget h3 list (v i) == bget h3end list (v i + 1) /\
            bget h3 list (v i + 1) == bget h3end list (v i)) \/
            (bget h3 list (v i) == bget h3end list (v i) /\
            bget h3 list (v i + 1) == bget h3end list (v i + 1)));
-    assume(I32.v (bget h3end list (v i)) <= I32.v (bget h3end list (v i + 1)));
+    assert(I32.v (bget h3end list (v i)) <= I32.v (bget h3end list (v i + 1)));
     assert(check_ES_list_bound h3end list (v i));
     assert(check_ES_list_bound h3end list (v i + 1))
 
@@ -173,7 +219,6 @@ let check_ES p bound =
   let h0 = ST.get () in
   // Nik says push_frame should give us (modifies B.loc_none hInit h0) but it doesn't.
   // Will talk to Tahina.
-  assume(is_poly_sampler_output hInit p ==> is_poly_sampler_output h0 p);
   let sum = create (size 1) 0ul in
   let limit = create (size 1) params_n in
   let (list:lbuffer I32.t params_n) = create params_n 0l in
@@ -188,11 +233,16 @@ let check_ES p bound =
                is_poly_sampler_output h p /\
                (forall i . check_ES_list_bound h list i))
       (fun j ->
+        let hx = ST.get () in assert(is_poly_sampler_output hx p); assert(is_sampler_output (bget hx p (v j)));
         let pj = p.(j) in
+        assert(is_sampler_output pj);
         let abspj = abs_ (elem_to_int32 pj) in
         assert(I32.v abspj >= 0 /\ I32.v abspj <= pow2 (v params_s_bits) - 1);
         list.(j) <- abspj;
-        let h = ST.get() in assert(check_ES_list_bound h list (v j))
+        let h = ST.get() in 
+        assert(check_ES_list_bound h list (v j)); 
+        assert(forall (i:nat{i < v params_n}). {:pattern bget h p i} bget hx p i == bget h p i);
+        assert(is_poly_sampler_output h p)
       );
 
   let h1 = ST.get () in
@@ -289,20 +339,25 @@ val poly_uniform_setA:
                           is_poly_k_montgomery_i h1 a (v (bget h1 iBuf 0)))
 
 let poly_uniform_setA a iBuf value =
-    [@inline_let] let params_q = elem_to_uint32 params_q in
+    let params_q = elem_to_uint32 params_q in
     let i = iBuf.(size 0) in
     let h = ST.get () in assert(is_poly_k_montgomery_i h a (v i)); assert(modifies0 h h);
     if (value <. params_q && i <. (params_k *. params_n))
-    then ( let h = ST.get () in assert(is_poly_k_montgomery_i h a (v i)); 
+    then ( let h0 = ST.get () in assert(is_poly_k_montgomery_i h0 a (v i)); 
            [@inline_let] let reduction = reduce I64.((uint32_to_int64 value) *^ params_r2_invn) in
            assert(is_montgomery reduction);
            a.(i) <- reduction; // reduce I64.((uint32_to_int64 value) *^ params_r2_invn);
-           let h = ST.get () in 
-           assert(is_montgomery (bget h a (v i))); admit();
-           assert(is_poly_k_montgomery_i h a (v i)); admit();
-           assert(is_poly_k_montgomery_i h a (v i + 1)); admit();
+           let h1 = ST.get () in 
+           assert(is_montgomery (bget h1 a (v i)));
+           assert(forall (j:nat{j < v i}). {:pattern bget h1 a j} bget h0 a j == bget h1 a j);
+           assert(is_poly_k_montgomery_i h1 a (v i));
+           assert(is_poly_k_montgomery_i h1 a (v i + 1));
            iBuf.(size 0) <- i +. size 1;
-           assert(is_poly_k_montgomery_i h a (v (bget h iBuf 0))) )
+           let h2 = ST.get() in
+           assert(v (bget h2 iBuf 0) == (v i + 1));
+           assert(forall (j:nat{j < v params_n * v params_k}) . {:pattern bget h2 a j} bget h1 a j == bget h2 a j);
+           assert(is_poly_k_montgomery_i h2 a (v i + 1));
+           assert(is_poly_k_montgomery_i h2 a (v (bget h2 iBuf 0))) )
     else ()
 
 private inline_for_extraction noextract
@@ -321,12 +376,15 @@ val poly_uniform_do_while:
                     ((bget h nblocks 0) == size 1 \/ (bget h nblocks 0) == params_genA) /\
                     is_poly_k_montgomery_i h a (v (bget h i 0)))
     (ensures fun h0 _ h1 -> modifies (loc a |+| loc pos |+| loc i |+| loc nblocks |+| loc buf |+| loc dmsp) h0 h1 /\
-                         ((bget h1 nblocks 0) == size 1 \/ (bget h1 nblocks 0) == params_genA))// /\
-                         //v (bget h1 i 0) <= v params_k * v params_n)// /\
-                         //is_poly_montgomery_k h1 a (v (bget h1 i 0)))
+                         ((bget h1 nblocks 0) == size 1 \/ (bget h1 nblocks 0) == params_genA) /\
+                         v (bget h1 i 0) <= v params_k * v params_n /\
+                         is_poly_k_montgomery_i h1 a (v (bget h1 i 0)))
+
+#reset-options "--z3rlimit 300 --max_fuel 1 --max_ifuel 1"
 
 let poly_uniform_do_while a seed pos i nblocks buf dmsp =
     let h0 = ST.get () in
+    assert(is_poly_k_montgomery_i h0 a (v (bget h0 i 0)));
     assert(modifies0 h0 h0);
     let nbytes:size_t = (params_q_log +. 7ul) /. 8ul in
     if (pos.(size 0)) >. (shake128_rate *. (nblocks.(size 0))) -. ((size 4) *. nbytes)
@@ -356,26 +414,35 @@ let poly_uniform_do_while a seed pos i nblocks buf dmsp =
 
     let h2 = ST.get () in
     assert(modifies4 nblocks buf dmsp pos h0 h2);
-    //assert(is_poly_montgomery_k h2 a (v (bget h2 i 0)));
+    assert(forall (j:nat{j < v (bget h2 i 0)}) . {:pattern bget h2 a j} bget h0 a j == bget h2 a j);
+    assert(is_poly_k_montgomery_i h2 a (v (bget h2 i 0)));
 
+    let hi = ST.get () in assert(v (bget hi i 0) <= v params_n * v params_k);
+    assert(is_poly_k_montgomery_i hi a (v (bget hi i 0)));
     poly_uniform_setA a i val1;
-    //let hi = ST.get () in assert(is_poly_montgomery_k hi a (v (bget hi i 0)));
+    let hi = ST.get () in assert(v (bget hi i 0) <= v params_n * v params_k);
+    assert(is_poly_k_montgomery_i hi a (v (bget hi i 0)));
     poly_uniform_setA a i val2;
-    //let hi = ST.get () in assert(is_poly_montgomery_k hi a (v (bget hi i 0)));
+    let hi = ST.get () in assert(v (bget hi i 0) <= v params_n * v params_k);
+    assert(is_poly_k_montgomery_i hi a (v (bget hi i 0)));
     poly_uniform_setA a i val3;
-    //let hi = ST.get () in assert(is_poly_montgomery_k hi a (v (bget hi i 0)));
+    let hi = ST.get () in assert(v (bget hi i 0) <= v params_n * v params_k);
+    assert(is_poly_k_montgomery_i hi a (v (bget hi i 0)));
     poly_uniform_setA a i val4;
-    //let hi = ST.get () in assert(is_poly_montgomery_k hi a (v (bget hi i 0)));
+    let hi = ST.get () in assert(v (bget hi i 0) <= v params_n * v params_k);
+    assert(is_poly_k_montgomery_i hi a (v (bget hi i 0)));
 
     let h3 = ST.get () in
     assert(modifies (loc nblocks |+| loc buf |+| loc dmsp |+| loc pos |+| loc a |+| loc i) h0 h3)
     
+#reset-options "--z3rlimit 100 --max_fuel 1 --max_ifuel 1"
+
 val poly_uniform:
     a: poly_k
   -> seed: lbuffer uint8 crypto_randombytes
   -> Stack unit
     (requires fun h -> live h a /\ live h seed /\ disjoint a seed)
-    (ensures fun h0 _ h1 -> modifies1 a h0 h1 /\ is_poly_montgomery h1 a)
+    (ensures fun h0 _ h1 -> modifies1 a h0 h1 /\ is_poly_k_montgomery h1 a)
     
 let poly_uniform a seed =
     push_frame();
@@ -397,12 +464,21 @@ let poly_uniform a seed =
     LL.while
         (fun h -> live h a /\ live h pos /\ live h i /\ live h nblocks /\ live h buf /\ live h dmsp /\ live h seed /\
                modifies (loc dmsp |+| loc pos |+| loc a |+| loc i |+| loc nblocks |+| loc buf) h0 h /\
+               v (bget h i 0) <= v params_k * v params_n /\
+               is_poly_k_montgomery_i h a (v (bget h i 0)) /\
                ((bget h nblocks 0) == size 1 \/ (bget h nblocks 0) == params_genA))
         (fun h -> v (bget h i 0) < v params_k * v params_n)
         (fun _ -> i.(size 0) <. (params_k *. params_n) )
         (fun _ -> poly_uniform_do_while a seed pos i nblocks buf dmsp);
 
-    pop_frame()
+    let h1 = ST.get () in
+    assert(v (bget h1 i 0) == v params_k * v params_n); 
+    assert(is_poly_k_montgomery_i h1 a (v params_k * v params_n)); 
+    assert(is_poly_k_montgomery h1 a);
+    pop_frame();
+    let h2 = ST.get () in
+    assert(forall (j:nat{j < v params_k * v params_n}) . {:pattern bget h2 a j} bget h1 a j == bget h2 a j);
+    assert(is_poly_k_montgomery h2 a)
 
 private inline_for_extraction noextract
 let randomness_extended_size = (params_k +. size 3) *. crypto_seedbytes
@@ -416,7 +492,7 @@ val qtesla_keygen_sample_gauss_poly:
   -> Stack unit
     (requires fun h -> live h randomness_extended /\ live h nonce /\ live h p /\ 
                     disjoint randomness_extended nonce /\ disjoint randomness_extended p /\ disjoint nonce p)
-    (ensures fun h0 _ h1 -> modifies2 nonce p h0 h1)
+    (ensures fun h0 _ h1 -> modifies2 nonce p h0 h1 /\ is_poly_sampler_output h1 p)
 
 let qtesla_keygen_sample_gauss_poly randomness_extended nonce p k =
     let subbuffer = sub randomness_extended (k *. crypto_seedbytes) crypto_randombytes in
@@ -441,7 +517,7 @@ val qtesla_keygen_:
                     disjoint randomness pk /\ disjoint randomness sk /\ disjoint pk sk)
     (ensures fun h0 _ h1 -> modifies2 pk sk h0 h1)
 
-//#reset-options "--z3rlimit 300 --max_fuel 0 --max_ifuel 0 --z3cliopt 'smt.qi.eager_threshold=100'"
+#reset-options "--z3rlimit 300 --max_fuel 0 --max_ifuel 0 --z3cliopt 'smt.qi.eager_threshold=100'"
 
 let qtesla_keygen_ randomness pk sk =
   push_frame();
@@ -497,7 +573,7 @@ let qtesla_keygen_ randomness pk sk =
   pop_frame();
   0l
 
-//#reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0"
+#reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0"
 
 val qtesla_keygen:
     pk: lbuffer uint8 crypto_publickeybytes
@@ -540,7 +616,7 @@ let sample_y y seed nonce =
 
     params_cSHAKE crypto_randombytes seed dmsp.(size 0) (params_n *. nbytes) buf;
     let hInit = ST.get () in
-    assume(v (bget hInit dmsp 0) < pow2 ((bits U16) - 1));
+    //assume(v (bget hInit dmsp 0) < pow2 ((bits U16) - 1));
     dmsp.(size 0) <- dmsp.(size 0) +. u16 1;
 
     let h0 = ST.get () in
@@ -554,7 +630,7 @@ let sample_y y seed nonce =
 	then (
 	    nblocks.(size 0) <- nblocks_shake;
 	    params_cSHAKE crypto_randombytes seed dmsp.(size 0) shake_rate (sub buf (size 0) shake_rate);
-            assume(v (bget hInit dmsp 0) < pow2 ((bits U16) - 1));
+            //assume(v (bget hInit dmsp 0) < pow2 ((bits U16) - 1));
 	    dmsp.(size 0) <- dmsp.(size 0) +. u16 1;
 	    pos.(size 0) <- size 0
 	) else ();
@@ -588,6 +664,8 @@ val hash_H:
   -> Stack unit
     (requires fun h -> live h c_bin /\ live h v /\ live h hm /\ disjoint c_bin v /\ disjoint c_bin hm /\ disjoint v hm)
     (ensures fun h0 _ h1 -> modifies1 c_bin h0 h1)
+
+#reset-options "--admit_smt_queries true"
 
 let hash_H c_bin v_ hm =
     push_frame();

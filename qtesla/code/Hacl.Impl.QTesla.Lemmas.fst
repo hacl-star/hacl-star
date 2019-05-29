@@ -65,18 +65,19 @@ let lemma_int32_sar_n_minus_1 x = admit()
 
 val lemma_int32_logxor_identities: x:I32.t -> Lemma
   (ensures I32.v (I32.logxor x 0l) == I32.v x /\
-           I32.v (I32.logxor x (-1l)) == (-1) * (I32.v x) - 1) // (-1) * I32.v x - 1)
-
-//let test (x:I32.t) = assert(Int.logxor (I32.v x) (Int.ones I32.n) == (-1) * I32.v x - 1)
+           I32.v (I32.logxor x (-1l)) == (-1) * (I32.v x) - 1)
 
 let lemma_int32_logxor_identities x = 
-    nth_lemma (Int.logxor (I32.v x) (Int.zero I32.n)) (Int32.v x);
-    admit()
+    nth_lemma (Int.logxor (I32.v x) (Int.zero I32.n)) (I32.v x);
+    assume(I32.v (I32.logxor x (-1l)) == (-1) * (I32.v x) - 1)
+
     
 val lemma_int32_logor_zero: x:I32.t -> Lemma
-  (ensures I32.(x |^ 0l) == x)
+  (ensures I32.logor x 0l == x /\ I32.logor 0l x == x)
 
-let lemma_int32_logor_zero x = nth_lemma #I32.n (I32.v (I32.logor x (I32.int_to_t (zero I32.n)))) (I32.v x)
+let lemma_int32_logor_zero x = 
+  nth_lemma #I32.n (I32.v (I32.logor x (I32.int_to_t (zero I32.n)))) (I32.v x);
+  nth_lemma #I32.n (I32.v (I32.logor (I32.int_to_t (zero I32.n)) x)) (I32.v x)
 
 val lemma_int32_lognot_zero: x:I32.t -> Lemma
   (requires I32.v x == FStar.Int.zero I32.n)
