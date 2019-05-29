@@ -275,11 +275,11 @@ let lemma_untainted_eval_ins_equiv_states (i : ins) (s1 s2 : machine_state) :
     assert_spinoff (equiv_states_ext s1_final s2_final)
 
 let rec lemma_taint_match_args_equiv_states
-  (args:list instr_operand)
-  (oprs:instr_operands_t_args args)
-  (memTaint:memTaint_t)
-  (stackTaint:memTaint_t)
-  (s1 s2:machine_state) :
+    (args:list instr_operand)
+    (oprs:instr_operands_t_args args)
+    (memTaint:memTaint_t)
+    (stackTaint:memTaint_t)
+    (s1 s2:machine_state) :
   Lemma
     (requires (equiv_states s1 s2))
     (ensures (
@@ -296,12 +296,12 @@ let rec lemma_taint_match_args_equiv_states
       lemma_taint_match_args_equiv_states args (coerce oprs) memTaint stackTaint s1 s2
 
 let rec lemma_taint_match_inouts_equiv_states
-  (inouts:list instr_out)
-  (args:list instr_operand)
-  (oprs:instr_operands_t inouts args)
-  (memTaint:memTaint_t)
-  (stackTaint:memTaint_t)
-  (s1 s2:machine_state) :
+    (inouts:list instr_out)
+    (args:list instr_operand)
+    (oprs:instr_operands_t inouts args)
+    (memTaint:memTaint_t)
+    (stackTaint:memTaint_t)
+    (s1 s2:machine_state) :
   Lemma
     (requires (equiv_states s1 s2))
     (ensures (
@@ -339,6 +339,42 @@ let lemma_taint_match_ins_equiv_states (i : ins) (s1 s2 : machine_state) :
     lemma_taint_match_inouts_equiv_states outs args oprs s1.ms_memTaint s1.ms_stackTaint s1 s2
   | Push _ _ | Pop _ _ | Alloc _ | Dealloc _ -> ()
 
+let rec lemma_update_taint_outputs_equiv_states
+    (outs:list instr_out) (args:list instr_operand) (oprs:instr_operands_t outs args)
+    (memTaint:memTaint_t) (stackTaint:memTaint_t)
+    (s1 s2:machine_state) :
+  Lemma
+    (requires (equiv_states s1 s2))
+    (ensures (
+        (update_taint_outputs outs args oprs memTaint stackTaint s1) ==
+        (update_taint_outputs outs args oprs memTaint stackTaint s2))) =
+  match outs with
+  | [] -> ()
+  | (_, i) :: outs ->
+    let ((memTaint, stackTaint), oprs) =
+      match i with
+      | IOpEx i ->
+        let oprs = coerce oprs in
+        (update_taint_operand_explicit i (fst oprs) memTaint stackTaint s1, snd oprs)
+      | IOpIm i -> (update_taint_operand_implicit i memTaint stackTaint s1, coerce oprs)
+    in
+    lemma_update_taint_outputs_equiv_states outs args oprs memTaint stackTaint s1 s2
+
+let lemma_update_taint_ins_equiv_states
+    (i : ins)
+    (memTaint:memTaint_t)
+    (stackTaint:memTaint_t)
+    (s1 s2:machine_state) :
+  Lemma
+    (requires (equiv_states s1 s2))
+    (ensures (
+        (update_taint_ins i memTaint stackTaint s1) ==
+        (update_taint_ins i memTaint stackTaint s2))) =
+  match i with
+  | Instr (InstrTypeRecord #outs #args _) oprs _ ->
+    lemma_update_taint_outputs_equiv_states outs args oprs memTaint stackTaint s1 s2
+  | Push _ _ | Pop _ _ | Alloc _ | Dealloc _ -> ()
+
 let lemma_eval_ins_equiv_states (i : ins) (s1 s2 : machine_state) :
   Lemma
     (requires (equiv_states s1 s2))
@@ -352,8 +388,9 @@ let lemma_eval_ins_equiv_states (i : ins) (s1 s2 : machine_state) :
   assert (equiv_states s10 s20);
   let memTaint1, stackTaint1 = update_taint_ins i s1.ms_memTaint s1.ms_stackTaint s10 in
   let memTaint2, stackTaint2 = update_taint_ins i s2.ms_memTaint s2.ms_stackTaint s20 in
-  assume (memTaint1 == memTaint2);
-  assume (stackTaint1 == stackTaint2);
+  lemma_update_taint_ins_equiv_states i s1.ms_memTaint s2.ms_stackTaint s10 s20;
+  assert (memTaint1 == memTaint2);
+  assert (stackTaint1 == stackTaint2);
   let s11 = run (untainted_eval_ins i) s10 in
   let s21 = run (untainted_eval_ins i) s20 in
   lemma_untainted_eval_ins_equiv_states i s10 s20;
