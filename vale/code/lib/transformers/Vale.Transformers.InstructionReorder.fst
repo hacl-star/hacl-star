@@ -165,11 +165,11 @@ let lemma_disjoint_access_location_symmetric (a1 a2:access_location) :
     (ensures (!!(disjoint_access_location a1 a2) = !!(disjoint_access_location a2 a1))) = ()
 
 let rec disjoint_access_locations (l1 l2:list access_location) r : pbool =
-  match l1 with
-  | [] -> ttrue
-  | x :: xs ->
-    ((for_all (fun y -> (disjoint_access_location x y)) l2) /+< (r ^ " because ")) &&.
-    (disjoint_access_locations xs l2 r)
+  for_all (fun x ->
+      for_all (fun y ->
+          disjoint_access_location x y
+      ) l2 /+< (r ^ " because ")
+  ) l1
 
 let rec lemma_disjoint_access_locations_reason l1 l2 r1 r2 :
   Lemma
