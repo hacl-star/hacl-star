@@ -287,6 +287,57 @@ let rec lemma_instr_apply_eval_inouts_equiv_states
     | Some v ->
       lemma_instr_apply_eval_inouts_equiv_states outs inouts args (f v) oprs s1 s2
 
+let lemma_instr_write_output_implicit_equiv_states
+    (i:instr_operand_implicit) (v:instr_val_t (IOpIm i))
+    (s_orig1 s1 s_orig2 s2:machine_state) :
+  Lemma
+    (requires (
+        (equiv_states s_orig1 s_orig2) /\
+        (equiv_states s1 s2)))
+    (ensures (
+        (equiv_states
+           (instr_write_output_implicit i v s_orig1 s1)
+           (instr_write_output_implicit i v s_orig2 s2)))) =
+  assert (equiv_states_ext
+            (instr_write_output_implicit i v s_orig1 s1)
+            (instr_write_output_implicit i v s_orig2 s2))
+
+let rec lemma_instr_write_outputs_equiv_states
+    (outs:list instr_out) (args:list instr_operand)
+    (vs:instr_ret_t outs) (oprs:instr_operands_t outs args)
+    (s_orig1 s1:machine_state)
+    (s_orig2 s2:machine_state) :
+  Lemma
+    (requires (
+        (equiv_states s_orig1 s_orig2) /\
+        (equiv_states s1 s2)))
+    (ensures (
+        (equiv_states
+           (instr_write_outputs outs args vs oprs s_orig1 s1)
+           (instr_write_outputs outs args vs oprs s_orig2 s2)))) =
+  match outs with
+  | [] -> ()
+  | (_, i)::outs ->
+    (
+      let ((v:instr_val_t i), (vs:instr_ret_t outs)) =
+        match outs with
+        | [] -> (vs, ())
+        | _::_ -> let vs = coerce vs in (fst vs, snd vs)
+      in
+      match i with
+      | IOpEx i ->
+        let oprs = coerce oprs in
+        let s1 = instr_write_output_explicit i v (fst oprs) s_orig1 s1 in
+        let s2 = instr_write_output_explicit i v (fst oprs) s_orig2 s2 in
+        assert (equiv_states_ext s1 s2);
+        lemma_instr_write_outputs_equiv_states outs args vs (snd oprs) s_orig1 s1 s_orig2 s2
+      | IOpIm i ->
+        lemma_instr_write_output_implicit_equiv_states i v s_orig1 s1 s_orig2 s2;
+        let s1 = instr_write_output_implicit i v s_orig1 s1 in
+        let s2 = instr_write_output_implicit i v s_orig2 s2 in
+        lemma_instr_write_outputs_equiv_states outs args vs (coerce oprs) s_orig1 s1 s_orig2 s2
+    )
+
 let lemma_eval_instr_equiv_states
     (it:instr_t_record) (oprs:instr_operands_t it.outs it.args) (ann:instr_annotation it)
     (s1 s2:machine_state) :
@@ -314,7 +365,10 @@ let lemma_eval_instr_equiv_states
   assert (equiv_states s1_new s2_new);
   let os1 = FStar.Option.mapTot (fun vs -> instr_write_outputs outs args vs oprs s1 s1_new) vs1 in
   let os2 = FStar.Option.mapTot (fun vs -> instr_write_outputs outs args vs oprs s2 s2_new) vs2 in
-  assume (equiv_ostates os1 os2)
+  match vs1 with
+  | None -> ()
+  | Some vs ->
+    lemma_instr_write_outputs_equiv_states outs args vs oprs s1 s1_new s2 s2_new
 
 let lemma_untainted_eval_ins_equiv_states (i : ins) (s1 s2 : machine_state) :
   Lemma
