@@ -706,6 +706,57 @@ and lemma_eval_while_equiv_states (c : code{While? c}) (fuel:nat) (s1 s2:machine
 /// their read/write sets, then both orderings of the two instructions
 /// behave exactly the same, as per the previously defined
 /// [equiv_states] relation.
+///
+/// Note that we require (for the overall proof) a notion of the
+/// following:
+///
+///         s1  =====  s2        Key:
+///         |          |
+///         .          .            + s1, s2, ... : machine_states
+///         . f1       . f2         + f1, f2 : some function from a
+///         .          .                         machine_state to a
+///         |          |                         machine_state
+///         V          V            + ===== : equiv_states
+///         s1' ===== s2'
+///
+/// However, proving with the [equiv_states s1 s2] as part of the
+/// preconditions requires come complex wrangling and thinking about
+/// how different states [s1] and [s2] evolve. In particular, we'd
+/// need to show and write something similar _every_ step of the
+/// execution of [f1] and [f2]. Instead, we decompose the above
+/// diagram into the following:
+///
+///
+///             s1  =====  s2
+///            /  \          \
+///           .    .          .
+///          . f1   . f2       . f2
+///         .        .          .
+///        /          \          \
+///        V          V          V
+///        s1' =====  s2''===== s2'
+///
+///
+/// We now have the ability to decompose the left "triangular" portion
+/// which is similar to the rectangular diagram above, except the
+/// issue of having to manage both [s1] and [s2] is mitigated. Next,
+/// if we look at the right "parallelogram" portion of the diagram, we
+/// see that this is just the same as saying "running [f2] on
+/// [equiv_states] leads to [equiv_states]" which is something that is
+/// easier to prove.
+///
+/// All the parallelogram proofs have already been completed by this
+/// point in the file, so only the triangular portions remain (and the
+/// one proof that links the two up into a single diagram as above).
+
+let lemma_instruction_exchange'_ss (i1 i2 : ins) (s : machine_state) :
+  Lemma
+    (requires (!!(ins_exchange_allowed i1 i2)))
+    (ensures (
+        (equiv_states
+          (machine_eval_ins i2 (machine_eval_ins i1 s))
+          (machine_eval_ins i1 (machine_eval_ins i2 s))))) =
+  admit ()
 
 let lemma_instruction_exchange' (i1 i2 : ins) (s1 s2 : machine_state) :
   Lemma
@@ -717,7 +768,9 @@ let lemma_instruction_exchange' (i1 i2 : ins) (s1 s2 : machine_state) :
            machine_eval_ins i2 (machine_eval_ins i1 s1),
            machine_eval_ins i1 (machine_eval_ins i2 s2) in
          equiv_states s1' s2'))) =
-  admit ()
+  lemma_instruction_exchange'_ss i1 i2 s1;
+  lemma_eval_ins_equiv_states i2 s1 s2;
+  lemma_eval_ins_equiv_states i1 (machine_eval_ins i2 s1) (machine_eval_ins i2 s2)
 
 let lemma_instruction_exchange (i1 i2 : ins) (s1 s2 : machine_state) :
   Lemma
