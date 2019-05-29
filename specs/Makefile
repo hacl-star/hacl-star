@@ -29,10 +29,10 @@ SPEC_FILES=	Spec.Chacha20.fst \
 		Spec.HPKE.fst \
 		Spec.HPKE.CFRG.fst
 
-LIBS = Lib.IntTypes.fst Lib.RawIntTypes.fst Lib.NatMod.fst Lib.LoopCombinators.fst Lib.Sequence.fst Lib.ByteSequence.fst Lib.PrintSequence.fst # Lib.IntVector.fst
-LIBS_FILES= $(addprefix ../lib/, $(LIBS))
-LIBS_ML = Lib_IntTypes.ml Lib_RawIntTypes.ml Lib_NatMod.ml Lib_LoopCombinators.ml Lib_Sequence.ml Lib_ByteSequence.ml Lib_PrintSequence.ml # Lib_IntVector.ml
-LIBS_EX = $(addprefix --extract_module , $(LIBS:.fst=))
+LIBS = Lib.IntTypes.fst Lib.RawIntTypes.fst Lib.NatMod.fst Lib.LoopCombinators.fst Lib.Sequence.fst Lib.ByteSequence.fst Lib.PrintSequence.fst Lib.FixedSequence.fst # Lib.IntVector.fst
+LIBS_FILES= $(addprefix ../lib/, $(LIBS)) ../../kremlin/kremlib/Spec.Loops.fst
+LIBS_ML = Spec_Loops.ml Lib_IntTypes.ml Lib_RawIntTypes.ml Lib_NatMod.ml Lib_LoopCombinators.ml Lib_Sequence.ml Lib_ByteSequence.ml  Lib_FixedSequence.ml Lib_PrintSequence.ml # Lib_IntVector.ml
+LIBS_EX = $(addprefix --extract_module , $(LIBS:.fst=)) --extract_module Spec.Loops
 
 #
 # Main targets
@@ -169,12 +169,16 @@ hmac_generic.exe: $(LIBS_FILES) Spec.Blake2.fst Spec.SHA2.fst Spec.Hash_Generic.
 	$(OCAMLOPT) -I hmac-ml $(OCAML_INCLUDES) $(addprefix hmac-ml/, $(LIBS_ML)) hmac-ml/Spec_SHA2.ml hmac-ml/Spec_Blake2.ml hmac-ml/Spec_Hash_Generic.ml hmac-ml/Spec_HMAC_Generic.ml hmac-ml/Spec_HMAC_Generic_Test.ml -o hmac.exe
 	./hmac.exe
 
-sha2-new.exe: $(LIBS_FILES) Spec.SHA2.Constants.fst Spec.SHA2.New.fst tests/Spec.SHA2.New.Test.fst
+sha2-fixed: $(LIBS_FILES) Spec.SHA2.Constants.fst Spec.Hash.Definitions.fst Spec.SHA2.Fixed.fst 
 	mkdir -p sha2-ml
-	$(FSTAR) --codegen OCaml --lax $(LIBS_EX) --extract_module Spec.SHA2.Constants --extract_module Spec.SHA2.New --extract_module Spec.SHA2.New.Test --odir sha2-ml $^
-	@echo 'let _ = test()' >> sha2-ml/Spec_SHA2_New_Test.ml
-	$(OCAMLOPT) -I sha2-ml $(OCAML_INCLUDES) $(addprefix sha2-ml/, $(LIBS_ML)) sha2-ml/Spec_SHA2_Constants.ml sha2-ml/Spec_SHA2_New.ml sha2-ml/Spec_SHA2_New_Test.ml -o sha2-new.exe
-	./sha2-new.exe
+	$(FSTAR) --codegen OCaml --lax $(LIBS_EX) --extract_module Spec.SHA2.Constants --extract_module Spec.Hash.Definitions --extract_module Spec.SHA2.Fixed  --odir sha2-fixed-ml $^
+
+sha2-fixed.exe: $(LIBS_FILES) Spec.SHA2.Constants.fst Spec.Hash.Definitions.fst Spec.SHA2.Fixed.fst tests/Spec.SHA2.Fixed.Test.fst
+	mkdir -p sha2-ml
+	$(FSTAR) --codegen OCaml --lax $(LIBS_EX) --extract_module Spec.SHA2.Constants --extract_module Spec.Hash.Definitions --extract_module Spec.SHA2.Fixed --extract_module Spec.SHA2.Fixed.Test --odir sha2-fixed-ml $^
+	@echo 'let _ = test()' >> sha2-fixed-ml/Spec_SHA2_Fixed_Test.ml
+	$(OCAMLOPT) -I sha2-fixed-ml $(OCAML_INCLUDES) $(addprefix sha2-fixed-ml/, $(LIBS_ML)) sha2-fixed-ml/Spec_SHA2_Constants.ml sha2-fixed-ml/Spec_Hash_Definitions.ml sha2-fixed-ml/Spec_SHA2_Fixed.ml sha2-fixed-ml/Spec_SHA2_Fixed_Test.ml -o sha2-fixed.exe
+	./sha2-fixed.exe
 
 # Under CI
 hkdf.exe: $(LIBS_FILES) Spec.SHA2.fst Spec.Hash.fst Spec.HMAC.fst Spec.HKDF.fst tests/Spec.HKDF.Test.fst
@@ -257,11 +261,11 @@ qdsa.exe: $(LIBS_FILES) Spec.Curve25519.fst Spec.SHA2.fst Spec.Qdsa.fst
 	$(OCAMLOPT) -I qdsa-ml qdsa-ml/Lib_IntTypes.ml qdsa-ml/Lib_RawIntTypes.ml qdsa-ml/Lib_Sequence.ml qdsa-ml/Spec_Curve25519.ml qdsa-ml/Spec_SHA2.ml qdsa-ml/Spec_Qdsa.ml -o qdsa.exe
 	./qdsa.exe
 
-sha2.exe: $(LIBS_FILES) Spec.SHA2.fst tests/Spec.SHA2.Test.fst
+sha2.exe: $(LIBS_FILES) Spec.SHA2.Constants.fst Spec.Hash.Definitions.fst Spec.Hash.PadFinish.fst Spec.MD5.fst Spec.SHA1.fst Spec.SHA2.fst Spec.Hash.fst tests/Spec.SHA2.Test.fst
 	mkdir -p sha2-ml
-	$(FSTAR) --codegen OCaml --lax $(LIBS_EX) --extract_module Spec.SHA2 --extract_module Spec.SHA2.Test --odir sha2-ml $^
+	$(FSTAR) --codegen OCaml --lax $(LIBS_EX) --extract_module Spec.SHA2.Constants --extract_module Spec.Hash.Definitions --extract_module Spec.Hash.PadFinish --extract_module Spec.MD5 --extract_module Spec.SHA1 --extract_module Spec.SHA2 --extract_module Spec.Hash --extract_module Spec.SHA2.Test --odir sha2-ml $^
 	@echo 'let _ = test()' >> sha2-ml/Spec_SHA2_Test.ml
-	$(OCAMLOPT) -I sha2-ml $(addprefix sha2-ml/, $(LIBS_ML)) sha2-ml/Spec_SHA2.ml sha2-ml/Spec_SHA2_Test.ml -o sha2.exe
+	$(OCAMLOPT) -I sha2-ml $(addprefix sha2-ml/, $(LIBS_ML)) sha2-ml/Spec_SHA2_Constants.ml sha2-ml/Spec_Hash_Definitions.ml sha2-ml/Spec_Hash_PadFinish.ml sha2-ml/Spec_MD5.ml sha2-ml/Spec_SHA1.ml sha2-ml/Spec_SHA2.ml sha2-ml/Spec_Hash.ml sha2-ml/Spec_SHA2_Test.ml -o sha2.exe
 	./sha2.exe
 
 # NOT Under CI

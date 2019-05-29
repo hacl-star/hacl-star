@@ -58,7 +58,6 @@ val concat:
   -> s1:lseq a len1 ->
   Tot (s2:lseq a (len0 + len1){to_seq s2 == Seq.append (to_seq s0) (to_seq s1)})
 
-inline_for_extraction
 let ( @| ) #a #len0 #len1 s0 s1 = concat #a #len0 #len1 s0 s1
 
 (** Conversion of a Sequence to a list *)
