@@ -849,7 +849,18 @@ let lemma_code_exchange (c1 c2 : code) (fuel:nat) (s1 s2 : machine_state) :
 /// into another using only allowed swaps.
 
 (* WARNING UNSOUND We need to figure out a way to check for equality
-   between [code]s *)
+   between [code]s.
+
+   THOUGHTS: The only place we _really_ need [eq_code] is within
+             [find_code] below. We can probably restructure the code a
+             little bit and instead of taking two codes as input, we
+             instead take a permutation; not entirely sure what that
+             would look like for nested blocks though. Possibly a
+             nested set of permutations? On the other hand, in order
+             to obtain equality between the different [code]s, we can
+             add in a "tag" into the [code] object which is then used
+             to expose equality. Not sure what that would look like,
+             or what the domino effect for that would be. *)
 assume val eq_code (c1 c2 : code) : (b:bool{b <==> c1 == c2})
 
 let rec find_code (c1:code) (cs2:codes) : possibly (i:nat{i < L.length cs2 /\ c1 == L.index cs2 i}) =
