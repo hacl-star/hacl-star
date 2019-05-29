@@ -234,11 +234,12 @@ let lemma_ins_exchange_allowed_symmetric (i1 i2 : ins) :
   let r1, w1 = rw_set_of_ins i1 in
   let r2, w2 = rw_set_of_ins i2 in
   let disjoint = disjoint_access_locations in
-  let aux l1 l2 : (b:bool{forall r. b == !!(disjoint l1 l2 r)}) =
-    FStar.Classical.forall_intro (lemma_disjoint_access_locations_reason l1 l2 "");
-    !!(disjoint l1 l2 "") in
-  assume (b1 == (aux r1 w2 && aux r2 w1 && aux w1 w2));
-  assume (b2 == (aux r2 w1 && aux r1 w2 && aux w2 w1));
+  let aux l1 l2 : (b:bool) = !!(disjoint l1 l2 "") in
+  let aux_reason l1 l2 r : Lemma
+    (!!(disjoint l1 l2 r) == aux l1 l2) = lemma_disjoint_access_locations_reason l1 l2 "" r in
+  FStar.Classical.forall_intro_3 aux_reason;
+  assert (b1 == (aux r1 w2 && aux r2 w1 && aux w1 w2));
+  assert (b2 == (aux r2 w1 && aux r1 w2 && aux w2 w1));
   lemma_disjoint_access_locations_symmetric w1 w2 "";
   assert (aux w1 w2 = aux w2 w1)
 
