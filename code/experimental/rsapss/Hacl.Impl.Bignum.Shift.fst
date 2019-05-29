@@ -47,10 +47,93 @@ val bn_lshift1:
 [@ "c_inline"]
 let bn_lshift1 #aLen a res =
   push_frame();
-  let h0 = FStar.HyperStack.ST.get () in
   let carry = create 1ul (uint 0) in
   bn_lshift1_ a carry res;
   pop_frame()
+
+
+#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
+
+val bn_lshift_:
+     #aLen:bn_len
+  -> #n:size_t { v aLen + (v n / 64) + 1 < max_size_t }
+  -> a:lbignum aLen
+  -> nw:size_t { v nw = v n / 64}
+  -> lb:size_t{ v lb = v n % 64 /\ v lb > 0 /\ v lb < 64}
+  -> res:lbignum (aLen +. (n /. 64ul) +. 1ul)
+  -> Stack unit
+    (requires (fun h -> live h a /\ live h res /\ disjoint a res))
+    (ensures (fun h0 _ h1 -> live h1 a /\ live h1 res /\ modifies1 res h0 h1))
+let bn_lshift_ #aLen #n a nw lb res =
+  let h0 = FStar.HyperStack.ST.get () in
+  let inv h _ = live h a /\ live h res /\ modifies1 res h0 h in
+  for 0ul aLen inv (fun i ->
+    let count = aLen -! i in
+    let ind = nw +! count in
+    let tmp = res.(ind) in
+    let t1 = a.(count -. 1ul) in
+    let rb = 64ul -. lb in
+    res.(ind) <- tmp |. (t1 >>. rb);
+    res.(ind -. 1ul) <- t1 <<. lb)
+
+(* res = a << n *)
+val bn_lshift:
+     #aLen:bn_len
+  -> a:lbignum aLen
+  -> n:size_t { v aLen + (v n / 64) + 1 < max_size_t }
+  -> res:lbignum (aLen +. (n /. 64ul) +. 1ul)
+  -> Stack unit
+    (requires (fun h -> live h a /\ live h res /\ disjoint a res))
+    (ensures (fun h0 _ h1 -> live h1 a /\ live h1 res /\ modifies1 res h0 h1))
+let bn_lshift #aLen a n res =
+    let nw = n /. 64ul in
+    let resLen = aLen +. nw +. 1ul in
+    let lb = n %. 64ul in
+    if lb =. 0ul
+    then begin
+      // Set the result
+      copy (sub res nw aLen) a;
+      // Clear all the other res' bits
+      memset (sub res 0ul nw) (uint 0) nw;
+      res.(resLen -. 1ul) <- uint 0
+    end else bn_lshift_ a nw lb res
+
+
+val bn_rshift1_:
+     #aLen:bn_len
+  -> a:lbignum aLen
+  -> carry:lbignum 1ul
+  -> res:lbignum aLen
+  -> Stack unit
+    (requires (fun h -> live h a /\ live h res /\ live h carry))
+    (ensures (fun h0 _ h1 ->
+     modifies2 carry res h0 h1 /\
+     live h1 a /\ live h1 res /\ live h1 carry))
+let bn_rshift1_ #aLen a carry res =
+  let h0 = FStar.HyperStack.ST.get () in
+  let inv h _ = live h a /\ live h res /\ modifies2 carry res h0 h in
+  for 0ul aLen inv (fun i ->
+    let ind = aLen -! i -! 1ul in
+    let tmp:uint64 = a.(ind) in
+    res.(ind) <- (tmp >>. 1ul) |. carry.(0ul);
+    carry.(0ul) <- if eq_u64 (tmp &. uint 1) (uint 1) then bn_tbit else uint 0)
+
+(* res = a >> 1 *)
+val bn_rshift1:
+     #aLen:bn_len
+  -> a:lbignum aLen
+  -> res:lbignum aLen
+  -> Stack unit
+    (requires (fun h -> live h a /\ live h res))
+    (ensures (fun h0 _ h1 -> modifies1 res h0 h1 /\ live h1 a /\ live h1 res))
+let bn_rshift1 #aLen a res =
+  push_frame();
+  let carry = create 1ul (uint 0) in
+  bn_rshift1_ a carry res;
+  pop_frame()
+
+
+#reset-options
 
 inline_for_extraction
 val bn_pow2_mod_n_:
