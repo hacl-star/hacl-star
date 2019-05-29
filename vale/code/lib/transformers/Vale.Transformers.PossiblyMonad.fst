@@ -77,3 +77,16 @@ let (/+<) (p:pbool) (r:string) : pbool =
   match p with
   | Ok () -> Ok ()
   | Err rr -> Err (r ^ rr)
+
+(** [&&.] is a short-circuiting logical-and. *)
+let (&&.) (x y:pbool) : pbool =
+  match x with
+  | Ok () -> y
+  | Err reason -> Err reason
+
+(** [for_all f l] runs [f] on all the elements of [l] and performs a
+    short-circuit logical-and of all the results *)
+let rec for_all (f : 'a -> pbool) (l : list 'a) : pbool =
+  match l with
+  | [] -> ttrue
+  | x :: xs -> f x &&. for_all f xs

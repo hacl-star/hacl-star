@@ -166,14 +166,6 @@ let disjoint_access_locations (a1 a2:access_location) : pbool =
 
 let rw_exchange_allowed (rw1 rw2 : rw_set) : pbool =
   let (r1, w1), (r2, w2) = rw1, rw2 in
-  let (&&.) (x y:pbool) : pbool =
-    match x with
-    | Ok () -> y
-    | Err reason -> Err reason in
-  let rec for_all (f : 'a -> pbool) (l : list 'a) : pbool =
-    match l with
-    | [] -> ttrue
-    | x :: xs -> f x &&. for_all f xs in
   let disjoint (l1 l2:list access_location) r : pbool =
     match l1 with
     | [] -> ttrue
