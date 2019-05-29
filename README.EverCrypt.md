@@ -66,13 +66,13 @@ In upcoming releases, we aim to include:
 | **Hashes**          |                          |                            |           |
 | MD5                 | ✔︎²                       |                            | ✔︎         |
 | SHA1                | ✔︎²                       |                            | ✔︎         |
-| SHA2                | ✔︎                        |                            | ✔︎         |
+| SHA2                | ✔︎                        | ✔︎³ (SHAEXT)               | ✔︎         |
 | SHA3                | ✔︎                        |                            |           |
 | Blake2              | ✔︎                        |                            |           |
 |                     |                          |                            |           |
 | **MACS**            |                          |                            |           |
 | HMAC                | ✔︎⁴                       |                            | ✔︎         |
-| Poly1305            | ✔︎³ (+ AVX + AVX2)        | ✔︎ (X64)                    |           |
+| Poly1305            | ✔︎⁶ (+ AVX + AVX2)        | ✔︎ (X64)                    |           |
 |                     |                          |                            |           |
 | **Key Derivation**  |                          |                            |           |
 | HKDF                | ✔︎⁴                       |                            | ✔︎         |
@@ -87,12 +87,13 @@ In upcoming releases, we aim to include:
 | AES CTR             |                          | ✔︎ (AES NI + PCLMULQDQ)     |           |
 
 ¹: does not multiplex (yet) over the underlying Poly1305 implementation  
-²: insecure algorithms provided for legacy interop purposes  
-³: achieved via C compiler intrinsincs; no verification results claimed for the
-   AVX and AVX2 versions whose verification is not complete yet  
+²: insecure algorithms provided for legacy interop purposes
+³: SHA2-256 only; SHA2-224, SHA2-384 and SHA2-512 are pure C  
 ⁴: HMAC and HKDF on top of the agile hash API, so HMAC-SHA2-256 and
-   HKDF-SHA2-256 leverage the assembly version under the hood  
-⁵: legacy implementation  
+   HKDF-SHA2-256 leverage the assembly version under the hood 
+⁵: legacy implementation 
+⁶: achieved via C compiler intrinsincs; no verification results claimed for the
+   AVX and AVX2 versions whose verification is not complete yet 
 
 # Building or Integrating EverCrypt
 
