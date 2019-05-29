@@ -29,7 +29,7 @@ add_subdirectory(libevercrypt)
 add_library(benchmark STATIC benchmark.cpp)
 target_include_directories(benchmark PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(benchmark PRIVATE evercrypt)
-target_compile_options(benchmark PRIVATE -march=native -mtune=native)
+target_compile_options(benchmark PRIVATE -march=native -mtune=native -std=c++11)
 
 add_executable(runbenchmark
   runbenchmark.cpp
@@ -40,7 +40,7 @@ add_executable(runbenchmark
   bench_merkle.cpp)
 target_include_directories(runbenchmark PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(runbenchmark PRIVATE benchmark evercrypt)
-target_compile_options(runbenchmark PRIVATE -march=native -mtune=native)
+target_compile_options(runbenchmark PRIVATE -march=native -mtune=native -std=c++11)
 
 if("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
   target_compile_definitions(benchmark PRIVATE _DEBUG)
