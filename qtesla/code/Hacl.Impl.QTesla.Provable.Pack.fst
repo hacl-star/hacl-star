@@ -26,13 +26,13 @@ open Hacl.Impl.QTesla.Params
 open Hacl.Impl.QTesla.Constants
 open Hacl.Impl.QTesla.Globals
 
-#reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0 --admit_smt_queries true"
+#set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit_factor 4"
 
 val pack_sk:
     sk: lbuffer uint8 crypto_secretkeybytes
   -> s: poly
   -> e: poly_k
-  -> seeds: lbuffer uint8 (2 *. crypto_seedbytes)
+  -> seeds: lbuffer uint8 (size 2 *. crypto_seedbytes)
   -> Stack unit
     (requires fun h -> live h sk /\ live h s /\ live h e /\ live h seeds /\
                     disjoint sk s /\ disjoint sk e /\ disjoint sk seeds /\
@@ -41,25 +41,30 @@ val pack_sk:
 
 let pack_sk sk s e seeds =
     push_frame();
-
+    let sk0 = sk in
+    let h_init = FStar.HyperStack.ST.get () in
     for 0ul params_n
-    (fun h _ -> live h sk /\ live h s)
+    (fun h _ -> live h sk /\ live h s /\ modifies1 sk0 h_init h)
     (fun i -> let si = s.(i) in sk.(i) <- elem_to_uint8 si);
 
     let sk = sub sk params_n (crypto_secretkeybytes -. params_n) in
     for 0ul params_k
-    (fun h _ -> live h sk /\ live h e)
+    (fun h _ -> live h sk /\ live h e /\ modifies1 sk0 h_init h)
     (fun k -> for 0ul params_n
-           (fun h0 _ -> live h0 sk /\ live h0 e)
+           (fun h0 _ -> live h0 sk /\ live h0 e /\ modifies1 sk0 h_init h0)
 	   (fun i -> let eVal = e.(k *. params_n +. i) in sk.(k *. params_n +. i) <- elem_to_uint8 eVal )
     );
 
     update_sub #MUT #_ #_ sk (params_k *. params_n) (size 2 *. crypto_seedbytes) seeds;
-
+    let h = FStar.HyperStack.ST.get () in
+    assert (modifies1 sk0 h_init h);
     pop_frame()
+
 
 inline_for_extraction noextract
 let encode_or_pack_sk = pack_sk
+
+assume val uint8_to_pub_int16 : uint8 -> sparse_elem
 
 val decode_sk:
     seeds : lbuffer uint8 (size 2 *. crypto_seedbytes)
@@ -74,17 +79,17 @@ val decode_sk:
 
 let decode_sk seeds s e sk =
     push_frame();
-
+    let h_init = FStar.HyperStack.ST.get () in
     for 0ul params_n
-    (fun h _ -> live h sk /\ live h s)
-    (fun i -> let ski = sk.(i) in s.(i) <- uint8_to_int8 ski);
-
+    (fun h _ -> live h sk /\ live h s /\ modifies (loc s) h_init h)
+    (fun i -> let ski = sk.(i) in s.(i) <- uint8_to_pub_int16 ski);
+    let h1 = FStar.HyperStack.ST.get() in
     for 0ul params_k
-    (fun h _ -> live h sk /\ live h e)
+    (fun h _ -> live h sk /\ live h e /\ modifies (loc e) h1 h)
     (fun k ->
         for 0ul params_n
-	(fun h _ -> live h sk /\ live h e)
-	(fun i -> let skVal = sk.(params_n *. (k +. size 1) +. i) in e.(params_n *. k +. i) <- uint8_to_int8 skVal)
+	(fun h _ -> live h sk /\ live h e /\ modifies (loc e) h1 h)
+	(fun i -> let skVal = sk.(params_n *. (k +. size 1) +. i) in e.(params_n *. k +. i) <- uint8_to_pub_int16 skVal)
     );
 
     copy seeds (sub sk (params_n +. params_k *. params_n) (size 2 *. crypto_seedbytes));

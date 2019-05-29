@@ -84,6 +84,7 @@ let reduce a =
     lemma_logand32_value_min I64.(a *^ params_qinv);
     let u:I64.t = I64.(u *^ (elem_to_int64 params_q)) in
     let a:I64.t = I64.(a +^ u) in
+    assume (I64.v a >= 0);
     assume(let result = I64.v I64.(a >>^ 32ul) in let q = elem_v params_q in -q < result /\ result < q);
     int64_to_elem I64.(a >>^ 32ul)
 
@@ -93,6 +94,7 @@ val barr_reduce:
 
 let barr_reduce a =
     let a64:I64.t = elem_to_int64 a in
+    assume (I64.(v (a64 *^ params_barr_mult)) >= 0);
     let u:elem_base = (int64_to_elem I64.((a64 *^ params_barr_mult) >>^ params_barr_div)) in
     assume(FStar.Int.fits (elem_v u * elem_v params_q) elem_n);
     assume(is_elem_int (elem_v a - elem_v u * elem_v params_q));
