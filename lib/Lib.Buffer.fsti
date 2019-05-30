@@ -71,7 +71,7 @@ let union (l1:B.loc) (l2:B.loc) : GTot B.loc = B.loc_union l1 l2
 let ( |+| ) (l1:B.loc) (l2:B.loc) : GTot B.loc = union l1 l2
 
 (** Generalized modification clause for Buffer locations *)
-let modifies (s:B.loc) (h1 h2:HS.mem) = B.modifies s h1 h2 /\ ST.equal_domains h1 h2
+let modifies (s:B.loc) (h1 h2:HS.mem) = B.modifies s h1 h2 /\ ST.equal_domains h1 h2 //NS: equal_domains is overkill here
 //val modifies: s:B.loc -> h1:HS.mem -> h2:HS.mem -> GTot Type0
 
 val modifies_preserves_live: #t:buftype

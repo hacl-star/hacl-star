@@ -140,6 +140,7 @@ val barr_reduce:
 
 let barr_reduce a =
     let a64:I64.t = elem_to_int64 a in
+    assume (I64.(v (a64 *^ params_barr_mult)) >= 0);
     let u:elem_base = (int64_to_elem I64.((a64 *^ params_barr_mult) >>^ params_barr_div)) in
     assume(FStar.Int.fits (elem_v u * elem_v params_q) elem_n);
     assume(is_elem_int (elem_v a - elem_v u * elem_v params_q));

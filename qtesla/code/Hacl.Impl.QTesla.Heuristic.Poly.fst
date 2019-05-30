@@ -313,7 +313,7 @@ let poly_pointwise result x y =
     );
     pop_frame()
 
-#reset-options "--z3rlimit 100 --max_fuel 1 --max_ifuel 1"
+//#reset-options "--z3rlimit 100 --max_fuel 1 --max_ifuel 1"
 
 val poly_add:
     result: poly

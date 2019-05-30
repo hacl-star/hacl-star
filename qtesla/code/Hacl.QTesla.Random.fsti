@@ -16,7 +16,7 @@ val randombytes_init_:
   -> Stack unit
     (requires fun h -> live h entropy_input)
     (ensures  fun h0 _ h1 -> 
-      modifies1 state h0 h1 /\
+      modifies1 state h0 h1 /\ //NS: switch to using LowStar modifies?
       as_seq h1 state == S.randombytes_init_ (as_seq h0 entropy_input))
 
 val randombytes_:
@@ -25,6 +25,6 @@ val randombytes_:
   -> Stack unit
     (requires fun h -> live h res)
     (ensures  fun h0 _ h1 ->
-      modifies2 res state h0 h1 /\
+      modifies2 res state h0 h1 /\ //NS: switch to using LowStar modifies?
       (let r, st = S.randombytes_ (as_seq h0 state) (v len) in
        r == as_seq h1 res /\ st == as_seq h1 state))
