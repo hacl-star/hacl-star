@@ -796,8 +796,7 @@ let rec lemma_eval_instr_unchanged_args
     (f:st unit) (s:machine_state) :
   Lemma
     (requires (
-        unchanged_all (aux_read_set0 args oprs) f s /\
-        (Some? (instr_apply_eval_args outs args ff oprs s))))
+        unchanged_all (aux_read_set0 args oprs) f s))
     (ensures (
         let v0, v1 =
           instr_apply_eval_args outs args ff oprs s,
