@@ -911,13 +911,67 @@ let valid_dst_access_location (a:access_location) (s:machine_state) : bool =
   | ALocCf -> true
   | ALocOf -> true
 
+let unchanged_except (exceptions:list access_location) (s1 s2:machine_state) :
+  GTot Type0 =
+  forall (a:access_location). {:pattern (eval_access_location a s2)} (
+    (!!(disjoint_access_location_from_locations a exceptions) ==>
+     (eval_access_location a s1 == eval_access_location a s2))
+  )
+
+private abstract
+let sanity_check_unchanged_except1 s =
+  assert (unchanged_except [] s s);
+  assert (unchanged_except [ALocCf] s s);
+  assert (unchanged_except [ALocCf; ALocOf] s ({s with ms_flags = 0}))
+
+private abstract
+[@expect_failure]
+let sanity_check_unchanged_except2 s =
+  assert (unchanged_except [] s ({s with ms_flags = 0}))
+
+let only_affects (locs:list access_location) (f:st unit) : GTot Type0 =
+  forall s. {:pattern unchanged_except locs s (run f s)} (
+    unchanged_except locs s (run f s)
+  )
+
+let rec unchanged_at (locs:list access_location) (s1 s2:machine_state) : GTot Type0 =
+  match locs with
+  | [] -> True
+  | x :: xs -> (
+      (eval_access_location x s1 == eval_access_location x s2) /\
+      (unchanged_at xs s1 s2)
+    )
+
+let bounded_effects (reads writes:list access_location) (f:st unit) : GTot Type0 =
+  (only_affects writes f) /\
+  (
+    forall s1 s2. {:pattern unchanged_at writes (run f s1) (run f s2)} (
+      unchanged_at reads s1 s2 ==>
+      unchanged_at writes (run f s1) (run f s2)
+    )
+  )
+
+let lemma_commute (f1 f2:st unit) (r1 w1 r2 w2:list access_location) (s:machine_state) :
+  Lemma
+    (requires (
+        (bounded_effects r1 w1 f1) /\
+        (bounded_effects r2 w2 f2) /\
+        !!(rw_exchange_allowed (r1, w1) (r2, w2))))
+    (ensures (
+        equiv_states
+          (run2 f1 f2 s)
+          (run2 f2 f1 s))) =
+  admit ()
+
 let lemma_unchanged_commutes (i1 i2 : ins) (s : machine_state) :
   Lemma
     (requires (
         let r1, w1 = rw_set_of_ins i1 in
         let r2, w2 = rw_set_of_ins i2 in
         unchanged_all r2 (untainted_eval_ins i1) s /\
-        unchanged_all r1 (untainted_eval_ins i2) s))
+        unchanged_all r1 (untainted_eval_ins i2) s /\
+        only_affects w1 (untainted_eval_ins i1) /\
+        only_affects w2 (untainted_eval_ins i2)))
     (ensures (
         commutes s
           (untainted_eval_ins i1)
