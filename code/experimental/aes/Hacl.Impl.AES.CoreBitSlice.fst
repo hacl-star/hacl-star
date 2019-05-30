@@ -1,4 +1,4 @@
-module Hacl.Impl.AES_128.CoreBitSlice
+module Hacl.Impl.AES.CoreBitSlice
 
 open FStar.HyperStack
 open FStar.HyperStack.All
@@ -332,10 +332,44 @@ let aes_keygen_assist next prev rcon =
 
 
 inline_for_extraction
+val aes_keygen_assist0:
+    next: state
+  -> prev: state
+  -> rcon: uint8 ->
+  Stack unit
+  (requires (fun h -> live h next /\ live h prev /\ disjoint next prev))
+  (ensures (fun h0 _ h1 -> modifies1 next h0 h1))
+
+let aes_keygen_assist0 next prev rcon =
+  aes_keygen_assist next prev rcon;
+  let h0 = ST.get() in
+  loop_nospec #h0 (size 8) next
+    (fun i -> let n = next.(i) in
+           let n = (n &. u64 0xf000f000f000f000) in
+	   let n = n ^. (n >>. size 4) in
+	   let n = n ^. (n >>. size 8) in
+	   next.(i) <- n)
+
+inline_for_extraction
+val aes_keygen_assist1:
+    next: state
+  -> prev: state ->
+  Stack unit
+  (requires (fun h -> live h next /\ live h prev /\ disjoint next prev))
+  (ensures (fun h0 _ h1 -> modifies1 next h0 h1))
+
+let aes_keygen_assist1 next prev =
+  aes_keygen_assist next prev (u8 0);
+  let h0 = ST.get() in
+  loop_nospec #h0 (size 8) next
+    (fun i -> let n = next.(i) in
+           let n = (n &. u64 0x0f000f000f000f00) in
+	   let n = n ^. (n <<. size 4) in
+	   let n = n ^. (n >>. size 8) in
+	   next.(i) <- n)
+
+inline_for_extraction
 let key_expand1 (p:uint64) (n:uint64) =
-  let n = (n &. u64 0xf000f000f000f000) in
-  let n = n ^. (n >>. size 4) in
-  let n = n ^. (n >>. size 8) in
   let p = p ^. ((p &. u64 0x0fff0fff0fff0fff) <<. size 4) ^. ((p &. u64 0x00ff00ff00ff00ff) <<. size 8)
             ^. ((p &. u64 0x000f000f000f000f) <<. size 12) in
   n ^. p

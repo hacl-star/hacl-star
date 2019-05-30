@@ -1,4 +1,4 @@
-module Hacl.Impl.AES_128.Core
+module Hacl.Impl.AES.Core
 
 open FStar.HyperStack
 open FStar.HyperStack.All
@@ -155,7 +155,7 @@ val aes_enc_last:
   (ensures  (fun h0 _ h1 -> modifies1 st h0 h1))
 
 inline_for_extraction
-val aes_keygen_assist:
+val aes_keygen_assist0:
     #m: m_spec
   -> ok: key1 m
   -> ik: key1 m
@@ -165,16 +165,16 @@ val aes_keygen_assist:
   (ensures  (fun h0 _ h1 -> modifies1 ok h0 h1))
 
 inline_for_extraction
-val key_expansion_step:
+val aes_keygen_assist1:
     #m: m_spec
-  -> next: key1 m
-  -> prev: key1 m ->
+  -> ok: key1 m
+  -> ik: key1 m ->
   Stack unit
-  (requires (fun h -> live h prev /\ live h next))
-  (ensures  (fun h0 _ h1 -> modifies1 next h0 h1))
+  (requires (fun h -> live h ok /\ live h ik /\ disjoint ik ok))
+  (ensures  (fun h0 _ h1 -> modifies1 ok h0 h1))
 
 inline_for_extraction
-val key_expansion_step2:
+val key_expansion_step:
     #m: m_spec
   -> next: key1 m
   -> prev: key1 m ->

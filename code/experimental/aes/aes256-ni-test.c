@@ -31,8 +31,8 @@ static __inline__ cycles cpucycles_end(void)
   //return ( (uint64_t)lo)|( ((uint64_t)hi)<<32 );
 }
 
-extern void Hacl_AES_256_BitSlice_aes256_init(uint64_t* ctx, uint8_t* key, uint8_t* nonce);
-extern void Hacl_AES_256_BitSlice_aes256_encrypt_block(uint8_t* out, uint64_t* ctx, uint8_t* in);
+extern void Hacl_AES_256_NI_aes256_init(uint64_t* ctx, uint8_t* key, uint8_t* nonce);
+extern void Hacl_AES_256_NI_aes256_encrypt_block(uint8_t* out, uint64_t* ctx, uint8_t* in);
 
 #define ROUNDS 10240
 #define SIZE   16384
@@ -98,30 +98,14 @@ int main() {
 
   uint64_t ctx[(uint32_t)8U + (uint32_t)15U * (uint32_t)8U] = {0};
 
-  Hacl_AES_256_BitSlice_aes256_init(ctx,test1_input_key1,comp);
+  Hacl_AES_256_NI_aes256_init(ctx,k,comp);
+  Hacl_AES_256_NI_aes256_encrypt_block(comp,ctx,in);
 
-  printf("AES-BitSlice key expansion computed:");
-  for (int i = 64; i < 64 + 960; i++)
-    printf("%02x",((uint8_t*)ctx)[i]);
-  printf("\n");
-  printf("AES-BitSlice expected:");
-  for (int i = 0; i < 960; i++)
-    printf("%02x",test1_output_expanded[i]);
-  printf("\n");
-  ok = true;
-  for (int i = 0; i < 960; i++)
-    ok = ok & (test1_output_expanded[i] == ((uint8_t*)ctx)[64 + i]);
-  if (ok) printf("Success!\n");
-
-
-  Hacl_AES_256_BitSlice_aes256_init(ctx,k,comp);
-  Hacl_AES_256_BitSlice_aes256_encrypt_block(comp,ctx,in);
-
-  printf("AES-BitSlice computed:");
+  printf("AES256-NI computed:");
   for (int i = 0; i < 16; i++)
     printf("%02x",comp[i]);
   printf("\n");
-  printf("AES-BitSlice expected:");
+  printf("AES256-NI expected:");
   for (int i = 0; i < 16; i++)
     printf("%02x",exp[i]);
   printf("\n");

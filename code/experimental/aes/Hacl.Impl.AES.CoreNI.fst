@@ -1,4 +1,4 @@
-module Hacl.Impl.AES_128.CoreNI
+module Hacl.Impl.AES.CoreNI
 
 open FStar.HyperStack
 open FStar.HyperStack.All
@@ -180,7 +180,7 @@ let aes_enc_last st key =
 
 
 inline_for_extraction
-val aes_keygen_assist:
+val aes_keygen_assist0:
     ok: key1
   -> ik: key1
   -> rcon: uint8 ->
@@ -188,9 +188,22 @@ val aes_keygen_assist:
   (requires (fun h -> live h ok /\ live h ik))
   (ensures (fun h0 _ h1 -> modifies1 ok h0 h1))
 
-let aes_keygen_assist ok ik rcon =
-  ok.(size 0) <- ni_aes_keygen_assist ik.(size 0) rcon
+let aes_keygen_assist0 ok ik rcon =
+  let v = ni_aes_keygen_assist ik.(size 0) rcon in
+  ok.(size 0) <- vec128_shuffle32 v (vec128_shuffle32_spec (u8 3) (u8 3) (u8 3) (u8 3))
 
+
+inline_for_extraction
+val aes_keygen_assist1:
+    ok: key1
+  -> ik: key1 ->
+  Stack unit
+  (requires (fun h -> live h ok /\ live h ik))
+  (ensures (fun h0 _ h1 -> modifies1 ok h0 h1))
+
+let aes_keygen_assist1 ok ik =
+  let v = ni_aes_keygen_assist ik.(size 0) (u8 0) in
+  ok.(size 0) <- vec128_shuffle32 v (vec128_shuffle32_spec (u8 2) (u8 2) (u8 2) (u8 2))
 
 inline_for_extraction
 val key_expansion_step:
@@ -202,26 +215,9 @@ val key_expansion_step:
 
 let key_expansion_step next prev =
   let n0 = next.(size 0) in
-  next.(size 0) <- vec128_shuffle32 n0 (vec128_shuffle32_spec (u8 3) (u8 3) (u8 3) (u8 3));
   let key = prev.(size 0) in
   let key = vec128_xor key (vec128_shift_left key (size 32)) in
   let key = vec128_xor key (vec128_shift_left key (size 32)) in
   let key = vec128_xor key (vec128_shift_left key (size 32)) in
   next.(size 0) <- vec128_xor next.(size 0) key
 
-
-inline_for_extraction
-val key_expansion_step2:
-    next: key1
-  -> prev: key1 ->
-  Stack unit
-  (requires (fun h -> live h prev /\ live h next))
-  (ensures (fun h0 _ h1 -> modifies1 next h0 h1))
-
-let key_expansion_step2 next prev =
-  next.(size 0) <- vec128_shuffle32 next.(size 0) (vec128_shuffle32_spec (u8 2) (u8 2) (u8 2) (u8 2));
-  let key = prev.(size 0) in
-  let key = vec128_xor key (vec128_shift_left key (size 32)) in
-  let key = vec128_xor key (vec128_shift_left key (size 32)) in
-  let key = vec128_xor key (vec128_shift_left key (size 32)) in
-  next.(size 0) <- vec128_xor next.(size 0) key
