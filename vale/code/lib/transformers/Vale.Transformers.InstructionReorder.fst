@@ -790,7 +790,7 @@ let rec unchanged_all (as:list access_location) (f:st unit) (s:machine_state) : 
   | x :: xs ->
     unchanged x f s /\ unchanged_all xs f s
 
-let rec temp_lemma_eval_instr_unchanged_args
+let rec lemma_eval_instr_unchanged_args
     (outs:list instr_out) (args:list instr_operand)
     (ff:instr_args_t outs args) (oprs:instr_operands_t_args args)
     (f:st unit) (s:machine_state) :
@@ -838,7 +838,7 @@ let rec temp_lemma_eval_instr_unchanged_args
       assert (v == eval_access_location read_op s);
       assert (eval_access_location read_op s == eval_access_location read_op (run f s));
       assert (v' == eval_access_location read_op (run f s));
-      temp_lemma_eval_instr_unchanged_args outs args (ff v) oprs f s;
+      lemma_eval_instr_unchanged_args outs args (ff v) oprs f s;
       let v0', v1' =
         instr_apply_eval_args outs args (ff v) oprs s,
         instr_apply_eval_args outs args (ff v) oprs (run f s) in
@@ -850,7 +850,7 @@ let rec temp_lemma_eval_instr_unchanged_args
       assert (res' == v1);
       ()
 
-let temp_lemma_eval_instr_unchanged_inouts
+let lemma_eval_instr_unchanged_inouts
     (outs inouts:list instr_out) (args:list instr_operand)
     (ff:instr_inouts_t outs inouts args) (oprs:instr_operands_t inouts args)
     (f:st unit) (s:machine_state) :
@@ -864,11 +864,11 @@ let temp_lemma_eval_instr_unchanged_inouts
         v0 == v1)) =
   match inouts with
   | [] ->
-    temp_lemma_eval_instr_unchanged_args outs args ff oprs f s
+    lemma_eval_instr_unchanged_args outs args ff oprs f s
   | _ ->
     admit ()
 
-let temp_lemma_eval_instr_unchanged
+let lemma_eval_instr_unchanged
     (it:instr_t_record) (oprs:instr_operands_t it.outs it.args) (ann:instr_annotation it)
     (f:st unit) (s:machine_state) :
   Lemma
@@ -881,7 +881,7 @@ let temp_lemma_eval_instr_unchanged
           instr_apply_eval outs args (instr_eval i) oprs (run f s) in
         v0 == v1)) =
   let InstrTypeRecord #outs #args #havoc_flags i = it in
-  temp_lemma_eval_instr_unchanged_inouts outs outs args (instr_eval i) oprs f s
+  lemma_eval_instr_unchanged_inouts outs outs args (instr_eval i) oprs f s
 
 let lemma_unchanged_commutes (i1 i2 : ins) (s : machine_state) :
   Lemma
