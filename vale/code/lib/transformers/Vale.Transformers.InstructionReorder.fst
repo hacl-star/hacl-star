@@ -951,6 +951,50 @@ let bounded_effects (reads writes:list access_location) (f:st unit) : GTot Type0
     )
   )
 
+let rec lemma_disjoint_implies_unchanged_at (reads changes:list access_location) (s1 s2:machine_state) :
+  Lemma
+    (requires (!!(disjoint_access_locations reads changes "") /\
+               unchanged_except changes s1 s2))
+    (ensures (unchanged_at reads s1 s2)) =
+  match reads with
+  | [] -> ()
+  | x :: xs ->
+    lemma_disjoint_implies_unchanged_at xs changes s1 s2
+
+let rec lemma_disjoint_access_location_from_locations_append
+  (a:access_location) (as1 as2:list access_location) :
+  Lemma (
+    (!!(disjoint_access_location_from_locations a as1) /\
+     !!(disjoint_access_location_from_locations a as2)) <==>
+    (!!(disjoint_access_location_from_locations a (as1 `L.append` as2)))) =
+  match as1 with
+  | [] -> ()
+  | x :: xs ->
+    lemma_disjoint_access_location_from_locations_append a xs as2
+
+let lemma_unchanged_except_transitive (a12 a23:list access_location) (s1 s2 s3:machine_state) :
+  Lemma
+    (requires (unchanged_except a12 s1 s2 /\ unchanged_except a23 s2 s3))
+    (ensures (unchanged_except (a12 `L.append` a23) s1 s3)) =
+  let aux a : Lemma
+    (requires (!!(disjoint_access_location_from_locations a (a12 `L.append` a23))))
+    (ensures (eval_access_location a s1 == eval_access_location a s3)) =
+    lemma_disjoint_access_location_from_locations_append a a12 a23 in
+  FStar.Classical.forall_intro (FStar.Classical.move_requires aux)
+
+let lemma_unchanged_except_append_symmetric (a1 a2:list access_location) (s1 s2:machine_state) :
+  Lemma
+    (requires (unchanged_except (a1 `L.append` a2) s1 s2))
+    (ensures (unchanged_except (a2 `L.append` a1) s1 s2)) =
+  let aux a : Lemma
+    (requires (
+       (!!(disjoint_access_location_from_locations a (a1 `L.append` a2))) \/
+       (!!(disjoint_access_location_from_locations a (a2 `L.append` a1)))))
+    (ensures (eval_access_location a s1 == eval_access_location a s2)) =
+    lemma_disjoint_access_location_from_locations_append a a1 a2;
+    lemma_disjoint_access_location_from_locations_append a a2 a1 in
+  FStar.Classical.forall_intro (FStar.Classical.move_requires aux)
+
 let lemma_commute (f1 f2:st unit) (r1 w1 r2 w2:list access_location) (s:machine_state) :
   Lemma
     (requires (
@@ -961,6 +1005,31 @@ let lemma_commute (f1 f2:st unit) (r1 w1 r2 w2:list access_location) (s:machine_
         equiv_states
           (run2 f1 f2 s)
           (run2 f2 f1 s))) =
+  let s12 = run2 f1 f2 s in
+  let s21 = run2 f2 f1 s in
+  let is1 = run f1 s in
+  let is2 = run f2 s in
+  let is12 = run f2 is1 in
+  let is21 = run f1 is2 in
+  FStar.Classical.forall_intro_3 (
+    (fun l1 l2 r -> lemma_disjoint_access_locations_reason l1 l2 "" r) <:
+    ((l1:_) -> (l2:_) -> (r:_) -> Lemma
+       (!!(disjoint_access_locations l1 l2 r) ==
+        !!(disjoint_access_locations l1 l2 ""))));
+  lemma_disjoint_implies_unchanged_at r1 w2 s is2;
+  lemma_disjoint_implies_unchanged_at r2 w1 s is1;
+  assert (unchanged_at w1 is1 is21);
+  assert (unchanged_at w2 is2 is12);
+  assert (unchanged_except w2 s is2);
+  assert (unchanged_except w1 s is1);
+  assert (unchanged_except w2 is1 is12);
+  assert (unchanged_except w1 is2 is21);
+  lemma_unchanged_except_transitive w1 w2 s is1 is12;
+  assert (unchanged_except (w1 `L.append` w2) s is12);
+  lemma_unchanged_except_transitive w2 w1 s is2 is21;
+  assert (unchanged_except (w2 `L.append` w1) s is21);
+  lemma_unchanged_except_append_symmetric w1 w2 s is12;
+  lemma_unchanged_except_append_symmetric w2 w1 s is21;
   admit ()
 
 let lemma_unchanged_commutes (i1 i2 : ins) (s : machine_state) :
