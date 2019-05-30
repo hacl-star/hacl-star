@@ -1,5 +1,5 @@
 project(benchmark LANGUAGES C CXX ASM)
-cmake_minimum_required(VERSION 3.6)
+cmake_minimum_required(VERSION 3.5)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_LEGACY_CYGWIN_WIN32 0) # Remove when CMake >= 3.8.4 is required
@@ -15,13 +15,10 @@ option(USE_LIBCURVE25519 "Use the library Curve25519 implementations" ON)
 option(ASAN "Enable clang address sanitizer" OFF)
 
 add_compile_options(-march=native -mtune=native)
-if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+  add_compile_options(-flto -ffat-lto-objects)
+elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
   add_compile_options(-fbracket-depth=512)
-else()
-  add_compile_options(-flto)
-  if(CMAKE_SYSTEM_NAME STREQUAL "CYGWIN")
-    add_compile_options(-ffat-lto-objects)
-  endif()
 endif()
 
 add_subdirectory(libevercrypt)
@@ -29,7 +26,7 @@ add_subdirectory(libevercrypt)
 add_library(benchmark STATIC benchmark.cpp)
 target_include_directories(benchmark PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(benchmark PRIVATE evercrypt)
-target_compile_options(benchmark PRIVATE -march=native -mtune=native)
+target_compile_options(benchmark PRIVATE -march=native -mtune=native -std=c++11)
 
 add_executable(runbenchmark
   runbenchmark.cpp
@@ -40,7 +37,7 @@ add_executable(runbenchmark
   bench_merkle.cpp)
 target_include_directories(runbenchmark PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(runbenchmark PRIVATE benchmark evercrypt)
-target_compile_options(runbenchmark PRIVATE -march=native -mtune=native)
+target_compile_options(runbenchmark PRIVATE -march=native -mtune=native -std=c++11)
 
 if("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
   target_compile_definitions(benchmark PRIVATE _DEBUG)

@@ -11,6 +11,15 @@
 #include <vector>
 #include <chrono>
 
+#define GNUPLOT_GLOBALS "\
+set datafile separator \",\" \n\
+set datafile commentschars \"//\" \n\
+set xtics norotate \n\
+set boxwidth 0.9 \n\
+set style fill solid\n\
+set bmargin 3 \n\
+set yrange[0:]"
+
 #define ABORT_BENCHMARK(msg, rv) { printf("\nABORT: %s\n", msg); return rv; }
 
 typedef uint64_t cycles;
@@ -37,6 +46,8 @@ class Benchmark
     static std::string escape(const std::string & str);
 
     std::vector<cycles> samples;
+
+    static bool have_gnuplot;
 
   public:
     Benchmark();
@@ -88,7 +99,6 @@ class Benchmark
                           const std::string & data_header,
                           const std::string & data_filename,
                           std::list<Benchmark*> & benchmarks);
-
 
     class PlotSpec : public std::vector<std::pair<std::string, std::string> >
     {

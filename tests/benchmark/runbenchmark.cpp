@@ -76,24 +76,12 @@ BenchmarkSettings & parse_args(int argc, char const ** argv)
   return r;
 }
 
-void check_prerequisites()
-{
-  #ifndef WIN32
-  if (system("gnuplot --help > /dev/null 2>&1") != 0)
-    throw std::logic_error("gnuplot not found!");
-  if (system("grep --help > /dev/null 2>&1") != 0)
-    throw std::logic_error("grep not found!");
-  #endif
-}
-
 #define ADD_BENCH(X) if (b == #X) { bench_##X(s); continue; }
 
 int main(int argc, char const **argv)
 {
   try
   {
-    check_prerequisites();
-
     Benchmark::initialize();
     BenchmarkSettings & s = parse_args(argc, argv);
 

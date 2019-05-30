@@ -1,5 +1,5 @@
 project(librfc7748 LANGUAGES C ASM)
-cmake_minimum_required(VERSION 3.6)
+cmake_minimum_required(VERSION 3.5)
 
 set(RFC7748_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../rfc7748_src CACHE PATH "Where to find the RFC 7748 reference implementation sources.")
 get_filename_component(RFC7748_DIR ${RFC7748_DIR} REALPATH)

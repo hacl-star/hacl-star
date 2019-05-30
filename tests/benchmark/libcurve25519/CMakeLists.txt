@@ -1,5 +1,5 @@
 project(libcurve25519 LANGUAGES C ASM)
-cmake_minimum_required(VERSION 3.6)
+cmake_minimum_required(VERSION 3.5)
 
 set(LIBCURVE25519_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR} CACHE PATH "Where to find the library of Curve25519 implementations.")
 get_filename_component(LIBCURVE25519_SRC_DIR ${LIBCURVE25519_SRC_DIR} ABSOLUTE)
