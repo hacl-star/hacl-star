@@ -167,7 +167,6 @@ procedure aes_ctr_loop_body(
     Load128_buffer(rk2,  key_ptr, 16, Secret, keys_b, 1);
     Load128_buffer(rk3, key_ptr, 32, Secret, keys_b, 2);
     Load128_buffer(rk4,  key_ptr, 48, Secret, keys_b, 3);
-    assert{:quick_type} length(round_keys) == nr(alg) + 1;
     assert rk1  == index(round_keys, 0);
     assert rk2  == index(round_keys, 1);
     assert rk3 == index(round_keys, 2);
@@ -367,7 +366,6 @@ procedure aes_counter_loop(
     Mov128(iv, const2_1);
     lemma_insrq_extrq_relations(iv, old_iv);
     Pinsrq(iv, iv_lower64, 0);
-    assert {:quick_type} 4*old(num_quad_blocks) < pow2_32;
     //assert iv == Mkfour(old_iv.lo0, old_iv.lo1, old_iv.hi2, reverse_bytes_nat32(add_wrap32(icb_BE.lo0, 4*old(num_quad_blocks))));
     // Reversed: iv == Mkfour(r (r (add_wrap32(r(old_iv.hi3), 4*old(num_quad_blocks)))), r(old_iv.hi2), r(old_iv.lo1), r(old_iv.lo0));
     //              == Mkfour( add_wrap32(old(iv.lo0, 4*old(num_quad_blocks))), old(iv.lo2), old(iv.hi2), old(iv).hi3));

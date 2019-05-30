@@ -138,7 +138,7 @@ ghost procedure finish_aes_encrypt_le(ghost alg:algorithm, ghost input_LE:quad32
     ensures
         aes_encrypt_le(alg, key, input_LE) == cipher_opaque(alg, input_LE, key_to_round_keys_LE(alg, key));
 {
-    Vale.Def.Opaque_s.reveal_opaque(aes_encrypt_LE_def);
+    reveal aes_encrypt_le;
     Vale.Def.Opaque_s.reveal_opaque(cipher);
 }
 
@@ -1537,7 +1537,6 @@ procedure Loop6x_round9(
     commute_sub_bytes_shift_rows_forall();
 
     inline if (alg = AES_256) {
-        assert {:quick_type} length(round_keys) = 15;
         VAESNI_enc(inout0, inout0, rndkey);
         VAESNI_enc(inout1, inout1, rndkey);
         VAESNI_enc(inout2, inout2, rndkey);
@@ -2271,7 +2270,6 @@ procedure Loop6x(
     //let h := of_quad32(reverse_bytes_quad32(h_LE));
     let prev := of_quad32(Xi) +. of_quad32(Z0) +. of_quad32(buffer128_read(scratch_b, 1, mem));
     let y_prev := reverse_bytes_quad32(to_quad32(prev));
-    assert{:quick_type} 0 <= #nat(count-2) * 6 /\ #nat(count-2) * 6 + 6 <= Seq.length(s128(mem, in0_b));
     let data := Seq.slice(s128(mem, in0_b), #nat(count-2) * 6, #nat(count-2) * 6 + 6);
 
     assert degree(of_quad32(Xi)) < 128;
@@ -2515,7 +2513,6 @@ procedure Loop6x_decrypt(
     //let h := of_quad32(reverse_bytes_quad32(h_LE));
     let prev := of_quad32(Xi) +. of_quad32(Z0) +. of_quad32(buffer128_read(scratch_b, 1, mem));
     let y_prev := reverse_bytes_quad32(to_quad32(prev));
-    assert{:quick_type} count * 6 + 6 <= Seq.length(s128(mem, in0_b)) /\ count * 6 + 6 <= Seq.length(s128(mem, in_b)) /\ count * 6 + 6 <= Seq.length(plain_quads);
     let data := Seq.slice(s128(mem, in0_b), count * 6, count * 6 + 6);
     assert equal(data, Seq.slice(s128(mem, in_b), count * 6, count * 6 + 6));
     assert equal(Seq.slice(s128(mem, in_b), count * 6, count * 6 + 6), Seq.slice(plain_quads, count * 6, count * 6 + 6));
@@ -3581,7 +3578,6 @@ procedure AESNI_ctr32_6x(
         // GCTR progress
         gctr_partial_opaque(alg, 6*(count+1), plain_quads, s128(mem, out_b), key_words, ctr_BE_orig);
 {
-    assert {:quick_type} length(round_keys) == nr(alg)+1;
     let init0 := quad32_xor(reverse_bytes_quad32(inc32lite(ctr_BE, 0)), index_work_around_quad32(round_keys, 0));
     let init1 := quad32_xor(reverse_bytes_quad32(inc32lite(ctr_BE, 1)), index_work_around_quad32(round_keys, 0));
     let init2 := quad32_xor(reverse_bytes_quad32(inc32lite(ctr_BE, 2)), index_work_around_quad32(round_keys, 0));
@@ -4337,10 +4333,8 @@ procedure AES_GCM_encrypt_6mult(
 
         Ctr32_ghash_6_prelude(alg, scratch_b, key_words, round_keys, keys_b, inc32(ctr_BE, 12));
         Mov64(counter, 14);
-        //assert {:quick_type} len >= 12 && len < pow2_32;
         //let mid_len:nat32 := #nat32(len);
         let mid_len := len;
-        //assert {:quick_type} old(len) < pow2_32;
         //let old_len:nat32 := #nat32(old(len));
         //assert mid_len == old(len) - 12;
         lemma_quad32_zero();
@@ -4377,7 +4371,6 @@ procedure AES_GCM_encrypt_6mult(
 //        Load128_buffer(rndkey, Xip, 0x20-0x20, Secret, hkeys_b, 2);   // # borrow $rndkey for $HK
 //        VPolyAdd(T1, T1, Z3);   // Moved up two instructions compared to OpenSSL, to avoid mixing with Encrypt_save_and_shuffle_output
 
-        assert {:quick_type} old(len) / 6 >= 3;
         let offset_in := #nat((old(len) / 6) - 1);
         Encrypt_save_and_shuffle_output(offset_in, out_b);
 

@@ -85,7 +85,7 @@ ghost procedure finish_aes_encrypt_le(ghost alg:algorithm, ghost input_LE:quad32
     ensures
         aes_encrypt_le(alg, key, input_LE) == cipher_opaque(alg, input_LE, key_to_round_keys_LE(alg, key));
 {
-    Vale.Def.Opaque_s.reveal_opaque(aes_encrypt_LE_def);
+    reveal aes_encrypt_le;
     Vale.Def.Opaque_s.reveal_opaque(cipher);
 }
 
@@ -2003,7 +2003,6 @@ procedure AESNI_ctr32_6x(
         // GCTR progress
         gctr_partial_opaque(alg, 6*(count+1), plain_quads, buffer128_as_seq(mem, out_b), key_words, ctr_BE_orig);
 {
-    assert {:quick_type} length(round_keys) == nr(alg)+1;
     let init0 := quad32_xor(reverse_bytes_quad32(inc32lite(ctr_BE, 0)), index(round_keys, 0));
     let init1 := quad32_xor(reverse_bytes_quad32(inc32lite(ctr_BE, 1)), index(round_keys, 0));
     let init2 := quad32_xor(reverse_bytes_quad32(inc32lite(ctr_BE, 2)), index(round_keys, 0));
@@ -2289,7 +2288,6 @@ procedure AES_GCM_encrypt(
     let out_snapshot := buffer128_as_seq(mem, out_b);
 
     InitPshufbMask(Ii, r12);    // # borrow $Ii for .Lbswap_mask
-    assert {:quick_type} old(len) / 6 >= 3;
     let offset_in := #nat((old(len) / 6) - 1);
     Encrypt_save_and_shuffle_output(offset_in, out_b);
 
@@ -2299,7 +2297,6 @@ procedure AES_GCM_encrypt(
 
     gctr_partial_opaque_completed(alg, old(buffer128_as_seq(mem, in_b)), buffer128_as_seq(mem, out_b), key_words, ctr_BE);
     gctr_partial_to_full_basic(ctr_BE, old(buffer128_as_seq(mem, in_b)), alg, key_words, buffer128_as_seq(mem, out_b));
-    //assert {:quick_type} is_gctr_plain_LE(le_seq_quad32_to_bytes(old(buffer128_as_seq(mem, in_b)))) && is_aes_key_LE(alg, key_words);
     //assert le_seq_quad32_to_bytes(buffer128_as_seq(mem, out_b)) == gctr_encrypt_LE(ctr_BE, le_seq_quad32_to_bytes(old(buffer128_as_seq(mem, in_b))), alg, key_words);
 }
 

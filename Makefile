@@ -377,26 +377,21 @@ VALE_FSTAR_FLAGS=$(VALE_FSTAR_FLAGS_NOSMT) \
 # assignments.
 only-for = $(call to-obj-dir,$(filter $1,$(addsuffix .checked,$(FSTAR_ROOTS) $(VAF_AS_FSTS))))
 
-# By default Vale files don't use two phase tc
 $(call only-for,$(HACL_HOME)/vale/%.checked): \
-  FSTAR_FLAGS=$(VALE_FSTAR_FLAGS) --use_two_phase_tc false
+  FSTAR_FLAGS=$(VALE_FSTAR_FLAGS)
 
-# Except for the files in specs/ and code/
 $(call only-for,$(HACL_HOME)/vale/specs/%.checked): \
   FSTAR_FLAGS=$(VALE_FSTAR_FLAGS)
 $(call only-for,$(HACL_HOME)/vale/code/%.checked): \
   FSTAR_FLAGS=$(VALE_FSTAR_FLAGS)
 
-# Except for the interop files, which apparently are ok with two phase TC.
 $(call only-for,$(HACL_HOME)/vale/code/arch/x64/interop/%.checked): \
   FSTAR_FLAGS=$(shell echo $(VALE_FSTAR_FLAGS_NOSMT) | \
     sed 's/--z3cliopt smt.arith.nl=false//; \
       s/--z3cliopt smt.QI.EAGER_THRESHOLD=100//')
 
-# Now the fst files coming from vaf files, which also don't work with two
-# phase tc (VALE_FSTS is of the form obj/foobar.fst).
 $(addsuffix .checked,$(VALE_FSTS)): \
-  FSTAR_FLAGS=$(VALE_FSTAR_FLAGS) --use_two_phase_tc false
+  FSTAR_FLAGS=$(VALE_FSTAR_FLAGS)
 
 # Then a series of individual overrides.
 obj/Vale.Interop.fst.checked: \

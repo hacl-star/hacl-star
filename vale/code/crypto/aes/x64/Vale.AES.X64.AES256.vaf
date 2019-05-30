@@ -218,7 +218,7 @@ procedure KeyExpansion256Stdcall(
     Vale.Def.Opaque_s.reveal_opaque(expand_key_256_def);
     KeyExpansionRoundUnrolledRecursive256(key, output_key_expansion_b, 14);
     lemma_expand_key_256(key, 15);
-    Vale.Def.Opaque_s.reveal_opaque(key_to_round_keys_LE_def);
+    reveal key_to_round_keys_LE;
 
     // Clear secrets out of registers
     Pxor(xmm1, xmm1);
@@ -279,7 +279,6 @@ procedure AES256EncryptBlock(
     ensures
         xmm0 == aes_encrypt_LE(AES_256, key, input);
 {
-    assert{:quick_type} length(round_keys) == 15;
     let init := quad32_xor(input, index(round_keys, 0));
 
     Load128_buffer(xmm2, r8, 0, Secret, keys_buffer, 0);
@@ -348,7 +347,6 @@ procedure AES256EncryptBlockStdcall(
         Mov64(r8, rdx);
     }
 
-    assert{:quick_type} is_aes_key_LE(AES_256, key);
     AES256EncryptBlock(input, key, key_to_round_keys_LE(AES_256, key), keys_buffer);
 
     inline if (win)

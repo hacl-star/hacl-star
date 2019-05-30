@@ -2,6 +2,7 @@ include "../../../arch/x64/Vale.X64.InsBasic.vaf"
 include "../../../arch/x64/Vale.X64.InsMem.vaf"
 include "../../../arch/x64/Vale.X64.InsVector.vaf"
 include "../../../arch/x64/Vale.X64.InsStack.vaf"
+include "../../../lib/util/Vale.Lib.Basic.vaf"
 include "../../../lib/util/x64/Vale.X64.Stack.vaf"
 include "../../../thirdPartyPorts/OpenSSL/aes/Vale.AES.X64.AESGCM.vaf"
 include "Vale.AES.X64.GCMencryptOpt.vaf"
@@ -101,6 +102,10 @@ let aes_reqs
   s128 mem keys_b == round_keys
 #endverbatim
 
+#verbatim
+open Vale.Lib.Basic
+#endverbatim
+
 function aes_reqs(alg:algorithm, key:seq(nat32), round_keys:seq(quad32), keys_b:buffer128,
     key_ptr:int, mem:memory, memTaint:memtaint) : prop extern;
 
@@ -190,7 +195,7 @@ procedure gcm_block_bytes(
     Mov128(xmm0, icb);
     Pshufb(xmm0, mask);
     AESEncryptBlock(alg, reverse_bytes_quad32(icb), key, round_keys, keys_b);
-    Vale.Def.Opaque_s.reveal_opaque(aes_encrypt_LE_def);
+    reveal aes_encrypt_le;
 
     Pxor(xmm6, xmm0);
     Store128_buffer(out_ptr, xmm6, 0, Secret, out_b, 0);
@@ -313,7 +318,7 @@ procedure gcm_blocks128(
         Mov128(xmm0, icb);
         Pshufb(xmm0, mask);
         AESEncryptBlock(alg, reverse_bytes_quad32(icb), key, round_keys, keys_b);
-        Vale.Def.Opaque_s.reveal_opaque(aes_encrypt_LE_def);
+        reveal aes_encrypt_le;
 
         Pxor(xmm3, xmm0);
         Store128_buffer(r10, xmm3, 0, Secret, out_b, rdx);
@@ -801,12 +806,12 @@ procedure gcm_blocks(
 
     PinsrdImm(xmm7, 1, 0, r12);   // Reconstruct j0 (this is all we need, since gctr_core says it only changes iv.lo0)
     let ctr_BE_1:quad32 := Mkfour(1, ctr_BE.lo1, ctr_BE.hi2, ctr_BE.hi3);
-    assert_norm(xmm7 == ctr_BE_1);      // OBSERVE
+    //assert(xmm7 == ctr_BE_1);      // OBSERVE
 
     // Encrypt the hash value with gctr_register; result goes in xmm1
     gctr_register(alg, key, round_keys, keys_b); // Encrypt using j0 and xmm0 = hash_value
     le_seq_quad32_to_bytes_of_singleton(xmm1);
-    assert {:quick_type}  is_aes_key_LE(alg, key);
+    //_ assert{:quick_type}  is_aes_key_LE(alg, key);
     assert xmm1 == gctr_encrypt_block(ctr_BE_1, y_final, alg, key, 0);
 
     // Consolidate encryption results

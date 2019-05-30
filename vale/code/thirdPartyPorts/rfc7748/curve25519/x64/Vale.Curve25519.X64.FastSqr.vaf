@@ -1,3 +1,4 @@
+include "../../../../lib/util/Vale.Lib.Basic.vaf"
 include "../../../../arch/x64/Vale.X64.InsBasic.vaf"
 include "../../../../arch/x64/Vale.X64.InsMem.vaf"
 include "../../../../arch/x64/Vale.X64.InsStack.vaf"
@@ -46,9 +47,7 @@ open Vale.Curve25519.FastSqr_helpers
 open Vale.X64.CPU_Features_s
 #endverbatim
 
-type tactic:Type(0) extern;
 const int_canon:tactic extern;
-ghost procedure assert_by_tactic(ghost p:prop, ghost t:tactic) extern;
 
 #reset-options "--z3rlimit 600"
 procedure fast_sqr_part1(inline offset:nat, ghost inA_b:buffer64)
@@ -282,7 +281,17 @@ procedure fast_sqr(inline offset:nat, ghost dst_b:buffer64, ghost inA_b:buffer64
         validSrcAddrs64(mem, dst_ptr, dst_b, 8 + offset*2, memTaint, Secret);
         modifies_buffer_specific(dst_b, old(mem), mem, 0 + offset*2, 8 + offset*2 - 1);
 {
-    assert_by_tactic(a*a == pow2_seven(mul_nats(a0,a0), 2*mul_nats(a0,a1), 2*mul_nats(a0,a2) + mul_nats(a1,a1), 2*(mul_nats(a0,a3)+mul_nats(a1,a2)), 2*mul_nats(a1,a3) + mul_nats(a2,a2), 2*mul_nats(a2,a3), mul_nats(a3,a3)), int_canon);      // PASSES
+    assert_by_tactic(
+        a * a ==
+        0 + pow2_seven(
+            mul_nats(a0, a0),
+            2 * mul_nats(a0, a1),
+            2 * mul_nats(a0, a2) + mul_nats(a1, a1),
+            2 * (mul_nats(a0, a3) + mul_nats(a1, a2)),
+            2 * mul_nats(a1, a3) + mul_nats(a2, a2),
+            2 * mul_nats(a2, a3),
+            mul_nats(a3, a3)),
+        int_canon);      // PASSES
     fast_sqr_part1(offset, inA_b);
 
     let old_r8  := r8;
@@ -375,7 +384,6 @@ procedure fast_sqr_stdcall(inline win:bool, ghost dst_b:buffer64, ghost inA_b:bu
         r13 == old(r13);
         r14 == old(r14);
         r15 == old(r15);
-
         rsp == old(rsp);
 {
     // Store callee-save registers
@@ -386,7 +394,8 @@ procedure fast_sqr_stdcall(inline win:bool, ghost dst_b:buffer64, ghost inA_b:bu
     Push(r14);
 
     // Line up the rest of the arguments
-    inline if (win) {
+    inline if (win)
+    {
         Mov64(dst_ptr, rcx);
         Mov64(inA_ptr, rdx);
     }
@@ -519,7 +528,6 @@ procedure fast_sqr_loop_stdcall(inline win:bool, ghost dst_b:buffer64, ghost inA
         r13 == old(r13);
         r14 == old(r14);
         r15 == old(r15);
-
         rsp == old(rsp);
 {
     // Store callee-save registers
@@ -531,11 +539,14 @@ procedure fast_sqr_loop_stdcall(inline win:bool, ghost dst_b:buffer64, ghost inA
     Push(r14);
 
     // Line up the rest of the arguments
-    inline if (win) {
+    inline if (win)
+    {
         Mov64(dst_ptr, rcx);
         Mov64(inA_ptr, rdx);
         Mov64(count, r8);
-    } else {
+    }
+    else
+    {
         Mov64(count, rdx);
     }
 
@@ -602,7 +613,6 @@ procedure sqr2_stdcall(inline win:bool, ghost dst_b:buffer64, ghost inA_b:buffer
         r13 == old(r13);
         r14 == old(r14);
         r15 == old(r15);
-
         rsp == old(rsp);
 {
     // Store callee-save registers
@@ -612,7 +622,8 @@ procedure sqr2_stdcall(inline win:bool, ghost dst_b:buffer64, ghost inA_b:buffer
     Push(r14);
 
     // Line up the rest of the arguments
-    inline if (win) {
+    inline if (win)
+    {
         Push(rsi);
         Mov64(dst_ptr, rcx);
         Mov64(inA_ptr, rdx);
@@ -621,7 +632,8 @@ procedure sqr2_stdcall(inline win:bool, ghost dst_b:buffer64, ghost inA_b:buffer
     fast_sqr(0, dst_b, inA_b);
     fast_sqr(4, dst_b, inA_b);
 
-    inline if (win) {
+    inline if (win)
+    {
         Pop(rsi);
     }
 

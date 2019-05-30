@@ -199,7 +199,7 @@ procedure gcm_one_pass_blocks(
         Mov128(xmm0, icb);
         Pshufb(xmm0, mask);
         AESEncryptBlock(alg, reverse_bytes_quad32(icb), key, round_keys, keys_b); // Clobbers xmm0 and xmm2
-        Vale.Def.Opaque_s.reveal_opaque(aes_encrypt_LE_def);
+        reveal aes_encrypt_le;
 
         Pxor(xmm3, xmm0);
         Store128_buffer(r10, xmm3, 0, Secret, out_b, rdx);
