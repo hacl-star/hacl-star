@@ -337,6 +337,60 @@ procedure Handle_ctr32(
     VPshufb(T1, T1, Ii);            // # next counter value
 }
 
+
+#reset-options "--z3rlimit 20"
+procedure Handle_ctr32_2(
+        ghost ctr_BE:quad32)
+    {:quick}
+    lets
+        Ii @= xmm0; T1 @= xmm1; T2 @= xmm2; Hkey @= xmm3;
+        Z1 @= xmm5; Z2 @= xmm6;
+        inout1 @= xmm10; inout2 @= xmm11; inout3 @= xmm12;
+        inout4 @= xmm13; inout5 @= xmm14; 
+        constp @= r11;
+    reads
+        Ii;
+
+    modifies
+        constp;
+        Ii; T1; T2; Z1; Z2; inout1; inout2; inout3; inout4; inout5;
+        efl;
+
+    requires
+        avx_enabled;
+        mask == Mkfour(0x0C0D0E0F, 0x08090A0B, 0x04050607, 0x00010203);
+        T1 == reverse_bytes_quad32(ctr_BE);
+    ensures
+        inout1 == quad32_xor(reverse_bytes_quad32(inc32lite(ctr_BE, 1)), rndkey);
+        inout2 == quad32_xor(reverse_bytes_quad32(inc32lite(ctr_BE, 2)), rndkey);
+        inout3 ==            reverse_bytes_quad32(inc32lite(ctr_BE, 3));
+        inout4 ==            reverse_bytes_quad32(inc32lite(ctr_BE, 4));
+        inout5 ==            reverse_bytes_quad32(inc32lite(ctr_BE, 5));
+        T1     ==            reverse_bytes_quad32(inc32lite(ctr_BE, 6));
+{
+    VPshufb(Z2, T1, Ii);         // # byte-swap counter
+    // OpenSSL uses a memory operand with VPaddd to do the addition with .Lone_lsb.  We avoid that here for now.
+    //Load_two_lsb();              // # borrow $Z1, .Ltwo_lsb
+    //Load_one_lsb();              // # .Lone_lsb
+    Load_one_lsb(Z1);
+    VPaddd(inout1, Z2, Z1);
+    Load_two_lsb(Z1);
+    VPaddd(inout2, Z2, Z1);
+    VPaddd(inout3, inout1, Z1);
+    VPshufb(inout1, inout1, Ii);
+    VPaddd(inout4, inout2, Z1);
+    VPshufb(inout2, inout2, Ii);
+    VPxor(inout1, inout1, Z0);
+    VPaddd(inout5, inout3, Z1);
+    VPshufb(inout3, inout3, Ii);
+    VPxor(inout2, inout2, Z0);
+    VPaddd(T1, inout4, Z1);         // # byte-swapped next counter value
+    VPshufb(inout4, inout4, Ii);
+    VPshufb(inout5, inout5, Ii);
+    VPshufb(T1, T1, Ii);            // # next counter value
+}
+
+
 #reset-options "--z3rlimit 20"
 procedure Loop6x_ctr_update(
         inline alg:algorithm,
@@ -4267,45 +4321,47 @@ procedure AES_GCM_encrypt_6mult(
         validSrcAddrs128(mem, Xip - 0x20, hkeys_b, 8, memTaint, Secret);
         key == old(key);
 
-        let iv_LE := old(buffer128_read(iv_b, 0, mem));
-        let iv_BE := reverse_bytes_quad32(iv_LE);
-        ctr_BE == Mkfour(2, iv_BE.lo1, iv_BE.hi2, iv_BE.hi3);
+//        let iv_LE := old(buffer128_read(iv_b, 0, mem));
+//        let iv_BE := reverse_bytes_quad32(iv_LE);
+//        ctr_BE == Mkfour(2, iv_BE.lo1, iv_BE.hi2, iv_BE.hi3);
 
         // GCTR result
-        gctr_partial_opaque(alg, old(len), old(s128(mem, in_b)), s128(mem, out_b), key_words, ctr_BE);
+        gctr_partial_opaque(alg, old(len), old(s128(mem, in_b)), s128(mem, out_b), key_words, old(T1));
         // GCM result
         Xi == ghash_incremental0(h_LE, old(Xi), s128(mem, out_b));
 
         // Counter updated
         old(len) < pow2_32 /\
-        buffer128_read(iv_b, 0, mem) == reverse_bytes_quad32(inc32lite(ctr_BE, old(len)));
+        buffer128_read(iv_b, 0, mem) == reverse_bytes_quad32(inc32lite(old(T1), old(len)));
+        //T1 == inc32lite(old(T1), old(len));
 {
     if (len == 0) {
         AddLea64(Xip, Xip, 0x20);   // # size optimization
 
-        Load128_buffer(T1, ivp, 0, Secret, iv_b, 0);    // # input counter value
-        // TODO: Replace all of this with a single PinsrdImm(T1, 0x02000000, 3, counter)
-        InitPshufbMask(Ii, r12);    // # borrow $Ii for .Lbswap_mask
-        VPshufb(T1, T1, Ii);
-        PinsrdImm(T1, 2, 0, counter);   // Directly set the counter in T1.lo0 (and counter) to 2, rather than read the existing value as OpenSSL does
+//        Load128_buffer(T1, ivp, 0, Secret, iv_b, 0);    // # input counter value
+//        // TODO: Replace all of this with a single PinsrdImm(T1, 0x02000000, 3, counter)
+//        InitPshufbMask(Ii, r12);    // # borrow $Ii for .Lbswap_mask
+//        VPshufb(T1, T1, Ii);
+//        PinsrdImm(T1, 2, 0, counter);   // Directly set the counter in T1.lo0 (and counter) to 2, rather than read the existing value as OpenSSL does
         ctr_BE := T1;
-        VPshufb(T1, T1, Ii);
-        Store128_buffer(ivp, T1, 0x00, Secret, iv_b, 0);
-        gctr_partial_opaque_init(alg, s128(mem, in_b), s128(mem, out_b), key_words, ctr_BE);
+//        VPshufb(T1, T1, Ii);
+//        Store128_buffer(ivp, T1, 0x00, Secret, iv_b, 0);
+        gctr_partial_opaque_init(alg, s128(mem, in_b), s128(mem, out_b), key_words, T1);
+        assume false;
     } else {
         let plain_quads := s128(mem, in_b);
 
         InitPshufbMask(Ii, r12);    // # borrow $Ii for .Lbswap_mask
-        Load128_buffer(T1, ivp, 0, Secret, iv_b, 0);    // # input counter value
+        //Load128_buffer(T1, ivp, 0, Secret, iv_b, 0);    // # input counter value
         VPshufb(Xi, Xi, Ii);        // TODO: Why do we need a reverse here and at the end?
         let y_orig := reverse_bytes_quad32(Xi);
         Store128_buffer(ivp, Xi, 0x00, Secret, iv_b, 0); // Save a copy of the interm. hash in Xi
-        let iv_LE := T1;
+        //let iv_LE := T1;
         Add64(key, 0x80);           // # size optimization
         // TODO: Replace all of this with a single PinsrdImm(T1, 0x02000000, 3, counter)
-        VPshufb(T1, T1, Ii);
-        let iv_BE := T1;
-        PinsrdImm(T1, 2, 0, counter);   // Directly set the counter in T1.lo0 (and counter) to 2, rather than read the existing value as OpenSSL does
+        //VPshufb(T1, T1, Ii);
+        //let iv_BE := T1;
+        //PinsrdImm(T1, 2, 0, counter);   // Directly set the counter in T1.lo0 (and counter) to 2, rather than read the existing value as OpenSSL does
         ctr_BE := T1;
         //assert ctr_BE == Mkfour(2, iv_BE.lo1, iv_BE.hi2, iv_BE.hi3);
         VPshufb(T1, T1, Ii);
