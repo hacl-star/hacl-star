@@ -1,5 +1,5 @@
 project(fiat-curve25519 LANGUAGES C ASM)
-cmake_minimum_required(VERSION 3.6)
+cmake_minimum_required(VERSION 3.5)
 
 set(FIAT_CURVE25519_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR} CACHE PATH "Where to find the Fiat Curve25519 sources.")
 get_filename_component(FIAT_CURVE25519_SRC_DIR ${FIAT_CURVE25519_SRC_DIR} ABSOLUTE)
@@ -12,7 +12,7 @@ add_library(fiat-curve25519 SHARED STATIC
   ${FIAT_CURVE25519_SRC_DIR}/ladderstep.c
   ${FIAT_CURVE25519_SRC_DIR}/scalarmult.c
   ${FIAT_CURVE25519_SRC_DIR}/liblow/cmovznz.c)
-target_compile_options(fiat-curve25519 PRIVATE -Wno-parentheses -std=gnu11 -Wno-attributes)
+target_compile_options(fiat-curve25519 PRIVATE -Wno-parentheses -std=gnu11 -Wno-attributes -Wno-implicit-function-declaration)
 target_include_directories(fiat-curve25519 PUBLIC ${FIAT_CURVE25519_SRC_DIR} ${FIAT_CURVE25519_SRC_DIR}/liblow)
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")

@@ -12,13 +12,21 @@ extern "C" {
 }
 
 #include "benchmark.h"
-#include "benchmark_plot_templates.h"
+
+bool Benchmark::have_gnuplot = false;
 
 void Benchmark::initialize()
 {
   srand(0);
 
   Benchmark::set_runtime_config(1, 1, 1, 1, 1, 1, 1, 1, 1);
+
+  have_gnuplot = false;
+  #ifndef WIN32
+    if (system("gnuplot --help > /dev/null 2>&1") == 0 &&
+        system("grep --help > /dev/null 2>&1") == 0)
+      have_gnuplot = true;
+  #endif
 }
 
 void Benchmark::randomize(char *buf, size_t buf_sz)
@@ -358,9 +366,12 @@ void Benchmark::make_plot(const BenchmarkSettings & s,
   }
   of.close();
 
-  std::cout << "-- " << plot_filename << "...\n";
-  std::cout.flush();
-  int r = system((std::string("gnuplot ") + gnuplot_filename).c_str());
-  if (r != 0)
-    throw std::logic_error("Plot generation failed");
+  if (have_gnuplot)
+  {
+    std::cout << "-- " << plot_filename << "...\n";
+    std::cout.flush();
+    int r = system((std::string("gnuplot ") + gnuplot_filename).c_str());
+    if (r != 0)
+      throw std::logic_error("Plot generation failed");
+  }
 }

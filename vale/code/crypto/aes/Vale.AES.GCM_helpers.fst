@@ -54,7 +54,7 @@ let index_helper (s:seq quad32) (num_bytes:int) : Lemma
              num_bytes % 16 <> 0 /\
              length s == bytes_to_quad_size num_bytes)
   (ensures (let num_blocks = num_bytes / 16 in
-            index s num_blocks == index_work_around_quad32 (slice_work_around s (bytes_to_quad_size num_bytes)) num_blocks))
+            index s num_blocks == index (slice s 0 (bytes_to_quad_size num_bytes)) num_blocks))
   =
   ()
 

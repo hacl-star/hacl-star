@@ -14,7 +14,6 @@ include{:fstar}{:open} "Vale.AES.AES_s"
 include{:fstar}{:open} "Vale.AES.GCTR_s"
 include{:fstar}{:open} "Vale.AES.GCTR"
 include{:fstar}{:open} "Vale.AES.GCM_helpers"
-include{:fstar}{:open} "Vale.Lib.Workarounds"
 include{:fstar}{:open} "Vale.Poly1305.Math"
 include{:fstar}{:open} "Vale.Def.Words.Two_s"
 include{:fstar}{:open} "Vale.X64.Machine_s"
@@ -38,7 +37,6 @@ open Vale.AES.X64.AES
 open Vale.AES.GCTR_s
 open Vale.AES.GCTR
 open Vale.AES.GCM_helpers
-open Vale.Lib.Workarounds
 open Vale.Poly1305.Math
 open Vale.Def.Words.Two_s
 open Vale.X64.Machine_s
@@ -120,7 +118,7 @@ procedure gctr_register(
     InitPshufbMask(xmm2, r12);
     Pshufb(xmm0, xmm2);
     AESEncryptBlock(alg, reverse_bytes_quad32(icb_BE), key, round_keys, keys_b);
-    Vale.Def.Opaque_s.reveal_opaque(aes_encrypt_LE_def);
+    reveal aes_encrypt_le;
     //assert xmm0 == aes_encrypt_LE(alg, key, reverse_bytes_quad32(icb_BE));
 
     Pxor(xmm1, xmm0);
@@ -229,7 +227,7 @@ procedure gctr_core(
         Mov128(xmm0, icb);
         Pshufb(xmm0, mask);
         AESEncryptBlock(alg, reverse_bytes_quad32(icb), key, round_keys, keys_b);
-        Vale.Def.Opaque_s.reveal_opaque(aes_encrypt_LE_def);
+        reveal aes_encrypt_le;
 
         Load128_buffer(xmm2, r9, 0, Secret, in_b, block_offset + rdx);
         Pxor(xmm2, xmm0);
@@ -303,7 +301,8 @@ procedure gctr_core_opt(
     let num_quad_blocks := rdx;
     assert old(len) == 4 * num_quad_blocks + len;
 
-    if (rdx > 0) {
+    if (rdx > 0)
+    {
         // TODO: Align registers to avoid all of this pointer copying
         Mov64(r9, in_ptr);
         Mov64(r10, out_ptr);
@@ -369,8 +368,8 @@ procedure gctr_bytes_extra_work(
         let num_blocks := num_bytes / 16;
         validSrcAddrs128(mem, orig_out_ptr, out_b, bytes_to_quad_size(num_bytes), memTaint, Secret);
         modifies_buffer128(out_b, old(mem), mem);
-            slice_work_around(buffer128_as_seq(mem, out_b), num_blocks) ==
-        old(slice_work_around(buffer128_as_seq(mem, out_b), num_blocks));
+            slice(buffer128_as_seq(mem, out_b), 0, num_blocks) ==
+        old(slice(buffer128_as_seq(mem, out_b), 0, num_blocks));
         buffer128_read(out_b, num_blocks, mem) == gctr_encrypt_block(icb_BE, buffer128_read(in_b, num_blocks, mem), alg, key, num_blocks);
         xmm1 == buffer128_read(out_b, num_blocks, mem);
 {
@@ -457,13 +456,13 @@ procedure gctr_bytes_extra(
 
 // TODO: Prove this inside gctr_bytes_extra_work
         // We modified out_b, but we didn't disrupt the work that was previously done
-        let     cipher_blocks := slice_work_around(buffer128_as_seq(mem,      out_b), num_blocks);
-        let old_cipher_blocks := slice_work_around(buffer128_as_seq(old(mem), out_b), num_blocks);
+        let     cipher_blocks := slice(buffer128_as_seq(mem,      out_b), 0, num_blocks);
+        let old_cipher_blocks := slice(buffer128_as_seq(old(mem), out_b), 0, num_blocks);
         cipher_blocks == old_cipher_blocks;
 {
     let num_blocks := num_bytes / 16;
-    gctr_partial_completed(alg, slice_work_around(buffer128_as_seq(mem, in_b),  num_blocks),
-                           slice_work_around(buffer128_as_seq(mem, out_b), num_blocks),
+    gctr_partial_completed(alg, slice(buffer128_as_seq(mem, in_b), 0, num_blocks),
+                           slice(buffer128_as_seq(mem, out_b), 0, num_blocks),
                            key, icb_BE);
 
     gctr_bytes_extra_work(alg, icb_BE, in_b, out_b, key, round_keys, keys_b, orig_in_ptr, orig_out_ptr, num_bytes);
@@ -528,8 +527,8 @@ procedure gctr_bytes_no_extra(
 //    assert le_seq_quad32_to_bytes(buffer128_as_seq(mem, out_b)) == gctr_encrypt_LE(icb_BE, make_gctr_plain_LE(le_seq_quad32_to_bytes(buffer128_as_seq(old(mem), in_b))), alg, key);
     no_extra_bytes_helper(buffer128_as_seq(mem, in_b),  old(num_bytes));
     no_extra_bytes_helper(buffer128_as_seq(mem, out_b), old(num_bytes));
-//    let plain  := slice_work_around(le_seq_quad32_to_bytes(buffer128_as_seq(mem,  in_b)), old(num_bytes));
-//    let cipher := slice_work_around(le_seq_quad32_to_bytes(buffer128_as_seq(mem, out_b)), old(num_bytes));
+//    let plain  := slice(le_seq_quad32_to_bytes(buffer128_as_seq(mem,  in_b)), 0, old(num_bytes));
+//    let cipher := slice(le_seq_quad32_to_bytes(buffer128_as_seq(mem, out_b)), 0, old(num_bytes));
 //    assert plain  == le_seq_quad32_to_bytes(buffer128_as_seq(mem, in_b));
 //    assert cipher == le_seq_quad32_to_bytes(buffer128_as_seq(mem, out_b));
 //    assert cipher == gctr_encrypt_LE(icb_BE, make_gctr_plain_LE(plain), alg, key);
@@ -546,8 +545,9 @@ procedure gctr_bytes(
         ghost round_keys:seq(quad32),
         ghost keys_b:buffer128)
     {:quick}
-    lets in_ptr @= rax; out_ptr @= rbx; num_blocks @= rcx; icb @= xmm7;
-         inout_ptr @= r13; plain_num_bytes @= rsi; tmp @= rbp;
+    lets
+        in_ptr @= rax; out_ptr @= rbx; num_blocks @= rcx; icb @= xmm7;
+        inout_ptr @= r13; plain_num_bytes @= rsi; tmp @= rbp;
 
     reads
         r8; inout_ptr; plain_num_bytes; memTaint;
@@ -587,9 +587,9 @@ procedure gctr_bytes(
         modifies_buffer128_2(out_b, inout_b, old(mem), mem);
         validSrcAddrs128(mem, old(out_ptr), out_b, old(num_blocks), memTaint, Secret);
         let plain_quads := append(old(s128(mem, in_b)), old(s128(mem, inout_b)));
-        let plain_bytes := slice_work_around(le_seq_quad32_to_bytes(plain_quads), old(plain_num_bytes));
+        let plain_bytes := slice(le_seq_quad32_to_bytes(plain_quads), 0, old(plain_num_bytes));
         let cipher_quads := append(s128(mem, out_b), s128(mem, inout_b));
-        let cipher_bytes := slice_work_around(le_seq_quad32_to_bytes(cipher_quads), old(plain_num_bytes));
+        let cipher_bytes := slice(le_seq_quad32_to_bytes(cipher_quads), 0, old(plain_num_bytes));
 
         cipher_bytes == gctr_encrypt_LE(old(icb), make_gctr_plain_LE(plain_bytes), alg, key);
 {
@@ -601,7 +601,8 @@ procedure gctr_bytes(
 
     gctr_bytes_no_extra(alg, old(icb), in_b, out_b, key, round_keys, keys_b, old(in_ptr), old(out_ptr), old(num_blocks * 16 /* == 128/8 */));
 
-    if (plain_num_bytes > tmp) {
+    if (plain_num_bytes > tmp)
+    {
         Load128_buffer(xmm1, inout_ptr, 0, Secret, inout_b, 0);
         assert equal(create(1, xmm1), s128(mem, inout_b));
         gctr_register(alg, key, round_keys, keys_b);
@@ -636,11 +637,11 @@ procedure gctr_bytes_stdcall(
         xmm0; xmm1; xmm2; xmm3; xmm4; xmm5; xmm6; xmm7; xmm8; xmm9; xmm10; xmm11; xmm12; xmm13; xmm14; xmm15;
         mem; efl; stack; stackTaint;
     lets
-      in_ptr    := if win then rcx else rdi;
-      out_ptr   := if win then r8 else rdx;
-      inout_ptr  := if win then r9 else rcx;
-      keys_ptr   := if win then load_stack64(rsp + 32 + 8 + 0, stack) else r8;
-      ctr_ptr   := if win then load_stack64(rsp + 32 + 8 + 8, stack) else r9;
+        in_ptr    := if win then rcx else rdi;
+        out_ptr   := if win then r8 else rdx;
+        inout_ptr  := if win then r9 else rcx;
+        keys_ptr   := if win then load_stack64(rsp + 32 + 8 + 0, stack) else r8;
+        ctr_ptr   := if win then load_stack64(rsp + 32 + 8 + 8, stack) else r9;
 
     requires
         rsp == init_rsp(stack);
@@ -684,9 +685,9 @@ procedure gctr_bytes_stdcall(
     ensures
         modifies_buffer128_2(out_b, inout_b, old(mem), mem);
         let plain_quads := append(old(s128(mem, in_b)), old(s128(mem, inout_b)));
-        let plain_bytes := slice_work_around(le_seq_quad32_to_bytes(plain_quads), old(num_bytes));
+        let plain_bytes := slice(le_seq_quad32_to_bytes(plain_quads), 0, old(num_bytes));
         let cipher_quads := append(s128(mem, out_b), s128(mem, inout_b));
-        let cipher_bytes := slice_work_around(le_seq_quad32_to_bytes(cipher_quads), old(num_bytes));
+        let cipher_bytes := slice(le_seq_quad32_to_bytes(cipher_quads), 0, old(num_bytes));
         cipher_bytes == gctr_encrypt_LE(old(buffer128_read(ctr_b, 0, mem)), make_gctr_plain_LE(plain_bytes), alg, key);
 
         rsp == old(rsp);
@@ -729,7 +730,8 @@ procedure gctr_bytes_stdcall(
     Push_Secret(rbp);
     Push_Secret(rbx);
 
-    inline if (win) {
+    inline if (win)
+    {
         PushXmm_Secret(xmm15, rax);
         PushXmm_Secret(xmm14, rax);
         PushXmm_Secret(xmm13, rax);
@@ -742,29 +744,31 @@ procedure gctr_bytes_stdcall(
         PushXmm_Secret(xmm6,  rax);
     }
 
-    inline if (win) {
-      // Load ptr for ctr_b
-      Load64_stack(rax, rsp, 224 + 32 + 8 + 8);
-      Load128_buffer(xmm7, rax, 0, Secret, ctr_b, 0);
+    inline if (win)
+    {
+        // Load ptr for ctr_b
+        Load64_stack(rax, rsp, 224 + 32 + 8 + 8);
+        Load128_buffer(xmm7, rax, 0, Secret, ctr_b, 0);
 
-      Mov64(rax, rcx);
-      Mov64(rbx, r8);
-      Mov64(rsi, rdx);
-      Mov64(r13, r9);
-      Load64_stack(r8, rsp, 224 + 32 + 8 + 0);
-      Load64_stack(rcx, rsp, 224 + 32 + 8 + 16);
-
-    } else {
-      Load128_buffer(xmm7, r9, 0, Secret, ctr_b, 0);
-      Mov64(rax, rdi);
-      Mov64(rbx, rdx);
-      Mov64(r13, rcx);
-      Load64_stack(rcx, rsp, 64+ 8);
-
+        Mov64(rax, rcx);
+        Mov64(rbx, r8);
+        Mov64(rsi, rdx);
+        Mov64(r13, r9);
+        Load64_stack(r8, rsp, 224 + 32 + 8 + 0);
+        Load64_stack(rcx, rsp, 224 + 32 + 8 + 16);
+    }
+    else
+    {
+        Load128_buffer(xmm7, r9, 0, Secret, ctr_b, 0);
+        Mov64(rax, rdi);
+        Mov64(rbx, rdx);
+        Mov64(r13, rcx);
+        Load64_stack(rcx, rsp, 64+ 8);
     }
     gctr_bytes(alg, in_b, out_b, inout_b, key, old(buffer128_as_seq(mem, keys_b)), keys_b);
 
-    inline if (win) {
+    inline if (win)
+    {
         PopXmm_Secret(xmm6,  rax, old(xmm6));
         PopXmm_Secret(xmm7,  rax, old(xmm7));
         PopXmm_Secret(xmm8,  rax, old(xmm8));

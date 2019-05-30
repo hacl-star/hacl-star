@@ -437,7 +437,8 @@ procedure Poly1305_last_block()
         Adc64Wrap(h1, 0);
         Adc64Wrap(h2, 0);
     } else {
-        lemma_bytes_shift_power2(#nat64(nExtra - 8));
+        let nExtra8 := #nat8(nExtra - 8);
+        lemma_bytes_shift_power2(nExtra8);
         Mov64(rcx, nExtra);
         Sub64(rcx, 8);
         Shl64(rcx, 3);
@@ -445,13 +446,13 @@ procedure Poly1305_last_block()
         Shl64(rdx, rcx);
 
         assert padLast == lowerUpper128_opaque(0, rdx) by {
-            lemma_power2_add64(#nat64(8 * nExtra - 64));
+            lemma_power2_add64(8 * nExtra8);
             Vale.Def.Opaque_s.reveal_opaque(lowerUpper128);
         }
 
         // inpLast := (inpLast % padLast)
-        lemma_bytes_and_mod(r9, #nat64(nExtra - 8));
-        lemma_mod_hi(r8, r9, #nat64(pow2(#nat(8 * (nExtra - 8)))));
+        lemma_bytes_and_mod(r9, nExtra8);
+        lemma_mod_hi(r8, r9, #nat64(pow2(8 * nExtra8)));
         Mov64(rcx, rdx);
         Sub64(rcx, 1);
         And64(r9, rcx);
@@ -548,7 +549,7 @@ let reveal_logand128 (x y:nat128) : Lemma
   (ensures Vale.Def.Types_s.iand x y == FStar.UInt.logand #128 x y)
   = Vale.Def.TypesNative_s.reveal_iand 128 x y
 #endverbatim
-ghost procedure reveal_logand128(ghost x:nat128, ghost y:nat128) extern;
+ghost procedure reveal_logand128(ghost x:nat128, ghost y:nat128) {:infer_spec} extern;
 
 procedure Poly1305_impl(
         ghost key_r:nat128,

@@ -21,6 +21,10 @@ let update_of (flags:int) (new_of:bool) = Lemmas.update_of flags new_of
 let ins = BS.ins
 type ocmp = BS.ocmp
 type va_fuel = nat
+
+let mul_nat_helper x y =
+  FStar.Math.Lemmas.nat_times_nat_is_nat x y
+
 let va_fuel_default () = 0
 
 let va_opr_lemma_Mem s base offset b index t =

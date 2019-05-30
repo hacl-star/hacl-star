@@ -50,20 +50,41 @@ let if_code (b:bool) (c1:code) (c2:code) : code = if b then c1 else c2
 
 noeq type quickCodes (a:Type0) : codes -> Type =
 | QEmpty: a -> quickCodes a []
-| QSeq: #b:Type -> #c:code -> #cs:codes -> r:range -> msg:string -> quickCode b c -> quickCodes a cs -> quickCodes a (c::cs)
-| QBind: #b:Type -> #c:code -> #cs:codes -> r:range -> msg:string -> quickCode b c -> (state -> b -> GTot (quickCodes a cs)) -> quickCodes a (c::cs)
+| QSeq: #b:Type -> #c:code -> #cs:codes -> r:range -> msg:string ->
+    quickCode b c -> quickCodes a cs -> quickCodes a (c::cs)
+| QBind: #b:Type -> #c:code -> #cs:codes -> r:range -> msg:string ->
+    quickCode b c -> (state -> b -> GTot (quickCodes a cs)) -> quickCodes a (c::cs)
 | QGetState: #cs:codes -> (state -> GTot (quickCodes a cs)) -> quickCodes a ((Block [])::cs)
-| QPURE: #cs:codes -> r:range -> msg:string -> pre:((unit -> GTot Type0) -> GTot Type0) -> (unit -> PURE unit pre) -> quickCodes a cs -> quickCodes a cs
-| QLemma: #cs:codes -> r:range -> msg:string -> pre:Type0 -> post:Type0 -> (unit -> Lemma (requires pre) (ensures post)) -> quickCodes a cs -> quickCodes a cs
+| QPURE: #cs:codes -> r:range -> msg:string -> pre:((unit -> GTot Type0) -> GTot Type0) ->
+    (unit -> PURE unit pre) -> quickCodes a cs -> quickCodes a cs
+//| QBindPURE: #cs:codes -> b:Type -> r:range -> msg:string -> pre:((b -> GTot Type0) -> GTot Type0) ->
+//    (unit -> PURE b pre) -> (state -> b -> GTot (quickCodes a cs)) -> quickCodes a ((Block [])::cs)
+| QLemma: #cs:codes -> r:range -> msg:string -> pre:Type0 -> post:(squash pre -> Type0) ->
+    (unit -> Lemma (requires pre) (ensures post ())) -> quickCodes a cs -> quickCodes a cs
+| QGhost: #cs:codes -> b:Type -> r:range -> msg:string -> pre:Type0 -> post:(b -> Type0) ->
+    (unit -> Ghost b (requires pre) (ensures post)) -> (b -> GTot (quickCodes a cs)) -> quickCodes a ((Block [])::cs)
 
 [@va_qattr]
-let qPURE (#cs:codes) (#pre:(unit -> GTot Type0) -> GTot Type0) (#a:Type0) (r:range) (msg:string) ($l:unit -> PURE unit pre) (qcs:quickCodes a cs) : quickCodes a cs =
+let qPURE
+    (#cs:codes) (#pre:(unit -> GTot Type0) -> GTot Type0) (#a:Type0) (r:range) (msg:string)
+    ($l:unit -> PURE unit pre) (qcs:quickCodes a cs)
+  : quickCodes a cs =
   QPURE r msg pre l qcs
+
+(* REVIEW: this might be useful, but inference of pre doesn't work as well as for qPURE
+  (need to provide pre explicitly; as a result, no need to put $ on l)
+[@va_qattr]
+let qBindPURE
+    (#a #b:Type0) (#cs:codes) (pre:(b -> GTot Type0) -> GTot Type0) (r:range) (msg:string)
+    (l:unit -> PURE b pre) (qcs:state -> b -> GTot (quickCodes a cs))
+  : quickCodes a ((Block [])::cs) =
+  QBindPURE b r msg pre l qcs
+*)
 
 [@va_qattr]
 let wp_proc (#a:Type0) (c:code) (qc:quickCode a c) (s0:state) (k:state -> a -> Type0) : Type0 =
   match qc with
-  | QProc _ _ wp _ _ _ -> wp s0 k
+  | QProc _ _ wp _ -> wp s0 k
 
 let wp_Seq_t (a:Type0) = state -> a -> Type0
 let wp_Bind_t (a:Type0) = state -> a -> Type0
@@ -95,8 +116,19 @@ let rec wp (#a:Type0) (cs:codes) (qcs:quickCodes a cs) (mods:mods_t) (k:state ->
         (forall (u:unit).{:pattern (guard_free (p u))} wp cs qcs mods k s0 ==> p ())
         ==>
         label r msg (pre p))
+(*
+  | QBindPURE b r msg pre l qcs ->
+      let c::cs = cs in
+      (forall (p:b -> GTot Type0).//{:pattern (pre p)}
+        (forall (g:b).{:pattern (guard_free (p g))} wp cs (qcs s0 g) mods k s0 ==> p g)
+        ==>
+        label r msg (pre p))
+*)
   | QLemma r msg pre post l qcs ->
-      label r msg pre /\ (post ==> wp cs qcs mods k s0)
+      label r msg pre /\ (post () ==> wp cs qcs mods k s0)
+  | QGhost b r msg pre post l qcs ->
+      let c::cs = cs in
+      label r msg pre /\ (forall (g:b). post g ==> wp cs (qcs g) mods k s0)
 // Hoist lambdas out of main definition to avoid issues with function equality
 and wp_Seq (#a:Type0) (#b:Type0) (cs:codes) (qcs:quickCodes b cs) (mods:mods_t) (k:state -> b -> Type0) :
   Tot (wp_Seq_t a) (decreases %[cs; 1; qcs])
@@ -107,22 +139,12 @@ and wp_Bind (#a:Type0) (#b:Type0) (cs:codes) (qcs:state -> a -> GTot (quickCodes
   =
   let f s0 g = wp cs (qcs s0 g) mods k s0 in f
 
-val wp_monotone (#a:Type0) (cs:codes) (qcs:quickCodes a cs) (mods:mods_t) (k1:state -> a -> Type0) (k2:state -> a -> Type0) (s0:state) : Lemma
-  (requires (forall (s:state) (g:a). k1 s g ==> k2 s g))
-  (ensures wp cs qcs mods k1 s0 ==> wp cs qcs mods k2 s0)
-
-val wp_compute (#a:Type0) (cs:codes) (qcs:quickCodes a cs) (mods:mods_t) (s0:state) :
-  Ghost ((sN:state) * (fN:fuel) * (g:a))
-  (requires wp cs qcs mods k_true s0)
-  (ensures fun _ -> True)
-
-val wp_sound (#a:Type0) (cs:codes) (qcs:quickCodes a cs) (mods:mods_t) (k:state -> a -> Type0) (s0:state) : Lemma
+val wp_sound (#a:Type0) (cs:codes) (qcs:quickCodes a cs) (mods:mods_t) (k:state -> a -> Type0) (s0:state)
+  : Ghost (state * va_fuel * a)
   (requires wp cs qcs mods k s0)
-  (ensures (
-    wp_monotone cs qcs mods k k_true s0;
-    let (sN, fN, gN) = wp_compute cs qcs mods s0 in
+  (ensures fun (sN, fN, gN) ->
     eval (Block cs) s0 fN sN /\ update_state_mods mods sN s0 == sN /\ k sN gN
-  ))
+  )
 
 ///// Block
 
@@ -132,25 +154,16 @@ unfold let block = va_Block
 let wp_block (#a:Type) (#cs:codes) (qcs:state -> GTot (quickCodes a cs)) (mods:mods_t) (s0:state) (k:state -> a -> Type0) : Type0 =
   wp cs (qcs s0) mods k s0
 
-val qblock_monotone (#a:Type) (#cs:codes) (qcs:state -> GTot (quickCodes a cs)) (mods:mods_t) (s0:state) (k1:state -> a -> Type0) (k2:state -> a -> Type0) : Lemma
-  (requires (forall (s:state) (g:a). k1 s g ==> k2 s g))
-  (ensures wp_block qcs mods s0 k1 ==> wp_block qcs mods s0 k2)
-
-val qblock_compute (#a:Type) (#cs:codes) (qcs:state -> GTot (quickCodes a cs)) (mods:mods_t) (s0:state) : Ghost (state * fuel * a)
-  (requires wp_block qcs mods s0 k_true)
-  (ensures fun _ -> True)
-
-val qblock_proof (#a:Type) (#cs:codes) (qcs:state -> GTot (quickCodes a cs)) (mods:mods_t) (s0:state) (k:state -> a -> Type0) : Lemma
+val qblock_proof (#a:Type) (#cs:codes) (qcs:state -> GTot (quickCodes a cs)) (mods:mods_t) (s0:state) (k:state -> a -> Type0)
+  : Ghost (state * va_fuel * a)
   (requires wp_block qcs mods s0 k)
-  (ensures (
-    qblock_monotone qcs mods s0 k k_true;
-    let (sM, f0, g) = qblock_compute qcs mods s0 in
+  (ensures fun (sM, f0, g) ->
     eval_code (block cs) s0 f0 sM /\ update_state_mods mods sM s0 == sM /\ k sM g
-  ))
+  )
 
 [@"opaque_to_smt" va_qattr]
 let qblock (#a:Type) (#cs:codes) (mods:mods_t) (qcs:state -> GTot (quickCodes a cs)) : quickCode a (block cs) =
-  QProc (block cs) mods (wp_block qcs mods) (qblock_monotone qcs mods) (qblock_compute qcs mods) (qblock_proof qcs mods)
+  QProc (block cs) mods (wp_block qcs mods) (qblock_proof qcs mods)
 
 ///// If, InlineIf
 
@@ -160,25 +173,16 @@ let wp_InlineIf (#a:Type) (#c1:code) (#c2:code) (b:bool) (qc1:quickCode a c1) (q
   (    b ==> mods_contains mods qc1.mods /\ QProc?.wp qc1 s0 k) /\
   (not b ==> mods_contains mods qc2.mods /\ QProc?.wp qc2 s0 k)
 
-val qInlineIf_monotone (#a:Type) (#c1:code) (#c2:code) (b:bool) (qc1:quickCode a c1) (qc2:quickCode a c2) (mods:mods_t) (s0:state) (k1:state -> a -> Type0) (k2:state -> a -> Type0) : Lemma
-  (requires (forall (s:state) (g:a). k1 s g ==> k2 s g))
-  (ensures wp_InlineIf b qc1 qc2 mods s0 k1 ==> wp_InlineIf b qc1 qc2 mods s0 k2)
-
-val qInlineIf_compute (#a:Type) (#c1:code) (#c2:code) (b:bool) (qc1:quickCode a c1) (qc2:quickCode a c2) (mods:mods_t) (s0:state) : Ghost (state * fuel * a)
-  (requires wp_InlineIf b qc1 qc2 mods s0 k_true)
-  (ensures fun _ -> True)
-
-val qInlineIf_proof (#a:Type) (#c1:code) (#c2:code) (b:bool) (qc1:quickCode a c1) (qc2:quickCode a c2) (mods:mods_t) (s0:state) (k:state -> a -> Type0) : Lemma
+val qInlineIf_proof (#a:Type) (#c1:code) (#c2:code) (b:bool) (qc1:quickCode a c1) (qc2:quickCode a c2) (mods:mods_t) (s0:state) (k:state -> a -> Type0)
+  : Ghost (state * va_fuel * a)
   (requires wp_InlineIf b qc1 qc2 mods s0 k)
-  (ensures (
-    qInlineIf_monotone b qc1 qc2 mods s0 k k_true;
-    let (sM, f0, g) = qInlineIf_compute b qc1 qc2 mods s0 in
+  (ensures fun (sM, f0, g) ->
     eval_code (if_code b c1 c2) s0 f0 sM /\ update_state_mods mods sM s0 == sM /\ k sM g
-  ))
+  )
 
 [@"opaque_to_smt" va_qattr]
 let qInlineIf (#a:Type) (#c1:code) (#c2:code) (mods:mods_t) (b:bool) (qc1:quickCode a c1) (qc2:quickCode a c2) : quickCode a (if_code b c1 c2) =
-  QProc (if_code b c1 c2) mods (wp_InlineIf b qc1 qc2 mods) (qInlineIf_monotone b qc1 qc2 mods) (qInlineIf_compute b qc1 qc2 mods) (qInlineIf_proof b qc1 qc2 mods)
+  QProc (if_code b c1 c2) mods (wp_InlineIf b qc1 qc2 mods) (qInlineIf_proof b qc1 qc2 mods)
 
 noeq type cmp =
 | Cmp_eq : o1:va_operand{not (OMem? o1 || OStack? o1)} -> o2:va_operand{not (OMem? o2 || OStack? o2)} -> cmp
@@ -225,25 +229,16 @@ let wp_If (#a:Type) (#c1:code) (#c2:code) (b:cmp) (qc1:quickCode a c1) (qc2:quic
   (     eval_cmp s0 b  ==> mods_contains mods qc1.mods /\ QProc?.wp qc1 s0 k) /\
   (not (eval_cmp s0 b) ==> mods_contains mods qc2.mods /\ QProc?.wp qc2 s0 k)
 
-val qIf_monotone (#a:Type) (#c1:code) (#c2:code) (b:cmp) (qc1:quickCode a c1) (qc2:quickCode a c2) (mods:mods_t) (s0:state) (k1:state -> a -> Type0) (k2:state -> a -> Type0) : Lemma
-  (requires (forall (s:state) (g:a). k1 s g ==> k2 s g))
-  (ensures wp_If b qc1 qc2 mods s0 k1 ==> wp_If b qc1 qc2 mods s0 k2)
-
-val qIf_compute (#a:Type) (#c1:code) (#c2:code) (b:cmp) (qc1:quickCode a c1) (qc2:quickCode a c2) (mods:mods_t) (s0:state) : Ghost (state * fuel * a)
-  (requires wp_If b qc1 qc2 mods s0 k_true)
-  (ensures fun _ -> True)
-
-val qIf_proof (#a:Type) (#c1:code) (#c2:code) (b:cmp) (qc1:quickCode a c1) (qc2:quickCode a c2) (mods:mods_t) (s0:state) (k:state -> a -> Type0) : Lemma
+val qIf_proof (#a:Type) (#c1:code) (#c2:code) (b:cmp) (qc1:quickCode a c1) (qc2:quickCode a c2) (mods:mods_t) (s0:state) (k:state -> a -> Type0)
+  : Ghost (state * va_fuel * a)
   (requires wp_If b qc1 qc2 mods s0 k)
-  (ensures (
-    qIf_monotone b qc1 qc2 mods s0 k k_true;
-    let (sM, f0, g) = qIf_compute b qc1 qc2 mods s0 in
+  (ensures fun (sM, f0, g) ->
     eval_code (IfElse (cmp_to_ocmp b) c1 c2) s0 f0 sM /\ update_state_mods mods sM s0 == sM /\ k sM g
-  ))
+  )
 
 [@"opaque_to_smt" va_qattr]
 let qIf (#a:Type) (#c1:code) (#c2:code) (mods:mods_t) (b:cmp) (qc1:quickCode a c1) (qc2:quickCode a c2) : quickCode a (IfElse (cmp_to_ocmp b) c1 c2) =
-  QProc (IfElse (cmp_to_ocmp b) c1 c2) mods (wp_If b qc1 qc2 mods) (qIf_monotone b qc1 qc2 mods) (qIf_compute b qc1 qc2 mods) (qIf_proof b qc1 qc2 mods)
+  QProc (IfElse (cmp_to_ocmp b) c1 c2) mods (wp_If b qc1 qc2 mods) (qIf_proof b qc1 qc2 mods)
 
 ///// While
 
@@ -272,38 +267,21 @@ let wp_While
   // REVIEW: we could get a better WP with forall (...state components...) instead of forall (s1:state)
   (forall (s1:state) (g1:a). inv s1 g1 ==> wp_While_body b qc mods inv dec g1 s1 k)
 
-val qWhile_monotone
-    (#a #d:Type) (#c:code) (b:cmp) (qc:a -> quickCode a c) (mods:mods_t) (inv:state -> a -> Type0)
-    (dec:state -> a -> d) (g0:a) (s0:state) (k1:state -> a -> Type0) (k2:state -> a -> Type0)
-    : Lemma
-      (requires (forall (s:state) (g:a). k1 s g ==> k2 s g))
-      (ensures wp_While b qc mods inv dec g0 s0 k1 ==> wp_While b qc mods inv dec g0 s0 k2)
-
-val qWhile_compute
-    (#a #d:Type) (#c:code) (b:cmp) (qc:a -> quickCode a c) (mods:mods_t) (inv:state -> a -> Type0)
-    (dec:state -> a -> d) (g0:a) (s0:state)
-    : Ghost (state * fuel * a)
-      (requires wp_While b qc mods inv dec g0 s0 k_true)
-      (ensures fun _ -> True)
-
 val qWhile_proof
     (#a #d:Type) (#c:code) (b:cmp) (qc:a -> quickCode a c) (mods:mods_t) (inv:state -> a -> Type0)
     (dec:state -> a -> d) (g0:a) (s0:state) (k:state -> a -> Type0)
-    : Lemma
-      (requires wp_While b qc mods inv dec g0 s0 k)
-      (ensures (
-        qWhile_monotone b qc mods inv dec g0 s0 k k_true;
-        let (sM, f0, g) = qWhile_compute b qc mods inv dec g0 s0 in
-        eval_code (While (cmp_to_ocmp b) c) s0 f0 sM /\ update_state_mods mods sM s0 == sM /\ k sM g))
+  : Ghost (state * va_fuel * a)
+  (requires wp_While b qc mods inv dec g0 s0 k)
+  (ensures fun (sM, f0, g) ->
+    eval_code (While (cmp_to_ocmp b) c) s0 f0 sM /\ update_state_mods mods sM s0 == sM /\ k sM g
+  )
 
 [@"opaque_to_smt" va_qattr]
 let qWhile
     (#a #d:Type) (#c:code) (mods:mods_t) (b:cmp) (qc:a -> quickCode a c) (inv:state -> a -> Type0)
     (dec:state -> a -> d) (g0:a)
-    : quickCode a (While (cmp_to_ocmp b) c) =
+  : quickCode a (While (cmp_to_ocmp b) c) =
   QProc (While (cmp_to_ocmp b) c) mods (wp_While b qc mods inv dec g0)
-    (qWhile_monotone b qc mods inv dec g0)
-    (qWhile_compute b qc mods inv dec g0)
     (qWhile_proof b qc mods inv dec g0)
 
 ///// Assert, Assume, AssertBy
@@ -313,14 +291,23 @@ val qAssertLemma (p:Type0) : tAssertLemma p
 
 [@va_qattr]
 let qAssert (#a:Type) (#cs:codes) (r:range) (msg:string) (e:Type0) (qcs:quickCodes a cs) : quickCodes a cs =
-  QLemma r msg e e (qAssertLemma e) qcs
+  QLemma r msg e (fun () -> e) (qAssertLemma e) qcs
 
 let tAssumeLemma (p:Type0) = unit -> Lemma (requires True) (ensures p)
 val qAssumeLemma (p:Type0) : tAssumeLemma p
 
 [@va_qattr]
 let qAssume (#a:Type) (#cs:codes) (r:range) (msg:string) (e:Type0) (qcs:quickCodes a cs) : quickCodes a cs =
-  QLemma r msg True e (qAssumeLemma e) qcs
+  QLemma r msg True (fun () -> e) (qAssumeLemma e) qcs
+
+let tAssertSquashLemma (p:Type0) = unit -> Ghost (squash p) (requires p) (ensures fun () -> p)
+val qAssertSquashLemma (p:Type0) : tAssertSquashLemma p
+
+[@va_qattr]
+let qAssertSquash
+    (#a:Type) (#cs:codes) (r:range) (msg:string) (e:Type0) (qcs:squash e -> GTot (quickCodes a cs))
+  : quickCodes a ((Block [])::cs) =
+  QGhost (squash e) r msg e (fun () -> e) (qAssertSquashLemma e) qcs
 
 let tAssertByLemma (#a:Type) (p:Type0) (qcs:quickCodes a []) (mods:mods_t) (s0:state) =
   unit -> Lemma (requires wp [] qcs mods (fun _ _ -> p) s0) (ensures p)
@@ -328,7 +315,7 @@ val qAssertByLemma (#a:Type) (p:Type0) (qcs:quickCodes a []) (mods:mods_t) (s0:s
 
 [@va_qattr]
 let qAssertBy (#a:Type) (#cs:codes) (mods:mods_t) (r:range) (msg:string) (p:Type0) (qcsBy:quickCodes unit []) (s0:state) (qcsTail:quickCodes a cs) : quickCodes a cs =
-  QLemma r msg (wp [] qcsBy mods (fun _ _ -> p) s0) p (qAssertByLemma p qcsBy mods s0) qcsTail
+  QLemma r msg (wp [] qcsBy mods (fun _ _ -> p) s0) (fun () -> p) (qAssertByLemma p qcsBy mods s0) qcsTail
 
 ///// Code
 
@@ -384,74 +371,15 @@ let va_state_match (s0:state) (s1:state) : Pure Type0
   s0.stackTaint == s1.stackTaint
 
 [@va_qattr]
-unfold let wp_sound_pre (#a:Type0) (#cs:codes) (qcs:quickCodes a cs) (mods:mods_t) (s0:state) (k:state -> state -> a -> Type0) : Type0 =
-  forall (ok:bool) (regs:Regs.t) (xmms:Xmms.t) (flags:nat64) (mem:mem) (stack:stack) (memTaint:memtaint) (stackTaint:memtaint).
-    let s0' = {ok = ok; regs = regs; xmms = xmms; flags = flags; mem = mem; stack=stack; memTaint = memTaint; stackTaint = stackTaint} in
-    s0 == s0' ==> wp cs qcs mods (k (state_eta s0')) (state_eta s0')
-
-unfold let wp_sound_post (#a:Type0) (#cs:codes) (qcs:quickCodes a cs) (mods:mods_t) (s0:state) (k:state -> state -> a -> Type0) ((sN:state), (fN:fuel), (gN:a)) : Type0 =
-  eval (Block cs) s0 fN sN /\
-  update_state_mods mods sN s0 == sN /\
-  k s0 sN gN
-
-val wp_sound_wrap (#a:Type0) (cs:codes) (qcs:quickCodes a cs) (mods:mods_t) (s0:state) (k:state -> state -> a -> Type0) :
-  Ghost (state * fuel * a)
-    (wp_sound_pre qcs mods s0 k)
-    (wp_sound_post qcs mods s0 k)
-
-[@va_qattr]
-unfold let wp_sound_code_pre (#a:Type0) (#c:code) (qc:quickCode a c) (s0:state) (k:state -> state -> a -> Type0) : Type0 =
+unfold let wp_sound_code_pre (#a:Type0) (#c:code) (qc:quickCode a c) (s0:state) (k:(s0':state{s0 == s0'}) -> state -> a -> Type0) : Type0 =
   forall (ok:bool) (regs:Regs.t) (xmms:Xmms.t) (flags:nat64) (mem:mem) (stack:stack) (memTaint:memtaint) (stackTaint:memtaint).
     let s0' = {ok = ok; regs = regs; xmms = xmms; flags = flags; mem = mem; stack = stack; memTaint = memTaint; stackTaint = stackTaint} in
     s0 == s0' ==> QProc?.wp qc (state_eta s0') (k (state_eta s0'))
 
-unfold let wp_sound_code_post (#a:Type0) (#c:code) (qc:quickCode a c) (s0:state) (k:state -> state -> a -> Type0) ((sN:state), (fN:fuel), (gN:a)) : Type0 =
+unfold let wp_sound_code_post (#a:Type0) (#c:code) (qc:quickCode a c) (s0:state) (k:(s0':state{s0 == s0'}) -> state -> a -> Type0) ((sN:state), (fN:fuel), (gN:a)) : Type0 =
   eval c s0 fN sN /\
   update_state_mods qc.mods sN s0 == sN /\
   k s0 sN gN
-
-val wp_sound_code_wrap (#a:Type0) (c:code) (qc:quickCode a c) (s0:state) (k:state -> state -> a -> Type0) :
-  Ghost (state * fuel * a)
-    (wp_sound_code_pre qc s0 k)
-    (wp_sound_code_post qc s0 k)
-
-// For efficiency, absorb the state components from the (potentially large) normalized
-// final state sN into an alternate final state sN' (related to sN via 'update' and 'post':
-// update describes which components changed, post describes what they changed to).
-[@va_qattr]
-let wp_final_k (#a:Type0) (update:state -> state) (post:state -> state -> Type0) (k:state -> a -> Type0) (sN:state) (g:a) : Type0 =
-  va_state_match sN (update sN) /\ post sN sN /\
-    (forall (ok':bool) (regs':Regs.t) (xmms':Xmms.t) (flags':nat64) (mem':mem) (stack':stack) (memTaint':memtaint) (stackTaint':memtaint).
-      let sN' = state_eta ({ok = ok'; regs = regs'; xmms = xmms'; flags = flags'; mem = mem'; stack = stack'; memTaint = memTaint'; stackTaint = stackTaint'}) in
-      post sN sN' ==> k sN' g)
-
-// For efficiency, introduce shorter names (e.g. ok, mem) for components of initial state s0.
-[@va_qattr]
-let wp_wrap (#a:Type0) (cs:codes) (qcs:quickCodes a cs) (mods:mods_t) (update:state -> state -> state) (post:state -> state -> Type0) (k:state -> a -> Type0) (s0:state) : Type0 =
-  forall (ok:bool) (regs:Regs.t) (xmms:Xmms.t) (flags:nat64) (mem:mem) (stack:stack) (memTaint:memtaint) (stackTaint:memtaint).
-    let s0' = {ok = ok; regs = regs; xmms = xmms; flags = flags; mem = mem; stack = stack; memTaint = memTaint; stackTaint = stackTaint} in
-    s0 == s0' ==> wp cs qcs mods (wp_final_k (update (state_eta s0')) post k) (state_eta s0')
-
-[@va_qattr]
-let wp_wrap_code (#a:Type0) (c:code) (qc:quickCode a c) (update:state -> state -> state) (post:state -> state -> Type0) (k:state -> a -> Type0) (s0:state) : Type0 =
-  forall (ok:bool) (regs:Regs.t) (xmms:Xmms.t) (flags:nat64) (mem:mem) (stack:stack) (memTaint:memtaint) (stackTaint:memtaint).
-    let s0' = {ok = ok; regs = regs; xmms = xmms; flags = flags; mem = mem; stack = stack; memTaint = memTaint; stackTaint = stackTaint} in
-    s0 == s0' ==> QProc?.wp qc (state_eta s0') (wp_final_k (update (state_eta s0')) post k)
-
-unfold let wp_GHOST (#a:Type0) (c:code) (s0:state) (update:state -> state -> state) (fk:(state -> a -> Type0) -> Type0) (p:state * fuel * a -> Type0) : Type0 =
-  forall (k:state -> a -> Type0).
-    (forall (sN:state) (gN:a).{:pattern (k sN gN)}
-      (forall (fN:fuel). eval c s0 fN sN /\ sN == update s0 sN ==> p (sN, fN, gN)) ==>
-      k sN gN
-    ) ==>
-    fk k
-
-// Use raw GHOST effect to integrate soundness proof into F*'s own weakest precondition generation.
-val wp_run (#a:Type0) (cs:codes) (qcs:quickCodes a cs) (mods:mods_t) (s0:state) (update:state -> state -> state) (post:state -> state -> Type0) :
-  GHOST (state * fuel * a) (wp_GHOST (Block cs) s0 update (fun k -> wp_wrap cs qcs mods update post k s0))
-
-val wp_run_code (#a:Type0) (c:code) (qc:quickCode a c) (s0:state) (update:state -> state -> state) (post:state -> state -> Type0) :
-  GHOST (state * fuel * a) (wp_GHOST c s0 update (fun k -> wp_wrap_code c qc update post k s0))
 
 unfold let normal_steps : list string =
   [
@@ -474,16 +402,8 @@ unfold let normal_steps : list string =
 
 unfold let normal (x:Type0) : Type0 = norm [iota; zeta; simplify; primops; delta_attr [`%va_qattr]; delta_only normal_steps] x
 
-val wp_sound_norm (#a:Type0) (cs:codes) (qcs:quickCodes a cs) (mods:mods_t) (s0:state) (k:state -> state -> a -> Type0) :
-  Ghost (state * fuel * a)
-    (normal (wp_sound_pre qcs mods s0 k))
-    (wp_sound_post qcs mods s0 k)
-
-val wp_sound_code_norm (#a:Type0) (c:code) (qc:quickCode a c) (s0:state) (k:state -> state -> a -> Type0) :
+val wp_sound_code_norm (#a:Type0) (c:code) (qc:quickCode a c) (s0:state) (k:(s0':state{s0 == s0'}) -> state -> a -> Type0) :
   Ghost (state * fuel * a)
     (normal (wp_sound_code_pre qc s0 k))
     (wp_sound_code_post qc s0 k)
-
-val wp_run_norm (#a:Type0) (cs:codes) (qcs:quickCodes a cs) (mods:mods_t) (s0:state) (update:state -> state -> state) (post:state -> state -> Type0) :
-  GHOST (state * fuel * a) (wp_GHOST (Block cs) s0 update (fun k -> normal (wp_wrap cs qcs mods update post k s0)))
 

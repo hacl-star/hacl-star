@@ -19,7 +19,6 @@ include{:fstar}{:open} "Vale.Arch.Types"
 include{:fstar}{:open} "Vale.AES.AES_helpers"
 include{:fstar}{:open} "Vale.Poly1305.Math"
 include{:fstar}{:open} "Vale.AES.GCM_helpers"
-include{:fstar}{:open} "Vale.Lib.Workarounds"
 include{:fstar}{:open} "Vale.AES.GCTR_s"
 include{:fstar}{:open} "Vale.AES.GCTR"
 include{:fstar}{:open} "Vale.Arch.TypesNative"
@@ -49,7 +48,6 @@ open Vale.Arch.Types
 open Vale.AES.AES_helpers
 open Vale.Poly1305.Math    // For lemma_poly_bits64()
 open Vale.AES.GCM_helpers
-open Vale.Lib.Workarounds
 open Vale.AES.GCTR_s
 open Vale.AES.GCTR
 open Vale.Arch.TypesNative
@@ -81,7 +79,7 @@ ghost procedure finish_aes_encrypt_le(ghost alg:algorithm, ghost input_LE:quad32
     ensures
         aes_encrypt_le(alg, key, input_LE) == cipher_opaque(alg, input_LE, key_to_round_keys_LE(alg, key));
 {
-    Vale.Def.Opaque_s.reveal_opaque(aes_encrypt_LE_def);
+    reveal aes_encrypt_le;
     Vale.Def.Opaque_s.reveal_opaque(cipher);
 }
 
@@ -282,7 +280,6 @@ procedure aes_ctr_encrypt(
         ctr3 == aes_encrypt_le(alg, key, in3);
         ctr4 == aes_encrypt_le(alg, key, in4);
 {
-    assert{:quick_type} length(round_keys) == nr(alg) + 1;
     init_rounds_opaque(old(ctr1), round_keys);
     init_rounds_opaque(old(ctr2), round_keys);
     init_rounds_opaque(old(ctr3), round_keys);
@@ -321,7 +318,6 @@ procedure aes_ctr_encrypt(
         Load128_buffer(rk2, key_ptr, 176, Secret, keys_b, 11);
         Load128_buffer(rk3, key_ptr, 192, Secret, keys_b, 12);
         Load128_buffer(rk4, key_ptr, 208, Secret, keys_b, 13);
-        assert{:quick_type} length(round_keys) == 15;
         assert rk1 == index(round_keys, 10);
         assert rk2 == index(round_keys, 11);
         assert rk3 == index(round_keys, 12);
@@ -374,7 +370,7 @@ procedure aes_ctr_ghash(
         mask == Mkfour(0x0C0D0E0F, 0x08090A0B, 0x04050607, 0x00010203);
 
         // Partial GCM progress
-        hash == ghash_incremental0(reverse_bytes_quad32(h), hash_init, slice_work_around(buffer128_as_seq(mem, out_b), 4*count));
+        hash == ghash_incremental0(reverse_bytes_quad32(h), hash_init, slice(buffer128_as_seq(mem, out_b), 0, 4 * count));
 
         ctr1 == index(buffer128_as_seq(mem, out_b), 4*count+0);
         ctr2 == index(buffer128_as_seq(mem, out_b), 4*count+1);
@@ -384,7 +380,7 @@ procedure aes_ctr_ghash(
     reads mask; h; ctr2; ctr3; ctr4; mem; memTaint;
     modifies hash; rk4; rk1; rk2; rk3; ctr1; r12; efl;
     ensures
-        hash == ghash_incremental(reverse_bytes_quad32(h), hash_init, slice_work_around(buffer128_as_seq(mem, out_b), 4*(count+1)));
+        hash == ghash_incremental(reverse_bytes_quad32(h), hash_init, slice(buffer128_as_seq(mem, out_b), 0, 4 * (count+1)));
 {
     // Compute GHash on the four outputs
     let h_in_0 := ctr1;
@@ -471,7 +467,7 @@ procedure aes_ctr_loop_body(
 
         // GCTR progress
         gctr_partial(alg, 4*count, old(buffer128_as_seq(mem, plain_b)), buffer128_as_seq(mem, out_b), key, icb_BE);
-        hash == ghash_incremental0(reverse_bytes_quad32(h), hash_init, slice_work_around(buffer128_as_seq(mem, out_b), 4*count));
+        hash == ghash_incremental0(reverse_bytes_quad32(h), hash_init, slice(buffer128_as_seq(mem, out_b), 0, 4 * count));
 
     reads key_ptr; iv_lower64; mask; mask64; four; memTaint; h;
     modifies
@@ -498,7 +494,7 @@ procedure aes_ctr_loop_body(
 
         // GCTR progress
         gctr_partial(alg, 4*count+4, old(buffer128_as_seq(mem, plain_b)), buffer128_as_seq(mem, out_b), key, icb_BE);
-        hash == ghash_incremental(reverse_bytes_quad32(h), hash_init, slice_work_around(buffer128_as_seq(mem, out_b), 4*(count+1)));
+        hash == ghash_incremental(reverse_bytes_quad32(h), hash_init, slice(buffer128_as_seq(mem, out_b), 0, 4 * (count+1)));
 {
     lemma_insrq_extrq_relations(ctr1, iv);
     lemma_insrq_extrq_relations(ctr2, iv);
@@ -528,7 +524,6 @@ procedure aes_ctr_loop_body(
     Load128_buffer(rk2,  key_ptr, 16, Secret, keys_b, 1);
     Load128_buffer(rk3, key_ptr, 32, Secret, keys_b, 2);
     Load128_buffer(rk4,  key_ptr, 48, Secret, keys_b, 3);
-    assert{:quick_type} length(round_keys) == nr(alg) + 1;
     assert rk1  == index(round_keys, 0);
     assert rk2  == index(round_keys, 1);
     assert rk3 == index(round_keys, 2);
@@ -575,7 +570,7 @@ procedure aes_ctr_loop_body(
     lemma_quad32_xor_commutes_forall();
     //commute_sub_bytes_shift_rows_forall();
 
-    assert slice_work_around(buffer128_as_seq(mem, out_b), 4*count) == old(slice_work_around(buffer128_as_seq(mem, out_b), 4*count));   // OBSERVE
+    assert slice(buffer128_as_seq(mem, out_b), 0, 4 * count) == old(slice(buffer128_as_seq(mem, out_b), 0, 4 * count));   // OBSERVE
 
     // Compute GHash on the four outputs
     aes_ctr_ghash(old_out_ptr, old_num_quad_blocks, count, out_b, hash_init);
@@ -642,8 +637,8 @@ procedure aes_counter_loop(
         iv == old(inc32(iv, 4*num_quad_blocks));
 
         // GHash
-        length(slice_work_around(buffer128_as_seq(mem, out_b), 4*old(num_quad_blocks))) > 0 /\
-        hash == ghash_incremental(reverse_bytes_quad32(h), old(hash), slice_work_around(buffer128_as_seq(mem, out_b), 4*old(num_quad_blocks)));
+        length(slice(buffer128_as_seq(mem, out_b), 0, 4 * old(num_quad_blocks))) > 0 /\
+        hash == ghash_incremental(reverse_bytes_quad32(h), old(hash), slice(buffer128_as_seq(mem, out_b), 0, 4 * old(num_quad_blocks)));
 {
     // To interface with our existing code, start by reversing the IV
     Pshufb(iv, mask);
@@ -730,8 +725,8 @@ procedure aes_counter_loop(
             iv_lower64 == lo64(old_iv);
 
             // GCTR progress
-            length(slice_work_around(buffer128_as_seq(mem, out_b), 4*old(num_quad_blocks))) > 0;
-            hash == ghash_incremental0(reverse_bytes_quad32(h), old(hash), slice_work_around(buffer128_as_seq(mem, out_b), 4*count));
+            length(slice(buffer128_as_seq(mem, out_b), 0, 4 * old(num_quad_blocks))) > 0;
+            hash == ghash_incremental0(reverse_bytes_quad32(h), old(hash), slice(buffer128_as_seq(mem, out_b), 0, 4 * count));
             gctr_partial(alg, 4*count, old(buffer128_as_seq(mem, plain_b)), buffer128_as_seq(mem, out_b), key, icb_BE);
         decreases num_quad_blocks;
     {
@@ -742,7 +737,6 @@ procedure aes_counter_loop(
     Mov128(iv, const2_1);
     lemma_insrq_extrq_relations(iv, old_iv);
     Pinsrq(iv, iv_lower64, 0);
-    assert {:quick_type} 4*old(num_quad_blocks) < pow2_32;
     //assert iv == Mkfour(old_iv.lo0, old_iv.lo1, old_iv.hi2, reverse_bytes_nat32(add_wrap32(icb_BE.lo0, 4*old(num_quad_blocks))));
     // Reversed: iv == Mkfour(r (r (add_wrap32(r(old_iv.hi3), 4*old(num_quad_blocks)))), r(old_iv.hi2), r(old_iv.lo1), r(old_iv.lo0));
     //              == Mkfour( add_wrap32(old(iv.lo0, 4*old(num_quad_blocks))), old(iv.lo2), old(iv.hi2), old(iv).hi3));

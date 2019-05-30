@@ -75,17 +75,6 @@ operand_type Stack(in base:reg64, inline offset:int, inline t:taint):int;
 operand_type dst_opr64:nat64 @ va_operand := reg_opr64 | Mem | Stack;
 operand_type opr64:nat64 @ va_operand := dst_opr64 | const;
 
-// add {:typecheck false} attr because Type0 is not defined. (TODO: get rid of this)
-procedure AssertQuickType(ghost p:Type0) returns(ghost u:squash(p))
-    {:public}
-    {:quick exportOnly}
-    {:typecheck false}
-    requires
-        p;
-{
-    u := tuple();
-}
-
 procedure Mov64(inout dst:dst_opr64, in src:opr64)
     {:public}
     {:quick exportOnly}
@@ -245,7 +234,7 @@ let lemma_fundamental_div_mod (a b:nat64) :
 
 #reset-options "--initial_fuel 5 --max_fuel 5 --max_ifuel 2 --z3rlimit 20"
 
-ghost procedure lemma_fundamental_div_mod(ghost a:nat64, ghost b:nat64) extern;
+ghost procedure lemma_fundamental_div_mod(ghost a:nat64, ghost b:nat64) {:infer_spec} extern;
 
 procedure Mul64Wrap(in src:opr64)
     {:public}
@@ -274,8 +263,8 @@ procedure Mulx64(out dst_hi:dst_opr64, out dst_lo:dst_opr64, in src:opr64)
     lemma_fundamental_div_mod(old(rdx), old(src));
 }
 
-ghost procedure lemma_mul_nat(ghost x:nat, ghost y:nat) extern;
-ghost procedure lemma_mul_in_bounds(ghost a:nat64, ghost b:nat64) extern;
+ghost procedure lemma_mul_nat(ghost x:nat, ghost y:nat) {:infer_spec} extern;
+ghost procedure lemma_mul_in_bounds(ghost a:nat64, ghost b:nat64) {:infer_spec} extern;
 
 procedure IMul64(inout dst:dst_opr64, in src:opr64)
     {:public}

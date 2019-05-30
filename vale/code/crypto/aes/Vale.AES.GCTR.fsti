@@ -9,7 +9,6 @@ open FStar.Mul
 open FStar.Seq
 open Vale.AES.AES_s
 open Vale.AES.GCTR_s
-open Vale.Lib.Workarounds
 open Vale.AES.GCM_helpers
 open FStar.Math.Lemmas
 open Vale.Lib.Seqs
@@ -61,12 +60,13 @@ val gctr_encrypt_block_offset (icb_BE:quad32) (plain_LE:quad32) (alg:algorithm) 
 val gctr_encrypt_empty (icb_BE:quad32) (plain_LE cipher_LE:seq quad32) (alg:algorithm) (key:seq nat32) : Lemma
   (requires is_aes_key_LE alg key)
   (ensures (
-    let plain = slice_work_around (le_seq_quad32_to_bytes plain_LE) 0 in
-    let cipher = slice_work_around (le_seq_quad32_to_bytes cipher_LE) 0 in
+    let plain = slice (le_seq_quad32_to_bytes plain_LE) 0 0 in
+    let cipher = slice (le_seq_quad32_to_bytes cipher_LE) 0 0 in
     cipher = gctr_encrypt_LE icb_BE (make_gctr_plain_LE plain) alg key
   ))
 
-let aes_encrypt_le = make_opaque aes_encrypt_LE_def
+[@"opaque_to_smt"]
+let aes_encrypt_le = aes_encrypt_LE_def
 
 let aes_encrypt_BE (alg:algorithm) (key:seq nat32) (p_BE:quad32) : Pure quad32
   (requires is_aes_key_LE alg key)

@@ -120,10 +120,8 @@ procedure AESEncryptBlock(
         xmm0 == aes_encrypt_LE(alg, key, input);
 {
     inline if (alg = AES_128) {
-        assert {:quick_type} alg == AES_128;
         AES128EncryptBlock(input, key, round_keys, keys_buffer);
     } else {
-        assert {:quick_type} alg == AES_256;
         AES256EncryptBlock(input, key, round_keys, keys_buffer);
     }
 }

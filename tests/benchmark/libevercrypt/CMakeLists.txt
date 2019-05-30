@@ -1,7 +1,9 @@
 project(evercrypt LANGUAGES C ASM)
-cmake_minimum_required(VERSION 3.6)
+cmake_minimum_required(VERSION 3.5)
 
-set(EVERCRYPT_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../../dist/compact-gcc CACHE PATH "Where to find the EverCrypt sources.")
+if (NOT EVERCRYPT_SRC_DIR)
+  set(EVERCRYPT_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../../dist/compact-gcc CACHE PATH "Where to find the EverCrypt sources.")
+endif()
 get_filename_component(EVERCRYPT_SRC_DIR ${EVERCRYPT_SRC_DIR} ABSOLUTE)
 message("-- Using EverCrypt at ${EVERCRYPT_SRC_DIR}")
 
