@@ -849,7 +849,7 @@ let rec lemma_eval_instr_unchanged_args
       assert (res' == v1);
       ()
 
-let lemma_eval_instr_unchanged_inouts
+let rec lemma_eval_instr_unchanged_inouts
     (outs inouts:list instr_out) (args:list instr_operand)
     (ff:instr_inouts_t outs inouts args) (oprs:instr_operands_t inouts args)
     (f:st unit) (s:machine_state) :
@@ -864,8 +864,26 @@ let lemma_eval_instr_unchanged_inouts
   match inouts with
   | [] ->
     lemma_eval_instr_unchanged_args outs args ff oprs f s
-  | _ ->
-    admit ()
+  | (Out, i)::inouts ->
+    let oprs =
+      match i with
+      | IOpEx i -> snd #(instr_operand_t i) (coerce oprs)
+      | IOpIm i -> coerce oprs
+    in
+    let res = instr_apply_eval_inouts outs inouts args (coerce ff) oprs s in
+    lemma_eval_instr_unchanged_inouts outs inouts args (coerce ff) oprs f s
+  | (InOut, i)::inouts ->
+    let (v, oprs) : option _ & _ =
+      match i with
+      | IOpEx i -> let oprs = coerce oprs in (instr_eval_operand_explicit i (fst oprs) s, snd oprs)
+      | IOpIm i -> (instr_eval_operand_implicit i s, coerce oprs)
+    in
+    let ff:arrow (instr_val_t i) (instr_inouts_t outs inouts args) = coerce ff in
+    let res = bind_option v (fun v -> instr_apply_eval_inouts outs inouts args (ff v) oprs s) in
+    match v with
+    | None -> ()
+    | Some v ->
+      lemma_eval_instr_unchanged_inouts outs inouts args (ff v) oprs f s
 
 let lemma_eval_instr_unchanged
     (it:instr_t_record) (oprs:instr_operands_t it.outs it.args) (ann:instr_annotation it)
