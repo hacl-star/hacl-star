@@ -904,6 +904,13 @@ let lemma_eval_instr_unchanged
   let InstrTypeRecord #outs #args #havoc_flags i = it in
   lemma_eval_instr_unchanged_inouts outs outs args (instr_eval i) oprs f s
 
+let valid_dst_access_location (a:access_location) (s:machine_state) : bool =
+  match a with
+  | ALoc64 o -> valid_dst_operand o s
+  | ALoc128 o -> valid_dst_mov128_op o s
+  | ALocCf -> true
+  | ALocOf -> true
+
 let lemma_unchanged_commutes (i1 i2 : ins) (s : machine_state) :
   Lemma
     (requires (
