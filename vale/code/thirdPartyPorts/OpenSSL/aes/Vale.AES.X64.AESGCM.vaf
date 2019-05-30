@@ -19,7 +19,6 @@ include{:fstar}{:open} "Vale.Arch.Types"
 include{:fstar}{:open} "Vale.AES.AES_helpers"
 //include{:fstar}{:open} "Vale.Poly1305.Math"
 include{:fstar}{:open} "Vale.AES.GCM_helpers"
-include{:fstar}{:open} "Vale.Lib.Workarounds"
 include{:fstar}{:open} "Vale.AES.GCTR_s"
 include{:fstar}{:open} "Vale.AES.GCTR"
 include{:fstar}{:open} "Vale.Arch.TypesNative"
@@ -58,7 +57,6 @@ open Vale.Arch.Types
 open Vale.AES.AES_helpers
 //open Vale.Poly1305.Math    // For lemma_poly_bits64()
 open Vale.AES.GCM_helpers
-open Vale.Lib.Workarounds
 open Vale.AES.GCTR_s
 open Vale.AES.GCTR
 open Vale.Arch.TypesNative
@@ -1808,7 +1806,7 @@ procedure Loop6x_save_output(ghost count:nat, ghost out_b:buffer128)
 
     ensures
         modifies_buffer_specific128(out_b, old(mem), mem, count*6+0, count*6+5);
-        slice_work_around(s128(mem, out_b), 6*count) == old(slice_work_around(s128(mem, out_b), 6*count));
+        slice(s128(mem, out_b), 0, 6 * count) == old(slice(s128(mem, out_b), 0, 6 * count));
 
         buffer128_read(out_b, count*6 + 0, mem) == old(inout0);
         buffer128_read(out_b, count*6 + 1, mem) == old(inout1);
@@ -2185,7 +2183,7 @@ procedure Loop6x(
         h_LE == aes_encrypt_LE(alg, key_words, Mkfour(0, 0, 0, 0));
         hkeys_reqs_priv(s128(mem, hkeys_b), reverse_bytes_quad32(h_LE));
         scratch_reqs(scratch_b, #nat(count-2), mem, s128(mem, in0_b), Z3);
-        y_prev == ghash_incremental0(h_LE, y_orig, slice_work_around(s128(mem, in0_b), (count-2)*6));
+        y_prev == ghash_incremental0(h_LE, y_orig, slice(s128(mem, in0_b), 0, #nat(count - 2) * 6));
         y_prev == reverse_bytes_quad32(to_quad32(
               of_quad32(Xi) +. of_quad32(Z0) +. of_quad32(buffer128_read(scratch_b, 1, mem))));
 
@@ -2259,7 +2257,7 @@ procedure Loop6x(
         len > 0 ==> gctr_partial_opaque(alg, 6*(count+1), plain_quads, s128(mem, out_b), key_words, ctr_BE_orig);
 
         // GHash progress
-        y_new == ghash_incremental0(h_LE, y_orig, slice_work_around(s128(mem, in0_b), (count-1)*6));
+        y_new == ghash_incremental0(h_LE, y_orig, slice(s128(mem, in0_b), 0, #nat(count - 1) * 6));
         len > 0 ==> y_new == reverse_bytes_quad32(to_quad32(
                     of_quad32(Xi) +. of_quad32(Z0) +. of_quad32(buffer128_read(scratch_b, 1, mem))));
         len == 0 ==> Xi == reverse_bytes_quad32(y_new);
@@ -2304,17 +2302,17 @@ procedure Loop6x(
 
     y_new := ghash_incremental0(h_LE, y_prev, data);
     let mem_snap := mem;
-    lemma_ghash_incremental0_append(h_LE, y_orig, y_prev, y_new, slice_work_around(s128(mem, in0_b), (count-2)*6), data);
-    assert y_new == ghash_incremental0(h_LE, y_orig, append(slice_work_around(s128(mem, in0_b), (count-2)*6), data));
-    assert equal(append(slice_work_around(s128(mem, in0_b), (count-2)*6), data),
-                 slice_work_around(s128(mem, in0_b), (count-1)*6)); // OBSERVE
-    assert y_new == ghash_incremental0(h_LE, y_orig, slice_work_around(s128(mem, in0_b), (count-1)*6));
+    lemma_ghash_incremental0_append(h_LE, y_orig, y_prev, y_new, slice(s128(mem, in0_b), 0, #nat(count - 2) * 6), data);
+    assert y_new == ghash_incremental0(h_LE, y_orig, append(slice(s128(mem, in0_b), 0, #nat(count - 2) * 6), data));
+    assert equal(append(slice(s128(mem, in0_b), 0, #nat(count - 2) * 6), data),
+                 slice(s128(mem, in0_b), 0, #nat(count - 1) * 6)); // OBSERVE
+    assert y_new == ghash_incremental0(h_LE, y_orig, slice(s128(mem, in0_b), 0, #nat(count - 1) * 6));
 
 
     if (len > 0) {
         Loop6x_save_output(count, out_b);
-        assert equal(slice_work_around(s128(mem,      out_b), (count-1)*6),
-                     slice_work_around(s128(mem_snap, out_b), (count-1)*6));    // OBSERVE
+        assert equal(slice(s128(mem,      out_b), 0, #nat(count - 1) * 6),
+                     slice(s128(mem_snap, out_b), 0, #nat(count - 1) * 6));    // OBSERVE
 
         Load128_buffer(Z3, rbp, 0x20, Secret, scratch_b, 2);   // # I[5]
 
@@ -2427,9 +2425,9 @@ procedure Loop6x_decrypt(
         h_LE == aes_encrypt_LE(alg, key_words, Mkfour(0, 0, 0, 0));
         hkeys_reqs_priv(s128(mem, hkeys_b), reverse_bytes_quad32(h_LE));
         scratch_reqs(scratch_b, count, mem, s128(mem, in0_b), Z3);
-        y_prev == ghash_incremental0(h_LE, y_orig, slice_work_around(plain_quads, count*6));
+        y_prev == ghash_incremental0(h_LE, y_orig, slice(plain_quads, 0, count * 6));
         y_prev == reverse_bytes_quad32(to_quad32(
-              of_quad32(Xi) +. of_quad32(Z0) +. of_quad32(buffer128_read(scratch_b, 1, mem))));
+            of_quad32(Xi) +. of_quad32(Z0) +. of_quad32(buffer128_read(scratch_b, 1, mem))));
 
         // Counter requirements
         count*6 + 6 < pow2_32;
@@ -2502,7 +2500,7 @@ procedure Loop6x_decrypt(
         len > 0 ==> gctr_partial_opaque(alg, 6*(count+1), plain_quads, s128(mem, out_b), key_words, ctr_BE_orig);
 
         // GHash progress
-        y_new == ghash_incremental0(h_LE, y_orig, slice_work_around(plain_quads, (count+1)*6));
+        y_new == ghash_incremental0(h_LE, y_orig, slice(plain_quads, 0, (count + 1) * 6));
         len > 0 ==> y_new == reverse_bytes_quad32(to_quad32(
                     of_quad32(Xi) +. of_quad32(Z0) +. of_quad32(buffer128_read(scratch_b, 1, mem))));
         len == 0 ==> Xi == reverse_bytes_quad32(y_new);
@@ -2551,17 +2549,17 @@ procedure Loop6x_decrypt(
 
     y_new := ghash_incremental0(h_LE, y_prev, data);
     let mem_snap := mem;
-    lemma_ghash_incremental0_append(h_LE, y_orig, y_prev, y_new, slice_work_around(plain_quads, count*6), data);
-    assert y_new == ghash_incremental0(h_LE, y_orig, append(slice_work_around(plain_quads, count*6), data));
-    assert equal(append(slice_work_around(plain_quads, count*6), data),
-                 slice_work_around(plain_quads, (count+1)*6)); // OBSERVE
-    assert y_new == ghash_incremental0(h_LE, y_orig, slice_work_around(plain_quads, (count+1)*6));
+    lemma_ghash_incremental0_append(h_LE, y_orig, y_prev, y_new, slice(plain_quads, 0, count * 6), data);
+    assert y_new == ghash_incremental0(h_LE, y_orig, append(slice(plain_quads, 0, count * 6), data));
+    assert equal(append(slice(plain_quads, 0, count * 6), data),
+                 slice(plain_quads, 0, (count + 1) * 6)); // OBSERVE
+    assert y_new == ghash_incremental0(h_LE, y_orig, slice(plain_quads, 0, (count + 1) * 6));
 
 
     if (len > 0) {
         Loop6x_save_output(count, out_b);
-//        assert equal(slice_work_around(s128(mem,      out_b), (count-1)*6),
-//                     slice_work_around(s128(mem_snap, out_b), (count-1)*6));    // OBSERVE
+//        assert equal(slice(s128(mem,      out_b), 0, (count - 1) * 6),
+//                     slice(s128(mem_snap, out_b), 0, (count - 1) * 6));    // OBSERVE
 
         Load128_buffer(Z3, rbp, 0x20, Secret, scratch_b, 2);   // # I[5]
 
@@ -2716,7 +2714,7 @@ procedure Loop6x_loop_decrypt(
         inout5 == quad32_xor(old(buffer128_read(in_b, old(len)-6 + 5, mem)), aes_encrypt_BE(alg, key_words, inc32lite(ctr_BE_orig, old(len) - 6 + 5)));
 
         // GHash
-        y_new == ghash_incremental0(h_LE, y_orig, old(slice_work_around(s128(mem, in_b), len)));
+        y_new == ghash_incremental0(h_LE, y_orig, old(slice(s128(mem, in_b), 0, len)));
         Xi == reverse_bytes_quad32(y_new);
 
         // Counters
@@ -2786,7 +2784,7 @@ procedure Loop6x_loop_decrypt(
             h_LE == aes_encrypt_LE(alg, key_words, Mkfour(0, 0, 0, 0));
             hkeys_reqs_priv(s128(mem, hkeys_b), reverse_bytes_quad32(h_LE));
             len > 0 ==> scratch_reqs(scratch_b, iter, mem, s128(mem, in0_b), Z3);
-            y_cur == ghash_incremental0(h_LE, y_orig, slice_work_around(plain_quads, iter*6));
+            iter * 6 <= length(plain_quads) ==> y_cur == ghash_incremental0(h_LE, y_orig, slice(plain_quads, 0, iter * 6));
             len > 0 ==> y_cur == reverse_bytes_quad32(to_quad32(
                         of_quad32(Xi) +. of_quad32(Z0) +. of_quad32(buffer128_read(scratch_b, 1, mem))));
             len == 0 ==> Xi == reverse_bytes_quad32(y_cur);
@@ -2918,7 +2916,7 @@ procedure Loop6x_loop(
         h_LE == aes_encrypt_LE(alg, key_words, Mkfour(0, 0, 0, 0));
         hkeys_reqs_priv(s128(mem, hkeys_b), reverse_bytes_quad32(h_LE));
         scratch_reqs(scratch_b, #nat(count - 2), mem, s128(mem, in0_b), Z3);
-        y_prev == ghash_incremental0(h_LE, y_orig, slice_work_around(s128(mem, in0_b), (count-2)*6));
+        y_prev == ghash_incremental0(h_LE, y_orig, slice(s128(mem, in0_b), 0, #nat(count - 2) * 6));
         y_prev == reverse_bytes_quad32(to_quad32(
               of_quad32(Xi) +. of_quad32(Z0) +. of_quad32(buffer128_read(scratch_b, 1, mem))));
 
@@ -2965,10 +2963,10 @@ procedure Loop6x_loop(
         inout5 == quad32_xor(old(buffer128_read(in_b, 6*count+old(len)-6 + 5, mem)), aes_encrypt_BE(alg, key_words, inc32lite(ctr_BE_orig, 6*count + old(len) - 6 + 5)));
 
         // GHash
-        y_new == ghash_incremental0(h_LE, y_orig, slice_work_around(s128(mem, in0_b), 6*count+old(len)-12));
+        y_new == ghash_incremental0(h_LE, y_orig, slice(s128(mem, in0_b), 0, #nat(6 * count + old(len) - 12)));
         Xi == reverse_bytes_quad32(y_new);
 
-        scratch_reqs_simple(scratch_b, mem, slice_workaround(s128(mem, in0_b), #nat(6*count+old(len)-12), #nat(6*count+old(len)-6)), buffer128_read(scratch_b, 2, mem));
+        scratch_reqs_simple(scratch_b, mem, slice(s128(mem, in0_b), #nat(6*count+old(len)-12), #nat(6*count+old(len)-6)), buffer128_read(scratch_b, 2, mem));
 
         // Counters
         T1 == reverse_bytes_quad32(inc32lite(ctr_BE, old(len)));
@@ -3037,7 +3035,7 @@ procedure Loop6x_loop(
             len > 0 ==> scratch_reqs(scratch_b, #nat(count + iter - 2), mem, s128(mem, in0_b), Z3);
             len == 0 ==> scratch_reqs(scratch_b, #nat(count + iter - 2), mem, s128(mem, in0_b), buffer128_read(scratch_b, 2, mem));
 
-            y_cur == ghash_incremental0(h_LE, y_orig, slice_work_around(s128(mem, in0_b), (count + iter - 2)*6));
+            y_cur == ghash_incremental0(h_LE, y_orig, slice(s128(mem, in0_b), 0, #nat(count + iter - 2) * 6));
             len > 0 ==> y_cur == reverse_bytes_quad32(to_quad32(
                         of_quad32(Xi) +. of_quad32(Z0) +. of_quad32(buffer128_read(scratch_b, 1, mem))));
             len == 0 ==> Xi == reverse_bytes_quad32(y_cur);
@@ -3454,7 +3452,7 @@ procedure AESNI_ctr32_6x_final(
 
     ensures
         modifies_buffer_specific128(out_b, old(mem), mem, count*6+0, count*6+5);
-        slice_work_around(s128(mem, out_b), 6*count) == old(slice_work_around(s128(mem, out_b), 6*count));
+        slice(s128(mem, out_b), 0, 6 * count) == old(slice(s128(mem, out_b), 0, 6 * count));
         outp == old(outp) + 0x60;
 
         buffer128_read(out_b, count*6 + 0, mem) == inout0;
@@ -3562,7 +3560,7 @@ procedure AESNI_ctr32_6x(
         gctr_partial_opaque(alg, 6*count, plain_quads, s128(mem, out_b), key_words, ctr_BE_orig);
     ensures
         modifies_buffer_specific128(out_b, old(mem), mem, count*6+0, count*6+5);
-        slice_work_around(s128(mem, out_b), 6*count) == old(slice_work_around(s128(mem, out_b), 6*count));
+        slice(s128(mem, out_b), 0, 6 * count) == old(slice(s128(mem, out_b), 0, 6 * count));
          inp == old( inp) + 0x60;
         outp == old(outp) + 0x60;
 
@@ -3578,12 +3576,12 @@ procedure AESNI_ctr32_6x(
         // GCTR progress
         gctr_partial_opaque(alg, 6*(count+1), plain_quads, s128(mem, out_b), key_words, ctr_BE_orig);
 {
-    let init0 := quad32_xor(reverse_bytes_quad32(inc32lite(ctr_BE, 0)), index_work_around_quad32(round_keys, 0));
-    let init1 := quad32_xor(reverse_bytes_quad32(inc32lite(ctr_BE, 1)), index_work_around_quad32(round_keys, 0));
-    let init2 := quad32_xor(reverse_bytes_quad32(inc32lite(ctr_BE, 2)), index_work_around_quad32(round_keys, 0));
-    let init3 := quad32_xor(reverse_bytes_quad32(inc32lite(ctr_BE, 3)), index_work_around_quad32(round_keys, 0));
-    let init4 := quad32_xor(reverse_bytes_quad32(inc32lite(ctr_BE, 4)), index_work_around_quad32(round_keys, 0));
-    let init5 := quad32_xor(reverse_bytes_quad32(inc32lite(ctr_BE, 5)), index_work_around_quad32(round_keys, 0));
+    let init0 := quad32_xor(reverse_bytes_quad32(inc32lite(ctr_BE, 0)), index(round_keys, 0));
+    let init1 := quad32_xor(reverse_bytes_quad32(inc32lite(ctr_BE, 1)), index(round_keys, 0));
+    let init2 := quad32_xor(reverse_bytes_quad32(inc32lite(ctr_BE, 2)), index(round_keys, 0));
+    let init3 := quad32_xor(reverse_bytes_quad32(inc32lite(ctr_BE, 3)), index(round_keys, 0));
+    let init4 := quad32_xor(reverse_bytes_quad32(inc32lite(ctr_BE, 4)), index(round_keys, 0));
+    let init5 := quad32_xor(reverse_bytes_quad32(inc32lite(ctr_BE, 5)), index(round_keys, 0));
 
     AESNI_ctr32_6x_preamble(alg, key_words, round_keys, keys_b, ctr_BE);
     inline if (alg = AES_128) {
@@ -3644,7 +3642,7 @@ procedure Encrypt_save_and_shuffle_output(ghost count:nat, ghost out_b:buffer128
 
     ensures
         modifies_buffer_specific128(out_b, old(mem), mem, count*6+0, count*6+5);
-        slice_work_around(s128(mem, out_b), 6*count) == old(slice_work_around(s128(mem, out_b), 6*count));
+        slice(s128(mem, out_b), 0, 6 * count) == old(slice(s128(mem, out_b), 0, 6 * count));
 
         buffer128_read(out_b, count*6 + 0, mem) == old(inout0);
         buffer128_read(out_b, count*6 + 1, mem) == old(inout1);
@@ -3700,7 +3698,7 @@ procedure UpdateScratch(ghost scratch_b:buffer128)
     ensures
         modifies_buffer128(scratch_b, old(mem), mem);
         //modifies_buffer_specific128(out_b, old(mem), mem, count*6+0, count*6+5);
-        //slice_work_around(s128(mem, out_b), 6*count) == old(slice_work_around(s128(mem, out_b), 6*count));
+        //slice(s128(mem, out_b), 0, 6 * count) == old(slice(s128(mem, out_b), 0, 6 * count));
 
         buffer128_read(scratch_b, 0, mem) == Mkfour(0,0,0,0);
         buffer128_read(scratch_b, 3, mem) == inout4;
@@ -4354,13 +4352,13 @@ procedure AES_GCM_encrypt_6mult(
         Store128_buffer(rbp, Z0, 0x00, Secret, scratch_b, 0);
         lemma_add_zero(of_quad32(Xi));
 
-        ghost var data := slice_workaround(s128(mem, out_b), #nat(old(len)-12), #nat(old(len)-6));
+        ghost var data := slice(s128(mem, out_b), #nat(old(len)-12), #nat(old(len)-6));
         GhashUnroll6x(hkeys_b, scratch_b, h_LE, y_new, data);
         let y_new' := reverse_bytes_quad32(Xi);
-        lemma_ghash_incremental0_append(h_LE, y_orig, y_new, y_new', slice_work_around(s128(mem, out_b), old(len)-12), data);
-        //assert y_new' == ghash_incremental0(h_LE, y_orig, append(slice_work_around(s128(mem, out_b), old(len)-12), data));
-        assert equal(append(slice_work_around(s128(mem, out_b), old(len)-12), data),
-                     slice_work_around(s128(mem, out_b), old(len)-6)); // OBSERVE
+        lemma_ghash_incremental0_append(h_LE, y_orig, y_new, y_new', slice(s128(mem, out_b), 0, #nat(old(len) - 12)), data);
+        //assert y_new' == ghash_incremental0(h_LE, y_orig, append(slice(s128(mem, out_b), 0, #nat(old(len) - 12)), data));
+        assert equal(append(slice(s128(mem, out_b), 0, #nat(old(len) - 12)), data),
+                     slice(s128(mem, out_b), 0, #nat(old(len) - 6))); // OBSERVE
 
 
 
@@ -4377,14 +4375,14 @@ procedure AES_GCM_encrypt_6mult(
         // TODO: Avoid the copying in here via a custom version of GhashUnroll6x
         UpdateScratch(scratch_b);
 
-        data := slice_workaround(s128(mem, out_b), #nat(old(len)-6), #nat(old(len)));
+        data := slice(s128(mem, out_b), #nat(old(len)-6), #nat(old(len)));
         lemma_add_zero(of_quad32(Xi));
         GhashUnroll6x(hkeys_b, scratch_b, h_LE, y_new', data);
 
         let y_new'' := reverse_bytes_quad32(Xi);
-        lemma_ghash_incremental0_append(h_LE, y_orig, y_new', y_new'', slice_work_around(s128(mem, out_b), old(len)-6), data);
-        //assert y_new'' == ghash_incremental0(h_LE, y_orig, append(slice_work_around(s128(mem, out_b), old(len)-6), data));
-        assert equal(append(slice_work_around(s128(mem, out_b), old(len)-6), data),
+        lemma_ghash_incremental0_append(h_LE, y_orig, y_new', y_new'', slice(s128(mem, out_b), 0, #nat(old(len) - 6)), data);
+        //assert y_new'' == ghash_incremental0(h_LE, y_orig, append(slice(s128(mem, out_b), 0, #nat(old(len) - 6)), data));
+        assert equal(append(slice(s128(mem, out_b), 0, #nat(old(len) - 6)), data),
                      s128(mem, out_b)); // OBSERVE
 
         InitPshufbMask(Ii, r12);    // # borrow $Ii for .Lbswap_mask

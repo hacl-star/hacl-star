@@ -22,8 +22,8 @@ let gctr_encrypt_block_offset (icb_BE:quad32) (plain_LE:quad32) (alg:algorithm) 
 let gctr_encrypt_empty (icb_BE:quad32) (plain_LE cipher_LE:seq quad32) (alg:algorithm) (key:seq nat32) =
   FStar.Pervasives.reveal_opaque (`%le_bytes_to_seq_quad32) le_bytes_to_seq_quad32;
   reveal_opaque gctr_encrypt_LE_def;
-  let plain = slice_work_around (le_seq_quad32_to_bytes plain_LE) 0 in
-  let cipher = slice_work_around (le_seq_quad32_to_bytes cipher_LE) 0 in
+  let plain = slice (le_seq_quad32_to_bytes plain_LE) 0 0 in
+  let cipher = slice (le_seq_quad32_to_bytes cipher_LE) 0 0 in
   assert (plain == empty);
   assert (cipher == empty);
   assert (length plain == 0);

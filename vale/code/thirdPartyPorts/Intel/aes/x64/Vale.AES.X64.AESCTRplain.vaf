@@ -18,7 +18,6 @@ include{:fstar}{:open} "Vale.X64.QuickCodes"
 include{:fstar}{:open} "Vale.Arch.Types"
 include{:fstar}{:open} "Vale.AES.AES_helpers"
 include{:fstar}{:open} "Vale.Poly1305.Math"
-include{:fstar}{:open} "Vale.Lib.Workarounds"
 include{:fstar}{:open} "Vale.AES.GCTR_s"
 include{:fstar}{:open} "Vale.AES.GCTR"
 include{:fstar}{:open} "Vale.Arch.TypesNative"
@@ -46,7 +45,6 @@ open Vale.X64.QuickCodes
 open Vale.Arch.Types
 open Vale.AES.AES_helpers
 open Vale.Poly1305.Math    // For lemma_poly_bits64()
-open Vale.Lib.Workarounds
 open Vale.AES.GCTR_s
 open Vale.AES.GCTR
 open Vale.Arch.TypesNative
@@ -213,7 +211,7 @@ procedure aes_ctr_loop_body(
     lemma_quad32_xor_commutes_forall();
     //commute_sub_bytes_shift_rows_forall();
 
-    assert slice_work_around(buffer128_as_seq(mem, out_b), 4*count) == old(slice_work_around(buffer128_as_seq(mem, out_b), 4*count));   // OBSERVE
+    assert slice(buffer128_as_seq(mem, out_b), 0, 4 * count) == old(slice(buffer128_as_seq(mem, out_b), 0, 4 * count));   // OBSERVE
 
     Sub64(rdx, 1);
     Add64(plain_ptr, 64);
@@ -355,7 +353,7 @@ procedure aes_counter_loop(
             iv_lower64 == lo64(old_iv);
 
             // GCTR progress
-            length(slice_work_around(buffer128_as_seq(mem, out_b), 4*old(num_quad_blocks))) > 0;
+            length(slice(buffer128_as_seq(mem, out_b), 0, 4 * old(num_quad_blocks))) > 0;
             gctr_partial(alg, 4*count, old(buffer128_as_seq(mem, plain_b)), buffer128_as_seq(mem, out_b), key, icb_BE);
         decreases num_quad_blocks;
     {

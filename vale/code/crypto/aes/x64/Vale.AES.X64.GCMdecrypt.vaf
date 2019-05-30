@@ -25,7 +25,6 @@ include{:fstar}{:open} "Vale.AES.GF128_s"
 include{:fstar}{:open} "Vale.AES.GF128"
 include{:fstar}{:open} "Vale.Poly1305.Math"
 include{:fstar}{:open} "Vale.AES.GCM_helpers"
-include{:fstar}{:open} "Vale.Lib.Workarounds"
 include{:fstar}{:open} "Vale.X64.Machine_s"
 include{:fstar}{:open} "Vale.X64.Memory"
 include{:fstar}{:open} "Vale.X64.Stack_i"
@@ -56,7 +55,6 @@ open Vale.AES.GF128_s
 open Vale.AES.GF128
 open Vale.Poly1305.Math
 open Vale.AES.GCM_helpers
-open Vale.Lib.Workarounds
 open Vale.AES.X64.GHash
 open Vale.AES.X64.GCTR
 open Vale.X64.Machine_s
@@ -81,7 +79,7 @@ open Vale.X64.CPU_Features_s
 // GCM
 ///////////////////////////
 
-#reset-options "--z3rlimit 30"
+#reset-options "--z3rlimit 100"
 procedure gcm_one_pass_blocks(
         inline alg:algorithm,
         ghost in_b:buffer128,
@@ -131,7 +129,7 @@ procedure gcm_one_pass_blocks(
 
         // GHash
         len == 0 ==> hash == old(hash);
-        len > 0 ==> length(buffer128_as_seq(mem, out_b)) > 0 /\ hash == ghash_incremental(reverse_bytes_quad32(h), old(hash), slice_work_around(old(buffer128_as_seq(mem, in_b)), len));
+        len > 0 ==> length(buffer128_as_seq(mem, out_b)) > 0 /\ hash == ghash_incremental(reverse_bytes_quad32(h), old(hash), slice(old(buffer128_as_seq(mem, in_b)), 0, len));
 {
     Mov64(rdx, 0);
     Mov64(r9, in_ptr);
@@ -178,7 +176,7 @@ procedure gcm_one_pass_blocks(
             gctr_partial(alg, rdx, buffer128_as_seq(mem, in_b), buffer128_as_seq(mem, out_b), key, old(icb));
 
             rdx == 0 ==> hash == old(hash);
-            rdx > 0 ==> hash == ghash_incremental(reverse_bytes_quad32(h), old(hash), slice_work_around(buffer128_as_seq(mem, in_b), rdx));
+            rdx > 0 ==> hash == ghash_incremental(reverse_bytes_quad32(h), old(hash), slice(buffer128_as_seq(mem, in_b), 0, rdx));
 
 //            forall(j) 0 <= j < rdx ==>
 //                        buffer128_read(out_b, j, mem) ==
@@ -259,8 +257,8 @@ procedure gcm_one_pass(
         validSrcAddrs128(mem, out_ptr, out_b, bytes_to_quad_size(old(num_bytes)), memTaint, Secret);
 
         // GCTR
-        let cipher := slice_work_around(le_seq_quad32_to_bytes(buffer128_as_seq(old(mem),  in_b)), old(num_bytes));
-        let plain  := slice_work_around(le_seq_quad32_to_bytes(buffer128_as_seq(mem,      out_b)), old(num_bytes));
+        let cipher := slice(le_seq_quad32_to_bytes(buffer128_as_seq(old(mem),  in_b)), 0, old(num_bytes));
+        let plain  := slice(le_seq_quad32_to_bytes(buffer128_as_seq(mem,      out_b)), 0, old(num_bytes));
         plain == gctr_encrypt_LE(old(icb), make_gctr_plain_LE(cipher), alg, key);
 
         //icb == inc32(old(icb), bytes_to_quad_size(old(num_bytes)));
@@ -309,7 +307,7 @@ procedure gcm_one_pass(
 //            assert buffer128_as_seq(old(mem), in_b) == buffer128_as_seq(mem, in_b);       // OBSERVE
         }
 
-        let cipher := slice_work_around(le_seq_quad32_to_bytes(buffer128_as_seq(old(mem), in_b)), old(num_bytes));
+        let cipher := slice(le_seq_quad32_to_bytes(buffer128_as_seq(old(mem), in_b)), 0, old(num_bytes));
         let cipher_padded_bytes := pad_to_128_bits(cipher);
         let cipher_padded_quads := le_bytes_to_seq_quad32(cipher_padded_bytes);
         assert length(cipher_padded_quads) > 0 by {reveal le_bytes_to_seq_quad32;}
@@ -389,9 +387,9 @@ procedure gcm_core_part1(
         validSrcAddrs128(mem, out_ptr, out_b, bytes_to_quad_size(cipher_num_bytes), memTaint, Secret);
 
         // Main result
-        let auth   := slice_work_around(le_seq_quad32_to_bytes(buffer128_as_seq(old(mem), auth_b)),  old(auth_num_bytes));
-        let cipher  := slice_work_around(le_seq_quad32_to_bytes(buffer128_as_seq(old(mem), cipher_b)), old(cipher_num_bytes));
-        let plain := slice_work_around(le_seq_quad32_to_bytes(buffer128_as_seq(mem,      out_b)),   old(cipher_num_bytes));
+        let auth   := slice(le_seq_quad32_to_bytes(buffer128_as_seq(old(mem), auth_b)), 0, old(auth_num_bytes));
+        let cipher  := slice(le_seq_quad32_to_bytes(buffer128_as_seq(old(mem), cipher_b)), 0, old(cipher_num_bytes));
+        let plain := slice(le_seq_quad32_to_bytes(buffer128_as_seq(mem,      out_b)), 0, old(cipher_num_bytes));
 
 //        // TODO: First two clauses work around Vale's type limitations
         length(cipher) < pow2_32 /\
@@ -441,11 +439,11 @@ procedure gcm_core_part1(
     ghash_incremental_bytes(auth_b);
     y_auth := xmm1;
 
-//    let auth_bytes := slice_work_around(le_seq_quad32_to_bytes(buffer128_as_seq(mem, auth_b)), auth_num_bytes);
+//    let auth_bytes := slice(le_seq_quad32_to_bytes(buffer128_as_seq(mem, auth_b)), 0, auth_num_bytes);
 //    let auth_padded_bytes := pad_to_128_bits(auth_bytes);
 //    let auth_padded_quads := le_bytes_to_seq_quad32(auth_padded_bytes);
-    let cipher := slice_work_around(le_seq_quad32_to_bytes(buffer128_as_seq(old(mem), cipher_b)), old(cipher_num_bytes));
-    let auth   := slice_work_around(le_seq_quad32_to_bytes(buffer128_as_seq(old(mem), auth_b)),   old(auth_num_bytes));
+    let cipher := slice(le_seq_quad32_to_bytes(buffer128_as_seq(old(mem), cipher_b)), 0, old(cipher_num_bytes));
+    let auth   := slice(le_seq_quad32_to_bytes(buffer128_as_seq(old(mem), auth_b)), 0, old(auth_num_bytes));
 //
 //    assert y_0 == Mkfour(0,0,0,0);
 //    assert y_auth   == ghash_incremental0(reverse_bytes_quad32(h), y_0, auth_padded_quads);
@@ -459,7 +457,7 @@ procedure gcm_core_part1(
     assert icb_enc == inc32 (Mkfour(1,iv_BE.lo1,iv_BE.hi2,iv_BE.hi3), 1);     // Passes -- REVIEW: Seems to be necessary for it to pass at the end of the procedure; unclear why that could possibly be the case
     gcm_one_pass(alg, cipher_b, out_b, key, round_keys, keys_b);
     y_cipher := xmm1;
-    let plain := slice_work_around(le_seq_quad32_to_bytes(buffer128_as_seq(mem, out_b)), old(cipher_num_bytes));
+    let plain := slice(le_seq_quad32_to_bytes(buffer128_as_seq(mem, out_b)), 0, old(cipher_num_bytes));
     gcm_encrypt_LE_fst_helper(icb_enc, iv_BE, cipher, auth, plain, alg, key);
     reveal le_bytes_to_seq_quad32;
 }
@@ -554,9 +552,9 @@ procedure gcm_core(
         modifies_buffer128(out_b, old(mem), mem);
         validSrcAddrs128(mem, out_ptr, out_b, bytes_to_quad_size(cipher_num_bytes), memTaint, Secret);
 
-        let auth   := slice_work_around(le_seq_quad32_to_bytes(buffer128_as_seq(old(mem), auth_b)),  old(auth_num_bytes));
-        let cipher  := slice_work_around(le_seq_quad32_to_bytes(buffer128_as_seq(old(mem), cipher_b)), old(cipher_num_bytes));
-        let plain := slice_work_around(le_seq_quad32_to_bytes(buffer128_as_seq(mem,      out_b)),   old(cipher_num_bytes));
+        let auth   := slice(le_seq_quad32_to_bytes(buffer128_as_seq(old(mem), auth_b)), 0, old(auth_num_bytes));
+        let cipher  := slice(le_seq_quad32_to_bytes(buffer128_as_seq(old(mem), cipher_b)), 0, old(cipher_num_bytes));
+        let plain := slice(le_seq_quad32_to_bytes(buffer128_as_seq(mem,      out_b)), 0, old(cipher_num_bytes));
 
 //        // TODO: First two clauses work around Vale's type limitations
         length(cipher) < pow2_32 /\
@@ -574,10 +572,10 @@ procedure gcm_core(
     let y_final := xmm1;
 
     // Invoke lemma showing that incremental hashing works
-    let auth_bytes := slice_work_around(le_seq_quad32_to_bytes(buffer128_as_seq(old(mem), auth_b)), old(auth_num_bytes));
+    let auth_bytes := slice(le_seq_quad32_to_bytes(buffer128_as_seq(old(mem), auth_b)), 0, old(auth_num_bytes));
     let auth_padded_quads := le_bytes_to_seq_quad32(pad_to_128_bits(auth_bytes));
 
-    let cipher := slice_work_around(le_seq_quad32_to_bytes(buffer128_as_seq(old(mem), cipher_b)), old(cipher_num_bytes));
+    let cipher := slice(le_seq_quad32_to_bytes(buffer128_as_seq(old(mem), cipher_b)), 0, old(cipher_num_bytes));
     let cipher_padded_quads := le_bytes_to_seq_quad32(pad_to_128_bits(cipher));
     lemma_hash_append3(reverse_bytes_quad32(h), y_0, y_auth, y_cipher, y_final,
                        auth_padded_quads, //buffer128_as_seq(mem, auth_b),
@@ -589,7 +587,7 @@ procedure gcm_core(
     // Encrypt the hash value with gctr_register; result goes in xmm1
     gctr_register(alg, key, round_keys, keys_b); // Encrypt using j0 and xmm0 = hash_value
 
-    let plain := slice_work_around(le_seq_quad32_to_bytes(buffer128_as_seq(mem, out_b)), old(cipher_num_bytes));
+    let plain := slice(le_seq_quad32_to_bytes(buffer128_as_seq(mem, out_b)), 0, old(cipher_num_bytes));
 
     le_seq_quad32_to_bytes_of_singleton(xmm1);
 
@@ -671,9 +669,9 @@ procedure gcm_decrypt_stdcall_inner_inner(
 
         validSrcAddrs128(mem, old(out_ptr), out_b, bytes_to_quad_size(old(cipher_num_bytes)), memTaint, Secret);
 
-        let auth   := slice_work_around(le_seq_quad32_to_bytes(buffer128_as_seq(old(mem), auth_b)),   old(auth_num_bytes));
-        let cipher := slice_work_around(le_seq_quad32_to_bytes(buffer128_as_seq(old(mem), cipher_b)), old(cipher_num_bytes));
-        let plain  := slice_work_around(le_seq_quad32_to_bytes(buffer128_as_seq(mem,      out_b)),    old(cipher_num_bytes));
+        let auth   := slice(le_seq_quad32_to_bytes(buffer128_as_seq(old(mem), auth_b)), 0, old(auth_num_bytes));
+        let cipher := slice(le_seq_quad32_to_bytes(buffer128_as_seq(old(mem), cipher_b)), 0, old(cipher_num_bytes));
+        let plain  := slice(le_seq_quad32_to_bytes(buffer128_as_seq(mem,      out_b)), 0, old(cipher_num_bytes));
         let alleged_tag := le_quad32_to_bytes(buffer128_read(tag_b, 0, old(mem)));
 
 //        // TODO: First two clauses work around Vale's type limitations
@@ -698,9 +696,9 @@ procedure gcm_decrypt_stdcall_inner_inner(
 
     gcm_core(alg, iv_BE, cipher_b, auth_b, out_b, key, round_keys, keys_b);
 
-    let auth   := slice_work_around(le_seq_quad32_to_bytes(buffer128_as_seq(old(mem), auth_b)),   old(auth_num_bytes));
-    let cipher := slice_work_around(le_seq_quad32_to_bytes(buffer128_as_seq(old(mem), cipher_b)), old(cipher_num_bytes));
-    let plain  := slice_work_around(le_seq_quad32_to_bytes(buffer128_as_seq(mem,      out_b)),    old(cipher_num_bytes));
+    let auth   := slice(le_seq_quad32_to_bytes(buffer128_as_seq(old(mem), auth_b)), 0, old(auth_num_bytes));
+    let cipher := slice(le_seq_quad32_to_bytes(buffer128_as_seq(old(mem), cipher_b)), 0, old(cipher_num_bytes));
+    let plain  := slice(le_seq_quad32_to_bytes(buffer128_as_seq(mem,      out_b)), 0, old(cipher_num_bytes));
     let alleged_tag := le_quad32_to_bytes(buffer128_read(tag_b, 0, old(mem)));
     lemma_gcm_encrypt_decrypt_equiv(alg, key, iv_BE, plain, cipher, auth, alleged_tag);
 }
@@ -782,9 +780,9 @@ procedure gcm_decrypt_stdcall_inner(
         modifies_buffer128(out_b, old(mem), mem);
         validSrcAddrs128(mem, old(out_ptr), out_b, bytes_to_quad_size(old(cipher_num_bytes)), memTaint, Secret);
 
-        let auth   := slice_work_around(le_seq_quad32_to_bytes(buffer128_as_seq(old(mem), auth_b)),  old(auth_num_bytes));
-        let cipher  := slice_work_around(le_seq_quad32_to_bytes(buffer128_as_seq(old(mem), cipher_b)), old(cipher_num_bytes));
-        let plain := slice_work_around(le_seq_quad32_to_bytes(buffer128_as_seq(mem,      out_b)),   old(cipher_num_bytes));
+        let auth   := slice(le_seq_quad32_to_bytes(buffer128_as_seq(old(mem), auth_b)), 0, old(auth_num_bytes));
+        let cipher  := slice(le_seq_quad32_to_bytes(buffer128_as_seq(old(mem), cipher_b)), 0, old(cipher_num_bytes));
+        let plain := slice(le_seq_quad32_to_bytes(buffer128_as_seq(mem,      out_b)), 0, old(cipher_num_bytes));
 
 //        // TODO: First two clauses work around Vale's type limitations
         length(cipher) < pow2_32 /\
@@ -804,8 +802,8 @@ procedure gcm_decrypt_stdcall_inner(
     let computed_tag := xmm1;
 
     XmmEqual();
-    let auth   := slice_work_around(le_seq_quad32_to_bytes(buffer128_as_seq(old(mem), auth_b)),  old(auth_num_bytes));
-    let cipher  := slice_work_around(le_seq_quad32_to_bytes(buffer128_as_seq(old(mem), cipher_b)), old(cipher_num_bytes));
+    let auth   := slice(le_seq_quad32_to_bytes(buffer128_as_seq(old(mem), auth_b)), 0, old(auth_num_bytes));
+    let cipher  := slice(le_seq_quad32_to_bytes(buffer128_as_seq(old(mem), cipher_b)), 0, old(cipher_num_bytes));
     decrypt_helper(alg, seq_nat32_to_seq_nat8_LE(key), be_quad32_to_bytes(iv_BE), cipher, auth, rax, alleged_tag_quad, computed_tag);
 }
 
@@ -889,9 +887,9 @@ procedure gcm_decrypt_stdcall(
 
         validSrcAddrs128(mem, old(out_ptr), out_b, bytes_to_quad_size(cipher_num_bytes), memTaint, Secret);
 
-        let auth   := slice_work_around(le_seq_quad32_to_bytes(buffer128_as_seq(old(mem), auth_b)),  old(auth_num_bytes));
-        let cipher  := slice_work_around(le_seq_quad32_to_bytes(buffer128_as_seq(old(mem), cipher_b)), old(cipher_num_bytes));
-        let plain := slice_work_around(le_seq_quad32_to_bytes(buffer128_as_seq(mem,      out_b)),   old(cipher_num_bytes));
+        let auth   := slice(le_seq_quad32_to_bytes(buffer128_as_seq(old(mem), auth_b)), 0, old(auth_num_bytes));
+        let cipher  := slice(le_seq_quad32_to_bytes(buffer128_as_seq(old(mem), cipher_b)), 0, old(cipher_num_bytes));
+        let plain := slice(le_seq_quad32_to_bytes(buffer128_as_seq(mem,      out_b)), 0, old(cipher_num_bytes));
 
 //        // TODO: First two clauses work around Vale's type limitations
         length(cipher) < pow2_32 /\
@@ -1073,9 +1071,9 @@ procedure gcm_decrypt2_stdcall(
         validSrcAddrs128(mem, old(out_ptr), out_b, old(bytes_to_quad_size(cipher_num_bytes)), memTaint, Secret);
         validSrcAddrs128(mem, old(tag_ptr), tag_b, 1, memTaint, Secret);
 
-        let auth   := slice_work_around(le_seq_quad32_to_bytes(buffer128_as_seq(old(mem), auth_b)),  old(auth_num_bytes));
-        let cipher  := slice_work_around(le_seq_quad32_to_bytes(buffer128_as_seq(old(mem), cipher_b)), old(cipher_num_bytes));
-        let plain := slice_work_around(le_seq_quad32_to_bytes(buffer128_as_seq(mem,      out_b)),   old(cipher_num_bytes));
+        let auth   := slice(le_seq_quad32_to_bytes(buffer128_as_seq(old(mem), auth_b)), 0, old(auth_num_bytes));
+        let cipher  := slice(le_seq_quad32_to_bytes(buffer128_as_seq(old(mem), cipher_b)), 0, old(cipher_num_bytes));
+        let plain := slice(le_seq_quad32_to_bytes(buffer128_as_seq(mem,      out_b)), 0, old(cipher_num_bytes));
         let expected_tag := le_quad32_to_bytes(buffer128_read(tag_b, 0, old(mem)));
 
 //        // TODO: First two clauses work around Vale's type limitations
@@ -1169,9 +1167,9 @@ procedure gcm_decrypt2_stdcall(
 
     gcm_core(alg, reverse_bytes_quad32(buffer128_read(iv_b, 0, old(mem))), cipher_b, auth_b, out_b, key, buffer128_as_seq(old(mem), keys_b), keys_b);
 
-    let auth   := slice_work_around(le_seq_quad32_to_bytes(buffer128_as_seq(old(mem), auth_b)),   old(auth_num_bytes));
-    let cipher := slice_work_around(le_seq_quad32_to_bytes(buffer128_as_seq(old(mem), cipher_b)), old(cipher_num_bytes));
-    let plain  := slice_work_around(le_seq_quad32_to_bytes(buffer128_as_seq(mem,      out_b)),    old(cipher_num_bytes));
+    let auth   := slice(le_seq_quad32_to_bytes(buffer128_as_seq(old(mem), auth_b)), 0, old(auth_num_bytes));
+    let cipher := slice(le_seq_quad32_to_bytes(buffer128_as_seq(old(mem), cipher_b)), 0, old(cipher_num_bytes));
+    let plain  := slice(le_seq_quad32_to_bytes(buffer128_as_seq(mem,      out_b)), 0, old(cipher_num_bytes));
     let alleged_tag := le_quad32_to_bytes(buffer128_read(tag_b, 0, old(mem)));
     lemma_gcm_encrypt_decrypt_equiv(alg, key, reverse_bytes_quad32(buffer128_read(iv_b, 0, old(mem))), plain, cipher, auth, alleged_tag);
 
