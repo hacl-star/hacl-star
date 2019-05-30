@@ -773,7 +773,15 @@ let eval_access_location (a:access_location) (s:machine_state) : access_location
   | ALocCf -> cf s.ms_flags
   | ALocOf -> overflow s.ms_flags
 
+let valid_src_access_location (a:access_location) (s:machine_state) : bool =
+  match a with
+  | ALoc64 o -> valid_src_operand o s
+  | ALoc128 o -> valid_src_mov128_op o s
+  | ALocCf -> true
+  | ALocOf -> true
+
 let unchanged (a:access_location) (f:st unit) (s:machine_state) : GTot Type0 =
+  (valid_src_access_location a s) = (valid_src_access_location a (run f s)) /\
   (eval_access_location a s) == (eval_access_location a (run f s))
 
 let rec unchanged_all (as:list access_location) (f:st unit) (s:machine_state) : GTot Type0 =
@@ -781,6 +789,99 @@ let rec unchanged_all (as:list access_location) (f:st unit) (s:machine_state) : 
   | [] -> True
   | x :: xs ->
     unchanged x f s /\ unchanged_all xs f s
+
+let rec temp_lemma_eval_instr_unchanged_args
+    (outs:list instr_out) (args:list instr_operand)
+    (ff:instr_args_t outs args) (oprs:instr_operands_t_args args)
+    (f:st unit) (s:machine_state) :
+  Lemma
+    (requires (
+        unchanged_all (aux_read_set0 args oprs) f s /\
+        (Some? (instr_apply_eval_args outs args ff oprs s))))
+    (ensures (
+        let v0, v1 =
+          instr_apply_eval_args outs args ff oprs s,
+          instr_apply_eval_args outs args ff oprs (run f s) in
+        v0 == v1)) =
+  let v0, v1 =
+    instr_apply_eval_args outs args ff oprs s,
+    instr_apply_eval_args outs args ff oprs (run f s) in
+  let reads = aux_read_set0 args oprs in
+  match args with
+  | [] -> ()
+  | i :: args ->
+    let (v, v', oprs) : option _ & option _ & _ =
+      match i with
+      | IOpEx i -> let op, rest = coerce oprs in
+        let v, v' =
+          instr_eval_operand_explicit i op s,
+          instr_eval_operand_explicit i op (run f s)
+        in
+        assert (v == v');
+        (v, v', rest)
+      | IOpIm i ->
+        let v, v' =
+          instr_eval_operand_implicit i s,
+          instr_eval_operand_implicit i (run f s)
+        in
+        assert (v == v');
+        (v, v', coerce oprs)
+    in
+    let ff:arrow (instr_val_t i) (instr_args_t outs args) = coerce ff in
+    let res = bind_option v (fun v -> instr_apply_eval_args outs args (ff v) oprs s) in
+    let res' = bind_option v' (fun v -> instr_apply_eval_args outs args (ff v) oprs (run f s)) in
+    match v with
+    | None -> ()
+    | Some v ->
+      let Some v' = v' in
+      let read_op :: _ = reads in
+      assert (v == eval_access_location read_op s);
+      assert (eval_access_location read_op s == eval_access_location read_op (run f s));
+      assert (v' == eval_access_location read_op (run f s));
+      temp_lemma_eval_instr_unchanged_args outs args (ff v) oprs f s;
+      let v0', v1' =
+        instr_apply_eval_args outs args (ff v) oprs s,
+        instr_apply_eval_args outs args (ff v) oprs (run f s) in
+      assert (v0' == v1');
+      assert (res == v0');
+      assert (res' == v1');
+      assert (res == res');
+      assert (res == v0);
+      assert (res' == v1);
+      ()
+
+let temp_lemma_eval_instr_unchanged_inouts
+    (outs inouts:list instr_out) (args:list instr_operand)
+    (ff:instr_inouts_t outs inouts args) (oprs:instr_operands_t inouts args)
+    (f:st unit) (s:machine_state) :
+  Lemma
+    (requires (
+        unchanged_all (aux_read_set1 inouts args oprs) f s))
+    (ensures (
+        let v0, v1 =
+          instr_apply_eval_inouts outs inouts args ff oprs s,
+          instr_apply_eval_inouts outs inouts args ff oprs (run f s) in
+        v0 == v1)) =
+  match inouts with
+  | [] ->
+    temp_lemma_eval_instr_unchanged_args outs args ff oprs f s
+  | _ ->
+    admit ()
+
+let temp_lemma_eval_instr_unchanged
+    (it:instr_t_record) (oprs:instr_operands_t it.outs it.args) (ann:instr_annotation it)
+    (f:st unit) (s:machine_state) :
+  Lemma
+    (requires (
+        unchanged_all (fst (rw_set_of_ins (Instr it oprs ann))) f s))
+    (ensures (
+        let InstrTypeRecord #outs #args #havoc_flags i = it in
+        let v0, v1 =
+          instr_apply_eval outs args (instr_eval i) oprs s,
+          instr_apply_eval outs args (instr_eval i) oprs (run f s) in
+        v0 == v1)) =
+  let InstrTypeRecord #outs #args #havoc_flags i = it in
+  temp_lemma_eval_instr_unchanged_inouts outs outs args (instr_eval i) oprs f s
 
 let lemma_unchanged_commutes (i1 i2 : ins) (s : machine_state) :
   Lemma
