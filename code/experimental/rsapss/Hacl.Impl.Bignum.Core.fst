@@ -14,7 +14,12 @@ open Lib.RawIntTypes
 inline_for_extraction noextract
 let lbuffer8 (len : size_t) = lbuffer uint8 len
 
+/// We only consider positive length buffers
 let bn_len = s:size_t{v s > 0}
+
+/// And, particularly, such buffers lengths' that we can
+/// index every single bit with size_t.
+let bn_len_strict = s:bn_len {v s * 64 < max_size_t}
 
 inline_for_extraction noextract
 let lbignum (len : bn_len) = lbuffer uint64 len

@@ -3,6 +3,7 @@ module Hacl.Impl.Bignum.Division
 open FStar.HyperStack.ST
 open FStar.HyperStack
 open FStar.Buffer
+open FStar.Mul
 
 open Lib.IntTypes
 open Lib.Buffer
@@ -31,43 +32,88 @@ let bn_remainder_core #rLen #modLen r_i mod count =
   let tmp = create rLen (uint 0) in
 
   let h0 = FStar.HyperStack.ST.get () in
-  let inv h _ = live h r_i /\ live h mod /\ live h mod1 /\ live h tmp /\ modifies4 mod r_i mod1 tmp h0 h in
+  let inv h _ = live h r_i /\ live h mod /\ live h mod1 /\ live h tmp /\
+                modifies4 mod r_i mod1 tmp h0 h in
 
   for 0ul count inv (fun i ->
-    let ind = count -! i in
     bn_rshift1 mod mod1;
-    let tmp_b = bn_is_greater mod r_i in
-    if not tmp_b then (let _ = bn_sub r_i mod tmp in copy r_i tmp); // in-place sub?
+    if bn_is_geq r_i mod
+      then (let _ = bn_sub r_i mod tmp in copy r_i tmp); // in-place sub?
     copy mod mod1
   );
 
   pop_frame()
 
+val calc_bits_test:
+     #aLen:bn_len_strict
+  -> a:lbignum aLen
+  -> ind:size_t{v ind / 64 < v aLen}
+  -> Stack size_t
+    (requires fun h -> live h a)
+    (ensures  fun h0 _ h1 -> modifies0 h0 h1 /\ h0 == h1)
+let rec calc_bits_test #aLen a ind =
+  if ind =. 0ul then 0ul else
+  if bn_is_bit_set a ind then ind else calc_bits_test a (ind -! 1ul)
+
+val calc_bits:
+     #aLen:bn_len_strict
+  -> a:lbignum aLen
+  -> Stack size_t
+    (requires fun h -> live h a)
+    (ensures  fun h0 _ h1 -> modifies0 h0 h1 /\ h0 == h1 /\ live h1 a)
+let calc_bits #aLen a = calc_bits_test a (aLen *! 64ul -! 1ul)
+
 // res = a % n
 // TODO it should also support case for modLen > aLen
 val bn_remainder:
-     #aLen:bn_len{v aLen + 1 < max_size_t}
-  -> #modLen:bn_len{v modLen <= v aLen}
-  -> #resLen:bn_len{v resLen <= v modLen}
+     #aLen:bn_len_strict{v aLen + 1 < max_size_t}
+  -> #modLen:bn_len_strict
   -> a:lbignum aLen
   -> mod:lbignum modLen
-  -> res:lbignum resLen
+  -> res:lbignum modLen
   -> Stack unit
     (requires fun h -> live h a /\ live h mod /\ live h res)
     (ensures fun h0 _ h1 ->
         live h1 a /\ live h1 mod /\ live h1 res /\
         modifies1 res h0 h1)
-let bn_remainder #aLen #modLen #resLen a mod res =
+let bn_remainder #aLen #modLen a mod res =
   push_frame();
-  let diffBits = 64ul *. (aLen -! modLen) in
-  let modk = diffBits /. 64ul in
-  assume (v modLen + v modk + 1 < max_size_t);
-  let mod1Len = modLen +! modk +! 1ul in
-  let mod1 = create mod1Len (uint 0) in
-  bn_lshift mod diffBits mod1;
-  let a1Len = aLen +! 1ul in
-  let r0 = create a1Len (uint 0) in
-  copy (sub r0 0ul aLen) a;
-  bn_remainder_core r0 mod1 diffBits;
-  copy res (sub r0 0ul resLen);
+
+  let modBits = calc_bits mod in
+  let aBits = calc_bits a in
+  let realALen = aBits /. 64ul in
+
+  if aBits >=. modBits then begin
+    assume (v aBits >= v modBits);
+    let diffBits = aBits -! modBits in // +1?
+    let modk = diffBits /. 64ul in
+    assume ((v modLen + v modk + 1) * 64 < max_size_t);
+    assume (v modLen + v modk + 1 > 0);
+    assume (v (modLen +! modk) + 1 > 0);
+    let mod1Len:bn_len = modLen +! modk +! 1ul in
+    // this push_frame() is required, because otherwise
+    // kremlin says it can't generate buffer allocation
+    // because of the variable length.
+    push_frame();
+    let mod1 = create mod1Len (uint 0) in
+    bn_lshift mod diffBits mod1;
+    assume (v mod1Len <= v aLen);
+
+    let res1 = create aLen (uint 0) in
+    copy (sub res1 0ul aLen) a;
+
+    assume (v diffBits + 1 < max_size_t);
+    bn_remainder_core res1 mod1 (diffBits +! 1ul);
+
+    copy res (sub res1 0ul modLen);
+    pop_frame()
+  end
+  else
+  begin
+    // what's wrong???
+    if aLen >=. modLen
+    then (assert (v aLen >= v modLen); admit(); copy res (sub a 0ul modLen))
+    else (admit(); copy (sub res 0ul aLen) a)
+  end;
+
   pop_frame()

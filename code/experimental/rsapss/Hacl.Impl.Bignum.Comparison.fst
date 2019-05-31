@@ -17,19 +17,20 @@ val bn_is_less_:
   -> #bLen:bn_len{v bLen <= v aLen}
   -> a:lbignum aLen
   -> b:lbignum bLen
+  -> finval:bool
   -> i:size_t{v i <= v aLen}
   -> Stack bool
     (requires fun h -> live h a /\ live h b)
     (ensures  fun h0 _ h1 -> modifies loc_none h0 h1 /\ h0 == h1)
-let rec bn_is_less_ #aLen #bLen a b i =
-  if i >. 0ul then
+let rec bn_is_less_ #aLen #bLen a b finval i =
+  if i =. 0ul then finval else begin
     let i = i -. size 1 in
     let t1 = a.(i) in
     let t2 = bval bLen b i in
     (if not (eq_u64 t1 t2) then
       if lt_u64 t1 t2 then true else false
-    else bn_is_less_ a b i)
-  else false
+    else bn_is_less_ a b finval i)
+  end
 
 val bn_is_less:
      #aLen:bn_len
@@ -45,8 +46,27 @@ val bn_is_less:
 let bn_is_less #aLen #bLen a b =
     let res =
       if bLen <=. aLen
-      then (assert (v bLen <= v aLen); bn_is_less_ #aLen #bLen a b aLen)
-      else (let res = bn_is_less_ #bLen #aLen b a bLen in not res) in
+      then (assert (v bLen <= v aLen); bn_is_less_ #aLen #bLen a b false aLen)
+      else (let res = bn_is_less_ #bLen #aLen b a false bLen in not res) in
+    admit();
+    res
+
+val bn_is_leq:
+     #aLen:bn_len
+  -> #bLen:bn_len
+  -> a:lbignum aLen
+  -> b:lbignum bLen
+  -> Stack bool
+    (requires fun h -> live h a /\ live h b)
+    (ensures  fun h0 r h1 ->
+     modifies loc_none h0 h1 /\ h0 == h1 /\
+     r == (as_snat h0 a <= as_snat h0 b))
+[@"c_inline"]
+let bn_is_leq #aLen #bLen a b =
+    let res =
+      if bLen <=. aLen
+      then (assert (v bLen <= v aLen); bn_is_less_ #aLen #bLen a b true aLen)
+      else (let res = bn_is_less_ #bLen #aLen b a true bLen in not res) in
     admit();
     res
 
@@ -71,7 +91,7 @@ let rec bn_is_equal_ #aLen #bLen a b i =
 // way to compare buffers.
 val bn_is_equal:
      #aLen:bn_len
-  -> #bLen:bn_len{v bLen <= v aLen}
+  -> #bLen:bn_len
   -> a:lbignum aLen
   -> b:lbignum bLen
   -> Stack bool
@@ -79,7 +99,13 @@ val bn_is_equal:
     (ensures  fun h0 r h1 ->
      modifies loc_none h0 h1 /\ h0 == h1 /\
      r == (as_snat h0 a = as_snat h0 b))
-let bn_is_equal #aLen #bLen a b = let res = bn_is_equal_ a b aLen in admit(); res
+let bn_is_equal #aLen #bLen a b =
+    let res =
+      if bLen <=. aLen
+      then (bn_is_equal_ #aLen #bLen a b aLen)
+      else (bn_is_equal_ #bLen #aLen b a bLen) in
+    admit();
+    res
 
 val bn_is_greater:
      #aLen:bn_len
@@ -93,3 +119,16 @@ val bn_is_greater:
      r == (as_snat h0 a > as_snat h0 b))
 [@"c_inline"]
 let bn_is_greater #aLen #bLen a b = bn_is_less b a
+
+val bn_is_geq:
+     #aLen:bn_len
+  -> #bLen:bn_len
+  -> a:lbignum aLen
+  -> b:lbignum bLen
+  -> Stack bool
+    (requires fun h -> live h a /\ live h b)
+    (ensures  fun h0 r h1 ->
+     modifies loc_none h0 h1 /\ h0 == h1 /\
+     r == (as_snat h0 a >= as_snat h0 b))
+[@"c_inline"]
+let bn_is_geq #aLen #bLen a b = bn_is_leq b a
