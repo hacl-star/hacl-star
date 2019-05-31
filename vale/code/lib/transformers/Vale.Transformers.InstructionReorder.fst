@@ -995,6 +995,33 @@ let lemma_unchanged_except_append_symmetric (a1 a2:list access_location) (s1 s2:
     lemma_disjoint_access_location_from_locations_append a a2 a1 in
   FStar.Classical.forall_intro (FStar.Classical.move_requires aux)
 
+let lemma_unchanged_at_combine (as1 as2:list access_location) (sa1 sa2 sb1 sb2:machine_state) :
+  Lemma
+    (requires (
+        !!(disjoint_access_locations as1 as2 "") /\
+        (unchanged_at as1 sa1 sb2) /\
+        (unchanged_at as2 sa2 sb1)))
+    (ensures (
+        (unchanged_at (as1 `L.append` as2) sb1 sb2))) =
+  admit ()
+
+let lemma_unchanged_except_same_transitive (as:list access_location) (s1 s2 s3:machine_state) :
+  Lemma
+    (requires (
+        (unchanged_except as s1 s2) /\
+        (unchanged_except as s2 s3)))
+    (ensures (
+        (unchanged_except as s1 s3))) = ()
+
+let lemma_unchanged_at_and_except (as:list access_location) (s1 s2:machine_state) :
+  Lemma
+    (requires (
+        (unchanged_at as s1 s2) /\
+        (unchanged_except as s1 s2)))
+    (ensures (
+        (unchanged_except [] s1 s2))) =
+  admit ()
+
 let lemma_commute (f1 f2:st unit) (r1 w1 r2 w2:list access_location) (s:machine_state) :
   Lemma
     (requires (
@@ -1030,6 +1057,10 @@ let lemma_commute (f1 f2:st unit) (r1 w1 r2 w2:list access_location) (s:machine_
   assert (unchanged_except (w2 `L.append` w1) s is21);
   lemma_unchanged_except_append_symmetric w1 w2 s is12;
   lemma_unchanged_except_append_symmetric w2 w1 s is21;
+  lemma_unchanged_except_same_transitive (w1 `L.append` w2) s is12 is21;
+  lemma_unchanged_at_combine w1 w2 is1 is2 is12 is21;
+  lemma_unchanged_at_and_except (w1 `L.append` w2) is12 is21;
+  assert (unchanged_except [] is12 is21);
   admit ()
 
 let lemma_unchanged_commutes (i1 i2 : ins) (s : machine_state) :
