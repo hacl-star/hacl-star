@@ -997,17 +997,92 @@ let lemma_unchanged_except_append_symmetric (a1 a2:list access_location) (s1 s2:
     lemma_disjoint_access_location_from_locations_append a a2 a1 in
   FStar.Classical.forall_intro (FStar.Classical.move_requires aux)
 
-let lemma_unchanged_at_combine (as1 as2:list access_location) (sa1 sa2 sb1 sb2:machine_state) :
+let rec lemma_disjoint_access_location_from_locations_mem
+    (a1 a2:list access_location) (a:access_location) :
   Lemma
     (requires (
-        !!(disjoint_access_locations as1 as2 "") /\
-        (unchanged_at as1 sa1 sb2) /\
-        (unchanged_except as2 sa1 sb1) /\
-        (unchanged_at as2 sa2 sb1) /\
-        (unchanged_except as1 sa2 sb2)))
+        (L.mem a a1) /\
+        !!(disjoint_access_locations a1 a2 "")))
     (ensures (
-        (unchanged_at (as1 `L.append` as2) sb1 sb2))) =
-  admit ()
+        !!(disjoint_access_location_from_locations a a2))) =
+  match a1 with
+  | [_] -> ()
+  | x :: xs ->
+    if a = x then () else
+    lemma_disjoint_access_location_from_locations_mem xs a2 a
+
+let rec lemma_unchanged_at_mem (as:list access_location) (a:access_location) (s1 s2:machine_state) :
+  Lemma
+    (requires (
+        (unchanged_at as s1 s2) /\
+        (L.mem a as)))
+    (ensures (
+        (eval_access_location a s1 == eval_access_location a s2))) =
+  match as with
+  | [_] -> ()
+  | x :: xs ->
+    if a = x then () else
+    lemma_unchanged_at_mem xs a s1 s2
+
+let lemma_unchanged_at_combine (a1 a2:list access_location) (sa1 sa2 sb1 sb2:machine_state) :
+  Lemma
+    (requires (
+        !!(disjoint_access_locations a1 a2 "") /\
+        (unchanged_at a1 sa1 sb2) /\
+        (unchanged_except a2 sa1 sb1) /\
+        (unchanged_at a2 sa2 sb1) /\
+        (unchanged_except a1 sa2 sb2)))
+    (ensures (
+        (unchanged_at (a1 `L.append` a2) sb1 sb2))) =
+  let precond = !!(disjoint_access_locations a1 a2 "") /\
+                 (unchanged_at a1 sa1 sb2) /\
+                 (unchanged_except a2 sa1 sb1) /\
+                 (unchanged_at a2 sa2 sb1) /\
+                 (unchanged_except a1 sa2 sb2) in
+  let rec aux1 a :
+    Lemma
+      (requires (L.mem a a1 /\
+                 precond))
+      (ensures (eval_access_location a sb1 == eval_access_location a sb2)) =
+    lemma_disjoint_access_location_from_locations_mem a1 a2 a;
+    assert (!!(disjoint_access_location_from_locations a a2));
+    assert (eval_access_location a sb1 == eval_access_location a sa1);
+    lemma_unchanged_at_mem a1 a sa1 sb2
+  in
+  let rec aux2 a :
+    Lemma
+      (requires (L.mem a a2 /\
+                 precond))
+      (ensures (eval_access_location a sb1 == eval_access_location a sb2)) =
+    lemma_disjoint_access_locations_symmetric a1 a2 "";
+    lemma_disjoint_access_location_from_locations_mem a2 a1 a;
+    assert (!!(disjoint_access_location_from_locations a a1));
+    assert (eval_access_location a sb2 == eval_access_location a sa2);
+    lemma_unchanged_at_mem a2 a sa2 sb1
+  in
+  let rec aux a1' a1'' a2' a2'' :
+    Lemma
+      (requires (a1' `L.append` a1'' == a1 /\ a2' `L.append` a2'' == a2 /\
+                precond))
+      (ensures (unchanged_at (a1'' `L.append` a2'') sb1 sb2))
+      (decreases %[a1''; a2'']) =
+    match a1'' with
+    | [] -> (
+        match a2'' with
+        | [] -> ()
+        | y :: ys -> (
+            L.append_l_cons y ys a2';
+            L.append_mem a2' a2'' y;
+            aux2 y;
+            aux a1' a1'' (a2' `L.append` [y]) ys
+          )
+      )
+    | x :: xs ->
+      L.append_l_cons x xs a1';
+      L.append_mem a1' a1'' x;
+      aux1 x;
+      aux (a1' `L.append` [x]) xs a2' a2'' in
+  aux [] a1 [] a2
 
 let lemma_unchanged_except_same_transitive (as:list access_location) (s1 s2 s3:machine_state) :
   Lemma
