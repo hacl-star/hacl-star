@@ -646,6 +646,8 @@ let filt_state (s:machine_state) =
   { s with
     ms_trace = [] }
 
+#push-options "--z3rlimit 10 --max_fuel 1 --max_ifuel 1"
+
 let rec lemma_eval_code_equiv_states (c : code) (fuel:nat) (s1 s2 : machine_state) :
   Lemma
     (requires (equiv_states s1 s2))
@@ -729,6 +731,8 @@ and lemma_eval_while_equiv_states (c : code{While? c}) (fuel:nat) (s1 s2:machine
         ) else ()
     )
   )
+
+#pop-options
 
 /// If an exchange is allowed between two instructions based off of
 /// their read/write sets, then both orderings of the two instructions
