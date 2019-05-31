@@ -208,8 +208,13 @@ let rw_exchange_allowed (rw1 rw2 : rw_set) : pbool =
   (disjoint w1 w2 "write sets not disjoint")
 
 let ins_exchange_allowed (i1 i2 : ins) : pbool =
-  (rw_exchange_allowed (rw_set_of_ins i1) (rw_set_of_ins i2))
-  /+> normal (" for instructions " ^ print_ins i1 gcc ^ " and " ^ print_ins i2 gcc)
+  (
+    match i1, i2 with
+    | Instr _ _ _, Instr _ _ _ ->
+      (rw_exchange_allowed (rw_set_of_ins i1) (rw_set_of_ins i2))
+    | _, _ ->
+      ffalse "non-generic instructions: conservatively disallowed exchange"
+  ) /+> normal (" for instructions " ^ print_ins i1 gcc ^ " and " ^ print_ins i2 gcc)
 
 private abstract
 let sanity_check_1 =
