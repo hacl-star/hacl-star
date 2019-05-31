@@ -793,15 +793,32 @@ let commutes (s:machine_state) (f1 f2:st unit) : GTot Type0 =
 
 let access_location_val_t (a:access_location) : eqtype =
   match a with
-  | ALoc64 _ -> nat64
-  | ALoc128 _ -> quad32
+  | ALoc64 (OConst _) -> nat64
+  | ALoc64 (OReg _) -> nat64
+  | ALoc64 (OMem _) -> nat64 & taint
+  | ALoc64 (OStack _) -> nat64 & taint
+  | ALoc128 (OReg128 _) -> quad32
+  | ALoc128 (OMem128 _) -> quad32 & taint
+  | ALoc128 (OStack128 _) -> quad32 & taint
   | ALocCf -> bool
   | ALocOf -> bool
 
 let eval_access_location (a:access_location) (s:machine_state) : access_location_val_t a =
   match a with
-  | ALoc64 o -> eval_operand o s
-  | ALoc128 o -> eval_mov128_op o s
+  | ALoc64 o -> (
+      let v = eval_operand o s in
+      match o with
+      | OConst _ | OReg _ -> v
+      | OMem (m, _) -> v, Map.sel s.ms_memTaint (eval_maddr m s)
+      | OStack (m, _) -> v, Map.sel s.ms_stackTaint (eval_maddr m s)
+    )
+  | ALoc128 o -> (
+      let v = eval_mov128_op o s in
+      match o with
+      | OReg128 _ -> v
+      | OMem128 (m, _) -> v, Map.sel s.ms_memTaint (eval_maddr m s)
+      | OStack128 (m, _) -> v, Map.sel s.ms_stackTaint (eval_maddr m s)
+    )
   | ALocCf -> cf s.ms_flags
   | ALocOf -> overflow s.ms_flags
 
@@ -866,19 +883,10 @@ let rec lemma_eval_instr_unchanged_args
     | Some v ->
       let Some v' = v' in
       let read_op :: _ = reads in
-      assert (v == eval_access_location read_op s);
-      assert (eval_access_location read_op s == eval_access_location read_op (run f s));
-      assert (v' == eval_access_location read_op (run f s));
       lemma_eval_instr_unchanged_args outs args (ff v) oprs f s;
       let v0', v1' =
         instr_apply_eval_args outs args (ff v) oprs s,
         instr_apply_eval_args outs args (ff v) oprs (run f s) in
-      assert (v0' == v1');
-      assert (res == v0');
-      assert (res' == v1');
-      assert (res == res');
-      assert (res == v0);
-      assert (res' == v1);
       ()
 
 let rec lemma_eval_instr_unchanged_inouts
