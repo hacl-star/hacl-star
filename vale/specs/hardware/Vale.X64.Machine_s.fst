@@ -44,17 +44,17 @@ type taint:eqtype =
 type tmaddr:eqtype = maddr & taint
 
 [@va_qattr]
-type operand:eqtype =
-  | OConst: n:int -> operand
-  | OReg: r:reg -> operand
-  | OMem: m:tmaddr -> operand
-  | OStack: m:tmaddr -> operand
+type operand (tc:eqtype) (tr:eqtype) : eqtype =
+  | OConst: n:tc -> operand tc tr
+  | OReg: r:tr -> operand tc tr
+  | OMem: m:tmaddr -> operand tc tr
+  | OStack: m:tmaddr -> operand tc tr
 
 [@va_qattr]
-type operand128:eqtype =
-  | OReg128: x:xmm -> operand128
-  | OMem128: m:tmaddr -> operand128
-  | OStack128: m:tmaddr -> operand128
+let operand64:eqtype = operand int reg
+
+[@va_qattr]
+let operand128:eqtype = operand quad32 xmm
 
 noeq
 type precode (t_ins:Type0) (t_ocmp:eqtype) : Type0 =

@@ -105,7 +105,7 @@ let same_mem_get_heap_val128 ptr mem1 mem2 =
 (* All the following lemmas prove that the domain of the bytes memory map remains invariant
 through execution *)
 
-let update_operand_flags_same_domains (dst:operand) (v:nat64) (s_orig s:machine_state) : Lemma
+let update_operand_flags_same_domains (dst:operand64) (v:nat64) (s_orig s:machine_state) : Lemma
   (let s1 = update_operand_preserve_flags'' dst v s_orig s in
   Set.equal (Map.domain s.ms_mem) (Map.domain s_orig.ms_mem) ==>
   Set.equal (Map.domain s.ms_mem) (Map.domain s1.ms_mem))
@@ -116,7 +116,7 @@ let update_operand_flags_same_domains (dst:operand) (v:nat64) (s_orig s:machine_
   | OMem _ -> reveal_opaque update_heap64_def
   | _ -> ()
 
-let update_operand_same_domains (dst:operand) (ins:ins) (v:nat64) (s:machine_state) : Lemma
+let update_operand_same_domains (dst:operand64) (ins:ins) (v:nat64) (s:machine_state) : Lemma
   (let s1 = update_operand' dst ins v s in
   Set.equal (Map.domain s.ms_mem) (Map.domain s1.ms_mem))
   [SMTPat (update_operand' dst ins v s)]
@@ -133,7 +133,7 @@ let update_operand128_flags_same_domains (o:operand128) (v:quad32) (s_orig s:mac
   FStar.Pervasives.reveal_opaque (`%valid_addr128) valid_addr128;
   Vale.Def.Opaque_s.reveal_opaque update_heap128_def;
   match o with
-  | OMem128 (m, _) ->
+  | OMem (m, _) ->
       let ptr = eval_maddr m s_orig in
       if not (valid_addr128 ptr s.ms_mem) then ()
       else
@@ -153,7 +153,7 @@ let update_operand128_flags_same_domains (o:operand128) (v:quad32) (s_orig s:mac
 (* The following lemmas prove that the unspecified heap remains invariant through execution *)
 
 #push-options "--max_fuel 0 --max_ifuel 1 --initial_ifuel 1"
-let update_operand_flags_same_unspecified (dst:operand) (v:nat64) (s_orig s:machine_state) : Lemma
+let update_operand_flags_same_unspecified (dst:operand64) (v:nat64) (s_orig s:machine_state) : Lemma
   (let s1 = update_operand_preserve_flags'' dst v s_orig s in
   Set.equal (Map.domain s.ms_mem) (Map.domain s_orig.ms_mem) ==>
   (forall x.{:pattern (s.ms_mem.[x])} not (Map.contains s1.ms_mem x && Map.contains s.ms_mem x) ==> s1.ms_mem.[x] == s.ms_mem.[x]))
@@ -164,7 +164,7 @@ let update_operand_flags_same_unspecified (dst:operand) (v:nat64) (s_orig s:mach
   | _ -> ()
 #pop-options
 
-let update_operand_same_unspecified (dst:operand) (ins:ins) (v:nat64) (s:machine_state) : Lemma
+let update_operand_same_unspecified (dst:operand64) (ins:ins) (v:nat64) (s:machine_state) : Lemma
   (let s1 = update_operand' dst ins v s in
   forall x.{:pattern (s.ms_mem.[x])} not (Map.contains s1.ms_mem x && Map.contains s.ms_mem x) ==> s1.ms_mem.[x] == s.ms_mem.[x])
   [SMTPat (update_operand' dst ins v s)]
@@ -192,7 +192,7 @@ let update_operand128_flags_same_unspecified (o:operand128) (v:quad32) (s_orig s
   FStar.Pervasives.reveal_opaque (`%valid_addr128) valid_addr128;
   Vale.Def.Opaque_s.reveal_opaque update_heap128_def;
   match o with
-  | OMem128 (m, _) ->
+  | OMem (m, _) ->
       let ptr = eval_maddr m s_orig in
       if not (valid_addr128 ptr s.ms_mem) then ()
       else

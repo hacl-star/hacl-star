@@ -33,7 +33,7 @@ let lemma_valid_taint_match64 o s =
 
 let lemma_valid_taint_match128 o s =
   match o with
-  | OMem128 (m, t) ->
+  | OMem (m, t) ->
     let addr = eval_maddr m s in
     let aux (b:buffer128) (i:int) : Lemma
       (requires valid_maddr128 addr s.mem s.memTaint b i t)
@@ -42,7 +42,7 @@ let lemma_valid_taint_match128 o s =
       Vale.X64.Memory.lemma_valid_taint128 b s.memTaint s.mem i t
       in
     Classical.forall_intro_2 (fun b i -> (fun b -> Classical.move_requires (aux b)) b i)
-  | OStack128 (m, t) -> lemma_valid_taint_stack128 (eval_maddr m s) t s.stackTaint
+  | OStack (m, t) -> lemma_valid_taint_stack128 (eval_maddr m s) t s.stackTaint
   | _ -> ()
 
 let instr_norm_lemma (#a:Type) (x:a) : Lemma

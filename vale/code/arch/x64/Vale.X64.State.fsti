@@ -45,7 +45,7 @@ let to_nat64 (i:int) : nat64 =
   if 0 <= i && i < 0x10000000000000000 then i else int_to_nat64 i
 
 [@va_qattr]
-let eval_operand (o:operand) (s:state) : GTot nat64 =
+let eval_operand (o:operand64) (s:state) : GTot nat64 =
   match o with
   | OConst n -> to_nat64 n
   | OReg r -> eval_reg r s
@@ -55,9 +55,10 @@ let eval_operand (o:operand) (s:state) : GTot nat64 =
 [@va_qattr]
 let eval_operand128 (o:operand128) (s:state) : GTot Vale.Def.Types_s.quad32 =
   match o with
-  | OReg128 x -> eval_xmm x s
-  | OMem128 (m, _) -> eval_mem128 (eval_maddr m s) s
-  | OStack128 (m, _) -> eval_stack128 (eval_maddr m s) s
+  | OConst c -> c
+  | OReg x -> eval_xmm x s
+  | OMem (m, _) -> eval_mem128 (eval_maddr m s) s
+  | OStack (m, _) -> eval_stack128 (eval_maddr m s) s
 
 [@va_qattr]
 let update_reg (r:reg) (v:nat64) (s:state) : state =
@@ -74,7 +75,7 @@ let update_mem (ptr:int) (v:nat64) (s:state) : GTot state = {s with mem = store_
 let update_stack (ptr:int) (v:nat64) (s:state) : GTot state = {s with stack = store_stack64 ptr v s.stack}
 
 [@va_qattr]
-let update_operand (o:operand) (v:nat64) (sM:state) : GTot state =
+let update_operand (o:operand64) (v:nat64) (sM:state) : GTot state =
   match o with
   | OConst n -> sM
   | OReg r -> update_reg r v sM
@@ -88,7 +89,7 @@ let valid_maddr (m:maddr) (s:state) : prop0 = valid_mem64 (eval_maddr m s) s.mem
 let valid_maddr128 (m:maddr) (s:state) : prop0 = valid_mem128 (eval_maddr m s) s.mem
 
 [@va_qattr]
-let valid_src_operand (o:operand) (s:state) : prop0 =
+let valid_src_operand (o:operand64) (s:state) : prop0 =
   match o with
   | OConst n -> 0 <= n /\ n < pow2_64
   | OReg r -> True
@@ -98,9 +99,10 @@ let valid_src_operand (o:operand) (s:state) : prop0 =
 [@va_qattr]
 let valid_src_operand128 (o:operand128) (s:state) : prop0 =
   match o with
-  | OReg128 _ -> True
-  | OMem128 (m, _) -> valid_maddr128 m s
-  | OStack128 (m, _) -> valid_src_stack128 (eval_maddr m s) s.stack
+  | OConst _ -> False
+  | OReg _ -> True
+  | OMem (m, _) -> valid_maddr128 m s
+  | OStack (m, _) -> valid_src_stack128 (eval_maddr m s) s.stack
 
 [@va_qattr]
 let state_eta (s:state) : state =

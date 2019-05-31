@@ -9,15 +9,15 @@ module BC = Vale.X64.Bytes_Code_s
 module S = Vale.X64.Machine_Semantics_s
 let has_taint128 (o:operand128) (t:taint) : bool =
   match o with
-  | OMem128 (_, t') | OStack128 (_, t') -> t = t'
+  | OMem (_, t') | OStack (_, t') -> t = t'
   | _ -> true
 
 val lemma_valid_taint64_operand (m:maddr) (t:taint) (s:va_state) : Lemma
   (requires valid_operand (OMem (m, t)) s)
   (ensures taint_at s.memTaint (eval_maddr m s) == t)
-  [SMTPat (eval_maddr m s); SMTPat (OMem (m, t))]
+  [SMTPat (eval_maddr m s); SMTPat (OMem #int #reg (m, t))]
 
-val lemma_valid_taint_match64 (o:operand) (s:state) : Lemma
+val lemma_valid_taint_match64 (o:operand64) (s:state) : Lemma
   (requires valid_operand o s)
   (ensures S.taint_match o s.memTaint s.stackTaint (state_to_S s))
   [SMTPat (S.taint_match o s.memTaint s.stackTaint (state_to_S s))]

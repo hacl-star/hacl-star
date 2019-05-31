@@ -79,7 +79,7 @@ let rec check_if_consumes_fixed_time_outs
   =
   allow_inversion maddr;
   allow_inversion tmaddr;
-  allow_inversion operand;
+  allow_inversion operand64;
   allow_inversion operand128;
   match outs with
   | [] -> check_if_consumes_fixed_time_args args oprs ts
@@ -113,7 +113,7 @@ let rec lemma_args_taint
   =
   allow_inversion maddr;
   allow_inversion tmaddr;
-  allow_inversion operand;
+  allow_inversion operand64;
   allow_inversion operand128;
   match args with
   | [] -> ()
@@ -159,7 +159,7 @@ let rec lemma_inouts_taint
   =
   allow_inversion maddr;
   allow_inversion tmaddr;
-  allow_inversion operand;
+  allow_inversion operand64;
   allow_inversion operand128;
   match inouts with
   | [] -> lemma_args_taint outs args f oprs ts s1 s2
@@ -460,7 +460,7 @@ let lemma_instr_set_taints_implicit
   =
   allow_inversion maddr;
   allow_inversion tmaddr;
-  allow_inversion operand;
+  allow_inversion operand64;
   allow_inversion operand128;
   lemma_preserve_valid64 s1_orig.S.ms_mem s1.S.ms_mem;
   lemma_preserve_valid64 s2_orig.S.ms_mem s2.S.ms_mem;
@@ -755,6 +755,7 @@ let lemma_push_leakage_free (ts:analysis_taints) (ins:S.ins) : Lemma
     ()
   )
 
+#reset-options "--initial_ifuel 1 --max_ifuel 1 --initial_fuel 1 --max_fuel 1 --z3rlimit 100"
 let lemma_pop_leakage_free (ts:analysis_taints) (ins:S.ins) : Lemma
   (requires BC.Pop? ins)
   (ensures (

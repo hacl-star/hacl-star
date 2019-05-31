@@ -45,51 +45,51 @@ let ensure_valid_ocmp (c:ocmp) (s:state) : GTot state =
   let ts:BS.machine_state = fst (BS.machine_eval_ocmp (state_to_S s) c) in
   state_of_S s ts
 
-val lemma_cmp_eq (s:state) (o1:operand{not (OMem? o1 || OStack? o1)}) (o2:operand{not (OMem? o2 || OStack? o2)}) : Lemma
+val lemma_cmp_eq (s:state) (o1:operand64{not (OMem? o1 || OStack? o1)}) (o2:operand64{not (OMem? o2 || OStack? o2)}) : Lemma
   (ensures eval_ocmp s (BC.OEq o1 o2) <==> eval_operand o1 s == eval_operand o2 s)
   [SMTPat (eval_ocmp s (BC.OEq o1 o2))]
 
-val lemma_cmp_ne (s:state) (o1:operand{not (OMem? o1 || OStack? o1)}) (o2:operand{not (OMem? o2 || OStack? o2)}) : Lemma
+val lemma_cmp_ne (s:state) (o1:operand64{not (OMem? o1 || OStack? o1)}) (o2:operand64{not (OMem? o2 || OStack? o2)}) : Lemma
   (ensures eval_ocmp s (BC.ONe o1 o2) <==> eval_operand o1 s <> eval_operand o2 s)
   [SMTPat (eval_ocmp s (BC.ONe o1 o2))]
 
-val lemma_cmp_le (s:state) (o1:operand{not (OMem? o1 || OStack? o1)}) (o2:operand{not (OMem? o2 || OStack? o2)}) : Lemma
+val lemma_cmp_le (s:state) (o1:operand64{not (OMem? o1 || OStack? o1)}) (o2:operand64{not (OMem? o2 || OStack? o2)}) : Lemma
   (ensures eval_ocmp s (BC.OLe o1 o2) <==> eval_operand o1 s <= eval_operand o2 s)
   [SMTPat (eval_ocmp s (BC.OLe o1 o2))]
 
-val lemma_cmp_ge (s:state) (o1:operand{not (OMem? o1 || OStack? o1)}) (o2:operand{not (OMem? o2 || OStack? o2)}) : Lemma
+val lemma_cmp_ge (s:state) (o1:operand64{not (OMem? o1 || OStack? o1)}) (o2:operand64{not (OMem? o2 || OStack? o2)}) : Lemma
   (ensures eval_ocmp s (BC.OGe o1 o2) <==> eval_operand o1 s >= eval_operand o2 s)
   [SMTPat (eval_ocmp s (BC.OGe o1 o2))]
 
-val lemma_cmp_lt (s:state) (o1:operand{not (OMem? o1 || OStack? o1)}) (o2:operand{not (OMem? o2 || OStack? o2)}) : Lemma
+val lemma_cmp_lt (s:state) (o1:operand64{not (OMem? o1 || OStack? o1)}) (o2:operand64{not (OMem? o2 || OStack? o2)}) : Lemma
   (ensures eval_ocmp s (BC.OLt o1 o2) <==> eval_operand o1 s < eval_operand o2 s)
   [SMTPat (eval_ocmp s (BC.OLt o1 o2))]
 
-val lemma_cmp_gt (s:state) (o1:operand{not (OMem? o1 || OStack? o1)}) (o2:operand{not (OMem? o2 || OStack? o2)}) : Lemma
+val lemma_cmp_gt (s:state) (o1:operand64{not (OMem? o1 || OStack? o1)}) (o2:operand64{not (OMem? o2 || OStack? o2)}) : Lemma
   (ensures eval_ocmp s (BC.OGt o1 o2) <==> eval_operand o1 s > eval_operand o2 s)
   [SMTPat (eval_ocmp s (BC.OGt o1 o2))]
 
-val lemma_valid_cmp_eq (s:state) (o1:operand{not (OMem? o1 || OStack? o1)}) (o2:operand{not (OMem? o2 || OStack? o2)}) : Lemma
+val lemma_valid_cmp_eq (s:state) (o1:operand64{not (OMem? o1 || OStack? o1)}) (o2:operand64{not (OMem? o2 || OStack? o2)}) : Lemma
   (ensures valid_src_operand o1 s /\ valid_src_operand o2 s ==> valid_ocmp (BC.OEq o1 o2) s)
   [SMTPat (valid_ocmp (BC.OEq o1 o2) s)]
 
-val lemma_valid_cmp_ne (s:state) (o1:operand{not (OMem? o1 || OStack? o1)}) (o2:operand{not (OMem? o2 || OStack? o2)}) : Lemma
+val lemma_valid_cmp_ne (s:state) (o1:operand64{not (OMem? o1 || OStack? o1)}) (o2:operand64{not (OMem? o2 || OStack? o2)}) : Lemma
   (ensures valid_src_operand o1 s /\ valid_src_operand o2 s ==> valid_ocmp (BC.ONe o1 o2) s)
   [SMTPat (valid_ocmp (BC.ONe o1 o2) s)]
 
-val lemma_valid_cmp_le (s:state) (o1:operand{not (OMem? o1 || OStack? o1)}) (o2:operand{not (OMem? o2 || OStack? o2)}) : Lemma
+val lemma_valid_cmp_le (s:state) (o1:operand64{not (OMem? o1 || OStack? o1)}) (o2:operand64{not (OMem? o2 || OStack? o2)}) : Lemma
   (ensures valid_src_operand o1 s /\ valid_src_operand o2 s ==> valid_ocmp (BC.OLe o1 o2) s)
   [SMTPat (valid_ocmp (BC.OLe o1 o2) s)]
 
-val lemma_valid_cmp_ge (s:state) (o1:operand{not (OMem? o1 || OStack? o1)}) (o2:operand{not (OMem? o2 || OStack? o2)}) : Lemma
+val lemma_valid_cmp_ge (s:state) (o1:operand64{not (OMem? o1 || OStack? o1)}) (o2:operand64{not (OMem? o2 || OStack? o2)}) : Lemma
   (ensures valid_src_operand o1 s /\ valid_src_operand o2 s ==> valid_ocmp (BC.OGe o1 o2) s)
   [SMTPat (valid_ocmp (BC.OGe o1 o2) s)]
 
-val lemma_valid_cmp_lt (s:state) (o1:operand{not (OMem? o1 || OStack? o1)}) (o2:operand{not (OMem? o2 || OStack? o2)}) : Lemma
+val lemma_valid_cmp_lt (s:state) (o1:operand64{not (OMem? o1 || OStack? o1)}) (o2:operand64{not (OMem? o2 || OStack? o2)}) : Lemma
   (ensures valid_src_operand o1 s /\ valid_src_operand o2 s ==> valid_ocmp (BC.OLt o1 o2) s)
   [SMTPat (valid_ocmp (BC.OLt o1 o2) s)]
 
-val lemma_valid_cmp_gt (s:state) (o1:operand{not (OMem? o1 || OStack? o1)}) (o2:operand{not (OMem? o2 || OStack? o2)}) : Lemma
+val lemma_valid_cmp_gt (s:state) (o1:operand64{not (OMem? o1 || OStack? o1)}) (o2:operand64{not (OMem? o2 || OStack? o2)}) : Lemma
   (ensures valid_src_operand o1 s /\ valid_src_operand o2 s ==> valid_ocmp (BC.OGt o1 o2) s)
   [SMTPat (valid_ocmp (BC.OGt o1 o2) s)]
 

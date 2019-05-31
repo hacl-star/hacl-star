@@ -50,7 +50,7 @@ friend Vale.X64.Decls
 procedure Pclmulqdq(inout dst:xmm, in src:xmm, inline dstHi:bool, inline srcHi:bool)
     {:public}
     {:quick exportOnly}
-    {:instruction mk_ins(make_instr(I.ins_Pclmulqdq((if dstHi then 1 else 0) + (if srcHi then 16 else 0)), OReg128(dst), OReg128(src)))}
+    {:instruction mk_ins(make_instr(I.ins_Pclmulqdq((if dstHi then 1 else 0) + (if srcHi then 16 else 0)), OReg(dst), OReg(src)))}
     requires pclmulqdq_enabled;
     modifies efl;
     ensures
@@ -63,7 +63,7 @@ procedure Pclmulqdq(inout dst:xmm, in src:xmm, inline dstHi:bool, inline srcHi:b
 procedure VPclmulqdq(out dst:xmm, in src1:xmm, in src2:xmm, inline src1Hi:bool, inline src2Hi:bool)
     {:public}
     {:quick exportOnly}
-    {:instruction mk_ins(make_instr(I.ins_VPclmulqdq((if src1Hi then 1 else 0) + (if src2Hi then 16 else 0)), OReg128(dst), OReg128(src1), OReg128(src2)))}
+    {:instruction mk_ins(make_instr(I.ins_VPclmulqdq((if src1Hi then 1 else 0) + (if src2Hi then 16 else 0)), OReg(dst), OReg(src1), OReg(src2)))}
     requires pclmulqdq_enabled && avx_enabled;
     modifies efl;
     ensures
@@ -76,7 +76,7 @@ procedure VPclmulqdq(out dst:xmm, in src1:xmm, in src2:xmm, inline src1Hi:bool, 
 procedure AESNI_enc(inout dst:xmm, in src:xmm)
     {:public}
     {:quick exportOnly}
-    {:instruction mk_ins(make_instr(I.ins_AESNI_enc, OReg128(dst), OReg128(src)))}
+    {:instruction mk_ins(make_instr(I.ins_AESNI_enc, OReg(dst), OReg(src)))}
     requires aesni_enabled;
     modifies efl;
     ensures
@@ -87,7 +87,7 @@ procedure AESNI_enc(inout dst:xmm, in src:xmm)
 procedure VAESNI_enc(inout dst:xmm, in src1:xmm, in src2:xmm)
     {:public}
     {:quick exportOnly}
-    {:instruction mk_ins(make_instr(I.ins_VAESNI_enc, OReg128(dst), OReg128(src1), OReg128(src2)))}
+    {:instruction mk_ins(make_instr(I.ins_VAESNI_enc, OReg(dst), OReg(src1), OReg(src2)))}
     requires aesni_enabled && avx_enabled;
     modifies efl;
     ensures
@@ -98,7 +98,7 @@ procedure VAESNI_enc(inout dst:xmm, in src1:xmm, in src2:xmm)
 procedure AESNI_enc_last(inout dst:xmm, in src:xmm)
     {:public}
     {:quick exportOnly}
-    {:instruction mk_ins(make_instr(I.ins_AESNI_enc_last, OReg128(dst), OReg128(src)))}
+    {:instruction mk_ins(make_instr(I.ins_AESNI_enc_last, OReg(dst), OReg(src)))}
     requires aesni_enabled;
     modifies efl;
     ensures
@@ -109,7 +109,7 @@ procedure AESNI_enc_last(inout dst:xmm, in src:xmm)
 procedure VAESNI_enc_last(inout dst:xmm, in src1:xmm, in src2:xmm)
     {:public}
     {:quick exportOnly}
-    {:instruction mk_ins(make_instr(I.ins_VAESNI_enc_last, OReg128(dst), OReg128(src1), OReg128(src2)))}
+    {:instruction mk_ins(make_instr(I.ins_VAESNI_enc_last, OReg(dst), OReg(src1), OReg(src2)))}
     requires aesni_enabled && avx_enabled;
     modifies efl;
     ensures
@@ -119,7 +119,7 @@ procedure VAESNI_enc_last(inout dst:xmm, in src1:xmm, in src2:xmm)
 
 procedure AESNI_dec(inout dst:xmm, in src:xmm)
     {:quick exportOnly}
-    {:instruction mk_ins(make_instr(I.ins_AESNI_dec, OReg128(dst), OReg128(src)))}
+    {:instruction mk_ins(make_instr(I.ins_AESNI_dec, OReg(dst), OReg(src)))}
     requires aesni_enabled;
     modifies efl;
     ensures
@@ -129,7 +129,7 @@ procedure AESNI_dec(inout dst:xmm, in src:xmm)
 
 procedure AESNI_dec_last(inout dst:xmm, in src:xmm)
     {:quick exportOnly}
-    {:instruction mk_ins(make_instr(I.ins_AESNI_dec_last, OReg128(dst), OReg128(src)))}
+    {:instruction mk_ins(make_instr(I.ins_AESNI_dec_last, OReg(dst), OReg(src)))}
     requires aesni_enabled;
     modifies efl;
     ensures
@@ -139,7 +139,7 @@ procedure AESNI_dec_last(inout dst:xmm, in src:xmm)
 
 procedure AESNI_imc(inout dst:xmm, in src:xmm)
     {:quick exportOnly}
-    {:instruction mk_ins(make_instr(I.ins_AESNI_imc, OReg128(dst), OReg128(src)))}
+    {:instruction mk_ins(make_instr(I.ins_AESNI_imc, OReg(dst), OReg(src)))}
     requires aesni_enabled;
     modifies efl;
     ensures
@@ -150,7 +150,7 @@ procedure AESNI_imc(inout dst:xmm, in src:xmm)
 procedure AESNI_keygen_assist(inout dst:xmm, in src:xmm, inline imm:imm8)
     {:public}
     {:quick exportOnly}
-    {:instruction mk_ins(make_instr(I.ins_AESNI_keygen_assist(imm), OReg128(dst), OReg128(src)))}
+    {:instruction mk_ins(make_instr(I.ins_AESNI_keygen_assist(imm), OReg(dst), OReg(src)))}
     requires aesni_enabled;
     modifies efl;
     ensures

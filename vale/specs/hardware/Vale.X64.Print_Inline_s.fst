@@ -112,7 +112,7 @@ let print_modified_registers
 (* This is a copy from X64.Print_s, and should remain in sync. The difference is that
    each line should be in quotes, and end by a semicolon in inline assembly *)
 let print_cmp (c:ocmp) (counter:int) (p:P.printer) : string =
-  let print_ops (o1:operand) (o2:operand) : string =
+  let print_ops (o1:operand64) (o2:operand64) : string =
     let first, second = p.P.op_order (P.print_operand o1 p) (P.print_operand o2 p) in
     "  cmp " ^ first ^ ", " ^ second ^ "\n"
   in

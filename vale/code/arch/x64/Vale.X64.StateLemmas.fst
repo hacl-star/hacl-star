@@ -73,11 +73,11 @@ let lemma_to_eval_xmm s x = ()
 #set-options "--max_ifuel 2 --initial_ifuel 2"
 let lemma_to_eval_operand128 s o =
   match o with
-  | OReg128 _ -> ()
-  | OMem128 (m, _) ->
+  | OConst _ | OReg _ -> ()
+  | OMem (m, _) ->
     let addr = eval_maddr m s in
     MS.equiv_load_mem128 addr s.mem
-  | OStack128 (m, _) -> ()
+  | OStack (m, _) -> ()
 
 #reset-options "--initial_fuel 2 --max_fuel 2"
 
