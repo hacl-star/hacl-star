@@ -1002,7 +1002,9 @@ let lemma_unchanged_at_combine (as1 as2:list access_location) (sa1 sa2 sb1 sb2:m
     (requires (
         !!(disjoint_access_locations as1 as2 "") /\
         (unchanged_at as1 sa1 sb2) /\
-        (unchanged_at as2 sa2 sb1)))
+        (unchanged_except as2 sa1 sb1) /\
+        (unchanged_at as2 sa2 sb1) /\
+        (unchanged_except as1 sa2 sb2)))
     (ensures (
         (unchanged_at (as1 `L.append` as2) sb1 sb2))) =
   admit ()
