@@ -53,6 +53,24 @@ let print_lbignum #aLen a =
   pop_frame ();
   admit()
 
+val print_verdict:
+     #aLen:bn_len
+  -> #bLen:bn_len
+  -> exp:lbignum aLen
+  -> got:lbignum bLen
+  -> r:bool
+  -> ST unit (requires fun h -> live h exp /\ live h got) (ensures fun h0 _ h1 -> h0 == h1)
+let print_verdict #aLen #bLen exp got r =
+  if r
+  then print_strln " * Success"
+  else begin
+    print_strln " * Failed";
+    print_str "  exp: ";
+    print_lbignum exp;
+    print_str "  got: ";
+    print_lbignum got
+  end
+
 val test_printing: unit -> St unit
 let test_printing _ =
   admit();
@@ -70,22 +88,25 @@ let test_printing _ =
 inline_for_extraction noextract
 val test_comp_gen:
      a:snat
-  -> b:snat{b <= a}
+  -> b:snat
   -> St unit
 let test_comp_gen a b =
+  push_frame();
   let less_exp = normalize_term (a < b) in
   let eq_exp = normalize_term (a = b) in
-
-  admit();
+  let greater_exp = normalize_term (a > b) in
 
   let bn_a: lbignum (nat_bytes_num a) = nat_to_bignum_exact a in
   let bn_b: lbignum (nat_bytes_num b) = nat_to_bignum_exact b in
 
   let less_res = bn_is_less bn_a bn_b in
   let eq_res = bn_is_equal bn_a bn_b in
+  let greater_res = bn_is_greater bn_a bn_b in
 
-  let res = (less_res = less_exp && eq_res = eq_exp) in
-  if res then print_strln " * Success" else print_strln " * Failed"
+
+  let res = (less_res = less_exp && eq_res = eq_exp && greater_res = greater_exp) in
+  if res then print_strln " * Success" else print_strln " * Failed";
+  pop_frame()
 
 inline_for_extraction noextract
 val test_eq_repr:
@@ -109,7 +130,7 @@ let test_eq_repr a =
   assert_norm (v bLen > 0);
   assert_norm (v aLen <= v bLen);
   let res = bn_is_equal bn_b bn_a in
-   if res then print_strln " * Success" else print_strln " * Failed";
+  if res then print_strln " * Success" else print_strln " * Failed";
   pop_frame()
 
 val test_comp: unit -> St unit
@@ -119,10 +140,13 @@ let test_comp _ =
 
   test_comp_gen 0 0;
   test_comp_gen 1 0;
+  test_comp_gen 0 1;
   test_comp_gen 12345 0;
+  test_comp_gen 0 12345;
   test_comp_gen 12345 12345;
-  test_comp_gen 18446744073709551618 18446744073709551618;
-  test_comp_gen 18446744073709551618 18446744073709551617;
+  test_comp_gen 100000000000000000000000 100000000000000000000000;
+  test_comp_gen 100000000000000000000000 100000000000000000000001;
+  test_comp_gen 100000000000000000000001 100000000000000000000000;
 
   C.String.print (C.String.of_literal "...leading zeroes tests:\n");
 
@@ -158,13 +182,7 @@ let test_add_gen a b =
   admit();
   bn_add_full bn_a bn_b bn_res;
   let res = bn_is_equal bn_c bn_res in
-  if res
-  then print_strln " * Success"
-  else begin
-    print_strln " * Failed";
-    print_lbignum bn_res;
-    print_lbignum bn_c
-  end;
+  print_verdict bn_c bn_res res;
   pop_frame()
 
 val test_add: unit -> St unit
@@ -216,13 +234,7 @@ let test_mult_gen a b =
 
   bn_mul bn_a bn_b bn_res;
   let res = bn_is_equal bn_c bn_res in
-  if res
-  then print_strln " * Success"
-  else begin
-    print_strln " * Failed";
-    print_lbignum bn_res;
-    print_lbignum bn_c
-  end;
+  print_verdict bn_c bn_res res;
   pop_frame()
 
 val test_mult: unit -> St unit
@@ -289,14 +301,8 @@ let test_lshift_gen a p =
 
   bn_lshift bn_a p' bn_res;
   let res = bn_is_equal bn_expected bn_res in
-  if res
-  then print_strln " * Success"
-  else begin
-    print_strln " * Failed";
-    print_lbignum bn_res;
-    print_lbignum bn_expected
-  end;
-  pop_frame()
+  print_verdict bn_expected bn_res res;
+  pop_frame ()
 
 val test_lshift: unit -> St unit
 let test_lshift _ =
@@ -347,13 +353,7 @@ let test_rshift1_gen a =
 
   bn_rshift1 bn_a bn_res;
   let res = bn_is_equal bn_expected bn_res in
-  if res
-  then print_strln " * Success"
-  else begin
-    print_strln " * Failed";
-    print_lbignum bn_res;
-    print_lbignum bn_expected
-  end;
+  print_verdict bn_expected bn_res res;
   pop_frame()
 
 val test_rshift1: unit -> St unit
@@ -400,13 +400,7 @@ let test_pow2_gen a p =
 
   bn_pow2_mod_n aBits bn_a p' bn_res;
   let res = bn_is_equal bn_expected bn_res in
-  if res
-  then print_strln " * Success"
-  else begin
-    print_strln " * Failed";
-    print_lbignum bn_res;
-    print_lbignum bn_expected
-  end;
+  print_verdict bn_expected bn_res res;
   pop_frame()
 
 val test_pow2: unit -> St unit
@@ -461,13 +455,7 @@ let test_mod_gen n a =
   assume (v xLen + 1 < max_size_t);
   bn_remainder bn_a bn_n bn_res;
   let res = bn_is_equal bn_expected bn_res in
-  if res
-  then print_strln " * Success"
-  else begin
-    print_strln " * Failed";
-    print_lbignum bn_res;
-    print_lbignum bn_expected
-  end;
+  print_verdict bn_expected bn_res res;
   pop_frame()
 
 val test_mod: unit -> St unit
@@ -478,7 +466,6 @@ let test_mod _ =
   test_mod_gen 3 0;
   test_mod_gen 3 1;
   test_mod_gen 3 2;
-  test_mod_gen 3 3;
   test_mod_gen 3 100;
   test_mod_gen 3 1024;
   test_mod_gen 3 511;
@@ -495,20 +482,27 @@ let test_mod _ =
   test_mod_gen 1000000000000000000000000 0;
   test_mod_gen 1000000000000000000000000 1;
   test_mod_gen 1000000000000000000000000 2;
-  test_mod_gen 1000000000000000000000000 3;
-  test_mod_gen 1000000000000000000000000 100;
   test_mod_gen 1000000000000000000000000 256;
-  test_mod_gen 1000000000000000000000000 511;
-  test_mod_gen 1000000000000000000000000 512;
-  test_mod_gen 1000000000000000000000000 513;
-  test_mod_gen 1000000000000000000000000 1024;
-  test_mod_gen 1000000000000000000000000 1000000;
   test_mod_gen 1000000000000000000000000
       10000001234912034981720349871029834701928374019823401;
 
+  // modulo 2^64-1
+  test_mod_gen 18446744073709551615 18446744073709551616;
+  test_mod_gen 18446744073709551615 18446744073709551617;
+  test_mod_gen 18446744073709551615 18446744073709551615;
+
+  // modulo 2^64
+  test_mod_gen 18446744073709551616 18446744073709551616;
+  test_mod_gen 18446744073709551616 18446744073709551617;
+  test_mod_gen 18446744073709551616 18446744073709551615;
+
+  // modulo 2^64+1
+  test_mod_gen 18446744073709551617 18446744073709551616;
+  test_mod_gen 18446744073709551617 18446744073709551617;
+  test_mod_gen 18446744073709551617 18446744073709551615;
+
 
   pop_frame ()
-
 
 
 inline_for_extraction noextract
@@ -542,13 +536,7 @@ let test_exp_gen n a b =
   admit();
   mod_exp_compact pow2_i bn_n bn_a bn_b bn_res;
   let res = bn_is_equal bn_expected bn_res in
-  if res
-  then print_strln " * Success"
-  else begin
-    print_strln " * Failed";
-    print_lbignum bn_res;
-    print_lbignum bn_expected
-  end;
+  print_verdict bn_expected bn_res res;
   pop_frame()
 
 

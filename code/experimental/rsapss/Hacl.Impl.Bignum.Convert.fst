@@ -144,10 +144,12 @@ let rec list64_sec_to_nat l = match l with
   | [x] -> v x
   | x::tl -> v x + list64_sec_to_nat tl * modulus U64
 
-/// Relatively "small" nats, which fit into 32 GB
+/// Relatively "small" nats, which fit into 512 Mb.
+/// Bignums of the related length satisfy bn_len_strict.
 let issnat (n:nat) =
-    List.Tot.length (nat_to_list64_sec n) <= max_size_t /\
-    normalize (List.Tot.length (nat_to_list64_sec n) <= max_size_t)
+    List.Tot.length (nat_to_list64_sec n) * 64 <= max_size_t /\
+    normalize (List.Tot.length (nat_to_list64_sec n) * 64 <= max_size_t)
+
 type snat = n:nat{issnat n}
 
 inline_for_extraction noextract
