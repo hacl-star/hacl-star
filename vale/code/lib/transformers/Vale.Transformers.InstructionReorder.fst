@@ -457,6 +457,8 @@ let lemma_eval_instr_equiv_states
     | HavocFlags -> {s2 with ms_flags = havoc_state_ins s2 (Instr it oprs ann)}
     | PreserveFlags -> s2
   in
+  assume (overflow s1_new.ms_flags == overflow s2_new.ms_flags); (* TODO FIXME *)
+  assume (cf s1_new.ms_flags == cf s2_new.ms_flags); (* TODO FIXME ; [havoc_state_ins] depends upon the entire ms_flags and thus we don't automatically get these working. We have to figure out some workaround for this. *)
   assert (equiv_states s1_new s2_new);
   let os1 = FStar.Option.mapTot (fun vs -> instr_write_outputs outs args vs oprs s1 s1_new) vs1 in
   let os2 = FStar.Option.mapTot (fun vs -> instr_write_outputs outs args vs oprs s2 s2_new) vs2 in
