@@ -52,9 +52,19 @@ module L = FStar.List.Tot
 ///
 /// This allows us to define read and write sets for instructions.
 ///
-/// TODO FIXME WARNING UNSOUND: We completely ignore [HavocFlags]
-/// here. Technically, we need to add both flags to the write sets
-/// whenever there is a flag havoc that happens.
+/// REVIEW: Any instruction with [HavocFlags] causes the flags to be
+///   part of the write set. Since we don't allow moving instructions
+///   past write boundaries which have commonalities, this means that
+///   any instruction which havocs the flags will not be allowed to
+///   move past another that does the same. We should think of a
+///   better way to handle this. One possibility is to tag "intent"
+///   into the flags, which means we should be able to move havocing
+///   instructions past other havocing instructions. This only fixes
+///   up the issue wrt havocs. Another issue might be that we might
+///   want to move groups of instructions together. The solution to
+///   that would be to group instructions together and move them as a
+///   single unit. This will still have the havoc problems, so we will
+///   likely need to place some sort of intention bits for the flags.
 
 type access_location =
   | ALoc64 : operand -> access_location
@@ -114,7 +124,11 @@ let rec aux_write_set
     access_location_of_implicit i :: aux_write_set outs args (coerce #(instr_operands_t outs args) oprs)
 
 let write_set (i:instr_t_record) (oprs:instr_operands_t i.outs i.args) : list access_location =
-  aux_write_set i.outs i.args oprs
+  let InstrTypeRecord #outs #args #havoc_flags _ = i in
+  let ws = aux_write_set outs args oprs in
+  match havoc_flags with
+  | HavocFlags -> ALocCf :: ALocOf :: ws
+  | PreserveFlags -> ws
 
 let rw_set_of_ins (i:ins) : rw_set =
   match i with
