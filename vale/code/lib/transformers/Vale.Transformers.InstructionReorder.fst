@@ -1192,7 +1192,9 @@ let lemma_equiv_states_when_except_none (s1 s2:machine_state) :
        admit ()
     ) <:
     (l:_) -> Lemma ((Map.sel s1.ms_mem l = Map.sel s2.ms_mem l) /\
-                    (Map.contains s1.ms_mem l = Map.contains s2.ms_mem l))
+                    (Map.contains s1.ms_mem l = Map.contains s2.ms_mem l) /\
+                    (Map.sel s1.ms_memTaint l = Map.sel s2.ms_memTaint l) /\
+                    (Map.contains s1.ms_memTaint l = Map.contains s2.ms_memTaint l))
   );
   assert (Map.equal s1.ms_mem s2.ms_mem);
   assert (s1.ms_mem == s2.ms_mem);
@@ -1203,13 +1205,17 @@ let lemma_equiv_states_when_except_none (s1 s2:machine_state) :
        admit ()
     ) <:
     (l:_) -> Lemma ((Map.sel s1.ms_stack.stack_mem l = Map.sel s2.ms_stack.stack_mem l) /\
-                    (Map.contains s1.ms_stack.stack_mem l = Map.contains s2.ms_stack.stack_mem l))
+                    (Map.contains s1.ms_stack.stack_mem l = Map.contains s2.ms_stack.stack_mem l) /\
+                    (Map.sel s1.ms_stackTaint l = Map.sel s2.ms_stackTaint l) /\
+                    (Map.contains s1.ms_stackTaint l = Map.contains s2.ms_stackTaint l))
   );
   assert (Map.equal s1.ms_stack.stack_mem s2.ms_stack.stack_mem);
   assume (s1.ms_stack.initial_rsp = s2.ms_stack.initial_rsp);
   assert (s1.ms_stack == s2.ms_stack);
-  assume (s1.ms_memTaint == s2.ms_memTaint);
-  assume (s1.ms_stackTaint == s2.ms_stackTaint);
+  assert (Map.equal s1.ms_memTaint s2.ms_memTaint);
+  assert (s1.ms_memTaint == s2.ms_memTaint);
+  assert (Map.equal s1.ms_stackTaint s2.ms_stackTaint);
+  assert (s1.ms_stackTaint == s2.ms_stackTaint);
   ()
 
 let lemma_commute (f1 f2:st unit) (r1 w1 r2 w2:list access_location) (s:machine_state) :
