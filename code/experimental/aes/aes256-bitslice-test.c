@@ -98,6 +98,7 @@ int main() {
 
   uint64_t ctx[(uint32_t)8U + (uint32_t)15U * (uint32_t)8U] = {0};
 
+/*
   Hacl_AES_256_BitSlice_aes256_init(ctx,test1_input_key1,comp);
 
   printf("AES-BitSlice key expansion computed:");
@@ -112,7 +113,7 @@ int main() {
   for (int i = 0; i < 960; i++)
     ok = ok & (test1_output_expanded[i] == ((uint8_t*)ctx)[64 + i]);
   if (ok) printf("Success!\n");
-
+*/
 
   Hacl_AES_256_BitSlice_aes256_init(ctx,k,comp);
   Hacl_AES_256_BitSlice_aes256_encrypt_block(comp,ctx,in);

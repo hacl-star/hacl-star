@@ -305,14 +305,15 @@ let rcon : b:ilbuffer uint8 11ul =
 inline_for_extraction
 val aes_keygen_assisti: rcon:uint8 -> i:shiftval U8 -> u:uint64 -> Tot uint64
 let aes_keygen_assisti rcon i u =
-  let n = (u &. u64 0xf000f000f000f000) >>. size 12 in
+  let u3 = u &. u64 0xf000f000f000f000 in
+  let n = u3 >>. size 12 in
   let n = ((n >>. size 1) |. (n <<. size 3)) &. u64  0x000f000f000f000f in
   let ri = to_u64 ((rcon >>. i) &. u8 1) in
   let ri = ri ^. (ri <<. size 16) in
   let ri = ri ^. (ri <<. size 32) in
   let n = n ^. ri in
   let n = n <<. size 12 in
-  n
+  n ^. (u3 >>. 4ul)
 
 
 val aes_keygen_assist:
