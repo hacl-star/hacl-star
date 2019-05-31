@@ -1031,7 +1031,56 @@ let lemma_equiv_states_when_except_none (s1 s2:machine_state) :
         (unchanged_except [] s1 s2)))
     (ensures (
         (equiv_states s1 s2))) =
-  admit ()
+  let open FStar.FunctionalExtensionality in
+  assert (s1.ms_ok == s2.ms_ok);
+  FStar.Classical.forall_intro (
+    (fun r ->
+       assert (eval_access_location (ALoc64 (OReg r)) s1 ==
+               eval_access_location (ALoc64 (OReg r)) s2) (* OBSERVE *)
+    ) <:
+    (r:_) -> Lemma (eval_reg r s1 = eval_reg r s2)
+  );
+  assert (feq s1.ms_regs s2.ms_regs);
+  assert (s1.ms_regs == s2.ms_regs);
+  FStar.Classical.forall_intro (
+    (fun r ->
+       assert (eval_access_location (ALoc128 (OReg128 r)) s1 ==
+               eval_access_location (ALoc128 (OReg128 r)) s2) (* OBSERVE *)
+    ) <:
+    (r:_) -> Lemma (eval_xmm r s1 = eval_xmm r s2)
+  );
+  assert (feq s1.ms_xmms s2.ms_xmms);
+  assert (s1.ms_xmms == s2.ms_xmms);
+  assert (eval_access_location ALocCf s1 == eval_access_location ALocCf s2); (* OBSERVE *)
+  assert (eval_access_location ALocOf s1 == eval_access_location ALocOf s2); (* OBSERVE *)
+  assert (cf s1.ms_flags = cf s2.ms_flags);
+  assert (overflow s1.ms_flags = overflow s2.ms_flags);
+  FStar.Classical.forall_intro (
+    (fun (l:int) ->
+       assert (eval_access_location (ALoc64 (OMem (MConst l, Public))) s1 ==
+               eval_access_location (ALoc64 (OMem (MConst l, Public))) s2); (* OBSERVE *)
+       admit ()
+    ) <:
+    (l:_) -> Lemma ((Map.sel s1.ms_mem l = Map.sel s2.ms_mem l) /\
+                    (Map.contains s1.ms_mem l = Map.contains s2.ms_mem l))
+  );
+  assert (Map.equal s1.ms_mem s2.ms_mem);
+  assert (s1.ms_mem == s2.ms_mem);
+  FStar.Classical.forall_intro (
+    (fun (l:int) ->
+       assert (eval_access_location (ALoc64 (OStack (MConst l, Public))) s1 ==
+               eval_access_location (ALoc64 (OStack (MConst l, Public))) s2); (* OBSERVE *)
+       admit ()
+    ) <:
+    (l:_) -> Lemma ((Map.sel s1.ms_stack.stack_mem l = Map.sel s2.ms_stack.stack_mem l) /\
+                    (Map.contains s1.ms_stack.stack_mem l = Map.contains s2.ms_stack.stack_mem l))
+  );
+  assert (Map.equal s1.ms_stack.stack_mem s2.ms_stack.stack_mem);
+  assume (s1.ms_stack.initial_rsp = s2.ms_stack.initial_rsp);
+  assert (s1.ms_stack == s2.ms_stack);
+  assume (s1.ms_memTaint == s2.ms_memTaint);
+  assume (s1.ms_stackTaint == s2.ms_stackTaint);
+  ()
 
 let lemma_commute (f1 f2:st unit) (r1 w1 r2 w2:list access_location) (s:machine_state) :
   Lemma
