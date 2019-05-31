@@ -1015,14 +1015,32 @@ let lemma_unchanged_except_same_transitive (as:list access_location) (s1 s2 s3:m
     (ensures (
         (unchanged_except as s1 s3))) = ()
 
-let lemma_unchanged_at_and_except (as:list access_location) (s1 s2:machine_state) :
+let rec lemma_unchanged_at_and_except (as:list access_location) (s1 s2:machine_state) :
   Lemma
     (requires (
         (unchanged_at as s1 s2) /\
         (unchanged_except as s1 s2)))
     (ensures (
         (unchanged_except [] s1 s2))) =
-  admit ()
+  match as with
+  | [] -> ()
+  | x :: xs ->
+    FStar.Classical.forall_intro ((fun a -> (
+          FStar.Classical.arrow_to_impl
+          #(!!(disjoint_access_location_from_locations a xs))
+          #(eval_access_location a s1 == eval_access_location a s2))
+          (fun _ ->
+             FStar.Classical.or_elim
+             #_ #_ #(fun () -> eval_access_location a s1 == eval_access_location a s2)
+               (fun (_:unit{!!(disjoint_access_location a x)}) -> ())
+               (fun (_:unit{not !!(disjoint_access_location a x)}) ->
+                  admit ())
+          )
+      ) <: (a:_) -> Lemma (
+        (!!(disjoint_access_location_from_locations a xs) ==>
+         (eval_access_location a s1 == eval_access_location a s2))
+      ));
+    lemma_unchanged_at_and_except xs s1 s2
 
 let lemma_equiv_states_when_except_none (s1 s2:machine_state) :
   Lemma
