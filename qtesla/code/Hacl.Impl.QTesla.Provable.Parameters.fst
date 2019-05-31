@@ -30,18 +30,22 @@ unfold let elem_to_int32 = int64_to_int32
 unfold let int32_to_elem = int32_to_int64
 unfold let elem_to_uint32 = int64_to_uint32
 unfold let uint32_to_elem = uint32_to_int64
-unfold let elem_to_int64 x = x
-unfold let int64_to_elem x = x
+unfold let elem_to_int64 (x:elem_base) : I64.t = x
+unfold let int64_to_elem (x:I64.t) : elem_base = x
 unfold let elem_to_uint64 = int64_to_uint64
 unfold let uint64_to_elem = uint64_to_int64
 unfold let elem_to_uelem = int64_to_uint64
+unfold let uelem_to_elem = uint64_to_int64
 
+unfold let uelem_sl = UI64.shift_left
 unfold let uelem_sr = UI64.shift_right
 unfold let uelem_or = UI64.logor
 
 unfold let sparse_elem = I8.t
+unfold let sparse_n = I8.n
 unfold let to_sparse_elem = I8.int_to_t
 unfold let sparse_to_int16 = int8_to_int16
+unfold let sparse_v = I8.v
 
 unfold let op_Plus_Hat = IElem.op_Plus_Hat
 unfold let op_Subtraction_Hat = IElem.op_Subtraction_Hat
@@ -53,6 +57,7 @@ unfold let op_Amp_Hat = IElem.op_Amp_Hat
 unfold let op_Bar_Hat = IElem.op_Bar_Hat
 unfold let op_Less_Less_Hat = IElem.op_Less_Less_Hat
 unfold let op_Greater_Greater_Hat = IElem.op_Greater_Greater_Hat
+unfold let op_Greater_Greater_Greater_Hat = IElem.op_Greater_Greater_Greater_Hat
 unfold let op_Equals_Hat = IElem.op_Equals_Hat
 unfold let op_Greater_Hat = IElem.op_Greater_Hat
 unfold let op_Greater_Equals_Hat = IElem.op_Greater_Equals_Hat

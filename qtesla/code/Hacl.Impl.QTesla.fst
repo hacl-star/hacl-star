@@ -50,7 +50,7 @@ module R    = Hacl.QTesla.Random
 
 private let _RADIX32 = size params_radix32
 
-private let lemma_abs_by_mask (mask:I32.t{mask == 0l \/ mask == (-1l)}) (value:I32.t) : Lemma
+(*private let lemma_abs_by_mask (mask:I32.t{mask == 0l \/ mask == (-1l)}) (value:I32.t) : Lemma
     (requires FStar.Int.fits (I32.v (I32.(mask ^^ value)) - I32.v mask) I32.n /\
               ((mask == 0l) <==> (I32.v value >= 0)) /\
               ((mask == (-1l)) <==> (I32.v value < 0)))
@@ -67,7 +67,7 @@ private let lemma_abs_by_mask (mask:I32.t{mask == 0l \/ mask == (-1l)}) (value:I
     assert((mask == 0l) ==> ( (mask ^^ value) == value ));
     assert((mask == 0l) ==> ( value -^ mask == value ));
     assert((mask == (-1l)) ==> ( (mask ^^ value) == (-1l) *^ value -^ 1l ));
-    assert((mask == (-1l)) ==> ( ((-1l) *^ value -^ 1l) -^ mask == (-1l) *^ value ))
+    assert((mask == (-1l)) ==> ( ((-1l) *^ value -^ 1l) -^ mask == (-1l) *^ value ))*)
 
     //assume(mask == 0l \/ mask == (-1l));
     //assume(FStar.Int.fits (elem_v (mask ^^ value) - elem_v mask) I32.n);
@@ -87,9 +87,9 @@ private let lemma_abs_by_mask (mask:I32.t{mask == 0l \/ mask == (-1l)}) (value:I
 // it's important to do this. In one case the return value is compared against a quantity that isn't even close
 // to exceeding the maximum value of a signed int32, much less an int64, and in all other cases ends up getting
 // immediately cast back into a signed type.
-val abs_: value: I32.t -> Tot (x:I32.t{I32.v x == FStar.Math.Lib.abs (I32.v value)})
-let abs_ value = 
-    assert_norm(v (_RADIX32 -. size 1) < I32.n);
+val abs_: value: I32.t{Int.min_int I32.n < I32.v value} -> Tot (x:I32.t{I32.v x == FStar.Math.Lib.abs (I32.v value)})
+let abs_ value = I32.ct_abs value
+(*    assert_norm(v (_RADIX32 -. size 1) < I32.n);
     let mask = I32.(value >>^ (_RADIX32 -. size 1)) in
     lemma_int32_sar_n_minus_1 value;
     assert_norm(I32.n - 1 == v (_RADIX32 -. size 1));
@@ -97,7 +97,7 @@ let abs_ value =
     assert((I32.v value >= 0) ==> (mask == 0l));
     assert((I32.v value < 0) ==> (mask == (-1l)));
     lemma_abs_by_mask mask value;
-    I32.((mask ^^ value) -^ mask)
+    I32.((mask ^^ value) -^ mask)*)
 
 private unfold let check_ES_list_bound (h:HS.mem) (list: lbuffer I32.t params_n) (i:nat{i < v params_n}) =
     let e = I32.v (bget h list i) in e >= 0 /\ e <= pow2 (v params_s_bits - 1) 
@@ -105,6 +105,28 @@ private unfold let check_ES_list_bound (h:HS.mem) (list: lbuffer I32.t params_n)
 // {:pattern check_ES_list_bound h list i}
 private unfold let check_ES_list_bound_buffer (h:HS.mem) (list: lbuffer I32.t params_n) =
     forall i. check_ES_list_bound h list i
+
+// Shamelessly copied from FStar.Int32.ct_abs
+private let lemma_mask (a:I32.t) (mask:I32.t) : Lemma
+    (requires mask == I32.(a >>>^ UInt32.uint_to_t (n - 1)))
+    (ensures ((0 <= I32.v a) ==> (mask == 0l)) /\
+             ((0 > I32.v a) ==> (mask == (-1l)))) =
+      let v = I32.v in
+      if 0 <= v a then
+        begin
+        Int.sign_bit_positive (v a);
+        Int.nth_lemma (v mask) (Int.zero _);
+        Int.logxor_lemma_1 (v a)
+        end
+      else
+        begin
+        Int.sign_bit_negative (v a);
+        Int.nth_lemma (v mask) (Int.ones _);
+        Int.logxor_lemma_2 (v a);
+        Int.lognot_negative (v a);
+        UInt.lemma_lognot_value #I32.n (Int.to_uint (v a))
+        end
+    
 
 private inline_for_extraction noextract
 let check_ES_ordered_exchange_ct (list: lbuffer I32.t params_n) (i: size_t{v i + 1 < v params_n}) : Stack unit
@@ -115,6 +137,7 @@ let check_ES_ordered_exchange_ct (list: lbuffer I32.t params_n) (i: size_t{v i +
     [@inline_let] let op_Plus_Hat = I32.op_Plus_Hat in
     [@inline_let] let op_Subtraction_Hat = I32.op_Subtraction_Hat in
     [@inline_let] let op_Greater_Greater_Hat = I32.op_Greater_Greater_Hat in
+    [@inline_let] let op_Greater_Greater_Greater_Hat = I32.op_Greater_Greater_Greater_Hat in
     [@inline_let] let op_Amp_Hat = I32.op_Amp_Hat in
     [@inline_let] let op_Bar_Hat = I32.op_Bar_Hat in
     [@inline_let] let lognot = I32.lognot in
@@ -138,8 +161,9 @@ let check_ES_ordered_exchange_ct (list: lbuffer I32.t params_n) (i: size_t{v i +
     // 
     // Similarly for list[i+1] >= list[i], mask is 0, and so the quantities ANDed with ~mask instead survive
     // and each element is reassigned its own value and nothing changes.
-    let mask = ((list.(i +. size 1)) -^ (list.(i))) >>^ (_RADIX32 -. size 1) in
-    lemma_int32_sar_n_minus_1 ((bget h3 list (v i + 1)) -^ (bget h3 list (v i)));
+    let a = ((list.(i +. size 1)) -^ (list.(i))) in
+    let mask = a >>>^ (_RADIX32 -. size 1) in
+    lemma_mask a mask;  
     let temp = ((list.(i +. size 1)) &^ mask) |^
                           ((list.(i)) &^ (lognot mask)) in
     list.(i +. size 1) <- (list.(i)) &^ mask |^
@@ -530,6 +554,7 @@ let qtesla_keygen_ randomness pk sk =
   let nonce = create (size 1) (u32 0) in
   params_SHAKE crypto_randombytes randomness randomness_extended_size randomness_extended;
   let h0 = ST.get () in
+  assert(modifies0 h0 h0);
   for (size 0) params_k
       (fun h _ -> live h nonce /\ live h e /\ live h randomness_extended /\ modifies2 nonce e h0 h)
       (fun k ->
@@ -542,6 +567,7 @@ let qtesla_keygen_ randomness pk sk =
           )
       ); 
   let h1 = ST.get () in
+  assert(modifies2 nonce e h0 h1);
   do_while
       (fun h stop -> live h s /\ live h randomness_extended /\ live h nonce /\ modifies2 nonce s h1 h)
       (fun _ ->
@@ -549,12 +575,14 @@ let qtesla_keygen_ randomness pk sk =
         not (check_ES s params_Ls)
       ); 
   let h2 = ST.get () in
+  assert(modifies3 nonce e s h0 h2);
   let rndsubbuffer = sub randomness_extended ((params_k +. (size 1)) *. crypto_seedbytes) (size 2 *. crypto_seedbytes) in
   poly_uniform a (sub rndsubbuffer (size 0) crypto_randombytes);
   let h3 = ST.get () in
-
+  assert(modifies4 nonce e s a h0 h3); 
   poly_ntt s_ntt s;
   let h4 = ST.get () in
+  assert(modifies (loc nonce |+| loc e |+| loc s |+| loc a |+| loc s_ntt) h0 h4);
   C.Loops.for (size 0) params_k
       (fun h _ -> live h t /\ live h a /\ live h s_ntt /\ live h e /\ modifies1 t h4 h)
       (fun k ->
@@ -566,14 +594,18 @@ let qtesla_keygen_ randomness pk sk =
         );
 
   let h5 = ST.get () in
+  assert(modifies (loc nonce |+| loc e |+| loc s |+| loc a |+| loc s_ntt |+| loc t) h0 h5);
   encode_or_pack_sk sk s e rndsubbuffer;
   let h6 = ST.get () in
+  assert(modifies (loc nonce |+| loc e |+| loc s |+| loc a |+| loc s_ntt |+| loc t |+| loc sk) h0 h6);
+  assume(is_poly_k_pk h6 t);
   encode_pk pk t (sub rndsubbuffer (size 0) crypto_seedbytes);
   let h7 = ST.get () in
+  assert(modifies (loc nonce |+| loc e |+| loc s |+| loc a |+| loc s_ntt |+| loc t |+| loc sk |+| loc pk) h0 h7);
   pop_frame();
   0l
 
-#reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0"
+#reset-options "--z3rlimit 100 --max_fuel 1 --max_ifuel 1"
 
 val qtesla_keygen:
     pk: lbuffer uint8 crypto_publickeybytes
@@ -592,125 +624,277 @@ let qtesla_keygen pk sk =
     pop_frame();
     r
 
+private let nblocks_shake = shake_rate /. (((params_b_bits +. (size 1)) +. (size 7)) /. (size 8))
+private let bplus1bytes = ((params_b_bits +. size 1) +. (size 7)) /. (size 8)
+
+private inline_for_extraction noextract
+val sample_y_while_body:
+    y : poly
+  -> seed : lbuffer uint8 crypto_randombytes
+  -> nblocks : lbuffer size_t (size 1)
+  -> buf : lbuffer uint8 (params_n *. bplus1bytes)
+  -> dmsp : lbuffer uint16 (size 1)
+  -> pos : lbuffer size_t (size 1)
+  -> i : lbuffer size_t (size 1)
+  -> Stack unit
+    (requires fun h -> let bufs = [bb y; bb seed; bb nblocks; bb buf; bb dmsp; bb pos; bb i] in
+                    FStar.BigOps.big_and (live_buf h) bufs /\ FStar.BigOps.pairwise_and disjoint_buf bufs /\
+                    (v (bget h nblocks 0) == v params_n \/ v (bget h nblocks 0) == v nblocks_shake) /\
+                    v (bget h i 0) < v params_n /\
+                    (v (bget h pos 0) + numbytes U32 <= v params_n * v bplus1bytes \/ v (bget h pos 0) >= v params_n * v bplus1bytes)) 
+    (ensures fun h0 _ h1 -> modifies (loc y |+| loc nblocks |+| loc buf |+| loc dmsp |+| loc pos |+| loc i) h0 h1 /\
+                         (v (bget h1 i 0) == v (bget h0 i 0) \/ v (bget h1 i 0) == v (bget h0 i 0) + 1) /\
+                         (v (bget h1 nblocks 0) == v params_n \/ v (bget h1 nblocks 0) == v nblocks_shake) /\
+
+                         (v (bget h1 pos 0) + numbytes U32 <= v params_n * v bplus1bytes \/ v (bget h1 pos 0) >= v params_n * v bplus1bytes))
+    
+//                         is_poly_y_sampler_output_i h1 y (v (bget h1 i 0)))
+
+let sample_y_while_body y seed nblocks buf dmsp pos i =
+    let nbytes = bplus1bytes in
+    let h = ST.get () in
+    if pos.(size 0) >=. nblocks.(size 0) *. nbytes
+    then (
+        nblocks.(size 0) <- nblocks_shake;
+        params_cSHAKE crypto_randombytes seed dmsp.(size 0) shake_rate (sub buf (size 0) shake_rate);
+        dmsp.(size 0) <- dmsp.(size 0) +. u16 1;
+        pos.(size 0) <- size 0
+    ) else ();
+
+    let h0 = ST.get () in
+    assert(v (bget h0 pos 0) + numbytes U32 <= v params_n * v bplus1bytes);
+
+    let pos0 = pos.(size 0) in
+    //assume(v pos0 + numbytes U32 <= v (params_n *. bplus1bytes));
+    let subbuff = sub buf pos0 (size (numbytes U32)) in
+    let bufPosAsU32 = uint_from_bytes_le #U32 #_ subbuff in
+    let bufPosAsElem = uint32_to_elem (Lib.RawIntTypes.u32_to_UInt32 bufPosAsU32) in
+    let i0 = i.(size 0) in
+    // Heuristic parameter sets do four at once. Perf. But optional.
+    let h1 = ST.get () in
+    assume(FStar.Int.fits (elem_v (to_elem 1 <<^ (params_b_bits +. size 1)) - 1) elem_n);
+    assume(is_elem (bufPosAsElem &^ ((to_elem 1 <<^ (params_b_bits +. size 1)) -^ to_elem 1)));
+    y.(i0) <- bufPosAsElem &^ ((to_elem 1 <<^ (params_b_bits +. size 1)) -^ to_elem 1);
+    let h2 = ST.get () in
+    assume(is_elem ((bget h2 y (v i0)) -^ params_B));
+    y.(i0) <- y.(i0) -^ params_B;
+    if y.(i0) <> (to_elem 1 <<^ params_b_bits)
+    then ( i.(size 0) <- i0 +. size 1 )
+    else ();
+    pos.(size 0) <- pos.(size 0) +. nbytes;
+    let hFinal = ST.get () in
+    assume(v (bget hFinal pos 0) + numbytes U32 <= v params_n * v bplus1bytes \/ v (bget hFinal pos 0) >= v params_n * v bplus1bytes)
+
 val sample_y:
     y : poly
   -> seed : lbuffer uint8 crypto_randombytes
-  -> nonce: I32.t
+  -> nonce: I32.t{I32.v nonce > 0} // Although signed, it starts at zero and only increases
   -> Stack unit
     (requires fun h -> live h y /\ live h seed /\ disjoint y seed)
-    (ensures fun h0 _ h1 -> modifies1 y h0 h1)
+    (ensures fun h0 _ h1 -> modifies1 y h0 h1)// /\ is_poly_y_sampler_output h1 y)
 
-let sample_y y seed nonce =
+let sample_y y seed nonce = 
     push_frame();
-
-    let nblocks_shake = shake_rate /. (((params_b_bits +. (size 1)) +. (size 7)) /. (size 8)) in
-    let bplus1bytes = ((params_b_bits +. size 1) +. (size 7)) /. (size 8) in
 
     let i = create (size 1) (size 0) in
     let pos = create (size 1) (size 0) in
     let nblocks = create (size 1) params_n in
-    let buf = create (params_n *. bplus1bytes ) (u8 0) in
+    let buf = create (params_n *. bplus1bytes) (u8 0) in
     let nbytes = bplus1bytes in
     [@inline_let] let dmspVal:uint16 = cast U16 SEC (Lib.RawIntTypes.u16_from_UInt16 (int32_to_uint16 I32.(nonce <<^ 8ul))) in
     let dmsp = create (size 1) dmspVal in
 
     params_cSHAKE crypto_randombytes seed dmsp.(size 0) (params_n *. nbytes) buf;
     let hInit = ST.get () in
-    //assume(v (bget hInit dmsp 0) < pow2 ((bits U16) - 1));
     dmsp.(size 0) <- dmsp.(size 0) +. u16 1;
 
     let h0 = ST.get () in
+    assert(v (bget h0 pos 0) < v params_n * v bplus1bytes);
     LL.while
     (fun h -> live h y /\ live h i /\ live h pos /\ live h nblocks /\ live h buf /\ live h dmsp /\
-           modifies (loc y |+| loc i |+| loc pos |+| loc nblocks |+| loc buf |+| loc dmsp) h0 h)
+           modifies (loc y |+| loc i |+| loc pos |+| loc nblocks |+| loc buf |+| loc dmsp) h0 h /\
+           (v (bget h nblocks 0) == v params_n \/ v (bget h nblocks 0) == v nblocks_shake) /\
+           (v (bget h pos 0) + numbytes U32 <= v params_n * v bplus1bytes \/ v (bget h pos 0) >= v params_n * v bplus1bytes))
     (fun h -> v (bget h i 0) < v params_n)
     (fun _ -> i.(size 0) <. params_n)
     (fun _ ->
-        if pos.(size 0) >=. nblocks.(size 0) *. nbytes
-	then (
-	    nblocks.(size 0) <- nblocks_shake;
-	    params_cSHAKE crypto_randombytes seed dmsp.(size 0) shake_rate (sub buf (size 0) shake_rate);
-            //assume(v (bget hInit dmsp 0) < pow2 ((bits U16) - 1));
-	    dmsp.(size 0) <- dmsp.(size 0) +. u16 1;
-	    pos.(size 0) <- size 0
-	) else ();
-
-        let pos0 = pos.(size 0) in
-        assume(v pos0 + numbytes U32 <= v (params_n *. bplus1bytes));
-	let subbuff = sub buf pos0 (size (numbytes U32)) in
-	let bufPosAsU32 = uint_from_bytes_le #U32 #_ subbuff in
-	let bufPosAsElem = uint32_to_elem (Lib.RawIntTypes.u32_to_UInt32 bufPosAsU32) in
-	let i0 = i.(size 0) in
-	// Heuristic parameter sets do four at once. Perf. But optional.
-        let h1 = ST.get () in
-        assume(FStar.Int.fits (elem_v (to_elem 1 <<^ (params_b_bits +. size 1)) - 1) elem_n);
-        assume(is_elem (bufPosAsElem &^ ((to_elem 1 <<^ (params_b_bits +. size 1)) -^ to_elem 1)));
-	y.(i0) <- bufPosAsElem &^ ((to_elem 1 <<^ (params_b_bits +. size 1)) -^ to_elem 1);
-        let h2 = ST.get () in
-        assume(is_elem ((bget h2 y (v i0)) -^ params_B));
-	y.(i0) <- y.(i0) -^ params_B;
-	if y.(i0) <> (to_elem 1 <<^ params_b_bits)
-	then ( i.(size 0) <- i0 +. size 1 )
-	else ();
-	pos.(size 0) <- pos.(size 0) +. nbytes
+        sample_y_while_body y seed nblocks buf dmsp pos i
     );
 
     pop_frame()
-    
+
+private inline_for_extraction noextract
+val hash_H_inner_for:
+    v_ : poly_k
+  -> t : lbuffer uint8 (params_k *. params_n +. crypto_hmbytes)
+  -> index : size_t{v index < v params_n * v params_k}
+  -> Stack unit
+    (requires fun h -> live h v_ /\ live h t /\ disjoint v_ t /\ is_poly_k_corrected h v_)
+    (ensures fun h0 _ h1 -> modifies1 t h0 h1 /\ is_poly_k_corrected h1 v_)
+
+//#reset-options "--log_queries --print_z3_statistics --using_facts_from '* -FStar.BitVector'"
+
+//let test _ = assert(FStar.Int.fits (I32.v (1l <<^ params_d_ui32) - 1) I32.n)
+
+module S = QTesla.Params
+
+let hash_H_inner_for v_ t index =
+    let hInit = ST.get () in 
+    assert(is_poly_k_corrected hInit v_);
+    assert(is_corrected (bget hInit v_ (v index)));
+    let vindex:elem = v_.(index) in
+    assert(is_corrected vindex);
+    let temp:I32.t = elem_to_int32 vindex in
+    assert_norm(v (_RADIX32 -. size 1) < I32.n);
+    let mask = I32.((params_q /^ 2l -^ temp) >>>^ (_RADIX32 -. size 1)) in
+    let temp = I32.(((temp -^ params_q) &^ mask) |^ (temp &^ (lognot mask))) in
+    assert_norm(FStar.Int.fits (I32.v (1l <<^ params_d)) I32.n); 
+    Int.shift_left_value_lemma (I32.v 1l) (v params_d);
+    assert_norm(pow2 (v params_d) > 0);
+    assert_norm(pow2 S.params_d < pow2 (I32.n - 1));
+    assert_norm(pow2 (v params_d) < pow2 (I32.n - 1));
+    assert(I32.v (1l <<^ params_d) == pow2 (v params_d));
+    assert(FStar.Int.fits (I32.v (1l <<^ params_d) - 1) I32.n);
+    let cL = I32.(temp &^ ((1l <<^ params_d) -^ 1l)) in
+    assert_norm(v (params_d -. size 1) < I32.n);
+    //Int.logand_pos_le (I32.v temp) (I32.v ((1l <<^ params_d) -^ 1l));
+    Int.sign_bit_positive (I32.v cL);
+    assert(I32.v cL >= 0);
+    let mask = I32.(((1l <<^ (params_d -. (size 1))) -^ cL) >>>^ (_RADIX32 -. size 1)) in
+    let cL = I32.(((cL -^ (1l <<^ params_d)) &^ mask) |^ (cL &^ (lognot mask))) in
+    assume(FStar.Int.fits (I32.v temp - I32.v cL) I32.n);
+    //assume(I32.v temp >= -(S.params_q / 2) /\ I32.v temp <= S.params_q / 2);
+    //assume(I32.v cL >= 0 /\ I32.v cL <= pow2 S.params_d);
+    t.(index) <- Lib.RawIntTypes.u8_from_UInt8 (int32_to_uint8 I32.((temp -^ cL) >>>^ params_d));
+    let hFinal = ST.get () in 
+    assert(forall (j:nat{j < v params_n * v params_k}) . {:pattern bget hFinal v_ j} bget hInit v_ j == bget hFinal v_ j);
+    assert(is_poly_k_corrected hFinal v_)
+
+private inline_for_extraction noextract
+val hash_H_outer_for:
+    v_ : poly_k
+  -> t : lbuffer uint8 (params_k *. params_n +. crypto_hmbytes)
+  -> k : size_t{v k < v params_k}
+  -> Stack unit
+    (requires fun h -> live h v_ /\ live h t /\ disjoint v_ t /\ is_poly_k_corrected h v_)
+    (ensures fun h0 _ h1 -> modifies1 t h0 h1 /\ is_poly_k_corrected h1 v_)
+
+let hash_H_outer_for v_ t k =
+    let h1 = ST.get () in
+    for 0ul params_n
+    (fun h i -> live h v_ /\ live h t /\ modifies1 t h1 h /\ is_poly_k_corrected h v_)
+    (fun i ->
+        hash_H_inner_for v_ t (k *. params_n +. i)
+    )
+
 val hash_H:
     c_bin : lbuffer uint8 crypto_c_bytes
-  -> v : poly_k
+  -> v_ : poly_k
   -> hm : lbuffer uint8 crypto_hmbytes
   -> Stack unit
-    (requires fun h -> live h c_bin /\ live h v /\ live h hm /\ disjoint c_bin v /\ disjoint c_bin hm /\ disjoint v hm)
+    (requires fun h -> live h c_bin /\ live h v_ /\ live h hm /\ disjoint c_bin v_ /\ disjoint c_bin hm /\ disjoint v_ hm /\
+                    is_poly_k_corrected h v_)
     (ensures fun h0 _ h1 -> modifies1 c_bin h0 h1)
 
-#reset-options "--admit_smt_queries true"
+#reset-options "--z3rlimit 400 --max_fuel 1 --max_ifuel 1"
 
 let hash_H c_bin v_ hm =
+    let hInit = ST.get () in
     push_frame();
+    let hFrame = ST.get () in 
+    assert(forall (j:nat{j < v params_n * v params_k}) . {:pattern bget hFrame v_ j} bget hInit v_ j == bget hFrame v_ j);
+    assert(is_poly_k_corrected hFrame v_);
 
     [@inline_let] let params_q = elem_to_int32 params_q in
     let t = create (params_k *. params_n +. crypto_hmbytes) (u8 0) in
 
     let h0 = ST.get () in
+    //assert(Seq.equal (as_seq hInit v_) (as_seq hFrame v_));
+    //assert(Seq.equal (as_seq hFrame v_) (as_seq h0 v_));
+    //assert(Seq.equal (as_seq hInit v_) (as_seq h0 v_));
+    assert(forall (j:nat{j < v params_n * v params_k}) . {:pattern bget h0 v_ j} bget hInit v_ j == bget h0 v_ j);
+    assert(is_poly_k_corrected h0 v_);
     for 0ul params_k
-    (fun h _ -> live h v_ /\ live h t /\ modifies1 t h0 h)
+    (fun h _ -> live h v_ /\ live h t /\ modifies1 t h0 h /\ is_poly_k_corrected h v_)
     (fun k ->
-        push_frame();
-        let index = create (size 1) (k *. params_n) in
-        let h1 = ST.get () in
-	for 0ul params_n
-	(fun h i -> live h v_ /\ live h t /\ live h index /\ modifies2 t index h1 h) ///\ 
-                 //(i < v params_n ==> v (bget h index 0) < v (k *. params_n +. params_n)))
-	(fun i ->
-	    let vindex:elem = v_.(index.(size 0)) in
-	    let temp:I32.t = elem_to_int32 vindex in
-            assert_norm(v (_RADIX32 -. size 1) < I32.n);
-	    let mask = I32.((params_q /^ 2l -^ temp) >>^ (_RADIX32 -. size 1)) in
-	    let temp = I32.(((temp -^ params_q) &^ mask) |^ (temp &^ (lognot mask))) in
-            assume(FStar.Int.fits (I32.v (1l <<^ params_d) - 1) I32.n);
-	    let cL = I32.(temp &^ ((1l <<^ params_d) -^ 1l)) in
-            assert_norm(v (params_d -. size 1) < I32.n);
-            assume(FStar.Int.fits (I32.v ((1l <<^ (params_d -. (size 1)))) - I32.v cL) I32.n);
-	    let mask = I32.(((1l <<^ (params_d -. (size 1))) -^ cL) >>^ (_RADIX32 -. size 1)) in
-            assume(FStar.Int.fits (I32.v cL - (I32.v (1l <<^ params_d))) I32.n);
-	    let cL = I32.(((cL -^ (1l <<^ params_d)) &^ mask) |^ (cL &^ (lognot mask))) in
-            assume(FStar.Int.fits (I32.v temp - I32.v cL) I32.n);
-	    t.(index.(size 0)) <- Lib.RawIntTypes.u8_from_UInt8 (int32_to_uint8 I32.((temp -^ cL) >>^ params_d));
-	    // Putting (index.(size 0)) inline in the assignment causes a typing error for some reason.
-	    // Opened a bug on this.
-	    let indexVal:size_t = index.(size 0) in
-            assume(v indexVal + 1 < v (k *. params_n +. params_n));
-	    index.(size 0) <- indexVal +. (size 1)
-	);
-        pop_frame()
+        hash_H_outer_for v_ t k
     );
 
     update_sub #MUT #_ #_ t (params_k *. params_n) crypto_hmbytes hm;
     params_SHAKE (params_k *. params_n +. crypto_hmbytes) t crypto_c_bytes c_bin;
 
     pop_frame()
+
+private let encode_c_invariant (h:HS.mem) (pos_list : lbuffer UI32.t params_h) (sign_list : lbuffer I16.t params_h) (i : size_t) = 
+    forall (j:nat{j < v i /\ j < v params_h}) . 
+        v (bget h pos_list j) < v params_n /\
+        (bget h sign_list j == (-1s) \/ bget h sign_list j == 0s \/ bget h sign_list j == 1s)
+
+private inline_for_extraction noextract
+val encode_c_while_body:
+    pos_list : lbuffer UI32.t params_h
+  -> sign_list : lbuffer I16.t params_h
+  -> c_bin : lbuffer uint8 crypto_c_bytes
+  -> c : lbuffer I16.t params_n
+  -> r : lbuffer uint8 shake_rate
+  -> dmsp : lbuffer uint16 (size 1)
+  -> cnt : lbuffer size_t (size 1)
+  -> i : lbuffer size_t (size 1)
+  -> Stack unit
+    (requires fun h -> let bufs = [bb pos_list; bb sign_list; bb c_bin; bb c; bb r; bb dmsp; bb cnt; bb i] in
+                    FStar.BigOps.big_and (live_buf h) bufs /\ FStar.BigOps.pairwise_and disjoint_buf bufs /\
+                    v (bget h i 0) < v params_h /\
+                    encode_c_invariant h pos_list sign_list (bget h i 0))
+    (ensures fun h0 _ h1 -> modifies (loc pos_list |+| loc sign_list |+| loc c |+| loc r |+| loc dmsp |+| loc cnt |+| loc i) h0 h1 /\
+                         encode_c_invariant h1 pos_list sign_list (bget h1 i 0))
+
+let encode_c_while_body pos_list sign_list c_bin c r dmsp cnt i =
+    let h0 = ST.get () in
+    assert(encode_c_invariant h0 pos_list sign_list (bget h0 i 0));
+    
+    let iVal:size_t = i.(size 0) in
+    if cnt.(size 0) >. (shake128_rate -. (size 3))
+    then ( cshake128_qtesla crypto_randombytes c_bin (dmsp.(size 0)) shake128_rate r;
+           dmsp.(size 0) <- dmsp.(size 0) +. (u16 1);
+           cnt.(size 0) <- size 0
+         )
+    else ();
+
+    let cntVal:size_t = cnt.(size 0) in
+    let rCntVal:uint8 = r.(cntVal) in
+    [@inline_let] let rCntVal:size_t = unsafe_declassify (cast U32 SEC rCntVal) in
+    let rCntVal1:uint8 = r.(cntVal +. size 1) in
+    [@inline_let] let rCntVal1:size_t = unsafe_declassify (cast U32 SEC rCntVal1) in
+    let pos:size_t = (rCntVal <<. size 8) |. rCntVal1 in
+    //assert(v pos >= 0);
+    //Int.logand_pos_le #(numbytes U32) (v pos) (v (params_n -. size 1));
+    let pos:size_t = pos &. (params_n -. (size 1)) in
+
+    assume(v pos < v params_n);
+
+    let h1 = ST.get () in
+    assert(forall (j:nat{j < v params_h}) . {:pattern bget h1 pos_list j} bget h0 pos_list j == bget h1 pos_list j);
+    assert(forall (j:nat{j < v params_h}) . {:pattern bget h1 sign_list j} bget h0 sign_list j == bget h1 sign_list j);
+    assert(bget h0 i 0 == bget h1 i 0);
+    assert(encode_c_invariant h1 pos_list sign_list (bget h1 i 0)); 
+    
+    if (c.(pos)) = 0s
+    then ( let rCntVal2:uint8 = r.(cntVal +. size 2) in
+           [@inline_let] let rCntVal2:UI8.t = Lib.RawIntTypes.u8_to_UInt8 rCntVal2 in
+           if UI8.((rCntVal2 &^ 1uy) = 1uy)
+           then c.(pos) <- -1s
+           else c.(pos) <- 1s;
+           pos_list.(iVal) <- pos;
+           sign_list.(iVal) <- c.(pos);
+           i.(size 0) <- iVal +. (size 1)
+         )
+    else ();
+    cnt.(size 0) <- cntVal +. (size 3);
+
+    let h2 = ST.get () in
+    assert(forall (j:nat{j < v params_h /\ j <> v iVal}) . {:pattern bget h2 pos_list j} bget h1 pos_list j == bget h2 pos_list j);
+    assert(forall (j:nat{j < v params_h /\ j <> v iVal}) . {:pattern bget h2 sign_list j} bget h1 sign_list j == bget h2 sign_list j);
+    assert(encode_c_invariant h2 pos_list sign_list (bget h2 i 0))
 
 val encode_c:
     pos_list : lbuffer UI32.t params_h
@@ -719,9 +903,9 @@ val encode_c:
   -> Stack unit
     (requires fun h -> live h pos_list /\ live h sign_list /\ live h c_bin /\ disjoint pos_list sign_list /\
                     disjoint pos_list c_bin /\ disjoint sign_list c_bin)
-    (ensures fun h0 _ h1 -> modifies2 pos_list sign_list h0 h1)
+    (ensures fun h0 _ h1 -> modifies2 pos_list sign_list h0 h1 /\ encode_c_invariant h1 pos_list sign_list params_h)
 
-//#reset-options "--z3rlimit 300 --max_fuel 0 --max_ifuel 0"
+#reset-options "--z3rlimit 300 --max_fuel 0 --max_ifuel 0"
 
 // This function looks identical between the I and p-III sets.
 let encode_c pos_list sign_list c_bin =
@@ -737,47 +921,29 @@ let encode_c pos_list sign_list c_bin =
     let dmspVal:uint16 = dmsp.(size 0) in
     dmsp.(size 0) <- dmspVal +. (u16 1);
 
-    // c already initialized to zero above, no need to loop and do it again
+    // c already initialized to zero above, no need to loop and do it again as is done in the reference code
 
     let h0 = ST.get () in
     LL.while
     (fun h -> live h pos_list /\ live h sign_list /\ live h c_bin /\ live h c /\ live h r /\ live h dmsp /\ live h cnt /\ live h i /\
-           modifies (loc r |+| loc dmsp |+| loc cnt |+| loc c |+| loc pos_list |+| loc sign_list |+| loc i) h0 h)
+           modifies (loc r |+| loc dmsp |+| loc cnt |+| loc c |+| loc pos_list |+| loc sign_list |+| loc i) h0 h /\
+           encode_c_invariant h pos_list sign_list (bget h i 0))
     (fun h -> v (bget h i 0) < v params_h)
     (fun _ -> i.(size 0) <. params_h)
     (fun _ ->
-        let iVal:size_t = i.(size 0) in
-        if cnt.(size 0) >. (shake128_rate -. (size 3))
-	then ( cshake128_qtesla crypto_randombytes c_bin (dmsp.(size 0)) shake128_rate r;
-	       dmsp.(size 0) <- dmsp.(size 0) +. (u16 1);
-               cnt.(size 0) <- size 0
-	     )
-	else ();
-
-        let cntVal:size_t = cnt.(size 0) in
-        let rCntVal:uint8 = r.(cntVal) in
-        [@inline_let] let rCntVal:size_t = unsafe_declassify (cast U32 SEC rCntVal) in
-        let rCntVal1:uint8 = r.(cntVal +. size 1) in
-        [@inline_let] let rCntVal1:size_t = unsafe_declassify (cast U32 SEC rCntVal1) in
-	let pos:size_t = (rCntVal <<. size 8) |. rCntVal1 in
-	let pos:size_t = pos &. (params_n -. (size 1)) in
-
-        assume(v pos < v params_n);
-	if (c.(pos)) = 0s
-	then ( let rCntVal2:uint8 = r.(cntVal +. size 2) in
-               [@inline_let] let rCntVal2:UI8.t = Lib.RawIntTypes.u8_to_UInt8 rCntVal2 in
-               if UI8.((rCntVal2 &^ 1uy) = 1uy)
-	       then c.(pos) <- -1s
-	       else c.(pos) <- 1s;
-	       pos_list.(iVal) <- pos;
-	       sign_list.(iVal) <- c.(pos);
-	       i.(size 0) <- iVal +. (size 1)
-	     )
-	else ();
-	cnt.(size 0) <- cntVal +. (size 3)
+        encode_c_while_body pos_list sign_list c_bin c r dmsp cnt i
     );
 
+    let h1 = ST.get () in
+    assert(encode_c_invariant h1 pos_list sign_list params_h);
+
     pop_frame()
+
+#reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0"
+
+private let is_sparse_elem_sk (e:sparse_elem) = -(pow2 (v params_s_bits)) <= sparse_v e /\ sparse_v e < pow2 (v params_s_bits)
+private let is_s_sk (h:HS.mem) (s:lbuffer sparse_elem params_n) =
+    forall (i:nat{i < v params_n}) . {:pattern is_sparse_elem_sk (bget h s i)} is_sparse_elem_sk (bget h s i)
 
 val sparse_mul:
     prod : poly
@@ -786,50 +952,76 @@ val sparse_mul:
   -> sign_list : lbuffer I16.t params_h
   -> Stack unit
     (requires fun h -> live h prod /\ live h s /\ live h pos_list /\ live h sign_list /\ 
-                    disjoint prod s /\ disjoint prod pos_list /\ disjoint prod sign_list)
+                    disjoint prod s /\ disjoint prod pos_list /\ disjoint prod sign_list /\
+                    encode_c_invariant h pos_list sign_list params_h /\
+                    is_s_sk h s)
     (ensures fun h0 _ h1 -> modifies1 prod h0 h1)
 
 let sparse_mul prod s pos_list sign_list =
+    let hInit = ST.get () in
     push_frame();
 
     let t = s in
 
     let h0 = ST.get () in
+    assert(forall (i:nat{i < v params_n}) . bget hInit s i == bget h0 s i);
+    assert(is_s_sk h0 s);
     for 0ul params_n
     (fun h _ -> live h prod /\ modifies1 prod h0 h)
     (fun i -> prod.(i) <- to_elem 0);
 
     let h1 = ST.get () in
     for 0ul params_h
-    (fun h _ -> live h prod /\ live h t /\ live h pos_list /\ live h sign_list /\ modifies1 prod h1 h)
+    (fun h _ -> live h prod /\ live h t /\ live h pos_list /\ live h sign_list /\ modifies1 prod h1 h /\
+             encode_c_invariant h pos_list sign_list params_h /\ is_s_sk h s)
     (fun i ->
+        let h = ST.get () in assert(UI32.v (bget h pos_list (v i)) < v params_n);
         let pos = pos_list.(i) in
+        assert(UI32.v pos < v params_n);
         let h2 = ST.get () in
 	for 0ul pos
-	(fun h _ -> live h prod /\ live h t /\ live h pos_list /\ live h sign_list /\ modifies1 prod h2 h)
+	(fun h _ -> live h prod /\ live h t /\ live h pos_list /\ live h sign_list /\ modifies1 prod h2 h /\ 
+                 encode_c_invariant h pos_list sign_list params_h /\ is_s_sk h s)
 	(fun j -> 
 	    let sign_list_i:I16.t = sign_list.(i) in
-            assume(v (j +. params_n -. pos) < v params_n);
+            //assume(v (j +. params_n -. pos) < v params_n);
+            assert(v j < v pos);
+            let h = ST.get() in assert(is_sparse_elem_sk (bget h t (v j + v params_n - v pos)));
 	    let tVal:sparse_elem = t.(j +. params_n -. pos) in
-            assume(v j < v params_n);
-            assume(FStar.Int.fits (I16.v sign_list_i * I16.v tVal) I16.n);
+            assert(is_sparse_elem_sk tVal);
+            //assume(v j < v params_n);
+            //assume(FStar.Int.fits (I16.v sign_list_i * I16.v tVal) I16.n);
             let hx = ST.get () in
-            assume(FStar.Int.fits (elem_v (bget hx prod (v j)) - (I16.v sign_list_i * I16.v tVal)) elem_n);
-            assume(is_elem ((bget hx prod (v j)) -^ (int16_to_elem I16.(sign_list_i *^ (sparse_to_int16 tVal)))));
+            //assume(FStar.Int.fits (elem_v (bget hx prod (v j)) - (I16.v sign_list_i * I16.v tVal)) elem_n);
+            //assume(is_elem ((bget hx prod (v j)) -^ (int16_to_elem I16.(sign_list_i *^ (sparse_to_int16 tVal)))));
+            assert(sign_list_i == (-1s) \/ sign_list_i == 0s \/ sign_list_i == 1s);
+            //assume(I16.v tVal <> Int.min_int I16.n);
+            assert(sparse_v tVal < pow2 (v params_s_bits));
+            assert(sparse_v tVal >= -(pow2 (v params_s_bits)));
+            assume(Int.min_int I16.n < -(pow2 (v params_s_bits)));
+            assert(Int.fits (I16.v sign_list_i * sparse_v tVal) I16.n);
+            assume(Int.fits (elem_v (bget h prod (v j)) - (I16.v sign_list_i * sparse_v tVal)) elem_n);
 	    prod.(j) <- prod.(j) -^ (int16_to_elem I16.(sign_list_i *^ (sparse_to_int16 tVal)))
 	);
 
         let h3 = ST.get () in
-        assume(v pos < v params_n);
+        //assume(v pos < v params_n);
 	for pos params_n
-	(fun h _ -> live h prod /\ live h t /\ live h pos_list /\ live h sign_list /\ modifies1 prod h3 h)
+	(fun h _ -> live h prod /\ live h t /\ live h pos_list /\ live h sign_list /\ modifies1 prod h3 h /\ is_s_sk h s)
 	(fun j -> 
 	    let sign_list_i:I16.t = sign_list.(i) in
+            let h = ST.get() in assert(is_sparse_elem_sk (bget h t (v j - v pos)));
 	    let tVal:sparse_elem = t.(j -. pos) in
             let hx = ST.get () in
-            assume(FStar.Int.fits (I16.v sign_list_i * I16.v tVal) I16.n);
-            assume(FStar.Int.fits (elem_v (bget hx prod (v j)) + (I16.v sign_list_i * I16.v tVal)) elem_n);
-            assume(is_elem ((bget hx prod (v j)) +^ (int16_to_elem I16.(sign_list_i *^ (sparse_to_int16 tVal)))));
+            //assume(FStar.Int.fits (I16.v sign_list_i * I16.v tVal) I16.n);
+            //assume(FStar.Int.fits (elem_v (bget hx prod (v j)) + (I16.v sign_list_i * I16.v tVal)) elem_n);
+            //assume(is_elem ((bget hx prod (v j)) +^ (int16_to_elem I16.(sign_list_i *^ (sparse_to_int16 tVal)))));
+            assert(is_sparse_elem_sk tVal);            
+            assert(sparse_v tVal < pow2 (v params_s_bits));
+            assert(sparse_v tVal >= -(pow2 (v params_s_bits)));
+            assume(Int.min_int I16.n < -(pow2 (v params_s_bits)));
+            assert(Int.fits (I16.v sign_list_i * sparse_v tVal) I16.n);
+            assume(Int.fits (elem_v (bget h prod (v j)) + (I16.v sign_list_i * sparse_v tVal)) elem_n);
   	    prod.(j) <- prod.(j) +^ (int16_to_elem I16.(sign_list_i *^ (sparse_to_int16 tVal)))
 	)
     );
@@ -895,6 +1087,8 @@ let sparse_mul32 prod pk pos_list sign_list =
 
     pop_frame()
 
+#reset-options "--admit_smt_queries true"
+
 val test_rejection:
     z : poly
   -> Stack bool
@@ -938,7 +1132,7 @@ let test_correctness v_ =
         assume(is_elem (params_q /^ (to_elem 2) -^ (bget h1 v_ (v i))));
         let mask:elem = (params_q /^ (to_elem 2) -^ v_.(i)) in
         assert_norm(v (_RADIX32 -. size 1) < I32.n);
-        let mask:I32.t = I32.((elem_to_int32 mask) >>^ (_RADIX32 -. size 1)) in
+        let mask:I32.t = I32.((elem_to_int32 mask) >>>^ (_RADIX32 -. size 1)) in
         assume(is_elem ((((bget h1 v_ (v i)) -^ params_q) &^ (int32_to_elem mask)) |^ ((bget h1 v_ (v i)) &^ (lognot (int32_to_elem mask)))));
         let val_:elem = (((v_.(i) -^ params_q) &^ (int32_to_elem mask)) |^ (v_.(i) &^ (lognot (int32_to_elem mask)))) in
         let val_:I32.t = elem_to_int32 val_ in
@@ -951,8 +1145,9 @@ let test_correctness v_ =
         assert_norm(v (params_d -. (size 1)) < I32.n);
         assume(FStar.Int.fits (I32.v val_ + I32.v (1l <<^ (params_d -. (size 1)))) I32.n);
         assume(FStar.Int.fits (I32.v val_ + I32.v (1l <<^ (params_d -. (size 1))) - 1) I32.n);
-        let val_:I32.t = I32.((val_ +^ (1l <<^ (params_d -. (size 1))) -^ 1l) >>^ params_d) in
+        let val_:I32.t = I32.((val_ +^ (1l <<^ (params_d -. (size 1))) -^ 1l) >>>^ params_d) in
         assume(FStar.Int.fits (I32.v left - I32.v (val_ <<^ params_d)) I32.n);
+        // val is always -1, 0, or 1 it looks like
         let val_:I32.t = I32.(left -^ (val_ <<^ params_d)) in
         assume(FStar.Int.fits (I32.v (1l <<^ (params_d -. (size 1))) - elem_v params_rejection) I32.n);
         assume(FStar.Int.fits (I32.v (abs_ val_) - (I32.v (1l <<^ (params_d -. (size 1))) - elem_v params_rejection)) I32.n);

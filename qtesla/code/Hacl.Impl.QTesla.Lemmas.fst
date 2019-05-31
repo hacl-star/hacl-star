@@ -55,13 +55,13 @@ val lemma_elem_product_fits_int64: x:elem_base -> y:elem_base -> Lemma
 
 let lemma_elem_product_fits_int64 x y = admit()
 
-val lemma_int32_sar_n_minus_1: x:I32.t -> Lemma
+//val lemma_int32_sar_n_minus_1: x:I32.t -> Lemma
 //  (ensures (x >=^ 0l) <==> I32.(x >>^ (UI32.uint_to_t (I32.n - 1)) == 0l) /\
 //           (x <^ 0l) <==> I32.(x >>^ (UI32.uint_to_t (I32.n - 1)) == (-1l)))
-  (ensures ((I32.v x >= 0) <==> I32.v I32.(x >>^ (UI32.uint_to_t (I32.n - 1))) == 0) /\
-           ((I32.v x < 0) <==> I32.v I32.(x >>^ (UI32.uint_to_t (I32.n - 1))) == (-1)))
+//  (ensures ((I32.v x >= 0) <==> I32.v I32.(x >>>^ (UI32.uint_to_t (I32.n - 1))) == 0) /\
+//           ((I32.v x < 0) <==> I32.v I32.(x >>>^ (UI32.uint_to_t (I32.n - 1))) == (-1)))
 
-let lemma_int32_sar_n_minus_1 x = admit()
+//let lemma_int32_sar_n_minus_1 x = admit()// shift_arithmetic_right_lemma_1 #I32.n (I32.v x) (I32.n - 1) (I32.n - 1)
 
 val lemma_int32_logxor_identities: x:I32.t -> Lemma
   (ensures I32.v (I32.logxor x 0l) == I32.v x /\
@@ -80,10 +80,12 @@ let lemma_int32_logor_zero x =
   nth_lemma #I32.n (I32.v (I32.logor (I32.int_to_t (zero I32.n)) x)) (I32.v x)
 
 val lemma_int32_lognot_zero: x:I32.t -> Lemma
-  (requires I32.v x == FStar.Int.zero I32.n)
-  (ensures I32.v (lognot x) == FStar.Int.ones I32.n)
+  (ensures ((x == 0l) ==> (lognot x == (-1l))) /\
+           ((x == (-1l)) ==> (lognot x == 0l)))
 
-let lemma_int32_lognot_zero x = nth_lemma (Int.lognot (Int.zero I32.n)) (Int.ones I32.n)
+let lemma_int32_lognot_zero x = 
+    nth_lemma (Int.lognot (Int.zero I32.n)) (Int.ones I32.n);
+    nth_lemma (Int.lognot (Int.ones I32.n)) (Int.zero I32.n)
 
 open FStar.UInt
 

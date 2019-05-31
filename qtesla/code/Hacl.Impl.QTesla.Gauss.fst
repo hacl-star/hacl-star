@@ -46,6 +46,7 @@ private unfold let op_Amp_Hat = sdigit_op_Amp_Hat
 private unfold let op_Hat_Hat = sdigit_op_Hat_Hat
 private unfold let op_Bar_Hat = sdigit_op_Bar_Hat
 private unfold let op_Greater_Greater_Hat = sdigit_op_Greater_Greater_Hat
+private unfold let op_Greater_Greater_Greater_Hat = sdigit_op_Greater_Greater_Greater_Hat
 private unfold let op_Less_Hat = sdigit_op_Less_Hat
 private unfold let lognot = sdigit_lognot
 
@@ -64,15 +65,13 @@ private val _PRODIFF:
     (ensures fun h0 _ h1 -> modifies1 diff h0 h1)
   
 let _PRODIFF #n_u #n_v diff a_u a_v k =
-    push_frame();
     let h = ST.get () in
     assume(FStar.Int.fits (sdigit_v (bget h diff 0) + sdigit_v ((bget h a_v (v k)) &^ _DFIELD)) sdigit_n);
     let minuend = diff.(size 0) +^ (a_v.(k) &^ _DFIELD) in
     assume(FStar.Int.fits (sdigit_v minuend - sdigit_v ((bget h a_u (v k)) &^ _DFIELD)) sdigit_n);
     let shifted = minuend -^ (a_u.(k) &^ _DFIELD) in
     assert_norm(v (_RADIX -. size 1) < sdigit_n);
-    diff.(size 0) <- shifted >>^ (_RADIX -. size 1);
-    pop_frame()
+    diff.(size 0) <- shifted >>>^ (_RADIX -. size 1)
 
 private val _PROSWAP:
     #n_u: size_t{v n_u > 0}
@@ -89,11 +88,9 @@ private val _PROSWAP:
     (ensures fun h0 _ h1 -> modifies3 swap a_u a_v h0 h1)
 
 let _PROSWAP #n_u #n_v swap diff a_u a_v k =
-    push_frame();
     swap.(size 0) <- (a_u.(k) ^^ a_v.(k)) &^ diff.(size 0);
     a_u.(k) <- a_u.(k) ^^ swap.(size 0);
-    a_v.(k) <- a_v.(k) ^^ swap.(size 0);
-    pop_frame()
+    a_v.(k) <- a_v.(k) ^^ swap.(size 0)
 
 private val _PROSWAPG:
     swap: lbuffer I32.t (size 1)
@@ -107,12 +104,10 @@ private val _PROSWAPG:
     (ensures fun h0 _ h1 -> modifies3 swap g_u g_v h0 h1)
 
 let _PROSWAPG swap diff g_u g_v =
-    push_frame();
     let diffVal = diff.(size 0) in
     swap.(size 0) <- I32.((g_u.(size 0) ^^ g_v.(size 0)) &^ (sdigit_to_int32 diffVal));
     g_u.(size 0) <- I32.(g_u.(size 0) ^^ swap.(size 0));
-    g_v.(size 0) <- I32.(g_v.(size 0) ^^ swap.(size 0));
-    pop_frame()
+    g_v.(size 0) <- I32.(g_v.(size 0) ^^ swap.(size 0))
 
 private val _MINMAX0:
     #n_u: size_t{v n_u > 0}
@@ -128,10 +123,8 @@ private val _MINMAX0:
     (ensures fun h0 _ h1 -> modifies4 swap diff a_u a_v h0 h1)
 
 let _MINMAX0 #n_u #n_v swap diff a_u a_v =
-    push_frame();
     _PRODIFF diff a_u a_v 0ul;
-    _PROSWAP swap diff a_u a_v 0ul;
-    pop_frame()
+    _PROSWAP swap diff a_u a_v 0ul
  
 private val _MINMAX1:
     #n_u: size_t{v n_u > 0}
@@ -147,15 +140,13 @@ private val _MINMAX1:
     (ensures fun h0 _ h1 -> modifies4 swap diff a_u a_v h0 h1)
 
 let _MINMAX1 #n_u #n_v swap diff a_u a_v =
-    push_frame();
     if _CDT_COLS >. size 1
     then (
         _PRODIFF diff a_u a_v 1ul;
 	_MINMAX0 swap diff a_u a_v;
 	_PROSWAP swap diff a_u a_v 1ul
 	 )
-    else ( _MINMAX0 swap diff a_u a_v );
-    pop_frame()
+    else ( _MINMAX0 swap diff a_u a_v )
 
 private val _MINMAX2:
     #n_u: size_t{v n_u > 0}
@@ -171,15 +162,13 @@ private val _MINMAX2:
     (ensures fun h0 _ h1 -> modifies4 swap diff a_u a_v h0 h1)
 
 let _MINMAX2 #n_u #n_v swap diff a_u a_v =
-    push_frame();
     if _CDT_COLS >. size 2
     then (
         _PRODIFF diff a_u a_v 2ul;
 	_MINMAX1 swap diff a_u a_v;
 	_PROSWAP swap diff a_u a_v 2ul
 	 )
-    else ( _MINMAX1 swap diff a_u a_v );
-    pop_frame()
+    else ( _MINMAX1 swap diff a_u a_v )
 
 private val _MINMAX3:
     #n_u: size_t{v n_u > 0}
@@ -195,15 +184,13 @@ private val _MINMAX3:
     (ensures fun h0 _ h1 -> modifies4 swap diff a_u a_v h0 h1)
 
 let _MINMAX3 #n_u #n_v swap diff a_u a_v =
-    push_frame();
     if _CDT_COLS >. size 3
     then (
         _PRODIFF diff a_u a_v 3ul;
 	_MINMAX2 swap diff a_u a_v;
 	_PROSWAP swap diff a_u a_v 3ul
 	 )
-    else ( _MINMAX2 swap diff a_u a_v );
-    pop_frame()
+    else ( _MINMAX2 swap diff a_u a_v )
 
 private val _MINMAX4:
     #n_u: size_t{v n_u > 0}
@@ -219,15 +206,13 @@ private val _MINMAX4:
     (ensures fun h0 _ h1 -> modifies4 swap diff a_u a_v h0 h1)
 
 let _MINMAX4 #n_u #n_v swap diff a_u a_v =
-    push_frame();
     if _CDT_COLS >. size 4
     then (
         _PRODIFF diff a_u a_v 4ul;
 	_MINMAX3 swap diff a_u a_v;
 	_PROSWAP swap diff a_u a_v 4ul
 	 )
-    else ( _MINMAX3 swap diff a_u a_v );
-    pop_frame()
+    else ( _MINMAX3 swap diff a_u a_v )
 
 // Reference implementation generates a compile-time error if _CDT_COLS is more than 5. We are just going
 // to assume it is less than or equal to.
@@ -390,7 +375,7 @@ let _MINMAXG a_u a_v =
     let h0 = ST.get () in
     assume(FStar.Int.fits I32.(v ((bget h0 a_v 0) &^ 0x7FFFFFFFl) - v ((bget h0 a_u 0) &^ 0x7FFFFFFFl)) I32.n);
     assert_norm(v (_RADIX32 -. size 1) < 32);
-    let diff = I32.(((a_v.(size 0) &^ 0x7FFFFFFFl) -^ (a_u.(size 0) &^ 0x7FFFFFFFl)) >>^ (_RADIX32 -. size 1)) in
+    let diff = I32.(((a_v.(size 0) &^ 0x7FFFFFFFl) -^ (a_u.(size 0) &^ 0x7FFFFFFFl)) >>>^ (_RADIX32 -. size 1)) in
     let swap = I32.((a_u.(size 0) ^^ a_v.(size 0)) &^ diff) in
     a_u.(size 0) <- I32.(a_u.(size 0) ^^ swap);
     a_v.(size 0) <- I32.(a_v.(size 0) ^^ swap);
@@ -509,9 +494,9 @@ let kmxGauss_setIndices sampg sampk =
         let hx = ST.get() in
         assume(FStar.Int.fits (I32.v (bget hx prev_inx 0) - I32.v curr_inx) I32.n);
         assert_norm(v (_RADIX32 -. size 1) < 32);
-	prev_inx.(size 0) <- I32.(prev_inx.(size 0) ^^ ((curr_inx ^^ prev_inx.(size 0)) &^ ((prev_inx.(size 0) -^ curr_inx) >>^ (_RADIX32 -. size 1))));
+	prev_inx.(size 0) <- I32.(prev_inx.(size 0) ^^ ((curr_inx ^^ prev_inx.(size 0)) &^ ((prev_inx.(size 0) -^ curr_inx) >>>^ (_RADIX32 -. size 1))));
         assert_norm(v (_RADIX -. size 1) < sdigit_n);
-	let neg = sampk.(i *. _CDT_COLS) >>^ (_RADIX -. size 1) in
+	let neg = sampk.(i *. _CDT_COLS) >>>^ (_RADIX -. size 1) in
 	let neg = sdigit_to_int32 neg in
         let hy = ST.get () in
         assume(I32.v (bget hy prev_inx 0) <> FStar.Int.min_int 32);
@@ -587,7 +572,8 @@ let kmxGauss z seed nonce =
     (fun i -> 
         assert_norm(v (_RADIX32 -. size 16) < 32);
         z.(i) <- 
-        let result = I32.((sampg.(i) <<^ (_RADIX32 -. size 16)) >>^ (_RADIX32 -. size 16)) in
+        let h = ST.get () in assume(I32.v (bget h sampg (v i)) >= 0);
+        let result = I32.((sampg.(i) <<^ (_RADIX32 -. size 16)) >>>^ (_RADIX32 -. size 16)) in
         assume(is_elem result);
         int32_to_elem result
     ); 
@@ -625,4 +611,3 @@ let sample_gauss_poly z seed nonce =
     );
     pop_frame();
     let h1 = ST.get () in assume(is_poly_sampler_output h1 z)
-

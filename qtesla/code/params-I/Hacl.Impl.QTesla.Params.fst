@@ -37,7 +37,7 @@ let params_qinv = I64.int_to_t 3098553343
 let params_q_log = size 23 // TODO: this can be computed
 let params_r2_invn = I64.int_to_t 113307
 let params_s_bits = size 10
-let params_b_bits = size 20
+unfold let params_b_bits = size 20
 let params_rejection = to_elem S.params_Le
 let params_r = I64.int_to_t 1081347
 
@@ -47,7 +47,7 @@ inline_for_extraction noextract
 let params_cSHAKE = cshake128_qtesla
 
 inline_for_extraction noextract
-let shake_rate = shake128_rate
+unfold let shake_rate = shake128_rate
 
 let crypto_hmbytes = size 64
 let crypto_randombytes = size 32

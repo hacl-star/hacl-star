@@ -64,8 +64,6 @@ let pack_sk sk s e seeds =
 inline_for_extraction noextract
 let encode_or_pack_sk = pack_sk
 
-assume val uint8_to_pub_int16 : uint8 -> sparse_elem
-
 val decode_sk:
     seeds : lbuffer uint8 (size 2 *. crypto_seedbytes)
   -> s : lbuffer sparse_elem params_n
@@ -82,7 +80,7 @@ let decode_sk seeds s e sk =
     let h_init = FStar.HyperStack.ST.get () in
     for 0ul params_n
     (fun h _ -> live h sk /\ live h s /\ modifies (loc s) h_init h)
-    (fun i -> let ski = sk.(i) in s.(i) <- uint8_to_pub_int16 ski);
+    (fun i -> let ski = sk.(i) in s.(i) <- uint8_to_int8 ski);
     let h1 = FStar.HyperStack.ST.get() in
     for 0ul params_k
     (fun h _ -> live h sk /\ live h e /\ modifies (loc e) h1 h)

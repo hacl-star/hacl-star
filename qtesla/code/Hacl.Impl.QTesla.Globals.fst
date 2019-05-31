@@ -53,8 +53,11 @@ type poly_k = lbuffer elem (params_k *. params_n)
 type poly_k_pred pred = lbuffer (e:elem{pred e}) (params_k *. params_n)
 
 let is_montgomery (e:elem) = 0 <= elem_v e /\ elem_v e < 2 * elem_v params_q
-let is_corrected (e:elem) = -(elem_v params_q) <= elem_v e /\ elem_v e < elem_v params_q
+let is_corrected (e:elem) = -(elem_v params_q / 2) < elem_v e /\ elem_v e <= elem_v params_q / 2
 let is_sampler_output (e:elem) = let b = pow2 (v params_s_bits-1) in -b <= elem_v e /\ elem_v e < b
+let is_y_sampler_output (e:elem) = let b = elem_v params_B in -b <= elem_v e /\ elem_v e <= b
+let is_pk (e:elem) = 0 <= elem_v e /\ elem_v e < elem_v params_q
+let is_sk (e:elem) = -(pow2 (v params_s_bits)) <= elem_v e /\ elem_v e < pow2 (v params_s_bits)
 
 (*{:pattern (bget h p i)}*)
 //let is_poly_pred (h:HS.mem) (p:poly) (pred:(elem -> Type0)) (k:nat{k <= v params_k * v params_n}) = forall i . (i < k) ==> (pred (bget h p i))
@@ -63,21 +66,31 @@ let is_sampler_output (e:elem) = let b = pow2 (v params_s_bits-1) in -b <= elem_
 //let is_poly_corrected_k (h:HS.mem) (p:poly) = is_poly_pred h p is_corrected
 //let is_poly_sampler_output_k (h:HS.mem) (p:poly) = is_poly_pred h p is_sampler_output
 
-unfold let is_poly_montgomery_i (h:HS.mem) (p:poly) (j:nat{j <= v params_n}) = forall i. {:pattern is_montgomery (bget h p i)} (i < j) ==> is_montgomery (bget h p i)
-unfold let is_poly_corrected_i (h:HS.mem) (p:poly) (j:nat{j <= v params_n}) = forall i. {:pattern is_corrected (bget h p i)} (i < j) ==> is_corrected (bget h p i)
-unfold let is_poly_sampler_output_i (h:HS.mem) (p:poly) (j:nat{j <= v params_n}) = forall i. {:pattern is_sampler_output (bget h p i)} (i < j) ==> is_sampler_output (bget h p i)
+unfold let is_poly_montgomery_i (h:HS.mem) (p:poly) (j:nat{j <= v params_n}) = forall (i:nat{i < j}). {:pattern is_montgomery (bget h p i)} is_montgomery (bget h p i)
+unfold let is_poly_corrected_i (h:HS.mem) (p:poly) (j:nat{j <= v params_n}) = forall (i:nat{i < j}). {:pattern is_corrected (bget h p i)}  is_corrected (bget h p i)
+unfold let is_poly_sampler_output_i (h:HS.mem) (p:poly) (j:nat{j <= v params_n}) = forall (i:nat{i < j}). {:pattern is_sampler_output (bget h p i)} is_sampler_output (bget h p i)
+unfold let is_poly_y_sampler_output_i (h:HS.mem) (p:poly) (j:nat{j <= v params_n}) = forall (i:nat{i < j}). {:pattern is_y_sampler_output (bget h p i)} is_sampler_output (bget h p i)
+unfold let is_poly_pk_i (h:HS.mem) (p:poly) (j:nat{j <= v params_n}) = forall (i:nat{i < j}). {:pattern is_pk (bget h p i)} is_pk (bget h p i)
+unfold let is_poly_sk_i (h:HS.mem) (p:poly) (j:nat{j <= v params_n}) = forall (i:nat{i < j}). {:pattern is_sk (bget h p i)} is_sk (bget h p i)
 
-unfold let is_poly_k_montgomery_i (h:HS.mem) (p:poly_k) (j:nat{j <= v params_k * v params_n}) = forall i. {:pattern is_montgomery (bget h p i)} (i < j) ==> is_montgomery (bget h p i)
-unfold let is_poly_k_corrected_i (h:HS.mem) (p:poly_k) (j:nat{j <= v params_k * v params_n}) = forall i. {:pattern is_corrected (bget h p i)} (i < j) ==> is_corrected (bget h p i)
-unfold let is_poly_k_sampler_output_i (h:HS.mem) (p:poly_k) (j:nat{j <= v params_k * v params_n}) = forall i. {:pattern is_sampler_output (bget h p i)} (i < j) ==> is_sampler_output (bget h p i)
+unfold let is_poly_k_montgomery_i (h:HS.mem) (p:poly_k) (j:nat{j <= v params_k * v params_n}) = forall (i:nat{i < j}). {:pattern is_montgomery (bget h p i)} is_montgomery (bget h p i)
+unfold let is_poly_k_corrected_i (h:HS.mem) (p:poly_k) (j:nat{j <= v params_k * v params_n}) = forall (i:nat{i < j}). {:pattern is_corrected (bget h p i)} is_corrected (bget h p i)
+unfold let is_poly_k_sampler_output_i (h:HS.mem) (p:poly_k) (j:nat{j <= v params_k * v params_n}) = forall (i:nat{i < j}). {:pattern is_sampler_output (bget h p i)} is_sampler_output (bget h p i)
+unfold let is_poly_k_pk_i (h:HS.mem) (p:poly_k) (j:nat{j <= v params_k * v params_n}) = forall (i:nat{i < j}). {:pattern is_pk (bget h p i)} is_pk (bget h p i)
+unfold let is_poly_k_sk_i (h:HS.mem) (p:poly_k) (j:nat{j <= v params_k * v params_n}) = forall (i:nat{i < j}). {:pattern is_sk (bget h p i)} is_sk (bget h p i)
 
 unfold let is_poly_montgomery (h:HS.mem) (p:poly) = is_poly_montgomery_i h p (v params_n)
 unfold let is_poly_corrected (h:HS.mem) (p:poly) = is_poly_corrected_i h p (v params_n)
 unfold let is_poly_sampler_output (h:HS.mem) (p:poly) = is_poly_sampler_output_i h p (v params_n)
+unfold let is_poly_y_sampler_output (h:HS.mem) (p:poly) = is_poly_y_sampler_output_i h p (v params_n)
+unfold let is_poly_pk (h:HS.mem) (p:poly) = is_poly_pk_i h p (v params_n)
+unfold let is_poly_sk (h:HS.mem) (p:poly) = is_poly_sk_i h p (v params_n)
 
 unfold let is_poly_k_montgomery (h:HS.mem) (p:poly_k) = is_poly_k_montgomery_i h p (v params_k * v params_n)
 unfold let is_poly_k_corrected (h:HS.mem) (p:poly_k) = is_poly_k_corrected_i h p (v params_k * v params_n)
 unfold let is_poly_k_sampler_output (h:HS.mem) (p:poly_k) = is_poly_k_sampler_output_i h p (v params_k * v params_n)
+unfold let is_poly_k_pk (h:HS.mem) (p:poly_k) = is_poly_k_pk_i h p (v params_k * v params_n)
+unfold let is_poly_k_sk (h:HS.mem) (p:poly_k) = is_poly_k_sk_i h p (v params_k * v params_n)
 
 val poly_create:
     unit
@@ -140,8 +153,7 @@ val barr_reduce:
 
 let barr_reduce a =
     let a64:I64.t = elem_to_int64 a in
-    assume (I64.(v (a64 *^ params_barr_mult)) >= 0);
-    let u:elem_base = (int64_to_elem I64.((a64 *^ params_barr_mult) >>^ params_barr_div)) in
+    let u:elem_base = (int64_to_elem I64.((a64 *^ params_barr_mult) >>>^ params_barr_div)) in
     assume(FStar.Int.fits (elem_v u * elem_v params_q) elem_n);
     assume(is_elem_int (elem_v a - elem_v u * elem_v params_q));
     a -^ u *^ params_q
@@ -181,3 +193,21 @@ let live_buf (h:HS.mem) (b: buf) =
   let (| _, _, b |) = b in
   live h b
 
+private let shift_arithmetic_left_value_check (x:elem) (s:UI32.t{UI32.v s < elem_n}) =
+    elem_v x * pow2 (UI32.v s) >= Int.min_int elem_n /\
+    elem_v x * pow2 (UI32.v s) <= Int.max_int elem_n
+
+inline_for_extraction noextract
+val shift_arithmetic_left:
+    x : elem
+  -> s : UI32.t{v s < elem_n}// /\ shift_arithmetic_left_value_check x s}
+  -> Tot I32.t // (r:I32.t{I32.v r == I32.v x * pow2 (UI32.v s)})
+
+#reset-options "--z3rlimit 100 --max_fuel 2 --max_ifuel 2"
+
+let shift_arithmetic_left x s =
+    uelem_to_elem ((elem_to_uelem x) `uelem_sl` s)
+    //let r = FStar.Int.Cast.uint32_to_int32 UI32.((FStar.Int.Cast.int32_to_uint32 x) <<^ s) in
+    //Int.shift_left_value_lemma (I32.v x) (UI32.v s);
+    //assert(I32.v r == I32.v x * pow2 (UI32.v s));
+    //r

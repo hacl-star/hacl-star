@@ -23,8 +23,8 @@ unfold let elem_to_uint8 x = Lib.RawIntTypes.u8_from_UInt8 (int32_to_uint8 x)
 unfold let uint8_to_elem = uint8_to_int32
 unfold let elem_to_int16 = int32_to_int16
 unfold let int16_to_elem = int16_to_int32
-unfold let elem_to_int32 x = x //NS: these coercions need annotations otherwise they're just identities
-unfold let int32_to_elem x = x
+unfold let elem_to_int32 (x:elem_base) : I32.t = x
+unfold let int32_to_elem (x:I32.t) : elem_base = x
 unfold let elem_to_uint32 = int32_to_uint32
 unfold let uint32_to_elem = uint32_to_int32
 unfold let elem_to_int64 = int32_to_int64
@@ -32,14 +32,17 @@ unfold let int64_to_elem = int64_to_int32
 unfold let elem_to_uint64 = int32_to_uint64
 unfold let uint64_to_elem = uint64_to_int32
 unfold let elem_to_uelem = int32_to_uint32
+unfold let uelem_to_elem = uint32_to_int32
 
+unfold let uelem_sl = UI32.shift_left
 unfold let uelem_sr = UI32.shift_right
 unfold let uelem_or = UI32.logor
 
 unfold let sparse_elem = I16.t
 unfold let sparse_n = size I16.n
 unfold let to_sparse_elem = I16.int_to_t
-unfold let sparse_to_int16 x = x
+unfold let sparse_to_int16 (x:sparse_elem) : I16.t = x
+unfold let sparse_v = I16.v
 
 unfold let op_Plus_Hat = IElem.op_Plus_Hat
 unfold let op_Subtraction_Hat = IElem.op_Subtraction_Hat
@@ -51,6 +54,7 @@ unfold let op_Amp_Hat = IElem.op_Amp_Hat
 unfold let op_Bar_Hat = IElem.op_Bar_Hat
 unfold let op_Less_Less_Hat = IElem.op_Less_Less_Hat
 unfold let op_Greater_Greater_Hat = IElem.op_Greater_Greater_Hat
+unfold let op_Greater_Greater_Greater_Hat = IElem.op_Greater_Greater_Greater_Hat
 unfold let op_Equals_Hat = IElem.op_Equals_Hat
 unfold let op_Greater_Hat = IElem.op_Greater_Hat
 unfold let op_Greater_Equals_Hat = IElem.op_Greater_Equals_Hat

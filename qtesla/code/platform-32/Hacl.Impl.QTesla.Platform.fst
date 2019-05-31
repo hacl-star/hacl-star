@@ -28,6 +28,7 @@ unfold let sdigit_op_Amp_Hat = I32.op_Amp_Hat
 unfold let sdigit_op_Hat_Hat = I32.op_Hat_Hat
 unfold let sdigit_op_Bar_Hat = I32.op_Bar_Hat
 unfold let sdigit_op_Greater_Greater_Hat = I32.op_Greater_Greater_Hat
+unfold let sdigit_op_Greater_Greater_Greater_Hat = I32.op_Greater_Greater_Greater_Hat
 unfold let sdigit_op_Less_Hat = I32.op_Less_Hat
 unfold let sdigit_lognot = I32.lognot
 unfold let digit_lognot = UI32.lognot

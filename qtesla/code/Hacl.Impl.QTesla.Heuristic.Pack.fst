@@ -73,13 +73,15 @@ val encode_pk_tGet:
   -> t: poly_k
   -> j: size_t
   -> k: size_t{v j + v k < v params_n}
-  -> Unsafe elem
-    (requires fun h -> valid_t t snapshot h)
-    (ensures fun _ e h1 -> valid_t t snapshot h1)
+  -> Unsafe (r:elem{is_pk r})
+    (requires fun h -> valid_t t snapshot h /\ is_poly_k_pk h t)
+    (ensures fun _ e h1 -> valid_t t snapshot h1 /\ is_poly_k_pk h1 t /\ e == bget h1 t (v j + v k))
 
 let encode_pk_tGet snapshot t j k = 
     let h = ST.get () in
     reveal_valid_t t snapshot h;
+    assert(is_poly_k_pk h t);
+    assert(is_pk (bget h t (v j + v k)));
     t.(j +. k)
 
 private inline_for_extraction noextract
@@ -89,8 +91,8 @@ val encode_pk_loopBody:
   -> i: size_t{v i + 22 < v crypto_publickeybytes / numbytes U32} 
   -> j: size_t{v j + 31 < v params_n}
   -> Stack unit
-    (requires fun h -> live h pk /\ live h t /\ disjoint pk t)
-    (ensures fun h0 _ h1 -> modifies1 pk h0 h1)
+    (requires fun h -> live h pk /\ live h t /\ disjoint pk t /\ is_poly_k_pk h t)
+    (ensures fun h0 _ h1 -> modifies1 pk h0 h1 /\ is_poly_k_pk h1 t)
 
 let valid_t_valid_pk (t:poly_k) (pk: lbuffer uint8 crypto_publickeybytes) (h0 h1:HS.mem)
   : Lemma (requires (valid_t t h0 h1 /\ live h0 pk))
@@ -101,10 +103,11 @@ let valid_t_valid_pk (t:poly_k) (pk: lbuffer uint8 crypto_publickeybytes) (h0 h1
 #reset-options "--z3rlimit 1000 --max_fuel 0 --max_ifuel 0 --query_stats \
                 --z3cliopt 'smt.qi.eager_threshold=100'"
 
-let encode_pk_loopBody pk t i j =
+let encode_pk_loopBody pk t i j = admit();
     let h0 = ST.get () in
     reveal_valid_t t h0 h0;
     assert(valid_t t h0 h0);
+    assert(is_poly_k_pk h0 t);
     [@inline_let] let tj = encode_pk_tGet h0 t in
     let tj0  = tj j (size 0)  in let tj1 = tj j (size 1)   in let tj2  = tj j (size 2)  in let tj3  = tj j (size 3) in 
     let tj4  = tj j (size 4)  in let tj5 = tj j (size 5)   in let tj6  = tj j (size 6)  in let tj7  = tj j (size 7) in
@@ -126,6 +129,8 @@ let encode_pk_loopBody pk t i j =
     // Instead, we curry encode_pk_ptSet above with pk as its first parameter to provide a function that looks a lot
     // like the integer assignment in the reference code, and it extracts down to store32_le in C.
     [@inline_let] let pt = encode_pk_ptSet h0 pk in
+    [@inline_let] let op_Greater_Greater_Hat = op_Greater_Greater_Greater_Hat in
+    [@inline_let] let op_Less_Less_Hat = shift_arithmetic_left in
     pt i (size 0)  (tj0              |^ (tj1  <<^ 23ul)); 
     pt i (size 1)  ((tj1  >>^ 9ul)   |^ (tj2  <<^ 14ul)); pt i (size 2)   ((tj2  >>^ 18ul)  |^ (tj3  <<^  5ul) |^ (tj4 <<^ 28ul)); 
     pt i (size 3)  ((tj4  >>^  4ul)  |^ (tj5  <<^ 19ul));
@@ -152,10 +157,12 @@ val encode_pk:
   -> seedA: lbuffer uint8 crypto_seedbytes
   -> Stack unit
     (requires fun h -> live h pk /\ live h t /\ live h seedA /\
-                    disjoint pk t /\ disjoint pk seedA /\ disjoint t seedA)
+                    disjoint pk t /\ disjoint pk seedA /\ disjoint t seedA /\
+                    is_poly_k_pk h t)
     (ensures fun h0 _ h1 -> modifies1 pk h0 h1)
 
 let encode_pk pk t seedA =
+    let hInit = ST.get () in
     push_frame();
 
     let i = create (size 1) (size 0) in
@@ -164,19 +171,27 @@ let encode_pk pk t seedA =
     assert(v params_k = 1);
 
     let h0 = ST.get () in
+    assert(forall (i:nat{i < v params_n * v params_k}) . {:pattern bget h0 t i} bget hInit t i == bget h0 t i);
+    assert(is_poly_k_pk h0 t);
     LL.while
-    (fun h -> live h pk /\ live h t /\ live h i /\ live h j /\ modifies3 pk i j h0 h)
+    (fun h -> live h pk /\ live h t /\ live h i /\ live h j /\ modifies3 pk i j h0 h /\ is_poly_k_pk h t)
     (fun h -> v (bget h i 0) < v params_n * v params_q_log / 32)
     (fun _ -> i.(size 0) <. params_n *. params_q_log /. size 32)
     (fun _ ->
         let h1 = ST.get () in
+        assert(is_poly_k_pk h1 t);
         assume(v (bget h1 j 0) + 31 < v params_n);
         assume(v (bget h1 i 0) + 22 < v (crypto_publickeybytes /. size (numbytes U32)));
         encode_pk_loopBody pk t i.(size 0) j.(size 0);
         let h2 = ST.get () in
+        assert(forall (i:nat{i < v params_n * v params_k}) . {:pattern bget h2 t i} bget h1 t i == bget h2 t i);
+        assert(is_poly_k_pk h2 t);
         assume(v (bget h2 j 0) + 32 + 31 < v params_n);
         j.(size 0) <- j.(size 0) +. size 32;
-	i.(size 0) <- i.(size 0) +. params_q_log
+	i.(size 0) <- i.(size 0) +. params_q_log;
+        let h3 = ST.get () in
+        assert(forall (i:nat{i < v params_n * v params_k}) . {:pattern bget h3 t i} bget h2 t i == bget h3 t i);
+        assert(is_poly_k_pk h3 t)
     );
 
     update_sub #MUT #_ #_ pk (params_n *. params_q_log /. size 8) crypto_seedbytes seedA;
@@ -530,7 +545,7 @@ val decode_sig_loopBody:
     (requires fun h -> live h sm /\ live h z /\ disjoint sm z)
     (ensures fun h0 _ h1 -> modifies1 z h0 h1)
 
-#reset-options "--z3rlimit 300 --max_fuel 0 --max_ifuel 0"
+#reset-options "--z3rlimit 800 --max_fuel 0 --max_ifuel 0"
 
 let decode_sig_loopBody sm z k =
     let h0 = ST.get () in
@@ -564,38 +579,38 @@ let decode_sig_loopBody sm z k =
 
     let i = k *. size 32 in
 
-    z_ i (size  0) (i2e I32.( u2i UI32.( ptj0 <<^ 11ul ) >>^ 11ul ));
-    z_ i (size  1) (i2e I32.( u2i UI32.( ptj0 >>^ 21ul ) |^ (u2i UI32.(ptj1 <<^ 22ul)) >>^ 11ul ));
-    z_ i (size  2) (i2e I32.( u2i UI32.( ptj1 <<^  1ul ) >>^ 11ul ));
-    z_ i (size  3) (i2e I32.( u2i UI32.( ptj1 >>^ 31ul ) |^ (u2i UI32.(ptj2 <<^ 12ul)) >>^ 11ul ));
-    z_ i (size  4) (i2e I32.( u2i UI32.( ptj2 >>^ 20ul ) |^ (u2i UI32.(ptj3 <<^ 23ul)) >>^ 11ul ));
-    z_ i (size  5) (i2e I32.( u2i UI32.( ptj3 <<^  2ul ) >>^ 11ul ));
-    z_ i (size  6) (i2e I32.( u2i UI32.( ptj3 >>^ 30ul ) |^ (u2i UI32.(ptj4 <<^ 13ul)) >>^ 11ul ));
-    z_ i (size  7) (i2e I32.( u2i UI32.( ptj4 >>^ 19ul ) |^ (u2i UI32.(ptj5 <<^ 24ul)) >>^ 11ul ));
-    z_ i (size  8) (i2e I32.( u2i UI32.( ptj5 <<^  3ul ) >>^ 11ul ));
-    z_ i (size  9) (i2e I32.( u2i UI32.( ptj5 >>^ 29ul ) |^ (u2i UI32.(ptj6 <<^ 14ul)) >>^ 11ul ));
-    z_ i (size 10) (i2e I32.( u2i UI32.( ptj6 >>^ 18ul ) |^ (u2i UI32.(ptj7 <<^ 25ul)) >>^ 11ul ));
-    z_ i (size 11) (i2e I32.( u2i UI32.( ptj7 <<^  4ul ) >>^ 11ul ));
-    z_ i (size 12) (i2e I32.( u2i UI32.( ptj7 >>^ 28ul ) |^ (u2i UI32.(ptj8 <<^ 15ul)) >>^ 11ul ));
-    z_ i (size 13) (i2e I32.( u2i UI32.( ptj8 >>^ 17ul ) |^ (u2i UI32.(ptj9 <<^ 26ul)) >>^ 11ul ));
-    z_ i (size 14) (i2e I32.( u2i UI32.( ptj9 <<^  5ul ) >>^ 11ul ));
-    z_ i (size 15) (i2e I32.( u2i UI32.( ptj9 >>^ 27ul ) |^ (u2i UI32.(ptj10 <<^ 16ul)) >>^ 11ul ));
-    z_ i (size 16) (i2e I32.( u2i UI32.( ptj10 >>^ 16ul ) |^ (u2i UI32.(ptj11 <<^ 27ul)) >>^ 11ul ));
-    z_ i (size 17) (i2e I32.( u2i UI32.( ptj11 <<^  6ul ) >>^ 11ul ));
-    z_ i (size 18) (i2e I32.( u2i UI32.( ptj11 >>^ 26ul ) |^ (u2i UI32.(ptj12 <<^ 17ul)) >>^ 11ul ));
-    z_ i (size 19) (i2e I32.( u2i UI32.( ptj12 >>^ 15ul ) |^ (u2i UI32.(ptj13 <<^ 28ul)) >>^ 11ul ));
-    z_ i (size 20) (i2e I32.( u2i UI32.( ptj13 <<^  7ul ) >>^ 11ul ));
-    z_ i (size 21) (i2e I32.( u2i UI32.( ptj13 >>^ 25ul ) |^ (u2i UI32.(ptj14 <<^ 18ul)) >>^ 11ul ));
-    z_ i (size 22) (i2e I32.( u2i UI32.( ptj14 >>^ 14ul ) |^ (u2i UI32.(ptj15 <<^ 29ul)) >>^ 11ul ));
-    z_ i (size 23) (i2e I32.( u2i UI32.( ptj15 <<^  8ul ) >>^ 11ul ));
-    z_ i (size 24) (i2e I32.( u2i UI32.( ptj15 >>^ 24ul ) |^ (u2i UI32.(ptj16 <<^ 19ul)) >>^ 11ul ));
-    z_ i (size 25) (i2e I32.( u2i UI32.( ptj16 >>^ 13ul ) |^ (u2i UI32.(ptj17 <<^ 30ul)) >>^ 11ul ));
-    z_ i (size 26) (i2e I32.( u2i UI32.( ptj17 <<^  9ul ) >>^ 11ul ));
-    z_ i (size 27) (i2e I32.( u2i UI32.( ptj17 >>^ 23ul ) |^ (u2i UI32.(ptj18 <<^ 20ul)) >>^ 11ul ));
-    z_ i (size 28) (i2e I32.( u2i UI32.( ptj18 >>^ 12ul ) |^ (u2i UI32.(ptj19 <<^ 31ul)) >>^ 11ul ));
-    z_ i (size 29) (i2e I32.( u2i UI32.( ptj19 <<^ 10ul ) >>^ 11ul ));
-    z_ i (size 30) (i2e I32.( u2i UI32.( ptj19 >>^ 22ul ) |^ (u2i UI32.(ptj20 <<^ 21ul)) >>^ 11ul ));
-    z_ i (size 31) (i2e I32.( u2i ptj20 >>^ 11ul ));
+    z_ i (size  0) (i2e I32.( u2i UI32.( ptj0 <<^ 11ul ) >>>^ 11ul ));
+    z_ i (size  1) (i2e I32.( u2i UI32.( ptj0 >>^ 21ul ) |^ (u2i UI32.(ptj1 <<^ 22ul)) >>>^ 11ul ));
+    z_ i (size  2) (i2e I32.( u2i UI32.( ptj1 <<^  1ul ) >>>^ 11ul ));
+    z_ i (size  3) (i2e I32.( u2i UI32.( ptj1 >>^ 31ul ) |^ (u2i UI32.(ptj2 <<^ 12ul)) >>>^ 11ul ));
+    z_ i (size  4) (i2e I32.( u2i UI32.( ptj2 >>^ 20ul ) |^ (u2i UI32.(ptj3 <<^ 23ul)) >>>^ 11ul ));
+    z_ i (size  5) (i2e I32.( u2i UI32.( ptj3 <<^  2ul ) >>>^ 11ul ));
+    z_ i (size  6) (i2e I32.( u2i UI32.( ptj3 >>^ 30ul ) |^ (u2i UI32.(ptj4 <<^ 13ul)) >>>^ 11ul ));
+    z_ i (size  7) (i2e I32.( u2i UI32.( ptj4 >>^ 19ul ) |^ (u2i UI32.(ptj5 <<^ 24ul)) >>>^ 11ul ));
+    z_ i (size  8) (i2e I32.( u2i UI32.( ptj5 <<^  3ul ) >>>^ 11ul ));
+    z_ i (size  9) (i2e I32.( u2i UI32.( ptj5 >>^ 29ul ) |^ (u2i UI32.(ptj6 <<^ 14ul)) >>>^ 11ul ));
+    z_ i (size 10) (i2e I32.( u2i UI32.( ptj6 >>^ 18ul ) |^ (u2i UI32.(ptj7 <<^ 25ul)) >>>^ 11ul ));
+    z_ i (size 11) (i2e I32.( u2i UI32.( ptj7 <<^  4ul ) >>>^ 11ul ));
+    z_ i (size 12) (i2e I32.( u2i UI32.( ptj7 >>^ 28ul ) |^ (u2i UI32.(ptj8 <<^ 15ul)) >>>^ 11ul ));
+    z_ i (size 13) (i2e I32.( u2i UI32.( ptj8 >>^ 17ul ) |^ (u2i UI32.(ptj9 <<^ 26ul)) >>>^ 11ul ));
+    z_ i (size 14) (i2e I32.( u2i UI32.( ptj9 <<^  5ul ) >>>^ 11ul ));
+    z_ i (size 15) (i2e I32.( u2i UI32.( ptj9 >>^ 27ul ) |^ (u2i UI32.(ptj10 <<^ 16ul)) >>>^ 11ul ));
+    z_ i (size 16) (i2e I32.( u2i UI32.( ptj10 >>^ 16ul ) |^ (u2i UI32.(ptj11 <<^ 27ul)) >>>^ 11ul ));
+    z_ i (size 17) (i2e I32.( u2i UI32.( ptj11 <<^  6ul ) >>>^ 11ul ));
+    z_ i (size 18) (i2e I32.( u2i UI32.( ptj11 >>^ 26ul ) |^ (u2i UI32.(ptj12 <<^ 17ul)) >>>^ 11ul ));
+    z_ i (size 19) (i2e I32.( u2i UI32.( ptj12 >>^ 15ul ) |^ (u2i UI32.(ptj13 <<^ 28ul)) >>>^ 11ul ));
+    z_ i (size 20) (i2e I32.( u2i UI32.( ptj13 <<^  7ul ) >>>^ 11ul ));
+    z_ i (size 21) (i2e I32.( u2i UI32.( ptj13 >>^ 25ul ) |^ (u2i UI32.(ptj14 <<^ 18ul)) >>>^ 11ul ));
+    z_ i (size 22) (i2e I32.( u2i UI32.( ptj14 >>^ 14ul ) |^ (u2i UI32.(ptj15 <<^ 29ul)) >>>^ 11ul ));
+    z_ i (size 23) (i2e I32.( u2i UI32.( ptj15 <<^  8ul ) >>>^ 11ul ));
+    z_ i (size 24) (i2e I32.( u2i UI32.( ptj15 >>^ 24ul ) |^ (u2i UI32.(ptj16 <<^ 19ul)) >>>^ 11ul ));
+    z_ i (size 25) (i2e I32.( u2i UI32.( ptj16 >>^ 13ul ) |^ (u2i UI32.(ptj17 <<^ 30ul)) >>>^ 11ul ));
+    z_ i (size 26) (i2e I32.( u2i UI32.( ptj17 <<^  9ul ) >>>^ 11ul ));
+    z_ i (size 27) (i2e I32.( u2i UI32.( ptj17 >>^ 23ul ) |^ (u2i UI32.(ptj18 <<^ 20ul)) >>>^ 11ul ));
+    z_ i (size 28) (i2e I32.( u2i UI32.( ptj18 >>^ 12ul ) |^ (u2i UI32.(ptj19 <<^ 31ul)) >>>^ 11ul ));
+    z_ i (size 29) (i2e I32.( u2i UI32.( ptj19 <<^ 10ul ) >>>^ 11ul ));
+    z_ i (size 30) (i2e I32.( u2i UI32.( ptj19 >>^ 22ul ) |^ (u2i UI32.(ptj20 <<^ 21ul)) >>>^ 11ul ));
+    z_ i (size 31) (i2e I32.( u2i ptj20 >>>^ 11ul ));
 
     let h1 = ST.get () in
     reveal_valid_decode_sig z sm h0 h1;

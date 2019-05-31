@@ -29,6 +29,7 @@ unfold let sdigit_op_Amp_Hat = I64.op_Amp_Hat
 unfold let sdigit_op_Hat_Hat = I64.op_Hat_Hat
 unfold let sdigit_op_Bar_Hat = I64.op_Bar_Hat
 unfold let sdigit_op_Greater_Greater_Hat = I64.op_Greater_Greater_Hat
+unfold let sdigit_op_Greater_Greater_Greater_Hat = I64.op_Greater_Greater_Greater_Hat
 unfold let sdigit_op_Less_Hat = I64.op_Less_Hat
 unfold let sdigit_lognot = I64.lognot
 unfold let digit_lognot = UI64.lognot
