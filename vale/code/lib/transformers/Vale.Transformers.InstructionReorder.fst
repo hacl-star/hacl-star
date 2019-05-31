@@ -258,7 +258,8 @@ let equiv_states (s1 s2 : machine_state) : GTot Type0 =
   (s1.ms_ok == s2.ms_ok) /\
   (s1.ms_regs == s2.ms_regs) /\
   (s1.ms_xmms == s2.ms_xmms) /\
-  (s1.ms_flags == s2.ms_flags) /\
+  (cf s1.ms_flags = cf s2.ms_flags) /\
+  (overflow s1.ms_flags = overflow s2.ms_flags) /\
   (s1.ms_mem == s2.ms_mem) /\
   (s1.ms_memTaint == s2.ms_memTaint) /\
   (s1.ms_stack == s2.ms_stack) /\
