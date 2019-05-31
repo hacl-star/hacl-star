@@ -122,7 +122,7 @@ test-c: $(subst .,_,$(patsubst %.fst,test-c-%,$(notdir $(wildcard code/tests/*.f
 test-ml: $(subst .,_,$(patsubst %.fst,test-ml-%,$(notdir $(wildcard specs/tests/*.fst))))
 
 test-benchmark: all-unstaged
-	$(MAKE) -C tests/benchmark all
+	#$(MAKE) -C tests/benchmark all
 
 # Not reusing the -staged automatic target so as to export NOSHORTLOG
 ci:
