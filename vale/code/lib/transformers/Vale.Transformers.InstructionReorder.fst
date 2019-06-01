@@ -1003,7 +1003,7 @@ let bounded_effects (reads writes:list access_location) (f:st unit) : GTot Type0
     forall s1 s2. {:pattern unchanged_at writes (run f s1) (run f s2)} (
       unchanged_at reads s1 s2 ==>
       (unchanged_at writes (run f s1) (run f s2) /\
-       s1.ms_ok = s2.ms_ok)
+       (run f s1).ms_ok = (run f s2).ms_ok)
     )
   )
 
