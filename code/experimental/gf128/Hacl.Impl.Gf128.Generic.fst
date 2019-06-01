@@ -122,7 +122,8 @@ let poly #s ctx len text =
   let blocks = len /. size 16 in
   let h2 = ST.get() in
   loop_nospec #h2 blocks acc (fun i ->
-    update #s acc (sub text (i *. size 16) (size 16)) r);
+    let tb = (sub text (i *. size 16) (size 16)) in
+    update #s acc tb r);
   let rem = len %. size 16 in
   if (rem >. size 0) then (
     let last = sub text (blocks *. size 16) rem in
