@@ -27,10 +27,10 @@ AESGCM_NI_FILES= $(HACL_HOME)/lib/Lib.IntTypes.fst \
 	../gf128/Hacl.Impl.Gf128.Fields.fst \
 	../gf128/Hacl.Impl.Gf128.Generic.fst \
 	../gf128/Hacl.Gf128.NI.fst \
-	Hacl.Impl.AES.CoreNI.fst \
-	Hacl.Impl.AES.Core.fst \
-	Hacl.Impl.AES.Generic.fst \
-	Hacl.AES_128.NI.fst \
+	../aes/Hacl.Impl.AES.CoreNI.fst \
+	../aes/Hacl.Impl.AES.Core.fst \
+	../aes/Hacl.Impl.AES.Generic.fst \
+	../aes/Hacl.AES_128.NI.fst \
 	Hacl.AES_128_GCM.NI.fst
 
 AESGCM_AES256_NI_FILES= $(HACL_HOME)/lib/Lib.IntTypes.fst \
@@ -42,10 +42,10 @@ AESGCM_AES256_NI_FILES= $(HACL_HOME)/lib/Lib.IntTypes.fst \
 	../gf128/Hacl.Impl.Gf128.Fields.fst \
 	../gf128/Hacl.Impl.Gf128.Generic.fst \
 	../gf128/Hacl.Gf128.NI.fst \
-	Hacl.Impl.AES.CoreNI.fst \
-	Hacl.Impl.AES.Core.fst \
-	Hacl.Impl.AES.Generic.fst \
-	Hacl.AES_256.NI.fst \
+	../aes/Hacl.Impl.AES.CoreNI.fst \
+	../aes/Hacl.Impl.AES.Core.fst \
+	../aes/Hacl.Impl.AES.Generic.fst \
+	../aes/Hacl.AES_256.NI.fst \
 	Hacl.AES_256_GCM.NI.fst
 
 AESGCM_M32_FILES= $(HACL_HOME)/lib/Lib.IntTypes.fst \
@@ -57,10 +57,10 @@ AESGCM_M32_FILES= $(HACL_HOME)/lib/Lib.IntTypes.fst \
 	../gf128/Hacl.Impl.Gf128.Fields.fst \
 	../gf128/Hacl.Impl.Gf128.Generic.fst \
 	../gf128/Hacl.Gf128.PreComp.fst \
-	Hacl.Impl.AES.CoreBitSlice.fst \
-	Hacl.Impl.AES.Core.fst \
-	Hacl.Impl.AES.Generic.fst \
-	Hacl.AES_128.BitSlice.fst \
+	../aes/Hacl.Impl.AES.CoreBitSlice.fst \
+	../aes/Hacl.Impl.AES.Core.fst \
+	../aes/Hacl.Impl.AES.Generic.fst \
+	../aes/Hacl.AES_128.BitSlice.fst \
 	Hacl.AES_128_GCM.M32.fst
 
 AESGCM_AES256_M32_FILES= $(HACL_HOME)/lib/Lib.IntTypes.fst \
@@ -72,10 +72,10 @@ AESGCM_AES256_M32_FILES= $(HACL_HOME)/lib/Lib.IntTypes.fst \
 	../gf128/Hacl.Impl.Gf128.Fields.fst \
 	../gf128/Hacl.Impl.Gf128.Generic.fst \
 	../gf128/Hacl.Gf128.PreComp.fst \
-	Hacl.Impl.AES.CoreBitSlice.fst \
-	Hacl.Impl.AES.Core.fst \
-	Hacl.Impl.AES.Generic.fst \
-	Hacl.AES_256.BitSlice.fst \
+	../aes/Hacl.Impl.AES.CoreBitSlice.fst \
+	../aes/Hacl.Impl.AES.Core.fst \
+	../aes/Hacl.Impl.AES.Generic.fst \
+	../aes/Hacl.AES_256.BitSlice.fst \
 	Hacl.AES_256_GCM.M32.fst
 
 
