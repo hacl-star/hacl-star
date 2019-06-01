@@ -134,9 +134,11 @@ aesgcm-aes256-m32.exe: aesgcm-aes256-m32-c/Hacl_AES_256_GCM_M32.c aesgcm-aes256-
 
 
 
-aesgcm-perf: aesgcm-ni.exe  aesgcm-m32.exe
+aesgcm-perf: aesgcm-ni.exe  aesgcm-m32.exe aesgcm-aes256-ni.exe  aesgcm-aes256-m32.exe
 	./aesgcm-ni.exe
 	./aesgcm-m32.exe
+	./aesgcm-aes256-ni.exe
+	./aesgcm-aes256-m32.exe
 
 test:
 	rm -f .depend && $(MAKE) .depend

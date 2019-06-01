@@ -98,9 +98,16 @@ val store_block0:
   (ensures (fun h0 _ h1 -> modifies1 out h0 h1))
 
 let store_block0 out (inp:state) =
+  let i0 = inp.(0ul) in
+  let i1 = inp.(1ul) in
+  let i2 = inp.(2ul) in
+  let i3 = inp.(3ul) in
+  let i4 = inp.(4ul) in
+  let i5 = inp.(5ul) in
+  let i6 = inp.(6ul) in
+  let i7 = inp.(7ul) in
   let (t0,t1,t2,t3,t4,t5,t6,t7) =
-    transpose_bits64x8 inp.(size 0) inp.(size 1) inp.(size 2) inp.(size 3)
-				           inp.(size 4) inp.(size 5) inp.(size 6) inp.(size 7)
+    transpose_bits64x8 i0 i1 i2 i3 i4 i5 i6 i7
   in
   uint_to_bytes_le #U64 (sub out (size 0) (size 8)) t0;
   uint_to_bytes_le #U64 (sub out (size 8) (size 8)) t1
