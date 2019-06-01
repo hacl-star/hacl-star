@@ -64,10 +64,10 @@ endif
 ifeq (,$(wildcard $(VALE_HOME)/bin/vale.exe))
   $(error $$VALE_HOME/bin/vale.exe does not exist (VALE_HOME=$(VALE_HOME)))
 endif
-endif
 
 ifneq ($(shell cat $(VALE_HOME)/bin/.vale_version | tr -d '\r'),$(shell cat vale/.vale_version | tr -d '\r'))
   $(error this repository wants Vale $(shell cat vale/.vale_version) but in $$VALE_HOME I found $(shell cat $(VALE_HOME)/bin/.vale_version))
+endif
 endif
 
 # Backwards-compat, remove
@@ -241,7 +241,7 @@ VALE_FSTS = $(call to-obj-dir,$(VAF_AS_FSTS))
 # this is only correct in the second stage of the build.
 FSTAR_ROOTS = $(wildcard $(addsuffix /*.fsti,$(ALL_HACL_DIRS)) $(addsuffix /*.fst,$(ALL_HACL_DIRS))) \
   $(FSTAR_HOME)/ulib/LowStar.Endianness.fst \
-  $(wildcard obj/*.fst) $(wildcard obj/*.fsti) # these two empty during the first stage
+  $(wildcard $(VALE_FSTS)) # empty during the first stage
 
 # We currently force regeneration of three depend files. This is long.
 

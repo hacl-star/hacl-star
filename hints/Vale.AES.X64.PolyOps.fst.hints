@@ -1,5 +1,5 @@
 [
-  "'\u0002÷ ™5ª”£Q\u0005S∏sá0",
+  "5máb1n\u0001 \r˜ñiùÉ\u0014 ",
   [
     [
       "Vale.AES.X64.PolyOps.va_lemma_VPolyAdd",
@@ -58,59 +58,17 @@
         "typing_Vale.X64.State.update_xmm"
       ],
       0,
-      "89dd839781549a50fc17f84e88c7e4f7"
-    ],
-    [
-      "Vale.AES.X64.PolyOps.va_wpMonotone_VPolyAdd",
-      1,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "equation_Vale.AES.X64.PolyOps.va_wp_VPolyAdd",
-        "fuel_guarded_inversion_Vale.X64.State.state",
-        "typing_Vale.X64.Decls.va_upd_flags",
-        "typing_Vale.X64.Decls.va_upd_operand_xmm", "unit_typing"
-      ],
-      0,
-      "d504ed368397459536e4477b224d2c39"
-    ],
-    [
-      "Vale.AES.X64.PolyOps.va_wpCompute_VPolyAdd",
-      1,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query", "eq2-interp",
-        "equation_Vale.AES.X64.PolyOps.va_wp_VPolyAdd",
-        "equation_Vale.X64.Decls.va_require_total",
-        "fuel_guarded_inversion_Vale.X64.State.state"
-      ],
-      0,
-      "2882ec82d892a67d369f2da298395027"
+      "088e801ac05dd0adb2d5ec1e30332dda"
     ],
     [
       "Vale.AES.X64.PolyOps.va_wpProof_VPolyAdd",
       1,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query", "equation_Prims.squash",
-        "refinement_interpretation_Tm_refine_8d65e998a07dd53ec478e27017d9dba5"
-      ],
-      0,
-      "8d17f6c3320f5287f553e5bbc297d955"
-    ],
-    [
-      "Vale.AES.X64.PolyOps.va_wpProof_VPolyAdd",
-      2,
       1,
       0,
       [
         "@MaxIFuel_assumption", "@query",
         "Prims_pretyping_f8666440faa91836cc5a13998af863fc", "bool_inversion",
-        "eq2-interp", "equation_Vale.AES.X64.PolyOps.va_wpCompute_VPolyAdd",
-        "equation_Vale.AES.X64.PolyOps.va_wp_VPolyAdd",
+        "eq2-interp", "equation_Vale.AES.X64.PolyOps.va_wp_VPolyAdd",
         "equation_Vale.X64.Decls.va_ensure_total",
         "equation_Vale.X64.Decls.va_require_total",
         "equation_Vale.X64.Decls.va_state_eq",
@@ -133,7 +91,6 @@
         "proj_equation_Vale.X64.State.Mkstate_stackTaint",
         "proj_equation_Vale.X64.State.Mkstate_xmms",
         "projection_inverse_FStar.Pervasives.Native.Mktuple2__1",
-        "projection_inverse_FStar.Pervasives.Native.Mktuple2__2",
         "projection_inverse_FStar.Pervasives.Native.Mktuple3__1",
         "projection_inverse_FStar.Pervasives.Native.Mktuple3__2",
         "projection_inverse_FStar.Pervasives.Native.Mktuple3__3",
@@ -145,7 +102,6 @@
         "projection_inverse_Vale.X64.State.Mkstate_stackTaint",
         "projection_inverse_Vale.X64.State.Mkstate_xmms",
         "refinement_interpretation_Tm_refine_f0a4eeefab9c63f31c350a802a4d45dd",
-        "token_correspondence_Vale.AES.X64.PolyOps.va_wpCompute_VPolyAdd",
         "typing_Vale.X64.CPU_Features_s.avx_enabled",
         "typing_Vale.X64.State.__proj__Mkstate__item__flags",
         "typing_Vale.X64.State.__proj__Mkstate__item__ok",
@@ -154,7 +110,19 @@
         "typing_Vale.X64.Xmms.sel", "typing_Vale.X64.Xmms.upd", "unit_typing"
       ],
       0,
-      "b7d8da9a465bb3b0f181b827096a8f27"
+      "c21665526a135710c5dd4f8dbc2c622f"
+    ],
+    [
+      "Vale.AES.X64.PolyOps.va_quick_VPolyAdd",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "fuel_guarded_inversion_FStar.Pervasives.Native.tuple3"
+      ],
+      0,
+      "3489431c22799deda934bdfc7be87ae0"
     ],
     [
       "Vale.AES.X64.PolyOps.va_lemma_PolyAnd",
@@ -216,59 +184,17 @@
         "typing_Vale.X64.Xmms.sel", "typing_Vale.X64.Xmms.upd"
       ],
       0,
-      "db81509ee860faeb68b008de26cedbbc"
-    ],
-    [
-      "Vale.AES.X64.PolyOps.va_wpMonotone_PolyAnd",
-      1,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "equation_Vale.AES.X64.PolyOps.va_wp_PolyAnd",
-        "fuel_guarded_inversion_Vale.X64.State.state",
-        "typing_Vale.X64.Decls.va_upd_flags",
-        "typing_Vale.X64.Decls.va_upd_operand_xmm", "unit_typing"
-      ],
-      0,
-      "ca590b3e2ae70841cd462b059dcc8d2e"
-    ],
-    [
-      "Vale.AES.X64.PolyOps.va_wpCompute_PolyAnd",
-      1,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query", "eq2-interp",
-        "equation_Vale.AES.X64.PolyOps.va_wp_PolyAnd",
-        "equation_Vale.X64.Decls.va_require_total",
-        "fuel_guarded_inversion_Vale.X64.State.state"
-      ],
-      0,
-      "480ecfdf74c6a3036bb2f625ad213fa2"
+      "29dde1fba027dc06b0b7bd8c8465d23f"
     ],
     [
       "Vale.AES.X64.PolyOps.va_wpProof_PolyAnd",
       1,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query", "equation_Prims.squash",
-        "refinement_interpretation_Tm_refine_8d65e998a07dd53ec478e27017d9dba5"
-      ],
-      0,
-      "33e41dfe25fec5065f17b758a84b6610"
-    ],
-    [
-      "Vale.AES.X64.PolyOps.va_wpProof_PolyAnd",
-      2,
       1,
       0,
       [
         "@MaxIFuel_assumption", "@query",
         "Prims_pretyping_f8666440faa91836cc5a13998af863fc", "bool_inversion",
-        "eq2-interp", "equation_Vale.AES.X64.PolyOps.va_wpCompute_PolyAnd",
-        "equation_Vale.AES.X64.PolyOps.va_wp_PolyAnd",
+        "eq2-interp", "equation_Vale.AES.X64.PolyOps.va_wp_PolyAnd",
         "equation_Vale.X64.Decls.va_ensure_total",
         "equation_Vale.X64.Decls.va_require_total",
         "equation_Vale.X64.Decls.va_state_eq",
@@ -291,7 +217,6 @@
         "proj_equation_Vale.X64.State.Mkstate_stackTaint",
         "proj_equation_Vale.X64.State.Mkstate_xmms",
         "projection_inverse_FStar.Pervasives.Native.Mktuple2__1",
-        "projection_inverse_FStar.Pervasives.Native.Mktuple2__2",
         "projection_inverse_FStar.Pervasives.Native.Mktuple3__1",
         "projection_inverse_FStar.Pervasives.Native.Mktuple3__2",
         "projection_inverse_FStar.Pervasives.Native.Mktuple3__3",
@@ -303,7 +228,6 @@
         "projection_inverse_Vale.X64.State.Mkstate_stackTaint",
         "projection_inverse_Vale.X64.State.Mkstate_xmms",
         "refinement_interpretation_Tm_refine_f0a4eeefab9c63f31c350a802a4d45dd",
-        "token_correspondence_Vale.AES.X64.PolyOps.va_wpCompute_PolyAnd",
         "typing_Vale.X64.State.__proj__Mkstate__item__flags",
         "typing_Vale.X64.State.__proj__Mkstate__item__ok",
         "typing_Vale.X64.State.__proj__Mkstate__item__regs",
@@ -311,7 +235,19 @@
         "typing_Vale.X64.Xmms.sel", "typing_Vale.X64.Xmms.upd", "unit_typing"
       ],
       0,
-      "33d31869d7ff8c0f0a59c3cbcfcbce86"
+      "38b9b0375421475eac3b3463f8f7696c"
+    ],
+    [
+      "Vale.AES.X64.PolyOps.va_quick_PolyAnd",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "fuel_guarded_inversion_FStar.Pervasives.Native.tuple3"
+      ],
+      0,
+      "5e34c9ef5fb44258b4562270cb961434"
     ],
     [
       "Vale.AES.X64.PolyOps.va_lemma_VHigh64ToLow",
@@ -375,60 +311,17 @@
         "typing_Vale.X64.Xmms.sel", "typing_Vale.X64.Xmms.upd"
       ],
       0,
-      "2abf775b7284b838152dbc753a1f2237"
-    ],
-    [
-      "Vale.AES.X64.PolyOps.va_wpMonotone_VHigh64ToLow",
-      1,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "equation_Vale.AES.X64.PolyOps.va_wp_VHigh64ToLow",
-        "fuel_guarded_inversion_Vale.X64.State.state",
-        "typing_Vale.X64.Decls.va_upd_flags",
-        "typing_Vale.X64.Decls.va_upd_operand_xmm", "unit_typing"
-      ],
-      0,
-      "39f7723e6423f7de17e678e18110de31"
-    ],
-    [
-      "Vale.AES.X64.PolyOps.va_wpCompute_VHigh64ToLow",
-      1,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query", "eq2-interp",
-        "equation_Vale.AES.X64.PolyOps.va_wp_VHigh64ToLow",
-        "equation_Vale.X64.Decls.va_require_total",
-        "fuel_guarded_inversion_Vale.X64.State.state"
-      ],
-      0,
-      "41ae91a14afa945bec0b9b269a18dc4e"
+      "21faf49496ae00a18d6072b3470a4dc1"
     ],
     [
       "Vale.AES.X64.PolyOps.va_wpProof_VHigh64ToLow",
       1,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query", "equation_Prims.squash",
-        "refinement_interpretation_Tm_refine_8d65e998a07dd53ec478e27017d9dba5"
-      ],
-      0,
-      "0a85e2517376b87459e754b5b48033ec"
-    ],
-    [
-      "Vale.AES.X64.PolyOps.va_wpProof_VHigh64ToLow",
-      2,
       1,
       0,
       [
         "@MaxIFuel_assumption", "@query",
         "Prims_pretyping_f8666440faa91836cc5a13998af863fc", "bool_inversion",
-        "eq2-interp",
-        "equation_Vale.AES.X64.PolyOps.va_wpCompute_VHigh64ToLow",
-        "equation_Vale.AES.X64.PolyOps.va_wp_VHigh64ToLow",
+        "eq2-interp", "equation_Vale.AES.X64.PolyOps.va_wp_VHigh64ToLow",
         "equation_Vale.X64.Decls.va_ensure_total",
         "equation_Vale.X64.Decls.va_require_total",
         "equation_Vale.X64.Decls.va_state_eq",
@@ -451,7 +344,6 @@
         "proj_equation_Vale.X64.State.Mkstate_stackTaint",
         "proj_equation_Vale.X64.State.Mkstate_xmms",
         "projection_inverse_FStar.Pervasives.Native.Mktuple2__1",
-        "projection_inverse_FStar.Pervasives.Native.Mktuple2__2",
         "projection_inverse_FStar.Pervasives.Native.Mktuple3__1",
         "projection_inverse_FStar.Pervasives.Native.Mktuple3__2",
         "projection_inverse_FStar.Pervasives.Native.Mktuple3__3",
@@ -463,7 +355,6 @@
         "projection_inverse_Vale.X64.State.Mkstate_stackTaint",
         "projection_inverse_Vale.X64.State.Mkstate_xmms",
         "refinement_interpretation_Tm_refine_f0a4eeefab9c63f31c350a802a4d45dd",
-        "token_correspondence_Vale.AES.X64.PolyOps.va_wpCompute_VHigh64ToLow",
         "typing_Vale.X64.CPU_Features_s.avx_enabled",
         "typing_Vale.X64.State.__proj__Mkstate__item__flags",
         "typing_Vale.X64.State.__proj__Mkstate__item__ok",
@@ -472,7 +363,19 @@
         "typing_Vale.X64.Xmms.sel", "typing_Vale.X64.Xmms.upd", "unit_typing"
       ],
       0,
-      "0dddcaac2a0b4b390205e2e8c7003aaf"
+      "4d29799b18a1aa49bbeaa6dc3fc956be"
+    ],
+    [
+      "Vale.AES.X64.PolyOps.va_quick_VHigh64ToLow",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "fuel_guarded_inversion_FStar.Pervasives.Native.tuple3"
+      ],
+      0,
+      "b635a1bfb69dedbef8c201a2867d70e0"
     ],
     [
       "Vale.AES.X64.PolyOps.va_lemma_VLow64ToHigh",
@@ -543,60 +446,17 @@
         "typing_Vale.X64.Xmms.sel", "typing_Vale.X64.Xmms.upd"
       ],
       0,
-      "c8e1492304067f8174dcd8d67363731c"
-    ],
-    [
-      "Vale.AES.X64.PolyOps.va_wpMonotone_VLow64ToHigh",
-      1,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "equation_Vale.AES.X64.PolyOps.va_wp_VLow64ToHigh",
-        "fuel_guarded_inversion_Vale.X64.State.state",
-        "typing_Vale.X64.Decls.va_upd_flags",
-        "typing_Vale.X64.Decls.va_upd_operand_xmm", "unit_typing"
-      ],
-      0,
-      "2032c327d351775e69fcce4ab72c8be7"
-    ],
-    [
-      "Vale.AES.X64.PolyOps.va_wpCompute_VLow64ToHigh",
-      1,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query", "eq2-interp",
-        "equation_Vale.AES.X64.PolyOps.va_wp_VLow64ToHigh",
-        "equation_Vale.X64.Decls.va_require_total",
-        "fuel_guarded_inversion_Vale.X64.State.state"
-      ],
-      0,
-      "a97549f244d7d536325a22f20390794a"
+      "200a193b332ebbee541514888f3ef52c"
     ],
     [
       "Vale.AES.X64.PolyOps.va_wpProof_VLow64ToHigh",
       1,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query", "equation_Prims.squash",
-        "refinement_interpretation_Tm_refine_8d65e998a07dd53ec478e27017d9dba5"
-      ],
-      0,
-      "35824c2e9d50e70e70041e19dfd24679"
-    ],
-    [
-      "Vale.AES.X64.PolyOps.va_wpProof_VLow64ToHigh",
-      2,
       1,
       0,
       [
         "@MaxIFuel_assumption", "@query",
         "Prims_pretyping_f8666440faa91836cc5a13998af863fc", "bool_inversion",
-        "eq2-interp",
-        "equation_Vale.AES.X64.PolyOps.va_wpCompute_VLow64ToHigh",
-        "equation_Vale.AES.X64.PolyOps.va_wp_VLow64ToHigh",
+        "eq2-interp", "equation_Vale.AES.X64.PolyOps.va_wp_VLow64ToHigh",
         "equation_Vale.X64.Decls.va_ensure_total",
         "equation_Vale.X64.Decls.va_require_total",
         "equation_Vale.X64.Decls.va_state_eq",
@@ -619,7 +479,6 @@
         "proj_equation_Vale.X64.State.Mkstate_stackTaint",
         "proj_equation_Vale.X64.State.Mkstate_xmms",
         "projection_inverse_FStar.Pervasives.Native.Mktuple2__1",
-        "projection_inverse_FStar.Pervasives.Native.Mktuple2__2",
         "projection_inverse_FStar.Pervasives.Native.Mktuple3__1",
         "projection_inverse_FStar.Pervasives.Native.Mktuple3__2",
         "projection_inverse_FStar.Pervasives.Native.Mktuple3__3",
@@ -631,7 +490,6 @@
         "projection_inverse_Vale.X64.State.Mkstate_stackTaint",
         "projection_inverse_Vale.X64.State.Mkstate_xmms",
         "refinement_interpretation_Tm_refine_f0a4eeefab9c63f31c350a802a4d45dd",
-        "token_correspondence_Vale.AES.X64.PolyOps.va_wpCompute_VLow64ToHigh",
         "typing_Vale.X64.CPU_Features_s.avx_enabled",
         "typing_Vale.X64.State.__proj__Mkstate__item__flags",
         "typing_Vale.X64.State.__proj__Mkstate__item__ok",
@@ -640,7 +498,19 @@
         "typing_Vale.X64.Xmms.sel", "typing_Vale.X64.Xmms.upd", "unit_typing"
       ],
       0,
-      "2620ded5626363d94b971cde6b08907b"
+      "8c3ba184dc150e9748f468cceab6ab2a"
+    ],
+    [
+      "Vale.AES.X64.PolyOps.va_quick_VLow64ToHigh",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "fuel_guarded_inversion_FStar.Pervasives.Native.tuple3"
+      ],
+      0,
+      "64e5064a93b56de0964edacea8d8db0f"
     ],
     [
       "Vale.AES.X64.PolyOps.va_lemma_VSwap",
@@ -692,59 +562,17 @@
         "typing_Vale.X64.Xmms.sel"
       ],
       0,
-      "c16e7944238cabe399ae4de329f511d7"
-    ],
-    [
-      "Vale.AES.X64.PolyOps.va_wpMonotone_VSwap",
-      1,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "equation_Vale.AES.X64.PolyOps.va_wp_VSwap",
-        "fuel_guarded_inversion_Vale.X64.State.state",
-        "typing_Vale.X64.Decls.va_upd_flags",
-        "typing_Vale.X64.Decls.va_upd_operand_xmm", "unit_typing"
-      ],
-      0,
-      "e6422059ed955571e2c4d514212baadc"
-    ],
-    [
-      "Vale.AES.X64.PolyOps.va_wpCompute_VSwap",
-      1,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query", "eq2-interp",
-        "equation_Vale.AES.X64.PolyOps.va_wp_VSwap",
-        "equation_Vale.X64.Decls.va_require_total",
-        "fuel_guarded_inversion_Vale.X64.State.state"
-      ],
-      0,
-      "689ab83ef9cf20b4fd30110b65ba8e12"
+      "5dbff9294e6efc5ed308d0bed68ceb82"
     ],
     [
       "Vale.AES.X64.PolyOps.va_wpProof_VSwap",
       1,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query", "equation_Prims.squash",
-        "refinement_interpretation_Tm_refine_8d65e998a07dd53ec478e27017d9dba5"
-      ],
-      0,
-      "fe1c03010922ab6556a752cb4c3ae4a4"
-    ],
-    [
-      "Vale.AES.X64.PolyOps.va_wpProof_VSwap",
-      2,
       1,
       0,
       [
         "@MaxIFuel_assumption", "@query",
         "Prims_pretyping_f8666440faa91836cc5a13998af863fc", "bool_inversion",
-        "eq2-interp", "equation_Vale.AES.X64.PolyOps.va_wpCompute_VSwap",
-        "equation_Vale.AES.X64.PolyOps.va_wp_VSwap",
+        "eq2-interp", "equation_Vale.AES.X64.PolyOps.va_wp_VSwap",
         "equation_Vale.X64.Decls.va_ensure_total",
         "equation_Vale.X64.Decls.va_require_total",
         "equation_Vale.X64.Decls.va_state_eq",
@@ -767,7 +595,6 @@
         "proj_equation_Vale.X64.State.Mkstate_stackTaint",
         "proj_equation_Vale.X64.State.Mkstate_xmms",
         "projection_inverse_FStar.Pervasives.Native.Mktuple2__1",
-        "projection_inverse_FStar.Pervasives.Native.Mktuple2__2",
         "projection_inverse_FStar.Pervasives.Native.Mktuple3__1",
         "projection_inverse_FStar.Pervasives.Native.Mktuple3__2",
         "projection_inverse_FStar.Pervasives.Native.Mktuple3__3",
@@ -779,7 +606,6 @@
         "projection_inverse_Vale.X64.State.Mkstate_stackTaint",
         "projection_inverse_Vale.X64.State.Mkstate_xmms",
         "refinement_interpretation_Tm_refine_f0a4eeefab9c63f31c350a802a4d45dd",
-        "token_correspondence_Vale.AES.X64.PolyOps.va_wpCompute_VSwap",
         "typing_Vale.X64.CPU_Features_s.avx_enabled",
         "typing_Vale.X64.State.__proj__Mkstate__item__flags",
         "typing_Vale.X64.State.__proj__Mkstate__item__ok",
@@ -788,7 +614,19 @@
         "typing_Vale.X64.Xmms.sel", "typing_Vale.X64.Xmms.upd", "unit_typing"
       ],
       0,
-      "7a15cce5d848bbab5b9ac441e4b774ef"
+      "1549008811fb936afc5c0ff8d72635eb"
+    ],
+    [
+      "Vale.AES.X64.PolyOps.va_quick_VSwap",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "fuel_guarded_inversion_FStar.Pervasives.Native.tuple3"
+      ],
+      0,
+      "48fcca531f27d8c3ce1937af0155c5f9"
     ],
     [
       "Vale.AES.X64.PolyOps.va_lemma_VPolyMul",
@@ -860,59 +698,17 @@
         "typing_Vale.X64.Xmms.sel", "typing_Vale.X64.Xmms.upd"
       ],
       0,
-      "d567cbe1071b47e037dcc67f89424c26"
-    ],
-    [
-      "Vale.AES.X64.PolyOps.va_wpMonotone_VPolyMul",
-      1,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "equation_Vale.AES.X64.PolyOps.va_wp_VPolyMul",
-        "fuel_guarded_inversion_Vale.X64.State.state",
-        "typing_Vale.X64.Decls.va_upd_flags",
-        "typing_Vale.X64.Decls.va_upd_operand_xmm", "unit_typing"
-      ],
-      0,
-      "f965fb0435341e68d196dfed61657a5b"
-    ],
-    [
-      "Vale.AES.X64.PolyOps.va_wpCompute_VPolyMul",
-      1,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query", "eq2-interp",
-        "equation_Vale.AES.X64.PolyOps.va_wp_VPolyMul",
-        "equation_Vale.X64.Decls.va_require_total",
-        "fuel_guarded_inversion_Vale.X64.State.state"
-      ],
-      0,
-      "00eb8f8689ff444b4d53bb3f1a30829a"
+      "f6698e53a17b7028dba3f773b2199d7b"
     ],
     [
       "Vale.AES.X64.PolyOps.va_wpProof_VPolyMul",
       1,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query", "equation_Prims.squash",
-        "refinement_interpretation_Tm_refine_8d65e998a07dd53ec478e27017d9dba5"
-      ],
-      0,
-      "0a5cea9792b738d54dc257625424c25e"
-    ],
-    [
-      "Vale.AES.X64.PolyOps.va_wpProof_VPolyMul",
-      2,
       1,
       0,
       [
         "@MaxIFuel_assumption", "@query",
         "Prims_pretyping_f8666440faa91836cc5a13998af863fc", "bool_inversion",
-        "eq2-interp", "equation_Vale.AES.X64.PolyOps.va_wpCompute_VPolyMul",
-        "equation_Vale.AES.X64.PolyOps.va_wp_VPolyMul",
+        "eq2-interp", "equation_Vale.AES.X64.PolyOps.va_wp_VPolyMul",
         "equation_Vale.X64.Decls.va_ensure_total",
         "equation_Vale.X64.Decls.va_if",
         "equation_Vale.X64.Decls.va_require_total",
@@ -938,7 +734,6 @@
         "proj_equation_Vale.X64.State.Mkstate_stackTaint",
         "proj_equation_Vale.X64.State.Mkstate_xmms",
         "projection_inverse_FStar.Pervasives.Native.Mktuple2__1",
-        "projection_inverse_FStar.Pervasives.Native.Mktuple2__2",
         "projection_inverse_FStar.Pervasives.Native.Mktuple3__1",
         "projection_inverse_FStar.Pervasives.Native.Mktuple3__2",
         "projection_inverse_FStar.Pervasives.Native.Mktuple3__3",
@@ -950,7 +745,6 @@
         "projection_inverse_Vale.X64.State.Mkstate_stackTaint",
         "projection_inverse_Vale.X64.State.Mkstate_xmms",
         "refinement_interpretation_Tm_refine_f0a4eeefab9c63f31c350a802a4d45dd",
-        "token_correspondence_Vale.AES.X64.PolyOps.va_wpCompute_VPolyMul",
         "typing_Vale.X64.CPU_Features_s.avx_enabled",
         "typing_Vale.X64.State.__proj__Mkstate__item__flags",
         "typing_Vale.X64.State.__proj__Mkstate__item__ok",
@@ -959,7 +753,19 @@
         "typing_Vale.X64.Xmms.sel", "typing_Vale.X64.Xmms.upd", "unit_typing"
       ],
       0,
-      "8ab4362d5b9e0b61cd70ddb7ac26fc61"
+      "42f371362fad7b985bf8e4904b4db1e3"
+    ],
+    [
+      "Vale.AES.X64.PolyOps.va_quick_VPolyMul",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "fuel_guarded_inversion_FStar.Pervasives.Native.tuple3"
+      ],
+      0,
+      "497105069ef485016207ed62aa9ab71c"
     ]
   ]
 ]
