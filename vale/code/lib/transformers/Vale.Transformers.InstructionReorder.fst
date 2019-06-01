@@ -968,10 +968,11 @@ let valid_dst_access_location (a:access_location) (s:machine_state) : bool =
 
 let unchanged_except (exceptions:list access_location) (s1 s2:machine_state) :
   GTot Type0 =
-  forall (a:access_location). {:pattern (eval_access_location a s2)} (
-    (!!(disjoint_access_location_from_locations a exceptions) ==>
-     (eval_access_location a s1 == eval_access_location a s2))
-  )
+  (forall (a:access_location). {:pattern (eval_access_location a s2)} (
+      (!!(disjoint_access_location_from_locations a exceptions) ==>
+       (eval_access_location a s1 == eval_access_location a s2))
+    )) /\
+  (s1.ms_stack.initial_rsp = s2.ms_stack.initial_rsp)
 
 private abstract
 let sanity_check_unchanged_except1 s =
@@ -1042,6 +1043,7 @@ let lemma_unchanged_except_append_symmetric (a1 a2:list access_location) (s1 s2:
   Lemma
     (requires (unchanged_except (a1 `L.append` a2) s1 s2))
     (ensures (unchanged_except (a2 `L.append` a1) s1 s2)) =
+  assert (s1.ms_stack.initial_rsp = s2.ms_stack.initial_rsp);
   let aux a : Lemma
     (requires (
        (!!(disjoint_access_location_from_locations a (a1 `L.append` a2))) \/
@@ -1276,7 +1278,7 @@ let lemma_commute (f1 f2:st unit) (r1 w1 r2 w2:list access_location) (s:machine_
   lemma_unchanged_at_and_except (w1 `L.append` w2) is12 is21;
   assert (unchanged_except [] is12 is21);
   assert (s21.ms_ok = s12.ms_ok);
-  assume (is12.ms_stack.initial_rsp = is21.ms_stack.initial_rsp); (* TODO: Prove this *)
+  assert (is12.ms_stack.initial_rsp = is21.ms_stack.initial_rsp);
   lemma_equiv_states_when_except_none is12 is21 s12.ms_ok;
   assert (equiv_states (run2 f1 f2 s) (run2 f2 f1 s))
 
