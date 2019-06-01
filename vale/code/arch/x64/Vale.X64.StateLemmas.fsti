@@ -63,7 +63,7 @@ val lemma_to_stackTaint : s:state -> Lemma
   (ensures s.stackTaint === stackTaint' (state_to_S s))
   [SMTPat s.stackTaint]
 
-val lemma_to_eval_operand : s:state -> o:operand -> Lemma
+val lemma_to_eval_operand : s:state -> o:operand64 -> Lemma
   (requires valid_src_operand o s)
   (ensures eval_operand o s == BS.eval_operand o (state_to_S s))
   [SMTPat (eval_operand o s)]
@@ -77,7 +77,7 @@ val lemma_to_eval_operand128 : s:state -> o:operand128 -> Lemma
   (ensures eval_operand128 o s == BS.eval_mov128_op o (state_to_S s))
   [SMTPat (eval_operand128 o s)]
 
-val lemma_to_valid_operand : s:state -> o:operand -> Lemma
+val lemma_to_valid_operand : s:state -> o:operand64 -> Lemma
   (ensures valid_src_operand o s ==> BS.valid_src_operand o (state_to_S s))
   [SMTPat (valid_src_operand o s)]
 

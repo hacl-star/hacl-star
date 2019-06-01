@@ -51,14 +51,14 @@ unfold let va_codes = list va_code
 let va_tl (cs:va_codes) : Ghost va_codes (requires Cons? cs) (ensures fun tl -> tl == Cons?.tl cs) = Cons?.tl cs
 unfold let va_state = state
 val va_fuel : Type0
-unfold let va_operand = operand
+unfold let va_operand = operand64
 unfold let va_operand_opr64 = va_operand
 let va_reg_operand = o:va_operand{OReg? o}
 let va_operand_reg_opr64 = o:va_operand{OReg? o}
-unfold let va_dst_operand = o:va_operand
-unfold let va_operand_dst_opr64 = o:va_operand
+unfold let va_dst_operand = va_operand
+unfold let va_operand_dst_opr64 = va_operand
 unfold let va_shift_amt = o:va_operand
-unfold let va_operand_shift_amt64 = o:va_operand
+unfold let va_operand_shift_amt64 = va_operand
 unfold let va_cmp = o:va_operand{not (OMem? o)}
 unfold let va_register = reg
 unfold let va_operand_xmm = xmm
@@ -118,7 +118,7 @@ let valid_mem_operand128 (addr:int) (t:taint) (s_mem:M.mem) (s_memTaint:M.memtai
     valid_maddr128 addr s_mem s_memTaint b index t
 
 [@va_qattr]
-let valid_operand (o:operand) (s:state) : prop0 =
+let valid_operand (o:operand64) (s:state) : prop0 =
   Vale.X64.State.valid_src_operand o s /\
   ( match o with
     | OMem (m, t) -> valid_mem_operand (eval_maddr m s) t s.mem s.memTaint
@@ -130,8 +130,8 @@ let valid_operand (o:operand) (s:state) : prop0 =
 let valid_operand128 (o:operand128) (s:state) : prop0 =
   Vale.X64.State.valid_src_operand128 o s /\
   ( match o with
-    | OMem128 (m, t) -> valid_mem_operand128 (eval_maddr m s) t s.mem s.memTaint
-    | OStack128 (m, t) -> S.valid_taint_stack128 (eval_maddr m s) t s.stackTaint
+    | OMem (m, t) -> valid_mem_operand128 (eval_maddr m s) t s.mem s.memTaint
+    | OStack (m, t) -> S.valid_taint_stack128 (eval_maddr m s) t s.stackTaint
     | _ -> True
   )
 
@@ -142,9 +142,9 @@ val va_fuel_default : unit -> va_fuel
 [@va_qattr] unfold let va_op_opr_reg (r:reg) : va_operand = OReg r
 [@va_qattr] unfold let va_op_opr64_reg (r:reg) : va_operand = OReg r
 [@va_qattr] unfold let va_op_reg64_reg (r:reg) : va_operand = OReg r
-[@va_qattr] unfold let va_op_opr128_xmm (x:xmm) : va_operand128 = OReg128 x
-[@va_qattr] unfold let va_const_operand (n:int) = OConst n
-[@va_qattr] unfold let va_const_opr64 (n:int) = OConst n
+[@va_qattr] unfold let va_op_opr128_xmm (x:xmm) : va_operand128 = OReg x
+[@va_qattr] unfold let va_const_operand (n:int) : va_operand = OConst n
+[@va_qattr] unfold let va_const_opr64 (n:int) : va_operand = OConst n
 [@va_qattr] unfold let va_const_shift_amt (n:int) : va_shift_amt = OConst n
 [@va_qattr] unfold let va_const_shift_amt64 (n:int) : va_shift_amt = OConst n
 [@va_qattr] unfold let va_op_shift_amt_reg (r:reg) : va_shift_amt = OReg r
@@ -167,7 +167,7 @@ val va_fuel_default : unit -> va_fuel
 [@va_qattr] unfold let va_coerce_operand_to_dst_operand (o:va_operand) : va_dst_operand = o
 [@va_qattr] unfold let va_coerce_dst_operand_to_operand (o:va_dst_operand) : va_operand = o
 [@va_qattr] unfold let va_coerce_dst_opr64_to_opr64 (o:va_dst_operand) : va_operand = o
-[@va_qattr] unfold let va_coerce_xmm_to_opr128 (x:xmm) : va_operand128 = OReg128 x
+[@va_qattr] unfold let va_coerce_xmm_to_opr128 (x:xmm) : va_operand128 = OReg x
 
 [@va_qattr]
 unfold let va_opr_code_Mem (o:va_operand) (offset:int) (t:taint) : va_operand =
@@ -205,8 +205,8 @@ val va_opr_lemma_Stack (s:va_state) (base:va_operand) (offset:int) (t:taint) : L
 [@va_qattr]
 unfold let va_opr_code_Mem128 (o:va_operand) (offset:int) (t:taint) : va_operand128 =
   match o with
-  | OReg r -> OMem128 (MReg r offset, t)
-  | _ -> OMem128 (MConst 42, t)
+  | OReg r -> OMem (MReg r offset, t)
+  | _ -> OMem (MConst 42, t)
 
 val va_opr_lemma_Mem128 (s:va_state) (base:va_operand) (offset:int) (t:taint) (b:M.buffer128) (index:int) : Lemma
   (requires

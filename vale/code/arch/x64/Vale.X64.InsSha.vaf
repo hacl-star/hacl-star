@@ -60,7 +60,7 @@ friend Vale.X64.Decls
 procedure SHA256_rnds2(inout dst:xmm, in src:xmm, ghost t:counter, ghost block:block_w, ghost hash_orig:hash256)
     {:public}
     {:quick exportOnly}
-    {:instruction mk_ins(make_instr(I.ins_SHA256_rnds2, OReg128(dst), OReg128(src)))}
+    {:instruction mk_ins(make_instr(I.ins_SHA256_rnds2, OReg(dst), OReg(src)))}
     {:typecheck false}
     reads xmm0;
     requires
@@ -78,7 +78,7 @@ procedure SHA256_rnds2(inout dst:xmm, in src:xmm, ghost t:counter, ghost block:b
 procedure SHA256_msg1(inout dst:xmm, in src:xmm, ghost t:counter, ghost block:block_w)
     {:public}
     {:quick exportOnly}
-    {:instruction mk_ins(make_instr(I.ins_SHA256_msg1, OReg128(dst), OReg128(src)))}
+    {:instruction mk_ins(make_instr(I.ins_SHA256_msg1, OReg(dst), OReg(src)))}
     {:typecheck false}
     requires
         sha_enabled;
@@ -94,7 +94,7 @@ procedure SHA256_msg1(inout dst:xmm, in src:xmm, ghost t:counter, ghost block:bl
 procedure SHA256_msg2(inout dst:xmm, in src:xmm, ghost t:counter, ghost block:block_w)
     {:public}
     {:quick exportOnly}
-    {:instruction mk_ins(make_instr(I.ins_SHA256_msg2, OReg128(dst), OReg128(src)))}
+    {:instruction mk_ins(make_instr(I.ins_SHA256_msg2, OReg(dst), OReg(src)))}
     {:typecheck false}
     requires
         sha_enabled;

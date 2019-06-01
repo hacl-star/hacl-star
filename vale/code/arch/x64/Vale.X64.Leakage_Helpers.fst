@@ -9,7 +9,7 @@ let merge_taint (t1:taint) (t2:taint) :taint =
   else Public
 
 (* Also pass the taint of the instruction *)
-let operand_taint (op:operand) (ts:analysis_taints) =
+let operand_taint (op:operand64) (ts:analysis_taints) =
   match op with
   | OConst _ -> Public
   | OReg reg -> ts.regTaint reg
@@ -17,8 +17,9 @@ let operand_taint (op:operand) (ts:analysis_taints) =
 
 let operand_taint128 (op:operand128) (ts:analysis_taints) : taint =
   match op with
-  | OReg128 x -> ts.xmmTaint x
-  | OMem128 (_, t) | OStack128 (_, t) -> t
+  | OConst _ -> Public
+  | OReg x -> ts.xmmTaint x
+  | OMem (_, t) | OStack (_, t) -> t
 
 [@instr_attr]
 let operand_taint_explicit
@@ -93,27 +94,27 @@ let maddr_does_not_use_secrets (addr:maddr) (ts:analysis_taints) : bool =
       let indexTaint = operand_taint (OReg index) ts in
       (Public? baseTaint) && (Public? indexTaint)
 
-let operand_does_not_use_secrets (op:operand) (ts:analysis_taints) : bool =
+let operand_does_not_use_secrets (op:operand64) (ts:analysis_taints) : bool =
   match op with
   | OConst _ | OReg _ -> true
   | OMem (m, _) | OStack (m, _) -> maddr_does_not_use_secrets m ts
 
 let operand128_does_not_use_secrets (op:operand128) (ts:analysis_taints) : bool =
   match op with
-  | OReg128 _ -> true
-  | OMem128 (m, _) | OStack128 (m, _) -> maddr_does_not_use_secrets m ts
+  | OConst _ | OReg _ -> true
+  | OMem (m, _) | OStack (m, _) -> maddr_does_not_use_secrets m ts
 
-let operand_taint_allowed (o:operand) (t_data:taint) : bool =
+let operand_taint_allowed (o:operand64) (t_data:taint) : bool =
   match o with
   | OConst _ | OReg _ -> true
   | OMem (_, t_operand) | OStack (_, t_operand) -> t_operand = Secret || t_data = Public
 
 let operand128_taint_allowed (o:operand128) (t_data:taint) : bool =
   match o with
-  | OReg128 _ -> true
-  | OMem128 (_, t_operand) | OStack128 (_, t_operand) -> t_operand = Secret || t_data = Public
+  | OConst _ | OReg _ -> true
+  | OMem (_, t_operand) | OStack (_, t_operand) -> t_operand = Secret || t_data = Public
 
-let set_taint (dst:operand) (ts:analysis_taints) (t:taint) : analysis_taints =
+let set_taint (dst:operand64) (ts:analysis_taints) (t:taint) : analysis_taints =
   match dst with
   | OConst _ -> ts  // Shouldn't actually happen
   | OReg r -> AnalysisTaints (FunctionalExtensionality.on reg
@@ -122,9 +123,10 @@ let set_taint (dst:operand) (ts:analysis_taints) (t:taint) : analysis_taints =
 
 let set_taint128 (dst:operand128) (ts:analysis_taints) (t:taint) : analysis_taints =
   match dst with
-  | OReg128 r -> AnalysisTaints ts.regTaint ts.flagsTaint ts.cfFlagsTaint ts.ofFlagsTaint
+  | OConst _ -> ts  // Shouldn't actually happen
+  | OReg r -> AnalysisTaints ts.regTaint ts.flagsTaint ts.cfFlagsTaint ts.ofFlagsTaint
       (FunctionalExtensionality.on xmm (fun x -> if x = r then t else ts.xmmTaint x))
-  | OMem128 _ | OStack128 _-> ts
+  | OMem _ | OStack _-> ts
 
 let set_taint_cf_and_flags (ts:analysis_taints) (t:taint) : analysis_taints =
   let AnalysisTaints rs flags cf ovf xmms = ts in

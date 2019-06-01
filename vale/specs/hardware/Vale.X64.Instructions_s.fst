@@ -10,7 +10,7 @@ let ins_Cmovc64 = make_ins (fun dst src -> print_s "cmovc" [P64 dst; P64 src])
 let ins_Add64 = make_ins (fun dst src -> print_s "add" [P64 dst; P64 src])
 
 let ins_AddLea64 =
-  make_ins (fun dst src1 src2 ->
+  make_ins (fun (dst src1 src2:operand64) ->
     let m =
       match (src1, src2) with
       | (OReg r1, OConst i2) -> MReg r1 i2
@@ -121,3 +121,4 @@ let ins_SHA256_rnds2 =
 let ins_SHA256_msg1 = make_ins (fun dst src -> print "sha256msg1" [PXmm dst; PXmm src])
 
 let ins_SHA256_msg2 = make_ins (fun dst src -> print "sha256msg2" [PXmm dst; PXmm src])
+
