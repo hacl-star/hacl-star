@@ -1,5 +1,5 @@
 [
-  "\bÛ\u0005\t®w\u0001ıÛ|È’„Y£ﬁ",
+  "^QG!J7ŒΩR∆h\u000bG\u0010`\u0002",
   [
     [
       "Vale.Test.X64.Args.va_req_test",
@@ -16,7 +16,7 @@
         "unit_typing"
       ],
       0,
-      "9caebac1bdd83f0891a10fbc60404b32"
+      "a6a6cfcd90c353925c9b47487200f059"
     ],
     [
       "Vale.Test.X64.Args.va_ens_test",
@@ -33,7 +33,7 @@
         "unit_typing"
       ],
       0,
-      "4dd3458d3337e0ad6f809a6c0cdc1498"
+      "5394f830176cc40eab9d6b736ad27f77"
     ],
     [
       "Vale.Test.X64.Args.va_lemma_test",
@@ -83,59 +83,11 @@
         "typing_Vale.X64.State.__proj__Mkstate__item__xmms", "unit_typing"
       ],
       0,
-      "749451c3cd6e22cbfcf0b06dc5bcd9ca"
-    ],
-    [
-      "Vale.Test.X64.Args.va_wpMonotone_test",
-      1,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "Prims_pretyping_ae567c2fb75be05905677af440075565",
-        "equation_Vale.Test.X64.Args.va_wp_test",
-        "equation_Vale.X64.Machine_s.reg", "equation_Vale.X64.Machine_s.xmm",
-        "fuel_guarded_inversion_Vale.X64.State.state",
-        "function_token_typing_Prims.__cache_version_number__", "int_typing",
-        "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_f0a4eeefab9c63f31c350a802a4d45dd",
-        "typing_Vale.X64.Decls.va_upd_flags",
-        "typing_Vale.X64.Decls.va_upd_mem",
-        "typing_Vale.X64.Decls.va_upd_reg",
-        "typing_Vale.X64.Decls.va_upd_xmm", "unit_typing"
-      ],
-      0,
-      "d9dae87e526f63fa20a9838b8629f2e6"
-    ],
-    [
-      "Vale.Test.X64.Args.va_wpCompute_test",
-      1,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query", "eq2-interp",
-        "equation_Vale.Test.X64.Args.va_wp_test",
-        "equation_Vale.X64.Decls.va_require_total",
-        "fuel_guarded_inversion_Vale.X64.State.state"
-      ],
-      0,
-      "5a65f71f9111409f26ab2c7e814ad63a"
+      "4ec52c5ad0d8a41fffe67204e78d9fd8"
     ],
     [
       "Vale.Test.X64.Args.va_wpProof_test",
       1,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query", "equation_Prims.squash",
-        "refinement_interpretation_Tm_refine_8d65e998a07dd53ec478e27017d9dba5"
-      ],
-      0,
-      "2d521aa10a6fcbb30ce42c1d6c9cdb34"
-    ],
-    [
-      "Vale.Test.X64.Args.va_wpProof_test",
-      2,
       1,
       0,
       [
@@ -143,7 +95,6 @@
         "Prims_pretyping_ae567c2fb75be05905677af440075565",
         "Prims_pretyping_f8666440faa91836cc5a13998af863fc", "bool_inversion",
         "eq2-interp", "equation_Vale.Def.Words_s.nat64",
-        "equation_Vale.Test.X64.Args.va_wpCompute_test",
         "equation_Vale.Test.X64.Args.va_wp_test",
         "equation_Vale.X64.Decls.va_ensure_total",
         "equation_Vale.X64.Decls.va_require_total",
@@ -172,7 +123,6 @@
         "proj_equation_Vale.X64.State.Mkstate_xmms",
         "projection_inverse_BoxInt_proj_0",
         "projection_inverse_FStar.Pervasives.Native.Mktuple2__1",
-        "projection_inverse_FStar.Pervasives.Native.Mktuple2__2",
         "projection_inverse_FStar.Pervasives.Native.Mktuple3__1",
         "projection_inverse_FStar.Pervasives.Native.Mktuple3__2",
         "projection_inverse_FStar.Pervasives.Native.Mktuple3__3",
@@ -186,7 +136,6 @@
         "projection_inverse_Vale.X64.State.Mkstate_xmms",
         "refinement_interpretation_Tm_refine_4c6411da037541583c16876f5cc7dfe4",
         "refinement_interpretation_Tm_refine_f0a4eeefab9c63f31c350a802a4d45dd",
-        "token_correspondence_Vale.Test.X64.Args.va_wpCompute_test",
         "typing_Vale.X64.Decls.va_upd_flags",
         "typing_Vale.X64.Decls.va_upd_mem",
         "typing_Vale.X64.Decls.va_upd_ok",
@@ -202,7 +151,19 @@
         "typing_Vale.X64.Xmms.sel", "unit_typing"
       ],
       0,
-      "88c2ebd30e18e7bdc311b3546b61028c"
+      "bf667729d0fd2eb7488e5e1afb1c4b33"
+    ],
+    [
+      "Vale.Test.X64.Args.va_quick_test",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "fuel_guarded_inversion_FStar.Pervasives.Native.tuple3"
+      ],
+      0,
+      "4391a45f906e0ad6627534c7391c7ebc"
     ]
   ]
 ]

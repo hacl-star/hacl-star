@@ -1,5 +1,5 @@
 [
-  ")(JŽ‹©¬Æ[¯zäÿö\u0018¹",
+  "¥\\1<‡\u000bì(¸\u0002÷AcŽRì",
   [
     [
       "Vale.X64.InsMem.va_lemma_Load64_buffer",
@@ -18,7 +18,6 @@
         "@fuel_correspondence_Vale.X64.Machine_Semantics_s.taint_match_args.fuel_instrumented",
         "@fuel_correspondence_Vale.X64.Machine_Semantics_s.taint_match_inouts.fuel_instrumented",
         "@fuel_correspondence_Vale.X64.Machine_Semantics_s.update_taint_outputs.fuel_instrumented",
-        "@fuel_irrelevance_Vale.X64.Instruction_s.instr_args_t.fuel_instrumented",
         "@fuel_irrelevance_Vale.X64.Instruction_s.instr_operands_t.fuel_instrumented",
         "@fuel_irrelevance_Vale.X64.Instruction_s.instr_operands_t_args.fuel_instrumented",
         "@fuel_irrelevance_Vale.X64.Machine_Semantics_s.obs_args.fuel_instrumented",
@@ -117,7 +116,6 @@
         "equation_Vale.X64.StateLemmas.state_of_S",
         "equation_Vale.X64.StateLemmas.state_to_S",
         "equation_with_fuel_FStar.List.Tot.Base.append.fuel_instrumented",
-        "equation_with_fuel_Vale.X64.Instruction_s.instr_args_t.fuel_instrumented",
         "equation_with_fuel_Vale.X64.Instruction_s.instr_operands_t.fuel_instrumented",
         "equation_with_fuel_Vale.X64.Instruction_s.instr_operands_t_args.fuel_instrumented",
         "equation_with_fuel_Vale.X64.Instruction_s.instr_ret_t.fuel_instrumented",
@@ -256,7 +254,6 @@
         "typing_Vale.X64.Decls.va_is_dst_opr64",
         "typing_Vale.X64.Decls.va_update_operand",
         "typing_Vale.X64.Instructions_s.ins_Mov64",
-        "typing_Vale.X64.Machine_Semantics_s.__proj__Mkmachine_state__item__ms_trace",
         "typing_Vale.X64.Machine_Semantics_s.eval_maddr",
         "typing_Vale.X64.Machine_Semantics_s.eval_operand",
         "typing_Vale.X64.Machine_Semantics_s.match_n",
@@ -282,50 +279,8 @@
       "7781f2dc5580105d323ec71b8f997398"
     ],
     [
-      "Vale.X64.InsMem.va_wpMonotone_Load64_buffer",
-      1,
-      2,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "equation_Vale.X64.Decls.va_operand_reg_opr64",
-        "equation_Vale.X64.InsMem.va_wp_Load64_buffer",
-        "fuel_guarded_inversion_Vale.X64.State.state",
-        "refinement_interpretation_Tm_refine_c7e3c0d3955f12f4089701024e3bec07",
-        "typing_Vale.X64.Decls.va_upd_operand_dst_opr64", "unit_typing"
-      ],
-      0,
-      "48a8af8919f8143092c09345962a87c1"
-    ],
-    [
-      "Vale.X64.InsMem.va_wpCompute_Load64_buffer",
-      1,
-      2,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query", "eq2-interp",
-        "equation_Vale.X64.Decls.va_require_total",
-        "equation_Vale.X64.InsMem.va_wp_Load64_buffer",
-        "fuel_guarded_inversion_Vale.X64.State.state"
-      ],
-      0,
-      "149c742a55bc89362c2f4eecaacaff1f"
-    ],
-    [
       "Vale.X64.InsMem.va_wpProof_Load64_buffer",
       1,
-      2,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query", "equation_Prims.squash",
-        "refinement_interpretation_Tm_refine_8d65e998a07dd53ec478e27017d9dba5"
-      ],
-      0,
-      "7a01408f54cbc7eaf987bdea1f38c9a3"
-    ],
-    [
-      "Vale.X64.InsMem.va_wpProof_Load64_buffer",
-      2,
       2,
       0,
       [
@@ -338,8 +293,7 @@
         "constructor_distinct_Prims.Nil",
         "constructor_distinct_Vale.X64.QuickCode.Mod_reg",
         "data_typing_intro_Prims.Cons@tok",
-        "data_typing_intro_Prims.Nil@tok",
-        "disc_equation_Vale.X64.Machine_s.OReg", "eq2-interp",
+        "data_typing_intro_Prims.Nil@tok", "eq2-interp",
         "equality_tok_Vale.X64.QuickCode.Mod_None@tok", "equation_Prims.nat",
         "equation_Vale.X64.Decls.va_ensure_total",
         "equation_Vale.X64.Decls.va_fuel",
@@ -349,7 +303,6 @@
         "equation_Vale.X64.Decls.va_upd_ok",
         "equation_Vale.X64.Decls.va_upd_operand_dst_opr64",
         "equation_Vale.X64.Decls.va_update_operand",
-        "equation_Vale.X64.InsMem.va_wpCompute_Load64_buffer",
         "equation_Vale.X64.InsMem.va_wp_Load64_buffer",
         "equation_Vale.X64.QuickCode.t_ensure",
         "equation_Vale.X64.QuickCode.update_state_mod",
@@ -357,7 +310,7 @@
         "equation_Vale.X64.State.state_eq",
         "equation_Vale.X64.State.update_reg",
         "equation_with_fuel_Vale.X64.QuickCode.update_state_mods.fuel_instrumented",
-        "fuel_guarded_inversion_Vale.X64.State.state", "int_inversion",
+        "fuel_guarded_inversion_Vale.X64.State.state",
         "kinding_Vale.X64.QuickCode.mod_t@tok",
         "lemma_Vale.X64.Regs.lemma_equal_elim",
         "lemma_Vale.X64.StateLemmas.lemma_to_flags",
@@ -388,7 +341,6 @@
         "projection_inverse_Vale.X64.State.Mkstate_stack",
         "projection_inverse_Vale.X64.State.Mkstate_stackTaint",
         "projection_inverse_Vale.X64.State.Mkstate_xmms",
-        "token_correspondence_Vale.X64.InsMem.va_wpCompute_Load64_buffer",
         "typing_Vale.X64.Decls.va_is_dst_opr64",
         "typing_Vale.X64.Decls.va_upd_ok",
         "typing_Vale.X64.Decls.va_update_operand",
@@ -400,7 +352,20 @@
         "typing_tok_Vale.X64.QuickCode.Mod_None@tok", "unit_typing"
       ],
       0,
-      "16f35bb6bfdf8ee9d7ecb5218a4f909d"
+      "7012575b046e49b6f4aca8fa47247bb3"
+    ],
+    [
+      "Vale.X64.InsMem.va_quick_Load64_buffer",
+      1,
+      2,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
+        "equation_Vale.X64.Decls.va_fuel",
+        "fuel_guarded_inversion_FStar.Pervasives.Native.tuple3"
+      ],
+      0,
+      "0f834f6cdece0eb89387e68108911bbe"
     ],
     [
       "Vale.X64.InsMem.va_lemma_Store64_buffer",
@@ -668,70 +633,27 @@
         "typing_tok_Vale.X64.Instruction_s.Out@tok", "unit_typing"
       ],
       0,
-      "93ec5c934c5ae0390580ec0cad04d75d"
-    ],
-    [
-      "Vale.X64.InsMem.va_wpMonotone_Store64_buffer",
-      1,
-      2,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "equation_Vale.X64.Decls.va_operand_reg_opr64",
-        "equation_Vale.X64.InsMem.va_wp_Store64_buffer",
-        "fuel_guarded_inversion_Vale.X64.State.state",
-        "refinement_interpretation_Tm_refine_c7e3c0d3955f12f4089701024e3bec07",
-        "typing_Vale.X64.Decls.va_upd_mem", "unit_typing"
-      ],
-      0,
-      "e96d4ba53b25bd8f0111e7ea23fa3091"
-    ],
-    [
-      "Vale.X64.InsMem.va_wpCompute_Store64_buffer",
-      1,
-      2,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query", "eq2-interp",
-        "equation_Vale.X64.Decls.va_require_total",
-        "equation_Vale.X64.InsMem.va_wp_Store64_buffer",
-        "fuel_guarded_inversion_Vale.X64.State.state"
-      ],
-      0,
-      "81d5dd38b424f2f752c285a819a5c17c"
+      "92a761ae813556128bcf5dd0f2d1257f"
     ],
     [
       "Vale.X64.InsMem.va_wpProof_Store64_buffer",
       1,
-      2,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query", "equation_Prims.squash",
-        "refinement_interpretation_Tm_refine_8d65e998a07dd53ec478e27017d9dba5"
-      ],
-      0,
-      "74668175c40a35343d3bbaceb7abd9e1"
-    ],
-    [
-      "Vale.X64.InsMem.va_wpProof_Store64_buffer",
-      2,
       2,
       0,
       [
         "@MaxIFuel_assumption", "@query",
         "Prims_pretyping_f8666440faa91836cc5a13998af863fc", "bool_inversion",
-        "disc_equation_Vale.X64.Machine_s.OReg", "eq2-interp",
-        "equation_Prims.nat", "equation_Vale.X64.Decls.va_ensure_total",
+        "eq2-interp", "equation_Prims.nat",
+        "equation_Vale.X64.Decls.va_ensure_total",
         "equation_Vale.X64.Decls.va_fuel",
         "equation_Vale.X64.Decls.va_require_total",
         "equation_Vale.X64.Decls.va_state_eq",
         "equation_Vale.X64.Decls.va_upd_mem",
         "equation_Vale.X64.Decls.va_upd_ok",
-        "equation_Vale.X64.InsMem.va_wpCompute_Store64_buffer",
         "equation_Vale.X64.InsMem.va_wp_Store64_buffer",
         "equation_Vale.X64.QuickCode.t_ensure",
         "equation_Vale.X64.State.state_eq",
-        "fuel_guarded_inversion_Vale.X64.State.state", "int_inversion",
+        "fuel_guarded_inversion_Vale.X64.State.state",
         "lemma_Vale.X64.Regs.lemma_equal_elim",
         "lemma_Vale.X64.StateLemmas.lemma_to_flags",
         "lemma_Vale.X64.StateLemmas.lemma_to_ok",
@@ -744,7 +666,6 @@
         "proj_equation_Vale.X64.State.Mkstate_stack",
         "proj_equation_Vale.X64.State.Mkstate_stackTaint",
         "proj_equation_Vale.X64.State.Mkstate_xmms",
-        "projection_inverse_BoxBool_proj_0",
         "projection_inverse_FStar.Pervasives.Native.Mktuple2__1",
         "projection_inverse_FStar.Pervasives.Native.Mktuple3__1",
         "projection_inverse_FStar.Pervasives.Native.Mktuple3__2",
@@ -756,16 +677,26 @@
         "projection_inverse_Vale.X64.State.Mkstate_stack",
         "projection_inverse_Vale.X64.State.Mkstate_stackTaint",
         "projection_inverse_Vale.X64.State.Mkstate_xmms",
-        "token_correspondence_Vale.X64.InsMem.va_wpCompute_Store64_buffer",
-        "typing_Vale.X64.Decls.va_upd_mem",
-        "typing_Vale.X64.Decls.va_upd_ok",
         "typing_Vale.X64.State.__proj__Mkstate__item__mem",
         "typing_Vale.X64.State.__proj__Mkstate__item__ok",
         "typing_Vale.X64.State.__proj__Mkstate__item__regs",
         "typing_Vale.X64.State.__proj__Mkstate__item__xmms", "unit_typing"
       ],
       0,
-      "96c84eb914353e293f236446d0f01df4"
+      "109d892a89739b8214c85c9045066577"
+    ],
+    [
+      "Vale.X64.InsMem.va_quick_Store64_buffer",
+      1,
+      2,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
+        "equation_Vale.X64.Decls.va_fuel",
+        "fuel_guarded_inversion_FStar.Pervasives.Native.tuple3"
+      ],
+      0,
+      "92dc81aa271febfcdd3f4628fdf431b1"
     ],
     [
       "Vale.X64.InsMem.va_lemma_LoadBe64_buffer",
@@ -1005,6 +936,7 @@
         "refinement_interpretation_Tm_refine_f0a4eeefab9c63f31c350a802a4d45dd",
         "token_correspondence_FStar.Map.sel",
         "token_correspondence_Vale.X64.Instructions_s.eval_MovBe64",
+        "token_correspondence_Vale.X64.Machine_Semantics_s.__proj__Mkmachine_state__item__ms_regs",
         "token_correspondence_Vale.X64.Machine_Semantics_s.apply_option",
         "token_correspondence_Vale.X64.Machine_Semantics_s.obs_args.fuel_instrumented",
         "token_correspondence_Vale.X64.Machine_Semantics_s.obs_inouts.fuel_instrumented",
@@ -1020,7 +952,6 @@
         "typing_Vale.X64.Decls.va_is_dst_opr64",
         "typing_Vale.X64.Decls.va_update_operand",
         "typing_Vale.X64.Instructions_s.ins_MovBe64",
-        "typing_Vale.X64.Machine_Semantics_s.__proj__Mkmachine_state__item__ms_trace",
         "typing_Vale.X64.Machine_Semantics_s.eval_maddr",
         "typing_Vale.X64.Machine_Semantics_s.eval_operand",
         "typing_Vale.X64.Machine_Semantics_s.match_n",
@@ -1043,53 +974,11 @@
         "typing_tok_Vale.X64.Instruction_s.IOp64@tok", "unit_typing"
       ],
       0,
-      "6741c5ecce523d071ce9399210d93520"
-    ],
-    [
-      "Vale.X64.InsMem.va_wpMonotone_LoadBe64_buffer",
-      1,
-      2,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "equation_Vale.X64.Decls.va_operand_reg_opr64",
-        "equation_Vale.X64.InsMem.va_wp_LoadBe64_buffer",
-        "fuel_guarded_inversion_Vale.X64.State.state",
-        "refinement_interpretation_Tm_refine_c7e3c0d3955f12f4089701024e3bec07",
-        "typing_Vale.X64.Decls.va_upd_operand_dst_opr64", "unit_typing"
-      ],
-      0,
-      "2f99fb6511f50fd7c6fee2e0428ddaa6"
-    ],
-    [
-      "Vale.X64.InsMem.va_wpCompute_LoadBe64_buffer",
-      1,
-      2,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query", "eq2-interp",
-        "equation_Vale.X64.Decls.va_require_total",
-        "equation_Vale.X64.InsMem.va_wp_LoadBe64_buffer",
-        "fuel_guarded_inversion_Vale.X64.State.state"
-      ],
-      0,
-      "9f53ef8bb64c919ea2bbbd546fdf3a7d"
+      "1add628005e079fcddabd6242f21b962"
     ],
     [
       "Vale.X64.InsMem.va_wpProof_LoadBe64_buffer",
       1,
-      2,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query", "equation_Prims.squash",
-        "refinement_interpretation_Tm_refine_8d65e998a07dd53ec478e27017d9dba5"
-      ],
-      0,
-      "3a88d1180a972cdc98be3066a90150e7"
-    ],
-    [
-      "Vale.X64.InsMem.va_wpProof_LoadBe64_buffer",
-      2,
       2,
       0,
       [
@@ -1102,8 +991,7 @@
         "constructor_distinct_Prims.Nil",
         "constructor_distinct_Vale.X64.QuickCode.Mod_reg",
         "data_typing_intro_Prims.Cons@tok",
-        "data_typing_intro_Prims.Nil@tok",
-        "disc_equation_Vale.X64.Machine_s.OReg", "eq2-interp",
+        "data_typing_intro_Prims.Nil@tok", "eq2-interp",
         "equality_tok_Vale.X64.QuickCode.Mod_None@tok", "equation_Prims.nat",
         "equation_Vale.X64.Decls.va_ensure_total",
         "equation_Vale.X64.Decls.va_fuel",
@@ -1113,7 +1001,6 @@
         "equation_Vale.X64.Decls.va_upd_ok",
         "equation_Vale.X64.Decls.va_upd_operand_dst_opr64",
         "equation_Vale.X64.Decls.va_update_operand",
-        "equation_Vale.X64.InsMem.va_wpCompute_LoadBe64_buffer",
         "equation_Vale.X64.InsMem.va_wp_LoadBe64_buffer",
         "equation_Vale.X64.QuickCode.t_ensure",
         "equation_Vale.X64.QuickCode.update_state_mod",
@@ -1121,7 +1008,7 @@
         "equation_Vale.X64.State.state_eq",
         "equation_Vale.X64.State.update_reg",
         "equation_with_fuel_Vale.X64.QuickCode.update_state_mods.fuel_instrumented",
-        "fuel_guarded_inversion_Vale.X64.State.state", "int_inversion",
+        "fuel_guarded_inversion_Vale.X64.State.state",
         "kinding_Vale.X64.QuickCode.mod_t@tok",
         "lemma_Vale.X64.Regs.lemma_equal_elim",
         "lemma_Vale.X64.StateLemmas.lemma_to_flags",
@@ -1152,7 +1039,6 @@
         "projection_inverse_Vale.X64.State.Mkstate_stack",
         "projection_inverse_Vale.X64.State.Mkstate_stackTaint",
         "projection_inverse_Vale.X64.State.Mkstate_xmms",
-        "token_correspondence_Vale.X64.InsMem.va_wpCompute_LoadBe64_buffer",
         "typing_Vale.X64.Decls.va_is_dst_opr64",
         "typing_Vale.X64.Decls.va_upd_ok",
         "typing_Vale.X64.Decls.va_update_operand",
@@ -1164,7 +1050,20 @@
         "typing_tok_Vale.X64.QuickCode.Mod_None@tok", "unit_typing"
       ],
       0,
-      "30038cd45babdd78500ccb47af869447"
+      "cb511ec7f9f5784e21f27d11b474d3a1"
+    ],
+    [
+      "Vale.X64.InsMem.va_quick_LoadBe64_buffer",
+      1,
+      2,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
+        "equation_Vale.X64.Decls.va_fuel",
+        "fuel_guarded_inversion_FStar.Pervasives.Native.tuple3"
+      ],
+      0,
+      "6f72767f5e538b4731944f08f06cd9a0"
     ],
     [
       "Vale.X64.InsMem.va_lemma_StoreBe64_buffer",
@@ -1431,70 +1330,27 @@
         "typing_tok_Vale.X64.Instruction_s.Out@tok", "unit_typing"
       ],
       0,
-      "2efd24a326ca8cfdd1a947cf7db272b2"
-    ],
-    [
-      "Vale.X64.InsMem.va_wpMonotone_StoreBe64_buffer",
-      1,
-      2,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "equation_Vale.X64.Decls.va_operand_reg_opr64",
-        "equation_Vale.X64.InsMem.va_wp_StoreBe64_buffer",
-        "fuel_guarded_inversion_Vale.X64.State.state",
-        "refinement_interpretation_Tm_refine_c7e3c0d3955f12f4089701024e3bec07",
-        "typing_Vale.X64.Decls.va_upd_mem", "unit_typing"
-      ],
-      0,
-      "0061f55de261664b16cd0fbc3c616cb1"
-    ],
-    [
-      "Vale.X64.InsMem.va_wpCompute_StoreBe64_buffer",
-      1,
-      2,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query", "eq2-interp",
-        "equation_Vale.X64.Decls.va_require_total",
-        "equation_Vale.X64.InsMem.va_wp_StoreBe64_buffer",
-        "fuel_guarded_inversion_Vale.X64.State.state"
-      ],
-      0,
-      "52ac54ba1188d6fefb1532c6820f7e35"
+      "5d62d197a39918739be0fcb380300479"
     ],
     [
       "Vale.X64.InsMem.va_wpProof_StoreBe64_buffer",
       1,
-      2,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query", "equation_Prims.squash",
-        "refinement_interpretation_Tm_refine_8d65e998a07dd53ec478e27017d9dba5"
-      ],
-      0,
-      "c403688ee86ee5431c0e51e4a1f73440"
-    ],
-    [
-      "Vale.X64.InsMem.va_wpProof_StoreBe64_buffer",
-      2,
       2,
       0,
       [
         "@MaxIFuel_assumption", "@query",
         "Prims_pretyping_f8666440faa91836cc5a13998af863fc", "bool_inversion",
-        "disc_equation_Vale.X64.Machine_s.OReg", "eq2-interp",
-        "equation_Prims.nat", "equation_Vale.X64.Decls.va_ensure_total",
+        "eq2-interp", "equation_Prims.nat",
+        "equation_Vale.X64.Decls.va_ensure_total",
         "equation_Vale.X64.Decls.va_fuel",
         "equation_Vale.X64.Decls.va_require_total",
         "equation_Vale.X64.Decls.va_state_eq",
         "equation_Vale.X64.Decls.va_upd_mem",
         "equation_Vale.X64.Decls.va_upd_ok",
-        "equation_Vale.X64.InsMem.va_wpCompute_StoreBe64_buffer",
         "equation_Vale.X64.InsMem.va_wp_StoreBe64_buffer",
         "equation_Vale.X64.QuickCode.t_ensure",
         "equation_Vale.X64.State.state_eq",
-        "fuel_guarded_inversion_Vale.X64.State.state", "int_inversion",
+        "fuel_guarded_inversion_Vale.X64.State.state",
         "lemma_Vale.X64.Regs.lemma_equal_elim",
         "lemma_Vale.X64.StateLemmas.lemma_to_flags",
         "lemma_Vale.X64.StateLemmas.lemma_to_ok",
@@ -1507,7 +1363,6 @@
         "proj_equation_Vale.X64.State.Mkstate_stack",
         "proj_equation_Vale.X64.State.Mkstate_stackTaint",
         "proj_equation_Vale.X64.State.Mkstate_xmms",
-        "projection_inverse_BoxBool_proj_0",
         "projection_inverse_FStar.Pervasives.Native.Mktuple2__1",
         "projection_inverse_FStar.Pervasives.Native.Mktuple3__1",
         "projection_inverse_FStar.Pervasives.Native.Mktuple3__2",
@@ -1519,16 +1374,26 @@
         "projection_inverse_Vale.X64.State.Mkstate_stack",
         "projection_inverse_Vale.X64.State.Mkstate_stackTaint",
         "projection_inverse_Vale.X64.State.Mkstate_xmms",
-        "token_correspondence_Vale.X64.InsMem.va_wpCompute_StoreBe64_buffer",
-        "typing_Vale.X64.Decls.va_upd_mem",
-        "typing_Vale.X64.Decls.va_upd_ok",
         "typing_Vale.X64.State.__proj__Mkstate__item__mem",
         "typing_Vale.X64.State.__proj__Mkstate__item__ok",
         "typing_Vale.X64.State.__proj__Mkstate__item__regs",
         "typing_Vale.X64.State.__proj__Mkstate__item__xmms", "unit_typing"
       ],
       0,
-      "495fe5c631233f16fcbbd47fb6fd5a25"
+      "8d29e404b6ceb4ef28b8e25263eb2648"
+    ],
+    [
+      "Vale.X64.InsMem.va_quick_StoreBe64_buffer",
+      1,
+      2,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
+        "equation_Vale.X64.Decls.va_fuel",
+        "fuel_guarded_inversion_FStar.Pervasives.Native.tuple3"
+      ],
+      0,
+      "87629edb872285147dc4716b913d9a1a"
     ]
   ]
 ]

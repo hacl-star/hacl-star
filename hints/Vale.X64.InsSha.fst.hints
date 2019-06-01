@@ -1,5 +1,5 @@
 [
-  "%\u000bBﬁK[\fQlxè)\r\u001b’·",
+  "<¶∑·\u000f»“»k\u001b¢â&(†Í",
   [
     [
       "Vale.X64.InsSha.va_lemma_SHA256_rnds2",
@@ -22,7 +22,7 @@
         "typing_Vale.SHA.SHA_helpers.k"
       ],
       0,
-      "f4fa301e5c04414e626a580615bece85"
+      "765b904f114e005adbef15baad7d15e7"
     ],
     [
       "Vale.X64.InsSha.va_lemma_SHA256_rnds2",
@@ -106,7 +106,6 @@
         "equation_Vale.X64.Machine_Semantics_s.taint_match_ins",
         "equation_Vale.X64.Machine_Semantics_s.taint_match_operand_explicit",
         "equation_Vale.X64.Machine_Semantics_s.taint_match_operand_implicit",
-        "equation_Vale.X64.Machine_Semantics_s.untainted_eval_ins",
         "equation_Vale.X64.Machine_Semantics_s.update_mov128_op_preserve_flags__",
         "equation_Vale.X64.Machine_Semantics_s.update_taint128",
         "equation_Vale.X64.Machine_Semantics_s.update_taint_ins",
@@ -137,9 +136,8 @@
         "function_token_typing_Vale.X64.Instruction_s.instr_eval",
         "function_token_typing_Vale.X64.Instruction_s.instr_out",
         "function_token_typing_Vale.X64.Machine_Semantics_s.__proj__Mkmachine_state__item__ms_regs",
-        "function_token_typing_Vale.X64.Machine_Semantics_s.__proj__Mkmachine_state__item__ms_xmms",
         "function_token_typing_Vale.X64.Machine_Semantics_s.untainted_eval_ins",
-        "int_inversion", "int_typing",
+        "int_typing",
         "interpretation_Tm_abs_103386ea0ab82cff7f8f0649761255f0",
         "interpretation_Tm_abs_278ee39c56146da2cf768923b14788e6",
         "interpretation_Tm_abs_4a03b74fa95b855aa0b1402883b6422f",
@@ -148,7 +146,6 @@
         "interpretation_Tm_abs_5dbeb05fe190b8001e99d4a43205ac44",
         "interpretation_Tm_abs_66926e89e50e2ac69caf858cc1113f07",
         "interpretation_Tm_abs_79ba8bf6347047aead297a0ac2627909",
-        "interpretation_Tm_abs_aa142dd6b9f501d1035efe28fa818300",
         "interpretation_Tm_abs_ad07e75703d7d2864034149bef2eb520",
         "interpretation_Tm_abs_bbf2e5e60114d744ea10e543df147121",
         "kinding_FStar.Pervasives.Native.tuple2@tok",
@@ -205,7 +202,7 @@
         "projection_inverse_Vale.X64.Bytes_Code_s.Instr_oprs",
         "projection_inverse_Vale.X64.Instruction_s.IOpEx__0",
         "projection_inverse_Vale.X64.Instruction_s.IOpIm__0",
-        "projection_inverse_Vale.X64.Instruction_s.IOpXmmOne__0",
+        "projection_inverse_Vale.X64.Instruction_s.IOpXmmOne_o",
         "projection_inverse_Vale.X64.Instruction_s.InstrTypeRecord_args",
         "projection_inverse_Vale.X64.Instruction_s.InstrTypeRecord_outs",
         "projection_inverse_Vale.X64.Machine_Semantics_s.Mkmachine_state_ms_flags",
@@ -240,7 +237,6 @@
         "token_correspondence_Vale.X64.Machine_Semantics_s.obs_args.fuel_instrumented",
         "token_correspondence_Vale.X64.Machine_Semantics_s.obs_inouts.fuel_instrumented",
         "typing_FStar.Pervasives.Native.snd",
-        "typing_Tm_abs_2f06a563a0c8e1eb1408ecbad2193486",
         "typing_Tm_abs_52384b7794d05e0dfa591121f589db45",
         "typing_Tm_abs_66926e89e50e2ac69caf858cc1113f07",
         "typing_Vale.X64.CPU_Features_s.sha_enabled",
@@ -266,7 +262,7 @@
         "typing_tok_Vale.X64.Instruction_s.InOut@tok", "unit_typing"
       ],
       0,
-      "3a3b4168dd961cf5ea78d42aa0758eea"
+      "2e6bacc2d9d8f279b3cec6021d0ff1c9"
     ],
     [
       "Vale.X64.InsSha.va_wp_SHA256_rnds2",
@@ -283,65 +279,23 @@
         "typing_Vale.SHA.SHA_helpers.k"
       ],
       0,
-      "cb152653fd5f864cd5afd2da30ffff1b"
-    ],
-    [
-      "Vale.X64.InsSha.va_wpMonotone_SHA256_rnds2",
-      1,
-      4,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "equation_Vale.X64.InsSha.va_wp_SHA256_rnds2",
-        "fuel_guarded_inversion_Vale.X64.State.state",
-        "typing_Vale.X64.Decls.va_upd_operand_xmm", "unit_typing"
-      ],
-      0,
-      "ed0ffc00756e50fe3cdb9266c3e6d364"
-    ],
-    [
-      "Vale.X64.InsSha.va_wpCompute_SHA256_rnds2",
-      1,
-      4,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query", "eq2-interp",
-        "equation_Vale.X64.Decls.va_require_total",
-        "equation_Vale.X64.InsSha.va_wp_SHA256_rnds2",
-        "fuel_guarded_inversion_Vale.X64.State.state"
-      ],
-      0,
-      "039b517d345b88778a2dbd7070df073c"
+      "5e2550431382ef9eda7d883c38c8014d"
     ],
     [
       "Vale.X64.InsSha.va_wpProof_SHA256_rnds2",
       1,
-      4,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query", "equation_Prims.squash",
-        "refinement_interpretation_Tm_refine_8d65e998a07dd53ec478e27017d9dba5"
-      ],
-      0,
-      "3d1ed0ba0f57c246dc701db0a80268ba"
-    ],
-    [
-      "Vale.X64.InsSha.va_wpProof_SHA256_rnds2",
-      2,
       4,
       0,
       [
         "@MaxIFuel_assumption", "@query",
         "Prims_pretyping_f8666440faa91836cc5a13998af863fc", "bool_inversion",
         "eq2-interp", "equation_Prims.nat",
-        "equation_Vale.SHA.SHA_helpers.counter",
         "equation_Vale.X64.Decls.va_ensure_total",
         "equation_Vale.X64.Decls.va_fuel",
         "equation_Vale.X64.Decls.va_require_total",
         "equation_Vale.X64.Decls.va_state_eq",
         "equation_Vale.X64.Decls.va_upd_ok",
         "equation_Vale.X64.Decls.va_upd_xmm",
-        "equation_Vale.X64.InsSha.va_wpCompute_SHA256_rnds2",
         "equation_Vale.X64.InsSha.va_wp_SHA256_rnds2",
         "equation_Vale.X64.Machine_s.xmm",
         "equation_Vale.X64.QuickCode.t_ensure",
@@ -371,16 +325,27 @@
         "projection_inverse_Vale.X64.State.Mkstate_stack",
         "projection_inverse_Vale.X64.State.Mkstate_stackTaint",
         "projection_inverse_Vale.X64.State.Mkstate_xmms",
-        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
         "refinement_interpretation_Tm_refine_f0a4eeefab9c63f31c350a802a4d45dd",
-        "token_correspondence_Vale.X64.InsSha.va_wpCompute_SHA256_rnds2",
         "typing_Vale.X64.State.__proj__Mkstate__item__ok",
         "typing_Vale.X64.State.__proj__Mkstate__item__regs",
         "typing_Vale.X64.State.__proj__Mkstate__item__xmms",
         "typing_Vale.X64.Xmms.sel", "typing_Vale.X64.Xmms.upd", "unit_typing"
       ],
       0,
-      "445bfdc8c14c09dff66f696c5280d09a"
+      "8d92eb7ef47edf4d131991503d542bf6"
+    ],
+    [
+      "Vale.X64.InsSha.va_quick_SHA256_rnds2",
+      1,
+      4,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
+        "equation_Vale.X64.Decls.va_fuel",
+        "fuel_guarded_inversion_FStar.Pervasives.Native.tuple3"
+      ],
+      0,
+      "5ae060a3ffbbd8c595359526dcaf0aa7"
     ],
     [
       "Vale.X64.InsSha.va_lemma_SHA256_msg1",
@@ -397,7 +362,7 @@
         "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-      "7ba36c2813d942b6a37f15a074bd9033"
+      "d9a6b8c5f5d79105e229acda14a95119"
     ],
     [
       "Vale.X64.InsSha.va_lemma_SHA256_msg1",
@@ -628,7 +593,7 @@
         "typing_tok_Vale.X64.Instruction_s.InOut@tok", "unit_typing"
       ],
       0,
-      "a475671fcdd39ce8d6d983c44161b269"
+      "6260e12f5e5e727fdaad04b867b06e1c"
     ],
     [
       "Vale.X64.InsSha.va_wp_SHA256_msg1",
@@ -645,65 +610,23 @@
         "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-      "0efd6d1dc24a3ed10da2cde04e012c69"
-    ],
-    [
-      "Vale.X64.InsSha.va_wpMonotone_SHA256_msg1",
-      1,
-      4,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "equation_Vale.X64.InsSha.va_wp_SHA256_msg1",
-        "fuel_guarded_inversion_Vale.X64.State.state",
-        "typing_Vale.X64.Decls.va_upd_operand_xmm", "unit_typing"
-      ],
-      0,
-      "e121da9b14ce17ba12d2a842eb772e5c"
-    ],
-    [
-      "Vale.X64.InsSha.va_wpCompute_SHA256_msg1",
-      1,
-      4,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query", "eq2-interp",
-        "equation_Vale.X64.Decls.va_require_total",
-        "equation_Vale.X64.InsSha.va_wp_SHA256_msg1",
-        "fuel_guarded_inversion_Vale.X64.State.state"
-      ],
-      0,
-      "d6bef94d34672731d0c0d6d57bb6c070"
+      "6fb0a4e93c4755248960e6dbdc362cc0"
     ],
     [
       "Vale.X64.InsSha.va_wpProof_SHA256_msg1",
       1,
-      4,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query", "equation_Prims.squash",
-        "refinement_interpretation_Tm_refine_8d65e998a07dd53ec478e27017d9dba5"
-      ],
-      0,
-      "598fb0f27dd9a86d5bc3f29c2b511e84"
-    ],
-    [
-      "Vale.X64.InsSha.va_wpProof_SHA256_msg1",
-      2,
       4,
       0,
       [
         "@MaxIFuel_assumption", "@query",
         "Prims_pretyping_f8666440faa91836cc5a13998af863fc", "bool_inversion",
         "eq2-interp", "equation_Prims.nat",
-        "equation_Vale.SHA.SHA_helpers.counter",
         "equation_Vale.X64.Decls.va_ensure_total",
         "equation_Vale.X64.Decls.va_fuel",
         "equation_Vale.X64.Decls.va_require_total",
         "equation_Vale.X64.Decls.va_state_eq",
         "equation_Vale.X64.Decls.va_upd_ok",
         "equation_Vale.X64.Decls.va_upd_xmm",
-        "equation_Vale.X64.InsSha.va_wpCompute_SHA256_msg1",
         "equation_Vale.X64.InsSha.va_wp_SHA256_msg1",
         "equation_Vale.X64.Machine_s.xmm",
         "equation_Vale.X64.QuickCode.t_ensure",
@@ -733,16 +656,27 @@
         "projection_inverse_Vale.X64.State.Mkstate_stack",
         "projection_inverse_Vale.X64.State.Mkstate_stackTaint",
         "projection_inverse_Vale.X64.State.Mkstate_xmms",
-        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
         "refinement_interpretation_Tm_refine_f0a4eeefab9c63f31c350a802a4d45dd",
-        "token_correspondence_Vale.X64.InsSha.va_wpCompute_SHA256_msg1",
         "typing_Vale.X64.State.__proj__Mkstate__item__ok",
         "typing_Vale.X64.State.__proj__Mkstate__item__regs",
         "typing_Vale.X64.State.__proj__Mkstate__item__xmms",
         "typing_Vale.X64.Xmms.sel", "typing_Vale.X64.Xmms.upd", "unit_typing"
       ],
       0,
-      "c00987d1bcc25639b0304ecb98a36124"
+      "1267ab97c7d787a6540ff1ecddfd6240"
+    ],
+    [
+      "Vale.X64.InsSha.va_quick_SHA256_msg1",
+      1,
+      4,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
+        "equation_Vale.X64.Decls.va_fuel",
+        "fuel_guarded_inversion_FStar.Pervasives.Native.tuple3"
+      ],
+      0,
+      "0315d7a63d5335f4f4d399a5363efd6a"
     ],
     [
       "Vale.X64.InsSha.va_lemma_SHA256_msg2",
@@ -758,7 +692,7 @@
         "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-      "f834f8d6bcb54c7179fa84508db9716f"
+      "e1ac8461d9c2a78e0072eb26c257a4e4"
     ],
     [
       "Vale.X64.InsSha.va_lemma_SHA256_msg2",
@@ -990,7 +924,7 @@
         "typing_tok_Vale.X64.Instruction_s.InOut@tok", "unit_typing"
       ],
       0,
-      "d164ef05bfd890f046429b2c11188388"
+      "ee5afbbbcfb47925f22054b708d3a8e7"
     ],
     [
       "Vale.X64.InsSha.va_wp_SHA256_msg2",
@@ -1006,51 +940,11 @@
         "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-      "2ea5fc084efd212728c6c6adf7540a7f"
-    ],
-    [
-      "Vale.X64.InsSha.va_wpMonotone_SHA256_msg2",
-      1,
-      4,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "equation_Vale.X64.InsSha.va_wp_SHA256_msg2",
-        "fuel_guarded_inversion_Vale.X64.State.state",
-        "typing_Vale.X64.Decls.va_upd_operand_xmm", "unit_typing"
-      ],
-      0,
-      "3d80184c7b67ac21a2cec8d1bf0a12b0"
-    ],
-    [
-      "Vale.X64.InsSha.va_wpCompute_SHA256_msg2",
-      1,
-      4,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query", "eq2-interp",
-        "equation_Vale.X64.Decls.va_require_total",
-        "equation_Vale.X64.InsSha.va_wp_SHA256_msg2",
-        "fuel_guarded_inversion_Vale.X64.State.state"
-      ],
-      0,
-      "af9ab6c403806793f208e22c8864ee98"
+      "179b23aa9a4981c56fa60f9550f76ce4"
     ],
     [
       "Vale.X64.InsSha.va_wpProof_SHA256_msg2",
       1,
-      4,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query", "equation_Prims.squash",
-        "refinement_interpretation_Tm_refine_8d65e998a07dd53ec478e27017d9dba5"
-      ],
-      0,
-      "606baa3e23fcbab8659f5317f82e1547"
-    ],
-    [
-      "Vale.X64.InsSha.va_wpProof_SHA256_msg2",
-      2,
       4,
       0,
       [
@@ -1064,7 +958,6 @@
         "equation_Vale.X64.Decls.va_state_eq",
         "equation_Vale.X64.Decls.va_upd_ok",
         "equation_Vale.X64.Decls.va_upd_xmm",
-        "equation_Vale.X64.InsSha.va_wpCompute_SHA256_msg2",
         "equation_Vale.X64.InsSha.va_wp_SHA256_msg2",
         "equation_Vale.X64.Machine_s.xmm",
         "equation_Vale.X64.QuickCode.t_ensure",
@@ -1096,7 +989,6 @@
         "projection_inverse_Vale.X64.State.Mkstate_xmms",
         "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
         "refinement_interpretation_Tm_refine_f0a4eeefab9c63f31c350a802a4d45dd",
-        "token_correspondence_Vale.X64.InsSha.va_wpCompute_SHA256_msg2",
         "typing_Vale.SHA.SHA_helpers.ws_quad32",
         "typing_Vale.X64.State.__proj__Mkstate__item__ok",
         "typing_Vale.X64.State.__proj__Mkstate__item__regs",
@@ -1104,7 +996,20 @@
         "typing_Vale.X64.Xmms.upd", "unit_typing"
       ],
       0,
-      "19aadf127aa7d0ce5ebac61b5ee7ed9a"
+      "6e7f170a3e09913ba50eeea3b3e35554"
+    ],
+    [
+      "Vale.X64.InsSha.va_quick_SHA256_msg2",
+      1,
+      4,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
+        "equation_Vale.X64.Decls.va_fuel",
+        "fuel_guarded_inversion_FStar.Pervasives.Native.tuple3"
+      ],
+      0,
+      "15b24a5b35344e871b1519b3f7460ffc"
     ]
   ]
 ]

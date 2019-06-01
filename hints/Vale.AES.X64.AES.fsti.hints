@@ -1,5 +1,5 @@
 [
-  "∫Òb◊\u0019ìAóÅA5ÓWî)Ç",
+  "nÃP\u001dõáƒmºd,–µÃ ô",
   [
     [
       "Vale.AES.X64.AES.va_req_KeyExpansionStdcall",
@@ -16,7 +16,7 @@
         "unit_typing"
       ],
       0,
-      "bb7689a823b4a4b279fcde5ad8664ccc"
+      "77c607a91f0f3574685ce8f84b0c7429"
     ],
     [
       "Vale.AES.X64.AES.va_ens_KeyExpansionStdcall",
@@ -58,7 +58,7 @@
         "typing_tok_Vale.Interop.Types.TUInt128@tok", "unit_typing"
       ],
       0,
-      "742aafc1c4ccf055492b49b2ef414793"
+      "2bb13b389dfe969c3c4f66dde84c1c24"
     ],
     [
       "Vale.AES.X64.AES.va_lemma_KeyExpansionStdcall",
@@ -98,7 +98,7 @@
         "typing_tok_Vale.Interop.Types.TUInt128@tok"
       ],
       0,
-      "42cb6201326675b146bbe48c4eb1bc19"
+      "a6f263501da71928d1eb6c25cfe00cd1"
     ],
     [
       "Vale.AES.X64.AES.va_wp_KeyExpansionStdcall",
@@ -158,19 +158,19 @@
         "typing_tok_Vale.Interop.Types.TUInt128@tok", "unit_typing"
       ],
       0,
-      "b4d3099ac4ab6db2eaa56d8276710192"
+      "1e6fb479cba57379dc75aaaddc600602"
     ],
     [
-      "Vale.AES.X64.AES.va_wpProof_KeyExpansionStdcall",
+      "Vale.AES.X64.AES.va_quick_KeyExpansionStdcall",
       1,
       1,
       0,
       [
-        "@MaxIFuel_assumption", "@query", "equation_Prims.squash",
-        "refinement_interpretation_Tm_refine_8d65e998a07dd53ec478e27017d9dba5"
+        "@MaxIFuel_assumption", "@query",
+        "fuel_guarded_inversion_FStar.Pervasives.Native.tuple3"
       ],
       0,
-      "64647bf77f17639937789e51df2f54bb"
+      "6188230a28b8fd4d347b6a0ff5d440eb"
     ],
     [
       "Vale.AES.X64.AES.va_lemma_AESEncryptBlock",
@@ -187,7 +187,7 @@
         "refinement_interpretation_Tm_refine_5b03104b69efa2fe61532055435af66a"
       ],
       0,
-      "363019a5edbfbcf80c33b8ac848685ca"
+      "c84b67cd0e5895296324b3b7dc345ae7"
     ],
     [
       "Vale.AES.X64.AES.va_wp_AESEncryptBlock",
@@ -196,19 +196,19 @@
       0,
       [ "@query", "projection_inverse_BoxInt_proj_0" ],
       0,
-      "b7290c49930f6f60420d3254af3a0ff4"
+      "197b2c58269c3c1fc35d0ff2c9e4254c"
     ],
     [
-      "Vale.AES.X64.AES.va_wpProof_AESEncryptBlock",
+      "Vale.AES.X64.AES.va_quick_AESEncryptBlock",
       1,
       1,
       0,
       [
-        "@MaxIFuel_assumption", "@query", "equation_Prims.squash",
-        "refinement_interpretation_Tm_refine_8d65e998a07dd53ec478e27017d9dba5"
+        "@MaxIFuel_assumption", "@query",
+        "fuel_guarded_inversion_FStar.Pervasives.Native.tuple3"
       ],
       0,
-      "d38a81cfc8fda1305f3509729be23c47"
+      "51bdb04111fa603a3d0e5039126dc7a8"
     ]
   ]
 ]
