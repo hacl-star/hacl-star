@@ -1173,16 +1173,14 @@ let rec lemma_unchanged_at_and_except (as:list access_location) (s1 s2:machine_s
       ));
     lemma_unchanged_at_and_except xs s1 s2
 
-let lemma_equiv_states_when_except_none (s1 s2:machine_state) :
+let lemma_equiv_states_when_except_none (s1 s2:machine_state) (ok:bool) :
   Lemma
     (requires (
-        (s1.ms_ok == s2.ms_ok) /\
         (s1.ms_stack.initial_rsp = s2.ms_stack.initial_rsp) /\
         (unchanged_except [] s1 s2)))
     (ensures (
-        (equiv_states s1 s2))) =
+        (equiv_states ({s1 with ms_ok=ok}) ({s2 with ms_ok=ok})))) =
   let open FStar.FunctionalExtensionality in
-  assert (s1.ms_ok == s2.ms_ok);
   FStar.Classical.forall_intro (
     (fun r ->
        assert (eval_access_location (ALoc64 (OReg r)) s1 ==
@@ -1277,9 +1275,9 @@ let lemma_commute (f1 f2:st unit) (r1 w1 r2 w2:list access_location) (s:machine_
   lemma_unchanged_at_combine w1 w2 is1 is2 is12 is21;
   lemma_unchanged_at_and_except (w1 `L.append` w2) is12 is21;
   assert (unchanged_except [] is12 is21);
-  assume (is12.ms_ok = is21.ms_ok); (* Not always true? *)
+  assert (s21.ms_ok = s12.ms_ok);
   assume (is12.ms_stack.initial_rsp = is21.ms_stack.initial_rsp); (* TODO: Prove this *)
-  lemma_equiv_states_when_except_none is12 is21;
+  lemma_equiv_states_when_except_none is12 is21 s12.ms_ok;
   assert (equiv_states (run2 f1 f2 s) (run2 f2 f1 s))
 
 let lemma_unchanged_commutes (i1 i2 : ins) (s : machine_state) :
