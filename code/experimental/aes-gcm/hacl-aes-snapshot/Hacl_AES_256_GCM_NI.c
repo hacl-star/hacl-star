@@ -182,11 +182,11 @@ Hacl_Gf128_NI_gcm_update_blocks(Lib_Vec128_vec128 *ctx, uint32_t len, uint8_t *t
   uint32_t blocks = len / (uint32_t)64U;
   for (uint32_t i = (uint32_t)0U; i < blocks; i = i + (uint32_t)1U)
   {
-    uint8_t *uu____0 = text + i * (uint32_t)64U;
-    b4[0U] = Lib_Vec128_vec128_load_be(uu____0);
-    b4[1U] = Lib_Vec128_vec128_load_be(uu____0 + (uint32_t)16U);
-    b4[2U] = Lib_Vec128_vec128_load_be(uu____0 + (uint32_t)32U);
-    b4[3U] = Lib_Vec128_vec128_load_be(uu____0 + (uint32_t)48U);
+    uint8_t *tb = text + i * (uint32_t)64U;
+    b4[0U] = Lib_Vec128_vec128_load_be(tb);
+    b4[1U] = Lib_Vec128_vec128_load_be(tb + (uint32_t)16U);
+    b4[2U] = Lib_Vec128_vec128_load_be(tb + (uint32_t)32U);
+    b4[3U] = Lib_Vec128_vec128_load_be(tb + (uint32_t)48U);
     Hacl_Impl_Gf128_FieldNI_fadd_mul4(acc, b4, pre);
   }
   uint32_t rem1 = len % (uint32_t)64U;
@@ -196,9 +196,9 @@ Hacl_Gf128_NI_gcm_update_blocks(Lib_Vec128_vec128 *ctx, uint32_t len, uint8_t *t
   uint32_t blocks1 = rem1 / (uint32_t)16U;
   for (uint32_t i = (uint32_t)0U; i < blocks1; i = i + (uint32_t)1U)
   {
-    uint8_t *uu____1 = last1 + i * (uint32_t)16U;
+    uint8_t *tb = last1 + i * (uint32_t)16U;
     Lib_Vec128_vec128 elem = Lib_Vec128_vec128_zero;
-    elem = Lib_Vec128_vec128_load_be(uu____1);
+    elem = Lib_Vec128_vec128_load_be(tb);
     Hacl_Impl_Gf128_FieldNI_fadd(acc1, &elem);
     Hacl_Impl_Gf128_FieldNI_fmul(acc1, r);
   }
@@ -218,46 +218,7 @@ Hacl_Gf128_NI_gcm_update_blocks(Lib_Vec128_vec128 *ctx, uint32_t len, uint8_t *t
 static void
 Hacl_Gf128_NI_gcm_update_padded(Lib_Vec128_vec128 *ctx, uint32_t len, uint8_t *text)
 {
-  Lib_Vec128_vec128 *acc = ctx;
-  Lib_Vec128_vec128 *pre = ctx + (uint32_t)1U;
-  KRML_CHECK_SIZE(sizeof (Lib_Vec128_vec128), (uint32_t)4U);
-  Lib_Vec128_vec128 b4[4U];
-  for (uint32_t _i = 0U; _i < (uint32_t)4U; ++_i)
-    b4[_i] = Lib_Vec128_vec128_zero;
-  uint32_t blocks = len / (uint32_t)64U;
-  for (uint32_t i = (uint32_t)0U; i < blocks; i = i + (uint32_t)1U)
-  {
-    uint8_t *uu____0 = text + i * (uint32_t)64U;
-    b4[0U] = Lib_Vec128_vec128_load_be(uu____0);
-    b4[1U] = Lib_Vec128_vec128_load_be(uu____0 + (uint32_t)16U);
-    b4[2U] = Lib_Vec128_vec128_load_be(uu____0 + (uint32_t)32U);
-    b4[3U] = Lib_Vec128_vec128_load_be(uu____0 + (uint32_t)48U);
-    Hacl_Impl_Gf128_FieldNI_fadd_mul4(acc, b4, pre);
-  }
-  uint32_t rem1 = len % (uint32_t)64U;
-  uint8_t *last1 = text + blocks * (uint32_t)64U;
-  Lib_Vec128_vec128 *acc1 = ctx;
-  Lib_Vec128_vec128 *r = ctx + (uint32_t)4U;
-  uint32_t blocks1 = rem1 / (uint32_t)16U;
-  for (uint32_t i = (uint32_t)0U; i < blocks1; i = i + (uint32_t)1U)
-  {
-    uint8_t *uu____1 = last1 + i * (uint32_t)16U;
-    Lib_Vec128_vec128 elem = Lib_Vec128_vec128_zero;
-    elem = Lib_Vec128_vec128_load_be(uu____1);
-    Hacl_Impl_Gf128_FieldNI_fadd(acc1, &elem);
-    Hacl_Impl_Gf128_FieldNI_fmul(acc1, r);
-  }
-  uint32_t rem2 = rem1 % (uint32_t)16U;
-  if (rem2 > (uint32_t)0U)
-  {
-    uint8_t *last2 = last1 + blocks1 * (uint32_t)16U;
-    Lib_Vec128_vec128 elem = Lib_Vec128_vec128_zero;
-    uint8_t b[16U] = { 0U };
-    memcpy(b, last2, rem2 * sizeof last2[0U]);
-    elem = Lib_Vec128_vec128_load_be(b);
-    Hacl_Impl_Gf128_FieldNI_fadd(acc1, &elem);
-    Hacl_Impl_Gf128_FieldNI_fmul(acc1, r);
-  }
+  Hacl_Gf128_NI_gcm_update_blocks(ctx, len, text);
 }
 
 static void Hacl_Gf128_NI_gcm_emit(uint8_t *tag, Lib_Vec128_vec128 *ctx)
