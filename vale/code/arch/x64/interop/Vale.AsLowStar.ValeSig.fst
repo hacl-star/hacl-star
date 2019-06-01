@@ -43,7 +43,7 @@ let vale_calling_conventions
   (regs_modified:MS.reg -> bool)
   (xmms_modified:MS.xmm -> bool) =
   let open MS in
-  s1.VS.ok /\
+  s1.VS.vs_ok /\
   vale_save_reg MS.rRsp s0 s1 /\
   (forall (r:MS.reg).
     not (regs_modified r) ==> vale_save_reg r s0 s1) /\
@@ -62,7 +62,7 @@ let mloc_modified_args (args:list arg) : GTot ME.loc =
 
 let state_of (x:(V.va_state & V.va_fuel)) = fst x
 let fuel_of (x:(V.va_state & V.va_fuel)) = snd x
-let sprop = VS.state -> prop
+let sprop = VS.vale_state -> prop
 
 
 [@__reduce__]
@@ -126,8 +126,8 @@ let vale_sig_nil
        V.eval_code code va_s0 f va_s1 /\
        vale_calling_conventions va_s0 va_s1 regs_modified xmms_modified /\
        elim_nil post va_s0 va_s1 f /\
-       readable args VS.(va_s1.mem) /\
-       ME.modifies (mloc_modified_args args) va_s0.VS.mem va_s1.VS.mem))
+       readable args VS.(va_s1.vs_mem) /\
+       ME.modifies (mloc_modified_args args) va_s0.VS.vs_mem va_s1.VS.vs_mem))
 
 [@__reduce__]
 let rec vale_sig_tl (regs_modified:MS.reg -> bool)
@@ -192,5 +192,5 @@ let vale_sig (#dom:list td)
 let vale_sig_stdcall #dom = vale_sig #dom IX64.regs_modified_stdcall IX64.xmms_modified_stdcall
 
 [@__reduce__]
-let vale_calling_conventions_stdcall (s0 s1:VS.state) =
+let vale_calling_conventions_stdcall (s0 s1:VS.vale_state) =
   vale_calling_conventions s0 s1 IX64.regs_modified_stdcall IX64.xmms_modified_stdcall

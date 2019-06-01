@@ -22,7 +22,7 @@ let as_vale_immbuffer #src #t i =
 
 let mem_eq = ()
 let stack_eq = ()
-let buffer_addr_is_nat64 (#t:_) (x:ME.buffer t) (s:VS.state) = ()
+let buffer_addr_is_nat64 (#t:_) (x:ME.buffer t) (s:VS.vale_state) = ()
 
 module V = Vale.X64.Decls
 friend Vale.X64.Decls

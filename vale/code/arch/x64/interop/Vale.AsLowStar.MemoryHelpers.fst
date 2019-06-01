@@ -68,8 +68,8 @@ let core_create_lemma_taint_hyp
       (ensures (let va_s = LSig.create_initial_vale_state #max_arity #arg_reg args h0 in
                 LSig.taint_hyp args va_s))
   = let va_s = LSig.create_initial_vale_state #max_arity #arg_reg args h0 in
-    let taint_map = va_s.VS.memTaint in
-    let mem = va_s.VS.mem in
+    let taint_map = va_s.VS.vs_memTaint in
+    let mem = va_s.VS.vs_mem in
 //    assert (mem == mk_mem args h0);
     let raw_taint = IX64.(mk_taint args IX64.init_taint) in
     assert (taint_map == create_memtaint mem (args_b8 args) raw_taint);

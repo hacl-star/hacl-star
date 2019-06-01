@@ -88,13 +88,13 @@ let cswap_lemma'
        V.eval_code code va_s0 f va_s1 /\
        VSig.vale_calling_conventions va_s0 va_s1 cswap_regs_modified cswap_xmms_modified /\
        cswap_post code p0 p1 bit va_s0 va_s1 f /\
-       ME.buffer_readable VS.(va_s1.mem) (as_vale_buffer p0) /\
-       ME.buffer_readable VS.(va_s1.mem) (as_vale_buffer p1) /\
+       ME.buffer_readable VS.(va_s1.vs_mem) (as_vale_buffer p0) /\
+       ME.buffer_readable VS.(va_s1.vs_mem) (as_vale_buffer p1) /\
        ME.buffer_writeable (as_vale_buffer p0) /\
        ME.buffer_writeable (as_vale_buffer p1) /\
        ME.modifies (ME.loc_union (ME.loc_buffer (as_vale_buffer p0))
                    (ME.loc_union (ME.loc_buffer (as_vale_buffer p1))
-                                 ME.loc_none)) va_s0.VS.mem va_s1.VS.mem
+                                 ME.loc_none)) va_s0.VS.vs_mem va_s1.VS.vs_mem
  )) =
    let va_s1, f = FU.va_lemma_cswap2 code va_s0 (as_vale_buffer p0) (as_vale_buffer p1) (UInt64.v bit) in
    Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 p0;

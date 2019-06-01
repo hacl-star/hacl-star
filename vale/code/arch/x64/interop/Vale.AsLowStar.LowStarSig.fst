@@ -68,7 +68,7 @@ let view_of_base_typ (t:ME.base_typ)
 //    Interepreting a vale pre/post as a Low* function type
 //////////////////////////////////////////////////////////////////////////////////////////
 let hprop = HS.mem -> prop
-let hsprop = HS.mem -> VS.state -> prop
+let hsprop = HS.mem -> VS.vale_state -> prop
 module IB = Vale.Interop.Base
 
 [@__reduce__]
@@ -76,12 +76,12 @@ let mem_correspondence_1
       (src t:ME.base_typ)
       (x:IB.buf_t src t)
       (h:HS.mem)
-      (s:VS.state) =
+      (s:VS.vale_state) =
   let y = as_vale_buffer x in
   let db = get_downview x in
   DV.length_eq db;
   Seq.equal
-    (nat_to_uint_seq_t t (ME.buffer_as_seq s.VS.mem y))
+    (nat_to_uint_seq_t t (ME.buffer_as_seq s.VS.vs_mem y))
     (UV.as_seq h (UV.mk_buffer db (view_of_base_typ t)))
 
 [@__reduce__]
@@ -89,12 +89,12 @@ let mem_imm_correspondence_1
       (src t:ME.base_typ)
       (x:IB.ibuf_t src t)
       (h:HS.mem)
-      (s:VS.state) =
+      (s:VS.vale_state) =
   let y = as_vale_immbuffer x in
   let db = get_downview x in
   DV.length_eq db;
   Seq.equal
-    (nat_to_uint_seq_t t (ME.buffer_as_seq s.VS.mem y))
+    (nat_to_uint_seq_t t (ME.buffer_as_seq s.VS.vs_mem y))
     (UV.as_seq h (UV.mk_buffer db (view_of_base_typ t)))
 
 [@__reduce__]
@@ -116,7 +116,7 @@ let rec mem_correspondence (args:list arg) : hsprop =
       mem_correspondence tl
 
 [@__reduce__]
-let arg_as_nat64 (a:arg) (s:VS.state) : GTot ME.nat64 =
+let arg_as_nat64 (a:arg) (s:VS.vale_state) : GTot ME.nat64 =
   let (| tag, x |) = a in
   let open ME in
   match tag with
@@ -130,10 +130,10 @@ let arg_as_nat64 (a:arg) (s:VS.state) : GTot ME.nat64 =
      UInt64.v x
   | TD_Buffer src bt _ ->
      buffer_addr_is_nat64 (as_vale_buffer #src #bt x) s;
-     ME.buffer_addr (as_vale_buffer #src #bt x) VS.(s.mem)
+     ME.buffer_addr (as_vale_buffer #src #bt x) VS.(s.vs_mem)
   | TD_ImmBuffer src bt _ ->
      buffer_addr_is_nat64 (as_vale_immbuffer #src #bt x) s;
-     ME.buffer_addr (as_vale_immbuffer #src #bt x) VS.(s.mem)
+     ME.buffer_addr (as_vale_immbuffer #src #bt x) VS.(s.vs_mem)
 
 
 [@__reduce__]
@@ -166,8 +166,8 @@ let rec stack_args (max_arity:nat)
              + 8
              + VS.eval_reg MS.rRsp s
            in
-           SI.valid_stack_slot64 ptr s.VS.stack MS.Public s.VS.stackTaint /\
-           SI.load_stack64 ptr s.VS.stack == arg_as_nat64 hd s)
+           SI.valid_stack_slot64 ptr s.VS.vs_stack MS.Public s.VS.vs_stackTaint /\
+           SI.load_stack64 ptr s.VS.vs_stack == arg_as_nat64 hd s)
 
 [@__reduce__]
 let taint_hyp_arg (m:ME.mem) (tm:MS.memTaint_t) (a:arg) =
@@ -202,7 +202,7 @@ let taint_hyp_arg (m:ME.mem) (tm:MS.memTaint_t) (a:arg) =
 
 [@__reduce__]
 let taint_hyp (args:list arg) : VSig.sprop =
-  fun s0 -> BigOps.big_and' (taint_hyp_arg s0.VS.mem s0.VS.memTaint) args
+  fun s0 -> BigOps.big_and' (taint_hyp_arg s0.VS.vs_mem s0.VS.vs_memTaint) args
 
 [@__reduce__]
 let vale_pre_hyp
@@ -212,10 +212,10 @@ let vale_pre_hyp
   : VSig.sprop =
     fun s0 ->
       VSig.disjoint_or_eq args /\
-      VSig.readable args VS.(s0.mem) /\
+      VSig.readable args VS.(s0.vs_mem) /\
       register_args max_arity arg_reg (List.length args) args s0 /\
       stack_args max_arity (List.length args) args s0 /\
-      VS.eval_reg MS.rRsp s0 == SI.init_rsp s0.VS.stack /\
+      VS.eval_reg MS.rRsp s0 == SI.init_rsp s0.VS.vs_stack /\
       taint_hyp args s0
 
 [@__reduce__]
@@ -260,12 +260,12 @@ let create_initial_vale_state
   fun h0 ->
     let t_state, mem = IX64.create_initial_trusted_state max_arity arg_reg args Vale.Interop.down_mem h0 in
     let open VS in
-    { ok = true;
-      regs = Vale.X64.Regs.of_fun t_state.BS.ms_regs;
-      xmms = Vale.X64.Xmms.of_fun t_state.BS.ms_xmms;
-      flags = IA.init_flags;
-      mem = as_vale_mem mem;
-      memTaint = t_state.BS.ms_memTaint;
-      stack = as_vale_stack t_state.BS.ms_stack;
-      stackTaint = t_state.BS.ms_stackTaint;
+    { vs_ok = true;
+      vs_regs = Vale.X64.Regs.of_fun t_state.BS.ms_regs;
+      vs_xmms = Vale.X64.Xmms.of_fun t_state.BS.ms_xmms;
+      vs_flags = IA.init_flags;
+      vs_mem = as_vale_mem mem;
+      vs_memTaint = t_state.BS.ms_memTaint;
+      vs_stack = as_vale_stack t_state.BS.ms_stack;
+      vs_stackTaint = t_state.BS.ms_stackTaint;
     }

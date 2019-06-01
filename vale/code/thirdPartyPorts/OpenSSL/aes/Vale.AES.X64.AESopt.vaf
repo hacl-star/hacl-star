@@ -1120,7 +1120,7 @@ procedure Loop6x(
         mem; efl;
 
     requires
-        this.ok;
+        this.vs_ok;
         count >= 2;
         len >= 6;
         T2 == Mkfour(0, 0, 0, 0x1000000);
@@ -1168,7 +1168,7 @@ procedure Loop6x(
         gctr_partial_opaque(alg, 6*count, plain_quads, buffer128_as_seq(mem, out_b), key_words, ctr_BE_orig);
     ensures
         // Framing
-        this.ok;
+        this.vs_ok;
         rax == old(rax);
         rcx == old(rcx);
         rsp == old(rsp);
@@ -1317,7 +1317,7 @@ procedure Loop6x_loop(
         mem; efl;
 
     requires
-        this.ok;
+        this.vs_ok;
         count >= 2;
         6 <= len && count*6 + len + 6 < pow2_32;
         len % 6 == 0;
@@ -1369,7 +1369,7 @@ procedure Loop6x_loop(
         // GCTR progress
         gctr_partial_opaque(alg, 6*count, plain_quads, buffer128_as_seq(mem, out_b), key_words, ctr_BE_orig);
     ensures
-        this.ok;
+        this.vs_ok;
         // Framing
         modifies_buffer128_3(stack_b, out_b, iv_b, old(mem), mem);
         buffer_modifies_specific128(stack_b, old(mem), mem, 2, 7);
@@ -1411,7 +1411,7 @@ procedure Loop6x_loop(
     while (len > 0)
         invariant
             // Manual framing
-            this.ok;
+            this.vs_ok;
             rax == old(rax);
             rcx == old(rcx);
             rsp == old(rsp);

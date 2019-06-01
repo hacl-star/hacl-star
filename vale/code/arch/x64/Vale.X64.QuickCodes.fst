@@ -8,26 +8,26 @@ let lemma_label_Type0 (r:range) (msg:string) (p:Type0) : Lemma
 
 let lemma_label_bool r msg b = lemma_label_Type0 r msg b
 
-let state_mod_eq (m:mod_t) (s1 s2:state) =
+let state_mod_eq (m:mod_t) (s1 s2:vale_state) =
   match m with
   | Mod_None -> True
-  | Mod_ok -> s1.ok == s2.ok
+  | Mod_ok -> s1.vs_ok == s2.vs_ok
   | Mod_reg r -> eval_reg r s1 == eval_reg r s2
   | Mod_xmm x -> eval_xmm x s1 == eval_xmm x s2
-  | Mod_flags -> s1.flags == s2.flags
-  | Mod_mem -> s1.mem == s2.mem
-  | Mod_stack -> s1.stack == s2.stack
-  | Mod_memTaint -> s1.memTaint == s2.memTaint
-  | Mod_stackTaint -> s1.stackTaint == s2.stackTaint
+  | Mod_flags -> s1.vs_flags == s2.vs_flags
+  | Mod_mem -> s1.vs_mem == s2.vs_mem
+  | Mod_stack -> s1.vs_stack == s2.vs_stack
+  | Mod_memTaint -> s1.vs_memTaint == s2.vs_memTaint
+  | Mod_stackTaint -> s1.vs_stackTaint == s2.vs_stackTaint
 
-let rec update_state_mods_refl (mods:mods_t) (s:state) : Lemma
+let rec update_state_mods_refl (mods:mods_t) (s:vale_state) : Lemma
   (ensures state_eq (update_state_mods mods s s) s)
   =
   match mods with
   | [] -> ()
   | _::mods -> update_state_mods_refl mods s
 
-let rec update_state_mods_not1 (mods:mods_t) (s' s:state) (m0:mod_t) : Lemma
+let rec update_state_mods_not1 (mods:mods_t) (s' s:vale_state) (m0:mod_t) : Lemma
   (requires not (mods_contains1 mods m0))
   (ensures state_mod_eq m0 s (update_state_mods mods s' s))
   =
@@ -35,13 +35,13 @@ let rec update_state_mods_not1 (mods:mods_t) (s' s:state) (m0:mod_t) : Lemma
   | [] -> ()
   | _::mods -> update_state_mods_not1 mods s' s m0
 
-let update_state_mods_from1 (mods:mods_t) (s' s:state) (m0:mod_t) : Lemma
+let update_state_mods_from1 (mods:mods_t) (s' s:vale_state) (m0:mod_t) : Lemma
   (requires state_mod_eq m0 s' (update_state_mods mods s' s))
   (ensures mods_contains1 mods m0 \/ state_mod_eq m0 s s')
   =
   if not (mods_contains1 mods m0) then update_state_mods_not1 mods s' s m0
 
-let rec update_state_mods_to1 (mods:mods_t) (s' s:state) (m0:mod_t) : Lemma
+let rec update_state_mods_to1 (mods:mods_t) (s' s:vale_state) (m0:mod_t) : Lemma
   (requires mods_contains1 mods m0 \/ state_mod_eq m0 s s')
   (ensures state_mod_eq m0 s' (update_state_mods mods s' s))
   =
@@ -54,7 +54,7 @@ let rec update_state_mods_to1 (mods:mods_t) (s' s:state) (m0:mod_t) : Lemma
       let l2 (_:squash (~b)) : Lemma (goal ()) = () in
       FStar.Classical.or_elim #b #(~b) #goal l1 l2
 
-let update_state_mods_from (mods:mods_t) (s' s:state) : Lemma
+let update_state_mods_from (mods:mods_t) (s' s:vale_state) : Lemma
   (requires update_state_mods mods s' s == s')
   (ensures (
     forall (m0:mod_t).{:pattern mods_contains1 mods m0 \/ state_mod_eq m0 s s'}
@@ -66,7 +66,7 @@ let update_state_mods_from (mods:mods_t) (s' s:state) : Lemma
     in
   FStar.Classical.forall_intro f1
 
-let update_state_mods_to (mods:mods_t) (s' s:state) : Lemma
+let update_state_mods_to (mods:mods_t) (s' s:vale_state) : Lemma
   (requires (
     forall (m0:mod_t).{:pattern mods_contains1 mods m0 \/ state_mod_eq m0 s s'}
       mods_contains1 mods m0 \/ state_mod_eq m0 s s'
@@ -88,7 +88,7 @@ let update_state_mods_to (mods:mods_t) (s' s:state) : Lemma
   f1 (Mod_stackTaint);
   ()
 
-let update_state_mods_trans (mods:mods_t) (s0 s1 s2:state) : Lemma
+let update_state_mods_trans (mods:mods_t) (s0 s1 s2:vale_state) : Lemma
   (requires update_state_mods mods s1 s0 == s1 /\ update_state_mods mods s2 s1 == s2)
   (ensures update_state_mods mods s2 s0 == s2)
   =
@@ -96,7 +96,7 @@ let update_state_mods_trans (mods:mods_t) (s0 s1 s2:state) : Lemma
   update_state_mods_from mods s2 s1;
   update_state_mods_to mods s2 s0
 
-let rec update_state_mods_weaken1 (mods mods':mods_t) (s' s:state) (m0:mod_t) : Lemma
+let rec update_state_mods_weaken1 (mods mods':mods_t) (s' s:vale_state) (m0:mod_t) : Lemma
   (requires (mods_contains1 mods m0 \/ state_mod_eq m0 s s') /\ mods_contains mods' mods)
   (ensures (mods_contains1 mods' m0 \/ state_mod_eq m0 s s'))
   =
@@ -106,7 +106,7 @@ let rec update_state_mods_weaken1 (mods mods':mods_t) (s' s:state) (m0:mod_t) : 
       if mods_contains mods' mods && mods_contains1 mods m0 then
         update_state_mods_weaken1 mods mods' s' s m0
 
-let update_state_mods_weaken (mods mods':mods_t) (s' s:state) : Lemma
+let update_state_mods_weaken (mods mods':mods_t) (s' s:vale_state) : Lemma
   (requires update_state_mods mods s' s == s' /\ mods_contains mods' mods)
   (ensures update_state_mods mods' s' s == s')
   =
@@ -119,7 +119,7 @@ let update_state_mods_weaken (mods mods':mods_t) (s' s:state) : Lemma
 
 let call_QPURE
     (#a:Type0) (#cs:codes) (r:range) (msg:string) (pre:((unit -> GTot Type0) -> GTot Type0))
-    (l:unit -> PURE unit pre) (qcs:quickCodes a cs) (mods:mods_t) (k:state -> a -> Type0) (s0:state)
+    (l:unit -> PURE unit pre) (qcs:quickCodes a cs) (mods:mods_t) (k:vale_state -> a -> Type0) (s0:vale_state)
   : Lemma
   (requires
     (forall (p:unit -> GTot Type0).{:pattern pre p}
@@ -131,8 +131,8 @@ let call_QPURE
 (*
 let call_QBindPURE
     (#a #b:Type0) (#cs:codes) (r:range) (msg:string) (pre:((b -> GTot Type0) -> GTot Type0))
-    (l:unit -> PURE b pre) (qcs:state -> b -> GTot (quickCodes a cs)) (mods:mods_t)
-    (k:state -> a -> Type0) (s0:state)
+    (l:unit -> PURE b pre) (qcs:vale_state -> b -> GTot (quickCodes a cs)) (mods:mods_t)
+    (k:vale_state -> a -> Type0) (s0:vale_state)
   : Ghost b
   (requires
     (forall (p:b -> GTot Type0).{:pattern pre p}
@@ -240,9 +240,9 @@ let qIf_proof #a #c1 #c2 b qc1 qc2 mods s0 k =
   )
 
 let rec qWhile_proof_rec
-    (#a #d:Type) (#c:code) (b:cmp) (qc:a -> quickCode a c) (mods:mods_t) (inv:state -> a -> Type0)
-    (dec:state -> a -> d) (s0 s1:state) (g1:a) (f1:fuel) (k:state -> a -> Type0)
-  : Ghost (state * va_fuel * a)
+    (#a #d:Type) (#c:code) (b:cmp) (qc:a -> quickCode a c) (mods:mods_t) (inv:vale_state -> a -> Type0)
+    (dec:vale_state -> a -> d) (s0 s1:vale_state) (g1:a) (f1:fuel) (k:vale_state -> a -> Type0)
+  : Ghost (vale_state & va_fuel & a)
   (requires
     wp_While b qc mods inv dec g1 s1 k /\
     eval_while_inv (While (cmp_to_ocmp b) c) s0 f1 s1 /\
@@ -288,8 +288,8 @@ let wp_sound_code #a c qc k s0 =
   let QProc c _ wp proof = qc in
   proof s0 k
 
-let wp_sound_code_wrap (#a:Type0) (c:code) (qc:quickCode a c) (s0:state) (k:(s0':state{s0 == s0'}) -> state -> a -> Type0) :
-  Ghost (state * fuel * a)
+let wp_sound_code_wrap (#a:Type0) (c:code) (qc:quickCode a c) (s0:vale_state) (k:(s0':vale_state{s0 == s0'}) -> vale_state -> a -> Type0) :
+  Ghost (vale_state & fuel & a)
     (wp_sound_code_pre qc s0 k)
     (wp_sound_code_post qc s0 k)
   =

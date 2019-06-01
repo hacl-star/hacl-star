@@ -30,7 +30,7 @@ let lemma_create_initial_vale_state_core
   : Lemma
       (ensures (
         let s = LSig.create_initial_vale_state #max_arity #reg_arg args h0 in
-        hs_of_mem (as_mem s.VS.mem) == h0
+        hs_of_mem (as_mem s.VS.vs_mem) == h0
       ))
   = ()
 
@@ -94,7 +94,7 @@ let core_create_lemma_readable
   : Lemma
       (ensures
         (let va_s = LSig.create_initial_vale_state #max_arity #arg_reg args h0 in
-         VSig.readable args VS.(va_s.mem)))
+         VSig.readable args VS.(va_s.vs_mem)))
   =
     let readable_registered_one (a:arg) (s:ME.mem)
       : Lemma VSig.(arg_is_registered_root s a <==> readable_one s a)
@@ -257,14 +257,14 @@ let core_create_lemma_register_args
     assert (register_args' max_arity arg_reg (List.length args) args regs);
     let rec aux
         (args:IX64.arg_list)
-        (s:VS.state)
+        (s:VS.vale_state)
         (args':list arg)
         (h0:HS.mem{mem_roots_p h0 args'})
      : Lemma
          (requires
             (forall r. VS.eval_reg r s == regs r) /\
             register_args' max_arity arg_reg (List.length args) args regs /\
-            s.VS.mem == as_vale_mem (mk_mem args' h0))
+            s.VS.vs_mem == as_vale_mem (mk_mem args' h0))
          (ensures LSig.register_args max_arity arg_reg (List.length args) args s)
          (decreases args)
     = let n = List.length args in
@@ -291,8 +291,8 @@ let core_create_lemma_state
   = let va_s = LSig.create_initial_vale_state #max_arity #arg_reg args h0 in
     let tr_s = fst (IX64.create_initial_trusted_state max_arity arg_reg args I.down_mem h0) in
     let sl_s = SL.state_to_S va_s in
-    assert (tr_s.BS.ms_memTaint == va_s.VS.memTaint);
-    assert (tr_s.BS.ms_stackTaint == va_s.VS.stackTaint);
+    assert (tr_s.BS.ms_memTaint == va_s.VS.vs_memTaint);
+    assert (tr_s.BS.ms_stackTaint == va_s.VS.vs_stackTaint);
     SL.lemma_to_ok va_s;
     SL.lemma_to_flags va_s;
     SL.lemma_to_mem va_s;
@@ -453,7 +453,7 @@ let core_create_lemma_stack_args
              + init_rsp
           in
           Vale.AsLowStar.MemoryHelpers.mk_stack_reveal stack_f;
-          SI.lemma_valid_taint_stack64_reveal ptr MS.Public va_s.VS.stackTaint;
+          SI.lemma_valid_taint_stack64_reveal ptr MS.Public va_s.VS.vs_stackTaint;
           let aux2 () : Lemma (IX64.arg_as_nat64 hd == LSig.arg_as_nat64 hd va_s) =
             match hd with
             | (| TD_Buffer src bt _, x |) ->
@@ -478,9 +478,9 @@ let core_create_lemma
          fst (IX64.create_initial_trusted_state max_arity arg_reg args I.down_mem h0) == SL.state_to_S va_s /\
          LSig.mem_correspondence args h0 va_s /\
          VSig.disjoint_or_eq args /\
-         VSig.readable args VS.(va_s.mem) /\
+         VSig.readable args VS.(va_s.vs_mem) /\
          LSig.vale_pre_hyp #max_arity #arg_reg args va_s /\
-         ST.equal_domains h0 (hs_of_mem (as_mem va_s.VS.mem))
+         ST.equal_domains h0 (hs_of_mem (as_mem va_s.VS.vs_mem))
   ))
   = let va_s = LSig.create_initial_vale_state #max_arity #arg_reg args h0 in
     let t_state = fst (IX64.create_initial_trusted_state max_arity arg_reg args I.down_mem h0) in
@@ -510,9 +510,9 @@ let eval_code_rel (c:BS.code)
 let rec mem_correspondence_refl (args:list arg)
                                 (va_s:V.va_state)
  : Lemma
-     (ensures LSig.mem_correspondence args (hs_of_mem (as_mem va_s.VS.mem)) va_s)
+     (ensures LSig.mem_correspondence args (hs_of_mem (as_mem va_s.VS.vs_mem)) va_s)
  =
-   let h = hs_of_mem (as_mem va_s.VS.mem) in
+   let h = hs_of_mem (as_mem va_s.VS.vs_mem) in
    match args with
    | [] -> ()
    | hd::tl ->
@@ -600,7 +600,7 @@ let vale_lemma_as_prediction
        core_create_lemma #max_arity #arg_reg args h0;
        assert (SL.state_to_S va_s0 == s0);
        assert (LSig.mem_correspondence args h0 va_s0);
-       assert (va_s0.VS.ok);
+       assert (va_s0.VS.vs_ok);
        assert (LSig.vale_pre_hyp #max_arity #arg_reg args va_s0);
        assert (elim_nil pre va_s0);
        let va_s1, f = VSig.elim_vale_sig_nil v va_s0 in
@@ -610,26 +610,26 @@ let vale_lemma_as_prediction
        assert (VL.state_eq_opt (Some (SL.state_to_S va_s1)) (Some s1));
        assert (VSig.vale_calling_conventions va_s0 va_s1 regs_modified xmms_modified);
        assert (IX64.calling_conventions s0 s1 regs_modified xmms_modified);
-       assert (ME.modifies (VSig.mloc_modified_args args) va_s0.VS.mem va_s1.VS.mem);
-       let final_mem = va_s1.VS.mem in
+       assert (ME.modifies (VSig.mloc_modified_args args) va_s0.VS.vs_mem va_s1.VS.vs_mem);
+       let final_mem = va_s1.VS.vs_mem in
        let h1= hs_of_mem (as_mem final_mem) in
-       Vale.AsLowStar.MemoryHelpers.relate_modifies args va_s0.VS.mem va_s1.VS.mem;
+       Vale.AsLowStar.MemoryHelpers.relate_modifies args va_s0.VS.vs_mem va_s1.VS.vs_mem;
        assert (B.modifies (loc_modified_args args) h0 h1);
        Vale.AsLowStar.MemoryHelpers.modifies_equal_domains
-         (VSig.mloc_modified_args args) va_s0.VS.mem final_mem;
+         (VSig.mloc_modified_args args) va_s0.VS.vs_mem final_mem;
        Vale.AsLowStar.MemoryHelpers.modifies_same_roots
-         (VSig.mloc_modified_args args) va_s0.VS.mem final_mem;
+         (VSig.mloc_modified_args args) va_s0.VS.vs_mem final_mem;
        Vale.AsLowStar.MemoryHelpers.state_eq_down_mem va_s1 s1;
        assert (I.down_mem (as_mem final_mem) == s1.BS.ms_mem);
        mem_correspondence_refl args va_s1;
-       assert (VSig.readable args VS.(va_s1.mem));
+       assert (VSig.readable args VS.(va_s1.vs_mem));
        assert (disjoint_or_eq args);
-       readable_all_live VS.(va_s1.mem) args;
+       readable_all_live VS.(va_s1.vs_mem) args;
        assert (all_live h1 args);
        assert (mem_roots_p h1 args);
        assert (B.modifies (loc_modified_args args) h0 h1);
        assert (LSig.(to_low_post post args h0 (IX64.return_val s1) h1));
-       IX64.return_val s1, coerce f, as_mem va_s1.VS.mem
+       IX64.return_val s1, coerce f, as_mem va_s1.VS.vs_mem
 
 [@__reduce__]
 let rec lowstar_typ

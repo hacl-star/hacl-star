@@ -30,9 +30,9 @@ let as_vale_stack (st:BS.stack)
   : SI.stack
   = IB.coerce st
 
-val buffer_addr_is_nat64 (#t:_) (x:ME.buffer t) (s:VS.state)
-  : Lemma (0 <= ME.buffer_addr x VS.(s.mem) /\
-           ME.buffer_addr x VS.(s.mem) < pow2 64)
+val buffer_addr_is_nat64 (#t:_) (x:ME.buffer t) (s:VS.vale_state)
+  : Lemma (0 <= ME.buffer_addr x VS.(s.vs_mem) /\
+           ME.buffer_addr x VS.(s.vs_mem) < pow2 64)
 
 val code_equiv : squash (V.va_code == Vale.X64.Machine_Semantics_s.code)
 val ins_equiv : squash (V.ins == Vale.X64.Machine_Semantics_s.ins)

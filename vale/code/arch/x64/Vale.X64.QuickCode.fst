@@ -32,7 +32,7 @@ let mod_eq (x y:mod_t) : Pure bool (requires True) (ensures fun b -> b == (x = y
   | Mod_stackTaint -> (match y with Mod_stackTaint -> true | _ -> false)
 
 [@va_qattr]
-let update_state_mod (m:mod_t) (sM sK:state) : state =
+let update_state_mod (m:mod_t) (sM sK:vale_state) : vale_state =
   match m with
   | Mod_None -> sK
   | Mod_ok -> va_update_ok sM sK
@@ -45,16 +45,16 @@ let update_state_mod (m:mod_t) (sM sK:state) : state =
   | Mod_stackTaint -> va_update_stackTaint sM sK
 
 [@va_qattr]
-let rec update_state_mods (mods:mods_t) (sM sK:state) : state =
+let rec update_state_mods (mods:mods_t) (sM sK:vale_state) : vale_state =
   match mods with
   | [] -> sK
   | m::mods -> update_state_mod m sM (update_state_mods mods sM sK)
 
 [@va_qattr]
-unfold let update_state_mods_norm (mods:mods_t) (sM sK:state) : state =
+unfold let update_state_mods_norm (mods:mods_t) (sM sK:vale_state) : vale_state =
   norm [iota; zeta; delta_attr [`%qmodattr]; delta_only [`%update_state_mods; `%update_state_mod]] (update_state_mods mods sM sK)
 
-let lemma_norm_mods (mods:mods_t) (sM sK:state) : Lemma
+let lemma_norm_mods (mods:mods_t) (sM sK:vale_state) : Lemma
   (ensures update_state_mods mods sM sK == update_state_mods_norm mods sM sK)
   = ()
 
@@ -73,25 +73,25 @@ let va_mod_reg_opr64 (o:va_reg_operand) : mod_t =
 
 [@va_qattr qmodattr] let va_mod_xmm (x:xmm) : mod_t = Mod_xmm x
 
-let quickProc_wp (a:Type0) : Type u#1 = (s0:state) -> (wp_continue:state -> a -> Type0) -> Type0
+let quickProc_wp (a:Type0) : Type u#1 = (s0:vale_state) -> (wp_continue:vale_state -> a -> Type0) -> Type0
 
-let k_true (#a:Type0) (_:state) (_:a) = True
+let k_true (#a:Type0) (_:vale_state) (_:a) = True
 
 let t_monotone (#a:Type0) (c:va_code) (wp:quickProc_wp a) : Type =
-  s0:state -> k1:(state -> a -> Type0) -> k2:(state -> a -> Type0) -> Lemma
-    (requires (forall (s:state) (g:a). k1 s g ==> k2 s g))
+  s0:vale_state -> k1:(vale_state -> a -> Type0) -> k2:(vale_state -> a -> Type0) -> Lemma
+    (requires (forall (s:vale_state) (g:a). k1 s g ==> k2 s g))
     (ensures wp s0 k1 ==> wp s0 k2)
 
 let t_compute (#a:Type0) (c:va_code) (wp:quickProc_wp a) : Type =
-  s0:state -> Ghost (state * va_fuel * a)
+  s0:vale_state -> Ghost (vale_state & va_fuel & a)
     (requires wp s0 k_true)
     (ensures fun _ -> True)
 
-let t_ensure (#a:Type0) (c:va_code) (mods:mods_t) (wp:quickProc_wp a) (s0:state) (k:(state -> a -> Type0)) =
+let t_ensure (#a:Type0) (c:va_code) (mods:mods_t) (wp:quickProc_wp a) (s0:vale_state) (k:(vale_state -> a -> Type0)) =
   fun (sM, f0, g) -> eval_code c s0 f0 sM /\ update_state_mods mods sM s0 == sM /\ k sM g
 
 let t_proof (#a:Type0) (c:va_code) (mods:mods_t) (wp:quickProc_wp a) : Type =
-  s0:state -> k:(state -> a -> Type0) -> Ghost (state * va_fuel * a)
+  s0:vale_state -> k:(vale_state -> a -> Type0) -> Ghost (vale_state & va_fuel & a)
     (requires wp s0 k)
     (ensures t_ensure c mods wp s0 k)
 

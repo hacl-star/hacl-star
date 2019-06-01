@@ -1267,7 +1267,7 @@ procedure gcm_blocks_stdcall(
         mem; efl; stack; stackTaint;
     requires
         // Manual framing
-        this.ok;
+        this.vs_ok;
         aesni_enabled && pclmulqdq_enabled && avx_enabled;
 
         rsp == init_rsp(stack);
@@ -1372,8 +1372,8 @@ procedure gcm_blocks_stdcall(
 
     ensures
         // Manual framing
-        this.ok;
-        this.memTaint == old(this.memTaint);
+        this.vs_ok;
+        this.vs_memTaint == old(this.vs_memTaint);
 
         modifies_mem(loc_union(loc_buffer(tag_b),
                      loc_union(loc_buffer(iv_b),

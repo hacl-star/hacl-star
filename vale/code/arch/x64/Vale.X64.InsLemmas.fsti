@@ -14,15 +14,15 @@ let has_taint128 (o:operand128) (t:taint) : bool =
 
 val lemma_valid_taint64_operand (m:maddr) (t:taint) (s:va_state) : Lemma
   (requires valid_operand (OMem (m, t)) s)
-  (ensures taint_at s.memTaint (eval_maddr m s) == t)
+  (ensures taint_at s.vs_memTaint (eval_maddr m s) == t)
   [SMTPat (eval_maddr m s); SMTPat (OMem #int #reg (m, t))]
 
-val lemma_valid_src_operand64_and_taint (o:operand64) (s:state) : Lemma
+val lemma_valid_src_operand64_and_taint (o:operand64) (s:vale_state) : Lemma
   (requires valid_operand o s)
   (ensures S.valid_src_operand64_and_taint o (state_to_S s))
   [SMTPat (S.valid_src_operand64_and_taint o (state_to_S s))]
 
-val lemma_valid_src_operand128_and_taint (o:operand128) (s:state) : Lemma
+val lemma_valid_src_operand128_and_taint (o:operand128) (s:vale_state) : Lemma
   (requires valid_operand128 o s)
   (ensures S.valid_src_operand128_and_taint o (state_to_S s))
   [SMTPat (S.valid_src_operand128_and_taint o (state_to_S s))]

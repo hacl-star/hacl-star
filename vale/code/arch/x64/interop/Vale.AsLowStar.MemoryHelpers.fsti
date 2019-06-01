@@ -37,7 +37,7 @@ val state_eq_down_mem (va_s1:V.va_state) (s1:_)
         VL.state_eq_opt (Some (SL.state_to_S va_s1))
                         (Some s1))
       (ensures (
-         I.down_mem (as_mem va_s1.VS.mem) == s1.BS.ms_mem))
+         I.down_mem (as_mem va_s1.VS.vs_mem) == s1.BS.ms_mem))
 
 val relate_modifies (args:list arg) (m0 m1 : ME.mem)
   : Lemma
@@ -122,9 +122,9 @@ val buffer_as_seq_reveal2
   (let y = as_vale_buffer x in
    let db = get_downview x in
    DV.length_eq db;
-   let h = hs_of_mem (as_mem va_s.VS.mem) in
+   let h = hs_of_mem (as_mem va_s.VS.vs_mem) in
    Seq.equal
-    (LSig.nat_to_uint_seq_t t (ME.buffer_as_seq va_s.VS.mem y))
+    (LSig.nat_to_uint_seq_t t (ME.buffer_as_seq va_s.VS.vs_mem y))
     (UV.as_seq h (UV.mk_buffer db (LSig.view_of_base_typ t))))
 
 val immbuffer_as_seq_reveal2
@@ -134,9 +134,9 @@ val immbuffer_as_seq_reveal2
   (let y = as_vale_immbuffer x in
    let db = get_downview x in
    DV.length_eq db;
-   let h = hs_of_mem (as_mem va_s.VS.mem) in
+   let h = hs_of_mem (as_mem va_s.VS.vs_mem) in
    Seq.equal
-    (LSig.nat_to_uint_seq_t t (ME.buffer_as_seq va_s.VS.mem y))
+    (LSig.nat_to_uint_seq_t t (ME.buffer_as_seq va_s.VS.vs_mem y))
     (UV.as_seq h (UV.mk_buffer db (LSig.view_of_base_typ t))))
 
 val buffer_addr_reveal
@@ -256,22 +256,22 @@ val buffer_as_seq_reveal_tuint128
   (x:buf_t src TUInt128)
   (va_s:V.va_state) : Lemma
   (let y = as_vale_buffer x in
-   let h = hs_of_mem (as_mem va_s.VS.mem) in
+   let h = hs_of_mem (as_mem va_s.VS.vs_mem) in
    Seq.equal
-    (LSig.nat_to_uint_seq_t TUInt128 (ME.buffer_as_seq va_s.VS.mem y))
-    (V.buffer128_as_seq va_s.VS.mem (as_vale_buffer x)))
-  [SMTPat (V.buffer128_as_seq va_s.VS.mem (as_vale_buffer x))]
+    (LSig.nat_to_uint_seq_t TUInt128 (ME.buffer_as_seq va_s.VS.vs_mem y))
+    (V.buffer128_as_seq va_s.VS.vs_mem (as_vale_buffer x)))
+  [SMTPat (V.buffer128_as_seq va_s.VS.vs_mem (as_vale_buffer x))]
 
 val immbuffer_as_seq_reveal_tuint128
   (src:base_typ)
   (x:ibuf_t src TUInt128)
   (va_s:V.va_state) : Lemma
   (let y = as_vale_immbuffer x in
-   let h = hs_of_mem (as_mem va_s.VS.mem) in
+   let h = hs_of_mem (as_mem va_s.VS.vs_mem) in
    Seq.equal
-    (LSig.nat_to_uint_seq_t TUInt128 (ME.buffer_as_seq va_s.VS.mem y))
-    (V.buffer128_as_seq va_s.VS.mem (as_vale_immbuffer x)))
-  [SMTPat (V.buffer128_as_seq va_s.VS.mem (as_vale_immbuffer x))]
+    (LSig.nat_to_uint_seq_t TUInt128 (ME.buffer_as_seq va_s.VS.vs_mem y))
+    (V.buffer128_as_seq va_s.VS.vs_mem (as_vale_immbuffer x)))
+  [SMTPat (V.buffer128_as_seq va_s.VS.vs_mem (as_vale_immbuffer x))]
 
 val bounded_buffer_addrs (src t:base_typ) (h:HS.mem) (b:buf_t src t{B.live h b}) (s:ME.mem) : Lemma
   (ME.buffer_addr #t (as_vale_buffer b) s + DV.length (get_downview b) < Vale.Def.Words_s.pow2_64)

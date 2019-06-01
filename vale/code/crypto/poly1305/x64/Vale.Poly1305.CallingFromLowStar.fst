@@ -3,6 +3,10 @@ module Vale.Poly1305.CallingFromLowStar
 module BS = Lib.ByteSequence
 module LI = Lib.IntTypes
 module FE = FStar.Endianness
+module PU = Vale.Poly1305.Util
+module PM = Vale.Poly1305.Math
+module IT = Vale.Interop.Types
+module PS = Vale.Wrapper.X64.Poly
 
 let lemma_hash_init h0 h1 ctx_b is_zero =
   let open IT in

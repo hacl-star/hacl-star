@@ -8,32 +8,32 @@ open Vale.X64.Stack_i
 module Regs = Vale.X64.Regs
 module Xmms = Vale.X64.Xmms
 
-noeq type state = {
-  ok: bool;
-  regs: Regs.t;
-  xmms: Xmms.t;
-  flags: nat64;
-  mem: mem;
-  stack:stack;
-  memTaint: memtaint;
-  stackTaint: memtaint;
+noeq type vale_state = {
+  vs_ok: bool;
+  vs_regs: Regs.t;
+  vs_xmms: Xmms.t;
+  vs_flags: nat64;
+  vs_mem: mem;
+  vs_stack: stack;
+  vs_memTaint: memtaint;
+  vs_stackTaint: memtaint;
 }
 
 [@va_qattr]
-unfold let eval_reg (r:reg) (s:state) : nat64 = Regs.sel r s.regs
+unfold let eval_reg (r:reg) (s:vale_state) : nat64 = Regs.sel r s.vs_regs
 [@va_qattr]
-unfold let eval_xmm (x:xmm) (s:state) : Vale.Def.Types_s.quad32 = Xmms.sel x s.xmms
+unfold let eval_xmm (x:xmm) (s:vale_state) : Vale.Def.Types_s.quad32 = Xmms.sel x s.vs_xmms
 [@va_qattr]
-unfold let eval_mem (ptr:int) (s:state) : GTot nat64 = load_mem64 ptr s.mem
+unfold let eval_mem (ptr:int) (s:vale_state) : GTot nat64 = load_mem64 ptr s.vs_mem
 [@va_qattr]
-unfold let eval_mem128 (ptr:int) (s:state) : GTot Vale.Def.Types_s.quad32 = load_mem128 ptr s.mem
+unfold let eval_mem128 (ptr:int) (s:vale_state) : GTot Vale.Def.Types_s.quad32 = load_mem128 ptr s.vs_mem
 [@va_qattr]
-unfold let eval_stack (ptr:int) (s:state) : GTot nat64 = load_stack64 ptr s.stack
+unfold let eval_stack (ptr:int) (s:vale_state) : GTot nat64 = load_stack64 ptr s.vs_stack
 [@va_qattr]
-unfold let eval_stack128 (ptr:int) (s:state) : GTot quad32 = load_stack128 ptr s.stack
+unfold let eval_stack128 (ptr:int) (s:vale_state) : GTot quad32 = load_stack128 ptr s.vs_stack
 
 [@va_qattr]
-let eval_maddr (m:maddr) (s:state) : int =
+let eval_maddr (m:maddr) (s:vale_state) : int =
   let open FStar.Mul in
     match m with
     | MConst n -> n
@@ -45,7 +45,7 @@ let to_nat64 (i:int) : nat64 =
   if 0 <= i && i < 0x10000000000000000 then i else int_to_nat64 i
 
 [@va_qattr]
-let eval_operand (o:operand64) (s:state) : GTot nat64 =
+let eval_operand (o:operand64) (s:vale_state) : GTot nat64 =
   match o with
   | OConst n -> to_nat64 n
   | OReg r -> eval_reg r s
@@ -53,7 +53,7 @@ let eval_operand (o:operand64) (s:state) : GTot nat64 =
   | OStack (m, _) -> eval_stack (eval_maddr m s) s
 
 [@va_qattr]
-let eval_operand128 (o:operand128) (s:state) : GTot Vale.Def.Types_s.quad32 =
+let eval_operand128 (o:operand128) (s:vale_state) : GTot Vale.Def.Types_s.quad32 =
   match o with
   | OConst c -> c
   | OReg x -> eval_xmm x s
@@ -61,21 +61,21 @@ let eval_operand128 (o:operand128) (s:state) : GTot Vale.Def.Types_s.quad32 =
   | OStack (m, _) -> eval_stack128 (eval_maddr m s) s
 
 [@va_qattr]
-let update_reg (r:reg) (v:nat64) (s:state) : state =
-  {s with regs = Regs.upd r v s.regs}
+let update_reg (r:reg) (v:nat64) (s:vale_state) : vale_state =
+  {s with vs_regs = Regs.upd r v s.vs_regs}
 
 [@va_qattr]
-let update_xmm (x:xmm) (v:Vale.Def.Types_s.quad32) (s:state) : state =
-  {s with xmms = Xmms.upd x v s.xmms}
+let update_xmm (x:xmm) (v:Vale.Def.Types_s.quad32) (s:vale_state) : vale_state =
+  {s with vs_xmms = Xmms.upd x v s.vs_xmms}
 
 [@va_qattr]
-let update_mem (ptr:int) (v:nat64) (s:state) : GTot state = {s with mem = store_mem64 ptr v s.mem}
+let update_mem (ptr:int) (v:nat64) (s:vale_state) : GTot vale_state = {s with vs_mem = store_mem64 ptr v s.vs_mem}
 
 [@va_qattr]
-let update_stack64 (ptr:int) (v:nat64) (s:state) : GTot state = {s with stack = store_stack64 ptr v s.stack}
+let update_stack64 (ptr:int) (v:nat64) (s:vale_state) : GTot vale_state = {s with vs_stack = store_stack64 ptr v s.vs_stack}
 
 [@va_qattr]
-let update_operand64 (o:operand64) (v:nat64) (sM:state) : GTot state =
+let update_operand64 (o:operand64) (v:nat64) (sM:vale_state) : GTot vale_state =
   match o with
   | OConst n -> sM
   | OReg r -> update_reg r v sM
@@ -83,38 +83,38 @@ let update_operand64 (o:operand64) (v:nat64) (sM:state) : GTot state =
   | OStack (m, _) -> update_stack64 (eval_maddr m sM) v sM
 
 [@va_qattr]
-let valid_maddr (m:maddr) (s:state) : prop0 = valid_mem64 (eval_maddr m s) s.mem
+let valid_maddr (m:maddr) (s:vale_state) : prop0 = valid_mem64 (eval_maddr m s) s.vs_mem
 
 [@va_qattr]
-let valid_maddr128 (m:maddr) (s:state) : prop0 = valid_mem128 (eval_maddr m s) s.mem
+let valid_maddr128 (m:maddr) (s:vale_state) : prop0 = valid_mem128 (eval_maddr m s) s.vs_mem
 
 [@va_qattr]
-let valid_src_operand (o:operand64) (s:state) : prop0 =
+let valid_src_operand (o:operand64) (s:vale_state) : prop0 =
   match o with
   | OConst n -> 0 <= n /\ n < pow2_64
   | OReg r -> True
-  | OMem (m, _) -> valid_mem64 (eval_maddr m s) s.mem
-  | OStack (m, _) -> valid_src_stack64 (eval_maddr m s) s.stack
+  | OMem (m, _) -> valid_mem64 (eval_maddr m s) s.vs_mem
+  | OStack (m, _) -> valid_src_stack64 (eval_maddr m s) s.vs_stack
 
 [@va_qattr]
-let valid_src_operand128 (o:operand128) (s:state) : prop0 =
+let valid_src_operand128 (o:operand128) (s:vale_state) : prop0 =
   match o with
   | OConst _ -> False
   | OReg _ -> True
   | OMem (m, _) -> valid_maddr128 m s
-  | OStack (m, _) -> valid_src_stack128 (eval_maddr m s) s.stack
+  | OStack (m, _) -> valid_src_stack128 (eval_maddr m s) s.vs_stack
 
 [@va_qattr]
-let state_eta (s:state) : state =
-  {s with regs = Regs.eta s.regs; xmms = Xmms.eta s.xmms}
+let state_eta (s:vale_state) : vale_state =
+  {s with vs_regs = Regs.eta s.vs_regs; vs_xmms = Xmms.eta s.vs_xmms}
 
 [@va_qattr]
-let state_eq (s0:state) (s1:state) : prop0 =
-  s0.ok == s1.ok /\
-  Regs.equal s0.regs s1.regs /\
-  Xmms.equal s0.xmms s1.xmms /\
-  s0.flags == s1.flags /\
-  s0.mem == s1.mem /\
-  s0.stack == s1.stack /\
-  s0.memTaint == s1.memTaint /\
-  s0.stackTaint == s1.stackTaint
+let state_eq (s0:vale_state) (s1:vale_state) : prop0 =
+  s0.vs_ok == s1.vs_ok /\
+  Regs.equal s0.vs_regs s1.vs_regs /\
+  Xmms.equal s0.vs_xmms s1.vs_xmms /\
+  s0.vs_flags == s1.vs_flags /\
+  s0.vs_mem == s1.vs_mem /\
+  s0.vs_stack == s1.vs_stack /\
+  s0.vs_memTaint == s1.vs_memTaint /\
+  s0.vs_stackTaint == s1.vs_stackTaint
