@@ -84,6 +84,21 @@ val aes256_update4:
 
 let aes256_update4 out inp ctx ctr = aes_update4 out inp ctx ctr
 
+
+[@ CInline ]
+val aes256_ctr:
+  len: size_t
+  -> out: lbuffer uint8 len
+  -> inp: lbuffer uint8 len
+  -> ctx: aes_ctx
+  -> counter: size_t
+  -> ST unit
+  (requires (fun h -> live h out /\ live h inp /\ live h ctx))
+  (ensures (fun h0 _ h1 -> modifies (loc out) h0 h1))
+
+let aes256_ctr len out inp ctx c =  aes_ctr #M32 #Spec.AES.AES256 len out inp ctx c
+
+
 [@ CInline ]
 val aes256_ctr_encrypt:
     len: size_t
