@@ -30,7 +30,7 @@ extern bool Hacl_AES_256_GCM_NI_aes256_gcm_decrypt(uint64_t* ctx, int out_len, u
 #define SIZE   16384
 
 int main() {
-  uint8_t in[60] = {
+ uint8_t in[60] = {
     0xd9, 0x31, 0x32, 0x25, 0xf8, 0x84, 0x06, 0xe5,
     0xa5, 0x59, 0x09, 0xc5, 0xaf, 0xf5, 0x26, 0x9a,
     0x86, 0xa7, 0xa9, 0x53, 0x15, 0x34, 0xf7, 0xda,
@@ -39,21 +39,91 @@ int main() {
     0x2f, 0xcf, 0x0e, 0x24, 0x49, 0xa6, 0xb5, 0x25,
     0xb1, 0x6a, 0xed, 0xf5, 0xaa, 0x0d, 0xe6, 0x57,
     0xba, 0x63, 0x7b, 0x39};
+
+  uint8_t in1[16] = 
+  {
+    0x2d, 0x71, 0xbc, 0xfa, 0x91, 0x4e, 0x4a, 0xc0,
+    0x45, 0xb2, 0xaa, 0x60, 0x95, 0x5f, 0xad, 0x24
+  };   
+
+uint8_t in2[129] = {
+    0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+    0x02
+};
+
   uint8_t k[32] = {
     0xfe, 0xff, 0xe9, 0x92, 0x86, 0x65, 0x73, 0x1c,
     0x6d, 0x6a, 0x8f, 0x94, 0x67, 0x30, 0x83, 0x08,
     0xfe, 0xff, 0xe9, 0x92, 0x86, 0x65, 0x73, 0x1c,
     0x6d, 0x6a, 0x8f, 0x94, 0x67, 0x30, 0x83, 0x08
   };
+
+  uint8_t k1[32] = {
+    0x92, 0xe1, 0x1d, 0xcd, 0xaa, 0x86, 0x6f, 0x5c,
+    0xe7, 0x90, 0xfd, 0x24, 0x50, 0x1f, 0x92, 0x50,
+    0x9a, 0xac, 0xf4, 0xcb, 0x8b, 0x13, 0x39, 0xd5, 
+    0x0c, 0x9c, 0x12, 0x40, 0x93, 0x5d, 0xd0, 0x8b
+  };
+
+  uint8_t k2[32] = 
+  {
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+  };
+
   uint8_t n[12] = {
     0xca, 0xfe, 0xba, 0xbe, 0xfa, 0xce, 0xdb, 0xad,
     0xde, 0xca, 0xf8, 0x88
   };
+
+  uint8_t n1[12] = 
+  {
+    0xac, 0x93, 0xa1, 0xa6, 0x14, 0x52, 0x99, 0xbd, 
+    0xe9, 0x02, 0xf2, 0x1a
+
+  };
+
+  uint8_t n2[12] = 
+  {
+    0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+    0xff, 0xff, 0xff, 0xff
+  }  ;
+
   uint8_t aad[20] = {
     0xfe, 0xed, 0xfa, 0xce, 0xde, 0xad, 0xbe, 0xef,
     0xfe, 0xed, 0xfa, 0xce, 0xde, 0xad, 0xbe, 0xef,
     0xab, 0xad, 0xda, 0xd2
   };
+
+  uint8_t aad1[16] = 
+  {
+    0x1e, 0x08, 0x89, 0x01, 0x6f, 0x67, 0x60, 0x1c, 
+    0x8e, 0xbe, 0xa4, 0x94, 0x3b, 0xc2, 0x3a, 0xd6
+  };
+
+  uint8_t aad2[13] = 
+  {
+    0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
+    0x09, 0x0a, 0x0b, 0x0c, 0x0d
+  };
+
   uint8_t exp[76] = {
     0x52, 0x2d, 0xc1, 0xf0, 0x99, 0x56, 0x7d, 0x07, 
     0xf4, 0x7f, 0x37, 0xa3, 0x2a, 0x84, 0x42, 0x7d,
@@ -66,6 +136,40 @@ int main() {
     0x0f, 0x4e, 0x17, 0x68, 0xcd, 0xdf, 0x88, 0x53,
     0xbb, 0x2d, 0x55, 0x1b
   };
+
+  uint8_t exp1[32] = 
+  {
+    0x89, 0x95, 0xae, 0x2e, 0x6d, 0xf3, 0xdb, 0xf9, 
+    0x6f, 0xac, 0x7b, 0x71, 0x37, 0xba, 0xe6, 0x7f,
+    0xec, 0xa5, 0xaa, 0x77, 0xd5, 0x1d, 0x4a, 0x0a, 
+    0x14, 0xd9, 0xc5, 0x1e, 0x1d, 0xa4, 0x74, 0xab
+
+  };
+
+  uint8_t exp2[129 + 16] = 
+  {
+    0xd3, 0xb0, 0x89, 0xde, 0xad, 0x85, 0xb8, 0xb6, 
+    0x87, 0x43, 0x27, 0x39, 0x0d, 0x0f, 0xff, 0x15,
+    0x75, 0x05, 0x1e, 0x2a, 0x96, 0x24, 0x3a, 0xb8, 
+    0xca, 0x09, 0x27, 0x44, 0x7f, 0x58, 0xd7, 0x05, 
+    0x3d, 0x99, 0x91, 0x84, 0x91, 0xee, 0xee, 0xe4,
+    0x70, 0xcd, 0x92, 0x90, 0x77, 0xcc, 0xb4, 0x04,
+    0xef, 0x14, 0x03, 0x54, 0x24, 0x1e, 0x12, 0xe2,
+    0xe3, 0x6e, 0x3a, 0xea, 0x89, 0xa0, 0x6e, 0x79,
+    0xc0, 0x64, 0x47, 0x9d, 0x7c, 0xdd, 0x71, 0x12,
+    0x20, 0xdf, 0xf6, 0x05, 0x9a, 0xb9, 0x13, 0xa1, 
+    0xea, 0x3b, 0xa7, 0xbc, 0xdb, 0x2d, 0x5b, 0x87,
+    0x46, 0xa9, 0x90, 0xec, 0x54, 0xcf, 0x2a, 0xab, 
+    0x55, 0xc1, 0x1c, 0x9c, 0x84, 0x9a, 0xb5, 0x52, 
+    0xfc, 0x03, 0xcc, 0x44, 0x25, 0xdb, 0x4e, 0x54, 
+    0xb1, 0x3d, 0x33, 0x4e, 0x9e, 0xf1, 0x45, 0x80, 
+    0x5c, 0x73, 0x68, 0x0d, 0x78, 0x99, 0xb6, 0x4b,
+    0xab,
+    0xc9, 0xee, 0x76, 0x8b, 0x54, 0x73, 0xf6, 0x78, 
+    0xac, 0x00, 0x20, 0x3a, 0xff, 0xa6, 0xa3, 0x4e
+  };
+
+
 
   const uint32_t size_tv0 = 2000;
   uint8_t test_vector0[2000] = {
@@ -97,14 +201,25 @@ int main() {
   uint8_t comp[76] = {0};
   bool ok = true;
 
+  uint8_t comp1[32] = {0};
+  bool ok1 = true;
+  uint8_t comp1_result[16] = {0};
+
+  uint8_t comp2[129 + 16] = {0};
+  bool ok2 = true;
+  uint8_t comp2_result[129] = {0};
+
   uint64_t ctx[396] = {0};
-  Hacl_AES_256_GCM_NI_aes256_gcm_init(ctx,k,n);
+  
+
+
+Hacl_AES_256_GCM_NI_aes256_gcm_init(ctx,k,n);
   Hacl_AES_256_GCM_NI_aes256_gcm_encrypt(ctx,60,comp,in,20,aad);
-  printf("AESGCM-AES256-NI computed:");
+  printf("Test0: AESGCM-AES256-NI computed:");
   for (int i = 0; i < 76; i++)
     printf("%02x",comp[i]);
   printf("\n");
-  printf("AESGCM-AES256-NI expected:");
+  printf("Test0: AESGCM-AES256-NI expected:");
   for (int i = 0; i < 76; i++)
     printf("%02x",exp[i]);
   printf("\n");
@@ -113,28 +228,119 @@ int main() {
     ok = ok & (exp[i] == comp[i]);
     if (!ok) break;
   }
-  if (ok) printf("Encrypt Success!\n");
-  else printf("Encrypt FAILURE!\n");
+  if (ok) printf("Test0: Encrypt Success!\n");
+  else printf("Test0: Encrypt FAILURE!\n");
 
   Hacl_AES_256_GCM_NI_aes256_gcm_init(ctx,k,n);
   bool res = Hacl_AES_256_GCM_NI_aes256_gcm_decrypt(ctx,60,comp,exp,20,aad);
   if (!res)
-    printf("AESGCM-AES256-NI Decrypt failed!\n");
+    printf("Test0: AESGCM-AES256-NI Decrypt failed!\n");
   else {
-    printf("AESGCM-AES256-NI Decrypt computed:");
+    printf("Test0: AESGCM-AES256-NI Decrypt computed:");
     for (int i = 0; i < 60; i++)
       printf("%02x",comp[i]);
     printf("\n");
-    printf("AESGCM-AES256-NI Decrypt expected:");
+    printf("Test0: AESGCM-AES256-NI Decrypt expected:");
     for (int i = 0; i < 60; i++)
       printf("%02x",in[i]);
     printf("\n");
     ok = true;
     for (int i = 0; i < 60; i++)
       ok = ok & (in[i] == comp[i]);
-    if (ok) printf("Decrypt Success!\n");
-    else printf("Decrypt FAILURE!\n");
+    if (ok) printf("Test0: Decrypt Success!\n");
+    else printf("Test0: Decrypt FAILURE!\n");
   }
+
+  printf("%s\n", "-----------------------------------------------------");
+
+
+  Hacl_AES_256_GCM_NI_aes256_gcm_init(ctx,k1,n1);
+  Hacl_AES_256_GCM_NI_aes256_gcm_encrypt(ctx,16,comp1,in1,16,aad1);
+  printf("Test1: AESGCM-AES256-NI computed:");
+  for (int i = 0; i < 32; i++)
+    printf("%02x",comp1[i]);
+  printf("\n");
+  printf("Test1: AESGCM-AES256-NI expected:");
+  for (int i = 0; i < 32; i++)
+    printf("%02x",exp1[i]);
+  printf("\n");
+  ok = true;
+  for (int i = 0; i < 32; i++) {
+    ok = ok & (exp1[i] == comp1[i]);
+    if (!ok) break;
+  }
+  if (ok) printf("Test1: Encrypt Success!\n");
+  else printf("Test1: Encrypt FAILURE!\n");
+
+
+  Hacl_AES_256_GCM_NI_aes256_gcm_init(ctx,k1,n1);
+  bool res1 = Hacl_AES_256_GCM_NI_aes256_gcm_decrypt(ctx, 16, comp1_result, comp1, 16 , aad1);
+  if (!res1)
+    printf("Test1: AESGCM-AES256-NI Decrypt failed!\n");
+  // else {
+    printf("Test1: AESGCM-AES256-NI Decrypt computed:");
+    for (int i = 0; i < 16; i++)
+      printf("%02x",comp1_result[i]);
+    printf("\n");
+    printf("Test1: AESGCM-AES256-NI Decrypt expected:");
+    for (int i = 0; i < 16; i++)
+      printf("%02x",in1[i]);
+    printf("\n");
+    ok = true;
+    for (int i = 0; i < 16; i++)
+      ok = ok & (in1[i] == comp1_result[i]);
+    if (ok) printf("Test1: Decrypt Success!\n");
+    else printf("Test1: Decrypt FAILURE!\n");
+  // }
+
+
+  printf("%s\n", "-----------------------------------------------------");
+
+
+
+
+  Hacl_AES_256_GCM_NI_aes256_gcm_init(ctx,k2,n2);
+  Hacl_AES_256_GCM_NI_aes256_gcm_encrypt(ctx,129,comp2,in2,13,aad2);
+  printf("Test2: AESGCM-AES256-NI computed:");
+  for (int i = 0; i < 129 + 16; i++)
+    printf("%02x",comp2[i]);
+  printf("\n");
+  printf("Test2: AESGCM-AES256-NI expected:");
+  for (int i = 0; i < 129 + 16; i++)
+    printf("%02x",exp2[i]);
+  printf("\n");
+  ok = true;
+  for (int i = 0; i < 129 + 16; i++) {
+    ok = ok & (exp2[i] == comp2[i]);
+    if (!ok) break;
+  }
+  if (ok) printf("Test2: Encrypt Success!\n");
+  else printf("Test2: Encrypt FAILURE!\n");
+
+
+
+  Hacl_AES_256_GCM_NI_aes256_gcm_init(ctx,k2,n2);
+  bool res2 = Hacl_AES_256_GCM_NI_aes256_gcm_decrypt(ctx, 129, comp2_result, comp2, 13 , aad2);
+  if (!res2)
+    printf("Test2: AESGCM-AES256-NI Decrypt failed!\n");
+  // else {
+    printf("Test2: AESGCM-AES256-NI Decrypt computed:");
+    for (int i = 0; i < 129; i++)
+      printf("%02x",comp2_result[i]);
+    printf("\n");
+    printf("Test2: AESGCM-AES256-NI Decrypt expected:");
+    for (int i = 0; i < 129; i++)
+      printf("%02x",in2[i]);
+    printf("\n");
+    ok = true;
+    for (int i = 0; i < 129; i++)
+      ok = ok & (in2[i] == comp2_result[i]);
+    if (ok) printf("Test2: Decrypt Success!\n");
+    else printf("Test2: Decrypt FAILURE!\n");
+  // }
+
+
+  printf("%s\n", "-----------------------------------------------------");
 
 
   Hacl_AES_256_GCM_NI_aes256_gcm_init(ctx, k, n);
@@ -143,66 +349,27 @@ int main() {
   bool res_tv0 = Hacl_AES_256_GCM_NI_aes256_gcm_decrypt(ctx,size_tv0,comp1_tv0,comp_tv0,20,aad);  
 
    if (!res_tv0)
-    printf("Test1: AESGCM-AES256-M32 Decrypt failed!\n");
+    printf("Test3: AESGCM-AES256-NI Decrypt failed!\n");
   else {
-    printf("Test1: AESGCM-AES256-M32 Decrypt computed:");
+    printf("Test3: AESGCM-AES256-NI Decrypt computed:");
     for (int i = 0; i < size_tv0; i++)
       printf("%02x",comp1_tv0[i]);
     printf("\n");
-    printf("Test1: AESGCM-AES256-M32 Decrypt expected:");
+    printf("Test3: AESGCM-AES256-NI Decrypt expected:");
     for (int i = 0; i < size_tv0; i++)
       printf("%02x",test_vector0[i]);
     printf("\n");
     ok = true;
     for (int i = 0; i < size_tv0; i++)
       ok = ok & (test_vector0[i] == comp1_tv0[i]);
-    if (ok) printf("Test1: Decrypt Success!\n");
-    else printf("Test1: Decrypt FAILURE!\n");
+    if (ok) printf("Test3: Decrypt Success!\n");
+    else printf("Test3: Decrypt FAILURE!\n");
   }
 
 
-  /*uint8_t comp2[668] = {0};
-  Hacl_AES_256_GCM_NI_aes256_gcm_init(ctx,k2,n2);
-  Hacl_AES_256_GCM_NI_aes256_gcm_encrypt(ctx,652,comp2,in2,0,aad2);
-  printf("AESGCM-NI computed:");
-  for (int i = 0; i < 668; i++)
-    printf("%02x",comp2[i]);
-  printf("\n");
-  printf("AESGCM_NI expected:");
-  for (int i = 0; i < 668; i++)
-    printf("%02x",exp2[i]);
-  printf("\n");
-  ok = true;
-  int i = 0;
-  for (i = 0; i < 668; i++) {
-    ok = ok & (exp2[i] == comp2[i]);
-    if (!ok) break;
-   }
+    printf("%s\n", "-----------------------------------------------------");
 
-  if (ok) printf("Encrypt Success!\n");
-  else printf("Encrypt FAILURE at %d!\n",i);
 
-  Hacl_AES_256_GCM_NI_aes256_gcm_init(ctx,k2,n2);
-  res = Hacl_AES_256_GCM_NI_aes256_gcm_decrypt(ctx,652,comp2,exp2,0,aad2);
-  if (!res)
-    printf("AESGCM-NI Decrypt failed!\n");
-  else {
-    printf("AESGCM-NI Decrypt computed:");
-    for (int i = 0; i < 652; i++)
-      printf("%02x",comp2[i]);
-    printf("\n");
-    printf("AESGCM_NI Decrypt expected:");
-    for (int i = 0; i < 652; i++)
-      printf("%02x",in2[i]);
-    printf("\n");
-    ok = true;
-    int i = 0;
-    for (i = 0; i < 652; i++)
-      ok = ok & (in2[i] == comp2[i]);
-    if (ok) printf("Decrypt Success!\n");
-    else printf("Decrypt FAILURE at %d!\n",i);
-  }
-*/
   uint64_t len = SIZE;
   uint8_t plain[SIZE+16];
   uint8_t key[16];
