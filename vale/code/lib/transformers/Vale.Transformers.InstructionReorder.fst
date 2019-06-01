@@ -1205,16 +1205,21 @@ let lemma_equiv_states_when_except_none (s1 s2:machine_state) (ok:bool) :
   assert (eval_access_location ALocOf s1 == eval_access_location ALocOf s2); (* OBSERVE *)
   assert (cf s1.ms_flags = cf s2.ms_flags);
   assert (overflow s1.ms_flags = overflow s2.ms_flags);
-  FStar.Classical.forall_intro (
-    (fun (l:int) ->
-       assert (eval_access_location (ALoc64 (OMem (MConst l, Public))) s1 ==
-               eval_access_location (ALoc64 (OMem (MConst l, Public))) s2); (* OBSERVE *)
-       admit ()
+  FStar.Classical.forall_intro_2 (
+    (fun (l:int) (t:taint) ->
+       assert (eval_access_location (ALoc64 (OMem (MConst l, t))) s1 ==
+               eval_access_location (ALoc64 (OMem (MConst l, t))) s2); (* OBSERVE *)
+       Vale.Def.Opaque_s.reveal_opaque get_heap_val64_def;
+       Vale.Def.Words.Seq.four_to_nat_8_injective ();
+       Vale.Def.Words.Two.two_to_nat_32_injective ();
+       assume (Map.contains s1.ms_mem l = Map.contains s2.ms_mem l);
+       assert (Map.sel s1.ms_memTaint l = Map.sel s2.ms_memTaint l);
+       assert (Map.contains s1.ms_memTaint l = Map.contains s2.ms_memTaint l)
     ) <:
-    (l:_) -> Lemma ((Map.sel s1.ms_mem l = Map.sel s2.ms_mem l) /\
-                    (Map.contains s1.ms_mem l = Map.contains s2.ms_mem l) /\
-                    (Map.sel s1.ms_memTaint l = Map.sel s2.ms_memTaint l) /\
-                    (Map.contains s1.ms_memTaint l = Map.contains s2.ms_memTaint l))
+    (l:_) -> _ -> Lemma ((Map.sel s1.ms_mem l = Map.sel s2.ms_mem l) /\
+                         (Map.contains s1.ms_mem l = Map.contains s2.ms_mem l) /\
+                         (Map.sel s1.ms_memTaint l = Map.sel s2.ms_memTaint l) /\
+                         (Map.contains s1.ms_memTaint l = Map.contains s2.ms_memTaint l))
   );
   assert (Map.equal s1.ms_mem s2.ms_mem);
   assert (s1.ms_mem == s2.ms_mem);
