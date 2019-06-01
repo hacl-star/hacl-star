@@ -72,15 +72,15 @@ let update_xmm (x:xmm) (v:Vale.Def.Types_s.quad32) (s:state) : state =
 let update_mem (ptr:int) (v:nat64) (s:state) : GTot state = {s with mem = store_mem64 ptr v s.mem}
 
 [@va_qattr]
-let update_stack (ptr:int) (v:nat64) (s:state) : GTot state = {s with stack = store_stack64 ptr v s.stack}
+let update_stack64 (ptr:int) (v:nat64) (s:state) : GTot state = {s with stack = store_stack64 ptr v s.stack}
 
 [@va_qattr]
-let update_operand (o:operand64) (v:nat64) (sM:state) : GTot state =
+let update_operand64 (o:operand64) (v:nat64) (sM:state) : GTot state =
   match o with
   | OConst n -> sM
   | OReg r -> update_reg r v sM
   | OMem (m, _) -> update_mem (eval_maddr m sM) v sM
-  | OStack (m, _) -> update_stack (eval_maddr m sM) v sM
+  | OStack (m, _) -> update_stack64 (eval_maddr m sM) v sM
 
 [@va_qattr]
 let valid_maddr (m:maddr) (s:state) : prop0 = valid_mem64 (eval_maddr m s) s.mem

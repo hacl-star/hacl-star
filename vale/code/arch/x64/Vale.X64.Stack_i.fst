@@ -6,7 +6,7 @@ let stack = BS.stack
 
 let valid_src_stack64 i st = BS.valid_src_stack64 i st
 let load_stack64 i st = BS.eval_stack i st
-let store_stack64 i v h = BS.update_stack' i v h
+let store_stack64 i v h = BS.update_stack64' i v h
 let free_stack64 start finish h = BS.free_stack' start finish h
 
 let valid_src_stack128 i st = BS.valid_src_stack128 i st

@@ -14,9 +14,9 @@ let mk_ins (i:S.ins) : Pure S.code
   (ensures fun c ->
     c == Ins i /\
     i == normal i /\
-    S.untainted_eval_ins i == normal (S.untainted_eval_ins i)
+    S.machine_eval_ins_st i == normal (S.machine_eval_ins_st i)
   )
   =
-  normal_term_spec (S.untainted_eval_ins i);
+  normal_term_spec (S.machine_eval_ins_st i);
   Ins i
 

@@ -12,11 +12,6 @@ unfold let op_String_Assignment = Map.upd
 
 unfold let obs_args = S.obs_args
 unfold let obs_inouts = S.obs_inouts
-unfold let taint_match_args = S.taint_match_args
-unfold let taint_match_inouts = S.taint_match_inouts
-unfold let update_taint_operand_explicit = S.update_taint_operand_explicit
-unfold let update_taint_operand_implicit = S.update_taint_operand_implicit
-unfold let update_taint_outputs = S.update_taint_outputs
 unfold let machine_eval_code = S.machine_eval_code
 
 let rec check_if_consumes_fixed_time_args
@@ -101,8 +96,6 @@ let rec lemma_args_taint
   : Lemma
     (requires
       constTimeInvariant ts s1 s2 /\
-      taint_match_args args oprs s1.S.ms_memTaint s1.S.ms_stackTaint s1 /\
-      taint_match_args args oprs s2.S.ms_memTaint s2.S.ms_stackTaint s2 /\
       Some? (S.instr_apply_eval_args outs args f oprs s1) /\
       Some? (S.instr_apply_eval_args outs args f oprs s2) /\
       check_if_consumes_fixed_time_args args oprs ts /\
@@ -147,8 +140,6 @@ let rec lemma_inouts_taint
   : Lemma
     (requires
       constTimeInvariant ts s1 s2 /\
-      taint_match_inouts inouts args oprs s1.S.ms_memTaint s1.S.ms_stackTaint s1 /\
-      taint_match_inouts inouts args oprs s2.S.ms_memTaint s2.S.ms_stackTaint s2 /\
       Some? (S.instr_apply_eval_inouts outs inouts args f oprs s1) /\
       Some? (S.instr_apply_eval_inouts outs inouts args f oprs s2) /\
       check_if_consumes_fixed_time_outs inouts args oprs ts Public /\
@@ -372,24 +363,12 @@ let lemma_preserve_valid128 (m m':S.heap) : Lemma
   =
   FStar.Pervasives.reveal_opaque (`%S.valid_addr128) S.valid_addr128
 
-// Avoid extra ifuel for "with":
-let state_with_taint (s:S.machine_state) (memTaint stackTaint:memTaint_t) : Pure S.machine_state
-  (requires True)
-  (ensures fun s' ->
-    s'.S.ms_mem == s.S.ms_mem /\ s'.S.ms_stack == s.S.ms_stack /\
-    s'.S.ms_regs == s.S.ms_regs /\ s'.S.ms_xmms == s.S.ms_xmms)
-  =
-  {s with S.ms_memTaint = memTaint; S.ms_stackTaint = stackTaint}
-
 let lemma_instr_set_taints_explicit
     (i:instr_operand_explicit) (v1 v2:instr_val_t (IOpEx i)) (o:instr_operand_t i)
     (ts_orig ts:analysis_taints) (t_out:taint)
     (s1_orig s1 s2_orig s2:S.machine_state)
-    (memTaint1 stackTaint1 memTaint2 stackTaint2:memTaint_t)
   : Lemma
     (requires (
-      let s1t = state_with_taint s1 memTaint1 stackTaint1 in
-      let s2t = state_with_taint s2 memTaint2 stackTaint2 in
       let s1' = S.instr_write_output_explicit i v1 o s1_orig s1 in
       let s2' = S.instr_write_output_explicit i v2 o s2_orig s2 in
       s1'.S.ms_ok /\ s2'.S.ms_ok /\
@@ -398,21 +377,15 @@ let lemma_instr_set_taints_explicit
       Set.equal (Map.domain s2_orig.S.ms_mem) (Map.domain s2.S.ms_mem) /\
       check_if_consumes_fixed_time_outs_explicit i o ts_orig t_out /\
       publicValuesAreSame ts_orig s1_orig s2_orig /\
-      publicValuesAreSame ts s1t s2t
+      publicValuesAreSame ts s1 s2
     ))
     (ensures (
-      let (memTaint1', stackTaint1') =
-        update_taint_operand_explicit i o memTaint1 stackTaint1 s1_orig in
       let s1' = S.instr_write_output_explicit i v1 o s1_orig s1 in
-      let (memTaint2', stackTaint2') =
-        update_taint_operand_explicit i o memTaint2 stackTaint2 s2_orig in
       let s2' = S.instr_write_output_explicit i v2 o s2_orig s2 in
       let ts' = instr_set_taint_explicit i o ts t_out in
-      let s1t' = state_with_taint s1' memTaint1' stackTaint1' in
-      let s2t' = state_with_taint s2' memTaint2' stackTaint2' in
       Set.equal (Map.domain s1_orig.S.ms_mem) (Map.domain s1'.S.ms_mem) /\
       Set.equal (Map.domain s2_orig.S.ms_mem) (Map.domain s2'.S.ms_mem) /\
-      publicValuesAreSame ts' s1t' s2t'
+      publicValuesAreSame ts' s1' s2'
     ))
   =
   allow_inversion maddr;
@@ -428,11 +401,8 @@ let lemma_instr_set_taints_implicit
     (i:instr_operand_implicit) (v1 v2:instr_val_t (IOpIm i))
     (ts_orig ts:analysis_taints) (t_out:taint)
     (s1_orig s1 s2_orig s2:S.machine_state)
-    (memTaint1 stackTaint1 memTaint2 stackTaint2:memTaint_t)
   : Lemma
     (requires (
-      let s1t = state_with_taint s1 memTaint1 stackTaint1 in
-      let s2t = state_with_taint s2 memTaint2 stackTaint2 in
       let s1' = S.instr_write_output_implicit i v1 s1_orig s1 in
       let s2' = S.instr_write_output_implicit i v2 s2_orig s2 in
       s1'.S.ms_ok /\ s2'.S.ms_ok /\
@@ -441,21 +411,15 @@ let lemma_instr_set_taints_implicit
       Set.equal (Map.domain s2_orig.S.ms_mem) (Map.domain s2.S.ms_mem) /\
       check_if_consumes_fixed_time_outs_implicit i ts_orig t_out /\
       publicValuesAreSame ts_orig s1_orig s2_orig /\
-      publicValuesAreSame ts s1t s2t
+      publicValuesAreSame ts s1 s2
     ))
     (ensures (
-      let (memTaint1', stackTaint1') =
-        update_taint_operand_implicit i memTaint1 stackTaint1 s1_orig in
       let s1' = S.instr_write_output_implicit i v1 s1_orig s1 in
-      let (memTaint2', stackTaint2') =
-        update_taint_operand_implicit i memTaint2 stackTaint2 s2_orig in
       let s2' = S.instr_write_output_implicit i v2 s2_orig s2 in
       let ts' = instr_set_taint_implicit i ts t_out in
-      let s1t' = state_with_taint s1' memTaint1' stackTaint1' in
-      let s2t' = state_with_taint s2' memTaint2' stackTaint2' in
       Set.equal (Map.domain s1_orig.S.ms_mem) (Map.domain s1'.S.ms_mem) /\
       Set.equal (Map.domain s2_orig.S.ms_mem) (Map.domain s2'.S.ms_mem) /\
-      publicValuesAreSame ts' s1t' s2t'
+      publicValuesAreSame ts' s1' s2'
     ))
   =
   allow_inversion maddr;
@@ -475,30 +439,21 @@ let rec lemma_instr_set_taints
     (vs1 vs2:instr_ret_t outs) (oprs:instr_operands_t outs args)
     (ts_orig ts:analysis_taints) (t_out:taint)
     (s1_orig s1 s2_orig s2:S.machine_state)
-    (memTaint1 stackTaint1 memTaint2 stackTaint2:memTaint_t)
   : Lemma
     (requires (
       let s1_state' = S.instr_write_outputs outs args vs1 oprs s1_orig s1 in
       let s2_state' = S.instr_write_outputs outs args vs2 oprs s2_orig s2 in
-      let s1t = state_with_taint s1 memTaint1 stackTaint1 in
-      let s2t = state_with_taint s2 memTaint2 stackTaint2 in
       s1_state'.S.ms_ok /\ s2_state'.S.ms_ok /\
       (t_out == Public ==> vs1 == vs2) /\
       Set.equal (Map.domain s1_orig.S.ms_mem) (Map.domain s1.S.ms_mem) /\
       Set.equal (Map.domain s2_orig.S.ms_mem) (Map.domain s2.S.ms_mem) /\
       check_if_consumes_fixed_time_outs outs args oprs ts_orig t_out /\
       publicValuesAreSame ts_orig s1_orig s2_orig /\
-      publicValuesAreSame ts s1t s2t
+      publicValuesAreSame ts s1 s2
     ))
     (ensures (
-      let (memTaint1', stackTaint1') =
-        update_taint_outputs outs args oprs memTaint1 stackTaint1 s1_orig in
-      let s1' = state_with_taint (S.instr_write_outputs outs args vs1 oprs s1_orig s1)
-        memTaint1' stackTaint1' in
-      let (memTaint2', stackTaint2') =
-        update_taint_outputs outs args oprs memTaint2 stackTaint2 s2_orig in
-      let s2' = state_with_taint (S.instr_write_outputs outs args vs2 oprs s2_orig s2)
-        memTaint2' stackTaint2' in
+      let s1' = S.instr_write_outputs outs args vs1 oprs s1_orig s1 in
+      let s2' = S.instr_write_outputs outs args vs2 oprs s2_orig s2 in
       let ts' = instr_set_taints outs args oprs ts t_out in
       publicValuesAreSame ts' s1' s2'
     ))
@@ -520,33 +475,21 @@ let rec lemma_instr_set_taints
       match i with
       | IOpEx i ->
         let (o, oprs):instr_operand_t i & instr_operands_t outs args = coerce oprs in
-        let (memTaint1', stackTaint1') =
-          update_taint_operand_explicit i o memTaint1 stackTaint1 s1_orig in
         let s1' = S.instr_write_output_explicit i v1 o s1_orig s1 in
-        let (memTaint2', stackTaint2') =
-          update_taint_operand_explicit i o memTaint2 stackTaint2 s2_orig in
         let s2' = S.instr_write_output_explicit i v2 o s2_orig s2 in
         lemma_instr_write_outputs_ok outs args vs1 oprs s1_orig s1';
         lemma_instr_write_outputs_ok outs args vs2 oprs s2_orig s2';
         let ts' = instr_set_taint_explicit i o ts t_out in
-        lemma_instr_set_taints_explicit i v1 v2 o ts_orig ts t_out s1_orig s1 s2_orig s2
-          memTaint1 stackTaint1 memTaint2 stackTaint2;
-        lemma_instr_set_taints outs args vs1 vs2 oprs ts_orig ts' t_out
-          s1_orig s1' s2_orig s2' memTaint1' stackTaint1' memTaint2' stackTaint2'
+        lemma_instr_set_taints_explicit i v1 v2 o ts_orig ts t_out s1_orig s1 s2_orig s2;
+        lemma_instr_set_taints outs args vs1 vs2 oprs ts_orig ts' t_out s1_orig s1' s2_orig s2'
       | IOpIm i ->
-        let (memTaint1', stackTaint1') =
-          update_taint_operand_implicit i memTaint1 stackTaint1 s1_orig in
         let s1' = S.instr_write_output_implicit i v1 s1_orig s1 in
-        let (memTaint2', stackTaint2') =
-          update_taint_operand_implicit i memTaint2 stackTaint2 s2_orig in
         let s2' = S.instr_write_output_implicit i v2 s2_orig s2 in
         lemma_instr_write_outputs_ok outs args vs1 (coerce oprs) s1_orig s1';
         lemma_instr_write_outputs_ok outs args vs2 (coerce oprs) s2_orig s2';
         let ts' = instr_set_taint_implicit i ts t_out in
-        lemma_instr_set_taints_implicit i v1 v2 ts_orig ts t_out s1_orig s1 s2_orig s2
-          memTaint1 stackTaint1 memTaint2 stackTaint2;
-        lemma_instr_set_taints outs args vs1 vs2 (coerce oprs) ts_orig ts' t_out
-          s1_orig s1' s2_orig s2' memTaint1' stackTaint1' memTaint2' stackTaint2'
+        lemma_instr_set_taints_implicit i v1 v2 ts_orig ts t_out s1_orig s1 s2_orig s2;
+        lemma_instr_set_taints outs args vs1 vs2 (coerce oprs) ts_orig ts' t_out s1_orig s1' s2_orig s2'
     )
 
 let check_if_instr_consumes_fixed_time (ins:S.ins) (ts:analysis_taints) : Pure (bool & analysis_taints)
@@ -662,16 +605,14 @@ let lemma_instr_leakage_free (ts:analysis_taints) (ins:S.ins) : Lemma
 
       if t_out = Secret then
       (
-        lemma_instr_set_taints outs args vs1 vs2 oprs ts ts_havoc t_out s1 s1' s2 s2'
-          s1.S.ms_memTaint s1.S.ms_stackTaint s2.S.ms_memTaint s2.S.ms_stackTaint;
+        lemma_instr_set_taints outs args vs1 vs2 oprs ts ts_havoc t_out s1 s1' s2 s2';
         ()
       )
       else
       (
         let vs = vs1 in
         lemma_inouts_taint outs outs args (instr_eval i) oprs ts s1 s2;
-        lemma_instr_set_taints outs args vs vs oprs ts ts_havoc t_out s1 s1' s2 s2'
-          s1.S.ms_memTaint s1.S.ms_stackTaint s2.S.ms_memTaint s2.S.ms_stackTaint;
+        lemma_instr_set_taints outs args vs vs oprs ts ts_havoc t_out s1 s1' s2 s2';
         ()
       )
       in

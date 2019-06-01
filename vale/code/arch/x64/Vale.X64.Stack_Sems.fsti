@@ -29,7 +29,7 @@ val free_stack_same_load: (start:int) -> (finish:int) -> (ptr:int) -> (h:S.stack
   [SMTPat (S.eval_stack ptr (S.free_stack' start finish h))]
 
 val equiv_store_stack64: (ptr:int) -> (v:nat64) -> (h:stack) -> Lemma
-  (stack_from_s (S.update_stack' ptr v (stack_to_s h)) == store_stack64 ptr v h)
+  (stack_from_s (S.update_stack64' ptr v (stack_to_s h)) == store_stack64 ptr v h)
   [SMTPat (store_stack64 ptr v h)]
 
 val equiv_init_rsp: (h:stack) -> Lemma

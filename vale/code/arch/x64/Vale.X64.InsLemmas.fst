@@ -17,13 +17,13 @@ let lemma_valid_taint64_operand m t s =
     (fun (b:Vale.X64.Memory.buffer64) (index:nat{valid_maddr (eval_maddr m s) real_mem tainted_mem b index t}) ->
       lemma_valid_taint64 b tainted_mem real_mem index t)
 
-let lemma_valid_taint_match64 o s =
+let lemma_valid_src_operand64_and_taint o s =
   match o with
   | OMem (m, t) ->
     let addr = eval_maddr m s in
     let aux (b:buffer64) (i:int) : Lemma
       (requires valid_maddr addr s.mem s.memTaint b i t)
-      (ensures S.taint_match o s.memTaint s.stackTaint (state_to_S s))
+      (ensures S.valid_src_operand64_and_taint o (state_to_S s))
       =
       Vale.X64.Memory.lemma_valid_taint64 b s.memTaint s.mem i t
       in
@@ -31,13 +31,13 @@ let lemma_valid_taint_match64 o s =
   | OStack (m, t) -> lemma_valid_taint_stack64 (eval_maddr m s) t s.stackTaint
   | _ -> ()
 
-let lemma_valid_taint_match128 o s =
+let lemma_valid_src_operand128_and_taint o s =
   match o with
   | OMem (m, t) ->
     let addr = eval_maddr m s in
     let aux (b:buffer128) (i:int) : Lemma
       (requires valid_maddr128 addr s.mem s.memTaint b i t)
-      (ensures S.taint_match128 o s.memTaint s.stackTaint (state_to_S s))
+      (ensures S.valid_src_operand128_and_taint o (state_to_S s))
       =
       Vale.X64.Memory.lemma_valid_taint128 b s.memTaint s.mem i t
       in
