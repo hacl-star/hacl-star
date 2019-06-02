@@ -13,7 +13,9 @@ open Lib.ByteBuffer
 open Hacl.Impl.Bignum.Core
 
 module Seq = Lib.Sequence
+module FSeq = FStar.Seq
 module B = FStar.Bytes
+module L = FStar.List.Tot
 module ST = FStar.HyperStack.ST
 
 #reset-options "--z3rlimit 150 --max_fuel 0 --max_ifuel 0"
@@ -124,40 +126,71 @@ let bignum_to_bytes_direct #len input res =
 
 /// Converts nat to b64 base, lsb first (little endian)
 inline_for_extraction noextract
-val nat_to_list64: y:nat -> Tot (l:list pub_uint64{List.Tot.length l > 0}) (decreases y)
+val nat_to_list64: y:nat -> Tot (l:list pub_uint64{L.length l > 0}) (decreases y)
 let rec nat_to_list64 y =
     if y <= maxint U64
     then [uint y]
     else uint (y % (modulus U64)) :: nat_to_list64 (y / (modulus U64))
 
+/// Base64 representation preserves order.
+val nat_to_list64_order: a:nat -> b:nat -> Lemma
+  (requires (a <= b))
+  (ensures (L.length (nat_to_list64 a) <=
+            L.length (nat_to_list64 b)))
+let rec nat_to_list64_order a b =
+    if a <= maxint U64 then ()
+    else nat_to_list64_order (a / (modulus U64)) (b / (modulus U64))
+
 /// Same as nat_to_list64, but converts to the secure 64 ints.
 inline_for_extraction noextract
 val nat_to_list64_sec:
        x:nat
-    -> l:list uint64{ List.Tot.length l == List.Tot.length (nat_to_list64 x) }
-let nat_to_list64_sec x = normalize_term (List.Tot.map secret (nat_to_list64 x))
+    -> l:list uint64{ L.length l == L.length (nat_to_list64 x) }
+let nat_to_list64_sec x = normalize_term (L.map secret (nat_to_list64 x))
 
 /// List64 to nat conversion.
 inline_for_extraction noextract
-val list64_sec_to_nat: l:list uint64{ List.Tot.length l > 0 } -> Tot nat
+val list64_sec_to_nat: l:list uint64{ L.length l > 0 } -> Tot nat
 let rec list64_sec_to_nat l = match l with
   | [x] -> v x
   | x::tl -> v x + list64_sec_to_nat tl * modulus U64
 
-/// Relatively "small" nats, which fit into 512 Mb.
-/// Bignums of the related length satisfy bn_len_strict.
+/// This conversion is invertible.
+val conv_inv1: a:nat -> Lemma
+  (list64_sec_to_nat (nat_to_list64_sec a) = a)
+let rec conv_inv1 a =
+    if a <= maxint U64 then ()
+    else conv_inv1 (a / (modulus U64))
+
+/// Relatively "small" nats, which fit into 256 Mb (2147483648 bits).
+/// Related bignums' lengths satisfy all the needed library predicates.
 let issnat (n:nat) =
-    List.Tot.length (nat_to_list64_sec n) * 64 <= max_size_t /\
-    normalize (List.Tot.length (nat_to_list64_sec n) * 64 <= max_size_t)
+    L.length (nat_to_list64_sec n) * 128 <= max_size_t
 
 type snat = n:nat{issnat n}
 
-inline_for_extraction noextract
-val nat_bytes_num: x:snat -> r:size_t { v r = List.Tot.length (nat_to_list64_sec x) }
-let nat_bytes_num x = normalize_term (size (List.Tot.length (nat_to_list64_sec x)))
+/// Nats less than any snat are snats too.
+val snat_order: a:nat -> b:nat{a <= b} ->
+  Lemma (requires (issnat b)) (ensures (issnat a))
+let snat_order a b = nat_to_list64_order a b
 
-noextract
-let example_snat:snat = assert_norm(issnat 12345678901234567890); 12345678901234567890
+inline_for_extraction noextract
+val nat_bytes_num: x:snat -> r:size_t { v r = L.length (nat_to_list64_sec x) }
+let nat_bytes_num x = normalize_term (size (L.length (nat_to_list64_sec x)))
+
+/// Bignums created of snats are properly sized, their size is bn_len_strict.
+val nat_bytes_num_range: x:snat -> Lemma
+  (requires true)
+  (ensures (v (nat_bytes_num x) * 64 <= max_size_t /\
+            v (nat_bytes_num x +. nat_bytes_num x) * 64 <= max_size_t /\
+            v (nat_bytes_num x) > 0))
+let nat_bytes_num_range _ = ()
+
+/// Base64 representation on snats preserves order (specialised version).
+val nat_bytes_num_fit: a:snat -> b:snat -> Lemma
+  (requires (a <= b))
+  (ensures (v (nat_bytes_num a) <= v (nat_bytes_num b)))
+let rec nat_bytes_num_fit a b = nat_to_list64_order a b
 
 /// Nat representation of bigint.
 noextract
@@ -167,11 +200,9 @@ val as_snat:
   -> lbignum eLen
   -> GTot nat
 let as_snat #eLen h e =
-  let s = as_seq h e in
-  let l = Seq.Properties.seq_to_list s in
-  list64_sec_to_nat l
-
-#reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0"
+//  assert (L.length e > 0);
+  let x = as_seq h e in
+  list64_sec_to_nat (Seq.Properties.seq_to_list x)
 
 /// Converts nat to the bignum, for that creates a bignum of exact length required.
 inline_for_extraction noextract
@@ -181,8 +212,15 @@ val nat_to_bignum_exact:
     (requires fun _ -> true)
     (ensures  fun h0 b h1 ->
      live h1 b /\
+     as_snat h1 b = input /\
      stack_allocated b h0 h1 (Seq.of_list (nat_to_list64_sec input)))
-let nat_to_bignum_exact input = createL (nat_to_list64_sec input)
+let nat_to_bignum_exact input =
+  let res = createL (nat_to_list64_sec input) in
+  Seq.Properties.lemma_list_seq_bij (nat_to_list64_sec input);
+  conv_inv1 input;
+  res
+
+#reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0"
 
 /// Converts nat to the bignum, but allows to allocate bigger buffer for the bignum returned.
 inline_for_extraction noextract
@@ -193,6 +231,7 @@ val nat_to_bignum:
     (requires fun _ -> true)
     (ensures  fun h0 b h1 ->
      live h1 b /\
+     as_snat h1 b = input /\
      stack_allocated b h0 h1
        (Seq.concat (Seq.of_list (nat_to_list64_sec input))
                    (Seq.create (v k - v (nat_bytes_num input)) (uint 0)))
@@ -205,6 +244,6 @@ let nat_to_bignum #k input =
 
   copy res_sub created;
 
-  admit();
+  admit(); // must prove that adding extra high bit zeroes doesn't change number
 
   res
