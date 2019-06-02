@@ -41,13 +41,9 @@ let eval_maddr (m:maddr) (s:vale_state) : int =
     | MIndex base scale index offset -> eval_reg base s + scale * (eval_reg index s) + offset
 
 [@va_qattr]
-let to_nat64 (i:int) : nat64 =
-  if 0 <= i && i < 0x10000000000000000 then i else int_to_nat64 i
-
-[@va_qattr]
 let eval_operand (o:operand64) (s:vale_state) : GTot nat64 =
   match o with
-  | OConst n -> to_nat64 n
+  | OConst n -> n
   | OReg r -> eval_reg r s
   | OMem (m, _) -> eval_mem (eval_maddr m s) s
   | OStack (m, _) -> eval_stack (eval_maddr m s) s

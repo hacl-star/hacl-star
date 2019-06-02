@@ -116,7 +116,7 @@ let eval_maddr (m:maddr) (s:machine_state) : int =
 
 let eval_operand (o:operand64) (s:machine_state) : nat64 =
   match o with
-  | OConst n -> int_to_nat64 n
+  | OConst n -> n
   | OReg r -> eval_reg r s
   | OMem (m, _) -> eval_mem (eval_maddr m s) s
   | OStack (m, _) -> eval_stack (eval_maddr m s) s.ms_stack
@@ -539,21 +539,13 @@ let bind_option (#a #b:Type) (v:option a) (f:a -> option b) : option b =
 let operand_obs (s:machine_state) (o:operand64) : list observation =
   match o with
   | OConst _ | OReg _ -> []
-  | OMem (m, _) | OStack (m, _) ->
-    match m with
-    | MConst _ -> []
-    | MReg reg _ -> [MemAccess (eval_reg reg s)]
-    | MIndex base _ index _ -> [MemAccessOffset (eval_reg base s) (eval_reg index s)]
+  | OMem (m, _) | OStack (m, _) -> [MemAccess (eval_maddr m s)]
 
 [@instr_attr]
 let operand_obs128 (s:machine_state) (op:operand128) : list observation =
   match op with
   | OConst _ | OReg _ -> []
-  | OStack (m, _) | OMem (m, _) ->
-    match m with
-    | MConst _ -> []
-    | MReg reg _ -> [MemAccess (eval_reg reg s)]
-    | MIndex base _ index _ -> [MemAccessOffset (eval_reg base s) (eval_reg index s)]
+  | OMem (m, _) | OStack (m, _) -> [MemAccess (eval_maddr m s)]
 
 [@instr_attr]
 let obs_operand_explicit

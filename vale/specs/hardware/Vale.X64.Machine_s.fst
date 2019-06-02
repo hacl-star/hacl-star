@@ -51,7 +51,7 @@ type operand (tc:eqtype) (tr:eqtype) : eqtype =
   | OStack: m:tmaddr -> operand tc tr
 
 [@va_qattr]
-let operand64:eqtype = operand int reg
+let operand64:eqtype = operand nat64 reg
 
 [@va_qattr]
 let operand128:eqtype = operand quad32 xmm
@@ -65,7 +65,6 @@ type precode (t_ins:Type0) (t_ocmp:eqtype) : Type0 =
 
 type observation:eqtype =
   | BranchPredicate: pred:bool -> observation
-  | MemAccess: addr:nat64 -> observation
-  | MemAccessOffset: base:nat64 -> index:nat64 -> observation
+  | MemAccess: addr:int -> observation
 
 type memTaint_t = (m:Map.t int taint{Set.equal (Map.domain m) (Set.complement Set.empty)})
