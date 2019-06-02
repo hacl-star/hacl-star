@@ -157,6 +157,7 @@ let test_comp _ =
 
   pop_frame()
 
+#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
 
 inline_for_extraction noextract
 val test_add_gen:
@@ -168,10 +169,9 @@ let test_add_gen a b =
 
   let a_len: size_t = normalize_term (nat_bytes_num a) in
   let b_len: size_t = normalize_term (nat_bytes_num b) in
-  assume (v a_len + 1 <= max_size_t);
-  assume (v b_len <= v a_len);
+  nat_bytes_num_range a;
+  nat_bytes_num_fit b a;
   let res_len: size_t = a_len +. 1ul in
-  assume (v (a_len +. 1ul) > 0);
   let c_len: size_t = normalize_term (nat_bytes_num (a+b)) in
 
   let bn_a:lbignum a_len     = nat_to_bignum_exact a in
@@ -179,11 +179,12 @@ let test_add_gen a b =
   let bn_c:lbignum c_len     = nat_to_bignum_exact (normalize_term (a+b)) in
   let bn_res:lbignum res_len = create res_len (uint 0) in
 
-  admit();
   bn_add_full bn_a bn_b bn_res;
   let res = bn_is_equal bn_c bn_res in
   print_verdict bn_c bn_res res;
   pop_frame()
+
+#reset-options
 
 val test_add: unit -> St unit
 let test_add _ =
@@ -210,32 +211,35 @@ let test_add _ =
 
   pop_frame()
 
+#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
 
 inline_for_extraction noextract
 val test_mult_gen:
      a:snat
-  -> b:snat{issnat (a+b)}
+  -> b:snat{issnat (a*b)}
   -> Stack unit (requires fun _ -> true) (ensures fun _ _ _ -> true)
 let test_mult_gen a b =
   push_frame();
 
   let a_len: size_t = normalize_term (nat_bytes_num a) in
   let b_len: size_t = normalize_term (nat_bytes_num b) in
-  assume (v a_len + v b_len <= max_size_t);
-  assume (v (a_len +. b_len) > 0);
-  let res_len: size_t = (a_len +. b_len +. 1ul) in
+  nat_bytes_num_range a;
+  nat_bytes_num_range b;
+  let res_len: size_t = (a_len +. b_len) in
 
   let bn_a:lbignum a_len     = nat_to_bignum_exact a in
   let bn_b:lbignum b_len     = nat_to_bignum_exact b in
-  admit();
+  assume (v (nat_bytes_num (a*b)) <= v res_len);
   let bn_c:lbignum res_len   = nat_to_bignum #res_len (normalize_term (a * b)) in
   let bn_res:lbignum res_len = create res_len (uint 0) in
-
 
   bn_mul bn_a bn_b bn_res;
   let res = bn_is_equal bn_c bn_res in
   print_verdict bn_c bn_res res;
+
   pop_frame()
+
+#reset-options
 
 val test_mult: unit -> St unit
 let test_mult _ =
@@ -274,8 +278,7 @@ let test_mult _ =
 
   pop_frame()
 
-#reset-options "--z3rlimit 30"
-
+#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
 
 inline_for_extraction noextract
 val test_lshift_gen:
@@ -287,9 +290,7 @@ let test_lshift_gen a p =
 
   let p' = normalize_term (size p) in
   let aLen = normalize_term (nat_bytes_num a) in
-  assume (v 64ul > 0);
   let resLen = aLen +. (p' /. 64ul) +. 1ul in
-  assume (v aLen + (v p' / 64) + 1 < max_size_t);
   assume (v resLen < max_size_t /\ v resLen > 0);
 
   let bn_a:lbignum aLen = nat_to_bignum a in
@@ -303,6 +304,8 @@ let test_lshift_gen a p =
   let res = bn_is_equal bn_expected bn_res in
   print_verdict bn_expected bn_res res;
   pop_frame ()
+
+#reset-options
 
 val test_lshift: unit -> St unit
 let test_lshift _ =
@@ -337,6 +340,8 @@ let test_lshift _ =
 
   pop_frame ()
 
+#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
+
 inline_for_extraction noextract
 val test_rshift1_gen:
      a:snat{a>1}
@@ -344,17 +349,22 @@ val test_rshift1_gen:
 let test_rshift1_gen a =
   push_frame();
 
+  nat_bytes_num_range a;
   let aLen = normalize_term (nat_bytes_num a) in
 
   let bn_a:lbignum aLen = nat_to_bignum a in
   let bn_res:lbignum aLen = create aLen (uint 0) in
-  assume (a / 2 > 0 /\ issnat (a / 2) /\ v (nat_bytes_num (a / 2)) <= v aLen);
+  assert (a/2 > 0 /\ a/2 < a);
+  snat_order (a/2) a;
+  nat_bytes_num_fit (a/2) a;
   let bn_expected:lbignum aLen = nat_to_bignum (normalize_term (a / 2)) in
 
   bn_rshift1 bn_a bn_res;
   let res = bn_is_equal bn_expected bn_res in
   print_verdict bn_expected bn_res res;
   pop_frame()
+
+#reset-options
 
 val test_rshift1: unit -> St unit
 let test_rshift1 _ =
@@ -377,6 +387,8 @@ let test_rshift1 _ =
   pop_frame ()
 
 
+#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
+
 inline_for_extraction noextract
 val test_pow2_gen:
      a:snat{a > 2}
@@ -387,13 +399,13 @@ let test_pow2_gen a p =
 
   let p' = normalize_term (size p) in
   let aLen = normalize_term (nat_bytes_num a) in
-  assume (v aLen + 1 < max_size_t);
+  nat_bytes_num_range a;
   let aBits = aLen *. 64ul in
 
   let bn_a:lbignum aLen = nat_to_bignum a in
   let bn_res:lbignum aLen = create aLen (uint 0) in
-  assume (issnat (fexp #a 2 p));
-  assume (v (nat_bytes_num (fexp #a 2 p)) <= v aLen);
+  snat_order (fexp #a 2 p) a;
+  nat_bytes_num_fit (fexp #a 2 p) a;
   let bn_expected:lbignum aLen = nat_to_bignum (normalize_term (fexp #a 2 p)) in
 
   assume (v aBits / 64 <= v aLen);
@@ -402,6 +414,8 @@ let test_pow2_gen a p =
   let res = bn_is_equal bn_expected bn_res in
   print_verdict bn_expected bn_res res;
   pop_frame()
+
+#reset-options
 
 val test_pow2: unit -> St unit
 let test_pow2 _ =
@@ -433,26 +447,32 @@ let test_pow2 _ =
 
   pop_frame ()
 
+#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
+
 
 inline_for_extraction noextract
 val test_mod_gen:
      n:snat{n > 2}
   -> a:snat
   -> Stack unit (requires fun _ -> true) (ensures fun _ _ _ -> true)
-let test_mod_gen n a =
+let test_mod_gen n (a:nat{issnat a}) =
   push_frame();
 
-  let nLen = normalize_term (nat_bytes_num n) in
-  let aLen = normalize_term (nat_bytes_num a) in
-  let xLen = if nLen >=. aLen then nLen else aLen in
+  nat_bytes_num_range n;
+  nat_bytes_num_range a;
+  let aLen:bn_len_strict = normalize_term (nat_bytes_num a) in
+  let nLen:bn_len_strict = normalize_term (nat_bytes_num n) in
 
-  let bn_n:lbignum xLen = nat_to_bignum n in
-  let bn_a:lbignum xLen = nat_to_bignum a in
-  let bn_res:lbignum xLen = create xLen (uint 0) in
-  assume (issnat (a % n) /\ v (nat_bytes_num (a % n)) <= v xLen);
-  let bn_expected:lbignum xLen = nat_to_bignum (normalize_term (a % n)) in
+  let bn_n:lbignum nLen = nat_to_bignum n in
+  let bn_a:lbignum aLen = nat_to_bignum a in
+  let bn_res:lbignum nLen = create nLen (uint 0) in
 
-  assume (v xLen + 1 < max_size_t);
+  Math.Lemmas.lemma_mod_lt a n;
+  assert (a % n < n);
+  snat_order (a % n) n;
+  nat_bytes_num_fit (a % n) n;
+  let bn_expected:lbignum nLen = nat_to_bignum (normalize_term (a % n)) in
+
   bn_remainder bn_a bn_n bn_res;
   let res = bn_is_equal bn_expected bn_res in
   print_verdict bn_expected bn_res res;
@@ -502,43 +522,140 @@ let test_mod _ =
   test_mod_gen 18446744073709551617 18446744073709551615;
 
 
+  test_mod_gen 1234123432165873264969873219648712
+     243241359213059132408213100000;
+
   pop_frame ()
 
+#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
+
+
+inline_for_extraction noextract
+val test_mod_ops_gen:
+     n:snat{ n > 1 }
+  -> a:snat{ a < n }
+  -> b:snat{ b < n }
+  -> Stack unit (requires fun _ -> true) (ensures fun _ _ _ -> true)
+let test_mod_ops_gen n a b =
+  push_frame();
+
+  nat_bytes_num_range n;
+  let nLen:bn_len_strict = normalize_term (nat_bytes_num n) in
+
+  nat_bytes_num_fit a n;
+  nat_bytes_num_fit b n;
+
+  let bn_a:lbignum nLen = nat_to_bignum a in
+  let bn_b:lbignum nLen = nat_to_bignum b in
+  let bn_n:lbignum nLen = nat_to_bignum n in
+
+  let bn_add_res:lbignum nLen = create nLen (uint 0) in
+  let bn_mul_res:lbignum nLen = create nLen (uint 0) in
+
+  Math.Lemmas.lemma_mod_lt (a+b) n;
+  snat_order ((a+b) % n) n;
+  nat_bytes_num_fit ((a+b) % n) n;
+  let bn_add_exp:lbignum nLen = nat_to_bignum (normalize_term ((a + b) % n)) in
+
+  Math.Lemmas.lemma_mod_lt (a*b) n;
+  snat_order ((a*b) % n) n;
+  nat_bytes_num_fit ((a*b) % n) n;
+  let bn_mul_exp:lbignum nLen = nat_to_bignum (normalize_term ((a * b) % n)) in
+
+
+  bn_modular_add bn_n bn_a bn_b bn_add_res;
+  bn_modular_mul bn_n bn_a bn_b bn_mul_res;
+
+  let res_add = bn_is_equal bn_add_exp bn_add_res in
+  print_verdict bn_add_exp bn_add_res res_add;
+
+  let res_mul = bn_is_equal bn_mul_exp bn_mul_res in
+  print_verdict bn_mul_exp bn_mul_res res_mul;
+
+  pop_frame()
+
+#reset-options
+
+val test_mod_ops: unit -> St unit
+let test_mod_ops _ =
+  C.String.print (C.String.of_literal "Testing mod_ops\n");
+  push_frame();
+
+
+  test_mod_ops_gen 100000000001 0 0;
+  test_mod_ops_gen 100000000001 1 0;
+  test_mod_ops_gen 100000000001 12345 0;
+  test_mod_ops_gen 100000000001 10 1;
+  test_mod_ops_gen 100000000001 10 2;
+  test_mod_ops_gen 100000000001 10 25;
+  test_mod_ops_gen 100000000001 10 1000;
+  test_mod_ops_gen 100000000001 100000000000 1;
+  test_mod_ops_gen 100000000001 100000000000 2;
+  test_mod_ops_gen 100000000001 100000000000 100000000000;
+
+
+  test_mod_ops_gen 1234123432165873264969873219648712 0 0;
+  test_mod_ops_gen 1234123432165873264969873219648712 1 0;
+  test_mod_ops_gen 1234123432165873264969873219648712 12345 0;
+  test_mod_ops_gen 1234123432165873264969873219648712 10 1;
+  test_mod_ops_gen 1234123432165873264969873219648712 10 2;
+  test_mod_ops_gen 1234123432165873264969873219648712 10 25;
+  test_mod_ops_gen 1234123432165873264969873219648712 10 1000;
+  test_mod_ops_gen 1234123432165873264969873219648712 100000 10000000000000000000;
+
+
+  test_mod_ops_gen 1234123432165873264969873219648712
+     243241359213059132408213100000 2;
+  test_mod_ops_gen 1234123432165873264969873219648712
+     243241359213059132408213100000 10;
+  test_mod_ops_gen 1234123432165873264969873219648712
+     243241359213059132408213100000 100000;
+  test_mod_ops_gen 1234123432165873264969873219648712
+     243241359213059132408213100000 100000000000;
+  test_mod_ops_gen 1234123432165873264969873219648712
+     243241359213059132408213100000 1000000000000000;
+  test_mod_ops_gen 1234123432165873264969873219648712
+     243241359213059132408213100000 1000000000000000000;
+  test_mod_ops_gen 1234123432165873264969873219648712
+     243241359213059132408213100000 10000000000000000000;
+
+  pop_frame ()
+
+
+#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
 
 inline_for_extraction noextract
 val test_exp_gen:
      n:snat{ n > 1 }
   -> a:snat{ a < n }
-  -> b:snat
+  -> exp:snat
   -> Stack unit (requires fun _ -> true) (ensures fun _ _ _ -> true)
-let test_exp_gen n a b =
+let test_exp_gen n a exp =
   push_frame();
 
-  //let nLen = normalize_term (nat_bytes_num n) in
-  let nLen = 4ul in
-  let pow2_i = 4ul in
+  nat_bytes_num_range n;
+  let nLen:bn_len_strict = normalize_term (nat_bytes_num n) in
+  let expLen:bn_len_strict = normalize_term (nat_bytes_num exp) in
 
-  assume (v (nat_bytes_num a) <= v nLen);
-  assume (v (nat_bytes_num b) <= v nLen);
-  assume (v (nat_bytes_num n) <= v nLen);
-  [@inline_let]
-  let r =  fexp #n a b in
-  assume (issnat r);
-  assume (v (nat_bytes_num r) <= v nLen);
+  nat_bytes_num_fit a n;
 
   let bn_a:lbignum nLen = nat_to_bignum a in
-  let bn_b:lbignum nLen = nat_to_bignum b in
   let bn_n:lbignum nLen = nat_to_bignum n in
+  let bn_exp:lbignum expLen = nat_to_bignum exp in
   let bn_res:lbignum nLen = create nLen (uint 0) in
 
-  let bn_expected:lbignum nLen = nat_to_bignum (normalize_term (fexp #n a b)) in
+  snat_order (fexp #n a exp) n;
+  nat_bytes_num_fit (fexp #n a exp) n;
+  let bn_expected:lbignum nLen = nat_to_bignum (normalize_term (fexp #n a exp)) in
 
-  admit();
-  mod_exp_compact pow2_i bn_n bn_a bn_b bn_res;
+  let h = FStar.HyperStack.ST.get () in
+  nat_bytes_num_range n;
+  bn_modular_exp bn_n bn_a bn_exp bn_res;
   let res = bn_is_equal bn_expected bn_res in
   print_verdict bn_expected bn_res res;
   pop_frame()
 
+#reset-options
 
 val test_exp: unit -> St unit
 let test_exp _ =
@@ -549,26 +666,46 @@ let test_exp _ =
   test_exp_gen 100000000000 1 0;
   test_exp_gen 100000000000 12345 0;
   test_exp_gen 100000000000 10 1;
-  test_exp_gen 100000000000 10 5;
-  test_exp_gen 100000000000 100000 5;
-//  test_exp_gen 1234123432165873264969873219648712 1;
-//  test_exp_gen 1234123432165873264969873219648712 0;
-//  test_exp_gen 1234123432165873264969873219648712 2;
-//  test_exp_gen 1234123432165873264969873219648712 3;
-//  test_exp_gen 1234123432165873264969873219648712 4;
-//  test_exp_gen 1234123432165873264969873219648712 5;
-//  admit();
-//  test_exp_gen
-//    111111111111111111111111111111
-//    18446744073709551618;
-//  test_exp_gen
-//    111111111111123123123111111111111111111
-//    184467440737095553212351618;
-//  test_exp_gen
-//    11111111111112312312311111114973210598732098407321111111111111
-//    18446744073709555321235160918327501928374098320749182318;
+  test_exp_gen 100000000000 10 2;
+  test_exp_gen 100000000000 10 25;
+  test_exp_gen 100000000000 10 1000;
+  test_exp_gen 100000000000 100000 10000000000000000000;
+  test_exp_gen 100000000001 100000000000 1;
+  test_exp_gen 100000000001 100000000000 2;
+  test_exp_gen 100000000001 100000000000 10000000000000000000;
+
+
+  test_exp_gen 1234123432165873264969873219648712 0 0;
+  test_exp_gen 1234123432165873264969873219648712 1 0;
+  test_exp_gen 1234123432165873264969873219648712 12345 0;
+  test_exp_gen 1234123432165873264969873219648712 10 1;
+  test_exp_gen 1234123432165873264969873219648712 10 2;
+  test_exp_gen 1234123432165873264969873219648712 10 25;
+  test_exp_gen 1234123432165873264969873219648712 10 1000;
+  test_exp_gen 1234123432165873264969873219648712 100000 10000000000000000000;
+
+
+  test_exp_gen 1234123432165873264969873219648712
+     243241359213059132408213100000 1;
+  test_exp_gen 1234123432165873264969873219648712
+     243241359213059132408213100000 2;
+  test_exp_gen 1234123432165873264969873219648712
+     243241359213059132408213100000 10;
+  test_exp_gen 1234123432165873264969873219648712
+     243241359213059132408213100000 100000;
+  test_exp_gen 1234123432165873264969873219648712
+     243241359213059132408213100000 100000000000;
+  test_exp_gen 1234123432165873264969873219648712
+     243241359213059132408213100000 1000000000000000;
+  test_exp_gen 1234123432165873264969873219648712
+     243241359213059132408213100000 1000000000000000000;
+  test_exp_gen 1234123432165873264969873219648712
+     243241359213059132408213100000 10000000000000000000;
+  test_exp_gen 12341234321658128370192373264969873219648712
+     2432413592130591324082131012038720000 100000000000000000170987102983470918200;
 
   pop_frame ()
+
 
 
 val testBignum: unit -> St unit
@@ -582,5 +719,6 @@ let testBignum _ =
   test_rshift1 ();
   test_pow2 ();
   test_mod ();
+  test_mod_ops ();
   test_exp ();
   C.String.print (C.String.of_literal "Bignum tests are done \n\n")

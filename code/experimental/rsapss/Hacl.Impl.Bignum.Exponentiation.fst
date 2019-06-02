@@ -12,9 +12,11 @@ open Lib.Math.Algebra
 
 open Hacl.Impl.Bignum.Core
 open Hacl.Impl.Bignum.Convert
+open Hacl.Impl.Bignum.Comparison
+open Hacl.Impl.Bignum.Division
 open Hacl.Impl.Bignum.Montgomery
-open Hacl.Impl.Bignum.Shift
 open Hacl.Impl.Bignum.Multiplication
+open Hacl.Impl.Bignum.Shift
 
 module ST = FStar.HyperStack.ST
 
@@ -92,9 +94,7 @@ val mod_exp:
   -> res:lbignum nLen
   -> Stack unit
     (requires fun h -> live h n /\ live h a /\ live h b /\ live h res /\ live h r2 /\ as_snat h n > 1)
-    (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
-    (let n = as_snat h0 n in
-    to_fe #n (as_snat h1 res) = fexp #n (to_fe (as_snat h0 a)) (as_snat #(blocks bBits 64ul) h0 b)))
+    (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1)
 [@"c_inline"]
 let mod_exp pow2_i modBits nLen n r2 a bBits b res =
   push_frame ();
@@ -128,39 +128,71 @@ let mod_exp pow2_i modBits nLen n r2 a bBits b res =
   from_mont nLen rLen pow2_i n nInv_u64 accM tmp res;
   pop_frame ()
 
-#reset-options
 
-val mod_exp_compact:
-     pow2_i:size_t{v pow2_i > 0}
-  -> #nLen:bn_len{
-       5 * v nLen + 4 * v pow2_i < max_size_t /\
-       v nLen <= v pow2_i /\
-       v nLen + 1 < 2 * v pow2_i}
+val naive_exp_loop:
+     #nLen:bn_len_strict{(v nLen + v nLen) * 64 < max_size_t}
+  -> #expLen:bn_len_strict
   -> n:lbignum nLen
   -> a:lbignum nLen
-  -> b:lbignum nLen
+  -> b:lbignum expLen
   -> res:lbignum nLen
   -> Stack unit
-    (requires fun h -> live h n /\ live h a /\ live h b /\ live h res /\ as_snat h n > 1)
-    (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
+    (requires fun h ->
+        disjoint n b /\ disjoint n res /\
+        live h n /\ live h a /\ live h b /\ live h res /\
+        as_snat h n > 1)
+    (ensures fun h0 _ h1 -> modifies2 res b h0 h1 /\
+        live h1 n /\ live h1 a /\ live h1 b /\ live h1 res)
+let rec naive_exp_loop #nLen #expLen n a b res =
+  push_frame ();
+  let tmp = create expLen (uint 0) in
+  let tmp' = create nLen (uint 0) in
+  assert_norm (issnat 0);
+  assert_norm (nat_bytes_num 0 =. 1ul);
+  let zero:lbignum 1ul = nat_to_bignum_exact 0 in
+  let isnull = bn_is_equal b zero in
+  if not isnull then begin
+     let odd = eq_u64 (b.(0ul) &. uint 1) (uint 1)in
+     bn_rshift1 b tmp; copy b tmp;
+     naive_exp_loop #nLen n a b res;
+     bn_modular_mul n res res tmp'; copy res tmp';
+     if odd then (bn_modular_mul n res a tmp'; copy res tmp')
+  end;
+  pop_frame ()
+
+
+val bn_modular_exp:
+     #nLen:bn_len_strict{v (nLen +. nLen) * 64 < max_size_t}
+  -> #expLen:bn_len_strict
+  -> n:lbignum nLen
+  -> a:lbignum nLen
+  -> b:lbignum expLen
+  -> res:lbignum nLen
+  -> Stack unit
+    (requires fun h ->
+      live h n /\ live h a /\ live h b /\ live h res /\
+      as_snat h n > 1 /\
+      disjoint a res /\ disjoint a b /\ disjoint b res /\
+      disjoint a n /\ disjoint b n /\ disjoint res n)
+    (ensures  fun h0 _ h1 -> modifies1 res h0 h1 /\
+      live h1 n /\ live h1 a /\ live h1 b /\ live h1 res /\
     (let n = as_snat h0 n in
     to_fe #n (as_snat h1 res) = fexp #n (to_fe (as_snat h0 a)) (as_snat h0 b)))
 [@"c_inline"]
-let mod_exp_compact pow2_i #nLen n a b res =
+let bn_modular_exp #nLen #expLen n a b res =
+  let h0 = FStar.HyperStack.ST.get () in
+
   push_frame ();
-  let modBits = 64ul *. nLen in
-  let bBits = 64ul *. nLen in
 
-  let rLen = nLen +! 1ul in
-  let exp_r = 64ul *. rLen in
-  let exp_r2 = exp_r *. exp_r in
-  let r2:lbignum nLen = create nLen (uint 0) in
+  memset res (uint 0) nLen;
+  res.(0ul) <- uint 1;
+  let tmp_b = create expLen (uint 0) in
+  copy tmp_b b;
+  naive_exp_loop n a tmp_b res;
 
-  assume (v nLen + 1 < max_size_t);
-  assume (v modBits / 64 <= v nLen);
-  assume (v modBits < v exp_r2);
-  bn_pow2_mod_n modBits n exp_r2 r2;
+  pop_frame ();
 
-  admit();
-  mod_exp pow2_i modBits nLen n r2 a bBits b res;
-  pop_frame ()
+  let h1 = FStar.HyperStack.ST.get () in
+  assume (let n' = as_snat h0 n in
+          to_fe #n' (as_snat h1 res) =
+          fexp #n' (to_fe (as_snat h0 a)) (as_snat h0 b))

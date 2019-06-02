@@ -6,12 +6,15 @@ open FStar.Buffer
 open FStar.Mul
 
 open Lib.IntTypes
+open Lib.Math.Algebra
 open Lib.Buffer
 open Lib.Loops
 
 open Hacl.Impl.Bignum.Core
+open Hacl.Impl.Bignum.Convert
 open Hacl.Impl.Bignum.Shift
 open Hacl.Impl.Bignum.Comparison
+open Hacl.Impl.Bignum.Multiplication
 open Hacl.Impl.Bignum.Addition
 
 
@@ -64,9 +67,8 @@ val calc_bits:
 let calc_bits #aLen a = calc_bits_test a (aLen *! 64ul -! 1ul)
 
 // res = a % n
-// TODO it should also support case for modLen > aLen
 val bn_remainder:
-     #aLen:bn_len_strict{v aLen + 1 < max_size_t}
+     #aLen:bn_len_strict
   -> #modLen:bn_len_strict
   -> a:lbignum aLen
   -> mod:lbignum modLen
@@ -117,3 +119,58 @@ let bn_remainder #aLen #modLen a mod res =
   end;
 
   pop_frame()
+
+val bn_modular_add:
+     #len:bn_len_strict{(v len + 1) * 64 < max_size_t}
+  -> n:lbignum len
+  -> a:lbignum len
+  -> b:lbignum len
+  -> res:lbignum len
+  -> Stack unit
+    (requires fun h ->
+       live h n /\ live h a /\ live h b /\ live h res /\
+       as_snat h n > 1)
+    (ensures  fun h0 _ h1 ->
+         live h1 n /\ live h1 a /\ live h1 b /\ live h1 res /\
+         modifies (loc res) h0 h1 /\
+         (let n' = as_snat h0 n in
+         to_fe #n' (as_snat h1 res) = to_fe (as_snat h0 a) +% to_fe (as_snat h0 b)))
+let bn_modular_add #len n a b res =
+  let h0 = FStar.HyperStack.ST.get () in
+  push_frame ();
+  assert (v len < max_size_t);
+  let res' = create (len +! 1ul) (uint 0) in
+  bn_add_full a b res';
+  bn_remainder res' n res;
+  pop_frame ();
+  let h1 = FStar.HyperStack.ST.get () in
+  assume (let n' = as_snat h0 n in
+          to_fe #n' (as_snat h1 res) =
+          to_fe (as_snat h0 a) +% to_fe (as_snat h0 b))
+
+val bn_modular_mul:
+     #len:bn_len_strict{(v len + v len) * 64 < max_size_t}
+  -> n:lbignum len
+  -> a:lbignum len
+  -> b:lbignum len
+  -> res:lbignum len
+  -> Stack unit
+    (requires fun h ->
+       live h n /\ live h a /\ live h b /\ live h res /\
+       as_snat h n > 1)
+    (ensures  fun h0 _ h1 ->
+         live h1 n /\ live h1 a /\ live h1 b /\ live h1 res /\
+         modifies (loc res) h0 h1 /\
+         (let n' = as_snat h0 n in
+         to_fe #n' (as_snat h1 res) = to_fe (as_snat h0 a) *% to_fe (as_snat h0 b)))
+let bn_modular_mul #len n a b res =
+  let h0 = FStar.HyperStack.ST.get () in
+  push_frame ();
+  let res' = create (len +! len) (uint 0) in
+  bn_mul a b res';
+  bn_remainder res' n res;
+  pop_frame ();
+  let h1 = FStar.HyperStack.ST.get () in
+  assume (let n' = as_snat h0 n in
+          to_fe #n' (as_snat h1 res) =
+          to_fe (as_snat h0 a) *% to_fe (as_snat h0 b))
