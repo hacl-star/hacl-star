@@ -171,9 +171,8 @@ val bn_modular_exp:
   -> Stack unit
     (requires fun h ->
       live h n /\ live h a /\ live h b /\ live h res /\
-      as_snat h n > 1 /\
-      disjoint a res /\ disjoint a b /\ disjoint b res /\
-      disjoint a n /\ disjoint b n /\ disjoint res n)
+      disjoint a res /\ disjoint b res /\ disjoint n res /\
+      as_snat h n > 1)
     (ensures  fun h0 _ h1 -> modifies1 res h0 h1 /\
       live h1 n /\ live h1 a /\ live h1 b /\ live h1 res /\
     (let n = as_snat h0 n in
