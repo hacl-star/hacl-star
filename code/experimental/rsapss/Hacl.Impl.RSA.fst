@@ -9,13 +9,8 @@ open LowStar.Buffer
 open Lib.IntTypes
 open Lib.Buffer
 
-open Hacl.Impl.Bignum.Core
 open Hacl.Impl.MGF
-open Hacl.Impl.Bignum.Comparison
-open Hacl.Impl.Bignum.Convert
-open Hacl.Impl.Bignum.Exponentiation
-open Hacl.Impl.Bignum.Addition
-open Hacl.Impl.Bignum.Multiplication
+open Hacl.Impl.Bignum
 
 module ST = FStar.HyperStack.ST
 
