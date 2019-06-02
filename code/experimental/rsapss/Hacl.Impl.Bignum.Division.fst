@@ -5,6 +5,7 @@ open FStar.HyperStack
 open FStar.Buffer
 open FStar.Mul
 
+open Lib.PrintBuffer
 open Lib.IntTypes
 open Lib.Math.Algebra
 open Lib.Buffer
@@ -55,8 +56,9 @@ val calc_bits_test:
     (requires fun h -> live h a)
     (ensures  fun h0 _ h1 -> modifies0 h0 h1 /\ h0 == h1)
 let rec calc_bits_test #aLen a ind =
-  if ind =. 0ul then 0ul else
-  if bn_is_bit_set a ind then ind else calc_bits_test a (ind -! 1ul)
+  if bn_is_bit_set a ind
+  then ind +! 1ul
+  else if ind =. 0ul then 0ul else calc_bits_test a (ind -! 1ul)
 
 // Returns the index of the highest bit set plus one.
 val calc_bits:
@@ -67,6 +69,8 @@ val calc_bits:
     (ensures  fun h0 _ h1 -> modifies0 h0 h1 /\ h0 == h1 /\ live h1 a)
 let calc_bits #aLen a = calc_bits_test a (aLen *! 64ul -! 1ul)
 
+noextract inline_for_extraction
+let debug (s:string) = () // C.String.print (C.String.of_literal s)
 
 /// Copies the part that fits.
 val copy_fit:
@@ -78,9 +82,12 @@ val copy_fit:
     (requires fun h -> live h o /\ live h i /\ disjoint i o)
     (ensures fun h0 _ h1 -> live h1 o /\ live h1 i /\ modifies1 o h0 h1)
 let copy_fit #oLen #iLen o i =
-  if iLen >=. oLen
-  then copy o (sub i 0ul oLen)
+  if iLen =. oLen then
+  (debug "copy_fit 1\n"; copy o i)
+  else if iLen >. oLen then
+  (debug "copy_fit 2\n"; copy o (sub i 0ul oLen))
   else begin
+    debug "copy_fit 3\n";
     copy (sub o 0ul iLen) i;
     memset (sub o iLen (oLen -. iLen)) (uint 0) (oLen -. iLen)
   end
@@ -115,7 +122,7 @@ let bn_remainder_reduce #aLen #modLen a mod res realALen diffBits mod1Len count 
     let mod2 = sub mod1 0ul realALen in
 
     let res1 = create aLen (uint 0) in
-    copy (sub res1 0ul aLen) a;
+    copy res1 a;
 
     bn_remainder_core res1 mod2 count;
 
@@ -147,16 +154,21 @@ let bn_remainder #aLen #modLen a mod res =
   let modBits = calc_bits mod in
   let aBits = calc_bits a in
 
-  if aBits =. 0ul then memset res (uint 0) modLen else
-  if modBits >. aBits then copy_fit res a
+  if aBits =. 0ul then begin
+    debug "aBits = 0\n";
+    memset res (uint 0) modLen
+  end else if modBits >. aBits then copy_fit res a
   else begin
+    debug "remainder reduction branch\n";
     ne_lemma aBits 0ul;
     assert (v aBits > 0);
 
     let realALen = blocks aBits 64ul in
     assume (v realALen <= v aLen); // always true
 
+    [@inline_let]
     let maxLen:bn_len_strict = if aLen >=. modLen then aLen else modLen in
+
     let diffBits = aBits -! modBits in
     assume (v diffBits < 64 * v maxLen); // always true
 
@@ -179,7 +191,6 @@ let bn_remainder #aLen #modLen a mod res =
     assume (v mod1Len >= v realALen);
 
     bn_remainder_reduce a mod res realALen diffBits mod1Len count
-
   end;
 
   pop_frame();
