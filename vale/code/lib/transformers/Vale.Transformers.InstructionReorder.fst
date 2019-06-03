@@ -1000,12 +1000,26 @@ let rec unchanged_at (locs:list access_location) (s1 s2:machine_state) : GTot Ty
       (unchanged_at xs s1 s2)
     )
 
+let rec unchanged_at_extended (locs:list access_location) (s1 s2:machine_state) : GTot Type0 =
+  (forall a. {:pattern (eval_access_location a s1) \/ (eval_access_location a s2)} (
+      (not !!(disjoint_access_location_from_locations a locs)) ==> (
+        (eval_access_location a s1 == eval_access_location a s2))))
+
+let rec lemma_unchanged_at_extended_implies_unchanged_at locs s1 s2 :
+  Lemma
+    (requires (unchanged_at_extended locs s1 s2))
+    (ensures (unchanged_at locs s1 s2)) =
+  match locs with
+  | [] -> ()
+  | x :: xs ->
+    lemma_unchanged_at_extended_implies_unchanged_at xs s1 s2
+
 let bounded_effects (reads writes:list access_location) (f:st unit) : GTot Type0 =
   (only_affects writes f) /\
   (
-    forall s1 s2. {:pattern unchanged_at writes (run f s1) (run f s2)} (
+    forall s1 s2. {:pattern unchanged_at_extended writes (run f s1) (run f s2)} (
       unchanged_at reads s1 s2 ==>
-      (unchanged_at writes (run f s1) (run f s2) /\
+      (unchanged_at_extended writes (run f s1) (run f s2) /\
        (run f s1).ms_ok = (run f s2).ms_ok)
     )
   )
@@ -1072,7 +1086,7 @@ let rec lemma_disjoint_access_location_from_locations_mem
 let rec lemma_unchanged_at_mem (as:list access_location) (a:access_location) (s1 s2:machine_state) :
   Lemma
     (requires (
-        (unchanged_at as s1 s2) /\
+        (unchanged_at_extended as s1 s2) /\
         (L.mem a as)))
     (ensures (
         (eval_access_location a s1 == eval_access_location a s2))) =
@@ -1082,65 +1096,35 @@ let rec lemma_unchanged_at_mem (as:list access_location) (a:access_location) (s1
     if a = x then () else
     lemma_unchanged_at_mem xs a s1 s2
 
+let unchanged_upon_both_non_disjoint (a1 a2:list access_location) (s1 s2:machine_state) =
+  (forall a. {:pattern (eval_access_location a s1) \/ (eval_access_location a s2)}
+     (
+       (not (!!(disjoint_access_location_from_locations a a1))) /\
+       (not (!!(disjoint_access_location_from_locations a a2)))
+     ) ==> (
+     eval_access_location a s1 == eval_access_location a s2
+   )
+  )
+
+
 let lemma_unchanged_at_combine (a1 a2:list access_location) (sa1 sa2 sb1 sb2:machine_state) :
   Lemma
     (requires (
         !!(disjoint_access_locations a1 a2 "") /\
-        (unchanged_at a1 sa1 sb2) /\
+        (unchanged_upon_both_non_disjoint a1 a2 sa1 sa2) /\
+        (unchanged_at_extended a1 sa1 sb2) /\
         (unchanged_except a2 sa1 sb1) /\
-        (unchanged_at a2 sa2 sb1) /\
+        (unchanged_at_extended a2 sa2 sb1) /\
         (unchanged_except a1 sa2 sb2)))
     (ensures (
-        (unchanged_at (a1 `L.append` a2) sb1 sb2))) =
-  let precond = !!(disjoint_access_locations a1 a2 "") /\
-                 (unchanged_at a1 sa1 sb2) /\
-                 (unchanged_except a2 sa1 sb1) /\
-                 (unchanged_at a2 sa2 sb1) /\
-                 (unchanged_except a1 sa2 sb2) in
-  let rec aux1 a :
+        (unchanged_at_extended (a1 `L.append` a2) sb1 sb2))) =
+  let aux a :
     Lemma
-      (requires (L.mem a a1 /\
-                 precond))
+      (requires (not !!(disjoint_access_location_from_locations a (a1 `L.append` a2))))
       (ensures (eval_access_location a sb1 == eval_access_location a sb2)) =
-    lemma_disjoint_access_location_from_locations_mem a1 a2 a;
-    assert (!!(disjoint_access_location_from_locations a a2));
-    assert (eval_access_location a sb1 == eval_access_location a sa1);
-    lemma_unchanged_at_mem a1 a sa1 sb2
+    lemma_disjoint_access_location_from_locations_append a a1 a2
   in
-  let rec aux2 a :
-    Lemma
-      (requires (L.mem a a2 /\
-                 precond))
-      (ensures (eval_access_location a sb1 == eval_access_location a sb2)) =
-    lemma_disjoint_access_locations_symmetric a1 a2 "";
-    lemma_disjoint_access_location_from_locations_mem a2 a1 a;
-    assert (!!(disjoint_access_location_from_locations a a1));
-    assert (eval_access_location a sb2 == eval_access_location a sa2);
-    lemma_unchanged_at_mem a2 a sa2 sb1
-  in
-  let rec aux a1' a1'' a2' a2'' :
-    Lemma
-      (requires (a1' `L.append` a1'' == a1 /\ a2' `L.append` a2'' == a2 /\
-                precond))
-      (ensures (unchanged_at (a1'' `L.append` a2'') sb1 sb2))
-      (decreases %[a1''; a2'']) =
-    match a1'' with
-    | [] -> (
-        match a2'' with
-        | [] -> ()
-        | y :: ys -> (
-            L.append_l_cons y ys a2';
-            L.append_mem a2' a2'' y;
-            aux2 y;
-            aux a1' a1'' (a2' `L.append` [y]) ys
-          )
-      )
-    | x :: xs ->
-      L.append_l_cons x xs a1';
-      L.append_mem a1' a1'' x;
-      aux1 x;
-      aux (a1' `L.append` [x]) xs a2' a2'' in
-  aux [] a1 [] a2
+  FStar.Classical.forall_intro (FStar.Classical.move_requires aux)
 
 let lemma_unchanged_except_same_transitive (as:list access_location) (s1 s2 s3:machine_state) :
   Lemma
@@ -1150,81 +1134,13 @@ let lemma_unchanged_except_same_transitive (as:list access_location) (s1 s2 s3:m
     (ensures (
         (unchanged_except as s1 s3))) = ()
 
-let lemma_unchanged_at_and_except_aux (a x:access_location) (xs:list access_location) (s1 s2:machine_state) :
+let rec lemma_unchanged_at_extended_and_except (as:list access_location) (s1 s2:machine_state) :
   Lemma
     (requires (
-        (unchanged_at (x :: xs) s1 s2) /\
-        (unchanged_except (x :: xs) s1 s2) /\
-        (!!(disjoint_access_location_from_locations a xs)) /\
-        (not !!(disjoint_access_location a x))))
-    (ensures (
-        (eval_access_location a s1 == eval_access_location a s2))) =
-  match a with
-  | ALoc64 oa -> (
-      match oa with
-      | OConst _ -> ()
-      | OReg ra -> (
-          match x with
-          | ALoc64 ox -> (
-              match ox with
-              | OConst _ -> ()
-              | OReg rx -> ()
-              | OMem mx ->
-                admit ()
-              | OStack mx ->
-                admit ()
-            )
-          | ALoc128 ox -> (
-              match ox with
-              | OReg128 rx ->
-                admit () (* WAT! *)
-              | _ ->
-                admit ()
-            )
-          | ALocCf | ALocOf -> ()
-        )
-      | OMem ma ->
-        admit ()
-      | OStack ma ->
-        admit ()
-    )
-  | ALoc128 oa -> (
-      match oa with
-      | OReg128 ra ->
-        admit ()
-      | OMem128 ma ->
-        admit ()
-      | OStack128 ma ->
-        admit ()
-    )
-  | ALocCf | ALocOf -> ()
-
-let rec lemma_unchanged_at_and_except (as:list access_location) (s1 s2:machine_state) :
-  Lemma
-    (requires (
-        (unchanged_at as s1 s2) /\
+        (unchanged_at_extended as s1 s2) /\
         (unchanged_except as s1 s2)))
     (ensures (
-        (unchanged_except [] s1 s2))) =
-  match as with
-  | [] -> ()
-  | x :: xs ->
-    FStar.Classical.forall_intro ((fun a -> (
-          FStar.Classical.arrow_to_impl
-          #(!!(disjoint_access_location_from_locations a xs))
-          #(eval_access_location a s1 == eval_access_location a s2))
-          (fun _ ->
-             FStar.Classical.or_elim
-             #_ #_ #(fun () -> eval_access_location a s1 == eval_access_location a s2)
-               (fun (_:unit{!!(disjoint_access_location a x)}) -> ())
-               (fun (_:unit{not !!(disjoint_access_location a x)}) ->
-                  lemma_unchanged_at_and_except_aux a x xs s1 s2)
-          )
-      ) <: (a:_) -> Lemma (
-        (!!(disjoint_access_location_from_locations a xs) ==>
-         (eval_access_location a s1 == eval_access_location a s2))
-      ));
-    lemma_unchanged_at_and_except xs s1 s2
+        (unchanged_except [] s1 s2))) = ()
 
 let lemma_equiv_states_when_except_none (s1 s2:machine_state) (ok:bool) :
   Lemma
@@ -1316,8 +1232,8 @@ let lemma_commute (f1 f2:st unit) (r1 w1 r2 w2:list access_location) (s:machine_
         !!(disjoint_access_locations l1 l2 ""))));
   lemma_disjoint_implies_unchanged_at r1 w2 s is2;
   lemma_disjoint_implies_unchanged_at r2 w1 s is1;
-  assert (unchanged_at w1 is1 is21);
-  assert (unchanged_at w2 is2 is12);
+  assert (unchanged_at_extended w1 is1 is21);
+  assert (unchanged_at_extended w2 is2 is12);
   assert (unchanged_except w2 s is2);
   assert (unchanged_except w1 s is1);
   assert (unchanged_except w2 is1 is12);
@@ -1329,8 +1245,9 @@ let lemma_commute (f1 f2:st unit) (r1 w1 r2 w2:list access_location) (s:machine_
   lemma_unchanged_except_append_symmetric w1 w2 s is12;
   lemma_unchanged_except_append_symmetric w2 w1 s is21;
   lemma_unchanged_except_same_transitive (w1 `L.append` w2) s is12 is21;
+  assume (unchanged_upon_both_non_disjoint w1 w2 is1 is2);
   lemma_unchanged_at_combine w1 w2 is1 is2 is12 is21;
-  lemma_unchanged_at_and_except (w1 `L.append` w2) is12 is21;
+  lemma_unchanged_at_extended_and_except (w1 `L.append` w2) is12 is21;
   assert (unchanged_except [] is12 is21);
   assert (s21.ms_ok = s12.ms_ok);
   assert (is12.ms_stack.initial_rsp = is21.ms_stack.initial_rsp);
@@ -1469,7 +1386,7 @@ let lemma_untainted_eval_ins_unchanged_behavior (i:ins{Instr? i}) (s1 s2:machine
     (ensures (
         let r, w = rw_set_of_ins i in
         let f = untainted_eval_ins i in
-        (unchanged_at w (run f s1) (run f s2)) /\
+        (unchanged_at_extended w (run f s1) (run f s2)) /\
         (run f s1).ms_ok = (run f s2).ms_ok)) =
   admit ()
 
