@@ -342,21 +342,6 @@ val generate_blocks:
 
 (* The following functions allow us to bridge between unbounded and bounded sequences *)
 
-let map_blocks_a (a:Type) (bs:size_nat) (max:nat) (i:nat{i <= max}) = s:seq a{length s == i * bs}
-
-let map_blocks_f
-  (#a:Type0)
-  (bs:size_nat{bs > 0})
-  (max:nat)
-  (inp:seq a{length inp == max * bs})
-  (f:(i:nat{i < max} -> lseq a bs -> lseq a bs))
-  (i:nat{i < max})
-  (acc:map_blocks_a a bs max i) : map_blocks_a a bs max (i + 1)
-=
-  Math.Lemmas.multiple_division_lemma max bs;
-  let block = Seq.slice inp (i*bs) ((i+1)*bs) in
-  Seq.append acc (f i block)
-
 val map_blocks_multi:
     #a:Type0
   -> blocksize:size_nat{blocksize > 0}
@@ -365,18 +350,6 @@ val map_blocks_multi:
   -> inp:seq a{length inp == max * blocksize}
   -> f:(i:nat{i < max} -> lseq a blocksize -> lseq a blocksize) ->
   Tot (out:seq a {length out == n * blocksize})
-
-val lemma_map_blocks_multi:
-    #a:Type0
-  -> bs:size_nat{bs > 0}
-  -> max:nat
-  -> n:nat{n <= max}
-  -> inp:seq a{length inp == max * bs}
-  -> f:(i:nat{i < max} -> lseq a bs -> lseq a bs) ->
-  Lemma (
-    map_blocks_multi #a bs max n inp f ==
-    Lib.LoopCombinators.repeat_gen n (map_blocks_a a bs max)
-      (map_blocks_f #a bs max inp f) Seq.empty)
 
 val index_map_blocks_multi:
     #a:Type0
@@ -400,22 +373,6 @@ val map_blocks:
   -> f:(i:nat{i < length inp / blocksize} -> lseq a blocksize -> lseq a blocksize)
   -> g:(i:nat{i == length inp / blocksize} -> len:size_nat{len < blocksize} -> s:lseq a len -> lseq a len) ->
   Tot (out:seq a {length out == length inp})
-
-val lemma_map_blocks:
-    #a:Type0
-  -> bs:size_nat{bs > 0}
-  -> inp:seq a
-  -> f:(i:nat{i < length inp / bs} -> lseq a bs -> lseq a bs)
-  -> g:(i:nat{i == length inp / bs} -> len:size_nat{len < bs} -> s:lseq a len -> lseq a len) ->
-  Lemma (
-    let len = length inp in
-    let nb = len / bs in
-    let rem = len % bs in
-    let blocks = Seq.slice inp 0 (nb * bs) in
-    let last = Seq.slice inp (nb * bs) len in
-    let acc = map_blocks_multi #a bs nb nb blocks f in
-    let res = if rem > 0 then Seq.append acc (g nb rem last) else acc in
-    map_blocks #a bs inp f g == res)
 
 #set-options "--z3rlimit 100"
 

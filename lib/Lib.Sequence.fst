@@ -221,11 +221,24 @@ let generate_blocks #t len max n a f acc0 =
   let a0  = (acc0, (Seq.empty <: s:seq t{length s == 0 * len}))  in
   repeat_gen n (generate_blocks_a t len max a) (generate_blocks_inner t len max a f) a0
 
+let map_blocks_a (a:Type) (bs:size_nat) (max:nat) (i:nat{i <= max}) = s:seq a{length s == i * bs}
+
+let map_blocks_f
+  (#a:Type0)
+  (bs:size_nat{bs > 0})
+  (max:nat)
+  (inp:seq a{length inp == max * bs})
+  (f:(i:nat{i < max} -> lseq a bs -> lseq a bs))
+  (i:nat{i < max})
+  (acc:map_blocks_a a bs max i) : map_blocks_a a bs max (i + 1)
+=
+  Math.Lemmas.multiple_division_lemma max bs;
+  let block = Seq.slice inp (i*bs) ((i+1)*bs) in
+  Seq.append acc (f i block)
+
 let map_blocks_multi #a bs max nb inp f =
   repeat_gen nb (map_blocks_a a bs max)
     (map_blocks_f #a bs max inp f) Seq.empty
-
-let lemma_map_blocks_multi #a bs max nb inp f = ()
 
 private
 val mod_prop: n:pos -> a:nat -> b:nat{a * n <= b /\ b < (a + 1) * n} ->
@@ -234,9 +247,9 @@ let mod_prop n a b =
   FStar.Math.Lemmas.modulo_lemma (b - a * n) n;
   FStar.Math.Lemmas.lemma_mod_sub b n a
 
-#reset-options "--z3rlimit 300 --max_fuel 2 --max_ifuel 2"
+#reset-options "--z3rlimit 150 --max_fuel 2 --max_ifuel 1"
+
 let rec index_map_blocks_multi #a bs max n inp f i =
-  lemma_map_blocks_multi #a bs max n inp f;
   let map_blocks_a = map_blocks_a a bs max in
   let map_blocks_f = map_blocks_f #a bs max inp f in
   let acc0 : seq a = Seq.empty in
@@ -265,7 +278,7 @@ let map_blocks #a blocksize inp f g =
     Seq.append bs (g nb rem last)
   else bs
 
-let lemma_map_blocks #a blocksize inp f g = ()
+#reset-options "--z3rlimit 300 --max_fuel 0 --max_ifuel 0"
 
 let index_map_blocks #a bs inp f g i =
   let len = length inp in
@@ -281,6 +294,7 @@ let index_map_blocks #a bs inp f g i =
   if rem > 0 then begin
     let s' = g nb rem last in
     assert (s1 == Seq.append s s');
+
     if i < nb * bs then begin
       Seq.lemma_index_app1 s s' i;
       assert (Seq.index s1 i == Seq.index s i);
@@ -312,8 +326,8 @@ let unfold_generate_blocks #t len n a f acc0 i =
   unfold_repeat_gen (i+1) (generate_blocks_a t len n a) (generate_blocks_inner t len n a f) a0 i;
   ()
 
-#push-options "--z3rlimit 100"
-#push-options "--max_ifuel 1"
+#reset-options "--z3rlimit 150 --max_fuel 2 --max_ifuel 1"
+
 let rec index_generate_blocks #t len max n f i =
   assert (0 < n);
   let a_spec (i:nat{i <= max}) = unit in
@@ -332,7 +346,7 @@ let rec index_generate_blocks #t len max n f i =
     Seq.lemma_index_app2 s s' i;
     mod_prop len (n-1) i
     end
-#pop-options
+
 
 (***** The following lemmas are work in progress: Do not rely on them ****)
 

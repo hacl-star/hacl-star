@@ -4,225 +4,84 @@ open FStar.Mul
 open Lib.IntTypes
 open Lib.Sequence
 open Lib.ByteSequence
-open Lib.LoopCombinators
 open Lib.IntVector
 
 module Scalar = Spec.Chacha20
-module Loops = Lib.LoopCombinators
-
 open Hacl.Spec.Chacha20.Vec
 
 #reset-options "--z3rlimit 50 --max_fuel 1"
 
 val line_lemma_i:
-  #w:lanes
+    #w:lanes
   -> a:idx -> b:idx -> d:idx
   -> s:rotval U32 -> m:state w
   -> i:nat{i < w} ->
-  Lemma ((transpose_state (line #w a b d s m)).[i] ==
-	 Scalar.line a b d s (transpose_state #w m).[i])
+  Lemma ((transpose_state (line #w a b d s m)).[i] == Scalar.line a b d s (transpose_state #w m).[i])
 let line_lemma_i #w a b d s m i =
   eq_intro (transpose_state (line #w a b d s m)).[i] (Scalar.line a b d s (transpose_state #w m).[i])
 
-val line_lemma: #w:lanes
-  -> a:idx -> b:idx -> d:idx
-  -> s:rotval U32 -> m:state w ->
-  Lemma (transpose_state (line #w a b d s m) ==
-	 map (Scalar.line a b d s) (transpose_state #w m))
-let line_lemma #w a b d s m =
-  let lp = transpose_state (line #w a b d s m) in
-  let rp = map (Scalar.line a b d s) (transpose_state #w m) in
-  match w with
-  | 1 ->
-    line_lemma_i #w a b d s m 0;
-    eq_intro lp rp
-  | 4 ->
-    line_lemma_i #w a b d s m 0;
-    line_lemma_i #w a b d s m 1;
-    line_lemma_i #w a b d s m 2;
-    line_lemma_i #w a b d s m 3;
-    eq_intro lp rp
-  | 8 ->
-    line_lemma_i #w a b d s m 0;
-    line_lemma_i #w a b d s m 1;
-    line_lemma_i #w a b d s m 2;
-    line_lemma_i #w a b d s m 3;
-    line_lemma_i #w a b d s m 4;
-    line_lemma_i #w a b d s m 5;
-    line_lemma_i #w a b d s m 6;
-    line_lemma_i #w a b d s m 7;
-    eq_intro lp rp
-
-val quarter_round_map_lemma_i:
-  #w:lanes
+val quarter_round_lemma_i:
+    #w:lanes
   -> a:idx -> b:idx -> c:idx -> d:idx
   -> m:state w
   -> i:nat{i < w} ->
   Lemma ((transpose_state (quarter_round #w a b c d m)).[i] == Scalar.quarter_round a b c d (transpose_state m).[i])
-let quarter_round_map_lemma_i #w a b c d m i =
+let quarter_round_lemma_i #w a b c d m i =
   let lp0 = line a b d (size 16) m in
   let lp1 = line c d b (size 12) lp0 in
   let lp2 = line a b d (size 8) lp1 in
   let lp3 = line c d b (size 7) lp2 in
   assert (quarter_round #w a b c d m == lp3);
-  line_lemma a b d (size 16) m;
-  line_lemma c d b (size 12) lp0;
-  line_lemma a b d (size 8) lp1;
-  line_lemma c d b (size 7) lp2;
+  line_lemma_i a b d (size 16) m i;
+  line_lemma_i c d b (size 12) lp0 i;
+  line_lemma_i a b d (size 8) lp1 i;
+  line_lemma_i c d b (size 7) lp2 i;
   eq_intro (transpose_state (quarter_round #w a b c d m)).[i] (Scalar.quarter_round a b c d (transpose_state m).[i])
 
-val quarter_round_map_lemma: #w:lanes
-  -> a:idx -> b:idx -> c:idx -> d:idx
-  -> m:state w ->
-  Lemma (transpose_state (quarter_round #w a b c d m) == map (Scalar.quarter_round a b c d) (transpose_state m))
-  //[SMTPat (transpose_state (quarter_round #w a b c d m))]
-let quarter_round_map_lemma #w a b c d m =
-  let lp = transpose_state (quarter_round #w a b c d m) in
-  let rp = map (Scalar.quarter_round a b c d) (transpose_state m) in
-  match w with
-  | 1 ->
-    quarter_round_map_lemma_i #w a b c d m 0;
-    eq_intro lp rp
-  | 4 ->
-    quarter_round_map_lemma_i #w a b c d m 0;
-    quarter_round_map_lemma_i #w a b c d m 1;
-    quarter_round_map_lemma_i #w a b c d m 2;
-    quarter_round_map_lemma_i #w a b c d m 3;
-    eq_intro lp rp
-  | 8 ->
-    quarter_round_map_lemma_i #w a b c d m 0;
-    quarter_round_map_lemma_i #w a b c d m 1;
-    quarter_round_map_lemma_i #w a b c d m 2;
-    quarter_round_map_lemma_i #w a b c d m 3;
-    quarter_round_map_lemma_i #w a b c d m 4;
-    quarter_round_map_lemma_i #w a b c d m 5;
-    quarter_round_map_lemma_i #w a b c d m 6;
-    quarter_round_map_lemma_i #w a b c d m 7;
-    eq_intro lp rp
-
-val column_round_map_lemma_i: #w:lanes
+val column_round_lemma_i:
+    #w:lanes
   -> m:state w
   -> i:nat{i < w} ->
   Lemma ((transpose_state (column_round #w m)).[i] == Scalar.column_round (transpose_state m).[i])
-let column_round_map_lemma_i #w m i =
+let column_round_lemma_i #w m i =
   let lp0 = quarter_round 0 4 8  12 m in
   let lp1 = quarter_round 1 5 9  13 lp0 in
   let lp2 = quarter_round 2 6 10 14 lp1 in
   let lp3 = quarter_round 3 7 11 15 lp2 in
   assert (column_round #w m == lp3);
-  quarter_round_map_lemma 0 4 8  12 m;
-  quarter_round_map_lemma 1 5 9  13 lp0;
-  quarter_round_map_lemma 2 6 10 14 lp1;
-  quarter_round_map_lemma 3 7 11 15 lp2;
+  quarter_round_lemma_i 0 4 8  12 m i;
+  quarter_round_lemma_i 1 5 9  13 lp0 i;
+  quarter_round_lemma_i 2 6 10 14 lp1 i;
+  quarter_round_lemma_i 3 7 11 15 lp2 i;
   eq_intro (transpose_state (column_round #w m)).[i] (Scalar.column_round (transpose_state m).[i])
 
-val column_round_map_lemma: #w:lanes
-  -> m:state w ->
-  Lemma (transpose_state (column_round #w m) == map (Scalar.column_round) (transpose_state m))
-  [SMTPat (transpose_state (column_round #w m))]
-let column_round_map_lemma #w m =
-  let lp = transpose_state (column_round #w m) in
-  let rp = map (Scalar.column_round) (transpose_state m) in
-  match w with
-  | 1 ->
-    column_round_map_lemma_i #w m 0;
-    eq_intro lp rp
-  | 4 ->
-    column_round_map_lemma_i #w m 0;
-    column_round_map_lemma_i #w m 1;
-    column_round_map_lemma_i #w m 2;
-    column_round_map_lemma_i #w m 3;
-    eq_intro lp rp
-  | 8 ->
-    column_round_map_lemma_i #w m 0;
-    column_round_map_lemma_i #w m 1;
-    column_round_map_lemma_i #w m 2;
-    column_round_map_lemma_i #w m 3;
-    column_round_map_lemma_i #w m 4;
-    column_round_map_lemma_i #w m 5;
-    column_round_map_lemma_i #w m 6;
-    column_round_map_lemma_i #w m 7;
-    eq_intro lp rp
-
-val diagonal_round_map_lemma_i: #w:lanes
+val diagonal_round_lemma_i:
+    #w:lanes
   -> m:state w
   -> i:nat{i < w} ->
   Lemma ((transpose_state (diagonal_round #w m)).[i] == Scalar.diagonal_round (transpose_state m).[i])
-let diagonal_round_map_lemma_i #w m i =
+let diagonal_round_lemma_i #w m i =
   let lp0 = quarter_round 0 5 10 15 m in
   let lp1 = quarter_round 1 6 11 12 lp0 in
   let lp2 = quarter_round 2 7 8  13 lp1 in
   let lp3 = quarter_round 3 4 9  14 lp2 in
   assert (diagonal_round #w m == lp3);
-  quarter_round_map_lemma 0 5 10 15 m;
-  quarter_round_map_lemma 1 6 11 12 lp0;
-  quarter_round_map_lemma 2 7 8  13 lp1;
-  quarter_round_map_lemma 3 4 9  14 lp2;
+  quarter_round_lemma_i 0 5 10 15 m i;
+  quarter_round_lemma_i 1 6 11 12 lp0 i;
+  quarter_round_lemma_i 2 7 8  13 lp1 i;
+  quarter_round_lemma_i 3 4 9  14 lp2 i;
   eq_intro (transpose_state (diagonal_round #w m)).[i] (Scalar.diagonal_round (transpose_state m).[i])
-
-val diagonal_round_map_lemma: #w:lanes
-  -> m:state w ->
-  Lemma (transpose_state (diagonal_round #w m) == map (Scalar.diagonal_round) (transpose_state m))
-  [SMTPat (transpose_state (diagonal_round #w m))]
-let diagonal_round_map_lemma #w m =
-  let lp = transpose_state (diagonal_round #w m) in
-  let rp = map (Scalar.diagonal_round) (transpose_state m) in
-  match w with
-  | 1 ->
-    diagonal_round_map_lemma_i #w m 0;
-    eq_intro lp rp
-  | 4 ->
-    diagonal_round_map_lemma_i #w m 0;
-    diagonal_round_map_lemma_i #w m 1;
-    diagonal_round_map_lemma_i #w m 2;
-    diagonal_round_map_lemma_i #w m 3;
-    eq_intro lp rp
-  | 8 ->
-    diagonal_round_map_lemma_i #w m 0;
-    diagonal_round_map_lemma_i #w m 1;
-    diagonal_round_map_lemma_i #w m 2;
-    diagonal_round_map_lemma_i #w m 3;
-    diagonal_round_map_lemma_i #w m 4;
-    diagonal_round_map_lemma_i #w m 5;
-    diagonal_round_map_lemma_i #w m 6;
-    diagonal_round_map_lemma_i #w m 7;
-    eq_intro lp rp
 
 val double_round_map_lemma_i:
     #w:lanes
   -> m:state w
   -> i:nat{i < w} ->
   Lemma ((transpose_state (double_round #w m)).[i] == Scalar.double_round (transpose_state m).[i])
-let double_round_map_lemma_i #w m i = ()
-
-
-val double_round_map_lemma: #w:lanes
-  -> m:state w ->
-  Lemma (transpose_state (double_round #w m) == map (Scalar.double_round) (transpose_state m))
-  [SMTPat (transpose_state (double_round #w m))]
-let double_round_map_lemma #w m =
-  let lp = transpose_state (double_round #w m) in
-  let rp = map (Scalar.double_round) (transpose_state m) in
-  match w with
-  | 1 ->
-    double_round_map_lemma_i #w m 0;
-    eq_intro lp rp
-  | 4 ->
-    double_round_map_lemma_i #w m 0;
-    double_round_map_lemma_i #w m 1;
-    double_round_map_lemma_i #w m 2;
-    double_round_map_lemma_i #w m 3;
-    eq_intro lp rp
-  | 8 ->
-    double_round_map_lemma_i #w m 0;
-    double_round_map_lemma_i #w m 1;
-    double_round_map_lemma_i #w m 2;
-    double_round_map_lemma_i #w m 3;
-    double_round_map_lemma_i #w m 4;
-    double_round_map_lemma_i #w m 5;
-    double_round_map_lemma_i #w m 6;
-    double_round_map_lemma_i #w m 7;
-    eq_intro lp rp
+let double_round_map_lemma_i #w m i =
+  let m1 = column_round m in
+  let m2 = diagonal_round m1 in
+  column_round_lemma_i m i;
+  diagonal_round_lemma_i m1 i
 
 let scalar_rounds (m:Scalar.state) : Scalar.state =
   Scalar.double_round (Scalar.double_round (
@@ -233,8 +92,8 @@ let scalar_rounds (m:Scalar.state) : Scalar.state =
 
 val scalar_rounds_unroll_lemma: m:Scalar.state ->
   Lemma (scalar_rounds m == Scalar.rounds m)
-  [SMTPat (Scalar.rounds m)]
 let scalar_rounds_unroll_lemma m =
+  let open Lib.LoopCombinators in
   eq_repeat0 Scalar.double_round m;
   unfold_repeat 10 Scalar.double_round m 0;
   unfold_repeat 10 Scalar.double_round m 1;
@@ -245,10 +104,10 @@ let scalar_rounds_unroll_lemma m =
   unfold_repeat 10 Scalar.double_round m 6;
   unfold_repeat 10 Scalar.double_round m 7;
   unfold_repeat 10 Scalar.double_round m 8;
-  unfold_repeat 10 Scalar.double_round m 9;
-  ()
+  unfold_repeat 10 Scalar.double_round m 9
 
-val rounds_lemma_i: #w:lanes
+val rounds_lemma_i:
+    #w:lanes
   -> m:state w
   -> i:nat{i < w} ->
   Lemma ((transpose_state (rounds #w m)).[i] == Scalar.rounds (transpose_state m).[i])
@@ -265,48 +124,18 @@ let rounds_lemma_i #w m i =
   let m9 = double_round m8 in
   let m10 = double_round m9 in
   assert (rounds m == m10);
-  double_round_map_lemma #w m;
-  assert ((transpose_state m1).[i] == Scalar.double_round ms);
-  double_round_map_lemma #w m1;
-  assert ((transpose_state m2).[i] == Scalar.double_round (Scalar.double_round ms));
-  double_round_map_lemma #w m2;
-  double_round_map_lemma #w m3;
-  double_round_map_lemma #w m4;
-  double_round_map_lemma #w m5;
-  double_round_map_lemma #w m6;
-  double_round_map_lemma #w m7;
-  double_round_map_lemma #w m8;
-  double_round_map_lemma #w m9;
+  double_round_map_lemma_i #w m i;
+  double_round_map_lemma_i #w m1 i;
+  double_round_map_lemma_i #w m2 i;
+  double_round_map_lemma_i #w m3 i;
+  double_round_map_lemma_i #w m4 i;
+  double_round_map_lemma_i #w m5 i;
+  double_round_map_lemma_i #w m6 i;
+  double_round_map_lemma_i #w m7 i;
+  double_round_map_lemma_i #w m8 i;
+  double_round_map_lemma_i #w m9 i;
   assert ((transpose_state m10).[i] == scalar_rounds ms);
   scalar_rounds_unroll_lemma ms
-
-val rounds_lemma: #w:lanes
-  -> m:state w ->
-  Lemma (transpose_state (rounds #w m) == map Scalar.rounds (transpose_state m))
-  [SMTPat (transpose_state (rounds #w m))]
-let rounds_lemma #w m =
-  let lp = transpose_state (rounds #w m) in
-  let rp = map Scalar.rounds (transpose_state m) in
-  match w with
-  | 1 ->
-    rounds_lemma_i #w m 0;
-    eq_intro lp rp
-  | 4 ->
-    rounds_lemma_i #w m 0;
-    rounds_lemma_i #w m 1;
-    rounds_lemma_i #w m 2;
-    rounds_lemma_i #w m 3;
-    eq_intro lp rp
-  | 8 ->
-    rounds_lemma_i #w m 0;
-    rounds_lemma_i #w m 1;
-    rounds_lemma_i #w m 2;
-    rounds_lemma_i #w m 3;
-    rounds_lemma_i #w m 4;
-    rounds_lemma_i #w m 5;
-    rounds_lemma_i #w m 6;
-    rounds_lemma_i #w m 7;
-    eq_intro lp rp
 
 val sum_state_lemma_i:
     #w:lanes
@@ -318,36 +147,6 @@ val sum_state_lemma_i:
 let sum_state_lemma_i #w st1 st2 i =
   eq_intro (transpose_state (sum_state st1 st2)).[i]
 	   (Scalar.sum_state (transpose_state st1).[i] (transpose_state st2).[i])
-
-val sum_state_lemma: #w:lanes
-  -> st1:state w
-  -> st2:state w ->
-  Lemma (transpose_state (sum_state st1 st2) ==
-	 map2 Scalar.sum_state (transpose_state st1) (transpose_state st2))
-  [SMTPat (transpose_state (sum_state st1 st2))]
-let sum_state_lemma #w st1 st2 =
-  let lp = transpose_state (sum_state st1 st2) in
-  let rp = map2 Scalar.sum_state (transpose_state st1) (transpose_state st2) in
-  match w with
-  | 1 ->
-    sum_state_lemma_i #w st1 st2 0;
-    eq_intro lp rp
-  | 4 ->
-    sum_state_lemma_i #w st1 st2 0;
-    sum_state_lemma_i #w st1 st2 1;
-    sum_state_lemma_i #w st1 st2 2;
-    sum_state_lemma_i #w st1 st2 3;
-    eq_intro lp rp
-  | 8 ->
-    sum_state_lemma_i #w st1 st2 0;
-    sum_state_lemma_i #w st1 st2 1;
-    sum_state_lemma_i #w st1 st2 2;
-    sum_state_lemma_i #w st1 st2 3;
-    sum_state_lemma_i #w st1 st2 4;
-    sum_state_lemma_i #w st1 st2 5;
-    sum_state_lemma_i #w st1 st2 6;
-    sum_state_lemma_i #w st1 st2 7;
-    eq_intro lp rp
 
 val add_counter_lemma_i:
     #w:lanes
@@ -362,36 +161,6 @@ let add_counter_lemma_i #w st ctr i =
   eq_intro (transpose_state (add_counter #w ctr st)).[i]
 	   (Scalar.add_counter (w * ctr) (transpose_state st).[i])
 
-val add_counter_lemma: #w:lanes
-  -> st:state w
-  -> ctr:counter{w * ctr <= max_size_t} ->
-  Lemma (transpose_state (add_counter #w ctr st) ==
-	 map (Scalar.add_counter (w * ctr)) (transpose_state st))
-  [SMTPat (transpose_state (add_counter #w ctr st))]
-let add_counter_lemma #w st ctr =
-  let lp = transpose_state (add_counter #w ctr st) in
-  let rp = map (Scalar.add_counter (w * ctr)) (transpose_state st) in
-  match w with
-  | 1 ->
-    add_counter_lemma_i #w st ctr 0;
-    eq_intro lp rp
-  | 4 ->
-    add_counter_lemma_i #w st ctr 0;
-    add_counter_lemma_i #w st ctr 1;
-    add_counter_lemma_i #w st ctr 2;
-    add_counter_lemma_i #w st ctr 3;
-    eq_intro lp rp
-  | 8 ->
-    add_counter_lemma_i #w st ctr 0;
-    add_counter_lemma_i #w st ctr 1;
-    add_counter_lemma_i #w st ctr 2;
-    add_counter_lemma_i #w st ctr 3;
-    add_counter_lemma_i #w st ctr 4;
-    add_counter_lemma_i #w st ctr 5;
-    add_counter_lemma_i #w st ctr 6;
-    add_counter_lemma_i #w st ctr 7;
-    eq_intro lp rp
-
 val chacha20_core_lemma_i:
     #w:lanes
   -> ctr:counter{w * ctr <= max_size_t}
@@ -399,36 +168,15 @@ val chacha20_core_lemma_i:
   -> i:nat{i < w} ->
   Lemma ((transpose_state (chacha20_core ctr s0)).[i] ==
 	 Scalar.chacha20_core (w * ctr) (transpose_state s0).[i])
-let chacha20_core_lemma_i #w ctr s0 i = ()
-
-val chacha20_core_lemma: #w:lanes
-  -> ctr:counter{w * ctr <= max_size_t}
-  -> s0:state w ->
-  Lemma (transpose_state (chacha20_core ctr s0) ==
-	map (Scalar.chacha20_core (w * ctr)) (transpose_state s0))
-let chacha20_core_lemma #w ctr s0 =
-  let lp = transpose_state (chacha20_core ctr s0) in
-  let rp = map (Scalar.chacha20_core (w * ctr)) (transpose_state s0) in
-  match w with
-  | 1 ->
-    chacha20_core_lemma_i #w ctr s0 0;
-    eq_intro lp rp
-  | 4 ->
-    chacha20_core_lemma_i #w ctr s0 0;
-    chacha20_core_lemma_i #w ctr s0 1;
-    chacha20_core_lemma_i #w ctr s0 2;
-    chacha20_core_lemma_i #w ctr s0 3;
-    eq_intro lp rp
-  | 8 ->
-    chacha20_core_lemma_i #w ctr s0 0;
-    chacha20_core_lemma_i #w ctr s0 1;
-    chacha20_core_lemma_i #w ctr s0 2;
-    chacha20_core_lemma_i #w ctr s0 3;
-    chacha20_core_lemma_i #w ctr s0 4;
-    chacha20_core_lemma_i #w ctr s0 5;
-    chacha20_core_lemma_i #w ctr s0 6;
-    chacha20_core_lemma_i #w ctr s0 7;
-    eq_intro lp rp
+let chacha20_core_lemma_i #w ctr s0 i =
+  let k0 = add_counter ctr s0 in
+  add_counter_lemma_i s0 ctr i;
+  let k1 = rounds k0 in
+  rounds_lemma_i k0 i;
+  let k2 = sum_state k1 s0 in
+  sum_state_lemma_i k1 s0 i;
+  let k3 = add_counter ctr k2 in
+  add_counter_lemma_i k2 ctr i
 
 val chacha20_init_equiv_lemma:
     k:key
@@ -516,9 +264,7 @@ val load_blocks_lemma_index:
     #w:lanes
   -> b:blocks w
   -> i:nat{i < w * 16} ->
-  Lemma (
-    (vec_v (load_blocks #w b).[i / w]).[i % w] ==
-    uint_from_bytes_le (sub b (4 * i) 4))
+  Lemma ((vec_v (load_blocks #w b).[i / w]).[i % w] == uint_from_bytes_le (sub b (4 * i) 4))
 let load_blocks_lemma_index #w b i =
   let j = i / w in
   let res = load_blocks #w b in
@@ -545,8 +291,7 @@ val store_blocks_lemma_index:
   -> i:nat{i < w * size_block} ->
   Lemma (
     let j = i / 4 in
-    index (store_blocks #w st) i ==
-    (uint_to_bytes_le (vec_v st.[j / w ]).[j % w]).[i % 4])
+    (store_blocks #w st).[i] == (uint_to_bytes_le (vec_v st.[j / w ]).[j % w]).[i % 4])
 let store_blocks_lemma_index #w st i =
   let res = store_blocks #w st in
   index_generate_blocks (w * 4) 16 16 (store_blocks_inner #w st) i;
@@ -569,8 +314,7 @@ val xor_block_scalar_lemma_index:
   -> i:nat{i < size_block} ->
   Lemma (
     let j = i / 4 in
-    index (Scalar.xor_block k b) i ==
-    (uint_to_bytes_le ((uint_from_bytes_le (sub b (4 * j) 4)) ^. k.[j])).[i % 4])
+    (Scalar.xor_block k b).[i] == (uint_to_bytes_le ((uint_from_bytes_le (sub b (4 * j) 4)) ^. k.[j])).[i % 4])
 let xor_block_scalar_lemma_index k b i =
   let ib = uints_from_bytes_le b in
   let ob = map2 (^.) ib k in
@@ -909,7 +653,7 @@ val xor_block_lemma_index:
   -> b:blocks w
   -> i:nat{i < w * size_block} ->
   Lemma (
-    index (xor_block k b) i ==
+    (xor_block k b).[i] ==
     index (Scalar.xor_block (transpose_state k).[i / size_block]
       (sub b (i / size_block * size_block) size_block)) (i % size_block))
 let xor_block_lemma_index #w k b i =
@@ -951,7 +695,7 @@ val chacha20_encrypt_block_lemma_index:
     Seq.index (Scalar.chacha20_encrypt_block (transpose_state st0).[j1] (w * incr) b_j1) (j % size_block))
 let chacha20_encrypt_block_lemma_index #w st0 incr b j =
   let k = chacha20_core incr st0 in
-  chacha20_core_lemma #w incr st0;
+  chacha20_core_lemma_i #w incr st0 (j / size_block);
   let res = xor_block k b in
   xor_block_lemma_index #w k b j
 
