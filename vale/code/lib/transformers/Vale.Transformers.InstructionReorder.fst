@@ -1150,6 +1150,55 @@ let lemma_unchanged_except_same_transitive (as:list access_location) (s1 s2 s3:m
     (ensures (
         (unchanged_except as s1 s3))) = ()
 
+let lemma_unchanged_at_and_except_aux (a x:access_location) (xs:list access_location) (s1 s2:machine_state) :
+  Lemma
+    (requires (
+        (unchanged_at (x :: xs) s1 s2) /\
+        (unchanged_except (x :: xs) s1 s2) /\
+        (!!(disjoint_access_location_from_locations a xs)) /\
+        (not !!(disjoint_access_location a x))))
+    (ensures (
+        (eval_access_location a s1 == eval_access_location a s2))) =
+  match a with
+  | ALoc64 oa -> (
+      match oa with
+      | OConst _ -> ()
+      | OReg ra -> (
+          match x with
+          | ALoc64 ox -> (
+              match ox with
+              | OConst _ -> ()
+              | OReg rx -> ()
+              | OMem mx ->
+                admit ()
+              | OStack mx ->
+                admit ()
+            )
+          | ALoc128 ox -> (
+              match ox with
+              | OReg128 rx ->
+                admit () (* WAT! *)
+              | _ ->
+                admit ()
+            )
+          | ALocCf | ALocOf -> ()
+        )
+      | OMem ma ->
+        admit ()
+      | OStack ma ->
+        admit ()
+    )
+  | ALoc128 oa -> (
+      match oa with
+      | OReg128 ra ->
+        admit ()
+      | OMem128 ma ->
+        admit ()
+      | OStack128 ma ->
+        admit ()
+    )
+  | ALocCf | ALocOf -> ()
+
 let rec lemma_unchanged_at_and_except (as:list access_location) (s1 s2:machine_state) :
   Lemma
     (requires (
@@ -1169,7 +1218,7 @@ let rec lemma_unchanged_at_and_except (as:list access_location) (s1 s2:machine_s
              #_ #_ #(fun () -> eval_access_location a s1 == eval_access_location a s2)
                (fun (_:unit{!!(disjoint_access_location a x)}) -> ())
                (fun (_:unit{not !!(disjoint_access_location a x)}) ->
-                  admit ())
+                  lemma_unchanged_at_and_except_aux a x xs s1 s2)
           )
       ) <: (a:_) -> Lemma (
         (!!(disjoint_access_location_from_locations a xs) ==>
