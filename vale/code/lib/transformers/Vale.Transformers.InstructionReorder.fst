@@ -1288,6 +1288,55 @@ let lemma_commute (f1 f2:st unit) (r1 w1 r2 w2:list access_location) (s:machine_
   lemma_equiv_states_when_except_none is12 is21 s12.ms_ok;
   assert (equiv_states (run2 f1 f2 s) (run2 f2 f1 s))
 
+let lemma_untainted_eval_ins_only_affects_write_aux1 (i:ins{Instr? i}) (s:machine_state) (a:access_location) :
+  Lemma
+    (requires (
+        let r, w = rw_set_of_ins i in
+        (!!(disjoint_access_location_from_locations a w))))
+    (ensures (
+        (eval_access_location a s == eval_access_location a (run (untainted_eval_ins i) s)))) =
+  admit ()
+
+let lemma_untainted_eval_ins_only_affects_write_aux2 (i:ins{Instr? i}) (s:machine_state) :
+  Lemma
+    (ensures (
+        let s' = run (untainted_eval_ins i) s in
+        (s.ms_stack.initial_rsp = s'.ms_stack.initial_rsp) /\
+        (Set.equal (Map.domain s.ms_mem) (Map.domain s'.ms_mem)) /\
+        (Set.equal (Map.domain s.ms_stack.stack_mem) (Map.domain s'.ms_stack.stack_mem))
+      )) =
+  admit ()
+
+let lemma_untainted_eval_ins_only_affects_write (i:ins{Instr? i}) (s:machine_state) :
+  Lemma
+    (ensures (
+       (let r, w = rw_set_of_ins i in
+        (unchanged_except w s (run (untainted_eval_ins i) s))))) =
+  FStar.Classical.forall_intro (
+    FStar.Classical.move_requires (lemma_untainted_eval_ins_only_affects_write_aux1 i s));
+  lemma_untainted_eval_ins_only_affects_write_aux2 i s
+
+let lemma_untainted_eval_ins_unchanged_behavior (i:ins{Instr? i}) (s1 s2:machine_state) :
+  Lemma
+    (requires (
+        let r, w = rw_set_of_ins i in
+        (unchanged_at r s1 s2)))
+    (ensures (
+        let r, w = rw_set_of_ins i in
+        let f = untainted_eval_ins i in
+        (unchanged_at w (run f s1) (run f s2)) /\
+        (run f s1).ms_ok = (run f s2).ms_ok)) =
+  admit ()
+
+let lemma_untainted_eval_ins_bounded_effects (i:ins{Instr? i}) :
+  Lemma
+    (ensures (
+        (let r, w = rw_set_of_ins i in
+         (bounded_effects r w (untainted_eval_ins i))))) =
+  FStar.Classical.forall_intro (lemma_untainted_eval_ins_only_affects_write i);
+  FStar.Classical.forall_intro_2 (fun s1 ->
+      FStar.Classical.move_requires (lemma_untainted_eval_ins_unchanged_behavior i s1))
+
 let lemma_untainted_eval_ins_exchange (i1 i2 : ins) (s : machine_state) :
   Lemma
     (requires (!!(ins_exchange_allowed i1 i2)))
