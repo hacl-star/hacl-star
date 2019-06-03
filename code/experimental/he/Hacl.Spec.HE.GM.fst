@@ -52,9 +52,11 @@ val leg_symbol_modulo: a:nat -> p:prm -> Lemma
   (leg_symbol (a % p) p = leg_symbol a p)
 let leg_symbol_modulo a p = lemma_mod_twice a p
 
-val leg_symbol_range: #p:prm -> a:fe p -> Lemma
-  (ensures (let l = leg_symbol a p in (l = 1 \/ l = 0 \/ l = -1)))
-let leg_symbol_range #p a =
+val leg_symbol_range_raw: #p:prm -> a:fe p -> Lemma
+  (ensures (let l = leg_symbol a p in
+            (a = 0 ==> l = 0) /\
+            (a <> 0 ==> l = 1 \/ l = -1)))
+let leg_symbol_range_raw #p a =
   let l = leg_symbol a p in
   assert (p >= 3);
   assert ((p-1)/2 <> 0);
@@ -74,6 +76,25 @@ let leg_symbol_range #p a =
     assert (l = 1 \/ l = -1)
   end
 
+val leg_symbol_range: #p:prm -> a:fe p -> Lemma
+  (ensures (let l = leg_symbol a p in (l = 1 \/ l = 0 \/ l = -1)))
+let leg_symbol_range #p a = leg_symbol_range_raw a
+
+val leg_symbol_range_exp: #p:prm -> a:fe p -> Lemma
+  (requires (fexp (to_fe #p a) ((p-1)/2) <> p-1))
+  (ensures (let res = fexp (to_fe #p a) ((p-1)/2) in res = 0 \/ res = 1))
+let leg_symbol_range_exp #p a = leg_symbol_range a
+
+val is_leg_symbol_raw: p:prm -> a:nat -> Lemma
+  (ensures (let l = leg_symbol a p in
+            let a' = to_fe #p a in
+            (l = 1 \/ l = 0 \/ l = -1) /\
+            (l = 1 <==> (is_sqr a' /\ a <> 0)) /\
+            (l = (-1) <==> (is_nonsqr a' /\ a <> 0)) /\
+            (l = 0 <==> a = 0)
+            ))
+let is_leg_symbol_raw _ _ = admit()
+
 val is_leg_symbol: #p:prm -> a:fe p -> Lemma
   (ensures (let l = leg_symbol a p in
               (l = 1 \/ l = 0 \/ l = -1) /\
@@ -81,7 +102,7 @@ val is_leg_symbol: #p:prm -> a:fe p -> Lemma
               (l = (-1) <==> (is_nonsqr a /\ a <> 0)) /\
               (l = 0 <==> a = 0)
               ))
-let is_leg_symbol #p _ = admit()
+let is_leg_symbol #p a = is_leg_symbol_raw p a; to_fe_idemp #p a
 
 #reset-options
 
@@ -156,21 +177,34 @@ let s2p sec =
 
 (* Enc/Dec *)
 
-type ciphertext (n:comp) = c:fe n{c <> 0}
+type ciphertext (n:big) = c:fe n{c <> 0}
+
+inline_for_extraction
+val encrypt_minimal:
+     n:big
+  -> y:fe n
+  -> r:fe n{sqr r > 0 /\ sqr r *% y > 0}
+  -> m:bool
+  -> c:ciphertext n
+let encrypt_minimal n y r m =
+  let r' = sqr r in
+  if m then r' *% y else r'
 
 val encrypt:
      p:public
   -> r:fe (Public?.n p){sqr r > 0 /\ sqr r *% (Public?.y p) > 0}
   -> m:bool
   -> c:ciphertext (Public?.n p)
-let encrypt p r m =
-  let r' = sqr r in
-  if m then r' *% (Public?.y p) else r'
+let encrypt p r m = encrypt_minimal (Public?.n p) (Public?.y p) r m
+
+inline_for_extraction
+val decrypt_minimal: p:prm -> c:pos -> m:bool
+let decrypt_minimal p c =
+  let v = leg_symbol c p in
+  if v = 1 then false else true
 
 val decrypt: s:secret -> c:ciphertext (Public?.n (s2p s)) -> m:bool
-let decrypt s c =
-  let v = leg_symbol c (Secret?.p s) in
-  if v = 1 then false else true
+let decrypt s c = decrypt_minimal (Secret?.p s) c
 
 (* Correctness *)
 

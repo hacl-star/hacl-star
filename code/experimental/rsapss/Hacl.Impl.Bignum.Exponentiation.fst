@@ -160,7 +160,6 @@ let rec naive_exp_loop #nLen #expLen n a b res =
   end;
   pop_frame ()
 
-
 val bn_modular_exp:
      #nLen:bn_len_strict{v (nLen +. nLen) * 64 < max_size_t}
   -> #expLen:bn_len_strict
@@ -175,9 +174,8 @@ val bn_modular_exp:
       as_snat h n > 1)
     (ensures  fun h0 _ h1 -> modifies1 res h0 h1 /\
       live h1 n /\ live h1 a /\ live h1 b /\ live h1 res /\
-    (let n = as_snat h0 n in
-    to_fe #n (as_snat h1 res) = fexp #n (to_fe (as_snat h0 a)) (as_snat h0 b)))
-[@"c_inline"]
+      (let n = as_snat h0 n in
+       as_snat h1 res = fexp (to_fe #n (as_snat h0 a)) (as_snat h0 b)))
 let bn_modular_exp #nLen #expLen n a b res =
   let h0 = FStar.HyperStack.ST.get () in
 
@@ -193,5 +191,5 @@ let bn_modular_exp #nLen #expLen n a b res =
 
   let h1 = FStar.HyperStack.ST.get () in
   assume (let n' = as_snat h0 n in
-          to_fe #n' (as_snat h1 res) =
-          fexp #n' (to_fe (as_snat h0 a)) (as_snat h0 b))
+          as_snat h1 res =
+          fexp (to_fe #n' (as_snat h0 a)) (as_snat h0 b))
