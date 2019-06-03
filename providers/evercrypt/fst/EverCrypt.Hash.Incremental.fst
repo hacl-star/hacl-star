@@ -10,14 +10,14 @@ module S = FStar.Seq
 module ST = FStar.HyperStack.ST
 module HS = FStar.HyperStack
 module G = FStar.Ghost
+module U32 = FStar.UInt32
 
 module Hash = EverCrypt.Hash
 
 open FStar.HyperStack.ST
 open Spec.Hash.Definitions
-open FStar.Integers
 
-#reset-options "--max_fuel 0 --max_ifuel 0 --z3refresh"
+#reset-options "--max_fuel 0 --max_ifuel 0"
 
 let _: squash (inversion Hash.alg) = allow_inversion Hash.alg
 
@@ -98,7 +98,6 @@ val update_small:
     (ensures fun h0 s' h1 ->
       update_post a s s' prev data len h0 h1)
 
-#push-options "--z3rlimit 50"
 let split_at_last_small (a: Hash.alg) (b: bytes) (d: bytes): Lemma
   (requires (
     let _, rest = split_at_last a b in
@@ -112,49 +111,58 @@ let split_at_last_small (a: Hash.alg) (b: bytes) (d: bytes): Lemma
   let blocks', rest' = split_at_last a (S.append b d) in
   let l = block_length a in
 
-  calc (S.equal) {
-    blocks;
-  (S.equal) { }
-    fst (split_at_last a b);
-  (S.equal) { (* definition of split_at_last *) }
-    fst (S.split b ((S.length b / l) * l));
-  (S.equal) { (* definition of split *) }
-    S.slice b 0 ((S.length b / l) * l);
-  (S.equal) { }
-    S.slice (S.append b d) 0 ((S.length b / l) * l);
-  (S.equal) { }
-    S.slice (S.append b d) 0 ((S.length blocks / l) * l);
-  (S.equal) { }
-    S.slice (S.append b d) 0 ((S.length blocks / l + 0) * l);
-  (S.equal) { Math.Lemmas.small_div (S.length d) l }
-    S.slice (S.append b d) 0 ((S.length blocks / l + (S.length rest + S.length d) / l) * l);
-  (S.equal) {
-    Math.Lemmas.lemma_div_plus (S.length rest + S.length d) (S.length blocks / l) l
-  }
-    S.slice (S.append b d) 0 (((S.length rest + S.length d + (S.length blocks / l) * l) / l) * l);
-  }; admit ()(*;
-(*
-    Math.Lemmas.div_exact_r (S.length blocks) l
-  }
-    S.slice (S.append b d) 0 (((S.length d + S.length b) / l) * l);
-  }; admit ()
-  (S.equal) { Math.Lemmas.div_exact_r (S.length b) l }
-    S.slice (S.append b d) 0 ((S.length b / l) * l + (S.length d / l) * l);
-  (S.equal) { Math.Lemmas.distributivity_add_left (S.length b / l) (S.length d / l) l }
-    S.slice (S.append b d) 0 ((S.length b / l + S.length d / l) * l);
-  (S.equal) { Math.Lemmas.lemma_div_plus (S.length d) (S.length b / l) l }
-    S.slice (S.append b d) 0 (((S.length b + S.length d) / l) * l);
-  (S.equal) { }
-    fst (S.split (S.append b d) (((S.length (S.append b d)) / l) * l));
-  (S.equal) { }
-    blocks'';
-  }*)
+  (* Looking at the definition of split_at_last, blocks depends only on S.length b / l. *)
+  calc (==) {
+    S.length b / l;
+  (==) { (* definition *) }
+    (S.length blocks + S.length rest) / l;
+  (==) { Math.Lemmas.lemma_div_exact (S.length blocks) l }
+    (l * (S.length blocks / l) + S.length rest) / l;
+  (==) { }
+    (S.length rest + (S.length blocks / l) * l) / l;
+  (==) { Math.Lemmas.lemma_div_plus (S.length rest) (S.length blocks / l) l }
+    (S.length rest) / l + (S.length blocks / l);
+  (==) { Math.Lemmas.small_div (S.length rest) l }
+    S.length blocks / l;
+  };
 
-  assert (S.length blocks = (S.length b / block_length a) * block_length a);
-  assert ((S.length b + S.length d) / block_length a = S.length b / block_length a);
-  assert (S.equal (S.append (S.append blocks rest) d) (S.append blocks' rest'));
-  ()*)
-#pop-options
+  calc (==) {
+    S.length (S.append b d) / l;
+  (==) { (* definition *) }
+    (S.length blocks + S.length rest + S.length d) / l;
+  (==) { Math.Lemmas.lemma_div_exact (S.length blocks) l }
+    (l * (S.length blocks / l) + (S.length rest + S.length d)) / l;
+  (==) { }
+    ((S.length rest + S.length d) + (S.length blocks / l) * l) / l;
+  (==) { Math.Lemmas.lemma_div_plus (S.length rest + S.length d) (S.length blocks / l) l }
+    (S.length rest + S.length d) / l + (S.length blocks / l);
+  (==) { Math.Lemmas.small_div (S.length rest + S.length d) l }
+    S.length blocks / l;
+  };
+
+  assert (S.equal blocks blocks');
+
+  calc (S.equal) {
+    rest `S.append` d;
+  (S.equal) { (* definition *) }
+    S.slice b ((S.length b / l) * l) (S.length b) `S.append` d;
+  (S.equal) { }
+    S.slice (S.append b d) ((S.length b / l) * l) (S.length b) `S.append` d;
+  (S.equal) { (* above *) }
+    S.slice (S.append b d) ((S.length (S.append b d) / l) * l) (S.length b) `S.append` d;
+  (S.equal) { (* ? *) }
+    S.slice (S.append b d) ((S.length (S.append b d) / l) * l) (S.length b)
+    `S.append`
+    S.slice (S.append b d) (S.length b) (S.length (S.append b d));
+  (S.equal) { S.lemma_split (S.append b d) ((S.length (S.append b d) / l) * l) }
+    S.slice (S.append b d) ((S.length (S.append b d) / l) * l) (S.length b + S.length d);
+  (S.equal) { S.lemma_len_append b d }
+    S.slice (S.append b d) ((S.length (S.append b d) / l) * l) (S.length (S.append b d));
+  (S.equal) { }
+    rest';
+  };
+
+  ()
 
 #push-options "--z3rlimit 100"
 let add_len_small a (total_len: UInt64.t) (len: UInt32.t): Lemma
@@ -187,21 +195,7 @@ let update_small a s prev data len =
   s'
 #pop-options
 
-/// Case 2: we have no buffered data.
-val update_empty_buf:
-  a:Hash.alg ->
-  s:state a ->
-  prev:G.erased bytes ->
-  data: B.buffer UInt8.t ->
-  len: UInt32.t ->
-  Stack (state a)
-    (requires fun h0 ->
-      update_pre a s prev data len h0 /\
-      rest a (State?.total_len s) = 0ul)
-    (ensures fun h0 s' h1 ->
-      update_post a s s' prev data len h0 h1)
-
-#set-options "--z3rlimit 50"
+#set-options "--z3rlimit 60"
 let split_at_last_blocks (a: Hash.alg) (b: bytes) (d: bytes): Lemma
   (requires (
     let blocks, rest = split_at_last a b in
@@ -270,6 +264,20 @@ let split_at_last_blocks (a: Hash.alg) (b: bytes) (d: bytes): Lemma
     blocks'';
   }
 
+/// Case 2: we have no buffered data.
+val update_empty_buf:
+  a:Hash.alg ->
+  s:state a ->
+  prev:G.erased bytes ->
+  data: B.buffer UInt8.t ->
+  len: UInt32.t ->
+  Stack (state a)
+    (requires fun h0 ->
+      update_pre a s prev data len h0 /\
+      rest a (State?.total_len s) = 0ul)
+    (ensures fun h0 s' h1 ->
+      update_post a s s' prev data len h0 h1)
+
 #push-options "--z3rlimit 150"
 let update_empty_buf a s prev data len =
   let State hash_state buf total_len = s in
@@ -281,8 +289,8 @@ let update_empty_buf a s prev data len =
     S.equal rest S.empty);
   split_at_last_blocks a (G.reveal prev) (B.as_seq h0 data);
   let n_blocks = len / Hacl.Hash.Definitions.block_len a in
-  let data1_len = n_blocks * Hacl.Hash.Definitions.block_len a in
-  let data2_len = len - data1_len in
+  let data1_len = n_blocks `U32.mul` Hacl.Hash.Definitions.block_len a in
+  let data2_len = len `U32.sub` data1_len in
   let data1 = B.sub data 0ul data1_len in
   let data2 = B.sub data data1_len data2_len in
   Hash.update_multi #(G.hide a) hash_state data1 data1_len;
