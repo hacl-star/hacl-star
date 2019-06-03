@@ -98,7 +98,7 @@ val update_small:
     (ensures fun h0 s' h1 ->
       update_post a s s' prev data len h0 h1)
 
-#push-options "--z3rlimit_factor 4"
+#push-options "--z3rlimit 50"
 let split_at_last_small (a: Hash.alg) (b: bytes) (d: bytes): Lemma
   (requires (
     let _, rest = split_at_last a b in
@@ -110,10 +110,50 @@ let split_at_last_small (a: Hash.alg) (b: bytes) (d: bytes): Lemma
 =
   let blocks, rest = split_at_last a b in
   let blocks', rest' = split_at_last a (S.append b d) in
+  let l = block_length a in
+
+  calc (S.equal) {
+    blocks;
+  (S.equal) { }
+    fst (split_at_last a b);
+  (S.equal) { (* definition of split_at_last *) }
+    fst (S.split b ((S.length b / l) * l));
+  (S.equal) { (* definition of split *) }
+    S.slice b 0 ((S.length b / l) * l);
+  (S.equal) { }
+    S.slice (S.append b d) 0 ((S.length b / l) * l);
+  (S.equal) { }
+    S.slice (S.append b d) 0 ((S.length blocks / l) * l);
+  (S.equal) { }
+    S.slice (S.append b d) 0 ((S.length blocks / l + 0) * l);
+  (S.equal) { Math.Lemmas.small_div (S.length d) l }
+    S.slice (S.append b d) 0 ((S.length blocks / l + (S.length rest + S.length d) / l) * l);
+  (S.equal) {
+    Math.Lemmas.lemma_div_plus (S.length rest + S.length d) (S.length blocks / l) l
+  }
+    S.slice (S.append b d) 0 (((S.length rest + S.length d + (S.length blocks / l) * l) / l) * l);
+  }; admit ()(*;
+(*
+    Math.Lemmas.div_exact_r (S.length blocks) l
+  }
+    S.slice (S.append b d) 0 (((S.length d + S.length b) / l) * l);
+  }; admit ()
+  (S.equal) { Math.Lemmas.div_exact_r (S.length b) l }
+    S.slice (S.append b d) 0 ((S.length b / l) * l + (S.length d / l) * l);
+  (S.equal) { Math.Lemmas.distributivity_add_left (S.length b / l) (S.length d / l) l }
+    S.slice (S.append b d) 0 ((S.length b / l + S.length d / l) * l);
+  (S.equal) { Math.Lemmas.lemma_div_plus (S.length d) (S.length b / l) l }
+    S.slice (S.append b d) 0 (((S.length b + S.length d) / l) * l);
+  (S.equal) { }
+    fst (S.split (S.append b d) (((S.length (S.append b d)) / l) * l));
+  (S.equal) { }
+    blocks'';
+  }*)
+
   assert (S.length blocks = (S.length b / block_length a) * block_length a);
   assert ((S.length b + S.length d) / block_length a = S.length b / block_length a);
   assert (S.equal (S.append (S.append blocks rest) d) (S.append blocks' rest'));
-  ()
+  ()*)
 #pop-options
 
 #push-options "--z3rlimit 100"
