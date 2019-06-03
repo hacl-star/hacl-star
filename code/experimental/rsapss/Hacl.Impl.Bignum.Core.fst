@@ -33,16 +33,28 @@ let blocks x m = admit();
   (x -. 1ul) /. m +. 1ul
 
 inline_for_extraction noextract
-val eq_u64: a:uint64 -> b:uint64 -> Tot bool
-let eq_u64 a b = FStar.UInt64.(u64_to_UInt64 a =^ u64_to_UInt64 b)
+val eq_u64: uint64 -> uint64 -> bool
+let eq_u64 a b = u64_to_UInt64 a =. u64_to_UInt64 b
+
+val eq_u64_lemma: a:uint64 -> b:uint64 ->
+  Lemma (eq_u64 a b == (v a = v b)) [SMTPat (eq_u64 a b)]
+let eq_u64_lemma a b = eq_lemma #U64 (u64_to_UInt64 a) (u64_to_UInt64 b)
 
 inline_for_extraction noextract
-val lt_u64: a:uint64 -> b:uint64 -> Tot bool
-let lt_u64 a b = FStar.UInt64.(u64_to_UInt64 a <^ u64_to_UInt64 b)
+val lt_u64: uint64 -> uint64 -> bool
+let lt_u64 a b = u64_to_UInt64 a <. u64_to_UInt64 b
+
+val lt_u64_lemma: a:uint64 -> b:uint64 ->
+  Lemma (lt_u64 a b == (v a < v b)) [SMTPat (lt_u64 a b)]
+let lt_u64_lemma a b = lt_lemma #U64 (u64_to_UInt64 a) (u64_to_UInt64 b)
 
 inline_for_extraction noextract
-val le_u64: a:uint64 -> b:uint64 -> Tot bool
-let le_u64 a b = FStar.UInt64.(u64_to_UInt64 a <=^ u64_to_UInt64 b)
+val le_u64: uint64 -> uint64 -> bool
+let le_u64 a b = u64_to_UInt64 a <=. u64_to_UInt64 b
+
+val le_u64_lemma: a:uint64 -> b:uint64 ->
+  Lemma (le_u64 a b == (v a <= v b)) [SMTPat (le_u64 a b)]
+let le_u64_lemma a b = lte_lemma #U64 (u64_to_UInt64 a) (u64_to_UInt64 b)
 
 inline_for_extraction noextract
 val eq_u8: a:uint8 -> b:uint8 -> Tot bool

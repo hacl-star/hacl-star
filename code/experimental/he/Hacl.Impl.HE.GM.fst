@@ -47,18 +47,9 @@ val conv_one_zero_to_int:
     (ensures fun h0 b h1 -> h0 == h1 /\ Int32.v b = as_snat h1 x)
 let conv_one_zero_to_int #nLen x =
   let h = FStar.HyperStack.ST.get () in
-  let b = if eq_u64 (x.(0ul)) (uint 0) then 0l else 1l in
-
-  let l (): Lemma (Int32.v b = as_snat h x) = begin
-//    let r = as_snat h x in
-//    assert (r = 0 ==> x.(0ul) = 0uL);
-    admit() // How to combine effects?
-    end in
-
-  l ();
-
-  b
-
+  bignum_of_uL x h (uint 1);
+  bignum_of_uL x h (uint 0);
+  if eq_u64 (x.(0ul)) (uint 0) then 0l else 1l
 
 val leg_symbol:
      #nLen:bn_len_s

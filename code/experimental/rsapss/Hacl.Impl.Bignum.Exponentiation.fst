@@ -152,7 +152,7 @@ let rec naive_exp_loop #nLen #expLen n a b res =
   let zero:lbignum 1ul = nat_to_bignum_exact 0 in
   let isnull = bn_is_equal b zero in
   if not isnull then begin
-     let odd = eq_u64 (b.(0ul) &. uint 1) (uint 1)in
+     let odd = eq_u64 (b.(0ul) &. uint 1) (uint 1) in
      bn_rshift1 b tmp; copy b tmp;
      naive_exp_loop #nLen n a b res;
      bn_modular_mul n res res tmp'; copy res tmp';
