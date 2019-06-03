@@ -1,5 +1,5 @@
 [
-  "`/…é⁄;\u0019†˚,úç\u000e_∏^",
+  "\u0005ŒOÕ_Á_µí„¬ﬂ‚õ?R",
   [
     [
       "Vale.X64.Bytes_Code_s.__proj__Instr__item__i",
@@ -13,7 +13,7 @@
         "refinement_interpretation_Tm_refine_9ed713f3afd4b3469851e41178e98008"
       ],
       0,
-      "010675d65f1f9dff43ca806ae7733b58"
+      "6c38180eeaa317dd128e705ed1fef1a3"
     ],
     [
       "Vale.X64.Bytes_Code_s.__proj__Instr__item__oprs",
@@ -29,7 +29,7 @@
         "refinement_interpretation_Tm_refine_9ed713f3afd4b3469851e41178e98008"
       ],
       0,
-      "66cc2a3b9474aca5ade5cde9f8bd9e0b"
+      "5e17c8221dc22606eeed11d1a8bd37a5"
     ],
     [
       "Vale.X64.Bytes_Code_s.__proj__Instr__item__annotation",
@@ -45,7 +45,7 @@
         "refinement_interpretation_Tm_refine_9ed713f3afd4b3469851e41178e98008"
       ],
       0,
-      "e0edec7e8a848636c8038e3f6fa587be"
+      "f5278eff72aeb82dbc8b9148a54e7c3e"
     ],
     [
       "Vale.X64.Bytes_Code_s.__proj__Push__item__src",
@@ -59,7 +59,7 @@
         "refinement_interpretation_Tm_refine_8d47c66d2fe2c7fca51b634f5d772f07"
       ],
       0,
-      "29de27ad9f4655b9c8071a1741392f09"
+      "1beff80de1a19f1b5c9163bd3d94fe64"
     ],
     [
       "Vale.X64.Bytes_Code_s.__proj__Push__item__t",
@@ -73,7 +73,7 @@
         "refinement_interpretation_Tm_refine_8d47c66d2fe2c7fca51b634f5d772f07"
       ],
       0,
-      "50a36690917829597ffacea9d1f68764"
+      "50215efa70c1bb4c0c94fd6553ac484d"
     ],
     [
       "Vale.X64.Bytes_Code_s.__proj__Pop__item__dst",
@@ -87,7 +87,7 @@
         "refinement_interpretation_Tm_refine_a41194e5340697dc14ad550c826af5bb"
       ],
       0,
-      "6d251364bc5e81c048d505c84d41fd28"
+      "08e10c3a8ac376b73399df4713da98b4"
     ],
     [
       "Vale.X64.Bytes_Code_s.__proj__Pop__item__t",
@@ -101,7 +101,7 @@
         "refinement_interpretation_Tm_refine_a41194e5340697dc14ad550c826af5bb"
       ],
       0,
-      "7d953c5e8161a57063a8ccf3d83e1b3f"
+      "94a237982cd1f5975c0f13705dadf449"
     ],
     [
       "Vale.X64.Bytes_Code_s.__proj__Alloc__item__n",
@@ -115,7 +115,7 @@
         "refinement_interpretation_Tm_refine_04725afadffade18a23b720288de2ea6"
       ],
       0,
-      "59090afe6243623449ba3e9ff4e3059e"
+      "053e956451ad0681c74bd7c39a13301f"
     ],
     [
       "Vale.X64.Bytes_Code_s.__proj__Dealloc__item__n",
@@ -129,16 +129,21 @@
         "refinement_interpretation_Tm_refine_8e6883448f2e31e05ac798ac59bd5dd5"
       ],
       0,
-      "b5b6b3ab4d1c61033cf7642ea2f9de71"
+      "0d69e900dd7c2a1c633a6729852b7059"
     ],
     [
       "Vale.X64.Bytes_Code_s.ocmp",
       1,
       1,
       0,
-      [ "@query", "assumption_Vale.X64.Machine_s.operand__uu___haseq" ],
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.eqtype",
+        "equation_Vale.X64.Machine_s.operand64",
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
+        "typing_Vale.X64.Machine_s.operand64"
+      ],
       0,
-      "21944b293659084e0b6f9135f7cbb031"
+      "505937f15e8029ce435f7280f535b021"
     ],
     [
       "Vale.X64.Bytes_Code_s.__proj__OEq__item__o1",
@@ -152,7 +157,7 @@
         "refinement_interpretation_Tm_refine_738e4742398a6fd1b9ef1c74d0e72ba7"
       ],
       0,
-      "804a836b5b68cc11a56caf7ef6a10aad"
+      "ab4d8f88f5b974fc20f1e797927d5467"
     ],
     [
       "Vale.X64.Bytes_Code_s.__proj__OEq__item__o2",
@@ -166,7 +171,7 @@
         "refinement_interpretation_Tm_refine_738e4742398a6fd1b9ef1c74d0e72ba7"
       ],
       0,
-      "08a88ccd95a23d902f65bcc01fff70f0"
+      "654bd7378cf6ef4ac500534478eb2845"
     ],
     [
       "Vale.X64.Bytes_Code_s.__proj__ONe__item__o1",
@@ -180,7 +185,7 @@
         "refinement_interpretation_Tm_refine_4eb56532d90130be0dfe426ca85158e0"
       ],
       0,
-      "026e70820cf4c7fedf9ccf4d751619bb"
+      "a59e4f8eb81976a31a6d6bf7b2a1c090"
     ],
     [
       "Vale.X64.Bytes_Code_s.__proj__ONe__item__o2",
@@ -194,7 +199,7 @@
         "refinement_interpretation_Tm_refine_4eb56532d90130be0dfe426ca85158e0"
       ],
       0,
-      "8b4deaa2f082d83c7e10741994465f30"
+      "33d729badd4f8df9bcac5eb1afdd2027"
     ],
     [
       "Vale.X64.Bytes_Code_s.__proj__OLe__item__o1",
@@ -208,7 +213,7 @@
         "refinement_interpretation_Tm_refine_4d57b39a09420dbf5e709fa4e0016fdc"
       ],
       0,
-      "cf3417d1f1cc937bc302af4070c7e622"
+      "fbd75441536fc64e683f58104806cc43"
     ],
     [
       "Vale.X64.Bytes_Code_s.__proj__OLe__item__o2",
@@ -222,7 +227,7 @@
         "refinement_interpretation_Tm_refine_4d57b39a09420dbf5e709fa4e0016fdc"
       ],
       0,
-      "3c4c27cce6ba7752e87ee9260e7221d6"
+      "5e44df572d9cf5eb2b473c7833edd374"
     ],
     [
       "Vale.X64.Bytes_Code_s.__proj__OGe__item__o1",
@@ -236,7 +241,7 @@
         "refinement_interpretation_Tm_refine_30c569fd102fbde7f2fcab8304347032"
       ],
       0,
-      "e17ea68f2213598b5d81acee9c0ad8e3"
+      "ded64b9f10ba917b82bb769676285530"
     ],
     [
       "Vale.X64.Bytes_Code_s.__proj__OGe__item__o2",
@@ -250,7 +255,7 @@
         "refinement_interpretation_Tm_refine_30c569fd102fbde7f2fcab8304347032"
       ],
       0,
-      "fb09f6c0da978deb3bcd3fc04d0be795"
+      "95fa918a862ae14dedb0777dcb24a0a5"
     ],
     [
       "Vale.X64.Bytes_Code_s.__proj__OLt__item__o1",
@@ -264,7 +269,7 @@
         "refinement_interpretation_Tm_refine_6ca79dd82a49254219bfc312de4953a6"
       ],
       0,
-      "8f27aa21831bab285af6d1027b27a304"
+      "ea0be73bfd3fbb7b6704a951aabe1016"
     ],
     [
       "Vale.X64.Bytes_Code_s.__proj__OLt__item__o2",
@@ -278,7 +283,7 @@
         "refinement_interpretation_Tm_refine_6ca79dd82a49254219bfc312de4953a6"
       ],
       0,
-      "b87c08671ffea81fc8799508bc948745"
+      "f6cb3b8fb9b86e961e5936cbf2460141"
     ],
     [
       "Vale.X64.Bytes_Code_s.__proj__OGt__item__o1",
@@ -292,7 +297,7 @@
         "refinement_interpretation_Tm_refine_ae0a710279acabb9a7d5b0e58cced981"
       ],
       0,
-      "2044513f79584e1f49d87c6efc1ffe00"
+      "e79e4cd3bf00917ca91c102b7244320f"
     ],
     [
       "Vale.X64.Bytes_Code_s.__proj__OGt__item__o2",
@@ -306,7 +311,7 @@
         "refinement_interpretation_Tm_refine_ae0a710279acabb9a7d5b0e58cced981"
       ],
       0,
-      "7757fd63f85e77f380dce057f68e295e"
+      "c1e668002b270eb277f337553914c8d4"
     ],
     [
       "Vale.X64.Bytes_Code_s.__proj__Instr__item__i",
@@ -320,7 +325,7 @@
         "refinement_interpretation_Tm_refine_9ed713f3afd4b3469851e41178e98008"
       ],
       0,
-      "453556c8636a843f87f5f9aa6a96bf59"
+      "1afdba493a780066eeaee4302ebf6cbc"
     ],
     [
       "Vale.X64.Bytes_Code_s.__proj__Instr__item__oprs",
@@ -336,7 +341,7 @@
         "refinement_interpretation_Tm_refine_9ed713f3afd4b3469851e41178e98008"
       ],
       0,
-      "05cd977415a7cbcad7f39bd33318cfe7"
+      "d4fa85c774d7470f77d7ada9d9045826"
     ],
     [
       "Vale.X64.Bytes_Code_s.__proj__Instr__item__annotation",
@@ -352,7 +357,7 @@
         "refinement_interpretation_Tm_refine_9ed713f3afd4b3469851e41178e98008"
       ],
       0,
-      "32c624e5e49a57aa2f3ad7ac09e65c28"
+      "0573ce5a2a46dab6be6fdde572c0621d"
     ],
     [
       "Vale.X64.Bytes_Code_s.__proj__Push__item__src",
@@ -366,7 +371,7 @@
         "refinement_interpretation_Tm_refine_8d47c66d2fe2c7fca51b634f5d772f07"
       ],
       0,
-      "7eab93f7f7df8eca75808615cd78f93c"
+      "677b478624bf5a3925130590750595ff"
     ],
     [
       "Vale.X64.Bytes_Code_s.__proj__Push__item__t",
@@ -380,7 +385,7 @@
         "refinement_interpretation_Tm_refine_8d47c66d2fe2c7fca51b634f5d772f07"
       ],
       0,
-      "f2cf05257ae4433221c2ea0d8f97d1fd"
+      "2209289aebb8f9d784ba28b954a6b373"
     ],
     [
       "Vale.X64.Bytes_Code_s.__proj__Pop__item__dst",
@@ -394,7 +399,7 @@
         "refinement_interpretation_Tm_refine_a41194e5340697dc14ad550c826af5bb"
       ],
       0,
-      "1c2c83c6a2faa954e84d93eea1ebd4ed"
+      "ad515a482a83f113f733f3c7399ac7ad"
     ],
     [
       "Vale.X64.Bytes_Code_s.__proj__Pop__item__t",
@@ -408,7 +413,7 @@
         "refinement_interpretation_Tm_refine_a41194e5340697dc14ad550c826af5bb"
       ],
       0,
-      "9d5227885dce946fb343fd0b1debc794"
+      "0a1b0f83ae97e619065c2eef46c9edd4"
     ],
     [
       "Vale.X64.Bytes_Code_s.__proj__Alloc__item__n",
@@ -422,7 +427,7 @@
         "refinement_interpretation_Tm_refine_04725afadffade18a23b720288de2ea6"
       ],
       0,
-      "fd1b6d3151246e8b7dace6693a31d67b"
+      "d2e558288af4792e10bdb311c956e05c"
     ],
     [
       "Vale.X64.Bytes_Code_s.__proj__Dealloc__item__n",
@@ -436,16 +441,21 @@
         "refinement_interpretation_Tm_refine_8e6883448f2e31e05ac798ac59bd5dd5"
       ],
       0,
-      "ebcdd236114dd61f61e1a658a176a215"
+      "b47938493d0b822526e56939e99f846a"
     ],
     [
       "Vale.X64.Bytes_Code_s.ocmp",
       1,
       1,
       0,
-      [ "@query", "assumption_Vale.X64.Machine_s.operand__uu___haseq" ],
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.eqtype",
+        "equation_Vale.X64.Machine_s.operand64",
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
+        "typing_Vale.X64.Machine_s.operand64"
+      ],
       0,
-      "85181b96ad357862c60919bb162ef5ba"
+      "048ab52482c16da6ce4d29ee2632b7bb"
     ],
     [
       "Vale.X64.Bytes_Code_s.__proj__OEq__item__o1",
@@ -459,7 +469,7 @@
         "refinement_interpretation_Tm_refine_738e4742398a6fd1b9ef1c74d0e72ba7"
       ],
       0,
-      "2953f09122ec64d05516aea55ba8558b"
+      "babc208f12fce8df810eb11d70db49f7"
     ],
     [
       "Vale.X64.Bytes_Code_s.__proj__OEq__item__o2",
@@ -473,7 +483,7 @@
         "refinement_interpretation_Tm_refine_738e4742398a6fd1b9ef1c74d0e72ba7"
       ],
       0,
-      "a3a024341d38f469ae3728e93b648489"
+      "a41004e45a2c23af092174f7ea26ea73"
     ],
     [
       "Vale.X64.Bytes_Code_s.__proj__ONe__item__o1",
@@ -487,7 +497,7 @@
         "refinement_interpretation_Tm_refine_4eb56532d90130be0dfe426ca85158e0"
       ],
       0,
-      "1a2b837f64f00a2932be3d6bf48b0bd8"
+      "6e501933d23089cc102f5e0b14d86617"
     ],
     [
       "Vale.X64.Bytes_Code_s.__proj__ONe__item__o2",
@@ -501,7 +511,7 @@
         "refinement_interpretation_Tm_refine_4eb56532d90130be0dfe426ca85158e0"
       ],
       0,
-      "7625244db46347d9ba607f1cf757f3dc"
+      "c3769fe720aaf2b76cfe516542317c7a"
     ],
     [
       "Vale.X64.Bytes_Code_s.__proj__OLe__item__o1",
@@ -515,7 +525,7 @@
         "refinement_interpretation_Tm_refine_4d57b39a09420dbf5e709fa4e0016fdc"
       ],
       0,
-      "3ddaa06f30ade0632e9a35fe04abcc23"
+      "d0ce36c25238139b2369df563b316f04"
     ],
     [
       "Vale.X64.Bytes_Code_s.__proj__OLe__item__o2",
@@ -529,7 +539,7 @@
         "refinement_interpretation_Tm_refine_4d57b39a09420dbf5e709fa4e0016fdc"
       ],
       0,
-      "70ec8d837c8216a1368de34870c155ac"
+      "8ecb97f1bc49bf0f942e2f276e9c8c3b"
     ],
     [
       "Vale.X64.Bytes_Code_s.__proj__OGe__item__o1",
@@ -543,7 +553,7 @@
         "refinement_interpretation_Tm_refine_30c569fd102fbde7f2fcab8304347032"
       ],
       0,
-      "6af46ff0d5afe599ae9d46e6a0d6c420"
+      "0752d094eb0b7262d3a5c8210a13e307"
     ],
     [
       "Vale.X64.Bytes_Code_s.__proj__OGe__item__o2",
@@ -557,7 +567,7 @@
         "refinement_interpretation_Tm_refine_30c569fd102fbde7f2fcab8304347032"
       ],
       0,
-      "4197692458cafe09afc5cd41e041a667"
+      "fbe15e2593037d51bfcc7418d44a92b2"
     ],
     [
       "Vale.X64.Bytes_Code_s.__proj__OLt__item__o1",
@@ -571,7 +581,7 @@
         "refinement_interpretation_Tm_refine_6ca79dd82a49254219bfc312de4953a6"
       ],
       0,
-      "29e3f818b9b2967c602628ecba529591"
+      "37e9b01c9b59ffac85c374a9b401ec16"
     ],
     [
       "Vale.X64.Bytes_Code_s.__proj__OLt__item__o2",
@@ -585,7 +595,7 @@
         "refinement_interpretation_Tm_refine_6ca79dd82a49254219bfc312de4953a6"
       ],
       0,
-      "75996928196bbd455dd3bad6bb76e2f4"
+      "7302ff2ea46b9c71f28f480c9505f594"
     ],
     [
       "Vale.X64.Bytes_Code_s.__proj__OGt__item__o1",
@@ -599,7 +609,7 @@
         "refinement_interpretation_Tm_refine_ae0a710279acabb9a7d5b0e58cced981"
       ],
       0,
-      "f231a517e54b531775b7caad48a0ee73"
+      "d30987344aacfa3e6690723b9afe5ee3"
     ],
     [
       "Vale.X64.Bytes_Code_s.__proj__OGt__item__o2",
@@ -613,7 +623,7 @@
         "refinement_interpretation_Tm_refine_ae0a710279acabb9a7d5b0e58cced981"
       ],
       0,
-      "69c6f8cb70a1c7f94c31b0cb36c8694c"
+      "b0e75b306dd114cd0cc2f5d2ae2f2735"
     ]
   ]
 ]
