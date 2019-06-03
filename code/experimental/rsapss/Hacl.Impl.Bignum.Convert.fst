@@ -9,6 +9,7 @@ open LowStar.Buffer
 open Lib.IntTypes
 open Lib.Buffer
 open Lib.ByteBuffer
+open Lib.PrintBuffer
 
 open Hacl.Impl.Bignum.Core
 
@@ -17,6 +18,10 @@ module FSeq = FStar.Seq
 module B = FStar.Bytes
 module L = FStar.List.Tot
 module ST = FStar.HyperStack.ST
+
+
+
+(*** From/to the byte array ***)
 
 #reset-options "--z3rlimit 150 --max_fuel 0 --max_ifuel 0"
 
@@ -123,6 +128,9 @@ let bignum_to_bytes_direct #len input res =
   pop_frame ()
 
 #reset-options
+
+
+(*** From/to nats ***)
 
 /// Converts nat to b64 base, lsb first (little endian)
 inline_for_extraction noextract
@@ -247,3 +255,37 @@ let nat_to_bignum #k input =
   admit(); // must prove that adding extra high bit zeroes doesn't change number
 
   res
+
+
+
+//////// Some debugging, at least for the time being
+// Couldn't place it into core as it requires bytes conversion
+
+noextract inline_for_extraction
+let debugOn = false
+
+// Prints in big endian, both with respect to uint64 chunks, and within them.
+val print_lbignum:
+     #aLen:bn_len
+  -> a:lbignum aLen
+  -> ST unit (requires fun h -> live h a) (ensures fun h0 _ h1 -> h0 == h1)
+let print_lbignum #aLen a =
+  assume (8 * v aLen < max_size_t);
+  push_frame ();
+  let bytes_n = aLen *! 8ul in
+  let bytes = create bytes_n (uint 0) in
+  assume (8 * v aLen < max_size_t);
+  let a' = bignum_to_bytes a bytes in
+  print_bytes bytes_n bytes;
+  pop_frame ();
+  admit()
+
+noextract inline_for_extraction
+val trace_lbignum:
+     #aLen:bn_len
+  -> a:lbignum aLen
+  -> ST unit (requires fun h -> live h a) (ensures fun h0 _ h1 -> h0 == h1)
+let trace_lbignum #aLen a = if debugOn then print_lbignum a else ()
+
+noextract inline_for_extraction
+let trace (s:string) = if debugOn then C.String.print (C.String.of_literal s) else ()

@@ -759,6 +759,6 @@ let main () =
     ctest 32ul 2048ul test4_n 24ul test4_e 2048ul test4_d 128ul test4_p 128ul test4_q
     test4_r2 8ul test4_rBlind 128ul test4_msg 20ul test4_salt test4_sgnt_expected in
   let testRes = test1 && test2 && test3 && test4 in
-  if testRes then C.String.print (C.String.of_literal "### RSA: Success\n\n")
+  if testRes then C.String.print (C.String.of_literal "### RSA: Successs\n\n")
   else C.String.print (C.String.of_literal "### RSA: Failure\n\n");
   C.EXIT_SUCCESS
