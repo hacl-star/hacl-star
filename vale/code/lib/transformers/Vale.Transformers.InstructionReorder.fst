@@ -1297,6 +1297,99 @@ let lemma_untainted_eval_ins_only_affects_write_aux1 (i:ins{Instr? i}) (s:machin
         (eval_access_location a s == eval_access_location a (run (untainted_eval_ins i) s)))) =
   admit ()
 
+let lemma_instr_write_output_explicit_only_affects_write_aux2
+    (i:instr_operand_explicit) (v:instr_val_t (IOpEx i)) (o:instr_operand_t i) (s_orig s:machine_state) :
+  Lemma
+    (requires (
+        (s_orig.ms_stack.initial_rsp = s.ms_stack.initial_rsp) /\
+        (Set.equal (Map.domain s_orig.ms_mem) (Map.domain s.ms_mem)) /\
+        (Set.equal (Map.domain s_orig.ms_stack.stack_mem) (Map.domain s.ms_stack.stack_mem))
+      ))
+    (ensures (
+        (let s1 = instr_write_output_explicit i v o s_orig s in
+         (s_orig.ms_stack.initial_rsp = s1.ms_stack.initial_rsp) /\
+         (Set.equal (Map.domain s_orig.ms_mem) (Map.domain s1.ms_mem)) /\
+         (Set.equal (Map.domain s_orig.ms_stack.stack_mem) (Map.domain s1.ms_stack.stack_mem))))) =
+  let s1 = instr_write_output_explicit i v o s_orig s in
+  match i with
+  | IOp64 -> (
+      if valid_dst_operand o s_orig then (
+        admit ()
+      ) else ()
+    )
+  | IOpXmm -> (
+      admit ()
+    )
+
+let lemma_instr_write_output_implicit_only_affects_write_aux2
+    (i:instr_operand_implicit) (v:instr_val_t (IOpIm i)) (s_orig s:machine_state) :
+  Lemma
+    (requires (
+        (s_orig.ms_stack.initial_rsp = s.ms_stack.initial_rsp) /\
+        (Set.equal (Map.domain s_orig.ms_mem) (Map.domain s.ms_mem)) /\
+        (Set.equal (Map.domain s_orig.ms_stack.stack_mem) (Map.domain s.ms_stack.stack_mem))
+      ))
+    (ensures (
+        (let s1 = instr_write_output_implicit i v s_orig s in
+         (s_orig.ms_stack.initial_rsp = s1.ms_stack.initial_rsp) /\
+         (Set.equal (Map.domain s_orig.ms_mem) (Map.domain s1.ms_mem)) /\
+         (Set.equal (Map.domain s_orig.ms_stack.stack_mem) (Map.domain s1.ms_stack.stack_mem))))) =
+  admit ()
+
+let rec lemma_instr_write_outputs_only_affects_write_aux2
+    (outs:list instr_out) (args:list instr_operand)
+    (vs:instr_ret_t outs) (oprs:instr_operands_t outs args) (s_orig s:machine_state) :
+  Lemma
+    (requires (
+        (s_orig.ms_stack.initial_rsp = s.ms_stack.initial_rsp) /\
+        (Set.equal (Map.domain s_orig.ms_mem) (Map.domain s.ms_mem)) /\
+        (Set.equal (Map.domain s_orig.ms_stack.stack_mem) (Map.domain s.ms_stack.stack_mem))
+      ))
+    (ensures (
+        let s1 = instr_write_outputs outs args vs oprs s_orig s in
+        (s_orig.ms_stack.initial_rsp = s1.ms_stack.initial_rsp) /\
+        (Set.equal (Map.domain s_orig.ms_mem) (Map.domain s1.ms_mem)) /\
+        (Set.equal (Map.domain s_orig.ms_stack.stack_mem) (Map.domain s1.ms_stack.stack_mem))
+      )) =
+  match outs with
+  | [] -> ()
+  | (_, i)::outs -> (
+      let ((v:instr_val_t i), (vs:instr_ret_t outs)) =
+        match outs with
+        | [] -> (vs, ())
+        | _::_ -> let vs = coerce vs in (fst vs, snd vs)
+        in
+      match i with
+      | IOpEx i ->
+        let oprs = coerce oprs in
+        lemma_instr_write_output_explicit_only_affects_write_aux2 i v (fst oprs) s_orig s;
+        let s = instr_write_output_explicit i v (fst oprs) s_orig s in
+        lemma_instr_write_outputs_only_affects_write_aux2 outs args vs (snd oprs) s_orig s
+      | IOpIm i ->
+        lemma_instr_write_output_implicit_only_affects_write_aux2 i v s_orig s;
+        let s = instr_write_output_implicit i v s_orig s in
+        lemma_instr_write_outputs_only_affects_write_aux2 outs args vs (coerce oprs) s_orig s
+    )
+
+let lemma_eval_instr_only_affects_write_aux2 it oprs ann s0 s1 :
+  Lemma
+    (requires (
+        (Some s1 == eval_instr it oprs ann s0)))
+    (ensures (
+        (s0.ms_stack.initial_rsp = s1.ms_stack.initial_rsp) /\
+        (Set.equal (Map.domain s0.ms_mem) (Map.domain s1.ms_mem)) /\
+        (Set.equal (Map.domain s0.ms_stack.stack_mem) (Map.domain s1.ms_stack.stack_mem))
+      )) =
+  let InstrTypeRecord #outs #args #havoc_flags i = it in
+  let Some vs = instr_apply_eval outs args (instr_eval i) oprs s0 in
+  let s1' =
+    match havoc_flags with
+    | HavocFlags -> {s0 with ms_flags = havoc_state_ins s0 (Instr it oprs ann)}
+    | PreserveFlags -> s0
+  in
+  let s1 = instr_write_outputs outs args vs oprs s0 s1' in
+  lemma_instr_write_outputs_only_affects_write_aux2 outs args vs oprs s0 s1'
+
 let lemma_untainted_eval_ins_only_affects_write_aux2 (i:ins{Instr? i}) (s:machine_state) :
   Lemma
     (ensures (
@@ -1305,7 +1398,10 @@ let lemma_untainted_eval_ins_only_affects_write_aux2 (i:ins{Instr? i}) (s:machin
         (Set.equal (Map.domain s.ms_mem) (Map.domain s'.ms_mem)) /\
         (Set.equal (Map.domain s.ms_stack.stack_mem) (Map.domain s'.ms_stack.stack_mem))
       )) =
-  admit ()
+  let Instr it oprs ann = i in
+  match eval_instr it oprs ann s with
+  | None -> ()
+  | Some s' -> lemma_eval_instr_only_affects_write_aux2 it oprs ann s s'
 
 let lemma_untainted_eval_ins_only_affects_write (i:ins{Instr? i}) (s:machine_state) :
   Lemma
