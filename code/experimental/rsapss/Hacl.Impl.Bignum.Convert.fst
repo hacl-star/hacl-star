@@ -170,6 +170,35 @@ let rec conv_inv1 a =
     if a <= maxint U64 then ()
     else conv_inv1 (a / (modulus U64))
 
+val strip_bits: l:list uint64{ L.length l > 0 } -> l':list uint64{ L.length l' > 0 }
+let rec strip_bits l = match l with
+  | [x] -> [x]
+  | (x::xs) -> if eq_u64 x (uint 0) then strip_bits xs else xs
+
+val rev_acc_preserves_length: l:list 'a -> acc:list 'a -> Lemma
+  (L.length (L.rev_acc l acc) = L.length l + L.length acc)
+let rec rev_acc_preserves_length l acc = match l with
+  | [] -> ()
+  | hd::tl -> rev_acc_preserves_length tl (hd::acc)
+
+val rev_preserves_length: l:list 'a -> Lemma
+  (L.length (L.rev l) = L.length l)
+let rec rev_preserves_length l = rev_acc_preserves_length l []
+
+val strip_high_bits: l:list uint64{ L.length l > 0 } -> l':list uint64{ L.length l' > 0 }
+let strip_high_bits l =
+  rev_preserves_length l;
+  rev_preserves_length (strip_bits (L.rev l));
+  L.rev (strip_bits (L.rev l))
+
+val msg_after_strip: l:list uint64 { L.length l > 0 } -> Lemma
+  (~(eq_u64 (L.last (strip_high_bits l)) (uint 0)) \/ eq_u64 (L.hd l) (uint 0))
+let msg_after_strip l = admit()
+
+val conv_inv2: l:list uint64{ L.length l > 0 } -> Lemma
+  (let l' = nat_to_list64_sec (list64_sec_to_nat l) in strip_high_bits l == l')
+let conv_inv2 l = admit()
+
 /// Relatively "small" nats, which fit into 256 Mb (2147483648 bits).
 /// Related bignums' lengths satisfy all the needed library predicates.
 let issnat (n:nat) =
@@ -252,10 +281,17 @@ let nat_to_bignum #k input =
 
   copy res_sub created;
 
-  admit(); // must prove that adding extra high bit zeroes doesn't change number
+  admit(); // must prove that adding extra high bit zeroes doesn't change the number
 
   res
 
+val bignum_of_uL:
+     #len:bn_len
+  -> a:lbignum len
+  -> h:mem
+  -> x:uint64
+  -> Lemma (as_snat h a = v x ==> (let s = as_seq h a in Seq.index s 0 == x))
+let bignum_of_uL #len a h x = admit()
 
 
 //////// Some debugging, at least for the time being
