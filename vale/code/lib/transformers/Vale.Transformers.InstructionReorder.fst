@@ -1288,21 +1288,6 @@ let lemma_commute (f1 f2:st unit) (r1 w1 r2 w2:list access_location) (s:machine_
   lemma_equiv_states_when_except_none is12 is21 s12.ms_ok;
   assert (equiv_states (run2 f1 f2 s) (run2 f2 f1 s))
 
-let lemma_unchanged_commutes (i1 i2 : ins) (s : machine_state) :
-  Lemma
-    (requires (
-        let r1, w1 = rw_set_of_ins i1 in
-        let r2, w2 = rw_set_of_ins i2 in
-        unchanged_all r2 (untainted_eval_ins i1) s /\
-        unchanged_all r1 (untainted_eval_ins i2) s /\
-        only_affects w1 (untainted_eval_ins i1) /\
-        only_affects w2 (untainted_eval_ins i2)))
-    (ensures (
-        commutes s
-          (untainted_eval_ins i1)
-          (untainted_eval_ins i2))) =
-  admit ()
-
 let lemma_untainted_eval_ins_exchange (i1 i2 : ins) (s : machine_state) :
   Lemma
     (requires (!!(ins_exchange_allowed i1 i2)))
