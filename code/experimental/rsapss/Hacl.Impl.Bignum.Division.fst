@@ -5,7 +5,6 @@ open FStar.HyperStack
 open FStar.Buffer
 open FStar.Mul
 
-open Lib.PrintBuffer
 open Lib.IntTypes
 open Lib.Math.Algebra
 open Lib.Buffer
@@ -39,10 +38,17 @@ let bn_remainder_core #rLen #modLen r_i mod count =
   let inv h _ = live h r_i /\ live h mod /\ live h mod1 /\ live h tmp /\
                 modifies4 mod r_i mod1 tmp h0 h in
 
+  trace "bn_remainder_core\n";
+
   for 0ul count inv (fun i ->
-    bn_rshift1 mod mod1;
+    trace "bn_remainder_core loop start, r_i,mod:\n";
+    trace_lbignum r_i;
+    trace_lbignum mod;
     if bn_is_geq r_i mod
-      then (let _ = bn_sub r_i mod tmp in copy r_i tmp); // in-place sub?
+      then (let _ = bn_sub r_i mod tmp in
+      trace "reducing\n";
+      copy r_i tmp); // in-place sub?
+    bn_rshift1 mod mod1;
     copy mod mod1
   );
 
@@ -69,8 +75,6 @@ val calc_bits:
     (ensures  fun h0 _ h1 -> modifies0 h0 h1 /\ h0 == h1 /\ live h1 a)
 let calc_bits #aLen a = calc_bits_test a (aLen *! 64ul -! 1ul)
 
-noextract inline_for_extraction
-let debug (s:string) = () // C.String.print (C.String.of_literal s)
 
 /// Copies the part that fits.
 val copy_fit:
@@ -83,11 +87,11 @@ val copy_fit:
     (ensures fun h0 _ h1 -> live h1 o /\ live h1 i /\ modifies1 o h0 h1)
 let copy_fit #oLen #iLen o i =
   if iLen =. oLen then
-  (debug "copy_fit 1\n"; copy o i)
+  (trace "copy_fit 1\n"; copy o i)
   else if iLen >. oLen then
-  (debug "copy_fit 2\n"; copy o (sub i 0ul oLen))
+  (trace "copy_fit 2\n"; copy o (sub i 0ul oLen))
   else begin
-    debug "copy_fit 3\n";
+    trace "copy_fit 3\n";
     copy (sub o 0ul iLen) i;
     memset (sub o iLen (oLen -. iLen)) (uint 0) (oLen -. iLen)
   end
@@ -155,11 +159,11 @@ let bn_remainder #aLen #modLen a mod res =
   let aBits = calc_bits a in
 
   if aBits =. 0ul then begin
-    debug "aBits = 0\n";
+    trace "aBits = 0\n";
     memset res (uint 0) modLen
   end else if modBits >. aBits then copy_fit res a
   else begin
-    debug "remainder reduction branch\n";
+    trace "remainder reduction branch\n";
     ne_lemma aBits 0ul;
     assert (v aBits > 0);
 
@@ -201,6 +205,7 @@ let bn_remainder #aLen #modLen a mod res =
 
 #reset-options "--z3rlimit 50 --max_fuel 1 --max_ifuel 0"
 
+
 val bn_modular_add:
      #len:bn_len{ (v len + 1) * 64 <= max_size_t}
   -> n:lbignum len
@@ -217,10 +222,19 @@ val bn_modular_add:
        modifies (loc res) h0 h1 /\
        as_snat h1 res = (as_snat h0 a + as_snat h0 b) % as_snat h0 n)
 let bn_modular_add #len n a b res =
+  trace "modular_add, args\n";
+  trace_lbignum n;
+  trace_lbignum a;
+  trace_lbignum b;
   push_frame();
   let res' = create (len +! 1ul) (uint 0) in
   bn_add_full a b res';
+  trace "res':\n";
+  trace_lbignum res';
   bn_remainder res' n res;
+  trace "res:\n";
+  trace_lbignum res;
+  trace "modular_add done\n";
   pop_frame()
 
 val bn_modular_mul:

@@ -37,22 +37,6 @@ val print_bool: b:bool -> ST unit (requires fun _ -> true) (ensures fun h0 _ h1 
 let print_bool b =
   C.String.print (if b then C.String.of_literal "true\n" else C.String.of_literal "false\n")
 
-// Prints in big endian, both with respect to uint64 chunks, and within them.
-val print_lbignum:
-     #aLen:bn_len
-  -> a:lbignum aLen
-  -> ST unit (requires fun h -> live h a) (ensures fun h0 _ h1 -> h0 == h1)
-let print_lbignum #aLen a =
-  assume (8 * v aLen < max_size_t);
-  push_frame ();
-  let bytes_n = aLen *! 8ul in
-  let bytes = create bytes_n (uint 0) in
-  assume (8 * v aLen < max_size_t);
-  let a' = bignum_to_bytes a bytes in
-  print_bytes bytes_n bytes;
-  pop_frame ();
-  admit()
-
 val print_verdict:
      #aLen:bn_len
   -> #bLen:bn_len
@@ -161,8 +145,8 @@ let test_comp _ =
 
 inline_for_extraction noextract
 val test_add_gen:
-     a:snat
-  -> b:snat{b <= a /\ issnat (a+b)}
+     a:snat{issnat (2*a)}
+  -> b:snat{b <= a}
   -> Stack unit (requires fun _ -> true) (ensures fun _ _ _ -> true)
 let test_add_gen a b =
   push_frame();
@@ -172,6 +156,7 @@ let test_add_gen a b =
   nat_bytes_num_range a;
   nat_bytes_num_fit b a;
   let res_len: size_t = a_len +. 1ul in
+  snat_order (a+b) (2*a);
   let c_len: size_t = normalize_term (nat_bytes_num (a+b)) in
 
   let bn_a:lbignum a_len     = nat_to_bignum_exact a in
@@ -184,7 +169,7 @@ let test_add_gen a b =
   print_verdict bn_c bn_res res;
   pop_frame()
 
-#reset-options
+#reset-options "--z3rlimit 100 --max_fuel 2 --max_ifuel 0"
 
 val test_add: unit -> St unit
 let test_add _ =
@@ -208,6 +193,48 @@ let test_add _ =
   test_add_gen
     111111111111123123123111111111111111111
     0;
+
+  test_add_gen 0 0;
+  test_add_gen 1 0;
+  test_add_gen 12345 0;
+  test_add_gen 10 1;
+  test_add_gen 10 2;
+  test_add_gen 25 10;
+  test_add_gen 1000 10;
+  test_add_gen 100000000000 1;
+  test_add_gen 100000000000 2;
+  test_add_gen 100000000000 100000000000;
+
+
+  test_add_gen 18446744073709551615 0;
+  test_add_gen 18446744073709551615 1;
+  test_add_gen 18446744073709551615 2;
+  test_add_gen 18446744073709551615 18446744073709551614;
+  test_add_gen 18446744073709551615 18446744073709551615;
+  test_add_gen 18446744073709551616 0;
+  test_add_gen 18446744073709551616 1;
+  test_add_gen 18446744073709551616 2;
+  test_add_gen 18446744073709551616 18446744073709551614;
+  test_add_gen 18446744073709551616 18446744073709551615;
+  test_add_gen 18446744073709551616 18446744073709551616;
+  test_add_gen 18446744073709551617 0;
+  test_add_gen 18446744073709551617 1;
+  test_add_gen 18446744073709551617 2;
+  test_add_gen 18446744073709551617 18446744073709551614;
+  test_add_gen 18446744073709551617 18446744073709551615;
+  test_add_gen 18446744073709551617 18446744073709551616;
+  test_add_gen 18446744073709551617 18446744073709551617;
+
+
+  test_add_gen 1234123432165873264969873219648712 0;
+  test_add_gen 1234123432165873264969873219648712 1;
+  test_add_gen 1234123432165873264969873219648712 2;
+  test_add_gen 1234123432165873264969873219648712 10;
+  test_add_gen 1234123432165873264969873219648712 100000;
+  test_add_gen 1234123432165873264969873219648712 100000000000;
+  test_add_gen 1234123432165873264969873219648712 1000000000000000;
+  test_add_gen 1234123432165873264969873219648712 1000000000000000000;
+  test_add_gen 1234123432165873264969873219648712 1000000000000000000000;
 
   pop_frame()
 
@@ -585,7 +612,6 @@ val test_mod_ops: unit -> St unit
 let test_mod_ops _ =
   C.String.print (C.String.of_literal "Testing mod_ops\n");
   push_frame();
-
 
   test_mod_ops_gen 100000000001 0 0;
   test_mod_ops_gen 100000000001 1 0;
