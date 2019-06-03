@@ -13,7 +13,6 @@ let to_uint16 (u:Lib.IntTypes.pub_uint16) : uint16 =
   createi 16 (fun i -> cast U1 SEC (u >>. (size i)))
 type lanes = n:nat{n == 1 \/ n == 4}
 type u1xNxL (n:bitlen) (l:lanes) = fseq (u1xN n) l
-type state (l: lanes) = fseq (u1xNxL 16 l) 8
 
 let ( ^| ) (#n:bitlen) (#l:lanes) (x:u1xNxL n l) (y:u1xNxL n l) : u1xNxL n l = map2 (map2 ( ^. )) x y
 let ( &| ) (#n:bitlen) (#l:lanes) (x:u1xNxL n l) (y:u1xNxL n l) : u1xNxL n l = map2 (map2 ( ^. )) x y
@@ -23,6 +22,9 @@ let ( >>| ) (#n:bitlen) (#l:lanes) (x:u1xNxL n l) (y:nat{y < n}) : u1xNxL n l =
 	    map (fun xi -> createi n (fun j -> xi.[(j + y) % n])) x
 let ( <<| )  (#n:bitlen) (#l:lanes) (x:u1xNxL n l) (y:nat{y < n}) : u1xNxL n l =
 	    map (fun xi -> createi n (fun j -> xi.[(j + n - y) % n])) x
+
+
+type state (l: lanes) = fseq (u1xNxL 16 l) 8
 
 let rotate_row_right (#l:lanes) (x:u1xNxL 16 l) (i:nat{i < 4}) (r:nat{r < 4}) =
   if r = 0 then x else
@@ -195,6 +197,8 @@ let subBytes #n #l (st0, (st1, (st2, (st3, (st4, (st5, (st6, st7)))))))  =
   let st6 = ~| (t109 ^| t140) in
   (st0,(st1,(st2,(st3,(st4,(st5,(st6,st7)))))))
 
+(* The result of subbytes is the same as calling the sbox for each uint8
+   in the transpose of the state *)
 val subBytesVecLemma: #n:bitlen -> #l: lanes -> s: fseq (u1xNxL n l) 8 ->
 		   i:nat{i < 8} -> j:nat{j < l} -> k:nat{k < n} ->
 		   Lemma (let r = subBytes #n #l s in
@@ -215,13 +219,25 @@ let subBytesLemma #l s i j k = admit()
 val mix_columns: #l:lanes -> s:state l -> state l
 let mix_columns #l s =
   let cols = map (fun u -> u ^| rotate_cols_right u 1) s in
-  let s' = createi 8 (fun i ->
-		   if i = 0 then s.[0] ^| cols.[0] ^| (rotate_cols_right cols.[0] 2)
-		   else s.[i] ^| cols.[i-1] ^| cols.[i] ^| (rotate_cols_right cols.[i] 2)) in
+  (* At this point each row is:
+    (c0 + c1, c1 + c2, c2 + c3, c3 + c0) *)
+  let s' = map2 (fun x y -> x ^| y ^| (rotate_cols_right y 2)) s cols in
+  (* At this point each row is:
+     (c1 + c2 + c3, c2 + c3 + c0, c3 + c0 + c1, c0 + c1 + c2) *)
+  let s' = createi 8 (fun i -> if i = 0 then s'.[0]
+			    else s'.[i] ^| cols.[i-1]) in
+  (* At this point each row is the unreduced form of:
+     (2c0 + 3c1 + c2 + c3, 2c1 + 3c2 + c3 + c0,
+      2c2 + 3c3 + c0 + c1, 2c3 + 3c0 + c1 + c2)
+     with an additional carry bit stored in cols.[7] *)
   let s' = s'.[0] <- s'.[0] ^| cols.[7] in
   let s' = s'.[1] <- s'.[1] ^| cols.[7] in
   let s' = s'.[3] <- s'.[3] ^| cols.[7] in
   let s' = s'.[4] <- s'.[4] ^| cols.[7] in
+  (* We multiply the carry bit in cols.[7] with 0x1b = 0x11011 (irred) and
+     add to each column to obtain the unreduced form of each row:
+     (2c0 + 3c1 + c2 + c3, 2c1 + 3c2 + c3 + c0,
+      2c2 + 3c3 + c0 + c1, 2c3 + 3c0 + c1 + c2) *)
   s'
 
 
