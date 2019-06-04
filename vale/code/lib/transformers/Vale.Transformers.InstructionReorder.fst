@@ -74,56 +74,82 @@ type access_location : eqtype =
   | ALocCf : access_location
   | ALocOf : access_location
 
-let access_location_of_explicit (t:instr_operand_explicit) (i:instr_operand_t t) : access_location =
+type access_locations = list access_location
+
+type rw_set = access_locations & access_locations
+
+let access_locations_of_maddr (m:maddr) : access_locations =
+  match m with
+  | MConst _ -> []
+  | MReg r _ -> [ALocReg r]
+  | MIndex b _ i _ -> [ALocReg b; ALocReg i]
+
+let access_locations_of_operand (o:operand) : rw_set =
+  match o with
+  | OConst _ -> [], []
+  | OReg r -> [ALocReg r], [ALocReg r]
+  | OMem (m, _) -> access_locations_of_maddr m, [ALocMem]
+  | OStack (m, _) -> access_locations_of_maddr m, [ALocStack]
+
+let access_locations_of_operand128 (o:operand128) : access_locations & access_locations =
+  match o with
+  | OReg128 r -> [ALocXmm r], [ALocXmm r]
+  | OMem128 (m, _) -> access_locations_of_maddr m, [ALocMem]
+  | OStack128 (m, _) -> access_locations_of_maddr m, [ALocStack]
+
+private
+let both (x: rw_set) =
+  let a, b = x in
+  a `L.append` b
+
+let access_locations_of_explicit (t:instr_operand_explicit) (i:instr_operand_t t) : rw_set =
   match t with
-  | IOp64 -> ALoc64 i
-  | IOpXmm -> ALoc128 i
+  | IOp64 -> access_locations_of_operand i
+  | IOpXmm -> access_locations_of_operand128 i
 
-let access_location_of_implicit (t:instr_operand_implicit) : access_location =
+let access_locations_of_implicit (t:instr_operand_implicit) : rw_set =
   match t with
-  | IOp64One i -> ALoc64 i
-  | IOpXmmOne i -> ALoc128 i
-  | IOpFlagsCf -> ALocCf
-  | IOpFlagsOf -> ALocOf
+  | IOp64One i -> access_locations_of_operand i
+  | IOpXmmOne i -> access_locations_of_operand128 i
+  | IOpFlagsCf -> [ALocCf], [ALocCf]
+  | IOpFlagsOf -> [ALocOf], [ALocOf]
 
-type rw_set = (list access_location) & (list access_location)
-
-let rec aux_read_set0 (args:list instr_operand) (oprs:instr_operands_t_args args) =
+let rec aux_read_set0 (args:list instr_operand) (oprs:instr_operands_t_args args) : access_locations =
   match args with
   | [] -> []
   | (IOpEx i) :: args ->
     let l, r = coerce #(instr_operand_t i & instr_operands_t_args args) oprs in
-    access_location_of_explicit i l :: aux_read_set0 args r
+    both (access_locations_of_explicit i l) `L.append` aux_read_set0 args r
   | (IOpIm i) :: args ->
-    access_location_of_implicit i :: aux_read_set0 args (coerce #(instr_operands_t_args args) oprs)
+    both (access_locations_of_implicit i) `L.append` aux_read_set0 args (coerce #(instr_operands_t_args args) oprs)
 
 let rec aux_read_set1
-    (outs:list instr_out) (args:list instr_operand) (oprs:instr_operands_t outs args) : list access_location =
+    (outs:list instr_out) (args:list instr_operand) (oprs:instr_operands_t outs args) : access_locations =
   match outs with
   | [] -> aux_read_set0 args oprs
   | (Out, IOpEx i) :: outs ->
     let l, r = coerce #(instr_operand_t i & instr_operands_t outs args) oprs in
-    aux_read_set1 outs args r
+    fst (access_locations_of_explicit i l) `L.append` aux_read_set1 outs args r
   | (InOut, IOpEx i) :: outs ->
     let l, r = coerce #(instr_operand_t i & instr_operands_t outs args) oprs in
-    access_location_of_explicit i l :: aux_read_set1 outs args r
+    both (access_locations_of_explicit i l) `L.append` aux_read_set1 outs args r
   | (Out, IOpIm i) :: outs ->
-    aux_read_set1 outs args (coerce #(instr_operands_t outs args) oprs)
+    fst (access_locations_of_implicit i) `L.append` aux_read_set1 outs args (coerce #(instr_operands_t outs args) oprs)
   | (InOut, IOpIm i) :: outs ->
-    access_location_of_implicit i :: aux_read_set1 outs args (coerce #(instr_operands_t outs args) oprs)
+    both (access_locations_of_implicit i) `L.append` aux_read_set1 outs args (coerce #(instr_operands_t outs args) oprs)
 
-let read_set (i:instr_t_record) (oprs:instr_operands_t i.outs i.args) : list access_location =
+let read_set (i:instr_t_record) (oprs:instr_operands_t i.outs i.args) : access_locations =
   aux_read_set1 i.outs i.args oprs
 
 let rec aux_write_set
-    (outs:list instr_out) (args:list instr_operand) (oprs:instr_operands_t outs args) : list access_location =
+    (outs:list instr_out) (args:list instr_operand) (oprs:instr_operands_t outs args) : access_locations =
   match outs with
   | [] -> []
   | (_, IOpEx i) :: outs ->
     let l, r = coerce #(instr_operand_t i & instr_operands_t outs args) oprs in
-    access_location_of_explicit i l :: aux_write_set outs args r
+    snd (access_locations_of_explicit i l) `L.append` aux_write_set outs args r
   | (_, IOpIm i) :: outs ->
-    access_location_of_implicit i :: aux_write_set outs args (coerce #(instr_operands_t outs args) oprs)
+    snd (access_locations_of_implicit i) `L.append` aux_write_set outs args (coerce #(instr_operands_t outs args) oprs)
 
 let write_set (i:instr_t_record) (oprs:instr_operands_t i.outs i.args) : list access_location =
   let InstrTypeRecord #outs #args #havoc_flags _ = i in
@@ -137,14 +163,14 @@ let rw_set_of_ins (i:ins) : rw_set =
   | Instr i oprs _ ->
     read_set i oprs, write_set i oprs
   | Push src t ->
-    [ALoc64 (OReg rRsp); ALoc64 src],
-    [ALoc64 (OReg rRsp); ALoc64 (OStack (MReg rRsp (-8), t))]
+    ALocReg rRsp :: both (access_locations_of_operand src),
+    [ALocReg rRsp; ALocStack]
   | Pop dst t ->
-    [ALoc64 (OReg rRsp); ALoc64 (OStack (MReg rRsp 0, t))],
-    [ALoc64 (OReg rRsp); ALoc64 dst]
+    ALocReg rRsp :: ALocStack :: fst (access_locations_of_operand dst),
+    ALocReg rRsp :: snd (access_locations_of_operand dst)
   | Alloc _
   | Dealloc _ ->
-    [ALoc64 (OReg rRsp)], [ALoc64 (OReg rRsp)]
+    [ALocReg rRsp], [ALocReg rRsp]
 
 /// We now need to define what it means for two different access
 /// locations to be "disjoint".
@@ -159,22 +185,14 @@ let disjoint_access_location (a1 a2:access_location) : pbool =
   | ALocCf, ALocCf -> ffalse "carry flag not disjoint from itself"
   | ALocOf, ALocOf -> ffalse "overflow flag not disjoint from itself"
   | ALocCf, _ | ALocOf, _ | _, ALocCf | _, ALocOf -> ttrue
-  | ALoc64 o1, ALoc64 o2 -> (
-      match o1, o2 with
-      | OConst _, _ | _, OConst _ -> ttrue
-      | OReg r1, OReg r2 -> (r1 <> r2) /- ("register " ^ print_reg_name r1 ^ " not disjoint from itself")
-      | _ ->
-        unimplemented "conservatively not disjoint ALoc64s"
-    )
-  | ALoc128 o1, ALoc128 o2 -> (
-      match o1, o2 with
-      | OReg128 r1, OReg128 r2 -> (r1 <> r2) /- ("register " ^ print_xmm r1 gcc ^ " not disjoint from itself")
-      | _ ->
-      unimplemented "conservatively not disjoint ALoc128s"
-    )
-  | ALoc64 o1, ALoc128 o2 | ALoc128 o1, ALoc64 o2 -> (
-      unimplemented "conservatively not disjoint ALoc64 & ALoc128"
-    )
+  | ALocMem, ALocMem -> ffalse "memory not disjoint from itself"
+  | ALocStack, ALocStack -> ffalse "stack not disjoint from itself"
+  | ALocMem, ALocStack | ALocStack, ALocMem -> ttrue
+  | ALocReg r1, ALocReg r2 ->
+    (r1 <> r2) /- ("register " ^ print_reg_name r1 ^ " not disjoint from itself")
+  | ALocXmm r1, ALocXmm r2 ->
+    (r1 <> r2) /- ("xmm-register " ^ print_reg_name r1 ^ " not disjoint from itself")
+  | ALocReg _, _ | ALocXmm _, _ | _, ALocReg _ | _, ALocXmm _ -> ttrue
 
 let lemma_disjoint_access_location_symmetric (a1 a2:access_location) :
   Lemma
