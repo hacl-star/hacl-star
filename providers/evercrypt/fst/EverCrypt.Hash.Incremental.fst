@@ -2,9 +2,8 @@ module EverCrypt.Hash.Incremental
 
 open FStar.Mul
 
-/// An alternative API on top of EverCrypt.Hash that holds an internal buffer.
-/// No state abstraction for now, can be added later on as we wish.
-
+// Watch out: keep the module declarations in sync between fsti and fst
+// (otherwise interleaving issues may bite).
 module B = LowStar.Buffer
 module S = FStar.Seq
 module ST = FStar.HyperStack.ST
@@ -51,8 +50,8 @@ let create_in a r =
   assert (
     let blocks, rest = split_at_last a S.empty in
     S.equal blocks S.empty /\ S.equal rest S.empty /\
-    S.equal (Hash.compress_many (Hash.acc0 #a) S.empty) (Hash.acc0 #a));
-  assert (S.equal (Hash.repr hash_state h3) (Hash.acc0 #a));
+    Spec.Hash.(S.equal (update_multi a (init a) S.empty) (init a)));
+  assert (S.equal (Hash.repr hash_state h3) (Spec.Hash.init a));
   assert (hashes h3 s S.empty);
   assert (freeable s h3);
   assert (Hash.fresh_loc (footprint s h3) h0 h3);
@@ -361,29 +360,30 @@ let update_round a s prev data len =
   let h2 = ST.get () in
   // JP: no clue why I had to go through all these manual steps.
   (
+    let open Spec.Hash in
     let blocks, rest = split_at_last a (G.reveal prev) in
     assert (S.equal (Hash.repr hash_state h2)
-      (Hash.compress_many (Hash.repr hash_state h1) (B.as_seq h1 buf0)));
+      (update_multi a (Hash.repr hash_state h1) (B.as_seq h1 buf0)));
     assert (S.equal (B.as_seq h0 buf1) (B.as_seq h1 buf1));
     assert (S.equal rest (B.as_seq h1 buf1));
     assert (S.equal (B.as_seq h0 data) (B.as_seq h1 data));
     assert (S.equal (B.as_seq h1 buf0) (S.append (B.as_seq h1 buf1) (B.as_seq h1 data)));
     assert (S.equal (Hash.repr hash_state h2)
-      (Hash.compress_many (Hash.acc0 #a)
+      (update_multi a (Spec.Hash.init a)
         (S.append blocks (B.as_seq h1 buf0))));
     assert (S.equal (Hash.repr hash_state h2)
-      (Hash.compress_many (Hash.acc0 #a)
+      (update_multi a (Spec.Hash.init a)
         (S.append blocks (S.append (B.as_seq h1 buf1) (B.as_seq h1 data)))));
     S.append_assoc blocks (B.as_seq h1 buf1) (B.as_seq h1 data);
     assert (S.equal (Hash.repr hash_state h2)
-      (Hash.compress_many (Hash.acc0 #a)
+      (update_multi a (Spec.Hash.init a)
         (S.append (S.append blocks (B.as_seq h1 buf1)) (B.as_seq h1 data))));
     assert (S.equal (S.append blocks rest) (G.reveal prev));
     assert (S.equal (Hash.repr hash_state h2)
-      (Hash.compress_many (Hash.acc0 #a)
+      (update_multi a (Spec.Hash.init a)
         (S.append (G.reveal prev) (B.as_seq h1 data))));
     assert (S.equal (Hash.repr hash_state h2)
-      (Hash.compress_many (Hash.acc0 #a)
+      (update_multi a (Spec.Hash.init a)
         (S.append (G.reveal prev) (B.as_seq h0 data))));
     split_at_last_block a (G.reveal prev) (B.as_seq h0 data);
     let blocks', rest' = split_at_last a (S.append (G.reveal prev) (B.as_seq h0 data)) in
