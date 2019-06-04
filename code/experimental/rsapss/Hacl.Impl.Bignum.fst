@@ -1,5 +1,6 @@
 module Hacl.Impl.Bignum
 
+include Hacl.Spec.Bignum
 include Hacl.Impl.Bignum.Core
 include Hacl.Impl.Bignum.Convert
 include Hacl.Impl.Bignum.Comparison
