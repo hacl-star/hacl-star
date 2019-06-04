@@ -150,3 +150,22 @@ let eval_access_location (a:access_location) (s:machine_state) : access_location
   | ALocXmm r -> eval_xmm r s
   | ALocCf -> cf s.ms_flags
   | ALocOf -> overflow s.ms_flags
+
+let update_access_location a v s =
+  match a with
+  | ALocMem ->
+    let v = coerce v in
+    { s with ms_mem = fst v ; ms_memTaint = snd v }
+  | ALocStack ->
+    let v = coerce v in
+    { s with ms_stack = fst v ; ms_stackTaint = snd v }
+  | ALocReg r ->
+    update_reg' r v s
+  | ALocXmm r ->
+    update_xmm' r v s
+  | ALocCf ->
+    { s with ms_flags = update_cf' s.ms_flags v }
+  | ALocOf ->
+    { s with ms_flags = update_of' s.ms_flags v }
+
+let lemma_access_locations_truly_disjoint a a_change v s = ()
