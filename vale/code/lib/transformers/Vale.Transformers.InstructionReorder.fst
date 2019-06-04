@@ -651,27 +651,12 @@ let rec unchanged_at (locs:list location) (s1 s2:machine_state) : GTot Type0 =
       (unchanged_at xs s1 s2)
     )
 
-let rec unchanged_at_extended (locs:list location) (s1 s2:machine_state) : GTot Type0 =
-  (forall a. {:pattern (eval_location a s1) \/ (eval_location a s2)} (
-      (not !!(disjoint_location_from_locations a locs)) ==> (
-        (eval_location a s1 == eval_location a s2))))
-
-let rec lemma_unchanged_at_extended_implies_unchanged_at locs s1 s2 :
-  Lemma
-    (requires (unchanged_at_extended locs s1 s2))
-    (ensures (unchanged_at locs s1 s2)) =
-  admit ();
-  match locs with
-  | [] -> ()
-  | x :: xs ->
-    lemma_unchanged_at_extended_implies_unchanged_at xs s1 s2
-
 let bounded_effects (reads writes:list location) (f:st unit) : GTot Type0 =
   (only_affects writes f) /\
   (
-    forall s1 s2. {:pattern unchanged_at_extended writes (run f s1) (run f s2)} (
+    forall s1 s2. {:pattern unchanged_at writes (run f s1) (run f s2)} (
       unchanged_at reads s1 s2 ==>
-      (unchanged_at_extended writes (run f s1) (run f s2) /\
+      (unchanged_at writes (run f s1) (run f s2) /\
        (run f s1).ms_ok = (run f s2).ms_ok)
     )
   )
@@ -738,11 +723,10 @@ let rec lemma_disjoint_location_from_locations_mem
 let rec lemma_unchanged_at_mem (as:list location) (a:location) (s1 s2:machine_state) :
   Lemma
     (requires (
-        (unchanged_at_extended as s1 s2) /\
+        (unchanged_at as s1 s2) /\
         (L.mem a as)))
     (ensures (
         (eval_location a s1 == eval_location a s2))) =
-  admit ();
   match as with
   | [_] -> ()
   | x :: xs ->
@@ -765,12 +749,13 @@ let lemma_unchanged_at_combine (a1 a2:list location) (sa1 sa2 sb1 sb2:machine_st
     (requires (
         !!(disjoint_locations a1 a2) /\
         (unchanged_upon_both_non_disjoint a1 a2 sa1 sa2) /\
-        (unchanged_at_extended a1 sa1 sb2) /\
+        (unchanged_at a1 sa1 sb2) /\
         (unchanged_except a2 sa1 sb1) /\
-        (unchanged_at_extended a2 sa2 sb1) /\
+        (unchanged_at a2 sa2 sb1) /\
         (unchanged_except a1 sa2 sb2)))
     (ensures (
-        (unchanged_at_extended (a1 `L.append` a2) sb1 sb2))) =
+        (unchanged_at (a1 `L.append` a2) sb1 sb2))) =
+  admit ();
   let aux a :
     Lemma
       (requires (not !!(disjoint_location_from_locations a (a1 `L.append` a2))))
@@ -787,13 +772,14 @@ let lemma_unchanged_except_same_transitive (as:list location) (s1 s2 s3:machine_
     (ensures (
         (unchanged_except as s1 s3))) = ()
 
-let rec lemma_unchanged_at_extended_and_except (as:list location) (s1 s2:machine_state) :
+let rec lemma_unchanged_at_and_except (as:list location) (s1 s2:machine_state) :
   Lemma
     (requires (
-        (unchanged_at_extended as s1 s2) /\
+        (unchanged_at as s1 s2) /\
         (unchanged_except as s1 s2)))
     (ensures (
-        (unchanged_except [] s1 s2))) = ()
+        (unchanged_except [] s1 s2))) =
+  admit ()
 
 let lemma_equiv_states_when_except_none (s1 s2:machine_state) (ok:bool) :
   Lemma
@@ -809,7 +795,6 @@ let rec lemma_mem_not_disjoint (a:location) (as1 as2:list location) :
     (requires (L.mem a as1 /\ L.mem a as2))
     (ensures (
         (not !!(disjoint_locations as1 as2)))) =
-  admit ();
   match as1, as2 with
   | [_], [_] -> ()
   | [_], y :: ys ->
@@ -827,7 +812,10 @@ let rec lemma_mem_not_disjoint (a:location) (as1 as2:list location) :
       lemma_mem_not_disjoint a xs as2
     )
 
-(* WARN XXX UNSOUND: This is not true!
+(*
+   REVIEW: With the modifications, we may no longer need this lemma
+
+   WARN XXX UNSOUND: This is not true!
 
    Counterexample to this lemma
 
@@ -883,8 +871,8 @@ let lemma_commute (f1 f2:st unit) (r1 w1 r2 w2:list location) (s:machine_state) 
   let is21 = run f1 is2 in
   lemma_disjoint_implies_unchanged_at r1 w2 s is2;
   lemma_disjoint_implies_unchanged_at r2 w1 s is1;
-  assert (unchanged_at_extended w1 is1 is21);
-  assert (unchanged_at_extended w2 is2 is12);
+  assert (unchanged_at w1 is1 is21);
+  assert (unchanged_at w2 is2 is12);
   assert (unchanged_except w2 s is2);
   assert (unchanged_except w1 s is1);
   assert (unchanged_except w2 is1 is12);
@@ -899,7 +887,7 @@ let lemma_commute (f1 f2:st unit) (r1 w1 r2 w2:list location) (s:machine_state) 
   lemma_disjoint_conservative w1 w2 s is1 is2;
   assert (unchanged_upon_both_non_disjoint w1 w2 is1 is2);
   lemma_unchanged_at_combine w1 w2 is1 is2 is12 is21;
-  lemma_unchanged_at_extended_and_except (w1 `L.append` w2) is12 is21;
+  lemma_unchanged_at_and_except (w1 `L.append` w2) is12 is21;
   assert (unchanged_except [] is12 is21);
   assert (s21.ms_ok = s12.ms_ok);
   assert (is12.ms_stack.initial_rsp = is21.ms_stack.initial_rsp);
@@ -1038,7 +1026,7 @@ let lemma_untainted_eval_ins_unchanged_behavior (i:ins{Instr? i}) (s1 s2:machine
     (ensures (
         let r, w = rw_set_of_ins i in
         let f = untainted_eval_ins i in
-        (unchanged_at_extended w (run f s1) (run f s2)) /\
+        (unchanged_at w (run f s1) (run f s2)) /\
         (run f s1).ms_ok = (run f s2).ms_ok)) =
   admit ()
 
@@ -1160,8 +1148,6 @@ let lemma_code_exchange (c1 c2 : code) (fuel:nat) (s1 s2 : machine_state) :
     assert_norm (equiv_states s2' s24);
     lemma_instruction_exchange i1 i2 s1 s2;
     assert (equiv_states s14 s24);
-    sanity_check_equiv_states s1' s14 s24;
-    sanity_check_equiv_states s1' s24 s2';
     assert (equiv_states s1' s2')
   | _ -> ()
 
