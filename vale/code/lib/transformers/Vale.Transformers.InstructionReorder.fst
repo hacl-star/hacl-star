@@ -1209,6 +1209,81 @@ let lemma_equiv_states_when_except_none (s1 s2:machine_state) (ok:bool) :
   assert (s1.ms_stackTaint == s2.ms_stackTaint);
   ()
 
+let rec lemma_disjoint_inversion_flags (a:access_location{ALocCf? a \/ ALocOf? a}) (as:list access_location) :
+  Lemma
+    (requires (not !!(disjoint_access_location_from_locations a as)))
+    (ensures (L.mem a as)) =
+  match as with
+  | [_] -> ()
+  | x :: xs ->
+    if a = x then () else (
+      lemma_disjoint_inversion_flags a xs
+    )
+
+let always_constant (a:access_location) =
+  (forall s1 s2. {:pattern (eval_access_location a s1); (eval_access_location a s2)} (
+      (eval_access_location a s1 == eval_access_location a s2)))
+
+let lemma_same_not_disjoint (a:access_location) :
+  Lemma
+    (ensures (
+        (not !!(disjoint_access_location a a) \/
+        (always_constant a)))) = ()
+
+let rec lemma_mem_not_disjoint (a:access_location) (as1 as2:list access_location) :
+  Lemma
+    (requires (L.mem a as1 /\ L.mem a as2))
+    (ensures (
+        (not !!(disjoint_access_locations as1 as2 "")) \/
+        (always_constant a))) =
+  FStar.Classical.forall_intro (lemma_disjoint_access_locations_reason as1 as2 "");
+  lemma_same_not_disjoint a;
+  match as1, as2 with
+  | [_], [_] -> ()
+  | [_], y :: ys ->
+    if a = y then () else (
+      lemma_mem_not_disjoint a as1 ys
+    )
+  | x :: xs, y :: ys ->
+    if a = x then (
+      if a = y then () else (
+        lemma_mem_not_disjoint a as1 ys;
+        lemma_disjoint_access_locations_symmetric as1 as2 "";
+        lemma_disjoint_access_locations_symmetric as1 ys ""
+      )
+    ) else (
+      lemma_mem_not_disjoint a xs as2
+    )
+
+let lemma_disjoint_conservative
+    (a1 a2:list access_location)
+    (s s1 s2:machine_state) :
+  Lemma
+    (requires (
+        (unchanged_except a1 s s1) /\
+        (unchanged_except a2 s s2) /\
+        !!(disjoint_access_locations a1 a2 "")))
+    (ensures (
+        (unchanged_upon_both_non_disjoint a1 a2 s1 s2))) =
+  let aux (a:access_location) :
+    Lemma
+      (requires (
+          (not !!(disjoint_access_location_from_locations a a1)) /\
+          (not !!(disjoint_access_location_from_locations a a2))))
+      (ensures (
+          (eval_access_location a s1 == eval_access_location a s2))) =
+    match a with
+    | ALoc64 _ ->
+      admit ()
+    | ALoc128 _ ->
+      admit ()
+    | ALocCf | ALocOf ->
+      lemma_disjoint_inversion_flags a a1;
+      lemma_disjoint_inversion_flags a a2;
+      lemma_mem_not_disjoint a a1 a2
+  in
+  FStar.Classical.forall_intro (FStar.Classical.move_requires aux)
+
 let lemma_commute (f1 f2:st unit) (r1 w1 r2 w2:list access_location) (s:machine_state) :
   Lemma
     (requires (
@@ -1245,7 +1320,8 @@ let lemma_commute (f1 f2:st unit) (r1 w1 r2 w2:list access_location) (s:machine_
   lemma_unchanged_except_append_symmetric w1 w2 s is12;
   lemma_unchanged_except_append_symmetric w2 w1 s is21;
   lemma_unchanged_except_same_transitive (w1 `L.append` w2) s is12 is21;
-  assume (unchanged_upon_both_non_disjoint w1 w2 is1 is2);
+  lemma_disjoint_conservative w1 w2 s is1 is2;
+  assert (unchanged_upon_both_non_disjoint w1 w2 is1 is2);
   lemma_unchanged_at_combine w1 w2 is1 is2 is12 is21;
   lemma_unchanged_at_extended_and_except (w1 `L.append` w2) is12 is21;
   assert (unchanged_except [] is12 is21);
