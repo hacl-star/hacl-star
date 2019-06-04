@@ -31,10 +31,11 @@ val rw_set_of_ins : i:ins -> rw_set
 val disjoint_location : location -> location -> pbool
 
 (** Disjointness is the same as syntactic equality on the locations. *)
-val lemma_disjoint_location :
+val auto_lemma_disjoint_location :
   a1:location -> a2:location ->
   Lemma
     (ensures (!!(disjoint_location a1 a2) = (a1 <> a2)))
+    [SMTPat (!!(disjoint_location a1 a2))]
 
 (** Disjointness of a [location] from [locations] *)
 let disjoint_location_from_locations (a:location) (l:locations) : pbool =
@@ -59,8 +60,6 @@ let rec lemma_disjoint_locations_symmetric l1 l2 :
   | [], x :: xs | x :: xs, [] ->
     lemma_disjoint_locations_symmetric xs []
   | x :: xs, y :: ys ->
-    lemma_disjoint_location x y;
-    lemma_disjoint_location y x;
     lemma_disjoint_locations_symmetric l1 ys;
     lemma_disjoint_locations_symmetric xs l2;
     lemma_disjoint_locations_symmetric xs ys
