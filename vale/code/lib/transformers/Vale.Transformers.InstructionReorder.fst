@@ -1255,7 +1255,23 @@ let rec lemma_mem_not_disjoint (a:access_location) (as1 as2:list access_location
       lemma_mem_not_disjoint a xs as2
     )
 
-(* WARN: This might not be provable / true ?! *)
+(* WARN XXX UNSOUND: This is not true!
+
+   Counterexample to this lemma
+
+     Consider the following:
+       a1 = [ALoc64 (OMem (MConst 0))]
+       a2 = [ALoc64 (OMem (MConst 8))]
+       a = ALoc64 (OMem (MConst 4))
+
+     (Under a stricter notion of disjoint--)
+
+     Now a is not disjoint from a1, nor is it disjoint from
+     a2. However, a1 and a2 are disjoint. Thus
+     [unchanged_upon_both_non_disjoint] would require that [a] must be
+     the same in both worlds, except that it is not, and thus this
+     lemma is false.
+*)
 let lemma_disjoint_conservative
     (a1 a2:list access_location)
     (s s1 s2:machine_state) :
