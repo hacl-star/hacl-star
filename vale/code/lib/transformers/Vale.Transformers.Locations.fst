@@ -131,7 +131,7 @@ let disjoint_location a1 a2 =
   | ALocReg _, _ | ALocXmm _, _ | _, ALocReg _ | _, ALocXmm _ -> ttrue
 
 (* See fsti *)
-let lemma_disjoint_location a1 a2 = ()
+let auto_lemma_disjoint_location a1 a2 = ()
 
 (* See fsti *)
 let location_val_t a =
