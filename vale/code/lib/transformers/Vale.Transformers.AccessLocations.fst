@@ -13,6 +13,7 @@ open Vale.Transformers.PossiblyMonad
 
 module L = FStar.List.Tot
 
+(* See fsti *)
 type access_location : eqtype =
   | ALocMem : access_location
   | ALocStack: access_location
@@ -34,7 +35,7 @@ let access_locations_of_operand (o:operand) : rw_set =
   | OMem (m, _) -> access_locations_of_maddr m, [ALocMem]
   | OStack (m, _) -> access_locations_of_maddr m, [ALocStack]
 
-let access_locations_of_operand128 (o:operand128) : access_locations & access_locations =
+let access_locations_of_operand128 (o:operand128) : rw_set =
   match o with
   | OReg128 r -> [ALocXmm r], [ALocXmm r]
   | OMem128 (m, _) -> access_locations_of_maddr m, [ALocMem]
@@ -101,7 +102,8 @@ let write_set (i:instr_t_record) (oprs:instr_operands_t i.outs i.args) : list ac
   | HavocFlags -> ALocCf :: ALocOf :: ws
   | PreserveFlags -> ws
 
-let rw_set_of_ins (i:ins) : rw_set =
+(* See fsti *)
+let rw_set_of_ins i =
   match i with
   | Instr i oprs _ ->
     read_set i oprs, write_set i oprs
@@ -115,7 +117,8 @@ let rw_set_of_ins (i:ins) : rw_set =
   | Dealloc _ ->
     [ALocReg rRsp], [ALocReg rRsp]
 
-let disjoint_access_location (a1 a2:access_location) : pbool =
+(* See fsti *)
+let disjoint_access_location a1 a2 =
   match a1, a2 with
   | ALocCf, ALocCf -> ffalse "carry flag not disjoint from itself"
   | ALocOf, ALocOf -> ffalse "overflow flag not disjoint from itself"
@@ -129,11 +132,14 @@ let disjoint_access_location (a1 a2:access_location) : pbool =
     (r1 <> r2) /- ("xmm-register " ^ print_reg_name r1 ^ " not disjoint from itself")
   | ALocReg _, _ | ALocXmm _, _ | _, ALocReg _ | _, ALocXmm _ -> ttrue
 
+(* See fsti *)
 let lemma_disjoint_access_location a1 a2 = ()
 
+(* See fsti *)
 let lemma_disjoint_access_location_symmetric a1 a2 = ()
 
-let access_location_val_t (a:access_location) : Type0 =
+(* See fsti *)
+let access_location_val_t a =
   match a with
   | ALocMem -> heap & memTaint_t
   | ALocStack -> stack & memTaint_t
@@ -142,7 +148,8 @@ let access_location_val_t (a:access_location) : Type0 =
   | ALocCf -> bool
   | ALocOf -> bool
 
-let eval_access_location (a:access_location) (s:machine_state) : access_location_val_t a =
+(* See fsti *)
+let eval_access_location a s =
   match a with
   | ALocMem -> s.ms_mem, s.ms_memTaint
   | ALocStack -> s.ms_stack, s.ms_stackTaint
@@ -151,6 +158,7 @@ let eval_access_location (a:access_location) (s:machine_state) : access_location
   | ALocCf -> cf s.ms_flags
   | ALocOf -> overflow s.ms_flags
 
+(* See fsti *)
 let update_access_location a v s =
   match a with
   | ALocMem ->
@@ -168,4 +176,5 @@ let update_access_location a v s =
   | ALocOf ->
     { s with ms_flags = update_of' s.ms_flags v }
 
+(* See fsti *)
 let lemma_access_locations_truly_disjoint a a_change v s = ()
