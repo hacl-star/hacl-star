@@ -28,30 +28,30 @@ let locations_of_maddr (m:maddr) : locations =
   | MReg r _ -> [ALocReg r]
   | MIndex b _ i _ -> [ALocReg b; ALocReg i]
 
-let locations_of_operand (o:operand) : rw_set =
+let locations_of_operand (o:operand) : locations & locations =
   match o with
   | OConst _ -> [], []
   | OReg r -> [ALocReg r], [ALocReg r]
   | OMem (m, _) -> locations_of_maddr m, [ALocMem]
   | OStack (m, _) -> locations_of_maddr m, [ALocStack]
 
-let locations_of_operand128 (o:operand128) : rw_set =
+let locations_of_operand128 (o:operand128) : locations & locations =
   match o with
   | OReg128 r -> [ALocXmm r], [ALocXmm r]
   | OMem128 (m, _) -> locations_of_maddr m, [ALocMem]
   | OStack128 (m, _) -> locations_of_maddr m, [ALocStack]
 
 private
-let both (x: rw_set) =
+let both (x: locations & locations) =
   let a, b = x in
   a `L.append` b
 
-let locations_of_explicit (t:instr_operand_explicit) (i:instr_operand_t t) : rw_set =
+let locations_of_explicit (t:instr_operand_explicit) (i:instr_operand_t t) : locations & locations =
   match t with
   | IOp64 -> locations_of_operand i
   | IOpXmm -> locations_of_operand128 i
 
-let locations_of_implicit (t:instr_operand_implicit) : rw_set =
+let locations_of_implicit (t:instr_operand_implicit) : locations & locations =
   match t with
   | IOp64One i -> locations_of_operand i
   | IOpXmmOne i -> locations_of_operand128 i
