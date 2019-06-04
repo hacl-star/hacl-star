@@ -113,14 +113,6 @@ let equiv_states_ext (s1 s2 : machine_state) : GTot Type0 =
   (Map.equal s1.ms_stackTaint s2.ms_stackTaint) /\
   (equiv_states s1 s2)
 
-private abstract
-let sanity_check_equiv_states (s1 s2 s3 : machine_state) :
-  Lemma
-    (ensures (
-        (equiv_states s1 s1) /\
-        (equiv_states s1 s2 ==> equiv_states s2 s1) /\
-        (equiv_states s1 s2 /\ equiv_states s2 s3 ==> equiv_states s1 s3))) = ()
-
 (** Convenience wrapper around [equiv_states] *)
 unfold
 let equiv_ostates (s1 s2 : option machine_state) : GTot Type0 =
