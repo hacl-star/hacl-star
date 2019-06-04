@@ -1255,6 +1255,7 @@ let rec lemma_mem_not_disjoint (a:access_location) (as1 as2:list access_location
       lemma_mem_not_disjoint a xs as2
     )
 
+(* WARN: This might not be provable / true ?! *)
 let lemma_disjoint_conservative
     (a1 a2:list access_location)
     (s s1 s2:machine_state) :
@@ -1273,10 +1274,25 @@ let lemma_disjoint_conservative
       (ensures (
           (eval_access_location a s1 == eval_access_location a s2))) =
     match a with
-    | ALoc64 _ ->
-      admit ()
-    | ALoc128 _ ->
-      admit ()
+    | ALoc64 o -> (
+        match o with
+        | OConst _ -> ()
+        | OReg r ->
+          admit ()
+        | OMem m ->
+          admit ()
+        | OStack m ->
+          admit ()
+      )
+    | ALoc128 o -> (
+        match o with
+        | OReg128 r ->
+          admit ()
+        | OMem128 m ->
+          admit ()
+        | OStack128 m ->
+          admit ()
+      )
     | ALocCf | ALocOf ->
       lemma_disjoint_inversion_flags a a1;
       lemma_disjoint_inversion_flags a a2;
