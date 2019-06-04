@@ -70,3 +70,18 @@ val eval_access_location :
   a:access_location ->
   machine_state ->
   access_location_val_t a
+
+val update_access_location :
+  a:access_location ->
+  v:access_location_val_t a ->
+  machine_state ->
+  s:machine_state{eval_access_location a s == v}
+
+val lemma_access_locations_truly_disjoint :
+  a:access_location ->
+  a_change:access_location ->
+  v:access_location_val_t a_change ->
+  s:machine_state ->
+  Lemma
+    (requires (a <> a_change))
+    (ensures (eval_access_location a s == eval_access_location a (update_access_location a_change v s)))
