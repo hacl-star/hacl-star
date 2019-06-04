@@ -11,6 +11,7 @@ open Lib.Buffer
 
 open Hacl.Impl.Bignum.Convert
 open Hacl.Impl.Bignum.Core
+open Hacl.Spec.Bignum
 
 
 val max': a:size_t -> b:size_t -> size_t

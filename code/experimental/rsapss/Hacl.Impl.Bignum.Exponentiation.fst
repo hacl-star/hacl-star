@@ -17,6 +17,7 @@ open Hacl.Impl.Bignum.Division
 open Hacl.Impl.Bignum.Montgomery
 open Hacl.Impl.Bignum.Multiplication
 open Hacl.Impl.Bignum.Shift
+open Hacl.Spec.Bignum
 
 module ST = FStar.HyperStack.ST
 

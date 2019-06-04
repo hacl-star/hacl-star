@@ -11,6 +11,7 @@ open Lib.Loops
 open Hacl.Impl.Bignum.Core
 open Hacl.Impl.Bignum.Comparison
 open Hacl.Impl.Bignum.Addition
+open Hacl.Spec.Bignum
 
 
 

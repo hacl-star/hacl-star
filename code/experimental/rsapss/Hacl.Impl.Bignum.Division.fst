@@ -16,6 +16,7 @@ open Hacl.Impl.Bignum.Shift
 open Hacl.Impl.Bignum.Comparison
 open Hacl.Impl.Bignum.Multiplication
 open Hacl.Impl.Bignum.Addition
+open Hacl.Spec.Bignum
 
 
 #reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"

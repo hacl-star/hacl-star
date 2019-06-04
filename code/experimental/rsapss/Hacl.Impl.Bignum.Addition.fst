@@ -11,6 +11,7 @@ open Lib.Buffer
 
 open Hacl.Impl.Bignum.Core
 open Hacl.Impl.Bignum.Convert
+open Hacl.Spec.Bignum
 
 module ST = FStar.HyperStack.ST
 
