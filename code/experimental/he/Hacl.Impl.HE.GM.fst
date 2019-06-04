@@ -137,3 +137,25 @@ val decrypt:
 let decrypt #nLen p p_min_one p_min_one_half c =
   let v = leg_symbol p p_min_one p_min_one_half c in
   if v = 1l then false else true
+
+val hom_xor:
+     #nLen:bn_len_s
+  -> n:lbignum nLen
+  -> c1:lbignum nLen
+  -> c2:lbignum nLen
+  -> res:lbignum nLen
+  -> Stack unit
+    (requires fun h ->
+       live h n /\ live h c1 /\ live h c2 /\ live h res /\
+       all_disjoint [loc n; loc c1; loc c2; loc res] /\
+       (let n' = as_snat h n in
+        let c1' = as_snat h c1 in
+        let c2' = as_snat h c2 in
+        n' > 1 /\
+        c1' < n' /\ c2' < n' /\ c1' <> 0 /\ c2' <> 0 /\
+        (let c1':fe n' = c1' in
+         let c2':fe n' = c2' in
+         c1' *% c2' <> 0)))
+    (ensures fun h0 b h1 -> modifies1 res h0 h1 /\
+        S.hom_xor #(as_snat h0 n) (as_snat h0 c1) (as_snat h0 c2) = as_snat h1 res)
+let hom_xor #nLen n c1 c2 res = bn_modular_mul n c1 c2 res
