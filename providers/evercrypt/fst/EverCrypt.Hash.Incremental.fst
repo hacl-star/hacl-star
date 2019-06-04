@@ -10,15 +10,97 @@ module ST = FStar.HyperStack.ST
 module HS = FStar.HyperStack
 module G = FStar.Ghost
 module U32 = FStar.UInt32
+module U64 = FStar.UInt64
 
 module Hash = EverCrypt.Hash
 
 open FStar.HyperStack.ST
 open Spec.Hash.Definitions
 
-#reset-options "--max_fuel 0 --max_ifuel 0"
+#set-options "--max_fuel 0 --max_ifuel 0"
 
 let _: squash (inversion Hash.alg) = allow_inversion Hash.alg
+
+/// State
+
+noeq
+type state_s a =
+| State:
+    hash_state: Hash.state a ->
+    buf: B.buffer UInt8.t { B.length buf = block_length a } ->
+    total_len: UInt64.t ->
+    state_s a
+
+let freeable (#a: alg) (h: HS.mem) (p: state a) =
+  B.freeable p /\ (
+  let s = B.deref h p in
+  let State hash_state buf _ = s in
+  B.freeable buf /\ Hash.freeable h hash_state)
+
+let footprint_s #a h (s: state_s a) =
+  let State hash_state buf_ _ = s in
+  B.(loc_union (loc_addr_of_buffer buf_) (Hash.footprint hash_state h))
+
+let invariant_s #a h s =
+  let State hash_state buf_ _ = s in
+  B.live h buf_ /\ Hash.invariant hash_state h /\
+  B.(loc_disjoint (loc_buffer buf_) (Hash.footprint hash_state h))
+
+#push-options "--max_ifuel 1"
+let invariant_loc_in_footprint #a s m =
+  ()
+#pop-options
+
+/// Hashes
+
+noextract
+let split_at_last (a: Hash.alg) (b: bytes):
+  Pure (bytes_blocks a & bytes)
+    (requires True)
+    (ensures (fun (blocks, rest) ->
+      S.length rest < block_length a /\
+      S.length rest = S.length b % block_length a /\
+      S.equal (S.append blocks rest) b /\
+      S.length blocks % block_length a = 0))
+=
+  let n = S.length b / block_length a in
+  let blocks, rest = S.split b (n * block_length a) in
+  assert (S.length blocks = n * block_length a);
+  assert ((n * block_length a) % block_length a = 0);
+  assert (S.length rest = S.length b - n * block_length a);
+  assert (S.length b - n * block_length a < block_length a);
+  blocks, rest
+
+let hashes (#a: Hash.alg) (h: HS.mem) (s: state a) (b: bytes) =
+  let State hash_state buf_ total_len = B.deref h s in
+  let blocks, rest = split_at_last a b in
+  S.length blocks + S.length rest = U64.v total_len /\
+  S.length b = U64.v total_len /\
+  U64.v total_len < pow2 61 /\
+  S.equal (Hash.repr hash_state h) (Spec.Hash.update_multi a (Spec.Hash.init a) blocks) /\
+  S.equal (S.slice (B.as_seq h buf_) 0 (U64.v total_len % block_length a)) rest
+
+let hash_fits #a h s b =
+  assert_norm (pow2 61 < pow2 125);
+  ()
+
+/// Framing
+
+#push-options "--max_ifuel 1"
+
+let frame_invariant #a l s h0 h1 =
+  let hash_state = State?.hash_state (B.deref h0 s) in
+  Hash.frame_invariant #a l hash_state h0 h1;
+  Hash.frame_invariant_implies_footprint_preservation #a l hash_state h0 h1
+
+let frame_hashes #a l s b h0 h1 =
+  let hash_state = State?.hash_state (B.deref h0 s) in
+  Hash.frame_invariant #a l hash_state h0 h1
+
+let frame_freeable #a l s h0 h1 =
+  ()
+
+#reset-options "--max_fuel 0 --max_ifuel 0"
 
 let split_at_last_empty (a: Hash.alg): Lemma
   (ensures (
