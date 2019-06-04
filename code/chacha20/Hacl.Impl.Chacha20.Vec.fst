@@ -13,7 +13,7 @@ module Spec = Hacl.Spec.Chacha20.Vec
 module Loop = Lib.LoopCombinators
 
 #set-options "--z3rlimit 100"
-#set-options "--debug Hacl.Impl.Chacha20.Vec --debug_level ExtractNorm"
+//#set-options "--debug Hacl.Impl.Chacha20.Vec --debug_level ExtractNorm"
 
 inline_for_extraction
 val rounds: #w:lanes -> st:state w -> ST unit

@@ -4,8 +4,8 @@ HACL_HOME    ?= ../../..
 
 OUTPUT_DIR    = .output
 HINT_DIR      = .hints
-GENERATED_DIR = poly-c
-OUT_DIR	      = poly-c
+GENERATED_DIR ?= poly-c
+OUT_DIR	      ?= poly-c
 
 .PHONY: all test stage1 stage2 clean clean-c distclean
 
@@ -75,10 +75,9 @@ $(GENERATED_DIR)/Hacl_Poly1305_32.c: $(ALL_KRML_FILES) | .depend
 	$(KREMLIN) $(KREMLIN_TESTLIB) -skip-compilation \
 	-bundle 'Lib.*' \
 	-bundle 'Spec.\*' \
-	-bundle 'C=C.Endianness' \
 	-bundle 'Hacl.Poly1305_32=Hacl.Impl.*' \
-	-library 'C,FStar' \
-	-drop 'Lib.IntVector.Intrinsics,LowStar,Spec,Prims,Lib,C.Loops.*,Hacl.Spec.*,Hacl.Poly1305.Field32xN.Lemmas,Hacl.Poly1305_128,Hacl.Poly1305_256' \
+	-bundle 'FStar.*' \
+	-drop 'Lib.IntVector.Intrinsics,LowStar,Spec,Prims,Lib,C.Loops.*,C.*,C,FStar.*,Hacl.Spec.*,Hacl.Poly1305.Field32xN.Lemmas,Hacl.Poly1305_128,Hacl.Poly1305_256' \
 	-tmpdir $(GENERATED_DIR) \
 	$^
 
@@ -86,10 +85,9 @@ $(GENERATED_DIR)/Hacl_Poly1305_128.c: $(ALL_KRML_FILES) | .depend
 	$(KREMLIN) $(KREMLIN_TESTLIB) -skip-compilation \
 	-bundle 'Lib.*' \
 	-bundle 'Spec.\*' \
-	-bundle 'C=C.Endianness' \
 	-bundle 'Hacl.Poly1305_128=Hacl.Impl.*' \
-	-library 'C,FStar' \
-	-drop 'Lib.IntVector.Intrinsics,LowStar,Spec,Prims,Lib,C.Loops.*,Hacl.Spec.*,Hacl.Poly1305.Field32xN.Lemmas,Hacl.Poly1305_32,Hacl.Poly1305_256' \
+	-bundle 'FStar.*' \
+	-drop 'Lib.IntVector.Intrinsics,LowStar,Spec,Prims,Lib,C.Loops.*,C.*,C,FStar.*,Hacl.Spec.*,Hacl.Poly1305.Field32xN.Lemmas,Hacl.Poly1305_32,Hacl.Poly1305_256' \
 	-tmpdir $(GENERATED_DIR) \
 	$^
 
@@ -97,10 +95,9 @@ $(GENERATED_DIR)/Hacl_Poly1305_256.c: $(ALL_KRML_FILES) | .depend
 	$(KREMLIN) $(KREMLIN_TESTLIB) -skip-compilation \
 	-bundle 'Lib.*' \
 	-bundle 'Spec.\*' \
-	-bundle 'C=C.Endianness' \
 	-bundle 'Hacl.Poly1305_256=Hacl.Impl.*' \
-	-library 'C,FStar' \
-	-drop 'Lib.IntVector.Intrinsics,LowStar,Spec,Prims,Lib,C.Loops.*,Hacl.Spec.*,Hacl.Poly1305.Field32xN.Lemmas,Hacl.Poly1305_32,Hacl.Poly1305_128' \
+	-bundle 'FStar.*' \
+	-drop 'Lib.IntVector.Intrinsics,LowStar,Spec,Prims,Lib,C.Loops.*,C.*,C,FStar.*,Hacl.Spec.*,Hacl.Poly1305.Field32xN.Lemmas,Hacl.Poly1305_32,Hacl.Poly1305_128' \
 	-tmpdir $(GENERATED_DIR) \
 	$^
 
