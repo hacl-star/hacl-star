@@ -66,9 +66,11 @@ module L = FStar.List.Tot
 ///   single unit. This will still have the havoc problems, so we will
 ///   likely need to place some sort of intention bits for the flags.
 
-type access_location =
-  | ALoc64 : operand -> access_location
-  | ALoc128 : operand128 -> access_location
+type access_location : eqtype =
+  | ALocMem : access_location
+  | ALocStack: access_location
+  | ALocReg : reg -> access_location
+  | ALocXmm : xmm -> access_location
   | ALocCf : access_location
   | ALocOf : access_location
 
