@@ -136,9 +136,6 @@ let disjoint_access_location a1 a2 =
 let lemma_disjoint_access_location a1 a2 = ()
 
 (* See fsti *)
-let lemma_disjoint_access_location_symmetric a1 a2 = ()
-
-(* See fsti *)
 let access_location_val_t a =
   match a with
   | ALocMem -> heap & memTaint_t
