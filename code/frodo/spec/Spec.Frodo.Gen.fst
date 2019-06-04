@@ -163,7 +163,7 @@ let frodo_gen_matrix_aes n seedLen seed =
       let j = j * 8 in
       let tmp = tmp.[0] <- u16 i in
       let tmp = tmp.[1] <- u16 j in
-      let res_i = block_cipher key (uints_to_bytes_le tmp) in
+      let res_i = aes_encrypt_block AES128 key (uints_to_bytes_le tmp) in
       Loops.repeati 8
       (fun k res ->
         res.(i, j + k) <- uint_from_bytes_le (Seq.sub res_i (k * 2) 2)

@@ -28,7 +28,7 @@ val aes128_encrypt_block:
   -> Stack unit
     (requires fun h0 -> live h0 cipher /\ live h0 plain /\ live h0 expanded_key)
     (ensures  fun h0 _ h1 ->
-      let c = S.block_cipher (as_seq h0 expanded_key) (uints_to_bytes_le (as_seq h0 plain)) in
+      let c = S.aes_encrypt_block S.AES128 (as_seq h0 expanded_key) (uints_to_bytes_le (as_seq h0 plain)) in
       let c' = as_seq h1 cipher in
       modifies1 cipher h0 h1 /\
       (forall (i:nat{i < 8}). c'.[i] == uint_from_bytes_le (Lib.Sequence.sub c (i * 2) 2)))
