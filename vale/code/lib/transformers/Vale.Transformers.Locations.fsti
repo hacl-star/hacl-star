@@ -1,4 +1,4 @@
-module Vale.Transformers.AccessLocations
+module Vale.Transformers.Locations
 
 open Vale.X64.Bytes_Code_s
 open Vale.X64.Instruction_s
