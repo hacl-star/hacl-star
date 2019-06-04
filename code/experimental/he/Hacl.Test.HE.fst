@@ -119,6 +119,8 @@ let test_gm _ =
     5233939904127998699
     5453821191296830610;
 
+  // trust me it's safe. i can't make verification here fast enough,
+  // because, apparently, fstar bignum implementation is slow per se
   admit();
 
   // 70

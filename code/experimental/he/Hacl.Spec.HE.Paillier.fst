@@ -6,7 +6,7 @@ open FStar.Math.Lemmas
 open FStar.Classical
 open FStar.Squash
 
-open Hacl.Spec.HE.Common
+open Lib.Math.Algebra
 
 
 (* Internals *)

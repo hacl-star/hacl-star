@@ -159,12 +159,12 @@ let leg_symbol_mul2 p a b =
 type secret =
   | Secret: p:prm
          -> q:prm{q <> p}
-         -> y:fe (p * q){is_nonsqr (to_fe #p y) /\ is_nonsqr (to_fe #q y)}
+         -> y:fe (p * q){is_nonsqr (to_fe #p y) /\ is_nonsqr (to_fe #q y) /\ y % p <> 0 /\ y <> 0}
          -> secret
 
 type public =
   | Public: n:comp
-         -> y:fe n{is_nonsqr y}
+         -> y:fe n{is_nonsqr y /\ y <> 0}
          -> public
 
 val s2p: secret -> public
@@ -206,7 +206,13 @@ let decrypt_minimal p c =
 val decrypt: s:secret -> c:ciphertext (Public?.n (s2p s)) -> m:bool
 let decrypt s c = decrypt_minimal (Secret?.p s) c
 
+(* Homomorphic property *)
+
+val hom_xor: #n:big -> c1:ciphertext n -> c2:ciphertext n{c1 *% c2 <> 0} -> c3:ciphertext n
+let hom_xor #n c1 c2 = c1 *% c2
+
 (* Correctness *)
+
 
 val sqr_mod_p_is_sqr: p:prm -> q:prm -> r:fe (p*q){(r * r) % p <> 0} -> Lemma
   (leg_symbol (sqr r) p = 1)
@@ -223,58 +229,125 @@ let sqr_mod_p_is_sqr p q r =
   assert (leg_symbol (sqr r) p = leg_symbol (sqr r') p);
   leg_of_fe_sqr r'
 
+val enc_dec_id1:
+     s:secret
+  -> c:ciphertext (Public?.n (s2p s))
+  -> Lemma
+  (requires (is_sqr c))
+  (ensures (decrypt s c = false))
+let enc_dec_id1 s c =
+  sq_mul_comp (Secret?.p s) (Secret?.q s) c;
+  is_leg_symbol_raw (Secret?.p s) c
+
+val enc_dec_id2:
+     s:secret
+  -> a:fe (Public?.n (s2p s)){is_sqr a /\ a > 0}
+  -> y:fe (Public?.n (s2p s)){is_nonsqr (to_fe #(Secret?.p s) y) /\ y > 0}
+  -> Lemma
+  (requires (a *% y <> 0))
+  (ensures (decrypt s (a *% y) = true))
+let enc_dec_id2 s a y =
+  let p = Secret?.p s in
+  let q = Secret?.q s in
+  nat_times_nat_is_nat a y;
+  leg_symbol_modulo (a * y) p;
+
+  assert (leg_symbol ((a*y)%p) p = leg_symbol (a*y) p);
+  leg_symbol_modulo a p;
+  sq_mul_comp p q a;
+  is_leg_symbol_raw p a;
+
+  assert (leg_symbol a p = 1);
+
+  leg_symbol_mul2 p a y;
+
+  assert (leg_symbol (a * y) p = leg_symbol y p);
+
+  is_leg_symbol_raw p y;
+  assert (leg_symbol y p = -1);
+
+  assert (leg_symbol (a * y) p = -1);
+
+  modulo_modulo_lemma (a*y) p q;
+  assert (leg_symbol (a *% y) p = -1)
+
+
 val enc_dec_id:
      s:secret
   -> r:fe (Public?.n (s2p s)){sqr r <> 0 /\ sqr r *% (Secret?.y s) <> 0}
   -> m:bool
   -> Lemma
+  // All these values are public, and p divides them with negligible prob
+  // though how to express it better?
+  (requires (let p = Secret?.p s in
+             (encrypt (s2p s) r m) % p <> 0 /\
+             (r * r) % p <> 0))
   (ensures (decrypt s (encrypt (s2p s) r m) = m))
 let enc_dec_id sec r m =
   let pub = s2p sec in
-  let p = Secret?.p sec in
-  let q = Secret?.q sec in
   let n = Public?.n pub in
   let y: fe n = Public?.y pub in
   let c: ciphertext n = encrypt pub r m in
 
-  let c': fe p = to_fe #p c in
+  if m then enc_dec_id2 sec (sqr r) y else enc_dec_id1 sec c
 
-  // All these values are public, and p divides them with negligible prob
-  // though how to express it without assumes?
-  assume (c % p <> 0);
-  assume (r * r % p <> 0);
-  assume (y % p <> 0);
 
-  let m' = decrypt sec c in
+val xor: b1:bool -> b2:bool -> b3:bool
+let xor b1 b2 = match (b1,b2) with
+  | (false,false) -> false
+  | (false,true) -> true
+  | (true,false) -> true
+  | (true,true) -> false
 
-  let v = leg_symbol c' p in
+val bti: bool -> nat
+let bti b = if b then 1 else 0
 
-  let mul_one (a:int): Lemma (1 * a = a) = () in
+val enc_as_exp:
+     p:public
+  -> r:fe (Public?.n p){sqr r <> 0 /\ sqr r *% (Public?.y p) <> 0}
+  -> m:bool
+  -> Lemma (encrypt p r m = fexp (Public?.y p) (bti m) *% sqr r)
+let enc_as_exp p r m =
+  let y = Public?.y p in
+  let c = encrypt p r m in
+  if m then fexp_one1 y else (fexp_zero2 y; mul_one (sqr r))
 
-  let lemma_m_false (): Lemma (requires (not m)) (ensures (not m')) = begin
-    sq_mul_comp p q c;
-    is_leg_symbol c';
-    leg_symbol_modulo c p
-    end in
+val hom_xor_prop:
+     s:secret
+  -> r1:fe (Public?.n (s2p s)){sqr r1 <> 0 /\ sqr r1 *% (Secret?.y s) <> 0}
+  -> r2:fe (Public?.n (s2p s)){sqr r2 <> 0 /\ sqr r2 *% (Secret?.y s) <> 0}
+  -> m1:bool
+  -> m2:bool
+  -> Lemma
+  (requires (encrypt (s2p s) r1 m1 *% encrypt (s2p s) r2 m2 <> 0 /\
+             sqr (r1 *% r2) <> 0 /\
+             sqr (r1 *% r2) *% (Secret?.y s) <> 0 /\
+             ((r1 *% r2) * (r1 *% r2)) % (Secret?.p s) <> 0 /\
+             encrypt (s2p s) (r1 *% r2) (xor m1 m2) % (Secret?.p s) <> 0))
+  (ensures (let c1 = encrypt (s2p s) r1 m1 in
+            let c2 = encrypt (s2p s) r2 m2 in
+            decrypt s (hom_xor c1 c2) = xor m1 m2))
+let hom_xor_prop s r1 r2 m1 m2 =
+  let p = s2p s in
+  let y = Public?.y p in
+  let c1 = encrypt (s2p s) r1 m1 in
+  let c2 = encrypt (s2p s) r2 m2 in
+  enc_as_exp p r1 m1;
+  enc_as_exp p r2 m2;
+  mul4_assoc (fexp y (bti m1)) (sqr r1) (fexp y (bti m2)) (sqr r2);
+  mul4_assoc r1 r1 r2 r2;
+  fexp_mul1 y (bti m1) (bti m2);
+  assert (hom_xor c1 c2 = fexp y (bti m1 + bti m2) *% sqr (r1 *% r2));
 
-  let lemma_m_true (): Lemma (requires m) (ensures m') = begin
-    nat_times_nat_is_nat (sqr r) y;
-    leg_symbol_modulo (sqr r *% y) p;
-    modulo_modulo_lemma (sqr r * y) p q;
-    leg_symbol_modulo (sqr r * y) p;
-    leg_symbol_mul2 p (sqr r) y;
-    leg_symbol_modulo (sqr r) p;
-
-    sqr_mod_p_is_sqr p q r;
-
-    mul_one (leg_symbol y p);
-
-    assert (leg_symbol (sqr r *% y) p = leg_symbol y p);
-
-    is_leg_symbol #p (to_fe #p y);
-    leg_symbol_modulo y p;
-
-    assert (leg_symbol y p = -1)
-    end in
-
-  if m then lemma_m_true () else lemma_m_false ()
+  if (m1 && m2) then begin
+    assert (is_sqr (fexp y 2));
+    assert (is_sqr (sqr (r1 *% r2)));
+    assert (hom_xor c1 c2 = y *% y *% sqr (r1 *% r2));
+    mul4_assoc y y (r1 *% r2) (r1 *% r2);
+    assert (hom_xor c1 c2 = sqr (y *% r1 *% r2));
+    assert (is_sqr (hom_xor c1 c2));
+    enc_dec_id1 s (hom_xor c1 c2)
+  end else begin
+    assert (hom_xor c1 c2 = encrypt (s2p s) (r1 *% r2) (xor m1 m2));
+    enc_dec_id s (r1 *% r2) (xor m1 m2)
+  end

@@ -5,7 +5,7 @@ open FStar.IO
 open FStar.Mul
 open FStar.UInt
 
-open Hacl.Spec.HE.Common
+open Lib.Math.Algebra
 
 module GM = Hacl.Spec.HE.GM
 module P = Hacl.Spec.HE.Paillier
@@ -26,7 +26,7 @@ let print_bool b = print_string (if b then "true" else "false")
 val run_test_gm:
      p:prm
   -> q:prm{q <> p}
-  -> y:fe (p * q){GM.is_nonsqr (to_fe #p y) /\ GM.is_nonsqr (to_fe #q y)}
+  -> y:fe (p * q){GM.is_nonsqr (to_fe #p y) /\ GM.is_nonsqr (to_fe #q y) /\ y % p <> 0}
   -> r:fe (p * q){sqr r > 0 /\ sqr r *% y > 0}
   -> ML unit
 let run_test_gm p q y r =
@@ -60,6 +60,7 @@ let test_gm () =
     let p:prm = to_prime p0 in
     let q:prm = to_prime q0 in
     let y:fe (p*q) = (assume (y0 < p * q); y0) in
+    assume (y % p <> 0);
     assume (GM.is_nonsqr #p (to_fe #p y) /\ GM.is_nonsqr #q (to_fe #q y));
     let r:fe (p*q) = (assume (r0 < p * q); r0) in
     assume (sqr r > 0 /\ sqr r *% y > 0);
