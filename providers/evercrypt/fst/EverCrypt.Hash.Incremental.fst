@@ -80,6 +80,7 @@ let add_len (total_len: UInt64.t) (len: UInt32.t):
   assert_norm (pow2 61 < pow2 64);
   total_len + Int.Cast.uint32_to_uint64 len
 
+#push-options "--z3rlimit 20"
 
 /// We split update into several versions, to all be simplified into a single
 /// large one at extraction-time.
@@ -163,6 +164,8 @@ let split_at_last_small (a: Hash.alg) (b: bytes) (d: bytes): Lemma
   };
 
   ()
+
+#pop-options
 
 #push-options "--z3rlimit 100"
 let add_len_small a (total_len: UInt64.t) (len: UInt32.t): Lemma
