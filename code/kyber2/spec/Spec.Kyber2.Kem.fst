@@ -35,14 +35,14 @@ let sklen:size_nat = Indcpa.pklen+Indcpa.sklen+32+32
 let pklen:size_nat = Indcpa.pklen
 let ciphertextlen = Indcpa.ciphertextlen
 
-val keygen: coins: lbytes_l SEC 32 -> indcpacoins:lbytes_l SEC 32 -> option ((lbytes_l SEC pklen) & (lbytes_l SEC sklen))
+val keygen: coins: lbytes_l SEC 32 -> indcpacoins:lbytes_l SEC 32 -> Tot (option ((lbytes_l SEC pklen) & (lbytes_l SEC sklen)))
 
 let keygen coins indcpacoins =
   match keygen indcpacoins with
   |None -> None
   |Some (pk', sk') -> Some (pk', concat (concat sk' pk') (concat (hash_h pklen pk') coins))
 
-val enc: pk: lbytes_l SEC pklen -> msgcoins: lbytes_l SEC 32 -> sharedkeylen:size_nat -> option ((lbytes_l SEC ciphertextlen) & lbytes_l SEC sharedkeylen)
+val enc: pk: lbytes_l SEC pklen -> msgcoins: lbytes_l SEC 32 -> sharedkeylen:size_nat -> Tot (option ((lbytes_l SEC ciphertextlen) & lbytes_l SEC sharedkeylen))
 
 let enc pk msgcoins sharedkeylen =
   let m = hash_h 32 msgcoins in
@@ -54,7 +54,7 @@ let enc pk msgcoins sharedkeylen =
 
 #reset-options "--z3rlimit 100 --max_fuel 2 --max_ifuel 2 --using_facts_from '* -FStar.Seq'"
 
-val dec: c:(lbytes_l SEC ciphertextlen) -> sk:(lbytes_l SEC sklen) -> sharedkeylen:size_nat -> lbytes_l SEC sharedkeylen
+val dec: c:(lbytes_l SEC ciphertextlen) -> sk:(lbytes_l SEC sklen) -> sharedkeylen:size_nat -> Tot (lbytes_l SEC sharedkeylen)
 
 let dec c sk sharedkeylen =
   let sk' = Seq.sub sk 0 Indcpa.sklen in

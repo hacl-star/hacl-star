@@ -7,12 +7,15 @@ open Lib.RawIntTypes
 open Lib.Sequence
 open Lib.ByteSequence
 
-//open Spec.Kyber2.Indcpa
+open Lib.Poly.NTT
+open Spec.Kyber2.Indcpa
 open Spec.Kyber2.Kem
 open Spec.Kyber2.Params
 
 open FStar.All
 
+open FStar.Math.Lemmas
+module Seq = Lib.Sequence
 friend Lib.IntTypes
   
 #reset-options "--max_fuel 0 --max_ifuel 1"

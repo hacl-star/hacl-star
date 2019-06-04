@@ -18,6 +18,7 @@ open Lib.IntTypes
 
 open Spec.SHA3
 
+
 module Seq = Lib.Sequence
 
 
@@ -53,7 +54,7 @@ let parse_xof input_len l b1 b2 =
   let a (i:nat{i<=4}) = state in
   let s, output = generate_blocks 168 4 a (squeeze_inner 168 (4*168)) s in
   let rec parse_inner (s:state) (len:size_nat{len%2=0}) (stream:lbytes_l SEC len) (out:lseq uint16 params_n) (i:nat{i<=params_n}) (j:nat{j%2=0}) : Tot (lseq uint16 params_n) (decreases (params_n - i))=
-    admit();
+    
     if (i=params_n) then out
     else if j>=len then let s,block = squeeze_inner 168 168 0 s in parse_inner s 168 block out i 0
     else let d = uint_v stream.[j] + 256 * uint_v stream.[j+1] in
@@ -61,9 +62,9 @@ let parse_xof input_len l b1 b2 =
     else parse_inner s len stream out i (j+2)
   in parse_inner s (4*168) output (create params_n (u16 0)) 0 0*)
   let s=xof input_len (4*168) l b1 b2 in
-  let rec parse_inner s out (i:nat{i<=params_n}) (j:nat{j<=84}) : Tot (option (lseq uint16 params_n)) (decreases ((params_n-i)+(84-j))) =
+  let rec parse_inner s out (i:nat{i<=params_n}) (j:nat{j<=336}) : Tot (option (lseq uint16 params_n)) (decreases ((params_n-i)+(336-j))) =
     if (i=params_n) then Some out
-    else if (j=84) then None
+    else if (j=336) then None
     else let d = uint_v s.[2*j] + 256 * uint_v s.[2*j+1] in
     if d < 19 * params_q then parse_inner s (upd out i (u16 (d%params_q))) (i+1) (j+1)
     else parse_inner s out i (j+1)

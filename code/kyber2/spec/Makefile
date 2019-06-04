@@ -1,5 +1,5 @@
 FSTAR_HOME ?= ../../../../FStar
-HACL_HOME  ?= ../../..
+HACL_HOME  = ../../..
 
 VARIANT    ?= 512
 

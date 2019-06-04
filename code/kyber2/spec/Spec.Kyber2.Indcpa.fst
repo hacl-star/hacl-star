@@ -1,6 +1,7 @@
 module Spec.Kyber2.Indcpa
 
 open FStar.Mul
+open FStar.IO
 
 open Spec.Kyber2.Params
 open Spec.Powtwo.Lemmas
@@ -51,6 +52,7 @@ type poly = vector_i #num_t params_n
 type vec = vector_i #poly_t params_k
 type matrix = matrix_i #poly_t params_k params_k
 
+#reset-options "--z3rlimit 100 --max_fuel 2 --max_ifuel 2 --using_facts_from '* -FStar.Seq'"
 let ring_num = ring_mod #params_q
 let ring_poly = lib_ntt_ring #num #ring_num #params_n 7 params_zeta
 
@@ -144,7 +146,7 @@ let ntt (x:poly) = lib_ntt #_ #ring_num #params_n 7 params_zeta x
 let ntt_vec (x:vec) = Seq.map #_ #_ #params_k ntt x
 let ntt_matrix (x:matrix) = Seq.map #_ #_ #params_k (ntt_vec) x
 
-let nttinv (x:poly) = lib_nttinv #_ #ring_num #params_n 7 params_halfninv params_zeta x
+let nttinv (x:poly) = lib_nttinv #_ #ring_num #params_n 7 params_halfninv params_zetainv x
 let nttinv_vec (x:vec) = Seq.map #_ #_ #params_k nttinv x
 let nttinv_matrix (x:matrix) = Seq.map #_ #_ #params_k (nttinv_vec) x
 
@@ -153,7 +155,7 @@ let new_matrix () : matrix = create params_k (create params_k (create params_n 0
 let upd_matrix a i j x : matrix = upd #_ #params_k a i (upd #_ #params_k a.[i] j x)
 
 #reset-options
-val gen_Ahat: (rho:lbytes_l SEC 32) -> i:nat{i<params_k} -> j:nat{j<params_k} -> option poly
+val gen_Ahat: (rho:lbytes_l SEC 32) -> i:nat{i<params_k} -> j:nat{j<params_k} -> Tot (option poly)
 
 let gen_Ahat rho i j =
     match parse_xof 32 rho (u8 j) (u8 i) with
@@ -161,7 +163,7 @@ let gen_Ahat rho i j =
     |Some out -> Some (convert_to_field out)
 
 
-val gen_matrix: (f: (i:nat{i<params_k}) -> (j:nat{j<params_k}) -> option poly) -> option matrix
+val gen_matrix: (f: (i:nat{i<params_k}) -> (j:nat{j<params_k}) -> Tot (option poly)) -> Tot (option matrix)
 
 let gen_matrix f =
   let rec aux (m:matrix) (i:nat{i<=params_k}) (j:nat{j<=params_k}) : Tot (option matrix) (decreases ((params_k+1)*(params_k+1) -(params_k+1)*i-j)) =
@@ -179,7 +181,7 @@ let ulen = params_du*params_k*params_n/8
 let vlen = params_dv*params_n/8
 let ciphertextlen:size_nat = ulen + vlen
 
-val keygen: (coins:lbytes_l SEC 32) -> option (lbytes_l SEC pklen & lbytes_l SEC sklen)
+val keygen: (coins:lbytes_l SEC 32) -> Tot (option (lbytes_l SEC pklen & lbytes_l SEC sklen))
 
 #reset-options "--z3rlimit 300"
 let keygen coins =
@@ -196,7 +198,7 @@ let keygen coins =
   Some ((concat (encode_vec 12 t_hat) rho),encode_vec 12 s_hat) 
 end
 
-val enc: (pk: lbytes_l SEC pklen) -> (msg: lbytes_l SEC 32) -> (msgcoins: lbytes_l SEC 32) -> option (lbytes_l SEC ciphertextlen)
+val enc: (pk: lbytes_l SEC pklen) -> (msg: lbytes_l SEC 32) -> (msgcoins: lbytes_l SEC 32) -> Tot (option (lbytes_l SEC ciphertextlen))
 
 let enc pk msg msgcoins =
   let t_hat = decode_vec 12 (Seq.sub pk 0 sklen) in
@@ -217,7 +219,7 @@ let enc pk msg msgcoins =
     let c2 = encode params_dv (compress_poly params_dv v) in
     Some (concat c1 c2) end
 
-val dec: (sk:lbytes_l SEC sklen) -> (c:lbytes_l SEC ciphertextlen) -> lbytes_l SEC 32
+val dec: (sk:lbytes_l SEC sklen) -> (c:lbytes_l SEC ciphertextlen) -> Tot (lbytes_l SEC 32)
 
 let dec sk c =
   let ring_poly = ring_poly in
@@ -226,5 +228,5 @@ let dec sk c =
   let u:vec = decompress_vec params_du (decode_vec params_du c1) in
   let v:poly = decompress_poly params_dv (decode params_dv c2) in
   let s_hat = decode_vec 12 sk in
-  let m = encode 1 (compress_poly 1 (minus v (dot_product #_ #ring_poly s_hat (ntt_vec u)))) in
+  let m = encode 1 (compress_poly 1 (minus v (nttinv (dot_product #_ #ring_poly s_hat (ntt_vec u))))) in
   m

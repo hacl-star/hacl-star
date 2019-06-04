@@ -16,7 +16,7 @@ open FStar.Tactics.Typeclasses
 open Lib.Arithmetic.Group
 open Lib.Arithmetic.Ring
 open Lib.Arithmetic.Sums
-//open Lib.Poly.NTT
+open Lib.Poly.NTT
 
 
 //friend Lib.ModularArithmetic.Lemmas
@@ -153,14 +153,14 @@ let lemma_join_split #a [| ring a |] #n p1 p2 =
 
 let lib_ntt #a [| ring a |] #n i zeta p = 
   let (peven, podd) = split_seq p in
-  join_seq (reorg i (lib_ntt (exp #a zeta 2) zeta peven)) (reorg i (lib_ntt (exp #a zeta 2) zeta podd))
+  join_seq (reorg i (Lib.Poly.NTT.lib_ntt (exp #a zeta 2) zeta peven)) (reorg i (Lib.Poly.NTT.lib_ntt (exp #a zeta 2) zeta podd))
 
 
 //let lib_ntt_lemma #n #m omega psi p p' = ()
 
 let lib_nttinv #a [| ring a |] #n i halfninv zetainv p = 
   let (peven, podd) = split_seq p in
-  join_seq (lib_nttinv halfninv (exp #a zetainv 2) zetainv (reorg i peven)) (lib_nttinv halfninv (exp #a zetainv 2) zetainv (reorg i podd))
+  join_seq (Lib.Poly.NTT.lib_nttinv halfninv (exp #a zetainv 2) zetainv (reorg i peven)) (Lib.Poly.NTT.lib_nttinv halfninv (exp #a zetainv 2) zetainv (reorg i podd))
 
 //let lib_nttinv_lemma #n #m ninv omegainv psiinv p p' = ()
 
