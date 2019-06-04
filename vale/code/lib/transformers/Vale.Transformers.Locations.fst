@@ -7,8 +7,6 @@ open Vale.X64.Machine_Semantics_s
 open Vale.X64.Machine_s
 open Vale.X64.Print_s
 
-open Vale.X64.InsLemmas // this one is from [code]; is that ok?; we use it primarily for the sanity checks
-
 open Vale.Transformers.PossiblyMonad
 
 module L = FStar.List.Tot
