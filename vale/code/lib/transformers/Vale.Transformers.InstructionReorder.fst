@@ -910,6 +910,49 @@ let lemma_instr_write_output_explicit_only_affects_write_aux2
       admit ()
     )
 
+let lemma_valid_addr_doesnt_change_domain32 (ptr:int) (v:Vale.Def.Types_s.nat32) (mem:heap) :
+  Lemma
+    (requires (
+        valid_addr ptr mem &&
+        valid_addr (ptr+1) mem &&
+        valid_addr (ptr+2) mem &&
+        valid_addr (ptr+3) mem))
+    (ensures (
+        Set.equal
+          (Map.domain mem)
+          (Map.domain (update_heap32 ptr v mem)))) =
+  Vale.Def.Opaque_s.reveal_opaque update_heap32_def
+
+let lemma_valid_addr_doesnt_change_domain64 (ptr:int) (v:nat64) (mem:heap) :
+  Lemma
+    (requires (valid_addr64 ptr mem))
+    (ensures (
+        Set.equal
+          (Map.domain mem)
+          (Map.domain (update_heap64 ptr v mem)))) =
+  reveal_opaque (`%valid_addr64) valid_addr64;
+  Vale.Def.Opaque_s.reveal_opaque update_heap64_def
+
+let lemma_valid_addr_doesnt_change_domain128 (ptr:int) (v:quad32) (mem:heap) :
+  Lemma
+    (requires (valid_addr128 ptr mem))
+    (ensures (
+        Set.equal
+          (Map.domain mem)
+          (Map.domain (update_heap128 ptr v mem)))) =
+  reveal_opaque (`%valid_addr128) valid_addr128;
+  Vale.Def.Opaque_s.reveal_opaque update_heap128_def;
+  let open Vale.Def.Words_s in
+  lemma_valid_addr_doesnt_change_domain32 ptr v.lo0 mem;
+  let mem = update_heap32 ptr v.lo0 mem in
+  lemma_valid_addr_doesnt_change_domain32 (ptr+4) v.lo1 mem;
+  let mem = update_heap32 (ptr+4) v.lo1 mem in
+  lemma_valid_addr_doesnt_change_domain32 (ptr+8) v.hi2 mem;
+  let mem = update_heap32 (ptr+8) v.hi2 mem in
+  lemma_valid_addr_doesnt_change_domain32 (ptr+12) v.hi3 mem;
+  let mem = update_heap32 (ptr+12) v.hi3 mem in
+  ()
+
 let lemma_instr_write_output_implicit_only_affects_write_aux2
     (i:instr_operand_implicit) (v:instr_val_t (IOpIm i)) (s_orig s:machine_state) :
   Lemma
@@ -923,7 +966,37 @@ let lemma_instr_write_output_implicit_only_affects_write_aux2
          (s_orig.ms_stack.initial_rsp = s1.ms_stack.initial_rsp) /\
          (Set.equal (Map.domain s_orig.ms_mem) (Map.domain s1.ms_mem)) /\
          (Set.equal (Map.domain s_orig.ms_stack.stack_mem) (Map.domain s1.ms_stack.stack_mem))))) =
-  admit ()
+  match i with
+  | IOp64One o ->
+    if valid_dst_operand o s_orig then (
+      match o with
+      | OReg r -> ()
+      | OMem (m, _) ->
+        reveal_opaque (`%valid_addr64) valid_addr64;
+        let ptr = eval_maddr m s_orig in
+        lemma_valid_addr_doesnt_change_domain64 ptr v s.ms_mem
+      | OStack (m, _) ->
+        reveal_opaque (`%valid_addr64) valid_addr64;
+        let ptr = eval_maddr m s_orig in
+        assume (valid_addr64 ptr s.ms_stack.stack_mem);
+        lemma_valid_addr_doesnt_change_domain64 ptr v s.ms_stack.stack_mem
+    ) else ()
+  | IOpXmmOne o ->
+    if valid_dst_mov128_op o s_orig then (
+      match o with
+      | OReg128 r -> ()
+      | OMem128 (m, _) ->
+        reveal_opaque (`%valid_addr128) valid_addr128;
+        let ptr = eval_maddr m s_orig in
+        lemma_valid_addr_doesnt_change_domain128 ptr v s.ms_mem
+      | OStack128 (m, _) ->
+        reveal_opaque (`%valid_addr128) valid_addr128;
+        let ptr = eval_maddr m s_orig in
+        assume (valid_addr128 ptr s.ms_stack.stack_mem);
+        lemma_valid_addr_doesnt_change_domain128 ptr v s.ms_stack.stack_mem
+    ) else ()
+  | IOpFlagsCf -> ()
+  | IOpFlagsOf -> ()
 
 let rec lemma_instr_write_outputs_only_affects_write_aux2
     (outs:list instr_out) (args:list instr_operand)
