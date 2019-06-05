@@ -652,8 +652,8 @@ procedure gcm_blocks(
 
         let iv_LE := old(buffer128_read(iv_b, 0, mem));
         let iv_BE := reverse_bytes_quad32(iv_LE);
-        let ctr_BE_1:quad32 := Mkfour(1, iv_BE.lo1, iv_BE.hi2, iv_BE.hi3);
-        let ctr_BE_2:quad32 := Mkfour(2, iv_BE.lo1, iv_BE.hi2, iv_BE.hi3);
+        let ctr_BE_1:quad32 := iv_BE;
+        let ctr_BE_2:quad32 := inc32(iv_BE, 1);
 
         // Encryption results
         let plain_in:seq(quad32) :=
@@ -723,7 +723,22 @@ procedure gcm_blocks(
     Mov64(Xip, r14);
     Mov128(xmm8, xmm1); // Line up the intermediate hash value
 
-    let ctr_BE := AES_GCM_encrypt_6mult(alg, h, iv_b, in128x6_b, out128x6_b, scratch_b, key, round_keys, keys_b, hkeys_b);
+    let iv_LE := old(buffer128_read(iv_b, 0, mem));
+    let iv_BE := reverse_bytes_quad32(iv_LE);
+    let ctr_BE_1:quad32 := iv_BE;
+    let ctr_BE_2:quad32 := inc32(iv_BE, 1);
+
+    Load128_buffer(xmm1, iv_ptr, 0, Secret, iv_b, 0);       // Load the j0 value (i.e., the result of calling compute_iv_BE)
+    InitPshufbMask(xmm0, rax);    // # borrow $Ii for .Lbswap_mask
+    VPshufb(xmm1, xmm1, xmm0);
+    assert xmm1 == iv_BE;
+    Store128_buffer(rbp, xmm1, 0x00, Secret, scratch_b, 0); // Save a copy, since we'll need it at the end to encrypt the hash
+    ghost var j0 := xmm1;
+    Load_one_lsb(xmm10);
+    VPaddd(xmm1, xmm1, xmm10);
+
+    //assert xmm1 == ctr_BE_2;
+    AES_GCM_encrypt_6mult(alg, h, iv_b, in128x6_b, out128x6_b, scratch_b, key, round_keys, keys_b, hkeys_b);
     let y_cipher128x6 := xmm8;
     ghost var auth_in := auth_quad_seq;
     lemma_ghash_incremental0_append(h, y_0, y_auth_bytes, y_cipher128x6, auth_in, s128(mem, out128x6_b));
@@ -788,16 +803,17 @@ procedure gcm_blocks(
 
     compute_ghash_incremental_register();
     let y_final := xmm1;
-
-    PinsrdImm(xmm7, 1, 0, r12);   // Reconstruct j0 (this is all we need, since gctr_core says it only changes iv.lo0)
-    let ctr_BE_1:quad32 := Mkfour(1, ctr_BE.lo1, ctr_BE.hi2, ctr_BE.hi3);
-    assert_norm(xmm7 == ctr_BE_1);      // OBSERVE
+// TODO: Fix me!
+    Load128_buffer(xmm7, rbp, 0, Secret, scratch_b, 0);       // Reload j0
+//    PinsrdImm(xmm7, 1, 0, r12);   // Reconstruct j0 (this is all we need, since gctr_core says it only changes iv.lo0)
+//    let ctr_BE_1:quad32 := Mkfour(1, ctr_BE.lo1, ctr_BE.hi2, ctr_BE.hi3);
+//    assert_norm(xmm7 == ctr_BE_1);      // OBSERVE
 
     // Encrypt the hash value with gctr_register; result goes in xmm1
     gctr_register(alg, key, round_keys, keys_b); // Encrypt using j0 and xmm0 = hash_value
     le_seq_quad32_to_bytes_of_singleton(xmm1);
     assert {:quick_type}  is_aes_key_LE(alg, key);
-    assert xmm1 == gctr_encrypt_block(ctr_BE_1, y_final, alg, key, 0);
+    assert xmm1 == gctr_encrypt_block(j0, y_final, alg, key, 0);
 
     // Consolidate encryption results
     let plain128 := append(old(s128(mem, in128x6_b)), old(s128(mem, in128_b)));
@@ -805,7 +821,7 @@ procedure gcm_blocks(
     assert length(plain_byte_seq)  == 0 ==> equal(append( plain128,  plain_byte_seq),  plain128);
     assert length(cipher_byte_seq) == 0 ==> equal(append(cipher128, cipher_byte_seq), cipher128);
 
-    let ctr_BE_2:quad32 := Mkfour(2, ctr_BE.lo1, ctr_BE.hi2, ctr_BE.hi3);
+    //let ctr_BE_2:quad32 := Mkfour(2, ctr_BE.lo1, ctr_BE.hi2, ctr_BE.hi3);
 //    assert gctr_partial_opaque(alg, old(len128x6), old(s128(mem, in128x6_b)), s128(mem, out128x6_b), key, ctr_BE_2);
 //    assert gctr_partial_opaque(alg, old(len128), old(s128(mem, in128_b)), s128(mem, out128_b), key, inc32lite(ctr_BE_2, old(len128x6)));
     lemma_gctr_partial_append(alg, old(len128x6), old(len128),
@@ -1382,7 +1398,6 @@ procedure gcm_blocks_stdcall(
         let iv_LE := old(buffer128_read(iv_b, 0, mem));
         let iv_BE := reverse_bytes_quad32(iv_LE);
         iv_BE == compute_iv_BE(h_LE, iv);
-        8*length(#(seq(nat8))(iv)) == 96;
 
     ensures
         // Manual framing

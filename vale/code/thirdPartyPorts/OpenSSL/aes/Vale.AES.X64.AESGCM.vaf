@@ -198,6 +198,7 @@ procedure Load_two_lsb(inout dst:xmm)
 
 procedure Load_one_lsb(inout dst:xmm)
     {:quick exportOnly}
+    {:public}
     lets constp @= r11;
     modifies constp; efl;
     ensures  dst == Mkfour(1, 0, 0, 0);
@@ -4323,6 +4324,7 @@ procedure AES_GCM_encrypt_6mult(
 
         buffer_addr(keys_b, mem) + 0x80 < pow2_64;
         aes_reqs_offset(alg, key_words, round_keys, keys_b, key + 0x80, mem, memTaint);
+        Ii == Mkfour(0x0C0D0E0F, 0x08090A0B, 0x04050607, 0x00010203);
 
         // GHash reqs
         pclmulqdq_enabled;
@@ -4339,6 +4341,7 @@ procedure AES_GCM_encrypt_6mult(
         modifies_mem(loc_union(loc_buffer(iv_b),
                      loc_union(loc_buffer(scratch_b),
                                loc_buffer(out_b))), old(mem), mem);
+        buffer_modifies_specific128(scratch_b, old(mem), mem, 1, 7);
         validSrcAddrs128(mem, Xip - 0x20, hkeys_b, 8, memTaint, Secret);
         key == old(key);
 
@@ -4355,14 +4358,12 @@ procedure AES_GCM_encrypt_6mult(
     if (len == 0) {
         AddLea64(Xip, Xip, 0x20);   // # size optimization
 
-        InitPshufbMask(Ii, r12);    // # borrow $Ii for .Lbswap_mask
         VPshufb(T1, T1, Ii);
         Store128_buffer(ivp, T1, 0x00, Secret, iv_b, 0);
         gctr_partial_opaque_init(alg, s128(mem, in_b), s128(mem, out_b), key_words, old(T1));
     } else {
         let plain_quads := s128(mem, in_b);
 
-        InitPshufbMask(Ii, r12);    // # borrow $Ii for .Lbswap_mask
         //Load128_buffer(T1, ivp, 0, Secret, iv_b, 0);    // # input counter value
         VPshufb(Xi, Xi, Ii);        // TODO: Why do we need a reverse here and at the end?
         let y_orig := reverse_bytes_quad32(Xi);
