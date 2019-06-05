@@ -14,15 +14,7 @@ open Lib.Loops
 open Lib.Buffer
 open Lib.Math.Algebra
 
-open Hacl.Impl.Bignum.Core
-open Hacl.Impl.Bignum.Convert
-open Hacl.Impl.Bignum.Comparison
-open Hacl.Impl.Bignum.Division
-open Hacl.Impl.Bignum.Addition
-open Hacl.Impl.Bignum.Multiplication
-open Hacl.Impl.Bignum.Exponentiation
-open Hacl.Impl.Bignum.Shift
-
+open Hacl.Impl.Bignum
 
 inline_for_extraction unfold noextract
 val print_str: string -> ST unit (requires fun _ -> true) (ensures fun h0 _ h1 -> h0 == h1)
@@ -505,6 +497,8 @@ let test_mod_gen n (a:nat{issnat a}) =
   print_verdict bn_expected bn_res res;
   pop_frame()
 
+#reset-options "--z3rlimit 50 --max_fuel 2 --max_ifuel 0"
+
 val test_mod: unit -> St unit
 let test_mod _ =
   C.String.print (C.String.of_literal "Testing mod reduction\n");
@@ -714,7 +708,7 @@ let test_exp_gen n a exp =
   print_verdict bn_expected bn_res res;
   pop_frame()
 
-#reset-options
+#reset-options "--z3rlimit 100 --max_fuel 2 --max_ifuel 0"
 
 val test_exp: unit -> St unit
 let test_exp _ =
