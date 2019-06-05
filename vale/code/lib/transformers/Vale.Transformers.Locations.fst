@@ -173,3 +173,29 @@ let update_location a v s =
 
 (* See fsti *)
 let lemma_locations_truly_disjoint a a_change v s = ()
+
+(* See fsti *)
+let lemma_locations_complete s1 s2 =
+  assert (s1.ms_ok == s2.ms_ok);
+  FStar.Classical.forall_intro (
+    (fun r ->
+       assert (eval_location (ALocReg r) s1 == eval_location (ALocReg r) s2) (* OBSERVE *)
+    ) <: (r:_ -> Lemma (eval_reg r s1 == eval_reg r s2))
+  );
+  assert (FStar.FunctionalExtensionality.feq s1.ms_regs s2.ms_regs);
+  assert (s1.ms_regs == s2.ms_regs);
+  FStar.Classical.forall_intro (
+    (fun r ->
+       assert (eval_location (ALocXmm r) s1 == eval_location (ALocXmm r) s2) (* OBSERVE *)
+    ) <: (r:_ -> Lemma (eval_xmm r s1 == eval_xmm r s2))
+  );
+  assert (FStar.FunctionalExtensionality.feq s1.ms_xmms s2.ms_xmms);
+  assert (s1.ms_xmms == s2.ms_xmms);
+  assert (overflow s1.ms_flags == overflow s2.ms_flags);
+  assert (cf s1.ms_flags == cf s2.ms_flags);
+  assume (s1.ms_flags == s2.ms_flags); (* WARN UNSOUND!!! REVIEW: Figure out how to fix this. *)
+  assert (s1.ms_mem == s2.ms_mem);
+  assert (s1.ms_memTaint == s2.ms_memTaint);
+  assert (s1.ms_stack == s2.ms_stack);
+  assert (s1.ms_stackTaint == s2.ms_stackTaint);
+  assert (s1.ms_trace == s2.ms_trace)
