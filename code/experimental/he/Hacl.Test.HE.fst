@@ -70,10 +70,7 @@ let run_test_gm p q y r =
   let bn_y: lbignum nLen = nat_to_bignum y in
   let bn_r: lbignum nLen = nat_to_bignum r in
 
-  let bn_res1: lbignum nLen = create nLen (uint 0) in
-  let bn_res2: lbignum nLen = create nLen (uint 0) in
-  let bn_res3: lbignum nLen = create nLen (uint 0) in
-
+  let bn_res: lbignum nLen = create nLen (uint 0) in
 
   [@inline_let]
   let encdec (m:bool) = begin
@@ -83,11 +80,11 @@ let run_test_gm p q y r =
     admit();
 
     print_str " --enc-> ";
-    GM.encrypt bn_n bn_y bn_r m bn_res1;
-    print_lbignum bn_res1;
+    GM.encrypt bn_n bn_y bn_r m bn_res;
+    print_lbignum bn_res;
 
     print_str " --dec-> ";
-    let m' = GM.decrypt bn_p bn_p_min_one bn_p_min_one_half bn_res1 in
+    let m' = GM.decrypt bn_p bn_p_min_one bn_p_min_one_half bn_res in
     print_bool m';
 
     if (m <> m')
@@ -95,15 +92,18 @@ let run_test_gm p q y r =
 
     end in
 
-  let xor (b1:bool) (b2:bool) = match (b1,b2) with
-    | (false,false) -> false
-    | (false,true) -> true
-    | (true,false) -> true
-    | (true,true) -> false in
 
+  encdec false;
+  encdec true;
+
+  push_frame();
+
+  let bn_res1: lbignum nLen = create nLen (uint 0) in
+  let bn_res2: lbignum nLen = create nLen (uint 0) in
+  let bn_res3: lbignum nLen = create nLen (uint 0) in
 
   [@inline_let]
-  let hom_xor (m1:bool) (m2:bool) = begin
+  let hom_xor (m1:bool) (m2:bool) (mexp:bool) = begin
     print_str "\n* xor ";
     print_bool m1;
     print_bool m2;
@@ -118,18 +118,18 @@ let run_test_gm p q y r =
 
     print_bool m;
 
-    if (m <> xor m1 m2)
+    if (m <>  mexp)
       then print_str " -------------------ERROR-------------------- "
 
     end in
 
-  encdec false;
-  encdec true;
 
-  hom_xor false false;
-  hom_xor false true;
-  hom_xor true false;
-  hom_xor true true;
+  hom_xor false false false;
+  hom_xor false true true;
+  hom_xor true false true;
+  hom_xor true true false;
+
+  pop_frame ();
 
   pop_frame ()
 

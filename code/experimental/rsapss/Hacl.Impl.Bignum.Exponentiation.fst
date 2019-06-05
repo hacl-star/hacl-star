@@ -162,7 +162,7 @@ let rec naive_exp_loop #nLen #expLen n a b res =
   pop_frame ()
 
 val bn_modular_exp:
-     #nLen:bn_len_strict{v (nLen +. nLen) * 64 < max_size_t}
+     #nLen:bn_len_strict{v nLen * 128 < max_size_t}
   -> #expLen:bn_len_strict
   -> n:lbignum nLen
   -> a:lbignum nLen

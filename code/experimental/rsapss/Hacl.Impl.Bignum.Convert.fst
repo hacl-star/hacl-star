@@ -21,7 +21,7 @@ module ST = FStar.HyperStack.ST
 
 
 
-#reset-options "--z3rlimit 150 --max_fuel 0 --max_ifuel 0"
+#reset-options "--z3rlimit 200 --max_fuel 0 --max_ifuel 0"
 
 inline_for_extraction noextract
 val bytes_to_bignum_:

@@ -8,13 +8,11 @@ open LowStar.Buffer
 
 open Lib.IntTypes
 open Lib.Buffer
-open Lib.PrintBuffer
 open Lib.Math.Algebra
 
 open Hacl.Impl.Bignum
 
 module S = Hacl.Spec.HE.GM
-module M = Lib.Math.Algebra
 
 // max 2^14 bits
 type bn_len_s = s:bn_len{v s <= 256}
