@@ -318,7 +318,7 @@ let ta_post : VSig.vale_post ta_dom =
       (as_vale_immbuffer arg7)
       va_s1 f
 
-#set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit_factor 4"
+#reset-options "--max_fuel 0 --max_ifuel 0"
 (* The vale lemma doesn't quite suffice to prove the modifies clause
    expected of the interop layer *)
 [@__reduce__]
