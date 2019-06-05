@@ -94,9 +94,11 @@ val lemma_locations_truly_disjoint :
 val lemma_locations_complete :
   s1:machine_state ->
   s2:machine_state ->
+  ok:bool ->
+  trace:list observation ->
   Lemma
     (requires (
-        (forall a. eval_location a s1 == eval_location a s2) /\
-        (s1.ms_ok == s2.ms_ok) /\
-        (s1.ms_trace == s2.ms_trace)))
-    (ensures (s1 == s2))
+        (forall a. eval_location a s1 == eval_location a s2)))
+    (ensures (
+        ({s1 with ms_ok = ok; ms_trace = trace}) ==
+        ({s2 with ms_ok = ok; ms_trace = trace})))
