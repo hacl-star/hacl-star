@@ -465,11 +465,7 @@ let lemma_eval_ins_equiv_states (i : ins) (s1 s2 : machine_state) :
   let s22 = { s21 with ms_memTaint = memTaint2 ; ms_stackTaint = stackTaint2 } in
   assert (equiv_states s12 s22)
 
-(** Filter out observation related stuff from the state.
-
-    REVIEW: Figure out _why_ all the taint analysis related stuff is
-    part of the core semantics of x64, rather than being separated
-    out. *)
+(** Filter out observation related stuff from the state. *)
 let filt_state (s:machine_state) =
   { s with
     ms_trace = [] }
