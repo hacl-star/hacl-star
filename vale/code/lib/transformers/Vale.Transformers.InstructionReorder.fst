@@ -755,14 +755,53 @@ let lemma_unchanged_at_combine (a1 a2:list location) (sa1 sa2 sb1 sb2:machine_st
         (unchanged_except a1 sa2 sb2)))
     (ensures (
         (unchanged_at (a1 `L.append` a2) sb1 sb2))) =
-  admit ();
-  let aux a :
+  let precond = !!(disjoint_locations a1 a2) /\
+                 (unchanged_at a1 sa1 sb2) /\
+                 (unchanged_except a2 sa1 sb1) /\
+                 (unchanged_at a2 sa2 sb1) /\
+                 (unchanged_except a1 sa2 sb2) in
+  let aux1 a :
     Lemma
-      (requires (not !!(disjoint_location_from_locations a (a1 `L.append` a2))))
+      (requires (L.mem a a1 /\ precond))
       (ensures (eval_location a sb1 == eval_location a sb2)) =
-    lemma_disjoint_location_from_locations_append a a1 a2
+    lemma_disjoint_location_from_locations_mem a1 a2 a;
+    assert (!!(disjoint_location_from_locations a a2));
+    assert (eval_location a sb1 == eval_location a sa1);
+    lemma_unchanged_at_mem a1 a sa1 sb2
   in
-  FStar.Classical.forall_intro (FStar.Classical.move_requires aux)
+  let aux2 a :
+    Lemma
+      (requires (L.mem a a2 /\ precond))
+      (ensures (eval_location a sb1 == eval_location a sb2)) =
+    lemma_disjoint_locations_symmetric a1 a2;
+    lemma_disjoint_location_from_locations_mem a2 a1 a;
+    assert (!!(disjoint_location_from_locations a a1));
+    assert (eval_location a sb2 == eval_location a sa2);
+    lemma_unchanged_at_mem a2 a sa2 sb1
+  in
+  let rec aux a1' a1'' a2' a2'' :
+    Lemma
+      (requires (a1' `L.append` a1'' == a1 /\ a2' `L.append` a2'' == a2 /\ precond))
+      (ensures (unchanged_at (a1'' `L.append` a2'') sb1 sb2))
+      (decreases %[a1''; a2'']) =
+    match a1'' with
+    | [] -> (
+        match a2'' with
+        | [] -> ()
+        | y :: ys -> (
+            L.append_l_cons y ys a2';
+            L.append_mem a2' a2'' y;
+            aux2 y;
+            aux a1' a1'' (a2' `L.append` [y]) ys
+          )
+      )
+    | x :: xs ->
+      L.append_l_cons x xs a1';
+      L.append_mem a1' a1'' x;
+      aux1 x;
+      aux (a1' `L.append` [x]) xs a2' a2''
+  in
+  aux [] a1 [] a2
 
 let lemma_unchanged_except_same_transitive (as:list location) (s1 s2 s3:machine_state) :
   Lemma
