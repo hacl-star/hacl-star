@@ -248,7 +248,7 @@ procedure Ctr32_ghash_6_prelude(
         aes_reqs_offset(alg, key_words, round_keys, keys_b, key, mem, memTaint);
 
         // Counters
-        ctr_orig.lo0 % 256 + 6 < 256;
+        //ctr_orig.lo0 % 256 + 6 < 256;
         T1 == reverse_bytes_quad32(inc32lite(ctr_orig, 0));
     ensures
         modifies_buffer_specific128(scratch_b, old(mem), mem, 1, 1);
@@ -257,11 +257,12 @@ procedure Ctr32_ghash_6_prelude(
         rndkey == index(round_keys, 0);
 
         inout0 == quad32_xor(reverse_bytes_quad32(inc32lite(ctr_orig, 0)), rndkey);
-        inout1 == reverse_bytes_quad32(inc32lite(ctr_orig, 1));
-        inout2 == reverse_bytes_quad32(inc32lite(ctr_orig, 2));
-        inout3 == reverse_bytes_quad32(inc32lite(ctr_orig, 3));
-        inout4 == reverse_bytes_quad32(inc32lite(ctr_orig, 4));
-        inout5 == reverse_bytes_quad32(inc32lite(ctr_orig, 5));
+        let counter := ctr_orig.lo0 % 256;
+        counter + 6 < 256 ==> inout1 == reverse_bytes_quad32(inc32lite(ctr_orig, 1));
+        counter + 6 < 256 ==> inout2 == reverse_bytes_quad32(inc32lite(ctr_orig, 2));
+        counter + 6 < 256 ==> inout3 == reverse_bytes_quad32(inc32lite(ctr_orig, 3));
+        counter + 6 < 256 ==> inout4 == reverse_bytes_quad32(inc32lite(ctr_orig, 4));
+        counter + 6 < 256 ==> inout5 == reverse_bytes_quad32(inc32lite(ctr_orig, 5));
 
         buffer128_read(scratch_b, 1, mem) == Mkfour(0, 0, 0, 0);
         Z0 == Mkfour(0, 0, 0, 0);
@@ -3158,20 +3159,20 @@ procedure AESNI_ctr32_6x_preamble(
     lets
 //      inp @= rdi; outp @= rsi; len @= rdx; key @= rcx; ivp @= r8; Xip @= r9;
         key @= rcx;
-        T1 @= xmm1; T2 @= xmm2; Z0 @= xmm4;
+        Ii @= xmm0; T1 @= xmm1; T2 @= xmm2; Z0 @= xmm4; Z1 @= xmm5; Z2 @= xmm6;
 
         inout0 @= xmm9; inout1 @= xmm10; inout2 @= xmm11; inout3 @= xmm12;
         inout4 @= xmm13; inout5 @= xmm14; rndkey @= xmm15;
-//      counter @= rbx; rounds @= rbp; ret @= r10; constp @= r11; in0 @= r14; end0 @= r15;
-        constp @= r11;
+//      rounds @= rbp; ret @= r10; constp @= r11; in0 @= r14; end0 @= r15;
+        counter @= rbx; constp @= r11;
 
     reads
-        key;
+        Ii; key;
         mem; memTaint;
 
     modifies
-        constp; r12;
-        T1; T2; Z0; inout0; inout1; inout2; inout3; inout4; inout5; rndkey;
+        counter; constp; r12;
+        T1; T2; Z0; Z1; Z2; inout0; inout1; inout2; inout3; inout4; inout5; rndkey;
         efl;
 
     requires
@@ -3179,10 +3180,15 @@ procedure AESNI_ctr32_6x_preamble(
         aes_reqs_offset(alg, key_words, round_keys, keys_b, key, mem, memTaint);
         key - 0x60 >= 0;
 
-        ctr_orig.lo0 % 256 + 6 < 256;
+        //ctr_orig.lo0 % 256 + 6 < 256;
         T1 == reverse_bytes_quad32(inc32lite(ctr_orig, 0));
+        counter == ctr_orig.lo0 % 256;
 
+        Ii == Mkfour(0x0C0D0E0F, 0x08090A0B, 0x04050607, 0x00010203);
     ensures
+        0 <= counter < 256;
+        counter == inc32lite(ctr_orig, 6).lo0 % 256;
+
         inout0 == rounds_opaque(quad32_xor(reverse_bytes_quad32(inc32lite(ctr_orig, 0)), index(round_keys, 0)), round_keys, 0);
         inout1 == rounds_opaque(quad32_xor(reverse_bytes_quad32(inc32lite(ctr_orig, 1)), index(round_keys, 0)), round_keys, 0);
         inout2 == rounds_opaque(quad32_xor(reverse_bytes_quad32(inc32lite(ctr_orig, 2)), index(round_keys, 0)), round_keys, 0);
@@ -3203,23 +3209,30 @@ procedure AESNI_ctr32_6x_preamble(
     Sub64(r12, 0x60);
 
     VPxor(inout0, T1, Z0);
-    VPaddd(inout1, T1, T2);
-    lemma_incr_msb(inc32lite(ctr_orig, 0), old(T1), inout1, 1);
-    VPaddd(inout2, inout1, T2);
-    lemma_incr_msb(inc32lite(ctr_orig, 0), old(T1), inout2, 2);
-    VPxor(inout1, inout1, Z0);
-    VPaddd(inout3, inout2, T2);
-    lemma_incr_msb(inc32lite(ctr_orig, 0), old(T1), inout3, 3);
-    VPxor(inout2, inout2, Z0);
-    VPaddd(inout4, inout3, T2);
-    lemma_incr_msb(inc32lite(ctr_orig, 0), old(T1), inout4, 4);
-    VPxor(inout3, inout3, Z0);
-    VPaddd(inout5, inout4, T2);
-    lemma_incr_msb(inc32lite(ctr_orig, 0), old(T1), inout5, 5);
-    VPxor(inout4, inout4, Z0);
-    VPaddd(T1, inout5, T2);
-    lemma_incr_msb(inc32lite(ctr_orig, 0), old(T1), T1, 6);
-    VPxor(inout5, inout5, Z0);
+
+    Add64(counter, 6);
+    if (counter < 256) { 
+        VPaddd(inout1, T1, T2);
+        lemma_incr_msb(inc32lite(ctr_orig, 0), old(T1), inout1, 1);
+        VPaddd(inout2, inout1, T2);
+        lemma_incr_msb(inc32lite(ctr_orig, 0), old(T1), inout2, 2);
+        VPxor(inout1, inout1, Z0);
+        VPaddd(inout3, inout2, T2);
+        lemma_incr_msb(inc32lite(ctr_orig, 0), old(T1), inout3, 3);
+        VPxor(inout2, inout2, Z0);
+        VPaddd(inout4, inout3, T2);
+        lemma_incr_msb(inc32lite(ctr_orig, 0), old(T1), inout4, 4);
+        VPxor(inout3, inout3, Z0);
+        VPaddd(inout5, inout4, T2);
+        lemma_incr_msb(inc32lite(ctr_orig, 0), old(T1), inout5, 5);
+        VPxor(inout4, inout4, Z0);
+        VPaddd(T1, inout5, T2);
+        lemma_incr_msb(inc32lite(ctr_orig, 0), old(T1), T1, 6);
+        VPxor(inout5, inout5, Z0);
+    } else {
+        Sub64(counter, 256);
+        Handle_ctr32_2(ctr_orig);
+    }
 
     init_rounds_opaque(inout0, round_keys);
     init_rounds_opaque(inout1, round_keys);
@@ -3586,20 +3599,20 @@ procedure AESNI_ctr32_6x(
     lets
 //      inp @= rdi; outp @= rsi; len @= rdx; key @= rcx; ivp @= r8; Xip @= r9;
         inp @= rdi; outp @= rsi; key @= rcx;
-        T1 @= xmm1; T2 @= xmm2; Hkey @= xmm3;
+        Ii @= xmm0; T1 @= xmm1; T2 @= xmm2; Hkey @= xmm3;
         Z0 @= xmm4; Z1 @= xmm5; Z2 @= xmm6; Xi @= xmm8;
 
         inout0 @= xmm9; inout1 @= xmm10; inout2 @= xmm11; inout3 @= xmm12;
         inout4 @= xmm13; inout5 @= xmm14; rndkey @= xmm15;
 //      counter @= rbx; rounds @= rbp; ret @= r10; constp @= r11; in0 @= r14; end0 @= r15;
-        constp @= r11;
+        counter @= rbx; constp @= r11;
 
     reads
-        key;
+        Ii; key;
         memTaint;
 
     modifies
-        inp; outp; constp; r12;
+        inp; outp; counter; constp; r12;
         T1; T2; Hkey; Z0; Z1; Z2; Xi;
         inout0; inout1; inout2; inout3; inout4; inout5; rndkey;
         mem; efl;
@@ -3615,12 +3628,14 @@ procedure AESNI_ctr32_6x(
         // AES reqs
         aes_reqs_offset(alg, key_words, round_keys, keys_b, key, mem, memTaint);
         key - 0x60 >= 0;
+        Ii == Mkfour(0x0C0D0E0F, 0x08090A0B, 0x04050607, 0x00010203);
 
         // Counter requirements
         count*6 + 6 < pow2_32;
         ctr_BE == inc32lite(ctr_BE_orig, count*6);
-        ctr_BE.lo0 % 256 + 6 < 256;
+        //ctr_BE.lo0 % 256 + 6 < 256;
         T1 == reverse_bytes_quad32(inc32lite(ctr_BE, 0));
+        counter == ctr_BE.lo0 % 256;
 
         // GCTR progress
         gctr_partial_opaque(alg, 6*count, plain_quads, s128(mem, out_b), key_words, ctr_BE_orig);
@@ -3631,6 +3646,8 @@ procedure AESNI_ctr32_6x(
         outp == old(outp) + 0x60;
 
         T1 == reverse_bytes_quad32(inc32lite(ctr_BE, 6));
+        0 <= counter < 256;
+        counter == inc32lite(ctr_BE, 6).lo0 % 256;
 
         buffer128_read(out_b, count*6 + 0, mem) == inout0;
         buffer128_read(out_b, count*6 + 1, mem) == inout1;
@@ -3677,7 +3694,6 @@ procedure AESNI_ctr32_6x(
     gctr_partial_opaque_ignores_postfix(alg, #nat32(bound), plain_quads, plain_quads, old(s128(mem, out_b)),
                                         cipher, key_words, ctr_BE_orig);
     gctr_partial_extend6(alg, bound, plain_quads, cipher, key_words, ctr_BE_orig);
-
 }
 
 
@@ -3785,7 +3801,7 @@ procedure UpdateScratch(ghost scratch_b:buffer128)
     Store128_buffer(rbp, inout1, 0x60, Secret, scratch_b, 6);
     Store128_buffer(rbp, inout0, 0x70, Secret, scratch_b, 7);
 }
-
+/*
 #reset-options ""
 procedure GCM_finalize(
         inline alg:algorithm,
@@ -4238,9 +4254,9 @@ procedure GCM_finalize(
 // vpxor  $T2,$Xi,$Xi
     VPolyAdd(Xi, Xi, T2);
 }
+*/
 
-
-#reset-options "--z3rlimit 60"
+#reset-options "--z3rlimit 90"
 procedure AES_GCM_encrypt_6mult(
         inline alg:algorithm,
         ghost h_LE:quad32,
@@ -4253,8 +4269,6 @@ procedure AES_GCM_encrypt_6mult(
         ghost round_keys:seq(quad32),
         ghost keys_b:buffer128,
         ghost hkeys_b:buffer128)
-    returns(
-        ghost ctr_BE:quad32)
     {:public}
     {:quick}
     lets
@@ -4328,10 +4342,6 @@ procedure AES_GCM_encrypt_6mult(
         validSrcAddrs128(mem, Xip - 0x20, hkeys_b, 8, memTaint, Secret);
         key == old(key);
 
-//        let iv_LE := old(buffer128_read(iv_b, 0, mem));
-//        let iv_BE := reverse_bytes_quad32(iv_LE);
-//        ctr_BE == Mkfour(2, iv_BE.lo1, iv_BE.hi2, iv_BE.hi3);
-
         // GCTR result
         gctr_partial_opaque(alg, old(len), old(s128(mem, in_b)), s128(mem, out_b), key_words, old(T1));
         // GCM result
@@ -4345,16 +4355,10 @@ procedure AES_GCM_encrypt_6mult(
     if (len == 0) {
         AddLea64(Xip, Xip, 0x20);   // # size optimization
 
-//        Load128_buffer(T1, ivp, 0, Secret, iv_b, 0);    // # input counter value
-//        // TODO: Replace all of this with a single PinsrdImm(T1, 0x02000000, 3, counter)
-//        InitPshufbMask(Ii, r12);    // # borrow $Ii for .Lbswap_mask
-//        VPshufb(T1, T1, Ii);
-//        PinsrdImm(T1, 2, 0, counter);   // Directly set the counter in T1.lo0 (and counter) to 2, rather than read the existing value as OpenSSL does
-        ctr_BE := T1;
-//        VPshufb(T1, T1, Ii);
-//        Store128_buffer(ivp, T1, 0x00, Secret, iv_b, 0);
-        gctr_partial_opaque_init(alg, s128(mem, in_b), s128(mem, out_b), key_words, T1);
-        assume false;
+        InitPshufbMask(Ii, r12);    // # borrow $Ii for .Lbswap_mask
+        VPshufb(T1, T1, Ii);
+        Store128_buffer(ivp, T1, 0x00, Secret, iv_b, 0);
+        gctr_partial_opaque_init(alg, s128(mem, in_b), s128(mem, out_b), key_words, old(T1));
     } else {
         let plain_quads := s128(mem, in_b);
 
@@ -4369,12 +4373,17 @@ procedure AES_GCM_encrypt_6mult(
         //VPshufb(T1, T1, Ii);
         //let iv_BE := T1;
         //PinsrdImm(T1, 2, 0, counter);   // Directly set the counter in T1.lo0 (and counter) to 2, rather than read the existing value as OpenSSL does
-        ctr_BE := T1;
-        //assert ctr_BE == Mkfour(2, iv_BE.lo1, iv_BE.hi2, iv_BE.hi3);
+        ghost var ctr_BE := T1;
+        Pextrq(counter, T1, 0);
+        ghost var full_counter := counter;
+        And64(counter, 0xFF);
+        lemma_counter_init(T1, full_counter, counter);
+
         VPshufb(T1, T1, Ii);
 
         //Mov64(in0, outp); // OpenSSL uses this, and then does complicated in0 manipulation inside Loop6x
         AddLea64(in0, outp, 96); // 96 == 128/8*6
+
 
         gctr_partial_opaque_init(alg, s128(mem, in_b), s128(mem, out_b), key_words, ctr_BE);
         AESNI_ctr32_6x(alg, 0, in_b, out_b, plain_quads, key_words, round_keys, keys_b, ctr_BE, ctr_BE);
@@ -4399,7 +4408,7 @@ procedure AES_GCM_encrypt_6mult(
         AddLea64(Xip, Xip, 0x20);   // # size optimization
 
         Ctr32_ghash_6_prelude(alg, scratch_b, key_words, round_keys, keys_b, inc32(ctr_BE, 12));
-        Mov64(counter, 14);
+        //Mov64(counter, 14);
         //assert {:quick_type} len >= 12 && len < pow2_32;
         //let mid_len:nat32 := #nat32(len);
         let mid_len := len;
