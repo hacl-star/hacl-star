@@ -36,179 +36,14 @@ open Vale.X64.Machine_Semantics_s
 open Vale.X64.Machine_s
 open Vale.X64.Print_s
 
-open Vale.X64.InsLemmas // this one is from [code]; is that ok?; we use it primarily for the sanity checks
-
-/// Open the PossiblyMonad so that we can keep track of failure cases
-/// for easier debugging.
+/// Relevant modules from Transformers
 
 open Vale.Transformers.PossiblyMonad
+open Vale.Transformers.Locations
 
 /// Finally some convenience module renamings
 
 module L = FStar.List.Tot
-
-/// We first need to talk about what locations may be accessed (either
-/// via a read or via a write) by an instruction.
-///
-/// This allows us to define read and write sets for instructions.
-///
-/// REVIEW: Any instruction with [HavocFlags] causes the flags to be
-///   part of the write set. Since we don't allow moving instructions
-///   past write boundaries which have commonalities, this means that
-///   any instruction which havocs the flags will not be allowed to
-///   move past another that does the same. We should think of a
-///   better way to handle this. One possibility is to tag "intent"
-///   into the flags, which means we should be able to move havocing
-///   instructions past other havocing instructions. This only fixes
-///   up the issue wrt havocs. Another issue might be that we might
-///   want to move groups of instructions together. The solution to
-///   that would be to group instructions together and move them as a
-///   single unit. This will still have the havoc problems, so we will
-///   likely need to place some sort of intention bits for the flags.
-
-type access_location =
-  | ALoc64 : operand -> access_location
-  | ALoc128 : operand128 -> access_location
-  | ALocCf : access_location
-  | ALocOf : access_location
-
-let access_location_of_explicit (t:instr_operand_explicit) (i:instr_operand_t t) : access_location =
-  match t with
-  | IOp64 -> ALoc64 i
-  | IOpXmm -> ALoc128 i
-
-let access_location_of_implicit (t:instr_operand_implicit) : access_location =
-  match t with
-  | IOp64One i -> ALoc64 i
-  | IOpXmmOne i -> ALoc128 i
-  | IOpFlagsCf -> ALocCf
-  | IOpFlagsOf -> ALocOf
-
-type rw_set = (list access_location) & (list access_location)
-
-let rec aux_read_set0 (args:list instr_operand) (oprs:instr_operands_t_args args) =
-  match args with
-  | [] -> []
-  | (IOpEx i) :: args ->
-    let l, r = coerce #(instr_operand_t i & instr_operands_t_args args) oprs in
-    access_location_of_explicit i l :: aux_read_set0 args r
-  | (IOpIm i) :: args ->
-    access_location_of_implicit i :: aux_read_set0 args (coerce #(instr_operands_t_args args) oprs)
-
-let rec aux_read_set1
-    (outs:list instr_out) (args:list instr_operand) (oprs:instr_operands_t outs args) : list access_location =
-  match outs with
-  | [] -> aux_read_set0 args oprs
-  | (Out, IOpEx i) :: outs ->
-    let l, r = coerce #(instr_operand_t i & instr_operands_t outs args) oprs in
-    aux_read_set1 outs args r
-  | (InOut, IOpEx i) :: outs ->
-    let l, r = coerce #(instr_operand_t i & instr_operands_t outs args) oprs in
-    access_location_of_explicit i l :: aux_read_set1 outs args r
-  | (Out, IOpIm i) :: outs ->
-    aux_read_set1 outs args (coerce #(instr_operands_t outs args) oprs)
-  | (InOut, IOpIm i) :: outs ->
-    access_location_of_implicit i :: aux_read_set1 outs args (coerce #(instr_operands_t outs args) oprs)
-
-let read_set (i:instr_t_record) (oprs:instr_operands_t i.outs i.args) : list access_location =
-  aux_read_set1 i.outs i.args oprs
-
-let rec aux_write_set
-    (outs:list instr_out) (args:list instr_operand) (oprs:instr_operands_t outs args) : list access_location =
-  match outs with
-  | [] -> []
-  | (_, IOpEx i) :: outs ->
-    let l, r = coerce #(instr_operand_t i & instr_operands_t outs args) oprs in
-    access_location_of_explicit i l :: aux_write_set outs args r
-  | (_, IOpIm i) :: outs ->
-    access_location_of_implicit i :: aux_write_set outs args (coerce #(instr_operands_t outs args) oprs)
-
-let write_set (i:instr_t_record) (oprs:instr_operands_t i.outs i.args) : list access_location =
-  let InstrTypeRecord #outs #args #havoc_flags _ = i in
-  let ws = aux_write_set outs args oprs in
-  match havoc_flags with
-  | HavocFlags -> ALocCf :: ALocOf :: ws
-  | PreserveFlags -> ws
-
-let rw_set_of_ins (i:ins) : rw_set =
-  match i with
-  | Instr i oprs _ ->
-    read_set i oprs, write_set i oprs
-  | Push src t ->
-    [ALoc64 (OReg rRsp); ALoc64 src],
-    [ALoc64 (OReg rRsp); ALoc64 (OStack (MReg rRsp (-8), t))]
-  | Pop dst t ->
-    [ALoc64 (OReg rRsp); ALoc64 (OStack (MReg rRsp 0, t))],
-    [ALoc64 (OReg rRsp); ALoc64 dst]
-  | Alloc _
-  | Dealloc _ ->
-    [ALoc64 (OReg rRsp)], [ALoc64 (OReg rRsp)]
-
-/// We now need to define what it means for two different access
-/// locations to be "disjoint".
-///
-/// Note that it is safe to say that two operands are not disjoint
-/// even if they are, but the converse is not true. That is, to be
-/// safe, we can say two operands are disjoint only if it is
-/// guaranteed that they are disjoint.
-
-let disjoint_access_location (a1 a2:access_location) : pbool =
-  match a1, a2 with
-  | ALocCf, ALocCf -> ffalse "carry flag not disjoint from itself"
-  | ALocOf, ALocOf -> ffalse "overflow flag not disjoint from itself"
-  | ALocCf, _ | ALocOf, _ | _, ALocCf | _, ALocOf -> ttrue
-  | ALoc64 o1, ALoc64 o2 -> (
-      match o1, o2 with
-      | OConst _, _ | _, OConst _ -> ttrue
-      | OReg r1, OReg r2 -> (r1 <> r2) /- ("register " ^ print_reg_name r1 ^ " not disjoint from itself")
-      | _ ->
-        unimplemented "conservatively not disjoint ALoc64s"
-    )
-  | ALoc128 o1, ALoc128 o2 -> (
-      match o1, o2 with
-      | OReg128 r1, OReg128 r2 -> (r1 <> r2) /- ("register " ^ print_xmm r1 gcc ^ " not disjoint from itself")
-      | _ ->
-      unimplemented "conservatively not disjoint ALoc128s"
-    )
-  | ALoc64 o1, ALoc128 o2 | ALoc128 o1, ALoc64 o2 -> (
-      unimplemented "conservatively not disjoint ALoc64 & ALoc128"
-    )
-
-let lemma_disjoint_access_location_symmetric (a1 a2:access_location) :
-  Lemma
-    (ensures (!!(disjoint_access_location a1 a2) = !!(disjoint_access_location a2 a1))) = ()
-
-let disjoint_access_location_from_locations
-    (a:access_location) (l:list access_location) : pbool =
-  for_all (fun b ->
-      disjoint_access_location a b
-    ) l
-
-let disjoint_access_locations (l1 l2:list access_location) r : pbool =
-  for_all (fun x ->
-      disjoint_access_location_from_locations x l2 /+< (r ^ " because ")
-  ) l1
-
-let rec lemma_disjoint_access_locations_reason l1 l2 r1 r2 :
-  Lemma
-    (!!(disjoint_access_locations l1 l2 r1) = !!(disjoint_access_locations l1 l2 r2)) =
-  match l1 with
-  | [] -> ()
-  | _ :: xs -> lemma_disjoint_access_locations_reason xs l2 r1 r2
-
-let rec lemma_disjoint_access_locations_symmetric l1 l2 r :
-  Lemma
-    (ensures (
-        (!!(disjoint_access_locations l1 l2 r) = !!(disjoint_access_locations l2 l1 r))))
-    (decreases %[L.length l1 + L.length l2]) =
-  match l1, l2 with
-  | [], [] -> ()
-  | [], x :: xs | x :: xs, [] ->
-    lemma_disjoint_access_locations_symmetric xs [] r
-  | x :: xs, y :: ys ->
-    lemma_disjoint_access_locations_symmetric l1 ys r;
-    lemma_disjoint_access_locations_symmetric xs l2 r;
-    lemma_disjoint_access_locations_symmetric xs ys r
 
 /// Given two read/write sets corresponding to two neighboring
 /// instructions, we can say whether exchanging those two instructions
@@ -216,10 +51,9 @@ let rec lemma_disjoint_access_locations_symmetric l1 l2 r :
 
 let rw_exchange_allowed (rw1 rw2 : rw_set) : pbool =
   let (r1, w1), (r2, w2) = rw1, rw2 in
-  let disjoint = disjoint_access_locations in
-  (disjoint r1 w2 "read set of 1st not disjoint from write set of 2nd") &&.
-  (disjoint r2 w1 "read set of 2nd not disjoint from write set of 1st") &&.
-  (disjoint w1 w2 "write sets not disjoint")
+  (disjoint_locations r1 w2 /+< "read set of 1st not disjoint from write set of 2nd because ") &&.
+  (disjoint_locations r2 w1 /+< "read set of 2nd not disjoint from write set of 1st because ") &&.
+  (disjoint_locations w1 w2 /+< "write sets not disjoint because ")
 
 let ins_exchange_allowed (i1 i2 : ins) : pbool =
   (
@@ -229,20 +63,6 @@ let ins_exchange_allowed (i1 i2 : ins) : pbool =
     | _, _ ->
       ffalse "non-generic instructions: conservatively disallowed exchange"
   ) /+> normal (" for instructions " ^ print_ins i1 gcc ^ " and " ^ print_ins i2 gcc)
-
-private abstract
-let sanity_check_1 =
-  assert_norm (!!(
-    ins_exchange_allowed
-      (make_instr ins_Mov64 (OReg rRax) (OConst 100))
-      (make_instr ins_Add64 (OReg rRbx) (OConst 299))))
-
-private abstract
-let sanity_check_2 =
-  assert_norm (not !!(
-    ins_exchange_allowed
-      (make_instr ins_Mov64 (OReg rRax) (OConst 100))
-      (make_instr ins_Add64 (OReg rRax) (OConst 299))))
 
 let lemma_ins_exchange_allowed_symmetric (i1 i2 : ins) :
   Lemma
@@ -256,14 +76,11 @@ let lemma_ins_exchange_allowed_symmetric (i1 i2 : ins) :
   assert (b2 == !!(rw_exchange_allowed (rw_set_of_ins i2) (rw_set_of_ins i1)));
   let r1, w1 = rw_set_of_ins i1 in
   let r2, w2 = rw_set_of_ins i2 in
-  let disjoint = disjoint_access_locations in
-  let aux l1 l2 : (b:bool) = !!(disjoint l1 l2 "") in
-  let aux_reason l1 l2 r : Lemma
-    (!!(disjoint l1 l2 r) == aux l1 l2) = lemma_disjoint_access_locations_reason l1 l2 "" r in
-  FStar.Classical.forall_intro_3 aux_reason;
+  let disjoint = disjoint_locations in
+  let aux l1 l2 : (b:bool) = !!(disjoint l1 l2) in
   assert (b1 == (aux r1 w2 && aux r2 w1 && aux w1 w2));
   assert (b2 == (aux r2 w1 && aux r1 w2 && aux w2 w1));
-  lemma_disjoint_access_locations_symmetric w1 w2 "";
+  lemma_disjoint_locations_symmetric w1 w2;
   assert (aux w1 w2 = aux w2 w1)
 
 /// First, we must define what it means for two states to be
@@ -295,14 +112,6 @@ let equiv_states_ext (s1 s2 : machine_state) : GTot Type0 =
   (Map.equal s1.ms_stack.stack_mem s2.ms_stack.stack_mem) /\
   (Map.equal s1.ms_stackTaint s2.ms_stackTaint) /\
   (equiv_states s1 s2)
-
-private abstract
-let sanity_check_equiv_states (s1 s2 s3 : machine_state) :
-  Lemma
-    (ensures (
-        (equiv_states s1 s1) /\
-        (equiv_states s1 s2 ==> equiv_states s2 s1) /\
-        (equiv_states s1 s2 /\ equiv_states s2 s3 ==> equiv_states s1 s3))) = ()
 
 (** Convenience wrapper around [equiv_states] *)
 unfold
@@ -656,11 +465,7 @@ let lemma_eval_ins_equiv_states (i : ins) (s1 s2 : machine_state) :
   let s22 = { s21 with ms_memTaint = memTaint2 ; ms_stackTaint = stackTaint2 } in
   assert (equiv_states s12 s22)
 
-(** Filter out observation related stuff from the state.
-
-    REVIEW: Figure out _why_ all the taint analysis related stuff is
-    part of the core semantics of x64, rather than being separated
-    out. *)
+(** Filter out observation related stuff from the state. *)
 let filt_state (s:machine_state) =
   { s with
     ms_trace = [] }
@@ -810,197 +615,27 @@ let commutes (s:machine_state) (f1 f2:st unit) : GTot Type0 =
     (run2 f1 f2 s)
     (run2 f2 f1 s)
 
-let access_location_val_t (a:access_location) : eqtype =
-  match a with
-  | ALoc64 (OConst _) -> nat64
-  | ALoc64 (OReg _) -> nat64
-  | ALoc64 (OMem _) -> nat64 & taint
-  | ALoc64 (OStack _) -> nat64 & taint
-  | ALoc128 (OReg128 _) -> quad32
-  | ALoc128 (OMem128 _) -> quad32 & taint
-  | ALoc128 (OStack128 _) -> quad32 & taint
-  | ALocCf -> bool
-  | ALocOf -> bool
-
-let eval_access_location (a:access_location) (s:machine_state) : access_location_val_t a =
-  match a with
-  | ALoc64 o -> (
-      let v = eval_operand o s in
-      match o with
-      | OConst _ | OReg _ -> v
-      | OMem (m, _) -> v, Map.sel s.ms_memTaint (eval_maddr m s)
-      | OStack (m, _) -> v, Map.sel s.ms_stackTaint (eval_maddr m s)
-    )
-  | ALoc128 o -> (
-      let v = eval_mov128_op o s in
-      match o with
-      | OReg128 _ -> v
-      | OMem128 (m, _) -> v, Map.sel s.ms_memTaint (eval_maddr m s)
-      | OStack128 (m, _) -> v, Map.sel s.ms_stackTaint (eval_maddr m s)
-    )
-  | ALocCf -> cf s.ms_flags
-  | ALocOf -> overflow s.ms_flags
-
-let valid_src_access_location (a:access_location) (s:machine_state) : bool =
-  match a with
-  | ALoc64 o -> valid_src_operand o s
-  | ALoc128 o -> valid_src_mov128_op o s
-  | ALocCf -> true
-  | ALocOf -> true
-
-let unchanged (a:access_location) (f:st unit) (s:machine_state) : GTot Type0 =
-  (valid_src_access_location a s) = (valid_src_access_location a (run f s)) /\
-  (eval_access_location a s) == (eval_access_location a (run f s))
-
-let rec unchanged_all (as:list access_location) (f:st unit) (s:machine_state) : GTot Type0 =
-  match as with
-  | [] -> True
-  | x :: xs ->
-    unchanged x f s /\ unchanged_all xs f s
-
-let rec lemma_eval_instr_unchanged_args
-    (outs:list instr_out) (args:list instr_operand)
-    (ff:instr_args_t outs args) (oprs:instr_operands_t_args args)
-    (f:st unit) (s:machine_state) :
-  Lemma
-    (requires (
-        unchanged_all (aux_read_set0 args oprs) f s))
-    (ensures (
-        let v0, v1 =
-          instr_apply_eval_args outs args ff oprs s,
-          instr_apply_eval_args outs args ff oprs (run f s) in
-        v0 == v1)) =
-  let v0, v1 =
-    instr_apply_eval_args outs args ff oprs s,
-    instr_apply_eval_args outs args ff oprs (run f s) in
-  let reads = aux_read_set0 args oprs in
-  match args with
-  | [] -> ()
-  | i :: args ->
-    let (v, v', oprs) : option _ & option _ & _ =
-      match i with
-      | IOpEx i -> let op, rest = coerce oprs in
-        let v, v' =
-          instr_eval_operand_explicit i op s,
-          instr_eval_operand_explicit i op (run f s)
-        in
-        assert (v == v');
-        (v, v', rest)
-      | IOpIm i ->
-        let v, v' =
-          instr_eval_operand_implicit i s,
-          instr_eval_operand_implicit i (run f s)
-        in
-        assert (v == v');
-        (v, v', coerce oprs)
-    in
-    let ff:arrow (instr_val_t i) (instr_args_t outs args) = coerce ff in
-    let res = bind_option v (fun v -> instr_apply_eval_args outs args (ff v) oprs s) in
-    let res' = bind_option v' (fun v -> instr_apply_eval_args outs args (ff v) oprs (run f s)) in
-    match v with
-    | None -> ()
-    | Some v ->
-      let Some v' = v' in
-      let read_op :: _ = reads in
-      lemma_eval_instr_unchanged_args outs args (ff v) oprs f s;
-      let v0', v1' =
-        instr_apply_eval_args outs args (ff v) oprs s,
-        instr_apply_eval_args outs args (ff v) oprs (run f s) in
-      ()
-
-let rec lemma_eval_instr_unchanged_inouts
-    (outs inouts:list instr_out) (args:list instr_operand)
-    (ff:instr_inouts_t outs inouts args) (oprs:instr_operands_t inouts args)
-    (f:st unit) (s:machine_state) :
-  Lemma
-    (requires (
-        unchanged_all (aux_read_set1 inouts args oprs) f s))
-    (ensures (
-        let v0, v1 =
-          instr_apply_eval_inouts outs inouts args ff oprs s,
-          instr_apply_eval_inouts outs inouts args ff oprs (run f s) in
-        v0 == v1)) =
-  match inouts with
-  | [] ->
-    lemma_eval_instr_unchanged_args outs args ff oprs f s
-  | (Out, i)::inouts ->
-    let oprs =
-      match i with
-      | IOpEx i -> snd #(instr_operand_t i) (coerce oprs)
-      | IOpIm i -> coerce oprs
-    in
-    let res = instr_apply_eval_inouts outs inouts args (coerce ff) oprs s in
-    lemma_eval_instr_unchanged_inouts outs inouts args (coerce ff) oprs f s
-  | (InOut, i)::inouts ->
-    let (v, oprs) : option _ & _ =
-      match i with
-      | IOpEx i -> let oprs = coerce oprs in (instr_eval_operand_explicit i (fst oprs) s, snd oprs)
-      | IOpIm i -> (instr_eval_operand_implicit i s, coerce oprs)
-    in
-    let ff:arrow (instr_val_t i) (instr_inouts_t outs inouts args) = coerce ff in
-    let res = bind_option v (fun v -> instr_apply_eval_inouts outs inouts args (ff v) oprs s) in
-    match v with
-    | None -> ()
-    | Some v ->
-      lemma_eval_instr_unchanged_inouts outs inouts args (ff v) oprs f s
-
-let lemma_eval_instr_unchanged
-    (it:instr_t_record) (oprs:instr_operands_t it.outs it.args) (ann:instr_annotation it)
-    (f:st unit) (s:machine_state) :
-  Lemma
-    (requires (
-        unchanged_all (fst (rw_set_of_ins (Instr it oprs ann))) f s))
-    (ensures (
-        let InstrTypeRecord #outs #args #havoc_flags i = it in
-        let v0, v1 =
-          instr_apply_eval outs args (instr_eval i) oprs s,
-          instr_apply_eval outs args (instr_eval i) oprs (run f s) in
-        v0 == v1)) =
-  let InstrTypeRecord #outs #args #havoc_flags i = it in
-  lemma_eval_instr_unchanged_inouts outs outs args (instr_eval i) oprs f s
-
-let valid_dst_access_location (a:access_location) (s:machine_state) : bool =
-  match a with
-  | ALoc64 o -> valid_dst_operand o s
-  | ALoc128 o -> valid_dst_mov128_op o s
-  | ALocCf -> true
-  | ALocOf -> true
-
-let unchanged_except (exceptions:list access_location) (s1 s2:machine_state) :
+let unchanged_except (exceptions:list location) (s1 s2:machine_state) :
   GTot Type0 =
-  (forall (a:access_location). {:pattern (eval_access_location a s2)} (
-      (!!(disjoint_access_location_from_locations a exceptions) ==>
-       (eval_access_location a s1 == eval_access_location a s2))
-    )) /\
-  (s1.ms_stack.initial_rsp = s2.ms_stack.initial_rsp) /\
-  (Set.equal (Map.domain s1.ms_mem) (Map.domain s2.ms_mem)) /\
-  (Set.equal (Map.domain s1.ms_stack.stack_mem) (Map.domain s2.ms_stack.stack_mem))
+  (forall (a:location). {:pattern (eval_location a s2)} (
+      (!!(disjoint_location_from_locations a exceptions) ==>
+       (eval_location a s1 == eval_location a s2))
+    ))
 
-private abstract
-let sanity_check_unchanged_except1 s =
-  assert (unchanged_except [] s s);
-  assert (unchanged_except [ALocCf] s s);
-  assert (unchanged_except [ALocCf; ALocOf] s ({s with ms_flags = 0}))
-
-private abstract
-[@expect_failure]
-let sanity_check_unchanged_except2 s =
-  assert (unchanged_except [] s ({s with ms_flags = 0}))
-
-let only_affects (locs:list access_location) (f:st unit) : GTot Type0 =
+let only_affects (locs:list location) (f:st unit) : GTot Type0 =
   forall s. {:pattern unchanged_except locs s (run f s)} (
     unchanged_except locs s (run f s)
   )
 
-let rec unchanged_at (locs:list access_location) (s1 s2:machine_state) : GTot Type0 =
+let rec unchanged_at (locs:list location) (s1 s2:machine_state) : GTot Type0 =
   match locs with
   | [] -> True
   | x :: xs -> (
-      (eval_access_location x s1 == eval_access_location x s2) /\
+      (eval_location x s1 == eval_location x s2) /\
       (unchanged_at xs s1 s2)
     )
 
-let bounded_effects (reads writes:list access_location) (f:st unit) : GTot Type0 =
+let bounded_effects (reads writes:list location) (f:st unit) : GTot Type0 =
   (only_affects writes f) /\
   (
     forall s1 s2. {:pattern unchanged_at writes (run f s1) (run f s2)} (
@@ -1010,9 +645,9 @@ let bounded_effects (reads writes:list access_location) (f:st unit) : GTot Type0
     )
   )
 
-let rec lemma_disjoint_implies_unchanged_at (reads changes:list access_location) (s1 s2:machine_state) :
+let rec lemma_disjoint_implies_unchanged_at (reads changes:list location) (s1 s2:machine_state) :
   Lemma
-    (requires (!!(disjoint_access_locations reads changes "") /\
+    (requires (!!(disjoint_locations reads changes) /\
                unchanged_except changes s1 s2))
     (ensures (unchanged_at reads s1 s2)) =
   match reads with
@@ -1020,108 +655,104 @@ let rec lemma_disjoint_implies_unchanged_at (reads changes:list access_location)
   | x :: xs ->
     lemma_disjoint_implies_unchanged_at xs changes s1 s2
 
-let rec lemma_disjoint_access_location_from_locations_append
-  (a:access_location) (as1 as2:list access_location) :
+let rec lemma_disjoint_location_from_locations_append
+  (a:location) (as1 as2:list location) :
   Lemma (
-    (!!(disjoint_access_location_from_locations a as1) /\
-     !!(disjoint_access_location_from_locations a as2)) <==>
-    (!!(disjoint_access_location_from_locations a (as1 `L.append` as2)))) =
+    (!!(disjoint_location_from_locations a as1) /\
+     !!(disjoint_location_from_locations a as2)) <==>
+    (!!(disjoint_location_from_locations a (as1 `L.append` as2)))) =
   match as1 with
   | [] -> ()
   | x :: xs ->
-    lemma_disjoint_access_location_from_locations_append a xs as2
+    lemma_disjoint_location_from_locations_append a xs as2
 
-let lemma_unchanged_except_transitive (a12 a23:list access_location) (s1 s2 s3:machine_state) :
+let lemma_unchanged_except_transitive (a12 a23:list location) (s1 s2 s3:machine_state) :
   Lemma
     (requires (unchanged_except a12 s1 s2 /\ unchanged_except a23 s2 s3))
     (ensures (unchanged_except (a12 `L.append` a23) s1 s3)) =
   let aux a : Lemma
-    (requires (!!(disjoint_access_location_from_locations a (a12 `L.append` a23))))
-    (ensures (eval_access_location a s1 == eval_access_location a s3)) =
-    lemma_disjoint_access_location_from_locations_append a a12 a23 in
+    (requires (!!(disjoint_location_from_locations a (a12 `L.append` a23))))
+    (ensures (eval_location a s1 == eval_location a s3)) =
+    lemma_disjoint_location_from_locations_append a a12 a23 in
   FStar.Classical.forall_intro (FStar.Classical.move_requires aux)
 
-let lemma_unchanged_except_append_symmetric (a1 a2:list access_location) (s1 s2:machine_state) :
+let lemma_unchanged_except_append_symmetric (a1 a2:list location) (s1 s2:machine_state) :
   Lemma
     (requires (unchanged_except (a1 `L.append` a2) s1 s2))
     (ensures (unchanged_except (a2 `L.append` a1) s1 s2)) =
-  assert (s1.ms_stack.initial_rsp = s2.ms_stack.initial_rsp);
   let aux a : Lemma
     (requires (
-       (!!(disjoint_access_location_from_locations a (a1 `L.append` a2))) \/
-       (!!(disjoint_access_location_from_locations a (a2 `L.append` a1)))))
-    (ensures (eval_access_location a s1 == eval_access_location a s2)) =
-    lemma_disjoint_access_location_from_locations_append a a1 a2;
-    lemma_disjoint_access_location_from_locations_append a a2 a1 in
+       (!!(disjoint_location_from_locations a (a1 `L.append` a2))) \/
+       (!!(disjoint_location_from_locations a (a2 `L.append` a1)))))
+    (ensures (eval_location a s1 == eval_location a s2)) =
+    lemma_disjoint_location_from_locations_append a a1 a2;
+    lemma_disjoint_location_from_locations_append a a2 a1 in
   FStar.Classical.forall_intro (FStar.Classical.move_requires aux)
 
-let rec lemma_disjoint_access_location_from_locations_mem
-    (a1 a2:list access_location) (a:access_location) :
+let rec lemma_disjoint_location_from_locations_mem
+    (a1 a2:list location) (a:location) :
   Lemma
     (requires (
         (L.mem a a1) /\
-        !!(disjoint_access_locations a1 a2 "")))
+        !!(disjoint_locations a1 a2)))
     (ensures (
-        !!(disjoint_access_location_from_locations a a2))) =
+        !!(disjoint_location_from_locations a a2))) =
   match a1 with
   | [_] -> ()
   | x :: xs ->
     if a = x then () else
-    lemma_disjoint_access_location_from_locations_mem xs a2 a
+    lemma_disjoint_location_from_locations_mem xs a2 a
 
-let rec lemma_unchanged_at_mem (as:list access_location) (a:access_location) (s1 s2:machine_state) :
+let rec lemma_unchanged_at_mem (as:list location) (a:location) (s1 s2:machine_state) :
   Lemma
     (requires (
         (unchanged_at as s1 s2) /\
         (L.mem a as)))
     (ensures (
-        (eval_access_location a s1 == eval_access_location a s2))) =
+        (eval_location a s1 == eval_location a s2))) =
   match as with
   | [_] -> ()
   | x :: xs ->
     if a = x then () else
     lemma_unchanged_at_mem xs a s1 s2
 
-let lemma_unchanged_at_combine (a1 a2:list access_location) (sa1 sa2 sb1 sb2:machine_state) :
+let lemma_unchanged_at_combine (a1 a2:list location) (sa1 sa2 sb1 sb2:machine_state) :
   Lemma
     (requires (
-        !!(disjoint_access_locations a1 a2 "") /\
+        !!(disjoint_locations a1 a2) /\
         (unchanged_at a1 sa1 sb2) /\
         (unchanged_except a2 sa1 sb1) /\
         (unchanged_at a2 sa2 sb1) /\
         (unchanged_except a1 sa2 sb2)))
     (ensures (
         (unchanged_at (a1 `L.append` a2) sb1 sb2))) =
-  let precond = !!(disjoint_access_locations a1 a2 "") /\
+  let precond = !!(disjoint_locations a1 a2) /\
                  (unchanged_at a1 sa1 sb2) /\
                  (unchanged_except a2 sa1 sb1) /\
                  (unchanged_at a2 sa2 sb1) /\
                  (unchanged_except a1 sa2 sb2) in
-  let rec aux1 a :
+  let aux1 a :
     Lemma
-      (requires (L.mem a a1 /\
-                 precond))
-      (ensures (eval_access_location a sb1 == eval_access_location a sb2)) =
-    lemma_disjoint_access_location_from_locations_mem a1 a2 a;
-    assert (!!(disjoint_access_location_from_locations a a2));
-    assert (eval_access_location a sb1 == eval_access_location a sa1);
+      (requires (L.mem a a1 /\ precond))
+      (ensures (eval_location a sb1 == eval_location a sb2)) =
+    lemma_disjoint_location_from_locations_mem a1 a2 a;
+    assert (!!(disjoint_location_from_locations a a2));
+    assert (eval_location a sb1 == eval_location a sa1);
     lemma_unchanged_at_mem a1 a sa1 sb2
   in
-  let rec aux2 a :
+  let aux2 a :
     Lemma
-      (requires (L.mem a a2 /\
-                 precond))
-      (ensures (eval_access_location a sb1 == eval_access_location a sb2)) =
-    lemma_disjoint_access_locations_symmetric a1 a2 "";
-    lemma_disjoint_access_location_from_locations_mem a2 a1 a;
-    assert (!!(disjoint_access_location_from_locations a a1));
-    assert (eval_access_location a sb2 == eval_access_location a sa2);
+      (requires (L.mem a a2 /\ precond))
+      (ensures (eval_location a sb1 == eval_location a sb2)) =
+    lemma_disjoint_locations_symmetric a1 a2;
+    lemma_disjoint_location_from_locations_mem a2 a1 a;
+    assert (!!(disjoint_location_from_locations a a1));
+    assert (eval_location a sb2 == eval_location a sa2);
     lemma_unchanged_at_mem a2 a sa2 sb1
   in
   let rec aux a1' a1'' a2' a2'' :
     Lemma
-      (requires (a1' `L.append` a1'' == a1 /\ a2' `L.append` a2'' == a2 /\
-                precond))
+      (requires (a1' `L.append` a1'' == a1 /\ a2' `L.append` a2'' == a2 /\ precond))
       (ensures (unchanged_at (a1'' `L.append` a2'') sb1 sb2))
       (decreases %[a1''; a2'']) =
     match a1'' with
@@ -1139,10 +770,11 @@ let lemma_unchanged_at_combine (a1 a2:list access_location) (sa1 sa2 sb1 sb2:mac
       L.append_l_cons x xs a1';
       L.append_mem a1' a1'' x;
       aux1 x;
-      aux (a1' `L.append` [x]) xs a2' a2'' in
+      aux (a1' `L.append` [x]) xs a2' a2''
+  in
   aux [] a1 [] a2
 
-let lemma_unchanged_except_same_transitive (as:list access_location) (s1 s2 s3:machine_state) :
+let lemma_unchanged_except_same_transitive (as:list location) (s1 s2 s3:machine_state) :
   Lemma
     (requires (
         (unchanged_except as s1 s2) /\
@@ -1150,56 +782,7 @@ let lemma_unchanged_except_same_transitive (as:list access_location) (s1 s2 s3:m
     (ensures (
         (unchanged_except as s1 s3))) = ()
 
-let lemma_unchanged_at_and_except_aux (a x:access_location) (xs:list access_location) (s1 s2:machine_state) :
-  Lemma
-    (requires (
-        (unchanged_at (x :: xs) s1 s2) /\
-        (unchanged_except (x :: xs) s1 s2) /\
-        (!!(disjoint_access_location_from_locations a xs)) /\
-        (not !!(disjoint_access_location a x))))
-    (ensures (
-        (eval_access_location a s1 == eval_access_location a s2))) =
-  match a with
-  | ALoc64 oa -> (
-      match oa with
-      | OConst _ -> ()
-      | OReg ra -> (
-          match x with
-          | ALoc64 ox -> (
-              match ox with
-              | OConst _ -> ()
-              | OReg rx -> ()
-              | OMem mx ->
-                admit ()
-              | OStack mx ->
-                admit ()
-            )
-          | ALoc128 ox -> (
-              match ox with
-              | OReg128 rx ->
-                admit () (* WAT! *)
-              | _ ->
-                admit ()
-            )
-          | ALocCf | ALocOf -> ()
-        )
-      | OMem ma ->
-        admit ()
-      | OStack ma ->
-        admit ()
-    )
-  | ALoc128 oa -> (
-      match oa with
-      | OReg128 ra ->
-        admit ()
-      | OMem128 ma ->
-        admit ()
-      | OStack128 ma ->
-        admit ()
-    )
-  | ALocCf | ALocOf -> ()
-
-let rec lemma_unchanged_at_and_except (as:list access_location) (s1 s2:machine_state) :
+let rec lemma_unchanged_at_and_except (as:list location) (s1 s2:machine_state) :
   Lemma
     (requires (
         (unchanged_at as s1 s2) /\
@@ -1209,91 +792,39 @@ let rec lemma_unchanged_at_and_except (as:list access_location) (s1 s2:machine_s
   match as with
   | [] -> ()
   | x :: xs ->
-    FStar.Classical.forall_intro ((fun a -> (
-          FStar.Classical.arrow_to_impl
-          #(!!(disjoint_access_location_from_locations a xs))
-          #(eval_access_location a s1 == eval_access_location a s2))
-          (fun _ ->
-             FStar.Classical.or_elim
-             #_ #_ #(fun () -> eval_access_location a s1 == eval_access_location a s2)
-               (fun (_:unit{!!(disjoint_access_location a x)}) -> ())
-               (fun (_:unit{not !!(disjoint_access_location a x)}) ->
-                  lemma_unchanged_at_and_except_aux a x xs s1 s2)
-          )
-      ) <: (a:_) -> Lemma (
-        (!!(disjoint_access_location_from_locations a xs) ==>
-         (eval_access_location a s1 == eval_access_location a s2))
-      ));
     lemma_unchanged_at_and_except xs s1 s2
 
 let lemma_equiv_states_when_except_none (s1 s2:machine_state) (ok:bool) :
   Lemma
     (requires (
-        (s1.ms_stack.initial_rsp = s2.ms_stack.initial_rsp) /\
         (unchanged_except [] s1 s2)))
     (ensures (
         (equiv_states ({s1 with ms_ok=ok}) ({s2 with ms_ok=ok})))) =
-  let open FStar.FunctionalExtensionality in
-  FStar.Classical.forall_intro (
-    (fun r ->
-       assert (eval_access_location (ALoc64 (OReg r)) s1 ==
-               eval_access_location (ALoc64 (OReg r)) s2) (* OBSERVE *)
-    ) <:
-    (r:_) -> Lemma (eval_reg r s1 = eval_reg r s2)
-  );
-  assert (feq s1.ms_regs s2.ms_regs);
-  assert (s1.ms_regs == s2.ms_regs);
-  FStar.Classical.forall_intro (
-    (fun r ->
-       assert (eval_access_location (ALoc128 (OReg128 r)) s1 ==
-               eval_access_location (ALoc128 (OReg128 r)) s2) (* OBSERVE *)
-    ) <:
-    (r:_) -> Lemma (eval_xmm r s1 = eval_xmm r s2)
-  );
-  assert (feq s1.ms_xmms s2.ms_xmms);
-  assert (s1.ms_xmms == s2.ms_xmms);
-  assert (eval_access_location ALocCf s1 == eval_access_location ALocCf s2); (* OBSERVE *)
-  assert (eval_access_location ALocOf s1 == eval_access_location ALocOf s2); (* OBSERVE *)
-  assert (cf s1.ms_flags = cf s2.ms_flags);
-  assert (overflow s1.ms_flags = overflow s2.ms_flags);
-  FStar.Classical.forall_intro_2 (
-    (fun (l:int) (t:taint) ->
-       assert (eval_access_location (ALoc64 (OMem (MConst l, t))) s1 ==
-               eval_access_location (ALoc64 (OMem (MConst l, t))) s2); (* OBSERVE *)
-       Vale.Def.Opaque_s.reveal_opaque get_heap_val64_def;
-       Vale.Def.Words.Seq.four_to_nat_8_injective ();
-       Vale.Def.Words.Two.two_to_nat_32_injective ()
-    ) <:
-    (l:_) -> _ -> Lemma ((Map.sel s1.ms_mem l = Map.sel s2.ms_mem l) /\
-                         (Map.contains s1.ms_mem l = Map.contains s2.ms_mem l) /\
-                         (Map.sel s1.ms_memTaint l = Map.sel s2.ms_memTaint l) /\
-                         (Map.contains s1.ms_memTaint l = Map.contains s2.ms_memTaint l))
-  );
-  assert (Map.equal s1.ms_mem s2.ms_mem);
-  assert (s1.ms_mem == s2.ms_mem);
-  FStar.Classical.forall_intro_2 (
-    (fun (l:int) (t:taint) ->
-       assert (eval_access_location (ALoc64 (OStack (MConst l, t))) s1 ==
-               eval_access_location (ALoc64 (OStack (MConst l, t))) s2); (* OBSERVE *)
-       Vale.Def.Opaque_s.reveal_opaque get_heap_val64_def;
-       Vale.Def.Words.Seq.four_to_nat_8_injective ();
-       Vale.Def.Words.Two.two_to_nat_32_injective ()
-    ) <:
-    (l:_) -> _ -> Lemma ((Map.sel s1.ms_stack.stack_mem l = Map.sel s2.ms_stack.stack_mem l) /\
-                         (Map.contains s1.ms_stack.stack_mem l = Map.contains s2.ms_stack.stack_mem l) /\
-                         (Map.sel s1.ms_stackTaint l = Map.sel s2.ms_stackTaint l) /\
-                         (Map.contains s1.ms_stackTaint l = Map.contains s2.ms_stackTaint l))
-  );
-  assert (Map.equal s1.ms_stack.stack_mem s2.ms_stack.stack_mem);
-  assert (s1.ms_stack.initial_rsp = s2.ms_stack.initial_rsp);
-  assert (s1.ms_stack == s2.ms_stack);
-  assert (Map.equal s1.ms_memTaint s2.ms_memTaint);
-  assert (s1.ms_memTaint == s2.ms_memTaint);
-  assert (Map.equal s1.ms_stackTaint s2.ms_stackTaint);
-  assert (s1.ms_stackTaint == s2.ms_stackTaint);
-  ()
+  lemma_locations_complete s1 s2 ok []
 
-let lemma_commute (f1 f2:st unit) (r1 w1 r2 w2:list access_location) (s:machine_state) :
+let rec lemma_mem_not_disjoint (a:location) (as1 as2:list location) :
+  Lemma
+    (requires (L.mem a as1 /\ L.mem a as2))
+    (ensures (
+        (not !!(disjoint_locations as1 as2)))) =
+  match as1, as2 with
+  | [_], [_] -> ()
+  | [_], y :: ys ->
+    if a = y then () else (
+      lemma_mem_not_disjoint a as1 ys
+    )
+  | x :: xs, y :: ys ->
+    if a = x then (
+      if a = y then () else (
+        lemma_mem_not_disjoint a as1 ys;
+        lemma_disjoint_locations_symmetric as1 as2;
+        lemma_disjoint_locations_symmetric as1 ys
+      )
+    ) else (
+      lemma_mem_not_disjoint a xs as2
+    )
+
+let lemma_commute (f1 f2:st unit) (r1 w1 r2 w2:list location) (s:machine_state) :
   Lemma
     (requires (
         (bounded_effects r1 w1 f1) /\
@@ -1309,11 +840,6 @@ let lemma_commute (f1 f2:st unit) (r1 w1 r2 w2:list access_location) (s:machine_
   let is2 = run f2 s in
   let is12 = run f2 is1 in
   let is21 = run f1 is2 in
-  FStar.Classical.forall_intro_3 (
-    (fun l1 l2 r -> lemma_disjoint_access_locations_reason l1 l2 "" r) <:
-    ((l1:_) -> (l2:_) -> (r:_) -> Lemma
-       (!!(disjoint_access_locations l1 l2 r) ==
-        !!(disjoint_access_locations l1 l2 ""))));
   lemma_disjoint_implies_unchanged_at r1 w2 s is2;
   lemma_disjoint_implies_unchanged_at r2 w1 s is1;
   assert (unchanged_at w1 is1 is21);
@@ -1333,124 +859,17 @@ let lemma_commute (f1 f2:st unit) (r1 w1 r2 w2:list access_location) (s:machine_
   lemma_unchanged_at_and_except (w1 `L.append` w2) is12 is21;
   assert (unchanged_except [] is12 is21);
   assert (s21.ms_ok = s12.ms_ok);
-  assert (is12.ms_stack.initial_rsp = is21.ms_stack.initial_rsp);
   lemma_equiv_states_when_except_none is12 is21 s12.ms_ok;
   assert (equiv_states (run2 f1 f2 s) (run2 f2 f1 s))
 
-let lemma_untainted_eval_ins_only_affects_write_aux1 (i:ins{Instr? i}) (s:machine_state) (a:access_location) :
+let lemma_untainted_eval_ins_only_affects_write_aux (i:ins{Instr? i}) (s:machine_state) (a:location) :
   Lemma
     (requires (
         let r, w = rw_set_of_ins i in
-        (!!(disjoint_access_location_from_locations a w))))
+        (!!(disjoint_location_from_locations a w))))
     (ensures (
-        (eval_access_location a s == eval_access_location a (run (untainted_eval_ins i) s)))) =
+        (eval_location a s == eval_location a (run (untainted_eval_ins i) s)))) =
   admit ()
-
-let lemma_instr_write_output_explicit_only_affects_write_aux2
-    (i:instr_operand_explicit) (v:instr_val_t (IOpEx i)) (o:instr_operand_t i) (s_orig s:machine_state) :
-  Lemma
-    (requires (
-        (s_orig.ms_stack.initial_rsp = s.ms_stack.initial_rsp) /\
-        (Set.equal (Map.domain s_orig.ms_mem) (Map.domain s.ms_mem)) /\
-        (Set.equal (Map.domain s_orig.ms_stack.stack_mem) (Map.domain s.ms_stack.stack_mem))
-      ))
-    (ensures (
-        (let s1 = instr_write_output_explicit i v o s_orig s in
-         (s_orig.ms_stack.initial_rsp = s1.ms_stack.initial_rsp) /\
-         (Set.equal (Map.domain s_orig.ms_mem) (Map.domain s1.ms_mem)) /\
-         (Set.equal (Map.domain s_orig.ms_stack.stack_mem) (Map.domain s1.ms_stack.stack_mem))))) =
-  let s1 = instr_write_output_explicit i v o s_orig s in
-  match i with
-  | IOp64 -> (
-      if valid_dst_operand o s_orig then (
-        admit ()
-      ) else ()
-    )
-  | IOpXmm -> (
-      admit ()
-    )
-
-let lemma_instr_write_output_implicit_only_affects_write_aux2
-    (i:instr_operand_implicit) (v:instr_val_t (IOpIm i)) (s_orig s:machine_state) :
-  Lemma
-    (requires (
-        (s_orig.ms_stack.initial_rsp = s.ms_stack.initial_rsp) /\
-        (Set.equal (Map.domain s_orig.ms_mem) (Map.domain s.ms_mem)) /\
-        (Set.equal (Map.domain s_orig.ms_stack.stack_mem) (Map.domain s.ms_stack.stack_mem))
-      ))
-    (ensures (
-        (let s1 = instr_write_output_implicit i v s_orig s in
-         (s_orig.ms_stack.initial_rsp = s1.ms_stack.initial_rsp) /\
-         (Set.equal (Map.domain s_orig.ms_mem) (Map.domain s1.ms_mem)) /\
-         (Set.equal (Map.domain s_orig.ms_stack.stack_mem) (Map.domain s1.ms_stack.stack_mem))))) =
-  admit ()
-
-let rec lemma_instr_write_outputs_only_affects_write_aux2
-    (outs:list instr_out) (args:list instr_operand)
-    (vs:instr_ret_t outs) (oprs:instr_operands_t outs args) (s_orig s:machine_state) :
-  Lemma
-    (requires (
-        (s_orig.ms_stack.initial_rsp = s.ms_stack.initial_rsp) /\
-        (Set.equal (Map.domain s_orig.ms_mem) (Map.domain s.ms_mem)) /\
-        (Set.equal (Map.domain s_orig.ms_stack.stack_mem) (Map.domain s.ms_stack.stack_mem))
-      ))
-    (ensures (
-        let s1 = instr_write_outputs outs args vs oprs s_orig s in
-        (s_orig.ms_stack.initial_rsp = s1.ms_stack.initial_rsp) /\
-        (Set.equal (Map.domain s_orig.ms_mem) (Map.domain s1.ms_mem)) /\
-        (Set.equal (Map.domain s_orig.ms_stack.stack_mem) (Map.domain s1.ms_stack.stack_mem))
-      )) =
-  match outs with
-  | [] -> ()
-  | (_, i)::outs -> (
-      let ((v:instr_val_t i), (vs:instr_ret_t outs)) =
-        match outs with
-        | [] -> (vs, ())
-        | _::_ -> let vs = coerce vs in (fst vs, snd vs)
-        in
-      match i with
-      | IOpEx i ->
-        let oprs = coerce oprs in
-        lemma_instr_write_output_explicit_only_affects_write_aux2 i v (fst oprs) s_orig s;
-        let s = instr_write_output_explicit i v (fst oprs) s_orig s in
-        lemma_instr_write_outputs_only_affects_write_aux2 outs args vs (snd oprs) s_orig s
-      | IOpIm i ->
-        lemma_instr_write_output_implicit_only_affects_write_aux2 i v s_orig s;
-        let s = instr_write_output_implicit i v s_orig s in
-        lemma_instr_write_outputs_only_affects_write_aux2 outs args vs (coerce oprs) s_orig s
-    )
-
-let lemma_eval_instr_only_affects_write_aux2 it oprs ann s0 s1 :
-  Lemma
-    (requires (
-        (Some s1 == eval_instr it oprs ann s0)))
-    (ensures (
-        (s0.ms_stack.initial_rsp = s1.ms_stack.initial_rsp) /\
-        (Set.equal (Map.domain s0.ms_mem) (Map.domain s1.ms_mem)) /\
-        (Set.equal (Map.domain s0.ms_stack.stack_mem) (Map.domain s1.ms_stack.stack_mem))
-      )) =
-  let InstrTypeRecord #outs #args #havoc_flags i = it in
-  let Some vs = instr_apply_eval outs args (instr_eval i) oprs s0 in
-  let s1' =
-    match havoc_flags with
-    | HavocFlags -> {s0 with ms_flags = havoc_state_ins s0 (Instr it oprs ann)}
-    | PreserveFlags -> s0
-  in
-  let s1 = instr_write_outputs outs args vs oprs s0 s1' in
-  lemma_instr_write_outputs_only_affects_write_aux2 outs args vs oprs s0 s1'
-
-let lemma_untainted_eval_ins_only_affects_write_aux2 (i:ins{Instr? i}) (s:machine_state) :
-  Lemma
-    (ensures (
-        let s' = run (untainted_eval_ins i) s in
-        (s.ms_stack.initial_rsp = s'.ms_stack.initial_rsp) /\
-        (Set.equal (Map.domain s.ms_mem) (Map.domain s'.ms_mem)) /\
-        (Set.equal (Map.domain s.ms_stack.stack_mem) (Map.domain s'.ms_stack.stack_mem))
-      )) =
-  let Instr it oprs ann = i in
-  match eval_instr it oprs ann s with
-  | None -> ()
-  | Some s' -> lemma_eval_instr_only_affects_write_aux2 it oprs ann s s'
 
 let lemma_untainted_eval_ins_only_affects_write (i:ins{Instr? i}) (s:machine_state) :
   Lemma
@@ -1458,8 +877,7 @@ let lemma_untainted_eval_ins_only_affects_write (i:ins{Instr? i}) (s:machine_sta
        (let r, w = rw_set_of_ins i in
         (unchanged_except w s (run (untainted_eval_ins i) s))))) =
   FStar.Classical.forall_intro (
-    FStar.Classical.move_requires (lemma_untainted_eval_ins_only_affects_write_aux1 i s));
-  lemma_untainted_eval_ins_only_affects_write_aux2 i s
+    FStar.Classical.move_requires (lemma_untainted_eval_ins_only_affects_write_aux i s))
 
 let lemma_untainted_eval_ins_unchanged_behavior (i:ins{Instr? i}) (s1 s2:machine_state) :
   Lemma
@@ -1591,8 +1009,6 @@ let lemma_code_exchange (c1 c2 : code) (fuel:nat) (s1 s2 : machine_state) :
     assert_norm (equiv_states s2' s24);
     lemma_instruction_exchange i1 i2 s1 s2;
     assert (equiv_states s14 s24);
-    sanity_check_equiv_states s1' s14 s24;
-    sanity_check_equiv_states s1' s24 s2';
     assert (equiv_states s1' s2')
   | _ -> ()
 
