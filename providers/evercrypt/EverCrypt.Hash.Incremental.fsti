@@ -24,10 +24,31 @@ open Spec.Hash.Definitions
 /// Convenience helpers, so that clients only ever need to refer to this module
 /// ---------------------------------------------------------------------------
 
-unfold noextract
-let alg = Hash.alg
+include Hacl.Hash.Definitions
+include Spec.Hash.Definitions
 
-// TODO: replace with include {Spec,Hacl}.Hash.Definitions here
+// Please refer to this module via a suitable module abbrevation!
+unfold noextract
+let alg = hash_alg
+
+// Similar to: Spec.Hash.Definitions.bytes_hash
+let bytes_any_hash = s:S.seq UInt8.t { S.length s = 64 }
+// Similar to: Hacl.Hash.Definitions.hash_t
+let any_hash_t = b:B.buffer UInt8.t { B.length b = 64 }
+
+#push-options "--max_ifuel 1"
+let bytes_any_hash_fits (a: alg) (b: bytes_any_hash): Lemma
+  (requires True)
+  (ensures hash_length a <= S.length b)
+=
+  ()
+
+let any_hash_t_fits (a: alg) (b: any_hash_t): Lemma
+  (requires True)
+  (ensures hash_length a <= B.length b)
+=
+  ()
+#pop-options
 
 /// Abstract footprints, with the same machinery as EverCrypt.Hash
 /// --------------------------------------------------------------
@@ -71,6 +92,7 @@ val invariant_loc_in_footprint
   (ensures (loc_in (footprint m s) m))
   [SMTPat (invariant m s)]
 
+
 /// Keeping track of the bytes hashed so far
 /// ----------------------------------------
 ///
@@ -82,11 +104,13 @@ let bytes = S.seq UInt8.t
 
 val hashes: #a:Hash.alg -> h:HS.mem -> s:state a -> b:bytes -> Type0
 
+// This should alleviate the need for painful proofs about things fitting.
 val hash_fits: #a:Hash.alg -> h:HS.mem -> s:state a -> b:bytes -> Lemma
   (requires hashes h s b)
   (ensures (
     S.length b < Spec.Hash.Definitions.max_input_length a))
   [ SMTPat (hashes h s b) ]
+
 
 /// Central frame invariants
 /// ------------------------
@@ -163,6 +187,7 @@ val init (a: Hash.alg) (s: state a): Stack unit
     preserves_freeable s h0 h1 /\
     invariant h1 s /\
     hashes h1 s S.empty /\
+    footprint h0 s == footprint h1 s /\
     B.(modifies (footprint h0 s) h0 h1)))
 
 unfold
@@ -184,7 +209,7 @@ let update_pre
 unfold
 let update_post
   (a: Hash.alg)
-  (s s': state a)
+  (s: state a)
   (prev: G.erased bytes)
   (data: B.buffer UInt8.t)
   (len: UInt32.t)
@@ -194,7 +219,7 @@ let update_post
   invariant h1 s /\
   B.(modifies (footprint h0 s) h0 h1) /\
   footprint h0 s == footprint h1 s /\
-  hashes h1 s' (Seq.append (G.reveal prev) (B.as_seq h0 data))
+  hashes h1 s (Seq.append (G.reveal prev) (B.as_seq h0 data))
 
 (** @type: true
 *)
@@ -204,9 +229,9 @@ val update:
   prev:G.erased bytes ->
   data: B.buffer UInt8.t ->
   len: UInt32.t ->
-  Stack (state a)
+  Stack unit
     (requires fun h0 -> update_pre a s prev data len h0)
-    (ensures fun h0 s' h1 -> update_post a s s' prev data len h0 h1)
+    (ensures fun h0 s' h1 -> update_post a s prev data len h0 h1)
 
 /// Note: the state is left to be reused by the caller to feed more data into
 /// the hash.
