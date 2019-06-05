@@ -30,8 +30,11 @@ let isunit_in_nsquare #n a =
   inv_as_gcd1 #(n*n) a;
   to_fe_idemp #(n*n) a
 
-val fenu_to_fen2u: #n:comp -> a:fenu n -> b:fen2u n{b = a /\ to_fe #n b = a}
-let fenu_to_fen2u #n a =
+#reset-options
+
+val fenu_to_fen2u_lemma: #n:comp -> a:fenu n -> Lemma
+  (a < n*n /\ isunit #(n*n) a /\ to_fe #n a = a)
+let fenu_to_fen2u_lemma #n a =
   multiplication_order_lemma n 1 n;
   assert (a < n*n);
   let res = to_fe #(n*n) a in
@@ -39,8 +42,10 @@ let fenu_to_fen2u #n a =
   modulo_lemma a (n*n);
   assert (res = a);
   assert (isunit a);
-  isunit_in_nsquare #n a;
-  res
+  isunit_in_nsquare #n a
+
+val fenu_to_fen2u: #n:comp -> a:fenu n -> b:fen2u n{b = a /\ to_fe #n b = a}
+let fenu_to_fen2u #n a = fenu_to_fen2u_lemma a; let res:fen2 n = a in res
 
 // euler's totient
 val etot: p:prm -> q:prm -> l:fe (p*q)
@@ -94,7 +99,7 @@ val encf_raw: #n:comp -> g:isg n -> x:nat -> y:fen2u n -> fen2 n
 let encf_raw #n g x y = fexp g x *% fexp y n
 
 val encf: #n:comp -> g:isg n -> x:fe n -> y:fenu n -> fen2 n
-let encf #n g x y = encf_raw #n g x (fenu_to_fen2u y)
+let encf #n g x y = fenu_to_fen2u_lemma y; encf_raw #n g x y
 
 val encf_unit: #n:comp -> g:isg n -> x:fe n -> y:fenu n -> Lemma
   (isunit #(n*n) (encf #n g x y))
@@ -166,6 +171,8 @@ let is_res_class #n g w x = exists y. encf g x y = w
 val res_class: #n:comp -> g:isg n -> w:fen2u n -> x:fe n{is_res_class g w x}
 let res_class #n g w = fst (encf_inv g w)
 
+#reset-options "--z3rlimit 150"
+
 val res_class_decomposition: #n:comp -> g1:isg n -> g2:isg n ->  w:fen2u n -> Lemma
   (ensures (res_class g1 w = res_class g2 w *% res_class g1 g2))
 let res_class_decomposition #n g1 g2 w =
@@ -228,7 +235,6 @@ let res_class_decomposition #n g1 g2 w =
   to_fe_idemp #n x1;
   to_fe_mul' x3 x2;
   assert(x1 = x3 *% x2)
-
 
 val res_class_inverse: #n:comp -> g1:isg n -> g2:isg n -> Lemma
   (isunit (res_class g1 g2) /\
@@ -381,11 +387,13 @@ let l1_div_l2 p q w g =
   //
   // TODO decryption of non-units is nonstandard and should
   // be re-considered at some point.
-  let l1:fe n = if l1arg = 0 then 0 else bigl l1arg in
-  g_pow_isunit g lambda; isunit_nonzero (fexp g lambda);
-  let l2:fe n = bigl (fexp g lambda) in
+  if l1arg = 0 then 0 else begin
+    let l1:fe n = bigl l1arg in
+    g_pow_isunit g lambda; isunit_nonzero (fexp g lambda);
+    let l2:fe n = bigl (fexp g lambda) in
 
-  l1 *% finv0 l2
+    l1 *% finv0 l2
+  end
 
 
 val l1_div_l2_of_unit_w: p:prm -> q:prm -> w:fen2u (p*q) -> g:isg (p*q) -> Lemma
@@ -492,6 +500,8 @@ let l1_div_l2_is_wg p q w g =
    == { }
     r_z;
   }
+
+#reset-options
 
 
 (* Keys *)

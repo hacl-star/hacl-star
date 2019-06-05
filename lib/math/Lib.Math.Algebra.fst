@@ -28,7 +28,10 @@ let isprm p = p % 2 = 1 /\ p >= 3 /\ (forall (x:nat{x>1&&x<p}). ~(divides x p))
 
 type prm = p:big{isprm p}
 
-type comp = n:big{ exists (p:prm) (q:prm). n = p * q }
+val iscomp: n:big -> Type0
+let iscomp n = exists (p:prm) (q:prm). n = p * q
+
+type comp = n:big{iscomp n}
 
 // In some cases F* can't decide the existential description
 val mkcomp: p:prm -> q:prm -> comp
