@@ -175,7 +175,8 @@ let update_location a v s =
 let lemma_locations_truly_disjoint a a_change v s = ()
 
 (* See fsti *)
-let lemma_locations_complete s1 s2 =
+let lemma_locations_complete s1 s2 ok trace =
+  let s1, s2 = {s1 with ms_ok = ok ; ms_trace = trace}, {s2 with ms_ok = ok ; ms_trace = trace} in
   assert (s1.ms_ok == s2.ms_ok);
   FStar.Classical.forall_intro (
     (fun r ->
