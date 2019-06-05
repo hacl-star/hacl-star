@@ -620,10 +620,7 @@ let unchanged_except (exceptions:list location) (s1 s2:machine_state) :
   (forall (a:location). {:pattern (eval_location a s2)} (
       (!!(disjoint_location_from_locations a exceptions) ==>
        (eval_location a s1 == eval_location a s2))
-    )) /\
-  (s1.ms_stack.initial_rsp = s2.ms_stack.initial_rsp) /\
-  (Set.equal (Map.domain s1.ms_mem) (Map.domain s2.ms_mem)) /\
-  (Set.equal (Map.domain s1.ms_stack.stack_mem) (Map.domain s2.ms_stack.stack_mem))
+    ))
 
 let only_affects (locs:list location) (f:st unit) : GTot Type0 =
   forall s. {:pattern unchanged_except locs s (run f s)} (
@@ -683,7 +680,6 @@ let lemma_unchanged_except_append_symmetric (a1 a2:list location) (s1 s2:machine
   Lemma
     (requires (unchanged_except (a1 `L.append` a2) s1 s2))
     (ensures (unchanged_except (a2 `L.append` a1) s1 s2)) =
-  assert (s1.ms_stack.initial_rsp = s2.ms_stack.initial_rsp);
   let aux a : Lemma
     (requires (
        (!!(disjoint_location_from_locations a (a1 `L.append` a2))) \/
@@ -801,7 +797,6 @@ let rec lemma_unchanged_at_and_except (as:list location) (s1 s2:machine_state) :
 let lemma_equiv_states_when_except_none (s1 s2:machine_state) (ok:bool) :
   Lemma
     (requires (
-        (s1.ms_stack.initial_rsp = s2.ms_stack.initial_rsp) /\
         (unchanged_except [] s1 s2)))
     (ensures (
         (equiv_states ({s1 with ms_ok=ok}) ({s2 with ms_ok=ok})))) =
@@ -864,7 +859,6 @@ let lemma_commute (f1 f2:st unit) (r1 w1 r2 w2:list location) (s:machine_state) 
   lemma_unchanged_at_and_except (w1 `L.append` w2) is12 is21;
   assert (unchanged_except [] is12 is21);
   assert (s21.ms_ok = s12.ms_ok);
-  assert (is12.ms_stack.initial_rsp = is21.ms_stack.initial_rsp);
   lemma_equiv_states_when_except_none is12 is21 s12.ms_ok;
   assert (equiv_states (run2 f1 f2 s) (run2 f2 f1 s))
 
