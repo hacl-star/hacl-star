@@ -818,7 +818,10 @@ let rec lemma_unchanged_at_and_except (as:list location) (s1 s2:machine_state) :
         (unchanged_except as s1 s2)))
     (ensures (
         (unchanged_except [] s1 s2))) =
-  admit ()
+  match as with
+  | [] -> ()
+  | x :: xs ->
+    lemma_unchanged_at_and_except xs s1 s2
 
 let lemma_equiv_states_when_except_none (s1 s2:machine_state) (ok:bool) :
   Lemma
