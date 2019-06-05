@@ -89,3 +89,14 @@ val lemma_locations_truly_disjoint :
   Lemma
     (requires (a <> a_change))
     (ensures (eval_location a s == eval_location a (update_location a_change v s)))
+
+(** The locations cover everything except some very explicitly mentioned parts of the state. *)
+val lemma_locations_complete :
+  s1:machine_state ->
+  s2:machine_state ->
+  Lemma
+    (requires (
+        (forall a. eval_location a s1 == eval_location a s2) /\
+        (s1.ms_ok == s2.ms_ok) /\
+        (s1.ms_trace == s2.ms_trace)))
+    (ensures (s1 == s2))
