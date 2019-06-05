@@ -343,39 +343,43 @@ procedure Handle_ctr32_2(
         ghost ctr_BE:quad32)
     {:quick}
     lets
-        Ii @= xmm0; T1 @= xmm1; T2 @= xmm2; Hkey @= xmm3;
-        Z1 @= xmm5; Z2 @= xmm6;
+        Ii @= xmm0; T1 @= xmm1; T2 @= xmm2; 
+        Z0 @= xmm4; Z1 @= xmm5; Z2 @= xmm6;
         inout1 @= xmm10; inout2 @= xmm11; inout3 @= xmm12;
         inout4 @= xmm13; inout5 @= xmm14; 
         constp @= r11;
     reads
-        Ii;
+        Ii; Z0;
 
     modifies
         constp;
-        Ii; T1; T2; Z1; Z2; inout1; inout2; inout3; inout4; inout5;
+        T1; T2; Z1; Z2; inout1; inout2; inout3; inout4; inout5;
         efl;
 
     requires
         avx_enabled;
-        mask == Mkfour(0x0C0D0E0F, 0x08090A0B, 0x04050607, 0x00010203);
+        Ii == Mkfour(0x0C0D0E0F, 0x08090A0B, 0x04050607, 0x00010203);
         T1 == reverse_bytes_quad32(ctr_BE);
     ensures
-        inout1 == quad32_xor(reverse_bytes_quad32(inc32lite(ctr_BE, 1)), rndkey);
-        inout2 == quad32_xor(reverse_bytes_quad32(inc32lite(ctr_BE, 2)), rndkey);
-        inout3 ==            reverse_bytes_quad32(inc32lite(ctr_BE, 3));
-        inout4 ==            reverse_bytes_quad32(inc32lite(ctr_BE, 4));
-        inout5 ==            reverse_bytes_quad32(inc32lite(ctr_BE, 5));
+        inout1 == quad32_xor(reverse_bytes_quad32(inc32lite(ctr_BE, 1)), Z0);
+        inout2 == quad32_xor(reverse_bytes_quad32(inc32lite(ctr_BE, 2)), Z0);
+        inout3 == quad32_xor(reverse_bytes_quad32(inc32lite(ctr_BE, 3)), Z0);
+        inout4 == quad32_xor(reverse_bytes_quad32(inc32lite(ctr_BE, 4)), Z0);
+        inout5 == quad32_xor(reverse_bytes_quad32(inc32lite(ctr_BE, 5)), Z0);
         T1     ==            reverse_bytes_quad32(inc32lite(ctr_BE, 6));
 {
     VPshufb(Z2, T1, Ii);         // # byte-swap counter
+
     // OpenSSL uses a memory operand with VPaddd to do the addition with .Lone_lsb.  We avoid that here for now.
     //Load_two_lsb();              // # borrow $Z1, .Ltwo_lsb
     //Load_one_lsb();              // # .Lone_lsb
     Load_one_lsb(Z1);
+
     VPaddd(inout1, Z2, Z1);
+
     Load_two_lsb(Z1);
     VPaddd(inout2, Z2, Z1);
+
     VPaddd(inout3, inout1, Z1);
     VPshufb(inout1, inout1, Ii);
     VPaddd(inout4, inout2, Z1);
@@ -386,8 +390,11 @@ procedure Handle_ctr32_2(
     VPxor(inout2, inout2, Z0);
     VPaddd(T1, inout4, Z1);         // # byte-swapped next counter value
     VPshufb(inout4, inout4, Ii);
+    VPxor(inout3, inout3, Z0);
     VPshufb(inout5, inout5, Ii);
-    VPshufb(T1, T1, Ii);            // # next counter value
+    VPxor(inout4, inout4, Z0);
+    VPshufb(T1, T1, Ii);    // # next counter value
+    VPxor(inout5, inout5, Z0);
 }
 
 
