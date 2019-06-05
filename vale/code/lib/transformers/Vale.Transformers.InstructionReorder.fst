@@ -615,15 +615,6 @@ let commutes (s:machine_state) (f1 f2:st unit) : GTot Type0 =
     (run2 f1 f2 s)
     (run2 f2 f1 s)
 
-let unchanged (a:location) (f:st unit) (s:machine_state) : GTot Type0 =
-  (eval_location a s) == (eval_location a (run f s))
-
-let rec unchanged_all (as:list location) (f:st unit) (s:machine_state) : GTot Type0 =
-  match as with
-  | [] -> True
-  | x :: xs ->
-    unchanged x f s /\ unchanged_all xs f s
-
 let unchanged_except (exceptions:list location) (s1 s2:machine_state) :
   GTot Type0 =
   (forall (a:location). {:pattern (eval_location a s2)} (
