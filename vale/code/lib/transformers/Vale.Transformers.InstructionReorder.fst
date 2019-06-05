@@ -733,22 +733,10 @@ let rec lemma_unchanged_at_mem (as:list location) (a:location) (s1 s2:machine_st
     if a = x then () else
     lemma_unchanged_at_mem xs a s1 s2
 
-let unchanged_upon_both_non_disjoint (a1 a2:list location) (s1 s2:machine_state) =
-  (forall a. {:pattern (eval_location a s1) \/ (eval_location a s2)}
-     (
-       (not (!!(disjoint_location_from_locations a a1))) /\
-       (not (!!(disjoint_location_from_locations a a2)))
-     ) ==> (
-     eval_location a s1 == eval_location a s2
-   )
-  )
-
-
 let lemma_unchanged_at_combine (a1 a2:list location) (sa1 sa2 sb1 sb2:machine_state) :
   Lemma
     (requires (
         !!(disjoint_locations a1 a2) /\
-        (unchanged_upon_both_non_disjoint a1 a2 sa1 sa2) /\
         (unchanged_at a1 sa1 sb2) /\
         (unchanged_except a2 sa1 sb1) /\
         (unchanged_at a2 sa2 sb1) /\
@@ -854,47 +842,6 @@ let rec lemma_mem_not_disjoint (a:location) (as1 as2:list location) :
       lemma_mem_not_disjoint a xs as2
     )
 
-(*
-   REVIEW: With the modifications, we may no longer need this lemma
-
-   WARN XXX UNSOUND: This is not true!
-
-   Counterexample to this lemma
-
-     Consider the following:
-       a1 = [ALoc64 (OMem (MConst 0))]
-       a2 = [ALoc64 (OMem (MConst 8))]
-       a = ALoc64 (OMem (MConst 4))
-
-     (Under a stricter notion of disjoint--)
-
-     Now a is not disjoint from a1, nor is it disjoint from
-     a2. However, a1 and a2 are disjoint. Thus
-     [unchanged_upon_both_non_disjoint] would require that [a] must be
-     the same in both worlds, except that it is not, and thus this
-     lemma is false.
-*)
-let lemma_disjoint_conservative
-    (a1 a2:list location)
-    (s s1 s2:machine_state) :
-  Lemma
-    (requires (
-        (unchanged_except a1 s s1) /\
-        (unchanged_except a2 s s2) /\
-        !!(disjoint_locations a1 a2)))
-    (ensures (
-        (unchanged_upon_both_non_disjoint a1 a2 s1 s2))) =
-  let aux (a:location) :
-    Lemma
-      (requires (
-          (not !!(disjoint_location_from_locations a a1)) /\
-          (not !!(disjoint_location_from_locations a a2))))
-      (ensures (
-          (eval_location a s1 == eval_location a s2))) =
-    admit ()
-  in
-  FStar.Classical.forall_intro (FStar.Classical.move_requires aux)
-
 let lemma_commute (f1 f2:st unit) (r1 w1 r2 w2:list location) (s:machine_state) :
   Lemma
     (requires (
@@ -926,8 +873,6 @@ let lemma_commute (f1 f2:st unit) (r1 w1 r2 w2:list location) (s:machine_state) 
   lemma_unchanged_except_append_symmetric w1 w2 s is12;
   lemma_unchanged_except_append_symmetric w2 w1 s is21;
   lemma_unchanged_except_same_transitive (w1 `L.append` w2) s is12 is21;
-  lemma_disjoint_conservative w1 w2 s is1 is2;
-  assert (unchanged_upon_both_non_disjoint w1 w2 is1 is2);
   lemma_unchanged_at_combine w1 w2 is1 is2 is12 is21;
   lemma_unchanged_at_and_except (w1 `L.append` w2) is12 is21;
   assert (unchanged_except [] is12 is21);
