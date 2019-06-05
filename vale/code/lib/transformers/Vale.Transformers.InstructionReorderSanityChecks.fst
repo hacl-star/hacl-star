@@ -29,12 +29,18 @@ let ins_exchange_sanity_check2 =
       (make_instr ins_Mov64 (OReg rRax) (OConst 100))
       (make_instr ins_Add64 (OReg rRax) (OConst 299))))
 
-let equiv_states_sanity_check (s1 s2 s3 : machine_state) :
-  Lemma
-    (ensures (
-        (equiv_states s1 s1) /\
-        (equiv_states s1 s2 ==> equiv_states s2 s1) /\
-        (equiv_states s1 s2 /\ equiv_states s2 s3 ==> equiv_states s1 s3))) = ()
+let equiv_states_sanity_check (s1 s2 s3 : machine_state) =
+  assert_norm (equiv_states s1 s1);
+  assert_norm (equiv_states s1 s2 ==> equiv_states s2 s1);
+  assert_norm (equiv_states s1 s2 /\ equiv_states s2 s3 ==> equiv_states s1 s3);
+  assert_norm (
+    forall trace. (
+        (
+          (({s1 with ms_trace = trace}) == ({s2 with ms_trace = trace})) ==>
+          (equiv_states s1 s2)
+        )
+      )
+  )
 
 let sanity_check_unchanged_except1 s =
   assert (unchanged_except [] s s);
