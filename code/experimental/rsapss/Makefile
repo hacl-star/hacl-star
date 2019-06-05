@@ -78,7 +78,7 @@ $(GENERATED_DIR)/Makefile.include: $(ALL_KRML_FILES) | .depend
 	-bundle 'C=C.Endianness' \
 	-bundle 'Hacl.RSAPSS=Hacl.Impl.*,Hacl.RSAPSS' \
 	-library 'Hacl.SHA256,C,FStar' \
-	-drop 'LowStar,Spec,Prims,Lib,C.Loops.*' \
+	-drop 'LowStar,Spec,Prims,Lib,C.Loops.*,Hacl.Spec.*' \
 	-add-include '"c/Lib_PrintBuffer.h"' \
 	-tmpdir $(GENERATED_DIR) \
 	$^
