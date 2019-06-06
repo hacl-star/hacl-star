@@ -11,6 +11,7 @@ open Lib.Buffer
 
 open Hacl.Impl.Bignum.Core
 open Hacl.Impl.Bignum.Convert
+open Hacl.Impl.Bignum.Misc
 open Hacl.Spec.Bignum
 
 module ST = FStar.HyperStack.ST
@@ -63,11 +64,12 @@ let bn_sub_ #aLen #bLen a b carry res =
   (fun i ->
     let t1 = a.(i) in
     let t2 = bval bLen b i in
-    let c, res_i = subborrow_u64 carry.(size 0) t1 t2 in
+    let c, res_i = subborrow_u64 carry.(0ul) t1 t2 in
     carry.(size 0) <- c;
     res.(i) <- res_i
   )
 
+inline_for_extraction noextract
 val bn_sub:
      #aLen:bn_len
   -> #bLen:bn_len{v bLen <= v aLen}
@@ -77,7 +79,6 @@ val bn_sub:
   -> Stack uint64
     (requires fun h -> live h a /\ live h b /\ live h res)
     (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1)
-[@"c_inline"]
 let bn_sub #aLen #bLen a b res =
   push_frame ();
   let carry = create 1ul (u64 0) in
@@ -85,6 +86,23 @@ let bn_sub #aLen #bLen a b res =
   let res = carry.(0ul) in
   pop_frame ();
   res
+
+inline_for_extraction noextract
+val bn_sub_exact:
+     #aLen:bn_len
+  -> #bLen:bn_len{v bLen <= v aLen}
+  -> a:lbignum aLen
+  -> b:lbignum bLen
+  -> res:lbignum aLen
+  -> Stack unit
+    (requires fun h -> live h a /\ live h b /\ live h res /\ as_snat h b <= as_snat h a)
+    (ensures  fun h0 _ h1 ->
+      modifies1 res h0 h1 /\ as_snat h1 res = as_snat h0 a - as_snat h0 b)
+let bn_sub_exact #aLen #bLen a b res =
+  let carry = bn_sub a b res in
+  if not (eq_u64 carry (uint 0))
+    then C.portable_exit 229l;
+  admit()
 
 inline_for_extraction noextract
 val bn_add_:
@@ -109,6 +127,7 @@ let bn_add_ #aLen #bLen a b carry res =
     res.(i) <- res_i
   )
 
+inline_for_extraction noextract
 val bn_add:
      #aLen:bn_len
   -> #bLen:bn_len{v bLen <= v aLen}
@@ -120,7 +139,6 @@ val bn_add:
     (ensures  fun h0 _ h1 ->
          modifies (loc res) h0 h1 /\
          as_snat h1 res = as_snat h0 a + as_snat h0 b)
-[@"c_inline"]
 let bn_add #aLen #bLen a b res =
   push_frame ();
   let carry = create 1ul (u64 0) in
@@ -130,7 +148,8 @@ let bn_add #aLen #bLen a b res =
   admit();
   res
 
-val bn_add_full:
+inline_for_extraction noextract
+val bn_add_exact:
      #aLen:bn_len{v aLen + 1 <= maxint U32}
   -> #bLen:bn_len{v bLen <= v aLen}
   -> a:lbignum aLen
@@ -141,8 +160,7 @@ val bn_add_full:
     (ensures  fun h0 _ h1 ->
          modifies (loc res) h0 h1 /\
          as_snat h1 res = as_snat h0 a + as_snat h0 b)
-[@"c_inline"]
-let bn_add_full #aLen #bLen a b res =
+let bn_add_exact #aLen #bLen a b res =
   push_frame ();
   let carry = sub res aLen 1ul in
   let res_prefix = sub res 0ul aLen in
