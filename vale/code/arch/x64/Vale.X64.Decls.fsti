@@ -6,7 +6,7 @@ module S = Vale.X64.Stack_i
 // (It should not refer to Semantics_s, directly or indirectly.)
 // It should not refer to StateLemmas, Lemmas, or Print_s,
 // because they refer to Semantics_s.
-// Stack_i, Memory, Regs and State are ok, because they do not refer to Semantics_s.
+// Stack_i, Memory, Regs, Flags and State are ok, because they do not refer to Semantics_s.
 
 open Vale.Def.Prop_s
 open Vale.X64.Machine_s
@@ -15,11 +15,11 @@ open Vale.Def.Types_s
 
 unfold let quad32 = quad32
 
-val cf : (flags:int) -> bool
-val overflow (flags:int) : bool
-val update_cf (flags:int) (new_cf:bool) : (new_flags:int { cf new_flags == new_cf /\
+val cf : (flags:Flags.t) -> Flags.flag_val_t
+val overflow (flags:Flags.t) : Flags.flag_val_t
+val update_cf (flags:Flags.t) (new_cf:bool) : (new_flags:Flags.t { cf new_flags == Some new_cf /\
                                                        overflow new_flags == overflow flags} )
-val update_of (flags:int) (new_of:bool) : (new_flags:int { overflow new_flags == new_of /\
+val update_of (flags:Flags.t) (new_of:bool) : (new_flags:Flags.t { overflow new_flags == Some new_of /\
                                                        cf new_flags == cf flags })
 
 //unfold let va_subscript = Map.sel

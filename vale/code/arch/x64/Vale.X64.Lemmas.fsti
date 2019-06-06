@@ -9,10 +9,10 @@ unfold let codes = BS.codes
 unfold let ocmp = BS.ocmp
 unfold let fuel = nat
 
-let cf (flags:BS.flags_t) : BS.flag_val_t = BS.cf flags
-let overflow (flags:BS.flags_t) : BS.flag_val_t = BS.overflow flags
-let update_cf (flags:BS.flags_t) (new_cf:bool) = BS.update_cf' flags new_cf
-let update_of (flags:BS.flags_t) (new_of:bool) = BS.update_of' flags new_of
+let cf (flags:Flags.t) : Flags.flag_val_t = Flags.sel fCarry flags
+let overflow (flags:Flags.t) : Flags.flag_val_t = Flags.sel fOverflow flags
+let update_cf (flags:Flags.t) (new_cf:bool) = Flags.upd fCarry (Some new_cf) flags
+let update_of (flags:Flags.t) (new_of:bool) = Flags.upd fOverflow (Some new_of) flags
 
 let state_eq_S (s1 s2:BS.machine_state) =
   s1 == {s2 with BS.ms_trace = s1.BS.ms_trace}
