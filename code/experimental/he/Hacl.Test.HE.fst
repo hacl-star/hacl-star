@@ -12,6 +12,9 @@ open Lib.Buffer
 module GM = Hacl.Impl.HE.GM
 module GMS = Hacl.Spec.HE.GM
 
+module P = Hacl.Impl.HE.Paillier
+module PS = Hacl.Spec.HE.Paillier
+
 open Hacl.Impl.Bignum
 
 module B = FStar.Bytes

@@ -528,20 +528,29 @@ let s2p sec =
 
 type ciphertext (n:comp) = c:fen2 n
 
-// TODO get rid of assumes in the enc/dec, move it to lemmas
+val encrypt_direct: #n:comp -> g:isg n -> r:fenu n -> m:fe n -> ciphertext n
+let encrypt_direct #n g r m = encf g m r
 
 val encrypt:
      p:public
   -> r:fenu (Public?.n p)
   -> m:fe (Public?.n p)
   -> ciphertext (Public?.n p)
-let encrypt pub r m = encf (Public?.g pub) m r
+let encrypt pub r m = encrypt_direct (Public?.g pub) r m
+
+val decrypt_direct:
+     p:prm
+  -> q:prm
+  -> g:isg (p * q)
+  -> c:ciphertext (p * q)
+  -> m:fe (p * q)
+let decrypt_direct p q g c = l1_div_l2 p q c g
 
 val decrypt:
      s:secret
   -> c:ciphertext (Public?.n (s2p s))
   -> m:fe (Public?.n (s2p s))
-let decrypt sec c = l1_div_l2 (Secret?.p sec) (Secret?.q sec) c (Secret?.g sec)
+let decrypt sec c = decrypt_direct (Secret?.p sec) (Secret?.q sec) (Secret?.g sec) c
 
 (* Functional correctness *)
 

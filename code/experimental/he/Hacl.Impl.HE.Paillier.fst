@@ -26,13 +26,21 @@ val bn_len_s_fits: (l:bn_len_s) -> Lemma
 let bn_len_s_fits _ = ()
 
 
+
+
 #reset-options "--z3rlimit 100 --max_fuel 1 --max_ifuel 0"
 
-type encf_cond (n2Len:bn_len_s) h (n:lbignum n2Len) (n2:lbignum n2Len)
-                (g:lbignum n2Len) (x:lbignum n2Len) (y:lbignum n2Len) =
+type n_cond h (#n2Len:bn_len_s) (n:lbignum n2Len) (n2:lbignum n2Len) =
        as_snat h n > 1 /\
+       as_snat h n2 > 1 /\
        iscomp (as_snat h n) /\
        as_snat h n * as_snat h n = as_snat h n2 /\
+       as_snat h n < as_snat h n2
+
+
+type encf_cond h (#n2Len:bn_len_s) (n:lbignum n2Len) (n2:lbignum n2Len)
+                (g:lbignum n2Len) (x:lbignum n2Len) (y:lbignum n2Len) =
+       n_cond h n n2 /\
 
        as_snat h g < as_snat h n2 /\
        S.is_g (as_snat h n) (as_snat h g) /\
@@ -55,7 +63,7 @@ val encf:
     (requires fun h ->
        live h n /\ live h n2 /\ live h g /\ live h x /\ live h y /\ live h res /\
        all_disjoint [loc n; loc n2; loc g; loc x; loc y; loc res] /\
-       encf_cond n2Len h n n2 g x y
+       encf_cond h n n2 g x y
        )
     (ensures fun h0 _ h1 ->
       modifies1 res h0 h1 /\
@@ -90,35 +98,41 @@ val encrypt:
     (requires fun h ->
        live h n /\ live h n2 /\ live h g /\ live h r /\ live h m /\ live h res /\
        all_disjoint [loc n; loc n2; loc g; loc r; loc m; loc res] /\
-       encf_cond n2Len h n n2 g m r
+       encf_cond h n n2 g m r
        )
-    (ensures fun h0 _ h1 -> true)
+    (ensures fun h0 _ h1 ->
+       live h1 n /\ live h1 n2 /\ live h1 g /\ live h1 r /\ live h1 m /\ live h1 res /\
+       modifies1 res h0 h1 /\
+       as_snat h1 res =
+         S.encrypt_direct #(as_snat h0 n) (as_snat h0 g) (as_snat h0 r) (as_snat h0 m)
+    )
 let encrypt #n2Len n n2 g r m res = encf n n2 g m r res
 
 val bigl:
-     #len:bn_len_s
-  -> n:lbignum len
-  -> u:lbignum len
-  -> res:lbignum len
+     #n2Len:bn_len_s
+  -> n:lbignum n2Len
+  -> n2:lbignum n2Len
+  -> u:lbignum n2Len
+  -> res:lbignum n2Len
   -> Stack unit
     (requires fun h ->
      live h n /\ live h u /\ live h res /\
-     as_snat h n > 1 /\
-     as_snat h u > 0 /\
-     as_snat h u < as_snat h n /\
-     iscomp (as_snat h n) /\
-     isunit #(as_snat h n) (as_snat h u))
+     all_disjoint [loc n; loc n2; loc u; loc res] /\
+     n_cond h n n2 /\
+     as_snat h u > 0 /\ as_snat h u < as_snat h n2)
     (ensures fun h0 _ h1 ->
      live h1 n /\ live h1 u /\
      modifies1 res h0 h1 /\
      as_snat h1 res = S.bigl #(as_snat h0 n) (as_snat h0 u)
      )
-let bigl #len n u res = admit() // requires bignum division
+let bigl #n2Len n n2 u res = admit() // requires bignum division
 
 
-type l1_div_l2_cond h (n2Len:bn_len_s) (p:lbignum n2Len) (q:lbignum n2Len)
-                      (n:lbignum n2Len) (n2:lbignum n2Len) (w:lbignum n2Len)
-                      (g:lbignum n2Len) (lambda:lbignum n2Len) (l2inv:lbignum n2Len) =
+type l1_div_l2_cond h (#n2Len:bn_len_s) (p:lbignum n2Len) (q:lbignum n2Len)
+                      (n:lbignum n2Len) (n2:lbignum n2Len)
+                      (w:lbignum n2Len) (g:lbignum n2Len)
+                      (lambda:lbignum n2Len) (l2inv:lbignum n2Len) =
+       n_cond h n n2 /\
        (let n = as_snat h n in
         let n2 = as_snat h n2 in
         let g = as_snat h g in
@@ -126,10 +140,6 @@ type l1_div_l2_cond h (n2Len:bn_len_s) (p:lbignum n2Len) (q:lbignum n2Len)
        (as_snat h p > 1 /\ as_snat h q > 1 /\ n > 1 /\
         isprm (as_snat h p) /\ isprm (as_snat h q) /\
         n = as_snat h p * as_snat h q /\
-        n > 1 /\
-        iscomp n /\
-        n2 > 1 /\
-        n2 = n * n /\
 
         as_snat h w < n /\
         as_snat h w < n2 /\ // todo remove
@@ -148,7 +158,7 @@ type l1_div_l2_cond h (n2Len:bn_len_s) (p:lbignum n2Len) (q:lbignum n2Len)
         ))
 
 
-#reset-options "--z3rlimit 100 --max_fuel 1 --max_ifuel 0"
+#reset-options "--z3rlimit 200 --max_fuel 1 --max_ifuel 0"
 
 
 val l1_div_l2:
@@ -164,25 +174,77 @@ val l1_div_l2:
   -> res:lbignum n2Len
   -> Stack unit
     (requires fun h ->
-       live h p /\ live h q /\ live h n /\ live h w /\ live h g /\
-       live h lambda /\ live h l2inv /\ live h res /\
-       all_disjoint [loc p; loc q; loc n; loc w; loc g; loc l2inv; loc res] /\
-       l1_div_l2_cond h n2Len p q n n2 w g lambda l2inv
+       live h p /\ live h q /\ live h n /\ live h n2 /\
+       live h w /\ live h g /\ live h lambda /\ live h l2inv /\ live h res /\
+       all_disjoint [loc p; loc q; loc n; loc n2; loc w; loc g; loc l2inv; loc res; loc lambda] /\
+       l1_div_l2_cond h p q n n2 w g lambda l2inv
        )
     (ensures fun h0 _ h1 ->
        live h1 p /\ live h1 q /\ live h1 n /\ live h1 w /\
        live h1 g /\ live h1 lambda /\ live h1 l2inv /\
-       modifies1 res h0 h1
-
+       modifies1 res h0 h1 /\
+       as_snat h1 res = S.l1_div_l2 (as_snat h0 p) (as_snat h0 q) (as_snat h0 w) (as_snat h0 g)
     )
+
 let l1_div_l2 #n2Len p q n n2 w g lambda l2inv res =
-  push_frame ();
+  bn_len_s_fits n2Len;
 
-  let l1arg:lbignum n2Len = create n2Len (uint 0) in
-  //bn_modular_exp n2 w lambda l1arg;
+  let h = FStar.HyperStack.ST.get () in
+  to_fe_idemp #(as_snat h n2) (as_snat h w);
+  bn_modular_exp n2 w lambda res;
 
-  //if bn_is_zero l1arg then bn_assign_uint64 res 0uL;
+  if bn_is_zero res then begin
+    let h = FStar.HyperStack.ST.get () in
+    assert (S.l1_div_l2 (as_snat h p) (as_snat h q) (as_snat h w) (as_snat h g) = as_snat h res)
+  end else begin
+    let h = FStar.HyperStack.ST.get () in
+    g_pow_isunit #(as_snat h n2) (as_snat h g) (as_snat h lambda);
+    isunit_nonzero #(as_snat h n2) (fexp #(as_snat h n2) (as_snat h g) (as_snat h lambda));
+    assert (S.l1_div_l2 (as_snat h p) (as_snat h q) (as_snat h w) (as_snat h g) =
+            ( *% ) #(as_snat h n)
+              (S.bigl #(as_snat h n) (as_snat h res))
+              (as_snat h l2inv));
 
-  admit();
+    push_frame ();
+    let l1:lbignum n2Len = create n2Len (uint 0) in
+    bigl n n2 res l1;
+    bn_modular_mul n l1 l2inv res;
 
-  pop_frame ()
+
+    let h1 = FStar.HyperStack.ST.get () in
+
+    assert (as_snat h1 l1 = S.bigl #(as_snat h n) (as_snat h res));
+    assert (as_snat h1 res =
+              (S.bigl #(as_snat h n) (as_snat h res) * as_snat h l2inv) % as_snat h n);
+    assert (as_snat h1 res =
+              ( *% ) #(as_snat h n) (S.bigl #(as_snat h n) (as_snat h res)) (as_snat h l2inv));
+
+    pop_frame ()
+  end
+
+
+val decrypt:
+     #n2Len:bn_len_s
+  -> p:lbignum n2Len
+  -> q:lbignum n2Len
+  -> n:lbignum n2Len
+  -> n2:lbignum n2Len
+  -> g:lbignum n2Len
+  -> lambda:lbignum n2Len
+  -> l2inv:lbignum n2Len
+  -> c:lbignum n2Len
+  -> res:lbignum n2Len
+  -> Stack unit
+    (requires fun h ->
+       live h p /\ live h q /\ live h n /\ live h n2 /\
+       live h c /\ live h g /\ live h lambda /\ live h l2inv /\ live h res /\
+       all_disjoint [loc p; loc q; loc n; loc n2; loc c; loc g; loc l2inv; loc res; loc lambda] /\
+       l1_div_l2_cond h p q n n2 c g lambda l2inv
+       )
+    (ensures fun h0 _ h1 ->
+       live h1 p /\ live h1 q /\ live h1 n /\ live h1 c /\
+       live h1 g /\ live h1 lambda /\ live h1 l2inv /\
+       modifies1 res h0 h1 /\
+       as_snat h1 res = S.decrypt_direct (as_snat h0 p) (as_snat h0 q) (as_snat h0 g) (as_snat h0 c)
+    )
+let decrypt #n2Len p q n n2 g lambda l2inv c res = l1_div_l2 p q n n2 c g lambda l2inv res
