@@ -42,6 +42,9 @@ type stack =
     stack_mem:Map.t int nat8 ->                // Stack contents
     stack
 
+type flag_val_t = option bool
+
+type flags_t = F.restricted_t flag (fun _ -> flag_val_t)
 type regs_t = F.restricted_t reg (fun _ -> nat64)
 type xmms_t = F.restricted_t xmm (fun _ -> quad32)
 
