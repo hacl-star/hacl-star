@@ -655,10 +655,10 @@ inline_for_extraction
 val lte_mask: #t:inttype{~(S8? t) /\ ~(S16? t) /\ ~(S32? t) /\ ~(S64? t)} -> uint_t t SEC -> uint_t t SEC -> uint_t t SEC
 
 inline_for_extraction
-let mod_mask (#t:inttype{~(S8? t) /\ ~(S16? t) /\ ~(S32? t) /\ ~(S64? t)}) (#l:secrecy_level) (m:shiftval t) : uint_t t l =
+let mod_mask (#t:inttype) (#l:secrecy_level) (m:shiftval t) : uint_t t l =
   (nat_to_uint 1 `shift_left` m) `sub_mod` nat_to_uint 1
 
-val mod_mask_lemma: #t:inttype{~(S8? t) /\ ~(S16? t) /\ ~(S32? t) /\ ~(S64? t)} -> #l:secrecy_level -> a:uint_t t l -> m:shiftval t ->
+val mod_mask_lemma: #t:inttype -> #l:secrecy_level -> a:uint_t t l -> m:shiftval t ->
   Lemma
     (requires True)
     (ensures  uint_v (a `logand` (mod_mask #t m)) == uint_v a % pow2 (uint_v m))

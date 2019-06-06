@@ -799,27 +799,38 @@ let gt_mask #t a b = logand (gte_mask a b) (neq_mask a b)
 let lte_mask #t a b = logor (lt_mask a b) (eq_mask a b)
 
 #reset-options "--z3rlimit 3000 --max_fuel 3 --max_ifuel 3"
+
 private
-val mod_mask_value: #t:inttype{~(S8? t) /\ ~(S16? t) /\ ~(S32? t) /\ ~(S64? t)} -> #l:secrecy_level -> m:shiftval t ->
+val mod_mask_value: #t:inttype -> #l:secrecy_level -> m:shiftval t ->
   Lemma (uint_v (mod_mask #t #l m) == pow2 (uint_v m) - 1)
+
 let mod_mask_value #t #l m =
-  if uint_v m > 0 then begin
-    let m = uint_v m in
-    pow2_lt_compat (bits t) m;
-    small_modulo_lemma_1 (pow2 m) (pow2 (bits t));
-    assert (FStar.Mul.(1 * pow2 m) == pow2 m);
-    UInt.shift_left_value_lemma #(bits t) 1 m
-  end
+  shift_left_lemma (nat_to_uint #t #l 1) m;
+  pow2_double_mult ((bits t) - 1);
+  pow2_le_compat (uint_v m) 0;
+  pow2_lt_compat (bits t) (uint_v m);
+  small_modulo_lemma_1 (pow2 (uint_v m)) (pow2 (bits t));
+  small_modulo_lemma_1 ((pow2 (uint_v m)) -1) (pow2 (bits t));
+  assert( uint_v (mod_mask #t #l m) == (((1 * pow2 (uint_v m)) @%. t) - 1) @%. t);
+  match t with
+  |U1 |U8 |U16 |U32 |U64 |U128 -> ()
+  |_ -> if (uint_v m < (bits t) -1) then (pow2_lt_compat ((bits t)-1) (uint_v m); assert((1*pow2 (uint_v m))@%. t = pow2 (uint_v m))) else (assert ((1* pow2 (uint_v m)) @%. t = pow2 (uint_v m) - pow2 (bits t)); assert (uint_v m = (bits t) -1); pow2_double_mult ((bits t) -1); assert ((1 * pow2 (uint_v m)) @%. t = - pow2 (uint_v m))) 
 
 #set-options "--max_fuel 1"
 
 let mod_mask_lemma #t #l a m =
   mod_mask_value #t #l m;
+  match t with
+  |U1 |U8 |U16 |U32 |U64 |U128 ->
   if uint_v m = 0 then
     UInt.logand_lemma_1 #(bits t) (uint_v a)
   else
-    UInt.logand_mask #(bits t) (uint_v a) (uint_v m)
-
+    UInt.logand_mask #(bits t) (uint_v a) (uint_v m) 
+  |_->
+  if uint_v m = 0 then
+    Int.logand_lemma_1 #(bits t) (uint_v a)
+  else admit() 
+  
 #set-options "--max_fuel 0"
 
 (* defined in .fsti: notations +^, -^, ...*)
