@@ -5,6 +5,7 @@ open Vale.Def.Prop_s
 open Vale.X64.Machine_s
 open Vale.X64.Memory
 open Vale.X64.Stack_i
+module Flags = Vale.X64.Flags
 module Regs = Vale.X64.Regs
 module Xmms = Vale.X64.Xmms
 
@@ -12,7 +13,7 @@ noeq type vale_state = {
   vs_ok: bool;
   vs_regs: Regs.t;
   vs_xmms: Xmms.t;
-  vs_flags: nat64;
+  vs_flags: Flags.t;
   vs_mem: mem;
   vs_stack: stack;
   vs_memTaint: memtaint;
@@ -106,14 +107,14 @@ let valid_src_operand128 (o:operand128) (s:vale_state) : prop0 =
 
 [@va_qattr]
 let state_eta (s:vale_state) : vale_state =
-  {s with vs_regs = Regs.eta s.vs_regs; vs_xmms = Xmms.eta s.vs_xmms}
+  {s with vs_regs = Regs.eta s.vs_regs; vs_xmms = Xmms.eta s.vs_xmms; vs_flags = Flags.eta s.vs_flags}
 
 [@va_qattr]
 let state_eq (s0:vale_state) (s1:vale_state) : prop0 =
   s0.vs_ok == s1.vs_ok /\
   Regs.equal s0.vs_regs s1.vs_regs /\
   Xmms.equal s0.vs_xmms s1.vs_xmms /\
-  s0.vs_flags == s1.vs_flags /\
+  Flags.equal s0.vs_flags s1.vs_flags /\
   s0.vs_mem == s1.vs_mem /\
   s0.vs_stack == s1.vs_stack /\
   s0.vs_memTaint == s1.vs_memTaint /\
