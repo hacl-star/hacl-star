@@ -18,7 +18,7 @@ module Loops = Lib.LoopCombinators
 
 #reset-options "--z3rlimit 300 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq'"
 
-val montgomery_reduce:
+(*val montgomery_reduce:
   a:int{a >= - params_q * pow2 (params_logr-1) /\ a < params_q * pow2 (params_logr-1)}
   -> Tot (t:int{t>= -params_q+1 /\ t<=params_q-1 /\ (t * pow2 params_logr) % params_q = a %params_q})
 
@@ -52,7 +52,7 @@ let montgomery_reduce a =
   assert (w = t * (pow2 params_logr));
   t
 
-
+*)
 #reset-options "--z3rlimit 2000 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq'"
 
 val montgomery_reduce_int32:
@@ -75,8 +75,8 @@ let montgomery_reduce_int32 a =
   pow2_double_mult 15;
   assert ( - pow2 16 * params_q < uint_v a - (uint_v u * params_q) /\ uint_v a - (uint_v u * params_q) < pow2 16 * params_q);
   assert_norm (pow2 16 * params_q < pow2 31);
-  assert (range (uint_v a - (uint_v u * params_q)) I32);
-  let t:(t:int32{range (uint_v a - uint_v t) I32}) = (to_i32 u) *. q in
+  assert (range (uint_v a - (uint_v u * params_q)) S32);
+  let t:(t:int32{range (uint_v a - uint_v t) S32}) = (to_i32 u) *! q in
   //assert (uint_v t = (uint_v u * params_q) @% pow2 32);
   assert (uint_v t = (uint_v u * params_q));
   lemma_mod_mul_distr_l (uint_v u) params_q (pow2 16); 
@@ -395,10 +395,19 @@ let freeze x =
 *)
 
 val csubq_int16:
-  a:int16
+  a:int16{uint_v a - params_q >= minint S16}
   -> t:int16{if (uint_v a >= params_q) then uint_v t = uint_v a - params_q else uint_v t = uint_v a}
 
 let csubq_int16 a =
-  let a2 = a -. (i16 params_q) in
+  let a2 = a -! (i16 params_q) in
   let a3 = (a2 >>. size 15) &. (i16 params_q) in
-  a3
+  if (uint_v a >= params_q) then begin
+    assert(uint_v a2 >= 0);
+    assert (uint_v (a2 >>. size 15) = 0)
+  end
+  else begin
+    assert(uint_v a2 < 0);
+    assert(uint_v (a2 >>. size 15) = -1)
+  end;
+  logand_lemma (a2 >>. size 15) (i16 params_q);
+  a2 +! a3

@@ -28,29 +28,6 @@ let bits (n:inttype) =
   | U128 -> 128
   //| S128 -> 128
 
-inline_for_extraction
-let range (x:int) (n:inttype) : Type0 =
-  match n with
-  | U1 | U8 | U16 | U32 | U64 | U128 -> UInt.size x (bits n)
-  | S8 | S16 | S32 | S64 -> Int.size x (bits n)
-
-inline_for_extraction
-type range_t (n:inttype) = x:int{range x n}
-
-inline_for_extraction
-let numbytes (n:inttype) =
-  match n with
-  | U1 -> 1
-  | U8 -> 1
-  | S8 -> 1
-  | U16 -> 2
-  | S16 -> 2
-  | U32 -> 4
-  | S32 -> 4
-  | U64 -> 8
-  | S64 -> 8
-  | U128 -> 16
-  //| S128 -> 16
 
 val pow2_values: n:nat ->  Lemma (
     pow2 0 == 1 /\
@@ -72,14 +49,37 @@ unfold let modulus (t:inttype) = pow2 (bits t)
 inline_for_extraction
 unfold let maxint (t:inttype) =
   match t with
-  | U1 | U8 | U16 | U32 | U64 | U128 -> UInt.max_int (bits t)
-  | S8 | S16 | S32 | S64 -> Int.max_int (bits t)
+  | U1 | U8 | U16 | U32 | U64 | U128 -> pow2 (bits t) - 1
+  | S8 | S16 | S32 | S64 -> pow2 ((bits t) -1) - 1
   
 inline_for_extraction
 unfold let minint (t:inttype) =
   match t with
-  | U1 | U8 | U16 | U32 | U64 | U128 -> UInt.min_int (bits t)
-  | S8 | S16 | S32 | S64 -> Int.min_int (bits t)
+  | U1 | U8 | U16 | U32 | U64 | U128 -> 0
+  | S8 | S16 | S32 | S64 -> - (pow2 ((bits t)-1))
+
+inline_for_extraction
+let range (x:int) (n:inttype) : Type0 =
+  minint n <= x /\ x <= maxint n
+  
+inline_for_extraction
+type range_t (n:inttype) = x:int{range x n}
+
+inline_for_extraction
+let numbytes (n:inttype) =
+  match n with
+  | U1 -> 1
+  | U8 -> 1
+  | S8 -> 1
+  | U16 -> 2
+  | S16 -> 2
+  | U32 -> 4
+  | S32 -> 4
+  | U64 -> 8
+  | S64 -> 8
+  | U128 -> 16
+  //| S128 -> 16
+
   
 (* PUBLIC Machine Integers *)
 
