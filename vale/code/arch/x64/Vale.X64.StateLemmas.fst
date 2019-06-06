@@ -47,7 +47,7 @@ let state_of_S (sv:vale_state) (s:BS.machine_state{same_domain sv s}) : GTot val
   }
 
 let lemma_to_ok s = ()
-let lemma_to_flags s = admit () (* TODO[jay]: Why does this now work?! *)
+let lemma_to_flags s = admit () (* TODO[jay]: Why does this not work?! *)
 
 let lemma_to_reg s r = ()
 let lemma_to_xmm s x = ()
