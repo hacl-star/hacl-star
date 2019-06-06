@@ -53,7 +53,7 @@ type machine_state = {
   ms_ok: bool;
   ms_regs: regs_t;
   ms_xmms: xmms_t;
-  ms_flags: nat64;
+  ms_flags: flags_t;
   ms_mem: heap;
   ms_memTaint: memTaint_t;
   ms_stack: stack;
@@ -66,10 +66,6 @@ let get_fst_ocmp (o:ocmp) = match o with
 
 let get_snd_ocmp (o:ocmp) = match o with
   | BC.OEq _ o2 | BC.ONe _ o2 | BC.OLe _ o2 | BC.OGe _ o2 | BC.OLt _ o2 | BC.OGt _ o2 -> o2
-
-assume val havoc_any (#a:Type) (x:a) : nat64
-let havoc_state_ins (s:machine_state) (i:ins) : nat64 =
-  havoc_any (s.ms_regs, s.ms_xmms, s.ms_flags, s.ms_mem, s.ms_stack, ins)
 
 unfold let eval_reg (r:reg) (s:machine_state) : nat64 = s.ms_regs r
 unfold let eval_xmm (i:xmm) (s:machine_state) : quad32 = s.ms_xmms i
@@ -379,9 +375,11 @@ let update_operand128_preserve_flags'' (o:operand128) (v:quad32) (s_orig s:machi
 let update_operand128_preserve_flags' (o:operand128) (v:quad32) (s:machine_state) : machine_state =
   update_operand128_preserve_flags'' o v s s
 
+let havoc_flags : flags_t = F.on_dom flag (fun _ -> None)
+
 // Default version havocs flags
 let update_operand64' (o:operand64) (ins:ins) (v:nat64) (s:machine_state) : machine_state =
-  { (update_operand64_preserve_flags' o v s) with ms_flags = havoc_state_ins s ins }
+  { (update_operand64_preserve_flags' o v s) with ms_flags = havoc_flags }
 
 let update_rsp' (new_rsp:int) (s:machine_state) : machine_state =
   let Vale_stack init_rsp mem = s.ms_stack in
@@ -391,39 +389,17 @@ let update_rsp' (new_rsp:int) (s:machine_state) : machine_state =
   else
     s
 
-// REVIEW: Will we regret exposing a mod here?  Should flags be something with more structure?
-let cf (flags:nat64) : bool =
-  flags % 2 = 1
+let cf (flags:flags_t) : flag_val_t =
+  flags fCarry
 
-//unfold let bit11 = normalize_term (pow2 11)
-let _ = assert (2048 == normalize_term (pow2 11))
+let overflow(flags:flags_t) : flag_val_t =
+  flags fOverflow
 
-let overflow(flags:nat64) : bool =
-  (flags / 2048) % 2 = 1  // OF is the 12th bit, so dividing by 2^11 shifts right 11 bits
+let update_cf' (flags:flags_t) (new_cf:bool) : (new_flags:flags_t{cf new_flags == Some new_cf}) =
+  F.on_dom flag (fun f -> if f = fCarry then Some new_cf else flags f)
 
-let update_cf' (flags:nat64) (new_cf:bool) : (new_flags:nat64{cf new_flags == new_cf}) =
-  if new_cf then
-    if not (cf flags) then
-      flags + 1
-    else
-      flags
-  else
-    if (cf flags) then
-      flags - 1
-    else
-      flags
-
-let update_of' (flags:nat64) (new_of:bool) : (new_flags:nat64{overflow new_flags == new_of}) =
-  if new_of then
-    if not (overflow flags) then
-      flags + 2048
-    else
-      flags
-  else
-    if (overflow flags) then
-      flags - 2048
-    else
-      flags
+let update_of' (flags:flags_t) (new_of:bool) : (new_flags:flags_t{overflow new_flags == Some new_of}) =
+  F.on_dom flag (fun f -> if f = fOverflow then Some new_of else flags f)
 
 let free_stack' (start finish:int) (st:stack) : stack =
   let Vale_stack init_rsp mem = st in
@@ -508,13 +484,13 @@ let update_reg (r:reg) (v:nat64) : st unit =
 
 let update_xmm (x:xmm)  (ins:ins) (v:quad32) : st unit =
   s <-- get;
-  set (  { (update_xmm' x v s) with ms_flags = havoc_state_ins s ins } )
+  set (  { (update_xmm' x v s) with ms_flags = havoc_flags } )
 
 let update_xmm_preserve_flags (x:xmm) (v:quad32) : st unit =
   s <-- get;
   set ( update_xmm' x v s )
 
-let update_flags (new_flags:nat64) : st unit =
+let update_flags (new_flags:flags_t) : st unit =
   s <-- get;
   set ( { s with ms_flags = new_flags } )
 
@@ -627,8 +603,8 @@ let instr_eval_operand_implicit (i:instr_operand_implicit) (s:machine_state) : o
   match i with
   | IOp64One o -> if valid_src_operand64_and_taint o s then Some (eval_operand o s) else None
   | IOpXmmOne o -> if valid_src_operand128_and_taint o s then Some (eval_mov128_op o s) else None
-  | IOpFlagsCf -> Some (cf s.ms_flags)
-  | IOpFlagsOf -> Some (overflow s.ms_flags)
+  | IOpFlagsCf -> cf s.ms_flags
+  | IOpFlagsOf -> overflow s.ms_flags
 
 [@instr_attr]
 let rec instr_apply_eval_args
@@ -741,11 +717,11 @@ let eval_instr
     (it:instr_t_record) (oprs:instr_operands_t it.outs it.args) (ann:instr_annotation it)
     (s0:machine_state)
   : option machine_state =
-  let InstrTypeRecord #outs #args #havoc_flags i = it in
+  let InstrTypeRecord #outs #args #havoc_flags' i = it in
   let vs = instr_apply_eval outs args (instr_eval i) oprs s0 in
   let s1 =
-    match havoc_flags with
-    | HavocFlags -> {s0 with ms_flags = havoc_state_ins s0 (BC.Instr it oprs ann)}
+    match havoc_flags' with
+    | HavocFlags -> {s0 with ms_flags = havoc_flags}
     | PreserveFlags -> s0
     in
   FStar.Option.mapTot (fun vs -> instr_write_outputs outs args vs oprs s0 s1) vs
