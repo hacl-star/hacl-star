@@ -27,7 +27,7 @@ FSTAR_HINTS ?= --use_hints --use_hint_hashes --record_hints
 #      verify... see https://github.com/FStarLang/FStar/issues/1652
 FSTAR_NO_FLAGS = $(FSTAR_HOME)/bin/fstar.exe $(FSTAR_HINTS) \
   --odir $(OUTPUT_DIR) --cache_checked_modules $(FSTAR_INCLUDES) --cmi \
-  --already_cached 'Prims FStar LowStar C Spec.Loops TestLib' --warn_error '+241@247-272' \
+  --already_cached 'Prims FStar LowStar C Spec.Loops TestLib WasmSupport' --warn_error '+241@247-272' \
   --cache_dir obj
 
 FSTAR = $(FSTAR_NO_FLAGS) $(OTHERFLAGS)
