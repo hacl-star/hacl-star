@@ -14,8 +14,8 @@ let lemma_mul_in_bounds (x y:nat64) : Lemma (requires x `op_Multiply` y < pow2_6
 let lemma_mul_nat (x:nat) (y:nat) : Lemma (ensures 0 <= (x `op_Multiply` y)) = ()
 #reset-options "--initial_fuel 2 --max_fuel 2"
 
-let cf = Lemmas.cf
-let overflow = Lemmas.overflow
+let cf flags = match Lemmas.cf flags with | Some v -> v | None -> false (* REVIEW[jay] This feels wrong to do *)
+let overflow flags = match Lemmas.overflow flags with | Some v -> v | None -> false (* REVIEW[jay] This feels wrong to do *)
 let update_cf (flags:Flags.t) (new_cf:bool) = Lemmas.update_cf flags new_cf
 let update_of (flags:Flags.t) (new_of:bool) = Lemmas.update_of flags new_of
 let ins = BS.ins

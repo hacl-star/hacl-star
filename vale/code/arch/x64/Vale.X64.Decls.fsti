@@ -15,11 +15,11 @@ open Vale.Def.Types_s
 
 unfold let quad32 = quad32
 
-val cf : (flags:Flags.t) -> Flags.flag_val_t
-val overflow (flags:Flags.t) : Flags.flag_val_t
-val update_cf (flags:Flags.t) (new_cf:bool) : (new_flags:Flags.t { cf new_flags == Some new_cf /\
+val cf : (flags:Flags.t) -> bool
+val overflow (flags:Flags.t) : bool
+val update_cf (flags:Flags.t) (new_cf:bool) : (new_flags:Flags.t { cf new_flags == new_cf /\
                                                        overflow new_flags == overflow flags} )
-val update_of (flags:Flags.t) (new_of:bool) : (new_flags:Flags.t { overflow new_flags == Some new_of /\
+val update_of (flags:Flags.t) (new_of:bool) : (new_flags:Flags.t { overflow new_flags == new_of /\
                                                        cf new_flags == cf flags })
 
 //unfold let va_subscript = Map.sel
