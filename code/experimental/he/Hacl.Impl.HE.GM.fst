@@ -103,7 +103,7 @@ val encrypt:
     (ensures fun h0 _ h1 ->
        live h1 n /\ live h1 y /\ live h1 r /\ live h1 res /\
        modifies1 res h0 h1 /\
-       as_snat h1 res = S.encrypt_minimal (as_snat h0 n) (as_snat h0 y) (as_snat h0 r) msg)
+       as_snat h1 res = S.encrypt_direct (as_snat h0 n) (as_snat h0 y) (as_snat h0 r) msg)
 let encrypt #nLen n y r msg res =
   if not msg then bn_modular_mul n r r res else begin
     push_frame ();
@@ -131,7 +131,7 @@ val decrypt:
        as_snat h p_min_one_half = as_snat h p_min_one / 2)
     (ensures fun h0 b h1 -> modifies0 h0 h1 /\
       (let c' = as_snat h0 c in
-       b = S.decrypt_minimal (as_snat h0 p) c'))
+       b = S.decrypt_direct (as_snat h0 p) c'))
 let decrypt #nLen p p_min_one p_min_one_half c =
   let v = leg_symbol p p_min_one p_min_one_half c in
   if v = 1l then false else true

@@ -179,14 +179,13 @@ let s2p sec =
 
 type ciphertext (n:big) = c:fe n{c <> 0}
 
-inline_for_extraction
-val encrypt_minimal:
+val encrypt_direct:
      n:big
   -> y:fe n
   -> r:fe n{sqr r > 0 /\ sqr r *% y > 0}
   -> m:bool
   -> c:ciphertext n
-let encrypt_minimal n y r m =
+let encrypt_direct n y r m =
   let r' = sqr r in
   if m then r' *% y else r'
 
@@ -195,16 +194,15 @@ val encrypt:
   -> r:fe (Public?.n p){sqr r > 0 /\ sqr r *% (Public?.y p) > 0}
   -> m:bool
   -> c:ciphertext (Public?.n p)
-let encrypt p r m = encrypt_minimal (Public?.n p) (Public?.y p) r m
+let encrypt p r m = encrypt_direct (Public?.n p) (Public?.y p) r m
 
-inline_for_extraction
-val decrypt_minimal: p:prm -> c:pos -> m:bool
-let decrypt_minimal p c =
+val decrypt_direct: p:prm -> c:pos -> m:bool
+let decrypt_direct p c =
   let v = leg_symbol c p in
   if v = 1 then false else true
 
 val decrypt: s:secret -> c:ciphertext (Public?.n (s2p s)) -> m:bool
-let decrypt s c = decrypt_minimal (Secret?.p s) c
+let decrypt s c = decrypt_direct (Secret?.p s) c
 
 (* Homomorphic property *)
 
