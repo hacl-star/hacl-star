@@ -28,10 +28,10 @@ let eta_sel (r:flag) (m:t) : v:flag_val_t{v == sel r m} =
 // so that we don't accidentally normalize past type abstractions
 [@va_qattr "opaque_to_smt"]
 let eta (m:t) : t =
-  let m0_3 = ((eta_sel rRax m, eta_sel rRbx m), (eta_sel rRcx m, eta_sel rRdx m)) in
-  let m4_7 = ((eta_sel rRsi m, eta_sel rRdi m), (eta_sel rRbp m, eta_sel rRsp m)) in
-  let m8_11 = ((eta_sel rR8 m, eta_sel rR9 m), (eta_sel rR10 m, eta_sel rR11 m)) in
-  let m12_15 = ((eta_sel rR12 m, eta_sel rR13 m), (eta_sel rR14 m, eta_sel rR15 m)) in
+  let m0_3 = ((eta_sel 0 m, eta_sel 1 m), (eta_sel 2 m, eta_sel 3 m)) in
+  let m4_7 = ((eta_sel 4 m, eta_sel 5 m), (eta_sel 6 m, eta_sel 7 m)) in
+  let m8_11 = ((eta_sel 8 m, eta_sel 9 m), (eta_sel 10 m, eta_sel 11 m)) in
+  let m12_15 = ((eta_sel 12 m, eta_sel 13 m), (eta_sel 14 m, eta_sel 15 m)) in
   ((m0_3, m4_7), (m8_11, m12_15))
 
 let to_fun (m:t) : (FStar.FunctionalExtensionality.restricted_t flag (fun _ -> flag_val_t)) =
