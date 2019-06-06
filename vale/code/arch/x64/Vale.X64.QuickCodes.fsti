@@ -372,7 +372,7 @@ let va_state_match (s0:vale_state) (s1:vale_state) : Pure Type0
 
 [@va_qattr]
 unfold let wp_sound_code_pre (#a:Type0) (#c:code) (qc:quickCode a c) (s0:vale_state) (k:(s0':vale_state{s0 == s0'}) -> vale_state -> a -> Type0) : Type0 =
-  forall (ok:bool) (regs:Regs.t) (xmms:Xmms.t) (flags:nat64) (mem:mem) (stack:stack) (memTaint:memtaint) (stackTaint:memtaint).
+  forall (ok:bool) (regs:Regs.t) (xmms:Xmms.t) (flags:Flags.t) (mem:mem) (stack:stack) (memTaint:memtaint) (stackTaint:memtaint).
     let s0' = {vs_ok = ok; vs_regs = regs; vs_xmms = xmms; vs_flags = flags; vs_mem = mem; vs_stack = stack; vs_memTaint = memTaint; vs_stackTaint = stackTaint} in
     s0 == s0' ==> QProc?.wp qc (state_eta s0') (k (state_eta s0'))
 
