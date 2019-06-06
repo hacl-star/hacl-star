@@ -9,7 +9,6 @@ open LowStar.Buffer
 open Lib.IntTypes
 open Lib.Buffer
 open Lib.ByteBuffer
-open Lib.PrintBuffer
 
 open Hacl.Impl.Bignum.Core
 
@@ -40,6 +39,7 @@ let bytes_to_bignum_ #len #resLen input res =
     res.(resLen -. i -. 1ul) <- uint_from_bytes_be (sub input (8ul *. i) 8ul)
   )
 
+inline_for_extraction noextract
 val bytes_to_bignum:
      #len:bn_len
   -> input:lbuffer8 len
@@ -47,7 +47,6 @@ val bytes_to_bignum:
   -> Stack unit
     (requires fun h -> live h input /\ live h res /\ disjoint res input)
     (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1)
-[@"c_inline"]
 let bytes_to_bignum #len input res =
   push_frame ();
   let num_words = blocks len 8ul in
@@ -80,6 +79,7 @@ let bignum_to_bytes_ #len #resLen input res =
     uint_to_bytes_be (sub res (8ul *. i) 8ul) tmp
   )
 
+inline_for_extraction noextract
 val bignum_to_bytes:
      #len:bn_len{v len > 0}
   -> input:lbignum (blocks len 8ul){8 * v (blocks len 8ul) < max_size_t}
@@ -87,7 +87,6 @@ val bignum_to_bytes:
   -> Stack unit
     (requires fun h -> live h input /\ live h res /\ disjoint res input)
     (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1)
-[@"c_inline"]
 let bignum_to_bytes #len input res = admit();
   push_frame ();
   let num_words = blocks len 8ul in
@@ -104,6 +103,7 @@ let bignum_to_bytes #len input res = admit();
 
 // Prints uints64 chunks in little-endian, though inner uint64 chunks
 // in big-endian.
+inline_for_extraction noextract
 val bignum_to_bytes_direct:
      #len:bn_len{8 * v len < max_size_t}
   -> input:lbignum len
@@ -111,7 +111,6 @@ val bignum_to_bytes_direct:
   -> Stack unit
     (requires fun h -> live h input /\ live h res /\ disjoint res input)
     (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1)
-[@"c_inline"]
 let bignum_to_bytes_direct #len input res =
   push_frame ();
 
@@ -124,39 +123,3 @@ let bignum_to_bytes_direct #len input res =
   );
 
   pop_frame ()
-
-#reset-options
-
-
-
-//////// Some debugging, at least for the time being
-// Couldn't place it into core as it requires bytes conversion
-
-noextract inline_for_extraction
-let debugOn = false
-
-// Prints in big endian, both with respect to uint64 chunks, and within them.
-val print_lbignum:
-     #aLen:bn_len
-  -> a:lbignum aLen
-  -> ST unit (requires fun h -> live h a) (ensures fun h0 _ h1 -> h0 == h1)
-let print_lbignum #aLen a =
-  assume (8 * v aLen < max_size_t);
-  push_frame ();
-  let bytes_n = aLen *! 8ul in
-  let bytes = create bytes_n (uint 0) in
-  assume (8 * v aLen < max_size_t);
-  let a' = bignum_to_bytes a bytes in
-  print_bytes bytes_n bytes;
-  pop_frame ();
-  admit()
-
-noextract inline_for_extraction
-val trace_lbignum:
-     #aLen:bn_len
-  -> a:lbignum aLen
-  -> ST unit (requires fun h -> live h a) (ensures fun h0 _ h1 -> h0 == h1)
-let trace_lbignum #aLen a = if debugOn then print_lbignum a else ()
-
-noextract inline_for_extraction
-let trace (s:string) = if debugOn then C.String.print (C.String.of_literal s) else ()

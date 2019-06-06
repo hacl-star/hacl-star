@@ -13,7 +13,7 @@ open Lib.Math.Algebra
 open Hacl.Impl.Bignum.Core
 open Hacl.Impl.Bignum.Convert
 open Hacl.Impl.Bignum.Comparison
-open Hacl.Impl.Bignum.Division
+open Hacl.Impl.Bignum.Modular
 open Hacl.Impl.Bignum.Montgomery
 open Hacl.Impl.Bignum.Multiplication
 open Hacl.Impl.Bignum.Shift

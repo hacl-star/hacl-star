@@ -10,5 +10,6 @@ include Hacl.Impl.Bignum.Comparison
 include Hacl.Impl.Bignum.Division
 include Hacl.Impl.Bignum.Exponentiation
 include Hacl.Impl.Bignum.Misc
+include Hacl.Impl.Bignum.Modular
 include Hacl.Impl.Bignum.Multiplication
 include Hacl.Impl.Bignum.Shift

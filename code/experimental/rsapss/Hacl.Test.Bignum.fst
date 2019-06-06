@@ -149,23 +149,45 @@ let test_add_gen a b =
   nat_bytes_num_fit b a;
   let res_len: size_t = a_len +. 1ul in
   snat_order (a+b) (2*a);
-  let c_len: size_t = normalize_term (nat_bytes_num (a+b)) in
+
+  assume (v (nat_bytes_num (a+b)) <= v res_len);
 
   let bn_a:lbignum a_len     = nat_to_bignum_exact a in
   let bn_b:lbignum b_len     = nat_to_bignum_exact b in
-  let bn_c:lbignum c_len     = nat_to_bignum_exact (normalize_term (a+b)) in
+  let bn_exp:lbignum res_len = nat_to_bignum (normalize_term (a+b)) in
   let bn_res:lbignum res_len = create res_len (uint 0) in
 
-  bn_add_full bn_a bn_b bn_res;
-  let res = bn_is_equal bn_c bn_res in
-  print_verdict bn_c bn_res res;
+  bn_add_exact bn_a bn_b bn_res;
+  let res = bn_is_equal bn_exp bn_res in
+  print_verdict bn_exp bn_res res;
+
+  assume (a-b <= a+b);
+  snat_order (a-b) (a+b);
+  nat_bytes_num_fit (a-b) (a+b);
+  let bn_exp3:lbignum res_len =
+         nat_to_bignum (normalize_term (a-b)) in
+  let bn_res3:lbignum a_len = create a_len (uint 0) in
+  let _ = bn_sub_exact bn_a bn_b bn_res3 in
+  let res = bn_is_equal bn_exp3 bn_res3 in
+  print_verdict bn_exp3 bn_res3 res;
+
+  // addition, but in-place
+  assume (((a+b) % (pow2 (64 * v (nat_bytes_num a)))) <= a+b);
+  snat_order ((a+b) % (pow2 (64 * v (nat_bytes_num a)))) (a+b);
+  assume (v (nat_bytes_num ((a+b) % (pow2 (64 * v (nat_bytes_num a))))) <= v res_len);
+  let bn_exp2:lbignum res_len =
+         nat_to_bignum (normalize_term ((a+b) % (pow2 (64 * v (nat_bytes_num a))))) in
+  let _ = bn_add bn_a bn_b bn_a in
+  let res = bn_is_equal bn_exp2 bn_a in
+  print_verdict bn_exp2 bn_a res;
+
   pop_frame()
 
 #reset-options "--z3rlimit 100 --max_fuel 2 --max_ifuel 0"
 
 val test_add: unit -> St unit
 let test_add _ =
-  C.String.print (C.String.of_literal "Testing add \n");
+  C.String.print (C.String.of_literal "Testing add/sub \n");
   push_frame();
 
   test_add_gen 0 0;

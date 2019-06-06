@@ -125,8 +125,14 @@ val bigl:
      modifies1 res h0 h1 /\
      as_snat h1 res = S.bigl #(as_snat h0 n) (as_snat h0 u)
      )
-let bigl #n2Len n n2 u res = admit() // requires bignum division
-
+let bigl #n2Len n n2 u res =
+  assert_norm (issnat 1);
+  push_frame ();
+  let one:lbignum 1ul = nat_to_bignum_exact 1 in
+  let tmp = create n2Len (uint 0) in
+  let _ = bn_sub_exact u one tmp in
+  bn_divide tmp n res;
+  pop_frame ()
 
 type l1_div_l2_cond h (#n2Len:bn_len_s) (p:lbignum n2Len) (q:lbignum n2Len)
                       (n:lbignum n2Len) (n2:lbignum n2Len)

@@ -110,6 +110,7 @@ let bn_mult_ #aLen #bLen #resLen a b res carry =
   )
 
 // res = a * b
+inline_for_extraction noextract
 val bn_mul:
      #aLen:bn_len
   -> #bLen:bn_len{v aLen + v bLen < max_size_t}
@@ -121,7 +122,6 @@ val bn_mul:
       live h a /\ live h b /\ live h res /\ disjoint res a /\ disjoint res b)
     (ensures  fun h0 _ h1 ->
      modifies (loc res) h0 h1 /\ as_snat h1 res == as_snat h0 a * as_snat h0 b)
-[@"c_inline"]
 let bn_mul #aLen #bLen a b res = admit();
   push_frame ();
   let resLen = aLen +. bLen in
@@ -152,6 +152,7 @@ let abs aLen a b res =
     let _ = bn_sub a b res in
     Positive end
 
+inline_for_extraction noextract
 val add_sign:
     a0Len:bn_len{v a0Len + v a0Len + 1 < max_size_t}
   -> c0:lbignum (a0Len +. a0Len)
@@ -174,7 +175,6 @@ val add_sign:
       live h b0 /\ live h b1 /\ live h b2 /\
       live h res)
     (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1)
-[@"c_inline"]
 let add_sign a0Len c0 c1 c2 a0 a1 a2 b0 b1 b2 sa2 sb2 resLen res =
   let c0Len = a0Len +. a0Len in
   // Was here previously: let res1 = sub #_ #(v resLen) #(v c0Len) res 0ul c0Len in
@@ -197,7 +197,6 @@ val karatsuba_:
       live h a /\ live h b /\ live h tmp /\ live h res /\
       disjoint res a /\ disjoint res b /\ disjoint res tmp)
     (ensures  fun h0 _ h1 -> modifies (loc_union (loc res) (loc tmp)) h0 h1)
-[@"c_inline"]
 let rec karatsuba_ pow2_i aLen a b tmp res = admit();
   let tmpLen = 4ul *. pow2_i in
   let resLen = aLen +. aLen in
@@ -239,6 +238,7 @@ let rec karatsuba_ pow2_i aLen a b tmp res = admit();
     let _ = bn_add res1 tmp1 res1 in ()
     end
 
+inline_for_extraction noextract
 val karatsuba:
     pow2_i:size_t
   -> aLen:bn_len{v aLen + v aLen + 4 * v pow2_i < max_size_t}
@@ -250,7 +250,6 @@ val karatsuba:
       live h a /\ live h b /\ live h st_kara /\
       disjoint st_kara a /\ disjoint st_kara b)
     (ensures  fun h0 _ h1 -> modifies (loc st_kara) h0 h1)
-[@"c_inline"]
 let karatsuba pow2_i aLen a b st_kara =
   let stLen = aLen +. aLen +. 4ul *. pow2_i in
   let res = sub st_kara 0ul (aLen +. aLen) in
