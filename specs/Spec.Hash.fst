@@ -60,4 +60,9 @@ let hash (a:hash_alg) (input:bytes{S.length input < max_input_length a}):
 =
   let padding = pad a (S.length input) in
   finish a (update_multi a (init a) S.(input @| padding))
-
+  (*
+  let nb = S.length input / block_length a in
+  let nblen = nb `op_Multiply` block_length a in
+  let sb = S.slice input 0 nblen in
+  finish a (update_multi a (init a) sb)
+*)

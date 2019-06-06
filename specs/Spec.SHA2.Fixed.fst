@@ -61,45 +61,45 @@ let op384_512: ops = {
   e3 = 19ul; e4 = 61ul; e5 =  6ul
 }
 
-inline_for_extraction
+inline_for_extraction noextract
 let op0: a:D.sha2_alg -> Tot ops = function
   | D.SHA2_224 -> op224_256
   | D.SHA2_256 -> op224_256
   | D.SHA2_384 -> op384_512
   | D.SHA2_512 -> op384_512
 
-inline_for_extraction
+inline_for_extraction noextract
 let ( +| ) (#w:lanes) (#a:D.sha2_alg): wordxN w a -> wordxN w a -> wordxN w a =
   match a with
   | D.SHA2_224 | D.SHA2_256 -> ( +| ) #U32 #SEC #w
   | D.SHA2_384 | D.SHA2_512 -> ( +| ) #U64 #SEC #w
 
-inline_for_extraction
+inline_for_extraction noextract
 let ( ^| ) (#w:lanes) (#a:D.sha2_alg): wordxN w a -> wordxN w a -> wordxN w a =
   match a with
   | D.SHA2_224 | D.SHA2_256 -> ( ^| ) #U32 #SEC #w
   | D.SHA2_384 | D.SHA2_512 -> ( ^| ) #U64 #SEC #w
 
 
-inline_for_extraction
+inline_for_extraction noextract
 let ( &| ) (#w:lanes) (#a:D.sha2_alg): wordxN w a -> wordxN w a -> wordxN w a =
   match a with
   | D.SHA2_224 | D.SHA2_256 -> ( &| ) #U32 #SEC #w
   | D.SHA2_384 | D.SHA2_512 -> ( &| ) #U64 #SEC #w
 
-inline_for_extraction
+inline_for_extraction noextract
 let ( ~| ) (#w:lanes) (#a:D.sha2_alg): wordxN w a  -> wordxN w a =
   match a with
   | D.SHA2_224 | D.SHA2_256 -> ( ~| ) #U32 #SEC #w
   | D.SHA2_384 | D.SHA2_512 -> ( ~| ) #U64 #SEC #w
 
-inline_for_extraction
+inline_for_extraction noextract
 let ( >>>| ) (#w:lanes) (#a:D.sha2_alg): wordxN w a -> rotval (D.word_t a) -> wordxN w a =
   match a with
   | D.SHA2_224 | D.SHA2_256 -> ( >>>| ) #U32 #SEC #w
   | D.SHA2_384 | D.SHA2_512 -> ( >>>| ) #U64 #SEC #w
 
-inline_for_extraction
+inline_for_extraction noextract
 let ( >>| ) (#w:lanes) (#a:D.sha2_alg): wordxN w a -> shiftval (D.word_t a) ->  wordxN w a =
   match a with
   | D.SHA2_224 | D.SHA2_256 -> ( >>| ) #U32 #SEC #w
