@@ -25,6 +25,8 @@ unfold let eval_reg (r:reg) (s:vale_state) : nat64 = Regs.sel r s.vs_regs
 [@va_qattr]
 unfold let eval_xmm (x:xmm) (s:vale_state) : Vale.Def.Types_s.quad32 = Xmms.sel x s.vs_xmms
 [@va_qattr]
+unfold let eval_flag (f:flag) (s:vale_state) : Flags.flag_val_t = Flags.sel f s.vs_flags
+[@va_qattr]
 unfold let eval_mem (ptr:int) (s:vale_state) : GTot nat64 = load_mem64 ptr s.vs_mem
 [@va_qattr]
 unfold let eval_mem128 (ptr:int) (s:vale_state) : GTot Vale.Def.Types_s.quad32 = load_mem128 ptr s.vs_mem
@@ -68,6 +70,10 @@ let update_reg (r:reg) (v:nat64) (s:vale_state) : vale_state =
 [@va_qattr]
 let update_xmm (x:xmm) (v:Vale.Def.Types_s.quad32) (s:vale_state) : vale_state =
   {s with vs_xmms = Xmms.upd x v s.vs_xmms}
+
+[@va_qattr]
+let update_flag (f:flag) (v:Flags.flag_val_t) (s:vale_state) : vale_state =
+  {s with vs_flags = Flags.upd f v s.vs_flags}
 
 [@va_qattr]
 let update_mem (ptr:int) (v:nat64) (s:vale_state) : GTot vale_state = {s with vs_mem = store_mem64 ptr v s.vs_mem}

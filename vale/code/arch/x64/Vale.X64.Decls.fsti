@@ -249,7 +249,7 @@ val taint_at (memTaint:M.memtaint) (addr:int) : taint
 
 (* Getters *)
 [@va_qattr] unfold let va_get_ok (s:va_state) : bool = s.vs_ok
-[@va_qattr] unfold let va_get_flags (s:va_state) : int = s.vs_flags
+[@va_qattr] unfold let va_get_flags (f:flag) (s:va_state) : Flags.flag_val_t = eval_flag f s
 [@va_qattr] unfold let va_get_reg (r:reg) (s:va_state) : nat64 = eval_reg r s
 [@va_qattr] unfold let va_get_xmm (x:xmm) (s:va_state) : quad32 = eval_xmm x s
 [@va_qattr] unfold let va_get_mem (s:va_state) : M.mem = s.vs_mem
@@ -258,7 +258,7 @@ val taint_at (memTaint:M.memtaint) (addr:int) : taint
 [@va_qattr] unfold let va_get_stackTaint (s:va_state) : M.memtaint = s.vs_stackTaint
 
 [@va_qattr] let va_upd_ok (ok:bool) (s:vale_state) : vale_state = { s with vs_ok = ok }
-[@va_qattr] let va_upd_flags (flags:nat64) (s:vale_state) : vale_state = { s with vs_flags = flags }
+[@va_qattr] let va_upd_flags (v:Flags.t) (s:vale_state) : vale_state = { s with vs_flags = v }
 [@va_qattr] let va_upd_reg (r:reg) (v:nat64) (s:vale_state) : vale_state = update_reg r v s
 [@va_qattr] let va_upd_xmm (x:xmm) (v:quad32) (s:vale_state) : vale_state = update_xmm x v s
 [@va_qattr] let va_upd_mem (mem:M.mem) (s:vale_state) : vale_state = { s with vs_mem = mem }
