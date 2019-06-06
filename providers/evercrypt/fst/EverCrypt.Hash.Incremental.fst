@@ -100,7 +100,7 @@ let frame_hashes #a l s b h0 h1 =
 let frame_freeable #a l s h0 h1 =
   ()
 
-#reset-options "--max_fuel 0 --max_ifuel 0"
+#pop-options
 
 let split_at_last_empty (a: Hash.alg): Lemma
   (ensures (
@@ -196,7 +196,7 @@ let split_at_last_small (a: Hash.alg) (b: bytes) (d: bytes): Lemma
   (* Looking at the definition of split_at_last, blocks depends only on S.length b / l. *)
   calc (==) {
     S.length b / l;
-  (==) { (* definition *) }
+  (==) { S.lemma_len_append blocks rest }
     (S.length blocks + S.length rest) / l;
   (==) { Math.Lemmas.lemma_div_exact (S.length blocks) l }
     (l * (S.length blocks / l) + S.length rest) / l;
@@ -210,7 +210,7 @@ let split_at_last_small (a: Hash.alg) (b: bytes) (d: bytes): Lemma
 
   calc (==) {
     S.length (S.append b d) / l;
-  (==) { (* definition *) }
+  (==) { S.lemma_len_append b d; S.lemma_len_append blocks rest }
     (S.length blocks + S.length rest + S.length d) / l;
   (==) { Math.Lemmas.lemma_div_exact (S.length blocks) l }
     (l * (S.length blocks / l) + (S.length rest + S.length d)) / l;
@@ -272,9 +272,11 @@ val update_small:
     (ensures fun h0 s' h1 ->
       update_post a s prev data len h0 h1)
 
-#push-options "--z3rlimit 150"
+#push-options "--z3rlimit 50"
 let update_small a p prev data len =
   let open LowStar.BufferOps in
+  let h00 = ST.get () in
+  assert (invariant h00 p);
   let s = !*p in
   let State hash_state buf total_len = s in
   let sz = rest a total_len in
@@ -290,14 +292,25 @@ let update_small a p prev data len =
   Hash.frame_invariant_implies_footprint_preservation (B.loc_buffer buf) hash_state h0 h1;
   assert (B.as_seq h1 data == B.as_seq h0 data);
 
-  p *= (State hash_state buf (add_len total_len len));
+  let total_len = add_len total_len len in
+  p *= (State hash_state buf total_len);
   let h2 = ST.get () in
   assert (B.as_seq h2 data == B.as_seq h1 data);
   Hash.frame_invariant (B.loc_buffer p) hash_state h1 h2;
   Hash.frame_invariant_implies_footprint_preservation (B.loc_buffer p) hash_state h1 h2;
+  assert (
+    let b = S.append (G.reveal prev) (B.as_seq h0 data) in
+    let blocks, rest = split_at_last a b in
+    S.length blocks + S.length rest = U64.v total_len /\
+    S.length b = U64.v total_len /\
+    U64.v total_len < pow2 61 /\
+    S.equal (Hash.repr hash_state h2) (Spec.Hash.update_multi a (Spec.Hash.init a) blocks) /\
+    S.equal (S.slice (B.as_seq h2 buf) 0 (U64.v total_len % block_length a)) rest
+    );
   assert (hashes h2 p (S.append (G.reveal prev) (B.as_seq h0 data)));
   assert (footprint h0 p == footprint h2 p);
-  assert (preserves_freeable p h0 h2)
+  assert (preserves_freeable p h0 h2);
+  assert (equal_domains h00 h2)
 
 #pop-options
 
@@ -372,7 +385,7 @@ let split_at_last_blocks (a: Hash.alg) (b: bytes) (d: bytes): Lemma
     blocks'';
   }
 
-#push-options "--z3rlimit 150 --z3refresh"
+#push-options "--z3rlimit 150"
 val update_empty_buf:
   a:Hash.alg ->
   s:state a ->
