@@ -15,16 +15,17 @@ unfold type gcm_auth_LE = gctr_plain_LE
 
 #reset-options "--z3rlimit 30"
 
-type supported_iv_BE:eqtype = iv:seq nat8 { 8 * (length iv) < pow2_64 }
+type supported_iv_LE:eqtype = iv:seq nat8 { 1 <= 8 * (length iv) /\ 8 * (length iv) < pow2_64 }
 
-let compute_iv_BE (h_LE:quad32) (iv:supported_iv_BE) : quad32
+let compute_iv_BE (h_LE:quad32) (iv:supported_iv_LE) : quad32
   =
   if 8 * (length iv) = 96 then (
-    let iv_BE = be_bytes_to_quad32 (pad_to_128_bits iv) in
+    let iv_LE = le_bytes_to_quad32 (pad_to_128_bits iv) in
+    let iv_BE = reverse_bytes_quad32 iv_LE in
     let j0_BE = Mkfour 1 iv_BE.lo1 iv_BE.hi2 iv_BE.hi3 in
     j0_BE
   ) else (
-    let padded_iv_quads = be_bytes_to_seq_quad32 (pad_to_128_bits iv) in
+    let padded_iv_quads = le_bytes_to_seq_quad32 (pad_to_128_bits iv) in
     let length_BE = insert_nat64 (Mkfour 0 0 0 0) (8 * length iv) 0 in
     let length_LE = reverse_bytes_quad32 length_BE in
     let hash_input_LE = append padded_iv_quads (create 1 length_LE) in
@@ -33,7 +34,7 @@ let compute_iv_BE (h_LE:quad32) (iv:supported_iv_BE) : quad32
   )
 
 // little-endian, except for iv_BE
-let gcm_encrypt_LE_def (alg:algorithm) (key:aes_key alg) (iv:supported_iv_BE) (plain:seq nat8) (auth:seq nat8) :
+let gcm_encrypt_LE_def (alg:algorithm) (key:aes_key alg) (iv:supported_iv_LE) (plain:seq nat8) (auth:seq nat8) :
   Pure (tuple2 (seq nat8) (seq nat8))
     (requires
       length plain < pow2_32 /\
@@ -64,7 +65,7 @@ let gcm_encrypt_LE_def (alg:algorithm) (key:aes_key alg) (iv:supported_iv_BE) (p
 //REVIEW: unexpectedly, the following fails:
 //  let fails () : Lemma (gcm_encrypt_LE == make_opaque gcm_encrypt_LE_def) = ()
 //So we do this instead:
-let gcm_encrypt_LE (alg:algorithm) (key:seq nat8) (iv:supported_iv_BE) (plain:seq nat8) (auth:seq nat8) :
+let gcm_encrypt_LE (alg:algorithm) (key:seq nat8) (iv:supported_iv_LE) (plain:seq nat8) (auth:seq nat8) :
   Pure (tuple2 (seq nat8) (seq nat8))
     (requires
       is_aes_key alg key /\
@@ -75,7 +76,7 @@ let gcm_encrypt_LE (alg:algorithm) (key:seq nat8) (iv:supported_iv_BE) (plain:se
   =
   make_opaque (gcm_encrypt_LE_def alg key iv plain auth)
 
-let gcm_decrypt_LE_def (alg:algorithm) (key:aes_key alg) (iv:supported_iv_BE) (cipher:seq nat8) (auth:seq nat8) (tag:seq nat8) :
+let gcm_decrypt_LE_def (alg:algorithm) (key:aes_key alg) (iv:supported_iv_LE) (cipher:seq nat8) (auth:seq nat8) (tag:seq nat8) :
   Pure (tuple2 (seq nat8) (bool))
     (requires
       length cipher < pow2_32 /\
@@ -101,7 +102,7 @@ let gcm_decrypt_LE_def (alg:algorithm) (key:aes_key alg) (iv:supported_iv_BE) (c
 
   (p, t = tag)
 
-let gcm_decrypt_LE (alg:algorithm) (key:seq nat8) (iv:supported_iv_BE) (cipher:seq nat8) (auth:seq nat8) (tag:seq nat8) :
+let gcm_decrypt_LE (alg:algorithm) (key:seq nat8) (iv:supported_iv_LE) (cipher:seq nat8) (auth:seq nat8) (tag:seq nat8) :
   Pure (tuple2 (seq nat8) (bool))
     (requires
       is_aes_key alg key /\

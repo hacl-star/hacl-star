@@ -15,7 +15,126 @@ open Vale.Def.Words_s
 open Vale.Def.Words.Seq_s
 open FStar.Calc
 
-let gcm_encrypt_LE_fst_helper (iv:supported_iv_BE) (iv_enc iv_BE:quad32) (plain auth cipher:seq nat8) (alg:algorithm) (key:seq nat32) : Lemma
+open Vale.Def.Words.Four_s
+
+let set_to_one_LE (q:quad32) : quad32 = four_insert q 1 0 // Mkfour 1 q.lo1 q.hi2 q.hi3 
+//let set_to_one_BE (q:quad32) : quad32 = four_insert q 1 3 //Mkfour q.lo0 q.lo1 q.hi2 1 
+
+let upper3_equal (q0 q1:quad32) : bool = 
+  q0.lo1 = q1.lo1 &&
+  q0.hi2 = q1.hi2 &&
+  q0.hi3 = q1.hi3
+
+let lower3_equal (q0 q1:quad32) : bool = 
+  q0.lo0 = q1.lo0 &&
+  q0.lo1 = q1.lo1 &&
+  q0.hi2 = q1.hi2
+
+let lemma_set_to_one_equality (q0 q1:quad32) : Lemma
+   (requires upper3_equal q0 q1)
+   (ensures  set_to_one_LE q0 == set_to_one_LE q1)
+   =
+   ()
+   
+let lemma_set_to_one_reverse_equality (q0 q1:quad32) : Lemma
+   (requires lower3_equal q0 q1)
+   (ensures  set_to_one_LE (reverse_bytes_quad32 q0) == set_to_one_LE (reverse_bytes_quad32 q1))
+   =
+   reveal_reverse_bytes_quad32 q0;
+   reveal_reverse_bytes_quad32 q1;
+   ()
+
+let lemma_le_bytes_to_quad32_prefix_equality (b0:seq nat8 {length b0 == 16}) (b1:seq nat8 {length b1 == 16}) : Lemma
+  (requires slice b0 0 12 == slice b1 0 12)
+  (ensures lower3_equal (le_bytes_to_quad32 b0) (le_bytes_to_quad32 b1))
+  =
+  let q0 = le_bytes_to_quad32 b0 in
+  let q1 = le_bytes_to_quad32 b1 in
+  reveal_opaque le_bytes_to_quad32_def;
+  assert (equal (slice b0 0 12) (slice b1 0 12));
+  let helper (i:int) : Lemma (0 <= i /\ i < 12 ==> index b0 i == index (slice b0 0 12) i
+                                             /\ index b1 i == index (slice b1 0 12) i)
+  = ()
+  in
+  FStar.Classical.forall_intro helper;
+  ()
+
+let lemma_le_seq_quad32_to_bytes_prefix_equality (q:quad32) : Lemma
+  (slice (le_quad32_to_bytes q) 0 12 == slice (pad_to_128_bits (slice (le_quad32_to_bytes q) 0 12)) 0 12)
+  =
+  assert (equal (slice (pad_to_128_bits (slice (le_quad32_to_bytes q) 0 12)) 0 12)
+                (slice (le_quad32_to_bytes q) 0 12));
+  ()
+
+let lemma_compute_iv (iv_b iv_extra_b:seq quad32) (iv:supported_iv_LE) (num_bytes:nat64) (h_LE j0:quad32) : Lemma
+  (requires
+    length iv_extra_b == 1 /\
+    length iv_b * (128/8) <= num_bytes /\ num_bytes < length iv_b * (128/8) + 128/8 /\
+    num_bytes == 96/8 /\
+    (let iv_BE = reverse_bytes_quad32 (index iv_extra_b 0) in
+     j0 == Mkfour 1 iv_BE.lo1 iv_BE.hi2 iv_BE.hi3) /\
+    (let raw_quads = append iv_b iv_extra_b in
+     let iv_bytes = slice (le_seq_quad32_to_bytes raw_quads) 0 num_bytes in
+     iv_bytes == iv))
+  (ensures j0 == compute_iv_BE h_LE iv)
+  =
+  assert (length iv == 12);
+  assert (length iv_b == 0);
+  lemma_empty iv_b;
+  append_empty_l iv_extra_b;
+  assert (append iv_b iv_extra_b == iv_extra_b);
+  let q = index iv_extra_b 0 in
+  le_seq_quad32_to_bytes_of_singleton q;
+  assert (equal iv_extra_b (create 1 q));
+  assert (le_seq_quad32_to_bytes iv_extra_b == le_quad32_to_bytes q);
+
+  // Prove this so we can call lemma_le_bytes_to_quad32_prefix_equality below
+  calc (==) {
+    slice (pad_to_128_bits (slice (le_quad32_to_bytes q) 0 12)) 0 12;
+    == {}
+    slice (pad_to_128_bits iv) 0 12;
+  };
+
+  // Prove this so we can call lemma_set_to_one_reverse_equality below
+  calc (==) {
+    le_bytes_to_quad32 (pad_to_128_bits (slice (le_quad32_to_bytes q) 0 num_bytes));
+    == {}
+    le_bytes_to_quad32 (pad_to_128_bits (slice (le_seq_quad32_to_bytes iv_extra_b) 0 num_bytes));
+    == {}
+    le_bytes_to_quad32 (pad_to_128_bits iv);
+  };
+  
+  calc (==) {
+    j0;
+    == {}
+    set_to_one_LE (reverse_bytes_quad32 q);
+    == {  le_bytes_to_quad32_to_bytes q }
+    set_to_one_LE (reverse_bytes_quad32 (le_bytes_to_quad32 (le_quad32_to_bytes q)));
+    == { 
+         lemma_le_seq_quad32_to_bytes_prefix_equality q;
+         lemma_le_bytes_to_quad32_prefix_equality 
+           (le_quad32_to_bytes q)
+           (pad_to_128_bits (slice (le_quad32_to_bytes q) 0 12));
+         lemma_set_to_one_reverse_equality
+           (le_bytes_to_quad32 (le_quad32_to_bytes q))
+           (le_bytes_to_quad32 (pad_to_128_bits (slice (le_quad32_to_bytes q) 0 12)))           
+       }
+    set_to_one_LE (reverse_bytes_quad32 (le_bytes_to_quad32 (pad_to_128_bits (slice (le_quad32_to_bytes q) 0 12))));
+    == { lemma_set_to_one_reverse_equality 
+           (le_bytes_to_quad32 (pad_to_128_bits (slice (le_quad32_to_bytes q) 0 12))) 
+           (le_bytes_to_quad32 (pad_to_128_bits iv));
+         lemma_le_bytes_to_quad32_prefix_equality 
+           (pad_to_128_bits (slice (le_quad32_to_bytes q) 0 12)) 
+           (pad_to_128_bits iv) }
+    set_to_one_LE (reverse_bytes_quad32 (le_bytes_to_quad32 (pad_to_128_bits iv)));
+    == {}
+    compute_iv_BE h_LE iv;
+  };
+  ()
+     
+
+
+let gcm_encrypt_LE_fst_helper (iv:supported_iv_LE) (iv_enc iv_BE:quad32) (plain auth cipher:seq nat8) (alg:algorithm) (key:seq nat32) : Lemma
   (requires
     is_aes_key_LE alg key /\
    (let h_LE = aes_encrypt_LE alg key (Mkfour 0 0 0 0) in
@@ -46,7 +165,7 @@ let gcm_encrypt_LE_fst_helper (iv:supported_iv_BE) (iv_enc iv_BE:quad32) (plain 
   ()
 *)
 
-let gcm_encrypt_LE_snd_helper (iv:supported_iv_BE) (j0_BE length_quad32 hash mac:quad32) (plain auth cipher:seq nat8) (alg:algorithm) (key:seq nat32) : Lemma
+let gcm_encrypt_LE_snd_helper (iv:supported_iv_LE) (j0_BE length_quad32 hash mac:quad32) (plain auth cipher:seq nat8) (alg:algorithm) (key:seq nat32) : Lemma
   (requires
     is_aes_key_LE alg key /\
    (let h_LE = aes_encrypt_LE alg key (Mkfour 0 0 0 0) in
@@ -75,7 +194,7 @@ let gcm_blocks_helper_enc (alg:algorithm) (key:seq nat32)
                    (p128x6 p128 p_bytes c128x6 c128 c_bytes:seq quad32)
                    (auth_bytes:seq nat8)
                    (p_num_bytes:nat)
-                   (iv:supported_iv_BE) (j0_BE:quad32) : Lemma
+                   (iv:supported_iv_LE) (j0_BE:quad32) : Lemma
   (requires // Required by gcm_blocks
            length p128x6 * 16 + length p128 * 16 <= p_num_bytes /\
            p_num_bytes < length p128x6 * 16 + length p128 * 16 + 16 /\
@@ -202,7 +321,7 @@ let pad_to_128_bits_multiple_append (x y:seq nat8) : Lemma
 let gcm_blocks_helper (alg:algorithm) (key:seq nat32)
                    (a128 a_bytes p128x6 p128 p_bytes c128x6 c128 c_bytes:seq quad32)
                    (p_num_bytes a_num_bytes:nat)
-                   (iv:supported_iv_BE) (j0_BE h enc_hash length_quad:quad32) : Lemma
+                   (iv:supported_iv_LE) (j0_BE h enc_hash length_quad:quad32) : Lemma
   (requires // Required by gcm_blocks
            length p128x6 * 16 + length p128 * 16 <= p_num_bytes /\
            p_num_bytes < length p128x6 * 16 + length p128 * 16 + 16 /\
@@ -482,7 +601,7 @@ let lemma_length_simplifier (s bytes t:seq quad32) (num_bytes:nat) : Lemma
 let gcm_blocks_helper_simplified (alg:algorithm) (key:seq nat32)
                    (a128 a_bytes p128x6 p128 p_bytes c128x6 c128 c_bytes:seq quad32)
                    (p_num_bytes a_num_bytes:nat)
-                   (iv:supported_iv_BE) (j0_BE h enc_hash length_quad:quad32) : Lemma
+                   (iv:supported_iv_LE) (j0_BE h enc_hash length_quad:quad32) : Lemma
   (requires // Required by gcm_blocks
            length p128x6 * 16 + length p128 * 16 <= p_num_bytes /\
            p_num_bytes < length p128x6 * 16 + length p128 * 16 + 16 /\
@@ -580,7 +699,7 @@ let gcm_blocks_helper_simplified (alg:algorithm) (key:seq nat32)
   ()
 
 
-let lemma_gcm_encrypt_decrypt_equiv (alg:algorithm) (key:seq nat32) (iv:supported_iv_BE) (j0_BE:quad32) (plain cipher auth alleged_tag:seq nat8) : Lemma
+let lemma_gcm_encrypt_decrypt_equiv (alg:algorithm) (key:seq nat32) (iv:supported_iv_LE) (j0_BE:quad32) (plain cipher auth alleged_tag:seq nat8) : Lemma
   (requires
     is_aes_key_LE alg key /\
    (let h_LE = aes_encrypt_LE alg key (Mkfour 0 0 0 0) in
@@ -600,7 +719,7 @@ let gcm_blocks_helper_dec_simplified (alg:algorithm) (key:seq nat32)
                    (p128x6 p128 p_bytes c128x6 c128 c_bytes:seq quad32)
                    (auth_bytes alleged_tag:seq nat8)
                    (p_num_bytes:nat)
-                   (iv:supported_iv_BE) (j0_BE:quad32) : Lemma
+                   (iv:supported_iv_LE) (j0_BE:quad32) : Lemma
   (requires // Required by gcm_blocks
            length p128x6 * 16 + length p128 * 16 <= p_num_bytes /\
            p_num_bytes < length p128x6 * 16 + length p128 * 16 + 16 /\
@@ -666,7 +785,7 @@ let gcm_blocks_helper_dec_simplified (alg:algorithm) (key:seq nat32)
   ()
 
 
-let gcm_decrypt_LE_tag (alg:algorithm) (key:seq nat8) (iv:supported_iv_BE) (cipher:seq nat8) (auth:seq nat8) :
+let gcm_decrypt_LE_tag (alg:algorithm) (key:seq nat8) (iv:supported_iv_LE) (cipher:seq nat8) (auth:seq nat8) :
   Pure (seq nat8)
     (requires
       is_aes_key alg key /\
@@ -694,7 +813,7 @@ let gcm_decrypt_LE_tag (alg:algorithm) (key:seq nat8) (iv:supported_iv_BE) (ciph
 let gcm_blocks_dec_helper (alg:algorithm) (key:seq nat32)
                    (a128 a_bytes p128x6 p128 p_bytes c128x6 c128 c_bytes:seq quad32)
                    (p_num_bytes a_num_bytes:nat)
-                   (iv:supported_iv_BE) (j0_BE h enc_hash length_quad:quad32) : Lemma
+                   (iv:supported_iv_LE) (j0_BE h enc_hash length_quad:quad32) : Lemma
   (requires // Required by gcm_blocks
            length p128x6 * 16 + length p128 * 16 <= p_num_bytes /\
            p_num_bytes < length p128x6 * 16 + length p128 * 16 + 16 /\
@@ -943,7 +1062,7 @@ let gcm_blocks_dec_helper (alg:algorithm) (key:seq nat32)
 let gcm_blocks_dec_helper_simplified (alg:algorithm) (key:seq nat32)
                    (a128 a_bytes p128x6 p128 p_bytes c128x6 c128 c_bytes:seq quad32)
                    (p_num_bytes a_num_bytes:nat)
-                   (iv:supported_iv_BE) (j0_BE h enc_hash length_quad:quad32) : Lemma
+                   (iv:supported_iv_LE) (j0_BE h enc_hash length_quad:quad32) : Lemma
   (requires // Required by gcm_blocks
            length p128x6 * 16 + length p128 * 16 <= p_num_bytes /\
            p_num_bytes < length p128x6 * 16 + length p128 * 16 + 16 /\
@@ -1038,7 +1157,7 @@ let gcm_blocks_dec_helper_simplified (alg:algorithm) (key:seq nat32)
   ()
 
 let decrypt_helper
-  (alg:algorithm) (key:seq nat8) (iv:supported_iv_BE) (cipher:seq nat8) (auth:seq nat8)
+  (alg:algorithm) (key:seq nat8) (iv:supported_iv_LE) (cipher:seq nat8) (auth:seq nat8)
   (rax:nat64) (alleged_tag_quad computed_tag:quad32) : Lemma
   (requires
     is_aes_key alg key /\    

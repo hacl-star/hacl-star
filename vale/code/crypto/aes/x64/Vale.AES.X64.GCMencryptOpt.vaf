@@ -106,6 +106,67 @@ function aes_reqs(alg:algorithm, key:seq(nat32), round_keys:seq(quad32), keys_b:
 // GCM
 ///////////////////////////
 
+procedure Compute_iv(
+        inline alg:algorithm,
+        ghost iv_b:buffer128,
+        ghost iv_extra_b:buffer128,
+        ghost iv:supported_iv_LE,
+        ghost j0_b:buffer128,
+        ghost hkeys_b:buffer128
+        )
+    {:quick}
+//    {:public}
+    lets 
+        iv_ptr @= rdi; extra_ptr @= rsi; len @= rdx; j0_ptr @= rcx; h_ptr @= r8; num_bytes @= r9;
+    reads
+        iv_ptr; extra_ptr; len; j0_ptr; h_ptr; num_bytes; memTaint;
+        
+    modifies
+        rax; xmm0; xmm1; mem; efl;
+
+    requires
+        validSrcAddrs128(mem, iv_ptr,    iv_b,       len, memTaint, Secret);
+        validSrcAddrs128(mem, extra_ptr, iv_extra_b, 1,   memTaint, Secret);
+        validDstAddrs128(mem, j0_ptr,    j0_b,       1,   memTaint, Secret);
+        validSrcAddrs128(mem, h_ptr,     hkeys_b,    3,   memTaint, Secret);
+
+        buffer_length(iv_b) == len;
+        buffer_length(iv_extra_b) == 1;
+
+        len * (128/8) <= num_bytes < len * (128/8) + 128/8;
+
+        0 < 8*num_bytes < pow2_64;
+
+        // GCM
+        pclmulqdq_enabled;
+
+        let iv_raw_quads := append(s128(mem, iv_b), s128(mem, iv_extra_b));
+        let iv_bytes_LE:supported_iv_LE := #supported_iv_LE(slice_work_around(le_seq_quad32_to_bytes(iv_raw_quads), num_bytes));
+        iv_bytes_LE == iv;
+
+    ensures
+        modifies_buffer128(j0_b, old(mem), mem);
+        let h_LE := old(buffer128_read(hkeys_b, 2, mem));
+        buffer128_read(j0_b, 0, mem) == compute_iv_BE(h_LE, iv);
+{
+    if (num_bytes == 12 /* == 96/8 */) {
+        Load128_buffer(xmm0, extra_ptr, 0, Secret, iv_extra_b, 0);
+        ghost var iv_LE := xmm0;
+        assert iv_LE == index_work_around_quad32(s128(mem, iv_extra_b), 0);
+        InitPshufbMask(xmm1, rax);
+        Pshufb(xmm0, xmm1);
+        ghost var iv_BE := xmm0;
+        assert iv_BE == reverse_bytes_quad32(iv_LE);
+        PinsrdImm(xmm0, 1, 0, rax);   // Set the low 32-bits to 1
+        assert xmm0 == set_to_one_LE(iv_BE);
+        Store128_buffer(j0_ptr, xmm0, 0, Secret, j0_b, 0);
+        lemma_compute_iv(old(s128(mem, iv_b)), old(s128(mem, iv_extra_b)), iv, num_bytes, old(buffer128_read(hkeys_b, 2, mem)), xmm0);
+    } else {
+        assume false;
+    }
+}
+
+
 #reset-options "--z3rlimit 10"
 procedure gcm_block_bytes(
         inline alg:algorithm,
@@ -855,7 +916,7 @@ procedure gcm_blocks_wrapped(
         ghost out128_b:buffer128,
         ghost inout_b:buffer128,
         ghost iv_b:buffer128,
-        ghost iv:supported_iv_BE,
+        ghost iv:supported_iv_LE,
         ghost scratch_b:buffer128,
         ghost key:seq(nat32),
         ghost round_keys:seq(quad32),
@@ -1243,7 +1304,7 @@ procedure gcm_blocks_stdcall(
         ghost auth_num:nat64,
         ghost keys_b:buffer128,
         ghost iv_b:buffer128,
-        ghost iv:supported_iv_BE,
+        ghost iv:supported_iv_LE,
         ghost hkeys_b:buffer128,
 
         ghost abytes_b:buffer128,
