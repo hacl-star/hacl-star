@@ -17,10 +17,14 @@ unfold let quad32 = quad32
 
 val cf (flags:Flags.t) : bool
 val overflow (flags:Flags.t) : bool
+val valid_cf (flags:Flags.t) : bool
+val valid_of (flags:Flags.t) : bool
 val update_cf (flags:Flags.t) (new_cf:bool) : (new_flags:Flags.t { cf new_flags == new_cf /\
-                                                       overflow new_flags == overflow flags} )
+                                                       overflow new_flags == overflow flags /\
+                                                       valid_cf new_flags } )
 val update_of (flags:Flags.t) (new_of:bool) : (new_flags:Flags.t { overflow new_flags == new_of /\
-                                                       cf new_flags == cf flags })
+                                                       cf new_flags == cf flags /\
+                                                       valid_of new_flags })
 
 //unfold let va_subscript = Map.sel
 unfold let va_subscript (#a:eqtype) (#b:Type) (x:Map.t a b) (y:a) : Tot b = Map.sel x y
