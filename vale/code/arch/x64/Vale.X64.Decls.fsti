@@ -263,7 +263,7 @@ val taint_at (memTaint:M.memtaint) (addr:int) : taint
 
 (* Getters *)
 [@va_qattr] unfold let va_get_ok (s:va_state) : bool = s.vs_ok
-[@va_qattr] unfold let va_get_flags (f:flag) (s:va_state) : Flags.flag_val_t = eval_flag f s
+[@va_qattr] unfold let va_get_flags (s:va_state) : Flags.t = s.vs_flags
 [@va_qattr] unfold let va_get_reg (r:reg) (s:va_state) : nat64 = eval_reg r s
 [@va_qattr] unfold let va_get_xmm (x:xmm) (s:va_state) : quad32 = eval_xmm x s
 [@va_qattr] unfold let va_get_mem (s:va_state) : M.mem = s.vs_mem
