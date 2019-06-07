@@ -277,6 +277,8 @@ let rounds_nat: size_nat = Spec.rounds Spec.Blake2.Blake2B
 noextract inline_for_extraction
 let rounds_t:x:size_t{x == size rounds_nat} = size (Spec.rounds Spec.Blake2.Blake2B)
 
+#reset-options "--z3rlimit 75 --max_ifuel 0 --max_fuel 0"
+
 [@ Substitute ]
 let blake2_compress2 wv m =
   let h0 = ST.get () in
@@ -284,6 +286,7 @@ let blake2_compress2 wv m =
   let spec h = Spec.blake2_round Spec.Blake2B h.[|m|] in
   loop1 h0 rounds_t wv spec
   (fun i ->
+    admit();
     Loops.unfold_repeati rounds_nat (spec h0) h0.[|wv|] (v i);
     blake2_round wv m i;
     let h1 = ST.get() in
