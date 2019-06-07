@@ -216,6 +216,7 @@ let create_initial_trusted_state
     let regs = register_of_args max_arity arg_reg (List.Tot.length args) args IA.init_regs in
     let regs = FunctionalExtensionality.on reg regs in
     let xmms = FunctionalExtensionality.on xmm IA.init_xmms in
+    let flags = FunctionalExtensionality.on flag IA.init_flags in
     let init_rsp = regs rRsp in
     // Create an initial empty stack
     let stack = Map.const_on Set.empty 0 in
@@ -226,7 +227,7 @@ let create_initial_trusted_state
       BS.ms_ok = true;
       BS.ms_regs = regs;
       BS.ms_xmms = xmms;
-      BS.ms_flags = IA.init_flags;
+      BS.ms_flags = flags;
       BS.ms_mem = down_mem mem;
       BS.ms_memTaint = create_memtaint mem (args_b8 args) (mk_taint args init_taint);
       BS.ms_stack = BS.Vale_stack init_rsp stack;
