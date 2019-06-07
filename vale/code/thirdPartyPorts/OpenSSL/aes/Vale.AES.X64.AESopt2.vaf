@@ -120,7 +120,7 @@ procedure MulAdd_unroll(
         of_quad32(buffer128_read(hkeys_b, 6, mem)) == gf128_power(h, 5);
         of_quad32(buffer128_read(hkeys_b, 7, mem)) == gf128_power(h, 6);
         validSrcAddrs128(mem, rbp, scratch_b, 8, memTaint, Secret);
-        of_quad32(Xi) +. of_quad32(Z0) +. of_quad32(buffer128_read(scratch_b, 0, mem)) == prev;
+        of_quad32(Xi) +. of_quad32(Z0) +. of_quad32(buffer128_read(scratch_b, 1, mem)) == prev;
         buffer128_read(scratch_b, 3, mem) == reverse_bytes_quad32(data[4]);
         buffer128_read(scratch_b, 4, mem) == reverse_bytes_quad32(data[3]);
         buffer128_read(scratch_b, 5, mem) == reverse_bytes_quad32(data[2]);
@@ -163,7 +163,7 @@ procedure MulAdd_unroll(
     VPolyAdd(Z0, T1, Z1);
     VPolyMul(T1, Ii, Hkey, false, true);
     VPolyMul(T2, Ii, Hkey, true, false);
-    VPolyAdd(Xi, Xi, Mem128(rbp, 0x00, Secret, scratch_b, 0));
+    VPolyAdd(Xi, Xi, Mem128(rbp, 0x10, Secret, scratch_b, 1));
     // assert ~~Xi == prev;
     VPolyMul(Hkey, Ii, Hkey, true, true);
     lemma_Mul128_accum(z0, ~~Z2, ~~Z3, data4, gf128_power(h, 2));
@@ -342,7 +342,7 @@ procedure GhashUnroll6x(
         of_quad32(buffer128_read(hkeys_b, 6, mem)) == gf128_power(h, 5);
         of_quad32(buffer128_read(hkeys_b, 7, mem)) == gf128_power(h, 6);
         validSrcAddrs128(mem, rbp, scratch_b, 8, memTaint, Secret);
-        of_quad32(Xi) +. of_quad32(Z0) +. of_quad32(buffer128_read(scratch_b, 0, mem)) == prev;
+        of_quad32(Xi) +. of_quad32(Z0) +. of_quad32(buffer128_read(scratch_b, 1, mem)) == prev;
         buffer128_read(scratch_b, 3, mem) == reverse_bytes_quad32(data[4]);
         buffer128_read(scratch_b, 4, mem) == reverse_bytes_quad32(data[3]);
         buffer128_read(scratch_b, 5, mem) == reverse_bytes_quad32(data[2]);

@@ -3781,10 +3781,9 @@ procedure UpdateScratch(ghost scratch_b:buffer128)
 
     ensures
         modifies_buffer128(scratch_b, old(mem), mem);
-        //modifies_buffer_specific128(out_b, old(mem), mem, count*6+0, count*6+5);
-        //slice_work_around(s128(mem, out_b), 6*count) == old(slice_work_around(s128(mem, out_b), 6*count));
+        buffer_modifies_specific128(scratch_b, old(mem), mem, 1, 7);
 
-        buffer128_read(scratch_b, 0, mem) == Mkfour(0,0,0,0);
+        buffer128_read(scratch_b, 1, mem) == Mkfour(0,0,0,0);
         buffer128_read(scratch_b, 3, mem) == inout4;
         buffer128_read(scratch_b, 4, mem) == inout3;
         buffer128_read(scratch_b, 5, mem) == inout2;
@@ -3795,7 +3794,7 @@ procedure UpdateScratch(ghost scratch_b:buffer128)
 {
     ZeroXmm(Z0);
     Mov128(Z3, inout5);
-    Store128_buffer(rbp, Z0,     0x00, Secret, scratch_b, 0);
+    Store128_buffer(rbp, Z0,     0x10, Secret, scratch_b, 1);
     Store128_buffer(rbp, inout4, 0x30, Secret, scratch_b, 3);
     Store128_buffer(rbp, inout3, 0x40, Secret, scratch_b, 4);
     Store128_buffer(rbp, inout2, 0x50, Secret, scratch_b, 5);
@@ -4428,9 +4427,9 @@ procedure AES_GCM_encrypt_6mult(
         let out_snapshot := s128(mem, out_b);
         Load128_buffer(Z3, rbp, 0x20, Secret, scratch_b, 2); // # I[5]
 
-        // TODO: Update AESOpt2 so we can skip these steps (borow rndkey, for example, instead of scratch_b[0])
+        // TODO: Update AESOpt2 so we can skip these steps (borow rndkey, for example, instead of scratch_b[1])
         ZeroXmm(Z0);
-        Store128_buffer(rbp, Z0, 0x00, Secret, scratch_b, 0);
+        Store128_buffer(rbp, Z0, 0x10, Secret, scratch_b, 1);
         lemma_add_zero(of_quad32(Xi));
 
         ghost var data := slice_workaround(s128(mem, out_b), #nat(old(len)-12), #nat(old(len)-6));
@@ -4549,7 +4548,7 @@ procedure DecryptPrelude(ghost in_b:buffer128, ghost scratch_b:buffer128)
 }
 
 
-#reset-options "--z3rlimit 50"
+#reset-options "--z3rlimit 100"
 procedure AES_GCM_decrypt_6mult(
         inline alg:algorithm,
         ghost h_LE:quad32,
