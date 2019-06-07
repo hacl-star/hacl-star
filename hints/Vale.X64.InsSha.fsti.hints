@@ -7,22 +7,27 @@
       1,
       0,
       [
-        "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
-        "equation_Vale.Def.Words_s.nat32",
+        "@MaxIFuel_assumption", "@query", "bool_inversion", "eq2-interp",
+        "equation_Prims.nat", "equation_Vale.Def.Words_s.nat32",
         "equation_Vale.SHA.SHA_helpers.counter",
         "equation_Vale.SHA.SHA_helpers.hash256",
         "equation_Vale.SHA.SHA_helpers.size_block_w_256",
+        "equation_Vale.X64.Decls.va_require_total",
         "equation_Vale.X64.Machine_s.xmm",
-        "fuel_guarded_inversion_Vale.X64.State.state", "int_inversion",
+        "fuel_guarded_inversion_Vale.X64.State.vale_state", "int_inversion",
+        "proj_equation_Vale.X64.State.Mkvale_state_vs_ok",
+        "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_76468f84b13b43041b38447434e330b5",
         "refinement_interpretation_Tm_refine_76eecaa5eb922850bd62c67e1b97491e",
-        "refinement_interpretation_Tm_refine_7dcd17d2b389c0a4ffd34d7b978d7577",
         "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
         "refinement_interpretation_Tm_refine_f0a4eeefab9c63f31c350a802a4d45dd",
-        "typing_Vale.SHA.SHA_helpers.k"
+        "typing_Vale.SHA.SHA_helpers.k",
+        "typing_Vale.X64.CPU_Features_s.sha_enabled",
+        "typing_Vale.X64.State.__proj__Mkvale_state__item__vs_ok"
       ],
       0,
-      "c862ef537026769e6a727c79c5a49b02"
+      "9bc3ab6a8d4137c91a4f5e7f5eeba4d0"
     ],
     [
       "Vale.X64.InsSha.va_wp_SHA256_rnds2",
@@ -39,7 +44,7 @@
         "typing_Vale.SHA.SHA_helpers.k"
       ],
       0,
-      "8df35ef1eaca7b78aef3b5f22f3d0643"
+      "815b356a1ebf98b1a6b2fb470f4b2d39"
     ],
     [
       "Vale.X64.InsSha.va_quick_SHA256_rnds2",
@@ -51,7 +56,7 @@
         "fuel_guarded_inversion_FStar.Pervasives.Native.tuple3"
       ],
       0,
-      "4cdb2d8cf9f77112e1b334505ce720de"
+      "456b8ced5251d0e5406fde52888a3cad"
     ],
     [
       "Vale.X64.InsSha.va_lemma_SHA256_msg1",
@@ -68,7 +73,7 @@
         "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-      "298fb140b4dc31ff2f3c787f4c2e7af7"
+      "d1d0a54724595613450f291b1dd654d0"
     ],
     [
       "Vale.X64.InsSha.va_wp_SHA256_msg1",
@@ -85,7 +90,7 @@
         "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-      "2355b337c56166ec9d20556f75e66c42"
+      "33d0dd6776a2fa6a7cc92b6720709c2c"
     ],
     [
       "Vale.X64.InsSha.va_quick_SHA256_msg1",
@@ -97,7 +102,7 @@
         "fuel_guarded_inversion_FStar.Pervasives.Native.tuple3"
       ],
       0,
-      "0603dce72df7ee326279bd62d3bf483f"
+      "023b4c3f26ea8260b5c49676a4390f86"
     ],
     [
       "Vale.X64.InsSha.va_lemma_SHA256_msg2",
@@ -113,7 +118,7 @@
         "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-      "721410dbd3defd8d77e2c492791e48e8"
+      "dd011f47545ecce8309ac04816cf9bf6"
     ],
     [
       "Vale.X64.InsSha.va_wp_SHA256_msg2",
@@ -129,7 +134,7 @@
         "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-      "e1e91e7257ea1455d9fb7e8dd585ced6"
+      "46a28907b002dcc68d51cda1731f256b"
     ],
     [
       "Vale.X64.InsSha.va_quick_SHA256_msg2",
@@ -141,7 +146,7 @@
         "fuel_guarded_inversion_FStar.Pervasives.Native.tuple3"
       ],
       0,
-      "ea3970ac47781b04554f00cca1bc855a"
+      "bdc1392c127497000efb152a6503d926"
     ]
   ]
 ]

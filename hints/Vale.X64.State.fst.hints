@@ -14,7 +14,7 @@
         "fuel_guarded_inversion_Vale.X64.Machine_s.maddr"
       ],
       0,
-      "69b12a40c006f0ec1da9e47aa1f28a78"
+      "466eb6f81980e8a06c0a7096a1131075"
     ],
     [
       "Vale.X64.State.to_nat64",
@@ -28,7 +28,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "f7ac98f0db47fd5edeb4643902bd58fa"
+      "dd1103d7a0bc4ebb50fe8c43e44af3f3"
     ],
     [
       "Vale.X64.State.eval_operand",
@@ -41,28 +41,15 @@
         "disc_equation_Vale.X64.Machine_s.OMem",
         "disc_equation_Vale.X64.Machine_s.OReg",
         "disc_equation_Vale.X64.Machine_s.OStack",
+        "equation_Vale.X64.Machine_s.operand64",
+        "equation_Vale.X64.Machine_s.reg",
         "fuel_guarded_inversion_Vale.X64.Machine_s.operand"
       ],
       0,
-      "3e7a2c4aa24afef06575a13b030affef"
+      "d072f3773659590df6cbf7475ea8065d"
     ],
     [
       "Vale.X64.State.eval_operand128",
-      1,
-      1,
-      1,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_Vale.X64.Machine_s.OMem128",
-        "disc_equation_Vale.X64.Machine_s.OReg128",
-        "disc_equation_Vale.X64.Machine_s.OStack128",
-        "fuel_guarded_inversion_Vale.X64.Machine_s.operand128"
-      ],
-      0,
-      "5ee77048f7be2972742b9a15d6f956c1"
-    ],
-    [
-      "Vale.X64.State.update_operand",
       1,
       1,
       1,
@@ -72,10 +59,31 @@
         "disc_equation_Vale.X64.Machine_s.OMem",
         "disc_equation_Vale.X64.Machine_s.OReg",
         "disc_equation_Vale.X64.Machine_s.OStack",
+        "equation_Vale.Def.Types_s.quad32",
+        "equation_Vale.X64.Machine_s.operand128",
+        "equation_Vale.X64.Machine_s.xmm",
         "fuel_guarded_inversion_Vale.X64.Machine_s.operand"
       ],
       0,
-      "fd33204c6c765097375ced0a75f0bc08"
+      "fc1721fc66e27120de0014d11c07bb0d"
+    ],
+    [
+      "Vale.X64.State.update_operand64",
+      1,
+      1,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "disc_equation_Vale.X64.Machine_s.OConst",
+        "disc_equation_Vale.X64.Machine_s.OMem",
+        "disc_equation_Vale.X64.Machine_s.OReg",
+        "disc_equation_Vale.X64.Machine_s.OStack",
+        "equation_Vale.X64.Machine_s.operand64",
+        "equation_Vale.X64.Machine_s.reg",
+        "fuel_guarded_inversion_Vale.X64.Machine_s.operand"
+      ],
+      0,
+      "e1698fb61e2d59c10820a73dcaae3b66"
     ],
     [
       "Vale.X64.State.valid_src_operand",
@@ -88,10 +96,12 @@
         "disc_equation_Vale.X64.Machine_s.OMem",
         "disc_equation_Vale.X64.Machine_s.OReg",
         "disc_equation_Vale.X64.Machine_s.OStack",
+        "equation_Vale.X64.Machine_s.operand64",
+        "equation_Vale.X64.Machine_s.reg",
         "fuel_guarded_inversion_Vale.X64.Machine_s.operand"
       ],
       0,
-      "0233dfd90fa12e65fa2a19067a955766"
+      "f2da547be6bd4bdc8c805a7bd9a8f8bd"
     ],
     [
       "Vale.X64.State.valid_src_operand128",
@@ -100,13 +110,17 @@
       1,
       [
         "@MaxIFuel_assumption", "@query",
-        "disc_equation_Vale.X64.Machine_s.OMem128",
-        "disc_equation_Vale.X64.Machine_s.OReg128",
-        "disc_equation_Vale.X64.Machine_s.OStack128",
-        "fuel_guarded_inversion_Vale.X64.Machine_s.operand128"
+        "disc_equation_Vale.X64.Machine_s.OConst",
+        "disc_equation_Vale.X64.Machine_s.OMem",
+        "disc_equation_Vale.X64.Machine_s.OReg",
+        "disc_equation_Vale.X64.Machine_s.OStack",
+        "equation_Vale.Def.Types_s.quad32",
+        "equation_Vale.X64.Machine_s.operand128",
+        "equation_Vale.X64.Machine_s.xmm",
+        "fuel_guarded_inversion_Vale.X64.Machine_s.operand"
       ],
       0,
-      "7e6d67a43daf7b9b77fa6866af1f1549"
+      "45ed7f39c2d6bd6790ad28df57e982d2"
     ]
   ]
 ]

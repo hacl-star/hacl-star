@@ -207,7 +207,7 @@ type hkdf_vector = {
   ikm:  hex_encoded;  // input key materials
   salt: hex_encoded; // input salt 
   info: hex_encoded; // expansion label
-  prk:  hex_encoded;  // extracted pseudo-random key (its length is tagLen ha)
+  prk:  hex_encoded;  // extracted pseudo-random key (its length is Spec.Hash.Definitions.hash_len ha)
   okm:  hex_encoded;  // output: expanded key materials (its length is an input)
 }
 

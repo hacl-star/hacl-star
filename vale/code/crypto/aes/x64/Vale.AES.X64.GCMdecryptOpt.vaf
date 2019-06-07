@@ -1010,6 +1010,9 @@ procedure gcm_blocks_wrapped(
 
 }
 
+#verbatim{:interface}
+#reset-options "--z3rlimit 100"
+#endverbatim
 #reset-options "--z3rlimit 1600"
 // Using exportOnly, since verification with quick mode fails with:
 // (Error 196) Implicit argument: Expected a total term; got a ghost term
