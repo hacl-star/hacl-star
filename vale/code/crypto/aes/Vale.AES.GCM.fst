@@ -66,7 +66,7 @@ let lemma_le_seq_quad32_to_bytes_prefix_equality (q:quad32) : Lemma
                 (slice (le_quad32_to_bytes q) 0 12));
   ()
 
-let lemma_compute_iv (iv_b iv_extra_b:seq quad32) (iv:supported_iv_LE) (num_bytes:nat64) (h_LE j0:quad32) : Lemma
+let lemma_compute_iv_easy (iv_b iv_extra_b:seq quad32) (iv:supported_iv_LE) (num_bytes:nat64) (h_LE j0:quad32) : Lemma
   (requires
     length iv_extra_b == 1 /\
     length iv_b * (128/8) <= num_bytes /\ num_bytes < length iv_b * (128/8) + 128/8 /\
@@ -131,8 +131,31 @@ let lemma_compute_iv (iv_b iv_extra_b:seq quad32) (iv:supported_iv_LE) (num_byte
     compute_iv_BE h_LE iv;
   };
   ()
-     
 
+open Vale.AES.GHash
+let lemma_compute_iv_hard (iv:supported_iv_LE) (quads:seq quad32) (length_quad h_LE j0:quad32) : Lemma
+  (requires
+    ~(length iv == 96/8) /\
+    quads == le_bytes_to_seq_quad32 (pad_to_128_bits iv) /\
+    j0 == ghash_incremental h_LE (Mkfour 0 0 0 0) (append quads (create 1 length_quad)) /\
+    length_quad == reverse_bytes_quad32 (insert_nat64_opaque 
+                                          (insert_nat64_opaque 
+                                            (Mkfour 0 0 0 0) 0 1) 
+                                        (8 * (length iv)) 0))
+
+    
+    
+
+  (ensures reverse_bytes_quad32 j0 == compute_iv_BE h_LE iv)
+  =
+  assert (two_to_nat32 (Mktwo 0 0) == 0);
+  let q0 = Mkfour 0 0 0 0 in
+  lemma_insert_nat64_nat32s q0 0 0;
+  assert (insert_nat64_opaque q0 0 1 == q0);
+  reveal_opaque insert_nat64;
+  assert (length_quad == reverse_bytes_quad32 (insert_nat64 (Mkfour 0 0 0 0) (8 * length iv) 0));
+  ghash_incremental_to_ghash h_LE (append quads (create 1 length_quad));
+  ()
 
 let gcm_encrypt_LE_fst_helper (iv:supported_iv_LE) (iv_enc iv_BE:quad32) (plain auth cipher:seq nat8) (alg:algorithm) (key:seq nat32) : Lemma
   (requires
