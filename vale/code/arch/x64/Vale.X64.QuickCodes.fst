@@ -15,7 +15,7 @@ let state_mod_eq (m:mod_t) (s1 s2:vale_state) =
   | Mod_reg r -> eval_reg_64 r s1 == eval_reg_64 r s2
   | Mod_xmm x -> eval_reg_xmm x s1 == eval_reg_xmm x s2
   | Mod_flags -> s1.vs_flags == s2.vs_flags
-  | Mod_mem -> s1.vs_mem == s2.vs_mem
+  | Mod_mem -> s1.vs_heap == s2.vs_heap
   | Mod_stack -> s1.vs_stack == s2.vs_stack
   | Mod_memTaint -> s1.vs_memTaint == s2.vs_memTaint
   | Mod_stackTaint -> s1.vs_stackTaint == s2.vs_stackTaint

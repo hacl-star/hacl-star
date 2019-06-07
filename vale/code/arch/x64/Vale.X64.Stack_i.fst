@@ -2,7 +2,7 @@ module Vale.X64.Stack_i
 
 module BS = Vale.X64.Machine_Semantics_s
 open Vale.X64.Bytes_Semantics
-let stack = BS.stack
+let vale_stack = BS.machine_stack
 
 let valid_src_stack64 i st = BS.valid_src_stack64 i st
 let load_stack64 i st = BS.eval_stack i st
@@ -22,7 +22,7 @@ let lemma_store_stack_same_valid64 ptr v h i =
 
 let lemma_free_stack_same_valid64 start finish ptr h =
   FStar.Pervasives.reveal_opaque (`%BS.valid_addr64) BS.valid_addr64;
-  let BS.Vale_stack _ mem = h in
+  let BS.Machine_stack _ mem = h in
   let domain = Map.domain mem in
   Classical.forall_intro (Vale.Lib.Set.remove_between_reveal domain start finish)
 
@@ -31,28 +31,28 @@ let lemma_store_new_valid64 ptr v h =
   Vale.Def.Opaque_s.reveal_opaque BS.update_heap64_def
 
 let lemma_correct_store_load_stack64 ptr v h =
-  let BS.Vale_stack _ mem = h in
+  let BS.Machine_stack _ mem = h in
   correct_update_get ptr v mem
 
 let lemma_frame_store_load_stack64 ptr v h i =
-  let BS.Vale_stack _ mem = h in
+  let BS.Machine_stack _ mem = h in
   frame_update_heap ptr v mem;
   Vale.Def.Opaque_s.reveal_opaque BS.get_heap_val64_def
 
 let lemma_free_stack_same_load64 start finish ptr h =
   FStar.Pervasives.reveal_opaque (`%BS.valid_addr64) BS.valid_addr64;
-  let BS.Vale_stack _ mem = h in
+  let BS.Machine_stack _ mem = h in
   let domain = Map.domain mem in
   Classical.forall_intro (Vale.Lib.Set.remove_between_reveal domain start finish);
   Vale.Def.Opaque_s.reveal_opaque BS.get_heap_val64_def
 
 let lemma_compose_free_stack64 start inter finish h =
-  let BS.Vale_stack _ mem = h in
+  let BS.Machine_stack _ mem = h in
   let domain = Map.domain mem in
   let map_restr = Map.restrict (Vale.Lib.Set.remove_between domain start inter) mem in
   let restrict = Map.domain map_restr in
-  let BS.Vale_stack _ mem1 = free_stack64 inter finish (free_stack64 start inter h) in
-  let BS.Vale_stack _ mem2 = free_stack64 start finish h in
+  let BS.Machine_stack _ mem1 = free_stack64 inter finish (free_stack64 start inter h) in
+  let BS.Machine_stack _ mem2 = free_stack64 start finish h in
   let aux (i:int) : Lemma (Map.contains mem1 i = Map.contains mem2 i /\ Map.sel mem1 i = Map.sel mem2 i)
     = Vale.Lib.Set.remove_between_reveal domain start inter i;
       Vale.Lib.Set.remove_between_reveal restrict inter finish i;

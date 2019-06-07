@@ -15,7 +15,7 @@ module BC = Vale.X64.Bytes_Code_s
 
 type uint64:eqtype = UInt64.t
 
-type heap = Map.t int nat8
+type machine_heap = Map.t int nat8
 let op_String_Access = Map.sel
 let op_String_Assignment = Map.upd
 
@@ -35,11 +35,11 @@ let code = BC.code_t instr_annotation
 let codes = BC.codes_t instr_annotation
 
 noeq
-type stack =
-  | Vale_stack:
+type machine_stack =
+  | Machine_stack:
     initial_rsp:nat64{initial_rsp >= 4096} ->  // Initial rsp pointer when entering the function
     stack_mem:Map.t int nat8 ->                // Stack contents
-    stack
+    machine_stack
 
 type regs_t = FStar.FunctionalExtensionality.restricted_t reg t_reg
 
@@ -48,9 +48,9 @@ type machine_state = {
   ms_ok: bool;
   ms_regs: regs_t;
   ms_flags: nat64;
-  ms_mem: heap;
+  ms_heap: machine_heap;
   ms_memTaint: memTaint_t;
-  ms_stack: stack;
+  ms_stack: machine_stack;
   ms_stackTaint: memTaint_t;
   ms_trace: list observation;
 }
@@ -63,7 +63,7 @@ let get_snd_ocmp (o:ocmp) = match o with
 
 assume val havoc_any (#a:Type) (x:a) : nat64
 let havoc_state_ins (s:machine_state) (i:ins) : nat64 =
-  havoc_any (s.ms_regs, s.ms_flags, s.ms_mem, s.ms_stack, ins)
+  havoc_any (s.ms_regs, s.ms_flags, s.ms_heap, s.ms_stack, ins)
 
 unfold let eval_reg (r:reg) (s:machine_state) : t_reg r = s.ms_regs r
 unfold let eval_reg_64 (r:reg_64) (s:machine_state) : nat64 = eval_reg (Reg 0 r) s
@@ -71,7 +71,7 @@ unfold let eval_reg_xmm (r:reg_xmm) (s:machine_state) : quad32 = eval_reg (Reg 1
 
 unfold let eval_reg_int (r:reg) (s:machine_state) : int = t_reg_to_int r.rf (eval_reg r s)
 
-let get_heap_val64_def (ptr:int) (mem:heap) : nat64 =
+let get_heap_val64_def (ptr:int) (mem:machine_heap) : nat64 =
   two_to_nat 32
   (Mktwo
     (four_to_nat 8 (Mkfour mem.[ptr] mem.[ptr + 1] mem.[ptr + 2] mem.[ptr + 3]))
@@ -79,7 +79,7 @@ let get_heap_val64_def (ptr:int) (mem:heap) : nat64 =
   )
 let get_heap_val64 = make_opaque get_heap_val64_def
 
-let get_heap_val32_def (ptr:int) (mem:heap) : nat32 =
+let get_heap_val32_def (ptr:int) (mem:machine_heap) : nat32 =
   four_to_nat 8
   (Mkfour
     mem.[ptr]
@@ -89,21 +89,21 @@ let get_heap_val32_def (ptr:int) (mem:heap) : nat32 =
 
 let get_heap_val32 = make_opaque get_heap_val32_def
 
-let get_heap_val128_def (ptr:int) (mem:heap) : quad32 = Mkfour
+let get_heap_val128_def (ptr:int) (mem:machine_heap) : quad32 = Mkfour
   (get_heap_val32 ptr mem)
   (get_heap_val32 (ptr + 4) mem)
   (get_heap_val32 (ptr + 8) mem)
   (get_heap_val32 (ptr + 12) mem)
 let get_heap_val128 = make_opaque get_heap_val128_def
 
-unfold let eval_mem (ptr:int) (s:machine_state) : nat64 = get_heap_val64 ptr s.ms_mem
-unfold let eval_mem128 (ptr:int) (s:machine_state) : quad32 = get_heap_val128 ptr s.ms_mem
+unfold let eval_mem (ptr:int) (s:machine_state) : nat64 = get_heap_val64 ptr s.ms_heap
+unfold let eval_mem128 (ptr:int) (s:machine_state) : quad32 = get_heap_val128 ptr s.ms_heap
 
-unfold let eval_stack (ptr:int) (s:stack) : nat64 =
-  let Vale_stack _ mem = s in
+unfold let eval_stack (ptr:int) (s:machine_stack) : nat64 =
+  let Machine_stack _ mem = s in
   get_heap_val64 ptr mem
-unfold let eval_stack128 (ptr:int) (s:stack) : quad32 =
-  let Vale_stack _ mem = s in
+unfold let eval_stack128 (ptr:int) (s:machine_stack) : quad32 =
+  let Machine_stack _ mem = s in
   get_heap_val128 ptr mem
 
 [@va_qattr]
@@ -149,7 +149,7 @@ let update_reg_xmm' (r:reg_xmm) (v:quad32) (s:machine_state) : machine_state =
 val mod_8: (n:nat{n < pow2_64}) -> nat8
 let mod_8 n = n % 0x100
 
-let update_heap32_def (ptr:int) (v:nat32) (mem:heap) : heap =
+let update_heap32_def (ptr:int) (v:nat32) (mem:machine_heap) : machine_heap =
   let v = nat_to_four 8 v in
   let mem = mem.[ptr] <- v.lo0 in
   let mem = mem.[ptr + 1] <- v.lo1 in
@@ -158,7 +158,7 @@ let update_heap32_def (ptr:int) (v:nat32) (mem:heap) : heap =
   mem
 let update_heap32 = make_opaque update_heap32_def
 
-let update_heap64_def (ptr:int) (v:nat64) (mem:heap) : heap =
+let update_heap64_def (ptr:int) (v:nat64) (mem:machine_heap) : machine_heap =
   let v = nat_to_two 32 v in
   let lo = nat_to_four 8 v.lo in
   let hi = nat_to_four 8 v.hi in
@@ -173,7 +173,7 @@ let update_heap64_def (ptr:int) (v:nat64) (mem:heap) : heap =
   mem
 let update_heap64 = make_opaque update_heap64_def
 
-let update_heap128_def (ptr:int) (v:quad32) (mem:heap) =
+let update_heap128_def (ptr:int) (v:quad32) (mem:machine_heap) =
   let mem = update_heap32 ptr v.lo0 mem in
   let mem = update_heap32 (ptr + 4) v.lo1 mem in
   let mem = update_heap32 (ptr + 8) v.hi2 mem in
@@ -181,11 +181,11 @@ let update_heap128_def (ptr:int) (v:quad32) (mem:heap) =
   mem
 let update_heap128 = make_opaque update_heap128_def
 
-let valid_addr (ptr:int) (mem:heap) : bool =
+let valid_addr (ptr:int) (mem:machine_heap) : bool =
   Map.contains mem ptr
 
 [@"opaque_to_smt"]
-let valid_addr64 (ptr:int) (mem:heap) =
+let valid_addr64 (ptr:int) (mem:machine_heap) =
   valid_addr ptr mem &&
   valid_addr (ptr + 1) mem &&
   valid_addr (ptr + 2) mem &&
@@ -196,7 +196,7 @@ let valid_addr64 (ptr:int) (mem:heap) =
   valid_addr (ptr + 7) mem
 
 [@"opaque_to_smt"]
-let valid_addr128 (ptr:int) (mem:heap) =
+let valid_addr128 (ptr:int) (mem:machine_heap) =
   valid_addr ptr mem &&
   valid_addr (ptr + 1) mem &&
   valid_addr (ptr + 2) mem &&
@@ -244,62 +244,62 @@ let rec update_n (addr:int) (n:nat) (memTaint:memTaint_t) (t:taint)
   else update_n (addr + 1) (n - 1) (memTaint.[addr] <- t) t
 
 let update_mem_and_taint (ptr:int) (v:nat64) (s:machine_state) (t:taint) : machine_state =
-  if valid_addr64 ptr s.ms_mem then
+  if valid_addr64 ptr s.ms_heap then
     { s with
-      ms_mem = update_heap64 ptr v s.ms_mem;
+      ms_heap = update_heap64 ptr v s.ms_heap;
       ms_memTaint = update_n ptr 8 s.ms_memTaint t;
     }
   else s
 
 let update_mem128_and_taint (ptr:int) (v:quad32) (s:machine_state) (t:taint) : machine_state =
-  if valid_addr128 ptr s.ms_mem then
+  if valid_addr128 ptr s.ms_heap then
     { s with
-      ms_mem = update_heap128 ptr v s.ms_mem;
+      ms_heap = update_heap128 ptr v s.ms_heap;
       ms_memTaint = update_n ptr 16 s.ms_memTaint t
     }
   else s
 
 unfold
-let update_stack64' (ptr:int) (v:nat64) (s:stack) : stack =
-  let Vale_stack init_rsp mem = s in
+let update_stack64' (ptr:int) (v:nat64) (s:machine_stack) : machine_stack =
+  let Machine_stack init_rsp mem = s in
   let mem = update_heap64 ptr v mem in
-  Vale_stack init_rsp mem
+  Machine_stack init_rsp mem
 
 unfold
-let update_stack128' (ptr:int) (v:quad32) (s:stack) : stack =
-  let Vale_stack init_rsp mem = s in
+let update_stack128' (ptr:int) (v:quad32) (s:machine_stack) : machine_stack =
+  let Machine_stack init_rsp mem = s in
   let mem = update_heap128 ptr v mem in
-  Vale_stack init_rsp mem
+  Machine_stack init_rsp mem
 
 let update_stack_and_taint (ptr:int) (v:nat64) (s:machine_state) (t:taint) : machine_state =
-  let Vale_stack init_rsp mem = s.ms_stack in
+  let Machine_stack init_rsp mem = s.ms_stack in
   { s with
     ms_stack = update_stack64' ptr v s.ms_stack;
     ms_stackTaint = update_n ptr 8 s.ms_stackTaint t;
   }
 
 let update_stack128_and_taint (ptr:int) (v:quad32) (s:machine_state) (t:taint) : machine_state =
-  let Vale_stack init_rsp mem = s.ms_stack in
+  let Machine_stack init_rsp mem = s.ms_stack in
   { s with
     ms_stack = update_stack128' ptr v s.ms_stack;
     ms_stackTaint = update_n ptr 16 s.ms_stackTaint t
   }
 
 unfold
-let valid_src_stack64 (ptr:int) (st:stack) : bool =
-  let Vale_stack init_rsp mem = st in
+let valid_src_stack64 (ptr:int) (st:machine_stack) : bool =
+  let Machine_stack init_rsp mem = st in
   valid_addr64 ptr mem
 
 unfold
-let valid_src_stack128 (ptr:int) (st:stack) : bool =
-  let Vale_stack init_rsp mem = st in
+let valid_src_stack128 (ptr:int) (st:machine_stack) : bool =
+  let Machine_stack init_rsp mem = st in
   valid_addr128 ptr mem
 
 let valid_src_operand (o:operand64) (s:machine_state) : bool =
   match o with
   | OConst n -> true
   | OReg r -> true
-  | OMem (m, t) -> valid_addr64 (eval_maddr m s) s.ms_mem
+  | OMem (m, t) -> valid_addr64 (eval_maddr m s) s.ms_heap
   | OStack (m, t) -> valid_src_stack64 (eval_maddr m s) s.ms_stack
 
 let valid_src_operand64_and_taint (o:operand64) (s:machine_state) : bool =
@@ -308,7 +308,7 @@ let valid_src_operand64_and_taint (o:operand64) (s:machine_state) : bool =
   | OReg r -> true
   | OMem (m, t) ->
     let ptr = eval_maddr m s in
-    valid_addr64 ptr s.ms_mem && match_n ptr 8 s.ms_memTaint t
+    valid_addr64 ptr s.ms_heap && match_n ptr 8 s.ms_memTaint t
   | OStack (m, t) ->
     let ptr = eval_maddr m s in
     valid_src_stack64 ptr s.ms_stack && match_n ptr 8 s.ms_stackTaint t
@@ -319,7 +319,7 @@ let valid_src_operand128_and_taint (o:operand128) (s:machine_state) : bool =
   | OReg i -> true // We leave it to the printer/assembler to object to invalid XMM indices
   | OMem (m, t) ->
     let ptr = eval_maddr m s in
-    valid_addr128 ptr s.ms_mem && match_n ptr 16 s.ms_memTaint t
+    valid_addr128 ptr s.ms_heap && match_n ptr 16 s.ms_memTaint t
   | OStack (m, t) ->
     let ptr = eval_maddr m s in
     valid_src_stack128 ptr s.ms_stack && match_n ptr 16 s.ms_stackTaint t
@@ -334,14 +334,14 @@ let valid_ocmp (c:ocmp) (s:machine_state) : bool =
   | BC.OGt o1 o2 -> valid_src_operand64_and_taint o1 s && valid_src_operand64_and_taint o2 s
 
 unfold
-let valid_dst_stack64 (rsp:nat64) (ptr:int) (st:stack) : bool =
-  let Vale_stack init_rsp mem = st in
+let valid_dst_stack64 (rsp:nat64) (ptr:int) (st:machine_stack) : bool =
+  let Machine_stack init_rsp mem = st in
     // We are allowed to store anywhere between rRsp and the initial stack pointer
   ptr >= rsp && ptr + 8 <= init_rsp
 
 unfold
-let valid_dst_stack128 (rsp:nat64) (ptr:int) (st:stack) : bool =
-  let Vale_stack init_rsp mem = st in
+let valid_dst_stack128 (rsp:nat64) (ptr:int) (st:machine_stack) : bool =
+  let Machine_stack init_rsp mem = st in
     // We are allowed to store anywhere between rRsp and the initial stack pointer
     ptr >= rsp && ptr + 16 <= init_rsp
 
@@ -349,14 +349,14 @@ let valid_dst_operand64 (o:operand64) (s:machine_state) : bool =
   match o with
   | OConst n -> false
   | OReg r -> not (rRsp = r)
-  | OMem (m, _) -> valid_addr64 (eval_maddr m s) s.ms_mem
+  | OMem (m, _) -> valid_addr64 (eval_maddr m s) s.ms_heap
   | OStack (m, _) -> valid_dst_stack64 (eval_reg_64 rRsp s) (eval_maddr m s) s.ms_stack
 
 let valid_dst_operand128 (o:operand128) (s:machine_state) : bool =
   match o with
   | OConst _ -> false
   | OReg i -> true // We leave it to the printer/assembler to object to invalid XMM indices
-  | OMem (m, _) -> valid_addr128 (eval_maddr m s) s.ms_mem
+  | OMem (m, _) -> valid_addr128 (eval_maddr m s) s.ms_heap
   | OStack (m, _) -> valid_dst_stack128 (eval_reg_64 rRsp s) (eval_maddr m s) s.ms_stack
 
 let update_operand64_preserve_flags'' (o:operand64) (v:nat64) (s_orig s:machine_state) : machine_state =
@@ -384,7 +384,7 @@ let update_operand64' (o:operand64) (ins:ins) (v:nat64) (s:machine_state) : mach
   { (update_operand64_preserve_flags' o v s) with ms_flags = havoc_state_ins s ins }
 
 let update_rsp' (new_rsp:int) (s:machine_state) : machine_state =
-  let Vale_stack init_rsp mem = s.ms_stack in
+  let Machine_stack init_rsp mem = s.ms_stack in
   // Only modify the stack pointer if the new value is valid, that is in the current stack frame, and in the same page
   if new_rsp >= init_rsp - 4096 && new_rsp <= init_rsp then
     update_reg_64' rRsp new_rsp s
@@ -425,14 +425,14 @@ let update_of' (flags:nat64) (new_of:bool) : (new_flags:nat64{overflow new_flags
     else
       flags
 
-let free_stack' (start finish:int) (st:stack) : stack =
-  let Vale_stack init_rsp mem = st in
+let free_stack' (start finish:int) (st:machine_stack) : machine_stack =
+  let Machine_stack init_rsp mem = st in
   let domain = Map.domain mem in
   // Returns the domain, without elements between start and finish
   let restricted_domain = Vale.Lib.Set.remove_between domain start finish in
   // The new domain of the stack does not contain elements between start and finish
   let new_mem = Map.restrict restricted_domain mem in
-  Vale_stack init_rsp new_mem
+  Machine_stack init_rsp new_mem
 
 // Define a stateful monad to simplify defining the instruction semantics
 let st (a:Type) = machine_state -> a & machine_state

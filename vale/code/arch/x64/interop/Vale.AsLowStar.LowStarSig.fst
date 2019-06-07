@@ -81,7 +81,7 @@ let mem_correspondence_1
   let db = get_downview x in
   DV.length_eq db;
   Seq.equal
-    (nat_to_uint_seq_t t (ME.buffer_as_seq s.VS.vs_mem y))
+    (nat_to_uint_seq_t t (ME.buffer_as_seq s.VS.vs_heap y))
     (UV.as_seq h (UV.mk_buffer db (view_of_base_typ t)))
 
 [@__reduce__]
@@ -94,7 +94,7 @@ let mem_imm_correspondence_1
   let db = get_downview x in
   DV.length_eq db;
   Seq.equal
-    (nat_to_uint_seq_t t (ME.buffer_as_seq s.VS.vs_mem y))
+    (nat_to_uint_seq_t t (ME.buffer_as_seq s.VS.vs_heap y))
     (UV.as_seq h (UV.mk_buffer db (view_of_base_typ t)))
 
 [@__reduce__]
@@ -130,10 +130,10 @@ let arg_as_nat64 (a:arg) (s:VS.vale_state) : GTot ME.nat64 =
      UInt64.v x
   | TD_Buffer src bt _ ->
      buffer_addr_is_nat64 (as_vale_buffer #src #bt x) s;
-     ME.buffer_addr (as_vale_buffer #src #bt x) VS.(s.vs_mem)
+     ME.buffer_addr (as_vale_buffer #src #bt x) VS.(s.vs_heap)
   | TD_ImmBuffer src bt _ ->
      buffer_addr_is_nat64 (as_vale_immbuffer #src #bt x) s;
-     ME.buffer_addr (as_vale_immbuffer #src #bt x) VS.(s.vs_mem)
+     ME.buffer_addr (as_vale_immbuffer #src #bt x) VS.(s.vs_heap)
 
 
 [@__reduce__]
@@ -170,7 +170,7 @@ let rec stack_args (max_arity:nat)
            SI.load_stack64 ptr s.VS.vs_stack == arg_as_nat64 hd s)
 
 [@__reduce__]
-let taint_hyp_arg (m:ME.mem) (tm:MS.memTaint_t) (a:arg) =
+let taint_hyp_arg (m:ME.vale_heap) (tm:MS.memTaint_t) (a:arg) =
    let (| tag, x |) = a in
     match tag with
     | TD_Buffer src TUInt64 {taint=tnt} ->
@@ -202,7 +202,7 @@ let taint_hyp_arg (m:ME.mem) (tm:MS.memTaint_t) (a:arg) =
 
 [@__reduce__]
 let taint_hyp (args:list arg) : VSig.sprop =
-  fun s0 -> BigOps.big_and' (taint_hyp_arg s0.VS.vs_mem s0.VS.vs_memTaint) args
+  fun s0 -> BigOps.big_and' (taint_hyp_arg s0.VS.vs_heap s0.VS.vs_memTaint) args
 
 [@__reduce__]
 let vale_pre_hyp
@@ -212,7 +212,7 @@ let vale_pre_hyp
   : VSig.sprop =
     fun s0 ->
       VSig.disjoint_or_eq args /\
-      VSig.readable args VS.(s0.vs_mem) /\
+      VSig.readable args VS.(s0.vs_heap) /\
       register_args max_arity arg_reg (List.length args) args s0 /\
       stack_args max_arity (List.length args) args s0 /\
       VS.eval_reg_64 MS.rRsp s0 == SI.init_rsp s0.VS.vs_stack /\
@@ -263,7 +263,7 @@ let create_initial_vale_state
     { vs_ok = true;
       vs_regs = Vale.X64.Regs.of_fun t_state.BS.ms_regs;
       vs_flags = IA.init_flags;
-      vs_mem = as_vale_mem mem;
+      vs_heap = as_vale_mem mem;
       vs_memTaint = t_state.BS.ms_memTaint;
       vs_stack = as_vale_stack t_state.BS.ms_stack;
       vs_stackTaint = t_state.BS.ms_stackTaint;

@@ -63,11 +63,11 @@ let mk_addr_map (ptrs : list b8 { list_disjoint_or_eq ptrs }) : GTot addr_map =
   global_addrs_map
 
 noeq
-type mem =
-  | Mem : ptrs : list b8 { list_disjoint_or_eq ptrs } ->
+type interop_heap =
+  | InteropHeap : ptrs : list b8 { list_disjoint_or_eq ptrs } ->
           addrs : addr_map { addrs  == mk_addr_map ptrs } ->
           hs : HS.mem{ list_live hs ptrs } ->
-          mem
+          interop_heap
 
 [@__reduce__]
 let coerce (x:'a{'a == 'b}) : 'b = x
@@ -113,7 +113,7 @@ let normal (#a:Type) (x:a) : a =
                  `%BS.Mkmachine_state?.ms_ok;
                  `%BS.Mkmachine_state?.ms_regs;
                  `%BS.Mkmachine_state?.ms_flags;
-                 `%BS.Mkmachine_state?.ms_mem;
+                 `%BS.Mkmachine_state?.ms_heap;
                  `%BS.Mkmachine_state?.ms_memTaint;
                  `%BS.Mkmachine_state?.ms_stack;
                  `%BS.Mkmachine_state?.ms_stackTaint;
@@ -423,19 +423,19 @@ let liveness_disjointness (args:list arg) (h:mem_roots args)
 
 let mem_of_hs_roots (ptrs:list b8{list_disjoint_or_eq ptrs})
                     (h:HS.mem{list_live h ptrs})
-  : GTot mem
-  = Mem ptrs (mk_addr_map ptrs) h
+  : GTot interop_heap
+  = InteropHeap ptrs (mk_addr_map ptrs) h
 
-let mk_mem (args:list arg) (h:mem_roots args) : GTot mem =
+let mk_mem (args:list arg) (h:mem_roots args) : GTot interop_heap =
   liveness_disjointness args h;
   mem_of_hs_roots (args_b8 args) h
 
 unfold
-let hs_of_mem (m:mem) : HS.mem = Mem?.hs m
+let hs_of_mem (m:interop_heap) : HS.mem = InteropHeap?.hs m
 unfold
-let ptrs_of_mem (m:mem) : l:list b8{list_disjoint_or_eq l} = Mem?.ptrs m
+let ptrs_of_mem (m:interop_heap) : l:list b8{list_disjoint_or_eq l} = InteropHeap?.ptrs m
 unfold
-let addrs_of_mem (m:mem) : addr_map = Mem?.addrs m
+let addrs_of_mem (m:interop_heap) : addr_map = InteropHeap?.addrs m
 
 let mk_mem_injective (args:list arg) (h:mem_roots args)
   : Lemma (hs_of_mem (mk_mem args h) == h /\
@@ -489,23 +489,23 @@ let rec disjoint_or_eq_fresh
 
 let rec write_taint
     (i:nat)
-    (mem:mem)
+    (mem:interop_heap)
     (ts:b8 -> GTot MS.taint)
     (b:b8{i <= DV.length (get_downview b.bsrc)})
     (accu:MS.memTaint_t)
   : GTot MS.memTaint_t
         (decreases %[DV.length (get_downview b.bsrc) - i]) =
   if i = DV.length (get_downview b.bsrc) then accu
-  else write_taint (i + 1) mem ts b (Map.upd accu (Mem?.addrs mem b + i) (ts b))
+  else write_taint (i + 1) mem ts b (Map.upd accu (InteropHeap?.addrs mem b + i) (ts b))
 
 let create_memtaint
-    (mem:mem)
+    (mem:interop_heap)
     (ps:list b8)
     (ts:b8 -> GTot MS.taint)
   : GTot MS.memTaint_t
   = List.Tot.fold_right_gtot ps (write_taint 0 mem ts) (FStar.Map.const MS.Public)
 
-let correct_down_p (mem:mem) (h:BS.heap) (p:b8) =
+let correct_down_p (mem:interop_heap) (h:BS.machine_heap) (p:b8) =
   let b = get_downview p.bsrc in
   let length = DV.length b in
   let contents = DV.as_seq (hs_of_mem mem) b in
@@ -519,12 +519,12 @@ let rec addrs_ptr (i:nat) (addrs:addr_map) (ptr:b8{i <= DV.length (get_downview 
   = if i = DV.length (get_downview ptr.bsrc) then acc
     else addrs_ptr (i + 1) addrs ptr (Set.union (Set.singleton (addrs ptr + i)) acc)
 
-let addrs_set (mem:mem) : GTot (Set.set int) =
+let addrs_set (mem:interop_heap) : GTot (Set.set int) =
   L.fold_right_gtot (ptrs_of_mem mem) (addrs_ptr 0 (addrs_of_mem mem)) Set.empty
 
-let correct_down (mem:mem) (h:BS.heap) =
+let correct_down (mem:interop_heap) (h:BS.machine_heap) =
   Set.equal (addrs_set mem) (Map.domain h) /\
   (forall p.{:pattern (L.memP p (ptrs_of_mem mem))}
     L.memP p (ptrs_of_mem mem) ==> correct_down_p mem h p)
 
-let down_mem_t = m:mem -> GTot (h:BS.heap {correct_down m h})
+let down_mem_t = m:interop_heap -> GTot (h:BS.machine_heap {correct_down m h})

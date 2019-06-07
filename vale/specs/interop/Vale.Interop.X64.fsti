@@ -211,7 +211,7 @@ let create_initial_trusted_state
       (arg_reg:arg_reg_relation max_arity)
       (args:arg_list)
       (down_mem: down_mem_t)
-  : state_builder_t max_arity args (BS.machine_state & mem) =
+  : state_builder_t max_arity args (BS.machine_state & interop_heap) =
   fun h0 ->
     let open MS in
     let regs_64 = register_of_args max_arity arg_reg (List.Tot.length args) args IA.init_regs in
@@ -226,14 +226,14 @@ let create_initial_trusted_state
     let stack = Map.const_on Set.empty 0 in
     // Spill additional arguments on the stack
     let stack = stack_of_args max_arity (List.Tot.length args) init_rsp args stack in
-    let mem:mem = mk_mem args h0 in
+    let mem:interop_heap = mk_mem args h0 in
     let (s0:BS.machine_state) = {
       BS.ms_ok = true;
       BS.ms_regs = regs;
       BS.ms_flags = IA.init_flags;
-      BS.ms_mem = down_mem mem;
+      BS.ms_heap = down_mem mem;
       BS.ms_memTaint = create_memtaint mem (args_b8 args) (mk_taint args init_taint);
-      BS.ms_stack = BS.Vale_stack init_rsp stack;
+      BS.ms_stack = BS.Machine_stack init_rsp stack;
       BS.ms_stackTaint = Map.const MS.Public;
       BS.ms_trace = [];
     } in
@@ -251,7 +251,7 @@ let return_val (sn:BS.machine_state) : return_val_t sn =
 let prediction_post_rel_t (c:BS.code) (args:arg_list) =
     h0:mem_roots args ->
     s0:BS.machine_state ->
-    (UInt64.t & nat & mem) ->
+    (UInt64.t & nat & interop_heap) ->
     sn:BS.machine_state ->
     prop
 
@@ -280,7 +280,7 @@ let prediction_post
     (post_rel: prediction_post_rel_t c args)
     (h0:mem_roots args)
     (s0:BS.machine_state)
-    (rax_fuel_mem:(UInt64.t & nat & mem)) =
+    (rax_fuel_mem:(UInt64.t & nat & interop_heap)) =
   let rax, fuel, final_mem = rax_fuel_mem in
   Some? (BS.machine_eval_code c fuel s0) /\ (
     let s1 = Some?.v (BS.machine_eval_code c fuel s0) in
@@ -288,7 +288,7 @@ let prediction_post
     FStar.HyperStack.ST.equal_domains h0 h1 /\
     B.modifies (loc_modified_args args) h0 h1 /\
     mem_roots_p h1 args /\
-    down_mem (mk_mem args h1) == s1.BS.ms_mem /\
+    down_mem (mk_mem args h1) == s1.BS.ms_heap /\
     calling_conventions s0 s1 regs_modified xmms_modified /\
     rax == return_val s1 /\
     post_rel h0 s0 rax_fuel_mem s1
@@ -306,7 +306,7 @@ let prediction
     (post_rel:prediction_post_rel_t c args) =
   h0:mem_roots args{pre_rel h0} ->
   s0:BS.machine_state ->
-  Ghost (UInt64.t & nat & mem)
+  Ghost (UInt64.t & nat & interop_heap)
     (requires prediction_pre n arg_reg down_mem c args pre_rel h0 s0)
     (ensures prediction_post n regs_modified xmms_modified down_mem c args post_rel h0 s0)
 
@@ -316,7 +316,7 @@ type as_lowstar_sig_ret =
       n:nat ->
       args:arg_list ->
       fuel:nat ->
-      final_mem:mem ->
+      final_mem:interop_heap ->
       as_lowstar_sig_ret
 
 let als_ret = UInt64.t & Ghost.erased as_lowstar_sig_ret

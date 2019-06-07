@@ -11,7 +11,7 @@ open Vale.Def.Prop_s
 unfold let ok' s = s.BS.ms_ok
 unfold let regs' s = s.BS.ms_regs
 unfold let flags' s = s.BS.ms_flags
-unfold let mem' s = s.BS.ms_mem
+unfold let mem' s = s.BS.ms_heap
 unfold let memTaint' s = s.BS.ms_memTaint
 unfold let stack' s = s.BS.ms_stack
 unfold let stackTaint' s = s.BS.ms_stackTaint
@@ -41,7 +41,7 @@ val lemma_to_reg (s:vale_state) (r:reg) : Lemma
   [SMTPat (Regs.sel r s.vs_regs)]
 
 val lemma_to_mem (s:vale_state) : Lemma
-  (ensures MS.get_heap s.vs_mem == mem' (state_to_S s))
+  (ensures MS.get_heap s.vs_heap == mem' (state_to_S s))
 
 val lemma_to_stack (s:vale_state) : Lemma
   (ensures VSS.stack_to_s s.vs_stack == stack' (state_to_S s))

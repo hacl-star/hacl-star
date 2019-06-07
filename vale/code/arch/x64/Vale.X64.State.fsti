@@ -12,8 +12,8 @@ noeq type vale_state = {
   vs_ok: bool;
   vs_regs: Regs.t;
   vs_flags: nat64;
-  vs_mem: mem;
-  vs_stack: stack;
+  vs_heap: vale_heap;
+  vs_stack: vale_stack;
   vs_memTaint: memtaint;
   vs_stackTaint: memtaint;
 }
@@ -23,9 +23,9 @@ unfold let eval_reg (r:reg) (s:vale_state) : t_reg r = Regs.sel r s.vs_regs
 [@va_qattr]
 unfold let eval_reg_int (r:reg) (s:vale_state) : int = t_reg_to_int r.rf (eval_reg r s)
 [@va_qattr]
-unfold let eval_mem (ptr:int) (s:vale_state) : GTot nat64 = load_mem64 ptr s.vs_mem
+unfold let eval_mem (ptr:int) (s:vale_state) : GTot nat64 = load_mem64 ptr s.vs_heap
 [@va_qattr]
-unfold let eval_mem128 (ptr:int) (s:vale_state) : GTot Vale.Def.Types_s.quad32 = load_mem128 ptr s.vs_mem
+unfold let eval_mem128 (ptr:int) (s:vale_state) : GTot Vale.Def.Types_s.quad32 = load_mem128 ptr s.vs_heap
 [@va_qattr]
 unfold let eval_stack (ptr:int) (s:vale_state) : GTot nat64 = load_stack64 ptr s.vs_stack
 [@va_qattr]
@@ -73,7 +73,7 @@ let update_reg_xmm (r:reg_xmm) (v:quad32) (s:vale_state) : vale_state =
   update_reg (Reg 1 r) v s
 
 [@va_qattr]
-let update_mem (ptr:int) (v:nat64) (s:vale_state) : GTot vale_state = {s with vs_mem = store_mem64 ptr v s.vs_mem}
+let update_mem (ptr:int) (v:nat64) (s:vale_state) : GTot vale_state = {s with vs_heap = store_mem64 ptr v s.vs_heap}
 
 [@va_qattr]
 let update_stack64 (ptr:int) (v:nat64) (s:vale_state) : GTot vale_state = {s with vs_stack = store_stack64 ptr v s.vs_stack}
@@ -87,17 +87,17 @@ let update_stack64 (ptr:int) (v:nat64) (s:vale_state) : GTot vale_state = {s wit
 //  | OStack (m, _) -> update_stack64 (eval_maddr m sM) v sM
 
 [@va_qattr]
-let valid_maddr (m:maddr) (s:vale_state) : prop0 = valid_mem64 (eval_maddr m s) s.vs_mem
+let valid_maddr (m:maddr) (s:vale_state) : prop0 = valid_mem64 (eval_maddr m s) s.vs_heap
 
 [@va_qattr]
-let valid_maddr128 (m:maddr) (s:vale_state) : prop0 = valid_mem128 (eval_maddr m s) s.vs_mem
+let valid_maddr128 (m:maddr) (s:vale_state) : prop0 = valid_mem128 (eval_maddr m s) s.vs_heap
 
 [@va_qattr]
 let valid_src_operand (o:operand64) (s:vale_state) : prop0 =
   match o with
   | OConst c -> True
   | OReg r -> True
-  | OMem (m, _) -> valid_mem64 (eval_maddr m s) s.vs_mem
+  | OMem (m, _) -> valid_mem64 (eval_maddr m s) s.vs_heap
   | OStack (m, _) -> valid_src_stack64 (eval_maddr m s) s.vs_stack
 
 [@va_qattr]
@@ -117,7 +117,7 @@ let state_eq (s0:vale_state) (s1:vale_state) : prop0 =
   s0.vs_ok == s1.vs_ok /\
   Regs.equal s0.vs_regs s1.vs_regs /\
   s0.vs_flags == s1.vs_flags /\
-  s0.vs_mem == s1.vs_mem /\
+  s0.vs_heap == s1.vs_heap /\
   s0.vs_stack == s1.vs_stack /\
   s0.vs_memTaint == s1.vs_memTaint /\
   s0.vs_stackTaint == s1.vs_stackTaint

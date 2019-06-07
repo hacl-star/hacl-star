@@ -12,7 +12,7 @@ let wrap_variadic c n arg_reg regs_modified xmms_modified down_mem args #pre_rel
   assert (mem_roots_p h0 args);
   let rax, fuel, final_mem =
     IA.st_put
-      #(UInt64.t & nat & mem)
+      #(UInt64.t & nat & interop_heap)
       (fun h0' -> h0' == h0)
       (fun h0' ->
         let va_s0, mem_s0 =

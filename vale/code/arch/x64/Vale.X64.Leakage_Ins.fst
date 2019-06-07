@@ -252,13 +252,13 @@ let update_heap32_val (ptr:int) (v:Vale.Def.Types_s.nat32) (i:int) : Vale.Def.Ty
   | 3 -> v.hi3
   | _ -> 0
 
-let valid_addr32 (ptr:int) (mem:S.heap) : bool =
+let valid_addr32 (ptr:int) (mem:S.machine_heap) : bool =
   S.valid_addr (ptr + 0) mem &&
   S.valid_addr (ptr + 1) mem &&
   S.valid_addr (ptr + 2) mem &&
   S.valid_addr (ptr + 3) mem
 
-let lemma_update_heap32_val (ptr:int) (v:Vale.Def.Types_s.nat32) (mem:S.heap) (i:int) : Lemma
+let lemma_update_heap32_val (ptr:int) (v:Vale.Def.Types_s.nat32) (mem:S.machine_heap) (i:int) : Lemma
   (requires True)
   (ensures (S.update_heap32 ptr v mem).[i] ==
     (if ptr <= i && i < ptr + 4 then update_heap32_val ptr v i else mem.[i]))
@@ -267,7 +267,7 @@ let lemma_update_heap32_val (ptr:int) (v:Vale.Def.Types_s.nat32) (mem:S.heap) (i
   Vale.Def.Opaque_s.reveal_opaque S.update_heap32_def;
   FStar.Pervasives.reveal_opaque (`%update_heap32_val) update_heap32_val
 
-let lemma_update_heap32_domain (ptr:int) (v:Vale.Def.Types_s.nat32) (mem:S.heap) : Lemma
+let lemma_update_heap32_domain (ptr:int) (v:Vale.Def.Types_s.nat32) (mem:S.machine_heap) : Lemma
   (requires valid_addr32 ptr mem)
   (ensures Map.domain (S.update_heap32 ptr v mem) == Map.domain mem)
   [SMTPat (Map.domain (S.update_heap32 ptr v mem))]
@@ -294,7 +294,7 @@ let update_heap64_val (ptr:int) (v:nat64) (i:int) : Vale.Def.Types_s.nat8 =
   | 7 -> hi.hi3
   | _ -> 0
 
-let lemma_update_heap64_val (ptr:int) (v:nat64) (mem:S.heap) (i:int) : Lemma
+let lemma_update_heap64_val (ptr:int) (v:nat64) (mem:S.machine_heap) (i:int) : Lemma
   (requires True)
   (ensures
     (S.update_heap64 ptr v mem).[i] ==
@@ -305,7 +305,7 @@ let lemma_update_heap64_val (ptr:int) (v:nat64) (mem:S.heap) (i:int) : Lemma
   Vale.Def.Opaque_s.reveal_opaque S.update_heap64_def;
   FStar.Pervasives.reveal_opaque (`%update_heap64_val) update_heap64_val
 
-let lemma_update_heap64_domain (ptr:int) (v:nat64) (mem:S.heap) : Lemma
+let lemma_update_heap64_domain (ptr:int) (v:nat64) (mem:S.machine_heap) : Lemma
   (requires S.valid_addr64 ptr mem)
   (ensures Map.domain (S.update_heap64 ptr v mem) == Map.domain mem)
   [SMTPat (Map.domain (S.update_heap64 ptr v mem))]
@@ -324,13 +324,13 @@ let update_heap128_val (ptr:int) (v:Vale.Def.Types_s.quad32) (i:int) : Vale.Def.
   if 12 <= j && j < 16 then update_heap32_val (ptr + 12) v.hi3 i else
   0
 
-let valid_addr128 (ptr:int) (mem:S.heap) : bool =
+let valid_addr128 (ptr:int) (mem:S.machine_heap) : bool =
   valid_addr32 (ptr + 0) mem &&
   valid_addr32 (ptr + 4) mem &&
   valid_addr32 (ptr + 8) mem &&
   valid_addr32 (ptr + 12) mem
 
-let lemma_update_heap128_val (ptr:int) (v:Vale.Def.Types_s.quad32) (mem:S.heap) (i:int) : Lemma
+let lemma_update_heap128_val (ptr:int) (v:Vale.Def.Types_s.quad32) (mem:S.machine_heap) (i:int) : Lemma
   (requires True)
   (ensures
     (S.update_heap128 ptr v mem).[i] ==
@@ -341,7 +341,7 @@ let lemma_update_heap128_val (ptr:int) (v:Vale.Def.Types_s.quad32) (mem:S.heap) 
   Vale.Def.Opaque_s.reveal_opaque S.update_heap128_def;
   FStar.Pervasives.reveal_opaque (`%update_heap128_val) update_heap128_val
 
-let lemma_update_heap128_domain (ptr:int) (v:Vale.Def.Types_s.quad32) (mem:S.heap) : Lemma
+let lemma_update_heap128_domain (ptr:int) (v:Vale.Def.Types_s.quad32) (mem:S.machine_heap) : Lemma
   (requires valid_addr128 ptr mem)
   (ensures Map.domain (S.update_heap128 ptr v mem) == Map.domain mem)
   [SMTPat (S.update_heap128 ptr v mem)]
@@ -349,14 +349,14 @@ let lemma_update_heap128_domain (ptr:int) (v:Vale.Def.Types_s.quad32) (mem:S.hea
   Vale.Def.Opaque_s.reveal_opaque S.update_heap128_def;
   assert (Set.equal (Map.domain (S.update_heap128 ptr v mem)) (Map.domain mem))
 
-let lemma_preserve_valid64 (m m':S.heap) : Lemma
+let lemma_preserve_valid64 (m m':S.machine_heap) : Lemma
   (requires Set.equal (Map.domain m) (Map.domain m'))
   (ensures (forall (i:int).{:pattern (S.valid_addr64 i m')}
     S.valid_addr64 i m ==> S.valid_addr64 i m'))
   =
   FStar.Pervasives.reveal_opaque (`%S.valid_addr64) S.valid_addr64
 
-let lemma_preserve_valid128 (m m':S.heap) : Lemma
+let lemma_preserve_valid128 (m m':S.machine_heap) : Lemma
   (requires Set.equal (Map.domain m) (Map.domain m'))
   (ensures (forall (i:int).{:pattern (S.valid_addr128 i m')}
     S.valid_addr128 i m ==> S.valid_addr128 i m'))
@@ -373,8 +373,8 @@ let lemma_instr_set_taints_explicit
       let s2' = S.instr_write_output_explicit i v2 o s2_orig s2 in
       s1'.S.ms_ok /\ s2'.S.ms_ok /\
       (t_out == Public ==> v1 == v2) /\
-      Set.equal (Map.domain s1_orig.S.ms_mem) (Map.domain s1.S.ms_mem) /\
-      Set.equal (Map.domain s2_orig.S.ms_mem) (Map.domain s2.S.ms_mem) /\
+      Set.equal (Map.domain s1_orig.S.ms_heap) (Map.domain s1.S.ms_heap) /\
+      Set.equal (Map.domain s2_orig.S.ms_heap) (Map.domain s2.S.ms_heap) /\
       check_if_consumes_fixed_time_outs_explicit i o ts_orig t_out /\
       publicValuesAreSame ts_orig s1_orig s2_orig /\
       publicValuesAreSame ts s1 s2
@@ -383,17 +383,17 @@ let lemma_instr_set_taints_explicit
       let s1' = S.instr_write_output_explicit i v1 o s1_orig s1 in
       let s2' = S.instr_write_output_explicit i v2 o s2_orig s2 in
       let ts' = instr_set_taint_explicit i o ts t_out in
-      Set.equal (Map.domain s1_orig.S.ms_mem) (Map.domain s1'.S.ms_mem) /\
-      Set.equal (Map.domain s2_orig.S.ms_mem) (Map.domain s2'.S.ms_mem) /\
+      Set.equal (Map.domain s1_orig.S.ms_heap) (Map.domain s1'.S.ms_heap) /\
+      Set.equal (Map.domain s2_orig.S.ms_heap) (Map.domain s2'.S.ms_heap) /\
       publicValuesAreSame ts' s1' s2'
     ))
   =
   allow_inversion maddr;
   allow_inversion tmaddr;
-  lemma_preserve_valid64 s1_orig.S.ms_mem s1.S.ms_mem;
-  lemma_preserve_valid64 s2_orig.S.ms_mem s2.S.ms_mem;
-  lemma_preserve_valid128 s1_orig.S.ms_mem s1.S.ms_mem;
-  lemma_preserve_valid128 s2_orig.S.ms_mem s2.S.ms_mem;
+  lemma_preserve_valid64 s1_orig.S.ms_heap s1.S.ms_heap;
+  lemma_preserve_valid64 s2_orig.S.ms_heap s2.S.ms_heap;
+  lemma_preserve_valid128 s1_orig.S.ms_heap s1.S.ms_heap;
+  lemma_preserve_valid128 s2_orig.S.ms_heap s2.S.ms_heap;
   FStar.Pervasives.reveal_opaque (`%S.valid_addr128) S.valid_addr128;
   ()
 
@@ -407,8 +407,8 @@ let lemma_instr_set_taints_implicit
       let s2' = S.instr_write_output_implicit i v2 s2_orig s2 in
       s1'.S.ms_ok /\ s2'.S.ms_ok /\
       (t_out == Public ==> v1 == v2) /\
-      Set.equal (Map.domain s1_orig.S.ms_mem) (Map.domain s1.S.ms_mem) /\
-      Set.equal (Map.domain s2_orig.S.ms_mem) (Map.domain s2.S.ms_mem) /\
+      Set.equal (Map.domain s1_orig.S.ms_heap) (Map.domain s1.S.ms_heap) /\
+      Set.equal (Map.domain s2_orig.S.ms_heap) (Map.domain s2.S.ms_heap) /\
       check_if_consumes_fixed_time_outs_implicit i ts_orig t_out /\
       publicValuesAreSame ts_orig s1_orig s2_orig /\
       publicValuesAreSame ts s1 s2
@@ -417,8 +417,8 @@ let lemma_instr_set_taints_implicit
       let s1' = S.instr_write_output_implicit i v1 s1_orig s1 in
       let s2' = S.instr_write_output_implicit i v2 s2_orig s2 in
       let ts' = instr_set_taint_implicit i ts t_out in
-      Set.equal (Map.domain s1_orig.S.ms_mem) (Map.domain s1'.S.ms_mem) /\
-      Set.equal (Map.domain s2_orig.S.ms_mem) (Map.domain s2'.S.ms_mem) /\
+      Set.equal (Map.domain s1_orig.S.ms_heap) (Map.domain s1'.S.ms_heap) /\
+      Set.equal (Map.domain s2_orig.S.ms_heap) (Map.domain s2'.S.ms_heap) /\
       publicValuesAreSame ts' s1' s2'
     ))
   =
@@ -426,10 +426,10 @@ let lemma_instr_set_taints_implicit
   allow_inversion tmaddr;
   allow_inversion operand64;
   allow_inversion operand128;
-  lemma_preserve_valid64 s1_orig.S.ms_mem s1.S.ms_mem;
-  lemma_preserve_valid64 s2_orig.S.ms_mem s2.S.ms_mem;
-  lemma_preserve_valid128 s1_orig.S.ms_mem s1.S.ms_mem;
-  lemma_preserve_valid128 s2_orig.S.ms_mem s2.S.ms_mem;
+  lemma_preserve_valid64 s1_orig.S.ms_heap s1.S.ms_heap;
+  lemma_preserve_valid64 s2_orig.S.ms_heap s2.S.ms_heap;
+  lemma_preserve_valid128 s1_orig.S.ms_heap s1.S.ms_heap;
+  lemma_preserve_valid128 s2_orig.S.ms_heap s2.S.ms_heap;
   FStar.Pervasives.reveal_opaque (`%S.valid_addr128) S.valid_addr128;
   ()
 
@@ -445,8 +445,8 @@ let rec lemma_instr_set_taints
       let s2_state' = S.instr_write_outputs outs args vs2 oprs s2_orig s2 in
       s1_state'.S.ms_ok /\ s2_state'.S.ms_ok /\
       (t_out == Public ==> vs1 == vs2) /\
-      Set.equal (Map.domain s1_orig.S.ms_mem) (Map.domain s1.S.ms_mem) /\
-      Set.equal (Map.domain s2_orig.S.ms_mem) (Map.domain s2.S.ms_mem) /\
+      Set.equal (Map.domain s1_orig.S.ms_heap) (Map.domain s1.S.ms_heap) /\
+      Set.equal (Map.domain s2_orig.S.ms_heap) (Map.domain s2.S.ms_heap) /\
       check_if_consumes_fixed_time_outs outs args oprs ts_orig t_out /\
       publicValuesAreSame ts_orig s1_orig s2_orig /\
       publicValuesAreSame ts s1 s2
@@ -639,10 +639,10 @@ let lemma_dealloc_leakage_free (ts:analysis_taints) (ins:S.ins) : Lemma
       let BC.Dealloc n = ins in
       let s1' = Some?.v (machine_eval_code code fuel s1) in
       let s2' = Some?.v (machine_eval_code code fuel s2) in
-      let S.Vale_stack _ stack1 = s1.S.ms_stack in
-      let S.Vale_stack _ stack2 = s2.S.ms_stack in
-      let S.Vale_stack _ stack1' = s1'.S.ms_stack in
-      let S.Vale_stack _ stack2' = s2'.S.ms_stack in
+      let S.Machine_stack _ stack1 = s1.S.ms_stack in
+      let S.Machine_stack _ stack2 = s2.S.ms_stack in
+      let S.Machine_stack _ stack1' = s1'.S.ms_stack in
+      let S.Machine_stack _ stack2' = s2'.S.ms_stack in
       let aux (x:int) : Lemma
         (requires publicStackValueIsSame stack1 stack2 s1.S.ms_stackTaint s2.S.ms_stackTaint x)
         (ensures publicStackValueIsSame stack1' stack2' s1'.S.ms_stackTaint s2'.S.ms_stackTaint x)
@@ -674,10 +674,10 @@ let lemma_push_leakage_free (ts:analysis_taints) (ins:S.ins) : Lemma
       let t_out = operand_taint src ts in
       let s1' = Some?.v (machine_eval_code code fuel s1) in
       let s2' = Some?.v (machine_eval_code code fuel s2) in
-      let S.Vale_stack _ stack1 = s1.S.ms_stack in
-      let S.Vale_stack _ stack2 = s2.S.ms_stack in
-      let S.Vale_stack _ stack1' = s1'.S.ms_stack in
-      let S.Vale_stack _ stack2' = s2'.S.ms_stack in
+      let S.Machine_stack _ stack1 = s1.S.ms_stack in
+      let S.Machine_stack _ stack2 = s2.S.ms_stack in
+      let S.Machine_stack _ stack1' = s1'.S.ms_stack in
+      let S.Machine_stack _ stack2' = s2'.S.ms_stack in
       let ptr1 = S.eval_reg_64 rRsp s1 - 8 in
       let ptr2 = S.eval_reg_64 rRsp s2 - 8 in
       let v1 = S.eval_operand src s1 in
@@ -725,8 +725,8 @@ let lemma_pop_leakage_free (ts:analysis_taints) (ins:S.ins) : Lemma
         Vale.Def.Opaque_s.reveal_opaque S.get_heap_val64_def;
         assert (v1 == v2)
       );
-      Classical.forall_intro_3 (fun s x (stack1:S.heap) -> Vale.Lib.Set.lemma_sel_restrict s stack1 x);
-      Classical.forall_intro_3 (fun s x (stack2:S.heap) -> Vale.Lib.Set.lemma_sel_restrict s stack2 x)
+      Classical.forall_intro_3 (fun s x (stack1:S.machine_heap) -> Vale.Lib.Set.lemma_sel_restrict s stack1 x);
+      Classical.forall_intro_3 (fun s x (stack2:S.machine_heap) -> Vale.Lib.Set.lemma_sel_restrict s stack2 x)
       in
     ()
   )

@@ -10,7 +10,7 @@ friend Vale.X64.Decls
 
 let lemma_valid_taint64_operand m t s =
   let tainted_mem:Vale.X64.Memory.memtaint = (state_to_S s).S.ms_memTaint in
-  let real_mem:Vale.X64.Memory.mem = s.vs_mem in
+  let real_mem:Vale.X64.Memory.vale_heap = s.vs_heap in
   Vale.Lib.Meta.exists_elim2
     (Map.sel tainted_mem (eval_maddr m s) == t)
     ()
@@ -22,10 +22,10 @@ let lemma_valid_src_operand64_and_taint o s =
   | OMem (m, t) ->
     let addr = eval_maddr m s in
     let aux (b:buffer64) (i:int) : Lemma
-      (requires valid_maddr addr s.vs_mem s.vs_memTaint b i t)
+      (requires valid_maddr addr s.vs_heap s.vs_memTaint b i t)
       (ensures S.valid_src_operand64_and_taint o (state_to_S s))
       =
-      Vale.X64.Memory.lemma_valid_taint64 b s.vs_memTaint s.vs_mem i t
+      Vale.X64.Memory.lemma_valid_taint64 b s.vs_memTaint s.vs_heap i t
       in
     Classical.forall_intro_2 (fun b i -> (fun b -> Classical.move_requires (aux b)) b i)
   | OStack (m, t) -> lemma_valid_taint_stack64 (eval_maddr m s) t s.vs_stackTaint
@@ -36,10 +36,10 @@ let lemma_valid_src_operand128_and_taint o s =
   | OMem (m, t) ->
     let addr = eval_maddr m s in
     let aux (b:buffer128) (i:int) : Lemma
-      (requires valid_maddr128 addr s.vs_mem s.vs_memTaint b i t)
+      (requires valid_maddr128 addr s.vs_heap s.vs_memTaint b i t)
       (ensures S.valid_src_operand128_and_taint o (state_to_S s))
       =
-      Vale.X64.Memory.lemma_valid_taint128 b s.vs_memTaint s.vs_mem i t
+      Vale.X64.Memory.lemma_valid_taint128 b s.vs_memTaint s.vs_heap i t
       in
     Classical.forall_intro_2 (fun b i -> (fun b -> Classical.move_requires (aux b)) b i)
   | OStack (m, t) -> lemma_valid_taint_stack128 (eval_maddr m s) t s.vs_stackTaint

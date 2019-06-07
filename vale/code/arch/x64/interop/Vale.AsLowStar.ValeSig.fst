@@ -66,7 +66,7 @@ let sprop = VS.vale_state -> prop
 
 
 [@__reduce__]
-let readable_one (s:ME.mem) (arg:arg) : prop =
+let readable_one (s:ME.vale_heap) (arg:arg) : prop =
   match arg with
   | (|TD_Buffer src bt _, x |) ->
     ME.buffer_readable s (as_vale_buffer #src #bt x) /\
@@ -78,7 +78,7 @@ let readable_one (s:ME.mem) (arg:arg) : prop =
   | _ -> True
 
 [@__reduce__]
-let readable (args:list arg) (s:ME.mem) : prop =
+let readable (args:list arg) (s:ME.vale_heap) : prop =
     BigOps.big_and' (readable_one s) args
 
 
@@ -126,8 +126,8 @@ let vale_sig_nil
        V.eval_code code va_s0 f va_s1 /\
        vale_calling_conventions va_s0 va_s1 regs_modified xmms_modified /\
        elim_nil post va_s0 va_s1 f /\
-       readable args VS.(va_s1.vs_mem) /\
-       ME.modifies (mloc_modified_args args) va_s0.VS.vs_mem va_s1.VS.vs_mem))
+       readable args VS.(va_s1.vs_heap) /\
+       ME.modifies (mloc_modified_args args) va_s0.VS.vs_heap va_s1.VS.vs_heap))
 
 [@__reduce__]
 let rec vale_sig_tl (regs_modified:MS.reg_64 -> bool)
