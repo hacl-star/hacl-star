@@ -589,12 +589,12 @@ let lemma_instr_leakage_free (ts:analysis_taints) (ins:S.ins) : Lemma
       let Some vs2 = S.instr_apply_eval outs args (instr_eval i) oprs s2 in
       let s1' =
         match havoc_flags with
-        | HavocFlags -> {s1 with S.ms_flags = S.havoc_state_ins s1 ins}
+        | HavocFlags -> {s1 with S.ms_flags = S.havoc_flags}
         | PreserveFlags -> s1
         in
       let s2' =
         match havoc_flags with
-        | HavocFlags -> {s2 with S.ms_flags = S.havoc_state_ins s2 ins}
+        | HavocFlags -> {s2 with S.ms_flags = S.havoc_flags}
         | PreserveFlags -> s2
         in
       let AnalysisTaints rs flags cf ovf xmms = ts in
