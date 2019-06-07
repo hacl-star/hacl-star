@@ -9,10 +9,30 @@ open Lib.IntTypes
 open Lib.Buffer
 open Lib.PrintBuffer
 
+module Seq = Lib.Sequence
+
 open Hacl.Impl.Bignum.Core
 open Hacl.Impl.Bignum.Convert
 open Hacl.Spec.Bignum
 
+#reset-options
+
+/// Creates a new bignum from a given one.
+val bn_copy:
+     #len:bn_len
+  -> a:lbignum len
+  -> StackInline (lbignum len)
+    (requires fun h -> live h a)
+    (ensures fun h0 b h1 ->
+     stack_allocated b h0 h1 (as_seq h0 a) /\
+     as_snat h1 b = as_snat h0 a)
+let bn_copy #len a =
+  let b = create len (u64 0) in
+  copy b a;
+  admit ();
+  b
+
+/// Assigns a uint64 number to the bignum.
 val bn_assign_uint64:
      #len:bn_len
   -> a:lbignum len

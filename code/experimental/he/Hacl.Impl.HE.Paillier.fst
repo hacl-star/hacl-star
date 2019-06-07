@@ -19,7 +19,9 @@ module S = Hacl.Spec.HE.Paillier
 type bn_len_s = s:bn_len{v s <= pow2 22}
 
 val bn_len_s_fits: (l:bn_len_s) -> Lemma
-  (v l * 64 < max_size_t /\
+  (
+   v l * 2 < max_size_t /\
+   v l * 64 < max_size_t /\
    v l * 128 < max_size_t /\
    (v l + 1) < max_size_t
   )
@@ -127,8 +129,11 @@ let bigl #n2Len n n2 u res =
   push_frame ();
   let one:lbignum 1ul = nat_to_bignum_exact 1 in
   let tmp = create n2Len (uint 0) in
+  let _rem = create n2Len (uint 0) in
+
   let _ = bn_sub_exact u one tmp in
-  bn_divide tmp n res;
+  bn_divide tmp n res _rem;
+
   pop_frame ()
 
 
@@ -198,20 +203,111 @@ type secret_disjoint_with (#n2Len:bn_len_s) h (s:secret n2Len) (a:lbignum n2Len)
   disjoint (Sec?.lambda s) a /\
   disjoint (Sec?.l2inv s) a
 
+
+
+val mul_order_lemma2: a:pos -> b:pos -> c:pos -> d:pos -> Lemma
+  (requires (a >= c /\ b >= d))
+  (ensures (a * b >= c * d))
+let mul_order_lemma2 a b c d =
+  Math.Lemmas.multiplication_order_lemma a c b;
+  Math.Lemmas.multiplication_order_lemma b d a
+
+val mul_order_lemma3: a:pos -> b:pos -> c:pos -> d:pos -> Lemma
+  (requires (a <= c /\ b <= d))
+  (ensures (a * b <= c * d))
+let mul_order_lemma3 a b c d = mul_order_lemma2 c d a b
+
+val mul_order_lemma4: p:pos -> q:pos -> Lemma
+  (p <= p * q && q <= p * q)
+let mul_order_lemma4 p q = ()
+
+
+#reset-options "--z3rlimit 150 --max_fuel 0 --max_ifuel 0"
+
+val fermat_inverse:
+     #n2Len:bn_len_s
+  -> p:lbignum n2Len
+  -> q:lbignum n2Len
+  -> n:lbignum n2Len
+  -> n2:lbignum n2Len
+  -> a:lbignum n2Len
+  -> res:lbignum n2Len
+  -> Stack unit
+     (requires fun h ->
+      live h p /\ live h q /\ live h n /\ live h n2 /\ live h a /\ live h res /\
+      all_disjoint [loc p; loc q; loc n; loc n2; loc a; loc res] /\
+      isprm (as_snat h p) /\
+      isprm (as_snat h q) /\
+      as_snat h p * as_snat h q = as_snat h n /\
+      as_snat h n * as_snat h n = as_snat h n2 /\
+      as_snat h n > 1 /\
+      as_snat h a < as_snat h n2 /\
+      isunit #(as_snat h n2) (as_snat h a))
+     (ensures fun h0 _ h1 -> modifies1 res h0 h1)
+let fermat_inverse #n2Len p q n n2 a res =
+
+  bn_len_s_fits n2Len;
+
+  push_frame ();
+
+  let p' = bn_copy p in
+  let q' = bn_copy q in
+
+  assert_norm (issnat 1);
+  assert_norm (nat_bytes_num 1 = 1ul);
+  let one:lbignum 1ul = nat_to_bignum_exact 1 in
+
+
+  bn_sub_exact p' one p';
+  bn_sub_exact q' one q';
+
+  // This needs more representation lemmas to be proven
+  let tmp:lbignum (n2Len +. n2Len)  = create (n2Len +. n2Len) (uint 0) in
+
+  bn_mul p' q' tmp;
+
+  let tmp2:lbignum n2Len = sub tmp 0ul n2Len in
+  let h = FStar.HyperStack.ST.get () in
+  assume (as_snat h tmp2 = as_snat h tmp); // we know that (p-1)(q-1) < n^2
+  mul_order_lemma2 (as_snat h p - 1) (as_snat h q - 1) 2 2;
+  assert (as_snat h tmp2 >= 1);
+
+  bn_sub_exact tmp2 one tmp2;
+
+  Math.Lemmas.multiplication_order_lemma (as_snat h n) 1 (as_snat h n) ;
+  bn_modular_exp n2 a tmp2 res;
+
+  let h = FStar.HyperStack.ST.get () in
+  assert (as_snat h tmp2 = (as_snat h p - 1) * (as_snat h q - 1) - 1);
+  mul_order_lemma4 (as_snat h p) (as_snat h q);
+  mul_order_lemma3 (as_snat h p - 1) (as_snat h q - 1) (as_snat h n) (as_snat h n);
+  assert (as_snat h tmp2 <= as_snat h n2);
+
+  to_fe_idemp #(as_snat h n2) (as_snat h a);
+
+  assert (as_snat h res =
+          fexp #(as_snat h n2) (as_snat h a) ((as_snat h p - 1) * (as_snat h q - 1) - 1));
+
+  pop_frame ()
+
+
 // TODO generate secret here -- precompute lambda, l2inv, n2
 val to_secret:
      #n2Len:bn_len_s
   -> p:lbignum n2Len
   -> q:lbignum n2Len
   -> n:lbignum n2Len
+  -> n2:lbignum n2Len
   -> g:lbignum n2Len
   -> Stack (secret n2Len)
      (requires fun h ->
       live h p /\ live h q /\ live h n /\ live h g /\
-      all_disjoint [loc p; loc q; loc n; loc g])
+      all_disjoint [loc p; loc q; loc n; loc g] /\
+      as_snat h p * as_snat h q = as_snat h n /\
+      is_g (as_snat h n) (as_snat h g))
      (ensures fun h0 s h1 -> h0 == h1 /\
       secret_mem h1 s /\ proper_secret h1 s)
-let to_secret #n2Len p q n g = admit ()
+let to_secret #n2Len p q n n2 g = admit ()
 
 val l1_div_l2:
      #n2Len:bn_len_s
