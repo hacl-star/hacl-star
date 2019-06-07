@@ -56,7 +56,7 @@ var r12:nat64 {:state reg(rR12)};
 var r13:nat64 {:state reg(rR13)};
 var r14:nat64 {:state reg(rR14)};
 var r15:nat64 {:state reg(rR15)};
-var efl:nat64 {:state flags()};
+var efl:Vale.X64.Flags.t {:state flags()};
 var mem:memory {:state mem()};
 var stack:stack_t {:state stack()};
 var memTaint:memtaint {:state memTaint()};
