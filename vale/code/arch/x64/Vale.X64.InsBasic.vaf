@@ -117,7 +117,7 @@ procedure Add64Wrap(inout dst:dst_opr64, in src:opr64)
         efl;
     ensures
         dst == old(add_wrap64(dst, src));
-        efl == update_cf(old(efl), old(dst + src >= pow2_64));
+        updated_cf(efl, old(dst + src >= pow2_64));
 {
 }
 
@@ -144,7 +144,7 @@ procedure Adc64(inout dst:dst_opr64, in src:opr64)
         valid_cf(efl);
     ensures
         dst == old(dst + src + (if cf(efl) then 1 else 0));
-        efl == update_cf(old(efl), old(dst + src + (if cf(efl) then 1 else 0)) >= pow2_64);
+        updated_cf(efl, old(dst + src + (if cf(efl) then 1 else 0)) >= pow2_64);
 {
 }
 
@@ -158,7 +158,7 @@ procedure Adc64Wrap(inout dst:dst_opr64, in src:opr64)
         valid_cf(efl);
     ensures
         dst == old(add_wrap64(add_wrap64(dst, src), (if cf(efl) then 1 else 0)));
-        efl == update_cf(old(efl), old(dst + src + (if cf(efl) then 1 else 0)) >= pow2_64);
+        updated_cf(efl, old(dst + src + (if cf(efl) then 1 else 0)) >= pow2_64);
 {
 }
 
@@ -216,7 +216,7 @@ procedure Sub64Wrap(inout dst:dst_opr64, in src:opr64)
         efl;
     ensures
         dst == old(dst - src) % pow2_64;
-        efl == update_cf(old(efl), old(dst - src < 0));
+        updated_cf(efl, old(dst - src < 0));
 {
 }
 
@@ -230,7 +230,7 @@ procedure Sbb64(inout dst:dst_opr64, in src:opr64)
         valid_cf(efl);
     ensures
         dst == old(dst - (src + (if cf(efl) then 1 else 0))) % pow2_64;
-        efl == update_cf(old(efl), old(dst - (src + (if cf(efl) then 1 else 0))) < 0);
+        updated_cf(efl, old(dst - (src + (if cf(efl) then 1 else 0))) < 0);
 {
 }
 

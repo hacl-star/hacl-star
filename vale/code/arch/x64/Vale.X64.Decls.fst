@@ -18,8 +18,8 @@ let cf flags = match Lemmas.cf flags with | Some v -> v | None -> false
 let overflow flags = match Lemmas.overflow flags with | Some v -> v | None -> false
 let valid_cf flags = match Lemmas.cf flags with | Some v -> true | None -> false
 let valid_of flags = match Lemmas.overflow flags with | Some v -> true | None -> false
-let update_cf (flags:Flags.t) (new_cf:bool) = Lemmas.update_cf flags new_cf
-let update_of (flags:Flags.t) (new_of:bool) = Lemmas.update_of flags new_of
+let updated_cf new_flags new_cf = Lemmas.cf new_flags = Some new_cf
+let updated_of new_flags new_cf = Lemmas.overflow new_flags = Some new_cf
 let update_cf_maintain_of (flags:Flags.t) (new_cf:bool) = Lemmas.update_cf flags new_cf
 let update_of_maintain_cf (flags:Flags.t) (new_of:bool) = Lemmas.update_of flags new_of
 let ins = BS.ins

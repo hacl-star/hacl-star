@@ -19,12 +19,12 @@ val cf (flags:Flags.t) : bool
 val overflow (flags:Flags.t) : bool
 val valid_cf (flags:Flags.t) : bool
 val valid_of (flags:Flags.t) : bool
-val update_cf (flags:Flags.t) (new_cf:bool) : (new_flags:Flags.t{
+val updated_cf (new_flags:Flags.t) (new_cf:bool) : (b:bool { b <==> (
                                                        cf new_flags == new_cf /\
-						       valid_cf new_flags } )
-val update_of (flags:Flags.t) (new_of:bool) : (new_flags:Flags.t{
+						       valid_cf new_flags ) } )
+val updated_of (new_flags:Flags.t) (new_of:bool) : (b:bool { b <==> (
                                                        overflow new_flags == new_of /\
-						       valid_of new_flags } )
+						       valid_of new_flags ) } )
 val update_cf_maintain_of (flags:Flags.t) (new_cf:bool) : (new_flags:Flags.t {
                                                        cf new_flags == new_cf /\
                                                        overflow new_flags == overflow flags /\
