@@ -7,32 +7,18 @@ open Vale.Lib.Map16
 
 type flag_val_t = option bool
 
-type flags_def = map16 flag_val_t
+type flags_def = (m:Map.t flag flag_val_t{Set.equal (Map.domain m) (Set.complement Set.empty)})
 [@"opaque_to_smt"]
 type t = flags_def
 
 [@va_qattr "opaque_to_smt"]
 let sel (r:flag) (m:t) : flag_val_t =
-  sel16 m r
+  Map.sel m r
 
 [@va_qattr "opaque_to_smt"]
 let upd (r:flag) (v:flag_val_t) (m:t) : t =
-  upd16 m r v
-
-// Used in eta-expansion; we ensure that it stops normalization by not marking it va_qattr
-[@"opaque_to_smt"]
-let eta_sel (r:flag) (m:t) : v:flag_val_t{v == sel r m} =
-  sel r m
-
-// Eta-expand into a map where normalization gracefully terminates to eta_sel applications,
-// so that we don't accidentally normalize past type abstractions
-[@va_qattr "opaque_to_smt"]
-let eta (m:t) : t =
-  let m0_3 = ((eta_sel 0 m, eta_sel 1 m), (eta_sel 2 m, eta_sel 3 m)) in
-  let m4_7 = ((eta_sel 4 m, eta_sel 5 m), (eta_sel 6 m, eta_sel 7 m)) in
-  let m8_11 = ((eta_sel 8 m, eta_sel 9 m), (eta_sel 10 m, eta_sel 11 m)) in
-  let m12_15 = ((eta_sel 12 m, eta_sel 13 m), (eta_sel 14 m, eta_sel 15 m)) in
-  ((m0_3, m4_7), (m8_11, m12_15))
+  reveal_opaque (`%t) t;
+  Map.upd m r v
 
 let to_fun (m:t) : (FStar.FunctionalExtensionality.restricted_t flag (fun _ -> flag_val_t)) =
   FStar.FunctionalExtensionality.on flag (fun (r:flag) -> sel r m)
@@ -62,8 +48,3 @@ val lemma_equal_elim (flags1:t) (flags2:t) : Lemma
   (requires equal flags1 flags2)
   (ensures flags1 == flags2)
   [SMTPat (equal flags1 flags2)]
-
-val lemma_eta (m:t) : Lemma
-  (requires True)
-  (ensures eta m == m)
-  [SMTPat (eta m)]

@@ -113,7 +113,7 @@ let valid_src_operand128 (o:operand128) (s:vale_state) : prop0 =
 
 [@va_qattr]
 let state_eta (s:vale_state) : vale_state =
-  {s with vs_regs = Regs.eta s.vs_regs; vs_xmms = Xmms.eta s.vs_xmms; vs_flags = Flags.eta s.vs_flags}
+  {s with vs_regs = Regs.eta s.vs_regs; vs_xmms = Xmms.eta s.vs_xmms}
 
 [@va_qattr]
 let state_eq (s0:vale_state) (s1:vale_state) : prop0 =
