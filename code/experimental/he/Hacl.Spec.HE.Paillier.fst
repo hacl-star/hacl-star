@@ -48,26 +48,26 @@ val fenu_to_fen2u: #n:comp -> a:fenu n -> b:fen2u n{b = a /\ to_fe #n b = a}
 let fenu_to_fen2u #n a = fenu_to_fen2u_lemma a; let res:fen2 n = a in res
 
 // euler's totient
-val etot: p:prm -> q:prm -> l:fe (p*q)
-let etot p q = lcm_less_mul (p-1) (q-1); lcm (p-1) (q-1)
+val carm: p:prm -> q:prm -> l:fe (p*q)
+let carm p q = lcm_less_mul (p-1) (q-1); lcm (p-1) (q-1)
 
-val etot_unit: p:prm -> q:prm -> Lemma
-  (isunit #(p*q) (etot p q))
-let etot_unit p q =
+val carm_unit: p:prm -> q:prm -> Lemma
+  (isunit #(p*q) (carm p q))
+let carm_unit p q =
   // Any divisor of p*q has form kp or kq, but (p-1)(q-1) has none
   // of this form.
   assume (gcd (p * q) ((p - 1) * (q - 1)) = 1);
   gcd_pq_lcm_lemma p q;
-  inv_as_gcd1 #(p*q) (etot p q)
+  inv_as_gcd1 #(p*q) (carm p q)
 
 val euler_thm: p:prm -> q:prm -> w:fen2u (p*q) -> Lemma
   (ensures (let n = p*q in
-            fexp w (etot p q) % n = 1 &&
-            fexp w (etot p q) > 0))
+            fexp w (carm p q) % n = 1 &&
+            fexp w (carm p q) > 0))
 let euler_thm _ _ _ = admit()
 
 val carmichael_thm: p:prm -> q:prm -> w:fen2u (p*q) -> Lemma
-  (ensures (let l = etot p q in
+  (ensures (let l = carm p q in
             let n = p * q in
             fexp w (n*l) = one))
 let carmichael_thm _ _ _ = admit()
@@ -81,7 +81,7 @@ val in_base_order: p:prm -> q:prm -> g:fe ((p*q)*(p*q)){isunit g} -> Type0
 let in_base_order p q g =
   let r = mult_order g in
   let n = p * q in
-  r % n = 0 /\ (r / n > 0) /\ (r / n < etot p q)
+  r % n = 0 /\ (r / n > 0) /\ (r / n < carm p q)
 
 val in_base: p:prm -> q:prm -> g:fe ((p*q)*(p*q)) -> Type0
 let in_base p q g = g <> 0 /\ isunit g /\ in_base_order p q g
@@ -311,11 +311,11 @@ val w_lambda_representation: p:prm -> q:prm -> w:fen2u (p*q) -> Lemma
   (let n = p * q in
    np1_is_g #n;
    let a = res_class np1 w in
-   let lm:fe n = etot p q in
+   let lm:fe n = carm p q in
    fexp w lm = 1 + ((a*lm)%n)*n)
 let w_lambda_representation p q w =
   let n:comp = p * q in
-  let lambda:pos = etot p q in
+  let lambda:pos = carm p q in
   np1_is_g #n;
   let (a,b) = encf_inv (np1 #n) w in
   let b': fen2u n = fenu_to_fen2u b in
@@ -349,12 +349,12 @@ val bigl_w_l_lemma: p:prm -> q:prm -> w:fen2u (p*q) -> Lemma
   (ensures (let n = p * q in
             np1_is_g #n;
             let x = res_class np1 w in
-            let lm:fe n = etot p q in
+            let lm:fe n = carm p q in
             euler_thm p q w;
             bigl (fexp w lm) = lm *% x))
 let bigl_w_l_lemma p q w =
   let n:comp = p * q in
-  let lambda:fe n = etot p q in
+  let lambda:fe n = carm p q in
   np1_is_g #n;
   let a:fe n = res_class (np1 #n) w in
   w_lambda_representation p q w;
@@ -380,7 +380,7 @@ let bigl_w_l_lemma p q w =
 val l1_div_l2: p:prm -> q:prm -> w:fen2 (p*q) -> g:isg (p*q) -> fe (p*q)
 let l1_div_l2 p q w g =
   let n = p * q in
-  let lambda: fe n = etot p q in
+  let lambda: fe n = carm p q in
   let l1arg = fexp w lambda in
   // If w is not guaranteed to be unit, then we could
   // possibly get 0, which is not a proper input to L.
@@ -397,14 +397,14 @@ let l1_div_l2 p q w g =
 
 
 val l1_div_l2_of_unit_w: p:prm -> q:prm -> w:fen2u (p*q) -> g:isg (p*q) -> Lemma
-  (let lambda = etot p q in
+  (let lambda = carm p q in
    isunit (fexp w lambda) /\ (fexp w lambda > 0) /\
    isunit (fexp g lambda) /\ (fexp g lambda > 0) /\
    (isunit_nonzero (fexp g lambda);
     isunit (bigl (fexp g lambda))))
 let l1_div_l2_of_unit_w p q w g =
   let n = p * q in
-  let lambda:fe n = etot p q in
+  let lambda:fe n = carm p q in
   let exp_is_unit (a:fen2u n): Lemma (isunit (fexp a lambda)) =
     begin
     g_pow_isunit a lambda;
@@ -421,7 +421,7 @@ let l1_div_l2_of_unit_w p q w g =
     np1_is_g #n;
     bigl_w_l_lemma p q g;
     assert (bigl (fexp g lambda) = lambda *% res_class np1 g);
-    etot_unit p q;
+    carm_unit p q;
     res_class_inverse np1 g;
     isunit_prod lambda (res_class np1 g)
     end in
@@ -430,11 +430,11 @@ let l1_div_l2_of_unit_w p q w g =
 
 
 val fexp_w_lambda_is_one_mod_n: p:prm -> q:prm -> w:fen2u (p*q) -> Lemma
-  (let lambda = etot p q in fexp w lambda % (p*q) = 1)
+  (let lambda = carm p q in fexp w lambda % (p*q) = 1)
 let fexp_w_lambda_is_one_mod_n p q w =
   let n:comp = p * q in
   one_mod_n n;
-  let lambda:fe n = etot p q in
+  let lambda:fe n = carm p q in
   np1_is_g #n;
   let a:fe n = res_class (np1 #n) w in
   w_lambda_representation p q w;
@@ -452,7 +452,7 @@ val l1_div_l2_is_wg: p:prm -> q:prm -> w:fen2u (p*q) -> g:isg (p*q) -> Lemma
   (l1_div_l2 p q w g = res_class g w)
 let l1_div_l2_is_wg p q w g =
   let n = p * q in
-  let lambda: fe n = etot p q in
+  let lambda: fe n = carm p q in
 
   np1_is_g #n;
   let r_w = res_class #n np1 w in
@@ -483,7 +483,7 @@ let l1_div_l2_is_wg p q w g =
   finv_mul r_w r_g r_z;
   assert (r_w *% finv r_g = r_z);
 
-  etot_unit p q;
+  carm_unit p q;
   let lem1 (): Lemma (isunit l2 /\ finv l2 = finv lambda *% finv r_g) =
     isunit_prod lambda r_g in
 

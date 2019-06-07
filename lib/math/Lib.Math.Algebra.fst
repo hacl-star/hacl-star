@@ -23,8 +23,8 @@ let one_mod_n _ = ()
 
 type divides (a:pos) (b:pos) = b % a = 0
 
-val isprm: p:big -> Type0
-let isprm p = p % 2 = 1 /\ p >= 3 /\ (forall (x:nat{x>1&&x<p}). ~(divides x p))
+val isprm: p:nat -> Type0
+let isprm p = p >= 3 /\ p % 2 = 1 /\ (forall (x:nat{x>1&&x<p}). ~(divides x p))
 
 type prm = p:big{isprm p}
 
@@ -549,7 +549,7 @@ let fexp_exp #n g e1 e2 =
   fexp_eq_nexp g (e1 * e2);
   nexp_exp g e1 e2
 
-// Probably needs slightly more lemma to prove then there are here
+// Probably needs slightly more involved machinery to prove it
 val flt: #p:prm -> a:fe p{a>0} -> Lemma
   (fexp a (p-1) = 1)
 let flt #p _ = admit()
