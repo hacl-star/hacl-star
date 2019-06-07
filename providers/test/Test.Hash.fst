@@ -41,28 +41,26 @@ let test_incremental_api (): St unit =
   HI.init SHA2_256 st;
   let h0 = ST.get () in
   assert B.(loc_disjoint (HI.footprint h0 st) (loc_buffer b1));
-  assert (HI.hashes h0 st Seq.empty);
+  assert (HI.hashed h0 st `Seq.equal` Seq.empty);
 
   assert_norm (4 < pow2 61);
-  HI.update SHA2_256 st (Ghost.hide Seq.empty) b1 4ul;
+  HI.update SHA2_256 st b1 4ul;
   let h1 = ST.get () in
-  assert (HI.hashes h1 st (Seq.append Seq.empty (B.as_seq h0 b1)));
+  assert (HI.hashed h1 st `Seq.equal` (Seq.append Seq.empty (B.as_seq h0 b1)));
   Seq.append_empty_l (B.as_seq h0 b1);
-  assert (HI.hashes h1 st (B.as_seq h0 b1));
+  assert (HI.hashed h1 st `Seq.equal` (B.as_seq h0 b1));
 
   assert (Seq.length (Ghost.reveal (Ghost.hide (B.as_seq h0 b1))) = 4);
   assert_norm (8 < pow2 61);
-  HI.update SHA2_256 st (Ghost.hide (B.as_seq h0 b1)) b2 4ul;
+  HI.update SHA2_256 st b2 4ul;
   let h2 = ST.get () in
-  assert (HI.hashes h2 st (Seq.append (B.as_seq h0 b1) (B.as_seq h0 b2)));
+  assert (HI.hashed h2 st `Seq.equal` (Seq.append (B.as_seq h0 b1) (B.as_seq h0 b2)));
 
   // An example of how to call the hash preservation lemma...
   let dst = B.alloca 0uy 32ul in
   let h3 = ST.get () in
-  HI.frame_invariant B.loc_none st h2 h3;
-  HI.frame_hashes B.loc_none st (Seq.append (B.as_seq h0 b1) (B.as_seq h0 b2)) h2 h3;
-  HI.frame_freeable B.loc_none st h2 h3;
-  HI.finish SHA2_256 st (Ghost.hide (Seq.append (B.as_seq h0 b1) (B.as_seq h0 b2))) dst;
+  // Auto-framing!
+  HI.finish SHA2_256 st dst;
 
   let h4 = ST.get () in
   assert (Seq.equal (B.as_seq h4 dst)

@@ -50,6 +50,7 @@ let any_hash_t_fits (a: alg) (b: any_hash_t): Lemma
   ()
 #pop-options
 
+
 /// Abstract footprints, with the same machinery as EverCrypt.Hash
 /// --------------------------------------------------------------
 ///
@@ -97,19 +98,57 @@ val invariant_loc_in_footprint
 /// ----------------------------------------
 ///
 /// We offer a stateful predicate that allows the client to tie a particular
-/// state to a sequence of bytes hashed so far.
+/// state to a sequence of bytes hashed so far. There are a variety of styles
+/// possible, here's a recap and a discussion of the respective merits of each
+/// style, so that we document and avoid going back and forth for future APIs.
+///
+/// 1. val update (b: erased bytes): unit
+///      requires (fun h0 -> hashes h0 s b)
+///      ensures (fun h1 -> hashes h1 s (b `append` data))
+///
+///    The problem with this one is that it requires the client to not only
+///    explicitly pass an erased argument, but also requires the client, when
+///    chaining calls to construct the "next" value by manually concatenating
+///    (ghostly) bytes.
+///
+/// 2. val update (b: erased bytes): erased bytes
+///      requires (fun h0 -> hashes h0 s b)
+///      ensures (fun h1 b' -> hashes h1 s b' /\ b' == b `append` data)
+///
+///    This one is a slight improvement over 1. because the client can "get
+///    their hands" on the returned bytes and doesn't need to manually create
+///    the concatenation ``b `append` data`` when they chain another call to
+///    update.
+///
+/// 3. val update (): unit
+///      requires _
+///      ensures (fun h0 _ h1 -> hashed h1 s == hashed h0 s `append` data)
+///
+///    While 1. and 2. were based on a predicate, this one relies on a function
+///    that returns the bytes (ghostly) for any given state and heap. It does
+///    not require the client to materialize the erased bytes, and it does not
+///    require the client to manually construct intermediary ghost byte values
+///    when chaining.
+///
+/// 4. There's another style based on a state machine and an erased value that
+///    materializes all the ghost state in a single record, thus requiring only a
+///    single framing lemma (as opposed to three or more for the styles 1. 2. and
+///    3.). It appears that this may be overkill for this module and may be better
+///    suited to TLS.
+///                                            JP (20190607)
 
 noextract
 let bytes = S.seq UInt8.t
 
-val hashes: #a:Hash.alg -> h:HS.mem -> s:state a -> b:bytes -> Type0
+val hashed: #a:Hash.alg -> h:HS.mem -> s:state a -> GTot bytes
 
 // This should alleviate the need for painful proofs about things fitting.
-val hash_fits: #a:Hash.alg -> h:HS.mem -> s:state a -> b:bytes -> Lemma
-  (requires hashes h s b)
+val hash_fits: #a:Hash.alg -> h:HS.mem -> s:state a -> Lemma
+  (requires (
+    invariant h s))
   (ensures (
-    S.length b < Spec.Hash.Definitions.max_input_length a))
-  [ SMTPat (hashes h s b) ]
+    S.length (hashed h s) < Spec.Hash.Definitions.max_input_length a))
+  [ SMTPat (hashed h s) ]
 
 
 /// Central frame invariants
@@ -146,14 +185,15 @@ val frame_invariant: #a:alg -> l:B.loc -> s:state a -> h0:HS.mem -> h1:HS.mem ->
   (ensures (
     invariant h1 s /\
     footprint h0 s == footprint h1 s))
+  [ SMTPat (invariant h1 s); SMTPat (B.modifies l h0 h1) ]
 
-val frame_hashes: #a:alg -> l:B.loc -> s:state a -> b:bytes -> h0:HS.mem -> h1:HS.mem -> Lemma
+val frame_hashed: #a:alg -> l:B.loc -> s:state a -> h0:HS.mem -> h1:HS.mem -> Lemma
   (requires (
     invariant h0 s /\
-    hashes h0 s b /\
     B.loc_disjoint l (footprint h0 s) /\
     B.modifies l h0 h1))
-  (ensures (hashes h1 s b))
+  (ensures (hashed h0 s == hashed h1 s))
+  [ SMTPat (hashed h1 s); SMTPat (B.modifies l h0 h1) ]
 
 val frame_freeable: #a:alg -> l:B.loc -> s:state a -> h0:HS.mem -> h1:HS.mem -> Lemma
   (requires (
@@ -162,6 +202,7 @@ val frame_freeable: #a:alg -> l:B.loc -> s:state a -> h0:HS.mem -> h1:HS.mem -> 
     B.loc_disjoint l (footprint h0 s) /\
     B.modifies l h0 h1))
   (ensures (freeable h1 s))
+  [ SMTPat (freeable h1 s); SMTPat (B.modifies l h0 h1) ]
 
 /// Stateful API
 /// ------------
@@ -186,7 +227,7 @@ val init (a: Hash.alg) (s: state a): Stack unit
   (ensures (fun h0 _ h1 ->
     preserves_freeable s h0 h1 /\
     invariant h1 s /\
-    hashes h1 s S.empty /\
+    hashed h1 s == S.empty /\
     footprint h0 s == footprint h1 s /\
     B.(modifies (footprint h0 s) h0 h1)))
 
@@ -194,23 +235,20 @@ unfold
 let update_pre
   (a: Hash.alg)
   (s: state a)
-  (prev: G.erased bytes)
   (data: B.buffer UInt8.t)
   (len: UInt32.t)
   (h0: HS.mem)
 =
   invariant h0 s /\
-  hashes h0 s (G.reveal prev) /\
   B.live h0 data /\
   U32.v len = B.length data /\
-  S.length (G.reveal prev) + U32.v len < pow2 61 /\
+  S.length (hashed h0 s) + U32.v len < pow2 61 /\
   B.(loc_disjoint (loc_buffer data) (footprint h0 s))
 
 unfold
 let update_post
   (a: Hash.alg)
   (s: state a)
-  (prev: G.erased bytes)
   (data: B.buffer UInt8.t)
   (len: UInt32.t)
   (h0 h1: HS.mem)
@@ -219,40 +257,37 @@ let update_post
   invariant h1 s /\
   B.(modifies (footprint h0 s) h0 h1) /\
   footprint h0 s == footprint h1 s /\
-  hashes h1 s (Seq.append (G.reveal prev) (B.as_seq h0 data))
+  hashed h1 s == hashed h0 s `S.append` B.as_seq h0 data
 
 (** @type: true
 *)
 val update:
   a:Hash.alg ->
   s:state a ->
-  prev:G.erased bytes ->
   data: B.buffer UInt8.t ->
   len: UInt32.t ->
   Stack unit
-    (requires fun h0 -> update_pre a s prev data len h0)
-    (ensures fun h0 s' h1 -> update_post a s prev data len h0 h1)
+    (requires fun h0 -> update_pre a s data len h0)
+    (ensures fun h0 s' h1 -> update_post a s data len h0 h1)
 
 /// Note: the state is left to be reused by the caller to feed more data into
 /// the hash.
 inline_for_extraction
 let finish_st (a: Hash.alg) =
   s:state a ->
-  prev:G.erased bytes ->
   dst: Hacl.Hash.Definitions.hash_t a ->
   Stack unit
     (requires fun h0 ->
       invariant h0 s /\
-      hashes h0 s (G.reveal prev) /\
       B.live h0 dst /\
       B.(loc_disjoint (loc_buffer dst) (footprint h0 s)))
     (ensures fun h0 s' h1 ->
       preserves_freeable s h0 h1 /\
       invariant h1 s /\
-      hashes h1 s (G.reveal prev) /\
+      hashed h0 s == hashed h1 s /\
       footprint h0 s == footprint h1 s /\
       B.(modifies (loc_union (loc_buffer dst) (footprint h0 s)) h0 h1) /\
-      S.equal (B.as_seq h1 dst) (Spec.Hash.hash a (G.reveal prev)))
+      S.equal (B.as_seq h1 dst) (Spec.Hash.hash a (hashed h0 s)))
 
 (** @type: true
 *)
