@@ -16,16 +16,17 @@ module List = FStar.List.Tot
 
 let calling_conventions
   (s0 s1:BS.machine_state)
-  (regs_modified: MS.reg -> bool)
-  (xmms_modified: MS.xmm -> bool) =
+  (regs_modified: MS.reg_64 -> bool)
+  (xmms_modified: MS.reg_xmm -> bool) =
   let s0 = s0 in
   let s1 = s1 in
   s1.BS.ms_ok /\
-  s0.BS.ms_regs MS.rRsp == s1.BS.ms_regs MS.rRsp /\
+  s0.BS.ms_regs MS.reg_Rsp == s1.BS.ms_regs MS.reg_Rsp /\
   (forall (r:MS.reg). {:pattern (s0.BS.ms_regs r)}
-    not (regs_modified r) ==> s0.BS.ms_regs r == s1.BS.ms_regs r) /\
-  (forall (x:MS.xmm). {:pattern (s0.BS.ms_xmms x)}
-    not (xmms_modified x) ==> s0.BS.ms_xmms x == s1.BS.ms_xmms x)
+    match r with
+    | MS.Reg 0 r -> not (regs_modified r) ==> s0.BS.ms_regs (MS.Reg 0 r) == s1.BS.ms_regs (MS.Reg 0 r)
+    | MS.Reg 1 r -> not (xmms_modified r) ==> s0.BS.ms_regs (MS.Reg 1 r) == s1.BS.ms_regs (MS.Reg 1 r)
+  )
 
 let reg_nat (n:nat) = i:nat{i < n}
 let arity_ok n 'a = l:list 'a { List.Tot.length l <= n }
@@ -42,8 +43,8 @@ let injective f = forall x y. f x == f y ==> x == y
 
 noeq
 type arg_reg_relation' (n:nat) =
-  | Rel: of_reg:(MS.reg -> option (reg_nat n)) ->
-         of_arg:(reg_nat n -> MS.reg){
+  | Rel: of_reg:(MS.reg_64 -> option (reg_nat n)) ->
+         of_arg:(reg_nat n -> MS.reg_64){
            // This function should be injective
            injective of_arg /\
            // rRsp is not a valid register to store paramters
@@ -56,12 +57,12 @@ type arg_reg_relation' (n:nat) =
 unfold
 let arg_reg_relation (n:nat) = (v:arg_reg_relation' n{
   // of_reg is a partial inverse of of_arg
-  forall (r:MS.reg). Some? (v.of_reg r) ==> v.of_arg (Some?.v (v.of_reg r)) = r})
+  forall (r:MS.reg_64). Some? (v.of_reg r) ==> v.of_arg (Some?.v (v.of_reg r)) = r})
 
-let registers = MS.reg -> MS.nat64
+let registers = MS.reg_64 -> MS.nat64
 
 let upd_reg (n:nat) (arg_reg:arg_reg_relation n) (regs:registers) (i:nat) (v:_) : registers =
-    fun (r:MS.reg) ->
+    fun (r:MS.reg_64) ->
       match arg_reg.of_reg r with
       | Some j ->
         if i = j then v
@@ -213,10 +214,14 @@ let create_initial_trusted_state
   : state_builder_t max_arity args (BS.machine_state & mem) =
   fun h0 ->
     let open MS in
-    let regs = register_of_args max_arity arg_reg (List.Tot.length args) args IA.init_regs in
-    let regs = FunctionalExtensionality.on reg regs in
-    let xmms = FunctionalExtensionality.on xmm IA.init_xmms in
-    let init_rsp = regs rRsp in
+    let regs_64 = register_of_args max_arity arg_reg (List.Tot.length args) args IA.init_regs in
+    let xmms = IA.init_xmms in
+    let init_rsp = regs_64 rRsp in
+    let regs = FunctionalExtensionality.on_dom reg #t_reg (fun r ->
+      match r with
+      | Reg 0 r -> regs_64 r
+      | Reg 1 r -> xmms r)
+      in
     // Create an initial empty stack
     let stack = Map.const_on Set.empty 0 in
     // Spill additional arguments on the stack
@@ -225,7 +230,6 @@ let create_initial_trusted_state
     let (s0:BS.machine_state) = {
       BS.ms_ok = true;
       BS.ms_regs = regs;
-      BS.ms_xmms = xmms;
       BS.ms_flags = IA.init_flags;
       BS.ms_mem = down_mem mem;
       BS.ms_memTaint = create_memtaint mem (args_b8 args) (mk_taint args init_taint);
@@ -240,9 +244,9 @@ let prediction_pre_rel_t (c:BS.code) (args:arg_list) =
     h0:mem_roots args ->
     prop
 
-let return_val_t (sn:BS.machine_state) = r:UInt64.t{UInt64.v r == BS.eval_reg MS.rRax sn}
+let return_val_t (sn:BS.machine_state) = r:UInt64.t{UInt64.v r == BS.eval_reg_64 MS.rRax sn}
 let return_val (sn:BS.machine_state) : return_val_t sn =
-  UInt64.uint_to_t (BS.eval_reg MS.rRax sn)
+  UInt64.uint_to_t (BS.eval_reg_64 MS.rRax sn)
 
 let prediction_post_rel_t (c:BS.code) (args:arg_list) =
     h0:mem_roots args ->
@@ -268,8 +272,8 @@ let prediction_pre
 [@__reduce__]
 let prediction_post
     (n:nat)
-    (regs_modified:MS.reg -> bool)
-    (xmms_modified:MS.xmm -> bool)
+    (regs_modified:MS.reg_64 -> bool)
+    (xmms_modified:MS.reg_xmm -> bool)
     (down_mem:down_mem_t)
     (c:BS.code)
     (args:arg_list)
@@ -293,8 +297,8 @@ let prediction_post
 let prediction
     (n:nat)
     (arg_reg:arg_reg_relation n)
-    (regs_modified:MS.reg -> bool)
-    (xmms_modified:MS.xmm -> bool)
+    (regs_modified:MS.reg_64 -> bool)
+    (xmms_modified:MS.reg_xmm -> bool)
     (down_mem:down_mem_t)
     (c:BS.code)
     (args:arg_list)
@@ -321,8 +325,8 @@ let als_ret = UInt64.t & Ghost.erased as_lowstar_sig_ret
 let as_lowstar_sig_post
     (n:nat)
     (arg_reg:arg_reg_relation n)
-    (regs_modified:MS.reg -> bool)
-    (xmms_modified:MS.xmm -> bool)
+    (regs_modified:MS.reg_64 -> bool)
+    (xmms_modified:MS.reg_xmm -> bool)
     (down_mem:down_mem_t)
     (c:BS.code)
     (args:arg_list)
@@ -350,8 +354,8 @@ let as_lowstar_sig_post
 let as_lowstar_sig_post_weak
     (n:nat)
     (arg_reg:arg_reg_relation n)
-    (regs_modified:MS.reg -> bool)
-    (xmms_modified:MS.xmm -> bool)
+    (regs_modified:MS.reg_64 -> bool)
+    (xmms_modified:MS.reg_xmm -> bool)
     (down_mem:down_mem_t)
     (c:BS.code)
     (args:arg_list)
@@ -380,8 +384,8 @@ let as_lowstar_sig_post_weak
 let as_lowstar_sig (c:BS.code) =
     n:nat ->
     arg_reg:arg_reg_relation n ->
-    regs_modified:(MS.reg -> bool) ->
-    xmms_modified:(MS.xmm -> bool) ->
+    regs_modified:(MS.reg_64 -> bool) ->
+    xmms_modified:(MS.reg_xmm -> bool) ->
     down_mem:down_mem_t ->
     args:arg_list ->
     #pre_rel:_ ->
@@ -422,8 +426,8 @@ let elim_rel_gen_t_cons #c hd tl #args #f (p:rel_gen_t c (hd::tl) args f)
 let rec prediction_t
       (n:nat)
       (arg_reg:arg_reg_relation n)
-      (regs_modified:MS.reg -> bool)
-      (xmms_modified:MS.xmm -> bool)
+      (regs_modified:MS.reg_64 -> bool)
+      (xmms_modified:MS.reg_xmm -> bool)
       (down_mem:down_mem_t)
       (c:BS.code)
       (dom:list td)
@@ -453,8 +457,8 @@ let rec prediction_t
 let elim_predict_t_nil
       (#n:nat)
       (#arg_reg:arg_reg_relation n)
-      (#regs_modified:MS.reg -> bool)
-      (#xmms_modified:MS.xmm -> bool)
+      (#regs_modified:MS.reg_64 -> bool)
+      (#xmms_modified:MS.reg_xmm -> bool)
       (#down_mem:down_mem_t)
       (#c:BS.code)
       (#args:arg_list)
@@ -468,8 +472,8 @@ let elim_predict_t_nil
 let elim_predict_t_cons
       (#n:nat)
       (#arg_reg:arg_reg_relation n)
-      (#regs_modified:MS.reg -> bool)
-      (#xmms_modified:MS.xmm -> bool)
+      (#regs_modified:MS.reg_64 -> bool)
+      (#xmms_modified:MS.reg_xmm -> bool)
       (#down_mem:down_mem_t)
       (#c:BS.code)
       (hd:td)
@@ -488,8 +492,8 @@ let elim_predict_t_cons
 let rec as_lowstar_sig_t
       (n:nat)
       (arg_reg:arg_reg_relation n)
-      (regs_modified:MS.reg -> bool)
-      (xmms_modified:MS.xmm -> bool)
+      (regs_modified:MS.reg_64 -> bool)
+      (xmms_modified:MS.reg_xmm -> bool)
       (down_mem:down_mem_t)
       (c:BS.code)
       (dom:list td)
@@ -526,8 +530,8 @@ private
 val wrap'
     (n:nat)
     (arg_reg:arg_reg_relation n)
-    (regs_modified:MS.reg -> bool)
-    (xmms_modified:MS.xmm -> bool)
+    (regs_modified:MS.reg_64 -> bool)
+    (xmms_modified:MS.reg_xmm -> bool)
     (down_mem:down_mem_t)
     (c:BS.code)
     (dom:list td{List.length dom <= 20})
@@ -541,8 +545,8 @@ private
 let rec as_lowstar_sig_t_weak'
       (n:nat)
       (arg_reg:arg_reg_relation n)
-      (regs_modified:MS.reg -> bool)
-      (xmms_modified:MS.xmm -> bool)
+      (regs_modified:MS.reg_64 -> bool)
+      (xmms_modified:MS.reg_xmm -> bool)
       (down_mem:down_mem_t)
       (c:BS.code)
       (dom:list td)
@@ -579,8 +583,8 @@ private
 val wrap_weak'
     (n:nat)
     (arg_reg:arg_reg_relation n)
-    (regs_modified:MS.reg -> bool)
-    (xmms_modified:MS.xmm -> bool)
+    (regs_modified:MS.reg_64 -> bool)
+    (xmms_modified:MS.reg_xmm -> bool)
     (down_mem:down_mem_t)
     (c:BS.code)
     (dom:list td{List.length dom <= 20})
@@ -594,8 +598,8 @@ val wrap_weak'
 let as_lowstar_sig_t_weak
       (n:nat{n <= 20})
       (arg_reg:arg_reg_relation n)
-      (regs_modified:MS.reg -> bool)
-      (xmms_modified:MS.xmm -> bool)
+      (regs_modified:MS.reg_64 -> bool)
+      (xmms_modified:MS.reg_xmm -> bool)
       (down_mem:down_mem_t)
       (c:BS.code)
       (dom:list td)
@@ -608,8 +612,8 @@ let as_lowstar_sig_t_weak
 val wrap_weak
     (n:nat{n <= 20})
     (arg_reg:arg_reg_relation n)
-    (regs_modified:MS.reg -> bool)
-    (xmms_modified:MS.xmm -> bool)
+    (regs_modified:MS.reg_64 -> bool)
+    (xmms_modified:MS.reg_xmm -> bool)
     (down_mem:down_mem_t)
     (c:BS.code)
     (dom:arity_ok n td)
@@ -618,7 +622,7 @@ val wrap_weak
     (predict:prediction_t n arg_reg regs_modified xmms_modified down_mem c dom [] pre_rel post_rel)
   : as_lowstar_sig_t_weak n arg_reg regs_modified xmms_modified down_mem c dom [] pre_rel post_rel predict
 
-let register_of_arg_i (i:reg_nat (if IA.win then 4 else 6)) : MS.reg =
+let register_of_arg_i (i:reg_nat (if IA.win then 4 else 6)) : MS.reg_64 =
   let open MS in
   if IA.win then
     match i with
@@ -637,7 +641,7 @@ let register_of_arg_i (i:reg_nat (if IA.win then 4 else 6)) : MS.reg =
 
 //A partial inverse of the above function
 [@__reduce__]
-let arg_of_register (r:MS.reg)
+let arg_of_register (r:MS.reg_64)
   : option (i:reg_nat (if IA.win then 4 else 6))
   = let open MS in
     if IA.win then
@@ -663,7 +667,7 @@ let arity_ok_stdcall = arity_ok max_stdcall
 let arg_reg_stdcall : arg_reg_relation max_stdcall =
   Rel arg_of_register register_of_arg_i
 
-let regs_modified_stdcall:MS.reg -> bool = fun (r:MS.reg) ->
+let regs_modified_stdcall:MS.reg_64 -> bool = fun (r:MS.reg_64) ->
   let open MS in
   if IA.win then (
     // These registers are callee-saved on Windows
@@ -677,7 +681,7 @@ let regs_modified_stdcall:MS.reg -> bool = fun (r:MS.reg) ->
     else true
   )
 
-let xmms_modified_stdcall:MS.xmm -> bool = fun (x:MS.xmm) ->
+let xmms_modified_stdcall:MS.reg_xmm -> bool = fun (x:MS.reg_xmm) ->
   let open MS in
   if IA.win then (
     // These xmms are callee-saved on Windows
@@ -687,7 +691,7 @@ let xmms_modified_stdcall:MS.xmm -> bool = fun (x:MS.xmm) ->
     // No xmm needs to be callee-saved on Linux
     true
 
-(* For stdcalls, we do not have the arity_ok restriction: We can pass as many arguments as we want, the extra arguments will be passed on the stack *)
+// For stdcalls, we do not have the arity_ok restriction: We can pass as many arguments as we want, the extra arguments will be passed on the stack
 [@__reduce__]
 let as_lowstar_sig_t_weak_stdcall = as_lowstar_sig_t_weak' max_stdcall arg_reg_stdcall regs_modified_stdcall xmms_modified_stdcall
 

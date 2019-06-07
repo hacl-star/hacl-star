@@ -74,7 +74,7 @@ let vm_post : VSig.vale_post  vm_dom =
       VM.va_ens_memcpy c va_s0 IA.win (as_vale_buffer dst) (as_vale_immbuffer src) va_s1 f
 
 module VS = Vale.X64.State
-#set-options "--print_effect_args --z3rlimit 20"
+#reset-options "--print_effect_args --z3rlimit 200"
 
 (* The vale lemma doesn't quite suffice to prove the modifies clause
    expected of the interop layer *)
@@ -85,22 +85,23 @@ let vm_lemma'
     (dst:b64)
     (src:ib64)
     (va_s0:V.va_state)
- : Ghost (V.va_state & V.va_fuel)
-     (requires
-       vm_pre code dst src va_s0)
-     (ensures (fun (va_s1, f) ->
-       V.eval_code code va_s0 f va_s1 /\
-       VSig.vale_calling_conventions_stdcall va_s0 va_s1 /\
-       vm_post code dst src va_s0 va_s1 f /\
-       ME.buffer_readable VS.(va_s1.vs_mem) (as_vale_immbuffer src) /\
-       ME.buffer_readable VS.(va_s1.vs_mem) (as_vale_buffer dst) /\
-       ME.buffer_writeable (as_vale_buffer dst) /\
-       ME.modifies (ME.loc_union (ME.loc_buffer (as_vale_buffer dst))
-                                 ME.loc_none) va_s0.VS.vs_mem va_s1.VS.vs_mem
- ))
- =  let va_s1, f = VM.va_lemma_memcpy code va_s0 IA.win (as_vale_buffer dst) (as_vale_immbuffer src) in
-    Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt8 ME.TUInt64 dst;
-    va_s1, f
+  : Ghost (V.va_state & V.va_fuel)
+    (requires
+      vm_pre code dst src va_s0)
+    (ensures (fun (va_s1, f) ->
+      V.eval_code code va_s0 f va_s1 /\
+      VSig.vale_calling_conventions_stdcall va_s0 va_s1 /\
+      vm_post code dst src va_s0 va_s1 f /\
+      ME.buffer_readable VS.(va_s1.vs_mem) (as_vale_immbuffer src) /\
+      ME.buffer_readable VS.(va_s1.vs_mem) (as_vale_buffer dst) /\
+      ME.buffer_writeable (as_vale_buffer dst) /\
+      ME.modifies (ME.loc_union (ME.loc_buffer (as_vale_buffer dst))
+                                ME.loc_none) va_s0.VS.vs_mem va_s1.VS.vs_mem
+    ))
+  = 
+  let va_s1, f = VM.va_lemma_memcpy code va_s0 IA.win (as_vale_buffer dst) (as_vale_immbuffer src) in
+  Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt8 ME.TUInt64 dst;
+  (va_s1, f)
 
 (* Prove that vm_lemma' has the required type *)
 let vm_lemma = as_t #(VSig.vale_sig_stdcall vm_pre vm_post) vm_lemma'
@@ -318,7 +319,7 @@ let ta_post : VSig.vale_post ta_dom =
       (as_vale_immbuffer arg7)
       va_s1 f
 
-#set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit_factor 4"
+#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
 (* The vale lemma doesn't quite suffice to prove the modifies clause
    expected of the interop layer *)
 [@__reduce__]

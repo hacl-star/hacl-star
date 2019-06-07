@@ -18,106 +18,123 @@ let combine_reg_taints_monotone (regs1 regs2:reg_taint) : Lemma
   (forall r. Public? ((combine_reg_taints regs1 regs2) r) ==> Public? (regs1 r) /\ Public? (regs2 r))
 = ()
 
-
-let combine_xmm_taints (xmms1 xmms2:xmms_taint) : xmms_taint =
-    FunctionalExtensionality.on xmm (fun x -> merge_taint (xmms1 x) (xmms2 x))
-
-let combine_xmm_taints_monotone (xmms1 xmms2:xmms_taint) : Lemma
-  (forall r. Public? ((combine_xmm_taints xmms1 xmms2) r) ==> Public? (xmms1 r) /\ Public? (xmms2 r))
-= ()
-
 let eq_registers (regs1 regs2:reg_taint) : (b:bool{b <==> regs1 == regs2}) =
-  let b = regs1 rRax = regs2 rRax &&
-  regs1 rRbx = regs2 rRbx &&
-  regs1 rRcx = regs2 rRcx &&
-  regs1 rRdx = regs2 rRdx &&
-  regs1 rRsi = regs2 rRsi &&
-  regs1 rRdi = regs2 rRdi &&
-  regs1 rRbp = regs2 rRbp &&
-  regs1 rRsp = regs2 rRsp &&
-  regs1 rR8 = regs2 rR8 &&
-  regs1 rR9 = regs2 rR9 &&
-  regs1 rR10 = regs2 rR10 &&
-  regs1 rR11 = regs2 rR11 &&
-  regs1 rR12 = regs2 rR12 &&
-  regs1 rR13 = regs2 rR13 &&
-  regs1 rR14 = regs2 rR14 &&
-  regs1 rR15 = regs2 rR15 in
+  let b =
+    regs1 (Reg 0 0 ) = regs2 (Reg 0 0 ) &&
+    regs1 (Reg 0 1 ) = regs2 (Reg 0 1 ) &&
+    regs1 (Reg 0 2 ) = regs2 (Reg 0 2 ) &&
+    regs1 (Reg 0 3 ) = regs2 (Reg 0 3 ) &&
+    regs1 (Reg 0 4 ) = regs2 (Reg 0 4 ) &&
+    regs1 (Reg 0 5 ) = regs2 (Reg 0 5 ) &&
+    regs1 (Reg 0 6 ) = regs2 (Reg 0 6 ) &&
+    regs1 (Reg 0 7 ) = regs2 (Reg 0 7 ) &&
+    regs1 (Reg 0 8 ) = regs2 (Reg 0 8 ) &&
+    regs1 (Reg 0 9 ) = regs2 (Reg 0 9 ) &&
+    regs1 (Reg 0 10) = regs2 (Reg 0 10) &&
+    regs1 (Reg 0 11) = regs2 (Reg 0 11) &&
+    regs1 (Reg 0 12) = regs2 (Reg 0 12) &&
+    regs1 (Reg 0 13) = regs2 (Reg 0 13) &&
+    regs1 (Reg 0 14) = regs2 (Reg 0 14) &&
+    regs1 (Reg 0 15) = regs2 (Reg 0 15) &&
+    regs1 (Reg 1 0 ) = regs2 (Reg 1 0 ) &&
+    regs1 (Reg 1 1 ) = regs2 (Reg 1 1 ) &&
+    regs1 (Reg 1 2 ) = regs2 (Reg 1 2 ) &&
+    regs1 (Reg 1 3 ) = regs2 (Reg 1 3 ) &&
+    regs1 (Reg 1 4 ) = regs2 (Reg 1 4 ) &&
+    regs1 (Reg 1 5 ) = regs2 (Reg 1 5 ) &&
+    regs1 (Reg 1 6 ) = regs2 (Reg 1 6 ) &&
+    regs1 (Reg 1 7 ) = regs2 (Reg 1 7 ) &&
+    regs1 (Reg 1 8 ) = regs2 (Reg 1 8 ) &&
+    regs1 (Reg 1 9 ) = regs2 (Reg 1 9 ) &&
+    regs1 (Reg 1 10) = regs2 (Reg 1 10) &&
+    regs1 (Reg 1 11) = regs2 (Reg 1 11) &&
+    regs1 (Reg 1 12) = regs2 (Reg 1 12) &&
+    regs1 (Reg 1 13) = regs2 (Reg 1 13) &&
+    regs1 (Reg 1 14) = regs2 (Reg 1 14) &&
+    regs1 (Reg 1 15) = regs2 (Reg 1 15)
+    in
+  allow_inversion reg;
   assert (FStar.FunctionalExtensionality.feq regs1 regs2 <==> b);
   b
 
-let eq_xmms (xmms1 xmms2:xmms_taint) : (b:bool{b <==> (xmms1 == xmms2)})  =
-  let b = xmms1 0 = xmms2 0 &&
-    xmms1 1 = xmms2 1 &&
-    xmms1 2 = xmms2 2 &&
-    xmms1 3 = xmms2 3 &&
-    xmms1 4 = xmms2 4 &&
-    xmms1 5 = xmms2 5 &&
-    xmms1 6 = xmms2 6 &&
-    xmms1 7 = xmms2 7 &&
-    xmms1 8 = xmms2 8 &&
-    xmms1 9 = xmms2 9 &&
-    xmms1 10 = xmms2 10 &&
-    xmms1 11 = xmms2 11 &&
-    xmms1 12 = xmms2 12 &&
-    xmms1 13 = xmms2 13 &&
-    xmms1 14 = xmms2 14 &&
-    xmms1 15 = xmms2 15
-  in
-  assert (FStar.FunctionalExtensionality.feq xmms1 xmms2 <==> b);
-  b
-
 let eq_taintStates (ts1 ts2:analysis_taints) : (b:bool{b <==> ts1 == ts2}) =
-    eq_registers ts1.regTaint ts2.regTaint && ts1.flagsTaint = ts2.flagsTaint && ts1.cfFlagsTaint = ts2.cfFlagsTaint && ts1.ofFlagsTaint = ts2.ofFlagsTaint && eq_xmms ts1.xmmTaint ts2.xmmTaint
+  eq_registers ts1.regTaint ts2.regTaint &&
+  ts1.flagsTaint = ts2.flagsTaint &&
+  ts1.cfFlagsTaint = ts2.cfFlagsTaint &&
+  ts1.ofFlagsTaint = ts2.ofFlagsTaint
 
-let taintstate_monotone (ts ts':analysis_taints) = ( forall r. Public? (ts'.regTaint r) ==> Public? (ts.regTaint r)) /\ (Public? (ts'.flagsTaint) ==> Public? (ts.flagsTaint)) /\
+let taintstate_monotone_regs (ts ts':reg_taint) =
+  (forall (r:reg).{:pattern (ts' r) \/ (ts r)}
+    Public? (ts' r) ==> Public? (ts r))
+
+let taintstate_monotone (ts ts':analysis_taints) =
+  taintstate_monotone_regs ts.regTaint ts'.regTaint /\
+  (Public? (ts'.flagsTaint) ==> Public? (ts.flagsTaint)) /\
   (Public? (ts'.cfFlagsTaint) ==> Public? (ts.cfFlagsTaint)) /\
-  (Public? (ts'.ofFlagsTaint) ==> Public? (ts.ofFlagsTaint)) /\
-  (forall x. Public? (ts'.xmmTaint x) ==> Public? (ts.xmmTaint x))
+  (Public? (ts'.ofFlagsTaint) ==> Public? (ts.ofFlagsTaint))
 
 let taintstate_monotone_trans (ts1:analysis_taints) (ts2:analysis_taints) (ts3:analysis_taints)
-  :Lemma (taintstate_monotone ts1 ts2 /\ taintstate_monotone ts2 ts3 ==> taintstate_monotone ts1 ts3) = ()
+  : Lemma (taintstate_monotone ts1 ts2 /\ taintstate_monotone ts2 ts3 ==> taintstate_monotone ts1 ts3) = ()
 
 let isConstant_monotone (ts1:analysis_taints) (ts2:analysis_taints) (code:S.code) (fuel:nat) (s1:S.machine_state) (s2:S.machine_state)
-  :Lemma (isConstantTimeGivenStates code fuel ts2 s1 s2 /\ taintstate_monotone ts1 ts2 ==> isConstantTimeGivenStates code fuel ts1 s1 s2)
+  : Lemma (isConstantTimeGivenStates code fuel ts2 s1 s2 /\ taintstate_monotone ts1 ts2 ==> isConstantTimeGivenStates code fuel ts1 s1 s2)
   = ()
 
 let isExplicit_monotone (ts:analysis_taints) (ts1:analysis_taints) (ts2:analysis_taints) (code:S.code)
   (fuel:nat) (s1:S.machine_state) (s2:S.machine_state)
-  :Lemma (isExplicitLeakageFreeGivenStates code fuel ts ts1 s1 s2 /\ taintstate_monotone ts1 ts2 ==> isExplicitLeakageFreeGivenStates code fuel ts ts2 s1 s2)
+  : Lemma (isExplicitLeakageFreeGivenStates code fuel ts ts1 s1 s2 /\ taintstate_monotone ts1 ts2 ==> isExplicitLeakageFreeGivenStates code fuel ts ts2 s1 s2)
   = ()
 
 let isExplicit_monotone2 (ts:analysis_taints) (ts1:analysis_taints) (ts2:analysis_taints)
   (code:S.code) (fuel:nat) (s1:S.machine_state) (s2:S.machine_state)
-  :Lemma (isExplicitLeakageFreeGivenStates code fuel ts2 ts s1 s2 /\ taintstate_monotone ts1 ts2 ==> isExplicitLeakageFreeGivenStates code fuel ts1 ts s1 s2)
+  : Lemma (isExplicitLeakageFreeGivenStates code fuel ts2 ts s1 s2 /\ taintstate_monotone ts1 ts2 ==> isExplicitLeakageFreeGivenStates code fuel ts1 ts s1 s2)
   = ()
 
 let combine_taint_states (ts1:analysis_taints) (ts2:analysis_taints) : (ts:analysis_taints{taintstate_monotone ts1 ts /\ taintstate_monotone ts2 ts}) =
-  AnalysisTaints (combine_reg_taints ts1.regTaint ts2.regTaint)
+  AnalysisTaints
+    (combine_reg_taints ts1.regTaint ts2.regTaint)
     (merge_taint ts1.flagsTaint ts2.flagsTaint)
     (merge_taint ts1.cfFlagsTaint ts2.cfFlagsTaint)
     (merge_taint ts1.ofFlagsTaint ts2.ofFlagsTaint)
-    (combine_xmm_taints ts1.xmmTaint ts2.xmmTaint)
 
 let count_public_register (regs:reg_taint) (r:reg) = if Public? (regs r) then 1 else 0
 
-let count_public_registers (regs:reg_taint) : nat =
-  count_public_register regs rRax +
-  count_public_register regs rRbx +
-  count_public_register regs rRcx +
-  count_public_register regs rRdx +
-  count_public_register regs rRsi +
-  count_public_register regs rRdi +
-  count_public_register regs rRbp +
-  count_public_register regs rRsp +
-  count_public_register regs rR8 +
-  count_public_register regs rR9 +
-  count_public_register regs rR10 +
-  count_public_register regs rR11 +
-  count_public_register regs rR12 +
-  count_public_register regs rR13 +
-  count_public_register regs rR14 +
-  count_public_register regs rR15
+let rec count_public_registers_file (regs:reg_taint) (rf:reg_file_id) (k:nat{k <= n_regs rf}) : nat =
+  if k = 0 then 0
+  else count_public_register regs (Reg rf (k - 1)) + count_public_registers_file regs rf (k - 1)
+
+let rec lemma_count_public_registers_file (regs1 regs2:reg_taint) (rf:reg_file_id) (k:nat{k <= n_regs rf}) : Lemma
+  (requires
+    taintstate_monotone_regs regs2 regs1 /\
+    count_public_registers_file regs1 rf k >= count_public_registers_file regs2 rf k
+  )
+  (ensures
+    count_public_registers_file regs1 rf k == count_public_registers_file regs2 rf k /\
+    (forall (i:nat).{:pattern regs1 (Reg rf i) \/ regs2 (Reg rf i)} i < k ==> regs1 (Reg rf i) == regs2 (Reg rf i))
+  )
+  =
+  if k > 0 then lemma_count_public_registers_file regs1 regs2 rf (k - 1)
+
+let rec count_public_registers (regs:reg_taint) (k:nat{k <= n_reg_files}) : nat =
+  if k = 0 then 0
+  else count_public_registers_file regs (k - 1) (n_regs (k - 1)) + count_public_registers regs (k - 1)
+
+let rec lemma_count_public_registers (regs1 regs2:reg_taint) (k:nat{k <= n_reg_files}) : Lemma
+  (requires
+    taintstate_monotone_regs regs2 regs1 /\
+    count_public_registers regs1 k >= count_public_registers regs2 k
+  )
+  (ensures
+    count_public_registers regs1 k == count_public_registers regs2 k /\
+    (forall (r:reg).{:pattern regs1 r \/ regs2 r} Reg?.rf r < k ==> regs1 r == regs2 r)
+  )
+  =
+  if k > 0 then (
+    let n = n_regs (k - 1) in
+    if count_public_registers_file regs1 (k - 1) n >= count_public_registers_file regs2 (k - 1) n then
+      lemma_count_public_registers_file regs1 regs2 (k - 1) n;
+    lemma_count_public_registers regs1 regs2 (k - 1)
+  )
 
 let count_flagTaint (ts:analysis_taints) : nat = if Public? ts.flagsTaint then 1 else 0
 
@@ -125,55 +142,38 @@ let count_cfFlagTaint (ts:analysis_taints) : nat = if Public? ts.cfFlagsTaint th
 
 let count_ofFlagTaint (ts:analysis_taints) : nat = if Public? ts.ofFlagsTaint then 1 else 0
 
-let count_public_xmm (xmms:xmms_taint) (x:xmm) : nat = if Public? (xmms x) then 1 else 0
-
-let count_public_xmms (xmms:xmms_taint) : nat =
-  count_public_xmm xmms 0 +
-  count_public_xmm xmms 1 +
-  count_public_xmm xmms 2 +
-  count_public_xmm xmms 3 +
-  count_public_xmm xmms 4 +
-  count_public_xmm xmms 5 +
-  count_public_xmm xmms 6 +
-  count_public_xmm xmms 7 +
-  count_public_xmm xmms 8 +
-  count_public_xmm xmms 9 +
-  count_public_xmm xmms 10 +
-  count_public_xmm xmms 11 +
-  count_public_xmm xmms 12 +
-  count_public_xmm xmms 13 +
-  count_public_xmm xmms 14 +
-  count_public_xmm xmms 15
-
 let count_publics (ts:analysis_taints) : nat =
-  count_public_registers ts.regTaint +
+  count_public_registers ts.regTaint n_reg_files +
   count_flagTaint ts +
   count_cfFlagTaint ts +
-  count_ofFlagTaint ts +
-  count_public_xmms ts.xmmTaint
+  count_ofFlagTaint ts
 
 #set-options "--z3rlimit 50"
 
-#push-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 1 --initial_ifuel 1"
+#push-options "--z3rlimit 500 --max_fuel 0 --max_ifuel 1 --initial_ifuel 1"
 let monotone_decreases_count (ts ts':analysis_taints) : Lemma
   (requires taintstate_monotone ts ts' /\ not (eq_taintStates ts ts'))
   (ensures count_publics ts' < count_publics ts)
   =
-  assert (forall r. count_public_register ts'.regTaint r <= count_public_register ts.regTaint r);
-  assert (forall r. count_public_xmm ts'.xmmTaint r <= count_public_xmm ts.xmmTaint r);
+  let regs1 = ts'.regTaint in
+  let regs2 = ts.regTaint in
+  if count_public_registers regs1 n_reg_files >= count_public_registers regs2 n_reg_files then
+    lemma_count_public_registers regs1 regs2 n_reg_files;
   assert (count_cfFlagTaint ts' <= count_cfFlagTaint ts);
   assert (count_ofFlagTaint ts' <= count_ofFlagTaint ts);
   assert (count_flagTaint ts' <= count_flagTaint ts)
 
 #pop-options
 
-val check_if_block_consumes_fixed_time: (block:S.codes) -> (ts:analysis_taints) -> Tot (bool * analysis_taints)
-(decreases %[block])
-val check_if_code_consumes_fixed_time: (code:S.code) -> (ts:analysis_taints) -> Tot (bool * analysis_taints) (decreases %[code; count_publics ts; 1])
-val check_if_loop_consumes_fixed_time: (code:S.code{While? code}) -> (ts:analysis_taints) -> Tot (bool * analysis_taints) (decreases %[code; count_publics ts; 0])
+val check_if_block_consumes_fixed_time (block:S.codes) (ts:analysis_taints) : Tot (bool & analysis_taints)
+  (decreases %[block])
+val check_if_code_consumes_fixed_time (code:S.code) (ts:analysis_taints) : Tot (bool & analysis_taints)
+  (decreases %[code; count_publics ts; 1])
+val check_if_loop_consumes_fixed_time (code:S.code{While? code}) (ts:analysis_taints) : Tot (bool & analysis_taints)
+  (decreases %[code; count_publics ts; 0])
 
 #set-options "--z3refresh --z3rlimit 600"
-let rec check_if_block_consumes_fixed_time (block:S.codes) (ts:analysis_taints) : bool * analysis_taints =
+let rec check_if_block_consumes_fixed_time (block:S.codes) (ts:analysis_taints) : bool & analysis_taints =
   match block with
   | [] -> true, ts
   | hd::tl -> let fixedTime, ts_int = check_if_code_consumes_fixed_time hd ts in
@@ -181,7 +181,7 @@ let rec check_if_block_consumes_fixed_time (block:S.codes) (ts:analysis_taints) 
     else check_if_block_consumes_fixed_time tl ts_int
 
 
-and check_if_code_consumes_fixed_time (code:S.code) (ts:analysis_taints) : bool * analysis_taints =
+and check_if_code_consumes_fixed_time (code:S.code) (ts:analysis_taints) : bool & analysis_taints =
   match code with
   | Ins ins -> check_if_ins_consumes_fixed_time ins ts
 
@@ -209,7 +209,7 @@ and check_if_code_consumes_fixed_time (code:S.code) (ts:analysis_taints) : bool 
 
   | While cond body -> check_if_loop_consumes_fixed_time code ts
 
-and check_if_loop_consumes_fixed_time c (ts:analysis_taints) : (bool * analysis_taints) =
+and check_if_loop_consumes_fixed_time c (ts:analysis_taints) : (bool & analysis_taints) =
   let While pred body = c in
   let o1 = operand_taint (S.get_fst_ocmp pred) ts in
   let o2 = operand_taint (S.get_snd_ocmp pred) ts in
@@ -436,29 +436,27 @@ let check_if_code_is_leakage_free' code ts tsExpected =
 let check_if_code_is_leakage_free code ts public_return =
   let b, ts' = check_if_code_consumes_fixed_time code ts in
   if public_return then
-    b && Public? (ts'.regTaint rRax)
+    b && Public? (ts'.regTaint reg_Rax)
   else b
 
 // Only the args should be public
 let mk_analysis_taints win nbr_args : analysis_taints =
-  let regTaint =
-  if win then
-  match nbr_args with
-  | 0 -> fun r -> Secret
-  | 1 -> fun r -> if r = rRcx then Public else Secret
-  | 2 -> fun r -> if r = rRcx || r = rRdx then Public else Secret
-  | 3 -> fun r -> if r = rRcx || r = rRdx || r = rR8 then Public else Secret  
-  | _ -> fun r -> if r = rRcx || r = rRdx || r = rR8 || r = rR9 then Public else Secret
-  else
-  match nbr_args with
-  | 0 -> fun r -> Secret
-  | 1 -> fun r -> if r = rRdi then Public else Secret
-  | 2 -> fun r -> if r = rRdi || r = rRsi then Public else Secret
-  | 3 -> fun r -> if r = rRdi || r = rRsi || r = rRdx then Public else Secret  
-  | 4 -> fun r -> if r = rRdi || r = rRsi || r = rRdx || r = rRcx then Public else Secret
-  | 5 -> fun r -> if r = rRdi || r = rRsi || r = rRdx || r = rRcx || r = rR8 then Public else Secret
-  | _ -> fun r -> if r = rRdi || r = rRsi || r = rRdx || r = rRcx || r = rR8 || r = rR9 then Public else Secret
-  in AnalysisTaints
-    (FunctionalExtensionality.on reg (fun r -> if r = rRsp then Public else regTaint r))
-    Secret Secret Secret
-    (FunctionalExtensionality.on xmm (fun _ -> Secret))
+  let regTaint r =
+    if win then
+      if r = reg_Rsp then Public else
+      if r = reg_Rcx && nbr_args >= 1 then Public else
+      if r = reg_Rdx && nbr_args >= 2 then Public else
+      if r = reg_R8  && nbr_args >= 3 then Public else
+      if r = reg_R9  && nbr_args >= 4 then Public else
+      Secret
+    else
+      if r = reg_Rsp then Public else
+      if r = reg_Rdi && nbr_args >= 1 then Public else
+      if r = reg_Rsi && nbr_args >= 2 then Public else
+      if r = reg_Rdx && nbr_args >= 3 then Public else
+      if r = reg_Rcx && nbr_args >= 4 then Public else
+      if r = reg_R8  && nbr_args >= 5 then Public else
+      if r = reg_R9  && nbr_args >= 6 then Public else
+      Secret
+    in
+  AnalysisTaints (FunctionalExtensionality.on reg regTaint) Secret Secret Secret

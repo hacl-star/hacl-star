@@ -112,7 +112,6 @@ let normal (#a:Type) (x:a) : a =
      delta_only [`%TD_Buffer?;
                  `%BS.Mkmachine_state?.ms_ok;
                  `%BS.Mkmachine_state?.ms_regs;
-                 `%BS.Mkmachine_state?.ms_xmms;
                  `%BS.Mkmachine_state?.ms_flags;
                  `%BS.Mkmachine_state?.ms_mem;
                  `%BS.Mkmachine_state?.ms_memTaint;

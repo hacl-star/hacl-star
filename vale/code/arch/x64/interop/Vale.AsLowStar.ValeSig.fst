@@ -32,22 +32,22 @@ let vale_post (dom:list td) =
     code:V.va_code ->
     vale_post_tl dom
 
-let vale_save_reg (r:MS.reg) (s0 s1:V.va_state) =
-  VS.eval_reg r s0 == VS.eval_reg r s1
+let vale_save_reg (r:MS.reg_64) (s0 s1:V.va_state) =
+  VS.eval_reg_64 r s0 == VS.eval_reg_64 r s1
 
-let vale_save_xmm (r:MS.xmm) (s0 s1:V.va_state) =
-  VS.eval_xmm r s0 == VS.eval_xmm r s1
+let vale_save_xmm (r:MS.reg_xmm) (s0 s1:V.va_state) =
+  VS.eval_reg_xmm r s0 == VS.eval_reg_xmm r s1
 
 let vale_calling_conventions
   (s0 s1:V.va_state)
-  (regs_modified:MS.reg -> bool)
-  (xmms_modified:MS.xmm -> bool) =
+  (regs_modified:MS.reg_64 -> bool)
+  (xmms_modified:MS.reg_xmm -> bool) =
   let open MS in
   s1.VS.vs_ok /\
   vale_save_reg MS.rRsp s0 s1 /\
-  (forall (r:MS.reg).
+  (forall (r:MS.reg_64).
     not (regs_modified r) ==> vale_save_reg r s0 s1) /\
-  (forall (x:MS.xmm).
+  (forall (x:MS.reg_xmm).
     not (xmms_modified x) ==> vale_save_xmm x s0 s1)
 
 [@__reduce__]
@@ -110,8 +110,8 @@ let disjoint_or_eq (l:list arg) =
 
 [@__reduce__] unfold
 let vale_sig_nil
-                 (regs_modified:MS.reg -> bool)
-                 (xmms_modified:MS.xmm -> bool)
+                 (regs_modified:MS.reg_64 -> bool)
+                 (xmms_modified:MS.reg_xmm -> bool)
                  (args:list arg)
                  (code:V.va_code)
                  (pre:vale_pre_tl [])
@@ -130,8 +130,8 @@ let vale_sig_nil
        ME.modifies (mloc_modified_args args) va_s0.VS.vs_mem va_s1.VS.vs_mem))
 
 [@__reduce__]
-let rec vale_sig_tl (regs_modified:MS.reg -> bool)
-                    (xmms_modified:MS.xmm -> bool)
+let rec vale_sig_tl (regs_modified:MS.reg_64 -> bool)
+                    (xmms_modified:MS.reg_xmm -> bool)
                     (#dom:list td)
                     (args:list arg)
                     (code:V.va_code)
@@ -148,8 +148,8 @@ let rec vale_sig_tl (regs_modified:MS.reg -> bool)
 
 [@__reduce__]
 let elim_vale_sig_nil  #code
-                       (#regs_modified:MS.reg -> bool)
-                       (#xmms_modified:MS.xmm -> bool)
+                       (#regs_modified:MS.reg_64 -> bool)
+                       (#xmms_modified:MS.reg_xmm -> bool)
                        (#args:list arg)
                        (#pre:vale_pre_tl [])
                        (#post:vale_post_tl [])
@@ -159,8 +159,8 @@ let elim_vale_sig_nil  #code
 
 [@__reduce__]
 let elim_vale_sig_cons #code
-                       (#regs_modified:MS.reg -> bool)
-                       (#xmms_modified:MS.xmm -> bool)
+                       (#regs_modified:MS.reg_64 -> bool)
+                       (#xmms_modified:MS.reg_xmm -> bool)
                        (hd:td)
                        (tl:list td)
                        (args:list arg)
@@ -173,8 +173,8 @@ let elim_vale_sig_cons #code
 
 [@__reduce__]
 let vale_sig (#dom:list td)
-             (regs_modified:MS.reg -> bool)
-             (xmms_modified:MS.xmm -> bool)
+             (regs_modified:MS.reg_64 -> bool)
+             (xmms_modified:MS.reg_xmm -> bool)
              (pre:vale_pre dom)
              (post:vale_post dom)
   : Type =

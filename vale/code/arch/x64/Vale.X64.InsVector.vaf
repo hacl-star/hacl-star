@@ -200,7 +200,7 @@ procedure VPalignr8(out dst:xmm, in src1:xmm, in src2:xmm)
 {
 }
 
-procedure Shufpd(inout dst:xmm, in src:xmm, inline permutation:imm8)
+procedure Shufpd(inout dst:xmm, in src:xmm, inline permutation:nat8)
     {:public}
     {:quick exportOnly}
     {:instruction mk_ins(make_instr(I.ins_Shufpd(permutation), OReg(dst), OReg(src)))}
@@ -215,7 +215,7 @@ procedure Shufpd(inout dst:xmm, in src:xmm, inline permutation:imm8)
 {
 }
 
-procedure VShufpd(out dst:xmm, in src1:xmm, in src2:xmm, inline permutation:imm8)
+procedure VShufpd(out dst:xmm, in src1:xmm, in src2:xmm, inline permutation:nat8)
     {:public}
     {:quick exportOnly}
     {:instruction mk_ins(make_instr(I.ins_VShufpd(permutation), OReg(dst), OReg(src1), OReg(src2)))}
@@ -329,7 +329,7 @@ procedure Pshufb(inout dst:xmm, in src:xmm)
 }
 */
 
-procedure Pshufd(inout dst:xmm, in src:xmm, inline permutation:imm8)
+procedure Pshufd(inout dst:xmm, in src:xmm, inline permutation:nat8)
     {:public}
     {:quick exportOnly}
     {:instruction mk_ins(make_instr(I.ins_Pshufd(permutation), OReg(dst), OReg(src)))}
@@ -355,7 +355,7 @@ procedure Pcmpeqd(inout dst:xmm, in src:xmm)
 {
 }
 
-procedure Pextrq(out dst:dst_opr64, in src:xmm, inline index:imm8)
+procedure Pextrq(out dst:dst_opr64, in src:xmm, inline index:nat8)
     {:public}
     {:quick exportOnly}
     {:instruction mk_ins(make_instr(I.ins_Pextrq(index), dst, OReg(src)))}
@@ -368,7 +368,7 @@ procedure Pextrq(out dst:dst_opr64, in src:xmm, inline index:imm8)
     Vale.Def.Opaque_s.reveal_opaque(hi64_def);
 }
 
-procedure Pinsrd(inout dst:xmm, in src:opr64, inline index:imm8)
+procedure Pinsrd(inout dst:xmm, in src:opr64, inline index:nat8)
     {:public}
     {:quick exportOnly}
     {:instruction mk_ins(make_instr(I.ins_Pinsrd(index), OReg(dst), src))}
@@ -380,7 +380,7 @@ procedure Pinsrd(inout dst:xmm, in src:opr64, inline index:imm8)
 {
 }
 
-procedure PinsrdImm(inout dst:xmm, inline immediate:nat32, inline index:imm8, out tmp:reg_opr64)
+procedure PinsrdImm(inout dst:xmm, inline immediate:nat32, inline index:nat8, out tmp:reg_opr64)
     {:public}
     {:quick exportOnly}
     requires
@@ -395,7 +395,7 @@ procedure PinsrdImm(inout dst:xmm, inline immediate:nat32, inline index:imm8, ou
 
 // TODO: get rid of this fuel
 #reset-options "--initial_fuel 2 --max_fuel 4 --max_ifuel 3 --z3rlimit 50"
-procedure Pinsrq(inout dst:xmm, in src:opr64, inline index:imm8)
+procedure Pinsrq(inout dst:xmm, in src:opr64, inline index:nat8)
     {:public}
     {:quick exportOnly}
     {:instruction mk_ins(make_instr(I.ins_Pinsrq(index), OReg(dst), src))}
@@ -408,7 +408,7 @@ procedure Pinsrq(inout dst:xmm, in src:opr64, inline index:imm8)
     assert dst == insert_nat64(old(dst), src, #nat1(index));
 }
 
-procedure PinsrqImm(inout dst:xmm, inline immediate:nat64, inline index:imm8, out tmp:reg_opr64)
+procedure PinsrqImm(inout dst:xmm, inline immediate:nat64, inline index:nat8, out tmp:reg_opr64)
     {:public}
     {:quick exportOnly}
     requires

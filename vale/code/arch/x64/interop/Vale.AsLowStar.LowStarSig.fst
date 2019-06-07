@@ -147,7 +147,7 @@ let rec register_args (max_arity:nat)
       fun s ->
          register_args max_arity arg_reg (n - 1) tl s /\
         (if n > max_arity then True // This arg is passed on the stack
-         else VS.eval_reg (arg_reg.IX64.of_arg (n - 1)) s == arg_as_nat64 hd s)
+         else VS.eval_reg_64 (arg_reg.IX64.of_arg (n - 1)) s == arg_as_nat64 hd s)
 
 [@__reduce__]
 let rec stack_args (max_arity:nat)
@@ -164,7 +164,7 @@ let rec stack_args (max_arity:nat)
            let ptr = ((n - max_arity) - 1) * 8
              + (if IA.win then 32 else 0)
              + 8
-             + VS.eval_reg MS.rRsp s
+             + VS.eval_reg_64 MS.rRsp s
            in
            SI.valid_stack_slot64 ptr s.VS.vs_stack MS.Public s.VS.vs_stackTaint /\
            SI.load_stack64 ptr s.VS.vs_stack == arg_as_nat64 hd s)
@@ -215,7 +215,7 @@ let vale_pre_hyp
       VSig.readable args VS.(s0.vs_mem) /\
       register_args max_arity arg_reg (List.length args) args s0 /\
       stack_args max_arity (List.length args) args s0 /\
-      VS.eval_reg MS.rRsp s0 == SI.init_rsp s0.VS.vs_stack /\
+      VS.eval_reg_64 MS.rRsp s0 == SI.init_rsp s0.VS.vs_stack /\
       taint_hyp args s0
 
 [@__reduce__]
@@ -248,7 +248,7 @@ let to_low_post
     (f:va_fuel).
        mem_correspondence args hs_mem0 s0 /\
        mem_correspondence args hs_mem1 s1 /\
-       UInt64.v res == VS.eval_reg MS.rRax s1 /\
+       UInt64.v res == VS.eval_reg_64 MS.rRax s1 /\
        elim_nil post s0 s1 f)
 
 [@__reduce__]
@@ -262,7 +262,6 @@ let create_initial_vale_state
     let open VS in
     { vs_ok = true;
       vs_regs = Vale.X64.Regs.of_fun t_state.BS.ms_regs;
-      vs_xmms = Vale.X64.Xmms.of_fun t_state.BS.ms_xmms;
       vs_flags = IA.init_flags;
       vs_mem = as_vale_mem mem;
       vs_memTaint = t_state.BS.ms_memTaint;

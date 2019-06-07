@@ -69,7 +69,7 @@ let fmul_post : VSig.vale_post fmul_dom =
     (f:V.va_fuel) ->
       FW.va_ens_fmul c va_s0 (as_vale_buffer tmp) (as_vale_buffer f1) (as_vale_buffer out) (as_vale_buffer f2) va_s1 f
 
-let fmul_regs_modified: MS.reg -> bool = fun (r:MS.reg) ->
+let fmul_regs_modified: MS.reg_64 -> bool = fun (r:MS.reg_64) ->
   let open MS in
   if r = rRax || r = rRcx || r = rRdx || r = rRdi || r = rRsi || r = rR8 || r = rR9 || r = rR10 || r = rR11 || r = rR12 || r = rR13 || r = rR14 || r = rR15 then true
   else false
@@ -117,14 +117,14 @@ let fmul_lemma'
 let fmul_lemma = as_t #(VSig.vale_sig fmul_regs_modified fmul_xmms_modified fmul_pre fmul_post) fmul_lemma'
 let code_fmul = FW.va_code_fmul ()
 
-let fmul_of_reg (r:MS.reg) : option (IX64.reg_nat 4) = match r with
+let fmul_of_reg (r:MS.reg_64) : option (IX64.reg_nat 4) = match r with
   | 5 -> Some 0 // rdi
   | 4 -> Some 1 // rsi
   | 3 -> Some 2 // rdx
   | 2 -> Some 3 // rcx
   | _ -> None
 
-let fmul_of_arg (i:IX64.reg_nat 4) : MS.reg = match i with
+let fmul_of_arg (i:IX64.reg_nat 4) : MS.reg_64 = match i with
   | 0 -> MS.rRdi
   | 1 -> MS.rRsi
   | 2 -> MS.rRdx
@@ -331,7 +331,7 @@ let fmul1_post : VSig.vale_post fmul1_dom =
 
 #set-options "--z3rlimit 200"
 
-let fmul1_regs_modified: MS.reg -> bool = fun (r:MS.reg) ->
+let fmul1_regs_modified: MS.reg_64 -> bool = fun (r:MS.reg_64) ->
   let open MS in
   if r = rRax || r = rRcx || r = rRdx || r = rR8 || r = rR9 || r = rR10 || r = rR11 || r = rR12 || r = rR13 then true
   else false
@@ -370,7 +370,7 @@ let fmul1_lemma = as_t #(VSig.vale_sig fmul1_regs_modified fmul1_xmms_modified f
 
 let code_fmul1 = FH.va_code_fmul1 ()
 
-let of_reg (r:MS.reg) : option (IX64.reg_nat 3) = match r with
+let of_reg (r:MS.reg_64) : option (IX64.reg_nat 3) = match r with
   | 5 -> Some 0 // rdi
   | 4 -> Some 1 // rsi
   | 3 -> Some 2 // rdx

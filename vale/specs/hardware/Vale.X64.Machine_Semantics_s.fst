@@ -11,7 +11,6 @@ open Vale.Def.Types_s
 open Vale.X64.Instruction_s
 open Vale.X64.Instructions_s
 open FStar.Seq.Base
-module F = FStar.FunctionalExtensionality
 module BC = Vale.X64.Bytes_Code_s
 
 type uint64:eqtype = UInt64.t
@@ -42,14 +41,12 @@ type stack =
     stack_mem:Map.t int nat8 ->                // Stack contents
     stack
 
-type regs_t = F.restricted_t reg (fun _ -> nat64)
-type xmms_t = F.restricted_t xmm (fun _ -> quad32)
+type regs_t = FStar.FunctionalExtensionality.restricted_t reg t_reg
 
 noeq
 type machine_state = {
   ms_ok: bool;
   ms_regs: regs_t;
-  ms_xmms: xmms_t;
   ms_flags: nat64;
   ms_mem: heap;
   ms_memTaint: memTaint_t;
@@ -66,10 +63,13 @@ let get_snd_ocmp (o:ocmp) = match o with
 
 assume val havoc_any (#a:Type) (x:a) : nat64
 let havoc_state_ins (s:machine_state) (i:ins) : nat64 =
-  havoc_any (s.ms_regs, s.ms_xmms, s.ms_flags, s.ms_mem, s.ms_stack, ins)
+  havoc_any (s.ms_regs, s.ms_flags, s.ms_mem, s.ms_stack, ins)
 
-unfold let eval_reg (r:reg) (s:machine_state) : nat64 = s.ms_regs r
-unfold let eval_xmm (i:xmm) (s:machine_state) : quad32 = s.ms_xmms i
+unfold let eval_reg (r:reg) (s:machine_state) : t_reg r = s.ms_regs r
+unfold let eval_reg_64 (r:reg_64) (s:machine_state) : nat64 = eval_reg (Reg 0 r) s
+unfold let eval_reg_xmm (r:reg_xmm) (s:machine_state) : quad32 = eval_reg (Reg 1 r) s
+
+unfold let eval_reg_int (r:reg) (s:machine_state) : int = t_reg_to_int r.rf (eval_reg r s)
 
 let get_heap_val64_def (ptr:int) (mem:heap) : nat64 =
   two_to_nat 32
@@ -111,20 +111,20 @@ let eval_maddr (m:maddr) (s:machine_state) : int =
   let open FStar.Mul in
     match m with
     | MConst n -> n
-    | MReg reg offset -> (eval_reg reg s) + offset
-    | MIndex base scale index offset -> (eval_reg base s) + scale * (eval_reg index s) + offset
+    | MReg r offset -> (eval_reg_int r s) + offset
+    | MIndex base scale index offset -> (eval_reg_int base s) + scale * (eval_reg_int index s) + offset
 
 let eval_operand (o:operand64) (s:machine_state) : nat64 =
   match o with
   | OConst n -> n
-  | OReg r -> eval_reg r s
+  | OReg r -> eval_reg_64 r s
   | OMem (m, _) -> eval_mem (eval_maddr m s) s
   | OStack (m, _) -> eval_stack (eval_maddr m s) s.ms_stack
 
 let eval_mov128_op (o:operand128) (s:machine_state) : quad32 =
   match o with
   | OConst c -> c
-  | OReg i -> eval_xmm i s
+  | OReg i -> eval_reg_xmm i s
   | OMem (m, _) -> eval_mem128 (eval_maddr m s) s
   | OStack (m, _) -> eval_stack128 (eval_maddr m s) s.ms_stack
 
@@ -137,11 +137,14 @@ let eval_ocmp (s:machine_state) (c:ocmp) :bool =
   | BC.OLt o1 o2 -> eval_operand o1 s < eval_operand o2 s
   | BC.OGt o1 o2 -> eval_operand o1 s > eval_operand o2 s
 
-let update_reg' (r:reg) (v:nat64) (s:machine_state) : machine_state =
-  { s with ms_regs = F.on_dom reg (fun r' -> if r' = r then v else s.ms_regs r') }
+let update_reg' (r:reg) (v:t_reg r) (s:machine_state) : machine_state =
+  {s with ms_regs = FStar.FunctionalExtensionality.on_dom reg (fun r' -> if r' = r then v else s.ms_regs r')}
 
-let update_xmm' (x:xmm) (v:quad32) (s:machine_state) : machine_state =
-  { s with ms_xmms = F.on_dom xmm (fun x' -> if x' = x then v else s.ms_xmms x') }
+let update_reg_64' (r:reg_64) (v:nat64) (s:machine_state) : machine_state =
+  update_reg' (Reg 0 r) v s
+
+let update_reg_xmm' (r:reg_xmm) (v:quad32) (s:machine_state) : machine_state =
+  update_reg' (Reg 1 r) v s
 
 val mod_8: (n:nat{n < pow2_64}) -> nat8
 let mod_8 n = n % 0x100
@@ -347,19 +350,19 @@ let valid_dst_operand64 (o:operand64) (s:machine_state) : bool =
   | OConst n -> false
   | OReg r -> not (rRsp = r)
   | OMem (m, _) -> valid_addr64 (eval_maddr m s) s.ms_mem
-  | OStack (m, _) -> valid_dst_stack64 (eval_reg rRsp s) (eval_maddr m s) s.ms_stack
+  | OStack (m, _) -> valid_dst_stack64 (eval_reg_64 rRsp s) (eval_maddr m s) s.ms_stack
 
 let valid_dst_operand128 (o:operand128) (s:machine_state) : bool =
   match o with
   | OConst _ -> false
   | OReg i -> true // We leave it to the printer/assembler to object to invalid XMM indices
   | OMem (m, _) -> valid_addr128 (eval_maddr m s) s.ms_mem
-  | OStack (m, _) -> valid_dst_stack128 (eval_reg rRsp s) (eval_maddr m s) s.ms_stack
+  | OStack (m, _) -> valid_dst_stack128 (eval_reg_64 rRsp s) (eval_maddr m s) s.ms_stack
 
 let update_operand64_preserve_flags'' (o:operand64) (v:nat64) (s_orig s:machine_state) : machine_state =
   match o with
   | OConst _ -> {s with ms_ok = false}
-  | OReg r -> update_reg' r v s
+  | OReg r -> update_reg_64' r v s
   | OMem (m, t) -> update_mem_and_taint (eval_maddr m s_orig) v s t // see valid_maddr for how eval_maddr connects to b and i
   | OStack (m, t) -> update_stack_and_taint (eval_maddr m s_orig) v s t
 
@@ -369,7 +372,7 @@ let update_operand64_preserve_flags' (o:operand64) (v:nat64) (s:machine_state) :
 let update_operand128_preserve_flags'' (o:operand128) (v:quad32) (s_orig s:machine_state) : machine_state =
   match o with
   | OConst _ -> {s with ms_ok = false}
-  | OReg i -> update_xmm' i v s
+  | OReg i -> update_reg_xmm' i v s
   | OMem (m, t) -> update_mem128_and_taint (eval_maddr m s_orig) v s t
   | OStack (m, t) -> update_stack128_and_taint (eval_maddr m s_orig) v s t
 
@@ -384,7 +387,7 @@ let update_rsp' (new_rsp:int) (s:machine_state) : machine_state =
   let Vale_stack init_rsp mem = s.ms_stack in
   // Only modify the stack pointer if the new value is valid, that is in the current stack frame, and in the same page
   if new_rsp >= init_rsp - 4096 && new_rsp <= init_rsp then
-    update_reg' rRsp new_rsp s
+    update_reg_64' rRsp new_rsp s
   else
     s
 
@@ -499,17 +502,17 @@ let update_rsp (i:int) : st unit =
  s <-- get;
  set (update_rsp' i s)
 
-let update_reg (r:reg) (v:nat64) : st unit =
+let update_reg_64 (r:reg_64) (v:nat64) : st unit =
   s <-- get;
-  set (update_reg' r v s)
+  set (update_reg_64' r v s)
 
-let update_xmm (x:xmm)  (ins:ins) (v:quad32) : st unit =
+let update_reg_xmm (x:reg_xmm)  (ins:ins) (v:quad32) : st unit =
   s <-- get;
-  set (  { (update_xmm' x v s) with ms_flags = havoc_state_ins s ins } )
+  set (  { (update_reg_xmm' x v s) with ms_flags = havoc_state_ins s ins } )
 
-let update_xmm_preserve_flags (x:xmm) (v:quad32) : st unit =
+let update_xmm_preserve_flags (x:reg_xmm) (v:quad32) : st unit =
   s <-- get;
-  set ( update_xmm' x v s )
+  set ( update_reg_xmm' x v s )
 
 let update_flags (new_flags:nat64) : st unit =
   s <-- get;
@@ -750,26 +753,26 @@ let machine_eval_ins_st (ins:ins) : st unit =
   | BC.Push src t ->
     check (valid_src_operand64_and_taint src);;
     let new_src = eval_operand src s in            // Evaluate value on initial state
-    let new_rsp = eval_reg rRsp s - 8 in           // Compute the new stack pointer
+    let new_rsp = eval_reg_64 rRsp s - 8 in           // Compute the new stack pointer
     update_rsp new_rsp;;                           // Actually modify the stack pointer
     let o_new = OStack (MConst new_rsp, t) in
     update_operand64_preserve_flags o_new new_src  // Store the element at the new stack pointer
 
   | BC.Pop dst t ->
-    let stack_op = OStack (MReg rRsp 0, t) in
+    let stack_op = OStack (MReg (Reg 0 rRsp) 0, t) in
     check (valid_src_operand64_and_taint stack_op);;  // Ensure that we can read at the initial stack pointer
     let new_dst = eval_operand stack_op s in          // Get the element currently on top of the stack
-    let new_rsp = (eval_reg rRsp s + 8) % pow2_64 in  // Compute the new stack pointer
+    let new_rsp = (eval_reg_64 rRsp s + 8) % pow2_64 in  // Compute the new stack pointer
     update_operand64_preserve_flags dst new_dst;;     // Store it in the dst operand
     free_stack (new_rsp - 8) new_rsp;;                // Free the memory that is popped
     update_rsp new_rsp                                // Finally, update the stack pointer
 
   | BC.Alloc n ->
     // We already check in update_rsp that the new stack pointer is valid
-    update_rsp (eval_reg rRsp s - n)
+    update_rsp (eval_reg_64 rRsp s - n)
 
   | BC.Dealloc n ->
-    let old_rsp = eval_reg rRsp s in
+    let old_rsp = eval_reg_64 rRsp s in
     let new_rsp = old_rsp + n in
     update_rsp new_rsp;;
     // The deallocated stack memory should now be considered invalid

@@ -499,11 +499,11 @@ let check_if_instr_consumes_fixed_time (ins:S.ins) (ts:analysis_taints) : Pure (
   let BC.Instr (InstrTypeRecord #outs #args #havoc_flags iins) oprs _ = ins in
   let t = inouts_taint outs args oprs ts in
   let b = check_if_consumes_fixed_time_outs outs args oprs ts t in
-  let AnalysisTaints rs flags cf ovf xmms = ts in
+  let AnalysisTaints rs flags cf ovf = ts in
   let flags = match havoc_flags with | HavocFlags -> Secret | PreserveFlags -> flags in
   let cf = match havoc_flags with | HavocFlags -> Secret | PreserveFlags -> cf in
   let ovf = match havoc_flags with | HavocFlags -> Secret | PreserveFlags -> ovf in
-  let ts = AnalysisTaints rs flags cf ovf xmms in
+  let ts = AnalysisTaints rs flags cf ovf in
   (b, instr_set_taints outs args oprs ts t)
 
 let coerce_to_normal (#a:Type0) (x:a) : y:(normal a){x == y} = x
@@ -519,8 +519,8 @@ let check_if_xor_consumes_fixed_time (ins:S.ins) (ts:analysis_taints) : Pure (bo
   if o1 = o2 then
     let t = Public in
     let b = check_if_consumes_fixed_time_outs outs args oprs ts t in
-    let AnalysisTaints rs _ _ _ xmms = ts in
-    let ts = AnalysisTaints rs Secret Public Public xmms in
+    let AnalysisTaints rs _ _ _ = ts in
+    let ts = AnalysisTaints rs Secret Public Public in
     (b, instr_set_taints outs args oprs ts t)
   else
     check_if_instr_consumes_fixed_time ins ts
@@ -545,7 +545,7 @@ let check_if_push_consumes_fixed_time (ins:S.ins) (ts:analysis_taints) : Pure (b
   =
   let BC.Push src t_stk = ins in
   let t_out = operand_taint src ts in
-  (Public? (ts.regTaint rRsp) && operand_does_not_use_secrets src ts && (t_out = Public || t_stk = Secret), ts)
+  (Public? (ts.regTaint reg_Rsp) && operand_does_not_use_secrets src ts && (t_out = Public || t_stk = Secret), ts)
 
 let check_if_pop_consumes_fixed_time (ins:S.ins) (ts:analysis_taints) : Pure (bool & analysis_taints)
   (requires BC.Pop? ins)
@@ -553,7 +553,7 @@ let check_if_pop_consumes_fixed_time (ins:S.ins) (ts:analysis_taints) : Pure (bo
   =
   let BC.Pop dst t_stk = ins in
   let allowed = operand_taint_allowed dst t_stk in
-  (Public? (ts.regTaint rRsp) && operand_does_not_use_secrets dst ts && allowed, set_taint dst ts t_stk)
+  (Public? (ts.regTaint reg_Rsp) && operand_does_not_use_secrets dst ts && allowed, set_taint dst ts t_stk)
 
 let check_if_ins_consumes_fixed_time ins ts =
   match ins with
@@ -597,11 +597,11 @@ let lemma_instr_leakage_free (ts:analysis_taints) (ins:S.ins) : Lemma
         | HavocFlags -> {s2 with S.ms_flags = S.havoc_state_ins s2 ins}
         | PreserveFlags -> s2
         in
-      let AnalysisTaints rs flags cf ovf xmms = ts in
+      let AnalysisTaints rs flags cf ovf = ts in
       let flags = match havoc_flags with | HavocFlags -> Secret | PreserveFlags -> flags in
       let cf = match havoc_flags with | HavocFlags -> Secret | PreserveFlags -> cf in
       let ovf = match havoc_flags with | HavocFlags -> Secret | PreserveFlags -> ovf in
-      let ts_havoc = AnalysisTaints rs flags cf ovf xmms in
+      let ts_havoc = AnalysisTaints rs flags cf ovf in
 
       if t_out = Secret then
       (
@@ -678,8 +678,8 @@ let lemma_push_leakage_free (ts:analysis_taints) (ins:S.ins) : Lemma
       let S.Vale_stack _ stack2 = s2.S.ms_stack in
       let S.Vale_stack _ stack1' = s1'.S.ms_stack in
       let S.Vale_stack _ stack2' = s2'.S.ms_stack in
-      let ptr1 = S.eval_reg rRsp s1 - 8 in
-      let ptr2 = S.eval_reg rRsp s2 - 8 in
+      let ptr1 = S.eval_reg_64 rRsp s1 - 8 in
+      let ptr2 = S.eval_reg_64 rRsp s2 - 8 in
       let v1 = S.eval_operand src s1 in
       let v2 = S.eval_operand src s2 in
       assert (ptr1 == ptr2);
@@ -718,7 +718,7 @@ let lemma_pop_leakage_free (ts:analysis_taints) (ins:S.ins) : Lemma
       let BC.Pop dst t_stk = ins in
       let s1' = Some?.v (machine_eval_code code fuel s1) in
       let s2' = Some?.v (machine_eval_code code fuel s2) in
-      let stack_op = OStack (MReg rRsp 0, Public) in
+      let stack_op = OStack (MReg reg_Rsp 0, Public) in
       let v1 = S.eval_operand stack_op s1 in
       let v2 = S.eval_operand stack_op s2 in
       if t_stk = Public then (

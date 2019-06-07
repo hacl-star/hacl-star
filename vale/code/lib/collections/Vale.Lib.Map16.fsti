@@ -1,10 +1,10 @@
 module Vale.Lib.Map16
 open Vale.X64.Machine_s
 
-type map2 (a:Type0) = a * a
-type map4 (a:Type0) = map2 a * map2 a
-type map8 (a:Type0) = map4 a * map4 a
-type map16 (a:Type0) = map8 a * map8 a
+type map2 (a:Type0) = a & a
+type map4 (a:Type0) = map2 a & map2 a
+type map8 (a:Type0) = map4 a & map4 a
+type map16 (a:Type0) = map8 a & map8 a
 
 [@va_qattr]
 let sel2 (#a:Type0) (m:map2 a) (n:int) : a =

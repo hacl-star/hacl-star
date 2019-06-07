@@ -9,8 +9,8 @@ irreducible let qmodattr = ()
 type mod_t =
 | Mod_None : mod_t
 | Mod_ok: mod_t
-| Mod_reg: reg -> mod_t
-| Mod_xmm: xmm -> mod_t
+| Mod_reg: reg_64 -> mod_t
+| Mod_xmm: reg_xmm -> mod_t
 | Mod_flags: mod_t
 | Mod_mem: mod_t
 | Mod_stack: mod_t
@@ -71,7 +71,7 @@ let va_mod_reg_opr64 (o:va_reg_operand) : mod_t =
   match o with
   | OReg r -> Mod_reg r
 
-[@va_qattr qmodattr] let va_mod_xmm (x:xmm) : mod_t = Mod_xmm x
+[@va_qattr qmodattr] let va_mod_xmm (x:reg_xmm) : mod_t = Mod_xmm x
 
 let quickProc_wp (a:Type0) : Type u#1 = (s0:vale_state) -> (wp_continue:vale_state -> a -> Type0) -> Type0
 

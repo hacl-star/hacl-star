@@ -12,13 +12,13 @@ let merge_taint (t1:taint) (t2:taint) :taint =
 let operand_taint (op:operand64) (ts:analysis_taints) =
   match op with
   | OConst _ -> Public
-  | OReg reg -> ts.regTaint reg
+  | OReg r -> ts.regTaint (Reg 0 r)
   | OMem (_, t) | OStack (_, t) -> t
 
 let operand_taint128 (op:operand128) (ts:analysis_taints) : taint =
   match op with
   | OConst _ -> Public
-  | OReg x -> ts.xmmTaint x
+  | OReg r -> ts.regTaint (Reg 1 r)
   | OMem (_, t) | OStack (_, t) -> t
 
 [@instr_attr]
@@ -88,10 +88,10 @@ let rec inouts_taint
 let maddr_does_not_use_secrets (addr:maddr) (ts:analysis_taints) : bool =
   match addr with
   | MConst _ -> true
-  | MReg r _ -> Public? (operand_taint (OReg r) ts)
+  | MReg r _ -> Public? (ts.regTaint r)
   | MIndex base _ index _ ->
-      let baseTaint = operand_taint (OReg base) ts in
-      let indexTaint = operand_taint (OReg index) ts in
+      let baseTaint = ts.regTaint base in
+      let indexTaint = ts.regTaint index in
       (Public? baseTaint) && (Public? indexTaint)
 
 let operand_does_not_use_secrets (op:operand64) (ts:analysis_taints) : bool =
@@ -117,24 +117,26 @@ let operand128_taint_allowed (o:operand128) (t_data:taint) : bool =
 let set_taint (dst:operand64) (ts:analysis_taints) (t:taint) : analysis_taints =
   match dst with
   | OConst _ -> ts  // Shouldn't actually happen
-  | OReg r -> AnalysisTaints (FunctionalExtensionality.on reg
-      (fun x -> if x = r then t else ts.regTaint x)) ts.flagsTaint ts.cfFlagsTaint ts.ofFlagsTaint ts.xmmTaint
+  | OReg r -> AnalysisTaints
+      (FunctionalExtensionality.on reg (fun x -> if x = Reg 0 r then t else ts.regTaint x))
+      ts.flagsTaint ts.cfFlagsTaint ts.ofFlagsTaint
   | OMem _ | OStack _ -> ts (* Ensured by taint semantics *)
 
 let set_taint128 (dst:operand128) (ts:analysis_taints) (t:taint) : analysis_taints =
   match dst with
   | OConst _ -> ts  // Shouldn't actually happen
-  | OReg r -> AnalysisTaints ts.regTaint ts.flagsTaint ts.cfFlagsTaint ts.ofFlagsTaint
-      (FunctionalExtensionality.on xmm (fun x -> if x = r then t else ts.xmmTaint x))
+  | OReg r -> AnalysisTaints
+      (FunctionalExtensionality.on reg (fun x -> if x = Reg 1 r then t else ts.regTaint x))
+      ts.flagsTaint ts.cfFlagsTaint ts.ofFlagsTaint
   | OMem _ | OStack _-> ts
 
 let set_taint_cf_and_flags (ts:analysis_taints) (t:taint) : analysis_taints =
-  let AnalysisTaints rs flags cf ovf xmms = ts in
-  AnalysisTaints rs (merge_taint t flags) t ovf xmms
+  let AnalysisTaints rs flags cf ovf = ts in
+  AnalysisTaints rs (merge_taint t flags) t ovf
 
 let set_taint_of_and_flags (ts:analysis_taints) (t:taint) : analysis_taints =
-  let AnalysisTaints rs flags cf ovf xmms = ts in
-  AnalysisTaints rs (merge_taint t flags) cf t xmms
+  let AnalysisTaints rs flags cf ovf = ts in
+  AnalysisTaints rs (merge_taint t flags) cf t
 
 let rec operands_do_not_use_secrets ops ts = match ops with
   | [] -> true
@@ -169,22 +171,38 @@ let registerAsExpected (r:reg) (tsAnalysis:analysis_taints) (tsExpected:analysis
   (tsExpected.regTaint r = Public && tsAnalysis.regTaint r = Public) || (tsExpected.regTaint r = Secret)
 
 let publicRegisterValuesAreAsExpected (tsAnalysis:analysis_taints) (tsExpected:analysis_taints) =
-  registerAsExpected rRax tsAnalysis tsExpected &&
-  registerAsExpected rRbx tsAnalysis tsExpected &&
-  registerAsExpected rRcx tsAnalysis tsExpected &&
-  registerAsExpected rRdx tsAnalysis tsExpected &&
-  registerAsExpected rRsi tsAnalysis tsExpected &&
-  registerAsExpected rRdi tsAnalysis tsExpected &&
-  registerAsExpected rRbp tsAnalysis tsExpected &&
-  registerAsExpected rRsp tsAnalysis tsExpected &&
-  registerAsExpected rR8 tsAnalysis tsExpected &&
-  registerAsExpected rR9 tsAnalysis tsExpected &&
-  registerAsExpected rR10 tsAnalysis tsExpected &&
-  registerAsExpected rR11 tsAnalysis tsExpected &&
-  registerAsExpected rR12 tsAnalysis tsExpected &&
-  registerAsExpected rR13 tsAnalysis tsExpected &&
-  registerAsExpected rR14 tsAnalysis tsExpected &&
-  registerAsExpected rR15 tsAnalysis tsExpected
+  registerAsExpected (Reg 0 0 ) tsAnalysis tsExpected &&
+  registerAsExpected (Reg 0 1 ) tsAnalysis tsExpected &&
+  registerAsExpected (Reg 0 2 ) tsAnalysis tsExpected &&
+  registerAsExpected (Reg 0 3 ) tsAnalysis tsExpected &&
+  registerAsExpected (Reg 0 4 ) tsAnalysis tsExpected &&
+  registerAsExpected (Reg 0 5 ) tsAnalysis tsExpected &&
+  registerAsExpected (Reg 0 6 ) tsAnalysis tsExpected &&
+  registerAsExpected (Reg 0 7 ) tsAnalysis tsExpected &&
+  registerAsExpected (Reg 0 8 ) tsAnalysis tsExpected &&
+  registerAsExpected (Reg 0 9 ) tsAnalysis tsExpected &&
+  registerAsExpected (Reg 0 10) tsAnalysis tsExpected &&
+  registerAsExpected (Reg 0 11) tsAnalysis tsExpected &&
+  registerAsExpected (Reg 0 12) tsAnalysis tsExpected &&
+  registerAsExpected (Reg 0 13) tsAnalysis tsExpected &&
+  registerAsExpected (Reg 0 14) tsAnalysis tsExpected &&
+  registerAsExpected (Reg 0 15) tsAnalysis tsExpected &&
+  registerAsExpected (Reg 1 0 ) tsAnalysis tsExpected &&
+  registerAsExpected (Reg 1 1 ) tsAnalysis tsExpected &&
+  registerAsExpected (Reg 1 2 ) tsAnalysis tsExpected &&
+  registerAsExpected (Reg 1 3 ) tsAnalysis tsExpected &&
+  registerAsExpected (Reg 1 4 ) tsAnalysis tsExpected &&
+  registerAsExpected (Reg 1 5 ) tsAnalysis tsExpected &&
+  registerAsExpected (Reg 1 6 ) tsAnalysis tsExpected &&
+  registerAsExpected (Reg 1 7 ) tsAnalysis tsExpected &&
+  registerAsExpected (Reg 1 8 ) tsAnalysis tsExpected &&
+  registerAsExpected (Reg 1 9 ) tsAnalysis tsExpected &&
+  registerAsExpected (Reg 1 10) tsAnalysis tsExpected &&
+  registerAsExpected (Reg 1 11) tsAnalysis tsExpected &&
+  registerAsExpected (Reg 1 12) tsAnalysis tsExpected &&
+  registerAsExpected (Reg 1 13) tsAnalysis tsExpected &&
+  registerAsExpected (Reg 1 14) tsAnalysis tsExpected &&
+  registerAsExpected (Reg 1 15) tsAnalysis tsExpected
 
 let publicTaintsAreAsExpected (tsAnalysis:analysis_taints) (tsExpected:analysis_taints) =
     publicFlagValuesAreAsExpected tsAnalysis tsExpected

@@ -28,8 +28,8 @@ let wrap_variadic c n arg_reg regs_modified xmms_modified down_mem args #pre_rel
 let rec wrap_aux
     (n:nat)
     (arg_reg:arg_reg_relation n)
-    (regs_modified:MS.reg -> bool)
-    (xmms_modified:MS.xmm -> bool)
+    (regs_modified:MS.reg_64 -> bool)
+    (xmms_modified:MS.reg_xmm -> bool)
     (down_mem:down_mem_t)
     (c:BS.code)
     (dom:list td)
@@ -64,8 +64,8 @@ let wrap' n arg_reg regs_modified xmms_modified down_mem c dom #pre_rel #post_re
 let rec wrap_aux_weak
     (n:nat)
     (arg_reg:arg_reg_relation n)
-    (regs_modified:MS.reg -> bool)
-    (xmms_modified:MS.xmm -> bool)
+    (regs_modified:MS.reg_64 -> bool)
+    (xmms_modified:MS.reg_xmm -> bool)
     (down_mem:down_mem_t)
     (c:BS.code)
     (dom:list td)

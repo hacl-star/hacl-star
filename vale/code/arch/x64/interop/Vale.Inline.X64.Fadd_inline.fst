@@ -68,7 +68,7 @@ let add1_post : VSig.vale_post dom =
 
 #set-options "--z3rlimit 50"
 
-let add1_regs_modified: MS.reg -> bool = fun (r:MS.reg) ->
+let add1_regs_modified: MS.reg_64 -> bool = fun (r:MS.reg_64) ->
   let open MS in
   if r = rRax || r = rRdx || r = rR8 || r = rR9 || r = rR10 || r = rR11 then true
   else false
@@ -107,13 +107,13 @@ let add1_lemma = as_t #(VSig.vale_sig add1_regs_modified add1_xmms_modified add1
 
 let code_add1 = FU.va_code_fast_add1 ()
 
-let of_reg (r:MS.reg) : option (IX64.reg_nat 3) = match r with
+let of_reg (r:MS.reg_64) : option (IX64.reg_nat 3) = match r with
   | 5 -> Some 0 // rdi
   | 4 -> Some 1 // rsi
   | 3 -> Some 2 // rdx
   | _ -> None
 
-let of_arg (i:IX64.reg_nat 3) : MS.reg = match i with
+let of_arg (i:IX64.reg_nat 3) : MS.reg_64 = match i with
   | 0 -> MS.rRdi
   | 1 -> MS.rRsi
   | 2 -> MS.rRdx
@@ -196,7 +196,7 @@ let fadd_post : VSig.vale_post fadd_dom =
 
 #set-options "--z3rlimit 50"
 
-let fadd_regs_modified: MS.reg -> bool = fun (r:MS.reg) ->
+let fadd_regs_modified: MS.reg_64 -> bool = fun (r:MS.reg_64) ->
   let open MS in
   if r = rRax || r = rRcx || r = rRdx || r = rR8 || r = rR9 || r = rR10 || r = rR11 then true
   else false
@@ -312,7 +312,7 @@ let fsub_post : VSig.vale_post fsub_dom =
 
 #set-options "--z3rlimit 200"
 
-let fsub_regs_modified: MS.reg -> bool = fun (r:MS.reg) ->
+let fsub_regs_modified: MS.reg_64 -> bool = fun (r:MS.reg_64) ->
   let open MS in
   if r = rRax || r = rRcx || r = rR8 || r = rR9 || r = rR10 || r = rR11 then true
   else false

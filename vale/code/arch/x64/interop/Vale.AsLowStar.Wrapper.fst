@@ -252,7 +252,7 @@ let core_create_lemma_register_args
     let regs' = IX64.register_of_args max_arity arg_reg (List.Tot.length args) args IA.init_regs in
     lemma_register_args' max_arity arg_reg args IA.init_regs;
     let open MS in
-    let regs = FunctionalExtensionality.on reg regs' in
+    let regs = FunctionalExtensionality.on reg_64 regs' in
     lemma_register_args'_aux max_arity arg_reg (List.length args) args regs' regs;
     assert (register_args' max_arity arg_reg (List.length args) args regs);
     let rec aux
@@ -262,7 +262,7 @@ let core_create_lemma_register_args
         (h0:HS.mem{mem_roots_p h0 args'})
      : Lemma
          (requires
-            (forall r. VS.eval_reg r s == regs r) /\
+            (forall r. VS.eval_reg_64 r s == regs r) /\
             register_args' max_arity arg_reg (List.length args) args regs /\
             s.VS.vs_mem == as_vale_mem (mk_mem args' h0))
          (ensures LSig.register_args max_arity arg_reg (List.length args) args s)
@@ -300,13 +300,8 @@ let core_create_lemma_state
     let aux_reg (r:MS.reg) : Lemma (tr_s.BS.ms_regs r == sl_s.BS.ms_regs r)
       = SL.lemma_to_reg va_s r
     in
-    let aux_xmm (x:MS.xmm) : Lemma (tr_s.BS.ms_xmms x == sl_s.BS.ms_xmms x)
-      = SL.lemma_to_xmm va_s x
-    in
     Classical.forall_intro aux_reg;
-    Classical.forall_intro aux_xmm;
     assert (FunctionalExtensionality.feq tr_s.BS.ms_regs sl_s.BS.ms_regs);
-    assert (FunctionalExtensionality.feq tr_s.BS.ms_xmms sl_s.BS.ms_xmms);
     Vale.AsLowStar.MemoryHelpers.get_heap_mk_mem_reveal args h0;
     Vale.AsLowStar.MemoryHelpers.mk_stack_reveal tr_s.BS.ms_stack
 
@@ -566,8 +561,8 @@ let loc_includes_union (l1 l1' l:B.loc)
 val vale_lemma_as_prediction
           (#max_arity:nat)
           (#arg_reg:IX64.arg_reg_relation max_arity)
-          (#regs_modified:MS.reg -> bool)
-          (#xmms_modified:MS.xmm -> bool)
+          (#regs_modified:MS.reg_64 -> bool)
+          (#xmms_modified:MS.reg_xmm -> bool)
           (code:V.va_code)
           (args:IX64.arg_list)
           (pre:VSig.vale_pre_tl [])
@@ -587,8 +582,8 @@ val vale_lemma_as_prediction
 let vale_lemma_as_prediction
           (#max_arity:nat)
           (#arg_reg:IX64.arg_reg_relation max_arity)
-          (#regs_modified:MS.reg -> bool)
-          (#xmms_modified:MS.xmm -> bool)
+          (#regs_modified:MS.reg_64 -> bool)
+          (#xmms_modified:MS.reg_xmm -> bool)
           (code:V.va_code)
           (args:IX64.arg_list)
           (pre:VSig.vale_pre_tl [])
@@ -669,8 +664,8 @@ private
 let rec __test__wrap
              (#max_arity:nat)
              (#arg_reg:IX64.arg_reg_relation max_arity)
-             (#regs_modified:MS.reg -> bool)
-             (#xmms_modified:MS.xmm -> bool)
+             (#regs_modified:MS.reg_64 -> bool)
+             (#xmms_modified:MS.reg_xmm -> bool)
              (#dom:list td)
              (code:V.va_code)
              (args:list arg{List.length dom + List.length args <= 20})
@@ -745,8 +740,8 @@ let rec post_rel_generic
 let rec mk_prediction
        (#max_arity:nat)
        (#arg_reg:IX64.arg_reg_relation max_arity)
-       (#regs_modified:MS.reg -> bool)
-       (#xmms_modified:MS.xmm -> bool)
+       (#regs_modified:MS.reg_64 -> bool)
+       (#xmms_modified:MS.reg_xmm -> bool)
        (code:V.va_code)
        (dom:list td)
        (args:list arg{List.length dom + List.length args <= 20})

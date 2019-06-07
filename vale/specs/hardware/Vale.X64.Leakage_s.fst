@@ -5,11 +5,10 @@ open Vale.X64.Machine_Semantics_s
 module F = FStar.FunctionalExtensionality
 
 type reg_taint = F.restricted_t reg (fun _ -> taint)
-type xmms_taint = F.restricted_t xmm (fun _ -> taint)
 
 noeq type analysis_taints =
   | AnalysisTaints: regTaint: reg_taint -> flagsTaint: taint -> cfFlagsTaint: taint -> ofFlagsTaint: taint ->
-      xmmTaint: xmms_taint -> analysis_taints
+      analysis_taints
 
 let publicFlagValuesAreSame (ts:analysis_taints) (s1:machine_state) (s2:machine_state) =
   ts.flagsTaint = Public ==> (s1.ms_flags = s2.ms_flags)
@@ -36,18 +35,12 @@ let publicMemValuesAreSame (s1:machine_state) (s2:machine_state) =
   forall x.{:pattern s1.ms_memTaint.[x] \/ s2.ms_memTaint.[x] \/ s1.ms_mem.[x] \/ s2.ms_mem.[x]}
     publicMemValueIsSame s1.ms_mem s2.ms_mem s1.ms_memTaint s2.ms_memTaint x
 
-let publicXmmValuesAreSame (ts:analysis_taints) (s1:machine_state) (s2:machine_state) =
-  forall r.{:pattern ts.xmmTaint r \/ s1.ms_xmms r \/ s2.ms_xmms r}
-    ts.xmmTaint r = Public ==>
-    (s1.ms_xmms r = s2.ms_xmms r)
-
 let publicStackValueIsSame
   (stack1 stack2:heap)
   (stackTaint1 stackTaint2:Map.t int taint)
   (x:int)
   = (Public? (stackTaint1.[x]) || Public? (stackTaint2.[x])) ==>
      stack1.[x] == stack2.[x]
-
 
 let publicStackValuesAreSame (s1:machine_state) (s2:machine_state) =
   let Vale_stack _ stack1 = s1.ms_stack in
@@ -62,7 +55,6 @@ let publicValuesAreSame (ts:analysis_taints) (s1:machine_state) (s2:machine_stat
   /\ publicOfFlagValuesAreSame ts s1 s2
   /\ publicMemValuesAreSame s1 s2
   /\ publicStackValuesAreSame s1 s2
-  /\ publicXmmValuesAreSame ts s1 s2
 
 let constTimeInvariant (ts:analysis_taints) (s:machine_state) (s':machine_state) =
     publicValuesAreSame ts s s'

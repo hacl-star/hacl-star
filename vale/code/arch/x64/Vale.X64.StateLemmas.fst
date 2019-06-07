@@ -24,7 +24,6 @@ let state_to_S (s:vale_state) : GTot BS.machine_state =
   {
     BS.ms_ok = s.vs_ok;
     BS.ms_regs = F.on_dom reg (fun r -> Regs.sel r s.vs_regs);
-    BS.ms_xmms = F.on_dom xmm (fun x -> Xmms.sel x s.vs_xmms);
     BS.ms_flags = int_to_nat64 s.vs_flags;
     BS.ms_mem = MS.get_heap s.vs_mem;
     BS.ms_memTaint = s.vs_memTaint;
@@ -34,11 +33,10 @@ let state_to_S (s:vale_state) : GTot BS.machine_state =
   }
 
 let state_of_S (sv:vale_state) (s:BS.machine_state{same_domain sv s}) : GTot vale_state =
-  let { BS.ms_ok = ok; BS.ms_regs = regs; BS.ms_xmms = xmms; BS.ms_flags = flags; BS.ms_mem = mem; BS.ms_stack = stack} = s in
+  let { BS.ms_ok = ok; BS.ms_regs = regs; BS.ms_flags = flags; BS.ms_mem = mem; BS.ms_stack = stack} = s in
   {
     vs_ok = ok;
     vs_regs = Regs.of_fun regs;
-    vs_xmms = Xmms.of_fun xmms;
     vs_flags = flags;
     vs_mem = MS.get_hs sv.vs_mem mem;
     vs_memTaint = s.BS.ms_memTaint;
@@ -106,10 +104,9 @@ let lemma_to_of_eval_ins c s0 =
   same_domain_eval_ins c 0 s0' s0;
   let s' = state_of_S s0 sM in
   let s'' = state_to_S s' in
-  let { BS.ms_ok = ok; BS.ms_regs = regs; BS.ms_xmms = xmms; BS.ms_flags = flags; BS.ms_mem = heap; BS.ms_stack = stack} = sM in
-  let { BS.ms_ok = ok''; BS.ms_regs = regs''; BS.ms_xmms = xmms''; BS.ms_flags = flags''; BS.ms_mem = heap''; BS.ms_stack = stack''} = s'' in
+  let {BS.ms_ok = ok; BS.ms_regs = regs; BS.ms_flags = flags; BS.ms_mem = heap; BS.ms_stack = stack} = sM in
+  let {BS.ms_ok = ok''; BS.ms_regs = regs''; BS.ms_flags = flags''; BS.ms_mem = heap''; BS.ms_stack = stack''} = s'' in
   assert (feq regs regs'');
-  assert (feq xmms xmms'');
   Vale.X64.Bytes_Semantics.eval_ins_same_unspecified ins s0';
   Vale.X64.Bytes_Semantics.eval_ins_domains ins s0';
   VSS.lemma_stack_to_from stack;
