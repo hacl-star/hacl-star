@@ -25,16 +25,12 @@ val updated_cf (new_flags:Flags.t) (new_cf:bool) : (b:bool { b <==> (
 val updated_of (new_flags:Flags.t) (new_of:bool) : (b:bool { b <==> (
                                                        overflow new_flags == new_of /\
 						       valid_of new_flags ) } )
-val update_cf_maintain_of (flags:Flags.t) (new_cf:bool) : (new_flags:Flags.t {
-                                                       cf new_flags == new_cf /\
-                                                       overflow new_flags == overflow flags /\
-                                                       valid_cf new_flags /\
-						       valid_of new_flags == valid_of flags } )
-val update_of_maintain_cf (flags:Flags.t) (new_of:bool) : (new_flags:Flags.t {
-                                                       overflow new_flags == new_of /\
+val maintained_cf (new_flags:Flags.t) (flags:Flags.t) : (b:bool { b <==> (
                                                        cf new_flags == cf flags /\
-                                                       valid_of new_flags /\
-						       valid_cf new_flags == valid_cf flags })
+						       valid_cf new_flags == valid_cf flags ) } )
+val maintained_of (new_flags:Flags.t) (flags:Flags.t) : (b:bool { b <==> (
+                                                       overflow new_flags == overflow flags /\
+						       valid_of new_flags == valid_of flags ) } )
 
 //unfold let va_subscript = Map.sel
 unfold let va_subscript (#a:eqtype) (#b:Type) (x:Map.t a b) (y:a) : Tot b = Map.sel x y

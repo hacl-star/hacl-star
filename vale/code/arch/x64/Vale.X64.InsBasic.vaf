@@ -174,7 +174,8 @@ procedure Adcx64Wrap(inout dst:dst_opr64, in src:opr64)
         valid_cf(efl);
     ensures
         dst == old(add_wrap64(add_wrap64(dst, src), (if cf(efl) then 1 else 0)));
-        efl == update_cf_maintain_of(old(efl), old(dst + src + (if cf(efl) then 1 else 0)) >= pow2_64);
+        updated_cf(efl, old(dst + src + (if cf(efl) then 1 else 0)) >= pow2_64);
+        maintained_of(efl, old(efl));
 {
     assert old(add_wrap64(add_wrap64(dst, src), (if cf(efl) then 1 else 0)) == (dst + src + (if cf(efl) then 1 else 0)) % pow2_64); // REVIEW: shouldn't be necessary
 }
@@ -191,7 +192,8 @@ procedure Adox64Wrap(inout dst:dst_opr64, in src:opr64)
         valid_of(efl);
     ensures
         dst == old(add_wrap64(add_wrap64(dst, src), (if overflow(efl) then 1 else 0)));
-        efl == update_of_maintain_cf(old(efl), old(dst + src + (if overflow(efl) then 1 else 0)) >= pow2_64);
+        updated_of(efl, old(dst + src + (if overflow(efl) then 1 else 0)) >= pow2_64);
+        maintained_cf(efl, old(efl));
 {
 }
 
