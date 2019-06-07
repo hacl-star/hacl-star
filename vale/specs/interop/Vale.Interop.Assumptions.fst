@@ -22,7 +22,7 @@ assume
 val init_xmms: MS.xmm -> MS.quad32
 
 assume
-val init_flags: MS.nat64
+val init_flags: MS.flag -> option bool
 
 // Abstract current operating system from Low*
 assume
