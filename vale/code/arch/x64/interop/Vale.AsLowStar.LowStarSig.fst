@@ -263,7 +263,7 @@ let create_initial_vale_state
     { vs_ok = true;
       vs_regs = Vale.X64.Regs.of_fun t_state.BS.ms_regs;
       vs_xmms = Vale.X64.Xmms.of_fun t_state.BS.ms_xmms;
-      vs_flags = IA.init_flags;
+      vs_flags = Vale.X64.Flags.of_fun IA.init_flags;
       vs_mem = as_vale_mem mem;
       vs_memTaint = t_state.BS.ms_memTaint;
       vs_stack = as_vale_stack t_state.BS.ms_stack;
