@@ -89,6 +89,8 @@ procedure Cmovc64(inout dst:dst_opr64, in src:opr64)
     {:quick exportOnly}
     {:instruction mk_ins(make_instr(I.ins_Cmovc64, dst, src))}
     reads efl;
+    requires
+        valid_cf(efl);
     ensures
         if cf(efl) then dst = old(src) else dst = old(dst);
 {
@@ -139,6 +141,7 @@ procedure Adc64(inout dst:dst_opr64, in src:opr64)
         efl;
     requires
         src + dst + 1 < pow2_64;
+        valid_cf(efl);
     ensures
         dst == old(dst + src + (if cf(efl) then 1 else 0));
         cf(efl) == old(dst + src + (if cf(efl) then 1 else 0)) >= pow2_64;
@@ -151,6 +154,8 @@ procedure Adc64Wrap(inout dst:dst_opr64, in src:opr64)
     {:instruction mk_ins(make_instr(I.ins_AddCarry64, dst, src))}
     modifies
         efl;
+    requires
+        valid_cf(efl);
     ensures
         dst == old(add_wrap64(add_wrap64(dst, src), (if cf(efl) then 1 else 0)));
         cf(efl) == old(dst + src + (if cf(efl) then 1 else 0)) >= pow2_64;
@@ -165,6 +170,8 @@ procedure Adcx64Wrap(inout dst:dst_opr64, in src:opr64)
     requires adx_enabled;
     modifies
         efl;
+    requires
+        valid_cf(efl);
     ensures
         dst == old(add_wrap64(add_wrap64(dst, src), (if cf(efl) then 1 else 0)));
         efl == update_cf(old(efl), old(dst + src + (if cf(efl) then 1 else 0)) >= pow2_64);
@@ -180,6 +187,8 @@ procedure Adox64Wrap(inout dst:dst_opr64, in src:opr64)
     requires adx_enabled;
     modifies
         efl;
+    requires
+        valid_of(efl);
     ensures
         dst == old(add_wrap64(add_wrap64(dst, src), (if overflow(efl) then 1 else 0)));
         efl == update_of(old(efl), old(dst + src + (if overflow(efl) then 1 else 0)) >= pow2_64);
@@ -217,6 +226,8 @@ procedure Sbb64(inout dst:dst_opr64, in src:opr64)
     {:instruction mk_ins(make_instr(I.ins_Sbb64, dst, src))}
     modifies
         efl;
+    requires
+        valid_cf(efl);
     ensures
         dst == old(dst - (src + (if cf(efl) then 1 else 0))) % pow2_64;
         cf(efl) == old(dst - (src + (if cf(efl) then 1 else 0))) < 0;
