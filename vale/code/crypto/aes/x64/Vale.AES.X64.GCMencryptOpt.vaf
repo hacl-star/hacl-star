@@ -903,11 +903,7 @@ procedure gcm_blocks(
 
     compute_ghash_incremental_register();
     let y_final := xmm1;
-// TODO: Fix me!
     Load128_buffer(xmm7, rbp, 0, Secret, scratch_b, 0);       // Reload j0
-//    PinsrdImm(xmm7, 1, 0, r12);   // Reconstruct j0 (this is all we need, since gctr_core says it only changes iv.lo0)
-//    let ctr_BE_1:quad32 := Mkfour(1, ctr_BE.lo1, ctr_BE.hi2, ctr_BE.hi3);
-//    assert_norm(xmm7 == ctr_BE_1);      // OBSERVE
 
     // Encrypt the hash value with gctr_register; result goes in xmm1
     gctr_register(alg, key, round_keys, keys_b); // Encrypt using j0 and xmm0 = hash_value
