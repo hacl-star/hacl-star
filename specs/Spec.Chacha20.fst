@@ -68,14 +68,14 @@ let rounds : shuffle =
 let sum_state (s0:state) (s1:state) : Tot state =
   map2 (+.) s0 s1
 
-let add_counter (ctr:counter) (s0:state) : Tot state =
+let chacha20_add_counter (s0:state) (ctr:counter) : Tot state =
   s0.[12] <- s0.[12] +. u32 ctr
 
-let chacha20_core (ctr:counter) (s0:state) : Tot state =
-  let k = add_counter ctr s0 in
+let chacha20_core (ctr:counter) (s0:state)  : Tot state =
+  let k = chacha20_add_counter s0 ctr in
   let k = rounds k in
   let k = sum_state k s0 in
-  add_counter ctr k
+  chacha20_add_counter k  ctr
 
 inline_for_extraction
 let c0 = 0x61707865ul
@@ -112,9 +112,6 @@ let chacha20_init (k:key) (n:nonce) (ctr0:counter) : Tot state =
   let st = create 16 (u32 0) in
   let st  = setup k n ctr0 st in
   st
-
-let chacha20_set_counter (st:state) (c:counter) : Tot state =
-  st.[12] <- u32 c
 
 let chacha20_key_block0 (k:key) (n:nonce) : Tot block =
   let st = chacha20_init k n 0 in

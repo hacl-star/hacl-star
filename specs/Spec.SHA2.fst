@@ -160,7 +160,7 @@ let rec ws_aux (a:sha2_alg) (b:block_w a) (t:counter{t < size_k_w a}): Tot (word
 let ws = ws_aux
 
 (* Core shuffling function *)
-let shuffle_core_aux (a:sha2_alg) (block:block_w a) (hash:words_state a) (t:counter{t < size_k_w a}): Tot (words_state a) =
+let shuffle_core_aux (a:sha2_alg) (block:block_w a) (t:counter{t < size_k_w a}) (hash:words_state a) : Tot (words_state a) =
   (**) assert(7 <= S.length hash);
   let a0 = hash.[0] in
   let b0 = hash.[1] in
@@ -185,7 +185,7 @@ let shuffle_core = shuffle_core_aux
 
 (* Full shuffling function *)
 let shuffle_aux (a:sha2_alg) (hash:words_state a) (block:block_w a): Tot (words_state a) =
-  Spec.Loops.repeat_range 0 (size_k_w a) (shuffle_core a block) hash
+  Lib.LoopCombinators.repeati (size_k_w a) (shuffle_core a block) hash
 
 [@"opaque_to_smt"]
 let shuffle = shuffle_aux

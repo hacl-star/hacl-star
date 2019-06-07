@@ -338,53 +338,52 @@ noeq type aes_ctr_state (v:variant) = {
   block:  lbytes 16;
 }
 
-let aes_ctr_init (v:variant) (k:aes_key v) (n_len:size_nat{n_len <= 16}) (n:lbytes n_len) : Tot (aes_ctr_state v) =
+let aes_ctr_add_counter (v:variant) (st:aes_ctr_state v) (incr:size_nat) : Tot (aes_ctr_state v) =
+  let n = nat_from_bytes_be st.block in
+  let n' = (n + incr) % pow2 128 in
+  let nblock' = nat_to_bytes_be 16 n' in
+  {st with block = nblock'}
+
+let aes_ctr_init (v:variant) (k:aes_key v) (n_len:size_nat{n_len <= 16}) (n:lbytes n_len) (c0:size_nat) : Tot (aes_ctr_state v) =
   let input = create 16 (u8 0) in
   let input = repeati #(lbytes 16) n_len (fun i b -> b.[i] <- n.[i]) input in
   let key_ex = aes_key_expansion v k in
-  { key_ex = key_ex; block = input}
-
-let aes_ctr_set_counter (v:variant) (st:aes_ctr_state v) (c:size_nat) : Tot (aes_ctr_state v) =
-  let cby = nat_to_bytes_be 4 c in
-  let nblock = update_sub st.block 12 4 cby in
-  {st with block = nblock}
+  let st0 = { key_ex = key_ex; block = input} in
+  aes_ctr_add_counter v st0 c0
 
 let aes_ctr_current_key_block (v:variant) (st:aes_ctr_state v) : Tot block =
   aes_encrypt_block v st.key_ex st.block
 
 let aes_ctr_key_block0 (v:variant) (k:aes_key v) (n_len:size_nat{n_len <= 16}) (n:lbytes n_len) : Tot block =
-  let st = aes_ctr_init v k n_len n in
+  let st = aes_ctr_init v k n_len n 0 in
   aes_ctr_current_key_block v st
 
 let aes_ctr_key_block1 (v:variant) (k:aes_key v) (n_len:size_nat{n_len <= 16}) (n:lbytes n_len) : Tot block =
-  let st = aes_ctr_init v k n_len n in
-  let st = aes_ctr_set_counter v st 1 in
+  let st = aes_ctr_init v k n_len n 1 in
   aes_ctr_current_key_block v st
 
 let aes_ctr_encrypt_block
   (v:variant)
   (st0:aes_ctr_state v)
-  (ctr0:size_nat)
-  (incr:size_nat{ctr0 + incr <= max_size_t})
+  (incr:size_nat)
   (b:block) :
   Tot block =
 
-  let st = aes_ctr_set_counter v st0 (ctr0 + incr) in
+  let st = aes_ctr_add_counter v st0 incr in
   let kb = aes_ctr_current_key_block v st in
   map2 (^.) b kb
 
 let aes_ctr_encrypt_last
   (v:variant)
   (st0:aes_ctr_state v)
-  (ctr0:size_nat)
-  (incr:size_nat{ctr0 + incr <= max_size_t})
+  (incr:size_nat)
   (len:size_nat{len < 16})
   (b:lbytes len):
   Tot (lbytes len) =
 
   let plain = create 16 (u8 0) in
   let plain = update_sub plain 0 (length b) b in
-  let cipher = aes_ctr_encrypt_block v st0 ctr0 incr plain in
+  let cipher = aes_ctr_encrypt_block v st0 incr plain in
   sub cipher 0 (length b)
 
 
@@ -398,11 +397,10 @@ val aes_ctr_encrypt_bytes:
   Tot (ciphertext:bytes{length ciphertext == length msg})
 
 let aes_ctr_encrypt_bytes v key n_len nonce ctr0 msg =
-  let cipher = msg in
-  let st0 = aes_ctr_init v key n_len nonce in
-  map_blocks 16 cipher
-    (aes_ctr_encrypt_block v st0 ctr0)
-    (aes_ctr_encrypt_last v st0 ctr0)
+  let st0 = aes_ctr_init v key n_len nonce ctr0 in
+  map_blocks 16 msg
+    (aes_ctr_encrypt_block v st0)
+    (aes_ctr_encrypt_last v st0)
 
 let aes128_ctr_encrypt_bytes key n_len nonce ctr0 msg =
   aes_ctr_encrypt_bytes AES128 key n_len nonce ctr0 msg
