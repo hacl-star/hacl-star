@@ -1056,7 +1056,6 @@ procedure gcm_blocks_wrapped(
         let iv_BE := reverse_bytes_quad32(iv_LE);
         let h_LE  := aes_encrypt_LE(alg, key, Mkfour(0, 0, 0, 0));
         iv_BE == compute_iv_BE(h_LE, iv);
-        8*length(#(seq(nat8))(iv)) == 96;
 
     ensures
         // Framing
