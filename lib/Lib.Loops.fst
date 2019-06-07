@@ -9,6 +9,21 @@ let for start finish inv f =
     (fun h i -> v start <= i /\ i <= v finish /\ inv h i)
     (fun i -> f i)
 
+let for_rev start finish inv f =
+  [@inline_let]
+  let conv_index (i:(i:nat{v finish <= i /\ i <= v start}))
+             : (j:nat{v finish <= j /\ j <= v start})
+               = (v start - i) + v finish in
+  [@inline_let]
+  let conv_index2 (i:(i:size_t{v finish <= v i /\ v i < v start}))
+            : (j:size_t{v finish <= v j /\ v j < v start})
+              = (start -! i -! 1ul) +! finish in
+  [@inline_let]
+  let inv' h i = inv h (conv_index i) in
+  [@inline_let]
+  let f' i = f (conv_index2 i) in
+  for finish start inv' f'
+
 let while inv guard test body =
   let test: unit -> Stack bool
     (requires inv)

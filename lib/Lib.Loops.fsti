@@ -17,6 +17,24 @@ val for:
     (requires fun h -> inv h (v start))
     (ensures  fun _ _ h_2 -> inv h_2 (v finish))
 
+
+// Iterates the same range [finish, start) as for but in reverse direction.
+//
+// Inv from index i means that the condition will be satisfied _after_
+// iteration with the index i.
+inline_for_extraction
+val for_rev:
+    start:size_t
+  -> finish:size_t{v start >= v finish}
+  -> inv:(mem -> (i:nat{v finish <= i /\ i <= v start}) -> Type0)
+  -> f:(i:size_t{v finish <= v i /\ v i < v start} -> Stack unit
+                  (requires fun h -> inv h (v i + 1))
+                  (ensures  fun h_1 _ h_2 -> inv h_2 (v i))) ->
+  Stack unit
+    (requires fun h -> inv h (v start))
+    (ensures  fun _ _ h_2 -> inv h_2 (v finish))
+
+
 (*
 {inv h0}
 while (test ()) do
@@ -29,8 +47,8 @@ inline_for_extraction
 val while:
     inv: (mem -> Type0)
   -> guard: (h:mem{inv h} -> GTot bool)
-  -> test: (unit -> Stack bool 
-                    (requires inv) 
+  -> test: (unit -> Stack bool
+                    (requires inv)
                     (ensures  fun h0 b h1 -> b == guard h0 /\ h0 == h1))
   -> body: (unit -> Stack unit
                     (requires fun h -> inv h /\ guard h)
