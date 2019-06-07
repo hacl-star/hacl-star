@@ -377,6 +377,7 @@ procedure carry_times_38(inout tmp:dst_opr64)
     requires
         carry == 0;
         @tmp != OReg(rRax);
+        valid_cf(efl);
     ensures
         carry == bool_bit(cf(efl)) * 38;
         tmp == 38;
