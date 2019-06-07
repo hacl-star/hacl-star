@@ -410,6 +410,7 @@ procedure carry_pass(inline use_cf:bool, inline offset:nat, ghost dst_b:buffer64
 
         carry_in * 38 < pow2_63;
         !use_cf ==> zero == 0 && tmp == 38;
+        use_cf ==> valid_cf(efl);
 
      validDstAddrs64(mem, dst_ptr, dst_b, 4 + offset, memTaint, Secret);
     ensures
@@ -616,6 +617,7 @@ procedure carry_sub_pass()
 
     requires
         adx_enabled && bmi2_enabled;
+        valid_cf(efl);
 
     ensures
        pow2_four(a0, a1, a2, a3) % prime == old(pow2_four(a0, a1, a2, a3) - bool_bit(cf(efl)) * pow2_256) % prime;
