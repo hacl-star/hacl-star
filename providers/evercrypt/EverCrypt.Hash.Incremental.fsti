@@ -157,20 +157,12 @@ val hash_fits: #a:Hash.alg -> h:HS.mem -> s:state a -> Lemma
 /// Everything a client needs to know when they modify something **disjoint**
 /// from a hash state.
 ///
-/// Note that the distinction between invariant and hashes is kind of unclear --
-/// what should go in the invariant, what should be captured by the hashes
-/// predicate, since the two are so close to each other?
-///
-/// Perhaps it would've been easier to have an erased field in the internal
-/// state to keep track of the bytes hashed so far, which would've allowed a
-/// function ``val hashed: HS.mem -> state -> bytes`` instead of adding an extra
-/// framing lemma.
-///
-/// Note that the three framing lemmas are most general. We could bundle
-/// invariant and freeable (hence committing to always heap-allocating); we
-/// could also bundle invariant and hashes (hence preventing clients from
-/// performing any operations in-between their call to ``create_in`` and
-/// ``init`` since only one of the two pre-conditions would be established).
+/// Note that the invariant now bundles a variety of conditions related to the
+/// hashing predicate, meaning that the only way to establish the invariant is
+/// actually to initialize the underlying state. This means that the framing
+/// lemmas for invariant and hashed could be bundled together. If we committed
+/// to always heap allocating, then we could conceivably have a single framing
+/// lemma.
 ///
 /// Note: it might be useful to call `Hash.fresh_is_disjoint` to turn the
 /// `fresh_loc` post-condition of create_in into a more useful `loc_disjoint`
@@ -214,6 +206,7 @@ val create_in (a: Hash.alg) (r: HS.rid): ST (state a)
     HyperStack.ST.is_eternal_region r))
   (ensures (fun h0 s h1 ->
     invariant h1 s /\
+    hashed h1 s == S.empty /\
     B.(modifies loc_none h0 h1) /\
     fresh_loc (footprint h1 s) h0 h1 /\
     B.(loc_includes (loc_region_only true r) (footprint h1 s)) /\
