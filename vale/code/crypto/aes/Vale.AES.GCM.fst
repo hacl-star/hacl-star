@@ -17,19 +17,6 @@ open FStar.Calc
 
 open Vale.Def.Words.Four_s
 
-let set_to_one_LE (q:quad32) : quad32 = four_insert q 1 0 // Mkfour 1 q.lo1 q.hi2 q.hi3 
-//let set_to_one_BE (q:quad32) : quad32 = four_insert q 1 3 //Mkfour q.lo0 q.lo1 q.hi2 1 
-
-let upper3_equal (q0 q1:quad32) : bool = 
-  q0.lo1 = q1.lo1 &&
-  q0.hi2 = q1.hi2 &&
-  q0.hi3 = q1.hi3
-
-let lower3_equal (q0 q1:quad32) : bool = 
-  q0.lo0 = q1.lo0 &&
-  q0.lo1 = q1.lo1 &&
-  q0.hi2 = q1.hi2
-
 let lemma_set_to_one_equality (q0 q1:quad32) : Lemma
    (requires upper3_equal q0 q1)
    (ensures  set_to_one_LE q0 == set_to_one_LE q1)
@@ -806,31 +793,6 @@ let gcm_blocks_helper_dec_simplified (alg:algorithm) (key:seq nat32)
   assert (cipher_bytes == fst (gcm_encrypt_LE alg (seq_nat32_to_seq_nat8_LE key) iv plain_bytes auth_bytes));
   lemma_gcm_encrypt_decrypt_equiv alg key iv j0_BE cipher_bytes plain_bytes auth_bytes alleged_tag;
   ()
-
-
-let gcm_decrypt_LE_tag (alg:algorithm) (key:seq nat8) (iv:supported_iv_LE) (cipher:seq nat8) (auth:seq nat8) :
-  Pure (seq nat8)
-    (requires
-      is_aes_key alg key /\
-      length cipher < pow2_32 /\
-      length auth < pow2_32
-    )
-    (ensures fun t -> True)
-  =
-  let key_LE = seq_nat8_to_seq_nat32_LE key in
-  let h_LE = aes_encrypt_LE alg key_LE (Mkfour 0 0 0 0) in
-  let j0_BE = compute_iv_BE h_LE iv in
-
-  let lengths_BE = insert_nat64_opaque (insert_nat64_opaque (Mkfour 0 0 0 0) (8 * length auth) 1) (8 * length cipher) 0 in
-  let lengths_LE = reverse_bytes_quad32 lengths_BE in
-
-  let zero_padded_c_LE = le_bytes_to_seq_quad32 (pad_to_128_bits cipher) in
-  let zero_padded_a_LE = le_bytes_to_seq_quad32 (pad_to_128_bits auth) in
-
-  let hash_input_LE = append zero_padded_a_LE (append zero_padded_c_LE (create 1 lengths_LE)) in
-  let s_LE = ghash_LE h_LE hash_input_LE in
-  let t = gctr_encrypt_LE j0_BE (le_quad32_to_bytes s_LE) alg key_LE in
-  t
 
 #reset-options "--z3rlimit 60"
 let gcm_blocks_dec_helper (alg:algorithm) (key:seq nat32)
