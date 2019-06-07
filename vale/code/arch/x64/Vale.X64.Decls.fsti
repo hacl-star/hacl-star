@@ -15,7 +15,7 @@ open Vale.Def.Types_s
 
 unfold let quad32 = quad32
 
-val cf : (flags:Flags.t) -> bool
+val cf (flags:Flags.t) : bool
 val overflow (flags:Flags.t) : bool
 val update_cf (flags:Flags.t) (new_cf:bool) : (new_flags:Flags.t { cf new_flags == new_cf /\
                                                        overflow new_flags == overflow flags} )
