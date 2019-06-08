@@ -48,7 +48,7 @@ type taint:eqtype =
 type tmaddr:eqtype = maddr & taint
 
 [@va_qattr]
-type operand (tc:eqtype) (tr:eqtype) : eqtype =
+type operand (tc tr:eqtype) : eqtype =
   | OConst: n:tc -> operand tc tr
   | OReg: r:tr -> operand tc tr
   | OMem: m:tmaddr -> operand tc tr
@@ -57,6 +57,10 @@ type operand (tc:eqtype) (tr:eqtype) : eqtype =
 [@va_qattr]
 let operand_rf (rf:reg_file_id) : eqtype =
   operand (t_reg_file rf) (reg_id rf)
+
+[@va_qattr]
+unfold let oreg (r:reg) : operand_rf r.rf =
+  OReg r.r
 
 let reg_64 : Type0 = r:nat{r < 16}
 let reg_xmm : Type0 = r:nat{r < 16}

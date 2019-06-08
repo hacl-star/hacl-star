@@ -29,8 +29,8 @@ let rec check_if_consumes_fixed_time_args
     let ((o:instr_operand_t i), (oprs:instr_operands_t_args args)) = coerce oprs in
     let b' =
       match i with
-      | IOp64 -> operand_does_not_use_secrets o ts
-      | IOpXmm -> operand128_does_not_use_secrets o ts
+      | IOp64 -> operand_does_not_use_secrets #nat64 #reg_64 o ts
+      | IOpXmm -> operand_does_not_use_secrets #quad32 #reg_xmm o ts
       in
     let b'' = check_if_consumes_fixed_time_args args oprs ts in
     b' && b''
@@ -38,7 +38,7 @@ let rec check_if_consumes_fixed_time_args
     let b' =
       match i with
       | IOp64One o -> operand_does_not_use_secrets o ts
-      | IOpXmmOne o -> operand128_does_not_use_secrets o ts
+      | IOpXmmOne o -> operand_does_not_use_secrets o ts
       | IOpFlagsCf -> true
       | IOpFlagsOf -> true
       in
@@ -51,8 +51,8 @@ let check_if_consumes_fixed_time_outs_explicit
   : bool
   =
   match i with
-  | IOp64 -> operand_does_not_use_secrets o ts && operand_taint_allowed o t_out
-  | IOpXmm -> operand128_does_not_use_secrets o ts && operand128_taint_allowed o t_out
+  | IOp64 -> operand_does_not_use_secrets #nat64 #reg_64 o ts && operand_taint_allowed #nat64 #reg_64 o t_out
+  | IOpXmm -> operand_does_not_use_secrets #quad32 #reg_xmm o ts && operand_taint_allowed #quad32 #reg_xmm o t_out
 
 let check_if_consumes_fixed_time_outs_implicit
     (i:instr_operand_implicit) (ts:analysis_taints) (t_out:taint)
@@ -60,7 +60,7 @@ let check_if_consumes_fixed_time_outs_implicit
   =
   match i with
   | IOp64One o -> operand_does_not_use_secrets o ts && operand_taint_allowed o t_out
-  | IOpXmmOne o -> operand128_does_not_use_secrets o ts && operand128_taint_allowed o t_out
+  | IOpXmmOne o -> operand_does_not_use_secrets o ts && operand_taint_allowed o t_out
   | IOpFlagsCf -> true
   | IOpFlagsOf -> true
 
@@ -188,14 +188,14 @@ let instr_set_taint_explicit
     (i:instr_operand_explicit) (o:instr_operand_t i) (ts:analysis_taints) (t:taint)
   : analysis_taints =
   match i with
-  | IOp64 -> set_taint o ts t
-  | IOpXmm -> set_taint128 o ts t
+  | IOp64 -> set_taint 0 (o <: operand64) ts t
+  | IOpXmm -> set_taint 1 (o <: operand128) ts t
 
 [@instr_attr]
 let instr_set_taint_implicit (i:instr_operand_implicit) (ts:analysis_taints) (t:taint) : analysis_taints =
   match i with
-  | IOp64One o -> set_taint o ts t
-  | IOpXmmOne o -> set_taint128 o ts t
+  | IOp64One o -> set_taint 0 o ts t
+  | IOpXmmOne o -> set_taint 1 o ts t
   | IOpFlagsCf -> set_taint_cf_and_flags ts t
   | IOpFlagsOf -> set_taint_of_and_flags ts t
 
@@ -544,7 +544,7 @@ let check_if_push_consumes_fixed_time (ins:S.ins) (ts:analysis_taints) : Pure (b
   (ensures ins_consumes_fixed_time ins ts)
   =
   let BC.Push src t_stk = ins in
-  let t_out = operand_taint src ts in
+  let t_out = operand_taint 0 src ts in
   (Public? (ts.regTaint reg_Rsp) && operand_does_not_use_secrets src ts && (t_out = Public || t_stk = Secret), ts)
 
 let check_if_pop_consumes_fixed_time (ins:S.ins) (ts:analysis_taints) : Pure (bool & analysis_taints)
@@ -553,7 +553,7 @@ let check_if_pop_consumes_fixed_time (ins:S.ins) (ts:analysis_taints) : Pure (bo
   =
   let BC.Pop dst t_stk = ins in
   let allowed = operand_taint_allowed dst t_stk in
-  (Public? (ts.regTaint reg_Rsp) && operand_does_not_use_secrets dst ts && allowed, set_taint dst ts t_stk)
+  (Public? (ts.regTaint reg_Rsp) && operand_does_not_use_secrets dst ts && allowed, set_taint 0 dst ts t_stk)
 
 let check_if_ins_consumes_fixed_time ins ts =
   match ins with
@@ -671,7 +671,7 @@ let lemma_push_leakage_free (ts:analysis_taints) (ins:S.ins) : Lemma
       [SMTPat (is_explicit_leakage_free_rhs code fuel ts ts' s1 s2)]
       =
       let BC.Push src t_stk = ins in
-      let t_out = operand_taint src ts in
+      let t_out = operand_taint 0 src ts in
       let s1' = Some?.v (machine_eval_code code fuel s1) in
       let s2' = Some?.v (machine_eval_code code fuel s2) in
       let S.Machine_stack _ stack1 = s1.S.ms_stack in

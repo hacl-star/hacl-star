@@ -325,53 +325,23 @@ val wp_sound_code (#a:Type0) (c:code) (qc:quickCode a c) (k:vale_state -> a -> T
   (ensures fun (sN, fN, gN) -> eval_code c s0 fN sN /\ update_state_mods qc.mods sN s0 == sN /\ k sN gN)
 
 [@va_qattr]
-let rec regs_match (regs:list reg) (r0:Regs.t) (r1:Regs.t) : Type0 =
-  match regs with
-  | [] -> True
-  | r::regs -> Regs.sel r r0 == Regs.sel r r1 /\ regs_match regs r0 r1
+let rec regs_match_file (r0:Regs.t) (r1:Regs.t) (rf:reg_file_id) (k:nat{k <= n_regs rf}) : Type0 =
+  if k = 0 then True
+  else
+    let r = Reg rf (k - 1) in
+    Regs.sel r r0 == Regs.sel r r1 /\ regs_match_file r0 r1 rf (k - 1)
 
 [@va_qattr]
-let all_regs_match (r0:Regs.t) (r1:Regs.t) : Type0
-  =
-  let regs = [
-      Reg 0 0;
-      Reg 0 1;
-      Reg 0 2;
-      Reg 0 3;
-      Reg 0 4;
-      Reg 0 5;
-      Reg 0 6;
-      Reg 0 7;
-      Reg 0 8;
-      Reg 0 9;
-      Reg 0 10;
-      Reg 0 11;
-      Reg 0 12;
-      Reg 0 13;
-      Reg 0 14;
-      Reg 0 15;
-      Reg 1 0;
-      Reg 1 1;
-      Reg 1 2;
-      Reg 1 3;
-      Reg 1 4;
-      Reg 1 5;
-      Reg 1 6;
-      Reg 1 7;
-      Reg 1 8;
-      Reg 1 9;
-      Reg 1 10;
-      Reg 1 11;
-      Reg 1 12;
-      Reg 1 13;
-      Reg 1 14;
-      Reg 1 15
-    ] in
-  regs_match regs r0 r1
+let rec regs_match (r0:Regs.t) (r1:Regs.t) (k:nat{k <= n_reg_files}) : Type0 =
+  if k = 0 then True
+  else regs_match_file r0 r1 (k - 1) (n_regs (k - 1)) /\ regs_match r0 r1 (k - 1)
 
 [@va_qattr]
-let state_match (s0:vale_state) (s1:vale_state) : Type0
-  =
+let all_regs_match (r0:Regs.t) (r1:Regs.t) : Type0 =
+  regs_match r0 r1 n_reg_files
+
+[@va_qattr]
+let state_match (s0:vale_state) (s1:vale_state) : Type0 =
   s0.vs_ok == s1.vs_ok /\
   all_regs_match s0.vs_regs s1.vs_regs /\
   s0.vs_flags == s1.vs_flags /\

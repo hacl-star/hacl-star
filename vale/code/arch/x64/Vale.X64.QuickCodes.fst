@@ -12,8 +12,7 @@ let state_mod_eq (m:mod_t) (s1 s2:vale_state) =
   match m with
   | Mod_None -> True
   | Mod_ok -> s1.vs_ok == s2.vs_ok
-  | Mod_reg r -> eval_reg_64 r s1 == eval_reg_64 r s2
-  | Mod_xmm x -> eval_reg_xmm x s1 == eval_reg_xmm x s2
+  | Mod_reg r -> eval_reg r s1 == eval_reg r s2
   | Mod_flags -> s1.vs_flags == s2.vs_flags
   | Mod_mem -> s1.vs_heap == s2.vs_heap
   | Mod_stack -> s1.vs_stack == s2.vs_stack
@@ -87,9 +86,7 @@ let update_state_mods_to (mods:mods_t) (s' s:vale_state) : Lemma
     (ensures Regs.sel r s'.vs_regs == Regs.sel r s''.vs_regs)
     [SMTPat (Regs.sel r s'.vs_regs)]
     =
-    match r with
-    | Reg 0 r -> f1 (Mod_reg r)
-    | Reg 1 r -> f1 (Mod_xmm r)
+    f1 (Mod_reg r)
     in
   ()
 
@@ -293,14 +290,23 @@ let wp_sound_code #a c qc k s0 =
   let QProc c _ wp proof = qc in
   proof s0 k
 
-let assert_norm_match (p:prop0) : Lemma
-  (requires norm [iota; zeta; simplify; primops; delta_only [`%regs_match; `%all_regs_match]] p)
-  (ensures p)
+let rec lemma_regs_match_file (r0:Regs.t) (r1:Regs.t) (rf:reg_file_id) (k:nat{k <= n_regs rf}) : Lemma
+  (requires regs_match_file r0 r1 rf k)
+  (ensures (forall (i:nat).{:pattern (Reg rf i)} i < k ==>
+    (let r = Reg rf i in Regs.sel r r0 == Regs.sel r r1)))
   =
-  ()
+  if k > 0 then lemma_regs_match_file r0 r1 rf (k - 1)
+
+let rec lemma_regs_match (r0:Regs.t) (r1:Regs.t) (k:nat{k <= n_reg_files}) : Lemma
+  (requires regs_match r0 r1 k)
+  (ensures (forall (i j:nat).{:pattern (Reg i j)} i < k /\ j < n_regs i ==>
+    (let r = Reg i j in Regs.sel r r0 == Regs.sel r r1)))
+  =
+  if k > 0 then (lemma_regs_match_file r0 r1 (k - 1) (n_regs (k - 1)); lemma_regs_match r0 r1 (k - 1))
 
 let lemma_state_match s0 s1 =
-  assert_norm_match (all_regs_match s0.vs_regs s1.vs_regs ==> Regs.equal s0.vs_regs s1.vs_regs)
+  lemma_regs_match s0.vs_regs s1.vs_regs n_reg_files;
+  assert (Regs.equal s0.vs_regs s1.vs_regs)
 
 let wp_sound_code_wrap (#a:Type0) (c:code) (qc:quickCode a c) (s0:vale_state) (k:(s0':vale_state{s0 == s0'}) -> vale_state -> a -> Type0) :
   Ghost (vale_state & fuel & a)

@@ -9,8 +9,7 @@ irreducible let qmodattr = ()
 type mod_t =
 | Mod_None : mod_t
 | Mod_ok: mod_t
-| Mod_reg: reg_64 -> mod_t
-| Mod_xmm: reg_xmm -> mod_t
+| Mod_reg: reg -> mod_t
 | Mod_flags: mod_t
 | Mod_mem: mod_t
 | Mod_stack: mod_t
@@ -18,13 +17,22 @@ type mod_t =
 | Mod_stackTaint: mod_t
 unfold let mods_t = list mod_t
 
+[@va_qattr] unfold let va_Mod_None = Mod_None
+[@va_qattr] unfold let va_Mod_ok = Mod_ok
+[@va_qattr] unfold let va_Mod_reg64 (r:reg_64) = Mod_reg (Reg 0 r)
+[@va_qattr] unfold let va_Mod_xmm (r:reg_xmm) = Mod_reg (Reg 1 r)
+[@va_qattr] unfold let va_Mod_flags = Mod_flags
+[@va_qattr] unfold let va_Mod_mem = Mod_mem
+[@va_qattr] unfold let va_Mod_stack = Mod_stack
+[@va_qattr] unfold let va_Mod_memTaint = Mod_memTaint
+[@va_qattr] unfold let va_Mod_stackTaint = Mod_stackTaint
+
 [@va_qattr "opaque_to_smt"]
 let mod_eq (x y:mod_t) : Pure bool (requires True) (ensures fun b -> b == (x = y)) =
   match x with
   | Mod_None -> (match y with Mod_None -> true | _ -> false)
   | Mod_ok -> (match y with Mod_ok -> true | _ -> false)
   | Mod_reg rx -> (match y with Mod_reg ry -> rx = ry | _ -> false)
-  | Mod_xmm xx -> (match y with Mod_xmm xy -> xx = xy | _ -> false)
   | Mod_flags -> (match y with Mod_flags -> true | _ -> false)
   | Mod_mem -> (match y with Mod_mem -> true | _ -> false)
   | Mod_stack -> (match y with Mod_stack -> true | _ -> false)
@@ -37,7 +45,6 @@ let update_state_mod (m:mod_t) (sM sK:vale_state) : vale_state =
   | Mod_None -> sK
   | Mod_ok -> va_update_ok sM sK
   | Mod_reg r -> va_update_reg r sM sK
-  | Mod_xmm x -> va_update_xmm x sM sK
   | Mod_flags -> va_update_flags sM sK
   | Mod_mem -> va_update_mem sM sK
   | Mod_stack -> va_update_stack sM sK
@@ -62,16 +69,16 @@ let lemma_norm_mods (mods:mods_t) (sM sK:vale_state) : Lemma
 let va_mod_dst_opr64 (o:va_operand) : mod_t =
   match o with
   | OConst n -> Mod_None
-  | OReg r -> Mod_reg r
+  | OReg r -> Mod_reg (Reg 0 r)
   | OMem _ -> Mod_None // TODO: support destination memory operands
   | OStack _ -> Mod_None // TODO: support destination stack operands
 
 [@va_qattr qmodattr]
 let va_mod_reg_opr64 (o:va_reg_operand) : mod_t =
   match o with
-  | OReg r -> Mod_reg r
+  | OReg r -> Mod_reg (Reg 0 r)
 
-[@va_qattr qmodattr] let va_mod_xmm (x:reg_xmm) : mod_t = Mod_xmm x
+[@va_qattr qmodattr] let va_mod_xmm (x:reg_xmm) : mod_t = Mod_reg (Reg 1 x)
 
 let quickProc_wp (a:Type0) : Type u#1 = (s0:vale_state) -> (wp_continue:vale_state -> a -> Type0) -> Type0
 
