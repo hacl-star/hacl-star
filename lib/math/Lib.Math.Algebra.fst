@@ -21,7 +21,33 @@ let zero_mod_n _ = ()
 val one_mod_n: n:big -> Lemma (1 % n = 1)
 let one_mod_n _ = ()
 
-type divides (a:pos) (b:pos) = b % a = 0
+type divides (a:pos) (b:int) = b % a = 0
+
+val divides_sum: c:pos -> a:int -> b:int -> Lemma
+  ((divides c a /\ divides c b) ==> divides c (a+b))
+let divides_sum c a b = modulo_distributivity a b c
+
+val divides_mult1: a:pos -> b:int -> n:nat -> Lemma
+  (divides a b ==> divides a (n*b))
+let rec divides_mult1 a b n = match n with
+  | 0 -> ()
+  | _ -> divides_mult1 a b (n-1); modulo_distributivity ((n-1)*b) b a
+
+val divides_mult2: a:pos -> b:int -> n:int{n<=0} -> Lemma
+  (requires True)
+  (ensures (divides a b ==> divides a (n*b)))
+  (decreases (-n))
+let rec divides_mult2 a b n = match n with
+  | 0 -> ()
+  | _ -> divides_mult2 a b (n+1); modulo_distributivity (n*b) b a
+
+val divides_mult: a:pos -> b:int -> n:int -> Lemma
+  (divides a b ==> divides a (n*b))
+let divides_mult a b n = if n >= 0 then divides_mult1 a b n else divides_mult2 a b n
+
+val divides_neg: a:pos -> b:int -> Lemma
+  (divides a b ==> divides a (-b))
+let divides_neg a b = divides_mult a b (-1)
 
 val isprm: p:nat -> Type0
 let isprm p = p >= 3 /\ p % 2 = 1 /\ (forall (x:nat{x>1&&x<p}). ~(divides x p))
@@ -47,23 +73,155 @@ val divides_multiple: a:pos -> b:pos{divides a b} -> k:pos -> Lemma
   (divides a (k*b))
 let divides_multiple a b k = modulo_mul_distributivity k b a
 
-type is_gcd (a:pos) (b:pos) (gcd:pos) =
-    (forall (d:pos). divides d a /\ divides d b ==> divides d gcd)
-    /\ divides gcd a
-    /\ divides gcd b
+type is_common_divisor (a:nat) (b:nat) (g:pos) = divides g a /\ divides g b
 
-val ex_eucl:
+type is_gcd (a:nat) (b:nat) (g:pos) =
+       is_common_divisor a b g /\
+       (forall (x:pos{x>g}). ~(is_common_divisor a b x))
+
+val gcd_exists: a:nat -> b:nat -> Lemma (exists g. is_gcd a b g)
+let gcd_exists a b = admit()
+
+val gcd_unique: a:nat -> b:nat -> g1:pos{is_gcd a b g1} -> g2:pos{is_gcd a b g2} -> Lemma
+  (g1 == g2)
+let gcd_unique a b g1 g2 = ()
+
+val gcd_symm: a:nat -> b:nat -> g:pos -> Lemma
+  (is_gcd a b g ==> is_gcd b a g)
+let gcd_symm a b g = ()
+
+val gcd_upper_bound: a:pos -> b:pos -> g:pos{is_gcd a b g} -> Lemma
+  (g <= a /\ g <= b /\ g <= min a b)
+let gcd_upper_bound a b g = ()
+
+val gcd_prop0: a:nat -> b:nat -> g:pos{is_gcd a b g} -> Lemma
+  (forall (d:pos). divides d a /\ divides d b ==> divides d g)
+let gcd_prop0 a b g = admit ()
+
+val gcd_prop_add_arg: a:nat -> b:nat -> g:pos{is_gcd a b g} -> Lemma
+  (is_gcd (a+b) b g)
+let gcd_prop_add_arg a b g =
+  exists_elim (is_gcd (a+b) b g) #pos #(fun g' -> is_gcd (a+b) b g') (gcd_exists (a+b) b)
+    (fun g' -> begin
+       if g' > g then begin
+         divides_neg g' b;
+         divides_sum g' (a+b) (-b);
+         assert (divides g' a);
+         assert (is_gcd a b g');
+         assert (False);
+         assert (is_gcd (a+b) b g)
+       end else begin
+         divides_sum g a b;
+         assert (is_gcd (a+b) b g)
+       end
+     end)
+
+val gcd_prop_sub_arg: a:nat -> b:nat -> g:pos{is_gcd a b g} -> Lemma
+  (requires (a-b >= 0))
+  (ensures (is_gcd (a-b) b g))
+let gcd_prop_sub_arg a b g =
+  exists_elim (is_gcd (a-b) b g) #pos #(fun g' -> is_gcd (a-b) b g') (gcd_exists (a-b) b)
+    (fun g' -> begin
+       if g' > g then begin
+         divides_neg g' b;
+         divides_sum g' (a-b) b;
+         assert (divides g' a);
+         assert (is_gcd a b g');
+         assert (False);
+         assert (is_gcd (a-b) b g)
+       end else begin
+         divides_neg g b;
+         divides_sum g a (-b);
+         assert (is_gcd (a-b) b g)
+       end
+     end)
+
+
+val gcd_prop_multiple1: a:nat -> b:nat -> g:pos -> m:nat -> Lemma
+  (requires (is_gcd a b g /\ a + m*b >= 0))
+  (ensures (is_gcd (a + m*b) b g))
+let rec gcd_prop_multiple1 a b g m = match m with
+  | 0 -> ()
+  | 1 -> gcd_prop_add_arg a b g
+  | _ -> gcd_prop_multiple1 a b g (m-1); gcd_prop_add_arg (a+(m-1)*b) b g
+
+val gcd_prop_multiple2: a:nat -> b:nat -> g:pos -> m:int{m <= 0} -> Lemma
+  (requires (is_gcd a b g /\ a + m*b >= 0))
+  (ensures (is_gcd (a + m*b) b g))
+  (decreases (-m))
+let rec gcd_prop_multiple2 a b g m = match m with
+  | 0 -> ()
+  | x -> if x = -1
+         then gcd_prop_sub_arg a b g
+         else begin
+           gcd_prop_multiple2 a b g (m+1);
+           gcd_prop_sub_arg (a+(m+1)*b) b g
+         end
+
+val gcd_prop_multiple: a:nat -> b:nat -> g:pos -> m:int -> Lemma
+  (requires (is_gcd a b g /\ a + m*b >= 0))
+  (ensures (is_gcd (a + m*b) b g))
+let gcd_prop_multiple a b g m =
+  if m >= 0 then gcd_prop_multiple1 a b g m else gcd_prop_multiple2 a b g m
+
+val ex_eucl_raw:
+     a:nat
+  -> b:pos
+  -> r:tuple3 pos int int{ let (g,u,v) = r in a * u + b * v = g }
+let rec ex_eucl_raw a b =
+  if a = 0 then (b, 0, 1) else begin
+    modulo_range_lemma b a;
+    let (g,s,t) = ex_eucl_raw (b % a) a in
+    distributivity_sub_left t ((b/a)*s) a;
+    lemma_div_mod b a;
+    (g, t - (b / a) * s, s)
+  end
+
+val gcd_eucl_step:
      a:pos
   -> b:pos
-  -> r:tuple3 pos int int{ let (g,u,v) = r in is_gcd a b g /\ a * u + b * v = g }
-let rec ex_eucl a b =
-  admit();
-  if a = 0 then (b, 0, 1) else
-  let (g,s,t) = ex_eucl (b % a) a in
-  (g, t - (b / a) * s, s)
+  -> g:pos
+  -> Lemma (requires is_gcd (b % a) a g) (ensures (is_gcd a b g))
+let rec gcd_eucl_step a b g =
+  assert (is_gcd (b % a) a g);
+  lemma_div_mod b a;
+  assert (b % a = b - a * (b / a));
+  assert (b - a * (b / a) = b + (- (b/a)) * a);
+  assert (b + (- (b/a)) * a >= 0);
+  gcd_prop_multiple (b - a * (b/a)) a g (b/a);
+  assert (is_gcd b a g);
+  gcd_symm b a g
 
-val gcd: a:pos -> b:pos -> Tot (r:pos{is_gcd a b r}) (decreases b)
+val ex_eucl_raw_is_gcd:
+     a:nat
+  -> b:pos
+  -> Lemma (let (g,_,_) = ex_eucl_raw a b in is_gcd a b g)
+let rec ex_eucl_raw_is_gcd a b =
+  if a = 0 then () else begin
+    modulo_range_lemma b a;
+    let (g,_,_) = ex_eucl_raw (b % a) a in
+    ex_eucl_raw_is_gcd (b % a) a;
+    gcd_eucl_step a b g
+  end
+
+val ex_eucl:
+     a:nat
+  -> b:pos
+  -> r:tuple3 pos int int{ let (g,u,v) = r in is_gcd a b g /\ a * u + b * v = g }
+let rec ex_eucl a b = ex_eucl_raw_is_gcd a b; ex_eucl_raw a b
+
+val gcd: a:pos -> b:pos -> g:pos{is_gcd a b g}
 let gcd a b = Mktuple3?._1 (ex_eucl a b)
+
+val gcd_standalone: a:nat -> b:pos -> g:pos{is_gcd a b g}
+let rec gcd_standalone a b =
+  if a = 0
+  then b
+  else
+    (modulo_range_lemma b a;
+     let g = gcd_standalone (b % a) a in
+     gcd_eucl_step a b g;
+     g)
 
 val ex_eucl_lemma1: a:pos -> b:pos -> g:pos -> u:int -> v:int -> Lemma
   (requires (a * u + b * v = g))
@@ -80,8 +238,11 @@ val ex_eucl_lemma3: a:pos -> b:pos -> u:int -> v:int -> Lemma
   (ensures (gcd a b = 1))
 let ex_eucl_lemma3 a b u v = ex_eucl_lemma2 a b 1 u v
 
+type is_common_multiple (a:pos) (b:pos) (l:pos) =
+  divides a l /\ divides b l
+
 val lcm: pos -> pos -> pos
-let lcm a b = (a / gcd a b) * b
+let lcm a b = (a / gcd_standalone a b) * b
 
 val division_mul_after: a:pos -> b:pos -> g:pos{divides g a} -> Lemma
   ((a / g) * b = (a * b) / g)
@@ -113,9 +274,13 @@ val gcd_pq_lcm_lemma: p:pos{p>1} -> q:pos{q>1} -> Lemma
    gcd (p * q) (lcm (p-1) (q-1)) = 1)
 let gcd_pq_lcm_lemma _ _ = admit()
 
-// Is there a constructive proof? Divisibility one is easy enough.
+// Is there a constructive proof? Divisibility one is easy enough:
+//
+// ~(a | n^2) ==> ~(a | n)
+// Since n^2 has the very same factors, then if gcd a n^2 = 1,
+// we won't find any other a | n^2 such that ~(a | n)
 val gcd_n_square: n:pos -> a:pos-> Lemma
-  (gcd a n = 1 ==> gcd a (n*n) = 1)
+  (gcd a n = 1 <==> gcd a (n*n) = 1)
 let gcd_n_square n a = admit()
 
 
@@ -172,7 +337,7 @@ let to_fe_neg #n a =
   assert((-a)%n = (-(a%n))%n);
   minus_is_neg a n
 
-val to_fe_add: #n:big -> a:nat -> b:nat -> Lemma
+val to_fe_add: #n:big -> a:int -> b:int -> Lemma
   (to_fe #n (a + b) = to_fe a +% to_fe b)
 let to_fe_add #n a b = modulo_distributivity a b n
 
@@ -194,7 +359,7 @@ let to_fe_sub' #n a b =
   to_fe_sub #n a b;
   assert (to_fe #n (a - b) = to_fe a -% to_fe b)
 
-val to_fe_mul: #n:big -> a:nat -> b:nat -> Lemma
+val to_fe_mul: #n:big -> a:int -> b:int -> Lemma
   (to_fe #n (a * b) = to_fe a *% to_fe b)
 let to_fe_mul #n a b = modulo_mul_distributivity a b n
 
@@ -549,6 +714,13 @@ let fexp_exp #n g e1 e2 =
   fexp_eq_nexp g (e1 * e2);
   nexp_exp g e1 e2
 
+val to_fe_fexp1: #n:big -> k:big{n % k = 0 && n / k > 1 } -> g:fe n -> e:nat -> Lemma
+  (to_fe #(n/k) (fexp g e) = fexp (to_fe #(n/k) g) e)
+let rec to_fe_fexp1 #n k g e =
+  to_fe_nexp1 #n k g e;
+  fexp_eq_nexp g e;
+  fexp_eq_nexp (to_fe #(n/k) g) e
+
 // Probably needs slightly more involved machinery to prove it
 val flt: #p:prm -> a:fe p{a>0} -> Lemma
   (fexp a (p-1) = 1)
@@ -557,7 +729,7 @@ let flt #p _ = admit()
 (* Inverses *)
 
 val isunit: #n:big -> a:fe n -> Type0
-let isunit #n a = exists b. a *% b = 1
+let isunit #n a = exists (b:fe n). a *% b = 1
 
 val isunit_nonzero: #n:big -> g:fe n{isunit g} -> Lemma (g <> 0)
 let isunit_nonzero #n g =
@@ -567,26 +739,79 @@ let isunit_nonzero #n g =
 val one_isunit: n:big -> Lemma (isunit #n 1)
 let one_isunit _ = ()
 
+val inv_unique: #n:big -> a:fe n -> b:fe n -> c:fe n -> Lemma
+  (requires (a *% b = one /\ a *% c = one))
+  (ensures (b = c))
+let inv_unique #n a b c =
+  calc (==) {
+    c; =={} c *% one; =={} c *% (a *% b); =={}
+            (c *% a) *% b; =={} one *% b; =={} b;
+  }
+
+val inv_as_gcd1: #n:big -> a:fe n{a>0} -> Lemma
+  (requires (gcd a n = 1))
+  (ensures (isunit a))
+let inv_as_gcd1 #n a =
+  let (g,u,v) = ex_eucl a n in
+  gcd_prop0 a n g;
+  assert (gcd a n = g);
+
+  assert (((u*a)%n = (1 + (-v)*n)%n));
+  modulo_distributivity 1 ((-v)*n) n;
+  assert ((u*a)%n = (1%n + ((-v)*n)%n)%n);
+  multiple_modulo_lemma (-v) n;
+  assert ((u*a)%n = (1%n)%n);
+  lemma_mod_twice 1 n;
+  one_mod_n n;
+  assert ((u*a)%n = 1);
+  modulo_mul_distributivity u a n;
+  assert (((to_fe #n u)*(a%n))%n = 1);
+  modulo_lemma a n;
+  assert ((to_fe #n u *% a) = 1)
+
+val inv_as_gcd2: #n:big -> a:fe n{a>0} -> Lemma
+  (requires (isunit a))
+  (ensures (gcd a n = 1))
+let inv_as_gcd2 #n a =
+  let l (): Lemma (exists (b:fe n). a *% b = 1) = () in
+  exists_elim (gcd a n = 1) #(fe n) #(fun (b:fe n) -> a *% b = 1) (l ()) (fun u -> begin
+    mod_prop n (u*a) 1;
+    assert ((u * a) + (-((u*a)/n)*n) = 1);
+    neg_mul_left ((u*a)/n) n;
+    ex_eucl_lemma3 a n u (-(u*a)/n)
+  end)
+
+val inv_as_gcd: #n:big -> a:fe n{a>0} -> Lemma
+  (isunit a <==> gcd a n = 1)
+let inv_as_gcd #n a =
+  move_requires inv_as_gcd1 a;
+  move_requires inv_as_gcd2 a
+
 val finv0: #n:big -> a:fe n ->
-  Tot (b:fe n{isunit a <==> b *% a = one})
+  Tot (b:fe n{ (isunit a <==> b *% a = one) /\
+               (~(isunit a) <==> b = 0)} )
 let finv0 #n a =
   if a = 0 then 0 else
-  let (g,u,_) = ex_eucl a n in
-  // Requires inv_as_gcd1 to be rewritten w/o depending on finv
-  admit();
-  if g = 1 then u else 0
+  let (g,u,v) = ex_eucl a n in
+  assert (gcd a n = g);
+  inv_as_gcd a;
+  if g <> 1 then 0 else begin
+    modulo_distributivity (u*a) (v*n) n;
+    multiple_modulo_lemma v n;
+    lemma_mod_twice (u * a) n;
+    to_fe_idemp #n 1;
+    to_fe_idemp a;
+    to_fe_mul #n u a;
+    to_fe #n u
+  end
 
 val finv: #n:big -> a:fe n{isunit a} -> b:fe n{b *% a = one}
 let finv #n a = finv0 a
 
-val finv_unique: #n:big -> a:fe n -> b:fe n{a *% b = one} -> Lemma
-  (isunit a /\ b = finv a)
-let finv_unique #n a b =
-  let z = finv a in
-  calc (==) {
-    z; =={} z *% one; =={} z *% (a *% b); =={}
-            (z *% a) *% b; =={} one *% b; =={} b;
-  }
+val finv_unique: #n:big -> a:fe n -> b:fe n -> Lemma
+  (requires (a *% b = one))
+  (ensures (isunit a /\ b = finv a))
+let finv_unique #n a b = inv_unique a b (finv a)
 
 val finv_mul: #n:big -> a:fe n -> b:fe n{isunit b} -> c:fe n -> Lemma
   (requires (a = b *% c))
@@ -602,44 +827,6 @@ let isunit_prod #n a b =
   mul4_assoc a b (finv a) (finv b);
   assert((a *% b) *% (finv a *% finv b) = one);
   finv_unique (a *% b) (finv a *% finv b)
-
-val inv_as_gcd1: #n:big -> a:fe n{a>0} -> Lemma
-  (requires (gcd a n = 1))
-  (ensures (isunit a))
-let inv_as_gcd1 #n a =
-  let (g,u,v) = ex_eucl a n in
-  assert (gcd a n = g);
-
-  assert (((u*a)%n = (1 + (-v)*n)%n));
-  modulo_distributivity 1 ((-v)*n) n;
-  assert ((u*a)%n = (1%n + ((-v)*n)%n)%n);
-  multiple_modulo_lemma (-v) n;
-  assert ((u*a)%n = (1%n)%n);
-  lemma_mod_twice 1 n;
-  one_mod_n n;
-  assert ((u*a)%n = 1);
-  modulo_mul_distributivity u a n;
-  assert (((to_fe #n u)*(a%n))%n = 1);
-  modulo_lemma a n;
-  assert ((to_fe #n u *% a) = 1);
-  finv_unique #n (to_fe u) a
-
-val inv_as_gcd2: #n:big -> a:fe n{a>0} -> Lemma
-  (requires (isunit a))
-  (ensures (gcd a n = 1))
-let inv_as_gcd2 #n a =
-  let u:fe n = finv a in
-
-  mod_prop n (u*a) 1;
-  assert ((u * a) + (-((u*a)/n)*n) = 1);
-  neg_mul_left ((u*a)/n) n;
-  ex_eucl_lemma3 a n u (-(u*a)/n)
-
-val inv_as_gcd: #n:big -> a:fe n{a>0} -> Lemma
-  (isunit a <==> gcd a n = 1)
-let inv_as_gcd #n a =
-  move_requires inv_as_gcd1 a;
-  move_requires inv_as_gcd2 a
 
 // Could be some naive algorithm, not used in the real code.
 val mult_order:

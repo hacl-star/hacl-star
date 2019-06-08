@@ -122,13 +122,44 @@ val bn_mul:
       live h a /\ live h b /\ live h res /\ disjoint res a /\ disjoint res b)
     (ensures  fun h0 _ h1 ->
      modifies (loc res) h0 h1 /\ as_snat h1 res == as_snat h0 a * as_snat h0 b)
-let bn_mul #aLen #bLen a b res = admit();
+let bn_mul #aLen #bLen a b res =
   push_frame ();
   let resLen = aLen +. bLen in
   memset res (u64 0) resLen;
   let carry = create 1ul (u64 0) in
   bn_mult_ a b res carry;
-  pop_frame ()
+  pop_frame ();
+  let h = FStar.HyperStack.ST.get () in
+  assume (as_snat h res = as_snat h a * as_snat h b)
+
+// Maybe this should be generalised: one can write a function
+// that cuts the bignum, removing the higher bits, preserving
+// functional correctness. This is a temporary stub.
+val bn_mul_fitting:
+     #aLen:bn_len
+  -> #bLen:bn_len{v aLen + v bLen < max_size_t}
+  -> #resLen:bn_len{v resLen <= v aLen + v bLen}
+  -> a:lbignum aLen
+  -> b:lbignum bLen
+  -> res:lbignum resLen
+  -> Stack unit
+    (requires fun h ->
+      live h a /\ live h b /\ live h res /\
+      all_disjoint [loc a; loc b; loc res] /\
+      issnat (as_snat h a * as_snat h b) /\
+      v (nat_bytes_num (as_snat h a * as_snat h b)) <= v resLen)
+    (ensures  fun h0 _ h1 ->
+     modifies (loc res) h0 h1 /\ as_snat h1 res == as_snat h0 a * as_snat h0 b)
+let bn_mul_fitting #aLen #bLen #resLen a b res =
+  push_frame ();
+  let tmp = create (aLen +. bLen) (u64 0) in
+  bn_mul a b tmp;
+  copy res (sub tmp 0ul resLen);
+  pop_frame ();
+
+  let h = FStar.HyperStack.ST.get () in
+  assume (as_snat h res = as_snat h a * as_snat h b)
+
 
 type sign =
   | Positive : sign

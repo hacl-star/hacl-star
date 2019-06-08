@@ -114,10 +114,10 @@ val nat_bytes_num_range: x:snat -> Lemma
 let nat_bytes_num_range _ = ()
 
 /// Base64 representation on snats preserves order (specialised version).
-val nat_bytes_num_fit: a:snat -> b:snat -> Lemma
+val nat_bytes_num_fit: a:nat -> b:snat -> Lemma
   (requires (a <= b))
-  (ensures (v (nat_bytes_num a) <= v (nat_bytes_num b)))
-let rec nat_bytes_num_fit a b = nat_to_list64_order a b
+  (ensures (issnat a /\ v (nat_bytes_num a) <= v (nat_bytes_num b)))
+let rec nat_bytes_num_fit a b = snat_order a b; nat_to_list64_order a b
 
 /// Nat representation of bigint.
 noextract
@@ -130,6 +130,15 @@ let as_snat #eLen h e =
 //  assert (L.length e > 0);
   let x = as_seq h e in
   list64_sec_to_nat (Seq.Properties.seq_to_list x)
+
+/// Number of real words neeeded to represent a number
+/// fit into its given bignum representation.
+val as_snat_prop:
+     #eLen:bn_len_strict
+  -> h:mem
+  -> e:lbignum eLen
+  -> Lemma (issnat (as_snat h e) /\ v (nat_bytes_num (as_snat h e)) <= v eLen)
+let as_snat_prop #eLen h e = admit ()
 
 /// Converts nat to the bignum, for that creates a bignum of exact length required.
 inline_for_extraction noextract
