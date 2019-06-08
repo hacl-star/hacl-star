@@ -1,5 +1,5 @@
 [
-  "æÿ%¢náYŸ²¶¥vîRâõ",
+  "×\tôãõ6œ†±JÄbç–Ÿ¡",
   [
     [
       "Vale.X64.Leakage_Helpers.operand_taint",
@@ -12,38 +12,13 @@
         "disc_equation_Vale.X64.Machine_s.OMem",
         "disc_equation_Vale.X64.Machine_s.OReg",
         "disc_equation_Vale.X64.Machine_s.OStack",
-        "equation_Vale.Def.Words_s.nat64",
-        "equation_Vale.X64.Machine_s.n_reg_files",
-        "equation_Vale.X64.Machine_s.n_regs",
-        "equation_Vale.X64.Machine_s.operand64",
-        "equation_Vale.X64.Machine_s.reg_64",
-        "fuel_guarded_inversion_Vale.X64.Machine_s.operand",
-        "projection_inverse_BoxInt_proj_0"
+        "equation_Vale.X64.Machine_s.operand_rf",
+        "equation_Vale.X64.Machine_s.reg_id",
+        "equation_Vale.X64.Machine_s.t_reg_file",
+        "fuel_guarded_inversion_Vale.X64.Machine_s.operand"
       ],
       0,
-      "d9c20eb71ee39a9c10a565ad53ec776b"
-    ],
-    [
-      "Vale.X64.Leakage_Helpers.operand_taint128",
-      1,
-      1,
-      1,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_Vale.X64.Machine_s.OConst",
-        "disc_equation_Vale.X64.Machine_s.OMem",
-        "disc_equation_Vale.X64.Machine_s.OReg",
-        "disc_equation_Vale.X64.Machine_s.OStack",
-        "equation_Vale.Def.Types_s.quad32",
-        "equation_Vale.X64.Machine_s.n_reg_files",
-        "equation_Vale.X64.Machine_s.n_regs",
-        "equation_Vale.X64.Machine_s.operand128",
-        "equation_Vale.X64.Machine_s.reg_xmm",
-        "fuel_guarded_inversion_Vale.X64.Machine_s.operand",
-        "projection_inverse_BoxInt_proj_0"
-      ],
-      0,
-      "0d2e6e815ee371cbd8f707e77bb03063"
+      "942f35a5127c66ce12420500b7dd07b3"
     ],
     [
       "Vale.X64.Leakage_Helpers.operand_taint_explicit",
@@ -55,11 +30,13 @@
         "disc_equation_Vale.X64.Instruction_s.IOp64",
         "disc_equation_Vale.X64.Instruction_s.IOpXmm",
         "equation_Vale.X64.Instruction_s.instr_operand_t",
+        "equation_Vale.X64.Machine_s.n_reg_files",
         "fuel_guarded_inversion_Vale.X64.Instruction_s.instr_operand_explicit",
-        "projection_inverse_BoxBool_proj_0"
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "983c5054aa23c3bfd4131d562f93a3c9"
+      "9643d50e1b461da5a10d9e03bba30349"
     ],
     [
       "Vale.X64.Leakage_Helpers.operand_taint_implicit",
@@ -72,10 +49,12 @@
         "disc_equation_Vale.X64.Instruction_s.IOpFlagsCf",
         "disc_equation_Vale.X64.Instruction_s.IOpFlagsOf",
         "disc_equation_Vale.X64.Instruction_s.IOpXmmOne",
-        "fuel_guarded_inversion_Vale.X64.Instruction_s.instr_operand_implicit"
+        "equation_Vale.X64.Machine_s.n_reg_files",
+        "fuel_guarded_inversion_Vale.X64.Instruction_s.instr_operand_implicit",
+        "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "969cd981803ae0d6a7bbad7b10f80158"
+      "cdf90e7ae9941275d53cbecfd069e086"
     ],
     [
       "Vale.X64.Leakage_Helpers.args_taint",
@@ -103,7 +82,7 @@
         "subterm_ordering_Prims.Cons"
       ],
       0,
-      "6813d4772d1b1bdbca0de1b685add71b"
+      "3a41ceba842219d66923a5c35519632c"
     ],
     [
       "Vale.X64.Leakage_Helpers.inouts_taint",
@@ -150,7 +129,7 @@
         "typing_FStar.Pervasives.Native.__proj__Mktuple2__item___1"
       ],
       0,
-      "40c8ef0f7e4876502978ca54b3dc2bdc"
+      "730044a28a3a50b8ca8239ffe136365d"
     ],
     [
       "Vale.X64.Leakage_Helpers.maddr_does_not_use_secrets",
@@ -165,7 +144,7 @@
         "fuel_guarded_inversion_Vale.X64.Machine_s.maddr"
       ],
       0,
-      "d9ea4d26c5a4cae7637a0362fa648248"
+      "2617d519e5aeb1d85892a578edc2aefc"
     ],
     [
       "Vale.X64.Leakage_Helpers.operand_does_not_use_secrets",
@@ -183,26 +162,7 @@
         "fuel_guarded_inversion_Vale.X64.Machine_s.operand"
       ],
       0,
-      "2427833c4a8ca946cc494a74d355165c"
-    ],
-    [
-      "Vale.X64.Leakage_Helpers.operand128_does_not_use_secrets",
-      1,
-      1,
-      1,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_Vale.X64.Machine_s.OConst",
-        "disc_equation_Vale.X64.Machine_s.OMem",
-        "disc_equation_Vale.X64.Machine_s.OReg",
-        "disc_equation_Vale.X64.Machine_s.OStack",
-        "equation_Vale.Def.Types_s.quad32",
-        "equation_Vale.X64.Machine_s.operand128",
-        "equation_Vale.X64.Machine_s.xmm",
-        "fuel_guarded_inversion_Vale.X64.Machine_s.operand"
-      ],
-      0,
-      "e182ea75a0551af9ebdcd5f3dbf15aab"
+      "9d5dba4746528575cd926064584385c5"
     ],
     [
       "Vale.X64.Leakage_Helpers.operand_taint_allowed",
@@ -220,26 +180,7 @@
         "fuel_guarded_inversion_Vale.X64.Machine_s.operand"
       ],
       0,
-      "207daf4a480316dc268240f42368a556"
-    ],
-    [
-      "Vale.X64.Leakage_Helpers.operand128_taint_allowed",
-      1,
-      1,
-      1,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_Vale.X64.Machine_s.OConst",
-        "disc_equation_Vale.X64.Machine_s.OMem",
-        "disc_equation_Vale.X64.Machine_s.OReg",
-        "disc_equation_Vale.X64.Machine_s.OStack",
-        "equation_Vale.Def.Types_s.quad32",
-        "equation_Vale.X64.Machine_s.operand128",
-        "equation_Vale.X64.Machine_s.xmm",
-        "fuel_guarded_inversion_Vale.X64.Machine_s.operand"
-      ],
-      0,
-      "04c099660241cad0016112ca87e01dbf"
+      "44344e830a0ea6d938c315a805bfca4b"
     ],
     [
       "Vale.X64.Leakage_Helpers.set_taint",
@@ -253,120 +194,66 @@
         "disc_equation_Vale.X64.Machine_s.OMem",
         "disc_equation_Vale.X64.Machine_s.OReg",
         "disc_equation_Vale.X64.Machine_s.OStack",
-        "equation_Vale.Def.Words_s.nat64",
+        "equation_Vale.X64.Machine_s.operand_rf",
+        "equation_Vale.X64.Machine_s.reg_id",
+        "equation_Vale.X64.Machine_s.t_reg_file",
+        "fuel_guarded_inversion_Vale.X64.Machine_s.operand"
+      ],
+      0,
+      "5e0945090e9d931e0984ad00cd0b15fb"
+    ],
+    [
+      "Vale.X64.Leakage_Helpers.publicRegisterValuesAreAsExpected_reg_file",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565",
+        "Vale.X64.Leakage_s_pretyping_ad50abf6589ef6c4087eb065e6cf08d5",
+        "binder_x_9b91d8420988f576f9b4f0d2e51465df_3",
+        "binder_x_ad50abf6589ef6c4087eb065e6cf08d5_0",
+        "binder_x_ad50abf6589ef6c4087eb065e6cf08d5_1",
+        "binder_x_f561aeaa820a1577b329b6cc49b9eb2b_2",
+        "equality_tok_Prims.LexTop@tok", "equation_Prims.nat",
+        "equation_Vale.Def.Words_s.natN",
         "equation_Vale.X64.Machine_s.n_reg_files",
-        "equation_Vale.X64.Machine_s.n_regs",
-        "equation_Vale.X64.Machine_s.operand64",
-        "equation_Vale.X64.Machine_s.reg_64",
-        "fuel_guarded_inversion_Vale.X64.Machine_s.operand",
-        "projection_inverse_BoxInt_proj_0"
-      ],
-      0,
-      "8e552663c9332658dcdc04fd8436de38"
-    ],
-    [
-      "Vale.X64.Leakage_Helpers.set_taint128",
-      1,
-      1,
-      1,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "assumption_Vale.X64.Machine_s.reg__uu___haseq",
-        "disc_equation_Vale.X64.Machine_s.OConst",
-        "disc_equation_Vale.X64.Machine_s.OMem",
-        "disc_equation_Vale.X64.Machine_s.OReg",
-        "disc_equation_Vale.X64.Machine_s.OStack",
-        "equation_Vale.Def.Types_s.quad32",
-        "equation_Vale.X64.Machine_s.n_reg_files",
-        "equation_Vale.X64.Machine_s.n_regs",
-        "equation_Vale.X64.Machine_s.operand128",
-        "equation_Vale.X64.Machine_s.reg_xmm",
-        "fuel_guarded_inversion_Vale.X64.Machine_s.operand",
-        "projection_inverse_BoxInt_proj_0"
-      ],
-      0,
-      "8d7d6636b93d4e740567f09c8901a335"
-    ],
-    [
-      "Vale.X64.Leakage_Helpers.operands_do_not_use_secrets",
-      1,
-      1,
-      1,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "binder_x_4a4bbbe3b837a1e1d453efc850cbb60e_0",
-        "disc_equation_Prims.Cons", "disc_equation_Prims.Nil",
-        "equation_Vale.X64.Machine_s.operand64",
-        "fuel_guarded_inversion_Prims.list", "subterm_ordering_Prims.Cons"
-      ],
-      0,
-      "1039a77072a5c3e7faf5582fbcc15e41"
-    ],
-    [
-      "Vale.X64.Leakage_Helpers.publicFlagValuesAreAsExpected",
-      1,
-      1,
-      1,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "Vale.X64.Machine_s_pretyping_38835f297fb700457da67879cc31d6a6",
-        "data_typing_intro_Vale.X64.Machine_s.Secret@tok",
-        "disc_equation_Vale.X64.Machine_s.Public",
-        "equality_tok_Vale.X64.Machine_s.Public@tok",
-        "equality_tok_Vale.X64.Machine_s.Secret@tok",
+        "equation_Vale.X64.Machine_s.reg_file_id",
         "fuel_guarded_inversion_Vale.X64.Leakage_s.analysis_taints",
-        "fuel_guarded_inversion_Vale.X64.Machine_s.taint",
-        "primitive_Prims.op_AmpAmp", "primitive_Prims.op_Equality",
-        "proj_equation_Vale.X64.Leakage_s.AnalysisTaints_flagsTaint",
-        "projection_inverse_BoxBool_proj_0",
-        "typing_Vale.X64.Leakage_s.__proj__AnalysisTaints__item__flagsTaint"
+        "function_token_typing_Prims.__cache_version_number__",
+        "int_inversion", "int_typing", "primitive_Prims.op_Equality",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_5514fbe9e08dfda40f950a7b9f1b2b98",
+        "refinement_interpretation_Tm_refine_91729efe0742770d103996c68383a250",
+        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "well-founded-ordering-on-nat"
       ],
       0,
-      "af454ed070fc620baf88fb884505cf89"
+      "12ea812e49bc6f460130c9c39854c006"
     ],
     [
-      "Vale.X64.Leakage_Helpers.publicCfFlagValuesAreAsExpected",
+      "Vale.X64.Leakage_Helpers.publicRegisterValuesAreAsExpected_regs",
       1,
       1,
-      1,
+      0,
       [
         "@MaxIFuel_assumption", "@query",
-        "Vale.X64.Machine_s_pretyping_38835f297fb700457da67879cc31d6a6",
-        "data_typing_intro_Vale.X64.Machine_s.Secret@tok",
-        "disc_equation_Vale.X64.Machine_s.Public",
-        "equality_tok_Vale.X64.Machine_s.Public@tok",
-        "equality_tok_Vale.X64.Machine_s.Secret@tok",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565",
+        "Vale.X64.Leakage_s_pretyping_ad50abf6589ef6c4087eb065e6cf08d5",
+        "binder_x_72e6a6563d3b803edbc9fb3026e9e0ca_2",
+        "binder_x_ad50abf6589ef6c4087eb065e6cf08d5_0",
+        "binder_x_ad50abf6589ef6c4087eb065e6cf08d5_1",
+        "equality_tok_Prims.LexTop@tok", "equation_Prims.nat",
         "fuel_guarded_inversion_Vale.X64.Leakage_s.analysis_taints",
-        "fuel_guarded_inversion_Vale.X64.Machine_s.taint",
-        "primitive_Prims.op_AmpAmp", "primitive_Prims.op_Equality",
-        "proj_equation_Vale.X64.Leakage_s.AnalysisTaints_cfFlagsTaint",
-        "projection_inverse_BoxBool_proj_0",
-        "typing_Vale.X64.Leakage_s.__proj__AnalysisTaints__item__cfFlagsTaint"
+        "function_token_typing_Prims.__cache_version_number__",
+        "int_inversion", "int_typing", "primitive_Prims.op_Equality",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_8ae4abcfc6bc8d4903b7e1f40e070ec2",
+        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "well-founded-ordering-on-nat"
       ],
       0,
-      "10686ff2b796f3969e2e6bf774152544"
-    ],
-    [
-      "Vale.X64.Leakage_Helpers.publicOfFlagValuesAreAsExpected",
-      1,
-      1,
-      1,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "Vale.X64.Machine_s_pretyping_38835f297fb700457da67879cc31d6a6",
-        "data_typing_intro_Vale.X64.Machine_s.Secret@tok",
-        "disc_equation_Vale.X64.Machine_s.Public",
-        "equality_tok_Vale.X64.Machine_s.Public@tok",
-        "equality_tok_Vale.X64.Machine_s.Secret@tok",
-        "fuel_guarded_inversion_Vale.X64.Leakage_s.analysis_taints",
-        "fuel_guarded_inversion_Vale.X64.Machine_s.taint",
-        "primitive_Prims.op_AmpAmp", "primitive_Prims.op_Equality",
-        "proj_equation_Vale.X64.Leakage_s.AnalysisTaints_ofFlagsTaint",
-        "projection_inverse_BoxBool_proj_0",
-        "typing_Vale.X64.Leakage_s.__proj__AnalysisTaints__item__ofFlagsTaint"
-      ],
-      0,
-      "44b5df79777b50cf580fa694b069b148"
+      "ef771c1f9431124d3b2105cc5be4f4a4"
     ],
     [
       "Vale.X64.Leakage_Helpers.publicRegisterValuesAreAsExpected",
@@ -416,7 +303,7 @@
         "typing_Vale.X64.Machine_s.n_regs"
       ],
       0,
-      "f11984cabfad1a32859be2db65fb6da1"
+      "92507e30df0393be82706c63e2904371"
     ],
     [
       "Vale.X64.Leakage_Helpers.operand_taint",
@@ -429,38 +316,13 @@
         "disc_equation_Vale.X64.Machine_s.OMem",
         "disc_equation_Vale.X64.Machine_s.OReg",
         "disc_equation_Vale.X64.Machine_s.OStack",
-        "equation_Vale.Def.Words_s.nat64",
-        "equation_Vale.X64.Machine_s.n_reg_files",
-        "equation_Vale.X64.Machine_s.n_regs",
-        "equation_Vale.X64.Machine_s.operand64",
-        "equation_Vale.X64.Machine_s.reg_64",
-        "fuel_guarded_inversion_Vale.X64.Machine_s.operand",
-        "projection_inverse_BoxInt_proj_0"
+        "equation_Vale.X64.Machine_s.operand_rf",
+        "equation_Vale.X64.Machine_s.reg_id",
+        "equation_Vale.X64.Machine_s.t_reg_file",
+        "fuel_guarded_inversion_Vale.X64.Machine_s.operand"
       ],
       0,
-      "90167a7a2d3398620f33f4866c14b146"
-    ],
-    [
-      "Vale.X64.Leakage_Helpers.operand_taint128",
-      2,
-      1,
-      1,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_Vale.X64.Machine_s.OConst",
-        "disc_equation_Vale.X64.Machine_s.OMem",
-        "disc_equation_Vale.X64.Machine_s.OReg",
-        "disc_equation_Vale.X64.Machine_s.OStack",
-        "equation_Vale.Def.Types_s.quad32",
-        "equation_Vale.X64.Machine_s.n_reg_files",
-        "equation_Vale.X64.Machine_s.n_regs",
-        "equation_Vale.X64.Machine_s.operand128",
-        "equation_Vale.X64.Machine_s.reg_xmm",
-        "fuel_guarded_inversion_Vale.X64.Machine_s.operand",
-        "projection_inverse_BoxInt_proj_0"
-      ],
-      0,
-      "7b74175257c4bf903d95f00da44f062a"
+      "31f4714febe614d909a6a850b434d7fe"
     ],
     [
       "Vale.X64.Leakage_Helpers.operand_taint_explicit",
@@ -472,11 +334,13 @@
         "disc_equation_Vale.X64.Instruction_s.IOp64",
         "disc_equation_Vale.X64.Instruction_s.IOpXmm",
         "equation_Vale.X64.Instruction_s.instr_operand_t",
+        "equation_Vale.X64.Machine_s.n_reg_files",
         "fuel_guarded_inversion_Vale.X64.Instruction_s.instr_operand_explicit",
-        "projection_inverse_BoxBool_proj_0"
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "8171f53094da76495be09bf2c064b38a"
+      "bf8dae522d45ca2d4e01ab5b74869629"
     ],
     [
       "Vale.X64.Leakage_Helpers.operand_taint_implicit",
@@ -489,10 +353,12 @@
         "disc_equation_Vale.X64.Instruction_s.IOpFlagsCf",
         "disc_equation_Vale.X64.Instruction_s.IOpFlagsOf",
         "disc_equation_Vale.X64.Instruction_s.IOpXmmOne",
-        "fuel_guarded_inversion_Vale.X64.Instruction_s.instr_operand_implicit"
+        "equation_Vale.X64.Machine_s.n_reg_files",
+        "fuel_guarded_inversion_Vale.X64.Instruction_s.instr_operand_implicit",
+        "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "eca7d387e59f02f610d84d999250f040"
+      "89dc9e51d3fd66d75e3d2952b1700cc7"
     ],
     [
       "Vale.X64.Leakage_Helpers.args_taint",
@@ -520,7 +386,7 @@
         "subterm_ordering_Prims.Cons"
       ],
       0,
-      "1c4ef735f4cca99f2a0b3a2a25d591d8"
+      "955d9481f22b9a497f9dfc93dcec28ea"
     ],
     [
       "Vale.X64.Leakage_Helpers.inouts_taint",
@@ -567,7 +433,7 @@
         "typing_FStar.Pervasives.Native.__proj__Mktuple2__item___1"
       ],
       0,
-      "2d6af81f7c6f7354b41a897a4a657c02"
+      "2f9e1802b471040869e6061a90289c98"
     ],
     [
       "Vale.X64.Leakage_Helpers.maddr_does_not_use_secrets",
@@ -582,7 +448,7 @@
         "fuel_guarded_inversion_Vale.X64.Machine_s.maddr"
       ],
       0,
-      "166e4a52b7878b80b83f953174fde9b9"
+      "be2a17ec773bc5dcb31b96c5690ed01e"
     ],
     [
       "Vale.X64.Leakage_Helpers.operand_does_not_use_secrets",
@@ -600,26 +466,7 @@
         "fuel_guarded_inversion_Vale.X64.Machine_s.operand"
       ],
       0,
-      "5a32069ff67c5a6f8e13de02f2dac6d9"
-    ],
-    [
-      "Vale.X64.Leakage_Helpers.operand128_does_not_use_secrets",
-      2,
-      1,
-      1,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_Vale.X64.Machine_s.OConst",
-        "disc_equation_Vale.X64.Machine_s.OMem",
-        "disc_equation_Vale.X64.Machine_s.OReg",
-        "disc_equation_Vale.X64.Machine_s.OStack",
-        "equation_Vale.Def.Types_s.quad32",
-        "equation_Vale.X64.Machine_s.operand128",
-        "equation_Vale.X64.Machine_s.xmm",
-        "fuel_guarded_inversion_Vale.X64.Machine_s.operand"
-      ],
-      0,
-      "6edbab2dbf40dfece845dd9cf4d83213"
+      "a779ccd0045d539b6d3ab568a02b7823"
     ],
     [
       "Vale.X64.Leakage_Helpers.operand_taint_allowed",
@@ -637,26 +484,7 @@
         "fuel_guarded_inversion_Vale.X64.Machine_s.operand"
       ],
       0,
-      "111e9d81e57059b88368df3024633123"
-    ],
-    [
-      "Vale.X64.Leakage_Helpers.operand128_taint_allowed",
-      2,
-      1,
-      1,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_Vale.X64.Machine_s.OConst",
-        "disc_equation_Vale.X64.Machine_s.OMem",
-        "disc_equation_Vale.X64.Machine_s.OReg",
-        "disc_equation_Vale.X64.Machine_s.OStack",
-        "equation_Vale.Def.Types_s.quad32",
-        "equation_Vale.X64.Machine_s.operand128",
-        "equation_Vale.X64.Machine_s.xmm",
-        "fuel_guarded_inversion_Vale.X64.Machine_s.operand"
-      ],
-      0,
-      "8a768f623def5df16a8fb3fc267f83bd"
+      "1174dfae0aacaab598b91a84bc72f5b3"
     ],
     [
       "Vale.X64.Leakage_Helpers.set_taint",
@@ -670,120 +498,66 @@
         "disc_equation_Vale.X64.Machine_s.OMem",
         "disc_equation_Vale.X64.Machine_s.OReg",
         "disc_equation_Vale.X64.Machine_s.OStack",
-        "equation_Vale.Def.Words_s.nat64",
+        "equation_Vale.X64.Machine_s.operand_rf",
+        "equation_Vale.X64.Machine_s.reg_id",
+        "equation_Vale.X64.Machine_s.t_reg_file",
+        "fuel_guarded_inversion_Vale.X64.Machine_s.operand"
+      ],
+      0,
+      "141cb1c6538ea98932ff3ed1e0d14af7"
+    ],
+    [
+      "Vale.X64.Leakage_Helpers.publicRegisterValuesAreAsExpected_reg_file",
+      2,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565",
+        "Vale.X64.Leakage_s_pretyping_ad50abf6589ef6c4087eb065e6cf08d5",
+        "binder_x_9b91d8420988f576f9b4f0d2e51465df_3",
+        "binder_x_ad50abf6589ef6c4087eb065e6cf08d5_0",
+        "binder_x_ad50abf6589ef6c4087eb065e6cf08d5_1",
+        "binder_x_f561aeaa820a1577b329b6cc49b9eb2b_2",
+        "equality_tok_Prims.LexTop@tok", "equation_Prims.nat",
+        "equation_Vale.Def.Words_s.natN",
         "equation_Vale.X64.Machine_s.n_reg_files",
-        "equation_Vale.X64.Machine_s.n_regs",
-        "equation_Vale.X64.Machine_s.operand64",
-        "equation_Vale.X64.Machine_s.reg_64",
-        "fuel_guarded_inversion_Vale.X64.Machine_s.operand",
-        "projection_inverse_BoxInt_proj_0"
-      ],
-      0,
-      "49f76d8a2167509bf7ca3838273c26b7"
-    ],
-    [
-      "Vale.X64.Leakage_Helpers.set_taint128",
-      2,
-      1,
-      1,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "assumption_Vale.X64.Machine_s.reg__uu___haseq",
-        "disc_equation_Vale.X64.Machine_s.OConst",
-        "disc_equation_Vale.X64.Machine_s.OMem",
-        "disc_equation_Vale.X64.Machine_s.OReg",
-        "disc_equation_Vale.X64.Machine_s.OStack",
-        "equation_Vale.Def.Types_s.quad32",
-        "equation_Vale.X64.Machine_s.n_reg_files",
-        "equation_Vale.X64.Machine_s.n_regs",
-        "equation_Vale.X64.Machine_s.operand128",
-        "equation_Vale.X64.Machine_s.reg_xmm",
-        "fuel_guarded_inversion_Vale.X64.Machine_s.operand",
-        "projection_inverse_BoxInt_proj_0"
-      ],
-      0,
-      "0b31333affc8b9f5abf44c351987d6ad"
-    ],
-    [
-      "Vale.X64.Leakage_Helpers.operands_do_not_use_secrets",
-      2,
-      1,
-      1,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "binder_x_4a4bbbe3b837a1e1d453efc850cbb60e_0",
-        "disc_equation_Prims.Cons", "disc_equation_Prims.Nil",
-        "equation_Vale.X64.Machine_s.operand64",
-        "fuel_guarded_inversion_Prims.list", "subterm_ordering_Prims.Cons"
-      ],
-      0,
-      "eb0bdec3e261d7ecc7dc9eac2b840409"
-    ],
-    [
-      "Vale.X64.Leakage_Helpers.publicFlagValuesAreAsExpected",
-      2,
-      1,
-      1,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "Vale.X64.Machine_s_pretyping_38835f297fb700457da67879cc31d6a6",
-        "data_typing_intro_Vale.X64.Machine_s.Secret@tok",
-        "disc_equation_Vale.X64.Machine_s.Public",
-        "equality_tok_Vale.X64.Machine_s.Public@tok",
-        "equality_tok_Vale.X64.Machine_s.Secret@tok",
+        "equation_Vale.X64.Machine_s.reg_file_id",
         "fuel_guarded_inversion_Vale.X64.Leakage_s.analysis_taints",
-        "fuel_guarded_inversion_Vale.X64.Machine_s.taint",
-        "primitive_Prims.op_AmpAmp", "primitive_Prims.op_Equality",
-        "proj_equation_Vale.X64.Leakage_s.AnalysisTaints_flagsTaint",
-        "projection_inverse_BoxBool_proj_0",
-        "typing_Vale.X64.Leakage_s.__proj__AnalysisTaints__item__flagsTaint"
+        "function_token_typing_Prims.__cache_version_number__",
+        "int_inversion", "int_typing", "primitive_Prims.op_Equality",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_5514fbe9e08dfda40f950a7b9f1b2b98",
+        "refinement_interpretation_Tm_refine_91729efe0742770d103996c68383a250",
+        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "well-founded-ordering-on-nat"
       ],
       0,
-      "55a76e4af175444567624790cb3a9b44"
+      "16c2667bc35ae2149ca96715fae40648"
     ],
     [
-      "Vale.X64.Leakage_Helpers.publicCfFlagValuesAreAsExpected",
+      "Vale.X64.Leakage_Helpers.publicRegisterValuesAreAsExpected_regs",
       2,
       1,
-      1,
+      0,
       [
         "@MaxIFuel_assumption", "@query",
-        "Vale.X64.Machine_s_pretyping_38835f297fb700457da67879cc31d6a6",
-        "data_typing_intro_Vale.X64.Machine_s.Secret@tok",
-        "disc_equation_Vale.X64.Machine_s.Public",
-        "equality_tok_Vale.X64.Machine_s.Public@tok",
-        "equality_tok_Vale.X64.Machine_s.Secret@tok",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565",
+        "Vale.X64.Leakage_s_pretyping_ad50abf6589ef6c4087eb065e6cf08d5",
+        "binder_x_72e6a6563d3b803edbc9fb3026e9e0ca_2",
+        "binder_x_ad50abf6589ef6c4087eb065e6cf08d5_0",
+        "binder_x_ad50abf6589ef6c4087eb065e6cf08d5_1",
+        "equality_tok_Prims.LexTop@tok", "equation_Prims.nat",
         "fuel_guarded_inversion_Vale.X64.Leakage_s.analysis_taints",
-        "fuel_guarded_inversion_Vale.X64.Machine_s.taint",
-        "primitive_Prims.op_AmpAmp", "primitive_Prims.op_Equality",
-        "proj_equation_Vale.X64.Leakage_s.AnalysisTaints_cfFlagsTaint",
-        "projection_inverse_BoxBool_proj_0",
-        "typing_Vale.X64.Leakage_s.__proj__AnalysisTaints__item__cfFlagsTaint"
+        "function_token_typing_Prims.__cache_version_number__",
+        "int_inversion", "int_typing", "primitive_Prims.op_Equality",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_8ae4abcfc6bc8d4903b7e1f40e070ec2",
+        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "well-founded-ordering-on-nat"
       ],
       0,
-      "3c2cceaca20b10b205a6d66d57bd1f2e"
-    ],
-    [
-      "Vale.X64.Leakage_Helpers.publicOfFlagValuesAreAsExpected",
-      2,
-      1,
-      1,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "Vale.X64.Machine_s_pretyping_38835f297fb700457da67879cc31d6a6",
-        "data_typing_intro_Vale.X64.Machine_s.Secret@tok",
-        "disc_equation_Vale.X64.Machine_s.Public",
-        "equality_tok_Vale.X64.Machine_s.Public@tok",
-        "equality_tok_Vale.X64.Machine_s.Secret@tok",
-        "fuel_guarded_inversion_Vale.X64.Leakage_s.analysis_taints",
-        "fuel_guarded_inversion_Vale.X64.Machine_s.taint",
-        "primitive_Prims.op_AmpAmp", "primitive_Prims.op_Equality",
-        "proj_equation_Vale.X64.Leakage_s.AnalysisTaints_ofFlagsTaint",
-        "projection_inverse_BoxBool_proj_0",
-        "typing_Vale.X64.Leakage_s.__proj__AnalysisTaints__item__ofFlagsTaint"
-      ],
-      0,
-      "b4b596509ed261a9e5b1968869447f8b"
+      "de3fcdd060ca6c71dd541187bf8755da"
     ],
     [
       "Vale.X64.Leakage_Helpers.publicRegisterValuesAreAsExpected",
@@ -833,7 +607,7 @@
         "typing_Vale.X64.Machine_s.n_regs"
       ],
       0,
-      "0c689351f1527774737a2eac9d634413"
+      "2154984398eee3f0883aabb93a99c183"
     ]
   ]
 ]

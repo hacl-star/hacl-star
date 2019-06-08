@@ -8,7 +8,7 @@
       0,
       [ "@query" ],
       0,
-      "3af6c87795a315181a0581e18d52b356"
+      "83dbd209a8ae92f98aaab520cb138ec3"
     ],
     [
       "Vale.Stdcalls.X64.Sha.as_normal_t",
@@ -17,7 +17,7 @@
       0,
       [ "@query" ],
       0,
-      "3f2dc45f73030125f1918fa1d10df3b7"
+      "cfbf8bde105f22706dfc288bf88c0aa1"
     ],
     [
       "Vale.Stdcalls.X64.Sha.dom",
@@ -29,7 +29,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "830582f71a275315236b552f82544f8a"
+      "e4e3268c783ed4a024e909a27acf9319"
     ],
     [
       "Vale.Stdcalls.X64.Sha.sha_pre",
@@ -58,7 +58,7 @@
         "typing_Vale.SHA.SHA_helpers.block_length"
       ],
       0,
-      "de9bbaa6c87980db28aa4e6a7def7ed3"
+      "3a463b09da7af83570b2f01fcbb9dfed"
     ],
     [
       "Vale.Stdcalls.X64.Sha.sha_post",
@@ -87,7 +87,7 @@
         "typing_Vale.SHA.SHA_helpers.block_length"
       ],
       0,
-      "2278fbd4201d65e705af331dcc2b30da"
+      "a60ff83475f05f05c84d09666c1ca7b6"
     ],
     [
       "Vale.Stdcalls.X64.Sha.sha_lemma'",
@@ -107,8 +107,8 @@
         "equality_tok_Vale.Interop.Types.TUInt128@tok",
         "equality_tok_Vale.Interop.Types.TUInt32@tok",
         "equality_tok_Vale.Interop.Types.TUInt8@tok",
-        "equation_LowStar.Buffer.buffer",
-        "equation_LowStar.Buffer.trivial_preorder",
+        "equation_LowStar.ImmutableBuffer.ibuffer",
+        "equation_LowStar.ImmutableBuffer.immutable_preorder",
         "equation_LowStar.Monotonic.Buffer.length", "equation_Prims.eq2",
         "equation_Prims.eqtype", "equation_Prims.nat", "equation_Prims.prop",
         "equation_Prims.squash",
@@ -121,12 +121,14 @@
         "equation_Vale.Def.Words.Seq_s.seq_nat8_to_seq_uint8",
         "equation_Vale.Def.Words_s.nat64", "equation_Vale.Def.Words_s.nat8",
         "equation_Vale.Def.Words_s.natN", "equation_Vale.Interop.Base.buf_t",
+        "equation_Vale.Interop.Base.ibuf_t",
         "equation_Vale.Interop.Types.base_typ_as_type",
         "equation_Vale.Interop.Types.view_n",
         "equation_Vale.Interop.X64.regs_modified_stdcall",
         "equation_Vale.Interop.X64.xmms_modified_stdcall",
         "equation_Vale.Lib.Seqs_s.compose",
         "equation_Vale.Lib.Seqs_s.seq_map",
+        "equation_Vale.SHA.SHA_helpers.k_reqs",
         "equation_Vale.SHA.SHA_helpers.size_block_w_256",
         "equation_Vale.SHA.X64.va_ens_sha_update_bytes_stdcall",
         "equation_Vale.SHA.X64.va_req_sha_update_bytes_stdcall",
@@ -141,7 +143,7 @@
         "equation_Vale.X64.Decls.va_upd_flags",
         "equation_Vale.X64.Decls.va_upd_mem",
         "equation_Vale.X64.Decls.va_upd_ok",
-        "equation_Vale.X64.Decls.va_upd_reg",
+        "equation_Vale.X64.Decls.va_upd_reg64",
         "equation_Vale.X64.Decls.va_upd_stack",
         "equation_Vale.X64.Decls.va_upd_xmm",
         "equation_Vale.X64.Machine_Semantics_s.code",
@@ -173,7 +175,9 @@
         "lemma_LowStar.Monotonic.Buffer.length_null_1",
         "lemma_LowStar.Monotonic.Buffer.length_null_2",
         "lemma_Vale.AsLowStar.MemoryHelpers.as_vale_buffer_len",
+        "lemma_Vale.AsLowStar.MemoryHelpers.as_vale_immbuffer_len",
         "lemma_Vale.Def.Types_s.le_seq_quad32_to_bytes_length",
+        "lemma_Vale.X64.Memory.buffer_length_buffer_as_seq",
         "primitive_Prims.op_Addition", "primitive_Prims.op_BarBar",
         "primitive_Prims.op_Division", "primitive_Prims.op_Equality",
         "primitive_Prims.op_Multiply",
@@ -196,17 +200,18 @@
         "refinement_interpretation_Tm_refine_283ce65aedf680c13f7ffd81c2fe0420",
         "refinement_interpretation_Tm_refine_36f208f2b1019ab7b5d9be73f4c89349",
         "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
+        "refinement_interpretation_Tm_refine_5499ed8f2f75d28e878e6e5f51145155",
         "refinement_interpretation_Tm_refine_5514fbe9e08dfda40f950a7b9f1b2b98",
         "refinement_interpretation_Tm_refine_8d65e998a07dd53ec478e27017d9dba5",
+        "refinement_interpretation_Tm_refine_a09a35eaf316de2d2c4b28c7aed610ab",
         "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
         "refinement_interpretation_Tm_refine_bc38afef117cbc3a0ecea14bc8e8d59b",
-        "refinement_interpretation_Tm_refine_f6e9e2a55f7d8395fcea5ab62e7171c6",
         "token_correspondence_Vale.Interop.X64.regs_modified_stdcall",
         "token_correspondence_Vale.Interop.X64.xmms_modified_stdcall",
         "token_correspondence_Vale.Stdcalls.X64.Sha.sha_post",
         "token_correspondence_Vale.Stdcalls.X64.Sha.sha_pre",
         "typing_FStar.Seq.Base.length",
-        "typing_LowStar.Buffer.trivial_preorder",
+        "typing_LowStar.ImmutableBuffer.immutable_preorder",
         "typing_Tm_abs_45bc106d66ff9e2c3c9f4100524b39b3",
         "typing_Vale.Def.Types_s.le_seq_quad32_to_bytes",
         "typing_Vale.Interop.Assumptions.win",
@@ -225,7 +230,7 @@
         "typing_tok_Vale.Interop.Types.TUInt8@tok"
       ],
       0,
-      "b68c582a296584db20d77633b6747412"
+      "8d5922f65c53f2a8506d70cf95a9e982"
     ],
     [
       "Vale.Stdcalls.X64.Sha.sha_lemma",
@@ -304,7 +309,7 @@
         "typing_tok_Vale.Interop.Types.TUInt8@tok"
       ],
       0,
-      "7f4cc2e3bd04ae76587d356df8ebf258"
+      "112b793ff89a0b85fa555ffdf6cca2f5"
     ],
     [
       "Vale.Stdcalls.X64.Sha.lowstar_sha_t",
@@ -335,7 +340,7 @@
         "typing_Vale.Stdcalls.X64.Sha.dom"
       ],
       0,
-      "bc5b17dc67a2857ebd1ef708276a5050"
+      "a09123b27af00d44537dc06ab417c30f"
     ],
     [
       "Vale.Stdcalls.X64.Sha.lowstar_sha",
@@ -366,7 +371,7 @@
         "typing_Vale.Stdcalls.X64.Sha.dom"
       ],
       0,
-      "c522d4b43fa0692d91da4422eb2620ea"
+      "f9fba495f716b5e2f0b28e5abce9cf9e"
     ]
   ]
 ]
