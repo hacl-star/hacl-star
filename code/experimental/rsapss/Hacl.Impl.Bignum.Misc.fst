@@ -15,7 +15,7 @@ open Hacl.Impl.Bignum.Core
 open Hacl.Impl.Bignum.Convert
 open Hacl.Spec.Bignum
 
-#reset-options
+#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
 
 /// Creates a new bignum from a given one.
 val bn_copy:
@@ -46,6 +46,38 @@ let bn_assign_uint64 #len a x =
   let h = FStar.HyperStack.ST.get () in
   assume (as_snat h a = v x)
 
+/// Copies a bignum into another bignum. Basically, copy with functional correctness.
+val bn_assign_bn:
+     #oLen:bn_len
+  -> #iLen:bn_len{v iLen <= v oLen}
+  -> o:lbignum oLen
+  -> i:lbignum iLen
+  -> Stack unit
+    (requires fun h -> live h i /\ live h o /\ disjoint i o)
+    (ensures fun h0 _ h1 -> modifies1 o h0 h1 /\ as_snat h1 o = as_snat h0 i)
+let bn_assign_bn #oLen #iLen o i =
+  if iLen =. oLen then copy o i else begin
+    copy (sub o 0ul iLen) i;
+    memset (sub o iLen (oLen -! iLen)) (uint 0) (oLen -! iLen)
+  end;
+  let h = FStar.HyperStack.ST.get () in
+  assume (as_snat h o = as_snat h i)
+
+val bn_one:
+     #len:bn_len
+  -> StackInline (lbignum len)
+    (requires fun h -> true)
+    (ensures fun h0 b h1 ->
+      stack_allocated b h0 h1
+       (Seq.concat (Seq.create 1 (u64 1))
+                   (Seq.create (v len - 1) (u64 0))) /\
+      issnat 1 /\ as_snat h1 b = 1)
+let bn_one #len =
+  assert_norm (issnat 1);
+  assert_norm (v (nat_bytes_num 1) = 1);
+  let one:lbignum len = nat_to_bignum 1 in
+  admit ();
+  one
 
 //////// Some debugging, at least for the time being
 

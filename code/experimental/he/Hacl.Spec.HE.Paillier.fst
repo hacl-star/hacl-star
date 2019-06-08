@@ -19,8 +19,9 @@ type fen2u n = r:fen2 n{isunit r}
 val np1: #n:comp -> fen2 n
 let np1 #n = 1 + n
 
-val isunit_in_nsquare: #n:comp -> a:fe n{isunit a} -> Lemma
-  (isunit (to_fe #(n*n) a))
+val isunit_in_nsquare: #n:comp -> a:fe n -> Lemma
+  (requires (isunit a))
+  (ensures (isunit (to_fe #(n*n) a)))
 let isunit_in_nsquare #n a =
   multiplication_order_lemma n 1 n;
   assert (a < n*n);
@@ -30,7 +31,18 @@ let isunit_in_nsquare #n a =
   inv_as_gcd1 #(n*n) a;
   to_fe_idemp #(n*n) a
 
-#reset-options
+val isunit_in_nsquare2: #n:comp -> a:fen2 n -> Lemma
+  (requires (isunit a))
+  (ensures (isunit (to_fe #n a)))
+let isunit_in_nsquare2 #n a =
+  multiplication_order_lemma n 1 n;
+  assert (a < n*n);
+  isunit_nonzero a;
+  inv_as_gcd a;
+  gcd_n_square n a;
+  inv_as_gcd1 #(n*n) a;
+  to_fe_idemp #(n*n) a
+
 
 val fenu_to_fen2u_lemma: #n:comp -> a:fenu n -> Lemma
   (a < n*n /\ isunit #(n*n) a /\ to_fe #n a = a)
@@ -47,8 +59,8 @@ let fenu_to_fen2u_lemma #n a =
 val fenu_to_fen2u: #n:comp -> a:fenu n -> b:fen2u n{b = a /\ to_fe #n b = a}
 let fenu_to_fen2u #n a = fenu_to_fen2u_lemma a; let res:fen2 n = a in res
 
-// euler's totient
-val carm: p:prm -> q:prm -> l:fe (p*q)
+// Carmichael's function
+val carm: p:prm -> q:prm -> l:fe (p*q){l <= (p-1) * (q-1) && l >= 1}
 let carm p q = lcm_less_mul (p-1) (q-1); lcm (p-1) (q-1)
 
 val carm_unit: p:prm -> q:prm -> Lemma
@@ -57,20 +69,51 @@ let carm_unit p q =
   // Any divisor of p*q has form kp or kq, but (p-1)(q-1) has none
   // of this form.
   assume (gcd (p * q) ((p - 1) * (q - 1)) = 1);
+
   gcd_pq_lcm_lemma p q;
+  gcd_symm (p*q) (carm p q) 1;
   inv_as_gcd1 #(p*q) (carm p q)
 
-val euler_thm: p:prm -> q:prm -> w:fen2u (p*q) -> Lemma
-  (ensures (let n = p*q in
-            fexp w (carm p q) % n = 1 &&
-            fexp w (carm p q) > 0))
+val euler_thm: p:prm -> q:prm -> w:fe (p*q) -> Lemma
+  (isunit w ==> fexp w (carm p q) = 1)
 let euler_thm _ _ _ = admit()
 
-val carmichael_thm: p:prm -> q:prm -> w:fen2u (p*q) -> Lemma
+// For n^2
+val euler_thm2: p:prm -> q:prm -> w:fen2 (p*q) -> Lemma
+  (isunit w ==> fexp w (carm p q) % (p*q) = 1)
+let euler_thm2 p q w =
+  let n = p * q in
+  multiple_modulo_lemma n n;
+  multiple_division_lemma n n;
+  assert ((n*n)%n = 0);
+  assert ((n*n)/n = n);
+  to_fe_fexp1 #(n*n) n w (carm p q);
+  assert (fexp (to_fe #n w) (carm p q) = fexp w (carm p q) % n);
+
+  euler_thm p q (to_fe #n w);
+  assert (isunit (to_fe #n w) ==> fexp w (carm p q) % (p*q) = 1);
+  admit ()
+
+
+val carmichael_thm: p:prm -> q:prm -> w:fen2 (p*q) -> Lemma
   (ensures (let l = carm p q in
             let n = p * q in
-            fexp w (n*l) = one))
+            isunit w ==> fexp #(n*n) w (n*l) = one))
 let carmichael_thm _ _ _ = admit()
+
+val fermat_inverse_carm:
+     p:prm
+  -> q:prm
+  -> a:fe (p*q)
+  -> b:fe (p*q){isunit a ==> (isunit b /\ a *% b = 1)}
+let fermat_inverse_carm p q a =
+  let n = p * q in
+  let b = fexp a (carm p q - 1) in
+  fexp_mul1 a (carm p q - 1) 1;
+  fexp_one1 a;
+  euler_thm p q a;
+
+  b
 
 // p225 after definition 1
 val root_of_unity_form: #n:comp -> x:nat -> Lemma
@@ -352,29 +395,29 @@ val bigl_w_l_lemma: p:prm -> q:prm -> w:fen2u (p*q) -> Lemma
             let lm:fe n = carm p q in
             euler_thm p q w;
             bigl (fexp w lm) = lm *% x))
-let bigl_w_l_lemma p q w =
-  let n:comp = p * q in
-  let lambda:fe n = carm p q in
-  np1_is_g #n;
-  let a:fe n = res_class (np1 #n) w in
-  w_lambda_representation p q w;
-
-  let d:fen2 n = (1 + ((a * lambda) % n) * n) in
-  assert(d > 0);
-
-  calc (==) {
-    bigl #n d;
-  == { }
-    (((a * lambda) % n) * n) / n;
-  == { cancel_mul_div ((a * lambda) % n) n }
-    (a * lambda) % n;
-  == { to_fe_mul #n a lambda }
-    to_fe #n a *% to_fe #n lambda;
-  == { to_fe_idemp #n a }
-    a *% to_fe lambda;
-  == { to_fe_idemp #n lambda }
-    a *% lambda;
-  }
+let bigl_w_l_lemma p q w = admit ()
+//  let n:comp = p * q in
+//  let lambda:fe n = carm p q in
+//  np1_is_g #n;
+//  let a:fe n = res_class (np1 #n) w in
+//  w_lambda_representation p q w;
+//
+//  let d:fen2 n = (1 + ((a * lambda) % n) * n) in
+//  assert(d > 0);
+//
+//  calc (==) {
+//    bigl #n d;
+//  == { }
+//    (((a * lambda) % n) * n) / n;
+//  == { cancel_mul_div ((a * lambda) % n) n }
+//    (a * lambda) % n;
+//  == { to_fe_mul #n a lambda }
+//    to_fe #n a *% to_fe #n lambda;
+//  == { to_fe_idemp #n a }
+//    a *% to_fe lambda;
+//  == { to_fe_idemp #n lambda }
+//    a *% lambda;
+//  }
 
 
 val l1_div_l2: p:prm -> q:prm -> w:fen2 (p*q) -> g:isg (p*q) -> fe (p*q)
@@ -390,9 +433,9 @@ let l1_div_l2 p q w g =
   if l1arg = 0 then 0 else begin
     let l1:fe n = bigl l1arg in
     g_pow_isunit g lambda; isunit_nonzero (fexp g lambda);
-    let l2:fe n = bigl (fexp g lambda) in
+    let l2:fenu n = bigl (fexp g lambda) in
 
-    l1 *% finv0 l2
+    l1 *% fermat_inverse_carm l2
   end
 
 
