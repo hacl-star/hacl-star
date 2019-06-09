@@ -39,7 +39,7 @@ let isunit_in_nsquare2 #n a =
     end in
 
   let l (): Lemma (a % n <> 0) = begin
-      move_requires #unit #(fun _ -> a % n = 0) #(fun _ -> false) l0 ()
+      move_requires l0 ()
     end in
 
   l ();
@@ -51,32 +51,6 @@ let isunit_in_nsquare2 #n a =
   assert (is_gcd (to_fe #n a) n 1);
   inv_as_gcd1 (to_fe #n a)
 
-//val isunit_in_nsquare: #n:comp -> a:fe n -> Lemma
-//  (requires (isunit a))
-//  (ensures (isunit (to_fe #(n*n) a)))
-//let isunit_in_nsquare #n a =
-//  multiplication_order_lemma n 1 n;
-//  assert (a < n*n);
-//  isunit_nonzero a;
-//  inv_as_gcd a;
-//  gcd_n_square n a;
-//  inv_as_gcd1 #(n*n) a;
-//  to_fe_idemp #(n*n) a
-
-//val fenu_to_fen2u_lemma: #n:comp -> a:fenu n -> Lemma
-//  (a < n*n /\ isunit #(n*n) a /\ to_fe #n a = a)
-//let fenu_to_fen2u_lemma #n a =
-//  multiplication_order_lemma n 1 n;
-//  assert (a < n*n);
-//  let res = to_fe #(n*n) a in
-//  modulo_lemma a n;
-//  modulo_lemma a (n*n);
-//  assert (res = a);
-//  assert (isunit a);
-//  isunit_in_nsquare #n a
-//
-//val fenu_to_fen2u: #n:comp -> a:fenu n -> b:fen2u n{b = a /\ to_fe #n b = a}
-//let fenu_to_fen2u #n a = fenu_to_fen2u_lemma a; let res:fen2 n = a in res
 
 val lift: #n:comp -> a:fe n -> b:fen2 n{b = a /\ to_fe #n b = a}
 let lift #n a = a
@@ -230,7 +204,7 @@ let np1_is_g #n =
   multiple_division_lemma 1 n
 
 
-
+// This is a basic property of carmichael function.
 val euler_thm: p:prm -> q:prm -> w:fe (p*q) -> Lemma
   (isunit w ==> fexp w (carm p q) = 1)
 let euler_thm _ _ _ = admit()
@@ -285,7 +259,7 @@ val carmichael_thm: p:prm -> q:prm -> w:fen2 (p*q) -> Lemma
   (let l = carm p q in
    let n = p * q in
    isunit (to_fe #n w) ==> fexp #(n*n) w (n*l) = one)
-let carmichael_thm p q w = admit ()
+let carmichael_thm p q w = admit () // it is not actually used anywhere
 
 val fermat_inverse_carm:
      p:prm
@@ -299,7 +273,7 @@ let fermat_inverse_carm p q a =
   fexp_one1 a;
   euler_thm p q a;
 
-  assume (isunit a ==> b = finv a); // TODO should be easy enough
+  finv_unique #n a b;
 
   b
 
@@ -363,7 +337,7 @@ let encf_unit #n g x y =
 val encf_inj_raw: #n:comp -> g:isg n -> x1:nat -> y1:fen2 n -> x2:nat -> y2:fen2 n -> Lemma
   (requires (encf_raw #n g x1 y1 = encf_raw #n g x2 y2))
   (ensures (to_fe #n x1 = to_fe #n x2 /\ to_fe #n y1 = to_fe #n y2))
-let encf_inj_raw #n _ _ _ _ = admit()
+let encf_inj_raw #n _ _ _ _ = admit() //TODO
 
 
 val encf_inj: #n:comp -> g:isg n -> x1:fe n -> y1:fenu n -> x2:fe n -> y2:fenu n -> Lemma
