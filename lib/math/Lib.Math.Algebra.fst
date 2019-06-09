@@ -24,9 +24,9 @@ let one_mod_n _ = ()
 
 type divides (a:pos) (b:int) = b % a = 0
 
-val divides_sum: c:pos -> a:int -> b:int -> Lemma
-  ((divides c a /\ divides c b) ==> divides c (a+b))
-let divides_sum c a b = modulo_distributivity a b c
+val divides_sum: a:pos -> b:int -> c:int -> Lemma
+  ((divides a b /\ divides a c) ==> divides a (b+c))
+let divides_sum a b c = modulo_distributivity c b a
 
 val divides_mult1: a:pos -> b:int -> n:nat -> Lemma
   (divides a b ==> divides a (n*b))
@@ -160,10 +160,6 @@ val gcd_upper_bound: a:pos -> b:pos -> g:pos{is_gcd a b g} -> Lemma
   (g <= a /\ g <= b /\ g <= min a b)
 let gcd_upper_bound a b g = ()
 
-val gcd_prop0: a:nat -> b:nat -> g:pos{is_gcd a b g} -> Lemma
-  (forall (d:pos). divides d a /\ divides d b ==> divides d g)
-let gcd_prop0 a b g = admit ()
-
 val gcd_prop_add_arg: a:nat -> b:nat -> g:pos{is_gcd a b g} -> Lemma
   (is_gcd (a+b) b g)
 let gcd_prop_add_arg a b g =
@@ -289,10 +285,26 @@ let rec gcd_standalone a b =
      gcd_eucl_step a b g;
      g)
 
+val gcd_prop_subdiv: a:pos -> b:pos -> g:pos{is_gcd a b g} -> d:pos -> Lemma
+  (divides d a /\ divides d b ==> divides d g)
+let gcd_prop_subdiv a b g d =
+  let (g',u,v) = ex_eucl a b in
+  assert (g'= g);
+  assert (u*a + v*b = g);
+
+  let l (): Lemma (requires (divides d a /\ divides d b))
+                       (ensures (divides d g)) =
+          divides_mult d a u;
+          divides_mult d b v;
+          divides_sum d (a * u) (b * v)
+          in
+
+  move_requires l ()
+
 val ex_eucl_lemma1: a:pos -> b:pos -> g:pos -> u:int -> v:int -> Lemma
   (requires (a * u + b * v = g))
-  (ensures (exists k. g = k * gcd a b))
-let ex_eucl_lemma1 a b g u v = admit()
+  (ensures (exists (k:pos). g = k * gcd a b))
+let ex_eucl_lemma1 a b g u v = admit ()
 
 val ex_eucl_lemma2: a:pos -> b:pos -> g:pos -> u:int -> v:int -> Lemma
   (requires (a * u + b * v = g /\ divides g a /\ divides g b))
@@ -395,13 +407,6 @@ let gcd_mod_reduce n a =
       assert (False);
       assert (is_gcd (a % n) n 1)
      end)
-
-// In general (without division condition) is not true:
-// n = pq, p^2 < n, then gcd p^2 (pq) = 1, but gcd p^2 (p^2*q^2) = p^2.
-val gcd_n_square3: p:prm -> q:prm -> a:pos -> Lemma
-  (requires (is_gcd a (p*q) 1 /\ ~(divides p a) /\ ~(divides q a)))
-  (ensures (is_gcd a ((p*q)*(p*q)) 1))
-let gcd_n_square3 p q a = admit ()
 
 (* Algebra *)
 
@@ -859,21 +864,29 @@ val one_isunit: n:big -> Lemma (isunit #n 1)
 let one_isunit _ = ()
 
 val inv_unique: #n:big -> a:fe n -> b:fe n -> c:fe n -> Lemma
-  (requires (a *% b = one /\ a *% c = one))
-  (ensures (b = c))
+  ((a *% b = one /\ a *% c = one) ==> b = c)
 let inv_unique #n a b c =
-  calc (==) {
-    c; =={} c *% one; =={} c *% (a *% b); =={}
-            (c *% a) *% b; =={} one *% b; =={} b;
-  }
+
+  let l (): Lemma (requires ((a *% b = one /\ a *% c = one)))
+                  (ensures (b = c)) =
+           calc (==) {
+             c; =={} c *% one; =={} c *% (a *% b); =={}
+                     (c *% a) *% b; =={} one *% b; =={} b;
+           }
+          in
+
+  move_requires l ()
+
+#reset-options "--z3rlimit 50"
 
 val inv_as_gcd1: #n:big -> a:fe n{a>0} -> Lemma
   (requires (is_gcd a n 1))
   (ensures (isunit a))
 let inv_as_gcd1 #n a =
   let (g,u,v) = ex_eucl a n in
-  gcd_prop0 a n g;
+  //gcd_prop_subdiv a n g;
   assert (gcd a n = g);
+
 
   assert (((u*a)%n = (1 + (-v)*n)%n));
   modulo_distributivity 1 ((-v)*n) n;
@@ -887,6 +900,8 @@ let inv_as_gcd1 #n a =
   assert (((to_fe #n u)*(a%n))%n = 1);
   modulo_lemma a n;
   assert ((to_fe #n u *% a) = 1)
+
+#reset-options
 
 val inv_as_gcd2: #n:big -> a:fe n{a>0} -> Lemma
   (requires (isunit a))
@@ -938,9 +953,12 @@ val finv: #n:big -> a:fe n{isunit a} -> b:fe n{b *% a = one}
 let finv #n a = finv0 a
 
 val finv_unique: #n:big -> a:fe n -> b:fe n -> Lemma
-  (requires (a *% b = one))
-  (ensures (isunit a /\ b = finv a))
-let finv_unique #n a b = inv_unique a b (finv a)
+  ((a *% b = one) ==> (b = finv a))
+let finv_unique #n a b =
+  let l (): Lemma (requires ((a *% b = one))) (ensures (isunit a /\ b = finv a)) =
+          inv_unique #n a b (finv a) in
+
+  move_requires l ()
 
 val finv_mul: #n:big -> a:fe n -> b:fe n{isunit b} -> c:fe n -> Lemma
   (requires (a = b *% c))
