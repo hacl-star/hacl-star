@@ -13,8 +13,8 @@ let ins_AddLea64 =
   make_ins (fun (dst src1 src2:operand64) ->
     let m =
       match (src1, src2) with
-      | (OReg r1, OConst i2) -> MReg r1 i2
-      | (OReg r1, OReg r2) -> MIndex r1 1 r2 0
+      | (OReg r1, OConst i2) -> MReg (Reg 0 r1) i2
+      | (OReg r1, OReg r2) -> MIndex (Reg 0 r1) 1 (Reg 0 r2) 0
       | _ -> MConst pow2_128 // Shouldn't hit this, but if we do, assembler will complain
       in
     let m = (m, Public) in // taint is not actually printed; we're just using OMem for its printer

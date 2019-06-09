@@ -76,7 +76,7 @@ open Vale.AES.X64.AESopt2
 #verbatim{:interface}
 let aes_reqs_offset
   (alg:algorithm) (key:seq nat32) (round_keys:seq quad32) (keys_b:buffer128)
-  (key_ptr:int) (mem:memory) (memTaint:memtaint) : prop0
+  (key_ptr:int) (mem:vale_heap) (memTaint:memtaint) : prop0
   =
   aesni_enabled /\ avx_enabled /\
   (alg = AES_128 || alg = AES_256) /\
@@ -100,7 +100,7 @@ let aes_reqs_offset
 unfold let lo(x:poly):poly = mask x 64
 unfold let hi(x:poly):poly = shift x (-64)
 
-let scratch_reqs (scratch_b:buffer128) (count:nat) (mem:memory) (s:seq quad32) (z3:quad32) : prop0 =
+let scratch_reqs (scratch_b:buffer128) (count:nat) (mem:vale_heap) (s:seq quad32) (z3:quad32) : prop0 =
   let open FStar.Mul in
   count * 6 + 6 <= length s /\
   (let data = slice s (count * 6) (count * 6 + 6) in
@@ -112,7 +112,7 @@ let scratch_reqs (scratch_b:buffer128) (count:nat) (mem:memory) (s:seq quad32) (
    buffer128_read scratch_b 7 mem == reverse_bytes_quad32 (index data 0))
 
 
-let scratch_reqs_simple (scratch_b:buffer128) (mem:memory) (data:seq quad32) (z3:quad32) : prop0 =
+let scratch_reqs_simple (scratch_b:buffer128) (mem:vale_heap) (data:seq quad32) (z3:quad32) : prop0 =
    length data == 6 /\
    z3 == reverse_bytes_quad32 (index data 5) /\
    buffer128_read scratch_b 3 mem == reverse_bytes_quad32 (index data 4) /\
@@ -123,12 +123,12 @@ let scratch_reqs_simple (scratch_b:buffer128) (mem:memory) (data:seq quad32) (z3
 #endverbatim
 
 function aes_reqs_offset(alg:algorithm, key:seq(nat32), round_keys:seq(quad32), keys_b:buffer128,
-    key_ptr:int, mem:memory, memTaint:memtaint) : prop extern;
+    key_ptr:int, mem:vale_heap, memTaint:memtaint) : prop extern;
 
 function lo(x:poly) : poly extern;
 function hi(x:poly) : poly extern;
-function scratch_reqs(scratch_b:buffer128, count:nat, mem:memory, s:seq(quad32), z3:quad32) : prop extern;
-function scratch_reqs_simple(scratch_b:buffer128, mem:memory, data:seq(quad32), z3:quad32) : prop extern;
+function scratch_reqs(scratch_b:buffer128, count:nat, mem:vale_heap, s:seq(quad32), z3:quad32) : prop extern;
+function scratch_reqs_simple(scratch_b:buffer128, mem:vale_heap, data:seq(quad32), z3:quad32) : prop extern;
 
 ghost procedure finish_aes_encrypt_le(ghost alg:algorithm, ghost input_LE:quad32, ghost key:seq(nat32))
     requires

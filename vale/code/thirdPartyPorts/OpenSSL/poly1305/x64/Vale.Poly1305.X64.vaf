@@ -102,7 +102,7 @@ procedure Poly1305_multiply(ghost r1:nat64) returns(ghost hh:int)
     let gd1:int := h0 * r1 + h1 * r0 + h2 * s1;
     let gd2:int := h2 * r0;
 
-    assert va_is_src_opr64(va_op_opr64_reg(rR14), this); // TODO: get rid of this
+    assert va_is_src_opr64(va_op_opr64_reg64(rR14), this); // TODO: get rid of this
     Mul64Wrap(h0);  // h0*r1
     Mov64(d2, rax);
     Mov64(rax, r0);

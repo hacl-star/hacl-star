@@ -16,10 +16,10 @@ val st_put
 
 //The initial registers, xmms, flags
 assume
-val init_regs: (regs:(MS.reg -> MS.nat64){regs MS.rRsp >= 4096})
+val init_regs: (regs:(MS.reg_64 -> MS.nat64){regs MS.rRsp >= 4096})
 
 assume
-val init_xmms: MS.xmm -> MS.quad32
+val init_xmms: MS.reg_xmm -> MS.quad32
 
 assume
 val init_flags: MS.flag -> option bool

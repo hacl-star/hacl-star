@@ -22,11 +22,11 @@ friend LowStar.BufferView.Up
 
 let math_aux (a b c:int) : Lemma (a + b + (c - b) == a + c) = ()
 
-let map_aux (ptr1 ptr2:int) (v:int) (m:heap) : Lemma
+let map_aux (ptr1 ptr2:int) (v:int) (m:machine_heap) : Lemma
   (requires ptr1 == ptr2 /\ m.[ptr1] == v)
   (ensures m.[ptr2] == v) = ()
 
-let get64_aux (ptr:int) (heap:heap) (v:nat64) (k:nat{k < 8}) : Lemma
+let get64_aux (ptr:int) (heap:machine_heap) (v:nat64) (k:nat{k < 8}) : Lemma
   (requires get_heap_val64 ptr heap == v)
   (ensures heap.[ptr + k] == UInt8.v (Seq.index (put64 (UInt64.uint_to_t v)) k)) =
   Vale.Def.Opaque_s.reveal_opaque get_heap_val64_def;
@@ -35,7 +35,7 @@ let get64_aux (ptr:int) (heap:heap) (v:nat64) (k:nat{k < 8}) : Lemma
   four_to_nat_8_injective ();
   two_to_nat_32_injective ()
 
-let get128_aux (ptr:int) (heap:heap) (v:quad32) (k:nat{k < 16}) : Lemma
+let get128_aux (ptr:int) (heap:machine_heap) (v:quad32) (k:nat{k < 16}) : Lemma
   (requires get_heap_val128 ptr heap == v)
   (ensures heap.[ptr + k] == UInt8.v (Seq.index (put128 v) k)) =
   Vale.Def.Opaque_s.reveal_opaque get_heap_val128_def;

@@ -13,9 +13,8 @@ let state_mod_eq (m:mod_t) (s1 s2:vale_state) =
   | Mod_None -> True
   | Mod_ok -> s1.vs_ok == s2.vs_ok
   | Mod_reg r -> eval_reg r s1 == eval_reg r s2
-  | Mod_xmm x -> eval_xmm x s1 == eval_xmm x s2
   | Mod_flags -> s1.vs_flags == s2.vs_flags
-  | Mod_mem -> s1.vs_mem == s2.vs_mem
+  | Mod_mem -> s1.vs_heap == s2.vs_heap
   | Mod_stack -> s1.vs_stack == s2.vs_stack
   | Mod_memTaint -> s1.vs_memTaint == s2.vs_memTaint
   | Mod_stackTaint -> s1.vs_stackTaint == s2.vs_stackTaint
@@ -73,19 +72,22 @@ let update_state_mods_to (mods:mods_t) (s' s:vale_state) : Lemma
   ))
   (ensures state_eq s' (update_state_mods mods s' s))
   =
-  let f1 (m0:mod_t) : Lemma (state_mod_eq m0 s' (update_state_mods mods s' s)) =
+  let s'' = update_state_mods mods s' s in
+  let f1 (m0:mod_t) : Lemma (state_mod_eq m0 s' s'') =
     update_state_mods_to1 mods s' s m0
     in
-  let f1_reg (r:reg) : Lemma (state_mod_eq (Mod_reg r) s' (update_state_mods mods s' s)) = f1 (Mod_reg r) in
-  let f1_xmm (x:xmm) : Lemma (state_mod_eq (Mod_xmm x) s' (update_state_mods mods s' s)) = f1 (Mod_xmm x) in
   f1 (Mod_ok);
-  FStar.Classical.forall_intro f1_reg;
-  FStar.Classical.forall_intro f1_xmm;
   f1 (Mod_flags);
   f1 (Mod_mem);
   f1 (Mod_stack);
   f1 (Mod_memTaint);
   f1 (Mod_stackTaint);
+  let f1_reg (r:reg) : Lemma
+    (ensures Regs.sel r s'.vs_regs == Regs.sel r s''.vs_regs)
+    [SMTPat (Regs.sel r s'.vs_regs)]
+    =
+    f1 (Mod_reg r)
+    in
   ()
 
 let update_state_mods_trans (mods:mods_t) (s0 s1 s2:vale_state) : Lemma
@@ -287,6 +289,24 @@ let qAssertByLemma #a p qcs mods s0 =
 let wp_sound_code #a c qc k s0 =
   let QProc c _ wp proof = qc in
   proof s0 k
+
+let rec lemma_regs_match_file (r0:Regs.t) (r1:Regs.t) (rf:reg_file_id) (k:nat{k <= n_regs rf}) : Lemma
+  (requires regs_match_file r0 r1 rf k)
+  (ensures (forall (i:nat).{:pattern (Reg rf i)} i < k ==>
+    (let r = Reg rf i in Regs.sel r r0 == Regs.sel r r1)))
+  =
+  if k > 0 then lemma_regs_match_file r0 r1 rf (k - 1)
+
+let rec lemma_regs_match (r0:Regs.t) (r1:Regs.t) (k:nat{k <= n_reg_files}) : Lemma
+  (requires regs_match r0 r1 k)
+  (ensures (forall (i j:nat).{:pattern (Reg i j)} i < k /\ j < n_regs i ==>
+    (let r = Reg i j in Regs.sel r r0 == Regs.sel r r1)))
+  =
+  if k > 0 then (lemma_regs_match_file r0 r1 (k - 1) (n_regs (k - 1)); lemma_regs_match r0 r1 (k - 1))
+
+let lemma_state_match s0 s1 =
+  lemma_regs_match s0.vs_regs s1.vs_regs n_reg_files;
+  assert (Regs.equal s0.vs_regs s1.vs_regs)
 
 let wp_sound_code_wrap (#a:Type0) (c:code) (qc:quickCode a c) (s0:vale_state) (k:(s0':vale_state{s0 == s0'}) -> vale_state -> a -> Type0) :
   Ghost (vale_state & fuel & a)

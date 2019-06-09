@@ -1,6 +1,38 @@
 [
-  "\u000f]VL‘–#žY¼\u0003wj‹W\u0002",
+  "[Á'RþÏé\u000fA\r6þ\u0019':â",
   [
+    [
+      "Vale.X64.State.eval_reg_64",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
+        "equation_Vale.X64.Machine_s.n_reg_files",
+        "equation_Vale.X64.Machine_s.n_regs",
+        "equation_Vale.X64.Machine_s.reg_64",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_1101de7a497235789e427aeb0d9938cc"
+      ],
+      0,
+      "819edc81833069291511912c2756ae31"
+    ],
+    [
+      "Vale.X64.State.eval_reg_xmm",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
+        "equation_Vale.X64.Machine_s.n_reg_files",
+        "equation_Vale.X64.Machine_s.n_regs",
+        "equation_Vale.X64.Machine_s.reg_xmm",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_1101de7a497235789e427aeb0d9938cc"
+      ],
+      0,
+      "b51a34083713238eea925e8e3109e87f"
+    ],
     [
       "Vale.X64.State.eval_maddr",
       1,
@@ -14,21 +46,7 @@
         "fuel_guarded_inversion_Vale.X64.Machine_s.maddr"
       ],
       0,
-      "4eb088ae769af651856161f7742a4fbf"
-    ],
-    [
-      "Vale.X64.State.to_nat64",
-      1,
-      1,
-      0,
-      [
-        "@query", "primitive_Prims.op_AmpAmp", "primitive_Prims.op_LessThan",
-        "primitive_Prims.op_LessThanOrEqual",
-        "projection_inverse_BoxBool_proj_0",
-        "projection_inverse_BoxInt_proj_0"
-      ],
-      0,
-      "af86f9573a6447b1fabe3a1d03d1c2e9"
+      "c43bfc8f76a4d9f146809bffe52bf853"
     ],
     [
       "Vale.X64.State.eval_operand",
@@ -46,7 +64,7 @@
         "fuel_guarded_inversion_Vale.X64.Machine_s.operand"
       ],
       0,
-      "d072f3773659590df6cbf7475ea8065d"
+      "3e412de4c45e77007da08825f91a2e15"
     ],
     [
       "Vale.X64.State.eval_operand128",
@@ -65,25 +83,39 @@
         "fuel_guarded_inversion_Vale.X64.Machine_s.operand"
       ],
       0,
-      "fc1721fc66e27120de0014d11c07bb0d"
+      "25305d2591db6a08c840a412c561dedb"
     ],
     [
-      "Vale.X64.State.update_operand64",
+      "Vale.X64.State.update_reg_64",
       1,
       1,
-      1,
+      0,
       [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_Vale.X64.Machine_s.OConst",
-        "disc_equation_Vale.X64.Machine_s.OMem",
-        "disc_equation_Vale.X64.Machine_s.OReg",
-        "disc_equation_Vale.X64.Machine_s.OStack",
-        "equation_Vale.X64.Machine_s.operand64",
-        "equation_Vale.X64.Machine_s.reg",
-        "fuel_guarded_inversion_Vale.X64.Machine_s.operand"
+        "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
+        "equation_Vale.X64.Machine_s.n_reg_files",
+        "equation_Vale.X64.Machine_s.n_regs",
+        "equation_Vale.X64.Machine_s.reg_64",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_1101de7a497235789e427aeb0d9938cc"
       ],
       0,
-      "e1698fb61e2d59c10820a73dcaae3b66"
+      "da5d49a79ac7394f1334845e8f2003ef"
+    ],
+    [
+      "Vale.X64.State.update_reg_xmm",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
+        "equation_Vale.X64.Machine_s.n_reg_files",
+        "equation_Vale.X64.Machine_s.n_regs",
+        "equation_Vale.X64.Machine_s.reg_xmm",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_1101de7a497235789e427aeb0d9938cc"
+      ],
+      0,
+      "e3920edfbd998a0a867e7e8d8b4ce993"
     ],
     [
       "Vale.X64.State.valid_src_operand",
@@ -101,7 +133,7 @@
         "fuel_guarded_inversion_Vale.X64.Machine_s.operand"
       ],
       0,
-      "f2da547be6bd4bdc8c805a7bd9a8f8bd"
+      "df8d9cfdb8706d73fb45e48b3edbcfc4"
     ],
     [
       "Vale.X64.State.valid_src_operand128",
@@ -120,7 +152,7 @@
         "fuel_guarded_inversion_Vale.X64.Machine_s.operand"
       ],
       0,
-      "45ed7f39c2d6bd6790ad28df57e982d2"
+      "d0a07915252e6fb66e93144516adcec5"
     ]
   ]
 ]

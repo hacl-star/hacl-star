@@ -23,7 +23,7 @@ noeq type printer = {
   sha256rnds2_explicit_xmm0: unit -> bool;
 }
 
-let print_reg_name (r:reg) =
+let print_reg_name (r:reg_64) : string =
   match r with
   | 0  -> "rax"
   | 1  -> "rbx"
@@ -42,10 +42,10 @@ let print_reg_name (r:reg) =
   | 14 -> "r14"
   | 15 -> "r15"
 
-let print_reg (r:reg) (p:printer) =
+let print_reg64 (r:reg_64) (p:printer) : string =
   p.reg_prefix() ^ print_reg_name r
 
-let print_reg32 (r:reg) (p:printer) =
+let print_reg32 (r:reg_64) (p:printer) : string =
   p.reg_prefix() ^
   (match r with
   | 0 -> "eax"
@@ -59,7 +59,7 @@ let print_reg32 (r:reg) (p:printer) =
   | _ -> print_reg_name r ^ "d"
   )
 
-let print_small_reg (r:reg) (p:printer) =
+let print_small_reg (r:reg_64) (p:printer) : string =
   p.reg_prefix() ^
   (match r with
   | 0 -> "al"
@@ -69,35 +69,40 @@ let print_small_reg (r:reg) (p:printer) =
   | _ -> " !!! INVALID small operand !!!  Expected al, bl, cl, or dl."
   )
 
-let print_maddr (m:maddr) (ptr_type:string) (reg_printer:reg->printer->string) (p:printer) =
+let print_maddr (m:maddr) (ptr_type:string) (reg_printer:reg -> printer -> string) (p:printer) : string =
   p.mem_prefix ptr_type ^
-  (match m with
-     | MConst n -> p.const n
-     | MReg r offset -> p.maddr (reg_printer r p) None (string_of_int offset)
-     | MIndex base scale index offset ->
-          p.maddr (reg_printer base p)
-          (Some (string_of_int scale, reg_printer index p))
-          (string_of_int offset)
-   )
+  ( match m with
+    | MConst n -> p.const n
+    | MReg r offset -> p.maddr (reg_printer r p) None (string_of_int offset)
+    | MIndex base scale index offset ->
+        p.maddr (reg_printer base p)
+        (Some (string_of_int scale, reg_printer index p))
+        (string_of_int offset)
+  )
 open FStar.UInt64
 
-let print_operand (o:operand64) (p:printer) =
+let print_reg_int (r:reg) (p:printer) : string =
+  match r with
+  | Reg 0 r -> print_reg64 r p
+  | _ -> "!!! INVALID integer register !!!"
+
+let print_operand (o:operand64) (p:printer) : string =
   match o with
   | OConst n ->
       if 0 <= n && n < pow2_64 then p.const n
       else "!!! INVALID constant: " ^ string_of_int n ^ " !!!"
-  | OReg r -> print_reg r p
-  | OMem (m, _) | OStack (m, _) -> print_maddr m "qword" print_reg p
+  | OReg r -> print_reg64 r p
+  | OMem (m, _) | OStack (m, _) -> print_maddr m "qword" print_reg_int p
 
-let print_operand32 (o:operand64) (p:printer) =
+let print_operand32 (o:operand64) (p:printer) : string =
   match o with
   | OConst n ->
       if 0 <= n && n < pow2_32 then p.const n
       else "!!! INVALID constant: " ^ string_of_int n ^ " !!!"
   | OReg r -> print_reg32 r p
-  | OMem (m, _) | OStack (m, _) -> print_maddr m "dword" print_reg32 p
+  | OMem (m, _) | OStack (m, _) -> print_maddr m "dword" print_reg_int p
 
-let print_small_operand (o:operand64) (p:printer) =
+let print_small_operand (o:operand64) (p:printer) : string =
   match o with
   | OConst n ->
       if n < 64 then p.const n
@@ -105,21 +110,21 @@ let print_small_operand (o:operand64) (p:printer) =
   | OReg r -> print_small_reg r p
   | _ -> "!!! INVALID small operand !!! Expected al, bl, cl, or dl."
 
-let print_imm8 (i:int) (p:printer) =
+let print_imm8 (i:int) (p:printer) : string =
   p.const i
 
-let print_xmm (x:xmm) (p:printer) =
+let print_xmm (x:reg_xmm) (p:printer) : string =
   p.reg_prefix () ^ "xmm" ^ string_of_int x
 
-let print_mov128_op (o:operand128) (p:printer) =
+let print_mov128_op (o:operand128) (p:printer) : string =
   match o with
   | OConst _ -> "!!! INVALID xmm constants not allowed !!!"
   | OReg x -> print_xmm x p
-  | OMem (m, _) | OStack (m, _) -> print_maddr m "xmmword" print_reg p
+  | OMem (m, _) | OStack (m, _) -> print_maddr m "xmmword" print_reg_int p
 
 assume val print_any: 'a -> string
 
-let print_shift_operand (o:operand64) (p:printer) =
+let print_shift_operand (o:operand64) (p:printer) : string =
   match o with
   | OConst n ->
       if n < 64 then p.const n
@@ -139,7 +144,7 @@ let cmp_not(o:ocmp) : ocmp =
 // Sanity check
 let _ = assert (forall o . o == cmp_not (cmp_not o))
 
-let print_pair (dst src:string) (p:printer) =
+let print_pair (dst src:string) (p:printer) : string =
   let first, second = p.op_order dst src in
     first ^ ", " ^ second
 
@@ -186,7 +191,7 @@ let print_instr (ip:instr_print) (p:printer) : string =
   | [] -> "  " ^ opcode
   | _ -> "  " ^ opcode ^ space ^ (print_operands oprs)
 
-let print_ins (ins:ins) (p:printer) =
+let print_ins (ins:ins) (p:printer) : string =
   let print_pair (dst src:string) = print_pair dst src p in
   let print_op_pair (dst:operand64) (src:operand64) (print_dst:operand64 -> printer -> string) (print_src:operand64 -> printer -> string) =
     print_pair (print_dst dst p) (print_src src p)
@@ -197,26 +202,26 @@ let print_ins (ins:ins) (p:printer) =
   let print_shift (dst:operand64) (amount:operand64) =
     print_op_pair dst amount print_operand print_shift_operand
   in
-  let print_xmm_op (dst:xmm) (src:operand64) =
+  let print_xmm_op (dst:reg_xmm) (src:operand64) =
     let first, second = p.op_order (print_xmm dst p) (print_operand src p) in
       first ^ ", " ^ second
   in
-  let print_xmm_op32 (dst:xmm) (src:operand64) =
+  let print_xmm_op32 (dst:reg_xmm) (src:operand64) =
     let first, second = p.op_order (print_xmm dst p) (print_operand32 src p) in
       first ^ ", " ^ second
   in
-  let print_op_xmm (dst:operand64) (src:xmm) =
+  let print_op_xmm (dst:operand64) (src:reg_xmm) =
     let first, second = p.op_order (print_operand dst p) (print_xmm src p) in
       first ^ ", " ^ second
   in
-  let print_xmms (dst:xmm) (src:xmm) =
+  let print_xmms (dst:reg_xmm) (src:reg_xmm) =
     let first, second = p.op_order (print_xmm dst p) (print_xmm src p) in
       first ^ ", " ^ second
   in
-  let print_xmms_3 (dst src1 src2:xmm) =
+  let print_xmms_3 (dst src1 src2:reg_xmm) =
     print_pair (print_xmm dst p) (print_xmms src1 src2)
   in
-  let print_vpxor (dst src1:xmm) (src2:operand128) =
+  let print_vpxor (dst src1:reg_xmm) (src2:operand128) =
     print_pair (print_xmm dst p) (print_pair (print_xmm src1 p) (print_mov128_op src2 p))
   in
   let print_instr (ip:instr_print) : string = print_instr ip p in

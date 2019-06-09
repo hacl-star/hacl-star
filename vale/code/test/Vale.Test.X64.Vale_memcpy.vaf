@@ -72,18 +72,19 @@ procedure memcpy(inline win:bool, ghost dst:buffer64, ghost src:buffer64)
         xmm0; xmm1; xmm2; xmm3; xmm4; xmm5; xmm6; xmm7; xmm8; xmm9; xmm10; xmm11; xmm12; xmm13; xmm14; xmm15;
         efl; mem;
 {
-  inline if (win) {
-    Load64_buffer(rax, rdx, 0, Secret, src, 0);
-    Load64_buffer(r9, rdx, 8, Secret, src, 1);
-    Store64_buffer(rcx, rax, 0, Secret, dst, 0);
-    Store64_buffer(rcx, r9, 8, Secret, dst, 1);
-
-  } else {
-    Load64_buffer(rax, rsi, 0, Secret, src, 0);
-    Load64_buffer(rcx, rsi, 8, Secret, src, 1);
-    Store64_buffer(rdi, rax, 0, Secret, dst, 0);
-    Store64_buffer(rdi, rcx, 8, Secret, dst, 1);
-
-  }
-  assert(Seq.equal(buffer_as_seq(mem, dst), buffer_as_seq(mem, src)));
+    inline if (win)
+    {
+        Load64_buffer(rax, rdx, 0, Secret, src, 0);
+        Load64_buffer(r9, rdx, 8, Secret, src, 1);
+        Store64_buffer(rcx, rax, 0, Secret, dst, 0);
+        Store64_buffer(rcx, r9, 8, Secret, dst, 1);
+    }
+    else
+    {
+        Load64_buffer(rax, rsi, 0, Secret, src, 0);
+        Load64_buffer(rcx, rsi, 8, Secret, src, 1);
+        Store64_buffer(rdi, rax, 0, Secret, dst, 0);
+        Store64_buffer(rdi, rcx, 8, Secret, dst, 1);
+    }
+    assert(Seq.equal(buffer_as_seq(mem, dst), buffer_as_seq(mem, src)));
 }
