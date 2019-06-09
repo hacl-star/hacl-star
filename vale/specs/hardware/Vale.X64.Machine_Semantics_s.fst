@@ -43,7 +43,7 @@ type machine_stack =
 
 type flag_val_t = option bool
 
-type flags_t = F.restricted_t flag (fun _ -> flag_val_t)
+type flags_t = FStar.FunctionalExtensionality.restricted_t flag (fun _ -> flag_val_t)
 type regs_t = FStar.FunctionalExtensionality.restricted_t reg t_reg
 
 noeq
@@ -378,7 +378,7 @@ let update_operand128_preserve_flags'' (o:operand128) (v:quad32) (s_orig s:machi
 let update_operand128_preserve_flags' (o:operand128) (v:quad32) (s:machine_state) : machine_state =
   update_operand128_preserve_flags'' o v s s
 
-let havoc_flags : flags_t = F.on_dom flag (fun _ -> None)
+let havoc_flags : flags_t = FStar.FunctionalExtensionality.on_dom flag (fun _ -> None)
 
 // Default version havocs flags
 let update_operand64' (o:operand64) (ins:ins) (v:nat64) (s:machine_state) : machine_state =
@@ -399,10 +399,10 @@ let overflow(flags:flags_t) : flag_val_t =
   flags fOverflow
 
 let update_cf' (flags:flags_t) (new_cf:bool) : (new_flags:flags_t{cf new_flags == Some new_cf}) =
-  F.on_dom flag (fun f -> if f = fCarry then Some new_cf else flags f)
+  FStar.FunctionalExtensionality.on_dom flag (fun f -> if f = fCarry then Some new_cf else flags f)
 
 let update_of' (flags:flags_t) (new_of:bool) : (new_flags:flags_t{overflow new_flags == Some new_of}) =
-  F.on_dom flag (fun f -> if f = fOverflow then Some new_of else flags f)
+  FStar.FunctionalExtensionality.on_dom flag (fun f -> if f = fOverflow then Some new_of else flags f)
 
 let free_stack' (start finish:int) (st:machine_stack) : machine_stack =
   let Machine_stack init_rsp mem = st in
