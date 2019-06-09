@@ -82,7 +82,6 @@ let encf #n2Len n n2 g x y res =
 
   let h = FStar.HyperStack.ST.get () in
   to_fe_idemp #(as_snat h n2) (as_snat h g);
-  S.fenu_to_fen2u_lemma #(as_snat h n) (as_snat h y);
   to_fe_idemp #(as_snat h n2) (as_snat h y);
 
   pop_frame ()
@@ -151,6 +150,7 @@ type secret (n2Len:bn_len_s) =
   -> l2inv:lbignum n2Len
   -> secret n2Len
 
+
 type proper_secret_raw h
      (#n2Len:bn_len_s) (p:lbignum n2Len) (q:lbignum n2Len)
      (n:lbignum n2Len) (n2:lbignum n2Len)
@@ -159,24 +159,22 @@ type proper_secret_raw h
        n_cond h n n2 /\
        (let n = as_snat h n in
         let n2 = as_snat h n2 in
+        let p = as_snat h p in
+        let q = as_snat h q in
         let g = as_snat h g in
         let lambda = as_snat h lambda in
-       (as_snat h p > 1 /\ as_snat h q > 1 /\ n > 1 /\
-        isprm (as_snat h p) /\ isprm (as_snat h q) /\
-        n = as_snat h p * as_snat h q /\
+       (p > 1 /\ q > 1 /\ n > 1 /\
+        isprm p /\ isprm q /\ n = p * q /\
 
         g < n2 /\
         S.is_g n g /\
 
-        lambda = S.carm (as_snat h p) (as_snat h q) /\
+        lambda = S.carm p q /\
         lambda < n2 /\
 
-        (let x:S.fen2 n = fexp #n2 g lambda in
-         assert (isunit #n2 g);
-         g_pow_isunit #n2 g lambda;
-         isunit_nonzero x;
-         as_snat h l2inv = finv0 #n (S.bigl #n x))
-        ))
+        // This can be actually proven inplace, but it works slower then
+        fexp #n2 g lambda > 0 /\
+        as_snat h l2inv = S.fermat_inverse_carm p q (S.bigl #n (fexp #n2 g lambda))))
 
 type proper_secret (#n2Len:bn_len_s) h (s:secret n2Len) =
   proper_secret_raw h (Sec?.p s) (Sec?.q s) (Sec?.n s) (Sec?.n2 s)
@@ -290,8 +288,7 @@ val fermat_inverse:
       as_snat h p * as_snat h q = as_snat h n /\
       as_snat h n * as_snat h n = as_snat h n2 /\
       as_snat h n > 1 /\
-      as_snat h a < as_snat h n2 /\
-      isunit #(as_snat h n2) (as_snat h a))
+      as_snat h a < as_snat h n)
      (ensures fun h0 _ h1 ->
       modifies1 res h0 h1 /\
       as_snat h1 res =
@@ -302,33 +299,20 @@ let fermat_inverse #n2Len p q n n2 a res =
   push_frame ();
 
   let bn_carm = create n2Len (u64 0) in
-
   carm p q n n2 bn_carm;
 
-  let h = FStar.HyperStack.ST.get () in
-  as_snat_prop h n2;
-  assert (issnat (as_snat h n2));
-  assert (as_snat h bn_carm < as_snat h n);
-  mul_order_lemma3 (as_snat h bn_carm) (as_snat h n) (as_snat h n) (as_snat h n);
-  assert (as_snat h bn_carm * as_snat h n <= as_snat h n2);
-  nat_bytes_num_fit (as_snat h bn_carm * as_snat h n) (as_snat h n2);
-  assert (v (nat_bytes_num (as_snat h bn_carm * as_snat h n)) <= v n2Len);
-
-  let crm_exp = create n2Len (u64 0) in
-
-  bn_mul_fitting bn_carm n crm_exp;
-
-
   let one = bn_one #1ul in
-  bn_sub_exact crm_exp one crm_exp;
+  bn_sub_exact bn_carm one bn_carm;
 
   let h = FStar.HyperStack.ST.get () in
   Math.Lemmas.multiplication_order_lemma (as_snat h n) 1 (as_snat h n) ;
-  to_fe_idemp #(as_snat h n2) (as_snat h a);
-  bn_modular_exp n2 a crm_exp res;
+  to_fe_idemp #(as_snat h n) (as_snat h a);
+  bn_modular_exp n a bn_carm res;
 
   let h = FStar.HyperStack.ST.get () in
-  assert (as_snat h crm_exp = as_snat h n * S.carm (as_snat h p) (as_snat h q) - 1);
+  assert (as_snat h bn_carm = S.carm (as_snat h p) (as_snat h q) - 1);
+  assert (as_snat h res = fexp #(as_snat h n) (as_snat h a)
+                               (S.carm (as_snat h p) (as_snat h q) - 1));
 
   pop_frame ()
 
@@ -342,7 +326,7 @@ val to_secret:
   -> n:lbignum n2Len
   -> n2:lbignum n2Len
   -> g:lbignum n2Len
-  -> Stack (secret n2Len)
+  -> StackInline (secret n2Len)
      (requires fun h ->
       live h p /\ live h q /\ live h n /\ live h n2 /\ live h g /\
       all_disjoint [loc p; loc q; loc n; loc n2; loc g] /\
@@ -353,11 +337,11 @@ val to_secret:
       as_snat h n > 1 /\
       as_snat h g < as_snat h n2 /\
       S.is_g (as_snat h n) (as_snat h g))
-     (ensures fun h0 s h1 -> h0 == h1 /\
+     (ensures fun h0 s h1 ->
+      live h1 p /\ live h1 q /\ live h1 n /\ live h1 n2 /\ live h1 g /\
       secret_mem h1 s /\ proper_secret h1 s)
 let to_secret #n2Len p q n n2 g =
   bn_len_s_fits n2Len;
-  push_frame ();
 
   let lambda:lbignum n2Len = create n2Len (uint 0) in
   carm p q n n2 lambda;
@@ -367,20 +351,36 @@ let to_secret #n2Len p q n n2 g =
   to_fe_idemp #(as_snat h n2) (as_snat h g);
   bn_modular_exp n2 g lambda x;
 
+
   let h = FStar.HyperStack.ST.get () in
   assert (isunit #(as_snat h n2) (as_snat h g));
   g_pow_isunit #(as_snat h n2) (as_snat h g) (as_snat h lambda);
   isunit_nonzero #(as_snat h n2) (as_snat h x);
+
+  // TODO this variable is temporary.
+  // Putting push_frame before this call and pop_frame right
+  // after the last one doesn't work for some reason.
   let bl_x:lbignum n2Len = create n2Len (uint 0) in
   bigl n n2 x bl_x;
 
-  assert (isunit
+  let h = FStar.HyperStack.ST.get () in
+  assert (as_snat h bl_x =
+           S.bigl #(as_snat h n)
+                   (fexp #(as_snat h n2) (as_snat h g) (as_snat h lambda)));
+
+  assert (as_snat h bl_x < as_snat h n);
+
   fermat_inverse p q n n2 bl_x x;
-  admit ();
 
+  let h = FStar.HyperStack.ST.get () in
+  assert (as_snat h x =
+          S.fermat_inverse_carm (as_snat h p) (as_snat h q)
+          (S.bigl #(as_snat h n)
+                   (fexp #(as_snat h n2) (as_snat h g) (as_snat h lambda))));
 
-  pop_frame ();
-  admit ()
+  let res_sk = Sec p q n n2 g lambda x in
+
+  res_sk
 
 val l1_div_l2:
      #n2Len:bn_len_s
