@@ -1,11 +1,12 @@
 module Lib.Math.Algebra
 
-open FStar.Math.Lemmas
-open FStar.Math.Lib
+open FStar.Calc
 open FStar.Constructive
 open FStar.Classical
+open FStar.Math.Lemmas
+open FStar.Math.Lib
 open FStar.Mul
-open FStar.Calc
+open FStar.Squash
 
 
 (* Divisibisity *)
@@ -43,11 +44,18 @@ let rec divides_mult2 a b n = match n with
 
 val divides_mult: a:pos -> b:int -> n:int -> Lemma
   (divides a b ==> divides a (n*b))
-let divides_mult a b n = if n >= 0 then divides_mult1 a b n else divides_mult2 a b n
+let divides_mult a b n =
+  if n >= 0 then divides_mult1 a b n else divides_mult2 a b n
 
 val divides_neg: a:pos -> b:int -> Lemma
   (divides a b ==> divides a (-b))
 let divides_neg a b = divides_mult a b (-1)
+
+val divides_sum_rev: c:pos -> a:int -> b:int -> Lemma
+  ((divides c (a+b) /\ divides c b) ==> divides c a)
+let divides_sum_rev c a b =
+  divides_neg c b;
+  divides_sum c (a+b) (-b)
 
 val isprm: p:nat -> Type0
 let isprm p = p >= 3 /\ p % 2 = 1 /\ (forall (x:nat{x>1&&x<p}). ~(divides x p))
@@ -62,6 +70,40 @@ type comp = n:big{iscomp n}
 // In some cases F* can't decide the existential description
 val mkcomp: p:prm -> q:prm -> comp
 let mkcomp p q = p * q
+
+// These two functions are useful for working with pair of factors.
+val exists_elim_pair (goal:Type) (#a:Type) (#p:(a -> a -> Type))
+  (_:squash (exists (x:a) (y:a). p x y))
+  (_:(x:a -> y:a{p x y} -> GTot (squash goal))) :Lemma goal
+let exists_elim_pair goal #a #p have f =
+  let joined1: squash (x:a & (exists (y:a). p x y)) = join_squash have in
+  bind_squash #_ #goal joined1 (fun (| x, pf1 |) ->
+    let joined2: squash (y:a & p x y) = join_squash (return_squash pf1) in
+    bind_squash joined2 (fun (|y, pf2|) -> return_squash pf2; f x y))
+
+val ex_pair: x:Type -> p:(x -> x -> bool) -> Lemma
+  (requires (exists a b. p a b))
+  (ensures (exists ab. p (fst ab) (snd ab)))
+let ex_pair x p =
+  let ex2: squash (exists (a:x) (b:x). p a b) = () in
+  let goal = exists ab. p (fst ab) (snd ab) in
+  exists_elim_pair
+    goal
+    ex2
+    (fun a b -> let ab = Mktuple2 a b in assert(p (fst ab) (snd ab)))
+
+// Prove statements about composite numbers without being given
+// explicit factorisation.
+val comp_elim:
+     n:comp
+  -> #goal:Type0
+  -> f:(p:prm -> q:prm{p*q = n} -> squash goal)
+  -> Lemma goal
+let comp_elim n #goal f =
+  exists_elim goal #(x:(tuple2 prm prm))
+      #(fun x -> fst x * snd x = n)
+      (ex_pair prm (fun p q -> p * q = n))
+      (fun x -> f (fst x) (snd x))
 
 val modulo_mul_distributivity: a:int -> b:int -> n:pos ->
     Lemma ((a * b) % n = ((a % n) * (b % n)) % n)
@@ -85,6 +127,30 @@ let gcd_exists a b = admit()
 val gcd_unique: a:nat -> b:nat -> g1:pos{is_gcd a b g1} -> g2:pos{is_gcd a b g2} -> Lemma
   (g1 == g2)
 let gcd_unique a b g1 g2 = ()
+
+val gcd_intro_forall: a:nat -> b:nat -> g:pos{is_gcd a b g} -> p:(pos -> Type0){p g} -> Lemma
+  (forall g'. is_gcd a b g' ==> p g')
+let gcd_intro_forall a b g p =
+  assert (forall g'. is_gcd a b g' ==> g = g');
+  assert (forall g'. is_gcd a b g' ==> p g')
+
+val gcd_exists_elim: a:nat -> b:nat -> g:pos -> Lemma
+  (requires (exists (g':pos{is_gcd a b g'}). g' = g))
+  (ensures (is_gcd a b g))
+let gcd_exists_elim a b g = ()
+
+val gcd_forall_to_exists: a:nat -> b:nat -> p:(g:pos{is_gcd a b g} -> Type0) -> Lemma
+  (requires (forall (g:pos{is_gcd a b g}). p g))
+  (ensures (exists (g:pos{is_gcd a b g}). p g))
+let gcd_forall_to_exists a b p =
+  gcd_exists a b;
+  assert (exists g. is_gcd a b g);
+  assert (exists g. is_gcd a b g ==> p g)
+
+val gcd_forall_elim: a:nat -> b:nat -> g:pos -> Lemma
+  (requires (forall (g':pos{is_gcd a b g'}). g' = g))
+  (ensures (is_gcd a b g))
+let gcd_forall_elim a b g = gcd_forall_to_exists a b (fun g' -> g' = g)
 
 val gcd_symm: a:nat -> b:nat -> g:pos -> Lemma
   (is_gcd a b g ==> is_gcd b a g)
@@ -244,6 +310,10 @@ type is_common_multiple (a:pos) (b:pos) (l:pos) =
 val lcm: pos -> pos -> pos
 let lcm a b = (a / gcd_standalone a b) * b
 
+val multiplication_order_lemma_strict: a:int -> b:int -> p:pos ->
+    Lemma (a < b <==> a * p < b * p)
+let multiplication_order_lemma_strict a b p = ()
+
 val division_mul_after: a:pos -> b:pos -> g:pos{divides g a} -> Lemma
   ((a / g) * b = (a * b) / g)
 let division_mul_after a b g =
@@ -256,8 +326,12 @@ let division_mul_after a b g =
   assert (g * ((a * b) / g) = a*b)
 
 val division_post_size: a:pos -> b:pos -> Lemma
-  (a >= a / b)
+  (a / b <= a)
 let division_post_size a b = division_definition_lemma_1 a b a
+
+val division_post_size2: a:pos -> b:pos{b>1} -> Lemma
+  (a / b < a)
+let division_post_size2 a b = division_definition_lemma_1 a b a
 
 val lcm_less_mul: a:pos -> b:pos -> Lemma
   (lcm a b <= a * b)
@@ -274,15 +348,60 @@ val gcd_pq_lcm_lemma: p:pos{p>1} -> q:pos{q>1} -> Lemma
    gcd (p * q) (lcm (p-1) (q-1)) = 1)
 let gcd_pq_lcm_lemma _ _ = admit()
 
-// Is there a constructive proof? Divisibility one is easy enough:
-//
-// ~(a | n^2) ==> ~(a | n)
-// Since n^2 has the very same factors, then if gcd a n^2 = 1,
-// we won't find any other a | n^2 such that ~(a | n)
-val gcd_n_square: n:pos -> a:pos-> Lemma
-  (gcd a n = 1 <==> gcd a (n*n) = 1)
-let gcd_n_square n a = admit()
+val gcd_to_factor: n:pos -> m:pos -> a:pos -> g:pos -> Lemma
+  (requires (is_gcd a (n*m) g))
+  (ensures (forall g'. (is_gcd a n g' ==> g' <= g)))
+let gcd_to_factor n m a g =
+  let k = n * m in
 
+  exists_elim (forall g'. (is_gcd a n g' ==> g' <= g))
+    #pos #(fun g' -> is_gcd a n g') (gcd_exists a n)
+    (fun g' -> begin
+      if g' > g then begin
+        assert (divides g' a /\ divides g' n);
+        divides_mult1 g' n m;
+        assert (divides g' a /\ divides g' k);
+        assert (is_gcd a k g');
+        assert (False);
+        assert (g' <= g)
+      end;
+      gcd_intro_forall a n g' (fun g'' -> g'' <= g)
+    end)
+
+val gcd_to_factor_one: n:pos -> m:pos -> a:pos -> Lemma
+  (requires (is_gcd a (n*m) 1))
+  (ensures (is_gcd a n 1))
+let gcd_to_factor_one n m a =
+  gcd_to_factor n m a 1;
+  assert (forall g'. (is_gcd a n g' ==> g' = 1));
+  gcd_forall_elim a n 1
+
+val gcd_mod_reduce: n:pos -> a:pos -> Lemma
+  (requires (is_gcd a n 1))
+  (ensures ((a % n) = 0 \/ is_gcd (a % n) n 1))
+let gcd_mod_reduce n a =
+  if a % n <> 0 then
+  exists_elim (is_gcd (a % n) n 1) #pos #(fun g -> is_gcd (a % n) n g)
+    (gcd_exists (a % n) n)
+    (fun g -> if g > 1 then begin
+      assert (divides g (a % n));
+      assert (divides g n);
+      lemma_div_mod a n;
+      divides_mult g n (a/n);
+      divides_neg g (n * (a/n));
+      divides_sum_rev g a (-(n*(a/n)));
+      assert (divides g a);
+      assert (is_gcd a n g);
+      assert (False);
+      assert (is_gcd (a % n) n 1)
+     end)
+
+// In general (without division condition) is not true:
+// n = pq, p^2 < n, then gcd p^2 (pq) = 1, but gcd p^2 (p^2*q^2) = p^2.
+val gcd_n_square3: p:prm -> q:prm -> a:pos -> Lemma
+  (requires (is_gcd a (p*q) 1 /\ ~(divides p a) /\ ~(divides q a)))
+  (ensures (is_gcd a ((p*q)*(p*q)) 1))
+let gcd_n_square3 p q a = admit ()
 
 (* Algebra *)
 
@@ -749,7 +868,7 @@ let inv_unique #n a b c =
   }
 
 val inv_as_gcd1: #n:big -> a:fe n{a>0} -> Lemma
-  (requires (gcd a n = 1))
+  (requires (is_gcd a n 1))
   (ensures (isunit a))
 let inv_as_gcd1 #n a =
   let (g,u,v) = ex_eucl a n in
@@ -771,7 +890,7 @@ let inv_as_gcd1 #n a =
 
 val inv_as_gcd2: #n:big -> a:fe n{a>0} -> Lemma
   (requires (isunit a))
-  (ensures (gcd a n = 1))
+  (ensures (is_gcd a n 1))
 let inv_as_gcd2 #n a =
   let l (): Lemma (exists (b:fe n). a *% b = 1) = () in
   exists_elim (gcd a n = 1) #(fe n) #(fun (b:fe n) -> a *% b = 1) (l ()) (fun u -> begin
@@ -786,6 +905,14 @@ val inv_as_gcd: #n:big -> a:fe n{a>0} -> Lemma
 let inv_as_gcd #n a =
   move_requires inv_as_gcd1 a;
   move_requires inv_as_gcd2 a
+
+// Can be shown using gcd
+val zerodiv_is_nonunit: #n:big -> a:fe n -> b:fe n -> Lemma
+  (requires (a *% b = 0))
+  (ensures (~(isunit a) /\ ~(isunit b)))
+let zerodiv_is_nonunit #n a b = admit ()
+
+#reset-options "--z3rlimit 50"
 
 val finv0: #n:big -> a:fe n ->
   Tot (b:fe n{ (isunit a <==> b *% a = one) /\
@@ -804,6 +931,8 @@ let finv0 #n a =
     to_fe_mul #n u a;
     to_fe #n u
   end
+
+#reset-options
 
 val finv: #n:big -> a:fe n{isunit a} -> b:fe n{b *% a = one}
 let finv #n a = finv0 a
@@ -828,15 +957,23 @@ let isunit_prod #n a b =
   assert((a *% b) *% (finv a *% finv b) = one);
   finv_unique (a *% b) (finv a *% finv b)
 
+type is_mult_order (#n:big) (g:fe n{isunit g}) (r:pos) =
+    fexp g r = one /\ (forall (x:pos{x<r}). fexp g x <> one)
+
+val mult_order_unique: #n:big -> g:fe n{isunit g} -> r1:pos -> r2:pos -> Lemma
+  ((is_mult_order g r1 /\ is_mult_order g r2) ==> r1 = r2)
+let mult_order_unique #n g r1 r2 = ()
+
 // Could be some naive algorithm, not used in the real code.
 val mult_order:
      #n:big
   -> g:fe n{isunit g}
-  -> r:pos{ fexp g r = one /\
-            (forall (x:pos{x<r}). fexp g x <> one) /\
-            (r >= 1)
-            }
+  -> r:pos{ is_mult_order g r }
 let mult_order #n g = admit()
+
+val mult_order_less: #n:big -> g:fe n{isunit g} -> e:pos -> Lemma
+  (fexp g e = 1 ==> mult_order g <= e)
+let mult_order_less #n g e = ()
 
 val g_pow_order_reduc: #n:big -> g:fe n{isunit g /\ g > 0} -> x:pos -> Lemma
   (ensures (fexp g x = fexp g (x % mult_order g)))
@@ -879,3 +1016,15 @@ val g_pow_isunit: #n:big -> g:fe n -> x:nat -> Lemma
   (requires (isunit g))
   (ensures (isunit (fexp g x)))
 let g_pow_isunit #n g x = g_pow_inverse g x
+
+val g_pow_isunit_rev: #n:big -> g:fe n -> x:pos -> Lemma
+  (requires (isunit (fexp g x)))
+  (ensures (isunit g))
+let g_pow_isunit_rev #n g x =
+  fexp_one1 g;
+  if x > 1 then begin
+    let y = finv (fexp g x) in
+    assert (fexp g x *% y = 1);
+    fexp_mul1 g (x-1) 1;
+    assert (g *% (fexp g (x-1) *% y) = 1)
+  end
