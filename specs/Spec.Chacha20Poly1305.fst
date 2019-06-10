@@ -4,7 +4,6 @@ open FStar.Mul
 open Lib.IntTypes
 open Lib.Sequence
 open Lib.ByteSequence
-open Lib.RawIntTypes
 
 module Poly = Spec.Poly1305
 
@@ -38,9 +37,10 @@ let poly1305_padded
   let r = len % Poly.size_block in
   let blocks = sub text 0 (n * Poly.size_block) in
   let rem = sub text (n * Poly.size_block) r in
-  let acc = Poly.poly blocks acc r_elem in
+  let acc = Poly.poly1305_update blocks acc r_elem in
   let tmp = update_sub tmp 0 r rem in
-  let acc = Poly.update1 r_elem Poly.size_block tmp acc in
+  // Only run the padded block if the initial text needed padding
+  let acc = if r > 0 then Poly.poly1305_update1 r_elem Poly.size_block tmp acc else acc in
   acc
 
 let poly1305_do
@@ -58,8 +58,8 @@ let poly1305_do
   let ciphertext_len8 = uint_to_bytes_le #U64 (u64 len) in
   let block = update_sub block 0 8 aad_len8 in
   let block = update_sub block 8 8 ciphertext_len8 in
-  let acc = Poly.update1 r 16 block acc in
-  Poly.finish k acc
+  let acc = Poly.poly1305_update1 r 16 block acc in
+  Poly.poly1305_finish k acc
 
 
 val aead_encrypt:

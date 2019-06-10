@@ -19,17 +19,17 @@ module Chacha = Hacl.Impl.Chacha20
 
 #set-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
 
-let aead_encrypt k n aadlen aad mlen m cipher mac =
+let aead_encrypt #w k n aadlen aad mlen m cipher mac =
   Chacha.chacha20_encrypt mlen cipher m k n 1ul;
-  poly1305_do k n aadlen aad mlen cipher mac
+  poly1305_do #w k n aadlen aad mlen cipher mac
 
-let aead_decrypt k n aadlen aad mlen m cipher mac =
+let aead_decrypt #w k n aadlen aad mlen m cipher mac =
   push_frame();
   let h0 = get() in
   // Create a buffer to store the temporary mac
   let computed_mac = create 16ul (u8 0) in
   // Compute the expected mac using Poly1305
-  poly1305_do k n aadlen aad mlen cipher computed_mac;
+  poly1305_do #w k n aadlen aad mlen cipher computed_mac;
   let h1 = get() in
   let res =
     if lbytes_eq computed_mac mac then (

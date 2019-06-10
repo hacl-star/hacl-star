@@ -4,7 +4,9 @@
 #include <stdbool.h>
 #include <time.h>
 
-#include "chacha20poly1305-c/Hacl_Chacha20Poly1305.h"
+#include "chacha20poly1305-c/Hacl_Chacha20Poly1305_32.h"
+#include "chacha20poly1305-c/Hacl_Chacha20Poly1305_128.h"
+#include "chacha20poly1305-c/Hacl_Chacha20Poly1305_256.h"
 
 uint8_t
 aead_plaintext[114] =
@@ -53,30 +55,20 @@ uint8_t aead_mac[16] = {
 
 };
 
+extern void 
+Hacl_Chacha20Poly1305_32_aead_encrypt(uint8_t *k, uint8_t *n1, uint32_t aadlen, uint8_t *aad, uint32_t mlen, uint8_t *m, uint8_t *cipher, uint8_t *mac);
+extern void 
+Hacl_Chacha20Poly1305_128_aead_encrypt(uint8_t *k, uint8_t *n1, uint32_t aadlen, uint8_t *aad, uint32_t mlen, uint8_t *m, uint8_t *cipher, uint8_t *mac);
+extern void 
+Hacl_Chacha20Poly1305_256_aead_encrypt(uint8_t *k, uint8_t *n1, uint32_t aadlen, uint8_t *aad, uint32_t mlen, uint8_t *m, uint8_t *cipher, uint8_t *mac);
 
-void
-aead_encrypt(
-  uint8_t *k,
-  uint8_t *n1,
-  uint32_t aadlen,
-  uint8_t *aad,
-  uint32_t mlen,
-  uint8_t *m,
-  uint8_t *cipher,
-  uint8_t *mac
-);
+extern uint32_t
+Hacl_Chacha20Poly1305_32_aead_decrypt(uint8_t *k, uint8_t *n1, uint32_t aadlen, uint8_t *aad, uint32_t mlen, uint8_t *m, uint8_t *cipher, uint8_t *mac);
+extern uint32_t
+Hacl_Chacha20Poly1305_128_aead_decrypt(uint8_t *k, uint8_t *n1, uint32_t aadlen, uint8_t *aad, uint32_t mlen, uint8_t *m, uint8_t *cipher, uint8_t *mac);
+extern uint32_t
+Hacl_Chacha20Poly1305_256_aead_decrypt(uint8_t *k, uint8_t *n1, uint32_t aadlen, uint8_t *aad, uint32_t mlen, uint8_t *m, uint8_t *cipher, uint8_t *mac);
 
-uint32_t
-aead_decrypt(
-  uint8_t *k,
-  uint8_t *n1,
-  uint32_t aadlen,
-  uint8_t *aad,
-  uint32_t mlen,
-  uint8_t *m,
-  uint8_t *cipher,
-  uint8_t *mac
-);
 
 int main(){
   int res;
@@ -87,8 +79,8 @@ int main(){
   uint8_t mac[16];
   memset(mac, 0, 16 * sizeof mac[0]);
 
-  printf("Testing HACL* Hacl_Chacha20Poly1305\n");
-  aead_encrypt(aead_key, aead_nonce, 12, aead_aad, 114, aead_plaintext, ciphertext, mac);
+  printf("Testing HACL* Hacl_Chacha20Poly1305 (32-bit)\n");
+  Hacl_Chacha20Poly1305_32_aead_encrypt(aead_key, aead_nonce, 12, aead_aad, 114, aead_plaintext, ciphertext, mac);
   res = memcmp(ciphertext, aead_ciphertext, 114 * sizeof (uint8_t));
   if (res != 0){
     printf("AEAD (Chacha20) failed on RFC test of size 114\n.");
@@ -98,7 +90,7 @@ int main(){
     printf("AEAD (Poly1305) failed on RFC test of size 114\n.");
   }
 
-  res = aead_decrypt(aead_key, aead_nonce, 12, aead_aad, 114, plaintext, aead_ciphertext, aead_mac);
+  res = Hacl_Chacha20Poly1305_32_aead_decrypt(aead_key, aead_nonce, 12, aead_aad, 114, plaintext, aead_ciphertext, aead_mac);
   if (res != 0){
     printf("AEAD Decrypt (Chacha20/Poly1305) failed on RFC test of size 114\n.");
   }
@@ -106,6 +98,61 @@ int main(){
   if (res != 0){
     printf("AEAD Decrypt (Chacha20/Poly1305) failed on RFC test of size 114\n.");
   }
+
+  if (res == 0){
+    printf("\nSuccess !\n");
+  } else {
+    printf("\nFailure !\n");
+  }
+
+  res = 0;
+  printf("Testing HACL* Hacl_Chacha20Poly1305 (128-bit)\n");
+  Hacl_Chacha20Poly1305_128_aead_encrypt(aead_key, aead_nonce, 12, aead_aad, 114, aead_plaintext, ciphertext, mac);
+  res = memcmp(ciphertext, aead_ciphertext, 114 * sizeof (uint8_t));
+  if (res != 0){
+    printf("AEAD (Chacha20) failed on RFC test of size 114\n.");
+  }
+  res = memcmp(mac, aead_mac, 16 * sizeof (uint8_t));
+  if (res != 0){
+    printf("AEAD (Poly1305) failed on RFC test of size 114\n.");
+  }
+
+  res = Hacl_Chacha20Poly1305_128_aead_decrypt(aead_key, aead_nonce, 12, aead_aad, 114, plaintext, aead_ciphertext, aead_mac);
+  if (res != 0){
+    printf("AEAD Decrypt (Chacha20/Poly1305) failed on RFC test of size 114\n.");
+  }
+  res = memcmp(plaintext, aead_plaintext, 114 * sizeof (uint8_t));
+  if (res != 0){
+    printf("AEAD Decrypt (Chacha20/Poly1305) failed on RFC test of size 114\n.");
+  }
+
+  if (res == 0){
+    printf("\nSuccess !\n");
+  } else {
+    printf("\nFailure !\n");
+  }
+
+  res = 0;
+  printf("Testing HACL* Hacl_Chacha20Poly1305 (256-bit)\n");
+  Hacl_Chacha20Poly1305_256_aead_encrypt(aead_key, aead_nonce, 12, aead_aad, 114, aead_plaintext, ciphertext, mac);
+  res = memcmp(ciphertext, aead_ciphertext, 114 * sizeof (uint8_t));
+  if (res != 0){
+    printf("AEAD (Chacha20) failed on RFC test of size 114\n.");
+  }
+  res = memcmp(mac, aead_mac, 16 * sizeof (uint8_t));
+  if (res != 0){
+    printf("AEAD (Poly1305) failed on RFC test of size 114\n.");
+  }
+
+  res = Hacl_Chacha20Poly1305_256_aead_decrypt(aead_key, aead_nonce, 12, aead_aad, 114, plaintext, aead_ciphertext, aead_mac);
+  if (res != 0){
+    printf("AEAD Decrypt (Chacha20/Poly1305) failed on RFC test of size 114\n.");
+  }
+  res = memcmp(plaintext, aead_plaintext, 114 * sizeof (uint8_t));
+  if (res != 0){
+    printf("AEAD Decrypt (Chacha20/Poly1305) failed on RFC test of size 114\n.");
+  }
+
   if (res == 0){
     printf("\nSuccess !\n");
   } else {

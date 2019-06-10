@@ -11,8 +11,10 @@ module LSeq = Lib.Sequence
 module ST = FStar.HyperStack.ST
 module Spec = Spec.Chacha20Poly1305
 
+open Hacl.Impl.Poly1305.Fields
 
-val aead_encrypt:
+inline_for_extraction noextract
+let aead_encrypt_st (w:field_spec) =
     key: lbuffer uint8 32ul
   -> nonce: lbuffer uint8 12ul
   -> alen: size_t
@@ -34,8 +36,11 @@ val aead_encrypt:
         (LSeq.concat (as_seq h1 output) (as_seq h1 tag))
         (Spec.aead_encrypt (as_seq h0 key) (as_seq h0 nonce) (as_seq h0 input) (as_seq h0 aad))))
 
+inline_for_extraction noextract
+val aead_encrypt: #w:field_spec -> aead_encrypt_st w
 
-val aead_decrypt:
+inline_for_extraction noextract
+let aead_decrypt_st (w:field_spec) =
     key: lbuffer uint8 32ul
   -> nonce: lbuffer uint8 12ul
   -> alen: size_t
@@ -56,3 +61,6 @@ val aead_decrypt:
       | _ -> false)  // decryption failed
       )
     )
+
+inline_for_extraction noextract
+val aead_decrypt: #w:field_spec -> aead_decrypt_st w
