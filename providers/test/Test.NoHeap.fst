@@ -34,7 +34,7 @@ val test_one_hash: hash_vector -> Stack unit (fun _ -> true) (fun _ _ _ -> true)
 let test_one_hash vec =
   let a, input, (LB expected_len expected), repeat = vec in
   let input_len = C.String.strlen input in
-  let tlen = H.tagLen a in
+  let tlen = Hacl.Hash.Definitions.hash_len a in
   if expected_len <> tlen then
     failwith !$"Wrong length of expected tag\n"
   else if repeat = 0ul then
@@ -58,7 +58,7 @@ let test_one_hash vec =
       C.String.memcpy (B.sub total_input (input_len * i) input_len) input input_len
     );
     EverCrypt.Hash.uint32_fits_maxLength a total_input_len;
-    assert (v total_input_len <= EverCrypt.Hash.maxLength a);
+    assert (v total_input_len <= Spec.Hash.Definitions.max_input_length a);
 
     EverCrypt.Hash.hash a computed total_input total_input_len;
 
@@ -88,7 +88,7 @@ let keysized (a:H.alg) (l: UInt32.t): Tot (b:bool{b ==> Spec.HMAC.keysized a (UI
 val test_one_hmac: hmac_vector -> Stack unit (fun _ -> True) (fun _ _ _ -> True)
 let test_one_hmac vec =
   let ha, (LB keylen key), (LB datalen data), (LB expectedlen expected) = vec in
-  if expectedlen <> H.tagLen ha then
+  if expectedlen <> Hacl.Hash.Definitions.hash_len ha then
     failwith !$"Wrong length of expected tag\n"
   else if not (keysized ha keylen) then
     failwith !$"Keysized predicate not satisfied\n"
@@ -98,14 +98,14 @@ let test_one_hmac vec =
     begin
     push_frame();
     assert (Spec.HMAC.keysized ha (v keylen));
-    assert (v datalen + H.blockLength ha < pow2 32);
+    assert (v datalen + Spec.Hash.Definitions.block_length ha < pow2 32);
     B.recall key;
     B.recall data;
-    let computed = B.alloca 0uy (H.tagLen ha) in
+    let computed = B.alloca 0uy (Hacl.Hash.Definitions.hash_len ha) in
     EverCrypt.HMAC.compute ha computed key keylen data datalen;
     let str = EverCrypt.Hash.string_of_alg ha  in
     B.recall expected;
-    TestLib.compare_and_print str expected computed (H.tagLen ha);
+    TestLib.compare_and_print str expected computed (Hacl.Hash.Definitions.hash_len ha);
     pop_frame()
     end
 
@@ -119,9 +119,9 @@ val test_one_hkdf: hkdf_vector -> Stack unit (fun _ -> True) (fun _ _ _ -> True)
 let test_one_hkdf vec =
   let ha, (LB ikmlen ikm), (LB saltlen salt),
     (LB infolen info), (LB prklen expected_prk), (LB okmlen expected_okm) = vec in
-  if prklen <> H.tagLen ha then
+  if prklen <> Hacl.Hash.Definitions.hash_len ha then
     failwith !$"Wrong length of expected PRK\n"
-  else if okmlen > 255ul * H.tagLen ha then
+  else if okmlen > 255ul * Hacl.Hash.Definitions.hash_len ha then
     failwith !$"Wrong output length\n"
   else if not (keysized ha saltlen) then
     failwith !$"Saltlen is not keysized\n"
@@ -135,17 +135,17 @@ let test_one_hkdf vec =
   else if supported_hmac_algorithm ha then begin
     push_frame();
     assert (Spec.HMAC.keysized ha (v saltlen));
-    assert (v ikmlen + H.blockLength ha < pow2 32);
+    assert (v ikmlen + Spec.Hash.Definitions.block_length ha < pow2 32);
     assert Spec.Hash.Definitions.(hash_length ha
       + v infolen + 1 + block_length ha < pow2 32);
     B.recall salt;
     B.recall ikm;
     B.recall info;
     let str = EverCrypt.Hash.string_of_alg ha in
-    let computed_prk = B.alloca 0uy (H.tagLen ha) in
+    let computed_prk = B.alloca 0uy (Hacl.Hash.Definitions.hash_len ha) in
     EverCrypt.HKDF.hkdf_extract ha computed_prk salt saltlen ikm ikmlen;
     B.recall expected_prk;
-    TestLib.compare_and_print str expected_prk computed_prk (H.tagLen ha);
+    TestLib.compare_and_print str expected_prk computed_prk (Hacl.Hash.Definitions.hash_len ha);
 
     let computed_okm = B.alloca 0uy (okmlen + 1ul) in
     let computed_okm = B.sub computed_okm 0ul okmlen in

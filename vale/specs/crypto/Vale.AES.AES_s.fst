@@ -120,13 +120,12 @@ let rec key_schedule_to_round_keys (rounds:nat) (w:seq nat32 {length w >= 4 * ro
     let rk = Mkfour (index w (4 * rounds - 4)) (index w (4 * rounds - 3)) (index w (4 * rounds - 2)) (index w (4 * rounds - 1)) in
     append round_keys (create 1 rk)
 
-let key_to_round_keys_LE_def (alg:algorithm) (key:seq nat32) : Pure (seq quad32)
+[@"opaque_to_smt"]
+let key_to_round_keys_LE (alg:algorithm) (key:seq nat32) : Pure (seq quad32)
   (requires is_aes_key_LE alg key)
   (ensures fun round_keys -> length round_keys == nr alg + 1)
   =
   key_schedule_to_round_keys (nr alg + 1) (expand_key alg key (nb * (nr alg + 1)))
-
-let key_to_round_keys_LE = make_opaque key_to_round_keys_LE_def
 
 let aes_encrypt_LE_def (alg:algorithm) (key:seq nat32) (input_LE:quad32) : Pure quad32
   (requires is_aes_key_LE alg key)

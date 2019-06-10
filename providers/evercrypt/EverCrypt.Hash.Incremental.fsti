@@ -3,7 +3,23 @@ module EverCrypt.Hash.Incremental
 open FStar.Mul
 
 /// An alternative API on top of EverCrypt.Hash that holds an internal buffer.
-/// No state abstraction for now, can be added later on as we wish.
+/// This module is the main entry point for hashes in EverCrypt; as such, it
+/// offers abstraction, framing principles, and re-export definitions along with
+/// a series of helpers.
+
+module B = LowStar.Buffer
+module S = FStar.Seq
+module ST = FStar.HyperStack.ST
+module HS = FStar.HyperStack
+module G = FStar.Ghost
+module U32 = FStar.UInt32
+
+module Hash = EverCrypt.Hash
+
+open FStar.HyperStack.ST
+open Spec.Hash.Definitions
+
+#reset-options "--max_fuel 0 --max_ifuel 0"
 
 module B = LowStar.Buffer
 module S = FStar.Seq
@@ -37,6 +53,7 @@ let preserves_freeable #a (s: state a) (h0 h1: HS.mem) =
   let State hash_state buf _ = s in
   Hash.preserves_freeable hash_state h0 h1
 
+#push-options "--max_ifuel 1"
 /// A lemma to be used by all clients, to show that a stateful operation that
 /// operates on a disjoint fragment of the heap preserves the invariants of this
 /// module. Note: it might be useful to call `Hash.fresh_is_disjoint` to turn
@@ -57,6 +74,7 @@ let modifies_disjoint_preserves #a (l: B.loc) (h0 h1: HS.mem) (s: state a): Lemm
   let hash_state = State?.hash_state s in
   Hash.frame_invariant l hash_state h0 h1;
   Hash.frame_invariant_implies_footprint_preservation l hash_state h0 h1
+#pop-options
 
 noextract
 let split_at_last (a: Hash.alg) (b: bytes):
@@ -87,7 +105,7 @@ let hashes (#a: Hash.alg) (h: HS.mem) (s: state a) (b: bytes) =
   B.live h buf_ /\
   B.(loc_disjoint (loc_buffer buf_) (Hash.footprint hash_state h)) /\
   Hash.invariant hash_state h /\
-  S.equal (Hash.repr hash_state h) (Hash.compress_many (Hash.acc0 #a) blocks) /\
+  S.equal (Hash.repr hash_state h) (Spec.Hash.update_multi a (Spec.Hash.init a) blocks) /\
   S.equal (S.slice (B.as_seq h buf_) 0 (v total_len % block_length a)) rest
 
 noextract
@@ -174,9 +192,9 @@ val finish: a:Hash.alg -> finish_st a
 
 (** @type: true
 *)
-val free: 
+val free:
   a:Hash.alg ->
-  s:state a -> 
+  s:state a ->
   ST unit
   (requires fun h0 ->
     let State hash_state buf_ _ = s in

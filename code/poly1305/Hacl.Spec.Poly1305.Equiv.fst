@@ -12,7 +12,7 @@ module Lemmas = Hacl.Spec.Poly1305.Equiv.Lemmas
 
 include Hacl.Spec.Poly1305.Vec
 
-#reset-options "--z3rlimit 150 --max_fuel 2"
+#reset-options "--z3rlimit 150 --max_fuel 2 --z3refresh"
 
 val poly_update_repeat_blocks_multi_lemma:
     #w:lanes
@@ -318,7 +318,7 @@ let poly_eq_lemma1 #w text acc0 r =
   Loops.repeati_def (len0 / size_block) repeat_bf_t0 acc0
 #pop-options
 
-#push-options "--z3rlimit 200"
+#push-options "--z3rlimit 500"
 #push-options "--max_fuel 2"
 val poly_eq_lemma2:
     #w:lanes

@@ -1,5 +1,5 @@
 [
-  "nž42ô0Öâm°9ƒ¿5¯±",
+  "š†6‰m\u0005\u0015W\u000e\u0014(qluÄ¾",
   [
     [
       "Vale.X64.Machine_Semantics_s.uint64",
@@ -8,7 +8,7 @@
       0,
       [ "@query", "assumption_FStar.UInt64.t__uu___haseq" ],
       0,
-      "bb4b87ac55f2c55da3dd68688871c248"
+      "61cb26b0fc83d39d2ad8d4b7cea533e1"
     ],
     [
       "Vale.X64.Machine_Semantics_s.__proj__AnnotateXor64__item___0",
@@ -22,7 +22,7 @@
         "refinement_interpretation_Tm_refine_b130da2079b7fa62c26741e2adf7f0b6"
       ],
       0,
-      "64a41332f439164890ec0c826eca24dc"
+      "7f09018e436b58c90bf7f906e91c951a"
     ],
     [
       "Vale.X64.Machine_Semantics_s.__proj__AnnotatePxor__item___0",
@@ -36,7 +36,7 @@
         "refinement_interpretation_Tm_refine_1f3942d454de893b05458ec4d1c706ea"
       ],
       0,
-      "40a75e85835b96e850887bf94e613d7b"
+      "84a2c1184dd3d7863190c9a396a5aa75"
     ],
     [
       "Vale.X64.Machine_Semantics_s.__proj__AnnotateVPxor__item___0",
@@ -50,7 +50,7 @@
         "refinement_interpretation_Tm_refine_1216058de9517c69bc27db9254c96884"
       ],
       0,
-      "fdd3f3db79973e8bbcbc937a449983cc"
+      "11bb2dfeddb8ff12e90632f04a969e64"
     ],
     [
       "Vale.X64.Machine_Semantics_s.get_fst_ocmp",
@@ -59,17 +59,27 @@
       1,
       [
         "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565",
         "disc_equation_Vale.X64.Bytes_Code_s.OEq",
         "disc_equation_Vale.X64.Bytes_Code_s.OGe",
         "disc_equation_Vale.X64.Bytes_Code_s.OGt",
         "disc_equation_Vale.X64.Bytes_Code_s.OLe",
         "disc_equation_Vale.X64.Bytes_Code_s.OLt",
-        "disc_equation_Vale.X64.Bytes_Code_s.ONe",
+        "disc_equation_Vale.X64.Bytes_Code_s.ONe", "equation_Prims.eqtype",
+        "equation_Prims.nat", "equation_Vale.Def.Words_s.nat64",
+        "equation_Vale.Def.Words_s.natN",
         "equation_Vale.X64.Machine_Semantics_s.ocmp",
-        "fuel_guarded_inversion_Vale.X64.Bytes_Code_s.ocmp"
+        "equation_Vale.X64.Machine_s.reg_64",
+        "fuel_guarded_inversion_Vale.X64.Bytes_Code_s.ocmp",
+        "function_token_typing_Prims.__cache_version_number__",
+        "function_token_typing_Prims.int",
+        "haseqTm_refine_1101de7a497235789e427aeb0d9938cc",
+        "haseqTm_refine_5514fbe9e08dfda40f950a7b9f1b2b98",
+        "haseqTm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "880ef375d585f192de76093e4d3d67b0"
+      "7cae2cb6384be36cbd20b3a43e78adfa"
     ],
     [
       "Vale.X64.Machine_Semantics_s.get_snd_ocmp",
@@ -78,17 +88,59 @@
       1,
       [
         "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565",
         "disc_equation_Vale.X64.Bytes_Code_s.OEq",
         "disc_equation_Vale.X64.Bytes_Code_s.OGe",
         "disc_equation_Vale.X64.Bytes_Code_s.OGt",
         "disc_equation_Vale.X64.Bytes_Code_s.OLe",
         "disc_equation_Vale.X64.Bytes_Code_s.OLt",
-        "disc_equation_Vale.X64.Bytes_Code_s.ONe",
+        "disc_equation_Vale.X64.Bytes_Code_s.ONe", "equation_Prims.eqtype",
+        "equation_Prims.nat", "equation_Vale.Def.Words_s.nat64",
+        "equation_Vale.Def.Words_s.natN",
         "equation_Vale.X64.Machine_Semantics_s.ocmp",
-        "fuel_guarded_inversion_Vale.X64.Bytes_Code_s.ocmp"
+        "equation_Vale.X64.Machine_s.reg_64",
+        "fuel_guarded_inversion_Vale.X64.Bytes_Code_s.ocmp",
+        "function_token_typing_Prims.__cache_version_number__",
+        "function_token_typing_Prims.int",
+        "haseqTm_refine_1101de7a497235789e427aeb0d9938cc",
+        "haseqTm_refine_5514fbe9e08dfda40f950a7b9f1b2b98",
+        "haseqTm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "6a9d5089ff287e9832e4ae09caaefba2"
+      "fb7fc8afc0bd0b94427e302aa334ac8f"
+    ],
+    [
+      "Vale.X64.Machine_Semantics_s.eval_reg_64",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
+        "equation_Vale.X64.Machine_s.n_reg_files",
+        "equation_Vale.X64.Machine_s.n_regs",
+        "equation_Vale.X64.Machine_s.reg_64",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_1101de7a497235789e427aeb0d9938cc"
+      ],
+      0,
+      "413d7c8f6ace35f78b9683b3075a779d"
+    ],
+    [
+      "Vale.X64.Machine_Semantics_s.eval_reg_xmm",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
+        "equation_Vale.X64.Machine_s.n_reg_files",
+        "equation_Vale.X64.Machine_s.n_regs",
+        "equation_Vale.X64.Machine_s.reg_xmm",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_1101de7a497235789e427aeb0d9938cc"
+      ],
+      0,
+      "22739898086df5c6bbe73ce4415d6c8f"
     ],
     [
       "Vale.X64.Machine_Semantics_s.eval_maddr",
@@ -103,7 +155,7 @@
         "fuel_guarded_inversion_Vale.X64.Machine_s.maddr"
       ],
       0,
-      "cbb1ab92496f5803b35a9008980e2512"
+      "c41e0674fb78187d9d971cdb5970b179"
     ],
     [
       "Vale.X64.Machine_Semantics_s.eval_operand",
@@ -116,10 +168,12 @@
         "disc_equation_Vale.X64.Machine_s.OMem",
         "disc_equation_Vale.X64.Machine_s.OReg",
         "disc_equation_Vale.X64.Machine_s.OStack",
+        "equation_Vale.X64.Machine_s.operand64",
+        "equation_Vale.X64.Machine_s.reg",
         "fuel_guarded_inversion_Vale.X64.Machine_s.operand"
       ],
       0,
-      "d6bfbb247da3b7a6ad803cce34031015"
+      "a588a7227bda6510c4d3a5782d312b96"
     ],
     [
       "Vale.X64.Machine_Semantics_s.eval_mov128_op",
@@ -128,13 +182,17 @@
       1,
       [
         "@MaxIFuel_assumption", "@query",
-        "disc_equation_Vale.X64.Machine_s.OMem128",
-        "disc_equation_Vale.X64.Machine_s.OReg128",
-        "disc_equation_Vale.X64.Machine_s.OStack128",
-        "fuel_guarded_inversion_Vale.X64.Machine_s.operand128"
+        "disc_equation_Vale.X64.Machine_s.OConst",
+        "disc_equation_Vale.X64.Machine_s.OMem",
+        "disc_equation_Vale.X64.Machine_s.OReg",
+        "disc_equation_Vale.X64.Machine_s.OStack",
+        "equation_Vale.Def.Types_s.quad32",
+        "equation_Vale.X64.Machine_s.operand128",
+        "equation_Vale.X64.Machine_s.xmm",
+        "fuel_guarded_inversion_Vale.X64.Machine_s.operand"
       ],
       0,
-      "047e90605e87e5a4b6e204f59237bd08"
+      "956d306e5ca255bdf64ffafd3ea3a479"
     ],
     [
       "Vale.X64.Machine_Semantics_s.eval_ocmp",
@@ -161,7 +219,53 @@
         "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "a4a3142610e47382e32d7d9a9fbcc2a1"
+      "d53aab965815553a134290a004f806c3"
+    ],
+    [
+      "Vale.X64.Machine_Semantics_s.update_reg'",
+      1,
+      1,
+      0,
+      [
+        "@query", "assumption_Vale.X64.Machine_s.reg__uu___haseq",
+        "equation_Vale.X64.Machine_s.t_reg",
+        "equation_Vale.X64.Machine_s.t_reg_file",
+        "primitive_Prims.op_Equality", "projection_inverse_BoxBool_proj_0"
+      ],
+      0,
+      "b995007955b5e1eb9665b1bce02b3ff3"
+    ],
+    [
+      "Vale.X64.Machine_Semantics_s.update_reg_64'",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
+        "equation_Vale.X64.Machine_s.n_reg_files",
+        "equation_Vale.X64.Machine_s.n_regs",
+        "equation_Vale.X64.Machine_s.reg_64",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_1101de7a497235789e427aeb0d9938cc"
+      ],
+      0,
+      "9162c4ff0890c8fc5d3979f06eaccdc2"
+    ],
+    [
+      "Vale.X64.Machine_Semantics_s.update_reg_xmm'",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
+        "equation_Vale.X64.Machine_s.n_reg_files",
+        "equation_Vale.X64.Machine_s.n_regs",
+        "equation_Vale.X64.Machine_s.reg_xmm",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_1101de7a497235789e427aeb0d9938cc"
+      ],
+      0,
+      "2e80b729b98667ca345c28ca1dfbf046"
     ],
     [
       "Vale.X64.Machine_Semantics_s.mod_8",
@@ -170,365 +274,7 @@
       0,
       [ "@query" ],
       0,
-      "2cb5da8d595580f31131f9f909b6e4f0"
-    ],
-    [
-      "Vale.X64.Machine_Semantics_s.valid_src_operand",
-      1,
-      1,
-      1,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_Vale.X64.Machine_s.OConst",
-        "disc_equation_Vale.X64.Machine_s.OMem",
-        "disc_equation_Vale.X64.Machine_s.OReg",
-        "disc_equation_Vale.X64.Machine_s.OStack",
-        "fuel_guarded_inversion_Vale.X64.Machine_s.operand"
-      ],
-      0,
-      "5d9bf4e738513077cfcfc3cd89ad02a9"
-    ],
-    [
-      "Vale.X64.Machine_Semantics_s.valid_src_mov128_op",
-      1,
-      1,
-      1,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_Vale.X64.Machine_s.OMem128",
-        "disc_equation_Vale.X64.Machine_s.OReg128",
-        "disc_equation_Vale.X64.Machine_s.OStack128",
-        "fuel_guarded_inversion_Vale.X64.Machine_s.operand128"
-      ],
-      0,
-      "9b03c92b6c07553bd6f9b920d99e1259"
-    ],
-    [
-      "Vale.X64.Machine_Semantics_s.valid_ocmp",
-      1,
-      1,
-      1,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_Vale.X64.Bytes_Code_s.OEq",
-        "disc_equation_Vale.X64.Bytes_Code_s.OGe",
-        "disc_equation_Vale.X64.Bytes_Code_s.OGt",
-        "disc_equation_Vale.X64.Bytes_Code_s.OLe",
-        "disc_equation_Vale.X64.Bytes_Code_s.OLt",
-        "disc_equation_Vale.X64.Bytes_Code_s.ONe",
-        "equation_Vale.X64.Machine_Semantics_s.ocmp",
-        "fuel_guarded_inversion_Vale.X64.Bytes_Code_s.ocmp"
-      ],
-      0,
-      "42048e68756afa7fb3b81db9fa85b487"
-    ],
-    [
-      "Vale.X64.Machine_Semantics_s.valid_dst_operand",
-      1,
-      1,
-      1,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_Vale.X64.Machine_s.OConst",
-        "disc_equation_Vale.X64.Machine_s.OMem",
-        "disc_equation_Vale.X64.Machine_s.OReg",
-        "disc_equation_Vale.X64.Machine_s.OStack",
-        "fuel_guarded_inversion_Vale.X64.Machine_s.operand"
-      ],
-      0,
-      "3716a7d1ed0adeba531d621c70b727fb"
-    ],
-    [
-      "Vale.X64.Machine_Semantics_s.valid_dst_mov128_op",
-      1,
-      1,
-      1,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_Vale.X64.Machine_s.OMem128",
-        "disc_equation_Vale.X64.Machine_s.OReg128",
-        "disc_equation_Vale.X64.Machine_s.OStack128",
-        "fuel_guarded_inversion_Vale.X64.Machine_s.operand128"
-      ],
-      0,
-      "24b946a7ad2a76b689ae5548c5dab6bd"
-    ],
-    [
-      "Vale.X64.Machine_Semantics_s.update_operand_preserve_flags''",
-      1,
-      1,
-      1,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_Vale.X64.Machine_s.OConst",
-        "disc_equation_Vale.X64.Machine_s.OMem",
-        "disc_equation_Vale.X64.Machine_s.OReg",
-        "disc_equation_Vale.X64.Machine_s.OStack",
-        "fuel_guarded_inversion_Vale.X64.Machine_s.operand"
-      ],
-      0,
-      "7da6d26cea02efc22ea6ee3c120769a0"
-    ],
-    [
-      "Vale.X64.Machine_Semantics_s.update_mov128_op_preserve_flags''",
-      1,
-      1,
-      1,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_Vale.X64.Machine_s.OMem128",
-        "disc_equation_Vale.X64.Machine_s.OReg128",
-        "disc_equation_Vale.X64.Machine_s.OStack128",
-        "fuel_guarded_inversion_Vale.X64.Machine_s.operand128"
-      ],
-      0,
-      "f1ddeb570689156f6b71b30df2494f39"
-    ],
-    [
-      "Vale.X64.Machine_Semantics_s.update_rsp'",
-      1,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
-        "equation_Vale.Def.Words_s.nat64", "equation_Vale.Def.Words_s.natN",
-        "primitive_Prims.op_AmpAmp", "primitive_Prims.op_GreaterThanOrEqual",
-        "primitive_Prims.op_LessThanOrEqual",
-        "projection_inverse_BoxBool_proj_0",
-        "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_4c6411da037541583c16876f5cc7dfe4",
-        "refinement_interpretation_Tm_refine_5514fbe9e08dfda40f950a7b9f1b2b98"
-      ],
-      0,
-      "143e74d012d71508513f124bf8b514ef"
-    ],
-    [
-      "Vale.X64.Machine_Semantics_s.update_cf'",
-      1,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "Prims_pretyping_ae567c2fb75be05905677af440075565", "bool_inversion",
-        "equation_Prims.nat", "equation_Vale.Def.Words_s.nat64",
-        "equation_Vale.Def.Words_s.natN",
-        "equation_Vale.X64.Machine_Semantics_s.cf",
-        "function_token_typing_Prims.__cache_version_number__",
-        "int_inversion", "primitive_Prims.op_Equality",
-        "primitive_Prims.op_Negation", "projection_inverse_BoxBool_proj_0",
-        "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_5514fbe9e08dfda40f950a7b9f1b2b98",
-        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
-        "typing_Vale.X64.Machine_Semantics_s.cf"
-      ],
-      0,
-      "4766f4e96a89e270a1e89a39af00ff7d"
-    ],
-    [
-      "Vale.X64.Machine_Semantics_s.update_of'",
-      1,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "Prims_pretyping_ae567c2fb75be05905677af440075565", "bool_inversion",
-        "equation_Prims.nat", "equation_Vale.Def.Words_s.nat64",
-        "equation_Vale.Def.Words_s.natN",
-        "equation_Vale.X64.Machine_Semantics_s.overflow",
-        "function_token_typing_Prims.__cache_version_number__",
-        "int_inversion", "primitive_Prims.op_Equality",
-        "primitive_Prims.op_Negation", "projection_inverse_BoxBool_proj_0",
-        "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_5514fbe9e08dfda40f950a7b9f1b2b98",
-        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
-        "typing_Vale.X64.Machine_Semantics_s.overflow"
-      ],
-      0,
-      "4dbcd13fe282f4dcf37377e018303460"
-    ],
-    [
-      "Vale.X64.Machine_Semantics_s.try_option",
-      1,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query", "bool_inversion",
-        "disc_equation_FStar.Pervasives.Native.None",
-        "disc_equation_FStar.Pervasives.Native.Some",
-        "lemma_FStar.Pervasives.invertOption",
-        "typing_FStar.Pervasives.Native.uu___is_None",
-        "typing_FStar.Pervasives.Native.uu___is_Some"
-      ],
-      0,
-      "8f87abdbdf87d50d5f755d5493917284"
-    ],
-    [
-      "Vale.X64.Machine_Semantics_s.bind_option",
-      1,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query", "bool_inversion",
-        "disc_equation_FStar.Pervasives.Native.None",
-        "disc_equation_FStar.Pervasives.Native.Some",
-        "lemma_FStar.Pervasives.invertOption",
-        "typing_FStar.Pervasives.Native.uu___is_None",
-        "typing_FStar.Pervasives.Native.uu___is_Some"
-      ],
-      0,
-      "ef8096bfbbda102990cec4161223a668"
-    ],
-    [
-      "Vale.X64.Machine_Semantics_s.operand_obs",
-      1,
-      1,
-      1,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_Vale.X64.Machine_s.MConst",
-        "disc_equation_Vale.X64.Machine_s.MIndex",
-        "disc_equation_Vale.X64.Machine_s.MReg",
-        "disc_equation_Vale.X64.Machine_s.OConst",
-        "disc_equation_Vale.X64.Machine_s.OMem",
-        "disc_equation_Vale.X64.Machine_s.OReg",
-        "disc_equation_Vale.X64.Machine_s.OStack",
-        "fuel_guarded_inversion_Vale.X64.Machine_s.maddr",
-        "fuel_guarded_inversion_Vale.X64.Machine_s.operand"
-      ],
-      0,
-      "7368466edf46cdde3cd1f63d825e0a7d"
-    ],
-    [
-      "Vale.X64.Machine_Semantics_s.operand_obs128",
-      1,
-      1,
-      1,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_Vale.X64.Machine_s.MConst",
-        "disc_equation_Vale.X64.Machine_s.MIndex",
-        "disc_equation_Vale.X64.Machine_s.MReg",
-        "disc_equation_Vale.X64.Machine_s.OMem128",
-        "disc_equation_Vale.X64.Machine_s.OReg128",
-        "disc_equation_Vale.X64.Machine_s.OStack128",
-        "fuel_guarded_inversion_Vale.X64.Machine_s.maddr",
-        "fuel_guarded_inversion_Vale.X64.Machine_s.operand128"
-      ],
-      0,
-      "d1d826ea81be42a284ec4e3f9ee111ed"
-    ],
-    [
-      "Vale.X64.Machine_Semantics_s.obs_operand_explicit",
-      1,
-      1,
-      1,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_Vale.X64.Instruction_s.IOp64",
-        "disc_equation_Vale.X64.Instruction_s.IOpXmm",
-        "equation_Vale.X64.Instruction_s.instr_operand_t",
-        "fuel_guarded_inversion_Vale.X64.Instruction_s.instr_operand_explicit",
-        "projection_inverse_BoxBool_proj_0"
-      ],
-      0,
-      "73ed2178615fa07f663f3839f9b9d9f5"
-    ],
-    [
-      "Vale.X64.Machine_Semantics_s.obs_operand_implicit",
-      1,
-      1,
-      1,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_Vale.X64.Instruction_s.IOp64One",
-        "disc_equation_Vale.X64.Instruction_s.IOpFlagsCf",
-        "disc_equation_Vale.X64.Instruction_s.IOpFlagsOf",
-        "disc_equation_Vale.X64.Instruction_s.IOpXmmOne",
-        "fuel_guarded_inversion_Vale.X64.Instruction_s.instr_operand_implicit"
-      ],
-      0,
-      "f214194097ba3b43f00bd5dbc8728fdc"
-    ],
-    [
-      "Vale.X64.Machine_Semantics_s.obs_args",
-      1,
-      1,
-      1,
-      [
-        "@MaxFuel_assumption", "@MaxIFuel_assumption",
-        "@fuel_correspondence_Vale.X64.Instruction_s.instr_operands_t_args.fuel_instrumented",
-        "@fuel_irrelevance_Vale.X64.Instruction_s.instr_operands_t_args.fuel_instrumented",
-        "@query", "binder_x_5b8a55910a662c783b1ed3212549410e_0",
-        "constructor_distinct_Prims.Cons",
-        "constructor_distinct_Vale.X64.Instruction_s.IOpEx",
-        "constructor_distinct_Vale.X64.Instruction_s.IOpIm",
-        "disc_equation_Prims.Cons", "disc_equation_Prims.Nil",
-        "disc_equation_Vale.X64.Instruction_s.IOpEx",
-        "disc_equation_Vale.X64.Instruction_s.IOpIm",
-        "equation_with_fuel_Vale.X64.Instruction_s.instr_operands_t_args.fuel_instrumented",
-        "fuel_guarded_inversion_Prims.list",
-        "fuel_guarded_inversion_Vale.X64.Instruction_s.instr_operand",
-        "projection_inverse_Prims.Cons_hd",
-        "projection_inverse_Prims.Cons_tl",
-        "projection_inverse_Vale.X64.Instruction_s.IOpEx__0",
-        "projection_inverse_Vale.X64.Instruction_s.IOpIm__0",
-        "subterm_ordering_Prims.Cons"
-      ],
-      0,
-      "ceed618e6b4f0ccb74468d67bbb12375"
-    ],
-    [
-      "Vale.X64.Machine_Semantics_s.obs_inouts",
-      1,
-      1,
-      1,
-      [
-        "@MaxFuel_assumption", "@MaxIFuel_assumption",
-        "@fuel_correspondence_Vale.X64.Instruction_s.instr_operands_t.fuel_instrumented",
-        "@fuel_irrelevance_Vale.X64.Instruction_s.instr_operands_t.fuel_instrumented",
-        "@query",
-        "Vale.X64.Instruction_s_pretyping_2fb66fcb47c648644e76dfa1323a4ab6",
-        "binder_x_5b8a55910a662c783b1ed3212549410e_1",
-        "binder_x_695f4be111338c847de65a0e01449238_0",
-        "binder_x_b6a48ef30bd1dfd7c55eceb0340d6f73_2",
-        "constructor_distinct_Prims.Cons", "constructor_distinct_Prims.Nil",
-        "constructor_distinct_Vale.X64.Instruction_s.IOpEx",
-        "constructor_distinct_Vale.X64.Instruction_s.IOpIm",
-        "data_typing_intro_Vale.X64.Instruction_s.Out@tok",
-        "disc_equation_Prims.Cons", "disc_equation_Prims.Nil",
-        "disc_equation_Vale.X64.Instruction_s.IOpEx",
-        "disc_equation_Vale.X64.Instruction_s.IOpIm",
-        "equation_Vale.X64.Instruction_s.instr_out",
-        "equation_with_fuel_Vale.X64.Instruction_s.instr_operands_t.fuel_instrumented",
-        "fuel_guarded_inversion_Prims.list",
-        "fuel_guarded_inversion_Vale.X64.Instruction_s.instr_operand",
-        "projection_inverse_FStar.Pervasives.Native.Mktuple2__2",
-        "projection_inverse_Prims.Cons_hd",
-        "projection_inverse_Prims.Cons_tl", "projection_inverse_Prims.Nil_a",
-        "projection_inverse_Vale.X64.Instruction_s.IOpEx__0",
-        "projection_inverse_Vale.X64.Instruction_s.IOpIm__0",
-        "subterm_ordering_Prims.Cons"
-      ],
-      0,
-      "b7e22f70d2505777ef20438e4eac2b55"
-    ],
-    [
-      "Vale.X64.Machine_Semantics_s.ins_obs",
-      1,
-      1,
-      1,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_Vale.X64.Bytes_Code_s.Alloc",
-        "disc_equation_Vale.X64.Bytes_Code_s.Dealloc",
-        "disc_equation_Vale.X64.Bytes_Code_s.Instr",
-        "disc_equation_Vale.X64.Bytes_Code_s.Pop",
-        "disc_equation_Vale.X64.Bytes_Code_s.Push",
-        "equation_Vale.X64.Machine_Semantics_s.ins",
-        "fuel_guarded_inversion_Vale.X64.Bytes_Code_s.instruction_t"
-      ],
-      0,
-      "2cbf9e502079ad949ba8981d26887300"
+      "33f9dd76d3ea10e33cc4e4433f721f4c"
     ],
     [
       "Vale.X64.Machine_Semantics_s.match_n",
@@ -553,7 +299,7 @@
         "well-founded-ordering-on-nat"
       ],
       0,
-      "3c0783b91772efa3a0d1d284af98ac7e"
+      "02c292733623baa6a37914be64758af2"
     ],
     [
       "Vale.X64.Machine_Semantics_s.update_n",
@@ -605,10 +351,10 @@
         "well-founded-ordering-on-nat"
       ],
       0,
-      "ec5db0dabfeed51a40b3e52506b94c45"
+      "952b3eb1b591cfde2b151ea74022f58b"
     ],
     [
-      "Vale.X64.Machine_Semantics_s.taint_match",
+      "Vale.X64.Machine_Semantics_s.valid_src_operand",
       1,
       1,
       1,
@@ -618,28 +364,293 @@
         "disc_equation_Vale.X64.Machine_s.OMem",
         "disc_equation_Vale.X64.Machine_s.OReg",
         "disc_equation_Vale.X64.Machine_s.OStack",
+        "equation_Vale.X64.Machine_s.operand64",
+        "equation_Vale.X64.Machine_s.reg",
         "fuel_guarded_inversion_Vale.X64.Machine_s.operand"
       ],
       0,
-      "ac7515ef500299b00fd8e4f35acc9feb"
+      "97b7d9df352751f480022badceca65ca"
     ],
     [
-      "Vale.X64.Machine_Semantics_s.taint_match128",
+      "Vale.X64.Machine_Semantics_s.valid_src_operand64_and_taint",
       1,
       1,
       1,
       [
         "@MaxIFuel_assumption", "@query",
-        "disc_equation_Vale.X64.Machine_s.OMem128",
-        "disc_equation_Vale.X64.Machine_s.OReg128",
-        "disc_equation_Vale.X64.Machine_s.OStack128",
-        "fuel_guarded_inversion_Vale.X64.Machine_s.operand128"
+        "disc_equation_Vale.X64.Machine_s.OConst",
+        "disc_equation_Vale.X64.Machine_s.OMem",
+        "disc_equation_Vale.X64.Machine_s.OReg",
+        "disc_equation_Vale.X64.Machine_s.OStack",
+        "equation_Vale.X64.Machine_s.operand64",
+        "equation_Vale.X64.Machine_s.reg",
+        "fuel_guarded_inversion_Vale.X64.Machine_s.operand"
       ],
       0,
-      "242f25f9534974a312b6de98a4f65da3"
+      "ba9bcfa0244e1bec8a6e5896d1653b14"
     ],
     [
-      "Vale.X64.Machine_Semantics_s.taint_match_operand_explicit",
+      "Vale.X64.Machine_Semantics_s.valid_src_operand128_and_taint",
+      1,
+      1,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "disc_equation_Vale.X64.Machine_s.OConst",
+        "disc_equation_Vale.X64.Machine_s.OMem",
+        "disc_equation_Vale.X64.Machine_s.OReg",
+        "disc_equation_Vale.X64.Machine_s.OStack",
+        "equation_Vale.Def.Types_s.quad32",
+        "equation_Vale.X64.Machine_s.operand128",
+        "equation_Vale.X64.Machine_s.xmm",
+        "fuel_guarded_inversion_Vale.X64.Machine_s.operand"
+      ],
+      0,
+      "01e5dc8af32bf381c7dbf01480efee0f"
+    ],
+    [
+      "Vale.X64.Machine_Semantics_s.valid_ocmp",
+      1,
+      1,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "disc_equation_Vale.X64.Bytes_Code_s.OEq",
+        "disc_equation_Vale.X64.Bytes_Code_s.OGe",
+        "disc_equation_Vale.X64.Bytes_Code_s.OGt",
+        "disc_equation_Vale.X64.Bytes_Code_s.OLe",
+        "disc_equation_Vale.X64.Bytes_Code_s.OLt",
+        "disc_equation_Vale.X64.Bytes_Code_s.ONe",
+        "equation_Vale.X64.Machine_Semantics_s.ocmp",
+        "fuel_guarded_inversion_Vale.X64.Bytes_Code_s.ocmp"
+      ],
+      0,
+      "8ebdf9dda276b67ca967bff1325a6b31"
+    ],
+    [
+      "Vale.X64.Machine_Semantics_s.valid_dst_operand64",
+      1,
+      1,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565",
+        "disc_equation_Vale.X64.Machine_s.OConst",
+        "disc_equation_Vale.X64.Machine_s.OMem",
+        "disc_equation_Vale.X64.Machine_s.OReg",
+        "disc_equation_Vale.X64.Machine_s.OStack", "equation_Prims.eqtype",
+        "equation_Prims.nat", "equation_Vale.Def.Words_s.nat64",
+        "equation_Vale.X64.Machine_s.operand64",
+        "equation_Vale.X64.Machine_s.reg_64",
+        "fuel_guarded_inversion_Vale.X64.Machine_s.operand",
+        "function_token_typing_Prims.__cache_version_number__",
+        "function_token_typing_Prims.int",
+        "haseqTm_refine_1101de7a497235789e427aeb0d9938cc",
+        "haseqTm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
+      ],
+      0,
+      "991e4923082ed695188b6b3bdb8da09d"
+    ],
+    [
+      "Vale.X64.Machine_Semantics_s.valid_dst_operand128",
+      1,
+      1,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "disc_equation_Vale.X64.Machine_s.OConst",
+        "disc_equation_Vale.X64.Machine_s.OMem",
+        "disc_equation_Vale.X64.Machine_s.OReg",
+        "disc_equation_Vale.X64.Machine_s.OStack",
+        "equation_Vale.Def.Types_s.quad32",
+        "equation_Vale.X64.Machine_s.operand128",
+        "equation_Vale.X64.Machine_s.xmm",
+        "fuel_guarded_inversion_Vale.X64.Machine_s.operand"
+      ],
+      0,
+      "29aea3c881e3944428076d21b74073a5"
+    ],
+    [
+      "Vale.X64.Machine_Semantics_s.update_operand64_preserve_flags''",
+      1,
+      1,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "disc_equation_Vale.X64.Machine_s.OConst",
+        "disc_equation_Vale.X64.Machine_s.OMem",
+        "disc_equation_Vale.X64.Machine_s.OReg",
+        "disc_equation_Vale.X64.Machine_s.OStack",
+        "equation_Vale.X64.Machine_s.operand64",
+        "equation_Vale.X64.Machine_s.reg",
+        "fuel_guarded_inversion_Vale.X64.Machine_s.operand"
+      ],
+      0,
+      "376380536c7ad5ce2b59d727f79b414d"
+    ],
+    [
+      "Vale.X64.Machine_Semantics_s.update_operand128_preserve_flags''",
+      1,
+      1,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "disc_equation_Vale.X64.Machine_s.OConst",
+        "disc_equation_Vale.X64.Machine_s.OMem",
+        "disc_equation_Vale.X64.Machine_s.OReg",
+        "disc_equation_Vale.X64.Machine_s.OStack",
+        "equation_Vale.Def.Types_s.quad32",
+        "equation_Vale.X64.Machine_s.operand128",
+        "equation_Vale.X64.Machine_s.xmm",
+        "fuel_guarded_inversion_Vale.X64.Machine_s.operand"
+      ],
+      0,
+      "fa69c509e0a8106bb93a868efa667090"
+    ],
+    [
+      "Vale.X64.Machine_Semantics_s.update_rsp'",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
+        "equation_Vale.Def.Words_s.nat64", "equation_Vale.Def.Words_s.natN",
+        "primitive_Prims.op_AmpAmp", "primitive_Prims.op_GreaterThanOrEqual",
+        "primitive_Prims.op_LessThanOrEqual",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_4c6411da037541583c16876f5cc7dfe4",
+        "refinement_interpretation_Tm_refine_5514fbe9e08dfda40f950a7b9f1b2b98"
+      ],
+      0,
+      "93e2684e0ce01bad9a1378e69a911c83"
+    ],
+    [
+      "Vale.X64.Machine_Semantics_s.update_cf'",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565", "bool_inversion",
+        "equation_Prims.nat", "equation_Vale.Def.Words_s.nat64",
+        "equation_Vale.Def.Words_s.natN",
+        "equation_Vale.X64.Machine_Semantics_s.cf",
+        "function_token_typing_Prims.__cache_version_number__",
+        "int_inversion", "primitive_Prims.op_Equality",
+        "primitive_Prims.op_Negation", "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_5514fbe9e08dfda40f950a7b9f1b2b98",
+        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "typing_Vale.X64.Machine_Semantics_s.cf"
+      ],
+      0,
+      "b45a27ed00a7c8a4864961da58a5eba4"
+    ],
+    [
+      "Vale.X64.Machine_Semantics_s.update_of'",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565", "bool_inversion",
+        "equation_Prims.nat", "equation_Vale.Def.Words_s.nat64",
+        "equation_Vale.Def.Words_s.natN",
+        "equation_Vale.X64.Machine_Semantics_s.overflow",
+        "function_token_typing_Prims.__cache_version_number__",
+        "int_inversion", "primitive_Prims.op_Equality",
+        "primitive_Prims.op_Negation", "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_5514fbe9e08dfda40f950a7b9f1b2b98",
+        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "typing_Vale.X64.Machine_Semantics_s.overflow"
+      ],
+      0,
+      "c5b39a1fd642ab1e06f66785e7162167"
+    ],
+    [
+      "Vale.X64.Machine_Semantics_s.try_option",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "bool_inversion",
+        "disc_equation_FStar.Pervasives.Native.None",
+        "disc_equation_FStar.Pervasives.Native.Some",
+        "lemma_FStar.Pervasives.invertOption",
+        "typing_FStar.Pervasives.Native.uu___is_None",
+        "typing_FStar.Pervasives.Native.uu___is_Some"
+      ],
+      0,
+      "e5f56b9fcad9c3c0243bb56d5ade839d"
+    ],
+    [
+      "Vale.X64.Machine_Semantics_s.bind_option",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "bool_inversion",
+        "disc_equation_FStar.Pervasives.Native.None",
+        "disc_equation_FStar.Pervasives.Native.Some",
+        "lemma_FStar.Pervasives.invertOption",
+        "typing_FStar.Pervasives.Native.uu___is_None",
+        "typing_FStar.Pervasives.Native.uu___is_Some"
+      ],
+      0,
+      "7e0c4777338b192c3c2e1b027136c6da"
+    ],
+    [
+      "Vale.X64.Machine_Semantics_s.operand_obs",
+      1,
+      1,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565",
+        "disc_equation_Vale.X64.Machine_s.MConst",
+        "disc_equation_Vale.X64.Machine_s.MIndex",
+        "disc_equation_Vale.X64.Machine_s.MReg",
+        "disc_equation_Vale.X64.Machine_s.OConst",
+        "disc_equation_Vale.X64.Machine_s.OMem",
+        "disc_equation_Vale.X64.Machine_s.OReg",
+        "disc_equation_Vale.X64.Machine_s.OStack",
+        "equation_Vale.X64.Machine_s.operand64",
+        "equation_Vale.X64.Machine_s.reg",
+        "fuel_guarded_inversion_Vale.X64.Machine_s.maddr",
+        "fuel_guarded_inversion_Vale.X64.Machine_s.operand",
+        "function_token_typing_Prims.__cache_version_number__"
+      ],
+      0,
+      "7e9d484838d0406a7895c01c697a6065"
+    ],
+    [
+      "Vale.X64.Machine_Semantics_s.operand_obs128",
+      1,
+      1,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "disc_equation_Vale.X64.Machine_s.MConst",
+        "disc_equation_Vale.X64.Machine_s.MIndex",
+        "disc_equation_Vale.X64.Machine_s.MReg",
+        "disc_equation_Vale.X64.Machine_s.OConst",
+        "disc_equation_Vale.X64.Machine_s.OMem",
+        "disc_equation_Vale.X64.Machine_s.OReg",
+        "disc_equation_Vale.X64.Machine_s.OStack",
+        "equation_Vale.Def.Types_s.quad32",
+        "equation_Vale.X64.Machine_s.operand128",
+        "equation_Vale.X64.Machine_s.xmm",
+        "fuel_guarded_inversion_Vale.X64.Machine_s.maddr",
+        "fuel_guarded_inversion_Vale.X64.Machine_s.operand"
+      ],
+      0,
+      "5e9550b690635d1f34ebcf84018f2d03"
+    ],
+    [
+      "Vale.X64.Machine_Semantics_s.obs_operand_explicit",
       1,
       1,
       1,
@@ -652,10 +663,10 @@
         "projection_inverse_BoxBool_proj_0"
       ],
       0,
-      "f4f88398a668225d49c0dc5cf899000a"
+      "cec1d725f23f7c212cc6d8a8ec8ec4e3"
     ],
     [
-      "Vale.X64.Machine_Semantics_s.taint_match_operand_implicit",
+      "Vale.X64.Machine_Semantics_s.obs_operand_implicit",
       1,
       1,
       1,
@@ -668,10 +679,10 @@
         "fuel_guarded_inversion_Vale.X64.Instruction_s.instr_operand_implicit"
       ],
       0,
-      "54ed7a4b74b5404bbe6579ba4d748e99"
+      "6349e4eaf250312d704e71cb8c44799e"
     ],
     [
-      "Vale.X64.Machine_Semantics_s.taint_match_args",
+      "Vale.X64.Machine_Semantics_s.obs_args",
       1,
       1,
       1,
@@ -696,10 +707,10 @@
         "subterm_ordering_Prims.Cons"
       ],
       0,
-      "8590724ec23e0b6eb64fcf3d43af007d"
+      "7183782b291bd0b188f5febefd9ea67b"
     ],
     [
-      "Vale.X64.Machine_Semantics_s.taint_match_inouts",
+      "Vale.X64.Machine_Semantics_s.obs_inouts",
       1,
       1,
       1,
@@ -715,153 +726,26 @@
         "constructor_distinct_Prims.Cons", "constructor_distinct_Prims.Nil",
         "constructor_distinct_Vale.X64.Instruction_s.IOpEx",
         "constructor_distinct_Vale.X64.Instruction_s.IOpIm",
-        "data_elim_Prims.Cons",
         "data_typing_intro_Vale.X64.Instruction_s.Out@tok",
         "disc_equation_Prims.Cons", "disc_equation_Prims.Nil",
         "disc_equation_Vale.X64.Instruction_s.IOpEx",
         "disc_equation_Vale.X64.Instruction_s.IOpIm",
-        "disc_equation_Vale.X64.Instruction_s.InOut",
-        "disc_equation_Vale.X64.Instruction_s.Out",
-        "equality_tok_Vale.X64.Instruction_s.InOut@tok",
-        "equality_tok_Vale.X64.Instruction_s.Out@tok",
         "equation_Vale.X64.Instruction_s.instr_out",
         "equation_with_fuel_Vale.X64.Instruction_s.instr_operands_t.fuel_instrumented",
-        "fuel_guarded_inversion_FStar.Pervasives.Native.tuple2",
         "fuel_guarded_inversion_Prims.list",
         "fuel_guarded_inversion_Vale.X64.Instruction_s.instr_operand",
-        "fuel_guarded_inversion_Vale.X64.Instruction_s.instr_operand_inout",
-        "kinding_Vale.X64.Instruction_s.instr_operand@tok",
-        "kinding_Vale.X64.Instruction_s.instr_operand_inout@tok",
-        "proj_equation_FStar.Pervasives.Native.Mktuple2__1",
-        "proj_equation_Prims.Cons_hd", "projection_inverse_BoxBool_proj_0",
         "projection_inverse_FStar.Pervasives.Native.Mktuple2__2",
         "projection_inverse_Prims.Cons_hd",
         "projection_inverse_Prims.Cons_tl", "projection_inverse_Prims.Nil_a",
         "projection_inverse_Vale.X64.Instruction_s.IOpEx__0",
         "projection_inverse_Vale.X64.Instruction_s.IOpIm__0",
-        "subterm_ordering_Prims.Cons",
-        "typing_FStar.Pervasives.Native.__proj__Mktuple2__item___1"
-      ],
-      0,
-      "e18f07129788b5582b2d7b1983a78764"
-    ],
-    [
-      "Vale.X64.Machine_Semantics_s.taint_match_ins",
-      1,
-      1,
-      1,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_Vale.X64.Bytes_Code_s.Alloc",
-        "disc_equation_Vale.X64.Bytes_Code_s.Dealloc",
-        "disc_equation_Vale.X64.Bytes_Code_s.Instr",
-        "disc_equation_Vale.X64.Bytes_Code_s.Pop",
-        "disc_equation_Vale.X64.Bytes_Code_s.Push",
-        "equation_Vale.X64.Machine_Semantics_s.ins",
-        "fuel_guarded_inversion_Vale.X64.Bytes_Code_s.instruction_t"
-      ],
-      0,
-      "a8d742120e274deb31dba6949c52eab2"
-    ],
-    [
-      "Vale.X64.Machine_Semantics_s.update_taint",
-      1,
-      1,
-      1,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_Vale.X64.Machine_s.OConst",
-        "disc_equation_Vale.X64.Machine_s.OMem",
-        "disc_equation_Vale.X64.Machine_s.OReg",
-        "disc_equation_Vale.X64.Machine_s.OStack",
-        "fuel_guarded_inversion_Vale.X64.Machine_s.operand"
-      ],
-      0,
-      "01d8078bb8cc785b39563f009e150ed8"
-    ],
-    [
-      "Vale.X64.Machine_Semantics_s.update_taint128",
-      1,
-      1,
-      1,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_Vale.X64.Machine_s.OMem128",
-        "disc_equation_Vale.X64.Machine_s.OReg128",
-        "disc_equation_Vale.X64.Machine_s.OStack128",
-        "fuel_guarded_inversion_Vale.X64.Machine_s.operand128"
-      ],
-      0,
-      "4b674a767b3820086c62ca163e804327"
-    ],
-    [
-      "Vale.X64.Machine_Semantics_s.update_taint_operand_explicit",
-      1,
-      1,
-      1,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_Vale.X64.Instruction_s.IOp64",
-        "disc_equation_Vale.X64.Instruction_s.IOpXmm",
-        "equation_Vale.X64.Instruction_s.instr_operand_t",
-        "fuel_guarded_inversion_Vale.X64.Instruction_s.instr_operand_explicit",
-        "projection_inverse_BoxBool_proj_0"
-      ],
-      0,
-      "4f5e52fc85b86eeb96432f14167abb56"
-    ],
-    [
-      "Vale.X64.Machine_Semantics_s.update_taint_operand_implicit",
-      1,
-      1,
-      1,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_Vale.X64.Instruction_s.IOp64One",
-        "disc_equation_Vale.X64.Instruction_s.IOpFlagsCf",
-        "disc_equation_Vale.X64.Instruction_s.IOpFlagsOf",
-        "disc_equation_Vale.X64.Instruction_s.IOpXmmOne",
-        "fuel_guarded_inversion_Vale.X64.Instruction_s.instr_operand_implicit"
-      ],
-      0,
-      "1ccdc7e78dbb80e49a67c67da553b536"
-    ],
-    [
-      "Vale.X64.Machine_Semantics_s.update_taint_outputs",
-      1,
-      1,
-      1,
-      [
-        "@MaxFuel_assumption", "@MaxIFuel_assumption",
-        "@fuel_correspondence_Vale.X64.Instruction_s.instr_operands_t.fuel_instrumented",
-        "@fuel_irrelevance_Vale.X64.Instruction_s.instr_operands_t.fuel_instrumented",
-        "@query",
-        "Vale.X64.Instruction_s_pretyping_2fb66fcb47c648644e76dfa1323a4ab6",
-        "binder_x_5b8a55910a662c783b1ed3212549410e_1",
-        "binder_x_695f4be111338c847de65a0e01449238_0",
-        "constructor_distinct_Prims.Cons",
-        "constructor_distinct_Vale.X64.Instruction_s.IOpEx",
-        "constructor_distinct_Vale.X64.Instruction_s.IOpIm",
-        "data_typing_intro_Vale.X64.Instruction_s.Out@tok",
-        "disc_equation_Prims.Cons", "disc_equation_Prims.Nil",
-        "disc_equation_Vale.X64.Instruction_s.IOpEx",
-        "disc_equation_Vale.X64.Instruction_s.IOpIm",
-        "equation_Vale.X64.Instruction_s.instr_out",
-        "equation_with_fuel_Vale.X64.Instruction_s.instr_operands_t.fuel_instrumented",
-        "fuel_guarded_inversion_Prims.list",
-        "fuel_guarded_inversion_Vale.X64.Instruction_s.instr_operand",
-        "projection_inverse_FStar.Pervasives.Native.Mktuple2__2",
-        "projection_inverse_Prims.Cons_hd",
-        "projection_inverse_Prims.Cons_tl",
-        "projection_inverse_Vale.X64.Instruction_s.IOpEx__0",
-        "projection_inverse_Vale.X64.Instruction_s.IOpIm__0",
         "subterm_ordering_Prims.Cons"
       ],
       0,
-      "7c083681d0fe991970630cd51a3f68f2"
+      "031b027eec05ac7fdb3b6225aaf97a9c"
     ],
     [
-      "Vale.X64.Machine_Semantics_s.update_taint_ins",
+      "Vale.X64.Machine_Semantics_s.ins_obs",
       1,
       1,
       1,
@@ -876,7 +760,7 @@
         "fuel_guarded_inversion_Vale.X64.Bytes_Code_s.instruction_t"
       ],
       0,
-      "fd185dc52f4c34f5cd948e5f86708e22"
+      "7024d0a9682e0d573d6b34f3c9de3113"
     ],
     [
       "Vale.X64.Machine_Semantics_s.instr_eval_operand_explicit",
@@ -897,7 +781,7 @@
         "projection_inverse_Vale.X64.Instruction_s.IOpEx__0"
       ],
       0,
-      "f75a4623627121d05b7599f2193a8c58"
+      "8c6c185806223e1f5dd0baa973ba841c"
     ],
     [
       "Vale.X64.Machine_Semantics_s.instr_eval_operand_implicit",
@@ -927,7 +811,7 @@
         "typing_Vale.X64.Machine_Semantics_s.overflow"
       ],
       0,
-      "aa9a58d7ba348437b31e75bba623aea9"
+      "cb7f46786446db3e36a60d3e3d57ded5"
     ],
     [
       "Vale.X64.Machine_Semantics_s.instr_apply_eval_args",
@@ -961,7 +845,7 @@
         "subterm_ordering_Prims.Cons"
       ],
       0,
-      "0acf17a7995e829a42d83f1b1e58d563"
+      "973166e70216f9f8b50d672e4b2bc5d5"
     ],
     [
       "Vale.X64.Machine_Semantics_s.instr_apply_eval_inouts",
@@ -1016,7 +900,7 @@
         "typing_FStar.Pervasives.Native.__proj__Mktuple2__item___1"
       ],
       0,
-      "4f8a47078af64d480ea94f8945c7fb3e"
+      "5ad117307e2c675fe3d19a2b959a2177"
     ],
     [
       "Vale.X64.Machine_Semantics_s.instr_write_output_explicit",
@@ -1038,7 +922,7 @@
         "projection_inverse_Vale.X64.Instruction_s.IOpEx__0"
       ],
       0,
-      "3494cf746e31515f8feea9e5186c530b"
+      "2a7c312ee1ec5015c57a158e7d9e3b45"
     ],
     [
       "Vale.X64.Machine_Semantics_s.instr_write_output_implicit",
@@ -1064,7 +948,7 @@
         "projection_inverse_Vale.X64.Instruction_s.IOpXmmOne__0"
       ],
       0,
-      "5e8784e9666dfc91b3fde3f1ba34bb9c"
+      "e92eccc0f9853ec32c426c388567d465"
     ],
     [
       "Vale.X64.Machine_Semantics_s.instr_write_outputs",
@@ -1106,7 +990,7 @@
         "subterm_ordering_Prims.Cons", "unit_typing"
       ],
       0,
-      "78e46aa069395809f4ebf04e320f1325"
+      "55151f3fb50e4e042b5b4833f6be537c"
     ],
     [
       "Vale.X64.Machine_Semantics_s.eval_instr",
@@ -1130,25 +1014,38 @@
         "typing_Vale.X64.Instruction_s.instr_eval"
       ],
       0,
-      "8b28ac7d5373e79990f54484511e6150"
+      "5d67d68493d982fe2780b52f81e895c9"
     ],
     [
-      "Vale.X64.Machine_Semantics_s.untainted_eval_ins",
+      "Vale.X64.Machine_Semantics_s.machine_eval_ins_st",
       1,
       1,
       1,
       [
         "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565",
         "disc_equation_Vale.X64.Bytes_Code_s.Alloc",
         "disc_equation_Vale.X64.Bytes_Code_s.Dealloc",
         "disc_equation_Vale.X64.Bytes_Code_s.Instr",
         "disc_equation_Vale.X64.Bytes_Code_s.Pop",
-        "disc_equation_Vale.X64.Bytes_Code_s.Push",
+        "disc_equation_Vale.X64.Bytes_Code_s.Push", "equation_Prims.eqtype",
+        "equation_Prims.nat", "equation_Vale.Def.Words_s.nat64",
+        "equation_Vale.Def.Words_s.natN",
         "equation_Vale.X64.Machine_Semantics_s.ins",
-        "fuel_guarded_inversion_Vale.X64.Bytes_Code_s.instruction_t"
+        "equation_Vale.X64.Machine_s.n_reg_files",
+        "equation_Vale.X64.Machine_s.n_regs",
+        "equation_Vale.X64.Machine_s.reg_64",
+        "fuel_guarded_inversion_Vale.X64.Bytes_Code_s.instruction_t",
+        "function_token_typing_Prims.__cache_version_number__",
+        "function_token_typing_Prims.int",
+        "haseqTm_refine_1101de7a497235789e427aeb0d9938cc",
+        "haseqTm_refine_5514fbe9e08dfda40f950a7b9f1b2b98",
+        "haseqTm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "78a83473e4a8ecc26c84a68f0683e499"
+      "6ec22f102d8c5c73f92ca1e80b715065"
     ],
     [
       "Vale.X64.Machine_Semantics_s.machine_eval_code",
@@ -1178,7 +1075,7 @@
         "well-founded-ordering-on-nat"
       ],
       0,
-      "4a0aa93a751e34dc02f3d82e05afc3de"
+      "6fbda1048f9fba44a0170431c96e3072"
     ],
     [
       "Vale.X64.Machine_Semantics_s.machine_eval_code",
@@ -1203,7 +1100,7 @@
         "subterm_ordering_Prims.Cons"
       ],
       0,
-      "6a5b67a290bc8e8f28b55674e00faa8d"
+      "917ca0ffe2a236e13be5b5aab6ab4373"
     ],
     [
       "Vale.X64.Machine_Semantics_s.machine_eval_code",
@@ -1233,7 +1130,7 @@
         "well-founded-ordering-on-nat"
       ],
       0,
-      "db7f04d93c4ed53cb68ec9f879012071"
+      "51536bc07e538594db30e34ee97bc330"
     ],
     [
       "Vale.X64.Machine_Semantics_s.uint64",
@@ -1242,7 +1139,7 @@
       0,
       [ "@query", "assumption_FStar.UInt64.t__uu___haseq" ],
       0,
-      "bdaa8dd3c97cf494b1998c6e80b5f238"
+      "d9adce57666dc38b65286d2bd033395c"
     ],
     [
       "Vale.X64.Machine_Semantics_s.__proj__AnnotateXor64__item___0",
@@ -1256,7 +1153,7 @@
         "refinement_interpretation_Tm_refine_b130da2079b7fa62c26741e2adf7f0b6"
       ],
       0,
-      "81ec92772830818892170ccb180f16b0"
+      "303215f6ce3e33b0b76928b56f7dd977"
     ],
     [
       "Vale.X64.Machine_Semantics_s.__proj__AnnotatePxor__item___0",
@@ -1270,7 +1167,7 @@
         "refinement_interpretation_Tm_refine_1f3942d454de893b05458ec4d1c706ea"
       ],
       0,
-      "5d20c36cad07da0b3dd3b1f4860e8374"
+      "e4e60171f94edf4acd7b4e1dc72ecf0a"
     ],
     [
       "Vale.X64.Machine_Semantics_s.__proj__AnnotateVPxor__item___0",
@@ -1284,7 +1181,7 @@
         "refinement_interpretation_Tm_refine_1216058de9517c69bc27db9254c96884"
       ],
       0,
-      "ca70fa1419e20c9adfa2d017f1f16634"
+      "91fb3411992feb095691d9b6e390bd3a"
     ],
     [
       "Vale.X64.Machine_Semantics_s.get_fst_ocmp",
@@ -1293,17 +1190,48 @@
       1,
       [
         "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565",
         "disc_equation_Vale.X64.Bytes_Code_s.OEq",
         "disc_equation_Vale.X64.Bytes_Code_s.OGe",
         "disc_equation_Vale.X64.Bytes_Code_s.OGt",
         "disc_equation_Vale.X64.Bytes_Code_s.OLe",
         "disc_equation_Vale.X64.Bytes_Code_s.OLt",
-        "disc_equation_Vale.X64.Bytes_Code_s.ONe",
+        "disc_equation_Vale.X64.Bytes_Code_s.ONe", "equation_Prims.eqtype",
+        "equation_Prims.nat", "equation_Vale.Def.Words_s.nat64",
+        "equation_Vale.Def.Words_s.natN",
         "equation_Vale.X64.Machine_Semantics_s.ocmp",
-        "fuel_guarded_inversion_Vale.X64.Bytes_Code_s.ocmp"
+        "equation_Vale.X64.Machine_s.reg_64",
+        "fuel_guarded_inversion_Vale.X64.Bytes_Code_s.ocmp",
+        "function_token_typing_Prims.__cache_version_number__",
+        "function_token_typing_Prims.int",
+        "haseqTm_refine_1101de7a497235789e427aeb0d9938cc",
+        "haseqTm_refine_5514fbe9e08dfda40f950a7b9f1b2b98",
+        "haseqTm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "eca2ca0fb94c5bcf46d32a98960d8a95"
+      "38a5a1b5291a84c35393a05b6ecf60cf"
+    ],
+    [
+      "Vale.X64.Machine_Semantics_s.get_fst_ocmp",
+      3,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565",
+        "equation_Prims.eqtype", "equation_Prims.nat",
+        "equation_Vale.Def.Words_s.nat64", "equation_Vale.Def.Words_s.natN",
+        "equation_Vale.X64.Machine_s.reg_64",
+        "function_token_typing_Prims.__cache_version_number__",
+        "function_token_typing_Prims.int",
+        "haseqTm_refine_1101de7a497235789e427aeb0d9938cc",
+        "haseqTm_refine_5514fbe9e08dfda40f950a7b9f1b2b98",
+        "haseqTm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
+      ],
+      0,
+      "2d721970c4db04d05da0ece873f1ed29"
     ],
     [
       "Vale.X64.Machine_Semantics_s.get_snd_ocmp",
@@ -1312,17 +1240,80 @@
       1,
       [
         "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565",
         "disc_equation_Vale.X64.Bytes_Code_s.OEq",
         "disc_equation_Vale.X64.Bytes_Code_s.OGe",
         "disc_equation_Vale.X64.Bytes_Code_s.OGt",
         "disc_equation_Vale.X64.Bytes_Code_s.OLe",
         "disc_equation_Vale.X64.Bytes_Code_s.OLt",
-        "disc_equation_Vale.X64.Bytes_Code_s.ONe",
+        "disc_equation_Vale.X64.Bytes_Code_s.ONe", "equation_Prims.eqtype",
+        "equation_Prims.nat", "equation_Vale.Def.Words_s.nat64",
+        "equation_Vale.Def.Words_s.natN",
         "equation_Vale.X64.Machine_Semantics_s.ocmp",
-        "fuel_guarded_inversion_Vale.X64.Bytes_Code_s.ocmp"
+        "equation_Vale.X64.Machine_s.reg_64",
+        "fuel_guarded_inversion_Vale.X64.Bytes_Code_s.ocmp",
+        "function_token_typing_Prims.__cache_version_number__",
+        "function_token_typing_Prims.int",
+        "haseqTm_refine_1101de7a497235789e427aeb0d9938cc",
+        "haseqTm_refine_5514fbe9e08dfda40f950a7b9f1b2b98",
+        "haseqTm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "f230e2bb0e09c909f32712263e9fff40"
+      "129e7849e7c31efd23f812c3200d53c4"
+    ],
+    [
+      "Vale.X64.Machine_Semantics_s.get_snd_ocmp",
+      3,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565",
+        "equation_Prims.eqtype", "equation_Prims.nat",
+        "equation_Vale.Def.Words_s.nat64", "equation_Vale.Def.Words_s.natN",
+        "equation_Vale.X64.Machine_s.reg_64",
+        "function_token_typing_Prims.__cache_version_number__",
+        "function_token_typing_Prims.int",
+        "haseqTm_refine_1101de7a497235789e427aeb0d9938cc",
+        "haseqTm_refine_5514fbe9e08dfda40f950a7b9f1b2b98",
+        "haseqTm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
+      ],
+      0,
+      "823cba56225027058278c27311d58627"
+    ],
+    [
+      "Vale.X64.Machine_Semantics_s.eval_reg_64",
+      2,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
+        "equation_Vale.X64.Machine_s.n_reg_files",
+        "equation_Vale.X64.Machine_s.n_regs",
+        "equation_Vale.X64.Machine_s.reg_64",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_1101de7a497235789e427aeb0d9938cc"
+      ],
+      0,
+      "9ff31d3efff23045bb2cd6bd650a8261"
+    ],
+    [
+      "Vale.X64.Machine_Semantics_s.eval_reg_xmm",
+      2,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
+        "equation_Vale.X64.Machine_s.n_reg_files",
+        "equation_Vale.X64.Machine_s.n_regs",
+        "equation_Vale.X64.Machine_s.reg_xmm",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_1101de7a497235789e427aeb0d9938cc"
+      ],
+      0,
+      "fa60eb04c394f0c6bf08893b6789189c"
     ],
     [
       "Vale.X64.Machine_Semantics_s.eval_maddr",
@@ -1337,7 +1328,7 @@
         "fuel_guarded_inversion_Vale.X64.Machine_s.maddr"
       ],
       0,
-      "f17b0aa45839197e42153788383e0c27"
+      "62e55b7b1033291d1996d8dfc9aaa7a1"
     ],
     [
       "Vale.X64.Machine_Semantics_s.eval_operand",
@@ -1350,10 +1341,12 @@
         "disc_equation_Vale.X64.Machine_s.OMem",
         "disc_equation_Vale.X64.Machine_s.OReg",
         "disc_equation_Vale.X64.Machine_s.OStack",
+        "equation_Vale.X64.Machine_s.operand64",
+        "equation_Vale.X64.Machine_s.reg",
         "fuel_guarded_inversion_Vale.X64.Machine_s.operand"
       ],
       0,
-      "d007157a0b1ff07eca17a2897ff49aaa"
+      "3f60dc867a25ff5c55f37be52539f6a4"
     ],
     [
       "Vale.X64.Machine_Semantics_s.eval_mov128_op",
@@ -1362,13 +1355,17 @@
       1,
       [
         "@MaxIFuel_assumption", "@query",
-        "disc_equation_Vale.X64.Machine_s.OMem128",
-        "disc_equation_Vale.X64.Machine_s.OReg128",
-        "disc_equation_Vale.X64.Machine_s.OStack128",
-        "fuel_guarded_inversion_Vale.X64.Machine_s.operand128"
+        "disc_equation_Vale.X64.Machine_s.OConst",
+        "disc_equation_Vale.X64.Machine_s.OMem",
+        "disc_equation_Vale.X64.Machine_s.OReg",
+        "disc_equation_Vale.X64.Machine_s.OStack",
+        "equation_Vale.Def.Types_s.quad32",
+        "equation_Vale.X64.Machine_s.operand128",
+        "equation_Vale.X64.Machine_s.xmm",
+        "fuel_guarded_inversion_Vale.X64.Machine_s.operand"
       ],
       0,
-      "1017580211de7909d24c048352cc516c"
+      "f4dec7f25ea33f816f3e3ff207654bae"
     ],
     [
       "Vale.X64.Machine_Semantics_s.eval_ocmp",
@@ -1395,7 +1392,53 @@
         "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "608b026a13f9f02ed377115efedae7e8"
+      "1da49c16c7883cafb816221a12e549f4"
+    ],
+    [
+      "Vale.X64.Machine_Semantics_s.update_reg'",
+      2,
+      1,
+      0,
+      [
+        "@query", "assumption_Vale.X64.Machine_s.reg__uu___haseq",
+        "equation_Vale.X64.Machine_s.t_reg",
+        "equation_Vale.X64.Machine_s.t_reg_file",
+        "primitive_Prims.op_Equality", "projection_inverse_BoxBool_proj_0"
+      ],
+      0,
+      "c93783f3006ab105e3913b0c83fe1c53"
+    ],
+    [
+      "Vale.X64.Machine_Semantics_s.update_reg_64'",
+      2,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
+        "equation_Vale.X64.Machine_s.n_reg_files",
+        "equation_Vale.X64.Machine_s.n_regs",
+        "equation_Vale.X64.Machine_s.reg_64",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_1101de7a497235789e427aeb0d9938cc"
+      ],
+      0,
+      "8ce6d4341dc77b9f102f321c6ce8acc5"
+    ],
+    [
+      "Vale.X64.Machine_Semantics_s.update_reg_xmm'",
+      2,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
+        "equation_Vale.X64.Machine_s.n_reg_files",
+        "equation_Vale.X64.Machine_s.n_regs",
+        "equation_Vale.X64.Machine_s.reg_xmm",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_1101de7a497235789e427aeb0d9938cc"
+      ],
+      0,
+      "b25290b132ba78661edc29f78c49cb84"
     ],
     [
       "Vale.X64.Machine_Semantics_s.mod_8",
@@ -1404,364 +1447,7 @@
       0,
       [ "@query" ],
       0,
-      "fff779a206c28e109931b030c2cf5f8e"
-    ],
-    [
-      "Vale.X64.Machine_Semantics_s.valid_src_operand",
-      2,
-      1,
-      1,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_Vale.X64.Machine_s.OConst",
-        "disc_equation_Vale.X64.Machine_s.OMem",
-        "disc_equation_Vale.X64.Machine_s.OReg",
-        "disc_equation_Vale.X64.Machine_s.OStack",
-        "fuel_guarded_inversion_Vale.X64.Machine_s.operand"
-      ],
-      0,
-      "29f069e73d31f56a3168877510fb146b"
-    ],
-    [
-      "Vale.X64.Machine_Semantics_s.valid_src_mov128_op",
-      2,
-      1,
-      1,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_Vale.X64.Machine_s.OMem128",
-        "disc_equation_Vale.X64.Machine_s.OReg128",
-        "disc_equation_Vale.X64.Machine_s.OStack128",
-        "fuel_guarded_inversion_Vale.X64.Machine_s.operand128"
-      ],
-      0,
-      "af76ea8d0f31464337660a7b59bc6bb7"
-    ],
-    [
-      "Vale.X64.Machine_Semantics_s.valid_ocmp",
-      2,
-      1,
-      1,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_Vale.X64.Bytes_Code_s.OEq",
-        "disc_equation_Vale.X64.Bytes_Code_s.OGe",
-        "disc_equation_Vale.X64.Bytes_Code_s.OGt",
-        "disc_equation_Vale.X64.Bytes_Code_s.OLe",
-        "disc_equation_Vale.X64.Bytes_Code_s.OLt",
-        "disc_equation_Vale.X64.Bytes_Code_s.ONe",
-        "equation_Vale.X64.Machine_Semantics_s.ocmp",
-        "fuel_guarded_inversion_Vale.X64.Bytes_Code_s.ocmp"
-      ],
-      0,
-      "de6614790b359a3a592d1b09c07c8a81"
-    ],
-    [
-      "Vale.X64.Machine_Semantics_s.valid_dst_operand",
-      2,
-      1,
-      1,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_Vale.X64.Machine_s.OConst",
-        "disc_equation_Vale.X64.Machine_s.OMem",
-        "disc_equation_Vale.X64.Machine_s.OReg",
-        "disc_equation_Vale.X64.Machine_s.OStack",
-        "fuel_guarded_inversion_Vale.X64.Machine_s.operand"
-      ],
-      0,
-      "559dd1ff96fd51ac6c3be9082e0446cf"
-    ],
-    [
-      "Vale.X64.Machine_Semantics_s.valid_dst_mov128_op",
-      2,
-      1,
-      1,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_Vale.X64.Machine_s.OMem128",
-        "disc_equation_Vale.X64.Machine_s.OReg128",
-        "disc_equation_Vale.X64.Machine_s.OStack128",
-        "fuel_guarded_inversion_Vale.X64.Machine_s.operand128"
-      ],
-      0,
-      "5aaaea7d134d3433e6c46201b44bc091"
-    ],
-    [
-      "Vale.X64.Machine_Semantics_s.update_operand_preserve_flags''",
-      2,
-      1,
-      1,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_Vale.X64.Machine_s.OConst",
-        "disc_equation_Vale.X64.Machine_s.OMem",
-        "disc_equation_Vale.X64.Machine_s.OReg",
-        "disc_equation_Vale.X64.Machine_s.OStack",
-        "fuel_guarded_inversion_Vale.X64.Machine_s.operand"
-      ],
-      0,
-      "abcc3c3ba72fdfde8262f0fe67da45cd"
-    ],
-    [
-      "Vale.X64.Machine_Semantics_s.update_mov128_op_preserve_flags''",
-      2,
-      1,
-      1,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_Vale.X64.Machine_s.OMem128",
-        "disc_equation_Vale.X64.Machine_s.OReg128",
-        "disc_equation_Vale.X64.Machine_s.OStack128",
-        "fuel_guarded_inversion_Vale.X64.Machine_s.operand128"
-      ],
-      0,
-      "63dfdfed0d98939c1d203059b5352e2b"
-    ],
-    [
-      "Vale.X64.Machine_Semantics_s.update_rsp'",
-      2,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
-        "equation_Vale.Def.Words_s.nat64", "equation_Vale.Def.Words_s.natN",
-        "primitive_Prims.op_AmpAmp", "primitive_Prims.op_GreaterThanOrEqual",
-        "primitive_Prims.op_LessThanOrEqual",
-        "projection_inverse_BoxBool_proj_0",
-        "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_4c6411da037541583c16876f5cc7dfe4",
-        "refinement_interpretation_Tm_refine_5514fbe9e08dfda40f950a7b9f1b2b98"
-      ],
-      0,
-      "af54af1139b66024f7cac7339a10dd71"
-    ],
-    [
-      "Vale.X64.Machine_Semantics_s.update_cf'",
-      2,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "Prims_pretyping_ae567c2fb75be05905677af440075565", "bool_inversion",
-        "equation_Prims.nat", "equation_Vale.Def.Words_s.nat64",
-        "equation_Vale.Def.Words_s.natN",
-        "equation_Vale.X64.Machine_Semantics_s.cf",
-        "function_token_typing_Prims.__cache_version_number__",
-        "int_inversion", "primitive_Prims.op_Equality",
-        "primitive_Prims.op_Negation", "projection_inverse_BoxBool_proj_0",
-        "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_5514fbe9e08dfda40f950a7b9f1b2b98",
-        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
-      ],
-      0,
-      "5f20dae452a7c5fdeddbd55447881a18"
-    ],
-    [
-      "Vale.X64.Machine_Semantics_s.update_of'",
-      2,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "Prims_pretyping_ae567c2fb75be05905677af440075565", "bool_inversion",
-        "equation_Prims.nat", "equation_Vale.Def.Words_s.nat64",
-        "equation_Vale.Def.Words_s.natN",
-        "equation_Vale.X64.Machine_Semantics_s.overflow",
-        "function_token_typing_Prims.__cache_version_number__",
-        "int_inversion", "primitive_Prims.op_Equality",
-        "primitive_Prims.op_Negation", "projection_inverse_BoxBool_proj_0",
-        "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_5514fbe9e08dfda40f950a7b9f1b2b98",
-        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
-        "typing_Vale.X64.Machine_Semantics_s.overflow"
-      ],
-      0,
-      "1827f9ace498783f283c5ee4c279f9fa"
-    ],
-    [
-      "Vale.X64.Machine_Semantics_s.try_option",
-      2,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query", "bool_inversion",
-        "disc_equation_FStar.Pervasives.Native.None",
-        "disc_equation_FStar.Pervasives.Native.Some",
-        "lemma_FStar.Pervasives.invertOption",
-        "typing_FStar.Pervasives.Native.uu___is_None",
-        "typing_FStar.Pervasives.Native.uu___is_Some"
-      ],
-      0,
-      "4ee4850779989c936535319149868160"
-    ],
-    [
-      "Vale.X64.Machine_Semantics_s.bind_option",
-      2,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query", "bool_inversion",
-        "disc_equation_FStar.Pervasives.Native.None",
-        "disc_equation_FStar.Pervasives.Native.Some",
-        "lemma_FStar.Pervasives.invertOption",
-        "typing_FStar.Pervasives.Native.uu___is_None",
-        "typing_FStar.Pervasives.Native.uu___is_Some"
-      ],
-      0,
-      "3164c0104bce8c7ac567f23028c91e63"
-    ],
-    [
-      "Vale.X64.Machine_Semantics_s.operand_obs",
-      2,
-      1,
-      1,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_Vale.X64.Machine_s.MConst",
-        "disc_equation_Vale.X64.Machine_s.MIndex",
-        "disc_equation_Vale.X64.Machine_s.MReg",
-        "disc_equation_Vale.X64.Machine_s.OConst",
-        "disc_equation_Vale.X64.Machine_s.OMem",
-        "disc_equation_Vale.X64.Machine_s.OReg",
-        "disc_equation_Vale.X64.Machine_s.OStack",
-        "fuel_guarded_inversion_Vale.X64.Machine_s.maddr",
-        "fuel_guarded_inversion_Vale.X64.Machine_s.operand"
-      ],
-      0,
-      "6db155fca35c2e3a30208757863abe7e"
-    ],
-    [
-      "Vale.X64.Machine_Semantics_s.operand_obs128",
-      2,
-      1,
-      1,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_Vale.X64.Machine_s.MConst",
-        "disc_equation_Vale.X64.Machine_s.MIndex",
-        "disc_equation_Vale.X64.Machine_s.MReg",
-        "disc_equation_Vale.X64.Machine_s.OMem128",
-        "disc_equation_Vale.X64.Machine_s.OReg128",
-        "disc_equation_Vale.X64.Machine_s.OStack128",
-        "fuel_guarded_inversion_Vale.X64.Machine_s.maddr",
-        "fuel_guarded_inversion_Vale.X64.Machine_s.operand128"
-      ],
-      0,
-      "d9fd9189f21ac2fca0b28d28296246fd"
-    ],
-    [
-      "Vale.X64.Machine_Semantics_s.obs_operand_explicit",
-      2,
-      1,
-      1,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_Vale.X64.Instruction_s.IOp64",
-        "disc_equation_Vale.X64.Instruction_s.IOpXmm",
-        "equation_Vale.X64.Instruction_s.instr_operand_t",
-        "fuel_guarded_inversion_Vale.X64.Instruction_s.instr_operand_explicit",
-        "projection_inverse_BoxBool_proj_0"
-      ],
-      0,
-      "8f17885fe9fb8ca538ebdf72d36ba8c9"
-    ],
-    [
-      "Vale.X64.Machine_Semantics_s.obs_operand_implicit",
-      2,
-      1,
-      1,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_Vale.X64.Instruction_s.IOp64One",
-        "disc_equation_Vale.X64.Instruction_s.IOpFlagsCf",
-        "disc_equation_Vale.X64.Instruction_s.IOpFlagsOf",
-        "disc_equation_Vale.X64.Instruction_s.IOpXmmOne",
-        "fuel_guarded_inversion_Vale.X64.Instruction_s.instr_operand_implicit"
-      ],
-      0,
-      "ab06a6907a1d91822cf2d32a262fdb15"
-    ],
-    [
-      "Vale.X64.Machine_Semantics_s.obs_args",
-      2,
-      1,
-      1,
-      [
-        "@MaxFuel_assumption", "@MaxIFuel_assumption",
-        "@fuel_correspondence_Vale.X64.Instruction_s.instr_operands_t_args.fuel_instrumented",
-        "@fuel_irrelevance_Vale.X64.Instruction_s.instr_operands_t_args.fuel_instrumented",
-        "@query", "binder_x_5b8a55910a662c783b1ed3212549410e_0",
-        "constructor_distinct_Prims.Cons",
-        "constructor_distinct_Vale.X64.Instruction_s.IOpEx",
-        "constructor_distinct_Vale.X64.Instruction_s.IOpIm",
-        "disc_equation_Prims.Cons", "disc_equation_Prims.Nil",
-        "disc_equation_Vale.X64.Instruction_s.IOpEx",
-        "disc_equation_Vale.X64.Instruction_s.IOpIm",
-        "equation_with_fuel_Vale.X64.Instruction_s.instr_operands_t_args.fuel_instrumented",
-        "fuel_guarded_inversion_Prims.list",
-        "fuel_guarded_inversion_Vale.X64.Instruction_s.instr_operand",
-        "projection_inverse_Prims.Cons_hd",
-        "projection_inverse_Prims.Cons_tl",
-        "projection_inverse_Vale.X64.Instruction_s.IOpEx__0",
-        "projection_inverse_Vale.X64.Instruction_s.IOpIm__0",
-        "subterm_ordering_Prims.Cons"
-      ],
-      0,
-      "dd3fa9ccc016d21bc3c7ca126c4fb291"
-    ],
-    [
-      "Vale.X64.Machine_Semantics_s.obs_inouts",
-      2,
-      1,
-      1,
-      [
-        "@MaxFuel_assumption", "@MaxIFuel_assumption",
-        "@fuel_correspondence_Vale.X64.Instruction_s.instr_operands_t.fuel_instrumented",
-        "@fuel_irrelevance_Vale.X64.Instruction_s.instr_operands_t.fuel_instrumented",
-        "@query",
-        "Vale.X64.Instruction_s_pretyping_2fb66fcb47c648644e76dfa1323a4ab6",
-        "binder_x_5b8a55910a662c783b1ed3212549410e_1",
-        "binder_x_695f4be111338c847de65a0e01449238_0",
-        "binder_x_b6a48ef30bd1dfd7c55eceb0340d6f73_2",
-        "constructor_distinct_Prims.Cons", "constructor_distinct_Prims.Nil",
-        "constructor_distinct_Vale.X64.Instruction_s.IOpEx",
-        "constructor_distinct_Vale.X64.Instruction_s.IOpIm",
-        "data_typing_intro_Vale.X64.Instruction_s.Out@tok",
-        "disc_equation_Prims.Cons", "disc_equation_Prims.Nil",
-        "disc_equation_Vale.X64.Instruction_s.IOpEx",
-        "disc_equation_Vale.X64.Instruction_s.IOpIm",
-        "equation_Vale.X64.Instruction_s.instr_out",
-        "equation_with_fuel_Vale.X64.Instruction_s.instr_operands_t.fuel_instrumented",
-        "fuel_guarded_inversion_Prims.list",
-        "fuel_guarded_inversion_Vale.X64.Instruction_s.instr_operand",
-        "projection_inverse_FStar.Pervasives.Native.Mktuple2__2",
-        "projection_inverse_Prims.Cons_hd",
-        "projection_inverse_Prims.Cons_tl", "projection_inverse_Prims.Nil_a",
-        "projection_inverse_Vale.X64.Instruction_s.IOpEx__0",
-        "projection_inverse_Vale.X64.Instruction_s.IOpIm__0",
-        "subterm_ordering_Prims.Cons"
-      ],
-      0,
-      "c819b215962f6739edbff1fff489bfd3"
-    ],
-    [
-      "Vale.X64.Machine_Semantics_s.ins_obs",
-      2,
-      1,
-      1,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_Vale.X64.Bytes_Code_s.Alloc",
-        "disc_equation_Vale.X64.Bytes_Code_s.Dealloc",
-        "disc_equation_Vale.X64.Bytes_Code_s.Instr",
-        "disc_equation_Vale.X64.Bytes_Code_s.Pop",
-        "disc_equation_Vale.X64.Bytes_Code_s.Push",
-        "equation_Vale.X64.Machine_Semantics_s.ins",
-        "fuel_guarded_inversion_Vale.X64.Bytes_Code_s.instruction_t"
-      ],
-      0,
-      "3565ac9fc57f51c220d4b5b6a506b9fb"
+      "a7d7fdb4a1ff10a0e34135925f22219e"
     ],
     [
       "Vale.X64.Machine_Semantics_s.match_n",
@@ -1786,7 +1472,7 @@
         "well-founded-ordering-on-nat"
       ],
       0,
-      "6318fcb5c384893f48572526a8201d41"
+      "656f8b16d7323e1a145a18ef0d987ac0"
     ],
     [
       "Vale.X64.Machine_Semantics_s.update_n",
@@ -1838,10 +1524,10 @@
         "well-founded-ordering-on-nat"
       ],
       0,
-      "ff063b421c9429d331a8ed93d9bd8b1e"
+      "1e54869b0aa8faeb4bb63489cd1397a7"
     ],
     [
-      "Vale.X64.Machine_Semantics_s.taint_match",
+      "Vale.X64.Machine_Semantics_s.valid_src_operand",
       2,
       1,
       1,
@@ -1851,28 +1537,292 @@
         "disc_equation_Vale.X64.Machine_s.OMem",
         "disc_equation_Vale.X64.Machine_s.OReg",
         "disc_equation_Vale.X64.Machine_s.OStack",
+        "equation_Vale.X64.Machine_s.operand64",
+        "equation_Vale.X64.Machine_s.reg",
         "fuel_guarded_inversion_Vale.X64.Machine_s.operand"
       ],
       0,
-      "1bdb30d44b81822a321266098110cf57"
+      "d57e6c047aa2d72b9e0591c4609f9c21"
     ],
     [
-      "Vale.X64.Machine_Semantics_s.taint_match128",
+      "Vale.X64.Machine_Semantics_s.valid_src_operand64_and_taint",
       2,
       1,
       1,
       [
         "@MaxIFuel_assumption", "@query",
-        "disc_equation_Vale.X64.Machine_s.OMem128",
-        "disc_equation_Vale.X64.Machine_s.OReg128",
-        "disc_equation_Vale.X64.Machine_s.OStack128",
-        "fuel_guarded_inversion_Vale.X64.Machine_s.operand128"
+        "disc_equation_Vale.X64.Machine_s.OConst",
+        "disc_equation_Vale.X64.Machine_s.OMem",
+        "disc_equation_Vale.X64.Machine_s.OReg",
+        "disc_equation_Vale.X64.Machine_s.OStack",
+        "equation_Vale.X64.Machine_s.operand64",
+        "equation_Vale.X64.Machine_s.reg",
+        "fuel_guarded_inversion_Vale.X64.Machine_s.operand"
       ],
       0,
-      "3b1965a637cd7cc0c564cd789b558286"
+      "e0b582e4feda6b7b1c04fd1ac5f1fb7b"
     ],
     [
-      "Vale.X64.Machine_Semantics_s.taint_match_operand_explicit",
+      "Vale.X64.Machine_Semantics_s.valid_src_operand128_and_taint",
+      2,
+      1,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "disc_equation_Vale.X64.Machine_s.OConst",
+        "disc_equation_Vale.X64.Machine_s.OMem",
+        "disc_equation_Vale.X64.Machine_s.OReg",
+        "disc_equation_Vale.X64.Machine_s.OStack",
+        "equation_Vale.Def.Types_s.quad32",
+        "equation_Vale.X64.Machine_s.operand128",
+        "equation_Vale.X64.Machine_s.xmm",
+        "fuel_guarded_inversion_Vale.X64.Machine_s.operand"
+      ],
+      0,
+      "6644e7cf0ac722d81d133c658438650a"
+    ],
+    [
+      "Vale.X64.Machine_Semantics_s.valid_ocmp",
+      2,
+      1,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "disc_equation_Vale.X64.Bytes_Code_s.OEq",
+        "disc_equation_Vale.X64.Bytes_Code_s.OGe",
+        "disc_equation_Vale.X64.Bytes_Code_s.OGt",
+        "disc_equation_Vale.X64.Bytes_Code_s.OLe",
+        "disc_equation_Vale.X64.Bytes_Code_s.OLt",
+        "disc_equation_Vale.X64.Bytes_Code_s.ONe",
+        "equation_Vale.X64.Machine_Semantics_s.ocmp",
+        "fuel_guarded_inversion_Vale.X64.Bytes_Code_s.ocmp"
+      ],
+      0,
+      "9c09d7c804c542c0de45feb75d741aaf"
+    ],
+    [
+      "Vale.X64.Machine_Semantics_s.valid_dst_operand64",
+      2,
+      1,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565",
+        "disc_equation_Vale.X64.Machine_s.OConst",
+        "disc_equation_Vale.X64.Machine_s.OMem",
+        "disc_equation_Vale.X64.Machine_s.OReg",
+        "disc_equation_Vale.X64.Machine_s.OStack", "equation_Prims.eqtype",
+        "equation_Prims.nat", "equation_Vale.Def.Words_s.nat64",
+        "equation_Vale.X64.Machine_s.operand64",
+        "equation_Vale.X64.Machine_s.reg_64",
+        "fuel_guarded_inversion_Vale.X64.Machine_s.operand",
+        "function_token_typing_Prims.__cache_version_number__",
+        "function_token_typing_Prims.int",
+        "haseqTm_refine_1101de7a497235789e427aeb0d9938cc",
+        "haseqTm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
+      ],
+      0,
+      "a4998eb2064343b628413e5fce8b51a3"
+    ],
+    [
+      "Vale.X64.Machine_Semantics_s.valid_dst_operand128",
+      2,
+      1,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "disc_equation_Vale.X64.Machine_s.OConst",
+        "disc_equation_Vale.X64.Machine_s.OMem",
+        "disc_equation_Vale.X64.Machine_s.OReg",
+        "disc_equation_Vale.X64.Machine_s.OStack",
+        "equation_Vale.Def.Types_s.quad32",
+        "equation_Vale.X64.Machine_s.operand128",
+        "equation_Vale.X64.Machine_s.xmm",
+        "fuel_guarded_inversion_Vale.X64.Machine_s.operand"
+      ],
+      0,
+      "cf76f999c03cce11e0bf9b0cd83bfc8d"
+    ],
+    [
+      "Vale.X64.Machine_Semantics_s.update_operand64_preserve_flags''",
+      2,
+      1,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "disc_equation_Vale.X64.Machine_s.OConst",
+        "disc_equation_Vale.X64.Machine_s.OMem",
+        "disc_equation_Vale.X64.Machine_s.OReg",
+        "disc_equation_Vale.X64.Machine_s.OStack",
+        "equation_Vale.X64.Machine_s.operand64",
+        "equation_Vale.X64.Machine_s.reg",
+        "fuel_guarded_inversion_Vale.X64.Machine_s.operand"
+      ],
+      0,
+      "963b8a308c12814deb39940002c2ac8e"
+    ],
+    [
+      "Vale.X64.Machine_Semantics_s.update_operand128_preserve_flags''",
+      2,
+      1,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "disc_equation_Vale.X64.Machine_s.OConst",
+        "disc_equation_Vale.X64.Machine_s.OMem",
+        "disc_equation_Vale.X64.Machine_s.OReg",
+        "disc_equation_Vale.X64.Machine_s.OStack",
+        "equation_Vale.Def.Types_s.quad32",
+        "equation_Vale.X64.Machine_s.operand128",
+        "equation_Vale.X64.Machine_s.xmm",
+        "fuel_guarded_inversion_Vale.X64.Machine_s.operand"
+      ],
+      0,
+      "e4e3f4846733d6754a2acf8554684598"
+    ],
+    [
+      "Vale.X64.Machine_Semantics_s.update_rsp'",
+      2,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
+        "equation_Vale.Def.Words_s.nat64", "equation_Vale.Def.Words_s.natN",
+        "primitive_Prims.op_AmpAmp", "primitive_Prims.op_GreaterThanOrEqual",
+        "primitive_Prims.op_LessThanOrEqual",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_4c6411da037541583c16876f5cc7dfe4",
+        "refinement_interpretation_Tm_refine_5514fbe9e08dfda40f950a7b9f1b2b98"
+      ],
+      0,
+      "1b3f2ae099572b7aa2d8d301da3dab7e"
+    ],
+    [
+      "Vale.X64.Machine_Semantics_s.update_cf'",
+      2,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565", "bool_inversion",
+        "equation_Prims.nat", "equation_Vale.Def.Words_s.nat64",
+        "equation_Vale.Def.Words_s.natN",
+        "equation_Vale.X64.Machine_Semantics_s.cf",
+        "function_token_typing_Prims.__cache_version_number__",
+        "int_inversion", "primitive_Prims.op_Equality",
+        "primitive_Prims.op_Negation", "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_5514fbe9e08dfda40f950a7b9f1b2b98",
+        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
+      ],
+      0,
+      "3dd9d14da4848d26812f65bb88481d2a"
+    ],
+    [
+      "Vale.X64.Machine_Semantics_s.update_of'",
+      2,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565", "bool_inversion",
+        "equation_Prims.nat", "equation_Vale.Def.Words_s.nat64",
+        "equation_Vale.Def.Words_s.natN",
+        "equation_Vale.X64.Machine_Semantics_s.overflow",
+        "function_token_typing_Prims.__cache_version_number__",
+        "int_inversion", "primitive_Prims.op_Equality",
+        "primitive_Prims.op_Negation", "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_5514fbe9e08dfda40f950a7b9f1b2b98",
+        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "typing_Vale.X64.Machine_Semantics_s.overflow"
+      ],
+      0,
+      "a000ee44c7ca7dc9f233267b0d6c7f97"
+    ],
+    [
+      "Vale.X64.Machine_Semantics_s.try_option",
+      2,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "bool_inversion",
+        "disc_equation_FStar.Pervasives.Native.None",
+        "disc_equation_FStar.Pervasives.Native.Some",
+        "lemma_FStar.Pervasives.invertOption",
+        "typing_FStar.Pervasives.Native.uu___is_None",
+        "typing_FStar.Pervasives.Native.uu___is_Some"
+      ],
+      0,
+      "eaf0448c2549f0013505d653d790fd09"
+    ],
+    [
+      "Vale.X64.Machine_Semantics_s.bind_option",
+      2,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "bool_inversion",
+        "disc_equation_FStar.Pervasives.Native.None",
+        "disc_equation_FStar.Pervasives.Native.Some",
+        "lemma_FStar.Pervasives.invertOption",
+        "typing_FStar.Pervasives.Native.uu___is_None",
+        "typing_FStar.Pervasives.Native.uu___is_Some"
+      ],
+      0,
+      "ea4d6366bdb3763e50201b051a876651"
+    ],
+    [
+      "Vale.X64.Machine_Semantics_s.operand_obs",
+      2,
+      1,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565",
+        "disc_equation_Vale.X64.Machine_s.MConst",
+        "disc_equation_Vale.X64.Machine_s.MIndex",
+        "disc_equation_Vale.X64.Machine_s.MReg",
+        "disc_equation_Vale.X64.Machine_s.OConst",
+        "disc_equation_Vale.X64.Machine_s.OMem",
+        "disc_equation_Vale.X64.Machine_s.OReg",
+        "disc_equation_Vale.X64.Machine_s.OStack",
+        "equation_Vale.X64.Machine_s.operand64",
+        "equation_Vale.X64.Machine_s.reg",
+        "fuel_guarded_inversion_Vale.X64.Machine_s.maddr",
+        "fuel_guarded_inversion_Vale.X64.Machine_s.operand",
+        "function_token_typing_Prims.__cache_version_number__"
+      ],
+      0,
+      "1509f34cc5353ff350491504eca442e5"
+    ],
+    [
+      "Vale.X64.Machine_Semantics_s.operand_obs128",
+      2,
+      1,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "disc_equation_Vale.X64.Machine_s.MConst",
+        "disc_equation_Vale.X64.Machine_s.MIndex",
+        "disc_equation_Vale.X64.Machine_s.MReg",
+        "disc_equation_Vale.X64.Machine_s.OConst",
+        "disc_equation_Vale.X64.Machine_s.OMem",
+        "disc_equation_Vale.X64.Machine_s.OReg",
+        "disc_equation_Vale.X64.Machine_s.OStack",
+        "equation_Vale.Def.Types_s.quad32",
+        "equation_Vale.X64.Machine_s.operand128",
+        "equation_Vale.X64.Machine_s.xmm",
+        "fuel_guarded_inversion_Vale.X64.Machine_s.maddr",
+        "fuel_guarded_inversion_Vale.X64.Machine_s.operand"
+      ],
+      0,
+      "e5c83fa4762a3880507e122f5317d594"
+    ],
+    [
+      "Vale.X64.Machine_Semantics_s.obs_operand_explicit",
       2,
       1,
       1,
@@ -1885,10 +1835,10 @@
         "projection_inverse_BoxBool_proj_0"
       ],
       0,
-      "08cd951fe295cb8c178c7ba23e4eb044"
+      "c6de6b3d933463c1fc5e0adf78df7664"
     ],
     [
-      "Vale.X64.Machine_Semantics_s.taint_match_operand_implicit",
+      "Vale.X64.Machine_Semantics_s.obs_operand_implicit",
       2,
       1,
       1,
@@ -1901,10 +1851,10 @@
         "fuel_guarded_inversion_Vale.X64.Instruction_s.instr_operand_implicit"
       ],
       0,
-      "b896a2e8d0d3d1ba52c48cd24a750fc4"
+      "986a395926cc5b0ff5c4cfabbcd2fc9f"
     ],
     [
-      "Vale.X64.Machine_Semantics_s.taint_match_args",
+      "Vale.X64.Machine_Semantics_s.obs_args",
       2,
       1,
       1,
@@ -1929,10 +1879,10 @@
         "subterm_ordering_Prims.Cons"
       ],
       0,
-      "12c568592a51e4f4e87a5b604f02600b"
+      "34f4f8faa4cceb9b3b88949ac169d2f7"
     ],
     [
-      "Vale.X64.Machine_Semantics_s.taint_match_inouts",
+      "Vale.X64.Machine_Semantics_s.obs_inouts",
       2,
       1,
       1,
@@ -1948,153 +1898,26 @@
         "constructor_distinct_Prims.Cons", "constructor_distinct_Prims.Nil",
         "constructor_distinct_Vale.X64.Instruction_s.IOpEx",
         "constructor_distinct_Vale.X64.Instruction_s.IOpIm",
-        "data_elim_Prims.Cons",
         "data_typing_intro_Vale.X64.Instruction_s.Out@tok",
         "disc_equation_Prims.Cons", "disc_equation_Prims.Nil",
         "disc_equation_Vale.X64.Instruction_s.IOpEx",
         "disc_equation_Vale.X64.Instruction_s.IOpIm",
-        "disc_equation_Vale.X64.Instruction_s.InOut",
-        "disc_equation_Vale.X64.Instruction_s.Out",
-        "equality_tok_Vale.X64.Instruction_s.InOut@tok",
-        "equality_tok_Vale.X64.Instruction_s.Out@tok",
         "equation_Vale.X64.Instruction_s.instr_out",
         "equation_with_fuel_Vale.X64.Instruction_s.instr_operands_t.fuel_instrumented",
-        "fuel_guarded_inversion_FStar.Pervasives.Native.tuple2",
         "fuel_guarded_inversion_Prims.list",
         "fuel_guarded_inversion_Vale.X64.Instruction_s.instr_operand",
-        "fuel_guarded_inversion_Vale.X64.Instruction_s.instr_operand_inout",
-        "kinding_Vale.X64.Instruction_s.instr_operand@tok",
-        "kinding_Vale.X64.Instruction_s.instr_operand_inout@tok",
-        "proj_equation_FStar.Pervasives.Native.Mktuple2__1",
-        "proj_equation_Prims.Cons_hd", "projection_inverse_BoxBool_proj_0",
         "projection_inverse_FStar.Pervasives.Native.Mktuple2__2",
         "projection_inverse_Prims.Cons_hd",
         "projection_inverse_Prims.Cons_tl", "projection_inverse_Prims.Nil_a",
         "projection_inverse_Vale.X64.Instruction_s.IOpEx__0",
         "projection_inverse_Vale.X64.Instruction_s.IOpIm__0",
-        "subterm_ordering_Prims.Cons",
-        "typing_FStar.Pervasives.Native.__proj__Mktuple2__item___1"
-      ],
-      0,
-      "98cbd818454be29a90229e0d89290a8e"
-    ],
-    [
-      "Vale.X64.Machine_Semantics_s.taint_match_ins",
-      2,
-      1,
-      1,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_Vale.X64.Bytes_Code_s.Alloc",
-        "disc_equation_Vale.X64.Bytes_Code_s.Dealloc",
-        "disc_equation_Vale.X64.Bytes_Code_s.Instr",
-        "disc_equation_Vale.X64.Bytes_Code_s.Pop",
-        "disc_equation_Vale.X64.Bytes_Code_s.Push",
-        "equation_Vale.X64.Machine_Semantics_s.ins",
-        "fuel_guarded_inversion_Vale.X64.Bytes_Code_s.instruction_t"
-      ],
-      0,
-      "c4efe8bc4c21fd4496b5523862e9ece4"
-    ],
-    [
-      "Vale.X64.Machine_Semantics_s.update_taint",
-      2,
-      1,
-      1,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_Vale.X64.Machine_s.OConst",
-        "disc_equation_Vale.X64.Machine_s.OMem",
-        "disc_equation_Vale.X64.Machine_s.OReg",
-        "disc_equation_Vale.X64.Machine_s.OStack",
-        "fuel_guarded_inversion_Vale.X64.Machine_s.operand"
-      ],
-      0,
-      "6d1927599340f73e695de5b9a817a847"
-    ],
-    [
-      "Vale.X64.Machine_Semantics_s.update_taint128",
-      2,
-      1,
-      1,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_Vale.X64.Machine_s.OMem128",
-        "disc_equation_Vale.X64.Machine_s.OReg128",
-        "disc_equation_Vale.X64.Machine_s.OStack128",
-        "fuel_guarded_inversion_Vale.X64.Machine_s.operand128"
-      ],
-      0,
-      "a84b3ffda418a6f1967c4f652f5518c6"
-    ],
-    [
-      "Vale.X64.Machine_Semantics_s.update_taint_operand_explicit",
-      2,
-      1,
-      1,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_Vale.X64.Instruction_s.IOp64",
-        "disc_equation_Vale.X64.Instruction_s.IOpXmm",
-        "equation_Vale.X64.Instruction_s.instr_operand_t",
-        "fuel_guarded_inversion_Vale.X64.Instruction_s.instr_operand_explicit",
-        "projection_inverse_BoxBool_proj_0"
-      ],
-      0,
-      "7ae22389186859860b2e4380061a7caf"
-    ],
-    [
-      "Vale.X64.Machine_Semantics_s.update_taint_operand_implicit",
-      2,
-      1,
-      1,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_Vale.X64.Instruction_s.IOp64One",
-        "disc_equation_Vale.X64.Instruction_s.IOpFlagsCf",
-        "disc_equation_Vale.X64.Instruction_s.IOpFlagsOf",
-        "disc_equation_Vale.X64.Instruction_s.IOpXmmOne",
-        "fuel_guarded_inversion_Vale.X64.Instruction_s.instr_operand_implicit"
-      ],
-      0,
-      "408fc851b0b7a9fdcc21bc12bfb6333e"
-    ],
-    [
-      "Vale.X64.Machine_Semantics_s.update_taint_outputs",
-      2,
-      1,
-      1,
-      [
-        "@MaxFuel_assumption", "@MaxIFuel_assumption",
-        "@fuel_correspondence_Vale.X64.Instruction_s.instr_operands_t.fuel_instrumented",
-        "@fuel_irrelevance_Vale.X64.Instruction_s.instr_operands_t.fuel_instrumented",
-        "@query",
-        "Vale.X64.Instruction_s_pretyping_2fb66fcb47c648644e76dfa1323a4ab6",
-        "binder_x_5b8a55910a662c783b1ed3212549410e_1",
-        "binder_x_695f4be111338c847de65a0e01449238_0",
-        "constructor_distinct_Prims.Cons",
-        "constructor_distinct_Vale.X64.Instruction_s.IOpEx",
-        "constructor_distinct_Vale.X64.Instruction_s.IOpIm",
-        "data_typing_intro_Vale.X64.Instruction_s.Out@tok",
-        "disc_equation_Prims.Cons", "disc_equation_Prims.Nil",
-        "disc_equation_Vale.X64.Instruction_s.IOpEx",
-        "disc_equation_Vale.X64.Instruction_s.IOpIm",
-        "equation_Vale.X64.Instruction_s.instr_out",
-        "equation_with_fuel_Vale.X64.Instruction_s.instr_operands_t.fuel_instrumented",
-        "fuel_guarded_inversion_Prims.list",
-        "fuel_guarded_inversion_Vale.X64.Instruction_s.instr_operand",
-        "projection_inverse_FStar.Pervasives.Native.Mktuple2__2",
-        "projection_inverse_Prims.Cons_hd",
-        "projection_inverse_Prims.Cons_tl",
-        "projection_inverse_Vale.X64.Instruction_s.IOpEx__0",
-        "projection_inverse_Vale.X64.Instruction_s.IOpIm__0",
         "subterm_ordering_Prims.Cons"
       ],
       0,
-      "f24eb0ea66336e463b12a3721def6bbf"
+      "289e7e7565d96eac5aa23f0f3c3f2889"
     ],
     [
-      "Vale.X64.Machine_Semantics_s.update_taint_ins",
+      "Vale.X64.Machine_Semantics_s.ins_obs",
       2,
       1,
       1,
@@ -2109,7 +1932,7 @@
         "fuel_guarded_inversion_Vale.X64.Bytes_Code_s.instruction_t"
       ],
       0,
-      "9c81d72d4195eec86409be1fa65010ca"
+      "775d10794f66174019f651f07e9b6b94"
     ],
     [
       "Vale.X64.Machine_Semantics_s.instr_eval_operand_explicit",
@@ -2130,7 +1953,7 @@
         "projection_inverse_Vale.X64.Instruction_s.IOpEx__0"
       ],
       0,
-      "33ce986c4f2de7a9b9a3296ac9adb7cc"
+      "64bce74f87755cfca36a5d41b82bd312"
     ],
     [
       "Vale.X64.Machine_Semantics_s.instr_eval_operand_implicit",
@@ -2160,7 +1983,7 @@
         "typing_Vale.X64.Machine_Semantics_s.overflow"
       ],
       0,
-      "176fe8a0a76094144f415e91506e523b"
+      "c977a832d3102b7b54aa92ce21eda1e4"
     ],
     [
       "Vale.X64.Machine_Semantics_s.instr_apply_eval_args",
@@ -2194,7 +2017,7 @@
         "subterm_ordering_Prims.Cons"
       ],
       0,
-      "ded3798fbf6dfc2e62fc603a7f025ec7"
+      "777527a3859046aea5ed3c58c79c9eda"
     ],
     [
       "Vale.X64.Machine_Semantics_s.instr_apply_eval_inouts",
@@ -2249,7 +2072,7 @@
         "typing_FStar.Pervasives.Native.__proj__Mktuple2__item___1"
       ],
       0,
-      "d0a311418cfda2b5528e13635a30299d"
+      "16613b43c813d249f57b948c12d6b6c6"
     ],
     [
       "Vale.X64.Machine_Semantics_s.instr_write_output_explicit",
@@ -2271,7 +2094,7 @@
         "projection_inverse_Vale.X64.Instruction_s.IOpEx__0"
       ],
       0,
-      "a9c75027030e7c4c9252055ba06f402f"
+      "65582778bb791175ba162bb8ce618400"
     ],
     [
       "Vale.X64.Machine_Semantics_s.instr_write_output_implicit",
@@ -2297,7 +2120,7 @@
         "projection_inverse_Vale.X64.Instruction_s.IOpXmmOne__0"
       ],
       0,
-      "1a2a6b8430646c4616692af4863967f9"
+      "132f442ac0a952b28fc007b6cfad41f6"
     ],
     [
       "Vale.X64.Machine_Semantics_s.instr_write_outputs",
@@ -2339,7 +2162,7 @@
         "subterm_ordering_Prims.Cons", "unit_typing"
       ],
       0,
-      "0d068676977ccc129293387ce27e962a"
+      "6993cd7408c4c26e79e7e302ee6e2974"
     ],
     [
       "Vale.X64.Machine_Semantics_s.eval_instr",
@@ -2363,25 +2186,38 @@
         "typing_Vale.X64.Instruction_s.instr_eval"
       ],
       0,
-      "262e105f57b97ddd7ba1722ded036bb9"
+      "5aa4077b790671a772dc7bcbe8cbaab6"
     ],
     [
-      "Vale.X64.Machine_Semantics_s.untainted_eval_ins",
+      "Vale.X64.Machine_Semantics_s.machine_eval_ins_st",
       2,
       1,
       1,
       [
         "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565",
         "disc_equation_Vale.X64.Bytes_Code_s.Alloc",
         "disc_equation_Vale.X64.Bytes_Code_s.Dealloc",
         "disc_equation_Vale.X64.Bytes_Code_s.Instr",
         "disc_equation_Vale.X64.Bytes_Code_s.Pop",
-        "disc_equation_Vale.X64.Bytes_Code_s.Push",
+        "disc_equation_Vale.X64.Bytes_Code_s.Push", "equation_Prims.eqtype",
+        "equation_Prims.nat", "equation_Vale.Def.Words_s.nat64",
+        "equation_Vale.Def.Words_s.natN",
         "equation_Vale.X64.Machine_Semantics_s.ins",
-        "fuel_guarded_inversion_Vale.X64.Bytes_Code_s.instruction_t"
+        "equation_Vale.X64.Machine_s.n_reg_files",
+        "equation_Vale.X64.Machine_s.n_regs",
+        "equation_Vale.X64.Machine_s.reg_64",
+        "fuel_guarded_inversion_Vale.X64.Bytes_Code_s.instruction_t",
+        "function_token_typing_Prims.__cache_version_number__",
+        "function_token_typing_Prims.int",
+        "haseqTm_refine_1101de7a497235789e427aeb0d9938cc",
+        "haseqTm_refine_5514fbe9e08dfda40f950a7b9f1b2b98",
+        "haseqTm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "32c1d33075a3cb411191415f83238eb6"
+      "896fd26bf4b1273fee7de10d77ee40c5"
     ],
     [
       "Vale.X64.Machine_Semantics_s.machine_eval_code",
@@ -2411,7 +2247,7 @@
         "well-founded-ordering-on-nat"
       ],
       0,
-      "9cfc285ffee2f6c96456ea1931b59d0d"
+      "ac92354575e4d2afe8baa0dcc8d8568c"
     ],
     [
       "Vale.X64.Machine_Semantics_s.machine_eval_code",
@@ -2436,7 +2272,7 @@
         "subterm_ordering_Prims.Cons"
       ],
       0,
-      "40fd1400c3f4b9f5629d9a092563c1a9"
+      "bd109d2cfacab1e0ff1d81c02daea0c5"
     ],
     [
       "Vale.X64.Machine_Semantics_s.machine_eval_code",
@@ -2466,7 +2302,7 @@
         "well-founded-ordering-on-nat"
       ],
       0,
-      "a20f2db5eefcec1311e252d94bb82479"
+      "eff59d2829e9b7e90edfd51ad9031262"
     ]
   ]
 ]

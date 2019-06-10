@@ -579,7 +579,6 @@ let lemma_sha256_msg2 (src1 src2:quad32) (t:counter) (block:block_w) : Lemma
 
 
 (* Abbreviations and lemmas for the code itself *)
-open Vale.Lib.Workarounds
 
 #reset-options "--z3rlimit 20 --max_fuel 1"
 let lemma_quads_to_block qs

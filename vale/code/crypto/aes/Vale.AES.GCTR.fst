@@ -22,8 +22,8 @@ let gctr_encrypt_block_offset (icb_BE:quad32) (plain_LE:quad32) (alg:algorithm) 
 let gctr_encrypt_empty (icb_BE:quad32) (plain_LE cipher_LE:seq quad32) (alg:algorithm) (key:seq nat32) =
   FStar.Pervasives.reveal_opaque (`%le_bytes_to_seq_quad32) le_bytes_to_seq_quad32;
   reveal_opaque gctr_encrypt_LE_def;
-  let plain = slice_work_around (le_seq_quad32_to_bytes plain_LE) 0 in
-  let cipher = slice_work_around (le_seq_quad32_to_bytes cipher_LE) 0 in
+  let plain = slice (le_seq_quad32_to_bytes plain_LE) 0 0 in
+  let cipher = slice (le_seq_quad32_to_bytes cipher_LE) 0 0 in
   assert (plain == empty);
   assert (cipher == empty);
   assert (length plain == 0);
@@ -137,7 +137,7 @@ let rec gctr_indexed_helper (icb:quad32) (plain:gctr_plain_internal_LE)
       let helper (j:int) :
         Lemma ((0 <= j /\ j < length plain) ==> (index cipher j == quad32_xor (index plain j) (aes_encrypt_BE alg key (inc32 icb (i + j)) )))
         =
-        reveal_opaque aes_encrypt_LE_def;
+        FStar.Pervasives.reveal_opaque (`%aes_encrypt_le) aes_encrypt_le;
         if 0 < j && j < length plain then (
           gctr_indexed_helper icb tl alg key (i+1);
           assert(index r_cipher (j-1) == quad32_xor (index tl (j-1)) (aes_encrypt_BE alg key (inc32 icb (i + 1 + j - 1)) )) // OBSERVE
@@ -699,7 +699,7 @@ let gctr_encrypt_one_block (icb_BE plain:quad32) (alg:algorithm) (key:seq nat32)
           (let icb_LE = reverse_bytes_quad32 (inc32 icb_BE 0) in
            quad32_xor (head plain_quads_LE) (aes_encrypt_LE alg key icb_LE)));
   assert (gctr_encrypt_block icb_BE (head plain_quads_LE) alg key 0 == quad32_xor plain (aes_encrypt_LE alg key (reverse_bytes_quad32 icb_BE)));
-  reveal_opaque aes_encrypt_LE_def;
+  FStar.Pervasives.reveal_opaque (`%aes_encrypt_le) aes_encrypt_le;
   assert (gctr_encrypt_block icb_BE (head plain_quads_LE) alg key 0 == quad32_xor plain (aes_encrypt_BE alg key icb_BE));
   assert (gctr_encrypt_block icb_BE (head plain_quads_LE) alg key 0 == quad32_xor plain encrypted_icb);
   assert(gctr_encrypt_recursive icb_BE (tail p_seq) alg key 1 == empty);   // OBSERVE
@@ -761,7 +761,7 @@ let gctr_bytes_helper (alg:algorithm) (key:seq nat32)
   let icb_BE_inc = inc32 iv_BE (length p128) in
   assert (gctr_encrypt_block icb_BE_inc (index p_bytes 0) alg key 0 ==
           gctr_encrypt_block iv_BE (index p_bytes 0) alg key  (length p128));
-  reveal_opaque aes_encrypt_LE_def;
+  FStar.Pervasives.reveal_opaque (`%aes_encrypt_le) aes_encrypt_le;
   //assert (gctr_partial alg 1 p_bytes c_bytes key icb_BE_inc);
   reveal_opaque gctr_partial;
 

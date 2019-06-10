@@ -18,7 +18,6 @@ include{:fstar}{:open} "Vale.X64.QuickCodes"
 include{:fstar}{:open} "Vale.Arch.Types"
 include{:fstar}{:open} "Vale.AES.AES_helpers"
 include{:fstar}{:open} "Vale.Poly1305.Math"
-include{:fstar}{:open} "Vale.Lib.Workarounds"
 include{:fstar}{:open} "Vale.AES.GCTR_s"
 include{:fstar}{:open} "Vale.AES.GCTR"
 include{:fstar}{:open} "Vale.Arch.TypesNative"
@@ -46,7 +45,6 @@ open Vale.X64.QuickCodes
 open Vale.Arch.Types
 open Vale.AES.AES_helpers
 open Vale.Poly1305.Math    // For lemma_poly_bits64()
-open Vale.Lib.Workarounds
 open Vale.AES.GCTR_s
 open Vale.AES.GCTR
 open Vale.Arch.TypesNative
@@ -167,7 +165,6 @@ procedure aes_ctr_loop_body(
     Load128_buffer(rk2,  key_ptr, 16, Secret, keys_b, 1);
     Load128_buffer(rk3, key_ptr, 32, Secret, keys_b, 2);
     Load128_buffer(rk4,  key_ptr, 48, Secret, keys_b, 3);
-    assert{:quick_type} length(round_keys) == nr(alg) + 1;
     assert rk1  == index(round_keys, 0);
     assert rk2  == index(round_keys, 1);
     assert rk3 == index(round_keys, 2);
@@ -214,7 +211,7 @@ procedure aes_ctr_loop_body(
     lemma_quad32_xor_commutes_forall();
     //commute_sub_bytes_shift_rows_forall();
 
-    assert slice_work_around(buffer128_as_seq(mem, out_b), 4*count) == old(slice_work_around(buffer128_as_seq(mem, out_b), 4*count));   // OBSERVE
+    assert slice(buffer128_as_seq(mem, out_b), 0, 4 * count) == old(slice(buffer128_as_seq(mem, out_b), 0, 4 * count));   // OBSERVE
 
     Sub64(rdx, 1);
     Add64(plain_ptr, 64);
@@ -356,7 +353,7 @@ procedure aes_counter_loop(
             iv_lower64 == lo64(old_iv);
 
             // GCTR progress
-            length(slice_work_around(buffer128_as_seq(mem, out_b), 4*old(num_quad_blocks))) > 0;
+            length(slice(buffer128_as_seq(mem, out_b), 0, 4 * old(num_quad_blocks))) > 0;
             gctr_partial(alg, 4*count, old(buffer128_as_seq(mem, plain_b)), buffer128_as_seq(mem, out_b), key, icb_BE);
         decreases num_quad_blocks;
     {
@@ -367,7 +364,6 @@ procedure aes_counter_loop(
     Mov128(iv, const2_1);
     lemma_insrq_extrq_relations(iv, old_iv);
     Pinsrq(iv, iv_lower64, 0);
-    assert {:quick_type} 4*old(num_quad_blocks) < pow2_32;
     //assert iv == Mkfour(old_iv.lo0, old_iv.lo1, old_iv.hi2, reverse_bytes_nat32(add_wrap32(icb_BE.lo0, 4*old(num_quad_blocks))));
     // Reversed: iv == Mkfour(r (r (add_wrap32(r(old_iv.hi3), 4*old(num_quad_blocks)))), r(old_iv.hi2), r(old_iv.lo1), r(old_iv.lo0));
     //              == Mkfour( add_wrap32(old(iv.lo0, 4*old(num_quad_blocks))), old(iv.lo2), old(iv.hi2), old(iv).hi3));

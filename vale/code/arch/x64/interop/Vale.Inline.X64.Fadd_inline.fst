@@ -68,7 +68,7 @@ let add1_post : VSig.vale_post dom =
 
 #set-options "--z3rlimit 50"
 
-let add1_regs_modified: MS.reg -> bool = fun (r:MS.reg) ->
+let add1_regs_modified: MS.reg_64 -> bool = fun (r:MS.reg_64) ->
   let open MS in
   if r = rRax || r = rRdx || r = rR8 || r = rR9 || r = rR10 || r = rR11 then true
   else false
@@ -90,12 +90,12 @@ let add1_lemma'
        V.eval_code code va_s0 f va_s1 /\
        VSig.vale_calling_conventions va_s0 va_s1 add1_regs_modified add1_xmms_modified /\
        add1_post code out f1 f2 va_s0 va_s1 f /\
-       ME.buffer_readable VS.(va_s1.mem) (as_vale_buffer f1) /\
-       ME.buffer_readable VS.(va_s1.mem) (as_vale_buffer out) /\
+       ME.buffer_readable VS.(va_s1.vs_heap) (as_vale_buffer f1) /\
+       ME.buffer_readable VS.(va_s1.vs_heap) (as_vale_buffer out) /\
        ME.buffer_writeable (as_vale_buffer out) /\
        ME.buffer_writeable (as_vale_buffer f1) /\
        ME.modifies (ME.loc_union (ME.loc_buffer (as_vale_buffer out))
-                                 ME.loc_none) va_s0.VS.mem va_s1.VS.mem
+                                 ME.loc_none) va_s0.VS.vs_heap va_s1.VS.vs_heap
  )) =
    let va_s1, f = FU.va_lemma_fast_add1 code va_s0 (as_vale_buffer out) (as_vale_buffer f1) (UInt64.v f2) in
    Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 out;
@@ -107,13 +107,13 @@ let add1_lemma = as_t #(VSig.vale_sig add1_regs_modified add1_xmms_modified add1
 
 let code_add1 = FU.va_code_fast_add1 ()
 
-let of_reg (r:MS.reg) : option (IX64.reg_nat 3) = match r with
+let of_reg (r:MS.reg_64) : option (IX64.reg_nat 3) = match r with
   | 5 -> Some 0 // rdi
   | 4 -> Some 1 // rsi
   | 3 -> Some 2 // rdx
   | _ -> None
 
-let of_arg (i:IX64.reg_nat 3) : MS.reg = match i with
+let of_arg (i:IX64.reg_nat 3) : MS.reg_64 = match i with
   | 0 -> MS.rRdi
   | 1 -> MS.rRsi
   | 2 -> MS.rRdx
@@ -196,7 +196,7 @@ let fadd_post : VSig.vale_post fadd_dom =
 
 #set-options "--z3rlimit 50"
 
-let fadd_regs_modified: MS.reg -> bool = fun (r:MS.reg) ->
+let fadd_regs_modified: MS.reg_64 -> bool = fun (r:MS.reg_64) ->
   let open MS in
   if r = rRax || r = rRcx || r = rRdx || r = rR8 || r = rR9 || r = rR10 || r = rR11 then true
   else false
@@ -218,14 +218,14 @@ let fadd_lemma'
        V.eval_code code va_s0 f va_s1 /\
        VSig.vale_calling_conventions va_s0 va_s1 fadd_regs_modified fadd_xmms_modified /\
        fadd_post code out f1 f2 va_s0 va_s1 f /\
-       ME.buffer_readable VS.(va_s1.mem) (as_vale_buffer out) /\
-       ME.buffer_readable VS.(va_s1.mem) (as_vale_buffer f1) /\
-       ME.buffer_readable VS.(va_s1.mem) (as_vale_buffer f2) /\
+       ME.buffer_readable VS.(va_s1.vs_heap) (as_vale_buffer out) /\
+       ME.buffer_readable VS.(va_s1.vs_heap) (as_vale_buffer f1) /\
+       ME.buffer_readable VS.(va_s1.vs_heap) (as_vale_buffer f2) /\
        ME.buffer_writeable (as_vale_buffer out) /\
        ME.buffer_writeable (as_vale_buffer f1) /\
        ME.buffer_writeable (as_vale_buffer f2) /\
        ME.modifies (ME.loc_union (ME.loc_buffer (as_vale_buffer out))
-                                 ME.loc_none) va_s0.VS.mem va_s1.VS.mem
+                                 ME.loc_none) va_s0.VS.vs_heap va_s1.VS.vs_heap
  )) =
    let va_s1, f = FH.va_lemma_fadd code va_s0 (as_vale_buffer out) (as_vale_buffer f1) (as_vale_buffer f2) in
    Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 out;
@@ -312,7 +312,7 @@ let fsub_post : VSig.vale_post fsub_dom =
 
 #set-options "--z3rlimit 200"
 
-let fsub_regs_modified: MS.reg -> bool = fun (r:MS.reg) ->
+let fsub_regs_modified: MS.reg_64 -> bool = fun (r:MS.reg_64) ->
   let open MS in
   if r = rRax || r = rRcx || r = rR8 || r = rR9 || r = rR10 || r = rR11 then true
   else false
@@ -334,14 +334,14 @@ let fsub_lemma'
        V.eval_code code va_s0 f va_s1 /\
        VSig.vale_calling_conventions va_s0 va_s1 fsub_regs_modified fsub_xmms_modified /\
        fsub_post code out f1 f2 va_s0 va_s1 f /\
-       ME.buffer_readable VS.(va_s1.mem) (as_vale_buffer out) /\
-       ME.buffer_readable VS.(va_s1.mem) (as_vale_buffer f1) /\
-       ME.buffer_readable VS.(va_s1.mem) (as_vale_buffer f2) /\
+       ME.buffer_readable VS.(va_s1.vs_heap) (as_vale_buffer out) /\
+       ME.buffer_readable VS.(va_s1.vs_heap) (as_vale_buffer f1) /\
+       ME.buffer_readable VS.(va_s1.vs_heap) (as_vale_buffer f2) /\
        ME.buffer_writeable (as_vale_buffer out) /\
        ME.buffer_writeable (as_vale_buffer f1) /\
        ME.buffer_writeable (as_vale_buffer f2) /\
        ME.modifies (ME.loc_union (ME.loc_buffer (as_vale_buffer out))
-                                 ME.loc_none) va_s0.VS.mem va_s1.VS.mem
+                                 ME.loc_none) va_s0.VS.vs_heap va_s1.VS.vs_heap
  )) =
    let va_s1, f = FH.va_lemma_fsub code va_s0 (as_vale_buffer out) (as_vale_buffer f1) (as_vale_buffer f2) in
    Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 out;

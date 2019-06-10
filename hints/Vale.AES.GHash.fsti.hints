@@ -1,5 +1,5 @@
 [
-  "êD0óckv¦±\t°ßÈµi¾",
+  "ÄÔ\u0017³m¡µ„¤Zú”œå‹ì",
   [
     [
       "Vale.AES.GHash.fun_seq_quad32_LE_poly128",
@@ -17,7 +17,7 @@
         "refinement_interpretation_Tm_refine_4fb9f86d722672850f4dd78575352362"
       ],
       0,
-      "6d3fbf7c43d1ce308c5835f24661647a"
+      "450f4d83476420059629e6ff8121bb88"
     ],
     [
       "Vale.AES.GHash.ghash_poly",
@@ -30,7 +30,7 @@
         "projection_inverse_BoxInt_proj_0", "well-founded-ordering-on-nat"
       ],
       0,
-      "6e364878f61f3a9a7e97335eff174e42"
+      "0dcdc14d4526a442632beb65445a45b8"
     ],
     [
       "Vale.AES.GHash.lemma_g_power_n",
@@ -43,7 +43,7 @@
         "refinement_interpretation_Tm_refine_f048236b5f8051f83b495ea5eaa6127b"
       ],
       0,
-      "949f2051137764e206f29c125c2bc9f8"
+      "24afdd6dcd06210005310e92bcd22f72"
     ],
     [
       "Vale.AES.GHash.hkeys_reqs_priv",
@@ -57,7 +57,7 @@
         "typing_Vale.Def.Types_s.quad32"
       ],
       0,
-      "0019af73224033717184cc8da9cdb26a"
+      "ff769e67838bda0e16ea37cb315cb979"
     ],
     [
       "Vale.AES.GHash.ghash_unroll",
@@ -77,7 +77,7 @@
         "well-founded-ordering-on-nat"
       ],
       0,
-      "83f5e063e275983ab70fab73eac76db5"
+      "ec093bed641566afb7d26a81915335f2"
     ],
     [
       "Vale.AES.GHash.ghash_unroll_back",
@@ -99,7 +99,7 @@
         "well-founded-ordering-on-nat"
       ],
       0,
-      "abb04031efbbbd16ab1b10872f8661c9"
+      "98774926e10593fc28bc2db5f05c3f81"
     ],
     [
       "Vale.AES.GHash.lemma_ghash_unroll_back_forward",
@@ -112,7 +112,7 @@
         "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-      "ba2023e32291948a266ee653d02e8ce6"
+      "a18574c59a964a2e3a3a362f60fbcfaf"
     ],
     [
       "Vale.AES.GHash.lemma_add_manip",
@@ -121,7 +121,7 @@
       0,
       [ "@query" ],
       0,
-      "d90f2a6d51c8e3e6fc335d24fdfe6f90"
+      "33fd92240f54e85040ae854a0cd269d0"
     ],
     [
       "Vale.AES.GHash.ghash_incremental_def",
@@ -149,7 +149,7 @@
         "typing_FStar.Seq.Base.length", "well-founded-ordering-on-nat"
       ],
       0,
-      "14e0024481a7001794756588df2a5a06"
+      "652259d87b4baba78564ad118a3c2ed3"
     ],
     [
       "Vale.AES.GHash.ghash_incremental_to_ghash",
@@ -164,7 +164,7 @@
         "refinement_interpretation_Tm_refine_8d65e998a07dd53ec478e27017d9dba5"
       ],
       0,
-      "70afb7a13a462279581ee898f8888651"
+      "7493e98aa96b41a2334cb71aeff6049d"
     ],
     [
       "Vale.AES.GHash.lemma_hash_append3",
@@ -192,7 +192,7 @@
         "typing_Vale.Def.Types_s.quad32", "unit_typing"
       ],
       0,
-      "bd3c7864d4bc7fd2c4153d8c0dc5a1f7"
+      "e0a2daf52e36b9e214e87f1239c03a96"
     ],
     [
       "Vale.AES.GHash.ghash_incremental_bytes_pure_no_extra",
@@ -217,25 +217,68 @@
         "typing_FStar.Seq.Base.length"
       ],
       0,
-      "8e8a7d4db7f8b1488af970f6ed0e2018"
+      "6e6f5bfd047d13b72cb67ed12c1916cb"
     ],
     [
       "Vale.AES.GHash.lemma_ghash_incremental_bytes_extra_helper",
       1,
       1,
       0,
-      [ "@query" ],
+      [
+        "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565",
+        "Prims_pretyping_f8666440faa91836cc5a13998af863fc", "b2t_def",
+        "equation_Prims.nat", "equation_Prims.squash",
+        "equation_Vale.Def.Types_s.quad32",
+        "equation_Vale.Def.Words_s.nat32", "equation_Vale.Def.Words_s.nat8",
+        "fuel_guarded_inversion_Vale.Def.Words_s.four",
+        "function_token_typing_Prims.__cache_version_number__",
+        "int_inversion", "l_and-interp",
+        "lemma_Vale.Def.Types_s.le_seq_quad32_to_bytes_length",
+        "primitive_Prims.op_Equality", "primitive_Prims.op_LessThan",
+        "primitive_Prims.op_LessThanOrEqual",
+        "primitive_Prims.op_disEquality",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_8d65e998a07dd53ec478e27017d9dba5",
+        "refinement_interpretation_Tm_refine_aca10fb50cc7162d8b55c168416f714b",
+        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "typing_Vale.Def.Types_s.le_quad32_to_bytes", "unit_typing"
+      ],
       0,
-      "1c96860b48d0bb9f072120ac77ada8aa"
+      "24cd16437c5dce6dc223178380dcd6e0"
     ],
     [
       "Vale.AES.GHash.lemma_ghash_incremental_bytes_extra_helper_alt",
       1,
       1,
       0,
-      [ "@query" ],
+      [
+        "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565",
+        "Prims_pretyping_f8666440faa91836cc5a13998af863fc", "b2t_def",
+        "equation_Prims.nat", "equation_Prims.squash",
+        "equation_Vale.Def.Types_s.quad32",
+        "equation_Vale.Def.Words_s.nat32", "equation_Vale.Def.Words_s.nat8",
+        "fuel_guarded_inversion_Vale.Def.Words_s.four",
+        "function_token_typing_Prims.__cache_version_number__",
+        "function_token_typing_Vale.Def.Words_s.nat32", "int_inversion",
+        "int_typing", "kinding_Vale.Def.Words_s.four@tok", "l_and-interp",
+        "lemma_FStar.Seq.Base.lemma_create_len",
+        "lemma_FStar.Seq.Base.lemma_len_append",
+        "lemma_Vale.Def.Types_s.le_seq_quad32_to_bytes_length",
+        "primitive_Prims.op_Addition", "primitive_Prims.op_LessThan",
+        "primitive_Prims.op_LessThanOrEqual",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_8d65e998a07dd53ec478e27017d9dba5",
+        "refinement_interpretation_Tm_refine_aca10fb50cc7162d8b55c168416f714b",
+        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "typing_FStar.Seq.Base.append", "typing_FStar.Seq.Base.create",
+        "typing_Vale.Def.Types_s.le_quad32_to_bytes", "unit_typing"
+      ],
       0,
-      "6bfb4e2ca7268094e41aaf5adb78c6eb"
+      "43b4b20e1a08d13d4a89cc7ab5de16fe"
     ],
     [
       "Vale.AES.GHash.lemma_ghash_registers",
@@ -258,7 +301,7 @@
         "unit_typing"
       ],
       0,
-      "db8852907e20d761ddc0f625e56b9349"
+      "44b7d05ee3fd8c889b5108350ba546a6"
     ]
   ]
 ]

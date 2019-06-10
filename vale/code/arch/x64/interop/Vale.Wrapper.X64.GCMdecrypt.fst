@@ -7,7 +7,9 @@ module V = Vale.X64.Decls
 open Vale.SHA.Simplify_Sha
 open Vale.AES.Gcm_simplify
 open Vale.AES.GCM_helpers
-open Vale.Lib.Workarounds
+
+let wrap_slice (#a:Type0) (s:Seq.seq a) (i:int) : Seq.seq a =
+  Seq.slice s 0 (if 0 <= i && i <= Seq.length s then i else 0)
 
 #set-options "--z3rlimit 200 --max_fuel 0 --max_ifuel 0"
 
@@ -63,14 +65,14 @@ val gcm128_decrypt_stdcall':
       B.modifies (B.loc_buffer out_b) h0 h1 /\
 
       (let iv = seq_uint8_to_seq_nat8 (B.as_seq h0 iv_b) in
-       let cipher = slice_work_around (seq_uint8_to_seq_nat8 (B.as_seq h0 cipher_b)) (UInt64.v cipher_num)  in
-       let auth = slice_work_around (seq_uint8_to_seq_nat8 (B.as_seq h0 auth_b)) (UInt64.v auth_num)  in
+       let cipher = wrap_slice (seq_uint8_to_seq_nat8 (B.as_seq h0 cipher_b)) (UInt64.v cipher_num)  in
+       let auth = wrap_slice (seq_uint8_to_seq_nat8 (B.as_seq h0 auth_b)) (UInt64.v auth_num)  in
        let tag = seq_uint8_to_seq_nat8 (B.as_seq h0 tag_b) in
        4096 * Seq.length cipher < pow2_32 /\
        4096 * Seq.length auth < pow2_32 /\ (
        let plain, result = gcm_decrypt_LE AES_128 (seq_nat32_to_seq_nat8_LE (Ghost.reveal key)) iv cipher auth tag in
        Seq.equal plain
-         (slice_work_around (seq_uint8_to_seq_nat8 (B.as_seq h1 out_b)) (UInt64.v cipher_num)) /\
+         (wrap_slice (seq_uint8_to_seq_nat8 (B.as_seq h1 out_b)) (UInt64.v cipher_num)) /\
        (UInt64.v r = 0) == result))
     )
 
@@ -185,14 +187,14 @@ val gcm256_decrypt_stdcall':
       B.modifies (B.loc_buffer out_b) h0 h1 /\
 
       (let iv = seq_uint8_to_seq_nat8 (B.as_seq h0 iv_b) in
-       let cipher = slice_work_around (seq_uint8_to_seq_nat8 (B.as_seq h0 cipher_b)) (UInt64.v cipher_num)  in
-       let auth = slice_work_around (seq_uint8_to_seq_nat8 (B.as_seq h0 auth_b)) (UInt64.v auth_num)  in
+       let cipher = wrap_slice (seq_uint8_to_seq_nat8 (B.as_seq h0 cipher_b)) (UInt64.v cipher_num)  in
+       let auth = wrap_slice (seq_uint8_to_seq_nat8 (B.as_seq h0 auth_b)) (UInt64.v auth_num)  in
        let tag = seq_uint8_to_seq_nat8 (B.as_seq h0 tag_b) in
        4096 * Seq.length cipher < pow2_32 /\
        4096 * Seq.length auth < pow2_32 /\ (
        let plain, result = gcm_decrypt_LE AES_256 (seq_nat32_to_seq_nat8_LE (Ghost.reveal key)) iv cipher auth tag in
        Seq.equal plain
-         (slice_work_around (seq_uint8_to_seq_nat8 (B.as_seq h1 out_b)) (UInt64.v cipher_num)) /\
+         (wrap_slice (seq_uint8_to_seq_nat8 (B.as_seq h1 out_b)) (UInt64.v cipher_num)) /\
        (UInt64.v r = 0) == result))
     )
 
@@ -303,10 +305,10 @@ let gcm128_decrypt_stdcall key cipher_b cipher_len auth_b auth_len iv_b out_b ta
 
   let h0 = get() in
   assert (Seq.equal
-    (slice_work_around (seq_uint8_to_seq_nat8 (B.as_seq h0 cipher_extra)) (UInt64.v cipher_len))
+    (wrap_slice (seq_uint8_to_seq_nat8 (B.as_seq h0 cipher_extra)) (UInt64.v cipher_len))
     (seq_uint8_to_seq_nat8 (B.as_seq h0 cipher_b)));
   assert (Seq.equal
-    (slice_work_around (seq_uint8_to_seq_nat8 (B.as_seq h0 auth_extra)) (UInt64.v auth_len))
+    (wrap_slice (seq_uint8_to_seq_nat8 (B.as_seq h0 auth_extra)) (UInt64.v auth_len))
     (seq_uint8_to_seq_nat8 (B.as_seq h0 auth_b)));
 
   let x = gcm128_decrypt_stdcall' key cipher_extra cipher_len auth_extra auth_len iv_b out_extra tag_b keys_b in
@@ -315,7 +317,7 @@ let gcm128_decrypt_stdcall key cipher_b cipher_len auth_b auth_len iv_b out_b ta
 
   let h1 = get() in
   assert (Seq.equal
-    (slice_work_around (seq_uint8_to_seq_nat8 (B.as_seq h1 out_extra)) (UInt64.v cipher_len))
+    (wrap_slice (seq_uint8_to_seq_nat8 (B.as_seq h1 out_extra)) (UInt64.v cipher_len))
     (seq_uint8_to_seq_nat8 (B.as_seq h1 out_b)));
 
   assert (let iv = seq_uint8_to_seq_nat8 (B.as_seq h0 iv_b) in
@@ -357,10 +359,10 @@ let gcm256_decrypt_stdcall key cipher_b cipher_len auth_b auth_len iv_b out_b ta
 
   let h0 = get() in
   assert (Seq.equal
-    (slice_work_around (seq_uint8_to_seq_nat8 (B.as_seq h0 cipher_extra)) (UInt64.v cipher_len))
+    (wrap_slice (seq_uint8_to_seq_nat8 (B.as_seq h0 cipher_extra)) (UInt64.v cipher_len))
     (seq_uint8_to_seq_nat8 (B.as_seq h0 cipher_b)));
   assert (Seq.equal
-    (slice_work_around (seq_uint8_to_seq_nat8 (B.as_seq h0 auth_extra)) (UInt64.v auth_len))
+    (wrap_slice (seq_uint8_to_seq_nat8 (B.as_seq h0 auth_extra)) (UInt64.v auth_len))
     (seq_uint8_to_seq_nat8 (B.as_seq h0 auth_b)));
 
   let x = gcm256_decrypt_stdcall' key cipher_extra cipher_len auth_extra auth_len iv_b out_extra tag_b keys_b in
@@ -369,7 +371,7 @@ let gcm256_decrypt_stdcall key cipher_b cipher_len auth_b auth_len iv_b out_b ta
 
   let h1 = get() in
   assert (Seq.equal
-    (slice_work_around (seq_uint8_to_seq_nat8 (B.as_seq h1 out_extra)) (UInt64.v cipher_len))
+    (wrap_slice (seq_uint8_to_seq_nat8 (B.as_seq h1 out_extra)) (UInt64.v cipher_len))
     (seq_uint8_to_seq_nat8 (B.as_seq h1 out_b)));
 
   assert (let iv = seq_uint8_to_seq_nat8 (B.as_seq h0 iv_b) in

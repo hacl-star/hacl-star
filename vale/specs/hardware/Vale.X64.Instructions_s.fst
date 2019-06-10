@@ -10,11 +10,11 @@ let ins_Cmovc64 = make_ins (fun dst src -> print_s "cmovc" [P64 dst; P64 src])
 let ins_Add64 = make_ins (fun dst src -> print_s "add" [P64 dst; P64 src])
 
 let ins_AddLea64 =
-  make_ins (fun dst src1 src2 ->
+  make_ins (fun (dst src1 src2:operand64) ->
     let m =
       match (src1, src2) with
-      | (OReg r1, OConst i2) -> MReg r1 i2
-      | (OReg r1, OReg r2) -> MIndex r1 1 r2 0
+      | (OReg r1, OConst i2) -> MReg (Reg 0 r1) i2
+      | (OReg r1, OReg r2) -> MIndex (Reg 0 r1) 1 (Reg 0 r2) 0
       | _ -> MConst pow2_128 // Shouldn't hit this, but if we do, assembler will complain
       in
     let m = (m, Public) in // taint is not actually printed; we're just using OMem for its printer
@@ -121,3 +121,4 @@ let ins_SHA256_rnds2 =
 let ins_SHA256_msg1 = make_ins (fun dst src -> print "sha256msg1" [PXmm dst; PXmm src])
 
 let ins_SHA256_msg2 = make_ins (fun dst src -> print "sha256msg2" [PXmm dst; PXmm src])
+

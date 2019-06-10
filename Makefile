@@ -64,10 +64,10 @@ endif
 ifeq (,$(wildcard $(VALE_HOME)/bin/vale.exe))
   $(error $$VALE_HOME/bin/vale.exe does not exist (VALE_HOME=$(VALE_HOME)))
 endif
-endif
 
 ifneq ($(shell cat $(VALE_HOME)/bin/.vale_version | tr -d '\r'),$(shell cat vale/.vale_version | tr -d '\r'))
   $(error this repository wants Vale $(shell cat vale/.vale_version) but in $$VALE_HOME I found $(shell cat $(VALE_HOME)/bin/.vale_version))
+endif
 endif
 
 # Backwards-compat, remove
@@ -100,7 +100,8 @@ all:
 	$(MAKE) all-staged
 
 all-unstaged: compile-compact compile-compact-msvc compile-compact-gcc \
-  compile-evercrypt-external-headers compile-compact-c89 compile-ccf
+  compile-evercrypt-external-headers compile-compact-c89 compile-ccf \
+  compile-portable
 
 # Automatic staging.
 %-staged:
@@ -121,7 +122,7 @@ test-c: $(subst .,_,$(patsubst %.fst,test-c-%,$(notdir $(wildcard code/tests/*.f
 test-ml: $(subst .,_,$(patsubst %.fst,test-ml-%,$(notdir $(wildcard specs/tests/*.fst))))
 
 test-benchmark: all-unstaged
-	$(MAKE) -C tests/benchmark all
+	#$(MAKE) -C tests/benchmark all
 
 # Not reusing the -staged automatic target so as to export NOSHORTLOG
 ci:
@@ -240,7 +241,7 @@ VALE_FSTS = $(call to-obj-dir,$(VAF_AS_FSTS))
 # this is only correct in the second stage of the build.
 FSTAR_ROOTS = $(wildcard $(addsuffix /*.fsti,$(ALL_HACL_DIRS)) $(addsuffix /*.fst,$(ALL_HACL_DIRS))) \
   $(FSTAR_HOME)/ulib/LowStar.Endianness.fst \
-  $(wildcard obj/*.fst) $(wildcard obj/*.fsti) # these two empty during the first stage
+  $(wildcard $(VALE_FSTS)) # empty during the first stage
 
 # We currently force regeneration of three depend files. This is long.
 
@@ -376,26 +377,21 @@ VALE_FSTAR_FLAGS=$(VALE_FSTAR_FLAGS_NOSMT) \
 # assignments.
 only-for = $(call to-obj-dir,$(filter $1,$(addsuffix .checked,$(FSTAR_ROOTS) $(VAF_AS_FSTS))))
 
-# By default Vale files don't use two phase tc
 $(call only-for,$(HACL_HOME)/vale/%.checked): \
-  FSTAR_FLAGS=$(VALE_FSTAR_FLAGS) --use_two_phase_tc false
+  FSTAR_FLAGS=$(VALE_FSTAR_FLAGS)
 
-# Except for the files in specs/ and code/
 $(call only-for,$(HACL_HOME)/vale/specs/%.checked): \
   FSTAR_FLAGS=$(VALE_FSTAR_FLAGS)
 $(call only-for,$(HACL_HOME)/vale/code/%.checked): \
   FSTAR_FLAGS=$(VALE_FSTAR_FLAGS)
 
-# Except for the interop files, which apparently are ok with two phase TC.
 $(call only-for,$(HACL_HOME)/vale/code/arch/x64/interop/%.checked): \
   FSTAR_FLAGS=$(shell echo $(VALE_FSTAR_FLAGS_NOSMT) | \
     sed 's/--z3cliopt smt.arith.nl=false//; \
       s/--z3cliopt smt.QI.EAGER_THRESHOLD=100//')
 
-# Now the fst files coming from vaf files, which also don't work with two
-# phase tc (VALE_FSTS is of the form obj/foobar.fst).
 $(addsuffix .checked,$(VALE_FSTS)): \
-  FSTAR_FLAGS=$(VALE_FSTAR_FLAGS) --use_two_phase_tc false
+  FSTAR_FLAGS=$(VALE_FSTAR_FLAGS)
 
 # Then a series of individual overrides.
 obj/Vale.Interop.fst.checked: \
@@ -688,7 +684,9 @@ DEFAULT_FLAGS_NO_TESTS	=\
   -fparentheses -fno-shadow -fcurly-braces \
   -bundle WasmSupport
 
-DEFAULT_FLAGS = $(DEFAULT_FLAGS_NO_TESTS) -bundle Test,Test.*,Hacl.Test.*
+OPT_FLAGS = -ccopts -march=native,-mtune=native
+
+DEFAULT_FLAGS = $(DEFAULT_FLAGS_NO_TESTS) -bundle Test,Test.*,Hacl.Test.* $(OPT_FLAGS)
 
 # Should be fixed by having KreMLin better handle imported names
 WASM_STANDALONE=Prims LowStar.Endianness C.Endianness \
@@ -767,7 +765,9 @@ dist/ccf/Makefile.basic: \
     -bundle '\*[rename=EverCrypt_Misc]'
 
 dist/wasm/Makefile.basic: KRML_EXTRA=$(WASM_FLAGS)
-dist/wasm/Makefile.basic: DEFAULT_FLAGS=$(DEFAULT_FLAGS_NO_TESTS)
+dist/wasm/Makefile.basic: DEFAULT_FLAGS=$(DEFAULT_FLAGS_NO_TESTS) $(OPT_FLAGS)
+
+dist/portable/Makefile.basic: OPT_FLAGS=-ccopts -mtune=generic
 
 # OpenSSL and BCrypt disabled
 ifeq ($(EVERCRYPT_CONFIG),everest)

@@ -15,8 +15,8 @@ open Vale.X64.Machine_s
 open Vale.X64.State
 open Vale.X64.Decls
 open Vale.X64.QuickCode
-unfold let memory = Vale.X64.Memory.mem // avoid conflict with "var{...} mem" vs. "mem" from X64.Memory
-unfold let stack_t = Vale.X64.Stack_i.stack // avoid conflict with "var{...} stack" vs. "stack" from X64.Stack_i
+unfold let vale_heap = Vale.X64.Memory.vale_heap
+unfold let vale_stack = Vale.X64.Stack_i.vale_stack
 open Vale.X64.CPU_Features_s
 #endverbatim
 
@@ -36,29 +36,29 @@ friend Vale.X64.Decls
 
 #reset-options "--initial_fuel 5 --max_fuel 5 --max_ifuel 2 --z3rlimit 20"
 
-type memory:Type(1) := Vale.X64.Memory.mem;
-type stack_t:Type(1) := Vale.X64.Stack_i.stack;
+type vale_heap:Type(1) := Vale.X64.Memory.vale_heap;
+type vale_stack:Type(1) := Vale.X64.Stack_i.vale_stack;
 
 var ok:bool {:state ok()};
-var rax:nat64 {:state reg(rRax)};
-var rbx:nat64 {:state reg(rRbx)};
-var rcx:nat64 {:state reg(rRcx)};
-var rdx:nat64 {:state reg(rRdx)};
-var rsi:nat64 {:state reg(rRsi)};
-var rdi:nat64 {:state reg(rRdi)};
-var rbp:nat64 {:state reg(rRbp)};
-var rsp:nat64 {:state reg(rRsp)};
-var r8:nat64  {:state reg(rR8)};
-var r9:nat64  {:state reg(rR9)};
-var r10:nat64 {:state reg(rR10)};
-var r11:nat64 {:state reg(rR11)};
-var r12:nat64 {:state reg(rR12)};
-var r13:nat64 {:state reg(rR13)};
-var r14:nat64 {:state reg(rR14)};
-var r15:nat64 {:state reg(rR15)};
+var rax:nat64 {:state reg64(rRax)};
+var rbx:nat64 {:state reg64(rRbx)};
+var rcx:nat64 {:state reg64(rRcx)};
+var rdx:nat64 {:state reg64(rRdx)};
+var rsi:nat64 {:state reg64(rRsi)};
+var rdi:nat64 {:state reg64(rRdi)};
+var rbp:nat64 {:state reg64(rRbp)};
+var rsp:nat64 {:state reg64(rRsp)};
+var r8:nat64  {:state reg64(rR8)};
+var r9:nat64  {:state reg64(rR9)};
+var r10:nat64 {:state reg64(rR10)};
+var r11:nat64 {:state reg64(rR11)};
+var r12:nat64 {:state reg64(rR12)};
+var r13:nat64 {:state reg64(rR13)};
+var r14:nat64 {:state reg64(rR14)};
+var r15:nat64 {:state reg64(rR15)};
 var efl:nat64 {:state flags()};
-var mem:memory {:state mem()};
-var stack:stack_t {:state stack()};
+var mem:vale_heap {:state mem()};
+var stack:vale_stack {:state stack()};
 var memTaint:memtaint {:state memTaint()};
 var stackTaint:memtaint {:state stackTaint()};
 
@@ -74,17 +74,6 @@ operand_type Mem(in base:reg64, inline offset:int, ghost b:buffer64, ghost index
 operand_type Stack(in base:reg64, inline offset:int, inline t:taint):int;
 operand_type dst_opr64:nat64 @ va_operand := reg_opr64 | Mem | Stack;
 operand_type opr64:nat64 @ va_operand := dst_opr64 | const;
-
-// add {:typecheck false} attr because Type0 is not defined. (TODO: get rid of this)
-procedure AssertQuickType(ghost p:Type0) returns(ghost u:squash(p))
-    {:public}
-    {:quick exportOnly}
-    {:typecheck false}
-    requires
-        p;
-{
-    u := tuple();
-}
 
 procedure Mov64(inout dst:dst_opr64, in src:opr64)
     {:public}
@@ -139,6 +128,20 @@ procedure AddLea64(out dst:dst_opr64, in src1:opr64, in src2:opr64)
         src1 + src2 < pow2_64;
     ensures
         dst == old(src1) + old(src2);
+{
+}
+
+procedure Adc64(inout dst:dst_opr64, in src:opr64)
+    {:public}
+    {:quick exportOnly}
+    {:instruction mk_ins(make_instr(I.ins_AddCarry64, dst, src))}
+    modifies
+        efl;
+    requires
+        src + dst + 1 < pow2_64;
+    ensures
+        dst == old(dst + src + (if cf(efl) then 1 else 0));
+        cf(efl) == old(dst + src + (if cf(efl) then 1 else 0)) >= pow2_64;
 {
 }
 
@@ -231,7 +234,7 @@ let lemma_fundamental_div_mod (a b:nat64) :
 
 #reset-options "--initial_fuel 5 --max_fuel 5 --max_ifuel 2 --z3rlimit 20"
 
-ghost procedure lemma_fundamental_div_mod(ghost a:nat64, ghost b:nat64) extern;
+ghost procedure lemma_fundamental_div_mod(ghost a:nat64, ghost b:nat64) {:infer_spec} extern;
 
 procedure Mul64Wrap(in src:opr64)
     {:public}
@@ -260,8 +263,8 @@ procedure Mulx64(out dst_hi:dst_opr64, out dst_lo:dst_opr64, in src:opr64)
     lemma_fundamental_div_mod(old(rdx), old(src));
 }
 
-ghost procedure lemma_mul_nat(ghost x:nat, ghost y:nat) extern;
-ghost procedure lemma_mul_in_bounds(ghost a:nat64, ghost b:nat64) extern;
+ghost procedure lemma_mul_nat(ghost x:nat, ghost y:nat) {:infer_spec} extern;
+ghost procedure lemma_mul_in_bounds(ghost a:nat64, ghost b:nat64) {:infer_spec} extern;
 
 procedure IMul64(inout dst:dst_opr64, in src:opr64)
     {:public}
@@ -392,3 +395,13 @@ procedure Cpuid_Avx2()
     cpuid_features();
 }
 
+procedure Nat64Equal(out dst:reg_opr64, inout src:reg_opr64)
+    {:public}
+    {:quick exportOnly}
+    modifies efl;
+    ensures if old(src = 0xFFFFFFFFFFFFFFFF) then dst = 0 else dst = 1;
+{
+    Sub64Wrap(src, 0xFFFFFFFFFFFFFFFF);
+    Mov64(dst, 0);
+    Adc64(dst, 0);
+}

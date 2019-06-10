@@ -1,5 +1,5 @@
 [
-  ";L–×@7¹ä‡!E\u0017_£ûw",
+  "…gÖ\u000fECl¨}¸Eq\u0016i\u0004ø",
   [
     [
       "Vale.AES.X64.AESCTR.aes_reqs",
@@ -8,7 +8,7 @@
       0,
       [ "@query" ],
       0,
-      "152cd53b3652b84f1f076d7eac99237a"
+      "114d8bbcf6f73161ce5503062db2e4dd"
     ],
     [
       "Vale.AES.X64.AESCTR.va_lemma_aes_ctr_encrypt",
@@ -33,7 +33,7 @@
         "typing_tok_Vale.AES.AES_s.AES_128@tok"
       ],
       0,
-      "adc1908c94e24ab8fd69f270cea2df10"
+      "de9b2f9d3dff6b1fa28417eba03203eb"
     ],
     [
       "Vale.AES.X64.AESCTR.va_wp_aes_ctr_encrypt",
@@ -53,19 +53,19 @@
         "typing_tok_Vale.AES.AES_s.AES_128@tok"
       ],
       0,
-      "85e158036a692f774fa19e2e99713489"
+      "4fff53738df9138034420aecfc6b6163"
     ],
     [
-      "Vale.AES.X64.AESCTR.va_wpProof_aes_ctr_encrypt",
+      "Vale.AES.X64.AESCTR.va_quick_aes_ctr_encrypt",
       1,
       1,
       0,
       [
-        "@MaxIFuel_assumption", "@query", "equation_Prims.squash",
-        "refinement_interpretation_Tm_refine_8d65e998a07dd53ec478e27017d9dba5"
+        "@MaxIFuel_assumption", "@query",
+        "fuel_guarded_inversion_FStar.Pervasives.Native.tuple3"
       ],
       0,
-      "ab9bdf18d9db1e3d6b13df53147ab0f0"
+      "bbed257977a9ce1700f25141abd50680"
     ],
     [
       "Vale.AES.X64.AESCTR.va_lemma_aes_counter_loop",
@@ -73,32 +73,61 @@
       1,
       0,
       [
-        "@MaxIFuel_assumption", "@query", "equation_Vale.Def.Words_s.nat32",
-        "refinement_interpretation_Tm_refine_688cbddf4c54b66cd6132f77b47b3931"
+        "@MaxIFuel_assumption", "@query",
+        "constructor_distinct_Vale.Interop.Types.TUInt128",
+        "equality_tok_Vale.Interop.Types.TUInt128@tok",
+        "equality_tok_Vale.X64.Machine_s.Secret@tok",
+        "equation_Vale.Def.Words_s.nat32",
+        "equation_Vale.X64.Decls.validDstAddrs128",
+        "equation_Vale.X64.Memory.base_typ_as_vale_type",
+        "equation_Vale.X64.Memory.buffer128",
+        "lemma_Vale.X64.Memory.buffer_length_buffer_as_seq",
+        "primitive_Prims.op_LessThanOrEqual",
+        "proj_equation_Vale.X64.State.Mkvale_state_vs_heap",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_ae0c2bcc743c21956ba5d3248fe5251e",
+        "typing_Vale.X64.State.__proj__Mkvale_state__item__vs_heap",
+        "typing_tok_Vale.Interop.Types.TUInt128@tok"
       ],
       0,
-      "3937e9ccb73f72980df744b5314fe4ea"
+      "1f937e3c07a625dd2830d50223a521d2"
     ],
     [
       "Vale.AES.X64.AESCTR.va_wp_aes_counter_loop",
       1,
       1,
       0,
-      [ "@query" ],
+      [
+        "@query", "constructor_distinct_Vale.Interop.Types.TUInt128",
+        "equality_tok_Vale.Interop.Types.TUInt128@tok",
+        "equality_tok_Vale.X64.Machine_s.Secret@tok",
+        "equation_Vale.X64.Decls.va_upd_mem",
+        "equation_Vale.X64.Decls.validSrcAddrs128",
+        "equation_Vale.X64.Memory.base_typ_as_vale_type",
+        "equation_Vale.X64.Memory.buffer128",
+        "lemma_Vale.X64.Memory.buffer_length_buffer_as_seq",
+        "primitive_Prims.op_LessThanOrEqual",
+        "proj_equation_Vale.X64.State.Mkvale_state_vs_heap",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "projection_inverse_Vale.X64.State.Mkvale_state_vs_heap",
+        "typing_tok_Vale.Interop.Types.TUInt128@tok"
+      ],
       0,
-      "deb1930d96a7e6a8baa1dab86538f1de"
+      "29dcf8ff8745319502e9382d66788f7c"
     ],
     [
-      "Vale.AES.X64.AESCTR.va_wpProof_aes_counter_loop",
+      "Vale.AES.X64.AESCTR.va_quick_aes_counter_loop",
       1,
       1,
       0,
       [
-        "@MaxIFuel_assumption", "@query", "equation_Prims.squash",
-        "refinement_interpretation_Tm_refine_8d65e998a07dd53ec478e27017d9dba5"
+        "@MaxIFuel_assumption", "@query",
+        "fuel_guarded_inversion_FStar.Pervasives.Native.tuple3"
       ],
       0,
-      "6554bf394280fe61cc00af7a5c74b989"
+      "27eb0fb0a6f4374c980064aef3c15eee"
     ]
   ]
 ]

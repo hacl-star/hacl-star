@@ -21,14 +21,14 @@ type instr_operand_explicit = // flexible operand
   | IOp64 : instr_operand_explicit
   | IOpXmm : instr_operand_explicit
 type instr_operand_implicit = // hard-coded operand
-  | IOp64One : operand -> instr_operand_implicit
-  | IOpXmmOne : operand128 -> instr_operand_implicit
+  | IOp64One : o:operand64 -> instr_operand_implicit
+  | IOpXmmOne : o:operand128 -> instr_operand_implicit
   | IOpFlagsCf : instr_operand_implicit
   | IOpFlagsOf : instr_operand_implicit
 type instr_operand =
   | IOpEx : instr_operand_explicit -> instr_operand
   | IOpIm : instr_operand_implicit -> instr_operand
-let instr_out = instr_operand_inout * instr_operand
+let instr_out = instr_operand_inout & instr_operand
 
 irreducible let instr_attr = ()
 unfold let normal (#a:Type) (x:a) : a = norm [zeta; iota; delta_attr [`%instr_attr]] x
@@ -40,8 +40,8 @@ let arrow (a b:Type) = a -> b
 [@instr_attr] unfold let out (o:instr_operand) = (Out, o)
 [@instr_attr] unfold let op64 = IOpEx IOp64
 [@instr_attr] unfold let opXmm = IOpEx IOpXmm
-[@instr_attr] unfold let one64 (o:operand) = IOpIm (IOp64One o)
-[@instr_attr] unfold let one64Reg (r:reg) = IOpIm (IOp64One (OReg r))
+[@instr_attr] unfold let one64 (o:operand64) = IOpIm (IOp64One o)
+[@instr_attr] unfold let one64Reg (r:reg_64) = IOpIm (IOp64One (OReg r))
 [@instr_attr] unfold let oneXmm (o:operand128) = IOpIm (IOpXmmOne o)
 [@instr_attr] unfold let opFlagsCf = IOpIm IOpFlagsCf
 [@instr_attr] unfold let opFlagsOf = IOpIm IOpFlagsOf
@@ -86,7 +86,7 @@ let instr_eval_t (outs:list instr_out) (args:list instr_operand) : Type0 =
 [@instr_attr]
 let instr_operand_t (arg:instr_operand_explicit) : Type0 =
   match arg with
-  | IOp64 -> operand
+  | IOp64 -> operand64
   | IOpXmm -> operand128
 
 [@instr_attr]
@@ -109,13 +109,13 @@ so we have a separate data type to represent operand syntax.
 The print operands are listed in Intel/MASM order (destination operand listed first).
 *)
 type instr_print_operand =
-  | P8 : operand -> instr_print_operand
-  | P16 : operand -> instr_print_operand
-  | P32 : operand -> instr_print_operand
-  | P64 : operand -> instr_print_operand
+  | P8 : operand64 -> instr_print_operand
+  | P16 : operand64 -> instr_print_operand
+  | P32 : operand64 -> instr_print_operand
+  | P64 : operand64 -> instr_print_operand
   | PXmm : operand128 -> instr_print_operand
   | PImm : int -> instr_print_operand
-  | PShift : operand -> instr_print_operand
+  | PShift : operand64 -> instr_print_operand
 type instr_print_kind =
   | POpcode
   | PSuffix // add suffix character to opcode for GCC/ATT syntax

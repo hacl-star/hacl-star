@@ -8,7 +8,6 @@ open Vale.AES.GHash_s
 open Vale.AES.GF128_s
 open Vale.AES.GCTR_s
 open Vale.AES.GCM_helpers
-open Vale.Lib.Workarounds
 open Vale.Lib.Seqs_s
 open Vale.Lib.Seqs
 open FStar.Seq
@@ -175,14 +174,14 @@ val lemma_ghash_incremental_bytes_extra_helper (h y_init y_mid y_final:quad32) (
              16 * (length input - 1) < num_bytes /\
              num_bytes % 16 <> 0 /\ //4096 * num_bytes < pow2_32 /\
              (let num_blocks = num_bytes / 16 in
-              let full_blocks = slice_work_around input num_blocks in
+              let full_blocks = slice input 0 num_blocks in
               y_mid = ghash_incremental0 h y_init full_blocks /\
               final == index input num_blocks /\
-              (let padded_bytes = pad_to_128_bits (slice_work_around (le_quad32_to_bytes final) (num_bytes % 16)) in
+              (let padded_bytes = pad_to_128_bits (slice (le_quad32_to_bytes final) 0 (num_bytes % 16)) in
                length padded_bytes == 16 /\
                final_padded == le_bytes_to_quad32 padded_bytes /\
                y_final = ghash_incremental h y_mid (create 1 final_padded)))))
-  (ensures (let input_bytes = slice_work_around (le_seq_quad32_to_bytes input) num_bytes in
+  (ensures (let input_bytes = slice (le_seq_quad32_to_bytes input) 0 num_bytes in
             let padded_bytes = pad_to_128_bits input_bytes in
             let input_quads = le_bytes_to_seq_quad32 padded_bytes in
             length padded_bytes == 16 * length input_quads /\
@@ -194,11 +193,11 @@ val lemma_ghash_incremental_bytes_extra_helper_alt (h y_init y_mid y_final:quad3
              16 * (length input_blocks) < num_bytes /\
              num_bytes % 16 <> 0 /\
              y_mid = ghash_incremental0 h y_init input_blocks /\
-            (let padded_bytes = pad_to_128_bits (slice_work_around (le_quad32_to_bytes final) (num_bytes % 16)) in
+            (let padded_bytes = pad_to_128_bits (slice (le_quad32_to_bytes final) 0 (num_bytes % 16)) in
              length padded_bytes == 16 /\
              final_padded == le_bytes_to_quad32 padded_bytes /\
              y_final = ghash_incremental h y_mid (create 1 final_padded))))
-  (ensures (let input_bytes = slice_work_around (le_seq_quad32_to_bytes (append input_blocks (create 1 final))) num_bytes in
+  (ensures (let input_bytes = slice (le_seq_quad32_to_bytes (append input_blocks (create 1 final))) 0 num_bytes in
             let padded_bytes = pad_to_128_bits input_bytes in
             let input_quads = le_bytes_to_seq_quad32 padded_bytes in
             length padded_bytes == 16 * length input_quads /\
@@ -220,7 +219,7 @@ val lemma_ghash_registers (h y_init y0 y1 y2 y3 y4 r0 r1 r2 r3:quad32) (input:se
 (*
 val lemma_slice_extension (s:seq quad32) (bound:int) (q:quad32) : Lemma
   (requires 0 <= bound /\ bound + 1 <= length s /\
-            index_work_around_quad32 (slice_work_around s (bound + 1)) bound == q)
-  (ensures equal (slice_work_around s (bound + 1))
-                 (append (slice_work_around s bound) (create 1 q)))
+            index (slice s 0 (bound + 1)) bound == q)
+  (ensures equal (slice s 0 (bound + 1))
+                 (append (slice s 0 bound) (create 1 q)))
 *)

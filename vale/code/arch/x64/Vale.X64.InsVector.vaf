@@ -85,7 +85,7 @@ procedure Mem128_in(in base:reg64, inline offset:int, inline t:taint, ghost b:bu
 procedure Paddd(inout dst:xmm, in src:xmm)
     {:public}
     {:quick exportOnly}
-    {:instruction mk_ins(make_instr(I.ins_Paddd, OReg128(dst), OReg128(src)))}
+    {:instruction mk_ins(make_instr(I.ins_Paddd, OReg(dst), OReg(src)))}
     modifies efl;
     ensures
         dst == old(add_wrap_quad32(dst, src));
@@ -95,7 +95,7 @@ procedure Paddd(inout dst:xmm, in src:xmm)
 procedure VPaddd(out dst:xmm, in src1:xmm, in src2:xmm)
     {:public}
     {:quick exportOnly}
-    {:instruction mk_ins(make_instr(I.ins_VPaddd, OReg128(dst), OReg128(src1), OReg128(src2)))}
+    {:instruction mk_ins(make_instr(I.ins_VPaddd, OReg(dst), OReg(src1), OReg(src2)))}
     modifies efl;
     requires avx_enabled;
     ensures
@@ -106,7 +106,7 @@ procedure VPaddd(out dst:xmm, in src1:xmm, in src2:xmm)
 procedure Pxor(inout dst:xmm, in src:xmm)
     {:public}
     {:quick exportOnly}
-    {:instruction mk_ins(make_instr(I.ins_Pxor, OReg128(dst), OReg128(src)))}
+    {:instruction mk_ins(make_instr(I.ins_Pxor, OReg(dst), OReg(src)))}
     ensures
         dst == old(quad32_xor(dst, src));
 {
@@ -117,7 +117,7 @@ procedure Pxor(inout dst:xmm, in src:xmm)
 procedure Pand(inout dst:xmm, in src:opr128)
     {:public}
     {:quick exportOnly}
-    {:instruction mk_ins(make_instr(I.ins_Pand, OReg128(dst), src))}
+    {:instruction mk_ins(make_instr(I.ins_Pand, OReg(dst), src))}
     ensures
         dst == four_map2(fun(di:nat32, si:nat32) iand32(di, si), old(dst), old(src));
 {
@@ -126,7 +126,7 @@ procedure Pand(inout dst:xmm, in src:opr128)
 procedure VPxor(out dst:xmm, in src1:xmm, in src2:opr128)
     {:public}
     {:quick exportOnly}
-    {:instruction mk_ins(make_instr(I.ins_VPxor, OReg128(dst), OReg128(src1), src2))}
+    {:instruction mk_ins(make_instr(I.ins_VPxor, OReg(dst), OReg(src1), src2))}
     requires avx_enabled;
     ensures
         dst == old(quad32_xor(src1, src2));
@@ -136,7 +136,7 @@ procedure VPxor(out dst:xmm, in src1:xmm, in src2:opr128)
 procedure Pslld(inout dst:xmm, inline amt:int)
     {:public}
     {:quick exportOnly}
-    {:instruction mk_ins(make_instr(I.ins_Pslld(amt), OReg128(dst)))}
+    {:instruction mk_ins(make_instr(I.ins_Pslld(amt), OReg(dst)))}
     requires
         0 <= amt < 32;
     ensures
@@ -147,7 +147,7 @@ procedure Pslld(inout dst:xmm, inline amt:int)
 procedure Psrld(inout dst:xmm, inline amt:int)
     {:public}
     {:quick exportOnly}
-    {:instruction mk_ins(make_instr(I.ins_Psrld(amt), OReg128(dst)))}
+    {:instruction mk_ins(make_instr(I.ins_Psrld(amt), OReg(dst)))}
     requires
         0 <= amt < 32;
     ensures
@@ -157,7 +157,7 @@ procedure Psrld(inout dst:xmm, inline amt:int)
 
 procedure Psrldq(inout dst:xmm, inline amt:int)
     {:quick exportOnly}
-    {:instruction mk_ins(make_instr(I.ins_Psrldq(amt), OReg128(dst)))}
+    {:instruction mk_ins(make_instr(I.ins_Psrldq(amt), OReg(dst)))}
     requires
         0 <= amt < 16;
     ensures
@@ -172,7 +172,7 @@ procedure Psrldq(inout dst:xmm, inline amt:int)
 procedure Palignr4(inout dst:xmm, in src:xmm)
     {:public}
     {:quick exportOnly}
-    {:instruction mk_ins(make_instr(I.ins_Palignr(4), OReg128(dst), OReg128(src)))}
+    {:instruction mk_ins(make_instr(I.ins_Palignr(4), OReg(dst), OReg(src)))}
     modifies efl;
     ensures
         dst == old(Mkfour(src.lo1, src.hi2, src.hi3, dst.lo0));
@@ -182,7 +182,7 @@ procedure Palignr4(inout dst:xmm, in src:xmm)
 procedure Palignr8(inout dst:xmm, in src:xmm)
     {:public}
     {:quick exportOnly}
-    {:instruction mk_ins(make_instr(I.ins_Palignr(8), OReg128(dst), OReg128(src)))}
+    {:instruction mk_ins(make_instr(I.ins_Palignr(8), OReg(dst), OReg(src)))}
     modifies efl;
     ensures
         dst == old(Mkfour(src.hi2, src.hi3, dst.lo0, dst.lo1));
@@ -192,7 +192,7 @@ procedure Palignr8(inout dst:xmm, in src:xmm)
 procedure VPalignr8(out dst:xmm, in src1:xmm, in src2:xmm)
     {:public}
     {:quick exportOnly}
-    {:instruction mk_ins(make_instr(I.ins_VPalignr(8), OReg128(dst), OReg128(src1), OReg128(src2)))}
+    {:instruction mk_ins(make_instr(I.ins_VPalignr(8), OReg(dst), OReg(src1), OReg(src2)))}
     modifies efl;
     requires avx_enabled;
     ensures
@@ -200,10 +200,10 @@ procedure VPalignr8(out dst:xmm, in src1:xmm, in src2:xmm)
 {
 }
 
-procedure Shufpd(inout dst:xmm, in src:xmm, inline permutation:imm8)
+procedure Shufpd(inout dst:xmm, in src:xmm, inline permutation:nat8)
     {:public}
     {:quick exportOnly}
-    {:instruction mk_ins(make_instr(I.ins_Shufpd(permutation), OReg128(dst), OReg128(src)))}
+    {:instruction mk_ins(make_instr(I.ins_Shufpd(permutation), OReg(dst), OReg(src)))}
     requires permutation < 4;
     modifies efl;
     ensures
@@ -215,10 +215,10 @@ procedure Shufpd(inout dst:xmm, in src:xmm, inline permutation:imm8)
 {
 }
 
-procedure VShufpd(out dst:xmm, in src1:xmm, in src2:xmm, inline permutation:imm8)
+procedure VShufpd(out dst:xmm, in src1:xmm, in src2:xmm, inline permutation:nat8)
     {:public}
     {:quick exportOnly}
-    {:instruction mk_ins(make_instr(I.ins_VShufpd(permutation), OReg128(dst), OReg128(src1), OReg128(src2)))}
+    {:instruction mk_ins(make_instr(I.ins_VShufpd(permutation), OReg(dst), OReg(src1), OReg(src2)))}
     requires
         avx_enabled;
         permutation < 4;
@@ -235,7 +235,7 @@ procedure VShufpd(out dst:xmm, in src1:xmm, in src2:xmm, inline permutation:imm8
 procedure Pshufb(inout dst:xmm, in src:xmm)
     {:public}
     {:quick exportOnly}
-    {:instruction mk_ins(make_instr(I.ins_Pshufb, OReg128(dst), OReg128(src)))}
+    {:instruction mk_ins(make_instr(I.ins_Pshufb, OReg(dst), OReg(src)))}
     requires
         src == Mkfour(0x0C0D0E0F, 0x08090A0B, 0x04050607, 0x00010203);
     modifies efl;
@@ -247,7 +247,7 @@ procedure Pshufb(inout dst:xmm, in src:xmm)
 procedure VPshufb(out dst:xmm, in src1:xmm, in src2:xmm)
     {:public}
     {:quick exportOnly}
-    {:instruction mk_ins(make_instr(I.ins_VPshufb, OReg128(dst), OReg128(src1), OReg128(src2)))}
+    {:instruction mk_ins(make_instr(I.ins_VPshufb, OReg(dst), OReg(src1), OReg(src2)))}
     requires
         avx_enabled;
         src2 == Mkfour(0x0C0D0E0F, 0x08090A0B, 0x04050607, 0x00010203);
@@ -260,7 +260,7 @@ procedure VPshufb(out dst:xmm, in src1:xmm, in src2:xmm)
 procedure PshufbStable(inout dst:xmm, in src:xmm)
     {:public}
     {:quick exportOnly}
-    {:instruction mk_ins(make_instr(I.ins_Pshufb, OReg128(dst), OReg128(src)))}
+    {:instruction mk_ins(make_instr(I.ins_Pshufb, OReg(dst), OReg(src)))}
     requires
         src == Mkfour(0x00010203, 0x04050607, 0x08090A0B, 0x0C0D0E0F);
     modifies efl;
@@ -276,7 +276,7 @@ procedure PshufbStable(inout dst:xmm, in src:xmm)
 procedure PshufbDup(inout dst:xmm, in src:xmm)
     {:public}
     {:quick exportOnly}
-    {:instruction mk_ins(make_instr(I.ins_Pshufb, OReg128(dst), OReg128(src)))}
+    {:instruction mk_ins(make_instr(I.ins_Pshufb, OReg(dst), OReg(src)))}
     requires
         src == Mkfour(0x0C0D0E0F, 0x08090A0B, 0x0C0D0E0F, 0x08090A0B);
     modifies efl;
@@ -291,7 +291,7 @@ procedure PshufbDup(inout dst:xmm, in src:xmm)
 procedure Pshufb64(inout dst:xmm, in src:xmm)
     {:public}
     {:quick exportOnly}
-    {:instruction mk_ins(make_instr(I.ins_Pshufb, OReg128(dst), OReg128(src)))}
+    {:instruction mk_ins(make_instr(I.ins_Pshufb, OReg(dst), OReg(src)))}
     requires
         src == Mkfour(0x04050607, 0x00010203, 0x0C0D0E0F, 0x08090A0B);
     modifies efl;
@@ -306,7 +306,7 @@ procedure Pshufb64(inout dst:xmm, in src:xmm)
 /*
 procedure Pshufb(inout dst:xmm, in src:xmm)
     {:quick exportOnly}
-    {:instruction mk_ins(make_instr(I.ins_Pshufb, OReg128(dst), OReg128(src)))}
+    {:instruction mk_ins(make_instr(I.ins_Pshufb, OReg(dst), OReg(src)))}
     requires
         src == Mkfour(0x0C0D0E0F, 0x08090A0B, 0x04050607, 0x00010203) ||
         src == Mkfour(0x0C0D0E0F, 0x08090A0B, 0x0C0D0E0F, 0x08090A0B) ||
@@ -329,10 +329,10 @@ procedure Pshufb(inout dst:xmm, in src:xmm)
 }
 */
 
-procedure Pshufd(inout dst:xmm, in src:xmm, inline permutation:imm8)
+procedure Pshufd(inout dst:xmm, in src:xmm, inline permutation:nat8)
     {:public}
     {:quick exportOnly}
-    {:instruction mk_ins(make_instr(I.ins_Pshufd(permutation), OReg128(dst), OReg128(src)))}
+    {:instruction mk_ins(make_instr(I.ins_Pshufd(permutation), OReg(dst), OReg(src)))}
     ensures
         dst == old(Mkfour(
             select_word(src, byte_to_twobits(permutation).lo0),
@@ -345,7 +345,7 @@ procedure Pshufd(inout dst:xmm, in src:xmm, inline permutation:imm8)
 procedure Pcmpeqd(inout dst:xmm, in src:xmm)
     {:public}
     {:quick exportOnly}
-    {:instruction mk_ins(make_instr(I.ins_Pcmpeqd, OReg128(dst), OReg128(src)))}
+    {:instruction mk_ins(make_instr(I.ins_Pcmpeqd, OReg(dst), OReg(src)))}
     ensures
         dst == old(Mkfour(
             if src.lo0 = dst.lo0 then 0xFFFFFFFF else 0,
@@ -355,10 +355,10 @@ procedure Pcmpeqd(inout dst:xmm, in src:xmm)
 {
 }
 
-procedure Pextrq(out dst:dst_opr64, in src:xmm, inline index:imm8)
+procedure Pextrq(out dst:dst_opr64, in src:xmm, inline index:nat8)
     {:public}
     {:quick exportOnly}
-    {:instruction mk_ins(make_instr(I.ins_Pextrq(index), dst, OReg128(src)))}
+    {:instruction mk_ins(make_instr(I.ins_Pextrq(index), dst, OReg(src)))}
     requires
         index < 2;
     ensures
@@ -368,10 +368,10 @@ procedure Pextrq(out dst:dst_opr64, in src:xmm, inline index:imm8)
     Vale.Def.Opaque_s.reveal_opaque(hi64_def);
 }
 
-procedure Pinsrd(inout dst:xmm, in src:opr64, inline index:imm8)
+procedure Pinsrd(inout dst:xmm, in src:opr64, inline index:nat8)
     {:public}
     {:quick exportOnly}
-    {:instruction mk_ins(make_instr(I.ins_Pinsrd(index), OReg128(dst), src))}
+    {:instruction mk_ins(make_instr(I.ins_Pinsrd(index), OReg(dst), src))}
     requires
         src < pow2_32;
         index < 4;
@@ -380,7 +380,7 @@ procedure Pinsrd(inout dst:xmm, in src:opr64, inline index:imm8)
 {
 }
 
-procedure PinsrdImm(inout dst:xmm, inline immediate:nat32, inline index:imm8, out tmp:reg_opr64)
+procedure PinsrdImm(inout dst:xmm, inline immediate:nat32, inline index:nat8, out tmp:reg_opr64)
     {:public}
     {:quick exportOnly}
     requires
@@ -395,10 +395,10 @@ procedure PinsrdImm(inout dst:xmm, inline immediate:nat32, inline index:imm8, ou
 
 // TODO: get rid of this fuel
 #reset-options "--initial_fuel 2 --max_fuel 4 --max_ifuel 3 --z3rlimit 50"
-procedure Pinsrq(inout dst:xmm, in src:opr64, inline index:imm8)
+procedure Pinsrq(inout dst:xmm, in src:opr64, inline index:nat8)
     {:public}
     {:quick exportOnly}
-    {:instruction mk_ins(make_instr(I.ins_Pinsrq(index), OReg128(dst), src))}
+    {:instruction mk_ins(make_instr(I.ins_Pinsrq(index), OReg(dst), src))}
     requires
         index < 2;
     ensures
@@ -408,7 +408,7 @@ procedure Pinsrq(inout dst:xmm, in src:opr64, inline index:imm8)
     assert dst == insert_nat64(old(dst), src, #nat1(index));
 }
 
-procedure PinsrqImm(inout dst:xmm, inline immediate:nat64, inline index:imm8, out tmp:reg_opr64)
+procedure PinsrqImm(inout dst:xmm, inline immediate:nat64, inline index:nat8, out tmp:reg_opr64)
     {:public}
     {:quick exportOnly}
     requires
@@ -424,7 +424,7 @@ procedure PinsrqImm(inout dst:xmm, inline immediate:nat64, inline index:imm8, ou
 procedure VPslldq4(out dst:xmm, in src:xmm)
     {:public}
     {:quick exportOnly}
-    {:instruction mk_ins(make_instr(I.ins_VPslldq(4), OReg128(dst), OReg128(src)))}
+    {:instruction mk_ins(make_instr(I.ins_VPslldq(4), OReg(dst), OReg(src)))}
     requires avx_enabled;
     ensures
         dst == old(Mkfour(0, src.lo0, src.lo1, src.hi2));
@@ -434,7 +434,7 @@ procedure VPslldq4(out dst:xmm, in src:xmm)
 procedure Vpslldq8(out dst:xmm, in src:xmm)
     {:public}
     {:quick exportOnly}
-    {:instruction mk_ins(make_instr(I.ins_VPslldq(8), OReg128(dst), OReg128(src)))}
+    {:instruction mk_ins(make_instr(I.ins_VPslldq(8), OReg(dst), OReg(src)))}
     requires avx_enabled;
     ensures
         dst == old(Mkfour(0, 0, src.lo0, src.lo1));
@@ -444,7 +444,7 @@ procedure Vpslldq8(out dst:xmm, in src:xmm)
 procedure Vpsrldq8(out dst:xmm, in src:xmm)
     {:public}
     {:quick exportOnly}
-    {:instruction mk_ins(make_instr(I.ins_VPsrldq(8), OReg128(dst), OReg128(src)))}
+    {:instruction mk_ins(make_instr(I.ins_VPsrldq(8), OReg(dst), OReg(src)))}
     requires avx_enabled;
     ensures
         dst == old(Mkfour(src.hi2, src.hi3, 0, 0));
@@ -454,7 +454,7 @@ procedure Vpsrldq8(out dst:xmm, in src:xmm)
 procedure Mov128(inout dst:xmm, in src:xmm)
     {:public}
     {:quick exportOnly}
-    {:instruction mk_ins(make_instr(I.ins_Movdqu, OReg128(dst), OReg128(src)))}
+    {:instruction mk_ins(make_instr(I.ins_Movdqu, OReg(dst), OReg(src)))}
     ensures
         dst == old(src);
 {
@@ -465,7 +465,7 @@ procedure Load128_buffer(
         ghost b:buffer128, ghost index:int)
     {:public}
     {:quick exportOnly}
-    {:instruction mk_ins(make_instr(I.ins_Movdqu, OReg128(dst), OMem128(tuple(MReg(get_reg(src), offset), t))))}
+    {:instruction mk_ins(make_instr(I.ins_Movdqu, OReg(dst), OMem(tuple(MReg(get_reg(src), offset), t))))}
     reads
         mem; memTaint;
     requires
@@ -507,7 +507,7 @@ procedure Store128_buffer(
         in dst:reg_opr64, in src:xmm, inline offset:int, inline t:taint, ghost b:buffer128, ghost index:int)
     {:public}
     {:quick exportOnly}
-    {:instruction mk_ins(make_instr(I.ins_Movdqu, OMem128(tuple(MReg(get_reg(dst), offset), t)), OReg128(src)))}
+    {:instruction mk_ins(make_instr(I.ins_Movdqu, OMem(tuple(MReg(get_reg(dst), offset), t)), OReg(src)))}
     reads
         memTaint;
     modifies
@@ -633,23 +633,15 @@ procedure XmmEqual()
     Pextrq(tmp, x1, 0);
     let tmp1 := tmp;
     lemma_equality_check_helper(x1);
-    if (tmp == 0xFFFFFFFFFFFFFFFF) {
-        //assert old(x1.lo0 == x2.lo0 /\ x1.lo1 == x2.lo1);
-        Mov64(result, 0);
-    } else {
-        //assert old(x1.lo0 != x2.lo0) \/ (x1.lo1 != x2.lo1);
-        Mov64(result, 1);
-    }
+
+    Nat64Equal(result, tmp);
+
     let result1 := result;
     Pextrq(tmp, x1, 1);
     let tmp2 := tmp;
-    if (tmp == 0xFFFFFFFFFFFFFFFF) {
-        //assert old(x1.hi2 == x2.hi2 /\ x1.hi3 == x2.hi3);
-        Mov64(tmp, 0);
-    } else {
-        //assert old(x1.hi2 != x2.hi2) \/ (x1.hi3 != x2.hi3);
-        Mov64(tmp, 1);
-    }
+
+    Nat64Equal(tmp, tmp);
+
     Add64(result, tmp);
 //    assert tmp1 == lo64(x1);
 //    assert tmp2 == hi64(x1);

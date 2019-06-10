@@ -1,5 +1,5 @@
 [
-  "\u0007Zü¯ß\u0004ÿS\u0018†Ê¸ü\u0001=p",
+  "\u0004L¦\n\u0007•’QO\u001f £D€úv",
   [
     [
       "Vale.X64.Instructions_s.eval_Add64",
@@ -8,7 +8,7 @@
       0,
       [ "@query" ],
       0,
-      "6b278811c85e27536a3c27301a6aa4d9"
+      "00972aeba571de86f91891327dbabc24"
     ],
     [
       "Vale.X64.Instructions_s.eval_AddLea64",
@@ -17,7 +17,32 @@
       0,
       [ "@query" ],
       0,
-      "79a5668ae559357545c7f844790a29e6"
+      "5b055c010551d8552a0cfe1e999cd9fe"
+    ],
+    [
+      "Vale.X64.Instructions_s.ins_AddLea64",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565",
+        "equation_Prims.eqtype", "equation_Prims.nat",
+        "equation_Vale.Def.Words_s.nat64", "equation_Vale.Def.Words_s.natN",
+        "equation_Vale.X64.Machine_s.n_reg_files",
+        "equation_Vale.X64.Machine_s.n_regs",
+        "equation_Vale.X64.Machine_s.reg_64",
+        "function_token_typing_Prims.__cache_version_number__",
+        "function_token_typing_Prims.int",
+        "haseqTm_refine_1101de7a497235789e427aeb0d9938cc",
+        "haseqTm_refine_5514fbe9e08dfda40f950a7b9f1b2b98",
+        "haseqTm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_1101de7a497235789e427aeb0d9938cc",
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
+      ],
+      0,
+      "d029827ee448d31998f74186aa6e1a2f"
     ],
     [
       "Vale.X64.Instructions_s.eval_AddCarry64",
@@ -26,7 +51,7 @@
       0,
       [ "@query" ],
       0,
-      "4ff11d092cde6d03c08ec5c4e5cd520f"
+      "6e036ae404e45812108cde2722151149"
     ],
     [
       "Vale.X64.Instructions_s.eval_Adcx64_Adox64",
@@ -35,7 +60,7 @@
       0,
       [ "@query" ],
       0,
-      "850c075237a8d28ed5585222daf5fc1a"
+      "cff1a41d7c6dc934501fff0cc4f119b5"
     ],
     [
       "Vale.X64.Instructions_s.eval_Sub64",
@@ -44,7 +69,7 @@
       0,
       [ "@query" ],
       0,
-      "d96777f83bfc1633fdf4ce0ad16f66b5"
+      "f0c529d49729d04ccf2a207ed6f963ba"
     ],
     [
       "Vale.X64.Instructions_s.eval_Sbb64",
@@ -53,7 +78,7 @@
       0,
       [ "@query" ],
       0,
-      "3275f68cf5880bab3f39e601ceb90e9d"
+      "031cc843bd4fb0378ee77d8ad3a7fd49"
     ],
     [
       "Vale.X64.Instructions_s.eval_Mul64",
@@ -80,7 +105,7 @@
         "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-      "853eeb9298881670d3d9a4e7c3f4c325"
+      "2622b01618718c4ccc9235d5ed00f52c"
     ],
     [
       "Vale.X64.Instructions_s.eval_Mulx64",
@@ -107,7 +132,7 @@
         "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-      "4360d854da7bad603d6d2ddde255304e"
+      "fc410701214f67c17af33bf101433c9b"
     ],
     [
       "Vale.X64.Instructions_s.eval_IMul64",
@@ -133,7 +158,7 @@
         "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-      "9c98484790d63f896f2f462b6022e828"
+      "b1db03c8e4e7c4df908b8d1c0c6cdcd8"
     ],
     [
       "Vale.X64.Instructions_s.eval_Paddd",
@@ -142,7 +167,7 @@
       0,
       [ "@query" ],
       0,
-      "6f72cf2c90ba9dc590a62286f23a59dc"
+      "d34f61da480b6a835b69c7cc4607f911"
     ],
     [
       "Vale.X64.Instructions_s.eval_Psrldq",
@@ -170,7 +195,7 @@
         "typing_FStar.Seq.Base.length"
       ],
       0,
-      "14089ffe35823f6108ee3019cdefef43"
+      "27e620d227119c33bfc42f83efb88750"
     ],
     [
       "Vale.X64.Instructions_s.eval_Pcmpeqd",
@@ -189,7 +214,7 @@
         "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "907703b626ce4d1ef7eff8e562f0aa81"
+      "3491f5b6949a9f47d900296c2ce32d90"
     ],
     [
       "Vale.X64.Instructions_s.eval_Pextrq",
@@ -198,7 +223,7 @@
       0,
       [ "@query" ],
       0,
-      "00dfd70089b2dbf230814f780b28866a"
+      "04e4616126f0c32dd7064ff7931c2825"
     ],
     [
       "Vale.X64.Instructions_s.eval_Pinsrd",
@@ -207,7 +232,7 @@
       0,
       [ "@query" ],
       0,
-      "a1828b0ce1451cb2b536467c543d17de"
+      "d6384b285a079bba24f03af9f32a1842"
     ],
     [
       "Vale.X64.Instructions_s.eval_Pinsrq",
@@ -216,7 +241,7 @@
       0,
       [ "@query" ],
       0,
-      "d5383317b5b29ff409d5511ab34b35db"
+      "3678c4818b8f1be6dc0477bee8cca18c"
     ],
     [
       "Vale.X64.Instructions_s.eval_AESNI_keygen_assist",
@@ -230,7 +255,39 @@
         "refinement_interpretation_Tm_refine_5514fbe9e08dfda40f950a7b9f1b2b98"
       ],
       0,
-      "033317aa1393db0c43b816db076d91d4"
+      "680c5b08588e6e937181d99f1cec6b15"
+    ],
+    [
+      "Vale.X64.Instructions_s.ins_SHA256_rnds2",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.eqtype",
+        "equation_Prims.nat", "equation_Vale.X64.Machine_s.reg_xmm",
+        "function_token_typing_Prims.int",
+        "haseqTm_refine_1101de7a497235789e427aeb0d9938cc",
+        "haseqTm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
+      ],
+      0,
+      "9064730efb2584c2f5dc5e85a3704d87"
+    ],
+    [
+      "Vale.X64.Instructions_s.ins_SHA256_rnds2",
+      2,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.eqtype",
+        "equation_Prims.nat", "equation_Vale.X64.Machine_s.reg_xmm",
+        "function_token_typing_Prims.int",
+        "haseqTm_refine_1101de7a497235789e427aeb0d9938cc",
+        "haseqTm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
+      ],
+      0,
+      "4fc8db209c86f96a662e1803bb9c7fe3"
     ]
   ]
 ]

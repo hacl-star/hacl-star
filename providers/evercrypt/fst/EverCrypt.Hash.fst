@@ -74,7 +74,7 @@ let repr #a s h: GTot _ =
   let s = B.get h s 0 in
   B.as_seq h (p s)
 
-let repr_eq (#a:alg) (r1 r2: acc a) =
+let repr_eq (#a:alg) (r1 r2: Spec.Hash.Definitions.words_state a) =
   Seq.equal r1 r2
 
 let fresh_is_disjoint l1 l2 h0 h1 = ()
@@ -215,7 +215,7 @@ let update_last_st (#a:e_alg) =
     B.(modifies (loc_buffer p) h0 h1) /\
     (B.length last + Seq.length (Spec.Hash.PadFinish.pad a (v total_len))) % block_length a = 0 /\
     B.as_seq h1 p ==
-      compress_many (B.as_seq h0 p)
+      Spec.Hash.update_multi a (B.as_seq h0 p)
         (Seq.append (B.as_seq h0 last) (Spec.Hash.PadFinish.pad a (v total_len))))
 
 inline_for_extraction

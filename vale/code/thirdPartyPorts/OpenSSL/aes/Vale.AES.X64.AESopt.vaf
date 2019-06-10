@@ -18,7 +18,6 @@ include{:fstar}{:open} "Vale.Arch.Types"
 include{:fstar}{:open} "Vale.AES.AES_helpers"
 //include{:fstar}{:open} "Vale.Poly1305.Math"
 include{:fstar}{:open} "Vale.AES.GCM_helpers"
-include{:fstar}{:open} "Vale.Lib.Workarounds"
 include{:fstar}{:open} "Vale.AES.GCTR_s"
 include{:fstar}{:open} "Vale.AES.GCTR"
 include{:fstar}{:open} "Vale.Arch.TypesNative"
@@ -47,7 +46,6 @@ open Vale.Arch.Types
 open Vale.AES.AES_helpers
 //open Vale.Poly1305.Math    // For lemma_poly_bits64()
 open Vale.AES.GCM_helpers
-open Vale.Lib.Workarounds
 open Vale.AES.GCTR_s
 open Vale.AES.GCTR
 open Vale.Arch.TypesNative
@@ -57,7 +55,7 @@ open Vale.X64.CPU_Features_s
 #verbatim{:interface}
 let aes_reqs
   (alg:algorithm) (key:seq nat32) (round_keys:seq quad32) (keys_b:buffer128)
-  (key_ptr:int) (mem:memory) (memTaint:memtaint) : prop0
+  (key_ptr:int) (mem:vale_heap) (memTaint:memtaint) : prop0
   =
   aesni_enabled /\ avx_enabled /\
   alg = AES_128 /\
@@ -77,7 +75,7 @@ let aes_reqs
   buffer128_as_seq mem keys_b == round_keys
 #endverbatim
 function aes_reqs(alg:algorithm, key:seq(nat32), round_keys:seq(quad32), keys_b:buffer128,
-    key_ptr:int, mem:memory, memTaint:memtaint) : prop extern;
+    key_ptr:int, mem:vale_heap, memTaint:memtaint) : prop extern;
 
 ghost procedure finish_aes_encrypt_le(ghost alg:algorithm, ghost input_LE:quad32, ghost key:seq(nat32))
     requires
@@ -85,7 +83,7 @@ ghost procedure finish_aes_encrypt_le(ghost alg:algorithm, ghost input_LE:quad32
     ensures
         aes_encrypt_le(alg, key, input_LE) == cipher_opaque(alg, input_LE, key_to_round_keys_LE(alg, key));
 {
-    Vale.Def.Opaque_s.reveal_opaque(aes_encrypt_LE_def);
+    reveal aes_encrypt_le;
     Vale.Def.Opaque_s.reveal_opaque(cipher);
 }
 
@@ -898,7 +896,7 @@ procedure Loop6x_save_output(ghost count:nat, ghost out_b:buffer128)
 
     ensures
         modifies_buffer_specific128(out_b, old(mem), mem, count*6+0, count*6+5);
-        slice_work_around(buffer128_as_seq(mem, out_b), 6*count) == old(slice_work_around(buffer128_as_seq(mem, out_b), 6*count));
+        slice(buffer128_as_seq(mem, out_b), 0, 6 * count) == old(slice(buffer128_as_seq(mem, out_b), 0, 6 * count));
 
         buffer128_read(out_b, count*6 + 0, mem) == old(inout0);
         buffer128_read(out_b, count*6 + 1, mem) == old(inout1);
@@ -1122,7 +1120,7 @@ procedure Loop6x(
         mem; efl;
 
     requires
-        this.ok;
+        this.vs_ok;
         count >= 2;
         len >= 6;
         T2 == Mkfour(0, 0, 0, 0x1000000);
@@ -1170,7 +1168,7 @@ procedure Loop6x(
         gctr_partial_opaque(alg, 6*count, plain_quads, buffer128_as_seq(mem, out_b), key_words, ctr_BE_orig);
     ensures
         // Framing
-        this.ok;
+        this.vs_ok;
         rax == old(rax);
         rcx == old(rcx);
         rsp == old(rsp);
@@ -1319,7 +1317,7 @@ procedure Loop6x_loop(
         mem; efl;
 
     requires
-        this.ok;
+        this.vs_ok;
         count >= 2;
         6 <= len && count*6 + len + 6 < pow2_32;
         len % 6 == 0;
@@ -1371,7 +1369,7 @@ procedure Loop6x_loop(
         // GCTR progress
         gctr_partial_opaque(alg, 6*count, plain_quads, buffer128_as_seq(mem, out_b), key_words, ctr_BE_orig);
     ensures
-        this.ok;
+        this.vs_ok;
         // Framing
         modifies_buffer128_3(stack_b, out_b, iv_b, old(mem), mem);
         buffer_modifies_specific128(stack_b, old(mem), mem, 2, 7);
@@ -1413,7 +1411,7 @@ procedure Loop6x_loop(
     while (len > 0)
         invariant
             // Manual framing
-            this.ok;
+            this.vs_ok;
             rax == old(rax);
             rcx == old(rcx);
             rsp == old(rsp);
@@ -1879,7 +1877,7 @@ procedure AESNI_ctr32_6x_final(
 
     ensures
         modifies_buffer_specific128(out_b, old(mem), mem, count*6+0, count*6+5);
-        slice_work_around(buffer128_as_seq(mem, out_b), 6*count) == old(slice_work_around(buffer128_as_seq(mem, out_b), 6*count));
+        slice(buffer128_as_seq(mem, out_b), 0, 6 * count) == old(slice(buffer128_as_seq(mem, out_b), 0, 6 * count));
         outp == old(outp) + 0x60;
 
         buffer128_read(out_b, count*6 + 0, mem) == inout0;
@@ -1987,7 +1985,7 @@ procedure AESNI_ctr32_6x(
         gctr_partial_opaque(alg, 6*count, plain_quads, buffer128_as_seq(mem, out_b), key_words, ctr_BE_orig);
     ensures
         modifies_buffer_specific128(out_b, old(mem), mem, count*6+0, count*6+5);
-        slice_work_around(buffer128_as_seq(mem, out_b), 6*count) == old(slice_work_around(buffer128_as_seq(mem, out_b), 6*count));
+        slice(buffer128_as_seq(mem, out_b), 0, 6 * count) == old(slice(buffer128_as_seq(mem, out_b), 0, 6 * count));
          inp == old( inp) + 0x60;
         outp == old(outp) + 0x60;
 
@@ -2003,7 +2001,6 @@ procedure AESNI_ctr32_6x(
         // GCTR progress
         gctr_partial_opaque(alg, 6*(count+1), plain_quads, buffer128_as_seq(mem, out_b), key_words, ctr_BE_orig);
 {
-    assert {:quick_type} length(round_keys) == nr(alg)+1;
     let init0 := quad32_xor(reverse_bytes_quad32(inc32lite(ctr_BE, 0)), index(round_keys, 0));
     let init1 := quad32_xor(reverse_bytes_quad32(inc32lite(ctr_BE, 1)), index(round_keys, 0));
     let init2 := quad32_xor(reverse_bytes_quad32(inc32lite(ctr_BE, 2)), index(round_keys, 0));
@@ -2133,7 +2130,7 @@ procedure Encrypt_save_and_shuffle_output(ghost count:nat, ghost out_b:buffer128
 
     ensures
         modifies_buffer_specific128(out_b, old(mem), mem, count*6+0, count*6+5);
-        slice_work_around(buffer128_as_seq(mem, out_b), 6*count) == old(slice_work_around(buffer128_as_seq(mem, out_b), 6*count));
+        slice(buffer128_as_seq(mem, out_b), 0, 6 * count) == old(slice(buffer128_as_seq(mem, out_b), 0, 6 * count));
 
         buffer128_read(out_b, count*6 + 0, mem) == old(inout0);
         buffer128_read(out_b, count*6 + 1, mem) == old(inout1);
@@ -2289,7 +2286,6 @@ procedure AES_GCM_encrypt(
     let out_snapshot := buffer128_as_seq(mem, out_b);
 
     InitPshufbMask(Ii, r12);    // # borrow $Ii for .Lbswap_mask
-    assert {:quick_type} old(len) / 6 >= 3;
     let offset_in := #nat((old(len) / 6) - 1);
     Encrypt_save_and_shuffle_output(offset_in, out_b);
 
@@ -2299,7 +2295,6 @@ procedure AES_GCM_encrypt(
 
     gctr_partial_opaque_completed(alg, old(buffer128_as_seq(mem, in_b)), buffer128_as_seq(mem, out_b), key_words, ctr_BE);
     gctr_partial_to_full_basic(ctr_BE, old(buffer128_as_seq(mem, in_b)), alg, key_words, buffer128_as_seq(mem, out_b));
-    //assert {:quick_type} is_gctr_plain_LE(le_seq_quad32_to_bytes(old(buffer128_as_seq(mem, in_b)))) && is_aes_key_LE(alg, key_words);
     //assert le_seq_quad32_to_bytes(buffer128_as_seq(mem, out_b)) == gctr_encrypt_LE(ctr_BE, le_seq_quad32_to_bytes(old(buffer128_as_seq(mem, in_b))), alg, key_words);
 }
 

@@ -131,12 +131,10 @@ val lemma_sha256_msg2 (src1 src2:quad32) (t:counter) (block:block_w) : Lemma
              src2.hi3 == ws_opaque block (t-1)))
   (ensures sha256_msg2_spec src1 src2 == ws_quad32 t block)
 
-open Vale.Lib.Workarounds
-
 (* Abbreviations and lemmas for the code itself *)
 let k_reqs (k_seq:seq quad32) : prop0 =
   length k_seq == size_k_w_256 / 4 /\
-  (forall i . {:pattern (index_work_around_quad32 k_seq i)} 0 <= i /\ i < (size_k_w_256/4) ==>
+  (forall i . {:pattern (index k_seq i)} 0 <= i /\ i < (size_k_w_256/4) ==>
     (k_seq.[i]).lo0 == word_to_nat32 (k.[4 `op_Multiply` i]) /\
     (k_seq.[i]).lo1 == word_to_nat32 (k.[4 `op_Multiply` i + 1]) /\
     (k_seq.[i]).hi2 == word_to_nat32 (k.[4 `op_Multiply` i + 2]) /\
@@ -152,7 +150,7 @@ val lemma_quads_to_block (qs:seq quad32) : Lemma
   (requires length qs == 4)
   (ensures
   (let block = quads_to_block qs in
-            forall i . {:pattern (index_work_around_quad32 qs i)} 0 <= i /\ i < 4 ==>
+            forall i . {:pattern (index qs i)} 0 <= i /\ i < 4 ==>
               (qs.[i]).lo0 == ws_opaque block (4 `op_Multiply` i + 0) /\
               (qs.[i]).lo1 == ws_opaque block (4 `op_Multiply` i + 1) /\
               (qs.[i]).hi2 == ws_opaque block (4 `op_Multiply` i + 2) /\
@@ -163,7 +161,7 @@ val lemma_quads_to_block (qs:seq quad32) : Lemma
 let lemma_quads_to_block (qs:seq quad32) : Lemma
   (requires length qs == 4)
   (ensures (let block = quads_to_block qs in
-            forall i . {:pattern (index_work_around_quad32 qs i)} 0 <= i /\ i < 4 ==>
+            forall i . {:pattern (index qs i)} 0 <= i /\ i < 4 ==>
               (qs.[i]).lo0 == ws_opaque block (4 `op_Multiply` i + 0) /\
               (qs.[i]).lo1 == ws_opaque block (4 `op_Multiply` i + 1) /\
               (qs.[i]).hi2 == ws_opaque block (4 `op_Multiply` i + 2) /\

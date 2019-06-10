@@ -72,8 +72,7 @@ OBJS 		+= $(patsubst %.S,%.o,$(wildcard *-$(MARCH)$(VARIANT).S))
 
 include Makefile.basic
 
-CFLAGS		+= -Wno-parentheses -g -std=gnu11 \
-  -O3 -march=native -mtune=native
+CFLAGS		+= -Wno-parentheses -g -std=gnu11 -O3
 
 Hacl_Poly1305_128.o: CFLAGS += -mavx
 Hacl_Poly1305_256.o: CFLAGS += -mavx -mavx2

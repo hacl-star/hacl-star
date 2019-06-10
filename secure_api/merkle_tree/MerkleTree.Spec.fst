@@ -24,7 +24,7 @@ inline_for_extraction noextract
 val hash_size: nat
 // joonwonc: KreMLin can't extract `Spec.Hash.Definitions.hash_length hash_alg`
 inline_for_extraction noextract
-let hash_size = 32 
+let hash_size = 32
 
 // fournet: [tag] is a better name than [hash] for this
 // Thus `hash_raw` is bytes of length 32
@@ -35,9 +35,9 @@ let hash_raw = b:Spec.Hash.Definitions.bytes_hash hash_alg
 // Thus we can append `src1` and `src2` together to make it as a single block.
 val hash2_raw: hash_raw -> hash_raw -> GTot hash_raw
 let hash2_raw src1 src2 =
-  let acc = EHS.acc0 #hash_alg in
-  let acc = EHS.compress #hash_alg acc (S.append src1 src2) in
-  EHS.extract #hash_alg acc
+  let acc = Spec.Hash.init hash_alg in
+  let acc = Spec.Hash.update hash_alg acc (S.append src1 src2) in
+  Spec.Hash.PadFinish.finish hash_alg acc
 
 /// For simplicity, we will specify the root for a sequence of [i]
 /// tags where [i <= 2^n] as the root of a full binary tree with [2^n]

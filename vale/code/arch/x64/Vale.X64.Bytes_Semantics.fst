@@ -10,7 +10,7 @@ open Vale.Def.Types_s
 open Vale.Arch.Types
 open Vale.X64.Instruction_s
 
-let same_mem_get_heap_val (ptr:int) (mem1 mem2:heap) =
+let same_mem_get_heap_val ptr mem1 mem2 =
   reveal_opaque get_heap_val64_def;
   four_to_nat_8_injective ();
   two_to_nat_32_injective ()
@@ -58,7 +58,7 @@ let frame_update_heap128 ptr v mem =
   let mem4 = update_heap32 (ptr+12) v.hi3 mem3 in
   frame_update_heap32 (ptr+12) v.hi3 mem3
 
-let correct_update_get32 (ptr:int) (v:nat32) (mem:heap) : Lemma
+let correct_update_get32 (ptr:int) (v:nat32) (mem:machine_heap) : Lemma
   (get_heap_val32 ptr (update_heap32 ptr v mem) == v) =
   reveal_opaque get_heap_val32_def;
   reveal_opaque update_heap32_def
@@ -105,73 +105,73 @@ let same_mem_get_heap_val128 ptr mem1 mem2 =
 (* All the following lemmas prove that the domain of the bytes memory map remains invariant
 through execution *)
 
-let update_operand_flags_same_domains (dst:operand) (v:nat64) (s_orig s:machine_state) : Lemma
-  (let s1 = update_operand_preserve_flags'' dst v s_orig s in
-  Set.equal (Map.domain s.ms_mem) (Map.domain s_orig.ms_mem) ==>
-  Set.equal (Map.domain s.ms_mem) (Map.domain s1.ms_mem))
-  [SMTPat (update_operand_preserve_flags'' dst v s_orig s)]
+let update_operand_flags_same_domains (dst:operand64) (v:nat64) (s_orig s:machine_state) : Lemma
+  (let s1 = update_operand64_preserve_flags'' dst v s_orig s in
+  Set.equal (Map.domain s.ms_heap) (Map.domain s_orig.ms_heap) ==>
+  Set.equal (Map.domain s.ms_heap) (Map.domain s1.ms_heap))
+  [SMTPat (update_operand64_preserve_flags'' dst v s_orig s)]
   =
   FStar.Pervasives.reveal_opaque (`%valid_addr64) valid_addr64;
   match dst with
   | OMem _ -> reveal_opaque update_heap64_def
   | _ -> ()
 
-let update_operand_same_domains (dst:operand) (ins:ins) (v:nat64) (s:machine_state) : Lemma
-  (let s1 = update_operand' dst ins v s in
-  Set.equal (Map.domain s.ms_mem) (Map.domain s1.ms_mem))
-  [SMTPat (update_operand' dst ins v s)]
+let update_operand_same_domains (dst:operand64) (ins:ins) (v:nat64) (s:machine_state) : Lemma
+  (let s1 = update_operand64' dst ins v s in
+  Set.equal (Map.domain s.ms_heap) (Map.domain s1.ms_heap))
+  [SMTPat (update_operand64' dst ins v s)]
   =
   update_operand_flags_same_domains dst v s s
 
 #set-options "--z3rlimit 20"
 let update_operand128_flags_same_domains (o:operand128) (v:quad32) (s_orig s:machine_state) : Lemma
-  ( let s1 = update_mov128_op_preserve_flags'' o v s_orig s in
-    Set.equal (Map.domain s.ms_mem) (Map.domain s_orig.ms_mem) ==>
-    Set.equal (Map.domain s.ms_mem) (Map.domain s1.ms_mem))
-  [SMTPat (update_mov128_op_preserve_flags'' o v s_orig s)]
+  ( let s1 = update_operand128_preserve_flags'' o v s_orig s in
+    Set.equal (Map.domain s.ms_heap) (Map.domain s_orig.ms_heap) ==>
+    Set.equal (Map.domain s.ms_heap) (Map.domain s1.ms_heap))
+  [SMTPat (update_operand128_preserve_flags'' o v s_orig s)]
   =
   FStar.Pervasives.reveal_opaque (`%valid_addr128) valid_addr128;
   Vale.Def.Opaque_s.reveal_opaque update_heap128_def;
   match o with
-  | OMem128 (m, _) ->
+  | OMem (m, t) ->
       let ptr = eval_maddr m s_orig in
-      if not (valid_addr128 ptr s.ms_mem) then ()
+      if not (valid_addr128 ptr s.ms_heap) then ()
       else
         // This line is unusued, but needed
-        let s1 = update_mem128 ptr v s in
+        let s1 = update_mem128_and_taint ptr v s t in
         reveal_opaque update_heap32_def;
-        let mem = update_heap32 ptr v.lo0 s.ms_mem in
-        assert (Set.equal (Map.domain s.ms_mem) (Map.domain mem));
+        let mem = update_heap32 ptr v.lo0 s.ms_heap in
+        assert (Set.equal (Map.domain s.ms_heap) (Map.domain mem));
         let mem = update_heap32 (ptr+4) v.lo1 mem in
-        assert (Set.equal (Map.domain s.ms_mem) (Map.domain mem));
+        assert (Set.equal (Map.domain s.ms_heap) (Map.domain mem));
         let mem = update_heap32 (ptr+8) v.hi2 mem in
-        assert (Set.equal (Map.domain s.ms_mem) (Map.domain mem));
+        assert (Set.equal (Map.domain s.ms_heap) (Map.domain mem));
         let mem = update_heap32 (ptr+12) v.hi3 mem in
-        assert (Set.equal (Map.domain s.ms_mem) (Map.domain mem))
+        assert (Set.equal (Map.domain s.ms_heap) (Map.domain mem))
   | _ -> ()
 
 (* The following lemmas prove that the unspecified heap remains invariant through execution *)
 
 #push-options "--max_fuel 0 --max_ifuel 1 --initial_ifuel 1"
-let update_operand_flags_same_unspecified (dst:operand) (v:nat64) (s_orig s:machine_state) : Lemma
-  (let s1 = update_operand_preserve_flags'' dst v s_orig s in
-  Set.equal (Map.domain s.ms_mem) (Map.domain s_orig.ms_mem) ==>
-  (forall x.{:pattern (s.ms_mem.[x])} not (Map.contains s1.ms_mem x && Map.contains s.ms_mem x) ==> s1.ms_mem.[x] == s.ms_mem.[x]))
-  [SMTPat (update_operand_preserve_flags'' dst v s_orig s)]
+let update_operand_flags_same_unspecified (dst:operand64) (v:nat64) (s_orig s:machine_state) : Lemma
+  (let s1 = update_operand64_preserve_flags'' dst v s_orig s in
+  Set.equal (Map.domain s.ms_heap) (Map.domain s_orig.ms_heap) ==>
+  (forall x.{:pattern (s.ms_heap.[x])} not (Map.contains s1.ms_heap x && Map.contains s.ms_heap x) ==> s1.ms_heap.[x] == s.ms_heap.[x]))
+  [SMTPat (update_operand64_preserve_flags'' dst v s_orig s)]
   =
   match dst with
   | OMem _ -> reveal_opaque update_heap64_def
   | _ -> ()
 #pop-options
 
-let update_operand_same_unspecified (dst:operand) (ins:ins) (v:nat64) (s:machine_state) : Lemma
-  (let s1 = update_operand' dst ins v s in
-  forall x.{:pattern (s.ms_mem.[x])} not (Map.contains s1.ms_mem x && Map.contains s.ms_mem x) ==> s1.ms_mem.[x] == s.ms_mem.[x])
-  [SMTPat (update_operand' dst ins v s)]
+let update_operand_same_unspecified (dst:operand64) (ins:ins) (v:nat64) (s:machine_state) : Lemma
+  (let s1 = update_operand64' dst ins v s in
+  forall x.{:pattern (s.ms_heap.[x])} not (Map.contains s1.ms_heap x && Map.contains s.ms_heap x) ==> s1.ms_heap.[x] == s.ms_heap.[x])
+  [SMTPat (update_operand64' dst ins v s)]
   =
   update_operand_flags_same_unspecified dst v s s
 
-let update_heap32_same_unspecified (ptr:int) (v:nat32) (h:heap) : Lemma
+let update_heap32_same_unspecified (ptr:int) (v:nat32) (h:machine_heap) : Lemma
   (requires
     valid_addr ptr h /\ valid_addr (ptr+1) h /\
     valid_addr (ptr+2) h /\ valid_addr (ptr+3) h)
@@ -184,22 +184,22 @@ let update_heap32_same_unspecified (ptr:int) (v:nat32) (h:heap) : Lemma
   reveal_opaque update_heap32_def
 
 let update_operand128_flags_same_unspecified (o:operand128) (v:quad32) (s_orig s:machine_state) : Lemma
-  (let s1 = update_mov128_op_preserve_flags'' o v s_orig s in
-  Set.equal (Map.domain s.ms_mem) (Map.domain s_orig.ms_mem) ==>
-  (forall x.{:pattern (s.ms_mem.[x])} not (Map.contains s1.ms_mem x && Map.contains s.ms_mem x) ==> s1.ms_mem.[x] == s.ms_mem.[x]))
-  [SMTPat (update_mov128_op_preserve_flags'' o v s_orig s)]
+  (let s1 = update_operand128_preserve_flags'' o v s_orig s in
+  Set.equal (Map.domain s.ms_heap) (Map.domain s_orig.ms_heap) ==>
+  (forall x.{:pattern (s.ms_heap.[x])} not (Map.contains s1.ms_heap x && Map.contains s.ms_heap x) ==> s1.ms_heap.[x] == s.ms_heap.[x]))
+  [SMTPat (update_operand128_preserve_flags'' o v s_orig s)]
   =
   FStar.Pervasives.reveal_opaque (`%valid_addr128) valid_addr128;
   Vale.Def.Opaque_s.reveal_opaque update_heap128_def;
   match o with
-  | OMem128 (m, _) ->
+  | OMem (m, t) ->
       let ptr = eval_maddr m s_orig in
-      if not (valid_addr128 ptr s.ms_mem) then ()
+      if not (valid_addr128 ptr s.ms_heap) then ()
       else
         // This line is unusued, but needed
-        let s1 = update_mem128 ptr v s in
-        update_heap32_same_unspecified ptr v.lo0 s.ms_mem;
-        let mem = update_heap32 ptr v.lo0 s.ms_mem in
+        let s1 = update_mem128_and_taint ptr v s t in
+        update_heap32_same_unspecified ptr v.lo0 s.ms_heap;
+        let mem = update_heap32 ptr v.lo0 s.ms_heap in
         update_heap32_same_unspecified (ptr+4) v.lo1 mem;
         let mem = update_heap32 (ptr+4) v.lo1 mem in
         update_heap32_same_unspecified (ptr+8) v.hi2 mem;
@@ -213,11 +213,11 @@ let rec instr_write_outputs_bs_domains
     (outs:list instr_out) (args:list instr_operand)
     (vs:instr_ret_t outs) (oprs:instr_operands_t outs args) (s_orig s:machine_state)
   : Lemma
-    (requires Set.equal (Map.domain s_orig.ms_mem) (Map.domain s.ms_mem))
+    (requires Set.equal (Map.domain s_orig.ms_heap) (Map.domain s.ms_heap))
     (ensures (
       let s1 = instr_write_outputs outs args vs oprs s_orig s in
-      Set.equal (Map.domain s.ms_mem) (Map.domain s1.ms_mem) /\
-      (forall (x:int).{:pattern (s.ms_mem.[x])} not (Map.contains s1.ms_mem x) ==> s1.ms_mem.[x] == s.ms_mem.[x])
+      Set.equal (Map.domain s.ms_heap) (Map.domain s1.ms_heap) /\
+      (forall (x:int).{:pattern (s.ms_heap.[x])} not (Map.contains s1.ms_heap x) ==> s1.ms_heap.[x] == s.ms_heap.[x])
     ))
     [SMTPat (instr_write_outputs outs args vs oprs s_orig s)]
   =
@@ -243,28 +243,26 @@ let rec instr_write_outputs_bs_domains
 #set-options "--z3rlimit 30 --max_ifuel 1"
 
 let eval_ins_bs_domains (ins:ins) (s0:machine_state) : Lemma
-  (let s1 = run (untainted_eval_ins ins) s0 in
-  Set.equal (Map.domain s0.ms_mem) (Map.domain s1.ms_mem))
+  (let s1 = run (machine_eval_ins_st ins) s0 in
+  Set.equal (Map.domain s0.ms_heap) (Map.domain s1.ms_heap))
   =
-  let s1 = run (untainted_eval_ins ins) s0 in
+  let s1 = run (machine_eval_ins_st ins) s0 in
   match ins with
-  | _ -> assert (Set.equal (Map.domain s0.ms_mem) (Map.domain s1.ms_mem))
+  | _ -> assert (Set.equal (Map.domain s0.ms_heap) (Map.domain s1.ms_heap))
 
 #set-options "--z3rlimit 30"
 
 let eval_ins_domains i s0 =
-  let s = run (check (taint_match_ins i s0.ms_memTaint s0.ms_stackTaint)) s0 in
-  eval_ins_bs_domains i s
+  eval_ins_bs_domains i s0
 
 #set-options "--z3rlimit 30 --max_ifuel 2"
 let eval_ins_bs_same_unspecified (ins:ins) (s0:machine_state) : Lemma
-  (let s1 = run (untainted_eval_ins ins) s0 in
-   forall x. not (Map.contains s1.ms_mem x) ==> s1.ms_mem.[x] == s0.ms_mem.[x])
+  (let s1 = run (machine_eval_ins_st ins) s0 in
+   forall x. not (Map.contains s1.ms_heap x) ==> s1.ms_heap.[x] == s0.ms_heap.[x])
   =
   ()
 #set-options "--z3rlimit 30 --max_ifuel 1"
 
 let eval_ins_same_unspecified i s0 =
-  let s0 = {s0 with ms_trace = []} in
-  let s = run (check (taint_match_ins i s0.ms_memTaint s0.ms_stackTaint)) s0 in
+  let s = {s0 with ms_trace = []} in
   eval_ins_bs_same_unspecified i s

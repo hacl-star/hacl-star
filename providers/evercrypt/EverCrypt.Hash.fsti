@@ -33,27 +33,10 @@ type broken_alg = a:alg {a = MD5 \/ a = SHA1}
 /// based on those.
 type alg13 = a:alg { a=SHA2_256 \/ a=SHA2_384 \/ a=SHA2_512 }
 
-/// Alternative names from C??dric, to be aligned with naming conventions.
-noextract unfold
-let tagLength = Spec.Hash.Definitions.hash_length
-noextract unfold
-let blockLength = Spec.Hash.Definitions.block_length
-noextract unfold
-let maxLength = Spec.Hash.Definitions.max_input_length
-noextract unfold
-let spec = Spec.Hash.hash
-unfold
-let tagLen = Hacl.Hash.Definitions.hash_len
-unfold
-let blockLen = Hacl.Hash.Definitions.block_len
-noextract unfold
-let tag (a:alg) = s:Seq.seq UInt8.t { Seq.length s = tagLength a }
-
-/// miTLS relies quite a bit on this; providing a pattern for it
+/// No pattern (would fire too often)!
 let uint32_fits_maxLength (a: alg) (x: UInt32.t): Lemma
   (requires True)
-  (ensures UInt32.v x < maxLength a)
-  [ SMTPat (UInt32.v x < maxLength a) ]
+  (ensures UInt32.v x < max_input_length a)
 =
   assert_norm (pow2 32 < pow2 61);
   assert_norm (pow2 61 < pow2 125)
@@ -64,36 +47,14 @@ let uint32_fits_maxLength (a: alg) (x: UInt32.t): Lemma
 /// The hash state is kept in an accumulator, with
 /// - an initial value
 /// - an update function, adding a block of bytes;
-/// - an extract function, returning a hash tag.
+/// - an extract (also: "finish") function, returning a hash tag.
 ///
-/// Before hashing, some algorithm-specific padding and length
-/// encoding is appended to the input bytestring.
+/// Before hashing, some algorithm-specific padding and length encoding is
+/// appended to the input bytestring.
 ///
-/// This is not a general-purpose incremental specification, which
-/// would support adding text fragments of arbitrary lengths.
-
-noextract
-let acc (a: alg): Type0 =
-  words_state a
-
-(* the initial value of the accumulator *)
-noextract
-let acc0 (#a: alg): acc a =
-  Spec.Hash.init a
-
-(* hashes one block of data into the accumulator *)
-noextract
-let compress (#a:alg) (s: acc a) (b: bytes_block a): GTot (acc a) =
-  Spec.Hash.update a s b
-
-noextract
-let compress_many (#a: alg) (s: acc a) (b:bytes_blocks a): GTot (acc a) =
-  Spec.Hash.update_multi a s b
-
-(* extracts the tag from the (possibly larger) accumulator *)
-noextract
-let extract (#a:alg) (s: acc a): GTot (bytes_hash a) =
-  Spec.Hash.PadFinish.finish a s
+/// This is not a general-purpose incremental specification, which would support
+/// adding text fragments of arbitrary lengths (for that, see
+/// EverCrypt.Hash.Incremental).
 
 
 /// Stateful interface implementing the agile specifications.
@@ -155,7 +116,7 @@ let invariant (#a:alg) (s: state a) (m: HS.mem) =
 
 //18-07-06 as_acc a better name? not really a representation
 val repr: #a:alg ->
-  s:state a -> h:HS.mem { invariant s h } -> GTot (acc a)
+  s:state a -> h:HS.mem { invariant s h } -> GTot (words_state a)
 
 // Waiting for these to land in LowStar.Modifies
 let loc_in (l: M.loc) (h: HS.mem) =
@@ -259,7 +220,7 @@ val init: #a:e_alg -> (
   (requires invariant s)
   (ensures fun h0 _ h1 ->
     invariant s h1 /\
-    repr s h1 == acc0 #a /\
+    repr s h1 == Spec.Hash.init a /\
     M.(modifies (footprint s h0) h0 h1) /\
     footprint s h0 == footprint s h1 /\
     preserves_freeable s h0 h1))
@@ -289,7 +250,7 @@ val update:
     M.(modifies (footprint s h0) h0 h1) /\
     footprint s h0 == footprint s h1 /\
     invariant s h1 /\
-    repr s h1 == compress (repr s h0) (B.as_seq h0 block) /\
+    repr s h1 == Spec.Hash.update a (repr s h0) (B.as_seq h0 block) /\
     preserves_freeable s h0 h1))
 
 // Note that we pass the data length in bytes (rather than blocks).
@@ -310,7 +271,7 @@ val update_multi:
     M.(modifies (footprint s h0) h0 h1) /\
     footprint s h0 == footprint s h1 /\
     invariant s h1 /\
-    repr s h1 == compress_many (repr s h0) (B.as_seq h0 blocks) /\
+    repr s h1 == Spec.Hash.update_multi a (repr s h0) (B.as_seq h0 blocks) /\
     preserves_freeable s h0 h1))
 
 val update_last_256: Hacl.Hash.Definitions.update_last_st SHA2_256
@@ -345,7 +306,7 @@ val update_last:
     invariant s h1 /\
     (B.length last + Seq.length (Spec.Hash.PadFinish.pad a (v total_len))) % block_length a = 0 /\
     repr s h1 ==
-      compress_many (repr s h0)
+      Spec.Hash.update_multi a (repr s h0)
         (Seq.append (B.as_seq h0 last) (Spec.Hash.PadFinish.pad a (v total_len))) /\
     M.(modifies (footprint s h0) h0 h1) /\
     footprint s h0 == footprint s h1 /\
@@ -367,7 +328,7 @@ val finish:
     invariant s h1 /\
     M.(modifies (loc_buffer dst) h0 h1) /\
     footprint s h0 == footprint s h1 /\
-    B.as_seq h1 dst == extract (repr s h0) /\
+    B.as_seq h1 dst == Spec.Hash.PadFinish.finish a (repr s h0) /\
     preserves_freeable s h0 h1))
 
 (** @type: true

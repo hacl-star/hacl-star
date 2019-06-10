@@ -242,31 +242,36 @@ procedure Keyhash_init(
         validDstAddrs128(mem, hkey_ptr, hkeys_b, 8, memTaint, Secret);
     ensures
         modifies_buffer128(hkeys_b, old(mem), mem);
-        hkeys_reqs_pub(s128(mem, hkeys_b), reverse_bytes_quad32(aes_encrypt_LE(alg, key, Mkfour(0,0,0,0))));
+        hkeys_reqs_pub(s128(mem, hkeys_b), reverse_bytes_quad32(aes_encrypt_LE(alg, key, Mkfour(0, 0, 0, 0))));
 
         xmm6 == old(xmm6);
         r12 == old(r12);
-
 {
-   InitPshufbMask(xmm4, r8);
-   ZeroXmm(xmm0);
-   inline if (win) {
-     Store128_buffer(rdx, xmm0, 0x50, Secret, hkeys_b, 5); // Store 0 into 5th element
-     Mov64(r8, rcx);
-   } else {
-     Store128_buffer(rsi, xmm0, 0x50, Secret, hkeys_b, 5); // Store 0 into 5th element
-     Mov64(r8, rdi);
-   }
-   AESEncryptBlock(alg, xmm0, key, old(buffer128_as_seq(mem, roundkeys_b)), roundkeys_b); // h = xmm0 = aes_encrypt_LE alg key (Mkfour 0 0 0 0) in
-   Pshufb(xmm0, xmm4);   // reverse h, since the hashing code assumes the reversal has already happened
-   inline if (win) {
-     Mov64(rcx, rdx);
-   } else {
-     Mov64(rcx, rsi);
-   }
-   Store128_buffer(rcx, xmm0, 0x20, Secret, hkeys_b, 2);
+    InitPshufbMask(xmm4, r8);
+    ZeroXmm(xmm0);
+    inline if (win)
+    {
+        Store128_buffer(rdx, xmm0, 0x50, Secret, hkeys_b, 5); // Store 0 into 5th element
+        Mov64(r8, rcx);
+    }
+    else
+    {
+        Store128_buffer(rsi, xmm0, 0x50, Secret, hkeys_b, 5); // Store 0 into 5th element
+        Mov64(r8, rdi);
+    }
+    AESEncryptBlock(alg, xmm0, key, old(buffer128_as_seq(mem, roundkeys_b)), roundkeys_b); // h = xmm0 = aes_encrypt_LE alg key (Mkfour 0 0 0 0) in
+    Pshufb(xmm0, xmm4);   // reverse h, since the hashing code assumes the reversal has already happened
+    inline if (win)
+    {
+        Mov64(rcx, rdx);
+    }
+    else
+    {
+        Mov64(rcx, rsi);
+    }
+    Store128_buffer(rcx, xmm0, 0x20, Secret, hkeys_b, 2);
 
-   Gf128_powers(of_quad32(xmm0), hkeys_b);
+    Gf128_powers(of_quad32(xmm0), hkeys_b);
 
-   lemma_hkeys_reqs_pub_priv(s128(mem, hkeys_b), reverse_bytes_quad32(aes_encrypt_LE(alg, key, Mkfour(0,0,0,0))));
+    lemma_hkeys_reqs_pub_priv(s128(mem, hkeys_b), reverse_bytes_quad32(aes_encrypt_LE(alg, key, Mkfour(0, 0, 0, 0))));
 }

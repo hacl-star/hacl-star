@@ -1,3 +1,4 @@
+include "../../../../lib/util/Vale.Lib.Basic.vaf"
 include "../../../../arch/x64/Vale.X64.InsBasic.vaf"
 include "../../../../arch/x64/Vale.X64.InsMem.vaf"
 include "../../../../arch/x64/Vale.X64.InsStack.vaf"
@@ -48,10 +49,7 @@ open Vale.Curve25519.FastMul_helpers
 open Vale.X64.CPU_Features_s
 #endverbatim
 
-type tactic:Type(0) extern;
 const int_canon:tactic extern;
-ghost procedure assert_by_tactic(ghost p:prop, ghost t:tactic) extern;
-
 
 #reset-options "--z3rlimit 200"
 procedure fast_multiply_a0b(
@@ -273,7 +271,7 @@ procedure fast_multiply_a1b(
     let a1b := pow2_five(a1b_0, a1b_1, a1b_2, a1b_3, a1b_4);
     let a0a1b := pow2_seven(d0, d1, d2, r12, r14, rax, carry_bit);
 
-    assert_by_tactic(a1 * b == pow2_four(a1*b0, a1*b1, a1*b2, a1*b3), int_canon);   // PASSES
+    assert_by_tactic(a1 * b == 0 + pow2_four(a1 * b0, a1 * b1, a1 * b2, a1 * b3), int_canon);   // PASSES
     assert a1b == a1 * b;  // PASSES
 
     lemma_sum_a1b(
@@ -398,7 +396,7 @@ procedure fast_multiply_a2b(
     let a2b := pow2_five(a2b_0, a2b_1, a2b_2, a2b_3, a2b_4);
     let a0a1a2b := pow2_seven(d0, d1, d2, d3, r12, r14, rax);
 
-    assert_by_tactic(a2 * b == pow2_four(a2*b0, a2*b1, a2*b2, a2*b3), int_canon);   // PASSES
+    assert_by_tactic(a2 * b == 0 + pow2_four(a2 * b0, a2 * b1, a2 * b2, a2 * b3), int_canon);   // PASSES
     //assert a2b == a2 * b;  // PASSES
 
     lemma_sum_a2b(a0, a1, a2,
@@ -539,7 +537,7 @@ procedure fast_multiply_a3b(
     let a3b := pow2_five(a3b_0, a3b_1, a3b_2, a3b_3, a3b_4);
     let a0a1a2a3b := pow2_eight(d0, d1, d2, d3, d4, d5, d6, d7);
 
-    assert_by_tactic(a3 * b == pow2_four(a3*b0, a3*b1, a3*b2, a3*b3), int_canon);   // PASSES
+    assert_by_tactic(a3 * b == 0 + pow2_four(a3 * b0, a3 * b1, a3 * b2, a3 * b3), int_canon);   // PASSES
     assert a3b == a3 * b;  // PASSES
 
     lemma_sum_a3b(a0, a1, a2, a3,
@@ -678,7 +676,6 @@ procedure fast_mul_stdcall(
         r12 == old(r12);
         r13 == old(r13);
         r14 == old(r14);
-
         rsp == old(rsp);
 {
     // Store callee-save registers
@@ -688,11 +685,14 @@ procedure fast_mul_stdcall(
     Push(r14);
 
     // Line up the rest of the arguments
-    inline if (win) {
+    inline if (win)
+    {
         Mov64(dst_ptr, rcx);
         Mov64(inA_ptr, rdx);
         Mov64(inB_ptr, r8);
-    } else {
+    }
+    else
+    {
         Mov64(inB_ptr, rdx);
     }
 
@@ -793,7 +793,6 @@ procedure fast_mul2_stdcall(
         r12 == old(r12);
         r13 == old(r13);
         r14 == old(r14);
-
         rsp == old(rsp);
 {
     // Store callee-save registers
@@ -802,19 +801,23 @@ procedure fast_mul2_stdcall(
     Push(r14);
 
     // Line up the rest of the arguments
-    inline if (win) {
+    inline if (win)
+    {
         Push(rsi);
         Mov64(dst_ptr, rcx);
         Mov64(inA_ptr, rdx);
         Mov64(inB_ptr, r8);
-    } else {
+    }
+    else
+    {
         Mov64(inB_ptr, rdx);
     }
 
     fast_multiply(0, dst_b, inA_b, inB_b);
     fast_multiply(4, dst_b, inA_b, inB_b);
 
-    inline if (win) {
+    inline if (win)
+    {
         Pop(rsi);
     }
     Pop(r14);

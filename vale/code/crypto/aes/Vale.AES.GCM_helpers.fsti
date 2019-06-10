@@ -11,7 +11,6 @@ open Vale.AES.AES_s
 open Vale.AES.GCTR_s
 open FStar.Math.Lemmas
 open Vale.Lib.Seqs
-open Vale.Lib.Workarounds
 
 let bytes_to_quad_size (num_bytes:nat) =
   ((num_bytes + 15) / 16)
@@ -25,7 +24,7 @@ val no_extra_bytes_helper (s:seq quad32) (num_bytes:int) : Lemma
             num_bytes % 16 == 0 /\
             length s == bytes_to_quad_size num_bytes)
   (ensures slice (le_seq_quad32_to_bytes s) 0 num_bytes == le_seq_quad32_to_bytes s /\
-           slice_work_around s (num_bytes / 16) == s)
+           slice s 0 (num_bytes / 16) == s)
 
 val le_seq_quad32_to_bytes_tail_prefix (s:seq quad32) (num_bytes:nat) : Lemma
   (requires (1 <= num_bytes /\

@@ -47,7 +47,7 @@ open Vale.X64.CPU_Features_s
 // Given round key for round, generate round key for round + 1
 procedure KeyExpansionRound(
         inline round:nat64,
-        inline rcon:imm8,
+        inline rcon:nat8,
         ghost dst:buffer128,
         ghost key:seq(nat32))
     {:quick}
@@ -155,7 +155,7 @@ procedure KeyExpansion128Stdcall(
     Store128_buffer(rdx, xmm1, 0, Secret, output_key_expansion_b, 0);
     KeyExpansionRoundUnrolledRecursive(key, output_key_expansion_b, 10);
     lemma_expand_key_128(key, 11);
-    Vale.Def.Opaque_s.reveal_opaque(key_to_round_keys_LE_def);
+    reveal key_to_round_keys_LE;
 
     // Clear secrets out of registers
     Pxor(xmm1, xmm1);
@@ -215,7 +215,6 @@ procedure AES128EncryptBlock(
     ensures
         xmm0 == aes_encrypt_LE(AES_128, key, input);
 {
-    assert{:quick_type} length(round_keys) == 11;
     let init := quad32_xor(input, index(round_keys, 0));
 
     Load128_buffer(xmm2, r8, 0, Secret, keys_buffer, 0);
@@ -280,7 +279,6 @@ procedure AES128EncryptBlockStdcall(
         Mov64(r8, rdx);
     }
 
-    assert{:quick_type} is_aes_key_LE(AES_128, key);
     AES128EncryptBlock(input, key, key_to_round_keys_LE(AES_128, key), keys_buffer);
 
     inline if (win)
