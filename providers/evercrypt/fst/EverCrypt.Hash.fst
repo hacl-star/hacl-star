@@ -74,7 +74,7 @@ let repr #a s h: GTot _ =
   let s = B.get h s 0 in
   B.as_seq h (p s)
 
-let alg_of_state #a s =
+let alg_of_state a s =
   let open LowStar.BufferOps in
   match !*s with
   | MD5_s _ -> MD5

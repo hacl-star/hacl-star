@@ -118,6 +118,7 @@ let split_at_last_empty (a: Hash.alg): Lemma
 =
   ()
 
+#push-options "--z3rlimit 20"
 let create_in a r =
   (**) let h0 = ST.get () in
 
@@ -148,9 +149,9 @@ let create_in a r =
   (**) B.modifies_only_not_unused_in B.loc_none h0 h4;
 
   p
+#pop-options
 
-#set-options "--ugly"
-
+#push-options "--z3refresh"
 let init a s =
   let open LowStar.BufferOps in
   let h1 = ST.get () in
@@ -167,14 +168,16 @@ let init a s =
   Spec.Hash.Lemmas.update_multi_zero a (Hash.repr #a hash_state h2);
   split_at_last_empty a;
 
-  s *= (State hash_state buf 0UL (G.hide S.empty));
+  B.upd s 0ul (State hash_state buf 0UL (G.hide S.empty));
   let h3 = ST.get () in
   Hash.frame_invariant B.(loc_buffer s) hash_state h2 h3;
   Hash.frame_invariant_implies_footprint_preservation B.(loc_buffer s) hash_state h2 h3;
   assert (preserves_freeable #a s h1 h3);
   assert (invariant #a h3 s);
   assert B.(modifies (footprint #a h1 s) h1 h3);
-  assert (equal_domains h1 h3)
+  // This seems to cause insurmountable difficulties. Puzzled.
+  assert (equal_domains h2 h3)
+#pop-options
 
 /// We keep the total length at run-time, on 64 bits, but require that it abides
 /// by the size requirements for the smaller hashes -- we're not interested at

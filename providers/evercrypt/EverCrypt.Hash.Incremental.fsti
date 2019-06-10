@@ -173,11 +173,6 @@ val alg_of_state: a:e_alg -> (
 /// lemmas for invariant and hashed could be bundled together. If we committed
 /// to always heap allocating, then we could conceivably have a single framing
 /// lemma.
-///
-/// Note: it might be useful to call `Hash.fresh_is_disjoint` to turn the
-/// `fresh_loc` post-condition of create_in into a more useful `loc_disjoint`
-/// clause.
-
 
 val frame_invariant: #a:alg -> l:B.loc -> s:state a -> h0:HS.mem -> h1:HS.mem -> Lemma
   (requires (
@@ -230,11 +225,11 @@ val init: a:e_alg -> (
   (requires (fun h0 ->
     invariant h0 s))
   (ensures (fun h0 _ h1 ->
-    preserves_freeable s h0 h1 /\
-    invariant h1 s /\
+    preserves_freeable #a s h0 h1 /\
+    invariant #a h1 s /\
     hashed h1 s == S.empty /\
-    footprint h0 s == footprint h1 s /\
-    B.(modifies (footprint h0 s) h0 h1))))
+    footprint h0 s == footprint #a h1 s /\
+    B.(modifies (footprint #a h0 s) h0 h1))))
 
 unfold
 let update_pre
