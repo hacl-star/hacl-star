@@ -325,55 +325,47 @@ val wp_sound_code (#a:Type0) (c:code) (qc:quickCode a c) (k:vale_state -> a -> T
   (ensures fun (sN, fN, gN) -> eval_code c s0 fN sN /\ update_state_mods qc.mods sN s0 == sN /\ k sN gN)
 
 [@va_qattr]
-let rec regs_match (regs:list reg) (r0:Regs.t) (r1:Regs.t) : Type0 =
-  match regs with
-  | [] -> True
-  | r::regs -> Regs.sel r r0 == Regs.sel r r1 /\ regs_match regs r0 r1
+let rec regs_match_file (r0:Regs.t) (r1:Regs.t) (rf:reg_file_id) (k:nat{k <= n_regs rf}) : Type0 =
+  if k = 0 then True
+  else
+    let r = Reg rf (k - 1) in
+    Regs.sel r r0 == Regs.sel r r1 /\ regs_match_file r0 r1 rf (k - 1)
 
 [@va_qattr]
-let all_regs_match (r0:Regs.t) (r1:Regs.t) : Type0
-  =
-  let regs = [0; 1; 2; 3; 4; 5; 6; 7; 8; 9; 10; 11; 12; 13; 14; 15] in
-  regs_match regs r0 r1
+let rec regs_match (r0:Regs.t) (r1:Regs.t) (k:nat{k <= n_reg_files}) : Type0 =
+  if k = 0 then True
+  else regs_match_file r0 r1 (k - 1) (n_regs (k - 1)) /\ regs_match r0 r1 (k - 1)
 
 [@va_qattr]
-let rec xmms_match (xmms:list xmm) (r0:Xmms.t) (r1:Xmms.t) : Type0 =
-  match xmms with
-  | [] -> True
-  | r::xmms -> Xmms.sel r r0 == Xmms.sel r r1 /\ xmms_match xmms r0 r1
+let all_regs_match (r0:Regs.t) (r1:Regs.t) : Type0 =
+  regs_match r0 r1 n_reg_files
 
 [@va_qattr]
-let all_xmms_match (r0:Xmms.t) (r1:Xmms.t) : Type0
-  =
-  let xmms = [0; 1; 2; 3; 4; 5; 6; 7; 8; 9; 10; 11; 12; 13; 14; 15] in
-  xmms_match xmms r0 r1
+let state_match (s0:vale_state) (s1:vale_state) : Type0 =
+  s0.vs_ok == s1.vs_ok /\
+  all_regs_match s0.vs_regs s1.vs_regs /\
+  s0.vs_flags == s1.vs_flags /\
+  s0.vs_heap == s1.vs_heap /\
+  s0.vs_stack == s1.vs_stack /\
+  s0.vs_memTaint == s1.vs_memTaint /\
+  s0.vs_stackTaint == s1.vs_stackTaint
 
-let assert_norm_match (p:prop0) : Lemma
-  (requires norm [iota; zeta; simplify; primops; delta_only [`%regs_match; `%all_regs_match; `%xmms_match; `%all_xmms_match]] p)
-  (ensures p)
-  =
-  ()
+val lemma_state_match (s0:vale_state) (s1:vale_state) : Lemma
+  (requires state_match s0 s1)
+  (ensures state_eq s0 s1)
 
 [@va_qattr]
 let va_state_match (s0:vale_state) (s1:vale_state) : Pure Type0
   (requires True)
   (ensures fun b -> b ==> state_eq s0 s1)
   =
-  assert_norm_match (all_regs_match s0.vs_regs s1.vs_regs ==> Regs.equal s0.vs_regs s1.vs_regs);
-  assert_norm_match (all_xmms_match s0.vs_xmms s1.vs_xmms ==> Xmms.equal s0.vs_xmms s1.vs_xmms);
-  s0.vs_ok == s1.vs_ok /\
-  all_regs_match s0.vs_regs s1.vs_regs /\
-  all_xmms_match s0.vs_xmms s1.vs_xmms /\
-  s0.vs_flags == s1.vs_flags /\
-  s0.vs_mem == s1.vs_mem /\
-  s0.vs_stack == s1.vs_stack /\
-  s0.vs_memTaint == s1.vs_memTaint /\
-  s0.vs_stackTaint == s1.vs_stackTaint
+  FStar.Classical.move_requires (lemma_state_match s0) s1;
+  state_match s0 s1
 
 [@va_qattr]
 unfold let wp_sound_code_pre (#a:Type0) (#c:code) (qc:quickCode a c) (s0:vale_state) (k:(s0':vale_state{s0 == s0'}) -> vale_state -> a -> Type0) : Type0 =
-  forall (ok:bool) (regs:Regs.t) (xmms:Xmms.t) (flags:nat64) (mem:mem) (stack:stack) (memTaint:memtaint) (stackTaint:memtaint).
-    let s0' = {vs_ok = ok; vs_regs = regs; vs_xmms = xmms; vs_flags = flags; vs_mem = mem; vs_stack = stack; vs_memTaint = memTaint; vs_stackTaint = stackTaint} in
+  forall (ok:bool) (regs:Regs.t) (flags:nat64) (mem:vale_heap) (stack:vale_stack) (memTaint:memtaint) (stackTaint:memtaint).
+    let s0' = {vs_ok = ok; vs_regs = regs; vs_flags = flags; vs_heap = mem; vs_stack = stack; vs_memTaint = memTaint; vs_stackTaint = stackTaint} in
     s0 == s0' ==> QProc?.wp qc (state_eta s0') (k (state_eta s0'))
 
 unfold let wp_sound_code_post (#a:Type0) (#c:code) (qc:quickCode a c) (s0:vale_state) (k:(s0':vale_state{s0 == s0'}) -> vale_state -> a -> Type0) ((sN:vale_state), (fN:fuel), (gN:a)) : Type0 =
@@ -385,9 +377,8 @@ unfold let normal_steps : list string =
   [
     `%Mkvale_state?.vs_ok;
     `%Mkvale_state?.vs_regs;
-    `%Mkvale_state?.vs_xmms;
     `%Mkvale_state?.vs_flags;
-    `%Mkvale_state?.vs_mem;
+    `%Mkvale_state?.vs_heap;
     `%Mkvale_state?.vs_stack;
     `%Mkvale_state?.vs_memTaint;
     `%Mkvale_state?.vs_stackTaint;

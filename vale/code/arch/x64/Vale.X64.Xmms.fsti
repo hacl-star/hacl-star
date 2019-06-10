@@ -1,6 +1,6 @@
 module Vale.X64.Xmms
-// This interface should not refer to Semantics_s
-
+// This interface should not refer to Machine_Semantics_s
+(*
 open Vale.Def.Prop_s
 open Vale.X64.Machine_s
 open Vale.Lib.Map16
@@ -66,3 +66,4 @@ val lemma_eta (m:t) : Lemma
   (requires True)
   (ensures eta m == m)
   [SMTPat (eta m)]
+*)

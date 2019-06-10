@@ -86,7 +86,7 @@ open Vale.AES.OptPublic
 #verbatim{:interface}
 let aes_reqs
   (alg:algorithm) (key:seq nat32) (round_keys:seq quad32) (keys_b:buffer128)
-  (key_ptr:int) (mem:memory) (memTaint:memtaint) : prop0
+  (key_ptr:int) (mem:vale_heap) (memTaint:memtaint) : prop0
   =
   aesni_enabled /\ avx_enabled /\
   (alg = AES_128 \/ alg = AES_256) /\
@@ -102,7 +102,7 @@ open Vale.Lib.Basic
 #endverbatim
 
 function aes_reqs(alg:algorithm, key:seq(nat32), round_keys:seq(quad32), keys_b:buffer128,
-    key_ptr:int, mem:memory, memTaint:memtaint) : prop extern;
+    key_ptr:int, mem:vale_heap, memTaint:memtaint) : prop extern;
 
 
 ///////////////////////////
@@ -1207,6 +1207,9 @@ procedure restore_registers(
     Pop_Secret(r15);
 }
 
+#verbatim{:interface}
+#reset-options "--z3rlimit 100"
+#endverbatim
 #reset-options "--z3rlimit 1600"
 // Using exportOnly, since verification with quick mode fails with:
 // (Error 196) Implicit argument: Expected a total term; got a ghost term

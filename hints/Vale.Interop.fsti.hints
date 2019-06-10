@@ -1,5 +1,5 @@
 [
-  "=W\u000fÆŽÙ\u0017üŒªrÚÓE¤r",
+  "aO\u0019ü®\u0016¹U\\L6Š_’PA",
   [
     [
       "Vale.Interop.addrs_set_mem",
@@ -11,15 +11,15 @@
         "@fuel_correspondence_FStar.List.Tot.Base.memP.fuel_instrumented",
         "@fuel_irrelevance_FStar.List.Tot.Base.memP.fuel_instrumented",
         "@query", "equation_Vale.Interop.Types.b8",
-        "fuel_guarded_inversion_Vale.Interop.Base.mem",
+        "fuel_guarded_inversion_Vale.Interop.Base.interop_heap",
         "fuel_guarded_inversion_Vale.Interop.Types.b8_", "int_inversion",
         "lemma_Vale.Interop.addrs_set_lemma",
-        "proj_equation_Vale.Interop.Base.Mem_ptrs",
-        "refinement_interpretation_Tm_refine_676ca913b1be34fafe116f522b6c2ecb",
-        "refinement_interpretation_Tm_refine_703c6f879c5b001c36b204e25e1b2371"
+        "proj_equation_Vale.Interop.Base.InteropHeap_ptrs",
+        "refinement_interpretation_Tm_refine_703c6f879c5b001c36b204e25e1b2371",
+        "refinement_interpretation_Tm_refine_84c765ad50b82ca67aa68f9d81cef9c4"
       ],
       0,
-      "8f613f863e4b22861ae03e80e06c632f"
+      "df8c3f7de1e2ffdaf232e30e17c32dc7"
     ],
     [
       "Vale.Interop.same_unspecified_down",
@@ -31,7 +31,7 @@
         "refinement_interpretation_Tm_refine_0a9a0201c1e946e7699c62a9acef7084"
       ],
       0,
-      "bd020ca178525f2d7b3e3396fbcd1119"
+      "2532cdedb2c585c4832526abc8c871fe"
     ],
     [
       "Vale.Interop.get_seq_heap",
@@ -63,7 +63,7 @@
         "refinement_interpretation_Tm_refine_f6f771aa4b937a6835aaa16b332f7043"
       ],
       0,
-      "239c474ad0979fc9aae1b33695d9583f"
+      "52fe3c09b90bead6a1cbf68be78b5c0c"
     ],
     [
       "Vale.Interop.up_mem",
@@ -72,7 +72,7 @@
       0,
       [ "@query" ],
       0,
-      "7c1e97ed1e9dfb242b4a33204ae3b68e"
+      "756bd48f825241d51a007d5f1a66a76a"
     ],
     [
       "Vale.Interop.down_up_identity",
@@ -81,16 +81,16 @@
       0,
       [
         "@MaxIFuel_assumption", "@query",
-        "Vale.Interop.Base_interpretation_Tm_arrow_4433daa3f41ad0793d72176e5d5d7bb2",
+        "Vale.Interop.Base_interpretation_Tm_arrow_0f5a8fec3e06a1dd639dd43f818d6142",
         "equation_Vale.Interop.Base.correct_down",
         "equation_Vale.Interop.Base.down_mem_t",
-        "equation_Vale.X64.Machine_Semantics_s.heap",
-        "fuel_guarded_inversion_Vale.Interop.Base.mem",
+        "equation_Vale.X64.Machine_Semantics_s.machine_heap",
+        "fuel_guarded_inversion_Vale.Interop.Base.interop_heap",
         "refinement_interpretation_Tm_refine_28b4c2c121cb150b4ef8ee66a8e6935f",
         "typing_Vale.Interop.down_mem"
       ],
       0,
-      "ded534c1580355deca4849f1b4e04733"
+      "59c8ab94ae8d4ff72d7490fbcb323028"
     ],
     [
       "Vale.Interop.up_down_identity",
@@ -103,7 +103,7 @@
         "refinement_interpretation_Tm_refine_4a6df3ab4be57ebfcbd6beb89333efcb"
       ],
       0,
-      "1a3e15418c7e3fbb93fb9e78b223f18f"
+      "a45374d70b12ea9bfee208e525de7ad9"
     ],
     [
       "Vale.Interop.update_buffer_up_mem",
@@ -120,8 +120,8 @@
         "equation_Vale.Interop.Types.b8",
         "equation_Vale.Interop.Types.down_view",
         "equation_Vale.Interop.Types.get_downview",
-        "equation_Vale.X64.Machine_Semantics_s.heap",
-        "fuel_guarded_inversion_Vale.Interop.Base.mem",
+        "equation_Vale.X64.Machine_Semantics_s.machine_heap",
+        "fuel_guarded_inversion_Vale.Interop.Base.interop_heap",
         "fuel_guarded_inversion_Vale.Interop.Types.b8_",
         "function_token_typing_FStar.UInt8.t",
         "function_token_typing_Prims.__cache_version_number__",
@@ -131,13 +131,13 @@
         "lemma_LowStar.BufferView.Down.as_buffer_mk_buffer_view",
         "refinement_interpretation_Tm_refine_2322af032f121bab690c3ed48fc33544",
         "refinement_interpretation_Tm_refine_28b4c2c121cb150b4ef8ee66a8e6935f",
+        "refinement_interpretation_Tm_refine_337149f033524697c8076d7e1ea9c36f",
         "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
         "refinement_interpretation_Tm_refine_703c6f879c5b001c36b204e25e1b2371",
+        "refinement_interpretation_Tm_refine_9a439b6de6103af6ead377149eaee8cd",
         "refinement_interpretation_Tm_refine_a0cd7d06c5da6444b6b51b319febde8e",
-        "refinement_interpretation_Tm_refine_b7a792ddf8cc4f70d7b2689b148adc0d",
-        "refinement_interpretation_Tm_refine_d6ea50b0f1bb3fd0c7370d81022556e5",
         "typing_FStar.Map.domain",
-        "typing_Vale.Interop.Base.__proj__Mem__item__hs",
+        "typing_Vale.Interop.Base.__proj__InteropHeap__item__hs",
         "typing_Vale.Interop.Types.__proj__Buffer__item__bsrc",
         "typing_Vale.Interop.Types.__proj__Buffer__item__rel",
         "typing_Vale.Interop.Types.__proj__Buffer__item__rrel",
@@ -146,7 +146,7 @@
         "typing_Vale.Interop.Types.down_view"
       ],
       0,
-      "85a218e3bbb5f01cb7961af4cf97f90d"
+      "18ef2e1f06124d83baed38c642743fc1"
     ]
   ]
 ]

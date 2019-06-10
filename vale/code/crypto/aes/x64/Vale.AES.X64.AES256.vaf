@@ -50,7 +50,7 @@ open Vale.X64.CPU_Features_s
 // Given round key for round, generate round key for round + 1
 procedure KeyExpansionRoundEven256(
         inline round:nat64,
-        inline rcon:imm8,
+        inline rcon:nat8,
         ghost dst:buffer128,
         ghost key:seq(nat32))
     {:quick}
@@ -93,7 +93,7 @@ procedure KeyExpansionRoundEven256(
 // Given round key for round, generate round key for round + 1
 procedure KeyExpansionRoundOdd256(
         inline round:nat64,
-        inline rcon:imm8,
+        inline rcon:nat8,
         ghost dst:buffer128,
         ghost key:seq(nat32))
     {:quick}

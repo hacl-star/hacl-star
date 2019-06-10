@@ -66,7 +66,7 @@ let cswap_post : VSig.vale_post cswap_dom =
 
 #set-options "--z3rlimit 50"
 
-let cswap_regs_modified: MS.reg -> bool = fun (r:MS.reg) ->
+let cswap_regs_modified: MS.reg_64 -> bool = fun (r:MS.reg_64) ->
   let open MS in
   if r = rRdx || r = rR8 || r = rR9 || r = rR10 then true
   else false
@@ -88,13 +88,13 @@ let cswap_lemma'
        V.eval_code code va_s0 f va_s1 /\
        VSig.vale_calling_conventions va_s0 va_s1 cswap_regs_modified cswap_xmms_modified /\
        cswap_post code p0 p1 bit va_s0 va_s1 f /\
-       ME.buffer_readable VS.(va_s1.vs_mem) (as_vale_buffer p0) /\
-       ME.buffer_readable VS.(va_s1.vs_mem) (as_vale_buffer p1) /\
+       ME.buffer_readable VS.(va_s1.vs_heap) (as_vale_buffer p0) /\
+       ME.buffer_readable VS.(va_s1.vs_heap) (as_vale_buffer p1) /\
        ME.buffer_writeable (as_vale_buffer p0) /\
        ME.buffer_writeable (as_vale_buffer p1) /\
        ME.modifies (ME.loc_union (ME.loc_buffer (as_vale_buffer p0))
                    (ME.loc_union (ME.loc_buffer (as_vale_buffer p1))
-                                 ME.loc_none)) va_s0.VS.vs_mem va_s1.VS.vs_mem
+                                 ME.loc_none)) va_s0.VS.vs_heap va_s1.VS.vs_heap
  )) =
    let va_s1, f = FU.va_lemma_cswap2 code va_s0 (as_vale_buffer p0) (as_vale_buffer p1) (UInt64.v bit) in
    Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 p0;
@@ -106,13 +106,13 @@ let cswap_lemma = as_t #(VSig.vale_sig cswap_regs_modified cswap_xmms_modified c
 
 let code_cswap = FU.va_code_cswap2 ()
 
-let of_reg (r:MS.reg) : option (IX64.reg_nat 3) = match r with
+let of_reg (r:MS.reg_64) : option (IX64.reg_nat 3) = match r with
   | 5 -> Some 0 // rdi
   | 4 -> Some 1 // rsi
   | 3 -> Some 2 // rdx
   | _ -> None
 
-let of_arg (i:IX64.reg_nat 3) : MS.reg = match i with
+let of_arg (i:IX64.reg_nat 3) : MS.reg_64 = match i with
   | 0 -> MS.rRdi
   | 1 -> MS.rRsi
   | 2 -> MS.rRdx

@@ -147,7 +147,7 @@ procedure AESNI_imc(inout dst:xmm, in src:xmm)
 {
 }
 
-procedure AESNI_keygen_assist(inout dst:xmm, in src:xmm, inline imm:imm8)
+procedure AESNI_keygen_assist(inout dst:xmm, in src:xmm, inline imm:nat8)
     {:public}
     {:quick exportOnly}
     {:instruction mk_ins(make_instr(I.ins_AESNI_keygen_assist(imm), OReg(dst), OReg(src)))}

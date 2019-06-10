@@ -8,7 +8,7 @@
       0,
       [ "@query" ],
       0,
-      "9669dee8c7145184cc3977e6fe0c00fd"
+      "6539d2c6c8ceaed88e1bafec7b97d9e7"
     ],
     [
       "Vale.Stdcalls.X64.GCMdecrypt.as_normal_t",
@@ -17,7 +17,7 @@
       0,
       [ "@query" ],
       0,
-      "e4aa65fa51be13c45e4d694d4cb829ca"
+      "595f481d5034b17c737456727c6db99b"
     ],
     [
       "Vale.Stdcalls.X64.GCMdecrypt.dom",
@@ -26,7 +26,7 @@
       0,
       [ "@query", "projection_inverse_BoxInt_proj_0" ],
       0,
-      "120ad77c04973ccb05af154d7e8fe775"
+      "1f69c2abe8da64782c213c4c9f4c5d39"
     ],
     [
       "Vale.Stdcalls.X64.GCMdecrypt.gcm128_pre",
@@ -61,7 +61,7 @@
         "typing_Vale.Math.Poly2_s.degree"
       ],
       0,
-      "df016b407c639c4453892b83d2f52cf2"
+      "dfd87263ed2bc8208cd585a1174dd2f1"
     ],
     [
       "Vale.Stdcalls.X64.GCMdecrypt.gcm128_post",
@@ -96,7 +96,7 @@
         "typing_Vale.Math.Poly2_s.degree"
       ],
       0,
-      "c50d36e15e9652fba4727ae100e6fe7b"
+      "edad0e20e6133a799cc8d46b0df79fbc"
     ],
     [
       "Vale.Stdcalls.X64.GCMdecrypt.gcm128_lemma'",
@@ -232,7 +232,7 @@
         "typing_tok_Vale.Interop.Types.TUInt8@tok"
       ],
       0,
-      "59e9386914c6941bf248d0cb842eac92"
+      "959ef951df4a927e16a7f3bdf046d07d"
     ],
     [
       "Vale.Stdcalls.X64.GCMdecrypt.gcm128_lemma",
@@ -282,7 +282,8 @@
         "equation_Vale.X64.Memory.base_typ_as_vale_type",
         "equation_Vale.X64.Memory.buffer128",
         "equation_Vale.X64.State.update_reg",
-        "equation_Vale.X64.State.update_xmm",
+        "equation_Vale.X64.State.update_reg_64",
+        "equation_Vale.X64.State.update_reg_xmm",
         "fuel_guarded_inversion_FStar.Pervasives.Native.tuple2",
         "fuel_guarded_inversion_Vale.X64.State.vale_state",
         "function_token_typing_Vale.AsLowStar.MemoryHelpers.fuel_eq",
@@ -301,13 +302,13 @@
         "proj_equation_FStar.Pervasives.Native.Mktuple2__1",
         "proj_equation_FStar.Pervasives.Native.Mktuple2__2",
         "proj_equation_Vale.X64.State.Mkvale_state_vs_flags",
-        "proj_equation_Vale.X64.State.Mkvale_state_vs_mem",
+        "proj_equation_Vale.X64.State.Mkvale_state_vs_heap",
         "proj_equation_Vale.X64.State.Mkvale_state_vs_memTaint",
         "proj_equation_Vale.X64.State.Mkvale_state_vs_ok",
         "proj_equation_Vale.X64.State.Mkvale_state_vs_regs",
         "proj_equation_Vale.X64.State.Mkvale_state_vs_stack",
         "projection_inverse_BoxInt_proj_0",
-        "projection_inverse_Vale.X64.State.Mkvale_state_vs_mem",
+        "projection_inverse_Vale.X64.State.Mkvale_state_vs_heap",
         "refinement_interpretation_Tm_refine_416d0f805341e247c88dc3b5c65a99d4",
         "refinement_interpretation_Tm_refine_8d65e998a07dd53ec478e27017d9dba5",
         "token_correspondence_Vale.Stdcalls.X64.GCMdecrypt.gcm128_post",
@@ -320,13 +321,13 @@
         "typing_Vale.X64.Memory.loc_none",
         "typing_Vale.X64.Memory.loc_union",
         "typing_Vale.X64.MemoryAdapters.as_vale_buffer",
-        "typing_Vale.X64.State.__proj__Mkvale_state__item__vs_mem",
+        "typing_Vale.X64.State.__proj__Mkvale_state__item__vs_heap",
         "typing_tok_Vale.AES.AES_s.AES_128@tok",
         "typing_tok_Vale.Interop.Types.TUInt128@tok",
         "typing_tok_Vale.Interop.Types.TUInt8@tok"
       ],
       0,
-      "a985db7faca724d2516ce250f0e9ca9c"
+      "4c681ce286a3512eb6081ab603058efa"
     ],
     [
       "Vale.Stdcalls.X64.GCMdecrypt.lowstar_gcm128_t",
@@ -347,7 +348,7 @@
         "refinement_interpretation_Tm_refine_8d65e998a07dd53ec478e27017d9dba5"
       ],
       0,
-      "d514b3a51ed0a8b43a25fac0fdac3e89"
+      "1b021ba151f54fa636e00ebfb793f002"
     ],
     [
       "Vale.Stdcalls.X64.GCMdecrypt.gcm256_pre",
@@ -382,7 +383,7 @@
         "typing_Vale.Math.Poly2_s.degree"
       ],
       0,
-      "4064d66bad1f260c6cbf81c0f76d6da8"
+      "2569e69a0e634d242842e0b4aa936e74"
     ],
     [
       "Vale.Stdcalls.X64.GCMdecrypt.gcm256_post",
@@ -417,7 +418,7 @@
         "typing_Vale.Math.Poly2_s.degree"
       ],
       0,
-      "36844d796f4cfe53a175842512cf7d7e"
+      "edee4e7e1c2ef5573784e8555d3a1c96"
     ],
     [
       "Vale.Stdcalls.X64.GCMdecrypt.gcm256_lemma'",
@@ -533,7 +534,7 @@
         "typing_tok_Vale.Interop.Types.TUInt8@tok"
       ],
       0,
-      "a62a740200df6a6438a7bf7f69755574"
+      "6f66cca5d52201a5bcd1beb3ce5bea69"
     ],
     [
       "Vale.Stdcalls.X64.GCMdecrypt.gcm256_lemma",
@@ -580,7 +581,8 @@
         "equation_Vale.X64.Machine_Semantics_s.ocmp",
         "equation_Vale.X64.Memory.buffer128",
         "equation_Vale.X64.State.update_reg",
-        "equation_Vale.X64.State.update_xmm",
+        "equation_Vale.X64.State.update_reg_64",
+        "equation_Vale.X64.State.update_reg_xmm",
         "fuel_guarded_inversion_FStar.Pervasives.Native.tuple2",
         "fuel_guarded_inversion_Vale.X64.State.vale_state",
         "function_token_typing_Vale.AsLowStar.MemoryHelpers.fuel_eq",
@@ -597,12 +599,12 @@
         "proj_equation_FStar.Pervasives.Native.Mktuple2__1",
         "proj_equation_FStar.Pervasives.Native.Mktuple2__2",
         "proj_equation_Vale.X64.State.Mkvale_state_vs_flags",
-        "proj_equation_Vale.X64.State.Mkvale_state_vs_mem",
+        "proj_equation_Vale.X64.State.Mkvale_state_vs_heap",
         "proj_equation_Vale.X64.State.Mkvale_state_vs_memTaint",
         "proj_equation_Vale.X64.State.Mkvale_state_vs_ok",
         "proj_equation_Vale.X64.State.Mkvale_state_vs_regs",
         "proj_equation_Vale.X64.State.Mkvale_state_vs_stack",
-        "projection_inverse_Vale.X64.State.Mkvale_state_vs_mem",
+        "projection_inverse_Vale.X64.State.Mkvale_state_vs_heap",
         "refinement_interpretation_Tm_refine_8d65e998a07dd53ec478e27017d9dba5",
         "token_correspondence_Vale.Stdcalls.X64.GCMdecrypt.gcm256_post",
         "token_correspondence_Vale.Stdcalls.X64.GCMdecrypt.gcm256_pre",
@@ -612,12 +614,12 @@
         "typing_Vale.X64.Memory.loc_none",
         "typing_Vale.X64.Memory.loc_union",
         "typing_Vale.X64.MemoryAdapters.as_vale_buffer",
-        "typing_Vale.X64.State.__proj__Mkvale_state__item__vs_mem",
+        "typing_Vale.X64.State.__proj__Mkvale_state__item__vs_heap",
         "typing_tok_Vale.Interop.Types.TUInt128@tok",
         "typing_tok_Vale.Interop.Types.TUInt8@tok"
       ],
       0,
-      "b5becea3e45e057f8b444d72a952d8f0"
+      "7f51434f1a0875dfab167cdbf8293254"
     ],
     [
       "Vale.Stdcalls.X64.GCMdecrypt.lowstar_gcm256_t",
@@ -638,7 +640,7 @@
         "refinement_interpretation_Tm_refine_8d65e998a07dd53ec478e27017d9dba5"
       ],
       0,
-      "b37b622947123fe7124e8b3e91ae3d65"
+      "c2556a7747f89416167497d33867b55c"
     ],
     [
       "Vale.Stdcalls.X64.GCMdecrypt.lowstar_gcm128",
@@ -655,7 +657,7 @@
         "refinement_interpretation_Tm_refine_8d65e998a07dd53ec478e27017d9dba5"
       ],
       0,
-      "1ef101d7226c1f562d1213cc32405f7e"
+      "198ddbfe981588ace6493a966a9623bc"
     ],
     [
       "Vale.Stdcalls.X64.GCMdecrypt.lowstar_gcm256",
@@ -672,7 +674,7 @@
         "refinement_interpretation_Tm_refine_8d65e998a07dd53ec478e27017d9dba5"
       ],
       0,
-      "20e0778e63c5f491ea84ad60f6f4d45e"
+      "3b593dec277b26ca6f1bbf77462352e7"
     ],
     [
       "Vale.Stdcalls.X64.GCMdecrypt.as_t",
@@ -681,7 +683,7 @@
       0,
       [ "@query" ],
       0,
-      "d7119065a23b73bc69223c4315c38d6e"
+      "ba43c358be3ff65f6a097f7951b425b4"
     ],
     [
       "Vale.Stdcalls.X64.GCMdecrypt.as_normal_t",
@@ -690,7 +692,7 @@
       0,
       [ "@query" ],
       0,
-      "b731f788afe614d3138990058123d27a"
+      "d0f05b4c4b20f528a5bb0ab6fac8b6d6"
     ],
     [
       "Vale.Stdcalls.X64.GCMdecrypt.dom",
@@ -699,7 +701,7 @@
       0,
       [ "@query", "projection_inverse_BoxInt_proj_0" ],
       0,
-      "f173f3a6df2e64d893325ce82b38cf6d"
+      "7e7481bff76f2d7959d5d187d34b9be1"
     ],
     [
       "Vale.Stdcalls.X64.GCMdecrypt.gcm128_pre",
@@ -734,7 +736,7 @@
         "typing_Vale.Math.Poly2_s.degree"
       ],
       0,
-      "c6b803666a0c710e0888e482862bcacc"
+      "cf3c9644bc9d3a10563886be72922608"
     ],
     [
       "Vale.Stdcalls.X64.GCMdecrypt.gcm128_post",
@@ -769,7 +771,7 @@
         "typing_Vale.Math.Poly2_s.degree"
       ],
       0,
-      "f0af5b6c16c85e68cfc9ace7787afe86"
+      "86d64443aac6a1570e1ebd043de91d5d"
     ],
     [
       "Vale.Stdcalls.X64.GCMdecrypt.gcm128_lemma'",
@@ -883,7 +885,7 @@
         "typing_tok_Vale.Interop.Types.TUInt8@tok"
       ],
       0,
-      "9dadaa5526c306a33ba3e2ffd7fca397"
+      "d0f50445ba4641fc7cc7109f6018c09e"
     ],
     [
       "Vale.Stdcalls.X64.GCMdecrypt.gcm128_lemma",
@@ -933,7 +935,8 @@
         "equation_Vale.X64.Memory.base_typ_as_vale_type",
         "equation_Vale.X64.Memory.buffer128",
         "equation_Vale.X64.State.update_reg",
-        "equation_Vale.X64.State.update_xmm",
+        "equation_Vale.X64.State.update_reg_64",
+        "equation_Vale.X64.State.update_reg_xmm",
         "fuel_guarded_inversion_FStar.Pervasives.Native.tuple2",
         "fuel_guarded_inversion_Vale.X64.State.vale_state",
         "function_token_typing_Vale.AsLowStar.MemoryHelpers.fuel_eq",
@@ -952,13 +955,13 @@
         "proj_equation_FStar.Pervasives.Native.Mktuple2__1",
         "proj_equation_FStar.Pervasives.Native.Mktuple2__2",
         "proj_equation_Vale.X64.State.Mkvale_state_vs_flags",
-        "proj_equation_Vale.X64.State.Mkvale_state_vs_mem",
+        "proj_equation_Vale.X64.State.Mkvale_state_vs_heap",
         "proj_equation_Vale.X64.State.Mkvale_state_vs_memTaint",
         "proj_equation_Vale.X64.State.Mkvale_state_vs_ok",
         "proj_equation_Vale.X64.State.Mkvale_state_vs_regs",
         "proj_equation_Vale.X64.State.Mkvale_state_vs_stack",
         "projection_inverse_BoxInt_proj_0",
-        "projection_inverse_Vale.X64.State.Mkvale_state_vs_mem",
+        "projection_inverse_Vale.X64.State.Mkvale_state_vs_heap",
         "refinement_interpretation_Tm_refine_416d0f805341e247c88dc3b5c65a99d4",
         "refinement_interpretation_Tm_refine_8d65e998a07dd53ec478e27017d9dba5",
         "token_correspondence_Vale.Stdcalls.X64.GCMdecrypt.gcm128_post",
@@ -971,13 +974,13 @@
         "typing_Vale.X64.Memory.loc_none",
         "typing_Vale.X64.Memory.loc_union",
         "typing_Vale.X64.MemoryAdapters.as_vale_buffer",
-        "typing_Vale.X64.State.__proj__Mkvale_state__item__vs_mem",
+        "typing_Vale.X64.State.__proj__Mkvale_state__item__vs_heap",
         "typing_tok_Vale.AES.AES_s.AES_128@tok",
         "typing_tok_Vale.Interop.Types.TUInt128@tok",
         "typing_tok_Vale.Interop.Types.TUInt8@tok"
       ],
       0,
-      "d6341d6ba7c91d0c19bc629a5751c1a3"
+      "bbb5cf46b1c01ef6cad511b38cb2c2ee"
     ],
     [
       "Vale.Stdcalls.X64.GCMdecrypt.lowstar_gcm128_t",
@@ -998,7 +1001,7 @@
         "refinement_interpretation_Tm_refine_8d65e998a07dd53ec478e27017d9dba5"
       ],
       0,
-      "ec40bc3efc193340a64fc14bf9faaafc"
+      "467bf41597e0b95c858ec1dcd732fefe"
     ],
     [
       "Vale.Stdcalls.X64.GCMdecrypt.gcm256_pre",
@@ -1033,7 +1036,7 @@
         "typing_Vale.Math.Poly2_s.degree"
       ],
       0,
-      "9a524c4c7e52aadfa2fa654e9384b3cc"
+      "dd5e23da8eac76402ec336fce1a7e565"
     ],
     [
       "Vale.Stdcalls.X64.GCMdecrypt.gcm256_post",
@@ -1068,7 +1071,7 @@
         "typing_Vale.Math.Poly2_s.degree"
       ],
       0,
-      "48c7ff8a9f715eee758e3faeb7266a8f"
+      "b6351754c6e176a452c3094f4c53b258"
     ],
     [
       "Vale.Stdcalls.X64.GCMdecrypt.gcm256_lemma'",
@@ -1191,7 +1194,7 @@
         "typing_tok_Vale.Interop.Types.TUInt8@tok"
       ],
       0,
-      "d9ae8eb640df1bdfb6fd69bc85770ed7"
+      "eab58d9641db524fe1aaa561de7a8451"
     ],
     [
       "Vale.Stdcalls.X64.GCMdecrypt.gcm256_lemma",
@@ -1238,7 +1241,8 @@
         "equation_Vale.X64.Machine_Semantics_s.ocmp",
         "equation_Vale.X64.Memory.buffer128",
         "equation_Vale.X64.State.update_reg",
-        "equation_Vale.X64.State.update_xmm",
+        "equation_Vale.X64.State.update_reg_64",
+        "equation_Vale.X64.State.update_reg_xmm",
         "fuel_guarded_inversion_FStar.Pervasives.Native.tuple2",
         "fuel_guarded_inversion_Vale.X64.State.vale_state",
         "function_token_typing_Vale.AsLowStar.MemoryHelpers.fuel_eq",
@@ -1255,12 +1259,12 @@
         "proj_equation_FStar.Pervasives.Native.Mktuple2__1",
         "proj_equation_FStar.Pervasives.Native.Mktuple2__2",
         "proj_equation_Vale.X64.State.Mkvale_state_vs_flags",
-        "proj_equation_Vale.X64.State.Mkvale_state_vs_mem",
+        "proj_equation_Vale.X64.State.Mkvale_state_vs_heap",
         "proj_equation_Vale.X64.State.Mkvale_state_vs_memTaint",
         "proj_equation_Vale.X64.State.Mkvale_state_vs_ok",
         "proj_equation_Vale.X64.State.Mkvale_state_vs_regs",
         "proj_equation_Vale.X64.State.Mkvale_state_vs_stack",
-        "projection_inverse_Vale.X64.State.Mkvale_state_vs_mem",
+        "projection_inverse_Vale.X64.State.Mkvale_state_vs_heap",
         "refinement_interpretation_Tm_refine_8d65e998a07dd53ec478e27017d9dba5",
         "token_correspondence_Vale.Stdcalls.X64.GCMdecrypt.gcm256_post",
         "token_correspondence_Vale.Stdcalls.X64.GCMdecrypt.gcm256_pre",
@@ -1270,12 +1274,12 @@
         "typing_Vale.X64.Memory.loc_none",
         "typing_Vale.X64.Memory.loc_union",
         "typing_Vale.X64.MemoryAdapters.as_vale_buffer",
-        "typing_Vale.X64.State.__proj__Mkvale_state__item__vs_mem",
+        "typing_Vale.X64.State.__proj__Mkvale_state__item__vs_heap",
         "typing_tok_Vale.Interop.Types.TUInt128@tok",
         "typing_tok_Vale.Interop.Types.TUInt8@tok"
       ],
       0,
-      "82ba34a2ef848548243f72c664f14297"
+      "675c6058e6c9b33a3318b9c5c45b4faf"
     ],
     [
       "Vale.Stdcalls.X64.GCMdecrypt.lowstar_gcm256_t",
@@ -1296,7 +1300,7 @@
         "refinement_interpretation_Tm_refine_8d65e998a07dd53ec478e27017d9dba5"
       ],
       0,
-      "b2d15b7045cb5350c3da35e78896f551"
+      "f9d5b6460171a2919631a92f6b917f0c"
     ],
     [
       "Vale.Stdcalls.X64.GCMdecrypt.lowstar_gcm128",
@@ -1313,7 +1317,7 @@
         "refinement_interpretation_Tm_refine_8d65e998a07dd53ec478e27017d9dba5"
       ],
       0,
-      "2cac49791b1257ac59a5aa855fe2506e"
+      "277d464b51a8f1daa137aa7a57744620"
     ],
     [
       "Vale.Stdcalls.X64.GCMdecrypt.lowstar_gcm256",
@@ -1330,7 +1334,7 @@
         "refinement_interpretation_Tm_refine_8d65e998a07dd53ec478e27017d9dba5"
       ],
       0,
-      "0e44bf9de51c845ec50603161e1cfdb5"
+      "7806311ad67baf419c9a1d65d3cb67af"
     ]
   ]
 ]

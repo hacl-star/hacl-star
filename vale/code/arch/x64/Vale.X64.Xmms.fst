@@ -1,6 +1,6 @@
 module Vale.X64.Xmms
 open Vale.X64.Machine_s
-
+(*
 let of_fun m =
   let m0_3 = ((m 0, m 1), (m 2, m 3)) in
   let m4_7 = ((m 4, m 5), (m 6, m 7)) in
@@ -60,3 +60,4 @@ let lemma_eta m =
   assert_norm (sel 14 m1 == sel 14 m2);
   assert_norm (sel 15 m1 == sel 15 m2);
   lemma_equal_intro m1 m2
+*)

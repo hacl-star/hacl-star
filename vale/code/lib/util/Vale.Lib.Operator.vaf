@@ -33,4 +33,5 @@ function operator(<>) (x:Type0, y:Type0):Type0 := op_disEquality;
 function operator(/\) (x:Type0, y:Type0):Type0 := l_and;
 function operator(\/) (x:Type0, y:Type0):Type0 := l_or;
 
+type state:Type(0) {:primitive} := va_state;
 type list(a:Type(0)):Type(0) {:primitive} := Prims.list(a);

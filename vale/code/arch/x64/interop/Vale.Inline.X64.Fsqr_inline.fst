@@ -67,7 +67,7 @@ let fsqr_post : VSig.vale_post fsqr_dom =
     (f:V.va_fuel) ->
       FW.va_ens_fsqr c va_s0 (as_vale_buffer tmp) (as_vale_buffer f1) (as_vale_buffer out) va_s1 f
 
-let fsqr_regs_modified: MS.reg -> bool = fun (r:MS.reg) ->
+let fsqr_regs_modified: MS.reg_64 -> bool = fun (r:MS.reg_64) ->
   let open MS in
   if r = rRax || r = rRbx || r = rRcx || r = rRdx || r = rRdi || r = rRsi || r = rR8 || r = rR9 || r = rR10 || r = rR11 || r = rR12 || r = rR13 || r = rR14 || r = rR15 then true
   else false
@@ -91,15 +91,15 @@ let fsqr_lemma'
        V.eval_code code va_s0 f va_s1 /\
        VSig.vale_calling_conventions va_s0 va_s1 fsqr_regs_modified fsqr_xmms_modified /\
        fsqr_post code tmp f1 out va_s0 va_s1 f /\
-       ME.buffer_readable VS.(va_s1.vs_mem) (as_vale_buffer out) /\
-       ME.buffer_readable VS.(va_s1.vs_mem) (as_vale_buffer f1) /\
-       ME.buffer_readable VS.(va_s1.vs_mem) (as_vale_buffer tmp) /\
+       ME.buffer_readable VS.(va_s1.vs_heap) (as_vale_buffer out) /\
+       ME.buffer_readable VS.(va_s1.vs_heap) (as_vale_buffer f1) /\
+       ME.buffer_readable VS.(va_s1.vs_heap) (as_vale_buffer tmp) /\
        ME.buffer_writeable (as_vale_buffer out) /\
        ME.buffer_writeable (as_vale_buffer f1) /\
        ME.buffer_writeable (as_vale_buffer tmp) /\
        ME.modifies (ME.loc_union (ME.loc_buffer (as_vale_buffer out))
                    (ME.loc_union (ME.loc_buffer (as_vale_buffer tmp))
-                                 ME.loc_none)) va_s0.VS.vs_mem va_s1.VS.vs_mem
+                                 ME.loc_none)) va_s0.VS.vs_heap va_s1.VS.vs_heap
  )) =
    let va_s1, f = FW.va_lemma_fsqr code va_s0 (as_vale_buffer tmp) (as_vale_buffer f1) (as_vale_buffer out) in
    Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 out;
@@ -111,13 +111,13 @@ let fsqr_lemma'
 let fsqr_lemma = as_t #(VSig.vale_sig fsqr_regs_modified fsqr_xmms_modified fsqr_pre fsqr_post) fsqr_lemma'
 let code_fsqr = FW.va_code_fsqr ()
 
-let of_reg (r:MS.reg) : option (IX64.reg_nat 3) = match r with
+let of_reg (r:MS.reg_64) : option (IX64.reg_nat 3) = match r with
   | 5 -> Some 0 // rdi
   | 4 -> Some 1 // rsi
   | 3 -> Some 2 // rdx
   | _ -> None
 
-let of_arg (i:IX64.reg_nat 3) : MS.reg = match i with
+let of_arg (i:IX64.reg_nat 3) : MS.reg_64 = match i with
   | 0 -> MS.rRdi
   | 1 -> MS.rRsi
   | 2 -> MS.rRdx
@@ -212,15 +212,15 @@ let fsqr2_lemma'
        V.eval_code code va_s0 f va_s1 /\
        VSig.vale_calling_conventions va_s0 va_s1 fsqr_regs_modified fsqr_xmms_modified /\
        fsqr2_post code tmp f1 out va_s0 va_s1 f /\
-       ME.buffer_readable VS.(va_s1.vs_mem) (as_vale_buffer out) /\
-       ME.buffer_readable VS.(va_s1.vs_mem) (as_vale_buffer f1) /\
-       ME.buffer_readable VS.(va_s1.vs_mem) (as_vale_buffer tmp) /\
+       ME.buffer_readable VS.(va_s1.vs_heap) (as_vale_buffer out) /\
+       ME.buffer_readable VS.(va_s1.vs_heap) (as_vale_buffer f1) /\
+       ME.buffer_readable VS.(va_s1.vs_heap) (as_vale_buffer tmp) /\
        ME.buffer_writeable (as_vale_buffer out) /\
        ME.buffer_writeable (as_vale_buffer f1) /\
        ME.buffer_writeable (as_vale_buffer tmp) /\
        ME.modifies (ME.loc_union (ME.loc_buffer (as_vale_buffer out))
                    (ME.loc_union (ME.loc_buffer (as_vale_buffer tmp))
-                                 ME.loc_none)) va_s0.VS.vs_mem va_s1.VS.vs_mem
+                                 ME.loc_none)) va_s0.VS.vs_heap va_s1.VS.vs_heap
  )) =
    let va_s1, f = FW.va_lemma_fsqr2 code va_s0 (as_vale_buffer tmp) (as_vale_buffer f1) (as_vale_buffer out) in
    Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 out;
