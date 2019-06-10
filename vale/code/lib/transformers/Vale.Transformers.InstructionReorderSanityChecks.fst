@@ -45,8 +45,8 @@ let equiv_states_sanity_check (s1 s2 s3 : machine_state) =
 let sanity_check_unchanged_except1 s =
   assert (unchanged_except [] s s);
   assert (unchanged_except [ALocCf] s s);
-  assert (unchanged_except [ALocCf; ALocOf] s ({s with ms_flags = 0}))
+  assert (unchanged_except [ALocCf; ALocOf] s ({s with ms_flags = havoc_flags}))
 
 [@expect_failure]
 let sanity_check_unchanged_except2 s =
-  assert (unchanged_except [] s ({s with ms_flags = 0}))
+  assert (unchanged_except [] s ({s with ms_flags = havoc_flags}))
