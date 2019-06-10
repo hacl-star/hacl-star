@@ -16,7 +16,6 @@ type location : eqtype =
   | ALocMem : location
   | ALocStack: location
   | ALocReg : reg -> location
-  | ALocXmm : xmm -> location
   | ALocCf : location
   | ALocOf : location
 
@@ -26,18 +25,19 @@ let locations_of_maddr (m:maddr) : locations =
   | MReg r _ -> [ALocReg r]
   | MIndex b _ i _ -> [ALocReg b; ALocReg i]
 
-let locations_of_operand (o:operand) : locations & locations =
+let locations_of_operand64 (o:operand64) : locations & locations =
   match o with
   | OConst _ -> [], []
-  | OReg r -> [ALocReg r], [ALocReg r]
+  | OReg r -> [ALocReg (Reg 0 r)], [ALocReg (Reg 0 r)]
   | OMem (m, _) -> locations_of_maddr m, [ALocMem]
   | OStack (m, _) -> locations_of_maddr m, [ALocStack]
 
 let locations_of_operand128 (o:operand128) : locations & locations =
   match o with
-  | OReg128 r -> [ALocXmm r], [ALocXmm r]
-  | OMem128 (m, _) -> locations_of_maddr m, [ALocMem]
-  | OStack128 (m, _) -> locations_of_maddr m, [ALocStack]
+  | OConst _ -> [], []
+  | OReg r -> [ALocReg (Reg 1 r)], [ALocReg (Reg 1 r)]
+  | OMem (m, _) -> locations_of_maddr m, [ALocMem]
+  | OStack (m, _) -> locations_of_maddr m, [ALocStack]
 
 private
 let both (x: locations & locations) =
@@ -46,12 +46,12 @@ let both (x: locations & locations) =
 
 let locations_of_explicit (t:instr_operand_explicit) (i:instr_operand_t t) : locations & locations =
   match t with
-  | IOp64 -> locations_of_operand i
+  | IOp64 -> locations_of_operand64 i
   | IOpXmm -> locations_of_operand128 i
 
 let locations_of_implicit (t:instr_operand_implicit) : locations & locations =
   match t with
-  | IOp64One i -> locations_of_operand i
+  | IOp64One i -> locations_of_operand64 i
   | IOpXmmOne i -> locations_of_operand128 i
   | IOpFlagsCf -> [ALocCf], [ALocCf]
   | IOpFlagsOf -> [ALocOf], [ALocOf]
@@ -106,14 +106,20 @@ let rw_set_of_ins i =
   | Instr i oprs _ ->
     read_set i oprs, write_set i oprs
   | Push src t ->
-    ALocReg rRsp :: both (locations_of_operand src),
-    [ALocReg rRsp; ALocStack]
+    ALocReg (Reg 0 rRsp) :: both (locations_of_operand64 src),
+    [ALocReg (Reg 0 rRsp); ALocStack]
   | Pop dst t ->
-    ALocReg rRsp :: ALocStack :: fst (locations_of_operand dst),
-    ALocReg rRsp :: snd (locations_of_operand dst)
+    ALocReg (Reg 0 rRsp) :: ALocStack :: fst (locations_of_operand64 dst),
+    ALocReg (Reg 0 rRsp) :: snd (locations_of_operand64 dst)
   | Alloc _
   | Dealloc _ ->
-    [ALocReg rRsp], [ALocReg rRsp]
+    [ALocReg (Reg 0 rRsp)], [ALocReg (Reg 0 rRsp)]
+
+let aux_print_reg_from_location (a:location{ALocReg? a}) : string =
+  let ALocReg (Reg file id) = a in
+  match file with
+  | 0 -> print_reg_name id
+  | 1 -> print_xmm id gcc
 
 (* See fsti *)
 let disjoint_location a1 a2 =
@@ -125,10 +131,8 @@ let disjoint_location a1 a2 =
   | ALocStack, ALocStack -> ffalse "stack not disjoint from itself"
   | ALocMem, ALocStack | ALocStack, ALocMem -> ttrue
   | ALocReg r1, ALocReg r2 ->
-    (r1 <> r2) /- ("register " ^ print_reg_name r1 ^ " not disjoint from itself")
-  | ALocXmm r1, ALocXmm r2 ->
-    (r1 <> r2) /- ("xmm-register " ^ print_reg_name r1 ^ " not disjoint from itself")
-  | ALocReg _, _ | ALocXmm _, _ | _, ALocReg _ | _, ALocXmm _ -> ttrue
+    (r1 <> r2) /- ("register " ^ aux_print_reg_from_location a1 ^ " not disjoint from itself")
+  | ALocReg _, _ | _, ALocReg _ -> ttrue
 
 (* See fsti *)
 let auto_lemma_disjoint_location a1 a2 = ()
@@ -136,20 +140,18 @@ let auto_lemma_disjoint_location a1 a2 = ()
 (* See fsti *)
 let location_val_t a =
   match a with
-  | ALocMem -> heap & memTaint_t
-  | ALocStack -> stack & memTaint_t
-  | ALocReg _ -> nat64
-  | ALocXmm _ -> quad32
-  | ALocCf -> bool
-  | ALocOf -> bool
+  | ALocMem -> machine_heap & memTaint_t
+  | ALocStack -> machine_stack & memTaint_t
+  | ALocReg r -> t_reg r
+  | ALocCf -> flag_val_t
+  | ALocOf -> flag_val_t
 
 (* See fsti *)
 let eval_location a s =
   match a with
-  | ALocMem -> s.ms_mem, s.ms_memTaint
+  | ALocMem -> s.ms_heap, s.ms_memTaint
   | ALocStack -> s.ms_stack, s.ms_stackTaint
   | ALocReg r -> eval_reg r s
-  | ALocXmm r -> eval_xmm r s
   | ALocCf -> cf s.ms_flags
   | ALocOf -> overflow s.ms_flags
 
@@ -158,18 +160,16 @@ let update_location a v s =
   match a with
   | ALocMem ->
     let v = coerce v in
-    { s with ms_mem = fst v ; ms_memTaint = snd v }
+    { s with ms_heap = fst v ; ms_memTaint = snd v }
   | ALocStack ->
     let v = coerce v in
     { s with ms_stack = fst v ; ms_stackTaint = snd v }
   | ALocReg r ->
     update_reg' r v s
-  | ALocXmm r ->
-    update_xmm' r v s
   | ALocCf ->
-    { s with ms_flags = update_cf' s.ms_flags v }
+    { s with ms_flags = FStar.FunctionalExtensionality.on_dom flag (fun f -> if f = fCarry then v else s.ms_flags f) }
   | ALocOf ->
-    { s with ms_flags = update_of' s.ms_flags v }
+    { s with ms_flags = FStar.FunctionalExtensionality.on_dom flag (fun f -> if f = fOverflow then v else s.ms_flags f) }
 
 (* See fsti *)
 let lemma_locations_truly_disjoint a a_change v s = ()
@@ -185,17 +185,10 @@ let lemma_locations_complete s1 s2 ok trace =
   );
   assert (FStar.FunctionalExtensionality.feq s1.ms_regs s2.ms_regs);
   assert (s1.ms_regs == s2.ms_regs);
-  FStar.Classical.forall_intro (
-    (fun r ->
-       assert (eval_location (ALocXmm r) s1 == eval_location (ALocXmm r) s2) (* OBSERVE *)
-    ) <: (r:_ -> Lemma (eval_xmm r s1 == eval_xmm r s2))
-  );
-  assert (FStar.FunctionalExtensionality.feq s1.ms_xmms s2.ms_xmms);
-  assert (s1.ms_xmms == s2.ms_xmms);
   assert (overflow s1.ms_flags == overflow s2.ms_flags);
   assert (cf s1.ms_flags == cf s2.ms_flags);
   assume (s1.ms_flags == s2.ms_flags); (* WARN UNSOUND!!! REVIEW: Figure out how to fix this. *)
-  assert (s1.ms_mem == s2.ms_mem);
+  assert (s1.ms_heap == s2.ms_heap);
   assert (s1.ms_memTaint == s2.ms_memTaint);
   assert (s1.ms_stack == s2.ms_stack);
   assert (s1.ms_stackTaint == s2.ms_stackTaint);
