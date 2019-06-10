@@ -154,6 +154,12 @@ val hash_fits: #a:Hash.alg -> h:HS.mem -> s:state a -> Lemma
     S.length (hashed h s) < Spec.Hash.Definitions.max_input_length a))
   [ SMTPat (hashed h s) ]
 
+val alg_of_state: a:e_alg -> (
+  let a = G.reveal a in
+  s: state a -> Stack alg
+  (fun h0 -> invariant h0 s)
+  (fun h0 a' h1 -> h0 == h1 /\ a' == a))
+
 
 /// Central frame invariants
 /// ------------------------

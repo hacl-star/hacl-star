@@ -89,6 +89,11 @@ let hashed (#a: Hash.alg) (h: HS.mem) (s: state a) =
 let hash_fits #a h s =
   assert_norm (pow2 61 < pow2 125)
 
+let alg_of_state a s =
+  let open LowStar.BufferOps in
+  let State hash_state _ _ _ = !*s in
+  Hash.alg_of_state a hash_state
+
 /// Framing
 
 #push-options "--max_ifuel 1"
