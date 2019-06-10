@@ -154,12 +154,12 @@ val add_counter_lemma_i:
   -> ctr:counter{w * ctr <= max_size_t}
   -> i:nat{i < w} ->
   Lemma ((transpose_state (add_counter #w ctr st)).[i] ==
-	 Scalar.add_counter (w * ctr) (transpose_state st).[i])
+	 Scalar.chacha20_add_counter (transpose_state st).[i] (w * ctr))
 let add_counter_lemma_i #w st ctr i =
   FStar.Math.Lemmas.modulo_lemma (w * ctr) (pow2 32);
   uintv_extensionality (u32 w *! u32 ctr) (u32 (w * ctr));
   eq_intro (transpose_state (add_counter #w ctr st)).[i]
-	   (Scalar.add_counter (w * ctr) (transpose_state st).[i])
+	   (Scalar.chacha20_add_counter (transpose_state st).[i] (w * ctr))
 
 val chacha20_core_lemma_i:
     #w:lanes
@@ -835,9 +835,9 @@ val chacha20_core_equiv_lemma:
       Scalar.chacha20_core (w * incr + i) st1 ==
       Scalar.chacha20_core (w * incr) st2)
 let chacha20_core_equiv_lemma ctr0 st1 st2 w incr i =
-  let k1 = Scalar.add_counter (w * incr + i) st1 in
+  let k1 = Scalar.chacha20_add_counter st1 (w * incr + i) in
   assert (k1.[12] == u32 ctr0 +. u32 (w * incr + i));
-  let k2 = Scalar.add_counter (w * incr) st2 in
+  let k2 = Scalar.chacha20_add_counter st2 (w * incr) in
   assert (k2.[12] == u32 (ctr0 + i) +. u32 (w * incr));
   uintv_extensionality k1.[12] k2.[12];
   eq_intro k1 k2;
@@ -847,9 +847,9 @@ let chacha20_core_equiv_lemma ctr0 st1 st2 w incr i =
   let k2 = Scalar.sum_state k st2 in
   assert (k2.[12] == k.[12] +. u32 (ctr0 + i));
   assert (forall (j:nat). j < 16 /\ j <> 12 ==> k1.[j] == k2.[j]);
-  let k1 = Scalar.add_counter (w * incr + i) k1 in
+  let k1 = Scalar.chacha20_add_counter k1 (w * incr + i) in
   assert (k1.[12] == k.[12] +. u32 ctr0 +. u32 (w * incr + i));
-  let k2 = Scalar.add_counter (w * incr) k2 in
+  let k2 = Scalar.chacha20_add_counter k2 (w * incr) in
   assert (k2.[12] == k.[12] +. u32 (ctr0 + i) +. u32 (w * incr));
   add_counter_lemma_aux ctr0 w incr i k.[12];
   eq_intro k1 k2
