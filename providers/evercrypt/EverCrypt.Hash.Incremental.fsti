@@ -31,6 +31,9 @@ include Spec.Hash.Definitions
 unfold noextract
 let alg = hash_alg
 
+unfold noextract
+let e_alg = Hash.e_alg
+
 // Similar to: Spec.Hash.Definitions.bytes_hash
 let bytes_any_hash = s:S.seq UInt8.t { S.length s = 64 }
 // Similar to: Hacl.Hash.Definitions.hash_t
@@ -135,6 +138,7 @@ val invariant_loc_in_footprint
 ///    single framing lemma (as opposed to three or more for the styles 1. 2. and
 ///    3.). It appears that this may be overkill for this module and may be better
 ///    suited to TLS.
+///
 ///                                            JP (20190607)
 
 noextract
@@ -214,7 +218,9 @@ val create_in (a: Hash.alg) (r: HS.rid): ST (state a)
 
 (** @type: true
 *)
-val init (a: Hash.alg) (s: state a): Stack unit
+val init: a:e_alg -> (
+  let a = G.reveal a in
+  s:state a -> Stack unit
   (requires (fun h0 ->
     invariant h0 s))
   (ensures (fun h0 _ h1 ->
@@ -222,7 +228,7 @@ val init (a: Hash.alg) (s: state a): Stack unit
     invariant h1 s /\
     hashed h1 s == S.empty /\
     footprint h0 s == footprint h1 s /\
-    B.(modifies (footprint h0 s) h0 h1)))
+    B.(modifies (footprint h0 s) h0 h1))))
 
 unfold
 let update_pre
@@ -255,13 +261,14 @@ let update_post
 (** @type: true
 *)
 val update:
-  a:Hash.alg ->
+  a:e_alg -> (
+  let a = G.reveal a in
   s:state a ->
   data: B.buffer UInt8.t ->
   len: UInt32.t ->
   Stack unit
     (requires fun h0 -> update_pre a s data len h0)
-    (ensures fun h0 s' h1 -> update_post a s data len h0 h1)
+    (ensures fun h0 s' h1 -> update_post a s data len h0 h1))
 
 /// Note: the state is left to be reused by the caller to feed more data into
 /// the hash.
@@ -284,16 +291,17 @@ let finish_st (a: Hash.alg) =
 
 (** @type: true
 *)
-val finish: a:Hash.alg -> finish_st a
+val finish: a:e_alg -> finish_st (G.reveal a)
 
 (** @type: true
 *)
 val free:
-  a:Hash.alg ->
+  a:e_alg -> (
+  let a = G.reveal a in
   s:state a ->
   ST unit
   (requires fun h0 ->
     freeable h0 s /\
     invariant h0 s)
   (ensures fun h0 _ h1 ->
-    B.modifies (footprint h0 s) h0 h1)
+    B.modifies (footprint h0 s) h0 h1))

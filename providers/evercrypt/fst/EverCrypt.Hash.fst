@@ -74,6 +74,16 @@ let repr #a s h: GTot _ =
   let s = B.get h s 0 in
   B.as_seq h (p s)
 
+let alg_of_state #a s =
+  let open LowStar.BufferOps in
+  match !*s with
+  | MD5_s _ -> MD5
+  | SHA1_s _ -> SHA1
+  | SHA2_224_s _ -> SHA2_224
+  | SHA2_256_s _ -> SHA2_256
+  | SHA2_384_s _ -> SHA2_384
+  | SHA2_512_s _ -> SHA2_512
+
 let repr_eq (#a:alg) (r1 r2: Spec.Hash.Definitions.words_state a) =
   Seq.equal r1 r2
 
