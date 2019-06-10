@@ -650,7 +650,7 @@ let machine_eval_ins_st (ins:ins) : st unit =
     let new_src = eval_operand src s in            // Evaluate value on initial state
     let new_rsp = eval_reg_64 rRsp s - 8 in           // Compute the new stack pointer
     update_rsp new_rsp;;                           // Actually modify the stack pointer
-    let o_new = OStack (MReg rRsp (-8), t) in
+    let o_new = OStack (MReg (Reg 0 rRsp) (-8), t) in
     update_operand64_preserve_flags o_new new_src  // Store the element at the new stack pointer
 
   | BC.Pop dst t ->
