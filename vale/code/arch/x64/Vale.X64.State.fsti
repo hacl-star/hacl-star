@@ -6,12 +6,13 @@ open Vale.Def.Prop_s
 open Vale.X64.Machine_s
 open Vale.X64.Memory
 open Vale.X64.Stack_i
+module Flags = Vale.X64.Flags
 module Regs = Vale.X64.Regs
 
 noeq type vale_state = {
   vs_ok: bool;
   vs_regs: Regs.t;
-  vs_flags: nat64;
+  vs_flags: Flags.t;
   vs_heap: vale_heap;
   vs_stack: vale_stack;
   vs_memTaint: memtaint;
@@ -22,6 +23,8 @@ noeq type vale_state = {
 unfold let eval_reg (r:reg) (s:vale_state) : t_reg r = Regs.sel r s.vs_regs
 [@va_qattr]
 unfold let eval_reg_int (r:reg) (s:vale_state) : int = t_reg_to_int r.rf (eval_reg r s)
+[@va_qattr]
+unfold let eval_flag (f:flag) (s:vale_state) : Flags.flag_val_t = Flags.sel f s.vs_flags
 [@va_qattr]
 unfold let eval_mem (ptr:int) (s:vale_state) : GTot nat64 = load_mem64 ptr s.vs_heap
 [@va_qattr]
@@ -67,6 +70,10 @@ let update_reg (r:reg) (v:t_reg r) (s:vale_state) : vale_state =
 [@va_qattr]
 let update_reg_64 (r:reg_64) (v:nat64) (s:vale_state) : vale_state =
   update_reg (Reg 0 r) v s
+
+[@va_qattr]
+let update_flag (f:flag) (v:Flags.flag_val_t) (s:vale_state) : vale_state =
+  {s with vs_flags = Flags.upd f v s.vs_flags}
 
 [@va_qattr]
 let update_reg_xmm (r:reg_xmm) (v:quad32) (s:vale_state) : vale_state =
@@ -116,7 +123,7 @@ let state_eta (s:vale_state) : vale_state =
 let state_eq (s0:vale_state) (s1:vale_state) : prop0 =
   s0.vs_ok == s1.vs_ok /\
   Regs.equal s0.vs_regs s1.vs_regs /\
-  s0.vs_flags == s1.vs_flags /\
+  Flags.equal s0.vs_flags s1.vs_flags /\
   s0.vs_heap == s1.vs_heap /\
   s0.vs_stack == s1.vs_stack /\
   s0.vs_memTaint == s1.vs_memTaint /\

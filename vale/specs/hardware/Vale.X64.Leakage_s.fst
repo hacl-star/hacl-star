@@ -11,7 +11,7 @@ noeq type analysis_taints =
       analysis_taints
 
 let publicFlagValuesAreSame (ts:analysis_taints) (s1:machine_state) (s2:machine_state) =
-  ts.flagsTaint = Public ==> (s1.ms_flags = s2.ms_flags)
+  ts.flagsTaint = Public ==> (s1.ms_flags == s2.ms_flags)
 
 let publicCfFlagValuesAreSame (ts:analysis_taints) (s1:machine_state) (s2:machine_state) =
   Public? ts.cfFlagsTaint ==> (cf s1.ms_flags = cf s2.ms_flags)

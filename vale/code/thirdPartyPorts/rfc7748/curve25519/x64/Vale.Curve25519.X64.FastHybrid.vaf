@@ -377,6 +377,7 @@ procedure carry_times_38(inout tmp:dst_opr64)
     requires
         carry == 0;
         @tmp != OReg(rRax);
+        valid_cf(efl);
     ensures
         carry == bool_bit(cf(efl)) * 38;
         tmp == 38;
@@ -409,6 +410,7 @@ procedure carry_pass(inline use_cf:bool, inline offset:nat, ghost dst_b:buffer64
 
         carry_in * 38 < pow2_63;
         !use_cf ==> zero == 0 && tmp == 38;
+        use_cf ==> valid_cf(efl);
 
      validDstAddrs64(mem, dst_ptr, dst_b, 4 + offset, memTaint, Secret);
     ensures
@@ -615,6 +617,7 @@ procedure carry_sub_pass()
 
     requires
         adx_enabled && bmi2_enabled;
+        valid_cf(efl);
 
     ensures
        pow2_four(a0, a1, a2, a3) % prime == old(pow2_four(a0, a1, a2, a3) - bool_bit(cf(efl)) * pow2_256) % prime;
@@ -682,6 +685,7 @@ procedure fast_add(ghost inA_b:buffer64, ghost inB_b:buffer64)
     ensures
         let d := pow2_five(d0, d1, d2, d3, bool_bit(cf(efl)));
         d == old(a + b);
+        valid_cf(efl);
 {
     xor_lemmas();
     Load64_buffer(d0, inB_ptr,  0, Secret, inB_b, 0);     /* B[0] */
@@ -735,6 +739,7 @@ procedure fast_sub(ghost inA_b:buffer64, ghost inB_b:buffer64)
     ensures
         let d := pow2_four(d0, d1, d2, d3);
         d - bool_bit(cf(efl)) * pow2_256 == old(a - b);
+        valid_cf(efl);
 {
     xor_lemmas();
     lemma_sub_carry_equiv_forall();

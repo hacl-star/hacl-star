@@ -56,7 +56,7 @@ var r12:nat64 {:state reg64(rR12)};
 var r13:nat64 {:state reg64(rR13)};
 var r14:nat64 {:state reg64(rR14)};
 var r15:nat64 {:state reg64(rR15)};
-var efl:nat64 {:state flags()};
+var efl:Vale.X64.Flags.t {:state flags()};
 var mem:vale_heap {:state mem()};
 var stack:vale_stack {:state stack()};
 var memTaint:memtaint {:state memTaint()};
@@ -89,6 +89,8 @@ procedure Cmovc64(inout dst:dst_opr64, in src:opr64)
     {:quick exportOnly}
     {:instruction mk_ins(make_instr(I.ins_Cmovc64, dst, src))}
     reads efl;
+    requires
+        valid_cf(efl);
     ensures
         if cf(efl) then dst = old(src) else dst = old(dst);
 {
@@ -115,7 +117,7 @@ procedure Add64Wrap(inout dst:dst_opr64, in src:opr64)
         efl;
     ensures
         dst == old(add_wrap64(dst, src));
-        cf(efl) == old(dst + src >= pow2_64);
+        updated_cf(efl, old(dst + src >= pow2_64));
 {
 }
 
@@ -139,9 +141,10 @@ procedure Adc64(inout dst:dst_opr64, in src:opr64)
         efl;
     requires
         src + dst + 1 < pow2_64;
+        valid_cf(efl);
     ensures
         dst == old(dst + src + (if cf(efl) then 1 else 0));
-        cf(efl) == old(dst + src + (if cf(efl) then 1 else 0)) >= pow2_64;
+        updated_cf(efl, old(dst + src + (if cf(efl) then 1 else 0)) >= pow2_64);
 {
 }
 
@@ -151,9 +154,11 @@ procedure Adc64Wrap(inout dst:dst_opr64, in src:opr64)
     {:instruction mk_ins(make_instr(I.ins_AddCarry64, dst, src))}
     modifies
         efl;
+    requires
+        valid_cf(efl);
     ensures
         dst == old(add_wrap64(add_wrap64(dst, src), (if cf(efl) then 1 else 0)));
-        cf(efl) == old(dst + src + (if cf(efl) then 1 else 0)) >= pow2_64;
+        updated_cf(efl, old(dst + src + (if cf(efl) then 1 else 0)) >= pow2_64);
 {
 }
 
@@ -165,9 +170,12 @@ procedure Adcx64Wrap(inout dst:dst_opr64, in src:opr64)
     requires adx_enabled;
     modifies
         efl;
+    requires
+        valid_cf(efl);
     ensures
         dst == old(add_wrap64(add_wrap64(dst, src), (if cf(efl) then 1 else 0)));
-        efl == update_cf(old(efl), old(dst + src + (if cf(efl) then 1 else 0)) >= pow2_64);
+        updated_cf(efl, old(dst + src + (if cf(efl) then 1 else 0)) >= pow2_64);
+        maintained_of(efl, old(efl));
 {
     assert old(add_wrap64(add_wrap64(dst, src), (if cf(efl) then 1 else 0)) == (dst + src + (if cf(efl) then 1 else 0)) % pow2_64); // REVIEW: shouldn't be necessary
 }
@@ -180,9 +188,12 @@ procedure Adox64Wrap(inout dst:dst_opr64, in src:opr64)
     requires adx_enabled;
     modifies
         efl;
+    requires
+        valid_of(efl);
     ensures
         dst == old(add_wrap64(add_wrap64(dst, src), (if overflow(efl) then 1 else 0)));
-        efl == update_of(old(efl), old(dst + src + (if overflow(efl) then 1 else 0)) >= pow2_64);
+        updated_of(efl, old(dst + src + (if overflow(efl) then 1 else 0)) >= pow2_64);
+        maintained_cf(efl, old(efl));
 {
 }
 
@@ -207,7 +218,7 @@ procedure Sub64Wrap(inout dst:dst_opr64, in src:opr64)
         efl;
     ensures
         dst == old(dst - src) % pow2_64;
-        cf(efl) == old(dst - src < 0);
+        updated_cf(efl, old(dst - src < 0));
 {
 }
 
@@ -217,9 +228,11 @@ procedure Sbb64(inout dst:dst_opr64, in src:opr64)
     {:instruction mk_ins(make_instr(I.ins_Sbb64, dst, src))}
     modifies
         efl;
+    requires
+        valid_cf(efl);
     ensures
         dst == old(dst - (src + (if cf(efl) then 1 else 0))) % pow2_64;
-        cf(efl) == old(dst - (src + (if cf(efl) then 1 else 0))) < 0;
+        updated_cf(efl, old(dst - (src + (if cf(efl) then 1 else 0))) < 0);
 {
 }
 
@@ -291,7 +304,8 @@ procedure Xor64(inout dst:dst_opr64, in src:opr64)
         dst == old(ixor64(dst,src));
         !overflow(efl);
         !cf(efl);
-
+        valid_cf(efl);
+        valid_of(efl);
 {
 }
 

@@ -6,7 +6,7 @@ module S = Vale.X64.Stack_i
 // (It should not refer to Machine_Semantics_s, directly or indirectly.)
 // It should not refer to StateLemmas, Lemmas, or Print_s,
 // because they refer to Machine_Semantics_s.
-// Stack_i, Memory, Regs and State are ok, because they do not refer to Machine_Semantics_s.
+// Stack_i, Memory, Regs, Flags and State are ok, because they do not refer to Machine_Semantics_s.
 
 open Vale.Def.Prop_s
 open Vale.X64.Machine_s
@@ -16,12 +16,22 @@ open Vale.Def.Types_s
 unfold let vale_heap = M.vale_heap
 unfold let quad32 = quad32
 
-val cf : (flags:int) -> bool
-val overflow (flags:int) : bool
-val update_cf (flags:int) (new_cf:bool) : (new_flags:int { cf new_flags == new_cf /\
-                                                       overflow new_flags == overflow flags} )
-val update_of (flags:int) (new_of:bool) : (new_flags:int { overflow new_flags == new_of /\
-                                                       cf new_flags == cf flags })
+val cf (flags:Flags.t) : bool
+val overflow (flags:Flags.t) : bool
+val valid_cf (flags:Flags.t) : bool
+val valid_of (flags:Flags.t) : bool
+val updated_cf (new_flags:Flags.t) (new_cf:bool) : (b:bool { b <==> (
+                                                       cf new_flags == new_cf /\
+						       valid_cf new_flags ) } )
+val updated_of (new_flags:Flags.t) (new_of:bool) : (b:bool { b <==> (
+                                                       overflow new_flags == new_of /\
+						       valid_of new_flags ) } )
+val maintained_cf (new_flags:Flags.t) (flags:Flags.t) : (b:bool { b <==> (
+                                                       cf new_flags == cf flags /\
+						       valid_cf new_flags == valid_cf flags ) } )
+val maintained_of (new_flags:Flags.t) (flags:Flags.t) : (b:bool { b <==> (
+                                                       overflow new_flags == overflow flags /\
+						       valid_of new_flags == valid_of flags ) } )
 
 //unfold let va_subscript = Map.sel
 unfold let va_subscript (#a:eqtype) (#b:Type) (x:Map.t a b) (y:a) : Tot b = Map.sel x y
@@ -249,7 +259,7 @@ val taint_at (memTaint:M.memtaint) (addr:int) : taint
 
 (* Getters *)
 [@va_qattr] unfold let va_get_ok (s:va_state) : bool = s.vs_ok
-[@va_qattr] unfold let va_get_flags (s:va_state) : int = s.vs_flags
+[@va_qattr] unfold let va_get_flags (s:va_state) : Flags.t = s.vs_flags
 [@va_qattr] unfold let va_get_reg64 (r:reg_64) (s:va_state) : nat64 = eval_reg_64 r s
 [@va_qattr] unfold let va_get_xmm (x:reg_xmm) (s:va_state) : quad32 = eval_reg_xmm x s
 [@va_qattr] unfold let va_get_mem (s:va_state) : vale_heap = s.vs_heap
@@ -258,7 +268,7 @@ val taint_at (memTaint:M.memtaint) (addr:int) : taint
 [@va_qattr] unfold let va_get_stackTaint (s:va_state) : M.memtaint = s.vs_stackTaint
 
 [@va_qattr] let va_upd_ok (ok:bool) (s:vale_state) : vale_state = { s with vs_ok = ok }
-[@va_qattr] let va_upd_flags (flags:nat64) (s:vale_state) : vale_state = { s with vs_flags = flags }
+[@va_qattr] let va_upd_flags (flags:Flags.t) (s:vale_state) : vale_state = { s with vs_flags = flags }
 [@va_qattr] let va_upd_reg (r:reg) (v:t_reg r) (s:vale_state) : vale_state = update_reg r v s
 [@va_qattr] let va_upd_reg64 (r:reg_64) (v:nat64) (s:vale_state) : vale_state = update_reg_64 r v s
 [@va_qattr] let va_upd_xmm (x:reg_xmm) (v:quad32) (s:vale_state) : vale_state = update_reg_xmm x v s

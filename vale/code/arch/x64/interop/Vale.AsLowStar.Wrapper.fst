@@ -294,7 +294,11 @@ let core_create_lemma_state
     assert (tr_s.BS.ms_memTaint == va_s.VS.vs_memTaint);
     assert (tr_s.BS.ms_stackTaint == va_s.VS.vs_stackTaint);
     SL.lemma_to_ok va_s;
-    SL.lemma_to_flags va_s;
+    let aux_flag (f:MS.flag) : Lemma (tr_s.BS.ms_flags f == sl_s.BS.ms_flags f)
+      = SL.lemma_to_flags va_s f
+    in
+    Classical.forall_intro aux_flag;
+    assert (FunctionalExtensionality.feq tr_s.BS.ms_flags sl_s.BS.ms_flags);
     SL.lemma_to_mem va_s;
     SL.lemma_to_stack va_s;
     let aux_reg (r:MS.reg) : Lemma (tr_s.BS.ms_regs r == sl_s.BS.ms_regs r)
