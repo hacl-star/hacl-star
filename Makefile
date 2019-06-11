@@ -668,7 +668,6 @@ DEFAULT_FLAGS_NO_TESTS	=\
   -bundle Hacl.Poly1305.Field32xN.Lemmas[rename=Hacl_Lemmas] \
   -bundle Lib.*[rename=Hacl_Lib] \
   -drop Lib.IntVector.Intrinsics \
-  -add-include '"libintvector.h"' \
   -add-include '"evercrypt_targetconfig.h"' \
   -drop EverCrypt.TargetConfig \
   -bundle EverCrypt.BCrypt \
@@ -693,9 +692,11 @@ DEFAULT_FLAGS_NO_TESTS	=\
   -fparentheses -fno-shadow -fcurly-braces \
   -bundle WasmSupport
 
+INTRINSIC_FLAGS = -add-include '"libintvector.h"'
 OPT_FLAGS = -ccopts -march=native,-mtune=native
+TEST_FLAGS = -bundle Test,Test.*,Hacl.Test.*
 
-DEFAULT_FLAGS = $(DEFAULT_FLAGS_NO_TESTS) -bundle Test,Test.*,Hacl.Test.* $(OPT_FLAGS)
+DEFAULT_FLAGS = $(DEFAULT_FLAGS_NO_TESTS) $(TEST_FLAGS) $(OPT_FLAGS) $(INTRINSIC_FLAGS)
 
 # Should be fixed by having KreMLin better handle imported names
 WASM_STANDALONE=Prims LowStar.Endianness C.Endianness \
@@ -712,14 +713,21 @@ WASM_FLAGS	=\
   -bundle '\*[rename=Misc]' \
   -minimal -wasm
 
+HASH_BUNDLE=-bundle Hacl.Hash.MD5+Hacl.Hash.Core.MD5+Hacl.Hash.SHA1+Hacl.Hash.Core.SHA1+Hacl.Hash.SHA2+Hacl.Hash.Core.SHA2+Hacl.Hash.Core.SHA2.Constants=Hacl.Hash.*[rename=Hacl_Hash]
+SHA3_BUNDLE=-bundle Hacl.Impl.SHA3+Hacl.SHA3=[rename=Hacl_SHA3]
+CHACHA20_BUNDLE=-bundle Hacl.Impl.Chacha20=Hacl.Impl.Chacha20.*[rename=Hacl_Chacha20]
+CURVE_BUNDLE=-bundle Hacl.Curve25519_51+Hacl.Curve25519_64=Hacl.Impl.Curve25519.*[rename=Hacl_Curve25519]
+CHACHAPOLY_BUNDLE=-bundle Hacl.Impl.Chacha20Poly1305=Hacl.Impl.Chacha20Poly1305.*[rename=Hacl_Chacha20Poly1305]
+ED_BUNDLE=-bundle 'Hacl.Ed25519=Hacl.Impl.Ed25519.*,Hacl.Impl.BignumQ.Mul,Hacl.Impl.Load56,Hacl.Impl.SHA512.ModQ,Hacl.Impl.Store56,Hacl.Bignum25519'
+
 COMPACT_FLAGS	=\
-  -bundle Hacl.Hash.MD5+Hacl.Hash.Core.MD5+Hacl.Hash.SHA1+Hacl.Hash.Core.SHA1+Hacl.Hash.SHA2+Hacl.Hash.Core.SHA2+Hacl.Hash.Core.SHA2.Constants=Hacl.Hash.*[rename=Hacl_Hash] \
-  -bundle Hacl.Impl.SHA3+Hacl.SHA3=[rename=Hacl_SHA3] \
+  $(HASH_BUNDLE) \
+  $(SHA3_BUNDLE) \
+  $(CHACHA20_BUNDLE) \
+  $(CURVE_BUNDLE) \
+  $(CHACHAPOLY_BUNDLE) \
+  $(ED_BUNDLE) \
   -bundle Hacl.Impl.Poly1305.*[rename=Unused_Poly1305] \
-  -bundle Hacl.Impl.Chacha20=Hacl.Impl.Chacha20.*[rename=Hacl_Chacha20] \
-  -bundle Hacl.Curve25519_51+Hacl.Curve25519_64=Hacl.Impl.Curve25519.*[rename=Hacl_Curve25519] \
-  -bundle Hacl.Impl.Chacha20Poly1305=Hacl.Impl.Chacha20Poly1305.*[rename=Hacl_Chacha20Poly1305] \
-  -bundle 'Hacl.Ed25519=Hacl.Impl.Ed25519.*,Hacl.Impl.BignumQ.Mul,Hacl.Impl.Load56,Hacl.Impl.SHA512.ModQ,Hacl.Impl.Store56,Hacl.Bignum25519' \
   -bundle LowStar.* \
   -bundle Prims,C.Failure,C,C.String,C.Loops,Spec.Loops,C.Endianness,FStar.*[rename=Hacl_Kremlib] \
   -bundle 'EverCrypt.Spec.*' \
@@ -765,16 +773,22 @@ dist/compact-c89/Makefile.basic: \
 # - disable the legacy EverCrypt namespace -- this is mostly for Merkle Trees
 #   (and hashes, too)
 # - enclaves only use 64-bit GCC/Clang -- assume unsigned __int128
+# - disable intrinsics (immintrin not availble with enclave toolchain)
+# - disbable chacha20, chachapoly, corresponding assemblies
 dist/ccf/Makefile.basic: \
   KRML_EXTRA=$(COMPACT_FLAGS) \
     -fbuiltin-uint128 \
     -bundle EverCrypt.AutoConfig2= \
     -bundle EverCrypt \
     -bundle EverCrypt.Hacl \
-    -bundle '\*[rename=EverCrypt_Misc]'
+    -bundle Hacl.*[rename=Hacl_Leftovers]
+dist/ccf/Makefile.basic: INTRINSIC_FLAGS=
+dist/ccf/Makefile.basic: CHACHA20_BUNDLE=
+dist/ccf/Makefile.basic: CHACHAPOLY_BUNDLE=
+dist/ccf/Makefile.basic: VALE_ASMS := $(filter-out poly1305-%,$(VALE_ASMS))
 
 dist/wasm/Makefile.basic: KRML_EXTRA=$(WASM_FLAGS)
-dist/wasm/Makefile.basic: DEFAULT_FLAGS=$(DEFAULT_FLAGS_NO_TESTS) $(OPT_FLAGS)
+dist/wasm/Makefile.basic: TEST_FLAGS=
 
 dist/portable/Makefile.basic: OPT_FLAGS=-ccopts -mtune=generic
 
