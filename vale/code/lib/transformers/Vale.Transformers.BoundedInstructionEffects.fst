@@ -110,6 +110,59 @@ let rw_set_of_ins i =
   | Dealloc _ ->
     [ALocReg (Reg 0 rRsp)], [ALocReg (Reg 0 rRsp)]
 
+#push-options "--z3rlimit 20 --max_fuel 2 --max_ifuel 1"
+let rec lemma_instr_write_outputs_only_affects_write
+    (outs:list instr_out) (args:list instr_operand)
+    (vs:instr_ret_t outs) (oprs:instr_operands_t outs args) (s_orig s:machine_state)
+    (a:location) :
+  Lemma
+    (requires (
+        let w = aux_write_set outs args oprs in
+        !!(disjoint_location_from_locations a w)))
+    (ensures (
+        (eval_location a s == eval_location a (instr_write_outputs outs args vs oprs s_orig s)))) =
+  match outs with
+  | [] -> ()
+  | (_, i) :: outs -> (
+      let ((v:instr_val_t i), (vs:instr_ret_t outs)) =
+        match outs with
+        | [] -> (vs, ())
+        | _::_ -> let vs = coerce vs in (fst vs, snd vs)
+        in
+      match i with
+      | IOpEx i ->
+        let oprs = coerce oprs in
+        let s = instr_write_output_explicit i v (fst oprs) s_orig s in
+        lemma_instr_write_outputs_only_affects_write outs args vs (snd oprs) s_orig s a
+      | IOpIm i ->
+        let s = instr_write_output_implicit i v s_orig s in
+        lemma_instr_write_outputs_only_affects_write outs args vs (coerce oprs) s_orig s a
+    )
+#pop-options
+
+let lemma_eval_instr_only_affects_write
+    (it:instr_t_record) (oprs:instr_operands_t it.outs it.args) (ann:instr_annotation it)
+    (s0:machine_state)
+    (a:location) :
+  Lemma
+    (requires (
+        (let r, w = rw_set_of_ins (Instr it oprs ann) in
+         !!(disjoint_location_from_locations a w) /\
+         (Some? (eval_instr it oprs ann s0)))))
+    (ensures (
+        (eval_location a s0 == eval_location a (Some?.v (eval_instr it oprs ann s0))))) =
+  let r, w = rw_set_of_ins (Instr it oprs ann) in
+  let InstrTypeRecord #outs #args #havoc_flags' i = it in
+  let vs = instr_apply_eval outs args (instr_eval i) oprs s0 in
+  let s1 =
+    match havoc_flags' with
+    | HavocFlags -> {s0 with ms_flags = havoc_flags}
+    | PreserveFlags -> s0
+  in
+  let Some vs = vs in
+  let _ = instr_write_outputs outs args vs oprs s0 s1 in
+  lemma_instr_write_outputs_only_affects_write outs args vs oprs s0 s1 a
+
 let lemma_machine_eval_ins_st_only_affects_write_aux (i:ins{Instr? i}) (s:machine_state) (a:location) :
   Lemma
     (requires (
@@ -117,7 +170,10 @@ let lemma_machine_eval_ins_st_only_affects_write_aux (i:ins{Instr? i}) (s:machin
         (!!(disjoint_location_from_locations a w))))
     (ensures (
         (eval_location a s == eval_location a (run (machine_eval_ins_st i) s)))) =
-  admit ()
+  let Instr it oprs ann = i in
+  match eval_instr it oprs ann s with
+  | Some _ -> lemma_eval_instr_only_affects_write it oprs ann s a
+  | None -> ()
 
 let lemma_machine_eval_ins_st_only_affects_write (i:ins{Instr? i}) (s:machine_state) :
   Lemma
