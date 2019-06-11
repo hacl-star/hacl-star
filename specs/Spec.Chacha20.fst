@@ -99,15 +99,6 @@ let setup (k:key) (n:nonce) (ctr0:counter) (st:state) : Tot state =
   let st = update_sub st 13 3 (uints_from_bytes_le #U32 #SEC #3 n) in
   st
 
-
-let setup_ (k:key) (n:nonce) : Tot state =
-  let uc = map secret chacha20_constants in
-  let uk = uints_from_bytes_le #U32 #SEC #8 k in
-  let uctr = create 1 (u32 0) in
-  let un = uints_from_bytes_le #U32 #SEC #3 n in
-  uc @| uk @| uctr @| un
-
-
 let chacha20_init (k:key) (n:nonce) (ctr0:counter) : Tot state =
   let st = create 16 (u32 0) in
   let st  = setup k n ctr0 st in

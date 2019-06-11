@@ -387,6 +387,17 @@ let aes_ctr_encrypt_last
   sub cipher 0 (length b)
 
 
+val aes_ctr_encrypt_stream:
+    v:variant
+  -> st:aes_ctr_state v
+  -> msg:bytes{length msg / 16 <= max_size_t} ->
+  Tot (ciphertext:bytes{length ciphertext == length msg})
+let aes_ctr_encrypt_stream v st  msg =
+  map_blocks 16 msg
+    (aes_ctr_encrypt_block v st)
+    (aes_ctr_encrypt_last v st)
+
+
 val aes_ctr_encrypt_bytes:
     v:variant
   -> key:aes_key v
@@ -398,9 +409,8 @@ val aes_ctr_encrypt_bytes:
 
 let aes_ctr_encrypt_bytes v key n_len nonce ctr0 msg =
   let st0 = aes_ctr_init v key n_len nonce ctr0 in
-  map_blocks 16 msg
-    (aes_ctr_encrypt_block v st0)
-    (aes_ctr_encrypt_last v st0)
+  aes_ctr_encrypt_stream v st0 msg
+
 
 let aes128_ctr_encrypt_bytes key n_len nonce ctr0 msg =
   aes_ctr_encrypt_bytes AES128 key n_len nonce ctr0 msg
