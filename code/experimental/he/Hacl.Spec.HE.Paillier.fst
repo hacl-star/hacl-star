@@ -60,7 +60,7 @@ val carm: p:prm -> q:prm -> l:fe (p*q){l <= (p-1) * (q-1) /\ l >= 1}
 let carm p q = lcm_less_mul (p-1) (q-1); lcm (p-1) (q-1)
 
 val carm_unit: p:prm -> q:prm -> Lemma
-  (isunit #(p*q) (carm p q))
+  (isunit #(p*q) (carm p q) /\ is_gcd (carm p q) (p*q) 1)
 let carm_unit p q =
   // Any divisor of p*q has form kp or kq, but (p-1)(q-1) has none
   // of this form.
@@ -158,6 +158,12 @@ val is_g: n:big -> g:fe (n*n) -> Type0
 let is_g n g = isunit g /\ (exists (p:prm) (q:prm). n = p * q /\ in_base p q g)
 
 type isg (n:big) = g:fe (n*n){is_g n g}
+
+// simply move exists, needs the fact that factorisation is unique
+val is_g_in_base: p:prm -> q:prm -> g:fe ((p*q)*(p*q)) -> Lemma
+  (requires (is_g (p*q) g))
+  (ensures (in_base p q g))
+let is_g_in_base p q g = admit ()
 
 val np1_is_unit: #n:comp -> Lemma (isunit (np1 #n)) [SMTPat (np1 #n)]
 let np1_is_unit #n =
@@ -285,13 +291,9 @@ let encf #n g x y = encf_raw #n g x (lift y)
 
 #reset-options "--z3rlimit 100"
 
-val encf_unit: #n:comp -> g:isg n -> x:fe n -> y:fenu n -> Lemma
-  (isunit #(n*n) (encf #n g x y))
-let encf_unit #n g x y =
-
-  if x = 0 then (fexp_zero2 g; one_isunit n) else g_pow_isunit g x;
-  assert(isunit (fexp g x));
-
+val encf_unit_y: #n:comp -> g:isg n -> y:fenu n -> Lemma
+  (fexp (lift y) n *% fexp (lift (finv y)) n = 1)
+let encf_unit_y #n g y =
   let n2 = n * n in
   let y': fen2 n = lift y in
   let fy = finv y in
@@ -320,12 +322,213 @@ let encf_unit #n g x y =
   assert (fexp #n2 (1 + ((y' *% fy')/n)*n) n = 1);
   assert (fexp  (y' *% fy') n = 1);
   assert (fexp y' n *% fexp fy' n = 1);
-  assert (isunit (fexp y' n));
+  assert (isunit (fexp y' n))
 
+val encf_unit: #n:comp -> g:isg n -> x:fe n -> y:fenu n -> Lemma
+  (isunit #(n*n) (encf #n g x y))
+let encf_unit #n g x y =
 
-  isunit_prod (fexp g x) (fexp y' n)
+  if x = 0 then (fexp_zero2 g; one_isunit n) else g_pow_isunit g x;
+  assert(isunit (fexp g x));
+
+  encf_unit_y #n g y;
+
+  isunit_prod (fexp g x) (fexp (lift y) n)
 
 #reset-options
+
+
+// TODO
+// val encf_inj_raw: #n:comp -> g:isg n -> x1:nat -> y1:fen2 n -> x2:nat -> y2:fen2 n -> Lemma
+
+//#reset-options "--z3rlimit 150 --max_fuel 2 --max_ifuel 0"
+
+#reset-options "--z3rlimit 150"
+
+val encf_inj_raw1:
+     p:prm
+  -> q:prm
+  -> g:isg (p*q)
+  -> x1:nat
+  -> y1:fenu (p*q)
+  -> x2:nat
+  -> y2:fenu (p*q) -> Lemma
+  (requires (encf_raw g x1 (lift y1) = encf_raw g x2 (lift y2)))
+  (ensures (let lambda = carm p q in
+            let r = mult_order g in
+
+       fexp g (r - x1%r + x2%r) *%
+       fexp (lift y2 *% lift (finv y1)) (p*q) = 1 /\
+
+       fexp g ((r - x1%r + x2%r) * lambda) *%
+       fexp (lift y2 *% lift (finv y1)) ((p*q)*lambda) = 1
+   ))
+let encf_inj_raw1 p q g x1 y1 x2 y2 =
+  let lambda = carm p q in
+  let n = p * q in
+  let y1' = lift y1 in
+  let y2' = lift y2 in
+  assert (fexp g x1 *% fexp y1' n = fexp g x2 *% fexp y2' n);
+  let r = mult_order g in
+  g_pow_order_reduc g x1;
+  g_pow_order_reduc g x2;
+  let x1 = x1 % r in
+  let x2 = x2 % r in
+//  assert (fexp g x1 *% fexp y1' n = fexp g x2 *% fexp y2' n);
+  g_pow_inverse g x1;
+  let z1 = fexp g (r - (x1 % r)) in
+
+  encf_unit_y #n g y1;
+  let fy = finv y1 in
+  let fy' = lift fy in
+
+
+  let lemma1 (): Lemma
+   (fexp g (r - x1 + x2) *% (fexp (y2' *% fy') n) = 1 /\
+    fexp (fexp g (r - x1 + x2)) lambda *% fexp (fexp (y2' *% fy') n) lambda = 1) = begin
+    assert ((z1 *% fexp g x1) *% fexp y1' n = z1 *% (fexp g x2 *% fexp y2' n));
+    assert (fexp y1' n = (z1 *% fexp g x2) *% fexp y2' n);
+
+    assert (fexp y1' n *% fexp fy' n = (z1 *% fexp g x2) *% (fexp y2' n *% fexp fy' n));
+    assert ((z1 *% fexp g x2) *% (fexp y2' n *% fexp fy' n) = 1);
+
+    to_fe_idemp #r x1;
+    fexp_mul1 g (r - x1) x2;
+    assert (fexp g (r - x1 + x2) *% (fexp y2' n *% fexp fy' n) = 1);
+
+    fexp_mul2 y2' fy' n;
+    assert (fexp g (r - x1 + x2) *% fexp (y2' *% fy') n = 1);
+
+    assert (fexp (fexp g (r - x1 + x2) *% fexp (y2' *% fy') n) lambda = fexp 1 lambda);
+    fexp_one2 #(n*n) lambda;
+    assert (fexp (fexp g (r - x1 + x2) *% fexp (y2' *% fy') n) lambda = 1);
+    fexp_mul2 (fexp g (r - x1 + x2)) (fexp (y2' *% fy') n) lambda
+  end in
+
+  nat_times_nat_is_nat (r - x1 + x2) lambda;
+  nat_times_nat_is_nat n lambda;
+
+  let lemma2 (): Lemma (fexp g ((r - x1 + x2) * lambda) *% fexp (y2' *% fy') (n*lambda) = 1) = begin
+    lemma1 ();
+    fexp_exp g (r - x1 + x2) lambda;
+    assert (fexp (fexp g (r - x1 + x2)) lambda = fexp g ((r - x1 + x2) * lambda));
+    assert (fexp g ((r - x1 + x2) * lambda) *% fexp (fexp (y2' *% fy') n) lambda = 1);
+    fexp_exp (y2' *% fy') n lambda;
+    assert (fexp g ((r - x1 + x2) * lambda) *% fexp (y2' *% fy') (n * lambda) = 1)
+  end in
+
+  lemma1 ();
+  lemma2 ()
+
+
+val divides_over_higher_mod: n:big -> alpha:pos -> x1:nat -> x2:nat -> Lemma
+  (requires (x2 % (alpha*n) - x1 % (alpha*n)) % n = 0)
+  (ensures (x2 - x1) % n = 0)
+let divides_over_higher_mod n alpha x1 x2 =
+  let r = alpha * n in
+  let s = x2 % r - x1 % r in
+  mod_prop n s 0;
+  assert (x2 % r = x1 % r + n * (s / n));
+  mod_prop r x2 (x1 % r + n * (s / n));
+  assert (x2 - (x1 % r + n * (s / n)) = (x2 / r) * r );
+  assert (x1 % r = x2 - (x2 / r) * r - n * (s/n));
+  mod_prop r x1 (x2 - (x2 / r) * r - n * (s/n));
+  assert (x2 - x1 = n * ( (x2 / r) * alpha + (s/n) - (x1 / r) * alpha));
+  cancel_mul_mod ((x2 / r) * alpha + (s/n) - (x1 / r) * alpha) n;
+  assert (divides n (x2 - x1))
+
+#reset-options "--z3rlimit 150"
+
+val encf_inj_raw2: p:prm -> q:prm -> g:isg (p*q) -> x1:nat -> y1:fenu (p*q) -> x2:nat -> y2:fenu (p*q) -> Lemma
+  (requires (encf_raw g x1 (lift y1) = encf_raw g x2 (lift y2)))
+  (ensures (let r = mult_order g in
+    fexp g ((r - (x1%r) + (x2%r)) * (carm p q)) = 1 /\
+    (x2 - x1) % (p*q) = 0 /\
+    (x2 % r - x1 % r) % (p*q) = 0))
+let encf_inj_raw2 p q g x10 y1 x20 y2 =
+  encf_inj_raw1 p q g x10 y1 x20 y2;
+
+  let lambda = carm p q in
+  let n = p * q in
+  let r = mult_order g in
+  g_pow_order_reduc g x10;
+  g_pow_order_reduc g x20;
+
+  let x1 = x10 % r in
+  let x2 = x20 % r in
+
+  let remove_ys (): Lemma (fexp g ((r - x1 + x2) * lambda) = 1) = begin
+    let y1' = lift y1 in
+    let y2' = lift y2 in
+    let fy = finv y1 in
+    let fy' = lift fy in
+
+    assert (fexp g ((r - x1 + x2) * lambda) *% fexp (y2' *% fy') (n*lambda) = 1);
+
+    fexp_mul2 y2' fy' (n*lambda);
+    assert (fexp (y2' *% fy') (n*lambda) = fexp y2' (n*lambda) *% fexp fy' (n*lambda));
+
+    encf_unit_y g y2;
+    encf_unit_y g y1;
+    euler_thm3 p q y2;
+    euler_thm3 p q fy;
+    assert (fexp (y2' *% fy') (n*lambda) = 1);
+    mul_one (fexp g ((r - x1 + x2) * lambda))
+    end in
+
+  remove_ys ();
+
+  is_g_in_base p q g;
+  let alpha = r / n in
+  assert (r % n = 0 /\ alpha > 0 /\ alpha < lambda);
+  lemma_div_mod r n;
+  assert (r = alpha * n);
+
+  mult_order_divides g ((r - x1 + x2) * lambda);
+  divides_prod alpha n ((r - x1 + x2) * lambda);
+  assert (divides n ((r - x1 + x2) * lambda));
+
+  carm_unit p q;
+  divides_exactly_one_multiple n (r - x1 + x2) lambda;
+  assert (divides n (r - x1 + x2));
+
+  modulo_distributivity r (x2 - x1) n;
+  assert (divides n ((x2 - x1) % n));
+  modulo_modulo_lemma (x2 - x1) n 1;
+  assert (divides n (x2 - x1));
+
+  divides_over_higher_mod n alpha x10 x20
+
+
+#reset-options "--z3rlimit 150"
+
+val encf_inj_raw_partial: p:prm -> q:prm -> g:isg (p*q) -> x1:nat -> y1:fenu (p*q) -> x2:nat -> y2:fenu (p*q) -> Lemma
+  (requires (encf_raw g x1 (lift y1) = encf_raw g x2 (lift y2)))
+  (ensures ((x2 - x1) % (p*q) = 0))
+let encf_inj_raw_partial p q g x1 y1 x2 y2 = encf_inj_raw2 p q g x1 y1 x2 y2
+
+
+val encf_inj_raw: p:prm -> q:prm -> g:isg (p*q) -> x1:nat -> y1:fenu (p*q) -> x2:nat -> y2:fenu (p*q) -> Lemma
+  (requires (encf_raw g x1 (lift y1) = encf_raw g x2 (lift y2)))
+  (ensures (x1 = x2 /\ y1 = y2))
+let encf_inj_raw p q g x1 y1 x2 y2 = admit ()
+
+
+val encf_inj: #n:comp -> g:isg n -> x1:fe n -> y1:fenu n -> x2:fe n -> y2:fenu n -> Lemma
+  (requires (encf g x1 y1 = encf g x2 y2))
+  (ensures (x1 = x2 /\ y1 = y2))
+let encf_inj #n g x1 y1 x2 y2 = admit ()
+//  to_fe_idemp #n x1;
+//  to_fe_idemp #n x2;
+//  to_fe_idemp #n y1;
+//  to_fe_idemp #n y2;
+//  let y1' = lift y1 in
+//  let y2' = lift y2 in
+//  encf_inj_raw #n g x1 y1' x2 y2';
+//  multiplication_order_lemma n 1 n;
+//  to_fe_bigger_and_back (n*n) y1;
+//  to_fe_bigger_and_back (n*n) y2
+
 
 // Injectiveness is proven at the page 226
 //
@@ -334,26 +537,14 @@ let encf_unit #n g x y =
 //
 // TODO This is very important lemma, please pay double attention
 // when proving it.
-val encf_inj_raw: #n:comp -> g:isg n -> x1:nat -> y1:fen2 n -> x2:nat -> y2:fen2 n -> Lemma
-  (requires (encf_raw #n g x1 y1 = encf_raw #n g x2 y2))
-  (ensures (to_fe #n x1 = to_fe #n x2 /\ to_fe #n y1 = to_fe #n y2))
-let encf_inj_raw #n _ _ _ _ = admit() //TODO
+val encf_inj2: #n:comp -> g:isg n -> x1:nat -> y1:fenu n -> x2:nat -> y2:fenu n -> Lemma
+  (requires (encf_raw #n g x1 (lift y1) = encf_raw #n g x2 (lift y2)))
+  (ensures (to_fe #n x1 = to_fe #n x2)) //  /\ to_fe #n y1 = to_fe #n y2))
+let encf_inj2 #n g x1 y1 x2 y2 =
+  encf_inj #n g (to_fe #n x1) y1 (to_fe #n x2) y2;
+  admit ()
 
 
-val encf_inj: #n:comp -> g:isg n -> x1:fe n -> y1:fenu n -> x2:fe n -> y2:fenu n -> Lemma
-  (requires (encf g x1 y1 = encf g x2 y2))
-  (ensures (x1 = x2 /\ y1 = y2))
-let encf_inj #n g x1 y1 x2 y2 =
-  to_fe_idemp #n x1;
-  to_fe_idemp #n x2;
-  to_fe_idemp #n y1;
-  to_fe_idemp #n y2;
-  let y1' = lift y1 in
-  let y2' = lift y2 in
-  encf_inj_raw #n g x1 y1' x2 y2';
-  multiplication_order_lemma n 1 n;
-  to_fe_bigger_and_back (n*n) y1;
-  to_fe_bigger_and_back (n*n) y2
 
 // It is possible to get it checking every element of the preimage.
 // encf is bijection for proper g
