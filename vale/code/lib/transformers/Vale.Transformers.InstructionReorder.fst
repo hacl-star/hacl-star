@@ -853,6 +853,7 @@ let code_exchange_allowed (c1 c2:code) : pbool =
   | Ins i1, Ins i2 -> ins_exchange_allowed i1 i2
   | _ -> ffalse "non instruction swaps conservatively disallowed"
 
+#push-options "--initial_fuel 3 --max_fuel 3 --max_ifuel 0"
 let lemma_code_exchange (c1 c2 : code) (fuel:nat) (s1 s2 : machine_state) :
   Lemma
     (requires (
@@ -870,7 +871,6 @@ let lemma_code_exchange (c1 c2 : code) (fuel:nat) (s1 s2 : machine_state) :
     machine_eval_codes [c2; c1] fuel s2 in
   match c1, c2 with
   | Ins i1, Ins i2 ->
-    admit (); (* TODO FIXME: Broke during merge with fstar-master *)
     let Some s10 = machine_eval_code c1 fuel s1 in
     let Some s11 = machine_eval_code c1 fuel (filt_state s1) in
     // assert_norm (equiv_states s10 s11);
@@ -881,7 +881,7 @@ let lemma_code_exchange (c1 c2 : code) (fuel:nat) (s1 s2 : machine_state) :
     // assert_norm (equiv_states s12 s13);
     let s14 = machine_eval_ins i2 (filt_state (machine_eval_ins i1 (filt_state s1))) in
     // assert_norm (equiv_states s13 s14);
-    assert_norm (equiv_states s1' s14);
+    assert (equiv_states s1' s14);
     let Some s20 = machine_eval_code c2 fuel s2 in
     let Some s21 = machine_eval_code c2 fuel (filt_state s2) in
     // assert_norm (equiv_states s20 s21);
@@ -892,11 +892,12 @@ let lemma_code_exchange (c1 c2 : code) (fuel:nat) (s1 s2 : machine_state) :
     // assert_norm (equiv_states s22 s23);
     let s24 = machine_eval_ins i1 (filt_state (machine_eval_ins i2 (filt_state s2))) in
     // assert_norm (equiv_states s23 s24);
-    assert_norm (equiv_states s2' s24);
+    assert (equiv_states s2' s24);
     lemma_instruction_exchange i1 i2 s1 s2;
     assert (equiv_states s14 s24);
     assert (equiv_states s1' s2')
   | _ -> ()
+#pop-options
 
 /// Given that we can perform simple swaps between [code]s, we can
 /// define a relation that tells us if some [codes] can be transformed
