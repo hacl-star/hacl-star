@@ -15,14 +15,20 @@ type fenu (n:comp) = r:fe n{isunit r}
 type fen2 (n:comp) = fe (n * n)
 type fen2u n = r:fen2 n{isunit r}
 
-val lemma_div_le_strict: #n:comp -> a:fen2 n -> Lemma (a / n < n)
+val lemma_div_le_strict: #n:comp -> a:fen2 n -> Lemma (a / n < n /\ field_el #n (a/n))
 let lemma_div_le_strict #n a =
   multiple_division_lemma n n;
   lemma_div_le a (n*n) n
 
+val shrink: #n:comp -> a:fen2 n -> b:fe n{b = to_fe #n a}
+let shrink #n a = to_fe #n a
+
+val lift: #n:comp -> a:fe n -> b:fen2 n{b = a /\ shrink b = a}
+let lift #n a = a
+
 val isunit_in_nsquare2: #n:comp -> a:fen2 n -> Lemma
   (requires (isunit a))
-  (ensures (isunit (to_fe #n a)))
+  (ensures (isunit (shrink a)))
 let isunit_in_nsquare2 #n a =
 
   let n2 = n * n in
@@ -51,12 +57,19 @@ let isunit_in_nsquare2 #n a =
   assert (is_gcd (to_fe #n a) n 1);
   inv_as_gcd1 (to_fe #n a)
 
-val shrink: #n:comp -> a:fen2 n -> b:fe n{b = to_fe #n a}
-let shrink #n a = to_fe #n a
+// to_fe_mul specified for our case
+val shrink_mul: #n:comp -> a:fen2 n -> b:fen2 n -> Lemma
+  (shrink (a *% b) = shrink a *% shrink b)
+let shrink_mul #n a b =
+  to_fe_mul #n a b;
+  modulo_modulo_lemma (a * b) n n
 
-val lift: #n:comp -> a:fe n -> b:fen2 n{b = a /\ shrink b = a}
-let lift #n a = a
-
+// to_fe_fexp specified for our case
+val shrink_fexp: #n:comp -> g:fen2 n -> x:nat -> Lemma
+  (shrink (fexp #(n*n) g x) = fexp #n (shrink g) x)
+let shrink_fexp #n g x =
+  cancel_mul_div n n;
+  to_fe_fexp1 #(n*n) n g x
 
 // Carmichael's function
 val carm: p:prm -> q:prm -> l:fe (p*q){l <= (p-1) * (q-1) /\ l >= 1}
@@ -93,9 +106,23 @@ let root_of_unity_form #n _ = admit()
 // (1 + xn)^n = (n choose 0)*1 + (n choose 1)*xn + (n choose 2)*(xn)^2 + ...
 //            = 1 + xn^2 + (n choose 2) * x^2n^2 + ...
 //            = 1
+val root_of_unity_prop0: #n:comp -> x:fen2 n -> Lemma
+  (fexp #(n*n) (1 +% (x *% n)) n = 1)
+let root_of_unity_prop0 #n x = admit ()
+
 val root_of_unity_prop: #n:comp -> x:fe n -> Lemma
   (fexp #(n*n) (1 + (x * n)) n = 1)
-let root_of_unity_prop #n x = admit ()
+let root_of_unity_prop #n x =
+  let n2 = n * n in
+  assert (x * n < n2);
+  assert (lift x *% n = x * n);
+  assert (x * n + 1 < n2);
+  to_fe_idemp #n2 (x * n + 1);
+  assert (to_fe #n2 (x * n + 1) = x * n + 1);
+  to_fe_add' #n2 1 (x * n);
+  assert (( +% ) #n2 1 (x * n) = 1 + x * n);
+  root_of_unity_prop0 #n (lift x)
+
 
 #reset-options "--z3rlimit 100"
 
@@ -266,12 +293,6 @@ let euler_thm3 p q w =
   assert (fexp #n2 (1 + (f1/n)*n) n = 1);
   assert (fexp f1 n = 1)
 
-val carmichael_thm: p:prm -> q:prm -> w:fen2 (p*q) -> Lemma
-  (let l = carm p q in
-   let n = p * q in
-   isunit (to_fe #n w) ==> fexp #(n*n) w (n*l) = one)
-let carmichael_thm p q w = admit () // it is not actually used anywhere
-
 val fermat_inverse_carm:
      p:prm
   -> q:prm
@@ -329,6 +350,8 @@ let encf_unit_y #n g y =
   assert (fexp y' n *% fexp fy' n = 1);
   assert (isunit (fexp y' n))
 
+#reset-options
+
 val encf_unit: #n:comp -> g:isg n -> x:fe n -> y:fenu n -> Lemma
   (isunit #(n*n) (encf #n g x y))
 let encf_unit #n g x y =
@@ -340,15 +363,36 @@ let encf_unit #n g x y =
 
   isunit_prod (fexp g x) (fexp (lift y) n)
 
-#reset-options
+val lemma_y_inverse_lift0:
+     p:prm
+  -> q:prm
+  -> y:fen2 (p*q) { isunit (shrink y) }
+  -> Lemma
+  (let n = p * q in
+   let k = to_fe #(n*n) (((shrink y)*(finv (shrink y)))/n) in
+   lift (shrink y) *% lift (finv (shrink y)) = 1 +% k *% n)
+let lemma_y_inverse_lift0 p q y =
+  let n = p * q in
+  let n2 = n * n in
 
+  let a = shrink y in
+  let b = finv a in
 
-// TODO
-// val encf_inj_raw: #n:comp -> g:isg n -> x1:nat -> y1:fen2 n -> x2:nat -> y2:fen2 n -> Lemma
+  mod_prop n (a * b) 1;
+  assert (a * b = 1 + ((a*b)/n) * n);
 
-//#reset-options "--z3rlimit 150 --max_fuel 2 --max_ifuel 0"
+  assert (lift a *% lift b = (a * b) % n2);
+  assert (lift a *% lift b = (1 + ((a*b)/n) * n) % n2);
+  modulo_distributivity 1 (((a*b)/n)*n) n2;
+  modulo_lemma 1 n2;
+  assert (lift a *% lift b = (1 + (((a*b)/n) * n)%n2) % n2);
+  modulo_mul_distributivity ((a*b)/n) n n2;
+  modulo_lemma n n2;
+  assert ((((a*b)/n) * n)%n2 = (to_fe #n2 ((a*b)/n)) *% n);
+  assert (lift a *% lift b = (1 + (to_fe #n2 ((a*b)/n)) *% n) % n2);
+  assert (lift a *% lift b = 1 +% (to_fe #n2 ((a*b)/n)) *% n)
 
-#reset-options "--z3rlimit 50"
+#reset-options "--z3rlimit 100"
 
 val lemma_y_inverse_lift:
      p:prm
@@ -356,9 +400,50 @@ val lemma_y_inverse_lift:
   -> y:fen2 (p*q) { isunit (shrink y) }
   -> Lemma
   (fexp y (p*q) *% fexp (lift (finv (shrink y))) (p*q) = 1)
-let lemma_y_inverse_lift p q y = admit () // written on paper...
+let lemma_y_inverse_lift p q y =
+  let n = p * q in
+  let n2 = n * n in
+  assert (n < n2);
+  let y' = lift (finv (shrink y)) in
+  fexp_mul2 y y' n;
 
+  let k:fen2 n = to_fe #(n*n) (((shrink y)*(finv (shrink y)))/n) in
+  lemma_div_le_strict y;
+  let y_n:fen2 n = lift (y/n) in
 
+  let lemma1 (): Lemma (y *% y' = 1 +% (k +% (y_n *% y')) *% n) = begin
+      lemma_div_mod y n;
+      assert (y = shrink y + n * (y / n));
+      to_fe_idemp #n2 (shrink y);
+      assert (to_fe #n2 (shrink y) = shrink y);
+      to_fe_idemp_raw n2 (n * (y/n));
+      assert (to_fe #n2 (n * (y/n)) = n * (y/n));
+      to_fe_add #n2 (shrink y) (n * (y/n));
+      let l1:fe n2 = lift (shrink y) in
+      let l2:fe n2 = n * (y/n) in
+      to_fe_idemp #n2 (shrink y + n * (y/n));
+      assert (y = l1 +% l2);
+      mul_add_distr_l #(n*n) l1 l2 y';
+      assert (y *% y' = (l1 *% y') +% (l2 *% y'));
+      lemma_y_inverse_lift0 p q y;
+      assert (y *% y' = (1 +% (k *% n)) +% ((n * (y/n)) *% y'));
+      to_fe_idemp #n2 (n * (y/n));
+      to_fe_idemp #n2 n;
+      to_fe_idemp #n2 (y/n);
+      to_fe_mul #n2 n (y/n);
+      assert (y *% y' = (1 +% k *% n) +% ((n *% (y/n)) *% y'));
+      assert (y *% y' = (1 +% n *% k) +% ((n *% (y/n)) *% y'));
+      assert (y *% y' = 1 +% (n *% k +% n *% (y_n *% y')));
+      mul_add_distr_r n k (y_n *% y');
+      assert (y *% y' = 1 +% (k +% (y_n *% y')) *% n)
+    end in
+
+  lemma1 ();
+
+  root_of_unity_prop0 #n (k +% (y_n *% y'));
+  assert (fexp (y *% y') n = 1)
+
+#reset-options "--z3rlimit 50"
 
 val encf_inj_raw1:
      p:prm
@@ -367,7 +452,7 @@ val encf_inj_raw1:
   -> x1:nat
   -> y1:fen2 (p*q) { isunit (shrink y1) }
   -> x2:nat
-  -> y2:fen2 (p*q) { isunit (shrink y2) }
+  -> y2:fen2 (p*q)
   -> Lemma
   (requires (encf_raw g x1 y1 = encf_raw g x2 y2))
   (ensures (let lambda = carm p q in
@@ -385,7 +470,7 @@ let encf_inj_raw1 p q g x1 y1' x2 y2' =
   let lambda = carm p q in
   let n = p * q in
   let y1:fenu n = shrink y1' in
-  let y2:fenu n = shrink y2' in
+  let y2:fe n = shrink y2' in
   assert (fexp g x1 *% fexp y1' n = fexp g x2 *% fexp y2' n);
   let r = mult_order g in
   g_pow_order_reduc g x1;
@@ -396,7 +481,6 @@ let encf_inj_raw1 p q g x1 y1' x2 y2' =
   encf_unit_y #n g y1;
   let fy = finv y1 in
   let fy' = lift fy in
-
 
   let lemma1 (): Lemma
    (fexp g (r - x1 + x2) *% (fexp (y2' *% fy') n) = 1 /\
@@ -491,6 +575,7 @@ let encf_inj_raw2 p q g x10 y1' x20 y2' =
 
   nat_times_nat_is_nat (r - x1 + x2) lambda;
 
+
   let remove_ys (): Lemma (fexp g ((r - x1 + x2) * lambda) = 1) = begin
     let y1 = shrink y1' in
     let y2 = shrink y2' in
@@ -508,7 +593,6 @@ let encf_inj_raw2 p q g x10 y1' x20 y2' =
     assert (fexp (y2' *% fy') (n*lambda) = 1);
     mul_one (fexp g ((r - x1 + x2) * lambda))
     end in
-
 
   remove_ys ();
 
@@ -533,8 +617,7 @@ let encf_inj_raw2 p q g x10 y1' x20 y2' =
 
   divides_over_higher_mod n alpha x10 x20
 
-
-#reset-options "--z3rlimit 150"
+#reset-options
 
 val encf_inj_raw_partial:
      #n:comp
@@ -554,27 +637,14 @@ let encf_inj_raw_partial #n g x1 y1 x2 y2 =
   add_move_to_right #n (to_fe #n x2) (to_fe #n x1) 0;
   add_sub_zero (to_fe #n x1)
 
-
-val encf_inj_raw: p:prm -> q:prm -> g:isg (p*q) -> x1:nat -> y1:fenu (p*q) -> x2:nat -> y2:fenu (p*q) -> Lemma
-  (requires (encf_raw g x1 (lift y1) = encf_raw g x2 (lift y2)))
-  (ensures (x1 = x2 /\ y1 = y2))
-let encf_inj_raw p q g x1 y1 x2 y2 = admit ()
-
-
+// We only need injectivity on xs
 val encf_inj: #n:comp -> g:isg n -> x1:fe n -> y1:fenu n -> x2:fe n -> y2:fenu n -> Lemma
   (requires (encf g x1 y1 = encf g x2 y2))
-  (ensures (x1 = x2 /\ y1 = y2))
-let encf_inj #n g x1 y1 x2 y2 = admit ()
-//  to_fe_idemp #n x1;
-//  to_fe_idemp #n x2;
-//  to_fe_idemp #n y1;
-//  to_fe_idemp #n y2;
-//  let y1' = lift y1 in
-//  let y2' = lift y2 in
-//  encf_inj_raw #n g x1 y1' x2 y2';
-//  multiplication_order_lemma n 1 n;
-//  to_fe_bigger_and_back (n*n) y1;
-//  to_fe_bigger_and_back (n*n) y2
+  (ensures (x1 = x2))
+let encf_inj #n g x1 y1 x2 y2 =
+  to_fe_idemp #n x1;
+  to_fe_idemp #n x2;
+  encf_inj_raw_partial #n g x1 (lift y1) x2 (lift y2)
 
 
 // It is possible to get it checking every element of the preimage.
@@ -659,8 +729,16 @@ let res_class_decomposition #n g1 g2 w =
 
   assert (encf_raw g1 x1 y1' = encf_raw g1 (x3 * x2) (fexp y3' x2 *% y2'));
 
+  let second_y_is_unit (): Lemma (isunit (shrink (fexp y3' x2 *% y2'))) = begin
+      shrink_mul (fexp y3' x2) y2';
+      shrink_fexp y3' x2;
+      assert (shrink (fexp y3' x2 *% y2') = fexp y3 x2 *% y2);
+      g_pow_isunit y3 x2;
+      isunit_prod (fexp y3 x2) y2
+    end in
+
   assert (isunit (shrink y1'));
-  assume (isunit (shrink (fexp y3' x2 *% y2'))); // TODO
+  second_y_is_unit ();
   encf_inj_raw_partial g1 x1 y1' (x3 * x2) (fexp y3' x2 *% y2');
   to_fe_idemp #n x1;
   to_fe_mul' x3 x2;
