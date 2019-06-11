@@ -656,7 +656,9 @@ let lemma_equiv_states_when_except_none (s1 s2:machine_state) (ok:bool) :
         (unchanged_except [] s1 s2)))
     (ensures (
         (equiv_states ({s1 with ms_ok=ok}) ({s2 with ms_ok=ok})))) =
-  lemma_locations_complete s1 s2 ok []
+  assert_norm (cf s2.ms_flags == cf (filter_state s2 s1.ms_flags ok []).ms_flags); (* OBSERVE *)
+  assert_norm (overflow s2.ms_flags == overflow (filter_state s2 s1.ms_flags ok []).ms_flags); (* OBSERVE *)
+  lemma_locations_complete s1 s2 s1.ms_flags ok []
 
 let rec lemma_mem_not_disjoint (a:location) (as1 as2:list location) :
   Lemma

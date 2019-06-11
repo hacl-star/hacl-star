@@ -79,8 +79,10 @@ let update_location a v s =
 let lemma_locations_truly_disjoint a a_change v s = ()
 
 (* See fsti *)
-let lemma_locations_complete s1 s2 ok trace =
-  let s1, s2 = {s1 with ms_ok = ok ; ms_trace = trace}, {s2 with ms_ok = ok ; ms_trace = trace} in
+let lemma_locations_complete s1 s2 flags ok trace =
+  let s1, s2 =
+    filter_state s1 flags ok trace,
+    filter_state s2 flags ok trace in
   assert (s1.ms_ok == s2.ms_ok);
   FStar.Classical.forall_intro (
     (fun r ->
@@ -91,7 +93,7 @@ let lemma_locations_complete s1 s2 ok trace =
   assert (s1.ms_regs == s2.ms_regs);
   assert (overflow s1.ms_flags == overflow s2.ms_flags);
   assert (cf s1.ms_flags == cf s2.ms_flags);
-  assume (s1.ms_flags == s2.ms_flags); (* WARN UNSOUND!!! REVIEW: Figure out how to fix this. *)
+  assert (FStar.FunctionalExtensionality.feq s1.ms_flags s2.ms_flags);
   assert (s1.ms_heap == s2.ms_heap);
   assert (s1.ms_memTaint == s2.ms_memTaint);
   assert (s1.ms_stack == s2.ms_stack);
