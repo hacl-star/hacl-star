@@ -82,15 +82,30 @@ val lemma_locations_truly_disjoint :
     (requires (a <> a_change))
     (ensures (eval_location a s == eval_location a (update_location a_change v s)))
 
+(** Filter out things we don't want to compare on two states *)
+let filter_state (s:machine_state) (flags:flags_t) (ok:bool) (trace:list observation) =
+  { s with
+    ms_flags = FunctionalExtensionality.on_dom flag
+        (fun f ->
+           if f = fCarry then
+             s.ms_flags fCarry
+           else if f = fOverflow then
+             s.ms_flags fOverflow
+           else
+             flags f ) ;
+    ms_ok = ok ;
+    ms_trace = trace }
+
 (** The locations cover everything except some very explicitly mentioned parts of the state. *)
 val lemma_locations_complete :
   s1:machine_state ->
   s2:machine_state ->
+  flags:flags_t ->
   ok:bool ->
   trace:list observation ->
   Lemma
     (requires (
         (forall a. eval_location a s1 == eval_location a s2)))
     (ensures (
-        ({s1 with ms_ok = ok; ms_trace = trace}) ==
-        ({s2 with ms_ok = ok; ms_trace = trace})))
+        filter_state s1 flags ok trace ==
+        filter_state s2 flags ok trace))
