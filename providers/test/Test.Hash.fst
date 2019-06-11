@@ -9,6 +9,7 @@ module M = LowStar.Modifies
 module MP = LowStar.ModifiesPat
 
 module B = LowStar.Buffer
+module G = FStar.Ghost
 
 open LowStar.BufferOps
 open Spec.Hash.Definitions
@@ -38,29 +39,33 @@ let test_incremental_api (): St unit =
   let b2 = B.alloca_of_list [ 0x05uy; 0x06uy; 0x07uy; 0x08uy ] in
 
   let st = HI.create_in SHA2_256 HyperStack.root in
+  HI.init (G.hide SHA2_256) st;
   let h0 = ST.get () in
-  assert (HI.hashes h0 st Seq.empty);
+  assert B.(loc_disjoint (HI.footprint h0 st) (loc_buffer b1));
+  assert (HI.hashed h0 st `Seq.equal` Seq.empty);
 
   assert_norm (4 < pow2 61);
-  let st = HI.update SHA2_256 st (Ghost.hide Seq.empty) b1 4ul in
+  HI.update (G.hide SHA2_256) st b1 4ul;
   let h1 = ST.get () in
-  assert (HI.hashes h1 st (B.as_seq h0 b1));
+  assert (HI.hashed h1 st `Seq.equal` (Seq.append Seq.empty (B.as_seq h0 b1)));
+  Seq.append_empty_l (B.as_seq h0 b1);
+  assert (HI.hashed h1 st `Seq.equal` (B.as_seq h0 b1));
 
   assert (Seq.length (Ghost.reveal (Ghost.hide (B.as_seq h0 b1))) = 4);
   assert_norm (8 < pow2 61);
-  let st = HI.update SHA2_256 st (Ghost.hide (B.as_seq h0 b1)) b2 4ul in
+  HI.update (G.hide SHA2_256) st b2 4ul;
   let h2 = ST.get () in
-  assert (HI.hashes h2 st (Seq.append (B.as_seq h0 b1) (B.as_seq h0 b2)));
+  assert (HI.hashed h2 st `Seq.equal` (Seq.append (B.as_seq h0 b1) (B.as_seq h0 b2)));
 
   // An example of how to call the hash preservation lemma...
   let dst = B.alloca 0uy 32ul in
   let h3 = ST.get () in
-  HI.modifies_disjoint_preserves B.loc_none h2 h3 st;
-  HI.finish SHA2_256 st (Ghost.hide (Seq.append (B.as_seq h0 b1) (B.as_seq h0 b2))) dst;
+  // Auto-framing!
+  HI.finish (G.hide SHA2_256) st dst;
 
   let h4 = ST.get () in
   assert (Seq.equal (B.as_seq h4 dst)
     (Spec.Hash.hash SHA2_256 (Seq.append (B.as_seq h0 b1) (B.as_seq h0 b2))));
 
-  HI.free SHA2_256 st;
+  HI.free (G.hide SHA2_256) st;
   pop_frame ()
