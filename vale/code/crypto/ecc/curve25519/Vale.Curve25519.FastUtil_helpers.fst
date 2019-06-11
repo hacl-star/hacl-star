@@ -8,7 +8,7 @@ open FStar.Tactics.CanonCommSemiring
 open Vale.Curve25519.Fast_defs
 open Vale.Curve25519.Fast_lemmas_internal
 
-
+(*
 let lemma_sub_carry_equiv (x y:nat64) (c:bit) :
   Lemma (let v, c' = sub_carry x y c in
          v == (x - (y + c)) % pow2_64 /\
@@ -23,6 +23,7 @@ let lemma_sub_carry_equiv_forall () :
          c' == bool_bit (x - (y+c) < 0))
   =
   ()
+*)
 
 #reset-options "--using_facts_from '* -FStar.Tactics -FStar.Reflection' \
   --max_fuel 0 --max_ifuel 0 --z3rlimit 50"
