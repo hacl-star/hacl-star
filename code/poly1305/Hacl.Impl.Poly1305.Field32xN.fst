@@ -693,7 +693,8 @@ let load_blocks #s f b =
   load_felems_le f b;
   set_bit128 f
 
-inline_for_extraction noextract
+//inline_for_extraction noextract
+[@CInline]
 val load_acc1:
     acc:felem 1
   -> b:lbuffer uint8 16ul
@@ -714,7 +715,8 @@ let load_acc1 acc b =
   fadd acc acc e;
   pop_frame()
 
-inline_for_extraction noextract
+//inline_for_extraction noextract
+[@CInline]
 val load_acc2:
     acc:felem 2
   -> b:lbuffer uint8 32ul
@@ -751,7 +753,8 @@ let load_acc2 acc b =
   acc.(4ul) <- acc4;
   pop_frame()
 
-inline_for_extraction noextract
+//inline_for_extraction noextract
+[@CInline]
 val load_acc4:
     acc:felem 4
   -> b:lbuffer uint8 64ul
@@ -931,7 +934,8 @@ let store_felem_le #w b lo hi =
   | 2 -> store_felem2_le b lo hi
   | 4 -> store_felem4_le b lo hi
 
-inline_for_extraction noextract
+//inline_for_extraction noextract
+[@CInline]
 val fmul_r1_normalize:
     out:felem 1
   -> p:precomp_r 1
@@ -950,7 +954,8 @@ let fmul_r1_normalize out p =
   let r5 = sub p 5ul 5ul in
   fmul_r out out r r5
 
-inline_for_extraction noextract
+//inline_for_extraction noextract
+[@CInline]
 val fmul_r2_normalize:
     out:felem 2
   -> p:precomp_r 2
@@ -994,7 +999,8 @@ let fmul_r2_normalize out p =
   out.(3ul) <- o3;
   out.(4ul) <- o4
 
-inline_for_extraction noextract
+//inline_for_extraction noextract
+[@CInline]
 val fmul_r4_normalize:
     out:felem 4
   -> p:precomp_r 4
