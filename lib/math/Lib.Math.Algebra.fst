@@ -434,6 +434,10 @@ val to_fe_bigger_and_back: #n:big -> m:big{m>=n} -> a:fe n -> Lemma
   (to_fe #n (to_fe #m a) = a)
 let to_fe_bigger_and_back #n m a = ()
 
+val to_fe_idemp_raw: n:big -> a:nat -> Lemma
+  (a < n ==> to_fe #n a = a)
+let to_fe_idemp_raw n a = ()
+
 val to_fe_idemp: #n:big -> a:fe n -> Lemma
   (to_fe #n a = a)
 let to_fe_idemp #n a = ()
@@ -539,6 +543,49 @@ let add_move_to_right #n a b c =
 val add_comm: #n:big -> a:fe n -> b:fe n -> Lemma
   (a +% b = b +% a)
 let add_comm #n _ _ = ()
+
+val add3_modulo_out_l: #n:big -> a:fe n -> b:fe n -> c:fe n -> Lemma
+  ((a +% b) +% c = ((a + b) + c) % n)
+let add3_modulo_out_l #n a b c =
+  calc (==) {
+   (a +% b) +% c;
+  == { }
+   ( (a + b) % n ) +% c;
+  == { }
+   ( ((a + b) % n) + c ) % n;
+  == { modulo_distributivity ((a + b) % n) c n }
+   ( (((a + b) % n) % n) + (c % n) ) % n;
+  == { lemma_mod_twice (a + b) n }
+   ( ((a + b) % n) + (c % n)) % n;
+  == { modulo_distributivity (a + b) c n }
+   ( (a + b) + c ) % n;
+  }
+
+val add3_modulo_out_r: #n:big -> a:fe n -> b:fe n -> c:fe n -> Lemma
+  (a +% (b +% c) = (a + (b + c)) % n)
+let add3_modulo_out_r #n a b c =
+  calc (==) {
+    a +% (b +% c);
+   == { add3_modulo_out_l #n b c a }
+    ((b + c) + a) % n;
+   == { }
+    (a + (b + c)) % n;
+  }
+
+val add_assoc: #n:big -> a:fe n -> b:fe n -> c:fe n -> Lemma
+  (ensures ((a +% b) +% c = a +% (b +% c)))
+  [SMTPat ((a +% b) +% c); SMTPat (a +% (b +% c))]
+let add_assoc #n a b c =
+  calc (==) {
+    (a +% b) +% c;
+  == { add3_modulo_out_l a b c }
+    ((a + b) + c) % n;
+  == { }
+    (a + (b + c)) % n;
+  == { add3_modulo_out_r a b c }
+    (a +% (b +% c));
+  }
+
 
 val neg_zero: #n:big -> Lemma
   (neg (to_fe #n 0) = 0)
