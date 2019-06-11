@@ -40,6 +40,7 @@ open Vale.X64.Print_s
 
 open Vale.Transformers.PossiblyMonad
 open Vale.Transformers.Locations
+open Vale.Transformers.BoundedInstructionEffects
 
 /// Finally some convenience module renamings
 
