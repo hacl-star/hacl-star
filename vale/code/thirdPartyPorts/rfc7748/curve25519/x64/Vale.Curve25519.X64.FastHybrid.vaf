@@ -737,7 +737,7 @@ procedure fast_sub(ghost inA_b:buffer64, ghost inB_b:buffer64)
         d - bool_bit(cf(efl)) * pow2_256 == old(a - b);
 {
     xor_lemmas();
-    lemma_sub_carry_equiv_forall();
+//    lemma_sub_carry_equiv_forall();
 
     Load64_buffer(d0, inA_ptr,  0, Secret, inA_b, 0);     /* A[0] */
     Sub64Wrap(d0, Mem(inB_ptr, 0, inB_b, 0, Secret));      /* A[0] - B[0] */

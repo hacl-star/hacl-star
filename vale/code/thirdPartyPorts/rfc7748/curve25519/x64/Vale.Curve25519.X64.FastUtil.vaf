@@ -675,7 +675,7 @@ procedure fast_sub(ghost dst_b:buffer64, ghost inA_b:buffer64, ghost inB_b:buffe
         modifies_buffer(dst_b, old(mem), mem);
 {
     xor_lemmas();
-    lemma_sub_carry_equiv_forall();
+//    lemma_sub_carry_equiv_forall();
 
     Xor64(rax, rax);
 

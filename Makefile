@@ -66,7 +66,8 @@ ifeq (,$(wildcard $(VALE_HOME)/bin/vale.exe))
 endif
 
 ifneq ($(shell cat $(VALE_HOME)/bin/.vale_version | tr -d '\r'),$(shell cat vale/.vale_version | tr -d '\r'))
-  $(error this repository wants Vale $(shell cat vale/.vale_version) but in $$VALE_HOME I found $(shell cat $(VALE_HOME)/bin/.vale_version))
+  $(error this repository wants Vale $(shell cat vale/.vale_version) but in \
+    $$VALE_HOME I found $(shell cat $(VALE_HOME)/bin/.vale_version). Hint: ./everest get_vale.)
 endif
 endif
 
@@ -104,11 +105,16 @@ all-unstaged: compile-compact compile-compact-msvc compile-compact-gcc \
   compile-portable
 
 # Automatic staging.
-%-staged:
+%-staged: .last_vale_version
 	@echo "[STAGE1] Vale to F*"
 	$(MAKE) vale-fst
 	@echo "[STAGE2] Main target: $*"
 	FSTAR_DEPEND_FLAGS="--warn_error +285" $(MAKE) $*-unstaged
+
+.last_vale_version: vale/.vale_version
+	@echo ℹ️  Vale tool upgrade detected
+	cp $< $@
+	find vale -name '*.vaf' -exec touch {} \;
 
 test: test-staged
 test-unstaged: test-handwritten test-c test-ml test-benchmark
@@ -239,7 +245,8 @@ VALE_FSTS = $(call to-obj-dir,$(VAF_AS_FSTS))
 
 # The complete set of F* files, both hand-written and Vale-generated. Note that
 # this is only correct in the second stage of the build.
-FSTAR_ROOTS = $(wildcard $(addsuffix /*.fsti,$(ALL_HACL_DIRS)) $(addsuffix /*.fst,$(ALL_HACL_DIRS))) \
+FSTAR_ROOTS = $(wildcard $(addsuffix /*.fsti,$(ALL_HACL_SOURCE_DIRS)) \
+    $(addsuffix /*.fst,$(ALL_HACL_SOURCE_DIRS))) \
   $(FSTAR_HOME)/ulib/LowStar.Endianness.fst \
   $(wildcard $(VALE_FSTS)) # empty during the first stage
 
