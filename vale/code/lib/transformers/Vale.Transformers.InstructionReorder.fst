@@ -797,15 +797,6 @@ let lemma_machine_eval_ins_st_exchange (i1 i2 : ins) (s : machine_state) :
     admit ()
   | Push _ _ | Pop _ _ | Alloc _ | Dealloc _ -> ()
 
-let lemma_instruction_exchange'_ss (i1 i2 : ins) (s : machine_state) :
-  Lemma
-    (requires (!!(ins_exchange_allowed i1 i2)))
-    (ensures (
-        (equiv_states
-          (machine_eval_ins i2 (machine_eval_ins i1 s))
-          (machine_eval_ins i1 (machine_eval_ins i2 s))))) =
-  admit ()
-
 let lemma_instruction_exchange' (i1 i2 : ins) (s1 s2 : machine_state) :
   Lemma
     (requires (
@@ -816,7 +807,7 @@ let lemma_instruction_exchange' (i1 i2 : ins) (s1 s2 : machine_state) :
            machine_eval_ins i2 (machine_eval_ins i1 s1),
            machine_eval_ins i1 (machine_eval_ins i2 s2) in
          equiv_states s1' s2'))) =
-  lemma_instruction_exchange'_ss i1 i2 s1;
+  lemma_machine_eval_ins_st_exchange i1 i2 s1;
   lemma_eval_ins_equiv_states i2 s1 s2;
   lemma_eval_ins_equiv_states i1 (machine_eval_ins i2 s1) (machine_eval_ins i2 s2)
 
