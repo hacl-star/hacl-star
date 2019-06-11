@@ -187,7 +187,8 @@ let poly1305_encode_r #s p b =
   load_precompute_r p lo hi
 
 inline_for_extraction noextract
-let poly1305_init #s ctx key =
+val poly1305_init_: #s:field_spec -> poly1305_init_st s
+let poly1305_init_ #s ctx key =
   let acc = get_acc ctx in
   let pre = get_precomp_r ctx in
 
@@ -197,6 +198,19 @@ let poly1305_init #s ctx key =
   let h1 = ST.get () in
   lemma_felem_fits_init_post h1 acc;
   poly1305_encode_r #s pre kr
+
+[@CInline]
+let poly1305_init_32 : poly1305_init_st M32 = poly1305_init_ #M32
+[@CInline]
+let poly1305_init_128 : poly1305_init_st M128 = poly1305_init_ #M128
+[@CInline]
+let poly1305_init_256 : poly1305_init_st M256 = poly1305_init_ #M256
+
+let poly1305_init #s ctx key =
+  match s with
+  | M32 -> poly1305_init_32 ctx key
+  | M128 -> poly1305_init_128 ctx key
+  | M256 -> poly1305_init_256 ctx key
 
 inline_for_extraction noextract
 let update1_st (s:field_spec) =
@@ -287,9 +301,8 @@ let update1_last #s =
   | M256 -> poly1305_update1_last_256
 
 inline_for_extraction noextract
-val updaten:
-    #s:field_spec
-  -> p:precomp_r s
+let updaten_st (s:field_spec) =
+    p:precomp_r s
   -> b:lbuffer uint8 (blocklen s)
   -> acc:felem s
   -> Stack unit
@@ -303,13 +316,31 @@ val updaten:
       felem_fits h1 acc (2, 3, 2, 2, 2) /\
       feval h1 acc ==
         Vec.poly1305_update_nblocks #(width s) (feval h0 (gsub p 10ul 5ul)) (as_seq h0 b) (feval h0 acc))
-let updaten #s pre b acc =
+
+inline_for_extraction noextract
+val updaten_: #s:field_spec -> updaten_st s
+let updaten_ #s pre b acc =
   push_frame ();
   let e = create (nlimb s) (limb_zero s) in
   poly1305_encode_blocks e b;
   fmul_rn acc acc pre;
   fadd acc acc e;
   pop_frame ()
+
+[@CInline]
+let poly1305_updaten_32 : updaten_st M32 = updaten_ #M32
+[@CInline]
+let poly1305_updaten_128 : updaten_st M128 = updaten_ #M128
+[@CInline]
+let poly1305_updaten_256 : updaten_st M256 = updaten_ #M256
+
+inline_for_extraction noextract
+val updaten: #s:field_spec -> updaten_st s
+let updaten #s pre b acc =
+  match s with
+  | M32 -> poly1305_updaten_32 pre b acc
+  | M128 -> poly1305_updaten_128 pre b acc
+  | M256 -> poly1305_updaten_256 pre b acc
 
 inline_for_extraction noextract
 val poly1305_update_multi_f:
@@ -585,7 +616,9 @@ let poly1305_update #s =
   | M32 -> poly1305_update32
   | _ -> poly1305_update_128_256 #s
 
-let poly1305_finish #s tag key ctx =
+inline_for_extraction noextract
+val poly1305_finish_: #s:field_spec -> poly1305_finish_st s
+let poly1305_finish_ #s tag key ctx =
   let acc = get_acc ctx in
   let ks = sub key 16ul 16ul in
 
@@ -602,6 +635,19 @@ let poly1305_finish #s tag key ctx =
     ((fas_nat h1 acc).[0] % pow2 128 + BSeq.nat_from_bytes_le (as_seq h0 ks)) % pow2 128);
   FStar.Math.Lemmas.lemma_mod_plus_distr_l (fas_nat h1 acc).[0] (BSeq.nat_from_bytes_le (as_seq h0 ks)) (pow2 128);
   store_felem_le tag f30 f31
+
+[@CInline]
+let poly1305_finish_32 : poly1305_finish_st M32 = poly1305_finish_ #M32
+[@CInline]
+let poly1305_finish_128 : poly1305_finish_st M128 = poly1305_finish_ #M128
+[@CInline]
+let poly1305_finish_256 : poly1305_finish_st M256 = poly1305_finish_ #M256
+
+let poly1305_finish #s tag key ctx =
+  match s with
+  | M32 -> poly1305_finish_32 tag key ctx
+  | M128 -> poly1305_finish_128 tag key ctx
+  | M256 -> poly1305_finish_256 tag key ctx
 
 #set-options "--z3rlimit 150"
 
