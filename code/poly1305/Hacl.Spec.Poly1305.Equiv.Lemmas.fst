@@ -486,10 +486,6 @@ let poly_update_multi_lemma_load2_simplify acc0 r c0 c1 =
   poly_update_multi_lemma_load2_simplify_lp a0 r c0 c1;
   poly_update_multi_lemma_load2_simplify_rp a0 r c0 c1
 
-val poly_update_multi_lemma_load4_simplify_lp:
-  a0:pfelem -> r:pfelem -> c0:pfelem -> c1:pfelem -> c2:pfelem -> c3:pfelem -> Lemma
-  (((((((((a0 * r % prime) + c1) % prime) * r % prime) + c2) % prime) * r % prime) + c3) % prime * r % prime ==
-   (a0 * r * (r * r * r) + c1 * (r * r * r) + c2 * r * r + c3 * r) % prime)
 let poly_update_multi_lemma_load4_simplify_lp a0 r c0 c1 c2 c3 =
   calc (==) {
     ((((((((a0 * r % prime) + c1) % prime) * r % prime) + c2) % prime) * r % prime) + c3) % prime * r % prime;

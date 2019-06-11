@@ -9,10 +9,10 @@ open Lib.Sequence
 open Lib.ByteSequence
 
 
-module AEAD = Spec.AES256_GCM
+module AEAD = Spec.AES_GCM
 
 
-let key_length = AEAD.size_key
+let key_length = AEAD.size_key Spec.AES.AES256
 
 let test1_key = List.Tot.map u8 [
 0x00; 0x00; 0x00; 0x00; 0x00; 0x00; 0x00; 0x00; 0x00; 0x00; 0x00; 0x00; 0x00; 0x00; 0x00; 0x00;
@@ -91,10 +91,10 @@ let test_aesgcm text_len text aad_len aad n_len n k expected i =
   IO.print_string " ================================ CIPHER ";
   IO.print_string (UInt8.to_string (u8_to_UInt8 (u8 i)));
   IO.print_string " ================================\n";
-  let output = AEAD.aead_encrypt k n text aad in
-  let ciphertext = sub output 0 (length output - 16) in
-  let mac = sub output (length output - 16) 16 in
-  let decrypted = AEAD.aead_decrypt k n ciphertext mac aad in
+  let output = AEAD.aes256gcm_encrypt k n text aad in
+  let ciphertext = sub (to_lseq output) 0 (length output - 16) in
+  let mac = sub (to_lseq output) (length output - 16) 16 in
+  let decrypted = AEAD.aes256gcm_decrypt k n aad ciphertext mac in
   let result0 = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) ciphertext expected in
   let result1 =
     match decrypted with
