@@ -293,6 +293,7 @@ let lemma_eval_instr_equiv_states
   | Some vs ->
     lemma_instr_write_outputs_equiv_states outs args vs oprs s1 s1_new s2 s2_new
 
+#push-options "--z3rlimit 20 --max_fuel 0 --max_ifuel 1"
 (* REVIEW: This proof is INSANELY annoying to deal with due to the [Pop].
 
    TODO: Figure out why it is slowing down so much. It practically
@@ -312,13 +313,11 @@ let lemma_machine_eval_ins_st_equiv_states (i : ins) (s1 s2 : machine_state) :
   | Instr it oprs ann ->
     lemma_eval_instr_equiv_states it oprs ann s1 s2
   | Push _ _ ->
-    admit (); (* TODO FIXME: Broke during merge with fstar-master *)
     assert_spinoff (equiv_states_ext s1_final s2_final)
   | Pop dst t ->
-    admit (); (* TODO FIXME: Broke during merge with fstar-master *)
     let stack_op = OStack (MReg (Reg 0 rRsp) 0, t) in
-    let s1 = proof_run s1 (check (valid_src_operand stack_op)) in
-    let s2 = proof_run s2 (check (valid_src_operand stack_op)) in
+    let s1 = proof_run s1 (check (valid_src_operand64_and_taint stack_op)) in
+    let s2 = proof_run s2 (check (valid_src_operand64_and_taint stack_op)) in
     // assert (equiv_states s1 s2);
     let new_dst1 = eval_operand stack_op s1 in
     let new_dst2 = eval_operand stack_op s2 in
@@ -340,6 +339,7 @@ let lemma_machine_eval_ins_st_equiv_states (i : ins) (s1 s2 : machine_state) :
     assert_spinoff (equiv_states_ext s1_final s2_final)
   | Dealloc _ ->
     assert_spinoff (equiv_states_ext s1_final s2_final)
+#pop-options
 
 let lemma_eval_ins_equiv_states (i : ins) (s1 s2 : machine_state) :
   Lemma
