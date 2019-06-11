@@ -795,14 +795,7 @@ let lemma_machine_eval_ins_st_exchange (i1 i2 : ins) (s : machine_state) :
   match i2 with
   | Instr it oprs ann ->
     admit ()
-  | Push src t ->
-    admit ()
-  | Pop dst t ->
-    admit ()
-  | Alloc n ->
-    admit ()
-  | Dealloc n ->
-    admit ()
+  | Push _ _ | Pop _ _ | Alloc _ | Dealloc _ -> ()
 
 let lemma_instruction_exchange'_ss (i1 i2 : ins) (s : machine_state) :
   Lemma
