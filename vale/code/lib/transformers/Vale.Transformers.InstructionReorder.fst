@@ -791,11 +791,11 @@ let lemma_machine_eval_ins_st_exchange (i1 i2 : ins) (s : machine_state) :
     (ensures (commutes s
                 (machine_eval_ins_st i1)
                 (machine_eval_ins_st i2))) =
-  let f = machine_eval_ins_st i1 in
-  match i2 with
-  | Instr it oprs ann ->
-    admit ()
-  | Push _ _ | Pop _ _ | Alloc _ | Dealloc _ -> ()
+  lemma_machine_eval_ins_st_bounded_effects i1;
+  lemma_machine_eval_ins_st_bounded_effects i2;
+  let r1, w1 = rw_set_of_ins i1 in
+  let r2, w2 = rw_set_of_ins i2 in
+  lemma_commute (machine_eval_ins_st i1) (machine_eval_ins_st i2) r1 w1 r2 w2 s
 
 let lemma_instruction_exchange' (i1 i2 : ins) (s1 s2 : machine_state) :
   Lemma
