@@ -112,9 +112,11 @@ all-unstaged: compile-compact compile-compact-msvc compile-compact-gcc \
 	FSTAR_DEPEND_FLAGS="--warn_error +285" $(MAKE) $*-unstaged
 
 .last_vale_version: vale/.vale_version
-	@echo ℹ️  Vale tool upgrade detected
+	@if [[ $$(cat $@) != $$(cat $<) ]]; then \
+	  echo ℹ️  Vale tool upgrade detected; \
+	  find vale -name '*.vaf' -exec touch {} \; ; \
+	fi
 	cp $< $@
-	find vale -name '*.vaf' -exec touch {} \;
 
 test: test-staged
 test-unstaged: test-handwritten test-c test-ml test-benchmark
