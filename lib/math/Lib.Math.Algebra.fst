@@ -57,6 +57,13 @@ let divides_sum_rev c a b =
   divides_neg c b;
   divides_sum c (a+b) (-b)
 
+val divides_prod: a:pos -> b:pos -> c:int -> Lemma
+  (requires divides (a*b) c)
+  (ensures (divides a c /\ divides b c))
+let divides_prod a b c =
+  mod_mult_exact c a b;
+  mod_mult_exact c b a
+
 val isprm: p:nat -> Type0
 let isprm p = p >= 3 /\ p % 2 = 1 /\ (forall (x:nat{x>1&&x<p}). ~(divides x p))
 
@@ -300,6 +307,11 @@ let gcd_prop_subdiv a b g d =
           in
 
   move_requires l ()
+
+val divides_exactly_one_multiple: a:pos -> b:nat -> c:nat -> Lemma
+  (requires (divides a (b*c) /\ is_gcd a c 1))
+  (ensures (divides a b))
+let divides_exactly_one_multiple a b c = admit ()
 
 val ex_eucl_lemma1: a:pos -> b:pos -> g:pos -> u:int -> v:int -> Lemma
   (requires (a * u + b * v = g))
@@ -993,7 +1005,12 @@ val mult_order_less: #n:big -> g:fe n{isunit g} -> e:pos -> Lemma
   (fexp g e = 1 ==> mult_order g <= e)
 let mult_order_less #n g e = ()
 
-val g_pow_order_reduc: #n:big -> g:fe n{isunit g /\ g > 0} -> x:pos -> Lemma
+val mult_order_divides: #n:big -> g:fe n{isunit g} -> e:pos -> Lemma
+  (fexp g e = 1 ==> divides (mult_order g) e)
+let mult_order_divides #n g e = admit () // TODO
+
+
+val g_pow_order_reduc: #n:big -> g:fe n{isunit g /\ g > 0} -> x:nat -> Lemma
   (ensures (fexp g x = fexp g (x % mult_order g)))
   (decreases x)
 let rec g_pow_order_reduc #n g x =
