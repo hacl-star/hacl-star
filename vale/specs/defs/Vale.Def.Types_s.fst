@@ -14,6 +14,7 @@ unfold let nat32 = Vale.Def.Words_s.nat32
 unfold let nat64 = Vale.Def.Words_s.nat64
 
 let add_wrap (#n:nat) (x:natN n) (y:natN n) : natN n = if x + y < n then x + y else x + y - n
+let sub_wrap (#n:nat) (x:natN n) (y:natN n) : natN n = if x - y >= 0 then x - y else x - y + n
 
 // abstract bitwise operations on integers:
 assume val iand : #n:nat -> a:natN n -> b:natN n -> natN n
