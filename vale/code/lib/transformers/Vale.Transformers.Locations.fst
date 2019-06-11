@@ -39,11 +39,6 @@ let locations_of_operand128 (o:operand128) : locations & locations =
   | OMem (m, _) -> locations_of_maddr m, [ALocMem]
   | OStack (m, _) -> locations_of_maddr m, [ALocStack]
 
-private
-let both (x: locations & locations) =
-  let a, b = x in
-  a `L.append` b
-
 let locations_of_explicit (t:instr_operand_explicit) (i:instr_operand_t t) : locations & locations =
   match t with
   | IOp64 -> locations_of_operand64 i
@@ -99,21 +94,6 @@ let write_set (i:instr_t_record) (oprs:instr_operands_t i.outs i.args) : list lo
   match havoc_flags with
   | HavocFlags -> ALocCf :: ALocOf :: ws
   | PreserveFlags -> ws
-
-(* See fsti *)
-let rw_set_of_ins i =
-  match i with
-  | Instr i oprs _ ->
-    read_set i oprs, write_set i oprs
-  | Push src t ->
-    ALocReg (Reg 0 rRsp) :: both (locations_of_operand64 src),
-    [ALocReg (Reg 0 rRsp); ALocStack]
-  | Pop dst t ->
-    ALocReg (Reg 0 rRsp) :: ALocStack :: fst (locations_of_operand64 dst),
-    ALocReg (Reg 0 rRsp) :: snd (locations_of_operand64 dst)
-  | Alloc _
-  | Dealloc _ ->
-    [ALocReg (Reg 0 rRsp)], [ALocReg (Reg 0 rRsp)]
 
 let aux_print_reg_from_location (a:location{ALocReg? a}) : string =
   let ALocReg (Reg file id) = a in

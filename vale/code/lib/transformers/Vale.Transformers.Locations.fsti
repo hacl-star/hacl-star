@@ -18,14 +18,6 @@ val location : eqtype
 unfold
 type locations = list location
 
-(** An [rw_set] is the pair of [locations] that are respectively read
-    and written by an operation. *)
-type rw_set = locations & locations
-
-(** [rw_set_of_ins i] returns the read/write sets for the execution of
-    an instruction. *)
-val rw_set_of_ins : i:ins -> rw_set
-
 (** [disjoint_location a1 a2] is true whenever locations [a1] and [a2]
     are disjoint. When not disjoint, it gives a reason for why not. *)
 val disjoint_location : location -> location -> pbool
