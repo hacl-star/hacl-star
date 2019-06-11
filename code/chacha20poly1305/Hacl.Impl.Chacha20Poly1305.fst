@@ -18,6 +18,8 @@ module BSeq = Lib.ByteSequence
 module Spec = Spec.Chacha20Poly1305
 module Chacha = Hacl.Impl.Chacha20
 module ChachaCore = Hacl.Impl.Chacha20.Core32
+module ChachaVec = Hacl.Impl.Chacha20.Vec
+module ChachaEquiv = Hacl.Spec.Chacha20.Equiv
 
 module SpecPoly = Spec.Poly1305
 module Poly = Hacl.Impl.Poly1305
@@ -157,8 +159,52 @@ let derive_key_poly1305_do #w k n aadlen aad mlen m out =
   poly1305_do #w key aadlen aad mlen m out;
   pop_frame()
 
+unfold noextract
+let width_chacha20 (s:field_spec) : Hacl.Spec.Chacha20.Vec.lanes =
+  match s with
+  | M32  -> 1
+  | M128 -> 4
+  | M256 -> 8
+
+inline_for_extraction noextract
+let chacha20_encrypt_vec_st (w:field_spec) =
+    len:size_t
+  -> out:lbuffer uint8 len
+  -> text:lbuffer uint8 len
+  -> key:lbuffer uint8 32ul
+  -> n:lbuffer uint8 12ul
+  -> ctr:size_t{v ctr + width_chacha20 w <= max_size_t } ->
+  ST unit
+    (requires fun h ->
+      live h key /\ live h n /\ live h text /\ live h out /\ eq_or_disjoint text out)
+    (ensures  fun h0 _ h1 ->
+      modifies (loc out) h0 h1 /\
+      as_seq h1 out == Spec.Chacha20.chacha20_encrypt_bytes (as_seq h0 key) (as_seq h0 n) (v ctr) (as_seq h0 text))
+
+inline_for_extraction noextract
+val chacha20_encrypt_vec_: #w:field_spec -> chacha20_encrypt_vec_st w
+let chacha20_encrypt_vec_ #w len out text key n ctr =
+  let h0 = ST.get () in
+  ChachaVec.chacha20_encrypt #(width_chacha20 w) len out text key n ctr;
+  ChachaEquiv.chacha20_encrypt_bytes_lemma_equiv #(width_chacha20 w) (as_seq h0 key) (as_seq h0 n) (v ctr) (as_seq h0 text)
+
+[@CInline]
+let chacha20_encrypt_vec_32 : chacha20_encrypt_vec_st M32 = chacha20_encrypt_vec_ #M32
+[@CInline]
+let chacha20_encrypt_vec_128 : chacha20_encrypt_vec_st M128 = chacha20_encrypt_vec_ #M128
+[@CInline]
+let chacha20_encrypt_vec_256 : chacha20_encrypt_vec_st M256 = chacha20_encrypt_vec_ #M256
+
+inline_for_extraction noextract
+val chacha20_encrypt_vec: #w:field_spec -> chacha20_encrypt_vec_st w
+let chacha20_encrypt_vec #w len out text key n ctr =
+  match w with
+  | M32 -> chacha20_encrypt_vec_32 len out text key n ctr
+  | M128 -> chacha20_encrypt_vec_128 len out text key n ctr
+  | M256 -> chacha20_encrypt_vec_256 len out text key n ctr
+
 let aead_encrypt #w k n aadlen aad mlen m cipher mac =
-  Chacha.chacha20_encrypt mlen cipher m k n 1ul;
+  chacha20_encrypt_vec #w mlen cipher m k n 1ul;
   derive_key_poly1305_do #w k n aadlen aad mlen cipher mac
 
 let aead_decrypt #w k n aadlen aad mlen m cipher mac =
@@ -173,7 +219,7 @@ let aead_decrypt #w k n aadlen aad mlen m cipher mac =
     if lbytes_eq computed_mac mac then (
       assert (Lib.ByteSequence.lbytes_eq (as_seq h1 computed_mac) (as_seq h1 mac));
       // If the computed mac matches the mac given, decrypt the ciphertext and return 0
-      Chacha.chacha20_encrypt mlen m cipher k n 1ul;
+      chacha20_encrypt_vec #w mlen m cipher k n 1ul;
       0ul
     ) else 1ul // Macs do not agree, do not decrypt
   in
