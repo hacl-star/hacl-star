@@ -11,7 +11,7 @@ open Lib.Buffer
 open Lib.ByteBuffer
 open Lib.IntVector
 
-module S = Hacl.Spec.Poly1305.Vec
+module Vec = Hacl.Spec.Poly1305.Vec
 module LSeq = Lib.Sequence
 module BSeq = Lib.ByteSequence
 module F32xN = Hacl.Impl.Poly1305.Field32xN
@@ -101,7 +101,7 @@ let fas_nat #s h e =
   | M256 -> fas_nat #4 h e
 
 noextract
-val feval: #s:field_spec -> h:mem -> e:felem s -> GTot (LSeq.lseq S.pfelem (width s))
+val feval: #s:field_spec -> h:mem -> e:felem s -> GTot (LSeq.lseq Vec.pfelem (width s))
 let feval #s h e =
   match s with
   | M32  -> feval #1 h e
@@ -167,7 +167,7 @@ val load_felems_le:
       modifies (loc f) h0 h1 /\
       felem_fits h1 f (1, 1, 1, 1, 1) /\
       felem_less #(width s) h1 f (pow2 128) /\
-      feval h1 f == S.load_elem #(width s) (as_seq h0 b))
+      feval h1 f == Vec.load_elem #(width s) (as_seq h0 b))
 let load_felems_le #s f b =
   match s with
   | M32  -> F32xN.load_felems_le #1 f b
@@ -186,7 +186,7 @@ val load_acc:
     (ensures  fun h0 _ h1 ->
       modifies (loc acc) h0 h1 /\
       felem_fits h1 acc (2, 3, 2, 2, 2) /\
-      feval h1 acc == S.load_acc #(width s) (feval h0 acc).[0] (as_seq h0 b))
+      feval h1 acc == Vec.load_acc #(width s) (feval h0 acc).[0] (as_seq h0 b))
 let load_acc #s acc b =
   match s with
   | M32 -> load_acc1 acc b
@@ -209,7 +209,7 @@ val set_bit:
       modifies (loc f) h0 h1 /\
       felem_fits h1 f (1, 1, 1, 1, 1) /\
      (Math.Lemmas.pow2_le_compat 128 (v i);
-      feval h1 f == LSeq.map (S.pfadd (pow2 (v i))) (feval h0 f)))
+      feval h1 f == LSeq.map (Vec.pfadd (pow2 (v i))) (feval h0 f)))
 let set_bit #s f i =
   match s with
   | M32  -> F32xN.set_bit #1 f i
@@ -228,7 +228,7 @@ val set_bit128:
     (ensures  fun h0 _ h1 ->
       modifies (loc f) h0 h1 /\
       felem_fits h1 f (1, 1, 1, 1, 1) /\
-      feval h1 f == LSeq.map (S.pfadd (pow2 128)) (feval h0 f))
+      feval h1 f == LSeq.map (Vec.pfadd (pow2 128)) (feval h0 f))
 let set_bit128 #s f =
   match s with
   | M32  -> F32xN.set_bit128 #1 f
@@ -323,7 +323,7 @@ val fadd_mul_r:
       modifies (loc out) h0 h1 /\
       acc_inv_t #(width s) (as_tup5 h1 out) /\
       feval h1 out ==
-        S.fmul (S.fadd (feval h0 out) (feval h0 f1)) (feval h0 (gsub precomp 0ul 5ul)))
+        Vec.fmul (Vec.fadd (feval h0 out) (feval h0 f1)) (feval h0 (gsub precomp 0ul 5ul)))
 let fadd_mul_r #s out f1 precomp =
   match s with
   | M32  -> F32xN.fadd_mul_r #1 out f1 precomp
@@ -348,7 +348,7 @@ val fmul_rn:
     (ensures fun h0 _ h1 ->
       modifies (loc out) h0 h1 /\
       acc_inv_t #(width s) (as_tup5 h1 out) /\
-      feval h1 out == S.fmul (feval h0 f1) (feval h0 (gsub precomp 10ul 5ul)))
+      feval h1 out == Vec.fmul (feval h0 f1) (feval h0 (gsub precomp 10ul 5ul)))
 let fmul_rn #s out f1 precomp =
   match s with
   | M32  -> F32xN.fmul_rn #1 out f1 precomp
@@ -369,7 +369,7 @@ val fmul_rn_normalize:
       modifies (loc out) h0 h1 /\
       acc_inv_t #(width s) (as_tup5 h1 out) /\
       (feval h1 out).[0] ==
-        S.normalize_n #(width s) (feval h0 out) (feval h0 (gsub precomp 0ul 5ul)).[0])
+        Vec.normalize_n #(width s) (feval h0 out) (feval h0 (gsub precomp 0ul 5ul)).[0])
 let fmul_rn_normalize #s out precomp =
   match s with
   | M32  -> F32xN.fmul_rn_normalize #1 out precomp
@@ -390,7 +390,7 @@ val fadd:
     (ensures fun h0 _ h1 ->
       modifies (loc out) h0 h1 /\
       felem_fits h1 out (2,3,2,2,2) /\
-      feval h1 out == S.fadd (feval h0 f1) (feval h0 f2))
+      feval h1 out == Vec.fadd (feval h0 f1) (feval h0 f2))
 let fadd #s out f1 f2 =
   match s with
   | M32  -> F32xN.fadd #1 out f1 f2
