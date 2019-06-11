@@ -501,36 +501,6 @@ let commutes (s:machine_state) (f1 f2:st unit) : GTot Type0 =
     (run2 f1 f2 s)
     (run2 f2 f1 s)
 
-let unchanged_except (exceptions:list location) (s1 s2:machine_state) :
-  GTot Type0 =
-  (forall (a:location). {:pattern (eval_location a s2)} (
-      (!!(disjoint_location_from_locations a exceptions) ==>
-       (eval_location a s1 == eval_location a s2))
-    ))
-
-let only_affects (locs:list location) (f:st unit) : GTot Type0 =
-  forall s. {:pattern unchanged_except locs s (run f s)} (
-    unchanged_except locs s (run f s)
-  )
-
-let rec unchanged_at (locs:list location) (s1 s2:machine_state) : GTot Type0 =
-  match locs with
-  | [] -> True
-  | x :: xs -> (
-      (eval_location x s1 == eval_location x s2) /\
-      (unchanged_at xs s1 s2)
-    )
-
-let bounded_effects (reads writes:list location) (f:st unit) : GTot Type0 =
-  (only_affects writes f) /\
-  (
-    forall s1 s2. {:pattern unchanged_at writes (run f s1) (run f s2)} (
-      unchanged_at reads s1 s2 ==>
-      (unchanged_at writes (run f s1) (run f s2) /\
-       (run f s1).ms_ok = (run f s2).ms_ok)
-    )
-  )
-
 let rec lemma_disjoint_implies_unchanged_at (reads changes:list location) (s1 s2:machine_state) :
   Lemma
     (requires (!!(disjoint_locations reads changes) /\
