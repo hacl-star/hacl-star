@@ -33,7 +33,7 @@ let compute_iv_BE (h_LE:quad32) (iv:supported_iv_LE) : quad32
     reverse_bytes_quad32 hash_output_LE
   )
 
-// little-endian, except for iv_BE
+// little-endian 
 let gcm_encrypt_LE_def (alg:algorithm) (key:aes_key alg) (iv:supported_iv_LE) (plain:seq nat8) (auth:seq nat8) :
   Pure (tuple2 (seq nat8) (seq nat8))
     (requires
