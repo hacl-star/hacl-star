@@ -17,7 +17,7 @@
         "refinement_interpretation_Tm_refine_4fb9f86d722672850f4dd78575352362"
       ],
       0,
-      "450f4d83476420059629e6ff8121bb88"
+      "745d3d0dee0f5ab03e31fe53f3c2a161"
     ],
     [
       "Vale.AES.GHash.ghash_poly",
@@ -30,7 +30,7 @@
         "projection_inverse_BoxInt_proj_0", "well-founded-ordering-on-nat"
       ],
       0,
-      "0dcdc14d4526a442632beb65445a45b8"
+      "fab6cb96fd5e91fd2499c7da040e0c68"
     ],
     [
       "Vale.AES.GHash.lemma_g_power_n",
@@ -43,7 +43,7 @@
         "refinement_interpretation_Tm_refine_f048236b5f8051f83b495ea5eaa6127b"
       ],
       0,
-      "24afdd6dcd06210005310e92bcd22f72"
+      "5a882b0720ef9a9d729b8d0df11fb2a5"
     ],
     [
       "Vale.AES.GHash.hkeys_reqs_priv",
@@ -57,7 +57,7 @@
         "typing_Vale.Def.Types_s.quad32"
       ],
       0,
-      "ff769e67838bda0e16ea37cb315cb979"
+      "e536972b706f19cf05025ad3406df304"
     ],
     [
       "Vale.AES.GHash.ghash_unroll",
@@ -77,7 +77,7 @@
         "well-founded-ordering-on-nat"
       ],
       0,
-      "ec093bed641566afb7d26a81915335f2"
+      "85cfe2d2e7c1408f41255a4eb8d7d58f"
     ],
     [
       "Vale.AES.GHash.ghash_unroll_back",
@@ -99,7 +99,7 @@
         "well-founded-ordering-on-nat"
       ],
       0,
-      "98774926e10593fc28bc2db5f05c3f81"
+      "73f4fe35f8ebe422c46413e20de1f3c4"
     ],
     [
       "Vale.AES.GHash.lemma_ghash_unroll_back_forward",
@@ -112,7 +112,7 @@
         "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-      "a18574c59a964a2e3a3a362f60fbcfaf"
+      "b1831809c745d08c812424e6c3a010e5"
     ],
     [
       "Vale.AES.GHash.lemma_add_manip",
@@ -121,7 +121,7 @@
       0,
       [ "@query" ],
       0,
-      "33fd92240f54e85040ae854a0cd269d0"
+      "92d0ca978a530b1a29a9f34d28c28c82"
     ],
     [
       "Vale.AES.GHash.ghash_incremental_def",
@@ -149,7 +149,7 @@
         "typing_FStar.Seq.Base.length", "well-founded-ordering-on-nat"
       ],
       0,
-      "652259d87b4baba78564ad118a3c2ed3"
+      "9a5e18c934147a0bf223c3591c5072d6"
     ],
     [
       "Vale.AES.GHash.ghash_incremental_to_ghash",
@@ -164,7 +164,7 @@
         "refinement_interpretation_Tm_refine_8d65e998a07dd53ec478e27017d9dba5"
       ],
       0,
-      "7493e98aa96b41a2334cb71aeff6049d"
+      "1a8bb5328910296586fd62a6c64e3046"
     ],
     [
       "Vale.AES.GHash.lemma_hash_append3",
@@ -192,7 +192,7 @@
         "typing_Vale.Def.Types_s.quad32", "unit_typing"
       ],
       0,
-      "e0a2daf52e36b9e214e87f1239c03a96"
+      "3b3d6801fd8963403ebd8dff2e6b3c67"
     ],
     [
       "Vale.AES.GHash.ghash_incremental_bytes_pure_no_extra",
@@ -209,7 +209,7 @@
         "function_token_typing_Vale.Def.Words_s.nat32", "int_inversion",
         "kinding_Vale.Def.Words_s.four@tok",
         "lemma_Vale.Def.Types_s.le_seq_quad32_to_bytes_length",
-        "primitive_Prims.op_LessThanOrEqual",
+        "primitive_Prims.op_LessThanOrEqual", "primitive_Prims.op_Multiply",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_5514fbe9e08dfda40f950a7b9f1b2b98",
@@ -217,7 +217,7 @@
         "typing_FStar.Seq.Base.length"
       ],
       0,
-      "6e6f5bfd047d13b72cb67ed12c1916cb"
+      "196d8247b5ee317c72160ff0399adc0e"
     ],
     [
       "Vale.AES.GHash.lemma_ghash_incremental_bytes_extra_helper",
@@ -236,7 +236,7 @@
         "int_inversion", "l_and-interp",
         "lemma_Vale.Def.Types_s.le_seq_quad32_to_bytes_length",
         "primitive_Prims.op_Equality", "primitive_Prims.op_LessThan",
-        "primitive_Prims.op_LessThanOrEqual",
+        "primitive_Prims.op_LessThanOrEqual", "primitive_Prims.op_Multiply",
         "primitive_Prims.op_disEquality",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
@@ -246,7 +246,7 @@
         "typing_Vale.Def.Types_s.le_quad32_to_bytes", "unit_typing"
       ],
       0,
-      "24cd16437c5dce6dc223178380dcd6e0"
+      "c14c09e873f591f60a70be6b39c8fa40"
     ],
     [
       "Vale.AES.GHash.lemma_ghash_incremental_bytes_extra_helper_alt",
@@ -268,7 +268,7 @@
         "lemma_FStar.Seq.Base.lemma_len_append",
         "lemma_Vale.Def.Types_s.le_seq_quad32_to_bytes_length",
         "primitive_Prims.op_Addition", "primitive_Prims.op_LessThan",
-        "primitive_Prims.op_LessThanOrEqual",
+        "primitive_Prims.op_LessThanOrEqual", "primitive_Prims.op_Multiply",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_8d65e998a07dd53ec478e27017d9dba5",
@@ -278,7 +278,7 @@
         "typing_Vale.Def.Types_s.le_quad32_to_bytes", "unit_typing"
       ],
       0,
-      "43b4b20e1a08d13d4a89cc7ab5de16fe"
+      "57e6147088eba247a47571b9cdcbf420"
     ],
     [
       "Vale.AES.GHash.lemma_ghash_registers",
@@ -301,7 +301,7 @@
         "unit_typing"
       ],
       0,
-      "44b7d05ee3fd8c889b5108350ba546a6"
+      "8a8a9720c0f38661a17e22bad16e3892"
     ]
   ]
 ]
