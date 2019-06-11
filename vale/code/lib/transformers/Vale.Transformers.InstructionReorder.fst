@@ -718,44 +718,6 @@ let lemma_commute (f1 f2:st unit) (r1 w1 r2 w2:list location) (s:machine_state) 
   lemma_equiv_states_when_except_none is12 is21 s12.ms_ok;
   assert (equiv_states (run2 f1 f2 s) (run2 f2 f1 s))
 
-let lemma_machine_eval_ins_st_only_affects_write_aux (i:ins{Instr? i}) (s:machine_state) (a:location) :
-  Lemma
-    (requires (
-        let r, w = rw_set_of_ins i in
-        (!!(disjoint_location_from_locations a w))))
-    (ensures (
-        (eval_location a s == eval_location a (run (machine_eval_ins_st i) s)))) =
-  admit ()
-
-let lemma_machine_eval_ins_st_only_affects_write (i:ins{Instr? i}) (s:machine_state) :
-  Lemma
-    (ensures (
-       (let r, w = rw_set_of_ins i in
-        (unchanged_except w s (run (machine_eval_ins_st i) s))))) =
-  FStar.Classical.forall_intro (
-    FStar.Classical.move_requires (lemma_machine_eval_ins_st_only_affects_write_aux i s))
-
-let lemma_machine_eval_ins_st_unchanged_behavior (i:ins{Instr? i}) (s1 s2:machine_state) :
-  Lemma
-    (requires (
-        let r, w = rw_set_of_ins i in
-        (unchanged_at r s1 s2)))
-    (ensures (
-        let r, w = rw_set_of_ins i in
-        let f = machine_eval_ins_st i in
-        (unchanged_at w (run f s1) (run f s2)) /\
-        (run f s1).ms_ok = (run f s2).ms_ok)) =
-  admit ()
-
-let lemma_machine_eval_ins_st_bounded_effects (i:ins{Instr? i}) :
-  Lemma
-    (ensures (
-        (let r, w = rw_set_of_ins i in
-         (bounded_effects r w (machine_eval_ins_st i))))) =
-  FStar.Classical.forall_intro (lemma_machine_eval_ins_st_only_affects_write i);
-  FStar.Classical.forall_intro_2 (fun s1 ->
-      FStar.Classical.move_requires (lemma_machine_eval_ins_st_unchanged_behavior i s1))
-
 let lemma_machine_eval_ins_st_exchange (i1 i2 : ins) (s : machine_state) :
   Lemma
     (requires (!!(ins_exchange_allowed i1 i2)))

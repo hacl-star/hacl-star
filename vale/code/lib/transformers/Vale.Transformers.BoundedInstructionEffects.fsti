@@ -53,3 +53,12 @@ let bounded_effects (reads writes:locations) (f:st unit) : GTot Type0 =
        (run f s1).ms_ok = (run f s2).ms_ok)
     )
   )
+
+(** The evaluation of an instruction [i] is bounded by the read/write
+    set given by [rw_set_of_ins i]. *)
+val lemma_machine_eval_ins_st_bounded_effects :
+  (i:ins) ->
+  Lemma
+    (ensures (
+        (let r, w = rw_set_of_ins i in
+         (bounded_effects r w (machine_eval_ins_st i)))))

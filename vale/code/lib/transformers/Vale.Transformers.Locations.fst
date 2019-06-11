@@ -51,6 +51,10 @@ let locations_of_implicit (t:instr_operand_implicit) : locations & locations =
   | IOpFlagsCf -> [ALocCf], [ALocCf]
   | IOpFlagsOf -> [ALocOf], [ALocOf]
 
+let both (x: locations & locations) =
+  let a, b = x in
+  a `L.append` b
+
 let rec aux_read_set0 (args:list instr_operand) (oprs:instr_operands_t_args args) : locations =
   match args with
   | [] -> []
