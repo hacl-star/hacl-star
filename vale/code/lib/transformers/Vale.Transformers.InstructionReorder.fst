@@ -112,6 +112,14 @@ let equiv_states_ext (s1 s2 : machine_state) : GTot Type0 =
   (Map.equal s1.ms_stackTaint s2.ms_stackTaint) /\
   (equiv_states s1 s2)
 
+(** A weaker version of [equiv_states] that makes all non-ok states
+    equivalent. Since non-ok states indicate something "gone-wrong" in
+    execution, we can safely say that the rest of the state is
+    irrelevant. *)
+let equiv_states_or_both_not_ok (s1 s2:machine_state) =
+  (equiv_states s1 s2) \/
+  ((not s1.ms_ok) /\ (not s2.ms_ok))
+
 (** Convenience wrapper around [equiv_states] *)
 unfold
 let equiv_ostates (s1 s2 : option machine_state) : GTot Type0 =
@@ -489,10 +497,6 @@ unfold
 let run2 (f1 f2:st unit) (s:machine_state) : machine_state =
   let open Vale.X64.Machine_Semantics_s in
   run (f1;; f2;; return ()) s
-
-let equiv_states_or_both_not_ok (s1 s2:machine_state) =
-  (equiv_states s1 s2) \/
-  ((not s1.ms_ok) /\ (not s2.ms_ok))
 
 let commutes (s:machine_state) (f1 f2:st unit) : GTot Type0 =
   equiv_states_or_both_not_ok
