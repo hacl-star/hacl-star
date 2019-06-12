@@ -14,6 +14,9 @@ open Vale.Transformers.PossiblyMonad
 open Vale.Transformers.Locations
 friend Vale.Transformers.Locations
 
+open Vale.Transformers.BoundedInstructionEffects
+friend Vale.Transformers.BoundedInstructionEffects
+
 open Vale.Transformers.InstructionReorder
 
 let ins_exchange_sanity_check1 =
