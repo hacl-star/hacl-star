@@ -216,6 +216,7 @@ let create_initial_trusted_state
     let open MS in
     let regs_64 = register_of_args max_arity arg_reg (List.Tot.length args) args IA.init_regs in
     let xmms = IA.init_xmms in
+    let flags = FunctionalExtensionality.on flag IA.init_flags in
     let init_rsp = regs_64 rRsp in
     let regs = FunctionalExtensionality.on_dom reg #t_reg (fun r ->
       match r with
@@ -230,7 +231,7 @@ let create_initial_trusted_state
     let (s0:BS.machine_state) = {
       BS.ms_ok = true;
       BS.ms_regs = regs;
-      BS.ms_flags = IA.init_flags;
+      BS.ms_flags = flags;
       BS.ms_heap = down_mem mem;
       BS.ms_memTaint = create_memtaint mem (args_b8 args) (mk_taint args init_taint);
       BS.ms_stack = BS.Machine_stack init_rsp stack;

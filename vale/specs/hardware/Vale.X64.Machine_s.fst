@@ -11,6 +11,11 @@ let int_to_nat64 (i:int) : n:nat64{0 <= i && i < pow2_64 ==> i == n} =
 unfold let nat128 = Vale.Def.Words_s.nat128
 unfold let quad32 = Vale.Def.Types_s.quad32
 
+type flag:eqtype = i:int{0 <= i /\ i < 16}
+
+[@va_qattr] unfold let fCarry    : flag = 0
+[@va_qattr] unfold let fOverflow : flag = 11
+
 let n_reg_files = 2
 let reg_file_id = rf:nat{rf < n_reg_files}
 let n_regs (rf:reg_file_id) : nat =

@@ -121,7 +121,7 @@ procedure fast_sqr_part1(inline offset:nat, ghost inA_b:buffer64)
 
 }
 
-#reset-options "--z3rlimit 200000"
+#reset-options "--z3rlimit 2000000"
 procedure fast_sqr_part2()
     {:quick}
     modifies

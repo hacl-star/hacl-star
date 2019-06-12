@@ -183,7 +183,7 @@ let lemma_same_seq_dv (h:HS.mem) (b:B.buffer UInt8.t) : Lemma
     Vale.Def.Opaque_s.reveal_opaque Vale.Interop.Views.put8_def
   in Classical.forall_intro aux
 
-#set-options "--z3rlimit 20 --max_fuel 0 --initial_ifuel 1 --max_ifuel 1"
+#reset-options "--z3rlimit 250 --max_fuel 0 --initial_ifuel 1 --max_ifuel 1"
 
 let aes_simplify_aux (s:seq16 nat8) : Lemma
   (seq_nat8_to_seq_nat32_LE s == quad32_to_seq (le_bytes_to_quad32 s))

@@ -1,0 +1,135 @@
+[
+  "บุ(อ๎\u001f\"9…\u0014า{<w<",
+  [
+    [
+      "Vale.X64.Flags.upd",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "equation_Vale.X64.Flags.flag_val_t",
+        "equation_Vale.X64.Flags.flags_def",
+        "equation_Vale.X64.Machine_s.flag",
+        "function_token_typing_Vale.X64.Flags.flag_val_t", "int_inversion",
+        "lemma_FStar.Map.lemma_ContainsDom",
+        "lemma_FStar.Map.lemma_InDomUpd1",
+        "lemma_FStar.Set.lemma_equal_elim",
+        "lemma_FStar.Set.lemma_equal_intro",
+        "lemma_FStar.Set.mem_complement", "lemma_FStar.Set.mem_empty",
+        "lemma_FStar.Set.mem_singleton", "primitive_Prims.op_BarBar",
+        "primitive_Prims.op_Negation", "projection_inverse_BoxBool_proj_0",
+        "refinement_interpretation_Tm_refine_8d24a8ed0792f3ba8f451fa9e50aefec",
+        "refinement_interpretation_Tm_refine_f0a4eeefab9c63f31c350a802a4d45dd",
+        "typing_FStar.Map.domain", "typing_FStar.Map.upd",
+        "typing_FStar.Set.complement", "typing_FStar.Set.empty",
+        "typing_Vale.X64.Machine_s.flag"
+      ],
+      0,
+      "183018b902298bca6bb656dc43fc5cbb"
+    ],
+    [
+      "Vale.X64.Flags.of_fun",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "Prims_interpretation_Tm_arrow_9cb3c953faf527c316d427b2ce8bd81b",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565",
+        "data_typing_intro_FStar.Pervasives.Native.None@tok",
+        "equation_Prims.eqtype", "equation_Vale.X64.Flags.flag_val_t",
+        "equation_Vale.X64.Machine_s.flag",
+        "function_token_typing_Prims.__cache_version_number__",
+        "function_token_typing_Prims.bool",
+        "function_token_typing_Prims.int",
+        "function_token_typing_Vale.X64.Flags.flag_val_t",
+        "haseqTm_refine_f07248a18d2a74f8e0d86883c991441b", "int_inversion",
+        "int_typing", "lemma_FStar.Map.lemma_ContainsDom",
+        "lemma_FStar.Map.lemma_InDomConstMap",
+        "lemma_FStar.Map.lemma_SelUpd1", "lemma_FStar.Map.lemma_SelUpd2",
+        "lemma_FStar.Map.lemma_UpdDomain",
+        "lemma_FStar.Set.lemma_equal_elim",
+        "lemma_FStar.Set.lemma_equal_intro",
+        "lemma_FStar.Set.mem_complement", "lemma_FStar.Set.mem_empty",
+        "lemma_FStar.Set.mem_union", "primitive_Prims.op_BarBar",
+        "primitive_Prims.op_LessThan", "primitive_Prims.op_LessThanOrEqual",
+        "primitive_Prims.op_Negation", "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
+        "refinement_interpretation_Tm_refine_f07248a18d2a74f8e0d86883c991441b",
+        "refinement_interpretation_Tm_refine_f0a4eeefab9c63f31c350a802a4d45dd",
+        "refinement_kinding_Tm_refine_f07248a18d2a74f8e0d86883c991441b",
+        "typing_FStar.Map.const", "typing_FStar.Map.domain",
+        "typing_FStar.Map.upd", "typing_FStar.Set.complement",
+        "typing_FStar.Set.empty", "typing_FStar.Set.singleton",
+        "typing_FStar.Set.union", "typing_Vale.X64.Machine_s.flag"
+      ],
+      0,
+      "7457c76e46e9a46e0a446052bc7c4639"
+    ],
+    [
+      "Vale.X64.Flags.lemma_upd_eq",
+      1,
+      1,
+      0,
+      [
+        "@query", "equation_Vale.X64.Flags.flag_val_t",
+        "equation_Vale.X64.Machine_s.flag",
+        "function_token_typing_Vale.X64.Flags.sel",
+        "function_token_typing_Vale.X64.Flags.upd",
+        "interpretation_Tm_abs_322da2d9bba29216c4f60a3e984d437b",
+        "interpretation_Tm_abs_753f5e0306c473645376fecaf77df754"
+      ],
+      0,
+      "4d5a523ea08f0547064ce210fff4dbfd"
+    ],
+    [
+      "Vale.X64.Flags.lemma_upd_ne",
+      1,
+      1,
+      0,
+      [
+        "@query", "equation_Vale.X64.Flags.flag_val_t",
+        "equation_Vale.X64.Machine_s.flag",
+        "function_token_typing_Vale.X64.Flags.sel",
+        "function_token_typing_Vale.X64.Flags.upd",
+        "interpretation_Tm_abs_322da2d9bba29216c4f60a3e984d437b",
+        "interpretation_Tm_abs_753f5e0306c473645376fecaf77df754"
+      ],
+      0,
+      "788d06dc32463b9e591055f81512b415"
+    ],
+    [
+      "Vale.X64.Flags.lemma_equal_intro",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "eq2-interp",
+        "equation_Vale.X64.Flags.equal",
+        "equation_Vale.X64.Flags.flag_val_t",
+        "equation_Vale.X64.Flags.flags_def",
+        "equation_Vale.X64.Machine_s.flag",
+        "function_token_typing_Vale.X64.Flags.flag_val_t",
+        "lemma_FStar.Map.lemma_ContainsDom",
+        "lemma_FStar.Map.lemma_equal_elim",
+        "lemma_FStar.Set.lemma_equal_elim",
+        "refinement_interpretation_Tm_refine_8d24a8ed0792f3ba8f451fa9e50aefec",
+        "typing_FStar.Map.domain", "typing_FStar.Set.complement",
+        "typing_FStar.Set.empty", "typing_Vale.X64.Machine_s.flag"
+      ],
+      0,
+      "88e5e0ae911408c42ea32763f873b0ac"
+    ],
+    [
+      "Vale.X64.Flags.lemma_equal_elim",
+      1,
+      1,
+      0,
+      [ "@query", "eq2-interp", "equation_Vale.X64.Flags.equal" ],
+      0,
+      "3a84181480cfd699814cdc180b4a3376"
+    ]
+  ]
+]
