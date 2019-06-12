@@ -368,7 +368,7 @@ verify_options = [
 #  ('code/thirdPartyPorts/rfc7748/curve25519/x64/X64.FastSqr.vaf', None),
 
   # Temporarily deactivate verification of the whole interop layer in scons, since the Makefile will check
-  ('code/arch/x64/interop/*', None), 
+#  ('code/arch/x64/interop/*', None), 
 
   #('code/thirdPartyPorts/OpenSSL/sha/X64.SHA.vaf', None),
 #  ('code/arch/x64/interop/GCMencryptOpt_stdcalls.fst', BuildOptions(fstar_default_args_nosmtencoding())),
