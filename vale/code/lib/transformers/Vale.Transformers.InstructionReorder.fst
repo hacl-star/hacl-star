@@ -119,12 +119,6 @@ let equiv_ostates (s1 s2 : option machine_state) : GTot Type0 =
   (Some? s1 ==>
    (equiv_states (Some?.v s1) (Some?.v s2)))
 
-(** A stricter convenience wrapper around [equiv_states] *)
-unfold
-let equiv_ostates' (s1 : machine_state) (s2' : option machine_state) : GTot Type0 =
-  (Some? s2') /\
-  (equiv_states s1 (Some?.v s2'))
-
 /// If evaluation starts from a set of equivalent states, and the
 /// exact same thing is evaluated, then the final states are still
 /// equivalent.
@@ -898,7 +892,9 @@ let rec lemma_bubble_to_top (cs : codes) (i:nat{i < L.length cs}) (fuel:nat) (s 
   Lemma
     (ensures (
         let s_final' = machine_eval_codes cs fuel s in
-        equiv_ostates' s_1 s_final')) =
+        Some? s_final' /\ (
+          let Some s_final = s_final' in
+          equiv_states_or_both_not_ok s_1 s_final))) =
   let s_final' = machine_eval_codes cs fuel s in
   match i with
   | 0 -> ()
@@ -911,11 +907,14 @@ let rec lemma_bubble_to_top (cs : codes) (i:nat{i < L.length cs}) (fuel:nat) (s 
     let Some s_start = machine_eval_code (L.hd cs) fuel s in
     let Some s_0' = machine_eval_code x fuel s_start in
     let Some s_0'' = machine_eval_code (L.hd cs) fuel s_0 in
-    admit (); (* TODO FIXME Broke due to change of [equiv_states_or_both_not_ok] *)
-    assert (equiv_states s_0' s_0'');
-    lemma_eval_codes_equiv_states tlxs fuel s_0' s_0'';
-    let Some s_1' = machine_eval_codes tlxs fuel s_0' in
-    lemma_bubble_to_top (L.tl cs) (i - 1) fuel s_start x tlxs s_0' s_1'
+    assert (equiv_states_or_both_not_ok s_0' s_0'');
+    if not s_0'.ms_ok && not s_0''.ms_ok then (
+      admit ()
+    ) else (
+      lemma_eval_codes_equiv_states tlxs fuel s_0' s_0'';
+      let Some s_1' = machine_eval_codes tlxs fuel s_0' in
+      lemma_bubble_to_top (L.tl cs) (i - 1) fuel s_start x tlxs s_0' s_1'
+    )
 #pop-options
 
 let rec lemma_reordering (c1 c2 : codes) (fuel:nat) (s1 s2 : machine_state) :
@@ -929,7 +928,7 @@ let rec lemma_reordering (c1 c2 : codes) (fuel:nat) (s1 s2 : machine_state) :
         (let Some s1', Some s2' =
            machine_eval_codes c1 fuel s1,
            machine_eval_codes c2 fuel s2 in
-         equiv_states s1' s2'))) =
+         equiv_states_or_both_not_ok s1' s2'))) =
   match c1 with
   | [] -> ()
   | h1 :: t1 ->
