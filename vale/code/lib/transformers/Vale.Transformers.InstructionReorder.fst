@@ -127,6 +127,22 @@ let equiv_ostates (s1 s2 : option machine_state) : GTot Type0 =
   (Some? s1 ==>
    (equiv_states (Some?.v s1) (Some?.v s2)))
 
+(** An [option state] is said to be erroring if it is either [None] or
+    if it is [Some] but is not ok.  *)
+unfold
+let erroring_option_state (s:option machine_state) =
+  match s with
+  | None -> true
+  | Some s -> not (s.ms_ok)
+
+(** [equiv_option_states s1 s2] means that [s1] and [s2] are
+    equivalent [option machine_state]s iff both have same erroring behavior
+    and if they are non-erroring, they are [equiv_states]. *)
+unfold
+let equiv_option_states (s1 s2:option machine_state) =
+  (erroring_option_state s1 == erroring_option_state s2) /\
+  (not (erroring_option_state s1) ==> equiv_states (Some?.v s1) (Some?.v s2))
+
 /// If evaluation starts from a set of equivalent states, and the
 /// exact same thing is evaluated, then the final states are still
 /// equivalent.
@@ -884,6 +900,51 @@ let rec reordering_allowed (c1 c2 : codes) : pbool =
     (* TODO: Also check _inside_ blocks/ifelse/etc rather than just at the highest level *)
     reordering_allowed t1 t2
 
+/// Not-ok states lead to erroring states upon execution
+
+let rec lemma_not_ok_propagate_code (c:code) (fuel:nat) (s:machine_state) :
+  Lemma
+    (requires (not s.ms_ok))
+    (ensures (erroring_option_state (machine_eval_code c fuel s)))
+    (decreases %[fuel; c; 1]) =
+  match c with
+  | Ins _ -> ()
+  | Block l ->
+    lemma_not_ok_propagate_codes l fuel s
+  | IfElse ifCond ifTrue ifFalse ->
+    let (st, b) = machine_eval_ocmp s ifCond in
+    let s' = {st with ms_trace = (BranchPredicate b)::s.ms_trace} in
+    if b then lemma_not_ok_propagate_code ifTrue fuel s' else lemma_not_ok_propagate_code ifFalse fuel s'
+  | While _ _ ->
+    lemma_not_ok_propagate_while c fuel s
+
+and lemma_not_ok_propagate_codes (l:codes) (fuel:nat) (s:machine_state) :
+  Lemma
+    (requires (not s.ms_ok))
+    (ensures (erroring_option_state (machine_eval_codes l fuel s)))
+    (decreases %[fuel; l]) =
+  match l with
+  | [] -> ()
+  | x :: xs ->
+    lemma_not_ok_propagate_code x fuel s;
+    match machine_eval_code x fuel s with
+    | None -> ()
+    | Some s -> lemma_not_ok_propagate_codes xs fuel s
+
+and lemma_not_ok_propagate_while (c:code{While? c}) (fuel:nat) (s:machine_state) :
+  Lemma
+    (requires (not s.ms_ok))
+    (ensures (erroring_option_state (machine_eval_code c fuel s)))
+    (decreases %[fuel; c; 0]) =
+  if fuel = 0 then () else (
+    let While cond body = c in
+    let (s, b) = machine_eval_ocmp s cond in
+    if not b then () else (
+      let s = { s with ms_trace = (BranchPredicate true) :: s.ms_trace } in
+      lemma_not_ok_propagate_code body (fuel - 1) s
+    )
+  )
+
 /// If there are two sequences of instructions that can be transformed
 /// amongst each other, then they behave identically as per the
 /// [equiv_states] relation.
@@ -894,11 +955,10 @@ let rec lemma_bubble_to_top (cs : codes) (i:nat{i < L.length cs}) (fuel:nat) (s 
     (s_0 : _{Some s_0 == machine_eval_code x fuel s})
     (s_1 : _{Some s_1 == machine_eval_codes xs fuel s_0}) :
   Lemma
+    (requires (s_1.ms_ok))
     (ensures (
         let s_final' = machine_eval_codes cs fuel s in
-        Some? s_final' /\ (
-          let Some s_final = s_final' in
-          equiv_states_or_both_not_ok s_1 s_final))) =
+        equiv_option_states (Some s_1) s_final')) =
   let s_final' = machine_eval_codes cs fuel s in
   match i with
   | 0 -> ()
@@ -913,7 +973,8 @@ let rec lemma_bubble_to_top (cs : codes) (i:nat{i < L.length cs}) (fuel:nat) (s 
     let Some s_0'' = machine_eval_code (L.hd cs) fuel s_0 in
     assert (equiv_states_or_both_not_ok s_0' s_0'');
     if not s_0'.ms_ok && not s_0''.ms_ok then (
-      admit ()
+      lemma_not_ok_propagate_codes tlxs fuel s_0';
+      lemma_not_ok_propagate_codes tlxs fuel s_0''
     ) else (
       lemma_eval_codes_equiv_states tlxs fuel s_0' s_0'';
       let Some s_1' = machine_eval_codes tlxs fuel s_0' in
@@ -926,7 +987,8 @@ let rec lemma_reordering (c1 c2 : codes) (fuel:nat) (s1 s2 : machine_state) :
     (requires (
         !!(reordering_allowed c1 c2) /\
         (equiv_states s1 s2) /\
-        (Some? (machine_eval_codes c1 fuel s1))))
+        (Some? (machine_eval_codes c1 fuel s1)) /\
+        (Some?.v (machine_eval_codes c1 fuel s1)).ms_ok))
     (ensures (
         (Some? (machine_eval_codes c2 fuel s2)) /\
         (let Some s1', Some s2' =
