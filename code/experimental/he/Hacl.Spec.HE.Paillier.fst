@@ -315,64 +315,13 @@ let encf_raw #n g x y = fexp g x *% fexp y n
 val encf: #n:comp -> g:isg n -> x:fe n -> y:fenu n -> fen2 n
 let encf #n g x y = encf_raw #n g x (lift y)
 
-#reset-options "--z3rlimit 100"
-
-val encf_unit_y: #n:comp -> g:isg n -> y:fenu n -> Lemma
-  (fexp (lift y) n *% fexp (lift (finv y)) n = 1)
-let encf_unit_y #n g y =
-  let n2 = n * n in
-  let y': fen2 n = lift y in
-  let fy = finv y in
-  let fy': fen2 n = lift fy in
-
-  // if y is unit in Zn, then (lift y)^n*(lift fy)^n =
-  // ((lift y)*(lift fy))^n
-  // internal lift product is 1 modulo n,
-  // so it is a root of 1 in n^2,
-  // which means ((lift y)*(lift fy))^n = 1
-  fexp_mul2 y' fy' n;
-  assert (fexp y' n *% fexp fy' n = fexp (y' *% fy') n);
-  to_fe_mul' #n2 y' fy';
-  assert ((y' * fy') % n2 = y' *% fy');
-  assert (((y' * fy') % n2) % n = (y' *% fy') % n);
-  modulo_modulo_lemma (y' * fy') n n;
-  assert ((y' * fy') % n = (y' *% fy') % n);
-  to_fe_mul #n y' fy';
-  assert ((y' *% fy') % n = 1);
-  mod_prop n (y' *% fy') 1;
-  assert (y' *% fy' = 1 + ((y' *% fy')/n)*n);
-  assert (y' *% fy' < n2);
-  lemma_div_le_strict (y' *% fy');
-  assert ((y' *% fy')/n < n);
-  root_of_unity_prop #n ((y' *% fy')/n);
-  assert (fexp #n2 (1 + ((y' *% fy')/n)*n) n = 1);
-  assert (fexp  (y' *% fy') n = 1);
-  assert (fexp y' n *% fexp fy' n = 1);
-  assert (isunit (fexp y' n))
-
-#reset-options
-
-val encf_unit: #n:comp -> g:isg n -> x:fe n -> y:fenu n -> Lemma
-  (isunit #(n*n) (encf #n g x y))
-let encf_unit #n g x y =
-
-  if x = 0 then (fexp_zero2 g; one_isunit n) else g_pow_isunit g x;
-  assert(isunit (fexp g x));
-
-  encf_unit_y #n g y;
-
-  isunit_prod (fexp g x) (fexp (lift y) n)
-
-val lemma_y_inverse_lift0:
-     p:prm
-  -> q:prm
-  -> y:fen2 (p*q) { isunit (shrink y) }
+val encf_y_unit_raw0:
+     #n:comp
+  -> y:fen2 n { isunit (shrink y) }
   -> Lemma
-  (let n = p * q in
-   let k = to_fe #(n*n) (((shrink y)*(finv (shrink y)))/n) in
+  (let k = to_fe #(n*n) (((shrink y)*(finv (shrink y)))/n) in
    lift (shrink y) *% lift (finv (shrink y)) = 1 +% k *% n)
-let lemma_y_inverse_lift0 p q y =
-  let n = p * q in
+let encf_y_unit_raw0 #n y =
   let n2 = n * n in
 
   let a = shrink y in
@@ -394,14 +343,12 @@ let lemma_y_inverse_lift0 p q y =
 
 #reset-options "--z3rlimit 100"
 
-val lemma_y_inverse_lift:
-     p:prm
-  -> q:prm
-  -> y:fen2 (p*q) { isunit (shrink y) }
+val encf_y_unit_raw:
+     #n:comp
+  -> y:fen2 n { isunit (shrink y) }
   -> Lemma
-  (fexp y (p*q) *% fexp (lift (finv (shrink y))) (p*q) = 1)
-let lemma_y_inverse_lift p q y =
-  let n = p * q in
+  (fexp y n *% fexp (lift (finv (shrink y))) n = 1)
+let encf_y_unit_raw #n y =
   let n2 = n * n in
   assert (n < n2);
   let y' = lift (finv (shrink y)) in
@@ -425,7 +372,7 @@ let lemma_y_inverse_lift p q y =
       assert (y = l1 +% l2);
       mul_add_distr_l #(n*n) l1 l2 y';
       assert (y *% y' = (l1 *% y') +% (l2 *% y'));
-      lemma_y_inverse_lift0 p q y;
+      encf_y_unit_raw0 #n y;
       assert (y *% y' = (1 +% (k *% n)) +% ((n * (y/n)) *% y'));
       to_fe_idemp #n2 (n * (y/n));
       to_fe_idemp #n2 n;
@@ -443,7 +390,26 @@ let lemma_y_inverse_lift p q y =
   root_of_unity_prop0 #n (k +% (y_n *% y'));
   assert (fexp (y *% y') n = 1)
 
-#reset-options "--z3rlimit 50"
+#reset-options "--z3rlimit 100"
+
+val encf_y_unit: #n:comp -> y:fenu n -> Lemma
+  (fexp (lift y) n *% fexp (lift (finv y)) n = 1)
+let encf_y_unit #n y = encf_y_unit_raw #n (lift y)
+
+val encf_unit_raw: #n:comp -> g:isg n -> x:nat -> y:fen2 n{isunit (shrink y)} -> Lemma
+  (isunit #(n*n) (encf_raw #n g x y))
+let encf_unit_raw #n g x y =
+
+  if x = 0 then (fexp_zero2 g; one_isunit n) else g_pow_isunit g x;
+  assert(isunit (fexp g x));
+
+  encf_y_unit_raw #n y;
+
+  isunit_prod (fexp g x) (fexp y n)
+
+val encf_unit: #n:comp -> g:isg n -> x:fe n -> y:fenu n -> Lemma
+  (isunit #(n*n) (encf #n g x y))
+let encf_unit #n g x y = encf_unit_raw g x (lift y)
 
 val encf_inj_raw1:
      p:prm
@@ -478,7 +444,7 @@ let encf_inj_raw1 p q g x1 y1' x2 y2' =
   let x1 = x1 % r in
   let x2 = x2 % r in
 
-  encf_unit_y #n g y1;
+  encf_y_unit #n y1;
   let fy = finv y1 in
   let fy' = lift fy in
 
@@ -493,7 +459,7 @@ let encf_inj_raw1 p q g x1 y1' x2 y2' =
       assert (fexp y1' n = (z1 *% fexp g x2) *% fexp y2' n);
 
       assert (fexp y1' n *% fexp fy' n = (z1 *% fexp g x2) *% (fexp y2' n *% fexp fy' n));
-      lemma_y_inverse_lift p q y1';
+      encf_y_unit_raw #n y1';
       assert ((z1 *% fexp g x2) *% (fexp y2' n *% fexp fy' n) = 1);
 
       to_fe_idemp #r x1;
@@ -588,7 +554,7 @@ let encf_inj_raw2 p q g x10 y1' x20 y2' =
     assert (fexp (y2' *% fy') (n*lambda) = fexp y2' (n*lambda) *% fexp fy' (n*lambda));
 
     euler_thm3 p q y2';
-    lemma_y_inverse_lift p q y1';
+    encf_y_unit_raw y1';
     euler_thm3 p q fy';
     assert (fexp (y2' *% fy') (n*lambda) = 1);
     mul_one (fexp g ((r - x1 + x2) * lambda))
@@ -646,7 +612,6 @@ let encf_inj #n g x1 y1 x2 y2 =
   to_fe_idemp #n x2;
   encf_inj_raw_partial #n g x1 (lift y1) x2 (lift y2)
 
-
 // It is possible to get it checking every element of the preimage.
 // encf is bijection for proper g
 val encf_inv: #n:comp -> g:isg n -> w:fen2 n ->
@@ -667,11 +632,57 @@ let encf_inv #n g w =
     Mktuple2 x y
   end else magic() // it's hard to invert it
 
-val is_res_class: #n:comp -> g:isg n -> w:fen2u n -> x:fe n -> Type0
-let is_res_class #n g w x = exists y. encf g x y = w
+type is_res_class (#n:comp) (g:isg n) (w:fen2u n) (x:fe n) =
+  exists (y:(t:fen2 n{isunit (shrink t)})). encf_raw g x y = w
+
+val is_res_class_of_encf_raw: #n:comp -> g:isg n -> x:fe n -> y:fen2 n{isunit (shrink y)} -> Lemma
+  (encf_unit_raw g x y; is_res_class g (encf_raw g x y) x)
+let is_res_class_of_encf_raw #n g x y =
+  let func (y':fen2 n): Type =  encf_raw g x y' = encf_raw g x y in
+  exists_intro func y
+
+val res_class_elim:
+     #n:comp
+  -> #goal:Type0
+  -> g:isg n
+  -> w:fen2u n
+  -> x:fe n{is_res_class #n g w x}
+  -> f:((y:fen2 n{isunit (shrink y) /\ encf_raw g x y = w}) -> squash goal)
+  -> Lemma goal
+let res_class_elim #n #goal g w x f =
+  let l (): Lemma (is_res_class g w x) = () in
+  exists_elim goal #(t:fen2 n{isunit (shrink t)}) #(fun y -> encf_raw g x y = w) (l ()) f
 
 val res_class: #n:comp -> g:isg n -> w:fen2u n -> x:fe n{is_res_class g w x}
 let res_class #n g w = fst (encf_inv g w)
+
+// We invert twice and apply injectivity.
+val res_class_is_unique: #n:comp -> g:isg n -> w:fen2u n -> x:fe n -> Lemma
+  (requires is_res_class g w x)
+  (ensures res_class g w = x)
+let res_class_is_unique #n g w x =
+  let x' = res_class g w in
+
+  let goal = x' = x in
+
+  let proof (y:fen2 n{isunit (shrink y) /\ encf_raw g x y = w})
+            (y':fen2 n{isunit (shrink y') /\ encf_raw g x' y' = w}):
+            Lemma goal = begin
+      encf_inj_raw_partial g x y x' y';
+      to_fe_idemp #n x;
+      to_fe_idemp #n x'
+    end in
+
+  res_class_elim #n #goal g w x (fun y ->
+    res_class_elim #n #goal g w x' (fun y' ->
+      proof y y'))
+
+val res_class_of_encf_raw: #n:comp -> g:isg n -> x:fe n -> y:fen2 n{isunit (shrink y)} -> Lemma
+  (encf_unit_raw g x y; res_class g (encf_raw g x y) = x)
+let res_class_of_encf_raw #n g x y =
+  is_res_class_of_encf_raw g x y;
+  encf_unit_raw g x y;
+  res_class_is_unique g (encf_raw g x y) x
 
 #reset-options "--z3rlimit 150"
 
@@ -752,6 +763,64 @@ let res_class_inverse #n g1 g2 =
   assert(res_class g1 g1 = one);
   finv_unique (res_class g1 g2) (res_class g2 g1)
 
+#reset-options
+
+val res_class_modulo_encf:
+     #n:comp
+  -> g:isg n
+  -> x1:fe n
+  -> y1:fenu n
+  -> x2:nat
+  -> y2:fen2 n{isunit (shrink y2)}
+  -> Lemma
+  (requires x2 % n = x1)
+  (ensures (encf_unit g x1 y1; encf_unit_raw g x2 y2;
+           res_class g (encf g x1 y1) = res_class g (encf_raw g x2 y2)))
+let res_class_modulo_encf #n g x1 y1 x2 y2 =
+  division_definition_lemma_2 x2 n 0;
+  assert (x2/n >= 0);
+
+  let lemma1 (): Lemma (encf_raw g x2 y2 = encf_raw g x1 (fexp g (x2/n) *% y2)) = begin
+      mod_prop n x2 x1;
+      assert (x2 = x1 + (x2/n) * n);
+      assert (isunit (shrink y2));
+      assert (encf_raw g x2 y2 = fexp g x2 *% fexp y2 n);
+      nat_times_nat_is_nat (x2/n) n;
+      fexp_mul1 g x1 ((x2/n)*n);
+      assert (encf_raw g x2 y2 = fexp g x1 *% fexp g ((x2/n)*n) *% fexp y2 n);
+      fexp_exp g (x2/n) n;
+      assert (encf_raw g x2 y2 = fexp g x1 *% (fexp (fexp g (x2/n)) n) *% fexp y2 n);
+      fexp_mul2 (fexp g (x2/n)) y2 n;
+      assert (encf_raw g x2 y2 = fexp g x1 *% fexp (fexp g (x2/n) *% y2) n);
+      assert (encf_raw g x2 y2 = encf_raw g x1 (fexp g (x2/n) *% y2))
+  end in
+
+  lemma1 ();
+
+
+  encf_unit_raw g x1 (lift y1);
+
+  let y3:fen2 n = fexp g (x2/n) *% y2 in
+
+  let y3_is_unit (): Lemma (isunit (shrink (fexp g (x2/n) *% y2))) = begin
+      shrink_mul (fexp g (x2/n)) y2;
+      shrink_fexp g (x2/n);
+      assert (shrink (fexp g (x2/n) *% y2) = fexp (shrink g) (x2/n) *% (shrink y2));
+      isunit_in_nsquare2 g;
+      g_pow_isunit (shrink g) (x2/n);
+      isunit_prod (fexp (shrink g) (x2/n)) (shrink y2)
+    end in
+
+  y3_is_unit ();
+
+  let w3 = encf_raw g x1 y3 in
+  encf_unit_raw g x1 y3;
+  res_class_of_encf_raw #n g x1 y3;
+  assert (res_class g w3 = x1);
+
+  assert (res_class g (encf_raw g x2 y2) = x1);
+  res_class_of_encf_raw g x1 (lift y1);
+  assert (res_class g (encf_raw g x1 (lift y1)) = x1)
 
 val bigl: #n:comp -> u:fen2 n{u > 0} -> r:fe n
 let bigl #n u = (u - 1) / n
@@ -983,7 +1052,7 @@ let s2p sec =
          (Secret?.g sec)
 
 
-(* Enc/Dec *)
+(* Enc/Dec/Hom *)
 
 type ciphertext (n:comp) = c:fen2 n
 
@@ -1011,7 +1080,15 @@ val decrypt:
   -> m:fe (Public?.n (s2p s))
 let decrypt sec c = decrypt_direct (Secret?.p sec) (Secret?.q sec) (Secret?.g sec) c
 
-(* Functional correctness *)
+// Corresponds to the modular addition of encrypted values
+val hom_add: #n:comp -> c1:ciphertext n -> c2:ciphertext n -> c:ciphertext n
+let hom_add #n c1 c2 = c1 *% c2
+
+// Corresponds to the modular multiplication of encrypted value by plaintext k
+val hom_mul_plain: #n:comp -> c1:ciphertext n -> k:fe n -> c:ciphertext n
+let hom_mul_plain #n c1 k = fexp c1 k
+
+(* Functional correctness and properties *)
 
 val enc_is_unit:
      p:public
@@ -1064,6 +1141,7 @@ let enc_dec_id sec r m =
   let pub = s2p sec in
   let n = Public?.n pub in
   let g = Secret?.g sec in
+
   enc_is_unit pub r m;
   let c: fen2u n = encrypt (s2p sec) r m in
   assert(exists y1. encf g m y1 = c);
@@ -1076,3 +1154,57 @@ let enc_dec_id sec r m =
   assert(exists y2. encf g m' y2 = c);
   assert(exists y1 y2. encf g m y1 = encf g m' y2);
   encf_inj_pair g m m'
+
+val hom_add_lemma:
+     s:secret
+  -> r1:fenu (Public?.n (s2p s))
+  -> m1:fe (Public?.n (s2p s))
+  -> r2:fenu (Public?.n (s2p s))
+  -> m2:fe (Public?.n (s2p s))
+  -> Lemma
+  (let c1 = encrypt (s2p s) r1 m1 in
+  (let c2 = encrypt (s2p s) r2 m2 in
+   decrypt s (hom_add c1 c2) = m1 +% m2))
+let hom_add_lemma s r1 m1 r2 m2 =
+  let g = Secret?.g s in
+  let p = Secret?.p s in
+  let q = Secret?.q s in
+  let n = p * q in
+  let c1 = encrypt (s2p s) r1 m1 in
+  let c2 = encrypt (s2p s) r2 m2 in
+  assert (hom_add c1 c2 = encf_raw g m1 (lift r1) *% encf_raw g m2 (lift r2));
+  assert (hom_add c1 c2 = fexp g m1 *% fexp (lift r1) n *% fexp g m2 *% fexp (lift r2) n);
+  assert (hom_add c1 c2 = fexp g m1 *% fexp g m2 *% fexp (lift r1) n *% fexp (lift r2) n);
+  fexp_mul1 g m1 m2;
+  fexp_mul2 (lift r1) (lift r2) n;
+  assert (hom_add c1 c2 = fexp g (m1 + m2) *% fexp (lift r1 *% lift r2) n);
+
+  let r3:fen2 n = lift r1 *% lift r2 in
+  let shrink_r3_is_unit (): Lemma (isunit (shrink r3)) = begin
+      shrink_mul (lift r1) (lift r2);
+      isunit_prod r1 r2
+    end in
+  shrink_r3_is_unit ();
+  assert (hom_add c1 c2 = encf_raw g(m1+m2) r3);
+
+
+  let goal = decrypt s (hom_add c1 c2) = m1 +% m2 in
+  // stub encryption w/ same res class
+  let w = fexp g ((m1+m2)%n) *% fexp r3 n in
+  is_res_class_of_encf_raw g ((m1+m2)%n) r3;
+  res_class_modulo_encf g ((m1 + m2)%n) (shrink r3) (m1+m2) r3;
+  encf_unit g ((m1+m2)%n) (shrink r3);
+  encf_unit_raw g ((m1+m2)%n) r3;
+  encf_unit_raw g (m1+m2) r3;
+  assert (res_class g (encf g ((m1+m2)%n) (shrink r3)) =
+          res_class g (encf_raw g (m1+m2) r3));
+  let y' = lift (shrink r3) in
+  assert (encf g ((m1+m2)%n) (shrink r3) = encf_raw g ((m1+m2)%n) y');
+  assert (res_class g (encf_raw g ((m1+m2)%n) y') = res_class g (encf_raw g (m1+m2) r3));
+  res_class_of_encf_raw g ((m1+m2)%n) y';
+  assert (res_class g (encf_raw g ((m1+m2)%n) y') = (m1+m2)%n);
+  assert (res_class g (hom_add c1 c2) = (m1+m2)%n);
+  decrypts_into_res_class s (hom_add c1 c2);
+  assert (decrypt s (hom_add c1 c2) = (m1 + m2)%n);
+  to_fe_add' m1 m2;
+  assert (decrypt s (hom_add c1 c2) = m1 +% m2)
