@@ -1,4 +1,4 @@
-module Spec.SHA2.Fixed.Test
+ module Spec.SHA2.Fixed.Test
 
 #reset-options "--z3rlimit 100 --initial_fuel 0 --max_fuel 0 --initial_ifuel 0"
 
@@ -245,10 +245,17 @@ let test_sha2 msg_len msg expected224 expected256 expected384 expected512 =
   let expected384:lbytes 48 = of_list expected384 in
   let expected512:lbytes 64 = of_list expected512 in
 
+  let test224 = Spec.hash2 Def.SHA2_224 msg in
+  let test256 = Spec.hash2 Def.SHA2_256 msg in
+  let test384 = Spec.hash2 Def.SHA2_384 msg in
+  let test512 = Spec.hash2 Def.SHA2_512 msg in
+
+(*
   let test224 = Spec.hash1 Def.SHA2_224 msg in
   let test256 = Spec.hash1 Def.SHA2_256 msg in
   let test384 = Spec.hash1 Def.SHA2_384 msg in
   let test512 = Spec.hash1 Def.SHA2_512 msg in
+*)
 
   let r224 = print_and_compare "\nExpected SHA2 224: " "\nComputed SHA2 224: " 28 expected224 test224 in
   let r256 = print_and_compare "\nExpected SHA2 256: " "\nComputed SHA2 256: " 32 expected256 test256 in
