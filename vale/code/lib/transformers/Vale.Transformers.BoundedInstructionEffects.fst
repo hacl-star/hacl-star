@@ -183,7 +183,7 @@ let lemma_machine_eval_ins_st_only_affects_write (i:ins{Instr? i}) (s:machine_st
   FStar.Classical.forall_intro (
     FStar.Classical.move_requires (lemma_machine_eval_ins_st_only_affects_write_aux i s))
 
-let lemma_machine_eval_ins_st_unchanged_behavior (i:ins{Instr? i}) (s1 s2:machine_state) :
+let lemma_machine_eval_ins_st_unchanged_behavior_ok (i:ins{Instr? i}) (s1 s2:machine_state) :
   Lemma
     (requires (
         let r, w = rw_set_of_ins i in
@@ -191,8 +191,21 @@ let lemma_machine_eval_ins_st_unchanged_behavior (i:ins{Instr? i}) (s1 s2:machin
     (ensures (
         let r, w = rw_set_of_ins i in
         let f = machine_eval_ins_st i in
-        (unchanged_at w (run f s1) (run f s2)) /\
         (run f s1).ms_ok = (run f s2).ms_ok)) =
+  admit ()
+
+let lemma_machine_eval_ins_st_unchanged_behavior (i:ins{Instr? i}) (s1 s2:machine_state) :
+  Lemma
+    (requires (
+        let r, w = rw_set_of_ins i in
+        let f = machine_eval_ins_st i in
+        (unchanged_at r s1 s2) /\
+        (run f s1).ms_ok /\
+        (run f s2).ms_ok))
+    (ensures (
+        let r, w = rw_set_of_ins i in
+        let f = machine_eval_ins_st i in
+        (unchanged_at w (run f s1) (run f s2)))) =
   admit ()
 
 let lemma_machine_eval_ins_st_bounded_effects_Instr (i:ins{Instr? i}) :
@@ -201,6 +214,8 @@ let lemma_machine_eval_ins_st_bounded_effects_Instr (i:ins{Instr? i}) :
         (let r, w = rw_set_of_ins i in
          (bounded_effects r w (machine_eval_ins_st i))))) =
   FStar.Classical.forall_intro (lemma_machine_eval_ins_st_only_affects_write i);
+  FStar.Classical.forall_intro_2 (fun s1 ->
+      FStar.Classical.move_requires (lemma_machine_eval_ins_st_unchanged_behavior_ok i s1));
   FStar.Classical.forall_intro_2 (fun s1 ->
       FStar.Classical.move_requires (lemma_machine_eval_ins_st_unchanged_behavior i s1))
 
