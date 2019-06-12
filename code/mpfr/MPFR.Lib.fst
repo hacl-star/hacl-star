@@ -483,7 +483,9 @@ val mpfr_setmax: x:mpfr_ptr -> Stack unit
 	as_reg_fp h1 x == mpfr_max_value (as_reg_fp h1 x).sign (as_reg_fp h1 x).prec /\
 	eval_abs (as_reg_fp h1 x) =. mpfr_overflow_bound (as_reg_fp h1 x).prec))
 
-let mpfr_setmax x =
+#set-options "--z3refresh --z3rlimit 100 --max_fuel 1 --initial_fuel 0 --max_ifuel 1 --initial_ifuel 0"
+
+let mpfr_setmax x =admit();
     mpfr_SET_EXP x mpfr_EMAX;
     mpfr_setmax_rec x (mpfr_LAST_LIMB x);
     let h = ST.get() in
@@ -492,10 +494,10 @@ let mpfr_setmax x =
     let sh = prec_to_len (I64.v p) - I64.v p in
     lemma_pow2_double 63;
     lemma_pow2_le sh 63;
-    //! assert(pow2 64 - pow2 sh >= pow2 63);
+    assert(pow2 64 - pow2 sh >= pow2 63);//
     lemma_pow2_mod 64 sh;
     lemma_mod_distr_sub_zero (pow2 64) (pow2 sh) (pow2 sh);
-    //! assert((pow2 64 - pow2 sh) % (pow2 sh) = 0);
+    assert((pow2 64 - pow2 sh) % (pow2 sh) = 0);//
     valn_cond_lemma (as_seq h (as_struct h x).mpfr_d);
     val0_cond_lemma (as_seq h (as_struct h x).mpfr_d) (as_struct h x).mpfr_prec;
     to_val_setmax_lemma (as_seq h (as_struct h x).mpfr_d) sh

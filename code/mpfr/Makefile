@@ -24,8 +24,8 @@ MPFR_FILES=	MPFR.Maths.fst \
 		MPFR.Umul_ppmm.fst \
 		MPFR.Mul.Spec.fst \
 		MPFR.Mul_1.fst \
-		MPFR.fst
-#		Test.MPFR.fst
+		MPFR.fst\
+		Test.MPFR.fst
 
 # This target is very concise and re-uses the variables defined in
 # Makefile.include. You shouldn't need to call `cp` ever.
@@ -49,7 +49,7 @@ MPFR_FILES=	MPFR.Maths.fst \
 #	out/Test_MPFR
 
 %.fst-verify: %.fst
-	$(FSTAR) --use_hints $*.fst
+	$(FSTAR) --include $(KREMLIN_HOME)/kremlib --use_hints --cache_checked_modules $*.fst
 
 %.fst-hints: %.fst
 	$(FSTAR) --z3rlimit_factor 5 --use_hints --record_hints $*.fst

@@ -32,7 +32,7 @@ type fp_type_t =
 type fp_sign_t = s:int{s = -1 \/ s = 1}
    
 (* flag: indicates value type, other entries are useless for sigular value (except sign)
- * sign: sign of the value, indicates also the sign of zero and infinity
+k * sign: sign of the value, indicates also the sign of zero and infinity
  * prec: precision of the value, see more information below with limb
  * exp : exponent of the value
  * len : the bit length of significand, see more information below with limb
@@ -40,7 +40,7 @@ type fp_sign_t = s:int{s = -1 \/ s = 1}
  *       it is a 'len'-bit natural number (possibly with leading zeros),
  *       the first 'prec' bits can have values while the last 'len - prec' bits should be 0s.
  *	 it represents a rational number between 0 and 1 by adding '0.' in front of it *)
-type fp_struct = {
+noeq type fp_struct = {
     sign: fp_sign_t;
     prec: pos;
     exp : int;

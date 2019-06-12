@@ -132,6 +132,7 @@ val dyadic_eq_trans_lemma: a:dyadic -> b:dyadic -> c:dyadic -> Lemma
     (ensures  (a =. c))
     [SMTPat (a =. b); SMTPat (b =. c)]
 
+#set-options "--z3rlimit 150"
 let dyadic_eq_trans_lemma a b c =
     let elbab = min a.exponent b.exponent in
     let elbbc = min b.exponent c.exponent in
@@ -142,7 +143,14 @@ let dyadic_eq_trans_lemma a b c =
     lemma_pow2_mul (b.exponent - elbab) (elbab - elb);
     lemma_pow2_mul (b.exponent - elbbc) (elbbc - elb);
     lemma_pow2_mul (c.exponent - elbac) (elbac - elb);
-    lemma_pow2_mul (c.exponent - elbbc) (elbbc - elb)
+    lemma_pow2_mul (c.exponent - elbbc) (elbbc - elb);
+    assert((eval_i a elbab) = (eval_i b elbab));
+    assert((eval_i a elb) = (eval_i b elb));
+    assert((eval_i b elbbc) = (eval_i c elbbc));
+    assert((eval_i b elb) = (eval_i c elb)); 
+    assert((eval_i a elb) = (eval_i c elb));
+    assert((eval_i a elbac) = (eval_i c elbac));
+    assert(a=.c)
 
 val dyadic_gt_trans_lemma: a:dyadic -> b:dyadic -> c:dyadic -> Lemma
     (requires ((a >=. b /\ b >. c) \/ (a >. b /\ b >=. c)))

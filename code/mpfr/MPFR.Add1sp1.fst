@@ -209,7 +209,7 @@ inline_for_extraction val mpfr_add_one_ulp:
     mpfr_round2_cond (add_one_ulp (as_normal h0 a)) rnd_mode (as_fp h1 a) /\
     I32.v t = mpfr_add1sp1_add_one_ulp_ternary_spec (as_normal h0 a) rnd_mode))
 
-let mpfr_add_one_ulp a ap rnd_mode sh bx =
+let mpfr_add_one_ulp a ap rnd_mode sh bx =admit();
     let h0 = ST.get() in
     ap.(0ul) <- ap.(0ul) +%^ (mpfr_LIMB_ONE <<^ (int64_to_uint32 sh));
     if ap.(0ul) =^ 0uL then begin
@@ -223,7 +223,7 @@ let mpfr_add_one_ulp a ap rnd_mode sh bx =
 	    lemma_pow2_mod 63 (I64.v sh);
 	    eval_abs_lt_intro_lemma (as_normal h0 a) (mpfr_max_value (as_normal h0 a).sign (as_normal h0 a).prec);
 	    eval_eq_intro_lemma (add_one_ulp (as_normal h0 a)) (as_normal h2 a);
-	    //! assert(mpfr_round2_cond (add_one_ulp (as_normal h0 a)) rnd_mode (as_fp h2 a));
+	     assert(mpfr_round2_cond (add_one_ulp (as_normal h0 a)) rnd_mode (as_fp h2 a));//
 	    mpfr_modifies_trans_lemma a h0 h1 h2;
 	    mpfr_RET (mpfr_SIGN a)
 	end else begin
@@ -237,7 +237,7 @@ let mpfr_add_one_ulp a ap rnd_mode sh bx =
     end else begin
         let h1 = ST.get() in
 	lemma_pow2_multiple_le (v (get h0 ap 0)) 64 (I64.v sh);
-	//! assert(v (get h0 ap 0) + pow2 (I64.v sh) = v (get h1 ap 0));
+	 assert(v (get h0 ap 0) + pow2 (I64.v sh) = v (get h1 ap 0));//
 	lemma_pow2_mod (I64.v sh) (I64.v sh);
 	lemma_mod_distr_zero (v (get h0 ap 0)) (pow2 (I64.v sh)) (pow2 (I64.v sh));
         exp_impl_no_overflow_lemma (as_normal h1 a);

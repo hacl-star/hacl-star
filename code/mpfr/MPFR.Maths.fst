@@ -54,13 +54,12 @@ val lemma_distr_sub_right: a:int -> b:int -> c:int -> Lemma
 let lemma_distr_sub_right a b c = ()
 
 (* Division and modulo *)
-val lemma_euclidean: a:nat -> b:pos -> Lemma
+val lemma_euclidean: a:int -> b:pos -> Lemma
     (a = (a / b) * b + a % b)
 let lemma_euclidean a b = ()
 
-val lemma_add_div: a:nat -> n:int -> d:pos -> Lemma
-    (requires (a + n * d >= 0))
-    (ensures  ((a + n * d) / d = a / d + n))
+val lemma_add_div: a:int -> n:int -> d:pos -> Lemma
+    ((a + n * d) / d = a / d + n)
 let lemma_add_div a n d =
     assert(a / d + n - 1 < (a + n * d) / d /\ (a + n * d) / d < a / d + n + 1)
 
@@ -79,11 +78,11 @@ val lemma_small_mod: a:nat -> b:pos -> Lemma
     (ensures  (a % b = a))
 let lemma_small_mod a b = ()
 
-val lemma_multiple_div: a:nat -> b:pos -> Lemma
+val lemma_multiple_div: a:int -> b:pos -> Lemma
     ((a * b) / b = a)
 let lemma_multiple_div a b = lemma_add_div 0 a b
 
-val lemma_multiple_mod: a:nat -> b:pos -> Lemma
+val lemma_multiple_mod: a:int -> b:pos -> Lemma
     ((a * b) % b = 0)
 let lemma_multiple_mod a b = lemma_multiple_div a b
 
@@ -103,6 +102,11 @@ val lemma_multiple_le: a:nat -> b:nat -> d:pos -> Lemma
 let lemma_multiple_le a b d =
     lemma_div_lt a b d;
     lemma_distr_add_left (a / d) 1 d
+
+val lemma_mod_ge_zero: a:pos-> d:pos->Lemma
+    (requires (a%d=0))
+    (ensures (a>=d))
+let lemma_mod_ge_zero a d=()
 
 val lemma_div_distr: a:nat -> b:nat -> c:pos -> Lemma
     (requires (a % c = 0))
@@ -132,25 +136,40 @@ let lemma_mod_distr_sub a b c =
     //! assert((a - b) / c = ((a / c - b / c - 1) * c + (a % c - b % c + c)) / c);
     lemma_add_mod (a % c - b % c + c) (a / c - b / c - 1) c
 
-val lemma_mod_distr_sub_zero: a:nat -> b:nat -> c:pos -> Lemma
-    (requires (a % c = 0 /\ b % c = 0 /\ a >= b))
-    (ensures  ((a - b) % c = 0))
-
-let lemma_mod_distr_sub_zero a b c = lemma_mod_distr_sub a b c
-
-val lemma_div_mul: a:nat -> b:pos -> Lemma
+val lemma_div_mul: a:int -> b:pos -> Lemma
     (requires (a % b = 0))
     (ensures  ((a / b) * b = a))
 
 let lemma_div_mul a b = ()
 
+val lemma_mod_distr_sub_zero: a:int -> b:int -> c:pos -> Lemma
+    (requires (a % c = 0 /\ b % c = 0))
+    (ensures  ((a - b) % c = 0))
+
+let lemma_mod_distr_sub_zero a b c =
+    lemma_div_mul a c;
+    lemma_div_mul b c;
+    //! assert((a-b)=(a/c)*c-(b/c)*c);
+    lemma_distr_sub_left (a/c) (b/c) c;
+    //! assert((a/c)*c-(b/c)*c=(a/c-b/c)*c);
+    //! assert((a-b)=(a/c-b/c)*c);
+    lemma_multiple_mod (a/c-b/c) c
+
+val lemma_mod_abs_zero: x:int->d:pos->Lemma
+    (requires (x%d=0))
+    (ensures ((abs x)%d=0))
+let lemma_mod_abs_zero x d=
+    lemma_mod_distr_sub_zero 0 x d
+
 val lemma_div_div: a:nat -> b:pos -> c:pos -> Lemma
     ((a / b) / c = a / (b * c))
-    
+
+#set-options "--z3rlimit 30"
+
 let lemma_div_div a b c =
     let adb = a / b in
     lemma_euclidean a b;
-    //! assert(a = adb * b + a % b);
+    assert(a = adb * b + a % b);
     lemma_euclidean adb c;
     //! assert(adb = (adb / c) * c + adb % c);
     lemma_distr_add_left b ((adb / c) * c) (adb % c);
@@ -168,6 +187,9 @@ val lemma_div_mod: a:nat -> b:pos -> c:pos -> Lemma
     ((a / b) % c = (a % (b * c)) / b)
     
 let lemma_div_mod a b c =
+    assert(b>0);
+    assert(c>0);
+    assert(b*c>0);
     lemma_euclidean a (b * c);
     //! assert(a = (a / (b * c)) * (b * c) + a % (b * c));
     lemma_add_div a (- (a / (b * c)) * c) b;
@@ -190,6 +212,8 @@ val lemma_mul_mod_zero: a:nat -> b:nat -> c:pos -> Lemma
     (requires (a % c = 0 \/ b % c = 0))
     (ensures  ((a * b) % c = 0))
     (decreases (b % c))
+
+#set-options "--max_fuel 2 --max_ifuel 2"
 
 let rec lemma_mul_mod_zero a b c =
     if b % c > 0 then lemma_mul_mod_zero b a c else lemma_multiple_mod (a * (b / c)) c
@@ -216,12 +240,14 @@ let lemma_mod_mul a b c =
 val lemma_mod_product_zero: a:nat -> b:nat -> c:pos -> d:pos -> Lemma
     (requires (a % c = 0 /\ b % d = 0))
     (ensures  ((a * b) % (c * d) = 0))
-
+(*
+#set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
+*)
 let lemma_mod_product_zero a b c d = 
+    let bdd:nat=b/d in
     lemma_mod_mul (a * (b / d)) c d;
     //! assert((a * (b / d) % c) * d = (a * b) % (c * d));
     lemma_mul_mod_zero a (b / d) c
-
 
 (* pow2 proprieties *)
 val lemma_pow2_le: n:nat -> m:nat -> Lemma
@@ -537,3 +563,33 @@ let lemma_sb_logor #n x a b sb1 sb2 =
     lemma_euclidean x (pow2 b);
     if v sb1 = 0 && v sb2 = 0 then nth_lemma (v (sb1 |^ sb2)) (zero 64)
     else logor_ge (v sb1) (v sb2)
+
+(*New lemmas, should be inserted at the right place at some point*)
+
+val lemma_add_gt_right: a:int -> b:int -> c:int -> Lemma
+    (requires (b > c))
+    (ensures  (b + a >= c + a+1))
+let lemma_add_gt_right a b c = ()
+
+val lemma_pow2_gt_rev: a:nat -> b:nat -> Lemma
+    (requires (pow2 a>pow2 b))
+    (ensures (a>b))
+let lemma_pow2_gt_rev a b=
+    if a>b then () else lemma_pow2_le a b
+
+val nbits: n:pos->r:pos
+let rec nbits n=match n with
+    |1->1
+    |n->1+nbits (n/2)
+
+val lemma_pow2_nbits: n:pos->Lemma (n>=pow2 ((nbits n)-1)/\n<pow2 (nbits n))
+let rec lemma_pow2_nbits dif=match dif with
+    |1->()
+    |n->lemma_pow2_nbits (n/2)
+
+val lemma_pow2_nbits_2: a:pos->b:nat->Lemma
+    (requires (a>=pow2 b))
+    (ensures (nbits a>b))
+let rec lemma_pow2_nbits_2 a b=match a,b with
+    |_,0->()
+    |a,b->lemma_pow2_nbits_2 (a/2) (b-1)

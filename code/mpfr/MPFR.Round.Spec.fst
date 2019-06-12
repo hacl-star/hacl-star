@@ -104,7 +104,7 @@ let low_mant a p =
 //  Rounding with different rounding modes can be done in 2 steps.                   //
 //  1. Firstly round with unbounded precision.                                       // 
 //  2. Then convert the result into MPFR numbers according to the rounding mode,     //
-//     this is used to deal with sigular values when exponent exceeds the limits.    //
+//     this is used to deal with singular values when exponent exceeds the limits.    //
 //  Here we give definitions for 5 rounding modes.                                   //
 //  RNDZ: round towards zero           RNDA: round away from zero                    //
 //  RNDU: round towards +infinity      RNDD: round towards -infinity                 //
@@ -120,6 +120,9 @@ let low_mant a p =
 //     it will have multiple representations, which means there is no definition.    //
 ///////////////////////////////////////////////////////////////////////////////////////
 
+(*Values that satisfy this condition can be rounded*)
+let mpfr_ROUND_COND (a:valid_fp)=normal_fp_cond a \/ a.flag=MPFR_ZERO
+
 (* RNDZ definition *)
 val rndz_def: a:normal_fp -> p:pos{p <= a.prec} ->
     Tot (r:normal_fp{r.prec = p /\
@@ -127,7 +130,7 @@ val rndz_def: a:normal_fp -> p:pos{p <= a.prec} ->
 	
 let rndz_def a p = high_mant a p
 
-let mpfr_rndz2_cond (a:normal_fp{mpfr_PREC_COND a.prec}) (r:mpfr_fp{r.prec = a.prec}): GTot Type0 =
+let mpfr_rndz2_cond (a:valid_fp{mpfr_ROUND_COND a /\ mpfr_PREC_COND a.prec}) (r:mpfr_fp{r.prec = a.prec}): GTot Type0 =
     if eval_abs a >. mpfr_overflow_bound a.prec then
         valid_num_cond r /\ r == mpfr_max_value a.sign a.prec
     else if eval_abs a <. mpfr_underflow_bound a.prec then
@@ -144,7 +147,7 @@ let rnda_def a p =
     if eval a =. eval (rndz_def a p) then rndz_def a p
     else add_one_ulp (rndz_def a p)
 
-let mpfr_rnda2_cond (a:normal_fp{mpfr_PREC_COND a.prec}) (r:mpfr_fp{r.prec = a.prec}): GTot Type0 =
+let mpfr_rnda2_cond (a:valid_fp{mpfr_ROUND_COND a /\ mpfr_PREC_COND a.prec}) (r:mpfr_fp{r.prec = a.prec}): GTot Type0 =
     if eval_abs a >. mpfr_overflow_bound a.prec then
         valid_inf_cond r /\ r.sign = a.sign
     else if eval_abs a <. mpfr_underflow_bound a.prec then
@@ -161,7 +164,7 @@ let rndu_def a p =
     if eval a =. eval (rndz_def a p) || eval a <. zero_dyadic then rndz_def a p
     else add_one_ulp (rndz_def a p)
 
-let mpfr_rndu2_cond (a:normal_fp{mpfr_PREC_COND a.prec}) (r:mpfr_fp{r.prec = a.prec}): GTot Type0 =
+let mpfr_rndu2_cond (a:valid_fp{mpfr_ROUND_COND a /\ mpfr_PREC_COND a.prec}) (r:mpfr_fp{r.prec = a.prec}): GTot Type0 =
     if eval_abs a >. mpfr_overflow_bound a.prec && a.sign > 0 then
         valid_inf_cond r /\ r.sign > 0
     else if eval_abs a >. mpfr_overflow_bound a.prec && a.sign < 0 then
@@ -182,7 +185,7 @@ let rndd_def a p =
     if eval a =. eval (rndz_def a p) || eval a >. zero_dyadic then rndz_def a p
     else add_one_ulp (rndz_def a p)
 
-let mpfr_rndd2_cond (a:normal_fp{mpfr_PREC_COND a.prec}) (r:mpfr_fp{r.prec = a.prec}): GTot Type0 =
+let mpfr_rndd2_cond (a:valid_fp{mpfr_ROUND_COND a /\ mpfr_PREC_COND a.prec}) (r:mpfr_fp{r.prec = a.prec}): GTot Type0 =
     if eval_abs a >. mpfr_overflow_bound a.prec && a.sign > 0 then
         valid_num_cond r /\ r == mpfr_max_value 1 a.prec
     else if eval_abs a >. mpfr_overflow_bound a.prec && a.sign < 0 then
@@ -197,14 +200,15 @@ let mpfr_rndd2_cond (a:normal_fp{mpfr_PREC_COND a.prec}) (r:mpfr_fp{r.prec = a.p
 (* RNDN definition *)
 let is_even (a:normal_fp) = (nth #a.len a.limb (a.prec - 1) = false)
 
-let rndn_def (a:normal_fp) (p:pos{p <= a.prec}): Tot (r:normal_fp{r.prec = p}) =
+let rndn_def (a:valid_fp{mpfr_ROUND_COND a}) (p:pos{p <= a.prec}): Tot (r:valid_fp{r.prec = p \/ r.flag=MPFR_ZERO}) =
+    if a.flag=MPFR_ZERO then a else
     let high, low = high_mant a p, low_mant a p in
     if ((eval_abs low <. ulp_p high (p + 1)) ||
         (eval_abs low =. ulp_p high (p + 1) && is_even high))
     then rndz_def a p
     else add_one_ulp (rndz_def a p)
 
-let mpfr_rndn2_cond (a:normal_fp{mpfr_PREC_COND a.prec}) (r:mpfr_fp{r.prec = a.prec}): GTot Type0 =
+let mpfr_rndn2_cond (a:valid_fp{mpfr_ROUND_COND a /\ mpfr_PREC_COND a.prec}) (r:mpfr_fp{r.prec = a.prec}): GTot Type0 =
     if eval_abs a >. mpfr_overflow_bound a.prec then
         valid_inf_cond r /\ r.sign = a.sign
     else if eval_abs a <=. fdiv_pow2 (mpfr_underflow_bound a.prec) 1 then
@@ -272,7 +276,7 @@ val round_sp_lemma: a:normal_fp -> rnd_mode:mpfr_rnd_t -> Lemma
 let round_sp_lemma a rnd_mode = ()
 
 (* Generalized mpfr_rndx2_cond for all rounding modes *)
-let mpfr_round2_cond (a:normal_fp{mpfr_PREC_COND a.prec}) (rnd_mode:mpfr_rnd_t)
+let mpfr_round2_cond (a:valid_fp{mpfr_ROUND_COND a /\ mpfr_PREC_COND a.prec}) (rnd_mode:mpfr_rnd_t)
                      (r:mpfr_fp): GTot Type0 =
     r.prec = a.prec /\ (
     match rnd_mode with
@@ -289,7 +293,8 @@ val mpfr_round2_cond_refl_lemma: a:mpfr_fp{valid_fp_cond a /\ normal_fp_cond a} 
 
 let mpfr_round2_cond_refl_lemma a rnd_mode =
     exp_impl_no_overflow_lemma a;
-    exp_impl_no_underflow_lemma a
+    exp_impl_no_underflow_lemma a;
+    assert(a:normal_fp)
 
 val mpfr_round2_cond_in_range_lemma: a:normal_fp{mpfr_PREC_COND a.prec /\ mpfr_EXP_COND a.exp} ->
     rnd_mode:mpfr_rnd_t -> r:mpfr_fp -> Lemma
@@ -306,14 +311,19 @@ let mpfr_round2_cond_in_range_lemma a rnd_mode r =
 (* Given a normal number 'a', precision 'p', rounding mode 'rnd_mode',
  * and a MPFR number as rounding result 'r',
  * check if 'r' is the correct result for RND(a, p, rnd_mode) *)
-let mpfr_round_cond (a:normal_fp) (p:pos{mpfr_PREC_COND p}) (rnd_mode:mpfr_rnd_t)
+let mpfr_round_cond (a:valid_fp{mpfr_ROUND_COND a}) (p:pos{mpfr_PREC_COND p}) (rnd_mode:mpfr_rnd_t)
                     (r:mpfr_fp): GTot Type0 =
-    r.prec = p /\ mpfr_round2_cond (round_def a p rnd_mode) rnd_mode r
+                    if a.flag=MPFR_ZERO then
+                        r.flag=MPFR_ZERO /\ r.sign=(match rnd_mode with
+                        |MPFR_RNDD -> -1
+                        |_ -> 1)
+                    else
+                        r.prec = p /\ mpfr_round2_cond (round_def a p rnd_mode) rnd_mode r
 
 (* Every MPFR function will return an integer, aka ternary value,
  * to indicate if the calculated result is greater or lesser than the exact result.
  * This is used to check if the ternary value is computed correctly *)
-let mpfr_ternary_cond (t:int) (a:normal_fp) (r:mpfr_fp): GTot Type0 =
+let mpfr_ternary_cond (t:int) (a:valid_fp{mpfr_ROUND_COND a}) (r:mpfr_fp): GTot Type0 =
     ((MPFR_INF? r.flag /\ r.sign > 0) \/ (valid_fp_cond r /\ eval r >. eval a) <==> t > 0) /\
     ((MPFR_INF? r.flag /\ r.sign < 0) \/ (valid_fp_cond r /\ eval r <. eval a) <==> t < 0) /\
     ((valid_fp_cond r /\ eval r =. eval a) <==> t = 0)
