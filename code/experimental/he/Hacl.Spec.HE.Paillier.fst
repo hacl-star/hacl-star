@@ -822,6 +822,25 @@ let res_class_modulo_encf #n g x1 y1 x2 y2 =
   res_class_of_encf_raw g x1 (lift y1);
   assert (res_class g (encf_raw g x1 (lift y1)) = x1)
 
+#reset-options
+
+val res_class_reduce_mod_n:
+     #n:comp
+  -> g:isg n
+  -> x:nat
+  -> y:fen2 n{isunit (shrink y)}
+  -> Lemma
+  (encf_unit_raw g x y; res_class g (encf_raw g x y) = x % n)
+let res_class_reduce_mod_n #n g x y =
+  encf_unit_raw g x y;
+  let w = fexp g (x%n) *% fexp y n in
+  is_res_class_of_encf_raw g (x%n) y;
+  res_class_modulo_encf g (x%n) (shrink y) x y;
+  encf_unit g (x%n) (shrink y);
+  encf_unit_raw g (x%n) y;
+  res_class_of_encf_raw g (x%n) (lift (shrink y))
+
+
 val bigl: #n:comp -> u:fen2 n{u > 0} -> r:fe n
 let bigl #n u = (u - 1) / n
 
@@ -1187,24 +1206,51 @@ let hom_add_lemma s r1 m1 r2 m2 =
   shrink_r3_is_unit ();
   assert (hom_add c1 c2 = encf_raw g(m1+m2) r3);
 
-
-  let goal = decrypt s (hom_add c1 c2) = m1 +% m2 in
-  // stub encryption w/ same res class
-  let w = fexp g ((m1+m2)%n) *% fexp r3 n in
-  is_res_class_of_encf_raw g ((m1+m2)%n) r3;
-  res_class_modulo_encf g ((m1 + m2)%n) (shrink r3) (m1+m2) r3;
-  encf_unit g ((m1+m2)%n) (shrink r3);
   encf_unit_raw g ((m1+m2)%n) r3;
   encf_unit_raw g (m1+m2) r3;
-  assert (res_class g (encf g ((m1+m2)%n) (shrink r3)) =
-          res_class g (encf_raw g (m1+m2) r3));
-  let y' = lift (shrink r3) in
-  assert (encf g ((m1+m2)%n) (shrink r3) = encf_raw g ((m1+m2)%n) y');
-  assert (res_class g (encf_raw g ((m1+m2)%n) y') = res_class g (encf_raw g (m1+m2) r3));
-  res_class_of_encf_raw g ((m1+m2)%n) y';
-  assert (res_class g (encf_raw g ((m1+m2)%n) y') = (m1+m2)%n);
+  res_class_reduce_mod_n g (m1+m2) r3;
+
   assert (res_class g (hom_add c1 c2) = (m1+m2)%n);
   decrypts_into_res_class s (hom_add c1 c2);
   assert (decrypt s (hom_add c1 c2) = (m1 + m2)%n);
   to_fe_add' m1 m2;
   assert (decrypt s (hom_add c1 c2) = m1 +% m2)
+
+val hom_mul_plain_lemma:
+     s:secret
+  -> r:fenu (Public?.n (s2p s))
+  -> m:fe (Public?.n (s2p s))
+  -> k:fe (Public?.n (s2p s))
+  -> Lemma
+  (let c = encrypt (s2p s) r m in
+   decrypt s (hom_mul_plain c k) = m *% k)
+let hom_mul_plain_lemma s r m k =
+  let g = Secret?.g s in
+  let p = Secret?.p s in
+  let q = Secret?.q s in
+  let n = p * q in
+  let c = encrypt (s2p s) r m in
+
+  assert (c = encf_raw g m r);
+  assert (c = fexp g m *% fexp (lift r) n);
+  assert (hom_mul_plain c k = fexp (fexp g m *% fexp (lift r) n) k);
+  fexp_mul2 (fexp g m) (fexp (lift r) n) k;
+  assert (hom_mul_plain c k = fexp (fexp g m) k *% fexp (fexp (lift r) n) k);
+  fexp_exp g m k;
+  nat_times_nat_is_nat m k;
+  assert (hom_mul_plain c k = fexp g (m * k) *% fexp (fexp (lift r) n) k);
+  fexp_exp (lift r) n k;
+  nat_times_nat_is_nat n k;
+  assert (hom_mul_plain c k = fexp g (m * k) *% fexp (lift r) (n * k));
+  assert (hom_mul_plain c k = fexp g (m * k) *% fexp (lift r) (k * n));
+  fexp_exp (lift r) k n;
+  assert (hom_mul_plain c k = fexp g (m * k) *% fexp (fexp (lift r) k) n);
+
+  let r3:fen2 n = fexp (lift r) k in
+  shrink_fexp (lift r) k;
+  g_pow_isunit r k;
+  assert (isunit (shrink r3));
+  encf_unit_raw g (m*k) r3;
+  res_class_reduce_mod_n g (m*k) r3;
+
+  decrypts_into_res_class s (hom_mul_plain c k)
