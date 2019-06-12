@@ -821,6 +821,8 @@ procedure cswap_single(inline offset:nat, ghost p0_b:buffer64, ghost p1_b:buffer
         validDstAddrs64(mem, p0_ptr, p0_b, 8, memTaint, Secret);
         validDstAddrs64(mem, p1_ptr, p1_b, 8, memTaint, Secret);
 
+        valid_cf(efl);
+
     ensures
         validSrcAddrs64(mem, p0_ptr, p0_b, 8, memTaint, Secret);
         validSrcAddrs64(mem, p1_ptr, p1_b, 8, memTaint, Secret);

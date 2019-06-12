@@ -32,9 +32,9 @@ val lemma_to_ok (s:vale_state) : Lemma
   (ensures s.vs_ok == ok' (state_to_S s))
   [SMTPat s.vs_ok]
 
-val lemma_to_flags (s:vale_state) : Lemma
-  (ensures s.vs_flags == flags' (state_to_S s))
-  [SMTPat s.vs_flags]
+val lemma_to_flags (s:vale_state) (f:flag) : Lemma
+  (ensures Flags.sel f s.vs_flags == flags' (state_to_S s) f)
+  [SMTPat (Flags.sel f s.vs_flags)]
 
 val lemma_to_reg (s:vale_state) (r:reg) : Lemma
   (ensures Regs.sel r s.vs_regs == regs' (state_to_S s) r)
