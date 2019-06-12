@@ -17,7 +17,7 @@ open Vale.X64.QuickCodes
 #set-options "--z3rlimit 20"
 #endverbatim
 
-procedure memcpy(inline win:bool, ghost dst:buffer64, ghost src:buffer64)
+procedure Memcpy(inline win:bool, ghost dst:buffer64, ghost src:buffer64)
     {:public}
     {:exportSpecs}
     {:quick}
@@ -64,7 +64,7 @@ procedure memcpy(inline win:bool, ghost dst:buffer64, ghost src:buffer64)
         win ==>  xmm15 == old(xmm15);
 
         buffer_as_seq(mem, dst) == buffer_as_seq(mem, src);
-    //    forall(i) 0 <= i && i < 2 ==> buffer64_read(dst, i, mem) == buffer64_read(src, i, mem);
+//        forall(i) 0 <= i && i < 2 ==> buffer64_read(dst, i, mem) == buffer64_read(src, i, mem);
         modifies_mem(loc_buffer(dst), old(mem), mem);
     reads memTaint;
     modifies
@@ -88,3 +88,91 @@ procedure memcpy(inline win:bool, ghost dst:buffer64, ghost src:buffer64)
     }
     assert(Seq.equal(buffer_as_seq(mem, dst), buffer_as_seq(mem, src)));
 }
+
+/*
+Benchmarking experiments to see impact of heap representation on verification time
+*/
+
+procedure Load64_fake(out dst:dst_opr64, in src:reg_opr64, ghost b:Seq.seq(nat64), ghost index:nat)
+    {:quick exportOnly}
+    requires
+        0 <= index < Seq.length(b);
+    ensures
+        dst == Seq.index(b, index);
+{
+    assume false;
+}
+
+procedure Store64_fake(in dst:reg_opr64, in src:reg_opr64, ghost b_in:Seq.seq(nat64), ghost index:nat)
+    returns(ghost b:Seq.seq(nat64))
+    {:quick exportOnly}
+    requires
+        0 <= index < Seq.length(b_in);
+    ensures
+        b == Seq.upd(b_in, index, src);
+{
+    b := Seq.upd(b_in, index, src);
+}
+
+procedure Benchmark_fake_memcpy(inline win:bool, ghost dst_in:Seq.seq(nat64), ghost src_in:Seq.seq(nat64))
+    returns(ghost dst:Seq.seq(nat64), ghost src:Seq.seq(nat64))
+    {:quick}
+    requires
+        Seq.length(src_in) == 2;
+        Seq.length(dst_in) == 2;
+    ensures
+        rsp == old(rsp);
+
+        win ==>  rbx == old(rbx);
+        win ==>  rbp == old(rbp);
+        win ==>  rdi == old(rdi);
+        win ==>  rsi == old(rsi);
+        win ==>  rsp == old(rsp);
+        win ==>  r12 == old(r12);
+        win ==>  r13 == old(r13);
+        win ==>  r14 == old(r14);
+        win ==>  r15 == old(r15);
+        !win ==>  rbx == old(rbx);
+        !win ==>  rbp == old(rbp);
+        !win ==>  r12 == old(r12);
+        !win ==>  r13 == old(r13);
+        !win ==>  r14 == old(r14);
+        !win ==>  r15 == old(r15);
+        win ==>  xmm6 == old(xmm6);
+        win ==>  xmm7 == old(xmm7);
+        win ==>  xmm8 == old(xmm8);
+        win ==>  xmm9 == old(xmm9);
+        win ==>  xmm10 == old(xmm10);
+        win ==>  xmm11 == old(xmm11);
+        win ==>  xmm12 == old(xmm12);
+        win ==>  xmm13 == old(xmm13);
+        win ==>  xmm14 == old(xmm14);
+        win ==>  xmm15 == old(xmm15);
+
+        Seq.length(src) == 2;
+        Seq.length(dst) == 2;
+        dst == src;
+    modifies
+        rax; rbx; rcx; rdx; rsi; rdi; rbp; rsp; r8; r9; r10; r11; r12; r13; r14; r15;
+        xmm0; xmm1; xmm2; xmm3; xmm4; xmm5; xmm6; xmm7; xmm8; xmm9; xmm10; xmm11; xmm12; xmm13; xmm14; xmm15;
+        efl;
+{
+    src := src_in;
+    dst := dst_in;
+    inline if (win)
+    {
+        Load64_fake(rax, rdx, src, 0);
+        Load64_fake(r9, rdx, src, 1);
+        dst := Store64_fake(rcx, rax, dst, 0);
+        dst := Store64_fake(rcx, r9, dst, 1);
+    }
+    else
+    {
+        Load64_fake(rax, rsi, src, 0);
+        Load64_fake(rcx, rsi, src, 1);
+        dst := Store64_fake(rdi, rax, dst, 0);
+        dst := Store64_fake(rdi, rcx, dst, 1);
+    }
+    assert(Seq.equal(dst, src));
+}
+
