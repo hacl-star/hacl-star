@@ -462,6 +462,8 @@ val minus_is_neg: a:nat -> n:big -> Lemma
   ((-(a % n)) % n = neg (to_fe #n a))
 let minus_is_neg a n = ()
 
+#reset-options "--z3rlimit 100"
+
 val to_fe_neg: #n:big -> a:nat -> Lemma
   ((-a)%n = neg (to_fe #n a))
 let to_fe_neg #n a =
@@ -476,6 +478,8 @@ let to_fe_neg #n a =
   lemma_mod_twice (-(a%n)) n;
   assert((-a)%n = (-(a%n))%n);
   minus_is_neg a n
+
+#reset-options
 
 val to_fe_add: #n:big -> a:int -> b:int -> Lemma
   (to_fe #n (a + b) = to_fe a +% to_fe b)
