@@ -515,7 +515,7 @@ vale-verify-unstaged: \
 
 hacl-verify-unstaged: code-verify-unstaged spec-verify-unstaged
 code-verify-unstaged: $(call only-for,$(HACL_HOME)/code/%)
-spec-verify-unstaged: $(call only-for,$(HACL_HOME)/spec/%)
+spec-verify-unstaged: $(call only-for,$(HACL_HOME)/specs/%)
 curve25519-verify-unstaged: $(call only-for,$(HACL_HOME)/code/curve25519/%)
 poly1305-verify-unstaged: $(call only-for,$(HACL_HOME)/code/poly1305/%)
 chacha20-verify-unstaged: $(call only-for,$(HACL_HOME)/code/chacha20/%)
