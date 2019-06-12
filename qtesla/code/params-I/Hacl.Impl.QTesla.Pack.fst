@@ -110,7 +110,7 @@ val decode_sk_s:
   -> sk : lbuffer uint8 crypto_secretkeybytes
   -> Stack size_t
     (requires fun h -> live h s /\ live h sk /\ disjoint s sk)
-    (ensures fun h0 _ h1 -> modifies1 s h0 h1)
+    (ensures fun h0 _ h1 -> modifies1 s h0 h1 /\ is_s_sk h1 s)
 
 #reset-options "--z3rlimit 1000 --max_fuel 1 --max_ifuel 1"
 
@@ -152,6 +152,8 @@ let decode_sk_s j s sk =
 
     let j = jBuf.(size 0) in
     pop_frame();
+    let hReturn = ST.get () in
+    assume(is_s_sk hReturn s);
     j
 
 val decode_sk:
@@ -163,7 +165,7 @@ val decode_sk:
     (requires fun h -> live h seeds /\ live h s /\ live h e /\ live h sk /\
                     disjoint seeds s /\ disjoint seeds e /\ disjoint seeds sk /\
 		    disjoint s e /\ disjoint s sk /\ disjoint e sk)
-    (ensures fun h0 _ h1 -> modifies3 seeds s e h0 h1)
+    (ensures fun h0 _ h1 -> modifies3 seeds s e h0 h1 /\ is_s_sk h1 s /\ is_e_sk h1 e)
 
 let decode_sk seeds s e sk =
     push_frame();

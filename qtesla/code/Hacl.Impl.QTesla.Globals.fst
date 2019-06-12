@@ -18,8 +18,9 @@ module UI64 = FStar.UInt64
 module I64 = FStar.Int64
 module I32 = FStar.Int32
 module HS = FStar.HyperStack
+module B = LowStar.Buffer
 
-#reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0"
+#reset-options "--z3rlimit 100 --max_fuel 1 --max_ifuel 1"
 
 //let is_elem (e:elem_base) = let x = elem_v e in let q = elem_v params_q in -q < x /\ x < q
 
@@ -58,6 +59,10 @@ let is_sampler_output (e:elem) = let b = pow2 (v params_s_bits-1) in -b <= elem_
 let is_y_sampler_output (e:elem) = let b = elem_v params_B in -b <= elem_v e /\ elem_v e <= b
 let is_pk (e:elem) = 0 <= elem_v e /\ elem_v e < elem_v params_q
 let is_sk (e:elem) = -(pow2 (v params_s_bits)) <= elem_v e /\ elem_v e < pow2 (v params_s_bits)
+let is_pmq (e:elem) = let q = elem_v params_q in -q < elem_v e /\ elem_v e < q
+let is_z_accepted (e:elem) = let b = elem_v params_B in let s = elem_v params_U in -(b-s) <= elem_v e /\ elem_v e <= (b-s)
+let is_sparse_mul_output (e:elem) = (-65536) <= elem_v e /\ elem_v e <= 65536 // [-2^16, 2^16]; see sparse_mul for comments
+let is_sparse_mul32_output (e:elem) = let q = elem_v params_q in -q <= elem_v e /\ elem_v e < 2 * q
 
 (*{:pattern (bget h p i)}*)
 //let is_poly_pred (h:HS.mem) (p:poly) (pred:(elem -> Type0)) (k:nat{k <= v params_k * v params_n}) = forall i . (i < k) ==> (pred (bget h p i))
@@ -69,9 +74,13 @@ let is_sk (e:elem) = -(pow2 (v params_s_bits)) <= elem_v e /\ elem_v e < pow2 (v
 unfold let is_poly_montgomery_i (h:HS.mem) (p:poly) (j:nat{j <= v params_n}) = forall (i:nat{i < j}). {:pattern is_montgomery (bget h p i)} is_montgomery (bget h p i)
 unfold let is_poly_corrected_i (h:HS.mem) (p:poly) (j:nat{j <= v params_n}) = forall (i:nat{i < j}). {:pattern is_corrected (bget h p i)}  is_corrected (bget h p i)
 unfold let is_poly_sampler_output_i (h:HS.mem) (p:poly) (j:nat{j <= v params_n}) = forall (i:nat{i < j}). {:pattern is_sampler_output (bget h p i)} is_sampler_output (bget h p i)
-unfold let is_poly_y_sampler_output_i (h:HS.mem) (p:poly) (j:nat{j <= v params_n}) = forall (i:nat{i < j}). {:pattern is_y_sampler_output (bget h p i)} is_sampler_output (bget h p i)
+unfold let is_poly_y_sampler_output_i (h:HS.mem) (p:poly) (j:nat{j <= v params_n}) = forall (i:nat{i < j}). {:pattern is_y_sampler_output (bget h p i)} is_y_sampler_output (bget h p i)
 unfold let is_poly_pk_i (h:HS.mem) (p:poly) (j:nat{j <= v params_n}) = forall (i:nat{i < j}). {:pattern is_pk (bget h p i)} is_pk (bget h p i)
 unfold let is_poly_sk_i (h:HS.mem) (p:poly) (j:nat{j <= v params_n}) = forall (i:nat{i < j}). {:pattern is_sk (bget h p i)} is_sk (bget h p i)
+unfold let is_poly_pmq_i (h:HS.mem) (p:poly) (j:nat{j <= v params_n}) = forall (i:nat{i < j}). {:pattern is_pmq (bget h p i)} is_pmq (bget h p i)
+unfold let is_poly_z_accepted_i (h:HS.mem) (p:poly) (j:nat{j <= v params_n}) = forall (i:nat{i < j}). {:pattern is_z_accepted (bget h p i)} is_z_accepted (bget h p i)
+unfold let is_poly_sparse_mul_output_i (h:HS.mem) (p:poly) (j:nat{j <= v params_n}) = forall (i:nat{i < j}). {:pattern is_sparse_mul_output (bget h p i)} is_sparse_mul_output (bget h p i)
+unfold let is_poly_sparse_mul32_output_i (h:HS.mem) (p:poly) (j:nat{j <= v params_n}) = forall (i:nat{i < j}). {:pattern is_sparse_mul32_output (bget h p i)} is_sparse_mul32_output (bget h p i)
 
 unfold let is_poly_k_montgomery_i (h:HS.mem) (p:poly_k) (j:nat{j <= v params_k * v params_n}) = forall (i:nat{i < j}). {:pattern is_montgomery (bget h p i)} is_montgomery (bget h p i)
 unfold let is_poly_k_corrected_i (h:HS.mem) (p:poly_k) (j:nat{j <= v params_k * v params_n}) = forall (i:nat{i < j}). {:pattern is_corrected (bget h p i)} is_corrected (bget h p i)
@@ -85,6 +94,10 @@ unfold let is_poly_sampler_output (h:HS.mem) (p:poly) = is_poly_sampler_output_i
 unfold let is_poly_y_sampler_output (h:HS.mem) (p:poly) = is_poly_y_sampler_output_i h p (v params_n)
 unfold let is_poly_pk (h:HS.mem) (p:poly) = is_poly_pk_i h p (v params_n)
 unfold let is_poly_sk (h:HS.mem) (p:poly) = is_poly_sk_i h p (v params_n)
+unfold let is_poly_pmq (h:HS.mem) (p:poly) = is_poly_pmq_i h p (v params_n)
+unfold let is_poly_z_accepted (h:HS.mem) (p:poly) = is_poly_z_accepted_i h p (v params_n)
+unfold let is_poly_sparse_mul_output (h:HS.mem) (p:poly) = is_poly_sparse_mul_output_i h p (v params_n)
+unfold let is_poly_sparse_mul32_output (h:HS.mem) (p:poly) = is_poly_sparse_mul32_output_i h p (v params_n)
 
 unfold let is_poly_k_montgomery (h:HS.mem) (p:poly_k) = is_poly_k_montgomery_i h p (v params_k * v params_n)
 unfold let is_poly_k_corrected (h:HS.mem) (p:poly_k) = is_poly_k_corrected_i h p (v params_k * v params_n)
@@ -92,6 +105,38 @@ unfold let is_poly_k_sampler_output (h:HS.mem) (p:poly_k) = is_poly_k_sampler_ou
 unfold let is_poly_k_pk (h:HS.mem) (p:poly_k) = is_poly_k_pk_i h p (v params_k * v params_n)
 unfold let is_poly_k_sk (h:HS.mem) (p:poly_k) = is_poly_k_sk_i h p (v params_k * v params_n)
 
+unfold let is_poly_equal (h0 h1:HS.mem) (p:poly) = 
+    forall (i:nat{i < v params_n}) . {:pattern bget h1 p i} bget h0 p i == bget h1 p i
+unfold let is_poly_equal_except (h0 h1:HS.mem) (p:poly) (k:nat{k < v params_n}) = 
+    forall (i:nat{i < v params_n /\ i <> k}) . {:pattern bget h1 p i} bget h0 p i == bget h1 p i
+unfold let is_poly_k_equal (h0 h1:HS.mem) (p:poly_k) = 
+    forall (i:nat{i < v params_n * v params_k}) . {:pattern bget h1 p i} bget h0 p i == bget h1 p i
+
+unfold let is_sparse_elem_sk (e:sparse_elem) = -(pow2 (v params_s_bits)) <= sparse_v e /\ sparse_v e < pow2 (v params_s_bits)
+let is_s_sk (h:HS.mem) (s:lbuffer sparse_elem params_n) =
+    forall (i:nat{i < v params_n}) . {:pattern is_sparse_elem_sk (bget h s i)} is_sparse_elem_sk (bget h s i)
+let is_e_sk (h:HS.mem) (e:lbuffer sparse_elem (params_n *. params_k)) =
+    forall (i:nat{i < v params_n * v params_k}) . {:pattern is_sparse_elem_sk (bget h e i)} is_sparse_elem_sk (bget h e i)
+
+(*let frame_is_poly_sampler_output_i (h0 h1: HS.mem) (p: poly) (i:nat{i <= v params_n}) (l:B.loc) : Lemma
+    (requires is_poly_sampler_output_i h0 p i /\ modifies l h0 h1 /\ disjoint l (gsub p (size 0) (size i)))
+    (ensures is_poly_sampler_output_i h1 p i)
+    [SMTPat (is_poly_sampler_output_i h1 p i); SMTPat (modifies l h0 h1)] =
+    assert(is_poly_equal h0 h1 p)*)
+
+(*let frame_is_poly_sampler_output_i (h0 h1: HS.mem) (p: B.lbuffer elem (v params_n)) (i:nat{i <= v params_n}) (l:B.loc) : Lemma
+    (requires is_poly_sampler_output_i h0 p i /\ B.modifies l h0 h1 /\ B.loc_disjoint l (B.loc_buffer p)) //(B.loc_buffer (B.gsub p 0ul (UI32.uint_to_t i))))
+    (ensures is_poly_sampler_output_i h1 p i)
+    [SMTPat (is_poly_sampler_output_i h1 p i); SMTPat (B.modifies l h0 h1)] = 
+    assert(forall (j:nat{j < i}) . {:pattern B.get h1 p j} B.get h0 p j == B.get h1 p j)*)
+
+let frame_is_poly_sampler_output_i (h0 h1: HS.mem) (p: poly) (i:nat{i <= v params_n}) (l:B.loc) : Lemma
+    (requires is_poly_sampler_output_i h0 p i /\ B.modifies l h0 h1 /\ B.loc_disjoint l (loc ((gsub p (size 0) (size i)))))
+    (ensures is_poly_sampler_output_i h1 p i)
+    [SMTPat (is_poly_sampler_output_i h1 p i); SMTPat (modifies l h0 h1)] = admit()
+    //assert(forall (j:nat{j < i}) . {:pattern bget h1 p j} bget h0 p j == bget h1 p j)
+    //assert(is_poly_equal h0 h1 p)
+    
 val poly_create:
     unit
   -> StackInline poly
@@ -114,12 +159,12 @@ let get_poly p k = gsub p (k *. params_n) params_n
 unfold inline_for_extraction noextract
 val index_poly: p: poly_k -> k: size_t{k <. params_k} -> Stack poly
     (requires fun h -> live h p)
-    (ensures  fun h0 r h1 -> h0 == h1 /\ live h1 r /\ r == gsub p (size (v k * v params_n)) params_n /\
+    (ensures  fun h0 r h1 -> h0 == h1 /\ live h1 r /\ r == gsub p (k *. params_n) params_n /\
                           loc_includes (loc p) (loc r))
 let index_poly p k = sub p (k *. params_n) params_n
 
 val reduce:
-    a: I64.t{let q = elem_v params_q in let va = I64.v a in va >= 0 /\ va <= (q-1)*(q-1)}
+    a: I64.t{let q = elem_v params_q in let va = I64.v a in va <= (q-1)*(q-1)}
   -> Tot (r:elem{is_montgomery r})
 
 let reduce a =
@@ -142,15 +187,17 @@ let reduce a =
     //assume(I64.v I64.(a >>^ 32ul) == I64.v a / pow2 32); 
     //assume(let result = I64.v I64.(a >>^ 32ul) in let q = elem_v params_q in -q < result /\ result < q);
     //assume(let result = I64.(a >>^ 32ul) in is_montgomery (int64_to_elem result));
-    assert(0 <= I64.v a);
+    assume(0 <= I64.v a);
     shift_right_value_lemma_int64 a 32ul;
     assert(is_montgomery (int64_to_elem (I64.(a >>^ 32ul))));
     int64_to_elem I64.(a >>^ 32ul)
+
 
 val barr_reduce:
     a: elem_base
   -> Tot elem
 
+// Output range of barr_reduce is [-q, 2q] per Patrick
 let barr_reduce a =
     let a64:I64.t = elem_to_int64 a in
     let u:elem_base = (int64_to_elem I64.((a64 *^ params_barr_mult) >>>^ params_barr_div)) in

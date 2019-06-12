@@ -322,19 +322,26 @@ val poly_add:
   -> Stack unit
     (requires fun h -> live h result /\ live h x /\ live h y /\ disjoint result x /\ disjoint result y /\ disjoint x y /\
                     (forall (i:nat{i < v params_n}) . is_elem_int (elem_v (bget h x i) + elem_v (bget h y i))))
-    (ensures fun h0 _ h1 -> modifies1 result h0 h1)
+    (ensures fun h0 _ h1 -> modifies1 result h0 h1 /\ is_poly_pmq h1 result)
 
 let poly_add result x y =
     push_frame();
     let h0 = ST.get() in
     for 0ul params_n
-    (fun h _ -> live h result /\ live h x /\ live h y /\ modifies1 result h0 h /\
+    (fun h i -> live h result /\ live h x /\ live h y /\ modifies1 result h0 h /\ i <= v params_n /\ is_poly_pmq_i h result i /\
              (forall (i:nat{i < v params_n}) . is_elem_int (elem_v (bget h x i) + elem_v (bget h y i))))
     (fun i ->
         let h = ST.get () in assert(is_elem_int (elem_v (bget h x (v i)) + elem_v (bget h y (v i))));
-        result.(i) <- x.(i) +^ y.(i)
+        result.(i) <- x.(i) +^ y.(i);
+        let hLoopEnd = ST.get () in
+        assert(forall (j:nat{j < v params_n /\ j <> v i}) . bget h result j == bget hLoopEnd result j);
+        assert(is_pmq (bget hLoopEnd result (v i)))
     );
-    pop_frame()
+    let hFinal = ST.get () in
+    assert(is_poly_pmq hFinal result);
+    pop_frame();
+    let hReturn = ST.get () in
+    assert(is_poly_equal hFinal hReturn result)
     
 val poly_add_correct:
     result: poly
@@ -411,19 +418,47 @@ val poly_sub_reduce:
   -> x: poly
   -> y: poly
   -> Stack unit
-    (requires fun h -> live h result /\ live h x /\ live h y /\ disjoint result y)
-    (ensures fun h0 _ h1 -> modifies1 result h0 h1)
+    (requires fun h -> live h result /\ live h x /\ live h y /\ disjoint result y /\ (disjoint x result \/ result == x) /\
+                    is_poly_montgomery h x /\ is_poly_sparse_mul32_output h y)
+    (ensures fun h0 _ h1 -> modifies1 result h0 h1 /\ is_poly_montgomery h1 result)
 
 let poly_sub_reduce result x y =
+    let hInit = ST.get () in
     push_frame();
     let h0 = ST.get() in
+    assert(is_poly_equal hInit h0 x);
+    assert(is_poly_equal hInit h0 y);
     for 0ul params_n
-    (fun h _ -> live h result /\ live h x /\ live h y /\ modifies1 result h0 h)
+    (fun h i -> live h result /\ live h x /\ live h y /\ i <= v params_n /\ modifies1 result h0 h /\ is_poly_montgomery_i h result i /\
+             is_poly_sparse_mul32_output h y /\ is_poly_montgomery h x)
     (fun i ->
+        let hBegin = ST.get () in
+        assert(is_montgomery (bget hBegin x (v i)));
+        assert(is_sparse_mul32_output (bget hBegin y (v i)));
         let xi = x.(i) in
         let yi = y.(i) in
-        assume(let q = elem_v params_q in let r = I64.v params_r in let result = r * (elem_v xi - elem_v yi) in
-               result >= 0 /\ result <= (q-1)*(q-1));
-        result.(i) <- reduce I64.(params_r *^ ((elem_to_int64 xi) -^ (elem_to_int64 yi)))
+        //assume(let q = elem_v params_q in let r = I64.v params_r in let result = r * (elem_v xi - elem_v yi) in
+        //       result >= 0 /\ result <= (q-1)*(q-1));
+        assert(elem_v xi >= 0 /\ elem_v xi < 2 * elem_v params_q);
+        assert(let q = elem_v params_q in elem_v yi >= -q /\ elem_v yi < 2*q);
+        assert(elem_v xi - elem_v yi <= 3 * elem_v params_q);
+        result.(i) <- reduce I64.(params_r *^ ((elem_to_int64 xi) -^ (elem_to_int64 yi)));
+        let hResult = ST.get () in
+        assert(is_poly_equal_except hBegin hResult result (v i));
+        assert(is_poly_montgomery_i hBegin result (v i));
+        assert(is_montgomery (bget hResult result (v i)));
+        assert(is_poly_equal hBegin hResult y);
+        // TODO: This is tricky. Need to figure out how to prove:
+        // if disjoint x result
+        // 1. Trivial: x never changes, stays is_poly_montgomery the whole time
+        // else x == result
+        // 1. x started off is_poly_montgomery
+        // 2. result therefore is is_poly_montgomery
+        // 3. result.(i) we prove is_montgomery
+        // 4. result therefore is still is_poly_montgomery
+        assume(is_poly_montgomery hResult x)
     );
-    pop_frame()
+    let hFinal = ST.get () in
+    pop_frame();
+    let hReturn = ST.get () in
+    assert(is_poly_equal hFinal hReturn result)

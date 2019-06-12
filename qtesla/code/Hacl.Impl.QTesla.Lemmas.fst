@@ -46,6 +46,18 @@ val shift_right_value_lemma_int64: x:I64.t{0 <= I64.v x} -> s:UI32.t{UI32.v s < 
 let shift_right_value_lemma_int64 x s =
   FStar.UInt.shift_right_value_lemma #UI64.n (I64.v x) (UI32.v s)
 
+val shift_arithmetic_right_value_lemma_int64 : x:I64.t -> s:UI32.t {UI32.v s < UI64.n} -> Lemma
+  (ensures I64.v (I64.shift_arithmetic_right x s) = (I64.v x) / pow2 (UI32.v s))
+
+let shift_arithmetic_right_value_lemma_int64 x s = admit()
+(*  if (I64.v x >= 0)
+  then UInt.shift_right_value_lemma #UI64.n (I64.v x) (UI32.v s)
+  else 
+  begin
+      UInt.shift_right_value_lemma #UI64.n -(I64.v x) (UI32.v s);
+      assert(I64.v (I64.shift_arithmetic_right x s) == I64.v -(I64.shift_right (-x) s))
+  end*)
+
 val elem_product_fits_int64: x:elem_base -> y:elem_base -> GTot bool
 let elem_product_fits_int64 x y = FStar.Int.fits (elem_v x * elem_v y) 64
 

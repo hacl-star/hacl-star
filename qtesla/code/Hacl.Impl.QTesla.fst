@@ -616,7 +616,7 @@ val qtesla_keygen:
     (ensures fun h0 _ h1 -> modifies3 R.state pk sk h0 h1)
 
 let qtesla_keygen pk sk =
-    recall R.state;
+    //recall R.state;
     push_frame();
     let randomness = create crypto_randombytes (u8 0) in
     R.randombytes_ crypto_randombytes randomness;
@@ -646,9 +646,9 @@ val sample_y_while_body:
                          (v (bget h1 i 0) == v (bget h0 i 0) \/ v (bget h1 i 0) == v (bget h0 i 0) + 1) /\
                          (v (bget h1 nblocks 0) == v params_n \/ v (bget h1 nblocks 0) == v nblocks_shake) /\
 
-                         (v (bget h1 pos 0) + numbytes U32 <= v params_n * v bplus1bytes \/ v (bget h1 pos 0) >= v params_n * v bplus1bytes))
+                         (v (bget h1 pos 0) + numbytes U32 <= v params_n * v bplus1bytes \/ v (bget h1 pos 0) >= v params_n * v bplus1bytes) /\
     
-//                         is_poly_y_sampler_output_i h1 y (v (bget h1 i 0)))
+                         is_poly_y_sampler_output_i h1 y (v (bget h1 i 0)))
 
 let sample_y_while_body y seed nblocks buf dmsp pos i =
     let nbytes = bplus1bytes in
@@ -683,7 +683,8 @@ let sample_y_while_body y seed nblocks buf dmsp pos i =
     else ();
     pos.(size 0) <- pos.(size 0) +. nbytes;
     let hFinal = ST.get () in
-    assume(v (bget hFinal pos 0) + numbytes U32 <= v params_n * v bplus1bytes \/ v (bget hFinal pos 0) >= v params_n * v bplus1bytes)
+    assume(v (bget hFinal pos 0) + numbytes U32 <= v params_n * v bplus1bytes \/ v (bget hFinal pos 0) >= v params_n * v bplus1bytes);
+    assume(is_poly_y_sampler_output_i hFinal y (v (bget hFinal i 0)))
 
 val sample_y:
     y : poly
@@ -691,7 +692,7 @@ val sample_y:
   -> nonce: I32.t{I32.v nonce > 0} // Although signed, it starts at zero and only increases
   -> Stack unit
     (requires fun h -> live h y /\ live h seed /\ disjoint y seed)
-    (ensures fun h0 _ h1 -> modifies1 y h0 h1)// /\ is_poly_y_sampler_output h1 y)
+    (ensures fun h0 _ h1 -> modifies1 y h0 h1 /\ is_poly_y_sampler_output h1 y)
 
 let sample_y y seed nonce = 
     push_frame();
@@ -714,14 +715,19 @@ let sample_y y seed nonce =
     (fun h -> live h y /\ live h i /\ live h pos /\ live h nblocks /\ live h buf /\ live h dmsp /\
            modifies (loc y |+| loc i |+| loc pos |+| loc nblocks |+| loc buf |+| loc dmsp) h0 h /\
            (v (bget h nblocks 0) == v params_n \/ v (bget h nblocks 0) == v nblocks_shake) /\
-           (v (bget h pos 0) + numbytes U32 <= v params_n * v bplus1bytes \/ v (bget h pos 0) >= v params_n * v bplus1bytes))
+           (v (bget h pos 0) + numbytes U32 <= v params_n * v bplus1bytes \/ v (bget h pos 0) >= v params_n * v bplus1bytes) /\
+           v (bget h i 0) <= v params_n /\
+           is_poly_y_sampler_output_i h y (v (bget h i 0)))
     (fun h -> v (bget h i 0) < v params_n)
     (fun _ -> i.(size 0) <. params_n)
     (fun _ ->
         sample_y_while_body y seed nblocks buf dmsp pos i
     );
 
-    pop_frame()
+    let hFinal = ST.get () in
+    pop_frame();
+    let hReturn = ST.get () in
+    assert(is_poly_equal hFinal hReturn y)
 
 private inline_for_extraction noextract
 val hash_H_inner_for:
@@ -729,8 +735,8 @@ val hash_H_inner_for:
   -> t : lbuffer uint8 (params_k *. params_n +. crypto_hmbytes)
   -> index : size_t{v index < v params_n * v params_k}
   -> Stack unit
-    (requires fun h -> live h v_ /\ live h t /\ disjoint v_ t /\ is_poly_k_corrected h v_)
-    (ensures fun h0 _ h1 -> modifies1 t h0 h1 /\ is_poly_k_corrected h1 v_)
+    (requires fun h -> live h v_ /\ live h t /\ disjoint v_ t /\ is_poly_k_montgomery h v_)
+    (ensures fun h0 _ h1 -> modifies1 t h0 h1 /\ is_poly_k_montgomery h1 v_)
 
 //#reset-options "--log_queries --print_z3_statistics --using_facts_from '* -FStar.BitVector'"
 
@@ -740,10 +746,10 @@ module S = QTesla.Params
 
 let hash_H_inner_for v_ t index =
     let hInit = ST.get () in 
-    assert(is_poly_k_corrected hInit v_);
-    assert(is_corrected (bget hInit v_ (v index)));
+    assert(is_poly_k_montgomery hInit v_);
+    assert(is_montgomery (bget hInit v_ (v index)));
     let vindex:elem = v_.(index) in
-    assert(is_corrected vindex);
+    assert(is_montgomery vindex);
     let temp:I32.t = elem_to_int32 vindex in
     assert_norm(v (_RADIX32 -. size 1) < I32.n);
     let mask = I32.((params_q /^ 2l -^ temp) >>>^ (_RADIX32 -. size 1)) in
@@ -767,8 +773,7 @@ let hash_H_inner_for v_ t index =
     //assume(I32.v cL >= 0 /\ I32.v cL <= pow2 S.params_d);
     t.(index) <- Lib.RawIntTypes.u8_from_UInt8 (int32_to_uint8 I32.((temp -^ cL) >>>^ params_d));
     let hFinal = ST.get () in 
-    assert(forall (j:nat{j < v params_n * v params_k}) . {:pattern bget hFinal v_ j} bget hInit v_ j == bget hFinal v_ j);
-    assert(is_poly_k_corrected hFinal v_)
+    assert(is_poly_k_equal hInit hFinal v_)
 
 private inline_for_extraction noextract
 val hash_H_outer_for:
@@ -776,13 +781,13 @@ val hash_H_outer_for:
   -> t : lbuffer uint8 (params_k *. params_n +. crypto_hmbytes)
   -> k : size_t{v k < v params_k}
   -> Stack unit
-    (requires fun h -> live h v_ /\ live h t /\ disjoint v_ t /\ is_poly_k_corrected h v_)
-    (ensures fun h0 _ h1 -> modifies1 t h0 h1 /\ is_poly_k_corrected h1 v_)
+    (requires fun h -> live h v_ /\ live h t /\ disjoint v_ t /\ is_poly_k_montgomery h v_)
+    (ensures fun h0 _ h1 -> modifies1 t h0 h1 /\ is_poly_k_montgomery h1 v_)
 
 let hash_H_outer_for v_ t k =
     let h1 = ST.get () in
     for 0ul params_n
-    (fun h i -> live h v_ /\ live h t /\ modifies1 t h1 h /\ is_poly_k_corrected h v_)
+    (fun h i -> live h v_ /\ live h t /\ modifies1 t h1 h /\ is_poly_k_montgomery h v_)
     (fun i ->
         hash_H_inner_for v_ t (k *. params_n +. i)
     )
@@ -793,7 +798,7 @@ val hash_H:
   -> hm : lbuffer uint8 crypto_hmbytes
   -> Stack unit
     (requires fun h -> live h c_bin /\ live h v_ /\ live h hm /\ disjoint c_bin v_ /\ disjoint c_bin hm /\ disjoint v_ hm /\
-                    is_poly_k_corrected h v_)
+                    is_poly_k_montgomery h v_)
     (ensures fun h0 _ h1 -> modifies1 c_bin h0 h1)
 
 #reset-options "--z3rlimit 400 --max_fuel 1 --max_ifuel 1"
@@ -802,8 +807,7 @@ let hash_H c_bin v_ hm =
     let hInit = ST.get () in
     push_frame();
     let hFrame = ST.get () in 
-    assert(forall (j:nat{j < v params_n * v params_k}) . {:pattern bget hFrame v_ j} bget hInit v_ j == bget hFrame v_ j);
-    assert(is_poly_k_corrected hFrame v_);
+    assert(is_poly_k_equal hInit hFrame v_);
 
     [@inline_let] let params_q = elem_to_int32 params_q in
     let t = create (params_k *. params_n +. crypto_hmbytes) (u8 0) in
@@ -812,10 +816,9 @@ let hash_H c_bin v_ hm =
     //assert(Seq.equal (as_seq hInit v_) (as_seq hFrame v_));
     //assert(Seq.equal (as_seq hFrame v_) (as_seq h0 v_));
     //assert(Seq.equal (as_seq hInit v_) (as_seq h0 v_));
-    assert(forall (j:nat{j < v params_n * v params_k}) . {:pattern bget h0 v_ j} bget hInit v_ j == bget h0 v_ j);
-    assert(is_poly_k_corrected h0 v_);
+    assert(is_poly_k_equal hFrame h0 v_);
     for 0ul params_k
-    (fun h _ -> live h v_ /\ live h t /\ modifies1 t h0 h /\ is_poly_k_corrected h v_)
+    (fun h _ -> live h v_ /\ live h t /\ modifies1 t h0 h /\ is_poly_k_montgomery h v_)
     (fun k ->
         hash_H_outer_for v_ t k
     );
@@ -941,10 +944,6 @@ let encode_c pos_list sign_list c_bin =
 
 #reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0"
 
-private let is_sparse_elem_sk (e:sparse_elem) = -(pow2 (v params_s_bits)) <= sparse_v e /\ sparse_v e < pow2 (v params_s_bits)
-private let is_s_sk (h:HS.mem) (s:lbuffer sparse_elem params_n) =
-    forall (i:nat{i < v params_n}) . {:pattern is_sparse_elem_sk (bget h s i)} is_sparse_elem_sk (bget h s i)
-
 val sparse_mul:
     prod : poly
   -> s : lbuffer sparse_elem params_n
@@ -955,10 +954,15 @@ val sparse_mul:
                     disjoint prod s /\ disjoint prod pos_list /\ disjoint prod sign_list /\
                     encode_c_invariant h pos_list sign_list params_h /\
                     is_s_sk h s)
-    (ensures fun h0 _ h1 -> modifies1 prod h0 h1)
+    (ensures fun h0 _ h1 -> modifies1 prod h0 h1 /\ is_poly_sparse_mul_output h1 prod)
 
+// Patrick says each element of prod on output will be at most params_s_bits + log2(params_h) in length,
+// which bounds each element's size. params_h determines how many times we may possibly add something to
+// a single element. This should be within 2^16 for all parameter sets. That's a loose bound, but enough
+// for later proving that poly_add(z, y, Sc) falls within the modulus q.
 let sparse_mul prod s pos_list sign_list =
     let hInit = ST.get () in
+    assert(is_s_sk hInit s);
     push_frame();
 
     let t = s in
@@ -967,13 +971,23 @@ let sparse_mul prod s pos_list sign_list =
     assert(forall (i:nat{i < v params_n}) . bget hInit s i == bget h0 s i);
     assert(is_s_sk h0 s);
     for 0ul params_n
-    (fun h _ -> live h prod /\ modifies1 prod h0 h)
-    (fun i -> prod.(i) <- to_elem 0);
+    (fun h i -> live h prod /\ modifies1 prod h0 h /\ i <= v params_n /\ (forall (j:nat{j < i}) . elem_v (bget h prod j) == 0))
+    (fun i -> 
+        let hStart = ST.get () in
+        assert(forall (j:nat{j < v i}) . elem_v (bget hStart prod j) == 0);
+        prod.(i) <- to_elem 0;
+        let hZero = ST.get () in
+        assert(forall (j:nat{j < v i}) . bget hStart prod j == bget hZero prod j);
+        assert(elem_v (bget hZero prod (v i)) == 0);
+        assert(forall (j:nat{j <= v i}) . elem_v (bget hZero prod j) == 0)
+    );
 
     let h1 = ST.get () in
+    assert(forall (i:nat{i < v params_n}) . {:pattern bget h1 prod i} bget h1 prod i == to_elem 0);
+    assert(is_poly_sparse_mul_output h1 prod);
     for 0ul params_h
     (fun h _ -> live h prod /\ live h t /\ live h pos_list /\ live h sign_list /\ modifies1 prod h1 h /\
-             encode_c_invariant h pos_list sign_list params_h /\ is_s_sk h s)
+             encode_c_invariant h pos_list sign_list params_h /\ is_s_sk h s /\ is_poly_sparse_mul_output h prod)
     (fun i ->
         let h = ST.get () in assert(UI32.v (bget h pos_list (v i)) < v params_n);
         let pos = pos_list.(i) in
@@ -981,12 +995,14 @@ let sparse_mul prod s pos_list sign_list =
         let h2 = ST.get () in
 	for 0ul pos
 	(fun h _ -> live h prod /\ live h t /\ live h pos_list /\ live h sign_list /\ modifies1 prod h2 h /\ 
-                 encode_c_invariant h pos_list sign_list params_h /\ is_s_sk h s)
+                 encode_c_invariant h pos_list sign_list params_h /\ is_s_sk h s /\ is_poly_sparse_mul_output h prod)
 	(fun j -> 
 	    let sign_list_i:I16.t = sign_list.(i) in
             //assume(v (j +. params_n -. pos) < v params_n);
             assert(v j < v pos);
-            let h = ST.get() in assert(is_sparse_elem_sk (bget h t (v j + v params_n - v pos)));
+            let h = ST.get() in 
+            assert(is_sparse_elem_sk (bget h t (v j + v params_n - v pos)));
+            assert(is_poly_sparse_mul_output h prod);
 	    let tVal:sparse_elem = t.(j +. params_n -. pos) in
             assert(is_sparse_elem_sk tVal);
             //assume(v j < v params_n);
@@ -1001,16 +1017,21 @@ let sparse_mul prod s pos_list sign_list =
             assume(Int.min_int I16.n < -(pow2 (v params_s_bits)));
             assert(Int.fits (I16.v sign_list_i * sparse_v tVal) I16.n);
             assume(Int.fits (elem_v (bget h prod (v j)) - (I16.v sign_list_i * sparse_v tVal)) elem_n);
-	    prod.(j) <- prod.(j) -^ (int16_to_elem I16.(sign_list_i *^ (sparse_to_int16 tVal)))
+	    prod.(j) <- prod.(j) -^ (int16_to_elem I16.(sign_list_i *^ (sparse_to_int16 tVal)));
+            let hLoopEnd = ST.get () in
+            assert(forall (k:nat{k < v params_n /\ k <> v j}) . {:pattern bget hLoopEnd prod k} bget h prod k == bget hLoopEnd prod k);
+            assume(is_sparse_mul_output (bget hLoopEnd prod (v j)))
 	);
 
         let h3 = ST.get () in
         //assume(v pos < v params_n);
 	for pos params_n
-	(fun h _ -> live h prod /\ live h t /\ live h pos_list /\ live h sign_list /\ modifies1 prod h3 h /\ is_s_sk h s)
+	(fun h _ -> live h prod /\ live h t /\ live h pos_list /\ live h sign_list /\ modifies1 prod h3 h /\ is_s_sk h s /\
+                 is_poly_sparse_mul_output h prod)
 	(fun j -> 
 	    let sign_list_i:I16.t = sign_list.(i) in
-            let h = ST.get() in assert(is_sparse_elem_sk (bget h t (v j - v pos)));
+            let h = ST.get() in 
+            assert(is_sparse_elem_sk (bget h t (v j - v pos)));
 	    let tVal:sparse_elem = t.(j -. pos) in
             let hx = ST.get () in
             //assume(FStar.Int.fits (I16.v sign_list_i * I16.v tVal) I16.n);
@@ -1022,11 +1043,18 @@ let sparse_mul prod s pos_list sign_list =
             assume(Int.min_int I16.n < -(pow2 (v params_s_bits)));
             assert(Int.fits (I16.v sign_list_i * sparse_v tVal) I16.n);
             assume(Int.fits (elem_v (bget h prod (v j)) + (I16.v sign_list_i * sparse_v tVal)) elem_n);
-  	    prod.(j) <- prod.(j) +^ (int16_to_elem I16.(sign_list_i *^ (sparse_to_int16 tVal)))
+  	    prod.(j) <- prod.(j) +^ (int16_to_elem I16.(sign_list_i *^ (sparse_to_int16 tVal)));
+            let hLoopEnd = ST.get () in
+            assert(forall (k:nat{k < v params_n /\ k <> v j}) . {:pattern bget hLoopEnd prod k} bget h prod k == bget hLoopEnd prod k);
+            assume(is_sparse_mul_output (bget hLoopEnd prod (v j)))
+
 	)
     );
 
-    pop_frame()
+    let hFinal = ST.get () in
+    pop_frame();
+    let hReturn = ST.get () in
+    assert(forall (i:nat{i < v params_n}) . {:pattern bget hReturn prod i} bget hFinal prod i == bget hReturn prod i)
 
 val sparse_mul32:
     prod : poly
@@ -1037,63 +1065,101 @@ val sparse_mul32:
     (requires fun h -> live h prod /\ live h pk /\ live h pos_list /\ live h sign_list /\
                     disjoint prod pk /\ disjoint prod pos_list /\ disjoint prod sign_list /\
                     disjoint pk pos_list /\ disjoint pk sign_list /\ disjoint pos_list sign_list /\
-                    (forall i . v (bget h pos_list i) < v params_n))
-    (ensures fun h0 _ h1 -> modifies1 prod h0 h1)
+                    is_poly_pk h pk /\
+                    encode_c_invariant h pos_list sign_list params_h)
+    (ensures fun h0 _ h1 -> modifies1 prod h0 h1 /\ is_poly_sparse_mul32_output h1 prod)
 
 let sparse_mul32 prod pk pos_list sign_list =
+    let hInit = ST.get () in
     push_frame();
 
     let h0 = ST.get () in
     for 0ul params_n
-    (fun h _ -> live h prod /\ modifies1 prod h0 h)
-    (fun i -> prod.(i) <- to_elem 0);
+    (fun h i -> live h prod /\ modifies1 prod h0 h /\ i <= v params_n /\ (forall (j:nat{j < i}) . elem_v (bget h prod j) == 0))
+    (fun i -> 
+        let hStart = ST.get () in
+        assert(forall (j:nat{j < v i}) . elem_v (bget hStart prod j) == 0);
+        prod.(i) <- to_elem 0;
+        let hZero = ST.get () in
+        assert(forall (j:nat{j < v i}) . bget hStart prod j == bget hZero prod j);
+        assert(elem_v (bget hZero prod (v i)) == 0);
+        assert(forall (j:nat{j <= v i}) . elem_v (bget hZero prod j) == 0)
+    );
 
     let h1 = ST.get () in
+    assert(forall (i:nat{i < v params_n}) . {:pattern bget h1 prod i} bget h1 prod i == to_elem 0);
+    assert(is_poly_sparse_mul32_output h1 prod);
+    assert(is_poly_equal hInit h1 pk);
+    assert(is_poly_pk h1 pk);
+
     for 0ul params_h
-    (fun h _ -> live h prod /\ live h pk /\ live h pos_list /\ live h sign_list /\ modifies1 prod h1 h)
+    (fun h _ -> live h prod /\ live h pk /\ live h pos_list /\ live h sign_list /\ modifies1 prod h1 h /\
+             encode_c_invariant h pos_list sign_list params_h /\ is_poly_pk h pk /\ is_poly_sparse_mul32_output h prod)
     (fun i ->
         let hPos = ST.get () in
+        assert(is_poly_pk hPos pk);
         assert(v (bget hPos pos_list (v i)) < v params_n);
         let pos = pos_list.(i) in
 	let sign_list_i = sign_list.(i) in
         let h2 = ST.get () in
 	for 0ul pos
-	(fun h _ -> live h prod /\ live h pk /\ modifies1 prod h2 h)
+	(fun h _ -> live h prod /\ live h pk /\ modifies1 prod h2 h /\ is_poly_pk h pk /\ is_poly_sparse_mul32_output h prod)
 	(fun j ->
+            let h = ST.get () in
 	    let pkItem = pk.(j +. params_n -. pos) in
             assume(FStar.Int.fits (I16.v sign_list_i * I32.v pkItem) I32.n);
             let hProd = ST.get () in
             assume(FStar.Int.fits (elem_v (bget hProd prod (v j)) - (I16.v sign_list_i * I32.v pkItem)) elem_n);
             assume(is_elem_int (elem_v (bget hProd prod (v j)) - (I16.v sign_list_i * I32.v pkItem)));
-	    prod.(j) <- prod.(j) -^ int32_to_elem I32.( (int16_to_int32 sign_list_i) *^ pkItem )
+	    prod.(j) <- prod.(j) -^ int32_to_elem I32.( (int16_to_int32 sign_list_i) *^ pkItem );
+            let hLoopEnd = ST.get () in
+            assert(is_poly_equal h hLoopEnd pk);
+            assert(forall (k:nat{k < v params_n /\ k <> v j}) . {:pattern bget hLoopEnd prod k} bget h prod k == bget hLoopEnd prod k);
+            assume(is_sparse_mul32_output (bget hLoopEnd prod (v j)))
 	);
         let h3 = ST.get () in
 	for pos params_n
-	(fun h _ -> live h prod /\ live h pk /\ modifies1 prod h3 h)
+	(fun h _ -> live h prod /\ live h pk /\ modifies1 prod h3 h /\ is_poly_pk h pk /\ is_poly_sparse_mul32_output h prod)
 	(fun j ->
+            let h = ST.get () in
 	    let pkItem = pk.(j -. pos) in
             assume(FStar.Int.fits (I16.v sign_list_i * I32.v pkItem) I32.n);
             let hProd = ST.get () in
             assume(FStar.Int.fits (elem_v (bget hProd prod (v j)) + (I16.v sign_list_i * I32.v pkItem)) elem_n);
             assume(is_elem_int (elem_v (bget hProd prod (v j)) + (I16.v sign_list_i * I32.v pkItem)));
-	    prod.(j) <- prod.(j) +^ int32_to_elem I32.( (int16_to_int32 sign_list_i) *^ pkItem )
-	)
+	    prod.(j) <- prod.(j) +^ int32_to_elem I32.( (int16_to_int32 sign_list_i) *^ pkItem );
+            let hLoopEnd = ST.get () in
+            assert(is_poly_equal h hLoopEnd pk);
+            assert(forall (k:nat{k < v params_n /\ k <> v j}) . {:pattern bget hLoopEnd prod k} bget h prod k == bget hLoopEnd prod k);
+            assume(is_sparse_mul32_output (bget hLoopEnd prod (v j)))
+	);
+        let hOuterLoopEnd = ST.get () in
+        assert(is_poly_equal hPos hOuterLoopEnd pk);
+        assert(is_poly_pk hOuterLoopEnd pk)
     );
 
     let h4 = ST.get () in
     for 0ul params_n
-    (fun h _ -> live h prod /\ modifies1 prod h4 h)
-    (fun i -> prod.(i) <- barr_reduce prod.(i));
+    (fun h _ -> live h prod /\ modifies1 prod h4 h /\ is_poly_sparse_mul32_output h prod)
+    (fun i -> 
+        let hBefore = ST.get () in
+        assert(is_poly_sparse_mul32_output hBefore prod);
+        prod.(i) <- barr_reduce prod.(i);
+        let hAfter = ST.get () in
+        assert(forall (j:nat{j < v params_n /\ j <> v i}) . {:pattern bget hAfter prod j} bget hBefore prod j == bget hAfter prod j);
+        assume(is_sparse_mul32_output (bget hAfter prod (v i)))
+    );
 
-    pop_frame()
-
-#reset-options "--admit_smt_queries true"
+    let hFinal = ST.get () in
+    pop_frame();
+    let hReturn = ST.get () in
+    assert(is_poly_equal hFinal hReturn prod)
 
 val test_rejection:
     z : poly
   -> Stack bool
-    (requires fun h -> live h z)
-    (ensures fun h0 _ h1 -> h0 == h1)
+    (requires fun h -> live h z /\ is_poly_pmq h z)
+    (ensures fun h0 r h1 -> h0 == h1 /\ ((not r) ==> is_poly_z_accepted h1 z))
 
 let test_rejection z =
     [@inline_let] let params_B = elem_to_int32 params_B in
@@ -1104,8 +1170,11 @@ let test_rejection z =
     let h0 = ST.get () in
     let _, res =
     interruptible_for 0ul params_n
-    (fun h _ _ -> live h z /\ h0 == h)
+    (fun h i r -> live h z /\ h0 == h /\ modifies0 h0 h /\
+               is_poly_pmq h z /\ i <= v params_n /\ ((not r) ==> is_poly_z_accepted_i h z i))
     (fun i ->
+        let h = ST.get () in
+        assert(is_pmq (bget h z (v i)));
         let zi:elem = z.(i) in
         let zVal:I32.t = elem_to_int32 zi in
 	abs_ zVal >^ params_B -^ params_U
@@ -1113,55 +1182,82 @@ let test_rejection z =
 
     res
 
+#reset-options "--z3rlimit 300 --max_fuel 0 --max_ifuel 0"
+
 val test_correctness:
     v_ : poly
   -> Stack (r:I32.t{r == 0l \/ r == 1l})
-    (requires fun h -> live h v_)
+    (requires fun h -> live h v_ /\ is_poly_montgomery h v_)
     (ensures fun h0 _ h1 -> modifies0 h0 h1)
 
 let test_correctness v_ =
+    admit();
     push_frame();
-
     let res = create (size 1) 0l in
 
     let h0 = ST.get () in
     let _, _ = interruptible_for 0ul params_n
-    (fun h _ _ -> live h v_ /\ modifies1 res h0 h /\ ((bget h res 0) == 0l \/ (bget h res 0) == 1l))
+    (fun h _ _ -> live h v_ /\ modifies1 res h0 h /\ ((bget h res 0) == 0l \/ (bget h res 0) == 1l) /\
+               is_poly_corrected h v_)
     (fun i ->
         let h1 = ST.get () in
-        assume(is_elem (params_q /^ (to_elem 2) -^ (bget h1 v_ (v i))));
-        let mask:elem = (params_q /^ (to_elem 2) -^ v_.(i)) in
+        assert(is_poly_corrected h1 v_);
+        assert(is_corrected (bget h1 v_ (v i)));
+        let mask0:elem = (params_q /^ (to_elem 2) -^ v_.(i)) in
         assert_norm(v (_RADIX32 -. size 1) < I32.n);
-        let mask:I32.t = I32.((elem_to_int32 mask) >>>^ (_RADIX32 -. size 1)) in
-        assume(is_elem ((((bget h1 v_ (v i)) -^ params_q) &^ (int32_to_elem mask)) |^ ((bget h1 v_ (v i)) &^ (lognot (int32_to_elem mask)))));
+        let mask:I32.t = I32.((elem_to_int32 mask0) >>>^ (_RADIX32 -. size 1)) in
+        let h2 = ST.get () in
+        // TODO (kkane): A lot of this proof is repeated from check_ES_ordered_exchange_ct. I really should
+        // extract these facts about masking into a lemma.
+        lemma_mask mask0 mask;
+        assert(mask == 0l \/ mask == (-1l));
+        assert(I32.v mask == Int.zero I32.n \/ I32.v mask == Int.ones I32.n);
         let val_:elem = (((v_.(i) -^ params_q) &^ (int32_to_elem mask)) |^ (v_.(i) &^ (lognot (int32_to_elem mask)))) in
+        Int.logand_lemma_1 (I32.v ((bget h2 v_ (v i)) -^ params_q));
+        Int.logand_lemma_1 (I32.v (bget h2 v_ (v i)));
+        Int.logand_lemma_2 (I32.v ((bget h2 v_ (v i)) -^ params_q));
+        Int.logand_lemma_2 (I32.v (bget h2 v_ (v i)));
+        lemma_int32_logor_zero (bget h2 v_ (v i));
+        lemma_int32_logor_zero ((bget h2 v_ (v i)) -^ params_q);
+        lemma_int32_lognot_zero mask;
+        assert((mask == 0l) ==> (lognot mask == (-1l)));
+        assert((mask == (-1l)) ==> (lognot mask == 0l));
+        assert(val_ == (bget h1 v_ (v i)) -^ params_q \/ val_ == bget h1 v_ (v i));
+        assert(elem_v val_ >= -(2 * elem_v params_q));
+        assert(elem_v val_ <= 2 * elem_v params_q);
         let val_:I32.t = elem_to_int32 val_ in
         // From here on, we only use params_q and params_rejection in 32-bit operations, so "cast" them to int32_t.
         [@inline_let] let params_q = elem_to_int32 params_q in
         [@inline_let] let params_rejection = elem_to_int32 params_rejection in
-        assume(FStar.Int.fits (I32.v (abs_ val_) - I32.v (params_q /^ 2l -^ params_rejection)) I32.n);
+        //assume(FStar.Int.fits (I32.v (abs_ val_) - I32.v (params_q /^ 2l -^ params_rejection)) I32.n);
         let t0:UI32.t = UI32.(int32_to_uint32 I32.(((lognot ((abs_ val_) -^ (params_q /^ 2l -^ params_rejection))))) >>^ (_RADIX32 -. size 1)) in
         let left:I32.t = val_ in
         assert_norm(v (params_d -. (size 1)) < I32.n);
         assume(FStar.Int.fits (I32.v val_ + I32.v (1l <<^ (params_d -. (size 1)))) I32.n);
         assume(FStar.Int.fits (I32.v val_ + I32.v (1l <<^ (params_d -. (size 1))) - 1) I32.n);
         let val_:I32.t = I32.((val_ +^ (1l <<^ (params_d -. (size 1))) -^ 1l) >>>^ params_d) in
+        assume(I32.v val_ >= 0);
         assume(FStar.Int.fits (I32.v left - I32.v (val_ <<^ params_d)) I32.n);
         // val is always -1, 0, or 1 it looks like
         let val_:I32.t = I32.(left -^ (val_ <<^ params_d)) in
+        assume(I32.v val_ > Int.min_int I32.n);
         assume(FStar.Int.fits (I32.v (1l <<^ (params_d -. (size 1))) - elem_v params_rejection) I32.n);
         assume(FStar.Int.fits (I32.v (abs_ val_) - (I32.v (1l <<^ (params_d -. (size 1))) - elem_v params_rejection)) I32.n);
         let t1:UI32.t = UI32.(int32_to_uint32 I32.(((lognot ((abs_ val_) -^ ((1l <<^ (params_d -. (size 1))) -^ params_rejection))))) >>^ (_RADIX32 -. size 1)) in
-        if UI32.((t0 |^ t1) = 1ul)
+        let r = if UI32.((t0 |^ t1) = 1ul)
         then ( res.(size 0) <- 1l; true )
-        else ( false )
+        else ( false ) in
+        let hLoopEnd = ST.get() in
+        assert(forall (i:nat{i < v params_n}) . {:pattern bget hLoopEnd v_ i} bget h1 v_ i == bget hLoopEnd v_ i);
+        assert(is_poly_corrected hLoopEnd v_);
+        r
     ) in
 
     let resVal:I32.t = res.(size 0) in
     pop_frame();
     resVal
 
-//#reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0"
+#reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0"
 
 private inline_for_extraction noextract
 val qtesla_sign_compute_v:
@@ -1172,8 +1268,9 @@ val qtesla_sign_compute_v:
   -> a: poly_k
   -> Stack unit
     (requires fun h -> let bufs = [bb randomness; bb v_; bb y; bb a] in 
-                    BigOps.big_and (live_buf h) bufs /\ BigOps.pairwise_and disjoint_buf bufs)
-    (ensures fun h0 _ h1 -> modifies1 v_ h0 h1)
+                    BigOps.big_and (live_buf h) bufs /\ BigOps.pairwise_and disjoint_buf bufs /\
+                    is_poly_k_montgomery h a /\ is_poly_y_sampler_output h y)
+    (ensures fun h0 _ h1 -> modifies1 v_ h0 h1 /\ is_poly_k_montgomery h1 v_)
 
 let qtesla_sign_compute_v nonce randomness v_ y a =
     push_frame();
@@ -1189,7 +1286,14 @@ let qtesla_sign_compute_v nonce randomness v_ y a =
         (fun k ->
             poly_mul (index_poly v_ k) (index_poly a k) y_ntt
         );
-    pop_frame()
+    pop_frame();
+    let hReturn = ST.get () in
+    assume(is_poly_k_montgomery hReturn v_)
+
+private let lemma_poly_add_in_bounds (h: HS.mem) (y sc: poly) : Lemma
+    (requires is_poly_y_sampler_output h y /\ is_poly_sparse_mul_output h sc)
+    (ensures (forall (i:nat{i < v params_n}) . is_elem_int (elem_v (bget h y i) + elem_v (bget h sc i)))) = 
+    assert(forall (i:nat{i < v params_n}) . is_y_sampler_output(bget h y i) /\ is_sparse_mul_output(bget h sc i))
 
 private inline_for_extraction noextract
 val qtesla_sign_compute_c_z:
@@ -1203,22 +1307,66 @@ val qtesla_sign_compute_c_z:
   -> sign_list: lbuffer I16.t params_h
   -> Stack unit
     (requires fun h -> let bufs = [bb v_; bb randomness_input; bb s; bb y; bb c; bb z; bb pos_list; bb sign_list] in
-                    BigOps.big_and (live_buf h) bufs /\ BigOps.pairwise_and disjoint_buf bufs)
-    (ensures fun h0 _ h1 -> modifies4 c z pos_list sign_list h0 h1)
+                    BigOps.big_and (live_buf h) bufs /\ BigOps.pairwise_and disjoint_buf bufs /\
+                    is_poly_y_sampler_output h y /\ is_poly_k_montgomery h v_ /\ is_s_sk h s)
+    (ensures fun h0 _ h1 -> modifies4 c z pos_list sign_list h0 h1 /\ is_poly_pmq h1 z /\
+                        encode_c_invariant h1 pos_list sign_list params_h)
 
 let qtesla_sign_compute_c_z v_ randomness_input s y c z pos_list sign_list =
+    let hInit = ST.get () in
+    assert(is_poly_y_sampler_output hInit y);
     push_frame();
     let sc:poly = poly_create () in
-
+    let h0 = ST.get () in
+    assert(is_poly_k_equal hInit h0 v_);
+    assert(is_poly_k_montgomery h0 v_);
     hash_H c v_ (sub randomness_input (crypto_randombytes +. crypto_seedbytes) crypto_hmbytes);
     encode_c pos_list sign_list c;
+    let h1 = ST.get () in
+    assert(forall (i:nat{i < v params_n}) . {:pattern bget h1 s i} bget hInit s i == bget h1 s i);
+    assert(is_s_sk h1 s);
     sparse_mul sc s pos_list sign_list;
-    let h = ST.get () in
-    //NS: I'm not sure how this is meant to be established
-    assume (forall i .{:pattern elem_v (bget h y i)}
-               i < v params_n ==> is_elem_int (elem_v (bget h y i) + elem_v (bget h sc i)));
+    let h2 = ST.get () in
+    assert(is_poly_equal hInit h2 y);
+    assert(is_poly_y_sampler_output h2 y);
+    assert(is_poly_sparse_mul_output h2 sc);
+    lemma_poly_add_in_bounds h2 y sc;
     poly_add z y sc;
-    pop_frame()
+    let hFinal = ST.get () in
+    pop_frame();
+    let hReturn = ST.get () in
+    assert(is_poly_equal hFinal hReturn z)
+
+private let lemma_sub_poly_is_sk 
+    (h: HS.mem) 
+    (e: lbuffer sparse_elem (params_n *. params_k)) 
+    (s: lbuffer sparse_elem params_n)
+    (k: size_t{v k < v params_k}) : Lemma
+    (requires is_e_sk h e /\ s == gsub e (k *. params_n) params_n)
+    (ensures is_s_sk h s) = 
+    assert(forall (i:nat{i < v params_k * v params_n}) . is_sparse_elem_sk (bget h e i));
+    assert(forall (i:nat{i < v params_n}) . bget h s i == bget h e (v k * v params_n + i));
+    assert(forall (i:nat{i < v params_n}) . is_sparse_elem_sk (bget h s i))
+
+private let lemma_sub_poly_is_montgomery
+    (h: HS.mem) 
+    (p: poly_k)
+    (sp: poly)
+    (k: size_t{v k < v params_k}) : Lemma
+    (requires is_poly_k_montgomery h p /\ sp == gsub p (k *. params_n) params_n)
+    (ensures is_poly_montgomery h sp) = 
+    assert(forall (i:nat{i < v params_k * v params_n}) . is_montgomery (bget h p i));
+    assert(forall (i:nat{i < v params_n}) . bget h sp i == bget h p (v k * v params_n + i));
+    assert(forall (i:nat{i < v params_n}) . is_montgomery (bget h sp i))
+
+private let lemma_disjoint 
+    (ec: poly_k) 
+    (e: lbuffer sparse_elem (params_n *. params_k))
+    (ec_k: poly)
+    (e_k: lbuffer sparse_elem params_n)
+    (k: size_t{v k < v params_k}) : Lemma
+    (requires disjoint ec e /\ ec_k == gsub ec (k *. params_n) params_n /\ e_k == gsub e (k *. params_n) params_n)
+    (ensures disjoint ec_k e_k) = ()
 
 private inline_for_extraction noextract
 val qtesla_sign_update_v:
@@ -1228,28 +1376,42 @@ val qtesla_sign_update_v:
   -> sign_list: lbuffer I16.t params_h
   -> Stack (r:I32.t{r == 0l \/ r == 1l})
     (requires fun h -> let bufs = [bb v_; bb e; bb pos_list; bb sign_list] in
-                    FStar.BigOps.big_and (live_buf h) bufs /\ FStar.BigOps.pairwise_and disjoint_buf bufs)
+                    FStar.BigOps.big_and (live_buf h) bufs /\ FStar.BigOps.pairwise_and disjoint_buf bufs /\
+                    encode_c_invariant h pos_list sign_list params_h /\ is_e_sk h e)
     (ensures fun h0 _ h1 -> modifies1 v_ h0 h1)
 
 let qtesla_sign_update_v v_ e pos_list sign_list =
+    let hInit = ST.get () in
+    assert(is_e_sk hInit e);
     push_frame();
     let rsp = create (size 1) 0l in
 
     let h0 = ST.get () in
+    assert(forall (i:nat{i < v params_n * v params_k}) . bget hInit e i == bget h0 e i);
     let _, _ =
     interruptible_for (size 0) params_k
-         (fun h _ _ -> live h v_ /\ live h e /\ live h rsp /\
-                    modifies2 v_ rsp h0 h)
+         (fun h _ _ -> live h v_ /\ live h e /\ live h rsp /\ (bget h rsp 0 == 0l \/ bget h rsp 0 == 1l) /\
+                    modifies2 v_ rsp h0 h /\ is_e_sk h e)
          (fun k ->
              push_frame();
              let ec:poly_k = poly_k_create () in
 
              let ec_k = index_poly ec k in
-             let e_k = sub e (params_n *. k) params_n in
+             let e_k = sub e (k *. params_n) params_n in
+             assert(e_k == gsub e (k *. params_n) params_n);
+             let h = ST.get () in
+             assert(forall (i:nat{i < v params_n * v params_k}) . bget hInit e i == bget h e i);
+             assert(is_e_sk h e);
+             lemma_sub_poly_is_sk h e e_k k;
+             assert(is_s_sk h e_k);
              //NS: Not sure why this is not provable
-             assume (disjoint ec_k e_k);
+             lemma_disjoint ec e ec_k e_k k;
+             assert(disjoint ec_k e_k);
              sparse_mul ec_k e_k pos_list sign_list;
              poly_sub_correct (index_poly v_ k) (index_poly v_ k) (index_poly ec k);
+             let hSub = ST.get () in
+             assume(is_poly_k_montgomery hSub v_);
+             lemma_sub_poly_is_montgomery hSub v_ (gsub v_ (k *. params_n) params_n) k;
              rsp.(size 0) <- test_correctness (index_poly v_ k);
              let rspVal = rsp.(size 0) in 
              pop_frame(); 
@@ -1258,6 +1420,8 @@ let qtesla_sign_update_v v_ e pos_list sign_list =
    let rspVal = rsp.(size 0) in
    pop_frame();
    rspVal
+
+#reset-options "--z3rlimit 500 --max_fuel 0 --max_ifuel 0"
 
 private inline_for_extraction noextract
 val qtesla_sign_do_while:
@@ -1286,7 +1450,9 @@ val qtesla_sign_do_while:
       in
       BigOps.big_and (live_buf h) bufs /\
       BigOps.pairwise_and disjoint_buf bufs /\
-      FStar.Int.fits (I32.v (bget h nonce 0) + 1) I32.n)
+      FStar.Int.fits (I32.v (bget h nonce 0) + 1) I32.n /\
+      I32.v (bget h nonce 0) >= 0 /\
+      is_poly_k_montgomery h a /\ is_s_sk h s /\ is_e_sk h e)
     (ensures fun h0 _ h1 -> modifies3 nonce smlen sm h0 h1)
 
 // -LowStar.Monotonic.Buffer.unused_in_not_unused_in_disjoint_2
@@ -1339,15 +1505,19 @@ let qtesla_sign_do_while randomness randomness_input nonce a s e smlen mlen m sm
 
     let h1 = ST.get () in
     assert(modifies2 y nonce h0 h1);
-
+    assert(is_poly_k_equal hInit h1 a); // for is_poly_k_montgomery h1 a
     qtesla_sign_compute_v nonce.(size 0) randomness v_ y a;
 
     let h2 = ST.get () in
     assert(modifies3 v_ y nonce h0 h2);
+    assert(is_poly_equal h1 h2 y); // for is_poly_y_sampler_output h2 y
+    assert(forall (i:nat{i < v params_n}) . bget h2 s i == bget hInit s i); // for is_s_sk h2 s
 
+//is_poly_k_corrected h v_ /\ is_s_sk h s
     qtesla_sign_compute_c_z v_ randomness_input s y c z pos_list sign_list;
     let h3 = ST.get () in
     assert(modifies (loc c |+| loc z |+| loc v_ |+| loc y |+| loc nonce |+| loc pos_list |+| loc sign_list) h0 h3);
+    assert(forall (i:nat{i < v params_n * v params_k}) . bget h3 e i == bget hInit e i); // for is_e_sk h3 e
 
     let res = 
     if test_rejection z
@@ -1459,7 +1629,7 @@ let qtesla_sign smlen mlen m sm sk =
                  FStar.BigOps.big_and (live_buf h) bufs /\ modifies3 nonce smlen sm h3 h)
         (fun _ -> 
             let h4 = ST.get () in
-            assume(FStar.Int.fits (I32.v (bget h4 nonce 0) + 1) I32.n);
+            //assume(FStar.Int.fits (I32.v (bget h4 nonce 0) + 1) I32.n);
             qtesla_sign_do_while randomness randomness_input nonce a s e smlen mlen m sm
         );
 

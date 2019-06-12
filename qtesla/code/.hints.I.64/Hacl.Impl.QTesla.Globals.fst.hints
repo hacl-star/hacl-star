@@ -1,5 +1,5 @@
 [
-  "®RÙ¡Ï∏≥∫6KWnª\u0004TÓ",
+  "√Ååwv…\u0016®—˜»Ó‰,≤•",
   [
     [
       "Hacl.Impl.QTesla.Globals.is_sampler_output",
@@ -23,7 +23,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "11523da2b092c6c7809bcd3c00f3cbdc"
+      "323f67f386be89f895fe965ed7357830"
     ],
     [
       "Hacl.Impl.QTesla.Globals.is_poly_montgomery_i",
@@ -42,7 +42,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "95d45a099c103ed344f9d219817b6b56"
+      "33eb7553d0be1e5c57d2440f53665244"
     ],
     [
       "Hacl.Impl.QTesla.Globals.is_poly_corrected_i",
@@ -61,7 +61,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "06d31c680b2d72fd48358a9dab711d21"
+      "3fac50c77bc6b086194198a748ef0f5c"
     ],
     [
       "Hacl.Impl.QTesla.Globals.is_poly_sampler_output_i",
@@ -80,7 +80,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "8ec9ebf778b26f618d4ed34f0de6048b"
+      "1831050a3a3be0655d1c928a8e468d89"
     ],
     [
       "Hacl.Impl.QTesla.Globals.is_poly_y_sampler_output_i",
@@ -99,7 +99,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "5c459986be9861cb0c65cc776467443e"
+      "64ab1e4fb6cf50d536113dfaf2b26362"
     ],
     [
       "Hacl.Impl.QTesla.Globals.is_poly_pk_i",
@@ -118,7 +118,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "36f44cc2a8f28c34558240d1f0f38b3f"
+      "8622aa053c0c19624b12a056bf8ab505"
     ],
     [
       "Hacl.Impl.QTesla.Globals.is_poly_sk_i",
@@ -137,7 +137,83 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "a9ec6f08cf1413759aacd2ad644a296d"
+      "d577f6686f512ba199f6b92b09af7e32"
+    ],
+    [
+      "Hacl.Impl.QTesla.Globals.is_poly_pmq_i",
+      1,
+      1,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "equality_tok_Lib.IntTypes.PUB@tok",
+        "equality_tok_Lib.IntTypes.U32@tok",
+        "equation_Hacl.Impl.QTesla.Params.params_n", "equation_Prims.nat",
+        "refinement_interpretation_Tm_refine_113506a5c5478b736b54f7420b966f48",
+        "refinement_interpretation_Tm_refine_a023f390483b324d20370f23ed0795dc",
+        "typing_Hacl.Impl.QTesla.Params.params_n",
+        "typing_Lib.IntTypes.uint_v", "typing_tok_Lib.IntTypes.PUB@tok",
+        "typing_tok_Lib.IntTypes.U32@tok"
+      ],
+      0,
+      "18645cdf81b47e9b55f9dd53a056e4c3"
+    ],
+    [
+      "Hacl.Impl.QTesla.Globals.is_poly_z_accepted_i",
+      1,
+      1,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "equality_tok_Lib.IntTypes.PUB@tok",
+        "equality_tok_Lib.IntTypes.U32@tok",
+        "equation_Hacl.Impl.QTesla.Params.params_n", "equation_Prims.nat",
+        "refinement_interpretation_Tm_refine_113506a5c5478b736b54f7420b966f48",
+        "refinement_interpretation_Tm_refine_a023f390483b324d20370f23ed0795dc",
+        "typing_Hacl.Impl.QTesla.Params.params_n",
+        "typing_Lib.IntTypes.uint_v", "typing_tok_Lib.IntTypes.PUB@tok",
+        "typing_tok_Lib.IntTypes.U32@tok"
+      ],
+      0,
+      "0e80fbe38247f99374c66f7e3c8f044c"
+    ],
+    [
+      "Hacl.Impl.QTesla.Globals.is_poly_sparse_mul_output_i",
+      1,
+      1,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "equality_tok_Lib.IntTypes.PUB@tok",
+        "equality_tok_Lib.IntTypes.U32@tok",
+        "equation_Hacl.Impl.QTesla.Params.params_n", "equation_Prims.nat",
+        "refinement_interpretation_Tm_refine_113506a5c5478b736b54f7420b966f48",
+        "refinement_interpretation_Tm_refine_a023f390483b324d20370f23ed0795dc",
+        "typing_Hacl.Impl.QTesla.Params.params_n",
+        "typing_Lib.IntTypes.uint_v", "typing_tok_Lib.IntTypes.PUB@tok",
+        "typing_tok_Lib.IntTypes.U32@tok"
+      ],
+      0,
+      "154b3bcb1b434afe51c5d8709f0d1dc4"
+    ],
+    [
+      "Hacl.Impl.QTesla.Globals.is_poly_sparse_mul32_output_i",
+      1,
+      1,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "equality_tok_Lib.IntTypes.PUB@tok",
+        "equality_tok_Lib.IntTypes.U32@tok",
+        "equation_Hacl.Impl.QTesla.Params.params_n", "equation_Prims.nat",
+        "refinement_interpretation_Tm_refine_113506a5c5478b736b54f7420b966f48",
+        "refinement_interpretation_Tm_refine_a023f390483b324d20370f23ed0795dc",
+        "typing_Hacl.Impl.QTesla.Params.params_n",
+        "typing_Lib.IntTypes.uint_v", "typing_tok_Lib.IntTypes.PUB@tok",
+        "typing_tok_Lib.IntTypes.U32@tok"
+      ],
+      0,
+      "982e686f4d904c173f059c29862c951f"
     ],
     [
       "Hacl.Impl.QTesla.Globals.is_poly_k_montgomery_i",
@@ -184,7 +260,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "196adcf2f9a31266b8a3eeaa721111b6"
+      "02b4110b94465ffa86579090bc042536"
     ],
     [
       "Hacl.Impl.QTesla.Globals.is_poly_k_corrected_i",
@@ -231,7 +307,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "240c4602f3d2ef23e1ad52d837a9f264"
+      "d6b7b48cf1c8c631f02c9ac8b80ff3d0"
     ],
     [
       "Hacl.Impl.QTesla.Globals.is_poly_k_sampler_output_i",
@@ -278,7 +354,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "18345b4791c23390e7fb2b9a48e5b9ae"
+      "3f4e7ab326b2f3f6808fc220c91c6a47"
     ],
     [
       "Hacl.Impl.QTesla.Globals.is_poly_k_pk_i",
@@ -325,7 +401,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "816a5817b0b0d69fca21ae4cfcad7e54"
+      "fb604f5a52f677e14be0f4d1d44a306c"
     ],
     [
       "Hacl.Impl.QTesla.Globals.is_poly_k_sk_i",
@@ -372,7 +448,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "df4b2aa246c8b1a660cf7554dce4adb2"
+      "d4615ff62ef80d2447e4eb0409e9ac26"
     ],
     [
       "Hacl.Impl.QTesla.Globals.is_poly_montgomery",
@@ -381,7 +457,7 @@
       0,
       [ "@query" ],
       0,
-      "a9dce531713a06a791a17e6929a098d5"
+      "d007922ebda183ad3430bddd2c15b305"
     ],
     [
       "Hacl.Impl.QTesla.Globals.is_poly_corrected",
@@ -390,7 +466,7 @@
       0,
       [ "@query" ],
       0,
-      "2bce6d60f3bfb0a7c7c953ca4cb331c2"
+      "381ccdc71ffd5b32204b6f0bfb2ef6a4"
     ],
     [
       "Hacl.Impl.QTesla.Globals.is_poly_sampler_output",
@@ -399,7 +475,7 @@
       0,
       [ "@query" ],
       0,
-      "4ae1bfb7b041db6211121b94b1341cef"
+      "4327358ad600e428460af5eb5d842386"
     ],
     [
       "Hacl.Impl.QTesla.Globals.is_poly_y_sampler_output",
@@ -408,7 +484,7 @@
       0,
       [ "@query" ],
       0,
-      "b32171308ce718d3a2405643f4dbc904"
+      "275a90f4594867a1b5f03c44289011fc"
     ],
     [
       "Hacl.Impl.QTesla.Globals.is_poly_pk",
@@ -417,7 +493,7 @@
       0,
       [ "@query" ],
       0,
-      "1f5d113f0b10438f71eb47ca8fa7d7f6"
+      "068d97c2e2b0feacc4136c2a69ae9881"
     ],
     [
       "Hacl.Impl.QTesla.Globals.is_poly_sk",
@@ -426,7 +502,43 @@
       0,
       [ "@query" ],
       0,
-      "c8a5b9d3e3bcbddb1e8d510507513ae3"
+      "3ba961c7ddd0b1f468ba36a4d0241d35"
+    ],
+    [
+      "Hacl.Impl.QTesla.Globals.is_poly_pmq",
+      1,
+      1,
+      1,
+      [ "@query" ],
+      0,
+      "d83a5f5724f398e429738d670430762e"
+    ],
+    [
+      "Hacl.Impl.QTesla.Globals.is_poly_z_accepted",
+      1,
+      1,
+      1,
+      [ "@query" ],
+      0,
+      "b004a2f4dfdeaa5f9fdcbf7fb6a5c051"
+    ],
+    [
+      "Hacl.Impl.QTesla.Globals.is_poly_sparse_mul_output",
+      1,
+      1,
+      1,
+      [ "@query" ],
+      0,
+      "9e7ac2ca4c4936afc95cebb689c8a18f"
+    ],
+    [
+      "Hacl.Impl.QTesla.Globals.is_poly_sparse_mul32_output",
+      1,
+      1,
+      1,
+      [ "@query" ],
+      0,
+      "9e3aa5f40aaf3c4a0de623737a2c56a1"
     ],
     [
       "Hacl.Impl.QTesla.Globals.is_poly_k_montgomery",
@@ -453,7 +565,7 @@
         "typing_QTesla.Params.params_k", "typing_QTesla.Params.params_n"
       ],
       0,
-      "e4194fc816c0297646e1506632be8ba2"
+      "ab9817714c34fe7f8c4270f3284e1768"
     ],
     [
       "Hacl.Impl.QTesla.Globals.is_poly_k_corrected",
@@ -480,7 +592,7 @@
         "typing_QTesla.Params.params_k", "typing_QTesla.Params.params_n"
       ],
       0,
-      "2a327c799a9b53487d7679b66c0e6c39"
+      "f1a01191f096097e609c64312dd94dd3"
     ],
     [
       "Hacl.Impl.QTesla.Globals.is_poly_k_sampler_output",
@@ -507,7 +619,7 @@
         "typing_QTesla.Params.params_k", "typing_QTesla.Params.params_n"
       ],
       0,
-      "7177c193732bf45e6935814c249e791f"
+      "90ff63f2b09d12eb9d663d7fa2749e23"
     ],
     [
       "Hacl.Impl.QTesla.Globals.is_poly_k_pk",
@@ -534,7 +646,7 @@
         "typing_QTesla.Params.params_k", "typing_QTesla.Params.params_n"
       ],
       0,
-      "fd10cd99422fdc831fa358f2ac126d04"
+      "3802dc10d581ce94083dd0a462e9d395"
     ],
     [
       "Hacl.Impl.QTesla.Globals.is_poly_k_sk",
@@ -561,7 +673,74 @@
         "typing_QTesla.Params.params_k", "typing_QTesla.Params.params_n"
       ],
       0,
-      "491eee53ac90350bed621dfeecc8652d"
+      "34eb0021305c376036684f410df9c0bd"
+    ],
+    [
+      "Hacl.Impl.QTesla.Globals.is_poly_equal",
+      1,
+      1,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "equality_tok_Lib.IntTypes.PUB@tok",
+        "equality_tok_Lib.IntTypes.U32@tok",
+        "equation_Hacl.Impl.QTesla.Params.params_n", "equation_Prims.nat",
+        "refinement_interpretation_Tm_refine_961f6f8ae4e1f44a35c50230f5decf42",
+        "refinement_interpretation_Tm_refine_a023f390483b324d20370f23ed0795dc",
+        "typing_Hacl.Impl.QTesla.Params.params_n",
+        "typing_Lib.IntTypes.uint_v", "typing_tok_Lib.IntTypes.PUB@tok",
+        "typing_tok_Lib.IntTypes.U32@tok"
+      ],
+      0,
+      "e2d3ca3e7d3731cc5134c52778d6e22a"
+    ],
+    [
+      "Hacl.Impl.QTesla.Globals.is_poly_k_equal",
+      1,
+      1,
+      1,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented",
+        "@fuel_irrelevance_Prims.pow2.fuel_instrumented", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565",
+        "constructor_distinct_Lib.IntTypes.U128",
+        "constructor_distinct_Lib.IntTypes.U32",
+        "equality_tok_Lib.Buffer.MUT@tok",
+        "equality_tok_Lib.IntTypes.PUB@tok",
+        "equality_tok_Lib.IntTypes.U128@tok",
+        "equality_tok_Lib.IntTypes.U32@tok",
+        "equation_Hacl.Impl.QTesla.Globals.elem",
+        "equation_Hacl.Impl.QTesla.Globals.poly_k",
+        "equation_Hacl.Impl.QTesla.Heuristic.Parameters.elem_base",
+        "equation_Hacl.Impl.QTesla.Params.params_k",
+        "equation_Hacl.Impl.QTesla.Params.params_n",
+        "equation_Lib.Buffer.lbuffer_t", "equation_Lib.IntTypes.bits",
+        "equation_Lib.IntTypes.op_Star_Dot", "equation_Lib.IntTypes.size",
+        "equation_Lib.IntTypes.uint_v", "equation_Prims.nat",
+        "equation_QTesla.Params.params_k", "equation_QTesla.Params.params_n",
+        "function_token_typing_FStar.Int32.t",
+        "function_token_typing_Prims.__cache_version_number__", "int_typing",
+        "lemma_Lib.IntTypes.mul_mod_lemma", "lemma_Lib.IntTypes.pow2_values",
+        "primitive_Prims.op_Modulus", "primitive_Prims.op_Multiply",
+        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_29b4147ff63f49558f8bc6d3917761df",
+        "refinement_interpretation_Tm_refine_485b1639e956873bf6de53e6ff9e6b14",
+        "refinement_interpretation_Tm_refine_a023f390483b324d20370f23ed0795dc",
+        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "refinement_interpretation_Tm_refine_c2215b703b2340e9e4551c4e8820d7c8",
+        "refinement_interpretation_Tm_refine_e7baecf1446b738b3604b097069629a3",
+        "token_correspondence_Lib.IntTypes.mul_mod",
+        "token_correspondence_Lib.IntTypes.op_Star_Dot",
+        "typing_Hacl.Impl.QTesla.Params.params_k",
+        "typing_Hacl.Impl.QTesla.Params.params_n",
+        "typing_Lib.Buffer.length", "typing_Lib.IntTypes.uint",
+        "typing_QTesla.Params.params_k", "typing_QTesla.Params.params_n",
+        "typing_tok_Lib.Buffer.MUT@tok", "typing_tok_Lib.IntTypes.PUB@tok",
+        "typing_tok_Lib.IntTypes.U32@tok"
+      ],
+      0,
+      "8022dd12c706ebb98f11133b295a755f"
     ],
     [
       "Hacl.Impl.QTesla.Globals.poly_create",
@@ -614,7 +793,7 @@
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "b3beb6bbfc6ccf0478d884747cc2f327"
+      "ab6df76a8d305d7d22c67a73d48ff25f"
     ],
     [
       "Hacl.Impl.QTesla.Globals.poly_create",
@@ -664,7 +843,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "1e1e62c9d91b3032a4c528f91a7074ea"
+      "3dd4f93f7f437b1cc0685a7fa518380a"
     ],
     [
       "Hacl.Impl.QTesla.Globals.poly_k_create",
@@ -738,7 +917,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "e6578d752a0baf73add9bc9e6fccde5b"
+      "73248269a0405c1cd3c5e05e9875e299"
     ],
     [
       "Hacl.Impl.QTesla.Globals.poly_k_create",
@@ -807,7 +986,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "551783c373ce03af56e21b5555d39b1f"
+      "c856695916f36f184efe1c1a98bcff55"
     ],
     [
       "Hacl.Impl.QTesla.Globals.get_poly",
@@ -856,7 +1035,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "cb57114cd38fcba74961807487f33919"
+      "898c08f53b7968ddccbfde722f285005"
     ],
     [
       "Hacl.Impl.QTesla.Globals.index_poly",
@@ -912,7 +1091,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "c1419dd13f61c83b73146323d1b137d9"
+      "44da9c8228c416d16a5d5d8e0b466070"
     ],
     [
       "Hacl.Impl.QTesla.Globals.index_poly",
@@ -983,7 +1162,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "1d1c6086038f0107d4c3522f749c0b55"
+      "b375be5cc4731c4f951e006ecd7741dd"
     ],
     [
       "Hacl.Impl.QTesla.Globals.reduce",
@@ -1043,7 +1222,7 @@
         "typing_QTesla.Params.params_q", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "1f29a24713c2027c2f048d44f0644111"
+      "c4e31cc44f4469c16c8d07b1209deaa0"
     ],
     [
       "Hacl.Impl.QTesla.Globals.barr_reduce",
@@ -1085,7 +1264,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "d71db50fbfb1318db79899a0b5625b8a"
+      "b71c49176a6316200a9b0771d576f616"
     ],
     [
       "Hacl.Impl.QTesla.Globals.unsafe_declassify",
@@ -1094,7 +1273,7 @@
       1,
       [ "@query" ],
       0,
-      "bb0764a20d4888eeaea618cf2aa540f7"
+      "903e49e5d9eb489619db64f5e96838d2"
     ],
     [
       "Hacl.Impl.QTesla.Globals.unsafe_declassify",
@@ -1147,7 +1326,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "1f820609f5a56f97d429ee0a9d3c6209"
+      "222c135ea7152c5e30a7a8595791efad"
     ],
     [
       "Hacl.Impl.QTesla.Globals.shift_arithmetic_left_value_check",
@@ -1168,7 +1347,7 @@
         "typing_FStar.UInt32.v"
       ],
       0,
-      "11086bf7fab9b473baf5172568b56d26"
+      "0552a07382931a8a70a96b453bdb1ce1"
     ],
     [
       "Hacl.Impl.QTesla.Globals.shift_arithmetic_left",
@@ -1185,7 +1364,7 @@
         "refinement_interpretation_Tm_refine_5a80f1693a9d1a0e7aff5fc5520d539d"
       ],
       0,
-      "3113c3e0bfece19e51cb0e2ca2d7e9bd"
+      "87c6b346a2d0c6d77d8aa9285746ee56"
     ]
   ]
 ]
