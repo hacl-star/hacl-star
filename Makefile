@@ -652,8 +652,6 @@ HAND_WRITTEN_OPTIONAL_FILES = \
   $(addprefix providers/evercrypt/c/evercrypt_,openssl.c bcrypt.c)
 
 
-# TODO: put all the Vale files under a single namespace to avoid this nonsense
-#
 # Note: I am using the deprecated -drop option, but it's ok because the dropped
 # module ends up in another bundle. Maybe the semantics of -drop should be
 # changed to just drop the declarations from a given module and then rely on
@@ -754,15 +752,16 @@ old-%:
 HACL_OLD_FILES=\
   code/old/experimental/aesgcm/aesgcm-c/Hacl_AES.c
 
+# Customizations for regular, msvc and gcc flavors.
 dist/compact/Makefile.basic: KRML_EXTRA=$(COMPACT_FLAGS)
 
 dist/compact-msvc/Makefile.basic: KRML_EXTRA=$(COMPACT_FLAGS) -falloca -ftail-calls
 
 dist/compact-gcc/Makefile.basic: KRML_EXTRA=$(COMPACT_FLAGS) -fbuiltin-uint128
 
-dist/curve25519-64/Makefile.basic: KRML_EXTRA=-bundle Hacl.Curve25519_64=* -fbuiltin-uint128 -extract-uints
-
-# MerkleTree doesn't compile in C89 mode
+# Customizations for C89 mode:
+# - MerkleTree doesn't compile in C89 mode (FIXME?)
+# - Use C89 versions of ancient HACL code
 dist/compact-c89/Makefile.basic: \
   KRML_EXTRA=$(patsubst 'Merkle%[rename=MerkleTree]','MerkleTree.*',$(COMPACT_FLAGS)) \
     -fc89 -ccopt -std=c89 -ccopt -Wno-typedef-redefinition
@@ -770,34 +769,47 @@ dist/compact-c89/Makefile.basic: \
   HACL_OLD_FILES:=$(subst -c,-c89,$(HACL_OLD_FILES))
 
 # Customizations for CCF:
-# - disable the legacy EverCrypt namespace -- this is mostly for Merkle Trees
-#   (and hashes, too)
+# - disable the legacy EverCrypt namespace
 # - enclaves only use 64-bit GCC/Clang -- assume unsigned __int128
 # - disable intrinsics (immintrin not availble with enclave toolchain)
 # - disbable chacha20, chachapoly, corresponding assemblies
+# - ensure poly1305 is unreachable via EverCrypt so that no file in the
+#   distribution needs compiling with intrinsics; this may not be tenable in the
+#   long run, as we'll have AEAD versions that need intrinsics; at that stage,
+#   we'll have to add a TargetConfig.has_intrinsics and guard even more
 dist/ccf/Makefile.basic: \
   KRML_EXTRA=$(COMPACT_FLAGS) \
     -fbuiltin-uint128 \
     -bundle EverCrypt.AutoConfig2= \
+    -bundle Hacl.Poly1305_32[rename=Hacl_Poly1305] \
+    -bundle Hacl.*[rename=Hacl_Leftovers] \
     -bundle EverCrypt \
     -bundle EverCrypt.Hacl \
-    -bundle Hacl.*[rename=Hacl_Leftovers]
+    -bundle EverCrypt.Helpers \
+    -bundle EverCrypt.Poly1305 \
+    -bundle EverCrypt.Chacha20Poly1305
 dist/ccf/Makefile.basic: INTRINSIC_FLAGS=
-dist/ccf/Makefile.basic: CHACHA20_BUNDLE=
-dist/ccf/Makefile.basic: CHACHAPOLY_BUNDLE=
-dist/ccf/Makefile.basic: VALE_ASMS := $(filter-out poly1305-%,$(VALE_ASMS))
+dist/ccf/Makefile.basic: VALE_ASMS := $(filter-out $(HACL_HOME)/secure_api/vale/asm/aes-% dist/vale/poly1305-%,$(VALE_ASMS))
+dist/ccf/Makefile.basic: HAND_WRITTEN_OPTIONAL_FILES =
+dist/ccf/Makefile.basic: HAND_WRITTEN_FILES := $(filter-out %/Lib_PrintBuffer.c %_vale_stubs.c,$(HAND_WRITTEN_FILES))
+dist/ccf/Makefile.basic: HAND_WRITTEN_H_FILES := $(filter-out %/libintvector.h,$(HAND_WRITTEN_H_FILES))
+dist/ccf/Makefile.basic: HACL_OLD_FILES =
 
+# Customizations for WASM.
+# - only keep definitions reachable from Test.NoHeap -- this indicates what we
+#   should retain for the WASM distribution.
 dist/wasm/Makefile.basic: KRML_EXTRA=$(WASM_FLAGS)
 dist/wasm/Makefile.basic: TEST_FLAGS=
 
+# ?
 dist/portable/Makefile.basic: OPT_FLAGS=-ccopts -mtune=generic
 
-# OpenSSL and BCrypt disabled
+# This will eventually go. OpenSSL and BCrypt disabled
 ifeq ($(EVERCRYPT_CONFIG),everest)
 HAND_WRITTEN_OPTIONAL_FILES :=
 endif
 
-# For Kaizala, no BCrypt, no Vale.
+# Customizations for Kaizala. No BCrypt, no Vale.
 ifeq ($(EVERCRYPT_CONFIG),kaizala)
 dist/compact/Makefile.basic: \
   HAND_WRITTEN_OPTIONAL_FILES := $(filter-out %_bcrypt.c,$(HAND_WRITTEN_OPTIONAL_FILES))
@@ -811,7 +823,7 @@ endif
 dist/%/Makefile.basic: $(ALL_KRML_FILES) dist/hacl-internal-headers/Makefile.basic \
   $(HAND_WRITTEN_FILES) $(HAND_WRITTEN_H_FILES) $(HAND_WRITTEN_OPTIONAL_FILES) $(VALE_ASMS) | old-extract-c
 	mkdir -p $(dir $@)
-	cp $(HACL_OLD_FILES) $(patsubst %.c,%.h,$(HACL_OLD_FILES)) $(dir $@)
+	[ x"$(HACL_OLD_FILES)" != x ] && cp $(HACL_OLD_FILES) $(patsubst %.c,%.h,$(HACL_OLD_FILES)) $(dir $@) || true
 	cp $(HAND_WRITTEN_FILES) $(HAND_WRITTEN_H_FILES) $(HAND_WRITTEN_OPTIONAL_FILES) dist/hacl-internal-headers/*.h $(dir $@)
 	[ x"$(VALE_ASMS)" != x ] && cp $(VALE_ASMS) $(dir $@) || true
 	$(KRML) $(DEFAULT_FLAGS) $(KRML_EXTRA) \
