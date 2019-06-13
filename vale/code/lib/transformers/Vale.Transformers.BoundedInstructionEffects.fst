@@ -183,22 +183,56 @@ let lemma_machine_eval_ins_st_only_affects_write (i:ins{Instr? i}) (s:machine_st
   FStar.Classical.forall_intro (
     FStar.Classical.move_requires (lemma_machine_eval_ins_st_only_affects_write_aux i s))
 
-let lemma_machine_eval_ins_st_unchanged_behavior_ok (i:ins{Instr? i}) (s1 s2:machine_state) :
+let lemma_eval_instr_ok
+    (it:instr_t_record) (oprs:instr_operands_t it.outs it.args) (ann:instr_annotation it)
+    (s1 s2:machine_state) :
+  Lemma
+    (requires (
+        let r, w = rw_set_of_ins (Instr it oprs ann) in
+        (s1.ms_ok = s2.ms_ok) /\
+        (unchanged_at r s1 s2)))
+    (ensures (
+        let r, w = rw_set_of_ins (Instr it oprs ann) in
+        let s1' = eval_instr it oprs ann s1 in
+        let s2' = eval_instr it oprs ann s2 in
+        (Some? s1' = Some? s2') /\
+        (Some? s1' ==> (Some?.v s1').ms_ok = (Some?.v s2').ms_ok))) =
+  let InstrTypeRecord #outs #args #havoc_flags' i = it in
+  let vs1 = instr_apply_eval outs args (instr_eval i) oprs s1 in
+  let vs2 = instr_apply_eval outs args (instr_eval i) oprs s2 in
+  let s11 =
+    match havoc_flags' with
+    | HavocFlags -> {s1 with ms_flags = havoc_flags}
+    | PreserveFlags -> s1
+    in
+  let s22 =
+    match havoc_flags' with
+    | HavocFlags -> {s2 with ms_flags = havoc_flags}
+    | PreserveFlags -> s2
+    in
+  let _1 = FStar.Option.mapTot (fun vs -> instr_write_outputs outs args vs oprs s1 s11) vs1 in
+  let _2 = FStar.Option.mapTot (fun vs -> instr_write_outputs outs args vs oprs s2 s22) vs2 in
+  admit ()
+
+let lemma_machine_eval_ins_st_ok (i:ins{Instr? i}) (s1 s2:machine_state) :
   Lemma
     (requires (
         let r, w = rw_set_of_ins i in
+        (s1.ms_ok = s2.ms_ok) /\
         (unchanged_at r s1 s2)))
     (ensures (
         let r, w = rw_set_of_ins i in
         let f = machine_eval_ins_st i in
         (run f s1).ms_ok = (run f s2).ms_ok)) =
-  admit ()
+  let Instr it oprs ann = i in
+  lemma_eval_instr_ok it oprs ann s1 s2
 
 let lemma_machine_eval_ins_st_unchanged_behavior (i:ins{Instr? i}) (s1 s2:machine_state) :
   Lemma
     (requires (
         let r, w = rw_set_of_ins i in
         let f = machine_eval_ins_st i in
+        (s1.ms_ok = s2.ms_ok) /\
         (unchanged_at r s1 s2) /\
         (run f s1).ms_ok /\
         (run f s2).ms_ok))
@@ -215,7 +249,7 @@ let lemma_machine_eval_ins_st_bounded_effects_Instr (i:ins{Instr? i}) :
          (bounded_effects r w (machine_eval_ins_st i))))) =
   FStar.Classical.forall_intro (lemma_machine_eval_ins_st_only_affects_write i);
   FStar.Classical.forall_intro_2 (fun s1 ->
-      FStar.Classical.move_requires (lemma_machine_eval_ins_st_unchanged_behavior_ok i s1));
+      FStar.Classical.move_requires (lemma_machine_eval_ins_st_ok i s1));
   FStar.Classical.forall_intro_2 (fun s1 ->
       FStar.Classical.move_requires (lemma_machine_eval_ins_st_unchanged_behavior i s1))
 
