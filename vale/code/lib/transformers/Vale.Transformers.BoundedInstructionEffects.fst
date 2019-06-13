@@ -15,25 +15,27 @@ friend Vale.Transformers.Locations
 module L = FStar.List.Tot
 
 
-let locations_of_maddr (m:maddr) : locations =
-  match m with
-  | MConst _ -> []
-  | MReg r _ -> [ALocReg r]
-  | MIndex b _ i _ -> [ALocReg b; ALocReg i]
+let locations_of_maddr (m:maddr) (mem:location) : locations =
+  mem :: (
+    match m with
+    | MConst _ -> []
+    | MReg r _ -> [ALocReg r]
+    | MIndex b _ i _ -> [ALocReg b; ALocReg i]
+  )
 
 let locations_of_operand64 (o:operand64) : locations & locations =
   match o with
   | OConst _ -> [], []
   | OReg r -> [ALocReg (Reg 0 r)], [ALocReg (Reg 0 r)]
-  | OMem (m, _) -> locations_of_maddr m, [ALocMem]
-  | OStack (m, _) -> locations_of_maddr m, [ALocStack]
+  | OMem (m, _) -> locations_of_maddr m ALocMem, [ALocMem]
+  | OStack (m, _) -> locations_of_maddr m ALocStack, [ALocStack]
 
 let locations_of_operand128 (o:operand128) : locations & locations =
   match o with
   | OConst _ -> [], []
   | OReg r -> [ALocReg (Reg 1 r)], [ALocReg (Reg 1 r)]
-  | OMem (m, _) -> locations_of_maddr m, [ALocMem]
-  | OStack (m, _) -> locations_of_maddr m, [ALocStack]
+  | OMem (m, _) -> locations_of_maddr m ALocMem, [ALocMem]
+  | OStack (m, _) -> locations_of_maddr m ALocStack, [ALocStack]
 
 let locations_of_explicit (t:instr_operand_explicit) (i:instr_operand_t t) : locations & locations =
   match t with
@@ -251,7 +253,7 @@ let rec lemma_instr_apply_eval_args_same_read
     | Some v ->
       lemma_instr_apply_eval_args_same_read outs args (f v) oprs s1 s2
 
-#push-options "--z3rlimit 20 --initial_fuel 4 --max_fuel 4 --initial_ifuel 1 --max_ifuel 1"
+#push-options "--z3rlimit 20 --initial_fuel 5 --max_fuel 5 --initial_ifuel 2 --max_ifuel 2"
 let rec lemma_instr_apply_eval_inouts_same_read
     (outs inouts:list instr_out) (args:list instr_operand)
     (f:instr_inouts_t outs inouts args) (oprs:instr_operands_t inouts args)
