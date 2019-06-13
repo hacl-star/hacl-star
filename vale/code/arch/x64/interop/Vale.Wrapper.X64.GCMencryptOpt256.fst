@@ -26,6 +26,7 @@ let length_div (b:uint8_p) : Lemma
 inline_for_extraction
 val gcm256_encrypt_opt':
   key:Ghost.erased (Seq.seq nat32) ->
+  iv:Ghost.erased supported_iv_LE ->
   auth_b:uint8_p ->
   auth_bytes:uint64 ->
   auth_num:uint64 ->
@@ -193,7 +194,7 @@ val gcm256_encrypt_opt':
 
 
 inline_for_extraction
-let gcm256_encrypt_opt' key auth_b auth_bytes auth_num keys_b iv_b hkeys_b abytes_b
+let gcm256_encrypt_opt' key iv auth_b auth_bytes auth_num keys_b iv_b hkeys_b abytes_b
   in128x6_b out128x6_b len128x6 in128_b out128_b len128_num inout_b plain_num scratch_b tag_b =
 
   let h0 = get() in
@@ -260,7 +261,7 @@ let gcm256_encrypt_opt' key auth_b auth_bytes auth_num keys_b iv_b hkeys_b abyte
   Classical.forall_intro (bounded_buffer_addrs TUInt8 TUInt128 h0 keys_b);
   Classical.forall_intro (bounded_buffer_addrs TUInt8 TUInt128 h0 hkeys_b);
 
-  let x, _ = gcm256_encrypt_opt  key auth_b auth_bytes auth_num keys_b iv_b hkeys_b abytes_b
+  let x, _ = gcm256_encrypt_opt  key iv auth_b auth_bytes auth_num keys_b iv_b hkeys_b abytes_b
   in128x6_b out128x6_b len128x6 in128_b out128_b len128_num inout_b plain_num scratch_b tag_b () in
 
   let h1 = get() in
@@ -269,6 +270,7 @@ let gcm256_encrypt_opt' key auth_b auth_bytes auth_num keys_b iv_b hkeys_b abyte
 inline_for_extraction
 val gcm256_encrypt_opt_alloca:
   key:Ghost.erased (Seq.seq nat32) ->
+  iv:Ghost.erased supported_iv_LE ->
   plain_b:uint8_p ->
   plain_len:uint64 ->
   auth_b:uint8_p ->
@@ -496,7 +498,7 @@ let math_cast_aux (n:UInt64.t) : Lemma
   = FStar.Math.Lemmas.small_mod (UInt64.v n) (pow2 32)
 
 inline_for_extraction
-let gcm256_encrypt_opt_alloca key plain_b plain_len auth_b auth_bytes iv_b
+let gcm256_encrypt_opt_alloca key iv plain_b plain_len auth_b auth_bytes iv_b
   out_b tag_b keys_b hkeys_b scratch_b inout_b abytes_b =
 
   let h0 = get() in
@@ -565,6 +567,7 @@ let gcm256_encrypt_opt_alloca key plain_b plain_len auth_b auth_bytes iv_b
 
     gcm256_encrypt_opt'
       key
+      iv
       auth_b
       auth_bytes
       auth_num
@@ -643,6 +646,7 @@ let gcm256_encrypt_opt_alloca key plain_b plain_len auth_b auth_bytes iv_b
 
     gcm256_encrypt_opt'
       key
+      iv
       auth_b
       auth_bytes
       auth_num
@@ -841,7 +845,7 @@ let lemma_slice_sub (b:uint8_p) (b_sub:uint8_p) (b_extra:uint8_p) (h:HS.mem) : L
 #set-options "--z3rlimit 600 --max_fuel 0 --max_ifuel 0"
 
 inline_for_extraction
-let gcm256_encrypt_opt_stdcall key plain_b plain_len auth_b auth_len iv_b out_b tag_b keys_b hkeys_b =
+let gcm256_encrypt_opt_stdcall key iv plain_b plain_len auth_b auth_len iv_b out_b tag_b keys_b hkeys_b =
   let h0 = get() in
 
   push_frame();
@@ -876,6 +880,7 @@ let gcm256_encrypt_opt_stdcall key plain_b plain_len auth_b auth_len iv_b out_b 
 
   gcm256_encrypt_opt_alloca
     key
+    iv
     plain_b'
     plain_len
     auth_b'

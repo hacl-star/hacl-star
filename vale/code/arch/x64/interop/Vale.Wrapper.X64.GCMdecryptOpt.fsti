@@ -60,6 +60,7 @@ let length_aux5 (b:uint8_p) : Lemma
 inline_for_extraction noextract
 let decrypt_opt_stdcall_st (a: algorithm { a = AES_128 \/ a = AES_256 }) =
   key:Ghost.erased (Seq.seq nat32) ->
+  iv:Ghost.erased supported_iv_LE ->
   cipher_b:uint8_p ->
   cipher_len:uint64 ->
   auth_b:uint8_p ->
