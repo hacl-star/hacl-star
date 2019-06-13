@@ -7,7 +7,7 @@ let has_adx_bmi2 (): Stack bool
   (fun _ -> True)
   (ensures (fun h0 b h1 ->
     B.(modifies B.loc_none h0 h1) /\
-    (b ==> X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled))))
+    (b ==> Vale.X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled))))
 =
   let has_bmi2 = EverCrypt.AutoConfig2.has_bmi2 () in
   let has_adx = EverCrypt.AutoConfig2.has_adx () in

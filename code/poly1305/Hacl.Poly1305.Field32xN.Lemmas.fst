@@ -31,7 +31,9 @@ let lemma_mul_assos_3 a b c = ()
 val lemma_mul_assos_4:
   a:nat -> b:nat -> c:nat -> d:nat ->
   Lemma (a * b * c * d == a * (b * c * d))
-let lemma_mul_assos_4 a b c d = ()
+let lemma_mul_assos_4 a b c d =
+  assert ((a * b * c) * d == (a * (b * c)) * d);
+  FStar.Math.Lemmas.paren_mul_right a (b * c) d
 
 val lemma_mul_assos_5:
   a:nat -> b:nat -> c:nat -> d:nat -> e:nat ->
@@ -276,6 +278,7 @@ val lemma_fmul5_pow26:
     (ensures
       (let (r0, r1, r2, r3, r4) = r in
       (pow26 * as_nat5 r) % prime == as_nat5 (r4 *! u64 5, r0, r1, r2, r3) % prime))
+#reset-options "--z3rlimit 500 --using_facts_from '* -FStar.Seq' --max_fuel 0 --max_ifuel 0"
 let lemma_fmul5_pow26 r =
   let (r0, r1, r2, r3, r4) = r in
   assert (pow26 * as_nat5 r ==

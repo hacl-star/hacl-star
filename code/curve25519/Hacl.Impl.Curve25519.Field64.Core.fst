@@ -7,7 +7,7 @@ open FStar.Calc
 friend Lib.Buffer
 friend Lib.IntTypes
 
-module FA = Fadd_stdcalls
+module FA = Vale.Wrapper.X64.Fadd
 
 /// We are trying to connect HACL* abstractions with regular F* libraries, so in
 /// addition to ``friend``'ing ``Lib.*``, we also write a couple lemmas that we
@@ -28,70 +28,70 @@ let as_nat_is_as_nat (b:lbuffer uint64 4ul) (h:HS.mem): Lemma
 =
   ()
 
-let _: squash (Fast_defs.prime = Spec.Curve25519.prime) =
-  assert_norm (Fast_defs.prime = Spec.Curve25519.prime)
+let _: squash (Vale.Curve25519.Fast_defs.prime = Spec.Curve25519.prime) =
+  assert_norm (Vale.Curve25519.Fast_defs.prime = Spec.Curve25519.prime)
 
 // This one only goes through in a reasonable amount of rlimit thanks to
 // ``as_nat_is_as_nat`` and ``buffer_is_buffer`` above.
 [@ CInline]
 let add1 out f1 f2 =
   if EverCrypt.TargetConfig.gcc then
-    Fadd_inline.add1_inline out f1 f2
+    Vale.Inline.X64.Fadd_inline.add1_inline out f1 f2
   else
-    Fadd_stdcalls.add1 out f1 f2
+    Vale.Wrapper.X64.Fadd.add1 out f1 f2
 
 // Spec discrepancy. Need to call the right lemma from FStar.Math.Lemmas.
 [@ CInline]
 let fadd out f1 f2 =
   let h0 = ST.get () in
   FStar.Math.Lemmas.modulo_distributivity
-    (FA.as_nat f1 h0) (FA.as_nat f2 h0) Fast_defs.prime;
+    (FA.as_nat f1 h0) (FA.as_nat f2 h0) Vale.Curve25519.Fast_defs.prime;
   if EverCrypt.TargetConfig.gcc then
-    Fadd_inline.fadd_inline out f1 f2
+    Vale.Inline.X64.Fadd_inline.fadd_inline out f1 f2
   else
-    Fadd_stdcalls.fadd out f1 f2
+    Vale.Wrapper.X64.Fadd.fadd out f1 f2
 
 [@ CInline]
 let fsub out f1 f2 =
   let h0 = ST.get() in
-  let aux () : Lemma (P.fsub (fevalh h0 f1) (fevalh h0 f2) == (FA.as_nat f1 h0 - FA.as_nat f2 h0) % Fast_defs.prime) =
+  let aux () : Lemma (P.fsub (fevalh h0 f1) (fevalh h0 f2) == (FA.as_nat f1 h0 - FA.as_nat f2 h0) % Vale.Curve25519.Fast_defs.prime) =
     let a = P.fsub (fevalh h0 f1) (fevalh h0 f2) in
-    let a1 = (as_nat h0 f1 % Fast_defs.prime - as_nat h0 f2 % Fast_defs.prime) % Fast_defs.prime in
-    let a2 = (as_nat h0 f1 % Fast_defs.prime - as_nat h0 f2) % Fast_defs.prime in
-    let a3 = (as_nat h0 f1 - as_nat h0 f2) % Fast_defs.prime in
-    let b = (FA.as_nat f1 h0 - FA.as_nat f2 h0) % Fast_defs.prime in
+    let a1 = (as_nat h0 f1 % Vale.Curve25519.Fast_defs.prime - as_nat h0 f2 % Vale.Curve25519.Fast_defs.prime) % Vale.Curve25519.Fast_defs.prime in
+    let a2 = (as_nat h0 f1 % Vale.Curve25519.Fast_defs.prime - as_nat h0 f2) % Vale.Curve25519.Fast_defs.prime in
+    let a3 = (as_nat h0 f1 - as_nat h0 f2) % Vale.Curve25519.Fast_defs.prime in
+    let b = (FA.as_nat f1 h0 - FA.as_nat f2 h0) % Vale.Curve25519.Fast_defs.prime in
     calc (==) {
       a;
       == { }
       a1;
-      == { FStar.Math.Lemmas.lemma_mod_sub_distr (as_nat h0 f1 % Fast_defs.prime) (as_nat h0 f2)
-        Fast_defs.prime }
+      == { FStar.Math.Lemmas.lemma_mod_sub_distr (as_nat h0 f1 % Vale.Curve25519.Fast_defs.prime) (as_nat h0 f2)
+        Vale.Curve25519.Fast_defs.prime }
       a2;
-      == { FStar.Math.Lemmas.lemma_mod_add_distr (- as_nat h0 f2) (as_nat h0 f1) Fast_defs.prime }
+      == { FStar.Math.Lemmas.lemma_mod_add_distr (- as_nat h0 f2) (as_nat h0 f1) Vale.Curve25519.Fast_defs.prime }
       a3;
       == { }
       b;
     }
   in aux();
   if EverCrypt.TargetConfig.gcc then
-    Fadd_inline.fsub_inline out f1 f2
+    Vale.Inline.X64.Fadd_inline.fsub_inline out f1 f2
   else
-    Fsub_stdcalls.fsub out f1 f2
+    Vale.Wrapper.X64.Fsub.fsub out f1 f2
 
 let lemma_fmul_equiv (h0:HS.mem) (f1 f2:u256) : Lemma 
-  (P.fmul (fevalh h0 f1) (fevalh h0 f2) == (FA.as_nat f1 h0 * FA.as_nat f2 h0) % Fast_defs.prime)
+  (P.fmul (fevalh h0 f1) (fevalh h0 f2) == (FA.as_nat f1 h0 * FA.as_nat f2 h0) % Vale.Curve25519.Fast_defs.prime)
   = let a = P.fmul (fevalh h0 f1) (fevalh h0 f2) in
-    let a1 = ((as_nat h0 f1 % Fast_defs.prime) * (as_nat h0 f2 % Fast_defs.prime)) % Fast_defs.prime in
-    let a2 = ((as_nat h0 f1 % Fast_defs.prime) * as_nat h0 f2) % Fast_defs.prime in
-    let a3 = (as_nat h0 f1 * as_nat h0 f2) % Fast_defs.prime in
-    let b = (FA.as_nat f1 h0 * FA.as_nat f2 h0) % Fast_defs.prime in
+    let a1 = ((as_nat h0 f1 % Vale.Curve25519.Fast_defs.prime) * (as_nat h0 f2 % Vale.Curve25519.Fast_defs.prime)) % Vale.Curve25519.Fast_defs.prime in
+    let a2 = ((as_nat h0 f1 % Vale.Curve25519.Fast_defs.prime) * as_nat h0 f2) % Vale.Curve25519.Fast_defs.prime in
+    let a3 = (as_nat h0 f1 * as_nat h0 f2) % Vale.Curve25519.Fast_defs.prime in
+    let b = (FA.as_nat f1 h0 * FA.as_nat f2 h0) % Vale.Curve25519.Fast_defs.prime in
     calc (==) {
       a;
       == { }
       a1;
-      == { FStar.Math.Lemmas.lemma_mod_mul_distr_r (as_nat h0 f1 % Fast_defs.prime) (as_nat h0 f2) Fast_defs.prime }
+      == { FStar.Math.Lemmas.lemma_mod_mul_distr_r (as_nat h0 f1 % Vale.Curve25519.Fast_defs.prime) (as_nat h0 f2) Vale.Curve25519.Fast_defs.prime }
       a2;
-      == { FStar.Math.Lemmas.lemma_mod_mul_distr_l (as_nat h0 f1) (as_nat h0 f2) Fast_defs.prime }
+      == { FStar.Math.Lemmas.lemma_mod_mul_distr_l (as_nat h0 f1) (as_nat h0 f2) Vale.Curve25519.Fast_defs.prime }
       a3;
       == { }
       b;
@@ -102,9 +102,9 @@ let fmul out f1 f2 tmp =
   let h0 = ST.get() in
   lemma_fmul_equiv h0 f1 f2;
   if EverCrypt.TargetConfig.gcc then
-    Fmul_inline.fmul_inline (sub tmp 0ul 8ul) f1 out f2
+    Vale.Inline.X64.Fmul_inline.fmul_inline (sub tmp 0ul 8ul) f1 out f2
   else
-    Fmul_stdcalls.fmul (sub tmp 0ul 8ul) f1 out f2
+    Vale.Wrapper.X64.Fmul.fmul (sub tmp 0ul 8ul) f1 out f2
 
 [@ CInline]
 let fmul2 out f1 f2 tmp =
@@ -112,23 +112,23 @@ let fmul2 out f1 f2 tmp =
   lemma_fmul_equiv h0 (gsub f1 0ul 4ul) (gsub f2 0ul 4ul);
   lemma_fmul_equiv h0 (gsub f1 4ul 4ul) (gsub f2 4ul 4ul);
   if EverCrypt.TargetConfig.gcc then
-    Fmul_inline.fmul2_inline tmp f1 out f2
+    Vale.Inline.X64.Fmul_inline.fmul2_inline tmp f1 out f2
   else
-    Fmul_stdcalls.fmul2 tmp f1 out f2
+    Vale.Wrapper.X64.Fmul.fmul2 tmp f1 out f2
 
 [@ CInline]
 let fmul1 out f1 f2 =
   let h0 = ST.get() in
-  let aux () : Lemma (P.fmul (fevalh h0 f1) (v f2) == (FA.as_nat f1 h0 * v f2) % Fast_defs.prime) =
+  let aux () : Lemma (P.fmul (fevalh h0 f1) (v f2) == (FA.as_nat f1 h0 * v f2) % Vale.Curve25519.Fast_defs.prime) =
     let a = P.fmul (fevalh h0 f1) (v f2) in
-    let a1 =  ((as_nat h0 f1 % Fast_defs.prime) * v f2) % Fast_defs.prime in
-    let a2 = (as_nat h0 f1 * v f2) % Fast_defs.prime in
-    let b = (FA.as_nat f1 h0 * v f2) % Fast_defs.prime in
+    let a1 =  ((as_nat h0 f1 % Vale.Curve25519.Fast_defs.prime) * v f2) % Vale.Curve25519.Fast_defs.prime in
+    let a2 = (as_nat h0 f1 * v f2) % Vale.Curve25519.Fast_defs.prime in
+    let b = (FA.as_nat f1 h0 * v f2) % Vale.Curve25519.Fast_defs.prime in
     calc (==) {
       a;
       == { }
       a1;
-      == { FStar.Math.Lemmas.lemma_mod_mul_distr_l (as_nat h0 f1) (v f2) Fast_defs.prime }
+      == { FStar.Math.Lemmas.lemma_mod_mul_distr_l (as_nat h0 f1) (v f2) Vale.Curve25519.Fast_defs.prime }
       a2;
       == { }
       b;
@@ -136,18 +136,18 @@ let fmul1 out f1 f2 =
   in aux();
   assert_norm (pow2 17 = 131072);
   if EverCrypt.TargetConfig.gcc then
-    Fmul_inline.fmul1_inline out f1 f2
+    Vale.Inline.X64.Fmul_inline.fmul1_inline out f1 f2
   else
-    Fmul_stdcalls.fmul1 out f1 f2
+    Vale.Wrapper.X64.Fmul.fmul1 out f1 f2
 
 [@ CInline]
 let fsqr out f1 tmp =
   let h0 = ST.get() in
   lemma_fmul_equiv h0 f1 f1;
   if EverCrypt.TargetConfig.gcc then
-    Fsqr_inline.fsqr_inline tmp f1 out
+    Vale.Inline.X64.Fsqr_inline.fsqr_inline tmp f1 out
   else
-    Fsqr_stdcalls.fsqr tmp f1 out
+    Vale.Wrapper.X64.Fsqr.fsqr tmp f1 out
 
 [@ CInline]
 let fsqr2 out f tmp =
@@ -155,17 +155,17 @@ let fsqr2 out f tmp =
   lemma_fmul_equiv h0 (gsub f 0ul 4ul) (gsub f 0ul 4ul);
   lemma_fmul_equiv h0 (gsub f 4ul 4ul) (gsub f 4ul 4ul);
   if EverCrypt.TargetConfig.gcc then
-    Fsqr_inline.fsqr2_inline tmp f out
+    Vale.Inline.X64.Fsqr_inline.fsqr2_inline tmp f out
   else
-    Fsqr_stdcalls.fsqr2 tmp f out
+    Vale.Wrapper.X64.Fsqr.fsqr2 tmp f out
 
 [@ CInline]
 let cswap2 bit p1 p2 =
   let h0 = ST.get() in
   if EverCrypt.TargetConfig.gcc then
-    Fswap_inline.cswap2_inline p1 p2 bit
+    Vale.Inline.X64.Fswap_inline.cswap2_inline p1 p2 bit
   else
-    Fswap_stdcalls.cswap2 p1 p2 bit;
+    Vale.Wrapper.X64.Fswap.cswap2 p1 p2 bit;
   let h1 = ST.get() in
   // Seq.equal is swapped in the interop wrappers, so the SMTPat is not matching:
   // We have Seq.equal s1 s2 but are trying to prove s2 == s1

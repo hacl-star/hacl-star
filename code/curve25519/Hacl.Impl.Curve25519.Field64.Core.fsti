@@ -49,7 +49,7 @@ let feval_wideh (h:mem) (f:u512) : GTot P.elem = (wide_as_nat h f) % P.prime
 val add1: out:u256 -> f1:u256  -> f2:uint64
   -> Stack uint64
     (requires fun h ->
-      X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled) /\
+      Vale.X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled) /\
       live h f1 /\ live h out /\
       (disjoint out f1 \/ out == f1))
     (ensures  fun h0 c h1 ->
@@ -60,7 +60,7 @@ val add1: out:u256 -> f1:u256  -> f2:uint64
 val fadd: out:u256 -> f1:u256  -> f2:u256
   -> Stack unit
     (requires fun h ->
-      X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled) /\    
+      Vale.X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled) /\    
       live h f1 /\ live h f2 /\ live h out /\
       (disjoint out f1 \/ out == f1) /\
       (disjoint out f2 \/ out == f2) /\
@@ -73,7 +73,7 @@ val fadd: out:u256 -> f1:u256  -> f2:u256
 val fsub: out:u256 -> f1:u256 -> f2:u256
   -> Stack unit
     (requires fun h ->
-      X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled) /\    
+      Vale.X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled) /\    
       live h f1 /\ live h f2 /\ live h out /\
       (disjoint out f1 \/ out == f1) /\
       (disjoint out f2 \/ out == f2) /\
@@ -86,7 +86,7 @@ val fsub: out:u256 -> f1:u256 -> f2:u256
 val fmul: out:u256 -> f1:u256 -> f2:u256 -> tmp:u1024
   -> Stack unit
     (requires fun h ->
-      X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled) /\    
+      Vale.X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled) /\    
       live h out /\ live h f1 /\ live h f2 /\ live h tmp /\
       (disjoint out f1 \/ out == f1) /\
       (disjoint out f2 \/ out == f2) /\
@@ -102,7 +102,7 @@ val fmul: out:u256 -> f1:u256 -> f2:u256 -> tmp:u1024
 val fmul2: out:u512 -> f1:u512 -> f2:u512 -> tmp:u1024
   -> Stack unit
     (requires fun h ->
-      X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled) /\    
+      Vale.X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled) /\    
       live h out /\ live h f1 /\ live h f2 /\ live h tmp /\
       (disjoint out f1 \/ out == f1) /\
       (disjoint out f2 \/ out == f2) /\
@@ -125,7 +125,7 @@ val fmul2: out:u512 -> f1:u512 -> f2:u512 -> tmp:u1024
 val fmul1: out:u256 -> f1:u256 -> f2:uint64{v f2 < pow2 17}
   -> Stack unit
     (requires fun h ->
-      X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled) /\    
+      Vale.X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled) /\    
       live h out /\ live h f1 /\
       (disjoint out f1 \/ out == f1))
     (ensures  fun h0 _ h1 ->
@@ -136,7 +136,7 @@ val fmul1: out:u256 -> f1:u256 -> f2:uint64{v f2 < pow2 17}
 val fsqr: out:u256 -> f1:u256 -> tmp:u512
   -> Stack unit
     (requires fun h ->
-      X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled) /\    
+      Vale.X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled) /\    
       live h out /\ live h f1 /\ live h tmp /\
       (disjoint out f1 \/ out == f1) /\
       (disjoint out tmp \/ out == tmp) /\
@@ -149,7 +149,7 @@ val fsqr: out:u256 -> f1:u256 -> tmp:u512
 val fsqr2: out:u512 -> f:u512 -> tmp:u1024
   -> Stack unit
     (requires fun h ->
-      X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled) /\    
+      Vale.X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled) /\    
       live h out /\ live h f /\ live h tmp /\
       (disjoint out f \/ out == f) /\
       (disjoint out tmp \/ out == tmp) /\
@@ -167,7 +167,7 @@ val fsqr2: out:u512 -> f:u512 -> tmp:u1024
 val cswap2: bit:uint64{v bit <= 1} -> p1:u512 -> p2:u512
   -> Stack unit
     (requires fun h ->
-      X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled) /\    
+      Vale.X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled) /\    
       live h p1 /\ live h p2 /\
       (disjoint p1 p2 \/ p1 == p2))
     (ensures  fun h0 _ h1 ->

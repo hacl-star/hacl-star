@@ -72,7 +72,7 @@ let ekv_length: supported_alg -> nat =
 let max_length: supported_alg -> nat =
   function
   | CHACHA20_POLY1305 -> pow2 32 - 1 - 16
-  | AES128_GCM | AES256_GCM -> assert_norm (pow2 20 - 1 - 16 >= 0); pow2 20 - 1 - 16
+  | AES128_GCM | AES256_GCM -> pow2 32 - 1 
 
 // Proudly defining this type abbreviation for the tenth time in HACL*!
 let lbytes (l:nat) = b:Seq.seq UInt8.t { Seq.length b = l }
@@ -114,5 +114,8 @@ let ekv (a: supported_alg) = lbytes (ekv_length a)
 val expand: #(a: supported_alg) -> kv a -> ekv a
 val encrypt: #(a: supported_alg) -> kv a -> iv a -> ad a -> p:plain a -> encrypted p
 val decrypt: #(a: supported_alg) -> kv a -> iv a -> ad a ->
-  c:cipher a { S.length c <= max_length a } ->
+  c:cipher a { S.length c <= max_length a + tag_length a} ->
   option (decrypted c)
+
+val correctness: #a:supported_alg -> k:kv a -> n:iv a -> aad:ad a -> p:plain a ->
+  Lemma (decrypt k n aad (encrypt k n aad p) == Some p)

@@ -8,7 +8,7 @@ module S = FStar.Seq
 open Spec.Hash.Lemmas0
 open Spec.Hash.Definitions
 
-(** This module contains specifications shared across all the Merkle-Damgård
+(** This module contains specifications shared across all the Merkle-Damg??rd
     constructions. *)
 
 (** Padding *)

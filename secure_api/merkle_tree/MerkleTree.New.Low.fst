@@ -359,16 +359,16 @@ let hash_2 src1 src2 dst =
 
   EHS.update #(Ghost.hide hash_alg) st cb;
   let hh2 = HST.get () in
-  assert (EHS.repr st hh2 == EHS.compress #hash_alg EHS.acc0 (B.as_seq hh1 cb));
+  assert (EHS.repr st hh2 == Spec.Hash.update hash_alg (Spec.Hash.init hash_alg) (B.as_seq hh1 cb));
   assert (S.equal (S.append S.empty (B.as_seq hh1 cb))
                   (B.as_seq hh1 cb));
 
   EHS.finish #(Ghost.hide hash_alg) st dst;
   let hh3 = HST.get () in
   assert (S.equal (B.as_seq hh3 dst)
-                  (EHS.extract (EHS.repr st hh2)));
+                  (Spec.Hash.PadFinish.finish hash_alg (EHS.repr st hh2)));
   assert (S.equal (B.as_seq hh3 dst)
-                  (EHS.extract (EHS.compress #hash_alg EHS.acc0 (B.as_seq hh1 cb))));
+                  (Spec.Hash.PadFinish.finish hash_alg (Spec.Hash.update hash_alg (Spec.Hash.init hash_alg) (B.as_seq hh1 cb))));
   assert (S.equal (B.as_seq hh3 dst)
                   (High.hash_2
                     (Rgl?.r_repr hreg hh0 src1)

@@ -1,0 +1,78 @@
+[
+  "£\\N*Ù\u0011×\u0018»'Òû# ”\u0017",
+  [
+    [
+      "Vale.AES.X64.GF128_Init.va_req_Keyhash_init",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_f8666440faa91836cc5a13998af863fc",
+        "equation_Prims.l_and", "equation_Prims.squash",
+        "equation_Prims.subtype_of",
+        "l_quant_interp_0235708612358a0dd8d2d21a7f9984d9",
+        "refinement_interpretation_Tm_refine_8d65e998a07dd53ec478e27017d9dba5",
+        "unit_typing"
+      ],
+      0,
+      "a50543d772ca1f6e681d8b0d5249fe49"
+    ],
+    [
+      "Vale.AES.X64.GF128_Init.va_ens_Keyhash_init",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_f8666440faa91836cc5a13998af863fc", "bool_inversion",
+        "equation_Prims.l_and", "equation_Prims.squash",
+        "equation_Prims.subtype_of", "equation_Vale.X64.Decls.va_state_eq",
+        "fuel_guarded_inversion_Vale.X64.State.state",
+        "l_quant_interp_0235708612358a0dd8d2d21a7f9984d9",
+        "refinement_interpretation_Tm_refine_8d65e998a07dd53ec478e27017d9dba5",
+        "unit_typing"
+      ],
+      0,
+      "5249a8c75d2a2b248ebc139efae11b45"
+    ],
+    [
+      "Vale.AES.X64.GF128_Init.va_lemma_Keyhash_init",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "bool_inversion",
+        "equality_tok_Vale.X64.Machine_s.Secret@tok",
+        "equation_Vale.X64.Decls.validDstAddrs128",
+        "fuel_guarded_inversion_Vale.X64.State.state",
+        "proj_equation_Vale.X64.State.Mkstate_mem",
+        "proj_equation_Vale.X64.State.Mkstate_memTaint",
+        "refinement_interpretation_Tm_refine_875e674cdfb7eb52ac5a0456995c8116"
+      ],
+      0,
+      "37d0738fcc5a039cad2d4ccb6b0ab469"
+    ],
+    [
+      "Vale.AES.X64.GF128_Init.va_wp_Keyhash_init",
+      1,
+      1,
+      0,
+      [ "@query" ],
+      0,
+      "5e844ef2f396f929f1f469a15cf94a86"
+    ],
+    [
+      "Vale.AES.X64.GF128_Init.va_quick_Keyhash_init",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "fuel_guarded_inversion_FStar.Pervasives.Native.tuple3"
+      ],
+      0,
+      "7570a9af9f24bf0fe57734f262671e0f"
+    ]
+  ]
+]

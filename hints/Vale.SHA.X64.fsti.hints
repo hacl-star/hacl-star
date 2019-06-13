@@ -1,0 +1,110 @@
+[
+  "_w‚œil&ûww\u001fô$$“\u0010",
+  [
+    [
+      "Vale.SHA.X64.va_req_sha_update_bytes_stdcall",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_f8666440faa91836cc5a13998af863fc",
+        "equation_Prims.l_and", "equation_Prims.squash",
+        "equation_Prims.subtype_of",
+        "l_quant_interp_0235708612358a0dd8d2d21a7f9984d9",
+        "refinement_interpretation_Tm_refine_8d65e998a07dd53ec478e27017d9dba5",
+        "unit_typing"
+      ],
+      0,
+      "7b6f0fbd32b7a1e0a40a785dd9822a5b"
+    ],
+    [
+      "Vale.SHA.X64.va_ens_sha_update_bytes_stdcall",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565",
+        "Prims_pretyping_f8666440faa91836cc5a13998af863fc", "bool_inversion",
+        "equation_Prims.l_and", "equation_Prims.nat",
+        "equation_Prims.squash", "equation_Prims.subtype_of",
+        "equation_Vale.Def.Words_s.nat64", "equation_Vale.Def.Words_s.natN",
+        "equation_Vale.SHA.SHA_helpers.block_length",
+        "equation_Vale.SHA.SHA_helpers.byte",
+        "equation_Vale.SHA.SHA_helpers.size_block_w_256",
+        "equation_Vale.SHA.X64.va_req_sha_update_bytes_stdcall",
+        "equation_Vale.X64.Decls.va_state_eq",
+        "equation_Vale.X64.Machine_s.reg",
+        "fuel_guarded_inversion_Vale.X64.State.state",
+        "function_token_typing_Prims.__cache_version_number__",
+        "int_inversion", "int_typing",
+        "l_quant_interp_0235708612358a0dd8d2d21a7f9984d9",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_5514fbe9e08dfda40f950a7b9f1b2b98",
+        "refinement_interpretation_Tm_refine_8d65e998a07dd53ec478e27017d9dba5",
+        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "refinement_interpretation_Tm_refine_f0a4eeefab9c63f31c350a802a4d45dd",
+        "typing_Vale.X64.Regs.sel",
+        "typing_Vale.X64.State.__proj__Mkstate__item__regs", "unit_typing"
+      ],
+      0,
+      "4631ac9869f1717a738041d578a6a54a"
+    ],
+    [
+      "Vale.SHA.X64.va_lemma_sha_update_bytes_stdcall",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565", "bool_inversion",
+        "equation_Prims.nat", "equation_Vale.Def.Words_s.nat64",
+        "equation_Vale.Def.Words_s.natN",
+        "equation_Vale.SHA.SHA_helpers.block_length",
+        "equation_Vale.SHA.SHA_helpers.byte",
+        "equation_Vale.SHA.SHA_helpers.size_block_w_256",
+        "equation_Vale.X64.Machine_s.reg",
+        "fuel_guarded_inversion_Vale.X64.State.state",
+        "function_token_typing_Prims.__cache_version_number__",
+        "int_inversion", "int_typing",
+        "proj_equation_Vale.X64.State.Mkstate_regs",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_0dfb3c1adbdc17930f81093a845d5d95",
+        "refinement_interpretation_Tm_refine_5514fbe9e08dfda40f950a7b9f1b2b98",
+        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "refinement_interpretation_Tm_refine_f0a4eeefab9c63f31c350a802a4d45dd",
+        "typing_Vale.X64.Regs.sel",
+        "typing_Vale.X64.State.__proj__Mkstate__item__regs"
+      ],
+      0,
+      "cc450997650ec289ce82771a34bf37df"
+    ],
+    [
+      "Vale.SHA.X64.va_wp_sha_update_bytes_stdcall",
+      1,
+      1,
+      0,
+      [
+        "@query", "equation_Vale.SHA.SHA_helpers.block_length",
+        "equation_Vale.SHA.SHA_helpers.byte",
+        "equation_Vale.SHA.SHA_helpers.size_block_w_256",
+        "projection_inverse_BoxInt_proj_0"
+      ],
+      0,
+      "4227fc105ec511bff9708ca9079e44e3"
+    ],
+    [
+      "Vale.SHA.X64.va_quick_sha_update_bytes_stdcall",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "fuel_guarded_inversion_FStar.Pervasives.Native.tuple3"
+      ],
+      0,
+      "b1913b264b1fb194dcbe0cf40ca103bd"
+    ]
+  ]
+]

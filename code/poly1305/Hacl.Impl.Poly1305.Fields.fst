@@ -174,6 +174,25 @@ let load_felems_le #s f b =
   | M128 -> F32xN.load_felems_le #2 f b
   | M256 -> F32xN.load_felems_le #4 f b
 
+inline_for_extraction noextract
+val load_acc:
+    #s:field_spec
+  -> acc:felem s
+  -> b:lbuffer uint8 (blocklen s)
+  -> Stack unit
+    (requires fun h ->
+      live h acc /\ live h b /\ disjoint acc b /\
+      felem_fits h acc (1, 2, 1, 1, 1))
+    (ensures  fun h0 _ h1 ->
+      modifies (loc acc) h0 h1 /\
+      felem_fits h1 acc (2, 3, 2, 2, 2) /\
+      feval h1 acc == S.load_acc #(width s) (feval h0 acc).[0] (as_seq h0 b))
+let load_acc #s acc b =
+  match s with
+  | M32 -> load_acc1 acc b
+  | M128 -> load_acc2 acc b
+  | M256 -> load_acc4 acc b
+
 #set-options "--z3rlimit 50"
 
 inline_for_extraction noextract
@@ -350,7 +369,7 @@ val fmul_rn_normalize:
       modifies (loc out) h0 h1 /\
       acc_inv_t #(width s) (as_tup5 h1 out) /\
       (feval h1 out).[0] ==
-        S.normalize_n #(width s) (feval h0 out) (feval h0 (gsub precomp 0ul 5ul)))
+        S.normalize_n #(width s) (feval h0 out) (feval h0 (gsub precomp 0ul 5ul)).[0])
 let fmul_rn_normalize #s out precomp =
   match s with
   | M32  -> F32xN.fmul_rn_normalize #1 out precomp

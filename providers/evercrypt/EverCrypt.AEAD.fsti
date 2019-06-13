@@ -92,6 +92,12 @@ val frame_invariant: #a:alg -> l:B.loc -> s:state a -> h0:HS.mem -> h1:HS.mem ->
 noextract
 let bytes = Seq.seq UInt8.t
 
+val alg_of_state (a: G.erased alg) (s: state (G.reveal a)): Stack alg
+  (requires (fun h0 -> invariant #(G.reveal a) h0 s))
+  (ensures (fun h0 a' h1 ->
+    a' == G.reveal a /\
+    h0 == h1))
+
 /// The API is constructed in a way that one can always get the original key
 /// value behind a state, any any memory.
 val as_kv: (#a: alg) -> state_s a -> GTot (kv a)
@@ -114,6 +120,7 @@ let create_in_st (a: alg) =
           // Sanity
           is_supported_alg a /\
           not (B.g_is_null s) /\
+          invariant h1 s /\
 
           // Memory stuff
           B.(modifies (loc_buffer dst) h0 h1) /\
@@ -205,6 +212,9 @@ let decrypt_st (a: supported_alg) =
         B.(loc_disjoint (footprint h0 s) (loc_buffer dst)) /\
         B.(loc_disjoint (footprint h0 s) (loc_buffer cipher)) /\
         MB.(all_live h0 [ buf iv; buf ad; buf cipher; buf tag; buf dst ]) /\
+        B.disjoint tag dst /\ B.disjoint tag cipher /\
+        B.disjoint tag ad /\
+        B.disjoint cipher ad /\ B.disjoint dst ad /\
         (B.disjoint cipher dst \/ cipher == dst))
     (ensures fun h0 err h1 ->
       let cipher_tag = B.as_seq h0 cipher `S.append` B.as_seq h0 tag in

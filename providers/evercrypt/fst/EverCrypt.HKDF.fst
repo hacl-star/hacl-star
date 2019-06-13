@@ -5,6 +5,8 @@ module EverCrypt.HKDF
 module ST = FStar.HyperStack.ST
 open FStar.HyperStack.All
 
+open FStar.Seq
+
 open FStar.Mul
 open FStar.HyperStack
 open FStar.HyperStack.ST
@@ -14,37 +16,39 @@ open FStar.Integers
 
 open EverCrypt.Hash
 
-type alg = EverCrypt.HMAC.ha
+open Spec.Hash.Definitions
+open Spec.HKDF
+friend Spec.HKDF
 
 // [hashed] holds the HMAC text,
-// of the form | tagLen a | infolen | 1 |;
+// of the form | Spec.Hash.Definitions.hash_len a | infolen | 1 |;
 // its prefix is overwritten by HMAC at each iteration.
 
 val hkdf_expand_loop:
-  a       : alg -> (
+  a       : EverCrypt.HMAC.supported_alg -> (
   okm     : uint8_p ->
   prk     : uint8_p ->
   prklen  : uint8_l prk ->
   infolen : UInt32.t ->
   len     : uint8_l okm  ->
-  hashed  : uint8_pl (tagLength a + v infolen + 1) ->
+  hashed  : uint8_pl (Spec.Hash.Definitions.hash_length a + v infolen + 1) ->
   i       : UInt8.t {
-    HMAC.keysized a (length prk) /\
+    Spec.HMAC.keysized a (length prk) /\
     disjoint okm prk /\
     disjoint hashed okm /\
     disjoint hashed prk /\
-    tagLength a + v infolen + 1 + blockLength a < pow2 32 /\ (* specific to this implementation *)
-    tagLength a + pow2 32 + blockLength a <= maxLength a /\
+    Spec.Hash.Definitions.hash_length a + v infolen + 1 + Spec.Hash.Definitions.block_length a < pow2 32 /\ (* specific to this implementation *)
+    Spec.Hash.Definitions.hash_length a + pow2 32 + Spec.Hash.Definitions.block_length a <= Spec.Hash.Definitions.max_input_length a /\
     v i < 255 /\
-    v len <= (255 - v i) * tagLength a } ->
-  ST unit
+    v len <= (255 - v i) * Spec.Hash.Definitions.hash_length a } ->
+  Stack unit
   (requires fun h0 ->
     live h0 okm /\ live h0 prk /\ live h0 hashed)
   (ensures  fun h0 r h1 ->
     LowStar.Modifies.(modifies (loc_union (loc_buffer okm) (loc_buffer hashed)) h0 h1) /\ (
     let prk  = as_seq h0 prk in
-    let info = as_seq h0 (gsub hashed (tagLen a) infolen) in
-    let last = if i = 0uy then Seq.empty else as_seq h0 (gsub hashed 0ul (tagLen a)) in
+    let info = as_seq h0 (gsub hashed (Hacl.Hash.Definitions.hash_len a) infolen) in
+    let last = if i = 0uy then Seq.empty else as_seq h0 (gsub hashed 0ul (Hacl.Hash.Definitions.hash_len a)) in
     as_seq h1 okm == expand0 a prk info (v len) (v i) last)))
 
 //18-07-13 how to improve this proof? should we use C.loops instead?
@@ -52,7 +56,7 @@ val hkdf_expand_loop:
 let rec hkdf_expand_loop a okm prk prklen infolen len hashed i =
   push_frame ();
 
-  let tlen = tagLen a in
+  let tlen = Hacl.Hash.Definitions.hash_len a in
   let tag = sub hashed 0ul tlen in
   let info_counter = offset hashed tlen in
   let info = sub info_counter 0ul infolen in
@@ -80,7 +84,7 @@ let rec hkdf_expand_loop a okm prk prklen infolen len hashed i =
       // Seq.lemma_eq_intro (as_seq h1 counter) ctr1;
       // assert(tag2 == HMAC.hmac a v_prk (as_seq h1 hashed1));
       Seq.lemma_eq_intro (as_seq h1 info_counter) text;
-      assert(tag2 == HMAC.hmac a prk text)  ))
+      assert(tag2 == Spec.HMAC.hmac a prk text)  ))
   else (
     HMAC.compute a tag prk prklen hashed (tlen + infolen + 1ul);
     ( let h2 = ST.get() in
@@ -92,7 +96,7 @@ let rec hkdf_expand_loop a okm prk prklen infolen len hashed i =
       let text = tag1 @| info @| ctr1 in
       // assert(tag2 == HMAC.hmac (Ghost.hide a) prk (as_seq h1 hashed));
       Seq.lemma_eq_intro (as_seq h1 hashed) text ;
-      assert(tag2 == HMAC.hmac a prk text )));
+      assert(tag2 == Spec.HMAC.hmac a prk text )));
 
   // copy it to the result; iterate if required
   let h2 = ST.get() in
@@ -137,14 +141,14 @@ let hkdf_extract a prk salt saltlen ikm ikmlen =
 
 let hkdf_expand a okm prk prklen info infolen len =
   push_frame();
-  let tlen = tagLen a in
+  let tlen = Hacl.Hash.Definitions.hash_len a in
   let text = LowStar.Buffer.alloca 0uy (tlen + infolen + 1ul) in
   blit info 0ul text tlen infolen;
-  assert (tagLength a <= 64);
-  assert (blockLength a <= 128);
+  assert (Spec.Hash.Definitions.hash_length a <= 64);
+  assert (Spec.Hash.Definitions.block_length a <= 128);
   assert_norm (64 + pow2 32 + 128 < pow2 61);
   assert_norm (pow2 61 < pow2 125);
   assert(
-    tagLength a + pow2 32 + blockLength a < maxLength a);
+    Spec.Hash.Definitions.hash_length a + pow2 32 + Spec.Hash.Definitions.block_length a < Spec.Hash.Definitions.max_input_length a);
   hkdf_expand_loop a okm prk prklen infolen len text 0uy;
   pop_frame()

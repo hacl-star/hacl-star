@@ -118,7 +118,7 @@ val store_felem:
   -> f:felem s
   -> Stack unit
     (requires fun h ->
-      (s = M64 ==> X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled)) /\
+      (s = M64 ==> Vale.X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled)) /\
       live h f /\ live h b /\ disjoint f b /\ state_inv_t h f)
     (ensures  fun h0 _ h1 ->
       modifies (loc b |+| loc f) h0 h1 /\
@@ -178,7 +178,7 @@ let fadd_fsub_pre #s h f1 f2 =
   | M51 ->
       F51.felem_fits h f1 (1, 2, 1, 1, 1) /\
       F51.felem_fits h f2 (1, 2, 1, 1, 1)
-  | M64 -> X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled)
+  | M64 -> Vale.X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled)
 
 val fadd_post: #s:field_spec -> h:mem -> out:felem s -> Type0
 let fadd_post #s h out =
@@ -221,7 +221,7 @@ val fsub:
   -> f2:felem s
   -> Stack unit
     (requires fun h ->
-      (s = M64 ==> X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled)) /\
+      (s = M64 ==> Vale.X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled)) /\
       live h out /\ live h f1 /\ live h f2 /\
       (disjoint out f1 \/ out == f1) /\
       (disjoint out f2 \/ out == f2) /\
@@ -241,7 +241,7 @@ let fmul_pre #s h f1 f2 =
   | M51 ->
       F51.felem_fits h f1 (9, 10, 9, 9, 9) /\
       F51.felem_fits h f2 (9, 10, 9, 9, 9)
-  | M64 -> X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled)
+  | M64 -> Vale.X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled)
 
 inline_for_extraction noextract
 val fmul:
@@ -280,7 +280,7 @@ let fmul2_pre #s h f1 f2 =
       F51.felem_fits h f11 (9, 10, 9, 9, 9) /\
       F51.felem_fits h f20 (9, 10, 9, 9, 9) /\
       F51.felem_fits h f21 (9, 10, 9, 9, 9)
-  | M64 -> X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled)
+  | M64 -> Vale.X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled)
 
 val fmul2_fsqr2_post:#s:field_spec -> h:mem -> out:felem2 s -> Type0
 let fmul2_fsqr2_post #s h out =
@@ -330,7 +330,7 @@ val fmul1_pre:#s:field_spec -> h:mem -> f1:felem s -> f2:uint64 -> Type0
 let fmul1_pre #s h f1 f2 =
   match s with
   | M51 -> F51.felem_fits h f1 (9, 10, 9, 9, 9) /\ F51.felem_fits1 f2 1
-  | M64 -> v f2 < pow2 17 /\ X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled)
+  | M64 -> v f2 < pow2 17 /\ Vale.X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled)
 
 inline_for_extraction noextract
 val fmul1:
@@ -356,7 +356,7 @@ val fsqr_pre:#s:field_spec -> h:mem -> f:felem s -> Type0
 let fsqr_pre #s h f =
   match s with
   | M51 -> F51.felem_fits h f (9, 10, 9, 9, 9)
-  | M64 -> X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled)
+  | M64 -> Vale.X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled)
 
 inline_for_extraction noextract
 val fsqr:
@@ -387,7 +387,7 @@ let fsqr2_pre #s h f =
       let f2 = gsub f 5ul 5ul in
       F51.felem_fits h f1 (9, 10, 9, 9, 9) /\
       F51.felem_fits h f2 (9, 10, 9, 9, 9)
-  | M64 -> X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled)
+  | M64 -> Vale.X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled)
 
 inline_for_extraction noextract
 val fsqr2:
@@ -423,7 +423,7 @@ val cswap2:
   -> p2:felem2 s
   -> Stack unit
     (requires fun h0 ->
-      (s = M64 ==> X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled)) /\    
+      (s = M64 ==> Vale.X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled)) /\    
       live h0 p1 /\ live h0 p2 /\
       (disjoint p1 p2 \/ p1 == p2))
     (ensures  fun h0 _ h1 ->

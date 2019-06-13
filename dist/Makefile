@@ -33,6 +33,7 @@ else ifeq ($(UNAME),Linux)
   SO 		= so
   LDFLAGS	+= -Xlinker -z -Xlinker noexecstack -Xlinker --unresolved-symbols=report-all
 else ifeq ($(OS),Windows_NT)
+  CFLAGS        += -fno-asynchronous-unwind-tables
   CC		= $(MARCH)-w64-mingw32-gcc
   AR		= $(MARCH)-w64-mingw32-ar
   VARIANT	= -mingw
@@ -71,8 +72,7 @@ OBJS 		+= $(patsubst %.S,%.o,$(wildcard *-$(MARCH)$(VARIANT).S))
 
 include Makefile.basic
 
-CFLAGS		+= -Wno-parentheses -g -std=gnu11 \
-  -O3 -march=native -mtune=native
+CFLAGS		+= -Wno-parentheses -g -std=gnu11 -O3
 
 Hacl_Poly1305_128.o: CFLAGS += -mavx
 Hacl_Poly1305_256.o: CFLAGS += -mavx -mavx2
