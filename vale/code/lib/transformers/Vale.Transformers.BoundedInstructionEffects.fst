@@ -521,6 +521,16 @@ let rec lemma_instr_write_outputs_only_writes
     )
 #pop-options
 
+let rec lemma_unchanged_at'_maintained_upon_flag_update (locs:locations) (s1 s2:machine_state) (flags:flags_t) :
+  Lemma
+    (requires (unchanged_at' locs s1 s2))
+    (ensures (unchanged_at' locs
+                ({s1 with ms_flags = flags})
+                ({s2 with ms_flags = flags}))) =
+  match locs with
+  | [] -> ()
+  | x :: xs -> lemma_unchanged_at'_maintained_upon_flag_update xs s1 s2 flags
+
 let lemma_eval_instr_ok
     (it:instr_t_record) (oprs:instr_operands_t it.outs it.args) (ann:instr_annotation it)
     (s1 s2:machine_state) :
@@ -541,22 +551,17 @@ let lemma_eval_instr_ok
   let vs2 = instr_apply_eval outs args (instr_eval i) oprs s2 in
   lemma_instr_apply_eval_same_read outs args (instr_eval i) oprs s1 s2;
   assert (vs1 == vs2);
-  let s11 =
+  let s11, s22 =
     match havoc_flags' with
-    | HavocFlags -> {s1 with ms_flags = havoc_flags}
-    | PreserveFlags -> s1
-  in
-  let s22 =
-    match havoc_flags' with
-    | HavocFlags -> {s2 with ms_flags = havoc_flags}
-    | PreserveFlags -> s2
+    | HavocFlags -> {s1 with ms_flags = havoc_flags}, {s2 with ms_flags = havoc_flags}
+    | PreserveFlags -> s1, s2
   in
   let _ = FStar.Option.mapTot (fun vs -> instr_write_outputs outs args vs oprs s1 s11) vs1 in
   let _ = FStar.Option.mapTot (fun vs -> instr_write_outputs outs args vs oprs s2 s22) vs2 in
   match vs1 with
   | None -> ()
   | Some vs ->
-    assume (unchanged_at (aux_read_set1 outs args oprs) s11 s22);
+    lemma_unchanged_at'_maintained_upon_flag_update (aux_read_set1 outs args oprs) s1 s2 havoc_flags;
     lemma_instr_write_outputs_only_writes outs args vs oprs s1 s11 s2 s22
 
 let lemma_machine_eval_ins_st_ok (i:ins{Instr? i}) (s1 s2:machine_state) :
