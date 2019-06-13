@@ -67,7 +67,7 @@ val aead_encrypt:
   Tot (res:bytes{length res == length m + Poly.size_block})
 let aead_encrypt k n m aad =
   let cipher = Spec.Chacha20.chacha20_encrypt_bytes k n 1 m in
-  let key0 = Spec.Chacha20.chacha20_key_block0 k n in
+  let key0:lbytes 64 = Spec.Chacha20.chacha20_encrypt_bytes k n 0 (create 64 (u8 0)) in
   let poly_k = sub key0 0 32 in
   let mac = poly1305_do poly_k cipher aad in
   Seq.append cipher mac
@@ -80,7 +80,7 @@ val aead_decrypt:
   -> aad:bytes{length aad <= maxint U64} ->
   Tot (option (lbytes (length c)))
 let aead_decrypt k n cipher mac aad =
-  let key0 = Spec.Chacha20.chacha20_key_block0 k n in
+  let key0:lbytes 64 = Spec.Chacha20.chacha20_encrypt_bytes k n 0 (create 64 (u8 0)) in
   let poly_k = sub key0 0 32 in
   let computed_mac = poly1305_do poly_k cipher aad in
   if lbytes_eq computed_mac mac then
