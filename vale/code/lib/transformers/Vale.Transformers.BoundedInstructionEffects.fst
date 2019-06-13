@@ -451,7 +451,9 @@ let rec lemma_instr_write_outputs_only_writes
         let locs = aux_write_set outs args oprs in
         (unchanged_at' locs s1' s2' /\
          unchanged_except locs s1 s1' /\
-         unchanged_except locs s2 s2'))) =
+         unchanged_except locs s2 s2' /\
+         (not s1.ms_ok ==> not s1'.ms_ok) /\
+         (not s2.ms_ok ==> not s2'.ms_ok)))) =
   let s1', s2' =
     instr_write_outputs outs args vs oprs s_orig1 s1,
     instr_write_outputs outs args vs oprs s_orig2 s2 in
@@ -484,10 +486,12 @@ let rec lemma_instr_write_outputs_only_writes
         lemma_instr_write_outputs_only_writes outs args vs oprs s_orig1 s1 s_orig2 s2;
         lemma_instr_write_outputs_only_affects_write_extend outs args vs oprs s_orig1 s1 loc_op_r;
         lemma_instr_write_outputs_only_affects_write_extend outs args vs oprs s_orig2 s2 loc_op_r;
+        lemma_instr_write_outputs_only_affects_write_extend outs args vs oprs s_orig1 s1 [];
+        lemma_instr_write_outputs_only_affects_write_extend outs args vs oprs s_orig2 s2 [];
         let s1_old, s1 = s1, instr_write_outputs outs args vs oprs s_orig1 s1 in
         let s2_old, s2 = s2, instr_write_outputs outs args vs oprs s_orig2 s2 in
         lemma_unchanged_at_append loc_op_r (aux_write_set outs args oprs) s1 s2;
-        assume (unchanged_at' loc_op_r s1 s2)
+        lemma_unchanged_at'_maintained loc_op_r (aux_write_set outs args oprs) s1_old s1 s2_old s2
       | IOpIm i ->
         let oprs = coerce oprs in
         let loc_op_l, loc_op_r = locations_of_implicit i in
@@ -508,10 +512,12 @@ let rec lemma_instr_write_outputs_only_writes
         lemma_instr_write_outputs_only_writes outs args vs oprs s_orig1 s1 s_orig2 s2;
         lemma_instr_write_outputs_only_affects_write_extend outs args vs oprs s_orig1 s1 loc_op_r;
         lemma_instr_write_outputs_only_affects_write_extend outs args vs oprs s_orig2 s2 loc_op_r;
+        lemma_instr_write_outputs_only_affects_write_extend outs args vs oprs s_orig1 s1 [];
+        lemma_instr_write_outputs_only_affects_write_extend outs args vs oprs s_orig2 s2 [];
         let s1_old, s1 = s1, instr_write_outputs outs args vs oprs s_orig1 s1 in
         let s2_old, s2 = s2, instr_write_outputs outs args vs oprs s_orig2 s2 in
         lemma_unchanged_at_append loc_op_r (aux_write_set outs args oprs) s1 s2;
-        assume (unchanged_at' loc_op_r s1 s2)
+        lemma_unchanged_at'_maintained loc_op_r (aux_write_set outs args oprs) s1_old s1 s2_old s2
     )
 #pop-options
 
