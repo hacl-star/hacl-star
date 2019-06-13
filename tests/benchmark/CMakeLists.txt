@@ -65,6 +65,7 @@ if(USE_BCRYPT)
 endif(USE_BCRYPT)
 
 if(USE_OPENSSL)
+  SET(CMAKE_FIND_LIBRARY_SUFFIXES "")
   find_library(OPENSSL_LIB libcrypto.a PATHS $ENV{MLCRYPTO_HOME}/openssl NO_DEFAULT_PATH)
   find_library(OPENSSL_LIB libcrypto.a) # search default paths
   find_path(OPENSSL_INC openssl/crypto.h PATHS $ENV{MLCRYPTO_HOME}/openssl/include NO_DEFAULT_PATH)
