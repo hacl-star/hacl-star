@@ -9,7 +9,7 @@ open FStar.Squash
 open Lib.Math.Algebra
 
 
-(* Internals *)
+(*** Basic algebra & types ***)
 
 type fenu (n:comp) = r:fe n{isunit r}
 type fen2 (n:comp) = fe (n * n)
@@ -26,11 +26,10 @@ let shrink #n a = to_fe #n a
 val lift: #n:comp -> a:fe n -> b:fen2 n{b = a /\ shrink b = a}
 let lift #n a = a
 
-val isunit_in_nsquare2: #n:comp -> a:fen2 n -> Lemma
+val shrink_unit: #n:comp -> a:fen2 n -> Lemma
   (requires (isunit a))
   (ensures (isunit (shrink a)))
-let isunit_in_nsquare2 #n a =
-
+let shrink_unit #n a =
   let n2 = n * n in
 
   let l0 (): Lemma (requires (a % n = 0)) (ensures false) = begin
@@ -71,21 +70,7 @@ let shrink_fexp #n g x =
   cancel_mul_div n n;
   to_fe_fexp1 #(n*n) n g x
 
-// Carmichael's function
-val carm: p:prm -> q:prm -> l:fe (p*q){l <= (p-1) * (q-1) /\ l >= 1}
-let carm p q = lcm_less_mul (p-1) (q-1); lcm (p-1) (q-1)
-
-val carm_unit: p:prm -> q:prm -> Lemma
-  (isunit #(p*q) (carm p q) /\ is_gcd (carm p q) (p*q) 1)
-let carm_unit p q =
-  // Any divisor of p*q has form kp or kq, but (p-1)(q-1) has none
-  // of this form.
-  assume (gcd (p * q) ((p - 1) * (q - 1)) = 1);
-
-  gcd_pq_lcm_lemma p q;
-  gcd_symm (p*q) (carm p q) 1;
-  inv_as_gcd1 #(p*q) (carm p q)
-
+(*** Roots of unity ***)
 
 // N plus one, for SMTPat not to throw warnings
 val np1: #n:comp -> fen2 n
@@ -110,6 +95,7 @@ val root_of_unity_prop0: #n:comp -> x:fen2 n -> Lemma
   (fexp #(n*n) (1 +% (x *% n)) n = 1)
 let root_of_unity_prop0 #n x = admit ()
 
+// Specialised case: for x:fe n the number (1 + x*n) fits into n2.
 val root_of_unity_prop: #n:comp -> x:fe n -> Lemma
   (fexp #(n*n) (1 + (x * n)) n = 1)
 let root_of_unity_prop #n x =
@@ -122,7 +108,6 @@ let root_of_unity_prop #n x =
   to_fe_add' #n2 1 (x * n);
   assert (( +% ) #n2 1 (x * n) = 1 + x * n);
   root_of_unity_prop0 #n (lift x)
-
 
 #reset-options "--z3rlimit 100"
 
@@ -174,7 +159,22 @@ let roots_of_unity_mod_n #n x =
     1 + (x % n) * n;
   }
 
+// Carmichael's function
+val carm: p:prm -> q:prm -> l:fe (p*q){l <= (p-1) * (q-1) /\ l >= 1}
+let carm p q = lcm_less_mul (p-1) (q-1); lcm (p-1) (q-1)
 
+val carm_unit: p:prm -> q:prm -> Lemma
+  (isunit #(p*q) (carm p q) /\ is_gcd (carm p q) (p*q) 1)
+let carm_unit p q =
+  // Any divisor of p*q has form kp or kq, but (p-1)(q-1) has none
+  // of this form.
+  assume (gcd (p * q) ((p - 1) * (q - 1)) = 1);
+
+  gcd_pq_lcm_lemma p q;
+  gcd_symm (p*q) (carm p q) 1;
+  inv_as_gcd1 #(p*q) (carm p q)
+
+// Elements of order nα for α = 1..λ.
 val in_base_order: p:prm -> q:prm -> g:fe ((p*q)*(p*q)){isunit g} -> Type0
 let in_base_order p q g =
   let r = mult_order g in
@@ -184,17 +184,19 @@ let in_base_order p q g =
 val in_base: p:prm -> q:prm -> g:fe ((p*q)*(p*q)) -> Type0
 let in_base p q g = g <> 0 /\ isunit g /\ in_base_order p q g
 
+// Being g ∈ B_α means being a unit in Z_{n^2} and having a proper order.
 val is_g: n:big -> g:fe (n*n) -> Type0
 let is_g n g = isunit g /\ (exists (p:prm) (q:prm). n = p * q /\ in_base p q g)
 
 type isg (n:big) = g:fe (n*n){is_g n g}
 
-// simply move exists, needs the fact that factorisation is unique
+// Simply move exists, though needs the fact that factorisation is unique
 val is_g_in_base: p:prm -> q:prm -> g:fe ((p*q)*(p*q)) -> Lemma
   (requires (is_g (p*q) g))
   (ensures (in_base p q g))
 let is_g_in_base p q g = admit ()
 
+// n+1 is a first n-th root of unity.
 val np1_is_unit: #n:comp -> Lemma (isunit (np1 #n)) [SMTPat (np1 #n)]
 let np1_is_unit #n =
   let g = np1 #n in
@@ -207,6 +209,7 @@ let np1_is_unit #n =
 
 #reset-options "--z3rlimit 100"
 
+// n+1 is also a primitev root of unity.
 val np1_is_primitive_root: #n:comp -> Lemma (mult_order (np1 #n) = n)
 let np1_is_primitive_root #n =
   let g = np1 #n in
@@ -230,6 +233,7 @@ let np1_is_primitive_root #n =
 
 #reset-options
 
+// np+1 is a proper g (∈ B_α) for our purposes.
 val np1_is_g: #n:comp -> Lemma (is_g n (np1 #n))
 let np1_is_g #n =
   let g = np1 #n in
@@ -263,7 +267,7 @@ let euler_thm2 p q w =
 
   move_requires #(fen2 n) #(fun a -> isunit a)
       #(fun a -> isunit (to_fe #n a))
-      (isunit_in_nsquare2 #n)
+      (shrink_unit #n)
       w;
 
   assert (isunit (to_fe #n w));
@@ -293,6 +297,7 @@ let euler_thm3 p q w =
   assert (fexp #n2 (1 + (f1/n)*n) n = 1);
   assert (fexp f1 n = 1)
 
+// Inverting an element of Z_n using fermat inverse theorem.
 val fermat_inverse_carm:
      p:prm
   -> q:prm
@@ -309,9 +314,17 @@ let fermat_inverse_carm p q a =
 
   b
 
+(*** Enc function and its inj/bij ***)
+
+// Encryption function specified for the "raw" values of (x,y).  This
+// variant of function is not injective, but it satisfies modular
+// injectivity. It is used frequently for proofs when values of the
+// expression looking like arguments to encf don't fit into its
+// conditions.
 val encf_raw: #n:comp -> g:isg n -> x:nat -> y:fen2 n -> fen2 n
 let encf_raw #n g x y = fexp g x *% fexp y n
 
+// The original encryption function.
 val encf: #n:comp -> g:isg n -> x:fe n -> y:fenu n -> fen2 n
 let encf #n g x y = encf_raw #n g x (lift y)
 
@@ -585,6 +598,8 @@ let encf_inj_raw2 p q g x10 y1' x20 y2' =
 
 #reset-options
 
+// Injectivity result saying tat for every two eual raw encf
+// expressions their x arguments are equal modulo n.
 val encf_inj_raw_partial:
      #n:comp
   -> g:isg n
@@ -603,7 +618,7 @@ let encf_inj_raw_partial #n g x1 y1 x2 y2 =
   add_move_to_right #n (to_fe #n x2) (to_fe #n x1) 0;
   add_sub_zero (to_fe #n x1)
 
-// We only need injectivity on xs
+// Version of the previous injectivity lemma specified for x ∈ Z_n.
 val encf_inj: #n:comp -> g:isg n -> x1:fe n -> y1:fenu n -> x2:fe n -> y2:fenu n -> Lemma
   (requires (encf g x1 y1 = encf g x2 y2))
   (ensures (x1 = x2))
@@ -612,8 +627,10 @@ let encf_inj #n g x1 y1 x2 y2 =
   to_fe_idemp #n x2;
   encf_inj_raw_partial #n g x1 (lift y1) x2 (lift y2)
 
-// It is possible to get it checking every element of the preimage.
-// encf is bijection for proper g
+// Inverse of the enc function. Full encf is bijective, but
+// bijectivity is not proven here (for now?). Instead, we suppose
+// inverse exists and provide its partial implemenation that is useful
+// in some proofs.
 val encf_inv: #n:comp -> g:isg n -> w:fen2 n ->
   t:(tuple2 (fe n) (fenu n)){ encf g (fst t) (snd t) = w }
 let encf_inv #n g w =
@@ -632,15 +649,21 @@ let encf_inv #n g w =
     Mktuple2 x y
   end else magic() // it's hard to invert it
 
+(*** Residuosity classes ***)
+
+// x is a residuosity class of w if we can find y such that
+// w is encf g x y. We use the "raw" version of encf here.
 type is_res_class (#n:comp) (g:isg n) (w:fen2u n) (x:fe n) =
   exists (y:(t:fen2 n{isunit (shrink t)})). encf_raw g x y = w
 
+// is_res_class is true for any valid instance of encf_raw
 val is_res_class_of_encf_raw: #n:comp -> g:isg n -> x:fe n -> y:fen2 n{isunit (shrink y)} -> Lemma
   (encf_unit_raw g x y; is_res_class g (encf_raw g x y) x)
 let is_res_class_of_encf_raw #n g x y =
   let func (y':fen2 n): Type =  encf_raw g x y' = encf_raw g x y in
   exists_intro func y
 
+// Elimination of existential quantifier of is_res_class.
 val res_class_elim:
      #n:comp
   -> #goal:Type0
@@ -653,6 +676,7 @@ let res_class_elim #n #goal g w x f =
   let l (): Lemma (is_res_class g w x) = () in
   exists_elim goal #(t:fen2 n{isunit (shrink t)}) #(fun y -> encf_raw g x y = w) (l ()) f
 
+// Getting the res_class value using the (partial) inverse.
 val res_class: #n:comp -> g:isg n -> w:fen2u n -> x:fe n{is_res_class g w x}
 let res_class #n g w = fst (encf_inv g w)
 
@@ -686,6 +710,7 @@ let res_class_of_encf_raw #n g x y =
 
 #reset-options "--z3rlimit 150"
 
+// Lemma 7 p.226
 val res_class_decomposition: #n:comp -> g1:isg n -> g2:isg n ->  w:fen2u n -> Lemma
   (ensures (res_class g1 w = res_class g2 w *% res_class g1 g2))
 let res_class_decomposition #n g1 g2 w =
@@ -755,6 +780,7 @@ let res_class_decomposition #n g1 g2 w =
   to_fe_mul' x3 x2;
   assert(x1 = x3 *% x2)
 
+// Also Lemma 7.
 val res_class_inverse: #n:comp -> g1:isg n -> g2:isg n -> Lemma
   (isunit (res_class g1 g2) /\
    finv (res_class g1 g2) = res_class g2 g1)
@@ -765,6 +791,8 @@ let res_class_inverse #n g1 g2 =
 
 #reset-options
 
+// Residuosity classes of two encf instances with xs different in
+// modulo are the same mod n.
 val res_class_modulo_encf:
      #n:comp
   -> g:isg n
@@ -806,7 +834,7 @@ let res_class_modulo_encf #n g x1 y1 x2 y2 =
       shrink_mul (fexp g (x2/n)) y2;
       shrink_fexp g (x2/n);
       assert (shrink (fexp g (x2/n) *% y2) = fexp (shrink g) (x2/n) *% (shrink y2));
-      isunit_in_nsquare2 g;
+      shrink_unit g;
       g_pow_isunit (shrink g) (x2/n);
       isunit_prod (fexp (shrink g) (x2/n)) (shrink y2)
     end in
@@ -824,6 +852,7 @@ let res_class_modulo_encf #n g x1 y1 x2 y2 =
 
 #reset-options
 
+// The previous function specified to one encf instance.
 val res_class_reduce_mod_n:
      #n:comp
   -> g:isg n
@@ -840,7 +869,9 @@ let res_class_reduce_mod_n #n g x y =
   encf_unit_raw g (x%n) y;
   res_class_of_encf_raw g (x%n) (lift (shrink y))
 
+(*** L-function ***)
 
+// L defined in Theorem 9.
 val bigl: #n:comp -> u:fen2 n{u > 0} -> r:fe n
 let bigl #n u = (u - 1) / n
 
@@ -852,6 +883,7 @@ let bigl_prop #n u =
   assert(u % n = 1 ==> (r = 0 ==> u = 1));
   assert(u % n = 1 ==> (r = 0 <==> u = 1))
 
+// Part of the proof of Lemma 10.
 val w_lambda_representation: p:prm -> q:prm -> w:fen2u (p*q) -> Lemma
   (let n = p * q in
    np1_is_g #n;
@@ -890,8 +922,7 @@ let w_lambda_representation p q w =
     1 + ((a*lambda)%n)*n;
   }
 
-
-// lemma 10 p227
+// Lemma 10 in full.
 val bigl_w_l_lemma: p:prm -> q:prm -> w:fen2u (p*q) -> Lemma
   (ensures (let n = p * q in
             np1_is_g #n;
@@ -923,7 +954,8 @@ let bigl_w_l_lemma p q w =
     a *% lambda;
   }
 
-
+// Function that implements the division L(w^lambda)/L(g^lambda), see
+// proof of the theorem 9.
 val l1_div_l2: p:prm -> q:prm -> w:fen2 (p*q) -> g:isg (p*q) -> fe (p*q)
 let l1_div_l2 p q w g =
   let n = p * q in
@@ -1051,7 +1083,7 @@ let l1_div_l2_is_wg p q w g =
 #reset-options
 
 
-(* Keys *)
+(*** Keys, enc/dec, hom props ***)
 
 type secret =
   | Secret: p:prm
@@ -1059,7 +1091,6 @@ type secret =
          -> g:isg (p*q)
          -> secret
 
-// TODO get rid of "comp" here
 type public =
   | Public: n:comp
          -> g:isg n
@@ -1069,9 +1100,6 @@ val s2p: secret -> public
 let s2p sec =
   Public (Secret?.p sec * Secret?.q sec)
          (Secret?.g sec)
-
-
-(* Enc/Dec/Hom *)
 
 type ciphertext (n:comp) = c:fen2 n
 
@@ -1107,7 +1135,7 @@ let hom_add #n c1 c2 = c1 *% c2
 val hom_mul_plain: #n:comp -> c1:ciphertext n -> k:fe n -> c:ciphertext n
 let hom_mul_plain #n c1 k = fexp c1 k
 
-(* Functional correctness and properties *)
+(*** Functional correctness and props ***)
 
 val enc_is_unit:
      p:public
