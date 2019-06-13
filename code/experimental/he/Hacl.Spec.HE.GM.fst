@@ -6,7 +6,7 @@ open FStar.Math.Lemmas
 open Lib.Math.Algebra
 
 
-(* Squares and nonsquares *)
+(*** Squares and nonsquares ***)
 
 val is_sqr: #n:big -> a:fe n -> Type0
 let is_sqr #n a = exists s . b2t(sqr s = a)
@@ -41,7 +41,7 @@ val sq_mul_comp: p:prm -> q:prm -> a:fe (p * q) -> Lemma
   (ensures (is_sqr #p (to_fe a) /\ is_sqr #q (to_fe a)))
 let sq_mul_comp _ _ _ = admit()
 
-(* Legendre symbol *)
+(*** Legendre symbol ***)
 
 val leg_symbol: a:nat -> p:prm -> res:int
 let leg_symbol a p =
@@ -154,7 +154,7 @@ let leg_symbol_mul2 p a b =
   to_fe_mul #p a b
 
 
-(* Keys *)
+(*** Keys, enc/dec, hom props ***)
 
 type secret =
   | Secret: p:prm
@@ -174,8 +174,6 @@ let s2p sec =
   let y = Secret?.y sec in
   nonsq_mul_comp p q y;
   Public (p * q) y
-
-(* Enc/Dec *)
 
 type ciphertext (n:big) = c:fe n{c <> 0}
 
@@ -204,13 +202,10 @@ let decrypt_direct p c =
 val decrypt: s:secret -> c:ciphertext (Public?.n (s2p s)) -> m:bool
 let decrypt s c = decrypt_direct (Secret?.p s) c
 
-(* Homomorphic property *)
-
 val hom_xor: #n:big -> c1:ciphertext n -> c2:ciphertext n{c1 *% c2 <> 0} -> c3:ciphertext n
 let hom_xor #n c1 c2 = c1 *% c2
 
-(* Correctness *)
-
+(*** Functional correctness, properties ***)
 
 val sqr_mod_p_is_sqr: p:prm -> q:prm -> r:fe (p*q){(r * r) % p <> 0} -> Lemma
   (leg_symbol (sqr r) p = 1)
