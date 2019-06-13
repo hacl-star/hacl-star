@@ -310,6 +310,39 @@ let lemma_instr_apply_eval_same_read
         (instr_apply_eval outs args f oprs s2))) =
   lemma_instr_apply_eval_inouts_same_read outs outs args f oprs s1 s2
 
+let unchanged_at' (l:locations) (s1 s2:machine_state) =
+  (s1.ms_ok = s2.ms_ok) /\
+  (s1.ms_ok /\ s2.ms_ok ==>
+   unchanged_at l s1 s2)
+
+let lemma_instr_write_output_explicit_only_writes
+    (i:instr_operand_explicit) (v:instr_val_t (IOpEx i)) (o:instr_operand_t i)
+    (s_orig1 s1 s_orig2 s2:machine_state) :
+  Lemma
+    (requires (
+        (unchanged_at (fst (locations_of_explicit i o)) s_orig1 s_orig2) /\
+        (unchanged_at (fst (locations_of_explicit i o)) s1 s2) /\
+        (s1.ms_ok = s2.ms_ok)))
+    (ensures (
+        let s1', s2' =
+          instr_write_output_explicit i v o s_orig1 s1,
+          instr_write_output_explicit i v o s_orig2 s2 in
+        (unchanged_at' (snd (locations_of_explicit i o)) s1' s2'))) = ()
+
+let lemma_instr_write_output_implicit_only_writes
+    (i:instr_operand_implicit) (v:instr_val_t (IOpIm i))
+    (s_orig1 s1 s_orig2 s2:machine_state) :
+  Lemma
+    (requires (
+        (unchanged_at (fst (locations_of_implicit i)) s_orig1 s_orig2) /\
+        (unchanged_at (fst (locations_of_implicit i)) s1 s2) /\
+        (s1.ms_ok = s2.ms_ok)))
+    (ensures (
+        let s1', s2' =
+          instr_write_output_implicit i v s_orig1 s1,
+          instr_write_output_implicit i v s_orig2 s2 in
+        (unchanged_at' (snd (locations_of_implicit i)) s1' s2'))) = ()
+
 let rec lemma_instr_write_outputs_only_writes
     (outs:list instr_out) (args:list instr_operand)
     (vs:instr_ret_t outs) (oprs:instr_operands_t outs args)
@@ -317,16 +350,19 @@ let rec lemma_instr_write_outputs_only_writes
   Lemma
     (requires (
         (unchanged_at (aux_read_set1 outs args oprs) s_orig1 s_orig2) /\
+        (unchanged_at (aux_read_set1 outs args oprs) s1 s2) /\
         (s1.ms_ok = s2.ms_ok)))
     (ensures (
         let s1', s2' =
           instr_write_outputs outs args vs oprs s_orig1 s1,
           instr_write_outputs outs args vs oprs s_orig2 s2 in
-        (s1'.ms_ok = s2'.ms_ok) /\
-        (unchanged_at (aux_write_set outs args oprs) s1' s2'))) =
+        (unchanged_at' (aux_write_set outs args oprs) s1' s2'))) =
+  let s1', s2' =
+    instr_write_outputs outs args vs oprs s_orig1 s1,
+    instr_write_outputs outs args vs oprs s_orig2 s2 in
   match outs with
   | [] -> ()
-  | (_, i) :: outs -> (
+  | (io, i) :: outs -> (
       let ((v:instr_val_t i), (vs:instr_ret_t outs)) =
         match outs with
         | [] -> (vs, ())
@@ -334,18 +370,49 @@ let rec lemma_instr_write_outputs_only_writes
       in
       match i with
       | IOpEx i ->
-        let oprs = coerce oprs in
-        let s1 = instr_write_output_explicit i v (fst oprs) s_orig1 s1 in
-        let s2 = instr_write_output_explicit i v (fst oprs) s_orig2 s2 in
-        let _ = instr_write_outputs outs args vs (snd oprs) s_orig1 s1 in
-        let _ = instr_write_outputs outs args vs (snd oprs) s_orig2 s2 in
-        admit ()
+        let o, oprs = coerce oprs in
+        let loc_op_l, loc_op_r = locations_of_explicit i o in
+        let loc_op_b = loc_op_l `L.append` loc_op_r in
+        let loc_rest = aux_read_set1 outs args oprs in
+        lemma_unchanged_at_append loc_op_l loc_op_r s_orig1 s_orig2;
+        lemma_unchanged_at_append loc_op_l loc_rest s_orig1 s_orig2;
+        lemma_unchanged_at_append loc_op_b loc_rest s_orig1 s_orig2;
+        lemma_unchanged_at_append loc_op_l loc_rest s_orig1 s_orig2;
+        lemma_unchanged_at_append loc_op_l loc_op_r s1 s2;
+        lemma_unchanged_at_append loc_op_l loc_rest s1 s2;
+        lemma_unchanged_at_append loc_op_b loc_rest s1 s2;
+        lemma_unchanged_at_append loc_op_l loc_rest s1 s2;
+        lemma_instr_write_output_explicit_only_writes i v o s_orig1 s1 s_orig2 s2;
+        let s1 = instr_write_output_explicit i v o s_orig1 s1 in
+        let s2 = instr_write_output_explicit i v o s_orig2 s2 in
+        assume (unchanged_at (aux_read_set1 outs args oprs) s1 s2);
+        lemma_instr_write_outputs_only_writes outs args vs oprs s_orig1 s1 s_orig2 s2;
+        let s1 = instr_write_outputs outs args vs oprs s_orig1 s1 in
+        let s2 = instr_write_outputs outs args vs oprs s_orig2 s2 in
+        lemma_unchanged_at_append loc_op_r (aux_write_set outs args oprs) s1 s2;
+        assume (unchanged_at loc_op_r s1 s2)
       | IOpIm i ->
+        let oprs = coerce oprs in
+        let loc_op_l, loc_op_r = locations_of_implicit i in
+        let loc_op_b = loc_op_l `L.append` loc_op_r in
+        let loc_rest = aux_read_set1 outs args oprs in
+        lemma_unchanged_at_append loc_op_l loc_op_r s_orig1 s_orig2;
+        lemma_unchanged_at_append loc_op_l loc_rest s_orig1 s_orig2;
+        lemma_unchanged_at_append loc_op_b loc_rest s_orig1 s_orig2;
+        lemma_unchanged_at_append loc_op_l loc_rest s_orig1 s_orig2;
+        lemma_unchanged_at_append loc_op_l loc_op_r s1 s2;
+        lemma_unchanged_at_append loc_op_l loc_rest s1 s2;
+        lemma_unchanged_at_append loc_op_b loc_rest s1 s2;
+        lemma_unchanged_at_append loc_op_l loc_rest s1 s2;
+        lemma_instr_write_output_implicit_only_writes i v s_orig1 s1 s_orig2 s2;
         let s1 = instr_write_output_implicit i v s_orig1 s1 in
         let s2 = instr_write_output_implicit i v s_orig2 s2 in
-        let _ = instr_write_outputs outs args vs (coerce oprs) s_orig1 s1 in
-        let _ = instr_write_outputs outs args vs (coerce oprs) s_orig2 s2 in
-        admit ()
+        assume (unchanged_at (aux_read_set1 outs args oprs) s1 s2);
+        lemma_instr_write_outputs_only_writes outs args vs oprs s_orig1 s1 s_orig2 s2;
+        let s1 = instr_write_outputs outs args vs oprs s_orig1 s1 in
+        let s2 = instr_write_outputs outs args vs oprs s_orig2 s2 in
+        lemma_unchanged_at_append loc_op_r (aux_write_set outs args oprs) s1 s2;
+        assume (unchanged_at loc_op_r s1 s2)
     )
 
 let lemma_eval_instr_ok
@@ -383,6 +450,7 @@ let lemma_eval_instr_ok
   match vs1 with
   | None -> ()
   | Some vs ->
+    assume (unchanged_at (aux_read_set1 outs args oprs) s11 s22);
     lemma_instr_write_outputs_only_writes outs args vs oprs s1 s11 s2 s22
 
 let lemma_machine_eval_ins_st_ok (i:ins{Instr? i}) (s1 s2:machine_state) :
