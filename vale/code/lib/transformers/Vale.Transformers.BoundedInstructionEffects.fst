@@ -28,14 +28,14 @@ let locations_of_operand64 (o:operand64) : locations & locations =
   | OConst _ -> [], []
   | OReg r -> [ALocReg (Reg 0 r)], [ALocReg (Reg 0 r)]
   | OMem (m, _) -> locations_of_maddr m ALocMem, [ALocMem]
-  | OStack (m, _) -> locations_of_maddr m ALocStack, [ALocStack]
+  | OStack (m, _) -> (ALocReg (Reg 0 rRsp)) :: locations_of_maddr m ALocStack, [ALocStack]
 
 let locations_of_operand128 (o:operand128) : locations & locations =
   match o with
   | OConst _ -> [], []
   | OReg r -> [ALocReg (Reg 1 r)], [ALocReg (Reg 1 r)]
   | OMem (m, _) -> locations_of_maddr m ALocMem, [ALocMem]
-  | OStack (m, _) -> locations_of_maddr m ALocStack, [ALocStack]
+  | OStack (m, _) -> (ALocReg (Reg 0 rRsp)) :: locations_of_maddr m ALocStack, [ALocStack]
 
 let locations_of_explicit (t:instr_operand_explicit) (i:instr_operand_t t) : locations & locations =
   match t with
@@ -253,7 +253,7 @@ let rec lemma_instr_apply_eval_args_same_read
     | Some v ->
       lemma_instr_apply_eval_args_same_read outs args (f v) oprs s1 s2
 
-#push-options "--z3rlimit 20 --initial_fuel 5 --max_fuel 5 --initial_ifuel 2 --max_ifuel 2"
+#push-options "--z3rlimit 25 --initial_fuel 6 --max_fuel 6 --initial_ifuel 2 --max_ifuel 2"
 let rec lemma_instr_apply_eval_inouts_same_read
     (outs inouts:list instr_out) (args:list instr_operand)
     (f:instr_inouts_t outs inouts args) (oprs:instr_operands_t inouts args)
