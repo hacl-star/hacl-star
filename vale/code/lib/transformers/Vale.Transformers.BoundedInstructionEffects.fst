@@ -395,6 +395,29 @@ let rec lemma_unchanged_at'_maintained (locs locs_change:locations) (s1 s1' s2 s
       lemma_unchanged_except_not_mem locs_change x
     )
 
+let rec lemma_disjoint_location_from_locations_append
+  (a:location) (as1 as2:list location) :
+  Lemma (
+    (!!(disjoint_location_from_locations a as1) /\
+     !!(disjoint_location_from_locations a as2)) <==>
+    (!!(disjoint_location_from_locations a (as1 `L.append` as2)))) =
+  match as1 with
+  | [] -> ()
+  | x :: xs ->
+    lemma_disjoint_location_from_locations_append a xs as2
+
+let lemma_unchanged_except_extend (ls_extend ls:locations) (s1 s2:machine_state) :
+  Lemma
+    (requires (unchanged_except ls s1 s2))
+    (ensures (unchanged_except (ls_extend `L.append` ls) s1 s2)) =
+  let aux a :
+    Lemma
+      (requires (!!(disjoint_location_from_locations a (ls_extend `L.append` ls))))
+      (ensures (eval_location a s1 == eval_location a s2)) =
+    lemma_disjoint_location_from_locations_append a ls_extend ls
+  in
+  FStar.Classical.forall_intro (FStar.Classical.move_requires aux)
+
 let lemma_instr_write_outputs_only_affects_write_extend
     (outs:list instr_out) (args:list instr_operand)
     (vs:instr_ret_t outs) (oprs:instr_operands_t outs args)
@@ -404,11 +427,14 @@ let lemma_instr_write_outputs_only_affects_write_extend
     (ensures (
         let s' = instr_write_outputs outs args vs oprs s_orig s in
         let locs = aux_write_set outs args oprs in
-        unchanged_except (locs_extension `L.append` locs) s s)) =
+        unchanged_except (locs_extension `L.append` locs) s s')) =
+  let s' = instr_write_outputs outs args vs oprs s_orig s in
+  let locs = aux_write_set outs args oprs in
   FStar.Classical.forall_intro
-    (FStar.Classical.move_requires (lemma_instr_write_outputs_only_affects_write outs args vs oprs s_orig s))
+    (FStar.Classical.move_requires (lemma_instr_write_outputs_only_affects_write outs args vs oprs s_orig s));
+  lemma_unchanged_except_extend locs_extension locs s s'
 
-#push-options "--z3rlimit 50 --max_fuel 2 --max_ifuel 1"
+#push-options "--z3rlimit 100 --max_fuel 2 --max_ifuel 1"
 let rec lemma_instr_write_outputs_only_writes
     (outs:list instr_out) (args:list instr_operand)
     (vs:instr_ret_t outs) (oprs:instr_operands_t outs args)
@@ -458,10 +484,10 @@ let rec lemma_instr_write_outputs_only_writes
         lemma_instr_write_outputs_only_writes outs args vs oprs s_orig1 s1 s_orig2 s2;
         lemma_instr_write_outputs_only_affects_write_extend outs args vs oprs s_orig1 s1 loc_op_r;
         lemma_instr_write_outputs_only_affects_write_extend outs args vs oprs s_orig2 s2 loc_op_r;
-        let s1 = instr_write_outputs outs args vs oprs s_orig1 s1 in
-        let s2 = instr_write_outputs outs args vs oprs s_orig2 s2 in
+        let s1_old, s1 = s1, instr_write_outputs outs args vs oprs s_orig1 s1 in
+        let s2_old, s2 = s2, instr_write_outputs outs args vs oprs s_orig2 s2 in
         lemma_unchanged_at_append loc_op_r (aux_write_set outs args oprs) s1 s2;
-        assume (unchanged_at loc_op_r s1 s2)
+        assume (unchanged_at' loc_op_r s1 s2)
       | IOpIm i ->
         let oprs = coerce oprs in
         let loc_op_l, loc_op_r = locations_of_implicit i in
@@ -482,10 +508,10 @@ let rec lemma_instr_write_outputs_only_writes
         lemma_instr_write_outputs_only_writes outs args vs oprs s_orig1 s1 s_orig2 s2;
         lemma_instr_write_outputs_only_affects_write_extend outs args vs oprs s_orig1 s1 loc_op_r;
         lemma_instr_write_outputs_only_affects_write_extend outs args vs oprs s_orig2 s2 loc_op_r;
-        let s1 = instr_write_outputs outs args vs oprs s_orig1 s1 in
-        let s2 = instr_write_outputs outs args vs oprs s_orig2 s2 in
+        let s1_old, s1 = s1, instr_write_outputs outs args vs oprs s_orig1 s1 in
+        let s2_old, s2 = s2, instr_write_outputs outs args vs oprs s_orig2 s2 in
         lemma_unchanged_at_append loc_op_r (aux_write_set outs args oprs) s1 s2;
-        assume (unchanged_at loc_op_r s1 s2)
+        assume (unchanged_at' loc_op_r s1 s2)
     )
 #pop-options
 
