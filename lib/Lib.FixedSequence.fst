@@ -148,7 +148,8 @@ let rec upd_ (#a:Type) (#len:flen) (s:fseq a len) (i:nat{i < len}) (x:a) : fseq_
   else fst s,upd_ #a #(len-1) (rest s) (i-1) x
 
 inline_for_extraction
-let upd (#a:Type) (#len:flen) (s:fseq a len) (i:nat{i < len}) (x:a) : fseq a len =
+val upd: #a:Type -> #len:flen -> s:fseq a len -> i:nat{i < len} -> x:a -> fseq a len
+let upd (#a:Type) (#len:flen) (s:fseq a len) (i:nat{i < len}) (x:a) : fseq a len = 
   normalize_term (upd_ s i x)
 
 inline_for_extraction noextract
