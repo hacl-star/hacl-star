@@ -8,6 +8,8 @@ open FStar.Math.Lib
 open FStar.Mul
 open FStar.Squash
 
+module L = FStar.List.Tot
+
 
 (* Divisibisity *)
 
@@ -22,7 +24,7 @@ let zero_mod_n _ = ()
 val one_mod_n: n:big -> Lemma (1 % n = 1)
 let one_mod_n _ = ()
 
-type divides (a:pos) (b:int) = b % a = 0
+let divides (a:pos) (b:int):bool = b % a = 0
 
 val divides_sum: a:pos -> b:int -> c:int -> Lemma
   ((divides a b /\ divides a c) ==> divides a (b+c))
@@ -122,44 +124,17 @@ val divides_multiple: a:pos -> b:pos{divides a b} -> k:pos -> Lemma
   (divides a (k*b))
 let divides_multiple a b k = modulo_mul_distributivity k b a
 
-type is_common_divisor (a:nat) (b:nat) (g:pos) = divides g a /\ divides g b
+let is_common_divisor (a:nat) (b:nat) (g:pos) = divides g a && divides g b
 
-type is_gcd (a:nat) (b:nat) (g:pos) =
+// Notion of gcd is extended here to cover the euclidian algorithm
+// logic -- we allow a to be zero. Most of the lemmas apply to the
+// case when both arguments are positive, but some lemmas need first
+// one to be zero.
+type is_gcd (a:nat) (b:pos) (g:pos) =
        is_common_divisor a b g /\
        (forall (x:pos{x>g}). ~(is_common_divisor a b x))
 
-val gcd_exists: a:nat -> b:nat -> Lemma (exists g. is_gcd a b g)
-let gcd_exists a b = admit()
-
-val gcd_unique: a:nat -> b:nat -> g1:pos{is_gcd a b g1} -> g2:pos{is_gcd a b g2} -> Lemma
-  (g1 == g2)
-let gcd_unique a b g1 g2 = ()
-
-val gcd_intro_forall: a:nat -> b:nat -> g:pos{is_gcd a b g} -> p:(pos -> Type0){p g} -> Lemma
-  (forall g'. is_gcd a b g' ==> p g')
-let gcd_intro_forall a b g p =
-  assert (forall g'. is_gcd a b g' ==> g = g');
-  assert (forall g'. is_gcd a b g' ==> p g')
-
-val gcd_exists_elim: a:nat -> b:nat -> g:pos -> Lemma
-  (requires (exists (g':pos{is_gcd a b g'}). g' = g))
-  (ensures (is_gcd a b g))
-let gcd_exists_elim a b g = ()
-
-val gcd_forall_to_exists: a:nat -> b:nat -> p:(g:pos{is_gcd a b g} -> Type0) -> Lemma
-  (requires (forall (g:pos{is_gcd a b g}). p g))
-  (ensures (exists (g:pos{is_gcd a b g}). p g))
-let gcd_forall_to_exists a b p =
-  gcd_exists a b;
-  assert (exists g. is_gcd a b g);
-  assert (exists g. is_gcd a b g ==> p g)
-
-val gcd_forall_elim: a:nat -> b:nat -> g:pos -> Lemma
-  (requires (forall (g':pos{is_gcd a b g'}). g' = g))
-  (ensures (is_gcd a b g))
-let gcd_forall_elim a b g = gcd_forall_to_exists a b (fun g' -> g' = g)
-
-val gcd_symm: a:nat -> b:nat -> g:pos -> Lemma
+val gcd_symm: a:pos -> b:pos -> g:pos -> Lemma
   (is_gcd a b g ==> is_gcd b a g)
 let gcd_symm a b g = ()
 
@@ -167,7 +142,63 @@ val gcd_upper_bound: a:pos -> b:pos -> g:pos{is_gcd a b g} -> Lemma
   (g <= a /\ g <= b /\ g <= min a b)
 let gcd_upper_bound a b g = ()
 
-val gcd_prop_add_arg: a:nat -> b:nat -> g:pos{is_gcd a b g} -> Lemma
+#reset-options "--z3rlimit 100"
+
+val find_gcd_naive:
+     a:pos
+  -> b:pos
+  -> g_cur:pos{g_cur <= min a b}
+  -> g_last:pos{g_last < g_cur /\ is_common_divisor a b g_last /\
+                (forall (g':pos{g'>g_last /\ g' < g_cur}). ~(is_common_divisor a b g'))}
+  -> Tot (g:pos{is_gcd a b g})
+         (decreases (min a b - g_cur))
+let rec find_gcd_naive a b g_cur g_last =
+  let m = min a b in
+  if g_cur = m then
+    (if is_common_divisor a b g_cur then g_cur else g_last)
+  else begin
+    find_gcd_naive a b (g_cur + 1) (if is_common_divisor a b g_cur then g_cur else g_last)
+  end
+
+#reset-options
+
+val gcd_exists: a:pos -> b:pos -> Lemma (exists (g:pos). is_gcd a b g)
+let gcd_exists a b =
+  assert (a > 0 && b > 0);
+  assert (is_common_divisor a b 1);
+  if min a b = 1
+    then assert (is_gcd a b 1)
+    else (let g = find_gcd_naive a b 2 1 in assert (is_gcd a b g))
+
+val gcd_unique: a:pos -> b:pos -> g1:pos{is_gcd a b g1} -> g2:pos{is_gcd a b g2} -> Lemma
+  (g1 == g2)
+let gcd_unique a b g1 g2 = ()
+
+val gcd_intro_forall: a:pos -> b:pos -> g:pos{is_gcd a b g} -> p:(pos -> Type0){p g} -> Lemma
+  (forall g'. is_gcd a b g' ==> p g')
+let gcd_intro_forall a b g p =
+  assert (forall g'. is_gcd a b g' ==> g = g');
+  assert (forall g'. is_gcd a b g' ==> p g')
+
+val gcd_exists_elim: a:pos -> b:pos -> g:pos -> Lemma
+  (requires (exists (g':pos{is_gcd a b g'}). g' = g))
+  (ensures (is_gcd a b g))
+let gcd_exists_elim a b g = ()
+
+val gcd_forall_to_exists: a:pos -> b:pos -> p:(g:pos{is_gcd a b g} -> Type0) -> Lemma
+  (requires (forall (g:pos{is_gcd a b g}). p g))
+  (ensures (exists (g:pos{is_gcd a b g}). p g))
+let gcd_forall_to_exists a b p =
+  gcd_exists a b;
+  assert (exists g. is_gcd a b g);
+  assert (exists g. is_gcd a b g ==> p g)
+
+val gcd_forall_elim: a:pos -> b:pos -> g:pos -> Lemma
+  (requires (forall (g':pos{is_gcd a b g'}). g' = g))
+  (ensures (is_gcd a b g))
+let gcd_forall_elim a b g = gcd_forall_to_exists a b (fun g' -> g' = g)
+
+val gcd_prop_add_arg: a:nat -> b:pos -> g:pos{is_gcd a b g} -> Lemma
   (is_gcd (a+b) b g)
 let gcd_prop_add_arg a b g =
   exists_elim (is_gcd (a+b) b g) #pos #(fun g' -> is_gcd (a+b) b g') (gcd_exists (a+b) b)
@@ -185,8 +216,8 @@ let gcd_prop_add_arg a b g =
        end
      end)
 
-val gcd_prop_sub_arg: a:nat -> b:nat -> g:pos{is_gcd a b g} -> Lemma
-  (requires (a-b >= 0))
+val gcd_prop_sub_arg: a:nat -> b:pos -> g:pos{is_gcd a b g} -> Lemma
+  (requires (a-b > 0))
   (ensures (is_gcd (a-b) b g))
 let gcd_prop_sub_arg a b g =
   exists_elim (is_gcd (a-b) b g) #pos #(fun g' -> is_gcd (a-b) b g') (gcd_exists (a-b) b)
@@ -206,7 +237,7 @@ let gcd_prop_sub_arg a b g =
      end)
 
 
-val gcd_prop_multiple1: a:nat -> b:nat -> g:pos -> m:nat -> Lemma
+val gcd_prop_multiple1: a:nat -> b:pos -> g:pos -> m:nat -> Lemma
   (requires (is_gcd a b g /\ a + m*b >= 0))
   (ensures (is_gcd (a + m*b) b g))
 let rec gcd_prop_multiple1 a b g m = match m with
@@ -214,8 +245,8 @@ let rec gcd_prop_multiple1 a b g m = match m with
   | 1 -> gcd_prop_add_arg a b g
   | _ -> gcd_prop_multiple1 a b g (m-1); gcd_prop_add_arg (a+(m-1)*b) b g
 
-val gcd_prop_multiple2: a:nat -> b:nat -> g:pos -> m:int{m <= 0} -> Lemma
-  (requires (is_gcd a b g /\ a + m*b >= 0))
+val gcd_prop_multiple2: a:nat -> b:pos -> g:pos -> m:int{m <= 0} -> Lemma
+  (requires (is_gcd a b g /\ a + m*b > 0))
   (ensures (is_gcd (a + m*b) b g))
   (decreases (-m))
 let rec gcd_prop_multiple2 a b g m = match m with
@@ -227,8 +258,8 @@ let rec gcd_prop_multiple2 a b g m = match m with
            gcd_prop_sub_arg (a+(m+1)*b) b g
          end
 
-val gcd_prop_multiple: a:nat -> b:nat -> g:pos -> m:int -> Lemma
-  (requires (is_gcd a b g /\ a + m*b >= 0))
+val gcd_prop_multiple: a:nat -> b:pos -> g:pos -> m:int -> Lemma
+  (requires (is_gcd a b g /\ a + m*b > 0))
   (ensures (is_gcd (a + m*b) b g))
 let gcd_prop_multiple a b g m =
   if m >= 0 then gcd_prop_multiple1 a b g m else gcd_prop_multiple2 a b g m
@@ -308,7 +339,7 @@ let gcd_prop_subdiv a b g d =
 
   move_requires l ()
 
-val divides_exactly_one_multiple: a:pos -> b:nat -> c:nat -> Lemma
+val divides_exactly_one_multiple: a:pos -> b:nat -> c:pos -> Lemma
   (requires (divides a (b*c) /\ is_gcd a c 1))
   (ensures (divides a b))
 let divides_exactly_one_multiple a b c = admit ()
@@ -1058,8 +1089,7 @@ let mult_order_less #n g e = ()
 
 val mult_order_divides: #n:big -> g:fe n{isunit g} -> e:pos -> Lemma
   (fexp g e = 1 ==> divides (mult_order g) e)
-let mult_order_divides #n g e = admit () // TODO
-
+let mult_order_divides #n g e = admit ()
 
 val g_pow_order_reduc: #n:big -> g:fe n{isunit g /\ g > 0} -> x:nat -> Lemma
   (ensures (fexp g x = fexp g (x % mult_order g)))
