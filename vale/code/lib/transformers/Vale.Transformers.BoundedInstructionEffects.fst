@@ -310,6 +310,44 @@ let lemma_instr_apply_eval_same_read
         (instr_apply_eval outs args f oprs s2))) =
   lemma_instr_apply_eval_inouts_same_read outs outs args f oprs s1 s2
 
+let rec lemma_instr_write_outputs_only_writes
+    (outs:list instr_out) (args:list instr_operand)
+    (vs:instr_ret_t outs) (oprs:instr_operands_t outs args)
+    (s_orig1 s1 s_orig2 s2:machine_state) :
+  Lemma
+    (requires (
+        (unchanged_at (aux_read_set1 outs args oprs) s_orig1 s_orig2) /\
+        (s1.ms_ok = s2.ms_ok)))
+    (ensures (
+        let s1', s2' =
+          instr_write_outputs outs args vs oprs s_orig1 s1,
+          instr_write_outputs outs args vs oprs s_orig2 s2 in
+        (s1'.ms_ok = s2'.ms_ok) /\
+        (unchanged_at (aux_write_set outs args oprs) s1' s2'))) =
+  match outs with
+  | [] -> ()
+  | (_, i) :: outs -> (
+      let ((v:instr_val_t i), (vs:instr_ret_t outs)) =
+        match outs with
+        | [] -> (vs, ())
+        | _::_ -> let vs = coerce vs in (fst vs, snd vs)
+      in
+      match i with
+      | IOpEx i ->
+        let oprs = coerce oprs in
+        let s1 = instr_write_output_explicit i v (fst oprs) s_orig1 s1 in
+        let s2 = instr_write_output_explicit i v (fst oprs) s_orig2 s2 in
+        let _ = instr_write_outputs outs args vs (snd oprs) s_orig1 s1 in
+        let _ = instr_write_outputs outs args vs (snd oprs) s_orig2 s2 in
+        admit ()
+      | IOpIm i ->
+        let s1 = instr_write_output_implicit i v s_orig1 s1 in
+        let s2 = instr_write_output_implicit i v s_orig2 s2 in
+        let _ = instr_write_outputs outs args vs (coerce oprs) s_orig1 s1 in
+        let _ = instr_write_outputs outs args vs (coerce oprs) s_orig2 s2 in
+        admit ()
+    )
+
 let lemma_eval_instr_ok
     (it:instr_t_record) (oprs:instr_operands_t it.outs it.args) (ann:instr_annotation it)
     (s1 s2:machine_state) :
@@ -324,6 +362,7 @@ let lemma_eval_instr_ok
         let s2' = eval_instr it oprs ann s2 in
         (Some? s1' = Some? s2') /\
         (Some? s1' ==> (Some?.v s1').ms_ok = (Some?.v s2').ms_ok))) =
+  let r, w = rw_set_of_ins (Instr it oprs ann) in
   let InstrTypeRecord #outs #args #havoc_flags' i = it in
   let vs1 = instr_apply_eval outs args (instr_eval i) oprs s1 in
   let vs2 = instr_apply_eval outs args (instr_eval i) oprs s2 in
@@ -333,15 +372,18 @@ let lemma_eval_instr_ok
     match havoc_flags' with
     | HavocFlags -> {s1 with ms_flags = havoc_flags}
     | PreserveFlags -> s1
-    in
+  in
   let s22 =
     match havoc_flags' with
     | HavocFlags -> {s2 with ms_flags = havoc_flags}
     | PreserveFlags -> s2
-    in
-  let _1 = FStar.Option.mapTot (fun vs -> instr_write_outputs outs args vs oprs s1 s11) vs1 in
-  let _2 = FStar.Option.mapTot (fun vs -> instr_write_outputs outs args vs oprs s2 s22) vs2 in
-  admit ()
+  in
+  let _ = FStar.Option.mapTot (fun vs -> instr_write_outputs outs args vs oprs s1 s11) vs1 in
+  let _ = FStar.Option.mapTot (fun vs -> instr_write_outputs outs args vs oprs s2 s22) vs2 in
+  match vs1 with
+  | None -> ()
+  | Some vs ->
+    lemma_instr_write_outputs_only_writes outs args vs oprs s1 s11 s2 s22
 
 let lemma_machine_eval_ins_st_ok (i:ins{Instr? i}) (s1 s2:machine_state) :
   Lemma
