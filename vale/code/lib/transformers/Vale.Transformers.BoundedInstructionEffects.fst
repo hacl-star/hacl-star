@@ -395,7 +395,20 @@ let rec lemma_unchanged_at'_maintained (locs locs_change:locations) (s1 s1' s2 s
       lemma_unchanged_except_not_mem locs_change x
     )
 
-#push-options "--z3rlimit 20 --max_fuel 2 --max_ifuel 1"
+let lemma_instr_write_outputs_only_affects_write_extend
+    (outs:list instr_out) (args:list instr_operand)
+    (vs:instr_ret_t outs) (oprs:instr_operands_t outs args)
+    (s_orig s:machine_state)
+    (locs_extension:locations) :
+  Lemma
+    (ensures (
+        let s' = instr_write_outputs outs args vs oprs s_orig s in
+        let locs = aux_write_set outs args oprs in
+        unchanged_except (locs_extension `L.append` locs) s s)) =
+  FStar.Classical.forall_intro
+    (FStar.Classical.move_requires (lemma_instr_write_outputs_only_affects_write outs args vs oprs s_orig s))
+
+#push-options "--z3rlimit 50 --max_fuel 2 --max_ifuel 1"
 let rec lemma_instr_write_outputs_only_writes
     (outs:list instr_out) (args:list instr_operand)
     (vs:instr_ret_t outs) (oprs:instr_operands_t outs args)
@@ -409,7 +422,10 @@ let rec lemma_instr_write_outputs_only_writes
         let s1', s2' =
           instr_write_outputs outs args vs oprs s_orig1 s1,
           instr_write_outputs outs args vs oprs s_orig2 s2 in
-        (unchanged_at' (aux_write_set outs args oprs) s1' s2'))) =
+        let locs = aux_write_set outs args oprs in
+        (unchanged_at' locs s1' s2' /\
+         unchanged_except locs s1 s1' /\
+         unchanged_except locs s2 s2'))) =
   let s1', s2' =
     instr_write_outputs outs args vs oprs s_orig1 s1,
     instr_write_outputs outs args vs oprs s_orig2 s2 in
@@ -440,6 +456,8 @@ let rec lemma_instr_write_outputs_only_writes
         let s2_old, s2 = s2, instr_write_output_explicit i v o s_orig2 s2 in
         lemma_unchanged_at'_maintained loc_rest loc_op_r s1_old s1 s2_old s2;
         lemma_instr_write_outputs_only_writes outs args vs oprs s_orig1 s1 s_orig2 s2;
+        lemma_instr_write_outputs_only_affects_write_extend outs args vs oprs s_orig1 s1 loc_op_r;
+        lemma_instr_write_outputs_only_affects_write_extend outs args vs oprs s_orig2 s2 loc_op_r;
         let s1 = instr_write_outputs outs args vs oprs s_orig1 s1 in
         let s2 = instr_write_outputs outs args vs oprs s_orig2 s2 in
         lemma_unchanged_at_append loc_op_r (aux_write_set outs args oprs) s1 s2;
@@ -462,6 +480,8 @@ let rec lemma_instr_write_outputs_only_writes
         let s2_old, s2 = s2, instr_write_output_implicit i v s_orig2 s2 in
         lemma_unchanged_at'_maintained loc_rest loc_op_r s1_old s1 s2_old s2;
         lemma_instr_write_outputs_only_writes outs args vs oprs s_orig1 s1 s_orig2 s2;
+        lemma_instr_write_outputs_only_affects_write_extend outs args vs oprs s_orig1 s1 loc_op_r;
+        lemma_instr_write_outputs_only_affects_write_extend outs args vs oprs s_orig2 s2 loc_op_r;
         let s1 = instr_write_outputs outs args vs oprs s_orig1 s1 in
         let s2 = instr_write_outputs outs args vs oprs s_orig2 s2 in
         lemma_unchanged_at_append loc_op_r (aux_write_set outs args oprs) s1 s2;
