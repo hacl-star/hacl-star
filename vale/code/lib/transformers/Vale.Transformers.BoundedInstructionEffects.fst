@@ -531,7 +531,7 @@ let rec lemma_unchanged_at'_maintained_upon_flag_update (locs:locations) (s1 s2:
   | [] -> ()
   | x :: xs -> lemma_unchanged_at'_maintained_upon_flag_update xs s1 s2 flags
 
-let lemma_eval_instr_ok
+let lemma_eval_instr_unchanged_at'
     (it:instr_t_record) (oprs:instr_operands_t it.outs it.args) (ann:instr_annotation it)
     (s1 s2:machine_state) :
   Lemma
@@ -544,7 +544,8 @@ let lemma_eval_instr_ok
         let s1' = eval_instr it oprs ann s1 in
         let s2' = eval_instr it oprs ann s2 in
         (Some? s1' = Some? s2') /\
-        (Some? s1' ==> (Some?.v s1').ms_ok = (Some?.v s2').ms_ok))) =
+        (Some? s1' ==>
+         unchanged_at' w (Some?.v s1') (Some?.v s2')))) =
   let r, w = rw_set_of_ins (Instr it oprs ann) in
   let InstrTypeRecord #outs #args #havoc_flags' i = it in
   let vs1 = instr_apply_eval outs args (instr_eval i) oprs s1 in
@@ -556,13 +557,27 @@ let lemma_eval_instr_ok
     | HavocFlags -> {s1 with ms_flags = havoc_flags}, {s2 with ms_flags = havoc_flags}
     | PreserveFlags -> s1, s2
   in
-  let _ = FStar.Option.mapTot (fun vs -> instr_write_outputs outs args vs oprs s1 s11) vs1 in
-  let _ = FStar.Option.mapTot (fun vs -> instr_write_outputs outs args vs oprs s2 s22) vs2 in
+  let s111 = FStar.Option.mapTot (fun vs -> instr_write_outputs outs args vs oprs s1 s11) vs1 in
+  let s222 = FStar.Option.mapTot (fun vs -> instr_write_outputs outs args vs oprs s2 s22) vs2 in
   match vs1 with
   | None -> ()
   | Some vs ->
     lemma_unchanged_at'_maintained_upon_flag_update (aux_read_set1 outs args oprs) s1 s2 havoc_flags;
-    lemma_instr_write_outputs_only_writes outs args vs oprs s1 s11 s2 s22
+    lemma_instr_write_outputs_only_writes outs args vs oprs s1 s11 s2 s22;
+    if havoc_flags' = HavocFlags then (
+      let Some s1', Some s2' = s111, s222 in
+      let locs = aux_write_set outs args oprs in
+      if L.mem ALocOf locs then (
+        lemma_unchanged_at'_mem locs ALocOf s1' s2'
+      ) else (
+        lemma_unchanged_except_not_mem locs ALocOf
+      );
+      if L.mem ALocCf locs then (
+        lemma_unchanged_at'_mem locs ALocCf s1' s2'
+      ) else (
+        lemma_unchanged_except_not_mem locs ALocCf
+      )
+    ) else ()
 
 let lemma_machine_eval_ins_st_ok (i:ins{Instr? i}) (s1 s2:machine_state) :
   Lemma
@@ -575,7 +590,7 @@ let lemma_machine_eval_ins_st_ok (i:ins{Instr? i}) (s1 s2:machine_state) :
         let f = machine_eval_ins_st i in
         (run f s1).ms_ok = (run f s2).ms_ok)) =
   let Instr it oprs ann = i in
-  lemma_eval_instr_ok it oprs ann s1 s2
+  lemma_eval_instr_unchanged_at' it oprs ann s1 s2
 
 let lemma_machine_eval_ins_st_unchanged_behavior (i:ins{Instr? i}) (s1 s2:machine_state) :
   Lemma
