@@ -700,6 +700,29 @@ let rec lemma_mem_not_disjoint (a:location) (as1 as2:list location) :
       lemma_mem_not_disjoint a xs as2
     )
 
+let lemma_bounded_effects_means_same_ok (r w:locations) (f:st unit) (s1 s2 s1' s2':machine_state) :
+  Lemma
+    (requires (
+        (bounded_effects r w f) /\
+        (s1.ms_ok = s2.ms_ok) /\
+        (unchanged_at r s1 s2) /\
+        (s1' == run f s1) /\
+        (s2' == run f s2)))
+    (ensures (
+        ((run f s1).ms_ok = (run f s2).ms_ok))) = ()
+
+let lemma_both_not_ok (f1 f2:st unit) (r1 w1 r2 w2:locations) (s:machine_state) :
+  Lemma
+    (requires (
+        (bounded_effects r1 w1 f1) /\
+        (bounded_effects r2 w2 f2) /\
+        !!(rw_exchange_allowed (r1, w1) (r2, w2))))
+    (ensures (
+        (run2 f1 f2 s).ms_ok =
+        (run2 f2 f1 s).ms_ok)) =
+  lemma_disjoint_implies_unchanged_at r1 w2 s (run f2 s);
+  lemma_disjoint_implies_unchanged_at r2 w1 s (run f1 s)
+
 let lemma_commute (f1 f2:st unit) (r1 w1 r2 w2:list location) (s:machine_state) :
   Lemma
     (requires (
@@ -712,7 +735,9 @@ let lemma_commute (f1 f2:st unit) (r1 w1 r2 w2:list location) (s:machine_state) 
           (run2 f2 f1 s))) =
   let s12 = run2 f1 f2 s in
   let s21 = run2 f2 f1 s in
-  if not s12.ms_ok && not s21.ms_ok then () else (
+  if not s12.ms_ok || not s21.ms_ok then (
+    lemma_both_not_ok f1 f2 r1 w1 r2 w2 s
+  ) else (
     let is1 = run f1 s in
     let is2 = run f2 s in
     let is12 = run f2 is1 in
