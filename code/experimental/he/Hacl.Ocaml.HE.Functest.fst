@@ -118,6 +118,14 @@ let test_paillier () =
 
   print_string "\nPaillier test done\n"
 
+// Compared to this one:
+// https://github.com/n1analytics/python-paillier
+//
+// Since there's no specification, the comparison is to the most
+// popular github repository at the time of writing.
+//
+// The particular data is taken from here:
+// https://github.com/n1analytics/python-paillier/blob/master/phe/tests/paillier_test.py#L128
 val compare_paillier: unit -> ML unit
 let compare_paillier () =
   let p:prm = to_prime 293 in
