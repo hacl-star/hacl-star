@@ -282,7 +282,21 @@ let finish (#w:lanes) (#a:D.sha2_alg) (h:state_w w a) : fseq (hash a) w =
       let h: hash a = Lib.Sequence.sub sb 0 (D.hash_length a) in
       h)
 
-let hash1 (a:D.sha2_alg) (input:bytes{Lib.Sequence.length input < D.max_input_length a}) : hash a =
+let hashn (#w:lanes) (a:D.sha2_alg) (len:nat{len < D.max_input_length a}) (inputs:fseq (b:bytes{Lib.Sequence.length b = len}) w) : fseq (hash a) w =
+  let nblocks = len / D.block_length a in
+  let rest : nat = len % (D.block_length a) in
+  let st : state_w w a = init w a in
+  let st = repeati nblocks
+	   (fun i st ->
+	     let blocks = map #(b:bytes{Lib.Sequence.length b = len}) #(block a) #w (fun x -> Seq.slice x (i * D.block_length a) ((i+1) * D.block_length a)) inputs in
+	     compress #w #a blocks st) st in
+  let lasts = map  #(b:bytes{Lib.Sequence.length b = len}) #(lbytes rest) #w (fun x -> Seq.slice x (nblocks * D.block_length a) len) inputs in
+  let st = compress_last #w #a nblocks rest lasts st in
+  finish #w st 
+
+(*
+let hash1 (a:D.sha2_alg) (input:bytes{Lib.Sequence.length input < D.max_input_length a}) : hash a = hashn #1 a (Lib.Sequence.length input) input
+let hash1 (a:D.sha2_alg) (input:bytes{Lib.Sequence.length input < D.max_input_length a}) : hash a = 
   let nblocks = Lib.Sequence.length input / D.block_length a in
   let st = Lib.Sequence.repeat_blocks (D.block_length a) input
 	   (compress #1 #a)
@@ -290,19 +304,23 @@ let hash1 (a:D.sha2_alg) (input:bytes{Lib.Sequence.length input < D.max_input_le
 	   (init 1 a) in
   (finish #1 st <: hash a)
 
-let hash2 (a:D.sha2_alg) (input:bytes{Lib.Sequence.length input < D.max_input_length a}) : hash a =
-  let nblocks = Lib.Sequence.length input / (D.block_length a) in
-  let rest : nat = Lib.Sequence.length input % (D.block_length a) in
+let hash2 (a:D.sha2_alg) (input1:bytes{Lib.Sequence.length input1 < D.max_input_length a})
+			 (input2:bytes{Lib.Sequence.length input1 = Lib.Sequence.length input2}) : (hash a & hash a) = 
+  let nblocks = Lib.Sequence.length input1 / (D.block_length a) in
+  let rest : nat = Lib.Sequence.length input1 % (D.block_length a) in
   let st : state_w 2 a = init 2 a in
   let st = repeati nblocks
 	   (fun i st ->
-	     let bl = Seq.slice input (i * D.block_length a) ((i+1)* D.block_length a) in
-	     compress #2 #a (bl,bl) st) st in
-  let last = Seq.slice input (nblocks * D.block_length a) (Lib.Sequence.length input) in
-  let st = compress_last #2 #a nblocks rest (last,last) st in
+	     let bl1 = Seq.slice input1 (i * D.block_length a) ((i+1)* D.block_length a) in
+	     let bl2 = Seq.slice input2 (i * D.block_length a) ((i+1)* D.block_length a) in
+	     compress #2 #a (bl1,bl2) st) st in
+  let last1 = Seq.slice input1 (nblocks * D.block_length a) (Lib.Sequence.length input1) in
+  let last2 = Seq.slice input2 (nblocks * D.block_length a) (Lib.Sequence.length input2) in
+  let st = compress_last #2 #a nblocks rest (last1,last2) st in
   let (h1,h2) = finish #2 st in
-  h2 <: hash a
-  
+  (h1,h2)
+*)
+
 
 
 

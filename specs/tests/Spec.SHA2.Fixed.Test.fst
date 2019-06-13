@@ -245,26 +245,50 @@ let test_sha2 msg_len msg expected224 expected256 expected384 expected512 =
   let expected384:lbytes 48 = of_list expected384 in
   let expected512:lbytes 64 = of_list expected512 in
 
-  let test224 = Spec.hash2 Def.SHA2_224 msg in
-  let test256 = Spec.hash2 Def.SHA2_256 msg in
-  let test384 = Spec.hash2 Def.SHA2_384 msg in
-  let test512 = Spec.hash2 Def.SHA2_512 msg in
-
-(*
-  let test224 = Spec.hash1 Def.SHA2_224 msg in
-  let test256 = Spec.hash1 Def.SHA2_256 msg in
-  let test384 = Spec.hash1 Def.SHA2_384 msg in
-  let test512 = Spec.hash1 Def.SHA2_512 msg in
-*)
+  let test224 = Spec.hashn #1 Def.SHA2_224 (length msg) msg in
+  let test256 = Spec.hashn #1 Def.SHA2_256 (length msg) msg in
+  let test384 = Spec.hashn #1 Def.SHA2_384 (length msg) msg in
+  let test512 = Spec.hashn #1 Def.SHA2_512 (length msg) msg in
 
   let r224 = print_and_compare "\nExpected SHA2 224: " "\nComputed SHA2 224: " 28 expected224 test224 in
   let r256 = print_and_compare "\nExpected SHA2 256: " "\nComputed SHA2 256: " 32 expected256 test256 in
   let r384 = print_and_compare "\nExpected SHA2 384: " "\nComputed SHA2 384: " 48 expected384 test384 in
   let r512 = print_and_compare "\nExpected SHA2 512: " "\nComputed SHA2 512: " 64 expected512 test512 in
-  let res = r224 && r256 && r384 && r512 in
-  if res then IO.print_string "\nSHA2 Test ontime: Success!\n"
-  else IO.print_string "\nSHA2 Test ontime: Failure :(\n";
-  res
+  let res1 = r224 && r256 && r384 && r512 in
+
+  let (_,test224) = Spec.hashn #2 Def.SHA2_224 (length msg) (msg,msg) in
+  let (_,test256) = Spec.hashn #2 Def.SHA2_256 (length msg) (msg,msg) in
+  let (_,test384) = Spec.hashn #2 Def.SHA2_384 (length msg) (msg,msg) in
+  let (_,test512) = Spec.hashn #2 Def.SHA2_512 (length msg) (msg,msg) in
+
+  let r224 = print_and_compare "\nExpected SHA2 224: " "\nComputed SHA2 224: " 28 expected224 test224 in
+  let r256 = print_and_compare "\nExpected SHA2 256: " "\nComputed SHA2 256: " 32 expected256 test256 in
+  let r384 = print_and_compare "\nExpected SHA2 384: " "\nComputed SHA2 384: " 48 expected384 test384 in
+  let r512 = print_and_compare "\nExpected SHA2 512: " "\nComputed SHA2 512: " 64 expected512 test512 in
+  let res2 = r224 && r256 && r384 && r512 in
+
+  let zz = create (length msg) (u8 0x00) in
+
+  let (_,(test224,(_,_))) = Spec.hashn #4 Def.SHA2_224 (length msg) (zz,(msg,(zz,zz))) in
+  let (_,(test256,(_,_))) = Spec.hashn #4 Def.SHA2_256 (length msg) (zz,(msg,(zz,zz))) in
+  let (_,(test384,(_,_))) = Spec.hashn #4 Def.SHA2_384 (length msg) (zz,(msg,(zz,zz))) in
+  let (_,(test512,(_,_))) = Spec.hashn #4 Def.SHA2_512 (length msg) (zz,(msg,(zz,zz))) in
+
+  let r224 = print_and_compare "\nExpected SHA2 224: " "\nComputed SHA2 224: " 28 expected224 test224 in
+  let r256 = print_and_compare "\nExpected SHA2 256: " "\nComputed SHA2 256: " 32 expected256 test256 in
+  let r384 = print_and_compare "\nExpected SHA2 384: " "\nComputed SHA2 384: " 48 expected384 test384 in
+  let r512 = print_and_compare "\nExpected SHA2 512: " "\nComputed SHA2 512: " 64 expected512 test512 in
+  let res4 = r224 && r256 && r384 && r512 in
+
+  
+  if res1 then IO.print_string "\nSHA2 Test w=1: Success!\n"
+  else IO.print_string "\nSHA2 Test w=1: Failure :(\n";
+  if res2 then IO.print_string "\nSHA2 Test w=2: Success!\n"
+  else IO.print_string "\nSHA2 Test w=2: Failure :(\n";
+  if res4 then IO.print_string "\nSHA2 Test w=4: Success!\n"
+  else IO.print_string "\nSHA2 Test w=4: Failure :(\n";
+  
+  res1 && res2 && res4
 
 //
 // Main
