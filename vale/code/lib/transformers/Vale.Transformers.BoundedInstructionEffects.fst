@@ -605,7 +605,8 @@ let lemma_machine_eval_ins_st_unchanged_behavior (i:ins{Instr? i}) (s1 s2:machin
         let r, w = rw_set_of_ins i in
         let f = machine_eval_ins_st i in
         (unchanged_at w (run f s1) (run f s2)))) =
-  admit ()
+  let Instr it oprs ann = i in
+  lemma_eval_instr_unchanged_at' it oprs ann s1 s2
 
 let lemma_machine_eval_ins_st_bounded_effects_Instr (i:ins{Instr? i}) :
   Lemma
