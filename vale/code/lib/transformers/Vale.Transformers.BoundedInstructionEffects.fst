@@ -183,6 +183,107 @@ let lemma_machine_eval_ins_st_only_affects_write (i:ins{Instr? i}) (s:machine_st
   FStar.Classical.forall_intro (
     FStar.Classical.move_requires (lemma_machine_eval_ins_st_only_affects_write_aux i s))
 
+let rec lemma_unchanged_at_append (l1 l2:locations) (s1 s2:machine_state) :
+  Lemma
+    (ensures (
+        (unchanged_at (l1 `L.append` l2) s1 s2) <==>
+        (unchanged_at l1 s1 s2 /\ unchanged_at l2 s1 s2))) =
+  match l1 with
+  | [] -> ()
+  | x :: xs ->
+    lemma_unchanged_at_append xs l2 s1 s2
+
+let rec lemma_instr_apply_eval_args_same_read
+    (outs:list instr_out) (args:list instr_operand)
+    (f:instr_args_t outs args) (oprs:instr_operands_t_args args)
+    (s1 s2:machine_state) :
+  Lemma
+    (requires (unchanged_at (aux_read_set0 args oprs) s1 s2))
+    (ensures (
+        (instr_apply_eval_args outs args f oprs s1) ==
+        (instr_apply_eval_args outs args f oprs s2))) =
+  match args with
+  | [] -> ()
+  | i :: args ->
+    let (v1, v2, oprs) : option _ & option _ & instr_operands_t_args args =
+      match i with
+      | IOpEx i ->
+        let oprs = coerce oprs in
+        lemma_unchanged_at_append (both (locations_of_explicit i (fst oprs))) (aux_read_set0 args (snd oprs)) s1 s2;
+        (instr_eval_operand_explicit i (fst oprs) s1,
+         instr_eval_operand_explicit i (fst oprs) s2,
+         snd oprs)
+      | IOpIm i ->
+        let oprs = coerce oprs in
+        lemma_unchanged_at_append (both (locations_of_implicit i)) (aux_read_set0 args oprs) s1 s2;
+        (instr_eval_operand_implicit i s1,
+         instr_eval_operand_implicit i s2,
+         coerce oprs)
+    in
+    assume (v1 == v2); (* TODO Prove this *)
+    let f:arrow (instr_val_t i) (instr_args_t outs args) = coerce f in
+    let _ = bind_option v1 (fun v -> instr_apply_eval_args outs args (f v) oprs s1) in
+    let _ = bind_option v2 (fun v -> instr_apply_eval_args outs args (f v) oprs s2) in
+    match v1 with
+    | None -> ()
+    | Some v ->
+      lemma_instr_apply_eval_args_same_read outs args (f v) oprs s1 s2
+
+#push-options "--z3rlimit 20 --initial_fuel 4 --max_fuel 4 --initial_ifuel 1 --max_ifuel 1"
+let rec lemma_instr_apply_eval_inouts_same_read
+    (outs inouts:list instr_out) (args:list instr_operand)
+    (f:instr_inouts_t outs inouts args) (oprs:instr_operands_t inouts args)
+    (s1 s2:machine_state) :
+  Lemma
+    (requires (unchanged_at (aux_read_set1 inouts args oprs) s1 s2))
+    (ensures (
+        (instr_apply_eval_inouts outs inouts args f oprs s1) ==
+        (instr_apply_eval_inouts outs inouts args f oprs s2))) =
+  match inouts with
+  | [] ->
+    lemma_instr_apply_eval_args_same_read outs args f oprs s1 s2
+  | (Out, i)::inouts ->
+    let oprs =
+      match i with
+      | IOpEx i -> snd #(instr_operand_t i) (coerce oprs)
+      | IOpIm i -> coerce oprs
+    in
+    lemma_instr_apply_eval_inouts_same_read outs inouts args (coerce f) oprs s1 s2
+  | (InOut, i)::inouts ->
+    let (v1, v2, oprs) : option _ & option _ & instr_operands_t inouts args =
+      match i with
+      | IOpEx i ->
+        let oprs = coerce oprs in
+        lemma_unchanged_at_append (both (locations_of_explicit i (fst oprs))) (aux_read_set1 inouts args (snd oprs)) s1 s2;
+        (instr_eval_operand_explicit i (fst oprs) s1,
+         instr_eval_operand_explicit i (fst oprs) s2,
+         snd oprs)
+      | IOpIm i ->
+        (instr_eval_operand_implicit i s1,
+         instr_eval_operand_implicit i s2,
+         coerce oprs)
+    in
+    assume (v1 == v2); (* TODO Prove this *)
+    let f:arrow (instr_val_t i) (instr_inouts_t outs inouts args) = coerce f in
+    let _ = bind_option v1 (fun v -> instr_apply_eval_inouts outs inouts args (f v) oprs s1) in
+    let _ = bind_option v2 (fun v -> instr_apply_eval_inouts outs inouts args (f v) oprs s2) in
+    match v1 with
+    | None -> ()
+    | Some v ->
+      lemma_instr_apply_eval_inouts_same_read outs inouts args (f v) oprs s1 s2
+#pop-options
+
+let lemma_instr_apply_eval_same_read
+    (outs:list instr_out) (args:list instr_operand)
+    (f:instr_eval_t outs args) (oprs:instr_operands_t outs args)
+    (s1 s2:machine_state) :
+  Lemma
+    (requires (unchanged_at (aux_read_set1 outs args oprs) s1 s2))
+    (ensures (
+        (instr_apply_eval outs args f oprs s1) ==
+        (instr_apply_eval outs args f oprs s2))) =
+  lemma_instr_apply_eval_inouts_same_read outs outs args f oprs s1 s2
+
 let lemma_eval_instr_ok
     (it:instr_t_record) (oprs:instr_operands_t it.outs it.args) (ann:instr_annotation it)
     (s1 s2:machine_state) :
@@ -200,6 +301,8 @@ let lemma_eval_instr_ok
   let InstrTypeRecord #outs #args #havoc_flags' i = it in
   let vs1 = instr_apply_eval outs args (instr_eval i) oprs s1 in
   let vs2 = instr_apply_eval outs args (instr_eval i) oprs s2 in
+  lemma_instr_apply_eval_same_read outs args (instr_eval i) oprs s1 s2;
+  assert (vs1 == vs2);
   let s11 =
     match havoc_flags' with
     | HavocFlags -> {s1 with ms_flags = havoc_flags}
