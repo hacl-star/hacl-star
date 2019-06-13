@@ -464,3 +464,49 @@ val decrypt:
            (as_snat h0 (Sec?.q sec)) (as_snat h0 (Sec?.g sec)) (as_snat h0 c)
     )
 let decrypt #n2Len sec c res = l1_div_l2 sec c res
+
+val hom_add:
+     #n2Len:bn_len_s
+  -> n:lbignum n2Len
+  -> n2:lbignum n2Len
+  -> c1:lbignum n2Len
+  -> c2:lbignum n2Len
+  -> res:lbignum n2Len
+  -> Stack unit
+     (requires fun h ->
+       live h n /\ live h n2 /\ live h c1 /\ live h c2 /\ live h res /\
+       all_disjoint [loc n; loc n2; loc c1; loc c2; loc res] /\
+       as_snat h n > 1 /\
+       iscomp (as_snat h n) /\
+       as_snat h n2 = as_snat h n * as_snat h n /\
+       as_snat h c1 < as_snat h n2 /\
+       as_snat h c2 < as_snat h n2)
+     (ensures fun h0 _ h1 ->
+       modifies1 res h0 h1 /\
+       as_snat h1 res = S.hom_add #(as_snat h0 n) (as_snat h0 c1) (as_snat h0 c2))
+let hom_add #n2Len _ n2 c1 c2 res =
+  bn_len_s_fits n2Len;
+  bn_modular_mul n2 c1 c2 res
+
+val hom_mul_plain:
+     #n2Len:bn_len_s
+  -> n:lbignum n2Len
+  -> n2:lbignum n2Len
+  -> c:lbignum n2Len
+  -> k:lbignum n2Len
+  -> res:lbignum n2Len
+  -> Stack unit
+     (requires fun h ->
+       live h n /\ live h n2 /\ live h c /\ live h k /\ live h res /\
+       all_disjoint [loc n; loc n2; loc c; loc k; loc res] /\
+       as_snat h n > 1 /\
+       iscomp (as_snat h n) /\
+       as_snat h n2 = as_snat h n * as_snat h n /\
+       as_snat h c < as_snat h n2 /\
+       as_snat h k < as_snat h n)
+     (ensures fun h0 _ h1 ->
+       modifies1 res h0 h1 /\
+       as_snat h1 res = S.hom_mul_plain #(as_snat h0 n) (as_snat h0 c) (as_snat h0 k))
+let hom_mul_plain #n2Len _ n2 c k res =
+  bn_len_s_fits n2Len;
+  bn_modular_exp n2 c k res
