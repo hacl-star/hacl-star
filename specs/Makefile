@@ -29,6 +29,8 @@ ENABLE_HINTS = --use_hints --use_hint_hashes --record_hints --query_stats
 ALL_SOURCES = $(wildcard *.fst) $(wildcard *.fsti)
 
 FIXME = \
+	Spec.HPKE.fst \
+	Spec.HPKE.CFRG.fst \
 	Spec.RSAPSS.fst \
 	Spec.Poly1305.Generic.fst \
 	Spec.Hash_Generic.fst \
