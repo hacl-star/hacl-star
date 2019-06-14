@@ -40,9 +40,10 @@ test: Chacha20.exe \
 	hkdf.exe \
 	hpke.exe \
 	sha3.exe \
-	argon2i.exe
+	argon2i.exe \
+	rsapss.exe
 
-FIXME = dh.exe Salsa20.exe aes128cbc.exe hmac_generic.exe hpkecfrg.exe rsapss.exe chacha20_vec.exe poly1305_generic.exe poly1305_ml.exe qdsa.exe
+FIXME = dh.exe Salsa20.exe aes128cbc.exe hmac_generic.exe hpkecfrg.exe chacha20_vec.exe poly1305_generic.exe poly1305_ml.exe qdsa.exe
 
 
 #
@@ -184,6 +185,13 @@ argon2i.exe: $(LIBS_FILES) Spec.Argon2i.fst tests/Spec.Argon2i.Test.fst
 	$(OCAMLOPT) -I argon2i-ml $(OCAML_INCLUDES) $(addprefix argon2i-ml/, $(LIBS_ML)) argon2i-ml/Spec_Blake2.ml argon2i-ml/Spec_Argon2i.ml argon2i-ml/Spec_Argon2i_Test.ml -o argon2i.exe
 	./argon2i.exe
 
+rsapss.exe: $(LIBS_FILES) Spec.SHA2.Constants.fst Spec.Hash.Definitions.fst Spec.Hash.PadFinish.fst Spec.MD5.fst Spec.SHA1.fst Spec.SHA2.fst Spec.Hash.fst Spec.RSAPSS.fst tests/Spec.RSAPSS.Test.fst
+	mkdir -p rsapss-ml
+	$(FSTAR)  --codegen OCaml --lax $(LIBS_EX) --extract_module Spec.SHA2.Constants --extract_module Spec.Hash.Definitions --extract_module Spec.Hash.PadFinish --extract_module Spec.MD5 --extract_module Spec.SHA1 --extract_module Spec.SHA2 --extract_module Spec.Hash --extract_module Spec.RSAPSS --extract_module Spec.RSAPSS.Test --odir rsapss-ml $^
+	@echo 'let _ = test()' >> rsapss-ml/Spec_RSAPSS_Test.ml
+	$(OCAMLOPT) -I rsapss-ml $(OCAML_INCLUDES) $(addprefix rsapss-ml/, $(LIBS_ML)) rsapss-ml/Spec_SHA2_Constants.ml rsapss-ml/Spec_Hash_Definitions.ml rsapss-ml/Spec_Hash_PadFinish.ml rsapss-ml/Spec_MD5.ml rsapss-ml/Spec_SHA1.ml rsapss-ml/Spec_SHA2.ml rsapss-ml/Spec_Hash.ml rsapss-ml/Spec_RSAPSS.ml rsapss-ml/Spec_RSAPSS_Test.ml -o rsapss.exe
+	./rsapss.exe
+
 random.exe: $(LIBS_FILES) tests/Spec.Random.Test.fst
 	mkdir -p random-ml
 	$(FSTAR) --codegen OCaml --lax --extract_module Lib.IntTypes --extract_module Lib.RawIntTypes --extract_module Lib.LoopCombinators --extract_module Lib.Sequence --extract_module Lib.ByteSequence --extract_module Lib.PrintSequence --extract_module Spec.Random.Test --odir random-ml $^
@@ -227,13 +235,6 @@ random.exe: $(LIBS_FILES) tests/Spec.Random.Test.fst
 # 	@echo 'let _ = test()' >> hpkecfrg-ml/Spec_HPKE_CFRG_Test.ml
 # 	$(OCAMLOPT) -package cryptokit -I hpkecfrg-ml $(OCAML_INCLUDES) $(addprefix hpkecfrg-ml/, $(LIBS_ML)) hpkecfrg-ml/Lib_RandomSequence.ml hpkecfrg-ml/Spec_SHA2_Constants.ml hpkecfrg-ml/Spec_Hash_Definitions.ml hpkecfrg-ml/Spec_Hash_PadFinish.ml hpkecfrg-ml/Spec_MD5.ml hpkecfrg-ml/Spec_SHA1.ml hpkecfrg-ml/Spec_SHA2.ml hpkecfrg-ml/Spec_Hash.ml hpkecfrg-ml/Spec_HMAC.ml hpkecfrg-ml/Spec_HKDF.ml hpkecfrg-ml/Spec_Curve25519.ml hpkecfrg-ml/Spec_Curve448.ml hpkecfrg-ml/Spec_Agile_DH.ml hpkecfrg-ml/Spec_GaloisField.ml hpkecfrg-ml/Spec_AES.ml hpkecfrg-ml/Spec_GF128.ml hpkecfrg-ml/Spec_AES128_GCM.ml hpkecfrg-ml/Spec_Chacha20.ml hpkecfrg-ml/Spec_Poly1305.ml hpkecfrg-ml/Spec_Chacha20Poly1305.ml hpkecfrg-ml/Spec_Agile_AEAD.ml hpkecfrg-ml/Spec_HPKE_CFRG.ml hpke-ml/Spec_HPKE_CFRG_Test.ml -o hpkecfrg.exe
 # 	./hpkecfrg.exe
-
-# rsapss.exe: $(LIBS_FILES) Spec.SHA2.fst Spec.RSAPSS.fst tests/Spec.RSAPSS.Test.fst
-# 	mkdir -p rsapss-ml
-# 	$(FSTAR)  --codegen OCaml --lax $(LIBS_EX) --extract_module Spec.SHA2 --extract_module Spec.RSAPSS --extract_module Spec.RSAPSS.Test --odir rsapss-ml $^
-# 	@echo 'let _ = test()' >> rsapss-ml/Spec_RSAPSS_Test.ml
-# 	$(OCAMLOPT) -I rsapss-ml $(OCAML_INCLUDES) $(addprefix rsapss-ml/, $(LIBS_ML)) rsapss-ml/Spec_SHA2.ml rsapss-ml/Spec_RSAPSS.ml rsapss-ml/Spec_RSAPSS_Test.ml -o rsapss.exe
-# 	./rsapss.exe
 
 # chacha20_vec.exe: $(LIBS_FILES) Spec.CTR.fst Spec.Chacha20_vec.fst tests/Spec.Chacha20_vec.Test.fst
 # 	mkdir -p chacha20_vec-ml
