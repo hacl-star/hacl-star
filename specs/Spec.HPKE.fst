@@ -7,9 +7,9 @@ open Lib.Sequence
 open Lib.ByteSequence
 open Lib.RandomSequence
 
-module DH = Spec.DH
-module AEAD = Spec.AEAD
-module Hash = Spec.Hash
+module DH = Spec.Agile.DH
+module AEAD = Spec.Agile.AEAD
+module Hash = Spec.Hash.Definitions
 module HKDF = Spec.HKDF
 
 
