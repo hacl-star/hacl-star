@@ -872,6 +872,14 @@ let lemma_code_exchange (c1 c2 : code) (fuel:nat) (s1 s2 : machine_state) :
 assume val eq_code (c1 c2:code) : (b:bool{
     b ==> (machine_eval_code c1 == machine_eval_code c2)})
 
+let lemma_eq_code_exchange_allowed (c1 c1' c2:code) :
+  Lemma
+    (requires (
+        !!(code_exchange_allowed c1 c2) /\
+        (eq_code c1' c1)))
+    (ensures (!!(code_exchange_allowed c1' c2))) =
+  admit ()
+
 let rec find_code (c1:code) (cs2:codes) : possibly (i:nat{i < L.length cs2 /\ eq_code c1 (L.index cs2 i)}) =
   match cs2 with
   | [] -> Err ("Not found: " ^ fst (print_code c1 0 gcc))
@@ -978,7 +986,8 @@ let rec lemma_bubble_to_top (cs : codes) (i:nat{i < L.length cs}) (fuel:nat) (s 
   match i with
   | 0 -> ()
   | _ ->
-    assume !!(code_exchange_allowed x (L.hd cs));
+    lemma_eq_code_exchange_allowed (L.index cs i) x (L.hd cs);
+    assert !!(code_exchange_allowed x (L.hd cs));
     lemma_code_exchange x (L.hd cs) fuel s s;
     let Ok tlxs = bubble_to_top (L.tl cs) (i - 1) in
     assert (L.tl xs == tlxs);
