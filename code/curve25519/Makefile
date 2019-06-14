@@ -3,7 +3,7 @@ KREMLIN_HOME ?= ../../../../kremlin
 HACL_HOME    ?= ../../..
 
 OUTPUT_DIR    = .output
-HINT_DIR      = .hints
+HINT_DIR      ?= .hints
 GENERATED_DIR ?= curve25519-c
 OUT_DIR	      ?= curve25519-c
 

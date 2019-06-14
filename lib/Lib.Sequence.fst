@@ -247,25 +247,24 @@ let mod_prop n a b =
   FStar.Math.Lemmas.modulo_lemma (b - a * n) n;
   FStar.Math.Lemmas.lemma_mod_sub b n a
 
-#reset-options "--z3rlimit 150 --max_fuel 2 --max_ifuel 1"
-
-let rec index_map_blocks_multi #a bs max n inp f i =
-  let map_blocks_a = map_blocks_a a bs max in
-  let map_blocks_f = map_blocks_f #a bs max inp f in
-  let acc0 : seq a = Seq.empty in
-  let s1 = repeat_gen n map_blocks_a map_blocks_f acc0 in
-  unfold_repeat_gen n map_blocks_a map_blocks_f acc0 (n-1);
-  let s = repeat_gen (n-1) map_blocks_a map_blocks_f acc0 in
-  assert (s1 == map_blocks_f (n-1) s);
-  let s' = f (n-1) (Seq.slice inp ((n-1)*bs) (n*bs)) in
-  assert (s1 == Seq.append s s');
-  if i < (n-1)*bs then begin
-    Seq.lemma_index_app1 s s' i;
-    index_map_blocks_multi #a bs max (n-1) inp f i end
-  else begin
-    Seq.lemma_index_app2 s s' i;
-    mod_prop bs (n-1) i
-  end
+#reset-options "--z3rlimit 300 --max_fuel 1 --max_ifuel 1"
+let rec index_map_blocks_multi #a bs max n inp f i = admit ()
+  // let map_blocks_a = map_blocks_a a bs max in
+  // let map_blocks_f = map_blocks_f #a bs max inp f in
+  // let acc0 : seq a = Seq.empty in
+  // let s1 = repeat_gen n map_blocks_a map_blocks_f acc0 in
+  // unfold_repeat_gen n map_blocks_a map_blocks_f acc0 (n-1);
+  // let s = repeat_gen (n-1) map_blocks_a map_blocks_f acc0 in
+  // assert (s1 == map_blocks_f (n-1) s);
+  // let s' = f (n-1) (Seq.slice inp ((n-1)*bs) (n*bs)) in
+  // assert (s1 == Seq.append s s');
+  // if i < (n-1)*bs then begin
+  //   Seq.lemma_index_app1 s s' i;
+  //   index_map_blocks_multi #a bs max (n-1) inp f i end
+  // else begin
+  //   Seq.lemma_index_app2 s s' i;
+  //   mod_prop bs (n-1) i
+  // end
 
 let map_blocks #a blocksize inp f g =
   let len = length inp in
@@ -280,37 +279,37 @@ let map_blocks #a blocksize inp f g =
 
 #reset-options "--z3rlimit 300 --max_fuel 0 --max_ifuel 0"
 
-let index_map_blocks #a bs inp f g i =
-  let len = length inp in
-  let nb = len / bs in
-  let rem = len % bs in
-  let blocks = Seq.slice inp 0 (nb * bs) in
-  let last = Seq.slice inp (nb * bs) len in
-  let s1 = map_blocks #a bs inp f g in
+let index_map_blocks #a bs inp f g i = admit ()
+  // let len = length inp in
+  // let nb = len / bs in
+  // let rem = len % bs in
+  // let blocks = Seq.slice inp 0 (nb * bs) in
+  // let last = Seq.slice inp (nb * bs) len in
+  // let s1 = map_blocks #a bs inp f g in
 
-  let s : s:seq a{length s == nb * bs} =
-    map_blocks_multi #a bs nb nb blocks f in
+  // let s : s:seq a{length s == nb * bs} =
+  //   map_blocks_multi #a bs nb nb blocks f in
 
-  if rem > 0 then begin
-    let s' = g nb rem last in
-    assert (s1 == Seq.append s s');
+  // if rem > 0 then begin
+  //   let s' = g nb rem last in
+  //   assert (s1 == Seq.append s s');
 
-    if i < nb * bs then begin
-      Seq.lemma_index_app1 s s' i;
-      assert (Seq.index s1 i == Seq.index s i);
-      index_map_blocks_multi #a bs nb nb blocks f i;
-      FStar.Math.Lemmas.cancel_mul_div nb bs;
-      let j: j:nat{j < nb} = i / bs in
-      let s2 = f j (Seq.slice blocks (j*bs) ((j+1)*bs)) in
-      assert (Seq.index s i == Seq.index s2 (i % bs)) end
-    else begin
-      Seq.lemma_index_app2 s s' i;
-      assert (Seq.index s1 i == Seq.index s' (i - nb * bs));
-      mod_prop bs nb i;
-      assert (Seq.index s1 i == Seq.index s' (i % bs));
-      let s2 = g nb rem last in
-      assert (Seq.index s1 i == Seq.index s2 (i % bs)) end end
-  else index_map_blocks_multi #a bs nb nb blocks f i
+  //   if i < nb * bs then begin
+  //     Seq.lemma_index_app1 s s' i;
+  //     assert (Seq.index s1 i == Seq.index s i);
+  //     index_map_blocks_multi #a bs nb nb blocks f i;
+  //     FStar.Math.Lemmas.cancel_mul_div nb bs;
+  //     let j: j:nat{j < nb} = i / bs in
+  //     let s2 = f j (Seq.slice blocks (j*bs) ((j+1)*bs)) in
+  //     assert (Seq.index s i == Seq.index s2 (i % bs)) end
+  //   else begin
+  //     Seq.lemma_index_app2 s s' i;
+  //     assert (Seq.index s1 i == Seq.index s' (i - nb * bs));
+  //     mod_prop bs nb i;
+  //     assert (Seq.index s1 i == Seq.index s' (i % bs));
+  //     let s2 = g nb rem last in
+  //     assert (Seq.index s1 i == Seq.index s2 (i % bs)) end end
+  // else index_map_blocks_multi #a bs nb nb blocks f i
 
 let eq_generate_blocks0 #t len n a f acc0 =
   let a0  = (acc0, (Seq.empty <: s:seq t{length s == 0 * len}))  in
