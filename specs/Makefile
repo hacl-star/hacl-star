@@ -55,6 +55,9 @@ $(HINT_DIR):
 
 verify: $(addsuffix .checked, $(ROOTS))
 
+test:
+	$(MAKE) -f Makefile.test
+
 # Targets for interactive mode
 
 %.fst-in:
@@ -71,5 +74,6 @@ SHELL=/bin/bash
 
 clean:
 	rm -rf *.checked *~
+	rm -rf *.cmi *.cmo *.cmx *.o *~ *.out *.exe *-ml
 
 distclean: clean
