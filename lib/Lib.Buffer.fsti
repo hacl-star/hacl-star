@@ -260,10 +260,14 @@ let recallable (#t:buftype) (#a:Type0) (#len:size_t) (b:lbuffer_t t a len) =
   | MUT -> B.recallable (b <: buffer a)
 
 inline_for_extraction noextract
-let recall (#t:buftype) (#a:Type0) (#len:size_t) (b:lbuffer_t t a len) =
-  match t with
-  | IMMUT -> B.recall (b <: ibuffer a)
-  | MUT -> B.recall (b <: buffer a)
+let recall (#t:buftype) (#a:Type0) (#len:size_t) (b:lbuffer_t t a len)
+  : Stack unit
+    (requires fun _ -> recallable b)
+    (ensures  fun h0 _ h1 ->
+      live h0 b /\ h1 == h0)
+  = match t with
+    | IMMUT -> B.recall (b <: ibuffer a)
+    | MUT -> B.recall (b <: buffer a)
 
 unfold private
 let cpred (#a:Type0) (s:Seq.seq a) : B.spred a = fun s1 -> FStar.Seq.equal s s1

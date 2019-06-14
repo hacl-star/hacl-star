@@ -217,7 +217,7 @@ procedure Sub64Wrap(inout dst:dst_opr64, in src:opr64)
     modifies
         efl;
     ensures
-        dst == old(dst - src) % pow2_64;
+        dst == old(sub_wrap64(dst, src));
         updated_cf(efl, old(dst - src < 0));
 {
 }
@@ -231,7 +231,7 @@ procedure Sbb64(inout dst:dst_opr64, in src:opr64)
     requires
         valid_cf(efl);
     ensures
-        dst == old(dst - (src + (if cf(efl) then 1 else 0))) % pow2_64;
+        dst == old(sub_wrap64(dst, add_wrap64(src, (if cf(efl) then 1 else 0))));
         updated_cf(efl, old(dst - (src + (if cf(efl) then 1 else 0))) < 0);
 {
 }

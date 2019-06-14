@@ -338,7 +338,7 @@ let poly1305_update_multi_loop #s bs len text pre acc =
   fmul_rn_normalize acc pre
 #pop-options
 
-#push-options "--z3rlimit 150"
+#push-options "--z3rlimit 350"
 inline_for_extraction noextract
 val poly1305_update_multi:
     #s:field_spec

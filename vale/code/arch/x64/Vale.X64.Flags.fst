@@ -1,6 +1,17 @@
 module Vale.X64.Flags
 open Vale.X64.Machine_s
 
+type t = (m:Map.t flag flag_val_t{Set.equal (Map.domain m) (Set.complement Set.empty)})
+
+[@va_qattr "opaque_to_smt"]
+let sel (r:flag) (m:t) : flag_val_t =
+  Map.sel m r
+
+[@va_qattr "opaque_to_smt"]
+let upd (r:flag) (v:flag_val_t) (m:t) : t =
+  reveal_opaque (`%t) t;
+  Map.upd m r v
+
 let of_fun m =
   let m' = Map.const None in
   let m' = Map.upd m' 0 (m 0) in

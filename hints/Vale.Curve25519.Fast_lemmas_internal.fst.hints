@@ -8,7 +8,7 @@
       0,
       [ "@query" ],
       0,
-      "8d845aebde8c73a72a0eb31b80ba025b"
+      "cde5a035733a39d5545809163a6bf743"
     ],
     [
       "Vale.Curve25519.Fast_lemmas_internal.lemma_mul_pow2_bound",
@@ -20,7 +20,7 @@
         "refinement_interpretation_Tm_refine_72d6c48acb428d0fcded52586310dd6f"
       ],
       0,
-      "ca00fb51bc5e3380791c3c4ddde719c6"
+      "48f52955f58dcb4e0b8980c530998fc9"
     ],
     [
       "Vale.Curve25519.Fast_lemmas_internal.lemma_mul_pow2_bound",
@@ -29,7 +29,7 @@
       0,
       [ "@query" ],
       0,
-      "51599dc49b1db4bc64b37beef2d29668"
+      "198ac748b408f9aa43c4d01ef0b70012"
     ],
     [
       "Vale.Curve25519.Fast_lemmas_internal.lemma_mul_pow2_bound",
@@ -54,7 +54,7 @@
         "typing_Prims.pow2"
       ],
       0,
-      "e57886d013ee0227252e5e2ba65606b4"
+      "a1b31fc6bf6f7afc6c5292b635479e94"
     ],
     [
       "Vale.Curve25519.Fast_lemmas_internal.lemma_mul_bound64",
@@ -63,7 +63,7 @@
       0,
       [ "@query", "projection_inverse_BoxInt_proj_0" ],
       0,
-      "51680998d1bf7802259be52c886cb005"
+      "256dd0da43dec055b2961d4a9ae6e56d"
     ],
     [
       "Vale.Curve25519.Fast_lemmas_internal.lemma_intel_prod_sum_bound",
@@ -77,7 +77,7 @@
         "refinement_interpretation_Tm_refine_5514fbe9e08dfda40f950a7b9f1b2b98"
       ],
       0,
-      "a963bb37d885b8d9a0bd996feb8d3221"
+      "01ddcfff641ff9e46ee899f1be624047"
     ],
     [
       "Vale.Curve25519.Fast_lemmas_internal.lemma_double_bound",
@@ -88,12 +88,14 @@
         "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
         "equation_Vale.Def.Types_s.add_wrap",
         "equation_Vale.Def.Words_s.nat64", "equation_Vale.Def.Words_s.natN",
-        "primitive_Prims.op_LessThan", "projection_inverse_BoxBool_proj_0",
+        "primitive_Prims.op_Addition", "primitive_Prims.op_LessThan",
+        "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_5514fbe9e08dfda40f950a7b9f1b2b98"
       ],
       0,
-      "4a3710f2a2c5149de272294474795023"
+      "c6bac602a836afc226e2df121d716e3e"
     ]
   ]
 ]

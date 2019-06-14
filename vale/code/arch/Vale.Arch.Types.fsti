@@ -15,6 +15,8 @@ unfold let ( *^^ ) = quad32_xor
 
 unfold let add_wrap32 (x:nat32) (y:nat32) : nat32 = add_wrap x y
 unfold let add_wrap64 (x:nat64) (y:nat64) : nat64 = add_wrap x y
+unfold let sub_wrap32 (x:nat32) (y:nat32) : nat32 = sub_wrap x y
+unfold let sub_wrap64 (x:nat64) (y:nat64) : nat64 = sub_wrap x y
 
 unfold let iand32 (a:nat32) (b:nat32) : nat32 = iand a b
 unfold let ixor32 (a:nat32) (b:nat32) : nat32 = ixor a b

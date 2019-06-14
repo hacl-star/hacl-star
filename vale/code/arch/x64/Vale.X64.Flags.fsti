@@ -7,18 +7,11 @@ open Vale.Lib.Map16
 
 type flag_val_t = option bool
 
-type flags_def = (m:Map.t flag flag_val_t{Set.equal (Map.domain m) (Set.complement Set.empty)})
-[@"opaque_to_smt"]
-type t = flags_def
+val t : Type0
 
-[@va_qattr "opaque_to_smt"]
-let sel (r:flag) (m:t) : flag_val_t =
-  Map.sel m r
+val sel (f:flag) (m:t) : flag_val_t
 
-[@va_qattr "opaque_to_smt"]
-let upd (r:flag) (v:flag_val_t) (m:t) : t =
-  reveal_opaque (`%t) t;
-  Map.upd m r v
+val upd (f:flag) (v:flag_val_t) (m:t) : t
 
 let to_fun (m:t) : (FStar.FunctionalExtensionality.restricted_t flag (fun _ -> flag_val_t)) =
   FStar.FunctionalExtensionality.on flag (fun (r:flag) -> sel r m)

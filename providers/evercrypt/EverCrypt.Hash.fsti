@@ -116,7 +116,13 @@ let invariant (#a:alg) (s: state a) (m: HS.mem) =
 
 //18-07-06 as_acc a better name? not really a representation
 val repr: #a:alg ->
-  s:state a -> h:HS.mem { invariant s h } -> GTot (words_state a)
+  s:state a -> h:HS.mem -> GTot (words_state a)
+
+val alg_of_state: a:e_alg -> (
+  let a = G.reveal a in
+  s: state a -> Stack alg
+  (fun h0 -> invariant s h0)
+  (fun h0 a' h1 -> h0 == h1 /\ a' == a))
 
 // Waiting for these to land in LowStar.Modifies
 let loc_in (l: M.loc) (h: HS.mem) =

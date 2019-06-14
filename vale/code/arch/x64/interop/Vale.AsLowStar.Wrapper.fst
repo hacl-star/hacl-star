@@ -377,7 +377,7 @@ let rec stack_of_args_stack_args'_aux
         frame_update_valid_heap fixed v stack ptr
      )
 
-#push-options "--max_fuel 1 --max_ifuel 0 --z3rlimit 100 --z3refresh"
+#push-options "--max_fuel 1 --max_ifuel 0 --z3rlimit 150 --z3refresh"
 let rec stack_of_args_stack_args'
     (max_arity:nat)
     (n:nat)
@@ -419,7 +419,7 @@ let rec stack_of_args_stack_args'
     in aux args (Map.const_on Set.empty 0)
 #pop-options
 
-#reset-options "--z3rlimit 20"
+#reset-options "--z3rlimit 40"
 let core_create_lemma_stack_args
     (#max_arity:nat)
     (#arg_reg:IX64.arg_reg_relation max_arity)
@@ -437,6 +437,7 @@ let core_create_lemma_stack_args
       (requires
          stack_args' max_arity (List.length accu) accu init_rsp stack_map)
       (ensures LSig.stack_args max_arity (List.length accu) accu va_s)
+      (decreases (List.length accu))
     =
     match accu with
       | [] -> ()
