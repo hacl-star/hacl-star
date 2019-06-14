@@ -867,22 +867,12 @@ let lemma_code_exchange (c1 c2 : code) (fuel:nat) (s1 s2 : machine_state) :
 /// define a relation that tells us if some [codes] can be transformed
 /// into another using only allowed swaps.
 
-(* WARNING UNSOUND We need to figure out a way to check for equality
-   between [code]s.
+(* WARNING: We assume this function since it is not yet exposed. Once
+   exposed, we should be able to remove it from here *)
+assume val eq_code (c1 c2:code) : (b:bool{
+    b ==> (machine_eval_code c1 == machine_eval_code c2)})
 
-   THOUGHTS: The only place we _really_ need [eq_code] is within
-             [find_code] below. We can probably restructure the code a
-             little bit and instead of taking two codes as input, we
-             instead take a permutation; not entirely sure what that
-             would look like for nested blocks though. Possibly a
-             nested set of permutations? On the other hand, in order
-             to obtain equality between the different [code]s, we can
-             add in a "tag" into the [code] object which is then used
-             to expose equality. Not sure what that would look like,
-             or what the domino effect for that would be. *)
-assume val eq_code (c1 c2 : code) : (b:bool{b <==> c1 == c2})
-
-let rec find_code (c1:code) (cs2:codes) : possibly (i:nat{i < L.length cs2 /\ c1 == L.index cs2 i}) =
+let rec find_code (c1:code) (cs2:codes) : possibly (i:nat{i < L.length cs2 /\ eq_code c1 (L.index cs2 i)}) =
   match cs2 with
   | [] -> Err ("Not found: " ^ fst (print_code c1 0 gcc))
   | h2 :: t2 ->
@@ -976,7 +966,7 @@ and lemma_not_ok_propagate_while (c:code{While? c}) (fuel:nat) (s:machine_state)
 
 #push-options "--initial_fuel 3 --max_fuel 3"
 let rec lemma_bubble_to_top (cs : codes) (i:nat{i < L.length cs}) (fuel:nat) (s : machine_state)
-    (x : _{x == L.index cs i}) (xs : _{Ok xs == bubble_to_top cs i})
+    (x : _{eq_code x (L.index cs i)}) (xs : _{Ok xs == bubble_to_top cs i})
     (s_0 : _{Some s_0 == machine_eval_code x fuel s})
     (s_1 : _{Some s_1 == machine_eval_codes xs fuel s_0}) :
   Lemma
@@ -988,7 +978,7 @@ let rec lemma_bubble_to_top (cs : codes) (i:nat{i < L.length cs}) (fuel:nat) (s 
   match i with
   | 0 -> ()
   | _ ->
-    assert !!(code_exchange_allowed x (L.hd cs));
+    assume !!(code_exchange_allowed x (L.hd cs));
     lemma_code_exchange x (L.hd cs) fuel s s;
     let Ok tlxs = bubble_to_top (L.tl cs) (i - 1) in
     assert (L.tl xs == tlxs);
