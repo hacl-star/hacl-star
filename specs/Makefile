@@ -31,7 +31,6 @@ ALL_SOURCES = $(wildcard *.fst) $(wildcard *.fsti)
 FIXME = \
 	Spec.HPKE.fst \
 	Spec.HPKE.CFRG.fst \
-	Spec.RSAPSS.fst \
 	Spec.Poly1305.Generic.fst \
 	Spec.Hash_Generic.fst \
 	Spec.Hash_Generic.fsti \
