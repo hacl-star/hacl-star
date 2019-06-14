@@ -28,7 +28,13 @@ ENABLE_HINTS = --use_hints --use_hint_hashes --record_hints --query_stats
 
 ALL_SOURCES = $(wildcard *.fst) $(wildcard *.fsti)
 
-FIXME =
+FIXME = \
+	Spec.RSAPSS.fst \
+	Spec.Poly1305.Generic.fst \
+	Spec.Hash_Generic.fst \
+	Spec.Hash_Generic.fsti \
+	Spec.HMAC_Generic.fst \
+	Spec.HMAC_Generic.fsti
 
 ROOTS = $(filter-out $(FIXME),$(ALL_SOURCES))
 
