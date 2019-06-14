@@ -1,5 +1,6 @@
 module Vale.Transformers.BoundedInstructionEffects
 
+open Vale.X64.Bytes_Code_s
 open Vale.X64.Machine_Semantics_s
 
 open Vale.Transformers.PossiblyMonad
@@ -56,11 +57,19 @@ let bounded_effects (reads writes:locations) (f:st unit) : GTot Type0 =
     )
   )
 
+(** Safely bounded instructions are instructions that we can guarantee
+    [bounded_effects] upon their execution. For the rest of the
+    instructions, we currently don't have proofs about
+    [bounded_effects] for them. *)
+let safely_bounded (i:ins) =
+  Instr? i
+
 (** The evaluation of an instruction [i] is bounded by the read/write
     set given by [rw_set_of_ins i]. *)
 val lemma_machine_eval_ins_st_bounded_effects :
   (i:ins) ->
   Lemma
+    (requires (safely_bounded i))
     (ensures (
         (let r, w = rw_set_of_ins i in
          (bounded_effects r w (machine_eval_ins_st i)))))

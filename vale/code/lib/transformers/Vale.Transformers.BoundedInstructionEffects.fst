@@ -624,11 +624,4 @@ let lemma_machine_eval_ins_st_bounded_effects_Instr (i:ins{Instr? i}) :
 let lemma_machine_eval_ins_st_bounded_effects i =
   match i with
   | Instr _ _ _ -> lemma_machine_eval_ins_st_bounded_effects_Instr i
-  | Push _ _ ->
-    admit ()
-  | Pop _ _ ->
-    admit ()
-  | Alloc _ ->
-    admit ()
-  | Dealloc _ ->
-    admit ()
+  | _ -> assert_norm (not (safely_bounded i))
