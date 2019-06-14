@@ -34,5 +34,12 @@ test-snapshot:
 	cp -f tmp_25519.h vale_25519.h
 	rm -f tmp_25519.h
 
+test-tezos-snapshot: test-snapshot
+	mkdir -p test/tezos
+	cp test/curve51-test.c test/tezos
+	sed -i 's/Hacl_Curve25519_51_ecdh/Tezos_curve25519_51_ecdh/g' test/tezos/curve51-test.c
+	cc $(CFLAGS) -I . Hacl_Curve25519_51.c Tezos.c test/tezos/curve51-test.c -L . -lkremlib -o out/test_curve25519_51_tezos.exe
+	./out/test_curve25519_51_tezos.exe
+
 clean:
 	rm -rf out

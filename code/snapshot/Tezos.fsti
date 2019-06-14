@@ -11,7 +11,7 @@ open Hacl.Impl.Curve25519.Generic
 
 module S = Spec.Curve25519
 
-val curve25519_64_ecdh:
+val curve25519_51_ecdh:
     shared:lbuffer uint8 32ul
   -> my_priv:lbuffer uint8 32ul
   -> their_pub:lbuffer uint8 32ul

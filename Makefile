@@ -236,35 +236,3 @@ hints: code.dir-hints secure_api.dir-hints specs.dir-hints
 NORMAL="\\033[0;39m"
 CYAN="\\033[1;36m"
 
-.PHONY: dump-%
-dump-%:
-	mkdir -p dump
-	GENERATED_DIR=$(HACL_HOME)/dump make -C code/$* stage1
-	rm -f dump/Makefile.*
-
-snapshot: dump-poly1305 dump-chacha20 dump-curve25519
-	cp lib/c/vec-intrin.h dump
-	cp $(KREMLIN_HOME)/kremlib/dist/generic/libkremlib.a dump
-	cp $(KREMLIN_HOME)/kremlib/dist/generic/TestLib.h dump
-	cp $(KREMLIN_HOME)/kremlib/dist/generic/FStar_UInt_8_16_32_64.h dump
-	cp $(KREMLIN_HOME)/include/kremlib.h dump
-	cp -r $(KREMLIN_HOME)/include/kremlin dump/kremlin
-	cp code/curve25519/vale_25519.h dump
-	cp code/curve25519/rfc7748_25519.h dump
-
-	mkdir -p dump/test
-	cp code/poly1305/poly1305_test.c dump/test
-	cp code/chacha20/chacha20*-test.c dump/test
-	mkdir -p dump/test/hacl-c
-	cp snapshots/hacl-c/Hacl_Chacha20_Vec128.[ch] dump/test/hacl-c
-	cp snapshots/hacl-c/Hacl_Chacha20.[ch] dump/test/hacl-c
-	cp snapshots/hacl-c/vec128.h dump/test/hacl-c
-	cp code/curve25519/curve51-test.c dump/test
-	cp code/curve25519/curve64-test.c dump/test
-	cp code/curve25519/curve64-rfc-test.c dump/test
-	cp code/curve25519/vale/obj/curve25519-x86_64-darwin.S dump/test
-	cp -r code/curve25519/rfc7748_src dump/test
-	cp Makefile.snapshot dump/Makefile
-
-test-snapshot:
-	make -C dump test-snapshot
