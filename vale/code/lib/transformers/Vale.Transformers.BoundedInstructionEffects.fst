@@ -103,14 +103,15 @@ let rw_set_of_ins i =
   | Instr i oprs _ ->
     read_set i oprs, write_set i oprs
   | Push src t ->
-    ALocReg (Reg 0 rRsp) :: both (locations_of_operand64 src),
+    ALocReg (Reg 0 rRsp) :: ALocStack :: both (locations_of_operand64 src),
     [ALocReg (Reg 0 rRsp); ALocStack]
   | Pop dst t ->
     ALocReg (Reg 0 rRsp) :: ALocStack :: fst (locations_of_operand64 dst),
     ALocReg (Reg 0 rRsp) :: snd (locations_of_operand64 dst)
-  | Alloc _
-  | Dealloc _ ->
+  | Alloc _ ->
     [ALocReg (Reg 0 rRsp)], [ALocReg (Reg 0 rRsp)]
+  | Dealloc _ ->
+    [ALocStack; ALocReg (Reg 0 rRsp)], [ALocStack; ALocReg (Reg 0 rRsp)]
 
 #push-options "--z3rlimit 20 --max_fuel 2 --max_ifuel 1"
 let rec lemma_instr_write_outputs_only_affects_write
