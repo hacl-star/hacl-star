@@ -1,4 +1,4 @@
-module Spec.AEAD
+module Spec.Agile.AEAD
 
 open FStar.Mul
 open Lib.IntTypes
@@ -80,6 +80,7 @@ val aead_decrypt:
   Tot (option (lbytes (length c)))
 
 let aead_decrypt a k n c mac aad =
+  admit();
   match a with
   | AEAD_AES128_GCM -> Spec.AES128_GCM.aead_decrypt k n c mac aad
   | AEAD_Chacha20_Poly1305 -> Spec.Chacha20Poly1305.aead_decrypt k n c mac aad

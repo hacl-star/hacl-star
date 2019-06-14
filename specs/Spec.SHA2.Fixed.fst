@@ -279,13 +279,13 @@ let store_hash_inner (#w:lanes) (#a:D.sha2_alg) (h:fseq (fseq (D.word a) (D.stat
 		     (i:nat{i < w}) (p:unit): unit & lbytes (D.word_length a * D.state_word_length a) =
     (), fseq_to_bytes_be h.[i]
 
+#set-options "--z3rlimit 50"
+
 let store_hash (#w:lanes) (#a:D.sha2_alg) (h:state_w w a) : lbytes (w * D.word_length a * D.state_word_length a) =
     let th = createi w (fun i -> createi (D.state_word_length a) (fun j -> h.[j].[i])) in
     let p,s = Lib.Sequence.generate_blocks (D.word_length a * D.state_word_length a) w w store_hash_a
 	      (store_hash_inner #w #a th) () in
-    s 
-
-#set-options "--z3rlimit 50"
+    s
 
 let finish (#w:lanes) (#a:D.sha2_alg) (h:state_w w a) : fseq (hash a) w =
     let hb: lbytes (w * D.word_length a * D.state_word_length a) = store_hash #w #a h in
@@ -306,11 +306,11 @@ let hashn (#w:lanes) (a:D.sha2_alg) (len:nat{len < D.max_input_length a}) (input
 	     compress #w #a blocks st) st in
   let lasts = map  #(b:bytes{Lib.Sequence.length b = len}) #(lbytes rest) #w (fun x -> Seq.slice x (nblocks * D.block_length a) len) inputs in
   let st = compress_last #w #a nblocks rest lasts st in
-  finish #w st 
+  finish #w st
 
 (*
 let hash1 (a:D.sha2_alg) (input:bytes{Lib.Sequence.length input < D.max_input_length a}) : hash a = hashn #1 a (Lib.Sequence.length input) input
-let hash1 (a:D.sha2_alg) (input:bytes{Lib.Sequence.length input < D.max_input_length a}) : hash a = 
+let hash1 (a:D.sha2_alg) (input:bytes{Lib.Sequence.length input < D.max_input_length a}) : hash a =
   let nblocks = Lib.Sequence.length input / D.block_length a in
   let st = Lib.Sequence.repeat_blocks (D.block_length a) input
 	   (compress #1 #a)
@@ -319,7 +319,7 @@ let hash1 (a:D.sha2_alg) (input:bytes{Lib.Sequence.length input < D.max_input_le
   (finish #1 st <: hash a)
 
 let hash2 (a:D.sha2_alg) (input1:bytes{Lib.Sequence.length input1 < D.max_input_length a})
-			 (input2:bytes{Lib.Sequence.length input1 = Lib.Sequence.length input2}) : (hash a & hash a) = 
+			 (input2:bytes{Lib.Sequence.length input1 = Lib.Sequence.length input2}) : (hash a & hash a) =
   let nblocks = Lib.Sequence.length input1 / (D.block_length a) in
   let rest : nat = Lib.Sequence.length input1 % (D.block_length a) in
   let st : state_w 2 a = init 2 a in
@@ -334,8 +334,3 @@ let hash2 (a:D.sha2_alg) (input1:bytes{Lib.Sequence.length input1 < D.max_input_
   let (h1,h2) = finish #2 st in
   (h1,h2)
 *)
-
-
-
-
-

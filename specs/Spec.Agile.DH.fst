@@ -1,4 +1,4 @@
-module Spec.DH
+module Spec.Agile.DH
 
 open FStar.Mul
 open Lib.IntTypes

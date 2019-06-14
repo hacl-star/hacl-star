@@ -626,15 +626,15 @@ let poly1305_finish_ #s tag key ctx =
   reduce_felem acc;
   let h1 = ST.get () in
   assert ((fas_nat h1 acc).[0] == (feval h0 acc).[0]);
-  let (f10, f11) = felem_to_limbs acc in
-  assert ((limb_v f11).[0] * pow2 64 + (limb_v f10).[0] == (fas_nat h1 acc).[0] % pow2 128);
-  let (f20, f21) = bytes_to_limbs #s ks in
-  assert ((limb_v f21).[0] * pow2 64 + (limb_v f20).[0] == BSeq.nat_from_bytes_le (as_seq h0 ks));
+  let (f10, f11) = uints64_from_felem_le acc in
+  assert (v f11 * pow2 64 + v f10 == (fas_nat h1 acc).[0] % pow2 128);
+  let (f20, f21) = uints64_from_bytes_le ks in
+  assert (v f21 * pow2 64 + v f20 == BSeq.nat_from_bytes_le (as_seq h0 ks));
   let (f30, f31) = mod_add128 (f10, f11) (f20, f21) in
-  assert ((limb_v f31).[0] * pow2 64 + (limb_v f30).[0] ==
+  assert (v f31 * pow2 64 + v f30 ==
     ((fas_nat h1 acc).[0] % pow2 128 + BSeq.nat_from_bytes_le (as_seq h0 ks)) % pow2 128);
   FStar.Math.Lemmas.lemma_mod_plus_distr_l (fas_nat h1 acc).[0] (BSeq.nat_from_bytes_le (as_seq h0 ks)) (pow2 128);
-  store_felem_le tag f30 f31
+  uints64_to_bytes_le tag f30 f31
 
 [@CInline]
 let poly1305_finish_32 : poly1305_finish_st M32 = poly1305_finish_ #M32

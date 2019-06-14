@@ -7,9 +7,9 @@ open Lib.Sequence
 open Lib.ByteSequence
 open Lib.RandomSequence
 
-module DH = Spec.DH
-module AEAD = Spec.AEAD
-module Hash = Spec.Hash
+module DH = Spec.Agile.DH
+module AEAD = Spec.Agile.AEAD
+module Hash = Spec.Hash.Definitions
 module HKDF = Spec.HKDF
 
 
@@ -17,7 +17,7 @@ let pow2_61 : _:unit{pow2 61 == 2305843009213693952} = assert_norm(pow2 61 == 23
 let pow2_35_less_than_pow2_61 : _:unit{pow2 32 * pow2 3 <= pow2 61 - 1} = assert_norm(pow2 32 * pow2 3 <= pow2 61 - 1)
 let pow2_35_less_than_pow2_125 : _:unit{pow2 32 * pow2 3 <= pow2 125 - 1} = assert_norm(pow2 32 * pow2 3 <= pow2 125 - 1)
 
-#set-options "--z3rlimit 100"
+#set-options "--z3rlimit 200"
 
 /// Types
 
@@ -95,8 +95,6 @@ type tag_s (cs:ciphersuite) = lbytes (size_tag cs)
 
 
 /// Cryptographic Primitives
-
-#reset-options "--z3rlimit 100 --max_fuel 0"
 
 val encap:
     cs: ciphersuite
@@ -203,8 +201,6 @@ val decrypt_single:
   -> input: bytes {size_key_dh cs + AEAD.size_tag (aead_of_cs cs) <= length input /\ length input + AEAD.size_block (aead_of_cs cs) <= max_size_t}
   -> context: lbytes 32 ->
   Tot (option (lbytes (length input - size_key_dh cs - AEAD.size_tag (aead_of_cs cs))))
-
-#reset-options "--z3rlimit 100"
 
 let decrypt_single cs sk input context =
   let epk = sub #uint8 #(length input) input 0 (size_key_dh cs) in

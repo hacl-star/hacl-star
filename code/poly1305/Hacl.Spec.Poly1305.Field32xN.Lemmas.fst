@@ -902,21 +902,10 @@ val store_felem5_lemma:
     (requires felem_fits5 f (1, 1, 1, 1, 1))
     (ensures
       (let (lo, hi) = store_felem5 f in
-      (forall (i:nat). i < w ==>
-	(uint64xN_v hi).[i] * pow2 64 + (uint64xN_v lo).[i] == (fas_nat5 f).[i] % pow2 128)))
+       v hi * pow2 64 + v lo == (fas_nat5 f).[0] % pow2 128))
     [SMTPat (store_felem5 f)]
 let store_felem5_lemma #w f =
-  match w with
-  | 1 ->
-    store_felem5_lemma_i #w f 0
-  | 2 ->
-    store_felem5_lemma_i #w f 0;
-    store_felem5_lemma_i #w f 1
-  | 4 ->
-    store_felem5_lemma_i #w f 0;
-    store_felem5_lemma_i #w f 1;
-    store_felem5_lemma_i #w f 2;
-    store_felem5_lemma_i #w f 3
+  store_felem5_lemma #w f
 
 val set_bit5_lemma:
   #w:lanes
@@ -947,26 +936,11 @@ let set_bit5_lemma #w f i =
     eq_intro (lfeval (set_bit5 f i)) tmp
 
 val mod_add128_lemma:
-    #w:lanes
-  -> a:(uint64xN w & uint64xN w)
-  -> b:(uint64xN w & uint64xN w)
+    a:(uint64 & uint64)
+  -> b:(uint64 & uint64)
   -> Lemma
-    (let (r0, r1) = mod_add128_ws a b in
-     let (a0, a1) = a in
-     let (b0, b1) = b in
-    (forall (i:nat). i < w ==>
-    (uint64xN_v r1).[i] * pow2 64 + (uint64xN_v r0).[i] ==
-      (((uint64xN_v a1).[i] + (uint64xN_v b1).[i]) * pow2 64 +
-      (uint64xN_v a0).[i] + (uint64xN_v b0).[i]) % pow2 128))
-let mod_add128_lemma #w a b =
-  match w with
-  | 1 ->
-    mod_add128_lemma_i a b 0
-  | 2 ->
-    mod_add128_lemma_i a b 0;
-    mod_add128_lemma_i a b 1
-  | 4 ->
-    mod_add128_lemma_i a b 0;
-    mod_add128_lemma_i a b 1;
-    mod_add128_lemma_i a b 2;
-    mod_add128_lemma_i a b 3
+    (let (r0, r1) = mod_add128 a b in
+     let (a0, a1) = a in let (b0, b1) = b in
+      v r1 * pow2 64 + v r0 == ((v a1 + v b1) * pow2 64 + v a0 + v b0) % pow2 128)
+let mod_add128_lemma a b =
+  mod_add128_lemma a b

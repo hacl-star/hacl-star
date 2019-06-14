@@ -58,21 +58,9 @@ val uints_from_bytes_le_lemma128_2: b:lseq uint8 64 -> Lemma
   b3 == uint_v hi.[0] /\
   b4 == uint_v hi.[1])
 
-val uint_to_bytes_le_lemma128: r:uint128 -> Lemma
-  (BSeq.uint_to_bytes_le r == BSeq.nat_to_bytes_le 16 (uint_v r))
-
-val uints_to_bytes_le_lemma64_1: lo:lseq uint64 1 -> hi:lseq uint64 1 -> Lemma
- (let b0 = BSeq.uints_to_bytes_le lo in
-  let b1 = BSeq.uints_to_bytes_le hi in
-  BSeq.nat_to_bytes_le 16 (uint_v hi.[0] * pow2 64 + uint_v lo.[0]) == concat b0 b1)
-
-val uints_to_bytes_le_lemma64_2: r:lseq uint64 2 -> Lemma
-  (BSeq.uints_to_bytes_le r == BSeq.nat_to_bytes_le 16 (uint_v r.[1] * pow2 64 + uint_v r.[0]))
-
-val uints_to_bytes_le_lemma128_2: r:lseq uint128 2 -> Lemma
- (let b = BSeq.uints_to_bytes_le r in
-  sub b 0 16 == BSeq.uint_to_bytes_le r.[0] /\
-  sub b 16 16 == BSeq.uint_to_bytes_le r.[1])
+val uints64_to_bytes_le_lemma: lo:uint64 -> hi:uint64 -> Lemma
+  (concat (BSeq.uint_to_bytes_le lo) (BSeq.uint_to_bytes_le hi) ==
+    BSeq.nat_to_bytes_le 16 (v hi * pow2 64 + v lo))
 
 val nat_from_bytes_le_eq_lemma: len:size_nat{len < 16} -> b:lseq uint8 len -> Lemma
  (let tmp = create 16 (u8 0) in

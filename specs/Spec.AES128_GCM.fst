@@ -64,6 +64,7 @@ let aead_init k n =
   let st = AES.aes_ctr_add_counter AES.AES128 st 1 in
   (st, gf_key, tag_key)
 
+
 val aead_encrypt:
     k: key
   -> n: nonce
@@ -78,12 +79,13 @@ let aead_encrypt k n m aad =
   let mac = ghash c aad gf_key tag_key in
   Seq.append c mac
 
+
 val aead_decrypt:
     k: key
   -> n: nonce
-  -> c: bytes
+  -> c: bytes{length c / 16 <= max_size_t /\ length c * 8 < pow2 64}
   -> mac:tag
-  -> aad:bytes ->
+  -> aad:bytes{length aad * 8 < pow2 64} ->
   Tot (option (b:bytes{length b = length c}))
 
 let aead_decrypt k n c tag aad =
