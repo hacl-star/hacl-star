@@ -68,6 +68,6 @@ verify: $(addsuffix .checked, $(ROOTS))
 SHELL=/bin/bash
 
 clean:
-	rm -rf *.checked
+	rm -rf *.checked *~
 
 distclean: clean
