@@ -9,6 +9,7 @@ open FStar.Mul
 val pow2_2: n:nat -> Lemma (pow2 2 = 4)  [SMTPat (pow2 n)]
 val pow2_3: n:nat -> Lemma (pow2 3 = 8)  [SMTPat (pow2 n)]
 val pow2_4: n:nat -> Lemma (pow2 4 = 16) [SMTPat (pow2 n)]
+val pow2_127: n:nat -> Lemma (pow2 127 = 0x80000000000000000000000000000000) [SMTPat (pow2 n)]
 
 ///
 /// Definition of machine integer base types
@@ -20,7 +21,7 @@ type inttype =
 let unsigned = function
   | U1 | U8 | U16 | U32 | U64 | U128 -> true
   | _ -> false
-  
+
 let signed = function
   | S8 | S16 | S32 | S64 | S128 -> true
   | _ -> false
@@ -57,14 +58,14 @@ let bits = function
   | U128 -> 128
   | S128 -> 128
 
-unfold 
+unfold
 let modulus (t:inttype) = pow2 (bits t)
 
-unfold 
+unfold
 let maxint (t:inttype) =
   if unsigned t then pow2 (bits t) - 1 else pow2 (bits t - 1) - 1
 
-unfold 
+unfold
 let minint (t:inttype) =
   if unsigned t then 0 else -(pow2 (bits t - 1))
 
@@ -234,12 +235,12 @@ let uint (#t:inttype{unsigned t}) (#l:secrecy_level) (n:range_t t) = mk_int #t #
 unfold
 let sint (#t:inttype{signed t}) (#l:secrecy_level) (n:range_t t) = mk_int #t #l n
 
-val v_injective: #t:inttype -> #l:secrecy_level -> a:int_t t l -> Lemma 
+val v_injective: #t:inttype -> #l:secrecy_level -> a:int_t t l -> Lemma
   (mk_int (v #t #l a) == a)
   [SMTPat (v #t #l a)]
 
-val v_mk_int: #t:inttype -> #l:secrecy_level -> n:range_t t -> Lemma 
-  (v #t #l (mk_int #t #l n) == n) 
+val v_mk_int: #t:inttype -> #l:secrecy_level -> n:range_t t -> Lemma
+  (v #t #l (mk_int #t #l n) == n)
   [SMTPat (v #t #l (mk_int #t #l n))]
 
 unfold
@@ -274,8 +275,8 @@ unfold
 let u128 (n:range_t U64) : u:uint128{v #U128 u == n} = uint #U128 #SEC n
 
 unfold
-let i128 (n:range_t S64) : u:int128{v #S128 u == n} = 
-  assert_norm (pow2 (bits S64 - 1) <= pow2 (bits S128 - 1));  
+let i128 (n:range_t S64) : u:int128{v #S128 u == n} =
+  assert_norm (pow2 (bits S64 - 1) <= pow2 (bits S128 - 1));
   sint #S128 #SEC n
 
 unfold
@@ -313,12 +314,16 @@ let op_At_Percent_Dot x t =
   if unsigned t then x % modulus t
   else FStar.Int.(x @% modulus t)
 
+// Casting a value to a signed type is implementation-defined when the value can't 
+// be represented in the new type; e.g. (int8_t)128UL is implementation-defined
+// We rule out this case in the type of `u1`
+// See 6.3.1.3 in http://www.open-std.org/jtc1/sc22/wg14/www/docs/n1548.pdf
 inline_for_extraction
 val cast: #t:inttype -> #l:secrecy_level
-  -> t':inttype 
+  -> t':inttype
   -> l':secrecy_level{PUB? l \/ SEC? l'}
-  -> u1:int_t t l 
-  -> u2:int_t t' l'{v #t' #l' u2 == v #t #l u1 @%. t'}
+  -> u1:int_t t l{unsigned t' \/ range (v u1) t'}
+  -> u2:int_t t' l'{v u2 == v u1 @%. t'}
 
 unfold
 let to_u1 #t #l u : uint1 = cast #t #l U1 SEC u
@@ -370,16 +375,16 @@ inline_for_extraction
 val zeros: t:inttype -> l:secrecy_level -> n:int_t t l{v n = 0}
 
 inline_for_extraction
-val add_mod: #t:inttype -> #l:secrecy_level 
+val add_mod: #t:inttype{unsigned t} -> #l:secrecy_level
   -> int_t t l
-  -> int_t t l 
+  -> int_t t l
   -> int_t t l
 
-val add_mod_lemma: #t:inttype -> #l:secrecy_level
+val add_mod_lemma: #t:inttype{unsigned t} -> #l:secrecy_level
   -> a:int_t t l
   -> b:int_t t l
   -> Lemma
-    (v #t #l (add_mod #t #l a b) == (v a + v b) @%. t)
+    (v (add_mod a b) == (v a + v b) @%. t)
     [SMTPat (v #t #l (add_mod #t #l a b))]
 
 inline_for_extraction
@@ -402,18 +407,18 @@ val incr: #t:inttype -> #l:secrecy_level
 
 val incr_lemma: #t:inttype -> #l:secrecy_level
   -> a:int_t t l{v a < maxint t}
-  -> Lemma (v #t #l (incr a) == v a + 1)
+  -> Lemma (v (incr a) == v a + 1)
 
 inline_for_extraction
-val mul_mod: #t:inttype{~(U128? t) /\ ~(S128? t)} -> #l:secrecy_level
+val mul_mod: #t:inttype{unsigned t /\ ~(U128? t)} -> #l:secrecy_level
   -> int_t t l
   -> int_t t l
   -> int_t t l
 
-val mul_mod_lemma: #t:inttype{~(U128? t) /\ ~(S128? t)} -> #l:secrecy_level
+val mul_mod_lemma: #t:inttype{unsigned t /\ ~(U128? t)} -> #l:secrecy_level
   -> a:int_t t l
   -> b:int_t t l
-  -> Lemma (v #t #l (mul_mod #t #l a b) == (v a * v b) @%. t)
+  -> Lemma (v (mul_mod a b) == (v a * v b) @%. t)
   [SMTPat (v #t #l (mul_mod #t #l a b))]
 
 inline_for_extraction
@@ -431,27 +436,27 @@ val mul_lemma: #t:inttype{~(U128? t) /\ ~(S128? t)} -> #l:secrecy_level
 inline_for_extraction
 val mul64_wide: uint64 -> uint64 -> uint128
 
-val mul64_wide_lemma: a:uint64 -> b:uint64 -> Lemma 
+val mul64_wide_lemma: a:uint64 -> b:uint64 -> Lemma
   (v (mul64_wide a b) == v a * v b)
   [SMTPat (v (mul64_wide a b))]
-// KB: I'd prefer 
+// KB: I'd prefer
 // v (mul64_wide a b) = (pow2 (bits t) + v a - v b) % pow2 (bits t)
 
 inline_for_extraction
 val mul_s64_wide: int64 -> int64 -> int128
 
-val mul_s64_wide_lemma: a:int64 -> b:int64 -> Lemma 
+val mul_s64_wide_lemma: a:int64 -> b:int64 -> Lemma
   (v (mul_s64_wide a b) == v a * v b)
   [SMTPat (v (mul_s64_wide a b))]
 
 inline_for_extraction
-val sub_mod: #t:inttype -> #l:secrecy_level
+val sub_mod: #t:inttype{unsigned t} -> #l:secrecy_level
   -> int_t t l
   -> int_t t l
   -> int_t t l
 
-val sub_mod_lemma: #t:inttype -> #l:secrecy_level -> a:int_t t l -> b:int_t t l -> Lemma 
-  (v (sub_mod a b) == (v a - v b) @%. t)
+val sub_mod_lemma: #t:inttype{unsigned t} -> #l:secrecy_level -> a:int_t t l -> b:int_t t l 
+  -> Lemma (v (sub_mod a b) == (v a - v b) @%. t)
   [SMTPat (v #t #l (sub_mod #t #l a b))]
 
 inline_for_extraction
@@ -460,10 +465,10 @@ val sub: #t:inttype -> #l:secrecy_level
   -> b:int_t t l{range (v a - v b) t}
   -> int_t t l
 
-val sub_lemma: #t:inttype -> #l:secrecy_level 
-  -> a:int_t t l 
-  -> b:int_t t l{range (v a - v b) t} 
-  -> Lemma (v #t #l (sub #t #l a b) == v a - v b)
+val sub_lemma: #t:inttype -> #l:secrecy_level
+  -> a:int_t t l
+  -> b:int_t t l{range (v a - v b) t}
+  -> Lemma (v (sub a b) == v a - v b)
     [SMTPat (v #t #l (sub #t #l a b))]
 
 inline_for_extraction
@@ -473,7 +478,7 @@ val decr: #t:inttype -> #l:secrecy_level
 
 val decr_lemma: #t:inttype -> #l:secrecy_level
   -> a:int_t t l{minint t < v a}
-  -> Lemma (v #t #l (decr a) == v a - 1)
+  -> Lemma (v (decr a) == v a - 1)
 
 inline_for_extraction
 val logxor: #t:inttype -> #l:secrecy_level
@@ -496,19 +501,27 @@ val logand: #t:inttype -> #l:secrecy_level
   -> int_t t l
   -> int_t t l
 
-val logand_zeros: #t:inttype{~(U1? t)} -> #l:secrecy_level -> a:int_t t l ->
+val logand_zeros: #t:inttype -> #l:secrecy_level -> a:int_t t l ->
   Lemma (v (a `logand` zeros t l) == 0)
 
-val logand_ones: #t:inttype{~(U1? t)} -> #l:secrecy_level -> a:int_t t l ->
+val logand_ones: #t:inttype -> #l:secrecy_level -> a:int_t t l ->
   Lemma (v (a `logand` ones t l) == v a)
 
-let logand_v (#t:inttype{~(U1? t)}) (a: range_t t) (b:range_t t) : range_t t =
+// For backwards compatibility
+val logand_lemma: #t:inttype -> #l:secrecy_level 
+  -> a:int_t t l 
+  -> b:int_t t l
+  -> Lemma
+    (requires v a = 0 \/ v a = ones_v t)
+    (ensures  (if v a = 0 then v (a `logand` b) == 0 else v (a `logand` b) == v b))
+
+let logand_v (#t:inttype) (a:range_t t) (b:range_t t) : range_t t =
   match t with
   | S8 | S16 | S32 | S64 | S128 -> Int.logand #(bits t) a b
   | _ -> UInt.logand #(bits t) a b
 
-val logand_spec: #t:inttype{~(U1? t)} -> #l:secrecy_level
-  -> a:int_t t l 
+val logand_spec: #t:inttype -> #l:secrecy_level
+  -> a:int_t t l
   -> b:int_t t l
   -> Lemma (v (a `logand` b) == v a `logand_v` v b)
   //[SMTPat (v (a `logand` b))]
@@ -520,9 +533,9 @@ val logor: #t:inttype -> #l:secrecy_level
   -> int_t t l
 
 val logor_disjoint: #t:inttype{unsigned t} -> #l:secrecy_level
-  -> a:int_t t l 
-  -> b:int_t t l 
-  -> m:nat{m < bits t} 
+  -> a:int_t t l
+  -> b:int_t t l
+  -> m:nat{m < bits t}
   -> Lemma
     (requires 0 <= v a /\ v a < pow2 m /\ v b % pow2 m == 0)
     (ensures  v (a `logor` b) == v a + v b)
@@ -552,14 +565,14 @@ val shift_right_lemma: #t:inttype -> #l:secrecy_level
 
 inline_for_extraction
 val shift_left: #t:inttype -> #l:secrecy_level
-  -> int_t t l
+  -> a:int_t t l{unsigned t \/ 0 <= v a}
   -> shiftval t
   -> int_t t l
 
-val shift_left_lemma: 
-    #t:inttype 
+val shift_left_lemma:
+    #t:inttype
   -> #l:secrecy_level
-  -> a:int_t t l
+  -> a:int_t t l{unsigned t \/ 0 <= v a}
   -> b:shiftval t
   -> Lemma
     (v (shift_left a b) == (v a * pow2 (v b)) @%. t)
@@ -567,13 +580,13 @@ val shift_left_lemma:
 
 inline_for_extraction
 val rotate_right: #t:inttype -> #l:secrecy_level
-  -> int_t t l
+  -> a:int_t t l{unsigned t \/ 0 <= v a}
   -> rotval t
   -> int_t t l
 
 inline_for_extraction
 val rotate_left: #t:inttype -> #l:secrecy_level
-  -> int_t t l
+  -> a:int_t t l{unsigned t \/ 0 <= v a}
   -> rotval t
   -> int_t t l
 
@@ -582,26 +595,26 @@ val rotate_left: #t:inttype -> #l:secrecy_level
 ///
 
 inline_for_extraction
-val eq_mask: #t:inttype{unsigned t} -> int_t t SEC -> int_t t SEC -> int_t t SEC
+val eq_mask: #t:inttype{~(S128? t)} -> int_t t SEC -> int_t t SEC -> int_t t SEC
 
-val eq_mask_lemma: #t:inttype{unsigned t} -> a:int_t t SEC -> b:int_t t SEC -> Lemma
+val eq_mask_lemma: #t:inttype{~(S128? t)} -> a:int_t t SEC -> b:int_t t SEC -> Lemma
   (if v a = v b then v (eq_mask a b) == ones_v t
                 else v (eq_mask a b) == 0)
   [SMTPat (eq_mask #t a b)]
 
-val eq_mask_logand_lemma: 
-    #t:inttype{unsigned t /\ ~(U1? t)} 
-  -> a:int_t t SEC 
-  -> b:int_t t SEC 
+val eq_mask_logand_lemma:
+    #t:inttype{~(S128? t)}
+  -> a:int_t t SEC
+  -> b:int_t t SEC
   -> c:int_t t SEC -> Lemma
-  (if v a = v b then v (c `logand` eq_mask a b) == v c 
+  (if v a = v b then v (c `logand` eq_mask a b) == v c
                 else v (c `logand` eq_mask a b) == 0)
   [SMTPat (c `logand` eq_mask a b)]
 
 inline_for_extraction
-val neq_mask: #t:inttype{unsigned t} -> a:int_t t SEC -> b:int_t t SEC -> int_t t SEC
+val neq_mask: #t:inttype{~(S128? t)} -> a:int_t t SEC -> b:int_t t SEC -> int_t t SEC
 
-val neq_mask_lemma: #t:inttype{unsigned t /\ ~(U1? t)} -> a:int_t t SEC -> b:int_t t SEC -> Lemma
+val neq_mask_lemma: #t:inttype{~(S128? t)} -> a:int_t t SEC -> b:int_t t SEC -> Lemma
   (if v a = v b then v (neq_mask a b) == 0
                 else v (neq_mask a b) == ones_v t)
   [SMTPat (neq_mask #t a b)]
@@ -614,19 +627,19 @@ val gte_mask_lemma: #t:inttype{unsigned t} -> a:int_t t SEC -> b:int_t t SEC -> 
                 else v (gte_mask a b) == 0)
   [SMTPat (gte_mask #t a b)]
 
-val gte_mask_logand_lemma: #t:inttype{~(U1? t) /\ unsigned t} 
-  -> a:int_t t SEC 
-  -> b:int_t t SEC 
-  -> c:int_t t SEC 
+val gte_mask_logand_lemma: #t:inttype{unsigned t}
+  -> a:int_t t SEC
+  -> b:int_t t SEC
+  -> c:int_t t SEC
   -> Lemma
-  (if v a >= v b then v (c `logand` gte_mask a b) == v c 
+  (if v a >= v b then v (c `logand` gte_mask a b) == v c
                 else v (c `logand` gte_mask a b) == 0)
   [SMTPat (c `logand` gte_mask a b)]
 
 inline_for_extraction
 val lt_mask: #t:inttype{unsigned t} -> int_t t SEC -> int_t t SEC -> int_t t SEC
 
-val lt_mask_lemma: #t:inttype{unsigned t /\ ~(U1? t)} -> a:int_t t SEC -> b:int_t t SEC -> Lemma
+val lt_mask_lemma: #t:inttype{unsigned t} -> a:int_t t SEC -> b:int_t t SEC -> Lemma
   (if v a < v b then v (lt_mask a b) == ones_v t
                 else v (lt_mask a b) == 0)
   [SMTPat (lt_mask #t a b)]
@@ -634,7 +647,7 @@ val lt_mask_lemma: #t:inttype{unsigned t /\ ~(U1? t)} -> a:int_t t SEC -> b:int_
 inline_for_extraction
 val gt_mask: #t:inttype{unsigned t} -> int_t t SEC -> b:int_t t SEC -> int_t t SEC
 
-val gt_mask_lemma: #t:inttype{unsigned t /\ ~(U1? t)} -> a:int_t t SEC -> b:int_t t SEC -> Lemma
+val gt_mask_lemma: #t:inttype{unsigned t} -> a:int_t t SEC -> b:int_t t SEC -> Lemma
   (if v a > v b then v (gt_mask a b) == ones_v t
                 else v (gt_mask a b) == 0)
   [SMTPat (gt_mask #t a b)]
@@ -642,7 +655,7 @@ val gt_mask_lemma: #t:inttype{unsigned t /\ ~(U1? t)} -> a:int_t t SEC -> b:int_
 inline_for_extraction
 val lte_mask: #t:inttype{unsigned t} -> int_t t SEC -> int_t t SEC -> int_t t SEC
 
-val lte_mask_lemma: #t:inttype{unsigned t /\ ~(U1? t)} -> a:int_t t SEC -> b:int_t t SEC -> Lemma
+val lte_mask_lemma: #t:inttype{unsigned t} -> a:int_t t SEC -> b:int_t t SEC -> Lemma
   (if v a <= v b then v (lte_mask a b) == ones_v t
                 else v (lte_mask a b) == 0)
   [SMTPat (lte_mask #t a b)]
@@ -650,13 +663,13 @@ val lte_mask_lemma: #t:inttype{unsigned t /\ ~(U1? t)} -> a:int_t t SEC -> b:int
 #push-options "--max_fuel 1"
 
 inline_for_extraction
-let mod_mask (#t:inttype) (#l:secrecy_level) (m:shiftval t) : int_t t l =
+let mod_mask (#t:inttype{unsigned t}) (#l:secrecy_level) (m:shiftval t) : int_t t l =
   (mk_int 1 `shift_left` m) `sub_mod` mk_int 1
 
 #pop-options
 
-val mod_mask_lemma: #t:inttype -> #l:secrecy_level -> a:int_t t l -> m:shiftval t -> Lemma
-  (v (a `logand` mod_mask m) == v a % pow2 (v m))
+val mod_mask_lemma: #t:inttype{unsigned t} -> #l:secrecy_level -> a:int_t t l -> m:shiftval t
+  -> Lemma (v (a `logand` mod_mask m) == v a % pow2 (v m))
   [SMTPat (a `logand` mod_mask #t m)]
 
 ///
@@ -710,29 +723,30 @@ let ( ~. ) #t #l = lognot #t #l
 ///
 
 inline_for_extraction
-val div: #t:inttype{t <> U128 (*/\ t <> S128*) /\ unsigned t}
+val div: #t:inttype{~(U128? t) /\ ~(S128? t)}
   -> a:int_t t PUB
-  -> b:int_t t PUB{v b <> 0 (*/\ range (v a / v b) t*)}
+  -> b:int_t t PUB{v b <> 0 /\ (unsigned t \/ range FStar.Int.(v a / v b) t)}
   -> int_t t PUB
 
-val div_lemma: #t:inttype{t <> U128 /\ (*t <> S128*) unsigned t}
+val div_lemma: #t:inttype{~(U128? t) /\ ~(S128? t)}
   -> a:int_t t PUB
-  -> b:int_t t PUB{v b <> 0 (*/\ range (v a / v b) t*)}
-  -> Lemma
-  (v #t (div #t a b) == v a / v b)
+  -> b:int_t t PUB{v b <> 0 /\ (unsigned t \/ range FStar.Int.(v a / v b) t)}
+  -> Lemma (v (div a b) == FStar.Int.(v a / v b))
   [SMTPat (v #t (div #t a b))]
 
 inline_for_extraction
-val mod: #t:inttype{t <> U128 (*/\ t <> S128*) /\ unsigned t} 
-  -> a:int_t t PUB 
-  -> b:int_t t PUB{v b <> 0 (*/\ range (v a / v b) t*)} 
+val mod: #t:inttype{~(U128? t) /\ ~(S128? t)}
+  -> a:int_t t PUB
+  -> b:int_t t PUB{v b <> 0 /\ (unsigned t \/ range FStar.Int.(v a / v b) t)}
   -> int_t t PUB
 
-val mod_lemma: #t:inttype{t <> U128 /\ (*t <> S128*) unsigned t}
+val mod_lemma: #t:inttype{~(U128? t) /\ ~(S128? t)}
   -> a:int_t t PUB
-  -> b:int_t t PUB{v b <> 0 (*/\ range (v a / v b) t*)}
-  -> Lemma
-  (v #t (mod #t a b) == v a % v b)
+  -> b:int_t t PUB{v b <> 0 /\ (unsigned t \/ range FStar.Int.(v a / v b) t)}
+  -> Lemma (if signed t then 
+             v (mod a b) == FStar.Int.mod #(bits t) (v a) (v b)
+           else
+             v (mod a b) == FStar.UInt.mod #(bits t) (v a) (v b))
   [SMTPat (v #t (mod #t a b))]
 
 inline_for_extraction
@@ -742,8 +756,7 @@ inline_for_extraction
 val eq_lemma: #t:inttype
   -> a:int_t t PUB
   -> b:int_t t PUB
-  -> Lemma
-  (eq #t a b == (v a = v b))
+  -> Lemma (a `eq` b == (v a = v b))
   [SMTPat (eq #t a b)]
 
 inline_for_extraction
@@ -752,8 +765,7 @@ val ne: #t:inttype -> int_t t PUB -> int_t t PUB -> bool
 val ne_lemma: #t:inttype
   -> a:int_t t PUB
   -> b:int_t t PUB
-  -> Lemma
-  (ne #t a b == (v a <> v b))
+  -> Lemma (a `ne` b == (v a <> v b))
   [SMTPat (ne #t a b)]
 
 inline_for_extraction
