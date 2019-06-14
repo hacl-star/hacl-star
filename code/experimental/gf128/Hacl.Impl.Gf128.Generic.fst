@@ -122,7 +122,8 @@ let poly #s ctx len text =
   let blocks = len /. size 16 in
   let h2 = ST.get() in
   loop_nospec #h2 blocks acc (fun i ->
-    update #s acc (sub text (i *. size 16) (size 16)) r);
+    let tb = (sub text (i *. size 16) (size 16)) in
+    update #s acc tb r);
   let rem = len %. size 16 in
   if (rem >. size 0) then (
     let last = sub text (blocks *. size 16) rem in
@@ -147,7 +148,8 @@ let poly_pre #s ctx len text =
   let blocks = len /. size 16 in
   let h0 = ST.get() in
   loop_nospec2 #h0 blocks acc b (fun i ->
-    encode b (sub text (i *. size 16) (size 16));
+    let tb = sub text (i *. size 16) (size 16) in
+    encode b tb;
     fadd acc b;
     fmul_pre acc pre);
   let rem = len %. size 16 in
@@ -177,7 +179,8 @@ let poly4_add_mul #s ctx len text =
   let blocks = len /. size 64 in
   let h0 = ST.get() in
   loop_nospec2 #h0 blocks acc b4
-    (fun i -> encode4 b4 (sub text (i *. size 64) (size 64));
+    (fun i -> let tb = sub text (i *. size 64) (size 64) in
+           encode4 b4 tb;
            fadd_mul4 acc b4 pre );
   let rem = len %. size 64 in
   let last = sub text (blocks *. size 64) rem in
@@ -212,13 +215,15 @@ let poly4_mul_add #s ctx len text =
   let blocks = len /. size 64 in
   if (blocks >. 0ul) then (
     let h4 = ST.get () in
-    encode4 b4 (sub text (size 0) (size 64));
+    let tb = sub text (size 0) (size 64) in
+    encode4 b4 tb;
     fadd4 acc4 b4;
     let h5 = ST.get() in
     loop_nospec2 #h5 (blocks -. 1ul) b4 acc4 (fun i ->
-      encode4 b4 (sub text ((i +. size 1) *. size 64) (size 64));
+      let tb = sub text ((i +. size 1) *. size 64) (size 64) in
+      encode4 b4 tb;
       fmul4 acc4 pre;
-	   fadd4 acc4 b4);
+      fadd4 acc4 b4);
     let r4 = sub pre 0ul 2ul in
     let r3 = sub pre 2ul 2ul in
     let r2 = sub pre 4ul 2ul in

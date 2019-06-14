@@ -13,7 +13,6 @@ open Hacl.Gf128.NI
 
 module ST = FStar.HyperStack.ST
 
-
 #set-options "--z3rlimit 50"
 type aes_gcm_ctx = lbuffer vec128 22ul
 

@@ -58,8 +58,8 @@ val concat:
   -> s1:lseq a len1 ->
   Tot (s2:lseq a (len0 + len1){to_seq s2 == Seq.append (to_seq s0) (to_seq s1)})
 
-inline_for_extraction
 let ( @| ) #a #len0 #len1 s0 s1 = concat #a #len0 #len1 s0 s1
+
 
 (** Conversion of a Sequence to a list *)
 val to_list:
@@ -339,20 +339,34 @@ val generate_blocks:
   -> a:(i:nat{i <= max} -> Type)
   -> f:(i:nat{i < max} -> a i -> a (i + 1) & s:seq t{length s == len})
   -> init:a 0 ->
-  Tot (a n & s:seq t{ length s == n * len})
-
+  Tot (a n & s:seq t{length s == n * len})
 
 (* The following functions allow us to bridge between unbounded and bounded sequences *)
+
 val map_blocks_multi:
     #a:Type0
   -> blocksize:size_nat{blocksize > 0}
-  -> n:nat
-  -> inp:seq a{length inp == n * blocksize}
-  -> f:(i:nat{i < length inp / blocksize} -> lseq a blocksize -> lseq a blocksize) ->
-  Tot (out:seq a {length out == length inp})
+  -> max:nat
+  -> n:nat{n <= max}
+  -> inp:seq a{length inp == max * blocksize}
+  -> f:(i:nat{i < max} -> lseq a blocksize -> lseq a blocksize) ->
+  Tot (out:seq a {length out == n * blocksize})
 
+val index_map_blocks_multi:
+    #a:Type0
+  -> bs:size_nat{bs > 0}
+  -> max:pos
+  -> n:pos{n <= max}
+  -> inp:seq a{length inp == max * bs}
+  -> f:(i:nat{i < max} -> lseq a bs -> lseq a bs)
+  -> i:nat{i < n * bs}
+  -> Lemma (
+    let s1 = map_blocks_multi #a bs max n inp f in
+    FStar.Math.Lemmas.cancel_mul_div n bs;
+    let j: j:nat{j < max} = i / bs in
+    let s2 = f j (Seq.slice inp (j*bs) ((j+1)*bs)) in
+    Seq.index s1 i == Seq.index s2 (i % bs))
 
-(* The following functions allow us to bridge between unbounded and bounded sequences *)
 val map_blocks:
     #a:Type0
   -> blocksize:size_nat{blocksize > 0}
@@ -361,6 +375,33 @@ val map_blocks:
   -> g:(i:nat{i == length inp / blocksize} -> len:size_nat{len < blocksize} -> s:lseq a len -> lseq a len) ->
   Tot (out:seq a {length out == length inp})
 
+#set-options "--z3rlimit 100"
+
+val index_map_blocks:
+    #a:Type0
+  -> bs:size_nat{bs > 0}
+  -> inp:seq a
+  -> f:(i:nat{i < length inp / bs} -> lseq a bs -> lseq a bs)
+  -> g:(i:nat{i == length inp / bs} -> len:size_nat{len < bs} -> s:lseq a len -> lseq a len)
+  -> i:nat{i < length inp}
+  -> Lemma (
+    let len = length inp in
+    let nb = len / bs in
+    let rem = len % bs in
+    let blocks = Seq.slice inp 0 (nb * bs) in
+    let last = Seq.slice inp (nb * bs) len in
+
+    let s1 = map_blocks #a bs inp f g in
+    if i < nb * bs then begin
+      FStar.Math.Lemmas.cancel_mul_div nb bs;
+      let j: j:nat{j < nb} = i / bs in
+      let s2 = f j (Seq.slice inp (j*bs) ((j+1)*bs)) in
+      Seq.index s1 i == Seq.index s2 (i % bs) end
+    else begin
+      let s2 : lseq a rem = g nb rem last in
+      FStar.Math.Lemmas.modulo_lemma (i - nb * bs) bs;
+      FStar.Math.Lemmas.lemma_mod_sub i bs nb;
+      Seq.index s1 i == Seq.index s2 (i % bs) end)
 
 val eq_generate_blocks0:
     #t:Type0
@@ -371,7 +412,6 @@ val eq_generate_blocks0:
   -> init:a 0 ->
   Lemma (generate_blocks #t len n 0 a f init ==
 	 (init,Seq.empty))
-
 
 val unfold_generate_blocks:
     #t:Type0
@@ -386,7 +426,18 @@ val unfold_generate_blocks:
 	    let (acc',s') = f i acc in
 	    (acc',Seq.append s s')))
 
-
+val index_generate_blocks:
+    #t:Type0
+  -> len:size_nat{0 < len}
+  -> max:nat
+  -> n:pos{n <= max}
+  -> f:(i:nat{i < max} -> unit -> unit & s:seq t{length s == len})
+  -> i:nat{i < n * len}
+  -> Lemma (let j: j:nat{j < max} = i / len in
+           let a_spec (i:nat{i <= max}) = unit in
+           let _,s1 = generate_blocks #t len max n a_spec f () in
+           let _,s2 = f j () in
+           Seq.index s1 i == Seq.index s2 (i % len))
 
 (*
 #set-options "--z3rlimit 400 --max_ifuel 1"

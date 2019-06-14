@@ -54,7 +54,7 @@ let uint_from_bytes_le_lemma b =
   assert (r2.[1] == uint_from_bytes_le (sub b 8 8));
   assert (nat_from_intseq_le_ r2 == v r2.[0] + pow2 64 * nat_from_intseq_le_ (Seq.slice r2 1 2));
   assert (nat_from_intseq_le_ (Seq.slice r2 1 2) == v r2.[1])
-  
+
 let uints_from_bytes_le_lemma64_1 b =
   uint_from_bytes_le_lemma b
 
@@ -63,14 +63,6 @@ let uints_from_bytes_le_lemma64_2 b =
   uint_from_bytes_le_lemma (sub b 16 16)
 
 let uints_from_bytes_le_lemma128_2 b = ()
-
-let uint_to_bytes_le_lemma128 r = ()
-
-let uints_to_bytes_le_lemma64_1 lo hi = admit()
-
-let uints_to_bytes_le_lemma64_2 r = admit()
-
-let uints_to_bytes_le_lemma128_2 r = admit()
 
 val lemma_nat_from_bytes_le_zeroes: len:size_nat -> b:lseq uint8 len -> Lemma
   (requires (forall (i:nat). i < len ==> b.[i] == u8 0))
@@ -92,5 +84,22 @@ let nat_from_bytes_le_eq_lemma_ len b =
   assert (nat_from_intseq_le_ r == nat_from_intseq_le_ (Seq.slice r 0 len) + pow2 (len * 8) * nat_from_intseq_le_ (Seq.slice r len 16));
   assert (nat_from_intseq_le_ r == nat_from_intseq_le_ b + pow2 (len * 8) * nat_from_intseq_le_ (Seq.slice r len 16));
   lemma_nat_from_bytes_le_zeroes (16 - len) (Seq.slice r len 16)
+
+let uints64_to_bytes_le_lemma lo hi =
+  let lp = BSeq.nat_to_bytes_le #SEC 16 (v hi * pow2 64 + v lo) in
+  let rp = concat (BSeq.uint_to_bytes_le lo) (BSeq.uint_to_bytes_le hi) in
+  //assert (nat_from_bytes_le lp == v hi * pow2 64 + v lo);
+  //assert (uint_to_bytes_le lo == nat_to_bytes_le 8 (v lo));
+  //assert (uint_to_bytes_le hi == nat_to_bytes_le 8 (v hi));
+  //assert (nat_from_bytes_le rp == nat_from_bytes_le (concat #uint8 #8 #8 (nat_to_bytes_le 8 (v lo)) (nat_to_bytes_le 8 (v hi))));
+  let rp1 = concat #uint8 #8 #8 (nat_to_bytes_le 8 (v lo)) (nat_to_bytes_le 8 (v hi)) in
+  Seq.append_slices (nat_to_bytes_le #SEC 8 (v lo)) (nat_to_bytes_le 8 (v hi));
+  //assert (Seq.slice rp1 0 8 == nat_to_bytes_le 8 (v lo));
+  //assert (Seq.slice rp1 8 16 == nat_to_bytes_le 8 (v hi));
+  nat_from_bytes_le_slice_lemma #SEC #16 rp1 8;
+  //assert (nat_from_bytes_le rp1 == nat_from_bytes_le (Seq.slice rp1 0 8) + pow2 (8 * 8) * nat_from_bytes_le (Seq.slice rp1 8 16));
+  //assert (nat_from_bytes_le rp1 == nat_from_bytes_le (nat_to_bytes_le #SEC 8 (v lo)) + pow2 (8 * 8) * nat_from_bytes_le (nat_to_bytes_le #SEC 8 (v hi)));
+  //assert (nat_from_bytes_le rp1 == v lo + pow2 64 * v hi);
+  nat_from_intseq_le_inj lp rp
 
 let nat_from_bytes_le_eq_lemma len b = nat_from_bytes_le_eq_lemma_ len b

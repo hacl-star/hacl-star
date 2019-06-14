@@ -343,10 +343,19 @@ val fadd4:
   (ensures (fun h0 _ h1 -> modifies1 x h0 h1))
 
 let fadd4 (x:felem4) (y:felem4) =
-  x.(size 0) <- cl_add x.(size 0) y.(size 0);
-  x.(size 1) <- cl_add x.(size 1) y.(size 1);
-  x.(size 2) <- cl_add x.(size 2) y.(size 2);
-  x.(size 2) <- cl_add x.(size 3) y.(size 3)
+  let x0 = x.(0ul) in
+  let x1 = x.(1ul) in
+  let x2 = x.(2ul) in
+  let x3 = x.(3ul) in
+  let y0 = y.(0ul) in
+  let y1 = y.(1ul) in
+  let y2 = y.(2ul) in
+  let y3 = y.(3ul) in
+
+  x.(size 0) <- cl_add x0 y0;
+  x.(size 1) <- cl_add x1 y1;
+  x.(size 2) <- cl_add x2 y2;
+  x.(size 2) <- cl_add x3 y3
 
 
 [@ CInline]

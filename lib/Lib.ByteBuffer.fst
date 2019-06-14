@@ -258,7 +258,7 @@ let uints_from_bytes_be #t #l #len o i =
 let uints_to_bytes_le #t #l len o i =
   let h0 = ST.get () in
   [@ inline_let]
-  let a_spec i = unit in
+  let a_spec (i:nat{i <= v len}) = unit in
   [@ inline_let]
   let spec (h:mem) = BS.uints_to_bytes_le_inner (as_seq h i) in
   fill_blocks h0 (size (numbytes t)) len o a_spec (fun _ _ -> ()) (fun _ -> loc_none) spec
@@ -269,7 +269,7 @@ let uints_to_bytes_le #t #l len o i =
 let uints_to_bytes_be #t #l len o i =
   let h0 = ST.get () in
   [@ inline_let]
-  let a_spec i = unit in
+  let a_spec (i:nat{i <= v len}) = unit in
   [@ inline_let]
   let spec (h:mem) = BS.uints_to_bytes_be_inner (as_seq h i) in
   fill_blocks h0 (size (numbytes t)) len o a_spec (fun _ _ -> ()) (fun _ -> loc_none) spec
@@ -284,4 +284,3 @@ let uint_at_index_le #t #l #len i idx =
 let uint_at_index_be #t #l #len i idx = 
   let b = sub i (idx *! (size (numbytes t))) (size (numbytes t)) in
   uint_from_bytes_be b
-

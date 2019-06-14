@@ -56,10 +56,18 @@ val load_felem4:
   (ensures (fun h0 _ h1 -> modifies1 x h0 h1))
 
 let load_felem4 x y =
-  load_felem (sub x (size 0) (size 2)) (sub y (size 0) (size 16));
-  load_felem (sub x (size 2) (size 2)) (sub y (size 16) (size 16));
-  load_felem (sub x (size 4) (size 2)) (sub y (size 32) (size 16));
-  load_felem (sub x (size 6) (size 2)) (sub y (size 48) (size 16))
+  let x0 = (sub x (size 0) (size 2)) in
+  let y0 = (sub y (size 0) (size 16)) in
+  let x1 = (sub x (size 2) (size 2)) in
+  let y1 = (sub y (size 16) (size 16)) in
+  let x2 = (sub x (size 4) (size 2)) in
+  let y2 = (sub y (size 32) (size 16)) in
+  let x3 = (sub x (size 6) (size 2)) in
+  let y3 = (sub y (size 48) (size 16)) in
+  load_felem x0 y0;
+  load_felem x1 y1;
+  load_felem x2 y2;
+  load_felem x3 y3
 
 
 inline_for_extraction
@@ -152,10 +160,19 @@ val fadd4:
   (ensures (fun h0 _ h1 -> modifies1 x h0 h1))
 
 let fadd4 (x:felem4) (y:felem4) =
-  fadd (sub x (size 0) (size 2)) (sub y (size 0) (size 2));
-  fadd (sub x (size 2) (size 2)) (sub y (size 2) (size 2));
-  fadd (sub x (size 4) (size 2)) (sub y (size 4) (size 2));
-  fadd (sub x (size 6) (size 2)) (sub y (size 6) (size 2))
+  let x0 = (sub x (size 0) (size 2)) in
+  let y0 = (sub y (size 0) (size 2)) in
+  let x1 = (sub x (size 2) (size 2)) in
+  let y1 = (sub y (size 2) (size 2)) in
+  let x2 = (sub x (size 4) (size 2)) in
+  let y2 = (sub y (size 4) (size 2)) in
+  let x3 = (sub x (size 6) (size 2)) in
+  let y3 = (sub y (size 6) (size 2)) in
+
+  fadd x0 y0;
+  fadd x1 y1;
+  fadd x2 y2;
+  fadd x3 y3
 
 
 [@ "c_inline" ]

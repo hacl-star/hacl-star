@@ -91,6 +91,11 @@ inline_for_extraction
 val uints_to_bytes_le: #t:inttype -> #l:secrecy_level -> #len:size_nat{len * numbytes t < pow2 32}
   -> lseq (uint_t t l) len -> lbytes_l l (len * numbytes t)
 
+val index_uints_to_bytes_le: #t:inttype -> #l:secrecy_level -> #len:size_nat{len * numbytes t < pow2 32}
+  -> ul:lseq (uint_t t l) len -> i:nat{i < len * numbytes t}
+  -> Lemma
+    (index (uints_to_bytes_le #t #l #len ul) i == (uint_to_bytes_le ul.[i / numbytes t]).[i % numbytes t])
+
 inline_for_extraction
 val uints_to_bytes_be: #t:inttype -> #l:secrecy_level -> #len:size_nat{len * numbytes t < pow2 32}
   -> lseq (uint_t t l) len -> lbytes_l l (len * numbytes t)
@@ -99,19 +104,24 @@ inline_for_extraction
 val uints_from_bytes_le: #t:inttype{~(t == U1)} -> #l:secrecy_level -> #len:size_nat{len * numbytes t < pow2 32}
   -> lbytes_l l (len * numbytes t) -> lseq (uint_t t l) len
 
+val index_uints_from_bytes_le: #t:inttype{~(t == U1)} -> #l:secrecy_level -> #len:size_nat{len * numbytes t < pow2 32}
+  -> b:lbytes_l l (len * numbytes t) -> i:size_nat{i < len}
+  -> Lemma
+    (index (uints_from_bytes_le #t #l #len b) i == uint_from_bytes_le (sub b (i * numbytes t) (numbytes t)))
+
 inline_for_extraction
 val uints_from_bytes_be: #t:inttype{~(t == U1)} -> #l:secrecy_level -> #len:size_nat{len * numbytes t < pow2 32}
   -> lbytes_l l (len * numbytes t) -> lseq (uint_t t l) len
 
 inline_for_extraction
 val uint_at_index_le: #t:inttype{~(t == U1)} -> #l:secrecy_level -> #len:size_nat{len * numbytes t < pow2 32}
-  -> b:lbytes_l l (len * numbytes t) 
+  -> b:lbytes_l l (len * numbytes t)
   -> idx:nat{idx < len}
   -> u:uint_t t l{u == (uints_from_bytes_le #t #l #len b).[idx]}
 
 inline_for_extraction
 val uint_at_index_be: #t:inttype{~(t == U1)} -> #l:secrecy_level -> #len:size_nat{len * numbytes t < pow2 32}
-  -> b:lbytes_l l (len * numbytes t) 
+  -> b:lbytes_l l (len * numbytes t)
   -> idx:nat{idx < len}
   -> u:uint_t t l{u == (uints_from_bytes_be #t #l #len b).[idx]}
 

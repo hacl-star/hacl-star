@@ -1,5 +1,5 @@
 [
-  "êÚ¨0É¸µ¹óXeP¾ŠÎy",
+  "a5\u0011Ï)v\u0015gï ½­Hõ÷ø",
   [
     [
       "Hacl.Impl.Chacha20.Core32xN.create_state",
@@ -22,7 +22,7 @@
         "typing_LowStar.Buffer.trivial_preorder"
       ],
       0,
-      "9fca343bc28f6fa426640dd7483c1513"
+      "8f9be17d02eaec38d5a3b37c354af494"
     ],
     [
       "Hacl.Impl.Chacha20.Core32xN.create_state",
@@ -83,7 +83,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "f23c18e3ac068d5a05b344da036253e0"
+      "2dfd0fb15f837d2458468307717f9bd9"
     ],
     [
       "Hacl.Impl.Chacha20.Core32xN.load_state",
@@ -176,7 +176,7 @@
         "typing_tok_Lib.IntTypes.U32@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "72a6f0ad031466be0836407d31ada66c"
+      "72dd22fceba1dce7280c29db32d51c84"
     ],
     [
       "Hacl.Impl.Chacha20.Core32xN.load_state",
@@ -229,7 +229,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "2387f29820bc7b5ecc6ce82b5074d082"
+      "4e0f7b18f29c5b936be6f3ff9b8a94d1"
     ],
     [
       "Hacl.Impl.Chacha20.Core32xN.load_state",
@@ -354,7 +354,7 @@
         "typing_tok_Lib.IntTypes.U32@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "4fd54d130c508a3987479709518df67b"
+      "77ec064a657dceba37ef12dabca851d4"
     ],
     [
       "Hacl.Impl.Chacha20.Core32xN.store_state",
@@ -414,7 +414,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "0ceb23bc9b7fa1e952c4ad163a87408a"
+      "acd5d8e0fa6cc983e0d6ff7e553861ef"
     ],
     [
       "Hacl.Impl.Chacha20.Core32xN.store_state",
@@ -462,7 +462,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "df1a3d1936115f910c1619f1c39c6da9"
+      "e8114e6c7a536f8ea190eacbc5046f40"
     ],
     [
       "Hacl.Impl.Chacha20.Core32xN.store_state",
@@ -535,8 +535,10 @@
         "lemma_Lib.Buffer.modifies_preserves_live",
         "lemma_Lib.Buffer.modifies_sub", "lemma_Lib.IntTypes.mul_lemma",
         "lemma_Lib.IntTypes.pow2_values",
-        "lemma_Lib.IntTypes.uintv_injective", "lemma_Lib.Sequence.eq_elim",
+        "lemma_Lib.IntTypes.uintv_injective", "lemma_Lib.Sequence.eq_intro",
+        "lemma_LowStar.Monotonic.Buffer.as_seq_gsub",
         "lemma_LowStar.Monotonic.Buffer.lemma_live_equal_mem_domains",
+        "lemma_LowStar.Monotonic.Buffer.length_as_seq",
         "lemma_LowStar.Monotonic.Buffer.length_null_1",
         "lemma_LowStar.Monotonic.Buffer.length_null_2",
         "lemma_LowStar.Monotonic.Buffer.loc_disjoint_none_r",
@@ -554,7 +556,6 @@
         "projection_inverse_FStar.Pervasives.Native.Mktuple2__1",
         "projection_inverse_FStar.Pervasives.Native.Mktuple2__2",
         "projection_inverse_Spec.GaloisField.GF_t",
-        "refinement_interpretation_Tm_refine_0773a299ec43f8fb537ec511f9cd85af",
         "refinement_interpretation_Tm_refine_0a44a9c52461f7b29dab1fe1db7afc62",
         "refinement_interpretation_Tm_refine_244cb7c5828c28d18595aa07064423c4",
         "refinement_interpretation_Tm_refine_26a0fa60eebbbae337d30a56c9e9f3e9",
@@ -575,6 +576,7 @@
         "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
         "refinement_interpretation_Tm_refine_c2215b703b2340e9e4551c4e8820d7c8",
         "refinement_interpretation_Tm_refine_c6df74521cf8902970517b079ca845b9",
+        "refinement_interpretation_Tm_refine_d8eab0e32e3da6949058bafc441e03c7",
         "refinement_interpretation_Tm_refine_e7baecf1446b738b3604b097069629a3",
         "token_correspondence_Lib.IntTypes.mul",
         "token_correspondence_Lib.IntTypes.op_Star_Bang",
@@ -592,7 +594,6 @@
         "typing_LowStar.Buffer.trivial_preorder",
         "typing_LowStar.Monotonic.Buffer.address_liveness_insensitive_locs",
         "typing_LowStar.Monotonic.Buffer.len",
-        "typing_LowStar.Monotonic.Buffer.loc_buffer",
         "typing_LowStar.Monotonic.Buffer.loc_none",
         "typing_LowStar.Monotonic.Buffer.loc_union",
         "typing_LowStar.Monotonic.Buffer.mgsub", "typing_Spec.AES.gf8",
@@ -602,7 +603,7 @@
         "unit_typing"
       ],
       0,
-      "b768a7aec43ac8d1f080287093da75fc"
+      "3cb67f61be17068f4be979046ce24e76"
     ],
     [
       "Hacl.Impl.Chacha20.Core32xN.add_counter",
@@ -614,7 +615,7 @@
         "refinement_interpretation_Tm_refine_857ffcde50fc1c346517df5aa3885a82"
       ],
       0,
-      "1cb9bffe54f1e532847b67c8f089995b"
+      "5d653c8e19b960bab60487c3292382a3"
     ],
     [
       "Hacl.Impl.Chacha20.Core32xN.add_counter",
@@ -713,7 +714,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "00413adbee2d0cb5e2264b6f972945b3"
+      "029572637391e756712582f17453acf3"
     ],
     [
       "Hacl.Impl.Chacha20.Core32xN.copy_state",
@@ -749,7 +750,7 @@
         "typing_Lib.Buffer.loc", "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "0b99bf19ec5c1961b4bb9ba34efbdde9"
+      "9a2d3489e66f43f1120001be1ccb7066"
     ],
     [
       "Hacl.Impl.Chacha20.Core32xN.sum_state",
@@ -832,10 +833,10 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "397347fe1e40e2bf6264362aee3bcf6a"
+      "73b2f95e8fe628ebdd045ff0b1c0f70b"
     ],
     [
-      "Hacl.Impl.Chacha20.Core32xN.transpose_state1",
+      "Hacl.Impl.Chacha20.Core32xN.transpose1",
       1,
       2,
       1,
@@ -863,10 +864,10 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "d73ef6445f616417f7eea87372f1da79"
+      "6daacb4add71da167b527fc10c966719"
     ],
     [
-      "Hacl.Impl.Chacha20.Core32xN.transpose_state1",
+      "Hacl.Impl.Chacha20.Core32xN.transpose1",
       2,
       2,
       1,
@@ -894,10 +895,10 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "2e6d225c5b1d02be8d59f35c3210da2e"
+      "4bc2e89f590fa3af64c2b060dca81825"
     ],
     [
-      "Hacl.Impl.Chacha20.Core32xN.transpose_state1",
+      "Hacl.Impl.Chacha20.Core32xN.transpose1",
       3,
       2,
       1,
@@ -953,10 +954,10 @@
         "typing_tok_Lib.Buffer.MUT@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "625e6d7cc942462a3408df189bfb3a4e"
+      "cf2a4ec898d28366113f67fe6d9f99ba"
     ],
     [
-      "Hacl.Impl.Chacha20.Core32xN.transpose_state4",
+      "Hacl.Impl.Chacha20.Core32xN.transpose4",
       1,
       2,
       1,
@@ -984,10 +985,10 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "749b8e1bad53080c29218a9a43e547d2"
+      "fbb01bd19fde9c66140c0fa882635679"
     ],
     [
-      "Hacl.Impl.Chacha20.Core32xN.transpose_state4",
+      "Hacl.Impl.Chacha20.Core32xN.transpose4",
       2,
       2,
       1,
@@ -1015,10 +1016,10 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "57bb6f6d4e003aacb6948a48f7acf343"
+      "c1edfe94e5bbb6c3a41259cf8b781754"
     ],
     [
-      "Hacl.Impl.Chacha20.Core32xN.transpose_state4",
+      "Hacl.Impl.Chacha20.Core32xN.transpose4",
       3,
       2,
       1,
@@ -1088,7 +1089,6 @@
         "projection_inverse_FStar.Pervasives.Native.Mktuple4__3",
         "projection_inverse_FStar.Pervasives.Native.Mktuple4__4",
         "projection_inverse_Spec.GaloisField.GF_t",
-        "refinement_interpretation_Tm_refine_0773a299ec43f8fb537ec511f9cd85af",
         "refinement_interpretation_Tm_refine_0a44a9c52461f7b29dab1fe1db7afc62",
         "refinement_interpretation_Tm_refine_5a4fe33be2b93c781e552e491bb9dd31",
         "refinement_interpretation_Tm_refine_70597463dd221580f371f83615527f81",
@@ -1121,10 +1121,10 @@
         "typing_tok_Lib.IntTypes.U32@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "b03f21e05b7f269508b905f52b8ed355"
+      "e143529f726b3b4323bf5c075f6368d5"
     ],
     [
-      "Hacl.Impl.Chacha20.Core32xN.transpose_state8",
+      "Hacl.Impl.Chacha20.Core32xN.transpose8",
       1,
       2,
       1,
@@ -1152,10 +1152,10 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "a9a71283a70d3c43348199135e431c37"
+      "29da34b397cf004b1a61fc0837b2e411"
     ],
     [
-      "Hacl.Impl.Chacha20.Core32xN.transpose_state8",
+      "Hacl.Impl.Chacha20.Core32xN.transpose8",
       2,
       2,
       1,
@@ -1183,10 +1183,10 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "e4fe403186528a989f6827841dfd601f"
+      "c639a7d8eb069c8d92dc0557ffd8c760"
     ],
     [
-      "Hacl.Impl.Chacha20.Core32xN.transpose_state8",
+      "Hacl.Impl.Chacha20.Core32xN.transpose8",
       3,
       2,
       1,
@@ -1259,7 +1259,6 @@
         "projection_inverse_FStar.Pervasives.Native.Mktuple8__7",
         "projection_inverse_FStar.Pervasives.Native.Mktuple8__8",
         "projection_inverse_Spec.GaloisField.GF_t",
-        "refinement_interpretation_Tm_refine_0773a299ec43f8fb537ec511f9cd85af",
         "refinement_interpretation_Tm_refine_0a44a9c52461f7b29dab1fe1db7afc62",
         "refinement_interpretation_Tm_refine_2bb5cf44958ca1faf8fcdc830919f85f",
         "refinement_interpretation_Tm_refine_3380f7b34775ae92197d590aa3d498ca",
@@ -1289,10 +1288,10 @@
         "typing_tok_Lib.IntTypes.U32@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "2a30104a5875fb0642b4bf0f1fc4498c"
+      "1e2b14af04742bba3ea20b4c09298ecb"
     ],
     [
-      "Hacl.Impl.Chacha20.Core32xN.transpose_state",
+      "Hacl.Impl.Chacha20.Core32xN.transpose",
       1,
       2,
       1,
@@ -1342,7 +1341,6 @@
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
         "projection_inverse_Spec.GaloisField.GF_t",
-        "refinement_interpretation_Tm_refine_0773a299ec43f8fb537ec511f9cd85af",
         "refinement_interpretation_Tm_refine_26a0fa60eebbbae337d30a56c9e9f3e9",
         "refinement_interpretation_Tm_refine_2bb5cf44958ca1faf8fcdc830919f85f",
         "refinement_interpretation_Tm_refine_70597463dd221580f371f83615527f81",
@@ -1363,7 +1361,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "26bbdfb79ffc29161799884361d234c3"
+      "6baafc26bb1a80d2051bd76ec131b98b"
     ],
     [
       "Hacl.Impl.Chacha20.Core32xN.xor_block",
@@ -1457,7 +1455,7 @@
         "typing_tok_Lib.IntTypes.U32@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "eb4ee00f18f2bf16529be4c4f1d278bf"
+      "ac6f607e5fbff8a06bd5df6942702a67"
     ],
     [
       "Hacl.Impl.Chacha20.Core32xN.xor_block",
@@ -1526,7 +1524,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "1f9f019b0f443c921add42678c487668"
+      "016a26f9944da4c7a37586d049f9460e"
     ],
     [
       "Hacl.Impl.Chacha20.Core32xN.xor_block",
@@ -1707,7 +1705,7 @@
         "typing_tok_Lib.IntTypes.U32@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "c8daa7efd8fc605bcc777b71a139c859"
+      "7b34bd3f9d8f1b9dfb2bf34533c4ded5"
     ],
     [
       "Hacl.Impl.Chacha20.Core32xN.line",
@@ -1720,7 +1718,7 @@
         "refinement_interpretation_Tm_refine_5a32bd185edd6e5d2e9127c058b9a9f0"
       ],
       0,
-      "61e3019279365104d80866ee7c933459"
+      "1d9631008517c25a421b18a395a0b45a"
     ],
     [
       "Hacl.Impl.Chacha20.Core32xN.line",
@@ -1820,7 +1818,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "3e3829c0039aab9d261b201f07ce21a5"
+      "61af3e04f73a54081175177d1585f30e"
     ],
     [
       "Hacl.Impl.Chacha20.Core32xN.quarter_round",
@@ -1843,7 +1841,7 @@
         "refinement_interpretation_Tm_refine_5a32bd185edd6e5d2e9127c058b9a9f0"
       ],
       0,
-      "30b478f864ef260bfd4203370da59d8b"
+      "4de34a767f13140253a27fd6c511e69d"
     ],
     [
       "Hacl.Impl.Chacha20.Core32xN.quarter_round",
@@ -1920,7 +1918,7 @@
         "typing_tok_Lib.IntTypes.U32@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "766751edb867a9bb6a112cd660209a7e"
+      "ce5f2753743a87fda1f82c09ec9566cb"
     ],
     [
       "Hacl.Impl.Chacha20.Core32xN.double_round_",
@@ -2000,7 +1998,7 @@
         "typing_tok_Lib.IntTypes.U32@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "0a7d9681a4ccd99fa5ef1efe8c67b5c1"
+      "a0cc93d69b5cdb319522aa3d2dadce23"
     ],
     [
       "Hacl.Impl.Chacha20.Core32xN.double_round1",
@@ -2031,7 +2029,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "03b6506bc5e4de8c5e8c55e254a74b95"
+      "0b18fbe31dad6e6c3e7827d3e2a188a9"
     ],
     [
       "Hacl.Impl.Chacha20.Core32xN.double_round4",
@@ -2062,7 +2060,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "5f5269b30593a2053ad09c63647fbbd5"
+      "74291a25bfb5d2a93372f743c78a7ddf"
     ],
     [
       "Hacl.Impl.Chacha20.Core32xN.double_round8",
@@ -2093,7 +2091,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "53d6200b50f4a042f48ddf25885885d9"
+      "622acbf685ebdba01734ebca7b4364c5"
     ],
     [
       "Hacl.Impl.Chacha20.Core32xN.double_round",
@@ -2130,7 +2128,7 @@
         "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "7b541627a64ad16ce74ff502ddbb130c"
+      "e5a115d0145363742225cac8479c4259"
     ]
   ]
 ]

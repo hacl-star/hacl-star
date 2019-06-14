@@ -50,7 +50,7 @@ val gcm_update_padded:
   (requires (fun h -> live h ctx /\ live h text))
   (ensures (fun h0 _ h1 -> modifies1 ctx h0 h1))
 
-let gcm_update_padded  ctx len text = poly4_add_mul #FNI ctx len text
+let gcm_update_padded  ctx len text = gcm_update_blocks ctx len text
 
 
 [@ CInline ]

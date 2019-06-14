@@ -37,14 +37,14 @@ let test1_context = List.Tot.map u8_from_UInt8 [
 
 assume val e: Lib.RandomSequence.entropy
 
-let cs: Spec.ciphersuite = Spec.DH.DH_Curve25519, Spec.AEAD.AEAD_AES128_GCM, Spec.Hash.SHA2_256
+let cs: Spec.ciphersuite = Spec.Agile.DH.DH_Curve25519, Spec.Agile.AEAD.AEAD_AES128_GCM, Spec.Hash.Definitions.SHA2_256
 
 
 
 val test1: unit -> FStar.All.ML bool
 let test1 () =
   let test1_sk = of_list test1_sk in
-  let test1_pk = Spec.DH.secret_to_public (Spec.HPKE.curve_of_cs cs) test1_sk in
+  let test1_pk = Spec.Agile.DH.secret_to_public (Spec.HPKE.curve_of_cs cs) test1_sk in
   let test1_context = create 32 (u8 0) in
   let test1_input = create 32 (u8 0xFF) in
   (match Spec.HPKE.encap cs e test1_pk test1_context with
@@ -53,9 +53,9 @@ let test1 () =
     Lib.PrintSequence.print_label_lbytes dflag "\nHPKE Encap Secret" (Spec.HPKE.size_key cs) ek;
     Lib.PrintSequence.print_label_lbytes dflag "\nHPKE Encap Ephemeral Public" (Spec.HPKE.size_key_dh cs) epk);
     let output = Spec.HPKE.encrypt cs ek test1_input lbytes_empty (u32 0) in
-    let ciphertext = sub #uint8 #(32 + Spec.AEAD.size_tag Spec.AEAD.AEAD_AES128_GCM) output 0 32 in
-    let tag = sub #uint8 #(32 + Spec.AEAD.size_tag Spec.AEAD.AEAD_AES128_GCM) output 32 (Spec.AEAD.size_tag Spec.AEAD.AEAD_AES128_GCM) in
-    Lib.PrintSequence.print_label_lbytes dflag "\nHPKE Output" (32 + Spec.AEAD.size_tag Spec.AEAD.AEAD_AES128_GCM) output;
+    let ciphertext = sub #uint8 #(32 + Spec.Agile.AEAD.size_tag Spec.Agile.AEAD.AEAD_AES128_GCM) output 0 32 in
+    let tag = sub #uint8 #(32 + Spec.Agile.AEAD.size_tag Spec.Agile.AEAD.AEAD_AES128_GCM) output 32 (Spec.Agile.AEAD.size_tag Spec.Agile.AEAD.AEAD_AES128_GCM) in
+    Lib.PrintSequence.print_label_lbytes dflag "\nHPKE Output" (32 + Spec.Agile.AEAD.size_tag Spec.Agile.AEAD.AEAD_AES128_GCM) output;
     match Spec.HPKE.decap cs test1_sk epk test1_context with
     | None -> IO.print_string "\nError: Spec.HPKE.decap failed\n"; false
     | Some dk -> (
@@ -81,7 +81,7 @@ let test1 () =
 val test2: unit -> FStar.All.ML bool
 let test2 () =
   let test2_sk = of_list test1_sk in
-  let test2_pk = Spec.DH.secret_to_public (Spec.HPKE.curve_of_cs cs) test2_sk in
+  let test2_pk = Spec.Agile.DH.secret_to_public (Spec.HPKE.curve_of_cs cs) test2_sk in
   let test2_context = create 32 (u8 0) in
   let test2_input = create 128 (u8 0xFF) in
   match Spec.HPKE.encrypt_single e cs test2_pk test2_input test2_context with
