@@ -33,6 +33,8 @@ type hash_alg =
   | SHA1
   | MD5
 
+type algorithm = hash_alg
+
 let is_sha2 = function
   | SHA2_224 | SHA2_256 | SHA2_384 | SHA2_512 -> true
   | _ -> false
