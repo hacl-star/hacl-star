@@ -7,9 +7,9 @@ open Lib.Sequence
 open Lib.ByteSequence
 open Lib.RandomSequence
 
-module DH = Spec.DH
-module AEAD = Spec.AEAD
-module Hash = Spec.Hash
+module DH = Spec.Agile.DH
+module AEAD = Spec.Agile.AEAD
+module Hash = Spec.Hash.Definitions
 module HKDF = Spec.HKDF
 
 
@@ -119,7 +119,7 @@ let encap cs e pkR einfo =
   let e', skE = crypto_random e (size_key_dh cs) in
   let pkE = DH.secret_to_public (curve_of_cs cs) skE in
   let zz = DH.scalarmult (curve_of_cs cs) skE pkR in
-  let nh0 = create (Spec.Hash.size_hash (hash_of_cs cs)) (u8 0) in
+  let nh0 = create (Hash.hash_length (hash_of_cs cs)) (u8 0) in
   let secret = HKDF.hkdf_extract (hash_of_cs cs) nh0 zz in
   let context: lbytes (size_context cs) = (id_of_cs cs) @| pkE @| pkR @| einfo in
   let info_key: lbytes (size_context cs + size_label_key) = label_key @| context in
@@ -147,7 +147,7 @@ val decap:
   Tot (key_s cs & nonce_s cs)
 
 let decap cs pkE skR einfo =
-  let nh0 = create (Spec.Hash.size_hash (hash_of_cs cs)) (u8 0) in
+  let nh0 = create (Hash.size_hash (hash_of_cs cs)) (u8 0) in
   let zz = DH.scalarmult (curve_of_cs cs) skR pkE in
   let pkR = DH.secret_to_public (curve_of_cs cs) skR in
   let secret = HKDF.hkdf_extract (hash_of_cs cs) nh0 zz in
@@ -204,4 +204,4 @@ val decrypt:
 
 let decrypt cs skR pkE info aad ct mac =
   let keyIR, nonceIR = decap cs pkE skR info in
-  Spec.AEAD.aead_decrypt (aead_of_cs cs) keyIR nonceIR ct mac aad
+  AEAD.aead_decrypt (aead_of_cs cs) keyIR nonceIR ct mac aad
