@@ -17,7 +17,7 @@ let pow2_61 : _:unit{pow2 61 == 2305843009213693952} = assert_norm(pow2 61 == 23
 let pow2_35_less_than_pow2_61 : _:unit{pow2 32 * pow2 3 <= pow2 61 - 1} = assert_norm(pow2 32 * pow2 3 <= pow2 61 - 1)
 let pow2_35_less_than_pow2_125 : _:unit{pow2 32 * pow2 3 <= pow2 125 - 1} = assert_norm(pow2 32 * pow2 3 <= pow2 125 - 1)
 
-#set-options "--z3rlimit 150 --max_fuel 0"
+#set-options "--z3rlimit 200"
 
 /// Types
 
