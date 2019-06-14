@@ -137,6 +137,7 @@ let hash_length a =
   let open FStar.Mul in
   word_length a * hash_word_length a
 
+let size_hash a = hash_length a
 
 (** Padding *)
 
