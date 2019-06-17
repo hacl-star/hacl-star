@@ -111,7 +111,7 @@ let aead_iv_length32 (al: Spec.AEAD.alg) : Tot (x: U32.t { U32.v x == Spec.AEAD.
 
 #reset-options "--using_facts_from '* -Test.Vectors'"
 
-#push-options "--z3rlimit 128"
+#push-options "--z3rlimit 256"
 
 let test_aead_st alg key key_len iv iv_len aad aad_len tag tag_len plaintext plaintext_len
   ciphertext ciphertext_len: ST unit

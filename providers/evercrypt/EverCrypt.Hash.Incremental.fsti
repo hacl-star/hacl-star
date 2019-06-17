@@ -76,10 +76,6 @@ let footprint (#a:alg) (m: HS.mem) (s: state a) =
   B.(loc_union (loc_addr_of_buffer s) (footprint_s m (B.deref m s)))
 
 unfold let loc_includes_union_l_footprint_s = EverCrypt.Hash.loc_includes_union_l_footprint_s
-unfold let loc_in = EverCrypt.Hash.loc_in
-unfold let loc_unused_in = EverCrypt.Hash.loc_unused_in
-unfold let fresh_loc = EverCrypt.Hash.fresh_loc
-unfold let fresh_is_disjoint = EverCrypt.Hash.fresh_is_disjoint
 
 val invariant_s: (#a:alg) -> HS.mem -> state_s a -> Type0
 let invariant (#a:alg) (m: HS.mem) (s: state a) =
@@ -93,7 +89,7 @@ val invariant_loc_in_footprint
   (m: HS.mem)
 : Lemma
   (requires (invariant m s))
-  (ensures (loc_in (footprint m s) m))
+  (ensures (B.loc_in (footprint m s) m))
   [SMTPat (invariant m s)]
 
 
@@ -213,7 +209,7 @@ val create_in (a: Hash.alg) (r: HS.rid): ST (state a)
     invariant h1 s /\
     hashed h1 s == S.empty /\
     B.(modifies loc_none h0 h1) /\
-    fresh_loc (footprint h1 s) h0 h1 /\
+    B.fresh_loc (footprint h1 s) h0 h1 /\
     B.(loc_includes (loc_region_only true r) (footprint h1 s)) /\
     freeable h1 s))
 
