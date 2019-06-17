@@ -99,3 +99,6 @@ let lemma_locations_complete s1 s2 flags ok trace =
   assert (s1.ms_stack == s2.ms_stack);
   assert (s1.ms_stackTaint == s2.ms_stackTaint);
   assert (s1.ms_trace == s2.ms_trace)
+
+(* See fsti *)
+let lemma_locations_same_with_filter s flags ok trace = ()
