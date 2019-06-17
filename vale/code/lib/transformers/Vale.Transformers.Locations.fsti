@@ -109,3 +109,15 @@ val lemma_locations_complete :
     (ensures (
         filter_state s1 flags ok trace ==
         filter_state s2 flags ok trace))
+
+(** Filtering the state does not affect it wrt locations. *)
+val lemma_locations_same_with_filter :
+  s:machine_state ->
+  flags:flags_t ->
+  ok:bool ->
+  trace:list observation ->
+  Lemma
+    (ensures (
+        let s' = filter_state s flags ok trace in
+        (forall a. {:pattern (eval_location a s')}
+           (eval_location a s == eval_location a s'))))
