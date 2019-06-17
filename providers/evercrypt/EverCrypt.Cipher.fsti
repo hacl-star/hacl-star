@@ -142,7 +142,9 @@ val update_block: a:e_alg -> (
 
 // TODO: update_blocks, update_last
 
-/// For custom clients, e.g. libquiccrypto: does not modify the state in place and allows directly passing a custom value for the counter.
+/// For custom clients, e.g. libquiccrypto: does not modify the state in place
+/// and allows directly passing a custom value for the counter. Potentially
+/// dangerous, since a client may reuse a counter if they don't pay attention.
 val single_block: a:e_alg -> (
   let a = G.reveal a in
   s:state a ->
@@ -171,4 +173,6 @@ val single_block: a:e_alg -> (
 // state). This way, custom clients like libquiccrypt would just use single
 // block, and the module above this one (EverCrypt.Cipher.Incremental) could
 // take care of incrementing the counter whenever a full block has been
-// processed.
+// processed. But then the API is dangerous so maybe what we want is
+// single_block with a precondition that c <> 0 and a modification in place of
+// the state to guarantee it's harder to reuse the counter?
