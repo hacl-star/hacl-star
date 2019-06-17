@@ -1510,6 +1510,7 @@ procedure Loop6x_round8(
 }
 
 
+#reset-options "--z3rlimit 20"
 procedure Loop6x_round9(
         inline alg:algorithm,
         ghost count:nat,
@@ -3451,6 +3452,7 @@ procedure AESNI_ctr32_6x_round9(
     AddLea64(inp, inp, 0x60);
 }
 
+#reset-options "--z3rlimit 10"
 procedure AESNI_ctr32_6x_final(
         inline alg:algorithm,
         ghost count:nat,
@@ -4250,7 +4252,7 @@ procedure GCM_finalize(
 }
 */
 
-#reset-options "--z3rlimit 90"
+#reset-options "--z3rlimit 150"
 procedure AES_GCM_encrypt_6mult(
         inline alg:algorithm,
         ghost h_LE:quad32,

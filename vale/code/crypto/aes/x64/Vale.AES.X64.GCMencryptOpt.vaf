@@ -546,7 +546,7 @@ procedure Compute_iv(
         pclmulqdq_enabled && avx_enabled;
 
         let iv_raw_quads := append(s128(mem, iv_b), s128(mem, iv_extra_b));
-        let iv_bytes_LE:supported_iv_LE := #supported_iv_LE(slice_work_around(le_seq_quad32_to_bytes(iv_raw_quads), num_bytes));
+        let iv_bytes_LE:supported_iv_LE := #supported_iv_LE(slice(le_seq_quad32_to_bytes(iv_raw_quads), 0, num_bytes));
         iv_bytes_LE == iv;
 
     ensures
@@ -579,7 +579,7 @@ procedure Compute_iv(
     if (num_bytes == 12 /* == 96/8 */) {
         Load128_buffer(xmm0, extra_ptr, 0, Secret, iv_extra_b, 0);
         ghost var iv_LE := xmm0;
-        assert iv_LE == index_work_around_quad32(s128(mem, iv_extra_b), 0);
+        assert iv_LE == index(s128(mem, iv_extra_b), 0);
         InitPshufbMask(xmm1, rax);
         Pshufb(xmm0, xmm1);
         ghost var iv_BE := xmm0;
