@@ -327,7 +327,7 @@ let pad_to_128_bits_multiple_append (x y:seq nat8) : Lemma
   =
   assert (equal (pad_to_128_bits (append x y)) (append x (pad_to_128_bits y)))
 
-#reset-options "--z3rlimit 30"
+#reset-options "--z3rlimit 60"
 let gcm_blocks_helper (alg:algorithm) (key:seq nat32)
                    (a128 a_bytes p128x6 p128 p_bytes c128x6 c128 c_bytes:seq quad32)
                    (p_num_bytes a_num_bytes:nat)
