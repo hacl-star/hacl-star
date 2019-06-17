@@ -37,10 +37,13 @@ let block_len (a:cipher_alg) =
   | AES128 | AES256 -> 16
   | CHACHA20 -> 64
 
-let nonce_len (a:cipher_alg) =
+let nonce_bound (a: cipher_alg) (n_len: nat): Type0 =
   match a with
-  | AES128 | AES256 -> n_len:size_nat{n_len <= block_len a}
-  | CHACHA20 -> n_len:size_nat{n_len == 12}
+  | AES128 | AES256 -> n_len <= block_len a
+  | CHACHA20 -> n_len == 12
+
+let nonce_len (a:cipher_alg) =
+  n_len:size_nat { nonce_bound a n_len }
 
 let init (a:cipher_alg) (k:lbytes (key_len a)) (n_len:nonce_len a) (n:lbytes n_len) (c:size_nat) : state a =
   match a with
