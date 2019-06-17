@@ -1,5 +1,5 @@
 [
-  " v4ÊƒÆÀg-~_ s‹È\u0013",
+  "`ß4BÅ_i\u0018Àþ{—o-T‰",
   [
     [
       "Vale.AES.X64.AESGCM.aes_reqs_offset",
@@ -8,19 +8,19 @@
       0,
       [ "@query" ],
       0,
-      "9659c51ec07c5dcdd62fc1b6029a8412"
+      "85afba24516493cc54f031cf3a865a6b"
     ],
     [
-      "Vale.AES.X64.AESGCM.va_wpProof_Load_one_lsb",
+      "Vale.AES.X64.AESGCM.va_quick_Load_one_lsb",
       1,
       1,
       0,
       [
-        "@MaxIFuel_assumption", "@query", "equation_Prims.squash",
-        "refinement_interpretation_Tm_refine_8d65e998a07dd53ec478e27017d9dba5"
+        "@MaxIFuel_assumption", "@query",
+        "fuel_guarded_inversion_FStar.Pervasives.Native.tuple3"
       ],
       0,
-      "cd60d1ac2ebf0e82e8f34327069f5eda"
+      "855ab553a02d3635c774070903f9cdc3"
     ],
     [
       "Vale.AES.X64.AESGCM.va_lemma_AES_GCM_encrypt_6mult",
@@ -29,7 +29,7 @@
       0,
       [ "@query", "equation_Vale.AES.X64.AESGCM.aes_reqs_offset" ],
       0,
-      "5fedd2842e012e654a8a87c70c48b31b"
+      "e8e842abcb0e9318b2165989c6275805"
     ],
     [
       "Vale.AES.X64.AESGCM.va_wp_AES_GCM_encrypt_6mult",
@@ -38,19 +38,19 @@
       0,
       [ "@query", "equation_Vale.AES.X64.AESGCM.aes_reqs_offset" ],
       0,
-      "4789e838e35badf4a0e15fe80975c31f"
+      "ac81f6a19a6a6db4bae074d1a88108bf"
     ],
     [
-      "Vale.AES.X64.AESGCM.va_wpProof_AES_GCM_encrypt_6mult",
+      "Vale.AES.X64.AESGCM.va_quick_AES_GCM_encrypt_6mult",
       1,
       1,
       0,
       [
-        "@MaxIFuel_assumption", "@query", "equation_Prims.squash",
-        "refinement_interpretation_Tm_refine_8d65e998a07dd53ec478e27017d9dba5"
+        "@MaxIFuel_assumption", "@query",
+        "fuel_guarded_inversion_FStar.Pervasives.Native.tuple3"
       ],
       0,
-      "4e5cace83accbca0b9b3a8b0ada37a31"
+      "b75d9821ab34d0ee7f92685b1013ce9b"
     ],
     [
       "Vale.AES.X64.AESGCM.va_lemma_AES_GCM_decrypt_6mult",
@@ -59,7 +59,7 @@
       0,
       [ "@query", "equation_Vale.AES.X64.AESGCM.aes_reqs_offset" ],
       0,
-      "f9112db45cd794e9146460e1239fcada"
+      "bcaa55622f3c7d3010f68e610a5fac9b"
     ],
     [
       "Vale.AES.X64.AESGCM.va_wp_AES_GCM_decrypt_6mult",
@@ -68,19 +68,19 @@
       0,
       [ "@query", "equation_Vale.AES.X64.AESGCM.aes_reqs_offset" ],
       0,
-      "81fe50e75057e2adbdbe4c736b4c00fa"
+      "3f2f573fa6f70fb2625de3e841916634"
     ],
     [
-      "Vale.AES.X64.AESGCM.va_wpProof_AES_GCM_decrypt_6mult",
+      "Vale.AES.X64.AESGCM.va_quick_AES_GCM_decrypt_6mult",
       1,
       1,
       0,
       [
-        "@MaxIFuel_assumption", "@query", "equation_Prims.squash",
-        "refinement_interpretation_Tm_refine_8d65e998a07dd53ec478e27017d9dba5"
+        "@MaxIFuel_assumption", "@query",
+        "fuel_guarded_inversion_FStar.Pervasives.Native.tuple3"
       ],
       0,
-      "bca4319231a62f18a6130ef72ce10ca1"
+      "5b50769a995f02a353d7e3a948c631f2"
     ]
   ]
 ]

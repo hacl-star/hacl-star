@@ -1,5 +1,5 @@
 [
-  "\u0000e@Û\u0006]ÌþÁ\u0013èË¶ý\fD",
+  "¶vQ#ml…æÏ\fæÜ>Ikk",
   [
     [
       "Vale.AES.X64.AESCTR.aes_reqs",
@@ -8,7 +8,7 @@
       0,
       [ "@query" ],
       0,
-      "8a6a7eea2652cd7a70e29f81f09e1749"
+      "8c1ecc439cb862a3beba527d08854900"
     ],
     [
       "Vale.AES.X64.AESCTR.va_lemma_aes_ctr_encrypt",
@@ -33,7 +33,7 @@
         "typing_tok_Vale.AES.AES_s.AES_128@tok"
       ],
       0,
-      "c8c19c1f75d854163a279cb0d29f8f62"
+      "325845436d23ce3936995813985bfdc3"
     ],
     [
       "Vale.AES.X64.AESCTR.va_wp_aes_ctr_encrypt",
@@ -53,19 +53,19 @@
         "typing_tok_Vale.AES.AES_s.AES_128@tok"
       ],
       0,
-      "34b84060455ca996b726f576f0c79909"
+      "bef17b6ca4412ab7c8c3d8b983cf6b2e"
     ],
     [
-      "Vale.AES.X64.AESCTR.va_wpProof_aes_ctr_encrypt",
+      "Vale.AES.X64.AESCTR.va_quick_aes_ctr_encrypt",
       1,
       1,
       0,
       [
-        "@MaxIFuel_assumption", "@query", "equation_Prims.squash",
-        "refinement_interpretation_Tm_refine_8d65e998a07dd53ec478e27017d9dba5"
+        "@MaxIFuel_assumption", "@query",
+        "fuel_guarded_inversion_FStar.Pervasives.Native.tuple3"
       ],
       0,
-      "db864013b92d0de8ae6b3e62e28dd9ee"
+      "4d7ff834820dd76e476ef90c3d3b843a"
     ],
     [
       "Vale.AES.X64.AESCTR.va_lemma_aes_counter_loop",
@@ -73,32 +73,61 @@
       1,
       0,
       [
-        "@MaxIFuel_assumption", "@query", "equation_Vale.Def.Words_s.nat32",
-        "refinement_interpretation_Tm_refine_688cbddf4c54b66cd6132f77b47b3931"
+        "@MaxIFuel_assumption", "@query",
+        "constructor_distinct_Vale.Interop.Types.TUInt128",
+        "equality_tok_Vale.Interop.Types.TUInt128@tok",
+        "equality_tok_Vale.X64.Machine_s.Secret@tok",
+        "equation_Vale.Def.Words_s.nat32",
+        "equation_Vale.X64.Decls.validDstAddrs128",
+        "equation_Vale.X64.Memory.base_typ_as_vale_type",
+        "equation_Vale.X64.Memory.buffer128",
+        "lemma_Vale.X64.Memory.buffer_length_buffer_as_seq",
+        "primitive_Prims.op_LessThanOrEqual",
+        "proj_equation_Vale.X64.State.Mkvale_state_vs_heap",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_ae0c2bcc743c21956ba5d3248fe5251e",
+        "typing_Vale.X64.State.__proj__Mkvale_state__item__vs_heap",
+        "typing_tok_Vale.Interop.Types.TUInt128@tok"
       ],
       0,
-      "3cd7d11ac9ddf17302fae1cd719a39e6"
+      "52762a4afe560bba899e7ac4fe2d4ea7"
     ],
     [
       "Vale.AES.X64.AESCTR.va_wp_aes_counter_loop",
       1,
       1,
       0,
-      [ "@query" ],
+      [
+        "@query", "constructor_distinct_Vale.Interop.Types.TUInt128",
+        "equality_tok_Vale.Interop.Types.TUInt128@tok",
+        "equality_tok_Vale.X64.Machine_s.Secret@tok",
+        "equation_Vale.X64.Decls.va_upd_mem",
+        "equation_Vale.X64.Decls.validSrcAddrs128",
+        "equation_Vale.X64.Memory.base_typ_as_vale_type",
+        "equation_Vale.X64.Memory.buffer128",
+        "lemma_Vale.X64.Memory.buffer_length_buffer_as_seq",
+        "primitive_Prims.op_LessThanOrEqual",
+        "proj_equation_Vale.X64.State.Mkvale_state_vs_heap",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "projection_inverse_Vale.X64.State.Mkvale_state_vs_heap",
+        "typing_tok_Vale.Interop.Types.TUInt128@tok"
+      ],
       0,
-      "5a7cafffa804b6d9f2f58841258d395c"
+      "b3d7a737816fdc183f571e5f9a0f2069"
     ],
     [
-      "Vale.AES.X64.AESCTR.va_wpProof_aes_counter_loop",
+      "Vale.AES.X64.AESCTR.va_quick_aes_counter_loop",
       1,
       1,
       0,
       [
-        "@MaxIFuel_assumption", "@query", "equation_Prims.squash",
-        "refinement_interpretation_Tm_refine_8d65e998a07dd53ec478e27017d9dba5"
+        "@MaxIFuel_assumption", "@query",
+        "fuel_guarded_inversion_FStar.Pervasives.Native.tuple3"
       ],
       0,
-      "23b2f5bd82b33312186bac933c62b61d"
+      "5e68d972458f1c8ac21a18014aa931e2"
     ]
   ]
 ]

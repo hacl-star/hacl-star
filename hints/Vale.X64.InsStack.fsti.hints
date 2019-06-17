@@ -1,65 +1,113 @@
 [
-  "BÄS?Ä\u0012˙h%+≈,2ÏÏ ",
+  "P—ªUô &Å\u000b\u0014ö\u0016Óµ—Æ",
   [
     [
-      "Vale.X64.InsStack.va_wpProof_Pop",
+      "Vale.X64.InsStack.va_quick_Pop",
       1,
       1,
       0,
       [
-        "@MaxIFuel_assumption", "@query", "equation_Prims.squash",
-        "refinement_interpretation_Tm_refine_8d65e998a07dd53ec478e27017d9dba5"
+        "@MaxIFuel_assumption", "@query",
+        "fuel_guarded_inversion_FStar.Pervasives.Native.tuple3"
       ],
       0,
-      "5c690e7d0b970fb4350205bdde42a035"
+      "460f979f9d4c774a9e774e910dfbf95f"
     ],
     [
-      "Vale.X64.InsStack.va_wpProof_Push",
+      "Vale.X64.InsStack.va_quick_Push",
       1,
       1,
       0,
       [
-        "@MaxIFuel_assumption", "@query", "equation_Prims.squash",
-        "refinement_interpretation_Tm_refine_8d65e998a07dd53ec478e27017d9dba5"
+        "@MaxIFuel_assumption", "@query",
+        "fuel_guarded_inversion_FStar.Pervasives.Native.tuple3"
       ],
       0,
-      "98f76e35edfd73ef2554b76d671c2247"
+      "cfb7cb7dedbc879b41fa5d83f9ea198e"
     ],
     [
-      "Vale.X64.InsStack.va_wpProof_Load64_stack",
+      "Vale.X64.InsStack.va_quick_Pop_Secret",
       1,
       1,
       0,
       [
-        "@MaxIFuel_assumption", "@query", "equation_Prims.squash",
-        "refinement_interpretation_Tm_refine_8d65e998a07dd53ec478e27017d9dba5"
+        "@MaxIFuel_assumption", "@query",
+        "fuel_guarded_inversion_FStar.Pervasives.Native.tuple3"
       ],
       0,
-      "d41288d478725fcfd7c5d147a99c33f6"
+      "9b9a132e3b41bbbae664be2d12d12a31"
     ],
     [
-      "Vale.X64.InsStack.va_wpProof_PushXmm",
+      "Vale.X64.InsStack.va_quick_Push_Secret",
       1,
       1,
       0,
       [
-        "@MaxIFuel_assumption", "@query", "equation_Prims.squash",
-        "refinement_interpretation_Tm_refine_8d65e998a07dd53ec478e27017d9dba5"
+        "@MaxIFuel_assumption", "@query",
+        "fuel_guarded_inversion_FStar.Pervasives.Native.tuple3"
       ],
       0,
-      "ed65ec948e69102f883190cfbb7ad401"
+      "babb5eb51e1bed1b51e98506af8f635f"
     ],
     [
-      "Vale.X64.InsStack.va_wpProof_PopXmm",
+      "Vale.X64.InsStack.va_quick_Load64_stack",
       1,
       1,
       0,
       [
-        "@MaxIFuel_assumption", "@query", "equation_Prims.squash",
-        "refinement_interpretation_Tm_refine_8d65e998a07dd53ec478e27017d9dba5"
+        "@MaxIFuel_assumption", "@query",
+        "fuel_guarded_inversion_FStar.Pervasives.Native.tuple3"
       ],
       0,
-      "2e560b4b2f315905264b73206ee31541"
+      "cf425819c2857cfa96eac65a9370f28d"
+    ],
+    [
+      "Vale.X64.InsStack.va_quick_PushXmm",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "fuel_guarded_inversion_FStar.Pervasives.Native.tuple3"
+      ],
+      0,
+      "7788db52b7619ad9bba44ff766b6cc66"
+    ],
+    [
+      "Vale.X64.InsStack.va_quick_PopXmm",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "fuel_guarded_inversion_FStar.Pervasives.Native.tuple3"
+      ],
+      0,
+      "e86837d850400cb7b9f109963c58684f"
+    ],
+    [
+      "Vale.X64.InsStack.va_quick_PushXmm_Secret",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "fuel_guarded_inversion_FStar.Pervasives.Native.tuple3"
+      ],
+      0,
+      "d3038e9fe4ea646b7964a93a6616ae45"
+    ],
+    [
+      "Vale.X64.InsStack.va_quick_PopXmm_Secret",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "fuel_guarded_inversion_FStar.Pervasives.Native.tuple3"
+      ],
+      0,
+      "48c4aaf027a3c2a1840f179a8fe54c79"
     ]
   ]
 ]
