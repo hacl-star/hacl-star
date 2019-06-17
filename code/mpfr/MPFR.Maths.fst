@@ -593,3 +593,18 @@ val lemma_pow2_nbits_2: a:pos->b:nat->Lemma
 let rec lemma_pow2_nbits_2 a b=match a,b with
     |_,0->()
     |a,b->lemma_pow2_nbits_2 (a/2) (b-1)
+
+val lemma_mul_simp: a:int -> b:int -> c:pos ->Lemma
+    (requires (a*c=b*c))
+    (ensures (a=b))
+
+let lemma_mul_simp a b c=()
+
+val lemma_pow2_sub : a:int -> b:int -> x:nat -> y:nat ->Lemma
+    (requires (x >= y /\ a * pow2 x = b * pow2 y))
+    (ensures (a * pow2 (x-y) = b))
+
+let lemma_pow2_sub a b x y=
+    lemma_pow2_mul (x-y) y;
+    lemma_mul_simp (a * pow2 (x-y)) b (pow2 y)
+    

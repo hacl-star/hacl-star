@@ -485,7 +485,7 @@ val mpfr_setmax: x:mpfr_ptr -> Stack unit
 
 #set-options "--z3refresh --z3rlimit 100 --max_fuel 1 --initial_fuel 0 --max_ifuel 1 --initial_ifuel 0"
 
-let mpfr_setmax x =admit();
+let mpfr_setmax x =
     mpfr_SET_EXP x mpfr_EMAX;
     mpfr_setmax_rec x (mpfr_LAST_LIMB x);
     let h = ST.get() in

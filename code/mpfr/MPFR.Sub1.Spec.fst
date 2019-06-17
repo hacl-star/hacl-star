@@ -33,14 +33,6 @@ let sub1sp_gt_exp a b =
 
 let sub1sp_gt_prec a b =sub1sp_gt_len a b
 
-(* Subtraction for two MPFR numbers with same precision *)
-val sub1sp_exact: a:mpfr_reg_fp ->
-    b:mpfr_reg_fp{a.prec = b.prec} ->
-    Tot (r:valid_fp{((gt (eval_abs a) (eval_abs b) /\ r.sign = a.sign) \/
-                    (eq (eval_abs a) (eval_abs b)) \/
-                    (lt (eval_abs a) (eval_abs b) /\ r.sign = -a.sign))
-                    /\ fabs (eval_abs a -. eval_abs b) =. eval_abs r})
-
 val lemma_fp_exp_ge: a:mpfr_reg_fp ->
     b:mpfr_reg_fp -> Lemma
     (requires (a.prec=b.prec /\ ge (eval_abs a) (eval_abs b)))
@@ -54,6 +46,15 @@ let lemma_fp_exp_ge a b=let elb=min (a.exp-a.len) (b.exp-b.len) in
        lemma_pow2_mul (b.len-1) (b.exp-b.len-elb);
        assert(pow2 (a.exp-elb)>pow2 (b.exp-1-elb));
        lemma_pow2_gt_rev (a.exp-elb) (b.exp-1-elb)
+
+(* Subtraction for two MPFR numbers with same precision *)
+val sub1sp_exact: a:mpfr_reg_fp ->
+    b:mpfr_reg_fp{a.prec = b.prec} ->
+    Tot (r:valid_fp{((gt (eval_abs a) (eval_abs b) /\ r.sign = a.sign) \/
+                    (eq (eval_abs a) (eval_abs b)) \/
+                    (lt (eval_abs a) (eval_abs b) /\ r.sign = -a.sign))
+                    /\ fabs (eval_abs a -. eval_abs b) =. eval_abs r /\
+                    (normal_fp_cond r \/ r.flag=MPFR_ZERO)})
 
 let sub1sp_exact ar br = 
     if eq (eval_abs ar) (eval_abs br) then mpfr_zero 1 1 else

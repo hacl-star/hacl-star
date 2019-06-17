@@ -81,22 +81,26 @@ let decr_prec a p =
 
 (* Split mantissa into high part and low part in order to round it
  * No need to normalize low_mant as long as it has the same value *)
-val high_mant: a:normal_fp -> p:pos{p <= a.prec} ->
+val high_mant: a:normal_fp -> p:pos ->
     Tot (hm:normal_fp{hm.prec = p /\
         eval_abs hm <=. eval_abs a /\ eval_abs a <. eval_abs hm +. ulp hm})
 	
-let high_mant a p = decr_prec a p
+let high_mant a p = if p<=a.prec then decr_prec a p else incr_prec a p
 
-val low_mant: a:normal_fp -> p:pos{p <= a.prec} -> Tot (lm:valid_fp{
+val low_mant: a:normal_fp -> p:pos -> Tot (lm:valid_fp{
     eval_abs lm <. ulp (high_mant a p) /\ eval lm +. eval (high_mant a p) =. eval a})
     
 let low_mant a p = 
-    lemma_euclidean a.limb (pow2 (a.len - p));
-    if a.limb % pow2 (a.len - p) = 0 then begin
+    if p>a.prec then
         {a with limb = 0; flag = MPFR_ZERO}
-    end else begin
-        lemma_pow2_mod_mod a.limb (a.len - p) (a.len - a.prec);
-        {a with limb = a.limb % pow2 (a.len - p)}
+    else begin
+      lemma_euclidean a.limb (pow2 (a.len - p));
+      if a.limb % pow2 (a.len - p) = 0 then begin
+         {a with limb = 0; flag = MPFR_ZERO}
+      end else begin
+          lemma_pow2_mod_mod a.limb (a.len - p) (a.len - a.prec);
+          {a with limb = a.limb % pow2 (a.len - p)}
+      end
     end
     
 
@@ -181,9 +185,13 @@ val rndd_def: a:normal_fp -> p:pos{p <= a.prec} ->
     Tot (r:normal_fp{r.prec = p /\
         eval r <=. eval a /\ eval a <. eval r +. ulp_p a p})
 
+#set-options "--z3refresh --z3rlimit 100"
+
 let rndd_def a p =
     if eval a =. eval (rndz_def a p) || eval a >. zero_dyadic then rndz_def a p
     else add_one_ulp (rndz_def a p)
+
+#set-options "--z3refresh --z3rlimit 40"
 
 let mpfr_rndd2_cond (a:valid_fp{mpfr_ROUND_COND a /\ mpfr_PREC_COND a.prec}) (r:mpfr_fp{r.prec = a.prec}): GTot Type0 =
     if eval_abs a >. mpfr_overflow_bound a.prec && a.sign > 0 then
@@ -220,8 +228,8 @@ let mpfr_rndn2_cond (a:valid_fp{mpfr_ROUND_COND a /\ mpfr_PREC_COND a.prec}) (r:
 
 
 (* Definitions of round bit and sticky bit which are widely used to implement rounding *)
-let rb_def (a:normal_fp) (p:pos{p < a.prec}): Tot bool = nth #a.len a.limb p
-let sb_def (a:normal_fp) (p:pos{p < a.prec}): Tot bool = (a.limb % pow2 (a.len - p - 1) <> 0)
+let rb_def (a:normal_fp) (p:pos): Tot bool = if p<a.prec then nth #a.len a.limb p else false
+let sb_def (a:normal_fp) (p:pos): Tot bool = if p<a.prec then (a.limb % pow2 (a.len - p - 1) <> 0) else false
 
 val rb_value_lemma: a:normal_fp -> p:pos{p < a.prec} ->
     Lemma (a.limb % pow2 (a.len - p) = a.limb % pow2 (a.len - p - 1) + (if rb_def a p then pow2 (a.len - p - 1) else 0))

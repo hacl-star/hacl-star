@@ -3,8 +3,8 @@ include ../../Makefile.include
 
 #You shoukd set FSTAR_HOME and KREMLIN_HOME to where you cloned those two repos
 #Usually it is better to define these environment variables in the .bash_profile
-#FSTAR_HOME=
-#KREMLIN_HOME=
+FSTAR_HOME=/home/felix/FStar
+KREMLIN_HOME=~/kremlin
 
 FSTAR=$(FSTAR_HOME)/bin/fstar.exe
 
