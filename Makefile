@@ -481,6 +481,12 @@ obj/Vale.Wrapper.X64.GCMdecryptOpt.fst.checked: \
 obj/Vale.Wrapper.X64.GCMencryptOpt.fst.checked: \
   FSTAR_FLAGS=$(VALE_FSTAR_FLAGS) --admit_smt_queries true
 
+obj/Vale.Wrapper.X64.GCMencryptOpt256.fst.checked: \
+  FSTAR_FLAGS=$(VALE_FSTAR_FLAGS) --admit_smt_queries true
+
+obj/Vale.Wrapper.X64.GCMdecryptOpt256.fst.checked: \
+  FSTAR_FLAGS=$(VALE_FSTAR_FLAGS) --admit_smt_queries true
+
 obj/Vale.AES.GCM.fst.checked: \
   FSTAR_FLAGS=$(VALE_FSTAR_FLAGS)
 
