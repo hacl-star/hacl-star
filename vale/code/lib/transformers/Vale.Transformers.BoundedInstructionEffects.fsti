@@ -14,6 +14,9 @@ type rw_set = locations & locations
     an instruction. *)
 val rw_set_of_ins : i:ins -> rw_set
 
+(** [locations_of_ocmp o] returns the read set for a comparison operator. *)
+val locations_of_ocmp : o:ocmp -> locations
+
 (** [unchanged_except exc s1 s2] means all locations that are disjoint
     from the exceptions [exc] have the same value in both [s1] and [s2]. *)
 let unchanged_except (exceptions:locations) (s1 s2:machine_state) :
@@ -73,3 +76,10 @@ val lemma_machine_eval_ins_st_bounded_effects :
     (ensures (
         (let r, w = rw_set_of_ins i in
          (bounded_effects r w (machine_eval_ins_st i)))))
+
+(** The evaluation of a comparison [o] depends solely upon its
+    locations, given by [locations_of_ocmp o] *)
+val lemma_locations_of_ocmp : o:ocmp -> s1:machine_state -> s2:machine_state ->
+  Lemma
+    (requires (unchanged_at (locations_of_ocmp o) s1 s2))
+    (ensures (eval_ocmp s1 o == eval_ocmp s2 o))
