@@ -113,6 +113,17 @@ let rw_set_of_ins i =
   | Dealloc _ ->
     [ALocStack; ALocReg (Reg 0 rRsp)], [ALocStack; ALocReg (Reg 0 rRsp)]
 
+(* See fsti *)
+let locations_of_ocmp o =
+  match o with
+  | OEq o1 o2
+  | ONe o1 o2
+  | OLe o1 o2
+  | OGe o1 o2
+  | OLt o1 o2
+  | OGt o1 o2 ->
+    both (locations_of_operand64 o1) `L.append` both (locations_of_operand64 o2)
+
 #push-options "--z3rlimit 20 --max_fuel 2 --max_ifuel 1"
 let rec lemma_instr_write_outputs_only_affects_write
     (outs:list instr_out) (args:list instr_operand)
@@ -625,3 +636,6 @@ let lemma_machine_eval_ins_st_bounded_effects i =
   match i with
   | Instr _ _ _ -> lemma_machine_eval_ins_st_bounded_effects_Instr i
   | _ -> assert_norm (not (safely_bounded i))
+
+(* See fsti *)
+let lemma_locations_of_ocmp o s1 s2 = ()
