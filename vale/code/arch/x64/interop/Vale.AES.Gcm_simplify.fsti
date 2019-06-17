@@ -5,7 +5,6 @@ module DV = LowStar.BufferView.Down
 module UV = LowStar.BufferView.Up
 module HS = FStar.HyperStack
 open Vale.Interop.Base
-open Vale.Lib.Workarounds
 open Vale.Def.Types_s
 open Vale.Arch.Types
 open Vale.Def.Words_s
@@ -22,10 +21,12 @@ val le_bytes_to_seq_quad32_uint8_to_nat8_length (s:Seq.seq UInt8.t) : Lemma
 val gcm_simplify1 (b:buf_t TUInt8 TUInt128) (h:HS.mem) (n:nat) : Lemma
   (requires B.length b = n)
   (ensures (
-  DV.length_eq (get_downview b);
-  Seq.equal
-    (seq_uint8_to_seq_nat8 (B.as_seq h b))
-    (slice_work_around (le_seq_quad32_to_bytes (UV.as_seq h (UV.mk_buffer (get_downview b) Vale.Interop.Views.up_view128))) n)
+    DV.length_eq (get_downview b);
+    let s = (le_seq_quad32_to_bytes (UV.as_seq h (UV.mk_buffer (get_downview b) Vale.Interop.Views.up_view128))) in
+    n <= Seq.length s ==>
+      Seq.equal
+        (seq_uint8_to_seq_nat8 (B.as_seq h b))
+        (Seq.slice s 0 n)
   ))
 
 val gcm_simplify2 (b:buf_t TUInt8 TUInt128) (h:HS.mem) : Lemma

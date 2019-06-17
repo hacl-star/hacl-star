@@ -7,8 +7,10 @@ module V = Vale.X64.Decls
 open Vale.SHA.Simplify_Sha
 open Vale.AES.Gcm_simplify
 open Vale.AES.GCM_helpers
-open Vale.Lib.Workarounds
 open Vale.Arch.Types
+
+let wrap_slice (#a:Type0) (s:Seq.seq a) (i:int) : Seq.seq a =
+  Seq.slice s 0 (if 0 <= i && i <= Seq.length s then i else 0)
 
 let length_aux3 (b:uint8_p) (n:nat) : Lemma
   (requires B.length b = 16 * n)
@@ -72,9 +74,9 @@ val gctr128_bytes_stdcall':
        let out_u = UV.mk_buffer out_d Vale.Interop.Views.up_view128 in
 
       let plain_quads = Seq.append (UV.as_seq h0 in_u) (UV.as_seq h0 inout_u) in
-      let plain = slice_work_around (le_seq_quad32_to_bytes plain_quads) (UInt64.v num_bytes) in
+      let plain = wrap_slice (le_seq_quad32_to_bytes plain_quads) (UInt64.v num_bytes) in
       let cipher_quads = Seq.append (UV.as_seq h1 out_u) (UV.as_seq h1 inout_u) in
-      let cipher = slice_work_around (le_seq_quad32_to_bytes cipher_quads) (UInt64.v num_bytes) in
+      let cipher = wrap_slice (le_seq_quad32_to_bytes cipher_quads) (UInt64.v num_bytes) in
       Seq.equal
         (gctr_encrypt_LE (le_bytes_to_quad32 ctr) (make_gctr_plain_LE plain) AES_128 (Ghost.reveal key))
         cipher
@@ -137,9 +139,9 @@ val gctr256_bytes_stdcall':
        let out_u = UV.mk_buffer out_d Vale.Interop.Views.up_view128 in
 
       let plain_quads = Seq.append (UV.as_seq h0 in_u) (UV.as_seq h0 inout_u) in
-      let plain = slice_work_around (le_seq_quad32_to_bytes plain_quads) (UInt64.v num_bytes) in
+      let plain = wrap_slice (le_seq_quad32_to_bytes plain_quads) (UInt64.v num_bytes) in
       let cipher_quads = Seq.append (UV.as_seq h1 out_u) (UV.as_seq h1 inout_u) in
-      let cipher = slice_work_around (le_seq_quad32_to_bytes cipher_quads) (UInt64.v num_bytes) in
+      let cipher = wrap_slice (le_seq_quad32_to_bytes cipher_quads) (UInt64.v num_bytes) in
       Seq.equal
         (gctr_encrypt_LE (le_bytes_to_quad32 ctr) (make_gctr_plain_LE plain) AES_256 (Ghost.reveal key))
         cipher
@@ -288,7 +290,7 @@ let lemma_slice_uv_extra (b:uint8_p) (b_start:uint8_p) (b_extra:uint8_p) (h:HS.m
     length_aux4 b_extra 1;
     let b_extra_u = UV.mk_buffer b_extra_d Vale.Interop.Views.up_view128 in
     let suv = Seq.append (UV.as_seq h b_start_u) (UV.as_seq h b_extra_u) in
-    let sf = slice_work_around (le_seq_quad32_to_bytes suv) (B.length b) in
+    let sf = wrap_slice (le_seq_quad32_to_bytes suv) (B.length b) in
     Seq.equal sf (seq_uint8_to_seq_nat8 (B.as_seq h b))
  ))
  =
@@ -299,20 +301,20 @@ let lemma_slice_uv_extra (b:uint8_p) (b_start:uint8_p) (b_extra:uint8_p) (h:HS.m
  length_aux6 b_extra;
  let b_extra_u = UV.mk_buffer b_extra_d Vale.Interop.Views.up_view128 in
  let suv = Seq.append (UV.as_seq h b_start_u) (UV.as_seq h b_extra_u) in
- let sf = slice_work_around (le_seq_quad32_to_bytes suv) (B.length b) in
+ let sf = wrap_slice (le_seq_quad32_to_bytes suv) (B.length b) in
  let b_f = seq_uint8_to_seq_nat8 (B.as_seq h b) in
  // if B.length b > B.length b_start then (
    calc (==) {
      sf;
      (==) { DV.length_eq b_start_d; lemma_seq_nat8_le_seq_quad32_to_bytes_uint32 b_start h;
           le_bytes_to_seq_quad32_to_bytes (UV.as_seq h b_start_u) }
-     slice_work_around (le_seq_quad32_to_bytes (Seq.append
+     wrap_slice (le_seq_quad32_to_bytes (Seq.append
        (le_bytes_to_seq_quad32 (seq_uint8_to_seq_nat8 (B.as_seq h b_start)))
        (UV.as_seq h b_extra_u)))
      (B.length b);
      (==) { DV.length_eq b_extra_d; lemma_seq_nat8_le_seq_quad32_to_bytes_uint32 b_extra h;
        le_bytes_to_seq_quad32_to_bytes (UV.as_seq h b_extra_u) }
-     slice_work_around (le_seq_quad32_to_bytes (Seq.append
+     wrap_slice (le_seq_quad32_to_bytes (Seq.append
        (le_bytes_to_seq_quad32 (seq_uint8_to_seq_nat8 (B.as_seq h b_start)))
        (le_bytes_to_seq_quad32 (seq_uint8_to_seq_nat8 (B.as_seq h b_extra)))))
      (B.length b);
@@ -320,18 +322,18 @@ let lemma_slice_uv_extra (b:uint8_p) (b_start:uint8_p) (b_extra:uint8_p) (h:HS.m
         (le_bytes_to_seq_quad32 (seq_uint8_to_seq_nat8 (B.as_seq h b_start)))
         (le_bytes_to_seq_quad32 (seq_uint8_to_seq_nat8 (B.as_seq h b_extra)))
         }
-     slice_work_around (Seq.append
+     wrap_slice (Seq.append
        (le_seq_quad32_to_bytes (le_bytes_to_seq_quad32 (seq_uint8_to_seq_nat8 (B.as_seq h b_start))))
        (le_seq_quad32_to_bytes (le_bytes_to_seq_quad32 (seq_uint8_to_seq_nat8 (B.as_seq h b_extra)))))
      (B.length b);
      (==) { le_seq_quad32_to_bytes_to_seq_quad32 (seq_uint8_to_seq_nat8 (B.as_seq h b_start));
             le_seq_quad32_to_bytes_to_seq_quad32 (seq_uint8_to_seq_nat8 (B.as_seq h b_extra)) }
-     slice_work_around (Seq.append
+     wrap_slice (Seq.append
        (seq_uint8_to_seq_nat8 (B.as_seq h b_start))
        (seq_uint8_to_seq_nat8 (B.as_seq h b_extra)))
      (B.length b);
      (==) { Seq.lemma_eq_intro b_f
-       (slice_work_around (Seq.append
+       (wrap_slice (Seq.append
          (seq_uint8_to_seq_nat8 (B.as_seq h b_start))
          (seq_uint8_to_seq_nat8 (B.as_seq h b_extra)))
        (B.length b))
@@ -437,9 +439,9 @@ let gctr_bytes_stdcall128 key in_b num_bytes out_b keys_b ctr_b =
        let out_u = UV.mk_buffer out_d Vale.Interop.Views.up_view128 in
 
       let plain_quads = Seq.append (UV.as_seq h0 in_u) (UV.as_seq h0 inout_u) in
-      let plain = slice_work_around (le_seq_quad32_to_bytes plain_quads) (UInt64.v num_bytes) in
+      let plain = wrap_slice (le_seq_quad32_to_bytes plain_quads) (UInt64.v num_bytes) in
       let cipher_quads = Seq.append (UV.as_seq h_post out_u) (UV.as_seq h_post inout_u) in
-      let cipher = slice_work_around (le_seq_quad32_to_bytes cipher_quads) (UInt64.v num_bytes) in
+      let cipher = wrap_slice (le_seq_quad32_to_bytes cipher_quads) (UInt64.v num_bytes) in
       Seq.equal
         (gctr_encrypt_LE (le_bytes_to_quad32 ctr) (make_gctr_plain_LE plain) AES_128 (Ghost.reveal key))
         cipher);
@@ -492,9 +494,9 @@ let gctr_bytes_stdcall256 key in_b num_bytes out_b keys_b ctr_b =
        let out_u = UV.mk_buffer out_d Vale.Interop.Views.up_view128 in
 
       let plain_quads = Seq.append (UV.as_seq h0 in_u) (UV.as_seq h0 inout_u) in
-      let plain = slice_work_around (le_seq_quad32_to_bytes plain_quads) (UInt64.v num_bytes) in
+      let plain = wrap_slice (le_seq_quad32_to_bytes plain_quads) (UInt64.v num_bytes) in
       let cipher_quads = Seq.append (UV.as_seq h_post out_u) (UV.as_seq h_post inout_u) in
-      let cipher = slice_work_around (le_seq_quad32_to_bytes cipher_quads) (UInt64.v num_bytes) in
+      let cipher = wrap_slice (le_seq_quad32_to_bytes cipher_quads) (UInt64.v num_bytes) in
       Seq.equal
         (gctr_encrypt_LE (le_bytes_to_quad32 ctr) (make_gctr_plain_LE plain) AES_256 (Ghost.reveal key))
         cipher);

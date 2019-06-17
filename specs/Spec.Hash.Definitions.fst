@@ -8,7 +8,7 @@ module Spec.Hash.Definitions
  *
  * Some notes about terminology:
  * - this module uses the HACL* naming convention, namely init/update/finish
- *   (C??dric uses init/compress/extract in EverCrypt.HMAC and above)
+ *   (Cédric uses init/compress/extract in EverCrypt.HMAC and above)
  * - this module defines maximum lengths to be *bounds* (i.e. max_value + 1), a
  *   somewhat dubious convention that persists for historical reasons, but that
  *   is abandoned in miTLS via an extra indirection

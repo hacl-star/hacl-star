@@ -12,7 +12,7 @@ assume val adx_enabled : bool        // CPUID.7.0.EBX[19]
 assume val sha_enabled : bool        // CPUID.7.0.EBX[29]
 
 
-assume val cpuid (r:reg) (rax:nat64) (rcx:nat64) : nat64
+assume val cpuid (r:reg_64) (rax:nat64) (rcx:nat64) : nat64
 
 assume val cpuid_features (u:unit) :
   Lemma ((forall rcx . {:pattern (cpuid rRcx 1 rcx)} (Vale.Def.Types_s.iand (cpuid rRcx 1 rcx) (pow2_norm 25) > 0) = aesni_enabled) /\

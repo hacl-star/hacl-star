@@ -14,30 +14,38 @@ let lemma_mul_in_bounds (x y:nat64) : Lemma (requires x `op_Multiply` y < pow2_6
 let lemma_mul_nat (x:nat) (y:nat) : Lemma (ensures 0 <= (x `op_Multiply` y)) = ()
 #reset-options "--initial_fuel 2 --max_fuel 2"
 
-let cf = Lemmas.cf
-let overflow = Lemmas.overflow
-let update_cf (flags:int) (new_cf:bool) = Lemmas.update_cf flags new_cf
-let update_of (flags:int) (new_of:bool) = Lemmas.update_of flags new_of
+let cf flags = match Lemmas.cf flags with | Some v -> v | None -> false
+let overflow flags = match Lemmas.overflow flags with | Some v -> v | None -> false
+let valid_cf flags = match Lemmas.cf flags with | Some v -> true | None -> false
+let valid_of flags = match Lemmas.overflow flags with | Some v -> true | None -> false
+let updated_cf new_flags new_cf = Lemmas.cf new_flags = Some new_cf
+let updated_of new_flags new_cf = Lemmas.overflow new_flags = Some new_cf
+let maintained_cf new_flags flags = Lemmas.cf new_flags = Lemmas.cf flags
+let maintained_of new_flags flags = Lemmas.overflow new_flags = Lemmas.overflow flags
 let ins = BS.ins
 type ocmp = BS.ocmp
 type va_fuel = nat
+
+let mul_nat_helper x y =
+  FStar.Math.Lemmas.nat_times_nat_is_nat x y
+
 let va_fuel_default () = 0
 
 let va_opr_lemma_Mem s base offset b index t =
   let t = va_opr_code_Mem base offset t in
-  M.lemma_valid_mem64 b index s.mem;
+  M.lemma_valid_mem64 b index s.vs_heap;
   let OMem (m, t) = t in
-  assert (valid_maddr (eval_maddr m s) s.mem s.memTaint b index t);
-  M.lemma_load_mem64 b index s.mem
+  assert (valid_maddr (eval_maddr m s) s.vs_heap s.vs_memTaint b index t);
+  M.lemma_load_mem64 b index s.vs_heap
 
 let va_opr_lemma_Stack s base offset t = ()
 
 let va_opr_lemma_Mem128 s base offset t b index =
   let t = va_opr_code_Mem128 base offset t in
-  M.lemma_valid_mem128 b index s.mem;
-  let OMem128 (m, t) = t in
-  assert (valid_maddr128 (eval_maddr m s) s.mem s.memTaint b index t);
-  M.lemma_load_mem128 b index s.mem
+  M.lemma_valid_mem128 b index s.vs_heap;
+  let OMem (m, t) = t in
+  assert (valid_maddr128 (eval_maddr m s) s.vs_heap s.vs_memTaint b index t);
+  M.lemma_load_mem128 b index s.vs_heap
 
 let taint_at memTaint addr = Map.sel memTaint addr
 

@@ -207,16 +207,16 @@ procedure fmul_stdcall(
 
         rsp == old(rsp);
 {
-    Push(r12);
-    Push(r13);
-    Push(r14);
-    Push(r15);
+    Push_Secret(r12);
+    Push_Secret(r13);
+    Push_Secret(r14);
+    Push_Secret(r15);
 
     // Line up the rest of the arguments
     inline if (win) {
         // Store callee-save registers
-        Push(rsi);
-        Push(rdi);
+        Push_Secret(rsi);
+        Push_Secret(rdi);
 
         Mov64(tmp_ptr, rcx);
         Mov64(inA_ptr, rdx);
@@ -227,14 +227,14 @@ procedure fmul_stdcall(
     fmul(tmp_b, inA_b, dst_b, inB_b);
 
     inline if (win) {
-        Pop(rdi);
-        Pop(rsi);
+        Pop_Secret(rdi);
+        Pop_Secret(rsi);
     }
 
-    Pop(r15);
-    Pop(r14);
-    Pop(r13);
-    Pop(r12);
+    Pop_Secret(r15);
+    Pop_Secret(r14);
+    Pop_Secret(r13);
+    Pop_Secret(r12);
 }
 
 #reset-options "--z3rlimit 60"
@@ -431,16 +431,16 @@ procedure fmul2_stdcall(
 
         rsp == old(rsp);
 {
-    Push(r12);
-    Push(r13);
-    Push(r14);
-    Push(r15);
+    Push_Secret(r12);
+    Push_Secret(r13);
+    Push_Secret(r14);
+    Push_Secret(r15);
 
     // Line up the rest of the arguments
     inline if (win) {
         // Store callee-save registers
-        Push(rsi);
-        Push(rdi);
+        Push_Secret(rsi);
+        Push_Secret(rdi);
 
         Mov64(tmp_ptr, rcx);
         Mov64(inA_ptr, rdx);
@@ -451,14 +451,14 @@ procedure fmul2_stdcall(
     fmul2(tmp_b, inA_b, dst_b, inB_b);
 
     inline if (win) {
-        Pop(rdi);
-        Pop(rsi);
+        Pop_Secret(rdi);
+        Pop_Secret(rsi);
     }
 
-    Pop(r15);
-    Pop(r14);
-    Pop(r13);
-    Pop(r12);
+    Pop_Secret(r15);
+    Pop_Secret(r14);
+    Pop_Secret(r13);
+    Pop_Secret(r12);
 }
 
 procedure fsqr(ghost tmp_b:buffer64, ghost inA_b:buffer64, ghost dst_b:buffer64)
@@ -584,17 +584,17 @@ procedure fsqr_stdcall(
 
         rsp == old(rsp);
 {
-    Push(r15);
-    Push(r12);
-    Push(r13);
-    Push(r14);
-    Push(rbx);
+    Push_Secret(r15);
+    Push_Secret(r12);
+    Push_Secret(r13);
+    Push_Secret(r14);
+    Push_Secret(rbx);
 
     // Line up the rest of the arguments
     inline if (win) {
         // Store callee-save registers
-        Push(rsi);
-        Push(rdi);
+        Push_Secret(rsi);
+        Push_Secret(rdi);
 
         Mov64(tmp_ptr, rcx);
         Mov64(inA_ptr, rdx);
@@ -604,15 +604,15 @@ procedure fsqr_stdcall(
     fsqr(tmp_b, inA_b, dst_b);
 
     inline if (win) {
-        Pop(rdi);
-        Pop(rsi);
+        Pop_Secret(rdi);
+        Pop_Secret(rsi);
     }
 
-    Pop(rbx);
-    Pop(r14);
-    Pop(r13);
-    Pop(r12);
-    Pop(r15);
+    Pop_Secret(rbx);
+    Pop_Secret(r14);
+    Pop_Secret(r13);
+    Pop_Secret(r12);
+    Pop_Secret(r15);
 }
 
 procedure fsqr2(ghost tmp_b:buffer64, ghost inA_b:buffer64, ghost dst_b:buffer64)
@@ -762,17 +762,17 @@ procedure fsqr2_stdcall(
 
         rsp == old(rsp);
 {
-    Push(r15);
-    Push(r12);
-    Push(r13);
-    Push(r14);
-    Push(rbx);
+    Push_Secret(r15);
+    Push_Secret(r12);
+    Push_Secret(r13);
+    Push_Secret(r14);
+    Push_Secret(rbx);
 
     // Line up the rest of the arguments
     inline if (win) {
         // Store callee-save registers
-        Push(rsi);
-        Push(rdi);
+        Push_Secret(rsi);
+        Push_Secret(rdi);
 
         Mov64(tmp_ptr, rcx);
         Mov64(inA_ptr, rdx);
@@ -782,15 +782,15 @@ procedure fsqr2_stdcall(
     fsqr2(tmp_b, inA_b, dst_b);
 
     inline if (win) {
-        Pop(rdi);
-        Pop(rsi);
+        Pop_Secret(rdi);
+        Pop_Secret(rsi);
     }
 
-    Pop(rbx);
-    Pop(r14);
-    Pop(r13);
-    Pop(r12);
-    Pop(r15);
+    Pop_Secret(rbx);
+    Pop_Secret(r14);
+    Pop_Secret(r13);
+    Pop_Secret(r12);
+    Pop_Secret(r15);
 }
 
 

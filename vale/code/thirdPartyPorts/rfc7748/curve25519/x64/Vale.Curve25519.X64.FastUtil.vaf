@@ -1,3 +1,4 @@
+include "../../../../lib/util/Vale.Lib.Basic.vaf"
 include "../../../../arch/x64/Vale.X64.InsBasic.vaf"
 include "../../../../arch/x64/Vale.X64.InsMem.vaf"
 include "../../../../arch/x64/Vale.X64.InsStack.vaf"
@@ -46,9 +47,7 @@ open Vale.Curve25519.FastUtil_helpers
 open Vale.X64.CPU_Features_s
 #endverbatim
 
-type tactic:Type(0) extern;
 const int_canon:tactic extern;
-ghost procedure assert_by_tactic(ghost p:prop, ghost t:tactic) extern;
 
 #reset-options "--z3rlimit 600"
 
@@ -108,7 +107,7 @@ procedure fast_mul1(ghost dst_b:buffer64, ghost inA_b:buffer64)
 
     let carry_bit := bool_bit(cf(efl));
     assert carry_bit == 0;      // PASSES
-    assert_by_tactic(a * b == pow2_four(b*a0, b*a1, b*a2, b*a3), int_canon);   // PASSES
+    assert_by_tactic(a * b == 0 + pow2_four(b * a0, b * a1, b * a2, b * a3), int_canon);   // PASSES
 }
 
 /*
@@ -161,7 +160,6 @@ procedure fast_mul1_stdcall(inline win:bool, ghost dst_b:buffer64, ghost inA_b:b
         r12 == old(r12);
         r13 == old(r13);
         r14 == old(r14);
-
         rsp == old(rsp);
 {
     // Store callee-save registers
@@ -171,7 +169,8 @@ procedure fast_mul1_stdcall(inline win:bool, ghost dst_b:buffer64, ghost inA_b:b
     Push(r14);
 
     // Line up the rest of the arguments
-    inline if (win) {
+    inline if (win)
+    {
         Mov64(dst_ptr, rcx);
         Mov64(inA_ptr, rdx);
         Mov64(b, r8);
@@ -320,8 +319,8 @@ procedure fast_add1_stdcall(
         rsp == old(rsp);
 {
     // Store callee-save registers
-    Push(rdi);
-    Push(rsi);
+    Push_Secret(rdi);
+    Push_Secret(rsi);
 
     // Line up the rest of the arguments
     inline if (win) {
@@ -332,8 +331,8 @@ procedure fast_add1_stdcall(
 
     fast_add1(dst_b, inA_b, inB_in);
 
-    Pop(rsi);
-    Pop(rdi);
+    Pop_Secret(rsi);
+    Pop_Secret(rdi);
 }
 
 #reset-options "--z3rlimit 1200"
@@ -453,14 +452,14 @@ procedure fast_sub1_stdcall(inline win:bool, ghost dst_b:buffer64, ghost inA_b:b
         r12 == old(r12);
         r13 == old(r13);
         r14 == old(r14);
-
         rsp == old(rsp);
 {
     // Store callee-save registers
     Push(rsi);
 
     // Line up the rest of the arguments
-    inline if (win) {
+    inline if (win)
+    {
         Mov64(dst_ptr, rcx);
         Mov64(inA_ptr, rdx);
         Mov64(b, r8);
@@ -603,7 +602,6 @@ procedure fast_add_stdcall(
         r12 == old(r12);
         r13 == old(r13);
         r14 == old(r14);
-
         rsp == old(rsp);
 {
     // Store callee-save registers
@@ -611,11 +609,14 @@ procedure fast_add_stdcall(
     Push(r12);
 
     // Line up the rest of the arguments
-    inline if (win) {
+    inline if (win)
+    {
         Mov64(dst_ptr, rcx);
         Mov64(inA_ptr, rdx);
         Mov64(inB_ptr, r8);
-    } else {
+    }
+    else
+    {
         Mov64(inB_ptr, rdx);
     }
 
@@ -674,7 +675,7 @@ procedure fast_sub(ghost dst_b:buffer64, ghost inA_b:buffer64, ghost inB_b:buffe
         modifies_buffer(dst_b, old(mem), mem);
 {
     xor_lemmas();
-    lemma_sub_carry_equiv_forall();
+//    lemma_sub_carry_equiv_forall();
 
     Xor64(rax, rax);
 
@@ -768,7 +769,6 @@ procedure fast_sub_stdcall(
         r12 == old(r12);
         r13 == old(r13);
         r14 == old(r14);
-
         rsp == old(rsp);
 {
     // Store callee-save registers
@@ -776,11 +776,14 @@ procedure fast_sub_stdcall(
     Push(r12);
 
     // Line up the rest of the arguments
-    inline if (win) {
+    inline if (win)
+    {
         Mov64(dst_ptr, rcx);
         Mov64(inA_ptr, rdx);
         Mov64(inB_ptr, r8);
-    } else {
+    }
+    else
+    {
         Mov64(inB_ptr, rdx);
     }
 
@@ -817,6 +820,8 @@ procedure cswap_single(inline offset:nat, ghost p0_b:buffer64, ghost p1_b:buffer
 
         validDstAddrs64(mem, p0_ptr, p0_b, 8, memTaint, Secret);
         validDstAddrs64(mem, p1_ptr, p1_b, 8, memTaint, Secret);
+
+        valid_cf(efl);
 
     ensures
         validSrcAddrs64(mem, p0_ptr, p0_b, 8, memTaint, Secret);
@@ -1051,10 +1056,11 @@ procedure cswap2_stdcall(
         rsp == old(rsp);
 {
     // Line up the rest of the arguments
-    inline if (win) {
+    inline if (win)
+    {
         // Store callee-save registers
-        Push(rdi);
-        Push(rsi);
+        Push_Secret(rdi);
+        Push_Secret(rsi);
         Mov64(p0_ptr, rcx);
         Mov64(p1_ptr, rdx);
         Mov64(bit, r8);
@@ -1062,9 +1068,9 @@ procedure cswap2_stdcall(
 
     cswap2(p0_b, p1_b, bit_in);
 
-    inline if (win) {
-        Pop(rsi);
-        Pop(rdi);
+    inline if (win)
+    {
+        Pop_Secret(rsi);
+        Pop_Secret(rdi);
     }
-
 }

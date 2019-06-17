@@ -102,6 +102,43 @@ procedure Push(in src:reg_opr64)
     equiv_store_stack64(rsp, old(src), old(stack));
 }
 
+procedure Pop_Secret(out dst:dst_opr64)
+    {:public}
+    {:quick exportOnly}
+    {:instruction Ins(BC.Pop(dst, Secret))}
+    reads stackTaint;
+    modifies rsp; stack;
+    requires
+        valid_src_stack64(rsp, stack);
+        valid_taint_stack64(rsp, Secret, stackTaint);
+        rsp >= init_rsp(stack) - 4096;
+        rsp + 8 <= init_rsp(stack);
+    ensures
+        dst == load_stack64(old(rsp), old(stack));
+        rsp == old(rsp) + 8;
+        stack == free_stack64(rsp-8, rsp, old(stack));
+{
+    lemma_valid_taint_stack64(old(rsp), Secret, old(stackTaint));
+}
+
+procedure Push_Secret(in src:reg_opr64)
+    {:public}
+    {:quick exportOnly}
+    {:instruction Ins(BC.Push(src, Secret))}
+    modifies
+        rsp; stack; stackTaint;
+    requires
+        rsp <= init_rsp(stack);
+        init_rsp(stack) - 4096 <= rsp - 8;
+    ensures
+        rsp == old(rsp) - 8;
+        stack == store_stack64(rsp, old(src), old(stack));
+        stackTaint == store_taint_stack64(rsp, Secret, old(stackTaint));
+{
+    equiv_store_stack64(rsp, old(src), old(stack));
+}
+
+
 procedure Load64_stack(out dst:dst_opr64, in src:reg_opr64, inline offset:int)
     {:public}
     {:quick exportOnly}
@@ -160,6 +197,53 @@ procedure PopXmm(out dst:xmm, out tmp:reg_opr64, ghost expected_xmm:quad32)
     Pop(tmp);
     Pinsrq(dst, tmp, 1);
     Pop(tmp);
+    Pinsrq(dst, tmp, 0);
+    push_pop_xmm(expected_xmm, old(dst));
+}
+
+procedure PushXmm_Secret(in src:xmm, out tmp:reg_opr64)
+    {:public}
+    {:quick exportOnly}
+    modifies
+        rsp; stack; stackTaint;
+    requires
+        rsp <= init_rsp(stack);
+        init_rsp(stack) - 4096 <= rsp - 16;
+    ensures
+        let src_lo := lo64(src);
+        let src_hi := hi64(src);
+        stack == old(store_stack64(rsp - 16, src_hi, store_stack64(rsp - 8, src_lo, stack)));
+        stackTaint == old(store_taint_stack64(rsp - 16, Secret, store_taint_stack64(rsp - 8, Secret, stackTaint)));
+        rsp == old(rsp) - 16;
+{
+    Pextrq(tmp, src, 0);
+    Push_Secret(tmp);
+    Pextrq(tmp, src, 1);
+    Push_Secret(tmp);
+}
+
+procedure PopXmm_Secret(out dst:xmm, out tmp:reg_opr64, ghost expected_xmm:quad32)
+    {:public}
+    {:quick exportOnly}
+    reads stackTaint;
+    modifies rsp; stack;
+    requires
+        valid_src_stack64(rsp, stack);
+        valid_src_stack64(rsp + 8, stack);
+        valid_taint_stack64(rsp, Secret, stackTaint);
+        valid_taint_stack64(rsp + 8, Secret, stackTaint);
+        hi64(expected_xmm) == load_stack64(rsp, stack);
+        lo64(expected_xmm) == load_stack64(rsp+8, stack);
+        rsp >= init_rsp(stack) - 4096;
+        rsp + 16 <= init_rsp(stack);
+    ensures
+        dst == expected_xmm;
+        rsp == old(rsp) + 16;
+        stack == free_stack64(rsp-16, rsp, old(stack));
+{
+    Pop_Secret(tmp);
+    Pinsrq(dst, tmp, 1);
+    Pop_Secret(tmp);
     Pinsrq(dst, tmp, 0);
     push_pop_xmm(expected_xmm, old(dst));
 }

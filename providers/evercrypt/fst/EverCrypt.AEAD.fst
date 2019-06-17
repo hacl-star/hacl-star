@@ -80,6 +80,14 @@ let frame_invariant #a l s h0 h1 =
 /// Actual stateful API
 /// -------------------
 
+let alg_of_state a s =
+  let open LowStar.BufferOps in
+  let Ek impl _ _ = !*s in
+  match impl with
+  | Hacl_CHACHA20_POLY1305 -> CHACHA20_POLY1305
+  | Vale_AES128_GCM -> AES128_GCM
+  | Vale_AES256_GCM -> AES256_GCM
+
 let as_kv #a (Ek _ kv _) =
   G.reveal kv
 

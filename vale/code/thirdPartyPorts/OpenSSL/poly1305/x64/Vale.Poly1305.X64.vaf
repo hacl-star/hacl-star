@@ -23,6 +23,7 @@
 
 include "../../../../arch/x64/Vale.X64.InsBasic.vaf"
 include "../../../../arch/x64/Vale.X64.InsMem.vaf"
+include "../../../../arch/x64/Vale.X64.InsStack.vaf"
 include{:fstar}{:open} "Vale.Def.Types_s"
 include{:fstar}{:open} "Vale.Arch.Types"
 include{:fstar}{:open} "Vale.X64.Machine_s"
@@ -50,6 +51,7 @@ open Vale.X64.State
 open Vale.X64.Decls
 open Vale.X64.InsBasic
 open Vale.X64.InsMem
+open Vale.X64.InsStack
 open Vale.X64.QuickCode
 open Vale.X64.QuickCodes
 open Vale.Poly1305.Spec_s
@@ -100,7 +102,7 @@ procedure Poly1305_multiply(ghost r1:nat64) returns(ghost hh:int)
     let gd1:int := h0 * r1 + h1 * r0 + h2 * s1;
     let gd2:int := h2 * r0;
 
-    assert va_is_src_opr64(va_op_opr64_reg(rR14), this); // TODO: get rid of this
+    assert va_is_src_opr64(va_op_opr64_reg64(rR14), this); // TODO: get rid of this
     Mul64Wrap(h0);  // h0*r1
     Mov64(d2, rax);
     Mov64(rax, r0);
@@ -435,7 +437,8 @@ procedure Poly1305_last_block()
         Adc64Wrap(h1, 0);
         Adc64Wrap(h2, 0);
     } else {
-        lemma_bytes_shift_power2(#nat64(nExtra - 8));
+        let nExtra8 := #nat8(nExtra - 8);
+        lemma_bytes_shift_power2(nExtra8);
         Mov64(rcx, nExtra);
         Sub64(rcx, 8);
         Shl64(rcx, 3);
@@ -443,13 +446,13 @@ procedure Poly1305_last_block()
         Shl64(rdx, rcx);
 
         assert padLast == lowerUpper128_opaque(0, rdx) by {
-            lemma_power2_add64(#nat64(8 * nExtra - 64));
+            lemma_power2_add64(8 * nExtra8);
             Vale.Def.Opaque_s.reveal_opaque(lowerUpper128);
         }
 
         // inpLast := (inpLast % padLast)
-        lemma_bytes_and_mod(r9, #nat64(nExtra - 8));
-        lemma_mod_hi(r8, r9, #nat64(pow2(#nat(8 * (nExtra - 8)))));
+        lemma_bytes_and_mod(r9, nExtra8);
+        lemma_mod_hi(r8, r9, #nat64(pow2(8 * nExtra8)));
         Mov64(rcx, rdx);
         Sub64(rcx, 1);
         And64(r9, rcx);
@@ -546,7 +549,7 @@ let reveal_logand128 (x y:nat128) : Lemma
   (ensures Vale.Def.Types_s.iand x y == FStar.UInt.logand #128 x y)
   = Vale.Def.TypesNative_s.reveal_iand 128 x y
 #endverbatim
-ghost procedure reveal_logand128(ghost x:nat128, ghost y:nat128) extern;
+ghost procedure reveal_logand128(ghost x:nat128, ghost y:nat128) {:infer_spec} extern;
 
 procedure Poly1305_impl(
         ghost key_r:nat128,
@@ -700,8 +703,10 @@ procedure Poly1305(
     reads memTaint;
     modifies
         rax; rbx; rcx; rdx; rsi; rdi; rbp; rsp; r8; r9; r10; r11; r12; r13; r14; r15;
-        efl; mem;
+        efl; mem; stack; stackTaint;
     requires
+        rsp == init_rsp(stack);
+
         buffers_disjoint(ctx_b, inp_b);
         validDstAddrs64(mem, ctx_in, ctx_b, 24, memTaint, Public);
         validSrcAddrs64(mem, inp_in, inp_b, readable_words(len_in), memTaint, Public);
@@ -776,17 +781,18 @@ procedure Poly1305(
     //   40, 48: key_s
     //   56: will hold len % 16
     //   64: will hold len / 16 * 16
-    //   72, 80, 88, 96, 104, 112, 120, 128: callee-save registers
     //   184: finish
-    Store64_buffer(ctx, h1,  72, Public, ctx_b, 9);
-    Store64_buffer(ctx, h2,  80, Public, ctx_b, 10);
-    Store64_buffer(ctx, rax, 88, Public, ctx_b, 11);
-    Store64_buffer(ctx, r11, 96, Public, ctx_b, 12);
-    Store64_buffer(ctx, r12, 104, Public, ctx_b, 13);
-    Store64_buffer(ctx, r13, 112, Public, ctx_b, 14);
-    Store64_buffer(ctx, h0,  120, Public, ctx_b, 15);
-    Store64_buffer(ctx, r15, 128, Public, ctx_b, 16);
     Store64_buffer(ctx, finish, 184, Public, ctx_b, 23);
+
+    // Save callee-saved registers
+    Push_Secret(h1);
+    Push_Secret(h2);
+    Push_Secret(rax);
+    Push_Secret(r11);
+    Push_Secret(r12);
+    Push_Secret(r13);
+    Push_Secret(h0);
+    Push_Secret(r15);
 
     let h' := Poly1305_impl(key_r, key_s, ctx_b, inp_b, finish_in);
 
@@ -794,14 +800,16 @@ procedure Poly1305(
     Store64_buffer(ctx, h1,  8, Public, ctx_b, 1);
     Store64_buffer(ctx, h2, 16, Public, ctx_b, 2);
 
-    Load64_buffer(h1,  ctx, 72, Public, ctx_b, 9);
-    Load64_buffer(h2,  ctx, 80, Public, ctx_b, 10);
-    Load64_buffer(rax, ctx, 88, Public, ctx_b, 11);
-    Load64_buffer(inp, ctx, 96, Public, ctx_b, 12);
-    Load64_buffer(r12, ctx, 104, Public, ctx_b, 13);
-    Load64_buffer(r13, ctx, 112, Public, ctx_b, 14);
-    Load64_buffer(h0,  ctx, 120, Public, ctx_b, 15);
-    Load64_buffer(r15, ctx, 128, Public, ctx_b, 16);
+    // Restore callee-saved registers
+    Pop_Secret(r15);
+    Pop_Secret(h0);
+    Pop_Secret(r13);
+    Pop_Secret(r12);
+    Pop_Secret(inp);
+    Pop_Secret(rax);
+    Pop_Secret(h2);
+    Pop_Secret(h1);
+
     Mov64(ctx, rax);
 }
 

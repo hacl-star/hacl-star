@@ -16,10 +16,10 @@ module IB = Vale.Interop.Base
 
 val bv_upd_update_heap64:
   (b:IB.b8{DV.length (IB.get_downview b.IB.bsrc) % 8 == 0}) ->
-  (heap:heap) ->
+  (heap:machine_heap) ->
   (i:nat{i < DV.length (IB.get_downview b.IB.bsrc) / 8}) ->
   (v:nat64) ->
-  (mem:IB.mem{MB.live (IB.hs_of_mem mem) b.IB.bsrc}) ->
+  (mem:IB.interop_heap{MB.live (IB.hs_of_mem mem) b.IB.bsrc}) ->
    Lemma
      (requires IB.correct_down_p mem heap b)
      (ensures
@@ -33,10 +33,10 @@ val bv_upd_update_heap64:
 
 val bv_upd_update_heap128:
   (b:IB.b8{DV.length (IB.get_downview b.IB.bsrc) % 16 == 0}) ->
-  (heap:heap) ->
+  (heap:machine_heap) ->
   (i:nat{i < DV.length (IB.get_downview b.IB.bsrc) / 16}) ->
   (v:quad32) ->
-  (mem:IB.mem{MB.live (IB.hs_of_mem mem) b.IB.bsrc}) ->
+  (mem:IB.interop_heap{MB.live (IB.hs_of_mem mem) b.IB.bsrc}) ->
    Lemma
      (requires IB.correct_down_p mem heap b)
      (ensures

@@ -1,3 +1,4 @@
+include "../../../../lib/util/Vale.Lib.Basic.vaf"
 include "../../../../arch/x64/Vale.X64.InsBasic.vaf"
 include "../../../../arch/x64/Vale.X64.InsMem.vaf"
 include "../../../../arch/x64/Vale.X64.InsStack.vaf"
@@ -49,9 +50,7 @@ open Vale.Curve25519.FastUtil_helpers
 open Vale.X64.CPU_Features_s
 #endverbatim
 
-type tactic:Type(0) extern;
 const int_canon:tactic extern;
-ghost procedure assert_by_tactic(ghost p:prop, ghost t:tactic) extern;
 
 #reset-options "--z3rlimit 600"
 procedure fast_mul1(inline offset:nat, ghost inA_b:buffer64)
@@ -111,8 +110,7 @@ procedure fast_mul1(inline offset:nat, ghost inA_b:buffer64)
 
     let carry_bit := bool_bit(cf(efl));
     assert carry_bit == 0;      // PASSES
-    assert_by_tactic(a * b == pow2_four(b*a0, b*a1, b*a2, b*a3), int_canon);   // PASSES
-
+    assert_by_tactic(a * b == 0 + pow2_four(b * a0, b * a1, b * a2, b * a3), int_canon);   // PASSES
 }
 
 /*
@@ -293,7 +291,6 @@ procedure fast_mul1_add(inline offset:nat, ghost inA_b:buffer64)
 {
     xor_lemmas();
 
-
     Mulx64( tmp0,  d0, Mem(inA_ptr, 32 + offset*8, inA_b, 4 + offset, Secret));  /* A[4]*B */ lemma_prod_bounds(tmp0, d0, b, a4);
     let ba4_hi := tmp0;
     let ba4_lo := d0;
@@ -380,6 +377,7 @@ procedure carry_times_38(inout tmp:dst_opr64)
     requires
         carry == 0;
         @tmp != OReg(rRax);
+        valid_cf(efl);
     ensures
         carry == bool_bit(cf(efl)) * 38;
         tmp == 38;
@@ -412,6 +410,7 @@ procedure carry_pass(inline use_cf:bool, inline offset:nat, ghost dst_b:buffer64
 
         carry_in * 38 < pow2_63;
         !use_cf ==> zero == 0 && tmp == 38;
+        use_cf ==> valid_cf(efl);
 
      validDstAddrs64(mem, dst_ptr, dst_b, 4 + offset, memTaint, Secret);
     ensures
@@ -425,13 +424,16 @@ procedure carry_pass(inline use_cf:bool, inline offset:nat, ghost dst_b:buffer64
         modifies_buffer_specific(dst_b, old(mem), mem, 0 + offset, 4 + offset - 1);
         validSrcAddrs64(mem, dst_ptr, dst_b, 4 + offset, memTaint, Secret);
 {
-    inline if (use_cf) {
+    inline if (use_cf)
+    {
         Mov64(carry, 0);
         carry_times_38(tmp);
 
         xor_lemmas();
         Xor64( zero,  zero);
-    } else {
+    }
+    else
+    {
         IMul64(carry, tmp);
     }
 
@@ -574,7 +576,6 @@ procedure carry_wide_stdcall(inline win:bool, ghost dst_b:buffer64, ghost inA_b:
         r12 == old(r12);
         r13 == old(r13);
         r14 == old(r14);
-
         rsp == old(rsp);
 {
     // Store callee-save registers
@@ -582,7 +583,8 @@ procedure carry_wide_stdcall(inline win:bool, ghost dst_b:buffer64, ghost inA_b:
     Push(r13);
 
     // Line up the rest of the arguments
-    inline if (win) {
+    inline if (win)
+    {
         Push(rsi);
         Mov64(dst_ptr, rcx);
         Mov64(inA_ptr, rdx);
@@ -590,7 +592,8 @@ procedure carry_wide_stdcall(inline win:bool, ghost dst_b:buffer64, ghost inA_b:
 
     carry_wide(0, dst_b, inA_b);
 
-    inline if (win) {
+    inline if (win)
+    {
         Pop(rsi);
     }
     Pop(r13);
@@ -614,6 +617,7 @@ procedure carry_sub_pass()
 
     requires
         adx_enabled && bmi2_enabled;
+        valid_cf(efl);
 
     ensures
        pow2_four(a0, a1, a2, a3) % prime == old(pow2_four(a0, a1, a2, a3) - bool_bit(cf(efl)) * pow2_256) % prime;
@@ -681,6 +685,7 @@ procedure fast_add(ghost inA_b:buffer64, ghost inB_b:buffer64)
     ensures
         let d := pow2_five(d0, d1, d2, d3, bool_bit(cf(efl)));
         d == old(a + b);
+        valid_cf(efl);
 {
     xor_lemmas();
     Load64_buffer(d0, inB_ptr,  0, Secret, inB_b, 0);     /* B[0] */
@@ -734,9 +739,10 @@ procedure fast_sub(ghost inA_b:buffer64, ghost inB_b:buffer64)
     ensures
         let d := pow2_four(d0, d1, d2, d3);
         d - bool_bit(cf(efl)) * pow2_256 == old(a - b);
+        valid_cf(efl);
 {
     xor_lemmas();
-    lemma_sub_carry_equiv_forall();
+//    lemma_sub_carry_equiv_forall();
 
     Load64_buffer(d0, inA_ptr,  0, Secret, inA_b, 0);     /* A[0] */
     Sub64Wrap(d0, Mem(inB_ptr, 0, inB_b, 0, Secret));      /* A[0] - B[0] */
@@ -893,10 +899,11 @@ procedure fadd_stdcall(
 {
 
     // Line up the rest of the arguments
-    inline if (win) {
+    inline if (win)
+    {
         // Store callee-save registers
-        Push(rdi);
-        Push(rsi);
+        Push_Secret(rdi);
+        Push_Secret(rsi);
 
         Mov64(dst_ptr, rcx);
         Mov64(inA_ptr, rdx);
@@ -905,9 +912,10 @@ procedure fadd_stdcall(
 
     fadd(dst_b, inA_b, inB_b);
 
-    inline if (win) {
-        Pop(rsi);
-        Pop(rdi);
+    inline if (win)
+    {
+        Pop_Secret(rsi);
+        Pop_Secret(rdi);
     }
 }
 
@@ -1046,10 +1054,11 @@ procedure fsub_stdcall(
 {
 
     // Line up the rest of the arguments
-    inline if (win) {
+    inline if (win)
+    {
         // Store callee-save registers
-        Push(rdi);
-        Push(rsi);
+        Push_Secret(rdi);
+        Push_Secret(rsi);
 
         Mov64(dst_ptr, rcx);
         Mov64(inA_ptr, rdx);
@@ -1058,9 +1067,10 @@ procedure fsub_stdcall(
 
     fsub(dst_b, inA_b, inB_b);
 
-    inline if (win) {
-        Pop(rsi);
-        Pop(rdi);
+    inline if (win)
+    {
+        Pop_Secret(rsi);
+        Pop_Secret(rdi);
     }
 }
 
@@ -1191,13 +1201,14 @@ procedure fmul1_stdcall(
         rsp == old(rsp);
 {
     // Store callee-save registers
-    Push(rdi);
-    Push(r12);
-    Push(r13);
+    Push_Secret(rdi);
+    Push_Secret(r12);
+    Push_Secret(r13);
 
     // Line up the rest of the arguments
-    inline if (win) {
-        Push(rsi);
+    inline if (win)
+    {
+        Push_Secret(rsi);
         Mov64(dst_ptr, rcx);
         Mov64(inA_ptr, rdx);
         Mov64(b, r8);
@@ -1205,10 +1216,11 @@ procedure fmul1_stdcall(
 
     fmul1(dst_b, inA_b, inB_in);
 
-    inline if (win) {
-        Pop(rsi);
+    inline if (win)
+    {
+        Pop_Secret(rsi);
     }
-    Pop(r13);
-    Pop(r12);
-    Pop(rdi);
+    Pop_Secret(r13);
+    Pop_Secret(r12);
+    Pop_Secret(rdi);
 }

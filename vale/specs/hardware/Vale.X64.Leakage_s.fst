@@ -5,14 +5,13 @@ open Vale.X64.Machine_Semantics_s
 module F = FStar.FunctionalExtensionality
 
 type reg_taint = F.restricted_t reg (fun _ -> taint)
-type xmms_taint = F.restricted_t xmm (fun _ -> taint)
 
 noeq type analysis_taints =
   | AnalysisTaints: regTaint: reg_taint -> flagsTaint: taint -> cfFlagsTaint: taint -> ofFlagsTaint: taint ->
-      xmmTaint: xmms_taint -> analysis_taints
+      analysis_taints
 
 let publicFlagValuesAreSame (ts:analysis_taints) (s1:machine_state) (s2:machine_state) =
-  ts.flagsTaint = Public ==> (s1.ms_flags = s2.ms_flags)
+  ts.flagsTaint = Public ==> (s1.ms_flags == s2.ms_flags)
 
 let publicCfFlagValuesAreSame (ts:analysis_taints) (s1:machine_state) (s2:machine_state) =
   Public? ts.cfFlagsTaint ==> (cf s1.ms_flags = cf s2.ms_flags)
@@ -26,32 +25,26 @@ let publicRegisterValuesAreSame (ts:analysis_taints) (s1:machine_state) (s2:mach
     (s1.ms_regs r = s2.ms_regs r)
 
 let publicMemValueIsSame
-  (mem1 mem2:heap)
+  (mem1 mem2:machine_heap)
   (memTaint1 memTaint2:Map.t int taint)
   (x:int) =
   (Public? (memTaint1.[x]) || Public? (memTaint2.[x])) ==>
      mem1.[x] == mem2.[x]
 
 let publicMemValuesAreSame (s1:machine_state) (s2:machine_state) =
-  forall x.{:pattern s1.ms_memTaint.[x] \/ s2.ms_memTaint.[x] \/ s1.ms_mem.[x] \/ s2.ms_mem.[x]}
-    publicMemValueIsSame s1.ms_mem s2.ms_mem s1.ms_memTaint s2.ms_memTaint x
-
-let publicXmmValuesAreSame (ts:analysis_taints) (s1:machine_state) (s2:machine_state) =
-  forall r.{:pattern ts.xmmTaint r \/ s1.ms_xmms r \/ s2.ms_xmms r}
-    ts.xmmTaint r = Public ==>
-    (s1.ms_xmms r = s2.ms_xmms r)
+  forall x.{:pattern s1.ms_memTaint.[x] \/ s2.ms_memTaint.[x] \/ s1.ms_heap.[x] \/ s2.ms_heap.[x]}
+    publicMemValueIsSame s1.ms_heap s2.ms_heap s1.ms_memTaint s2.ms_memTaint x
 
 let publicStackValueIsSame
-  (stack1 stack2:heap)
+  (stack1 stack2:machine_heap)
   (stackTaint1 stackTaint2:Map.t int taint)
   (x:int)
   = (Public? (stackTaint1.[x]) || Public? (stackTaint2.[x])) ==>
      stack1.[x] == stack2.[x]
 
-
 let publicStackValuesAreSame (s1:machine_state) (s2:machine_state) =
-  let Vale_stack _ stack1 = s1.ms_stack in
-  let Vale_stack _ stack2 = s2.ms_stack in
+  let Machine_stack _ stack1 = s1.ms_stack in
+  let Machine_stack _ stack2 = s2.ms_stack in
   forall x.{:pattern s1.ms_stackTaint.[x] \/ s2.ms_stackTaint.[x] \/ stack1.[x] \/ stack2.[x]}
     publicStackValueIsSame stack1 stack2 s1.ms_stackTaint s2.ms_stackTaint x
 
@@ -62,7 +55,6 @@ let publicValuesAreSame (ts:analysis_taints) (s1:machine_state) (s2:machine_stat
   /\ publicOfFlagValuesAreSame ts s1 s2
   /\ publicMemValuesAreSame s1 s2
   /\ publicStackValuesAreSame s1 s2
-  /\ publicXmmValuesAreSame ts s1 s2
 
 let constTimeInvariant (ts:analysis_taints) (s:machine_state) (s':machine_state) =
     publicValuesAreSame ts s s'

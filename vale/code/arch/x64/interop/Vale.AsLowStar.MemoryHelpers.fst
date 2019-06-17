@@ -34,11 +34,11 @@ let rec loc_eq (args:list arg)
     | [] -> ()
     | hd :: tl -> loc_eq tl
 
-let relate_modifies (args:list arg) (m0 m1 : ME.mem) = loc_eq args
-let reveal_readable (#src #t:_) (x:buf_t src t) (s:ME.mem) = ()
-let reveal_imm_readable (#src #t:_) (x:ibuf_t src t) (s:ME.mem) = ()
-let readable_live (#src #t:_) (x:buf_t src t) (s:ME.mem) = ()
-let readable_imm_live (#src #t:_) (x:ibuf_t src t) (s:ME.mem) = ()
+let relate_modifies (args:list arg) (m0 m1 : ME.vale_heap) = loc_eq args
+let reveal_readable (#src #t:_) (x:buf_t src t) (s:ME.vale_heap) = ()
+let reveal_imm_readable (#src #t:_) (x:ibuf_t src t) (s:ME.vale_heap) = ()
+let readable_live (#src #t:_) (x:buf_t src t) (s:ME.vale_heap) = ()
+let readable_imm_live (#src #t:_) (x:ibuf_t src t) (s:ME.vale_heap) = ()
 let buffer_readable_reveal #max_arity src bt x args h0 = ()
 let get_heap_mk_mem_reveal args h0 = ()
 let mk_stack_reveal stack = ()
@@ -68,8 +68,8 @@ let core_create_lemma_taint_hyp
       (ensures (let va_s = LSig.create_initial_vale_state #max_arity #arg_reg args h0 in
                 LSig.taint_hyp args va_s))
   = let va_s = LSig.create_initial_vale_state #max_arity #arg_reg args h0 in
-    let taint_map = va_s.VS.memTaint in
-    let mem = va_s.VS.mem in
+    let taint_map = va_s.VS.vs_memTaint in
+    let mem = va_s.VS.vs_heap in
 //    assert (mem == mk_mem args h0);
     let raw_taint = IX64.(mk_taint args IX64.init_taint) in
     assert (taint_map == create_memtaint mem (args_b8 args) raw_taint);

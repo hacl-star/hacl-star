@@ -293,7 +293,7 @@ let gcm_blocks_helper_enc (alg:algorithm) (key:seq nat32)
     gctr_encrypt_block_offset ctr_BE_2 (index plain num_blocks) alg key num_blocks;
     assert( gctr_encrypt_block ctr_BE_2 (index plain num_blocks) alg key num_blocks ==
             gctr_encrypt_block (inc32 ctr_BE_2 num_blocks) (index plain num_blocks) alg key 0);
-    reveal_opaque aes_encrypt_LE_def;
+    FStar.Pervasives.reveal_opaque (`%aes_encrypt_le) aes_encrypt_le;
     gctr_partial_to_full_advanced ctr_BE_2 plain cipher alg key p_num_bytes;
     assert (cipher_bytes == gctr_encrypt_LE ctr_BE_2 plain_bytes alg key)
   ) else (
@@ -327,7 +327,7 @@ let pad_to_128_bits_multiple_append (x y:seq nat8) : Lemma
   =
   assert (equal (pad_to_128_bits (append x y)) (append x (pad_to_128_bits y)))
 
-#reset-options "--z3rlimit 60"
+#reset-options "--z3rlimit 100"
 let gcm_blocks_helper (alg:algorithm) (key:seq nat32)
                    (a128 a_bytes p128x6 p128 p_bytes c128x6 c128 c_bytes:seq quad32)
                    (p_num_bytes a_num_bytes:nat)
@@ -471,7 +471,7 @@ let gcm_blocks_helper (alg:algorithm) (key:seq nat32)
       gctr_encrypt_block ctr_BE_1 hash alg key 0;
       == {}
       quad32_xor hash (aes_encrypt_LE alg key (reverse_bytes_quad32 ctr_BE_1));
-      == { reveal_opaque aes_encrypt_LE_def }
+      == { FStar.Pervasives.reveal_opaque (`%aes_encrypt_le) aes_encrypt_le }
       quad32_xor hash (aes_encrypt_le alg key (reverse_bytes_quad32 ctr_BE_1));
       == {}
       quad32_xor hash (aes_encrypt_BE alg key ctr_BE_1);
@@ -582,6 +582,7 @@ let gcm_blocks_helper (alg:algorithm) (key:seq nat32)
   );
   ()
 
+// TODO: remove duplicate code -- there is an identical copy of this in GCTR.fst
 let lemma_length_simplifier (s bytes t:seq quad32) (num_bytes:nat) : Lemma
   (requires t == (if num_bytes > (length s) * 16 then append s bytes else s) /\
             (num_bytes <= (length s) * 16 ==> num_bytes == (length s * 16)) /\
@@ -936,7 +937,7 @@ let gcm_blocks_dec_helper (alg:algorithm) (key:seq nat32)
       gctr_encrypt_block ctr_BE_1 hash alg key 0;
       == {}
       quad32_xor hash (aes_encrypt_LE alg key (reverse_bytes_quad32 ctr_BE_1));
-      == { reveal_opaque aes_encrypt_LE_def }
+      == { FStar.Pervasives.reveal_opaque (`%aes_encrypt_le) aes_encrypt_le }
       quad32_xor hash (aes_encrypt_le alg key (reverse_bytes_quad32 ctr_BE_1));
       == {}
       quad32_xor hash (aes_encrypt_BE alg key ctr_BE_1);

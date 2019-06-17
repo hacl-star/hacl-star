@@ -16,6 +16,7 @@ let sub_carry (x y:nat64) (c:bit) : nat64 & (c':bit)
   else
     (x - (y + c)), 0
 
+(*
 val lemma_sub_carry_equiv (x y:nat64) (c:bit) :
   Lemma (let v, c' = sub_carry x y c in
          v == (x - (y + c)) % pow2_64 /\
@@ -26,6 +27,7 @@ val lemma_sub_carry_equiv_forall: unit ->
          let v, c' = sub_carry x y c in
          v == (x - (y + c)) % pow2_64 /\
          c' == bool_bit (x - (y+c) < 0))
+*)
 
 val lemma_sub3
       (a:nat) (a0 a1 a2:nat64)

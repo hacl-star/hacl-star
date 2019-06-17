@@ -19,7 +19,6 @@ include{:fstar}{:open} "Vale.Arch.Types"
 include{:fstar}{:open} "Vale.AES.AES_helpers"
 include{:fstar}{:open} "Vale.Poly1305.Math"
 include{:fstar}{:open} "Vale.AES.GCM_helpers"
-include{:fstar}{:open} "Vale.Lib.Workarounds"
 include{:fstar}{:open} "Vale.AES.GCTR_s"
 include{:fstar}{:open} "Vale.AES.GCTR"
 include{:fstar}{:open} "Vale.Arch.TypesNative"
@@ -57,7 +56,6 @@ open Vale.Arch.Types
 open Vale.AES.AES_helpers
 open Vale.Poly1305.Math    // For lemma_poly_bits64()
 open Vale.AES.GCM_helpers
-open Vale.Lib.Workarounds
 open Vale.AES.GCTR_s
 open Vale.AES.GCTR
 open Vale.Arch.TypesNative

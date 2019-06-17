@@ -1,0 +1,18 @@
+module Vale.Lib.Basic
+
+function normalize(p:prop):prop extern;
+
+ghost procedure assert_normalize(ghost p:prop)
+    {:public}
+    requires
+        normalize(p);
+    ensures
+        p;
+{
+}
+
+type tactic:Type(0) extern;
+ghost procedure assert_by_tactic(ghost p:prop, ghost t:tactic)
+    {:infer_spec}
+    extern;
+

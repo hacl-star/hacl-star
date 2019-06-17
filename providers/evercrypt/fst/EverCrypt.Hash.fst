@@ -74,7 +74,17 @@ let repr #a s h: GTot _ =
   let s = B.get h s 0 in
   B.as_seq h (p s)
 
-let repr_eq (#a:alg) (r1 r2: acc a) =
+let alg_of_state a s =
+  let open LowStar.BufferOps in
+  match !*s with
+  | MD5_s _ -> MD5
+  | SHA1_s _ -> SHA1
+  | SHA2_224_s _ -> SHA2_224
+  | SHA2_256_s _ -> SHA2_256
+  | SHA2_384_s _ -> SHA2_384
+  | SHA2_512_s _ -> SHA2_512
+
+let repr_eq (#a:alg) (r1 r2: Spec.Hash.Definitions.words_state a) =
   Seq.equal r1 r2
 
 let fresh_is_disjoint l1 l2 h0 h1 = ()
@@ -215,7 +225,7 @@ let update_last_st (#a:e_alg) =
     B.(modifies (loc_buffer p) h0 h1) /\
     (B.length last + Seq.length (Spec.Hash.PadFinish.pad a (v total_len))) % block_length a = 0 /\
     B.as_seq h1 p ==
-      compress_many (B.as_seq h0 p)
+      Spec.Hash.update_multi a (B.as_seq h0 p)
         (Seq.append (B.as_seq h0 last) (Spec.Hash.PadFinish.pad a (v total_len))))
 
 inline_for_extraction
