@@ -97,6 +97,18 @@ let write_set (i:instr_t_record) (oprs:instr_operands_t i.outs i.args) : list lo
   | HavocFlags -> ALocCf :: ALocOf :: ws
   | PreserveFlags -> ws
 
+let constant_writes (i:instr_t_record) (oprs:instr_operands_t i.outs i.args) : locations_with_values =
+  let InstrTypeRecord #outs #args #havoc_flags _ = i in
+  match havoc_flags with
+  | HavocFlags -> (
+      let ws = aux_write_set outs args oprs in
+      let cr = [] in
+      let cr = if L.mem ALocCf ws then cr else (| ALocCf, None |) :: cr in
+      let cr = if L.mem ALocOf ws then cr else (| ALocOf, None |) :: cr in
+      cr
+    )
+  | PreserveFlags -> []
+
 (* See fsti *)
 let rw_set_of_ins i =
   match i with
@@ -104,7 +116,7 @@ let rw_set_of_ins i =
     {
       loc_reads = read_set i oprs;
       loc_writes = write_set i oprs;
-      loc_constant_writes = [];
+      loc_constant_writes = constant_writes i oprs;
     }
   | Push src t ->
     {
@@ -183,7 +195,6 @@ let lemma_eval_instr_only_affects_write
          (Some? (eval_instr it oprs ann s0)))))
     (ensures (
         (eval_location a s0 == eval_location a (Some?.v (eval_instr it oprs ann s0))))) =
-  let w = (rw_set_of_ins (Instr it oprs ann)).loc_writes in
   let InstrTypeRecord #outs #args #havoc_flags' i = it in
   let vs = instr_apply_eval outs args (instr_eval i) oprs s0 in
   let s1 =
@@ -636,11 +647,54 @@ let lemma_machine_eval_ins_st_unchanged_behavior (i:ins{Instr? i}) (s1 s2:machin
   let Instr it oprs ann = i in
   lemma_eval_instr_unchanged_at' it oprs ann s1 s2
 
+let rec lemma_machine_eval_ins_st_constant_on_execution (i:ins{Instr? i}) (s:machine_state) :
+  Lemma
+    (ensures (constant_on_execution (rw_set_of_ins i).loc_constant_writes (machine_eval_ins_st i) s)) =
+  if s.ms_ok then (
+    let Instr it oprs ann = i in
+    let InstrTypeRecord #outs #args #havoc_flags' i = it in
+    match havoc_flags' with
+    | PreserveFlags -> ()
+    | HavocFlags ->
+      let ws = aux_write_set outs args oprs in
+      if L.mem ALocCf ws then () else (
+        let s0 = s in
+        let vs = instr_apply_eval outs args (instr_eval i) oprs s0 in
+        let s1 =
+          match havoc_flags' with
+          | HavocFlags -> {s0 with ms_flags = havoc_flags}
+          | PreserveFlags -> s0
+        in
+        match vs with
+        | None -> ()
+        | Some vs ->
+          let _ = instr_write_outputs outs args vs oprs s0 s1 in
+          lemma_unchanged_except_not_mem ws ALocCf;
+          lemma_instr_write_outputs_only_affects_write outs args vs oprs s0 s1 ALocCf
+      );
+      if L.mem ALocOf ws then () else (
+        let s0 = s in
+        let vs = instr_apply_eval outs args (instr_eval i) oprs s0 in
+        let s1 =
+          match havoc_flags' with
+          | HavocFlags -> {s0 with ms_flags = havoc_flags}
+          | PreserveFlags -> s0
+        in
+        match vs with
+        | None -> ()
+        | Some vs ->
+          let _ = instr_write_outputs outs args vs oprs s0 s1 in
+          lemma_unchanged_except_not_mem ws ALocOf;
+          lemma_instr_write_outputs_only_affects_write outs args vs oprs s0 s1 ALocOf
+      )
+  ) else ()
+
 let lemma_machine_eval_ins_st_bounded_effects_Instr (i:ins{Instr? i}) :
   Lemma
     (ensures (
         (bounded_effects (rw_set_of_ins i) (machine_eval_ins_st i)))) =
   FStar.Classical.forall_intro (lemma_machine_eval_ins_st_only_affects_write i);
+  FStar.Classical.forall_intro (lemma_machine_eval_ins_st_constant_on_execution i);
   FStar.Classical.forall_intro_2 (fun s1 ->
       FStar.Classical.move_requires (lemma_machine_eval_ins_st_ok i s1));
   FStar.Classical.forall_intro_2 (fun s1 ->

@@ -54,7 +54,7 @@ let rec unchanged_at (locs:locations) (s1 s2:machine_state) : GTot Type0 =
     ensures that the values of the locations in [locv] always match
     the values given to them in [locv]. *)
 let rec constant_on_execution (locv:locations_with_values) (f:st unit) (s:machine_state) : GTot Type0 =
-  s.ms_ok ==> (
+  (run f s).ms_ok ==> (
     match locv with
     | [] -> True
     | (|l, v|) :: xs -> (
