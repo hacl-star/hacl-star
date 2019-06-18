@@ -75,12 +75,13 @@ let frodo_sample_res r0 e =
   u16 (e % modulus U16)
 
 #set-options "--max_fuel 1"
+
 val frodo_sample: r:uint16 -> uint16
 let frodo_sample r =
   let t = r >>. 1ul in
   let r0 = r &. u16 1 in
   mod_mask_lemma r 1ul;
-  uintv_extensionality (mod_mask 1ul) (u16 1);
+  assert (v #U16 #SEC (mod_mask 1ul) == 1);
   assert (uint_v r0 == 0 \/ uint_v r0 == 1);
   let e =
     Loops.repeati_inductive
