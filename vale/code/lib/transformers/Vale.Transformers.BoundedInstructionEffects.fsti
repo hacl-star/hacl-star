@@ -6,11 +6,15 @@ open Vale.X64.Machine_Semantics_s
 open Vale.Transformers.PossiblyMonad
 open Vale.Transformers.Locations
 
+(** A [locations_with_values] contains locations and values they must hold *)
+type locations_with_values = list ((l:location{hasEq (location_val_t l)}) & location_val_t l)
+
 (** An [rw_set] contains information about what locations are read and
      written by a stateful operation. *)
 type rw_set = {
      loc_reads: locations;
      loc_writes: locations;
+     loc_constant_writes: locations_with_values;
 }
 
 (** [rw_set_of_ins i] returns the read/write sets for the execution of
@@ -46,13 +50,30 @@ let rec unchanged_at (locs:locations) (s1 s2:machine_state) : GTot Type0 =
       (unchanged_at xs s1 s2)
     )
 
-(** [bounded_effects r w f] means that the execution of [f] is bounded
-    by the read-set [r] and write-set [w]. This means that whenever
-    two different states are same at the locations in [r], then the
+(** [constant_on_execution locv f s] means that running [f] on [s]
+    ensures that the values of the locations in [locv] always match
+    the values given to them in [locv]. *)
+let rec constant_on_execution (locv:locations_with_values) (f:st unit) (s:machine_state) : GTot Type0 =
+  s.ms_ok ==> (
+    match locv with
+    | [] -> True
+    | (|l, v|) :: xs -> (
+        (eval_location l (run f s) = v) /\
+        (constant_on_execution xs f s)
+      )
+  )
+
+(** [bounded_effects rw f] means that the execution of [f] is bounded
+    by the read-write [rw]. This means that whenever two different
+    states are same at the locations in [rw.loc_reads], then the
     function will have the same effect, and that its effect is bounded
-    to the set [w]. *)
+    to the set [rw.loc_writes]. Additionally, execution always causes
+    the resultant state to cause the results to be written as per
+    [rw.loc_constant_writes]. *)
 let bounded_effects (rw:rw_set) (f:st unit) : GTot Type0 =
   (only_affects rw.loc_writes f) /\
+  (forall s. {:pattern (constant_on_execution rw.loc_constant_writes f s)}
+     constant_on_execution rw.loc_constant_writes f s) /\
   (
     forall s1 s2. {:pattern (run f s1); (run f s2)} (
       (s1.ms_ok = s2.ms_ok /\ unchanged_at rw.loc_reads s1 s2) ==> (
