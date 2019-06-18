@@ -104,26 +104,31 @@ let rw_set_of_ins i =
     {
       loc_reads = read_set i oprs;
       loc_writes = write_set i oprs;
+      loc_constant_writes = [];
     }
   | Push src t ->
     {
       loc_reads = ALocReg (Reg 0 rRsp) :: ALocStack :: both (locations_of_operand64 src);
       loc_writes = [ALocReg (Reg 0 rRsp); ALocStack];
+      loc_constant_writes = [];
     }
   | Pop dst t ->
     {
       loc_reads = ALocReg (Reg 0 rRsp) :: ALocStack :: fst (locations_of_operand64 dst);
       loc_writes = ALocReg (Reg 0 rRsp) :: snd (locations_of_operand64 dst);
+      loc_constant_writes = [];
     }
   | Alloc _ ->
     {
       loc_reads = [ALocReg (Reg 0 rRsp)];
       loc_writes = [ALocReg (Reg 0 rRsp)];
+      loc_constant_writes = [];
     }
   | Dealloc _ ->
     {
       loc_reads = [ALocStack; ALocReg (Reg 0 rRsp)];
       loc_writes = [ALocStack; ALocReg (Reg 0 rRsp)];
+      loc_constant_writes = [];
     }
 
 (* See fsti *)
@@ -340,7 +345,7 @@ let unchanged_at' (l:locations) (s1 s2:machine_state) =
   (s1.ms_ok /\ s2.ms_ok ==>
    unchanged_at l s1 s2)
 
-#push-options "--z3rlimit 15 --initial_fuel 4 --max_fuel 4 --initial_ifuel 2 --max_ifuel 2"
+#push-options "--z3rlimit 20 --initial_fuel 4 --max_fuel 4 --initial_ifuel 2 --max_ifuel 2"
 let lemma_instr_write_output_explicit_only_writes
     (i:instr_operand_explicit) (v:instr_val_t (IOpEx i)) (o:instr_operand_t i)
     (s_orig1 s1 s_orig2 s2:machine_state) :
