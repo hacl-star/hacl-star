@@ -9,6 +9,8 @@ let pow2_3 _   = assert_norm (pow2 3 = 8)
 let pow2_4 _   = assert_norm (pow2 4 = 16)
 let pow2_127 _ = assert_norm (pow2 127 = 0x80000000000000000000000000000000)
 
+let bits_numbytes t = ()
+
 let sec_int_t t = pub_int_t t
 
 let sec_int_v #t u = pub_int_v u
@@ -64,45 +66,42 @@ let byte_to_uint8 x = x
 
 let byte_to_int8 x = Int.Cast.uint8_to_int8 x
 
-#push-options "--z3rlimit 300"
-
 let op_At_Percent = Int.op_At_Percent
 
-// FStar.UInt128 gets special treatment in KreMLin 
-// There is no equivalent for FStar.Int128 at the moment, so we assume
-// these casts for the time being. Using them will fail at runtime with 
-// an informative message. The commented-out implementations show that they
-// are realizable.
+// FStar.UInt128 gets special treatment in KreMLin. There is no
+// equivalent for FStar.Int128 at the moment, so we use the three
+// assumed cast operators below.
+//
+// Using them will fail at runtime with an informative message.
+// The commented-out implementations show that they are realizable.
+//
+// When support for `FStar.Int128` is added KreMLin, these casts must
+// be added as special cases. When using builtin compiler support for
+// `int128_t`, they can be implemented directly as C casts without
+// undefined or implementation-defined behaviour.
 
-// U1,U8,U16,U32,U64 -> S128
-assume 
-val uint64_to_int128: a:UInt64.t -> b:Int128.t{Int128.v b == UInt64.v a}
-//let uint64_to_int128 a = Int128.int_to_t (v a)
-
-// U128 -> S128
-assume 
+assume
 val uint128_to_int128: a:UInt128.t{v a <= maxint S128} -> b:Int128.t{Int128.v b == UInt128.v a}
 //let uint128_to_int128 a = Int128.int_to_t (v a)
 
-// S8,S16,S32,S64 -> S128
-assume 
-val int64_to_int128: a:Int64.t -> b:Int128.t{Int128.v b == Int64.v a}
-//let int64_to_int128 a = Int128.int_to_t (v a)
-
-// S8,S16,S32,S64 -> U128
-assume 
-val int64_to_uint128: a:Int64.t -> b:UInt128.t{UInt128.v b == Int64.v a % pow2 128}
-//let int64_to_uint128 a = mk_int (v a % pow2 128)
-
-// S128 -> U128
-assume 
+assume
 val int128_to_uint128: a:Int128.t -> b:UInt128.t{UInt128.v b == Int128.v a % pow2 128}
 //let int128_to_uint128 a = mk_int (v a % pow2 128)
 
-// S128 -> U1..U64,S8..S64
 assume
+val int64_to_int128: a:Int64.t -> b:Int128.t{Int128.v b == Int64.v a}
+//let int64_to_int128 a = Int128.int_to_t (v a)
+
+val uint64_to_int128: a:UInt64.t -> b:Int128.t{Int128.v b == UInt64.v a}
+let uint64_to_int128 a = uint128_to_int128 (Int.Cast.Full.uint64_to_uint128 a)
+
+val int64_to_uint128: a:Int64.t -> b:UInt128.t{UInt128.v b == Int64.v a % pow2 128}
+let int64_to_uint128 a = int128_to_uint128 (int64_to_int128 a)
+
 val int128_to_uint64: a:Int128.t -> b:UInt64.t{UInt64.v b == Int128.v a % pow2 64}
-//let int128_to_uint64 a = UInt64.uint_to_t (v a % pow2 64)
+let int128_to_uint64 a = Int.Cast.Full.uint128_to_uint64 (int128_to_uint128 a)
+
+#push-options "--z3rlimit 300"
 
 let cast #t #l t' l' u =
   assert_norm (pow2 8 = 2 * pow2 7);
@@ -200,8 +199,8 @@ let cast #t #l t' l' u =
   | S8, S8     -> u
   | S8, S16    -> int8_to_int16 u
   | S8, S32    -> int8_to_int32 u
-  | S8, S64    -> int8_to_int64 u   
-  | S8, S128   -> int64_to_int128 (int8_to_int64 u) 
+  | S8, S64    -> int8_to_int64 u
+  | S8, S128   -> int64_to_int128 (int8_to_int64 u)
 
   | S16, U1    -> UInt8.rem (int16_to_uint8 u) 2uy
   | S16, U8    -> int16_to_uint8 u
@@ -239,18 +238,18 @@ let cast #t #l t' l' u =
   | S64, S64   -> u
   | S64, S128  -> int64_to_int128 u
 
-  | S128, U1    -> UInt8.rem (uint64_to_uint8 (int128_to_uint64 u)) 2uy  
+  | S128, U1    -> UInt8.rem (uint64_to_uint8 (int128_to_uint64 u)) 2uy
   | S128, U8    -> uint64_to_uint8 (int128_to_uint64 u)
   | S128, U16   -> uint64_to_uint16 (int128_to_uint64 u)
   | S128, U32   -> uint64_to_uint32 (int128_to_uint64 u)
-  | S128, U64   -> int128_to_uint64 u  
+  | S128, U64   -> int128_to_uint64 u
   | S128, U128  -> int128_to_uint128 u
   | S128, S8    -> uint64_to_int8  (int128_to_uint64 u)
   | S128, S16   -> uint64_to_int16 (int128_to_uint64 u)
   | S128, S32   -> uint64_to_int32 (int128_to_uint64 u)
   | S128, S64   -> uint64_to_int64 (int128_to_uint64 u)
   | S128, S128  -> u
-  
+
 #pop-options
 
 let ones t l = mk_int #t #l (ones_v t)
@@ -423,13 +422,13 @@ let logxor_lemma #t #l a b =
   logxor_lemma_ #t a b;
   v_extensionality (logxor a (logxor a b)) b;
   begin
-  match t with 
+  match t with
   | U1 | U8 | U16 | U32 | U64 | U128 -> UInt.logxor_commutative #(bits t) (v a) (v b)
   | S8 | S16 | S32 | S64 | S128      -> Int.logxor_commutative #(bits t) (v a) (v b)
   end;
   v_extensionality (logxor a (logxor b a)) b;
   begin
-  match t with 
+  match t with
   | U1 | U8 | U16 | U32 | U64 | U128 -> UInt.logxor_lemma_1 #(bits t) (v a)
   | S8 | S16 | S32 | S64 | S128      -> Int.logxor_lemma_1 #(bits t) (v a)
   end;
@@ -480,7 +479,7 @@ let logand_ones #t #l a =
   | S8 | S16 | S32 | S64 | S128 -> Int.logand_lemma_2 #(bits t) (v a)
 
 let logand_lemma #t #l a b =
-  logand_zeros #t #l b;  
+  logand_zeros #t #l b;
   logand_ones #t #l b;
   match t with
   | U1 ->
@@ -491,7 +490,7 @@ let logand_lemma #t #l a b =
 
 let logand_spec #t #l a b =
   match t with
-  | U1 -> 
+  | U1 ->
     assert_norm (u1 0 `logand` u1 0 == u1 0 /\ u1 0 `logand` u1 1 == u1 0);
     assert_norm (u1 1 `logand` u1 0 == u1 0 /\ u1 1 `logand` u1 1 == u1 1);
     assert_norm (0 `logand_v #U1` 0 == 0 /\ 0 `logand_v #U1` 1 == 0);
@@ -570,9 +569,9 @@ let shift_right_value_aux_1 #n a s =
 val shift_right_value_aux_2: #n:pos{1 < n} -> a:Int.int_t n ->
   Lemma (Int.shift_arithmetic_right #n a 1 = a / 2)
 let shift_right_value_aux_2 #n a =
-  if a >= 0 then 
+  if a >= 0 then
     begin
-    Int.sign_bit_positive a;    
+    Int.sign_bit_positive a;
     UInt.shift_right_value_aux_3 #n a 1
     end
   else
@@ -601,15 +600,15 @@ val shift_right_value_aux_3: #n:pos -> a:Int.int_t n -> s:pos{s < n} ->
   Lemma (ensures Int.shift_arithmetic_right #n a s = a / pow2 s)
         (decreases s)
 let rec shift_right_value_aux_3 #n a s =
-  if s = 1 then 
+  if s = 1 then
     shift_right_value_aux_2 #n a
-  else 
+  else
     begin
     let a1 = Int.to_vec a in
-    assert (Seq.equal (BitVector.shift_arithmetic_right_vec #n a1 s)   
+    assert (Seq.equal (BitVector.shift_arithmetic_right_vec #n a1 s)
                       (BitVector.shift_arithmetic_right_vec #n
                          (BitVector.shift_arithmetic_right_vec #n a1 (s-1)) 1));
-    assert (Int.shift_arithmetic_right #n a s = 
+    assert (Int.shift_arithmetic_right #n a s =
             Int.shift_arithmetic_right #n (Int.shift_arithmetic_right #n a (s-1)) 1);
     shift_right_value_aux_3 #n a (s-1);
     shift_right_value_aux_2 #n (Int.shift_arithmetic_right #n a (s-1));
@@ -621,11 +620,11 @@ let rec shift_right_value_aux_3 #n a s =
 let shift_right_lemma #t #l a b =
   match t with
   | U1 | U8 | U16 | U32 | U64 | U128 -> ()
-  | S8 | S16 | S32 | S64 | S128 -> 
+  | S8 | S16 | S32 | S64 | S128 ->
     if v b = 0 then ()
-    else if v b >= bits t then 
+    else if v b >= bits t then
       shift_right_value_aux_1 #(bits t) (v a) (v b)
-    else 
+    else
       shift_right_value_aux_3 #(bits t) (v a) (v b)
 
 let shift_left #t #l a b =
@@ -636,11 +635,11 @@ let shift_left #t #l a b =
   | U32  -> UInt32.shift_left a b
   | U64  -> UInt64.shift_left a b
   | U128 -> UInt128.shift_left a b
-  | S8   -> Int8.shift_left a b           
-  | S16  -> Int16.shift_left a b           
-  | S32  -> Int32.shift_left a b           
-  | S64  -> Int64.shift_left a b           
-  | S128 -> Int128.shift_left a b           
+  | S8   -> Int8.shift_left a b
+  | S16  -> Int16.shift_left a b
+  | S32  -> Int32.shift_left a b
+  | S64  -> Int64.shift_left a b
+  | S128 -> Int128.shift_left a b
 
 #push-options "--max_fuel 1"
 
@@ -677,51 +676,51 @@ val eq_mask_lemma_unsigned: #t:inttype{unsigned t} -> a:int_t t SEC -> b:int_t t
                 else v (eq_mask a b) == 0)
 let eq_mask_lemma_unsigned #t a b =
   match t with
-  | U1 -> 
+  | U1 ->
     assert_norm (
       logxor (u1 0) (u1 0) == u1 0 /\ logxor (u1 0) (u1 1) == u1 1 /\
       logxor (u1 1) (u1 0) == u1 1 /\ logxor (u1 1) (u1 1) == u1 0 /\
-      lognot (u1 1) == u1 0 /\ lognot (u1 0) == u1 1)      
+      lognot (u1 1) == u1 0 /\ lognot (u1 0) == u1 1)
   | U8 | U16 | U32 | U64 | U128 -> ()
 
 val eq_mask_lemma_signed: #t:inttype{signed t /\ ~(S128? t)} -> a:int_t t SEC -> b:int_t t SEC -> Lemma
   (if v a = v b then v (eq_mask a b) == ones_v t
                 else v (eq_mask a b) == 0)
 let eq_mask_lemma_signed #t a b =
-  match t with  
-  | S8 -> 
+  match t with
+  | S8 ->
     begin
     assert_norm (pow2 8 = 2 * pow2 7);
     if 0 <= v a then modulo_lemma (v a) (pow2 8)
-    else 
+    else
       begin
       modulo_addition_lemma (v a) 1 (pow2 8);
       modulo_lemma (v a + pow2 8) (pow2 8)
       end
-    end  
-  | S16 -> 
+    end
+  | S16 ->
     begin
     assert_norm (pow2 16 = 2 * pow2 15);
     if 0 <= v a then modulo_lemma (v a) (pow2 16)
-    else 
+    else
       begin
       modulo_addition_lemma (v a) 1 (pow2 16);
       modulo_lemma (v a + pow2 16) (pow2 16)
       end
     end
-  | S32 -> 
+  | S32 ->
     begin
     if 0 <= v a then modulo_lemma (v a) (pow2 32)
-    else 
+    else
       begin
       modulo_addition_lemma (v a) 1 (pow2 32);
       modulo_lemma (v a + pow2 32) (pow2 32)
       end
     end
-  | S64 -> 
+  | S64 ->
     begin
     if 0 <= v a then modulo_lemma (v a) (pow2 64)
-    else 
+    else
       begin
       modulo_addition_lemma (v a) 1 (pow2 64);
       modulo_lemma (v a + pow2 64) (pow2 64)
@@ -744,7 +743,7 @@ let neq_mask #t a b = lognot (eq_mask #t a b)
 
 let neq_mask_lemma #t a b =
   match t with
-  | U1 -> assert_norm (lognot (u1 1) == u1 0 /\ lognot (u1 0) == u1 1)      
+  | U1 -> assert_norm (lognot (u1 1) == u1 0 /\ lognot (u1 0) == u1 1)
   | _ ->
     UInt.lognot_lemma_1 #(bits t);
     UInt.lognot_self #(bits t) 0
@@ -773,7 +772,7 @@ let gte_mask_logand_lemma #t a b c =
   logand_zeros c;
   logand_ones c;
   match t with
-  | U1 -> 
+  | U1 ->
     assert_norm (
       logor (u1 0) (u1 0) == u1 0 /\ logor (u1 1) (u1 1) == u1 1 /\
       logor (u1 0) (u1 1) == u1 1 /\ logor (u1 1) (u1 0) == u1 1 /\
@@ -797,7 +796,7 @@ let lte_mask #t a b = logor (lt_mask a b) (eq_mask a b)
 
 let lte_mask_lemma #t a b =
   match t with
-  | U1 -> 
+  | U1 ->
     assert_norm (
       logor (u1 0) (u1 0) == u1 0 /\ logor (u1 1) (u1 1) == u1 1 /\
       logor (u1 0) (u1 1) == u1 1 /\ logor (u1 1) (u1 0) == u1 1)
@@ -836,12 +835,12 @@ let div #t x y =
   | U16 -> UInt16.div x y
   | U32 -> UInt32.div x y
   | U64 -> UInt64.div x y
-  | S8  -> Int.pow2_values 8; Int8.div x y  
+  | S8  -> Int.pow2_values 8; Int8.div x y
   | S16 -> Int.pow2_values 16; Int16.div x y
   | S32 -> Int.pow2_values 32; Int32.div x y
   | S64 -> Int.pow2_values 64; Int64.div x y
 
-let div_lemma #t a b =  
+let div_lemma #t a b =
   match t with
   | U1 | U8 | U16 | U32 | U64 -> ()
   | S8  -> Int.pow2_values 8
@@ -856,7 +855,7 @@ let mod #t x y =
   | U16 -> UInt16.rem x y
   | U32 -> UInt32.rem x y
   | U64 -> UInt64.rem x y
-  | S8  -> Int.pow2_values 8; Int8.rem x y  
+  | S8  -> Int.pow2_values 8; Int8.rem x y
   | S16 -> Int.pow2_values 16; Int16.rem x y
   | S32 -> Int.pow2_values 32; Int32.rem x y
   | S64 -> Int.pow2_values 64; Int64.rem x y

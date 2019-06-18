@@ -58,6 +58,9 @@ let bits = function
   | U128 -> 128
   | S128 -> 128
 
+val bits_numbytes: t:inttype{~(U1? t)} -> Lemma (bits t == 8 * numbytes t)
+//  [SMTPat [bits t; numbytes t]]
+
 unfold
 let modulus (t:inttype) = pow2 (bits t)
 
