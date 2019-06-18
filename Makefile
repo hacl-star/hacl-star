@@ -472,16 +472,13 @@ obj/Vale.Inline.X64.Fsqr_inline.fst.checked: \
   FSTAR_FLAGS=$(VALE_FSTAR_FLAGS)
 
 obj/Vale.Stdcalls.X64.GCMencryptOpt.fst.checked: \
-  USE_EXTRACTED_INTERFACES=false --admit_smt_queries true
-
-obj/Vale.Stdcalls.X64.GCMencryptOpt.fst.checked: \
-  FSTAR_FLAGS=$(VALE_FSTAR_FLAGS) --admit_smt_queries true
+  FSTAR_FLAGS=$(VALE_FSTAR_FLAGS)
 
 obj/Vale.Stdcalls.X64.GCMdecryptOpt.fst.checked: \
-  FSTAR_FLAGS=$(VALE_FSTAR_FLAGS) --admit_smt_queries true
+  FSTAR_FLAGS=$(VALE_FSTAR_FLAGS)
 
 obj/Vale.Wrapper.X64.GCMdecryptOpt.fst.checked: \
-  FSTAR_FLAGS=$(VALE_FSTAR_FLAGS) --admit_smt_queries true
+  FSTAR_FLAGS=$(VALE_FSTAR_FLAGS)
 
 obj/Vale.Wrapper.X64.GCMencryptOpt.fst.checked: \
   FSTAR_FLAGS=$(VALE_FSTAR_FLAGS) --admit_smt_queries true
@@ -490,7 +487,7 @@ obj/Vale.Wrapper.X64.GCMencryptOpt256.fst.checked: \
   FSTAR_FLAGS=$(VALE_FSTAR_FLAGS) --admit_smt_queries true
 
 obj/Vale.Wrapper.X64.GCMdecryptOpt256.fst.checked: \
-  FSTAR_FLAGS=$(VALE_FSTAR_FLAGS) --admit_smt_queries true
+  FSTAR_FLAGS=$(VALE_FSTAR_FLAGS)
 
 obj/Vale.AES.GCM.fst.checked: \
   FSTAR_FLAGS=$(VALE_FSTAR_FLAGS)
