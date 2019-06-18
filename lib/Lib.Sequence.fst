@@ -247,7 +247,7 @@ let mod_prop n a b =
   FStar.Math.Lemmas.modulo_lemma (b - a * n) n;
   FStar.Math.Lemmas.lemma_mod_sub b n a
 
-#reset-options "--z3rlimit 150 --max_fuel 2 --max_ifuel 1"
+#push-options "--z3rlimit 150 --max_fuel 0 --max_ifuel 0"
 
 let rec index_map_blocks_multi #a bs max n inp f i =
   let map_blocks_a = map_blocks_a a bs max in
@@ -278,86 +278,55 @@ let map_blocks #a blocksize inp f g =
     Seq.append bs (g nb rem last)
   else bs
 
-#reset-options "--z3rlimit 300 --max_fuel 1 --max_ifuel 0"
-
-val index_map_blocks_aux:
-    #a:Type0
-  -> bs:size_nat{bs > 0}
-  -> inp:seq a{length inp % bs > 0}
-  -> f:(i:nat{i < length inp / bs} -> lseq a bs -> lseq a bs)
-  -> g:(i:nat{i == length inp / bs} -> len:size_nat{len < bs} -> s:lseq a len -> lseq a len)
-  -> i:nat{i < length inp} ->
-  Lemma (
-    let len = length inp in
-    let nb = len / bs in
-    let rem = len % bs in
-    let blocks = Seq.slice inp 0 (nb * bs) in
-    let last = Seq.slice inp (nb * bs) len in
-
-    let s1 = map_blocks #a bs inp f g in
-    if i < nb * bs then begin
-      FStar.Math.Lemmas.cancel_mul_div nb bs;
-      let j: j:nat{j < nb} = i / bs in
-      let s2 = f j (Seq.slice inp (j*bs) ((j+1)*bs)) in
-      Seq.index s1 i == Seq.index s2 (i % bs) end
-    else begin
-      mod_prop bs nb i;
-      Seq.index s1 i == Seq.index (g nb rem last) (i % bs) end)
-let index_map_blocks_aux #a bs inp f g i =
-  let len = length inp in
-  let nb = len / bs in
-  let rem = len % bs in
-  let blocks = Seq.slice inp 0 (nb * bs) in
-  let last = Seq.slice inp (nb * bs) len in
-
-  let s1 = map_blocks #a bs inp f g in
-  let s  = map_blocks_multi #a bs nb nb blocks f in
-  let s' = g nb rem last in
-  assert (rem > 0);
-  assert (s1 == Seq.append s s');
-
-  if i < nb * bs then begin
-    Seq.lemma_index_app1 s s' i;
-    //assert (Seq.index s1 i == Seq.index s i);
-    index_map_blocks_multi #a bs nb nb blocks f i;
-    FStar.Math.Lemmas.cancel_mul_div nb bs;
-    let j: j:nat{j < nb} = i / bs in
-    //let s2 = f j (Seq.slice blocks (j*bs) ((j+1)*bs)) in
-    //assert (Seq.index s i == Seq.index s2 (i % bs)) end
-    FStar.Seq.slice_slice inp 0 (nb * bs) (j*bs) ((j+1)*bs);
-    () end
-  else begin
-    Seq.lemma_index_app2 s s' i;
-    //assert (Seq.index s1 i == Seq.index s' (i - nb * bs));
-    mod_prop bs nb i;
-    //assert (Seq.index s1 i == Seq.index s' (i % bs)) end
-    () end
+#reset-options "--z3rlimit 200 --max_fuel 0 --max_ifuel 0"
 
 let index_map_blocks #a bs inp f g i =
   let len = length inp in
-  let nb = len / bs in
+  let nb  = len / bs in
   let rem = len % bs in
   let blocks = Seq.slice inp 0 (nb * bs) in
   if rem > 0 then
-    index_map_blocks_aux #a bs inp f g i
-  else
-    index_map_blocks_multi #a bs nb nb blocks f i
+    begin
+    let s1 = map_blocks_multi #a bs nb nb blocks f in
+    let last = Seq.slice inp (nb * bs) len in
+    calc (==) {
+      length last;
+      == { Seq.lemma_len_slice inp (nb * bs) len }
+      len - nb * bs;
+      == {mod_prop bs nb len}
+      len % bs;
+      == { }
+      rem;
+    };
+    let s2 = g nb rem last in
+    assert (Seq.equal (map_blocks bs inp f g) (Seq.append s1 s2));
+    if i < nb * bs then
+      begin
+      div_mul_lt i nb bs;
+      Seq.lemma_index_app1 s1 s2 i;
+      index_map_blocks_multi bs nb nb blocks f i
+      end
+    else
+      begin
+      Seq.lemma_index_app2 s1 s2 i;
+      mod_prop bs nb i
+      end
+    end
+  else index_map_blocks_multi #a bs nb nb blocks f i
 
 let eq_generate_blocks0 #t len n a f acc0 =
   let a0  = (acc0, (Seq.empty <: s:seq t{length s == 0 * len}))  in
   assert (generate_blocks #t len n 0 a f acc0 ==
 	  repeat_gen 0 (generate_blocks_a t len n a) (generate_blocks_inner t len n a f) a0);
-  eq_repeat_gen0 0 (generate_blocks_a t len n a) (generate_blocks_inner t len n a f) a0;
-  ()
+  eq_repeat_gen0 0 (generate_blocks_a t len n a) (generate_blocks_inner t len n a f) a0
 
 let unfold_generate_blocks #t len n a f acc0 i =
   let a0  = (acc0, (Seq.empty <: s:seq t{length s == 0 * len}))  in
   assert (generate_blocks #t len n (i+1) a f acc0 ==
 	  repeat_gen (i+1) (generate_blocks_a t len n a) (generate_blocks_inner t len n a f) a0);
-  unfold_repeat_gen (i+1) (generate_blocks_a t len n a) (generate_blocks_inner t len n a f) a0 i;
-  ()
+  unfold_repeat_gen (i+1) (generate_blocks_a t len n a) (generate_blocks_inner t len n a f) a0 i
 
-#set-options "--z3rlimit 100 --max_ifuel 0 --max_fuel 0"
+#reset-options "--z3rlimit 200 --max_fuel 0 --max_ifuel 0"
 
 let rec index_generate_blocks #t len max n f i =
   assert (0 < n);
