@@ -51,7 +51,8 @@ module L = FStar.List.Tot
 /// should be allowed.
 
 let rw_exchange_allowed (rw1 rw2 : rw_set) : pbool =
-  let (r1, w1), (r2, w2) = rw1, rw2 in
+  let r1, w1 = rw1.loc_reads, rw1.loc_writes in
+  let r2, w2 = rw2.loc_reads, rw2.loc_writes in
   (disjoint_locations r1 w2 /+< "read set of 1st not disjoint from write set of 2nd because ") &&.
   (disjoint_locations r2 w1 /+< "read set of 2nd not disjoint from write set of 1st because ") &&.
   (disjoint_locations w1 w2 /+< "write sets not disjoint because ")
@@ -75,8 +76,9 @@ let lemma_ins_exchange_allowed_symmetric (i1 i2 : ins) :
   let b2 = !!(ins_exchange_allowed i2 i1) in
   assert (b1 == !!(rw_exchange_allowed (rw_set_of_ins i1) (rw_set_of_ins i2)));
   assert (b2 == !!(rw_exchange_allowed (rw_set_of_ins i2) (rw_set_of_ins i1)));
-  let r1, w1 = rw_set_of_ins i1 in
-  let r2, w2 = rw_set_of_ins i2 in
+  let rw1, rw2 = rw_set_of_ins i1, rw_set_of_ins i2 in
+  let r1, w1 = rw1.loc_reads, rw1.loc_writes in
+  let r2, w2 = rw2.loc_reads, rw2.loc_writes in
   let disjoint = disjoint_locations in
   let aux l1 l2 : (b:bool) = !!(disjoint l1 l2) in
   assert (b1 == (aux r1 w2 && aux r2 w1 && aux w1 w2));
@@ -175,6 +177,7 @@ let rec lemma_instr_apply_eval_args_equiv_states
     | Some v ->
       lemma_instr_apply_eval_args_equiv_states outs args (f v) oprs s1 s2
 
+#push-options "--z3rlimit 10"
 let rec lemma_instr_apply_eval_inouts_equiv_states
     (outs inouts:list instr_out) (args:list instr_operand)
     (f:instr_inouts_t outs inouts args) (oprs:instr_operands_t inouts args)
@@ -205,6 +208,7 @@ let rec lemma_instr_apply_eval_inouts_equiv_states
     | None -> ()
     | Some v ->
       lemma_instr_apply_eval_inouts_equiv_states outs inouts args (f v) oprs s1 s2
+#pop-options
 
 #push-options "--z3rlimit 10 --max_fuel 1 --max_ifuel 0"
 
@@ -700,35 +704,35 @@ let rec lemma_mem_not_disjoint (a:location) (as1 as2:list location) :
       lemma_mem_not_disjoint a xs as2
     )
 
-let lemma_bounded_effects_means_same_ok (r w:locations) (f:st unit) (s1 s2 s1' s2':machine_state) :
+let lemma_bounded_effects_means_same_ok (rw:rw_set) (f:st unit) (s1 s2 s1' s2':machine_state) :
   Lemma
     (requires (
-        (bounded_effects r w f) /\
+        (bounded_effects rw f) /\
         (s1.ms_ok = s2.ms_ok) /\
-        (unchanged_at r s1 s2) /\
+        (unchanged_at rw.loc_reads s1 s2) /\
         (s1' == run f s1) /\
         (s2' == run f s2)))
     (ensures (
         ((run f s1).ms_ok = (run f s2).ms_ok))) = ()
 
-let lemma_both_not_ok (f1 f2:st unit) (r1 w1 r2 w2:locations) (s:machine_state) :
+let lemma_both_not_ok (f1 f2:st unit) (rw1 rw2:rw_set) (s:machine_state) :
   Lemma
     (requires (
-        (bounded_effects r1 w1 f1) /\
-        (bounded_effects r2 w2 f2) /\
-        !!(rw_exchange_allowed (r1, w1) (r2, w2))))
+        (bounded_effects rw1 f1) /\
+        (bounded_effects rw2 f2) /\
+        !!(rw_exchange_allowed rw1 rw2)))
     (ensures (
         (run2 f1 f2 s).ms_ok =
         (run2 f2 f1 s).ms_ok)) =
-  lemma_disjoint_implies_unchanged_at r1 w2 s (run f2 s);
-  lemma_disjoint_implies_unchanged_at r2 w1 s (run f1 s)
+  lemma_disjoint_implies_unchanged_at rw1.loc_reads rw2.loc_writes s (run f2 s);
+  lemma_disjoint_implies_unchanged_at rw2.loc_reads rw1.loc_writes s (run f1 s)
 
-let lemma_commute (f1 f2:st unit) (r1 w1 r2 w2:list location) (s:machine_state) :
+let lemma_commute (f1 f2:st unit) (rw1 rw2:rw_set) (s:machine_state) :
   Lemma
     (requires (
-        (bounded_effects r1 w1 f1) /\
-        (bounded_effects r2 w2 f2) /\
-        !!(rw_exchange_allowed (r1, w1) (r2, w2))))
+        (bounded_effects rw1 f1) /\
+        (bounded_effects rw2 f2) /\
+        !!(rw_exchange_allowed rw1 rw2)))
     (ensures (
         equiv_states_or_both_not_ok
           (run2 f1 f2 s)
@@ -736,29 +740,29 @@ let lemma_commute (f1 f2:st unit) (r1 w1 r2 w2:list location) (s:machine_state) 
   let s12 = run2 f1 f2 s in
   let s21 = run2 f2 f1 s in
   if not s12.ms_ok || not s21.ms_ok then (
-    lemma_both_not_ok f1 f2 r1 w1 r2 w2 s
+    lemma_both_not_ok f1 f2 rw1 rw2 s
   ) else (
     let is1 = run f1 s in
     let is2 = run f2 s in
     let is12 = run f2 is1 in
     let is21 = run f1 is2 in
-    lemma_disjoint_implies_unchanged_at r1 w2 s is2;
-    lemma_disjoint_implies_unchanged_at r2 w1 s is1;
-    assert (unchanged_at w1 is1 is21);
-    assert (unchanged_at w2 is2 is12);
-    assert (unchanged_except w2 s is2);
-    assert (unchanged_except w1 s is1);
-    assert (unchanged_except w2 is1 is12);
-    assert (unchanged_except w1 is2 is21);
-    lemma_unchanged_except_transitive w1 w2 s is1 is12;
-    assert (unchanged_except (w1 `L.append` w2) s is12);
-    lemma_unchanged_except_transitive w2 w1 s is2 is21;
-    assert (unchanged_except (w2 `L.append` w1) s is21);
-    lemma_unchanged_except_append_symmetric w1 w2 s is12;
-    lemma_unchanged_except_append_symmetric w2 w1 s is21;
-    lemma_unchanged_except_same_transitive (w1 `L.append` w2) s is12 is21;
-    lemma_unchanged_at_combine w1 w2 is1 is2 is12 is21;
-    lemma_unchanged_at_and_except (w1 `L.append` w2) is12 is21;
+    lemma_disjoint_implies_unchanged_at rw1.loc_reads rw2.loc_writes s is2;
+    lemma_disjoint_implies_unchanged_at rw2.loc_reads rw1.loc_writes s is1;
+    assert (unchanged_at rw1.loc_writes is1 is21);
+    assert (unchanged_at rw2.loc_writes is2 is12);
+    assert (unchanged_except rw2.loc_writes s is2);
+    assert (unchanged_except rw1.loc_writes s is1);
+    assert (unchanged_except rw2.loc_writes is1 is12);
+    assert (unchanged_except rw1.loc_writes is2 is21);
+    lemma_unchanged_except_transitive rw1.loc_writes rw2.loc_writes s is1 is12;
+    assert (unchanged_except (rw1.loc_writes `L.append` rw2.loc_writes) s is12);
+    lemma_unchanged_except_transitive rw2.loc_writes rw1.loc_writes s is2 is21;
+    assert (unchanged_except (rw2.loc_writes `L.append` rw1.loc_writes) s is21);
+    lemma_unchanged_except_append_symmetric rw1.loc_writes rw2.loc_writes s is12;
+    lemma_unchanged_except_append_symmetric rw2.loc_writes rw1.loc_writes s is21;
+    lemma_unchanged_except_same_transitive (rw1.loc_writes `L.append` rw2.loc_writes) s is12 is21;
+    lemma_unchanged_at_combine rw1.loc_writes rw2.loc_writes is1 is2 is12 is21;
+    lemma_unchanged_at_and_except (rw1.loc_writes `L.append` rw2.loc_writes) is12 is21;
     assert (unchanged_except [] is12 is21);
     assert (s21.ms_ok = s12.ms_ok);
     lemma_equiv_states_when_except_none is12 is21 s12.ms_ok;
@@ -773,9 +777,9 @@ let lemma_machine_eval_ins_st_exchange (i1 i2 : ins) (s : machine_state) :
                 (machine_eval_ins_st i2))) =
   lemma_machine_eval_ins_st_bounded_effects i1;
   lemma_machine_eval_ins_st_bounded_effects i2;
-  let r1, w1 = rw_set_of_ins i1 in
-  let r2, w2 = rw_set_of_ins i2 in
-  lemma_commute (machine_eval_ins_st i1) (machine_eval_ins_st i2) r1 w1 r2 w2 s
+  let rw1 = rw_set_of_ins i1 in
+  let rw2 = rw_set_of_ins i2 in
+  lemma_commute (machine_eval_ins_st i1) (machine_eval_ins_st i2) rw1 rw2 s
 
 let lemma_instruction_exchange' (i1 i2 : ins) (s1 s2 : machine_state) :
   Lemma

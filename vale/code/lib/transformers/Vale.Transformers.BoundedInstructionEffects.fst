@@ -101,17 +101,30 @@ let write_set (i:instr_t_record) (oprs:instr_operands_t i.outs i.args) : list lo
 let rw_set_of_ins i =
   match i with
   | Instr i oprs _ ->
-    read_set i oprs, write_set i oprs
+    {
+      loc_reads = read_set i oprs;
+      loc_writes = write_set i oprs;
+    }
   | Push src t ->
-    ALocReg (Reg 0 rRsp) :: ALocStack :: both (locations_of_operand64 src),
-    [ALocReg (Reg 0 rRsp); ALocStack]
+    {
+      loc_reads = ALocReg (Reg 0 rRsp) :: ALocStack :: both (locations_of_operand64 src);
+      loc_writes = [ALocReg (Reg 0 rRsp); ALocStack];
+    }
   | Pop dst t ->
-    ALocReg (Reg 0 rRsp) :: ALocStack :: fst (locations_of_operand64 dst),
-    ALocReg (Reg 0 rRsp) :: snd (locations_of_operand64 dst)
+    {
+      loc_reads = ALocReg (Reg 0 rRsp) :: ALocStack :: fst (locations_of_operand64 dst);
+      loc_writes = ALocReg (Reg 0 rRsp) :: snd (locations_of_operand64 dst);
+    }
   | Alloc _ ->
-    [ALocReg (Reg 0 rRsp)], [ALocReg (Reg 0 rRsp)]
+    {
+      loc_reads = [ALocReg (Reg 0 rRsp)];
+      loc_writes = [ALocReg (Reg 0 rRsp)];
+    }
   | Dealloc _ ->
-    [ALocStack; ALocReg (Reg 0 rRsp)], [ALocStack; ALocReg (Reg 0 rRsp)]
+    {
+      loc_reads = [ALocStack; ALocReg (Reg 0 rRsp)];
+      loc_writes = [ALocStack; ALocReg (Reg 0 rRsp)];
+    }
 
 (* See fsti *)
 let locations_of_ocmp o =
@@ -124,7 +137,7 @@ let locations_of_ocmp o =
   | OGt o1 o2 ->
     both (locations_of_operand64 o1) `L.append` both (locations_of_operand64 o2)
 
-#push-options "--z3rlimit 20 --max_fuel 2 --max_ifuel 1"
+#push-options "--z3rlimit 30 --max_fuel 2 --max_ifuel 1 --z3refresh"
 let rec lemma_instr_write_outputs_only_affects_write
     (outs:list instr_out) (args:list instr_operand)
     (vs:instr_ret_t outs) (oprs:instr_operands_t outs args) (s_orig s:machine_state)
@@ -160,12 +173,12 @@ let lemma_eval_instr_only_affects_write
     (a:location) :
   Lemma
     (requires (
-        (let r, w = rw_set_of_ins (Instr it oprs ann) in
+        (let w = (rw_set_of_ins (Instr it oprs ann)).loc_writes in
          !!(disjoint_location_from_locations a w) /\
          (Some? (eval_instr it oprs ann s0)))))
     (ensures (
         (eval_location a s0 == eval_location a (Some?.v (eval_instr it oprs ann s0))))) =
-  let r, w = rw_set_of_ins (Instr it oprs ann) in
+  let w = (rw_set_of_ins (Instr it oprs ann)).loc_writes in
   let InstrTypeRecord #outs #args #havoc_flags' i = it in
   let vs = instr_apply_eval outs args (instr_eval i) oprs s0 in
   let s1 =
@@ -180,7 +193,7 @@ let lemma_eval_instr_only_affects_write
 let lemma_machine_eval_ins_st_only_affects_write_aux (i:ins{Instr? i}) (s:machine_state) (a:location) :
   Lemma
     (requires (
-        let r, w = rw_set_of_ins i in
+        let w = (rw_set_of_ins i).loc_writes in
         (!!(disjoint_location_from_locations a w))))
     (ensures (
         (eval_location a s == eval_location a (run (machine_eval_ins_st i) s)))) =
@@ -192,7 +205,7 @@ let lemma_machine_eval_ins_st_only_affects_write_aux (i:ins{Instr? i}) (s:machin
 let lemma_machine_eval_ins_st_only_affects_write (i:ins{Instr? i}) (s:machine_state) :
   Lemma
     (ensures (
-       (let r, w = rw_set_of_ins i in
+       (let w = (rw_set_of_ins i).loc_writes in
         (unchanged_except w s (run (machine_eval_ins_st i) s))))) =
   FStar.Classical.forall_intro (
     FStar.Classical.move_requires (lemma_machine_eval_ins_st_only_affects_write_aux i s))
@@ -345,7 +358,7 @@ let lemma_instr_write_output_explicit_only_writes
          unchanged_except locs s2 s2'))) = ()
 #pop-options
 
-#push-options "--z3rlimit 15 --initial_fuel 4 --max_fuel 4 --initial_ifuel 2 --max_ifuel 2"
+#push-options "--z3rlimit 20 --initial_fuel 4 --max_fuel 4 --initial_ifuel 2 --max_ifuel 2"
 let lemma_instr_write_output_implicit_only_writes
     (i:instr_operand_implicit) (v:instr_val_t (IOpIm i))
     (s_orig1 s1 s_orig2 s2:machine_state) :
@@ -548,17 +561,16 @@ let lemma_eval_instr_unchanged_at'
     (s1 s2:machine_state) :
   Lemma
     (requires (
-        let r, w = rw_set_of_ins (Instr it oprs ann) in
+        let r = (rw_set_of_ins (Instr it oprs ann)).loc_reads in
         (s1.ms_ok = s2.ms_ok) /\
         (unchanged_at r s1 s2)))
     (ensures (
-        let r, w = rw_set_of_ins (Instr it oprs ann) in
+        let w = (rw_set_of_ins (Instr it oprs ann)).loc_writes in
         let s1' = eval_instr it oprs ann s1 in
         let s2' = eval_instr it oprs ann s2 in
         (Some? s1' = Some? s2') /\
         (Some? s1' ==>
          unchanged_at' w (Some?.v s1') (Some?.v s2')))) =
-  let r, w = rw_set_of_ins (Instr it oprs ann) in
   let InstrTypeRecord #outs #args #havoc_flags' i = it in
   let vs1 = instr_apply_eval outs args (instr_eval i) oprs s1 in
   let vs2 = instr_apply_eval outs args (instr_eval i) oprs s2 in
@@ -594,11 +606,10 @@ let lemma_eval_instr_unchanged_at'
 let lemma_machine_eval_ins_st_ok (i:ins{Instr? i}) (s1 s2:machine_state) :
   Lemma
     (requires (
-        let r, w = rw_set_of_ins i in
+        let r = (rw_set_of_ins i).loc_reads in
         (s1.ms_ok = s2.ms_ok) /\
         (unchanged_at r s1 s2)))
     (ensures (
-        let r, w = rw_set_of_ins i in
         let f = machine_eval_ins_st i in
         (run f s1).ms_ok = (run f s2).ms_ok)) =
   let Instr it oprs ann = i in
@@ -607,14 +618,14 @@ let lemma_machine_eval_ins_st_ok (i:ins{Instr? i}) (s1 s2:machine_state) :
 let lemma_machine_eval_ins_st_unchanged_behavior (i:ins{Instr? i}) (s1 s2:machine_state) :
   Lemma
     (requires (
-        let r, w = rw_set_of_ins i in
+        let r = (rw_set_of_ins i).loc_reads in
         let f = machine_eval_ins_st i in
         (s1.ms_ok = s2.ms_ok) /\
         (unchanged_at r s1 s2) /\
         (run f s1).ms_ok /\
         (run f s2).ms_ok))
     (ensures (
-        let r, w = rw_set_of_ins i in
+        let w = (rw_set_of_ins i).loc_writes in
         let f = machine_eval_ins_st i in
         (unchanged_at w (run f s1) (run f s2)))) =
   let Instr it oprs ann = i in
@@ -623,8 +634,7 @@ let lemma_machine_eval_ins_st_unchanged_behavior (i:ins{Instr? i}) (s1 s2:machin
 let lemma_machine_eval_ins_st_bounded_effects_Instr (i:ins{Instr? i}) :
   Lemma
     (ensures (
-        (let r, w = rw_set_of_ins i in
-         (bounded_effects r w (machine_eval_ins_st i))))) =
+        (bounded_effects (rw_set_of_ins i) (machine_eval_ins_st i)))) =
   FStar.Classical.forall_intro (lemma_machine_eval_ins_st_only_affects_write i);
   FStar.Classical.forall_intro_2 (fun s1 ->
       FStar.Classical.move_requires (lemma_machine_eval_ins_st_ok i s1));

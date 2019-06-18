@@ -6,9 +6,12 @@ open Vale.X64.Machine_Semantics_s
 open Vale.Transformers.PossiblyMonad
 open Vale.Transformers.Locations
 
-(** An [rw_set] is the pair of [locations] that are respectively read
-    and written by an operation. *)
-type rw_set = locations & locations
+(** An [rw_set] contains information about what locations are read and
+     written by a stateful operation. *)
+type rw_set = {
+     loc_reads: locations;
+     loc_writes: locations;
+}
 
 (** [rw_set_of_ins i] returns the read/write sets for the execution of
     an instruction. *)
@@ -48,14 +51,14 @@ let rec unchanged_at (locs:locations) (s1 s2:machine_state) : GTot Type0 =
     two different states are same at the locations in [r], then the
     function will have the same effect, and that its effect is bounded
     to the set [w]. *)
-let bounded_effects (reads writes:locations) (f:st unit) : GTot Type0 =
-  (only_affects writes f) /\
+let bounded_effects (rw:rw_set) (f:st unit) : GTot Type0 =
+  (only_affects rw.loc_writes f) /\
   (
     forall s1 s2. {:pattern (run f s1); (run f s2)} (
-      (s1.ms_ok = s2.ms_ok /\ unchanged_at reads s1 s2) ==> (
+      (s1.ms_ok = s2.ms_ok /\ unchanged_at rw.loc_reads s1 s2) ==> (
         ((run f s1).ms_ok = (run f s2).ms_ok) /\
         ((run f s1).ms_ok ==>
-         unchanged_at writes (run f s1) (run f s2))
+         unchanged_at rw.loc_writes (run f s1) (run f s2))
       )
     )
   )
@@ -74,8 +77,7 @@ val lemma_machine_eval_ins_st_bounded_effects :
   Lemma
     (requires (safely_bounded i))
     (ensures (
-        (let r, w = rw_set_of_ins i in
-         (bounded_effects r w (machine_eval_ins_st i)))))
+        (bounded_effects (rw_set_of_ins i) (machine_eval_ins_st i))))
 
 (** The evaluation of a comparison [o] depends solely upon its
     locations, given by [locations_of_ocmp o] *)
