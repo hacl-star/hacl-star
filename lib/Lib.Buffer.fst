@@ -380,13 +380,7 @@ let fill_blocks #t h0 len n output a_spec refl footprint spec impl =
   B.loc_includes_union_l (footprint (v n)) (loc output) (loc (gsub output 0ul (n *! len)));
   //B.loc_includes_union_r (B.loc_union (footprint (v n)) (loc output)) (B.loc_union (footprint (v n)) (gsub output 0ul (n *! len)));
   assert(B.loc_includes (B.loc_union (footprint (v n)) (loc output)) (B.loc_union (footprint (v n)) (loc (gsub output 0ul (n *! len)))));
-  assert(B.modifies (B.loc_union (footprint (v n)) (loc output)) h0 h1);
-  ()
-
-
-
-
-
+  assert(B.modifies (B.loc_union (footprint (v n)) (loc output)) h0 h1)
 
 
 let fillT #a clen o spec_f f =
@@ -528,6 +522,7 @@ let map_blocks_multi #t #a h0 bs nb inp output spec_f impl_f =
   )
 
 #reset-options "--z3rlimit 300 --max_fuel 1 --max_ifuel 1"
+
 let map_blocks #t #a h0 len blocksize inp output spec_f spec_l impl_f impl_l =
   let nb = len /. blocksize in
   let rem = len %. blocksize in
@@ -541,6 +536,5 @@ let map_blocks #t #a h0 len blocksize inp output spec_f spec_l impl_f impl_l =
   if rem >. 0ul then
      (impl_l nb;
       let h1 = ST.get() in
-      FStar.Seq.lemma_split (as_seq h1 output) (v nb * v blocksize);
-      ())
+      FStar.Seq.lemma_split (as_seq h1 output) (v nb * v blocksize))
   else ()
