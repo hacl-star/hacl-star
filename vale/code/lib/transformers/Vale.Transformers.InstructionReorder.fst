@@ -67,15 +67,16 @@ let write_same_constants (c1 c2:locations_with_values) : pbool =
         ) c2
     ) c1
 
-let write_exchange_allowed (w1 w2:locations) (c1 c2:locations_with_values) : pbool =
+let aux_write_exchange_allowed (w2:locations) (c1 c2:locations_with_values) (x:location) : pbool =
   let cv1, cv2 =
     locations_of_locations_with_values c1,
     locations_of_locations_with_values c2 in
+  (disjoint_location_from_locations x w2) ||.
+  ((x `L.mem` cv1 && x `L.mem` cv2) /- "non constant write")
+
+let write_exchange_allowed (w1 w2:locations) (c1 c2:locations_with_values) : pbool =
   write_same_constants c1 c2 &&.
-  for_all (fun x ->
-      (disjoint_location_from_locations x w2) ||.
-      ((x `L.mem` cv1 && x `L.mem` cv2) /- "non constant write")
-    ) w1
+  for_all (aux_write_exchange_allowed w2 c1 c2) w1
 
 let rw_exchange_allowed (rw1 rw2 : rw_set) : pbool =
   let r1, w1, c1 = rw1.loc_reads, rw1.loc_writes, rw1.loc_constant_writes in
