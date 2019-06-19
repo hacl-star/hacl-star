@@ -124,3 +124,4 @@ val lemma_logand_value_max: x:I64.t -> n:nat -> Lemma
 
 (*private let lemma_q_log_fact _ : Lemma (ensures pow2 (v params_q_log) < 2 * elem_v params_q) =
     assert_norm(pow2 (v params_q_log) < 2 * elem_v params_q)*)
+

@@ -944,25 +944,6 @@ let encode_c pos_list sign_list c_bin =
 
 #reset-options "--z3rlimit 100 --max_fuel 1 --max_ifuel 1"
 
-let lemma_is_s_still_sk (h0 h1: HS.mem) (s: lbuffer sparse_elem params_n) : Lemma
-    (requires is_s_sk h0 s /\ 
-              (forall (i:nat{i < v params_n}) . {:pattern bget h1 s i} bget h0 s i == bget h1 s i))
-    (ensures is_s_sk h1 s) = 
-    //assert((is_s_sk h0 s) ==> (forall (i:nat{i < v params_n}) . is_sparse_elem_sk (bget h0 s i)));
-    //assert(is_s_sk h0 s);
-    //assert(forall (i:nat{i < v params_n}) . {:pattern is_sparse_elem_sk (bget h0 s i)} is_sparse_elem_sk (bget h0 s i));
-    //assert(forall (i:nat{i < v params_n}) . {:pattern bget h1 s i} bget h0 s i == bget h1 s i);
-    admit()
-
-let lemma_is_e_still_sk (h0 h1: HS.mem) (e: lbuffer sparse_elem (params_n *. params_k)) : Lemma
-    (requires is_e_sk h0 e /\ 
-              (forall (i:nat{i < v params_n * v params_k}) . {:pattern bget h1 e i} bget h0 e i == bget h1 e i))
-    (ensures is_e_sk h1 e) = 
-    //assert(is_s_sk h0 s);
-    //assert(forall (i:nat{i < v params_n}) . {:pattern is_sparse_elem_sk (bget h0 s i)} is_sparse_elem_sk (bget h0 s i));
-    //assert(forall (i:nat{i < v params_n}) . {:pattern bget h1 s i} bget h0 s i == bget h1 s i);
-    admit()
-
 val sparse_mul:
     prod : poly
   -> s : lbuffer sparse_elem params_n
@@ -1606,7 +1587,7 @@ val qtesla_sign:
     (ensures fun h0 _ h1 -> modifies3 R.state sm smlen h0 h1)
 
 // --log_queries --query_stats --print_z3_statistics 
-#reset-options "--z3rlimit 300 --max_fuel 0 --max_ifuel 0  --admit_smt_queries true \
+#reset-options "--z3rlimit 300 --max_fuel 0 --max_ifuel 0 \
                 --using_facts_from '* -LowStar.Monotonic.Buffer.unused_in_not_unused_in_disjoint_2'"
 
 let qtesla_sign smlen mlen m sm sk =
@@ -1665,7 +1646,12 @@ let qtesla_sign smlen mlen m sm sk =
         (fun _ -> 
             let h4 = ST.get () in
             //assume(FStar.Int.fits (I32.v (bget h4 nonce 0) + 1) I32.n);
-            qtesla_sign_do_while randomness randomness_input nonce a s e smlen mlen m sm
+            let res = qtesla_sign_do_while randomness randomness_input nonce a s e smlen mlen m sm in
+            let hLoopEnd = ST.get () in
+            assert(is_poly_k_equal h4 hLoopEnd a);
+            lemma_is_s_still_sk h4 hLoopEnd s;
+            lemma_is_e_still_sk h4 hLoopEnd e;
+            res
         );
 
     let h5 = ST.get () in
@@ -1696,7 +1682,10 @@ let test_z z =
 
 private let lemma_subpoly_of_pk_is_pk (h: HS.mem) (pk: poly_k) (p: poly) (k: size_t{v k < v params_k}) : Lemma
     (requires is_poly_k_pk h pk /\ p == gsub pk (k *. params_n) params_n)
-    (ensures is_poly_pk h p) = ()
+    (ensures is_poly_pk h p) = 
+    assert(forall (i:nat{i < v params_n * v params_k}) . is_pk (bget h pk i));
+    assert(forall (i:nat{i < v params_n}) . bget h p i == bget h pk (v k * v params_n + i));
+    assert(forall (i:nat{i < v params_n}) . is_pk (bget h p i))
 
 private inline_for_extraction noextract
 val qtesla_verify_decode_pk_compute_w:

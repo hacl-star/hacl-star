@@ -72,7 +72,7 @@ val encode_pk_tGet:
     snapshot: HS.mem
   -> t: poly_k
   -> j: size_t
-  -> k: size_t{v j + v k < v params_n}
+  -> k: size_t{v j + v k < v params_n * v params_k}
   -> Unsafe (r:elem{is_pk r})
     (requires fun h -> valid_t t snapshot h /\ is_poly_k_pk h t)
     (ensures fun _ e h1 -> valid_t t snapshot h1 /\ is_poly_k_pk h1 t /\ e == bget h1 t (v j + v k))
@@ -84,6 +84,12 @@ let encode_pk_tGet snapshot t j k =
     assert(is_pk (bget h t (v j + v k)));
     t.(j +. k)
 
+let valid_t_valid_pk (t:poly_k) (pk: lbuffer uint8 crypto_publickeybytes) (h0 h1:HS.mem)
+  : Lemma (requires (valid_t t h0 h1 /\ live h0 pk))
+          (ensures valid_pk pk h0 h1)
+  = reveal_valid_t t h0 h1;
+    reveal_valid_pk pk h0 h1
+
 private inline_for_extraction noextract
 val encode_pk_loopBody:
     pk: lbuffer uint8 crypto_publickeybytes
@@ -92,18 +98,12 @@ val encode_pk_loopBody:
   -> j: size_t{v j + 31 < v params_n}
   -> Stack unit
     (requires fun h -> live h pk /\ live h t /\ disjoint pk t /\ is_poly_k_pk h t)
-    (ensures fun h0 _ h1 -> modifies1 pk h0 h1 /\ is_poly_k_pk h1 t)
-
-let valid_t_valid_pk (t:poly_k) (pk: lbuffer uint8 crypto_publickeybytes) (h0 h1:HS.mem)
-  : Lemma (requires (valid_t t h0 h1 /\ live h0 pk))
-          (ensures valid_pk pk h0 h1)
-  = reveal_valid_t t h0 h1;
-    reveal_valid_pk pk h0 h1
+    (ensures fun h0 _ h1 -> modifies1 pk h0 h1)
 
 #reset-options "--z3rlimit 1000 --max_fuel 0 --max_ifuel 0 --query_stats \
                 --z3cliopt 'smt.qi.eager_threshold=100'"
 
-let encode_pk_loopBody pk t i j = admit();
+let encode_pk_loopBody pk t i j = 
     let h0 = ST.get () in
     reveal_valid_t t h0 h0;
     assert(valid_t t h0 h0);

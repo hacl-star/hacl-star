@@ -113,10 +113,14 @@ unfold let is_poly_k_equal (h0 h1:HS.mem) (p:poly_k) =
     forall (i:nat{i < v params_n * v params_k}) . {:pattern bget h1 p i} bget h0 p i == bget h1 p i
 
 unfold let is_sparse_elem_sk (e:sparse_elem) = -(pow2 (v params_s_bits)) <= sparse_v e /\ sparse_v e < pow2 (v params_s_bits)
- let is_s_sk (h:HS.mem) (s:lbuffer sparse_elem params_n) =
-    forall (i:nat{i < v params_n}) . {:pattern is_sparse_elem_sk (bget h s i)} is_sparse_elem_sk (bget h s i)
- let is_e_sk (h:HS.mem) (e:lbuffer sparse_elem (params_n *. params_k)) =
-    forall (i:nat{i < v params_n * v params_k}) . {:pattern is_sparse_elem_sk (bget h e i)} is_sparse_elem_sk (bget h e i)
+//let is_s_sk (h:HS.mem) (s:lbuffer sparse_elem params_n) =
+//    forall (i:nat{i < v params_n}) . {:pattern is_sparse_elem_sk (bget h s i)} is_sparse_elem_sk (bget h s i)
+let is_s_sk (h:HS.mem) (s:lbuffer sparse_elem params_n) =
+    forall (i:nat{i < v params_n}) . is_sparse_elem_sk (bget h s i)
+//let is_e_sk (h:HS.mem) (e:lbuffer sparse_elem (params_n *. params_k)) =
+//    forall (i:nat{i < v params_n * v params_k}) . {:pattern is_sparse_elem_sk (bget h e i)} is_sparse_elem_sk (bget h e i)
+let is_e_sk (h:HS.mem) (e:lbuffer sparse_elem (params_n *. params_k)) =
+    forall (i:nat{i < v params_n * v params_k}) . is_sparse_elem_sk (bget h e i)
 
 (*let frame_is_poly_sampler_output_i (h0 h1: HS.mem) (p: poly) (i:nat{i <= v params_n}) (l:B.loc) : Lemma
     (requires is_poly_sampler_output_i h0 p i /\ modifies l h0 h1 /\ disjoint l (gsub p (size 0) (size i)))
@@ -210,7 +214,7 @@ let modifies4 (#a0:Type0) (#a1:Type0) (#a2:Type0) (#a3:Type0)
   (b0:buffer_t MUT a0) (b1:buffer_t MUT a1) (b2:buffer_t MUT a2) (b3:buffer_t MUT a3) (h1 h2: HyperStack.mem) =
   modifies (loc b0 |+| loc b1 |+| loc b2 |+| loc b3) h1 h2
 
-#reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 1"
+#reset-options "--z3rlimit 100 --max_fuel 1 --max_ifuel 1"
 
 inline_for_extraction noextract
 val unsafe_declassify:
@@ -258,3 +262,23 @@ let shift_arithmetic_left x s =
     //Int.shift_left_value_lemma (I32.v x) (UI32.v s);
     //assert(I32.v r == I32.v x * pow2 (UI32.v s));
     //r
+(* {:pattern bget h1 s i}*) 
+let lemma_is_s_still_sk (h0 h1: HS.mem) (s: lbuffer sparse_elem params_n) : Lemma (ensures True) = ()
+//    (requires is_s_sk h0 s /\ 
+//              (forall (i:nat{i < v params_n}) . bget h0 s i == bget h1 s i))
+//    (ensures is_s_sk h0 s) = ()
+    //assert(forall (i:nat{i < v params_n}) . {:pattern is_sparse_elem_sk (bget h0 s i)} is_sparse_elem_sk (bget h0 s i))
+    //assert((is_s_sk h0 s) ==> (forall (i:nat{i < v params_n}) . is_sparse_elem_sk (bget h0 s i)));
+    //assert(is_s_sk h0 s);
+    //assert(forall (i:nat{i < v params_n}) . {:pattern is_sparse_elem_sk (bget h0 s i)} is_sparse_elem_sk (bget h0 s i));
+    //assert(forall (i:nat{i < v params_n}) . {:pattern bget h1 s i} bget h0 s i == bget h1 s i);
+
+let lemma_is_e_still_sk (h0 h1: HS.mem) (e: lbuffer sparse_elem (params_n *. params_k)) : Lemma (ensures True) = ()
+//    (requires is_e_sk h0 e /\ 
+//              (forall (i:nat{i < v params_n * v params_k}) . {:pattern bget h1 e i} bget h0 e i == bget h1 e i))
+//    (ensures is_e_sk h0 e) = ()
+    //assert(is_s_sk h0 s);
+    //assert(forall (i:nat{i < v params_n}) . {:pattern is_sparse_elem_sk (bget h0 s i)} is_sparse_elem_sk (bget h0 s i));
+    //assert(forall (i:nat{i < v params_n}) . {:pattern bget h1 s i} bget h0 s i == bget h1 s i);
+    //admit()
+

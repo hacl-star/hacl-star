@@ -372,7 +372,7 @@ let poly_add_correct result x y =
         //assert(elem_v temp < 0 ==> elem_v (shiftresult &^ params_q) == elem_v params_q);
         //assert(elem_v temp < 0 ==> elem_v andresult == elem_v params_q);
         //assert(elem_v andresult == elem_v params_q <==> elem_v temp < 0);
-        //assume((elem_v ((to_elem (-1)) &^ params_q)) == elem_v params_q); admit();
+        //assume((elem_v ((to_elem (-1)) &^ params_q)) == elem_v params_q); 
         //assert(elem_v andresult == elem_v params_q \/ elem_v andresult == 0);
         assume(FStar.Int.fits (elem_v temp + elem_v andresult) I32.n);
 	let temp:elem_base = temp +^ andresult in
