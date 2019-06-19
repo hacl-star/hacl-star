@@ -54,28 +54,35 @@ let rec locations_of_locations_with_values (lv:locations_with_values) : location
   | (|l,v|) :: lv ->
     l :: locations_of_locations_with_values lv
 
-let rec locations_subtract (a b:locations) : locations =
-  match a with
-  | [] -> []
-  | x :: xs ->
-    if List.Tot.mem x b then
-      locations_subtract xs b
-    else
-      x :: locations_subtract xs b
-
 /// Given two read/write sets corresponding to two neighboring
 /// instructions, we can say whether exchanging those two instructions
 /// should be allowed.
 
+let write_same_constants (c1 c2:locations_with_values) : pbool =
+  for_all (fun (x1:(l:location{hasEq (location_val_t l)}) & location_val_t l) ->
+      for_all (fun (x2:(l:location{hasEq (location_val_t l)}) & location_val_t l) ->
+          let (| l1, v1 |) = x1 in
+          let (| l2, v2 |) = x2 in
+          (if l1 = l2 then v1 = v2 else true) /- "not writing same constants"
+        ) c2
+    ) c1
+
+let write_exchange_allowed (w1 w2:locations) (c1 c2:locations_with_values) : pbool =
+  let cv1, cv2 =
+    locations_of_locations_with_values c1,
+    locations_of_locations_with_values c2 in
+  write_same_constants c1 c2 &&.
+  for_all (fun x ->
+      (disjoint_location_from_locations x w2) ||.
+      ((x `L.mem` cv1 && x `L.mem` cv2) /- "non constant write")
+    ) w1
+
 let rw_exchange_allowed (rw1 rw2 : rw_set) : pbool =
   let r1, w1, c1 = rw1.loc_reads, rw1.loc_writes, rw1.loc_constant_writes in
   let r2, w2, c2 = rw2.loc_reads, rw2.loc_writes, rw2.loc_constant_writes in
-  let dw1 = w1 `locations_subtract` (locations_of_locations_with_values c1) in
-  let dw2 = w2 `locations_subtract` (locations_of_locations_with_values c2) in
-  ((c1 = c2) /- "writing different constants") &&.
   (disjoint_locations r1 w2 /+< "read set of 1st not disjoint from write set of 2nd because ") &&.
   (disjoint_locations r2 w1 /+< "read set of 2nd not disjoint from write set of 1st because ") &&.
-  (disjoint_locations dw1 dw2 /+< "dynamic write sets not disjoint because ")
+  (write_exchange_allowed w1 w2 c1 c2 /+< "write sets not disjoint because ")
 
 let ins_exchange_allowed (i1 i2 : ins) : pbool =
   (
@@ -86,6 +93,36 @@ let ins_exchange_allowed (i1 i2 : ins) : pbool =
       ffalse "non-generic instructions: conservatively disallowed exchange"
   ) /+> normal (" for instructions " ^ print_ins i1 gcc ^ " and " ^ print_ins i2 gcc)
 
+let rec lemma_write_same_constants_symmetric (c1 c2:locations_with_values) :
+  Lemma
+    (ensures (!!(write_same_constants c1 c2) = !!(write_same_constants c2 c1))) =
+  match c1, c2 with
+  | [], [] -> ()
+  | x :: xs, [] ->
+    lemma_write_same_constants_symmetric xs []
+  | [], y :: ys ->
+    lemma_write_same_constants_symmetric [] ys
+  | x :: xs, y :: ys ->
+    lemma_write_same_constants_symmetric c1 ys;
+    lemma_write_same_constants_symmetric xs c2;
+    lemma_write_same_constants_symmetric xs ys
+
+let rec lemma_write_exchange_allowed_symmetric (w1 w2:locations) (c1 c2:locations_with_values) :
+  Lemma
+    (ensures (!!(write_exchange_allowed w1 w2 c1 c2) = !!(write_exchange_allowed w2 w1 c2 c1))) =
+  lemma_write_same_constants_symmetric c1 c2;
+  match w1, w2 with
+  | [], [] -> ()
+  | x :: xs, [] ->
+    lemma_write_exchange_allowed_symmetric xs [] c1 c2
+  | [], y :: ys ->
+    lemma_write_exchange_allowed_symmetric [] ys c1 c2
+  | x :: xs, y :: ys ->
+    lemma_write_exchange_allowed_symmetric w1 ys c1 c2;
+    lemma_write_exchange_allowed_symmetric xs w2 c1 c2;
+    lemma_write_exchange_allowed_symmetric xs ys c1 c2;
+    admit ()
+
 let lemma_ins_exchange_allowed_symmetric (i1 i2 : ins) :
   Lemma
     (requires (
@@ -94,10 +131,8 @@ let lemma_ins_exchange_allowed_symmetric (i1 i2 : ins) :
         !!(ins_exchange_allowed i2 i1))) =
   let rw1, rw2 = rw_set_of_ins i1, rw_set_of_ins i2 in
   let r1, w1, c1 = rw1.loc_reads, rw1.loc_writes, rw1.loc_constant_writes in
-  let r2, w2, c2 = rw2.loc_reads, rw2.loc_writes, rw1.loc_constant_writes in
-  let dw1 = w1 `locations_subtract` (locations_of_locations_with_values c1) in
-  let dw2 = w2 `locations_subtract` (locations_of_locations_with_values c2) in
-  lemma_disjoint_locations_symmetric dw1 dw2
+  let r2, w2, c2 = rw2.loc_reads, rw2.loc_writes, rw2.loc_constant_writes in
+  lemma_write_exchange_allowed_symmetric w1 w2 c1 c2
 
 /// First, we must define what it means for two states to be
 /// equivalent. Here, we basically say they must be exactly the same.
@@ -607,47 +642,21 @@ let rec lemma_unchanged_at_mem (as:list location) (a:location) (s1 s2:machine_st
     if a = x then () else
     lemma_unchanged_at_mem xs a s1 s2
 
-let rec lemma_disjoint_locations_subtract (a a_ b:locations) :
-  Lemma
-    (requires (!!(disjoint_locations a b)))
-    (ensures (!!(disjoint_locations (a `locations_subtract` a_) b))) =
-  match a with
-  | [] -> ()
-  | x :: xs ->
-    lemma_disjoint_locations_subtract xs a_ b
-
-let rec lemma_disjoint_location_from_locations_subtract (a:location) (as as_:locations) :
+let lemma_unchanged_at_combine (a1 a2:locations) (c1 c2:locations_with_values) (sa1 sa2 sb1 sb2:machine_state) :
   Lemma
     (requires (
-        !!(disjoint_location_from_locations a (as `locations_subtract` as_)) /\
-        not (L.mem a as_)))
-    (ensures (!!(disjoint_location_from_locations a as))) =
-  match as with
-  | [] -> ()
-  | x :: xs -> lemma_disjoint_location_from_locations_subtract a xs as_
-
-let rec lemma_locations_subtract_mem (a:location) (as as_:locations) :
-  Lemma
-    (ensures (L.mem a (as `locations_subtract` as_) = (L.mem a as && not (L.mem a as_)))) =
-  match as with
-  | [] -> ()
-  | x :: xs ->
-    lemma_locations_subtract_mem a xs as_
-
-let lemma_unchanged_at_combine (a1 a2 a_:list location) (sa1 sa2 sb1 sb2:machine_state) :
-  Lemma
-    (requires (
-        !!(disjoint_locations (a1 `locations_subtract` a_) (a2 `locations_subtract` a_)) /\
-        (unchanged_at a_ sb1 sb2) /\
+        !!(write_exchange_allowed a1 a2 c1 c2) /\
+        (unchanged_at (locations_of_locations_with_values c1) sb1 sb2) /\
+        (unchanged_at (locations_of_locations_with_values c2) sb1 sb2) /\
         (unchanged_at a1 sa1 sb2) /\
         (unchanged_except a2 sa1 sb1) /\
         (unchanged_at a2 sa2 sb1) /\
         (unchanged_except a1 sa2 sb2)))
     (ensures (
         (unchanged_at (a1 `L.append` a2) sb1 sb2))) =
-  let a1', a2' = a1 `locations_subtract` a_, a2 `locations_subtract` a_ in
-  let precond = !!(disjoint_locations a1' a2') /\
-                (unchanged_at a_ sb1 sb2) /\
+  let precond = !!(write_exchange_allowed a1 a2 c1 c2) /\
+                (unchanged_at (locations_of_locations_with_values c1) sb1 sb2) /\
+                (unchanged_at (locations_of_locations_with_values c2) sb1 sb2) /\
                 (unchanged_at a1 sa1 sb2) /\
                 (unchanged_except a2 sa1 sb1) /\
                 (unchanged_at a2 sa2 sb1) /\
@@ -656,34 +665,22 @@ let lemma_unchanged_at_combine (a1 a2 a_:list location) (sa1 sa2 sb1 sb2:machine
     Lemma
       (requires (L.mem a a1 /\ precond))
       (ensures (eval_location a sb1 == eval_location a sb2)) =
-    lemma_locations_subtract_mem a a1 a_;
-    lemma_locations_subtract_mem a a2 a_;
-    if L.mem a a_ then (
-      lemma_unchanged_at_mem a_ a sb1 sb2
-    ) else (
-      lemma_disjoint_location_from_locations_mem a1' a2' a;
-      assert (!!(disjoint_location_from_locations a a2'));
-      lemma_disjoint_location_from_locations_subtract a a2 a_;
-      assert (eval_location a sb1 == eval_location a sa1);
-      lemma_unchanged_at_mem a1 a sa1 sb2
-    )
+    admit ();
+    lemma_disjoint_location_from_locations_mem a1 a2 a;
+    assert (!!(disjoint_location_from_locations a a2));
+    assert (eval_location a sb1 == eval_location a sa1);
+    lemma_unchanged_at_mem a1 a sa1 sb2
   in
   let aux2 a :
     Lemma
       (requires (L.mem a a2 /\ precond))
       (ensures (eval_location a sb1 == eval_location a sb2)) =
-    lemma_disjoint_locations_symmetric a1' a2';
-    lemma_locations_subtract_mem a a1 a_;
-    lemma_locations_subtract_mem a a2 a_;
-    if L.mem a a_ then (
-      lemma_unchanged_at_mem a_ a sb1 sb2
-    ) else (
-      lemma_disjoint_location_from_locations_mem a2' a1' a;
-      assert (!!(disjoint_location_from_locations a a1'));
-      lemma_disjoint_location_from_locations_subtract a a1 a_;
-      assert (eval_location a sb2 == eval_location a sa2);
-      lemma_unchanged_at_mem a2 a sa2 sb1
-    )
+    admit ();
+    lemma_disjoint_locations_symmetric a1 a2;
+    lemma_disjoint_location_from_locations_mem a2 a1 a;
+    assert (!!(disjoint_location_from_locations a a1));
+    assert (eval_location a sb2 == eval_location a sa2);
+    lemma_unchanged_at_mem a2 a sa2 sb1
   in
   let rec aux a1' a1'' a2' a2'' :
     Lemma
@@ -801,38 +798,23 @@ let rec lemma_constant_on_execution_mem
       lemma_constant_on_execution_mem xs f s l v
     )
 
-let lemma_constant_on_execution_stays_constant (f1 f2:st unit) (rw1 rw2:rw_set) (s1 s2:machine_state) :
+let lemma_constant_on_execution_stays_constant (f1 f2:st unit) (rw1 rw2:rw_set) (s s1 s2:machine_state) :
   Lemma
     (requires (
         (run f1 s1).ms_ok /\ (run f2 s2).ms_ok /\
         (bounded_effects rw1 f1) /\
         (bounded_effects rw2 f2) /\
-        (rw1.loc_constant_writes = rw2.loc_constant_writes)))
+        (unchanged_except rw2.loc_writes s s1) /\
+        (unchanged_except rw1.loc_writes s s2) /\
+        !!(write_same_constants rw1.loc_constant_writes rw2.loc_constant_writes)))
     (ensures (
         unchanged_at (locations_of_locations_with_values rw1.loc_constant_writes)
           (run f1 s1)
+          (run f2 s2) /\
+        unchanged_at (locations_of_locations_with_values rw2.loc_constant_writes)
+          (run f1 s1)
           (run f2 s2))) =
-  let rec aux c1 c2 :
-    Lemma
-      (requires (
-          (run f1 s1).ms_ok /\ (run f2 s2).ms_ok /\
-          (bounded_effects rw1 f1) /\
-          (bounded_effects rw2 f2) /\
-          (rw1.loc_constant_writes = rw2.loc_constant_writes) /\
-          (c1 `L.append` c2 == rw1.loc_constant_writes)))
-      (ensures (unchanged_at (locations_of_locations_with_values c2) (run f1 s1) (run f2 s2)))
-      (decreases %[c2]) =
-    match c2 with
-    | [] -> ()
-    | y :: ys ->
-      L.append_l_cons y ys c1;
-      L.append_mem c1 c2 y;
-      aux (c1 `L.append` [y]) ys;
-      let (| l, c |) = y in
-      lemma_constant_on_execution_mem rw1.loc_constant_writes f1 s1 l c;
-      lemma_constant_on_execution_mem rw2.loc_constant_writes f2 s2 l c
-  in
-  aux [] rw1.loc_constant_writes
+  admit ()
 
 let lemma_commute (f1 f2:st unit) (rw1 rw2:rw_set) (s:machine_state) :
   Lemma
@@ -852,11 +834,7 @@ let lemma_commute (f1 f2:st unit) (rw1 rw2:rw_set) (s:machine_state) :
     let s1 = run f1 s in
     let s2 = run f2 s in
     let r1, w1, c1 = rw1.loc_reads, rw1.loc_writes, rw1.loc_constant_writes in
-    let r2, w2, c2 = rw2.loc_reads, rw2.loc_writes, rw1.loc_constant_writes in
-    let dw1 = w1 `locations_subtract` (locations_of_locations_with_values c1) in
-    let dw2 = w2 `locations_subtract` (locations_of_locations_with_values c2) in
-    assert (locations_of_locations_with_values c1 = locations_of_locations_with_values c2);
-    let const = locations_of_locations_with_values c1 in
+    let r2, w2, c2 = rw2.loc_reads, rw2.loc_writes, rw2.loc_constant_writes in
     assert (s12 == run f2 s1 /\ s21 == run f1 s2);
     lemma_disjoint_implies_unchanged_at r1 w2 s s2;
     lemma_disjoint_implies_unchanged_at r2 w1 s s1;
@@ -873,8 +851,9 @@ let lemma_commute (f1 f2:st unit) (rw1 rw2:rw_set) (s:machine_state) :
     lemma_unchanged_except_append_symmetric w1 w2 s s12;
     lemma_unchanged_except_append_symmetric w2 w1 s s21;
     lemma_unchanged_except_same_transitive (w1 `L.append` w2) s s12 s21;
-    lemma_constant_on_execution_stays_constant f2 f1 rw2 rw1 s1 s2;
-    lemma_unchanged_at_combine w1 w2 const s1 s2 s12 s21;
+    lemma_write_same_constants_symmetric c1 c2;
+    lemma_constant_on_execution_stays_constant f2 f1 rw2 rw1 s s1 s2;
+    lemma_unchanged_at_combine w1 w2 c1 c2 s1 s2 s12 s21;
     lemma_unchanged_at_and_except (w1 `L.append` w2) s12 s21;
     assert (unchanged_except [] s12 s21);
     assert (s21.ms_ok = s12.ms_ok);
