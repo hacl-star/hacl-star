@@ -600,42 +600,54 @@ let mpfr_add1sp1_round_spec (high:normal_fp) (rb:bool) (sb:bool) (rnd_mode:mpfr_
     end else if mpfr_IS_LIKE_RNDZ rnd_mode (high.sign < 0) then high
     else add_one_ulp high
 
-val mpfr_round_rb_sb_lemma: a:normal_fp -> p:pos{p < a.prec} ->
+#reset-options
+#set-options "--z3refresh --z3rlimit 100 --max_fuel 1 --initial_fuel 0 --max_ifuel 1 --initial_ifuel 0"
+
+val mpfr_round_rb_sb_lemma: a:normal_fp -> p:pos ->
     high:normal_fp{high.prec = p /\ eval high =. eval (high_mant a p)} ->
     rb:bool{rb = rb_def a p} -> sb:bool{sb = sb_def a p} -> rnd_mode:mpfr_rnd_t -> Lemma
     (eval (mpfr_add1sp1_round_spec high rb sb rnd_mode) =. eval (round_def a p rnd_mode))
-    
+
 let mpfr_round_rb_sb_lemma a p high rb sb rnd_mode =
-    rb_sb_lemma a p;
-    eval_eq_reveal_lemma high (high_mant a p);
-    eval_eq_intro_lemma (add_one_ulp high) (add_one_ulp (high_mant a p))
+    if (p<a.prec) then begin
+      rb_sb_lemma a p;
+      eval_eq_reveal_lemma high (high_mant a p);
+      eval_eq_intro_lemma (add_one_ulp high) (add_one_ulp (high_mant a p));
+      assert(high.sign<0 <==> eval a<.zero_dyadic)
+    end 
+
+val eval_eq_round2_cond: a:normal_fp -> h:normal_fp -> rnd_mode:mpfr_rnd_t -> r:mpfr_fp -> p:pos{mpfr_PREC_COND p} -> Lemma
+  (requires (a.sign=h.sign /\ a.prec=p /\ h.prec=p /\ r.prec=p /\ eval_abs a=.eval_abs h /\  mpfr_round2_cond a rnd_mode r))
+  (ensures (mpfr_round2_cond h rnd_mode r))
+
+let eval_eq_round2_cond a h rnd_mode r p= 
+  if eval_abs a >. mpfr_overflow_bound a.prec then
+     dyadic_gt_trans_lemma (eval_abs a) (eval_abs h) (mpfr_overflow_bound p)
+  else if eval_abs a <. mpfr_underflow_bound a.prec then
+     dyadic_lt_trans_lemma  (eval_abs a) (eval_abs h) (mpfr_underflow_bound p)
+  else
+     eval_eq_intro_lemma a h
 
 val mpfr_round_cond_lemma: a:normal_fp -> p:pos{mpfr_PREC_COND p} ->
     high:normal_fp{high.prec = p /\ high.sign = (high_mant a p).sign /\
                    high.exp = (high_mant a p).exp /\
-		   high.limb * pow2 a.len = (high_mant a p).limb * pow2 high.len} ->
+		   high.limb * pow2 (high_mant a p).len = (high_mant a p).limb * pow2 high.len} ->
     rb:bool{rb = rb_def a p} -> sb:bool{sb = sb_def a p} -> rnd_mode:mpfr_rnd_t ->
     r:mpfr_fp{r.prec = p} -> Lemma
     (requires (mpfr_round2_cond (mpfr_add1sp1_round_spec high rb sb rnd_mode) rnd_mode r))
     (ensures  (mpfr_round_cond a p rnd_mode r))
 
-#reset-options 
-#set-options "--z3refresh --z3rlimit 100 --max_fuel 1 --initial_fuel 0 --max_ifuel 1 --initial_ifuel 0"
-
-let mpfr_round_cond_lemma a p high rb sb rnd_mode r =admit();
+let mpfr_round_cond_lemma a p high rb sb rnd_mode r =
     if (a.len>=high.len) then begin
-       assert(a.len>=high.len);
-       lemma_pow2_sub high.limb (high_mant a p).limb a.len high.len
-    end else begin
-       assert(high.len >= a.len);
-       assert((high_mant a p).limb * pow2 high.len=high.limb * pow2 a.len);
-       lemma_pow2_sub (high_mant a p).limb high.limb high.len a.len;
-       assume(eval_abs (high_mant a p)=.eval_abs high );
-       admit()
+       lemma_pow2_sub high.limb (high_mant a p).limb (high_mant a p).len high.len
+    end else begin 
+       lemma_pow2_sub (high_mant a p).limb high.limb high.len (high_mant a p).len
     end;
     assert(eval_abs high =. eval_abs (high_mant a p));
-    mpfr_round_rb_sb_lemma a p high rb sb rnd_mode;admit();
-    eval_eq_reveal_lemma (mpfr_add1sp1_round_spec high rb sb rnd_mode) (round_def a p rnd_mode)
+    eval_eq_intro_lemma high (high_mant a p);
+    mpfr_round_rb_sb_lemma a p high rb sb rnd_mode;
+    eval_eq_reveal_lemma (mpfr_add1sp1_round_spec high rb sb rnd_mode) (round_def a p rnd_mode);
+    eval_eq_round2_cond (mpfr_add1sp1_round_spec high rb sb rnd_mode) (round_def a p rnd_mode) rnd_mode r p
 
 (* lemmas about ternary value *)
 val mpfr_truncate_ternary_cond_lemma: a:normal_fp{mpfr_EXP_COND a.exp} ->
@@ -747,7 +759,7 @@ val mpfr_add1sp1_round_post_cond_lemma: a:normal_fp{mpfr_EXP_COND a.exp} ->
     p:pos{mpfr_PREC_COND p} ->
     high:normal_fp{high.prec = p /\ high.sign = (high_mant a p).sign  /\
                    high.exp = (high_mant a p).exp /\
-		   high.limb * pow2 a.len = (high_mant a p).limb * pow2 high.len} ->
+		   high.limb * pow2 (high_mant a p).len = (high_mant a p).limb * pow2 high.len} ->
     rb:bool{rb = rb_def a p} -> sb:bool{sb = sb_def a p} -> rnd_mode:mpfr_rnd_t ->
     t:int -> r:mpfr_fp{r.prec = p} -> Lemma
     (requires (mpfr_round2_cond (mpfr_add1sp1_round_spec high rb sb rnd_mode) rnd_mode r /\

@@ -1,5 +1,5 @@
 [
-  "F¯né‰E(ÝB/‰±\u0002ìE¾",
+  "œ:Ö\fë')În‡\u0013\u000e’5îF",
   [
     [
       "MPFR.Dyadic.eval_i",
@@ -8,10 +8,10 @@
       0,
       [
         "@MaxIFuel_assumption", "@query",
-        "refinement_interpretation_MPFR.Dyadic_Tm_refine_b20bb07d38c03ea55caa1056dd1cd845"
+        "refinement_interpretation_Tm_refine_b20bb07d38c03ea55caa1056dd1cd845"
       ],
       0,
-      "b26d4c564ca41946c3c6d5074e549251"
+      "3c11ad14346db01555be5b8cdd27cefe"
     ],
     [
       "MPFR.Dyadic.eq",
@@ -19,8 +19,8 @@
       0,
       0,
       [
-        "@MaxIFuel_assumption", "@query", "assumption_Prims.HasEq_int",
-        "equation_Prims.min", "fuel_guarded_inversion_MPFR.Dyadic.dyadic",
+        "@MaxIFuel_assumption", "@query", "equation_Prims.min",
+        "fuel_guarded_inversion_MPFR.Dyadic.dyadic",
         "primitive_Prims.op_LessThanOrEqual",
         "primitive_Prims.op_Subtraction",
         "proj_equation_MPFR.Dyadic.Mkdyadic_exponent",
@@ -28,7 +28,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "239024c7ace29f43341a899de5d236f1"
+      "75b206067bd112025b5437dbdf7e872c"
     ],
     [
       "MPFR.Dyadic.gt",
@@ -45,7 +45,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "c5ea8521c9d0b03da96dfcbb1e329a28"
+      "d77e27c2b6d4a3aa0a07c3c8d0110ef4"
     ],
     [
       "MPFR.Dyadic.ge",
@@ -62,7 +62,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "1153b2bc2a03d4fbed364ab4392ef751"
+      "d7fbf9a64bd5b2186ffa8d3f93a9a516"
     ],
     [
       "MPFR.Dyadic.lt",
@@ -79,7 +79,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "3b2cba9290d245752c555665bb761e82"
+      "6231dd441247a56ac64aecf4c86f7930"
     ],
     [
       "MPFR.Dyadic.le",
@@ -96,7 +96,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "430a2fcec49db0a2e8d2c5457b4e63f1"
+      "3cc67f1ec5cab4291d390ff20e6ae930"
     ],
     [
       "MPFR.Dyadic.fneg",
@@ -104,13 +104,12 @@
       0,
       0,
       [
-        "@query", "assumption_Prims.HasEq_int",
-        "primitive_Prims.op_Subtraction",
+        "@query", "primitive_Prims.op_Subtraction",
         "proj_equation_MPFR.Dyadic.Mkdyadic_exponent",
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "910c6ee7fbc2b383c156769e1cdda202"
+      "bf860dedd033fddf3f7739e2b74362ba"
     ],
     [
       "MPFR.Dyadic.fneg",
@@ -121,11 +120,10 @@
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
         "Prims_pretyping_ae567c2fb75be05905677af440075565",
-        "equation_FStar.UInt32.n", "equation_MPFR.Dyadic.eval_i",
-        "equation_MPFR.Dyadic.mk_dyadic", "equation_Prims.nat",
-        "fuel_guarded_inversion_MPFR.Dyadic.dyadic",
-        "function_token_typing_FStar.UInt32.n", "int_inversion",
-        "int_typing", "lemma_FStar.UInt.pow2_values",
+        "equation_MPFR.Dyadic.eval_i", "equation_MPFR.Dyadic.mk_dyadic",
+        "equation_Prims.nat", "fuel_guarded_inversion_MPFR.Dyadic.dyadic",
+        "function_token_typing_Prims.__cache_version_number__",
+        "int_inversion", "int_typing", "lemma_FStar.UInt.pow2_values",
         "primitive_Prims.op_Minus", "primitive_Prims.op_Multiply",
         "primitive_Prims.op_Subtraction",
         "proj_equation_MPFR.Dyadic.Mkdyadic_exponent",
@@ -133,11 +131,11 @@
         "projection_inverse_BoxInt_proj_0",
         "projection_inverse_MPFR.Dyadic.Mkdyadic_exponent",
         "projection_inverse_MPFR.Dyadic.Mkdyadic_significand",
-        "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
         "typing_MPFR.Dyadic.__proj__Mkdyadic__item__significand"
       ],
       0,
-      "0163965547ee62f05137acf57a24f314"
+      "f6db982430c20f910017fc0fcb6998fa"
     ],
     [
       "MPFR.Dyadic.fadd",
@@ -145,15 +143,14 @@
       0,
       0,
       [
-        "@query", "assumption_Prims.HasEq_int", "equation_Prims.min",
-        "primitive_Prims.op_LessThanOrEqual",
+        "@query", "equation_Prims.min", "primitive_Prims.op_LessThanOrEqual",
         "primitive_Prims.op_Subtraction",
         "proj_equation_MPFR.Dyadic.Mkdyadic_exponent",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "0c1f9a70d54d2baddb53b7bd38da008d"
+      "9ab36973af3a660fdf0b333fc10ab067"
     ],
     [
       "MPFR.Dyadic.fadd",
@@ -176,7 +173,7 @@
         "projection_inverse_MPFR.Dyadic.Mkdyadic_significand"
       ],
       0,
-      "a4c8c91dba5fc596bbe1871135d5d00d"
+      "98a75166b2147d3adb6c76bf5d11306c"
     ],
     [
       "MPFR.Dyadic.fsub",
@@ -184,15 +181,14 @@
       0,
       0,
       [
-        "@query", "assumption_Prims.HasEq_int", "equation_Prims.min",
-        "primitive_Prims.op_LessThanOrEqual",
+        "@query", "equation_Prims.min", "primitive_Prims.op_LessThanOrEqual",
         "primitive_Prims.op_Subtraction",
         "proj_equation_MPFR.Dyadic.Mkdyadic_exponent",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "7eb1af4ca95a30245b0ea77604cd8b2a"
+      "4a8381aecc46e742728832dbab2b349a"
     ],
     [
       "MPFR.Dyadic.fsub",
@@ -200,27 +196,22 @@
       0,
       0,
       [
-        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
-        "Prims_pretyping_ae567c2fb75be05905677af440075565",
-        "equation_FStar.UInt32.n", "equation_MPFR.Dyadic.eval_i",
-        "equation_MPFR.Dyadic.fadd", "equation_MPFR.Dyadic.fneg",
+        "equation_MPFR.Dyadic.eval_i", "equation_MPFR.Dyadic.fneg",
         "equation_MPFR.Dyadic.mk_dyadic", "equation_Prims.min",
-        "equation_Prims.nat", "fuel_guarded_inversion_MPFR.Dyadic.dyadic",
-        "function_token_typing_FStar.UInt32.n", "int_inversion",
-        "int_typing", "lemma_FStar.UInt.pow2_values",
-        "primitive_Prims.op_Addition", "primitive_Prims.op_Minus",
-        "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
+        "fuel_guarded_inversion_MPFR.Dyadic.dyadic", "int_inversion",
+        "int_typing", "primitive_Prims.op_Addition",
+        "primitive_Prims.op_Minus", "primitive_Prims.op_Multiply",
+        "primitive_Prims.op_Subtraction",
         "proj_equation_MPFR.Dyadic.Mkdyadic_exponent",
         "proj_equation_MPFR.Dyadic.Mkdyadic_significand",
         "projection_inverse_BoxInt_proj_0",
         "projection_inverse_MPFR.Dyadic.Mkdyadic_exponent",
-        "refinement_interpretation_MPFR.Dyadic_Tm_refine_a6d33a04cfc03dd1fb08e3fe0f2af41a",
-        "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
-        "typing_MPFR.Dyadic.fneg"
+        "projection_inverse_MPFR.Dyadic.Mkdyadic_significand"
       ],
       0,
-      "050fc2152add1761dcf16b793aa07e04"
+      "541c4167b016df312b9c08401cde602a"
     ],
     [
       "MPFR.Dyadic.fmul",
@@ -228,15 +219,14 @@
       0,
       0,
       [
-        "@query", "assumption_Prims.HasEq_int", "equation_Prims.min",
-        "primitive_Prims.op_LessThanOrEqual", "primitive_Prims.op_Multiply",
-        "primitive_Prims.op_Subtraction",
+        "@query", "equation_Prims.min", "primitive_Prims.op_LessThanOrEqual",
+        "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
         "proj_equation_MPFR.Dyadic.Mkdyadic_exponent",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "7e079e0bdc7f99d3f067742a90c14111"
+      "cffce174ba580293ede4ad2cc95561f5"
     ],
     [
       "MPFR.Dyadic.fmul",
@@ -247,11 +237,11 @@
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
         "Prims_pretyping_ae567c2fb75be05905677af440075565",
-        "equation_FStar.UInt32.n", "equation_MPFR.Dyadic.eval_i",
-        "equation_MPFR.Dyadic.mk_dyadic", "equation_Prims.min",
-        "equation_Prims.nat", "fuel_guarded_inversion_MPFR.Dyadic.dyadic",
-        "function_token_typing_FStar.UInt32.n", "int_inversion",
-        "int_typing", "lemma_FStar.UInt.pow2_values",
+        "equation_MPFR.Dyadic.eval_i", "equation_MPFR.Dyadic.mk_dyadic",
+        "equation_Prims.min", "equation_Prims.nat",
+        "fuel_guarded_inversion_MPFR.Dyadic.dyadic",
+        "function_token_typing_Prims.__cache_version_number__",
+        "int_inversion", "lemma_FStar.UInt.pow2_values",
         "primitive_Prims.op_Addition", "primitive_Prims.op_LessThanOrEqual",
         "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
         "proj_equation_MPFR.Dyadic.Mkdyadic_exponent",
@@ -260,10 +250,10 @@
         "projection_inverse_BoxInt_proj_0",
         "projection_inverse_MPFR.Dyadic.Mkdyadic_exponent",
         "projection_inverse_MPFR.Dyadic.Mkdyadic_significand",
-        "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
+        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-      "bb03e5af846bb3a971db667491a3bced"
+      "92fd7fd4a870729d74f87b0d8a7ffd62"
     ],
     [
       "MPFR.Dyadic.fdiv_pow2",
@@ -271,14 +261,14 @@
       0,
       0,
       [
-        "@MaxIFuel_assumption", "@query", "assumption_Prims.HasEq_int",
-        "equation_Prims.nat", "primitive_Prims.op_Subtraction",
+        "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
+        "primitive_Prims.op_Subtraction",
         "proj_equation_MPFR.Dyadic.Mkdyadic_exponent",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
+        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d"
       ],
       0,
-      "0c38312c372e4640de5b44ca6d06a5ad"
+      "a23cc1abbd5b939f34e5c5b2cd2d4a18"
     ],
     [
       "MPFR.Dyadic.fdiv_pow2",
@@ -289,22 +279,21 @@
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
         "Prims_pretyping_ae567c2fb75be05905677af440075565",
-        "equation_FStar.UInt32.n", "equation_MPFR.Dyadic.eval_i",
-        "equation_MPFR.Dyadic.mk_dyadic", "equation_Prims.nat",
-        "fuel_guarded_inversion_MPFR.Dyadic.dyadic",
-        "function_token_typing_FStar.UInt32.n", "int_inversion",
-        "int_typing", "lemma_FStar.UInt.pow2_values",
+        "equation_MPFR.Dyadic.eval_i", "equation_MPFR.Dyadic.mk_dyadic",
+        "equation_Prims.nat", "fuel_guarded_inversion_MPFR.Dyadic.dyadic",
+        "function_token_typing_Prims.__cache_version_number__",
+        "int_inversion", "int_typing", "lemma_FStar.UInt.pow2_values",
         "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
         "proj_equation_MPFR.Dyadic.Mkdyadic_exponent",
         "proj_equation_MPFR.Dyadic.Mkdyadic_significand",
         "projection_inverse_BoxInt_proj_0",
         "projection_inverse_MPFR.Dyadic.Mkdyadic_exponent",
         "projection_inverse_MPFR.Dyadic.Mkdyadic_significand",
-        "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
         "typing_MPFR.Dyadic.__proj__Mkdyadic__item__significand"
       ],
       0,
-      "ef4b73362f9ed5e063ca0354f8c82740"
+      "2797a79e90a356e03ca042f7f92f01e5"
     ],
     [
       "MPFR.Dyadic.dyadic_eq_symm_lemma",
@@ -314,8 +303,8 @@
       [
         "@MaxIFuel_assumption", "@query",
         "Prims_pretyping_ae567c2fb75be05905677af440075565", "bool_inversion",
-        "equation_FStar.UInt32.n", "equation_MPFR.Dyadic.eq",
-        "equation_Prims.min", "function_token_typing_FStar.UInt32.n",
+        "equation_MPFR.Dyadic.eq", "equation_Prims.min",
+        "function_token_typing_Prims.__cache_version_number__",
         "int_inversion", "primitive_Prims.op_Equality",
         "primitive_Prims.op_LessThanOrEqual",
         "proj_equation_MPFR.Dyadic.Mkdyadic_exponent",
@@ -324,7 +313,7 @@
         "typing_MPFR.Dyadic.eq", "typing_Prims.min"
       ],
       0,
-      "0a1497aa577d20233c61bddc178741a0"
+      "ced51785f1b21b4577d2ca4a6dc0d8d1"
     ],
     [
       "MPFR.Dyadic.dyadic_gt_symm_lemma",
@@ -340,10 +329,10 @@
         "proj_equation_MPFR.Dyadic.Mkdyadic_exponent",
         "projection_inverse_BoxBool_proj_0",
         "typing_MPFR.Dyadic.__proj__Mkdyadic__item__exponent",
-        "typing_MPFR.Dyadic.gt", "typing_Prims.min"
+        "typing_MPFR.Dyadic.gt"
       ],
       0,
-      "198bf7ecf5d5a076c4ac675436bb5eb8"
+      "0ce83c6494227fad8eab7386c24043e7"
     ],
     [
       "MPFR.Dyadic.dyadic_ge_symm_lemma",
@@ -362,7 +351,7 @@
         "typing_MPFR.Dyadic.ge"
       ],
       0,
-      "c668e7cbd0b11535d3cce96915b323ca"
+      "f007cda45c67dcd297359cfaa46e2c6d"
     ],
     [
       "MPFR.Dyadic.dyadic_lt_symm_lemma",
@@ -378,10 +367,10 @@
         "proj_equation_MPFR.Dyadic.Mkdyadic_exponent",
         "projection_inverse_BoxBool_proj_0",
         "typing_MPFR.Dyadic.__proj__Mkdyadic__item__exponent",
-        "typing_MPFR.Dyadic.lt", "typing_Prims.min"
+        "typing_MPFR.Dyadic.lt"
       ],
       0,
-      "61e5926e36bcca69d8c1d4ddb92404f9"
+      "4cf0405a5f881f9a0d94496bb48cbb10"
     ],
     [
       "MPFR.Dyadic.dyadic_le_symm_lemma",
@@ -397,10 +386,10 @@
         "proj_equation_MPFR.Dyadic.Mkdyadic_exponent",
         "projection_inverse_BoxBool_proj_0",
         "typing_MPFR.Dyadic.__proj__Mkdyadic__item__exponent",
-        "typing_MPFR.Dyadic.le", "typing_Prims.min"
+        "typing_MPFR.Dyadic.le"
       ],
       0,
-      "40adf5ebd2ed035ba55a0c445722d316"
+      "3bdc9b7d899ce976f3d7c63cf9409e22"
     ],
     [
       "MPFR.Dyadic.dyadic_eq_trans_lemma",
@@ -411,12 +400,11 @@
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
         "Prims_pretyping_ae567c2fb75be05905677af440075565", "bool_inversion",
-        "equation_FStar.UInt32.n", "equation_MPFR.Dyadic.eq",
-        "equation_MPFR.Dyadic.eval_i", "equation_Prims.min",
-        "equation_Prims.nat", "equation_Prims.pos",
+        "equation_MPFR.Dyadic.eq", "equation_MPFR.Dyadic.eval_i",
+        "equation_Prims.min", "equation_Prims.nat", "equation_Prims.pos",
         "fuel_guarded_inversion_MPFR.Dyadic.dyadic",
-        "function_token_typing_FStar.UInt32.n", "int_inversion",
-        "int_typing", "lemma_FStar.UInt.pow2_values",
+        "function_token_typing_Prims.__cache_version_number__",
+        "int_inversion", "int_typing", "lemma_FStar.UInt.pow2_values",
         "lemma_MPFR.Dyadic.dyadic_eq_symm_lemma",
         "primitive_Prims.op_Addition", "primitive_Prims.op_Equality",
         "primitive_Prims.op_LessThanOrEqual", "primitive_Prims.op_Multiply",
@@ -425,14 +413,14 @@
         "proj_equation_MPFR.Dyadic.Mkdyadic_significand",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
-        "refinement_interpretation_Prims_Tm_refine_f048236b5f8051f83b495ea5eaa6127b",
+        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "refinement_interpretation_Tm_refine_f048236b5f8051f83b495ea5eaa6127b",
         "typing_MPFR.Dyadic.__proj__Mkdyadic__item__exponent",
         "typing_MPFR.Dyadic.__proj__Mkdyadic__item__significand",
         "typing_MPFR.Dyadic.eq", "typing_Prims.min", "typing_Prims.pow2"
       ],
       0,
-      "3ac8daa6aac1c11a235d73948c77a114"
+      "830483907de58b02e7c2c3ffb558a82a"
     ],
     [
       "MPFR.Dyadic.dyadic_gt_trans_lemma",
@@ -443,12 +431,12 @@
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
         "Prims_pretyping_ae567c2fb75be05905677af440075565", "bool_inversion",
-        "equation_FStar.UInt32.n", "equation_MPFR.Dyadic.eval_i",
-        "equation_MPFR.Dyadic.ge", "equation_MPFR.Dyadic.gt",
-        "equation_Prims.min", "equation_Prims.nat", "equation_Prims.pos",
+        "equation_MPFR.Dyadic.eval_i", "equation_MPFR.Dyadic.ge",
+        "equation_MPFR.Dyadic.gt", "equation_Prims.min",
+        "equation_Prims.nat", "equation_Prims.pos",
         "fuel_guarded_inversion_MPFR.Dyadic.dyadic",
-        "function_token_typing_FStar.UInt32.n", "int_inversion",
-        "int_typing", "lemma_FStar.UInt.pow2_values",
+        "function_token_typing_Prims.__cache_version_number__",
+        "int_inversion", "int_typing", "lemma_FStar.UInt.pow2_values",
         "primitive_Prims.op_Addition", "primitive_Prims.op_GreaterThan",
         "primitive_Prims.op_GreaterThanOrEqual",
         "primitive_Prims.op_LessThanOrEqual", "primitive_Prims.op_Multiply",
@@ -457,14 +445,15 @@
         "proj_equation_MPFR.Dyadic.Mkdyadic_significand",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
-        "refinement_interpretation_Prims_Tm_refine_f048236b5f8051f83b495ea5eaa6127b",
-        "token_correspondence_Prims.pow2.fuel_instrumented",
+        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "refinement_interpretation_Tm_refine_f048236b5f8051f83b495ea5eaa6127b",
         "typing_MPFR.Dyadic.__proj__Mkdyadic__item__exponent",
-        "typing_MPFR.Dyadic.gt", "typing_Prims.min", "typing_Prims.pow2"
+        "typing_MPFR.Dyadic.__proj__Mkdyadic__item__significand",
+        "typing_MPFR.Dyadic.ge", "typing_MPFR.Dyadic.gt", "typing_Prims.min",
+        "typing_Prims.pow2"
       ],
       0,
-      "4a529be4adef8753f181fdc35bc61fa7"
+      "5645ee5942f20b22f719442c70667817"
     ],
     [
       "MPFR.Dyadic.dyadic_ge_trans_lemma",
@@ -475,12 +464,11 @@
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
         "Prims_pretyping_ae567c2fb75be05905677af440075565", "bool_inversion",
-        "equation_FStar.UInt32.n", "equation_MPFR.Dyadic.eval_i",
-        "equation_MPFR.Dyadic.ge", "equation_Prims.min",
-        "equation_Prims.nat", "equation_Prims.pos",
+        "equation_MPFR.Dyadic.eval_i", "equation_MPFR.Dyadic.ge",
+        "equation_Prims.min", "equation_Prims.nat", "equation_Prims.pos",
         "fuel_guarded_inversion_MPFR.Dyadic.dyadic",
-        "function_token_typing_FStar.UInt32.n", "int_inversion",
-        "int_typing", "lemma_FStar.UInt.pow2_values",
+        "function_token_typing_Prims.__cache_version_number__",
+        "int_inversion", "int_typing", "lemma_FStar.UInt.pow2_values",
         "primitive_Prims.op_Addition",
         "primitive_Prims.op_GreaterThanOrEqual",
         "primitive_Prims.op_LessThanOrEqual", "primitive_Prims.op_Multiply",
@@ -489,14 +477,14 @@
         "proj_equation_MPFR.Dyadic.Mkdyadic_significand",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
-        "refinement_interpretation_Prims_Tm_refine_f048236b5f8051f83b495ea5eaa6127b",
+        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "refinement_interpretation_Tm_refine_f048236b5f8051f83b495ea5eaa6127b",
         "typing_MPFR.Dyadic.__proj__Mkdyadic__item__exponent",
         "typing_MPFR.Dyadic.__proj__Mkdyadic__item__significand",
         "typing_MPFR.Dyadic.ge", "typing_Prims.min", "typing_Prims.pow2"
       ],
       0,
-      "d7f6798ab6ccbfa764fb59036c298e5d"
+      "941f9437b64c87204001681734081818"
     ],
     [
       "MPFR.Dyadic.dyadic_lt_trans_lemma",
@@ -507,12 +495,12 @@
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
         "Prims_pretyping_ae567c2fb75be05905677af440075565", "bool_inversion",
-        "equation_FStar.UInt32.n", "equation_MPFR.Dyadic.eval_i",
-        "equation_MPFR.Dyadic.le", "equation_MPFR.Dyadic.lt",
-        "equation_Prims.min", "equation_Prims.nat", "equation_Prims.pos",
+        "equation_MPFR.Dyadic.eval_i", "equation_MPFR.Dyadic.le",
+        "equation_MPFR.Dyadic.lt", "equation_Prims.min",
+        "equation_Prims.nat", "equation_Prims.pos",
         "fuel_guarded_inversion_MPFR.Dyadic.dyadic",
-        "function_token_typing_FStar.UInt32.n", "int_inversion",
-        "int_typing", "lemma_FStar.UInt.pow2_values",
+        "function_token_typing_Prims.__cache_version_number__",
+        "int_inversion", "int_typing", "lemma_FStar.UInt.pow2_values",
         "primitive_Prims.op_Addition", "primitive_Prims.op_LessThan",
         "primitive_Prims.op_LessThanOrEqual", "primitive_Prims.op_Multiply",
         "primitive_Prims.op_Subtraction",
@@ -520,13 +508,14 @@
         "proj_equation_MPFR.Dyadic.Mkdyadic_significand",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
-        "refinement_interpretation_Prims_Tm_refine_f048236b5f8051f83b495ea5eaa6127b",
+        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "refinement_interpretation_Tm_refine_f048236b5f8051f83b495ea5eaa6127b",
         "typing_MPFR.Dyadic.__proj__Mkdyadic__item__exponent",
-        "typing_MPFR.Dyadic.lt", "typing_Prims.min", "typing_Prims.pow2"
+        "typing_MPFR.Dyadic.le", "typing_MPFR.Dyadic.lt", "typing_Prims.min",
+        "typing_Prims.pow2"
       ],
       0,
-      "1d6943110f87d97b16a83f52000e2692"
+      "4c1387b5c528ab7830d1c2b4ac7d479f"
     ],
     [
       "MPFR.Dyadic.dyadic_le_trans_lemma",
@@ -537,43 +526,41 @@
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
         "Prims_pretyping_ae567c2fb75be05905677af440075565", "bool_inversion",
-        "equation_FStar.UInt32.n", "equation_MPFR.Dyadic.eval_i",
-        "equation_MPFR.Dyadic.le", "equation_Prims.min",
-        "equation_Prims.nat", "equation_Prims.pos",
+        "equation_MPFR.Dyadic.eval_i", "equation_MPFR.Dyadic.le",
+        "equation_Prims.min", "equation_Prims.nat", "equation_Prims.pos",
         "fuel_guarded_inversion_MPFR.Dyadic.dyadic",
-        "function_token_typing_FStar.UInt32.n", "int_inversion",
-        "int_typing", "lemma_FStar.UInt.pow2_values",
+        "function_token_typing_Prims.__cache_version_number__",
+        "int_inversion", "int_typing", "lemma_FStar.UInt.pow2_values",
         "primitive_Prims.op_Addition", "primitive_Prims.op_LessThanOrEqual",
         "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
         "proj_equation_MPFR.Dyadic.Mkdyadic_exponent",
         "proj_equation_MPFR.Dyadic.Mkdyadic_significand",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
-        "refinement_interpretation_Prims_Tm_refine_f048236b5f8051f83b495ea5eaa6127b",
+        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "refinement_interpretation_Tm_refine_f048236b5f8051f83b495ea5eaa6127b",
         "typing_MPFR.Dyadic.__proj__Mkdyadic__item__exponent",
         "typing_MPFR.Dyadic.__proj__Mkdyadic__item__significand",
         "typing_MPFR.Dyadic.le", "typing_Prims.min", "typing_Prims.pow2"
       ],
       0,
-      "944a02ecd984ee2d4a86b55ef82eb58f"
+      "90b0e917aa35bd9683e428df2da6dc6b"
     ],
     [
       "MPFR.Dyadic.fadd_eq_lemma",
       1,
       0,
-      1,
+      0,
       [
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
         "Prims_pretyping_ae567c2fb75be05905677af440075565", "bool_inversion",
-        "data_elim_MPFR.Dyadic.Mkdyadic", "equation_FStar.UInt32.n",
         "equation_MPFR.Dyadic.eq", "equation_MPFR.Dyadic.eval_i",
         "equation_MPFR.Dyadic.fadd", "equation_MPFR.Dyadic.mk_dyadic",
         "equation_Prims.min", "equation_Prims.nat", "equation_Prims.pos",
         "fuel_guarded_inversion_MPFR.Dyadic.dyadic",
-        "function_token_typing_FStar.UInt32.n", "int_inversion",
-        "int_typing", "lemma_FStar.UInt.pow2_values",
+        "function_token_typing_Prims.__cache_version_number__",
+        "int_inversion", "int_typing", "lemma_FStar.UInt.pow2_values",
         "lemma_MPFR.Dyadic.dyadic_eq_symm_lemma",
         "primitive_Prims.op_Addition", "primitive_Prims.op_Equality",
         "primitive_Prims.op_LessThanOrEqual", "primitive_Prims.op_Multiply",
@@ -584,16 +571,16 @@
         "projection_inverse_BoxInt_proj_0",
         "projection_inverse_MPFR.Dyadic.Mkdyadic_exponent",
         "projection_inverse_MPFR.Dyadic.Mkdyadic_significand",
-        "refinement_interpretation_MPFR.Dyadic_Tm_refine_9d9dce831191a7cb57327479ca43147c",
-        "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
-        "refinement_interpretation_Prims_Tm_refine_f048236b5f8051f83b495ea5eaa6127b",
+        "refinement_interpretation_Tm_refine_9d9dce831191a7cb57327479ca43147c",
+        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "refinement_interpretation_Tm_refine_f048236b5f8051f83b495ea5eaa6127b",
         "typing_MPFR.Dyadic.__proj__Mkdyadic__item__exponent",
         "typing_MPFR.Dyadic.__proj__Mkdyadic__item__significand",
         "typing_MPFR.Dyadic.eq", "typing_MPFR.Dyadic.fadd",
         "typing_Prims.min", "typing_Prims.pow2"
       ],
       0,
-      "25a1ee02c1af7d9b57c1e94b787488d3"
+      "77cb42f3b7b359639d3790074ffb1759"
     ],
     [
       "MPFR.Dyadic.fadd_comm_lemma",
@@ -603,24 +590,23 @@
       [
         "@MaxIFuel_assumption", "@query",
         "Prims_pretyping_ae567c2fb75be05905677af440075565",
-        "equation_FStar.UInt32.n", "equation_MPFR.Dyadic.eq",
-        "equation_MPFR.Dyadic.eval_i", "equation_MPFR.Dyadic.fadd",
-        "equation_MPFR.Dyadic.mk_dyadic", "equation_Prims.min",
-        "fuel_guarded_inversion_MPFR.Dyadic.dyadic",
-        "function_token_typing_FStar.UInt32.n", "int_inversion",
-        "primitive_Prims.op_Addition", "primitive_Prims.op_Equality",
-        "primitive_Prims.op_LessThanOrEqual",
+        "equation_MPFR.Dyadic.eq", "equation_MPFR.Dyadic.eval_i",
+        "equation_MPFR.Dyadic.fadd", "equation_MPFR.Dyadic.mk_dyadic",
+        "equation_Prims.min", "fuel_guarded_inversion_MPFR.Dyadic.dyadic",
+        "function_token_typing_Prims.__cache_version_number__",
+        "int_inversion", "primitive_Prims.op_Addition",
+        "primitive_Prims.op_Equality", "primitive_Prims.op_LessThanOrEqual",
         "primitive_Prims.op_Subtraction",
         "proj_equation_MPFR.Dyadic.Mkdyadic_exponent",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
         "projection_inverse_MPFR.Dyadic.Mkdyadic_exponent",
-        "refinement_interpretation_MPFR.Dyadic_Tm_refine_9d9dce831191a7cb57327479ca43147c",
+        "refinement_interpretation_Tm_refine_9d9dce831191a7cb57327479ca43147c",
         "typing_MPFR.Dyadic.__proj__Mkdyadic__item__exponent",
         "typing_MPFR.Dyadic.fadd", "typing_Prims.min"
       ],
       0,
-      "694911316ce36e482fcd30584edd8873"
+      "7cfa9cab6366761b0a833d528e6bdbc3"
     ],
     [
       "MPFR.Dyadic.fadd_asso_lemma",
@@ -631,13 +617,12 @@
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
         "Prims_pretyping_ae567c2fb75be05905677af440075565",
-        "equation_FStar.UInt32.n", "equation_MPFR.Dyadic.eq",
-        "equation_MPFR.Dyadic.eval_i", "equation_MPFR.Dyadic.fadd",
-        "equation_MPFR.Dyadic.mk_dyadic", "equation_Prims.min",
-        "equation_Prims.nat", "equation_Prims.pos",
+        "equation_MPFR.Dyadic.eq", "equation_MPFR.Dyadic.eval_i",
+        "equation_MPFR.Dyadic.fadd", "equation_MPFR.Dyadic.mk_dyadic",
+        "equation_Prims.min", "equation_Prims.nat", "equation_Prims.pos",
         "fuel_guarded_inversion_MPFR.Dyadic.dyadic",
-        "function_token_typing_FStar.UInt32.n", "int_inversion",
-        "int_typing", "lemma_FStar.UInt.pow2_values",
+        "function_token_typing_Prims.__cache_version_number__",
+        "int_inversion", "int_typing", "lemma_FStar.UInt.pow2_values",
         "lemma_MPFR.Dyadic.fadd_comm_lemma", "primitive_Prims.op_Addition",
         "primitive_Prims.op_Equality", "primitive_Prims.op_LessThanOrEqual",
         "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
@@ -647,15 +632,15 @@
         "projection_inverse_BoxInt_proj_0",
         "projection_inverse_MPFR.Dyadic.Mkdyadic_exponent",
         "projection_inverse_MPFR.Dyadic.Mkdyadic_significand",
-        "refinement_interpretation_MPFR.Dyadic_Tm_refine_9d9dce831191a7cb57327479ca43147c",
-        "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
-        "refinement_interpretation_Prims_Tm_refine_f048236b5f8051f83b495ea5eaa6127b",
+        "refinement_interpretation_Tm_refine_9d9dce831191a7cb57327479ca43147c",
+        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "refinement_interpretation_Tm_refine_f048236b5f8051f83b495ea5eaa6127b",
         "typing_MPFR.Dyadic.__proj__Mkdyadic__item__exponent",
         "typing_MPFR.Dyadic.fadd", "typing_MPFR.Dyadic.mk_dyadic",
-        "typing_Prims.min"
+        "typing_Prims.min", "typing_Prims.pow2"
       ],
       0,
-      "8bf08bac2f11c23908e61e4b7a7c61cb"
+      "4cbb3bee745ba6f5bf3305742bf85512"
     ]
   ]
 ]

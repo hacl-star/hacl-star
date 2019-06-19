@@ -7,8 +7,8 @@
       0,
       0,
       [
-        "@MaxIFuel_assumption", "@query", "assumption_Prims.HasEq_int",
-        "equation_MPFR.Lib.Spec.gnb", "equation_MPFR.Lib.Spec.mpfr_len_cond",
+        "@MaxIFuel_assumption", "@query", "equation_MPFR.Lib.Spec.gnb",
+        "equation_MPFR.Lib.Spec.mpfr_len_cond",
         "equation_MPFR.Lib.Spec.mpfr_reg_fp",
         "equation_MPFR.Lib.Spec.mpfr_reg_fp_cond",
         "equation_MPFR.Lib.Spec.normal_fp",
@@ -22,15 +22,15 @@
         "proj_equation_MPFR.Lib.Spec.Mkfp_struct_prec",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_MPFR.Lib.Spec_Tm_refine_86293af5a6b0716544585d81a5354ba9",
-        "refinement_interpretation_MPFR.Lib.Spec_Tm_refine_cedc0570303b71cc42672e5086472b7c",
-        "refinement_interpretation_MPFR.Lib.Spec_Tm_refine_e0206349739457cdb0e328d07023d05a",
-        "refinement_interpretation_MPFR.Lib.Spec_Tm_refine_eb312eee7ec0eb77507118d57f669825",
+        "refinement_interpretation_Tm_refine_86293af5a6b0716544585d81a5354ba9",
+        "refinement_interpretation_Tm_refine_cedc0570303b71cc42672e5086472b7c",
+        "refinement_interpretation_Tm_refine_e0206349739457cdb0e328d07023d05a",
+        "refinement_interpretation_Tm_refine_eb312eee7ec0eb77507118d57f669825",
         "typing_MPFR.Lib.Spec.__proj__Mkfp_struct__item__prec",
         "typing_MPFR.Lib.Spec.prec_to_len"
       ],
       0,
-      "8f739d67fce710d546dd97d186c9bbbd"
+      "45e8cc788877aafaf25e18545ba3d325"
     ],
     [
       "MPFR.Mul.Spec.mul_limb",
@@ -48,10 +48,9 @@
         "equation_MPFR.Lib.Spec.prec_to_len",
         "equation_MPFR.Lib.Spec.valid_fp",
         "equation_MPFR.Lib.Spec.valid_num_cond",
-        "fuel_guarded_inversion_MPFR.Lib.Spec.fp_struct", "int_inversion",
-        "int_typing", "primitive_Prims.op_Addition",
-        "primitive_Prims.op_Equality", "primitive_Prims.op_Multiply",
-        "primitive_Prims.op_Subtraction",
+        "fuel_guarded_inversion_MPFR.Lib.Spec.fp_struct",
+        "primitive_Prims.op_Addition", "primitive_Prims.op_Equality",
+        "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
         "proj_equation_MPFR.Dyadic.Mkdyadic_significand",
         "proj_equation_MPFR.Lib.Spec.Mkfp_struct_exp",
         "proj_equation_MPFR.Lib.Spec.Mkfp_struct_len",
@@ -60,12 +59,12 @@
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
         "projection_inverse_MPFR.Dyadic.Mkdyadic_significand",
-        "refinement_interpretation_MPFR.Lib.Spec_Tm_refine_86293af5a6b0716544585d81a5354ba9",
-        "refinement_interpretation_MPFR.Lib.Spec_Tm_refine_cedc0570303b71cc42672e5086472b7c",
-        "refinement_interpretation_MPFR.Lib.Spec_Tm_refine_e0206349739457cdb0e328d07023d05a"
+        "refinement_interpretation_Tm_refine_86293af5a6b0716544585d81a5354ba9",
+        "refinement_interpretation_Tm_refine_cedc0570303b71cc42672e5086472b7c",
+        "refinement_interpretation_Tm_refine_e0206349739457cdb0e328d07023d05a"
       ],
       0,
-      "02e762cdce6ad5f361def64ea6d52337"
+      "bc7cca38b779a9c0efe51a94aa41a30a"
     ],
     [
       "MPFR.Mul.Spec.mul_len",
@@ -75,10 +74,10 @@
       [
         "@MaxIFuel_assumption", "@query", "equation_Prims.pos",
         "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Prims_Tm_refine_f048236b5f8051f83b495ea5eaa6127b"
+        "refinement_interpretation_Tm_refine_f048236b5f8051f83b495ea5eaa6127b"
       ],
       0,
-      "1006645e31a5cca926be53f972048e49"
+      "a49a4b74e690ecbf7124b7e2492880c4"
     ],
     [
       "MPFR.Mul.Spec.mul_len",
@@ -88,7 +87,7 @@
       [
         "@MaxIFuel_assumption", "@query",
         "Prims_pretyping_ae567c2fb75be05905677af440075565",
-        "equation_FStar.UInt32.n", "equation_MPFR.Lib.Spec.gnb",
+        "equation_MPFR.Lib.Spec.gnb",
         "equation_MPFR.Lib.Spec.mpfr_PREC_COND",
         "equation_MPFR.Lib.Spec.mpfr_PREC_MIN_spec",
         "equation_MPFR.Lib.Spec.mpfr_len_cond",
@@ -101,7 +100,7 @@
         "equation_MPFR.Lib.Spec.valid_num_cond",
         "equation_MPFR.Mul.Spec.mul_limb", "equation_Prims.pos",
         "fuel_guarded_inversion_MPFR.Lib.Spec.fp_struct",
-        "function_token_typing_FStar.UInt32.n",
+        "function_token_typing_Prims.__cache_version_number__",
         "primitive_Prims.op_Addition", "primitive_Prims.op_Equality",
         "primitive_Prims.op_LessThan", "primitive_Prims.op_Multiply",
         "primitive_Prims.op_Subtraction",
@@ -109,16 +108,16 @@
         "proj_equation_MPFR.Lib.Spec.Mkfp_struct_prec",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_MPFR.Lib.Spec_Tm_refine_86293af5a6b0716544585d81a5354ba9",
-        "refinement_interpretation_MPFR.Lib.Spec_Tm_refine_cedc0570303b71cc42672e5086472b7c",
-        "refinement_interpretation_MPFR.Lib.Spec_Tm_refine_e0206349739457cdb0e328d07023d05a",
-        "refinement_interpretation_MPFR.Lib.Spec_Tm_refine_eb312eee7ec0eb77507118d57f669825",
-        "refinement_interpretation_Prims_Tm_refine_f048236b5f8051f83b495ea5eaa6127b",
+        "refinement_interpretation_Tm_refine_86293af5a6b0716544585d81a5354ba9",
+        "refinement_interpretation_Tm_refine_cedc0570303b71cc42672e5086472b7c",
+        "refinement_interpretation_Tm_refine_e0206349739457cdb0e328d07023d05a",
+        "refinement_interpretation_Tm_refine_eb312eee7ec0eb77507118d57f669825",
+        "refinement_interpretation_Tm_refine_f048236b5f8051f83b495ea5eaa6127b",
         "typing_MPFR.Lib.Spec.__proj__Mkfp_struct__item__prec",
         "typing_MPFR.Lib.Spec.prec_to_len"
       ],
       0,
-      "c904c6470fd0ee20f861cdc18263ae7c"
+      "38023e1ded255acc5a9317b35a052151"
     ],
     [
       "MPFR.Mul.Spec.mul_exp",
@@ -127,7 +126,7 @@
       0,
       [ "@query" ],
       0,
-      "e3e2ba558e4292391e1594093290c28c"
+      "a363bfdf292b67fc04ae77ab47456bb1"
     ],
     [
       "MPFR.Mul.Spec.mul_exp",
@@ -137,17 +136,17 @@
       [
         "@MaxIFuel_assumption", "@query",
         "Prims_pretyping_ae567c2fb75be05905677af440075565",
-        "equation_FStar.UInt32.n", "equation_Prims.pos",
-        "function_token_typing_FStar.UInt32.n",
+        "equation_Prims.pos",
+        "function_token_typing_Prims.__cache_version_number__",
         "primitive_Prims.op_Addition", "primitive_Prims.op_Subtraction",
         "proj_equation_MPFR.Lib.Spec.Mkfp_struct_len",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_MPFR.Mul.Spec_Tm_refine_d51eaf8b090e43171693df050cf554a9",
-        "refinement_interpretation_Prims_Tm_refine_f048236b5f8051f83b495ea5eaa6127b",
+        "refinement_interpretation_Tm_refine_d51eaf8b090e43171693df050cf554a9",
+        "refinement_interpretation_Tm_refine_f048236b5f8051f83b495ea5eaa6127b",
         "typing_MPFR.Lib.Spec.__proj__Mkfp_struct__item__len"
       ],
       0,
-      "a1dcc74e3b4e890dab91c3e2391dc09b"
+      "7088cd1b4b8540dc10a5149c1d52cff5"
     ],
     [
       "MPFR.Mul.Spec.mul_prec",
@@ -156,7 +155,7 @@
       0,
       [ "@query" ],
       0,
-      "bff35a8950e732079294aa3c6e7638a5"
+      "3f54a1b7b224a40b6dd928530fd4b7a4"
     ],
     [
       "MPFR.Mul.Spec.mul_exact",
@@ -168,10 +167,10 @@
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
         "Prims_pretyping_ae567c2fb75be05905677af440075565",
         "disc_equation_MPFR.Lib.Spec.MPFR_NUM",
-        "equality_tok_MPFR.Lib.Spec.MPFR_NUM@tok", "equation_FStar.UInt32.n",
-        "equation_MPFR.Dyadic.eq", "equation_MPFR.Dyadic.eval_i",
-        "equation_MPFR.Dyadic.fmul", "equation_MPFR.Dyadic.mk_dyadic",
-        "equation_MPFR.Lib.Spec.eval", "equation_MPFR.Lib.Spec.eval_abs",
+        "equality_tok_MPFR.Lib.Spec.MPFR_NUM@tok", "equation_MPFR.Dyadic.eq",
+        "equation_MPFR.Dyadic.eval_i", "equation_MPFR.Dyadic.fmul",
+        "equation_MPFR.Dyadic.mk_dyadic", "equation_MPFR.Lib.Spec.eval",
+        "equation_MPFR.Lib.Spec.eval_abs",
         "equation_MPFR.Lib.Spec.fp_sign_t", "equation_MPFR.Lib.Spec.gnb",
         "equation_MPFR.Lib.Spec.mk_fp_struct",
         "equation_MPFR.Lib.Spec.mk_normal",
@@ -186,16 +185,14 @@
         "equation_MPFR.Lib.Spec.valid_fp",
         "equation_MPFR.Lib.Spec.valid_fp_cond",
         "equation_MPFR.Lib.Spec.valid_num_cond",
-        "equation_MPFR.Lib.Spec.valid_zero_cond",
         "equation_MPFR.Mul.Spec.mul_exp", "equation_MPFR.Mul.Spec.mul_len",
         "equation_MPFR.Mul.Spec.mul_prec", "equation_Prims.min",
         "equation_Prims.nat", "equation_Prims.pos",
         "fuel_guarded_inversion_MPFR.Lib.Spec.fp_struct",
-        "function_token_typing_FStar.UInt32.n", "int_inversion",
-        "int_typing", "lemma_FStar.UInt.pow2_values",
-        "primitive_Prims.op_Addition", "primitive_Prims.op_Division",
-        "primitive_Prims.op_Equality", "primitive_Prims.op_LessThanOrEqual",
-        "primitive_Prims.op_Minus", "primitive_Prims.op_Multiply",
+        "function_token_typing_Prims.__cache_version_number__", "int_typing",
+        "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_Addition",
+        "primitive_Prims.op_Division", "primitive_Prims.op_Equality",
+        "primitive_Prims.op_LessThanOrEqual", "primitive_Prims.op_Multiply",
         "primitive_Prims.op_Subtraction",
         "proj_equation_MPFR.Dyadic.Mkdyadic_exponent",
         "proj_equation_MPFR.Dyadic.Mkdyadic_significand",
@@ -214,20 +211,20 @@
         "projection_inverse_MPFR.Lib.Spec.Mkfp_struct_len",
         "projection_inverse_MPFR.Lib.Spec.Mkfp_struct_limb",
         "projection_inverse_MPFR.Lib.Spec.Mkfp_struct_prec",
-        "refinement_interpretation_MPFR.Lib.Spec_Tm_refine_58238ff56acdd192f498d18acc0a799b",
-        "refinement_interpretation_MPFR.Lib.Spec_Tm_refine_86293af5a6b0716544585d81a5354ba9",
-        "refinement_interpretation_MPFR.Lib.Spec_Tm_refine_cedc0570303b71cc42672e5086472b7c",
-        "refinement_interpretation_MPFR.Lib.Spec_Tm_refine_e0206349739457cdb0e328d07023d05a",
-        "refinement_interpretation_MPFR.Mul.Spec_Tm_refine_050fb7c2919d663b31f4698a1b60b07b",
-        "refinement_interpretation_MPFR.Mul.Spec_Tm_refine_91ca89de2c0f7d904f262be810904c5e",
-        "refinement_interpretation_Prims_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
-        "refinement_interpretation_Prims_Tm_refine_f048236b5f8051f83b495ea5eaa6127b",
+        "refinement_interpretation_Tm_refine_050fb7c2919d663b31f4698a1b60b07b",
+        "refinement_interpretation_Tm_refine_60f8b2fc0942c80dc3857c764050209a",
+        "refinement_interpretation_Tm_refine_86293af5a6b0716544585d81a5354ba9",
+        "refinement_interpretation_Tm_refine_91ca89de2c0f7d904f262be810904c5e",
+        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "refinement_interpretation_Tm_refine_cedc0570303b71cc42672e5086472b7c",
+        "refinement_interpretation_Tm_refine_e0206349739457cdb0e328d07023d05a",
+        "refinement_interpretation_Tm_refine_f048236b5f8051f83b495ea5eaa6127b",
         "typing_MPFR.Lib.Spec.__proj__Mkfp_struct__item__sign",
         "typing_MPFR.Mul.Spec.mul_len", "typing_MPFR.Mul.Spec.mul_limb",
         "typing_Prims.pow2"
       ],
       0,
-      "546a08a2f6133ba1bed1034f140b127a"
+      "cd6c1390ba4e486af1c11cdf47ee1e87"
     ]
   ]
 ]

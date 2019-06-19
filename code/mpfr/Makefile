@@ -42,11 +42,11 @@ MPFR_FILES=	MPFR.Maths.fst \
 #	$(OCAMLOPT) -I $(FSTAR_HOME)/ulib/ml -I out out/MPFR_RoundingMode.ml out/MPFR_Lib.ml out/MPFR_Exceptions.ml out/MPFR_Umul_ppmm.ml out/MPFR_Mul_1.ml out/Test_Mul_1.ml -o out/Mul_1
 #	out/Mul_1
 
-#test-ocaml: out MPFR.RoundingMode.fst MPFR.Lib.fst MPFR.Exceptions.fst MPFR.Add1sp1.fst MPFR.Umul_ppmm.fst MPFR.Mul_1.fst MPFR.fst Test.MPFR.fst
-#	$(FSTAR) $(FSTAR_DEFAULT_ARGS) --lax --odir out --codegen OCaml Test.MPFR.fst
-#	echo "let _ = main ()" >> out/Test_MPFR.ml
-#	$(OCAMLOPT) -I $(FSTAR_HOME)/ulib/ml -I out out/MPFR_RoundingMode.ml out/MPFR_Lib.ml out/MPFR_Exceptions.ml out/MPFR_Add1sp1.ml out/MPFR_Umul_ppmm.ml out/MPFR_Mul_1.ml out/MPFR.ml out/Test_MPFR.ml -o out/Test_MPFR
-#	out/Test_MPFR
+test-ocaml: out MPFR.RoundingMode.fst MPFR.Lib.fst MPFR.Exceptions.fst MPFR.Add1sp1.fst MPFR.Umul_ppmm.fst MPFR.Mul_1.fst MPFR.fst Test.MPFR.fst
+	$(FSTAR) $(FSTAR_DEFAULT_ARGS) --lax --odir out --codegen OCaml Test.MPFR.fst
+	echo "let _ = main ()" >> out/Test_MPFR.ml
+	$(OCAMLOPT) -I $(FSTAR_HOME)/ulib/ml -I out out/MPFR_RoundingMode.ml out/MPFR_Lib.ml out/MPFR_Exceptions.ml out/MPFR_Add1sp1.ml out/MPFR_Umul_ppmm.ml out/MPFR_Mul_1.ml out/MPFR.ml out/Test_MPFR.ml -o out/Test_MPFR
+	out/Test_MPFR
 
 %.fst-verify: %.fst
 	$(FSTAR) --include $(KREMLIN_HOME)/kremlib --use_hints --cache_checked_modules $*.fst

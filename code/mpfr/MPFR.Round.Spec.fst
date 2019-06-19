@@ -58,7 +58,7 @@ let rec add_one_ulp_lt_lemma a b =
 val incr_prec: a:normal_fp -> p:pos{p >= a.prec} ->
     Tot (r:normal_fp{r.prec = p /\ eval r =. eval a})
     
-let incr_prec a p =
+let incr_prec a p =          
     if p > a.len then begin
         lemma_pow2_mul_range a.limb (p - a.len) a.len;
         {a with prec = p; limb = a.limb * pow2 (p - a.len); len = p}
@@ -240,7 +240,7 @@ let rb_value_lemma a p =
     lemma_pow2_mod_div a.limb (a.len - p) (a.len - p - 1);
     lemma_pow2_mod_mod a.limb (a.len - p) (a.len - p - 1)
 
-val rb_sb_lemma: a:normal_fp -> p:pos{p < a.prec} -> Lemma (
+val rb_sb_lemma: a:normal_fp -> p:pos -> Lemma (
     let lm = eval_abs (low_mant a p) in
     let hulp  = ulp_p (high_mant a p) (p + 1) in
     ((rb_def a p = false /\ sb_def a p = false) <==> (lm =. zero_dyadic)) /\
@@ -249,16 +249,18 @@ val rb_sb_lemma: a:normal_fp -> p:pos{p < a.prec} -> Lemma (
     ((rb_def a p = true  /\ sb_def a p = true ) <==> (lm >. hulp)))
     
 let rb_sb_lemma a p =
-    rb_value_lemma a p;
-    if sb_def a p = false then ()
-    else if rb_def a p then begin
-        lemma_mul_lt_right (pow2 (p + 1)) (pow2 (a.len - p - 1)) (a.limb % pow2 (a.len - p));
-	lemma_pow2_mul (a.len - p - 1) (p + 1)
-    end else begin
-        assert(a.limb % pow2 (a.len - p) > 0);
-        lemma_mul_lt_right (pow2 (p + 1)) (a.limb % pow2 (a.len - p)) (pow2 (a.len - p - 1));
-	lemma_pow2_mul (a.len - p - 1) (p + 1)
-    end
+    if(p<a.prec) then begin
+      rb_value_lemma a p;
+      if sb_def a p = false then ()
+      else if rb_def a p then begin
+           lemma_mul_lt_right (pow2 (p + 1)) (pow2 (a.len - p - 1)) (a.limb % pow2 (a.len - p));
+	   lemma_pow2_mul (a.len - p - 1) (p + 1)
+      end else begin
+          assert(a.limb % pow2 (a.len - p) > 0);
+          lemma_mul_lt_right (pow2 (p + 1)) (a.limb % pow2 (a.len - p)) (pow2 (a.len - p - 1));
+	  lemma_pow2_mul (a.len - p - 1) (p + 1)
+      end
+    end 
 
 /////////////////////////////////////////////////////////////////
 //  Generalized rounding and rounding to mpfr_fp               //
@@ -286,13 +288,16 @@ let round_sp_lemma a rnd_mode = ()
 (* Generalized mpfr_rndx2_cond for all rounding modes *)
 let mpfr_round2_cond (a:valid_fp{mpfr_ROUND_COND a /\ mpfr_PREC_COND a.prec}) (rnd_mode:mpfr_rnd_t)
                      (r:mpfr_fp): GTot Type0 =
+    match a.flag with
+    | MPFR_ZERO -> r.flag=MPFR_ZERO /\ r.sign= (if rnd_mode=MPFR_RNDD then -1 else 1)
+    | MPFR_NUM ->(
     r.prec = a.prec /\ (
     match rnd_mode with
     | MPFR_RNDN -> mpfr_rndn2_cond a r
     | MPFR_RNDZ -> mpfr_rndz2_cond a r
     | MPFR_RNDU -> mpfr_rndu2_cond a r
     | MPFR_RNDD -> mpfr_rndd2_cond a r
-    | MPFR_RNDA -> mpfr_rnda2_cond a r)
+    | MPFR_RNDA -> mpfr_rnda2_cond a r))
 
 val mpfr_round2_cond_refl_lemma: a:mpfr_fp{valid_fp_cond a /\ normal_fp_cond a} -> 
     rnd_mode:mpfr_rnd_t -> Lemma

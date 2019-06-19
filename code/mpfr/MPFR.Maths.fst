@@ -608,3 +608,10 @@ let lemma_pow2_sub a b x y=
     lemma_pow2_mul (x-y) y;
     lemma_mul_simp (a * pow2 (x-y)) b (pow2 y)
     
+val lemma_pow2_add : a:int -> b:int -> x:nat -> y:nat ->Lemma
+    (requires (x >= y /\ a * pow2 (x-y) = b))
+    (ensures (a * pow2 x = b * pow2 y))
+
+let lemma_pow2_add a b x y=
+    lemma_pow2_mul (x-y) y
+ 

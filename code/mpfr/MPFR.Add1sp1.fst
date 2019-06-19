@@ -329,19 +329,33 @@ let mpfr_add1sp1 a b c rnd_mode p =
     let ap = mpfr_MANT a in
     let st = mpfr_add1sp1_any a b c ap p in
     let h1 = ST.get() in
-    lemma_reveal_modifies_1 (mpfr_MANT a) h0 h1;
-    lemma_intro_modifies_2 a (mpfr_MANT a) h0 h1;
-    if I64.(st.bx >^ mpfr_EMAX) then begin
+    let avoidWarning=mpfr_MANT a in
+    lemma_reveal_modifies_1 avoidWarning h0 h1;
+    lemma_intro_modifies_2 a avoidWarning h0 h1;
+    if I64.(st.bx >^ mpfr_EMAX) then begin 
         let s = mpfr_SIGN a in
         let t = mpfr_overflow a rnd_mode (mpfr_SIGN a) in
 	let h2 = ST.get() in
 	mpfr_overflow_post_cond_lemma (add1sp_exact (as_reg_fp h0 b) (as_reg_fp h0 c)) (I64.v (as_struct h0 a).mpfr_prec) rnd_mode (I32.v t) (as_fp h2 a);
-//	mpfr_modifies_trans_lemma a h0 h1 h2;
+ 	mpfr_modifies_trans_lemma a h0 h1 h2;
 	t
     end else begin
         let t = mpfr_add1sp1_round a ap rnd_mode st in
 	let h2 = ST.get() in
-	mpfr_add1sp1_round_post_cond_lemma (add1sp_exact (as_reg_fp h0 b) (as_reg_fp h0 c)) (I64.v (as_struct h0 a).mpfr_prec) (as_normal_ h1 ({as_struct h1 a with mpfr_exp = st.bx})) (st.rb <> 0uL) (st.sb <> 0uL) rnd_mode (I32.v t) (as_fp h2 a);
-//	mpfr_modifies_trans_lemma a h0 h1 h2;
+        assert(   as_val h1 (as_struct h1 a).mpfr_d * pow2 (as_normal_ h1 ({as_struct h1 a with mpfr_exp = st.bx})).len =(as_normal_ h1 ({as_struct h1 a with mpfr_exp = st.bx})).limb * pow2 64);
+        (* TO CLEAN*)
+        (  let aa=a in   let high=(as_normal_ h1 ({as_struct h1 a with mpfr_exp = st.bx})) in
+        let a=(add1sp_exact (as_reg_fp h0 b) (as_reg_fp h0 c)) in
+        lemma_pow2_mul (a.len-high.len) high.len;
+        assert(
+           high.limb * pow2 (a.len-high.len) = (high_mant a (I64.v (as_struct h0 aa).mpfr_prec)).limb);
+          assert(
+           high.limb * pow2 (a.len-high.len)*pow2 high.len = (high_mant a (I64.v (as_struct h0 aa).mpfr_prec)).limb*pow2 high.len);
+           lemma_paren_mul_right high.limb  (pow2 (a.len-high.len)) (pow2 high.len);
+          assert( high.limb *( pow2 (a.len-high.len)*pow2 high.len) = (high_mant a (I64.v (as_struct h0 aa).mpfr_prec)).limb*pow2 high.len);
+           lemma_pow2_mul (a.len-high.len) high.len );
+           
+	mpfr_add1sp1_round_post_cond_lemma (add1sp_exact (as_reg_fp h0 b) (as_reg_fp h0 c)) (I64.v (as_struct h0 a).mpfr_prec) (as_normal_ h1 ({as_struct h1 a with mpfr_exp = st.bx})) (st.rb <> 0uL) (st.sb <> 0uL) rnd_mode (I32.v t) (as_fp h2 a); 
+	mpfr_modifies_trans_lemma a h0 h1 h2;
 	t
     end
