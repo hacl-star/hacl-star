@@ -26,14 +26,14 @@ let locations_of_maddr (m:maddr) (mem:location) : locations =
 let locations_of_operand64 (o:operand64) : locations & locations =
   match o with
   | OConst _ -> [], []
-  | OReg r -> [ALocReg (Reg 0 r)], [ALocReg (Reg 0 r)]
+  | OReg r -> [], [ALocReg (Reg 0 r)]
   | OMem (m, _) -> locations_of_maddr m ALocMem, [ALocMem]
   | OStack (m, _) -> (ALocReg (Reg 0 rRsp)) :: locations_of_maddr m ALocStack, [ALocStack]
 
 let locations_of_operand128 (o:operand128) : locations & locations =
   match o with
   | OConst _ -> [], []
-  | OReg r -> [ALocReg (Reg 1 r)], [ALocReg (Reg 1 r)]
+  | OReg r -> [], [ALocReg (Reg 1 r)]
   | OMem (m, _) -> locations_of_maddr m ALocMem, [ALocMem]
   | OStack (m, _) -> (ALocReg (Reg 0 rRsp)) :: locations_of_maddr m ALocStack, [ALocStack]
 
@@ -46,8 +46,8 @@ let locations_of_implicit (t:instr_operand_implicit) : locations & locations =
   match t with
   | IOp64One i -> locations_of_operand64 i
   | IOpXmmOne i -> locations_of_operand128 i
-  | IOpFlagsCf -> [ALocCf], [ALocCf]
-  | IOpFlagsOf -> [ALocOf], [ALocOf]
+  | IOpFlagsCf -> [], [ALocCf]
+  | IOpFlagsOf -> [], [ALocOf]
 
 let both (x: locations & locations) =
   let a, b = x in
@@ -475,7 +475,7 @@ let lemma_instr_write_outputs_only_affects_write_extend
     (FStar.Classical.move_requires (lemma_instr_write_outputs_only_affects_write outs args vs oprs s_orig s));
   lemma_unchanged_except_extend locs_extension locs s s'
 
-#push-options "--z3rlimit 100 --max_fuel 2 --max_ifuel 1"
+#push-options "--z3rlimit 150 --max_fuel 2 --max_ifuel 1"
 let rec lemma_instr_write_outputs_only_writes
     (outs:list instr_out) (args:list instr_operand)
     (vs:instr_ret_t outs) (oprs:instr_operands_t outs args)
