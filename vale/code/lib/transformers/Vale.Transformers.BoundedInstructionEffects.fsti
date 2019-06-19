@@ -6,6 +6,8 @@ open Vale.X64.Machine_Semantics_s
 open Vale.Transformers.PossiblyMonad
 open Vale.Transformers.Locations
 
+module L = FStar.List.Tot
+
 (** A [locations_with_values] contains locations and values they must hold *)
 type locations_with_values = list ((l:location{hasEq (location_val_t l)}) & location_val_t l)
 
@@ -74,6 +76,8 @@ let bounded_effects (rw:rw_set) (f:st unit) : GTot Type0 =
   (only_affects rw.loc_writes f) /\
   (forall s. {:pattern (constant_on_execution rw.loc_constant_writes f s)}
      constant_on_execution rw.loc_constant_writes f s) /\
+  (forall l v. {:pattern (L.mem (|l,v|) rw.loc_constant_writes); (L.mem l rw.loc_writes)}
+     L.mem (|l,v|) rw.loc_constant_writes ==> L.mem l rw.loc_writes) /\
   (
     forall s1 s2. {:pattern (run f s1); (run f s2)} (
       (s1.ms_ok = s2.ms_ok /\ unchanged_at rw.loc_reads s1 s2) ==> (
