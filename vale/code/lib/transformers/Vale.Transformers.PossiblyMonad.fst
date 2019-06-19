@@ -84,6 +84,12 @@ let (&&.) (x y:pbool) : pbool =
   | Ok () -> y
   | Err reason -> Err reason
 
+(** [ ||. ] is a short-circuiting logical-or *)
+let ( ||. ) (x y:pbool) : pbool =
+  match x with
+  | Ok () -> Ok ()
+  | Err rx -> y /+< (rx ^ " and ")
+
 (** [for_all f l] runs [f] on all the elements of [l] and performs a
     short-circuit logical-and of all the results *)
 let rec for_all (f : 'a -> pbool) (l : list 'a) : pbool =
