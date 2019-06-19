@@ -807,7 +807,7 @@ let lemma_constant_on_execution_stays_constant (f1 f2:st unit) (rw1 rw2:rw_set) 
         (bounded_effects rw2 f2) /\
         (unchanged_except rw2.loc_writes s s1) /\
         (unchanged_except rw1.loc_writes s s2) /\
-        !!(write_same_constants rw1.loc_constant_writes rw2.loc_constant_writes)))
+        !!(write_exchange_allowed rw1.loc_writes rw2.loc_writes rw1.loc_constant_writes rw2.loc_constant_writes)))
     (ensures (
         unchanged_at (locations_of_locations_with_values rw1.loc_constant_writes)
           (run f1 s1)
@@ -852,7 +852,7 @@ let lemma_commute (f1 f2:st unit) (rw1 rw2:rw_set) (s:machine_state) :
     lemma_unchanged_except_append_symmetric w1 w2 s s12;
     lemma_unchanged_except_append_symmetric w2 w1 s s21;
     lemma_unchanged_except_same_transitive (w1 `L.append` w2) s s12 s21;
-    lemma_write_same_constants_symmetric c1 c2;
+    lemma_write_exchange_allowed_symmetric w1 w2 c1 c2;
     lemma_constant_on_execution_stays_constant f2 f1 rw2 rw1 s s1 s2;
     lemma_unchanged_at_combine w1 w2 c1 c2 s1 s2 s12 s21;
     lemma_unchanged_at_and_except (w1 `L.append` w2) s12 s21;
