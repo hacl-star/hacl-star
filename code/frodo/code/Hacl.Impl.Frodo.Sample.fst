@@ -60,7 +60,7 @@ let frodo_sample r =
   let prnd = r >>. 1ul in
   let sign = r &. u16 1 in
   mod_mask_lemma r 1ul;
-  uintv_extensionality (mod_mask 1ul) (u16 1);
+  assert (v #U16 #SEC (mod_mask 1ul) == 1);
   assert (uint_v sign == 0 \/ uint_v sign == 1);
   let sample :lbuffer uint16 1ul = create (size 1) (u16 0) in
   let h = ST.get () in
