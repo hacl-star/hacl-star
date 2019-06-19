@@ -96,3 +96,29 @@ let rec for_all (f : 'a -> pbool) (l : list 'a) : pbool =
   match l with
   | [] -> ttrue
   | x :: xs -> f x &&. for_all f xs
+
+(** Change from a [forall] to a [for_all] *)
+let rec lemma_for_all_intro (f : 'a -> pbool) (l : list 'a) :
+  Lemma
+    (requires (forall x. {:pattern (x `List.Tot.memP` l)} (x `List.Tot.memP` l) ==> !!(f x)))
+    (ensures !!(for_all f l)) =
+  let open FStar.List.Tot in
+  let aux l x :
+    Lemma
+      (requires (x `memP` l ==> !!(f x)))
+      (ensures (Cons? l /\ x `memP` tl l ==> !!(f x))) = () in
+  match l with
+  | [] -> ()
+  | x :: xs ->
+    FStar.Classical.forall_intro (FStar.Classical.move_requires (aux l));
+    lemma_for_all_intro f xs
+
+(** Change from a [for_all] to a [forall] *)
+let rec lemma_for_all_elim (f : 'a -> pbool) (l : list 'a) :
+  Lemma
+    (requires !!(for_all f l))
+    (ensures (forall x. {:pattern (x `List.Tot.memP` l)} (x `List.Tot.memP` l) ==> !!(f x))) =
+  match l with
+  | [] -> ()
+  | x :: xs ->
+    lemma_for_all_elim f xs
