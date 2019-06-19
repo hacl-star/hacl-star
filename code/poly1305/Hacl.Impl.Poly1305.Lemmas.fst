@@ -108,6 +108,7 @@ val lemma_nat_from_bytes_le_zeroes: len:size_nat -> b:lseq uint8 len -> Lemma
   (requires (forall (i:nat). i < len ==> b.[i] == u8 0))
   (ensures  nat_from_intseq_le_ b == 0)
 let rec lemma_nat_from_bytes_le_zeroes len b =
+  admit ();  //AR: 06/19: #1750 (FStar)
   if len = 0 then ()
   else lemma_nat_from_bytes_le_zeroes (len-1) (Seq.slice b 1 len)
 

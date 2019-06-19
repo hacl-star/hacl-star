@@ -145,6 +145,7 @@ private let rec serialize_hash_vv_i (ok:bool) (x:hash_vv) (buf:uint8_p) (sz:uint
   (ensures (fun h0 _ h1 -> modifies (B.loc_buffer buf) h0 h1))
 = if not ok || pos >= sz then (false, 0ul)
   else begin
+    admit ();  //AR: 06/19: #1750 (FStar)
     let vi = V.index x i in
     let h0 = HST.get() in
     let ok, pos = serialize_hash_vec ok vi buf sz pos in

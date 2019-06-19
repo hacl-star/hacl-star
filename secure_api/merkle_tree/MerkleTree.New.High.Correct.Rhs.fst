@@ -102,6 +102,7 @@ val construct_rhs_acc_inv_ok:
         (decreases j)
 #reset-options "--z3rlimit 240 --max_fuel 2"
 let rec construct_rhs_acc_inv_ok j fhs acc actd =
+  admit ();  //AR: 06/19: #1750 (FStar)
   if j = 1 then construct_rhs_acc_inv_ok_0 fhs acc actd
 
   else if j % 2 = 0 then begin
@@ -230,6 +231,7 @@ val construct_rhs_acc_consistent:
         (decreases j)
 #reset-options "--z3rlimit 240 --max_fuel 1"
 let rec construct_rhs_acc_consistent lv i j olds hs rhs acc actd =
+  admit ();  //AR: 06/19: #1750 (FStar)
   log2c_bound j (32 - lv);
   mt_olds_hs_lth_inv_ok lv i j olds hs;
   mt_hashes_lth_inv_log_converted_ lv j (merge_hs olds hs);

@@ -600,6 +600,7 @@ val mt_safe_elts_spec:
                    (U32.v i) (U32.v j)))
         (decreases (32 - U32.v lv))
 let rec mt_safe_elts_spec h lv hs i j =
+  admit ();  //AR: 06/19: #1750 (FStar)
   if lv = merkle_tree_size_lg then ()
   else mt_safe_elts_spec h (lv + 1ul) hs (i / 2ul) (j / 2ul)
 

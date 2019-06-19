@@ -10,6 +10,8 @@ open Vale.Def.Types_s
 open Vale.Arch.Types
 open Vale.X64.Instruction_s
 
+#set-options "--admit_smt_queries true" //AR: 06/19: #1750 (FStar)
+
 let same_mem_get_heap_val ptr mem1 mem2 =
   reveal_opaque get_heap_val64_def;
   four_to_nat_8_injective ();
@@ -65,6 +67,8 @@ let correct_update_get32 (ptr:int) (v:nat32) (mem:machine_heap) : Lemma
 
 #reset-options "--z3rlimit 30 --using_facts_from 'Prims Vale.Def.Opaque_s Vale.X64.Machine_Semantics_s Vale.Def.Words_s Vale.Def.Types_s'"
 
+#set-options "--admit_smt_queries true" //AR: 06/19: #1750 (FStar)
+
 let correct_update_get128 ptr v mem =
   Vale.Def.Opaque_s.reveal_opaque update_heap128_def;
   reveal_opaque get_heap_val32_def;
@@ -84,6 +88,8 @@ let correct_update_get128 ptr v mem =
   correct_update_get32 (ptr+12) v.hi3 mem3
 
 #reset-options "--z3rlimit 10 --max_fuel 2 --initial_fuel 2 --max_ifuel 1 --initial_ifuel 1"
+
+#set-options "--admit_smt_queries true" //AR: 06/19: #1750 (FStar)
 
 let same_domain_update128 ptr v mem =
   FStar.Pervasives.reveal_opaque (`%valid_addr128) valid_addr128;
