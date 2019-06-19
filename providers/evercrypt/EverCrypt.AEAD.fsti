@@ -66,15 +66,14 @@ let footprint (#a:alg) (m: HS.mem) (s: state a) =
 // smallest location that is not exposed to be a `loc_union`.)
 
 let loc_includes_union_l_footprint_s
-  (m: HS.mem)
   (l1 l2: B.loc) (#a: alg) (s: state_s a)
 : Lemma
   (requires (
-    B.loc_includes l1 (footprint_s m s) \/ B.loc_includes l2 (footprint_s m s)
+    B.loc_includes l1 (footprint_s s) \/ B.loc_includes l2 (footprint_s s)
   ))
-  (ensures (B.loc_includes (B.loc_union l1 l2) (footprint_s m s)))
-  [SMTPat (B.loc_includes (B.loc_union l1 l2) (footprint_s m s))]
-= B.loc_includes_union_l l1 l2 (footprint_s m s)
+  (ensures (B.loc_includes (B.loc_union l1 l2) (footprint_s s)))
+  [SMTPat (B.loc_includes (B.loc_union l1 l2) (footprint_s s))]
+= B.loc_includes_union_l l1 l2 (footprint_s s)
 
 val invariant_s: (#a:alg) -> HS.mem -> state_s a -> Type0
 let invariant (#a:alg) (m: HS.mem) (s: state a) =
