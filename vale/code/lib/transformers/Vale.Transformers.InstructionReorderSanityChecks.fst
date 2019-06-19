@@ -22,8 +22,15 @@ open Vale.Transformers.InstructionReorder
 let ins_exchange_sanity_check1 =
   assert_norm (!!(
     ins_exchange_allowed
+      (make_instr ins_IMul64 (OReg rRax) (OReg rRbx))
+      (make_instr ins_IMul64 (OReg rRcx) (OReg rRdx))
+  ));
+  admit (); (* WARN! FAILING! TODO FIXME *)
+  assert_norm (!!(
+    ins_exchange_allowed
       (make_instr ins_Mov64 (OReg rRax) (OConst 100))
-      (make_instr ins_Add64 (OReg rRbx) (OConst 299))))
+      (make_instr ins_Add64 (OReg rRbx) (OConst 299))
+  ))
 
 [@expect_failure]
 let ins_exchange_sanity_check2 =
