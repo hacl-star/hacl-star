@@ -325,7 +325,7 @@ val decode_pk:
   -> pk_in : lbuffer uint8 crypto_publickeybytes
   -> Stack unit
     (requires fun h -> live h pk /\ live h seedA /\ live h pk_in /\ disjoint pk seedA /\ disjoint pk pk_in /\ disjoint seedA pk_in)
-    (ensures fun h0 _ h1 -> modifies2 pk seedA h0 h1)
+    (ensures fun h0 _ h1 -> modifies2 pk seedA h0 h1 /\ is_poly_k_pk h1 pk)
 
 let decode_pk pk seedA pk_in =
     push_frame();
@@ -366,7 +366,9 @@ let decode_pk pk seedA pk_in =
     assert(v params_k = 1);
     copy seedA (sub pk_in (params_n *. params_q_log /. size 8) crypto_seedbytes);
 
-    pop_frame()
+    pop_frame();
+    let hReturn = ST.get () in
+    assume(is_poly_k_pk hReturn pk)
 
 [@"opaque_to_smt"]
 private let valid_encode_sig (z: poly) (sm: lbuffer uint8 crypto_bytes) (h0 h1: HS.mem) =

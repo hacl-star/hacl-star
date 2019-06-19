@@ -113,9 +113,9 @@ unfold let is_poly_k_equal (h0 h1:HS.mem) (p:poly_k) =
     forall (i:nat{i < v params_n * v params_k}) . {:pattern bget h1 p i} bget h0 p i == bget h1 p i
 
 unfold let is_sparse_elem_sk (e:sparse_elem) = -(pow2 (v params_s_bits)) <= sparse_v e /\ sparse_v e < pow2 (v params_s_bits)
-let is_s_sk (h:HS.mem) (s:lbuffer sparse_elem params_n) =
+ let is_s_sk (h:HS.mem) (s:lbuffer sparse_elem params_n) =
     forall (i:nat{i < v params_n}) . {:pattern is_sparse_elem_sk (bget h s i)} is_sparse_elem_sk (bget h s i)
-let is_e_sk (h:HS.mem) (e:lbuffer sparse_elem (params_n *. params_k)) =
+ let is_e_sk (h:HS.mem) (e:lbuffer sparse_elem (params_n *. params_k)) =
     forall (i:nat{i < v params_n * v params_k}) . {:pattern is_sparse_elem_sk (bget h e i)} is_sparse_elem_sk (bget h e i)
 
 (*let frame_is_poly_sampler_output_i (h0 h1: HS.mem) (p: poly) (i:nat{i <= v params_n}) (l:B.loc) : Lemma
@@ -130,12 +130,12 @@ let is_e_sk (h:HS.mem) (e:lbuffer sparse_elem (params_n *. params_k)) =
     [SMTPat (is_poly_sampler_output_i h1 p i); SMTPat (B.modifies l h0 h1)] = 
     assert(forall (j:nat{j < i}) . {:pattern B.get h1 p j} B.get h0 p j == B.get h1 p j)*)
 
-let frame_is_poly_sampler_output_i (h0 h1: HS.mem) (p: poly) (i:nat{i <= v params_n}) (l:B.loc) : Lemma
+(*let frame_is_poly_sampler_output_i (h0 h1: HS.mem) (p: poly) (i:nat{i <= v params_n}) (l:B.loc) : Lemma
     (requires is_poly_sampler_output_i h0 p i /\ B.modifies l h0 h1 /\ B.loc_disjoint l (loc ((gsub p (size 0) (size i)))))
     (ensures is_poly_sampler_output_i h1 p i)
     [SMTPat (is_poly_sampler_output_i h1 p i); SMTPat (modifies l h0 h1)] = admit()
     //assert(forall (j:nat{j < i}) . {:pattern bget h1 p j} bget h0 p j == bget h1 p j)
-    //assert(is_poly_equal h0 h1 p)
+    //assert(is_poly_equal h0 h1 p)*)
     
 val poly_create:
     unit
