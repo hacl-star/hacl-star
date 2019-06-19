@@ -236,34 +236,8 @@ fun s iv ad ad_len plain plain_len cipher tag ->
 
     let h0 = get() in
 
-    // The iv is modified by Vale, which the API does not allow. Hence
-    // we allocate a temporary buffer and blit the contents of the iv
+    // The iv can be arbitrary length, hence we need to allocate a new one to perform the hashing
     let tmp_iv = B.alloca 0uy 16ul in
-    let h_pre = get() in
-
-    MB.blit iv 0ul tmp_iv 0ul 12ul;
-
-    let h0 = get() in
-
-    // Some help is needed to prove that the end of the tmp_iv buffer
-    // is still 0s after blitting the contents of iv into the start of the buffer
-    let lemma_iv_eq () : Lemma
-      (let iv_nat = Vale.Def.Words.Seq_s.seq_uint8_to_seq_nat8 (B.as_seq h0 iv) in
-      let iv_nat = Seq.append iv_nat (Seq.create 4 0) in
-      Seq.equal
-        (Vale.Def.Words.Seq_s.seq_uint8_to_seq_nat8 (B.as_seq h0 tmp_iv))
-        iv_nat)
-      = let iv_nat = Vale.Def.Words.Seq_s.seq_uint8_to_seq_nat8 (B.as_seq h0 iv) in
-        let iv_nat = Seq.append iv_nat (Seq.create 4 0) in
-        let s_tmp = Vale.Def.Words.Seq_s.seq_uint8_to_seq_nat8 (B.as_seq h0 tmp_iv) in
-        Seq.lemma_index_slice (B.as_seq h0 tmp_iv) 12 16 0;
-        Seq.lemma_index_slice (B.as_seq h0 tmp_iv) 12 16 1;
-        Seq.lemma_index_slice (B.as_seq h0 tmp_iv) 12 16 2;
-        Seq.lemma_index_slice (B.as_seq h0 tmp_iv) 12 16 3;
-        assert (Seq.equal iv_nat s_tmp)
-
-
-    in lemma_iv_eq ();
 
     // There is no SMTPat on le_bytes_to_seq_quad32_to_bytes and the converse,
     // so we need an explicit lemma
@@ -289,10 +263,22 @@ fun s iv ad ad_len plain plain_len cipher tag ->
 
     in lemma_hkeys_reqs ();
 
+    // We perform the hashing of the iv. The extra buffer and the hashed iv are the same
+    Vale.Wrapper.X64.GCM_IV.compute_iv (vale_alg_of_alg a) 
+    (let k = G.reveal kv in
+      let k_nat = Vale.Def.Words.Seq_s.seq_uint8_to_seq_nat8 k in
+      let k_w = Vale.Def.Words.Seq_s.seq_nat8_to_seq_nat32_LE k_nat in G.hide k_w ) 
+      iv 12ul 
+      tmp_iv tmp_iv 
+      hkeys_b;
+
+    let h0 = get() in
+
     aes_gcm_encrypt a
       (let k = G.reveal kv in
       let k_nat = Vale.Def.Words.Seq_s.seq_uint8_to_seq_nat8 k in
       let k_w = Vale.Def.Words.Seq_s.seq_nat8_to_seq_nat32_LE k_nat in G.hide k_w)
+      (Ghost.hide (Vale.Def.Words.Seq_s.seq_uint8_to_seq_nat8 (B.as_seq h0 iv)))
       plain
       (uint32_to_uint64 plain_len)
       ad
@@ -310,10 +296,6 @@ fun s iv ad ad_len plain plain_len cipher tag ->
     assert (
       let kv_nat = Vale.Def.Words.Seq_s.seq_uint8_to_seq_nat8 (G.reveal kv) in
       let iv_nat = Vale.Def.Words.Seq_s.seq_uint8_to_seq_nat8 (B.as_seq h0 iv) in
-      // the specification takes a seq16 for convenience, but actually discards
-      // the trailing four bytes; we are, however, constrained by it and append
-      // zeroes just to satisfy the spec
-      let iv_nat = S.append iv_nat (S.create 4 0) in
       // `ad` is called `auth` in Vale world; "additional data", "authenticated
       // data", potato, potato
       let ad_nat = Vale.Def.Words.Seq_s.seq_uint8_to_seq_nat8 (B.as_seq h0 ad) in
@@ -375,36 +357,10 @@ fun s iv ad ad_len cipher cipher_len tag dst ->
       let keys_b = B.sub ek 0ul (key_offset a) in
       let hkeys_b = B.sub ek (key_offset a) 128ul in
 
-      // The iv is modified by Vale, which the API does not allow. Hence
-      // we allocate a temporary buffer and blit the contents of the iv
+      let h0 = get() in
+
+      // The iv can be arbitrary length, hence we need to allocate a new one to perform the hashing
       let tmp_iv = B.alloca 0uy 16ul in
-      let h_pre = get() in
-
-      MB.blit iv 0ul tmp_iv 0ul 12ul;
-
-      let h0 = get() in
-
-      // Some help is needed to prove that the end of the tmp_iv buffer
-      // is still 0s after blitting the contents of iv into the start of the buffer
-      let lemma_iv_eq () : Lemma
-        (let iv_nat = Vale.Def.Words.Seq_s.seq_uint8_to_seq_nat8 (B.as_seq h0 iv) in
-        let iv_nat = Seq.append iv_nat (Seq.create 4 0) in
-        Seq.equal
-          (Vale.Def.Words.Seq_s.seq_uint8_to_seq_nat8 (B.as_seq h0 tmp_iv))
-          iv_nat)
-        = let iv_nat = Vale.Def.Words.Seq_s.seq_uint8_to_seq_nat8 (B.as_seq h0 iv) in
-          let iv_nat = Seq.append iv_nat (Seq.create 4 0) in
-          let s_tmp = Vale.Def.Words.Seq_s.seq_uint8_to_seq_nat8 (B.as_seq h0 tmp_iv) in
-          Seq.lemma_index_slice (B.as_seq h0 tmp_iv) 12 16 0;
-          Seq.lemma_index_slice (B.as_seq h0 tmp_iv) 12 16 1;
-          Seq.lemma_index_slice (B.as_seq h0 tmp_iv) 12 16 2;
-          Seq.lemma_index_slice (B.as_seq h0 tmp_iv) 12 16 3;
-          assert (Seq.equal iv_nat s_tmp)
-
-
-      in lemma_iv_eq ();
-
-      let h0 = get() in
 
       // There is no SMTPat on le_bytes_to_seq_quad32_to_bytes and the converse,
       // so we need an explicit lemma
@@ -415,25 +371,35 @@ fun s iv ad ad_len cipher cipher_len tag dst ->
         Vale.AES.OptPublic.hkeys_reqs_pub
           (Vale.Def.Types_s.le_bytes_to_seq_quad32 (Vale.Def.Words.Seq_s.seq_uint8_to_seq_nat8 (B.as_seq h0 hkeys_b)))
           (Vale.Def.Types_s.reverse_bytes_quad32 (Vale.AES.AES_s.aes_encrypt_LE (vale_alg_of_alg a) k_w (Vale.Def.Words_s.Mkfour 0 0 0 0))))
-        = let k = G.reveal kv in
-          let k_nat = Vale.Def.Words.Seq_s.seq_uint8_to_seq_nat8 k in
-          let k_w = Vale.Def.Words.Seq_s.seq_nat8_to_seq_nat32_LE k_nat in
-          let hkeys_quad = Vale.AES.OptPublic.get_hkeys_reqs (Vale.Def.Types_s.reverse_bytes_quad32 (
+      = let k = G.reveal kv in
+            let k_nat = Vale.Def.Words.Seq_s.seq_uint8_to_seq_nat8 k in
+            let k_w = Vale.Def.Words.Seq_s.seq_nat8_to_seq_nat32_LE k_nat in
+            let hkeys_quad = Vale.AES.OptPublic.get_hkeys_reqs (Vale.Def.Types_s.reverse_bytes_quad32 (
             Vale.AES.AES_s.aes_encrypt_LE (vale_alg_of_alg a) k_w (Vale.Def.Words_s.Mkfour 0 0 0 0))) in
-          let hkeys = Vale.Def.Words.Seq_s.seq_nat8_to_seq_uint8 (Vale.Def.Types_s.le_seq_quad32_to_bytes hkeys_quad) in
-          assert (Seq.equal (B.as_seq h0 hkeys_b) hkeys);
-          calc (==) {
+            let hkeys = Vale.Def.Words.Seq_s.seq_nat8_to_seq_uint8 (Vale.Def.Types_s.le_seq_quad32_to_bytes hkeys_quad) in
+            assert (Seq.equal (B.as_seq h0 hkeys_b) hkeys);
+            calc (==) {
             Vale.Def.Types_s.le_bytes_to_seq_quad32 (Vale.Def.Words.Seq_s.seq_uint8_to_seq_nat8 hkeys);
             (==) { Vale.Arch.Types.le_bytes_to_seq_quad32_to_bytes hkeys_quad }
             hkeys_quad;
-          }
+            }
 
       in lemma_hkeys_reqs ();
+
+      // We perform the hashing of the iv. The extra buffer and the hashed iv are the same
+      Vale.Wrapper.X64.GCM_IV.compute_iv (vale_alg_of_alg a) 
+      (let k = G.reveal kv in
+        let k_nat = Vale.Def.Words.Seq_s.seq_uint8_to_seq_nat8 k in
+        let k_w = Vale.Def.Words.Seq_s.seq_nat8_to_seq_nat32_LE k_nat in G.hide k_w ) 
+        iv 12ul 
+        tmp_iv tmp_iv 
+        hkeys_b;
 
       let r = aes_gcm_decrypt a
         (let k = G.reveal kv in
         let k_nat = Vale.Def.Words.Seq_s.seq_uint8_to_seq_nat8 k in
         let k_w = Vale.Def.Words.Seq_s.seq_nat8_to_seq_nat32_LE k_nat in G.hide k_w)
+        (Ghost.hide (Vale.Def.Words.Seq_s.seq_uint8_to_seq_nat8 (B.as_seq h0 iv)))
         cipher
         (uint32_to_uint64 cipher_len)
         ad
@@ -451,10 +417,6 @@ fun s iv ad ad_len cipher cipher_len tag dst ->
       assert (
         let kv_nat = Vale.Def.Words.Seq_s.seq_uint8_to_seq_nat8 (G.reveal kv) in
         let iv_nat = Vale.Def.Words.Seq_s.seq_uint8_to_seq_nat8 (B.as_seq h0 iv) in
-        // the specification takes a seq16 for convenience, but actually discards
-        // the trailing four bytes; we are, however, constrained by it and append
-        // zeroes just to satisfy the spec
-        let iv_nat = S.append iv_nat (S.create 4 0) in
         // `ad` is called `auth` in Vale world; "additional data", "authenticated
         // data", potato, potato
         let ad_nat = Vale.Def.Words.Seq_s.seq_uint8_to_seq_nat8 (B.as_seq h0 ad) in
