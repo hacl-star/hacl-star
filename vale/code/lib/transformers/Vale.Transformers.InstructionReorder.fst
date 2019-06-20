@@ -737,22 +737,32 @@ let lemma_unchanged_at_combine (a1 a2:locations) (c1 c2:locations_with_values) (
     Lemma
       (requires (L.mem a a1 /\ precond))
       (ensures (eval_location a sb1 == eval_location a sb2)) =
-    admit ();
-    lemma_disjoint_location_from_locations_mem a1 a2 a;
-    assert (!!(disjoint_location_from_locations a a2));
-    assert (eval_location a sb1 == eval_location a sa1);
-    lemma_unchanged_at_mem a1 a sa1 sb2
+    if L.mem a (locations_of_locations_with_values c1) then (
+      lemma_unchanged_at_mem (locations_of_locations_with_values c1) a sb1 sb2
+    ) else (
+      lemma_for_all_elim (aux_write_exchange_allowed a2 c1 c2) a1;
+      L.mem_memP a a1;
+      assert !!(aux_write_exchange_allowed a2 c1 c2 a);
+      assert !!(disjoint_location_from_locations a a2);
+      assert (eval_location a sb1 == eval_location a sa1);
+      lemma_unchanged_at_mem a1 a sa1 sb2
+    )
   in
   let aux2 a :
     Lemma
       (requires (L.mem a a2 /\ precond))
       (ensures (eval_location a sb1 == eval_location a sb2)) =
-    admit ();
-    lemma_disjoint_locations_symmetric a1 a2;
-    lemma_disjoint_location_from_locations_mem a2 a1 a;
-    assert (!!(disjoint_location_from_locations a a1));
-    assert (eval_location a sb2 == eval_location a sa2);
-    lemma_unchanged_at_mem a2 a sa2 sb1
+    if L.mem a (locations_of_locations_with_values c2) then (
+      lemma_unchanged_at_mem (locations_of_locations_with_values c2) a sb1 sb2
+    ) else (
+      lemma_write_exchange_allowed_symmetric a1 a2 c1 c2;
+      lemma_for_all_elim (aux_write_exchange_allowed a1 c2 c1) a2;
+      L.mem_memP a a2;
+      assert !!(aux_write_exchange_allowed a1 c2 c1 a);
+      assert !!(disjoint_location_from_locations a a1);
+      assert (eval_location a sb2 == eval_location a sa2);
+      lemma_unchanged_at_mem a2 a sa2 sb1
+    )
   in
   let rec aux a1' a1'' a2' a2'' :
     Lemma
