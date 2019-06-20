@@ -13,12 +13,15 @@
 
    Usage:
 
-     Given two [codes], [reordering_allowed] tells you whether this
-     transformer considers them to be safe permutations of each-other.
-     If so, then by using [lemma_reordering], the transformer shows
-     that both behave identically (i.e., starting from equivalent
-     states, execution of the two [codes] objects should lead to
-     equivalent final states).
+     Given two [codes], say [c1] and [c2], [reordering_allowed c1 c2]
+     tells you whether this transformer considers them to be safe
+     permutations of each-other. If they indeed are safe, one can use
+     [perform_reordering c1 c2] to generate a new [codes] object, say
+     [c_gen], such that it is an actual reordering of [c1] which
+     satisfies the order of [c2]. Via [lemma_reordering c1 c2], the
+     transformation is shown to be correct. That is, starting from the
+     same state, execution of [c1] and [c2] leads to equivalent final
+     states.
 
      If the reordering is not allowed, then this transformer gives a
      (human-readable) reason for why it believes that the reordering
@@ -1158,29 +1161,39 @@ and lemma_not_ok_propagate_while (c:code{While? c}) (fuel:nat) (s:machine_state)
     )
   )
 
-
 /// Given that we can perform simple swaps between [code]s, we can
 /// define a relation that tells us if some [codes] can be transformed
 /// into another using only allowed swaps.
 
 (* WARNING: We assume this function since it is not yet exposed. Once
-   exposed, we should be able to remove it from here *)
-assume val eq_code (c1 c2:code) : (b:bool{
-    b ==> (machine_eval_code c1 == machine_eval_code c2)})
+   exposed, we should be able to remove it from here.
 
-let lemma_eq_code_exchange_allowed (c1 c1' c2:code) :
-  Lemma
-    (requires (
-        !!(code_exchange_allowed c1 c2) /\
-        (eq_code c1' c1)))
-    (ensures (!!(code_exchange_allowed c1' c2))) =
-  admit ()
+   Note that we don't require any other properties from [eq_ins]. It
+   is an uninterpreted function that simply gives us a "hint" to find
+   equivalent instructions! *)
+assume val eq_ins (i1 i2:ins) : bool
 
-let rec find_code (c1:code) (cs2:codes) : possibly (i:nat{i < L.length cs2 /\ eq_code c1 (L.index cs2 i)}) =
+let rec eq_code (c1 c2:code) : bool =
+  match c1, c2 with
+  | Ins i1, Ins i2 -> eq_ins i1 i2
+  | Block l1, Block l2 -> eq_codes l1 l2
+  | IfElse c1 t1 f1, IfElse c2 t2 f2 -> c1 = c2 && eq_code t1 t2 && eq_code f1 f2
+  | While c1 b1, While c2 b2 -> c1 = c2 && eq_code b1 b2
+  | _, _ -> false
+
+and eq_codes (c1 c2:codes) : bool =
+  match c1, c2 with
+  | [], [] -> true
+  | _, [] | [], _ -> false
+  | x :: xs, y :: ys ->
+    eq_code x y &&
+    eq_codes xs ys
+
+let rec find_code (c1:code) (cs2:codes) : possibly (i:nat{i < L.length cs2 /\ eq_code (L.index cs2 i) c1}) =
   match cs2 with
   | [] -> Err ("Not found: " ^ fst (print_code c1 0 gcc))
   | h2 :: t2 ->
-    if eq_code c1 h2 then (
+    if eq_code h2 c1 then (
       return 0
     ) else (
       match find_code c1 t2 with
@@ -1191,7 +1204,8 @@ let rec find_code (c1:code) (cs2:codes) : possibly (i:nat{i < L.length cs2 /\ eq
 
 let rec bubble_to_top (cs:codes) (i:nat{i < L.length cs}) : possibly (cs':codes{
     let a, b, c = L.split3 cs i in
-    cs' == L.append a c
+    cs' == L.append a c /\
+    L.length cs' = L.length cs - 1
   }) =
   match cs with
   | [_] -> return []
@@ -1209,74 +1223,110 @@ let rec bubble_to_top (cs:codes) (i:nat{i < L.length cs}) : possibly (cs':codes{
           return (h :: res)
     )
 
-let rec reordering_allowed (c1 c2 : codes) : pbool =
+let rec reordering_allowed (c1 c2 : codes) :
+  Tot pbool
+    (decreases %[L.length c1]) =
   match c1, c2 with
   | [], [] -> ttrue
   | [], _ | _, [] -> ffalse "disagreeing lengths of codes"
-  | h1 :: t1, _ ->
-    i <-- find_code h1 c2;
-    t2 <-- bubble_to_top c2 i;
+  | _, h2 :: t2 ->
+    i <-- find_code h2 c1;
+    t1 <-- bubble_to_top c1 i;
     (* TODO: Also check _inside_ blocks/ifelse/etc rather than just at the highest level *)
     reordering_allowed t1 t2
+
+(** Transform [c1] into the ordering specified by [c2] *)
+let rec perform_reordering (c1 c2 : codes) :
+  Pure (codes)
+    (requires !!(reordering_allowed c1 c2))
+    (ensures (fun c_gen -> eq_codes c_gen c2))
+    (decreases %[L.length c1]) =
+  match c1, c2 with
+  | [], [] -> []
+  | _, h2 :: t2 ->
+    let Ok i = find_code h2 c1 in
+    let Ok t1 = bubble_to_top c1 i in
+    L.index c1 i :: perform_reordering t1 t2
 
 /// If there are two sequences of instructions that can be transformed
 /// amongst each other, then they behave identically as per the
 /// [equiv_states] relation.
 
-#push-options "--initial_fuel 3 --max_fuel 3"
-let rec lemma_bubble_to_top (cs : codes) (i:nat{i < L.length cs}) (fuel:nat) (s : machine_state)
-    (x : _{eq_code x (L.index cs i)}) (xs : _{Ok xs == bubble_to_top cs i})
-    (s_0 : _{Some s_0 == machine_eval_code x fuel s})
-    (s_1 : _{Some s_1 == machine_eval_codes xs fuel s_0}) :
+#push-options "--initial_fuel 3 --max_fuel 3 --initial_ifuel 1 --max_ifuel 1"
+let rec lemma_bubble_to_top (cs : codes) (i:nat{i < L.length cs}) (fuel:nat) (s s' : machine_state) :
   Lemma
-    (requires (s_1.ms_ok))
+    (requires (
+        (s'.ms_ok) /\
+        (Some s' == machine_eval_codes cs fuel s) /\
+        (Ok? (bubble_to_top cs i))))
     (ensures (
-        let s_final' = machine_eval_codes cs fuel s in
-        equiv_option_states (Some s_1) s_final')) =
-  let s_final' = machine_eval_codes cs fuel s in
+        let x = L.index cs i in
+        let Ok xs = bubble_to_top cs i in
+        let s1' = machine_eval_code x fuel s in
+        (Some? s1') /\ (
+          let Some s1 = s1' in
+          let s2' = machine_eval_codes xs fuel s1 in
+          (Some? s2') /\ (
+            let Some s2 = s2' in
+            equiv_states s' s2)))) =
+  let x = L.index cs i in
+  let Ok xs = bubble_to_top cs i in
+  let Some s1 = machine_eval_code x fuel s in
+  let s2' = machine_eval_codes xs fuel s1 in
   match i with
   | 0 -> ()
   | _ ->
-    lemma_eq_code_exchange_allowed (L.index cs i) x (L.hd cs);
     assert !!(code_exchange_allowed x (L.hd cs));
     lemma_code_exchange x (L.hd cs) fuel s s;
-    let Ok tlxs = bubble_to_top (L.tl cs) (i - 1) in
-    assert (L.tl xs == tlxs);
-    assert (L.hd xs == L.hd cs);
-    let Some s_start = machine_eval_code (L.hd cs) fuel s in
-    let Some s_0' = machine_eval_code x fuel s_start in
-    let Some s_0'' = machine_eval_code (L.hd cs) fuel s_0 in
-    assert (equiv_states_or_both_not_ok s_0' s_0'');
-    if not s_0'.ms_ok && not s_0''.ms_ok then (
-      lemma_not_ok_propagate_codes tlxs fuel s_0';
-      lemma_not_ok_propagate_codes tlxs fuel s_0''
+    let Some new_s = machine_eval_code (L.hd cs) fuel s in
+    let new_cs = L.tl cs in
+    let new_i = i - 1 in
+    assert (Some s' == machine_eval_codes new_cs fuel new_s);
+    assert (Ok? (bubble_to_top new_cs new_i));
+    lemma_bubble_to_top new_cs new_i fuel new_s s';
+    assert (x == L.index new_cs new_i);
+    assert (Ok? (bubble_to_top new_cs new_i));
+    assert (L.tl xs == Ok?.v (bubble_to_top new_cs new_i));
+    let Some new_s1 = machine_eval_code x fuel new_s in
+    let Some new_s2 = machine_eval_codes (L.tl xs) fuel new_s1 in
+    assert (Some new_s2 == machine_eval_codes (x :: (L.tl xs)) fuel new_s);
+    assert (equiv_states s' new_s2);
+    let Some s1_ = machine_eval_code (L.hd xs) fuel s1 in
+    let Some new_s1_ = machine_eval_code x fuel new_s in
+    assert (Some s1_ == machine_eval_codes [x; L.hd xs] fuel s);
+    assert (Some new_s1_ == machine_eval_codes [L.hd xs; x] fuel s);
+    assert (equiv_states_or_both_not_ok s1_ new_s1_);
+    if s1_.ms_ok then (
+      assert (equiv_states s1_ new_s1_);
+      lemma_eval_codes_equiv_states (L.tl xs) fuel s1_ new_s1_;
+      assert (equiv_ostates s2' (Some new_s2))
     ) else (
-      lemma_eval_codes_equiv_states tlxs fuel s_0' s_0'';
-      let Some s_1' = machine_eval_codes tlxs fuel s_0' in
-      lemma_bubble_to_top (L.tl cs) (i - 1) fuel s_start x tlxs s_0' s_1'
+      lemma_not_ok_propagate_codes (L.tl xs) fuel new_s1_
     )
 #pop-options
 
-let rec lemma_reordering (c1 c2 : codes) (fuel:nat) (s1 s2 : machine_state) :
+let rec lemma_reordering (c1 c2 : codes) (fuel:nat) (s1 : machine_state) :
   Lemma
     (requires (
         !!(reordering_allowed c1 c2) /\
-        (equiv_states s1 s2) /\
         (Some? (machine_eval_codes c1 fuel s1)) /\
         (Some?.v (machine_eval_codes c1 fuel s1)).ms_ok))
     (ensures (
-        (Some? (machine_eval_codes c2 fuel s2)) /\
+        (Some? (machine_eval_codes (perform_reordering c1 c2) fuel s1)) /\
         (let Some s1', Some s2' =
            machine_eval_codes c1 fuel s1,
-           machine_eval_codes c2 fuel s2 in
-         equiv_states_or_both_not_ok s1' s2'))) =
-  match c1 with
+           machine_eval_codes (perform_reordering c1 c2) fuel s1 in
+         equiv_states_or_both_not_ok s1' s2')))
+    (decreases %[L.length c1]) =
+  match c2 with
   | [] -> ()
-  | h1 :: t1 ->
-    let Ok i = find_code h1 c2 in
-    let Ok t2 = bubble_to_top c2 i in
-    lemma_eval_code_equiv_states h1 fuel s1 s2;
-    lemma_reordering t1 t2 fuel (Some?.v (machine_eval_code h1 fuel s1)) (Some?.v (machine_eval_code h1 fuel s2));
-    let Some s_0 = machine_eval_code h1 fuel s2 in
-    let Some s_1 = machine_eval_codes t2 fuel s_0 in
-    lemma_bubble_to_top c2 i fuel s2 h1 t2 s_0 s_1
+  | h2 :: t2 ->
+    let c_gen = perform_reordering c1 c2 in
+    let Ok i = find_code h2 c1 in
+    let Ok t1 = bubble_to_top c1 i in
+    let h' = L.index c1 i in
+    let t' = perform_reordering t1 t2 in
+    lemma_bubble_to_top c1 i fuel s1 (Some?.v (machine_eval_codes c1 fuel s1));
+    let Some sa1' = machine_eval_code h' fuel s1 in
+    let Some sa2' = machine_eval_codes t1 fuel sa1' in
+    lemma_reordering t1 t2 fuel sa1'
