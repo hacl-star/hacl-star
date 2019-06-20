@@ -333,7 +333,6 @@ let frame_update_get_heap (ptr:int) (v:MS.nat64) (mem:BS.machine_heap) (j:int) :
   (requires ptr >= j + 8)
   (ensures BS.get_heap_val64 j mem == BS.get_heap_val64 j (BS.update_heap64 ptr v mem))
   =  
-  admit ();  //AR: 06/19: #1750 (FStar)
   Vale.Def.Opaque_s.reveal_opaque BS.get_heap_val64_def;
   Vale.Def.Opaque_s.reveal_opaque BS.update_heap64_def
 
@@ -341,7 +340,6 @@ let frame_update_valid_heap (ptr:int) (v:MS.nat64) (mem:BS.machine_heap) (j:int)
   (requires ptr >= j + 8)
   (ensures BS.valid_addr64 j mem == BS.valid_addr64 j (BS.update_heap64 ptr v mem))
   =
-  admit ();  //AR: 06/19: #1750 (FStar)
   FStar.Pervasives.reveal_opaque (`%BS.valid_addr64) BS.valid_addr64;
   Vale.Def.Opaque_s.reveal_opaque BS.update_heap64_def
 
@@ -395,7 +393,6 @@ let rec stack_of_args_stack_args'
         (IX64.stack_of_args max_arity (List.length args) init_rsp args accu)))
       (decreases (List.length args))
       =
-      admit ();  //AR: 06/19: #1750 (FStar)
       FStar.Pervasives.reveal_opaque (`%BS.valid_addr64) BS.valid_addr64;
       FStar.Pervasives.reveal_opaque (`%BS.valid_addr128) BS.valid_addr128;
       match args with
