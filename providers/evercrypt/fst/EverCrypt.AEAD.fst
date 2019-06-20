@@ -222,6 +222,9 @@ fun s iv iv_len ad ad_len plain plain_len cipher tag ->
   if B.is_null s then
     InvalidKey
   else
+    if iv_len = 0ul then
+      InvalidIVLength
+    else (
     let open LowStar.BufferOps in
     let Ek i kv ek = !*s in
     assert (
@@ -309,6 +312,7 @@ fun s iv iv_len ad ad_len plain plain_len cipher tag ->
 
     pop_frame();
     Success
+    )
 
 let encrypt_aes128_gcm: encrypt_st AES128_GCM = encrypt_aes_gcm AES128_GCM
 let encrypt_aes256_gcm: encrypt_st AES256_GCM = encrypt_aes_gcm AES256_GCM
@@ -325,11 +329,15 @@ let encrypt #a s iv iv_len ad ad_len plain plain_len cipher tag =
     | Vale_AES256_GCM ->
         encrypt_aes256_gcm s iv iv_len ad ad_len plain plain_len cipher tag
     | Hacl_CHACHA20_POLY1305 ->
-        // Length restrictions
-        assert_norm (pow2 31 + pow2 32 / 64 <= pow2 32 - 1);
-        Hacl.Impl.Chacha20Poly1305.aead_encrypt_chacha_poly
-          ek iv ad_len ad plain_len plain cipher tag;
-        Success
+        if iv_len <> 12ul then
+          InvalidIVLength
+        else begin
+          // Length restrictions
+          assert_norm (pow2 31 + pow2 32 / 64 <= pow2 32 - 1);
+          Hacl.Impl.Chacha20Poly1305.aead_encrypt_chacha_poly
+            ek iv ad_len ad plain_len plain cipher tag;
+          Success
+        end
 
 inline_for_extraction noextract
 let aes_gcm_decrypt (a:aes_gcm_alg): Vale.Wrapper.X64.GCMdecryptOpt.decrypt_opt_stdcall_st (vale_alg_of_alg a) =
@@ -343,8 +351,10 @@ let decrypt_aes_gcm (a: aes_gcm_alg): decrypt_st a =
 fun s iv iv_len ad ad_len cipher cipher_len tag dst ->
   if B.is_null s then
     InvalidKey
-
   else
+    if iv_len = 0ul then
+      InvalidIVLength
+    else (
     let open LowStar.BufferOps in
     let Ek i kv ek = !*s in
       assert (
@@ -441,6 +451,7 @@ fun s iv iv_len ad ad_len cipher cipher_len tag dst ->
         Success
       else
         AuthenticationFailure
+      )
 
 let decrypt_aes128_gcm: decrypt_st AES128_GCM = decrypt_aes_gcm AES128_GCM
 let decrypt_aes256_gcm: decrypt_st AES256_GCM = decrypt_aes_gcm AES256_GCM
@@ -457,25 +468,29 @@ let decrypt #a s iv iv_len ad ad_len cipher cipher_len tag dst =
     | Vale_AES256_GCM ->
         decrypt_aes256_gcm s iv iv_len ad ad_len cipher cipher_len tag dst
     | Hacl_CHACHA20_POLY1305 ->
-        [@ inline_let ] let bound = pow2 32 - 1 - 16 in
-        assert (v cipher_len <= bound);
-        assert_norm (bound + 16 <= pow2 32 - 1);
-        assert_norm (pow2 31 + bound / 64 <= pow2 32 - 1);
+        if iv_len <> 12ul then
+          InvalidIVLength
+        else begin
+          [@ inline_let ] let bound = pow2 32 - 1 - 16 in
+          assert (v cipher_len <= bound);
+          assert_norm (bound + 16 <= pow2 32 - 1);
+          assert_norm (pow2 31 + bound / 64 <= pow2 32 - 1);
 
-        let h0 = ST.get () in
-        let r = Hacl.Impl.Chacha20Poly1305.aead_decrypt_chacha_poly
-          ek iv ad_len ad cipher_len dst cipher tag
-        in
-        assert (
-          let cipher_tag = B.as_seq h0 cipher `S.append` B.as_seq h0 tag in
-          let tag_s = S.slice cipher_tag (S.length cipher_tag - tag_length CHACHA20_POLY1305) (S.length cipher_tag) in
-          let cipher_s = S.slice cipher_tag 0 (S.length cipher_tag - tag_length CHACHA20_POLY1305) in
-          S.equal cipher_s (B.as_seq h0 cipher) /\ S.equal tag_s (B.as_seq h0 tag));
+          let h0 = ST.get () in
+          let r = Hacl.Impl.Chacha20Poly1305.aead_decrypt_chacha_poly
+            ek iv ad_len ad cipher_len dst cipher tag
+          in
+          assert (
+            let cipher_tag = B.as_seq h0 cipher `S.append` B.as_seq h0 tag in
+            let tag_s = S.slice cipher_tag (S.length cipher_tag - tag_length CHACHA20_POLY1305) (S.length cipher_tag) in
+            let cipher_s = S.slice cipher_tag 0 (S.length cipher_tag - tag_length CHACHA20_POLY1305) in
+            S.equal cipher_s (B.as_seq h0 cipher) /\ S.equal tag_s (B.as_seq h0 tag));
 
-        if r = 0ul then
-          Success
-        else
-          AuthenticationFailure
+          if r = 0ul then
+            Success
+          else
+            AuthenticationFailure
+        end
 
 let free #a s =
   let open LowStar.BufferOps in

@@ -106,13 +106,13 @@ let aead_tag_length32 (al: Spec.AEAD.alg) : Tot (x: U32.t { U32.v x == Spec.AEAD
   | AES128_CCM        -> 16ul
   | AES256_CCM        -> 16ul
 
-let aead_iv_length32 (al: Spec.AEAD.alg) (x:U32.t) : Tot
+let aead_iv_length32 (al: Spec.AEAD.supported_alg) (x:U32.t) : Tot
   (res:bool{res <==> Spec.AEAD.iv_length (U32.v x) al}) =
   let open Spec.AEAD in
   match al with
   | AES128_GCM -> 0ul `U32.lt` x
   | AES256_GCM -> 0ul `U32.lt` x
-  | _ -> x = 12ul
+  | CHACHA20_POLY1305 -> x = 12ul
 
 
 #reset-options "--using_facts_from '* -Test.Vectors'"
