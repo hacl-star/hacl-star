@@ -651,10 +651,12 @@ let rotate_right #t #l a b =
 let rotate_left #t #l a b =
   logor (shift_left a b) (shift_right a (sub #U32 (size (bits t)) b))
 
-// Unused
-inline_for_extraction
-let minus (#t:inttype{unsigned t}) (#l:secrecy_level) (a:int_t t l) =
-  add_mod (lognot a) (mk_int 1)
+let ct_abs #t #l a =
+  match t with
+  | S8  -> Int8.ct_abs a
+  | S16 -> Int16.ct_abs a
+  | S32 -> Int32.ct_abs a
+  | S64 -> Int64.ct_abs a
 
 #pop-options
 

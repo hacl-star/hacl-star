@@ -593,6 +593,11 @@ val rotate_left: #t:inttype -> #l:secrecy_level
   -> rotval t
   -> int_t t l
 
+inline_for_extraction
+val ct_abs: #t:inttype{signed t /\ ~(S128? t)} -> #l:secrecy_level
+  -> a:int_t t l{minint t < v a}
+  -> b:int_t t l{v b == abs (v a)}
+
 ///
 /// Masking operators for all machine integers
 ///
