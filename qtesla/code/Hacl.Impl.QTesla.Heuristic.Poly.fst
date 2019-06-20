@@ -133,7 +133,7 @@ val ntt:
   -> w: poly
   -> Stack unit
     (requires fun h -> live h a /\ live h w /\ disjoint a w)
-    (ensures fun h0 _ h1 -> modifies1 a h0 h1)
+    (ensures fun h0 _ h1 -> modifies1 a h0 h1 /\ is_poly_montgomery h1 a)
 
 let ntt a w =
     push_frame();
@@ -157,7 +157,9 @@ let ntt a w =
             assert(v (bget h2 jTwiddle 0) < v params_n);
             numoProblems.(size 0) <- numoProblems.(size 0) >>. size 1
         );
-    pop_frame()
+    pop_frame();
+    let hReturn = ST.get () in
+    assume(is_poly_montgomery hReturn a)
 
 /// Inverse NTT implementation only for III-speed and III-size; I has its own which is slightly different.
 
