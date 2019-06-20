@@ -744,7 +744,7 @@ let lemma_be_to_n_4 (s:seq4 nat8) : Lemma
     index s 3 + pow2 8 * index s 2 + pow2 16 * index s 1 + pow2 24 * index s 0;
     == {}
     four_to_nat_unfold 8 (seq_to_four_BE s);
-    == {}
+    == {FStar.Pervasives.reveal_opaque (`%four_to_nat) four_to_nat}
     be_bytes_to_nat32 s;
   }
 #reset-options "--max_fuel 0 --max_ifuel 0"
