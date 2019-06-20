@@ -222,6 +222,8 @@ fun s iv iv_len ad ad_len plain plain_len cipher tag ->
   if B.is_null s then
     InvalidKey
   else
+    // This condition is never satisfied in F* because of the iv_length precondition on iv.
+    // We keep it here to be defensive when extracting to C    
     if iv_len = 0ul then
       InvalidIVLength
     else (
@@ -329,6 +331,8 @@ let encrypt #a s iv iv_len ad ad_len plain plain_len cipher tag =
     | Vale_AES256_GCM ->
         encrypt_aes256_gcm s iv iv_len ad ad_len plain plain_len cipher tag
     | Hacl_CHACHA20_POLY1305 ->
+        // This condition is never satisfied in F* because of the iv_length precondition on iv.
+        // We keep it here to be defensive when extracting to C    
         if iv_len <> 12ul then
           InvalidIVLength
         else begin
@@ -352,6 +356,8 @@ fun s iv iv_len ad ad_len cipher cipher_len tag dst ->
   if B.is_null s then
     InvalidKey
   else
+    // This condition is never satisfied in F* because of the iv_length precondition on iv.
+    // We keep it here to be defensive when extracting to C
     if iv_len = 0ul then
       InvalidIVLength
     else (
@@ -468,6 +474,8 @@ let decrypt #a s iv iv_len ad ad_len cipher cipher_len tag dst =
     | Vale_AES256_GCM ->
         decrypt_aes256_gcm s iv iv_len ad ad_len cipher cipher_len tag dst
     | Hacl_CHACHA20_POLY1305 ->
+        // This condition is never satisfied in F* because of the iv_length precondition on iv.
+        // We keep it here to be defensive when extracting to C
         if iv_len <> 12ul then
           InvalidIVLength
         else begin

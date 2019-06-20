@@ -150,7 +150,7 @@ inline_for_extraction noextract
 let encrypt_st (a: supported_alg) =
   s:B.pointer_or_null (state_s a) ->
   iv:iv_p a ->
-  iv_len: UInt32.t { v iv_len = B.length iv } ->
+  iv_len: UInt32.t { v iv_len = B.length iv /\ v iv_len > 0 } ->
   ad:ad_p a ->
   ad_len: UInt32.t { v ad_len = B.length ad /\ v ad_len <= pow2 31 } ->
   plain: plain_p a ->
@@ -180,7 +180,7 @@ let encrypt_st (a: supported_alg) =
           B.(modifies (loc_union (loc_buffer cipher) (loc_buffer tag)) h0 h1) /\
           S.equal (S.append (B.as_seq h1 cipher) (B.as_seq h1 tag))
             (encrypt #a (as_kv (B.deref h0 s)) (B.as_seq h0 iv) (B.as_seq h0 ad) (B.as_seq h0 plain))
-      | InvalidKey | InvalidIVLength ->
+      | InvalidKey ->
           B.(modifies loc_none h0 h1)
       | _ -> False)
 
@@ -197,7 +197,7 @@ inline_for_extraction noextract
 let decrypt_st (a: supported_alg) =
   s:B.pointer_or_null (state_s a) ->
   iv:iv_p a ->
-  iv_len:UInt32.t { v iv_len = B.length iv } ->
+  iv_len:UInt32.t { v iv_len = B.length iv /\ v iv_len > 0 } ->
   ad:ad_p a ->
   ad_len: UInt32.t { v ad_len = B.length ad /\ v ad_len <= pow2 31 } ->
   cipher: cipher_p a ->
@@ -221,7 +221,7 @@ let decrypt_st (a: supported_alg) =
     (ensures fun h0 err h1 ->
       let cipher_tag = B.as_seq h0 cipher `S.append` B.as_seq h0 tag in
       match err with
-      | InvalidKey | InvalidIVLength ->
+      | InvalidKey ->
           B.(modifies loc_none h0 h1)
       | Success ->
           not (B.g_is_null s) /\ (

@@ -50,15 +50,11 @@ let tag_length: alg -> nat =
   | AES128_CCM        -> 16
   | AES256_CCM        -> 16
 
-let iv_length (len:nat): alg -> Type0 =
+let iv_length (len:nat): supported_alg -> Type0 =
   function
   | AES128_GCM -> len > 0 /\ 8 * len <= pow2 64 - 1
   | AES256_GCM -> len > 0 /\ 8 * len <= pow2 64 - 1
   | CHACHA20_POLY1305 -> len == 12
-  | AES128_CCM8       -> len == 12
-  | AES256_CCM8       -> len == 12
-  | AES128_CCM        -> len == 12
-  | AES256_CCM        -> len == 12
 
 let ekv_length: supported_alg -> nat =
   function
