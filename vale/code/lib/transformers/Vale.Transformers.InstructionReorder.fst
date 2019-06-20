@@ -76,7 +76,11 @@ let aux_write_exchange_allowed (w2:locations) (c1 c2:locations_with_values) (x:l
 
 let write_exchange_allowed (w1 w2:locations) (c1 c2:locations_with_values) : pbool =
   write_same_constants c1 c2 &&.
-  for_all (aux_write_exchange_allowed w2 c1 c2) w1
+  for_all (aux_write_exchange_allowed w2 c1 c2) w1 &&.
+  (* REVIEW: Just to make the symmetry proof easier, we write the
+     other way around too. However, this makes things not as fast as
+     they _could_ be. *)
+  for_all (aux_write_exchange_allowed w1 c2 c1) w2
 
 let rw_exchange_allowed (rw1 rw2 : rw_set) : pbool =
   let r1, w1, c1 = rw1.loc_reads, rw1.loc_writes, rw1.loc_constant_writes in
@@ -111,18 +115,7 @@ let rec lemma_write_same_constants_symmetric (c1 c2:locations_with_values) :
 let rec lemma_write_exchange_allowed_symmetric (w1 w2:locations) (c1 c2:locations_with_values) :
   Lemma
     (ensures (!!(write_exchange_allowed w1 w2 c1 c2) = !!(write_exchange_allowed w2 w1 c2 c1))) =
-  lemma_write_same_constants_symmetric c1 c2;
-  match w1, w2 with
-  | [], [] -> ()
-  | x :: xs, [] ->
-    lemma_write_exchange_allowed_symmetric xs [] c1 c2
-  | [], y :: ys ->
-    lemma_write_exchange_allowed_symmetric [] ys c1 c2
-  | x :: xs, y :: ys ->
-    lemma_write_exchange_allowed_symmetric w1 ys c1 c2;
-    lemma_write_exchange_allowed_symmetric xs w2 c1 c2;
-    lemma_write_exchange_allowed_symmetric xs ys c1 c2;
-    admit ()
+  lemma_write_same_constants_symmetric c1 c2
 
 let lemma_ins_exchange_allowed_symmetric (i1 i2 : ins) :
   Lemma
