@@ -16,8 +16,8 @@ let store_stack128 i v h = BS.update_stack128' i v h
 let init_rsp h = h.BS.initial_rsp
 
 (* Lemmas *)
+#push-options "--z3rlimit 40"
 let lemma_store_stack_same_valid64 ptr v h i =
-  admit (); //AR: 06/19: #1750 (FStar)
   FStar.Pervasives.reveal_opaque (`%BS.valid_addr64) BS.valid_addr64;
   Vale.Def.Opaque_s.reveal_opaque BS.update_heap64_def
 
@@ -28,9 +28,9 @@ let lemma_free_stack_same_valid64 start finish ptr h =
   Classical.forall_intro (Vale.Lib.Set.remove_between_reveal domain start finish)
 
 let lemma_store_new_valid64 ptr v h =
-  admit (); //AR: 06/19: #1750 (FStar)
   FStar.Pervasives.reveal_opaque (`%BS.valid_addr64) BS.valid_addr64;
   Vale.Def.Opaque_s.reveal_opaque BS.update_heap64_def
+#pop-options
 
 let lemma_correct_store_load_stack64 ptr v h =
   let BS.Machine_stack _ mem = h in
