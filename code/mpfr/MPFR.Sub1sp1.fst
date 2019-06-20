@@ -105,7 +105,7 @@ let mpfr_sub1sp1_any_post_cond h0 s h1 (a:mpfr_ptr) b c (p:mpfr_reg_prec_t) rnd_
         (let r = sub1sp_exact (as_reg_fp h0 b) (as_reg_fp h0 c) in
         normal_fp_cond r /\
         mpfr_EXP_COND (I64.v s.bx) /\
-        as_val h1 (as_struct h1 a).mpfr_d * pow2 (r.len) = (high_mant r (I64.v p)).limb * (pow2 64) /\
+        as_val h1 (as_struct h1 a).mpfr_d * pow2 (high_mant r (I64.v p)).len = (high_mant r (I64.v p)).limb * (pow2 64) /\
         I64.v s.sh = I64.v gmp_NUMB_BITS - I64.v p /\
         I64.v s.bx = (high_mant r (I64.v p)).exp /\
         (rb_def r (I64.v p) = (v s.rb <> 0)) /\
@@ -123,33 +123,65 @@ inline_for_extraction val mpfr_sub1sp1_eq:
     I64.(bx=^cx) /\
     I64.(as_val h bp<>as_val h cp)
     ))
-    (ensures (fun h0 t h1->
+    (ensures (fun h0 s h1->
     let exact=sub1sp_exact (as_fp h0 b) (as_fp h0 c) in
-    mpfr_sub1sp1_any_post_cond h0 t h1 a b c p rnd_mode exact))
+     mpfr_live h1 a /\ mpfr_live h1 b /\ mpfr_live h1 c /\
+        length (as_struct h1 a).mpfr_d = 1 /\
+        length (as_struct h1 b).mpfr_d = 1 /\ length (as_struct h1 c).mpfr_d = 1 /\
+       (* modifies_1 (as_struct h1 a).mpfr_d h0 h1 /\*)  normal_cond h1 a /\ 
+        I64.(v ((as_struct h0 a).mpfr_prec)=v p) /\
+        I64.(v ((as_struct h0 b).mpfr_prec)=v p) /\
+        I64.(v ((as_struct h0 c).mpfr_prec)=v p) /\
+        mpfr_reg_cond h0 b /\ mpfr_reg_cond h0 c /\
+        (let r = sub1sp_exact (as_reg_fp h0 b) (as_reg_fp h0 c) in
+        normal_fp_cond r /\
+        mpfr_EXP_COND (I64.v s.bx)(* /\
+        as_val h1 (as_struct h1 a).mpfr_d * pow2 (high_mant r (I64.v p)).len = (high_mant r (I64.v p)).limb * (pow2 64) *) /\
+        I64.v s.sh = I64.v gmp_NUMB_BITS - I64.v p(* /\
+        I64.v s.bx = (high_mant r (I64.v p)).exp*) /\
+        I64.v p>=r.prec (*/\
+        (rb_def r (I64.v p) = (v s.rb <> 0))*)(* /\
+        (sb_def r (I64.v p) = (v s.sb <> 0))*) /\ 
+        (high_mant r (I64.v p)).sign = (as_normal h1 a).sign(*)
+    mpfr_sub1sp1_any_post_cond h0 t h1 a b c p rnd_mode exact*))))
 
-let mpfr_sub1sp1_eq a b c ap bp cp bx cx rnd_mode p sh =admit();
+val mpfr_sub1sp1_eq_prec_lemma:
+    b:mpfr_reg_fp -> c:mpfr_reg_fp -> p:pos -> Lemma
+    (requires (
+    b.prec=p /\ c.prec=p /\
+    b.exp=c.exp /\
+    b.limb<>c.limb
+    ))
+    (ensures (let r = sub1sp_exact b c in p>=r.prec))
+    
+let mpfr_sub1sp1_eq_prec_lemma b c p=
+let r=sub1sp_exact b c in
+//assert(b.limb>=r.limb \/ c.limb>=r.limb);
+assert(pow2 p>=b.limb);admit()
+
+let mpfr_sub1sp1_eq a b c ap bp cp bx cx rnd_mode p sh =
     let h0=ST.get() in
     let vb= v bp.(0ul) in
     let vc= v cp.(0ul) in
-    let vsh= I64.(v sh) in
-      if(cp.(0ul)>^bp.(0ul)) then begin
-        let a0=cp.(0ul) -^ bp.(0ul) in
-        let cnt=count_leading_zeros a0 in
-        mpfr_SET_OPPOSITE_SIGN a b;
-        ap.(0ul) <- a0<<^cnt;
-        lemma_mod_distr_sub_zero vc vb (pow2 vsh);
-        lemma_shift_left_mod_pow2 a0 cnt vsh;
-        let h1=ST.get() in
-        mk_state sh bx 0uL 0uL
-      end else begin 
-        let a0=bp.(0ul) -^ cp.(0ul) in
-        let cnt=count_leading_zeros a0 in
-        mpfr_SET_SAME_SIGN a b;
-        ap.(0ul) <- a0<<^cnt;
-        lemma_mod_distr_sub_zero vb vc (pow2 vsh);
-        lemma_shift_left_mod_pow2 a0 cnt vsh;
-        mk_state sh bx 0uL 0uL
-      end
+    let vsh= I64.(v sh) in 
+    if(cp.(0ul)>^bp.(0ul)) then begin admit();
+      let a0=cp.(0ul) -^ bp.(0ul) in
+      let cnt=count_leading_zeros a0 in
+     // mpfr_SET_OPPOSITE_SIGN a b;
+      ap.(0ul) <- a0<<^cnt;
+      lemma_mod_distr_sub_zero vc vb (pow2 vsh);
+      lemma_shift_left_mod_pow2 a0 cnt vsh;
+      let h1=ST.get() in
+      mk_state sh bx 0uL 0uL
+    end else begin 
+      let a0=bp.(0ul) -^ cp.(0ul) in
+      let cnt=count_leading_zeros a0 in
+      mpfr_SET_SAME_SIGN a b;
+      ap.(0ul) <- a0<<^cnt;
+      lemma_mod_distr_sub_zero vb vc (pow2 vsh);
+      lemma_shift_left_mod_pow2 a0 cnt vsh;
+      let t=mk_state sh bx 0uL 0uL in t
+    end
 
 inline_for_extraction val mpfr_sub1sp1_gt:
     a:mpfr_ptr -> b:mpfr_ptr -> c:mpfr_ptr ->
@@ -187,7 +219,7 @@ val mpfr_sub1sp1: a:mpfr_ptr -> b:mpfr_ptr -> c:mpfr_ptr ->
     (ensures  (fun h0 t h1 ->
     let exact=sub1sp_exact (as_fp h0 b) (as_fp h0 c) in
     mpfr_sub1sp1_post_cond h0 t h1 a b c p rnd_mode exact))
-val mpfr_add1sp1_round_post_cond_lemma: a:normal_fp{mpfr_EXP_COND a.exp} ->
+(*val mpfr_add1sp1_round_post_cond_lemma: a:normal_fp{mpfr_EXP_COND a.exp} ->
     p:pos{mpfr_PREC_COND p} ->
     high:normal_fp{high.prec = p /\ high.sign = (high_mant a p).sign  /\
                    high.exp = (high_mant a p).exp /\
@@ -199,9 +231,9 @@ val mpfr_add1sp1_round_post_cond_lemma: a:normal_fp{mpfr_EXP_COND a.exp} ->
     (ensures  (mpfr_round_cond a p rnd_mode r /\
                mpfr_ternary_cond t a r))
 
-let mpfr_add1sp1_round_post_cond_lemma a p high rb sb rnd_mode t r =admit();
+let mpfr_add1sp1_round_post_cond_lemma a p high rb sb rnd_mode t r =
     mpfr_round_cond_lemma a p high rb sb rnd_mode r;
-    mpfr_ternary_cond_lemma a p high rb sb rnd_mode t r
+    mpfr_ternary_cond_lemma a p high rb sb rnd_mode t r*)
 
 let mpfr_sub1sp1 a b c rnd_mode p =
     let bx=mpfr_GET_EXP b in

@@ -19,7 +19,7 @@ module I32 = FStar.Int32
 module I64 = FStar.Int64
 module U32 = FStar.UInt32
 
-#set-options "--z3refresh --z3rlimit 100 --max_fuel 1 --initial_fuel 0 --max_ifuel 1 --initial_ifuel 0 --lax"
+#set-options "--z3refresh --z3rlimit 100 --max_fuel 1 --initial_fuel 0 --max_ifuel 1 --initial_ifuel 0"
 
 (* intermediate results *)
 private type mpfr_tmp_exp_t = x:mpfr_exp_t{I64.(x >=^ mpfr_EMIN /\ x <=^ mpfr_EMAX +^ 1L)}
@@ -600,20 +600,17 @@ let mpfr_add1sp1_round_spec (high:normal_fp) (rb:bool) (sb:bool) (rnd_mode:mpfr_
     end else if mpfr_IS_LIKE_RNDZ rnd_mode (high.sign < 0) then high
     else add_one_ulp high
 
-#reset-options
-#set-options "--z3refresh --z3rlimit 100 --max_fuel 1 --initial_fuel 0 --max_ifuel 1 --initial_ifuel 0"
-
 val mpfr_round_rb_sb_lemma: a:normal_fp -> p:pos ->
     high:normal_fp{high.prec = p /\ eval high =. eval (high_mant a p)} ->
     rb:bool{rb = rb_def a p} -> sb:bool{sb = sb_def a p} -> rnd_mode:mpfr_rnd_t -> Lemma
     (eval (mpfr_add1sp1_round_spec high rb sb rnd_mode) =. eval (round_def a p rnd_mode))
 
 let mpfr_round_rb_sb_lemma a p high rb sb rnd_mode =
+    match rnd_mode with |_ -> (*Tells F* to consider each rounding mode separately*)
     if (p<a.prec) then begin
       rb_sb_lemma a p;
       eval_eq_reveal_lemma high (high_mant a p);
-      eval_eq_intro_lemma (add_one_ulp high) (add_one_ulp (high_mant a p));
-      assert(high.sign<0 <==> eval a<.zero_dyadic)
+      eval_eq_intro_lemma (add_one_ulp high) (add_one_ulp (high_mant a p))
     end 
 
 val eval_eq_round2_cond: a:normal_fp -> h:normal_fp -> rnd_mode:mpfr_rnd_t -> r:mpfr_fp -> p:pos{mpfr_PREC_COND p} -> Lemma
@@ -651,7 +648,7 @@ let mpfr_round_cond_lemma a p high rb sb rnd_mode r =
 
 (* lemmas about ternary value *)
 val mpfr_truncate_ternary_cond_lemma: a:normal_fp{mpfr_EXP_COND a.exp} ->
-    p:pos{p < a.prec /\ mpfr_PREC_COND p} ->
+    p:pos{mpfr_PREC_COND p} ->
     high:normal_fp{high.prec = p /\ eval high =. eval (high_mant a p)} ->
     rb:bool{rb = rb_def a p} -> sb:bool{sb = sb_def a p} -> rnd_mode:mpfr_rnd_t ->
     t:int -> r:mpfr_fp{r.prec = p} -> Lemma
@@ -674,7 +671,7 @@ let mpfr_add1sp1_add_one_ulp_ternary_spec
     else if mpfr_IS_LIKE_RNDZ rnd_mode (high.sign < 0) then -high.sign else high.sign
 
 val mpfr_add_one_ulp_ternary_cond_lemma: a:normal_fp{mpfr_EXP_COND a.exp} ->
-    p:pos{p < a.prec /\ mpfr_PREC_COND p} ->
+    p:pos{mpfr_PREC_COND p} ->
     high:normal_fp{high.prec = p /\ eval high =. eval (high_mant a p) /\
                    eval_abs (high_mant a p) <. eval_abs a} ->
     rnd_mode:mpfr_rnd_t -> t:int -> r:mpfr_fp{r.prec = p} -> Lemma
@@ -712,10 +709,10 @@ let mpfr_add1sp1_ternary_spec
     else mpfr_add1sp1_add_one_ulp_ternary_spec high rnd_mode
 
 val mpfr_ternary_cond_lemma: a:normal_fp{mpfr_EXP_COND a.exp} ->
-    p:pos{p < a.prec /\ mpfr_PREC_COND p} ->
+    p:pos{mpfr_PREC_COND p} ->
     high:normal_fp{high.prec = p /\ high.sign = (high_mant a p).sign /\
-                   high.exp = (high_mant a p).exp /\ high.len <= (high_mant a p).len /\
-		   high.limb * pow2 (a.len - high.len) = (high_mant a p).limb} ->
+                   high.exp = (high_mant a p).exp /\
+		   high.limb * pow2 (high_mant a p).len = (high_mant a p).limb * pow2 high.len} ->
     rb:bool{rb = rb_def a p} -> sb:bool{sb = sb_def a p} -> rnd_mode:mpfr_rnd_t ->
     t:int -> r:mpfr_fp{r.prec = p} -> Lemma
     (requires (mpfr_round2_cond (mpfr_add1sp1_round_spec high rb sb rnd_mode) rnd_mode r /\
@@ -723,6 +720,11 @@ val mpfr_ternary_cond_lemma: a:normal_fp{mpfr_EXP_COND a.exp} ->
     (ensures  (mpfr_ternary_cond t a r))
 
 let mpfr_ternary_cond_lemma a p high rb sb rnd_mode t r =
+    if ((high_mant a p).len>=high.len) then begin
+       lemma_pow2_sub high.limb (high_mant a p).limb (high_mant a p).len high.len
+    end else begin 
+       lemma_pow2_sub (high_mant a p).limb high.limb high.len (high_mant a p).len
+    end;
     assert(eval_abs high =. eval_abs (high_mant a p));
     if rb = false && sb = false then
         mpfr_truncate_ternary_cond_lemma a p high rb sb rnd_mode t r
@@ -739,6 +741,7 @@ let mpfr_ternary_cond_lemma a p high rb sb rnd_mode t r =
         rb_sb_lemma a p;
         mpfr_add_one_ulp_ternary_cond_lemma a p high rnd_mode t r
     end
+    
 (* original *)
 (* correctness by using high part of significand, rounding/sticky bit *)
 (*val mpfr_add1sp1_round_post_cond_lemma: a:normal_fp{mpfr_EXP_COND a.exp} ->
@@ -769,5 +772,4 @@ val mpfr_add1sp1_round_post_cond_lemma: a:normal_fp{mpfr_EXP_COND a.exp} ->
                
 let mpfr_add1sp1_round_post_cond_lemma a p high rb sb rnd_mode t r =
     mpfr_round_cond_lemma a p high rb sb rnd_mode r;
-    admit();
     mpfr_ternary_cond_lemma a p high rb sb rnd_mode t r
