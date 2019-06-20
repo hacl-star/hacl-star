@@ -218,7 +218,7 @@ let aes_gcm_encrypt (a:aes_gcm_alg): Vale.Wrapper.X64.GCMencryptOpt.encrypt_opt_
 #reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq.Properties.slice_slice'"
 inline_for_extraction noextract
 let encrypt_aes_gcm (a: aes_gcm_alg): encrypt_st a =
-fun s iv ad ad_len plain plain_len cipher tag ->
+fun s iv iv_len ad ad_len plain plain_len cipher tag ->
   if B.is_null s then
     InvalidKey
   else
@@ -268,7 +268,7 @@ fun s iv ad ad_len plain plain_len cipher tag ->
     (let k = G.reveal kv in
       let k_nat = Vale.Def.Words.Seq_s.seq_uint8_to_seq_nat8 k in
       let k_w = Vale.Def.Words.Seq_s.seq_nat8_to_seq_nat32_LE k_nat in G.hide k_w ) 
-      iv 12ul 
+      iv iv_len 
       tmp_iv tmp_iv 
       hkeys_b;
 
@@ -313,7 +313,7 @@ fun s iv ad ad_len plain plain_len cipher tag ->
 let encrypt_aes128_gcm: encrypt_st AES128_GCM = encrypt_aes_gcm AES128_GCM
 let encrypt_aes256_gcm: encrypt_st AES256_GCM = encrypt_aes_gcm AES256_GCM
 
-let encrypt #a s iv ad ad_len plain plain_len cipher tag =
+let encrypt #a s iv iv_len ad ad_len plain plain_len cipher tag =
   if B.is_null s then
     InvalidKey
   else
@@ -321,9 +321,9 @@ let encrypt #a s iv ad ad_len plain plain_len cipher tag =
     let Ek i kv ek = !*s in
     match i with
     | Vale_AES128_GCM ->
-        encrypt_aes128_gcm s iv ad ad_len plain plain_len cipher tag
+        encrypt_aes128_gcm s iv iv_len ad ad_len plain plain_len cipher tag
     | Vale_AES256_GCM ->
-        encrypt_aes256_gcm s iv ad ad_len plain plain_len cipher tag
+        encrypt_aes256_gcm s iv iv_len ad ad_len plain plain_len cipher tag
     | Hacl_CHACHA20_POLY1305 ->
         // Length restrictions
         assert_norm (pow2 31 + pow2 32 / 64 <= pow2 32 - 1);
@@ -340,7 +340,7 @@ let aes_gcm_decrypt (a:aes_gcm_alg): Vale.Wrapper.X64.GCMdecryptOpt.decrypt_opt_
 #reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq.Properties.slice_slice'"
 inline_for_extraction noextract
 let decrypt_aes_gcm (a: aes_gcm_alg): decrypt_st a =
-fun s iv ad ad_len cipher cipher_len tag dst ->
+fun s iv iv_len ad ad_len cipher cipher_len tag dst ->
   if B.is_null s then
     InvalidKey
 
@@ -391,7 +391,7 @@ fun s iv ad ad_len cipher cipher_len tag dst ->
       (let k = G.reveal kv in
         let k_nat = Vale.Def.Words.Seq_s.seq_uint8_to_seq_nat8 k in
         let k_w = Vale.Def.Words.Seq_s.seq_nat8_to_seq_nat32_LE k_nat in G.hide k_w ) 
-        iv 12ul 
+        iv iv_len
         tmp_iv tmp_iv 
         hkeys_b;
 
@@ -445,7 +445,7 @@ fun s iv ad ad_len cipher cipher_len tag dst ->
 let decrypt_aes128_gcm: decrypt_st AES128_GCM = decrypt_aes_gcm AES128_GCM
 let decrypt_aes256_gcm: decrypt_st AES256_GCM = decrypt_aes_gcm AES256_GCM
 
-let decrypt #a s iv ad ad_len cipher cipher_len tag dst =
+let decrypt #a s iv iv_len ad ad_len cipher cipher_len tag dst =
   if B.is_null s then
     InvalidKey
   else
@@ -453,9 +453,9 @@ let decrypt #a s iv ad ad_len cipher cipher_len tag dst =
     let Ek i kv ek = !*s in
     match i with
     | Vale_AES128_GCM ->
-        decrypt_aes128_gcm s iv ad ad_len cipher cipher_len tag dst
+        decrypt_aes128_gcm s iv iv_len ad ad_len cipher cipher_len tag dst
     | Vale_AES256_GCM ->
-        decrypt_aes256_gcm s iv ad ad_len cipher cipher_len tag dst
+        decrypt_aes256_gcm s iv iv_len ad ad_len cipher cipher_len tag dst
     | Hacl_CHACHA20_POLY1305 ->
         [@ inline_let ] let bound = pow2 32 - 1 - 16 in
         assert (v cipher_len <= bound);

@@ -17,6 +17,7 @@ let _ =
       ("gcm256_encrypt",           (fun win -> Vale_AES_X64_GCMencrypt.va_code_gcm_encrypt2_stdcall win Vale_AES_AES_s.AES_256), 8, false); 
       ("old_gcm256_decrypt",       (fun win -> Vale_AES_X64_GCMdecrypt.va_code_gcm_decrypt_stdcall win Vale_AES_AES_s.AES_256), 1, false); 
       ("gcm256_decrypt",           (fun win -> Vale_AES_X64_GCMdecrypt.va_code_gcm_decrypt2_stdcall win Vale_AES_AES_s.AES_256), 8, false); *)
+      ("compute_iv_stdcall",       (fun win -> Vale_AES_X64_GCMencryptOpt.va_code_compute_iv_stdcall win), 6, false);
       ("gcm128_encrypt_opt",       (fun win -> Vale_AES_X64_GCMencryptOpt.va_code_gcm_blocks_stdcall win Vale_AES_AES_s.AES_128), 17, false);
       ("gcm256_encrypt_opt",       (fun win -> Vale_AES_X64_GCMencryptOpt.va_code_gcm_blocks_stdcall win Vale_AES_AES_s.AES_256), 17, false);
       ("gcm128_decrypt_opt",       (fun win -> Vale_AES_X64_GCMdecryptOpt.va_code_gcm_blocks_decrypt_stdcall win Vale_AES_AES_s.AES_128), 17, false);
