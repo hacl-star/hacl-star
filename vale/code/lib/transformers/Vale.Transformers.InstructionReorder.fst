@@ -1113,6 +1113,52 @@ let lemma_code_exchange (c1 c2 : code) (fuel:nat) (s1 s2 : machine_state) :
   | _ -> ()
 #pop-options
 
+/// Not-ok states lead to erroring states upon execution
+
+let rec lemma_not_ok_propagate_code (c:code) (fuel:nat) (s:machine_state) :
+  Lemma
+    (requires (not s.ms_ok))
+    (ensures (erroring_option_state (machine_eval_code c fuel s)))
+    (decreases %[fuel; c; 1]) =
+  match c with
+  | Ins _ -> ()
+  | Block l ->
+    lemma_not_ok_propagate_codes l fuel s
+  | IfElse ifCond ifTrue ifFalse ->
+    let (st, b) = machine_eval_ocmp s ifCond in
+    let s' = {st with ms_trace = (BranchPredicate b)::s.ms_trace} in
+    if b then lemma_not_ok_propagate_code ifTrue fuel s' else lemma_not_ok_propagate_code ifFalse fuel s'
+  | While _ _ ->
+    lemma_not_ok_propagate_while c fuel s
+
+and lemma_not_ok_propagate_codes (l:codes) (fuel:nat) (s:machine_state) :
+  Lemma
+    (requires (not s.ms_ok))
+    (ensures (erroring_option_state (machine_eval_codes l fuel s)))
+    (decreases %[fuel; l]) =
+  match l with
+  | [] -> ()
+  | x :: xs ->
+    lemma_not_ok_propagate_code x fuel s;
+    match machine_eval_code x fuel s with
+    | None -> ()
+    | Some s -> lemma_not_ok_propagate_codes xs fuel s
+
+and lemma_not_ok_propagate_while (c:code{While? c}) (fuel:nat) (s:machine_state) :
+  Lemma
+    (requires (not s.ms_ok))
+    (ensures (erroring_option_state (machine_eval_code c fuel s)))
+    (decreases %[fuel; c; 0]) =
+  if fuel = 0 then () else (
+    let While cond body = c in
+    let (s, b) = machine_eval_ocmp s cond in
+    if not b then () else (
+      let s = { s with ms_trace = (BranchPredicate true) :: s.ms_trace } in
+      lemma_not_ok_propagate_code body (fuel - 1) s
+    )
+  )
+
+
 /// Given that we can perform simple swaps between [code]s, we can
 /// define a relation that tells us if some [codes] can be transformed
 /// into another using only allowed swaps.
@@ -1172,51 +1218,6 @@ let rec reordering_allowed (c1 c2 : codes) : pbool =
     t2 <-- bubble_to_top c2 i;
     (* TODO: Also check _inside_ blocks/ifelse/etc rather than just at the highest level *)
     reordering_allowed t1 t2
-
-/// Not-ok states lead to erroring states upon execution
-
-let rec lemma_not_ok_propagate_code (c:code) (fuel:nat) (s:machine_state) :
-  Lemma
-    (requires (not s.ms_ok))
-    (ensures (erroring_option_state (machine_eval_code c fuel s)))
-    (decreases %[fuel; c; 1]) =
-  match c with
-  | Ins _ -> ()
-  | Block l ->
-    lemma_not_ok_propagate_codes l fuel s
-  | IfElse ifCond ifTrue ifFalse ->
-    let (st, b) = machine_eval_ocmp s ifCond in
-    let s' = {st with ms_trace = (BranchPredicate b)::s.ms_trace} in
-    if b then lemma_not_ok_propagate_code ifTrue fuel s' else lemma_not_ok_propagate_code ifFalse fuel s'
-  | While _ _ ->
-    lemma_not_ok_propagate_while c fuel s
-
-and lemma_not_ok_propagate_codes (l:codes) (fuel:nat) (s:machine_state) :
-  Lemma
-    (requires (not s.ms_ok))
-    (ensures (erroring_option_state (machine_eval_codes l fuel s)))
-    (decreases %[fuel; l]) =
-  match l with
-  | [] -> ()
-  | x :: xs ->
-    lemma_not_ok_propagate_code x fuel s;
-    match machine_eval_code x fuel s with
-    | None -> ()
-    | Some s -> lemma_not_ok_propagate_codes xs fuel s
-
-and lemma_not_ok_propagate_while (c:code{While? c}) (fuel:nat) (s:machine_state) :
-  Lemma
-    (requires (not s.ms_ok))
-    (ensures (erroring_option_state (machine_eval_code c fuel s)))
-    (decreases %[fuel; c; 0]) =
-  if fuel = 0 then () else (
-    let While cond body = c in
-    let (s, b) = machine_eval_ocmp s cond in
-    if not b then () else (
-      let s = { s with ms_trace = (BranchPredicate true) :: s.ms_trace } in
-      lemma_not_ok_propagate_code body (fuel - 1) s
-    )
-  )
 
 /// If there are two sequences of instructions that can be transformed
 /// amongst each other, then they behave identically as per the
