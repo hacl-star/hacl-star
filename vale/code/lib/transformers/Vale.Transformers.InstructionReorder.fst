@@ -630,6 +630,77 @@ let rec lemma_disjoint_location_from_locations_mem
     if a = x then () else
     lemma_disjoint_location_from_locations_mem xs a2 a
 
+
+let rec lemma_constant_on_execution_mem
+    (locv:locations_with_values) (f:st unit) (s:machine_state)
+    (l:location{hasEq (location_val_t l)}) (v:location_val_t l) :
+  Lemma
+    (requires (
+        (constant_on_execution locv f s) /\
+        ((run f s).ms_ok) /\
+        ((| l, v |) `L.mem` locv)))
+    (ensures (
+        (eval_location l (run f s) = v))) =
+  match locv with
+  | [_] -> ()
+  | x :: xs ->
+    if x = (| l, v |) then () else (
+      lemma_constant_on_execution_mem xs f s l v
+    )
+
+let rec lemma_disjoint_location_from_locations_mem1 (a:location) (as:locations) :
+  Lemma
+    (requires (not (L.mem a as)))
+    (ensures (!!(disjoint_location_from_locations a as))) =
+  match as with
+  | [] -> ()
+  | x :: xs -> lemma_disjoint_location_from_locations_mem1 a xs
+
+let rec value_of_const_loc (lv:locations_with_values) (l:location{
+    hasEq (location_val_t l) /\
+    L.mem l (locations_of_locations_with_values lv)
+  }) : location_val_t l =
+  let x :: xs = lv in
+  if dfst x = l then dsnd x else value_of_const_loc xs l
+
+let rec lemma_write_same_constants_append (c1 c1' c2:locations_with_values) :
+  Lemma
+    (ensures (
+        !!(write_same_constants (c1 `L.append` c1') c2) = (
+          !!(write_same_constants c1 c2) &&
+          !!(write_same_constants c1' c2)))) =
+  match c1 with
+  | [] -> ()
+  | x :: xs -> lemma_write_same_constants_append xs c1' c2
+
+let rec lemma_write_same_constants_mem_both (c1 c2:locations_with_values)
+    (l:location{hasEq (location_val_t l)}) :
+  Lemma
+    (requires (!!(write_same_constants c1 c2) /\
+               L.mem l (locations_of_locations_with_values c1) /\
+               L.mem l (locations_of_locations_with_values c2)))
+    (ensures (value_of_const_loc c1 l = value_of_const_loc c2 l)) =
+  let x :: xs = c1 in
+  let y :: ys = c2 in
+  if dfst x = l then (
+    if dfst y = l then () else (
+      lemma_write_same_constants_symmetric c1 c2;
+      lemma_write_same_constants_symmetric ys c1;
+      lemma_write_same_constants_mem_both c1 ys l
+    )
+  ) else (
+    lemma_write_same_constants_mem_both xs c2 l
+  )
+
+let rec lemma_value_of_const_loc_mem (c:locations_with_values) (l:location{hasEq (location_val_t l)}) (v:location_val_t l) :
+  Lemma
+    (requires (
+        L.mem l (locations_of_locations_with_values c) /\
+        value_of_const_loc c l = v))
+    (ensures (L.mem (|l,v|) c)) =
+  let x :: xs = c in
+  if dfst x = l then () else lemma_value_of_const_loc_mem xs l v
+
 let rec lemma_unchanged_at_mem (as:list location) (a:location) (s1 s2:machine_state) :
   Lemma
     (requires (
@@ -782,31 +853,15 @@ let lemma_both_not_ok (f1 f2:st unit) (rw1 rw2:rw_set) (s:machine_state) :
   lemma_disjoint_implies_unchanged_at rw1.loc_reads rw2.loc_writes s (run f2 s);
   lemma_disjoint_implies_unchanged_at rw2.loc_reads rw1.loc_writes s (run f1 s)
 
-let rec lemma_constant_on_execution_mem
-    (locv:locations_with_values) (f:st unit) (s:machine_state)
-    (l:location{hasEq (location_val_t l)}) (v:location_val_t l) :
-  Lemma
-    (requires (
-        (constant_on_execution locv f s) /\
-        ((run f s).ms_ok) /\
-        ((| l, v |) `L.mem` locv)))
-    (ensures (
-        (eval_location l (run f s) = v))) =
-  match locv with
-  | [_] -> ()
-  | x :: xs ->
-    if x = (| l, v |) then () else (
-      lemma_constant_on_execution_mem xs f s l v
-    )
-
 let lemma_constant_on_execution_stays_constant (f1 f2:st unit) (rw1 rw2:rw_set) (s s1 s2:machine_state) :
   Lemma
     (requires (
+        s1.ms_ok /\ s2.ms_ok /\
         (run f1 s1).ms_ok /\ (run f2 s2).ms_ok /\
         (bounded_effects rw1 f1) /\
         (bounded_effects rw2 f2) /\
-        (unchanged_except rw2.loc_writes s s1) /\
-        (unchanged_except rw1.loc_writes s s2) /\
+        (s1 == run f2 s) /\
+        (s2 == run f1 s) /\
         !!(write_exchange_allowed rw1.loc_writes rw2.loc_writes rw1.loc_constant_writes rw2.loc_constant_writes)))
     (ensures (
         unchanged_at (locations_of_locations_with_values rw1.loc_constant_writes)
@@ -815,7 +870,102 @@ let lemma_constant_on_execution_stays_constant (f1 f2:st unit) (rw1 rw2:rw_set) 
         unchanged_at (locations_of_locations_with_values rw2.loc_constant_writes)
           (run f1 s1)
           (run f2 s2))) =
-  admit ()
+  let precond =
+    s1.ms_ok /\ s2.ms_ok /\
+    (run f1 s1).ms_ok /\ (run f2 s2).ms_ok /\
+    (bounded_effects rw1 f1) /\
+    (bounded_effects rw2 f2) /\
+    (s1 == run f2 s) /\
+    (s2 == run f1 s) /\
+    !!(write_exchange_allowed rw1.loc_writes rw2.loc_writes rw1.loc_constant_writes rw2.loc_constant_writes) in
+  let r1, w1, c1 = rw1.loc_reads, rw1.loc_writes, rw1.loc_constant_writes in
+  let r2, w2, c2 = rw2.loc_reads, rw2.loc_writes, rw2.loc_constant_writes in
+  let cv1, cv2 =
+    locations_of_locations_with_values rw1.loc_constant_writes,
+    locations_of_locations_with_values rw2.loc_constant_writes in
+  let rec aux1 lv lv' :
+    Lemma
+      (requires (
+          (precond) /\
+          lv `L.append` lv' == c1))
+      (ensures (
+          (unchanged_at (locations_of_locations_with_values lv') (run f1 s1) (run f2 s2))))
+      (decreases %[lv']) =
+    match lv' with
+    | [] -> ()
+    | x :: xs ->
+      let (|l,v|) = x in
+      L.append_mem lv lv' x;
+      lemma_constant_on_execution_mem (lv `L.append` lv') f1 s1 l v;
+      lemma_for_all_elim (aux_write_exchange_allowed w2 c1 c2) w1;
+      assert (eval_location l (run f1 s1) = v);
+      if L.mem l w2 then (
+        L.mem_memP l w1;
+        assert !!(aux_write_exchange_allowed w2 c1 c2 l);
+        lemma_mem_not_disjoint l [l] w2;
+        assert (not !!(disjoint_location_from_locations l w2));
+        assert (L.mem (coerce l) cv2);
+        assert !!(write_same_constants c1 c2);
+        assert (value_of_const_loc lv' l = v);
+        lemma_write_same_constants_append lv lv' c2;
+        lemma_write_same_constants_mem_both lv' c2 l;
+        lemma_value_of_const_loc_mem c2 l v;
+        lemma_constant_on_execution_mem c2 f2 s2 l v
+      ) else (
+        assert (constant_on_execution c1 f1 s);
+        lemma_constant_on_execution_mem (lv `L.append` lv') f1 s l v;
+        assert (eval_location l (run f1 s) = v);
+        assert (unchanged_except w2 s2 (run f2 s2));
+        lemma_disjoint_location_from_locations_mem1 l w2;
+        assert (!!(disjoint_location_from_locations l w2));
+        assert (eval_location l (run f2 s2) = v)
+      );
+      L.append_l_cons x xs lv;
+      aux1 (lv `L.append` [x]) xs
+  in
+  let rec aux2 lv lv' :
+    Lemma
+      (requires (
+          (precond) /\
+          lv `L.append` lv' == c2))
+      (ensures (
+          (unchanged_at (locations_of_locations_with_values lv') (run f1 s1) (run f2 s2))))
+      (decreases %[lv']) =
+    match lv' with
+    | [] -> ()
+    | x :: xs ->
+      let (|l,v|) = x in
+      L.append_mem lv lv' x;
+      lemma_constant_on_execution_mem (lv `L.append` lv') f2 s2 l v;
+      lemma_write_exchange_allowed_symmetric w1 w2 c1 c2;
+      lemma_for_all_elim (aux_write_exchange_allowed w1 c2 c1) w2;
+      assert (eval_location l (run f2 s2) = v);
+      if L.mem l w1 then (
+        L.mem_memP l w2;
+        assert !!(aux_write_exchange_allowed w1 c2 c1 l);
+        lemma_mem_not_disjoint l [l] w1;
+        assert (not !!(disjoint_location_from_locations l w1));
+        assert (L.mem (coerce l) cv1);
+        assert !!(write_same_constants c2 c1);
+        assert (value_of_const_loc lv' l = v);
+        lemma_write_same_constants_append lv lv' c1;
+        lemma_write_same_constants_mem_both lv' c1 l;
+        lemma_value_of_const_loc_mem c1 l v;
+        lemma_constant_on_execution_mem c1 f1 s1 l v
+      ) else (
+        assert (constant_on_execution c2 f2 s);
+        lemma_constant_on_execution_mem (lv `L.append` lv') f2 s l v;
+        assert (eval_location l (run f2 s) = v);
+        assert (unchanged_except w1 s1 (run f1 s1));
+        lemma_disjoint_location_from_locations_mem1 l w1;
+        assert (!!(disjoint_location_from_locations l w1));
+        assert (eval_location l (run f1 s1) = v)
+      );
+      L.append_l_cons x xs lv;
+      aux2 (lv `L.append` [x]) xs
+  in
+  aux1 [] c1;
+  aux2 [] c2
 
 let lemma_commute (f1 f2:st unit) (rw1 rw2:rw_set) (s:machine_state) :
   Lemma
