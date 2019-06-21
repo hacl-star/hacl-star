@@ -115,10 +115,6 @@ val lemma_locations_of_ocmp : o:ocmp -> s1:machine_state -> s2:machine_state ->
 let add_r_to_rw_set (r:locations) (rw:rw_set) : rw_set =
   { rw with loc_reads = r `L.append` rw.loc_reads }
 
-(** Add more values into the writes portion of an [rw_set] *)
-let add_w_to_rw_set (w:locations) (rw:rw_set) : rw_set =
-  { rw with loc_writes = w `L.append` rw.loc_reads }
-
 (** Merge two [rw_set]s that for executions that might go either
     way. *)
 val rw_set_in_parallel : rw_set -> rw_set -> rw_set
@@ -137,17 +133,6 @@ val lemma_add_r_to_rw_set :
         (bounded_effects rw f)))
     (ensures (
         (bounded_effects (add_r_to_rw_set r rw) f)))
-
-(** [bounded_effects] is held correctly when adding to the writes *)
-val lemma_add_w_to_rw_set :
-  w:locations ->
-  rw:rw_set ->
-  f:st unit ->
-  Lemma
-    (requires (
-        (bounded_effects rw f)))
-    (ensures (
-        (bounded_effects (add_w_to_rw_set w rw) f)))
 
 (** [bounded_effects] is held correctly when applied in parallel *)
 val lemma_bounded_effects_parallel :
