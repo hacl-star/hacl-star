@@ -111,7 +111,7 @@ val gcm128_decrypt_opt':
       B.length in128_b == 16 * UInt64.v len128_num /\
       B.length out128_b == B.length in128_b /\
       B.length inout_b == 16 /\
-      B.length scratch_b == 128 /\
+      B.length scratch_b == 144 /\
       B.length hkeys_b = 128 /\
       B.length tag_b == 16 /\
       B.length keys_b = 176 /\
@@ -237,7 +237,7 @@ let gcm128_decrypt_opt' key iv auth_b auth_bytes auth_num keys_b iv_b hkeys_b ab
   FStar.Math.Lemmas.cancel_mul_mod (UInt64.v auth_num) 16;
   assert_norm (176 % 16 = 0);
   assert_norm (16 % 16 = 0);
-  assert_norm (128 % 16 = 0);
+  assert_norm (144 % 16 = 0);
   FStar.Math.Lemmas.cancel_mul_mod (UInt64.v len128x6) 16;
   FStar.Math.Lemmas.cancel_mul_mod (UInt64.v len128_num) 16;
 
@@ -350,7 +350,7 @@ val gcm128_decrypt_opt_alloca:
       B.length tag_b == 16 /\
       B.length keys_b = 176 /\
 
-      B.length scratch_b = 128 /\
+      B.length scratch_b = 144 /\
       B.length inout_b = 16 /\
       B.length abytes_b = 16 /\
 
@@ -871,7 +871,7 @@ let gcm128_decrypt_opt_stdcall key iv cipher_b cipher_len auth_b auth_len iv_b o
 
   push_frame();
   // Scratch space for Vale procedure
-  let scratch_b = B.alloca 0uy 128ul in
+  let scratch_b = B.alloca 0uy 144ul in
   // Extra space to have a full input/output with length % 16 = 0
   let inout_b = B.alloca 0uy 16ul in
   // Same for auth_b

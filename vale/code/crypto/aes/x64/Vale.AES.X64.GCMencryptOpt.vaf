@@ -690,7 +690,7 @@ procedure gcm_blocks(
         validSrcAddrs128(mem,    in128_ptr,    in128_b,   len128, memTaint, Secret);
         validDstAddrs128(mem,   out128_ptr,   out128_b,   len128, memTaint, Secret);
         validDstAddrs128(mem,    inout_ptr,    inout_b,        1, memTaint, Secret);
-        validDstAddrs128(mem,  scratch_ptr,  scratch_b,        8, memTaint, Secret);
+        validDstAddrs128(mem,  scratch_ptr,  scratch_b,        9, memTaint, Secret);
         validSrcAddrs128(mem,          Xip,    hkeys_b,        8, memTaint, Secret);
 
         buffer_disjoints128(iv_b, list(keys_b, scratch_b, in128x6_b, out128x6_b, hkeys_b, in128_b, out128_b, inout_b));
@@ -834,7 +834,7 @@ procedure gcm_blocks(
 
     Load128_buffer(xmm1, iv_ptr, 0, Public, iv_b, 0);       // Load the j0 value (i.e., the result of calling compute_iv_BE)
 
-
+    ZeroXmm(xmm0); // Limitation of the taint analysis: It will not detect that InitPshufbMask can be public otherwise
     InitPshufbMask(xmm0, rax);    // # borrow $Ii for .Lbswap_mask
     VPshufb(xmm1, xmm1, xmm0);
 
@@ -1010,7 +1010,7 @@ procedure gcm_blocks_wrapped(
         validSrcAddrs128(mem,    in128_ptr,    in128_b,   len128, memTaint, Secret);
         validDstAddrs128(mem,   out128_ptr,   out128_b,   len128, memTaint, Secret);
         validDstAddrs128(mem,    inout_ptr,    inout_b,        1, memTaint, Secret);
-        validDstAddrs128(mem,  scratch_ptr,  scratch_b,        8, memTaint, Secret);
+        validDstAddrs128(mem,  scratch_ptr,  scratch_b,        9, memTaint, Secret);
         validSrcAddrs128(mem,          Xip,    hkeys_b,        8, memTaint, Secret);
 
         buffer_disjoints128(iv_b, list(keys_b, scratch_b, in128x6_b, out128x6_b, hkeys_b, in128_b, out128_b, inout_b));
@@ -1445,7 +1445,7 @@ procedure gcm_blocks_stdcall(
         validSrcAddrs128(mem,    in128_ptr,    in128_b,   len128, memTaint, Secret);
         validDstAddrs128(mem,   out128_ptr,   out128_b,   len128, memTaint, Secret);
         validDstAddrs128(mem,    inout_ptr,    inout_b,        1, memTaint, Secret);
-        validDstAddrs128(mem,  scratch_ptr,  scratch_b,        8, memTaint, Secret);
+        validDstAddrs128(mem,  scratch_ptr,  scratch_b,        9, memTaint, Secret);
         validSrcAddrs128(mem,          xip,    hkeys_b,        8, memTaint, Secret);
         validDstAddrs128(mem,      tag_ptr,      tag_b,        1, memTaint, Secret);
 
