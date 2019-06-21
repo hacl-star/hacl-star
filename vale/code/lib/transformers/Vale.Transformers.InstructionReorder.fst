@@ -1018,6 +1018,52 @@ let lemma_commute (f1 f2:st unit) (rw1 rw2:rw_set) (s:machine_state) :
     assert (equiv_states (run2 f1 f2 s) (run2 f2 f1 s))
   )
 
+let wrap_ss (f:machine_state -> machine_state) : st unit =
+  let open Vale.X64.Machine_Semantics_s in
+  s <-- get;
+  set (f s)
+
+let wrap_sos (f:machine_state -> option machine_state) : st unit =
+  let open Vale.X64.Machine_Semantics_s in
+  s <-- get;
+  apply_option (f s) set
+
+let lemma_feq_bounded_effects (rw:rw_set) (f1 f2:st unit) :
+  Lemma
+    (requires (bounded_effects rw f1 /\ FStar.FunctionalExtensionality.feq f1 f2))
+    (ensures (bounded_effects rw f2)) =
+  let open FStar.FunctionalExtensionality in
+  assert (only_affects rw.loc_writes f2);
+  let rec aux w s :
+    Lemma
+      (requires (feq f1 f2 /\ constant_on_execution w f1 s))
+      (ensures (constant_on_execution w f2 s))
+      [SMTPat (constant_on_execution w f2 s)] =
+    match w with
+    | [] -> ()
+    | x :: xs -> aux xs s
+  in
+  assert (forall s. {:pattern (constant_on_execution rw.loc_constant_writes f2 s)}
+            constant_on_execution rw.loc_constant_writes f2 s);
+  assert (forall l v. {:pattern (L.mem (|l,v|) rw.loc_constant_writes); (L.mem l rw.loc_writes)}
+            L.mem (|l,v|) rw.loc_constant_writes ==> L.mem l rw.loc_writes);
+  assert (
+    forall s1 s2. {:pattern (run f2 s1); (run f2 s2)} (
+      (s1.ms_ok = s2.ms_ok /\ unchanged_at rw.loc_reads s1 s2) ==> (
+        ((run f2 s1).ms_ok = (run f2 s2).ms_ok) /\
+        ((run f2 s1).ms_ok ==>
+         unchanged_at rw.loc_writes (run f2 s1) (run f2 s2))
+      )
+    )
+  )
+
+let lemma_machine_eval_ins_bounded_effects (i:ins) :
+  Lemma
+    (requires (safely_bounded i))
+    (ensures (bounded_effects (rw_set_of_ins i) (wrap_ss (machine_eval_ins i)))) =
+  lemma_machine_eval_ins_st_bounded_effects i;
+  lemma_feq_bounded_effects (rw_set_of_ins i) (machine_eval_ins_st i) (wrap_ss (machine_eval_ins i))
+
 let lemma_machine_eval_ins_st_exchange (i1 i2 : ins) (s : machine_state) :
   Lemma
     (requires (!!(ins_exchange_allowed i1 i2)))
