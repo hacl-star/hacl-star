@@ -30,9 +30,9 @@ let sub1sp_gt_len a b =
 
 let sub1sp_gt_exp a b =
     b.exp + sub1sp_gt_len a b - b.len
-
-let sub1sp_gt_prec a b =sub1sp_gt_len a b
-
+    
+let sub1sp_gt_prec a b = sub1sp_gt_len a b
+    
 val lemma_fp_exp_ge: a:mpfr_reg_fp ->
     b:mpfr_reg_fp -> Lemma
     (requires (a.prec=b.prec /\ ge (eval_abs a) (eval_abs b)))
@@ -53,7 +53,7 @@ val sub1sp_exact: a:mpfr_reg_fp ->
     Tot (r:valid_fp{((gt (eval_abs a) (eval_abs b) /\ r.sign = a.sign) \/
                     (eq (eval_abs a) (eval_abs b)) \/
                     (lt (eval_abs a) (eval_abs b) /\ r.sign = -a.sign))
-                    /\ fabs (eval_abs a -. eval_abs b) =. eval_abs r /\
+                    /\  fabs (eval_abs a -. eval_abs b) =. eval_abs r /\
                     (normal_fp_cond r \/ r.flag=MPFR_ZERO)})
 
 let sub1sp_exact ar br = 

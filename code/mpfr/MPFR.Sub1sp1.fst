@@ -152,12 +152,17 @@ val mpfr_sub1sp1_eq_prec_lemma:
     b.exp=c.exp /\
     b.limb<>c.limb
     ))
-    (ensures (let r = sub1sp_exact b c in p>=r.prec))
+    (ensures (let r = sub1sp_exact b c in sb_def r p=false))
     
 let mpfr_sub1sp1_eq_prec_lemma b c p=
-let r=sub1sp_exact b c in
+    let r=sub1sp_exact b c in
+    let a,b=if gt (eval_abs c) (eval_abs b) then c,b else b,c in
+    assert(pow2 (a.exp-b.exp)=1);
+    lemma_mod_distr_sub_zero (a.limb * pow2 (a.exp - b.exp)) b.limb (pow2 (b.len-b.prec));
+    lemma_pow2_gt_rev (sub1sp_gt_len a b) (b.len-b.prec);
 //assert(b.limb>=r.limb \/ c.limb>=r.limb);
-assert(pow2 p>=b.limb);admit()
+//assert(pow2 p>=b.limb);
+admit()
 
 let mpfr_sub1sp1_eq a b c ap bp cp bx cx rnd_mode p sh =
     let h0=ST.get() in
