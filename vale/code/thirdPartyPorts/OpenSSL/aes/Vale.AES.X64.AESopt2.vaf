@@ -127,6 +127,7 @@ procedure MulAdd_unroll(
     ensures
         of_quad32(Z0) +. shift(of_quad32(Z2), 64) +. shift(of_quad32(Z3), 128) ==
             ghash_unroll_back(h, prev, pdata, 0, 6, 5);
+        old(buffer128_read(scratch_b, 2, mem)) == buffer128_read(scratch_b, 2, mem);
         Hkey == Mkfour(0, 0, 0, 0xc2000000);
 {
     let data0 := #poly(pdata(0));
@@ -348,6 +349,7 @@ procedure GhashUnroll6x(
         buffer128_read(scratch_b, 7, mem) == reverse_bytes_quad32(data[0]);
     ensures
         Xi == reverse_bytes_quad32(ghash_incremental(h_LE, y_prev, data));
+        old(buffer128_read(scratch_b, 2, mem)) == buffer128_read(scratch_b, 2, mem);
 {
     MulAdd_unroll(hkeys_b, scratch_b, h, prev, data);
     lemma_gf128_low_shift();

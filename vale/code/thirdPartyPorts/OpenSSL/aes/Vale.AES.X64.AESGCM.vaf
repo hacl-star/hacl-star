@@ -208,7 +208,7 @@ procedure Load_one_lsb(inout dst:xmm)
 }
 
 
-#reset-options "--z3rlimit 20"
+#reset-options " --z3rlimit 20"
 procedure Ctr32_ghash_6_prelude(
         inline alg:algorithm,
         ghost scratch_b:buffer128,
@@ -280,7 +280,7 @@ procedure Ctr32_ghash_6_prelude(
     Store128_buffer(rbp, Z0, 0x10, Secret, scratch_b, 1);     // # "$Z3" = 0
 }
 
-#reset-options "--z3rlimit 20"
+#reset-options " --z3rlimit 20"
 procedure Handle_ctr32(
         ghost hkeys_b:buffer128,
         ghost ctr_BE:quad32)
@@ -338,7 +338,7 @@ procedure Handle_ctr32(
 }
 
 
-#reset-options "--z3rlimit 20"
+#reset-options " --z3rlimit 20"
 procedure Handle_ctr32_2(
         ghost ctr_BE:quad32)
     {:quick}
@@ -398,7 +398,7 @@ procedure Handle_ctr32_2(
 }
 
 
-#reset-options "--z3rlimit 20"
+#reset-options " --z3rlimit 20"
 procedure Loop6x_ctr_update(
         inline alg:algorithm,
         ghost key_words:seq(nat32),
@@ -478,7 +478,7 @@ procedure Loop6x_ctr_update(
     }
 }
 
-#reset-options ""
+#reset-options " "
 procedure Loop6x_preamble(
         inline alg:algorithm,  // OpenSSL includes the number of rounds (nr) as a dynamic parameter (stored with the key).  Saves code space but adds extra instructions to the fast path.  Maybe branch predictor is good enough for it not to matter
         ghost h:poly,
@@ -515,7 +515,7 @@ procedure Loop6x_preamble(
 
     requires
         // Valid ptrs and buffers
-        validDstAddrs128(mem, ivp, iv_b, 1, memTaint, Secret);
+        validDstAddrs128(mem, ivp, iv_b, 1, memTaint, Public);
         validSrcAddrs128(mem, Xip - 0x20, hkeys_b, 8, memTaint, Secret);
         validDstAddrs128(mem, rbp, scratch_b, 8, memTaint, Secret);
         buffers_disjoint128(iv_b, keys_b);
@@ -583,7 +583,7 @@ procedure Loop6x_preamble(
     init_rounds_opaque(inout1, round_keys);
     init_rounds_opaque(inout2, round_keys);
 
-    Store128_buffer(ivp, T1, 0, Secret, iv_b, 0);   // # save next counter value
+    Store128_buffer(ivp, T1, 0, Public, iv_b, 0);   // # save next counter value
     VPolyMul(Z1, Z3, Hkey, false, true);
     VPxor(inout3, inout3, rndkey); init_rounds_opaque(inout3, round_keys);
     Load128_buffer(T2, key, 0x10-0x80, Secret, keys_b, 1); // # borrow $T2 for $rndkey
@@ -749,7 +749,7 @@ procedure Loop6x_step1(
 
 }
 
-#reset-options ""
+#reset-options " "
 procedure Loop6x_plain(
         inline alg:algorithm,
         inline rnd:nat,
@@ -1010,7 +1010,7 @@ procedure Loop6x_step2(
 
 }
 
-#reset-options "--z3rlimit 20"
+#reset-options " --z3rlimit 20"
 procedure Loop6x_step3(
         inline alg:algorithm,
         inline rnd:nat,
@@ -1151,7 +1151,7 @@ procedure Loop6x_step3(
 
 }
 
-#reset-options ""
+#reset-options " "
 procedure Loop6x_step4(
         inline alg:algorithm,
         inline rnd:nat,
@@ -1286,7 +1286,7 @@ procedure Loop6x_step4(
 
 }
 
-#reset-options ""
+#reset-options " "
 procedure Loop6x_step5(
         inline alg:algorithm,
         inline rnd:nat,
@@ -1510,7 +1510,7 @@ procedure Loop6x_round8(
 }
 
 
-#reset-options "--z3rlimit 20"
+#reset-options " --z3rlimit 20"
 procedure Loop6x_round9(
         inline alg:algorithm,
         ghost count:nat,
@@ -1681,7 +1681,7 @@ procedure Loop6x_round9(
 //    commute_sub_bytes_shift_rows_forall();
 }
 
-#reset-options "--z3rlimit 30"
+#reset-options " --z3rlimit 30"
 procedure Loop6x_final(
         inline alg:algorithm,
         ghost iv_b:buffer128,
@@ -1734,7 +1734,7 @@ procedure Loop6x_final(
 
     requires
         // Valid ptrs and buffers
-        validSrcAddrs128(mem, ivp, iv_b, 1, memTaint, Secret);
+        validSrcAddrs128(mem, ivp, iv_b, 1, memTaint, Public);
         validDstAddrs128(mem, rbp, scratch_b, 8, memTaint, Secret);
         buffers_disjoint128(scratch_b, keys_b);
          inp + 0x60 < pow2_64;
@@ -1801,7 +1801,7 @@ procedure Loop6x_final(
         ctr + 6 < 256 ==> Hkey == reverse_bytes_quad32(inc32lite(ctr_orig, 5));
 {
     lemma_quad32_xor_commutes_forall();
-    Load128_buffer(T1, ivp, 0, Secret, iv_b, 0); // # load next counter value
+    Load128_buffer(T1, ivp, 0, Public, iv_b, 0); // # load next counter value
 
     VAESNI_enc_last(inout0, inout0, T2);
     Load_one_msb();                              // # borrow $T2, .Lone_msb
@@ -1844,7 +1844,7 @@ procedure Loop6x_final(
     lemma_incr_msb(ctr_orig, T1, Hkey, 5);
 }
 
-#reset-options ""
+#reset-options " "
 procedure Loop6x_save_output(ghost count:nat, ghost out_b:buffer128)
     {:quick}
     lets
@@ -1901,7 +1901,7 @@ procedure Loop6x_save_output(ghost count:nat, ghost out_b:buffer128)
     Mov128(inout5, Hkey);
 }
 
-#reset-options "--z3rlimit 50"
+#reset-options " --z3rlimit 50"
 procedure Loop6x_partial(
         inline alg:algorithm,
         ghost h_LE:quad32,
@@ -1954,7 +1954,7 @@ procedure Loop6x_partial(
         T2 == Mkfour(0, 0, 0, 0x1000000);
 
         // Valid ptrs and buffers
-        validDstAddrs128(mem, ivp, iv_b, 1, memTaint, Secret);
+        validDstAddrs128(mem, ivp, iv_b, 1, memTaint, Public);
         validSrcAddrsOffset128(mem, in0, in0_b, in0_count*6, 6, memTaint, Secret);
         validSrcAddrsOffset128(mem, inp, in_b, count*6, 6, memTaint, Secret);
         validDstAddrs128(mem, rbp, scratch_b, 8, memTaint, Secret);
@@ -2164,7 +2164,7 @@ procedure Loop6x_partial(
 //    assert to_quad32(eventual_Xi) == reverse_bytes_quad32(ghash_incremental(h_LE, y_prev, data));
 }
 
-#reset-options "--z3rlimit 100"
+#reset-options " --z3rlimit 100"
 procedure Loop6x(
         inline alg:algorithm,
         ghost h_LE:quad32,
@@ -2214,7 +2214,7 @@ procedure Loop6x(
         T2 == Mkfour(0, 0, 0, 0x1000000);
 
         // Valid ptrs and buffers
-        validDstAddrs128(mem, ivp, iv_b, 1, memTaint, Secret);
+        validDstAddrs128(mem, ivp, iv_b, 1, memTaint, Public);
         validSrcAddrsOffset128(mem, in0, in0_b, (count-1)*6, 6, memTaint, Secret);
         validSrcAddrsOffset128(mem, inp, in_b, count*6, 6, memTaint, Secret);
         validDstAddrsOffset128(mem, outp, out_b, count*6, 6, memTaint, Secret);
@@ -2406,7 +2406,7 @@ procedure Loop6x(
 }
 
 
-#reset-options "--z3rlimit 300"
+#reset-options " --z3rlimit 300"
 procedure Loop6x_decrypt(
         inline alg:algorithm,
         ghost h_LE:quad32,
@@ -2455,7 +2455,7 @@ procedure Loop6x_decrypt(
         T2 == Mkfour(0, 0, 0, 0x1000000);
 
         // Valid ptrs and buffers
-        validDstAddrs128(mem, ivp, iv_b, 1, memTaint, Secret);
+        validDstAddrs128(mem, ivp, iv_b, 1, memTaint, Public);
         len > 6 ==> validSrcAddrsOffset128(mem, in0, in0_b, (count+1)*6, 6, memTaint, Secret);
         len == 6 ==> validSrcAddrsOffset128(mem, in0, in0_b, count*6, 6, memTaint, Secret);
         validSrcAddrsOffset128(mem, inp, in_b, count*6, 6, memTaint, Secret);
@@ -2652,7 +2652,7 @@ procedure Loop6x_decrypt(
     Vale.Def.Opaque_s.reveal_opaque(gctr_registers_def);
 }
 
-#reset-options "--z3rlimit 700"
+#reset-options " --z3rlimit 700"
 procedure Loop6x_loop_decrypt(
         inline alg:algorithm,
         ghost h_LE:quad32,
@@ -2699,7 +2699,7 @@ procedure Loop6x_loop_decrypt(
         T2 == Mkfour(0, 0, 0, 0x1000000);
 
         // Valid ptrs and buffers
-        validDstAddrs128(mem, ivp, iv_b, 1, memTaint, Secret);
+        validDstAddrs128(mem, ivp, iv_b, 1, memTaint, Public);
 
         validSrcAddrsOffset128(mem,  in0, in0_b, 6, len - 6, memTaint, Secret);
         validSrcAddrsOffset128(mem,  inp,  in_b, 0, len, memTaint, Secret);
@@ -2801,7 +2801,7 @@ procedure Loop6x_loop_decrypt(
             T2 == Mkfour(0, 0, 0, 0x1000000);
 
             // Valid ptrs and buffers
-            validDstAddrs128(mem, ivp, iv_b, 1, memTaint, Secret);
+            validDstAddrs128(mem, ivp, iv_b, 1, memTaint, Public);
 
             len > 6 ==> validSrcAddrsOffset128(mem,  in0, in0_b, (iter+1)*6, old(len) - 6*(iter+1), memTaint, Secret);
             len == 6 ==> validSrcAddrsOffset128(mem, in0, in0_b, iter*6, old(len) - 6*iter, memTaint, Secret);
@@ -2893,7 +2893,7 @@ procedure Loop6x_loop_decrypt(
 
 
 
-#reset-options "--z3rlimit 750"
+#reset-options " --z3rlimit 750"
 procedure Loop6x_loop(
         inline alg:algorithm,
         ghost h_LE:quad32,
@@ -2943,7 +2943,7 @@ procedure Loop6x_loop(
         T2 == Mkfour(0, 0, 0, 0x1000000);
 
         // Valid ptrs and buffers
-        validDstAddrs128(mem, ivp, iv_b, 1, memTaint, Secret);
+        validDstAddrs128(mem, ivp, iv_b, 1, memTaint, Public);
 
         validSrcAddrsOffset128(mem, in0, in0_b, (count-1)*6, len, memTaint, Secret);
         validSrcAddrsOffset128(mem, inp, in_b, count*6, len, memTaint, Secret);
@@ -3050,7 +3050,7 @@ procedure Loop6x_loop(
             T2 == Mkfour(0, 0, 0, 0x1000000);
 
             // Valid ptrs and buffers
-            validDstAddrs128(mem, ivp, iv_b, 1, memTaint, Secret);
+            validDstAddrs128(mem, ivp, iv_b, 1, memTaint, Public);
 
             len > 0 ==> validSrcAddrsOffset128(mem,  in0, in0_b, (count-1)*6 + iter*6, old(len) - iter*6, memTaint, Secret);
             len > 0 ==> validSrcAddrsOffset128(mem,  inp,  in_b, count*6 + iter*6, old(len) - iter*6, memTaint, Secret);
@@ -3144,7 +3144,7 @@ procedure Loop6x_loop(
 }
 
 
-#reset-options "--z3rlimit 40"
+#reset-options " --z3rlimit 40"
 procedure AESNI_ctr32_6x_preamble(
         inline alg:algorithm,  // OpenSSL includes the number of rounds (nr) as a dynamic parameter (stored with the key).  Saves code space but adds extra instructions to the fast path.  Maybe branch predictor is good enough for it not to matter
         ghost key_words:seq(nat32),
@@ -3239,7 +3239,7 @@ procedure AESNI_ctr32_6x_preamble(
     init_rounds_opaque(inout5, round_keys);
 }
 
-#reset-options ""
+#reset-options " "
 procedure AESNI_ctr32_6x_loop_body(
         inline alg:algorithm,
         inline rnd:nat,
@@ -3452,7 +3452,7 @@ procedure AESNI_ctr32_6x_round9(
     AddLea64(inp, inp, 0x60);
 }
 
-#reset-options "--z3rlimit 10"
+#reset-options " --z3rlimit 10"
 procedure AESNI_ctr32_6x_final(
         inline alg:algorithm,
         ghost count:nat,
@@ -3578,7 +3578,7 @@ procedure AESNI_ctr32_6x_final(
     finish_aes_encrypt_le(alg, ctr5, key_words);
 }
 
-#reset-options "--z3rlimit 30"
+#reset-options " --z3rlimit 30"
 procedure AESNI_ctr32_6x(
         inline alg:algorithm,
         ghost count:nat,
@@ -3694,7 +3694,7 @@ procedure AESNI_ctr32_6x(
 }
 
 
-#reset-options ""
+#reset-options " "
 procedure Encrypt_save_and_shuffle_output(ghost count:nat, ghost out_b:buffer128)
     {:quick}
     lets
@@ -3755,7 +3755,7 @@ procedure Encrypt_save_and_shuffle_output(ghost count:nat, ghost out_b:buffer128
     VPshufb(inout5, inout5, Ii);
 }
 
-#reset-options ""
+#reset-options " "
 procedure UpdateScratch(ghost scratch_b:buffer128)
     {:quick}
     lets
@@ -3780,6 +3780,7 @@ procedure UpdateScratch(ghost scratch_b:buffer128)
         buffer_modifies_specific128(scratch_b, old(mem), mem, 1, 7);
 
         buffer128_read(scratch_b, 1, mem) == Mkfour(0,0,0,0);
+        old(buffer128_read(scratch_b, 2, mem)) == buffer128_read(scratch_b, 2, mem);
         buffer128_read(scratch_b, 3, mem) == inout4;
         buffer128_read(scratch_b, 4, mem) == inout3;
         buffer128_read(scratch_b, 5, mem) == inout2;
@@ -3798,7 +3799,7 @@ procedure UpdateScratch(ghost scratch_b:buffer128)
     Store128_buffer(rbp, inout0, 0x70, Secret, scratch_b, 7);
 }
 /*
-#reset-options ""
+#reset-options " "
 procedure GCM_finalize(
         inline alg:algorithm,
         ghost h_LE:quad32,
@@ -4252,7 +4253,7 @@ procedure GCM_finalize(
 }
 */
 
-#reset-options "--z3rlimit 150"
+#reset-options " --z3rlimit 150"
 procedure AES_GCM_encrypt_6mult(
         inline alg:algorithm,
         ghost h_LE:quad32,
@@ -4289,7 +4290,7 @@ procedure AES_GCM_encrypt_6mult(
 
     requires
         // Valid buffers and pointers
-        validDstAddrs128(mem,  ivp,  iv_b,   1, memTaint, Secret);
+        validDstAddrs128(mem,  ivp,  iv_b,   1, memTaint, Public);
         validSrcAddrs128(mem,  inp,  in_b, len, memTaint, Secret);
         validDstAddrs128(mem, outp, out_b, len, memTaint, Secret);
         validDstAddrs128(mem, rbp, scratch_b, 8, memTaint, Secret);
@@ -4347,22 +4348,22 @@ procedure AES_GCM_encrypt_6mult(
 
         // Counter updated
         old(len) < pow2_32 /\
-        buffer128_read(iv_b, 0, mem) == reverse_bytes_quad32(inc32lite(old(T1), old(len)));
+        buffer128_read(scratch_b, 2, mem) == reverse_bytes_quad32(inc32lite(old(T1), old(len)));
         //T1 == inc32lite(old(T1), old(len));
 {
     if (len == 0) {
         AddLea64(Xip, Xip, 0x20);   // # size optimization
 
         VPshufb(T1, T1, Ii);
-        Store128_buffer(ivp, T1, 0x00, Secret, iv_b, 0);
+        Store128_buffer(rbp, T1, 0x20, Secret, scratch_b, 2);
         gctr_partial_opaque_init(alg, s128(mem, in_b), s128(mem, out_b), key_words, old(T1));
     } else {
         let plain_quads := s128(mem, in_b);
 
-        //Load128_buffer(T1, ivp, 0, Secret, iv_b, 0);    // # input counter value
+        //Load128_buffer(T1, ivp, 0, Public, iv_b, 0);    // # input counter value
         VPshufb(Xi, Xi, Ii);        // TODO: Why do we need a reverse here and at the end?
         let y_orig := reverse_bytes_quad32(Xi);
-        Store128_buffer(ivp, Xi, 0x00, Secret, iv_b, 0); // Save a copy of the interm. hash in Xi
+        Store128_buffer(rbp, Xi, 0x20, Secret, scratch_b, 2); // Save a copy of the interm. hash in Xi
         //let iv_LE := T1;
         Add64(key, 0x80);           // # size optimization
         // TODO: Replace all of this with a single PinsrdImm(T1, 0x02000000, 3, counter)
@@ -4379,7 +4380,6 @@ procedure AES_GCM_encrypt_6mult(
 
         //Mov64(in0, outp); // OpenSSL uses this, and then does complicated in0 manipulation inside Loop6x
         AddLea64(in0, outp, 96); // 96 == 128/8*6
-
 
         gctr_partial_opaque_init(alg, s128(mem, in_b), s128(mem, out_b), key_words, ctr_BE);
         AESNI_ctr32_6x(alg, 0, in_b, out_b, plain_quads, key_words, round_keys, keys_b, ctr_BE, ctr_BE);
@@ -4400,7 +4400,7 @@ procedure AES_GCM_encrypt_6mult(
         Sub64(len, 12);
         // TODO: OpenSSL does this to enable multiple incremental calls.  For now, we only handle one, so Xi = X0 = Mkfour 0 0 0 0
         //Load128_buffer(Xi, Xip, 0, Secret, hkeys_b, 0); // # load Xi
-        Load128_buffer(Xi, ivp, 0, Secret, iv_b, 0);      // # load interm. hash (Xi)
+        Load128_buffer(Xi, rbp, 0x20, Secret, scratch_b, 2);      // # load interm. hash (Xi)
         AddLea64(Xip, Xip, 0x20);   // # size optimization
 
         Ctr32_ghash_6_prelude(alg, scratch_b, key_words, round_keys, keys_b, inc32(ctr_BE, 12));
@@ -4416,11 +4416,11 @@ procedure AES_GCM_encrypt_6mult(
         assert to_quad32(of_quad32(Xi)) == Xi;
         let y_new := Loop6x_loop(alg, h_LE, reverse_bytes_quad32(Xi), reverse_bytes_quad32(Xi), 2, iv_b, out_b, in_b, out_b, scratch_b, old(s128(mem, in_b)), key_words, round_keys, keys_b, hkeys_b, ctr_BE, inc32(ctr_BE, 12));
 
-        //test(T1, ctr_BE, mid_len);
-        Store128_buffer(ivp, T1, 0x00, Secret, iv_b, 0);
-
         let out_snapshot := s128(mem, out_b);
         Load128_buffer(Z3, rbp, 0x20, Secret, scratch_b, 2); // # I[5]
+
+        //test(T1, ctr_BE, mid_len);
+        Store128_buffer(rbp, T1, 0x20, Secret, scratch_b, 2);
 
         // TODO: Update AESOpt2 so we can skip these steps (borow rndkey, for example, instead of scratch_b[1])
         ZeroXmm(Z0);
@@ -4473,7 +4473,7 @@ procedure AES_GCM_encrypt_6mult(
 }
 
 
-#reset-options ""
+#reset-options " "
 procedure DecryptPrelude(ghost in_b:buffer128, ghost scratch_b:buffer128)
     {:quick}
     lets
@@ -4542,7 +4542,7 @@ procedure DecryptPrelude(ghost in_b:buffer128, ghost scratch_b:buffer128)
 }
 
 
-#reset-options "--z3rlimit 100"
+#reset-options " --z3rlimit 100"
 procedure AES_GCM_decrypt_6mult(
         inline alg:algorithm,
         ghost h_LE:quad32,
@@ -4579,7 +4579,7 @@ procedure AES_GCM_decrypt_6mult(
 
     requires
         // Valid buffers and pointers
-        validDstAddrs128(mem,  ivp,  iv_b,   1, memTaint, Secret);
+        validDstAddrs128(mem,  ivp,  iv_b,   1, memTaint, Public);
         validSrcAddrs128(mem,  inp,  in_b, len, memTaint, Secret);
         validDstAddrs128(mem, outp, out_b, len, memTaint, Secret);
         validDstAddrs128(mem, rbp, scratch_b, 8, memTaint, Secret);
@@ -4637,26 +4637,26 @@ procedure AES_GCM_decrypt_6mult(
 
         // Counter updated
         old(len) < pow2_32 /\
-        buffer128_read(iv_b, 0, mem) == reverse_bytes_quad32(inc32lite(old(T1), old(len)));
+        buffer128_read(scratch_b, 2, mem) == reverse_bytes_quad32(inc32lite(old(T1), old(len)));
 {
     if (len == 0) {
         AddLea64(Xip, Xip, 0x20);   // # size optimization
 
-//        Load128_buffer(T1, ivp, 0, Secret, iv_b, 0);    // # input counter value
+//        Load128_buffer(T1, ivp, 0, Public, iv_b, 0);    // # input counter value
 //        // TODO: Replace all of this with a single PinsrdImm(T1, 0x02000000, 3, counter)
 //        InitPshufbMask(Ii, r12);    // # borrow $Ii for .Lbswap_mask
 //        VPshufb(T1, T1, Ii);
 //        PinsrdImm(T1, 2, 0, counter);   // Directly set the counter in T1.lo0 (and counter) to 2, rather than read the existing value as OpenSSL does
 //        ctr_BE := T1;
         VPshufb(T1, T1, Ii);
-        Store128_buffer(ivp, T1, 0x00, Secret, iv_b, 0);
+        Store128_buffer(rbp, T1, 0x20, Secret, scratch_b, 2);
         gctr_partial_opaque_init(alg, s128(mem, in_b), s128(mem, out_b), key_words, old(T1));
     } else {
         let plain_quads := s128(mem, in_b);
 
         VPshufb(Xi, Xi, Ii);        // TODO: Why do we need a reverse here and at the end?
         let y_orig := reverse_bytes_quad32(Xi);
-        Store128_buffer(ivp, Xi, 0x00, Secret, iv_b, 0); // Save a copy of the interm. hash in Xi
+        Store128_buffer(rbp, Xi, 0x20, Secret, scratch_b, 2); // Save a copy of the interm. hash in Xi
         Add64(key, 0x80);           // # size optimization
         let ctr_BE := T1;
         Pextrq(counter, T1, 0);
@@ -4671,7 +4671,7 @@ procedure AES_GCM_decrypt_6mult(
 
         // TODO: OpenSSL does this to enable multiple incremental calls.  For now, we only handle one, so Xi = X0 = Mkfour 0 0 0 0
         //Load128_buffer(Xi, Xip, 0, Secret, hkeys_b, 0); // # load Xi
-        Load128_buffer(Xi, ivp, 0, Secret, iv_b, 0);      // # load interm. hash (Xi)
+        Load128_buffer(Xi, rbp, 0x20, Secret, scratch_b, 2);      // # load interm. hash (Xi)
         AddLea64(Xip, Xip, 0x20);   // # size optimization
 
         DecryptPrelude(in_b, scratch_b);
@@ -4684,7 +4684,7 @@ procedure AES_GCM_decrypt_6mult(
         assert to_quad32(of_quad32(Xi)) == Xi;
         let y_new := Loop6x_loop_decrypt(alg, h_LE, reverse_bytes_quad32(Xi), reverse_bytes_quad32(Xi), iv_b, in_b, in_b, out_b, scratch_b, key_words, round_keys, keys_b, hkeys_b, ctr_BE, inc32(ctr_BE, 0));
 
-        Store128_buffer(ivp, T1, 0x00, Secret, iv_b, 0);
+        Store128_buffer(rbp, T1, 0x20, Secret, scratch_b, 2);
 
         let out_snapshot := s128(mem, out_b);
 

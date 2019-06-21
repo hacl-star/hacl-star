@@ -835,11 +835,8 @@ procedure gcm_blocks(
     Load128_buffer(xmm1, iv_ptr, 0, Public, iv_b, 0);       // Load the j0 value (i.e., the result of calling compute_iv_BE)
 
 
-    ZeroXmm(xmm0);                // Limitation of the taint analysis: Need to zero xmm0 to prove that its value after InitPshufb is Public
     InitPshufbMask(xmm0, rax);    // # borrow $Ii for .Lbswap_mask
-
     VPshufb(xmm1, xmm1, xmm0);
-
 
     assert xmm1 == iv_BE;
     Store128_buffer(rbp, xmm1, 0x00, Secret, scratch_b, 0); // Save a copy, since we'll need it at the end to encrypt the hash

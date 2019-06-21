@@ -757,7 +757,7 @@ procedure gcm_blocks(
     auth_in := append(auth_in, old(s128(mem, in128x6_b)));
 
     // Line up arguments for gcm_blocks128 for remaining 128-bit blocks
-    Load128_buffer(xmm7, iv_ptr, 0, Public, iv_b, 0);
+    Load128_buffer(xmm7, rbp, 0x20, Secret, scratch_b, 2);
     Mov64(r8, keys_ptr);
     Load64_stack(rax, rsp, offset + 32);
     Load64_stack(rbx, rsp, offset + 40);
