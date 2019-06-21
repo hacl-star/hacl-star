@@ -111,27 +111,64 @@ val lemma_locations_of_ocmp : o:ocmp -> s1:machine_state -> s2:machine_state ->
     (requires (unchanged_at (locations_of_ocmp o) s1 s2))
     (ensures (eval_ocmp s1 o == eval_ocmp s2 o))
 
-/// Operations on [rw_set]s
-
-let rec intersect (#t:eqtype) (l1 l2:list t) : list t =
-  match l1 with
-  | [] -> []
-  | x :: xs -> if L.mem x l2 then x :: intersect xs l2 else intersect xs l2
-
-let rw_set_in_parallel (rw1 rw2:rw_set) : rw_set =
-  {
-    loc_reads = rw1.loc_reads `L.append` rw2.loc_reads;
-    loc_writes = rw1.loc_writes `L.append` rw2.loc_writes;
-    loc_constant_writes = rw1.loc_constant_writes `intersect` rw2.loc_constant_writes;
-  }
-
-let rw_set_in_series (rw1 rw2:rw_set) : rw_set =
-  (* TODO: Make this more precise. Currently we are toooo restrictive. *)
-  {
-    loc_reads = rw1.loc_reads `L.append` rw2.loc_reads;
-    loc_writes = rw1.loc_writes `L.append` rw2.loc_writes;
-    loc_constant_writes = rw1.loc_constant_writes `intersect` rw2.loc_constant_writes;
-  }
-
+(** Add more values into the reads portion of an [rw_set] *)
 let add_r_to_rw_set (r:locations) (rw:rw_set) : rw_set =
   { rw with loc_reads = r `L.append` rw.loc_reads }
+
+(** Add more values into the writes portion of an [rw_set] *)
+let add_w_to_rw_set (w:locations) (rw:rw_set) : rw_set =
+  { rw with loc_writes = w `L.append` rw.loc_reads }
+
+(** Merge two [rw_set]s that for executions that might go either
+    way. *)
+val rw_set_in_parallel : rw_set -> rw_set -> rw_set
+
+(** Merge two [rw_set]s that for executions go through the first one
+    and _then_ the second. *)
+val rw_set_in_series : rw_set -> rw_set -> rw_set
+
+(** [bounded_effects] is held correctly when adding to the reads *)
+val lemma_add_r_to_rw_set :
+  r:locations ->
+  rw:rw_set ->
+  f:st unit ->
+  Lemma
+    (requires (
+        (bounded_effects rw f)))
+    (ensures (
+        (bounded_effects (add_r_to_rw_set r rw) f)))
+
+(** [bounded_effects] is held correctly when adding to the writes *)
+val lemma_add_w_to_rw_set :
+  w:locations ->
+  rw:rw_set ->
+  f:st unit ->
+  Lemma
+    (requires (
+        (bounded_effects rw f)))
+    (ensures (
+        (bounded_effects (add_w_to_rw_set w rw) f)))
+
+(** [bounded_effects] is held correctly when applied in parallel *)
+val lemma_bounded_effects_parallel :
+  rw1:rw_set -> rw2:rw_set ->
+  f1:st unit -> f2:st unit ->
+  Lemma
+    (requires (
+        (bounded_effects rw1 f1) /\
+        (bounded_effects rw2 f2)))
+    (ensures (
+        (bounded_effects (rw_set_in_parallel rw1 rw2) f1) /\
+        (bounded_effects (rw_set_in_parallel rw1 rw2) f2)))
+
+(** [bounded_effects] is held correctly when applied in series *)
+val lemma_bounded_effects_series :
+  rw1:rw_set -> rw2:rw_set ->
+  f1:st unit -> f2:st unit ->
+  Lemma
+    (requires (
+        (bounded_effects rw1 f1) /\
+        (bounded_effects rw2 f2)))
+    (ensures (
+        let open Vale.X64.Machine_Semantics_s in
+        (bounded_effects (rw_set_in_series rw1 rw2) (f1;;f2))))
