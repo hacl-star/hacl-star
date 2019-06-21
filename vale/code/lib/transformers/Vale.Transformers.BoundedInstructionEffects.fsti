@@ -110,3 +110,28 @@ val lemma_locations_of_ocmp : o:ocmp -> s1:machine_state -> s2:machine_state ->
   Lemma
     (requires (unchanged_at (locations_of_ocmp o) s1 s2))
     (ensures (eval_ocmp s1 o == eval_ocmp s2 o))
+
+/// Operations on [rw_set]s
+
+let rec intersect (#t:eqtype) (l1 l2:list t) : list t =
+  match l1 with
+  | [] -> []
+  | x :: xs -> if L.mem x l2 then x :: intersect xs l2 else intersect xs l2
+
+let rw_set_in_parallel (rw1 rw2:rw_set) : rw_set =
+  {
+    loc_reads = rw1.loc_reads `L.append` rw2.loc_reads;
+    loc_writes = rw1.loc_writes `L.append` rw2.loc_writes;
+    loc_constant_writes = rw1.loc_constant_writes `intersect` rw2.loc_constant_writes;
+  }
+
+let rw_set_in_series (rw1 rw2:rw_set) : rw_set =
+  (* TODO: Make this more precise. Currently we are toooo restrictive. *)
+  {
+    loc_reads = rw1.loc_reads `L.append` rw2.loc_reads;
+    loc_writes = rw1.loc_writes `L.append` rw2.loc_writes;
+    loc_constant_writes = rw1.loc_constant_writes `intersect` rw2.loc_constant_writes;
+  }
+
+let add_r_to_rw_set (r:locations) (rw:rw_set) : rw_set =
+  { rw with loc_reads = r `L.append` rw.loc_reads }
