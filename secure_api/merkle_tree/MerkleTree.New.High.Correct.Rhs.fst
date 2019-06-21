@@ -100,9 +100,8 @@ val construct_rhs_acc_inv_ok:
                    (hash_seq_spec_full (S.head fhs) acc actd) == 
                  HRaw (snd crhs)))
         (decreases j)
-#reset-options "--z3rlimit 240 --max_fuel 2"
+#reset-options "--z3rlimit 240 --initial_fuel 2 --max_fuel 2 --max_ifuel 0"
 let rec construct_rhs_acc_inv_ok j fhs acc actd =
-  admit ();  //AR: 06/19: #1750 (FStar)
   if j = 1 then construct_rhs_acc_inv_ok_0 fhs acc actd
 
   else if j % 2 = 0 then begin
