@@ -4337,7 +4337,7 @@ procedure AES_GCM_encrypt_6mult(
         modifies_mem(loc_union(loc_buffer(iv_b),
                      loc_union(loc_buffer(scratch_b),
                                loc_buffer(out_b))), old(mem), mem);
-        buffer_modifies_specific128(scratch_b, old(mem), mem, 1, 7);
+        buffer_modifies_specific128(scratch_b, old(mem), mem, 1, 8);
         validSrcAddrs128(mem, Xip - 0x20, hkeys_b, 8, memTaint, Secret);
         key == old(key);
 
@@ -4625,7 +4625,7 @@ procedure AES_GCM_decrypt_6mult(
         modifies_mem(loc_union(loc_buffer(iv_b),
                      loc_union(loc_buffer(scratch_b),
                                loc_buffer(out_b))), old(mem), mem);
-        buffer_modifies_specific128(scratch_b, old(mem), mem, 1, 7);
+        buffer_modifies_specific128(scratch_b, old(mem), mem, 1, 8);
         validSrcAddrs128(mem, Xip - 0x20, hkeys_b, 8, memTaint, Secret);
         key == old(key);
 
