@@ -762,10 +762,6 @@ let lemma_add_r_to_rw_set r rw_old f =
   FStar.Classical.forall_intro_2 aux
 
 (* See fsti *)
-let lemma_add_w_to_rw_set w rw f =
-  admit ()
-
-(* See fsti *)
 let lemma_bounded_effects_parallel rw1 rw2 f1 f2 =
   let rw = rw_set_in_parallel rw1 rw2 in
   let aux s a :
