@@ -1125,6 +1125,40 @@ let lemma_instruction_exchange (i1 i2 : ins) (s1 s2 : machine_state) :
   lemma_eval_ins_equiv_states i1 (machine_eval_ins i2 s2) (machine_eval_ins i2 (filt_state s2));
   lemma_instruction_exchange' i1 i2 s1 s2
 
+/// Given that we have bounded instructions, we can compute bounds on
+/// [code] and [codes].
+
+let rec rw_set_of_code (c:safely_bounded_code) : rw_set =
+  match c with
+  | Ins i -> rw_set_of_ins i
+  | Block l -> rw_set_of_codes l
+  | IfElse c t f ->
+    add_r_to_rw_set
+      (locations_of_ocmp c)
+      (rw_set_in_parallel
+         (rw_set_of_code t)
+         (rw_set_of_code f))
+  | While c b ->
+    {
+      add_r_to_rw_set
+        (locations_of_ocmp c)
+        (rw_set_of_code b)
+      with
+        loc_constant_writes = [] (* Since the loop may not execute, we are not sure of any constant writes *)
+    }
+
+and rw_set_of_codes (c:safely_bounded_codes) : rw_set =
+  match c with
+  | [] -> {
+      loc_reads = [];
+      loc_writes = [];
+      loc_constant_writes = [];
+    }
+  | x :: xs ->
+    rw_set_in_series
+      (rw_set_of_code x)
+      (rw_set_of_codes xs)
+
 /// Given that we can perform simple swaps between instructions, we
 /// can do swaps between [code]s.
 
