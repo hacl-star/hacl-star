@@ -492,6 +492,7 @@ let map_blocks_multi #t #a h0 blocksize nb inp output spec_f impl_f =
   let spec h : GTot (i:size_nat{i < v nb} -> unit -> unit & Seq.lseq a (v blocksize)) =
     let iseq = as_seq h inp in
     Sequence.map_blocks_inner (v blocksize) (v nb) iseq (spec_f h) in
+  admit ();
   fill_blocks #a h0 blocksize nb output a_spec refl footprint spec impl_f;
   let h1 = ST.get() in
   [@ inline_let]
