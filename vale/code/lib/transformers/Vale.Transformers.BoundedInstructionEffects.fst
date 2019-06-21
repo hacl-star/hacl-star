@@ -745,8 +745,21 @@ let rec lemma_constant_on_execution_mem (locv:locations_with_values) (f:st unit)
   )
 
 (* See fsti *)
-let lemma_add_r_to_rw_set r rw f =
-  admit ()
+let lemma_add_r_to_rw_set r rw_old f =
+  let rw = add_r_to_rw_set r rw_old in
+  let aux s1 s2 :
+    Lemma
+      (requires (
+          (bounded_effects rw_old f) /\
+          (s1.ms_ok = s2.ms_ok /\ unchanged_at rw.loc_reads s1 s2)))
+      (ensures (
+          ((run f s1).ms_ok = (run f s2).ms_ok) /\
+          ((run f s1).ms_ok ==>
+           unchanged_at rw.loc_writes (run f s1) (run f s2)))) =
+    lemma_unchanged_at_append r rw_old.loc_reads s1 s2
+  in
+  let aux s1 = FStar.Classical.move_requires (aux s1) in
+  FStar.Classical.forall_intro_2 aux
 
 (* See fsti *)
 let lemma_add_w_to_rw_set w rw f =
