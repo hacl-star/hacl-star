@@ -708,3 +708,51 @@ let lemma_machine_eval_ins_st_bounded_effects i =
 
 (* See fsti *)
 let lemma_locations_of_ocmp o s1 s2 = ()
+
+let rec intersect (#t:eqtype) (l1 l2:list t) : list t =
+  match l1 with
+  | [] -> []
+  | x :: xs -> if L.mem x l2 then x :: intersect xs l2 else intersect xs l2
+
+(* See fsti *)
+let rw_set_in_parallel rw1 rw2 =
+  {
+    loc_reads = rw1.loc_reads `L.append` rw2.loc_reads;
+    loc_writes = rw1.loc_writes `L.append` rw2.loc_writes;
+    loc_constant_writes = rw1.loc_constant_writes `intersect` rw2.loc_constant_writes;
+  }
+
+(* See fsti *)
+let rw_set_in_series rw1 rw2 =
+  (* TODO: Make this more precise. Currently we are toooo restrictive. *)
+  {
+    loc_reads = rw1.loc_reads `L.append` rw2.loc_reads;
+    loc_writes = rw1.loc_writes `L.append` rw2.loc_writes;
+    loc_constant_writes = rw1.loc_constant_writes `intersect` rw2.loc_constant_writes;
+  }
+
+let rec lemma_constant_on_execution_mem (locv:locations_with_values) (f:st unit) (s:machine_state)
+    (l:location{hasEq (location_val_t l)}) (v:location_val_t l) :
+  Lemma
+    (requires (
+        (run f s).ms_ok /\
+        (constant_on_execution locv f s) /\
+        (L.mem (|l,v|) locv)))
+    (ensures (eval_location l (run f s) = v)) =
+  let (|l1,v1|) :: xs = locv in
+  if l = l1 && v = v1 then () else (
+    lemma_constant_on_execution_mem xs f s l v
+  )
+
+(* See fsti *)
+let lemma_add_r_to_rw_set r rw f =
+  admit ()
+
+(* See fsti *)
+let lemma_add_w_to_rw_set w rw f =
+  admit ()
+
+(* See fsti *)
+let lemma_bounded_effects_parallel rw1 rw2 f1 f2 = admit ()
+(* See fsti *)
+let lemma_bounded_effects_series rw1 rw2 f1 f2 = admit ()
