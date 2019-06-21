@@ -5,9 +5,6 @@ open Vale.X64.Leakage_s
 open Vale.X64.Leakage_Helpers
 open Vale.X64.Leakage_Ins
 
-open FStar.IO
-open Vale.X64.Print_s
-
 unfold let machine_eval_ocmp = S.machine_eval_ocmp
 unfold let machine_eval_code = S.machine_eval_code
 unfold let machine_eval_codes = S.machine_eval_codes
@@ -169,9 +166,7 @@ let rec check_if_block_consumes_fixed_time (block:S.codes) (ts:analysis_taints) 
 
 and check_if_code_consumes_fixed_time (code:S.code) (ts:analysis_taints) : bool & analysis_taints =
   match code with
-  | Ins ins ->  let b, ts = check_if_ins_consumes_fixed_time ins ts in
-    if not b then let _ = debug_print_string ("Ins failing " ^ print_ins ins gcc) in b, ts
-    else b, ts
+  | Ins ins ->  let b, ts = check_if_ins_consumes_fixed_time ins ts in b, ts
 
   | Block block -> check_if_block_consumes_fixed_time block ts
 
@@ -179,24 +174,19 @@ and check_if_code_consumes_fixed_time (code:S.code) (ts:analysis_taints) : bool 
     let o1 = operand_taint 0 (S.get_fst_ocmp ifCond) ts in
     let o2 = operand_taint 0 (S.get_snd_ocmp ifCond) ts in
     let predTaint = merge_taint o1 o2 in
-    if (Secret? predTaint) then 
-      let _ = debug_print_string (let s, _ = print_code code 0 gcc in "pred failing " ^ s) in (false, ts)
+    if (Secret? predTaint) then (false, ts)
     else
       let o1Public = operand_does_not_use_secrets (S.get_fst_ocmp ifCond) ts in
-      if (not o1Public) then
-      let _ = debug_print_string (let s, _ = print_code code 0 gcc in "left op failing " ^s) in (false, ts)
+      if (not o1Public) then (false, ts)
       else
       let o2Public = operand_does_not_use_secrets (S.get_snd_ocmp ifCond) ts in
-      if (not o2Public) then 
-      let _ = debug_print_string (let s, _ = print_code code 0 gcc in "right op failnig " ^s) in (false, ts)      
+      if (not o2Public) then (false, ts)      
       else
       let validIfTrue, tsIfTrue = check_if_code_consumes_fixed_time ifTrue ts in
-      if (not validIfTrue) then
-      let _ = debug_print_string (let s, _ = print_code code 0 gcc in "true branch failing " ^ s) in (false, ts)
+      if (not validIfTrue) then (false, ts)
       else
       let validIfFalse, tsIfFalse = check_if_code_consumes_fixed_time ifFalse ts in
-      if (not validIfFalse) then
-      let _ = debug_print_string (let s, _ = print_code code 0 gcc in "false branch failing " ^ s) in (false, ts)
+      if (not validIfFalse) then (false, ts)
       else
       (true, combine_taint_states tsIfTrue tsIfFalse)
 
