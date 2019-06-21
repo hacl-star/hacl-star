@@ -56,37 +56,45 @@ val four_to_seq_BE (#a:Type) (x:four a) : Pure (seq4 a)
     index s 0 == x.hi3
   )
 
-let seq_two_to_seq_LE (#a:Type) (x:seq (two a)) : seq a =
+[@"opaque_to_smt"]
+let seq_two_to_seq_LE (#a:Type) (x:seq (two a)) : (z:seq a{length z == length x * 2}) =
   let f (n:nat{n < length x * 2}) = two_select (index x (n / 2)) (n % 2) in
   init (length x * 2) f
 
-let seq_two_to_seq_BE (#a:Type) (x:seq (two a)) : seq a =
+[@"opaque_to_smt"]
+let seq_two_to_seq_BE (#a:Type) (x:seq (two a)) : (z:seq a{length z == length x * 2}) =
   let f (n:nat{n < length x * 2}) = two_select (index x (n / 2)) (1 - n % 2) in
   init (length x * 2) f
 
-let seq_four_to_seq_LE (#a:Type) (x:seq (four a)) : seq a =
+[@"opaque_to_smt"]
+let seq_four_to_seq_LE (#a:Type) (x:seq (four a)) : (z:seq a{length z == length x * 4}) =
   let f (n:nat{n < length x * 4}) = four_select (index x (n / 4)) (n % 4) in
   init (length x * 4) f
 
-let seq_four_to_seq_BE (#a:Type) (x:seq (four a)) : seq a =
+[@"opaque_to_smt"]
+let seq_four_to_seq_BE (#a:Type) (x:seq (four a)) : (z:seq a{length z == length x * 4}) =
   let f (n:nat{n < length x * 4}) = four_select (index x (n / 4)) (3 - n % 4) in
   init (length x * 4) f
 
-let seq_to_seq_two_LE (#a:Type) (x:seq a{length x % 2 == 0}) : seq (two a) =
+[@"opaque_to_smt"]
+let seq_to_seq_two_LE (#a:Type) (x:seq a{length x % 2 == 0}) : (z:seq (two a){length z == length x / 2}) =
   let f (n:nat{n < length x / 2}) = Mktwo (index x (n * 2)) (index x (n * 2 + 1)) in
   init (length x / 2) f
 
-let seq_to_seq_two_BE (#a:Type) (x:seq a{length x % 2 == 0}) : seq (two a) =
+[@"opaque_to_smt"]
+let seq_to_seq_two_BE (#a:Type) (x:seq a{length x % 2 == 0}) : (z:seq (two a){length z == length x / 2}) =
   let f (n:nat{n < length x / 2}) = Mktwo (index x (n * 2 + 1)) (index x (n * 2)) in
   init (length x / 2) f
 
-let seq_to_seq_four_LE (#a:Type) (x:seq a{length x % 4 == 0}) : seq (four a) =
+[@"opaque_to_smt"]
+let seq_to_seq_four_LE (#a:Type) (x:seq a{length x % 4 == 0}) : (z:seq (four a){length z == length x / 4}) =
   let f (n:nat{n < length x / 4}) = Mkfour
     (index x (n * 4)) (index x (n * 4 + 1)) (index x (n * 4 + 2)) (index x (n * 4 + 3))
     in
   init (length x / 4) f
 
-let seq_to_seq_four_BE (#a:Type) (x:seq a{length x % 4 == 0}) : seq (four a) =
+[@"opaque_to_smt"]
+let seq_to_seq_four_BE (#a:Type) (x:seq a{length x % 4 == 0}) : (z:seq (four a){length z == length x / 4}) =
   let f (n:nat{n < length x / 4}) = Mkfour
     (index x (n * 4 + 3)) (index x (n * 4 + 2)) (index x (n * 4 + 1)) (index x (n * 4))
     in
