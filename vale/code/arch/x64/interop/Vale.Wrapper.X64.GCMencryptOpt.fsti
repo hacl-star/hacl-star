@@ -75,7 +75,7 @@ let encrypt_opt_stdcall_st (a: algorithm { a = AES_128 \/ a = AES_256 }) =
     (requires fun h0 ->
       B.disjoint tag_b out_b /\ B.disjoint tag_b hkeys_b /\
       B.disjoint tag_b plain_b /\ B.disjoint tag_b auth_b /\
-      disjoint_or_eq tag_b iv_b /\ disjoint_or_eq tag_b keys_b /\
+      B.disjoint tag_b iv_b /\ disjoint_or_eq tag_b keys_b /\
 
       B.disjoint iv_b keys_b /\ B.disjoint iv_b out_b /\
       B.disjoint iv_b plain_b /\ B.disjoint iv_b hkeys_b /\

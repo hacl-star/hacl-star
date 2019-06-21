@@ -629,7 +629,7 @@ procedure Compute_iv(
 
 
 
-#reset-options "--z3rlimit 300"
+#reset-options "--z3rlimit 600"
 procedure gcm_blocks(
         inline alg:algorithm,
         inline offset:int,
@@ -684,7 +684,7 @@ procedure gcm_blocks(
 
         validSrcAddrs128(mem,     auth_ptr,     auth_b, auth_len, memTaint, Secret);
         validSrcAddrs128(mem,   abytes_ptr,   abytes_b,        1, memTaint, Secret);
-        validDstAddrs128(mem,       iv_ptr,       iv_b,        1, memTaint, Secret);
+        validDstAddrs128(mem,       iv_ptr,       iv_b,        1, memTaint, Public);
         validSrcAddrs128(mem,  in128x6_ptr,  in128x6_b, len128x6, memTaint, Secret);
         validDstAddrs128(mem, out128x6_ptr, out128x6_b, len128x6, memTaint, Secret);
         validSrcAddrs128(mem,    in128_ptr,    in128_b,   len128, memTaint, Secret);
@@ -832,16 +832,25 @@ procedure gcm_blocks(
     let ctr_BE_1:quad32 := iv_BE;
     let ctr_BE_2:quad32 := inc32(iv_BE, 1);
 
-    Load128_buffer(xmm1, iv_ptr, 0, Secret, iv_b, 0);       // Load the j0 value (i.e., the result of calling compute_iv_BE)
+    Load128_buffer(xmm1, iv_ptr, 0, Public, iv_b, 0);       // Load the j0 value (i.e., the result of calling compute_iv_BE)
+
+
+    ZeroXmm(xmm0);                // Limitation of the taint analysis: Need to zero xmm0 to prove that its value after InitPshufb is Public
     InitPshufbMask(xmm0, rax);    // # borrow $Ii for .Lbswap_mask
+
     VPshufb(xmm1, xmm1, xmm0);
+
+
     assert xmm1 == iv_BE;
     Store128_buffer(rbp, xmm1, 0x00, Secret, scratch_b, 0); // Save a copy, since we'll need it at the end to encrypt the hash
     ghost var j0 := xmm1;
     Load_one_lsb(xmm10);
+
     VPaddd(xmm1, xmm1, xmm10);
 
     //assert xmm1 == ctr_BE_2;
+
+
     AES_GCM_encrypt_6mult(alg, h, iv_b, in128x6_b, out128x6_b, scratch_b, key, round_keys, keys_b, hkeys_b);
     let y_cipher128x6 := xmm8;
     ghost var auth_in := auth_quad_seq;
@@ -849,7 +858,7 @@ procedure gcm_blocks(
     auth_in := append(auth_in, s128(mem, out128x6_b));
 
     // Line up arguments for gcm_blocks128 for remaining 128-bit blocks
-    Load128_buffer(xmm7, iv_ptr, 0, Secret, iv_b, 0);
+    Load128_buffer(xmm7, iv_ptr, 0, Public, iv_b, 0);
     Mov64(r8, keys_ptr);
     Load64_stack(rax, rsp, offset + 32);
     Load64_stack(rbx, rsp, offset + 40);
@@ -998,7 +1007,7 @@ procedure gcm_blocks_wrapped(
 
         validSrcAddrs128(mem,     auth_ptr,     auth_b, auth_len, memTaint, Secret);
         validSrcAddrs128(mem,   abytes_ptr,   abytes_b,        1, memTaint, Secret);
-        validDstAddrs128(mem,       iv_ptr,       iv_b,        1, memTaint, Secret);
+        validDstAddrs128(mem,       iv_ptr,       iv_b,        1, memTaint, Public);
         validSrcAddrs128(mem,  in128x6_ptr,  in128x6_b, len128x6, memTaint, Secret);
         validDstAddrs128(mem, out128x6_ptr, out128x6_b, len128x6, memTaint, Secret);
         validSrcAddrs128(mem,    in128_ptr,    in128_b,   len128, memTaint, Secret);
@@ -1433,7 +1442,7 @@ procedure gcm_blocks_stdcall(
 
         validSrcAddrs128(mem,     auth_ptr,     auth_b, auth_len, memTaint, Secret);
         validSrcAddrs128(mem,   abytes_ptr,   abytes_b,        1, memTaint, Secret);
-        validDstAddrs128(mem,       iv_ptr,       iv_b,        1, memTaint, Secret);
+        validDstAddrs128(mem,       iv_ptr,       iv_b,        1, memTaint, Public);
         validSrcAddrs128(mem,  in128x6_ptr,  in128x6_b, len128x6, memTaint, Secret);
         validDstAddrs128(mem, out128x6_ptr, out128x6_b, len128x6, memTaint, Secret);
         validSrcAddrs128(mem,    in128_ptr,    in128_b,   len128, memTaint, Secret);

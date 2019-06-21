@@ -52,7 +52,7 @@ val gcm256_encrypt_opt':
     (requires fun h0 ->
       B.disjoint tag_b out128x6_b /\ B.disjoint tag_b out128_b /\
       B.disjoint tag_b inout_b /\ B.disjoint tag_b hkeys_b /\
-      disjoint_or_eq tag_b auth_b /\ disjoint_or_eq tag_b iv_b /\
+      B.disjoint tag_b iv_b /\ disjoint_or_eq tag_b auth_b /\
       disjoint_or_eq tag_b keys_b /\ disjoint_or_eq tag_b abytes_b /\
       disjoint_or_eq tag_b in128x6_b /\ disjoint_or_eq tag_b in128_b /\
       disjoint_or_eq tag_b scratch_b /\
@@ -60,7 +60,7 @@ val gcm256_encrypt_opt':
       B.disjoint iv_b keys_b /\ B.disjoint iv_b scratch_b /\ B.disjoint iv_b in128x6_b /\
       B.disjoint iv_b out128x6_b /\ B.disjoint iv_b hkeys_b /\ B.disjoint iv_b in128_b /\
       B.disjoint iv_b out128_b /\ B.disjoint iv_b inout_b /\
-      disjoint_or_eq iv_b auth_b /\ disjoint_or_eq iv_b abytes_b /\
+      B.disjoint iv_b auth_b /\ B.disjoint iv_b abytes_b /\
 
       B.disjoint scratch_b keys_b /\ B.disjoint scratch_b in128x6_b /\
       B.disjoint scratch_b out128x6_b /\ B.disjoint scratch_b in128_b /\
@@ -202,6 +202,18 @@ let gcm256_encrypt_opt' key iv auth_b auth_bytes auth_num keys_b iv_b hkeys_b ab
 
   let h0 = get() in
 
+  B.disjoint_neq iv_b auth_b;
+  B.disjoint_neq iv_b keys_b;
+  B.disjoint_neq iv_b hkeys_b;
+  B.disjoint_neq iv_b abytes_b;
+  B.disjoint_neq iv_b in128x6_b;
+  B.disjoint_neq iv_b out128x6_b;
+  B.disjoint_neq iv_b in128_b;
+  B.disjoint_neq iv_b out128_b;
+  B.disjoint_neq iv_b inout_b;
+  B.disjoint_neq iv_b scratch_b;
+  B.disjoint_neq iv_b tag_b; 
+
   DV.length_eq (get_downview auth_b);
   DV.length_eq (get_downview keys_b);
   DV.length_eq (get_downview iv_b);
@@ -308,7 +320,7 @@ val gcm256_encrypt_opt_alloca:
 
       B.disjoint tag_b out_b /\ B.disjoint tag_b hkeys_b /\
       B.disjoint tag_b plain_b /\ B.disjoint tag_b auth_b /\
-      disjoint_or_eq tag_b iv_b /\ disjoint_or_eq tag_b keys_b /\
+      B.disjoint tag_b iv_b /\ disjoint_or_eq tag_b keys_b /\
 
       B.disjoint iv_b keys_b /\ B.disjoint iv_b out_b /\
       B.disjoint iv_b plain_b /\ B.disjoint iv_b hkeys_b /\
