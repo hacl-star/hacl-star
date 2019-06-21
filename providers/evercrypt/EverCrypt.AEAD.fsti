@@ -55,11 +55,25 @@ val footprint_s: #a:alg -> state_s a -> GTot B.loc
 let footprint (#a:alg) (m: HS.mem) (s: state a) =
   B.(loc_union (loc_addr_of_buffer s) (footprint_s (B.deref m s)))
 
-unfold let loc_includes_union_l_footprint_s = EverCrypt.Hash.loc_includes_union_l_footprint_s
-unfold let loc_in = EverCrypt.Hash.loc_in
-unfold let loc_unused_in = EverCrypt.Hash.loc_unused_in
-unfold let fresh_loc = EverCrypt.Hash.fresh_loc
-unfold let fresh_is_disjoint = EverCrypt.Hash.fresh_is_disjoint
+// TR: the following pattern is necessary because, if we generically
+// add such a pattern directly on `loc_includes_union_l`, then
+// verification will blowup whenever both sides of `loc_includes` are
+// `loc_union`s. We would like to break all unions on the
+// right-hand-side of `loc_includes` first, using
+// `loc_includes_union_r`.  Here the pattern is on `footprint_s`,
+// because we already expose the fact that `footprint` is a
+// `loc_union`. (In other words, the pattern should be on every
+// smallest location that is not exposed to be a `loc_union`.)
+
+let loc_includes_union_l_footprint_s
+  (l1 l2: B.loc) (#a: alg) (s: state_s a)
+: Lemma
+  (requires (
+    B.loc_includes l1 (footprint_s s) \/ B.loc_includes l2 (footprint_s s)
+  ))
+  (ensures (B.loc_includes (B.loc_union l1 l2) (footprint_s s)))
+  [SMTPat (B.loc_includes (B.loc_union l1 l2) (footprint_s s))]
+= B.loc_includes_union_l l1 l2 (footprint_s s)
 
 val invariant_s: (#a:alg) -> HS.mem -> state_s a -> Type0
 let invariant (#a:alg) (m: HS.mem) (s: state a) =
@@ -73,7 +87,7 @@ val invariant_loc_in_footprint
   (m: HS.mem)
 : Lemma
   (requires (invariant m s))
-  (ensures (loc_in (footprint m s) m))
+  (ensures (B.loc_in (footprint m s) m))
   [SMTPat (invariant m s)]
 
 val frame_invariant: #a:alg -> l:B.loc -> s:state a -> h0:HS.mem -> h1:HS.mem -> Lemma
@@ -124,7 +138,7 @@ let create_in_st (a: alg) =
 
           // Memory stuff
           B.(modifies (loc_buffer dst) h0 h1) /\
-          fresh_loc (footprint h1 s) h0 h1 /\
+          B.fresh_loc (footprint h1 s) h0 h1 /\
           B.(loc_includes (loc_region_only true r) (footprint h1 s)) /\
           freeable h1 s /\
 
