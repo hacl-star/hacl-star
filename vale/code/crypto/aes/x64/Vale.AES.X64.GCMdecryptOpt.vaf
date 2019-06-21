@@ -743,6 +743,8 @@ procedure gcm_blocks(
     let ctr_BE_2:quad32 := inc32(iv_BE, 1);
 
     Load128_buffer(xmm1, iv_ptr, 0, Public, iv_b, 0);       // Load the j0 value (i.e., the result of calling compute_iv_BE)
+
+    ZeroXmm(xmm0); // Limitation of the taint analysis: It will not detect that InitPshufbMask can be public otherwise
     InitPshufbMask(xmm0, rax);    // # borrow $Ii for .Lbswap_mask
     VPshufb(xmm1, xmm1, xmm0);
     //assert xmm1 == iv_BE;

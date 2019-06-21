@@ -1,8 +1,8 @@
 [
-  "ö\u001e.3nÏDùÑŠnû5J©¶",
+  "\u0012D\u0002Å}ò‰áEIÈB!L—ð",
   [
     [
-      "Spec.AEAD.uu___4",
+      "Spec.AEAD.uu___5",
       1,
       0,
       0,
@@ -27,7 +27,7 @@
         "fuel_guarded_inversion_Spec.AEAD.alg"
       ],
       0,
-      "4b98c07b70d7943fd0ecbbc17ce83c86"
+      "c72b454b857afadc8db9de821b73eb78"
     ],
     [
       "Spec.AEAD.tag_length",
@@ -46,7 +46,32 @@
         "fuel_guarded_inversion_Spec.AEAD.alg"
       ],
       0,
-      "58c4e57dd6f39128748c6af06a46ffae"
+      "dbcfea8ef1e1c135fec499e3c82895f6"
+    ],
+    [
+      "Spec.AEAD.iv_length",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "bool_inversion",
+        "constructor_distinct_FStar.Integers.Signed",
+        "constructor_distinct_FStar.Integers.W128",
+        "constructor_distinct_FStar.Integers.Winfinite",
+        "disc_equation_Spec.AEAD.AES128_GCM",
+        "disc_equation_Spec.AEAD.AES256_GCM",
+        "disc_equation_Spec.AEAD.CHACHA20_POLY1305",
+        "equality_tok_FStar.Integers.W128@tok",
+        "equality_tok_FStar.Integers.Winfinite@tok",
+        "equation_FStar.Integers.width_of_sw",
+        "equation_Spec.AEAD.is_supported_alg",
+        "equation_Spec.AEAD.supported_alg",
+        "projection_inverse_FStar.Integers.Signed__0",
+        "refinement_interpretation_Tm_refine_d2d399e4b0cd736cb6130361c7530aa2",
+        "typing_Spec.AEAD.is_supported_alg"
+      ],
+      0,
+      "d1511e161cb65aa18d90ab598b86197d"
     ],
     [
       "Spec.AEAD.ekv_length",
@@ -64,7 +89,7 @@
         "typing_Spec.AEAD.is_supported_alg"
       ],
       0,
-      "e60cbfb8137adc2ab60fccab166e1253"
+      "a1694e646e455b9c6023044a1b79838b"
     ],
     [
       "Spec.AEAD.max_length",
@@ -92,7 +117,7 @@
         "typing_Prims.pow2", "typing_Spec.AEAD.is_supported_alg"
       ],
       0,
-      "5bb13fde23f69b0e97df6321847e884c"
+      "58e5b21bfee056f538b76d945c48896e"
     ],
     [
       "Spec.AEAD.lbytes",
@@ -101,7 +126,16 @@
       1,
       [ "@query" ],
       0,
-      "6116bf6a6fd630e9f95b866ec7625a04"
+      "06361f1d6058c5a27204b8af21698d3e"
+    ],
+    [
+      "Spec.AEAD.iv",
+      1,
+      0,
+      0,
+      [ "@query" ],
+      0,
+      "f24203261fa249f1e913aaec698074ff"
     ],
     [
       "Spec.AEAD.correctness",
@@ -123,7 +157,7 @@
         "typing_Spec.AEAD.encrypt"
       ],
       0,
-      "6d12138a1f8d97508bdb15cf3047dbe2"
+      "6411e0303605355a41d5f3ed9b020f16"
     ]
   ]
 ]
