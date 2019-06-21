@@ -1057,9 +1057,26 @@ let lemma_feq_bounded_effects (rw:rw_set) (f1 f2:st unit) :
     )
   )
 
-let lemma_machine_eval_ins_bounded_effects (i:ins) :
+let rec safely_bounded_code_p (c:code) : bool =
+  match c with
+  | Ins i -> safely_bounded i
+  | Block l -> safely_bounded_codes_p l
+  | IfElse c t f -> safely_bounded_code_p t && safely_bounded_code_p f
+  | While c b -> safely_bounded_code_p b
+
+and safely_bounded_codes_p (l:codes) : bool =
+  match l with
+  | [] -> true
+  | x :: xs ->
+    safely_bounded_code_p x &&
+    safely_bounded_codes_p xs
+
+type safely_bounded_ins = (i:ins{safely_bounded i})
+type safely_bounded_code = (c:code{safely_bounded_code_p c})
+type safely_bounded_codes = (c:codes{safely_bounded_codes_p c})
+
+let lemma_machine_eval_ins_bounded_effects (i:safely_bounded_ins) :
   Lemma
-    (requires (safely_bounded i))
     (ensures (bounded_effects (rw_set_of_ins i) (wrap_ss (machine_eval_ins i)))) =
   lemma_machine_eval_ins_st_bounded_effects i;
   lemma_feq_bounded_effects (rw_set_of_ins i) (machine_eval_ins_st i) (wrap_ss (machine_eval_ins i))
