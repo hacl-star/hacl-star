@@ -555,7 +555,7 @@ procedure Compute_iv(
 
         // Framing
         modifies_buffer128(j0_b, old(mem), mem);
-        num_bytes == 12 ==>
+        old(num_bytes) == 12 ==>
             rbx == old(rbx) /\
             len == old(len) /\
             j0_ptr == old(j0_ptr) /\
@@ -1719,22 +1719,58 @@ procedure compute_iv_stdcall(
         !win ==> r14 == old(r14);
         !win ==> r15 == old(r15);
 {
-    save_registers(win);
-
     inline if (win) {
-      Mov64(rdi, rcx);
-      Mov64(rsi, rdx);
-      Mov64(rdx, r8);
-      Mov64(rcx, r9);
+      if (rdx == 12) {
+        Push_Secret(rdi);
+        Push_Secret(rsi);
+
+        Mov64(rdi, rcx);
+        Mov64(rsi, rdx);
+        Mov64(rdx, r8);
+        Mov64(rcx, r9);
+
+        assert rsp + 16 == old(rsp);
+        assert valid_src_stack64(rsp + 16 + 40, stack);     
+        Load64_stack(r8, rsp, 16 + 40 + 0);
+        Load64_stack(r9, rsp, 16 + 40 + 8);
+
+        Compute_iv(iv_b, iv_extra_b, iv, j0_b, hkeys_b);
+
+        Pop_Secret(rsi);
+        Pop_Secret(rdi);
+
+      } else {
+        save_registers(win);
+
+        Mov64(rdi, rcx);
+        Mov64(rsi, rdx);
+        Mov64(rdx, r8);
+        Mov64(rcx, r9);
+
+        assert rsp + 224 == old(rsp);
+        assert valid_src_stack64(rsp + 224 + 40, stack);     
+        Load64_stack(r8, rsp, 224 + 40 + 0);
+        Load64_stack(r9, rsp, 224 + 40 + 8);
+
+        Compute_iv(iv_b, iv_extra_b, iv, j0_b, hkeys_b);
+
+        restore_registers(win, old(rsp), old(xmm6), old(xmm7), old(xmm8), old(xmm9), old(xmm10), old(xmm11), old(xmm12), old(xmm13), old(xmm14), old(xmm15));
+        
+
+      }
+    } else {
+      // Linux
+      if (rsi == 12) {
+
+        Compute_iv(iv_b, iv_extra_b, iv, j0_b, hkeys_b);
+
+      } else {
       
-      assert rsp + 224 == old(rsp);
-      assert valid_src_stack64(rsp + 224 + 40, stack);     
-      Load64_stack(r8, rsp, 224 + 40 + 0);
-      Load64_stack(r9, rsp, 224 + 40 + 8);
+        save_registers(win);
+        Compute_iv(iv_b, iv_extra_b, iv, j0_b, hkeys_b);
+        restore_registers(win, old(rsp), old(xmm6), old(xmm7), old(xmm8), old(xmm9), old(xmm10), old(xmm11), old(xmm12), old(xmm13), old(xmm14), old(xmm15));
+        
+      }
     }
-
-    Compute_iv(iv_b, iv_extra_b, iv, j0_b, hkeys_b);
-
-    restore_registers(win, old(rsp), old(xmm6), old(xmm7), old(xmm8), old(xmm9), old(xmm10), old(xmm11), old(xmm12), old(xmm13), old(xmm14), old(xmm15));
     
 }    
