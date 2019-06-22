@@ -532,6 +532,71 @@ let qtesla_keygen_sample_gauss_poly randomness_extended nonce p k =
     assert(loc_includes (loc e) (loc ek2))*)
 
 private inline_for_extraction noextract
+val qtesla_keygen_compute_tk:
+    t : poly_k
+  -> a : poly_k
+  -> e : poly_k
+  -> s_ntt : poly
+  -> k : UI32.t{UI32.v k < v params_k}
+  -> Stack unit
+    (requires fun h -> let bufs = [bb t; bb a; bb e; bb s_ntt] in 
+                    FStar.BigOps.big_and (live_buf h) bufs /\ FStar.BigOps.pairwise_and disjoint_buf bufs /\
+                    is_poly_k_montgomery h a /\ is_poly_k_sk h e /\
+                    is_poly_k_pk_i h t (UI32.v k * v params_n))
+    (ensures fun h0 _ h1 -> modifies1 t h0 h1 /\ is_poly_k_pk_i h1 t (UI32.v k * v params_n + v params_n))
+
+let qtesla_keygen_compute_tk t a e s_ntt k =
+    let hLoopStart = ST.get () in
+    let tk:poly = index_poly t k in
+    let ak:poly = index_poly a k in
+    let ek:poly = index_poly e k in
+    poly_mul tk ak s_ntt;
+    poly_add_correct tk tk ek;
+    let hLoopEnd = ST.get () in
+    assume(is_poly_pk hLoopEnd tk);
+    assert(forall (i:nat{i < UI32.v k * v params_n}) . {:pattern bget hLoopEnd t i} bget hLoopStart t i == bget hLoopEnd t i);
+    assert(tk == gsub t (k *! params_n) params_n);
+    assert(forall (i:nat{i < v params_n}) . is_pk (bget hLoopEnd tk i));
+    assert(forall (i:nat{i >= v k * v params_n /\ i < v k * v params_n + v params_n}) . bget hLoopEnd t i == bget hLoopEnd tk (i - v k * v params_n))
+
+private inline_for_extraction noextract
+val qtesla_keygen_do_while:
+    nonce : lbuffer uint32 (size 1)
+  -> e : poly_k
+  -> randomness_extended : lbuffer uint8 randomness_extended_size
+  -> k : UI32.t{UI32.v k < v params_k}
+  -> Stack bool
+    (requires fun h -> live h nonce /\ live h e /\ live h randomness_extended /\
+                    disjoint nonce e /\ disjoint nonce randomness_extended /\ disjoint e randomness_extended /\
+                    is_poly_k_sampler_output_i h e (UI32.v k * v params_n))
+    (ensures fun h0 b h1 -> modifies2 nonce e h0 h1 /\ (b ==> is_poly_k_sampler_output_i h1 e ((UI32.v k + 1) * v params_n)))
+
+let qtesla_keygen_do_while nonce e randomness_extended k =
+    let ek = index_poly e k in
+    qtesla_keygen_sample_gauss_poly randomness_extended nonce ek k;
+    let hAfterSample = ST.get () in
+    assert(is_poly_sampler_output hAfterSample ek);            
+    let res = not (check_ES ek params_Le) in
+    let hLoopEnd = ST.get () in
+    assert(is_poly_equal hAfterSample hLoopEnd ek);
+    assert(is_poly_sampler_output hLoopEnd ek);
+    assert(ek == gsub e (k *! params_n) params_n);
+    assert(forall (i:nat{i < v params_n}) . is_sampler_output (bget hLoopEnd ek i));
+    assert(forall (i:nat{i >= UI32.v k * v params_n /\ i < UI32.v k * v params_n + v params_n}) . 
+           bget hLoopEnd e i == bget hLoopEnd ek (i - UI32.v k * v params_n));
+    assert(forall (i:nat{i >= UI32.v k * v params_n /\ i < UI32.v k * v params_n + v params_n}) . 
+           is_sampler_output (bget hLoopEnd e i));
+    assert(forall (i:nat{i < UI32.v k * v params_n + v params_n}) . is_sampler_output (bget hLoopEnd e i));
+    assert(is_poly_k_sampler_output_i hLoopEnd e (UI32.v k * v params_n));
+    assert(is_poly_k_sampler_output_i hLoopEnd e (UI32.v k * v params_n + v params_n));
+    assert(is_poly_k_sampler_output_i hLoopEnd e ((UI32.v k + 1) * v params_n));
+    res
+
+let lemma_poly_k_sampler_output_sk (h:HS.mem) (e:poly_k) : Lemma
+    (requires is_poly_k_sampler_output h e)
+    (ensures is_poly_k_sk h e) = ()
+
+private inline_for_extraction noextract
 val qtesla_keygen_:
     randomness: lbuffer uint8 crypto_randombytes
   -> pk: lbuffer uint8 crypto_publickeybytes
@@ -545,6 +610,7 @@ val qtesla_keygen_:
 
 let qtesla_keygen_ randomness pk sk =
   push_frame();
+  assume(v randomness_extended_size > 0);
   let randomness_extended = create randomness_extended_size (u8 0) in
   let e:poly_k = poly_k_create () in
   let s:poly = poly_create () in
@@ -556,24 +622,35 @@ let qtesla_keygen_ randomness pk sk =
   let h0 = ST.get () in
   assert(modifies0 h0 h0);
   for (size 0) params_k
-      (fun h _ -> live h nonce /\ live h e /\ live h randomness_extended /\ modifies2 nonce e h0 h)
+      (fun h k -> live h nonce /\ live h e /\ live h randomness_extended /\ modifies2 nonce e h0 h /\ k <= v params_k /\
+               is_poly_k_sampler_output_i h e (k * v params_n))
       (fun k ->
         do_while
-          (fun h _ -> live h nonce /\ live h e /\ live h randomness_extended /\ modifies2 nonce e h0 h)
+          (fun h b -> live h nonce /\ live h e /\ live h randomness_extended /\ modifies2 nonce e h0 h /\ UI32.v k < v params_k /\
+                   is_poly_k_sampler_output_i h e (UI32.v k * v params_n) /\
+                   (b ==> is_poly_k_sampler_output_i h e ((UI32.v k + 1) * v params_n)))
           (fun _ ->
-            let ek = index_poly e k in
-            qtesla_keygen_sample_gauss_poly randomness_extended nonce ek k;
-            not (check_ES ek params_Le)
-          )
-      ); 
+            qtesla_keygen_do_while nonce e randomness_extended k
+          );
+          let hLoopEnd = ST.get () in
+          assert(is_poly_k_sampler_output_i hLoopEnd e ((UI32.v k + 1) * v params_n))
+      );
   let h1 = ST.get () in
+  assert(is_poly_k_sampler_output h1 e);
+  assert(is_poly_k_sk h1 e);
   assert(modifies2 nonce e h0 h1);
   do_while
-      (fun h stop -> live h s /\ live h randomness_extended /\ live h nonce /\ modifies2 nonce s h1 h)
+      (fun h b -> live h s /\ live h randomness_extended /\ live h nonce /\ modifies2 nonce s h1 h /\
+               (b ==> is_poly_sampler_output h s))
       (fun _ ->
         qtesla_keygen_sample_gauss_poly randomness_extended nonce s params_k;
-        not (check_ES s params_Ls)
-      ); 
+        let hAfterSample = ST.get () in
+        assert(is_poly_sampler_output hAfterSample s);
+        let res = not (check_ES s params_Ls) in
+        let hLoopEnd = ST.get () in
+        assert(is_poly_equal hAfterSample hLoopEnd s);
+        res
+      );
   let h2 = ST.get () in
   assert(modifies3 nonce e s h0 h2);
   let rndsubbuffer = sub randomness_extended ((params_k +. (size 1)) *! crypto_seedbytes) (size 2 *! crypto_seedbytes) in
@@ -583,22 +660,27 @@ let qtesla_keygen_ randomness pk sk =
   poly_ntt s_ntt s;
   let h4 = ST.get () in
   assert(modifies (loc nonce |+| loc e |+| loc s |+| loc a |+| loc s_ntt) h0 h4);
-  C.Loops.for (size 0) params_k
-      (fun h _ -> live h t /\ live h a /\ live h s_ntt /\ live h e /\ modifies1 t h4 h)
+  assert(is_poly_k_equal h3 h4 a);
+  assert(is_poly_k_equal h1 h4 e);
+  for (size 0) params_k
+      (fun h k -> live h t /\ live h a /\ live h s_ntt /\ live h e /\ modifies1 t h4 h /\ k <= v params_k /\
+               is_poly_k_montgomery h a /\ is_poly_k_sk h e /\
+               is_poly_k_pk_i h t (k * v params_n))
       (fun k ->
-          let tk:poly = index_poly t k in
-          let ak:poly = index_poly a k in
-          let ek:poly = index_poly e k in
-          poly_mul tk ak s_ntt;
-          poly_add_correct tk tk ek
-        );
+          let hLoopStart = ST.get () in
+          qtesla_keygen_compute_tk t a e s_ntt k;
+          let hLoopEnd = ST.get () in
+          assert(is_poly_k_equal hLoopStart hLoopEnd a);
+          assert(is_poly_k_equal hLoopStart hLoopEnd e)
+      );
 
   let h5 = ST.get () in
   assert(modifies (loc nonce |+| loc e |+| loc s |+| loc a |+| loc s_ntt |+| loc t) h0 h5);
   encode_or_pack_sk sk s e rndsubbuffer;
   let h6 = ST.get () in
   assert(modifies (loc nonce |+| loc e |+| loc s |+| loc a |+| loc s_ntt |+| loc t |+| loc sk) h0 h6);
-  assume(is_poly_k_pk h6 t);
+  assert(is_poly_k_equal h5 h6 t);
+  assert(is_poly_k_pk h6 t);
   encode_pk pk t (sub rndsubbuffer (size 0) crypto_seedbytes);
   let h7 = ST.get () in
   assert(modifies (loc nonce |+| loc e |+| loc s |+| loc a |+| loc s_ntt |+| loc t |+| loc sk |+| loc pk) h0 h7);
@@ -617,7 +699,7 @@ val qtesla_keygen:
     (ensures fun h0 _ h1 -> modifies3 R.state pk sk h0 h1)
 
 let qtesla_keygen pk sk =
-    //recall R.state;
+    recall R.state;
     push_frame();
     let randomness = create crypto_randombytes (u8 0) in
     R.randombytes_ crypto_randombytes randomness;
@@ -674,11 +756,15 @@ let sample_y_while_body y seed nblocks buf dmsp pos i =
     let i0 = i.(size 0) in
     // Heuristic parameter sets do four at once. Perf. But optional.
     let h1 = ST.get () in
-    assume(FStar.Int.fits (elem_v (to_elem 1 <<^ (params_b_bits +! size 1)) - 1) elem_n);
-    assume(is_elem (bufPosAsElem &^ ((to_elem 1 <<^ (params_b_bits +! size 1)) -^ to_elem 1)));
+    //assume(FStar.Int.fits (elem_v (to_elem 1 <<^ (params_b_bits +! size 1)) - 1) elem_n);
+    //assume(is_elem (bufPosAsElem &^ ((to_elem 1 <<^ (params_b_bits +! size 1)) -^ to_elem 1)));
+    Int.shift_left_value_lemma (elem_v (to_elem 1)) (v (params_b_bits +! size 1));
+    assert(elem_v (to_elem 1 <<^ (params_b_bits +! size 1)) = 1 * (pow2 (v (params_b_bits +! size 1))) @% (pow2 elem_n));
+    assume(1 * (pow2 (v (params_b_bits +! size 1))) @% (pow2 elem_n) >= 0);
+    assert(elem_v (to_elem 1 <<^ (params_b_bits +! size 1)) >= 0); 
     y.(i0) <- bufPosAsElem &^ ((to_elem 1 <<^ (params_b_bits +! size 1)) -^ to_elem 1);
     let h2 = ST.get () in
-    assume(is_elem ((bget h2 y (v i0)) -^ params_B));
+    assume(Int.fits ( (elem_v (bget h2 y (v i0))) - (elem_v params_B) ) elem_n);
     y.(i0) <- y.(i0) -^ params_B;
     if y.(i0) <> (to_elem 1 <<^ params_b_bits)
     then ( i.(size 0) <- i0 +. size 1 )
@@ -1669,7 +1755,7 @@ let test_z z =
     then 1l
     else 0l
 
-#push-options "--print_z3_statistics"
+//#push-options "--print_z3_statistics"
 private let lemma_subpoly_of_pk_is_pk (h: HS.mem) (pk: poly_k) (p: poly) (k: size_t{v k < v params_k}) : Lemma
     (requires is_poly_k_pk h pk /\ p == get_poly pk k)
     (ensures is_poly_pk h p) = 
@@ -1677,7 +1763,7 @@ private let lemma_subpoly_of_pk_is_pk (h: HS.mem) (pk: poly_k) (p: poly) (k: siz
     assert(p == gsub pk (k *! params_n) params_n);
     assert(forall (i:nat{i < v params_n}) . bget h p i == bget h pk (v k * v params_n + i));
     assert(forall (i:nat{i < v params_n}) . is_pk (bget h p i))
-#pop-options
+//#pop-options
 
 private inline_for_extraction noextract
 val qtesla_verify_decode_pk_compute_w:

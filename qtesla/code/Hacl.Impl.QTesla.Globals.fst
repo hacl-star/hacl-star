@@ -41,7 +41,8 @@ let is_corrected (e:elem) = -(elem_v params_q / 2) < elem_v e /\ elem_v e <= ele
 let is_sampler_output (e:elem) = let b = pow2 (v params_s_bits-1) in -b <= elem_v e /\ elem_v e < b
 let is_y_sampler_output (e:elem) = let b = elem_v params_B in -b <= elem_v e /\ elem_v e <= b
 let is_pk (e:elem) = 0 <= elem_v e /\ elem_v e < elem_v params_q
-let is_sk (e:elem) = -(pow2 (v params_s_bits)) <= elem_v e /\ elem_v e < pow2 (v params_s_bits)
+//let is_sk (e:elem) = -(pow2 (v params_s_bits)) <= elem_v e /\ elem_v e < pow2 (v params_s_bits)
+unfold let is_sk = is_sampler_output
 let is_pmq (e:elem) = let q = elem_v params_q in -q < elem_v e /\ elem_v e < q
 let is_z_accepted (e:elem) = let b = elem_v params_B in let s = elem_v params_U in -(b-s) <= elem_v e /\ elem_v e <= (b-s)
 let is_sparse_mul_output (e:elem) = (-65536) <= elem_v e /\ elem_v e <= 65536 // [-2^16, 2^16]; see sparse_mul for comments
@@ -52,7 +53,8 @@ let is_poly_corrected_i (h:HS.mem) (p:poly) (j:nat{j <= v params_n}) = forall (i
 let is_poly_sampler_output_i (h:HS.mem) (p:poly) (j:nat{j <= v params_n}) = forall (i:nat{i < j}). {:pattern is_sampler_output (bget h p i)} is_sampler_output (bget h p i)
 let is_poly_y_sampler_output_i (h:HS.mem) (p:poly) (j:nat{j <= v params_n}) = forall (i:nat{i < j}). {:pattern is_y_sampler_output (bget h p i)} is_y_sampler_output (bget h p i)
 let is_poly_pk_i (h:HS.mem) (p:poly) (j:nat{j <= v params_n}) = forall (i:nat{i < j}). {:pattern is_pk (bget h p i)} is_pk (bget h p i)
-let is_poly_sk_i (h:HS.mem) (p:poly) (j:nat{j <= v params_n}) = forall (i:nat{i < j}). {:pattern is_sk (bget h p i)} is_sk (bget h p i)
+//let is_poly_sk_i (h:HS.mem) (p:poly) (j:nat{j <= v params_n}) = forall (i:nat{i < j}). {:pattern is_sk (bget h p i)} is_sk (bget h p i)
+unfold let is_poly_sk_i = is_poly_sampler_output_i
 let is_poly_pmq_i (h:HS.mem) (p:poly) (j:nat{j <= v params_n}) = forall (i:nat{i < j}). {:pattern is_pmq (bget h p i)} is_pmq (bget h p i)
 let is_poly_z_accepted_i (h:HS.mem) (p:poly) (j:nat{j <= v params_n}) = forall (i:nat{i < j}). {:pattern is_z_accepted (bget h p i)} is_z_accepted (bget h p i)
 let is_poly_sparse_mul_output_i (h:HS.mem) (p:poly) (j:nat{j <= v params_n}) = forall (i:nat{i < j}). {:pattern is_sparse_mul_output (bget h p i)} is_sparse_mul_output (bget h p i)
@@ -62,14 +64,16 @@ let is_poly_k_montgomery_i (h:HS.mem) (p:poly_k) (j:nat{j <= v params_k * v para
 let is_poly_k_corrected_i (h:HS.mem) (p:poly_k) (j:nat{j <= v params_k * v params_n}) = forall (i:nat{i < j}). {:pattern is_corrected (bget h p i)} is_corrected (bget h p i)
 let is_poly_k_sampler_output_i (h:HS.mem) (p:poly_k) (j:nat{j <= v params_k * v params_n}) = forall (i:nat{i < j}). {:pattern is_sampler_output (bget h p i)} is_sampler_output (bget h p i)
 let is_poly_k_pk_i (h:HS.mem) (p:poly_k) (j:nat{j <= v params_k * v params_n}) = forall (i:nat{i < j}). {:pattern is_pk (bget h p i)} is_pk (bget h p i)
-let is_poly_k_sk_i (h:HS.mem) (p:poly_k) (j:nat{j <= v params_k * v params_n}) = forall (i:nat{i < j}). {:pattern is_sk (bget h p i)} is_sk (bget h p i)
+//let is_poly_k_sk_i (h:HS.mem) (p:poly_k) (j:nat{j <= v params_k * v params_n}) = forall (i:nat{i < j}). {:pattern is_sk (bget h p i)} is_sk (bget h p i)
+unfold let is_poly_k_sk_i = is_poly_sampler_output_i
 
 let is_poly_montgomery (h:HS.mem) (p:poly) = is_poly_montgomery_i h p (v params_n)
 let is_poly_corrected (h:HS.mem) (p:poly) = is_poly_corrected_i h p (v params_n)
 let is_poly_sampler_output (h:HS.mem) (p:poly) = is_poly_sampler_output_i h p (v params_n)
 let is_poly_y_sampler_output (h:HS.mem) (p:poly) = is_poly_y_sampler_output_i h p (v params_n)
 let is_poly_pk (h:HS.mem) (p:poly) = is_poly_pk_i h p (v params_n)
-let is_poly_sk (h:HS.mem) (p:poly) = is_poly_sk_i h p (v params_n)
+//let is_poly_sk (h:HS.mem) (p:poly) = is_poly_sk_i h p (v params_n)
+unfold let is_poly_sk = is_poly_sampler_output
 let is_poly_pmq (h:HS.mem) (p:poly) = is_poly_pmq_i h p (v params_n)
 let is_poly_z_accepted (h:HS.mem) (p:poly) = is_poly_z_accepted_i h p (v params_n)
 let is_poly_sparse_mul_output (h:HS.mem) (p:poly) = is_poly_sparse_mul_output_i h p (v params_n)
@@ -79,7 +83,8 @@ let is_poly_k_montgomery (h:HS.mem) (p:poly_k) = is_poly_k_montgomery_i h p (v p
 let is_poly_k_corrected (h:HS.mem) (p:poly_k) = is_poly_k_corrected_i h p (v params_k * v params_n)
 let is_poly_k_sampler_output (h:HS.mem) (p:poly_k) = is_poly_k_sampler_output_i h p (v params_k * v params_n)
 let is_poly_k_pk (h:HS.mem) (p:poly_k) = is_poly_k_pk_i h p (v params_k * v params_n)
-let is_poly_k_sk (h:HS.mem) (p:poly_k) = is_poly_k_sk_i h p (v params_k * v params_n)
+//let is_poly_k_sk (h:HS.mem) (p:poly_k) = is_poly_k_sk_i h p (v params_k * v params_n)
+unfold let is_poly_k_sk = is_poly_k_sampler_output
 
 let is_poly_equal (h0 h1:HS.mem) (p:poly) = 
     forall (i:nat{i < v params_n}) . {:pattern bget h1 p i} bget h0 p i == bget h1 p i
@@ -97,7 +102,6 @@ let is_e_sk (h:HS.mem) (e:lbuffer sparse_elem (params_n *! params_k)) =
     forall (i:nat{i < v params_n * v params_k}) . {:pattern is_sparse_elem_sk (bget h e i)} is_sparse_elem_sk (bget h e i)
 let is_e_equal (h0 h1:HS.mem) (e:lbuffer sparse_elem (params_n *! params_k)) =
     forall (i:nat{i < v params_n}) . {:pattern bget h1 e i} bget h0 e i == bget h1 e i
-
 
 (*let frame_is_poly_sampler_output_i (h0 h1: HS.mem) (p: poly) (i:nat{i <= v params_n}) (l:B.loc) : Lemma
     (requires is_poly_sampler_output_i h0 p i /\ modifies l h0 h1 /\ disjoint l (gsub p (size 0) (size i)))
