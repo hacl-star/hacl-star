@@ -714,10 +714,18 @@ let rec intersect (#t:eqtype) (l1 l2:list t) : list t =
   | [] -> []
   | x :: xs -> if L.mem x l2 then x :: intersect xs l2 else intersect xs l2
 
+let rec difference (#t:eqtype) (l1 l2:list t) : list t =
+  match l1 with
+  | [] -> []
+  | x :: xs -> if L.mem x l2 then difference xs l2 else x :: difference xs l2
+
+let sym_difference (#t:eqtype) (l1 l2:list t) : list t =
+  difference l1 l2 `L.append` difference l2 l1
+
 (* See fsti *)
 let rw_set_in_parallel rw1 rw2 =
   {
-    loc_reads = rw1.loc_reads `L.append` rw2.loc_reads;
+    loc_reads = sym_difference rw1.loc_writes rw2.loc_writes `L.append` (rw1.loc_reads `L.append` rw2.loc_reads);
     loc_writes = rw1.loc_writes `L.append` rw2.loc_writes;
     loc_constant_writes = rw1.loc_constant_writes `intersect` rw2.loc_constant_writes;
   }
@@ -841,6 +849,7 @@ let lemma_bounded_effects_parallel rw1 rw2 f1 f2 =
   in
   FStar.Classical.forall_intro_2 aux;
   assert (forall l v. L.mem (|l,v|) rw.loc_constant_writes ==> L.mem l rw.loc_writes);
+  admit (); (* TODO: Update proofs from here *)
   let aux s1 s2 :
     Lemma
       (requires (s1.ms_ok = s2.ms_ok /\ unchanged_at rw.loc_reads s1 s2))
