@@ -117,7 +117,7 @@ let aead_iv_length32 (al: Spec.AEAD.supported_alg) (x:U32.t) : Tot
 
 #reset-options "--using_facts_from '* -Test.Vectors'"
 
-#push-options "--z3rlimit 500 --max_fuel 0 --max_ifuel 0"
+#push-options "--z3rlimit 700 --max_fuel 0 --max_ifuel 0"
 
 let test_aead_st alg key key_len iv iv_len aad aad_len tag tag_len plaintext plaintext_len
   ciphertext ciphertext_len: ST unit
