@@ -11,11 +11,7 @@
         "equality_tok_Spec.Hash.Definitions.SHA2_256@tok",
         "equality_tok_Spec.Hash.Definitions.SHA2_384@tok",
         "equation_EverCrypt.Hash.footprint",
-        "equation_EverCrypt.Hash.fresh_loc",
-        "equation_EverCrypt.Hash.invariant",
-        "equation_EverCrypt.Hash.loc_in",
-        "equation_EverCrypt.Hash.loc_unused_in",
-        "equation_EverCrypt.Hash.state",
+        "equation_EverCrypt.Hash.invariant", "equation_EverCrypt.Hash.state",
         "equation_FStar.HyperStack.ST.equal_domains",
         "equation_FStar.HyperStack.ST.equal_stack_domains",
         "equation_FStar.Monotonic.Heap.equal_dom",
@@ -23,6 +19,7 @@
         "equation_FStar.Monotonic.HyperStack.mem",
         "equation_LowStar.Buffer.buffer", "equation_LowStar.Buffer.pointer",
         "equation_LowStar.Buffer.trivial_preorder",
+        "equation_LowStar.Monotonic.Buffer.fresh_loc",
         "equation_LowStar.Monotonic.Buffer.get",
         "function_token_typing_FStar.Monotonic.Heap.heap",
         "kinding_Spec.Hash.Definitions.hash_alg@tok",
@@ -52,7 +49,7 @@
         "typing_tok_Spec.Hash.Definitions.SHA2_384@tok"
       ],
       0,
-      "dbc46304599e3497caa10e1d9b844235"
+      "5c2ab33e9cdb0fe49813270068715958"
     ],
     [
       "Test.Hash.test_incremental_api",
@@ -62,6 +59,7 @@
       [
         "@MaxIFuel_assumption", "@query",
         "Prims_pretyping_ae567c2fb75be05905677af440075565", "bool_inversion",
+        "constructor_distinct_FStar.Integers.Unsigned",
         "constructor_distinct_FStar.Integers.W32",
         "constructor_distinct_FStar.Integers.W63",
         "constructor_distinct_FStar.Integers.W8",
@@ -73,13 +71,11 @@
         "equation_EverCrypt.Hash.Incremental.bytes",
         "equation_EverCrypt.Hash.Incremental.footprint",
         "equation_EverCrypt.Hash.Incremental.preserves_freeable",
-        "equation_EverCrypt.Hash.fresh_loc",
-        "equation_EverCrypt.Hash.loc_in",
-        "equation_EverCrypt.Hash.loc_unused_in",
         "equation_FStar.HyperStack.ST.equal_domains",
         "equation_FStar.HyperStack.ST.equal_stack_domains",
         "equation_FStar.HyperStack.ST.inline_stack_inv",
         "equation_FStar.HyperStack.ST.is_eternal_region",
+        "equation_FStar.Integers.int_t", "equation_FStar.Integers.uint_8",
         "equation_FStar.Kremlin.Endianness.bytes",
         "equation_FStar.Monotonic.Heap.equal_dom",
         "equation_FStar.Monotonic.HyperHeap.hmap",
@@ -93,10 +89,13 @@
         "equation_FStar.Monotonic.HyperStack.poppable",
         "equation_FStar.Monotonic.HyperStack.popped",
         "equation_FStar.Monotonic.HyperStack.remove_elt",
-        "equation_LowStar.Buffer.trivial_preorder", "equation_Prims.eqtype",
+        "equation_LowStar.Buffer.trivial_preorder",
+        "equation_LowStar.Monotonic.Buffer.fresh_loc",
+        "equation_LowStar.Monotonic.Buffer.loc_in", "equation_Prims.eqtype",
         "equation_Prims.nat", "equation_Spec.Hash.Definitions.hash_length",
         "equation_Spec.Hash.Definitions.hash_word_length",
         "equation_Spec.Hash.Definitions.word_length",
+        "function_token_typing_FStar.Integers.uint_8",
         "function_token_typing_FStar.Kremlin.Endianness.bytes",
         "function_token_typing_FStar.Monotonic.Heap.heap",
         "function_token_typing_FStar.UInt8.t",
@@ -184,7 +183,7 @@
         "typing_tok_Spec.Hash.Definitions.SHA2_256@tok"
       ],
       0,
-      "0beaad374fa1d1bf348bc70749211f60"
+      "e69e9e8709e6d976bd6019a63fcf4906"
     ]
   ]
 ]
