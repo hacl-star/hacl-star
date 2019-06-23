@@ -116,6 +116,8 @@ let poly1305_encode_blocks #s f b =
   load_felems_le f b;
   set_bit128 f
 
+#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq'"
+
 #push-options "--z3rlimit 200"
 inline_for_extraction noextract
 val poly1305_encode_last:
