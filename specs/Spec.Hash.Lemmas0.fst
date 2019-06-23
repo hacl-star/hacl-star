@@ -13,7 +13,7 @@ let max_input_size_len (a: hash_alg): Lemma
   | SHA2_384 | SHA2_512 ->
       assert_norm (max_input_length a * 8 = pow2 (len_length a * 8))
 
-#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 400"
+#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 400 --using_facts_from 'Spec.Hash.Definitions FStar.Seq Prims'"
 let pad_invariant_block (a: hash_alg) (blocks: nat) (rest: nat): Lemma
   (requires blocks % block_length a = 0)
   (ensures (pad_length a rest = pad_length a (blocks + rest)))
