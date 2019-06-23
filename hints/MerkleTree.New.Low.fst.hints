@@ -335,7 +335,7 @@
         "typing_Spec.Poly1305.size_key", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "e23b9977cd0925c07fa26d5edd9cbbb5"
+      "3a750b857953d311eae839da3ee2aa95"
     ],
     [
       "MerkleTree.New.Low.hash_r_free",
@@ -1568,7 +1568,7 @@
         "typing_tok_Spec.Hash.Definitions.SHA2_256@tok"
       ],
       0,
-      "1768e569d667bebf65b4599871fc8c25"
+      "3c849cffcadc9b7045a7f9513336feed"
     ],
     [
       "MerkleTree.New.Low.offsets_connect",
@@ -2334,7 +2334,7 @@
         "typing_MerkleTree.New.Low.merkle_tree_size_lg"
       ],
       0,
-      "4987425de86f2c03e6014e152a3f20b1"
+      "8d85bfa676b636984fb6bc077f3dee56"
     ],
     [
       "MerkleTree.New.Low.mt_safe_elts_init",
@@ -4613,7 +4613,7 @@
         "typing_Spec.Poly1305.size_key"
       ],
       0,
-      "d4b39afd152f8a62653b8df2a663d048"
+      "01bf8f8476bb6649b563c3d9a6dc7311"
     ],
     [
       "MerkleTree.New.Low.insert_index_helper_even",
@@ -6012,7 +6012,7 @@
         "typing_Spec.Poly1305.size_key", "unit_typing"
       ],
       0,
-      "3e0bb7e2e5a3d693b68d50248f3e63fd"
+      "6172cf0d6587d80f433a66cc9d63e164"
     ],
     [
       "MerkleTree.New.Low.path_safe",
@@ -8379,6 +8379,7 @@
         "lemma_FStar.Set.mem_singleton", "lemma_FStar.Set.mem_subset",
         "lemma_FStar.Set.subset_mem",
         "lemma_LowStar.Monotonic.Buffer.address_liveness_insensitive_buffer",
+        "lemma_LowStar.Monotonic.Buffer.as_seq_gsub",
         "lemma_LowStar.Monotonic.Buffer.length_as_seq",
         "lemma_LowStar.Monotonic.Buffer.length_null_1",
         "lemma_LowStar.Monotonic.Buffer.length_null_2",
@@ -8422,6 +8423,7 @@
         "refinement_interpretation_Tm_refine_4fa8e2dd96f8bb1e23e6574326e9e019",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "refinement_interpretation_Tm_refine_562ac129d341d684eac8dd463a0f41fe",
+        "refinement_interpretation_Tm_refine_573cbec3ba63a4df15c2747d40766bb5",
         "refinement_interpretation_Tm_refine_573cfed777dae20cc82e8fef9622857e",
         "refinement_interpretation_Tm_refine_5fa73f9ba0059ee50de3e5c011b1572b",
         "refinement_interpretation_Tm_refine_7f73e30c062805dff41aa8360013eb4c",
@@ -8443,6 +8445,7 @@
         "refinement_kinding_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "token_correspondence_LowStar.Regional.__proj__Rgl__item__region_of",
         "token_correspondence_MerkleTree.New.Low.hash_region_of",
+        "token_correspondence_MerkleTree.New.Low.lift_path_.fuel_instrumented",
         "true_interp", "typing_FStar.Map.domain",
         "typing_FStar.Monotonic.HyperHeap.disjoint",
         "typing_FStar.Monotonic.HyperHeap.extends",
@@ -8455,11 +8458,13 @@
         "typing_FStar.Seq.Properties.snoc", "typing_FStar.Set.empty",
         "typing_FStar.Set.intersect", "typing_FStar.Set.mem",
         "typing_FStar.Set.singleton", "typing_FStar.UInt.fits",
-        "typing_FStar.UInt32.v", "typing_LowStar.Buffer.trivial_preorder",
+        "typing_FStar.UInt32.gte", "typing_FStar.UInt32.v",
+        "typing_LowStar.Buffer.trivial_preorder",
         "typing_LowStar.Monotonic.Buffer.as_addr",
         "typing_LowStar.Monotonic.Buffer.as_seq",
         "typing_LowStar.Monotonic.Buffer.frameOf",
         "typing_LowStar.Monotonic.Buffer.g_is_null",
+        "typing_LowStar.Monotonic.Buffer.len",
         "typing_LowStar.Monotonic.Buffer.length",
         "typing_LowStar.Monotonic.Buffer.loc_addresses",
         "typing_LowStar.Monotonic.Buffer.loc_buffer",
@@ -8467,6 +8472,8 @@
         "typing_LowStar.Monotonic.Buffer.loc_union",
         "typing_LowStar.Monotonic.Buffer.mgsub",
         "typing_LowStar.Monotonic.Buffer.mnull",
+        "typing_LowStar.Vector.__proj__Vec__item__cap",
+        "typing_LowStar.Vector.__proj__Vec__item__sz",
         "typing_LowStar.Vector.__proj__Vec__item__vs",
         "typing_LowStar.Vector.alloc_empty", "typing_LowStar.Vector.as_seq",
         "typing_LowStar.Vector.loc_addr_of_vector",
@@ -8478,7 +8485,7 @@
         "typing_MerkleTree.New.Low.path_loc", "typing_Spec.Poly1305.size_key"
       ],
       0,
-      "94aa51263741bf7a4bad8780cd360f1e"
+      "0bd73b9bc984cc1803fdb36971d3094c"
     ],
     [
       "MerkleTree.New.Low.mt_path_length_step",
@@ -10139,7 +10146,7 @@
         "typing_Spec.Poly1305.size_key"
       ],
       0,
-      "0b518b3ea22dab792bd3c3f0a99c29eb"
+      "111a246accb10bc5d9cc4e666c5dded5"
     ],
     [
       "MerkleTree.New.Low.mt_flush_to_",
@@ -10176,7 +10183,7 @@
         "typing_Spec.Poly1305.size_key"
       ],
       0,
-      "fe22db63dd9811b6cc6ae867ef7f250c"
+      "91376378069225ce9f5e9a4d77b7598d"
     ],
     [
       "MerkleTree.New.Low.mt_flush_to_",
@@ -10592,7 +10599,6 @@
         "lemma_FStar.Set.mem_subset", "lemma_FStar.Set.subset_mem",
         "lemma_FStar.UInt32.uv_inv", "lemma_FStar.UInt32.vu_inv",
         "lemma_Lib.IntTypes.pow2_values",
-        "lemma_LowStar.Monotonic.Buffer.address_liveness_insensitive_buffer",
         "lemma_LowStar.Monotonic.Buffer.freeable_length",
         "lemma_LowStar.Monotonic.Buffer.length_null_1",
         "lemma_LowStar.Monotonic.Buffer.length_null_2",
@@ -10602,13 +10608,13 @@
         "lemma_LowStar.Monotonic.Buffer.loc_disjoint_sym_",
         "lemma_LowStar.Monotonic.Buffer.loc_disjoint_union_r_",
         "lemma_LowStar.Monotonic.Buffer.loc_includes_addresses_buffer_",
+        "lemma_LowStar.Monotonic.Buffer.loc_includes_region_addresses_",
         "lemma_LowStar.Monotonic.Buffer.loc_includes_region_buffer",
         "lemma_LowStar.Monotonic.Buffer.loc_includes_region_buffer_",
         "lemma_LowStar.Monotonic.Buffer.loc_includes_region_region",
         "lemma_LowStar.Monotonic.Buffer.loc_includes_trans_backwards",
         "lemma_LowStar.Monotonic.Buffer.loc_includes_union_r_",
         "lemma_LowStar.Monotonic.Buffer.modifies_buffer_elim",
-        "lemma_LowStar.Monotonic.Buffer.modifies_liveness_insensitive_buffer",
         "lemma_LowStar.Monotonic.Buffer.modifies_loc_includes",
         "lemma_LowStar.Monotonic.Buffer.modifies_trans_linear",
         "lemma_LowStar.RVector.as_seq_preserved",
@@ -10694,7 +10700,6 @@
         "typing_FStar.UInt.fits", "typing_FStar.UInt32.lt",
         "typing_FStar.UInt32.lte", "typing_FStar.UInt32.v",
         "typing_LowStar.Buffer.trivial_preorder",
-        "typing_LowStar.Monotonic.Buffer.address_liveness_insensitive_locs",
         "typing_LowStar.Monotonic.Buffer.as_addr",
         "typing_LowStar.Monotonic.Buffer.as_seq",
         "typing_LowStar.Monotonic.Buffer.frameOf",
@@ -10728,7 +10733,7 @@
         "typing_Spec.Poly1305.size_key"
       ],
       0,
-      "40f9b81c6434b8212cea38c02fcf8d81"
+      "5c6f109477a3dbb9c824da16f1cbba15"
     ],
     [
       "MerkleTree.New.Low.mt_flush_pre",
@@ -10957,7 +10962,7 @@
         "typing_Spec.Poly1305.size_key"
       ],
       0,
-      "21a981533fe396332f476953c5c42951"
+      "1c7173e2c312ec29b8ae86bb11e9a629"
     ],
     [
       "MerkleTree.New.Low.mt_retract_to_",
