@@ -1,1 +1,96 @@
-[ "gCœ\u0016H_\u001dgŠPŸ»Ú1&’", [] ]
+[
+  "gCœ\u0016H_\u001dgŠPŸ»Ú1&’",
+  [
+    [
+      "Vale.Curve25519.Fast_lemmas_internal.lemma_mul_bounds_le",
+      1,
+      1,
+      0,
+      [ "@query" ],
+      0,
+      "8d57738ed68646ee69245692689b8a2b"
+    ],
+    [
+      "Vale.Curve25519.Fast_lemmas_internal.lemma_mul_pow2_bound",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "refinement_interpretation_Tm_refine_6161103b5d8ff67ff3c6e4753e084441"
+      ],
+      0,
+      "fb9eccd299d7cd5356f4a68d12301899"
+    ],
+    [
+      "Vale.Curve25519.Fast_lemmas_internal.lemma_mul_pow2_bound",
+      2,
+      1,
+      0,
+      [ "@query" ],
+      0,
+      "3d89f76369d36ee4e5db731a20c6ca08"
+    ],
+    [
+      "Vale.Curve25519.Fast_lemmas_internal.lemma_mul_pow2_bound",
+      3,
+      1,
+      0,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "equation_Prims.nat", "equation_Prims.pos",
+        "equation_Vale.Def.Words_s.natN",
+        "equation_with_fuel_Prims.pow2.fuel_instrumented", "int_inversion",
+        "int_typing", "primitive_Prims.op_Multiply",
+        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_6161103b5d8ff67ff3c6e4753e084441",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
+        "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c",
+        "token_correspondence_Prims.pow2.fuel_instrumented",
+        "typing_Prims.pow2"
+      ],
+      0,
+      "0e6917af8d77a167faf56ce0b381ee0e"
+    ],
+    [
+      "Vale.Curve25519.Fast_lemmas_internal.lemma_mul_bound64",
+      1,
+      1,
+      0,
+      [ "@query", "projection_inverse_BoxInt_proj_0" ],
+      0,
+      "6f1005a506d15d9c221de0f795bc9ab7"
+    ],
+    [
+      "Vale.Curve25519.Fast_lemmas_internal.lemma_intel_prod_sum_bound",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Vale.Def.Words_s.nat64",
+        "equation_Vale.Def.Words_s.natN", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c"
+      ],
+      0,
+      "f111db6831e4e771486d347c1904761d"
+    ],
+    [
+      "Vale.Curve25519.Fast_lemmas_internal.lemma_double_bound",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "equation_Vale.Def.Types_s.add_wrap",
+        "equation_Vale.Def.Words_s.nat64", "equation_Vale.Def.Words_s.natN",
+        "primitive_Prims.op_LessThan", "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c"
+      ],
+      0,
+      "9aadada55f09854feb2c30d4c3e707ea"
+    ]
+  ]
+]

@@ -1,1 +1,154 @@
-[ "aO\u0019ü®\u0016¹U\\L6Š_’PA", [] ]
+[
+  "aO\u0019ü®\u0016¹U\\L6Š_’PA",
+  [
+    [
+      "Vale.Interop.addrs_set_mem",
+      1,
+      1,
+      0,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_FStar.List.Tot.Base.memP.fuel_instrumented",
+        "@fuel_irrelevance_FStar.List.Tot.Base.memP.fuel_instrumented",
+        "@query", "equation_Vale.Interop.Types.b8",
+        "fuel_guarded_inversion_Vale.Interop.Base.interop_heap",
+        "fuel_guarded_inversion_Vale.Interop.Types.b8_", "int_inversion",
+        "lemma_Vale.Interop.addrs_set_lemma",
+        "proj_equation_Vale.Interop.Base.InteropHeap_ptrs",
+        "refinement_interpretation_Tm_refine_703c6f879c5b001c36b204e25e1b2371",
+        "refinement_interpretation_Tm_refine_95a7b7038d8b89131515e0e38e96543f"
+      ],
+      0,
+      "bb8c784739e43454e50a640c09de43f9"
+    ],
+    [
+      "Vale.Interop.same_unspecified_down",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "refinement_interpretation_Tm_refine_ff1b237321b1fdfa08a855e303ad9aa6"
+      ],
+      0,
+      "612b2d14d8499d21765d46ec00b0a1a6"
+    ],
+    [
+      "Vale.Interop.get_seq_heap",
+      1,
+      1,
+      0,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented",
+        "@fuel_irrelevance_Prims.pow2.fuel_instrumented", "@query",
+        "FStar.Seq.Base_interpretation_Tm_arrow_44bb45ed5c2534b346e0f58ea5033251",
+        "Vale.Interop_interpretation_Tm_arrow_992025dc489e7315d2abb53d1ad49c82",
+        "b2t_def", "equation_FStar.UInt.fits", "equation_FStar.UInt.max_int",
+        "equation_FStar.UInt.min_int", "equation_FStar.UInt.size",
+        "equation_Prims.nat", "equation_Vale.Interop.Types.b8",
+        "fuel_guarded_inversion_Vale.Interop.Types.b8_",
+        "function_token_typing_FStar.UInt8.t", "int_typing",
+        "lemma_FStar.Seq.Base.lemma_init_len",
+        "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_AmpAmp",
+        "primitive_Prims.op_LessThanOrEqual",
+        "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_703c6f879c5b001c36b204e25e1b2371",
+        "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c",
+        "refinement_interpretation_Tm_refine_ff9cf9634d9ad82e44410ccec01e1955"
+      ],
+      0,
+      "24ab56c2c5b716e20b2bea90ddabb4f0"
+    ],
+    [
+      "Vale.Interop.up_mem",
+      1,
+      1,
+      0,
+      [ "@query" ],
+      0,
+      "0a67fd0026d0fbb29036ec979e0da5d3"
+    ],
+    [
+      "Vale.Interop.down_up_identity",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "Vale.Interop.Base_interpretation_Tm_ghost_arrow_86dda27c4a751203a3e618c65d0fb5b5",
+        "equation_Vale.Interop.Base.correct_down",
+        "equation_Vale.Interop.Base.down_mem_t",
+        "fuel_guarded_inversion_Vale.Interop.Base.interop_heap",
+        "refinement_interpretation_Tm_refine_3fec5c21695a1fb657e6a6c228e77e11",
+        "typing_Vale.Interop.down_mem"
+      ],
+      0,
+      "c2379d9ce53104c756ad7d0ae646856c"
+    ],
+    [
+      "Vale.Interop.up_down_identity",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "refinement_interpretation_Tm_refine_4686c8e67340acce5020f04d79f53be8"
+      ],
+      0,
+      "e120a0c47d312372fe1c1d9d965ead98"
+    ],
+    [
+      "Vale.Interop.update_buffer_up_mem",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565",
+        "equation_FStar.Seq.Properties.lseq",
+        "equation_LowStar.BufferView.Down.buffer", "equation_Prims.eqtype",
+        "equation_Vale.Def.Words_s.nat8",
+        "equation_Vale.Interop.Base.correct_down",
+        "equation_Vale.Interop.Types.b8",
+        "equation_Vale.Interop.Types.down_view",
+        "equation_Vale.Interop.Types.get_downview",
+        "equation_Vale.X64.Machine_Semantics_s.machine_heap",
+        "fuel_guarded_inversion_FStar.Pervasives.dtuple4",
+        "fuel_guarded_inversion_Vale.Interop.Base.interop_heap",
+        "fuel_guarded_inversion_Vale.Interop.Types.b8_",
+        "function_token_typing_FStar.UInt8.t",
+        "function_token_typing_Prims.__cache_version_number__",
+        "function_token_typing_Prims.int",
+        "function_token_typing_Vale.Def.Words_s.nat8",
+        "lemma_FStar.Set.lemma_equal_elim",
+        "lemma_LowStar.BufferView.Down.as_buffer_mk_buffer_view",
+        "proj_equation_FStar.Pervasives.Mkdtuple4__1",
+        "proj_equation_FStar.Pervasives.Mkdtuple4__2",
+        "proj_equation_FStar.Pervasives.Mkdtuple4__3",
+        "proj_equation_Vale.Interop.Types.Buffer_bsrc",
+        "proj_equation_Vale.Interop.Types.Buffer_src",
+        "refinement_interpretation_Tm_refine_3fec5c21695a1fb657e6a6c228e77e11",
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
+        "refinement_interpretation_Tm_refine_569008a83ab4605faaefc4c5d1210738",
+        "refinement_interpretation_Tm_refine_703c6f879c5b001c36b204e25e1b2371",
+        "refinement_interpretation_Tm_refine_7ae5a5d89e52da1d5454233e706a9bd8",
+        "refinement_interpretation_Tm_refine_a0cd7d06c5da6444b6b51b319febde8e",
+        "refinement_interpretation_Tm_refine_d371cabe3c3bcbb0c4e096c4d35b87fb",
+        "typing_FStar.Map.domain",
+        "typing_Vale.Interop.Base.__proj__InteropHeap__item__hs",
+        "typing_Vale.Interop.Types.__proj__Buffer__item__bsrc",
+        "typing_Vale.Interop.Types.__proj__Buffer__item__rel",
+        "typing_Vale.Interop.Types.__proj__Buffer__item__rrel",
+        "typing_Vale.Interop.Types.__proj__Buffer__item__src",
+        "typing_Vale.Interop.Types.base_typ_as_type",
+        "typing_Vale.Interop.Types.down_view"
+      ],
+      0,
+      "6599f1b928d5223927c1145cc51db31b"
+    ]
+  ]
+]

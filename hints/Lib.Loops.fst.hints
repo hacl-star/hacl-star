@@ -1,1 +1,125 @@
-[ "ÂĞ\u0004'˜zpl<éÍœ¡8k", [] ]
+[
+  "ÂĞ\u0004'˜zpl<éÍœ¡8k",
+  [
+    [
+      "Lib.Loops.for",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "equality_tok_Lib.IntTypes.PUB@tok",
+        "equality_tok_Lib.IntTypes.U32@tok", "equation_Lib.IntTypes.uint_v",
+        "equation_Prims.nat", "primitive_Prims.op_Addition",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_1b64ab56da311d7423a716ac175775c0",
+        "refinement_interpretation_Tm_refine_24a2e4e4002dd35f896b1f3735743821",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_82f721d8dd9e5848515478ce5fa16da9",
+        "typing_Lib.IntTypes.uint_v", "typing_tok_Lib.IntTypes.PUB@tok",
+        "typing_tok_Lib.IntTypes.U32@tok"
+      ],
+      0,
+      "8150ae06da1be6d6bae26a32298dd226"
+    ],
+    [
+      "Lib.Loops.for",
+      2,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "equality_tok_Lib.IntTypes.PUB@tok",
+        "equality_tok_Lib.IntTypes.U32@tok", "equation_Lib.IntTypes.uint_v",
+        "equation_Prims.nat", "primitive_Prims.op_Addition",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_1b64ab56da311d7423a716ac175775c0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_82f721d8dd9e5848515478ce5fa16da9",
+        "typing_Lib.IntTypes.uint_v", "typing_tok_Lib.IntTypes.PUB@tok",
+        "typing_tok_Lib.IntTypes.U32@tok"
+      ],
+      0,
+      "7ff5d169f9cf0dbda5ec133147751dc4"
+    ],
+    [
+      "Lib.Loops.for",
+      3,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "constructor_distinct_Lib.IntTypes.PUB",
+        "constructor_distinct_Lib.IntTypes.U32",
+        "equality_tok_Lib.IntTypes.PUB@tok",
+        "equality_tok_Lib.IntTypes.U32@tok",
+        "equation_Lib.IntTypes.pub_int_t", "equation_Lib.IntTypes.pub_int_v",
+        "equation_Lib.IntTypes.uint_t", "equation_Lib.IntTypes.uint_v",
+        "lemma_FStar.UInt32.uv_inv", "primitive_Prims.op_Addition",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_073c6ba9791bdaaea2589394d1f24683",
+        "refinement_interpretation_Tm_refine_07626d7c39ed2edcaf7f58edec45d5ba",
+        "refinement_interpretation_Tm_refine_1b64ab56da311d7423a716ac175775c0",
+        "refinement_interpretation_Tm_refine_24a2e4e4002dd35f896b1f3735743821",
+        "refinement_interpretation_Tm_refine_3ebd7b9aa6a7476cd8e40ddc1e61d824",
+        "refinement_interpretation_Tm_refine_4f6d75e30a9aed9fdc7334b96c62b21e",
+        "refinement_interpretation_Tm_refine_53ce29735eda10a26b8a22bacbafecb9",
+        "refinement_interpretation_Tm_refine_5634a76d63b0ebc9932add4fc4a66d70",
+        "refinement_interpretation_Tm_refine_b77cd896e8ebdca73e21503364f038c6",
+        "refinement_interpretation_Tm_refine_dc6d0f6877796d0e4cc71dde2abea33b",
+        "typing_Lib.RawIntTypes.size_from_UInt32",
+        "typing_Lib.RawIntTypes.size_to_UInt32"
+      ],
+      0,
+      "e2741115d6f62d1cf214e782fdde636e"
+    ],
+    [
+      "Lib.Loops.while",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "refinement_interpretation_Tm_refine_b16bf82b210653a34e4d7322fab91ffb"
+      ],
+      0,
+      "b633040df569a315bc123105300649da"
+    ],
+    [
+      "Lib.Loops.while",
+      2,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "refinement_interpretation_Tm_refine_b16bf82b210653a34e4d7322fab91ffb"
+      ],
+      0,
+      "ce7b19434b6b1ea6b3ae90759850187a"
+    ],
+    [
+      "Lib.Loops.while",
+      3,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query", "bool_inversion",
+        "equation_FStar.Monotonic.HyperHeap.hmap",
+        "equation_FStar.Monotonic.HyperStack.is_tip",
+        "equation_FStar.Monotonic.HyperStack.is_wf_with_ctr_and_tip",
+        "equation_FStar.Monotonic.HyperStack.mem",
+        "function_token_typing_FStar.Monotonic.Heap.heap",
+        "lemma_FStar.Map.lemma_ContainsDom",
+        "projection_inverse_BoxBool_proj_0",
+        "refinement_interpretation_Tm_refine_05e15190c946858f68c69156f585f95a",
+        "refinement_interpretation_Tm_refine_1bbd46b74c3d9d07e864ebebad14e47a",
+        "refinement_interpretation_Tm_refine_2f71079aa0f268146f579ff4fe1cb716",
+        "typing_FStar.Map.contains", "typing_FStar.Monotonic.HyperHeap.rid",
+        "typing_FStar.Monotonic.HyperStack.get_hmap",
+        "typing_FStar.Monotonic.HyperStack.get_tip"
+      ],
+      0,
+      "ee6d525bb69207d30160415c12fc3587"
+    ]
+  ]
+]

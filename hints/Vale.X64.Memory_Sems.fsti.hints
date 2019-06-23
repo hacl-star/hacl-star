@@ -1,1 +1,91 @@
-[ "ÔπÈÅ%C˚aı˚\u001dlÛçÖg", [] ]
+[
+  "ÔπÈÅ%C˚aı˚\u001dlÛçÖg",
+  [
+    [
+      "Vale.X64.Memory_Sems.get_heap_hs",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "refinement_interpretation_Tm_refine_f7d6512a34f4cd7627794187ab7d7bc4"
+      ],
+      0,
+      "0b44174c0c9d6a84a87546408bef58b9"
+    ],
+    [
+      "Vale.X64.Memory_Sems.low_lemma_load_mem64",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "constructor_distinct_Vale.Interop.Types.TUInt64",
+        "equality_tok_Vale.Interop.Types.TUInt64@tok", "equation_Prims.nat",
+        "equation_Vale.Def.Words_s.nat64", "equation_Vale.Def.Words_s.natN",
+        "equation_Vale.X64.Memory.base_typ_as_vale_type",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c"
+      ],
+      0,
+      "4405e0b027f5bcaa61393a728a3a1749"
+    ],
+    [
+      "Vale.X64.Memory_Sems.low_lemma_store_mem64",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "b2t_def", "equation_Prims.l_and",
+        "equation_Prims.squash", "l_and-interp",
+        "primitive_Prims.op_LessThan", "projection_inverse_BoxBool_proj_0",
+        "refinement_interpretation_Tm_refine_2de20c066034c13bf76e9c0b94f4806c"
+      ],
+      0,
+      "046928b6f1ffa91c9db73554ae38fc48"
+    ],
+    [
+      "Vale.X64.Memory_Sems.low_lemma_store_mem128",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "b2t_def", "equation_Prims.l_and",
+        "equation_Prims.squash", "l_and-interp",
+        "primitive_Prims.op_LessThan", "projection_inverse_BoxBool_proj_0",
+        "refinement_interpretation_Tm_refine_2de20c066034c13bf76e9c0b94f4806c"
+      ],
+      0,
+      "713b5600e73803f3239c9aabb8ed6b1a"
+    ],
+    [
+      "Vale.X64.Memory_Sems.low_lemma_store_mem128_lo64",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "b2t_def", "equation_Prims.l_and",
+        "equation_Prims.squash", "l_and-interp",
+        "primitive_Prims.op_LessThan", "projection_inverse_BoxBool_proj_0",
+        "refinement_interpretation_Tm_refine_2de20c066034c13bf76e9c0b94f4806c"
+      ],
+      0,
+      "507b419c9d7d58c46d564e4679cc5e31"
+    ],
+    [
+      "Vale.X64.Memory_Sems.low_lemma_store_mem128_hi64",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "b2t_def", "equation_Prims.l_and",
+        "equation_Prims.squash", "l_and-interp",
+        "primitive_Prims.op_LessThan", "projection_inverse_BoxBool_proj_0",
+        "refinement_interpretation_Tm_refine_2de20c066034c13bf76e9c0b94f4806c"
+      ],
+      0,
+      "d4a8091669dfb6ee6b16fbe5c5cd14c8"
+    ]
+  ]
+]

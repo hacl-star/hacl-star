@@ -1,1 +1,35 @@
-[ "6I\u001a,êŸ|t‘Yâµ\tVhW", [] ]
+[
+  "6I\u001a,êŸ|t‘Yâµ\tVhW",
+  [
+    [
+      "Vale.AES.X64.AESopt2.va_lemma_GhashUnroll6x",
+      1,
+      1,
+      0,
+      [ "@query", "projection_inverse_BoxInt_proj_0" ],
+      0,
+      "24ead2bcaa308b118faec2fbf6e4354d"
+    ],
+    [
+      "Vale.AES.X64.AESopt2.va_wp_GhashUnroll6x",
+      1,
+      1,
+      0,
+      [ "@query", "projection_inverse_BoxInt_proj_0" ],
+      0,
+      "6de03f6fa717f3e0f83e847496ca1daa"
+    ],
+    [
+      "Vale.AES.X64.AESopt2.va_quick_GhashUnroll6x",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "fuel_guarded_inversion_FStar.Pervasives.Native.tuple3"
+      ],
+      0,
+      "79c6ec0eccdaf5ee528fb0d94cf77eca"
+    ]
+  ]
+]

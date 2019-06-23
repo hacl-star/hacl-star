@@ -1,1 +1,64 @@
-[ "¯I-\u0017!\t9g,¿X·£Áú^", [] ]
+[
+  "¯I-\u0017!\t9g,¿X·£Áú^",
+  [
+    [
+      "Hacl.Curve25519.Finv.Field51.fsquare_times_51",
+      1,
+      0,
+      1,
+      [ "@query" ],
+      0,
+      "1541261908b13849d926320090f4b08a"
+    ],
+    [
+      "Hacl.Curve25519.Finv.Field51.fsquare_times_51",
+      2,
+      0,
+      1,
+      [ "@query" ],
+      0,
+      "a02b1e759ed17a20f930d921f1e65c2c"
+    ],
+    [
+      "Hacl.Curve25519.Finv.Field51.finv_51",
+      1,
+      0,
+      1,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "equation_Prims.nat", "equation_Spec.Curve25519.prime", "int_typing",
+        "lemma_Spec.Curve25519.Lemmas.lemma_prime_value",
+        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
+      ],
+      0,
+      "7447e4897196075d3d860092b0b85ea1"
+    ],
+    [
+      "Hacl.Curve25519.Finv.Field51.finv_51",
+      2,
+      0,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "constructor_distinct_Hacl.Impl.Curve25519.Fields.M51",
+        "equality_tok_Hacl.Impl.Curve25519.Fields.M51@tok",
+        "equality_tok_Lib.Buffer.MUT@tok",
+        "equation_Hacl.Impl.Curve25519.Fields.felem",
+        "equation_Hacl.Impl.Curve25519.Fields.felem_wide2",
+        "equation_Lib.Buffer.disjoint", "equation_Lib.Buffer.lbuffer_t",
+        "equation_Lib.IntTypes.uint128", "equation_Lib.IntTypes.uint64",
+        "function_token_typing_Lib.IntTypes.uint128",
+        "function_token_typing_Lib.IntTypes.uint64",
+        "lemma_LowStar.Monotonic.Buffer.loc_disjoint_sym_",
+        "refinement_interpretation_Tm_refine_8ab33ce4b035b730ef91d7c534aefe9b",
+        "refinement_interpretation_Tm_refine_c2215b703b2340e9e4551c4e8820d7c8",
+        "refinement_interpretation_Tm_refine_eb8ffbddc49a6ac554a4cdbc0bd28b1f",
+        "typing_Lib.Buffer.loc", "typing_tok_Lib.Buffer.MUT@tok"
+      ],
+      0,
+      "be7e4cbf8f6c7192d824fd82dbb1d6f4"
+    ]
+  ]
+]
