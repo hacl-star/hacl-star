@@ -1218,21 +1218,11 @@ let code_exchange_allowed (c1 c2:safely_bounded_code) : pbool =
   rw_exchange_allowed (rw_set_of_code c1) (rw_set_of_code c2)
   /+> normal (" for instructions " ^ fst (print_code c1 0 gcc) ^ " and " ^ fst (print_code c2 0 gcc))
 
-let lemma_run_2_to_run2 (f1 f2:st unit) (s:machine_state) :
+#push-options "--initial_fuel 3 --max_fuel 3 --initial_ifuel 0 --max_ifuel 0"
+let lemma_code_exchange_allowed (c1 c2:safely_bounded_code) (fuel:nat) (s:machine_state) :
   Lemma
     (requires (
-        (s.ms_ok) /\
-        (run f1 s).ms_ok /\
-        (run f2 (run f1 s)).ms_ok
-    ))
-    (ensures (run2 f1 f2 s == run f2 (run f1 s))) = ()
-
-#push-options "--z3rlimit 20"
-let lemma_code_exchange_allowed (c1 c2 : safely_bounded_code) (fuel:nat) (s : machine_state) :
-  Lemma
-    (requires (
-        !!(code_exchange_allowed c1 c2) /\
-        not (erroring_option_state (machine_eval_codes [c1; c2] fuel s))))
+        !!(code_exchange_allowed c1 c2)))
     (ensures (
         equiv_option_states
           (machine_eval_codes [c1; c2] fuel s)
@@ -1243,21 +1233,23 @@ let lemma_code_exchange_allowed (c1 c2 : safely_bounded_code) (fuel:nat) (s : ma
   let f2 = wrap_sos (machine_eval_code c2 fuel) in
   lemma_commute f1 f2 (rw_set_of_code c1) (rw_set_of_code c2) s;
   assert (equiv_states_or_both_not_ok (run2 f1 f2 s) (run2 f2 f1 s));
-  let s12 = run2 f1 f2 s in
   let s1 = run f1 s in
-  let s2 = run f2 s1 in
+  let s12 = run f2 s1 in
+  let s2 = run f2 s in
+  let s21 = run f1 s2 in
   FStar.Classical.move_requires (lemma_not_ok_propagate_code c1 fuel) s;
   FStar.Classical.move_requires (lemma_not_ok_propagate_code c2 fuel) s1;
+  FStar.Classical.move_requires (lemma_not_ok_propagate_code c2 fuel) s;
+  FStar.Classical.move_requires (lemma_not_ok_propagate_code c1 fuel) s2;
   FStar.Classical.move_requires (lemma_not_ok_propagate_codes [c1;c2] fuel) s;
-  lemma_run_2_to_run2 f1 f2 s
+  FStar.Classical.move_requires (lemma_not_ok_propagate_codes [c2;c1] fuel) s
 #pop-options
 
 let lemma_code_exchange (c1 c2 : safely_bounded_code) (fuel:nat) (s1 s2 : machine_state) :
   Lemma
     (requires (
         !!(code_exchange_allowed c1 c2) /\
-        (equiv_states s1 s2) /\
-        not (erroring_option_state (machine_eval_codes [c1; c2] fuel s1))))
+        (equiv_states s1 s2)))
     (ensures (
         equiv_option_states
           (machine_eval_codes [c1; c2] fuel s1)
