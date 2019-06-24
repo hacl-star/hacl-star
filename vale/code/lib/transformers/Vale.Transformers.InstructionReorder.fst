@@ -1024,9 +1024,11 @@ let wrap_ss (f:machine_state -> machine_state) : st unit =
   set (f s)
 
 let wrap_sos (f:machine_state -> option machine_state) : st unit =
-  let open Vale.X64.Machine_Semantics_s in
-  s <-- get;
-  apply_option (f s) set
+  fun s -> (
+      match f s with
+      | None -> (), { s with ms_ok = false }
+      | Some s' -> (), s'
+    )
 
 let lemma_feq_bounded_effects (rw:rw_set) (f1 f2:st unit) :
   Lemma
@@ -1159,35 +1161,10 @@ and rw_set_of_codes (c:safely_bounded_codes) : rw_set =
       (rw_set_of_code x)
       (rw_set_of_codes xs)
 
-/// Given that we can perform simple swaps between instructions, we
-/// can do swaps between [code]s.
-
-let code_exchange_allowed (c1 c2:code) : pbool =
-  match c1, c2 with
-  | Ins i1, Ins i2 -> ins_exchange_allowed i1 i2
-  | _ -> ffalse "non instruction swaps conservatively disallowed"
-
-#push-options "--initial_fuel 3 --max_fuel 3 --max_ifuel 0"
-let lemma_code_exchange (c1 c2 : code) (fuel:nat) (s1 s2 : machine_state) :
+let lemma_bounded_code (c:safely_bounded_code) (fuel:nat) :
   Lemma
-    (requires (
-        !!(code_exchange_allowed c1 c2) /\
-        (equiv_states s1 s2) /\
-        (Some? (machine_eval_codes [c1; c2] fuel s1))))
-    (ensures (
-        (Some? (machine_eval_codes [c2; c1] fuel s2)) /\
-        (let Some s1', Some s2' =
-           machine_eval_codes [c1; c2] fuel s1,
-           machine_eval_codes [c2; c1] fuel s2 in
-         equiv_states_or_both_not_ok s1' s2'))) =
-  let Some s1', Some s2' =
-    machine_eval_codes [c1; c2] fuel s1,
-    machine_eval_codes [c2; c1] fuel s2 in
-  match c1, c2 with
-  | Ins i1, Ins i2 ->
-    lemma_instruction_exchange i1 i2 s1 s2
-  | _ -> ()
-#pop-options
+    (ensures (bounded_effects (rw_set_of_code c) (wrap_sos (machine_eval_code c fuel)))) =
+  admit ()
 
 /// Not-ok states lead to erroring states upon execution
 
@@ -1233,6 +1210,60 @@ and lemma_not_ok_propagate_while (c:code{While? c}) (fuel:nat) (s:machine_state)
       lemma_not_ok_propagate_code body (fuel - 1) s
     )
   )
+
+/// Given that we can perform simple swaps between instructions, we
+/// can do swaps between [code]s.
+
+let code_exchange_allowed (c1 c2:safely_bounded_code) : pbool =
+  rw_exchange_allowed (rw_set_of_code c1) (rw_set_of_code c2)
+  /+> normal (" for instructions " ^ fst (print_code c1 0 gcc) ^ " and " ^ fst (print_code c2 0 gcc))
+
+let lemma_run_2_to_run2 (f1 f2:st unit) (s:machine_state) :
+  Lemma
+    (requires (
+        (s.ms_ok) /\
+        (run f1 s).ms_ok /\
+        (run f2 (run f1 s)).ms_ok
+    ))
+    (ensures (run2 f1 f2 s == run f2 (run f1 s))) = ()
+
+#push-options "--z3rlimit 20"
+let lemma_code_exchange_allowed (c1 c2 : safely_bounded_code) (fuel:nat) (s : machine_state) :
+  Lemma
+    (requires (
+        !!(code_exchange_allowed c1 c2) /\
+        not (erroring_option_state (machine_eval_codes [c1; c2] fuel s))))
+    (ensures (
+        equiv_option_states
+          (machine_eval_codes [c1; c2] fuel s)
+          (machine_eval_codes [c2; c1] fuel s))) =
+  lemma_bounded_code c1 fuel;
+  lemma_bounded_code c2 fuel;
+  let f1 = wrap_sos (machine_eval_code c1 fuel) in
+  let f2 = wrap_sos (machine_eval_code c2 fuel) in
+  lemma_commute f1 f2 (rw_set_of_code c1) (rw_set_of_code c2) s;
+  assert (equiv_states_or_both_not_ok (run2 f1 f2 s) (run2 f2 f1 s));
+  let s12 = run2 f1 f2 s in
+  let s1 = run f1 s in
+  let s2 = run f2 s1 in
+  FStar.Classical.move_requires (lemma_not_ok_propagate_code c1 fuel) s;
+  FStar.Classical.move_requires (lemma_not_ok_propagate_code c2 fuel) s1;
+  FStar.Classical.move_requires (lemma_not_ok_propagate_codes [c1;c2] fuel) s;
+  lemma_run_2_to_run2 f1 f2 s
+#pop-options
+
+let lemma_code_exchange (c1 c2 : safely_bounded_code) (fuel:nat) (s1 s2 : machine_state) :
+  Lemma
+    (requires (
+        !!(code_exchange_allowed c1 c2) /\
+        (equiv_states s1 s2) /\
+        not (erroring_option_state (machine_eval_codes [c1; c2] fuel s1))))
+    (ensures (
+        equiv_option_states
+          (machine_eval_codes [c1; c2] fuel s1)
+          (machine_eval_codes [c2; c1] fuel s2))) =
+  lemma_code_exchange_allowed c1 c2 fuel s1;
+  lemma_eval_codes_equiv_states [c2; c1] fuel s1 s2
 
 /// Given that we can perform simple swaps between [code]s, we can
 /// define a relation that tells us if some [codes] can be transformed
@@ -1284,16 +1315,24 @@ let rec bubble_to_top (cs:codes) (i:nat{i < L.length cs}) : possibly (cs':codes{
   | [_] -> return []
   | h :: t ->
     let x = L.index cs i in
-    if i = 0 then (
-      return t
+    if not (safely_bounded_code_p x) then (
+      Err ("Cannot safely move " ^ fst (print_code x 0 gcc))
     ) else (
-      match bubble_to_top t (i - 1) with
-      | Err reason -> Err reason
-      | Ok res ->
-        match code_exchange_allowed x h with
-        | Err reason -> Err reason
-        | Ok () ->
-          return (h :: res)
+      if not (safely_bounded_code_p h) then (
+        Err ("Cannot safely move beyond " ^ fst (print_code h 0 gcc))
+      ) else (
+        if i = 0 then (
+          return t
+        ) else (
+          match bubble_to_top t (i - 1) with
+          | Err reason -> Err reason
+          | Ok res ->
+            match code_exchange_allowed x h with
+            | Err reason -> Err reason
+            | Ok () ->
+              return (h :: res)
+        )
+      )
     )
 
 let rec reordering_allowed (c1 c2 : codes) :
@@ -1342,6 +1381,7 @@ let rec lemma_bubble_to_top (cs : codes) (i:nat{i < L.length cs}) (fuel:nat) (s 
           (Some? s2') /\ (
             let Some s2 = s2' in
             equiv_states s' s2)))) =
+  admit ();
   let x = L.index cs i in
   let Ok xs = bubble_to_top cs i in
   let Some s1 = machine_eval_code x fuel s in
