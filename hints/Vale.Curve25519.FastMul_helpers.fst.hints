@@ -1,5 +1,5 @@
 [
-  "ñ\u0003Ÿ\u000bœçÈ\t£}˜5\u0012˜ÿ\u0014",
+  "ùˇE\"∑˚\f?‘\u000bòüXs;t",
   [
     [
       "Vale.Curve25519.FastMul_helpers.lemma_mul_pow2_bound",
@@ -547,7 +547,7 @@
       0,
       [ "@query" ],
       0,
-      "e03063d65ce6796e84b5687d3bf47223"
+      "90030628e4e3b319419f0a27fbda0604"
     ],
     [
       "Vale.Curve25519.FastMul_helpers.lemma_sqr",
@@ -564,7 +564,62 @@
         "typing_Vale.Curve25519.Fast_defs.mul_nats"
       ],
       0,
-      "7d9c0e2687c050370ab867851cafd286"
+      "5e950d8d74dca77180f2830e74647de7"
+    ],
+    [
+      "Vale.Curve25519.FastMul_helpers.lemma_sqr",
+      4,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
+        "equation_Vale.Curve25519.Fast_defs.mul_nats",
+        "equation_Vale.Curve25519.Fast_defs.pow2_eight",
+        "equation_Vale.Curve25519.Fast_defs.pow2_five",
+        "equation_Vale.Curve25519.Fast_defs.pow2_four",
+        "equation_Vale.Curve25519.Fast_defs.pow2_nine",
+        "equation_Vale.Curve25519.Fast_defs.pow2_seven",
+        "equation_Vale.Curve25519.Fast_defs.pow2_six",
+        "equation_Vale.Curve25519.Fast_defs.pow2_three",
+        "equation_Vale.Curve25519.Fast_defs.pow2_two",
+        "equation_Vale.Def.Words_s.nat64", "equation_Vale.Def.Words_s.natN",
+        "int_inversion", "int_typing", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c",
+        "true_interp", "typing_Vale.Curve25519.Fast_defs.mul_nats",
+        "typing_Vale.Curve25519.Fast_defs.pow2_eight"
+      ],
+      0,
+      "84119ec12d48fda0e06e80ea9dccc1b8"
+    ],
+    [
+      "Vale.Curve25519.FastMul_helpers.lemma_sqr",
+      5,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "b2t_def", "equation_Prims.nat",
+        "equation_Vale.Curve25519.Fast_defs.pow2_eight",
+        "equation_Vale.Curve25519.Fast_defs.pow2_five",
+        "equation_Vale.Curve25519.Fast_defs.pow2_four",
+        "equation_Vale.Curve25519.Fast_defs.pow2_nine",
+        "equation_Vale.Curve25519.Fast_defs.pow2_seven",
+        "equation_Vale.Curve25519.Fast_defs.pow2_six",
+        "equation_Vale.Curve25519.Fast_defs.pow2_three",
+        "equation_Vale.Curve25519.Fast_defs.pow2_two",
+        "equation_Vale.Def.Words_s.nat64", "equation_Vale.Def.Words_s.natN",
+        "int_inversion", "primitive_Prims.op_LessThan",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_8caf45e0aed18c9b62d4d95913588c9d",
+        "refinement_interpretation_Tm_refine_bdb863c0a6e2c0e83f748891c329df24",
+        "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c",
+        "refinement_interpretation_Tm_refine_d02dd1006939e455d111de04ad49b83d",
+        "refinement_interpretation_Tm_refine_f56de8ef361ef7c8dccb4af910d76d34"
+      ],
+      0,
+      "235f728a10ff1487cc6cc20f8adaae58"
     ]
   ]
 ]
