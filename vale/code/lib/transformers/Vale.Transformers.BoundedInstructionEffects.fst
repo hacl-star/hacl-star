@@ -772,6 +772,7 @@ let lemma_add_r_to_rw_set r rw_old f =
 (* See fsti *)
 let lemma_bounded_effects_parallel rw1 rw2 f1 f2 =
   let rw = rw_set_in_parallel rw1 rw2 in
+
   let aux s a :
     Lemma
       (requires !!(disjoint_location_from_locations a rw.loc_writes))
@@ -792,6 +793,7 @@ let lemma_bounded_effects_parallel rw1 rw2 f1 f2 =
   FStar.Classical.forall_intro_2 aux;
   assert (only_affects rw.loc_writes f1);
   assert (only_affects rw.loc_writes f2);
+
   let rec aux c1 c2 s :
     Lemma
       (requires (constant_on_execution c1 f1 s /\ constant_on_execution c2 f2 s))
@@ -801,8 +803,8 @@ let lemma_bounded_effects_parallel rw1 rw2 f1 f2 =
     | x :: xs ->
       aux xs c2 s
   in
-  let aux c1 c2 = FStar.Classical.move_requires (aux c1 c2) in
-  FStar.Classical.forall_intro_3 aux;
+  let aux = FStar.Classical.move_requires (aux rw1.loc_constant_writes rw2.loc_constant_writes) in
+  FStar.Classical.forall_intro aux;
   let rec aux c1 c2 s :
     Lemma
       (requires (constant_on_execution c1 f1 s /\ constant_on_execution c2 f2 s))
@@ -819,6 +821,7 @@ let lemma_bounded_effects_parallel rw1 rw2 f1 f2 =
   FStar.Classical.forall_intro aux;
   assert (forall s. constant_on_execution rw.loc_constant_writes f1 s);
   assert (forall s. constant_on_execution rw.loc_constant_writes f2 s);
+
   let rec aux (c1 c2:locations_with_values) (w1 w2:locations) (l:location{hasEq (location_val_t l)}) (v:location_val_t l) :
     Lemma
       (requires (
@@ -849,14 +852,15 @@ let lemma_bounded_effects_parallel rw1 rw2 f1 f2 =
   in
   FStar.Classical.forall_intro_2 aux;
   assert (forall l v. L.mem (|l,v|) rw.loc_constant_writes ==> L.mem l rw.loc_writes);
-  admit (); (* TODO: Update proofs from here *)
+
   let aux s1 s2 :
     Lemma
       (requires (s1.ms_ok = s2.ms_ok /\ unchanged_at rw.loc_reads s1 s2))
       (ensures (
           ((run f1 s1).ms_ok = (run f1 s2).ms_ok) /\
           ((run f2 s1).ms_ok = (run f2 s2).ms_ok))) =
-    lemma_unchanged_at_append rw1.loc_reads rw2.loc_reads s1 s2
+    lemma_unchanged_at_append rw1.loc_reads rw2.loc_reads s1 s2;
+    lemma_unchanged_at_append (sym_difference rw1.loc_writes rw2.loc_writes) (rw1.loc_reads `L.append` rw2.loc_reads) s1 s2
   in
   let aux s1 = FStar.Classical.move_requires (aux s1) in
   FStar.Classical.forall_intro_2 aux;
@@ -865,22 +869,52 @@ let lemma_bounded_effects_parallel rw1 rw2 f1 f2 =
       (requires ((s1.ms_ok = s2.ms_ok) /\
                  (run f1 s1).ms_ok /\
                  (run f1 s2).ms_ok /\
+                 unchanged_at rw.loc_reads s1 s2))
+      (ensures (
+          (unchanged_at rw.loc_writes (run f1 s1) (run f1 s2)))) =
+    lemma_unchanged_at_append rw1.loc_reads rw2.loc_reads s1 s2;
+    lemma_unchanged_at_append (sym_difference rw1.loc_writes rw2.loc_writes) (rw1.loc_reads `L.append` rw2.loc_reads) s1 s2;
+    lemma_unchanged_at_append rw1.loc_writes rw2.loc_writes (run f1 s1) (run f1 s2);
+    assert (unchanged_at rw1.loc_reads s1 s2);
+    assert (unchanged_at rw1.loc_writes (run f1 s1) (run f1 s2));
+    assume (unchanged_at rw2.loc_writes (run f1 s1) (run f1 s2)) (* TODO: Finish proving this *)
+  in
+  let aux s1 = FStar.Classical.move_requires (aux s1) in
+  FStar.Classical.forall_intro_2 aux;
+  let aux s1 s2 :
+    Lemma
+      (requires ((s1.ms_ok = s2.ms_ok) /\
                  (run f2 s1).ms_ok /\
                  (run f2 s2).ms_ok /\
                  unchanged_at rw.loc_reads s1 s2))
       (ensures (
-          (unchanged_at rw.loc_writes (run f1 s1) (run f1 s2)) /\
           (unchanged_at rw.loc_writes (run f2 s1) (run f2 s2)))) =
     lemma_unchanged_at_append rw1.loc_reads rw2.loc_reads s1 s2;
-    lemma_unchanged_at_append rw1.loc_writes rw2.loc_writes (run f1 s1) (run f1 s2);
+    lemma_unchanged_at_append (sym_difference rw1.loc_writes rw2.loc_writes) (rw1.loc_reads `L.append` rw2.loc_reads) s1 s2;
     lemma_unchanged_at_append rw1.loc_writes rw2.loc_writes (run f2 s1) (run f2 s2);
-    assert (unchanged_at rw1.loc_reads s1 s2);
-    assert (unchanged_at rw1.loc_writes (run f1 s1) (run f1 s2));
-    admit ();
-    assert (unchanged_at rw2.loc_writes (run f1 s1) (run f1 s2)); (* This is unprovable, right? *)
-    admit ()
+    assert (unchanged_at rw2.loc_writes (run f2 s1) (run f2 s2));
+    assume (unchanged_at rw1.loc_writes (run f2 s1) (run f2 s2)) (* TODO: Finish proving things *)
   in
-  admit ()
+  let aux s1 = FStar.Classical.move_requires (aux s1) in
+  FStar.Classical.forall_intro_2 aux;
+  assert (
+    forall s1 s2. (
+      (s1.ms_ok = s2.ms_ok /\ unchanged_at rw.loc_reads s1 s2) ==> (
+        ((run f1 s1).ms_ok = (run f1 s2).ms_ok) /\
+        ((run f1 s1).ms_ok ==>
+         unchanged_at rw.loc_writes (run f1 s1) (run f1 s2))
+      )
+    )
+  );
+  assert (
+    forall s1 s2. (
+      (s1.ms_ok = s2.ms_ok /\ unchanged_at rw.loc_reads s1 s2) ==> (
+        ((run f2 s1).ms_ok = (run f2 s2).ms_ok) /\
+        ((run f2 s1).ms_ok ==>
+         unchanged_at rw.loc_writes (run f2 s1) (run f2 s2))
+      )
+    )
+  )
 
 (* See fsti *)
 let lemma_bounded_effects_series rw1 rw2 f1 f2 = admit ()
