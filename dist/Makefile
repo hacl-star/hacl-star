@@ -50,8 +50,6 @@ ifneq (,$(MLCRYPTO_HOME))
 OPENSSL_HOME 	= $(MLCRYPTO_HOME)/openssl
 endif
 
-include Makefile.basic
-
 # This is the "auto-detection". Since the parent Makefile runs with -bundle
 # EverCrypt.OpenSSL, in case the static configuration doesn't call into
 # OpenSSL, then EverCrypt_OpenSSL.h is not generated, meaning if the header
@@ -71,6 +69,8 @@ ifneq (,$(wildcard EverCrypt_BCrypt.h))
 endif
 
 OBJS 		+= $(patsubst %.S,%.o,$(wildcard *-$(MARCH)$(VARIANT).S))
+
+include Makefile.basic
 
 CFLAGS		+= -Wno-parentheses -g -std=gnu11 -O3
 
