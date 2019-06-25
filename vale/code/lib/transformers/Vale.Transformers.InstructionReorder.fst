@@ -1245,18 +1245,6 @@ let lemma_code_exchange_allowed (c1 c2:safely_bounded_code) (fuel:nat) (s:machin
   FStar.Classical.move_requires (lemma_not_ok_propagate_codes [c2;c1] fuel) s
 #pop-options
 
-let lemma_code_exchange (c1 c2 : safely_bounded_code) (fuel:nat) (s1 s2 : machine_state) :
-  Lemma
-    (requires (
-        !!(code_exchange_allowed c1 c2) /\
-        (equiv_states s1 s2)))
-    (ensures (
-        equiv_option_states
-          (machine_eval_codes [c1; c2] fuel s1)
-          (machine_eval_codes [c2; c1] fuel s2))) =
-  lemma_code_exchange_allowed c1 c2 fuel s1;
-  lemma_eval_codes_equiv_states [c2; c1] fuel s1 s2
-
 /// Given that we can perform simple swaps between [code]s, we can
 /// define a relation that tells us if some [codes] can be transformed
 /// into another using only allowed swaps.
@@ -1373,40 +1361,22 @@ let rec lemma_bubble_to_top (cs : codes) (i:nat{i < L.length cs}) (fuel:nat) (s 
           (Some? s2') /\ (
             let Some s2 = s2' in
             equiv_states s' s2)))) =
-  admit ();
-  let x = L.index cs i in
-  let Ok xs = bubble_to_top cs i in
-  let Some s1 = machine_eval_code x fuel s in
-  let s2' = machine_eval_codes xs fuel s1 in
-  match i with
-  | 0 -> ()
-  | _ ->
-    assert !!(code_exchange_allowed x (L.hd cs));
-    lemma_code_exchange x (L.hd cs) fuel s s;
-    let Some new_s = machine_eval_code (L.hd cs) fuel s in
-    let new_cs = L.tl cs in
-    let new_i = i - 1 in
-    assert (Some s' == machine_eval_codes new_cs fuel new_s);
-    assert (Ok? (bubble_to_top new_cs new_i));
-    lemma_bubble_to_top new_cs new_i fuel new_s s';
-    assert (x == L.index new_cs new_i);
-    assert (Ok? (bubble_to_top new_cs new_i));
-    assert (L.tl xs == Ok?.v (bubble_to_top new_cs new_i));
-    let Some new_s1 = machine_eval_code x fuel new_s in
-    let Some new_s2 = machine_eval_codes (L.tl xs) fuel new_s1 in
-    assert (Some new_s2 == machine_eval_codes (x :: (L.tl xs)) fuel new_s);
-    assert (equiv_states s' new_s2);
-    let Some s1_ = machine_eval_code (L.hd xs) fuel s1 in
-    let Some new_s1_ = machine_eval_code x fuel new_s in
-    assert (Some s1_ == machine_eval_codes [x; L.hd xs] fuel s);
-    assert (Some new_s1_ == machine_eval_codes [L.hd xs; x] fuel s);
-    assert (equiv_states_or_both_not_ok s1_ new_s1_);
-    if s1_.ms_ok then (
-      assert (equiv_states s1_ new_s1_);
-      lemma_eval_codes_equiv_states (L.tl xs) fuel s1_ new_s1_;
-      assert (equiv_ostates s2' (Some new_s2))
-    ) else (
-      lemma_not_ok_propagate_codes (L.tl xs) fuel new_s1_
+  match cs with
+  | [_] -> ()
+  | h :: t ->
+    let x = L.index cs i in
+    let Ok xs = bubble_to_top cs i in
+    if i = 0 then () else (
+      let Some s_h = machine_eval_code h fuel s in
+      lemma_bubble_to_top (L.tl cs) (i-1) fuel s_h s';
+      let Some s_h_x = machine_eval_code x fuel s_h in
+      let Some s_hx = machine_eval_codes [h;x] fuel s in
+      assert (s_h_x == s_hx);
+      lemma_code_exchange_allowed x h fuel s;
+      FStar.Classical.move_requires (lemma_not_ok_propagate_codes (L.tl xs) fuel) s_hx;
+      assert (s_hx.ms_ok);
+      let Some s_xh = machine_eval_codes [x;h] fuel s in
+      lemma_eval_codes_equiv_states (L.tl xs) fuel s_hx s_xh
     )
 #pop-options
 
