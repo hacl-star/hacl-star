@@ -70,7 +70,8 @@ let encrypt_opt_stdcall_st (a: algorithm { a = AES_128 \/ a = AES_256 }) =
   tag_b:uint8_p ->
   keys_b:uint8_p ->
   hkeys_b:uint8_p ->
-
+  scratch_b:uint8_p ->
+  
   Stack unit
     (requires fun h0 ->
       B.disjoint tag_b out_b /\ B.disjoint tag_b hkeys_b /\
@@ -90,10 +91,15 @@ let encrypt_opt_stdcall_st (a: algorithm { a = AES_128 \/ a = AES_256 }) =
       disjoint_or_eq keys_b hkeys_b /\
       B.disjoint keys_b auth_b /\ B.disjoint hkeys_b auth_b /\
 
+      B.disjoint plain_b scratch_b /\ B.disjoint auth_b scratch_b /\
+      B.disjoint iv_b scratch_b /\ B.disjoint out_b scratch_b /\
+      B.disjoint tag_b scratch_b /\ B.disjoint keys_b scratch_b /\
+      B.disjoint hkeys_b scratch_b /\
+
       B.live h0 auth_b /\ B.live h0 keys_b /\
       B.live h0 iv_b /\ B.live h0 hkeys_b /\
       B.live h0 out_b /\ B.live h0 plain_b /\
-      B.live h0 tag_b /\
+      B.live h0 tag_b /\ B.live h0 scratch_b /\
 
       B.length auth_b = UInt64.v auth_len /\
       B.length iv_b = 16 /\
@@ -102,6 +108,7 @@ let encrypt_opt_stdcall_st (a: algorithm { a = AES_128 \/ a = AES_256 }) =
       B.length hkeys_b = 128 /\
       B.length tag_b == 16 /\
       B.length keys_b = Vale.Wrapper.X64.AES.key_offset a /\
+      B.length scratch_b = 176 /\
 
       aesni_enabled /\ pclmulqdq_enabled /\ avx_enabled /\
       is_aes_key_LE a (Ghost.reveal key) /\
@@ -115,9 +122,10 @@ let encrypt_opt_stdcall_st (a: algorithm { a = AES_128 \/ a = AES_256 }) =
         compute_iv_BE (aes_encrypt_LE a (Ghost.reveal key) (Mkfour 0 0 0 0)) (Ghost.reveal iv))
     )
     (ensures fun h0 _ h1 ->
-      B.modifies (B.loc_union (B.loc_buffer tag_b)
+      B.modifies (B.loc_union (B.loc_buffer scratch_b)
+                 (B.loc_union (B.loc_buffer tag_b)
                  (B.loc_union (B.loc_buffer iv_b)
-                 (B.loc_buffer out_b))) h0 h1 /\
+                 (B.loc_buffer out_b)))) h0 h1 /\
 
       (let plain = seq_uint8_to_seq_nat8 (B.as_seq h0 plain_b) in
        let auth = seq_uint8_to_seq_nat8 (B.as_seq h0 auth_b) in

@@ -862,16 +862,16 @@ let lemma_slice_sub (b:uint8_p) (b_sub:uint8_p) (b_extra:uint8_p) (h:HS.mem) : L
 #set-options "--z3rlimit 600 --max_fuel 0 --max_ifuel 0"
 
 inline_for_extraction
-let gcm256_decrypt_opt_stdcall key iv cipher_b cipher_len auth_b auth_len iv_b out_b tag_b keys_b hkeys_b =
+let gcm256_decrypt_opt_stdcall key iv cipher_b cipher_len auth_b auth_len iv_b out_b tag_b keys_b hkeys_b scratch_b =
   let h0 = get() in
 
   push_frame();
-  // Scratch space for Vale procedure
-  let scratch_b = B.alloca 0uy 144ul in
   // Extra space to have a full input/output with length % 16 = 0
-  let inout_b = B.alloca 0uy 16ul in
+  let inout_b = B.sub scratch_b 0ul 16ul in
   // Same for auth_b
-  let abytes_b = B.alloca 0uy 16ul in
+  let abytes_b = B.sub scratch_b 16ul 16ul in
+  // Scratch space for Vale procedure
+  let scratch_b = B.sub scratch_b 32ul 144ul in
 
   // Copy the remainder of cipher_b into inout_b
 
