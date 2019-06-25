@@ -31,7 +31,9 @@ let lemma_mul_assos_3 a b c = ()
 val lemma_mul_assos_4:
   a:nat -> b:nat -> c:nat -> d:nat ->
   Lemma (a * b * c * d == a * (b * c * d))
-let lemma_mul_assos_4 a b c d = ()
+let lemma_mul_assos_4 a b c d =
+  lemma_mul_assos_3 a b c;
+  FStar.Math.Lemmas.paren_mul_right a (b * c) d
 
 val lemma_mul_assos_5:
   a:nat -> b:nat -> c:nat -> d:nat -> e:nat ->
@@ -277,6 +279,7 @@ let smul_add_felem5_eval_lemma_i #w #m1 #m2 #m3 u1 f2 acc1 i =
   smul_add_lemma (v ta0) (v ta1) (v ta2) (v ta3) (v ta4) vu1 (v tf20) (v tf21) (v tf22) (v tf23) (v tf24)
 #pop-options
 
+#push-options "--z3rlimit 150"
 val lemma_fmul5_pow26:
   r:tup64_5
   -> Lemma
@@ -304,6 +307,7 @@ let lemma_fmul5_pow26 r =
   lemma_prime ();
   assert_norm ((v r4 * pow2 130) % prime == (v r4 * 5) % prime);
   FStar.Math.Lemmas.lemma_mod_plus_distr_r p26r0123 (v r4 * 5) prime
+#pop-options
 
 val lemma_fmul5_pow26_pow26:
     r:tup64_5

@@ -72,6 +72,18 @@ let size_variable: size_t = size vsize_variable // or size 42
 This in turn allows to be able to call `v` on `size_variable`
 such that `v size_variable = vsize_variable`.
 
+For maximum bounds, max is inclusive and names should be
+
+```
+inline_for_extraction
+let max_blah: size_nat = 42
+```
+such that signatures can use it as preconditions as
+
+```
+val f: n:size_nat{n <= max_blah} -> Tot size_nat
+```
+
 --------------------------------------------------------------------
 
 In an agile setting a module should use the type `algorithm` eg.

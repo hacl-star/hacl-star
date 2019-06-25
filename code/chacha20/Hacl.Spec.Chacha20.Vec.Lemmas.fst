@@ -9,7 +9,7 @@ open Lib.IntVector
 module Scalar = Spec.Chacha20
 open Hacl.Spec.Chacha20.Vec
 
-#reset-options "--z3rlimit 50 --max_fuel 1"
+#reset-options "--z3rlimit 150 --max_fuel 1"
 
 val line_lemma_i:
     #w:lanes
@@ -19,6 +19,8 @@ val line_lemma_i:
   Lemma ((transpose_state (line #w a b d s m)).[i] == Scalar.line a b d s (transpose_state #w m).[i])
 let line_lemma_i #w a b d s m i =
   eq_intro (transpose_state (line #w a b d s m)).[i] (Scalar.line a b d s (transpose_state #w m).[i])
+
+#set-options "--z3rlimit 50"
 
 val quarter_round_lemma_i:
     #w:lanes

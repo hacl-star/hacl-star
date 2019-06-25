@@ -69,6 +69,7 @@
         "lemma_FStar.Set.mem_singleton", "lemma_FStar.Set.mem_union",
         "lemma_FStar.UInt32.uv_inv", "lemma_FStar.UInt32.vu_inv",
         "lemma_Lib.Buffer.modifies_preserves_live",
+        "lemma_Lib.Buffer.mut_immut_disjoint",
         "lemma_Lib.IntTypes.pow2_values",
         "lemma_LowStar.Monotonic.Buffer.address_liveness_insensitive_buffer",
         "lemma_LowStar.Monotonic.Buffer.fresh_frame_modifies",
@@ -89,8 +90,6 @@
         "primitive_Prims.op_Negation", "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_038550465fa71ad92a926006f65db17f",
-        "refinement_interpretation_Tm_refine_0773a299ec43f8fb537ec511f9cd85af",
         "refinement_interpretation_Tm_refine_2011e81e05d092e08833cbfdaea77df9",
         "refinement_interpretation_Tm_refine_24b7dd59035c85e1265ac2b7574d80e0",
         "refinement_interpretation_Tm_refine_289bd5094ffa8f21f0af231e7fa0ac18",
@@ -130,7 +129,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "9aef10c9aa35036e9d2a4f952af2033d"
+      "71d5da89dfde5762eadf0c45bd043f33"
     ],
     [
       "Hacl.Test.SHA3.test_shake128",
@@ -190,6 +189,7 @@
         "lemma_FStar.Set.mem_complement", "lemma_FStar.Set.mem_intersect",
         "lemma_FStar.Set.mem_singleton", "lemma_FStar.Set.mem_union",
         "lemma_Lib.Buffer.modifies_preserves_live",
+        "lemma_Lib.Buffer.mut_immut_disjoint",
         "lemma_Lib.IntTypes.pow2_values",
         "lemma_LowStar.Monotonic.Buffer.address_liveness_insensitive_buffer",
         "lemma_LowStar.Monotonic.Buffer.fresh_frame_modifies",
@@ -210,8 +210,6 @@
         "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_038550465fa71ad92a926006f65db17f",
-        "refinement_interpretation_Tm_refine_0773a299ec43f8fb537ec511f9cd85af",
         "refinement_interpretation_Tm_refine_2011e81e05d092e08833cbfdaea77df9",
         "refinement_interpretation_Tm_refine_24b7dd59035c85e1265ac2b7574d80e0",
         "refinement_interpretation_Tm_refine_289bd5094ffa8f21f0af231e7fa0ac18",
@@ -243,7 +241,7 @@
         "typing_tok_Lib.Buffer.IMMUT@tok", "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "3c6a1da21d500262f3294440f3a2a0b7"
+      "4fa408b4bfe569f3e57ca2a2ef7ea440"
     ],
     [
       "Hacl.Test.SHA3.test_shake256",
@@ -303,6 +301,7 @@
         "lemma_FStar.Set.mem_complement", "lemma_FStar.Set.mem_intersect",
         "lemma_FStar.Set.mem_singleton", "lemma_FStar.Set.mem_union",
         "lemma_Lib.Buffer.modifies_preserves_live",
+        "lemma_Lib.Buffer.mut_immut_disjoint",
         "lemma_Lib.IntTypes.pow2_values",
         "lemma_LowStar.Monotonic.Buffer.address_liveness_insensitive_buffer",
         "lemma_LowStar.Monotonic.Buffer.fresh_frame_modifies",
@@ -323,8 +322,6 @@
         "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_038550465fa71ad92a926006f65db17f",
-        "refinement_interpretation_Tm_refine_0773a299ec43f8fb537ec511f9cd85af",
         "refinement_interpretation_Tm_refine_2011e81e05d092e08833cbfdaea77df9",
         "refinement_interpretation_Tm_refine_24b7dd59035c85e1265ac2b7574d80e0",
         "refinement_interpretation_Tm_refine_289bd5094ffa8f21f0af231e7fa0ac18",
@@ -356,7 +353,7 @@
         "typing_tok_Lib.Buffer.IMMUT@tok", "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "272761756c29387205a84b1f69dc6c73"
+      "6eb2c9b7fddb0f0e8ac69b45ff5e2fc9"
     ],
     [
       "Hacl.Test.SHA3.u8",
@@ -377,7 +374,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "a74a53ba16f911c754544ac780df274c"
+      "2c1d231680b180378ec662d6db29c2c9"
     ],
     [
       "Hacl.Test.SHA3.test1_plaintext",
@@ -425,7 +422,6 @@
         "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_038550465fa71ad92a926006f65db17f",
         "refinement_interpretation_Tm_refine_08b73966aee9c646db88e6c06828d161",
         "refinement_interpretation_Tm_refine_2fbd657fe85bcb2423f9c7e5f9b3bcb5",
         "refinement_interpretation_Tm_refine_446f42ec497767535289bc2b8f9c8be4",
@@ -444,7 +440,7 @@
         "typing_LowStar.ImmutableBuffer.immutable_preorder"
       ],
       0,
-      "fd2daa396bd124c10f217277bf3974dd"
+      "e13e64888b05cf89e47dd952c65fb612"
     ],
     [
       "Hacl.Test.SHA3.test1_expected_sha3_224",
@@ -481,7 +477,7 @@
         "equation_Lib.Sequence.lseq",
         "equation_LowStar.ImmutableBuffer.ibuffer",
         "equation_LowStar.ImmutableBuffer.immutable_preorder",
-        "equation_Prims.nat",
+        "equation_LowStar.Monotonic.Buffer.length", "equation_Prims.nat",
         "function_token_typing_FStar.Monotonic.Heap.heap",
         "function_token_typing_Lib.IntTypes.uint8",
         "function_token_typing_Prims.__cache_version_number__", "int_typing",
@@ -493,7 +489,6 @@
         "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_038550465fa71ad92a926006f65db17f",
         "refinement_interpretation_Tm_refine_08b73966aee9c646db88e6c06828d161",
         "refinement_interpretation_Tm_refine_2fbd657fe85bcb2423f9c7e5f9b3bcb5",
         "refinement_interpretation_Tm_refine_446f42ec497767535289bc2b8f9c8be4",
@@ -509,10 +504,11 @@
         "typing_FStar.Monotonic.HyperStack.get_hmap",
         "typing_FStar.Monotonic.HyperStack.get_tip",
         "typing_Lib.IntTypes.size", "typing_Lib.Sequence.of_list",
-        "typing_LowStar.ImmutableBuffer.immutable_preorder"
+        "typing_LowStar.ImmutableBuffer.immutable_preorder",
+        "typing_LowStar.Monotonic.Buffer.len"
       ],
       0,
-      "c6cf521b14fa725e2ab1d6663dc1ac1f"
+      "40395b37d136b894fde2338a190b09e9"
     ],
     [
       "Hacl.Test.SHA3.test1_expected_sha3_256",
@@ -549,7 +545,7 @@
         "equation_Lib.Sequence.lseq",
         "equation_LowStar.ImmutableBuffer.ibuffer",
         "equation_LowStar.ImmutableBuffer.immutable_preorder",
-        "equation_Prims.nat",
+        "equation_LowStar.Monotonic.Buffer.length", "equation_Prims.nat",
         "function_token_typing_FStar.Monotonic.Heap.heap",
         "function_token_typing_Lib.IntTypes.uint8",
         "function_token_typing_Prims.__cache_version_number__", "int_typing",
@@ -561,7 +557,6 @@
         "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_038550465fa71ad92a926006f65db17f",
         "refinement_interpretation_Tm_refine_08b73966aee9c646db88e6c06828d161",
         "refinement_interpretation_Tm_refine_2fbd657fe85bcb2423f9c7e5f9b3bcb5",
         "refinement_interpretation_Tm_refine_446f42ec497767535289bc2b8f9c8be4",
@@ -577,10 +572,11 @@
         "typing_FStar.Monotonic.HyperStack.get_hmap",
         "typing_FStar.Monotonic.HyperStack.get_tip",
         "typing_Lib.IntTypes.size", "typing_Lib.Sequence.of_list",
-        "typing_LowStar.ImmutableBuffer.immutable_preorder"
+        "typing_LowStar.ImmutableBuffer.immutable_preorder",
+        "typing_LowStar.Monotonic.Buffer.len"
       ],
       0,
-      "3ee92cdff8325e5d0a3ee015947f6129"
+      "d60ebe148c89389d2bfb5f9e25979313"
     ],
     [
       "Hacl.Test.SHA3.test1_expected_sha3_384",
@@ -617,7 +613,7 @@
         "equation_Lib.Sequence.lseq",
         "equation_LowStar.ImmutableBuffer.ibuffer",
         "equation_LowStar.ImmutableBuffer.immutable_preorder",
-        "equation_Prims.nat",
+        "equation_LowStar.Monotonic.Buffer.length", "equation_Prims.nat",
         "function_token_typing_FStar.Monotonic.Heap.heap",
         "function_token_typing_Lib.IntTypes.uint8",
         "function_token_typing_Prims.__cache_version_number__", "int_typing",
@@ -629,7 +625,6 @@
         "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_038550465fa71ad92a926006f65db17f",
         "refinement_interpretation_Tm_refine_08b73966aee9c646db88e6c06828d161",
         "refinement_interpretation_Tm_refine_2fbd657fe85bcb2423f9c7e5f9b3bcb5",
         "refinement_interpretation_Tm_refine_446f42ec497767535289bc2b8f9c8be4",
@@ -645,10 +640,11 @@
         "typing_FStar.Monotonic.HyperStack.get_hmap",
         "typing_FStar.Monotonic.HyperStack.get_tip",
         "typing_Lib.IntTypes.size", "typing_Lib.Sequence.of_list",
-        "typing_LowStar.ImmutableBuffer.immutable_preorder"
+        "typing_LowStar.ImmutableBuffer.immutable_preorder",
+        "typing_LowStar.Monotonic.Buffer.len"
       ],
       0,
-      "16f47b6f7317be744da98178111c51c9"
+      "4a09738209d5401a7557aab5163fc896"
     ],
     [
       "Hacl.Test.SHA3.test1_expected_sha3_512",
@@ -685,7 +681,7 @@
         "equation_Lib.Sequence.lseq",
         "equation_LowStar.ImmutableBuffer.ibuffer",
         "equation_LowStar.ImmutableBuffer.immutable_preorder",
-        "equation_Prims.nat",
+        "equation_LowStar.Monotonic.Buffer.length", "equation_Prims.nat",
         "function_token_typing_FStar.Monotonic.Heap.heap",
         "function_token_typing_Lib.IntTypes.uint8",
         "function_token_typing_Prims.__cache_version_number__", "int_typing",
@@ -697,7 +693,6 @@
         "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_038550465fa71ad92a926006f65db17f",
         "refinement_interpretation_Tm_refine_08b73966aee9c646db88e6c06828d161",
         "refinement_interpretation_Tm_refine_2fbd657fe85bcb2423f9c7e5f9b3bcb5",
         "refinement_interpretation_Tm_refine_446f42ec497767535289bc2b8f9c8be4",
@@ -713,10 +708,11 @@
         "typing_FStar.Monotonic.HyperStack.get_hmap",
         "typing_FStar.Monotonic.HyperStack.get_tip",
         "typing_Lib.IntTypes.size", "typing_Lib.Sequence.of_list",
-        "typing_LowStar.ImmutableBuffer.immutable_preorder"
+        "typing_LowStar.ImmutableBuffer.immutable_preorder",
+        "typing_LowStar.Monotonic.Buffer.len"
       ],
       0,
-      "a2be732a80cb817e211ad73ff220c26e"
+      "bdcc09dea3255382718f06f73b0c07a9"
     ],
     [
       "Hacl.Test.SHA3.test2_plaintext",
@@ -753,7 +749,7 @@
         "equation_Lib.Sequence.lseq",
         "equation_LowStar.ImmutableBuffer.ibuffer",
         "equation_LowStar.ImmutableBuffer.immutable_preorder",
-        "equation_Prims.nat",
+        "equation_LowStar.Monotonic.Buffer.length", "equation_Prims.nat",
         "function_token_typing_FStar.Monotonic.Heap.heap",
         "function_token_typing_Lib.IntTypes.uint8",
         "function_token_typing_Prims.__cache_version_number__", "int_typing",
@@ -765,7 +761,6 @@
         "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_038550465fa71ad92a926006f65db17f",
         "refinement_interpretation_Tm_refine_08b73966aee9c646db88e6c06828d161",
         "refinement_interpretation_Tm_refine_2fbd657fe85bcb2423f9c7e5f9b3bcb5",
         "refinement_interpretation_Tm_refine_446f42ec497767535289bc2b8f9c8be4",
@@ -781,10 +776,11 @@
         "typing_FStar.Monotonic.HyperStack.get_hmap",
         "typing_FStar.Monotonic.HyperStack.get_tip",
         "typing_Lib.IntTypes.size", "typing_Lib.Sequence.of_list",
-        "typing_LowStar.ImmutableBuffer.immutable_preorder"
+        "typing_LowStar.ImmutableBuffer.immutable_preorder",
+        "typing_LowStar.Monotonic.Buffer.len"
       ],
       0,
-      "57308932acaab7c161344a968d73255a"
+      "c13aca0acbff9bea441a9cf4a2ac1283"
     ],
     [
       "Hacl.Test.SHA3.test2_expected_sha3_224",
@@ -821,7 +817,7 @@
         "equation_Lib.Sequence.lseq",
         "equation_LowStar.ImmutableBuffer.ibuffer",
         "equation_LowStar.ImmutableBuffer.immutable_preorder",
-        "equation_Prims.nat",
+        "equation_LowStar.Monotonic.Buffer.length", "equation_Prims.nat",
         "function_token_typing_FStar.Monotonic.Heap.heap",
         "function_token_typing_Lib.IntTypes.uint8",
         "function_token_typing_Prims.__cache_version_number__", "int_typing",
@@ -833,7 +829,6 @@
         "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_038550465fa71ad92a926006f65db17f",
         "refinement_interpretation_Tm_refine_08b73966aee9c646db88e6c06828d161",
         "refinement_interpretation_Tm_refine_2fbd657fe85bcb2423f9c7e5f9b3bcb5",
         "refinement_interpretation_Tm_refine_446f42ec497767535289bc2b8f9c8be4",
@@ -849,10 +844,11 @@
         "typing_FStar.Monotonic.HyperStack.get_hmap",
         "typing_FStar.Monotonic.HyperStack.get_tip",
         "typing_Lib.IntTypes.size", "typing_Lib.Sequence.of_list",
-        "typing_LowStar.ImmutableBuffer.immutable_preorder"
+        "typing_LowStar.ImmutableBuffer.immutable_preorder",
+        "typing_LowStar.Monotonic.Buffer.len"
       ],
       0,
-      "f8ed490ccd447ab5bfa5f0911163e954"
+      "14c4f9fdb88f04672d7e28f1ce58326c"
     ],
     [
       "Hacl.Test.SHA3.test2_expected_sha3_256",
@@ -889,7 +885,7 @@
         "equation_Lib.Sequence.lseq",
         "equation_LowStar.ImmutableBuffer.ibuffer",
         "equation_LowStar.ImmutableBuffer.immutable_preorder",
-        "equation_Prims.nat",
+        "equation_LowStar.Monotonic.Buffer.length", "equation_Prims.nat",
         "function_token_typing_FStar.Monotonic.Heap.heap",
         "function_token_typing_Lib.IntTypes.uint8",
         "function_token_typing_Prims.__cache_version_number__", "int_typing",
@@ -901,7 +897,6 @@
         "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_038550465fa71ad92a926006f65db17f",
         "refinement_interpretation_Tm_refine_08b73966aee9c646db88e6c06828d161",
         "refinement_interpretation_Tm_refine_2fbd657fe85bcb2423f9c7e5f9b3bcb5",
         "refinement_interpretation_Tm_refine_446f42ec497767535289bc2b8f9c8be4",
@@ -917,10 +912,11 @@
         "typing_FStar.Monotonic.HyperStack.get_hmap",
         "typing_FStar.Monotonic.HyperStack.get_tip",
         "typing_Lib.IntTypes.size", "typing_Lib.Sequence.of_list",
-        "typing_LowStar.ImmutableBuffer.immutable_preorder"
+        "typing_LowStar.ImmutableBuffer.immutable_preorder",
+        "typing_LowStar.Monotonic.Buffer.len"
       ],
       0,
-      "1e139826fceb1968da171858948f57fe"
+      "53e2e23ff74b0cc9da08c73151370109"
     ],
     [
       "Hacl.Test.SHA3.test2_expected_sha3_384",
@@ -957,7 +953,7 @@
         "equation_Lib.Sequence.lseq",
         "equation_LowStar.ImmutableBuffer.ibuffer",
         "equation_LowStar.ImmutableBuffer.immutable_preorder",
-        "equation_Prims.nat",
+        "equation_LowStar.Monotonic.Buffer.length", "equation_Prims.nat",
         "function_token_typing_FStar.Monotonic.Heap.heap",
         "function_token_typing_Lib.IntTypes.uint8",
         "function_token_typing_Prims.__cache_version_number__", "int_typing",
@@ -969,7 +965,6 @@
         "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_038550465fa71ad92a926006f65db17f",
         "refinement_interpretation_Tm_refine_08b73966aee9c646db88e6c06828d161",
         "refinement_interpretation_Tm_refine_2fbd657fe85bcb2423f9c7e5f9b3bcb5",
         "refinement_interpretation_Tm_refine_446f42ec497767535289bc2b8f9c8be4",
@@ -985,10 +980,11 @@
         "typing_FStar.Monotonic.HyperStack.get_hmap",
         "typing_FStar.Monotonic.HyperStack.get_tip",
         "typing_Lib.IntTypes.size", "typing_Lib.Sequence.of_list",
-        "typing_LowStar.ImmutableBuffer.immutable_preorder"
+        "typing_LowStar.ImmutableBuffer.immutable_preorder",
+        "typing_LowStar.Monotonic.Buffer.len"
       ],
       0,
-      "36bb44b4f5b38ee6e09208730aa104ad"
+      "4464dd5a3587c4a429cb2cd69d6fb2d5"
     ],
     [
       "Hacl.Test.SHA3.test2_expected_sha3_512",
@@ -1025,7 +1021,7 @@
         "equation_Lib.Sequence.lseq",
         "equation_LowStar.ImmutableBuffer.ibuffer",
         "equation_LowStar.ImmutableBuffer.immutable_preorder",
-        "equation_Prims.nat",
+        "equation_LowStar.Monotonic.Buffer.length", "equation_Prims.nat",
         "function_token_typing_FStar.Monotonic.Heap.heap",
         "function_token_typing_Lib.IntTypes.uint8",
         "function_token_typing_Prims.__cache_version_number__", "int_typing",
@@ -1037,7 +1033,6 @@
         "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_038550465fa71ad92a926006f65db17f",
         "refinement_interpretation_Tm_refine_08b73966aee9c646db88e6c06828d161",
         "refinement_interpretation_Tm_refine_2fbd657fe85bcb2423f9c7e5f9b3bcb5",
         "refinement_interpretation_Tm_refine_446f42ec497767535289bc2b8f9c8be4",
@@ -1053,10 +1048,11 @@
         "typing_FStar.Monotonic.HyperStack.get_hmap",
         "typing_FStar.Monotonic.HyperStack.get_tip",
         "typing_Lib.IntTypes.size", "typing_Lib.Sequence.of_list",
-        "typing_LowStar.ImmutableBuffer.immutable_preorder"
+        "typing_LowStar.ImmutableBuffer.immutable_preorder",
+        "typing_LowStar.Monotonic.Buffer.len"
       ],
       0,
-      "e4b8f1679a99b015c7f76f11553ddbb8"
+      "b7bde13e96962fd8e682cc3c8ea0bf76"
     ],
     [
       "Hacl.Test.SHA3.test3_plaintext",
@@ -1093,7 +1089,7 @@
         "equation_Lib.Sequence.lseq",
         "equation_LowStar.ImmutableBuffer.ibuffer",
         "equation_LowStar.ImmutableBuffer.immutable_preorder",
-        "equation_Prims.nat",
+        "equation_LowStar.Monotonic.Buffer.length", "equation_Prims.nat",
         "function_token_typing_FStar.Monotonic.Heap.heap",
         "function_token_typing_Lib.IntTypes.uint8",
         "function_token_typing_Prims.__cache_version_number__", "int_typing",
@@ -1105,7 +1101,6 @@
         "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_038550465fa71ad92a926006f65db17f",
         "refinement_interpretation_Tm_refine_08b73966aee9c646db88e6c06828d161",
         "refinement_interpretation_Tm_refine_2fbd657fe85bcb2423f9c7e5f9b3bcb5",
         "refinement_interpretation_Tm_refine_446f42ec497767535289bc2b8f9c8be4",
@@ -1121,10 +1116,11 @@
         "typing_FStar.Monotonic.HyperStack.get_hmap",
         "typing_FStar.Monotonic.HyperStack.get_tip",
         "typing_Lib.IntTypes.size", "typing_Lib.Sequence.of_list",
-        "typing_LowStar.ImmutableBuffer.immutable_preorder"
+        "typing_LowStar.ImmutableBuffer.immutable_preorder",
+        "typing_LowStar.Monotonic.Buffer.len"
       ],
       0,
-      "66573b9b5c09e9dd374385624a0f19db"
+      "70edf4ecffa1e6e5e8b615b158c326a0"
     ],
     [
       "Hacl.Test.SHA3.test3_expected_sha3_224",
@@ -1161,7 +1157,7 @@
         "equation_Lib.Sequence.lseq",
         "equation_LowStar.ImmutableBuffer.ibuffer",
         "equation_LowStar.ImmutableBuffer.immutable_preorder",
-        "equation_Prims.nat",
+        "equation_LowStar.Monotonic.Buffer.length", "equation_Prims.nat",
         "function_token_typing_FStar.Monotonic.Heap.heap",
         "function_token_typing_Lib.IntTypes.uint8",
         "function_token_typing_Prims.__cache_version_number__", "int_typing",
@@ -1173,7 +1169,6 @@
         "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_038550465fa71ad92a926006f65db17f",
         "refinement_interpretation_Tm_refine_08b73966aee9c646db88e6c06828d161",
         "refinement_interpretation_Tm_refine_2fbd657fe85bcb2423f9c7e5f9b3bcb5",
         "refinement_interpretation_Tm_refine_446f42ec497767535289bc2b8f9c8be4",
@@ -1189,10 +1184,11 @@
         "typing_FStar.Monotonic.HyperStack.get_hmap",
         "typing_FStar.Monotonic.HyperStack.get_tip",
         "typing_Lib.IntTypes.size", "typing_Lib.Sequence.of_list",
-        "typing_LowStar.ImmutableBuffer.immutable_preorder"
+        "typing_LowStar.ImmutableBuffer.immutable_preorder",
+        "typing_LowStar.Monotonic.Buffer.len"
       ],
       0,
-      "b452ca54ef69379340ebd44f5d0d6e06"
+      "6d4cb4682823419e421d87c3b9ee03be"
     ],
     [
       "Hacl.Test.SHA3.test3_expected_sha3_256",
@@ -1229,7 +1225,7 @@
         "equation_Lib.Sequence.lseq",
         "equation_LowStar.ImmutableBuffer.ibuffer",
         "equation_LowStar.ImmutableBuffer.immutable_preorder",
-        "equation_Prims.nat",
+        "equation_LowStar.Monotonic.Buffer.length", "equation_Prims.nat",
         "function_token_typing_FStar.Monotonic.Heap.heap",
         "function_token_typing_Lib.IntTypes.uint8",
         "function_token_typing_Prims.__cache_version_number__", "int_typing",
@@ -1241,7 +1237,6 @@
         "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_038550465fa71ad92a926006f65db17f",
         "refinement_interpretation_Tm_refine_08b73966aee9c646db88e6c06828d161",
         "refinement_interpretation_Tm_refine_2fbd657fe85bcb2423f9c7e5f9b3bcb5",
         "refinement_interpretation_Tm_refine_446f42ec497767535289bc2b8f9c8be4",
@@ -1257,10 +1252,11 @@
         "typing_FStar.Monotonic.HyperStack.get_hmap",
         "typing_FStar.Monotonic.HyperStack.get_tip",
         "typing_Lib.IntTypes.size", "typing_Lib.Sequence.of_list",
-        "typing_LowStar.ImmutableBuffer.immutable_preorder"
+        "typing_LowStar.ImmutableBuffer.immutable_preorder",
+        "typing_LowStar.Monotonic.Buffer.len"
       ],
       0,
-      "7ef3b79c3e10412e36d9f4270e641afe"
+      "4d5716a11b8d8efd84b9f16543040511"
     ],
     [
       "Hacl.Test.SHA3.test3_expected_sha3_384",
@@ -1297,7 +1293,7 @@
         "equation_Lib.Sequence.lseq",
         "equation_LowStar.ImmutableBuffer.ibuffer",
         "equation_LowStar.ImmutableBuffer.immutable_preorder",
-        "equation_Prims.nat",
+        "equation_LowStar.Monotonic.Buffer.length", "equation_Prims.nat",
         "function_token_typing_FStar.Monotonic.Heap.heap",
         "function_token_typing_Lib.IntTypes.uint8",
         "function_token_typing_Prims.__cache_version_number__", "int_typing",
@@ -1309,7 +1305,6 @@
         "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_038550465fa71ad92a926006f65db17f",
         "refinement_interpretation_Tm_refine_08b73966aee9c646db88e6c06828d161",
         "refinement_interpretation_Tm_refine_2fbd657fe85bcb2423f9c7e5f9b3bcb5",
         "refinement_interpretation_Tm_refine_446f42ec497767535289bc2b8f9c8be4",
@@ -1325,10 +1320,11 @@
         "typing_FStar.Monotonic.HyperStack.get_hmap",
         "typing_FStar.Monotonic.HyperStack.get_tip",
         "typing_Lib.IntTypes.size", "typing_Lib.Sequence.of_list",
-        "typing_LowStar.ImmutableBuffer.immutable_preorder"
+        "typing_LowStar.ImmutableBuffer.immutable_preorder",
+        "typing_LowStar.Monotonic.Buffer.len"
       ],
       0,
-      "1b2148c2df71eade32dccdb5e46823df"
+      "a52887f8d8808fed7a86228ffdc777d3"
     ],
     [
       "Hacl.Test.SHA3.test3_expected_sha3_512",
@@ -1365,7 +1361,7 @@
         "equation_Lib.Sequence.lseq",
         "equation_LowStar.ImmutableBuffer.ibuffer",
         "equation_LowStar.ImmutableBuffer.immutable_preorder",
-        "equation_Prims.nat",
+        "equation_LowStar.Monotonic.Buffer.length", "equation_Prims.nat",
         "function_token_typing_FStar.Monotonic.Heap.heap",
         "function_token_typing_Lib.IntTypes.uint8",
         "function_token_typing_Prims.__cache_version_number__", "int_typing",
@@ -1377,7 +1373,6 @@
         "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_038550465fa71ad92a926006f65db17f",
         "refinement_interpretation_Tm_refine_08b73966aee9c646db88e6c06828d161",
         "refinement_interpretation_Tm_refine_2fbd657fe85bcb2423f9c7e5f9b3bcb5",
         "refinement_interpretation_Tm_refine_446f42ec497767535289bc2b8f9c8be4",
@@ -1393,10 +1388,11 @@
         "typing_FStar.Monotonic.HyperStack.get_hmap",
         "typing_FStar.Monotonic.HyperStack.get_tip",
         "typing_Lib.IntTypes.size", "typing_Lib.Sequence.of_list",
-        "typing_LowStar.ImmutableBuffer.immutable_preorder"
+        "typing_LowStar.ImmutableBuffer.immutable_preorder",
+        "typing_LowStar.Monotonic.Buffer.len"
       ],
       0,
-      "ac7ee48046e43bfe4b07565a9c9c99b8"
+      "f802ffca851659553c5f4f448682faa1"
     ],
     [
       "Hacl.Test.SHA3.test4_plaintext",
@@ -1433,7 +1429,7 @@
         "equation_Lib.Sequence.lseq",
         "equation_LowStar.ImmutableBuffer.ibuffer",
         "equation_LowStar.ImmutableBuffer.immutable_preorder",
-        "equation_Prims.nat",
+        "equation_LowStar.Monotonic.Buffer.length", "equation_Prims.nat",
         "function_token_typing_FStar.Monotonic.Heap.heap",
         "function_token_typing_Lib.IntTypes.uint8",
         "function_token_typing_Prims.__cache_version_number__", "int_typing",
@@ -1445,7 +1441,6 @@
         "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_038550465fa71ad92a926006f65db17f",
         "refinement_interpretation_Tm_refine_08b73966aee9c646db88e6c06828d161",
         "refinement_interpretation_Tm_refine_2fbd657fe85bcb2423f9c7e5f9b3bcb5",
         "refinement_interpretation_Tm_refine_446f42ec497767535289bc2b8f9c8be4",
@@ -1461,10 +1456,11 @@
         "typing_FStar.Monotonic.HyperStack.get_hmap",
         "typing_FStar.Monotonic.HyperStack.get_tip",
         "typing_Lib.IntTypes.size", "typing_Lib.Sequence.of_list",
-        "typing_LowStar.ImmutableBuffer.immutable_preorder"
+        "typing_LowStar.ImmutableBuffer.immutable_preorder",
+        "typing_LowStar.Monotonic.Buffer.len"
       ],
       0,
-      "4d0ee83797d8dc0878250f191c7a0e3d"
+      "2d577b4095d04d23bc0bcb3e8d9bff7b"
     ],
     [
       "Hacl.Test.SHA3.test4_expected_sha3_224",
@@ -1501,7 +1497,7 @@
         "equation_Lib.Sequence.lseq",
         "equation_LowStar.ImmutableBuffer.ibuffer",
         "equation_LowStar.ImmutableBuffer.immutable_preorder",
-        "equation_Prims.nat",
+        "equation_LowStar.Monotonic.Buffer.length", "equation_Prims.nat",
         "function_token_typing_FStar.Monotonic.Heap.heap",
         "function_token_typing_Lib.IntTypes.uint8",
         "function_token_typing_Prims.__cache_version_number__", "int_typing",
@@ -1513,7 +1509,6 @@
         "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_038550465fa71ad92a926006f65db17f",
         "refinement_interpretation_Tm_refine_08b73966aee9c646db88e6c06828d161",
         "refinement_interpretation_Tm_refine_2fbd657fe85bcb2423f9c7e5f9b3bcb5",
         "refinement_interpretation_Tm_refine_446f42ec497767535289bc2b8f9c8be4",
@@ -1529,10 +1524,11 @@
         "typing_FStar.Monotonic.HyperStack.get_hmap",
         "typing_FStar.Monotonic.HyperStack.get_tip",
         "typing_Lib.IntTypes.size", "typing_Lib.Sequence.of_list",
-        "typing_LowStar.ImmutableBuffer.immutable_preorder"
+        "typing_LowStar.ImmutableBuffer.immutable_preorder",
+        "typing_LowStar.Monotonic.Buffer.len"
       ],
       0,
-      "69258396074324348a3074fbe1386a62"
+      "c52b8f1c4b92d0e45b5f140ff718b015"
     ],
     [
       "Hacl.Test.SHA3.test4_expected_sha3_256",
@@ -1569,7 +1565,7 @@
         "equation_Lib.Sequence.lseq",
         "equation_LowStar.ImmutableBuffer.ibuffer",
         "equation_LowStar.ImmutableBuffer.immutable_preorder",
-        "equation_Prims.nat",
+        "equation_LowStar.Monotonic.Buffer.length", "equation_Prims.nat",
         "function_token_typing_FStar.Monotonic.Heap.heap",
         "function_token_typing_Lib.IntTypes.uint8",
         "function_token_typing_Prims.__cache_version_number__", "int_typing",
@@ -1581,7 +1577,6 @@
         "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_038550465fa71ad92a926006f65db17f",
         "refinement_interpretation_Tm_refine_08b73966aee9c646db88e6c06828d161",
         "refinement_interpretation_Tm_refine_2fbd657fe85bcb2423f9c7e5f9b3bcb5",
         "refinement_interpretation_Tm_refine_446f42ec497767535289bc2b8f9c8be4",
@@ -1597,10 +1592,11 @@
         "typing_FStar.Monotonic.HyperStack.get_hmap",
         "typing_FStar.Monotonic.HyperStack.get_tip",
         "typing_Lib.IntTypes.size", "typing_Lib.Sequence.of_list",
-        "typing_LowStar.ImmutableBuffer.immutable_preorder"
+        "typing_LowStar.ImmutableBuffer.immutable_preorder",
+        "typing_LowStar.Monotonic.Buffer.len"
       ],
       0,
-      "afe212431050a2c61e456b00293b431e"
+      "643f0a15e705d606fc2862cb5a5d3afd"
     ],
     [
       "Hacl.Test.SHA3.test4_expected_sha3_384",
@@ -1637,7 +1633,7 @@
         "equation_Lib.Sequence.lseq",
         "equation_LowStar.ImmutableBuffer.ibuffer",
         "equation_LowStar.ImmutableBuffer.immutable_preorder",
-        "equation_Prims.nat",
+        "equation_LowStar.Monotonic.Buffer.length", "equation_Prims.nat",
         "function_token_typing_FStar.Monotonic.Heap.heap",
         "function_token_typing_Lib.IntTypes.uint8",
         "function_token_typing_Prims.__cache_version_number__", "int_typing",
@@ -1649,7 +1645,6 @@
         "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_038550465fa71ad92a926006f65db17f",
         "refinement_interpretation_Tm_refine_08b73966aee9c646db88e6c06828d161",
         "refinement_interpretation_Tm_refine_2fbd657fe85bcb2423f9c7e5f9b3bcb5",
         "refinement_interpretation_Tm_refine_446f42ec497767535289bc2b8f9c8be4",
@@ -1665,10 +1660,11 @@
         "typing_FStar.Monotonic.HyperStack.get_hmap",
         "typing_FStar.Monotonic.HyperStack.get_tip",
         "typing_Lib.IntTypes.size", "typing_Lib.Sequence.of_list",
-        "typing_LowStar.ImmutableBuffer.immutable_preorder"
+        "typing_LowStar.ImmutableBuffer.immutable_preorder",
+        "typing_LowStar.Monotonic.Buffer.len"
       ],
       0,
-      "980bda0a39c360a781a7ca01b00cef5c"
+      "75bf314c21cc553ae94622814c0b77d4"
     ],
     [
       "Hacl.Test.SHA3.test4_expected_sha3_512",
@@ -1705,7 +1701,7 @@
         "equation_Lib.Sequence.lseq",
         "equation_LowStar.ImmutableBuffer.ibuffer",
         "equation_LowStar.ImmutableBuffer.immutable_preorder",
-        "equation_Prims.nat",
+        "equation_LowStar.Monotonic.Buffer.length", "equation_Prims.nat",
         "function_token_typing_FStar.Monotonic.Heap.heap",
         "function_token_typing_Lib.IntTypes.uint8",
         "function_token_typing_Prims.__cache_version_number__", "int_typing",
@@ -1717,7 +1713,6 @@
         "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_038550465fa71ad92a926006f65db17f",
         "refinement_interpretation_Tm_refine_08b73966aee9c646db88e6c06828d161",
         "refinement_interpretation_Tm_refine_2fbd657fe85bcb2423f9c7e5f9b3bcb5",
         "refinement_interpretation_Tm_refine_446f42ec497767535289bc2b8f9c8be4",
@@ -1733,10 +1728,11 @@
         "typing_FStar.Monotonic.HyperStack.get_hmap",
         "typing_FStar.Monotonic.HyperStack.get_tip",
         "typing_Lib.IntTypes.size", "typing_Lib.Sequence.of_list",
-        "typing_LowStar.ImmutableBuffer.immutable_preorder"
+        "typing_LowStar.ImmutableBuffer.immutable_preorder",
+        "typing_LowStar.Monotonic.Buffer.len"
       ],
       0,
-      "99d64834fd3f90625da97625fad641b3"
+      "0d305368ccf8ddf9e2319852201cb100"
     ],
     [
       "Hacl.Test.SHA3.test5_plaintext_shake128",
@@ -1784,7 +1780,6 @@
         "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_038550465fa71ad92a926006f65db17f",
         "refinement_interpretation_Tm_refine_08b73966aee9c646db88e6c06828d161",
         "refinement_interpretation_Tm_refine_2fbd657fe85bcb2423f9c7e5f9b3bcb5",
         "refinement_interpretation_Tm_refine_446f42ec497767535289bc2b8f9c8be4",
@@ -1803,7 +1798,7 @@
         "typing_LowStar.ImmutableBuffer.immutable_preorder"
       ],
       0,
-      "90b24074879c9fe953a32f10d1ca5b40"
+      "bdbfe54e71fbbff8d5468e37b7b381c8"
     ],
     [
       "Hacl.Test.SHA3.test5_expected_shake128",
@@ -1840,7 +1835,7 @@
         "equation_Lib.Sequence.lseq",
         "equation_LowStar.ImmutableBuffer.ibuffer",
         "equation_LowStar.ImmutableBuffer.immutable_preorder",
-        "equation_Prims.nat",
+        "equation_LowStar.Monotonic.Buffer.length", "equation_Prims.nat",
         "function_token_typing_FStar.Monotonic.Heap.heap",
         "function_token_typing_Lib.IntTypes.uint8",
         "function_token_typing_Prims.__cache_version_number__", "int_typing",
@@ -1852,7 +1847,6 @@
         "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_038550465fa71ad92a926006f65db17f",
         "refinement_interpretation_Tm_refine_08b73966aee9c646db88e6c06828d161",
         "refinement_interpretation_Tm_refine_2fbd657fe85bcb2423f9c7e5f9b3bcb5",
         "refinement_interpretation_Tm_refine_446f42ec497767535289bc2b8f9c8be4",
@@ -1868,10 +1862,11 @@
         "typing_FStar.Monotonic.HyperStack.get_hmap",
         "typing_FStar.Monotonic.HyperStack.get_tip",
         "typing_Lib.IntTypes.size", "typing_Lib.Sequence.of_list",
-        "typing_LowStar.ImmutableBuffer.immutable_preorder"
+        "typing_LowStar.ImmutableBuffer.immutable_preorder",
+        "typing_LowStar.Monotonic.Buffer.len"
       ],
       0,
-      "c100cb1628ed3dbf794c8d8f103de2af"
+      "852773ab7519e66e497a52c785ef5bde"
     ],
     [
       "Hacl.Test.SHA3.test6_plaintext_shake128",
@@ -1908,7 +1903,7 @@
         "equation_Lib.Sequence.lseq",
         "equation_LowStar.ImmutableBuffer.ibuffer",
         "equation_LowStar.ImmutableBuffer.immutable_preorder",
-        "equation_Prims.nat",
+        "equation_LowStar.Monotonic.Buffer.length", "equation_Prims.nat",
         "function_token_typing_FStar.Monotonic.Heap.heap",
         "function_token_typing_Lib.IntTypes.uint8",
         "function_token_typing_Prims.__cache_version_number__", "int_typing",
@@ -1920,7 +1915,6 @@
         "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_038550465fa71ad92a926006f65db17f",
         "refinement_interpretation_Tm_refine_08b73966aee9c646db88e6c06828d161",
         "refinement_interpretation_Tm_refine_2fbd657fe85bcb2423f9c7e5f9b3bcb5",
         "refinement_interpretation_Tm_refine_446f42ec497767535289bc2b8f9c8be4",
@@ -1936,10 +1930,11 @@
         "typing_FStar.Monotonic.HyperStack.get_hmap",
         "typing_FStar.Monotonic.HyperStack.get_tip",
         "typing_Lib.IntTypes.size", "typing_Lib.Sequence.of_list",
-        "typing_LowStar.ImmutableBuffer.immutable_preorder"
+        "typing_LowStar.ImmutableBuffer.immutable_preorder",
+        "typing_LowStar.Monotonic.Buffer.len"
       ],
       0,
-      "abab78eccae3649df5ddfbe85b92ddca"
+      "a6ff7dd843e29101d7a3124fcc5d2ee2"
     ],
     [
       "Hacl.Test.SHA3.test6_expected_shake128",
@@ -1976,7 +1971,7 @@
         "equation_Lib.Sequence.lseq",
         "equation_LowStar.ImmutableBuffer.ibuffer",
         "equation_LowStar.ImmutableBuffer.immutable_preorder",
-        "equation_Prims.nat",
+        "equation_LowStar.Monotonic.Buffer.length", "equation_Prims.nat",
         "function_token_typing_FStar.Monotonic.Heap.heap",
         "function_token_typing_Lib.IntTypes.uint8",
         "function_token_typing_Prims.__cache_version_number__", "int_typing",
@@ -1988,7 +1983,6 @@
         "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_038550465fa71ad92a926006f65db17f",
         "refinement_interpretation_Tm_refine_08b73966aee9c646db88e6c06828d161",
         "refinement_interpretation_Tm_refine_2fbd657fe85bcb2423f9c7e5f9b3bcb5",
         "refinement_interpretation_Tm_refine_446f42ec497767535289bc2b8f9c8be4",
@@ -2004,10 +1998,11 @@
         "typing_FStar.Monotonic.HyperStack.get_hmap",
         "typing_FStar.Monotonic.HyperStack.get_tip",
         "typing_Lib.IntTypes.size", "typing_Lib.Sequence.of_list",
-        "typing_LowStar.ImmutableBuffer.immutable_preorder"
+        "typing_LowStar.ImmutableBuffer.immutable_preorder",
+        "typing_LowStar.Monotonic.Buffer.len"
       ],
       0,
-      "57f6d648e2796d5bcd6af0524181b647"
+      "1cafbd33e6c79067d1944b6459754e34"
     ],
     [
       "Hacl.Test.SHA3.test7_plaintext_shake128",
@@ -2044,7 +2039,7 @@
         "equation_Lib.Sequence.lseq",
         "equation_LowStar.ImmutableBuffer.ibuffer",
         "equation_LowStar.ImmutableBuffer.immutable_preorder",
-        "equation_Prims.nat",
+        "equation_LowStar.Monotonic.Buffer.length", "equation_Prims.nat",
         "function_token_typing_FStar.Monotonic.Heap.heap",
         "function_token_typing_Lib.IntTypes.uint8",
         "function_token_typing_Prims.__cache_version_number__", "int_typing",
@@ -2056,7 +2051,6 @@
         "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_038550465fa71ad92a926006f65db17f",
         "refinement_interpretation_Tm_refine_08b73966aee9c646db88e6c06828d161",
         "refinement_interpretation_Tm_refine_2fbd657fe85bcb2423f9c7e5f9b3bcb5",
         "refinement_interpretation_Tm_refine_446f42ec497767535289bc2b8f9c8be4",
@@ -2072,10 +2066,11 @@
         "typing_FStar.Monotonic.HyperStack.get_hmap",
         "typing_FStar.Monotonic.HyperStack.get_tip",
         "typing_Lib.IntTypes.size", "typing_Lib.Sequence.of_list",
-        "typing_LowStar.ImmutableBuffer.immutable_preorder"
+        "typing_LowStar.ImmutableBuffer.immutable_preorder",
+        "typing_LowStar.Monotonic.Buffer.len"
       ],
       0,
-      "441335320daf18681c7683b150424fad"
+      "e7e722c54956d034e2f1d6d05a8df85f"
     ],
     [
       "Hacl.Test.SHA3.test7_expected_shake128",
@@ -2112,7 +2107,7 @@
         "equation_Lib.Sequence.lseq",
         "equation_LowStar.ImmutableBuffer.ibuffer",
         "equation_LowStar.ImmutableBuffer.immutable_preorder",
-        "equation_Prims.nat",
+        "equation_LowStar.Monotonic.Buffer.length", "equation_Prims.nat",
         "function_token_typing_FStar.Monotonic.Heap.heap",
         "function_token_typing_Lib.IntTypes.uint8",
         "function_token_typing_Prims.__cache_version_number__", "int_typing",
@@ -2124,7 +2119,6 @@
         "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_038550465fa71ad92a926006f65db17f",
         "refinement_interpretation_Tm_refine_08b73966aee9c646db88e6c06828d161",
         "refinement_interpretation_Tm_refine_2fbd657fe85bcb2423f9c7e5f9b3bcb5",
         "refinement_interpretation_Tm_refine_446f42ec497767535289bc2b8f9c8be4",
@@ -2140,10 +2134,11 @@
         "typing_FStar.Monotonic.HyperStack.get_hmap",
         "typing_FStar.Monotonic.HyperStack.get_tip",
         "typing_Lib.IntTypes.size", "typing_Lib.Sequence.of_list",
-        "typing_LowStar.ImmutableBuffer.immutable_preorder"
+        "typing_LowStar.ImmutableBuffer.immutable_preorder",
+        "typing_LowStar.Monotonic.Buffer.len"
       ],
       0,
-      "a8118442f6c75b7fee0220e24367236b"
+      "844a2a4c5d1e59171ac5a57b813af8ee"
     ],
     [
       "Hacl.Test.SHA3.test8_plaintext_shake128",
@@ -2180,7 +2175,7 @@
         "equation_Lib.Sequence.lseq",
         "equation_LowStar.ImmutableBuffer.ibuffer",
         "equation_LowStar.ImmutableBuffer.immutable_preorder",
-        "equation_Prims.nat",
+        "equation_LowStar.Monotonic.Buffer.length", "equation_Prims.nat",
         "function_token_typing_FStar.Monotonic.Heap.heap",
         "function_token_typing_Lib.IntTypes.uint8",
         "function_token_typing_Prims.__cache_version_number__", "int_typing",
@@ -2192,7 +2187,6 @@
         "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_038550465fa71ad92a926006f65db17f",
         "refinement_interpretation_Tm_refine_08b73966aee9c646db88e6c06828d161",
         "refinement_interpretation_Tm_refine_2fbd657fe85bcb2423f9c7e5f9b3bcb5",
         "refinement_interpretation_Tm_refine_446f42ec497767535289bc2b8f9c8be4",
@@ -2208,10 +2202,11 @@
         "typing_FStar.Monotonic.HyperStack.get_hmap",
         "typing_FStar.Monotonic.HyperStack.get_tip",
         "typing_Lib.IntTypes.size", "typing_Lib.Sequence.of_list",
-        "typing_LowStar.ImmutableBuffer.immutable_preorder"
+        "typing_LowStar.ImmutableBuffer.immutable_preorder",
+        "typing_LowStar.Monotonic.Buffer.len"
       ],
       0,
-      "4f3be1914edcd638b067f1d9391daab7"
+      "751883c3a33a7ecc835f3ead21fef312"
     ],
     [
       "Hacl.Test.SHA3.test8_expected_shake128",
@@ -2248,7 +2243,7 @@
         "equation_Lib.Sequence.lseq",
         "equation_LowStar.ImmutableBuffer.ibuffer",
         "equation_LowStar.ImmutableBuffer.immutable_preorder",
-        "equation_Prims.nat",
+        "equation_LowStar.Monotonic.Buffer.length", "equation_Prims.nat",
         "function_token_typing_FStar.Monotonic.Heap.heap",
         "function_token_typing_Lib.IntTypes.uint8",
         "function_token_typing_Prims.__cache_version_number__", "int_typing",
@@ -2260,7 +2255,6 @@
         "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_038550465fa71ad92a926006f65db17f",
         "refinement_interpretation_Tm_refine_08b73966aee9c646db88e6c06828d161",
         "refinement_interpretation_Tm_refine_2fbd657fe85bcb2423f9c7e5f9b3bcb5",
         "refinement_interpretation_Tm_refine_446f42ec497767535289bc2b8f9c8be4",
@@ -2276,10 +2270,11 @@
         "typing_FStar.Monotonic.HyperStack.get_hmap",
         "typing_FStar.Monotonic.HyperStack.get_tip",
         "typing_Lib.IntTypes.size", "typing_Lib.Sequence.of_list",
-        "typing_LowStar.ImmutableBuffer.immutable_preorder"
+        "typing_LowStar.ImmutableBuffer.immutable_preorder",
+        "typing_LowStar.Monotonic.Buffer.len"
       ],
       0,
-      "43dc5e9867fa08802dfb42d7e428b171"
+      "a22d68cae94c10cfdd68c017ce4fa748"
     ],
     [
       "Hacl.Test.SHA3.test9_plaintext_shake256",
@@ -2327,7 +2322,6 @@
         "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_038550465fa71ad92a926006f65db17f",
         "refinement_interpretation_Tm_refine_08b73966aee9c646db88e6c06828d161",
         "refinement_interpretation_Tm_refine_2fbd657fe85bcb2423f9c7e5f9b3bcb5",
         "refinement_interpretation_Tm_refine_446f42ec497767535289bc2b8f9c8be4",
@@ -2346,7 +2340,7 @@
         "typing_LowStar.ImmutableBuffer.immutable_preorder"
       ],
       0,
-      "72c83cf4d113b685fbcf240bdea26564"
+      "7e718db3e16492b75af3d29e4af4bc88"
     ],
     [
       "Hacl.Test.SHA3.test9_expected_shake256",
@@ -2383,7 +2377,7 @@
         "equation_Lib.Sequence.lseq",
         "equation_LowStar.ImmutableBuffer.ibuffer",
         "equation_LowStar.ImmutableBuffer.immutable_preorder",
-        "equation_Prims.nat",
+        "equation_LowStar.Monotonic.Buffer.length", "equation_Prims.nat",
         "function_token_typing_FStar.Monotonic.Heap.heap",
         "function_token_typing_Lib.IntTypes.uint8",
         "function_token_typing_Prims.__cache_version_number__", "int_typing",
@@ -2395,7 +2389,6 @@
         "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_038550465fa71ad92a926006f65db17f",
         "refinement_interpretation_Tm_refine_08b73966aee9c646db88e6c06828d161",
         "refinement_interpretation_Tm_refine_2fbd657fe85bcb2423f9c7e5f9b3bcb5",
         "refinement_interpretation_Tm_refine_446f42ec497767535289bc2b8f9c8be4",
@@ -2411,10 +2404,11 @@
         "typing_FStar.Monotonic.HyperStack.get_hmap",
         "typing_FStar.Monotonic.HyperStack.get_tip",
         "typing_Lib.IntTypes.size", "typing_Lib.Sequence.of_list",
-        "typing_LowStar.ImmutableBuffer.immutable_preorder"
+        "typing_LowStar.ImmutableBuffer.immutable_preorder",
+        "typing_LowStar.Monotonic.Buffer.len"
       ],
       0,
-      "9dc933f3e6d7ee1aa14694465b8e073a"
+      "753aaf3a7781f228ea4afb21c763bbb7"
     ],
     [
       "Hacl.Test.SHA3.test10_plaintext_shake256",
@@ -2451,7 +2445,7 @@
         "equation_Lib.Sequence.lseq",
         "equation_LowStar.ImmutableBuffer.ibuffer",
         "equation_LowStar.ImmutableBuffer.immutable_preorder",
-        "equation_Prims.nat",
+        "equation_LowStar.Monotonic.Buffer.length", "equation_Prims.nat",
         "function_token_typing_FStar.Monotonic.Heap.heap",
         "function_token_typing_Lib.IntTypes.uint8",
         "function_token_typing_Prims.__cache_version_number__", "int_typing",
@@ -2463,7 +2457,6 @@
         "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_038550465fa71ad92a926006f65db17f",
         "refinement_interpretation_Tm_refine_08b73966aee9c646db88e6c06828d161",
         "refinement_interpretation_Tm_refine_2fbd657fe85bcb2423f9c7e5f9b3bcb5",
         "refinement_interpretation_Tm_refine_446f42ec497767535289bc2b8f9c8be4",
@@ -2479,10 +2472,11 @@
         "typing_FStar.Monotonic.HyperStack.get_hmap",
         "typing_FStar.Monotonic.HyperStack.get_tip",
         "typing_Lib.IntTypes.size", "typing_Lib.Sequence.of_list",
-        "typing_LowStar.ImmutableBuffer.immutable_preorder"
+        "typing_LowStar.ImmutableBuffer.immutable_preorder",
+        "typing_LowStar.Monotonic.Buffer.len"
       ],
       0,
-      "844f3619ee7067233bc894f87e9538d9"
+      "4a257138374bfb67e6cb0aec7f03e4bc"
     ],
     [
       "Hacl.Test.SHA3.test10_expected_shake256",
@@ -2519,7 +2513,7 @@
         "equation_Lib.Sequence.lseq",
         "equation_LowStar.ImmutableBuffer.ibuffer",
         "equation_LowStar.ImmutableBuffer.immutable_preorder",
-        "equation_Prims.nat",
+        "equation_LowStar.Monotonic.Buffer.length", "equation_Prims.nat",
         "function_token_typing_FStar.Monotonic.Heap.heap",
         "function_token_typing_Lib.IntTypes.uint8",
         "function_token_typing_Prims.__cache_version_number__", "int_typing",
@@ -2531,7 +2525,6 @@
         "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_038550465fa71ad92a926006f65db17f",
         "refinement_interpretation_Tm_refine_08b73966aee9c646db88e6c06828d161",
         "refinement_interpretation_Tm_refine_2fbd657fe85bcb2423f9c7e5f9b3bcb5",
         "refinement_interpretation_Tm_refine_446f42ec497767535289bc2b8f9c8be4",
@@ -2547,10 +2540,11 @@
         "typing_FStar.Monotonic.HyperStack.get_hmap",
         "typing_FStar.Monotonic.HyperStack.get_tip",
         "typing_Lib.IntTypes.size", "typing_Lib.Sequence.of_list",
-        "typing_LowStar.ImmutableBuffer.immutable_preorder"
+        "typing_LowStar.ImmutableBuffer.immutable_preorder",
+        "typing_LowStar.Monotonic.Buffer.len"
       ],
       0,
-      "4f5aaa582fe1fbca9882c57b90cac2b2"
+      "9ca4da86564bfb9913a936d2f94722d4"
     ],
     [
       "Hacl.Test.SHA3.test11_plaintext_shake256",
@@ -2587,7 +2581,7 @@
         "equation_Lib.Sequence.lseq",
         "equation_LowStar.ImmutableBuffer.ibuffer",
         "equation_LowStar.ImmutableBuffer.immutable_preorder",
-        "equation_Prims.nat",
+        "equation_LowStar.Monotonic.Buffer.length", "equation_Prims.nat",
         "function_token_typing_FStar.Monotonic.Heap.heap",
         "function_token_typing_Lib.IntTypes.uint8",
         "function_token_typing_Prims.__cache_version_number__", "int_typing",
@@ -2599,7 +2593,6 @@
         "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_038550465fa71ad92a926006f65db17f",
         "refinement_interpretation_Tm_refine_08b73966aee9c646db88e6c06828d161",
         "refinement_interpretation_Tm_refine_2fbd657fe85bcb2423f9c7e5f9b3bcb5",
         "refinement_interpretation_Tm_refine_446f42ec497767535289bc2b8f9c8be4",
@@ -2615,10 +2608,11 @@
         "typing_FStar.Monotonic.HyperStack.get_hmap",
         "typing_FStar.Monotonic.HyperStack.get_tip",
         "typing_Lib.IntTypes.size", "typing_Lib.Sequence.of_list",
-        "typing_LowStar.ImmutableBuffer.immutable_preorder"
+        "typing_LowStar.ImmutableBuffer.immutable_preorder",
+        "typing_LowStar.Monotonic.Buffer.len"
       ],
       0,
-      "5f1c446d169217270bb2f5752df380a2"
+      "ca8a5827539109b1efaaafddfdd7a5bd"
     ],
     [
       "Hacl.Test.SHA3.test11_expected_shake256",
@@ -2655,7 +2649,7 @@
         "equation_Lib.Sequence.lseq",
         "equation_LowStar.ImmutableBuffer.ibuffer",
         "equation_LowStar.ImmutableBuffer.immutable_preorder",
-        "equation_Prims.nat",
+        "equation_LowStar.Monotonic.Buffer.length", "equation_Prims.nat",
         "function_token_typing_FStar.Monotonic.Heap.heap",
         "function_token_typing_Lib.IntTypes.uint8",
         "function_token_typing_Prims.__cache_version_number__", "int_typing",
@@ -2667,7 +2661,6 @@
         "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_038550465fa71ad92a926006f65db17f",
         "refinement_interpretation_Tm_refine_08b73966aee9c646db88e6c06828d161",
         "refinement_interpretation_Tm_refine_2fbd657fe85bcb2423f9c7e5f9b3bcb5",
         "refinement_interpretation_Tm_refine_446f42ec497767535289bc2b8f9c8be4",
@@ -2683,10 +2676,11 @@
         "typing_FStar.Monotonic.HyperStack.get_hmap",
         "typing_FStar.Monotonic.HyperStack.get_tip",
         "typing_Lib.IntTypes.size", "typing_Lib.Sequence.of_list",
-        "typing_LowStar.ImmutableBuffer.immutable_preorder"
+        "typing_LowStar.ImmutableBuffer.immutable_preorder",
+        "typing_LowStar.Monotonic.Buffer.len"
       ],
       0,
-      "8a463732e72cb8b9b5252c3d9d537896"
+      "4b8150b7ef66240f5f9d67166e09638d"
     ],
     [
       "Hacl.Test.SHA3.test12_plaintext_shake256",
@@ -2723,7 +2717,7 @@
         "equation_Lib.Sequence.lseq",
         "equation_LowStar.ImmutableBuffer.ibuffer",
         "equation_LowStar.ImmutableBuffer.immutable_preorder",
-        "equation_Prims.nat",
+        "equation_LowStar.Monotonic.Buffer.length", "equation_Prims.nat",
         "function_token_typing_FStar.Monotonic.Heap.heap",
         "function_token_typing_Lib.IntTypes.uint8",
         "function_token_typing_Prims.__cache_version_number__", "int_typing",
@@ -2735,7 +2729,6 @@
         "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_038550465fa71ad92a926006f65db17f",
         "refinement_interpretation_Tm_refine_08b73966aee9c646db88e6c06828d161",
         "refinement_interpretation_Tm_refine_2fbd657fe85bcb2423f9c7e5f9b3bcb5",
         "refinement_interpretation_Tm_refine_446f42ec497767535289bc2b8f9c8be4",
@@ -2751,10 +2744,11 @@
         "typing_FStar.Monotonic.HyperStack.get_hmap",
         "typing_FStar.Monotonic.HyperStack.get_tip",
         "typing_Lib.IntTypes.size", "typing_Lib.Sequence.of_list",
-        "typing_LowStar.ImmutableBuffer.immutable_preorder"
+        "typing_LowStar.ImmutableBuffer.immutable_preorder",
+        "typing_LowStar.Monotonic.Buffer.len"
       ],
       0,
-      "6e3f37b9d4eb04bc4cb92bcbd84266ab"
+      "8316e1e12cf09cf51c3683da845a62d2"
     ],
     [
       "Hacl.Test.SHA3.test12_expected_shake256",
@@ -2791,7 +2785,7 @@
         "equation_Lib.Sequence.lseq",
         "equation_LowStar.ImmutableBuffer.ibuffer",
         "equation_LowStar.ImmutableBuffer.immutable_preorder",
-        "equation_Prims.nat",
+        "equation_LowStar.Monotonic.Buffer.length", "equation_Prims.nat",
         "function_token_typing_FStar.Monotonic.Heap.heap",
         "function_token_typing_Lib.IntTypes.uint8",
         "function_token_typing_Prims.__cache_version_number__", "int_typing",
@@ -2803,7 +2797,6 @@
         "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_038550465fa71ad92a926006f65db17f",
         "refinement_interpretation_Tm_refine_08b73966aee9c646db88e6c06828d161",
         "refinement_interpretation_Tm_refine_2fbd657fe85bcb2423f9c7e5f9b3bcb5",
         "refinement_interpretation_Tm_refine_446f42ec497767535289bc2b8f9c8be4",
@@ -2819,10 +2812,11 @@
         "typing_FStar.Monotonic.HyperStack.get_hmap",
         "typing_FStar.Monotonic.HyperStack.get_tip",
         "typing_Lib.IntTypes.size", "typing_Lib.Sequence.of_list",
-        "typing_LowStar.ImmutableBuffer.immutable_preorder"
+        "typing_LowStar.ImmutableBuffer.immutable_preorder",
+        "typing_LowStar.Monotonic.Buffer.len"
       ],
       0,
-      "e652d15d36e868e17d5e840b3c9e12f2"
+      "44590ab97a77b65db29c4353fc13e0e6"
     ],
     [
       "Hacl.Test.SHA3.main",
@@ -2874,7 +2868,6 @@
         "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_038550465fa71ad92a926006f65db17f",
         "refinement_interpretation_Tm_refine_1ef03f58258024ca2ddcbc16c00d3336",
         "refinement_interpretation_Tm_refine_3010eac9262d7399e7c16bcd010b0623",
         "refinement_interpretation_Tm_refine_3c8cebd851124598de1cb204902b179e",
@@ -2941,7 +2934,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "c72045aed83b1de21621a82cced42663"
+      "b2f0271f58d9ef16a555e98718404182"
     ]
   ]
 ]
