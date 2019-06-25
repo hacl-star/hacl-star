@@ -19,6 +19,7 @@ unfold
 let uint8_p = B.buffer UInt8.t
 let uint64 = UInt64.t
 
+inline_for_extraction
 val compute_iv 
   (a:algorithm)
   (key:Ghost.erased (Seq.seq nat32))
