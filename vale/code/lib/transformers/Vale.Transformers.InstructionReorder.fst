@@ -1231,6 +1231,40 @@ let lemma_bounded_effects_on_functional_extensionality (rw:rw_set) (f1 f2:st uni
   let aux s1 = FStar.Classical.move_requires (aux s1) in
   FStar.Classical.forall_intro_2 aux
 
+let lemma_only_affects_to_unchanged_except locs f s : (* REVIEW: Why is this even needed?! *)
+  Lemma
+    (requires (only_affects locs f))
+    (ensures (unchanged_except locs s (run f s))) = ()
+
+let lemma_equiv_code_codes (c:code) (cs:codes) (fuel:nat) (s:machine_state) :
+  Lemma
+    (ensures (
+        let open Vale.X64.Machine_Semantics_s in
+        let f1 = wrap_sos (machine_eval_code c fuel) in
+        let f2 = wrap_sos (machine_eval_codes cs fuel) in
+        let f12 = wrap_sos (machine_eval_codes (c :: cs) fuel) in
+        equiv_states_or_both_not_ok
+          (run (f1;;f2) s)
+          (run f12 s))) =
+  let open Vale.X64.Machine_Semantics_s in
+  let f1 = wrap_sos (machine_eval_code c fuel) in
+  let f2 = wrap_sos (machine_eval_codes cs fuel) in
+  let f12 = wrap_sos (machine_eval_codes (c :: cs) fuel) in
+  let s_1 = run f1 s in
+  let s_1_2 = run f2 s_1 in
+  let s_12 = run (f1;;f2) s in
+  let s12 = run f12 s in
+  assert (s_12 == {s_1_2 with ms_ok = s.ms_ok && s_1.ms_ok && s_1_2.ms_ok});
+  if s.ms_ok then (
+    if s_1.ms_ok then () else (
+      lemma_not_ok_propagate_codes cs fuel s_1
+    )
+  ) else (
+    lemma_not_ok_propagate_code c fuel s;
+    lemma_not_ok_propagate_codes cs fuel s_1;
+    lemma_not_ok_propagate_codes (c :: cs) fuel s
+  )
+
 let lemma_bounded_effects_code_codes (c:code) (cs:codes) (rw:rw_set) (fuel:nat) :
   Lemma
     (requires (
@@ -1244,7 +1278,40 @@ let lemma_bounded_effects_code_codes (c:code) (cs:codes) (rw:rw_set) (fuel:nat) 
   let open Vale.X64.Machine_Semantics_s in
   let f1 = wrap_sos (machine_eval_code c fuel) in
   let f2 = wrap_sos (machine_eval_codes cs fuel) in
+  let f = f1;;f2 in
   let f12 = wrap_sos (machine_eval_codes (c :: cs) fuel) in
+  let pre = bounded_effects rw f in
+  let aux s a :
+    Lemma
+      (requires pre /\ !!(disjoint_location_from_locations a rw.loc_writes))
+      (ensures (eval_location a s == eval_location a (run f12 s))) =
+    assert (only_affects rw.loc_writes f);
+    lemma_only_affects_to_unchanged_except rw.loc_writes f s;
+    assert (unchanged_except rw.loc_writes s (run f s));
+    assert (eval_location a s == eval_location a (run f s));
+    let s_1 = run f1 s in
+    let s_1_2 = run f2 s_1 in
+    let s_12 = run (f1;;f2) s in
+    let s12 = run f12 s in
+    lemma_equiv_code_codes c cs fuel s;
+    assert (equiv_states_or_both_not_ok s_12 s12);
+    if s.ms_ok then (
+      if s_1.ms_ok then (
+        if s_1_2.ms_ok then () else (
+          admit ()
+        )
+      ) else (
+        admit ()
+      )
+    ) else (
+      lemma_not_ok_propagate_code c fuel s;
+      lemma_not_ok_propagate_codes cs fuel s_1;
+      lemma_not_ok_propagate_codes (c :: cs) fuel s
+    )
+  in
+  let aux s = FStar.Classical.move_requires (aux s) in
+  FStar.Classical.forall_intro_2 aux;
+  assert (only_affects rw.loc_writes f12);
   admit () (* I _really_ hope this is true *)
 
 let rec lemma_bounded_code (c:safely_bounded_code) (fuel:nat) :
