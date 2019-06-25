@@ -60,6 +60,7 @@ let length_aux5 (b:uint8_p) : Lemma
 inline_for_extraction noextract
 let encrypt_opt_stdcall_st (a: algorithm { a = AES_128 \/ a = AES_256 }) =
   key:Ghost.erased (Seq.seq nat32) ->
+  iv:Ghost.erased supported_iv_LE ->
   plain_b:uint8_p ->
   plain_len:uint64 ->
   auth_b:uint8_p ->
@@ -74,7 +75,7 @@ let encrypt_opt_stdcall_st (a: algorithm { a = AES_128 \/ a = AES_256 }) =
     (requires fun h0 ->
       B.disjoint tag_b out_b /\ B.disjoint tag_b hkeys_b /\
       B.disjoint tag_b plain_b /\ B.disjoint tag_b auth_b /\
-      disjoint_or_eq tag_b iv_b /\ disjoint_or_eq tag_b keys_b /\
+      B.disjoint tag_b iv_b /\ disjoint_or_eq tag_b keys_b /\
 
       B.disjoint iv_b keys_b /\ B.disjoint iv_b out_b /\
       B.disjoint iv_b plain_b /\ B.disjoint iv_b hkeys_b /\
@@ -108,17 +109,19 @@ let encrypt_opt_stdcall_st (a: algorithm { a = AES_128 \/ a = AES_256 }) =
         (seq_nat8_to_seq_uint8 (le_seq_quad32_to_bytes (key_to_round_keys_LE a (Ghost.reveal key))))) /\
 
       hkeys_reqs_pub (le_bytes_to_seq_quad32 (seq_uint8_to_seq_nat8 (B.as_seq h0 hkeys_b)))
-        (reverse_bytes_quad32 (aes_encrypt_LE a (Ghost.reveal key) (Mkfour 0 0 0 0)))
+        (reverse_bytes_quad32 (aes_encrypt_LE a (Ghost.reveal key) (Mkfour 0 0 0 0))) /\
+
+      (be_bytes_to_quad32 (seq_uint8_to_seq_nat8 (B.as_seq h0 iv_b)) ==
+        compute_iv_BE (aes_encrypt_LE a (Ghost.reveal key) (Mkfour 0 0 0 0)) (Ghost.reveal iv))
     )
     (ensures fun h0 _ h1 ->
       B.modifies (B.loc_union (B.loc_buffer tag_b)
                  (B.loc_union (B.loc_buffer iv_b)
                  (B.loc_buffer out_b))) h0 h1 /\
 
-      (let iv = seq_uint8_to_seq_nat8 (B.as_seq h0 iv_b) in
-       let plain = seq_uint8_to_seq_nat8 (B.as_seq h0 plain_b) in
+      (let plain = seq_uint8_to_seq_nat8 (B.as_seq h0 plain_b) in
        let auth = seq_uint8_to_seq_nat8 (B.as_seq h0 auth_b) in
-       let cipher, tag = gcm_encrypt_LE a (seq_nat32_to_seq_nat8_LE (Ghost.reveal key)) iv plain auth in
+       let cipher, tag = gcm_encrypt_LE a (seq_nat32_to_seq_nat8_LE (Ghost.reveal key)) (Ghost.reveal iv) plain auth in
        Seq.equal (seq_uint8_to_seq_nat8 (B.as_seq h1 out_b)) cipher /\
        Seq.equal (seq_uint8_to_seq_nat8 (B.as_seq h1 tag_b)) tag)
   )

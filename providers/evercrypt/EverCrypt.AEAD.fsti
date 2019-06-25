@@ -155,7 +155,7 @@ let create_in_st (a: alg) =
 *)
 val create_in: #a:alg -> create_in_st a
 
-let iv_p a = iv:B.buffer UInt8.t { B.length iv = iv_length a }
+let iv_p a = iv:B.buffer UInt8.t { iv_length (B.length iv) a }
 let ad_p a = ad:B.buffer UInt8.t { B.length ad <= max_length a }
 let plain_p a = p:B.buffer UInt8.t { B.length p <= max_length a }
 let cipher_p a = p:B.buffer UInt8.t { B.length p + tag_length a <= max_length a }
@@ -164,6 +164,7 @@ inline_for_extraction noextract
 let encrypt_st (a: supported_alg) =
   s:B.pointer_or_null (state_s a) ->
   iv:iv_p a ->
+  iv_len: UInt32.t { v iv_len = B.length iv /\ v iv_len > 0 } ->
   ad:ad_p a ->
   ad_len: UInt32.t { v ad_len = B.length ad /\ v ad_len <= pow2 31 } ->
   plain: plain_p a ->
@@ -210,6 +211,7 @@ inline_for_extraction noextract
 let decrypt_st (a: supported_alg) =
   s:B.pointer_or_null (state_s a) ->
   iv:iv_p a ->
+  iv_len:UInt32.t { v iv_len = B.length iv /\ v iv_len > 0 } ->
   ad:ad_p a ->
   ad_len: UInt32.t { v ad_len = B.length ad /\ v ad_len <= pow2 31 } ->
   cipher: cipher_p a ->

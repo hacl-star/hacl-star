@@ -26,6 +26,20 @@ let inc32lite (cb:quad32) (i:int) : quad32 =
 
 let empty_seq_quad32 : seq quad32 = empty
 
+let lemma_counter_init (x:quad32) (low64 low8:nat64) : Lemma
+  (requires low64 == lo64 x /\
+            low8  == iand64 low64 0xff)
+  (ensures  low8 == x.lo0 % 256)
+  =
+  Vale.Poly1305.Bitvectors.lemma_bytes_and_mod1 low64;
+  Vale.Def.TypesNative_s.reveal_iand 64 low64 0xff;
+  assert (low8 == low64 % 256);
+  Vale.Def.Opaque_s.reveal_opaque lo64_def;
+  assert_norm (pow2_norm 32 == pow2_32);      // OBSERVE
+  assert (low64 == x.lo0 + x.lo1 * pow2_32);  // OBSERVE
+  assert (low64 % 256 == x.lo0 % 256);
+  ()
+
 let partial_seq_agreement (x y:seq quad32) (lo hi:nat) =
   lo <= hi /\ hi <= length x /\ hi <= length y /\
   (forall i . {:pattern (index x i) \/ (index y i)} lo <= i /\ i < hi ==> index x i == index y i)
