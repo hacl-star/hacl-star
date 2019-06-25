@@ -1674,7 +1674,7 @@ let store_felem5_lemma_i #w f i =
   assert (store_tup64_lemma (as_tup64_i f i) == (loi, hii))
 #pop-options
 
-#push-options "--z3rlimit 200"
+#push-options "--z3rlimit 1000"
 #push-options "--max_ifuel 1"
 
 val lset_bit5_lemma0:
@@ -1816,6 +1816,7 @@ let lemma_sum_lt_pow2_26 i a b =
   FStar.Math.Lemmas.pow2_double_sum 25;
   assert_norm (pow26 = pow2 26)
 
+#reset-options "--z3rlimit 1000"
 val lset_bit5:
     f:lseq uint64 5
   -> i:size_nat{i <= 128}

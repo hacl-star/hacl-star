@@ -158,7 +158,7 @@ let nat_to_intseq_le = nat_to_intseq_le_
 let nat_to_bytes_be = nat_to_intseq_be_ #U8
 let nat_to_bytes_le = nat_to_intseq_le_ #U8
 
-#reset-options "--z3rlimit 200 --max_fuel 1 --max_ifuel 0"
+#reset-options "--z3rlimit 1000 --max_fuel 1 --max_ifuel 0"
 
 val index_nat_to_intseq_le:
     #t:inttype
