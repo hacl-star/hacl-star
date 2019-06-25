@@ -88,6 +88,7 @@ let rec check_if_consumes_fixed_time_outs
     let b'' = check_if_consumes_fixed_time_outs outs args (coerce oprs) ts t_out in
     b' && b''
 
+#restart-solver
 #reset-options "--z3rlimit 300"
 let rec lemma_args_taint
     (outs:list instr_out) (args:list instr_operand)
@@ -133,6 +134,7 @@ let rec lemma_args_taint
     let Some v = v1 in
     lemma_args_taint outs args (f v) oprs ts s1 s2
 
+#restart-solver
 let rec lemma_inouts_taint
     (outs inouts:list instr_out) (args:list instr_operand)
     (f:instr_inouts_t outs inouts args) (oprs:instr_operands_t inouts args)
