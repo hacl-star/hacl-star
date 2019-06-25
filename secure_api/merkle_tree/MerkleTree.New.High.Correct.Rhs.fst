@@ -228,9 +228,9 @@ val construct_rhs_acc_consistent:
           rhs_equiv j (fst rrf) (S.slice (fst rr) lv (lv + log2c j)) actd /\
           snd rrf == snd rr)))
         (decreases j)
-#reset-options "--z3rlimit 240 --max_fuel 1"
+#reset-options "--z3rlimit 500 --initial_fuel 1 --max_fuel 1 --initial_ifuel 1 --max_ifuel 1"
 let rec construct_rhs_acc_consistent lv i j olds hs rhs acc actd =
-  admit ();  //AR: 06/19: #1750 (FStar)
+  assert (j < pow2 (32 - lv));
   log2c_bound j (32 - lv);
   mt_olds_hs_lth_inv_ok lv i j olds hs;
   mt_hashes_lth_inv_log_converted_ lv j (merge_hs olds hs);
