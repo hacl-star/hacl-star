@@ -1365,6 +1365,8 @@ let subtract_p5_felem5_lemma #w f =
     subtract_p5_felem5_lemma_i #w f 3
 
 
+#restart-solver
+#reset-options "--z3rlimit 500 --using_facts_from '* -FStar.Seq' --max_fuel 0 --max_ifuel 0"
 val load_tup64_lemma0_lo: lo:uint64 ->
   Lemma
     (v lo % pow2 26 + ((v lo / pow2 26) % pow2 26) * pow26 +

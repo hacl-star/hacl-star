@@ -38,13 +38,14 @@ let lemma_le_bytes_to_quad32_prefix_equality (b0:seq nat8 {length b0 == 16}) (b1
   let q0 = le_bytes_to_quad32 b0 in
   let q1 = le_bytes_to_quad32 b1 in
   reveal_opaque le_bytes_to_quad32_def;
-  assert (equal (slice b0 0 12) (slice b1 0 12));
-  let helper (i:int) : Lemma (0 <= i /\ i < 12 ==> index b0 i == index (slice b0 0 12) i
-                                             /\ index b1 i == index (slice b1 0 12) i)
-  = ()
-  in
-  FStar.Classical.forall_intro helper;
-  ()
+
+  (*
+   * AR: 06/25: Someone should review this code, is this proof supposed to work without revealing this?
+   *)
+  FStar.Pervasives.reveal_opaque (`%seq_to_seq_four_LE) (seq_to_seq_four_LE #nat8);
+
+  assert (forall (i:int). (0 <= i /\ i < 12) ==> (index b0 i == index (slice b0 0 12) i /\
+                                         index b1 i == index (slice b1 0 12) i))
 
 let lemma_le_seq_quad32_to_bytes_prefix_equality (q:quad32) : Lemma
   (slice (le_quad32_to_bytes q) 0 12 == slice (pad_to_128_bits (slice (le_quad32_to_bytes q) 0 12)) 0 12)
