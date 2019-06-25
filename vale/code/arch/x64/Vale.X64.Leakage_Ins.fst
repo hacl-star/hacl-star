@@ -88,7 +88,7 @@ let rec check_if_consumes_fixed_time_outs
     let b'' = check_if_consumes_fixed_time_outs outs args (coerce oprs) ts t_out in
     b' && b''
 
-#reset-options "--z3rlimit 80"
+#reset-options "--z3rlimit 150"
 let rec lemma_args_taint
     (outs:list instr_out) (args:list instr_operand)
     (f:instr_args_t outs args) (oprs:instr_operands_t_args args)
