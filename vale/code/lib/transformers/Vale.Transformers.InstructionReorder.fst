@@ -1265,6 +1265,132 @@ let lemma_equiv_code_codes (c:code) (cs:codes) (fuel:nat) (s:machine_state) :
     lemma_not_ok_propagate_codes (c :: cs) fuel s
   )
 
+let lemma_bounded_effects_code_codes_aux1 (c:code) (cs:codes) (rw:rw_set) (fuel:nat) s a :
+  Lemma
+    (requires (
+        let open Vale.X64.Machine_Semantics_s in
+        let f1 = wrap_sos (machine_eval_code c fuel) in
+        let f2 = wrap_sos (machine_eval_codes cs fuel) in
+        (bounded_effects rw (f1 ;; f2)) /\
+        !!(disjoint_location_from_locations a rw.loc_writes)))
+    (ensures (
+        let f12 = wrap_sos (machine_eval_codes (c :: cs) fuel) in
+        eval_location a s == eval_location a (run f12 s))) =
+  let open Vale.X64.Machine_Semantics_s in
+  let f1 = wrap_sos (machine_eval_code c fuel) in
+  let f2 = wrap_sos (machine_eval_codes cs fuel) in
+  let f = (f1;;f2) in
+  let f12 = wrap_sos (machine_eval_codes (c :: cs) fuel) in
+  let pre = bounded_effects rw f in
+  assert (only_affects rw.loc_writes f);
+  lemma_only_affects_to_unchanged_except rw.loc_writes f s;
+  assert (unchanged_except rw.loc_writes s (run f s));
+  assert (eval_location a s == eval_location a (run f s));
+  let s_1 = run f1 s in
+  let s_1_2 = run f2 s_1 in
+  let s_12 = run (f1;;f2) s in
+  let s12 = run f12 s in
+  lemma_equiv_code_codes c cs fuel s;
+  assert (equiv_states_or_both_not_ok s_12 s12);
+  if s.ms_ok then (
+    if s_1.ms_ok then (
+      if s_1_2.ms_ok then () else (
+        admit ()
+      )
+    ) else (
+      admit ()
+    )
+  ) else (
+    lemma_not_ok_propagate_code c fuel s;
+    lemma_not_ok_propagate_codes cs fuel s_1;
+    lemma_not_ok_propagate_codes (c :: cs) fuel s
+  )
+
+let rec lemma_bounded_effects_code_codes_aux2 (c:code) (cs:codes) (fuel:nat) cw s :
+  Lemma
+    (requires (
+        let open Vale.X64.Machine_Semantics_s in
+        let f1 = wrap_sos (machine_eval_code c fuel) in
+        let f2 = wrap_sos (machine_eval_codes cs fuel) in
+        (constant_on_execution cw (f1;;f2) s)))
+    (ensures (
+        let f12 = wrap_sos (machine_eval_codes (c :: cs) fuel) in
+        (constant_on_execution cw f12 s))) =
+  let open Vale.X64.Machine_Semantics_s in
+  let f1 = wrap_sos (machine_eval_code c fuel) in
+  let f2 = wrap_sos (machine_eval_codes cs fuel) in
+  let f = (f1;;f2) in
+  let f12 = wrap_sos (machine_eval_codes (c :: cs) fuel) in
+  lemma_equiv_code_codes c cs fuel s;
+  if (run f s).ms_ok then (
+    match cw with
+    | [] -> ()
+    | (|l, v|) :: xs -> (
+        lemma_bounded_effects_code_codes_aux2 c cs fuel xs s
+      )
+  ) else ()
+
+let lemma_unchanged_at_reads_implies_both_ok_equal (rw:rw_set) (f:st unit) s1 s2 : (* REVIEW: Why is this necessary?! *)
+  Lemma
+    (requires (bounded_effects rw f /\ s1.ms_ok = s2.ms_ok /\ unchanged_at rw.loc_reads s1 s2))
+    (ensures (
+        ((run f s1).ms_ok = (run f s2).ms_ok) /\
+        ((run f s1).ms_ok ==>
+         unchanged_at rw.loc_writes (run f s1) (run f s2)))) = ()
+
+let lemma_bounded_effects_code_codes_aux3 (c:code) (cs:codes) (rw:rw_set) (fuel:nat) s1 s2 :
+  Lemma
+    (requires (
+        let open Vale.X64.Machine_Semantics_s in
+        let f1 = wrap_sos (machine_eval_code c fuel) in
+        let f2 = wrap_sos (machine_eval_codes cs fuel) in
+        (bounded_effects rw (f1 ;; f2)) /\
+        s1.ms_ok = s2.ms_ok /\ unchanged_at rw.loc_reads s1 s2))
+    (ensures (
+        let open Vale.X64.Machine_Semantics_s in
+        let f1 = wrap_sos (machine_eval_code c fuel) in
+        let f2 = wrap_sos (machine_eval_codes cs fuel) in
+        let f12 = wrap_sos (machine_eval_codes (c :: cs) fuel) in
+        (run f12 s1).ms_ok = (run f12 s2).ms_ok /\
+        (run (f1 ;; f2) s1).ms_ok = (run f12 s1).ms_ok)) =
+  let open Vale.X64.Machine_Semantics_s in
+  let f1 = wrap_sos (machine_eval_code c fuel) in
+  let f2 = wrap_sos (machine_eval_codes cs fuel) in
+  let f = (f1;;f2) in
+  let f12 = wrap_sos (machine_eval_codes (c :: cs) fuel) in
+  let pre = bounded_effects rw f in
+  lemma_equiv_code_codes c cs fuel s1;
+  lemma_equiv_code_codes c cs fuel s2;
+  assert ((run f s1).ms_ok == (run f12 s1).ms_ok);
+  assert ((run f s2).ms_ok == (run f12 s2).ms_ok);
+  lemma_unchanged_at_reads_implies_both_ok_equal rw f s1 s2
+
+let lemma_bounded_effects_code_codes_aux4 (c:code) (cs:codes) (rw:rw_set) (fuel:nat) s1 s2 :
+  Lemma
+    (requires (
+        let open Vale.X64.Machine_Semantics_s in
+        let f1 = wrap_sos (machine_eval_code c fuel) in
+        let f2 = wrap_sos (machine_eval_codes cs fuel) in
+        (bounded_effects rw (f1 ;; f2)) /\
+        s1.ms_ok = s2.ms_ok /\ unchanged_at rw.loc_reads s1 s2 /\ (run (f1 ;; f2) s1).ms_ok))
+    (ensures (
+        let f12 = wrap_sos (machine_eval_codes (c :: cs) fuel) in
+        unchanged_at rw.loc_writes (run f12 s1) (run f12 s2))) =
+  let open Vale.X64.Machine_Semantics_s in
+  let f1 = wrap_sos (machine_eval_code c fuel) in
+  let f2 = wrap_sos (machine_eval_codes cs fuel) in
+  let f = (f1;;f2) in
+  let f12 = wrap_sos (machine_eval_codes (c :: cs) fuel) in
+  let pre = bounded_effects rw f in
+  lemma_equiv_code_codes c cs fuel s1;
+  lemma_equiv_code_codes c cs fuel s2;
+  lemma_unchanged_at_reads_implies_both_ok_equal rw f s1 s2;
+  assert (run f12 s1).ms_ok;
+  assert (run f12 s2).ms_ok;
+  assert (unchanged_at rw.loc_writes (run f s1) (run f s2));
+  assert (run f s1 == run f12 s1);
+  assert (run f s2 == run f12 s2)
+
 let lemma_bounded_effects_code_codes (c:code) (cs:codes) (rw:rw_set) (fuel:nat) :
   Lemma
     (requires (
@@ -1281,38 +1407,14 @@ let lemma_bounded_effects_code_codes (c:code) (cs:codes) (rw:rw_set) (fuel:nat) 
   let f = f1;;f2 in
   let f12 = wrap_sos (machine_eval_codes (c :: cs) fuel) in
   let pre = bounded_effects rw f in
-  let aux s a :
-    Lemma
-      (requires pre /\ !!(disjoint_location_from_locations a rw.loc_writes))
-      (ensures (eval_location a s == eval_location a (run f12 s))) =
-    assert (only_affects rw.loc_writes f);
-    lemma_only_affects_to_unchanged_except rw.loc_writes f s;
-    assert (unchanged_except rw.loc_writes s (run f s));
-    assert (eval_location a s == eval_location a (run f s));
-    let s_1 = run f1 s in
-    let s_1_2 = run f2 s_1 in
-    let s_12 = run (f1;;f2) s in
-    let s12 = run f12 s in
-    lemma_equiv_code_codes c cs fuel s;
-    assert (equiv_states_or_both_not_ok s_12 s12);
-    if s.ms_ok then (
-      if s_1.ms_ok then (
-        if s_1_2.ms_ok then () else (
-          admit ()
-        )
-      ) else (
-        admit ()
-      )
-    ) else (
-      lemma_not_ok_propagate_code c fuel s;
-      lemma_not_ok_propagate_codes cs fuel s_1;
-      lemma_not_ok_propagate_codes (c :: cs) fuel s
-    )
-  in
-  let aux s = FStar.Classical.move_requires (aux s) in
+  let aux s = FStar.Classical.move_requires (lemma_bounded_effects_code_codes_aux1 c cs rw fuel s) in
   FStar.Classical.forall_intro_2 aux;
-  assert (only_affects rw.loc_writes f12);
-  admit () (* I _really_ hope this is true *)
+  let aux = FStar.Classical.move_requires (lemma_bounded_effects_code_codes_aux2 c cs fuel rw.loc_constant_writes) in
+  FStar.Classical.forall_intro aux;
+  let aux s1 = FStar.Classical.move_requires (lemma_bounded_effects_code_codes_aux3 c cs rw fuel s1) in
+  FStar.Classical.forall_intro_2 aux;
+  let aux s1 = FStar.Classical.move_requires (lemma_bounded_effects_code_codes_aux4 c cs rw fuel s1) in
+  FStar.Classical.forall_intro_2 aux
 
 let rec lemma_bounded_code (c:safely_bounded_code) (fuel:nat) :
   Lemma
