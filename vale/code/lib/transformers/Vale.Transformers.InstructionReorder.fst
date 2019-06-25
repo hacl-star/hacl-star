@@ -1127,45 +1127,6 @@ let lemma_instruction_exchange (i1 i2 : ins) (s1 s2 : machine_state) :
   lemma_eval_ins_equiv_states i1 (machine_eval_ins i2 s2) (machine_eval_ins i2 (filt_state s2));
   lemma_instruction_exchange' i1 i2 s1 s2
 
-/// Given that we have bounded instructions, we can compute bounds on
-/// [code] and [codes].
-
-let rec rw_set_of_code (c:safely_bounded_code) : rw_set =
-  match c with
-  | Ins i -> rw_set_of_ins i
-  | Block l -> rw_set_of_codes l
-  | IfElse c t f ->
-    add_r_to_rw_set
-      (locations_of_ocmp c)
-      (rw_set_in_parallel
-         (rw_set_of_code t)
-         (rw_set_of_code f))
-  | While c b ->
-    {
-      add_r_to_rw_set
-        (locations_of_ocmp c)
-        (rw_set_of_code b)
-      with
-        loc_constant_writes = [] (* Since the loop may not execute, we are not sure of any constant writes *)
-    }
-
-and rw_set_of_codes (c:safely_bounded_codes) : rw_set =
-  match c with
-  | [] -> {
-      loc_reads = [];
-      loc_writes = [];
-      loc_constant_writes = [];
-    }
-  | x :: xs ->
-    rw_set_in_series
-      (rw_set_of_code x)
-      (rw_set_of_codes xs)
-
-let lemma_bounded_code (c:safely_bounded_code) (fuel:nat) :
-  Lemma
-    (ensures (bounded_effects (rw_set_of_code c) (wrap_sos (machine_eval_code c fuel)))) =
-  admit ()
-
 /// Not-ok states lead to erroring states upon execution
 
 let rec lemma_not_ok_propagate_code (c:code) (fuel:nat) (s:machine_state) :
@@ -1210,6 +1171,113 @@ and lemma_not_ok_propagate_while (c:code{While? c}) (fuel:nat) (s:machine_state)
       lemma_not_ok_propagate_code body (fuel - 1) s
     )
   )
+
+/// Given that we have bounded instructions, we can compute bounds on
+/// [code] and [codes].
+
+let rec rw_set_of_code (c:safely_bounded_code) : rw_set =
+  match c with
+  | Ins i -> rw_set_of_ins i
+  | Block l -> rw_set_of_codes l
+  | IfElse c t f ->
+    add_r_to_rw_set
+      (locations_of_ocmp c)
+      (rw_set_in_parallel
+         (rw_set_of_code t)
+         (rw_set_of_code f))
+  | While c b ->
+    {
+      add_r_to_rw_set
+        (locations_of_ocmp c)
+        (rw_set_of_code b)
+      with
+        loc_constant_writes = [] (* Since the loop may not execute, we are not sure of any constant writes *)
+    }
+
+and rw_set_of_codes (c:safely_bounded_codes) : rw_set =
+  match c with
+  | [] -> {
+      loc_reads = [];
+      loc_writes = [];
+      loc_constant_writes = [];
+    }
+  | x :: xs ->
+    rw_set_in_series
+      (rw_set_of_code x)
+      (rw_set_of_codes xs)
+
+let lemma_bounded_effects_on_functional_extensionality (rw:rw_set) (f1 f2:st unit) :
+  Lemma
+    (requires (FStar.FunctionalExtensionality.feq f1 f2 /\ bounded_effects rw f1))
+    (ensures (bounded_effects rw f2)) =
+  let pre = FStar.FunctionalExtensionality.feq f1 f2 /\ bounded_effects rw f1 in
+  assert (only_affects rw.loc_writes f1 <==> only_affects rw.loc_writes f2);
+  let rec aux c s :
+    Lemma
+      (requires (pre /\ constant_on_execution c f1 s))
+      (ensures (constant_on_execution c f2 s)) =
+    match c with
+    | [] -> ()
+    | (|l,v|) :: xs ->
+      aux xs s
+  in
+  let aux = FStar.Classical.move_requires (aux rw.loc_constant_writes) in
+  FStar.Classical.forall_intro aux;
+  let aux s1 s2 :
+    Lemma
+      (requires (pre /\ s1.ms_ok = s2.ms_ok /\ unchanged_at rw.loc_reads s1 s2 /\ (run f2 s1).ms_ok))
+      (ensures (unchanged_at rw.loc_writes (run f2 s1) (run f2 s2))) = ()
+  in
+  let aux s1 = FStar.Classical.move_requires (aux s1) in
+  FStar.Classical.forall_intro_2 aux
+
+let lemma_bounded_effects_code_codes (c:code) (cs:codes) (rw:rw_set) (fuel:nat) :
+  Lemma
+    (requires (
+        let open Vale.X64.Machine_Semantics_s in
+        let f1 = wrap_sos (machine_eval_code c fuel) in
+        let f2 = wrap_sos (machine_eval_codes cs fuel) in
+        (bounded_effects rw (f1 ;; f2))))
+    (ensures (
+        let f12 = wrap_sos (machine_eval_codes (c :: cs) fuel) in
+        bounded_effects rw f12)) =
+  let open Vale.X64.Machine_Semantics_s in
+  let f1 = wrap_sos (machine_eval_code c fuel) in
+  let f2 = wrap_sos (machine_eval_codes cs fuel) in
+  let f12 = wrap_sos (machine_eval_codes (c :: cs) fuel) in
+  admit () (* I _really_ hope this is true *)
+
+let rec lemma_bounded_code (c:safely_bounded_code) (fuel:nat) :
+  Lemma
+    (ensures (bounded_effects (rw_set_of_code c) (wrap_sos (machine_eval_code c fuel))))
+    (decreases %[c]) =
+  match c with
+  | Ins i -> admit ()
+  | Block l ->
+    lemma_bounded_codes l fuel;
+    lemma_bounded_effects_on_functional_extensionality
+      (rw_set_of_codes l)
+      (wrap_sos (machine_eval_codes l fuel))
+      (wrap_sos (machine_eval_code (Block l) fuel))
+  | IfElse c t f -> admit ()
+  | While c b -> admit ()
+
+and lemma_bounded_codes (c:safely_bounded_codes) (fuel:nat) :
+  Lemma
+    (ensures (bounded_effects (rw_set_of_codes c) (wrap_sos (machine_eval_codes c fuel))))
+    (decreases %[c]) =
+  let open Vale.X64.Machine_Semantics_s in
+  match c with
+  | [] -> ()
+  | x :: xs ->
+    lemma_bounded_code x fuel;
+    lemma_bounded_codes xs fuel;
+    lemma_bounded_effects_series
+      (rw_set_of_code x)
+      (rw_set_of_codes xs)
+      (wrap_sos (machine_eval_code x fuel))
+      (wrap_sos (machine_eval_codes xs fuel));
+    lemma_bounded_effects_code_codes x xs (rw_set_of_codes c) fuel
 
 /// Given that we can perform simple swaps between instructions, we
 /// can do swaps between [code]s.
