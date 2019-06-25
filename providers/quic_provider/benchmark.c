@@ -23,21 +23,27 @@
 #include <string.h>
 #include <stdlib.h>
 #include <assert.h>
+#include <openssl/evp.h>
+#include <inttypes.h>
 
 #include "timing.h"
 #include "EverCrypt.h"
 
+// How long to measure for KB/s figures
+#define MEASUREMENT_TIME 2
+// How many iterations to run for cycles/byte figures
+#define ITERATIONS(bsize) (uint64_t)(6553500 / bsize) //(bsize <= 2048 ? 4000 : (bsize <= 8096 ? 2000 : 1000))
 #define HEADER_FORMAT   "  %-24s :  "
 
 #define TIME_AND_TSC( TITLE, BUFSIZE, CODE )                            \
 do {                                                                    \
-    uint64_t ii, jj, tsc, cnt;                                          \
-    cnt = BUFSIZE < 2048 ? 512 : (BUFSIZE < 8192 ? 256 : 128);          \
+    uint64_t ii, jj, tsc;                                               \
+    uint64_t cnt = ITERATIONS(BUFSIZE);                                 \
                                                                         \
     printf( HEADER_FORMAT, TITLE );                                     \
     fflush( stdout );                                                   \
                                                                         \
-    set_alarm( 1 );                                                     \
+    set_alarm( MEASUREMENT_TIME );                                      \
     for( ii = 1; ! timing_alarmed; ii++ )                               \
     {                                                                   \
         CODE;                                                           \
@@ -49,9 +55,9 @@ do {                                                                    \
         CODE;                                                           \
     }                                                                   \
                                                                         \
-    printf( "%9lu KiB/s,  %9f cycles/byte\n",                          \
-                     ii * BUFSIZE / 1024,                               \
-                     (float)(timing_hardclock() - tsc ) /(float)( jj * BUFSIZE ) ); \
+    printf( "%9lu KiB/s,  %9f cycles/byte\n",                           \
+                     (ii * BUFSIZE) / (MEASUREMENT_TIME * 1024),        \
+                     (double)(timing_hardclock() - tsc ) /(double)( jj * BUFSIZE ) ); \
 } while( 0 )
 
 #define TIME_PUBLIC( TITLE, TYPE, CODE )                                \
@@ -81,9 +87,6 @@ do {                                                                    \
     }                                                                   \
 } while( 0 )
 
-typedef void (*aead_enc)(uint8_t *key, uint8_t *iv, uint8_t *ad, uint32_t adlen, uint8_t *plain, uint32_t len, uint8_t *cipher, uint8_t *tag);
-typedef uint32_t (*aead_dec)(uint8_t *key, uint8_t *iv, uint8_t *ad, uint32_t adlen, uint8_t *plain, uint32_t len, uint8_t *cipher, uint8_t *tag);
-
 void bench_aead(Spec_AEAD_alg a, const unsigned char *alg, size_t plain_len)
 {
   unsigned char tag[16], key[32], iv[12];
@@ -109,7 +112,6 @@ void bench_aead(Spec_AEAD_alg a, const unsigned char *alg, size_t plain_len)
   free(plain);
   free(cipher);
 }
-
 
 void bench_hash(Spec_Hash_Definitions_hash_alg a, const unsigned char *alg, size_t plain_len)
 {
@@ -171,6 +173,99 @@ void run() //EverCrypt_AutoConfig_cfg cfg)
     bench_hash(Spec_Hash_Definitions_MD5, "MD5", i);
 }
 
+void handleErrors()
+{
+  printf("Fatal error!\n");
+  exit(1);
+}
+
+static int openssl_aead(EVP_CIPHER_CTX *ctx,
+  int enc, uint8_t *iv,
+  uint8_t *aad, uint32_t aad_len,
+  uint8_t *plaintext, uint32_t plaintext_len,
+  uint8_t *ciphertext, uint8_t *tag)
+{
+  int len;
+
+  /* Initialise the cipher with the key and IV */
+  if (1 != EVP_CipherInit_ex(ctx, NULL, NULL, NULL, iv, enc))
+    handleErrors();
+
+  /* Set additional authenticated data */
+  if (aad_len > 0 && 1 != EVP_CipherUpdate(ctx, NULL, &len, aad, aad_len))
+    handleErrors();
+
+  /* Process the plaintext */
+  if (enc && plaintext_len > 0
+      && 1 != EVP_CipherUpdate(ctx, ciphertext, &len, plaintext, plaintext_len))
+    handleErrors();
+
+  /* Process the ciphertext */
+  if (!enc && plaintext_len > 0
+      && 1 != EVP_CipherUpdate(ctx, plaintext, &len, ciphertext, plaintext_len))
+    handleErrors();
+
+  /* Set the tag */
+  if(!enc && EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_AEAD_SET_TAG, 16, tag) <= 0)
+    handleErrors();
+
+  /* Finalize last block */
+  if (1 != EVP_CipherFinal_ex(ctx, ciphertext + len, &len))
+    return 0;
+
+  /* Get the tag */
+  if (enc && 1 != EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_AEAD_GET_TAG, 16, tag))
+    handleErrors();
+
+  return 1;
+}
+
+void bench_openssl(const EVP_CIPHER *a, const unsigned char *alg, size_t plain_len)
+{
+  unsigned char tag[16], key[32], iv[12];
+  unsigned char *plain = malloc(65536);
+  unsigned char *cipher = malloc(65536);
+  EVP_CIPHER_CTX *ctx;
+
+  if (!(ctx = EVP_CIPHER_CTX_new()))
+    handleErrors();
+
+  if (1 != EVP_CipherInit_ex(ctx, a, NULL, key, NULL, -1))
+  {
+    EVP_CIPHER_CTX_free(ctx);
+    handleErrors();
+  }
+
+  char title[128];
+  sprintf(title, "ENC %s[%5d]", alg, plain_len);
+
+  TIME_AND_TSC(title, plain_len,
+    openssl_aead(ctx, 1, iv, "", 0, plain, plain_len, cipher, tag);
+  );
+
+  sprintf(title, "DEC %s[%5d]", alg, plain_len);
+
+  TIME_AND_TSC(title, plain_len,
+    openssl_aead(ctx, 0, iv, "", 0, plain, plain_len, cipher, tag);
+  );
+
+  EVP_CIPHER_CTX_free(ctx);
+  free(plain);
+  free(cipher);
+}
+
+
+void run_openssl()
+{
+  size_t i;
+
+  for(i=4; i<=65536; i<<=1)
+    bench_openssl(EVP_aes_128_gcm(), "AES128-GCM", i);
+
+  for(i=4; i<=65536; i<<=1)
+    bench_openssl(EVP_aes_256_gcm(), "AES256-GCM", i);
+}
+
 int main(int argc, char **argv)
 {
 //  EverCrypt_AutoConfig_cfg cfg = { .tag = EverCrypt_AutoConfig_Prefer };
@@ -199,7 +294,10 @@ int main(int argc, char **argv)
     run(cfg);
   }
 */
+  printf("*** EverCrypt bencharks ***\n\n");
   run();
+  printf("*** OpenSSL comparison ***\n\n");
+  run_openssl();
   return 0;
 }
 
