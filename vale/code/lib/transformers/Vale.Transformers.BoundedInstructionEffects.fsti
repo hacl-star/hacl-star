@@ -1,6 +1,7 @@
 module Vale.Transformers.BoundedInstructionEffects
 
 open Vale.X64.Bytes_Code_s
+open Vale.X64.Machine_s
 open Vale.X64.Machine_Semantics_s
 
 open Vale.Transformers.PossiblyMonad
@@ -103,6 +104,17 @@ val lemma_machine_eval_ins_st_bounded_effects :
     (requires (safely_bounded i))
     (ensures (
         (bounded_effects (rw_set_of_ins i) (machine_eval_ins_st i))))
+
+(** The evaluation of a [code] which is just an instruction [i] is
+    bounded by the read/write set given by [rw_set_of_ins i]. *)
+val lemma_machine_eval_code_Ins_bounded_effects :
+  (i:ins) ->
+  (fuel:nat) ->
+  Lemma
+    (requires (safely_bounded i))
+    (ensures (
+        (bounded_effects (rw_set_of_ins i)
+           (fun s -> (), (Some?.v (machine_eval_code (Ins i) fuel s))))))
 
 (** The evaluation of a comparison [o] depends solely upon its
     locations, given by [locations_of_ocmp o] *)

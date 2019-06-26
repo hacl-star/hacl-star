@@ -706,6 +706,75 @@ let lemma_machine_eval_ins_st_bounded_effects i =
   | Instr _ _ _ -> lemma_machine_eval_ins_st_bounded_effects_Instr i
   | _ -> assert_norm (not (safely_bounded i))
 
+let rec lemma_unchanged_at_trace (locs:locations) (s1 s2:machine_state) trace1 trace2 :
+  Lemma
+    (requires (unchanged_at locs s1 s2))
+    (ensures (unchanged_at locs ({s1 with ms_trace = trace1}) ({s2 with ms_trace = trace2}))) =
+  match locs with
+  | [] -> ()
+  | x :: xs ->
+    lemma_unchanged_at_trace xs s1 s2 trace1 trace2
+
+(* See fsti *)
+let lemma_machine_eval_code_Ins_bounded_effects i fuel =
+  let filt s = { s with ms_trace = [] } in
+  let intr s_orig s = { s with ms_trace = (ins_obs i s_orig) @ s_orig.ms_trace } in
+  let f : st unit = (fun s -> (), (Some?.v (machine_eval_code (Ins i) fuel s))) in
+  let rw = rw_set_of_ins i in
+  let aux s :
+    Lemma (ensures (unchanged_except rw.loc_writes s (run f s))) =
+    lemma_machine_eval_ins_st_only_affects_write i (filt s);
+    assert (unchanged_except rw.loc_writes
+              (run (machine_eval_ins_st i) (filt s))
+              (run f s)) (* OBSERVE *)
+  in
+  FStar.Classical.forall_intro aux;
+  let aux s :
+    Lemma
+      (ensures (constant_on_execution rw.loc_constant_writes f s)) =
+    lemma_machine_eval_ins_st_constant_on_execution i (filt s);
+    let rec aux c :
+      Lemma
+        (requires (constant_on_execution c (machine_eval_ins_st i) (filt s)))
+        (ensures (constant_on_execution c f s)) =
+      if (run f s).ms_ok then (
+        match c with
+        | [] -> ()
+        | (|l,v|) :: xs ->
+          aux xs
+      ) else ()
+    in
+    aux rw.loc_constant_writes
+  in
+  FStar.Classical.forall_intro aux;
+  let aux s1 s2 :
+    Lemma
+      (requires (
+          (s1.ms_ok = s2.ms_ok) /\
+          (unchanged_at rw.loc_reads s1 s2)))
+      (ensures ((run f s1).ms_ok = (run f s2).ms_ok)) =
+    lemma_unchanged_at_trace rw.loc_reads s1 s2 [] [];
+    lemma_machine_eval_ins_st_ok i (filt s1) (filt s2)
+  in
+  FStar.Classical.forall_intro_2 (fun s1 ->
+      FStar.Classical.move_requires (aux s1));
+  let aux s1 s2 :
+    Lemma
+      (requires (
+          (s1.ms_ok = s2.ms_ok) /\
+          (unchanged_at rw.loc_reads s1 s2) /\
+          (run f s1).ms_ok /\
+          (run f s2).ms_ok))
+      (ensures (
+          (unchanged_at rw.loc_writes (run f s1) (run f s2)))) =
+    lemma_unchanged_at_trace rw.loc_reads s1 s2 [] [];
+    lemma_machine_eval_ins_st_unchanged_behavior i (filt s1) (filt s2);
+    lemma_unchanged_at_trace rw.loc_writes (machine_eval_ins i (filt s1)) (machine_eval_ins i (filt s2))
+      (intr s1 s1).ms_trace (intr s2 s2).ms_trace
+  in
+  FStar.Classical.forall_intro_2 (fun s1 ->
+      FStar.Classical.move_requires (aux s1))
+
 (* See fsti *)
 let lemma_locations_of_ocmp o s1 s2 = ()
 
