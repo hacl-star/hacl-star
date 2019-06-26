@@ -289,83 +289,24 @@ let le_bytes_to_seq_quad32_empty () :
   ()
 
 #reset-options "--z3rlimit 10 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq.Properties'"
-let le_bytes_to_seq_quad32_to_bytes_one_quad (b:quad32) :
-  Lemma (le_bytes_to_seq_quad32 (le_quad32_to_bytes b) == create 1 b)
-(* This expands into showing:
-   le_bytes_to_seq_quad32 (le_quad32_to_bytes b)
- == { definition of le_bytes_to_seq_quad32 }
-   seq_to_seq_four_LE (seq_nat8_to_seq_nat32_LE (le_quad32_to_bytes b))
- == { definition of le_quad32_to_bytes }
-   seq_to_seq_four_LE (seq_nat8_to_seq_nat32_LE (seq_four_to_seq_LE (seq_map (nat_to_four 8) (four_to_seq_LE b))))
- == { definition of seq_nat8_to_seq_nat32_LE }
-   seq_to_seq_four_LE (seq_map (four_to_nat 8) (seq_to_seq_four_LE (seq_four_to_seq_LE (seq_map (nat_to_four 8) (four_to_seq_LE b)))))
- == { seq_to_seq_four_to_seq_LE (seq_map (nat_to_four 8) (four_to_seq_LE b)) }
-   seq_to_seq_four_LE (seq_map (four_to_nat 8) (seq_map (nat_to_four 8) (four_to_seq_LE b)))
- == { seq_map_inverses (four_to_nat 8) (nat_to_four 8) (four_to_seq_LE b) }
-   seq_to_seq_four_LE (four_to_seq_LE b)
- == { four_to_seq_LE_is_seq_four_to_seq_LE b }
-   seq_to_seq_four_LE (seq_four_to_seq_LE (create 1 b))
- == { seq_to_seq_four_to_seq_LE (create 1 b) }
-   create 1 b
- *)
-  =
-  FStar.Pervasives.reveal_opaque (`%le_bytes_to_seq_quad32) le_bytes_to_seq_quad32;
-  FStar.Pervasives.reveal_opaque (`%le_quad32_to_bytes) le_quad32_to_bytes;
-  seq_to_seq_four_to_seq_LE (seq_map (nat_to_four 8) (four_to_seq_LE b));
-  seq_map_inverses (nat_to_four 8) (four_to_nat 8) (four_to_seq_LE b);
-  four_to_seq_LE_is_seq_four_to_seq_LE b;
-  seq_to_seq_four_to_seq_LE (create 1 b) ;
-  (*
-  assert (le_bytes_to_seq_quad32 (le_quad32_to_bytes b) == seq_to_seq_four_LE (seq_nat8_to_seq_nat32_LE (le_quad32_to_bytes b)));
-  assert (le_quad32_to_bytes b == seq_four_to_seq_LE (seq_map (nat_to_four 8) (four_to_seq_LE b)));
-  assert ((le_bytes_to_seq_quad32 (le_quad32_to_bytes b)) ==
-          (seq_to_seq_four_LE (seq_nat8_to_seq_nat32_LE (seq_four_to_seq_LE (seq_map (nat_to_four 8) (four_to_seq_LE b)))))
-          );
-  let annoying_definition_expander (x:seq nat8{length x % 4 == 0}) :
-    Lemma ( (seq_nat8_to_seq_nat32_LE (x)) ==
-           (seq_map (four_to_nat 8) (seq_to_seq_four_LE x) )) = () in
-
-  let (s:seq nat8{length s % 4 == 0}) = seq_four_to_seq_LE (seq_map (nat_to_four 8) (four_to_seq_LE b)) in
-  //annoying_definition_expander s;
-  assert ( (seq_nat8_to_seq_nat32_LE (s)) ==
-           (seq_map (four_to_nat 8) (seq_to_seq_four_LE s) ));
-
-  assert ( (le_bytes_to_seq_quad32 (le_quad32_to_bytes b)) ==
-           seq_to_seq_four_LE (seq_map (four_to_nat 8) (seq_to_seq_four_LE s)) );
-  assert (seq_to_seq_four_LE (seq_four_to_seq_LE (seq_map (nat_to_four 8) (four_to_seq_LE b))) ==
-          seq_map (nat_to_four 8) (four_to_seq_LE b));
-  assert ( (le_bytes_to_seq_quad32 (le_quad32_to_bytes b)) ==
-           seq_to_seq_four_LE (seq_map (four_to_nat 8) (seq_map (nat_to_four 8) (four_to_seq_LE b))) );
-  (*
-  assert ( (seq_to_seq_four_LE (seq_map (four_to_nat 8) (seq_to_seq_four_LE (seq_four_to_seq_LE (seq_map (nat_to_four 8) (four_to_seq_LE b))))))
-                   ==
-                  (seq_to_seq_four_LE (seq_map (four_to_nat 8) (seq_map (nat_to_four 8) (four_to_seq_LE b)))));
-                  *)
-  //assert (equal (le_bytes_to_seq_quad32 (le_quad32_to_bytes b)) (create 1 b));
-  *)
-  ()
-
-
-(*
-  Let s4 = seq_map (nat_to_four 8) (four_to_seq_LE b) in
-  let s4wrapped = seq_to_seq_four_LE (seq_four_to_seq_LE s4) in
-  assert (s4wrapped == s4);
-  seq_map_inverses (nat_to_four 8) (four_to_nat 8) (four_to_seq_LE b);
-  seq_to_seq_four_to_seq_LE (create 1 b);
-  four_to_seq_LE_is_seq_four_to_seq_LE b;
-
-  assert (le_bytes_to_seq_quad32 (le_quad32_to_bytes b) ==
-            seq_to_seq_four_LE (seq_nat8_to_seq_nat32_LE (le_quad32_to_bytes b)));
-  assert (equal (le_quad32_to_bytes b) (seq_four_to_seq_LE (seq_map (nat_to_four 8) (four_to_seq_LE b))));
-  (*
-  assert (equal (seq_nat8_to_seq_nat32_LE (le_quad32_to_bytes b))
-                (seq_nat8_to_seq_nat32_LE (seq_four_to_seq_LE (seq_map (nat_to_four 8) (four_to_seq_LE b)))));
-  *)
-  assert (equal (seq_to_seq_four_LE (seq_nat8_to_seq_nat32_LE (le_quad32_to_bytes b)))
-          (seq_to_seq_four_LE (seq_nat8_to_seq_nat32_LE (seq_four_to_seq_LE (seq_map (nat_to_four 8) (four_to_seq_LE b))))));
-  ()
-*)
-
+let le_bytes_to_seq_quad32_to_bytes_one_quad b =
+  calc (==) {
+    le_bytes_to_seq_quad32 (le_quad32_to_bytes b);
+    == {FStar.Pervasives.reveal_opaque (`%le_bytes_to_seq_quad32) le_bytes_to_seq_quad32}
+    seq_to_seq_four_LE (seq_nat8_to_seq_nat32_LE (le_quad32_to_bytes b));
+    == {FStar.Pervasives.reveal_opaque (`%le_quad32_to_bytes) le_quad32_to_bytes}
+    seq_to_seq_four_LE (seq_nat8_to_seq_nat32_LE (seq_four_to_seq_LE (seq_map (nat_to_four 8) (four_to_seq_LE b))));
+    == {}
+    seq_to_seq_four_LE (seq_map (four_to_nat 8) (seq_to_seq_four_LE (seq_four_to_seq_LE (seq_map (nat_to_four 8) (four_to_seq_LE b)))));
+    == {seq_to_seq_four_to_seq_LE (seq_map (nat_to_four 8) (four_to_seq_LE b))}
+    seq_to_seq_four_LE (seq_map (four_to_nat 8) (seq_map (nat_to_four 8) (four_to_seq_LE b)));
+    == {seq_map_inverses (nat_to_four 8) (four_to_nat 8) (four_to_seq_LE b)}
+    seq_to_seq_four_LE (four_to_seq_LE b);
+    == {four_to_seq_LE_is_seq_four_to_seq_LE b}
+    seq_to_seq_four_LE (seq_four_to_seq_LE (create 1 b));
+    == {}
+    create 1 b;
+  }
 
 let le_bytes_to_seq_quad32_to_bytes (s:seq quad32) :
   Lemma (le_bytes_to_seq_quad32 (le_seq_quad32_to_bytes s) == s)
@@ -407,25 +348,20 @@ seq_four_to_seq_LE (seq_map (nat_to_four 8) (four_to_seq_LE (le_bytes_to_quad32 
 seq_four_to_seq_LE (seq_map (nat_to_four 8) (four_to_seq_LE (seq_to_four_LE (seq_map (four_to_nat 8) (seq_to_seq_four_LE s)))))
 *)
 
-let le_quad32_to_bytes_to_quad32 (s:seq nat8 { length s == 16 }) :
-  Lemma(le_quad32_to_bytes (le_bytes_to_quad32 s) == s)
-  =
-  reveal_opaque le_bytes_to_quad32_def;
-  FStar.Pervasives.reveal_opaque (`%le_quad32_to_bytes) le_quad32_to_bytes;
-  let q = le_bytes_to_quad32 s in
-  let s' = le_quad32_to_bytes q in
-  if not (s = s') then (
-    four_to_seq_to_four_LE (seq_map (four_to_nat 8) (seq_to_seq_four_LE s));
-    let helper (x:four (natN (pow2_norm 8))) : Lemma (nat_to_four 8 (four_to_nat 8 x) == x) =
-      nat_to_four_to_nat x
-    in
-    FStar.Classical.forall_intro helper;  // Prove the inverse property needed for seq_map_inverses
-    seq_map_inverses (four_to_nat 8) (nat_to_four 8) (seq_to_seq_four_LE s);
-    seq_four_to_seq_to_seq_four_LE s;
-    ()
-  ) else (
-    assert (s == s')
-  )
+let le_quad32_to_bytes_to_quad32 s =
+  calc (==) {
+    le_quad32_to_bytes (le_bytes_to_quad32 s);
+    == {reveal_opaque le_bytes_to_quad32_def}
+    le_quad32_to_bytes (seq_to_four_LE (seq_map (four_to_nat 8) (seq_to_seq_four_LE s)));
+    == {FStar.Pervasives.reveal_opaque (`%le_quad32_to_bytes) le_quad32_to_bytes}
+    seq_four_to_seq_LE (seq_map (nat_to_four 8) (four_to_seq_LE (seq_to_four_LE (seq_map (four_to_nat 8) (seq_to_seq_four_LE s)))));
+    == {four_to_seq_to_four_LE (seq_map (four_to_nat 8) (seq_to_seq_four_LE s))}
+    seq_four_to_seq_LE (seq_map (nat_to_four 8) (seq_map (four_to_nat 8) (seq_to_seq_four_LE s)));
+    == {seq_map_inverses (four_to_nat 8) (nat_to_four 8) (seq_to_seq_four_LE s)}
+    seq_four_to_seq_LE (seq_to_seq_four_LE s);
+    == {}
+    s;
+  }
 
 let le_seq_quad32_to_bytes_of_singleton (q:quad32) :
   Lemma (le_quad32_to_bytes q == le_seq_quad32_to_bytes (create 1 q))
@@ -470,24 +406,10 @@ let le_seq_quad32_to_bytes_injective (b b':seq quad32) =
   seq_four_to_seq_LE_injective_specific b b';
   assert (equal b b')
 
-(*
-
-let seq_to_four_LE (#a:Type) (s:seq4 a) : four a =
-  Mkfour (index s 0) (index s 1) (index s 2) (index s 3)
-
-let seq_to_seq_four_LE (#a:Type) (x:seq a{length x % 4 == 0}) : seq (four a) =
-  let f (n:nat{n < length x / 4}) = Mkfour
-    (index x (n * 4)) (index x (n * 4 + 1)) (index x (n * 4 + 2)) (index x (n * 4 + 3))
-    in
-  init (length x / 4) f
-
-let seq_nat8_to_seq_nat32_LE (x:seq nat8{length x % 4 == 0}) : seq nat32 =
-  seq_map (four_to_nat 8) (seq_to_seq_four_LE x)
-
-*)
 let seq_to_four_LE_is_seq_to_seq_four_LE (#a:Type) (s:seq4 a) : Lemma
   (create 1 (seq_to_four_LE s) == seq_to_seq_four_LE s)
   =
+  FStar.Pervasives.reveal_opaque (`%seq_to_seq_four_LE) (seq_to_seq_four_LE #a);
   assert (equal (create 1 (seq_to_four_LE s)) (seq_to_seq_four_LE s));
   ()
 
@@ -520,21 +442,6 @@ let le_bytes_to_quad32_to_bytes (q:quad32) :
   assert (q == index (create 1 q) 0);      // OBSERVE
   assert (q == q');
   ()
-
-// let be_quad32_to_bytes (q:quad32) : seq16 nat8 =
-//   seq_four_to_seq_BE (seq_map (nat_to_four 8) (four_to_seq_BE q))
-
-// be_bytes_to_quad32 (be_quad32_to_bytes q)
-//   { definition of be_bytes_to_quad32 }
-// seq_to_four_BE (seq_map (four_to_nat 8) (seq_to_seq_four_BE (be_quad32_to_bytes q)))
-//   { definition of be_quad32_to_bytes }
-// seq_to_four_BE (seq_map (four_to_nat 8) (seq_to_seq_four_BE (seq_four_to_seq_BE (seq_map (nat_to_four 8) (four_to_seq_BE q)))))
-//    { seq_to_seq_four_to_seq_BE (seq_map (nat_to_four 8) (seq_four_to_seq_BE q)); }
-// seq_to_four_BE (seq_map (four_to_nat 8) (seq_map (nat_to_four 8) (four_to_seq_BE q)))
-//    { seq_map_inverses  (four_to_nat 8) (nat_to_four 8) (four_to_seq_BE q); }
-// seq_to_four_BE (four_to_seq_BE q)
-//    { seq_to_four_to_seq_BE q }
-//  q
 
 let be_bytes_to_quad32_to_bytes (q:quad32) :
   Lemma (be_bytes_to_quad32 (be_quad32_to_bytes q) == q)
@@ -581,6 +488,7 @@ let slice_commutes_seq_four_to_seq_LE (#a:Type) (s:seq (four a)) (n:nat{n <= len
   Lemma(slice (seq_four_to_seq_LE s) (n * 4) (n' * 4) ==
         seq_four_to_seq_LE (slice s n n'))
   =
+  FStar.Pervasives.reveal_opaque (`%seq_four_to_seq_LE) (seq_four_to_seq_LE #a);
   assert (equal (slice (seq_four_to_seq_LE s) (n * 4) (n' * 4))
                 (seq_four_to_seq_LE (slice s n n')));
   ()
@@ -611,16 +519,6 @@ let slice_commutes_le_seq_quad32_to_bytes0 (s:seq quad32) (n:nat{n <= length s})
   =
   slice_commutes_le_seq_quad32_to_bytes s 0 n
 
-(*
-let seq_to_seq_four_LE (#a:Type) (x:seq a{length x % 4 == 0}) : seq (four a) =
-  let f (n:nat{n < length x / 4}) = Mkfour
-    (index x (n * 4)) (index x (n * 4 + 1)) (index x (n * 4 + 2)) (index x (n * 4 + 3))
-    in
-  init (length x / 4) f
-
-let seq_nat8_to_seq_nat32_LE (x:seq nat8{length x % 4 == 0}) : seq nat32 =
-  seq_map (four_to_nat 8) (seq_to_seq_four_LE x)
-*)
 #reset-options "--z3rlimit 20 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq.Properties'"
 let append_distributes_le_bytes_to_seq_quad32 (s1:seq nat8 { length s1 % 16 == 0 }) (s2:seq nat8 { length s2 % 16 == 0 }) :
   Lemma(le_bytes_to_seq_quad32 (s1 @| s2) == (le_bytes_to_seq_quad32 s1) @| (le_bytes_to_seq_quad32 s2))

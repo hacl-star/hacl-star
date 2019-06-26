@@ -55,11 +55,25 @@ val footprint_s: #a:alg -> state_s a -> GTot B.loc
 let footprint (#a:alg) (m: HS.mem) (s: state a) =
   B.(loc_union (loc_addr_of_buffer s) (footprint_s (B.deref m s)))
 
-unfold let loc_includes_union_l_footprint_s = EverCrypt.Hash.loc_includes_union_l_footprint_s
-unfold let loc_in = EverCrypt.Hash.loc_in
-unfold let loc_unused_in = EverCrypt.Hash.loc_unused_in
-unfold let fresh_loc = EverCrypt.Hash.fresh_loc
-unfold let fresh_is_disjoint = EverCrypt.Hash.fresh_is_disjoint
+// TR: the following pattern is necessary because, if we generically
+// add such a pattern directly on `loc_includes_union_l`, then
+// verification will blowup whenever both sides of `loc_includes` are
+// `loc_union`s. We would like to break all unions on the
+// right-hand-side of `loc_includes` first, using
+// `loc_includes_union_r`.  Here the pattern is on `footprint_s`,
+// because we already expose the fact that `footprint` is a
+// `loc_union`. (In other words, the pattern should be on every
+// smallest location that is not exposed to be a `loc_union`.)
+
+let loc_includes_union_l_footprint_s
+  (l1 l2: B.loc) (#a: alg) (s: state_s a)
+: Lemma
+  (requires (
+    B.loc_includes l1 (footprint_s s) \/ B.loc_includes l2 (footprint_s s)
+  ))
+  (ensures (B.loc_includes (B.loc_union l1 l2) (footprint_s s)))
+  [SMTPat (B.loc_includes (B.loc_union l1 l2) (footprint_s s))]
+= B.loc_includes_union_l l1 l2 (footprint_s s)
 
 val invariant_s: (#a:alg) -> HS.mem -> state_s a -> Type0
 let invariant (#a:alg) (m: HS.mem) (s: state a) =
@@ -73,7 +87,7 @@ val invariant_loc_in_footprint
   (m: HS.mem)
 : Lemma
   (requires (invariant m s))
-  (ensures (loc_in (footprint m s) m))
+  (ensures (B.loc_in (footprint m s) m))
   [SMTPat (invariant m s)]
 
 val frame_invariant: #a:alg -> l:B.loc -> s:state a -> h0:HS.mem -> h1:HS.mem -> Lemma
@@ -124,7 +138,7 @@ let create_in_st (a: alg) =
 
           // Memory stuff
           B.(modifies (loc_buffer dst) h0 h1) /\
-          fresh_loc (footprint h1 s) h0 h1 /\
+          B.fresh_loc (footprint h1 s) h0 h1 /\
           B.(loc_includes (loc_region_only true r) (footprint h1 s)) /\
           freeable h1 s /\
 
@@ -141,7 +155,7 @@ let create_in_st (a: alg) =
 *)
 val create_in: #a:alg -> create_in_st a
 
-let iv_p a = iv:B.buffer UInt8.t { B.length iv = iv_length a }
+let iv_p a = iv:B.buffer UInt8.t { iv_length (B.length iv) a }
 let ad_p a = ad:B.buffer UInt8.t { B.length ad <= max_length a }
 let plain_p a = p:B.buffer UInt8.t { B.length p <= max_length a }
 let cipher_p a = p:B.buffer UInt8.t { B.length p + tag_length a <= max_length a }
@@ -150,6 +164,7 @@ inline_for_extraction noextract
 let encrypt_st (a: supported_alg) =
   s:B.pointer_or_null (state_s a) ->
   iv:iv_p a ->
+  iv_len: UInt32.t { v iv_len = B.length iv /\ v iv_len > 0 } ->
   ad:ad_p a ->
   ad_len: UInt32.t { v ad_len = B.length ad /\ v ad_len <= pow2 31 } ->
   plain: plain_p a ->
@@ -176,7 +191,9 @@ let encrypt_st (a: supported_alg) =
       match r with
       | Success ->
           not (B.g_is_null s) /\
-          B.(modifies (loc_union (loc_buffer cipher) (loc_buffer tag)) h0 h1) /\
+        B.(modifies (loc_union (footprint h1 s) (loc_union (loc_buffer cipher) (loc_buffer tag))) h0 h1) /\
+        invariant h1 s /\
+        footprint h0 s == footprint h1 s /\
           S.equal (S.append (B.as_seq h1 cipher) (B.as_seq h1 tag))
             (encrypt #a (as_kv (B.deref h0 s)) (B.as_seq h0 iv) (B.as_seq h0 ad) (B.as_seq h0 plain))
       | InvalidKey ->
@@ -196,6 +213,7 @@ inline_for_extraction noextract
 let decrypt_st (a: supported_alg) =
   s:B.pointer_or_null (state_s a) ->
   iv:iv_p a ->
+  iv_len:UInt32.t { v iv_len = B.length iv /\ v iv_len > 0 } ->
   ad:ad_p a ->
   ad_len: UInt32.t { v ad_len = B.length ad /\ v ad_len <= pow2 31 } ->
   cipher: cipher_p a ->
@@ -224,12 +242,16 @@ let decrypt_st (a: supported_alg) =
       | Success ->
           not (B.g_is_null s) /\ (
           let plain = decrypt #a (as_kv (B.deref h0 s)) (B.as_seq h0 iv) (B.as_seq h0 ad) cipher_tag in
-          B.(modifies (loc_buffer dst) h0 h1) /\
+          B.(modifies (loc_union (footprint h1 s) (loc_buffer dst)) h0 h1) /\
+          invariant h1 s /\
+          footprint h0 s == footprint h1 s /\
           Some? plain /\ S.equal (Some?.v plain) (B.as_seq h1 dst))
       | AuthenticationFailure ->
           not (B.g_is_null s) /\ (
           let plain = decrypt #a (as_kv (B.deref h0 s)) (B.as_seq h0 iv) (B.as_seq h0 ad) cipher_tag in
-          B.(modifies (loc_buffer dst) h0 h1) /\
+          B.(modifies (loc_union (footprint h1 s) (loc_buffer dst)) h0 h1) /\
+          invariant h1 s /\
+          footprint h0 s == footprint h1 s /\
           None? plain)
       | _ ->
           False)

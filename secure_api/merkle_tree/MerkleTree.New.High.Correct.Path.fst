@@ -128,7 +128,7 @@ val mt_get_path_acc_consistent:
                     (S.slice rhs lv (lv + log2c j)) k actd)
                   (mt_get_path_ lv hs rhs i j k S.empty actd)))
         (decreases j)
-#reset-options "--z3rlimit 200 --max_fuel 1"
+#reset-options "--z3rlimit 200 --max_fuel 1 --max_ifuel 0"
 let rec mt_get_path_acc_consistent lv i j olds hs rhs k actd =
   log2c_bound j (32 - lv);
   mt_olds_hs_lth_inv_ok lv i j olds hs;

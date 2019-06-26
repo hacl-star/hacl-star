@@ -476,30 +476,40 @@ let mapi #a #b h0 clen out spec_f f inp =
       lemma_eq_disjoint clen clen out inp i h0 h1;
       let xi = inp.(i) in f i xi)
 
-#reset-options "--z3refresh --z3rlimit 100 --max_fuel 1 --initial_ifuel 1 --max_ifuel 1 --using_facts_from '* -LowStar.Monotonic.Buffer.loc_disjoint_includes_r -LowStar.Monotonic.Buffer.loc_disjoint_sym_'"
+#reset-options "--z3refresh --z3rlimit 200 --initial_fuel 1 --max_fuel 1 --initial_ifuel 1 --max_ifuel 1 --using_facts_from '* -LowStar.Monotonic.Buffer.loc_disjoint_includes_r '"
 
-let map_blocks_multi #t #a h0 blocksize nb inp output spec_f impl_f =
+let map_blocks_multi #t #a h00 blocksize nb inp output spec_f impl_f =
   let h0 = ST.get() in
   assert(Sequence.length (as_seq h0 inp) == v nb * v blocksize);
   [@inline_let]
-  let a_spec = Sequence.fixed_a unit in
+  let a_spec : i:size_nat{i <= v nb} -> Type0 = Sequence.fixed_a unit in
   [@inline_let]
-  let refl h i = () in
+  let refl : HS.mem -> i:size_nat{i <= v nb} -> GTot (a_spec i) = fun h i -> () in
   [@inline_let]
   let footprint (i:size_nat {i <= v  nb}) : GTot (l:B.loc{B.loc_disjoint l (loc output) /\
 			       B.address_liveness_insensitive_locs `B.loc_includes` l}) = B.loc_none in
   [@inline_let]
-  let spec h : GTot (i:size_nat{i < v nb} -> unit -> unit & Seq.lseq a (v blocksize)) =
+  let spec h : GTot (i:size_nat{i < v nb} -> a_spec i -> (a_spec (i + 1)) & Seq.lseq a (v blocksize)) =
     let iseq = as_seq h inp in
     Sequence.map_blocks_inner (v blocksize) (v nb) iseq (spec_f h) in
   fill_blocks #a h0 blocksize nb output a_spec refl footprint spec impl_f;
   let h1 = ST.get() in
+  assert (modifies1 output h0 h1);
   [@ inline_let]
-  let g = Sequence.generate_blocks (v blocksize) (v nb) (v nb) (Sequence.fixed_a unit) (spec h0) () in
+  let g = Sequence.generate_blocks (v blocksize) (v nb) (v nb) a_spec (spec h0) (refl h0 0) in
+
+  (*
+   * Typing of (spec_f h0) below requires us to prove that:
+   *   Seq.length (as_seq h0 inp) / v blocksize == v nb
+   *
+   * Helping Z3 get there
+   *)
+  FStar.Math.Lemmas.cancel_mul_div (v nb) (v blocksize);
+  assert (Seq.length (as_seq h0 inp) / v blocksize == v nb);
+
   [@ inline_let]
   let m = Sequence.map_blocks_multi (v blocksize) (v nb) (as_seq h0 inp) (spec_f h0) in
-  assert (modifies1 output h0 h1); 
-  assert (as_seq h1 output `FStar.Seq.equal` snd g);
+  assert (as_seq h1 output == snd g);
   assert (m `FStar.Seq.equal` snd g)
 
 #reset-options "--z3rlimit 900 --max_fuel 0 --max_ifuel 2"

@@ -315,7 +315,14 @@ let fmul15 (f10, f11, f12, f13, f14) f2 =
   let out = (tmp_w0, tmp_w1, tmp_w2, tmp_w3, tmp_w4) in
   [@inline_let]
   let res = carry_wide5 (tmp_w0, tmp_w1, tmp_w2, tmp_w3, tmp_w4) in
+
   FStar.Math.Lemmas.lemma_mod_mul_distr_l (as_nat5 (f10, f11, f12, f13, f14)) (uint_v f2) prime;
+  
+  assert (feval res == feval_wide (tmp_w0, tmp_w1, tmp_w2, tmp_w3, tmp_w4));
+  assert (feval res == (wide_as_nat5 (tmp_w0, tmp_w1, tmp_w2, tmp_w3, tmp_w4)) % prime);
+  assert (feval res == (v f2 * as_nat5 (f10, f11, f12, f13, f14)) % prime);
+  FStar.Math.Lemmas.swap_mul (v f2) (as_nat5 (f10, f11, f12, f13, f14));
+  assert (feval res == (as_nat5 (f10, f11, f12, f13, f14) * v f2) % prime);
   res
 
 // inline_for_extraction noextract

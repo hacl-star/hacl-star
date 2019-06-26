@@ -599,9 +599,11 @@ val mt_safe_elts_spec:
                    (U32.v lv) (RV.as_seq h hs)
                    (U32.v i) (U32.v j)))
         (decreases (32 - U32.v lv))
+#push-options "--initial_fuel 2 --max_fuel 2 --initial_ifuel 0 --max_ifuel 0 --z3rlimit 100"
 let rec mt_safe_elts_spec h lv hs i j =
   if lv = merkle_tree_size_lg then ()
   else mt_safe_elts_spec h (lv + 1ul) hs (i / 2ul) (j / 2ul)
+#pop-options
 
 val merkle_tree_lift:
   h:HS.mem ->

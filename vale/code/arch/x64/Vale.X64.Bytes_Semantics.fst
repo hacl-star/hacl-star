@@ -240,7 +240,7 @@ let rec instr_write_outputs_bs_domains
         instr_write_outputs_bs_domains outs args vs (coerce oprs) s_orig s'
     )
 
-#set-options "--z3rlimit 30 --max_ifuel 1"
+#set-options "--z3rlimit 30 --max_ifuel 2"
 
 let eval_ins_bs_domains (ins:ins) (s0:machine_state) : Lemma
   (let s1 = run (machine_eval_ins_st ins) s0 in

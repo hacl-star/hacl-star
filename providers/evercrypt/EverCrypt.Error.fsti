@@ -8,5 +8,6 @@ type error_code =
 | UnsupportedAlgorithm
 | InvalidKey
 | AuthenticationFailure
+| InvalidIVLength
 
 let _: squash (inversion error_code) = allow_inversion error_code

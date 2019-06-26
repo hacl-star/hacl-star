@@ -106,12 +106,18 @@ let aead_tag_length32 (al: Spec.AEAD.alg) : Tot (x: U32.t { U32.v x == Spec.AEAD
   | AES128_CCM        -> 16ul
   | AES256_CCM        -> 16ul
 
-let aead_iv_length32 (al: Spec.AEAD.alg) : Tot (x: U32.t { U32.v x == Spec.AEAD.iv_length al}) =
-  12ul
+let aead_iv_length32 (al: Spec.AEAD.supported_alg) (x:U32.t) : Tot
+  (res:bool{res <==> Spec.AEAD.iv_length (U32.v x) al}) =
+  let open Spec.AEAD in
+  match al with
+  | AES128_GCM -> 0ul `U32.lt` x
+  | AES256_GCM -> 0ul `U32.lt` x
+  | CHACHA20_POLY1305 -> x = 12ul
+
 
 #reset-options "--using_facts_from '* -Test.Vectors'"
 
-#push-options "--z3rlimit 128"
+#push-options "--z3rlimit 700 --max_fuel 0 --max_ifuel 0"
 
 let test_aead_st alg key key_len iv iv_len aad aad_len tag tag_len plaintext plaintext_len
   ciphertext ciphertext_len: ST unit
@@ -146,7 +152,7 @@ let test_aead_st alg key key_len iv iv_len aad aad_len tag tag_len plaintext pla
   then C.Failure.failwith !$"test_aead_st: not (tag_len = aead_tag_length32 alg)"
   else if not (ciphertext_len = plaintext_len)
   then C.Failure.failwith !$"test_aead_st: not (ciphertext_len = plaintext_len)"
-  else if not (iv_len = aead_iv_length32 alg)
+  else if not (aead_iv_length32 alg iv_len)
   then C.Failure.failwith !$"test_aead_st: not (iv_len = aead_iv_length32 alg)"
   else if not (aad_len `U32.lte` max_len)
   then C.Failure.failwith !$"test_aead_st: not (aad_len `U32.lte` max_len)"
@@ -181,11 +187,11 @@ let test_aead_st alg key key_len iv iv_len aad aad_len tag tag_len plaintext pla
       let h2 = HST.get () in
       EverCrypt.AEAD.frame_invariant B.loc_none st h1 h2;
 
-      if EverCrypt.AEAD.(encrypt #(G.hide alg) st iv aad aad_len plaintext plaintext_len ciphertext' tag' <> Success) then
+      if EverCrypt.AEAD.(encrypt #(G.hide alg) st iv iv_len aad aad_len plaintext plaintext_len ciphertext' tag' <> Success) then
         C.Failure.failwith !$"Failure AEAD encrypt\n";
       let h3 = HST.get () in
-      EverCrypt.AEAD.frame_invariant (B.loc_buffer ciphertext' `B.loc_union` B.loc_buffer tag') st h2 h3;
-      (match EverCrypt.AEAD.decrypt #(G.hide alg) st iv aad aad_len ciphertext' ciphertext_len tag' plaintext' with
+      Classical.move_requires (EverCrypt.AEAD.frame_invariant (B.loc_buffer ciphertext' `B.loc_union` B.loc_buffer tag') st h2) h3;
+      (match EverCrypt.AEAD.decrypt #(G.hide alg) st iv iv_len aad aad_len ciphertext' ciphertext_len tag' plaintext' with
       | Success ->
         B.recall ciphertext;
         TestLib.compare_and_print !$"of AEAD cipher" ciphertext ciphertext' plaintext_len;
