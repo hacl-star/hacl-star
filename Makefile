@@ -137,6 +137,7 @@ ci:
 	NOSHORTLOG=1 $(MAKE) vale-fst
 	FSTAR_DEPEND_FLAGS="--warn_error +285" NOSHORTLOG=1 $(MAKE) all-unstaged test-unstaged
 	NOSHORTLOG=1 $(MAKE) wasm
+	$(MAKE) -C providers/quic_provider # needs a checkout of miTLS, only valid on CI
 
 wasm:
 	tools/blast-staticconfig.sh wasm
