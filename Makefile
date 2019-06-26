@@ -24,6 +24,7 @@ display:
 	@echo "Build"
 	@echo "- 'make build' will collect code and generate static/shared librairies"
 	@echo "- 'make build-experimental' same, with experimental code"
+	@echo "- 'make build/ml/libhacl.cmxa' will build an OCaml shared library from specs"
 
 
 #
@@ -61,6 +62,9 @@ build:
 
 build-experimental:
 	@echo "Build Experimental"
+
+build/ml/libhacl.cmxa:
+	$(MAKE) -f Makefile.OCaml
 
 #
 # Packaging helper
@@ -115,7 +119,7 @@ clean-build:
 	rm -rf build
 	rm -rf build-experimental
 
-clean: .clean-banner clean-base clean-build
+clean: clean-base clean-build
 
 # Colors
 NORMAL="\\033[0;39m"
