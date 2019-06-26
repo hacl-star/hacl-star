@@ -8,17 +8,17 @@ open Lib.ByteSequence
 
 
 (* Tests: RFC7539 *)
-let k = List.Tot.map u8_from_UInt8 [
+let key = List.Tot.map u8_from_UInt8 [
   0x80uy; 0x81uy; 0x82uy; 0x83uy; 0x84uy; 0x85uy; 0x86uy; 0x87uy;
   0x88uy; 0x89uy; 0x8auy; 0x8buy; 0x8cuy; 0x8duy; 0x8euy; 0x8fuy;
   0x90uy; 0x91uy; 0x92uy; 0x93uy; 0x94uy; 0x95uy; 0x96uy; 0x97uy;
   0x98uy; 0x99uy; 0x9auy; 0x9buy; 0x9cuy; 0x9duy; 0x9euy; 0x9fuy]
 
-let n = List.Tot.map u8_from_UInt8 [
+let nonce = List.Tot.map u8_from_UInt8 [
   0x07uy; 0x00uy; 0x00uy; 0x00uy; 0x40uy; 0x41uy; 0x42uy; 0x43uy;
   0x44uy; 0x45uy; 0x46uy; 0x47uy]
 
-let p = List.Tot.map u8_from_UInt8 [
+let plaintext = List.Tot.map u8_from_UInt8 [
   0x4cuy; 0x61uy; 0x64uy; 0x69uy; 0x65uy; 0x73uy; 0x20uy; 0x61uy;
   0x6euy; 0x64uy; 0x20uy; 0x47uy; 0x65uy; 0x6euy; 0x74uy; 0x6cuy;
   0x65uy; 0x6duy; 0x65uy; 0x6euy; 0x20uy; 0x6fuy; 0x66uy; 0x20uy;
@@ -63,25 +63,28 @@ let xmac = List.Tot.map u8_from_UInt8 [
 #set-options "--max_fuel 0 --z3rlimit 25"
 
 let test () =
-  assert_norm(List.Tot.length k = 32);
-  assert_norm(List.Tot.length n = 12);
-  assert_norm(List.Tot.length p = 114);
+  assert_norm(List.Tot.length key = 32);
+  assert_norm(List.Tot.length nonce = 12);
+  assert_norm(List.Tot.length plaintext = 114);
+
   assert_norm(List.Tot.length aad = 12);
   assert_norm(List.Tot.length xcipher = 114);
   assert_norm(List.Tot.length xmac = 16);
-  let k = of_list k in
-  let n = of_list n in
-  let p = of_list p in
+  let key = of_list key in
+  let nonce = of_list nonce in
+  let plaintext = of_list plaintext in
   let aad = of_list aad in
   let xcipher = of_list xcipher in
   let xmac = of_list xmac in
-  let enc = Spec.Chacha20Poly1305.aead_encrypt k n p aad in
-  let cipher = sub enc 0 114 in
-  let mac = sub enc 114 16 in
-  let dec = Spec.Chacha20Poly1305.aead_decrypt k n cipher mac aad in
+  let enc = Spec.Chacha20Poly1305.aead_encrypt key nonce plaintext aad in
+  let cipher = Seq.slice enc 0 114 in
+  let mac = Seq.slice enc 114 130 in
   let result_encryption = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) cipher xcipher in
   let result_mac_compare = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) mac xmac in
+
+  let dec = Spec.Chacha20Poly1305.aead_decrypt key nonce cipher mac aad in
   let dec_p = match dec with | Some p -> p | None -> create 114 (u8 0) in
-  let result_decryption = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) dec_p p in
+  let result_decryption = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) dec_p plaintext in
+
   if result_encryption && result_mac_compare && result_decryption then IO.print_string "\nSuccess!\n"
   else IO.print_string "\nFailure :("

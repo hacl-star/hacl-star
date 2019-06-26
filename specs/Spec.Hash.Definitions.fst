@@ -33,6 +33,8 @@ type hash_alg =
   | SHA1
   | MD5
 
+type algorithm = hash_alg
+
 let is_sha2 = function
   | SHA2_224 | SHA2_256 | SHA2_384 | SHA2_512 -> true
   | _ -> false
@@ -49,18 +51,21 @@ let max_input_length: hash_alg -> Tot nat = function
   | SHA2_224 | SHA2_256 -> pow2 61
   | SHA2_384 | SHA2_512 -> pow2 125
 
+inline_for_extraction
+let max_input a = max_input_length a
+
 (* A type that can hold a maximum length, in bits. *)
 inline_for_extraction
 let len_int_type: hash_alg -> inttype = function
   | MD5 | SHA1
   | SHA2_224 | SHA2_256 -> U64
-  | SHA2_384 | SHA2_512 -> U128 
+  | SHA2_384 | SHA2_512 -> U128
 
 inline_for_extraction
 let len_t (a:hash_alg) = uint_t (len_int_type a ) PUB
 
 inline_for_extraction
-let nat_to_len (a:hash_alg) (n:nat{n <= maxint (len_int_type a)}) = 
+let nat_to_len (a:hash_alg) (n:nat{n <= maxint (len_int_type a)}) =
   nat_to_uint #(len_int_type a ) #PUB n
 
 val len_v: a:hash_alg -> len_t a -> nat
@@ -135,6 +140,7 @@ let hash_length a =
   let open FStar.Mul in
   word_length a * hash_word_length a
 
+let size_hash a = hash_length a
 
 (** Padding *)
 

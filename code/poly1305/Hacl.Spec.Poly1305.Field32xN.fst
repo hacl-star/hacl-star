@@ -406,10 +406,11 @@ inline_for_extraction noextract
 val store_felem5:
     #w:lanes
   -> f:felem5 w
-  -> uint64xN w & uint64xN w
+  -> uint64 & uint64
 let store_felem5 #w (f0, f1, f2, f3, f4) =
-  let lo = vec_or (vec_or f0 (vec_shift_left f1 26ul)) (vec_shift_left f2 52ul) in
-  let hi = vec_or (vec_or (vec_shift_right f2 12ul) (vec_shift_left f3 14ul)) (vec_shift_left f4 40ul) in
+  let (f0, f1, f2, f3, f4) = (vec_get f0 0ul, vec_get f1 0ul, vec_get f2 0ul, vec_get f3 0ul, vec_get f4 0ul) in
+  let lo = (f0 |. (f1 <<. 26ul)) |. (f2 <<. 52ul) in
+  let hi = ((f2 >>. 12ul) |. (f3 <<. 14ul)) |. (f4 <<. 40ul) in
   lo, hi
 
 inline_for_extraction noextract
@@ -568,14 +569,13 @@ let set_bit5 #w f i =
   res
 
 inline_for_extraction noextract
-val mod_add128_ws:
-    #w:lanes
-  -> a:(uint64xN w & uint64xN w)
-  -> b:(uint64xN w & uint64xN w)
-  -> uint64xN w & uint64xN w
-let mod_add128_ws #w (a0, a1) (b0, b1) =
-  let r0 = vec_add_mod a0 b0 in
-  let r1 = vec_add_mod a1 b1 in
-  let c = r0 ^| ((r0 ^| b0) `vec_or` ((r0 -| b0) ^| b0)) >>| 63ul in
-  let r1 = vec_add_mod r1 c in
+val mod_add128:
+    a:(uint64 & uint64)
+  -> b:(uint64 & uint64)
+  -> uint64 & uint64
+let mod_add128 (a0, a1) (b0, b1) =
+  let r0 = a0 +. b0 in
+  let r1 = a1 +. b1 in
+  let c = r0 ^. ((r0 ^. b0) |. ((r0 -. b0) ^. b0)) >>. 63ul in
+  let r1 = r1 +. c in
   (r0, r1)

@@ -42,7 +42,7 @@ Hacl_AES_128_BitSlice_aes_ctr(
   uint32_t counter,
   uint32_t rounds);
 
-#define ROUNDS 10240
+#define ROUNDS 40960
 #define SIZE   16384
 
 int main() {

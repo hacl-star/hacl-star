@@ -85,13 +85,14 @@ let transpose_bits64x8 i0 i1 i2 i3 i4 i5 i6 i7 =
   (t0,t1,t2,t3,t4,t5,t6,t7)
 
 
+(* Boyar and Peralta circuit: depth 16, gates 125 *)
 inline_for_extraction
-val sub_bytes64x8:
+val sub_bytes64x8_boyar:
     uint64 -> uint64 -> uint64 -> uint64
   -> uint64 -> uint64 -> uint64 -> uint64 ->
   Tot (uint64 * uint64 * uint64 * uint64 * uint64 * uint64 * uint64 * uint64)
 
-let sub_bytes64x8 (st0:uint64) (st1:uint64) (st2:uint64) (st3:uint64) (st4:uint64) (st5:uint64) (st6:uint64) (st7:uint64) =
+let sub_bytes64x8_boyar (st0:uint64) (st1:uint64) (st2:uint64) (st3:uint64) (st4:uint64) (st5:uint64) (st6:uint64) (st7:uint64) =
   let u0 = st7 in
   let u1 = st6 in
   let u2 = st5 in
@@ -113,43 +114,43 @@ let sub_bytes64x8 (st0:uint64) (st1:uint64) (st2:uint64) (st3:uint64) (st4:uint6
   let t4 = u7 ^. t3 in
   let t5 = t1 ^. t2 in
   let t8 = t1 ^. t6 in
-  let t9 = u6 ^. t4 in
+  let t15 = u5 ^. t7 in
+  let t19 = t2 ^. t18 in
+  let t21 = t1 ^. t13 in
 
+  let t9 = u6 ^. t4 in
   let t10 = u3 ^. t4 in
   let t11 = u7 ^. t5 in
   let t12 = t5 ^. t6 in
   let t14 = t3 ^. t5 in
-  let t15 = u5 ^. t7 in
   let t17 = u7 ^. t8 in
-  let t19 = t2 ^. t18 in
   let t22 = u0 ^. t4 in
   let t54 = t2 &. t8 in
-  let t50 = t9 &. t4 in
-
   let t20 = t4 ^. t15 in
-  let t21 = t1 ^. t13 in
   let t39 = t21 ^. t5 in
   let t40 = t21 ^. t7 in
   let t41 = t7 ^. t19 in
+  let t44 = t19 &. t5 in
+  let t49 = t7 &. t21 in
+
+  let t50 = t9 &. t4 in
   let t42 = t16 ^. t14 in
   let t43 = t22 ^. t17 in
-  let t44 = t19 &. t5 in
   let t45 = t20 &. t11 in
   let t47 = t10 &. u7 in
   let t57 = t16 &. t14 in
-
   let t46 = t12 ^. t44 in
+  let t55 = t41 &. t39 in
+
   let t48 = t47 ^. t44 in
-  let t49 = t7 &. t21 in
   let t51 = t40 ^. t49 in
   let t52 = t22 &. t17 in
   let t53 = t52 ^. t49 in
-
-  let t55 = t41 &. t39 in
   let t56 = t55 ^. t54 in
   let t58 = t57 ^. t54 in
   let t59 = t46 ^. t45 in
   let t60 = t48 ^. t42 in
+
   let t61 = t51 ^. t50 in
   let t62 = t53 ^. t58 in
   let t63 = t59 ^. t56 in
@@ -232,6 +233,142 @@ let sub_bytes64x8 (st0:uint64) (st1:uint64) (st2:uint64) (st3:uint64) (st4:uint6
   let t140 = t114 ^. t136 in
   let st6 = lognot (t109 ^. t140) in
   (st0,st1,st2,st3,st4,st5,st6,st7)
+
+
+(* A slightly faster circuit from Cagdas Calik: depth 27, gates 113 *)
+inline_for_extraction
+val sub_bytes64x8:
+    uint64 -> uint64 -> uint64 -> uint64
+  -> uint64 -> uint64 -> uint64 -> uint64 ->
+  Tot (uint64 * uint64 * uint64 * uint64 * uint64 * uint64 * uint64 * uint64)
+
+let sub_bytes64x8 (st0:uint64) (st1:uint64) (st2:uint64) (st3:uint64) (st4:uint64) (st5:uint64) (st6:uint64) (st7:uint64) =
+  let u0 = st7 in
+  let u1 = st6 in
+  let u2 = st5 in
+  let u3 = st4 in
+  let u4 = st3 in
+  let u5 = st2 in
+  let u6 = st1 in
+  let u7 = st0 in
+
+  let y14 = u3 ^. u5 in
+  let y13 = u0 ^. u6 in
+  let y9 = u0 ^. u3 in
+  let y8 = u0 ^. u5 in
+  let t0 = u1 ^. u2 in
+  let y1 = t0 ^. u7 in
+  let y4 = y1 ^. u3 in
+  let y12 = y13 ^. y14 in
+  let y2 = y1 ^. u0 in
+  let y5 = y1 ^. u6 in
+  let y3 = y5 ^. y8 in
+  let t1 = u4 ^. y12 in
+  let y15 = t1 ^. u5 in
+  let y20 = t1 ^. u1 in
+  let y6 = y15 ^. u7 in
+  let y10 = y15 ^. t0 in
+  let y11 = y20 ^. y9 in
+  let y7 = u7 ^. y11 in
+  let y17 = y10 ^. y11 in
+  let y19 = y10 ^. y8 in
+  let y16 = t0 ^. y11 in
+  let y21 = y13 ^. y16 in
+  let y18 = u0 ^. y16 in
+  let t2 = y12 &. y15 in
+  let t3 = y3 &. y6 in
+  let t4 = t3 ^. t2 in
+  let t5 = y4 &. u7 in
+  let t6 = t5 ^. t2 in
+  let t7 = y13 &. y16 in
+  let t8 = y5 &. y1 in
+  let t9 = t8 ^. t7 in
+  let t10 = y2 &. y7 in
+  let t11 = t10 ^. t7 in
+  let t12 = y9 &. y11 in
+  let t13 = y14 &. y17 in
+  let t14 = t13 ^. t12 in
+  let t15 = y8 &. y10 in
+  let t16 = t15 ^. t12 in
+  let t17 = t4 ^. y20 in
+  let t18 = t6 ^. t16 in
+  let t19 = t9 ^. t14 in
+  let t20 = t11 ^. t16 in
+  let t21 = t17 ^. t14 in
+  let t22 = t18 ^. y19 in
+  let t23 = t19 ^. y21 in
+  let t24 = t20 ^. y18 in
+  let t25 = t21 ^. t22 in
+  let t26 = t21 &. t23 in
+  let t27 = t24 ^. t26 in
+  let t28 = t25 &. t27 in
+  let t29 = t28 ^. t22 in
+  let t30 = t23 ^. t24 in
+  let t31 = t22 ^. t26 in
+  let t32 = t31 &. t30 in
+  let t33 = t32 ^. t24 in
+  let t34 = t23 ^. t33 in
+  let t35 = t27 ^. t33 in
+  let t36 = t24 &. t35 in
+  let t37 = t36 ^. t34 in
+  let t38 = t27 ^. t36 in
+  let t39 = t29 &. t38 in
+  let t40 = t25 ^. t39 in
+  let t41 = t40 ^. t37 in
+  let t42 = t29 ^. t33 in
+  let t43 = t29 ^. t40 in
+  let t44 = t33 ^. t37 in
+  let t45 = t42 ^. t41 in
+  let z0 = t44 &. y15 in
+  let z1 = t37 &. y6 in
+  let z2 = t33 &. u7 in
+  let z3 = t43 &. y16 in
+  let z4 = t40 &. y1 in
+  let z5 = t29 &. y7 in
+  let z6 = t42 &. y11 in
+  let z7 = t45 &. y17 in
+  let z8 = t41 &. y10 in
+  let z9 = t44 &. y12 in
+  let z10 = t37 &. y3 in
+  let z11 = t33 &. y4 in
+  let z12 = t43 &. y13 in
+  let z13 = t40 &. y5 in
+  let z14 = t29 &. y2 in
+  let z15 = t42 &. y9 in
+  let z16 = t45 &. y14 in
+  let z17 = t41 &. y8 in
+
+  let t46 = z15 ^. z16 in
+  let t47 = z10 ^. z11 in
+  let t48 = z5 ^. z13 in
+  let t49 = z9 ^. z10 in
+  let t50 = z2 ^. z12 in
+  let t51 = z2 ^. z5 in
+  let t52 = z7 ^. z8 in
+  let t53 = z0 ^. z3 in
+  let t54 = z6 ^. z7 in
+  let t55 = z16 ^. z17 in
+  let t56 = z12 ^. t48 in
+  let t57 = t50 ^. t53 in
+  let t58 = z4 ^. t46 in
+  let t59 = z3 ^. t54 in
+  let t60 = t46 ^. t57 in
+  let t61 = z14 ^. t57 in
+  let t62 = t52 ^. t58 in
+  let t63 = t49 ^. t58 in
+  let t64 = z4 ^. t59 in
+  let t65 = t61 ^. t62 in
+  let t66 = z1 ^. t63 in
+  let s0 = t59 ^. t63 in
+  let s6 = t56 ^. lognot t62 in
+  let s7 = t48 ^. lognot t60 in
+  let t67 = t64 ^. t65 in
+  let s3 = t53 ^. t66 in
+  let s4 = t51 ^. t66 in
+  let s5 = t47 ^. t65 in
+  let s1 = t64 ^. lognot s3 in
+  let s2 = t55 ^. lognot t67 in
+  (s7,s6,s5,s4,s3,s2,s1,s0)
 
 
 inline_for_extraction

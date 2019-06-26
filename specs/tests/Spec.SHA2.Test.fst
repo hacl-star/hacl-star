@@ -8,7 +8,8 @@ open Lib.RawIntTypes
 open Lib.Sequence
 open Lib.ByteSequence
 
-module Spec = Spec.SHA2
+module H = Spec.Hash
+module Def = Spec.Hash.Definitions
 
 //
 // Test 1
@@ -238,17 +239,41 @@ let test5_expected224 = List.Tot.map u8_from_UInt8 [
 
 let test () =
 
+  IO.print_string "\nTEST 0 : SHA2_256(00000...) \n";
+  let test0 = create 64 (u8 0x80) in
+  let init0 = H.init Def.SHA2_256 in
+  let update0 = H.update Def.SHA2_256 init0 test0 in
+  IO.print_string "\ninit 0\n";
+  List.iter (fun a -> IO.print_string (UInt32.to_string (u32_to_UInt32 a));
+	           IO.print_string ":") (to_list init0);
+  IO.print_string "\nupdate 0\n";
+  List.iter (fun a -> IO.print_string (UInt32.to_string (u32_to_UInt32 a));
+	           IO.print_string ":") (to_list update0);
+  let ws0_ = Def.words_of_bytes Def.SHA2_256 #16 test0 in 
+  IO.print_string "\nws0_\n";
+  List.iter (fun a -> IO.print_string (UInt32.to_string (u32_to_UInt32 a));
+	           IO.print_string ":") (to_list ws0_);
+  IO.print_string "\nws 0\n";
+  let ws0 = createi 16 (fun i -> Spec.SHA2.ws Def.SHA2_256 ws0_ i) in
+  List.iter (fun a -> IO.print_string (UInt32.to_string (u32_to_UInt32 a));
+	           IO.print_string ":") (to_list ws0);
+  IO.print_string "\nws 1\n";
+  let ws1 = createi 16 (fun i -> Spec.SHA2.ws Def.SHA2_256 ws0_ (i+16)) in
+  List.iter (fun a -> IO.print_string (UInt32.to_string (u32_to_UInt32 a));
+	           IO.print_string ":") (to_list ws1);
+
   IO.print_string "\nTEST 1\n";
+
   let test1_plaintext_len : size_t = 3 in
   let test1_plaintext : lbytes test1_plaintext_len = of_list test1_plaintext in
   let test1_expected224 : lbytes 28 = of_list test1_expected224 in
   let test1_expected256 : lbytes 32 = of_list test1_expected256 in
   let test1_expected384 : lbytes 48 = of_list test1_expected384 in
   let test1_expected512 : lbytes 64 = of_list test1_expected512 in
-  let test1_result224 : lbytes 28 = Spec.hash Spec.SHA2_224 test1_plaintext in
-  let test1_result256 : lbytes 32 = Spec.hash Spec.SHA2_256 test1_plaintext in
-  let test1_result384 : lbytes 48 = Spec.hash Spec.SHA2_384 test1_plaintext in
-  let test1_result512 : lbytes 64 = Spec.hash Spec.SHA2_512 test1_plaintext in
+  let test1_result224 : lbytes 28 = H.hash Def.SHA2_224 test1_plaintext in
+  let test1_result256 : lbytes 32 = H.hash Def.SHA2_256 test1_plaintext in
+  let test1_result384 : lbytes 48 = H.hash Def.SHA2_384 test1_plaintext in
+  let test1_result512 : lbytes 64 = H.hash Def.SHA2_512 test1_plaintext in
   let result1_224 = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) test1_expected224 test1_result224 in
   let result1_256 = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) test1_expected256 test1_result256 in
   let result1_384 = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) test1_expected384 test1_result384 in
@@ -282,10 +307,10 @@ let test () =
   let test2_expected256 : lbytes 32 = of_list test2_expected256 in
   let test2_expected384 : lbytes 48 = of_list test2_expected384 in
   let test2_expected512 : lbytes 64 = of_list test2_expected512 in
-  let test2_result224 : lbytes 28 = Spec.hash Spec.SHA2_224 test2_plaintext in
-  let test2_result256 : lbytes 32 = Spec.hash Spec.SHA2_256 test2_plaintext in
-  let test2_result384 : lbytes 48 = Spec.hash Spec.SHA2_384 test2_plaintext in
-  let test2_result512 : lbytes 64 = Spec.hash Spec.SHA2_512 test2_plaintext in
+  let test2_result224 : lbytes 28 = H.hash Def.SHA2_224 test2_plaintext in
+  let test2_result256 : lbytes 32 = H.hash Def.SHA2_256 test2_plaintext in
+  let test2_result384 : lbytes 48 = H.hash Def.SHA2_384 test2_plaintext in
+  let test2_result512 : lbytes 64 = H.hash Def.SHA2_512 test2_plaintext in
   let result2_224 = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) test2_expected224 test2_result224 in
   let result2_256 = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) test2_expected256 test2_result256 in
   let result2_384 = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) test2_expected384 test2_result384 in
@@ -320,10 +345,10 @@ let test () =
   let test3_expected256 : lbytes 32 = of_list test3_expected256 in
   let test3_expected384 : lbytes 48 = of_list test3_expected384 in
   let test3_expected512 : lbytes 64 = of_list test3_expected512 in
-  let test3_result224 : lbytes 28 = Spec.hash Spec.SHA2_224 test3_plaintext in
-  let test3_result256 : lbytes 32 = Spec.hash Spec.SHA2_256 test3_plaintext in
-  let test3_result384 : lbytes 48 = Spec.hash Spec.SHA2_384 test3_plaintext in
-  let test3_result512 : lbytes 64 = Spec.hash Spec.SHA2_512 test3_plaintext in
+  let test3_result224 : lbytes 28 = H.hash Def.SHA2_224 test3_plaintext in
+  let test3_result256 : lbytes 32 = H.hash Def.SHA2_256 test3_plaintext in
+  let test3_result384 : lbytes 48 = H.hash Def.SHA2_384 test3_plaintext in
+  let test3_result512 : lbytes 64 = H.hash Def.SHA2_512 test3_plaintext in
   let result3_224 = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) test3_expected224 test3_result224 in
   let result3_256 = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) test3_expected256 test3_result256 in
   let result3_384 = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) test3_expected384 test3_result384 in
@@ -357,10 +382,10 @@ let test () =
   let test4_expected256 : lbytes 32 = of_list test4_expected256 in
   let test4_expected384 : lbytes 48 = of_list test4_expected384 in
   let test4_expected512 : lbytes 64 = of_list test4_expected512 in
-  let test4_result224 : lbytes 28 = Spec.hash Spec.SHA2_224 test4_plaintext in
-  let test4_result256 : lbytes 32 = Spec.hash Spec.SHA2_256 test4_plaintext in
-  let test4_result384 : lbytes 48 = Spec.hash Spec.SHA2_384 test4_plaintext in
-  let test4_result512 : lbytes 64 = Spec.hash Spec.SHA2_512 test4_plaintext in
+  let test4_result224 : lbytes 28 = H.hash Def.SHA2_224 test4_plaintext in
+  let test4_result256 : lbytes 32 = H.hash Def.SHA2_256 test4_plaintext in
+  let test4_result384 : lbytes 48 = H.hash Def.SHA2_384 test4_plaintext in
+  let test4_result512 : lbytes 64 = H.hash Def.SHA2_512 test4_plaintext in
   let result4_224 = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) test4_expected224 test4_result224 in
   let result4_256 = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) test4_expected256 test4_result256 in
   let result4_384 = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) test4_expected384 test4_result384 in

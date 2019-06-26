@@ -1,17 +1,15 @@
 module Hacl.Impl.Poly1305
 
-module ST = FStar.HyperStack.ST
 open FStar.HyperStack
 open FStar.HyperStack.All
 open FStar.Mul
 
 open Lib.IntTypes
 open Lib.Buffer
-open Lib.ByteBuffer
 
 open Hacl.Impl.Poly1305.Fields
-module S = Hacl.Spec.Poly1305.Vec
-module F32xN = Hacl.Impl.Poly1305.Field32xN
+module Vec = Hacl.Spec.Poly1305.Vec
+module Scalar = Spec.Poly1305
 
 #reset-options "--z3rlimit 50"
 
@@ -19,16 +17,16 @@ inline_for_extraction noextract
 let poly1305_ctx (s:field_spec) = lbuffer (limb s) (nlimb s +. precomplen s)
 
 noextract
-val as_get_acc: #s:field_spec -> h:mem -> ctx:poly1305_ctx s -> GTot S.pfelem
+val as_get_acc: #s:field_spec -> h:mem -> ctx:poly1305_ctx s -> GTot Scalar.felem
 noextract
-val as_get_r: #s:field_spec -> h:mem -> ctx:poly1305_ctx s -> GTot S.pfelem
+val as_get_r: #s:field_spec -> h:mem -> ctx:poly1305_ctx s -> GTot Scalar.felem
 noextract
 val state_inv_t: #s:field_spec -> h:mem -> ctx:poly1305_ctx s -> Type0
 
 // If the ctx is not modified, all the components and invariants are preserved
 val reveal_ctx_inv: #s:field_spec -> ctx:poly1305_ctx s -> h0:mem -> h1:mem ->
   Lemma
-    (requires Seq.equal (as_seq h0 ctx) (as_seq h1 ctx) /\ state_inv_t h0 ctx)
+    (requires as_seq h0 ctx == as_seq h1 ctx /\ state_inv_t h0 ctx)
     (ensures
       as_get_r h0 ctx == as_get_r h1 ctx /\
       as_get_acc h0 ctx == as_get_acc h1 ctx /\
@@ -36,7 +34,7 @@ val reveal_ctx_inv: #s:field_spec -> ctx:poly1305_ctx s -> h0:mem -> h1:mem ->
     )
 
 inline_for_extraction noextract
-let poly1305_init_st (s: field_spec) =
+let poly1305_init_st (s:field_spec) =
     ctx:poly1305_ctx s
   -> key:lbuffer uint8 32ul
   -> Stack unit
@@ -45,13 +43,31 @@ let poly1305_init_st (s: field_spec) =
     (ensures  fun h0 _ h1 ->
       modifies (loc ctx) h0 h1 /\
       state_inv_t #s h1 ctx /\
-      (as_get_acc h1 ctx, as_get_r h1 ctx) == S.poly1305_init (as_seq h0 key))
+      (as_get_acc h1 ctx, as_get_r h1 ctx) == Scalar.poly1305_init (as_seq h0 key))
 
 inline_for_extraction noextract
 val poly1305_init: #s:field_spec -> poly1305_init_st s
 
 inline_for_extraction noextract
-let poly1305_update_st (s: field_spec) =
+let poly1305_update1_st (s:field_spec) =
+    ctx:poly1305_ctx s
+  -> b:lbuffer uint8 16ul
+  -> Stack unit
+    (requires fun h ->
+      live h ctx /\ live h b /\ disjoint b ctx /\
+      state_inv_t #s h ctx)
+    (ensures  fun h0 _ h1 ->
+      modifies (loc ctx) h0 h1 /\
+      state_inv_t #s h1 ctx /\
+      as_get_r h0 ctx == as_get_r h1 ctx /\
+      as_get_acc h1 ctx ==
+      Scalar.poly1305_update1 (as_get_r h0 ctx) 16 (as_seq h0 b) (as_get_acc h0 ctx))
+
+inline_for_extraction noextract
+val poly1305_update1: (#s:field_spec) -> poly1305_update1_st s
+
+inline_for_extraction noextract
+let poly1305_update_st (s:field_spec) =
     ctx:poly1305_ctx s
   -> len:size_t
   -> text:lbuffer uint8 len
@@ -64,13 +80,13 @@ let poly1305_update_st (s: field_spec) =
       state_inv_t #s h1 ctx /\
       as_get_r h0 ctx == as_get_r h1 ctx /\
       as_get_acc h1 ctx ==
-      S.poly_update #(width s) (as_seq h0 text) (as_get_acc h0 ctx) (as_get_r h0 ctx))
+      Vec.poly1305_update #(width s) (as_seq h0 text) (as_get_acc h0 ctx) (as_get_r h0 ctx))
 
 inline_for_extraction noextract
 val poly1305_update: #s:field_spec -> poly1305_update_st s
 
 inline_for_extraction noextract
-let poly1305_finish_st (s: field_spec) =
+let poly1305_finish_st (s:field_spec) =
     tag:lbuffer uint8 16ul
   -> key:lbuffer uint8 32ul
   -> ctx:poly1305_ctx s
@@ -81,13 +97,13 @@ let poly1305_finish_st (s: field_spec) =
       state_inv_t #s h ctx)
     (ensures  fun h0 _ h1 ->
       modifies (loc tag |+| loc ctx) h0 h1 /\
-      as_seq h1 tag == S.finish (as_seq h0 key) (as_get_acc h0 ctx))
+      as_seq h1 tag == Scalar.poly1305_finish (as_seq h0 key) (as_get_acc h0 ctx))
 
 inline_for_extraction noextract
 val poly1305_finish: #s:field_spec -> poly1305_finish_st s
 
 inline_for_extraction noextract
-let poly1305_mac_st (s: field_spec) =
+let poly1305_mac_st (s:field_spec) =
     tag:lbuffer uint8 16ul
   -> len:size_t
   -> text:lbuffer uint8 len
@@ -98,7 +114,7 @@ let poly1305_mac_st (s: field_spec) =
       disjoint tag text /\ disjoint tag key)
     (ensures  fun h0 _ h1 ->
       modifies (loc tag) h0 h1 /\
-      as_seq h1 tag == S.poly1305 #(width s) (as_seq h0 text) (as_seq h0 key))
+      as_seq h1 tag == Vec.poly1305_mac #(width s) (as_seq h0 text) (as_seq h0 key))
 
 inline_for_extraction noextract
 val mk_poly1305_mac: #s:field_spec ->

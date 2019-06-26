@@ -15,13 +15,14 @@ all: aes128-ni.exe aes128-bitslice.exe
 verify: test
 
 #CC=/usr/local/Cellar/llvm/7.0.0/bin/clang-7
-CC=gcc
+CC?=gcc
 
 AES_BS_FILES= $(HACL_HOME)/lib/Lib.IntTypes.fst \
 	$(HACL_HOME)/lib/Lib.RawIntTypes.fst \
 	$(HACL_HOME)/lib/Lib.Buffer.fst \
 	$(HACL_HOME)/lib/Lib.ByteBuffer.fst \
 	$(HACL_HOME)/lib/Lib.Loops.fst \
+	Hacl.Spec.AES_128.BitSlice.fst \
 	Hacl.Impl.AES.CoreBitSlice.fst \
 	Hacl.Impl.AES.Core.fst \
 	Hacl.Impl.AES.Generic.fst \
@@ -32,6 +33,7 @@ AES_256_BS_FILES= $(HACL_HOME)/lib/Lib.IntTypes.fst \
 	$(HACL_HOME)/lib/Lib.Buffer.fst \
 	$(HACL_HOME)/lib/Lib.ByteBuffer.fst \
 	$(HACL_HOME)/lib/Lib.Loops.fst \
+	Hacl.Spec.AES_128.BitSlice.fst \
 	Hacl.Impl.AES.CoreBitSlice.fst \
 	Hacl.Impl.AES.Core.fst \
 	Hacl.Impl.AES.Generic.fst  \
@@ -68,7 +70,7 @@ aes128-bitslice-c/Hacl_AES_128_BitSlice.c: aes128-bitslice-c/out.krml
 	 $(KREMLIN) $(KREMLIN_ARGS) -tmpdir aes128-bitslice-c $^ -skip-compilation \
 	   -minimal -add-include '"kremlib.h"' -bundle 'Hacl.AES_128.BitSlice=*'
 
-aes128-bitslice.exe: aes128-bitslice-c/Hacl_AES_128_BitSlice.c aes128-bitslice-test.c
+aes128-bitslice.exe: $(AES_BS_FILES) aes128-bitslice-c/Hacl_AES_128_BitSlice.c aes128-bitslice-test.c
 	$(CC) -march=native -mtune=native -O3 -I $(KREMLIN_HOME)/kremlib/dist/generic -I $(KREMLIN_HOME)/include -I . aes128-bitslice-c/Hacl_AES_128_BitSlice.c $(KREMLIN_HOME)/kremlib/dist/generic/testlib.o aes128-bitslice-test.c -o aes128-bitslice.exe
 	./aes128-bitslice.exe
 

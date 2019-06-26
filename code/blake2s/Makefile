@@ -69,9 +69,8 @@ KREMLIN=$(KREMLIN_HOME)/krml
 
 # We use -drop (deprecated) only to avoid creating unnecessary .c,.h files
 $(GENERATED_DIR)/Makefile.include: $(ALL_KRML_FILES) | .depend
-	$(KREMLIN) $(KREMLIN_TESTLIB) -skip-compilation \
+	$(KREMLIN) -skip-compilation \
 	-no-prefix 'Hacl.Test.Blake2s' \
-	-no-prefix 'Hacl.Impl.Blake2s' \
 	-no-prefix 'Hacl.Blake2s' \
 	-bundle 'Lib.*' \
 	-bundle 'Spec.*' \

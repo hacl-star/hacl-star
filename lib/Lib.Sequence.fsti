@@ -3,7 +3,7 @@ module Lib.Sequence
 open FStar.Mul
 open Lib.IntTypes
 
-#set-options "--z3rlimit 15"
+#set-options "--z3rlimit 20"
 
 /// Variable length Sequences, derived from FStar.Seq
 
@@ -59,6 +59,7 @@ val concat:
   Tot (s2:lseq a (len0 + len1){to_seq s2 == Seq.append (to_seq s0) (to_seq s1)})
 
 let ( @| ) #a #len0 #len1 s0 s1 = concat #a #len0 #len1 s0 s1
+
 
 (** Conversion of a Sequence to a list *)
 val to_list:
@@ -351,6 +352,10 @@ val map_blocks_multi:
   -> f:(i:nat{i < max} -> lseq a blocksize -> lseq a blocksize) ->
   Tot (out:seq a {length out == n * blocksize})
 
+private
+let div_mul_lt (a:nat) (n:nat) (b:pos) : Lemma (requires a < n * b) (ensures a / b < n)
+ = ()
+
 val index_map_blocks_multi:
     #a:Type0
   -> bs:size_nat{bs > 0}
@@ -360,11 +365,10 @@ val index_map_blocks_multi:
   -> f:(i:nat{i < max} -> lseq a bs -> lseq a bs)
   -> i:nat{i < n * bs}
   -> Lemma (
-    let s1 = map_blocks_multi #a bs max n inp f in
-    FStar.Math.Lemmas.cancel_mul_div n bs;
-    let j: j:nat{j < max} = i / bs in
-    let s2 = f j (Seq.slice inp (j*bs) ((j+1)*bs)) in
-    Seq.index s1 i == Seq.index s2 (i % bs))
+    div_mul_lt i n bs;
+    let j = i / bs in
+    let block = Seq.slice inp (j * bs) ((j + 1) * bs) in
+    Seq.index (map_blocks_multi bs max n inp f) i == Seq.index (f j block) (i % bs))
 
 val map_blocks:
     #a:Type0
@@ -374,8 +378,9 @@ val map_blocks:
   -> g:(i:nat{i == length inp / blocksize} -> len:size_nat{len < blocksize} -> s:lseq a len -> lseq a len) ->
   Tot (out:seq a {length out == length inp})
 
-#set-options "--z3rlimit 100"
+#reset-options "--z3rlimit 200 --max_fuel 0 --max_ifuel 0"
 
+// This declaration verifies fine without the calc statements when verifying the interface, // file, but they help when rechecking this declaration when verifying the implementation
 val index_map_blocks:
     #a:Type0
   -> bs:size_nat{bs > 0}
@@ -385,22 +390,39 @@ val index_map_blocks:
   -> i:nat{i < length inp}
   -> Lemma (
     let len = length inp in
-    let nb = len / bs in
+    let nb  = len / bs in
     let rem = len % bs in
-    let blocks = Seq.slice inp 0 (nb * bs) in
-    let last = Seq.slice inp (nb * bs) len in
-
-    let s1 = map_blocks #a bs inp f g in
-    if i < nb * bs then begin
-      FStar.Math.Lemmas.cancel_mul_div nb bs;
-      let j: j:nat{j < nb} = i / bs in
-      let s2 = f j (Seq.slice inp (j*bs) ((j+1)*bs)) in
-      Seq.index s1 i == Seq.index s2 (i % bs) end
-    else begin
-      let s2 : lseq a rem = g nb rem last in
+    if i < nb * bs then 
+      begin
+      div_mul_lt i nb bs;
+      let j = i / bs in
+      let block = Seq.slice inp (j * bs) ((j + 1) * bs) in
+      calc (==) {
+	length block;
+	== { Seq.lemma_len_slice inp (j * bs) ((j+1) * bs) }
+	(j + 1) * bs - j * bs;
+	== {}
+	bs * (j + 1) - bs * j;
+	== { Math.Lemmas.lemma_mul_sub_distr bs (j + 1) j }
+	bs;
+      };
+      Seq.index (map_blocks bs inp f g) i == Seq.index (f j block) (i % bs) 
+      end
+    else 
+      begin
+      let last = Seq.slice inp (nb * bs) len in
+      calc (==) {
+          length last;
+          == { Seq.lemma_len_slice inp (nb * bs) len }
+          len - nb * bs;
+          == {FStar.Math.Lemmas.modulo_lemma (len - nb * bs) bs;
+              FStar.Math.Lemmas.lemma_mod_sub len bs nb}
+          rem;
+      };
       FStar.Math.Lemmas.modulo_lemma (i - nb * bs) bs;
       FStar.Math.Lemmas.lemma_mod_sub i bs nb;
-      Seq.index s1 i == Seq.index s2 (i % bs) end)
+      Seq.index (map_blocks bs inp f g) i == Seq.index (g nb rem last) (i % bs) 
+      end)
 
 val eq_generate_blocks0:
     #t:Type0

@@ -11,16 +11,15 @@ OUT_DIR	      = chacha20poly1305-c
 
 all: test
 
-
-hack.exe:
-	$(CC) -O3 -march=native -mtune=native -funroll-loops -I $(KREMLIN_HOME)/include -I $(KREMLIN_HOME)/kremlib -I $(KREMLIN_HOME)/kremlib/dist/generic -I $(HACL_HOME)/lib -I chacha20poly1305-c -Wall -Wextra -Werror -Wno-parentheses -Wno-unused-parameter -Wno-unused-variable -Wno-incompatible-pointer-types -o chacha20poly1305-c/test.exe chacha20poly1305-c/Hacl_Chacha20Poly1305.c chacha20poly1305-test.c $(HACL_HOME)/lib/c/Lib_PrintBuffer.c -L /opt/kremlin/kremlib/dist/generic -lkremlib
-
 test:
 	rm -f .depend && $(MAKE) .depend
 	$(MAKE) stage1
 	STAGE=2 $(MAKE) stage2
 
-stage1: $(GENERATED_DIR)/Makefile.include
+stage1: $(GENERATED_DIR)/Hacl_Chacha20Poly1305_32.c \
+	$(GENERATED_DIR)/Hacl_Chacha20Poly1305_128.c \
+	$(GENERATED_DIR)/Hacl_Chacha20Poly1305_256.c
+
 
 stage2: $(OUT_DIR)/test.exe
 	$(OUT_DIR)/test.exe
@@ -42,7 +41,7 @@ FSTAR = $(FSTAR_HOME)/bin/fstar.exe $(FSTAR_FLAGS)
 
 ENABLE_HINTS = --use_hints --use_hint_hashes --record_hints --query_stats
 
-ROOTS = Hacl.Chacha20Poly1305.fst
+ROOTS = Hacl.Chacha20Poly1305_32.fst Hacl.Chacha20Poly1305_128.fst Hacl.Chacha20Poly1305_256.fst
 
 .PRECIOUS: %.krml
 
@@ -74,18 +73,41 @@ KREMLIN=$(KREMLIN_HOME)/krml
 # 2. Generation of .c files
 
 # We use -drop (deprecated) only to avoid creating unnecessary .c,.h files
-$(GENERATED_DIR)/Makefile.include: $(ALL_KRML_FILES) | .depend
+$(GENERATED_DIR)/Hacl_Chacha20Poly1305_32.c: $(ALL_KRML_FILES) | .depend
 	$(KREMLIN) $(KREMLIN_TESTLIB) -skip-compilation \
 	-no-prefix 'Hacl.Impl.Chacha20Poly1305' \
-	-no-prefix 'Hacl.Chacha20Poly1305' \
 	-bundle 'Lib.*' \
 	-bundle 'Spec.*' \
-	-bundle 'C=C.Endianness' \
-	-bundle 'Hacl.Chacha20Poly1305=Hacl.Impl.*,Hacl.Chacha20Poly1305' \
-	-library 'C,FStar' \
-	-drop 'C,FStar,LowStar,Spec,Prims,Lib,C.Loops.*,Hacl.Spec.*,Hacl.Poly1305.Field32xN.Lemmas' \
+	-bundle 'Hacl.Chacha20Poly1305_32=Hacl.Impl.*' \
+	-drop 'C,FStar,LowStar,Spec,Prims,Lib,C.Loops.*,C.*,Hacl.Spec.*,Hacl.Poly1305.Field32xN.Lemmas,Hacl.Chacha20Poly1305_128,Hacl.Chacha20Poly1305_256' \
 	-add-include '"c/Lib_PrintBuffer.h"' \
 	-add-include '"FStar_UInt_8_16_32_64.h"' \
+	-tmpdir $(GENERATED_DIR) \
+	$^
+
+$(GENERATED_DIR)/Hacl_Chacha20Poly1305_128.c: $(ALL_KRML_FILES) | .depend
+	$(KREMLIN) $(KREMLIN_TESTLIB) -skip-compilation \
+	-no-prefix 'Hacl.Impl.Chacha20Poly1305' \
+	-bundle 'Lib.*' \
+	-bundle 'Spec.*' \
+	-bundle 'Hacl.Chacha20Poly1305_128=Hacl.Impl.*' \
+	-drop 'C,FStar,LowStar,Spec,Prims,Lib,C.Loops.*,C.*,Hacl.Spec.*,Hacl.Poly1305.Field32xN.Lemmas,Hacl.Chacha20Poly1305_32,Hacl.Chacha20Poly1305_256' \
+	-add-include '"c/Lib_PrintBuffer.h"' \
+	-add-include '"FStar_UInt_8_16_32_64.h"' \
+	-add-include '"vec-intrin.h"' \
+	-tmpdir $(GENERATED_DIR) \
+	$^
+
+$(GENERATED_DIR)/Hacl_Chacha20Poly1305_256.c: $(ALL_KRML_FILES) | .depend
+	$(KREMLIN) $(KREMLIN_TESTLIB) -skip-compilation \
+	-no-prefix 'Hacl.Impl.Chacha20Poly1305' \
+	-bundle 'Lib.*' \
+	-bundle 'Spec.*' \
+	-bundle 'Hacl.Chacha20Poly1305_256=Hacl.Impl.*' \
+	-drop 'C,FStar,LowStar,Spec,Prims,Lib,C.Loops.*,C.*,Hacl.Spec.*,Hacl.Poly1305.Field32xN.Lemmas,Hacl.Chacha20Poly1305_32,Hacl.Chacha20Poly1305_128' \
+	-add-include '"c/Lib_PrintBuffer.h"' \
+	-add-include '"FStar_UInt_8_16_32_64.h"' \
+	-add-include '"vec-intrin.h"' \
 	-tmpdir $(GENERATED_DIR) \
 	$^
 
@@ -97,7 +119,7 @@ ifeq ($(STAGE),2)
 
 # The top-level invocation guarantees that stage1 has been run and this file is
 # there.
-include $(GENERATED_DIR)/Makefile.include
+#include $(GENERATED_DIR)/Makefile.include
 
 # 3. Collecting all of our source files, and generating corresponding object
 # files.
@@ -109,13 +131,15 @@ include $(GENERATED_DIR)/Makefile.include
 # KreMLin sees the fsti's for the various Lib* and LowStar modules and creates .h/.c
 # files for them in $(GENERATED_DIR). However, we are only interested in the header,
 # and drop these (mostly empty) C files.
-ALL_OUR_FILES 	    = $(filter-out FStar_* Lib.c LowStar.c C.c, $(ALL_C_FILES))
-ALL_GENERATED_FILES = $(addprefix $(GENERATED_DIR)/,$(ALL_OUR_FILES))
+#ALL_OUR_FILES 	    = $(filter-out FStar_* Lib.c LowStar.c C.c, $(ALL_C_FILES))
+#ALL_GENERATED_FILES = $(addprefix $(GENERATED_DIR)/,$(ALL_OUR_FILES))
 
 ALL_SOURCES = \
-  $(ALL_GENERATED_FILES) \
-  chacha20poly1305-test.c \
-  $(HACL_HOME)/lib/c/Lib_PrintBuffer.c
+	$(GENERATED_DIR)/Hacl_Chacha20Poly1305_32.c \
+	$(GENERATED_DIR)/Hacl_Chacha20Poly1305_128.c \
+	$(GENERATED_DIR)/Hacl_Chacha20Poly1305_256.c \
+	chacha20poly1305-test.c \
+	$(HACL_HOME)/lib/c/Lib_PrintBuffer.c
 
 ALL_OBJS = $(patsubst %.c,%.o,$(ALL_SOURCES))
 
@@ -123,13 +147,14 @@ INCLUDE_DIRS = \
   $(KREMLIN_HOME)/include \
   $(KREMLIN_HOME)/kremlib \
   $(KREMLIN_HOME)/kremlib/dist/generic \
-  $(HACL_HOME)/lib
+  $(HACL_HOME)/lib \
+  $(HACL_HOME)/lib/c
 
 # TODO: remove -Wno-incompatible-pointer-types when issue with --cmi is fixed
 CFLAGS += -O3 -march=native -mtune=native -funroll-loops
-CFLAGS += $(addprefix -I ,$(INCLUDE_DIRS)) -Wall -Wextra -Werror \
-  -Wno-parentheses -Wno-unused-parameter -Wno-unused-variable \
-  -Wno-incompatible-pointer-types
+CFLAGS += $(addprefix -I ,$(INCLUDE_DIRS))
+
+#-Wall -Wextra -Werror \ -Wno-parentheses -Wno-unused-parameter -Wno-unused-variable \ -Wno-incompatible-pointer-types
 
 # GNU Make manual section 4.14
 %.d: %.c

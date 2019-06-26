@@ -11,7 +11,7 @@ open Lib.Buffer
 open Lib.ByteBuffer
 open Lib.IntVector
 
-module S = Hacl.Spec.Poly1305.Vec
+module Vec = Hacl.Spec.Poly1305.Vec
 module LSeq = Lib.Sequence
 module BSeq = Lib.ByteSequence
 module F32xN = Hacl.Impl.Poly1305.Field32xN
@@ -101,20 +101,12 @@ let fas_nat #s h e =
   | M256 -> fas_nat #4 h e
 
 noextract
-val feval: #s:field_spec -> h:mem -> e:felem s -> GTot (LSeq.lseq S.pfelem (width s))
+val feval: #s:field_spec -> h:mem -> e:felem s -> GTot (LSeq.lseq Vec.pfelem (width s))
 let feval #s h e =
   match s with
   | M32  -> feval #1 h e
   | M128 -> feval #2 h e
   | M256 -> feval #4 h e
-
-noextract
-val limb_v: #s:field_spec -> x:limb s -> GTot (LSeq.lseq nat (width s))
-let limb_v #s x =
-  match s with
-  | M32  -> F32xN.uint64xN_v #1 x
-  | M128 -> F32xN.uint64xN_v #2 x
-  | M256 -> F32xN.uint64xN_v #4 x
 
 val lemma_feval_is_fas_nat: #s:field_spec -> h:mem -> f:felem s ->
   Lemma
@@ -167,7 +159,7 @@ val load_felems_le:
       modifies (loc f) h0 h1 /\
       felem_fits h1 f (1, 1, 1, 1, 1) /\
       felem_less #(width s) h1 f (pow2 128) /\
-      feval h1 f == S.load_elem #(width s) (as_seq h0 b))
+      feval h1 f == Vec.load_elem #(width s) (as_seq h0 b))
 let load_felems_le #s f b =
   match s with
   | M32  -> F32xN.load_felems_le #1 f b
@@ -186,7 +178,7 @@ val load_acc:
     (ensures  fun h0 _ h1 ->
       modifies (loc acc) h0 h1 /\
       felem_fits h1 acc (2, 3, 2, 2, 2) /\
-      feval h1 acc == S.load_acc #(width s) (feval h0 acc).[0] (as_seq h0 b))
+      feval h1 acc == Vec.load_acc #(width s) (feval h0 acc).[0] (as_seq h0 b))
 let load_acc #s acc b =
   match s with
   | M32 -> load_acc1 acc b
@@ -209,7 +201,7 @@ val set_bit:
       modifies (loc f) h0 h1 /\
       felem_fits h1 f (1, 1, 1, 1, 1) /\
      (Math.Lemmas.pow2_le_compat 128 (v i);
-      feval h1 f == LSeq.map (S.pfadd (pow2 (v i))) (feval h0 f)))
+      feval h1 f == LSeq.map (Vec.pfadd (pow2 (v i))) (feval h0 f)))
 let set_bit #s f i =
   match s with
   | M32  -> F32xN.set_bit #1 f i
@@ -228,7 +220,7 @@ val set_bit128:
     (ensures  fun h0 _ h1 ->
       modifies (loc f) h0 h1 /\
       felem_fits h1 f (1, 1, 1, 1, 1) /\
-      feval h1 f == LSeq.map (S.pfadd (pow2 128)) (feval h0 f))
+      feval h1 f == LSeq.map (Vec.pfadd (pow2 128)) (feval h0 f))
 let set_bit128 #s f =
   match s with
   | M32  -> F32xN.set_bit128 #1 f
@@ -323,7 +315,7 @@ val fadd_mul_r:
       modifies (loc out) h0 h1 /\
       acc_inv_t #(width s) (as_tup5 h1 out) /\
       feval h1 out ==
-        S.fmul (S.fadd (feval h0 out) (feval h0 f1)) (feval h0 (gsub precomp 0ul 5ul)))
+        Vec.fmul (Vec.fadd (feval h0 out) (feval h0 f1)) (feval h0 (gsub precomp 0ul 5ul)))
 let fadd_mul_r #s out f1 precomp =
   match s with
   | M32  -> F32xN.fadd_mul_r #1 out f1 precomp
@@ -348,7 +340,7 @@ val fmul_rn:
     (ensures fun h0 _ h1 ->
       modifies (loc out) h0 h1 /\
       acc_inv_t #(width s) (as_tup5 h1 out) /\
-      feval h1 out == S.fmul (feval h0 f1) (feval h0 (gsub precomp 10ul 5ul)))
+      feval h1 out == Vec.fmul (feval h0 f1) (feval h0 (gsub precomp 10ul 5ul)))
 let fmul_rn #s out f1 precomp =
   match s with
   | M32  -> F32xN.fmul_rn #1 out f1 precomp
@@ -369,7 +361,7 @@ val fmul_rn_normalize:
       modifies (loc out) h0 h1 /\
       acc_inv_t #(width s) (as_tup5 h1 out) /\
       (feval h1 out).[0] ==
-        S.normalize_n #(width s) (feval h0 out) (feval h0 (gsub precomp 0ul 5ul)).[0])
+        Vec.normalize_n #(width s) (feval h0 out) (feval h0 (gsub precomp 0ul 5ul)).[0])
 let fmul_rn_normalize #s out precomp =
   match s with
   | M32  -> F32xN.fmul_rn_normalize #1 out precomp
@@ -390,7 +382,7 @@ val fadd:
     (ensures fun h0 _ h1 ->
       modifies (loc out) h0 h1 /\
       felem_fits h1 out (2,3,2,2,2) /\
-      feval h1 out == S.fadd (feval h0 f1) (feval h0 f2))
+      feval h1 out == Vec.fadd (feval h0 f1) (feval h0 f2))
 let fadd #s out f1 f2 =
   match s with
   | M32  -> F32xN.fadd #1 out f1 f2
@@ -398,65 +390,51 @@ let fadd #s out f1 f2 =
   | M256 -> F32xN.fadd #4 out f1 f2
 
 inline_for_extraction noextract
-val felem_to_limbs:
+val uints64_from_felem_le:
     #s:field_spec
   -> f:felem s
-  -> Stack (limb s & limb s)
+  -> Stack (uint64 & uint64)
     (requires fun h ->
       live h f /\ felem_fits h f (1, 1, 1, 1, 1))
     (ensures  fun h0 (lo, hi) h1 -> h0 == h1 /\
-      (limb_v hi).[0] * pow2 64 + (limb_v lo).[0] == (fas_nat h0 f).[0] % pow2 128)
-let felem_to_limbs #s f =
+      v hi * pow2 64 + v lo == (fas_nat h0 f).[0] % pow2 128)
+let uints64_from_felem_le #s f =
   match s with
-  | M32  -> F32xN.store_felem #1 f
-  | M128 -> F32xN.store_felem #2 f
-  | M256 -> F32xN.store_felem #4 f
+  | M32  -> F32xN.uints64_from_felem_le #1 f
+  | M128 -> F32xN.uints64_from_felem_le #2 f
+  | M256 -> F32xN.uints64_from_felem_le #4 f
 
 inline_for_extraction noextract
-val bytes_to_limbs:
-    #s:field_spec
-  -> b:lbuffer uint8 16ul
-  -> Stack (limb s & limb s)
+val uints64_from_bytes_le:
+    b:lbuffer uint8 16ul
+  -> Stack (uint64 & uint64)
     (requires fun h -> live h b)
     (ensures  fun h0 (lo, hi) h1 -> h0 == h1 /\
-      (limb_v hi).[0] * pow2 64 + (limb_v lo).[0] == BSeq.nat_from_bytes_le (as_seq h0 b))
-let bytes_to_limbs #s b =
-  match s with
-  | M32  -> F32xN.bytes_to_limbs #1 b
-  | M128 -> F32xN.bytes_to_limbs #2 b
-  | M256 -> F32xN.bytes_to_limbs #4 b
+      v hi * pow2 64 + v lo == BSeq.nat_from_bytes_le (as_seq h0 b))
+let uints64_from_bytes_le b =
+  F32xN.uints64_from_bytes_le b
 
 inline_for_extraction noextract
-val mod_add128:
-    #s:field_spec
-  -> a:(limb s & limb s)
-  -> b:(limb s & limb s)
-  -> Pure (limb s & limb s)
-    (requires True)
-    (ensures (fun (r0, r1) ->
-      let (a0, a1) = a in
-      let (b0, b1) = b in
-      (limb_v r1).[0] * pow2 64 + (limb_v r0).[0] ==
-	(((limb_v a1).[0] + (limb_v b1).[0]) * pow2 64 + (limb_v a0).[0] + (limb_v b0).[0]) % pow2 128))
-let mod_add128 #s a b =
-  match s with
-  | M32  -> F32xN.mod_add128 #1 a b
-  | M128 -> F32xN.mod_add128 #2 a b
-  | M256 -> F32xN.mod_add128 #4 a b
-
-inline_for_extraction noextract
-val store_felem_le:
-    #s:field_spec
-  -> b:lbuffer uint8 16ul
-  -> lo:limb s
-  -> hi:limb s
+val uints64_to_bytes_le:
+    b:lbuffer uint8 16ul
+  -> lo:uint64
+  -> hi:uint64
   -> Stack unit
     (requires fun h -> live h b)
     (ensures  fun h0 _ h1 ->
       modifies (loc b) h0 h1 /\
-      as_seq h1 b == BSeq.nat_to_bytes_le 16 ((limb_v hi).[0] * pow2 64 + (limb_v lo).[0]))
-let store_felem_le #s b lo hi =
-  match s with
-  | M32  -> F32xN.store_felem_le #1 b lo hi
-  | M128 -> F32xN.store_felem_le #2 b lo hi
-  | M256 -> F32xN.store_felem_le #4 b lo hi
+      as_seq h1 b == BSeq.nat_to_bytes_le 16 (v hi * pow2 64 + v lo))
+let uints64_to_bytes_le b lo hi =
+  F32xN.uints64_to_bytes_le b lo hi
+
+inline_for_extraction noextract
+val mod_add128:
+    a:(uint64 & uint64)
+  -> b:(uint64 & uint64)
+  -> Pure (uint64 & uint64)
+    (requires True)
+    (ensures (fun (r0, r1) ->
+      let (a0, a1) = a in let (b0, b1) = b in
+      v r1 * pow2 64 + v r0 == ((v a1 + v b1) * pow2 64 + v a0 + v b0) % pow2 128))
+let mod_add128 a b =
+  F32xN.mod_add128 a b

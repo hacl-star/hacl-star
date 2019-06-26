@@ -25,7 +25,7 @@ let v' (#a: D.sha2_alg) (x:D.word a) = match a with
   | D.SHA2_224 | D.SHA2_256 -> uint_v #U32 #SEC x
   | D.SHA2_384 | D.SHA2_512 -> uint_v #U64 #SEC x
 
-let lanes = n:flen{n == 1 \/ n == 4 \/ n == 8}
+let lanes = n:flen{n == 1 \/ n == 2 \/  n == 4 \/ n == 8}
 //let wordxN (w:lanes) (a:D.sha2_alg) = vec_t (D.word_t a) w
 let wordxN (w:lanes) (a:D.sha2_alg) = fseq (D.word a) w
 
@@ -61,45 +61,45 @@ let op384_512: ops = {
   e3 = 19ul; e4 = 61ul; e5 =  6ul
 }
 
-inline_for_extraction
+inline_for_extraction noextract
 let op0: a:D.sha2_alg -> Tot ops = function
   | D.SHA2_224 -> op224_256
   | D.SHA2_256 -> op224_256
   | D.SHA2_384 -> op384_512
   | D.SHA2_512 -> op384_512
 
-inline_for_extraction
+inline_for_extraction noextract
 let ( +| ) (#w:lanes) (#a:D.sha2_alg): wordxN w a -> wordxN w a -> wordxN w a =
   match a with
   | D.SHA2_224 | D.SHA2_256 -> ( +| ) #U32 #SEC #w
   | D.SHA2_384 | D.SHA2_512 -> ( +| ) #U64 #SEC #w
 
-inline_for_extraction
+inline_for_extraction noextract
 let ( ^| ) (#w:lanes) (#a:D.sha2_alg): wordxN w a -> wordxN w a -> wordxN w a =
   match a with
   | D.SHA2_224 | D.SHA2_256 -> ( ^| ) #U32 #SEC #w
   | D.SHA2_384 | D.SHA2_512 -> ( ^| ) #U64 #SEC #w
 
 
-inline_for_extraction
+inline_for_extraction noextract
 let ( &| ) (#w:lanes) (#a:D.sha2_alg): wordxN w a -> wordxN w a -> wordxN w a =
   match a with
   | D.SHA2_224 | D.SHA2_256 -> ( &| ) #U32 #SEC #w
   | D.SHA2_384 | D.SHA2_512 -> ( &| ) #U64 #SEC #w
 
-inline_for_extraction
+inline_for_extraction noextract
 let ( ~| ) (#w:lanes) (#a:D.sha2_alg): wordxN w a  -> wordxN w a =
   match a with
   | D.SHA2_224 | D.SHA2_256 -> ( ~| ) #U32 #SEC #w
   | D.SHA2_384 | D.SHA2_512 -> ( ~| ) #U64 #SEC #w
 
-inline_for_extraction
+inline_for_extraction noextract
 let ( >>>| ) (#w:lanes) (#a:D.sha2_alg): wordxN w a -> rotval (D.word_t a) -> wordxN w a =
   match a with
   | D.SHA2_224 | D.SHA2_256 -> ( >>>| ) #U32 #SEC #w
   | D.SHA2_384 | D.SHA2_512 -> ( >>>| ) #U64 #SEC #w
 
-inline_for_extraction
+inline_for_extraction noextract
 let ( >>| ) (#w:lanes) (#a:D.sha2_alg): wordxN w a -> shiftval (D.word_t a) ->  wordxN w a =
   match a with
   | D.SHA2_224 | D.SHA2_256 -> ( >>| ) #U32 #SEC #w
@@ -265,24 +265,37 @@ let store_hash_inner (#w:lanes) (#a:D.sha2_alg) (h:fseq (fseq (D.word a) (D.stat
 		     (i:nat{i < w}) (p:unit): unit & lbytes (D.word_length a * D.state_word_length a) =
     (), fseq_to_bytes_be h.[i]
 
+#set-options "--z3rlimit 50"
+
 let store_hash (#w:lanes) (#a:D.sha2_alg) (h:state_w w a) : lbytes (w * D.word_length a * D.state_word_length a) =
     let th = createi w (fun i -> createi (D.state_word_length a) (fun j -> h.[j].[i])) in
     let p,s = Lib.Sequence.generate_blocks (D.word_length a * D.state_word_length a) w w store_hash_a
-	      (store_hash_inner #w #a h) () in
-    s // NEED TO TRANSPOSE
-
-(*
-let store_hash (#w:lanes) (#a:D.sha2_alg) (h:state_w w a) : lbytes (8 * w * D.word_length a) =
-
-    let thb = map (fun b -> fseq_to_bytes_be b) th in
-    let s = repeati w (fun i h -> Lib.Sequence.concat h @| thb.[i])  in
-    s // (DONE?) NEED TO TRANSPOSE
-*)
+	      (store_hash_inner #w #a th) () in
+    s
 
 let finish (#w:lanes) (#a:D.sha2_alg) (h:state_w w a) : fseq (hash a) w =
-    let hb = store_hash h in
-    createi w (fun i -> Lib.Sequence.sub hb (i * w * D.word_length a) (D.hash_length a))
+    let hb: lbytes (w * D.word_length a * D.state_word_length a) = store_hash #w #a h in
+    assert_norm (D.hash_word_length a <= D.state_word_length a);
+    assert_norm (D.hash_length a <= D.word_length a * D.state_word_length a);
+    createi w (fun i ->
+      let sb: lbytes (D.word_length a * D.state_word_length a) = Lib.Sequence.sub hb (i * D.word_length a * D.state_word_length a) (D.word_length a * D.state_word_length a) in
+      let h: hash a = Lib.Sequence.sub sb 0 (D.hash_length a) in
+      h)
 
+let hashn (#w:lanes) (a:D.sha2_alg) (len:nat{len < D.max_input_length a}) (inputs:fseq (b:bytes{Lib.Sequence.length b = len}) w) : fseq (hash a) w =
+  let nblocks = len / D.block_length a in
+  let rest : nat = len % (D.block_length a) in
+  let st : state_w w a = init w a in
+  let st = repeati nblocks
+	   (fun i st ->
+	     let blocks = map #(b:bytes{Lib.Sequence.length b = len}) #(block a) #w (fun x -> Seq.slice x (i * D.block_length a) ((i+1) * D.block_length a)) inputs in
+	     compress #w #a blocks st) st in
+  let lasts = map  #(b:bytes{Lib.Sequence.length b = len}) #(lbytes rest) #w (fun x -> Seq.slice x (nblocks * D.block_length a) len) inputs in
+  let st = compress_last #w #a nblocks rest lasts st in
+  finish #w st
+
+(*
+let hash1 (a:D.sha2_alg) (input:bytes{Lib.Sequence.length input < D.max_input_length a}) : hash a = hashn #1 a (Lib.Sequence.length input) input
 let hash1 (a:D.sha2_alg) (input:bytes{Lib.Sequence.length input < D.max_input_length a}) : hash a =
   let nblocks = Lib.Sequence.length input / D.block_length a in
   let st = Lib.Sequence.repeat_blocks (D.block_length a) input
@@ -291,5 +304,19 @@ let hash1 (a:D.sha2_alg) (input:bytes{Lib.Sequence.length input < D.max_input_le
 	   (init 1 a) in
   (finish #1 st <: hash a)
 
-
-
+let hash2 (a:D.sha2_alg) (input1:bytes{Lib.Sequence.length input1 < D.max_input_length a})
+			 (input2:bytes{Lib.Sequence.length input1 = Lib.Sequence.length input2}) : (hash a & hash a) =
+  let nblocks = Lib.Sequence.length input1 / (D.block_length a) in
+  let rest : nat = Lib.Sequence.length input1 % (D.block_length a) in
+  let st : state_w 2 a = init 2 a in
+  let st = repeati nblocks
+	   (fun i st ->
+	     let bl1 = Seq.slice input1 (i * D.block_length a) ((i+1)* D.block_length a) in
+	     let bl2 = Seq.slice input2 (i * D.block_length a) ((i+1)* D.block_length a) in
+	     compress #2 #a (bl1,bl2) st) st in
+  let last1 = Seq.slice input1 (nblocks * D.block_length a) (Lib.Sequence.length input1) in
+  let last2 = Seq.slice input2 (nblocks * D.block_length a) (Lib.Sequence.length input2) in
+  let st = compress_last #2 #a nblocks rest (last1,last2) st in
+  let (h1,h2) = finish #2 st in
+  (h1,h2)
+*)
