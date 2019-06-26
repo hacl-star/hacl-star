@@ -39,7 +39,7 @@ let unchanged_except (exceptions:locations) (s1 s2:machine_state) :
     except [locs] unchanged. *)
 let only_affects (locs:locations) (f:st unit) : GTot Type0 =
   forall s. {:pattern unchanged_except locs s (run f s)} (
-    unchanged_except locs s (run f s)
+    (run f s).ms_ok ==> unchanged_except locs s (run f s)
   )
 
 (** [unchanged_at locs s1 s2] means the the value of any location in

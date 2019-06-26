@@ -856,8 +856,12 @@ let lemma_both_not_ok (f1 f2:st unit) (rw1 rw2:rw_set) (s:machine_state) :
     (ensures (
         (run2 f1 f2 s).ms_ok =
         (run2 f2 f1 s).ms_ok)) =
-  lemma_disjoint_implies_unchanged_at rw1.loc_reads rw2.loc_writes s (run f2 s);
-  lemma_disjoint_implies_unchanged_at rw2.loc_reads rw1.loc_writes s (run f1 s)
+  if (run f1 s).ms_ok then (
+    lemma_disjoint_implies_unchanged_at rw2.loc_reads rw1.loc_writes s (run f1 s)
+  ) else ();
+  if (run f2 s).ms_ok then (
+    lemma_disjoint_implies_unchanged_at rw1.loc_reads rw2.loc_writes s (run f2 s)
+  ) else ()
 
 let lemma_constant_on_execution_stays_constant (f1 f2:st unit) (rw1 rw2:rw_set) (s s1 s2:machine_state) :
   Lemma
@@ -1233,7 +1237,7 @@ let lemma_bounded_effects_on_functional_extensionality (rw:rw_set) (f1 f2:st uni
 
 let lemma_only_affects_to_unchanged_except locs f s : (* REVIEW: Why is this even needed?! *)
   Lemma
-    (requires (only_affects locs f))
+    (requires (only_affects locs f /\ (run f s).ms_ok))
     (ensures (unchanged_except locs s (run f s))) = ()
 
 let lemma_equiv_code_codes (c:code) (cs:codes) (fuel:nat) (s:machine_state) :
@@ -1271,11 +1275,14 @@ let lemma_bounded_effects_code_codes_aux1 (c:code) (cs:codes) (rw:rw_set) (fuel:
         let open Vale.X64.Machine_Semantics_s in
         let f1 = wrap_sos (machine_eval_code c fuel) in
         let f2 = wrap_sos (machine_eval_codes cs fuel) in
+        let f12 = wrap_sos (machine_eval_codes (c :: cs) fuel) in
         (bounded_effects rw (f1 ;; f2)) /\
-        !!(disjoint_location_from_locations a rw.loc_writes)))
+        !!(disjoint_location_from_locations a rw.loc_writes) /\
+        (run f12 s).ms_ok))
     (ensures (
         let f12 = wrap_sos (machine_eval_codes (c :: cs) fuel) in
         eval_location a s == eval_location a (run f12 s))) =
+  admit ();
   let open Vale.X64.Machine_Semantics_s in
   let f1 = wrap_sos (machine_eval_code c fuel) in
   let f2 = wrap_sos (machine_eval_codes cs fuel) in
