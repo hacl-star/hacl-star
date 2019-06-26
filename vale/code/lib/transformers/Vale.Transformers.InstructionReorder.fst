@@ -1483,8 +1483,17 @@ let lemma_code_exchange_allowed (c1 c2:safely_bounded_code) (fuel:nat) (s:machin
 
    Note that we don't require any other properties from [eq_ins]. It
    is an uninterpreted function that simply gives us a "hint" to find
-   equivalent instructions! *)
-assume val eq_ins (i1 i2:ins) : bool
+   equivalent instructions!
+
+   Temporarily, for testing purposes, we have it set to an
+   [irreducible] function that looks at the printed representation of
+   the instructions. Since it is irreducible, no other function should
+   be able to "look into" the definition of this function, but instead
+   should be limited only to its signature. However, the OCaml
+   extraction _should_ be able to peek inside, and be able to proceed. *)
+irreducible
+let eq_ins (i1 i2:ins) : bool =
+  print_ins i1 gcc = print_ins i2 gcc
 
 let rec eq_code (c1 c2:code) : bool =
   match c1, c2 with
