@@ -1408,7 +1408,12 @@ let rec lemma_bounded_code (c:safely_bounded_code) (fuel:nat) :
     (ensures (bounded_effects (rw_set_of_code c) (wrap_sos (machine_eval_code c fuel))))
     (decreases %[c]) =
   match c with
-  | Ins i -> admit ()
+  | Ins i ->
+    lemma_machine_eval_code_Ins_bounded_effects i fuel;
+    lemma_bounded_effects_on_functional_extensionality
+      (rw_set_of_ins i)
+      (fun s -> (), (Some?.v (machine_eval_code (Ins i) fuel s)))
+      (wrap_sos (machine_eval_code c fuel))
   | Block l ->
     lemma_bounded_codes l fuel;
     lemma_bounded_effects_on_functional_extensionality
