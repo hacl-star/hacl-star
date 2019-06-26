@@ -801,9 +801,8 @@ let rw_set_in_parallel rw1 rw2 =
 
 (* See fsti *)
 let rw_set_in_series rw1 rw2 =
-  (* TODO: Make this more precise. Currently we are toooo restrictive. *)
   {
-    loc_reads = rw1.loc_reads `L.append` rw2.loc_reads;
+    loc_reads = rw1.loc_reads `L.append` (difference rw2.loc_reads rw1.loc_writes);
     loc_writes = rw1.loc_writes `L.append` rw2.loc_writes;
     loc_constant_writes = rw1.loc_constant_writes `intersect` rw2.loc_constant_writes;
   }
