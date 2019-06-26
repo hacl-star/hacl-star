@@ -1120,6 +1120,61 @@ let lemma_bounded_effects_series_aux3 rw1 rw2 f1 f2 s1 s2 :
     lemma_unchanged_at_difference_elim rw2.loc_reads rw1.loc_writes s1_1 s2_1
   ) else ()
 
+let rec lemma_unchanged_at_extend_append (l1 l2:locations) (s1 s2 s1' s2':machine_state):
+  Lemma
+    (requires (
+        (unchanged_at l1 s1 s2) /\
+        (unchanged_except l2 s1 s1') /\
+        (unchanged_except l2 s2 s2') /\
+        (unchanged_at l2 s1' s2')))
+    (ensures (
+        (unchanged_at (l1 `L.append` l2) s1' s2'))) =
+  match l1 with
+  | [] -> ()
+  | x :: xs ->
+    if L.mem x l2 then (
+      lemma_unchanged_at_mem l2 x s1' s2'
+    ) else (
+      lemma_unchanged_except_not_mem l2 x
+    );
+    lemma_unchanged_at_extend_append xs l2 s1 s2 s1' s2'
+
+let lemma_bounded_effects_series_aux4 rw1 rw2 f1 f2 s1 s2 :
+  Lemma
+    (requires (
+        let open Vale.X64.Machine_Semantics_s in
+        let rw = rw_set_in_series rw1 rw2 in
+        (bounded_effects rw1 f1) /\
+        (bounded_effects rw2 f2) /\
+        (s1.ms_ok = s2.ms_ok) /\
+        (run (f1;;f2) s1).ms_ok /\
+        (run (f1;;f2) s2).ms_ok /\
+        (unchanged_at rw.loc_reads s1 s2)))
+    (ensures (
+        let open Vale.X64.Machine_Semantics_s in
+        let f = f1;;f2 in
+        let rw = rw_set_in_series rw1 rw2 in
+        (unchanged_at rw.loc_writes (run f s1) (run f s2)))) =
+  let open Vale.X64.Machine_Semantics_s in
+  let rw = rw_set_in_series rw1 rw2 in
+  let f = (f1;;f2) in
+  let s1_1, s2_1 = run f1 s1, run f1 s2 in
+  let s1_1_2, s2_1_2 = run f2 s1_1, run f2 s2_1 in
+  lemma_unchanged_at_append rw1.loc_reads (rw2.loc_reads `difference` rw1.loc_writes) s1 s2;
+  assert (s1_1.ms_ok /\ s2_1.ms_ok);
+  assert (s1_1_2.ms_ok /\ s2_1_2.ms_ok);
+  assert (unchanged_except rw1.loc_writes s1 s1_1);
+  assert (unchanged_except rw1.loc_writes s2 s2_1);
+  assert (unchanged_at (rw2.loc_reads `difference` rw1.loc_writes) s1 s2);
+  lemma_difference_disjoint rw2.loc_reads rw1.loc_writes;
+  lemma_unchanged_at_except_disjoint (rw2.loc_reads `difference` rw1.loc_writes) rw1.loc_writes s1 s2 s1_1 s2_1;
+  lemma_unchanged_at_difference_elim rw2.loc_reads rw1.loc_writes s1_1 s2_1;
+  assert (unchanged_at rw1.loc_writes s1_1 s2_1);
+  assert (unchanged_except rw2.loc_writes s1_1 s1_1_2);
+  assert (unchanged_except rw2.loc_writes s2_1 s2_1_2);
+  assert (unchanged_at rw2.loc_writes s1_1_2 s2_1_2);
+  lemma_unchanged_at_extend_append rw1.loc_writes rw2.loc_writes s1_1 s2_1 s1_1_2 s2_1_2
+
 (* See fsti *)
 let lemma_bounded_effects_series rw1 rw2 f1 f2 =
   let open Vale.X64.Machine_Semantics_s in
@@ -1139,25 +1194,5 @@ let lemma_bounded_effects_series rw1 rw2 f1 f2 =
   FStar.Classical.forall_intro_2 aux;
   let aux s1 = FStar.Classical.move_requires (lemma_bounded_effects_series_aux3 rw1 rw2 f1 f2 s1) in
   FStar.Classical.forall_intro_2 aux;
-
-  let aux s1 s2 :
-    Lemma
-      (requires ((s1.ms_ok = s2.ms_ok) /\
-                 (run (f1;;f2) s1).ms_ok /\
-                 (run (f1;;f2) s2).ms_ok /\
-                 unchanged_at rw.loc_reads s1 s2))
-      (ensures (
-          (unchanged_at rw.loc_writes (run (f1;;f2) s1) (run (f1;;f2) s2)))) =
-    admit ()
-  in
-  let aux s1 = FStar.Classical.move_requires (aux s1) in
-  FStar.Classical.forall_intro_2 aux;
-  assert (
-    forall s1 s2. (
-      (s1.ms_ok = s2.ms_ok /\ unchanged_at rw.loc_reads s1 s2) ==> (
-        ((run (f1;;f2) s1).ms_ok = (run (f1;;f2) s2).ms_ok) /\
-        ((run (f1;;f2) s1).ms_ok ==>
-         unchanged_at rw.loc_writes (run (f1;;f2) s1) (run (f1;;f2) s2))
-      )
-    )
-  )
+  let aux s1 = FStar.Classical.move_requires (lemma_bounded_effects_series_aux4 rw1 rw2 f1 f2 s1) in
+  FStar.Classical.forall_intro_2 aux
