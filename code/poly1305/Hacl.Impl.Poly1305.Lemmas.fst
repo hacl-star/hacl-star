@@ -104,12 +104,14 @@ let uints_to_bytes_le_lemma128_2 r =
   // ibid.
   admit ()
 
+#push-options "--initial_fuel 1 --max_fuel 1 --max_ifuel 0"
 val lemma_nat_from_bytes_le_zeroes: len:size_nat -> b:lseq uint8 len -> Lemma
   (requires (forall (i:nat). i < len ==> b.[i] == u8 0))
   (ensures  nat_from_intseq_le_ b == 0)
 let rec lemma_nat_from_bytes_le_zeroes len b =
   if len = 0 then ()
   else lemma_nat_from_bytes_le_zeroes (len-1) (Seq.slice b 1 len)
+#pop-options
 
 val nat_from_bytes_le_eq_lemma_: len:size_nat{len < 16} -> b:lseq uint8 len -> Lemma
  (let tmp = create 16 (u8 0) in

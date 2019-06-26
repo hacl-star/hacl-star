@@ -583,6 +583,7 @@ let lemma_sha256_msg2 (src1 src2:quad32) (t:counter) (block:block_w) : Lemma
 #reset-options "--z3rlimit 20 --max_fuel 1"
 let lemma_quads_to_block qs
   =
+  FStar.Pervasives.reveal_opaque (`%seq_four_to_seq_LE) (seq_four_to_seq_LE #nat32);
   FStar.Pervasives.reveal_opaque (`%ws) ws
 #reset-options "--max_fuel 0 --max_ifuel 0"
 
@@ -717,7 +718,7 @@ let update_multi_one (h:hash256) (b:bytes_blocks {length b = block_length}) : Le
 
 #pop-options
 
-#reset-options "--max_fuel 1 --max_ifuel 0 --z3cliopt smt.arith.nl=true"
+#reset-options "--z3rlimit 50 --max_fuel 1 --max_ifuel 0 --z3cliopt smt.arith.nl=true"
 let lemma_be_to_n_4 (s:seq4 nat8) : Lemma
   (FStar.Kremlin.Endianness.be_to_n (seq_nat8_to_seq_uint8 s) == be_bytes_to_nat32 s)
   =
@@ -744,7 +745,7 @@ let lemma_be_to_n_4 (s:seq4 nat8) : Lemma
     index s 3 + pow2 8 * index s 2 + pow2 16 * index s 1 + pow2 24 * index s 0;
     == {}
     four_to_nat_unfold 8 (seq_to_four_BE s);
-    == {}
+    == {FStar.Pervasives.reveal_opaque (`%four_to_nat) four_to_nat}
     be_bytes_to_nat32 s;
   }
 #reset-options "--max_fuel 0 --max_ifuel 0"
@@ -778,7 +779,7 @@ let lemma_endian_relation (quads qs:seq quad32) (input2:seq UInt8.t) : Lemma
       seq_nat8_to_seq_uint8 (slice (seq_four_to_seq_LE (seq_map (nat_to_four 8) (seq_four_to_seq_LE quads))) (4 * i) (4 * i + 4));
       == {slice_commutes_seq_four_to_seq_LE (seq_map (nat_to_four 8) (seq_four_to_seq_LE quads)) i (i + 1)}
       seq_nat8_to_seq_uint8 (seq_four_to_seq_LE (slice (seq_map (nat_to_four 8) (seq_four_to_seq_LE quads)) i (i + 1)));
-      equal {}
+      equal {FStar.Pervasives.reveal_opaque (`%seq_four_to_seq_LE) (seq_four_to_seq_LE #nat8)}
       seq_nat8_to_seq_uint8 (four_to_seq_LE (nat_to_four 8 (seq_four_to_seq_LE quads).[i]));
     };
     calc (==) {
@@ -801,7 +802,7 @@ let lemma_endian_relation (quads qs:seq quad32) (input2:seq UInt8.t) : Lemma
       nat32_to_word (reverse_bytes_nat32 ni);
       == {}
       nat32_to_word (reverse_bytes_nat32 (seq_four_to_seq_LE quads).[i]);
-      == {}
+      == {FStar.Pervasives.reveal_opaque (`%seq_four_to_seq_LE) (seq_four_to_seq_LE #nat32)}
       nat32_to_word (seq_four_to_seq_LE qs).[i];
       == {}
       (quads_to_block qs).[i];
@@ -1005,6 +1006,7 @@ let lemma_le_bytes_to_hash_quads (s:seq quad32) : Lemma
             rhs.[7] == to_uint32 (s.[1]).hi3 /\
             length rhs == 8))
   =
+  FStar.Pervasives.reveal_opaque (`%seq_four_to_seq_LE) (seq_four_to_seq_LE #nat32);
   let rhs = le_bytes_to_hash (le_seq_quad32_to_bytes s) in
   lemma_le_bytes_to_hash_quads_part1 s;
   assert (rhs == Vale.Lib.Seqs_s.seq_map nat32_to_word (Vale.Def.Words.Seq_s.seq_four_to_seq_LE s));

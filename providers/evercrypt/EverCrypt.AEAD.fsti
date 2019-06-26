@@ -155,7 +155,7 @@ let create_in_st (a: alg) =
 *)
 val create_in: #a:alg -> create_in_st a
 
-let iv_p a = iv:B.buffer UInt8.t { B.length iv = iv_length a }
+let iv_p a = iv:B.buffer UInt8.t { iv_length (B.length iv) a }
 let ad_p a = ad:B.buffer UInt8.t { B.length ad <= max_length a }
 let plain_p a = p:B.buffer UInt8.t { B.length p <= max_length a }
 let cipher_p a = p:B.buffer UInt8.t { B.length p + tag_length a <= max_length a }
@@ -164,6 +164,7 @@ inline_for_extraction noextract
 let encrypt_st (a: supported_alg) =
   s:B.pointer_or_null (state_s a) ->
   iv:iv_p a ->
+  iv_len: UInt32.t { v iv_len = B.length iv /\ v iv_len > 0 } ->
   ad:ad_p a ->
   ad_len: UInt32.t { v ad_len = B.length ad /\ v ad_len <= pow2 31 } ->
   plain: plain_p a ->
@@ -190,7 +191,9 @@ let encrypt_st (a: supported_alg) =
       match r with
       | Success ->
           not (B.g_is_null s) /\
-          B.(modifies (loc_union (loc_buffer cipher) (loc_buffer tag)) h0 h1) /\
+        B.(modifies (loc_union (footprint h1 s) (loc_union (loc_buffer cipher) (loc_buffer tag))) h0 h1) /\
+        invariant h1 s /\
+        footprint h0 s == footprint h1 s /\
           S.equal (S.append (B.as_seq h1 cipher) (B.as_seq h1 tag))
             (encrypt #a (as_kv (B.deref h0 s)) (B.as_seq h0 iv) (B.as_seq h0 ad) (B.as_seq h0 plain))
       | InvalidKey ->
@@ -210,6 +213,7 @@ inline_for_extraction noextract
 let decrypt_st (a: supported_alg) =
   s:B.pointer_or_null (state_s a) ->
   iv:iv_p a ->
+  iv_len:UInt32.t { v iv_len = B.length iv /\ v iv_len > 0 } ->
   ad:ad_p a ->
   ad_len: UInt32.t { v ad_len = B.length ad /\ v ad_len <= pow2 31 } ->
   cipher: cipher_p a ->
@@ -238,12 +242,16 @@ let decrypt_st (a: supported_alg) =
       | Success ->
           not (B.g_is_null s) /\ (
           let plain = decrypt #a (as_kv (B.deref h0 s)) (B.as_seq h0 iv) (B.as_seq h0 ad) cipher_tag in
-          B.(modifies (loc_buffer dst) h0 h1) /\
+          B.(modifies (loc_union (footprint h1 s) (loc_buffer dst)) h0 h1) /\
+          invariant h1 s /\
+          footprint h0 s == footprint h1 s /\
           Some? plain /\ S.equal (Some?.v plain) (B.as_seq h1 dst))
       | AuthenticationFailure ->
           not (B.g_is_null s) /\ (
           let plain = decrypt #a (as_kv (B.deref h0 s)) (B.as_seq h0 iv) (B.as_seq h0 ad) cipher_tag in
-          B.(modifies (loc_buffer dst) h0 h1) /\
+          B.(modifies (loc_union (footprint h1 s) (loc_buffer dst)) h0 h1) /\
+          invariant h1 s /\
+          footprint h0 s == footprint h1 s /\
           None? plain)
       | _ ->
           False)

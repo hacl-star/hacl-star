@@ -37,6 +37,7 @@ val sha256_update
   )
   (ensures fun h0 _ h1 ->
     B.modifies (B.loc_buffer ctx_b) h0 h1 /\
+    Seq.length (B.as_seq h0 in_b) % block_length == 0 /\
    (reveal_word();
     Seq.equal
       (B.as_seq h1 ctx_b)

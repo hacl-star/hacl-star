@@ -1,5 +1,5 @@
 [
-  "±‚839L`P˜•±G⁄¿æa",
+  "ü\n√\u000f•èÊ+\u0013Lã˙÷Ö\u001a",
   [
     [
       "Vale.AES.X64.AESGCM.aes_reqs_offset",
@@ -8,7 +8,19 @@
       0,
       [ "@query" ],
       0,
-      "bf5486fdca76d03ee9e28684db5e1fcd"
+      "9ec67e59524381bdc1139b0217f85150"
+    ],
+    [
+      "Vale.AES.X64.AESGCM.va_quick_Load_one_lsb",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "fuel_guarded_inversion_FStar.Pervasives.Native.tuple3"
+      ],
+      0,
+      "f3bb1b66c704b640e024d0dbdbf16392"
     ],
     [
       "Vale.AES.X64.AESGCM.va_lemma_AES_GCM_encrypt_6mult",
@@ -17,7 +29,7 @@
       0,
       [ "@query", "equation_Vale.AES.X64.AESGCM.aes_reqs_offset" ],
       0,
-      "c75b40a22efa7e73709e2897aa0860b6"
+      "bf81783731b005d8926c312d64ec1371"
     ],
     [
       "Vale.AES.X64.AESGCM.va_wp_AES_GCM_encrypt_6mult",
@@ -26,7 +38,7 @@
       0,
       [ "@query", "equation_Vale.AES.X64.AESGCM.aes_reqs_offset" ],
       0,
-      "5a6a36f4700439e0e173ba1572b41f9c"
+      "556ef24e20c2c4d110859c2c8e51a7ab"
     ],
     [
       "Vale.AES.X64.AESGCM.va_quick_AES_GCM_encrypt_6mult",
@@ -38,7 +50,7 @@
         "fuel_guarded_inversion_FStar.Pervasives.Native.tuple3"
       ],
       0,
-      "ad49faa8b61cde99b1697915cf782d36"
+      "29721355d717d31ad18e4e0b4e9f5cca"
     ],
     [
       "Vale.AES.X64.AESGCM.va_lemma_AES_GCM_decrypt_6mult",
@@ -47,7 +59,7 @@
       0,
       [ "@query", "equation_Vale.AES.X64.AESGCM.aes_reqs_offset" ],
       0,
-      "569a3de7176b1addeae8ae0ed6c97e6a"
+      "a06a8a37b828f6d29557785b22aedf63"
     ],
     [
       "Vale.AES.X64.AESGCM.va_wp_AES_GCM_decrypt_6mult",
@@ -56,7 +68,7 @@
       0,
       [ "@query", "equation_Vale.AES.X64.AESGCM.aes_reqs_offset" ],
       0,
-      "bcbdd920578eb1119e9cd32db42dc73c"
+      "dc7fd1da29fe6fc685948c1e8535aa0a"
     ],
     [
       "Vale.AES.X64.AESGCM.va_quick_AES_GCM_decrypt_6mult",
@@ -68,7 +80,7 @@
         "fuel_guarded_inversion_FStar.Pervasives.Native.tuple3"
       ],
       0,
-      "9a642b16674713bdf6362b4bb2c5ea92"
+      "1357bbbba0e61f6fd533d4aa84cbb520"
     ]
   ]
 ]

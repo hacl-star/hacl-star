@@ -150,7 +150,9 @@ private let rec serialize_hash_vv_i (ok:bool) (x:hash_vv) (buf:uint8_p) (sz:uint
     let ok, pos = serialize_hash_vec ok vi buf sz pos in
     let h1 = HST.get() in
     let j = i + 1ul in
-    if j < V.size_of x then serialize_hash_vv_i ok x buf sz pos j
+    if j < V.size_of x then begin
+      serialize_hash_vv_i ok x buf sz pos j
+    end
     else (ok, pos)
   end
       

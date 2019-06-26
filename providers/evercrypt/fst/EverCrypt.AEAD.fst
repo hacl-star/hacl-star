@@ -58,16 +58,20 @@ let footprint_s #a (Ek _ _ ek) = B.loc_addr_of_buffer ek
 let invariant_s #a h (Ek i kv ek) =
   is_supported_alg a /\
   B.live h ek /\
-  B.as_seq h ek `S.equal` expand #a (G.reveal kv) /\ (
+  B.length ek >= ekv_length a /\
+  B.as_seq h (B.gsub ek 0ul (UInt32.uint_to_t (ekv_length a))) `S.equal` expand #a (G.reveal kv) /\ (
   match i with
   | Vale_AES128_GCM ->
       a = AES128_GCM /\
-      EverCrypt.TargetConfig.x64 /\ Vale.X64.CPU_Features_s.(aesni_enabled /\ pclmulqdq_enabled /\ avx_enabled)
+      EverCrypt.TargetConfig.x64 /\ Vale.X64.CPU_Features_s.(aesni_enabled /\ pclmulqdq_enabled /\ avx_enabled) /\
+      B.length ek = ekv_length a + 176
   | Vale_AES256_GCM ->
       a = AES256_GCM /\
-      EverCrypt.TargetConfig.x64 /\ Vale.X64.CPU_Features_s.(aesni_enabled /\ pclmulqdq_enabled /\ avx_enabled)
+      EverCrypt.TargetConfig.x64 /\ Vale.X64.CPU_Features_s.(aesni_enabled /\ pclmulqdq_enabled /\ avx_enabled) /\
+      B.length ek = ekv_length a + 176
   | Hacl_CHACHA20_POLY1305 ->
       a = CHACHA20_POLY1305 /\
+      B.length ek = ekv_length a /\
       True)
 
 let invariant_loc_in_footprint #a s m =
@@ -146,7 +150,7 @@ fun r dst k ->
   let has_pclmulqdq = EverCrypt.AutoConfig2.has_pclmulqdq () in
   let has_avx = EverCrypt.AutoConfig2.has_avx() in
   if EverCrypt.TargetConfig.x64 && (has_aesni && has_pclmulqdq && has_avx) then (
-    let ek = B.malloc r 0uy (ekv_len a) in
+    let ek = B.malloc r 0uy (ekv_len a + 176ul) in
     let keys_b = B.sub ek 0ul (key_offset a) in
     let hkeys_b = B.sub ek (key_offset a) 128ul in
     aes_gcm_key_expansion a k keys_b;
@@ -186,7 +190,7 @@ fun r dst k ->
     in lemma_aux_hkeys ();
 
     let h2 = ST.get() in
-    assert (Seq.equal (B.as_seq h2 ek)  (expand #a (G.reveal kv)));
+    assert (Seq.equal (B.as_seq h2 (B.gsub ek 0ul (ekv_len a))) (expand #a (G.reveal kv)));
     B.modifies_only_not_unused_in B.loc_none h0 h2;
     let p = B.malloc r (Ek (impl_of_aes_gcm_alg a) (G.hide (B.as_seq h0 k)) ek) 1ul in
     let open LowStar.BufferOps in
@@ -218,10 +222,15 @@ let aes_gcm_encrypt (a:aes_gcm_alg): Vale.Wrapper.X64.GCMencryptOpt.encrypt_opt_
 #reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq.Properties.slice_slice'"
 inline_for_extraction noextract
 let encrypt_aes_gcm (a: aes_gcm_alg): encrypt_st a =
-fun s iv ad ad_len plain plain_len cipher tag ->
+fun s iv iv_len ad ad_len plain plain_len cipher tag ->
   if B.is_null s then
     InvalidKey
   else
+    // This condition is never satisfied in F* because of the iv_length precondition on iv.
+    // We keep it here to be defensive when extracting to C    
+    if iv_len = 0ul then
+      InvalidIVLength
+    else (
     let open LowStar.BufferOps in
     let Ek i kv ek = !*s in
     assert (
@@ -231,39 +240,16 @@ fun s iv ad ad_len plain plain_len cipher tag ->
       Vale.AES.AES_s.is_aes_key_LE (vale_alg_of_alg a) k_w);
 
     push_frame();
+    let scratch_b = B.sub ek (ekv_len a) 176ul in
+
+    let ek = B.sub ek 0ul (ekv_len a) in
     let keys_b = B.sub ek 0ul (key_offset a) in
     let hkeys_b = B.sub ek (key_offset a) 128ul in
 
     let h0 = get() in
 
-    // The iv is modified by Vale, which the API does not allow. Hence
-    // we allocate a temporary buffer and blit the contents of the iv
+    // The iv can be arbitrary length, hence we need to allocate a new one to perform the hashing
     let tmp_iv = B.alloca 0uy 16ul in
-    let h_pre = get() in
-
-    MB.blit iv 0ul tmp_iv 0ul 12ul;
-
-    let h0 = get() in
-
-    // Some help is needed to prove that the end of the tmp_iv buffer
-    // is still 0s after blitting the contents of iv into the start of the buffer
-    let lemma_iv_eq () : Lemma
-      (let iv_nat = Vale.Def.Words.Seq_s.seq_uint8_to_seq_nat8 (B.as_seq h0 iv) in
-      let iv_nat = Seq.append iv_nat (Seq.create 4 0) in
-      Seq.equal
-        (Vale.Def.Words.Seq_s.seq_uint8_to_seq_nat8 (B.as_seq h0 tmp_iv))
-        iv_nat)
-      = let iv_nat = Vale.Def.Words.Seq_s.seq_uint8_to_seq_nat8 (B.as_seq h0 iv) in
-        let iv_nat = Seq.append iv_nat (Seq.create 4 0) in
-        let s_tmp = Vale.Def.Words.Seq_s.seq_uint8_to_seq_nat8 (B.as_seq h0 tmp_iv) in
-        Seq.lemma_index_slice (B.as_seq h0 tmp_iv) 12 16 0;
-        Seq.lemma_index_slice (B.as_seq h0 tmp_iv) 12 16 1;
-        Seq.lemma_index_slice (B.as_seq h0 tmp_iv) 12 16 2;
-        Seq.lemma_index_slice (B.as_seq h0 tmp_iv) 12 16 3;
-        assert (Seq.equal iv_nat s_tmp)
-
-
-    in lemma_iv_eq ();
 
     // There is no SMTPat on le_bytes_to_seq_quad32_to_bytes and the converse,
     // so we need an explicit lemma
@@ -289,10 +275,22 @@ fun s iv ad ad_len plain plain_len cipher tag ->
 
     in lemma_hkeys_reqs ();
 
+    // We perform the hashing of the iv. The extra buffer and the hashed iv are the same
+    Vale.Wrapper.X64.GCM_IV.compute_iv (vale_alg_of_alg a) 
+    (let k = G.reveal kv in
+      let k_nat = Vale.Def.Words.Seq_s.seq_uint8_to_seq_nat8 k in
+      let k_w = Vale.Def.Words.Seq_s.seq_nat8_to_seq_nat32_LE k_nat in G.hide k_w ) 
+      iv iv_len 
+      tmp_iv tmp_iv 
+      hkeys_b;
+
+    let h0 = get() in
+
     aes_gcm_encrypt a
       (let k = G.reveal kv in
       let k_nat = Vale.Def.Words.Seq_s.seq_uint8_to_seq_nat8 k in
       let k_w = Vale.Def.Words.Seq_s.seq_nat8_to_seq_nat32_LE k_nat in G.hide k_w)
+      (Ghost.hide (Vale.Def.Words.Seq_s.seq_uint8_to_seq_nat8 (B.as_seq h0 iv)))
       plain
       (uint32_to_uint64 plain_len)
       ad
@@ -301,7 +299,8 @@ fun s iv ad ad_len plain plain_len cipher tag ->
       cipher
       tag
       keys_b
-      hkeys_b;
+      hkeys_b
+      scratch_b;
 
     let h1 = get() in
 
@@ -310,10 +309,6 @@ fun s iv ad ad_len plain plain_len cipher tag ->
     assert (
       let kv_nat = Vale.Def.Words.Seq_s.seq_uint8_to_seq_nat8 (G.reveal kv) in
       let iv_nat = Vale.Def.Words.Seq_s.seq_uint8_to_seq_nat8 (B.as_seq h0 iv) in
-      // the specification takes a seq16 for convenience, but actually discards
-      // the trailing four bytes; we are, however, constrained by it and append
-      // zeroes just to satisfy the spec
-      let iv_nat = S.append iv_nat (S.create 4 0) in
       // `ad` is called `auth` in Vale world; "additional data", "authenticated
       // data", potato, potato
       let ad_nat = Vale.Def.Words.Seq_s.seq_uint8_to_seq_nat8 (B.as_seq h0 ad) in
@@ -327,11 +322,12 @@ fun s iv ad ad_len plain plain_len cipher tag ->
 
     pop_frame();
     Success
+    )
 
 let encrypt_aes128_gcm: encrypt_st AES128_GCM = encrypt_aes_gcm AES128_GCM
 let encrypt_aes256_gcm: encrypt_st AES256_GCM = encrypt_aes_gcm AES256_GCM
 
-let encrypt #a s iv ad ad_len plain plain_len cipher tag =
+let encrypt #a s iv iv_len ad ad_len plain plain_len cipher tag =
   if B.is_null s then
     InvalidKey
   else
@@ -339,15 +335,21 @@ let encrypt #a s iv ad ad_len plain plain_len cipher tag =
     let Ek i kv ek = !*s in
     match i with
     | Vale_AES128_GCM ->
-        encrypt_aes128_gcm s iv ad ad_len plain plain_len cipher tag
+        encrypt_aes128_gcm s iv iv_len ad ad_len plain plain_len cipher tag
     | Vale_AES256_GCM ->
-        encrypt_aes256_gcm s iv ad ad_len plain plain_len cipher tag
+        encrypt_aes256_gcm s iv iv_len ad ad_len plain plain_len cipher tag
     | Hacl_CHACHA20_POLY1305 ->
-        // Length restrictions
-        assert_norm (pow2 31 + pow2 32 / 64 <= pow2 32 - 1);
-        Hacl.Impl.Chacha20Poly1305.aead_encrypt_chacha_poly
-          ek iv ad_len ad plain_len plain cipher tag;
-        Success
+        // This condition is never satisfied in F* because of the iv_length precondition on iv.
+        // We keep it here to be defensive when extracting to C    
+        if iv_len <> 12ul then
+          InvalidIVLength
+        else begin
+          // Length restrictions
+          assert_norm (pow2 31 + pow2 32 / 64 <= pow2 32 - 1);
+          Hacl.Impl.Chacha20Poly1305.aead_encrypt_chacha_poly
+            ek iv ad_len ad plain_len plain cipher tag;
+          Success
+        end
 
 inline_for_extraction noextract
 let aes_gcm_decrypt (a:aes_gcm_alg): Vale.Wrapper.X64.GCMdecryptOpt.decrypt_opt_stdcall_st (vale_alg_of_alg a) =
@@ -358,11 +360,15 @@ let aes_gcm_decrypt (a:aes_gcm_alg): Vale.Wrapper.X64.GCMdecryptOpt.decrypt_opt_
 #reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq.Properties.slice_slice'"
 inline_for_extraction noextract
 let decrypt_aes_gcm (a: aes_gcm_alg): decrypt_st a =
-fun s iv ad ad_len cipher cipher_len tag dst ->
+fun s iv iv_len ad ad_len cipher cipher_len tag dst ->
   if B.is_null s then
     InvalidKey
-
   else
+    // This condition is never satisfied in F* because of the iv_length precondition on iv.
+    // We keep it here to be defensive when extracting to C
+    if iv_len = 0ul then
+      InvalidIVLength
+    else (
     let open LowStar.BufferOps in
     let Ek i kv ek = !*s in
       assert (
@@ -372,39 +378,16 @@ fun s iv ad ad_len cipher cipher_len tag dst ->
         Vale.AES.AES_s.is_aes_key_LE (vale_alg_of_alg a) k_w);
 
       push_frame();
+      let scratch_b = B.sub ek (ekv_len a) 176ul in
+
+      let ek = B.sub ek 0ul (ekv_len a) in
       let keys_b = B.sub ek 0ul (key_offset a) in
       let hkeys_b = B.sub ek (key_offset a) 128ul in
 
-      // The iv is modified by Vale, which the API does not allow. Hence
-      // we allocate a temporary buffer and blit the contents of the iv
+      let h0 = get() in
+
+      // The iv can be arbitrary length, hence we need to allocate a new one to perform the hashing
       let tmp_iv = B.alloca 0uy 16ul in
-      let h_pre = get() in
-
-      MB.blit iv 0ul tmp_iv 0ul 12ul;
-
-      let h0 = get() in
-
-      // Some help is needed to prove that the end of the tmp_iv buffer
-      // is still 0s after blitting the contents of iv into the start of the buffer
-      let lemma_iv_eq () : Lemma
-        (let iv_nat = Vale.Def.Words.Seq_s.seq_uint8_to_seq_nat8 (B.as_seq h0 iv) in
-        let iv_nat = Seq.append iv_nat (Seq.create 4 0) in
-        Seq.equal
-          (Vale.Def.Words.Seq_s.seq_uint8_to_seq_nat8 (B.as_seq h0 tmp_iv))
-          iv_nat)
-        = let iv_nat = Vale.Def.Words.Seq_s.seq_uint8_to_seq_nat8 (B.as_seq h0 iv) in
-          let iv_nat = Seq.append iv_nat (Seq.create 4 0) in
-          let s_tmp = Vale.Def.Words.Seq_s.seq_uint8_to_seq_nat8 (B.as_seq h0 tmp_iv) in
-          Seq.lemma_index_slice (B.as_seq h0 tmp_iv) 12 16 0;
-          Seq.lemma_index_slice (B.as_seq h0 tmp_iv) 12 16 1;
-          Seq.lemma_index_slice (B.as_seq h0 tmp_iv) 12 16 2;
-          Seq.lemma_index_slice (B.as_seq h0 tmp_iv) 12 16 3;
-          assert (Seq.equal iv_nat s_tmp)
-
-
-      in lemma_iv_eq ();
-
-      let h0 = get() in
 
       // There is no SMTPat on le_bytes_to_seq_quad32_to_bytes and the converse,
       // so we need an explicit lemma
@@ -415,25 +398,35 @@ fun s iv ad ad_len cipher cipher_len tag dst ->
         Vale.AES.OptPublic.hkeys_reqs_pub
           (Vale.Def.Types_s.le_bytes_to_seq_quad32 (Vale.Def.Words.Seq_s.seq_uint8_to_seq_nat8 (B.as_seq h0 hkeys_b)))
           (Vale.Def.Types_s.reverse_bytes_quad32 (Vale.AES.AES_s.aes_encrypt_LE (vale_alg_of_alg a) k_w (Vale.Def.Words_s.Mkfour 0 0 0 0))))
-        = let k = G.reveal kv in
-          let k_nat = Vale.Def.Words.Seq_s.seq_uint8_to_seq_nat8 k in
-          let k_w = Vale.Def.Words.Seq_s.seq_nat8_to_seq_nat32_LE k_nat in
-          let hkeys_quad = Vale.AES.OptPublic.get_hkeys_reqs (Vale.Def.Types_s.reverse_bytes_quad32 (
+      = let k = G.reveal kv in
+            let k_nat = Vale.Def.Words.Seq_s.seq_uint8_to_seq_nat8 k in
+            let k_w = Vale.Def.Words.Seq_s.seq_nat8_to_seq_nat32_LE k_nat in
+            let hkeys_quad = Vale.AES.OptPublic.get_hkeys_reqs (Vale.Def.Types_s.reverse_bytes_quad32 (
             Vale.AES.AES_s.aes_encrypt_LE (vale_alg_of_alg a) k_w (Vale.Def.Words_s.Mkfour 0 0 0 0))) in
-          let hkeys = Vale.Def.Words.Seq_s.seq_nat8_to_seq_uint8 (Vale.Def.Types_s.le_seq_quad32_to_bytes hkeys_quad) in
-          assert (Seq.equal (B.as_seq h0 hkeys_b) hkeys);
-          calc (==) {
+            let hkeys = Vale.Def.Words.Seq_s.seq_nat8_to_seq_uint8 (Vale.Def.Types_s.le_seq_quad32_to_bytes hkeys_quad) in
+            assert (Seq.equal (B.as_seq h0 hkeys_b) hkeys);
+            calc (==) {
             Vale.Def.Types_s.le_bytes_to_seq_quad32 (Vale.Def.Words.Seq_s.seq_uint8_to_seq_nat8 hkeys);
             (==) { Vale.Arch.Types.le_bytes_to_seq_quad32_to_bytes hkeys_quad }
             hkeys_quad;
-          }
+            }
 
       in lemma_hkeys_reqs ();
+
+      // We perform the hashing of the iv. The extra buffer and the hashed iv are the same
+      Vale.Wrapper.X64.GCM_IV.compute_iv (vale_alg_of_alg a) 
+      (let k = G.reveal kv in
+        let k_nat = Vale.Def.Words.Seq_s.seq_uint8_to_seq_nat8 k in
+        let k_w = Vale.Def.Words.Seq_s.seq_nat8_to_seq_nat32_LE k_nat in G.hide k_w ) 
+        iv iv_len
+        tmp_iv tmp_iv 
+        hkeys_b;
 
       let r = aes_gcm_decrypt a
         (let k = G.reveal kv in
         let k_nat = Vale.Def.Words.Seq_s.seq_uint8_to_seq_nat8 k in
         let k_w = Vale.Def.Words.Seq_s.seq_nat8_to_seq_nat32_LE k_nat in G.hide k_w)
+        (Ghost.hide (Vale.Def.Words.Seq_s.seq_uint8_to_seq_nat8 (B.as_seq h0 iv)))
         cipher
         (uint32_to_uint64 cipher_len)
         ad
@@ -442,7 +435,8 @@ fun s iv ad ad_len cipher cipher_len tag dst ->
         dst
         tag
         keys_b
-        hkeys_b in
+        hkeys_b 
+        scratch_b in
 
       let h1 = get() in
 
@@ -451,10 +445,6 @@ fun s iv ad ad_len cipher cipher_len tag dst ->
       assert (
         let kv_nat = Vale.Def.Words.Seq_s.seq_uint8_to_seq_nat8 (G.reveal kv) in
         let iv_nat = Vale.Def.Words.Seq_s.seq_uint8_to_seq_nat8 (B.as_seq h0 iv) in
-        // the specification takes a seq16 for convenience, but actually discards
-        // the trailing four bytes; we are, however, constrained by it and append
-        // zeroes just to satisfy the spec
-        let iv_nat = S.append iv_nat (S.create 4 0) in
         // `ad` is called `auth` in Vale world; "additional data", "authenticated
         // data", potato, potato
         let ad_nat = Vale.Def.Words.Seq_s.seq_uint8_to_seq_nat8 (B.as_seq h0 ad) in
@@ -479,11 +469,12 @@ fun s iv ad ad_len cipher cipher_len tag dst ->
         Success
       else
         AuthenticationFailure
+      )
 
 let decrypt_aes128_gcm: decrypt_st AES128_GCM = decrypt_aes_gcm AES128_GCM
 let decrypt_aes256_gcm: decrypt_st AES256_GCM = decrypt_aes_gcm AES256_GCM
 
-let decrypt #a s iv ad ad_len cipher cipher_len tag dst =
+let decrypt #a s iv iv_len ad ad_len cipher cipher_len tag dst =
   if B.is_null s then
     InvalidKey
   else
@@ -491,29 +482,35 @@ let decrypt #a s iv ad ad_len cipher cipher_len tag dst =
     let Ek i kv ek = !*s in
     match i with
     | Vale_AES128_GCM ->
-        decrypt_aes128_gcm s iv ad ad_len cipher cipher_len tag dst
+        decrypt_aes128_gcm s iv iv_len ad ad_len cipher cipher_len tag dst
     | Vale_AES256_GCM ->
-        decrypt_aes256_gcm s iv ad ad_len cipher cipher_len tag dst
+        decrypt_aes256_gcm s iv iv_len ad ad_len cipher cipher_len tag dst
     | Hacl_CHACHA20_POLY1305 ->
-        [@ inline_let ] let bound = pow2 32 - 1 - 16 in
-        assert (v cipher_len <= bound);
-        assert_norm (bound + 16 <= pow2 32 - 1);
-        assert_norm (pow2 31 + bound / 64 <= pow2 32 - 1);
+        // This condition is never satisfied in F* because of the iv_length precondition on iv.
+        // We keep it here to be defensive when extracting to C
+        if iv_len <> 12ul then
+          InvalidIVLength
+        else begin
+          [@ inline_let ] let bound = pow2 32 - 1 - 16 in
+          assert (v cipher_len <= bound);
+          assert_norm (bound + 16 <= pow2 32 - 1);
+          assert_norm (pow2 31 + bound / 64 <= pow2 32 - 1);
 
-        let h0 = ST.get () in
-        let r = Hacl.Impl.Chacha20Poly1305.aead_decrypt_chacha_poly
-          ek iv ad_len ad cipher_len dst cipher tag
-        in
-        assert (
-          let cipher_tag = B.as_seq h0 cipher `S.append` B.as_seq h0 tag in
-          let tag_s = S.slice cipher_tag (S.length cipher_tag - tag_length CHACHA20_POLY1305) (S.length cipher_tag) in
-          let cipher_s = S.slice cipher_tag 0 (S.length cipher_tag - tag_length CHACHA20_POLY1305) in
-          S.equal cipher_s (B.as_seq h0 cipher) /\ S.equal tag_s (B.as_seq h0 tag));
+          let h0 = ST.get () in
+          let r = Hacl.Impl.Chacha20Poly1305.aead_decrypt_chacha_poly
+            ek iv ad_len ad cipher_len dst cipher tag
+          in
+          assert (
+            let cipher_tag = B.as_seq h0 cipher `S.append` B.as_seq h0 tag in
+            let tag_s = S.slice cipher_tag (S.length cipher_tag - tag_length CHACHA20_POLY1305) (S.length cipher_tag) in
+            let cipher_s = S.slice cipher_tag 0 (S.length cipher_tag - tag_length CHACHA20_POLY1305) in
+            S.equal cipher_s (B.as_seq h0 cipher) /\ S.equal tag_s (B.as_seq h0 tag));
 
-        if r = 0ul then
-          Success
-        else
-          AuthenticationFailure
+          if r = 0ul then
+            Success
+          else
+            AuthenticationFailure
+        end
 
 let free #a s =
   let open LowStar.BufferOps in

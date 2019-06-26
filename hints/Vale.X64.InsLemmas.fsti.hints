@@ -7,20 +7,18 @@
       1,
       0,
       [
-        "@MaxIFuel_assumption", "@query",
-        "Prims_pretyping_ae567c2fb75be05905677af440075565",
-        "equation_Prims.eqtype", "equation_Prims.nat",
-        "equation_Vale.Def.Words_s.nat64", "equation_Vale.Def.Words_s.natN",
+        "@MaxIFuel_assumption", "@query", "equation_Prims.eqtype",
+        "equation_Prims.nat", "equation_Vale.Def.Words_s.nat64",
+        "equation_Vale.Def.Words_s.natN",
         "equation_Vale.X64.Machine_s.reg_64",
-        "function_token_typing_Prims.__cache_version_number__",
         "function_token_typing_Prims.int",
-        "haseqTm_refine_1101de7a497235789e427aeb0d9938cc",
-        "haseqTm_refine_5514fbe9e08dfda40f950a7b9f1b2b98",
-        "haseqTm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "haseqTm_refine_c1424615841f28cac7fc34e92b7ff33c",
+        "haseqTm_refine_c365eb902b454950de62fba701d9049d",
         "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "c4b236e1f16c19af0128f33b9eca2525"
+      "ccbedfacc1db081387c8b1bb33e69cd7"
     ],
     [
       "Vale.X64.InsLemmas.make_instr_t_args",
@@ -41,7 +39,7 @@
         "subterm_ordering_Prims.Cons", "typing_Prims.__proj__Cons__item__hd"
       ],
       0,
-      "a5e038c6f833b7ff65cd7f835a0d2fdb"
+      "563f948e4fa63da4010d74ee6a610247"
     ],
     [
       "Vale.X64.InsLemmas.make_instr_t",
@@ -51,7 +49,7 @@
       [
         "@MaxIFuel_assumption", "@query",
         "Vale.X64.Instruction_s_pretyping_2fb66fcb47c648644e76dfa1323a4ab6",
-        "binder_x_695f4be111338c847de65a0e01449238_0",
+        "binder_x_9480187c8e85713ad9eae72e33c57410_0",
         "data_elim_Prims.Cons",
         "data_typing_intro_Vale.X64.Instruction_s.Out@tok",
         "disc_equation_Prims.Cons", "disc_equation_Prims.Nil",
@@ -69,7 +67,7 @@
         "typing_FStar.Pervasives.Native.__proj__Mktuple2__item___2"
       ],
       0,
-      "f74cf5530969ee66721fc8ef1864443d"
+      "e8f2929fe90be6a192080afc58b39304"
     ],
     [
       "Vale.X64.InsLemmas.make_instr_args",
@@ -83,8 +81,8 @@
         "@fuel_irrelevance_Vale.X64.InsLemmas.make_instr_t_args.fuel_instrumented",
         "@fuel_irrelevance_Vale.X64.Instruction_s.instr_operands_t_args.fuel_instrumented",
         "@query",
-        "Prims_interpretation_Tm_arrow_9cb3c953faf527c316d427b2ce8bd81b",
-        "Vale.X64.InsLemmas_interpretation_Tm_arrow_2a018ee00ffb21555e8ff0c23591df83",
+        "FStar.FunctionalExtensionality_interpretation_Tm_arrow_6980332764c4493a7b0df5c02f7aefbe",
+        "Vale.X64.InsLemmas_interpretation_Tm_arrow_4871688054f7faf8ffeb88d2fe387ed5",
         "binder_x_5b8a55910a662c783b1ed3212549410e_0",
         "constructor_distinct_Prims.Nil",
         "constructor_distinct_Vale.X64.Instruction_s.IOpEx",
@@ -93,7 +91,6 @@
         "disc_equation_Vale.X64.Instruction_s.IOpIm",
         "equation_Vale.X64.Instruction_s.arrow",
         "equation_Vale.X64.Instruction_s.instr_operand_t",
-        "equation_Vale.X64.Machine_Semantics_s.ins",
         "equation_with_fuel_Vale.X64.InsLemmas.make_instr_t_args.fuel_instrumented",
         "equation_with_fuel_Vale.X64.Instruction_s.instr_operands_t_args.fuel_instrumented",
         "fuel_guarded_inversion_Prims.list",
@@ -105,10 +102,10 @@
         "projection_inverse_Vale.X64.Instruction_s.IOpEx__0",
         "refinement_interpretation_Tm_refine_7aac12c24449a22c34d98a0ea8ed4a32",
         "subterm_ordering_Prims.Cons", "typing_Prims.__proj__Cons__item__hd",
-        "typing_Tm_abs_142c6d489d97cd5021005cfdaa931617", "unit_typing"
+        "typing_Tm_abs_e682630a535575e1da5f42ea8f39afbd", "unit_typing"
       ],
       0,
-      "f5a7f1c1b0adaa051ddd04757c106565"
+      "224273f9166f74189dc46dab29011cf2"
     ],
     [
       "Vale.X64.InsLemmas.make_instr_outs",
@@ -122,11 +119,11 @@
         "@fuel_irrelevance_Vale.X64.InsLemmas.make_instr_t.fuel_instrumented",
         "@fuel_irrelevance_Vale.X64.Instruction_s.instr_operands_t.fuel_instrumented",
         "@query",
-        "Prims_interpretation_Tm_arrow_9cb3c953faf527c316d427b2ce8bd81b",
-        "Vale.X64.InsLemmas_interpretation_Tm_arrow_77a69653b553555bcaf219ff2287dbca",
+        "FStar.FunctionalExtensionality_interpretation_Tm_arrow_6980332764c4493a7b0df5c02f7aefbe",
+        "Vale.X64.InsLemmas_interpretation_Tm_arrow_3d5c379ce3103cb9706c98944b5171f4",
         "Vale.X64.Instruction_s_pretyping_2fb66fcb47c648644e76dfa1323a4ab6",
         "binder_x_5b8a55910a662c783b1ed3212549410e_1",
-        "binder_x_695f4be111338c847de65a0e01449238_0",
+        "binder_x_9480187c8e85713ad9eae72e33c57410_0",
         "constructor_distinct_Prims.Nil",
         "constructor_distinct_Vale.X64.Instruction_s.IOpEx",
         "data_elim_Prims.Cons",
@@ -137,7 +134,6 @@
         "equation_Vale.X64.Instruction_s.arrow",
         "equation_Vale.X64.Instruction_s.instr_operand_t",
         "equation_Vale.X64.Instruction_s.instr_out",
-        "equation_Vale.X64.Machine_Semantics_s.ins",
         "equation_with_fuel_Vale.X64.InsLemmas.make_instr_t.fuel_instrumented",
         "equation_with_fuel_Vale.X64.Instruction_s.instr_operands_t.fuel_instrumented",
         "fuel_guarded_inversion_FStar.Pervasives.Native.tuple2",
@@ -153,10 +149,10 @@
         "projection_inverse_Vale.X64.Instruction_s.IOpEx__0",
         "subterm_ordering_Prims.Cons",
         "typing_FStar.Pervasives.Native.__proj__Mktuple2__item___2",
-        "typing_Tm_abs_cc36045f93d9473a2d2b4b51afc77b2f"
+        "typing_Tm_abs_9479633f5fb2d9990211f1d2c283caf2"
       ],
       0,
-      "25d988f509ef84af05ed8d4662751b65"
+      "6987a1bd3dae34acb7bc3925540f37e5"
     ]
   ]
 ]

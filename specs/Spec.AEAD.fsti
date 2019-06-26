@@ -50,8 +50,11 @@ let tag_length: alg -> nat =
   | AES128_CCM        -> 16
   | AES256_CCM        -> 16
 
-let iv_length (a: alg): nat =
-  12
+let iv_length (len:nat): supported_alg -> Type0 =
+  function
+  | AES128_GCM -> len > 0 /\ 8 * len <= pow2 64 - 1
+  | AES256_GCM -> len > 0 /\ 8 * len <= pow2 64 - 1
+  | CHACHA20_POLY1305 -> len == 12
 
 let ekv_length: supported_alg -> nat =
   function
@@ -80,7 +83,7 @@ let lbytes (l:nat) = b:Seq.seq UInt8.t { Seq.length b = l }
 // Note: using <= for maximum admissible lengths
 // Note: not indexing the types over their lengths; we can use S.length in specs
 let kv a = lbytes (key_length a)
-let iv a = lbytes (iv_length a)
+let iv a = s:S.seq UInt8.t { iv_length (S.length s) a }
 let ad a = s:S.seq UInt8.t { S.length s <= max_length a }
 let plain (a: supported_alg) = s:S.seq UInt8.t { S.length s <= max_length a }
 let cipher (a: supported_alg) = s:S.seq UInt8.t { S.length s >= tag_length a }

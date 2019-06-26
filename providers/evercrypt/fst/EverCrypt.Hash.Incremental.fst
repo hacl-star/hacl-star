@@ -623,6 +623,7 @@ let update a p data len =
 inline_for_extraction noextract
 val mk_finish: a:Hash.alg -> finish_st a
 
+#restart-solver
 #reset-options "--z3rlimit 30 --max_fuel 0 --max_ifuel 0"
 inline_for_extraction noextract
 let mk_finish a p dst =

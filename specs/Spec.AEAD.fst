@@ -65,11 +65,9 @@ let encrypt #a kv iv ad plain =
 
   | AES128_GCM | AES256_GCM ->
       let kv_nat = Vale.Def.Words.Seq_s.seq_uint8_to_seq_nat8 kv in
+      // The specification of gcm_encrypt_LE takes care of computing a valid
+      // GCM iv from an arbitrary length iv. Hence the iv is the sequence of bytes
       let iv_nat = Vale.Def.Words.Seq_s.seq_uint8_to_seq_nat8 iv in
-      // the specification takes a seq16 for convenience, but actually discards
-      // the trailing four bytes; we are, however, constrained by it and append
-      // zeroes just to satisfy the spec
-      let iv_nat = S.append iv_nat (S.create 4 0) in
       // `ad` is called `auth` in Vale world; "additional data", "authenticated
       // data", potato, potato
       let ad_nat = Vale.Def.Words.Seq_s.seq_uint8_to_seq_nat8 ad in
@@ -109,7 +107,6 @@ let decrypt #a kv iv ad cipher =
   | AES128_GCM | AES256_GCM ->
       let kv_nat = Vale.Def.Words.Seq_s.seq_uint8_to_seq_nat8 kv in
       let iv_nat = Vale.Def.Words.Seq_s.seq_uint8_to_seq_nat8 iv in
-      let iv_nat = S.append iv_nat (S.create 4 0) in
       let ad_nat = Vale.Def.Words.Seq_s.seq_uint8_to_seq_nat8 ad in
       let cipher_nat = Vale.Def.Words.Seq_s.seq_uint8_to_seq_nat8 cipher in
       let tag_nat = Vale.Def.Words.Seq_s.seq_uint8_to_seq_nat8 tag in

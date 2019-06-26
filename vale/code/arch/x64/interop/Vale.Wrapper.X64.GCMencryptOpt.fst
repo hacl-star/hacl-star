@@ -28,6 +28,7 @@ let length_div (b:uint8_p) : Lemma
 inline_for_extraction
 val gcm128_encrypt_opt':
   key:Ghost.erased (Seq.seq nat32) ->
+  iv:Ghost.erased supported_iv_LE ->
   auth_b:uint8_p ->
   auth_bytes:uint64 ->
   auth_num:uint64 ->
@@ -51,6 +52,7 @@ val gcm128_encrypt_opt':
     (requires fun h0 ->
       B.disjoint tag_b out128x6_b /\ B.disjoint tag_b out128_b /\
       B.disjoint tag_b inout_b /\ B.disjoint tag_b hkeys_b /\
+      B.disjoint iv_b tag_b /\
       disjoint_or_eq tag_b auth_b /\ disjoint_or_eq tag_b iv_b /\
       disjoint_or_eq tag_b keys_b /\ disjoint_or_eq tag_b abytes_b /\
       disjoint_or_eq tag_b in128x6_b /\ disjoint_or_eq tag_b in128_b /\
@@ -59,6 +61,7 @@ val gcm128_encrypt_opt':
       B.disjoint iv_b keys_b /\ B.disjoint iv_b scratch_b /\ B.disjoint iv_b in128x6_b /\
       B.disjoint iv_b out128x6_b /\ B.disjoint iv_b hkeys_b /\ B.disjoint iv_b in128_b /\
       B.disjoint iv_b out128_b /\ B.disjoint iv_b inout_b /\
+      B.disjoint iv_b auth_b /\ B.disjoint iv_b abytes_b /\
       disjoint_or_eq iv_b auth_b /\ disjoint_or_eq iv_b abytes_b /\
 
       B.disjoint scratch_b keys_b /\ B.disjoint scratch_b in128x6_b /\
@@ -110,7 +113,7 @@ val gcm128_encrypt_opt':
       B.length in128_b == 16 * UInt64.v len128_num /\
       B.length out128_b == B.length in128_b /\
       B.length inout_b == 16 /\
-      B.length scratch_b == 128 /\
+      B.length scratch_b == 144 /\
       B.length hkeys_b = 128 /\
       B.length tag_b == 16 /\
       B.length keys_b = 176 /\
@@ -137,7 +140,12 @@ val gcm128_encrypt_opt':
       (let db = get_downview hkeys_b in
        length_aux5 hkeys_b;
        let ub = UV.mk_buffer db Vale.Interop.Views.up_view128 in
-       hkeys_reqs_pub (UV.as_seq h0 ub) (reverse_bytes_quad32 (aes_encrypt_LE AES_128 (Ghost.reveal key) (Mkfour 0 0 0 0))))
+       hkeys_reqs_pub (UV.as_seq h0 ub) (reverse_bytes_quad32 (aes_encrypt_LE AES_128 (Ghost.reveal key) (Mkfour 0 0 0 0)))) /\
+
+      (length_div iv_b;
+       (reverse_bytes_quad32 (low_buffer_read TUInt8 TUInt128 h0 iv_b 0) ==
+         compute_iv_BE (aes_encrypt_LE AES_128 (Ghost.reveal key) (Mkfour 0 0 0 0)) (Ghost.reveal iv))
+      )
     )
     (ensures fun h0 _ h1 ->
       B.modifies (B.loc_union (B.loc_buffer tag_b)
@@ -163,10 +171,6 @@ val gcm128_encrypt_opt':
        let out128_d = get_downview out128_b in
        length_aux3 out128_b (UInt64.v len128_num);
        let out128_u = UV.mk_buffer out128_d Vale.Interop.Views.up_view128 in
-       length_aux4 iv_b;
-       length_div iv_b;
-       let iv_LE = low_buffer_read TUInt8 TUInt128 h0 iv_b 0 in
-       let iv_BE = reverse_bytes_quad32 iv_LE in
        let plain_in =
            Seq.append (Seq.append (UV.as_seq h0 in128x6_u) (UV.as_seq h0 in128_u))
                       (UV.as_seq h0 inout_u)
@@ -186,7 +190,7 @@ val gcm128_encrypt_opt':
       (Seq.length plain_bytes) < pow2_32 /\
       (Seq.length auth_bytes) < pow2_32 /\
       is_aes_key AES_128 (seq_nat32_to_seq_nat8_LE (Ghost.reveal key)) /\
-      (let cipher, tag = gcm_encrypt_LE AES_128 (seq_nat32_to_seq_nat8_LE (Ghost.reveal key)) (be_quad32_to_bytes iv_BE) plain_bytes auth_bytes in
+      (let cipher, tag = gcm_encrypt_LE AES_128 (seq_nat32_to_seq_nat8_LE (Ghost.reveal key)) (Ghost.reveal iv) plain_bytes auth_bytes in
       cipher == cipher_bytes /\
       (length_div tag_b;
       le_quad32_to_bytes (low_buffer_read TUInt8 TUInt128 h1 tag_b 0) == tag
@@ -195,10 +199,22 @@ val gcm128_encrypt_opt':
 
 
 inline_for_extraction
-let gcm128_encrypt_opt' key auth_b auth_bytes auth_num keys_b iv_b hkeys_b abytes_b
+let gcm128_encrypt_opt' key iv auth_b auth_bytes auth_num keys_b iv_b hkeys_b abytes_b
   in128x6_b out128x6_b len128x6 in128_b out128_b len128_num inout_b plain_num scratch_b tag_b =
 
   let h0 = get() in
+
+  B.disjoint_neq iv_b auth_b;
+  B.disjoint_neq iv_b keys_b;
+  B.disjoint_neq iv_b hkeys_b;
+  B.disjoint_neq iv_b abytes_b;
+  B.disjoint_neq iv_b in128x6_b;
+  B.disjoint_neq iv_b out128x6_b;
+  B.disjoint_neq iv_b in128_b;
+  B.disjoint_neq iv_b out128_b;
+  B.disjoint_neq iv_b inout_b;
+  B.disjoint_neq iv_b scratch_b;
+  B.disjoint_neq iv_b tag_b;  
 
   DV.length_eq (get_downview auth_b);
   DV.length_eq (get_downview keys_b);
@@ -223,7 +239,7 @@ let gcm128_encrypt_opt' key auth_b auth_bytes auth_num keys_b iv_b hkeys_b abyte
   FStar.Math.Lemmas.cancel_mul_mod (UInt64.v auth_num) 16;
   assert_norm (176 % 16 = 0);
   assert_norm (16 % 16 = 0);
-  assert_norm (128 % 16 = 0);
+  assert_norm (144 % 16 = 0);
   FStar.Math.Lemmas.cancel_mul_mod (UInt64.v len128x6) 16;
   FStar.Math.Lemmas.cancel_mul_mod (UInt64.v len128_num) 16;
 
@@ -262,7 +278,7 @@ let gcm128_encrypt_opt' key auth_b auth_bytes auth_num keys_b iv_b hkeys_b abyte
   Classical.forall_intro (bounded_buffer_addrs TUInt8 TUInt128 h0 keys_b);
   Classical.forall_intro (bounded_buffer_addrs TUInt8 TUInt128 h0 hkeys_b);
 
-  let x, _ = gcm128_encrypt_opt  key auth_b auth_bytes auth_num keys_b iv_b hkeys_b abytes_b
+  let x, _ = gcm128_encrypt_opt  key iv auth_b auth_bytes auth_num keys_b iv_b hkeys_b abytes_b
   in128x6_b out128x6_b len128x6 in128_b out128_b len128_num inout_b plain_num scratch_b tag_b () in
 
   let h1 = get() in
@@ -271,6 +287,7 @@ let gcm128_encrypt_opt' key auth_b auth_bytes auth_num keys_b iv_b hkeys_b abyte
 inline_for_extraction
 val gcm128_encrypt_opt_alloca:
   key:Ghost.erased (Seq.seq nat32) ->
+  iv:Ghost.erased supported_iv_LE ->
   plain_b:uint8_p ->
   plain_len:uint64 ->
   auth_b:uint8_p ->
@@ -305,7 +322,7 @@ val gcm128_encrypt_opt_alloca:
 
       B.disjoint tag_b out_b /\ B.disjoint tag_b hkeys_b /\
       B.disjoint tag_b plain_b /\ B.disjoint tag_b auth_b /\
-      disjoint_or_eq tag_b iv_b /\ disjoint_or_eq tag_b keys_b /\
+      B.disjoint tag_b iv_b /\ disjoint_or_eq tag_b keys_b /\
 
       B.disjoint iv_b keys_b /\ B.disjoint iv_b out_b /\
       B.disjoint iv_b plain_b /\ B.disjoint iv_b hkeys_b /\
@@ -335,7 +352,7 @@ val gcm128_encrypt_opt_alloca:
       B.length tag_b == 16 /\
       B.length keys_b = 176 /\
 
-      B.length scratch_b = 128 /\
+      B.length scratch_b = 144 /\
       B.length inout_b = 16 /\
       B.length abytes_b = 16 /\
 
@@ -348,7 +365,10 @@ val gcm128_encrypt_opt_alloca:
          (seq_nat8_to_seq_uint8 (le_seq_quad32_to_bytes (key_to_round_keys_LE AES_128 (Ghost.reveal key))))) /\
 
       hkeys_reqs_pub (le_bytes_to_seq_quad32 (seq_uint8_to_seq_nat8 (B.as_seq h0 hkeys_b)))
-        (reverse_bytes_quad32 (aes_encrypt_LE AES_128 (Ghost.reveal key) (Mkfour 0 0 0 0)))
+        (reverse_bytes_quad32 (aes_encrypt_LE AES_128 (Ghost.reveal key) (Mkfour 0 0 0 0))) /\
+
+      (be_bytes_to_quad32 (seq_uint8_to_seq_nat8 (B.as_seq h0 iv_b))) ==
+         compute_iv_BE (aes_encrypt_LE AES_128 (Ghost.reveal key) (Mkfour 0 0 0 0)) (Ghost.reveal iv)
     )
     (ensures fun h0 _ h1 ->
       B.modifies (B.loc_union (B.loc_buffer tag_b)
@@ -367,9 +387,6 @@ val gcm128_encrypt_opt_alloca:
        let out_d = get_downview out_b in
        length_aux3 out_b (UInt64.v plain_len / 16);
        let out_u = UV.mk_buffer out_d Vale.Interop.Views.up_view128 in
-       length_aux4 iv_b;
-       DV.length_eq (get_downview iv_b);
-       let iv = seq_uint8_to_seq_nat8 (B.as_seq h0 iv_b) in
        let plain_in = Seq.append (UV.as_seq h0 plain_u) (UV.as_seq h0 inout_u) in
        let plain_bytes = wrap_slice (le_seq_quad32_to_bytes plain_in) (UInt64.v plain_len) in
        let cipher_out = Seq.append (UV.as_seq h1 out_u) (UV.as_seq h1 inout_u) in
@@ -384,7 +401,7 @@ val gcm128_encrypt_opt_alloca:
       let auth_bytes = wrap_slice (le_seq_quad32_to_bytes auth_in) (UInt64.v auth_len) in
       Seq.length plain_bytes < pow2_32 /\
       Seq.length auth_bytes < pow2_32 /\
-      (let cipher, tag = gcm_encrypt_LE AES_128 (seq_nat32_to_seq_nat8_LE (Ghost.reveal key)) iv plain_bytes auth_bytes in
+      (let cipher, tag = gcm_encrypt_LE AES_128 (seq_nat32_to_seq_nat8_LE (Ghost.reveal key)) (Ghost.reveal iv) plain_bytes auth_bytes in
       Seq.equal cipher cipher_bytes /\
       Seq.equal (seq_uint8_to_seq_nat8 (B.as_seq h1 tag_b)) tag
       )
@@ -498,7 +515,7 @@ let math_cast_aux (n:UInt64.t) : Lemma
   = FStar.Math.Lemmas.small_mod (UInt64.v n) (pow2 32)
 
 inline_for_extraction
-let gcm128_encrypt_opt_alloca key plain_b plain_len auth_b auth_bytes iv_b
+let gcm128_encrypt_opt_alloca key iv plain_b plain_len auth_b auth_bytes iv_b
   out_b tag_b keys_b hkeys_b scratch_b inout_b abytes_b =
 
   let h0 = get() in
@@ -567,6 +584,7 @@ let gcm128_encrypt_opt_alloca key plain_b plain_len auth_b auth_bytes iv_b
 
     gcm128_encrypt_opt'
       key
+      iv
       auth_b
       auth_bytes
       auth_num
@@ -645,6 +663,7 @@ let gcm128_encrypt_opt_alloca key plain_b plain_len auth_b auth_bytes iv_b
 
     gcm128_encrypt_opt'
       key
+      iv
       auth_b
       auth_bytes
       auth_num
@@ -843,16 +862,16 @@ let lemma_slice_sub (b:uint8_p) (b_sub:uint8_p) (b_extra:uint8_p) (h:HS.mem) : L
 #set-options "--z3rlimit 600 --max_fuel 0 --max_ifuel 0"
 
 inline_for_extraction
-let gcm128_encrypt_opt_stdcall key plain_b plain_len auth_b auth_len iv_b out_b tag_b keys_b hkeys_b =
+let gcm128_encrypt_opt_stdcall key iv plain_b plain_len auth_b auth_len iv_b out_b tag_b keys_b hkeys_b scratch_b =
   let h0 = get() in
 
   push_frame();
-  // Scratch space for Vale procedure
-  let scratch_b = B.alloca 0uy 128ul in
   // Extra space to have a full input/output with length % 16 = 0
-  let inout_b = B.alloca 0uy 16ul in
+  let inout_b = B.sub scratch_b 0ul 16ul in
   // Same for auth_b
-  let abytes_b = B.alloca 0uy 16ul in
+  let abytes_b = B.sub scratch_b 16ul 16ul in
+  // Scratch space for Vale procedure
+  let scratch_b = B.sub scratch_b 32ul 144ul in
 
   // Copy the remainder of plain_b into inout_b
 
@@ -878,6 +897,7 @@ let gcm128_encrypt_opt_stdcall key plain_b plain_len auth_b auth_len iv_b out_b 
 
   gcm128_encrypt_opt_alloca
     key
+    iv
     plain_b'
     plain_len
     auth_b'
@@ -908,9 +928,6 @@ let gcm128_encrypt_opt_stdcall key plain_b plain_len auth_b auth_len iv_b out_b 
        let out_d = get_downview out_b' in
        length_aux3 out_b' (UInt64.v plain_len / 16);
        let out_u = UV.mk_buffer out_d Vale.Interop.Views.up_view128 in
-       length_aux4 iv_b;
-       DV.length_eq (get_downview iv_b);
-       let iv = seq_uint8_to_seq_nat8 (B.as_seq h1 iv_b) in
        let plain_in = Seq.append (UV.as_seq h1 plain_u) (UV.as_seq h1 inout_u) in
        let plain_bytes = wrap_slice (le_seq_quad32_to_bytes plain_in) (UInt64.v plain_len) in
        let cipher_out = Seq.append (UV.as_seq h_post out_u) (UV.as_seq h_post inout_u) in
@@ -925,7 +942,7 @@ let gcm128_encrypt_opt_stdcall key plain_b plain_len auth_b auth_len iv_b out_b 
        let auth_bytes = wrap_slice (le_seq_quad32_to_bytes auth_in) (UInt64.v auth_len) in
        (Seq.length plain_bytes) < pow2_32 /\
        (Seq.length auth_bytes) < pow2_32 /\
-       (let cipher, tag = gcm_encrypt_LE AES_128 (seq_nat32_to_seq_nat8_LE (Ghost.reveal key)) iv plain_bytes auth_bytes in
+       (let cipher, tag = gcm_encrypt_LE AES_128 (seq_nat32_to_seq_nat8_LE (Ghost.reveal key)) (Ghost.reveal iv) plain_bytes auth_bytes in
        Seq.equal cipher cipher_bytes /\
        Seq.equal (seq_uint8_to_seq_nat8 (B.as_seq h_post tag_b)) tag
   ));
@@ -959,10 +976,9 @@ let gcm128_encrypt_opt_stdcall key plain_b plain_len auth_b auth_len iv_b out_b 
   lemma_slice_uv_extra out_b out_b' inout_b h2;
 
   assert (
-    let iv = seq_uint8_to_seq_nat8 (B.as_seq h1 iv_b) in
     let plain = seq_uint8_to_seq_nat8 (B.as_seq h1 plain_b) in
     let auth = seq_uint8_to_seq_nat8 (B.as_seq h1 auth_b) in
-    let cipher, tag = gcm_encrypt_LE AES_128 (seq_nat32_to_seq_nat8_LE (Ghost.reveal key)) iv plain auth in
+    let cipher, tag = gcm_encrypt_LE AES_128 (seq_nat32_to_seq_nat8_LE (Ghost.reveal key)) (Ghost.reveal iv) plain auth in
     Seq.equal (seq_uint8_to_seq_nat8 (B.as_seq h2 out_b)) cipher /\
     Seq.equal (seq_uint8_to_seq_nat8 (B.as_seq h2 tag_b)) tag);
 
