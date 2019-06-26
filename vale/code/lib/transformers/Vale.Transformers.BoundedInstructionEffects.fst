@@ -837,6 +837,56 @@ let lemma_add_r_to_rw_set r rw_old f =
   let aux s1 = FStar.Classical.move_requires (aux s1) in
   FStar.Classical.forall_intro_2 aux
 
+let rec lemma_constant_intersect_belongs_to_writes_union
+    (c1 c2:locations_with_values) (w1 w2:locations) (l:location{hasEq (location_val_t l)}) (v:location_val_t l) :
+  Lemma
+    (requires (
+        (let x : (l:location{hasEq (location_val_t l)} & v:location_val_t l) = (|l,v|) in
+         L.mem x (c1 `intersect` c2) /\
+         (forall l v. {:pattern (L.mem (|l,v|) c1); (L.mem l w1)}
+            L.mem (|l,v|) c1 ==> L.mem l w1) /\
+         (forall l v. {:pattern (L.mem (|l,v|) c2); (L.mem l w2)}
+            L.mem (|l,v|) c2 ==> L.mem l w2))))
+    (ensures (L.mem l (w1 `L.append` w2))) =
+  match c1 with
+  | [] -> ()
+  | x :: xs ->
+    if x = (|l,v|) then (
+      assert (L.mem (|l,v|) c1);
+      assert (L.mem l w1);
+      L.append_mem w1 w2 l
+    ) else (
+      assert (forall l v. L.mem (|l,v|) xs ==> L.mem (|l,v|) c1);
+      lemma_constant_intersect_belongs_to_writes_union xs c2 w1 w2 l v
+    )
+
+let rec lemma_unchanged_at_mem (as:list location) (a:location) (s1 s2:machine_state) :
+  Lemma
+    (requires (
+        (unchanged_at as s1 s2) /\
+        (L.mem a as)))
+    (ensures (
+        (eval_location a s1 == eval_location a s2))) =
+  match as with
+  | [_] -> ()
+  | x :: xs ->
+    if a = x then () else
+    lemma_unchanged_at_mem xs a s1 s2
+
+let rec lemma_unchanged_at_difference_elim (l1 l2:locations) (s1 s2:machine_state) :
+  Lemma
+    (requires (unchanged_at (l1 `difference` l2) s1 s2 /\ unchanged_at l2 s1 s2))
+    (ensures (unchanged_at l1 s1 s2)) =
+  match l1 with
+  | [] -> ()
+  | x :: xs ->
+    if L.mem x l2 then (
+      lemma_unchanged_at_mem l2 x s1 s2;
+      lemma_unchanged_at_difference_elim xs l2 s1 s2
+    ) else (
+      lemma_unchanged_at_difference_elim xs l2 s1 s2
+    )
+
 (* See fsti *)
 let lemma_bounded_effects_parallel rw1 rw2 f1 f2 =
   let rw = rw_set_in_parallel rw1 rw2 in
@@ -892,33 +942,12 @@ let lemma_bounded_effects_parallel rw1 rw2 f1 f2 =
   assert (forall s. constant_on_execution rw.loc_constant_writes f1 s);
   assert (forall s. constant_on_execution rw.loc_constant_writes f2 s);
 
-  let rec aux (c1 c2:locations_with_values) (w1 w2:locations) (l:location{hasEq (location_val_t l)}) (v:location_val_t l) :
-    Lemma
-      (requires (
-          (let x : (l:location{hasEq (location_val_t l)} & v:location_val_t l) = (|l,v|) in
-           L.mem x (c1 `intersect` c2) /\
-          (forall l v. {:pattern (L.mem (|l,v|) c1); (L.mem l w1)}
-             L.mem (|l,v|) c1 ==> L.mem l w1) /\
-          (forall l v. {:pattern (L.mem (|l,v|) c2); (L.mem l w2)}
-             L.mem (|l,v|) c2 ==> L.mem l w2))))
-      (ensures (L.mem l (w1 `L.append` w2))) =
-    match c1 with
-    | [] -> ()
-    | x :: xs ->
-      if x = (|l,v|) then (
-        assert (L.mem (|l,v|) c1);
-        assert (L.mem l w1);
-        L.append_mem w1 w2 l
-      ) else (
-        assert (forall l v. L.mem (|l,v|) xs ==> L.mem (|l,v|) c1);
-        aux xs c2 w1 w2 l v
-      )
-  in
   let aux l v :
     Lemma
       (L.mem (|l,v|) rw.loc_constant_writes ==> L.mem l rw.loc_writes) =
     FStar.Classical.arrow_to_impl #(L.mem (|l,v|) rw.loc_constant_writes) #(L.mem l rw.loc_writes)
-      (fun _ -> aux rw1.loc_constant_writes rw2.loc_constant_writes rw1.loc_writes rw2.loc_writes l v)
+      (fun _ -> lemma_constant_intersect_belongs_to_writes_union
+          rw1.loc_constant_writes rw2.loc_constant_writes rw1.loc_writes rw2.loc_writes l v)
   in
   FStar.Classical.forall_intro_2 aux;
   assert (forall l v. L.mem (|l,v|) rw.loc_constant_writes ==> L.mem l rw.loc_writes);
@@ -986,70 +1015,131 @@ let lemma_bounded_effects_parallel rw1 rw2 f1 f2 =
     )
   )
 
+let lemma_bounded_effects_series_aux1 rw1 rw2 f1 f2 s a :
+  Lemma
+    (requires (
+        let open Vale.X64.Machine_Semantics_s in
+        let rw = rw_set_in_series rw1 rw2 in
+        (bounded_effects rw1 f1) /\
+        (bounded_effects rw2 f2) /\
+        !!(disjoint_location_from_locations a rw.loc_writes) /\
+        (run (f1 ;; f2) s).ms_ok))
+    (ensures (
+        let open Vale.X64.Machine_Semantics_s in
+        eval_location a s == eval_location a (run (f1;;f2) s))) =
+  let open Vale.X64.Machine_Semantics_s in
+  lemma_disjoint_location_from_locations_append a rw1.loc_writes rw2.loc_writes;
+  assert (unchanged_except rw1.loc_writes s (run f1 s));
+  assert (eval_location a s == eval_location a (run f1 s));
+  assert (unchanged_except rw2.loc_writes (run f1 s) (run f2 (run f1 s)));
+  assert (eval_location a s == eval_location a (run (f1;;f2) s))
+
+let rec lemma_bounded_effects_series_aux2 c1 c2 f1 f2 s :
+  Lemma
+    (requires (
+        (forall s. (constant_on_execution c1 f1 s)) /\
+        (forall s. (constant_on_execution c2 f2 s))))
+    (ensures (
+        let open Vale.X64.Machine_Semantics_s in
+        (constant_on_execution (c1 `intersect` c2) (f1;;f2) s))) =
+  let open Vale.X64.Machine_Semantics_s in
+  let f = f1;;f2 in
+  if (run f s).ms_ok then (
+    match c1 with
+    | [] -> ()
+    | (|l,v|) :: xs ->
+      if L.mem (|l,v|) c2 then (
+        lemma_constant_on_execution_mem c2 f2 (run f1 s) l v;
+        lemma_bounded_effects_series_aux2 xs c2 f1 f2 s
+      ) else (
+        lemma_bounded_effects_series_aux2 xs c2 f1 f2 s
+      )
+  ) else ()
+
+let rec lemma_unchanged_at_except_disjoint (same change:locations) (s1 s2 s1' s2':machine_state) :
+  Lemma
+    (requires (
+        (unchanged_at same s1 s2) /\
+        (unchanged_except change s1 s1') /\
+        (unchanged_except change s2 s2') /\
+        !!(disjoint_locations same change)))
+    (ensures (
+        (unchanged_at same s1' s2'))) =
+  match same with
+  | [] -> ()
+  | x :: xs ->
+    lemma_unchanged_at_except_disjoint xs change s1 s2 s1' s2'
+
+let rec lemma_disjoint_location_from_locations_not_mem (locs:locations) (l:location) :
+  Lemma
+    (ensures (
+        !!(disjoint_location_from_locations l locs) <==>
+        not (L.mem l locs))) =
+  match locs with
+  | [] -> ()
+  | x :: xs ->
+    lemma_disjoint_location_from_locations_not_mem xs l
+
+let rec lemma_difference_disjoint (l1 l2:locations) :
+  Lemma
+    (ensures (
+        !!(disjoint_locations (l1 `difference` l2) l2))) =
+  match l1 with
+  | [] -> ()
+  | x :: xs ->
+    lemma_disjoint_location_from_locations_not_mem l2 x;
+    lemma_difference_disjoint xs l2
+
+let lemma_bounded_effects_series_aux3 rw1 rw2 f1 f2 s1 s2 :
+  Lemma
+    (requires (
+        let open Vale.X64.Machine_Semantics_s in
+        let rw = rw_set_in_series rw1 rw2 in
+        (bounded_effects rw1 f1) /\
+        (bounded_effects rw2 f2) /\
+        (s1.ms_ok = s2.ms_ok) /\
+        (unchanged_at rw.loc_reads s1 s2)))
+    (ensures (
+        let open Vale.X64.Machine_Semantics_s in
+        let f = f1;;f2 in
+        (run f s1).ms_ok = (run f s2).ms_ok)) =
+  let open Vale.X64.Machine_Semantics_s in
+  let rw = rw_set_in_series rw1 rw2 in
+  let f = (f1;;f2) in
+  let s1_1, s2_1 = run f1 s1, run f1 s2 in
+  let s1_1_2, s2_1_2 = run f2 s1_1, run f2 s2_1 in
+  lemma_unchanged_at_append rw1.loc_reads (rw2.loc_reads `difference` rw1.loc_writes) s1 s2;
+  assert (s1_1.ms_ok = s2_1.ms_ok);
+  if s1_1.ms_ok then (
+    assert (only_affects rw1.loc_writes f1);
+    assert (unchanged_except rw1.loc_writes s1 s1_1);
+    assert (unchanged_except rw1.loc_writes s2 s2_1);
+    assert (unchanged_at (rw2.loc_reads `difference` rw1.loc_writes) s1 s2);
+    lemma_difference_disjoint rw2.loc_reads rw1.loc_writes;
+    lemma_unchanged_at_except_disjoint (rw2.loc_reads `difference` rw1.loc_writes) rw1.loc_writes s1 s2 s1_1 s2_1;
+    lemma_unchanged_at_difference_elim rw2.loc_reads rw1.loc_writes s1_1 s2_1
+  ) else ()
+
 (* See fsti *)
 let lemma_bounded_effects_series rw1 rw2 f1 f2 =
   let open Vale.X64.Machine_Semantics_s in
   let rw = rw_set_in_series rw1 rw2 in
-
-  let aux s a :
-    Lemma
-      (requires !!(disjoint_location_from_locations a rw.loc_writes))
-      (ensures (eval_location a s == eval_location a (run (f1;;f2) s))) =
-    admit ()
-  in
-  let aux s = FStar.Classical.move_requires (aux s) in
+  let aux s = FStar.Classical.move_requires (lemma_bounded_effects_series_aux1 rw1 rw2 f1 f2 s) in
   FStar.Classical.forall_intro_2 aux;
-  assert (only_affects rw.loc_writes (f1;;f2));
-
-  let rec aux c1 c2 s :
-    Lemma
-      (requires (constant_on_execution c1 f1 s /\ constant_on_execution c2 f2 s))
-      (ensures (constant_on_execution (c1 `intersect` c2) (f1;;f2) s)) =
-    admit ()
-  in
-  let aux = FStar.Classical.move_requires (aux rw1.loc_constant_writes rw2.loc_constant_writes) in
+  let aux = FStar.Classical.move_requires (lemma_bounded_effects_series_aux2
+                                             rw1.loc_constant_writes rw2.loc_constant_writes f1 f2) in
   FStar.Classical.forall_intro aux;
-  assert (forall s. constant_on_execution rw.loc_constant_writes (f1;;f2) s);
-
-  let rec aux (c1 c2:locations_with_values) (w1 w2:locations) (l:location{hasEq (location_val_t l)}) (v:location_val_t l) :
-    Lemma
-      (requires (
-          (let x : (l:location{hasEq (location_val_t l)} & v:location_val_t l) = (|l,v|) in
-           L.mem x (c1 `intersect` c2) /\
-          (forall l v. {:pattern (L.mem (|l,v|) c1); (L.mem l w1)}
-             L.mem (|l,v|) c1 ==> L.mem l w1) /\
-          (forall l v. {:pattern (L.mem (|l,v|) c2); (L.mem l w2)}
-             L.mem (|l,v|) c2 ==> L.mem l w2))))
-      (ensures (L.mem l (w1 `L.append` w2))) =
-    match c1 with
-    | [] -> ()
-    | x :: xs ->
-      if x = (|l,v|) then (
-        assert (L.mem (|l,v|) c1);
-        assert (L.mem l w1);
-        L.append_mem w1 w2 l
-      ) else (
-        assert (forall l v. L.mem (|l,v|) xs ==> L.mem (|l,v|) c1);
-        aux xs c2 w1 w2 l v
-      )
-  in
   let aux l v :
     Lemma
       (L.mem (|l,v|) rw.loc_constant_writes ==> L.mem l rw.loc_writes) =
     FStar.Classical.arrow_to_impl #(L.mem (|l,v|) rw.loc_constant_writes) #(L.mem l rw.loc_writes)
-      (fun _ -> aux rw1.loc_constant_writes rw2.loc_constant_writes rw1.loc_writes rw2.loc_writes l v)
+      (fun _ -> lemma_constant_intersect_belongs_to_writes_union
+          rw1.loc_constant_writes rw2.loc_constant_writes rw1.loc_writes rw2.loc_writes l v)
   in
   FStar.Classical.forall_intro_2 aux;
-  assert (forall l v. L.mem (|l,v|) rw.loc_constant_writes ==> L.mem l rw.loc_writes);
+  let aux s1 = FStar.Classical.move_requires (lemma_bounded_effects_series_aux3 rw1 rw2 f1 f2 s1) in
+  FStar.Classical.forall_intro_2 aux;
 
-  let aux s1 s2 :
-    Lemma
-      (requires (s1.ms_ok = s2.ms_ok /\ unchanged_at rw.loc_reads s1 s2))
-      (ensures (((run (f1;;f2) s1).ms_ok) = ((run (f1;;f2) s2).ms_ok))) =
-    admit ()
-  in
-  let aux s1 = FStar.Classical.move_requires (aux s1) in
-  FStar.Classical.forall_intro_2 aux;
   let aux s1 s2 :
     Lemma
       (requires ((s1.ms_ok = s2.ms_ok) /\
