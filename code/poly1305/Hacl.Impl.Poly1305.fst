@@ -116,6 +116,9 @@ let poly1305_encode_blocks #s f b =
   load_felems_le f b;
   set_bit128 f
 
+#restart-solver
+#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq'"
+
 #push-options "--z3rlimit 200"
 inline_for_extraction noextract
 val poly1305_encode_last:
@@ -138,6 +141,7 @@ let poly1305_encode_last #s f len b =
   let h0 = ST.get () in
   Hacl.Impl.Poly1305.Lemmas.nat_from_bytes_le_eq_lemma (v len) (as_seq h0 b);
   assert (BSeq.nat_from_bytes_le (as_seq h0 b) == BSeq.nat_from_bytes_le (as_seq h0 tmp));
+  assert (live h0 f);
   load_felem_le f tmp;
   let h1 = ST.get () in
   lemma_feval_is_fas_nat h1 f;

@@ -106,7 +106,7 @@ let nat_from_bytes_le_is_le_bytes_to_nat64 b =
     index s01 0;
     == {}
     index (seq_map (four_to_nat 8) (seq_to_seq_four_LE sn)) 0;
-    == {}
+    == {FStar.Pervasives.reveal_opaque (`%seq_to_seq_four_LE) (seq_to_seq_four_LE #nat8)}
     four_to_nat 8 (Mkfour sn.[0] sn.[1] sn.[2] sn.[3]);
     == {nat_from_bytes_le_is_le_bytes_to_nat32 (slice b 0 4)}
     BS.nat_from_bytes_le (slice b 0 4);
@@ -115,7 +115,7 @@ let nat_from_bytes_le_is_le_bytes_to_nat64 b =
     index s01 1;
     == {}
     index (seq_map (four_to_nat 8) (seq_to_seq_four_LE sn)) 1;
-    == {}
+    == {FStar.Pervasives.reveal_opaque (`%seq_to_seq_four_LE) (seq_to_seq_four_LE #nat8)}
     four_to_nat 8 (Mkfour sn.[4] sn.[5] sn.[6] sn.[7]);
     == {nat_from_bytes_le_is_le_bytes_to_nat32 (slice b 4 8)}
     BS.nat_from_bytes_le (slice b 4 8);

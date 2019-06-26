@@ -20,18 +20,19 @@ let four_to_two_two (#a:Type) (x:four a) : two (two a) =
   Mktwo (Mktwo x0 x1) (Mktwo x2 x3)
 
 unfold
-let nat_to_four_unfold (size:nat) (n:natN (pow2_norm (4 * size))) : four (natN (pow2_norm size)) =
+let nat_to_four_unfold (size:nat) (n:natN (pow2 (4 * size))) : four (natN (pow2 size)) =
   let n1 = pow2_norm size in
   let n2 = pow2_norm (2 * size) in
   let n3 = pow2_norm (3 * size) in
   let n4 = pow2_norm (4 * size) in
   Mkfour (n % n1) ((n / n1) % n1) ((n / n2) % n1) ((n / n3) % n1)
 
-let nat_to_four (size:nat) (n:natN (pow2_norm (4 * size))) : four (natN (pow2_norm size)) =
+[@"opaque_to_smt"]
+let nat_to_four (size:nat) (n:natN (pow2 (4 * size))) : four (natN (pow2 size)) =
   nat_to_four_unfold size n
 
 unfold
-let four_to_nat_unfold (size:nat) (x:four (natN (pow2_norm size))) : natN (pow2_norm (4 * size)) =
+let four_to_nat_unfold (size:nat) (x:four (natN (pow2 size))) : natN (pow2 (4 * size)) =
   let n1 = pow2_norm size in
   let n2 = pow2_norm (2 * size) in
   let n3 = pow2_norm (3 * size) in
@@ -39,7 +40,8 @@ let four_to_nat_unfold (size:nat) (x:four (natN (pow2_norm size))) : natN (pow2_
   let Mkfour x0 x1 x2 x3 = x in
   int_to_natN n4 (x0 + x1 * n1 + x2 * n2 + x3 * n3)
 
-let four_to_nat (size:nat) (x:four (natN (pow2_norm size))) : natN (pow2_norm (4 * size)) =
+[@"opaque_to_smt"]
+let four_to_nat (size:nat) (x:four (natN (pow2 size))) : natN (pow2 (4 * size)) =
   four_to_nat_unfold size x
 
 let four_select (#a:Type) (x:four a) (selector:nat2) : a =

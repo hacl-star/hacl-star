@@ -32,13 +32,27 @@ val lemma_mul_assos_4:
   a:nat -> b:nat -> c:nat -> d:nat ->
   Lemma (a * b * c * d == a * (b * c * d))
 let lemma_mul_assos_4 a b c d =
-  assert ((a * b * c) * d == (a * (b * c)) * d);
-  FStar.Math.Lemmas.paren_mul_right a (b * c) d
+  let open FStar.Calc in
+  calc (==) {
+      a * b * c * d;
+    == { lemma_mul_assos_3 a b c }
+      (a * (b * c)) * d;
+    == { FStar.Math.Lemmas.paren_mul_right a (b * c) d }
+      a * (b * c * d);
+  }
 
 val lemma_mul_assos_5:
   a:nat -> b:nat -> c:nat -> d:nat -> e:nat ->
   Lemma (a * b * c * d * e == a * (b * c * d * e))
-let lemma_mul_assos_5 a b c d e = ()
+let lemma_mul_assos_5 a b c d e =
+  let open FStar.Calc in
+  calc (==) {
+      a * b * c * d * e;
+    == { lemma_mul_assos_4 a b c d }
+      (a * (b * c * d)) * e;
+    == { FStar.Math.Lemmas.paren_mul_right a (b * c * d) e }
+      a * (b * c * d * e);
+  }
 
 val lemma_mul_assos_6:
   a:nat -> b:nat -> c:nat -> d:nat -> e:nat -> f:nat ->
@@ -1351,6 +1365,8 @@ let subtract_p5_felem5_lemma #w f =
     subtract_p5_felem5_lemma_i #w f 3
 
 
+#restart-solver
+#reset-options "--z3rlimit 500 --using_facts_from '* -FStar.Seq' --max_fuel 0 --max_ifuel 0"
 val load_tup64_lemma0_lo: lo:uint64 ->
   Lemma
     (v lo % pow2 26 + ((v lo / pow2 26) % pow2 26) * pow26 +

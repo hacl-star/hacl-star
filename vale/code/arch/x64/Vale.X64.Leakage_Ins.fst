@@ -88,7 +88,8 @@ let rec check_if_consumes_fixed_time_outs
     let b'' = check_if_consumes_fixed_time_outs outs args (coerce oprs) ts t_out in
     b' && b''
 
-#reset-options "--z3rlimit 80"
+#restart-solver
+#reset-options "--z3rlimit 300"
 let rec lemma_args_taint
     (outs:list instr_out) (args:list instr_operand)
     (f:instr_args_t outs args) (oprs:instr_operands_t_args args)
@@ -133,6 +134,7 @@ let rec lemma_args_taint
     let Some v = v1 in
     lemma_args_taint outs args (f v) oprs ts s1 s2
 
+#restart-solver
 let rec lemma_inouts_taint
     (outs inouts:list instr_out) (args:list instr_operand)
     (f:instr_inouts_t outs inouts args) (oprs:instr_operands_t inouts args)
@@ -525,6 +527,40 @@ let check_if_xor_consumes_fixed_time (ins:S.ins) (ts:analysis_taints) : Pure (bo
   else
     check_if_instr_consumes_fixed_time ins ts
 
+let check_if_pxor_consumes_fixed_time (ins:S.ins) (ts:analysis_taints) : Pure (bool & analysis_taints)
+  (requires BC.Instr? ins /\ S.AnnotatePxor? (BC.Instr?.annotation ins))
+  (ensures ins_consumes_fixed_time ins ts)
+  =
+  let BC.Instr (InstrTypeRecord #outs #args #havoc_flags iins) oprs (S.AnnotatePxor eq) = ins in
+  let oprs:normal (instr_operands_t [inOut opXmm] [opXmm]) =
+    coerce_to_normal #(instr_operands_t [inOut opXmm] [opXmm]) oprs in
+  let (o1, (o2, ())) = oprs in
+  if o1 = o2 then
+    let t = Public in
+    let b = check_if_consumes_fixed_time_outs outs args oprs ts t in
+    let AnalysisTaints rs ft cft oft = ts in
+    let ts = AnalysisTaints rs ft cft oft in
+    (b, instr_set_taints outs args oprs ts t)
+  else
+    check_if_instr_consumes_fixed_time ins ts
+
+let check_if_vpxor_consumes_fixed_time (ins:S.ins) (ts:analysis_taints) : Pure (bool & analysis_taints)
+  (requires BC.Instr? ins /\ S.AnnotateVPxor? (BC.Instr?.annotation ins))
+  (ensures ins_consumes_fixed_time ins ts)
+  =
+  let BC.Instr (InstrTypeRecord #outs #args #havoc_flags iins) oprs (S.AnnotateVPxor eq) = ins in
+  let oprs:normal (instr_operands_t [out opXmm] [opXmm; opXmm]) =
+    coerce_to_normal #(instr_operands_t [out opXmm] [opXmm; opXmm]) oprs in
+  let (_, (o2, (o3, ()))) = oprs in
+  if o2 = o3 then
+    let t = Public in
+    let b = check_if_consumes_fixed_time_outs outs args oprs ts t in
+    let AnalysisTaints rs ft cft oft = ts in
+    let ts = AnalysisTaints rs ft cft oft in
+    (b, instr_set_taints outs args oprs ts t)
+  else
+    check_if_instr_consumes_fixed_time ins ts
+
 let check_if_alloc_consumes_fixed_time (ins:S.ins) (ts:analysis_taints) : Pure (bool & analysis_taints)
   (requires BC.Alloc? ins)
   (ensures ins_consumes_fixed_time ins ts)
@@ -558,6 +594,8 @@ let check_if_pop_consumes_fixed_time (ins:S.ins) (ts:analysis_taints) : Pure (bo
 let check_if_ins_consumes_fixed_time ins ts =
   match ins with
   | BC.Instr _ _ (S.AnnotateXor64 _) -> check_if_xor_consumes_fixed_time ins ts
+  | BC.Instr _ _ (S.AnnotatePxor _) -> check_if_pxor_consumes_fixed_time ins ts
+  | BC.Instr _ _ (S.AnnotateVPxor _) -> check_if_vpxor_consumes_fixed_time ins ts
   | BC.Instr _ _ _ -> check_if_instr_consumes_fixed_time ins ts
   | BC.Push _ _ -> check_if_push_consumes_fixed_time ins ts
   | BC.Pop _ _ -> check_if_pop_consumes_fixed_time ins ts
@@ -748,12 +786,46 @@ let lemma_xor_leakage_free (ts:analysis_taints) (ins:S.ins) : Lemma
   else
     lemma_instr_leakage_free ts ins
 
+let lemma_pxor_leakage_free (ts:analysis_taints) (ins:S.ins) : Lemma
+  (requires BC.Instr? ins /\ S.AnnotatePxor? (BC.Instr?.annotation ins))
+  (ensures (
+    let (b, ts') = check_if_pxor_consumes_fixed_time ins ts in
+    b2t b ==> isConstantTime (Ins ins) ts /\ isLeakageFree (Ins ins) ts ts'
+  ))
+  =
+  let BC.Instr (InstrTypeRecord #outs #args #havoc_flags iins) oprs (S.AnnotatePxor eq) = ins in
+  let oprs:normal (instr_operands_t [inOut opXmm] [opXmm]) =
+    coerce_to_normal #(instr_operands_t [inOut opXmm] [opXmm]) oprs in
+  let (o1, (o2, ())) = oprs in
+  if o1 = o2 then
+    Vale.Arch.Types.lemma_quad32_xor()
+  else
+    lemma_instr_leakage_free ts ins
+
+let lemma_vpxor_leakage_free (ts:analysis_taints) (ins:S.ins) : Lemma
+  (requires BC.Instr? ins /\ S.AnnotateVPxor? (BC.Instr?.annotation ins))
+  (ensures (
+    let (b, ts') = check_if_vpxor_consumes_fixed_time ins ts in
+    b2t b ==> isConstantTime (Ins ins) ts /\ isLeakageFree (Ins ins) ts ts'
+  ))
+  =
+  let BC.Instr (InstrTypeRecord #outs #args #havoc_flags iins) oprs (S.AnnotateVPxor eq) = ins in
+  let oprs:normal (instr_operands_t [out opXmm] [opXmm; opXmm]) =
+    coerce_to_normal #(instr_operands_t [out opXmm] [opXmm; opXmm]) oprs in
+  let (_, (o1, (o2, ()))) = oprs in
+  if o1 = o2 then
+    Vale.Arch.Types.lemma_quad32_xor()
+  else
+    lemma_instr_leakage_free ts ins
+
 #reset-options "--initial_ifuel 1 --max_ifuel 1 --initial_fuel 1 --max_fuel 1 --z3rlimit 20"
 
 let lemma_ins_leakage_free ts ins =
   let b, ts' = check_if_ins_consumes_fixed_time ins ts in
   match ins with
   | BC.Instr _ _ (S.AnnotateXor64 _) -> lemma_xor_leakage_free ts ins
+  | BC.Instr _ _ (S.AnnotatePxor _) -> lemma_pxor_leakage_free ts ins
+  | BC.Instr _ _ (S.AnnotateVPxor _) -> lemma_vpxor_leakage_free ts ins  
   | BC.Instr _ _ _ -> lemma_instr_leakage_free ts ins
   | BC.Alloc _ -> ()
   | BC.Dealloc _ -> lemma_dealloc_leakage_free ts ins

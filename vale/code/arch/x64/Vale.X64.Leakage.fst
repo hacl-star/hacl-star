@@ -166,7 +166,7 @@ let rec check_if_block_consumes_fixed_time (block:S.codes) (ts:analysis_taints) 
 
 and check_if_code_consumes_fixed_time (code:S.code) (ts:analysis_taints) : bool & analysis_taints =
   match code with
-  | Ins ins -> check_if_ins_consumes_fixed_time ins ts
+  | Ins ins ->  let b, ts = check_if_ins_consumes_fixed_time ins ts in b, ts
 
   | Block block -> check_if_block_consumes_fixed_time block ts
 
@@ -180,7 +180,7 @@ and check_if_code_consumes_fixed_time (code:S.code) (ts:analysis_taints) : bool 
       if (not o1Public) then (false, ts)
       else
       let o2Public = operand_does_not_use_secrets (S.get_snd_ocmp ifCond) ts in
-      if (not o2Public) then (false, ts)
+      if (not o2Public) then (false, ts)      
       else
       let validIfTrue, tsIfTrue = check_if_code_consumes_fixed_time ifTrue ts in
       if (not validIfTrue) then (false, ts)

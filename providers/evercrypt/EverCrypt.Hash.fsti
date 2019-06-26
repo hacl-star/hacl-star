@@ -124,18 +124,8 @@ val alg_of_state: a:e_alg -> (
   (fun h0 -> invariant s h0)
   (fun h0 a' h1 -> h0 == h1 /\ a' == a))
 
-// Waiting for these to land in LowStar.Modifies
-let loc_in (l: M.loc) (h: HS.mem) =
-  M.(loc_not_unused_in h `loc_includes` l)
-
-let loc_unused_in (l: M.loc) (h: HS.mem) =
-  M.(loc_unused_in h `loc_includes` l)
-
-let fresh_loc (l: M.loc) (h0 h1: HS.mem) =
-  loc_unused_in l h0 /\ loc_in l h1
-
 val fresh_is_disjoint: l1:M.loc -> l2:M.loc -> h0:HS.mem -> h1:HS.mem -> Lemma
-  (requires (fresh_loc l1 h0 h1 /\ l2 `loc_in` h0))
+  (requires (B.fresh_loc l1 h0 h1 /\ l2 `B.loc_in` h0))
   (ensures (M.loc_disjoint l1 l2))
 
 // TR: this lemma is necessary to prove that the footprint is disjoint
@@ -147,7 +137,7 @@ val invariant_loc_in_footprint
   (m: HS.mem)
 : Lemma
   (requires (invariant s m))
-  (ensures (loc_in (footprint s m) m))
+  (ensures (B.loc_in (footprint s m) m))
   [SMTPat (invariant s m)]
 
 // TR: frame_invariant, just like all lemmas eliminating `modifies`
@@ -193,7 +183,7 @@ val alloca: a:alg -> StackInline (state a)
   (ensures (fun h0 s h1 ->
     invariant s h1 /\
     M.(modifies loc_none h0 h1) /\
-    fresh_loc (footprint s h1) h0 h1 /\
+    B.fresh_loc (footprint s h1) h0 h1 /\
     M.(loc_includes (loc_region_only true (HS.get_tip h1)) (footprint s h1))))
 
 (** @type: true
@@ -204,7 +194,7 @@ val create_in: a:alg -> r:HS.rid -> ST (state a)
   (ensures (fun h0 s h1 ->
     invariant s h1 /\
     M.(modifies loc_none h0 h1) /\
-    fresh_loc (footprint s h1) h0 h1 /\
+    B.fresh_loc (footprint s h1) h0 h1 /\
     M.(loc_includes (loc_region_only true r) (footprint s h1)) /\
     freeable h1 s))
 
@@ -215,7 +205,7 @@ val create: a:alg -> ST (state a)
   (ensures fun h0 s h1 ->
     invariant s h1 /\
     M.(modifies loc_none h0 h1) /\
-    fresh_loc (footprint s h1) h0 h1 /\
+    B.fresh_loc (footprint s h1) h0 h1 /\
     freeable h1 s)
 
 (** @type: true

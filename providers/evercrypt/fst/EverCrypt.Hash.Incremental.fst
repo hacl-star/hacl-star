@@ -124,26 +124,26 @@ let create_in a r =
 
   let buf = B.malloc r 0uy (Hacl.Hash.Definitions.block_len a) in
   (**) let h1 = ST.get () in
-  (**) assert (Hash.fresh_loc (B.loc_buffer buf) h0 h1);
+  (**) assert (B.fresh_loc (B.loc_buffer buf) h0 h1);
 
   let hash_state = Hash.create_in a r in
   (**) let h2 = ST.get () in
-  (**) assert (Hash.fresh_loc (Hash.footprint hash_state h2) h0 h2);
+  (**) assert (B.fresh_loc (Hash.footprint hash_state h2) h0 h2);
 
   let s = State hash_state buf 0UL (G.hide S.empty) in
-  (**) assert (Hash.fresh_loc (footprint_s h2 s) h0 h2);
+  (**) assert (B.fresh_loc (footprint_s h2 s) h0 h2);
 
   let p = B.malloc r s 1ul in
   (**) let h3 = ST.get () in
   (**) Hash.frame_invariant B.loc_none hash_state h2 h3;
   (**) Hash.frame_invariant_implies_footprint_preservation B.loc_none hash_state h2 h3;
-  (**) assert (Hash.fresh_loc (footprint_s h3 s) h0 h3);
-  (**) assert (Hash.fresh_loc (B.loc_addr_of_buffer p) h0 h3);
+  (**) assert (B.fresh_loc (footprint_s h3 s) h0 h3);
+  (**) assert (B.fresh_loc (B.loc_addr_of_buffer p) h0 h3);
 
   Hash.init #(G.hide a) hash_state;
   (**) let h4 = ST.get () in
-  (**) assert (Hash.fresh_loc (Hash.footprint hash_state h4) h0 h4);
-  (**) assert (Hash.fresh_loc (B.loc_buffer buf) h0 h4);
+  (**) assert (B.fresh_loc (Hash.footprint hash_state h4) h0 h4);
+  (**) assert (B.fresh_loc (B.loc_buffer buf) h0 h4);
   (**) Spec.Hash.Lemmas.update_multi_zero a (Hash.repr hash_state h4);
   (**) split_at_last_empty a;
   (**) B.modifies_only_not_unused_in B.loc_none h0 h4;
@@ -623,6 +623,7 @@ let update a p data len =
 inline_for_extraction noextract
 val mk_finish: a:Hash.alg -> finish_st a
 
+#restart-solver
 #reset-options "--z3rlimit 30 --max_fuel 0 --max_ifuel 0"
 inline_for_extraction noextract
 let mk_finish a p dst =
