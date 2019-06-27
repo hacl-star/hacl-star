@@ -35,7 +35,7 @@ let hkdf_round0 a prk info =
   let input = input.[ilen] <- u8 1 in
   HMAC.hmac a prk input
 
-
+#reset-options "--z3rlimit 50"
 val hkdf_round:
     a: Hash.algorithm
   -> prk: bytes{length prk <= Hash.max_input a}

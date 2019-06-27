@@ -317,7 +317,7 @@ let chacha20_update_vector_lemma_equiv_g_f_i_aux #w k n ctr0 msg bs i =
   lemma_i_div_sb1 w bs len i
   //assert (w * nb_v + j1 == j_s);
 
-#push-options "--z3rlimit 200"
+#push-options "--z3rlimit 400"
 val chacha20_update_vector_lemma_equiv_g_f_i:
     #w:lanes
   -> k:key

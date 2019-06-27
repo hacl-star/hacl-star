@@ -1573,7 +1573,7 @@ let lemma_store_felem_hi f hi =
   //assert ((v f4 * pow2 40) % pow2 40 = 0);
   logor_disjoint ((f2 >>. 12ul) |. (f3 <<. 14ul)) (f4 <<. 40ul) 40
 
-#push-options "--z3rlimit 200"
+#push-options "--z3rlimit 400"
 
 val lemma_tup64_mod_pow2_128: f:tup64_5 ->
   Lemma
