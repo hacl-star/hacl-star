@@ -19,49 +19,49 @@ type field_spec =
   | M51
   | M64
 
-unfold
+unfold noextract
 let limb (s:field_spec) =
   match s with
   | M51 -> uint64
   | M64 -> uint64
 
-unfold
+unfold noextract
 let limb_zero (s:field_spec) : limb s=
   match s with
   | M51 -> u64 0
   | M64 -> u64 0
 
-unfold
+unfold noextract
 let nlimb (s:field_spec) : size_t =
   match s with
   | M51 -> 5ul
   | M64 -> 4ul
 
-unfold
+unfold noextract
 let wide (s:field_spec) =
   match s with
   | M51 -> uint128
   | M64 -> uint64
 
-unfold
+unfold noextract
 let wide_zero (s:field_spec) : wide s=
   match s with
   | M51 -> u128 0
   | M64 -> u64 0
 
-unfold
+unfold noextract
 let nwide (s:field_spec) : size_t =
   match s with
   | M51 -> 5ul
   | M64 -> 8ul
 
-inline_for_extraction
+inline_for_extraction noextract
 let felem (s:field_spec) = lbuffer (limb s) (nlimb s)
-inline_for_extraction
+inline_for_extraction noextract
 let felem2 (s:field_spec) = lbuffer (limb s) (nlimb s +. nlimb s)
-inline_for_extraction
+inline_for_extraction noextract
 let felem_wide (s:field_spec) = lbuffer (wide s) (nwide s)
-inline_for_extraction
+inline_for_extraction noextract
 let felem_wide2 (s:field_spec) = lbuffer (wide s) (nwide s +. nwide s)
 
 noextract
@@ -75,7 +75,7 @@ noextract
 val feval: #s:field_spec -> h:mem -> e:felem s -> GTot P.elem
 let feval #s h e = (as_nat h e) % P.prime
 
-inline_for_extraction
+inline_for_extraction noextract
 val create_felem:
     s:field_spec
   -> StackInline (felem s)
@@ -94,7 +94,7 @@ let state_inv_t #s h f =
   | M51 -> F51.mul_inv_t h f
   | M64 -> True
 
-inline_for_extraction
+inline_for_extraction noextract
 val load_felem:
     #s:field_spec
   -> f:felem s
@@ -111,7 +111,7 @@ let load_felem #s f b =
   | M51 -> F51.load_felem f b
   | M64 -> F64.load_felem f b
 
-inline_for_extraction
+inline_for_extraction noextract
 val store_felem:
     #s:field_spec
   -> b:lbuffer uint64 4ul
@@ -127,7 +127,7 @@ let store_felem #s b f =
   | M51 -> F51.store_felem b f
   | M64 -> F64.store_felem b f
 
-inline_for_extraction
+inline_for_extraction noextract
 val set_zero:
     #s:field_spec
   -> f:felem s
@@ -141,7 +141,7 @@ let set_zero #s f =
   | M51 -> F51.set_zero f
   | M64 -> F64.set_zero f
 
-inline_for_extraction
+inline_for_extraction noextract
 val set_one:
     #s:field_spec
   -> f:felem s
@@ -155,7 +155,7 @@ let set_one #s f =
   | M51 -> F51.set_one f
   | M64 -> F64.set_one f
 
-inline_for_extraction
+inline_for_extraction noextract
 val copy_felem:
     #s:field_spec
   -> f:felem s
@@ -185,7 +185,7 @@ let fadd_post #s h out =
   | M51 -> F51.felem_fits h out (2, 4, 2, 2, 2)
   | M64 -> True
 
-inline_for_extraction
+inline_for_extraction noextract
 val fadd:
     #s:field_spec
   -> out:felem s
@@ -212,7 +212,7 @@ let fsub_post #s h out =
   | M51 -> F51.felem_fits h out (9, 10, 9, 9, 9)
   | M64 -> True
 
-inline_for_extraction
+inline_for_extraction noextract
 val fsub:
     #s:field_spec
   -> out:felem s
@@ -241,7 +241,7 @@ let fmul_pre #s h f1 f2 =
       F51.felem_fits h f2 (9, 10, 9, 9, 9)
   | M64 -> True
 
-inline_for_extraction
+inline_for_extraction noextract
 val fmul:
     #s:field_spec
   -> out:felem s
@@ -292,7 +292,7 @@ let fmul2_fsqr2_post #s h out =
 
 #reset-options "--z3rlimit 50 --max_fuel 2"
 
-inline_for_extraction
+inline_for_extraction noextract
 val fmul2:
     #s:field_spec
   -> out:felem2 s
@@ -330,7 +330,7 @@ let fmul1_pre #s h f1 f2 =
   | M51 -> F51.felem_fits h f1 (9, 10, 9, 9, 9) /\ F51.felem_fits1 f2 1
   | M64 -> v f2 < pow2 17
 
-inline_for_extraction
+inline_for_extraction noextract
 val fmul1:
     #s:field_spec
   -> out:felem s
@@ -356,7 +356,7 @@ let fsqr_pre #s h f =
   | M51 -> F51.felem_fits h f (9, 10, 9, 9, 9)
   | M64 -> True
 
-inline_for_extraction
+inline_for_extraction noextract
 val fsqr:
     #s:field_spec
   -> out:felem s
@@ -387,7 +387,7 @@ let fsqr2_pre #s h f =
       F51.felem_fits h f2 (9, 10, 9, 9, 9)
   | M64 -> True
 
-inline_for_extraction
+inline_for_extraction noextract
 val fsqr2:
     #s:field_spec
   -> out:felem2 s
@@ -413,7 +413,7 @@ let fsqr2 #s out f tmp =
   | M51 -> F51.fsqr2 out f
   | M64 -> F64.fsqr2 out f tmp
 
-inline_for_extraction
+inline_for_extraction noextract
 val cswap2:
     #s:field_spec
   -> bit:uint64{v bit <= 1}

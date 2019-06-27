@@ -53,9 +53,9 @@ static __inline__ cycles cpucycles_end(void)
 }
 
 //extern void Hacl_Poly1305_64_poly1305_mac(uint8_t* out, uint8_t* in, int in_len, uint8_t* k);
-extern void Hacl_Poly1305_32_poly1305_mac(uint8_t* out, uint8_t* in, int in_len, uint8_t* k);
-extern void Hacl_Poly1305_128_poly1305_mac(uint8_t* out, uint8_t* in, int in_len, uint8_t* k);
-extern void Hacl_Poly1305_256_poly1305_mac(uint8_t* out, uint8_t* in, int in_len, uint8_t* k);
+extern void Hacl_Poly1305_32_poly1305_mac(uint8_t* out, int in_len, uint8_t* in, uint8_t* k);
+extern void Hacl_Poly1305_128_poly1305_mac(uint8_t* out, int in_len, uint8_t* in, uint8_t* k);
+extern void Hacl_Poly1305_256_poly1305_mac(uint8_t* out, int in_len, uint8_t* in, uint8_t* k);
 
 /*
 extern void
@@ -153,7 +153,7 @@ int main() {
   if (ok) printf("Success!\n");
   else printf("**FAILED**\n"); */
 
-  Hacl_Poly1305_32_poly1305_mac(comp,in,in_len,key);
+  Hacl_Poly1305_32_poly1305_mac(comp,in_len,in,key);
   printf("Poly1305 (32-bit) Result:\n");
   printf("computed:");
   for (int i = 0; i < 16; i++)
@@ -169,7 +169,7 @@ int main() {
   if (ok) printf("Success!\n");
   else printf("**FAILED**\n");
 
-  Hacl_Poly1305_128_poly1305_mac(comp,in,in_len,key);
+  Hacl_Poly1305_128_poly1305_mac(comp,in_len,in,key);
   printf("Poly1305 (128-bit) Result:\n");
   printf("computed:");
   for (int i = 0; i < 16; i++)
@@ -185,7 +185,7 @@ int main() {
   if (ok) printf("Success!\n");
   else printf("**FAILED**\n");
 
-  Hacl_Poly1305_256_poly1305_mac(comp,in,in_len,key);
+  Hacl_Poly1305_256_poly1305_mac(comp,in_len,in,key);
   printf("Poly1305 (256-bit) Result:\n");
   printf("computed:");
   for (int i = 0; i < 16; i++)
@@ -268,7 +268,7 @@ int main() {
   if (ok) printf("Success!\n");
   else printf("**FAILED**\n"); */
   
-  Hacl_Poly1305_32_poly1305_mac(comp,in2,in_len2,key2);
+  Hacl_Poly1305_32_poly1305_mac(comp,in_len2,in2,key2);
   printf("Poly1305 (32-bit) Result:\n");
   printf("computed:");
   for (int i = 0; i < 16; i++)
@@ -283,7 +283,7 @@ int main() {
     ok = ok & (exp2[i] == comp[i]);
   if (ok) printf("Success!\n");
 
-  Hacl_Poly1305_128_poly1305_mac(comp,in2,in_len2,key2);
+  Hacl_Poly1305_128_poly1305_mac(comp,in_len2,in2,key2);
   printf("Poly1305 (128-bit) Result:\n");
   printf("computed:");
   for (int i = 0; i < 16; i++)
@@ -299,7 +299,7 @@ int main() {
   if (ok) printf("Success!\n");
   else printf("**FAILED**\n");
 
-  Hacl_Poly1305_256_poly1305_mac(comp,in2,in_len2,key2);
+  Hacl_Poly1305_256_poly1305_mac(comp,in_len2,in2,key2);
   printf("Poly1305 (256-bit) Result:\n");
   printf("computed:");
   for (int i = 0; i < 16; i++)
@@ -330,7 +330,7 @@ int main() {
   if (ok) printf("Success!\n");
   else printf("**FAILED**\n"); */
   
-  Hacl_Poly1305_32_poly1305_mac(comp,in3,in_len3,key3);
+  Hacl_Poly1305_32_poly1305_mac(comp,in_len3,in3,key3);
   printf("Poly1305 (32-bit) Result:\n");
   printf("computed:");
   for (int i = 0; i < 16; i++)
@@ -345,7 +345,7 @@ int main() {
     ok = ok & (exp3[i] == comp[i]);
   if (ok) printf("Success!\n");
 
-  Hacl_Poly1305_128_poly1305_mac(comp,in3,in_len3,key3);
+  Hacl_Poly1305_128_poly1305_mac(comp,in_len3,in3,key3);
   printf("Poly1305 (128-bit) Result:\n");
   printf("computed:");
   for (int i = 0; i < 16; i++)
@@ -361,7 +361,7 @@ int main() {
   if (ok) printf("Success!\n");
   else printf("**FAILED**\n");
 
-  Hacl_Poly1305_256_poly1305_mac(comp,in3,in_len3,key3);
+  Hacl_Poly1305_256_poly1305_mac(comp,in_len3,in3,key3);
   printf("Poly1305 (256-bit) Result:\n");
   printf("computed:");
   for (int i = 0; i < 16; i++)
@@ -404,13 +404,13 @@ int main() {
   memset(plain,'P',SIZE);
   memset(key,'K',16);
   for (int j = 0; j < ROUNDS; j++) {
-    Hacl_Poly1305_32_poly1305_mac(plain,plain,SIZE,key);
+    Hacl_Poly1305_32_poly1305_mac(plain,SIZE,plain,key);
   }
 
   t1 = clock();
   a = cpucycles_begin();
   for (int j = 0; j < ROUNDS; j++) {
-    Hacl_Poly1305_32_poly1305_mac(tag,plain,SIZE,key);
+    Hacl_Poly1305_32_poly1305_mac(tag,SIZE,plain,key);
     res ^= tag[0] ^ tag[15];
   }
   b = cpucycles_end();
@@ -421,13 +421,13 @@ int main() {
   memset(plain,'P',SIZE);
   memset(key,'K',16);
   for (int j = 0; j < ROUNDS; j++) {
-    Hacl_Poly1305_128_poly1305_mac(plain,plain,SIZE,key);
+    Hacl_Poly1305_128_poly1305_mac(plain,SIZE,plain,key);
   }
 
   t1 = clock();
   a = cpucycles_begin();
   for (int j = 0; j < ROUNDS; j++) {
-    Hacl_Poly1305_128_poly1305_mac(tag,plain,SIZE,key);
+    Hacl_Poly1305_128_poly1305_mac(tag,SIZE,plain,key);
     res ^= tag[0] ^ tag[15];
   }
   b = cpucycles_end();
@@ -438,13 +438,13 @@ int main() {
   memset(plain,'P',SIZE);
   memset(key,'K',16);
   for (int j = 0; j < ROUNDS; j++) {
-    Hacl_Poly1305_256_poly1305_mac(plain,plain,SIZE,key);
+    Hacl_Poly1305_256_poly1305_mac(plain,SIZE,plain,key);
   }
 
   t1 = clock();
   a = cpucycles_begin();
   for (int j = 0; j < ROUNDS; j++) {
-    Hacl_Poly1305_256_poly1305_mac(tag,plain,SIZE,key);
+    Hacl_Poly1305_256_poly1305_mac(tag,SIZE,plain,key);
     res ^= tag[0] ^ tag[15];
   }
   b = cpucycles_end();

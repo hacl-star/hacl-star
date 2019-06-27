@@ -10,7 +10,7 @@ open Lib.IntTypes
   * or a vector type.
   *)
 type numeric_t =
-  | Int : inttype -> numeric_t
+  | Int : t:inttype{unsigned t} -> numeric_t
   | Vec : numeric_t -> size_nat -> numeric_t
 
 val dimension: numeric_t -> nat

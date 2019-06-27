@@ -328,10 +328,11 @@ let matrix_mul #n1 #n2 #n3 a b c =
       let h1 = ST.get() in
       Lib.Loops.for (size 0) n3
         (fun h2 k -> mul_inner_inv h0 h1 h2 a b c (f (v i)) i k)
-        (fun k -> mul_inner1 h0 h1 a b c i k (f (v i)));
+        (fun k -> admit();mul_inner1 h0 h1 a b c i k (f (v i)));
       let h1 = ST.get() in
-      let q i1 = forall k. get h1 c i1 k == f i1 k in
-      onemore (fun i1 -> i1 < v n1) q (v i)
+      let q i1 = forall (k:nat{k < v n3}). get h1 c i1 k == f i1 k in
+      onemore (fun i1 -> i1 < v n1) q (v i);
+      assert (forall (i1:nat{i1 < v n1 /\ i1 <= v i}) (k:nat{k < v n3}). get h1 c i1 k == f i1 k)
     );
   let h2 = ST.get() in
   M.extensionality (as_matrix h2 c) (M.mul (as_matrix h0 a) (as_matrix h0 b))
@@ -349,7 +350,7 @@ val mget_s:
   -> Stack elem
     (requires fun h0 -> live h0 a)
     (ensures  fun h0 x h1 ->
-      modifies loc_none h0 h1 /\
+      modifies0 h0 h1 /\
       x == M.mget_s (as_matrix h0 a) (v i) (v j))
 let mget_s #n1 #n2 a i j =
   M.index_lt_s (v n1) (v n2) (v i) (v j);
@@ -380,7 +381,6 @@ let mul_inner_s #n1 #n2 #n3 a b i k =
   [@ inline_let ]
   let f l = get h0 a (v i) l *. get_s h0 b l (v k) in
   let res = create #uint16 (size 1) (u16 0) in
-
   let h1 = ST.get() in
   Lib.Loops.for (size 0) n2
     (fun h2 j -> live h1 res /\ live h2 res /\
@@ -458,7 +458,8 @@ let matrix_mul_s #n1 #n2 #n3 a b c =
         (fun k -> mul_inner1_s h0 h1 a b c i k (f (v i)));
       let h1 = ST.get() in
       let q i1 = forall k. get h1 c i1 k == f i1 k in
-      onemore (fun i1 -> i1 < v n1) q (v i)
+      onemore (fun i1 -> i1 < v n1) q (v i);
+      assert (forall (i1:nat{i1 < v n1 /\ i1 <= v i}) (k:nat{k < v n3}). get h1 c i1 k == f i1 k)
     );
   let h2 = ST.get() in
   M.extensionality (as_matrix h2 c) (M.mul_s (as_matrix h0 a) (as_matrix h0 b))

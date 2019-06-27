@@ -25,7 +25,7 @@ let vec_v #t #w x = admit()
 let vec_zero (t:v_inttype) (w:width) =
   match t,w with
   | U128,1 -> vec128_zero
-  | _,1 -> nat_to_uint #t #SEC 0
+  | _,1 -> mk_int #t #SEC 0
   | U8, 16
   | U32,4
   | U64,2 -> vec128_zero
@@ -37,7 +37,7 @@ let vec_zero (t:v_inttype) (w:width) =
 let vec_counter (t:v_inttype) (w:width) =
   match t,w with
   | U128,1 -> vec128_zero
-  | _,1 -> nat_to_uint #t #SEC 0
+  | _,1 -> mk_int #t #SEC 0
   | U32,4 -> vec128_load32s (u32 3) (u32 2) (u32 1) (u32 0)
   | U64,2 -> vec128_load64s (u64 1) (u64 0)
   | U32,8 -> vec256_load32s (u32 7) (u32 6) (u32 5) (u32 4) (u32 3) (u32 2) (u32 1) (u32 0)

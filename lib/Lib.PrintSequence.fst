@@ -87,36 +87,42 @@ let print_uint64_dec_pad x =
   IO.print_uint64_dec_pad (u64_to_UInt64 x)
 
 
-let print_label_nat64 s x =
+let print_label_nat64 flag s x =
+  if not flag then () else (
   IO.print_string s;
   IO.print_string ": ";
   print_nat64_dec x;
-  IO.print_string "\n"
+  IO.print_string "\n")
 
-let print_label_uint8 s x =
+let print_label_uint8 flag s x =
+  if not flag then () else (
   IO.print_string s;
   IO.print_string ": ";
   print_uint8_hex_pad x;
-  IO.print_string "\n"
+  IO.print_string "\n")
 
-let print_label_uint32 s x =
+let print_label_uint32 flag s x =
+  if not flag then () else (
   IO.print_string s;
   IO.print_string ": ";
   print_uint32_hex_pad x;
-  IO.print_string "\n"
+  IO.print_string "\n")
 
-let print_label_uint64 s x =
+let print_label_uint64 flag s x =
+  if not flag then () else (
   IO.print_string s;
   IO.print_string ": ";
   print_uint64_hex_pad x;
-  IO.print_string "\n"
+  IO.print_string "\n")
 
 
-let print_list_nat64 l =
+let print_list_nat64 flag l =
+  if not flag then ()
+  else (
   repeat_range_all_ml 0 (List.Tot.length l) (fun i _ ->
     print_nat64_dec (List.Tot.index l i);
     IO.print_string " "
-) ()
+  ) ())
 
 
 let print_string flag s = if flag then IO.print_string s else ()

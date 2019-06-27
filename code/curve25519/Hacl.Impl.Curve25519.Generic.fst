@@ -29,10 +29,10 @@ friend Lib.LoopCombinators
 #reset-options "--z3rlimit 50 --max_fuel 2 --using_facts_from '* -FStar.Seq -Hacl.Spec.*'"
 //#set-options "--debug Hacl.Impl.Curve25519.Generic --debug_level ExtractNorm"
 
-inline_for_extraction
+inline_for_extraction noextract
 let scalar = lbuffer uint8 32ul
 
-inline_for_extraction
+inline_for_extraction noextract
 val scalar_bit:
     s:scalar
   -> n:size_t{v n < 256}
@@ -47,7 +47,7 @@ let scalar_bit s n =
   uintv_extensionality (mod_mask #U8 1ul) (u8 1);
   to_u64 ((s.(n /. 8ul) >>. (n %. 8ul)) &. u8 1)
 
-inline_for_extraction
+inline_for_extraction noextract
 val decode_point_:
     #s:field_spec
   -> o:point s
@@ -81,12 +81,12 @@ let decode_point_ #s o i =
   pop_frame()
 
 (* WRAPPER to Prevent Inlining *)
-inline_for_extraction
+inline_for_extraction noextract
 let decode_point_51 (o:point51) i = decode_point_ #M51 o i
-inline_for_extraction
+inline_for_extraction noextract
 let decode_point_64 (o:point64) i = decode_point_ #M64 o i
 
-inline_for_extraction
+inline_for_extraction noextract
 val decode_point:
     #s:field_spec
   -> o:point s
@@ -103,7 +103,7 @@ let decode_point #s o i =
 (* WRAPPER to Prevent Inlining *)
 
 
-inline_for_extraction
+inline_for_extraction noextract
 val encode_point_:
     #s:field_spec
   -> o:lbuffer uint8 32ul
@@ -139,12 +139,12 @@ let encode_point_ #s o i =
   pop_frame()
 
 (* WRAPPER to Prevent Inlining *)
-inline_for_extraction
+inline_for_extraction noextract
 let encode_point_51 o (i:point51) = encode_point_ #M51 o i
-inline_for_extraction
+inline_for_extraction noextract
 let encode_point_64 o (i:point64) = encode_point_ #M64 o i
 
-inline_for_extraction
+inline_for_extraction noextract
 val encode_point:
     #s:field_spec
   -> o:lbuffer uint8 32ul
@@ -161,7 +161,7 @@ let encode_point #s o i =
   | M64 -> encode_point_64 o i
 (* WRAPPER to Prevent Inlining *)
 
-inline_for_extraction
+inline_for_extraction noextract
 val cswap2:
     #s:field_spec
   -> bit:uint64{v bit <= 1}
@@ -181,7 +181,7 @@ let cswap2 #s bit p0 p1 =
 
 #set-options "--z3rlimit 150 --max_fuel 0 --max_ifuel 3"
 
-inline_for_extraction
+inline_for_extraction noextract
 val ladder_step:
     #s:field_spec
   -> k:scalar
@@ -237,7 +237,7 @@ let ladder_step #s k q i p01_tmp1_swap tmp2 =
 
 #set-options "--max_fuel 2"
 
-inline_for_extraction
+inline_for_extraction noextract
 val ladder_step_loop:
     #s:field_spec
   -> k:scalar
@@ -301,7 +301,7 @@ let ladder_step_loop #s k q p01_tmp1_swap tmp2 =
 
 #set-options "--max_fuel 0 --z3rlimit 150"
 
-inline_for_extraction
+inline_for_extraction noextract
 val ladder0_:
     #s:field_spec
   -> k:scalar
@@ -348,7 +348,7 @@ let ladder0_ #s k q p01_tmp1_swap tmp2 =
   let sw = swap.(0ul) in
   cswap2 #s sw nq nq_p1
 
-inline_for_extraction
+inline_for_extraction noextract
 val ladder1_:
     #s:field_spec
   -> p01_tmp1:lbuffer (limb s) (8ul *! nlimb s)
@@ -374,7 +374,7 @@ let ladder1_ #s p01_tmp1 tmp2 =
   point_double nq tmp1 tmp2;
   point_double nq tmp1 tmp2
 
-inline_for_extraction
+inline_for_extraction noextract
 val ladder2_:
     #s:field_spec
   -> k:scalar
@@ -409,7 +409,7 @@ let ladder2_ #s k q p01_tmp1_swap tmp2 =
   ladder0_ #s k q p01_tmp1_swap tmp2;
   ladder1_ #s p01_tmp1 tmp2
 
-inline_for_extraction
+inline_for_extraction noextract
 val ladder3_:
     #s:field_spec
   -> q:point s
@@ -450,7 +450,7 @@ let ladder3_ #s q p01 =
     state_inv_t h0 (get_x p0) /\ state_inv_t h0 (get_z p0) /\
     state_inv_t h0 (get_x p1) /\ state_inv_t h0 (get_z p1))
 
-inline_for_extraction
+inline_for_extraction noextract
 val ladder4_:
     #s:field_spec
   -> k:scalar
@@ -483,7 +483,7 @@ let ladder4_ #s k q p01_tmp1_swap tmp2 =
   assert (fget_xz h1 p0 == M.montgomery_ladder1 (fget_x h0 q) (as_seq h0 k));
   M.lemma_montgomery_ladder (fget_x h0 q) (as_seq h0 k)
 
-inline_for_extraction
+inline_for_extraction noextract
 val montgomery_ladder_:
     #s:field_spec
   -> o:point s
@@ -516,7 +516,7 @@ let montgomery_ladder_51 (out:point51) key (init:point51) = montgomery_ladder_ #
 [@CInline]
 let montgomery_ladder_64 (out:point64) key (init:point64) = montgomery_ladder_ #M64 out key init
 
-inline_for_extraction
+inline_for_extraction noextract
 val montgomery_ladder:
   #s:field_spec
   -> o:point s

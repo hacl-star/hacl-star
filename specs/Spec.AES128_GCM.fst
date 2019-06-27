@@ -51,7 +51,7 @@ let ghash text aad gf_key tag_key =
   tag
 
 val gcm:
-    k: key
+    k: AES.aes_key AES.AES128
   -> n: nonce
   -> m: bytes{length m <= max_size_t /\ length m + padlen (length m) <= max_size_t}
   -> aad: bytes {length aad <= max_size_t /\ length aad + padlen (length aad) <= max_size_t} ->
@@ -60,8 +60,8 @@ val gcm:
 
 let gcm k n m aad =
   let nlen = length n in
-  let tag_key = AES.aes_key_block1 k nlen n in
-  let gf_key = AES.aes_key_block0 k size_nonce (create size_nonce (u8 0)) in
+  let tag_key = AES.aes_ctr_key_block1 AES.AES128 k nlen n in
+  let gf_key = AES.aes_ctr_key_block0 AES.AES128 k size_nonce (create size_nonce (u8 0)) in
   let mac = ghash m aad gf_key tag_key in
   mac
 
@@ -77,7 +77,7 @@ let aead_encrypt k n m aad =
   let mlen = length m in
   let nonce = create size_nonce (u8 0) in
   let nonce = update_sub nonce 0 size_nonce n in
-  let c = AES.aes128_encrypt_bytes k size_nonce nonce 2 m in
+  let c = AES.aes128_ctr_encrypt_bytes k size_nonce nonce 2 m in
   let mac = gcm k nonce c aad in
   let result = create (mlen + size_block) (u8 0) in
   let result = update_slice result 0 mlen c in
@@ -99,5 +99,5 @@ let aead_decrypt k n c tag aad =
   let nonce = update_sub nonce 0 size_nonce n in
   let computed_tag = gcm k nonce c aad in
   if lbytes_eq computed_tag tag then
-    Some (AES.aes128_encrypt_bytes k size_nonce nonce 2 c)
+    Some (AES.aes128_ctr_encrypt_bytes k size_nonce nonce 2 c)
   else None

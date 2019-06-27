@@ -33,7 +33,7 @@ let as_tup4 (h:mem) (f:felem) : GTot S.felem4 =
   let s3 = s.[3] in
   (s0, s1, s2, s3)
 
-inline_for_extraction
+inline_for_extraction noextract
 val create_felem:
   unit -> StackInline felem
   (requires fun _ -> True)
@@ -42,7 +42,7 @@ val create_felem:
     as_nat h1 f == 0)
 let create_felem () = create 4ul (u64 0)
 
-inline_for_extraction
+inline_for_extraction noextract
 val load_felem:
     f:felem
   -> u64s:lbuffer uint64 4ul
@@ -60,7 +60,7 @@ let load_felem f u64s =
   f.(2ul) <- u64s.(2ul);
   f.(3ul) <- u64s.(3ul)
 
-inline_for_extraction
+inline_for_extraction noextract
 val carry_pass_store:
     f:felem
  -> Stack unit
@@ -74,7 +74,7 @@ let carry_pass_store f =
   f.(3ul) <- f3 &. u64 0x7fffffffffffffff;
   let carry = add1 f f (u64 19 *! top_bit) in ()
 
-inline_for_extraction
+inline_for_extraction noextract
 val store_felem:
     u64s:lbuffer uint64 4ul
   -> f:felem
@@ -108,7 +108,7 @@ let store_felem u64s f =
   let h3 = ST.get () in
   Hacl.Impl.Curve25519.Lemmas.lemma_nat_from_uints64_le_4 (as_seq h3 u64s)
 
-inline_for_extraction
+inline_for_extraction noextract
 val set_zero:
   f:felem -> Stack unit
   (requires fun h -> live h f)
@@ -121,7 +121,7 @@ let set_zero f =
   f.(2ul) <- u64 0;
   f.(3ul) <- u64 0
 
-inline_for_extraction
+inline_for_extraction noextract
 val set_one:
   f:felem -> Stack unit
   (requires fun h -> live h f)
@@ -134,7 +134,7 @@ let set_one f =
   f.(2ul) <- u64 0;
   f.(3ul) <- u64 0
 
-inline_for_extraction
+inline_for_extraction noextract
 val copy_felem:
     f1:felem
   -> f2:felem

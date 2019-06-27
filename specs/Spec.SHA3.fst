@@ -175,7 +175,7 @@ let squeeze
   let outBlocks = outputByteLen / rateInBytes in
   let a (i:nat{i <= outBlocks}) = state in
   let s, output =
-    generate_blocks rateInBytes outBlocks a
+    generate_blocks rateInBytes outBlocks outBlocks a
       (squeeze_inner rateInBytes outputByteLen) s
   in
   let remOut = outputByteLen % rateInBytes in

@@ -153,13 +153,13 @@ let frodo_gen_matrix_cshake_4x1 n seed_len seed r i res =
   let r2 = sub r (size 4 *! n) (size 2 *! n) in
   let r3 = sub r (size 6 *! n) (size 2 *! n) in
   let ctr0 = size_to_uint32 (size 256 +. size 4 *! i +. size 0) in
-  uintv_extensionality (to_u16 ctr0) (u16 (256 + 4 * v i + 0));
+  assert (to_u16 ctr0 == u16 (256 + 4 * v i + 0));
   let ctr1 = size_to_uint32 (size 256 +. size 4 *! i +. size 1) in
-  uintv_extensionality (to_u16 ctr1) (u16 (256 + 4 * v i + 1));
+  assert (to_u16 ctr1 == u16 (256 + 4 * v i + 1));
   let ctr2 = size_to_uint32 (size 256 +. size 4 *! i +. size 2) in
-  uintv_extensionality (to_u16 ctr2) (u16 (256 + 4 * v i + 2));
+  assert (to_u16 ctr2 == u16 (256 + 4 * v i + 2));
   let ctr3 = size_to_uint32 (size 256 +. size 4 *! i +. size 3) in
-  uintv_extensionality (to_u16 ctr3) (u16 (256 + 4 * v i + 3));
+  assert (to_u16 ctr3 == u16 (256 + 4 * v i + 3));
   Hacl.Keccak.cshake128_frodo_4x seed_len seed
     (to_u16 ctr0) (to_u16 ctr1) (to_u16 ctr2) (to_u16 ctr3)
     (size 2 *! n) r0 r1 r2 r3;

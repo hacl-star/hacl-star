@@ -29,7 +29,8 @@ FSTAR_INCLUDE_DIRS = \
   $(HACL_HOME)/lib/c \
   $(HACL_HOME)/code/curve25519 \
   $(HACL_HOME)/code/curve25519/lemmas \
-  $(HACL_HOME)/specs/lemmas
+  $(HACL_HOME)/specs/lemmas \
+  $(HACL_HOME)/code/hash
 
 FSTAR_FLAGS = $(OTHERFLAGS) --cmi \
   --cache_checked_modules --odir $(OUTPUT_DIR) \
@@ -53,9 +54,6 @@ $(HINT_DIR):
 	$(FSTAR) --dep full $(ROOTS) --extract '* -Prims -FStar +FStar.UInt128 -LowStar -Spec' > $@
 
 include .depend
-
-$(HINT_DIR):
-	mkdir -p $@
 
 %.checked: | .depend $(HINT_DIR)
 	$(FSTAR) $< $(ENABLE_HINTS) --hint_file $(HINT_DIR)/$(notdir $*).hints && \

@@ -332,9 +332,7 @@ let loadState rateInBytes input s =
         Loop.unfold_repeati 25 (spec h0) (as_seq h0 s) (v j);
         let h0 = ST.get() in
         let x = uint_from_bytes_le #U64 (sub block (j *! 8ul) 8ul) in
-        s.(j) <- s.(j) ^. x;
-        let h1 = ST.get() in
-        assert(x == (Lib.ByteSequence.uint_from_bytes_le #U64 (LSeq.sub (as_seq h0 block) (v j * 8) 8)))
+        s.(j) <- s.(j) ^. x
       ))
 
 inline_for_extraction noextract

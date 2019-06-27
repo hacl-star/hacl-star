@@ -114,10 +114,14 @@ let chacha20_init (k:key) (n:nonce) (ctr0:counter) : Tot state =
   st
 
 let chacha20_set_counter (st:state) (c:counter) : Tot state =
-  st.[12] <- (u32 c)
+  st.[12] <- u32 c
 
 let chacha20_key_block0 (k:key) (n:nonce) : Tot block =
   let st = chacha20_init k n 0 in
+  let st = chacha20_core 0 st in
+  uints_to_bytes_le st
+
+let chacha20_key_block (st:state) : Tot block =
   let st = chacha20_core 0 st in
   uints_to_bytes_le st
 
@@ -145,7 +149,7 @@ let chacha20_encrypt_last
 
 val chacha20_update:
     ctx: state
-  -> msg: bytes{length msg / size_block + v ctx.[12] <= max_size_t}
+  -> msg: bytes{length msg <= max_size_t}
   -> cipher: bytes{length cipher == length msg}
 
 let chacha20_update ctx msg =
@@ -159,7 +163,7 @@ val chacha20_encrypt_bytes:
     k: key
   -> n: nonce
   -> c: counter
-  -> msg: bytes{length msg / size_block + c <= max_size_t}
+  -> msg: bytes{length msg <= max_size_t}
   -> cipher: bytes{length cipher == length msg}
 
 let chacha20_encrypt_bytes key nonce ctr0 msg =
@@ -171,7 +175,7 @@ val chacha20_decrypt_bytes:
     k: key
   -> n: nonce
   -> c: counter
-  -> cipher: bytes{length cipher / size_block + c <= max_size_t}
+  -> cipher: bytes{length cipher <= max_size_t}
   -> msg: bytes{length cipher == length msg}
 
 let chacha20_decrypt_bytes key nonce ctr0 cipher =
