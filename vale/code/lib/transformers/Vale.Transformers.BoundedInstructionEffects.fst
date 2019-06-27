@@ -154,7 +154,8 @@ let locations_of_ocmp o =
   | OGt o1 o2 ->
     both (locations_of_operand64 o1) `L.append` both (locations_of_operand64 o2)
 
-#push-options "--z3rlimit 30 --max_fuel 2 --max_ifuel 1 --z3refresh"
+#push-options "--z3rlimit 50 --initial_fuel 2 --max_fuel 2 --initial_ifuel 1 --max_ifuel 1"
+#restart-solver
 let rec lemma_instr_write_outputs_only_affects_write
     (outs:list instr_out) (args:list instr_operand)
     (vs:instr_ret_t outs) (oprs:instr_operands_t outs args) (s_orig s:machine_state)
@@ -184,6 +185,7 @@ let rec lemma_instr_write_outputs_only_affects_write
     )
 #pop-options
 
+#push-options "--initial_fuel 2 --max_fuel 2 --initial_ifuel 1 --max_ifuel 1"
 let lemma_eval_instr_only_affects_write
     (it:instr_t_record) (oprs:instr_operands_t it.outs it.args) (ann:instr_annotation it)
     (s0:machine_state)
@@ -205,6 +207,7 @@ let lemma_eval_instr_only_affects_write
   let Some vs = vs in
   let _ = instr_write_outputs outs args vs oprs s0 s1 in
   lemma_instr_write_outputs_only_affects_write outs args vs oprs s0 s1 a
+#pop-options
 
 let lemma_machine_eval_ins_st_only_affects_write_aux (i:ins{Instr? i}) (s:machine_state) (a:location) :
   Lemma
@@ -226,6 +229,7 @@ let lemma_machine_eval_ins_st_only_affects_write (i:ins{Instr? i}) (s:machine_st
   FStar.Classical.forall_intro (
     FStar.Classical.move_requires (lemma_machine_eval_ins_st_only_affects_write_aux i s))
 
+#push-options "--initial_fuel 4 --max_fuel 4 --initial_ifuel 2 --max_ifuel 2"
 let lemma_instr_eval_operand_explicit_same_read_both
     (i:instr_operand_explicit) (o:instr_operand_t i)
     (s1 s2:machine_state) :
@@ -235,7 +239,9 @@ let lemma_instr_eval_operand_explicit_same_read_both
     (ensures (
         (instr_eval_operand_explicit i o s1) ==
         (instr_eval_operand_explicit i o s2))) = ()
+#pop-options
 
+#push-options "--initial_fuel 4 --max_fuel 4 --initial_ifuel 2 --max_ifuel 2"
 let lemma_instr_eval_operand_implicit_same_read_both
     (i:instr_operand_implicit)
     (s1 s2:machine_state) :
@@ -245,6 +251,7 @@ let lemma_instr_eval_operand_implicit_same_read_both
     (ensures (
         (instr_eval_operand_implicit i s1) ==
         (instr_eval_operand_implicit i s2))) = ()
+#pop-options
 
 let rec lemma_unchanged_at_append (l1 l2:locations) (s1 s2:machine_state) :
   Lemma
@@ -392,6 +399,7 @@ let lemma_instr_write_output_implicit_only_writes
          unchanged_except locs s2 s2'))) = ()
 #pop-options
 
+#push-options "--initial_fuel 2 --max_fuel 2 --initial_ifuel 1 --max_ifuel 1"
 let rec lemma_unchanged_at'_mem (as:locations) (a:location) (s1 s2:machine_state) :
   Lemma
     (requires (
@@ -404,6 +412,7 @@ let rec lemma_unchanged_at'_mem (as:locations) (a:location) (s1 s2:machine_state
   | x :: xs ->
     if a = x then () else
     lemma_unchanged_at'_mem xs a s1 s2
+#pop-options
 
 let rec lemma_unchanged_except_not_mem (as:locations) (a:location) :
   Lemma
@@ -475,7 +484,7 @@ let lemma_instr_write_outputs_only_affects_write_extend
     (FStar.Classical.move_requires (lemma_instr_write_outputs_only_affects_write outs args vs oprs s_orig s));
   lemma_unchanged_except_extend locs_extension locs s s'
 
-#push-options "--z3rlimit 150 --max_fuel 2 --max_ifuel 1"
+#push-options "--z3rlimit 200 --initial_fuel 2 --max_fuel 2 --initial_ifuel 1 --max_ifuel 1"
 let rec lemma_instr_write_outputs_only_writes
     (outs:list instr_out) (args:list instr_operand)
     (vs:instr_ret_t outs) (oprs:instr_operands_t outs args)
@@ -572,6 +581,7 @@ let rec lemma_unchanged_at'_maintained_upon_flag_update (locs:locations) (s1 s2:
   | [] -> ()
   | x :: xs -> lemma_unchanged_at'_maintained_upon_flag_update xs s1 s2 flags
 
+#push-options "--initial_fuel 2 --max_fuel 2 --initial_ifuel 1 --max_ifuel 1"
 let lemma_eval_instr_unchanged_at'
     (it:instr_t_record) (oprs:instr_operands_t it.outs it.args) (ann:instr_annotation it)
     (s1 s2:machine_state) :
@@ -618,6 +628,7 @@ let lemma_eval_instr_unchanged_at'
         lemma_unchanged_except_not_mem locs ALocCf
       )
     ) else ()
+#pop-options
 
 let lemma_machine_eval_ins_st_ok (i:ins{Instr? i}) (s1 s2:machine_state) :
   Lemma
@@ -647,6 +658,7 @@ let lemma_machine_eval_ins_st_unchanged_behavior (i:ins{Instr? i}) (s1 s2:machin
   let Instr it oprs ann = i in
   lemma_eval_instr_unchanged_at' it oprs ann s1 s2
 
+#push-options "--initial_fuel 3 --max_fuel 3 --initial_ifuel 1 --max_ifuel 1"
 let rec lemma_machine_eval_ins_st_constant_on_execution (i:ins{Instr? i}) (s:machine_state) :
   Lemma
     (ensures (constant_on_execution (rw_set_of_ins i).loc_constant_writes (machine_eval_ins_st i) s)) =
@@ -688,7 +700,9 @@ let rec lemma_machine_eval_ins_st_constant_on_execution (i:ins{Instr? i}) (s:mac
           lemma_instr_write_outputs_only_affects_write outs args vs oprs s0 s1 ALocOf
       )
   ) else ()
+#pop-options
 
+#push-options "--initial_fuel 3 --max_fuel 3 --initial_ifuel 1 --max_ifuel 1"
 let lemma_machine_eval_ins_st_bounded_effects_Instr (i:ins{Instr? i}) :
   Lemma
     (ensures (
@@ -699,6 +713,7 @@ let lemma_machine_eval_ins_st_bounded_effects_Instr (i:ins{Instr? i}) :
       FStar.Classical.move_requires (lemma_machine_eval_ins_st_ok i s1));
   FStar.Classical.forall_intro_2 (fun s1 ->
       FStar.Classical.move_requires (lemma_machine_eval_ins_st_unchanged_behavior i s1))
+#pop-options
 
 (* See fsti *)
 let lemma_machine_eval_ins_st_bounded_effects i =
@@ -715,68 +730,115 @@ let rec lemma_unchanged_at_trace (locs:locations) (s1 s2:machine_state) trace1 t
   | x :: xs ->
     lemma_unchanged_at_trace xs s1 s2 trace1 trace2
 
-(* See fsti *)
-let lemma_machine_eval_code_Ins_bounded_effects i fuel =
+let machine_eval_code_Ins i fuel : st unit =
+  (fun s -> (), (Some?.v (machine_eval_code (Ins i) fuel s)))
+
+let lemma_machine_eval_code_Ins_bounded_effects_aux1 (i:ins) (fuel:nat) s :
+  Lemma
+    (requires (safely_bounded i))
+    (ensures (
+        let filt s = { s with ms_trace = [] } in
+        let f : st unit = machine_eval_code_Ins i fuel in
+        let rw = rw_set_of_ins i in
+        unchanged_except rw.loc_writes s (run f s))) =
+  let filt s = { s with ms_trace = [] } in
+  let f : st unit = machine_eval_code_Ins i fuel in
+  let rw = rw_set_of_ins i in
+  lemma_machine_eval_ins_st_only_affects_write i (filt s);
+  assert (unchanged_except rw.loc_writes
+            (run (machine_eval_ins_st i) (filt s))
+            (run f s)) (* OBSERVE *)
+
+let lemma_machine_eval_code_Ins_bounded_effects_aux2 (i:ins) (fuel:nat) s :
+  Lemma
+    (requires (safely_bounded i))
+    (ensures (
+        let f : st unit = machine_eval_code_Ins i fuel in
+        let rw = rw_set_of_ins i in
+        constant_on_execution rw.loc_constant_writes f s)) =
+  let filt s = { s with ms_trace = [] } in
+  let f : st unit = machine_eval_code_Ins i fuel in
+  let rw = rw_set_of_ins i in
+  lemma_machine_eval_ins_st_constant_on_execution i (filt s);
+  let rec aux c :
+    Lemma
+      (requires (constant_on_execution c (machine_eval_ins_st i) (filt s)))
+      (ensures (constant_on_execution c f s)) =
+    if (run f s).ms_ok then (
+      match c with
+      | [] -> ()
+      | (|l,v|) :: xs ->
+        aux xs
+    ) else ()
+  in
+  aux rw.loc_constant_writes
+
+let lemma_machine_eval_code_Ins_bounded_effects_aux3 (i:ins) (fuel:nat) s1 s2 :
+  Lemma
+    (requires (
+        let f : st unit = machine_eval_code_Ins i fuel in
+        let rw = rw_set_of_ins i in
+        (safely_bounded i) /\
+        (s1.ms_ok = s2.ms_ok) /\
+        (unchanged_at rw.loc_reads s1 s2)))
+    (ensures (
+        let f : st unit = machine_eval_code_Ins i fuel in
+        (run f s1).ms_ok = (run f s2).ms_ok)) =
+  let filt s = { s with ms_trace = [] } in
+  let f : st unit = machine_eval_code_Ins i fuel in
+  let rw = rw_set_of_ins i in
+  lemma_unchanged_at_trace rw.loc_reads s1 s2 [] [];
+  lemma_machine_eval_ins_st_ok i (filt s1) (filt s2)
+
+let lemma_machine_eval_code_Ins_bounded_effects_aux4 (i:ins) (fuel:nat) s1 s2 :
+  Lemma
+    (requires (
+        let f : st unit = machine_eval_code_Ins i fuel in
+        let rw = rw_set_of_ins i in
+        (safely_bounded i) /\
+        (s1.ms_ok = s2.ms_ok) /\
+        (unchanged_at rw.loc_reads s1 s2) /\
+        (run f s1).ms_ok /\
+        (run f s2).ms_ok))
+    (ensures (
+        let f : st unit = machine_eval_code_Ins i fuel in
+        let rw = rw_set_of_ins i in
+        (unchanged_at rw.loc_writes (run f s1) (run f s2)))) =
   let filt s = { s with ms_trace = [] } in
   let intr s_orig s = { s with ms_trace = (ins_obs i s_orig) @ s_orig.ms_trace } in
-  let f : st unit = (fun s -> (), (Some?.v (machine_eval_code (Ins i) fuel s))) in
+  let f : st unit = machine_eval_code_Ins i fuel in
   let rw = rw_set_of_ins i in
-  let aux s :
-    Lemma (ensures (unchanged_except rw.loc_writes s (run f s))) =
-    lemma_machine_eval_ins_st_only_affects_write i (filt s);
-    assert (unchanged_except rw.loc_writes
-              (run (machine_eval_ins_st i) (filt s))
-              (run f s)) (* OBSERVE *)
-  in
+  lemma_unchanged_at_trace rw.loc_reads s1 s2 [] [];
+  lemma_machine_eval_ins_st_unchanged_behavior i (filt s1) (filt s2);
+  lemma_unchanged_at_trace rw.loc_writes (machine_eval_ins i (filt s1)) (machine_eval_ins i (filt s2))
+    (intr s1 s1).ms_trace (intr s2 s2).ms_trace
+
+#push-options "--initial_fuel 3 --max_fuel 3 --initial_ifuel 1 --max_ifuel 1"
+let lemma_machine_eval_code_Ins_bounded_effects_aux i fuel :
+  Lemma
+    (requires (safely_bounded i))
+    (ensures (
+        (bounded_effects (rw_set_of_ins i)
+           (machine_eval_code_Ins i fuel)))) =
+  let f : st unit = machine_eval_code_Ins i fuel in
+  let aux = FStar.Classical.move_requires (lemma_machine_eval_code_Ins_bounded_effects_aux1 i fuel) in
   FStar.Classical.forall_intro aux;
-  let aux s :
-    Lemma
-      (ensures (constant_on_execution rw.loc_constant_writes f s)) =
-    lemma_machine_eval_ins_st_constant_on_execution i (filt s);
-    let rec aux c :
-      Lemma
-        (requires (constant_on_execution c (machine_eval_ins_st i) (filt s)))
-        (ensures (constant_on_execution c f s)) =
-      if (run f s).ms_ok then (
-        match c with
-        | [] -> ()
-        | (|l,v|) :: xs ->
-          aux xs
-      ) else ()
-    in
-    aux rw.loc_constant_writes
-  in
+  let aux = FStar.Classical.move_requires (lemma_machine_eval_code_Ins_bounded_effects_aux2 i fuel) in
   FStar.Classical.forall_intro aux;
-  let aux s1 s2 :
-    Lemma
-      (requires (
-          (s1.ms_ok = s2.ms_ok) /\
-          (unchanged_at rw.loc_reads s1 s2)))
-      (ensures ((run f s1).ms_ok = (run f s2).ms_ok)) =
-    lemma_unchanged_at_trace rw.loc_reads s1 s2 [] [];
-    lemma_machine_eval_ins_st_ok i (filt s1) (filt s2)
-  in
-  FStar.Classical.forall_intro_2 (fun s1 ->
-      FStar.Classical.move_requires (aux s1));
-  let aux s1 s2 :
-    Lemma
-      (requires (
-          (s1.ms_ok = s2.ms_ok) /\
-          (unchanged_at rw.loc_reads s1 s2) /\
-          (run f s1).ms_ok /\
-          (run f s2).ms_ok))
-      (ensures (
-          (unchanged_at rw.loc_writes (run f s1) (run f s2)))) =
-    lemma_unchanged_at_trace rw.loc_reads s1 s2 [] [];
-    lemma_machine_eval_ins_st_unchanged_behavior i (filt s1) (filt s2);
-    lemma_unchanged_at_trace rw.loc_writes (machine_eval_ins i (filt s1)) (machine_eval_ins i (filt s2))
-      (intr s1 s1).ms_trace (intr s2 s2).ms_trace
-  in
-  FStar.Classical.forall_intro_2 (fun s1 ->
-      FStar.Classical.move_requires (aux s1))
+  let aux s1 = FStar.Classical.move_requires (lemma_machine_eval_code_Ins_bounded_effects_aux3 i fuel s1) in
+  FStar.Classical.forall_intro_2 aux;
+  let aux s1 = FStar.Classical.move_requires (lemma_machine_eval_code_Ins_bounded_effects_aux4 i fuel s1) in
+  FStar.Classical.forall_intro_2 aux
+#pop-options
 
 (* See fsti *)
+let lemma_machine_eval_code_Ins_bounded_effects i fuel =
+  lemma_machine_eval_code_Ins_bounded_effects_aux i fuel
+
+#push-options "--initial_fuel 2 --max_fuel 2 --initial_ifuel 1 --max_ifuel 1"
+(* See fsti *)
 let lemma_locations_of_ocmp o s1 s2 = ()
+#pop-options
 
 let rec intersect (#t:eqtype) (l1 l2:list t) : list t =
   match l1 with
@@ -860,6 +922,7 @@ let rec lemma_constant_intersect_belongs_to_writes_union
       lemma_constant_intersect_belongs_to_writes_union xs c2 w1 w2 l v
     )
 
+#push-options "--initial_fuel 2 --max_fuel 2 --initial_ifuel 1 --max_ifuel 1"
 let rec lemma_unchanged_at_mem (as:list location) (a:location) (s1 s2:machine_state) :
   Lemma
     (requires (
@@ -872,6 +935,7 @@ let rec lemma_unchanged_at_mem (as:list location) (a:location) (s1 s2:machine_st
   | x :: xs ->
     if a = x then () else
     lemma_unchanged_at_mem xs a s1 s2
+#pop-options
 
 let rec lemma_unchanged_at_difference_elim (l1 l2:locations) (s1 s2:machine_state) :
   Lemma
@@ -1034,11 +1098,12 @@ let lemma_bounded_effects_series_aux1 rw1 rw2 f1 f2 s a :
   assert (unchanged_except rw2.loc_writes (run f1 s) (run f2 (run f1 s)));
   assert (eval_location a s == eval_location a (run (f1;;f2) s))
 
+#push-options "--initial_fuel 1 --max_fuel 1 --initial_ifuel 1 --max_ifuel 1"
 let rec lemma_bounded_effects_series_aux2 c1 c2 f1 f2 s :
   Lemma
     (requires (
-        (forall s. (constant_on_execution c1 f1 s)) /\
-        (forall s. (constant_on_execution c2 f2 s))))
+        (forall s. {:pattern (constant_on_execution c1 f1 s)} (constant_on_execution c1 f1 s)) /\
+        (forall s. {:pattern (constant_on_execution c2 f2 s)} (constant_on_execution c2 f2 s))))
     (ensures (
         let open Vale.X64.Machine_Semantics_s in
         (constant_on_execution (c1 `intersect` c2) (f1;;f2) s))) =
@@ -1049,12 +1114,12 @@ let rec lemma_bounded_effects_series_aux2 c1 c2 f1 f2 s :
     | [] -> ()
     | (|l,v|) :: xs ->
       if L.mem (|l,v|) c2 then (
-        lemma_constant_on_execution_mem c2 f2 (run f1 s) l v;
-        lemma_bounded_effects_series_aux2 xs c2 f1 f2 s
-      ) else (
-        lemma_bounded_effects_series_aux2 xs c2 f1 f2 s
-      )
+        lemma_constant_on_execution_mem c2 f2 (run f1 s) l v
+      ) else ();
+      assert (forall s. constant_on_execution c1 f1 s ==> constant_on_execution xs f1 s); (* OBSERVE *)
+      lemma_bounded_effects_series_aux2 xs c2 f1 f2 s
   ) else ()
+#pop-options
 
 let rec lemma_unchanged_at_except_disjoint (same change:locations) (s1 s2 s1' s2':machine_state) :
   Lemma
