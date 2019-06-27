@@ -6,7 +6,6 @@ open Lib.IntTypes
 open Lib.Buffer
 open Hacl.Impl.Gf128.Fields
 open Hacl.Impl.Gf128.Generic
-open Lib.Vec128
 
 module ST = FStar.HyperStack.ST
 
@@ -43,7 +42,7 @@ let gcm_update_blocks  ctx len text = poly4_mul_add #F32 ctx len text
 inline_for_extraction
 val gcm_update_blocks_padded:
     ctx: gcm_ctx
-  -> len: size_t
+  -> len: size_t{v len % 16 = 0}
   -> text: lbuffer uint8 len ->
   Stack unit
   (requires (fun h -> live h ctx /\ live h text))

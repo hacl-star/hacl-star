@@ -1,20 +1,24 @@
 module Hacl.Gf128.NI
+
 open FStar.HyperStack
 open FStar.HyperStack.All
+
 open Lib.IntTypes
 open Lib.Buffer
+open Lib.IntVector
+
 open Hacl.Impl.Gf128.Fields
 open Hacl.Impl.Gf128.Generic
-open Lib.Vec128
 
 module ST = FStar.HyperStack.ST
 
-
-let gcm_ctx_elem = vec128
+inline_for_extraction noextract
+let gcm_ctx_elem = vec_t U128 1
+inline_for_extraction noextract
 let gcm_ctx_len = 5ul
 
 inline_for_extraction noextract
-let gcm_ctx_elem_zero = vec128_zero
+let gcm_ctx_elem_zero = vec_zero U128 1
 let gcm_ctx = lbuffer gcm_ctx_elem gcm_ctx_len
 
 
@@ -44,7 +48,7 @@ let gcm_update_blocks  ctx len text = poly4_add_mul #FNI ctx len text
 [@ CInline ]
 val gcm_update_padded:
     ctx: gcm_ctx
-  -> len: size_t
+  -> len: size_t{v len % 16 = 0}
   -> text: lbuffer uint8 len ->
   Stack unit
   (requires (fun h -> live h ctx /\ live h text))
