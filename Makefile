@@ -112,7 +112,7 @@ all-unstaged: compile-compact compile-compact-msvc compile-compact-gcc \
 	FSTAR_DEPEND_FLAGS="--warn_error +285" $(MAKE) $*-unstaged
 
 .last_vale_version: vale/.vale_version
-	@if [[ $$(cat $@) != $$(cat $<) ]]; then \
+	@if [[ -f $@ && $$(cat $@) != $$(cat $<) ]]; then \
 	  echo ℹ️  Vale tool upgrade detected; \
 	  find vale -name '*.vaf' -exec touch {} \; ; \
 	fi
@@ -137,6 +137,7 @@ ci:
 	NOSHORTLOG=1 $(MAKE) vale-fst
 	FSTAR_DEPEND_FLAGS="--warn_error +285" NOSHORTLOG=1 $(MAKE) all-unstaged test-unstaged
 	NOSHORTLOG=1 $(MAKE) wasm
+	$(MAKE) -C providers/quic_provider # needs a checkout of miTLS, only valid on CI
 
 wasm:
 	tools/blast-staticconfig.sh wasm

@@ -122,6 +122,7 @@ corresponds to a particular flavor of generated C code.
 | Distribution  | GCC-like | MSVC | C89 compiler |
 | ------------- | -------- | ---- | ------------ |
 | compact-gcc¹  | ✔︎        |      |              |
+| compact       | ✔︎        |      |              |
 | compact-msvc² | ✔︎        | ✔︎    |              |
 | compact-c89³  | ✔︎        | ✔︎    | ✔︎            |
 
@@ -156,7 +157,9 @@ Customizing distributions is easy; contact us if you need something bespoke
 Verifying and building EverCrypt from scratch is fairly involved and requires several tools.
 Hence the simplest approach is to look up the latest tag for the [HACL\* docker
 container](https://cloud.docker.com/u/projecteverest/repository/docker/projecteverest/hacl-star-linux)
-then retrieve it using `docker pull`.
+then retrieve it using `docker pull`. Please make sure you run `git rev-parse
+origin/fstar-master` to get the latest commit hash, and please avoid builds
+marked as failed.
 
 ## Verifying and building EverCrypt locally
 

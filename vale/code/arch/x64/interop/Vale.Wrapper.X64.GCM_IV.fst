@@ -72,6 +72,7 @@ val compute_iv_stdcall':
     low_buffer_read TUInt8 TUInt128 h1 j0_b 0 == reverse_bytes_quad32 (compute_iv_BE h_LE (Ghost.reveal iv)))
    )
 
+inline_for_extraction
 let compute_iv_stdcall' iv iv_b num_bytes len j0_b iv_extra_b hkeys_b =
   let h0 = get() in
 
@@ -213,6 +214,7 @@ let lemma_same_seq_same_buffer_read (h0 h1:HS.mem) (b:uint8_p) : Lemma
    UV.as_seq_sel h0 b_u 2;
    UV.as_seq_sel h1 b_u 2   
 
+inline_for_extraction
 let compute_iv a key full_iv_b num_bytes j0_b extra_b hkeys_b =
   let h0 = get() in
   let len = num_bytes / 16ul in

@@ -207,6 +207,7 @@
         "Vale.Wrapper.X64.Poly_interpretation_Tm_arrow_c848191ea710731d2d0d9c4edfa4b1be",
         "b2t_def", "bool_inversion", "bool_typing",
         "constructor_distinct_Vale.Interop.Types.TUInt8",
+        "equality_tok_Lib.IntTypes.SEC@tok",
         "equality_tok_Vale.Interop.Types.TUInt8@tok",
         "equation_FStar.Monotonic.HyperHeap.hmap",
         "equation_FStar.Monotonic.HyperStack.is_tip",
@@ -268,6 +269,7 @@
         "projection_inverse_BoxInt_proj_0",
         "projection_inverse_LowStar.BufferView.Up.View_get",
         "projection_inverse_LowStar.BufferView.Up.View_n",
+        "refinement_interpretation_Tm_refine_00db6d2d117d80b3e0b8c40ebba29604",
         "refinement_interpretation_Tm_refine_05e15190c946858f68c69156f585f95a",
         "refinement_interpretation_Tm_refine_1475147cef47f8becfe1ccf0d3ae9e6c",
         "refinement_interpretation_Tm_refine_1ba8fd8bb363097813064c67740b2de5",
@@ -365,6 +367,7 @@
         "refinement_interpretation_Tm_refine_05e15190c946858f68c69156f585f95a",
         "refinement_interpretation_Tm_refine_1ba8fd8bb363097813064c67740b2de5",
         "refinement_interpretation_Tm_refine_2de20c066034c13bf76e9c0b94f4806c",
+        "refinement_interpretation_Tm_refine_2ec327517e610bc799b7c766c75aff2a",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "refinement_interpretation_Tm_refine_6ed0011b12bdce1e2776a786b0350215",
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
@@ -380,7 +383,9 @@
         "typing_LowStar.Buffer.trivial_preorder",
         "typing_LowStar.Monotonic.Buffer.as_seq",
         "typing_LowStar.Monotonic.Buffer.len",
-        "typing_Spec.Poly1305.size_key"
+        "typing_LowStar.Monotonic.Buffer.length",
+        "typing_Spec.Poly1305.size_key",
+        "typing_Vale.Arch.BufferFriend.to_bytes"
       ],
       0,
       "f4f7e2350d655780e228eebb2d6400dc"
@@ -431,7 +436,7 @@
         "typing_Vale.Arch.BufferFriend.of_bytes"
       ],
       0,
-      "c92f3afe139cd2261ca59ce02f34374e"
+      "bb774d9d3da73b6b020c286313686cfb"
     ],
     [
       "Vale.Poly1305.CallingFromLowStar.lemma_call_poly1305_blocks",
@@ -526,7 +531,7 @@
         "typing_Vale.Poly1305.Spec_s.modp", "well-founded-ordering-on-nat"
       ],
       0,
-      "2eec7548607b418a6133106ca1ca0d17"
+      "9c004a2f3b3ea9c55e7023422607eb73"
     ],
     [
       "Vale.Poly1305.CallingFromLowStar.lemma_call_poly1305_all",

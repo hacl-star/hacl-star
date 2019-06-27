@@ -191,7 +191,9 @@ let encrypt_st (a: supported_alg) =
       match r with
       | Success ->
           not (B.g_is_null s) /\
-          B.(modifies (loc_union (loc_buffer cipher) (loc_buffer tag)) h0 h1) /\
+        B.(modifies (loc_union (footprint h1 s) (loc_union (loc_buffer cipher) (loc_buffer tag))) h0 h1) /\
+        invariant h1 s /\
+        footprint h0 s == footprint h1 s /\
           S.equal (S.append (B.as_seq h1 cipher) (B.as_seq h1 tag))
             (encrypt #a (as_kv (B.deref h0 s)) (B.as_seq h0 iv) (B.as_seq h0 ad) (B.as_seq h0 plain))
       | InvalidKey ->
@@ -240,12 +242,16 @@ let decrypt_st (a: supported_alg) =
       | Success ->
           not (B.g_is_null s) /\ (
           let plain = decrypt #a (as_kv (B.deref h0 s)) (B.as_seq h0 iv) (B.as_seq h0 ad) cipher_tag in
-          B.(modifies (loc_buffer dst) h0 h1) /\
+          B.(modifies (loc_union (footprint h1 s) (loc_buffer dst)) h0 h1) /\
+          invariant h1 s /\
+          footprint h0 s == footprint h1 s /\
           Some? plain /\ S.equal (Some?.v plain) (B.as_seq h1 dst))
       | AuthenticationFailure ->
           not (B.g_is_null s) /\ (
           let plain = decrypt #a (as_kv (B.deref h0 s)) (B.as_seq h0 iv) (B.as_seq h0 ad) cipher_tag in
-          B.(modifies (loc_buffer dst) h0 h1) /\
+          B.(modifies (loc_union (footprint h1 s) (loc_buffer dst)) h0 h1) /\
+          invariant h1 s /\
+          footprint h0 s == footprint h1 s /\
           None? plain)
       | _ ->
           False)
