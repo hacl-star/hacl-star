@@ -8,6 +8,11 @@ open Spec.Agile.Cipher
 
 #reset-options "--z3rlimit 20 --max_fuel 0 --max_ifuel 1"
 
+let state (a:cipher_alg) =
+  match a with
+  | AES128 | AES256 -> Spec.AES.aes_ctr_state (aes_alg_of_alg a)
+  | CHACHA20 -> Spec.Chacha20.state
+
 val process_block:
   a:cipher_alg ->
   st0:state a ->

@@ -1,4 +1,4 @@
-module EverCrypt.Cipher
+module EverCrypt.CTR
 
 module ST = FStar.HyperStack.ST
 module HS = FStar.HyperStack
