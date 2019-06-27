@@ -36,7 +36,7 @@ let gcm_init ctx key = gcm_init #FNI ctx key
 [@ CInline ]
 val gcm_update_blocks:
     ctx: gcm_ctx
-  -> len: size_t{v len % 16 == 0}
+  -> len: size_t
   -> text:lbuffer uint8 len ->
   Stack unit
   (requires (fun h -> live h ctx /\ live h text))
@@ -48,7 +48,7 @@ let gcm_update_blocks  ctx len text = poly4_add_mul #FNI ctx len text
 [@ CInline ]
 val gcm_update_padded:
     ctx: gcm_ctx
-  -> len: size_t{v len % 16 = 0}
+  -> len: size_t
   -> text: lbuffer uint8 len ->
   Stack unit
   (requires (fun h -> live h ctx /\ live h text))

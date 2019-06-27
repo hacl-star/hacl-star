@@ -30,7 +30,7 @@ let gcm_init ctx key = gcm_init #F32 ctx key
 inline_for_extraction
 val gcm_update_blocks:
     ctx: gcm_ctx
-  -> len: size_t{v len % 16 == 0}
+  -> len: size_t
   -> text: lbuffer uint8 len ->
   Stack unit
   (requires (fun h -> live h ctx /\ live h text))
@@ -42,7 +42,7 @@ let gcm_update_blocks  ctx len text = poly4_mul_add #F32 ctx len text
 inline_for_extraction
 val gcm_update_blocks_padded:
     ctx: gcm_ctx
-  -> len: size_t{v len % 16 = 0}
+  -> len: size_t
   -> text: lbuffer uint8 len ->
   Stack unit
   (requires (fun h -> live h ctx /\ live h text))
