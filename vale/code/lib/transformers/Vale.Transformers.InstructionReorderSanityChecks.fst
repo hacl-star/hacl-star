@@ -51,10 +51,12 @@ let equiv_states_sanity_check (s1 s2 s3 : machine_state) =
       )
   )
 
+#push-options "--initial_fuel 2 --max_fuel 2 --initial_ifuel 1 --max_ifuel 1"
 let sanity_check_unchanged_except1 s =
   assert (unchanged_except [] s s);
   assert (unchanged_except [ALocCf] s s);
   assert (unchanged_except [ALocCf; ALocOf] s ({s with ms_flags = havoc_flags}))
+#pop-options
 
 [@expect_failure]
 let sanity_check_unchanged_except2 s =

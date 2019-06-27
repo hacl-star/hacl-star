@@ -612,6 +612,7 @@ let lemma_unchanged_except_append_symmetric (a1 a2:list location) (s1 s2:machine
     lemma_disjoint_location_from_locations_append a a2 a1 in
   FStar.Classical.forall_intro (FStar.Classical.move_requires aux)
 
+#push-options "--initial_fuel 2 --max_fuel 2 --initial_ifuel 1 --max_ifuel 1"
 let rec lemma_disjoint_location_from_locations_mem
     (a1 a2:list location) (a:location) :
   Lemma
@@ -625,8 +626,9 @@ let rec lemma_disjoint_location_from_locations_mem
   | x :: xs ->
     if a = x then () else
     lemma_disjoint_location_from_locations_mem xs a2 a
+#pop-options
 
-
+#push-options "--initial_fuel 2 --max_fuel 2 --initial_ifuel 1 --max_ifuel 1"
 let rec lemma_constant_on_execution_mem
     (locv:locations_with_values) (f:st unit) (s:machine_state)
     (l:location{hasEq (location_val_t l)}) (v:location_val_t l) :
@@ -643,6 +645,7 @@ let rec lemma_constant_on_execution_mem
     if x = (| l, v |) then () else (
       lemma_constant_on_execution_mem xs f s l v
     )
+#pop-options
 
 let rec lemma_disjoint_location_from_locations_mem1 (a:location) (as:locations) :
   Lemma
@@ -697,6 +700,7 @@ let rec lemma_value_of_const_loc_mem (c:locations_with_values) (l:location{hasEq
   let x :: xs = c in
   if dfst x = l then () else lemma_value_of_const_loc_mem xs l v
 
+#push-options "--initial_fuel 2 --max_fuel 2 --initial_ifuel 1 --max_ifuel 1"
 let rec lemma_unchanged_at_mem (as:list location) (a:location) (s1 s2:machine_state) :
   Lemma
     (requires (
@@ -709,6 +713,7 @@ let rec lemma_unchanged_at_mem (as:list location) (a:location) (s1 s2:machine_st
   | x :: xs ->
     if a = x then () else
     lemma_unchanged_at_mem xs a s1 s2
+#pop-options
 
 let lemma_unchanged_at_combine (a1 a2:locations) (c1 c2:locations_with_values) (sa1 sa2 sb1 sb2:machine_state) :
   Lemma
@@ -814,6 +819,7 @@ let lemma_equiv_states_when_except_none (s1 s2:machine_state) (ok:bool) :
   assert_norm (overflow s2.ms_flags == overflow (filter_state s2 s1.ms_flags ok []).ms_flags); (* OBSERVE *)
   lemma_locations_complete s1 s2 s1.ms_flags ok []
 
+#push-options "--initial_fuel 2 --max_fuel 2 --initial_ifuel 1 --max_ifuel 1"
 let rec lemma_mem_not_disjoint (a:location) (as1 as2:list location) :
   Lemma
     (requires (L.mem a as1 /\ L.mem a as2))
@@ -835,6 +841,7 @@ let rec lemma_mem_not_disjoint (a:location) (as1 as2:list location) :
     ) else (
       lemma_mem_not_disjoint a xs as2
     )
+#pop-options
 
 let lemma_bounded_effects_means_same_ok (rw:rw_set) (f:st unit) (s1 s2 s1' s2':machine_state) :
   Lemma
@@ -863,6 +870,7 @@ let lemma_both_not_ok (f1 f2:st unit) (rw1 rw2:rw_set) (s:machine_state) :
     lemma_disjoint_implies_unchanged_at rw1.loc_reads rw2.loc_writes s (run f2 s)
   ) else ()
 
+#push-options "--initial_fuel 2 --max_fuel 2 --initial_ifuel 1 --max_ifuel 1"
 let lemma_constant_on_execution_stays_constant (f1 f2:st unit) (rw1 rw2:rw_set) (s s1 s2:machine_state) :
   Lemma
     (requires (
@@ -976,6 +984,7 @@ let lemma_constant_on_execution_stays_constant (f1 f2:st unit) (rw1 rw2:rw_set) 
   in
   aux1 [] c1;
   aux2 [] c2
+#pop-options
 
 let lemma_commute (f1 f2:st unit) (rw1 rw2:rw_set) (s:machine_state) :
   Lemma
@@ -1133,6 +1142,7 @@ let lemma_instruction_exchange (i1 i2 : ins) (s1 s2 : machine_state) :
 
 /// Not-ok states lead to erroring states upon execution
 
+#push-options "--initial_fuel 2 --max_fuel 2 --initial_ifuel 1 --max_ifuel 1"
 let rec lemma_not_ok_propagate_code (c:code) (fuel:nat) (s:machine_state) :
   Lemma
     (requires (not s.ms_ok))
@@ -1175,6 +1185,7 @@ and lemma_not_ok_propagate_while (c:code{While? c}) (fuel:nat) (s:machine_state)
       lemma_not_ok_propagate_code body (fuel - 1) s
     )
   )
+#pop-options
 
 /// Given that we have bounded instructions, we can compute bounds on
 /// [code] and [codes].
@@ -1524,6 +1535,7 @@ let rec find_code (c1:code) (cs2:codes) : possibly (i:nat{i < L.length cs2 /\ eq
         return (i+1)
     )
 
+#push-options "--initial_fuel 2 --max_fuel 2 --initial_ifuel 1 --max_ifuel 1"
 let rec bubble_to_top (cs:codes) (i:nat{i < L.length cs}) : possibly (cs':codes{
     let a, b, c = L.split3 cs i in
     cs' == L.append a c /\
@@ -1552,6 +1564,7 @@ let rec bubble_to_top (cs:codes) (i:nat{i < L.length cs}) : possibly (cs':codes{
         )
       )
     )
+#pop-options
 
 let rec reordering_allowed (c1 c2 : codes) :
   Tot pbool
