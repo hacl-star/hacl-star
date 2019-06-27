@@ -6,7 +6,6 @@
 VALE_BUNDLES=\
   -bundle 'Vale.Stdcalls.*,Vale.Interop,Vale.Interop.*,Vale.Wrapper.X64.*[rename=Vale]' \
   -bundle 'Vale.Inline.X64.*[rename=Vale_Inline]' \
-  -bundle FStar.Tactics.CanonCommMonoid,FStar.Tactics.CanonCommSemiring,FStar.Tactics.CanonCommSwaps[rename=Unused] \
   -bundle Vale.*[rename=Unused2]
 
 # Other configs are possible, e.g. everest or hacl-vale, by exporting

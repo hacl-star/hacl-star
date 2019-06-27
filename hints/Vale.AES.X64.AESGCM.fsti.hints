@@ -1,5 +1,5 @@
 [
-  "\u0007ªôL\u0007IIºä´ÓUF§S",
+  "ü\n√\u000f•èÊ+\u0013Lã˙÷Ö\u001a",
   [
     [
       "Vale.AES.X64.AESGCM.aes_reqs_offset",
@@ -8,7 +8,19 @@
       0,
       [ "@query" ],
       0,
-      "f9ea1fcb5f7b5d95e21f4c2cef42b3da"
+      "9ec67e59524381bdc1139b0217f85150"
+    ],
+    [
+      "Vale.AES.X64.AESGCM.va_quick_Load_one_lsb",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "fuel_guarded_inversion_FStar.Pervasives.Native.tuple3"
+      ],
+      0,
+      "f3bb1b66c704b640e024d0dbdbf16392"
     ],
     [
       "Vale.AES.X64.AESGCM.va_lemma_AES_GCM_encrypt_6mult",
@@ -17,7 +29,7 @@
       0,
       [ "@query", "equation_Vale.AES.X64.AESGCM.aes_reqs_offset" ],
       0,
-      "5ded39629f2aeff5e05e62989b3fcea1"
+      "bf81783731b005d8926c312d64ec1371"
     ],
     [
       "Vale.AES.X64.AESGCM.va_wp_AES_GCM_encrypt_6mult",
@@ -26,7 +38,7 @@
       0,
       [ "@query", "equation_Vale.AES.X64.AESGCM.aes_reqs_offset" ],
       0,
-      "7fa666059724c82e7226a5e7a547cf54"
+      "556ef24e20c2c4d110859c2c8e51a7ab"
     ],
     [
       "Vale.AES.X64.AESGCM.va_quick_AES_GCM_encrypt_6mult",
@@ -38,7 +50,7 @@
         "fuel_guarded_inversion_FStar.Pervasives.Native.tuple3"
       ],
       0,
-      "437db2fed148807e860c3e9608b74066"
+      "29721355d717d31ad18e4e0b4e9f5cca"
     ],
     [
       "Vale.AES.X64.AESGCM.va_lemma_AES_GCM_decrypt_6mult",
@@ -47,7 +59,7 @@
       0,
       [ "@query", "equation_Vale.AES.X64.AESGCM.aes_reqs_offset" ],
       0,
-      "40d155a3067a033a87a94bff4077eee6"
+      "a06a8a37b828f6d29557785b22aedf63"
     ],
     [
       "Vale.AES.X64.AESGCM.va_wp_AES_GCM_decrypt_6mult",
@@ -56,7 +68,7 @@
       0,
       [ "@query", "equation_Vale.AES.X64.AESGCM.aes_reqs_offset" ],
       0,
-      "4085eef2e0ced7eb09837ddfc1dafcf6"
+      "dc7fd1da29fe6fc685948c1e8535aa0a"
     ],
     [
       "Vale.AES.X64.AESGCM.va_quick_AES_GCM_decrypt_6mult",
@@ -68,7 +80,7 @@
         "fuel_guarded_inversion_FStar.Pervasives.Native.tuple3"
       ],
       0,
-      "41dc7c50ee188061ae199c3e8898aee8"
+      "1357bbbba0e61f6fd533d4aa84cbb520"
     ]
   ]
 ]

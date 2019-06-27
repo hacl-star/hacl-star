@@ -106,7 +106,7 @@ procedure VPaddd(out dst:xmm, in src1:xmm, in src2:xmm)
 procedure Pxor(inout dst:xmm, in src:xmm)
     {:public}
     {:quick exportOnly}
-    {:instruction mk_ins(make_instr(I.ins_Pxor, OReg(dst), OReg(src)))}
+    {:instruction mk_ins(make_instr_annotate(I.ins_Pxor, S.AnnotatePxor(), OReg(dst), OReg(src)))}
     ensures
         dst == old(quad32_xor(dst, src));
 {
@@ -126,7 +126,7 @@ procedure Pand(inout dst:xmm, in src:opr128)
 procedure VPxor(out dst:xmm, in src1:xmm, in src2:opr128)
     {:public}
     {:quick exportOnly}
-    {:instruction mk_ins(make_instr(I.ins_VPxor, OReg(dst), OReg(src1), src2))}
+    {:instruction mk_ins(make_instr_annotate(I.ins_VPxor, S.AnnotateVPxor(), OReg(dst), OReg(src1), src2))}
     requires avx_enabled;
     ensures
         dst == old(quad32_xor(src1, src2));

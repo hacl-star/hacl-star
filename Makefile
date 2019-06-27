@@ -112,7 +112,7 @@ all-unstaged: compile-compact compile-compact-msvc compile-compact-gcc \
 	FSTAR_DEPEND_FLAGS="--warn_error +285" $(MAKE) $*-unstaged
 
 .last_vale_version: vale/.vale_version
-	@if [[ $$(cat $@) != $$(cat $<) ]]; then \
+	@if [[ -f $@ && $$(cat $@) != $$(cat $<) ]]; then \
 	  echo ℹ️  Vale tool upgrade detected; \
 	  find vale -name '*.vaf' -exec touch {} \; ; \
 	fi
@@ -137,6 +137,7 @@ ci:
 	NOSHORTLOG=1 $(MAKE) vale-fst
 	FSTAR_DEPEND_FLAGS="--warn_error +285" NOSHORTLOG=1 $(MAKE) all-unstaged test-unstaged
 	NOSHORTLOG=1 $(MAKE) wasm
+	$(MAKE) -C providers/quic_provider # needs a checkout of miTLS, only valid on CI
 
 wasm:
 	tools/blast-staticconfig.sh wasm
@@ -471,19 +472,10 @@ obj/Vale.Inline.X64.Fmul_inline.fst.checked: \
 obj/Vale.Inline.X64.Fsqr_inline.fst.checked: \
   FSTAR_FLAGS=$(VALE_FSTAR_FLAGS)
 
-obj/Vale.Stdcalls.X64.GCMencrypt.fst.checked: \
-  FSTAR_FLAGS=$(VALE_FSTAR_FLAGS)
-
-obj/Vale.Stdcalls.X64.GCMencryptOpt.fst.checked: \
-  USE_EXTRACTED_INTERFACES=false
-
 obj/Vale.Stdcalls.X64.GCMencryptOpt.fst.checked: \
   FSTAR_FLAGS=$(VALE_FSTAR_FLAGS)
 
 obj/Vale.Stdcalls.X64.GCMdecryptOpt.fst.checked: \
-  FSTAR_FLAGS=$(VALE_FSTAR_FLAGS)
-
-obj/Vale.Wrapper.X64.GCMencryptOpt.fst.checked: \
   FSTAR_FLAGS=$(VALE_FSTAR_FLAGS)
 
 obj/Vale.AES.GCM.fst.checked: \
@@ -515,7 +507,7 @@ vale-verify-unstaged: \
 
 hacl-verify-unstaged: code-verify-unstaged spec-verify-unstaged
 code-verify-unstaged: $(call only-for,$(HACL_HOME)/code/%)
-spec-verify-unstaged: $(call only-for,$(HACL_HOME)/spec/%)
+spec-verify-unstaged: $(call only-for,$(HACL_HOME)/specs/%)
 curve25519-verify-unstaged: $(call only-for,$(HACL_HOME)/code/curve25519/%)
 poly1305-verify-unstaged: $(call only-for,$(HACL_HOME)/code/poly1305/%)
 chacha20-verify-unstaged: $(call only-for,$(HACL_HOME)/code/chacha20/%)
@@ -614,6 +606,8 @@ obj/vale-%.exe: $(ALL_CMX_FILES) obj/CmdLineParser.cmx
 VALE_ASMS = $(foreach P,cpuid aesgcm sha256 curve25519 poly1305,\
   $(addprefix dist/vale/,$P-x86_64-mingw.S $P-x86_64-msvc.asm $P-x86_64-linux.S $P-x86_64-darwin.S)) \
   $(wildcard \
+    $(HACL_HOME)/secure_api/vale/asm/oldaesgcm-*.S \
+    $(HACL_HOME)/secure_api/vale/asm/oldaesgcm-*.asm \
     $(HACL_HOME)/secure_api/vale/asm/aes-*.S \
     $(HACL_HOME)/secure_api/vale/asm/aes-*.asm) \
   dist/vale/curve25519-inline.h
@@ -652,8 +646,6 @@ HAND_WRITTEN_OPTIONAL_FILES = \
   $(addprefix providers/evercrypt/c/evercrypt_,openssl.c bcrypt.c)
 
 
-# TODO: put all the Vale files under a single namespace to avoid this nonsense
-#
 # Note: I am using the deprecated -drop option, but it's ok because the dropped
 # module ends up in another bundle. Maybe the semantics of -drop should be
 # changed to just drop the declarations from a given module and then rely on
@@ -668,7 +660,6 @@ DEFAULT_FLAGS_NO_TESTS	=\
   -bundle Hacl.Poly1305.Field32xN.Lemmas[rename=Hacl_Lemmas] \
   -bundle Lib.*[rename=Hacl_Lib] \
   -drop Lib.IntVector.Intrinsics \
-  -add-include '"libintvector.h"' \
   -add-include '"evercrypt_targetconfig.h"' \
   -drop EverCrypt.TargetConfig \
   -bundle EverCrypt.BCrypt \
@@ -693,9 +684,11 @@ DEFAULT_FLAGS_NO_TESTS	=\
   -fparentheses -fno-shadow -fcurly-braces \
   -bundle WasmSupport
 
+INTRINSIC_FLAGS = -add-include '"libintvector.h"'
 OPT_FLAGS = -ccopts -march=native,-mtune=native
+TEST_FLAGS = -bundle Test,Test.*,Hacl.Test.*
 
-DEFAULT_FLAGS = $(DEFAULT_FLAGS_NO_TESTS) -bundle Test,Test.*,Hacl.Test.* $(OPT_FLAGS)
+DEFAULT_FLAGS = $(DEFAULT_FLAGS_NO_TESTS) $(TEST_FLAGS) $(OPT_FLAGS) $(INTRINSIC_FLAGS)
 
 # Should be fixed by having KreMLin better handle imported names
 WASM_STANDALONE=Prims LowStar.Endianness C.Endianness \
@@ -712,14 +705,21 @@ WASM_FLAGS	=\
   -bundle '\*[rename=Misc]' \
   -minimal -wasm
 
+HASH_BUNDLE=-bundle Hacl.Hash.MD5+Hacl.Hash.Core.MD5+Hacl.Hash.SHA1+Hacl.Hash.Core.SHA1+Hacl.Hash.SHA2+Hacl.Hash.Core.SHA2+Hacl.Hash.Core.SHA2.Constants=Hacl.Hash.*[rename=Hacl_Hash]
+SHA3_BUNDLE=-bundle Hacl.Impl.SHA3+Hacl.SHA3=[rename=Hacl_SHA3]
+CHACHA20_BUNDLE=-bundle Hacl.Impl.Chacha20=Hacl.Impl.Chacha20.*[rename=Hacl_Chacha20]
+CURVE_BUNDLE=-bundle Hacl.Curve25519_51+Hacl.Curve25519_64=Hacl.Impl.Curve25519.*[rename=Hacl_Curve25519]
+CHACHAPOLY_BUNDLE=-bundle Hacl.Impl.Chacha20Poly1305=Hacl.Impl.Chacha20Poly1305.*[rename=Hacl_Chacha20Poly1305]
+ED_BUNDLE=-bundle 'Hacl.Ed25519=Hacl.Impl.Ed25519.*,Hacl.Impl.BignumQ.Mul,Hacl.Impl.Load56,Hacl.Impl.SHA512.ModQ,Hacl.Impl.Store56,Hacl.Bignum25519'
+
 COMPACT_FLAGS	=\
-  -bundle Hacl.Hash.MD5+Hacl.Hash.Core.MD5+Hacl.Hash.SHA1+Hacl.Hash.Core.SHA1+Hacl.Hash.SHA2+Hacl.Hash.Core.SHA2+Hacl.Hash.Core.SHA2.Constants=Hacl.Hash.*[rename=Hacl_Hash] \
-  -bundle Hacl.Impl.SHA3+Hacl.SHA3=[rename=Hacl_SHA3] \
+  $(HASH_BUNDLE) \
+  $(SHA3_BUNDLE) \
+  $(CHACHA20_BUNDLE) \
+  $(CURVE_BUNDLE) \
+  $(CHACHAPOLY_BUNDLE) \
+  $(ED_BUNDLE) \
   -bundle Hacl.Impl.Poly1305.*[rename=Unused_Poly1305] \
-  -bundle Hacl.Impl.Chacha20=Hacl.Impl.Chacha20.*[rename=Hacl_Chacha20] \
-  -bundle Hacl.Curve25519_51+Hacl.Curve25519_64=Hacl.Impl.Curve25519.*[rename=Hacl_Curve25519] \
-  -bundle Hacl.Impl.Chacha20Poly1305=Hacl.Impl.Chacha20Poly1305.*[rename=Hacl_Chacha20Poly1305] \
-  -bundle 'Hacl.Ed25519=Hacl.Impl.Ed25519.*,Hacl.Impl.BignumQ.Mul,Hacl.Impl.Load56,Hacl.Impl.SHA512.ModQ,Hacl.Impl.Store56,Hacl.Bignum25519' \
   -bundle LowStar.* \
   -bundle Prims,C.Failure,C,C.String,C.Loops,Spec.Loops,C.Endianness,FStar.*[rename=Hacl_Kremlib] \
   -bundle 'EverCrypt.Spec.*' \
@@ -746,15 +746,16 @@ old-%:
 HACL_OLD_FILES=\
   code/old/experimental/aesgcm/aesgcm-c/Hacl_AES.c
 
+# Customizations for regular, msvc and gcc flavors.
 dist/compact/Makefile.basic: KRML_EXTRA=$(COMPACT_FLAGS)
 
 dist/compact-msvc/Makefile.basic: KRML_EXTRA=$(COMPACT_FLAGS) -falloca -ftail-calls
 
 dist/compact-gcc/Makefile.basic: KRML_EXTRA=$(COMPACT_FLAGS) -fbuiltin-uint128
 
-dist/curve25519-64/Makefile.basic: KRML_EXTRA=-bundle Hacl.Curve25519_64=* -fbuiltin-uint128 -extract-uints
-
-# MerkleTree doesn't compile in C89 mode
+# Customizations for C89 mode:
+# - MerkleTree doesn't compile in C89 mode (FIXME?)
+# - Use C89 versions of ancient HACL code
 dist/compact-c89/Makefile.basic: \
   KRML_EXTRA=$(patsubst 'Merkle%[rename=MerkleTree]','MerkleTree.*',$(COMPACT_FLAGS)) \
     -fc89 -ccopt -std=c89 -ccopt -Wno-typedef-redefinition
@@ -762,28 +763,47 @@ dist/compact-c89/Makefile.basic: \
   HACL_OLD_FILES:=$(subst -c,-c89,$(HACL_OLD_FILES))
 
 # Customizations for CCF:
-# - disable the legacy EverCrypt namespace -- this is mostly for Merkle Trees
-#   (and hashes, too)
+# - disable the legacy EverCrypt namespace
 # - enclaves only use 64-bit GCC/Clang -- assume unsigned __int128
+# - disable intrinsics (immintrin not availble with enclave toolchain)
+# - disbable chacha20, chachapoly, corresponding assemblies
+# - ensure poly1305 is unreachable via EverCrypt so that no file in the
+#   distribution needs compiling with intrinsics; this may not be tenable in the
+#   long run, as we'll have AEAD versions that need intrinsics; at that stage,
+#   we'll have to add a TargetConfig.has_intrinsics and guard even more
 dist/ccf/Makefile.basic: \
   KRML_EXTRA=$(COMPACT_FLAGS) \
     -fbuiltin-uint128 \
     -bundle EverCrypt.AutoConfig2= \
+    -bundle Hacl.Poly1305_32[rename=Hacl_Poly1305] \
+    -bundle Hacl.*[rename=Hacl_Leftovers] \
     -bundle EverCrypt \
     -bundle EverCrypt.Hacl \
-    -bundle '\*[rename=EverCrypt_Misc]'
+    -bundle EverCrypt.Helpers \
+    -bundle EverCrypt.Poly1305 \
+    -bundle EverCrypt.Chacha20Poly1305
+dist/ccf/Makefile.basic: INTRINSIC_FLAGS=
+dist/ccf/Makefile.basic: VALE_ASMS := $(filter-out $(HACL_HOME)/secure_api/vale/asm/aes-% dist/vale/poly1305-%,$(VALE_ASMS))
+dist/ccf/Makefile.basic: HAND_WRITTEN_OPTIONAL_FILES =
+dist/ccf/Makefile.basic: HAND_WRITTEN_FILES := $(filter-out %/Lib_PrintBuffer.c %_vale_stubs.c,$(HAND_WRITTEN_FILES))
+dist/ccf/Makefile.basic: HAND_WRITTEN_H_FILES := $(filter-out %/libintvector.h,$(HAND_WRITTEN_H_FILES))
+dist/ccf/Makefile.basic: HACL_OLD_FILES =
 
+# Customizations for WASM.
+# - only keep definitions reachable from Test.NoHeap -- this indicates what we
+#   should retain for the WASM distribution.
 dist/wasm/Makefile.basic: KRML_EXTRA=$(WASM_FLAGS)
-dist/wasm/Makefile.basic: DEFAULT_FLAGS=$(DEFAULT_FLAGS_NO_TESTS) $(OPT_FLAGS)
+dist/wasm/Makefile.basic: TEST_FLAGS=
 
+# ?
 dist/portable/Makefile.basic: OPT_FLAGS=-ccopts -mtune=generic
 
-# OpenSSL and BCrypt disabled
+# This will eventually go. OpenSSL and BCrypt disabled
 ifeq ($(EVERCRYPT_CONFIG),everest)
 HAND_WRITTEN_OPTIONAL_FILES :=
 endif
 
-# For Kaizala, no BCrypt, no Vale.
+# Customizations for Kaizala. No BCrypt, no Vale.
 ifeq ($(EVERCRYPT_CONFIG),kaizala)
 dist/compact/Makefile.basic: \
   HAND_WRITTEN_OPTIONAL_FILES := $(filter-out %_bcrypt.c,$(HAND_WRITTEN_OPTIONAL_FILES))
@@ -797,7 +817,7 @@ endif
 dist/%/Makefile.basic: $(ALL_KRML_FILES) dist/hacl-internal-headers/Makefile.basic \
   $(HAND_WRITTEN_FILES) $(HAND_WRITTEN_H_FILES) $(HAND_WRITTEN_OPTIONAL_FILES) $(VALE_ASMS) | old-extract-c
 	mkdir -p $(dir $@)
-	cp $(HACL_OLD_FILES) $(patsubst %.c,%.h,$(HACL_OLD_FILES)) $(dir $@)
+	[ x"$(HACL_OLD_FILES)" != x ] && cp $(HACL_OLD_FILES) $(patsubst %.c,%.h,$(HACL_OLD_FILES)) $(dir $@) || true
 	cp $(HAND_WRITTEN_FILES) $(HAND_WRITTEN_H_FILES) $(HAND_WRITTEN_OPTIONAL_FILES) dist/hacl-internal-headers/*.h $(dir $@)
 	[ x"$(VALE_ASMS)" != x ] && cp $(VALE_ASMS) $(dir $@) || true
 	$(KRML) $(DEFAULT_FLAGS) $(KRML_EXTRA) \

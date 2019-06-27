@@ -148,7 +148,7 @@ let lemma_quad32_xor_associates (x y z:quad32) : Lemma
   lemma_nat32_xor_associates x3 y3 z3;
   ()
 
-let lemma_iand_pow2 (n:pos) (x:natN (pow2_norm n)) (i:nat{i < n}) : Lemma
+let lemma_iand_pow2 (n:pos) (x:natN (pow2 n)) (i:nat{i < n}) : Lemma
   (pow2 i < pow2 n /\ (iand x (pow2 i) == 0 \/ iand x (pow2 i) == pow2 i))
   =
   let open FStar.UInt in
@@ -210,7 +210,7 @@ let lemma_ishr_pow2_diff (n:pos) (i:nat{i < n}) (j:nat{i <= j /\ j < n}) : Lemma
   nth_lemma #n result (pow2 i);
   ()
 
-let lemma_iand_maybe_pow2 (n:pos) (x y:natN (pow2_norm n)) (i:nat{i < n}) : Lemma
+let lemma_iand_maybe_pow2 (n:pos) (x y:natN (pow2 n)) (i:nat{i < n}) : Lemma
   (requires (x == 0 \/ x == pow2 i) /\ (y == 0 \/ y == pow2 i))
   (ensures not (iand x y = 0) <==> not (x = 0) /\ not (y = 0))
   =

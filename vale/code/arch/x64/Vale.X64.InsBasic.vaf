@@ -245,7 +245,7 @@ let lemma_fundamental_div_mod (a b:nat64) :
   FStar.Math.Lemmas.lemma_div_mod (a `op_Multiply` b) pow2_64
 #endverbatim
 
-#reset-options "--initial_fuel 5 --max_fuel 5 --max_ifuel 2 --z3rlimit 20"
+#reset-options "--initial_fuel 5 --max_fuel 5 --max_ifuel 2 --z3rlimit 50"
 
 ghost procedure lemma_fundamental_div_mod(ghost a:nat64, ghost b:nat64) {:infer_spec} extern;
 

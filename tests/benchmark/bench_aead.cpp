@@ -127,7 +127,7 @@ class EverCryptAEADEncrypt : public AEADBenchmark
       #ifdef _DEBUG
       if (
       #endif
-        EverCrypt_AEAD_encrypt(state, (uint8_t*)iv, (uint8_t*)ad, ad_len, (uint8_t*)plain, msg_len, (uint8_t*)cipher, (uint8_t*)tag)
+        EverCrypt_AEAD_encrypt(state, (uint8_t*)iv, 12, (uint8_t*)ad, ad_len, (uint8_t*)plain, msg_len, (uint8_t*)cipher, (uint8_t*)tag)
       #ifdef _DEBUG
         != EverCrypt_Error_Success) throw std::logic_error("AEAD encryption failed")
       #endif
@@ -157,14 +157,14 @@ class EverCryptAEADDecrypt : public AEADBenchmark
       if (EverCrypt_AEAD_create_in(type, &state, (uint8_t*)key) != EverCrypt_Error_Success)
         throw std::logic_error("AEAD context creation failed");
 
-      EverCrypt_AEAD_encrypt(state, (uint8_t*)iv, (uint8_t*)ad, ad_len, (uint8_t*)plain, msg_len, (uint8_t*)cipher, (uint8_t*)tag);
+      EverCrypt_AEAD_encrypt(state, (uint8_t*)iv, 12, (uint8_t*)ad, ad_len, (uint8_t*)plain, msg_len, (uint8_t*)cipher, (uint8_t*)tag);
     }
     virtual void bench_func()
     {
       #ifdef _DEBUG
       if (
       #endif
-        EverCrypt_AEAD_decrypt(state, (uint8_t*)iv, (uint8_t*)ad, ad_len, (uint8_t*)cipher, msg_len, (uint8_t*)tag, (uint8_t*)plain)
+        EverCrypt_AEAD_decrypt(state, (uint8_t*)iv, 12, (uint8_t*)ad, ad_len, (uint8_t*)cipher, msg_len, (uint8_t*)tag, (uint8_t*)plain)
       #ifdef _DEBUG
         != EverCrypt_Error_Success) throw std::logic_error("AEAD decryption failed")
       #endif

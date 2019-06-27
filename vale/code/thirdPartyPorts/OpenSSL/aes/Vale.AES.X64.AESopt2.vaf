@@ -118,7 +118,7 @@ procedure MulAdd_unroll(
         of_quad32(buffer128_read(hkeys_b, 6, mem)) == gf128_power(h, 5);
         of_quad32(buffer128_read(hkeys_b, 7, mem)) == gf128_power(h, 6);
         validSrcAddrs128(mem, rbp, scratch_b, 8, memTaint, Secret);
-        of_quad32(Xi) +. of_quad32(Z0) +. of_quad32(buffer128_read(scratch_b, 0, mem)) == prev;
+        of_quad32(Xi) +. of_quad32(Z0) +. of_quad32(buffer128_read(scratch_b, 1, mem)) == prev;
         buffer128_read(scratch_b, 3, mem) == reverse_bytes_quad32(data[4]);
         buffer128_read(scratch_b, 4, mem) == reverse_bytes_quad32(data[3]);
         buffer128_read(scratch_b, 5, mem) == reverse_bytes_quad32(data[2]);
@@ -127,6 +127,7 @@ procedure MulAdd_unroll(
     ensures
         of_quad32(Z0) +. shift(of_quad32(Z2), 64) +. shift(of_quad32(Z3), 128) ==
             ghash_unroll_back(h, prev, pdata, 0, 6, 5);
+        old(buffer128_read(scratch_b, 2, mem)) == buffer128_read(scratch_b, 2, mem);
         Hkey == Mkfour(0, 0, 0, 0xc2000000);
 {
     let data0 := #poly(pdata(0));
@@ -161,7 +162,7 @@ procedure MulAdd_unroll(
     VPolyAdd(Z0, T1, Z1);
     VPolyMul(T1, Ii, Hkey, false, true);
     VPolyMul(T2, Ii, Hkey, true, false);
-    VPolyAdd(Xi, Xi, Mem128(rbp, 0x00, Secret, scratch_b, 0));
+    VPolyAdd(Xi, Xi, Mem128(rbp, 0x10, Secret, scratch_b, 1));
     // assert ~~Xi == prev;
     VPolyMul(Hkey, Ii, Hkey, true, true);
     lemma_Mul128_accum(z0, ~~Z2, ~~Z3, data4, gf128_power(h, 2));
@@ -340,7 +341,7 @@ procedure GhashUnroll6x(
         of_quad32(buffer128_read(hkeys_b, 6, mem)) == gf128_power(h, 5);
         of_quad32(buffer128_read(hkeys_b, 7, mem)) == gf128_power(h, 6);
         validSrcAddrs128(mem, rbp, scratch_b, 8, memTaint, Secret);
-        of_quad32(Xi) +. of_quad32(Z0) +. of_quad32(buffer128_read(scratch_b, 0, mem)) == prev;
+        of_quad32(Xi) +. of_quad32(Z0) +. of_quad32(buffer128_read(scratch_b, 1, mem)) == prev;
         buffer128_read(scratch_b, 3, mem) == reverse_bytes_quad32(data[4]);
         buffer128_read(scratch_b, 4, mem) == reverse_bytes_quad32(data[3]);
         buffer128_read(scratch_b, 5, mem) == reverse_bytes_quad32(data[2]);
@@ -348,6 +349,7 @@ procedure GhashUnroll6x(
         buffer128_read(scratch_b, 7, mem) == reverse_bytes_quad32(data[0]);
     ensures
         Xi == reverse_bytes_quad32(ghash_incremental(h_LE, y_prev, data));
+        old(buffer128_read(scratch_b, 2, mem)) == buffer128_read(scratch_b, 2, mem);
 {
     MulAdd_unroll(hkeys_b, scratch_b, h, prev, data);
     lemma_gf128_low_shift();

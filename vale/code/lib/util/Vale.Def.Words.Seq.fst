@@ -18,6 +18,8 @@ let seq_to_seq_four_to_seq_LE  (#a:Type) (x:seq (four a)) :
   Lemma (seq_to_seq_four_LE (seq_four_to_seq_LE x) == x)
   [SMTPat (seq_to_seq_four_LE (seq_four_to_seq_LE x))]
   =
+  FStar.Pervasives.reveal_opaque (`%seq_four_to_seq_LE) (seq_four_to_seq_LE #a);
+  FStar.Pervasives.reveal_opaque (`%seq_to_seq_four_LE) (seq_to_seq_four_LE #a);
   let bytes = seq_four_to_seq_LE x in
   let fours = seq_to_seq_four_LE bytes in
   assert (equal fours x);
@@ -27,13 +29,16 @@ let seq_to_seq_four_to_seq_BE  (#a:Type) (x:seq (four a)) :
   Lemma (seq_to_seq_four_BE (seq_four_to_seq_BE x) == x)
   [SMTPat (seq_to_seq_four_BE (seq_four_to_seq_BE x))]
   =
-  assert True;
-  assert(equal (seq_to_seq_four_BE (seq_four_to_seq_BE x)) x);
+  FStar.Pervasives.reveal_opaque (`%seq_four_to_seq_BE) (seq_four_to_seq_BE #a);
+  FStar.Pervasives.reveal_opaque (`%seq_to_seq_four_BE) (seq_to_seq_four_BE #a);
+  assert (equal (seq_to_seq_four_BE (seq_four_to_seq_BE x)) x);
   ()
 
 let seq_four_to_seq_to_seq_four_LE (#a:Type) (x:seq a{length x % 4 == 0}) :
   Lemma (seq_four_to_seq_LE (seq_to_seq_four_LE x) == x)
   =
+  FStar.Pervasives.reveal_opaque (`%seq_four_to_seq_LE) (seq_four_to_seq_LE #a);
+  FStar.Pervasives.reveal_opaque (`%seq_to_seq_four_LE) (seq_to_seq_four_LE #a);
   assert (equal (seq_four_to_seq_LE (seq_to_seq_four_LE x)) x);
   ()
 
@@ -112,24 +117,10 @@ let seq_to_four_to_seq_BE (#a:Type) (x:four a) :
   =
   ()
 
-(*
-let seq_four_to_seq_LE (#a:Type) (x:seq (four a)) : seq a =
-  let f (n:nat{n < length x * 4}) = four_select (index x (n / 4)) (n % 4) in
-  init (length x * 4) f
-
-val four_to_seq_LE (#a:Type) (x:four a) : Pure (seq4 a)
-  (requires True)
-  (ensures fun s ->
-    index s 0 == x.lo0 /\
-    index s 1 == x.lo1 /\
-    index s 2 == x.hi2 /\
-    index s 3 == x.hi3
-  )
-*)
-
 let four_to_seq_LE_is_seq_four_to_seq_LE(#a:Type) (x:four a) :
   Lemma (four_to_seq_LE x == seq_four_to_seq_LE (create 1 x))
   =
+  FStar.Pervasives.reveal_opaque (`%seq_four_to_seq_LE) (seq_four_to_seq_LE #a);
   let s0 = four_to_seq_LE x  in
   let s1 = seq_four_to_seq_LE (create 1 x) in
   assert (equal s0 s1);
@@ -144,6 +135,8 @@ let seq_nat8_to_seq_nat32_to_seq_nat8_LE (x:seq nat32) :
 let seq_nat32_to_seq_nat8_to_seq_nat32_LE (x:seq nat8{length x % 4 == 0}) :
   Lemma (seq_nat32_to_seq_nat8_LE (seq_nat8_to_seq_nat32_LE x) == x)
   =
+  FStar.Pervasives.reveal_opaque (`%seq_four_to_seq_LE) (seq_four_to_seq_LE #nat8);
+  FStar.Pervasives.reveal_opaque (`%seq_to_seq_four_LE) (seq_to_seq_four_LE #nat8);
   assert (equal (seq_nat32_to_seq_nat8_LE (seq_nat8_to_seq_nat32_LE x)) x);
   ()
 
@@ -195,8 +188,10 @@ let seq_to_four_LE_injective () :
 let append_distributes_seq_to_seq_four_LE (#a:Type) (x:seq a{length x % 4 == 0}) (y:seq a{length y % 4 == 0}) :
   Lemma (seq_to_seq_four_LE (x @| y) == seq_to_seq_four_LE x @| seq_to_seq_four_LE y)
   =
+  FStar.Pervasives.reveal_opaque (`%seq_to_seq_four_LE) (seq_to_seq_four_LE #a);
   assert (equal (seq_to_seq_four_LE (x @| y)) (seq_to_seq_four_LE x @| seq_to_seq_four_LE y));
   ()
 
 let append_distributes_seq_four_to_seq_LE #a x y =
+  FStar.Pervasives.reveal_opaque (`%seq_four_to_seq_LE) (seq_four_to_seq_LE #a);
   assert (equal (seq_four_to_seq_LE (x @| y)) (seq_four_to_seq_LE x @| seq_four_to_seq_LE y))
