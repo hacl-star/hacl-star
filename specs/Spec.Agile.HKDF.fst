@@ -25,7 +25,7 @@ val hkdf_round0:
     a: Hash.algorithm
   -> prk: bytes{length prk <= Hash.max_input a}
   -> info: bytes{length info + Hash.size_hash a + 1 <= max_size_t (* BB. FIXME, this is required by create *)
-              /\ length prk + length info + 1 + Hash.size_hash a + Hash.size_block a <= Hash.max_input a} ->
+              /\ length info + 1 + Hash.size_hash a + Hash.size_block a <= Hash.max_input a} ->
   Tot (lbytes (Hash.size_hash a))
 
 let hkdf_round0 a prk info =
@@ -40,7 +40,7 @@ val hkdf_round:
     a: Hash.algorithm
   -> prk: bytes{length prk <= Hash.max_input a}
   -> info: bytes{length info + Hash.size_hash a + 1 <= max_size_t (* BB. FIXME, this is required by create *)
-              /\ length prk + length info + 1 + Hash.size_hash a + Hash.size_block a <= Hash.max_input a}
+              /\ length info + 1 + Hash.size_hash a + Hash.size_block a <= Hash.max_input a}
   -> i:nat{1 < i /\ i <= 255}
   -> ti:lbytes (Hash.size_hash a) ->
   Tot (lbytes (Hash.size_hash a))

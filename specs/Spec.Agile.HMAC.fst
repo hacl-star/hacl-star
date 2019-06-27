@@ -60,7 +60,7 @@ let finish (a:H.algorithm) (key:lbytes (H.size_block a)) (hash:H.state a) =
 let hmac
   (a:H.algorithm)
   (key:bytes{length key <= H.max_input a})
-  (input:bytes{length key + length input + H.size_block a <= H.max_input a}) =
+  (input:bytes{length input + H.size_block a <= H.max_input a}) =
 
   let klen = length key in
   let ilen = length input in
