@@ -1,4 +1,4 @@
-module Spec.Kyber.Lemmas
+module Spec.Kyber2.Lemmas
 
 open FStar.Mul
 

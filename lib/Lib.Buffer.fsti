@@ -937,6 +937,34 @@ val fill_blocks:
       refl h1 (v n) == s /\
       as_seq #_ #t h1 (gsub output (size 0) (n *! len)) == o))
 
+(** Fills a buffer block by block using a function without modifying the accumulator *)
+inline_for_extraction noextract
+val fill_blocks_cst:
+    #t:Type0
+  -> h0:mem
+  -> len:size_t
+  -> n:size_t{v n * v len <= max_size_t}
+  -> output:lbuffer t (n *! len)
+  -> a_spec:(i:size_nat{i <= v n} -> Type)
+  -> refl:(mem -> i:size_nat{i <= v n} -> GTot (a_spec i))
+  -> spec:(mem -> GTot (i:size_nat{i < v n} -> acc:a_spec i -> a:(a_spec (i + 1) & Seq.lseq t (v len)){let (s,b) = a in s === acc}))
+  -> impl:(i:size_t{v i < v n} -> Stack unit
+      (requires fun h1 ->
+      	(v i + 1) * v len <= max_size_t /\
+        modifies (loc (gsub output 0ul (i *! len))) h0 h1)
+//        modifies (B.loc_union (footprint (v i)) (loc output)) h0 h1)
+      (ensures  fun h1 _ h2 ->
+        (let block = gsub output (i *! len) len in
+        let s, b = spec h0 (v i) (refl h1 (v i)) in
+        B.modifies (loc block) h1 h2 /\
+        refl h1 (v i + 1) == s /\ refl h2 (v i + 1) == s /\ as_seq h2 block == b))) ->
+  Stack unit
+    (requires fun h -> h0 == h /\ live h output)
+    (ensures  fun _ _ h1 ->
+      B.modifies (loc output) h0 h1 /\
+     (let s, o = Seq.generate_blocks (v len) (v n) a_spec (spec h0) (refl h0 0) in
+      refl h1 (v n) == s /\ as_seq #_ #t h1 (gsub output (size 0) (n *! len)) == o))
+
 (** Fill a buffer with a total function *)
 inline_for_extraction
 val fillT:
@@ -963,6 +991,26 @@ val fill:
           (requires fun h -> modifies1 (gsub o 0ul i) h0 h)
           (ensures  fun h r h' -> h == h' /\
 			       r == spec h0 (v i)))
+  -> Stack unit
+    (requires fun h -> h == h0 /\ live h0 o)
+    (ensures  fun h _ h' ->
+      modifies1 o h h' /\
+      as_seq h' o == Seq.createi #a (v clen) (spec h0))
+
+(** Fill a buffer with a stateful function
+    this version is useful when the function needs an accumulator *)
+    
+inline_for_extraction
+val fill_direct:
+    #a:Type
+  -> h0:mem
+  -> clen:size_t
+  -> o:lbuffer a clen
+  -> spec:(mem -> GTot(i:size_nat{i < v clen} -> a))
+  -> impl:(i:size_t{v i < v clen} -> Stack unit
+          (requires fun h -> modifies1 (gsub o 0ul i) h0 h)
+          (ensures  fun h _ h' -> modifies1 (gsub o i (size 1)) h h' /\
+			       Seq.index h'.[|o|] (v i) == spec h0 (v i)))
   -> Stack unit
     (requires fun h -> h == h0 /\ live h0 o)
     (ensures  fun h _ h' ->
