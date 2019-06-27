@@ -113,6 +113,8 @@ let quarter_round st a b c d =
     line st a b d (size 8);
     line st c d b (size 7)
 
+#reset-options "--z3rlimit 50"
+
 [@ CInline]
 val double_round: st:state -> Stack unit
 		  (requires (fun h -> live h st))

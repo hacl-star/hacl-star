@@ -1573,6 +1573,8 @@ let lemma_store_felem_hi f hi =
   //assert ((v f4 * pow2 40) % pow2 40 = 0);
   logor_disjoint ((f2 >>. 12ul) |. (f3 <<. 14ul)) (f4 <<. 40ul) 40
 
+#push-options "--z3rlimit 200"
+
 val lemma_tup64_mod_pow2_128: f:tup64_5 ->
   Lemma
   (requires tup64_fits5 f (1, 1, 1, 1, 1))
@@ -1683,7 +1685,6 @@ let store_felem5_lemma #w f =
   assert (store_tup64_lemma (as_tup64_i f 0) == (lo, hi))
 #pop-options
 
-#push-options "--z3rlimit 200"
 #push-options "--max_ifuel 1"
 
 val lset_bit5_lemma0:
