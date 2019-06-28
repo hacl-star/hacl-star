@@ -1,5 +1,5 @@
 [
-  "\u0018\"ø≤k{g\u0000 ƒ∂Ñª4ôL",
+  ":ÜËÒù·éH^˝\u0017\u0001k1\u0017G",
   [
     [
       "Spec.AES256_GCM.size_key",
@@ -10,7 +10,6 @@
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented",
         "@fuel_irrelevance_Prims.pow2.fuel_instrumented", "@query",
-        "Prims_pretyping_ae567c2fb75be05905677af440075565",
         "constructor_distinct_Lib.IntTypes.U32",
         "constructor_distinct_Lib.IntTypes.U8",
         "equality_tok_Lib.IntTypes.U1@tok",
@@ -18,19 +17,18 @@
         "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.bits",
         "equation_Prims.nat", "equation_Spec.AES.gf8",
         "equation_Spec.AES.irred", "equation_Spec.GaloisField.gf",
-        "function_token_typing_Prims.__cache_version_number__",
         "lemma_Lib.IntTypes.pow2_values", "primitive_Prims.op_Subtraction",
         "proj_equation_Spec.GaloisField.GF_t",
         "projection_inverse_BoxInt_proj_0",
         "projection_inverse_Spec.GaloisField.GF_t",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "refinement_interpretation_Tm_refine_70597463dd221580f371f83615527f81",
-        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
         "typing_Lib.IntTypes.bits", "typing_Spec.AES.gf8",
         "typing_Spec.GaloisField.__proj__GF__item__t",
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "1d08109bdcc3043191e8f1341b8badff"
+      "374b2daaf34004e29968a8b2d83ed70c"
     ],
     [
       "Spec.AES256_GCM.size_block",
@@ -41,13 +39,12 @@
         "@MaxIFuel_assumption", "@query",
         "constructor_distinct_Lib.IntTypes.U32",
         "equality_tok_Lib.IntTypes.U32@tok", "equation_Lib.IntTypes.bits",
-        "equation_Prims.nat", "equation_Spec.GF128.blocksize",
-        "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_5a4fe33be2b93c781e552e491bb9dd31",
-        "typing_Spec.GF128.blocksize"
+        "equation_Spec.GF128.size_block", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_a78e81a34494fa620ef91991a1267b1f",
+        "typing_Spec.GF128.size_block"
       ],
       0,
-      "b49f7624be7cc6a54316d37558c4e7f9"
+      "a31c33e16e2571204e1ca92677a3fd40"
     ],
     [
       "Spec.AES256_GCM.size_nonce",
@@ -58,7 +55,6 @@
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented",
         "@fuel_irrelevance_Prims.pow2.fuel_instrumented", "@query",
-        "Prims_pretyping_ae567c2fb75be05905677af440075565",
         "constructor_distinct_Lib.IntTypes.U32",
         "constructor_distinct_Lib.IntTypes.U8",
         "equality_tok_Lib.IntTypes.U1@tok",
@@ -66,19 +62,18 @@
         "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.bits",
         "equation_Prims.nat", "equation_Spec.AES.gf8",
         "equation_Spec.AES.irred", "equation_Spec.GaloisField.gf",
-        "function_token_typing_Prims.__cache_version_number__",
         "lemma_Lib.IntTypes.pow2_values", "primitive_Prims.op_Subtraction",
         "proj_equation_Spec.GaloisField.GF_t",
         "projection_inverse_BoxInt_proj_0",
         "projection_inverse_Spec.GaloisField.GF_t",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "refinement_interpretation_Tm_refine_70597463dd221580f371f83615527f81",
-        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
         "typing_Lib.IntTypes.bits", "typing_Spec.AES.gf8",
         "typing_Spec.GaloisField.__proj__GF__item__t",
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "20c31dbfcf4c09e55b732be447339db6"
+      "94c183c835208dc98cb751909cdb8496"
     ],
     [
       "Spec.AES256_GCM.size_tag",
@@ -91,7 +86,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "2168cd6e4388d693259bfafcd65eb257"
+      "56deaa2b003ec53424ef67545ade4b63"
     ],
     [
       "Spec.AES256_GCM.padlen",
@@ -103,7 +98,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "c10eeb2bbc5cd26ed95e542d5e16b3d5"
+      "c7d10ec4fc7024e7bd6e9b2d62957efe"
     ],
     [
       "Spec.AES256_GCM.ghash",
@@ -114,7 +109,6 @@
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented",
         "@fuel_irrelevance_Prims.pow2.fuel_instrumented", "@query",
-        "Prims_pretyping_ae567c2fb75be05905677af440075565",
         "constructor_distinct_Lib.IntTypes.U32",
         "constructor_distinct_Lib.IntTypes.U8",
         "equality_tok_Lib.IntTypes.SEC@tok",
@@ -125,32 +119,32 @@
         "equation_Prims.nat", "equation_Spec.AES.gf8",
         "equation_Spec.AES.irred", "equation_Spec.AES256_GCM.padlen",
         "equation_Spec.AES256_GCM.size_block",
-        "equation_Spec.AES256_GCM.size_key", "equation_Spec.GF128.blocksize",
-        "equation_Spec.GaloisField.felem", "equation_Spec.GaloisField.gf",
+        "equation_Spec.AES256_GCM.size_key",
+        "equation_Spec.GF128.size_block", "equation_Spec.GaloisField.felem",
+        "equation_Spec.GaloisField.gf",
         "function_token_typing_Lib.IntTypes.uint8",
-        "function_token_typing_Prims.__cache_version_number__",
         "lemma_Lib.IntTypes.pow2_values", "primitive_Prims.op_Addition",
         "primitive_Prims.op_Modulus", "primitive_Prims.op_Multiply",
         "primitive_Prims.op_Subtraction",
         "proj_equation_Spec.GaloisField.GF_t",
         "projection_inverse_BoxInt_proj_0",
         "projection_inverse_Spec.GaloisField.GF_t",
-        "refinement_interpretation_Tm_refine_5a4fe33be2b93c781e552e491bb9dd31",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "refinement_interpretation_Tm_refine_70597463dd221580f371f83615527f81",
-        "refinement_interpretation_Tm_refine_9e6cc9e39284a5c68dd399840386c1c4",
-        "refinement_interpretation_Tm_refine_a023f390483b324d20370f23ed0795dc",
+        "refinement_interpretation_Tm_refine_7f77d72a6aa2b614917c5ceb1002ecc0",
+        "refinement_interpretation_Tm_refine_82f721d8dd9e5848515478ce5fa16da9",
+        "refinement_interpretation_Tm_refine_a78e81a34494fa620ef91991a1267b1f",
         "refinement_interpretation_Tm_refine_a9031d967caab303e2672eb42c07105f",
         "refinement_interpretation_Tm_refine_b65097d277ca016aa22967a76ddf6964",
-        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
         "typing_Lib.IntTypes.bits", "typing_Lib.IntTypes.uint_v",
         "typing_Lib.Sequence.length", "typing_Spec.AES.gf8",
         "typing_Spec.AES.irred", "typing_Spec.AES256_GCM.size_key",
-        "typing_Spec.GF128.blocksize",
+        "typing_Spec.GF128.size_block",
         "typing_Spec.GaloisField.__proj__GF__item__t",
         "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "c28dc7be1a04985b41d0e4de30cb3d5a"
+      "76fb996b3f69eae4af39bbfa650b1215"
     ],
     [
       "Spec.AES256_GCM.gcm",
@@ -162,24 +156,24 @@
         "equality_tok_Lib.IntTypes.SEC@tok",
         "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.uint8",
         "equation_Lib.Sequence.length", "equation_Lib.Sequence.lseq",
-        "equation_Prims.nat", "equation_Spec.AES.gf8",
-        "equation_Spec.AES.irred", "equation_Spec.AES256_GCM.nonce",
+        "equation_Spec.AES.gf8", "equation_Spec.AES.irred",
+        "equation_Spec.AES256_GCM.nonce",
         "equation_Spec.AES256_GCM.size_key",
         "equation_Spec.AES256_GCM.size_nonce",
         "equation_Spec.GaloisField.felem", "equation_Spec.GaloisField.gf",
         "proj_equation_Spec.GaloisField.GF_t",
         "projection_inverse_BoxInt_proj_0",
         "projection_inverse_Spec.GaloisField.GF_t",
-        "refinement_interpretation_Tm_refine_5a4fe33be2b93c781e552e491bb9dd31",
-        "refinement_interpretation_Tm_refine_9e6cc9e39284a5c68dd399840386c1c4",
-        "refinement_interpretation_Tm_refine_a023f390483b324d20370f23ed0795dc",
+        "refinement_interpretation_Tm_refine_7f77d72a6aa2b614917c5ceb1002ecc0",
+        "refinement_interpretation_Tm_refine_82f721d8dd9e5848515478ce5fa16da9",
+        "refinement_interpretation_Tm_refine_a78e81a34494fa620ef91991a1267b1f",
         "refinement_interpretation_Tm_refine_d8d83307254a8900dd20598654272e42",
         "typing_Lib.IntTypes.uint_v", "typing_Spec.AES.irred",
         "typing_Spec.AES256_GCM.size_key", "typing_tok_Lib.IntTypes.SEC@tok",
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "f40fdd7fde98fc0013eb6ee90ef6ff92"
+      "b105b5071437c9d28e1cdac759a69370"
     ],
     [
       "Spec.AES256_GCM.aead_encrypt",
@@ -187,19 +181,17 @@
       1,
       1,
       [
-        "@MaxIFuel_assumption", "@query",
-        "Prims_pretyping_ae567c2fb75be05905677af440075565",
-        "equation_Lib.IntTypes.uint8", "equation_Lib.Sequence.length",
-        "equation_Prims.nat", "equation_Spec.AES256_GCM.size_block",
+        "@MaxIFuel_assumption", "@query", "equation_Lib.IntTypes.uint8",
+        "equation_Lib.Sequence.length", "equation_Prims.nat",
+        "equation_Spec.AES256_GCM.size_block",
         "function_token_typing_Lib.IntTypes.uint8",
-        "function_token_typing_Prims.__cache_version_number__",
         "primitive_Prims.op_Addition", "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_663d6342e56e7b1ee1761d2d1ddb755c",
-        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "refinement_interpretation_Tm_refine_46c54da9a994c0ec6d85804bc4a09764",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "typing_Lib.Sequence.length"
       ],
       0,
-      "a1c496070b483b9b5b6831fbb0a862c7"
+      "44e8bf3e2070f5dc016806389f588059"
     ],
     [
       "Spec.AES256_GCM.aead_encrypt",
@@ -208,7 +200,7 @@
       1,
       [ "@query" ],
       0,
-      "919b30b54611dc64e417c7b62e11de9f"
+      "ecbe40ae9453995c208db64b9e107f30"
     ],
     [
       "Spec.AES256_GCM.aead_encrypt",
@@ -219,7 +211,6 @@
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented",
         "@fuel_irrelevance_Prims.pow2.fuel_instrumented", "@query",
-        "Prims_pretyping_ae567c2fb75be05905677af440075565",
         "constructor_distinct_Lib.IntTypes.U32",
         "constructor_distinct_Lib.IntTypes.U8",
         "equality_tok_Lib.IntTypes.SEC@tok",
@@ -233,29 +224,27 @@
         "equation_Spec.AES256_GCM.size_block",
         "equation_Spec.AES256_GCM.size_key",
         "equation_Spec.AES256_GCM.size_nonce",
-        "equation_Spec.GF128.blocksize", "equation_Spec.GF128.tag",
+        "equation_Spec.GF128.size_block", "equation_Spec.GF128.tag",
         "equation_Spec.GaloisField.felem", "equation_Spec.GaloisField.gf",
-        "function_token_typing_Lib.IntTypes.uint8",
-        "function_token_typing_Prims.__cache_version_number__",
-        "int_inversion", "int_typing", "lemma_Lib.IntTypes.pow2_values",
-        "primitive_Prims.op_Addition", "primitive_Prims.op_Division",
-        "primitive_Prims.op_Subtraction",
+        "function_token_typing_Lib.IntTypes.uint8", "int_inversion",
+        "lemma_Lib.IntTypes.pow2_values", "primitive_Prims.op_Addition",
+        "primitive_Prims.op_Division", "primitive_Prims.op_Subtraction",
         "proj_equation_Spec.GaloisField.GF_t",
         "projection_inverse_BoxInt_proj_0",
         "projection_inverse_Spec.GaloisField.GF_t",
-        "refinement_interpretation_Tm_refine_45933ce5dc0961274fc15d25c41138ab",
-        "refinement_interpretation_Tm_refine_5a4fe33be2b93c781e552e491bb9dd31",
-        "refinement_interpretation_Tm_refine_5ec11040947c5b220494f96c4a4e6ec8",
-        "refinement_interpretation_Tm_refine_663d6342e56e7b1ee1761d2d1ddb755c",
+        "refinement_interpretation_Tm_refine_0232d9e9a408f73befc8ebbd2ee9bcef",
+        "refinement_interpretation_Tm_refine_1ef75eaf18eb994099f3490d5dd2e9dc",
+        "refinement_interpretation_Tm_refine_46c54da9a994c0ec6d85804bc4a09764",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "refinement_interpretation_Tm_refine_70597463dd221580f371f83615527f81",
-        "refinement_interpretation_Tm_refine_8c0874357a1fa28a67fb8b92ed6509ad",
-        "refinement_interpretation_Tm_refine_9e6cc9e39284a5c68dd399840386c1c4",
-        "refinement_interpretation_Tm_refine_a023f390483b324d20370f23ed0795dc",
-        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "refinement_interpretation_Tm_refine_7ac881507dfb1827f1c91b3e0507cb0c",
+        "refinement_interpretation_Tm_refine_7f77d72a6aa2b614917c5ceb1002ecc0",
+        "refinement_interpretation_Tm_refine_82f721d8dd9e5848515478ce5fa16da9",
+        "refinement_interpretation_Tm_refine_a78e81a34494fa620ef91991a1267b1f",
+        "refinement_interpretation_Tm_refine_be2bf8580787020e51d86e4f07aa76ad",
+        "refinement_interpretation_Tm_refine_c009b8266a0ab634370fa8cc2acb845a",
         "refinement_interpretation_Tm_refine_d8d83307254a8900dd20598654272e42",
         "refinement_interpretation_Tm_refine_dd6ec363012506c5f7020d78942776c5",
-        "refinement_interpretation_Tm_refine_e8c5436e5cab88f16d815be2f2d3cb46",
-        "refinement_interpretation_Tm_refine_fd51ef0db36e4fe28c38d3bdcf68e75c",
         "typing_Lib.IntTypes.bits", "typing_Lib.IntTypes.uint_v",
         "typing_Lib.Sequence.length", "typing_Spec.AES.gf8",
         "typing_Spec.AES.irred", "typing_Spec.AES256_GCM.size_key",
@@ -263,7 +252,7 @@
         "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "3564e50211571533cbc7911fc73109ee"
+      "452dbacfbdc7d0265ab0f1cc931a31ee"
     ],
     [
       "Spec.AES256_GCM.aead_decrypt",
@@ -274,10 +263,10 @@
         "@MaxIFuel_assumption", "@query", "equation_Lib.Sequence.length",
         "equation_Spec.AES256_GCM.size_block", "primitive_Prims.op_Addition",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_18d46edd4576a12bdec4926d6fb28f27"
+        "refinement_interpretation_Tm_refine_11389d67614e381bb45b30401c234958"
       ],
       0,
-      "da5a91149a9a25097f3a3cb33a82f956"
+      "593ef2c78ac32fca2c3a18d0fa774a39"
     ],
     [
       "Spec.AES256_GCM.aead_decrypt",
@@ -288,9 +277,8 @@
         "@MaxIFuel_assumption", "@query",
         "equality_tok_Lib.IntTypes.SEC@tok",
         "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.uint8",
-        "equation_Lib.Sequence.length", "equation_Prims.nat",
-        "equation_Spec.AES.gf8", "equation_Spec.AES.irred",
-        "equation_Spec.AES256_GCM.padlen",
+        "equation_Lib.Sequence.length", "equation_Spec.AES.gf8",
+        "equation_Spec.AES.irred", "equation_Spec.AES256_GCM.padlen",
         "equation_Spec.AES256_GCM.size_block",
         "equation_Spec.AES256_GCM.size_key",
         "equation_Spec.AES256_GCM.size_nonce",
@@ -299,17 +287,17 @@
         "primitive_Prims.op_Modulus", "proj_equation_Spec.GaloisField.GF_t",
         "projection_inverse_BoxInt_proj_0",
         "projection_inverse_Spec.GaloisField.GF_t",
-        "refinement_interpretation_Tm_refine_18d46edd4576a12bdec4926d6fb28f27",
-        "refinement_interpretation_Tm_refine_5a4fe33be2b93c781e552e491bb9dd31",
-        "refinement_interpretation_Tm_refine_9e6cc9e39284a5c68dd399840386c1c4",
-        "refinement_interpretation_Tm_refine_a023f390483b324d20370f23ed0795dc",
-        "refinement_interpretation_Tm_refine_fd51ef0db36e4fe28c38d3bdcf68e75c",
+        "refinement_interpretation_Tm_refine_11389d67614e381bb45b30401c234958",
+        "refinement_interpretation_Tm_refine_7ac881507dfb1827f1c91b3e0507cb0c",
+        "refinement_interpretation_Tm_refine_7f77d72a6aa2b614917c5ceb1002ecc0",
+        "refinement_interpretation_Tm_refine_82f721d8dd9e5848515478ce5fa16da9",
+        "refinement_interpretation_Tm_refine_a78e81a34494fa620ef91991a1267b1f",
         "typing_Lib.IntTypes.uint_v", "typing_Spec.AES.irred",
         "typing_Spec.AES256_GCM.size_key", "typing_tok_Lib.IntTypes.SEC@tok",
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "cb2f9c3909311551b4debd3995d37e92"
+      "8a23d49abe53653b787bd14c3de91931"
     ]
   ]
 ]
