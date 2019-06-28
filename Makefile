@@ -51,11 +51,11 @@ specs-test:
 code-verify:
 	@echo "Verifying Low* code"
 
-code-extract:
-	@echo "Extracting Low* code"
+code-extract: specs-verify
+	$(MAKE) snapshot -C code
 
-code-test:
-	@echo "Testing Low* code"
+code-test: code-extract
+	$(MAKE) test-snapshot -C code
 
 build:
 	mkdir -p build && cd build && cmake .. && make
