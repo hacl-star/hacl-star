@@ -3,8 +3,8 @@ module Hacl.Impl.Gf128.Fields
 open FStar.HyperStack
 open FStar.HyperStack.All
 open Lib.IntTypes
+open Lib.IntVector
 open Lib.Buffer
-open Lib.Vec128
 
 module ST = FStar.HyperStack.ST
 
@@ -17,13 +17,13 @@ inline_for_extraction noextract
 let elem_t (s:field_spec) =
   match s with
   | F32 -> uint64
-  | FNI -> vec128
+  | FNI -> vec_t U128 1
 
 inline_for_extraction noextract
 let elem_zero (s:field_spec) : elem_t s =
   match s with
   | F32 -> u64 0
-  | FNI -> vec128_zero
+  | FNI -> vec_zero U128 1
 
 inline_for_extraction noextract
 let felem_len (s:field_spec) =
@@ -65,8 +65,8 @@ val create_felem: s:field_spec ->
 inline_for_extraction noextract
 let create_felem s =
   match s with
-  | F32 -> create 2ul (u64 0)
-  | FNI -> create 1ul vec128_zero
+  | F32 -> create 2ul (elem_zero F32)
+  | FNI -> create 1ul (elem_zero FNI)
 
 
 inline_for_extraction
@@ -92,8 +92,8 @@ val create_felem4: s: field_spec ->
 
 let create_felem4 s =
   match s with
-  | F32 -> create 8ul (u64 0)
-  | FNI -> create 4ul (vec128_zero)
+  | F32 -> create 8ul (elem_zero F32)
+  | FNI -> create 4ul (elem_zero FNI)
 
 
 inline_for_extraction
@@ -105,8 +105,8 @@ val create_ctx: s:field_spec ->
 
 let create_ctx s =
   match s with
-  | F32 -> create 266ul (u64 0)
-  | FNI -> create 5ul (vec128_zero)
+  | F32 -> create 266ul (elem_zero F32)
+  | FNI -> create 5ul (elem_zero FNI)
 
 
 inline_for_extraction

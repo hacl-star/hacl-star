@@ -43,11 +43,11 @@ let ghash text aad gf_key tag_key =
   let text_pad = create (padlen tlen) (u8 0) in
   let aad_len_bytes : lseq uint8 8 = nat_to_bytes_be 8 (alen * 8) in
   let text_len_bytes : lseq uint8 8 = nat_to_bytes_be 8 (tlen * 8) in
-  let st = GF.init gf_key in
-  let st = GF.poly (Seq.append aad aad_pad) st in
-  let st = GF.poly (Seq.append text text_pad) st in
-  let st = GF.poly (Seq.append aad_len_bytes text_len_bytes) st in
-  let tag = GF.finish st tag_key in
+  let acc, r = GF.gf128_init gf_key in
+  let acc = GF.gf128_update (Seq.append aad aad_pad) acc r in
+  let acc = GF.gf128_update (Seq.append text text_pad) acc r in
+  let acc = GF.gf128_update (Seq.append aad_len_bytes text_len_bytes) acc r in
+  let tag = GF.gf128_finish tag_key acc in
   tag
 
 
@@ -101,4 +101,3 @@ let aes128gcm_encrypt k n m aad = aead_encrypt AES.AES128 k n m aad
 let aes128gcm_decrypt k n aad c tag = aead_decrypt AES.AES128 k n aad c tag
 let aes256gcm_encrypt k n m aad = aead_encrypt AES.AES256 k n m aad
 let aes256gcm_decrypt k n aad c tag = aead_decrypt AES.AES256 k n aad c tag
-

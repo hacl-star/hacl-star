@@ -4,7 +4,7 @@ open FStar.HyperStack
 open FStar.HyperStack.All
 open Lib.IntTypes
 open Lib.Buffer
-open Lib.Vec128
+open Lib.IntVector
 
 module ST = FStar.HyperStack.ST
 
@@ -17,7 +17,7 @@ type m_spec =
 unfold
 let stelem (m:m_spec) =
   match m with
-  | MAES -> vec128
+  | MAES -> vec_t U128 1
   | M32 -> uint64
 
 unfold
@@ -42,7 +42,7 @@ unfold
 let elem_zero (m:m_spec) : stelem m =
   match m with
   | M32 -> u64 0
-  | MAES -> vec128_zero
+  | MAES -> vec_zero U128 1
 
 unfold
 let state (m:m_spec) = lbuffer (stelem m) (stlen m)

@@ -23,6 +23,8 @@ AESGCM_NI_FILES= $(HACL_HOME)/lib/Lib.IntTypes.fst \
 	$(HACL_HOME)/lib/Lib.Buffer.fst \
 	$(HACL_HOME)/lib/Lib.ByteBuffer.fst \
 	$(HACL_HOME)/lib/Lib.Loops.fst \
+	$(HACL_HOME)/lib/Lib.IntVector.fst \
+	$(HACL_HOME)/lib/Lib.IntVector.Intrinsics.fsti \
 	../gf128/Hacl.Impl.Gf128.FieldNI.fst \
 	../gf128/Hacl.Impl.Gf128.Fields.fst \
 	../gf128/Hacl.Impl.Gf128.Generic.fst \
@@ -38,6 +40,8 @@ AESGCM_AES256_NI_FILES= $(HACL_HOME)/lib/Lib.IntTypes.fst \
 	$(HACL_HOME)/lib/Lib.Buffer.fst \
 	$(HACL_HOME)/lib/Lib.ByteBuffer.fst \
 	$(HACL_HOME)/lib/Lib.Loops.fst \
+	$(HACL_HOME)/lib/Lib.IntVector.fst \
+	$(HACL_HOME)/lib/Lib.IntVector.Intrinsics.fsti \
 	../gf128/Hacl.Impl.Gf128.FieldNI.fst \
 	../gf128/Hacl.Impl.Gf128.Fields.fst \
 	../gf128/Hacl.Impl.Gf128.Generic.fst \
@@ -87,10 +91,10 @@ aesgcm-ni-c/out.krml: $(AESGCM_NI_FILES)
 
 aesgcm-ni-c/Hacl_AES_128_GCM_NI.c: aesgcm-ni-c/out.krml
 	 $(KREMLIN) $(KREMLIN_ARGS) -tmpdir aesgcm-ni-c  $^ -skip-compilation \
-	   -minimal -add-include '"kremlib.h"' -add-include '"vec128.h"' -drop Lib.Vec128 -bundle 'Hacl.AES_128_GCM.NI=*'
+	   -minimal -add-include '"kremlib.h"' -add-include '"vec-intrin.h"' -drop Lib.IntVector.Intrinsics -bundle 'Hacl.AES_128_GCM.NI=*'
 
 aesgcm-ni.exe: aesgcm-ni-c/Hacl_AES_128_GCM_NI.c aesgcm-ni-test.c
-	$(CC) -march=native -mtune=native -O3 -I $(KREMLIN_HOME)/kremlib/c -I $(KREMLIN_HOME)/include -I . aesgcm-ni-c/Hacl_AES_128_GCM_NI.c $(KREMLIN_HOME)/kremlib/dist/generic/testlib.o aesgcm-ni-test.c -o aesgcm-ni.exe
+	$(CC) -march=native -mtune=native -O3 -I $(HACL_HOME)/lib/c -I $(KREMLIN_HOME)/kremlib/c -I $(KREMLIN_HOME)/include -I . aesgcm-ni-c/Hacl_AES_128_GCM_NI.c $(KREMLIN_HOME)/kremlib/dist/generic/testlib.o aesgcm-ni-test.c -o aesgcm-ni.exe
 	./aesgcm-ni.exe
 
 
@@ -100,10 +104,10 @@ aesgcm-aes256-ni-c/out.krml: $(AESGCM_AES256_NI_FILES)
 
 aesgcm-aes256-ni-c/Hacl_AES_256_GCM_NI.c: aesgcm-aes256-ni-c/out.krml
 	 $(KREMLIN) $(KREMLIN_ARGS) -tmpdir aesgcm-aes256-ni-c  $^ -skip-compilation \
-	   -minimal -add-include '"kremlib.h"' -add-include '"vec128.h"' -drop Lib.Vec128 -bundle 'Hacl.AES_256_GCM.NI=*'
+	   -minimal -add-include '"kremlib.h"' -add-include '"vec-intrin.h"' -drop Lib.IntVector.Intrinsics -bundle 'Hacl.AES_256_GCM.NI=*'
 
 aesgcm-aes256-ni.exe: aesgcm-aes256-ni-c/Hacl_AES_256_GCM_NI.c aesgcm-ni-test.c
-	$(CC) -march=native -mtune=native -O3 -I $(KREMLIN_HOME)/kremlib/c -I $(KREMLIN_HOME)/include -I . aesgcm-aes256-ni-c/Hacl_AES_256_GCM_NI.c $(KREMLIN_HOME)/kremlib/dist/generic/testlib.o aesgcm-aes256-ni-test.c -o aesgcm-aes256-ni.exe
+	$(CC) -march=native -mtune=native -O3 -I $(HACL_HOME)/lib/c -I $(KREMLIN_HOME)/kremlib/c -I $(KREMLIN_HOME)/include -I . aesgcm-aes256-ni-c/Hacl_AES_256_GCM_NI.c $(KREMLIN_HOME)/kremlib/dist/generic/testlib.o aesgcm-aes256-ni-test.c -o aesgcm-aes256-ni.exe
 	./aesgcm-aes256-ni.exe
 
 
@@ -113,7 +117,7 @@ aesgcm-m32-c/out.krml: $(AESGCM_M32_FILES)
 
 aesgcm-m32-c/Hacl_AES_128_GCM_M32.c: aesgcm-m32-c/out.krml
 	 $(KREMLIN) $(KREMLIN_ARGS) -tmpdir aesgcm-m32-c  $^ -skip-compilation \
-	   -minimal -add-include '"kremlib.h"' -drop Lib.Vec128 -bundle 'Hacl.AES_128_GCM.M32=*'
+	   -minimal -add-include '"kremlib.h"' -drop Lib.IntVector.Intrinsics -bundle 'Hacl.AES_128_GCM.M32=*'
 
 aesgcm-m32.exe: aesgcm-m32-c/Hacl_AES_128_GCM_M32.c aesgcm-m32-test.c
 	$(CC) -march=native -mtune=native -O3 -I $(KREMLIN_HOME)/kremlib/c -I $(KREMLIN_HOME)/include -I . aesgcm-m32-c/Hacl_AES_128_GCM_M32.c $(KREMLIN_HOME)/kremlib/dist/generic/testlib.o aesgcm-m32-test.c -o aesgcm-m32.exe
@@ -125,7 +129,7 @@ aesgcm-aes256-m32-c/out.krml: $(AESGCM_AES256_M32_FILES)
 
 aesgcm-aes256-m32-c/Hacl_AES_256_GCM_M32.c: aesgcm-aes256-m32-c/out.krml
 	 $(KREMLIN) $(KREMLIN_ARGS) -tmpdir aesgcm-aes256-m32-c  $^ -skip-compilation \
-	   -minimal -add-include '"kremlib.h"' -drop Lib.Vec128 -bundle 'Hacl.AES_256_GCM.M32=*'
+	   -minimal -add-include '"kremlib.h"' -drop Lib.IntVector.Intrinsics -bundle 'Hacl.AES_256_GCM.M32=*'
 
 aesgcm-aes256-m32.exe: aesgcm-aes256-m32-c/Hacl_AES_256_GCM_M32.c aesgcm-aes256-m32-test.c
 	$(CC) -march=native -mtune=native -O3 -I $(KREMLIN_HOME)/kremlib/c -I $(KREMLIN_HOME)/include -I . aesgcm-aes256-m32-c/Hacl_AES_256_GCM_M32.c $(KREMLIN_HOME)/kremlib/dist/generic/testlib.o aesgcm-aes256-m32-test.c -o aesgcm-aes256-m32.exe
