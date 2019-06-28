@@ -1,35 +1,6 @@
 [
-  "ˆ½\u0018B5\r{†¯\u0001äŒ²L‘³",
+  "\u001e>v–ŽC½¬m\t<\u0005¨UJ¿",
   [
-    [
-      "Spec.Agile.Cipher.aes_alg_of_alg",
-      1,
-      0,
-      1,
-      [ "@query", "assumption_Spec.Agile.Cipher.cipher_alg__uu___haseq" ],
-      0,
-      "96df9d29499c8462ca469c4eb9043838"
-    ],
-    [
-      "Spec.Agile.Cipher.aes_alg_of_alg",
-      2,
-      0,
-      1,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "constructor_distinct_Spec.Agile.Cipher.AES128",
-        "constructor_distinct_Spec.Agile.Cipher.AES256",
-        "constructor_distinct_Spec.Agile.Cipher.CHACHA20",
-        "disc_equation_Spec.Agile.Cipher.AES128",
-        "disc_equation_Spec.Agile.Cipher.AES256",
-        "equality_tok_Spec.Agile.Cipher.AES128@tok",
-        "equality_tok_Spec.Agile.Cipher.AES256@tok",
-        "fuel_guarded_inversion_Spec.Agile.Cipher.cipher_alg",
-        "refinement_interpretation_Tm_refine_177c69f55dbc44094b230a6a570a50b1"
-      ],
-      0,
-      "69158dfc88dc23ed48cec72bb57f8645"
-    ],
     [
       "Spec.Agile.Cipher.state",
       1,
@@ -38,15 +9,11 @@
       [
         "@MaxIFuel_assumption", "@query",
         "disc_equation_Spec.Agile.Cipher.AES128",
-        "disc_equation_Spec.Agile.Cipher.AES256",
         "disc_equation_Spec.Agile.Cipher.CHACHA20",
-        "equality_tok_Spec.Agile.Cipher.AES128@tok",
-        "equality_tok_Spec.Agile.Cipher.AES256@tok",
-        "fuel_guarded_inversion_Spec.Agile.Cipher.cipher_alg",
-        "projection_inverse_BoxBool_proj_0"
+        "fuel_guarded_inversion_Spec.Agile.Cipher.cipher_alg"
       ],
       0,
-      "47bc6a075ac396c4546155befcc802ff"
+      "a40f7cb6de35ef014b8cfc0bbac7a992"
     ],
     [
       "Spec.Agile.Cipher.key_len",
@@ -56,15 +23,11 @@
       [
         "@MaxIFuel_assumption", "@query",
         "disc_equation_Spec.Agile.Cipher.AES128",
-        "disc_equation_Spec.Agile.Cipher.AES256",
         "disc_equation_Spec.Agile.Cipher.CHACHA20",
-        "equality_tok_Spec.Agile.Cipher.AES128@tok",
-        "equality_tok_Spec.Agile.Cipher.AES256@tok",
-        "fuel_guarded_inversion_Spec.Agile.Cipher.cipher_alg",
-        "projection_inverse_BoxBool_proj_0"
+        "fuel_guarded_inversion_Spec.Agile.Cipher.cipher_alg"
       ],
       0,
-      "1871898d62a7ce5be867c18efdc4ea68"
+      "0f46574dd3a955570ee7b61128bf6862"
     ],
     [
       "Spec.Agile.Cipher.counter_max",
@@ -74,12 +37,11 @@
       [
         "@MaxIFuel_assumption", "@query",
         "disc_equation_Spec.Agile.Cipher.AES128",
-        "disc_equation_Spec.Agile.Cipher.AES256",
         "disc_equation_Spec.Agile.Cipher.CHACHA20",
         "fuel_guarded_inversion_Spec.Agile.Cipher.cipher_alg"
       ],
       0,
-      "b88abddc63bf69f2a0a4939f74d40f46"
+      "84447d755ca2efc7b98243abe5807685"
     ],
     [
       "Spec.Agile.Cipher.block_len",
@@ -89,27 +51,25 @@
       [
         "@MaxIFuel_assumption", "@query",
         "disc_equation_Spec.Agile.Cipher.AES128",
-        "disc_equation_Spec.Agile.Cipher.AES256",
         "disc_equation_Spec.Agile.Cipher.CHACHA20",
         "fuel_guarded_inversion_Spec.Agile.Cipher.cipher_alg"
       ],
       0,
-      "8d7b097b3adbcc0eeb40e7678cd69f03"
+      "d5c5d34b442cabe76c3202a30ed5f2dd"
     ],
     [
-      "Spec.Agile.Cipher.nonce_bound",
+      "Spec.Agile.Cipher.nonce_len",
       1,
       0,
       1,
       [
         "@MaxIFuel_assumption", "@query",
         "disc_equation_Spec.Agile.Cipher.AES128",
-        "disc_equation_Spec.Agile.Cipher.AES256",
         "disc_equation_Spec.Agile.Cipher.CHACHA20",
         "fuel_guarded_inversion_Spec.Agile.Cipher.cipher_alg"
       ],
       0,
-      "9f3583580835adb075471781c13de064"
+      "42df451649173307d163a99a6b99dcb0"
     ],
     [
       "Spec.Agile.Cipher.init",
@@ -121,32 +81,29 @@
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
         "constructor_distinct_Lib.IntTypes.U32",
         "constructor_distinct_Lib.IntTypes.U8",
-        "constructor_distinct_Spec.AES.AES128",
-        "constructor_distinct_Spec.AES.AES256",
-        "constructor_distinct_Spec.Agile.Cipher.AES128",
-        "constructor_distinct_Spec.Agile.Cipher.AES256",
         "equality_tok_Lib.IntTypes.U1@tok",
         "equality_tok_Lib.IntTypes.U32@tok",
-        "equality_tok_Lib.IntTypes.U8@tok",
-        "equality_tok_Spec.AES.AES128@tok",
-        "equality_tok_Spec.AES.AES256@tok", "equation_Lib.IntTypes.bits",
+        "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.bits",
         "equation_Prims.nat", "equation_Spec.AES.gf8",
-        "equation_Spec.AES.irred", "equation_Spec.AES.key_size",
-        "equation_Spec.Agile.Cipher.aes_alg_of_alg",
-        "equation_Spec.Agile.Cipher.key_len", "equation_Spec.GaloisField.gf",
+        "equation_Spec.AES.irred", "equation_Spec.Agile.Cipher.key_len",
+        "equation_Spec.Agile.Cipher.nonce_len",
+        "equation_Spec.GaloisField.gf",
         "fuel_guarded_inversion_Spec.Agile.Cipher.cipher_alg",
         "lemma_Lib.IntTypes.pow2_values", "primitive_Prims.op_Subtraction",
         "proj_equation_Spec.GaloisField.GF_t",
         "projection_inverse_BoxInt_proj_0",
         "projection_inverse_Spec.GaloisField.GF_t",
+        "refinement_interpretation_Tm_refine_050a5c81b30099cbd136da8db72efc38",
+        "refinement_interpretation_Tm_refine_3bb4277e6b41318eabba92c3e807e00b",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "refinement_interpretation_Tm_refine_70597463dd221580f371f83615527f81",
+        "refinement_interpretation_Tm_refine_a78e81a34494fa620ef91991a1267b1f",
         "typing_Lib.IntTypes.bits", "typing_Spec.AES.gf8",
         "typing_Spec.GaloisField.__proj__GF__item__t",
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "b8b03080167702b97418be6da4793534"
+      "27c56f31e336d84ed96b1cc00ef57134"
     ],
     [
       "Spec.Agile.Cipher.init",
@@ -155,33 +112,35 @@
       1,
       [
         "@MaxIFuel_assumption", "@query",
-        "Prims_pretyping_ae567c2fb75be05905677af440075565", "b2t_def",
+        "constructor_distinct_Spec.AES.AES128",
         "constructor_distinct_Spec.Agile.Cipher.AES128",
-        "constructor_distinct_Spec.Agile.Cipher.AES256",
         "constructor_distinct_Spec.Agile.Cipher.CHACHA20",
         "disc_equation_Spec.Agile.Cipher.AES128",
-        "disc_equation_Spec.Agile.Cipher.AES256",
-        "disc_equation_Spec.Agile.Cipher.CHACHA20", "eq2-interp",
-        "equality_tok_Spec.Agile.Cipher.AES128@tok",
-        "equality_tok_Spec.Agile.Cipher.AES256@tok",
-        "equation_Lib.Sequence.lseq",
-        "equation_Spec.Agile.Cipher.aes_alg_of_alg",
-        "equation_Spec.Agile.Cipher.block_len",
+        "disc_equation_Spec.Agile.Cipher.CHACHA20",
+        "equality_tok_Lib.IntTypes.U8@tok",
+        "equality_tok_Spec.AES.AES128@tok", "equation_Lib.Sequence.lseq",
+        "equation_Lib.Sequence.seq", "equation_Spec.AES.elem",
+        "equation_Spec.AES.gf8", "equation_Spec.AES.irred",
+        "equation_Spec.AES.key_size", "equation_Spec.Agile.Cipher.block_len",
         "equation_Spec.Agile.Cipher.key_len",
-        "equation_Spec.Agile.Cipher.nonce_bound",
         "equation_Spec.Agile.Cipher.nonce_len",
         "equation_Spec.Agile.Cipher.state",
         "equation_Spec.Chacha20.size_key",
         "equation_Spec.Chacha20.size_nonce",
+        "equation_Spec.GaloisField.felem", "equation_Spec.GaloisField.gf",
         "fuel_guarded_inversion_Spec.Agile.Cipher.cipher_alg",
-        "function_token_typing_Prims.__cache_version_number__",
-        "primitive_Prims.op_LessThanOrEqual",
+        "function_token_typing_Spec.AES.elem",
+        "proj_equation_Spec.GaloisField.GF_t",
         "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_cb3ba56b0da27ac4978c3bf04a5fb657",
-        "refinement_interpretation_Tm_refine_d8d83307254a8900dd20598654272e42"
+        "projection_inverse_Spec.GaloisField.GF_t",
+        "refinement_interpretation_Tm_refine_050a5c81b30099cbd136da8db72efc38",
+        "refinement_interpretation_Tm_refine_3bb4277e6b41318eabba92c3e807e00b",
+        "refinement_interpretation_Tm_refine_a78e81a34494fa620ef91991a1267b1f",
+        "refinement_interpretation_Tm_refine_d8d83307254a8900dd20598654272e42",
+        "typing_FStar.Seq.Base.length"
       ],
       0,
-      "a9f6ae381d642ff7f6458bfe9433cc31"
+      "076895c3567e3418db82a2aaabe30421"
     ],
     [
       "Spec.Agile.Cipher.add_counter",
@@ -191,16 +150,13 @@
       [
         "@MaxIFuel_assumption", "@query",
         "disc_equation_Spec.Agile.Cipher.AES128",
-        "disc_equation_Spec.Agile.Cipher.AES256",
         "disc_equation_Spec.Agile.Cipher.CHACHA20",
-        "equality_tok_Spec.Agile.Cipher.AES128@tok",
-        "equality_tok_Spec.Agile.Cipher.AES256@tok",
         "equation_Spec.Agile.Cipher.state",
         "fuel_guarded_inversion_Spec.Agile.Cipher.cipher_alg",
         "projection_inverse_BoxBool_proj_0"
       ],
       0,
-      "b39a727312aafc278b21a5fee6cf224d"
+      "8f4b2b7d6b2e7d235fdbb52e44f9012f"
     ],
     [
       "Spec.Agile.Cipher.key_block",
@@ -213,16 +169,13 @@
         "constructor_distinct_Lib.IntTypes.U32",
         "constructor_distinct_Lib.IntTypes.U8",
         "disc_equation_Spec.Agile.Cipher.AES128",
-        "disc_equation_Spec.Agile.Cipher.AES256",
         "disc_equation_Spec.Agile.Cipher.CHACHA20",
         "equality_tok_Lib.IntTypes.U1@tok",
         "equality_tok_Lib.IntTypes.U32@tok",
-        "equality_tok_Lib.IntTypes.U8@tok",
-        "equality_tok_Spec.Agile.Cipher.AES128@tok",
-        "equality_tok_Spec.Agile.Cipher.AES256@tok",
-        "equation_Lib.IntTypes.bits", "equation_Prims.nat",
-        "equation_Spec.AES.elem", "equation_Spec.AES.gf8",
-        "equation_Spec.AES.irred", "equation_Spec.Agile.Cipher.block_len",
+        "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.bits",
+        "equation_Prims.nat", "equation_Spec.AES.elem",
+        "equation_Spec.AES.gf8", "equation_Spec.AES.irred",
+        "equation_Spec.Agile.Cipher.block_len",
         "equation_Spec.Agile.Cipher.state",
         "equation_Spec.Chacha20.size_block",
         "equation_Spec.GaloisField.felem", "equation_Spec.GaloisField.gf",
@@ -239,7 +192,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "3bc559f3c75d727391d73b2815e6a0d6"
+      "5f5b2bda45ebdc290bf469634459fd08"
     ]
   ]
 ]
