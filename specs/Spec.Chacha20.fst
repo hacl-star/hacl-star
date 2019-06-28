@@ -71,6 +71,7 @@ let sum_state (s0:state) (s1:state) : Tot state =
 let chacha20_add_counter (s0:state) (ctr:counter) : Tot state =
   s0.[12] <- s0.[12] +. u32 ctr
 
+// JP: why the two calls to add_counter here?
 let chacha20_core (ctr:counter) (s0:state)  : Tot state =
   let k = chacha20_add_counter s0 ctr in
   let k = rounds k in

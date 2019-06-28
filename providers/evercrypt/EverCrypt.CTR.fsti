@@ -5,12 +5,12 @@ module HS = FStar.HyperStack
 module B = LowStar.Buffer
 module G = FStar.Ghost
 
-module Spec = Spec.Agile.Cipher
+module Spec = Spec.Agile.CTR
 
 open FStar.HyperStack.ST
 
 unfold noextract
-let alg = Spec.Agile.Cipher.cipher_alg
+let alg = Spec.cipher_alg
 
 /// Classic boilerplate
 /// -------------------
@@ -59,15 +59,14 @@ val frame_invariant: #a:alg -> l:B.loc -> s:state a -> h0:HS.mem -> h1:HS.mem ->
 /// Ghost accessors
 /// ---------------
 
-/// TODO: unify this definition with the ones in Spec.AEAD
-let kv a = Lib.ByteSequence.lbytes (Spec.key_len a)
+/// We keep ghost values for the key and the iv, meaning that their value
+/// doesn't depend on the heap, once we dereference past the initial pointer.
+/// This should give preservation of key and iv automatically to clients.
+val kv: #a:alg -> state_s a -> GTot (Spec.key a)
+val iv: #a:alg -> state_s a -> GTot (Spec.nonce a)
 
-val as_kv: #a:alg -> state_s a -> GTot (kv a)
-
-val repr: #a:alg -> h:HS.mem -> state a -> GTot (Spec.state a)
-
-// MISSING
-val ctr: #a:alg -> s:Spec.state a -> nat
+/// ctr is mutated from call to call
+val ctr: #a:alg -> h:HS.mem -> state a -> GTot Spec.ctr
 
 /// Stateful API
 /// ------------
@@ -93,13 +92,17 @@ val create_in (a: alg) (r: HS.rid): ST (state a)
     B.(loc_includes (loc_region_only true r) (footprint h1 s)) /\
     freeable h1 s))
 
-/// Resets an existing state to have counter 0.
+/// Initializes state to start at a given counter. This allows client to
+/// generate a counter-block directly for a given counter, or to just start at
+/// zero and do encryption block-by-block. Note that we use a C-like API where
+/// the length comes after the buffer.
 val init: a:e_alg -> (
   let a = G.reveal a in
   s:state a ->
-  key: lbuffer uint8 (size (Spec.key_len a)) ->
+  key: lbuffer uint8 (size (Spec.key_length a)) ->
   nonce: buffer uint8 ->
   nonce_len: UInt32.t { Spec.nonce_bound a (UInt32.v nonce_len) /\ B.len nonce = nonce_len } ->
+  c: UInt32.t ->
   Stack unit
     (requires (fun h0 ->
       live h0 key /\
@@ -112,8 +115,9 @@ val init: a:e_alg -> (
       invariant #a h1 s /\
       footprint h0 s == footprint #a h1 s /\
       B.(modifies (footprint #a h0 s) h0 h1) /\
-      repr #a h1 s == Spec.Agile.Cipher.init a (as_seq h0 key)
-        (UInt32.v nonce_len) (B.as_seq h0 nonce) 0
+      kv (B.deref h1 s) == as_seq h0 key /\
+      iv (B.deref h1 s) == B.as_seq h0 nonce /\
+      ctr h1 s = UInt32.v c
       )))
 
 /// Process exactly one block, incrementing the counter contained in the state
@@ -122,57 +126,24 @@ val init: a:e_alg -> (
 val update_block: a:e_alg -> (
   let a = G.reveal a in
   s:state a ->
-  dst:lbuffer uint8 (size (Spec.block_len a)) ->
-  src:lbuffer uint8 (size (Spec.block_len a)) ->
+  dst:lbuffer uint8 (size (Spec.block_length a)) ->
+  src:lbuffer uint8 (size (Spec.block_length a)) ->
   Stack unit
     (requires (fun h0 ->
       B.loc_disjoint (loc src) (footprint h0 s) /\
       B.loc_disjoint (loc dst) (footprint h0 s) /\
       disjoint src dst /\
       invariant h0 s /\
-      ctr (repr h0 s) < pow2 32 - 1))
+      ctr h0 s < pow2 32 - 1))
     (ensures (fun h0 _ h1 ->
       preserves_freeable s h0 h1 /\
       invariant h1 s /\
-      B.(modifies (footprint h0 s) h0 h1) /\
+      B.(modifies (footprint_s (B.deref h0 s)) h0 h1) /\
       footprint h0 s == footprint h1 s /\
-      repr h1 s == Spec.add_counter a (repr h0 s) 1 /\
+      ctr h1 s == ctr h0 s + 1 /\
       as_seq h1 dst ==
-        Spec.Agile.CTR.process_block a (repr h0 s) (ctr (repr h0 s)) (as_seq h0 src))))
+        Lib.Sequence.map2 ( ^. ) (as_seq h0 src) (
+          Spec.ctr_block a (Spec.expand a (kv (B.deref h0 s))) (iv (B.deref h0 s))
+            (ctr h0 s)))))
 
-// TODO: update_blocks, update_last
-
-/// For custom clients, e.g. libquiccrypto: does not modify the state in place
-/// and allows directly passing a custom value for the counter. Potentially
-/// dangerous, since a client may reuse a counter if they don't pay attention.
-val single_block: a:e_alg -> (
-  let a = G.reveal a in
-  s:state a ->
-  dst:lbuffer uint8 (size (Spec.block_len a)) ->
-  src:lbuffer uint8 (size (Spec.block_len a)) ->
-  c:UInt32.t ->
-  Stack unit
-    (requires (fun h0 ->
-      B.loc_disjoint (loc src) (footprint h0 s) /\
-      B.loc_disjoint (loc dst) (footprint h0 s) /\
-      disjoint src dst /\
-      invariant h0 s /\
-      ctr (repr h0 s) + UInt32.v c <= pow2 32 - 1))
-    (ensures (fun h0 _ h1 ->
-      preserves_freeable s h0 h1 /\
-      invariant h1 s /\
-      B.(modifies (footprint h0 s) h0 h1) /\
-      footprint h0 s == footprint h1 s /\
-      repr h1 s == repr h0 s /\
-      as_seq h1 dst ==
-        Spec.Agile.CTR.process_block a (repr h0 s) (ctr (repr h0 s) + UInt32.v c) (as_seq h0 src))))
-
-// TODO: perhaps it's not much use having update_block. What we could do instead
-// which would be more general is to offer i) single_block (which does not
-// modify the underlying state) and ii) increment_counter (which modifies the
-// state). This way, custom clients like libquiccrypt would just use single
-// block, and the module above this one (EverCrypt.Cipher.Incremental) could
-// take care of incrementing the counter whenever a full block has been
-// processed. But then the API is dangerous so maybe what we want is
-// single_block with a precondition that c <> 0 and a modification in place of
-// the state to guarantee it's harder to reuse the counter?
+// TODO: update_blocks, update_last... then an incremental API for CTR encryption.

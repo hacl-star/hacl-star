@@ -7,41 +7,31 @@ open Lib.ByteSequence
 
 #reset-options "--z3rlimit 20 --max_fuel 0 --max_ifuel 1"
 
-/// This module is concerned with defining an agile block cipher, i.e. a
-/// function that given a block and a suitably extended key produces a fresh
-/// block.
+/// This module is concerned with defining an agile stream cipher, i.e. a
+/// function that given: a suitably extended key; an iv (nonce); a counter,
+/// produces a fresh block.
+///
+/// TODO: share definitions with Spec.AEAD, in particular definitions of nonce,
+/// key, key expansion, etc.
 
-type cipher_alg =
-  | AES128
-  | AES256
-  | CHACHA20
+let aes_ctr_block_add_counter (block: lbytes 16) (incr:size_nat): Tot (lbytes 16) =
+  let n = nat_from_bytes_be block in
+  let n' = (n + incr) % pow2 128 in
+  nat_to_bytes_be 16 n'
 
-/// The AES spec itself is agile; this is the same technique used for SHA2 vs. MD.
-let aes_alg_of_alg (a: cipher_alg { a = AES128 \/ a = AES256 }) =
+/// A block is a function of key, iv, counter.
+let ctr_block (a: cipher_alg) (k: xkey a) (iv: nonce a) (c: ctr): block a =
   match a with
-  | AES128 -> Spec.AES.AES128
-  | AES256 -> Spec.AES.AES256
+  | AES128 | AES256 ->
+      let open Spec.AES in
+      let open Lib.LoopCombinators in
+      let block = create 16 (u8 0) in
+      let block = repeati #(lbytes 16) (length iv) (fun i b -> b.[i] <- Seq.index iv i) block in
+      let block = aes_ctr_block_add_counter block c in
+      aes_encrypt_block (aes_alg_of_alg a) k block
 
-/// Algorithms may (AES) or may not (Chacha) require a preliminary round of key expansion.
-let xkey (a: cipher_alg) =
-  match a with
-  | AES128 | AES256 -> Spec.AES.aes_xkey (aes_alg_of_alg a)
-  | CHACHA20 -> Spec.Chacha20.key
-
-/// Trying to enforce conventions: lengths for nats (spec); len for machine
-/// integers (runtime).
-let block_length (a:cipher_alg) =
-  match a with
-  | AES128 | AES256 -> 16
-  | CHACHA20 -> 64
-
-let block_t a = lbytes (block_length a)
-
-let block (a:cipher_alg) (s:xkey a) (b: block_t a): block_t a =
-  match a with
-  | AES128 | AES256 -> Spec.AES.aes_encrypt_block (aes_alg_of_alg a) s b
   | CHACHA20 ->
       let open Spec.Chacha20 in
-      let b = uints_from_bytes_le #U32 #SEC b in
-      let b = sum_state (rounds b) b in
-      uints_to_bytes_le b
+      let block = chacha20_init k iv c in
+      let block' = rounds block in
+      uints_to_bytes_le (sum_state block block')
