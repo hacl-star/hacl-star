@@ -602,31 +602,6 @@ let load_felem2_le f b =
   uints_from_bytes_le_lemma64_2 (as_seq h0 b);
   LSeq.eq_intro (feval h1 f) (Vec.load_elem2 (as_seq h0 b))
 
-val lemma_load_felem4_le: b:LSeq.lseq uint8 64 -> lo0:vec_t U128 2 -> hi0:vec_t U128 2 ->
-  Lemma
-  (requires (
-    let lo:LSeq.lseq uint128 2 = BSeq.uints_from_bytes_le (LSeq.sub b 0 32) in
-    let hi:LSeq.lseq uint128 2 = BSeq.uints_from_bytes_le (LSeq.sub b 32 32) in
-    vec_v lo0 == create2 lo.[0] hi.[0] /\
-    vec_v hi0 == create2 lo.[1] hi.[1]))
-  (ensures (
-    let lo:LSeq.lseq uint128 2 = BSeq.uints_from_bytes_le (LSeq.sub b 0 32) in
-    let hi:LSeq.lseq uint128 2 = BSeq.uints_from_bytes_le (LSeq.sub b 32 32) in
-    let b1 = BSeq.nat_from_bytes_le (LSeq.sub b 0 16) in
-    let b2 = BSeq.nat_from_bytes_le (LSeq.sub b 16 16) in
-    let b3 = BSeq.nat_from_bytes_le (LSeq.sub b 32 16) in
-    let b4 = BSeq.nat_from_bytes_le (LSeq.sub b 48 16) in
-    let lo1 = vec_v (cast U64 4 lo0) in
-    let hi1 = vec_v (cast U64 4 hi0) in
-    b1 == pow2 64 * uint_v lo1.[1] + uint_v lo1.[0] /\
-    b2 == pow2 64 * uint_v hi1.[1] + uint_v hi1.[0] /\
-    b3 == pow2 64 * uint_v lo1.[3] + uint_v lo1.[2] /\
-    b4 == pow2 64 * uint_v hi1.[3] + uint_v hi1.[2]))
-let lemma_load_felem4_le b lo0 hi0 =
-  uints_from_bytes_le_lemma128_2 b;
-  lemma_cast_vec128_to_vec64 lo0;
-  lemma_cast_vec128_to_vec64 hi0
-
 inline_for_extraction noextract
 val load_felem4_le:
     f:felem 4
@@ -640,23 +615,21 @@ val load_felem4_le:
       feval h1 f == Vec.load_elem4 (as_seq h0 b))
 let load_felem4_le f b =
   let h0 = ST.get () in
-  let lo0 = vec_load_le U128 2 (sub b 0ul 32ul) in
-  let hi0 = vec_load_le U128 2 (sub b 32ul 32ul) in
-  let lo1 = vec_interleave_low lo0 hi0 in
-  let hi1 = vec_interleave_high lo0 hi0 in
-  vec_interleave_low_lemma2 lo0 hi0;
-  vec_interleave_high_lemma2 lo0 hi0;
-  let lo2 = cast U64 4 lo1 in
-  let hi2 = cast U64 4 hi1 in
+  let lo0 = vec_load_le U64 4 (sub b 0ul 32ul) in
+  let hi0 = vec_load_le U64 4 (sub b 32ul 32ul) in
+  let lo1 = vec_interleave_low_n 2 lo0 hi0 in
+  vec_interleave_low_n_lemma_uint64_4_2 lo0 hi0;
+  let hi1 = vec_interleave_high_n 2 lo0 hi0 in
+  vec_interleave_high_n_lemma_uint64_4_2 lo0 hi0;
 
-  let lo = vec_interleave_low lo2 hi2 in
-  let hi = vec_interleave_high lo2 hi2 in
-  vec_interleave_low_lemma_uint64_4 lo2 hi2;
-  vec_interleave_high_lemma_uint64_4 lo2 hi2;
+  let lo = vec_interleave_low lo1 hi1 in
+  vec_interleave_low_lemma_uint64_4 lo1 hi1;
+  let hi = vec_interleave_high lo1 hi1 in
+  vec_interleave_high_lemma_uint64_4 lo1 hi1;
 
   load_felem f lo hi;
   let h1 = ST.get () in
-  lemma_load_felem4_le (as_seq h0 b) lo1 hi1;
+  uints_from_bytes_le_lemma64_4 (as_seq h0 b);
   LSeq.eq_intro (feval h1 f) (Vec.load_elem4 (as_seq h0 b))
 
 inline_for_extraction noextract

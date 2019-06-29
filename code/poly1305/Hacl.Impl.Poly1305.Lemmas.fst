@@ -9,40 +9,6 @@ open Lib.ByteSequence
 
 friend Lib.ByteSequence
 
-let lemma_cast_vec128_to_vec64 b = cast_vec_u128_to_u64_lemma b
-
-let lemma_cast_vec64_to_vec128 b = cast_vec_u64_to_u128_lemma #2 b
-
-let lemma_vec_interleave_low_cast_64_4 b1 b2 =
-  let r1 = cast U128 2 b1 in
-  lemma_cast_vec64_to_vec128 b1;
-  let r2 = cast U128 2 b2 in
-  lemma_cast_vec64_to_vec128 b2;
-  let r3 = vec_interleave_low r1 r2 in
-  vec_interleave_low_lemma2 r1 r2;
-  let r4 = cast U64 4 r3 in
-  lemma_cast_vec128_to_vec64 r3;
-  uintv_extensionality (vec_v r4).[0] (vec_v b1).[0];
-  uintv_extensionality (vec_v r4).[1] (vec_v b1).[1];
-  uintv_extensionality (vec_v r4).[2] (vec_v b2).[0];
-  uintv_extensionality (vec_v r4).[3] (vec_v b2).[1];
-  eq_intro (vec_v r4) (create4 (vec_v b1).[0] (vec_v b1).[1] (vec_v b2).[0] (vec_v b2).[1])
-
-let lemma_vec_interleave_high_cast_64_4 b1 b2 =
-  let r1 = cast U128 2 b1 in
-  lemma_cast_vec64_to_vec128 b1;
-  let r2 = cast U128 2 b2 in
-  lemma_cast_vec64_to_vec128 b2;
-  let r3 = vec_interleave_high r1 r2 in
-  vec_interleave_high_lemma2 r1 r2;
-  let r4 = cast U64 4 r3 in
-  lemma_cast_vec128_to_vec64 r3;
-  uintv_extensionality (vec_v r4).[0] (vec_v b1).[2];
-  uintv_extensionality (vec_v r4).[1] (vec_v b1).[3];
-  uintv_extensionality (vec_v r4).[2] (vec_v b2).[2];
-  uintv_extensionality (vec_v r4).[3] (vec_v b2).[3];
-  eq_intro (vec_v r4) (create4 (vec_v b1).[2] (vec_v b1).[3] (vec_v b2).[2] (vec_v b2).[3])
-
 #set-options "--z3rlimit 50 --max_fuel 1"
 
 let uint_from_bytes_le_lemma b =
@@ -62,7 +28,11 @@ let uints_from_bytes_le_lemma64_2 b =
   uint_from_bytes_le_lemma (sub b 0 16);
   uint_from_bytes_le_lemma (sub b 16 16)
 
-let uints_from_bytes_le_lemma128_2 b = ()
+let uints_from_bytes_le_lemma64_4 b =
+  uint_from_bytes_le_lemma (sub b 0 16);
+  uint_from_bytes_le_lemma (sub b 16 16);
+  uint_from_bytes_le_lemma (sub b 32 16);
+  uint_from_bytes_le_lemma (sub b 48 16)
 
 val lemma_nat_from_bytes_le_zeroes: len:size_nat -> b:lseq uint8 len -> Lemma
   (requires (forall (i:nat). i < len ==> b.[i] == u8 0))

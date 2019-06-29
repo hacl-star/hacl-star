@@ -56,6 +56,7 @@ val lemma_i_div_sb:
   Lemma (w * (i / bs) + (i % bs) / size_block == i / size_block)
 let lemma_i_div_sb w bs i = ()
 
+#push-options "--z3rlimit 150"
 val lemma_equiv_g_i_aux1:
     w:lanes
   -> len:nat
@@ -63,6 +64,7 @@ val lemma_equiv_g_i_aux1:
   -> i:nat{len / bs * bs <= i /\ i < len /\ i % bs < (len % bs / size_block) * size_block} ->
   Lemma ((i / size_block + 1) * size_block <= len)
 let lemma_equiv_g_i_aux1 w len bs i = ()
+#pop-options
 
 val lemma_equiv_g_i_aux2:
     w:lanes
