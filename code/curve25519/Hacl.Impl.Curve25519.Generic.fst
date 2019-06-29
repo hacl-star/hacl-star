@@ -129,8 +129,6 @@ let encode_point_ #s o i =
   assert (feval h1 tmp == S.fmul (feval h0 x) (S.fpow (feval h0 z) (pow2 255 - 21)));
   store_felem u64s tmp;
   let h2 = ST.get () in
-  assert (BSeq.nat_from_intseq_le (as_seq h2 u64s) == feval h1 tmp);
-  Hacl.Impl.Curve25519.Lemmas.lemma_nat_to_uints64_le_4 (as_seq h2 u64s) (feval h1 tmp);
   assert (as_seq h2 u64s == BSeq.nat_to_intseq_le 4 (feval h1 tmp));
   uints_to_bytes_le #U64 4ul o u64s;
   let h3 = ST.get () in
