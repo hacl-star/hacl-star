@@ -56,7 +56,7 @@ val lemma_i_div_sb:
   Lemma (w * (i / bs) + (i % bs) / size_block == i / size_block)
 let lemma_i_div_sb w bs i = ()
 
-#push-options "--z3rlimit 150"
+#push-options "--z3rlimit 400"
 val lemma_equiv_g_i_aux1:
     w:lanes
   -> len:nat
@@ -132,7 +132,7 @@ let chacha20_update_scalar_lemma_i ctx msg i =
     (Scalar.chacha20_encrypt_block ctx)
     (Scalar.chacha20_encrypt_last ctx) i
 
-#reset-options "--z3rlimit 50 --max_fuel 0 --using_facts_from '* -FStar.Seq'"
+#reset-options "--z3rlimit 100 --max_fuel 0 --using_facts_from '* -FStar.Seq'"
 
 val chacha20_update_vector_lemma_i:
     #w:lanes
@@ -275,6 +275,8 @@ val chacha20_update_vector_lemma_equiv_g_f_i_aux:
     let ctx = Scalar.chacha20_init k n ctr0 in
     Seq.index (chacha20_encrypt_last st0 nb_v rem_v last_v) (i % bs) ==
     Seq.index (Scalar.chacha20_encrypt_block ctx j_s b_j_s) (i % size_block))
+
+#push-options "--z3rlimit 400"
 let chacha20_update_vector_lemma_equiv_g_f_i_aux #w k n ctr0 msg bs i =
   let len = length msg in
   let nb_v = len / bs in
@@ -319,7 +321,6 @@ let chacha20_update_vector_lemma_equiv_g_f_i_aux #w k n ctr0 msg bs i =
   lemma_i_div_sb1 w bs len i
   //assert (w * nb_v + j1 == j_s);
 
-#push-options "--z3rlimit 400"
 val chacha20_update_vector_lemma_equiv_g_f_i:
     #w:lanes
   -> k:key
