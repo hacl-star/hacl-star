@@ -2,6 +2,7 @@
 # defining the .fst-in targets, as long as the sub-directory defines HACL_HOME.
 
 HACL_HOME 	?= .
+-include $(HACL_HOME)/Makefile.config
 KREMLIN_HOME 	?= $(HACL_HOME)/../kremlin
 FSTAR_HOME	?= $(HACL_HOME)/../FStar
 VALE_HOME	?= $(HACL_HOME)/../vale
