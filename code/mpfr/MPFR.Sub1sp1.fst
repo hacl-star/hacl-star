@@ -29,6 +29,8 @@ module U32 = FStar.UInt32
 
 #set-options "--z3refresh --z3rlimit 100 --max_fuel 1 --initial_fuel 0 --max_ifuel 1 --initial_ifuel 0"
 
+private type mpfr_tmp_exp_t = x:mpfr_exp_t{I64.((*x >=^ mpfr_EMIN /\*) x <=^ mpfr_EMAX +^ 1L)}
+
 let mpfr_sub1sp1_pre_cond h (a:mpfr_ptr) b c (p:mpfr_prec_t): GTot Type0=
         (* Memory safety *)
         mpfr_live h a /\ mpfr_live h b /\ mpfr_live h c /\
@@ -56,11 +58,11 @@ let mpfr_sub1sp1_post_cond h0 t h1 (a:mpfr_ptr) b c (p:mpfr_reg_prec_t) rnd_mode
         mpfr_disjoint_or_equal h1 a b /\ mpfr_disjoint_or_equal h1 a c /\
         mpfr_disjoint_or_equal h1 b c /\ mpfr_modifies a h0 h1 /\
         (* Functional correctness *)
-        mpfr_valid_cond h1 a /\ 
+        mpfr_valid_cond h1 a /\
         mpfr_round_cond exact (I64.v p) rnd_mode (as_fp h1 a) /\
         mpfr_ternary_cond (I32.v t) exact (as_fp h1 a)
 
-inline_for_extraction val count_leading_zeros: a:u64{not (a=^0uL)}->Tot (cnt:u32{U32.v cnt<32 /\ v (a<<^cnt)>=pow2 63})
+inline_for_extraction val count_leading_zeros: a:u64{not (a=^0uL)}->Tot (cnt:u32{U32.v cnt<32 /\ v (a<<^cnt)>=pow2 63 /\ v a*pow2 (U32.v cnt)<pow2 64 /\ U32.v cnt=64-(nbits (v a))})
 
 let  count_leading_zeros a=admit()
 
@@ -97,14 +99,17 @@ let mpfr_sub1sp1_any_post_cond h0 s h1 (a:mpfr_ptr) b c (p:mpfr_reg_prec_t) rnd_
         mpfr_live h1 a /\ mpfr_live h1 b /\ mpfr_live h1 c /\
         length (as_struct h1 a).mpfr_d = 1 /\
         length (as_struct h1 b).mpfr_d = 1 /\ length (as_struct h1 c).mpfr_d = 1 /\
-        modifies_1 (as_struct h1 a).mpfr_d h0 h1 /\ normal_cond h1 a /\ 
+        modifies_2 a (as_struct h1 a).mpfr_d h0 h1 /\ normal_cond h1 a /\ 
+        mpfr_modifies a h0 h1 /\
+        (as_normal h1 a).prec=I64.v p /\  (as_struct h0 a).mpfr_d==(as_struct h1 a).mpfr_d /\
+        (*Functional correctness*)
         I64.(v ((as_struct h0 a).mpfr_prec)=v p) /\
         I64.(v ((as_struct h0 b).mpfr_prec)=v p) /\
         I64.(v ((as_struct h0 c).mpfr_prec)=v p) /\
         mpfr_reg_cond h0 b /\ mpfr_reg_cond h0 c /\
         (let r = sub1sp_exact (as_reg_fp h0 b) (as_reg_fp h0 c) in
         normal_fp_cond r /\
-        mpfr_EXP_COND (I64.v s.bx) /\
+        I64.(s.bx<=^mpfr_EMAX) /\
         as_val h1 (as_struct h1 a).mpfr_d * pow2 (high_mant r (I64.v p)).len = (high_mant r (I64.v p)).limb * (pow2 64) /\
         I64.v s.sh = I64.v gmp_NUMB_BITS - I64.v p /\
         I64.v s.bx = (high_mant r (I64.v p)).exp /\
@@ -125,44 +130,85 @@ inline_for_extraction val mpfr_sub1sp1_eq:
     ))
     (ensures (fun h0 s h1->
     let exact=sub1sp_exact (as_fp h0 b) (as_fp h0 c) in
-     mpfr_live h1 a /\ mpfr_live h1 b /\ mpfr_live h1 c /\
-        length (as_struct h1 a).mpfr_d = 1 /\
-        length (as_struct h1 b).mpfr_d = 1 /\ length (as_struct h1 c).mpfr_d = 1 /\
-       (* modifies_1 (as_struct h1 a).mpfr_d h0 h1 /\*)  normal_cond h1 a /\ 
-        I64.(v ((as_struct h0 a).mpfr_prec)=v p) /\
-        I64.(v ((as_struct h0 b).mpfr_prec)=v p) /\
-        I64.(v ((as_struct h0 c).mpfr_prec)=v p) /\
-        mpfr_reg_cond h0 b /\ mpfr_reg_cond h0 c /\
-        (let r = sub1sp_exact (as_reg_fp h0 b) (as_reg_fp h0 c) in
-        normal_fp_cond r /\
-        mpfr_EXP_COND (I64.v s.bx)(* /\
-        as_val h1 (as_struct h1 a).mpfr_d * pow2 (high_mant r (I64.v p)).len = (high_mant r (I64.v p)).limb * (pow2 64) *) /\
-        I64.v s.sh = I64.v gmp_NUMB_BITS - I64.v p(* /\
-        I64.v s.bx = (high_mant r (I64.v p)).exp*) /\
-        I64.v p>=r.prec (*/\
-        (rb_def r (I64.v p) = (v s.rb <> 0))*)(* /\
-        (sb_def r (I64.v p) = (v s.sb <> 0))*) /\ 
-        (high_mant r (I64.v p)).sign = (as_normal h1 a).sign(*)
-    mpfr_sub1sp1_any_post_cond h0 t h1 a b c p rnd_mode exact*))))
+    mpfr_sub1sp1_any_post_cond h0 s h1 a b c p rnd_mode exact))
 
-val mpfr_sub1sp1_eq_prec_lemma:
+val mpfr_sub1sp1_eq_rb_sb_lemma:
     b:mpfr_reg_fp -> c:mpfr_reg_fp -> p:pos -> Lemma
     (requires (
     b.prec=p /\ c.prec=p /\
     b.exp=c.exp /\
     b.limb<>c.limb
     ))
-    (ensures (let r = sub1sp_exact b c in sb_def r p=false))
+    (ensures (let r = sub1sp_exact b c in rb_def r p=false /\ sb_def r p=false))
     
-let mpfr_sub1sp1_eq_prec_lemma b c p=
+let mpfr_sub1sp1_eq_rb_sb_lemma b c p=
     let r=sub1sp_exact b c in
-    let a,b=if gt (eval_abs c) (eval_abs b) then c,b else b,c in
-    assert(pow2 (a.exp-b.exp)=1);
-    lemma_mod_distr_sub_zero (a.limb * pow2 (a.exp - b.exp)) b.limb (pow2 (b.len-b.prec));
-    lemma_pow2_gt_rev (sub1sp_gt_len a b) (b.len-b.prec);
-//assert(b.limb>=r.limb \/ c.limb>=r.limb);
-//assert(pow2 p>=b.limb);
-admit()
+    let b,c=if gt (eval_abs c) (eval_abs b) then c,b else b,c in
+    assert(pow2 (b.exp-c.exp)=1);
+    lemma_mod_distr_sub_zero (b.limb * pow2 (b.exp - c.exp)) c.limb (pow2 (c.len-c.prec));
+    lemma_pow2_gt_rev (sub1sp_gt_len b c) (c.len-c.prec);
+    assert(b.limb>=r.limb \/ c.limb>=r.limb);
+    assert(pow2 b.len>=r.limb);
+    assert(pow2 b.len>pow2 (r.len-1));
+    lemma_pow2_gt_rev b.len (r.len-1);
+    assert(r.limb%pow2 (b.len-b.prec)=0);
+    if(p<r.prec) then (rb_value_lemma r p;
+      lemma_pow2_mod_mod_zero r.limb (b.len-b.prec) (r.len-p-1);
+      lemma_pow2_mod_mod_zero r.limb (b.len-b.prec) (r.len-p))
+
+val lemma_fp_eq_cross:
+    a:valid_fp -> b:valid_fp ->Lemma
+    (requires (eval_abs a =. eval_abs b /\ a.exp=b.exp))
+    (ensures (a.limb*pow2 b.len=b.limb*pow2 a.len)) 
+
+let lemma_fp_eq_cross a b=
+    let da,db=eval a,eval b in
+    let elb=min da.exponent db.exponent in
+    assert(a.limb*pow2(a.exp-a.len-elb)=b.limb*pow2(b.exp-b.len-elb));
+    assert(a.limb*pow2(a.exp-a.len-elb)*pow2 a.len=b.limb*pow2 a.len*pow2(b.exp-b.len-elb));
+    lemma_pow2_mul (a.exp-a.len-elb) a.len;
+    assert(a.limb*pow2(a.exp-elb)=b.limb*pow2 a.len*pow2(b.exp-b.len-elb));
+    assert(a.limb*pow2 b.len*pow2(a.exp-elb)=b.limb*pow2 a.len*pow2(b.exp-b.len-elb)*pow2 b.len);
+    lemma_paren_mul_right (b.limb*pow2 a.len) (pow2 (b.exp-b.len-elb)) (pow2 b.len);
+    lemma_pow2_mul (b.exp-b.len-elb) b.len;
+    assert(a.limb*pow2 b.len*pow2(a.exp-elb)=(b.limb*pow2 a.len)*pow2(b.exp-elb));
+    lemma_mul_simp (a.limb*pow2 b.len) (b.limb*pow2 a.len) (pow2 (a.exp-elb))
+
+val mpfr_sub1sp1_eq_value_lemma:
+    a:normal_fp -> b:mpfr_reg_fp -> c:mpfr_reg_fp -> cnt:nat -> p:pos -> Lemma
+    (requires (
+    b.prec=p /\ c.prec=p /\ p<64 /\
+    b.exp=c.exp /\
+    b.limb<>c.limb /\
+    (let b,c=if gt (eval_abs c) (eval_abs b) then c,b else b,c in
+    cnt=64-(nbits (b.limb-c.limb)) /\
+    a.limb=(b.limb-c.limb)*pow2 cnt /\
+    a.exp=b.exp-cnt /\
+    a.len=64
+    ) ))
+    (ensures (let r = sub1sp_exact b c in  a.limb * pow2 (high_mant r p).len = (high_mant r p).limb * (pow2 64) /\ a.exp = (high_mant r p).exp))
+
+let mpfr_sub1sp1_eq_value_lemma a b c cnt p=
+    let r=sub1sp_exact b c in
+    let b,c=if gt (eval_abs c) (eval_abs b) then c,b else b,c in
+    let k=high_mant r p in
+    assert(a.exp=k.exp);
+    assert(eval_abs a=.eval_abs r);
+    if p<=r.prec then begin 
+      assert(r.len<b.len);
+      lemma_pow2_lt (r.len-p) (b.len-p);
+      assert(b.limb%pow2(b.len-p)=0);
+      assert(c.limb%pow2(b.len-p)=0);
+      lemma_mod_distr_sub_zero b.limb c.limb (pow2 (b.len-p));
+      assert(r.limb%pow2(b.len-p)=0);
+      lemma_pow2_mod_mod_zero r.limb (b.len-p) (r.len-p);
+      assert(r.limb%pow2(r.len-p)=0);
+      lemma_div_mul r.limb (pow2 (r.len-p));
+      assert(r.limb=k.limb)
+    end;
+    assert(eval_abs r=.eval_abs k);
+    lemma_fp_eq_cross a k
+    
 
 let mpfr_sub1sp1_eq a b c ap bp cp bx cx rnd_mode p sh =
     let h0=ST.get() in
@@ -177,7 +223,8 @@ let mpfr_sub1sp1_eq a b c ap bp cp bx cx rnd_mode p sh =
       lemma_mod_distr_sub_zero vc vb (pow2 vsh);
       lemma_shift_left_mod_pow2 a0 cnt vsh;
       let h1=ST.get() in
-      mk_state sh bx 0uL 0uL
+      let bx=I64.(bx -^ (uint32_to_int64 cnt)) in
+      mk_state sh bx  0uL 0uL
     end else begin 
       let a0=bp.(0ul) -^ cp.(0ul) in
       let cnt=count_leading_zeros a0 in
@@ -185,6 +232,12 @@ let mpfr_sub1sp1_eq a b c ap bp cp bx cx rnd_mode p sh =
       ap.(0ul) <- a0<<^cnt;
       lemma_mod_distr_sub_zero vb vc (pow2 vsh);
       lemma_shift_left_mod_pow2 a0 cnt vsh;
+      let bx=I64.(bx -^ (uint32_to_int64 cnt)) in
+      let h1=ST.get() in
+      shift_left_value_lemma (v a0) (U32.v cnt);
+      lemma_small_mod (v a0*pow2 (U32.v cnt)) (pow2 64);
+      mpfr_sub1sp1_eq_value_lemma ({(as_normal h1 a) with exp=I64.v bx}) (as_reg_fp h0 b) (as_reg_fp h0 c) (U32.v cnt) (I64.v p);
+      mpfr_sub1sp1_eq_rb_sb_lemma (as_reg_fp h0 b) (as_reg_fp h0 c) (I64.v p);
       let t=mk_state sh bx 0uL 0uL in t
     end
 
@@ -224,21 +277,6 @@ val mpfr_sub1sp1: a:mpfr_ptr -> b:mpfr_ptr -> c:mpfr_ptr ->
     (ensures  (fun h0 t h1 ->
     let exact=sub1sp_exact (as_fp h0 b) (as_fp h0 c) in
     mpfr_sub1sp1_post_cond h0 t h1 a b c p rnd_mode exact))
-(*val mpfr_add1sp1_round_post_cond_lemma: a:normal_fp{mpfr_EXP_COND a.exp} ->
-    p:pos{mpfr_PREC_COND p} ->
-    high:normal_fp{high.prec = p /\ high.sign = (high_mant a p).sign  /\
-                   high.exp = (high_mant a p).exp /\
-		   high.limb * pow2 a.len = (high_mant a p).limb * pow2 high.len} ->
-    rb:bool{rb = rb_def a p} -> sb:bool{sb = sb_def a p} -> rnd_mode:mpfr_rnd_t ->
-    t:int -> r:mpfr_fp{r.prec = p} -> Lemma
-    (requires (mpfr_round2_cond (mpfr_add1sp1_round_spec high rb sb rnd_mode) rnd_mode r /\
-               t = mpfr_add1sp1_ternary_spec high rb sb rnd_mode))
-    (ensures  (mpfr_round_cond a p rnd_mode r /\
-               mpfr_ternary_cond t a r))
-
-let mpfr_add1sp1_round_post_cond_lemma a p high rb sb rnd_mode t r =
-    mpfr_round_cond_lemma a p high rb sb rnd_mode r;
-    mpfr_ternary_cond_lemma a p high rb sb rnd_mode t r*)
 
 let mpfr_sub1sp1 a b c rnd_mode p =
     let bx=mpfr_GET_EXP b in
@@ -260,27 +298,36 @@ let mpfr_sub1sp1 a b c rnd_mode p =
     mpfr_sub1sp1_gt a b c ap bp cp bx cx rnd_mode p sh
     end in 
     let h1 = ST.get() in
-    if I64.(st.bx <^ mpfr_EMIN) then begin
+    if I64.(st.bx <^ mpfr_EMIN) then begin 
         let s = mpfr_SIGN a in
-        let t = mpfr_underflow a rnd_mode (mpfr_SIGN a) in
-	let h2 = ST.get() in
-	mpfr_underflow_post_cond_lemma (sub1sp_exact (as_reg_fp h0 b) (as_reg_fp h0 c)) (I64.v (as_struct h0 a).mpfr_prec) rnd_mode (I32.v t) (as_fp h2 a);
+        let ap0ul=ap.(0ul) in
+        let t = if(rnd_mode=MPFR_RNDN(*&&(I64.(st.bx<^(mpfr_EMIN-^1L))||ap0ul=mpfr_LIMB_HIGHBIT)*)) then begin
+            ignore(mpfr_underflow a MPFR_RNDZ s);admit()
+        end else begin
+            let t=mpfr_underflow a rnd_mode s in
+            let h2=ST.get() in
+            
+            assume(I64.v p<=(sub1sp_exact (as_reg_fp h0 b) (as_reg_fp h0 c)).prec);
+            (let exact=(sub1sp_exact (as_reg_fp h0 b) (as_reg_fp h0 c)) in
+            let p=(as_struct h2 a).mpfr_prec in
+            assert((as_fp h2 a)==mpfr_underflow_spec exact (I64.v p) rnd_mode);
+            assert(I32.v t=mpfr_underflow_ternary_spec exact (I64.v p) rnd_mode);
+           // assert(mpfr_PREC_COND (I64.v p));
+           assume((round_def exact (I64.v p) rnd_mode).exp < mpfr_EMIN_spec);admit();
+            assert(eval_abs (round_def exact (I64.v p) rnd_mode) <. mpfr_underflow_bound (I64.v p) );admit();
+            assert( (MPFR_RNDN? rnd_mode ==>
+	            eval_abs (rndn_def exact (I64.v p)) >. fdiv_pow2 (mpfr_underflow_bound (I64.v p)) 1)));
+            assert(I64.v p=I64.v (as_struct h2 a).mpfr_prec);
+
+            mpfr_underflow_post_cond_lemma (sub1sp_exact (as_reg_fp h0 b) (as_reg_fp h0 c)) (I64.v p) rnd_mode (I32.v t) (as_fp h2 a);
+            t
+        end in
 	t
-    end else begin (*Rounding is the same as for add1sp1 (modulo an optimization), so this is copied from mpfr_add1sp1*)
+    end else begin admit();
         let t = mpfr_add1sp1_round a ap rnd_mode st in
 	let h2 = ST.get() in
-	mpfr_add1sp1_round_post_cond_lemma (sub1sp_exact (as_reg_fp h0 b) (as_reg_fp h0 c)) (I64.v (as_struct h0 a).mpfr_prec) (as_normal_ h1 ({as_struct h1 a with mpfr_exp = st.bx})) (st.rb <> 0uL) (st.sb <> 0uL) rnd_mode (I32.v t) (as_fp h2 a);
+	mpfr_add1sp1_round_post_cond_lemma (sub1sp_exact (as_reg_fp h0 b) (as_reg_fp h0 c)) (I64.v p) (as_normal_ h1 ({as_struct h1 a with mpfr_exp = st.bx})) (st.rb <> 0uL) (st.sb <> 0uL) rnd_mode (I32.v t) (as_fp h2 a);
+        mpfr_modifies_trans_lemma a h0 h1 h2;
 	t
     end
-   end
-
-(*
-   (let r = sub1sp_exact (as_reg_fp h0 b) (as_reg_fp h0 c) in
-        normal_fp_cond r /\
-        mpfr_EXP_COND (I64.v s.bx) /\
-        as_val h1 (as_struct h1 a).mpfr_d * pow2 (r.len) = (high_mant r (I64.v p)).limb * (pow2 64) /\
-        I64.v s.sh = I64.v gmp_NUMB_BITS - I64.v p /\
-        I64.v s.bx = (high_mant r (I64.v p)).exp /\
-        (rb_def r (I64.v p) = (v s.rb <> 0)) /\
-        (sb_def r (I64.v p) = (v s.sb <> 0)))
-*)
+ end

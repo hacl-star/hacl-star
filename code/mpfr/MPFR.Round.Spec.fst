@@ -103,12 +103,11 @@ let low_mant a p =
       end
     end
     
-
 ///////////////////////////////////////////////////////////////////////////////////////
 //  Rounding with different rounding modes can be done in 2 steps.                   //
-//  1. Firstly round with unbounded precision.                                       // 
+//  1. Firstly round with unbounded precision.                                       //
 //  2. Then convert the result into MPFR numbers according to the rounding mode,     //
-//     this is used to deal with singular values when exponent exceeds the limits.    //
+//     this is used to deal with singular values when exponent exceeds the limits.   //
 //  Here we give definitions for 5 rounding modes.                                   //
 //  RNDZ: round towards zero           RNDA: round away from zero                    //
 //  RNDU: round towards +infinity      RNDD: round towards -infinity                 //

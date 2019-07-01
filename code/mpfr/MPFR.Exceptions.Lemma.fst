@@ -50,11 +50,11 @@ let mpfr_underflow_ternary_spec (a:normal_fp{a.exp < mpfr_EMIN_spec})
 val mpfr_underflow_post_cond_lemma: a:normal_fp{a.exp < mpfr_EMIN_spec} ->
     p:pos{p <= a.prec /\ mpfr_PREC_COND p} -> rnd_mode:mpfr_rnd_t ->
     t:int -> r:mpfr_fp{r.prec = p} -> Lemma
-    (requires (r == mpfr_underflow_spec a p rnd_mode /\
+    (requires ((r == mpfr_underflow_spec a p rnd_mode /\
                t = mpfr_underflow_ternary_spec a p rnd_mode) /\
 	       eval_abs (round_def a p rnd_mode) <. mpfr_underflow_bound p /\
 	       (MPFR_RNDN? rnd_mode ==>
-	        eval_abs (rndn_def a p) >. fdiv_pow2 (mpfr_underflow_bound p) 1))
+	        eval_abs (rndn_def a p) >. fdiv_pow2 (mpfr_underflow_bound p) 1)))
     (ensures  (mpfr_round_cond a p rnd_mode r /\
                mpfr_ternary_cond t a r))
 

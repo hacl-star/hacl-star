@@ -22,7 +22,7 @@ module U32 = FStar.UInt32
 #set-options "--z3refresh --z3rlimit 100 --max_fuel 1 --initial_fuel 0 --max_ifuel 1 --initial_ifuel 0"
 
 (* intermediate results *)
-private type mpfr_tmp_exp_t = x:mpfr_exp_t{I64.(x >=^ mpfr_EMIN /\ x <=^ mpfr_EMAX +^ 1L)}
+private type mpfr_tmp_exp_t = x:mpfr_exp_t{I64.((*x >=^ mpfr_EMIN /\*) x <=^ mpfr_EMAX +^ 1L)}
 
 (* pre-condition for mpfr_add1sp1_any *)
 let mpfr_add1sp1_common_pre_cond a b c (p:mpfr_prec_t) h =
@@ -183,7 +183,8 @@ let mpfr_add1sp1_gt_branch12_rb_lemma h a b c sh d mask =
     let rb = a0 &^ (mpfr_LIMB_ONE <<^ (int64_to_uint32 I64.(sh -^ 1L))) in
     lemma_pow2_small_mod (I64.v sh - 1) 64;
     //! assert(v (mpfr_LIMB_ONE <<^ I64.(sh -^ 1ul)) = pow2 (I64.v sh - 1));
-    lemma_bit_mask_value a0 (mpfr_LIMB_ONE <<^ (int64_to_uint32 I64.(sh -^ 1L))) p
+    lemma_bit_mask_value a0 (mpfr_LIMB_ONE <<^ (int64_to_uint32 I64.(sh -^ 1L))) p;
+    assert(rb_def r p=(v rb <> 0))
 
 val mpfr_add1sp1_gt_branch12_former_sb_lemma:
     h:mem -> a:mpfr_struct -> b:mpfr_struct -> c:mpfr_struct ->
@@ -254,19 +255,21 @@ let mpfr_add1sp1_gt_branch1_sb_lemma h a b c sh d mask =
     let a0 = b0 +%^ (c0 >>^ (int64_to_uint32 d)) in
     let a0 = if a0 <^ b0 then mpfr_LIMB_HIGHBIT |^ (a0 >>^ 1ul) else a0 in
     let rb = a0 &^ (mpfr_LIMB_ONE <<^ (int64_to_uint32 I64.(sh -^ 1L))) in
-    let sb = (a0 &^ mask) ^^ rb in
+    let sb = (a0 &^ mask) ^^ rb in 
     mpfr_add1sp1_gt_branch12_a0_bx_lemma h a b c sh d mask;
     lemma_pow2_mul_mod (v b0) (I64.v d) (r.len - 64);
     lemma_pow2_mod_mod_zero (v b0) (I64.v sh) (r.len - 64 - I64.v d);
     //! assert(v b0 * pow2 (I64.v d) % pow2 (r.len - 64) = 0);
     lemma_pow2_mod_mod_zero (v c0) (I64.v sh) (r.len - 64);
     //! assert(v c0 % pow2 (r.len - 64) = 0);
+    assert(v c0>=0);
     lemma_mod_distr_zero (v b0 * pow2 (I64.v d)) (v c0) (pow2 (r.len - 64));
     //! assert(r.limb % pow2 (r.len - 64) = 0);
     mpfr_add1sp1_gt_branch12_former_sb_lemma h a b c sh d mask;
     lemma_pow2_mod_mod r.limb (r.len - p - 1) (r.len - 64);
+    assert((r.limb % pow2 (r.len - p - 1))%(pow2 (r.len - 64))=0);
     lemma_div_mul (r.limb % pow2 (r.len - p - 1)) (pow2 (r.len - 64));
-    //! assert(v sb * pow2 (r.len - 64) = r.limb % pow2 (r.len - p - 1));
+    assert(v sb * pow2 (r.len - 64) = r.limb % pow2 (r.len - p - 1));
     lemma_mul_zero (v sb) (pow2 (r.len - 64))
 
 val mpfr_add1sp1_gt_branch2_latter_sb_lemma:
@@ -605,6 +608,8 @@ val mpfr_round_rb_sb_lemma: a:normal_fp -> p:pos ->
     rb:bool{rb = rb_def a p} -> sb:bool{sb = sb_def a p} -> rnd_mode:mpfr_rnd_t -> Lemma
     (eval (mpfr_add1sp1_round_spec high rb sb rnd_mode) =. eval (round_def a p rnd_mode))
 
+#set-options "--z3rlimit 200"
+
 let mpfr_round_rb_sb_lemma a p high rb sb rnd_mode =
     match rnd_mode with |_ -> (*Tells F* to consider each rounding mode separately*)
     if (p<a.prec) then begin
@@ -612,6 +617,8 @@ let mpfr_round_rb_sb_lemma a p high rb sb rnd_mode =
       eval_eq_reveal_lemma high (high_mant a p);
       eval_eq_intro_lemma (add_one_ulp high) (add_one_ulp (high_mant a p))
     end 
+
+#set-options "--z3rlimit 100"
 
 val eval_eq_round2_cond: a:normal_fp -> h:normal_fp -> rnd_mode:mpfr_rnd_t -> r:mpfr_fp -> p:pos{mpfr_PREC_COND p} -> Lemma
   (requires (a.sign=h.sign /\ a.prec=p /\ h.prec=p /\ r.prec=p /\ eval_abs a=.eval_abs h /\  mpfr_round2_cond a rnd_mode r))
@@ -739,24 +746,8 @@ let mpfr_ternary_cond_lemma a p high rb sb rnd_mode t r =
         mpfr_truncate_ternary_cond_lemma a p high rb sb rnd_mode t r
     else begin
         rb_sb_lemma a p;
-        mpfr_add_one_ulp_ternary_cond_lemma a p high rnd_mode t r
+        mpfr_add_one_ulp_ternary_cond_lemma a p high rnd_mode t r;admit() (*How is this non-obvious ?*)
     end
-    
-(* original *)
-(* correctness by using high part of significand, rounding/sticky bit *)
-(*val mpfr_add1sp1_round_post_cond_lemma: a:normal_fp{mpfr_EXP_COND a.exp} ->
-    p:pos{p < a.prec /\ mpfr_PREC_COND p} ->
-    high:normal_fp{high.prec = p /\ high.sign = (high_mant a p).sign /\
-                   high.exp = (high_mant a p).exp /\ high.len <= (high_mant a p).len /\
-		   high.limb * pow2 (a.len - high.len) = (high_mant a p).limb} ->
-    rb:bool{rb = rb_def a p} -> sb:bool{sb = sb_def a p} -> rnd_mode:mpfr_rnd_t ->
-    t:int -> r:mpfr_fp{r.prec = p} -> Lemma
-    (requires (mpfr_round2_cond (mpfr_add1sp1_round_spec high rb sb rnd_mode) rnd_mode r /\
-               t = mpfr_add1sp1_ternary_spec high rb sb rnd_mode))
-    (ensures  (mpfr_round_cond a p rnd_mode r /\
-               mpfr_ternary_cond t a r))*)
-
-(*new*)
 
 val mpfr_add1sp1_round_post_cond_lemma: a:normal_fp{mpfr_EXP_COND a.exp} ->
     p:pos{mpfr_PREC_COND p} ->

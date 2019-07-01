@@ -39,7 +39,7 @@ val lemma_fp_exp_ge: a:mpfr_reg_fp ->
     (ensures (a.exp>=b.exp))
 let lemma_fp_exp_ge a b=let elb=min (a.exp-a.len) (b.exp-b.len) in
        assert(a.limb * pow2 (a.exp-a.len-elb)>=b.limb * pow2 (b.exp-b.len-elb));
-       //! assert(pow2 a.len * pow2 (a.exp-a.len-elb)>b.limb * pow2 (b.exp-b.len-elb));
+       assert(pow2 a.len * pow2 (a.exp-a.len-elb)>b.limb * pow2 (b.exp-b.len-elb));
        assert(pow2 a.len * pow2 (a.exp-a.len-elb)>pow2 (b.len-1) * pow2 (b.exp-b.len-elb));
        lemma_pow2_mul a.len (a.exp-a.len-elb);
        assert(pow2 (a.exp-elb)>pow2 (b.len-1) * pow2 (b.exp-b.len-elb));

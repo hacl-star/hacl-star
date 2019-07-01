@@ -427,6 +427,8 @@ val lemma_logor_disjoint: #n:pos -> a:uint_t n -> b:uint_t n -> Lemma
     (requires (forall (i:nat{i < n}). nth a i ==> not (nth b i)))
     (ensures  (logor a b = a + b))
 
+#set-options "--z3rlimit 100"
+
 let rec lemma_logor_disjoint #n a b =
     if n = 1 then begin
         if nth b 0 = false then () else assert(nth a 0 = false)
@@ -443,6 +445,8 @@ let rec lemma_logor_disjoint #n a b =
 	lemma_logor_disjoint #1 (a % 2) (b % 2);
 	nth_lemma (logor a b) (a + b)
     end
+
+#set-options "--z3rlimit 30"
 
 val lemma_xor_and_distr: #n:pos -> a:uint_t n -> b:uint_t n -> c:uint_t n -> Lemma
     (logxor (logand a b) (logand a c) = logand a (logxor b c))
@@ -568,7 +572,7 @@ let lemma_sb_logor #n x a b sb1 sb2 =
 
 val lemma_add_gt_right: a:int -> b:int -> c:int -> Lemma
     (requires (b > c))
-    (ensures  (b + a >= c + a+1))
+    (ensures  (b + a >= c + a + 1))
 let lemma_add_gt_right a b c = ()
 
 val lemma_pow2_gt_rev: a:nat -> b:nat -> Lemma
