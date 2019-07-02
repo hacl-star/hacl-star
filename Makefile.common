@@ -2,7 +2,11 @@
 # defining the .fst-in targets, as long as the sub-directory defines HACL_HOME.
 
 HACL_HOME 	?= .
+
+# Put your local configuration (e.g. HACL_HOME, KREMLIN_HOME, etc.) in
+# Makefile.config
 -include $(HACL_HOME)/Makefile.config
+
 KREMLIN_HOME 	?= $(HACL_HOME)/../kremlin
 FSTAR_HOME	?= $(HACL_HOME)/../FStar
 VALE_HOME	?= $(HACL_HOME)/../vale

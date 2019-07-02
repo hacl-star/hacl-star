@@ -40,9 +40,7 @@
 # - min-test: staged, runs only a subset of verification for the purposes of
 #   F*'s extended CI
 
-# Put your local configuration (e.g. HACL_HOME, KREMLIN_HOME, etc.) in
-# Makefile.config
--include Makefile.config
+include Makefile.common
 
 #########################
 # Catching setup errors #
@@ -163,8 +161,6 @@ clean:
 #################
 # Configuration #
 #################
-
-include Makefile.common
 
 IMPORT_FSTAR_TYPES := $(VALE_HOME)/bin/importFStarTypes.exe
 PYTHON3 ?= $(shell tools/findpython3.sh)
