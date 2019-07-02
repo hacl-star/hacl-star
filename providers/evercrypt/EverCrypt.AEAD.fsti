@@ -155,7 +155,7 @@ let create_in_st (a: alg) =
 *)
 val create_in: #a:alg -> create_in_st a
 
-let iv_p a = iv:B.buffer UInt8.t { iv_length (B.length iv) a }
+let iv_p a = iv:B.buffer UInt8.t { iv_length a (B.length iv)}
 let ad_p a = ad:B.buffer UInt8.t { B.length ad <= max_length a }
 let plain_p a = p:B.buffer UInt8.t { B.length p <= max_length a }
 let cipher_p a = p:B.buffer UInt8.t { B.length p + tag_length a <= max_length a }

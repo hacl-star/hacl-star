@@ -15,6 +15,7 @@ open FStar.Int.Cast
 open Spec.AEAD
 
 friend Spec.AEAD
+friend Spec.AES.Vale
 
 #set-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0"
 

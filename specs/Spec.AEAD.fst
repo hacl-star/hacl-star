@@ -13,24 +13,6 @@ let vale_alg_of_alg (a: alg { a = AES128_GCM \/ a = AES256_GCM }) =
   | AES128_GCM -> Vale.AES.AES_s.AES_128
   | AES256_GCM -> Vale.AES.AES_s.AES_256
 
-let expand #a k =
-  match a with
-  | CHACHA20_POLY1305 -> k
-  | AES256_GCM | AES128_GCM ->
-      let open Vale.AES.AES_s in
-      assert_norm (32 % 4 = 0);
-      assert_norm (16 % 4 = 0);
-      let k_nat = Vale.Def.Words.Seq_s.seq_uint8_to_seq_nat8 k in
-      let k_w = Vale.Def.Words.Seq_s.seq_nat8_to_seq_nat32_LE k_nat in
-      let ekv_w = key_to_round_keys_LE (vale_alg_of_alg a) k_w in
-      let ekv_nat = Vale.Def.Types_s.le_seq_quad32_to_bytes ekv_w in
-      Vale.Def.Types_s.le_seq_quad32_to_bytes_length ekv_w;
-      let ek = Vale.Def.Words.Seq_s.seq_nat8_to_seq_uint8 ekv_nat in
-      let hkeys_quad = Vale.AES.OptPublic.get_hkeys_reqs (Vale.Def.Types_s.reverse_bytes_quad32 (
-        aes_encrypt_LE (vale_alg_of_alg a) k_w (Vale.Def.Words_s.Mkfour 0 0 0 0))) in
-      let hkeys = Vale.Def.Words.Seq_s.seq_nat8_to_seq_uint8 (Vale.Def.Types_s.le_seq_quad32_to_bytes hkeys_quad) in
-      Seq.append ek hkeys
-
 // For gctr_encrypt_recursive and its pattern!
 friend Vale.AES.GCTR
 

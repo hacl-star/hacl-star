@@ -11,21 +11,6 @@ open Spec.Agile.Cipher
 // So that clients don't need to open both modules
 include Spec.Agile.Cipher
 
-let key_length (a: cipher_alg) =
-  match a with
-  | AES128 | AES256 -> Spec.AES.key_size (aes_alg_of_alg a)
-  | CHACHA20 -> Spec.Chacha20.size_key
-
-let key (a: cipher_alg) =
-  match a with
-  | AES128 | AES256 -> Spec.AES.aes_key (aes_alg_of_alg a)
-  | CHACHA20 -> Spec.Chacha20.key
-
-let expand (a: cipher_alg) (k: key a): xkey a =
-  match a with
-  | AES128 | AES256 -> Spec.AES.aes_key_expansion (aes_alg_of_alg a) k
-  | CHACHA20 -> k
-
 val counter_mode:
   a:cipher_alg ->
   k:key a ->
@@ -33,6 +18,5 @@ val counter_mode:
   plain:bytes { length plain <= max_size_t } ->
   Tot (cipher:bytes { length cipher = length plain })
 let counter_mode a k n plain =
-  let xk = expand a k in
-  let stream = ctr_stream a xk n (length plain) in
+  let stream = ctr_stream a k n (length plain) in
   map2 ( ^. ) (plain <: lbytes (length plain)) (stream <: lbytes (length plain))
