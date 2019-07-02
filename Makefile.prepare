@@ -23,6 +23,7 @@ ifeq ($(UNAME),Linux)
 endif
 
 VERSION_KREMLIN=4064311aba2c365c7f229f7c5d2118648d29cb41
+VERSION_Z3_BINARIES=9a81bc47b1bbe4b2e914ab9356352fc4c90e497b
 
 .prepare:
 	mkdir -p $(HACL_HOME)/dependencies
@@ -49,7 +50,7 @@ prepare-z3: .prepare
 	cd $(HACL_HOME)/dependencies && \
 	rm -rf $(HACL_HOME)/dependencies/z3 && \
 	rm -rf $(HACL_HOME)/dependencies/z3-$(VERSION_Z3) && \
-	wget https://github.com/FStarLang/binaries/raw/master/z3-tested/z3-$(VERSION_Z3).zip && \
+	wget https://github.com/FStarLang/binaries/raw/$(VERSION_Z3_BINARIES)/z3-tested/z3-$(VERSION_Z3).zip && \
 	unzip z3-$(VERSION_Z3).zip && \
 	rm -rf z3-$(VERSION_Z3).zip && \
 	mv z3-$(VERSION_Z3) $(Z3_HOME)
