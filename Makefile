@@ -51,7 +51,10 @@ specs-test:
 code-verify:
 	@echo "Verifying Low* code"
 
-code-extract: specs-verify
+code-extract:
+	$(MAKE) -C code extract
+
+code-snapshot: specs-verify
 	$(MAKE) snapshot -C code
 
 code-test: code-extract

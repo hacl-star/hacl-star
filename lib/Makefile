@@ -19,7 +19,7 @@ FSTAR_INCLUDE_DIRS = \
   $(HACL_HOME)/specs # For Spec.AES used in Lib.IntVector
 
 FSTAR_FLAGS = --cmi \
-  --cache_checked_modules \
+  --cache_checked_modules --cache_dir $(CACHE_DIR) \
   --already_cached "'Prims+FStar+LowStar+C+Spec.Loops+TestLib'" \
   $(addprefix --include ,$(FSTAR_INCLUDE_DIRS))
 
@@ -27,7 +27,7 @@ FSTAR = $(FSTAR_HOME)/bin/fstar.exe $(FSTAR_FLAGS) $(OTHERFLAGS)
 
 ENABLE_HINTS = --use_hints --use_hint_hashes --record_hints --query_stats
 
-ALL_SOURCES = $(wildcard *.fst) $(wildcard *.fsti) tutorial/Tutorial.fst
+ALL_SOURCES = $(wildcard *.fst) $(wildcard *.fsti) #tutorial/Tutorial.fst
 
 FIXME =
 
@@ -46,7 +46,7 @@ $(HINT_DIR):
 	$(FSTAR) $< $(ENABLE_HINTS) --hint_file $(HINT_DIR)/$(notdir $*).hints && \
 	touch -c $@
 
-verify: $(addsuffix .checked, $(ROOTS))
+verify: $(addsuffix .checked, $(addprefix $(CACHE_DIR)/,$(ROOTS)))
 
 # Targets for interactive mode
 

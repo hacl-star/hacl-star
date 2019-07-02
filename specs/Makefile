@@ -19,7 +19,7 @@ FSTAR_INCLUDE_DIRS = \
   $(HACL_HOME)/specs/lemmas
 
 FSTAR_FLAGS = --cmi \
-  --cache_checked_modules \
+  --cache_checked_modules --cache_dir $(CACHE_DIR) \
   --already_cached "'Prims+FStar+LowStar+C+Spec.Loops+TestLib'" \
   $(addprefix --include ,$(FSTAR_INCLUDE_DIRS))
 
@@ -53,7 +53,7 @@ $(HINT_DIR):
 	$(FSTAR) $< $(ENABLE_HINTS) --hint_file $(HINT_DIR)/$(notdir $*).hints && \
 	touch -c $@
 
-verify: $(addsuffix .checked, $(ROOTS))
+verify: $(addsuffix .checked, $(addprefix $(CACHE_DIR)/,$(ROOTS)))
 
 test:
 	$(MAKE) -f Makefile.test
