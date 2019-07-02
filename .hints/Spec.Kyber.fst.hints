@@ -1,0 +1,365 @@
+[
+  "¯\u000fÐƒ¤h\"8ÌÒ¯¿Q<ñ³",
+  [
+    [
+      "Spec.Kyber.zero",
+      1,
+      2,
+      1,
+      [
+        "@query", "equation_Spec.Kyber.q", "projection_inverse_BoxInt_proj_0"
+      ],
+      0,
+      "69a6873bba67a51f41024d8a5da0b6c4"
+    ],
+    [
+      "Spec.Kyber.one",
+      1,
+      2,
+      1,
+      [
+        "@query", "equation_Spec.Kyber.q", "projection_inverse_BoxInt_proj_0"
+      ],
+      0,
+      "9144832778d7856bb033c3896e17eb3d"
+    ],
+    [
+      "Spec.Kyber.fadd",
+      1,
+      2,
+      1,
+      [
+        "@query", "equation_Spec.Kyber.q", "primitive_Prims.op_Modulus",
+        "projection_inverse_BoxInt_proj_0"
+      ],
+      0,
+      "55ec0152c8773527037c7f1540689b10"
+    ],
+    [
+      "Spec.Kyber.fsub",
+      1,
+      2,
+      1,
+      [
+        "@query", "equation_Spec.Kyber.q", "primitive_Prims.op_Modulus",
+        "projection_inverse_BoxInt_proj_0"
+      ],
+      0,
+      "4a17a31f16cef996be05bbbb4b332d8b"
+    ],
+    [
+      "Spec.Kyber.fmul",
+      1,
+      2,
+      1,
+      [
+        "@query", "equation_Spec.Kyber.q", "primitive_Prims.op_Modulus",
+        "projection_inverse_BoxInt_proj_0"
+      ],
+      0,
+      "6e883c43f964a3b7cb6ff0ca8adf4800"
+    ],
+    [
+      "Spec.Kyber.fexp",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565",
+        "binder_x_bb4e1c9af0265270f8e7a5f250f730e2_1",
+        "equality_tok_Prims.LexTop@tok", "equation_Prims.nat",
+        "equation_Spec.Kyber.q",
+        "function_token_typing_Prims.__cache_version_number__",
+        "int_inversion", "int_typing", "primitive_Prims.op_Division",
+        "primitive_Prims.op_Equality", "primitive_Prims.op_Modulus",
+        "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "well-founded-ordering-on-nat"
+      ],
+      0,
+      "7c7e8d865808825e65d0c1f2215fc54a"
+    ],
+    [
+      "Spec.Kyber.poly",
+      1,
+      2,
+      1,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented",
+        "@fuel_irrelevance_Prims.pow2.fuel_instrumented", "@query",
+        "constructor_distinct_Lib.IntTypes.U32",
+        "equality_tok_Lib.IntTypes.U32@tok", "equation_Lib.IntTypes.bits",
+        "equation_Prims.nat", "equation_Spec.Kyber.n",
+        "lemma_Lib.IntTypes.pow2_values", "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
+      ],
+      0,
+      "9235e0de925d1fd778bd9b6fa892ba41"
+    ],
+    [
+      "Spec.Kyber.poly_add",
+      1,
+      2,
+      1,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented",
+        "@fuel_irrelevance_Prims.pow2.fuel_instrumented", "@query",
+        "constructor_distinct_Lib.IntTypes.U32",
+        "equality_tok_Lib.IntTypes.U32@tok", "equation_Lib.IntTypes.bits",
+        "equation_Prims.nat", "equation_Spec.Kyber.n",
+        "lemma_Lib.IntTypes.pow2_values", "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
+      ],
+      0,
+      "a68391f97d67eb4bf76f4aab67d3faec"
+    ],
+    [
+      "Spec.Kyber.poly_sub",
+      1,
+      2,
+      1,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented",
+        "@fuel_irrelevance_Prims.pow2.fuel_instrumented", "@query",
+        "constructor_distinct_Lib.IntTypes.U32",
+        "equality_tok_Lib.IntTypes.U32@tok", "equation_Lib.IntTypes.bits",
+        "equation_Prims.nat", "equation_Spec.Kyber.n",
+        "lemma_Lib.IntTypes.pow2_values", "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
+      ],
+      0,
+      "e5870714e8137a419c9a572065414e78"
+    ],
+    [
+      "Spec.Kyber.poly_pointwise_mul",
+      1,
+      2,
+      1,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented",
+        "@fuel_irrelevance_Prims.pow2.fuel_instrumented", "@query",
+        "constructor_distinct_Lib.IntTypes.U32",
+        "equality_tok_Lib.IntTypes.U32@tok", "equation_Lib.IntTypes.bits",
+        "equation_Prims.nat", "equation_Spec.Kyber.n",
+        "lemma_Lib.IntTypes.pow2_values", "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
+      ],
+      0,
+      "a760410a0819988618206e097af9b2cb"
+    ],
+    [
+      "Spec.Kyber.omega",
+      1,
+      2,
+      1,
+      [
+        "@query", "equation_Spec.Kyber.q", "projection_inverse_BoxInt_proj_0"
+      ],
+      0,
+      "59e5612781c800c955c1b1b7988757c1"
+    ],
+    [
+      "Spec.Kyber.psi",
+      1,
+      2,
+      1,
+      [
+        "@query", "equation_Spec.Kyber.q", "projection_inverse_BoxInt_proj_0"
+      ],
+      0,
+      "e99ae93a89361699a588e997543c0564"
+    ],
+    [
+      "Spec.Kyber.n_inv",
+      1,
+      2,
+      1,
+      [
+        "@query", "equation_Spec.Kyber.q", "projection_inverse_BoxInt_proj_0"
+      ],
+      0,
+      "adf3fb8c206b9fedbe0002f3cf6c13b8"
+    ],
+    [
+      "Spec.Kyber.psi_inv",
+      1,
+      2,
+      1,
+      [
+        "@query", "equation_Spec.Kyber.q", "projection_inverse_BoxInt_proj_0"
+      ],
+      0,
+      "d2c30a6c6137e0dbcf9a621a9c082b1c"
+    ],
+    [
+      "Spec.Kyber.omega_inv",
+      1,
+      2,
+      1,
+      [
+        "@query", "equation_Spec.Kyber.q", "projection_inverse_BoxInt_proj_0"
+      ],
+      0,
+      "6b95d7918af0ab485d639084db9c9582"
+    ],
+    [
+      "Spec.Kyber.ntt",
+      1,
+      2,
+      1,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented",
+        "@fuel_irrelevance_Prims.pow2.fuel_instrumented", "@query",
+        "constructor_distinct_Lib.IntTypes.U32",
+        "equality_tok_Lib.IntTypes.U32@tok", "equation_Lib.IntTypes.bits",
+        "equation_Prims.nat", "equation_Spec.Kyber.n",
+        "equation_Spec.Kyber.q", "int_inversion",
+        "lemma_Lib.IntTypes.pow2_values", "primitive_Prims.op_Multiply",
+        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_31c7d3d85d92cb942c95a78642e657c7",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
+      ],
+      0,
+      "bddb2b1aa28f874c7f4b35901792e7ae"
+    ],
+    [
+      "Spec.Kyber.inv_ntt",
+      1,
+      2,
+      1,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented",
+        "@fuel_irrelevance_Prims.pow2.fuel_instrumented", "@query",
+        "constructor_distinct_Lib.IntTypes.U32",
+        "equality_tok_Lib.IntTypes.U32@tok", "equation_Lib.IntTypes.bits",
+        "equation_Prims.nat", "equation_Spec.Kyber.n",
+        "equation_Spec.Kyber.q", "int_inversion",
+        "lemma_Lib.IntTypes.pow2_values", "primitive_Prims.op_Multiply",
+        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_31c7d3d85d92cb942c95a78642e657c7",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
+      ],
+      0,
+      "e96f5f50b0f9b421c0a871083c263e26"
+    ],
+    [
+      "Spec.Kyber.poly_scalar_mul",
+      1,
+      2,
+      1,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented",
+        "@fuel_irrelevance_Prims.pow2.fuel_instrumented", "@query",
+        "constructor_distinct_Lib.IntTypes.U32",
+        "equality_tok_Lib.IntTypes.U32@tok", "equation_Lib.IntTypes.bits",
+        "equation_Prims.nat", "equation_Spec.Kyber.n",
+        "lemma_Lib.IntTypes.pow2_values", "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
+      ],
+      0,
+      "17f11f4bb20b86c0b3c3576419740371"
+    ],
+    [
+      "Spec.Kyber.poly_shift_reduce",
+      1,
+      2,
+      1,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented",
+        "@fuel_irrelevance_Prims.pow2.fuel_instrumented", "@query",
+        "constructor_distinct_Lib.IntTypes.U32",
+        "equality_tok_Lib.IntTypes.U32@tok", "equation_Lib.IntTypes.bits",
+        "equation_Prims.nat", "equation_Spec.Kyber.n", "int_inversion",
+        "lemma_Lib.IntTypes.pow2_values", "primitive_Prims.op_Addition",
+        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_91ca73dc73194884b261c5a4c33e88b8",
+        "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
+      ],
+      0,
+      "bb1f3d5cc9cc959c19968cf3bedb4e34"
+    ],
+    [
+      "Spec.Kyber.poly_mul_textbook_old",
+      1,
+      2,
+      1,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented",
+        "@fuel_irrelevance_Prims.pow2.fuel_instrumented", "@query",
+        "constructor_distinct_Lib.IntTypes.U32",
+        "equality_tok_Lib.IntTypes.U32@tok", "equation_Lib.IntTypes.bits",
+        "equation_Prims.nat", "equation_Spec.Kyber.n", "int_inversion",
+        "lemma_Lib.IntTypes.pow2_values", "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_31c7d3d85d92cb942c95a78642e657c7",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
+      ],
+      0,
+      "9958c37bf862d38defa8d5eb84a8e314"
+    ],
+    [
+      "Spec.Kyber.poly_mul_textbook",
+      1,
+      2,
+      1,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented",
+        "@fuel_irrelevance_Prims.pow2.fuel_instrumented", "@query",
+        "constructor_distinct_Lib.IntTypes.U32",
+        "equality_tok_Lib.IntTypes.U32@tok", "equation_Lib.IntTypes.bits",
+        "equation_Lib.Sequence.lseq", "equation_Lib.Sequence.to_seq",
+        "equation_Prims.nat", "equation_Spec.Kyber.field",
+        "equation_Spec.Kyber.n", "int_inversion",
+        "lemma_Lib.IntTypes.pow2_values", "primitive_Prims.op_Addition",
+        "primitive_Prims.op_LessThanOrEqual",
+        "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_31c7d3d85d92cb942c95a78642e657c7",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_d8d83307254a8900dd20598654272e42",
+        "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
+      ],
+      0,
+      "fb158853a7c7e0435e66fb7efb671572"
+    ],
+    [
+      "Spec.Kyber.p1",
+      1,
+      2,
+      1,
+      [
+        "@query", "equation_Spec.Kyber.q", "projection_inverse_BoxInt_proj_0"
+      ],
+      0,
+      "2a6108f6f1a10c0d18bce6d853052f41"
+    ]
+  ]
+]
