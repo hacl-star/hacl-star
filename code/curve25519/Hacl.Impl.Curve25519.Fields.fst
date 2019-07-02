@@ -121,7 +121,7 @@ val store_felem:
       live h f /\ live h b /\ disjoint f b /\ state_inv_t h f)
     (ensures  fun h0 _ h1 ->
       modifies (loc b |+| loc f) h0 h1 /\
-      BSeq.nat_from_intseq_le (as_seq h1 b) == feval h0 f)
+      as_seq h1 b == BSeq.nat_to_intseq_le 4 (feval h0 f))
 let store_felem #s b f =
   match s with
   | M51 -> F51.store_felem b f

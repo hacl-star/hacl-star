@@ -1,7 +1,8 @@
 FSTAR_HOME ?= ../../FStar
 HACL_HOME  ?= ..
 
-HINT_DIR  = .hints
+CACHE_DIR     ?= $(HACL_HOME)/.cache
+HINT_DIR      ?= $(HACL_HOME)/.hints
 
 include ../Makefile.include
 
@@ -18,7 +19,7 @@ FSTAR_INCLUDE_DIRS = \
   $(HACL_HOME)/specs/lemmas
 
 FSTAR_FLAGS = --cmi \
-  --cache_checked_modules \
+  --cache_checked_modules --cache_dir $(CACHE_DIR) \
   --already_cached "'Prims+FStar+LowStar+C+Spec.Loops+TestLib'" \
   $(addprefix --include ,$(FSTAR_INCLUDE_DIRS))
 
@@ -31,7 +32,6 @@ ALL_SOURCES = $(wildcard *.fst) $(wildcard *.fsti)
 FIXME = \
 	Spec.HPKE.fst \
 	Spec.HPKE.CFRG.fst \
-	Spec.RSAPSS.fst \
 	Spec.Poly1305.Generic.fst \
 	Spec.Hash_Generic.fst \
 	Spec.Hash_Generic.fsti \
@@ -53,7 +53,7 @@ $(HINT_DIR):
 	$(FSTAR) $< $(ENABLE_HINTS) --hint_file $(HINT_DIR)/$(notdir $*).hints && \
 	touch -c $@
 
-verify: $(addsuffix .checked, $(ROOTS))
+verify: $(addsuffix .checked, $(addprefix $(CACHE_DIR)/,$(ROOTS)))
 
 test:
 	$(MAKE) -f Makefile.test

@@ -8,7 +8,7 @@
 #include <unistd.h>
 #include <stdbool.h>
 #include <time.h>
-#include <vec128.h>
+#include <vec-intrin.h>
 
 typedef uint64_t cycles;
 
@@ -22,9 +22,9 @@ static __inline__ cycles cpucycles(void)
 
 //https://boringssl.googlesource.com/boringssl/+/2214/crypto/cipher/cipher_test.txt
 
-extern void Hacl_AES_256_GCM_NI_aes256_gcm_init(uint64_t* ctx, uint8_t* k, uint8_t* n);
-extern void Hacl_AES_256_GCM_NI_aes256_gcm_encrypt(uint64_t* ctx, int in_len, uint8_t* out, uint8_t* in, int aad_len, uint8_t* aad);
-extern bool Hacl_AES_256_GCM_NI_aes256_gcm_decrypt(uint64_t* ctx, int out_len, uint8_t* out, uint8_t* in, int aad_len, uint8_t* aad);
+extern void Hacl_AES_256_GCM_NI_aes256_gcm_init(Lib_IntVector_Intrinsics_vec128* ctx, uint8_t* k, uint8_t* n);
+extern void Hacl_AES_256_GCM_NI_aes256_gcm_encrypt(Lib_IntVector_Intrinsics_vec128* ctx, int in_len, uint8_t* out, uint8_t* in, int aad_len, uint8_t* aad);
+extern bool Hacl_AES_256_GCM_NI_aes256_gcm_decrypt(Lib_IntVector_Intrinsics_vec128* ctx, int out_len, uint8_t* out, uint8_t* in, int aad_len, uint8_t* aad);
 
 #define ROUNDS 100000
 #define SIZE   16384
@@ -209,7 +209,7 @@ uint8_t in2[129] = {
   bool ok2 = true;
   uint8_t comp2_result[129] = {0};
 
-  uint64_t ctx[396] = {0};
+  Lib_IntVector_Intrinsics_vec128 ctx[396] = {0};
   
 
 

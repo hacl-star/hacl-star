@@ -503,7 +503,7 @@ let mapi #a #b h0 clen out spec_f f inp =
       lemma_eq_disjoint clen clen out inp i h0 h1;
       let xi = inp.(i) in f i xi)
 
-#reset-options "--z3rlimit 300 --max_fuel 2"
+#reset-options "--z3rlimit 500 --max_fuel 2"
 let map_blocks_multi #t #a h0 bs nb inp output spec_f impl_f =
   Math.Lemmas.multiple_division_lemma (v nb) (v bs);
   [@inline_let]
@@ -527,7 +527,7 @@ let map_blocks_multi #t #a h0 bs nb inp output spec_f impl_f =
       (v i * v bs)
   )
 
-#reset-options "--z3rlimit 300 --max_fuel 1 --max_ifuel 1"
+#reset-options "--z3rlimit 500 --max_fuel 1 --max_ifuel 1"
 let map_blocks #t #a h0 len blocksize inp output spec_f spec_l impl_f impl_l =
   let nb = len /. blocksize in
   let rem = len %. blocksize in

@@ -1,0 +1,110 @@
+[
+  "ÂG\u000b≥H…Ã?\u0003πa‰eZ\u001eå",
+  [
+    [
+      "Spec.Agile.Hash.size_block",
+      1,
+      2,
+      1,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented",
+        "@fuel_irrelevance_Prims.pow2.fuel_instrumented", "@query",
+        "constructor_distinct_Lib.IntTypes.U32",
+        "disc_equation_Spec.Agile.Hash.HASH_SHA2_224",
+        "disc_equation_Spec.Agile.Hash.HASH_SHA2_256",
+        "disc_equation_Spec.Agile.Hash.HASH_SHA2_384",
+        "disc_equation_Spec.Agile.Hash.HASH_SHA2_512",
+        "equality_tok_Lib.IntTypes.U32@tok", "equation_Lib.IntTypes.bits",
+        "equation_Prims.nat",
+        "fuel_guarded_inversion_Spec.Agile.Hash.algorithm",
+        "lemma_Lib.IntTypes.pow2_values", "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
+      ],
+      0,
+      "971118613e9faf87b618a31d78598d23"
+    ],
+    [
+      "Spec.Agile.Hash.size_hash",
+      1,
+      2,
+      1,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented",
+        "@fuel_irrelevance_Prims.pow2.fuel_instrumented", "@query",
+        "constructor_distinct_Lib.IntTypes.U32",
+        "disc_equation_Spec.Agile.Hash.HASH_SHA2_224",
+        "disc_equation_Spec.Agile.Hash.HASH_SHA2_256",
+        "disc_equation_Spec.Agile.Hash.HASH_SHA2_384",
+        "disc_equation_Spec.Agile.Hash.HASH_SHA2_512",
+        "equality_tok_Lib.IntTypes.U32@tok", "equation_Lib.IntTypes.bits",
+        "equation_Prims.nat",
+        "fuel_guarded_inversion_Spec.Agile.Hash.algorithm",
+        "lemma_Lib.IntTypes.pow2_values", "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
+      ],
+      0,
+      "3c720ac902ba891141442fb5c891c978"
+    ],
+    [
+      "Spec.Agile.Hash.size_hash_w",
+      1,
+      2,
+      1,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented",
+        "@fuel_irrelevance_Prims.pow2.fuel_instrumented", "@query",
+        "constructor_distinct_Lib.IntTypes.U32",
+        "equality_tok_Lib.IntTypes.U32@tok", "equation_Lib.IntTypes.bits",
+        "equation_Prims.nat", "lemma_Lib.IntTypes.pow2_values",
+        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
+      ],
+      0,
+      "68b39fc2ee729ba0ac98a31aa10a6a9d"
+    ],
+    [
+      "Spec.Agile.Hash.max_input",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "disc_equation_Spec.Agile.Hash.HASH_SHA2_224",
+        "disc_equation_Spec.Agile.Hash.HASH_SHA2_256",
+        "disc_equation_Spec.Agile.Hash.HASH_SHA2_384",
+        "disc_equation_Spec.Agile.Hash.HASH_SHA2_512", "equation_Prims.nat",
+        "equation_Prims.pos",
+        "fuel_guarded_inversion_Spec.Agile.Hash.algorithm", "int_typing",
+        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
+        "typing_Prims.pow2"
+      ],
+      0,
+      "5fc2b19b188941dff65cf3e46e97b9a7"
+    ],
+    [
+      "Spec.Agile.Hash.update_last",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "equation_Spec.Agile.Hash.size_block",
+        "refinement_interpretation_Tm_refine_a78e81a34494fa620ef91991a1267b1f",
+        "typing_Spec.Agile.Hash.size_block"
+      ],
+      0,
+      "0cc970ebcf30a8f3120e1f30b374f8f3"
+    ]
+  ]
+]

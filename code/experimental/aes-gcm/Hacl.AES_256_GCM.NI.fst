@@ -6,7 +6,7 @@ open FStar.HyperStack.All
 open Lib.IntTypes
 open Lib.Buffer
 open Lib.ByteBuffer
-open Lib.Vec128
+open Lib.IntVector
 
 open Hacl.AES_256.NI
 open Hacl.Gf128.NI
@@ -15,12 +15,12 @@ module ST = FStar.HyperStack.ST
 
 
 #set-options "--z3rlimit 50"
-type aes_gcm_ctx = lbuffer vec128 22ul
+type aes_gcm_ctx = lbuffer (vec_t U128 1) 22ul
 
 
 val aes256_gcm_init:
     ctx: aes_gcm_ctx
-  -> key: lbuffer uint8 16ul
+  -> key: lbuffer uint8 32ul
   -> nonce: lbuffer uint8 12ul ->
   Stack unit
   (requires (fun h -> live h ctx /\ live h key /\ live h nonce))
@@ -38,7 +38,7 @@ let aes256_gcm_init ctx key nonce =
   aes256_set_nonce aes_ctx nonce;
   aes256_key_block tag_mix aes_ctx (size 1);
   gcm_init gcm_ctx gcm_key;
-  ctx.(21ul) <- vec128_load_le tag_mix;
+  ctx.(21ul) <- vec_load_le U128 1 tag_mix;
   pop_frame()
 
 #reset-options "--z3rlimit 500 --max_fuel 1"
@@ -73,9 +73,9 @@ let aes256_gcm_encrypt ctx len out text aad_len aad =
   uint_to_bytes_be #U64 (sub tmp (size 8) (size 8)) (to_u64 (len *. 8ul));
   gcm_update_blocks gcm_ctx (size 16) tmp;
   gcm_emit tmp gcm_ctx;
-  let tmp_vec = vec128_load_le tmp in
-  let tmp_vec = vec128_xor tmp_vec tag_mix in
-  vec128_store_le (sub out len (size 16)) tmp_vec;
+  let tmp_vec = vec_load_le U128 1 tmp in
+  let tmp_vec = vec_xor tmp_vec tag_mix in
+  vec_store_le (sub out len (size 16)) tmp_vec;
   pop_frame()
 
 
@@ -113,9 +113,9 @@ let aes256_gcm_decrypt ctx len out cipher aad_len aad =
   uint_to_bytes_be #U64 (sub text (size 8) (size 8)) (to_u64 (len *. size 8));
   gcm_update_blocks gcm_ctx (size 16) text;
   gcm_emit text gcm_ctx;
-  let text_vec = vec128_load_le text in
-  let text_vec = vec128_xor text_vec tag_mix in
-  vec128_store_le text text_vec;
+  let text_vec = vec_load_le U128 1 text in
+  let text_vec = vec_xor text_vec tag_mix in
+  vec_store_le text text_vec;
   let h7 = ST.get () in
   loop_nospec #h7 (size 16) result
     (fun i -> result.(0ul) <- result.(0ul) |. (text.(i) ^. tag.(i)));

@@ -44,6 +44,8 @@ AES_NI_FILES= $(HACL_HOME)/lib/Lib.IntTypes.fst \
 	$(HACL_HOME)/lib/Lib.Buffer.fst \
 	$(HACL_HOME)/lib/Lib.ByteBuffer.fst \
 	$(HACL_HOME)/lib/Lib.Loops.fst \
+	$(HACL_HOME)/lib/Lib.IntVector.fst \
+	$(HACL_HOME)/lib/Lib.IntVector.Intrinsics.fsti \
 	Hacl.Impl.AES.CoreNI.fst \
 	Hacl.Impl.AES.Core.fst \
 	Hacl.Impl.AES.Generic.fst \
@@ -54,6 +56,8 @@ AES_256_NI_FILES= $(HACL_HOME)/lib/Lib.IntTypes.fst \
 	$(HACL_HOME)/lib/Lib.Buffer.fst \
 	$(HACL_HOME)/lib/Lib.ByteBuffer.fst \
 	$(HACL_HOME)/lib/Lib.Loops.fst \
+	$(HACL_HOME)/lib/Lib.IntVector.fst \
+	$(HACL_HOME)/lib/Lib.IntVector.Intrinsics.fsti \
 	Hacl.Impl.AES.CoreBitSlice.fst \
 	Hacl.Impl.AES.Core.fst \
 	Hacl.Impl.AES.Generic.fst  \
@@ -91,10 +95,10 @@ aes128-ni-c/out.krml: $(AES_NI_FILES)
 
 aes128-ni-c/Hacl_AES_128_NI.c: aes128-ni-c/out.krml
 	 $(KREMLIN) $(KREMLIN_ARGS) -tmpdir aes128-ni-c  $^ -skip-compilation \
-	   -minimal -add-include '"kremlib.h"' -add-include '"vec128.h"' -drop Lib.Vec128 -bundle 'Hacl.AES_128.NI=*'
+	   -minimal -add-include '"kremlib.h"' -add-include '"vec-intrin.h"' -drop Lib.IntVector.Intrinsics -bundle 'Hacl.AES_128.NI=*'
 
 aes128-ni.exe: aes128-ni-c/Hacl_AES_128_NI.c aes128-ni-test.c
-	$(CC) -march=native -mtune=native -O3 -I $(KREMLIN_HOME)/kremlib/dist/generic -I $(KREMLIN_HOME)/include -I . aes128-ni-c/Hacl_AES_128_NI.c $(KREMLIN_HOME)/kremlib/dist/generic/testlib.o aes128-ni-test.c -o aes128-ni.exe
+	$(CC) -march=native -mtune=native -O3 -I $(HACL_HOME)/lib/c -I $(KREMLIN_HOME)/kremlib/dist/generic -I $(KREMLIN_HOME)/include -I . aes128-ni-c/Hacl_AES_128_NI.c $(KREMLIN_HOME)/kremlib/dist/generic/testlib.o aes128-ni-test.c -o aes128-ni.exe
 	./aes128-ni.exe
 
 aes256-ni-c/out.krml: $(AES_256_NI_FILES)
@@ -102,10 +106,10 @@ aes256-ni-c/out.krml: $(AES_256_NI_FILES)
 
 aes256-ni-c/Hacl_AES_256_NI.c: aes256-ni-c/out.krml
 	 $(KREMLIN) $(KREMLIN_ARGS) -tmpdir aes256-ni-c  $^ -skip-compilation \
-	   -minimal -add-include '"kremlib.h"' -add-include '"vec128.h"' -drop Lib.Vec128 -bundle 'Hacl.AES_256.NI=*'
+	   -minimal -add-include '"kremlib.h"' -add-include '"vec-intrin.h"' -drop Lib.IntVector.Intrinsics -bundle 'Hacl.AES_256.NI=*'
 
 aes256-ni.exe: aes256-ni-c/Hacl_AES_256_NI.c aes256-ni-test.c
-	$(CC) -march=native -mtune=native -O3 -I $(KREMLIN_HOME)/kremlib/dist/generic -I $(KREMLIN_HOME)/include -I . aes256-ni-c/Hacl_AES_256_NI.c $(KREMLIN_HOME)/kremlib/dist/generic/testlib.o aes256-ni-test.c -o aes256-ni.exe
+	$(CC) -march=native -mtune=native -O3 -I $(HACL_HOME)/lib/c  -I $(KREMLIN_HOME)/kremlib/dist/generic -I $(KREMLIN_HOME)/include -I . aes256-ni-c/Hacl_AES_256_NI.c $(KREMLIN_HOME)/kremlib/dist/generic/testlib.o aes256-ni-test.c -o aes256-ni.exe
 	./aes256-ni.exe
 
 

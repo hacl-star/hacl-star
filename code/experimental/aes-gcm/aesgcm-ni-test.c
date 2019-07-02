@@ -8,7 +8,7 @@
 #include <unistd.h>
 #include <stdbool.h>
 #include <time.h>
-#include <vec128.h>
+#include <vec-intrin.h>
 
 typedef uint64_t cycles;
 
@@ -20,9 +20,9 @@ static __inline__ cycles cpucycles(void)
 }
 
 
-extern void Hacl_AES_128_GCM_NI_aes128_gcm_init(Lib_Vec128_vec128* ctx, uint8_t* k, uint8_t* n);
-extern void Hacl_AES_128_GCM_NI_aes128_gcm_encrypt(Lib_Vec128_vec128* ctx, int in_len, uint8_t* out, uint8_t* in, int aad_len, uint8_t* aad);
-extern bool Hacl_AES_128_GCM_NI_aes128_gcm_decrypt(Lib_Vec128_vec128* ctx, int out_len, uint8_t* out, uint8_t* in, int aad_len, uint8_t* aad);
+extern void Hacl_AES_128_GCM_NI_aes128_gcm_init(Lib_IntVector_Intrinsics_vec128* ctx, uint8_t* k, uint8_t* n);
+extern void Hacl_AES_128_GCM_NI_aes128_gcm_encrypt(Lib_IntVector_Intrinsics_vec128* ctx, int in_len, uint8_t* out, uint8_t* in, int aad_len, uint8_t* aad);
+extern bool Hacl_AES_128_GCM_NI_aes128_gcm_decrypt(Lib_IntVector_Intrinsics_vec128* ctx, int out_len, uint8_t* out, uint8_t* in, int aad_len, uint8_t* aad);
 
 #define ROUNDS 100000
 #define SIZE   16384
@@ -78,7 +78,7 @@ int main() {
   uint8_t comp[76] = {0};
   bool ok = true;
 
-  Lib_Vec128_vec128 ctx[22] = {0};
+  Lib_IntVector_Intrinsics_vec128 ctx[22] = {0};
   Hacl_AES_128_GCM_NI_aes128_gcm_init(ctx,k,n);
   Hacl_AES_128_GCM_NI_aes128_gcm_encrypt(ctx,60,comp,in,20,aad);
   printf("AESGCM-NI computed:");

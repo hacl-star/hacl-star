@@ -111,8 +111,6 @@ let rec nat_from_intseq_le_ #t #l b =
     n
 
 let nat_from_intseq_le = nat_from_intseq_le_
-let nat_from_bytes_be = nat_from_intseq_be #U8
-let nat_from_bytes_le = nat_from_intseq_le #U8
 
 #set-options "--max_fuel 1"
 
@@ -158,7 +156,7 @@ let nat_to_intseq_le = nat_to_intseq_le_
 let nat_to_bytes_be = nat_to_intseq_be_ #U8
 let nat_to_bytes_le = nat_to_intseq_le_ #U8
 
-#reset-options "--z3rlimit 200 --max_fuel 1 --max_ifuel 0"
+#reset-options "--z3rlimit 1000 --max_fuel 1 --max_ifuel 0"
 
 val index_nat_to_intseq_le:
     #t:inttype
@@ -300,10 +298,11 @@ let rec nat_from_intseq_le_slice_lemma_ #t #l #len b i =
     end
   end
 
-let nat_from_intseq_le_slice_lemma #t #l #len b i =
-  nat_from_intseq_le_slice_lemma_ b i
+#push-options "--max_fuel 1"
+let nat_from_intseq_le_lemma0 #t #l b = ()
+#pop-options
 
-let nat_from_bytes_le_slice_lemma #l #len b i =
+let nat_from_intseq_le_slice_lemma #t #l #len b i =
   nat_from_intseq_le_slice_lemma_ b i
 
 val uints_from_bytes_le_lemma0:
@@ -374,7 +373,7 @@ let rec uints_from_bytes_le_nat_lemma_ #t #l #len b =
   else begin
     let b1 = Seq.slice b (numbytes t) (len * numbytes t) in
     uints_from_bytes_le_nat_lemma_ #t #l #(len - 1) b1;
-    nat_from_bytes_le_slice_lemma #l #(len * numbytes t) b (numbytes t);
+    nat_from_intseq_le_slice_lemma #U8 #l #(len * numbytes t) b (numbytes t);
     uints_from_bytes_le_nat_lemma0 b
   end
 
@@ -473,3 +472,8 @@ let rec nat_from_intseq_le_inj #t #l b1 b2 =
 let lemma_nat_to_from_bytes_be_preserves_value #l b len x = ()
 
 let lemma_nat_to_from_bytes_le_preserves_value #l b len x = ()
+
+let lemma_uint_to_bytes_le_preserves_value #t #l x = ()
+
+let lemma_nat_from_to_intseq_le_preserves_value #t #l len b =
+  nat_from_intseq_le_inj (nat_to_intseq_le len (nat_from_intseq_le b)) b

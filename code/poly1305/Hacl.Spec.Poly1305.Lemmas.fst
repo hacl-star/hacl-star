@@ -3,7 +3,7 @@ module Hacl.Spec.Poly1305.Lemmas
 open FStar.Mul
 module Scalar = Spec.Poly1305
 
-#set-options "--z3rlimit 20 --max_fuel 0 --max_ifuel 0"
+#reset-options "--z3rlimit 20 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq'"
 
 //[@ "opaque_to_smt"]
 let ( % ) (a:nat) (b:pos) : nat = a % b
@@ -76,6 +76,8 @@ let prime : pos = Scalar.prime
 let pfelem = nat //x:nat{x < prime}
 unfold let pfmul a b = (a * b) % prime
 unfold let pfadd a b = (a + b) % prime
+
+#reset-options "--z3refresh --z3rlimit 50 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq'"
 
 val poly_update_repeat_blocks_multi_lemma2_simplify:
   acc0:pfelem -> acc1:pfelem -> c0:pfelem -> c1:pfelem -> r:pfelem -> Lemma

@@ -421,7 +421,7 @@ let poly1305_update_multi_loop #s bs len text pre acc =
       poly1305_update_multi_f #s pre bs nb len text i acc);
   fmul_rn_normalize acc pre
 
-#set-options "--z3rlimit 200 --max_fuel 0"
+#set-options "--z3rlimit 500 --max_ifuel 1"
 
 inline_for_extraction noextract
 val poly1305_update_multi:

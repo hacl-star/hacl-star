@@ -4,24 +4,27 @@ open FStar.HyperStack
 open FStar.HyperStack.All
 open Lib.IntTypes
 open Lib.Buffer
-open Lib.Vec128
+open Lib.IntVector
 
 module ST = FStar.HyperStack.ST
 
-
+inline_for_extraction noextract
+let vec128 = vec_t U128 1
+inline_for_extraction noextract
+let vec128_zero = vec_zero U128 1
 
 inline_for_extraction
-let cl_add (x:vec128) (y:vec128) : Tot vec128 = vec128_xor x y
+let cl_add (x:vec128) (y:vec128) : Tot vec128 = vec_xor x y
 
 inline_for_extraction
 let clmul_wide (x:vec128) (y:vec128) : Tot (vec128 & vec128) =
-  let lo = ni_clmul x y (u8 0x00) in
-  let m1 = ni_clmul x y (u8 0x10) in
-  let m2 = ni_clmul x y (u8 0x01) in
-  let hi = ni_clmul x y (u8 0x11) in
+  let lo = vec_clmul_lo_lo x y in
+  let m1 = vec_clmul_hi_lo x y in
+  let m2 = vec_clmul_lo_hi x y in
+  let hi = vec_clmul_hi_hi x y in
   let m1 = cl_add m1 m2 in
-  let m2 = vec128_shift_left m1 (size 64) in
-  let m1 = vec128_shift_right m1 (size 64) in
+  let m2 = vec_shift_left m1 (size 64) in
+  let m1 = vec_shift_right m1 (size 64) in
   let lo = cl_add lo m2 in
   let hi = cl_add hi m1 in
   (hi,lo)
@@ -32,94 +35,94 @@ let clmul_wide4
   (x1:vec128) (x2:vec128) (x3:vec128) (x4:vec128)
   (y1:vec128) (y2:vec128) (y3:vec128) (y4:vec128): Tot (vec128 & vec128) =
 
-  let lo1 = ni_clmul x1 y1 (u8 0x00) in
-  let lo2 = ni_clmul x2 y2 (u8 0x00) in
-  let lo3 = ni_clmul x3 y3 (u8 0x00) in
-  let lo4 = ni_clmul x4 y4 (u8 0x00) in
+  let lo1 = vec_clmul_lo_lo x1 y1 in
+  let lo2 = vec_clmul_lo_lo x2 y2 in
+  let lo3 = vec_clmul_lo_lo x3 y3 in
+  let lo4 = vec_clmul_lo_lo x4 y4 in
   let lo = cl_add lo1 lo2 in
   let lo = cl_add lo lo3 in
   let lo = cl_add lo lo4 in
 
-  let m1 = ni_clmul x1 y1 (u8 0x10) in
-  let m2 = ni_clmul x2 y2 (u8 0x10) in
-  let m3 = ni_clmul x3 y3 (u8 0x10) in
-  let m4 = ni_clmul x4 y4 (u8 0x10) in
+  let m1 = vec_clmul_hi_lo x1 y1 in
+  let m2 = vec_clmul_hi_lo x2 y2 in
+  let m3 = vec_clmul_hi_lo x3 y3 in
+  let m4 = vec_clmul_hi_lo x4 y4 in
   let m = cl_add m1 m2 in
   let m = cl_add m m3 in
   let m = cl_add m m4 in
 
-  let m1 = ni_clmul x1 y1 (u8 0x01) in
-  let m2 = ni_clmul x2 y2 (u8 0x01) in
-  let m3 = ni_clmul x3 y3 (u8 0x01) in
-  let m4 = ni_clmul x4 y4 (u8 0x01) in
+  let m1 = vec_clmul_lo_hi x1 y1 in
+  let m2 = vec_clmul_lo_hi x2 y2 in
+  let m3 = vec_clmul_lo_hi x3 y3 in
+  let m4 = vec_clmul_lo_hi x4 y4 in
   let m = cl_add m m1 in
   let m = cl_add m m2 in
   let m = cl_add m m3 in
   let m = cl_add m m4 in
 
-  let hi1 = ni_clmul x1 y1 (u8 0x11) in
-  let hi2 = ni_clmul x2 y2 (u8 0x11) in
-  let hi3 = ni_clmul x3 y3 (u8 0x11) in
-  let hi4 = ni_clmul x4 y4 (u8 0x11) in
+  let hi1 = vec_clmul_hi_hi x1 y1 in
+  let hi2 = vec_clmul_hi_hi x2 y2 in
+  let hi3 = vec_clmul_hi_hi x3 y3 in
+  let hi4 = vec_clmul_hi_hi x4 y4 in
   let hi = cl_add hi1 hi2 in
   let hi = cl_add hi hi3 in
   let hi = cl_add hi hi4 in
 
-  let m1 = vec128_shift_left m (size 64) in
-  let m2 = vec128_shift_right m (size 64) in
+  let m1 = vec_shift_left m (size 64) in
+  let m2 = vec_shift_right m (size 64) in
   let lo = cl_add lo m1 in
   let hi = cl_add hi m2 in
   (hi, lo)
 
 
-inline_for_extraction
-let vec128_shift_left_bits (x:vec128) (y:size_t): Tot vec128 =
-  if (y %. size 8 =. size 0) then
-    vec128_shift_left x y
-  else if (y <. size 64) then
-    let x1 = vec128_shift_right64 x (size 64 -. y) in
-    let x2 = vec128_shift_left64 x y in
-    let x3 = vec128_shift_left x1 (size 64) in
-    let x4 = vec128_or x3 x2 in
-    x4
-  else
-    let x1 = vec128_shift_left64 x (y -. size 64) in
-    let x2 = vec128_shift_left x1 (size 64) in
-    x2
+// inline_for_extraction
+// let vec128_shift_left_bits (x:vec128) (y:size_t): Tot vec128 =
+//   if (y %. size 8 =. size 0) then
+//     vec128_shift_left x y
+//   else if (y <. size 64) then
+//     let x1 = vec128_shift_right64 x (size 64 -. y) in
+//     let x2 = vec128_shift_left64 x y in
+//     let x3 = vec128_shift_left x1 (size 64) in
+//     let x4 = vec128_or x3 x2 in
+//     x4
+//   else
+//     let x1 = vec128_shift_left64 x (y -. size 64) in
+//     let x2 = vec128_shift_left x1 (size 64) in
+//     x2
 
 
-inline_for_extraction
-let vec128_shift_right_bits (x:vec128) (y:size_t) : Tot vec128 =
-  if (y %. size 8 =. size 0) then
-    vec128_shift_right x y
-  else if (y <. size 64) then
-    let x1 = vec128_shift_left64 x (size 64 -. y) in
-    let x2 = vec128_shift_right64 x y in
-    let x3 = vec128_shift_right x1 (size 64) in
-    let x4 = vec128_or x3 x2 in
-    x4
-  else
-    let x1 = vec128_shift_right64 x (y -. size 64) in
-    let x2 = vec128_shift_right x1 (size 64) in
-    x2
+// inline_for_extraction
+// let vec128_shift_right_bits (x:vec128) (y:size_t) : Tot vec128 =
+//   if (y %. size 8 =. size 0) then
+//     vec128_shift_right x y
+//   else if (y <. size 64) then
+//     let x1 = vec128_shift_left64 x (size 64 -. y) in
+//     let x2 = vec128_shift_right64 x y in
+//     let x3 = vec128_shift_right x1 (size 64) in
+//     let x4 = vec128_or x3 x2 in
+//     x4
+//   else
+//     let x1 = vec128_shift_right64 x (y -. size 64) in
+//     let x2 = vec128_shift_right x1 (size 64) in
+//     x2
 
 
 inline_for_extraction
 let gf128_reduce (hi:vec128) (lo:vec128) : Tot vec128 =
-    (* LEFT SHIFT [hi:lo] by 1 *)
-let lo1 = vec128_shift_right64 lo (size 63) in
-  let lo2 = vec128_shift_left lo1 (size 64) in
-  let lo3 = vec128_shift_left64 lo (size 1) in
-  let lo3 = vec128_xor lo3 lo2 in
+  (* LEFT SHIFT [hi:lo] by 1 *)
+  let lo1 = cast U128 1 (vec_shift_right (cast U64 2 lo) (size 63)) in
+  let lo2 = vec_shift_left lo1 (size 64) in
+  let lo3 = cast U128 1 (vec_shift_left (cast U64 2 lo) (size 1)) in
+  let lo3 = vec_xor lo3 lo2 in
 
-  let hi1 = vec128_shift_right64 hi (size 63) in
-  let hi1 = vec128_shift_left hi1 (size 64) in
-  let hi2 = vec128_shift_left64 hi (size 1) in
-  let hi2 = vec128_xor hi2 hi1 in
+  let hi1 = cast U128 1 (vec_shift_right (cast U64 2 hi) (size 63)) in
+  let hi1 = vec_shift_left hi1 (size 64) in
+  let hi2 = cast U128 1 (vec_shift_left (cast U64 2 hi) (size 1)) in
+  let hi2 = vec_xor hi2 hi1 in
 
-  let lo1 = vec128_shift_right64 lo (size 63) in
-  let lo1 = vec128_shift_right lo1 (size 64) in
-  let hi2 = vec128_xor hi2 lo1 in
+  let lo1 = cast U128 1 (vec_shift_right (cast U64 2 lo) (size 63)) in
+  let lo1 = vec_shift_right lo1 (size 64) in
+  let hi2 = vec_xor hi2 lo1 in
 
   let lo = lo3 in
   let hi = hi2 in
@@ -130,27 +133,27 @@ let lo1 = vec128_shift_right64 lo (size 63) in
     let hi = vec128_xor hi lo1 in
 *)
   (* LEFT SHIFT [x0:0] BY 63,62,57 and xor with [x1:x0] *)
-  let lo1 = vec128_shift_left64 lo (size 63) in
-  let lo2 = vec128_shift_left64 lo (size 62) in
-  let lo3 = vec128_shift_left64 lo (size 57) in
-  let lo1 = vec128_xor lo1 lo2 in
-  let lo1 = vec128_xor lo1 lo3 in
-  let lo2 = vec128_shift_right lo1 (size 64) in
-  let lo3 = vec128_shift_left lo1 (size 64) in
-  let lo =  vec128_xor lo lo3 in
+  let lo1 = cast U128 1 (vec_shift_left (cast U64 2 lo) (size 63)) in
+  let lo2 = cast U128 1 (vec_shift_left (cast U64 2 lo) (size 62)) in
+  let lo3 = cast U128 1 (vec_shift_left (cast U64 2 lo) (size 57)) in
+  let lo1 = vec_xor lo1 lo2 in
+  let lo1 = vec_xor lo1 lo3 in
+  let lo2 = vec_shift_right lo1 (size 64) in
+  let lo3 = vec_shift_left lo1 (size 64) in
+  let lo =  vec_xor lo lo3 in
   let lo' = lo2 in
 
   (* RIGHT SHIFT [x1:x0] BY 1,2,7 and xor with [x1:x0] *)
-  let lo1 = vec128_shift_right64 lo (size 1) in
-  let lo2 = vec128_shift_right64 lo (size 2) in
-  let lo3 = vec128_shift_right64 lo (size 7) in
-  let lo1 = vec128_xor lo1 lo2 in
-  let lo1 = vec128_xor lo1 lo3 in
+  let lo1 = cast U128 1 (vec_shift_right (cast U64 2 lo) (size 1)) in
+  let lo2 = cast U128 1 (vec_shift_right (cast U64 2 lo) (size 2)) in
+  let lo3 = cast U128 1 (vec_shift_right (cast U64 2 lo) (size 7)) in
+  let lo1 = vec_xor lo1 lo2 in
+  let lo1 = vec_xor lo1 lo3 in
 
-  let lo1 = vec128_xor lo1 lo' in
-  let lo = vec128_xor lo lo1 in
+  let lo1 = vec_xor lo1 lo' in
+  let lo = vec_xor lo lo1 in
 
-  let lo = vec128_xor lo hi in
+  let lo = vec_xor lo hi in
   lo
 
 
@@ -237,7 +240,7 @@ val load_felem:
   (ensures (fun h0 _ h1 -> modifies1 x h0 h1))
 
 let load_felem x y =
-  x.(size 0) <- vec128_load_be y
+  x.(size 0) <- vec_load_be U128 1 y
 
 
 inline_for_extraction
@@ -249,10 +252,10 @@ val load_felem4:
   (ensures (fun h0 _ h1 -> modifies1 x h0 h1))
 
 let load_felem4 x y =
-  x.(size 0) <- vec128_load_be (sub y (size 0) (size 16));
-  x.(size 1) <- vec128_load_be (sub y (size 16) (size 16));
-  x.(size 2) <- vec128_load_be (sub y (size 32) (size 16));
-  x.(size 3) <- vec128_load_be (sub y (size 48) (size 16))
+  x.(size 0) <- vec_load_be U128 1 (sub y (size 0) (size 16));
+  x.(size 1) <- vec_load_be U128 1 (sub y (size 16) (size 16));
+  x.(size 2) <- vec_load_be U128 1 (sub y (size 32) (size 16));
+  x.(size 3) <- vec_load_be U128 1 (sub y (size 48) (size 16))
 
 
 inline_for_extraction
@@ -264,7 +267,7 @@ val store_felem:
   (ensures (fun h0 _ h1 -> modifies1 x h0 h1))
 
 let store_felem x y =
-  vec128_store_be x y.(size 0)
+  vec_store_be x y.(size 0)
 
 
 [@ CInline]

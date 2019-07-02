@@ -2,10 +2,11 @@ FSTAR_HOME   ?= ../../../../FStar
 KREMLIN_HOME ?= ../../../../kremlin
 HACL_HOME    ?= ../../..
 
-OUTPUT_DIR    = .output
-HINT_DIR      = .hints
+CACHE_DIR     ?= $(HACL_HOME)/.cache
+HINT_DIR      ?= $(HACL_HOME)/.hints
+OUTPUT_DIR    ?= .output
 GENERATED_DIR ?= curve25519-c
-OUT_DIR	      ?= curve25519-c
+OUT_DIR	     ?= curve25519-c
 
 .PHONY: all test stage1 stage2 clean clean-c distclean
 
@@ -17,12 +18,12 @@ test:
 	STAGE=2 $(MAKE) stage2
 
 stage1: $(GENERATED_DIR)/Hacl_Curve25519_51.c \
-	$(GENERATED_DIR)/Hacl_Curve25519_64.c
+	$(GENERATED_DIR)/Hacl_Curve25519_64.c \
+	$(GENERATED_DIR)/Hacl_Curve25519_64_slow.c
 
-
-stage2: curve25519_51.exe curve25519_64.exe
-	./curve25519_51.exe \
-	./curve25519_64.exe \
+stage2: curve25519_51.exe curve25519_64.exe curve25519_64_slow.exe
+	./curve25519_51.exe
+	./curve25519_64_slow.exe
 
 curve25519_51.exe: $(GENERATED_DIR)/Hacl_Curve25519_51.c
 	$(CC) -march=native -mtune=native -O3 -I $(KREMLIN_HOME)/kremlib/dist/minimal -I $(KREMLIN_HOME)/kremlib/c -I $(KREMLIN_HOME)/include -I . $(GENERATED_DIR)/Hacl_Curve25519_51.c $(KREMLIN_HOME)/kremlib/dist/generic/testlib.o $(KREMLIN_HOME)/kremlib/dist/minimal/FStar_UInt_8_16_32_64.o curve51-test.c -o curve25519_51.exe
@@ -109,6 +110,17 @@ $(GENERATED_DIR)/Hacl_Curve25519_64.c: $(ALL_KRML_FILES) | .depend
 	-tmpdir $(GENERATED_DIR) \
 	$^
 
+$(GENERATED_DIR)/Hacl_Curve25519_64_slow.c: $(ALL_KRML_FILES) | .depend
+	$(KREMLIN) $(KREMLIN_TESTLIB) -skip-compilation \
+	-library 'C,FStar' \
+	-bundle 'Lib.*' \
+	-bundle 'Spec.*' \
+	-bundle 'C=C.Endianness' \
+	-bundle 'Hacl.Curve25519_64=Hacl.Spec.*,Hacl.Impl.*[rename=Hacl_Curve25519_64_slow]' \
+	-drop 'FStar.UInt128,LowStar,Spec,Prims,Lib,C.Loops.*,C.*,C,FStar.*,Hacl.Curve25519_51' \
+	-tmpdir $(GENERATED_DIR) \
+	$^
+
 # The Makefile is manually staged because GNU Make does not understand
 # dependencies between the Makefiles we include, i.e. it won't first generate
 # the .depend, parse it, then generate Makefile.include, parse it, then
@@ -162,6 +174,9 @@ curve25519_64.exe: curve25519_64_vale.exe curve25519_64_mixed.exe curve25519_64_
 	./curve25519_64_rfc.exe
 	./curve25519_64_mixed.exe
 
+curve25519_64_slow.exe: $(GENERATED_DIR)/Hacl_Curve25519_64_slow.c
+	$(CC) -march=native -mtune=native -O3 -I $(KREMLIN_HOME)/kremlib/dist/generic -I $(KREMLIN_HOME)/kremlib/c -I $(KREMLIN_HOME)/include -I . $(GENERATED_DIR)/Hacl_Curve25519_64_slow.c $(KREMLIN_HOME)/kremlib/dist/generic/testlib.o $(KREMLIN_HOME)/kremlib/dist/minimal/FStar_UInt_8_16_32_64.o curve64-test.c -o curve25519_64_slow.exe
+	./curve25519_64_slow.exe
 
 
 %.d: %.c
