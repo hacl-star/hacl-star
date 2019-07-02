@@ -20,12 +20,18 @@ let buffer8 = B.buffer uint8
 
 #set-options "--max_fuel 0 --max_ifuel 0"
 
+noextract
+let nonce_upper_bound a =
+  match a with
+  | AES128 | AES256 -> block_length a
+  | CHACHA20 -> 12
+
 noeq
 type state_s (a: Spec.cipher_alg) =
 | State:
     i:impl ->
     g_iv: G.erased (Spec.nonce a) ->
-    iv: buffer8 { Spec.nonce_bound a (B.length iv) } ->
+    iv: buffer8 { B.length iv = nonce_upper_bound a } ->
     g_key: G.erased (Spec.key a) ->
     xkey: buffer8 { B.length xkey = concrete_xkey_length i } ->
     ctr: uint32 ->
@@ -41,9 +47,10 @@ let footprint_s #a s =
 
 let invariant_s #a h s =
   let State i g_iv iv g_key key _ = s in
+  let g_iv = G.reveal g_iv in
   a = cipher_alg_of_impl i /\
   B.live h iv /\ B.live h key /\
-  G.reveal g_iv `Seq.equal` B.as_seq h iv /\
+  g_iv `Seq.equal` Seq.slice (B.as_seq h iv) 0 (Seq.length g_iv) /\
   concrete_expand i (G.reveal g_key) `Seq.equal` B.as_seq h key /\ (
   match i with
   | Vale_AES128 | Vale_AES256 ->
@@ -109,7 +116,7 @@ let create_in a r dst k iv iv_len c =
         (**) let h1 = ST.get () in
         (**) B.modifies_only_not_unused_in B.loc_none h0 h1;
 
-        let iv' = B.malloc r 0uy iv_len in
+        let iv' = B.malloc r 0uy 16ul in
         B.blit iv 0ul iv' 0ul iv_len;
         (**) let h2 = ST.get () in
         (**) B.modifies_only_not_unused_in B.loc_none h0 h2;
