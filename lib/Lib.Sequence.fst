@@ -223,6 +223,20 @@ let generate_blocks #t len max n a f acc0 =
 
 let map_blocks_a (a:Type) (bs:size_nat) (max:nat) (i:nat{i <= max}) = s:seq a{length s == i * bs}
 
+let generate_blocks_simple_f
+ (#a:Type)
+ (bs:size_nat{bs > 0})
+ (max:nat)
+ (f:(i:nat{i < max} -> lseq a bs))
+ (i:nat{i < max})
+ (acc:map_blocks_a a bs max i) : map_blocks_a a bs max (i + 1)
+=
+ Seq.append acc (f i)
+
+let generate_blocks_simple #a bs max nb f =
+ repeat_gen nb (map_blocks_a a bs max)
+   (generate_blocks_simple_f #a bs max f) Seq.empty
+
 let map_blocks_f
   (#a:Type)
   (bs:size_nat{bs > 0})

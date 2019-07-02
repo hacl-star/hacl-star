@@ -341,7 +341,17 @@ val generate_blocks:
   -> init:a 0 ->
   Tot (a n & s:seq t{length s == n * len})
 
-(* The following functions allow us to bridge between unbounded and bounded sequences *)
+(** Generates `n` blocks of length `len` by iteratively applying a function without an accumulator *)
+
+val generate_blocks_simple:
+   #a:Type0
+ -> blocksize:size_nat{blocksize > 0}
+ -> max:nat
+ -> n:nat{n <= max}
+ -> f:(i:nat{i < max} -> s:lseq a blocksize) ->
+ Tot (s:seq a{length s == n * blocksize})
+
+(** The following functions allow us to bridge between unbounded and bounded sequences *)
 
 val map_blocks_multi:
     #a:Type0
@@ -392,7 +402,7 @@ val index_map_blocks:
     let len = length inp in
     let nb  = len / bs in
     let rem = len % bs in
-    if i < nb * bs then 
+    if i < nb * bs then
       begin
       div_mul_lt i nb bs;
       let j = i / bs in
@@ -406,9 +416,9 @@ val index_map_blocks:
 	== { Math.Lemmas.lemma_mul_sub_distr bs (j + 1) j }
 	bs;
       };
-      Seq.index (map_blocks bs inp f g) i == Seq.index (f j block) (i % bs) 
+      Seq.index (map_blocks bs inp f g) i == Seq.index (f j block) (i % bs)
       end
-    else 
+    else
       begin
       let last = Seq.slice inp (nb * bs) len in
       calc (==) {
@@ -421,7 +431,7 @@ val index_map_blocks:
       };
       FStar.Math.Lemmas.modulo_lemma (i - nb * bs) bs;
       FStar.Math.Lemmas.lemma_mod_sub i bs nb;
-      Seq.index (map_blocks bs inp f g) i == Seq.index (g nb rem last) (i % bs) 
+      Seq.index (map_blocks bs inp f g) i == Seq.index (g nb rem last) (i % bs)
       end)
 
 val eq_generate_blocks0:
