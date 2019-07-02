@@ -2,10 +2,11 @@ FSTAR_HOME   ?= ../../../FStar
 KREMLIN_HOME ?= ../../../kremlin
 HACL_HOME    ?= ../..
 
-OUTPUT_DIR    = .output
-HINT_DIR      = .hints
-GENERATED_DIR = blake2-c
-OUT_DIR	      = blake2-c
+CACHE_DIR     ?= $(HACL_HOME)/.cache
+HINT_DIR      ?= $(HACL_HOME)/.hints
+OUTPUT_DIR    ?= .output
+GENERATED_DIR ?= blake2-c
+OUT_DIR	     ?= blake2-c
 
 .PHONY: all test stage1 stage2 clean clean-c distclean
 
@@ -77,7 +78,7 @@ $(GENERATED_DIR)/Makefile.include: $(ALL_KRML_FILES) | .depend
 	-bundle 'C=C.Endianness' \
 	-bundle 'Hacl.Blake2s=Hacl.Impl.*,Hacl.Blake2s' \
 	-library 'C,FStar' \
-	-drop 'LowStar,Spec,Prims,Lib,C.Loops.*' \
+	-drop 'LowStar,Spec,Prims,Lib,C.Loops.*,C,C.*' \
 	-add-include '"c/Lib_PrintBuffer.h"' \
 	-tmpdir $(GENERATED_DIR) \
 	$^

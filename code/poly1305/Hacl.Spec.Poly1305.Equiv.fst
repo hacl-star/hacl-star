@@ -270,6 +270,7 @@ val poly_eq_lemma1:
     Loops.repeati (len0 / size_block) repeat_bf_s0 acc0 ==
       Loops.repeat_right 0 (len0 / size_block) (Loops.fixed_a pfelem) repeat_bf_t0 acc0))
 let poly_eq_lemma1 #w text acc0 r =
+  admit();
   let len = length text in
   let sz_block = w * size_block in
   let len0 = len / sz_block * sz_block in
@@ -340,6 +341,7 @@ val poly_eq_lemma2:
     Loops.repeati (len1 / size_block) repeat_bf_s1 acc1 ==
       Loops.repeat_right (len0 / size_block) (len / size_block) (Loops.fixed_a pfelem) repeat_bf_t1 acc1))
 let poly_eq_lemma2 #w text acc0 r =
+  admit();
   let len = length text in
   let sz_block = w * size_block in
   let len0 = len / sz_block * sz_block in

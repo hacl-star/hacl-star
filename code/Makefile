@@ -2,13 +2,16 @@ KREMLIN_HOME ?= ../../kremlin
 HACL_HOME    ?= ..
 BUILD_DIR = $(HACL_HOME)/build/c
 
+
 .PHONY: extract-%
 extract-%:
 	mkdir -p $(BUILD_DIR)
 	GENERATED_DIR=$(BUILD_DIR) make -C $* stage1
 	rm -f $(BUILD_DIR)/Makefile.*
 
-snapshot: extract-poly1305 extract-chacha20 extract-curve25519
+extract: extract-poly1305 extract-chacha20 extract-curve25519 extract-chacha20poly1305 extract-blake2s
+
+snapshot: extract-poly1305 extract-chacha20 extract-curve25519 extract-chacha20poly1305 extract-blake2s
 	cp $(HACL_HOME)/lib/c/vec-intrin.h $(BUILD_DIR)
 	cp $(KREMLIN_HOME)/kremlib/dist/generic/libkremlib.a $(BUILD_DIR)
 	cp $(KREMLIN_HOME)/kremlib/dist/generic/TestLib.h $(BUILD_DIR)

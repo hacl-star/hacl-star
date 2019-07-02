@@ -1,7 +1,8 @@
 FSTAR_HOME ?= ../../FStar
 HACL_HOME  ?= ..
 
-HINT_DIR  = .hints
+CACHE_DIR     ?= $(HACL_HOME)/.cache
+HINT_DIR      ?= $(HACL_HOME)/.hints
 
 include ../Makefile.include
 

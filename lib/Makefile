@@ -1,7 +1,8 @@
 FSTAR_HOME ?= ../../FStar
 HACL_HOME  ?= ..
 
-HINT_DIR  = .hints
+CACHE_DIR     ?= $(HACL_HOME)/.cache
+HINT_DIR      ?= $(HACL_HOME)/.hints
 
 include ../Makefile.include
 
@@ -28,7 +29,7 @@ ENABLE_HINTS = --use_hints --use_hint_hashes --record_hints --query_stats
 
 ALL_SOURCES = $(wildcard *.fst) $(wildcard *.fsti) tutorial/Tutorial.fst
 
-FIXME = 
+FIXME =
 
 ROOTS = $(filter-out $(FIXME),$(ALL_SOURCES))
 

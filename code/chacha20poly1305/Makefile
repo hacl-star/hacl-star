@@ -2,10 +2,11 @@ FSTAR_HOME   ?= ../../../FStar
 KREMLIN_HOME ?= ../../../kremlin
 HACL_HOME    ?= ../..
 
-OUTPUT_DIR    = .output
-HINT_DIR      = .hints
-GENERATED_DIR = chacha20poly1305-c
-OUT_DIR	      = chacha20poly1305-c
+CACHE_DIR     ?= $(HACL_HOME)/.cache
+HINT_DIR      ?= $(HACL_HOME)/.hints
+OUTPUT_DIR    ?= .output
+GENERATED_DIR ?= chacha20poly1305-c
+OUT_DIR	     ?= chacha20poly1305-c
 
 .PHONY: all test stage1 stage2 clean clean-c distclean
 
