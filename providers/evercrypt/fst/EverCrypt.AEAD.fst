@@ -14,6 +14,7 @@ open FStar.Int.Cast
 
 open Spec.AEAD
 open Spec.Cipher.Expansion
+open EverCrypt.CTR.Keys
 
 friend Spec.AEAD
 friend Spec.Cipher.Expansion
@@ -107,13 +108,23 @@ let create_in_chacha20_poly1305: create_in_st CHACHA20_POLY1305 = fun r dst k ->
   Success
 
 inline_for_extraction noextract
-let aes_gcm_alg = a:alg { a = AES128_GCM \/ a = AES256_GCM }
+let vale_impl = a:impl { a = Vale_AES128 \/ a = Vale_AES256 }
+
+let vale_alg_of_vale_impl (i: vale_impl) =
+  match i with
+  | Vale_AES128 -> Vale.AES.AES_s.AES_128
+  | Vale_AES256 -> Vale.AES.AES_s.AES_256
+
+let alg_of_vale_impl (i: vale_impl) =
+  match i with
+  | Vale_AES128 -> AES128_GCM
+  | Vale_AES256 -> AES256_GCM
 
 inline_for_extraction noextract
-let key_offset (a: aes_gcm_alg) =
-  match a with
-  | AES128_GCM -> 176ul
-  | AES256_GCM -> 240ul
+let key_offset (i: vale_impl) =
+  match i with
+  | Vale_AES128 -> 176ul
+  | Vale_AES256 -> 240ul
 
 inline_for_extraction
 let concrete_xkey_len (i: impl): Tot (x:UInt32.t { UInt32.v x = concrete_xkey_length i }) =
@@ -121,31 +132,27 @@ let concrete_xkey_len (i: impl): Tot (x:UInt32.t { UInt32.v x = concrete_xkey_le
   | Hacl_CHACHA20 -> 32ul
   | Vale_AES256
   | Vale_AES128 ->
-      key_offset (supported_alg_of_impl i) + 128ul
+      key_offset i + 128ul
 
 inline_for_extraction noextract
-let aes_gcm_key_expansion (a: aes_gcm_alg): Vale.Wrapper.X64.AES.key_expansion_st (vale_alg_of_alg a) =
-  match a with
-  | AES128_GCM -> Vale.Wrapper.X64.AES.aes128_key_expansion_stdcall
-  | AES256_GCM -> Vale.Wrapper.X64.AES.aes256_key_expansion_stdcall
+let aes_gcm_key_expansion (i: vale_impl):
+  Vale.Wrapper.X64.AES.key_expansion_st (vale_alg_of_vale_impl i) =
+  match i with
+  | Vale_AES128 -> Vale.Wrapper.X64.AES.aes128_key_expansion_stdcall
+  | Vale_AES256 -> Vale.Wrapper.X64.AES.aes256_key_expansion_stdcall
 
 inline_for_extraction noextract
-let aes_gcm_keyhash_init (a: aes_gcm_alg): Vale.Wrapper.X64.AEShash.keyhash_init_st (vale_alg_of_alg a) =
-  match a with
-  | AES128_GCM -> Vale.Wrapper.X64.AEShash.aes128_keyhash_init_stdcall
-  | AES256_GCM -> Vale.Wrapper.X64.AEShash.aes256_keyhash_init_stdcall
+let aes_gcm_keyhash_init (i: vale_impl):
+  Vale.Wrapper.X64.AEShash.keyhash_init_st (vale_alg_of_vale_impl i) =
+  match i with
+  | Vale_AES128 -> Vale.Wrapper.X64.AEShash.aes128_keyhash_init_stdcall
+  | Vale_AES256 -> Vale.Wrapper.X64.AEShash.aes256_keyhash_init_stdcall
 
 inline_for_extraction noextract
-let vale_impl_of_aes_gcm_alg (a: aes_gcm_alg): impl =
-  match a with
-  | AES128_GCM -> Vale_AES128
-  | AES256_GCM -> Vale_AES256
-
-inline_for_extraction noextract
-let create_in_aes_gcm (a: aes_gcm_alg):
-  create_in_st a =
+let create_in_aes_gcm (i: vale_impl):
+  create_in_st (alg_of_vale_impl i) =
 fun r dst k ->
-  let i = vale_impl_of_aes_gcm_alg a in
+  let a = alg_of_vale_impl i in
   let h0 = ST.get () in
   let kv: G.erased (kv a) = G.hide (B.as_seq h0 k) in
   let has_aesni = EverCrypt.AutoConfig2.has_aesni () in
@@ -153,10 +160,10 @@ fun r dst k ->
   let has_avx = EverCrypt.AutoConfig2.has_avx() in
   if EverCrypt.TargetConfig.x64 && (has_aesni && has_pclmulqdq && has_avx) then (
     let ek = B.malloc r 0uy (concrete_xkey_len i + 176ul) in
-    let keys_b = B.sub ek 0ul (key_offset a) in
-    let hkeys_b = B.sub ek (key_offset a) 128ul in
-    aes_gcm_key_expansion a k keys_b;
-    aes_gcm_keyhash_init a
+    let keys_b = B.sub ek 0ul (key_offset i) in
+    let hkeys_b = B.sub ek (key_offset i) 128ul in
+    aes_gcm_key_expansion i k keys_b;
+    aes_gcm_keyhash_init i
       (let k = G.reveal kv in
       let k_nat = Vale.Def.Words.Seq_s.seq_uint8_to_seq_nat8 k in
       let k_w = Vale.Def.Words.Seq_s.seq_nat8_to_seq_nat32_LE k_nat in G.hide k_w)
@@ -206,8 +213,8 @@ fun r dst k ->
     UnsupportedAlgorithm
 
 
-let create_in_aes128_gcm: create_in_st AES128_GCM = create_in_aes_gcm AES128_GCM
-let create_in_aes256_gcm: create_in_st AES256_GCM = create_in_aes_gcm AES256_GCM
+let create_in_aes128_gcm: create_in_st AES128_GCM = create_in_aes_gcm Vale_AES128
+let create_in_aes256_gcm: create_in_st AES256_GCM = create_in_aes_gcm Vale_AES256
 
 let create_in #a r dst k =
   match a with
@@ -217,19 +224,20 @@ let create_in #a r dst k =
   | _ -> UnsupportedAlgorithm
 
 inline_for_extraction noextract
-let aes_gcm_encrypt (a:aes_gcm_alg): Vale.Wrapper.X64.GCMencryptOpt.encrypt_opt_stdcall_st (vale_alg_of_alg a) =
-  match a with
-  | AES128_GCM -> Vale.Wrapper.X64.GCMencryptOpt.gcm128_encrypt_opt_stdcall
-  | AES256_GCM -> Vale.Wrapper.X64.GCMencryptOpt256.gcm256_encrypt_opt_stdcall
+let aes_gcm_encrypt (i: vale_impl):
+  Vale.Wrapper.X64.GCMencryptOpt.encrypt_opt_stdcall_st (vale_alg_of_vale_impl i) =
+  match i with
+  | Vale_AES128 -> Vale.Wrapper.X64.GCMencryptOpt.gcm128_encrypt_opt_stdcall
+  | Vale_AES256 -> Vale.Wrapper.X64.GCMencryptOpt256.gcm256_encrypt_opt_stdcall
 
 #reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq.Properties.slice_slice'"
 inline_for_extraction noextract
-let encrypt_aes_gcm (a: aes_gcm_alg): encrypt_st a =
+let encrypt_aes_gcm (i: vale_impl): encrypt_st (alg_of_vale_impl i) =
 fun s iv iv_len ad ad_len plain plain_len cipher tag ->
   if B.is_null s then
     InvalidKey
   else
-    let i = vale_impl_of_aes_gcm_alg a in
+    let a = alg_of_vale_impl i in
     // This condition is never satisfied in F* because of the iv_length precondition on iv.
     // We keep it here to be defensive when extracting to C
     if iv_len = 0ul then
@@ -247,8 +255,8 @@ fun s iv iv_len ad ad_len plain plain_len cipher tag ->
       let scratch_b = B.sub ek (concrete_xkey_len i) 176ul in
 
       let ek = B.sub ek 0ul (concrete_xkey_len i) in
-      let keys_b = B.sub ek 0ul (key_offset a) in
-      let hkeys_b = B.sub ek (key_offset a) 128ul in
+      let keys_b = B.sub ek 0ul (key_offset i) in
+      let hkeys_b = B.sub ek (key_offset i) 128ul in
 
       let h0 = get() in
 
@@ -290,7 +298,7 @@ fun s iv iv_len ad ad_len plain plain_len cipher tag ->
 
       let h0 = get() in
 
-      aes_gcm_encrypt a
+      aes_gcm_encrypt i
         (let k = G.reveal kv in
         let k_nat = Vale.Def.Words.Seq_s.seq_uint8_to_seq_nat8 k in
         let k_w = Vale.Def.Words.Seq_s.seq_nat8_to_seq_nat32_LE k_nat in G.hide k_w)
@@ -327,8 +335,8 @@ fun s iv iv_len ad ad_len plain plain_len cipher tag ->
       pop_frame();
       Success
 
-let encrypt_aes128_gcm: encrypt_st AES128_GCM = encrypt_aes_gcm AES128_GCM
-let encrypt_aes256_gcm: encrypt_st AES256_GCM = encrypt_aes_gcm AES256_GCM
+let encrypt_aes128_gcm: encrypt_st AES128_GCM = encrypt_aes_gcm Vale_AES128
+let encrypt_aes256_gcm: encrypt_st AES256_GCM = encrypt_aes_gcm Vale_AES256
 
 let encrypt #a s iv iv_len ad ad_len plain plain_len cipher tag =
   if B.is_null s then
@@ -355,14 +363,15 @@ let encrypt #a s iv iv_len ad ad_len plain plain_len cipher tag =
         end
 
 inline_for_extraction noextract
-let aes_gcm_decrypt (a:aes_gcm_alg): Vale.Wrapper.X64.GCMdecryptOpt.decrypt_opt_stdcall_st (vale_alg_of_alg a) =
-  match a with
-  | AES128_GCM -> Vale.Wrapper.X64.GCMdecryptOpt.gcm128_decrypt_opt_stdcall
-  | AES256_GCM -> Vale.Wrapper.X64.GCMdecryptOpt256.gcm256_decrypt_opt_stdcall
+let aes_gcm_decrypt (i: vale_impl):
+  Vale.Wrapper.X64.GCMdecryptOpt.decrypt_opt_stdcall_st (vale_alg_of_vale_impl i) =
+  match i with
+  | Vale_AES128 -> Vale.Wrapper.X64.GCMdecryptOpt.gcm128_decrypt_opt_stdcall
+  | Vale_AES256 -> Vale.Wrapper.X64.GCMdecryptOpt256.gcm256_decrypt_opt_stdcall
 
 #reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq.Properties.slice_slice'"
 inline_for_extraction noextract
-let decrypt_aes_gcm (a: aes_gcm_alg): decrypt_st a =
+let decrypt_aes_gcm (i: vale_impl): decrypt_st (alg_of_vale_impl i) =
 fun s iv iv_len ad ad_len cipher cipher_len tag dst ->
   if B.is_null s then
     InvalidKey
@@ -372,7 +381,7 @@ fun s iv iv_len ad ad_len cipher cipher_len tag dst ->
     if iv_len = 0ul then
       InvalidIVLength
     else
-      let i = vale_impl_of_aes_gcm_alg a in
+      let a = alg_of_vale_impl i in
       let open LowStar.BufferOps in
       let Ek i kv ek = !*s in
         assert (
@@ -385,8 +394,8 @@ fun s iv iv_len ad ad_len cipher cipher_len tag dst ->
         let scratch_b = B.sub ek (concrete_xkey_len i) 176ul in
 
         let ek = B.sub ek 0ul (concrete_xkey_len i) in
-        let keys_b = B.sub ek 0ul (key_offset a) in
-        let hkeys_b = B.sub ek (key_offset a) 128ul in
+        let keys_b = B.sub ek 0ul (key_offset i) in
+        let hkeys_b = B.sub ek (key_offset i) 128ul in
 
         let h0 = get() in
 
@@ -426,7 +435,7 @@ fun s iv iv_len ad ad_len cipher cipher_len tag dst ->
           tmp_iv tmp_iv
           hkeys_b;
 
-        let r = aes_gcm_decrypt a
+        let r = aes_gcm_decrypt i
           (let k = G.reveal kv in
           let k_nat = Vale.Def.Words.Seq_s.seq_uint8_to_seq_nat8 k in
           let k_w = Vale.Def.Words.Seq_s.seq_nat8_to_seq_nat32_LE k_nat in G.hide k_w)
@@ -474,8 +483,8 @@ fun s iv iv_len ad ad_len cipher cipher_len tag dst ->
         else
           AuthenticationFailure
 
-let decrypt_aes128_gcm: decrypt_st AES128_GCM = decrypt_aes_gcm AES128_GCM
-let decrypt_aes256_gcm: decrypt_st AES256_GCM = decrypt_aes_gcm AES256_GCM
+let decrypt_aes128_gcm: decrypt_st AES128_GCM = decrypt_aes_gcm Vale_AES128
+let decrypt_aes256_gcm: decrypt_st AES256_GCM = decrypt_aes_gcm Vale_AES256
 
 let decrypt #a s iv iv_len ad ad_len cipher cipher_len tag dst =
   if B.is_null s then
