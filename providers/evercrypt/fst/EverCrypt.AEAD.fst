@@ -18,6 +18,7 @@ open EverCrypt.CTR.Keys
 
 friend Spec.AEAD
 friend Spec.Cipher.Expansion
+friend EverCrypt.CTR.Keys
 
 #set-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0"
 
@@ -38,6 +39,11 @@ let supported_alg_of_impl (i: impl): supported_alg =
   | Vale_AES128 -> AES128_GCM
   | Vale_AES256 -> AES256_GCM
   | Hacl_CHACHA20 -> CHACHA20_POLY1305
+
+let alg_of_vale_impl (i: vale_impl) =
+  match i with
+  | Vale_AES128 -> AES128_GCM
+  | Vale_AES256 -> AES256_GCM
 
 noeq
 type state_s a =
@@ -107,46 +113,6 @@ let create_in_chacha20_poly1305: create_in_st CHACHA20_POLY1305 = fun r dst k ->
   B.modifies_only_not_unused_in B.(loc_buffer dst) h0 h1;
   Success
 
-inline_for_extraction noextract
-let vale_impl = a:impl { a = Vale_AES128 \/ a = Vale_AES256 }
-
-let vale_alg_of_vale_impl (i: vale_impl) =
-  match i with
-  | Vale_AES128 -> Vale.AES.AES_s.AES_128
-  | Vale_AES256 -> Vale.AES.AES_s.AES_256
-
-let alg_of_vale_impl (i: vale_impl) =
-  match i with
-  | Vale_AES128 -> AES128_GCM
-  | Vale_AES256 -> AES256_GCM
-
-inline_for_extraction noextract
-let key_offset (i: vale_impl) =
-  match i with
-  | Vale_AES128 -> 176ul
-  | Vale_AES256 -> 240ul
-
-inline_for_extraction
-let concrete_xkey_len (i: impl): Tot (x:UInt32.t { UInt32.v x = concrete_xkey_length i }) =
-  match i with
-  | Hacl_CHACHA20 -> 32ul
-  | Vale_AES256
-  | Vale_AES128 ->
-      key_offset i + 128ul
-
-inline_for_extraction noextract
-let aes_gcm_key_expansion (i: vale_impl):
-  Vale.Wrapper.X64.AES.key_expansion_st (vale_alg_of_vale_impl i) =
-  match i with
-  | Vale_AES128 -> Vale.Wrapper.X64.AES.aes128_key_expansion_stdcall
-  | Vale_AES256 -> Vale.Wrapper.X64.AES.aes256_key_expansion_stdcall
-
-inline_for_extraction noextract
-let aes_gcm_keyhash_init (i: vale_impl):
-  Vale.Wrapper.X64.AEShash.keyhash_init_st (vale_alg_of_vale_impl i) =
-  match i with
-  | Vale_AES128 -> Vale.Wrapper.X64.AEShash.aes128_keyhash_init_stdcall
-  | Vale_AES256 -> Vale.Wrapper.X64.AEShash.aes256_keyhash_init_stdcall
 
 inline_for_extraction noextract
 let create_in_aes_gcm (i: vale_impl):

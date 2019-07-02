@@ -67,6 +67,3 @@ let ctr #a (h: HS.mem) (s: state a) =
 let alg_of_state _ s =
   let State i _ _ _ _ _ = !*s in
   cipher_alg_of_impl i
-
-let create_in a r dst =
-  
