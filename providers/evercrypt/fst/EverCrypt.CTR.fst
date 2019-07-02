@@ -18,6 +18,8 @@ let uint8 = Lib.IntTypes.uint8
 let uint32 = Lib.IntTypes.uint32
 let buffer8 = B.buffer uint8
 
+#set-options "--max_fuel 0 --max_ifuel 0"
+
 noeq
 type state_s (a: Spec.cipher_alg) =
 | State:
@@ -50,6 +52,16 @@ let invariant_s #a h s =
   | Hacl_CHACHA20 ->
       True)
 
+let _: squash (inversion impl) = allow_inversion impl
+let _: squash (inversion cipher_alg) = allow_inversion cipher_alg
+
+let invert_state_s (a: alg): Lemma
+  (requires True)
+  (ensures (inversion (state_s a)))
+  [ SMTPat (state_s a) ]
+=
+  allow_inversion (state_s a)
+
 let invariant_loc_in_footprint #_ _ _ = ()
 
 let frame_invariant #_ _ _ _ _ = ()
@@ -74,24 +86,72 @@ let vale_impl_of_alg (a: vale_cipher_alg): vale_impl =
   | AES128 -> Vale_AES128
   | AES256 -> Vale_AES256
 
-let create_in a r dst k iv iv_len =
+friend Lib.IntTypes
+
+#push-options "--z3rlimit 100"
+let create_in a r dst k iv iv_len c =
   match a with
   | AES128 | AES256 ->
       let has_aesni = EverCrypt.AutoConfig2.has_aesni () in
       let has_pclmulqdq = EverCrypt.AutoConfig2.has_pclmulqdq () in
       let has_avx = EverCrypt.AutoConfig2.has_avx() in
       let i = vale_impl_of_alg a in
-      if EverCrypt.TargetConfig.x64 && (has_aesni && has_pclmulqdq && has_avx) then
-        let h0 = ST.get () in
-        let g_iv = G.hide (B.as_seq h0 iv) in
-        let g_key = G.hide (as_seq h0 key) in
+      if iv_len `UInt32.lt` 12ul then
+        InvalidIVLength
+
+      else if EverCrypt.TargetConfig.x64 && (has_aesni && has_pclmulqdq && has_avx) then
+        (**) let h0 = ST.get () in
+        (**) let g_iv = G.hide (B.as_seq h0 iv) in
+        (**) let g_key: G.erased (key a) = G.hide (B.as_seq h0 (k <: B.buffer uint8)) in
+
         let ek = B.malloc r 0uy (concrete_xkey_len i) in
-        let iv' = B.malloc r 0uy (iv_len i) in
-        let p = B.malloc r (State (vale_impl_of_alg a) g_iv iv g_key ek ctr) 1ul in
         vale_expand i k ek;
+        (**) let h1 = ST.get () in
+        (**) B.modifies_only_not_unused_in B.loc_none h0 h1;
+
+        let iv' = B.malloc r 0uy iv_len in
         B.blit iv 0ul iv' 0ul iv_len;
+        (**) let h2 = ST.get () in
+        (**) B.modifies_only_not_unused_in B.loc_none h0 h2;
+
+        let p = B.malloc r (State (vale_impl_of_alg a) g_iv iv' g_key ek c) 1ul in
+        (**) let h3 = ST.get () in
+        (**) B.modifies_only_not_unused_in B.loc_none h0 h3;
+        assert (B.fresh_loc (footprint h3 p) h0 h3);
+
         dst *= p;
+        (**) let h4 = ST.get () in
+        (**) B.modifies_only_not_unused_in B.(loc_buffer dst) h0 h4;
+
         Success
+
       else
         UnsupportedAlgorithm
-  | CHACHA20 -> admit ()
+
+  | CHACHA20 ->
+        (**) let h0 = ST.get () in
+        (**) let g_iv = G.hide (B.as_seq h0 iv) in
+        (**) let g_key: G.erased (key a) = G.hide (B.as_seq h0 (k <: B.buffer uint8)) in
+
+        [@inline_let]
+        let l = concrete_xkey_len Hacl_CHACHA20 in
+        let ek = B.malloc r 0uy l in
+        B.blit (k <: B.buffer uint8) 0ul ek 0ul l;
+        (**) let h1 = ST.get () in
+        (**) B.modifies_only_not_unused_in B.loc_none h0 h1;
+
+        let iv' = B.malloc r 0uy iv_len in
+        B.blit iv 0ul iv' 0ul iv_len;
+        (**) let h2 = ST.get () in
+        (**) B.modifies_only_not_unused_in B.loc_none h0 h2;
+
+        let p = B.malloc r (State Hacl_CHACHA20 g_iv iv' g_key ek c) 1ul in
+        (**) let h3 = ST.get () in
+        (**) B.modifies_only_not_unused_in B.loc_none h0 h3;
+        assert (B.fresh_loc (footprint h3 p) h0 h3);
+
+        dst *= p;
+        (**) let h4 = ST.get () in
+        (**) B.modifies_only_not_unused_in B.(loc_buffer dst) h0 h4;
+
+        Success

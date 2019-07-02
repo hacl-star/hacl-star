@@ -93,10 +93,10 @@ val create_in: a:alg ->
   ST error_code
     (requires fun h0 ->
       ST.is_eternal_region r /\
-      B.live h0 dst)
+      B.live h0 dst /\ B.live h0 (k <: B.buffer uint8) /\ B.live h0 nonce)
     (ensures fun h0 e h1 ->
       match e with
-      | UnsupportedAlgorithm ->
+      | UnsupportedAlgorithm | InvalidIVLength ->
           B.(modifies loc_none h0 h1)
       | Success ->
           let s = B.deref h1 dst in
