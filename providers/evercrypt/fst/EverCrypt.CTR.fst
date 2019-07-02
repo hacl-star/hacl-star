@@ -7,48 +7,24 @@ module G = FStar.Ghost
 
 module Spec = Spec.Agile.CTR
 
+friend Spec.Cipher.Expansion
+
 open FStar.HyperStack.ST
 open LowStar.BufferOps
+open Spec.Cipher.Expansion
 
 let uint8 = Lib.IntTypes.uint8
 let uint32 = Lib.IntTypes.uint32
 let buffer8 = B.buffer uint8
 
-
-let expand (#a: supported_alg) (k: kv a): ekv a =
-  match a with
-  | CHACHA20_POLY1305 -> k
-  | AES256_GCM | AES128_GCM ->
-      let open Vale.AES.AES_s in
-      assert_norm (32 % 4 = 0);
-      assert_norm (16 % 4 = 0);
-      let k_nat = Vale.Def.Words.Seq_s.seq_uint8_to_seq_nat8 k in
-      let k_w = Vale.Def.Words.Seq_s.seq_nat8_to_seq_nat32_LE k_nat in
-      let ekv_w = key_to_round_keys_LE (vale_alg_of_alg a) k_w in
-      let ekv_nat = Vale.Def.Types_s.le_seq_quad32_to_bytes ekv_w in
-      Vale.Def.Types_s.le_seq_quad32_to_bytes_length ekv_w;
-      let ek = Vale.Def.Words.Seq_s.seq_nat8_to_seq_uint8 ekv_nat in
-      let hkeys_quad = Vale.AES.OptPublic.get_hkeys_reqs (Vale.Def.Types_s.reverse_bytes_quad32 (
-        aes_encrypt_LE (vale_alg_of_alg a) k_w (Vale.Def.Words_s.Mkfour 0 0 0 0))) in
-      let hkeys = Vale.Def.Words.Seq_s.seq_nat8_to_seq_uint8 (Vale.Def.Types_s.le_seq_quad32_to_bytes hkeys_quad) in
-      Seq.append ek hkeys
-
-
-
-/// Duplicated with EverCrypt.AEAD. Unify?
-type impl =
-  | Vale_AES128
-  | Vale_AES256
-  | Hacl_CHACHA20
-
 noeq
 type state_s (a: Spec.cipher_alg) =
 | State:
-    impl:impl ->
+    i:impl ->
     g_iv: G.erased (Spec.nonce a) ->
     iv: buffer8 { Spec.nonce_bound a (B.length iv) } ->
-    g_key: G.erased (Spec.xkey a) ->
-    xkey: buffer8 { B.length xkey = Spec.concrete_xkey_length a } ->
+    g_key: G.erased (Spec.key a) ->
+    xkey: buffer8 { B.length xkey = concrete_xkey_length i } ->
     ctr: uint32 ->
     state_s a
 
@@ -61,8 +37,33 @@ let footprint_s #a s =
   B.(loc_addr_of_buffer iv `loc_union` loc_addr_of_buffer key)
 
 let invariant_s #a h s =
-  let State impl g_iv iv g_key key _ = s in
+  let State i g_iv iv g_key key _ = s in
+  a = cipher_alg_of_impl i /\
   B.live h iv /\ B.live h key /\
   G.reveal g_iv `Seq.equal` B.as_seq h iv /\
-  G.reveal g_key `Seq.equal` B.as_seq h key /\
-  true
+  concrete_expand i (G.reveal g_key) `Seq.equal` B.as_seq h key /\ (
+  match i with
+  | Vale_AES128 | Vale_AES256 ->
+      EverCrypt.TargetConfig.x64 /\
+      Vale.X64.CPU_Features_s.(aesni_enabled /\ pclmulqdq_enabled /\ avx_enabled)
+  | Hacl_CHACHA20 ->
+      True)
+
+let invariant_loc_in_footprint #_ _ _ = ()
+
+let frame_invariant #_ _ _ _ _ = ()
+
+let kv #a (s: state_s a) =
+  let State _ _ _ g_key _ _ = s in
+  G.reveal g_key
+
+let iv #a (s: state_s a) =
+  let State _ g_iv _ _ _ _ = s in
+  G.reveal g_iv
+
+let ctr #a (h: HS.mem) (s: state a) =
+  UInt32.v (State?.ctr (B.deref h s))
+
+let alg_of_state _ s =
+  let State i _ _ _ _ _ = !*s in
+  cipher_alg_of_impl i
