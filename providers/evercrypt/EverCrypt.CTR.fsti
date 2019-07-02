@@ -86,6 +86,10 @@ val alg_of_state: a:e_alg -> (
 val create_in: a:alg ->
   r:HS.rid ->
   dst:B.pointer (B.pointer_or_null (state_s a)) ->
+  k:lbuffer uint8 (size (Spec.Agile.CTR.key_length a)) ->
+  nonce: buffer uint8 ->
+  nonce_len: UInt32.t { Spec.nonce_bound a (UInt32.v nonce_len) /\ B.len nonce = nonce_len } ->
+  c: UInt32.t ->
   ST error_code
     (requires fun h0 ->
       ST.is_eternal_region r /\
@@ -104,7 +108,12 @@ val create_in: a:alg ->
           B.(modifies (loc_buffer dst) h0 h1) /\
           B.fresh_loc (footprint h1 s) h0 h1 /\
           B.(loc_includes (loc_region_only true r) (footprint h1 s)) /\
-          freeable h1 s
+          freeable h1 s /\
+
+          // Useful stuff
+          kv (B.deref h1 s) == B.as_seq h0 (k <: B.buffer uint8) /\
+          iv (B.deref h1 s) == B.as_seq h0 nonce /\
+          ctr h1 s = UInt32.v c
       | _ -> False)
 
 /// Initializes state to start at a given counter. This allows client to

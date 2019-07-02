@@ -5,13 +5,14 @@ module HS = FStar.HyperStack
 module B = LowStar.Buffer
 module G = FStar.Ghost
 
-module Spec = Spec.Agile.CTR
-
 friend Spec.Cipher.Expansion
+friend EverCrypt.CTR.Keys
 
+open EverCrypt.CTR.Keys
 open FStar.HyperStack.ST
 open LowStar.BufferOps
 open Spec.Cipher.Expansion
+open Spec.Agile.CTR
 
 let uint8 = Lib.IntTypes.uint8
 let uint32 = Lib.IntTypes.uint32
@@ -67,3 +68,30 @@ let ctr #a (h: HS.mem) (s: state a) =
 let alg_of_state _ s =
   let State i _ _ _ _ _ = !*s in
   cipher_alg_of_impl i
+
+let vale_impl_of_alg (a: vale_cipher_alg): vale_impl =
+  match a with
+  | AES128 -> Vale_AES128
+  | AES256 -> Vale_AES256
+
+let create_in a r dst k iv iv_len =
+  match a with
+  | AES128 | AES256 ->
+      let has_aesni = EverCrypt.AutoConfig2.has_aesni () in
+      let has_pclmulqdq = EverCrypt.AutoConfig2.has_pclmulqdq () in
+      let has_avx = EverCrypt.AutoConfig2.has_avx() in
+      let i = vale_impl_of_alg a in
+      if EverCrypt.TargetConfig.x64 && (has_aesni && has_pclmulqdq && has_avx) then
+        let h0 = ST.get () in
+        let g_iv = G.hide (B.as_seq h0 iv) in
+        let g_key = G.hide (as_seq h0 key) in
+        let ek = B.malloc r 0uy (concrete_xkey_len i) in
+        let iv' = B.malloc r 0uy (iv_len i) in
+        let p = B.malloc r (State (vale_impl_of_alg a) g_iv iv g_key ek ctr) 1ul in
+        vale_expand i k ek;
+        B.blit iv 0ul iv' 0ul iv_len;
+        dst *= p;
+        Success
+      else
+        UnsupportedAlgorithm
+  | CHACHA20 -> admit ()
