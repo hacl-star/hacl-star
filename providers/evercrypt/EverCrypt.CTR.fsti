@@ -8,6 +8,7 @@ module G = FStar.Ghost
 module Spec = Spec.Agile.CTR
 
 open FStar.HyperStack.ST
+open EverCrypt.Error
 
 unfold noextract
 let alg = Spec.cipher_alg
@@ -82,15 +83,29 @@ val alg_of_state: a:e_alg -> (
   (fun h0 -> invariant h0 s)
   (fun h0 a' h1 -> h0 == h1 /\ a' == a))
 
-val create_in (a: alg) (r: HS.rid): ST (state a)
-  (requires (fun _ ->
-    HyperStack.ST.is_eternal_region r))
-  (ensures (fun h0 s h1 ->
-    invariant h1 s /\
-    B.(modifies loc_none h0 h1) /\
-    B.fresh_loc (footprint h1 s) h0 h1 /\
-    B.(loc_includes (loc_region_only true r) (footprint h1 s)) /\
-    freeable h1 s))
+val create_in: a:alg ->
+  r:HS.rid ->
+  dst:B.pointer (B.pointer_or_null (state_s a)) ->
+  ST error_code
+    (requires fun h0 ->
+      ST.is_eternal_region r /\
+      B.live h0 dst)
+    (ensures fun h0 e h1 ->
+      match e with
+      | UnsupportedAlgorithm ->
+          B.(modifies loc_none h0 h1)
+      | Success ->
+          let s = B.deref h1 dst in
+          // Sanity
+          not (B.g_is_null s) /\
+          invariant h1 s /\
+
+          // Memory stuff
+          B.(modifies (loc_buffer dst) h0 h1) /\
+          B.fresh_loc (footprint h1 s) h0 h1 /\
+          B.(loc_includes (loc_region_only true r) (footprint h1 s)) /\
+          freeable h1 s
+      | _ -> False)
 
 /// Initializes state to start at a given counter. This allows client to
 /// generate a counter-block directly for a given counter, or to just start at

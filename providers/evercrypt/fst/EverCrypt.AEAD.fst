@@ -64,14 +64,14 @@ let invariant_s #a h (Ek i kv ek) =
   B.as_seq h (B.gsub ek 0ul (UInt32.uint_to_t (concrete_xkey_length i)))
     `S.equal` concrete_expand i (G.reveal kv) /\ (
   match i with
-  | Vale_AES128_GCM
-  | Vale_AES256_GCM ->
+  | Vale_AES128
+  | Vale_AES256 ->
       EverCrypt.TargetConfig.x64 /\
       Vale.X64.CPU_Features_s.(aesni_enabled /\ pclmulqdq_enabled /\ avx_enabled) /\
       // Expanded key length + precomputed stuff + scratch space (AES-GCM specific)
       B.length ek =
-        Spec.Cipher.Details.vale_xkey_length (cipher_alg_of_supported_alg a) + 176
-  | Hacl_CHACHA20_POLY1305 ->
+        vale_xkey_length (cipher_alg_of_supported_alg a) + 176
+  | Hacl_CHACHA20 ->
       B.length ek = concrete_xkey_length i)
 
 let invariant_loc_in_footprint #a s m =
@@ -88,9 +88,9 @@ let alg_of_state a s =
   let open LowStar.BufferOps in
   let Ek impl _ _ = !*s in
   match impl with
-  | Hacl_CHACHA20_POLY1305 -> CHACHA20_POLY1305
-  | Vale_AES128_GCM -> AES128_GCM
-  | Vale_AES256_GCM -> AES256_GCM
+  | Hacl_CHACHA20 -> CHACHA20_POLY1305
+  | Vale_AES128 -> AES128_GCM
+  | Vale_AES256 -> AES256_GCM
 
 let as_kv #a (Ek _ kv _) =
   G.reveal kv
@@ -99,7 +99,7 @@ let create_in_chacha20_poly1305: create_in_st CHACHA20_POLY1305 = fun r dst k ->
   let open LowStar.BufferOps in
   let h0 = ST.get () in
   let ek = B.malloc r 0uy 32ul in
-  let p = B.malloc r (Ek Hacl_CHACHA20_POLY1305 (G.hide (B.as_seq h0 k)) ek) 1ul in
+  let p = B.malloc r (Ek Hacl_CHACHA20 (G.hide (B.as_seq h0 k)) ek) 1ul in
   B.blit k 0ul ek 0ul 32ul;
   let h1 = ST.get () in
   dst *= p;
@@ -118,9 +118,9 @@ let key_offset (a: aes_gcm_alg) =
 inline_for_extraction
 let concrete_xkey_len (i: impl): Tot (x:UInt32.t { UInt32.v x = concrete_xkey_length i }) =
   match i with
-  | Hacl_CHACHA20_POLY1305 -> 32ul
-  | Vale_AES256_GCM
-  | Vale_AES128_GCM ->
+  | Hacl_CHACHA20 -> 32ul
+  | Vale_AES256
+  | Vale_AES128 ->
       key_offset (supported_alg_of_impl i) + 128ul
 
 inline_for_extraction noextract
@@ -136,16 +136,16 @@ let aes_gcm_keyhash_init (a: aes_gcm_alg): Vale.Wrapper.X64.AEShash.keyhash_init
   | AES256_GCM -> Vale.Wrapper.X64.AEShash.aes256_keyhash_init_stdcall
 
 inline_for_extraction noextract
-let impl_of_aes_gcm_alg (a: aes_gcm_alg): impl =
+let vale_impl_of_aes_gcm_alg (a: aes_gcm_alg): impl =
   match a with
-  | AES128_GCM -> Vale_AES128_GCM
-  | AES256_GCM -> Vale_AES256_GCM
+  | AES128_GCM -> Vale_AES128
+  | AES256_GCM -> Vale_AES256
 
 inline_for_extraction noextract
 let create_in_aes_gcm (a: aes_gcm_alg):
   create_in_st a =
 fun r dst k ->
-  let i = impl_of_aes_gcm_alg a in
+  let i = vale_impl_of_aes_gcm_alg a in
   let h0 = ST.get () in
   let kv: G.erased (kv a) = G.hide (B.as_seq h0 k) in
   let has_aesni = EverCrypt.AutoConfig2.has_aesni () in
@@ -229,7 +229,7 @@ fun s iv iv_len ad ad_len plain plain_len cipher tag ->
   if B.is_null s then
     InvalidKey
   else
-    let i = impl_of_aes_gcm_alg a in
+    let i = vale_impl_of_aes_gcm_alg a in
     // This condition is never satisfied in F* because of the iv_length precondition on iv.
     // We keep it here to be defensive when extracting to C
     if iv_len = 0ul then
@@ -337,11 +337,11 @@ let encrypt #a s iv iv_len ad ad_len plain plain_len cipher tag =
     let open LowStar.BufferOps in
     let Ek i kv ek = !*s in
     match i with
-    | Vale_AES128_GCM ->
+    | Vale_AES128 ->
         encrypt_aes128_gcm s iv iv_len ad ad_len plain plain_len cipher tag
-    | Vale_AES256_GCM ->
+    | Vale_AES256 ->
         encrypt_aes256_gcm s iv iv_len ad ad_len plain plain_len cipher tag
-    | Hacl_CHACHA20_POLY1305 ->
+    | Hacl_CHACHA20 ->
         // This condition is never satisfied in F* because of the iv_length precondition on iv.
         // We keep it here to be defensive when extracting to C
         if iv_len <> 12ul then
@@ -372,7 +372,7 @@ fun s iv iv_len ad ad_len cipher cipher_len tag dst ->
     if iv_len = 0ul then
       InvalidIVLength
     else
-      let i = impl_of_aes_gcm_alg a in
+      let i = vale_impl_of_aes_gcm_alg a in
       let open LowStar.BufferOps in
       let Ek i kv ek = !*s in
         assert (
@@ -484,11 +484,11 @@ let decrypt #a s iv iv_len ad ad_len cipher cipher_len tag dst =
     let open LowStar.BufferOps in
     let Ek i kv ek = !*s in
     match i with
-    | Vale_AES128_GCM ->
+    | Vale_AES128 ->
         decrypt_aes128_gcm s iv iv_len ad ad_len cipher cipher_len tag dst
-    | Vale_AES256_GCM ->
+    | Vale_AES256 ->
         decrypt_aes256_gcm s iv iv_len ad ad_len cipher cipher_len tag dst
-    | Hacl_CHACHA20_POLY1305 ->
+    | Hacl_CHACHA20 ->
         // This condition is never satisfied in F* because of the iv_length precondition on iv.
         // We keep it here to be defensive when extracting to C
         if iv_len <> 12ul then

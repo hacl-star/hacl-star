@@ -147,10 +147,11 @@ let create_in_st (a: alg) =
       | _ -> False)
 
 /// This function takes a pointer to a caller-allocated reference ``dst`` then,
-/// if the algorithm is supported, allocates a fresh state and modifies ``dst``
-/// to point to it. The key-value associated with this can be obtained via ``kv
-/// (B.deref dst)``; as long as ``dst`` is not modified, then the caller can
-/// derive that the ``kv`` remains the same, which will be required for encrypt.
+/// if the algorithm is supported (on this platform), allocates a fresh state
+/// and modifies ``dst`` to point to it. The key-value associated with this can
+/// be obtained via ``kv (B.deref dst)``; as long as ``dst`` is not modified,
+/// then the caller can derive that the ``kv`` remains the same, which will be
+/// required for encrypt.
 (** @type: true
 *)
 val create_in: #a:alg -> create_in_st a
