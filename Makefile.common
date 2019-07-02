@@ -1,7 +1,7 @@
 # This Makefile can be safely included from sub-directories for the purposes of
 # defining the .fst-in targets, as long as the sub-directory defines HACL_HOME.
 
-HACL_HOME 	?= .
+HACL_HOME 	?= $(shell git rev-parse --show-toplevel 2>/dev/null || echo .)
 
 # Put your local configuration (e.g. HACL_HOME, KREMLIN_HOME, etc.) in
 # Makefile.config
