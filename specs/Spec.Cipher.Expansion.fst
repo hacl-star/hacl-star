@@ -1,8 +1,10 @@
-module Spec.AES.Vale
+module Spec.Cipher.Expansion
 
 open Spec.Agile.Cipher
 
 friend Lib.IntTypes
+
+let vale_cipher_alg = a: cipher_alg { a == AES128 \/ a == AES256 }
 
 let vale_alg_of_cipher_alg (a: cipher_alg { a == AES128 \/ a == AES256 }) =
   match a with
@@ -11,6 +13,18 @@ let vale_alg_of_cipher_alg (a: cipher_alg { a == AES128 \/ a == AES256 }) =
 
 #set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 20"
 
+/// Length of Vale expanded keys, i.e. length of the expanded key (per NIST AES
+/// specification) along with other precomputed things.
+val vale_xkey_length (a: vale_cipher_alg): Lib.IntTypes.size_nat
+let vale_xkey_length =
+  function
+  | AES128 -> 176 + 128 // Include the hashed keys here
+  | AES256 -> 240 + 128 // Include the hashed keys here
+
+
+/// And the specification of the Vale key expansion.
+val vale_aes_expansion (a: vale_cipher_alg) (key: key a):
+  Lib.ByteSequence.lbytes (vale_xkey_length a)
 let vale_aes_expansion a k =
   let open Vale.AES.AES_s in
   assert_norm (32 % 4 = 0);
@@ -27,9 +41,24 @@ let vale_aes_expansion a k =
   Seq.append ek hkeys
 
 let _: squash (inversion cipher_alg) = allow_inversion cipher_alg
+let _: squash (inversion impl) = allow_inversion impl
 
-let concrete_xkey_length: cipher_alg -> nat =
+let xkey_length =
   function
   | CHACHA20 -> 32
-  | AES128 -> 176 + 128 // Include the hashed keys here
-  | AES256 -> 240 + 128 // Include the hashed keys here
+  | AES128 -> 176
+  | AES256 -> 240
+
+let concrete_xkey_length (i: impl): nat =
+  match i with
+  | Vale_AES128
+  | Vale_AES256 ->
+      vale_xkey_length (cipher_alg_of_impl i)
+  | Hacl_CHACHA20 -> 32
+
+let concrete_expand i k =
+  match i with
+  | Hacl_CHACHA20 -> k
+  | Vale_AES128 | Vale_AES256 ->
+      let a = cipher_alg_of_impl i in
+      vale_aes_expansion a k

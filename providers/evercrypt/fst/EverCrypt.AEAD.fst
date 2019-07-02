@@ -13,32 +13,36 @@ open FStar.Integers
 open FStar.Int.Cast
 
 open Spec.AEAD
+open Spec.Cipher.Expansion
 
 friend Spec.AEAD
-friend Spec.AES.Vale
+friend Spec.Cipher.Expansion
 
 #set-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0"
 
 /// Defining abstract predicates, invariants, footprint, etc.
 /// ---------------------------------------------------------
 
-/// This type serves several purposes. First, it captures valid combinations:
-/// some pair of ``(alg, provider)`` might not be valid, and for a pair of
-/// ``(alg, provider)``, there may be multiple options. Second, it maintains at
-/// run-time which algorithm we're dealing with, which in turn allows encrypt
-/// and decrypt to take only an erased algorithm.
-type impl =
-| Hacl_CHACHA20_POLY1305
-| Vale_AES128_GCM
-| Vale_AES256_GCM
-
 let _: squash (inversion impl) = allow_inversion impl
+
+/// We now distinguish between an expanded key (as mandated by NIST spec) and a
+/// **concrete** expanded key, which may contain implementation-specific details
+/// and extra precomputations. In the rest of this module, we rely on concrete
+/// expanded keys, which are parameterized over an implementation, instead of
+/// regular expanded keys, which are parameterized over an algorithm. Helpers
+/// allow us to move from one notion to the other.
+
+let supported_alg_of_impl (i: impl): supported_alg =
+  match i with
+  | Vale_AES128 -> AES128_GCM
+  | Vale_AES256 -> AES256_GCM
+  | Hacl_CHACHA20 -> CHACHA20_POLY1305
 
 noeq
 type state_s a =
 | Ek: impl:impl ->
     kv:G.erased (kv a) ->
-    ek:B.buffer UInt8.t ->
+    ek:B.buffer UInt8.t -> // concrete expanded key
     state_s a
 
 let invert_state_s (a: alg): Lemma
@@ -52,28 +56,23 @@ let freeable_s #a (Ek _ _ ek) = B.freeable ek
 
 let footprint_s #a (Ek _ _ ek) = B.loc_addr_of_buffer ek
 
-// Note: once we start having a new implementation of AES-GCM, either the new
-// implementation will have to be compatible with the run-time representation of
-// expanded keys used by Vale, or we'll have to make the Spec.expand take an
-// `impl` instead of an `alg`.
 let invariant_s #a h (Ek i kv ek) =
   is_supported_alg a /\
+  a = supported_alg_of_impl i /\
   B.live h ek /\
-  B.length ek >= ekv_length a /\
-  B.as_seq h (B.gsub ek 0ul (UInt32.uint_to_t (ekv_length a))) `S.equal` expand #a (G.reveal kv) /\ (
+  B.length ek >= concrete_xkey_length i /\
+  B.as_seq h (B.gsub ek 0ul (UInt32.uint_to_t (concrete_xkey_length i)))
+    `S.equal` concrete_expand i (G.reveal kv) /\ (
   match i with
-  | Vale_AES128_GCM ->
-      a = AES128_GCM /\
-      EverCrypt.TargetConfig.x64 /\ Vale.X64.CPU_Features_s.(aesni_enabled /\ pclmulqdq_enabled /\ avx_enabled) /\
-      B.length ek = ekv_length a + 176
+  | Vale_AES128_GCM
   | Vale_AES256_GCM ->
-      a = AES256_GCM /\
-      EverCrypt.TargetConfig.x64 /\ Vale.X64.CPU_Features_s.(aesni_enabled /\ pclmulqdq_enabled /\ avx_enabled) /\
-      B.length ek = ekv_length a + 176
+      EverCrypt.TargetConfig.x64 /\
+      Vale.X64.CPU_Features_s.(aesni_enabled /\ pclmulqdq_enabled /\ avx_enabled) /\
+      // Expanded key length + precomputed stuff + scratch space (AES-GCM specific)
+      B.length ek =
+        Spec.Cipher.Details.vale_xkey_length (cipher_alg_of_supported_alg a) + 176
   | Hacl_CHACHA20_POLY1305 ->
-      a = CHACHA20_POLY1305 /\
-      B.length ek = ekv_length a /\
-      True)
+      B.length ek = concrete_xkey_length i)
 
 let invariant_loc_in_footprint #a s m =
   ()
@@ -117,11 +116,12 @@ let key_offset (a: aes_gcm_alg) =
   | AES256_GCM -> 240ul
 
 inline_for_extraction
-let ekv_len (a: supported_alg): Tot (x:UInt32.t { UInt32.v x = ekv_length a }) =
-  match a with
-  | CHACHA20_POLY1305 -> 32ul
-  | AES128_GCM -> key_offset a + 128ul
-  | AES256_GCM -> key_offset a + 128ul
+let concrete_xkey_len (i: impl): Tot (x:UInt32.t { UInt32.v x = concrete_xkey_length i }) =
+  match i with
+  | Hacl_CHACHA20_POLY1305 -> 32ul
+  | Vale_AES256_GCM
+  | Vale_AES128_GCM ->
+      key_offset (supported_alg_of_impl i) + 128ul
 
 inline_for_extraction noextract
 let aes_gcm_key_expansion (a: aes_gcm_alg): Vale.Wrapper.X64.AES.key_expansion_st (vale_alg_of_alg a) =
@@ -145,13 +145,14 @@ inline_for_extraction noextract
 let create_in_aes_gcm (a: aes_gcm_alg):
   create_in_st a =
 fun r dst k ->
+  let i = impl_of_aes_gcm_alg a in
   let h0 = ST.get () in
   let kv: G.erased (kv a) = G.hide (B.as_seq h0 k) in
   let has_aesni = EverCrypt.AutoConfig2.has_aesni () in
   let has_pclmulqdq = EverCrypt.AutoConfig2.has_pclmulqdq () in
   let has_avx = EverCrypt.AutoConfig2.has_avx() in
   if EverCrypt.TargetConfig.x64 && (has_aesni && has_pclmulqdq && has_avx) then (
-    let ek = B.malloc r 0uy (ekv_len a + 176ul) in
+    let ek = B.malloc r 0uy (concrete_xkey_len i + 176ul) in
     let keys_b = B.sub ek 0ul (key_offset a) in
     let hkeys_b = B.sub ek (key_offset a) 128ul in
     aes_gcm_key_expansion a k keys_b;
@@ -191,9 +192,10 @@ fun r dst k ->
     in lemma_aux_hkeys ();
 
     let h2 = ST.get() in
-    assert (Seq.equal (B.as_seq h2 (B.gsub ek 0ul (ekv_len a))) (expand #a (G.reveal kv)));
+    assert (Seq.equal (B.as_seq h2 (B.gsub ek 0ul (concrete_xkey_len i)))
+      (concrete_expand i (G.reveal kv)));
     B.modifies_only_not_unused_in B.loc_none h0 h2;
-    let p = B.malloc r (Ek (impl_of_aes_gcm_alg a) (G.hide (B.as_seq h0 k)) ek) 1ul in
+    let p = B.malloc r (Ek i (G.hide (B.as_seq h0 k)) ek) 1ul in
     let open LowStar.BufferOps in
     dst *= p;
     let h3 = ST.get() in
@@ -227,103 +229,103 @@ fun s iv iv_len ad ad_len plain plain_len cipher tag ->
   if B.is_null s then
     InvalidKey
   else
+    let i = impl_of_aes_gcm_alg a in
     // This condition is never satisfied in F* because of the iv_length precondition on iv.
-    // We keep it here to be defensive when extracting to C    
+    // We keep it here to be defensive when extracting to C
     if iv_len = 0ul then
       InvalidIVLength
-    else (
-    let open LowStar.BufferOps in
-    let Ek i kv ek = !*s in
-    assert (
-      let k = G.reveal kv in
-      let k_nat = Vale.Def.Words.Seq_s.seq_uint8_to_seq_nat8 k in
-      let k_w = Vale.Def.Words.Seq_s.seq_nat8_to_seq_nat32_LE k_nat in
-      Vale.AES.AES_s.is_aes_key_LE (vale_alg_of_alg a) k_w);
-
-    push_frame();
-    let scratch_b = B.sub ek (ekv_len a) 176ul in
-
-    let ek = B.sub ek 0ul (ekv_len a) in
-    let keys_b = B.sub ek 0ul (key_offset a) in
-    let hkeys_b = B.sub ek (key_offset a) 128ul in
-
-    let h0 = get() in
-
-    // The iv can be arbitrary length, hence we need to allocate a new one to perform the hashing
-    let tmp_iv = B.alloca 0uy 16ul in
-
-    // There is no SMTPat on le_bytes_to_seq_quad32_to_bytes and the converse,
-    // so we need an explicit lemma
-    let lemma_hkeys_reqs () : Lemma
-      (let k = G.reveal kv in
-      let k_nat = Vale.Def.Words.Seq_s.seq_uint8_to_seq_nat8 k in
-      let k_w = Vale.Def.Words.Seq_s.seq_nat8_to_seq_nat32_LE k_nat in
-      Vale.AES.OptPublic.hkeys_reqs_pub
-        (Vale.Def.Types_s.le_bytes_to_seq_quad32 (Vale.Def.Words.Seq_s.seq_uint8_to_seq_nat8 (B.as_seq h0 hkeys_b)))
-        (Vale.Def.Types_s.reverse_bytes_quad32 (Vale.AES.AES_s.aes_encrypt_LE (vale_alg_of_alg a) k_w (Vale.Def.Words_s.Mkfour 0 0 0 0))))
-    = let k = G.reveal kv in
+    else
+      let open LowStar.BufferOps in
+      let Ek i kv ek = !*s in
+      assert (
+        let k = G.reveal kv in
         let k_nat = Vale.Def.Words.Seq_s.seq_uint8_to_seq_nat8 k in
         let k_w = Vale.Def.Words.Seq_s.seq_nat8_to_seq_nat32_LE k_nat in
-        let hkeys_quad = Vale.AES.OptPublic.get_hkeys_reqs (Vale.Def.Types_s.reverse_bytes_quad32 (
-          Vale.AES.AES_s.aes_encrypt_LE (vale_alg_of_alg a) k_w (Vale.Def.Words_s.Mkfour 0 0 0 0))) in
-        let hkeys = Vale.Def.Words.Seq_s.seq_nat8_to_seq_uint8 (Vale.Def.Types_s.le_seq_quad32_to_bytes hkeys_quad) in
-        assert (Seq.equal (B.as_seq h0 hkeys_b) hkeys);
-        calc (==) {
-          Vale.Def.Types_s.le_bytes_to_seq_quad32 (Vale.Def.Words.Seq_s.seq_uint8_to_seq_nat8 hkeys);
-          (==) { Vale.Arch.Types.le_bytes_to_seq_quad32_to_bytes hkeys_quad }
-          hkeys_quad;
-        }
+        Vale.AES.AES_s.is_aes_key_LE (vale_alg_of_alg a) k_w);
 
-    in lemma_hkeys_reqs ();
+      push_frame();
+      let scratch_b = B.sub ek (concrete_xkey_len i) 176ul in
 
-    // We perform the hashing of the iv. The extra buffer and the hashed iv are the same
-    Vale.Wrapper.X64.GCM_IV.compute_iv (vale_alg_of_alg a) 
-    (let k = G.reveal kv in
-      let k_nat = Vale.Def.Words.Seq_s.seq_uint8_to_seq_nat8 k in
-      let k_w = Vale.Def.Words.Seq_s.seq_nat8_to_seq_nat32_LE k_nat in G.hide k_w ) 
-      iv iv_len 
-      tmp_iv tmp_iv 
-      hkeys_b;
+      let ek = B.sub ek 0ul (concrete_xkey_len i) in
+      let keys_b = B.sub ek 0ul (key_offset a) in
+      let hkeys_b = B.sub ek (key_offset a) 128ul in
 
-    let h0 = get() in
+      let h0 = get() in
 
-    aes_gcm_encrypt a
+      // The iv can be arbitrary length, hence we need to allocate a new one to perform the hashing
+      let tmp_iv = B.alloca 0uy 16ul in
+
+      // There is no SMTPat on le_bytes_to_seq_quad32_to_bytes and the converse,
+      // so we need an explicit lemma
+      let lemma_hkeys_reqs () : Lemma
+        (let k = G.reveal kv in
+        let k_nat = Vale.Def.Words.Seq_s.seq_uint8_to_seq_nat8 k in
+        let k_w = Vale.Def.Words.Seq_s.seq_nat8_to_seq_nat32_LE k_nat in
+        Vale.AES.OptPublic.hkeys_reqs_pub
+          (Vale.Def.Types_s.le_bytes_to_seq_quad32 (Vale.Def.Words.Seq_s.seq_uint8_to_seq_nat8 (B.as_seq h0 hkeys_b)))
+          (Vale.Def.Types_s.reverse_bytes_quad32 (Vale.AES.AES_s.aes_encrypt_LE (vale_alg_of_alg a) k_w (Vale.Def.Words_s.Mkfour 0 0 0 0))))
+      = let k = G.reveal kv in
+          let k_nat = Vale.Def.Words.Seq_s.seq_uint8_to_seq_nat8 k in
+          let k_w = Vale.Def.Words.Seq_s.seq_nat8_to_seq_nat32_LE k_nat in
+          let hkeys_quad = Vale.AES.OptPublic.get_hkeys_reqs (Vale.Def.Types_s.reverse_bytes_quad32 (
+            Vale.AES.AES_s.aes_encrypt_LE (vale_alg_of_alg a) k_w (Vale.Def.Words_s.Mkfour 0 0 0 0))) in
+          let hkeys = Vale.Def.Words.Seq_s.seq_nat8_to_seq_uint8 (Vale.Def.Types_s.le_seq_quad32_to_bytes hkeys_quad) in
+          assert (Seq.equal (B.as_seq h0 hkeys_b) hkeys);
+          calc (==) {
+            Vale.Def.Types_s.le_bytes_to_seq_quad32 (Vale.Def.Words.Seq_s.seq_uint8_to_seq_nat8 hkeys);
+            (==) { Vale.Arch.Types.le_bytes_to_seq_quad32_to_bytes hkeys_quad }
+            hkeys_quad;
+          }
+
+      in lemma_hkeys_reqs ();
+
+      // We perform the hashing of the iv. The extra buffer and the hashed iv are the same
+      Vale.Wrapper.X64.GCM_IV.compute_iv (vale_alg_of_alg a)
       (let k = G.reveal kv in
-      let k_nat = Vale.Def.Words.Seq_s.seq_uint8_to_seq_nat8 k in
-      let k_w = Vale.Def.Words.Seq_s.seq_nat8_to_seq_nat32_LE k_nat in G.hide k_w)
-      (Ghost.hide (Vale.Def.Words.Seq_s.seq_uint8_to_seq_nat8 (B.as_seq h0 iv)))
-      plain
-      (uint32_to_uint64 plain_len)
-      ad
-      (uint32_to_uint64 ad_len)
-      tmp_iv
-      cipher
-      tag
-      keys_b
-      hkeys_b
-      scratch_b;
+        let k_nat = Vale.Def.Words.Seq_s.seq_uint8_to_seq_nat8 k in
+        let k_w = Vale.Def.Words.Seq_s.seq_nat8_to_seq_nat32_LE k_nat in G.hide k_w )
+        iv iv_len
+        tmp_iv tmp_iv
+        hkeys_b;
 
-    let h1 = get() in
+      let h0 = get() in
 
-    // This assert is needed for z3 to pick up sequence equality for ciphertext
-    // and tag. It could be avoided if the spec returned both instead of appending them
-    assert (
-      let kv_nat = Vale.Def.Words.Seq_s.seq_uint8_to_seq_nat8 (G.reveal kv) in
-      let iv_nat = Vale.Def.Words.Seq_s.seq_uint8_to_seq_nat8 (B.as_seq h0 iv) in
-      // `ad` is called `auth` in Vale world; "additional data", "authenticated
-      // data", potato, potato
-      let ad_nat = Vale.Def.Words.Seq_s.seq_uint8_to_seq_nat8 (B.as_seq h0 ad) in
-      let plain_nat = Vale.Def.Words.Seq_s.seq_uint8_to_seq_nat8 (B.as_seq h0 plain) in
-      let cipher_nat, tag_nat =
-        Vale.AES.GCM_s.gcm_encrypt_LE (vale_alg_of_alg a) kv_nat iv_nat plain_nat ad_nat
-      in
-      Seq.equal (B.as_seq h1 cipher) (Vale.Def.Words.Seq_s.seq_nat8_to_seq_uint8 cipher_nat) /\
-      Seq.equal (B.as_seq h1 tag) (Vale.Def.Words.Seq_s.seq_nat8_to_seq_uint8 tag_nat));
+      aes_gcm_encrypt a
+        (let k = G.reveal kv in
+        let k_nat = Vale.Def.Words.Seq_s.seq_uint8_to_seq_nat8 k in
+        let k_w = Vale.Def.Words.Seq_s.seq_nat8_to_seq_nat32_LE k_nat in G.hide k_w)
+        (Ghost.hide (Vale.Def.Words.Seq_s.seq_uint8_to_seq_nat8 (B.as_seq h0 iv)))
+        plain
+        (uint32_to_uint64 plain_len)
+        ad
+        (uint32_to_uint64 ad_len)
+        tmp_iv
+        cipher
+        tag
+        keys_b
+        hkeys_b
+        scratch_b;
+
+      let h1 = get() in
+
+      // This assert is needed for z3 to pick up sequence equality for ciphertext
+      // and tag. It could be avoided if the spec returned both instead of appending them
+      assert (
+        let kv_nat = Vale.Def.Words.Seq_s.seq_uint8_to_seq_nat8 (G.reveal kv) in
+        let iv_nat = Vale.Def.Words.Seq_s.seq_uint8_to_seq_nat8 (B.as_seq h0 iv) in
+        // `ad` is called `auth` in Vale world; "additional data", "authenticated
+        // data", potato, potato
+        let ad_nat = Vale.Def.Words.Seq_s.seq_uint8_to_seq_nat8 (B.as_seq h0 ad) in
+        let plain_nat = Vale.Def.Words.Seq_s.seq_uint8_to_seq_nat8 (B.as_seq h0 plain) in
+        let cipher_nat, tag_nat =
+          Vale.AES.GCM_s.gcm_encrypt_LE (vale_alg_of_alg a) kv_nat iv_nat plain_nat ad_nat
+        in
+        Seq.equal (B.as_seq h1 cipher) (Vale.Def.Words.Seq_s.seq_nat8_to_seq_uint8 cipher_nat) /\
+        Seq.equal (B.as_seq h1 tag) (Vale.Def.Words.Seq_s.seq_nat8_to_seq_uint8 tag_nat));
 
 
-    pop_frame();
-    Success
-    )
+      pop_frame();
+      Success
 
 let encrypt_aes128_gcm: encrypt_st AES128_GCM = encrypt_aes_gcm AES128_GCM
 let encrypt_aes256_gcm: encrypt_st AES256_GCM = encrypt_aes_gcm AES256_GCM
@@ -341,7 +343,7 @@ let encrypt #a s iv iv_len ad ad_len plain plain_len cipher tag =
         encrypt_aes256_gcm s iv iv_len ad ad_len plain plain_len cipher tag
     | Hacl_CHACHA20_POLY1305 ->
         // This condition is never satisfied in F* because of the iv_length precondition on iv.
-        // We keep it here to be defensive when extracting to C    
+        // We keep it here to be defensive when extracting to C
         if iv_len <> 12ul then
           InvalidIVLength
         else begin
@@ -369,108 +371,108 @@ fun s iv iv_len ad ad_len cipher cipher_len tag dst ->
     // We keep it here to be defensive when extracting to C
     if iv_len = 0ul then
       InvalidIVLength
-    else (
-    let open LowStar.BufferOps in
-    let Ek i kv ek = !*s in
-      assert (
-        let k = G.reveal kv in
-        let k_nat = Vale.Def.Words.Seq_s.seq_uint8_to_seq_nat8 k in
-        let k_w = Vale.Def.Words.Seq_s.seq_nat8_to_seq_nat32_LE k_nat in
-        Vale.AES.AES_s.is_aes_key_LE (vale_alg_of_alg a) k_w);
+    else
+      let i = impl_of_aes_gcm_alg a in
+      let open LowStar.BufferOps in
+      let Ek i kv ek = !*s in
+        assert (
+          let k = G.reveal kv in
+          let k_nat = Vale.Def.Words.Seq_s.seq_uint8_to_seq_nat8 k in
+          let k_w = Vale.Def.Words.Seq_s.seq_nat8_to_seq_nat32_LE k_nat in
+          Vale.AES.AES_s.is_aes_key_LE (vale_alg_of_alg a) k_w);
 
-      push_frame();
-      let scratch_b = B.sub ek (ekv_len a) 176ul in
+        push_frame();
+        let scratch_b = B.sub ek (concrete_xkey_len i) 176ul in
 
-      let ek = B.sub ek 0ul (ekv_len a) in
-      let keys_b = B.sub ek 0ul (key_offset a) in
-      let hkeys_b = B.sub ek (key_offset a) 128ul in
+        let ek = B.sub ek 0ul (concrete_xkey_len i) in
+        let keys_b = B.sub ek 0ul (key_offset a) in
+        let hkeys_b = B.sub ek (key_offset a) 128ul in
 
-      let h0 = get() in
+        let h0 = get() in
 
-      // The iv can be arbitrary length, hence we need to allocate a new one to perform the hashing
-      let tmp_iv = B.alloca 0uy 16ul in
+        // The iv can be arbitrary length, hence we need to allocate a new one to perform the hashing
+        let tmp_iv = B.alloca 0uy 16ul in
 
-      // There is no SMTPat on le_bytes_to_seq_quad32_to_bytes and the converse,
-      // so we need an explicit lemma
-      let lemma_hkeys_reqs () : Lemma
+        // There is no SMTPat on le_bytes_to_seq_quad32_to_bytes and the converse,
+        // so we need an explicit lemma
+        let lemma_hkeys_reqs () : Lemma
+          (let k = G.reveal kv in
+          let k_nat = Vale.Def.Words.Seq_s.seq_uint8_to_seq_nat8 k in
+          let k_w = Vale.Def.Words.Seq_s.seq_nat8_to_seq_nat32_LE k_nat in
+          Vale.AES.OptPublic.hkeys_reqs_pub
+            (Vale.Def.Types_s.le_bytes_to_seq_quad32 (Vale.Def.Words.Seq_s.seq_uint8_to_seq_nat8 (B.as_seq h0 hkeys_b)))
+            (Vale.Def.Types_s.reverse_bytes_quad32 (Vale.AES.AES_s.aes_encrypt_LE (vale_alg_of_alg a) k_w (Vale.Def.Words_s.Mkfour 0 0 0 0))))
+        = let k = G.reveal kv in
+              let k_nat = Vale.Def.Words.Seq_s.seq_uint8_to_seq_nat8 k in
+              let k_w = Vale.Def.Words.Seq_s.seq_nat8_to_seq_nat32_LE k_nat in
+              let hkeys_quad = Vale.AES.OptPublic.get_hkeys_reqs (Vale.Def.Types_s.reverse_bytes_quad32 (
+              Vale.AES.AES_s.aes_encrypt_LE (vale_alg_of_alg a) k_w (Vale.Def.Words_s.Mkfour 0 0 0 0))) in
+              let hkeys = Vale.Def.Words.Seq_s.seq_nat8_to_seq_uint8 (Vale.Def.Types_s.le_seq_quad32_to_bytes hkeys_quad) in
+              assert (Seq.equal (B.as_seq h0 hkeys_b) hkeys);
+              calc (==) {
+              Vale.Def.Types_s.le_bytes_to_seq_quad32 (Vale.Def.Words.Seq_s.seq_uint8_to_seq_nat8 hkeys);
+              (==) { Vale.Arch.Types.le_bytes_to_seq_quad32_to_bytes hkeys_quad }
+              hkeys_quad;
+              }
+
+        in lemma_hkeys_reqs ();
+
+        // We perform the hashing of the iv. The extra buffer and the hashed iv are the same
+        Vale.Wrapper.X64.GCM_IV.compute_iv (vale_alg_of_alg a)
         (let k = G.reveal kv in
-        let k_nat = Vale.Def.Words.Seq_s.seq_uint8_to_seq_nat8 k in
-        let k_w = Vale.Def.Words.Seq_s.seq_nat8_to_seq_nat32_LE k_nat in
-        Vale.AES.OptPublic.hkeys_reqs_pub
-          (Vale.Def.Types_s.le_bytes_to_seq_quad32 (Vale.Def.Words.Seq_s.seq_uint8_to_seq_nat8 (B.as_seq h0 hkeys_b)))
-          (Vale.Def.Types_s.reverse_bytes_quad32 (Vale.AES.AES_s.aes_encrypt_LE (vale_alg_of_alg a) k_w (Vale.Def.Words_s.Mkfour 0 0 0 0))))
-      = let k = G.reveal kv in
-            let k_nat = Vale.Def.Words.Seq_s.seq_uint8_to_seq_nat8 k in
-            let k_w = Vale.Def.Words.Seq_s.seq_nat8_to_seq_nat32_LE k_nat in
-            let hkeys_quad = Vale.AES.OptPublic.get_hkeys_reqs (Vale.Def.Types_s.reverse_bytes_quad32 (
-            Vale.AES.AES_s.aes_encrypt_LE (vale_alg_of_alg a) k_w (Vale.Def.Words_s.Mkfour 0 0 0 0))) in
-            let hkeys = Vale.Def.Words.Seq_s.seq_nat8_to_seq_uint8 (Vale.Def.Types_s.le_seq_quad32_to_bytes hkeys_quad) in
-            assert (Seq.equal (B.as_seq h0 hkeys_b) hkeys);
-            calc (==) {
-            Vale.Def.Types_s.le_bytes_to_seq_quad32 (Vale.Def.Words.Seq_s.seq_uint8_to_seq_nat8 hkeys);
-            (==) { Vale.Arch.Types.le_bytes_to_seq_quad32_to_bytes hkeys_quad }
-            hkeys_quad;
-            }
+          let k_nat = Vale.Def.Words.Seq_s.seq_uint8_to_seq_nat8 k in
+          let k_w = Vale.Def.Words.Seq_s.seq_nat8_to_seq_nat32_LE k_nat in G.hide k_w )
+          iv iv_len
+          tmp_iv tmp_iv
+          hkeys_b;
 
-      in lemma_hkeys_reqs ();
+        let r = aes_gcm_decrypt a
+          (let k = G.reveal kv in
+          let k_nat = Vale.Def.Words.Seq_s.seq_uint8_to_seq_nat8 k in
+          let k_w = Vale.Def.Words.Seq_s.seq_nat8_to_seq_nat32_LE k_nat in G.hide k_w)
+          (Ghost.hide (Vale.Def.Words.Seq_s.seq_uint8_to_seq_nat8 (B.as_seq h0 iv)))
+          cipher
+          (uint32_to_uint64 cipher_len)
+          ad
+          (uint32_to_uint64 ad_len)
+          tmp_iv
+          dst
+          tag
+          keys_b
+          hkeys_b
+          scratch_b in
 
-      // We perform the hashing of the iv. The extra buffer and the hashed iv are the same
-      Vale.Wrapper.X64.GCM_IV.compute_iv (vale_alg_of_alg a) 
-      (let k = G.reveal kv in
-        let k_nat = Vale.Def.Words.Seq_s.seq_uint8_to_seq_nat8 k in
-        let k_w = Vale.Def.Words.Seq_s.seq_nat8_to_seq_nat32_LE k_nat in G.hide k_w ) 
-        iv iv_len
-        tmp_iv tmp_iv 
-        hkeys_b;
+        let h1 = get() in
 
-      let r = aes_gcm_decrypt a
-        (let k = G.reveal kv in
-        let k_nat = Vale.Def.Words.Seq_s.seq_uint8_to_seq_nat8 k in
-        let k_w = Vale.Def.Words.Seq_s.seq_nat8_to_seq_nat32_LE k_nat in G.hide k_w)
-        (Ghost.hide (Vale.Def.Words.Seq_s.seq_uint8_to_seq_nat8 (B.as_seq h0 iv)))
-        cipher
-        (uint32_to_uint64 cipher_len)
-        ad
-        (uint32_to_uint64 ad_len)
-        tmp_iv
-        dst
-        tag
-        keys_b
-        hkeys_b 
-        scratch_b in
+        // This assert is needed for z3 to pick up sequence equality for ciphertext
+        // It could be avoided if the spec returned both instead of appending them
+        assert (
+          let kv_nat = Vale.Def.Words.Seq_s.seq_uint8_to_seq_nat8 (G.reveal kv) in
+          let iv_nat = Vale.Def.Words.Seq_s.seq_uint8_to_seq_nat8 (B.as_seq h0 iv) in
+          // `ad` is called `auth` in Vale world; "additional data", "authenticated
+          // data", potato, potato
+          let ad_nat = Vale.Def.Words.Seq_s.seq_uint8_to_seq_nat8 (B.as_seq h0 ad) in
+          let cipher_nat = Vale.Def.Words.Seq_s.seq_uint8_to_seq_nat8 (B.as_seq h0 cipher) in
+          let tag_nat = Vale.Def.Words.Seq_s.seq_uint8_to_seq_nat8 (B.as_seq h0 tag) in
+          let plain_nat, success =
+            Vale.AES.GCM_s.gcm_decrypt_LE (vale_alg_of_alg a) kv_nat iv_nat cipher_nat ad_nat tag_nat
+          in
+          Seq.equal (B.as_seq h1 dst) (Vale.Def.Words.Seq_s.seq_nat8_to_seq_uint8 plain_nat) /\
+          (UInt64.v r = 0) == success);
 
-      let h1 = get() in
+        assert (
+          let kv = G.reveal kv in
+          let cipher_tag = B.as_seq h0 cipher `S.append` B.as_seq h0 tag in
+          Seq.equal (Seq.slice cipher_tag (S.length cipher_tag - tag_length a) (S.length cipher_tag))
+            (B.as_seq h0 tag) /\
+          Seq.equal (Seq.slice cipher_tag 0 (S.length cipher_tag - tag_length a)) (B.as_seq h0 cipher));
 
-      // This assert is needed for z3 to pick up sequence equality for ciphertext
-      // It could be avoided if the spec returned both instead of appending them
-      assert (
-        let kv_nat = Vale.Def.Words.Seq_s.seq_uint8_to_seq_nat8 (G.reveal kv) in
-        let iv_nat = Vale.Def.Words.Seq_s.seq_uint8_to_seq_nat8 (B.as_seq h0 iv) in
-        // `ad` is called `auth` in Vale world; "additional data", "authenticated
-        // data", potato, potato
-        let ad_nat = Vale.Def.Words.Seq_s.seq_uint8_to_seq_nat8 (B.as_seq h0 ad) in
-        let cipher_nat = Vale.Def.Words.Seq_s.seq_uint8_to_seq_nat8 (B.as_seq h0 cipher) in
-        let tag_nat = Vale.Def.Words.Seq_s.seq_uint8_to_seq_nat8 (B.as_seq h0 tag) in
-        let plain_nat, success =
-          Vale.AES.GCM_s.gcm_decrypt_LE (vale_alg_of_alg a) kv_nat iv_nat cipher_nat ad_nat tag_nat
-        in
-        Seq.equal (B.as_seq h1 dst) (Vale.Def.Words.Seq_s.seq_nat8_to_seq_uint8 plain_nat) /\
-        (UInt64.v r = 0) == success);
+        pop_frame();
 
-      assert (
-        let kv = G.reveal kv in
-        let cipher_tag = B.as_seq h0 cipher `S.append` B.as_seq h0 tag in
-        Seq.equal (Seq.slice cipher_tag (S.length cipher_tag - tag_length a) (S.length cipher_tag))
-          (B.as_seq h0 tag) /\
-        Seq.equal (Seq.slice cipher_tag 0 (S.length cipher_tag - tag_length a)) (B.as_seq h0 cipher));
-
-      pop_frame();
-
-      if r = 0uL then
-        Success
-      else
-        AuthenticationFailure
-      )
+        if r = 0uL then
+          Success
+        else
+          AuthenticationFailure
 
 let decrypt_aes128_gcm: decrypt_st AES128_GCM = decrypt_aes_gcm AES128_GCM
 let decrypt_aes256_gcm: decrypt_st AES256_GCM = decrypt_aes_gcm AES256_GCM

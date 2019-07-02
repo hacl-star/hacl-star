@@ -14,14 +14,6 @@ let uint8 = Lib.IntTypes.uint8
 let uint32 = Lib.IntTypes.uint32
 let buffer8 = B.buffer uint8
 
-/// Some implementations may choose to reserve more space in the expanded key
-/// for other pre-computations.
-let concrete_xkey_length: cipher_alg -> size_nat =
-  function
-  | CHACHA20 -> 32
-  | AES128 -> 176 + 128 // Include the hashed keys here
-  | AES256 -> 240 + 128 // Include the hashed keys here
-
 
 let expand (#a: supported_alg) (k: kv a): ekv a =
   match a with
