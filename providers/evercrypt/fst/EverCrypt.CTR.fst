@@ -162,3 +162,19 @@ let create_in a r dst k iv iv_len c =
         (**) B.modifies_only_not_unused_in B.(loc_buffer dst) h0 h4;
 
         Success
+
+let init a p k iv iv_len c =
+  let State i _ iv' _ ek _ = !*p in
+  match i with
+  | Vale_AES128 | Vale_AES256 ->
+        (**) let h0 = ST.get () in
+        (**) let g_iv = G.hide (B.as_seq h0 iv) in
+        (**) let g_key: G.erased (key (cipher_alg_of_impl i)) =
+          G.hide (B.as_seq h0 (k <: B.buffer uint8)) in
+
+        vale_expand i k ek;
+        B.blit iv 0ul iv' 0ul iv_len;
+        // TODO: two in-place updates
+        p *= (State i g_iv iv' g_key ek c)
+
+  | _ -> admit ()
