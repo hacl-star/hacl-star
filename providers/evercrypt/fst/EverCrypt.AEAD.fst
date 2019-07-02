@@ -126,47 +126,10 @@ fun r dst k ->
   let has_avx = EverCrypt.AutoConfig2.has_avx() in
   if EverCrypt.TargetConfig.x64 && (has_aesni && has_pclmulqdq && has_avx) then (
     let ek = B.malloc r 0uy (concrete_xkey_len i + 176ul) in
-    let keys_b = B.sub ek 0ul (key_offset i) in
-    let hkeys_b = B.sub ek (key_offset i) 128ul in
-    aes_gcm_key_expansion i k keys_b;
-    aes_gcm_keyhash_init i
-      (let k = G.reveal kv in
-      let k_nat = Vale.Def.Words.Seq_s.seq_uint8_to_seq_nat8 k in
-      let k_w = Vale.Def.Words.Seq_s.seq_nat8_to_seq_nat32_LE k_nat in G.hide k_w)
-      keys_b hkeys_b;
-    let h1 = ST.get() in
 
-    // We need to prove that we are copying the
-    // expanded key into it. In particular, that the hashed part corresponds to the spec
-    let lemma_aux_hkeys () : Lemma
-      (let k = G.reveal kv in
-        let k_nat = Vale.Def.Words.Seq_s.seq_uint8_to_seq_nat8 k in
-        let k_w = Vale.Def.Words.Seq_s.seq_nat8_to_seq_nat32_LE k_nat in
-        let hkeys_quad = Vale.AES.OptPublic.get_hkeys_reqs (Vale.Def.Types_s.reverse_bytes_quad32 (
-          Vale.AES.AES_s.aes_encrypt_LE (vale_alg_of_alg a) k_w (Vale.Def.Words_s.Mkfour 0 0 0 0))) in
-        let hkeys = Vale.Def.Words.Seq_s.seq_nat8_to_seq_uint8 (Vale.Def.Types_s.le_seq_quad32_to_bytes hkeys_quad) in
-        Seq.equal (B.as_seq h1 hkeys_b) hkeys)
-        = let k = G.reveal kv in
-          let k_nat = Vale.Def.Words.Seq_s.seq_uint8_to_seq_nat8 k in
-          let k_w = Vale.Def.Words.Seq_s.seq_nat8_to_seq_nat32_LE k_nat in
-          let hkeys_quad = Vale.AES.OptPublic.get_hkeys_reqs (Vale.Def.Types_s.reverse_bytes_quad32 (
-            Vale.AES.AES_s.aes_encrypt_LE (vale_alg_of_alg a) k_w (Vale.Def.Words_s.Mkfour 0 0 0 0))) in
-          let hkeys = Vale.Def.Words.Seq_s.seq_nat8_to_seq_uint8 (Vale.Def.Types_s.le_seq_quad32_to_bytes hkeys_quad) in
-        Vale.AES.Gcm_simplify.le_bytes_to_seq_quad32_uint8_to_nat8_length (B.as_seq h1 hkeys_b);
-        assert_norm (128 / 16 = 8);
-        // These two are equal
-        Vale.AES.OptPublic.get_hkeys_reqs_injective
-          (Vale.Def.Types_s.reverse_bytes_quad32 (
-            Vale.AES.AES_s.aes_encrypt_LE (vale_alg_of_alg a) k_w (Vale.Def.Words_s.Mkfour 0 0 0 0)))
-          hkeys_quad
-          (Vale.Def.Types_s.le_bytes_to_seq_quad32 (Vale.Def.Words.Seq_s.seq_uint8_to_seq_nat8 (B.as_seq h1 hkeys_b)));
-        Vale.Arch.Types.le_seq_quad32_to_bytes_to_seq_quad32 (Vale.Def.Words.Seq_s.seq_uint8_to_seq_nat8 (B.as_seq h1 hkeys_b))
+    vale_expand i k ek;
 
-    in lemma_aux_hkeys ();
-
-    let h2 = ST.get() in
-    assert (Seq.equal (B.as_seq h2 (B.gsub ek 0ul (concrete_xkey_len i)))
-      (concrete_expand i (G.reveal kv)));
+    let h2 = ST.get () in
     B.modifies_only_not_unused_in B.loc_none h0 h2;
     let p = B.malloc r (Ek i (G.hide (B.as_seq h0 k)) ek) 1ul in
     let open LowStar.BufferOps in
