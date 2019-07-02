@@ -28,7 +28,13 @@ inline_for_extraction
 let size_word : size_t = size (Spec.size_word Spec.Blake2B)
 
 inline_for_extraction
-let size_block : size_t = (size Spec.size_block_w) *. size_word
+let size_block : x:size_t{v x = Spec.size_block Spec.Blake2B /\ v x <= Spec.max_limb Spec.Blake2B} = (size Spec.size_block_w) *. size_word
+
+noextract inline_for_extraction
+let rounds_nat: size_nat = Spec.rounds Spec.Blake2.Blake2B
+
+noextract inline_for_extraction
+let rounds_t:x:size_t{x == size rounds_nat} = size (Spec.rounds Spec.Blake2.Blake2B)
 
 
 /// Constants
@@ -176,7 +182,7 @@ let blake2_mixing wv a b c d x y =
   g1 wv b c r3
 
 
-val blake2_round1 : wv:vector_wp -> m:block_wp -> i:size_t{v i <= 9} ->
+val blake2_round1 : wv:vector_wp -> m:block_wp -> i:size_t{v i <= rounds_nat -1} ->
   Stack unit
     (requires (fun h -> live h wv /\ live h m
                   /\ disjoint wv m))
@@ -201,7 +207,7 @@ let blake2_round1 wv m i =
   blake2_mixing wv (size 3) (size 7) (size 11) (size 15) m.(s6) m.(s7)
 
 
-val blake2_round2 : wv:vector_wp -> m:block_wp -> i:size_t{v i <= 9} ->
+val blake2_round2 : wv:vector_wp -> m:block_wp -> i:size_t{v i <= rounds_nat - 1} ->
   Stack unit
     (requires (fun h -> live h wv /\ live h m
                   /\ disjoint wv m))
@@ -226,7 +232,7 @@ let blake2_round2 wv m i =
   blake2_mixing wv (size 3) (size 4) (size  9) (size 14) m.(s6) m.(s7)
 
 
-val blake2_round: wv:vector_wp -> m:block_wp -> i:size_t{v i <= 9} ->
+val blake2_round: wv:vector_wp -> m:block_wp -> i:size_t{v i <= rounds_nat - 1} ->
   Stack unit
     (requires (fun h -> live h wv /\ live h m
                    /\ disjoint wv m))
@@ -266,14 +272,7 @@ let blake2_compress1 wv s m offset flag =
  (if flag then wv.(size 14) <- wv_14)
 
 
-noextract inline_for_extraction
-let rounds_nat: size_nat = Spec.rounds Spec.Blake2.Blake2B
-
-noextract inline_for_extraction
-let rounds_t:x:size_t{x == size rounds_nat} = size (Spec.rounds Spec.Blake2.Blake2B)
-
-#reset-options "--z3rlimit 75 --max_ifuel 0 --max_fuel 0"
-
+#reset-options "--z3rlimit 100 --max_ifuel 1 --max_fuel 1"
 
 val blake2_compress2 :
     wv: vector_wp
@@ -290,11 +289,8 @@ let blake2_compress2 wv m =
   let spec h = Spec.blake2_round Spec.Blake2B h.[|m|] in
   loop1 h0 rounds_t wv spec
   (fun i ->
-    admit();
     Loops.unfold_repeati rounds_nat (spec h0) h0.[|wv|] (v i);
-    blake2_round wv m i;
-    let h1 = ST.get() in
-    assert (modifies1 wv h0 h1))
+    blake2_round wv m i)
 
 
 val blake2_compress3_inner :
@@ -368,7 +364,6 @@ val blake2b_update_block:
                          /\ h1.[|hash|] == Spec.blake2_update_block Spec.Blake2B (uint_v prev) h0.[|d|] h0.[|hash|]))
 
 let blake2b_update_block hash prev d =
-  (admit (); uintv_extensionality prev (u128 (uint_v prev)));
   let h0 = ST.get () in
   [@inline_let]
   let spec _ h1 = live h1 hash /\ h1.[|hash|] == Spec.blake2_update_block Spec.Blake2B (uint_v prev) h0.[|d|] h0.[|hash|] in
@@ -410,13 +405,82 @@ val blake2b_init_branching:
                        let key_block1: Spec.block_s Spec.Blake2B = Seq.update_sub h0.[|key_block|] 0 (v kk) h0.[|k|] in
                        h1.[|hash|] == Spec.blake2_update_block Spec.Blake2B (Spec.size_block Spec.Blake2B) key_block1 h0.[|hash|])))
 
+
+val lemma_value: #t:inttype -> u:uint_t t PUB{uint_v u == uint_v size_block} -> Lemma
+  (uint_v u == uint_v size_block
+  /\ uint_v u <= Spec.max_limb Spec.Blake2B
+  )
+let lemma_value #t u = ()
+
+
+
+val lemma_value2: #t:inttype -> u:uint_t t PUB{uint_v u == uint_v size_block} -> Lemma
+  (uint_v u == uint_v size_block
+  /\ uint_v u <= Spec.max_limb Spec.Blake2B)
+let lemma_value2 #t u = ()
+
+val lemma_value3: #t:inttype -> u:uint_t t SEC{uint_v u == uint_v size_block} -> Lemma
+  (uint_v u == uint_v size_block
+  /\ uint_v u <= Spec.max_limb Spec.Blake2B)
+let lemma_value3 #t u = ()
+
+val lemma_value4: #t:inttype -> u:Spec.word_t Spec.Blake2.Blake2B{uint_v u == uint_v size_block
+                                                               /\ uint_v u <= Spec.max_limb Spec.Blake2B} ->
+  Lemma (
+    let x = Spec.word_to_limb Spec.Blake2B u in
+    uint_v x == uint_v size_block)
+
+let lemma_value4 #t u = ()
+
+
+val lemma_value5: #t:inttype -> u:uint_t (Spec.wt Spec.Blake2B) SEC{uint_v u <= Spec.max_limb Spec.Blake2B
+                                                        /\ uint_v u == uint_v size_block} ->
+  Lemma (
+    let x = Spec.word_to_limb Spec.Blake2B u in
+    uint_v x == uint_v size_block)
+
+let lemma_value5 #t u = ()
+
+
+val lemma_value6: u:uint_t (Spec.wt Spec.Blake2B) PUB{uint_v u <= Spec.max_limb Spec.Blake2B
+                                                        /\ uint_v u == Spec.size_block Spec.Blake2B} ->
+  Lemma (
+    let x = Spec.word_to_limb Spec.Blake2B (secret u) in
+    uint_v x == uint_v size_block)
+
+let lemma_value6 u = ()
+
+(* val lemma_value7: u:Spec.word_t Spec.Blake2B{uint_v u <= Spec.max_limb Spec.Blake2B *)
+(*                                                         /\ uint_v u == Spec.size_block Spec.Blake2B} -> *)
+(*   Lemma ( *)
+(*     let x = Spec.word_to_limb Spec.Blake2B (secret u) in *)
+(*     uint_v x == uint_v size_block) *)
+
+(* let lemma_value7 u = () *)
+
+
+(* val lemma_value8: u:Spec.word_t Spec.Blake2B -> *)
+(*   Lemma ( *)
+(*     let x: word_t = (secret #(Spec.wt Spec.Blake2B) u) in *)
+(*     uint_v #(Spec.wt Spec.Blake2B) #SEC x == uint_v u) *)
+
+(* let lemma_value8 u = () *)
+
+let f (x:Spec.word_t Spec.Blake2B) : Tot unit =
+  let y: word_t = (secret #(Spec.wt Spec.Blake2B) x) in
+  assert(x == y)
+
+
+
+
 [@ Substitute ]
 let blake2b_init_branching hash key_block kk k nn =
-  admit();
   let h0 = ST.get () in
   if kk <>. (size 0) then
   begin
     update_sub key_block (size 0) kk k;
+    assert(uint_v (secret size_block) <= Spec.max_limb Spec.Blake2B);
+    admit();
     let prev = Spec.word_to_limb Spec.Blake2B (secret size_block) in
     blake2b_update_block hash prev key_block
   end
@@ -455,7 +519,8 @@ val blake2b_update_last:
                          /\ h1.[|hash|] == Spec.Blake2.blake2_update_last Spec.Blake2B (uint_v prev) (v len) h0.[|last|] h0.[|hash|]))
 
 let blake2b_update_last hash prev len last =
-  (admit(); uintv_extensionality prev (u128 (uint_v prev)));
+  admit();
+  uintv_extensionality prev (u128 (uint_v prev));
   push_frame ();
   let last_block = create size_block (u8 0) in
   let last_block_w = create 16ul (u32 0) in
