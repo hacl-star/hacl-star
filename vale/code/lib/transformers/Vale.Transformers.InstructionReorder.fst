@@ -30,7 +30,7 @@
 *)
 module Vale.Transformers.InstructionReorder
 
-/// Open all the relevant modules from the x64 semantics.
+/// Open all the relevant modules
 
 open Vale.X64.Bytes_Code_s
 open Vale.X64.Instruction_s
@@ -39,13 +39,10 @@ open Vale.X64.Machine_Semantics_s
 open Vale.X64.Machine_s
 open Vale.X64.Print_s
 
-/// Relevant modules from Transformers
+open Vale.Def.PossiblyMonad
 
-open Vale.Transformers.PossiblyMonad
 open Vale.Transformers.Locations
 open Vale.Transformers.BoundedInstructionEffects
-
-/// Finally some convenience module renamings
 
 module L = FStar.List.Tot
 
