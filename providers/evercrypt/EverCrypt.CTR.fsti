@@ -154,20 +154,22 @@ val update_block: a:e_alg -> (
   src:lbuffer uint8 (size (Spec.block_length a)) ->
   Stack unit
     (requires (fun h0 ->
+      live h0 src /\ live h0 dst /\
       B.loc_disjoint (loc src) (footprint h0 s) /\
       B.loc_disjoint (loc dst) (footprint h0 s) /\
       disjoint src dst /\
       invariant h0 s /\
       ctr h0 s < pow2 32 - 1))
     (ensures (fun h0 _ h1 ->
+      let dst: B.buffer uint8 = dst in
       preserves_freeable s h0 h1 /\
       invariant h1 s /\
-      B.(modifies (footprint_s (B.deref h0 s)) h0 h1) /\
+      B.(modifies (footprint_s (B.deref h0 s) `loc_union` loc_buffer dst) h0 h1) /\
       footprint h0 s == footprint h1 s /\
       ctr h1 s == ctr h0 s + 1 /\
-      as_seq h1 dst ==
+      B.as_seq h1 dst ==
         Lib.Sequence.map2 ( ^. ) (as_seq h0 src) (
-          Spec.ctr_block a (Spec.expand a (kv (B.deref h0 s))) (iv (B.deref h0 s))
+          Spec.ctr_block a (kv (B.deref h0 s)) (iv (B.deref h0 s))
             (ctr h0 s)))))
 
 // TODO: update_blocks, update_last... then an incremental API for CTR encryption.

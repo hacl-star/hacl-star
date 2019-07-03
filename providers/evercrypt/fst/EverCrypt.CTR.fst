@@ -32,17 +32,18 @@ type state_s (a: Spec.cipher_alg) =
     i:impl ->
     g_iv: G.erased (Spec.nonce a) ->
     iv: buffer8 { B.length iv = nonce_upper_bound a } ->
+    iv_len: uint32 { UInt32.v iv_len = Seq.length (G.reveal g_iv) } ->
     g_key: G.erased (Spec.key a) ->
     xkey: buffer8 { B.length xkey = concrete_xkey_length i } ->
     ctr: uint32 ->
     state_s a
 
 let freeable_s #a s =
-  let State _ _ iv _ key _ = s in
+  let State _ _ iv _ _ key _ = s in
   B.freeable iv /\ B.freeable key
 
 let footprint_s #a s =
-  let State _ _ iv _ key _ = s in
+  let State _ _ iv _ _ key _ = s in
   B.(loc_addr_of_buffer iv `loc_union` loc_addr_of_buffer key)
 
 let cpu_features_invariant (i: impl): Type0 =
@@ -54,7 +55,7 @@ let cpu_features_invariant (i: impl): Type0 =
       True
 
 let invariant_s #a h s =
-  let State i g_iv iv g_key ek _ = s in
+  let State i g_iv iv _ g_key ek _ = s in
   let g_iv = G.reveal g_iv in
   a = cipher_alg_of_impl i /\
   B.live h iv /\ B.live h ek /\
@@ -78,18 +79,18 @@ let invariant_loc_in_footprint #_ _ _ = ()
 let frame_invariant #_ _ _ _ _ = ()
 
 let kv #a (s: state_s a) =
-  let State _ _ _ g_key _ _ = s in
+  let State _ _ _ _ g_key _ _ = s in
   G.reveal g_key
 
 let iv #a (s: state_s a) =
-  let State _ g_iv _ _ _ _ = s in
+  let State _ g_iv _ _ _ _ _ = s in
   G.reveal g_iv
 
 let ctr #a (h: HS.mem) (s: state a) =
   UInt32.v (State?.ctr (B.deref h s))
 
 let alg_of_state _ s =
-  let State i _ _ _ _ _ = !*s in
+  let State i _ _ _ _ _ _ = !*s in
   cipher_alg_of_impl i
 
 let vale_impl_of_alg (a: vale_cipher_alg): vale_impl =
@@ -125,7 +126,7 @@ let create_in a r dst k iv iv_len c =
         (**) let h2 = ST.get () in
         (**) B.modifies_only_not_unused_in B.loc_none h0 h2;
 
-        let p = B.malloc r (State (vale_impl_of_alg a) g_iv iv' g_key ek c) 1ul in
+        let p = B.malloc r (State (vale_impl_of_alg a) g_iv iv' iv_len g_key ek c) 1ul in
         (**) let h3 = ST.get () in
         (**) B.modifies_only_not_unused_in B.loc_none h0 h3;
         assert (B.fresh_loc (footprint h3 p) h0 h3);
@@ -156,7 +157,7 @@ let create_in a r dst k iv iv_len c =
       (**) let h2 = ST.get () in
       (**) B.modifies_only_not_unused_in B.loc_none h0 h2;
 
-      let p = B.malloc r (State Hacl_CHACHA20 g_iv iv' g_key ek c) 1ul in
+      let p = B.malloc r (State Hacl_CHACHA20 g_iv iv' 12ul g_key ek c) 1ul in
       (**) let h3 = ST.get () in
       (**) B.modifies_only_not_unused_in B.loc_none h0 h3;
       assert (B.fresh_loc (footprint h3 p) h0 h3);
@@ -187,7 +188,7 @@ let copy_or_expand (i: impl)
       B.blit k 0ul ek 0ul 32ul
 
 let init a p k iv iv_len c =
-  let State i _ iv' _ ek _ = !*p in
+  let State i _ iv' _ _ ek _ = !*p in
   [@inline_let]
   let k: B.buffer uint8 = k in
 
@@ -199,4 +200,91 @@ let init a p k iv iv_len c =
   copy_or_expand i k ek;
 
   // TODO: two in-place updates
-  p *= (State i g_iv iv' g_key ek c)
+  p *= (State i g_iv iv' iv_len g_key ek c)
+
+noextract
+let as_vale_key (i: vale_impl) (k: key (cipher_alg_of_impl i)):
+  s:Seq.seq Vale.Def.Types_s.nat32 {
+    Vale.AES.AES_s.is_aes_key_LE (vale_alg_of_vale_impl i) s
+  }
+=
+  let open Vale.Def.Words.Seq_s in
+  let k_nat = seq_uint8_to_seq_nat8 k in
+  let k_w = seq_nat8_to_seq_nat32_LE k_nat in
+  k_w
+
+friend Lib.IntTypes
+
+let vale_encrypt_is_hacl_encrypt (i: vale_impl)
+  (k: key (cipher_alg_of_impl i))
+  (ctr_block: Seq.lseq UInt8.t 16)
+  (input: Seq.lseq UInt8.t 16):
+  Lemma
+    (ensures (
+      let open Vale.Def.Words_s in
+      let open Vale.Def.Types_s in
+      let open Vale.Def.Words.Seq_s in
+      // Vale version
+      let a = vale_alg_of_vale_impl i in
+      let ctr_block_nat8 = seq_uint8_to_seq_nat8 ctr_block in
+      let k_nat32 = as_vale_key i k in
+      let input_nat8 = seq_uint8_to_seq_nat8 input in
+      let cipher_nat8 = Vale.AES.GCTR_s.gctr_encrypt_LE
+        (le_bytes_to_quad32 ctr_block_nat8) (Vale.AES.GCTR.make_gctr_plain_LE input_nat8)
+        a k_nat32
+      in
+      let cipher: Seq.seq UInt8.t = seq_nat8_to_seq_uint8 cipher_nat8 in
+
+      // HACL version
+      let a = aes_alg_of_alg (cipher_alg_of_impl i) in
+      let cipher': Seq.seq Lib.IntTypes.uint8 = Lib.Sequence.map2 Lib.IntTypes.(( ^. ))
+        Spec.AES.(aes_encrypt_block a (aes_key_expansion a k) ctr_block)
+        input
+      in
+      let cipher': Seq.seq UInt8.t = cipher' in
+      cipher `Seq.equal` cipher'))
+=
+  admit ()
+
+inline_for_extraction noextract
+let gctr_bytes (i: vale_impl): Vale.Wrapper.X64.GCTR.gctr_bytes_st (vale_alg_of_vale_impl i) =
+  match i with
+  | Vale_AES128 -> Vale.Wrapper.X64.GCTR.gctr_bytes_stdcall128
+  | Vale_AES256 -> Vale.Wrapper.X64.GCTR.gctr_bytes_stdcall256
+
+let update_block a p dst src =
+  // Can't use lbuffer because because implicit #len argument of Lib.as_seq
+  // unifies with (Spec.block_length (G.reveal a))
+  [@ inline_let ] let src: B.buffer Lib.IntTypes.uint8 = src in
+  [@ inline_let ] let dst: B.buffer Lib.IntTypes.uint8 = dst in
+
+  let State i g_iv iv iv_len g_key ek c = !*p in
+  match i with
+  | Vale_AES128 | Vale_AES256 ->
+      let open Vale.Wrapper.X64.GCTR in
+      push_frame ();
+
+      // Prepare the block. See Spec.AES.aes_ctr_key_block for instance.
+      let ctr_block = B.alloca 0uy 16ul in
+      B.blit iv 0ul ctr_block 0ul iv_len;
+      LowStar.Endianness.store32_be_i ctr_block 12ul c;
+
+      (**) let h1 = ST.get () in
+      gctr_bytes i
+        (G.elift1 (as_vale_key i) g_key)
+        src 16uL
+        dst
+        (B.sub ek 0ul (key_offset i))
+        ctr_block;
+
+      vale_encrypt_is_hacl_encrypt i (G.reveal g_key) (B.as_seq h1 ctr_block)
+        (B.as_seq h1 src);
+
+      let c = c `UInt32.add` 1ul in
+      p *= (State #(cipher_alg_of_impl i) i g_iv iv iv_len g_key ek c);
+
+      pop_frame ();
+
+      admit () // more miseries of dealing with uint8 vs UInt8.t, etc.
+
+  | _ -> admit ()

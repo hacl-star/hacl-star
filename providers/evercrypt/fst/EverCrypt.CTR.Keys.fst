@@ -33,7 +33,9 @@ let vale_alg_of_vale_impl (i: vale_impl) =
   | Vale_AES256 -> Vale.AES.AES_s.AES_256
 
 inline_for_extraction noextract
-let key_offset (i: vale_impl) =
+let key_offset (i: vale_impl):
+  o:UInt32.t { UInt32.v o = Vale.Wrapper.X64.AES.key_offset (vale_alg_of_vale_impl i) }
+=
   match i with
   | Vale_AES128 -> 176ul
   | Vale_AES256 -> 240ul

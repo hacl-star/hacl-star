@@ -107,7 +107,7 @@ let aead_tag_length32 (al: Spec.AEAD.alg) : Tot (x: U32.t { U32.v x == Spec.AEAD
   | AES256_CCM        -> 16ul
 
 let aead_iv_length32 (al: Spec.AEAD.supported_alg) (x:U32.t) : Tot
-  (res:bool{res <==> Spec.AEAD.iv_length (U32.v x) al}) =
+  (res:bool{res <==> Spec.AEAD.iv_length al (U32.v x)}) =
   let open Spec.AEAD in
   match al with
   | AES128_GCM -> 0ul `U32.lt` x
@@ -631,21 +631,10 @@ let test_all () : St unit =
   aes256_ecb_test_set       test_aes256_ecb_body
 
 let main (): St C.exit_code =
-  let equal_heap_dom_lemma (h1 h2:Heap.heap)
-    : Lemma
-      (requires Heap.equal_dom h1 h2)
-      (ensures  ((forall (a:Type0) (rel:Preorder.preorder a) (r:Heap.mref a rel).
-                    h1 `Heap.contains` r <==> h2 `Heap.contains` r) /\ 
-                 (forall (a:Type0) (rel:Preorder.preorder a) (r:Heap.mref a rel).
-                     r `Heap.unused_in` h1 <==> r `Heap.unused_in` h2)))
-      [SMTPat (Heap.equal_dom h1 h2)]
-    = ()
-  in
-
   push_frame ();
 
   test_all ();
-  
+
   // AR: 09/07: commenting it, random_init calls fails to verify, also see comment on test_rng above
   // print !$"\n  PSEUDO-RANDOM GENERATOR\n";
   // if EverCrypt.random_init () = 1ul then
