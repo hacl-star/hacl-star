@@ -81,6 +81,7 @@ let gcm_decrypt_cipher_length alg key iv plain auth tag: Lemma
 #pop-options
 
 // Note: bundling cipher and tag together is a pain...
+#push-options "--z3rlimit 20"
 let decrypt #a kv iv ad cipher =
   let tag = S.slice cipher (S.length cipher - tag_length a) (S.length cipher) in
   let cipher = S.slice cipher 0 (S.length cipher - tag_length a) in
@@ -100,6 +101,7 @@ let decrypt #a kv iv ad cipher =
       gcm_decrypt_cipher_length (vale_alg_of_alg a) kv_nat iv_nat cipher_nat ad_nat tag_nat;
       let plain = Vale.Def.Words.Seq_s.seq_nat8_to_seq_uint8 plain_nat in
       if success then Some plain else None
+#pop-options
 
 // Admitted until we prove correctness of individual algorithms
 let correctness #a k n aad p =

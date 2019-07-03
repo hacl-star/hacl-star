@@ -1,5 +1,5 @@
 [
-  "{IûŸr#IÂ(\nÕ}þGUœ",
+  "¨MHù[­\u0005Ø\u0014öR˜vŒ9ƒ",
   [
     [
       "Vale.Arch.BufferFriend.lemma_to_bytes_slice",
@@ -17,7 +17,7 @@
         "typing_Vale.Arch.BufferFriend.to_bytes"
       ],
       0,
-      "3b8067b7b66c5ae04a04cdafe14d71bc"
+      "32d044b6c8f3674e7cefc138b2afdf0a"
     ],
     [
       "Vale.Arch.BufferFriend.lemma_of_bytes_slice",
@@ -35,7 +35,7 @@
         "typing_Vale.Arch.BufferFriend.of_bytes"
       ],
       0,
-      "c02787b3bcc69d4d8a191aec845f1092"
+      "7b93202428caccb52d7a982528bc0c62"
     ],
     [
       "Vale.Arch.BufferFriend.lemma_up_as_seq_index",
@@ -66,7 +66,7 @@
         "typing_LowStar.BufferView.Up.get_view"
       ],
       0,
-      "96b230d8cb665fabdfcab5750283b1ef"
+      "5013274949cdd9ba49ccb2f58a0c7862"
     ],
     [
       "Vale.Arch.BufferFriend.lemma_n_to_le_is_nat_to_bytes",
@@ -82,7 +82,23 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "ea28fee513daf133cf803334171aa5d3"
+      "eb9d6ac6d6d7c5cdb4c435ec747f7b49"
+    ],
+    [
+      "Vale.Arch.BufferFriend.lemma_n_to_be_is_nat_to_bytes",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "b2t_def", "equation_Prims.nat",
+        "equation_Prims.squash", "int_inversion",
+        "primitive_Prims.op_LessThan", "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_2de20c066034c13bf76e9c0b94f4806c",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
+      ],
+      0,
+      "7ab7b2b7bef55a175f84963677ae23b0"
     ],
     [
       "Vale.Arch.BufferFriend.nat_from_bytes_le_is_four_to_nat",
@@ -98,7 +114,7 @@
         "refinement_interpretation_Tm_refine_2de20c066034c13bf76e9c0b94f4806c"
       ],
       0,
-      "5073b70bdc137219f4c8854366a73f85"
+      "83cfcf62243f145dabf4e318409ab001"
     ],
     [
       "Vale.Arch.BufferFriend.nat_from_bytes_le_is_le_bytes_to_nat32",
@@ -126,7 +142,7 @@
         "typing_Vale.Arch.BufferFriend.of_bytes"
       ],
       0,
-      "ca0ed3a627d98c1364b2ddf7f1f8caa7"
+      "959c74a8b0beec5fd003177d33d21787"
     ],
     [
       "Vale.Arch.BufferFriend.nat_from_bytes_le_is_le_bytes_to_nat64",
@@ -154,7 +170,7 @@
         "typing_Vale.Arch.BufferFriend.of_bytes"
       ],
       0,
-      "a2faac29c357fa76946c786eb5ebcf3b"
+      "9bfa524a5891e6eabc5d6582c9a9cfe5"
     ],
     [
       "Vale.Arch.BufferFriend.le_to_n_indexed_rec",
@@ -185,7 +201,7 @@
         "well-founded-ordering-on-nat"
       ],
       0,
-      "42040d931ecc6ab6bade3693ff7131db"
+      "6d73aa45a1908d4a9df12d36188e25e3"
     ],
     [
       "Vale.Arch.BufferFriend.le_to_n_indexed",
@@ -194,7 +210,7 @@
       0,
       [ "@query" ],
       0,
-      "1c0c75d8d91794f36152ec49f0c9104a"
+      "753e37e2279f1661bb6b1bf40585b93b"
     ],
     [
       "Vale.Arch.BufferFriend.lemma_le_to_n_indexed_rec",
@@ -212,7 +228,7 @@
         "typing_FStar.Seq.Base.length"
       ],
       0,
-      "cf2ac94ec88a76c41d47d3d12ab233c2"
+      "1dfebc562dd1dffb57fd0a506f5b0d01"
     ]
   ]
 ]

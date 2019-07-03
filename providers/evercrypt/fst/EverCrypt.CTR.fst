@@ -209,6 +209,7 @@ let as_vale_key (i: vale_impl) (k: key (cipher_alg_of_impl i)):
   let k_w = seq_nat8_to_seq_nat32_LE k_nat in
   k_w
 
+// Main (missing) proof of functional equivalence between Vale and HACL.
 let vale_encrypt_is_hacl_encrypt (i: vale_impl)
   (k: key (cipher_alg_of_impl i))
   (ctr_block: Seq.lseq uint8 16)
@@ -244,34 +245,84 @@ let gctr_bytes (i: vale_impl): Vale.Wrapper.X64.GCTR.gctr_bytes_st (vale_alg_of_
   | Vale_AES128 -> Vale.Wrapper.X64.GCTR.gctr_bytes_stdcall128
   | Vale_AES256 -> Vale.Wrapper.X64.GCTR.gctr_bytes_stdcall256
 
+friend Spec.Agile.Cipher
+
+inline_for_extraction
+let uint128_of_uint32 (x: UInt32.t): y:UInt128.t { UInt128.v y = UInt32.v x } =
+  let open FStar.Int.Cast.Full in
+  uint64_to_uint128 (uint32_to_uint64 x)
+
 let update_block a p dst src =
-  let State i g_iv iv iv_len g_key ek c = !*p in
+  let State i g_iv iv iv_len g_key ek c0 = !*p in
   match i with
   | Vale_AES128 | Vale_AES256 ->
       let open Vale.Wrapper.X64.GCTR in
+      let open LowStar.Endianness in
       push_frame ();
 
       // Prepare the block. See Spec.AES.aes_ctr_key_block for instance.
-      let ctr_block = B.alloca 0uy 16ul in
-      B.blit iv 0ul ctr_block 0ul iv_len;
-      LowStar.Endianness.store32_be_i ctr_block 12ul c;
+      let ctr_block = B.alloca (0uy <: uint8) 16ul in
+      (**) let h0 = ST.get () in
 
+      B.blit iv 0ul ctr_block 0ul iv_len;
       (**) let h1 = ST.get () in
+
+      // Proof steps missing:
+      // - show that repeati is equivalent to a blit
+      // - show that the uint128 addition does what aes_ctr_block_add_counter
+      //   does (the right lemmas should be there already...)
+      (* assert (
+        let open Lib.ByteSequence in
+        let open Lib.IntTypes in
+        let open Lib.Sequence in
+        let open Lib.LoopCombinators in
+        let block0 = B.as_seq h0 ctr_block in
+        let spec0 = create 16 (u8 0) in
+        let iv = B.as_seq h0 iv in
+        let block1 = B.as_seq h1 ctr_block in
+        let spec1 =
+          repeati #(lbytes 16) (length iv) (fun i b -> b.[i] <- Seq.index iv i) spec0
+        in
+        block0 `Seq.equal` spec0 /\
+        block1 `Seq.equal` spec1
+      );
+      admit () | _ -> admit () *)
+
+      // Interpreting potential overflow bytes of the IV as part of a 128-bit
+      // counter dictated by HACL* spec.
+      let c: UInt128.t = load128_be ctr_block `UInt128.add_mod` (uint128_of_uint32 c0) in
+      store128_be ctr_block c;
+      (**) let h2 = ST.get () in
+      (**) Vale.Arch.BufferFriend.lemma_be_to_n_is_nat_from_bytes (B.as_seq h1 ctr_block);
+      (**) Vale.Arch.BufferFriend.lemma_n_to_be_is_nat_to_bytes 16 (UInt128.v c);
+
       gctr_bytes i
         (G.elift1 (as_vale_key i) g_key)
         src 16uL
         dst
         (B.sub ek 0ul (key_offset i))
         ctr_block;
+      (**) vale_encrypt_is_hacl_encrypt i (G.reveal g_key) (B.as_seq h2 ctr_block)
+        (B.as_seq h2 src);
 
-      vale_encrypt_is_hacl_encrypt i (G.reveal g_key) (B.as_seq h1 ctr_block)
-        (B.as_seq h1 src);
-
-      let c = c `UInt32.add` 1ul in
+      let c = c0 `UInt32.add` 1ul in
       p *= (State #(cipher_alg_of_impl i) i g_iv iv iv_len g_key ek c);
 
       pop_frame ();
 
-      admit () // more miseries of dealing with uint8 vs UInt8.t, etc.
+      admit ()
 
-  | _ -> admit ()
+  | Hacl_CHACHA20 ->
+      let open Hacl.Impl.Chacha20 in
+      push_frame ();
+      let ctx = B.alloca 0ul 16ul in
+      // NOTE: chacha20_init must be called with 0ul because encrypt_block also
+      // takes a counter argument and increments too!
+      chacha20_init ctx ek (B.sub iv 0ul 12ul) 0ul;
+      chacha20_encrypt_block ctx dst c0 src;
+
+      pop_frame ();
+
+      // There's a non-trivial proof of spec equivalence here. See discussion in
+      // Spec.Chacha20.
+      admit ()
