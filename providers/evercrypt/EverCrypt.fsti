@@ -70,24 +70,28 @@ val aes256_free: aes256_key ->
 
 /// AES-GCM
 
+[@ (deprecated "Please use EverCrypt_AEAD.h (from C) or EverCrypt.AEAD.fsti (from F*) ")]
 val aes128_gcm_encrypt: key:uint8_p -> iv:uint8_p ->
   ad:uint8_p -> adlen:uint32_t ->
   plain:uint8_p -> len:uint32_t ->
   cipher: uint8_p -> tag:uint8_p ->
   ST unit aes256_gcm_encrypt_pre aes256_gcm_encrypt_post
 
+[@ (deprecated "Please use EverCrypt_AEAD.h (from C) or EverCrypt.AEAD.fsti (from F*) ")]
 val aes128_gcm_decrypt: key:uint8_p -> iv:uint8_p ->
   ad:uint8_p -> adlen:uint32_t ->
   plain:uint8_p -> len:uint32_t ->
   cipher: uint8_p -> tag:uint8_p ->
   ST uint32_t aes128_gcm_decrypt_pre aes128_gcm_decrypt_post
 
+[@ (deprecated "Please use EverCrypt_AEAD.h (from C) or EverCrypt.AEAD.fsti (from F*) ")]
 val aes256_gcm_encrypt: key:uint8_p -> iv:uint8_p ->
   ad:uint8_p -> adlen:uint32_t ->
   plain:uint8_p -> len:uint32_t ->
   cipher: uint8_p -> tag:uint8_p ->
   ST unit aes256_gcm_encrypt_pre aes256_gcm_encrypt_post
 
+[@ (deprecated "Please use EverCrypt_AEAD.h (from C) or EverCrypt.AEAD.fsti (from F*) ")]
 val aes256_gcm_decrypt: key:uint8_p -> iv:uint8_p ->
   ad:uint8_p -> adlen:uint32_t ->
   plain:uint8_p -> len:uint32_t ->
@@ -127,6 +131,7 @@ type aead_alg =
   | AES128_CCM8 // variant with truncated 8-byte tags
   | AES256_CCM8
 
+[@ (deprecated "Please use EverCrypt_AEAD.h (from C) or EverCrypt.AEAD.fsti (from F*) ")]
 let supported_aead_alg (a:aead_alg): GTot bool = 
   match a with 
   | AES128_GCM
@@ -134,6 +139,7 @@ let supported_aead_alg (a:aead_alg): GTot bool =
   | CHACHA20_POLY1305 -> true
   | _ -> false
 
+[@ (deprecated "Please use EverCrypt_AEAD.h (from C) or EverCrypt.AEAD.fsti (from F*) ")]
 let aead_keyLen = function
   | AES128_GCM        -> 16ul
   | AES256_GCM        -> 32ul
@@ -143,6 +149,7 @@ let aead_keyLen = function
   | AES256_CCM        -> 32ul
   | AES256_CCM8       -> 32ul
 
+[@ (deprecated "Please use EverCrypt_AEAD.h (from C) or EverCrypt.AEAD.fsti (from F*) ")]
 let aead_tagLen = function
   | AES128_CCM8       ->  8ul
   | AES256_CCM8       ->  8ul
@@ -152,6 +159,7 @@ let aead_tagLen = function
   | AES128_CCM        -> 16ul
   | AES256_CCM        -> 16ul
 
+[@ (deprecated "Please use EverCrypt_AEAD.h (from C) or EverCrypt.AEAD.fsti (from F*) ")]
 let aead_ivLen (a:aead_alg) = 12ul
 
 
@@ -160,21 +168,25 @@ val aead_state_s: Type0
 
 let aead_state = B.pointer aead_state_s
 
+[@ (deprecated "Please use EverCrypt_AEAD.h (from C) or EverCrypt.AEAD.fsti (from F*) ")]
 val aead_create: a:aead_alg {supported_aead_alg a} -> key:uint8_p ->
   ST aead_state aead_create_pre aead_create_post
 
+[@ (deprecated "Please use EverCrypt_AEAD.h (from C) or EverCrypt.AEAD.fsti (from F*) ")]
 val aead_encrypt: key:aead_state -> iv:uint8_p ->
   ad:uint8_p -> adlen:uint32_t ->
   plain:uint8_p -> len:uint32_t ->
   cipher:uint8_p -> tag:uint8_p ->
   ST unit aead_encrypt_pre aead_encrypt_post
 
+[@ (deprecated "Please use EverCrypt_AEAD.h (from C) or EverCrypt.AEAD.fsti (from F*) ")]
 val aead_decrypt: key:aead_state -> iv:uint8_p ->
   ad:uint8_p -> adlen:uint32_t ->
   plain:uint8_p -> len:uint32_t ->
   cipher:uint8_p -> tag:uint8_p ->
   ST uint32_t aead_decrypt_pre aead_decrypt_post
 
+[@ (deprecated "Please use EverCrypt_AEAD.h (from C) or EverCrypt.AEAD.fsti (from F*) ")]
 val aead_free: aead_state ->
   ST unit aead_free_pre aead_free_post
 
