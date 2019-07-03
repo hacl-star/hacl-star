@@ -47,7 +47,7 @@ FSTAR_INCLUDE_DIRS = \
   ./lemmas \
 
 FSTAR_FLAGS = $(OTHERFLAGS) --cmi \
-  --cache_checked_modules --odir $(OUTPUT_DIR) \
+  --cache_checked_modules --cache_dir $(CACHE_DIR) --odir $(OUTPUT_DIR) \
   --already_cached "'Prims+FStar+LowStar+C+Spec.Loops+TestLib+Lib'" \
   $(addprefix --include ,$(FSTAR_INCLUDE_DIRS))
 
@@ -68,7 +68,10 @@ include .depend
 $(HINT_DIR):
 	mkdir -p $@
 
-%.checked: | .depend $(HINT_DIR)
+$(CACHE_DIR):
+	mkdir -p $@
+
+%.checked: | .depend $(HINT_DIR) $(CACHE_DIR)
 	$(FSTAR) $< $(ENABLE_HINTS) --hint_file $(HINT_DIR)/$(notdir $*).hints && \
 	touch -c $@
 

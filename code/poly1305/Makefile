@@ -33,7 +33,7 @@ FSTAR_INCLUDE_DIRS = \
   $(HACL_HOME)/lib
 
 FSTAR_FLAGS = $(OTHERFLAGS) --cmi \
-  --cache_checked_modules --odir $(OUTPUT_DIR) \
+  --cache_checked_modules --cache_dir $(CACHE_DIR) --odir $(OUTPUT_DIR) \
   --already_cached "'Prims+FStar+LowStar+C+Spec.Loops+TestLib+Lib'" \
   $(addprefix --include ,$(FSTAR_INCLUDE_DIRS))
 
@@ -48,12 +48,15 @@ ROOTS = Hacl.Poly1305_32.fst Hacl.Poly1305_128.fst Hacl.Poly1305_256.fst
 $(HINT_DIR):
 	mkdir -p $@
 
+$(CACHE_DIR):
+	mkdir -p $@
+
 .depend:
 	$(FSTAR) --dep full $(ROOTS) --extract '* -Prims -FStar +FStar.UInt128 -LowStar -Spec' > $@
 
 include .depend
 
-%.checked: | .depend $(HINT_DIR)
+%.checked: | .depend $(HINT_DIR) $(CACHE_DIR)
 	$(FSTAR) $< $(ENABLE_HINTS) --hint_file $(HINT_DIR)/$(notdir $*).hints && \
 	touch -c $@
 
