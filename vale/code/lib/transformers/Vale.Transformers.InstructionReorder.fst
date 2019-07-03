@@ -1565,28 +1565,45 @@ let rec bubble_to_top (cs:codes) (i:nat{i < L.length cs}) : possibly (cs':codes{
 
 let rec reordering_allowed (c1 c2 : codes) :
   Tot pbool
-    (decreases %[L.length c1]) =
+    (decreases %[c2]) =
   match c1, c2 with
   | [], [] -> ttrue
   | [], _ | _, [] -> ffalse "disagreeing lengths of codes"
   | _, h2 :: t2 ->
-    i <-- find_code h2 c1;
-    t1 <-- bubble_to_top c1 i;
-    (* TODO: Also check _inside_ blocks/ifelse/etc rather than just at the highest level *)
-    reordering_allowed t1 t2
+    match find_code h2 c1 with
+    | Ok i -> (
+        t1 <-- bubble_to_top c1 i;
+        reordering_allowed t1 t2
+      )
+    | Err reason -> (
+        let h1 :: t1 = c1 in
+        match h1, h2 with
+        | Block l1, Block l2 ->
+          reordering_allowed l1 l2 &&. reordering_allowed t1 t2
+        | _ -> Err reason (* TODO: Handle IfElse and While specially too? *)
+      )
 
 (** Transform [c1] into the ordering specified by [c2] *)
 let rec perform_reordering (c1 c2 : codes) :
   Pure (codes)
     (requires !!(reordering_allowed c1 c2))
     (ensures (fun c_gen -> eq_codes c_gen c2))
-    (decreases %[L.length c1]) =
+    (decreases %[c2]) =
   match c1, c2 with
   | [], [] -> []
   | _, h2 :: t2 ->
-    let Ok i = find_code h2 c1 in
-    let Ok t1 = bubble_to_top c1 i in
-    L.index c1 i :: perform_reordering t1 t2
+    match find_code h2 c1 with
+    | Ok i -> (
+        let Ok t1 = bubble_to_top c1 i in
+        L.index c1 i :: perform_reordering t1 t2
+      )
+    | Err _ -> (
+        let h1 :: t1 = c1 in
+        match h1, h2 with
+        | Block l1, Block l2 ->
+          assert (eq_code (Block (perform_reordering l1 l2)) (Block l2)); (* OBSERVE *)
+          Block (perform_reordering l1 l2) :: perform_reordering t1 t2
+      )
 
 /// If there are two sequences of instructions that can be transformed
 /// amongst each other, then they behave identically as per the
@@ -1640,16 +1657,43 @@ let rec lemma_reordering (c1 c2 : codes) (fuel:nat) (s1 : machine_state) :
            machine_eval_codes c1 fuel s1,
            machine_eval_codes (perform_reordering c1 c2) fuel s1 in
          equiv_states_or_both_not_ok s1' s2')))
-    (decreases %[L.length c1]) =
+    (decreases %[c2]) =
   match c2 with
   | [] -> ()
   | h2 :: t2 ->
     let c_gen = perform_reordering c1 c2 in
-    let Ok i = find_code h2 c1 in
-    let Ok t1 = bubble_to_top c1 i in
-    let h' = L.index c1 i in
-    let t' = perform_reordering t1 t2 in
-    lemma_bubble_to_top c1 i fuel s1 (Some?.v (machine_eval_codes c1 fuel s1));
-    let Some sa1' = machine_eval_code h' fuel s1 in
-    let Some sa2' = machine_eval_codes t1 fuel sa1' in
-    lemma_reordering t1 t2 fuel sa1'
+    match find_code h2 c1 with
+    | Ok i -> (
+        let Ok t1 = bubble_to_top c1 i in
+        let h' = L.index c1 i in
+        let t' = perform_reordering t1 t2 in
+        lemma_bubble_to_top c1 i fuel s1 (Some?.v (machine_eval_codes c1 fuel s1));
+        let Some sa1' = machine_eval_code h' fuel s1 in
+        let Some sa2' = machine_eval_codes t1 fuel sa1' in
+        lemma_reordering t1 t2 fuel sa1'
+      )
+    | Err _ -> (
+        let h1 :: t1 = c1 in
+        match h1, h2 with
+        | Block l1, Block l2 ->
+          assert (machine_eval_code (Block l1) fuel s1 == machine_eval_codes l1 fuel s1);
+          assert (machine_eval_code (Block l2) fuel s1 == machine_eval_codes l2 fuel s1);
+          assert (Some? (machine_eval_code (Block l1) fuel s1));
+          assert (Some? (machine_eval_codes l1 fuel s1));
+          let Some s1' = machine_eval_codes l1 fuel s1 in
+          if s1'.ms_ok then () else (
+            lemma_not_ok_propagate_codes t1 fuel s1'
+          );
+          lemma_reordering l1 l2 fuel s1;
+          let Some s1'' = machine_eval_codes (perform_reordering l1 l2) fuel s1 in
+          assert (Some s1'' == machine_eval_code (Block (perform_reordering l1 l2)) fuel s1);
+          lemma_reordering t1 t2 fuel s1';
+          lemma_eval_codes_equiv_states (perform_reordering t1 t2) fuel s1' s1'';
+          let Some s2 = machine_eval_codes c1 fuel s1 in
+          let Some s2' = machine_eval_codes t1 fuel s1' in
+          let Some s2'' = machine_eval_codes (perform_reordering t1 t2) fuel s1'' in
+          assert (equiv_states s2 s2');
+          assert (equiv_states s2' s2'');
+          assert (machine_eval_codes (perform_reordering c1 c2) fuel s1 == machine_eval_codes (perform_reordering t1 t2) fuel s1'');
+          assert (Some s2'' == machine_eval_codes (perform_reordering c1 c2) fuel s1)
+      )
