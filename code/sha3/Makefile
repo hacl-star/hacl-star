@@ -2,8 +2,9 @@ FSTAR_HOME   ?= ../../../FStar
 KREMLIN_HOME ?= ../../../kremlin
 HACL_HOME    ?= ../..
 
+CACHE_DIR     ?= $(HACL_HOME)/.cache
+HINT_DIR      ?= $(HACL_HOME)/.hints
 OUTPUT_DIR    = .output
-HINT_DIR      = .hints
 GENERATED_DIR = sha3-c
 OUT_DIR	      = sha3-c
 
@@ -29,7 +30,7 @@ FSTAR_INCLUDE_DIRS = \
   $(HACL_HOME)/lib/c
 
 FSTAR_FLAGS = $(OTHERFLAGS) --cmi \
-  --cache_checked_modules --odir $(OUTPUT_DIR) \
+  --cache_checked_modules --cache_dir $(CACHE_DIR) --odir $(OUTPUT_DIR) \
   --already_cached "'Prims+FStar+LowStar+C+Spec.Loops+TestLib+Lib'" \
   $(addprefix --include ,$(FSTAR_INCLUDE_DIRS))
 
@@ -45,12 +46,15 @@ ROOTS = Hacl.Test.SHA3.fst
 $(HINT_DIR):
 	mkdir -p $@
 
+$(CACHE_DIR):
+	mkdir -p $@
+
 .depend:
 	$(FSTAR) --dep full $(ROOTS) --extract '* -Prims -FStar +FStar.UInt128 -LowStar -Spec' > $@
 
 include .depend
 
-%.checked: | .depend $(HINT_DIR)
+%.checked: | .depend $(HINT_DIR) $(CACHE_DIR)
 	$(FSTAR) $< $(ENABLE_HINTS) --hint_file $(HINT_DIR)/$(notdir $*).hints && \
 	touch -c $@
 
@@ -79,7 +83,7 @@ $(GENERATED_DIR)/Makefile.include: $(ALL_KRML_FILES) | .depend
 	-bundle 'C=C.Endianness' \
 	-bundle 'Hacl.SHA3=Hacl.Impl.*,Hacl.SHA3' \
 	-library 'C,FStar' \
-	-drop 'LowStar,Spec,Prims,Lib,C.Loops.*' \
+	-drop 'LowStar,Spec,Prims,Lib,C.Loops.*,FStar,C,C.String' \
 	-add-include '"c/Lib_PrintBuffer.h"' \
 	-tmpdir $(GENERATED_DIR) \
 	$^
