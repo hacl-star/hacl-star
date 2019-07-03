@@ -4,7 +4,7 @@ open Vale.X64.Bytes_Code_s
 open Vale.X64.Machine_s
 open Vale.X64.Machine_Semantics_s
 
-open Vale.Transformers.PossiblyMonad
+open Vale.Def.PossiblyMonad
 open Vale.Transformers.Locations
 
 module L = FStar.List.Tot
