@@ -540,6 +540,8 @@ let fmul_r2_normalize50 (a0, a1, a2, a3, a4) (r0, r1, r2, r3, r4) (r20, r21, r22
   assert (felem_fits5 a (1, 2, 1, 1, 1));
   a
 
+#push-options "--z3rlimit 400 --max_fuel 1"
+
 val fmul_r2_normalize51:
     a:felem5 2
   -> fa1:felem5 2
@@ -579,6 +581,8 @@ let fmul_r2_normalize51 a fa1 =
     (as_nat5 (a0, a1, a2, a3, a4) % Vec.prime) (as_nat5 (a10, a11, a12, a13, a14)) Vec.prime;
   assert (felem_fits5 out (2, 4, 2, 2, 2));
   out
+
+#pop-options
 
 val fmul_r2_normalize5_lemma:
     acc:felem5 2

@@ -1704,7 +1704,7 @@ let store_felem5_lemma #w f =
   assert (store_tup64_lemma (as_tup64_i f 0) == (lo, hi))
 #pop-options
 
-#push-options "--max_ifuel 1"
+#push-options "--z3rlimit 400 --max_fuel 1 --max_ifuel 1"
 
 val lset_bit5_lemma0:
     f:lseq uint64 5
