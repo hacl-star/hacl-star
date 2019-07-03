@@ -722,6 +722,7 @@ COMPACT_FLAGS	=\
   -bundle 'MerkleTree.New.Low+MerkleTree.New.Low.Serialization=[rename=MerkleTree]' \
   -bundle 'Test,Test.*,WindowsHack' \
   -bundle EverCrypt.Hash+EverCrypt.Hash.Incremental=[rename=EverCrypt_Hash] \
+  -bundle EverCrypt.CTR=EverCrypt.CTR.* \
   -library EverCrypt.AutoConfig,EverCrypt.OpenSSL,EverCrypt.BCrypt \
   -minimal \
   -add-include '"kremlin/internal/types.h"' \

@@ -42,13 +42,16 @@ val aes128_key_s: Type0
 
 let aes128_key = B.pointer aes128_key_s
 
+[@ (deprecated "Please use EverCrypt_CTR.h (from C) or EverCrypt.CTR.fsti (from F*) ")]
 val aes128_create: key:uint8_p ->
   ST aes128_key aes128_create_pre aes128_create_post
 
+[@ (deprecated "Please use EverCrypt_CTR.h (from C) or EverCrypt.CTR.fsti (from F*) ")]
 val aes128_compute: key:aes128_key ->
   plain: uint8_p -> cipher:uint8_p ->
   ST unit aes128_compute_pre aes128_compute_post
 
+[@ (deprecated "Please use EverCrypt_CTR.h (from C) or EverCrypt.CTR.fsti (from F*) ")]
 val aes128_free: aes128_key ->
   ST unit aes128_free_pre aes128_free_post
 
@@ -57,13 +60,16 @@ val aes256_key_s : Type0
 
 let aes256_key = B.pointer aes256_key_s
 
+[@ (deprecated "Please use EverCrypt_CTR.h (from C) or EverCrypt.CTR.fsti (from F*) ")]
 val aes256_create: key:uint8_p ->
   ST aes256_key aes256_create_pre aes256_create_post
 
+[@ (deprecated "Please use EverCrypt_CTR.h (from C) or EverCrypt.CTR.fsti (from F*) ")]
 val aes256_compute: key:aes256_key ->
   plain: uint8_p -> cipher:uint8_p ->
   ST unit aes256_compute_pre aes256_compute_post
 
+[@ (deprecated "Please use EverCrypt_CTR.h (from C) or EverCrypt.CTR.fsti (from F*) ")]
 val aes256_free: aes256_key ->
   ST unit aes256_free_pre aes256_free_post
 
