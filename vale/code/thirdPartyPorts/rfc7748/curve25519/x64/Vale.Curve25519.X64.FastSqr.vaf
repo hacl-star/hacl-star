@@ -2,10 +2,13 @@ include "../../../../lib/util/Vale.Lib.Basic.vaf"
 include "../../../../arch/x64/Vale.X64.InsBasic.vaf"
 include "../../../../arch/x64/Vale.X64.InsMem.vaf"
 include "../../../../arch/x64/Vale.X64.InsStack.vaf"
+include "../../../../test/Vale.Test.X64.Memcpy.vaf"
+include "../../../../test/Vale.Test.X64.Vale_memcpy.vaf"
 include{:fstar}{:open} "Vale.Curve25519.Fast_defs"
 include{:fstar}{:open} "Vale.Curve25519.Fast_lemmas_external"
 include{:fstar}{:open} "Vale.Curve25519.FastSqr_helpers"
 include{:fstar}{:open} "Vale.X64.CPU_Features_s"
+include{:fstar}{:open} "Vale.Test.X64.Vale_memcpy"
 
 module Vale.Curve25519.X64.FastSqr
 
@@ -26,6 +29,7 @@ open Vale.X64.QuickCode
 open Vale.X64.QuickCodes
 open Vale.Curve25519.Fast_defs
 open Vale.X64.CPU_Features_s
+open Vale.Test.X64.Vale_memcpy
 #endverbatim
 
 #verbatim{:implementation}
@@ -45,6 +49,7 @@ open Vale.Curve25519.Fast_defs
 open Vale.Curve25519.Fast_lemmas_external
 open Vale.Curve25519.FastSqr_helpers
 open Vale.X64.CPU_Features_s
+open Vale.Test.X64.Vale_memcpy
 #endverbatim
 
 const int_canon:tactic extern;
@@ -235,6 +240,99 @@ procedure fast_sqr_part3(inline offset:nat, ghost dst_b:buffer64, ghost inA_b:bu
                     buffer64_read(dst_b, 6 + offset*2, mem),
                     buffer64_read(dst_b, 7 + offset*2, mem),
                     bool_bit(cf(efl)));
+}
+
+#reset-options "--z3rlimit 400"
+procedure fast_sqr_part3_fake(inline offset:nat, ghost dst_in:Seq.seq(nat64), ghost inA_in:Seq.seq(nat64))
+    returns (ghost dst:Seq.seq(nat64))
+    {:quick}
+    requires
+        offset + 4 <= Seq.length(inA_in);
+        offset*2 + 8 <= Seq.length(dst_in);
+    lets
+        dst_ptr @= rdi;
+        inA_ptr @= rsi;
+
+        a0 := Seq.index(inA_in, 0 + offset);
+        a1 := Seq.index(inA_in, 1 + offset);
+        a2 := Seq.index(inA_in, 2 + offset);
+        a3 := Seq.index(inA_in, 3 + offset);
+
+        a := pow2_four(a0, a1, a2, a3);
+    reads
+        dst_ptr; inA_ptr;
+
+    modifies
+        rax; rcx; rdx; r8; r9; r10; r11; r12; r13; r14; r15;
+        efl;
+
+    requires
+        adx_enabled && bmi2_enabled;
+        offset == 0 || offset == 4;
+        !Seq.equal(dst_in, inA_in);
+
+        r14 <= 2;
+
+    ensures
+        Seq.length(dst) == Seq.length(dst_in);
+        let d0 := Seq.index(dst, 0 + offset*2);
+        let d1 := Seq.index(dst, 1 + offset*2);
+        let d2 := Seq.index(dst, 2 + offset*2);
+        let d3 := Seq.index(dst, 3 + offset*2);
+        let d4 := Seq.index(dst, 4 + offset*2);
+        let d5 := Seq.index(dst, 5 + offset*2);
+        let d6 := Seq.index(dst, 6 + offset*2);
+        let d7 := Seq.index(dst, 7 + offset*2);
+
+        pow2_nine(d0, d1, d2, d3, d4, d5, d6, d7, bool_bit(cf(efl))) ==
+        old(pow2_eight(mul_nats(a0,a0), r8, mul_nats(a1,a1) + r9, r10, mul_nats(a2,a2) + r11, r12, mul_nats(a3,a3) + r13, r14));
+        
+    
+{
+    dst := dst_in;
+    xor_lemmas();
+
+//    "movq   (%1), %%rdx ;"  "mulx %%rdx, %%rax, %%rcx ;" /* A[0]^2 */
+//    /********************/  "movq %%rax,  0(%0) ;"
+//    "addq %%rcx,  %%r8 ;"   "movq  %%r8,  8(%0) ;"
+//    "movq  8(%1), %%rdx ;"  "mulx %%rdx, %%rax, %%rcx ;" /* A[1]^2 */
+//    "adcq %%rax,  %%r9 ;"   "movq  %%r9, 16(%0) ;"
+//    "adcq %%rcx, %%r10 ;"   "movq %%r10, 24(%0) ;"
+//    "movq 16(%1), %%rdx ;"  "mulx %%rdx, %%rax, %%rcx ;" /* A[2]^2 */
+//    "adcq %%rax, %%r11 ;"   "movq %%r11, 32(%0) ;"
+//    "adcq %%rcx, %%r12 ;"   "movq %%r12, 40(%0) ;"
+//    "movq 24(%1), %%rdx ;"  "mulx %%rdx, %%rax, %%rcx ;" /* A[3]^2 */
+//    "adcq %%rax, %%r13 ;"   "movq %%r13, 48(%0) ;"
+//    "adcq %%rcx, %%r14 ;"   "movq %%r14, 56(%0) ;"
+
+    Load64_fake(rdx, inA_ptr,  inA_in, 0 + offset);   
+    Mulx64(rcx, rax, rdx);  /* A[0]^2 */                let a0_sqr_hi := rcx; let a0_sqr_lo := rax;
+    /********************/                               dst := Store64_fake(dst_ptr, rax,  dst, 0 + offset*2);
+    Add64Wrap(r8, rcx);                                  dst := Store64_fake(dst_ptr,  r8,  dst, 1 + offset*2);
+    Load64_fake(rdx, inA_ptr,  inA_in, 1 + offset);   Mulx64(rcx, rax, rdx);  /* A[1]^2 */                let a1_sqr_hi := rcx; let a1_sqr_lo := rax;
+    Adcx64Wrap( r9, rax);                                dst := Store64_fake(dst_ptr,  r9, dst, 2 + offset*2);
+    Adcx64Wrap(r10, rcx);                                dst := Store64_fake(dst_ptr, r10, dst, 3 + offset*2);
+    Load64_fake(rdx, inA_ptr, inA_in, 2 + offset);   Mulx64(rcx, rax, rdx);  /* A[2]^2 */                let a2_sqr_hi := rcx; let a2_sqr_lo := rax;
+    Adcx64Wrap(r11, rax);                                dst := Store64_fake(dst_ptr, r11, dst, 4 + offset*2);
+    Adcx64Wrap(r12, rcx);                                dst := Store64_fake(dst_ptr, r12, dst, 5 + offset*2);
+    Load64_fake(rdx, inA_ptr, inA_in, 3 + offset);   Mulx64(rcx, rax, rdx);  /* A[3]^2 */       lemma_prod_bounds(rcx, rax, rdx, rdx);                let a3_sqr_hi := rcx; let a3_sqr_lo := rax;
+    Adcx64Wrap(r13, rax);                                dst := Store64_fake(dst_ptr, r13, dst, 6 + offset*2);
+    Adcx64Wrap(r14, rcx);                                dst := Store64_fake(dst_ptr, r14, dst, 7 + offset*2);
+
+    
+    
+    lemma_sqr_part3(a, a0, a1, a2, a3, a0_sqr_hi, a0_sqr_lo, a1_sqr_hi, a1_sqr_lo, a2_sqr_hi, a2_sqr_lo, a3_sqr_hi, a3_sqr_lo,
+                    old(r8), old(r9), old(r10), old(r11), old(r12), old(r13), old(r14),
+                    Seq.index(dst, 0 + offset*2),
+                    Seq.index(dst, 1 + offset*2),
+                    Seq.index(dst, 2 + offset*2),
+                    Seq.index(dst, 3 + offset*2),
+                    Seq.index(dst, 4 + offset*2),
+                    Seq.index(dst, 5 + offset*2),
+                    Seq.index(dst, 6 + offset*2),
+                    Seq.index(dst, 7 + offset*2),
+                    bool_bit(cf(efl)));
+    
 }
 
 #reset-options "--z3rlimit 600"
