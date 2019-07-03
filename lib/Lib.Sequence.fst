@@ -261,7 +261,7 @@ let mod_prop n a b =
   FStar.Math.Lemmas.modulo_lemma (b - a * n) n;
   FStar.Math.Lemmas.lemma_mod_sub b n a
 
-#push-options "--z3rlimit 150 --max_fuel 0 --max_ifuel 0"
+#push-options "--z3rlimit 150 --max_fuel 1 --max_ifuel 1"
 
 let rec index_map_blocks_multi #a bs max n inp f i =
   let map_blocks_a = map_blocks_a a bs max in
