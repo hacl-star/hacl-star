@@ -45,19 +45,23 @@ let footprint_s #a s =
   let State _ _ iv _ key _ = s in
   B.(loc_addr_of_buffer iv `loc_union` loc_addr_of_buffer key)
 
-let invariant_s #a h s =
-  let State i g_iv iv g_key key _ = s in
-  let g_iv = G.reveal g_iv in
-  a = cipher_alg_of_impl i /\
-  B.live h iv /\ B.live h key /\
-  g_iv `Seq.equal` Seq.slice (B.as_seq h iv) 0 (Seq.length g_iv) /\
-  concrete_expand i (G.reveal g_key) `Seq.equal` B.as_seq h key /\ (
+let cpu_features_invariant (i: impl): Type0 =
   match i with
   | Vale_AES128 | Vale_AES256 ->
       EverCrypt.TargetConfig.x64 /\
       Vale.X64.CPU_Features_s.(aesni_enabled /\ pclmulqdq_enabled /\ avx_enabled)
   | Hacl_CHACHA20 ->
-      True)
+      True
+
+let invariant_s #a h s =
+  let State i g_iv iv g_key ek _ = s in
+  let g_iv = G.reveal g_iv in
+  a = cipher_alg_of_impl i /\
+  B.live h iv /\ B.live h ek /\
+  B.disjoint ek iv /\
+  g_iv `Seq.equal` Seq.slice (B.as_seq h iv) 0 (Seq.length g_iv) /\
+  concrete_expand i (G.reveal g_key) `Seq.equal` B.as_seq h ek /\
+  cpu_features_invariant i
 
 let _: squash (inversion impl) = allow_inversion impl
 let _: squash (inversion cipher_alg) = allow_inversion cipher_alg
@@ -136,45 +140,63 @@ let create_in a r dst k iv iv_len c =
         UnsupportedAlgorithm
 
   | CHACHA20 ->
-        (**) let h0 = ST.get () in
-        (**) let g_iv = G.hide (B.as_seq h0 iv) in
-        (**) let g_key: G.erased (key a) = G.hide (B.as_seq h0 (k <: B.buffer uint8)) in
+      (**) let h0 = ST.get () in
+      (**) let g_iv = G.hide (B.as_seq h0 iv) in
+      (**) let g_key: G.erased (key a) = G.hide (B.as_seq h0 (k <: B.buffer uint8)) in
 
-        [@inline_let]
-        let l = concrete_xkey_len Hacl_CHACHA20 in
-        let ek = B.malloc r 0uy l in
-        B.blit (k <: B.buffer uint8) 0ul ek 0ul l;
-        (**) let h1 = ST.get () in
-        (**) B.modifies_only_not_unused_in B.loc_none h0 h1;
+      [@inline_let]
+      let l = concrete_xkey_len Hacl_CHACHA20 in
+      let ek = B.malloc r 0uy l in
+      B.blit (k <: B.buffer uint8) 0ul ek 0ul l;
+      (**) let h1 = ST.get () in
+      (**) B.modifies_only_not_unused_in B.loc_none h0 h1;
 
-        let iv' = B.malloc r 0uy iv_len in
-        B.blit iv 0ul iv' 0ul iv_len;
-        (**) let h2 = ST.get () in
-        (**) B.modifies_only_not_unused_in B.loc_none h0 h2;
+      let iv' = B.malloc r 0uy iv_len in
+      B.blit iv 0ul iv' 0ul iv_len;
+      (**) let h2 = ST.get () in
+      (**) B.modifies_only_not_unused_in B.loc_none h0 h2;
 
-        let p = B.malloc r (State Hacl_CHACHA20 g_iv iv' g_key ek c) 1ul in
-        (**) let h3 = ST.get () in
-        (**) B.modifies_only_not_unused_in B.loc_none h0 h3;
-        assert (B.fresh_loc (footprint h3 p) h0 h3);
+      let p = B.malloc r (State Hacl_CHACHA20 g_iv iv' g_key ek c) 1ul in
+      (**) let h3 = ST.get () in
+      (**) B.modifies_only_not_unused_in B.loc_none h0 h3;
+      assert (B.fresh_loc (footprint h3 p) h0 h3);
 
-        dst *= p;
-        (**) let h4 = ST.get () in
-        (**) B.modifies_only_not_unused_in B.(loc_buffer dst) h0 h4;
+      dst *= p;
+      (**) let h4 = ST.get () in
+      (**) B.modifies_only_not_unused_in B.(loc_buffer dst) h0 h4;
 
-        Success
+      Success
+
+inline_for_extraction noextract
+let copy_or_expand (i: impl)
+  (k: B.buffer uint8 { B.length k = Spec.key_length (cipher_alg_of_impl i) })
+  (ek: B.buffer uint8 { B.len ek = concrete_xkey_len i }):
+  Stack unit
+    (requires (fun h0 ->
+      B.live h0 k /\ B.live h0 ek /\
+      B.disjoint k ek /\
+      cpu_features_invariant i))
+    (ensures (fun h0 _ h1 ->
+      B.(modifies (loc_buffer ek) h0 h1) /\
+      B.as_seq h1 ek `Seq.equal` concrete_expand i (B.as_seq h0 k)))
+=
+  match i with
+  | Vale_AES128 | Vale_AES256 ->
+      vale_expand i k ek
+  | Hacl_CHACHA20 ->
+      B.blit k 0ul ek 0ul 32ul
 
 let init a p k iv iv_len c =
   let State i _ iv' _ ek _ = !*p in
-  match i with
-  | Vale_AES128 | Vale_AES256 ->
-        (**) let h0 = ST.get () in
-        (**) let g_iv = G.hide (B.as_seq h0 iv) in
-        (**) let g_key: G.erased (key (cipher_alg_of_impl i)) =
-          G.hide (B.as_seq h0 (k <: B.buffer uint8)) in
+  [@inline_let]
+  let k: B.buffer uint8 = k in
 
-        vale_expand i k ek;
-        B.blit iv 0ul iv' 0ul iv_len;
-        // TODO: two in-place updates
-        p *= (State i g_iv iv' g_key ek c)
+  (**) let h0 = ST.get () in
+  (**) let g_iv = G.hide (B.as_seq h0 iv) in
+  (**) let g_key: G.erased (key (cipher_alg_of_impl i)) = G.hide (B.as_seq h0 k) in
 
-  | _ -> admit ()
+  B.blit iv 0ul iv' 0ul iv_len;
+  copy_or_expand i k ek;
+
+  // TODO: two in-place updates
+  p *= (State i g_iv iv' g_key ek c)
