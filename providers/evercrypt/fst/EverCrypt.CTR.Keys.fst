@@ -67,6 +67,7 @@ let uint8 = Lib.IntTypes.uint8
 // Because the wrapper are over UInt8.t not Lib.IntTypes.uint8
 friend Lib.IntTypes
 
+inline_for_extraction noextract
 let vale_expand (i: vale_impl) (k ek: B.buffer uint8):
   Stack unit
     (requires (fun h0 ->

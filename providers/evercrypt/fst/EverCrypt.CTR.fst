@@ -178,7 +178,9 @@ let copy_or_expand (i: impl)
       B.as_seq h1 ek `Seq.equal` concrete_expand i (B.as_seq h0 k)))
 =
   match i with
-  | Vale_AES128 | Vale_AES256 ->
+  | Vale_AES128 ->
+      vale_expand i k ek
+  | Vale_AES256 ->
       vale_expand i k ek
   | Hacl_CHACHA20 ->
       B.blit k 0ul ek 0ul 32ul
