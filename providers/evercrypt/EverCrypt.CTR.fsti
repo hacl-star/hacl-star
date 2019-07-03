@@ -72,8 +72,8 @@ val ctr: #a:alg -> h:HS.mem -> state a -> GTot Spec.ctr
 /// Stateful API
 /// ------------
 
-open Lib.Buffer
-open Lib.IntTypes
+let uint8 = Lib.IntTypes.uint8
+let xor8 = Lib.IntTypes.((^.) #U8 #SEC)
 
 let e_alg = G.erased alg
 
@@ -86,14 +86,14 @@ val alg_of_state: a:e_alg -> (
 val create_in: a:alg ->
   r:HS.rid ->
   dst:B.pointer (B.pointer_or_null (state_s a)) ->
-  k:lbuffer uint8 (size (Spec.Agile.CTR.key_length a)) ->
-  nonce: buffer uint8 ->
+  k:B.buffer uint8 { B.length k = Spec.Agile.CTR.key_length a } ->
+  nonce: B.buffer uint8 ->
   nonce_len: UInt32.t { Spec.nonce_bound a (UInt32.v nonce_len) /\ B.len nonce = nonce_len } ->
   c: UInt32.t ->
   ST error_code
     (requires fun h0 ->
       ST.is_eternal_region r /\
-      B.live h0 dst /\ B.live h0 (k <: B.buffer uint8) /\ B.live h0 nonce)
+      B.live h0 dst /\ B.live h0 k /\ B.live h0 nonce)
     (ensures fun h0 e h1 ->
       match e with
       | UnsupportedAlgorithm | InvalidIVLength ->
@@ -123,23 +123,23 @@ val create_in: a:alg ->
 val init: a:e_alg -> (
   let a = G.reveal a in
   s:state a ->
-  key: lbuffer uint8 (size (Spec.key_length a)) ->
-  nonce: buffer uint8 ->
+  k:B.buffer uint8 { B.length k = Spec.Agile.CTR.key_length a } ->
+  nonce: B.buffer uint8 ->
   nonce_len: UInt32.t { Spec.nonce_bound a (UInt32.v nonce_len) /\ B.len nonce = nonce_len } ->
   c: UInt32.t ->
   Stack unit
     (requires (fun h0 ->
-      live h0 key /\
-      live h0 nonce /\
-      B.loc_disjoint (loc key) (footprint h0 s) /\
-      B.loc_disjoint (loc nonce) (footprint h0 s) /\
+      B.live h0 k /\
+      B.live h0 nonce /\
+      B.(loc_disjoint (loc_buffer k) (footprint h0 s)) /\
+      B.(loc_disjoint (loc_buffer nonce) (footprint h0 s)) /\
       invariant h0 s))
     (ensures (fun h0 _ h1 ->
       preserves_freeable #a s h0 h1 /\
       invariant #a h1 s /\
       footprint h0 s == footprint #a h1 s /\
       B.(modifies (footprint #a h0 s) h0 h1) /\
-      kv (B.deref h1 s) == as_seq h0 key /\
+      kv (B.deref h1 s) == B.as_seq h0 k /\
       iv (B.deref h1 s) == B.as_seq h0 nonce /\
       ctr h1 s = UInt32.v c
       )))
@@ -150,26 +150,23 @@ val init: a:e_alg -> (
 val update_block: a:e_alg -> (
   let a = G.reveal a in
   s:state a ->
-  dst:lbuffer uint8 (size (Spec.block_length a)) ->
-  src:lbuffer uint8 (size (Spec.block_length a)) ->
+  dst:B.buffer uint8 { B.length dst = Spec.block_length a } ->
+  src:B.buffer uint8 { B.length src = Spec.block_length a } ->
   Stack unit
     (requires (fun h0 ->
-      live h0 src /\ live h0 dst /\
-      B.loc_disjoint (loc src) (footprint h0 s) /\
-      B.loc_disjoint (loc dst) (footprint h0 s) /\
-      disjoint src dst /\
+      B.live h0 src /\ B.live h0 dst /\
+      B.(loc_disjoint (loc_buffer src) (footprint h0 s)) /\
+      B.(loc_disjoint (loc_buffer dst) (footprint h0 s)) /\
+      B.disjoint src dst /\
       invariant h0 s /\
       ctr h0 s < pow2 32 - 1))
     (ensures (fun h0 _ h1 ->
-      let dst: B.buffer uint8 = dst in
       preserves_freeable s h0 h1 /\
       invariant h1 s /\
       B.(modifies (footprint_s (B.deref h0 s) `loc_union` loc_buffer dst) h0 h1) /\
       footprint h0 s == footprint h1 s /\
       ctr h1 s == ctr h0 s + 1 /\
-      B.as_seq h1 dst ==
-        Lib.Sequence.map2 ( ^. ) (as_seq h0 src) (
-          Spec.ctr_block a (kv (B.deref h0 s)) (iv (B.deref h0 s))
-            (ctr h0 s)))))
+      B.as_seq h1 dst == Spec.Loops.seq_map2 xor8 (B.as_seq h0 src)
+        (Spec.ctr_block a (kv (B.deref h0 s)) (iv (B.deref h0 s)) (ctr h0 s)))))
 
 // TODO: update_blocks, update_last... then an incremental API for CTR encryption.

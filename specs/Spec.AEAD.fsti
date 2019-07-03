@@ -80,16 +80,18 @@ let max_length: supported_alg -> nat =
   | CHACHA20_POLY1305 -> pow2 32 - 1 - 16
   | AES128_GCM | AES256_GCM -> pow2 32 - 1
 
+let uint8 = Lib.IntTypes.uint8
+
 // Proudly defining this type abbreviation for the tenth time in HACL*!
-let lbytes (l:nat) = b:Seq.seq UInt8.t { Seq.length b = l }
+let lbytes (l:nat) = b:Seq.seq uint8 { Seq.length b = l }
 
 // Note: using <= for maximum admissible lengths
 // Note: not indexing the types over their lengths; we can use S.length in specs
 let kv a = lbytes (key_length a)
-let iv a = s:S.seq UInt8.t { iv_length a (S.length s) }
-let ad a = s:S.seq UInt8.t { S.length s <= max_length a }
-let plain (a: supported_alg) = s:S.seq UInt8.t { S.length s <= max_length a }
-let cipher (a: supported_alg) = s:S.seq UInt8.t { S.length s >= tag_length a }
+let iv a = s:S.seq uint8 { iv_length a (S.length s) }
+let ad a = s:S.seq uint8 { S.length s <= max_length a }
+let plain (a: supported_alg) = s:S.seq uint8 { S.length s <= max_length a }
+let cipher (a: supported_alg) = s:S.seq uint8 { S.length s >= tag_length a }
 
 let cipher_length #a (p: plain a) =
   S.length p + tag_length a

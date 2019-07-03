@@ -62,7 +62,12 @@ let aes_gcm_keyhash_init (i: vale_impl):
   | Vale_AES128 -> Vale.Wrapper.X64.AEShash.aes128_keyhash_init_stdcall
   | Vale_AES256 -> Vale.Wrapper.X64.AEShash.aes256_keyhash_init_stdcall
 
-let vale_expand (i: vale_impl) (k ek: B.buffer UInt8.t):
+let uint8 = Lib.IntTypes.uint8
+
+// Because the wrapper are over UInt8.t not Lib.IntTypes.uint8
+friend Lib.IntTypes
+
+let vale_expand (i: vale_impl) (k ek: B.buffer uint8):
   Stack unit
     (requires (fun h0 ->
       let a = cipher_alg_of_impl i in

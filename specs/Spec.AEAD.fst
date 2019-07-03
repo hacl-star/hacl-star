@@ -6,8 +6,6 @@ module S = FStar.Seq
 
 #set-options "--max_fuel 0 --max_ifuel 0"
 
-friend Lib.IntTypes
-
 let vale_alg_of_alg (a: alg { a = AES128_GCM \/ a = AES256_GCM }) =
   match a with
   | AES128_GCM -> Vale.AES.AES_s.AES_128
@@ -40,12 +38,16 @@ let gcm_encrypt_cipher_length alg key iv plain auth: Lemma
   Vale.Def.Opaque_s.reveal_opaque (Vale.AES.GCM_s.gcm_encrypt_LE_def alg key iv plain auth)
 #pop-options
 
+// TODO remove me once seq_uint8_to_seq_nat8 takes Lib.IntTypes.uint8
+friend Lib.IntTypes
+
 let encrypt #a kv iv ad plain =
   match a with
   | CHACHA20_POLY1305 ->
       Spec.Chacha20Poly1305.aead_encrypt kv iv plain ad
 
   | AES128_GCM | AES256_GCM ->
+      // This step needs friend'ing.
       let kv_nat = Vale.Def.Words.Seq_s.seq_uint8_to_seq_nat8 kv in
       // The specification of gcm_encrypt_LE takes care of computing a valid
       // GCM iv from an arbitrary length iv. Hence the iv is the sequence of bytes

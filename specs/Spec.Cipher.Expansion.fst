@@ -2,8 +2,6 @@ module Spec.Cipher.Expansion
 
 open Spec.Agile.Cipher
 
-friend Lib.IntTypes
-
 let vale_cipher_alg = a: cipher_alg { a == AES128 \/ a == AES256 }
 
 let vale_alg_of_cipher_alg (a: cipher_alg { a == AES128 \/ a == AES256 }) =
@@ -21,6 +19,8 @@ let vale_xkey_length =
   | AES128 -> 176 + 128 // Include the hashed keys here
   | AES256 -> 240 + 128 // Include the hashed keys here
 
+/// Because seq_uint8_to_seq_nat8 does not take Lib.IntTypes.uint8
+friend Lib.IntTypes
 
 /// And the specification of the Vale key expansion.
 val vale_aes_expansion (a: vale_cipher_alg) (key: key a):

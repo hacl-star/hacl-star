@@ -14,10 +14,6 @@ open LowStar.BufferOps
 open Spec.Cipher.Expansion
 open Spec.Agile.CTR
 
-let uint8 = Lib.IntTypes.uint8
-let uint32 = Lib.IntTypes.uint32
-let buffer8 = B.buffer uint8
-
 #set-options "--max_fuel 0 --max_ifuel 0"
 
 noextract
@@ -31,11 +27,11 @@ type state_s (a: Spec.cipher_alg) =
 | State:
     i:impl ->
     g_iv: G.erased (Spec.nonce a) ->
-    iv: buffer8 { B.length iv = nonce_upper_bound a } ->
-    iv_len: uint32 { UInt32.v iv_len = Seq.length (G.reveal g_iv) } ->
+    iv: B.buffer uint8 { B.length iv = nonce_upper_bound a } ->
+    iv_len: UInt32.t { UInt32.v iv_len = Seq.length (G.reveal g_iv) } ->
     g_key: G.erased (Spec.key a) ->
-    xkey: buffer8 { B.length xkey = concrete_xkey_length i } ->
-    ctr: uint32 ->
+    xkey: B.buffer uint8 { B.length xkey = concrete_xkey_length i } ->
+    ctr: UInt32.t ->
     state_s a
 
 let freeable_s #a s =
@@ -213,12 +209,10 @@ let as_vale_key (i: vale_impl) (k: key (cipher_alg_of_impl i)):
   let k_w = seq_nat8_to_seq_nat32_LE k_nat in
   k_w
 
-friend Lib.IntTypes
-
 let vale_encrypt_is_hacl_encrypt (i: vale_impl)
   (k: key (cipher_alg_of_impl i))
-  (ctr_block: Seq.lseq UInt8.t 16)
-  (input: Seq.lseq UInt8.t 16):
+  (ctr_block: Seq.lseq uint8 16)
+  (input: Seq.lseq uint8 16):
   Lemma
     (ensures (
       let open Vale.Def.Words_s in
@@ -233,15 +227,13 @@ let vale_encrypt_is_hacl_encrypt (i: vale_impl)
         (le_bytes_to_quad32 ctr_block_nat8) (Vale.AES.GCTR.make_gctr_plain_LE input_nat8)
         a k_nat32
       in
-      let cipher: Seq.seq UInt8.t = seq_nat8_to_seq_uint8 cipher_nat8 in
+      let cipher = seq_nat8_to_seq_uint8 cipher_nat8 in
 
       // HACL version
       let a = aes_alg_of_alg (cipher_alg_of_impl i) in
-      let cipher': Seq.seq Lib.IntTypes.uint8 = Lib.Sequence.map2 Lib.IntTypes.(( ^. ))
+      let cipher' = Spec.Loops.seq_map2 xor8 input
         Spec.AES.(aes_encrypt_block a (aes_key_expansion a k) ctr_block)
-        input
       in
-      let cipher': Seq.seq UInt8.t = cipher' in
       cipher `Seq.equal` cipher'))
 =
   admit ()
@@ -253,11 +245,6 @@ let gctr_bytes (i: vale_impl): Vale.Wrapper.X64.GCTR.gctr_bytes_st (vale_alg_of_
   | Vale_AES256 -> Vale.Wrapper.X64.GCTR.gctr_bytes_stdcall256
 
 let update_block a p dst src =
-  // Can't use lbuffer because because implicit #len argument of Lib.as_seq
-  // unifies with (Spec.block_length (G.reveal a))
-  [@ inline_let ] let src: B.buffer Lib.IntTypes.uint8 = src in
-  [@ inline_let ] let dst: B.buffer Lib.IntTypes.uint8 = dst in
-
   let State i g_iv iv iv_len g_key ek c = !*p in
   match i with
   | Vale_AES128 | Vale_AES256 ->
