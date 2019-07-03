@@ -9,7 +9,8 @@ extract-%:
 	GENERATED_DIR=$(BUILD_DIR) make -C $* stage1
 	rm -f $(BUILD_DIR)/Makefile.*
 
-extract: extract-poly1305 extract-chacha20 extract-curve25519 extract-chacha20poly1305 extract-blake2s
+extract: extract-poly1305 extract-chacha20 extract-curve25519 extract-blake2s
+	$(MAKE) extract-chacha20poly1305
 
 snapshot: extract-poly1305 extract-chacha20 extract-curve25519 extract-chacha20poly1305 extract-blake2s
 	cp $(HACL_HOME)/lib/c/vec-intrin.h $(BUILD_DIR)
