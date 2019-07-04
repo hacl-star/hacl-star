@@ -83,6 +83,7 @@ $(GENERATED_DIR)/Makefile.include: $(ALL_KRML_FILES) | .depend
 	-library 'C,FStar' \
 	-drop 'LowStar,Spec,Prims,Lib,C.Loops.*,C,C.*' \
 	-add-include '"c/Lib_PrintBuffer.h"' \
+	-add-include '"C_String.h"' \
 	-tmpdir $(GENERATED_DIR) \
 	$^
 
