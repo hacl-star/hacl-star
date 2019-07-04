@@ -20,6 +20,12 @@ LIBS_EX = $(addprefix --extract_module , $(LIBS:.fst=)) --extract_module Spec.Lo
 
 all: test
 
+#
+# Note:
+# Spec.Agile.DH, Spec.Agile.AEAD, Spec.Agile.Hash, Spec.Agile.HMAC, and Spec.Agile.HKDF
+# are all tested as part of Spec.HPKE
+#
+
 test: Chacha20.exe \
 	Curve25519.exe \
 	Curve448.exe \
@@ -43,7 +49,8 @@ test: Chacha20.exe \
 	argon2i.exe \
 	rsapss.exe
 
-FIXME = dh.exe Salsa20.exe aes128cbc.exe hmac_generic.exe hpkecfrg.exe chacha20_vec.exe poly1305_generic.exe poly1305_ml.exe qdsa.exe
+
+FIXME = Salsa20.exe aes128cbc.exe hmac_generic.exe hpkecfrg.exe chacha20_vec.exe poly1305_generic.exe poly1305_ml.exe qdsa.exe
 
 
 #
@@ -199,13 +206,6 @@ random.exe: $(LIBS_FILES) tests/Spec.Random.Test.fst
 	$(OCAMLOPT) -package cryptokit -I random-ml -I ../lib/ml random-ml/Lib_IntTypes.ml random-ml/Lib_RawIntTypes.ml random-ml/Lib_LoopCombinators.ml random-ml/Lib_Sequence.ml ../lib/ml/Lib_RandomSequence.ml random-ml/Lib_ByteSequence.ml random-ml/Lib_PrintSequence.ml random-ml/Spec_Random_Test.ml -o random.exe
 	./random.exe
 
-
-# dh.exe: $(LIBS_FILES) Spec.Curve25519.fst Spec.Curve448.fst Spec.DH.fst tests/Spec.DH.Test.fst
-# 	mkdir -p dh-ml
-# 	$(FSTAR) --codegen OCaml --lax $(LIBS_EX) --extract_module Spec.Curve25519 --extract_module Spec.Curve448 --extract_module Spec.DH --extract_module Spec.DH.Test --odir dh-ml $^
-# 	@echo 'let _ = test()' >> dh-ml/Spec_DH_Test.ml
-# 	$(OCAMLOPT) -I dh-ml $(addprefix dh-ml/, $(LIBS_ML)) dh-ml/Spec_Curve25519.ml dh-ml/Spec_Curve448.ml dh-ml/Spec_DH.ml dh-ml/Spec_DH_Test.ml -o dh.exe
-# 	./dh.exe
 
 # Salsa20.exe: $(LIBS_FILES) Spec.CTR.fst Spec.Salsa20.fst tests/Spec.Salsa20.Test.fst
 # 	mkdir -p Salsa20-ml
