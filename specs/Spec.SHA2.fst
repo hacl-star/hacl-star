@@ -203,7 +203,7 @@ let ws_next = ws_next_
 
 (* Full shuffling function *)
 let shuffle_aux (a:sha2_alg) (hash:words_state a) (block:block_w a): Tot (words_state a) =
-  let (h',_) = Lib.LoopCombinators.repeati (size_k_w a / 16)
+  let (h',_) = Lib.LoopCombinators.repeati #(words_state a * block_w a) (size_k_w a / 16)
     (fun i (h,ws) ->
       let open FStar.Mul in
       let k = Seq.slice (k0 a) (i * 16) ((i+1) * 16) in
