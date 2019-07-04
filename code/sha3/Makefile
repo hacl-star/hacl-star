@@ -66,7 +66,7 @@ $(OUTPUT_DIR)/%.krml: | .depend
 
 # 2. Generation of .c files
 
-KREMLIN_TESTLIB=-add-include '"TestLib.h"' $(KREMLIB)/dist/generic/testlib.c
+KREMLIN_TESTLIB=-add-include '"TestLib.h"' -add-include '"C_String.h"' -add-include '"FStar_UInt_8_16_32_64.h"' $(KREMLIB)/dist/generic/testlib.c
 
 KREMLIN=$(KREMLIN_HOME)/krml
 
