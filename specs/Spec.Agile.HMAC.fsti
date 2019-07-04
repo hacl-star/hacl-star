@@ -26,7 +26,7 @@ val update_block:
 val update_last:
     a: H.algorithm
   -> prev: nat
-  -> len: nat{len < H.size_block a /\ len + prev <= H.max_input a}
+  -> len: nat{len <= H.size_block a /\ prev % H.size_block a = 0 /\ len + prev <= H.max_input a}
   -> last: lbytes len
   -> H.state a ->
   Tot (H.state a)
