@@ -122,7 +122,13 @@ clean-build:
 	rm -rf build
 	rm -rf build-experimental
 
-clean: clean-base clean-build
+clean-cache:
+	rm -rf .cache
+
+clean-hints:
+	rm -rf .hints
+
+clean: clean-base clean-build clean-cache
 
 # Colors
 NORMAL="\\033[0;39m"

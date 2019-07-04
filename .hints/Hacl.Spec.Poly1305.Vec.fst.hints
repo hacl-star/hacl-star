@@ -8,7 +8,7 @@
       0,
       [ "@query" ],
       0,
-      "38952a846f8fe5d6edbac4fbf086108f"
+      "1f093dfe8e98591348d5823c75595622"
     ],
     [
       "Hacl.Spec.Poly1305.Vec.from_elem",
@@ -678,6 +678,9 @@
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
         "constructor_distinct_Lib.IntTypes.U32",
+        "constructor_distinct_Lib.IntTypes.U8",
+        "equality_tok_Lib.IntTypes.SEC@tok",
+        "equality_tok_Lib.IntTypes.U1@tok",
         "equality_tok_Lib.IntTypes.U32@tok",
         "equality_tok_Lib.IntTypes.U8@tok",
         "equation_Hacl.Spec.Poly1305.Vec.lanes",
@@ -701,9 +704,11 @@
         "refinement_interpretation_Tm_refine_0e094f2eeffe9276d550f63938c0d548",
         "refinement_interpretation_Tm_refine_352482e58bd8245eb20a00c33bf4ba10",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_70597463dd221580f371f83615527f81",
         "refinement_interpretation_Tm_refine_81407705a0828c2c1b1976675443f647",
         "refinement_interpretation_Tm_refine_a658c976a9118ef6c4559f187aff2181",
-        "typing_Lib.Sequence.length"
+        "typing_Lib.Sequence.length", "typing_Spec.AES.gf8",
+        "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
       "05983c2b47ed7bc43ebbd2a2f698dd9f"
