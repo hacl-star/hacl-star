@@ -68,11 +68,11 @@ Chacha20Poly1305.exe: $(LIBS_FILES) Spec.Chacha20.fst Spec.Poly1305.fst Spec.Cha
 	$(OCAMLOPT) -I Chacha20Poly1305-ml $(addprefix Chacha20Poly1305-ml/, $(LIBS_ML)) Chacha20Poly1305-ml/Spec_Chacha20.ml Chacha20Poly1305-ml/Spec_Poly1305.ml Chacha20Poly1305-ml/Spec_Chacha20Poly1305.ml Chacha20Poly1305-ml/Spec_Chacha20Poly1305_Test.ml -o Chacha20Poly1305.exe
 	./Chacha20Poly1305.exe
 
-Ed25519.exe: $(LIBS_FILES) Spec.SHA2.Constants.fst Spec.Hash.Definitions.fst Spec.Hash.PadFinish.fst Spec.MD5.fst Spec.SHA1.fst Spec.SHA2.fst Spec.Hash.fst Spec.Curve25519.fst Spec.Ed25519.fst tests/Spec.Ed25519.Test.fst
+Ed25519.exe: $(LIBS_FILES) Spec.SHA2.Constants.fst Spec.Hash.Definitions.fst Spec.Hash.PadFinish.fst Spec.MD5.fst Spec.SHA1.fst Spec.SHA2.fst Spec.Hash.fst Spec.Hash.Incremental.fst Spec.Agile.Hash.fst Spec.Curve25519.fst Spec.Ed25519.fst tests/Spec.Ed25519.Test.fst
 	mkdir -p Ed25519-ml
-	$(FSTAR) --codegen OCaml --lax $(LIBS_EX) --extract_module Spec.SHA2.Constants --extract_module Spec.Hash.Definitions --extract_module Spec.Hash.PadFinish --extract_module Spec.MD5 --extract_module Spec.SHA1 --extract_module Spec.SHA2 --extract_module Spec.Hash --extract_module Spec.Curve25519 --extract_module Spec.Ed25519 --extract_module Spec.Ed25519.Test --odir Ed25519-ml $^
+	$(FSTAR) --codegen OCaml --lax $(LIBS_EX) --extract_module Spec.SHA2.Constants --extract_module Spec.Hash.Definitions --extract_module Spec.Hash.PadFinish --extract_module Spec.MD5 --extract_module Spec.SHA1 --extract_module Spec.SHA2 --extract_module Spec.Hash --extract_module Spec.Hash.Incremental --extract_module Spec.Agile.Hash --extract_module Spec.Curve25519 --extract_module Spec.Ed25519 --extract_module Spec.Ed25519.Test --odir Ed25519-ml $^
 	@echo 'let _ = test()' >> Ed25519-ml/Spec_Ed25519_Test.ml
-	$(OCAMLOPT) -I Ed25519-ml $(addprefix Ed25519-ml/, $(LIBS_ML)) Ed25519-ml/Spec_SHA2_Constants.ml Ed25519-ml/Spec_Hash_Definitions.ml Ed25519-ml/Spec_Hash_PadFinish.ml Ed25519-ml/Spec_MD5.ml Ed25519-ml/Spec_SHA1.ml Ed25519-ml/Spec_SHA2.ml Ed25519-ml/Spec_Hash.ml Ed25519-ml/Spec_Curve25519.ml Ed25519-ml/Spec_Ed25519.ml Ed25519-ml/Spec_Ed25519_Test.ml -o Ed25519.exe
+	$(OCAMLOPT) -I Ed25519-ml $(addprefix Ed25519-ml/, $(LIBS_ML)) Ed25519-ml/Spec_SHA2_Constants.ml Ed25519-ml/Spec_Hash_Definitions.ml Ed25519-ml/Spec_Hash_PadFinish.ml Ed25519-ml/Spec_MD5.ml Ed25519-ml/Spec_SHA1.ml Ed25519-ml/Spec_SHA2.ml Ed25519-ml/Spec_Hash.ml Ed25519-ml/Spec_Hash_Incremental.ml Ed25519-ml/Spec_Agile_Hash.ml Ed25519-ml/Spec_Curve25519.ml Ed25519-ml/Spec_Ed25519.ml Ed25519-ml/Spec_Ed25519_Test.ml -o Ed25519.exe
 	./Ed25519.exe
 
 gf128.exe: $(LIBS_FILES) Spec.GaloisField.fst Spec.GF128.fst tests/Spec.GF128.Test.fst
