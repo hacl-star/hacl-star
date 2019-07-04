@@ -185,11 +185,11 @@ argon2i.exe: $(LIBS_FILES) Spec.Argon2i.fst tests/Spec.Argon2i.Test.fst
 	$(OCAMLOPT) -I argon2i-ml $(OCAML_INCLUDES) $(addprefix argon2i-ml/, $(LIBS_ML)) argon2i-ml/Spec_Blake2.ml argon2i-ml/Spec_Argon2i.ml argon2i-ml/Spec_Argon2i_Test.ml -o argon2i.exe
 	./argon2i.exe
 
-rsapss.exe: $(LIBS_FILES) Spec.SHA2.Constants.fst Spec.Hash.Definitions.fst Spec.Hash.PadFinish.fst Spec.MD5.fst Spec.SHA1.fst Spec.SHA2.fst Spec.Hash.fst Spec.RSAPSS.fst tests/Spec.RSAPSS.Test.fst
+rsapss.exe: $(LIBS_FILES) Spec.SHA2.Constants.fst Spec.Hash.Definitions.fst Spec.Hash.PadFinish.fst Spec.MD5.fst Spec.SHA1.fst Spec.SHA2.fst Spec.Hash.fst Spec.Hash.Incremental.fst Spec.Agile.Hash.fst Spec.RSAPSS.fst tests/Spec.RSAPSS.Test.fst
 	mkdir -p rsapss-ml
-	$(FSTAR)  --codegen OCaml --lax $(LIBS_EX) --extract_module Spec.SHA2.Constants --extract_module Spec.Hash.Definitions --extract_module Spec.Hash.PadFinish --extract_module Spec.MD5 --extract_module Spec.SHA1 --extract_module Spec.SHA2 --extract_module Spec.Hash --extract_module Spec.RSAPSS --extract_module Spec.RSAPSS.Test --odir rsapss-ml $^
+	$(FSTAR)  --codegen OCaml --lax $(LIBS_EX) --extract_module Spec.SHA2.Constants --extract_module Spec.Hash.Definitions --extract_module Spec.Hash.PadFinish --extract_module Spec.MD5 --extract_module Spec.SHA1 --extract_module Spec.SHA2 --extract_module Spec.Hash --extract_module Spec.Hash.Incremental --extract_module Spec.Agile.Hash --extract_module Spec.RSAPSS --extract_module Spec.RSAPSS.Test --odir rsapss-ml $^
 	@echo 'let _ = test()' >> rsapss-ml/Spec_RSAPSS_Test.ml
-	$(OCAMLOPT) -I rsapss-ml $(OCAML_INCLUDES) $(addprefix rsapss-ml/, $(LIBS_ML)) rsapss-ml/Spec_SHA2_Constants.ml rsapss-ml/Spec_Hash_Definitions.ml rsapss-ml/Spec_Hash_PadFinish.ml rsapss-ml/Spec_MD5.ml rsapss-ml/Spec_SHA1.ml rsapss-ml/Spec_SHA2.ml rsapss-ml/Spec_Hash.ml rsapss-ml/Spec_RSAPSS.ml rsapss-ml/Spec_RSAPSS_Test.ml -o rsapss.exe
+	$(OCAMLOPT) -I rsapss-ml $(OCAML_INCLUDES) $(addprefix rsapss-ml/, $(LIBS_ML)) rsapss-ml/Spec_SHA2_Constants.ml rsapss-ml/Spec_Hash_Definitions.ml rsapss-ml/Spec_Hash_PadFinish.ml rsapss-ml/Spec_MD5.ml rsapss-ml/Spec_SHA1.ml rsapss-ml/Spec_SHA2.ml rsapss-ml/Spec_Hash.ml rsapss-ml/Spec_Hash_Incremental.ml rsapss-ml/Spec_Agile_Hash.ml rsapss-ml/Spec_RSAPSS.ml rsapss-ml/Spec_RSAPSS_Test.ml -o rsapss.exe
 	./rsapss.exe
 
 random.exe: $(LIBS_FILES) tests/Spec.Random.Test.fst
