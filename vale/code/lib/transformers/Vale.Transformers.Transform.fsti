@@ -53,7 +53,8 @@ val reorder :
 val lemma_reorder :
   orig:va_code ->
   hint:va_code ->
-  transformed:va_code -> va_s0:va_state -> va_sM:va_state -> va_fM:va_fuel ->
+  transformed:va_code ->
+  va_s0:va_state -> va_sM:va_state -> va_fM:va_fuel ->
   Ghost (va_state & va_fuel)
     (requires (
         (va_require_total transformed (reorder orig hint).result va_s0) /\
