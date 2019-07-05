@@ -15,13 +15,16 @@ open Vale.X64.Lemmas
 open Vale.X64.StateLemmas
 
 friend Vale.X64.Decls
+friend Vale.X64.StateLemmas
+
+module IR = Vale.Transformers.InstructionReorder
 
 (* See fsti *)
 let reorder orig hint =
-  match Vale.Transformers.InstructionReorder.reordering_allowed [orig] [hint] with
+  match IR.reordering_allowed [orig] [hint] with
   | Ok () -> {
       success = ttrue;
-      result = Block (Vale.Transformers.InstructionReorder.perform_reordering [orig] [hint])
+      result = Block (IR.perform_reordering [orig] [hint])
     }
   | Err reason -> {
       success = ffalse reason;
@@ -38,18 +41,38 @@ let lemma_codes_code (c:codes) (fuel:nat) (s:machine_state) :
     (ensures (machine_eval_codes c fuel s == machine_eval_code (Block c) fuel s)) = ()
 #pop-options
 
+assume val lemma_to_of : (s0:_) -> (sM:_) -> Lemma (state_to_S (state_of_S s0 sM) == {sM with ms_trace = []})
+
+let lemma_IR_equiv_states_to_equiv_states (vs0:vale_state) (s1 s2:machine_state) :
+  Lemma
+    (requires (
+        (same_domain vs0 s1) /\
+        (IR.equiv_states s1 s2)))
+    (ensures (
+        (same_domain vs0 s2) /\
+        (equiv_states (state_of_S vs0 s1) (state_of_S vs0 s2)))) = ()
+
 (* See fsti *)
 let lemma_reorder orig hint transformed va_s0 va_sM va_fM =
-  match Vale.Transformers.InstructionReorder.reordering_allowed [orig] [hint] with
+  match IR.reordering_allowed [orig] [hint] with
   | Ok () -> (
       lemma_code_codes orig va_fM (state_to_S va_s0);
-      Vale.Transformers.InstructionReorder.lemma_reordering [orig] [hint] va_fM (state_to_S va_s0);
-      lemma_codes_code (Vale.Transformers.InstructionReorder.perform_reordering [orig] [hint]) va_fM (state_to_S va_s0);
+      IR.lemma_reordering [orig] [hint] va_fM (state_to_S va_s0);
+      lemma_codes_code (IR.perform_reordering [orig] [hint]) va_fM (state_to_S va_s0);
+      let Some s = machine_eval_code orig va_fM (state_to_S va_s0) in
       let Some s' = machine_eval_code transformed va_fM (state_to_S va_s0) in
-      assume (same_domain va_sM s');
+      assert (same_domain va_sM s);
+      lemma_IR_equiv_states_to_equiv_states va_sM s s';
+      assert (eval_code orig va_s0 va_fM va_sM);
+      assert ({s with ms_trace = []} == (state_to_S va_sM));
+      assert (same_domain va_sM s');
       let va_sM' = state_of_S va_sM s' in
-      assume (equiv_states va_sM va_sM');
-      assume (va_ensure_total transformed va_s0 va_sM' va_fM);
+      lemma_to_of va_sM s';
+      assert (state_to_S va_sM' == {s' with ms_trace = []});
+      assert (state_to_S va_sM == {s with ms_trace = []});
+      assert (IR.equiv_states ({s with ms_trace = []}) ({s' with ms_trace = []}));
+      assert (equiv_states va_sM va_sM');
+      assert (va_ensure_total transformed va_s0 va_sM' va_fM);
       va_sM', va_fM
     )
   | Err reason -> va_sM, va_fM
