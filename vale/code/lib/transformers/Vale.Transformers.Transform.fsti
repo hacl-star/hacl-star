@@ -37,21 +37,11 @@ let equiv_states (s1 s2:va_state) =
   s1.vs_memTaint == s2.vs_memTaint /\
   s1.vs_stackTaint == s2.vs_stackTaint
 
-let semantically_equivalent (c1 c2:va_code) : GTot Type0 =
-  (forall (s_init s_final1 s_final2:va_state) (fuel:va_fuel).
-     {:pattern (eval_code c2 s_init fuel s_final2); (equiv_states s_final1 s_final2)} (
-     (eval_code c1 s_init fuel s_final1 /\ eval_code c2 s_init fuel s_final2) ==>
-     (equiv_states s_final1 s_final2)))
-
 noeq
 type transformation_result = {
   success : pbool;
   result : va_code;
 }
-
-unfold
-let correct_transformation (orig:va_code) (res:transformation_result) =
-  semantically_equivalent orig res.result
 
 /// The Instruction Reordering Transformation
 
@@ -63,5 +53,15 @@ val reorder :
 val lemma_reorder :
   orig:va_code ->
   hint:va_code ->
-  Lemma
-    (ensures (correct_transformation orig (reorder orig hint)))
+  transformed:va_code -> va_s0:va_state -> va_sM:va_state -> va_fM:va_fuel ->
+  Ghost (va_state & va_fuel)
+    (requires (
+        (va_require_total transformed (reorder orig hint).result va_s0) /\
+        (va_get_ok va_s0) /\
+        (va_ensure_total orig va_s0 va_sM va_fM) /\
+        (va_get_ok va_sM)))
+    (ensures (fun (va_sM', va_fM') ->
+         (va_fM' == va_fM) /\
+         (equiv_states va_sM va_sM') /\
+         (va_ensure_total transformed va_s0 va_sM' va_fM') /\
+         (va_get_ok va_sM')))
