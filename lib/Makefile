@@ -1,8 +1,8 @@
 FSTAR_HOME ?= ../../FStar
 HACL_HOME  ?= ..
 
-CACHE_DIR     ?= $(HACL_HOME)/.cache
-HINT_DIR      ?= $(HACL_HOME)/.hints
+CACHE_DIR     ?= $(HACL_HOME).cache
+HINT_DIR      ?= $(HACL_HOME).hints
 
 include ../Makefile.include
 
@@ -42,7 +42,10 @@ include .depend
 $(HINT_DIR):
 	mkdir -p $@
 
-%.checked: | .depend $(HINT_DIR)
+$(CACHE_DIR):
+	mkdir -p $@
+
+$(CACHE_DIR)/%.checked: | .depend $(HINT_DIR) $(CACHE_DIR)
 	$(FSTAR) $< $(ENABLE_HINTS) --hint_file $(HINT_DIR)/$(notdir $*).hints && \
 	touch -c $@
 

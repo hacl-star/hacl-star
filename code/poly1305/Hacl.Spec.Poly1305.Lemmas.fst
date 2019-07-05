@@ -77,7 +77,7 @@ let pfelem = nat //x:nat{x < prime}
 unfold let pfmul a b = (a * b) % prime
 unfold let pfadd a b = (a + b) % prime
 
-#set-options "--z3rlimit 50"
+#reset-options "--z3refresh --z3rlimit 100 --max_fuel 1 --max_ifuel 1 --using_facts_from '* -FStar.Seq'"
 
 val poly_update_repeat_blocks_multi_lemma2_simplify:
   acc0:pfelem -> acc1:pfelem -> c0:pfelem -> c1:pfelem -> r:pfelem -> Lemma

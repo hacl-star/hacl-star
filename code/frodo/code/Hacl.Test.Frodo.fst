@@ -15,7 +15,7 @@ open Hacl.Impl.Matrix
 open Hacl.Frodo.Random
 open Frodo.Params
 
-#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq -Spec.Frodo.KEM.KeyGen -Spec.Frodo.KEM.Encaps -Spec.Frodo.KEM.Decaps'"
+#reset-options "--z3rlimit 150 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq -Spec.Frodo.KEM.KeyGen -Spec.Frodo.KEM.Encaps -Spec.Frodo.KEM.Decaps'"
 
 val test_frodo: 
   seed: lbytes 48ul ->

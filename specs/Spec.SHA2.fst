@@ -143,7 +143,33 @@ let k0: a:sha2_alg -> Tot (m:S.seq (word a) {S.length m = size_k_w a}) = functio
 unfold
 let (.[]) = S.index
 
+(* Core shuffling function *)
+let shuffle_core_aux (a:sha2_alg) (k_t: word a) (ws_t: word a) (hash:words_state a) : Tot (words_state a) =
+  (**) assert(7 <= S.length hash);
+  let a0 = hash.[0] in
+  let b0 = hash.[1] in
+  let c0 = hash.[2] in
+  let d0 = hash.[3] in
+  let e0 = hash.[4] in
+  let f0 = hash.[5] in
+  let g0 = hash.[6] in
+  let h0 = hash.[7] in
+
+  (**) assert(S.length (k0 a) = size_k_w a);
+  let t1 = h0 +. (_Sigma1 a e0) +. (_Ch a e0 f0 g0) +. k_t +. ws_t in
+  let t2 = (_Sigma0 a a0) +. (_Maj a a0 b0 c0) in
+
+  let l = [ t1 +. t2; a0; b0; c0; d0 +. t1; e0; f0; g0 ] in
+  assert_norm (List.Tot.length l = 8);
+  S.seq_of_list l
+
+[@"opaque_to_smt"]
+let shuffle_core = shuffle_core_aux
+
+
 (* Scheduling function *)
+
+(* Recursive Version *)
 let rec ws_aux (a:sha2_alg) (b:block_w a) (t:counter{t < size_k_w a}): Tot (word a) =
   if t < block_word_length then b.[t]
   else
@@ -159,33 +185,32 @@ let rec ws_aux (a:sha2_alg) (b:block_w a) (t:counter{t < size_k_w a}): Tot (word
 [@"opaque_to_smt"]
 let ws = ws_aux
 
-(* Core shuffling function *)
-let shuffle_core_aux (a:sha2_alg) (block:block_w a) (t:counter{t < size_k_w a}) (hash:words_state a) : Tot (words_state a) =
-  (**) assert(7 <= S.length hash);
-  let a0 = hash.[0] in
-  let b0 = hash.[1] in
-  let c0 = hash.[2] in
-  let d0 = hash.[3] in
-  let e0 = hash.[4] in
-  let f0 = hash.[5] in
-  let g0 = hash.[6] in
-  let h0 = hash.[7] in
+(* Incremental Version *)
+let ws_next_inner (a:sha2_alg) (i:nat{i < block_word_length}) (ws:block_w a) : block_w a =
+    let t16 = ws.[i] in
+    let t15 = ws.[(i+1)%16] in
+    let t7  = ws.[(i+9)%16] in
+    let t2  = ws.[(i+14)%16] in
+    let s1 = _sigma1 a t2 in
+    let s0 = _sigma0 a t15 in
+    Seq.upd ws i (s1 +. t7 +. s0 +. t16)
 
-  (**) assert(S.length (k0 a) = size_k_w a);
-  let t1 = h0 +. (_Sigma1 a e0) +. (_Ch a e0 f0 g0) +. (k0 a).[t] +. (ws a block t) in
-  let t2 = (_Sigma0 a a0) +. (_Maj a a0 b0 c0) in
-
-  (**) assert(t < S.length (k0 a));
-  let l = [ t1 +. t2; a0; b0; c0; d0 +. t1; e0; f0; g0 ] in
-  assert_norm (List.Tot.length l = 8);
-  S.seq_of_list l
+let ws_next_ (a:sha2_alg) (ws:block_w a) : block_w a =
+  Lib.LoopCombinators.repeati block_word_length (ws_next_inner a) ws
 
 [@"opaque_to_smt"]
-let shuffle_core = shuffle_core_aux
+let ws_next = ws_next_
 
 (* Full shuffling function *)
 let shuffle_aux (a:sha2_alg) (hash:words_state a) (block:block_w a): Tot (words_state a) =
-  Lib.LoopCombinators.repeati (size_k_w a) (shuffle_core a block) hash
+  let (h',_) = Lib.LoopCombinators.repeati #(words_state a * block_w a) (size_k_w a / 16)
+    (fun i (h,ws) ->
+      let open FStar.Mul in
+      let k = Seq.slice (k0 a) (i * 16) ((i+1) * 16) in
+      let h' = Lib.LoopCombinators.repeati 16 (fun j h -> shuffle_core a k.[j] ws.[j] h) h in
+      let ws' = ws_next a ws in
+      (h',ws')) (hash,block) in
+  h'
 
 [@"opaque_to_smt"]
 let shuffle = shuffle_aux
@@ -196,7 +221,7 @@ let init = h0
 let update_aux (a:sha2_alg) (hash:words_state a) (block:bytes{S.length block = block_length a}): Tot (words_state a) =
   let block_w = words_of_bytes a #block_word_length block in
   let hash_1 = shuffle a hash block_w in
-  Spec.Loops.seq_map2 ( +. ) hash hash_1
+  Lib.Sequence.map2 ( +. ) (hash <: Lib.Sequence.lseq (word a) (state_word_length a)) hash_1
 
 [@"opaque_to_smt"]
 let update = update_aux

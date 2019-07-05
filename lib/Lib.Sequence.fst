@@ -223,6 +223,20 @@ let generate_blocks #t len max n a f acc0 =
 
 let map_blocks_a (a:Type) (bs:size_nat) (max:nat) (i:nat{i <= max}) = s:seq a{length s == i * bs}
 
+let generate_blocks_simple_f
+ (#a:Type)
+ (bs:size_nat{bs > 0})
+ (max:nat)
+ (f:(i:nat{i < max} -> lseq a bs))
+ (i:nat{i < max})
+ (acc:map_blocks_a a bs max i) : map_blocks_a a bs max (i + 1)
+=
+ Seq.append acc (f i)
+
+let generate_blocks_simple #a bs max nb f =
+ repeat_gen nb (map_blocks_a a bs max)
+   (generate_blocks_simple_f #a bs max f) Seq.empty
+
 let map_blocks_f
   (#a:Type)
   (bs:size_nat{bs > 0})
@@ -247,7 +261,7 @@ let mod_prop n a b =
   FStar.Math.Lemmas.modulo_lemma (b - a * n) n;
   FStar.Math.Lemmas.lemma_mod_sub b n a
 
-#push-options "--z3rlimit 150 --max_fuel 0 --max_ifuel 0"
+#push-options "--z3rlimit 150 --max_fuel 1 --max_ifuel 1"
 
 let rec index_map_blocks_multi #a bs max n inp f i =
   let map_blocks_a = map_blocks_a a bs max in

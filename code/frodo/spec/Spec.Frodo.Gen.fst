@@ -146,6 +146,18 @@ let frodo_gen_matrix_cshake_4x n seedLen seed =
   Spec.Matrix.extensionality res (frodo_gen_matrix_cshake n seedLen seed);
   res
 
+#set-options "--z3rlimit 150"
+
+val frodo_gen_matrix_cshake_4x_lemma:
+    n:size_nat{0 < n /\ 2 * n <= max_size_t /\ 256 + n < maxint U16 /\ n * n <= max_size_t /\ n % 4 = 0}
+  -> seedLen:size_nat{seedLen > 0}
+  -> seed:lbytes seedLen ->
+  Lemma (
+    frodo_gen_matrix_cshake_4x n seedLen seed ==
+    Loops.repeat_gen (n / 4) (frodo_gen_matrix_cshake_4x_s n)
+      (frodo_gen_matrix_cshake_4x1 n seedLen seed) (Matrix.create n n))
+let frodo_gen_matrix_cshake_4x_lemma n seedLen seed = ()
+
 val frodo_gen_matrix_aes:
     n:size_nat{n * n <= max_size_t /\ n < maxint U16}
   -> seedLen:size_nat{seedLen == 16}

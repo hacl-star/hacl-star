@@ -36,7 +36,7 @@
         "typing_tok_Lib.IntTypes.U32@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "aeba4173a7971d4c0107f9418c7c3a67"
+      "cdb7f9aaf56f456ed371adfa3e314036"
     ],
     [
       "Spec.Agile.HMAC.init",
@@ -60,7 +60,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "7cc3b0e10afa89582cbbae68918b1bc4"
+      "38294e1dfd3e87a4e8b28d6a46a67475"
     ],
     [
       "Spec.Agile.HMAC.update_last",
@@ -74,7 +74,7 @@
         "typing_Spec.Agile.Hash.size_block"
       ],
       0,
-      "0b801a3a75322936b434d61dc8f64632"
+      "5000851ade6b6936dd229e78f8e33675"
     ],
     [
       "Spec.Agile.HMAC.update_last",
@@ -88,16 +88,7 @@
         "typing_Spec.Agile.Hash.size_block"
       ],
       0,
-      "e9b232dc0b0de16b38f9e549c0a2e856"
-    ],
-    [
-      "Spec.Agile.HMAC.update_last",
-      3,
-      2,
-      1,
-      [ "@query" ],
-      0,
-      "2c6b56dfe8d03eb3b22f9bf5bc04740f"
+      "6145f6f4a18313331fabc699a9dd7adf"
     ],
     [
       "Spec.Agile.HMAC.finish",
@@ -117,8 +108,9 @@
         "equation_Spec.Agile.Hash.size_block",
         "equation_Spec.Agile.Hash.size_hash",
         "equation_with_fuel_Prims.pow2.fuel_instrumented",
-        "fuel_guarded_inversion_Spec.Agile.Hash.algorithm", "int_typing",
-        "lemma_Lib.IntTypes.pow2_values", "primitive_Prims.op_Addition",
+        "fuel_guarded_inversion_Spec.Agile.Hash.algorithm", "int_inversion",
+        "int_typing", "lemma_Lib.IntTypes.pow2_values",
+        "primitive_Prims.op_Addition", "primitive_Prims.op_Modulus",
         "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
@@ -129,7 +121,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "59572ed72da485c0e99fa124bd73219a"
+      "c9fd89d7cef28f798589430b7a0bd1c6"
     ],
     [
       "Spec.Agile.HMAC.hmac",
@@ -148,7 +140,7 @@
         "refinement_interpretation_Tm_refine_db6d99ce56f7a60ee6bec59562e9487d"
       ],
       0,
-      "61ba444b1e54a5b5384fb1f719c0baf0"
+      "ee92da09fd75b02120a5e3b37d2f8ab3"
     ]
   ]
 ]

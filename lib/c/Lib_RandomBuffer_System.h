@@ -1,5 +1,5 @@
-#ifndef __HACL_LIB_RANDOMBUFFER
-#define __HACL_LIB_RANDOMBUFFER
+#ifndef __HACL_LIB_RANDOMBUFFER_SYSTEM
+#define __HACL_LIB_RANDOMBUFFER_SYSTEM
 
 #include <inttypes.h>
 #include <stdbool.h>
@@ -17,5 +17,5 @@ void hacl_aligned_free(void * ptr);
 
 void randombytes(uint8_t * x,uint32_t len);
 
-#endif // __HACL_LIB_RANDOMBUFFER
+#endif // __HACL_LIB_RANDOMBUFFER_SYSTEM
 
