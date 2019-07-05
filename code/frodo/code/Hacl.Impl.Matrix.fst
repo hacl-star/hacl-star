@@ -297,6 +297,16 @@ val onemore: p:(nat -> Type0) -> q:(i:nat{p i} -> Type0) -> b:nat{p b} -> Lemma
   (ensures  forall (i:nat{p i /\ i <= b}). q i)
 let onemore p q b = ()
 
+val onemore1:
+    #n1:size_nat
+  -> #n3:size_nat{n1 * n3 <= max_size_t}
+  -> c:M.matrix n1 n3
+  -> f:(i:nat{i < n1} -> k:nat{k < n3} -> GTot uint16)
+  -> i:size_nat{i < n1} -> Lemma
+  (requires ((forall (i1:nat{i1 < i}) (k:nat{k < n3}). M.mget c i1 k == f i1 k) /\ (forall (k:nat{k < n3}). M.mget c i k == f i k)))
+  (ensures (forall (i1:nat{i1 <= i}) (k:nat{k < n3}). M.mget c i1 k == f i1 k))
+let onemore1 #n1 #n3 c f i = ()
+
 val matrix_mul:
     #n1:size_t
   -> #n2:size_t{v n1 * v n2 <= max_size_t}
@@ -330,8 +340,7 @@ let matrix_mul #n1 #n2 #n3 a b c =
         (fun h2 k -> mul_inner_inv h0 h1 h2 a b c (f (v i)) i k)
         (fun k -> mul_inner1 h0 h1 a b c i k (f (v i)));
       let h1 = ST.get() in
-      let q i1 = forall k. get h1 c i1 k == f i1 k in
-      onemore (fun i1 -> i1 < v n1) q (v i)
+      onemore1 #(v n1) #(v n3) (as_matrix h1 c) f (v i)
     );
   let h2 = ST.get() in
   M.extensionality (as_matrix h2 c) (M.mul (as_matrix h0 a) (as_matrix h0 b))
@@ -457,8 +466,7 @@ let matrix_mul_s #n1 #n2 #n3 a b c =
         (fun h2 k -> mul_inner_inv h0 h1 h2 a b c (f (v i)) i k)
         (fun k -> mul_inner1_s h0 h1 a b c i k (f (v i)));
       let h1 = ST.get() in
-      let q i1 = forall k. get h1 c i1 k == f i1 k in
-      onemore (fun i1 -> i1 < v n1) q (v i)
+      onemore1 #(v n1) #(v n3) (as_matrix h1 c) f (v i)
     );
   let h2 = ST.get() in
   M.extensionality (as_matrix h2 c) (M.mul_s (as_matrix h0 a) (as_matrix h0 b))

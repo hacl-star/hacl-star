@@ -32,7 +32,7 @@ val frodo_pack8:
   -> res:lbytes d
   -> Stack unit
     (requires fun h0 -> live h0 a /\ live h0 res /\ disjoint a res)
-    (ensures  fun h0 _ h1 -> 
+    (ensures  fun h0 _ h1 ->
       modifies1 res h0 h1 /\
       as_seq h1 res == S.frodo_pack8 (v d) (as_seq h0 a))
 let frodo_pack8 d a res =
@@ -87,13 +87,14 @@ let frodo_pack #n1 #n2 d a res =
   assert (Seq.equal (refl h0 0) (Seq.create 0 (u8 0)));
   loop h0 n a_spec refl footprint spec
     (fun i ->
-      assert_spinoff (v (d *! i +! d) <= v (d *! ((n1 *! n2) /. size 8)));
+      FStar.Math.Lemmas.lemma_mult_le_left (v d) (v i + 1) (v n);
+      assert (v (d *! i +! d) <= v (d *! ((n1 *! n2) /. size 8)));
       Loops.unfold_repeat_gen (v n) a_spec (spec h0) (refl h0 0) (v i);
       let a = sub a (size 8 *! i) (size 8) in
       let r = sub res (d *! i) d in
       frodo_pack8 d a r;
       let h = ST.get() in
-      lemma_split (refl h (v i + 1)) (v d * v i)   
+      lemma_split (refl h (v i + 1)) (v d * v i)
     )
 
 
@@ -107,7 +108,7 @@ val frodo_unpack8:
   -> res:lbuffer uint16 8ul
   -> Stack unit
     (requires fun h0 -> live h0 b /\ live h0 res)
-    (ensures  fun h0 _ h1 -> 
+    (ensures  fun h0 _ h1 ->
       modifies1 res h0 h1 /\
       Seq.equal (as_seq h1 res) (S.frodo_unpack8 (v d) (as_seq h0 b)))
 let frodo_unpack8 d b res =
@@ -139,22 +140,22 @@ val frodo_unpack_loop:
   -> i:size_t{v i < v n1 * v n2 / 8}
   -> Stack unit
     (requires
-      loop_inv h0 (n1 *! n2 /. size 8) 
-        (S.frodo_unpack_state #(v n1) #(v n2)) 
-        (fun h i -> Seq.sub (as_seq h res) 0 (8 * i)) 
+      loop_inv h0 (n1 *! n2 /. size 8)
+        (S.frodo_unpack_state #(v n1) #(v n2))
+        (fun h i -> Seq.sub (as_seq h res) 0 (8 * i))
         (fun i -> loc res)
         (fun h0 -> S.frodo_unpack_inner #(v n1) #(v n2) (v d) (as_seq h0 b))
         (v i))
     (ensures  fun _ _ ->
-      loop_inv h0 (n1 *! n2 /. size 8) 
-        (S.frodo_unpack_state #(v n1) #(v n2)) 
-        (fun h i -> Seq.sub (as_seq h res) 0 (8 * i)) 
+      loop_inv h0 (n1 *! n2 /. size 8)
+        (S.frodo_unpack_state #(v n1) #(v n2))
+        (fun h i -> Seq.sub (as_seq h res) 0 (8 * i))
         (fun i -> loc res)
         (fun h0 -> S.frodo_unpack_inner #(v n1) #(v n2) (v d) (as_seq h0 b))
         (v i + 1))
-let frodo_unpack_loop n1 n2 d b res h0 i =        
+let frodo_unpack_loop n1 n2 d b res h0 i =
   let n = n1 *! n2 /. size 8 in
-  let a_spec = S.frodo_unpack_state #(v n1) #(v n2) in  
+  let a_spec = S.frodo_unpack_state #(v n1) #(v n2) in
   [@inline_let]
   let refl h (i:size_nat{i <= v n}) = Seq.sub (as_seq h res) 0 (8 * i) in
   let footprint (i:size_nat{i <= v n}) = loc res in
@@ -181,11 +182,11 @@ val frodo_unpack:
 [@"c_inline"]
 let frodo_unpack n1 n2 d b res =
   let n = n1 *! n2 /. size 8 in
-  let a_spec = S.frodo_unpack_state #(v n1) #(v n2) in  
+  let a_spec = S.frodo_unpack_state #(v n1) #(v n2) in
   [@inline_let]
   let refl h (i:size_nat{i <= v n}) = Seq.sub (as_seq h res) 0 (8 * i) in
   let footprint (i:size_nat{i <= v n}) = loc res in
   [@inline_let]
   let spec h0 = S.frodo_unpack_inner #(v n1) #(v n2) (v d) (as_seq h0 b) in
-  let h0 = ST.get() in 
+  let h0 = ST.get() in
   loop h0 n a_spec refl footprint spec (frodo_unpack_loop n1 n2 d b res h0)
