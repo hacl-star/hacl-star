@@ -405,74 +405,6 @@ val blake2b_init_branching:
                        let key_block1: Spec.block_s Spec.Blake2B = Seq.update_sub h0.[|key_block|] 0 (v kk) h0.[|k|] in
                        h1.[|hash|] == Spec.blake2_update_block Spec.Blake2B (Spec.size_block Spec.Blake2B) key_block1 h0.[|hash|])))
 
-
-val lemma_value: #t:inttype -> u:uint_t t PUB{uint_v u == uint_v size_block} -> Lemma
-  (uint_v u == uint_v size_block
-  /\ uint_v u <= Spec.max_limb Spec.Blake2B
-  )
-let lemma_value #t u = ()
-
-
-
-val lemma_value2: #t:inttype -> u:uint_t t PUB{uint_v u == uint_v size_block} -> Lemma
-  (uint_v u == uint_v size_block
-  /\ uint_v u <= Spec.max_limb Spec.Blake2B)
-let lemma_value2 #t u = ()
-
-val lemma_value3: #t:inttype -> u:uint_t t SEC{uint_v u == uint_v size_block} -> Lemma
-  (uint_v u == uint_v size_block
-  /\ uint_v u <= Spec.max_limb Spec.Blake2B)
-let lemma_value3 #t u = ()
-
-val lemma_value4: #t:inttype -> u:Spec.word_t Spec.Blake2.Blake2B{uint_v u == uint_v size_block
-                                                               /\ uint_v u <= Spec.max_limb Spec.Blake2B} ->
-  Lemma (
-    let x = Spec.word_to_limb Spec.Blake2B u in
-    uint_v x == uint_v size_block)
-
-let lemma_value4 #t u = ()
-
-
-val lemma_value5: #t:inttype -> u:uint_t (Spec.wt Spec.Blake2B) SEC{uint_v u <= Spec.max_limb Spec.Blake2B
-                                                        /\ uint_v u == uint_v size_block} ->
-  Lemma (
-    let x = Spec.word_to_limb Spec.Blake2B u in
-    uint_v x == uint_v size_block)
-
-let lemma_value5 #t u = ()
-
-
-val lemma_value6: u:uint_t (Spec.wt Spec.Blake2B) PUB{uint_v u <= Spec.max_limb Spec.Blake2B
-                                                        /\ uint_v u == Spec.size_block Spec.Blake2B} ->
-  Lemma (
-    let x = Spec.word_to_limb Spec.Blake2B (secret u) in
-    uint_v x == uint_v size_block)
-
-let lemma_value6 u = ()
-
-(* val lemma_value7: u:Spec.word_t Spec.Blake2B{uint_v u <= Spec.max_limb Spec.Blake2B *)
-(*                                                         /\ uint_v u == Spec.size_block Spec.Blake2B} -> *)
-(*   Lemma ( *)
-(*     let x = Spec.word_to_limb Spec.Blake2B (secret u) in *)
-(*     uint_v x == uint_v size_block) *)
-
-(* let lemma_value7 u = () *)
-
-
-(* val lemma_value8: u:Spec.word_t Spec.Blake2B -> *)
-(*   Lemma ( *)
-(*     let x: word_t = (secret #(Spec.wt Spec.Blake2B) u) in *)
-(*     uint_v #(Spec.wt Spec.Blake2B) #SEC x == uint_v u) *)
-
-(* let lemma_value8 u = () *)
-
-let f (x:Spec.word_t Spec.Blake2B) : Tot unit =
-  let y: word_t = (secret #(Spec.wt Spec.Blake2B) x) in
-  assert(x == y)
-
-
-
-
 [@ Substitute ]
 let blake2b_init_branching hash key_block kk k nn =
   let h0 = ST.get () in
@@ -480,8 +412,8 @@ let blake2b_init_branching hash key_block kk k nn =
   begin
     update_sub key_block (size 0) kk k;
     assert(uint_v (secret size_block) <= Spec.max_limb Spec.Blake2B);
-    admit();
-    let prev = Spec.word_to_limb Spec.Blake2B (secret size_block) in
+    let prev64:uint64 = to_u64 (secret size_block) in
+    let prev = Spec.word_to_limb Spec.Blake2B prev64 in
     blake2b_update_block hash prev key_block
   end
 
@@ -519,11 +451,9 @@ val blake2b_update_last:
                          /\ h1.[|hash|] == Spec.Blake2.blake2_update_last Spec.Blake2B (uint_v prev) (v len) h0.[|last|] h0.[|hash|]))
 
 let blake2b_update_last hash prev len last =
-  admit();
-  uintv_extensionality prev (u128 (uint_v prev));
   push_frame ();
   let last_block = create size_block (u8 0) in
-  let last_block_w = create 16ul (u32 0) in
+  let last_block_w = create 16ul (u64 0) in
   update_sub last_block (size 0) len last;
   uints_from_bytes_le last_block_w last_block;
   let offset = prev in
@@ -562,16 +492,20 @@ let spec_prev2 (klen:size_nat{klen == 0 \/ klen == 1})
 	      (i:size_nat{i == dlen/128}) : r:nat{r < pow2 128} = (klen * 128) + dlen
 
 
+#push-options "--z3rlimit 150 --max_fuel 1"
 noextract inline_for_extraction
 let prev1 (klen:size_t{v klen == 0 \/ v klen == 1})
           (dlen:size_t{if v klen = 0 then v dlen < pow2 128 else v dlen + 128 < pow2 128})
-	  (i:size_t{v i < v dlen/128}) :
+	  (i:size_t{v i < v dlen / 128}) :
 	  (prev:uint128{uint_v prev == spec_prev1 (v klen) (v dlen) (v i)})
 	  =
-     admit();
-     let p = to_u128 (klen +. i +. size 1) *. u128 128 in
+     let p1r: size_t = klen +. i +. (size 1) in
+     let p1: uint64 = to_u64 p1r in
+     let p2: uint64 = u64 128 in
+     let p: uint128 = to_u128 (p1 *. p2) in
 	    assert (uint_v p == spec_prev1 (v klen) (v dlen) (v i));
 	    p
+#pop-options
 
 noextract inline_for_extraction
 let prev2 (klen:size_t{v klen == 0 \/ v klen == 1})
