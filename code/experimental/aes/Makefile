@@ -10,7 +10,7 @@ OUT_DIR	      = aes128-bitslice-c
 
 .PHONY: all test stage1 stage2 clean clean-c distclean
 
-all: aes128-ni.exe aes128-bitslice.exe
+all: aes128-ni.exe aes128-bitslice.exe aes256-ni.exe aes256-bitslice.exe
 
 verify: test
 
@@ -143,7 +143,7 @@ FSTAR = $(FSTAR_HOME)/bin/fstar.exe $(FSTAR_FLAGS)
 
 ENABLE_HINTS = --use_hints --use_hint_hashes --record_hints --query_stats
 
-ROOTS = Hacl.AES_128_NI.fst
+ROOTS = Hacl.AES_128.NI.fst Hacl.AES_256.NI.fst Hacl.AES_128.BitSlice.fst Hacl.AES_256.BitSlice.fst
 
 
 .PRECIOUS: %.krml
