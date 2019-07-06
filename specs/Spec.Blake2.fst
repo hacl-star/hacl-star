@@ -50,7 +50,7 @@ unfold let limb_inttype (a:alg) =
   | U32 -> U64
   | U64 -> U128
 
-type word_t (a:alg) = uint_t (wt a) SEC
+unfold type word_t (a:alg) = uint_t (wt a) SEC
 type pub_word_t (a:alg) = uint_t (wt a) PUB
 type limb_t (a:alg) : Type0 = uint_t (limb_inttype a) SEC
 
