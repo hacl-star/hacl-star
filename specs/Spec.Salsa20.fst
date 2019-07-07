@@ -10,16 +10,16 @@ open Lib.LoopCombinators
 #set-options "--max_fuel 0 --z3rlimit 100"
 
 (* Constants *)
-let keylen = 32 (* in bytes *)
-let blocklen = 64  (* in bytes *)
-let noncelen = 8   (* in bytes *)
+let size_key = 32 (* in bytes *)
+let size_block = 64  (* in bytes *)
+let size_nonce = 8   (* in bytes *)
 
-type key = lbytes keylen
-type block = lbytes blocklen
-type nonce = lbytes noncelen
+type key = lbytes size_key
+type block = lbytes size_block
+type nonce = lbytes size_nonce
 type counter = size_nat
 
-type state = m:lseq uint32 16
+type state = lseq uint32 16
 type idx = n:size_nat{n < 16}
 type shuffle = state -> Tot state
 
@@ -53,66 +53,99 @@ let double_round: shuffle =
   column_round @ row_round (* 2 rounds *)
 
 let rounds : shuffle =
-  repeati 10 (fun i -> double_round) (* 20 rounds *)
+  repeat 10 double_round (* 20 rounds *)
 
-let salsa20_core (s:state) : Tot state =
-  let s' = rounds s in
-  map2 (fun x y -> x +. y) s' s
+let salsa20_add_counter (s:state) (ctr:counter) : Tot state =
+  s.[8] <- s.[8] +. (u32 ctr)
+
+let salsa20_core (ctr:counter) (s:state) : Tot state =
+  let s' = salsa20_add_counter s ctr in
+  let s' = rounds s' in
+  let s' = map2 (+.) s' s in
+  salsa20_add_counter s' ctr
 
 (* state initialization *)
-let constant0 = 0x61707865
-let constant1 = 0x3320646e
-let constant2 = 0x79622d32
-let constant3 = 0x6b206574
+let constant0 = u32 0x61707865
+let constant1 = u32 0x3320646e
+let constant2 = u32 0x79622d32
+let constant3 = u32 0x6b206574
 
 
-let setup (k:key) (n:nonce) (st:state) : Tot state =
+let setup (k:key) (n:nonce) (ctr0:counter) (st:state) : Tot state =
   let ks = uints_from_bytes_le #U32 #SEC #8 k in
   let ns = uints_from_bytes_le #U32 #SEC #2 n in
-  let st = st.[0] <- u32 constant0 in
+  let st = st.[0] <- constant0 in
   let st = update_sub st 1 4 (slice ks 0 4) in
-  let st = st.[5] <- u32 constant1 in
-  let st = update_sub st 6 2 (slice ns 0 2) in
-  let st = st.[10] <- u32 constant2 in
+  let st = st.[5] <- constant1 in
+  let st = update_sub st 6 2 ns in
+  let st = st.[8] <- u32 ctr0 in
+  let st = st.[9] <- u32 0 in
+  let st = st.[10] <- constant2 in
   let st = update_sub st 11 4 (slice ks 4 8) in
-  let st = st.[15] <- u32 constant3 in
+  let st = st.[15] <- constant3 in
   st
 
-let salsa20_init (k:key) (n_len:size_nat) (n:nonce) : Tot state =
+let salsa20_init (k:key) (n:nonce) (ctr0:counter) : Tot state =
   let st = create 16 (u32 0) in
-  let st  = setup k n st in
+  let st  = setup k n ctr0 st in
   st
-
-let salsa20_set_counter (st:state) (c:counter) : Tot state =
-  let st = st.[8] <- (u32 c) in
-  st.[9] <- (u32 0)
 
 let salsa20_key_block (st:state) : Tot block =
-  let st' = salsa20_core st in
+  let st' = salsa20_core 0 st in
   uints_to_bytes_le st'
 
-let salsa20_encrypt_block (st0:state) (ctr0:counter) (incr:counter{ctr0 + incr <= max_size_t}) (b:block) : Tot block =
-  let st = salsa20_set_counter st0 (ctr0 + incr) in
-  let kb = salsa20_key_block st in
-  map2 (^.) b kb
+let salsa20_key_block0 (k:key) (n:nonce) : Tot block =
+  let st = salsa20_init k n 0 in
+  salsa20_key_block st
 
-let salsa20_encrypt_last (st0:state) (ctr0:counter) 
-			  (incr:counter{ctr0 + incr <= max_size_t}) 
-			  (len:size_nat{len < blocklen})
+let xor_block (k:state) (b:block) : block  =
+  let ib = uints_from_bytes_le b in
+  let ob = map2 (^.) ib k in
+  uints_to_bytes_le ob
+
+let salsa20_encrypt_block (st0:state) (incr:counter) (b:block) : Tot block =
+  let k = salsa20_core incr st0 in
+  xor_block k b
+
+let salsa20_encrypt_last (st0:state) (incr:counter)
+			  (len:size_nat{len < size_block})
 			  (b:lbytes len) : lbytes len =
-  let plain = create blocklen (u8 0) in
+  let plain = create size_block (u8 0) in
   let plain = update_sub plain 0 (length b) b in
-  let cipher = salsa20_encrypt_block st0 ctr0 incr plain in
-  sub cipher 0 (length b)
+  let cipher = salsa20_encrypt_block st0 incr plain in
+  sub cipher 0 len
+
+val salsa20_update:
+    ctx: state
+  -> msg: bytes{length msg <= max_size_t}
+  -> cipher: bytes{length cipher == length msg}
+
+let salsa20_update ctx msg =
+  let cipher = msg in
+  map_blocks size_block cipher
+    (salsa20_encrypt_block ctx)
+    (salsa20_encrypt_last ctx)
+
 
 val salsa20_encrypt_bytes:
-  key -> nonce -> c:counter 
--> msg:bytes{length msg / blocklen + c <= max_size_t} 
--> cipher:bytes{length cipher == length msg}
+    k: key
+  -> n: nonce
+  -> c: counter
+  -> msg: bytes{length msg <= max_size_t}
+  -> cipher: bytes{length cipher == length msg}
 
 let salsa20_encrypt_bytes key nonce ctr0 msg =
-  let cipher = msg in
-  let st0 = salsa20_init key 8 nonce in
-  map_blocks blocklen cipher
-    (salsa20_encrypt_block st0 ctr0) 
-    (salsa20_encrypt_last st0 ctr0)
+  let st0 = salsa20_init key nonce ctr0 in
+  salsa20_update st0 msg
+
+
+val salsa20_decrypt_bytes:
+    k: key
+  -> n: nonce
+  -> c: counter
+  -> cipher: bytes{length cipher <= max_size_t}
+  -> msg: bytes{length cipher == length msg}
+
+let salsa20_decrypt_bytes key nonce ctr0 cipher =
+  let st0 = salsa20_init key nonce ctr0 in
+  salsa20_update st0 cipher
