@@ -13,10 +13,12 @@ open Lib.LoopCombinators
 let size_key = 32 (* in bytes *)
 let size_block = 64  (* in bytes *)
 let size_nonce = 8   (* in bytes *)
+let size_xnonce = 16   (* in bytes *)
 
 type key = lbytes size_key
 type block = lbytes size_block
 type nonce = lbytes size_nonce
+type xnonce = lbytes size_xnonce
 type counter = size_nat
 
 type state = lseq uint32 16
@@ -65,9 +67,13 @@ let salsa20_core (ctr:counter) (s:state) : Tot state =
   salsa20_add_counter s' ctr
 
 (* state initialization *)
+inline_for_extraction
 let constant0 = u32 0x61707865
+inline_for_extraction
 let constant1 = u32 0x3320646e
+inline_for_extraction
 let constant2 = u32 0x79622d32
+inline_for_extraction
 let constant3 = u32 0x6b206574
 
 
@@ -89,6 +95,32 @@ let salsa20_init (k:key) (n:nonce) (ctr0:counter) : Tot state =
   let st = create 16 (u32 0) in
   let st  = setup k n ctr0 st in
   st
+
+let xsetup (k:key) (n:xnonce) (st:state) : Tot state =
+  let ks = uints_from_bytes_le #U32 #SEC #8 k in
+  let ns = uints_from_bytes_le #U32 #SEC #4 n in
+  let st = st.[0] <- constant0 in
+  let st = update_sub st 1 4 (slice ks 0 4) in
+  let st = st.[5] <- constant1 in
+  let st = update_sub st 6 4 ns in
+  let st = st.[10] <- constant2 in
+  let st = update_sub st 11 4 (slice ks 4 8) in
+  let st = st.[15] <- constant3 in
+  st
+
+let hsalsa20_init (k:key) (n:xnonce) : Tot state =
+  let st = create 16 (u32 0) in
+  let st  = xsetup k n st in
+  st
+
+let hsalsa20 (k:key) (n:xnonce) : Tot (lbytes 32) =
+  let st = hsalsa20_init k n in
+  let st = rounds st in
+  [@inline_let]
+  let res_l = [st.[0]; st.[5]; st.[10]; st.[15]; st.[6]; st.[7]; st.[8]; st.[9]] in
+  assert_norm(List.Tot.length res_l == 8);
+  let res = createL res_l in
+  uints_to_bytes_le res
 
 let salsa20_key_block (st:state) : Tot block =
   let st' = salsa20_core 0 st in
@@ -117,7 +149,7 @@ let salsa20_encrypt_last (st0:state) (incr:counter)
 
 val salsa20_update:
     ctx: state
-  -> msg: bytes{length msg <= max_size_t}
+  -> msg: bytes{length msg / size_block <= max_size_t}
   -> cipher: bytes{length cipher == length msg}
 
 let salsa20_update ctx msg =
@@ -131,7 +163,7 @@ val salsa20_encrypt_bytes:
     k: key
   -> n: nonce
   -> c: counter
-  -> msg: bytes{length msg <= max_size_t}
+  -> msg: bytes{length msg / size_block <= max_size_t}
   -> cipher: bytes{length cipher == length msg}
 
 let salsa20_encrypt_bytes key nonce ctr0 msg =
@@ -143,7 +175,7 @@ val salsa20_decrypt_bytes:
     k: key
   -> n: nonce
   -> c: counter
-  -> cipher: bytes{length cipher <= max_size_t}
+  -> cipher: bytes{length cipher / size_block <= max_size_t}
   -> msg: bytes{length cipher == length msg}
 
 let salsa20_decrypt_bytes key nonce ctr0 cipher =
