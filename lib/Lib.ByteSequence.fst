@@ -253,6 +253,8 @@ let uints_from_bytes_be #t #l #len b =
   Lib.Sequence.createi #(uint_t t l) len
     (fun i -> uint_from_bytes_be (sub b (i * numbytes t) (numbytes t)))
 
+let index_uints_from_bytes_be #t #l #len b i = ()
+
 let uint_at_index_le #t #l #len b i =
   uint_from_bytes_le (sub b (i * numbytes t) (numbytes t))
 
