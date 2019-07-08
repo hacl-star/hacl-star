@@ -521,7 +521,7 @@ let map_blocks_multi #t #a h0 bs nb inp output spec_f impl_f =
       (v i * v bs)
   )
 
-#reset-options "--z3rlimit 300 --max_fuel 1 --max_ifuel 1"
+#reset-options "--z3rlimit 300 --max_fuel 0 --max_ifuel 1"
 
 let map_blocks #t #a h0 len blocksize inp output spec_f spec_l impl_f impl_l =
   let nb = len /. blocksize in
