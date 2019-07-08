@@ -314,7 +314,8 @@ let test_ctr_st a counter counter_len nonce nonce_len k k_len
     B.recall output;
     B.recall counter;
 
-    let ctr = LowStar.Endianness.load32_le counter in
+    // Might only be correct for AES
+    let ctr = LowStar.Endianness.load32_be counter in
     if ctr = 0xfffffffful then
       C.Failure.failwith !$"test_ctr_st: ctr = max_uint32"
     else begin
