@@ -256,6 +256,106 @@ let rec test_aes128_gcm_loop (i: U32.t): St unit =
 let test_aes128_gcm () : St unit =
   test_aes128_gcm_loop 0ul
 
+let nonce_bound a (len: UInt32.t):
+  Tot (b:bool { b ==> Spec.Agile.Cipher.nonce_bound a (UInt32.v len) })
+=
+  let open Spec.Agile.Cipher in
+  match a with
+  | CHACHA20 -> len = 12ul
+  | _ -> len `U32.lte` 16ul
+
+let block_len a: Tot (x:UInt32.t { UInt32.v x = Spec.Agile.Cipher.block_length a }) =
+  match a with
+  | Spec.Agile.Cipher.CHACHA20 -> 64ul
+  | _ -> 16ul
+
+let key_len a: Tot (x:UInt32.t { UInt32.v x = Spec.Agile.Cipher.key_length a }) =
+  match a with
+  | Spec.Agile.Cipher.CHACHA20 -> 32ul
+  | Spec.Agile.Cipher.AES128 -> 16ul
+  | Spec.Agile.Cipher.AES256 -> 32ul
+
+#push-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
+let test_ctr_st a counter counter_len nonce nonce_len k k_len
+  input input_len output output_len:
+  ST unit
+  (requires (fun _ ->
+    B.recallable counter /\
+    B.recallable nonce /\
+    B.recallable k /\
+    B.recallable input /\
+    B.recallable output /\
+    B.len k == k_len /\
+    B.len nonce == nonce_len /\
+    B.len counter == counter_len /\
+    B.len input == input_len /\
+    B.len output == output_len /\
+    B.disjoint input output
+  ))
+  (ensures (fun _ _ _ -> True))
+=
+  let open EverCrypt.CTR in
+
+  if not (k_len = key_len a) then
+    C.Failure.failwith !$"test_ctr_st: not (key_len = aead_key_length32 alg)"
+  else if not (counter_len = 4ul) then
+    C.Failure.failwith !$"test_ctr_st: not (counter_len = 4)"
+  else if not (nonce_bound a nonce_len) then
+    C.Failure.failwith !$"test_ctr_st: not (nonce_bound a nonce_len)"
+  else if not (input_len = output_len) then
+    C.Failure.failwith !$"test_ctr_st: not (input_len = output_len)"
+  else if not (input_len = block_len a) then
+    C.Failure.failwith !$"test_ctr_st: not (input_len = block_len a)"
+
+  else begin
+    B.recall k;
+    B.recall nonce;
+    B.recall input;
+    B.recall output;
+    B.recall counter;
+
+    let ctr = LowStar.Endianness.load32_le counter in
+    if ctr = 0xfffffffful then
+      C.Failure.failwith !$"test_ctr_st: ctr = max_uint32"
+    else begin
+      push_frame ();
+      let output' = B.alloca 0uy output_len in
+
+      let s = B.alloca B.null 1ul in
+      let r = EverCrypt.CTR.create_in a HyperStack.root s k nonce nonce_len ctr in
+      if r <> Success then
+        C.Failure.failwith !$"test_ctr_st: create_in <> Success"
+      else begin
+        let s = B.index s 0ul in
+        update_block (Ghost.hide a) s output' input;
+
+        TestLib.compare_and_print !$"of CTR" output output' output_len
+      end;
+      pop_frame ()
+    end
+  end
+
+#pop-options
+
+let rec test_aes128_ctr_loop (i: U32.t): St unit =
+  let open Test.Vectors.Aes128 in
+  if i `U32.gte` vectors_len then
+    ()
+  else begin
+    B.recall vectors;
+    assert (U32.v i < B.length vectors);
+    let Vector output output_len counter counter_len nonce nonce_len key key_len input input_len =
+      vectors.(i)
+    in
+    assume (B.disjoint input output);
+    test_ctr_st Spec.Agile.Cipher.AES128 counter counter_len nonce nonce_len key key_len
+      input input_len output output_len;
+    test_aes128_ctr_loop (i `U32.add_mod` 1ul)
+  end
+
+let test_aes128_ctr () : St unit =
+  test_aes128_ctr_loop 0ul
+
 let rec test_rng (ctr:UInt32.t) : St unit = ()
   // AR: 09/07: B.alloca won't work, we don't know is_stack_region (get_tip h0)
   // let open FStar.Integers in
@@ -510,7 +610,13 @@ let curve25519_test_set =
 
 inline_for_extraction
 noextract
-let aead_gcm_test_set =
+let aes_gcm_test_set =
+  (Vale, f_aesni `f_concat` f_avx) `ts_cons` (
+  ts_nil)
+
+inline_for_extraction
+noextract
+let aes_ctr_test_set =
   (Vale, f_aesni `f_concat` f_avx) `ts_cons` (
   ts_nil)
 
@@ -563,13 +669,19 @@ let test_curve25519_body (print: C.String.t -> St unit) : St unit =
 
 inline_for_extraction
 noextract
-let test_aead_gcm_body (print: C.String.t -> St unit) : St unit =
+let test_aes_gcm_body (print: C.String.t -> St unit) : St unit =
     print !$"  >>>>>>>>> AEAD (AES128_GCM old vectors)\n";
     test_aead AES_128_GCM;
     print !$"  >>>>>>>>> AEAD (AES256_GCM old vectors)\n";
     test_aead AES_256_GCM;
     print !$"  >>>>>>>>> AEAD (AES128_GCM vectors)\n";
     test_aes128_gcm ()
+
+inline_for_extraction
+noextract
+let test_aes_ctr_body (print: C.String.t -> St unit) : St unit =
+    print !$"  >>>>>>>>> CTR (AES128_CTR vectors)\n";
+    test_aes128_ctr ()
 
 inline_for_extraction
 let test_chacha20poly1305_body (print: C.String.t -> St unit) : St unit =
@@ -618,7 +730,9 @@ let test_all () : St unit =
   print_sep ();
   curve25519_test_set       test_curve25519_body;
   print_sep ();
-  aead_gcm_test_set         test_aead_gcm_body;
+  aes_gcm_test_set          test_aes_gcm_body;
+  print_sep ();
+  aes_ctr_test_set          test_aes_ctr_body;
   print_sep ();
   chacha20poly1305_test_set test_chacha20poly1305_body;
   print_sep ();
