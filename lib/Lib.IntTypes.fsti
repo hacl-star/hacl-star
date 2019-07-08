@@ -568,28 +568,28 @@ val shift_right_lemma: #t:inttype -> #l:secrecy_level
 
 inline_for_extraction
 val shift_left: #t:inttype -> #l:secrecy_level
-  -> a:int_t t l{unsigned t \/ 0 <= v a}
-  -> shiftval t
+  -> a:int_t t l
+  -> s:shiftval t{unsigned t \/ (0 <= v a /\ v a * pow2 (v s) <= maxint t)}
   -> int_t t l
 
 val shift_left_lemma:
     #t:inttype
   -> #l:secrecy_level
   -> a:int_t t l{unsigned t \/ 0 <= v a}
-  -> b:shiftval t
+  -> s:shiftval t{unsigned t \/ (0 <= v a /\ v a * pow2 (v s) <= maxint t)}
   -> Lemma
-    (v (shift_left a b) == (v a * pow2 (v b)) @%. t)
-    [SMTPat (v #t #l (shift_left #t #l a b))]
+    (v (shift_left a s) == (v a * pow2 (v s)) @%. t)
+    [SMTPat (v #t #l (shift_left #t #l a s))]
 
 inline_for_extraction
 val rotate_right: #t:inttype -> #l:secrecy_level
-  -> a:int_t t l{unsigned t \/ 0 <= v a}
+  -> a:int_t t l{unsigned t}
   -> rotval t
   -> int_t t l
 
 inline_for_extraction
 val rotate_left: #t:inttype -> #l:secrecy_level
-  -> a:int_t t l{unsigned t \/ 0 <= v a}
+  -> a:int_t t l{unsigned t}
   -> rotval t
   -> int_t t l
 
@@ -671,12 +671,14 @@ val lte_mask_lemma: #t:inttype{unsigned t} -> a:int_t t SEC -> b:int_t t SEC -> 
 #push-options "--max_fuel 1"
 
 inline_for_extraction
-let mod_mask (#t:inttype{unsigned t}) (#l:secrecy_level) (m:shiftval t) : int_t t l =
-  (mk_int 1 `shift_left` m) `sub_mod` mk_int 1
+let mod_mask (#t:inttype) (#l:secrecy_level) (m:shiftval t{pow2 (uint_v m) <= maxint t}) : int_t t l =
+  shift_left_lemma #t #l (mk_int 1) m;
+  (mk_int 1 `shift_left` m) `sub` mk_int 1
 
 #pop-options
 
-val mod_mask_lemma: #t:inttype{unsigned t} -> #l:secrecy_level -> a:int_t t l -> m:shiftval t
+val mod_mask_lemma: #t:inttype -> #l:secrecy_level
+  -> a:int_t t l -> m:shiftval t{pow2 (uint_v m) <= maxint t}
   -> Lemma (v (a `logand` mod_mask m) == v a % pow2 (v m))
   [SMTPat (a `logand` mod_mask #t m)]
 

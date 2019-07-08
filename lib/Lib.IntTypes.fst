@@ -815,7 +815,7 @@ let lte_mask_lemma #t a b =
       UInt.logor_lemma_1 #(bits t) (v (lt_mask a b))
 
 private
-val mod_mask_value: #t:inttype{unsigned t} -> #l:secrecy_level -> m:shiftval t ->
+val mod_mask_value: #t:inttype -> #l:secrecy_level -> m:shiftval t{pow2 (uint_v m) <= maxint t} ->
   Lemma (v (mod_mask #t #l m) == pow2 (v m) - 1)
 
 #push-options "--max_fuel 1"
@@ -829,10 +829,23 @@ let mod_mask_value #t #l m =
 
 let mod_mask_lemma #t #l a m =
   mod_mask_value #t #l m;
-  if v m = 0 then
-    UInt.logand_lemma_1 #(bits t) (v a)
+  if unsigned t || 0 <= v a then
+    if v m = 0 then
+      UInt.logand_lemma_1 #(bits t) (v a)
+    else
+      UInt.logand_mask #(bits t) (v a) (v m)
   else
-    UInt.logand_mask #(bits t) (v a) (v m)
+    begin
+    let a1 = v a in
+    let a2 = v a + pow2 (bits t) in
+    pow2_plus (bits t - v m) (v m);
+    pow2_le_compat (bits t - 1) (v m);
+    lemma_mod_plus a1 (pow2 (bits t - v m)) (pow2 (v m));
+    if v m = 0 then
+      UInt.logand_lemma_1 #(bits t) a2
+    else
+      UInt.logand_mask #(bits t) a2 (v m)
+    end
 
 let div #t x y =
   match t with
