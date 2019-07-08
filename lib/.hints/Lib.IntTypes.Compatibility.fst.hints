@@ -1,0 +1,80 @@
+[
+  "}—ü∆©\u0007ƒØ{ù˚’Y$Úã",
+  [
+    [
+      "Lib.IntTypes.Compatibility.uint_v_size_lemma",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "constructor_distinct_Lib.IntTypes.U32",
+        "equality_tok_Lib.IntTypes.U32@tok",
+        "equation_Lib.IntTypes.unsigned", "equation_Prims.nat",
+        "projection_inverse_BoxBool_proj_0",
+        "refinement_interpretation_Tm_refine_0ec011aea9f93256a3547ad9f0c667f1",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
+      ],
+      0,
+      "537e327e7a82d494692f7aaf17026b0e"
+    ],
+    [
+      "Lib.IntTypes.Compatibility.uint_v_size_lemma",
+      2,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "constructor_distinct_Lib.IntTypes.U32",
+        "equality_tok_Lib.IntTypes.PUB@tok",
+        "equality_tok_Lib.IntTypes.U32@tok", "equation_Lib.IntTypes.range",
+        "equation_Lib.IntTypes.unsigned", "equation_Prims.nat",
+        "int_inversion", "lemma_Lib.IntTypes.v_mk_int",
+        "refinement_interpretation_Tm_refine_0ec011aea9f93256a3547ad9f0c667f1",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_83845a86f2550cdf941eeb1d9b59602b",
+        "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
+      ],
+      0,
+      "7a8e41cfef1982ac5bcc02886b02472e"
+    ],
+    [
+      "Lib.IntTypes.Compatibility.uintv_extensionality",
+      1,
+      2,
+      1,
+      [ "@query" ],
+      0,
+      "6b1827e2a32a6a617f89b0dca0f7064d"
+    ],
+    [
+      "Lib.IntTypes.Compatibility.uintv_extensionality",
+      2,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query", "lemma_Lib.IntTypes.v_injective",
+        "refinement_interpretation_Tm_refine_387e6d282145573240ab7b8a4b94cce5"
+      ],
+      0,
+      "3f0c5e9d7cfb5af9effea1a6436fd7bd"
+    ],
+    [
+      "Lib.IntTypes.Compatibility.nat_to_uint",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query", "bool_inversion",
+        "equation_Lib.IntTypes.range", "equation_Lib.IntTypes.unsigned",
+        "equation_Prims.nat",
+        "refinement_interpretation_Tm_refine_387e6d282145573240ab7b8a4b94cce5",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_703c12a729f61c310bf3d018fbe38084",
+        "typing_Lib.IntTypes.unsigned"
+      ],
+      0,
+      "7d362e7e3e80978b61f9e021137432a0"
+    ]
+  ]
+]
