@@ -173,7 +173,7 @@ fun s iv iv_len ad ad_len plain plain_len cipher tag ->
       InvalidIVLength
     else
       let open LowStar.BufferOps in
-      let Ek i kv ek = !*s in
+      let Ek _ kv ek = !*s in
       assert (
         let k = G.reveal kv in
         let k_nat = Vale.Def.Words.Seq_s.seq_uint8_to_seq_nat8 k in
@@ -312,7 +312,7 @@ fun s iv iv_len ad ad_len cipher cipher_len tag dst ->
     else
       let a = alg_of_vale_impl i in
       let open LowStar.BufferOps in
-      let Ek i kv ek = !*s in
+      let Ek _ kv ek = !*s in
         assert (
           let k = G.reveal kv in
           let k_nat = Vale.Def.Words.Seq_s.seq_uint8_to_seq_nat8 k in

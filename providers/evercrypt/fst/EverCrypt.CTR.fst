@@ -97,45 +97,54 @@ let vale_impl_of_alg (a: vale_cipher_alg): vale_impl =
 friend Lib.IntTypes
 
 #push-options "--z3rlimit 100"
+
+inline_for_extraction noextract
+let create_in_vale (i: vale_impl): create_in_st (cipher_alg_of_impl i) =
+fun r dst k iv iv_len c ->
+  let has_aesni = EverCrypt.AutoConfig2.has_aesni () in
+  let has_pclmulqdq = EverCrypt.AutoConfig2.has_pclmulqdq () in
+  let has_avx = EverCrypt.AutoConfig2.has_avx() in
+  [@inline_let]
+  let a = cipher_alg_of_impl i in
+
+  if iv_len `UInt32.lt` 12ul then
+    InvalidIVLength
+
+  else if EverCrypt.TargetConfig.x64 && (has_aesni && has_pclmulqdq && has_avx) then
+    (**) let h0 = ST.get () in
+    (**) let g_iv = G.hide (B.as_seq h0 iv) in
+    (**) let g_key: G.erased (key a) = G.hide (B.as_seq h0 (k <: B.buffer uint8)) in
+
+    let ek = B.malloc r 0uy (concrete_xkey_len i) in
+    vale_expand i k ek;
+    (**) let h1 = ST.get () in
+    (**) B.modifies_only_not_unused_in B.loc_none h0 h1;
+
+    let iv' = B.malloc r 0uy 16ul in
+    B.blit iv 0ul iv' 0ul iv_len;
+    (**) let h2 = ST.get () in
+    (**) B.modifies_only_not_unused_in B.loc_none h0 h2;
+
+    let p = B.malloc r (State (vale_impl_of_alg a) g_iv iv' iv_len g_key ek c) 1ul in
+    (**) let h3 = ST.get () in
+    (**) B.modifies_only_not_unused_in B.loc_none h0 h3;
+    assert (B.fresh_loc (footprint h3 p) h0 h3);
+
+    dst *= p;
+    (**) let h4 = ST.get () in
+    (**) B.modifies_only_not_unused_in B.(loc_buffer dst) h0 h4;
+
+    Success
+
+  else
+    UnsupportedAlgorithm
+
 let create_in a r dst k iv iv_len c =
   match a with
-  | AES128 | AES256 ->
-      let has_aesni = EverCrypt.AutoConfig2.has_aesni () in
-      let has_pclmulqdq = EverCrypt.AutoConfig2.has_pclmulqdq () in
-      let has_avx = EverCrypt.AutoConfig2.has_avx() in
-      let i = vale_impl_of_alg a in
-      if iv_len `UInt32.lt` 12ul then
-        InvalidIVLength
-
-      else if EverCrypt.TargetConfig.x64 && (has_aesni && has_pclmulqdq && has_avx) then
-        (**) let h0 = ST.get () in
-        (**) let g_iv = G.hide (B.as_seq h0 iv) in
-        (**) let g_key: G.erased (key a) = G.hide (B.as_seq h0 (k <: B.buffer uint8)) in
-
-        let ek = B.malloc r 0uy (concrete_xkey_len i) in
-        vale_expand i k ek;
-        (**) let h1 = ST.get () in
-        (**) B.modifies_only_not_unused_in B.loc_none h0 h1;
-
-        let iv' = B.malloc r 0uy 16ul in
-        B.blit iv 0ul iv' 0ul iv_len;
-        (**) let h2 = ST.get () in
-        (**) B.modifies_only_not_unused_in B.loc_none h0 h2;
-
-        let p = B.malloc r (State (vale_impl_of_alg a) g_iv iv' iv_len g_key ek c) 1ul in
-        (**) let h3 = ST.get () in
-        (**) B.modifies_only_not_unused_in B.loc_none h0 h3;
-        assert (B.fresh_loc (footprint h3 p) h0 h3);
-
-        dst *= p;
-        (**) let h4 = ST.get () in
-        (**) B.modifies_only_not_unused_in B.(loc_buffer dst) h0 h4;
-
-        Success
-
-      else
-        UnsupportedAlgorithm
-
+  | AES128 ->
+      create_in_vale Vale_AES128 r dst k iv iv_len c
+  | AES256 ->
+      create_in_vale Vale_AES256 r dst k iv iv_len c
   | CHACHA20 ->
       (**) let h0 = ST.get () in
       (**) let g_iv = G.hide (B.as_seq h0 iv) in
@@ -144,7 +153,7 @@ let create_in a r dst k iv iv_len c =
       [@inline_let]
       let l = concrete_xkey_len Hacl_CHACHA20 in
       let ek = B.malloc r 0uy l in
-      B.blit (k <: B.buffer uint8) 0ul ek 0ul l;
+      B.blit k 0ul ek 0ul l;
       (**) let h1 = ST.get () in
       (**) B.modifies_only_not_unused_in B.loc_none h0 h1;
 
@@ -179,9 +188,9 @@ let copy_or_expand (i: impl)
 =
   match i with
   | Vale_AES128 ->
-      vale_expand i k ek
+      vale_expand Vale_AES128 k ek
   | Vale_AES256 ->
-      vale_expand i k ek
+      vale_expand Vale_AES256 k ek
   | Hacl_CHACHA20 ->
       B.blit k 0ul ek 0ul 32ul
 
@@ -254,65 +263,75 @@ let uint128_of_uint32 (x: UInt32.t): y:UInt128.t { UInt128.v y = UInt32.v x } =
   let open FStar.Int.Cast.Full in
   uint64_to_uint128 (uint32_to_uint64 x)
 
+inline_for_extraction noextract
+let update_block_vale (i: vale_impl): update_block_st (cipher_alg_of_impl i) =
+fun p dst src ->
+  let State _ g_iv iv iv_len g_key ek c0 = !*p in
+
+  let open Vale.Wrapper.X64.GCTR in
+  let open LowStar.Endianness in
+  push_frame ();
+
+  // Prepare the block. See Spec.AES.aes_ctr_key_block for instance.
+  let ctr_block = B.alloca (0uy <: uint8) 16ul in
+  (**) let h0 = ST.get () in
+
+  B.blit iv 0ul ctr_block 0ul iv_len;
+  (**) let h1 = ST.get () in
+
+  // Proof steps missing:
+  // - show that repeati is equivalent to a blit
+  // - show that the uint128 addition does what aes_ctr_block_add_counter
+  //   does (the right lemmas should be there already...)
+  (* assert (
+    let open Lib.ByteSequence in
+    let open Lib.IntTypes in
+    let open Lib.Sequence in
+    let open Lib.LoopCombinators in
+    let block0 = B.as_seq h0 ctr_block in
+    let spec0 = create 16 (u8 0) in
+    let iv = B.as_seq h0 iv in
+    let block1 = B.as_seq h1 ctr_block in
+    let spec1 =
+      repeati #(lbytes 16) (length iv) (fun i b -> b.[i] <- Seq.index iv i) spec0
+    in
+    block0 `Seq.equal` spec0 /\
+    block1 `Seq.equal` spec1
+  );
+  admit () | _ -> admit () *)
+
+  // Interpreting potential overflow bytes of the IV as part of a 128-bit
+  // counter dictated by HACL* spec.
+  let c: UInt128.t = load128_be ctr_block `UInt128.add_mod` (uint128_of_uint32 c0) in
+  store128_be ctr_block c;
+  (**) let h2 = ST.get () in
+  (**) Vale.Arch.BufferFriend.lemma_be_to_n_is_nat_from_bytes (B.as_seq h1 ctr_block);
+  (**) Vale.Arch.BufferFriend.lemma_n_to_be_is_nat_to_bytes 16 (UInt128.v c);
+
+  gctr_bytes i
+    (G.elift1 (as_vale_key i) g_key)
+    src 16uL
+    dst
+    (B.sub ek 0ul (key_offset i))
+    ctr_block;
+  (**) vale_encrypt_is_hacl_encrypt i (G.reveal g_key) (B.as_seq h2 ctr_block)
+    (B.as_seq h2 src);
+
+  let c = c0 `UInt32.add` 1ul in
+  p *= (State #(cipher_alg_of_impl i) i g_iv iv iv_len g_key ek c);
+
+  pop_frame ();
+
+  admit ()
+
 let update_block a p dst src =
   let State i g_iv iv iv_len g_key ek c0 = !*p in
   match i with
-  | Vale_AES128 | Vale_AES256 ->
-      let open Vale.Wrapper.X64.GCTR in
-      let open LowStar.Endianness in
-      push_frame ();
+  | Vale_AES128 ->
+      update_block_vale Vale_AES128 p dst src
 
-      // Prepare the block. See Spec.AES.aes_ctr_key_block for instance.
-      let ctr_block = B.alloca (0uy <: uint8) 16ul in
-      (**) let h0 = ST.get () in
-
-      B.blit iv 0ul ctr_block 0ul iv_len;
-      (**) let h1 = ST.get () in
-
-      // Proof steps missing:
-      // - show that repeati is equivalent to a blit
-      // - show that the uint128 addition does what aes_ctr_block_add_counter
-      //   does (the right lemmas should be there already...)
-      (* assert (
-        let open Lib.ByteSequence in
-        let open Lib.IntTypes in
-        let open Lib.Sequence in
-        let open Lib.LoopCombinators in
-        let block0 = B.as_seq h0 ctr_block in
-        let spec0 = create 16 (u8 0) in
-        let iv = B.as_seq h0 iv in
-        let block1 = B.as_seq h1 ctr_block in
-        let spec1 =
-          repeati #(lbytes 16) (length iv) (fun i b -> b.[i] <- Seq.index iv i) spec0
-        in
-        block0 `Seq.equal` spec0 /\
-        block1 `Seq.equal` spec1
-      );
-      admit () | _ -> admit () *)
-
-      // Interpreting potential overflow bytes of the IV as part of a 128-bit
-      // counter dictated by HACL* spec.
-      let c: UInt128.t = load128_be ctr_block `UInt128.add_mod` (uint128_of_uint32 c0) in
-      store128_be ctr_block c;
-      (**) let h2 = ST.get () in
-      (**) Vale.Arch.BufferFriend.lemma_be_to_n_is_nat_from_bytes (B.as_seq h1 ctr_block);
-      (**) Vale.Arch.BufferFriend.lemma_n_to_be_is_nat_to_bytes 16 (UInt128.v c);
-
-      gctr_bytes i
-        (G.elift1 (as_vale_key i) g_key)
-        src 16uL
-        dst
-        (B.sub ek 0ul (key_offset i))
-        ctr_block;
-      (**) vale_encrypt_is_hacl_encrypt i (G.reveal g_key) (B.as_seq h2 ctr_block)
-        (B.as_seq h2 src);
-
-      let c = c0 `UInt32.add` 1ul in
-      p *= (State #(cipher_alg_of_impl i) i g_iv iv iv_len g_key ek c);
-
-      pop_frame ();
-
-      admit ()
+  | Vale_AES256 ->
+      update_block_vale Vale_AES256 p dst src
 
   | Hacl_CHACHA20 ->
       let open Hacl.Impl.Chacha20 in

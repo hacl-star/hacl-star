@@ -83,7 +83,8 @@ val alg_of_state: a:e_alg -> (
   (fun h0 -> invariant h0 s)
   (fun h0 a' h1 -> h0 == h1 /\ a' == a))
 
-val create_in: a:alg ->
+inline_for_extraction noextract
+let create_in_st (a:alg) =
   r:HS.rid ->
   dst:B.pointer (B.pointer_or_null (state_s a)) ->
   k:B.buffer uint8 { B.length k = Spec.Agile.CTR.key_length a } ->
@@ -116,6 +117,8 @@ val create_in: a:alg ->
           ctr h1 s = UInt32.v c
       | _ -> False)
 
+val create_in: a:alg -> create_in_st a
+
 /// Initializes state to start at a given counter. This allows client to
 /// generate a counter-block directly for a given counter, or to just start at
 /// zero and do encryption block-by-block. Note that we use a C-like API where
@@ -147,8 +150,8 @@ val init: a:e_alg -> (
 /// Process exactly one block, incrementing the counter contained in the state
 /// in passing. The expected usage is repeated calls to update_block as more
 /// data comes in, followed by a call to update_last.
-val update_block: a:e_alg -> (
-  let a = G.reveal a in
+inline_for_extraction noextract
+let update_block_st (a: alg) =
   s:state a ->
   dst:B.buffer uint8 { B.length dst = Spec.block_length a } ->
   src:B.buffer uint8 { B.length src = Spec.block_length a } ->
@@ -167,6 +170,8 @@ val update_block: a:e_alg -> (
       footprint h0 s == footprint h1 s /\
       ctr h1 s == ctr h0 s + 1 /\
       B.as_seq h1 dst == Spec.Loops.seq_map2 xor8 (B.as_seq h0 src)
-        (Spec.ctr_block a (kv (B.deref h0 s)) (iv (B.deref h0 s)) (ctr h0 s)))))
+        (Spec.ctr_block a (kv (B.deref h0 s)) (iv (B.deref h0 s)) (ctr h0 s))))
+
+val update_block: a:e_alg -> update_block_st (G.reveal a)
 
 // TODO: update_blocks, update_last... then an incremental API for CTR encryption.
