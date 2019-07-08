@@ -338,7 +338,8 @@ let update_block a p dst src =
       push_frame ();
       let ctx = B.alloca 0ul 16ul in
       // NOTE: chacha20_init must be called with 0ul because encrypt_block also
-      // takes a counter argument and increments too!
+      // takes a counter argument and increments too! There may be a way to keep
+      // the allocated initial block in the state, but not doing that for now.
       chacha20_init ctx ek (B.sub iv 0ul 12ul) 0ul;
       chacha20_encrypt_block ctx dst c0 src;
 
@@ -347,3 +348,9 @@ let update_block a p dst src =
       // There's a non-trivial proof of spec equivalence here. See discussion in
       // Spec.Chacha20.
       admit ()
+
+let free a p =
+  let State i g_iv iv iv_len g_key ek c0 = !*p in
+  B.free iv;
+  B.free ek;
+  B.free p

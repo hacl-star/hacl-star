@@ -175,3 +175,13 @@ let update_block_st (a: alg) =
 val update_block: a:e_alg -> update_block_st (G.reveal a)
 
 // TODO: update_blocks, update_last... then an incremental API for CTR encryption.
+
+val free: a:e_alg -> (
+  let a = G.reveal a in
+  s:state a ->
+  ST unit
+    (requires (fun h0 ->
+      freeable h0 s /\
+      invariant h0 s))
+    (ensures (fun h0 _ h1 ->
+      B.(modifies (footprint h0 s) h0 h1))))
