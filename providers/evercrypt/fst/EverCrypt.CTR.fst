@@ -303,7 +303,7 @@ fun p dst src ->
   // Interpreting potential overflow bytes of the IV as part of a 128-bit
   // counter dictated by HACL* spec.
   let c: UInt128.t = load128_be ctr_block `UInt128.add_mod` (uint128_of_uint32 c0) in
-  store128_be ctr_block c;
+  store128_le ctr_block c;
   (**) let h2 = ST.get () in
   (**) Vale.Arch.BufferFriend.lemma_be_to_n_is_nat_from_bytes (B.as_seq h1 ctr_block);
   (**) Vale.Arch.BufferFriend.lemma_n_to_be_is_nat_to_bytes 16 (UInt128.v c);

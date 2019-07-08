@@ -276,8 +276,17 @@ let key_len a: Tot (x:UInt32.t { UInt32.v x = Spec.Agile.Cipher.key_length a }) 
   | Spec.Agile.Cipher.AES256 -> 32ul
 
 #push-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
-let test_ctr_st a counter counter_len nonce nonce_len k k_len
-  input input_len output output_len:
+let rec test_ctr_st (a: Spec.Agile.Cipher.cipher_alg)
+  (counter: B.buffer UInt8.t)
+  (counter_len: UInt32.t)
+  (nonce: B.buffer UInt8.t)
+  (nonce_len: UInt32.t)
+  (k: B.buffer UInt8.t)
+  (k_len: UInt32.t)
+  (input: B.buffer UInt8.t)
+  (input_len: UInt32.t)
+  (output: B.buffer UInt8.t)
+  (output_len: UInt32.t):
   ST unit
   (requires (fun _ ->
     B.recallable counter /\
@@ -304,7 +313,7 @@ let test_ctr_st a counter counter_len nonce nonce_len k k_len
     C.Failure.failwith !$"test_ctr_st: not (nonce_bound a nonce_len)"
   else if not (input_len = output_len) then
     C.Failure.failwith !$"test_ctr_st: not (input_len = output_len)"
-  else if not (input_len = block_len a) then
+  else if not (input_len `U32.gte` block_len a) then
     C.Failure.failwith !$"test_ctr_st: not (input_len = block_len a)"
 
   else begin
@@ -320,7 +329,7 @@ let test_ctr_st a counter counter_len nonce nonce_len k k_len
       C.Failure.failwith !$"test_ctr_st: ctr = max_uint32"
     else begin
       push_frame ();
-      let output' = B.alloca 0uy output_len in
+      let output' = B.alloca 0uy (block_len a) in
 
       let s = B.alloca B.null 1ul in
       let r = EverCrypt.CTR.create_in a HyperStack.root s k nonce nonce_len ctr in
@@ -328,9 +337,20 @@ let test_ctr_st a counter counter_len nonce nonce_len k k_len
         C.Failure.failwith !$"test_ctr_st: create_in <> Success"
       else begin
         let s = B.index s 0ul in
-        update_block (Ghost.hide a) s output' input;
+        let input_block = B.sub input 0ul (block_len a) in
+        let output_block = B.sub output 0ul (block_len a) in
+        update_block (Ghost.hide a) s output' input_block;
+        free (Ghost.hide a) s;
 
-        TestLib.compare_and_print !$"of CTR" output output' output_len
+        TestLib.compare_and_print !$"of CTR" output_block output' (block_len a);
+
+        let rest = input_len `U32.sub` block_len a in
+        if rest `U32.gt` 0ul then begin
+          LowStar.Endianness.store32_be counter (ctr `U32.add_mod` 1ul);
+          test_ctr_st a counter counter_len nonce nonce_len k k_len
+            (B.sub input (block_len a) rest) rest
+            (B.sub output (block_len a) rest) rest
+        end
       end;
       pop_frame ()
     end
