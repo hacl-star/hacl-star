@@ -176,3 +176,43 @@ procedure Benchmark_fake_memcpy(inline win:bool, ghost dst_in:Seq.seq(nat64), gh
     assert(Seq.equal(dst, src));
 }
 
+// procedure Load128_buffer
+procedure Load128_fake(
+        out dst:xmm, in src:reg_opr64, ghost b:Seq.seq(quad32), ghost index:nat)
+    {:public}
+    {:quick exportOnly}
+    requires
+        0 <= index < Seq.length(b);
+    ensures
+        dst == Seq.index(b, index);
+{
+    assume false;
+}
+
+// procedure Store128_buffer
+procedure Store128_fake(
+        in dst:reg_opr64, in src:xmm, ghost b_in:Seq.seq(quad32), ghost index:nat)
+    returns(ghost b:Seq.seq(quad32))
+    {:public}
+    {:quick exportOnly}
+    requires
+        0 <= index < Seq.length(b_in);
+    ensures
+        b == Seq.upd(b_in, index, src);
+{
+    b := Seq.upd(b_in, index, src);
+}
+
+// procedure LoadBe64_buffer128
+procedure LoadBe64_fake128(
+        out dst:reg_opr64, in src:reg_opr64, inline upper:bool,
+        ghost b:Seq.seq(quad32), ghost index:nat)
+    {:public}
+    {:quick exportOnly}
+    requires
+        0 <= index < Seq.length(b);
+    ensures
+        dst == reverse_bytes_nat64(if upper then hi64(Seq.index(b, index)) else lo64(Seq.index(b, index)));
+{
+    assume false;
+}
