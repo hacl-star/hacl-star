@@ -317,7 +317,7 @@ let op_At_Percent_Dot x t =
   if unsigned t then x % modulus t
   else FStar.Int.(x @% modulus t)
 
-// Casting a value to a signed type is implementation-defined when the value can't 
+// Casting a value to a signed type is implementation-defined when the value can't
 // be represented in the new type; e.g. (int8_t)128UL is implementation-defined
 // We rule out this case in the type of `u1`
 // See 6.3.1.3 in http://www.open-std.org/jtc1/sc22/wg14/www/docs/n1548.pdf
@@ -458,7 +458,7 @@ val sub_mod: #t:inttype{unsigned t} -> #l:secrecy_level
   -> int_t t l
   -> int_t t l
 
-val sub_mod_lemma: #t:inttype{unsigned t} -> #l:secrecy_level -> a:int_t t l -> b:int_t t l 
+val sub_mod_lemma: #t:inttype{unsigned t} -> #l:secrecy_level -> a:int_t t l -> b:int_t t l
   -> Lemma (v (sub_mod a b) == (v a - v b) @%. t)
   [SMTPat (v #t #l (sub_mod #t #l a b))]
 
@@ -511,8 +511,8 @@ val logand_ones: #t:inttype -> #l:secrecy_level -> a:int_t t l ->
   Lemma (v (a `logand` ones t l) == v a)
 
 // For backwards compatibility
-val logand_lemma: #t:inttype -> #l:secrecy_level 
-  -> a:int_t t l 
+val logand_lemma: #t:inttype -> #l:secrecy_level
+  -> a:int_t t l
   -> b:int_t t l
   -> Lemma
     (requires v a = 0 \/ v a = ones_v t)
@@ -682,6 +682,14 @@ val mod_mask_lemma: #t:inttype -> #l:secrecy_level
   -> Lemma (v (a `logand` mod_mask m) == v a % pow2 (v m))
   [SMTPat (a `logand` mod_mask #t m)]
 
+(** Casts a value between two signed types using modular reduction *)
+inline_for_extraction
+val cast_mod: #t:inttype{signed t} -> #l:secrecy_level
+  -> t':inttype{signed t'}
+  -> l':secrecy_level{PUB? l \/ SEC? l'}
+  -> a:int_t t l
+  -> b:int_t t' l'{v b == v a @%. t'}
+
 ///
 /// Operators available for all machine integers
 ///
@@ -753,7 +761,7 @@ val mod: #t:inttype{~(U128? t) /\ ~(S128? t)}
 val mod_lemma: #t:inttype{~(U128? t) /\ ~(S128? t)}
   -> a:int_t t PUB
   -> b:int_t t PUB{v b <> 0 /\ (unsigned t \/ range FStar.Int.(v a / v b) t)}
-  -> Lemma (if signed t then 
+  -> Lemma (if signed t then
              v (mod a b) == FStar.Int.mod #(bits t) (v a) (v b)
            else
              v (mod a b) == FStar.UInt.mod #(bits t) (v a) (v b))

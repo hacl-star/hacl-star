@@ -814,18 +814,16 @@ let lte_mask_lemma #t a b =
     else
       UInt.logor_lemma_1 #(bits t) (v (lt_mask a b))
 
-private
-val mod_mask_value: #t:inttype -> #l:secrecy_level -> m:shiftval t{pow2 (uint_v m) <= maxint t} ->
-  Lemma (v (mod_mask #t #l m) == pow2 (v m) - 1)
-
 #push-options "--max_fuel 1"
 
+val mod_mask_value: #t:inttype -> #l:secrecy_level -> m:shiftval t{pow2 (uint_v m) <= maxint t} ->
+  Lemma (v (mod_mask #t #l m) == pow2 (v m) - 1)
 let mod_mask_value #t #l m =
   shift_left_lemma (mk_int #t #l 1) m;
   pow2_double_mult (bits t - 1);
   pow2_lt_compat (bits t) (v m);
   small_modulo_lemma_1 (pow2 (v m)) (pow2 (bits t));
-  small_modulo_lemma_1 ((pow2 (v m)) -1) (pow2 (bits t))
+  small_modulo_lemma_1 (pow2 (v m) - 1) (pow2 (bits t))
 
 let mod_mask_lemma #t #l a m =
   mod_mask_value #t #l m;
@@ -846,6 +844,54 @@ let mod_mask_lemma #t #l a m =
     else
       UInt.logand_mask #(bits t) a2 (v m)
     end
+
+#pop-options
+
+#push-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 1000"
+
+(**
+  Conditionally subtracts 2^(bits t') from a in constant-time,
+  so that the result fits in t'; i.e.
+  b = if a >= 2^(bits t' - 1) then a - 2^(bits t') else a
+*)
+inline_for_extraction noextract
+val conditional_subtract:
+    #t:inttype{signed t}
+  -> #l:secrecy_level
+  -> t':inttype{signed t' /\ bits t' < bits t}
+  -> a:int_t t l{0 <= v a /\ v a <= pow2 (bits t') - 1}
+  -> b:int_t t l{v b = v a @%. t'}
+let conditional_subtract #t #l t' a =
+  assert_norm (pow2 7 = 128);
+  assert_norm (pow2 15 = 32768);
+  let pow2_bits = shift_left #t #l (mk_int 1) (size (bits t')) in
+  shift_left_lemma #t #l (mk_int 1) (size (bits t'));
+  let pow2_bits_minus_one = shift_left #t #l (mk_int 1) (size (bits t' - 1)) in
+  shift_left_lemma #t #l (mk_int 1) (size (bits t' - 1));
+  // assert (v pow2_bits == pow2 (bits t'));
+  // assert (v pow2_bits_minus_one == pow2 (bits t' - 1));
+  let a2 = a `sub` pow2_bits_minus_one in
+  let mask = shift_right a2 (size (bits t - 1)) in
+  shift_right_lemma a2 (size (bits t - 1));
+  // assert (if v a2 < 0 then v mask = -1 else v mask = 0);
+  let a3 = a `sub` pow2_bits in
+  logand_lemma mask pow2_bits;
+  a3 `add` (mask `logand` pow2_bits)
+
+let cast_mod #t #l t' l' a =
+  assert_norm (pow2 7 = 128);
+  assert_norm (pow2 15 = 32768);
+  if bits t' >= bits t then
+    cast t' l' a
+  else
+    begin
+    let m = size (bits t') in
+    mod_mask_lemma a m;
+    let b = conditional_subtract t' (a `logand` mod_mask m) in
+    cast t' l' b
+    end
+
+#pop-options
 
 let div #t x y =
   match t with
