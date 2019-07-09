@@ -168,7 +168,7 @@ let loop2 #b0 #blen0 #b1 #blen1 h0 n acc0 acc1 spec impl =
 
 #set-options "--max_fuel 0"
 
-let salloc1 #a #res h len x footprint spec spec_inv impl =
+let salloc1_with_inv #a #res h len x footprint spec spec_inv impl =
   let h0 = ST.get() in
   push_frame();
   let h1 = ST.get() in
@@ -186,14 +186,14 @@ let salloc1 #a #res h len x footprint spec spec_inv impl =
   r
 
 inline_for_extraction noextract
-let salloc1_trivial #a #res h len x footprint spec impl =
-  salloc1 #a #res h len x footprint spec
+let salloc1 #a #res h len x footprint spec impl =
+  salloc1_with_inv #a #res h len x footprint spec
     (fun h1 h2 h3 (r:res) -> assert (spec r h2); assert (spec r h3))
     impl
 
 inline_for_extraction noextract
 let salloc_nospec #a #res h len x footprint impl =
-  salloc1_trivial #a #res h len x footprint (fun _ _ -> True) impl
+  salloc1 #a #res h len x footprint (fun _ _ -> True) impl
 
 inline_for_extraction noextract
 val loopi_blocks_f:

@@ -36,7 +36,7 @@
         "typing_tok_Lib.IntTypes.U32@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "cdb7f9aaf56f456ed371adfa3e314036"
+      "7341cafd1b481ed4cf8ad2788384536e"
     ],
     [
       "Spec.Agile.HMAC.init",
@@ -60,7 +60,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "38294e1dfd3e87a4e8b28d6a46a67475"
+      "a3106406bf98b70540566e1739d6fdf4"
     ],
     [
       "Spec.Agile.HMAC.update_last",
@@ -70,11 +70,13 @@
       [
         "@MaxIFuel_assumption", "@query",
         "equation_Spec.Agile.Hash.size_block",
+        "fuel_guarded_inversion_Spec.Agile.Hash.algorithm",
+        "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_a78e81a34494fa620ef91991a1267b1f",
         "typing_Spec.Agile.Hash.size_block"
       ],
       0,
-      "018022f17c0702daa8280233789d9b93"
+      "3fe3b1689cc96496696c5061d4966d4f"
     ],
     [
       "Spec.Agile.HMAC.update_last",
@@ -84,11 +86,13 @@
       [
         "@MaxIFuel_assumption", "@query",
         "equation_Spec.Agile.Hash.size_block",
+        "fuel_guarded_inversion_Spec.Agile.Hash.algorithm",
+        "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_a78e81a34494fa620ef91991a1267b1f",
         "typing_Spec.Agile.Hash.size_block"
       ],
       0,
-      "f43a4aa85169f8fe0d74a7f21082a3b4"
+      "2165ad8ed4ec3a7b082114852c63fcca"
     ],
     [
       "Spec.Agile.HMAC.finish",
@@ -121,7 +125,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "0c91b1391325123dee60f5e06f69d004"
+      "6cab69352924b0d2244be92fa6fa9185"
     ],
     [
       "Spec.Agile.HMAC.hmac",
@@ -140,7 +144,7 @@
         "refinement_interpretation_Tm_refine_db6d99ce56f7a60ee6bec59562e9487d"
       ],
       0,
-      "65d483033ff47b359c446b76bd22f605"
+      "635fba313187a53ceb785442e6496a79"
     ]
   ]
 ]

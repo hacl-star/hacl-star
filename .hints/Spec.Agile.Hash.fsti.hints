@@ -26,7 +26,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "148ee9a954a52c046644a941558ebb97"
+      "75e73207ce5c3d15d06819597dea72a4"
     ],
     [
       "Spec.Agile.Hash.size_hash",
@@ -72,7 +72,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "1fc1ea5a10f69e71b94fb58ec0d6943a"
+      "e2962a22efb84db0566ea0a5793028ab"
     ],
     [
       "Spec.Agile.Hash.max_input",
@@ -96,7 +96,7 @@
         "typing_Prims.pow2"
       ],
       0,
-      "d97f08743f95c76500e769bea40d6d1d"
+      "22c55cb130f18f913ef4044f16032f46"
     ],
     [
       "Spec.Agile.Hash.update_last",
@@ -106,11 +106,13 @@
       [
         "@MaxIFuel_assumption", "@query",
         "equation_Spec.Agile.Hash.size_block",
+        "fuel_guarded_inversion_Spec.Agile.Hash.algorithm",
+        "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_a78e81a34494fa620ef91991a1267b1f",
         "typing_Spec.Agile.Hash.size_block"
       ],
       0,
-      "843cb26dab2bf332309e99dc50fc0665"
+      "da550f0f6d56c22350a6d642b55b4174"
     ]
   ]
 ]
