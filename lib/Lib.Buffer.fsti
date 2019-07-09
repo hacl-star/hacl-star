@@ -685,7 +685,7 @@ val loop2:
 * after popping the stack frame
 *)
 inline_for_extraction noextract
-val salloc1:
+val salloc1_with_inv:
     #a:Type
   -> #res:Type
   -> h:mem
@@ -716,7 +716,7 @@ val salloc1:
     (ensures  fun h0 r h1 -> modifies (Ghost.reveal footprint) h0 h1 /\ spec r h1)
 
 inline_for_extraction noextract
-val salloc1_trivial:
+val salloc1:
     #a:Type
   -> #res:Type
   -> h:mem
