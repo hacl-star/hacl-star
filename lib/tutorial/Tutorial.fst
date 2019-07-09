@@ -12,7 +12,7 @@ module Tutorial
 /// iteration index. This allows, for instance, to use as an
 /// accumulator a sequence that grows iteratively, which is a common
 /// pattern in Hacl*.
-/// 
+///
 /// ``repeat`` is currently defined as ``repeat_right`` below, which
 /// has a recursive definition that unfolds to an application of ``f``
 /// at the head.
@@ -36,7 +36,7 @@ module Tutorial
 /// `repeati` combinator is a special case of `repeat_right` where
 /// iteration starts from `0` and the type of the iterated function
 /// `f` doesn't depend on the iteration index.
-/// 
+///
 /// - ``loop`` is a wrapper around ``Lib.Loops.for`` that abstracts
 /// over the Low* state used by the body. It takes as input a pure
 /// function operating over an arbitrary index-dependent state (as in
@@ -257,10 +257,10 @@ let fib n =
 
 /// Secure alloc combinator
 
-/// Use ``salloc1`` for computations that use temporary stack-allocated state, instead
+/// Use ``salloc1_with_inv`` for computations that use temporary stack-allocated state, instead
 /// of pushing a new stack frame and an explicit ``create``.
 ///
-/// ``salloc1 h len init footprint spec spec_inv impl`` allocates a buffer ``b`` of
+/// ``salloc1_with_inv h len init footprint spec spec_inv impl`` allocates a buffer ``b`` of
 /// length ``len``, initializes it to ``init``, and then runs ``impl b``.
 ///
 /// Before returning, it overwrites the buffer ``b`` in the stack. Although this has no
@@ -271,7 +271,7 @@ let fib n =
 /// which is guaranteed not to be optimized away during compilation.
 ///
 /// ``spec_inv`` is a lemma used to propagate the post-condition of ``impl`` to
-/// the final memory. The ``salloc1_trivial`` variant doesn't take this argument and
+/// the final memory. The ``salloc1`` variant doesn't take this argument and
 /// attempts to prove this automatically; it works in most cases.
 
 val set_true_spec: a:lbuffer bool (size 1) -> mem -> bool -> mem -> GTot Type0
@@ -284,7 +284,7 @@ val set_true: a:lbuffer bool (size 1) -> Stack bool
 let set_true a =
   let h = ST.get() in
   let footprint = Ghost.hide (loc a) in
-  salloc1_trivial h 1ul true footprint (set_true_spec a h)
+  salloc1 h 1ul true footprint (set_true_spec a h)
     (fun b ->
       b.(0ul) <- a.(0ul);
       a.(0ul) <- true;
@@ -324,14 +324,14 @@ let main () =
   let b0 : lbuffer uint8 3ul = createL l0 in
   [@inline_let]
   let l1 = [u8 1; u8 2; u8 3; u8 4] in
-  let a0 : lbuffer uint8 4ul = createL l1 in  
+  let a0 : lbuffer uint8 4ul = createL l1 in
   reverse_inplace 3ul b0;
   print_compare_display (size 3) b0 b2;
   reverse 3ul b0;
   print_compare_display (size 3) b0 b1;
   reverse_inplace 4ul a0;
   print_compare_display (size 4) a0 a2;
-  reverse 4ul a0;  
+  reverse 4ul a0;
   print_compare_display (size 4) a0 a1;
   let open TestLib in
   let n = fib 10 in
