@@ -11,13 +11,6 @@ module Hash = Spec.Hash.Definitions
 module HMAC = Spec.HMAC
 
 
-(* val hkdf_extract: *)
-(*     a:Hash.algorithm *)
-(*   -> salt: bytes{length salt <= Hash.max_input a} *)
-(*   -> ikm: bytes{length salt + length ikm + Hash.size_block a <= Hash.max_input a *)
-(*         /\ Hash.size_hash a + length ikm + Hash.size_block a <= Hash.max_input a} -> *)
-(*   Tot (lbytes (Hash.size_hash a)) *)
-
 let hkdf_extract a salt ikm =
   let slen = length salt in
   if slen = 0 then

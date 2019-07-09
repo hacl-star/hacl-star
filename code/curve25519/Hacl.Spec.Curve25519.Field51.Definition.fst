@@ -50,15 +50,19 @@ let ( ** ) (x:nat5) (y:nat5) : nat5 =
    x4 * y4 ,
    x5 * y5)
 
-#set-options "--z3rlimit 100"
 
 val lemma_mul_le_scale64: a:nat -> b:nat ->
   Lemma
     (requires a <= 8192 /\ b <= 8192)
     (ensures a * b <= 67108864)
 let lemma_mul_le_scale64 a b =
+  let open FStar.Math.Lemmas in
+  lemma_mult_le_left a b 8192; // a * b <= a * 8192
+  lemma_mult_le_right 8192 a 8192; // a * 8192 <= 8192 * 8192
   assert (a * b <= 8192 * 8192);
   assert_norm (8192 * 8192 = 67108864)
+
+#set-options "--z3rlimit 100"
 
 let ( *^ ) (x:scale64) (y:scale64_5) : scale128_5 =
   let (y1,y2,y3,y4,y5) = y in

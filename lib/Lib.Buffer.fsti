@@ -688,7 +688,7 @@ val loop2:
 * after popping the stack frame
 *)
 inline_for_extraction noextract
-val salloc1:
+val salloc1_with_inv:
     #a:Type
   -> #res:Type
   -> h:mem
@@ -719,7 +719,7 @@ val salloc1:
     (ensures  fun h0 r h1 -> modifies (Ghost.reveal footprint) h0 h1 /\ spec r h1)
 
 inline_for_extraction noextract
-val salloc1_trivial:
+val salloc1:
     #a:Type
   -> #res:Type
   -> h:mem
@@ -944,6 +944,30 @@ val fill_blocks:
       refl h1 (v n) == s /\
       as_seq #_ #t h1 output == o))
 
+(** Fills a buffer block by block using a function without an accumulator *)
+inline_for_extraction noextract
+val fill_blocks_simple:
+    #t:Type0
+  -> h0:mem
+  -> bs:size_t{v bs > 0}
+  -> n:size_t{v bs * v n <= max_size_t}
+  -> output:lbuffer t (bs *! n)
+  -> spec:(mem -> GTot (i:size_nat{i < v n} -> Seq.lseq t (v bs)))
+  -> impl:(i:size_t{v i < v n} -> Stack unit
+      (requires fun h1 ->
+        FStar.Math.Lemmas.lemma_mult_lt_right (v bs) (v i) (v n);
+      	(v i + 1) * v bs <= max_size_t /\
+        modifies (loc (gsub output 0ul (i *! bs))) h0 h1)
+      (ensures  fun h1 _ h2 ->
+        (let block = gsub output (i *! bs) bs in
+        let ob = spec h0 (v i) in
+        B.modifies (loc block) h1 h2 /\
+	as_seq h2 block == ob))) ->
+  Stack unit
+    (requires fun h -> h0 == h /\ live h output)
+    (ensures  fun _ _ h1 -> modifies1 output h0 h1 /\
+      as_seq #_ #t h1 output == Sequence.generate_blocks_simple (v bs) (v n) (v n) (spec h0))
+
 (** Fill a buffer with a total function *)
 inline_for_extraction
 val fillT:
@@ -1071,7 +1095,8 @@ val map_blocks_multi:
   -> spec_f:(mem -> GTot (i:nat{i < v nb} -> Seq.lseq a (v blocksize) -> Seq.lseq a (v blocksize)))
   -> impl_f:(i:size_t{v i < v nb} -> Stack unit
       (requires fun h1 ->
-	(v i + 1) * v blocksize <= max_size_t /\
+        FStar.Math.Lemmas.lemma_mult_lt_right (v blocksize) (v i) (v nb);
+        (v i + 1) * v blocksize <= max_size_t /\
         modifies (loc (gsub output 0ul (i *! blocksize))) h0 h1)
       (ensures  fun h1 _ h2 ->
 	let iblock = gsub inp (i *! blocksize) blocksize in
@@ -1082,8 +1107,7 @@ val map_blocks_multi:
   -> Stack unit
     (requires fun h -> h0 == h /\ live h output /\ live h inp /\ eq_or_disjoint inp output)
     (ensures  fun _ _ h1 -> modifies1 output h0 h1 /\
-	as_seq h1 output == Seq.map_blocks_multi (v blocksize) (v nb) (v nb)
-			    (as_seq h0 inp) (spec_f h0))
+	as_seq h1 output == Seq.map_blocks_multi (v blocksize) (v nb) (v nb) (as_seq h0 inp) (spec_f h0))
 
 inline_for_extraction noextract
 val map_blocks:
@@ -1098,7 +1122,8 @@ val map_blocks:
   -> spec_l:(mem -> GTot (i:nat{i == v len / v blocksize} -> llen:size_nat{llen < v blocksize} -> Seq.lseq a llen -> Seq.lseq a llen))
   -> impl_f:(i:size_t{v i < v len / v blocksize} -> Stack unit
       (requires fun h1 ->
-	(v i + 1) * v blocksize <= max_size_t /\
+        FStar.Math.Lemmas.lemma_mult_lt_right (v blocksize) (v i) (v len / v blocksize);
+        (v i + 1) * v blocksize <= max_size_t /\
         modifies (loc (gsub output 0ul (i *! blocksize))) h0 h1)
       (ensures  fun h1 _ h2 ->
 	let iblock = gsub inp (i *! blocksize) blocksize in

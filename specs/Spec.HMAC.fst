@@ -12,6 +12,8 @@ let wrap (a:hash_alg) (key: bytes{S.length key < max_input_length a}): Tot (lbyt
   let paddingLength = block_length a - S.length key0 in
   S.concat #uint8 #(S.length key0) #paddingLength key0 (S.create paddingLength (u8 0))
 
+#push-options "--z3rlimit 15"
+
 let wrap_lemma (a:hash_alg) (key: bytes{S.length key < max_input_length a}): Lemma
   (requires S.length key > block_length a)
   (ensures wrap a key == (

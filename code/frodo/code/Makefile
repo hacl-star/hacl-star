@@ -222,7 +222,8 @@ INCLUDE_DIRS = \
 CFLAGS += -O3 -march=native -mtune=native -funroll-loops
 CFLAGS += $(addprefix -I ,$(INCLUDE_DIRS)) -Wall -Wextra -Werror \
   -Wno-parentheses -Wno-unused-parameter -Wno-unused-variable \
-  -Wno-incompatible-pointer-types -Wno-int-conversion -Wno-int-to-pointer-cast
+  -Wno-incompatible-pointer-types -Wno-int-conversion -Wno-int-to-pointer-cast \
+  -Wno-deprecated-declarations
 
 # GNU Make manual section 4.14
 %.d: %.c

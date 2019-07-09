@@ -1,0 +1,45 @@
+CFLAGS=-O3 -march=native -mtune=native
+POLY1305_CFLAGS=-funroll-loops -Wall -Wextra -Werror -Wno-parentheses -Wno-unused-parameter -Wno-unused-variable
+
+test-snapshot:
+	mkdir -p out
+
+	cc $(CFLAGS) $(POLY1305_FLAGS) -I . -c -o out/Hacl_Poly1305_32.o Hacl_Poly1305_32.c
+	cc $(CFLAGS) $(POLY1305_FLAGS) -I . -c -o out/Hacl_Poly1305_128.o Hacl_Poly1305_128.c
+	cc $(CFLAGS) $(POLY1305_FLAGS) -I . -c -o out/Hacl_Poly1305_256.o Hacl_Poly1305_256.c
+	cc $(CFLAGS) $(POLY1305_FLAGS) -I . -c -o out/poly1305_test.o test/poly1305_test.c
+	cc $(CFLAGS) $(POLY1305_FLAGS) -o out/test_poly1305.exe out/Hacl_Poly1305_32.o out/Hacl_Poly1305_128.o out/Hacl_Poly1305_256.o out/poly1305_test.o -L . -lkremlib
+	./out/test_poly1305.exe
+
+	cc $(CFLAGS) -I . Hacl_Chacha20.c test/chacha20-test.c -L . -lkremlib -o out/test_chacha20.exe
+	./out/test_chacha20.exe
+	cc $(CFLAGS) -I test/hacl-c -I . Hacl_Chacha20_Vec32.c Hacl_Chacha20_Vec128.c Hacl_Chacha20_Vec256.c test/hacl-c/Hacl_Chacha20.c test/hacl-c/Hacl_Chacha20_Vec128.c test/chacha20-vec-test.c -L . -lkremlib -o out/test_chacha20-vec.exe
+	./out/test_chacha20-vec.exe
+
+	cc $(CFLAGS) -I . Hacl_Curve25519_51.c test/curve51-test.c -L . -lkremlib -o out/test_curve25519_51.exe
+	./out/test_curve25519_51.exe
+
+	cc $(CFLAGS) -flto test/curve25519-x86_64-darwin.S -c -o out/vale25519.o
+	cc $(CFLAGS)  -I test/rfc7748_src/ test/rfc7748_src/fp25519_x64.c -c -o out/fp25519.o
+	cp -f vale_25519.h tmp_25519.h
+	cp -f rfc7748_25519.h vale_25519.h
+	cc $(CFLAGS) -I . Hacl_Curve25519_64.c test/curve64-test.c -L . -lkremlib -o out/curve25519_64_mixed.exe
+	./out/curve25519_64_mixed.exe
+	cc $(CFLAGS) -flto -I . Hacl_Curve25519_64.c -L . -lkremlib test/curve64-test.c -o out/curve25519_64_vale.exe out/vale25519.o
+	./out/curve25519_64_vale.exe
+	cc $(CFLAGS) -I test/rfc7748_src/ test/rfc7748_src/x25519_x64.c -c -o out/x25519.o
+	cc $(CFLAGS) -I . -L . -lkremlib test/curve64-rfc-test.c -o out/curve25519_64_rfc.exe out/fp25519.o out/x25519.o
+	./out/curve25519_64_rfc.exe
+
+	cp -f tmp_25519.h vale_25519.h
+	rm -f tmp_25519.h
+
+test-tezos-snapshot: test-snapshot
+	mkdir -p test/tezos
+	cp test/curve51-test.c test/tezos
+	sed -i 's/Hacl_Curve25519_51_ecdh/Tezos_curve25519_51_ecdh/g' test/tezos/curve51-test.c
+	cc $(CFLAGS) -I . Hacl_Curve25519_51.c Tezos.c test/tezos/curve51-test.c -L . -lkremlib -o out/test_curve25519_51_tezos.exe
+	./out/test_curve25519_51_tezos.exe
+
+clean:
+	rm -rf out

@@ -9,7 +9,7 @@ open Lib.ByteSequence
 open Lib.LoopCombinators
 open Lib.NatMod
 
-module Hash = Spec.SHA2
+module Hash = Spec.Agile.Hash
 
 #reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
 
@@ -36,11 +36,11 @@ val xor_bytes:
 let xor_bytes #len b1 b2 =
   map2 (fun x y -> x ^. y) b1 b2
 
-let hLen = Spec.SHA2.size_hash Spec.SHA2.SHA2_256
+let hLen = Spec.Agile.Hash.size_hash Spec.Agile.Hash.HASH_SHA2_256
 
 (* Mask Generation Function *)
 val mgf_sha256:
-    #len: size_nat{len + 4 < max_size_t /\ len + 4 < Spec.SHA2.max_input256}
+    #len: size_nat{len + 4 <= max_size_t /\ len + 4 <= Spec.Agile.Hash.max_input Spec.Agile.Hash.HASH_SHA2_256}
   -> mgfseed: lbytes len
   -> maskLen: size_pos{(blocks maskLen hLen) * hLen < pow2 32} ->
   Tot (lbytes maskLen)
@@ -54,7 +54,7 @@ let mgf_sha256 #len mgfseed maskLen =
     repeati n (fun i acc ->
       let counter = nat_to_bytes_be 4 i in
       let mgfseed_counter = update_sub mgfseed_counter len 4 counter in
-      let mHash = Spec.SHA2.hash256 mgfseed_counter in
+      let mHash = Spec.Agile.Hash.hash Spec.Agile.Hash.HASH_SHA2_256 mgfseed_counter in
       update_sub acc (hLen * i) hLen mHash
     ) acc in
   sub acc 0 maskLen
@@ -105,22 +105,22 @@ let db_zero #len db emBits =
   else db
 
 val pss_encode:
-    #sLen: size_nat{sLen + hLen + 8 < max_size_t /\ sLen + hLen + 8 < Spec.SHA2.max_input256}
-  -> #msgLen: size_nat{msgLen < Spec.SHA2.max_input256}
+    #sLen: size_nat{sLen + hLen + 8 < max_size_t /\ sLen + hLen + 8 <= Spec.Agile.Hash.max_input Spec.Agile.Hash.HASH_SHA2_256}
+  -> #msgLen: size_nat{msgLen <= Spec.Agile.Hash.max_input Spec.Agile.Hash.HASH_SHA2_256}
   -> salt: lbytes sLen
   -> msg: lbytes msgLen
   -> emBits: size_pos{hLen + sLen + 2 <= blocks emBits 8} ->
   Tot (lbytes (blocks emBits 8))
 
 let pss_encode #sLen #msgLen salt msg emBits =
-  let mHash = Spec.SHA2.hash256 msg in
+  let mHash = Spec.Agile.Hash.hash Spec.Agile.Hash.HASH_SHA2_256 msg in
 
   //m1 = [8 * 0x00; mHash; salt]
   let m1Len = 8 + hLen + sLen in
   let m1 = create m1Len (u8 0) in
   let m1 = update_sub m1 8 hLen mHash in
   let m1 = update_sub m1 (8 + hLen) sLen salt in
-  let m1Hash = Spec.SHA2.hash256 m1 in
+  let m1Hash = Spec.Agile.Hash.hash Spec.Agile.Hash.HASH_SHA2_256 m1 in
 
   //db = [0x00;..; 0x00; 0x01; salt]
   let emLen = blocks emBits 8 in
@@ -130,7 +130,7 @@ let pss_encode #sLen #msgLen salt msg emBits =
   let db = db.[last_before_salt] <- u8 1 in
   let db = update_sub db (last_before_salt + 1) sLen salt in
 
-  let dbMask = mgf_sha256 m1Hash dbLen in
+  let dbMask = mgf_sha256 #(length m1Hash) m1Hash dbLen in
   let maskedDB = xor_bytes db dbMask in
   let maskedDB = db_zero maskedDB emBits in
 
@@ -142,15 +142,15 @@ let pss_encode #sLen #msgLen salt msg emBits =
 
 
 val pss_verify:
-    #msgLen: size_nat{msgLen < Spec.SHA2.max_input256}
-  -> sLen: size_nat{sLen + hLen + 8 < max_size_t /\ sLen + hLen + 8 < Spec.SHA2.max_input256}
+    #msgLen: size_nat{msgLen <= Spec.Agile.Hash.max_input Spec.Agile.Hash.HASH_SHA2_256}
+  -> sLen: size_nat{sLen + hLen + 8 <= max_size_t /\ sLen + hLen + 8 <= Spec.Agile.Hash.max_input Spec.Agile.Hash.HASH_SHA2_256}
   -> msg: lbytes msgLen
   -> emBits: size_pos
   -> em: lbytes (blocks emBits 8) ->
   Tot bool
 
 let pss_verify #msgLen sLen msg emBits em =
-  let mHash = Spec.SHA2.hash256 msg in
+  let mHash = Spec.Agile.Hash.hash Spec.Agile.Hash.HASH_SHA2_256 msg in
 
   let emLen = blocks emBits 8 in
   let msBits = emBits % 8 in
@@ -183,7 +183,7 @@ let pss_verify #msgLen sLen msg emBits em =
 	     let m1 = create m1Len (u8 0) in
 	     let m1 = update_sub m1 8 hLen mHash in
 	     let m1 = update_sub m1 (8 + hLen) sLen salt in
-	     let m1Hash0 = Spec.SHA2.hash256 m1 in
+	     let m1Hash0 = Spec.Agile.Hash.hash Spec.Agile.Hash.HASH_SHA2_256 m1 in
 	     lbytes_eq m1Hash0 m1Hash
       end
     end
@@ -191,8 +191,8 @@ let pss_verify #msgLen sLen msg emBits em =
 
 
 val rsapss_sign:
-    #sLen: size_nat{sLen + hLen + 8 < max_size_t /\ sLen + hLen + 8 < Spec.SHA2.max_input256}
-  -> #msgLen: size_nat{msgLen < Spec.SHA2.max_input256}
+    #sLen: size_nat{sLen + hLen + 8 <= max_size_t /\ sLen + hLen + 8 <= Spec.Agile.Hash.max_input Spec.Agile.Hash.HASH_SHA2_256}
+  -> #msgLen: size_nat{msgLen <= Spec.Agile.Hash.max_input Spec.Agile.Hash.HASH_SHA2_256}
   -> modBits: modBits{sLen + hLen + 2 <= blocks (modBits - 1) 8}
   -> skey: rsa_privkey modBits
   -> salt: lbytes sLen
@@ -220,10 +220,10 @@ let rsapss_sign #sLen #msgLen modBits skey salt msg =
 
 
 val rsapss_verify:
-    #msgLen: size_nat{msgLen < Spec.SHA2.max_input256}
+    #msgLen: size_nat{msgLen <= Spec.Agile.Hash.max_input Spec.Agile.Hash.HASH_SHA2_256}
   -> modBits: modBits
   -> pkey: rsa_pubkey modBits
-  -> sLen: size_nat{sLen + hLen + 8 < max_size_t /\ sLen + hLen + 8 < Spec.SHA2.max_input256}
+  -> sLen: size_nat{sLen + hLen + 8 <= max_size_t /\ sLen + hLen + 8 <= Spec.Agile.Hash.max_input Spec.Agile.Hash.HASH_SHA2_256}
   -> msg: lbytes msgLen
   -> sgnt: lbytes (blocks modBits 8) ->
   Tot bool

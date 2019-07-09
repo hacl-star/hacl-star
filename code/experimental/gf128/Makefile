@@ -15,7 +15,7 @@ all: gf128-ni.exe gf128-precomp.exe
 verify: test
 
 #CC=/usr/local/Cellar/llvm/7.0.0/bin/clang-7
-CC=gcc-8
+CC=gcc-9
 
 GF128_PRECOMP_FILES= $(HACL_HOME)/lib/Lib.IntTypes.fst \
 	$(HACL_HOME)/lib/Lib.RawIntTypes.fst \
@@ -32,6 +32,8 @@ GF128_NI_FILES= $(HACL_HOME)/lib/Lib.IntTypes.fst \
 	$(HACL_HOME)/lib/Lib.Buffer.fst \
 	$(HACL_HOME)/lib/Lib.ByteBuffer.fst \
 	$(HACL_HOME)/lib/Lib.Loops.fst \
+	$(HACL_HOME)/lib/Lib.IntVector.fst \
+	$(HACL_HOME)/lib/Lib.IntVector.Intrinsics.fsti \
 	Hacl.Impl.Gf128.FieldNI.fst \
 	Hacl.Impl.Gf128.Fields.fst \
 	Hacl.Impl.Gf128.Generic.fst \
@@ -58,10 +60,10 @@ gf128-ni-c/out.krml: $(GF128_NI_FILES)
 
 gf128-ni-c/Hacl_Gf128_NI.c: gf128-ni-c/out.krml
 	 $(KREMLIN) $(KREMLIN_ARGS) -tmpdir gf128-ni-c  $^ -skip-compilation \
-	   -minimal -add-include '"kremlib.h"' -add-include '"vec128.h"' -drop Lib.Vec128 -bundle 'Hacl.Gf128.NI=*'
+	   -minimal -add-include '"kremlib.h"' -add-include '"vec-intrin.h"' -drop Lib.IntVector.Intrinsics -drop Lib -bundle 'Hacl.Gf128.NI=*'
 
 gf128-ni.exe: gf128-ni-c/Hacl_Gf128_NI.c gf128-ni-test.c
-	$(CC) -march=native -mtune=native -O3 -I $(KREMLIN_HOME)/kremlib/dist/generic -I $(KREMLIN_HOME)/include -I . gf128-ni-c/Hacl_Gf128_NI.c $(KREMLIN_HOME)/kremlib/dist/generic/testlib.o gf128-ni-test.c -o gf128-ni.exe
+	$(CC) -march=native -mtune=native -O3 -I $(HACL_HOME)/lib/c -I $(KREMLIN_HOME)/kremlib/dist/generic -I $(KREMLIN_HOME)/include -I . gf128-ni-c/Hacl_Gf128_NI.c $(KREMLIN_HOME)/kremlib/dist/generic/testlib.o gf128-ni-test.c -o gf128-ni.exe
 	./gf128-ni.exe
 
 gf128-perf: gf128-precomp.exe gf128-ni.exe

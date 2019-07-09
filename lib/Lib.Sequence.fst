@@ -223,8 +223,22 @@ let generate_blocks #t len max n a f acc0 =
 
 let map_blocks_a (a:Type) (bs:size_nat) (max:nat) (i:nat{i <= max}) = s:seq a{length s == i * bs}
 
+let generate_blocks_simple_f
+ (#a:Type)
+ (bs:size_nat{bs > 0})
+ (max:nat)
+ (f:(i:nat{i < max} -> lseq a bs))
+ (i:nat{i < max})
+ (acc:map_blocks_a a bs max i) : map_blocks_a a bs max (i + 1)
+=
+ Seq.append acc (f i)
+
+let generate_blocks_simple #a bs max nb f =
+ repeat_gen nb (map_blocks_a a bs max)
+   (generate_blocks_simple_f #a bs max f) Seq.empty
+
 let map_blocks_f
-  (#a:Type0)
+  (#a:Type)
   (bs:size_nat{bs > 0})
   (max:nat)
   (inp:seq a{length inp == max * bs})
@@ -232,7 +246,7 @@ let map_blocks_f
   (i:nat{i < max})
   (acc:map_blocks_a a bs max i) : map_blocks_a a bs max (i + 1)
 =
-  Math.Lemmas.multiple_division_lemma max bs;
+  //Math.Lemmas.multiple_division_lemma max bs;
   let block = Seq.slice inp (i*bs) ((i+1)*bs) in
   Seq.append acc (f i block)
 
@@ -252,13 +266,13 @@ let mod_prop n a b =
 let rec index_map_blocks_multi #a bs max n inp f i =
   let map_blocks_a = map_blocks_a a bs max in
   let map_blocks_f = map_blocks_f #a bs max inp f in
-  let acc0 : seq a = Seq.empty in
+  let acc0 = Seq.empty #a in
   let s1 = repeat_gen n map_blocks_a map_blocks_f acc0 in
   unfold_repeat_gen n map_blocks_a map_blocks_f acc0 (n-1);
   let s = repeat_gen (n-1) map_blocks_a map_blocks_f acc0 in
-  assert (s1 == map_blocks_f (n-1) s);
+  //assert (s1 == map_blocks_f (n-1) s);
   let s' = f (n-1) (Seq.slice inp ((n-1)*bs) (n*bs)) in
-  assert (s1 == Seq.append s s');
+  //assert (s1 == Seq.append s s');
   if i < (n-1)*bs then begin
     Seq.lemma_index_app1 s s' i;
     index_map_blocks_multi #a bs max (n-1) inp f i end
@@ -326,7 +340,7 @@ let unfold_generate_blocks #t len n a f acc0 i =
 	  repeat_gen (i+1) (generate_blocks_a t len n a) (generate_blocks_inner t len n a f) a0);
   unfold_repeat_gen (i+1) (generate_blocks_a t len n a) (generate_blocks_inner t len n a f) a0 i
 
-#reset-options "--z3rlimit 200 --max_fuel 0 --max_ifuel 0"
+#reset-options "--z3rlimit 300 --max_fuel 0 --max_ifuel 0"
 
 let rec index_generate_blocks #t len max n f i =
   assert (0 < n);

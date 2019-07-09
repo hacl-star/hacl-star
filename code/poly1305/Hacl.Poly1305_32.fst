@@ -8,7 +8,8 @@ open Lib.Buffer
 
 open Hacl.Impl.Poly1305.Fields
 open Hacl.Impl.Poly1305
-module S = Hacl.Spec.Poly1305.Vec
+module Scalar = Spec.Poly1305
+module Vec = Hacl.Spec.Poly1305.Vec
 
 let blocklen = 16ul
 
@@ -31,7 +32,7 @@ val poly1305_update_blocks:
       modifies (loc ctx) h0 h1 /\
       state_inv_t #M32 h1 ctx /\
       as_get_acc h1 ctx ==
-      S.poly_update #(width M32) (as_seq h0 text) (as_get_acc h0 ctx) (as_get_r h0 ctx))
+      Vec.poly1305_update #(width M32) (as_seq h0 text) (as_get_acc h0 ctx) (as_get_r h0 ctx))
 let poly1305_update_blocks ctx len text =
   poly1305_update ctx len text
 
@@ -50,7 +51,7 @@ val poly1305_update_last:
       modifies (loc ctx) h0 h1 /\
       state_inv_t #M32 h1 ctx /\
       as_get_acc h1 ctx ==
-      S.poly_update #(width M32) (as_seq h0 text) (as_get_acc h0 ctx) (as_get_r h0 ctx))
+      Vec.poly1305_update #(width M32) (as_seq h0 text) (as_get_acc h0 ctx) (as_get_r h0 ctx))
 let poly1305_update_last ctx len text =
   poly1305_update ctx len text
 

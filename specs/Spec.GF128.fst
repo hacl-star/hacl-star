@@ -4,69 +4,65 @@ open FStar.Mul
 open Lib.IntTypes
 open Lib.Sequence
 open Lib.ByteSequence
+
 open Spec.GaloisField
-open Lib.LoopCombinators
 
+//GF128 Field: to load bits in little-endian order set the parameters as follows
+//let irred = u128 0x87
+//let load_elem (b:lbytes 16) : elem = load_felem_le #gf128 b
+//let store_elem (e:elem) : lbytes 16 = store_felem_le #gf128 e
+//and use `fmul` instead of `fmul_be`
 
-(* GF128 Field: note that bits are loaded in little-endian order *)
-let irred = u128 0x87
+let irred = nat_to_uint #U128 #SEC 0xE1000000000000000000000000000000
 let gf128 = gf U128 irred
 let elem = felem gf128
-let load_elem (b:lbytes 16) : elem = load_felem_le #gf128 b
-let store_elem (e:elem) : lbytes 16 = store_felem_le #gf128 e
+let load_elem (b:lbytes 16) : elem = load_felem_be #gf128 b
+let store_elem (e:elem) : lbytes 16 = store_felem_be #gf128 e
 
 (* GCM types and specs *)
-let blocksize : size_nat = 16
-let keysize   : size_nat = 16
-type block = lbytes blocksize
-type tag   = lbytes blocksize
-type key   = lbytes keysize
+let size_block : size_nat = 16
+let size_key   : size_nat = 16
 
+type block = lbytes size_block
+type tag   = lbytes size_block
+type key   = lbytes size_key
 
-let encode (len:size_nat{len <= blocksize}) (w:lbytes len) : Tot elem =
-  let b = create blocksize (u8 0) in
+/// Specification
+
+let encode (w:lbytes size_block) : Tot elem = load_elem w
+
+let encode_last (len:size_nat{len < size_block}) (w:lbytes len) : Tot elem =
+  let b = create size_block (u8 0) in
   let b = update_slice b 0 len w  in
   load_elem b
 
 let decode (e:elem) : Tot block = store_elem e
 
-noeq type state = {
-  r:elem;
-  acc:elem
-}
+let gf128_init (h:lbytes size_block) : Tot (elem & elem) =
+  let r = load_elem h in
+  zero, r
 
-let init (h:lbytes blocksize) : state = {
-  r =  encode blocksize h;
-  acc = zero
-}
+let gf128_update1 (r:elem) (b:lbytes size_block) (acc:elem) : Tot elem =
+  (encode b `fadd` acc) `fmul_be` r
 
-let set_acc (st:state) (acc:elem) = {st with acc = acc}
+let gf128_finish (s:key) (acc:elem) : Tot tag =
+  decode (acc `fadd` (load_elem s))
 
-let update (len:size_nat{len <= blocksize}) (w:lbytes len) (st:state) : state =
-  let acc = (encode len w `fadd` st.acc) `fmul` st.r in
-  set_acc st acc
+let gf128_update_last (r:elem) (l:size_nat{l < size_block}) (b:lbytes l) (acc:elem) =
+  if l = 0 then acc else (encode_last l b `fadd` acc) `fmul_be` r
 
-let poly (text:seq uint8) (st:state) : state =
-  repeat_blocks #uint8 #state blocksize text
-    (fun b st -> update blocksize b st)
-    (fun rem b st -> if rem = 0 then st else update rem b st)
-  st
+let gf128_update (text:bytes) (acc:elem) (r:elem) : Tot elem =
+  repeat_blocks #uint8 #elem size_block text
+    (gf128_update1 r)
+    (gf128_update_last r)
+  acc
 
-let finish (st:state) (s:tag) : Tot tag =
-  decode (st.acc `fadd` (encode blocksize s))
+let gmul (text:bytes) (h:lbytes size_block) : Tot tag =
+  let acc, r = gf128_init h in
+  let acc = gf128_update text acc r in
+  decode acc
 
-let gmul (text:bytes) (h:lbytes blocksize) : Tot tag  =
-  let st = init h in
-  let st = poly text st in
-  decode st.acc
-
-val gmac:
-    text: bytes
-  -> h: lbytes blocksize
-  -> k: key ->
-  Tot tag
-
-let gmac text h k =
-  let st = init h in
-  let st = poly text st in
-  finish st k
+let gmac (text:bytes) (h:lbytes size_block) (k:key) : Tot tag =
+  let acc, r = gf128_init h in
+  let acc = gf128_update text acc r in
+  gf128_finish k acc

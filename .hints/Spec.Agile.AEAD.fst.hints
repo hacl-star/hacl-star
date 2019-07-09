@@ -1,0 +1,203 @@
+[
+  "g—:¯É\u0001ØÂñÏ*\u0005«\u001b\u0014\u0006",
+  [
+    [
+      "Spec.Agile.AEAD.size_key",
+      1,
+      1,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "disc_equation_Spec.Agile.AEAD.AEAD_AES128_GCM",
+        "disc_equation_Spec.Agile.AEAD.AEAD_Chacha20_Poly1305",
+        "equation_Spec.Poly1305.size_block",
+        "equation_Spec.Poly1305.size_key",
+        "fuel_guarded_inversion_Spec.Agile.AEAD.algorithm",
+        "refinement_interpretation_Tm_refine_a78e81a34494fa620ef91991a1267b1f",
+        "typing_Spec.Poly1305.size_block", "typing_Spec.Poly1305.size_key"
+      ],
+      0,
+      "35cd643da74e07fd85699b8d0e45fa2d"
+    ],
+    [
+      "Spec.Agile.AEAD.size_block",
+      1,
+      1,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "disc_equation_Spec.Agile.AEAD.AEAD_AES128_GCM",
+        "disc_equation_Spec.Agile.AEAD.AEAD_Chacha20_Poly1305",
+        "equation_Spec.Poly1305.size_block",
+        "fuel_guarded_inversion_Spec.Agile.AEAD.algorithm",
+        "refinement_interpretation_Tm_refine_a78e81a34494fa620ef91991a1267b1f",
+        "typing_Spec.Poly1305.size_block"
+      ],
+      0,
+      "5f1342df6e42a82157148ce39d6353d5"
+    ],
+    [
+      "Spec.Agile.AEAD.size_tag",
+      1,
+      1,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "disc_equation_Spec.Agile.AEAD.AEAD_AES128_GCM",
+        "disc_equation_Spec.Agile.AEAD.AEAD_Chacha20_Poly1305",
+        "equation_Spec.Poly1305.size_block",
+        "fuel_guarded_inversion_Spec.Agile.AEAD.algorithm",
+        "refinement_interpretation_Tm_refine_a78e81a34494fa620ef91991a1267b1f",
+        "typing_Spec.Poly1305.size_block"
+      ],
+      0,
+      "337887b36553ca379ee094dbce601dbb"
+    ],
+    [
+      "Spec.Agile.AEAD.size_nonce",
+      1,
+      1,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "disc_equation_Spec.Agile.AEAD.AEAD_AES128_GCM",
+        "disc_equation_Spec.Agile.AEAD.AEAD_Chacha20_Poly1305",
+        "equation_Spec.Chacha20Poly1305.size_nonce",
+        "fuel_guarded_inversion_Spec.Agile.AEAD.algorithm",
+        "refinement_interpretation_Tm_refine_a78e81a34494fa620ef91991a1267b1f",
+        "typing_Spec.Chacha20Poly1305.size_nonce"
+      ],
+      0,
+      "4b5558ab1d6a15af8c6fe6bb51b4f650"
+    ],
+    [
+      "Spec.Agile.AEAD.padlen",
+      1,
+      1,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "equation_Spec.Agile.AEAD.size_block",
+        "equation_Spec.Poly1305.size_key",
+        "fuel_guarded_inversion_Spec.Agile.AEAD.algorithm",
+        "primitive_Prims.op_Modulus", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_a78e81a34494fa620ef91991a1267b1f",
+        "typing_Spec.Poly1305.size_key"
+      ],
+      0,
+      "f8ad4223c3f22bb6c0ec9d0f7cf31bb8"
+    ],
+    [
+      "Spec.Agile.AEAD.aead_encrypt",
+      1,
+      1,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Lib.IntTypes.uint8",
+        "equation_Lib.Sequence.length", "equation_Prims.nat",
+        "equation_Spec.Agile.AEAD.size_block",
+        "equation_Spec.Agile.AEAD.size_tag",
+        "function_token_typing_Lib.IntTypes.uint8",
+        "primitive_Prims.op_Addition", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_0913eeb3a74d6a98e6b2a63e458c7c0d",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_a78e81a34494fa620ef91991a1267b1f",
+        "typing_Lib.Sequence.length", "typing_Spec.Agile.AEAD.size_block"
+      ],
+      0,
+      "09ff13c18edc5ebc5f7c802a824a7b7a"
+    ],
+    [
+      "Spec.Agile.AEAD.aead_encrypt",
+      2,
+      1,
+      1,
+      [ "@query" ],
+      0,
+      "20d9cd7967eb03a5359d395d370aaf6b"
+    ],
+    [
+      "Spec.Agile.AEAD.aead_encrypt",
+      3,
+      1,
+      1,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented",
+        "@fuel_irrelevance_Prims.pow2.fuel_instrumented", "@query",
+        "constructor_distinct_Lib.IntTypes.U32",
+        "constructor_distinct_Lib.IntTypes.U64",
+        "constructor_distinct_Lib.IntTypes.U8",
+        "disc_equation_Spec.Agile.AEAD.AEAD_AES128_GCM",
+        "disc_equation_Spec.Agile.AEAD.AEAD_Chacha20_Poly1305",
+        "equality_tok_Lib.IntTypes.U1@tok",
+        "equality_tok_Lib.IntTypes.U32@tok",
+        "equality_tok_Lib.IntTypes.U64@tok",
+        "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.bits",
+        "equation_Lib.IntTypes.uint8", "equation_Lib.Sequence.length",
+        "equation_Lib.Sequence.lseq", "equation_Prims.nat",
+        "equation_Spec.AES.gf8", "equation_Spec.AES.irred",
+        "equation_Spec.AES128_GCM.size_block",
+        "equation_Spec.AES128_GCM.size_key",
+        "equation_Spec.AES128_GCM.size_nonce",
+        "equation_Spec.Agile.AEAD.key", "equation_Spec.Agile.AEAD.nonce",
+        "equation_Spec.Agile.AEAD.size_block",
+        "equation_Spec.Agile.AEAD.size_key",
+        "equation_Spec.Agile.AEAD.size_nonce",
+        "equation_Spec.Agile.AEAD.size_tag",
+        "equation_Spec.Chacha20Poly1305.size_key",
+        "equation_Spec.Chacha20Poly1305.size_nonce",
+        "equation_Spec.GaloisField.felem", "equation_Spec.GaloisField.gf",
+        "equation_Spec.Poly1305.size_block",
+        "fuel_guarded_inversion_Spec.Agile.AEAD.algorithm",
+        "function_token_typing_Lib.IntTypes.uint8",
+        "lemma_Lib.IntTypes.pow2_values", "primitive_Prims.op_Addition",
+        "primitive_Prims.op_Division", "primitive_Prims.op_Multiply",
+        "primitive_Prims.op_Subtraction",
+        "proj_equation_Spec.GaloisField.GF_t",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "projection_inverse_Spec.GaloisField.GF_t",
+        "refinement_interpretation_Tm_refine_0913eeb3a74d6a98e6b2a63e458c7c0d",
+        "refinement_interpretation_Tm_refine_4cdde10fc139e66f0fadb4b2faf41926",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_70597463dd221580f371f83615527f81",
+        "refinement_interpretation_Tm_refine_a78e81a34494fa620ef91991a1267b1f",
+        "refinement_interpretation_Tm_refine_d8d83307254a8900dd20598654272e42",
+        "typing_Lib.IntTypes.bits", "typing_Lib.Sequence.length",
+        "typing_Spec.AES.gf8", "typing_Spec.Agile.AEAD.size_block",
+        "typing_Spec.GaloisField.__proj__GF__item__t",
+        "typing_tok_Lib.IntTypes.U8@tok"
+      ],
+      0,
+      "f69252223d9409c86fa084dbd10616d0"
+    ],
+    [
+      "Spec.Agile.AEAD.aead_decrypt",
+      1,
+      1,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Lib.Sequence.length",
+        "equation_Prims.nat", "equation_Spec.Agile.AEAD.size_block",
+        "equation_Spec.Agile.AEAD.size_tag", "primitive_Prims.op_Addition",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_2791e7f6896af0baf040e4e19bcae65e",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_a78e81a34494fa620ef91991a1267b1f",
+        "typing_Spec.Agile.AEAD.size_tag"
+      ],
+      0,
+      "a640fac60b26c857b0805ac12b66c227"
+    ],
+    [
+      "Spec.Agile.AEAD.aead_decrypt",
+      2,
+      1,
+      1,
+      [ "@query" ],
+      0,
+      "5bb1c857670dadeddd3868aaf0f2dee9"
+    ]
+  ]
+]

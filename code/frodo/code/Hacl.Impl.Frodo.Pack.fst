@@ -87,7 +87,8 @@ let frodo_pack #n1 #n2 d a res =
   assert (Seq.equal (refl h0 0) (Seq.create 0 (u8 0)));
   loop h0 n a_spec refl footprint spec
     (fun i ->
-      assert_spinoff (v (d *! i +! d) <= v (d *! ((n1 *! n2) /. size 8)));
+      FStar.Math.Lemmas.lemma_mult_le_left (v d) (v i + 1) (v n);
+      assert (v (d *! i +! d) <= v (d *! ((n1 *! n2) /. size 8)));
       Loops.unfold_repeat_gen (v n) a_spec (spec h0) (refl h0 0) (v i);
       let a = sub a (size 8 *! i) (size 8) in
       let r = sub res (d *! i) d in

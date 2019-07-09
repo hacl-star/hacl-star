@@ -33,14 +33,26 @@ val lemma_slice_slice_msg:
   -> bs:nat{bs == w * size_block}
   -> i:nat ->
   Lemma (i / bs * bs + (i % bs) / size_block * size_block == i / size_block * size_block)
-let lemma_slice_slice_msg w bs i = ()
+let lemma_slice_slice_msg w bs i =
+  calc (==) {
+    i / bs * bs + (i % bs) / size_block * size_block;
+  (==) { assert ((i % bs) / size_block * size_block == i % bs - i % bs % size_block) }
+    i / bs * bs + i % bs - i % bs % size_block;
+  (==) { assert (i % bs % size_block == i % size_block) }
+    i / bs * bs + i % bs - i % size_block;
+  (==) { assert (i / bs * bs + i % bs == i) }
+    i - i % size_block;
+  (==) { assert (i / size_block * size_block + i % size_block == i) }
+    i / size_block * size_block;
+  }
 
 val lemma_slice_slice_msg1:
     w:lanes
   -> bs:nat{bs == w * size_block}
   -> i:nat ->
   Lemma (i / bs * bs + ((i % bs) / size_block + 1) * size_block == (i / size_block + 1) * size_block)
-let lemma_slice_slice_msg1 w bs i = ()
+let lemma_slice_slice_msg1 w bs i =
+  lemma_slice_slice_msg w bs i
 
 val lemma_bs_mod_sb_mod:
     w:lanes
@@ -54,7 +66,16 @@ val lemma_i_div_sb:
   -> bs:nat{bs == w * size_block}
   -> i:nat ->
   Lemma (w * (i / bs) + (i % bs) / size_block == i / size_block)
-let lemma_i_div_sb w bs i = ()
+let lemma_i_div_sb w bs i =
+  calc (==) {
+    w * (i / bs) + i % bs / size_block;
+  (==) { assert (i % bs / size_block == i / size_block % w) }
+    w * (i / bs) + i / size_block % w;
+  (==) { FStar.Math.Lemmas.division_multiplication_lemma i size_block w }
+    w * ((i / size_block) / w) + i / size_block % w;
+  (==) { FStar.Math.Lemmas.euclidean_division_definition (i / size_block) w }
+    i / size_block;
+  }
 
 val lemma_equiv_g_i_aux1:
     w:lanes
@@ -62,7 +83,13 @@ val lemma_equiv_g_i_aux1:
   -> bs:nat{bs == w * size_block}
   -> i:nat{len / bs * bs <= i /\ i < len /\ i % bs < (len % bs / size_block) * size_block} ->
   Lemma ((i / size_block + 1) * size_block <= len)
-let lemma_equiv_g_i_aux1 w len bs i = ()
+let lemma_equiv_g_i_aux1 w len bs i =
+  assert ((len % bs / size_block) * size_block == len % bs - len % bs % size_block);
+  assert (len % bs % size_block == len % size_block);
+  assert (i % bs < len % bs - len % size_block);
+  assert (i / bs == len / bs);
+  assert (i % bs < len - i / bs * bs - len % size_block);
+  assert (i < len / size_block * size_block)
 
 val lemma_equiv_g_i_aux2:
     w:lanes
@@ -70,7 +97,13 @@ val lemma_equiv_g_i_aux2:
   -> bs:nat{bs == w * size_block}
   -> i:nat{len / bs * bs <= i /\ i < len /\ i % bs >= (len % bs / size_block) * size_block} ->
   Lemma (len / size_block * size_block <= i)
-let lemma_equiv_g_i_aux2 w len bs i = ()
+let lemma_equiv_g_i_aux2 w len bs i =
+  assert ((len % bs / size_block) * size_block == len % bs - len % bs % size_block);
+  assert (len % bs % size_block == len % size_block);
+  assert (i % bs >= len % bs - len % size_block);
+  assert (i / bs == len / bs);
+  assert (i % bs >= len - i / bs * bs - len % size_block);
+  assert (i >= len / size_block * size_block)
 
 val lemma_slice_slice_msg2:
     w:lanes
@@ -98,14 +131,18 @@ val lemma_i_div_sb1:
   -> len:nat
   -> i:nat{len / bs * bs <= i /\ i < len} ->
   Lemma (w * (len / bs) + i % bs / size_block == i / size_block)
-let lemma_i_div_sb1 w bs len i = ()
-
-val lemma_len_div_sb:
-    w:lanes
-  -> bs:nat{bs == w * size_block}
-  -> len:nat ->
-  Lemma (w * (len / bs) + len % bs / size_block == len / size_block)
-let lemma_len_div_sb w bs len = ()
+let lemma_i_div_sb1 w bs len i =
+  calc (==) {
+    w * (len / bs) + i % bs / size_block;
+  (==) { assert (i % bs / size_block == i / size_block % w) }
+    w * (len / bs) + i / size_block % w;
+  (==) { assert (i / bs == len / bs) }
+    w * (i / bs) + i / size_block % w;
+  (==) { FStar.Math.Lemmas.division_multiplication_lemma len size_block w }
+    w * ((i / size_block) / w) + i / size_block % w;
+  (==) { FStar.Math.Lemmas.euclidean_division_definition (i / size_block) w }
+    i / size_block;
+  }
 
 val chacha20_update_scalar_lemma_i:
     ctx:Scalar.state
@@ -130,7 +167,7 @@ let chacha20_update_scalar_lemma_i ctx msg i =
     (Scalar.chacha20_encrypt_block ctx)
     (Scalar.chacha20_encrypt_last ctx) i
 
-#reset-options "--z3rlimit 50 --max_fuel 0 --using_facts_from '* -FStar.Seq'"
+#reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq -Hacl.Spec.*'"
 
 val chacha20_update_vector_lemma_i:
     #w:lanes
@@ -317,7 +354,6 @@ let chacha20_update_vector_lemma_equiv_g_f_i_aux #w k n ctr0 msg bs i =
   lemma_i_div_sb1 w bs len i
   //assert (w * nb_v + j1 == j_s);
 
-#push-options "--z3rlimit 100"
 val chacha20_update_vector_lemma_equiv_g_f_i:
     #w:lanes
   -> k:key
@@ -329,8 +365,9 @@ val chacha20_update_vector_lemma_equiv_g_f_i:
   Lemma (
     let len = length msg in
     let j_s = i / size_block in
+    lemma_equiv_g_i_aux1 w len bs i;
     FStar.Seq.lemma_len_slice msg (j_s*size_block) ((j_s+1)*size_block);
-    let b_j_s = Seq.slice msg (j_s*size_block) ((j_s+1)*size_block) in
+    let b_j_s:lseq uint8 size_block = Seq.slice msg (j_s*size_block) ((j_s+1)*size_block) in
 
     let st0 = chacha20_init #w k n ctr0 in
     let ctx = Scalar.chacha20_init k n ctr0 in
@@ -340,9 +377,7 @@ let chacha20_update_vector_lemma_equiv_g_f_i #w k n ctr0 msg bs i =
   let st0 = chacha20_init #w k n ctr0 in
   chacha20_update_vector_lemma_i #w st0 msg i;
   chacha20_update_vector_lemma_equiv_g_f_i_aux #w k n ctr0 msg bs i
-#pop-options
 
-#push-options "--z3rlimit 100"
 val chacha20_update_vector_lemma_equiv_g_g_i_aux:
     #w:lanes
   -> k:key
@@ -417,9 +452,8 @@ let chacha20_update_vector_lemma_equiv_g_g_i_aux #w k n ctr0 msg bs i =
   FStar.Seq.lemma_len_slice msg (nb*size_block) len;
   let last = Seq.slice msg (nb*size_block) len in
   assert (last_s == last);
-  lemma_len_div_sb w bs len;
+  lemma_i_div_sb w bs len;
   assert (w * nb_v + nb_s == nb)
-#pop-options
 
 val chacha20_update_vector_lemma_equiv_g_g_i:
     #w:lanes

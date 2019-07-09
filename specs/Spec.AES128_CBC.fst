@@ -75,7 +75,7 @@ let aes128_cbc_encrypt input k iv =
   let n = len / size_block in
   let rem = len % size_block in
   let xkey = AES.aes_key_expansion AES.AES128 k in
-  let last_iv, ciphertext = generate_blocks size_block n (fun _ -> block) (fun i iv ->
+  let last_iv, ciphertext = generate_blocks size_block n n (fun _ -> block) (fun i iv ->
     let block_i = sub #uint8 #len input (i * size_block) size_block in
     let cipher_block = cbc_encrypt_block iv xkey block_i in
     cipher_block, cipher_block) iv in
@@ -103,7 +103,7 @@ let aes128_cbc_decrypt ciphertext k iv =
   let clen : size_nat = length ciphertext in
   let n : size_nat = clen / size_block in
   let xkey = AES.aes_dec_key_expansion AES.AES128 k in
-  let last_iv, plaintext = generate_blocks size_block (n - 1) (fun _ -> block) (fun i iv ->
+  let last_iv, plaintext = generate_blocks size_block (n - 1) (n - 1) (fun _ -> block) (fun i iv ->
     let cblock_i = sub #uint8 #clen ciphertext (i * size_block) size_block in
     let plain_block = cbc_decrypt_block iv xkey cblock_i in
     cblock_i, plain_block) iv in

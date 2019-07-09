@@ -1,26 +1,9 @@
-module Hacl.Trusted.Random.Hardware
+module Lib.RandomBuffer.Hardware
 
 open FStar.HyperStack
 open FStar.HyperStack.All
 open FStar.HyperStack.ST
-open FStar.Buffer
 
-(* Aliases for modules *)
-module U8  = FStar.UInt8
-module U32 = FStar.UInt32
-module U64 = FStar.UInt64
-module FB  = FStar.Buffer
-module HS  = FStar.HyperStack
-module ST = FStar.HyperStack.ST
-
-module HTRHA = Hacl.Trusted.Random.Hardware.Assumed
-
-
-(* Aliases for types *)
-let uint8_t  = FStar.UInt8.t
-let uint32_t = FStar.UInt32.t
-let uint64_t = FStar.UInt64.t
-let uint8_p    = FStar.Buffer.buffer uint8_t
 
 
 (* Get a N random bytes from the CPU *)

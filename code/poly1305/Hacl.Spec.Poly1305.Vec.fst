@@ -8,30 +8,28 @@ open Lib.Sequence
 open Lib.ByteSequence
 open Lib.IntVector
 
-(* Field types and parameters *)
-let prime : pos =
-  let p = pow2 130 - 5 in
-  assert_norm (p > 0);
-  p
+module Scalar = Spec.Poly1305
 
+(* Field types and parameters *)
 val lemma_pow2_128: n:nat ->
   Lemma
   (requires n <= 128)
-  (ensures pow2 n < prime)
+  (ensures pow2 n < Scalar.prime)
   [SMTPat (pow2 n)]
 let lemma_pow2_128 n =
   Math.Lemmas.pow2_le_compat 128 n;
   assert (pow2 n <= pow2 128);
-  assert_norm (pow2 128 < prime)
+  assert_norm (pow2 128 < Scalar.prime)
 
-let pfelem = x:nat{x < prime}
-let pfadd (x:pfelem) (y:pfelem) : pfelem = (x + y) % prime
-let pfmul (x:pfelem) (y:pfelem) : pfelem = (x * y) % prime
+let prime = Scalar.prime
+let pfelem = Scalar.felem
+let pfadd (x:pfelem) (y:pfelem) : pfelem = Scalar.fadd x y
+let pfmul (x:pfelem) (y:pfelem) : pfelem = Scalar.fmul x y
 
 let lanes = w:width{w == 1 \/ w == 2 \/ w == 4}
 type elem (w:lanes) = lseq pfelem w
 
-unfold
+//unfold
 let to_elem (w:lanes) (x:pfelem) : elem w = create w x
 let from_elem (#w:lanes) (x:elem w) : pfelem = x.[0]
 let zero (w:lanes) : elem w = to_elem w 0
@@ -42,14 +40,9 @@ let fmul (#w:lanes) (x:elem w) (y:elem w) : elem w =
   map2 pfmul x y
 
 (* Specification *)
-let size_block : size_nat = 16
-let size_key   : size_nat = 32
+let size_block : size_nat = Scalar.size_block
 
-type block = lbytes size_block
-type tag   = lbytes size_block
-type key   = lbytes size_key
-
-let load_elem1 (b:block) : elem 1 =
+let load_elem1 (b:Scalar.block) : elem 1 =
   to_elem 1 (nat_from_bytes_le b)
 
 let load_elem2 (b:lbytes (2 * size_block)) : elem 2 =
@@ -125,69 +118,38 @@ let compute_rw (#w:lanes) (r:pfelem) : elem w =
   | 2 -> compute_r2 r
   | 4 -> compute_r4 r
 
-let update1 (r:pfelem) (len:size_nat{len <= size_block}) (b:lbytes len) (acc:pfelem) : pfelem =
-  let e = nat_from_bytes_le b in
-  let e = pfadd (pow2 (8 * len)) e in
-  let acc = pfmul (pfadd acc e) r in
-  acc
 
-let updaten (#w:lanes) (r_w:elem w) (b:lbytes (w * size_block)) (acc:elem w) : elem w =
+let poly1305_update_nblocks (#w:lanes) (r_w:elem w) (b:lbytes (w * size_block)) (acc:elem w) : elem w =
   let e = load_blocks b in
   let acc = fadd (fmul acc r_w) e in
   acc
 
-let poly_update_multi (#w:lanes) (text:bytes{0 < length text /\ length text % (w * size_block) = 0}) (acc:pfelem) (r:pfelem) : pfelem =
+let poly1305_update_multi (#w:lanes) (text:bytes{0 < length text /\ length text % (w * size_block) = 0}) (acc:pfelem) (r:pfelem) : pfelem =
   let acc = load_acc acc (Seq.slice text 0 (w * size_block)) in
   let text = Seq.slice text (w * size_block) (length text) in
   let rw = compute_rw r in
-  let acc = repeat_blocks_multi #uint8 #(elem w) (w * size_block) text (updaten rw) acc in
+  let acc = repeat_blocks_multi #uint8 #(elem w) (w * size_block) text (poly1305_update_nblocks rw) acc in
   let acc = normalize_n acc r in
   acc
 
-let poly_update1_rem (r:pfelem) (l:size_nat{l < 16}) (block:lbytes l) (acc:pfelem) : pfelem =
-  if l = 0 then acc else update1 r l block acc
-
-let poly_update1 (text:bytes) (acc:pfelem) (r:pfelem) : pfelem =
-  repeat_blocks #uint8 #pfelem size_block text
-  (update1 r size_block)
-  (poly_update1_rem r)
-  acc
-
-let poly (#w:lanes) (text:bytes) (acc:pfelem) (r:pfelem) : pfelem =
+let poly1305_update_vec (#w:lanes) (text:bytes) (acc:pfelem) (r:pfelem) : pfelem =
   let len = length text in
   let sz_block = w * size_block in
   let len0 = len / sz_block * sz_block in
   let t0 = Seq.slice text 0 len0 in
-  let acc = if len0 > 0 then poly_update_multi #w t0 acc r else acc in
+  let acc = if len0 > 0 then poly1305_update_multi #w t0 acc r else acc in
 
   let t1 = Seq.slice text len0 len in
-  poly_update1 t1 acc r
+  Scalar.poly1305_update t1 acc r
 
-let poly_update (#w:lanes) (text:bytes) (acc:pfelem) (r:pfelem) : pfelem =
+let poly1305_update (#w:lanes) (text:bytes) (acc:pfelem) (r:pfelem) : pfelem =
   match w with
-  | 1 -> poly_update1 text acc r
-  | 2 -> poly #2 text acc r
-  | 4 -> poly #4 text acc r
+  | 1 -> Scalar.poly1305_update text acc r
+  | 2 -> poly1305_update_vec #2 text acc r
+  | 4 -> poly1305_update_vec #4 text acc r
 
-let finish (k:key) (acc:pfelem) : tag =
-  let s = nat_from_bytes_le (sub k 16 16) in
-  let n = (acc + s) % pow2 128 in
-  nat_to_bytes_le 16 n
 
-let encode_r (rb:block) : pfelem =
-  let lo = uint_from_bytes_le (sub rb 0 8) in
-  let hi = uint_from_bytes_le (sub rb 8 8) in
-  let mask0 = u64 0x0ffffffc0fffffff in
-  let mask1 = u64 0x0ffffffc0ffffffc in
-  let lo = lo &. mask0 in
-  let hi = hi &. mask1 in
-  uint_v hi * pow2 64 + uint_v lo
-
-let poly1305_init (k:key) : pfelem & pfelem =
-  let r = encode_r (sub k 0 16) in
-  0, r
-
-let poly1305 (#w:lanes) (msg:bytes) (k:key) : tag =
-  let acc, r = poly1305_init k in
-  let acc = poly_update #w msg acc r in
-  finish k acc
+let poly1305_mac (#w:lanes) (msg:bytes) (k:Scalar.key) : Scalar.tag =
+  let acc, r = Scalar.poly1305_init k in
+  let acc = poly1305_update #w msg acc r in
+  Scalar.poly1305_finish k acc
