@@ -343,6 +343,7 @@ let fmul15 (f10, f11, f12, f13, f14) f2 =
 
 #set-options "--z3rlimit 150 --max_fuel 0"
 
+#push-options "--max_ifuel 0"
 inline_for_extraction noextract
 val fsqr_felem5:
     f:felem5{felem_fits5 f (9, 10, 9, 9, 9)}
@@ -371,6 +372,7 @@ let fsqr_felem5 (f0, f1, f2, f3, f4) =
   let s4 = mul64_wide d0 f4 +! mul64_wide d1 f3 +! mul64_wide f2 f2 in
   lemma_fmul_fsqr5 (f0, f1, f2, f3, f4);
   (s0, s1, s2, s3, s4)
+#pop-options
 
 inline_for_extraction noextract
 val fsqr5:
