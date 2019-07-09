@@ -107,7 +107,7 @@ let aead_tag_length32 (al: Spec.AEAD.alg) : Tot (x: U32.t { U32.v x == Spec.AEAD
   | AES256_CCM        -> 16ul
 
 let aead_iv_length32 (al: Spec.AEAD.supported_alg) (x:U32.t) : Tot
-  (res:bool{res <==> Spec.AEAD.iv_length (U32.v x) al}) =
+  (res:bool{res <==> Spec.AEAD.iv_length al (U32.v x)}) =
   let open Spec.AEAD in
   match al with
   | AES128_GCM -> 0ul `U32.lt` x
@@ -255,6 +255,160 @@ let rec test_aes128_gcm_loop (i: U32.t): St unit =
 
 let test_aes128_gcm () : St unit =
   test_aes128_gcm_loop 0ul
+
+let nonce_bound a (len: UInt32.t):
+  Tot (b:bool { b ==> Spec.Agile.Cipher.nonce_bound a (UInt32.v len) })
+=
+  let open Spec.Agile.Cipher in
+  match a with
+  | CHACHA20 -> len = 12ul
+  | _ -> len `U32.lte` 16ul
+
+let block_len a: Tot (x:UInt32.t { UInt32.v x = Spec.Agile.Cipher.block_length a }) =
+  match a with
+  | Spec.Agile.Cipher.CHACHA20 -> 64ul
+  | _ -> 16ul
+
+let key_len a: Tot (x:UInt32.t { UInt32.v x = Spec.Agile.Cipher.key_length a }) =
+  match a with
+  | Spec.Agile.Cipher.CHACHA20 -> 32ul
+  | Spec.Agile.Cipher.AES128 -> 16ul
+  | Spec.Agile.Cipher.AES256 -> 32ul
+
+#push-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
+let rec test_ctr_st (a: Spec.Agile.Cipher.cipher_alg)
+  (counter: B.buffer UInt8.t)
+  (counter_len: UInt32.t)
+  (nonce: B.buffer UInt8.t)
+  (nonce_len: UInt32.t)
+  (k: B.buffer UInt8.t)
+  (k_len: UInt32.t)
+  (input: B.buffer UInt8.t)
+  (input_len: UInt32.t)
+  (output: B.buffer UInt8.t)
+  (output_len: UInt32.t):
+  ST unit
+  (requires (fun h0 ->
+    B.live h0 counter /\
+    B.recallable nonce /\
+    B.recallable k /\
+    B.recallable input /\
+    B.recallable output /\
+    B.len k == k_len /\
+    B.len nonce == nonce_len /\
+    B.len counter == counter_len /\
+    B.len input == input_len /\
+    B.len output == output_len /\
+    B.disjoint input output
+  ))
+  (ensures (fun _ _ _ -> True))
+=
+  let open EverCrypt.CTR in
+
+  if not (k_len = key_len a) then
+    C.Failure.failwith !$"test_ctr_st: not (key_len = key_len a)"
+  else if not (counter_len = 4ul) then
+    C.Failure.failwith !$"test_ctr_st: not (counter_len = 4)"
+  else if not (nonce_bound a nonce_len) then
+    C.Failure.failwith !$"test_ctr_st: not (nonce_bound a nonce_len)"
+  else if not (input_len = output_len) then
+    C.Failure.failwith !$"test_ctr_st: not (input_len = output_len)"
+  else if not (input_len `U32.gte` block_len a) then
+    C.Failure.failwith !$"test_ctr_st: not (input_len >= block_len a)"
+
+  else begin
+    B.recall k;
+    B.recall nonce;
+    B.recall input;
+    B.recall output;
+
+    // Might only be correct for AES
+    let ctr = LowStar.Endianness.load32_be counter in
+    if ctr = 0xfffffffful then
+      C.Failure.failwith !$"test_ctr_st: ctr = max_uint32"
+    else begin
+      push_frame ();
+      let output' = B.alloca 0uy (block_len a) in
+
+      let s = B.alloca B.null 1ul in
+      let r = EverCrypt.CTR.create_in a HyperStack.root s k nonce nonce_len ctr in
+      if r <> Success then
+        C.Failure.failwith !$"test_ctr_st: create_in <> Success"
+      else begin
+        let s = B.index s 0ul in
+        let input_block = B.sub input 0ul (block_len a) in
+        let output_block = B.sub output 0ul (block_len a) in
+        update_block (Ghost.hide a) s output' input_block;
+        free (Ghost.hide a) s;
+
+        TestLib.compare_and_print !$"of CTR" output_block output' (block_len a);
+
+        let rest = input_len `U32.sub` block_len a in
+        if rest `U32.gt` 0ul then begin
+          LowStar.Endianness.store32_be counter (ctr `U32.add_mod` 1ul);
+          test_ctr_st a counter counter_len nonce nonce_len k k_len
+            (B.sub input (block_len a) rest) rest
+            (B.sub output (block_len a) rest) rest
+        end
+      end;
+      pop_frame ()
+    end
+  end
+
+
+let rec test_chacha20_ctr_loop (vs: lbuffer chacha20_vector): St unit =
+  let LB len vs = vs in
+  if len <> 0ul then begin
+    B.recall vs;
+    let v = vs.(0ul) in
+
+    let (LB key_len key), (LB iv_len iv), ctr, (LB plain_len plain), (LB cipher_len cipher) = v in
+    let round_len = (plain_len `U32.div` 64ul) `U32.mul` 64ul in
+    B.recall plain;
+    B.recall cipher;
+    B.recall key;
+    B.recall iv;
+    if cipher_len <> plain_len then
+      failwith !$"chacha-ctr: cipher len and plain len don't match"
+    else begin
+      let plain = B.sub plain 0ul round_len in
+      let cipher = B.sub cipher 0ul round_len in
+      push_frame ();
+      let counter = B.alloca 0uy 4ul in
+      LowStar.Endianness.store32_be counter ctr;
+      assume (B.disjoint plain cipher);
+      test_ctr_st Spec.Agile.Cipher.CHACHA20 counter 4ul iv iv_len key key_len
+        plain round_len cipher round_len;
+      pop_frame ()
+    end;
+
+    B.recall vs;
+    test_chacha20_ctr_loop (LB (len `U32.sub` 1ul) (B.offset vs 1ul))
+  end
+#pop-options
+
+let test_chacha20_ctr () : St unit =
+  test_chacha20_ctr_loop Test.Vectors.chacha20_vectors_low
+
+let rec test_aes128_ctr_loop (i: U32.t): St unit =
+  let open Test.Vectors.Aes128 in
+  if i `U32.gte` vectors_len then
+    ()
+  else begin
+    B.recall vectors;
+    assert (U32.v i < B.length vectors);
+    let Vector output output_len counter counter_len nonce nonce_len key key_len input input_len =
+      vectors.(i)
+    in
+    assume (B.disjoint input output);
+    B.recall counter;
+    test_ctr_st Spec.Agile.Cipher.AES128 counter counter_len nonce nonce_len key key_len
+      input input_len output output_len;
+    test_aes128_ctr_loop (i `U32.add_mod` 1ul)
+  end
+
+let test_aes128_ctr () : St unit =
+  test_aes128_ctr_loop 0ul
 
 let rec test_rng (ctr:UInt32.t) : St unit = ()
   // AR: 09/07: B.alloca won't work, we don't know is_stack_region (get_tip h0)
@@ -510,7 +664,7 @@ let curve25519_test_set =
 
 inline_for_extraction
 noextract
-let aead_gcm_test_set =
+let aes_gcm_test_set =
   (Vale, f_aesni `f_concat` f_avx) `ts_cons` (
   ts_nil)
 
@@ -563,13 +717,25 @@ let test_curve25519_body (print: C.String.t -> St unit) : St unit =
 
 inline_for_extraction
 noextract
-let test_aead_gcm_body (print: C.String.t -> St unit) : St unit =
+let test_aes_gcm_body (print: C.String.t -> St unit) : St unit =
     print !$"  >>>>>>>>> AEAD (AES128_GCM old vectors)\n";
     test_aead AES_128_GCM;
     print !$"  >>>>>>>>> AEAD (AES256_GCM old vectors)\n";
     test_aead AES_256_GCM;
     print !$"  >>>>>>>>> AEAD (AES128_GCM vectors)\n";
     test_aes128_gcm ()
+
+inline_for_extraction
+noextract
+let test_aes_ctr_body (print: C.String.t -> St unit) : St unit =
+    print !$"  >>>>>>>>> CTR (AES128_CTR vectors)\n";
+    test_aes128_ctr ()
+
+inline_for_extraction
+noextract
+let test_chacha20_ctr_body (print: C.String.t -> St unit) : St unit =
+    print !$"  >>>>>>>>> CTR (CHACHA20 vectors)\n";
+    test_chacha20_ctr ()
 
 inline_for_extraction
 let test_chacha20poly1305_body (print: C.String.t -> St unit) : St unit =
@@ -614,11 +780,16 @@ let print_sep () : St unit =
   C.String.print !$"=====================\n"
 
 let test_all () : St unit =
+  // The CTR-mode tests reuse the test modifiers for the underlying ciphers.
   poly1305_test_set         test_poly1305_body;
   print_sep ();
   curve25519_test_set       test_curve25519_body;
   print_sep ();
-  aead_gcm_test_set         test_aead_gcm_body;
+  aes_gcm_test_set          test_aes_gcm_body;
+  print_sep ();
+  aes_gcm_test_set          test_aes_ctr_body;
+  print_sep ();
+  chacha20_test_set         test_chacha20_ctr_body;
   print_sep ();
   chacha20poly1305_test_set test_chacha20poly1305_body;
   print_sep ();
@@ -631,21 +802,10 @@ let test_all () : St unit =
   aes256_ecb_test_set       test_aes256_ecb_body
 
 let main (): St C.exit_code =
-  let equal_heap_dom_lemma (h1 h2:Heap.heap)
-    : Lemma
-      (requires Heap.equal_dom h1 h2)
-      (ensures  ((forall (a:Type0) (rel:Preorder.preorder a) (r:Heap.mref a rel).
-                    h1 `Heap.contains` r <==> h2 `Heap.contains` r) /\ 
-                 (forall (a:Type0) (rel:Preorder.preorder a) (r:Heap.mref a rel).
-                     r `Heap.unused_in` h1 <==> r `Heap.unused_in` h2)))
-      [SMTPat (Heap.equal_dom h1 h2)]
-    = ()
-  in
-
   push_frame ();
 
   test_all ();
-  
+
   // AR: 09/07: commenting it, random_init calls fails to verify, also see comment on test_rng above
   // print !$"\n  PSEUDO-RANDOM GENERATOR\n";
   // if EverCrypt.random_init () = 1ul then

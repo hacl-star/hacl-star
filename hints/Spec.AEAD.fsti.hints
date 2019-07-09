@@ -1,14 +1,32 @@
 [
-  "\u0012D\u0002≈}Úâ·EI»B!Ló",
+  "Ì(ù\u001de≠â‘Ù«\u0017^7C\nq",
   [
     [
-      "Spec.AEAD.uu___5",
+      "Spec.AEAD.uu___2",
       1,
       0,
       0,
       [ "@query" ],
       0,
-      "f0c8cce8766020a6db8f792aab5e842b"
+      "f726a9ecfb0c4be2c7893711405b86a3"
+    ],
+    [
+      "Spec.AEAD.cipher_alg_of_supported_alg",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "bool_inversion",
+        "disc_equation_Spec.AEAD.AES128_GCM",
+        "disc_equation_Spec.AEAD.AES256_GCM",
+        "disc_equation_Spec.AEAD.CHACHA20_POLY1305",
+        "equation_Spec.AEAD.is_supported_alg",
+        "equation_Spec.AEAD.supported_alg",
+        "refinement_interpretation_Tm_refine_d2d399e4b0cd736cb6130361c7530aa2",
+        "typing_Spec.AEAD.is_supported_alg"
+      ],
+      0,
+      "7963b9b7621e552d4a652fc641e1442b"
     ],
     [
       "Spec.AEAD.key_length",
@@ -16,7 +34,7 @@
       0,
       0,
       [
-        "@MaxIFuel_assumption", "@query",
+        "@MaxIFuel_assumption", "@query", "bool_inversion",
         "disc_equation_Spec.AEAD.AES128_CCM",
         "disc_equation_Spec.AEAD.AES128_CCM8",
         "disc_equation_Spec.AEAD.AES128_GCM",
@@ -25,10 +43,13 @@
         "disc_equation_Spec.AEAD.AES256_GCM",
         "disc_equation_Spec.AEAD.CHACHA20_POLY1305",
         "equation_FStar.Pervasives.inversion",
-        "fuel_guarded_inversion_Spec.AEAD.alg", "inversion-interp"
+        "equation_Spec.AEAD.is_supported_alg",
+        "fuel_guarded_inversion_Spec.AEAD.alg", "inversion-interp",
+        "projection_inverse_BoxBool_proj_0",
+        "typing_Spec.AEAD.is_supported_alg"
       ],
       0,
-      "173fbdc3c60005f58beb9a122be035ba"
+      "d76aade0f4a7f5964c58dcb128dbf680"
     ],
     [
       "Spec.AEAD.tag_length",
@@ -48,7 +69,7 @@
         "fuel_guarded_inversion_Spec.AEAD.alg", "inversion-interp"
       ],
       0,
-      "ac5208968d25f2157ed9af64c844b578"
+      "e8dd1b34d9773a552e4bdb36d0e6b10f"
     ],
     [
       "Spec.AEAD.iv_length",
@@ -73,25 +94,7 @@
         "typing_Spec.AEAD.is_supported_alg"
       ],
       0,
-      "510669d2ae39de9f39c0b7dba5804bb6"
-    ],
-    [
-      "Spec.AEAD.ekv_length",
-      1,
-      0,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query", "bool_inversion",
-        "disc_equation_Spec.AEAD.AES128_GCM",
-        "disc_equation_Spec.AEAD.AES256_GCM",
-        "disc_equation_Spec.AEAD.CHACHA20_POLY1305",
-        "equation_Spec.AEAD.is_supported_alg",
-        "equation_Spec.AEAD.supported_alg",
-        "refinement_interpretation_Tm_refine_d2d399e4b0cd736cb6130361c7530aa2",
-        "typing_Spec.AEAD.is_supported_alg"
-      ],
-      0,
-      "e2d1e97bc3eaa11eee4abee5ad4ad741"
+      "633b5446edb2d03fd6b32cb6d42bca3d"
     ],
     [
       "Spec.AEAD.max_length",
@@ -114,7 +117,7 @@
         "typing_Prims.pow2", "typing_Spec.AEAD.is_supported_alg"
       ],
       0,
-      "9e14c55e682d483c1abc0cd2b6533264"
+      "acb1d1f2f33929e10f645792453c7413"
     ],
     [
       "Spec.AEAD.lbytes",
@@ -123,7 +126,7 @@
       0,
       [ "@query" ],
       0,
-      "743a4e039ae0147716112643613363f0"
+      "637c9be2db21573f26af8b75c44e9714"
     ],
     [
       "Spec.AEAD.iv",
@@ -132,7 +135,7 @@
       0,
       [ "@query" ],
       0,
-      "e7e1efcf5e343fc4272d2b87e513b768"
+      "37464a6e2b0b3076dbb993e61be1b52f"
     ],
     [
       "Spec.AEAD.correctness",
@@ -144,12 +147,12 @@
         "equation_Spec.AEAD.encrypted", "equation_Spec.AEAD.max_length",
         "equation_Spec.AEAD.plain", "equation_Spec.AEAD.tag_length",
         "primitive_Prims.op_Addition", "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_66f09978b2b3f4704ffd4ed058c982aa",
-        "refinement_interpretation_Tm_refine_d9d8abebf4e94638b16cc38baa2f737a",
+        "refinement_interpretation_Tm_refine_064506d56a6af7ceef8b06aef3cb54e5",
+        "refinement_interpretation_Tm_refine_ff4fb9e743a804b2a539fcf5d276f129",
         "typing_Spec.AEAD.encrypt"
       ],
       0,
-      "748b8782ab52fbdd3a5b32335cd2b6f4"
+      "5ad28cd59b82eba75668d01bce47ce84"
     ]
   ]
 ]
