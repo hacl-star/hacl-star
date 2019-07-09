@@ -16,7 +16,7 @@
         "typing_Spec.Poly1305.size_key"
       ],
       0,
-      "d3f7d7d4f166f31acdae8573ca64737a"
+      "165ba08079403a890a04cb5aa6df55f1"
     ],
     [
       "Spec.Chacha20Poly1305.size_nonce",
@@ -145,13 +145,15 @@
         "equation_Lib.IntTypes.uint_v", "equation_Lib.Sequence.length",
         "equation_Lib.Sequence.lseq", "equation_Lib.Sequence.seq",
         "equation_Lib.Sequence.to_seq", "equation_Prims.nat",
-        "equation_Spec.Chacha20.counter", "equation_Spec.Chacha20.size_key",
+        "equation_Spec.Chacha20.counter",
+        "equation_Spec.Chacha20.size_block",
+        "equation_Spec.Chacha20.size_key",
         "equation_Spec.Poly1305.size_block",
         "equation_Spec.Poly1305.size_key", "equation_Spec.Poly1305.tag",
         "function_token_typing_Lib.IntTypes.uint8", "int_inversion",
         "int_typing", "lemma_FStar.Seq.Base.lemma_len_append",
         "lemma_Lib.IntTypes.pow2_values", "primitive_Prims.op_Addition",
-        "primitive_Prims.op_LessThanOrEqual",
+        "primitive_Prims.op_Division", "primitive_Prims.op_LessThanOrEqual",
         "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
@@ -167,7 +169,7 @@
         "typing_Lib.IntTypes.u32", "typing_Spec.Poly1305.size_key"
       ],
       0,
-      "f9006aec7bc56d02f11194bccfcbe44b"
+      "cbe20929b0c68b080fa64ef84a9fe2a7"
     ],
     [
       "Spec.Chacha20Poly1305.aead_decrypt",
@@ -179,7 +181,7 @@
         "refinement_interpretation_Tm_refine_10d31b89009c0ffda80d750d82dea92d"
       ],
       0,
-      "a9082428d632123edecf3dd9e85c74a8"
+      "7a875a9b78b43fa3f6827c47fd8a8f3a"
     ],
     [
       "Spec.Chacha20Poly1305.aead_decrypt",
@@ -197,9 +199,11 @@
         "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.bits",
         "equation_Lib.Sequence.length", "equation_Lib.Sequence.lseq",
         "equation_Lib.Sequence.to_seq", "equation_Prims.nat",
+        "equation_Spec.Chacha20.size_block",
         "equation_Spec.Chacha20.size_key", "equation_Spec.Poly1305.size_key",
         "int_inversion", "lemma_Lib.IntTypes.pow2_values",
-        "primitive_Prims.op_Addition", "primitive_Prims.op_LessThanOrEqual",
+        "primitive_Prims.op_Addition", "primitive_Prims.op_Division",
+        "primitive_Prims.op_LessThanOrEqual",
         "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
@@ -213,7 +217,7 @@
         "typing_Spec.Poly1305.size_key"
       ],
       0,
-      "e9db1cdfe25e9f288acae72ddbfc9be6"
+      "d2e4a25e04fcfdf052c65c869dba46ad"
     ]
   ]
 ]

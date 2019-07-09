@@ -22,6 +22,7 @@ let update_last (a:algorithm) prev len last chash = Spec.Hash.Incremental.update
 
 let finish (a:algorithm) chash = Spec.Hash.PadFinish.finish (alg a) chash
 
+#set-options "--z3rlimit 200"
 let hash (a:algorithm) input =
   assert(Seq.length input < Spec.Hash.Definitions.max_input_length (alg a));
   Spec.Hash.hash (alg a) input
