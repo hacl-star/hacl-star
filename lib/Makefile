@@ -29,7 +29,7 @@ FSTAR = $(FSTAR_HOME)/bin/fstar.exe $(FSTAR_FLAGS) $(OTHERFLAGS)
 
 ENABLE_HINTS = --use_hints --use_hint_hashes --record_hints --query_stats
 
-ALL_SOURCES = $(wildcard *.fst) $(wildcard *.fsti) #tutorial/Tutorial.fst
+ALL_SOURCES = $(wildcard *.fst) $(wildcard *.fsti) tutorial/Tutorial.fst
 
 FIXME =
 
@@ -51,7 +51,7 @@ $(CACHE_DIR)/%.checked: | .depend $(HINT_DIR) $(CACHE_DIR)
 	$(FSTAR) $< $(ENABLE_HINTS) --hint_file $(HINT_DIR)/$(notdir $*).hints && \
 	touch -c $@
 
-verify: $(addsuffix .checked, $(addprefix $(CACHE_DIR)/,$(ROOTS)))
+verify: $(addsuffix .checked, $(addprefix $(CACHE_DIR)/,$(notdir $(ROOTS))))
 
 # Targets for interactive mode
 
