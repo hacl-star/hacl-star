@@ -27,10 +27,13 @@ all: test
 #
 
 test: Chacha20.exe \
+      Salsa20.exe \
 	Curve25519.exe \
 	Curve448.exe \
 	Blake2.exe \
 	Chacha20Poly1305.exe \
+	SecretBox.exe \
+	Box.exe \
 	Ed25519.exe \
 	gf128.exe \
 	aes.exe \
@@ -74,6 +77,20 @@ Chacha20Poly1305.exe: $(LIBS_FILES) Spec.Chacha20.fst Spec.Poly1305.fst Spec.Cha
 	@echo 'let _ = test()' >> Chacha20Poly1305-ml/Spec_Chacha20Poly1305_Test.ml
 	$(OCAMLOPT) -I Chacha20Poly1305-ml $(addprefix Chacha20Poly1305-ml/, $(LIBS_ML)) Chacha20Poly1305-ml/Spec_Chacha20.ml Chacha20Poly1305-ml/Spec_Poly1305.ml Chacha20Poly1305-ml/Spec_Chacha20Poly1305.ml Chacha20Poly1305-ml/Spec_Chacha20Poly1305_Test.ml -o Chacha20Poly1305.exe
 	./Chacha20Poly1305.exe
+
+SecretBox.exe: $(LIBS_FILES) Spec.Salsa20.fst Spec.Poly1305.fst Spec.SecretBox.fst tests/Spec.SecretBox.Test.fst
+	mkdir -p SecretBox-ml
+	$(FSTAR) --codegen OCaml --lax $(LIBS_EX) --extract_module Spec.Salsa20 --extract_module Spec.Poly1305 --extract_module Spec.SecretBox --extract_module Spec.SecretBox.Test --odir SecretBox-ml $^
+	@echo 'let _ = test()' >> SecretBox-ml/Spec_SecretBox_Test.ml
+	$(OCAMLOPT) -I SecretBox-ml $(addprefix SecretBox-ml/, $(LIBS_ML)) SecretBox-ml/Spec_Salsa20.ml SecretBox-ml/Spec_Poly1305.ml SecretBox-ml/Spec_SecretBox.ml SecretBox-ml/Spec_SecretBox_Test.ml -o SecretBox.exe
+	./SecretBox.exe
+
+Box.exe: $(LIBS_FILES) Spec.Salsa20.fst Spec.Poly1305.fst Spec.SecretBox.fst Spec.Box.fst tests/Spec.Box.Test.fst
+	mkdir -p Box-ml
+	$(FSTAR) --codegen OCaml --lax $(LIBS_EX) --extract_module Spec.Salsa20 --extract_module Spec.Poly1305 --extract_module Spec.SecretBox --extract_module Spec.Curve25519 --extract_module Spec.Box --extract_module Spec.Box.Test --odir Box-ml $^
+	@echo 'let _ = test()' >> Box-ml/Spec_Box_Test.ml
+	$(OCAMLOPT) -I Box-ml $(addprefix Box-ml/, $(LIBS_ML)) Box-ml/Spec_Salsa20.ml Box-ml/Spec_Poly1305.ml Box-ml/Spec_SecretBox.ml Box-ml/Spec_Curve25519.ml Box-ml/Spec_Box.ml Box-ml/Spec_Box_Test.ml -o Box.exe
+	./Box.exe
 
 Ed25519.exe: $(LIBS_FILES) Spec.SHA2.Constants.fst Spec.Hash.Definitions.fst Spec.Hash.PadFinish.fst Spec.MD5.fst Spec.SHA1.fst Spec.SHA2.fst Spec.Hash.fst Spec.Hash.Incremental.fst Spec.Agile.Hash.fst Spec.Curve25519.fst Spec.Ed25519.fst tests/Spec.Ed25519.Test.fst
 	mkdir -p Ed25519-ml

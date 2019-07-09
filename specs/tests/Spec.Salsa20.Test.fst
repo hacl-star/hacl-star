@@ -63,7 +63,7 @@ let test_salsa20_core () =
 	 49uy;237uy;179uy; 48uy; 1uy;106uy;178uy;219uy;175uy;199uy;166uy; 48uy; 86uy; 16uy;179uy;207uy;
 	 31uy;240uy; 32uy; 63uy; 15uy; 83uy; 93uy;161uy;116uy;147uy; 48uy;113uy;238uy; 55uy;204uy; 36uy;
 	 79uy;201uy;235uy; 79uy; 3uy; 81uy;156uy; 47uy;203uy; 26uy;244uy;243uy; 88uy;118uy;104uy; 54uy])) in
-  let st = salsa20_core st in
+  let st = salsa20_core 0 st in
   st = uints_from_bytes_le #U32 #SEC #16 (of_list (List.Tot.map u8_from_UInt8
   [ 109uy; 42uy;178uy;168uy;156uy;240uy;248uy;238uy;168uy;196uy;190uy;203uy; 26uy;110uy;170uy;154uy;
 	 29uy; 29uy;150uy; 26uy;150uy; 30uy;235uy;249uy;190uy;163uy;251uy; 48uy; 69uy;144uy; 51uy; 57uy;
