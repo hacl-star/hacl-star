@@ -17,7 +17,7 @@
         "fuel_guarded_inversion_Spec.Agile.Hash.algorithm"
       ],
       0,
-      "d1addeab6b538094369dcc6c26e19d9b"
+      "aa0d8ce5e90084e596a23f0a9fdf8eee"
     ],
     [
       "Spec.Agile.Hash.size_block",
@@ -44,7 +44,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "4ed70c15b22944f13ee0c40707005c20"
+      "8c923139780e514e385a1de99245435a"
     ],
     [
       "Spec.Agile.Hash.size_hash",
@@ -71,7 +71,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "5aeb3f7a551daef11a70d8b636406b6d"
+      "a4d400b4f582f2c6bb6146b757e02cc8"
     ],
     [
       "Spec.Agile.Hash.size_hash_w",
@@ -90,7 +90,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "512a75da70bc6cb24430524d42fa223e"
+      "e90f3a3bd9b073055738abdad7ffb4d8"
     ],
     [
       "Spec.Agile.Hash.max_input",
@@ -114,7 +114,7 @@
         "typing_Prims.pow2"
       ],
       0,
-      "01f3608844f5c14be5b7817e1d06eb5a"
+      "6b1e0eac642f844919c863b6bc1375f7"
     ],
     [
       "Spec.Agile.Hash.update_block",
@@ -153,7 +153,7 @@
         "typing_Spec.Hash.Definitions.block_length"
       ],
       0,
-      "e31fd9512d8fe0d85246ed72633f005c"
+      "ed499bda204dc9d3c90cb6af31a7f86a"
     ],
     [
       "Spec.Agile.Hash.update_last",
@@ -163,11 +163,13 @@
       [
         "@MaxIFuel_assumption", "@query",
         "equation_Spec.Agile.Hash.size_block",
+        "fuel_guarded_inversion_Spec.Agile.Hash.algorithm",
+        "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_a78e81a34494fa620ef91991a1267b1f",
         "typing_Spec.Agile.Hash.size_block"
       ],
       0,
-      "2a79967e03c2a3b95ff434b7df5b0998"
+      "7aa8b2fa18e2d1905d0f4122db68b375"
     ],
     [
       "Spec.Agile.Hash.update_last",
@@ -177,11 +179,13 @@
       [
         "@MaxIFuel_assumption", "@query",
         "equation_Spec.Agile.Hash.size_block",
+        "fuel_guarded_inversion_Spec.Agile.Hash.algorithm",
+        "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_a78e81a34494fa620ef91991a1267b1f",
         "typing_Spec.Agile.Hash.size_block"
       ],
       0,
-      "295c69fdcc1df1fdab9eabe83bb85bfe"
+      "194316bba685bd66997006257ab5a732"
     ],
     [
       "Spec.Agile.Hash.update_last",
@@ -225,7 +229,7 @@
         "refinement_interpretation_Tm_refine_d8d83307254a8900dd20598654272e42"
       ],
       0,
-      "1ba249e20c702581c96004f6db6a1e7c"
+      "38beb401a3807a9270008653fcb1cfa3"
     ],
     [
       "Spec.Agile.Hash.finish",
@@ -274,7 +278,8 @@
         "fuel_guarded_inversion_Lib.IntTypes.inttype",
         "fuel_guarded_inversion_Spec.Agile.Hash.algorithm",
         "function_token_typing_Lib.ByteSequence.uints_to_bytes_be",
-        "int_inversion", "lemma_FStar.Seq.Properties.slice_length",
+        "int_inversion", "int_typing",
+        "lemma_FStar.Seq.Properties.slice_length",
         "lemma_Lib.IntTypes.pow2_values", "primitive_Prims.op_Multiply",
         "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
@@ -290,13 +295,13 @@
         "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "793285596b92e72382accac130f99a06"
+      "6b8ed12d5e7b6878503d8f2e57e5b720"
     ],
     [
       "Spec.Agile.Hash.hash",
       1,
       2,
-      2,
+      1,
       [
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented",
@@ -330,6 +335,7 @@
         "equation_Prims.nat", "equation_Spec.Agile.Hash.alg",
         "equation_Spec.Agile.Hash.max_input",
         "equation_Spec.Agile.Hash.size_hash",
+        "equation_Spec.Hash.Definitions.block_length",
         "equation_Spec.Hash.Definitions.bytes",
         "equation_Spec.Hash.Definitions.bytes_blocks",
         "equation_Spec.Hash.Definitions.bytes_of_words",
@@ -350,7 +356,7 @@
         "fuel_guarded_inversion_Spec.Hash.Definitions.hash_alg",
         "function_token_typing_Lib.ByteSequence.uints_to_bytes_be",
         "function_token_typing_Lib.IntTypes.uint8", "int_inversion",
-        "lemma_FStar.Seq.Base.lemma_len_append",
+        "int_typing", "lemma_FStar.Seq.Base.lemma_len_append",
         "lemma_FStar.Seq.Properties.slice_length",
         "lemma_Lib.IntTypes.pow2_values", "primitive_Prims.op_Addition",
         "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
@@ -376,7 +382,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "f69478f3af8d27824c82d8617470b30a"
+      "22084dcf5e02c744584820295ca0e882"
     ]
   ]
 ]
