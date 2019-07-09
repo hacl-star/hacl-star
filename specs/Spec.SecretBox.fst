@@ -30,7 +30,7 @@ let secretbox_detached (k:key) (n:nonce) (m:bytes{length m / size_block <= max_s
   let (subkey,aekey) = secretbox_init k n in
   let n1 = sub n 16 8 in
   let mkey = sub aekey 0 32 in
-  let ekey0 = sub aekey 0 32 in
+  let ekey0 = sub aekey 32 32 in
   let block0 = create 32 (u8 0) in
   let mlen0 = if length m <= 32 then length m else 32 in
   let m0 = Seq.slice m 0 mlen0 in
@@ -51,7 +51,7 @@ let secretbox_open_detached (k:key) (n:nonce) (tg:tag) (c:bytes{length c / size_
   let (subkey,aekey) = secretbox_init k n in
   let n1 = sub n 16 8 in
   let mkey = sub aekey 0 32 in
-  let ekey0 = sub aekey 0 32 in
+  let ekey0 = sub aekey 32 32 in
   let tg' = Spec.Poly1305.poly1305_mac c mkey in
   if Lib.ByteSequence.lbytes_eq tg tg' then (
     let block0 = create 32 (u8 0) in
