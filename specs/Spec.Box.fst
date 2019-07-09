@@ -34,8 +34,8 @@ let box_easy (sk:secretkey) (pk:publickey) (n:nonce) (m:bytes{length m / size_bl
   let (tg,c) = box_detached sk pk n m in
   Seq.append tg c
 
-let box_open_easy (sk:secretkey) (pk:publickey) (n:nonce) (c:bytes{length c >= size_tag /\ (length c - size_tag) / size_block <= max_size_t}) : option (m:bytes{length m = length c - size_tag}) =
+let box_open_easy (pk:secretkey) (sk:publickey) (n:nonce) (c:bytes{length c >= size_tag /\ (length c - size_tag) / size_block <= max_size_t}) : option (m:bytes{length m = length c - size_tag}) =
   let tg = Seq.slice c 0 size_tag in
   let e = Seq.slice c size_tag (length c) in
-  box_open_detached sk pk n tg e
+  box_open_detached pk sk n tg e
 

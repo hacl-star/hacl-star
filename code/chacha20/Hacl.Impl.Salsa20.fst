@@ -167,6 +167,20 @@ let salsa20_update ctx len out text =
   pop_frame()
 
 inline_for_extraction
+val salsa20_key_block0: out:lbuffer uint8 64ul -> key:lbuffer uint8 32ul -> n:lbuffer uint8 8ul -> Stack unit
+		  (requires (fun h -> live h key /\ live h n /\ live h out))
+		  (ensures (fun h0 _ h1 -> modifies (loc out) h0 h1 /\
+			      as_seq h1 out == Spec.salsa20_key_block0 (as_seq h0 key) (as_seq h0 n)))
+let salsa20_key_block0 out key n =
+    push_frame();
+    let ctx = create_state () in
+    let k = create_state() in
+    salsa20_init ctx key n 0ul;
+    salsa20_core k ctx 0ul;
+    store_state out k;
+    pop_frame()
+
+inline_for_extraction
 val salsa20_encrypt: len:size_t -> out:lbuffer uint8 len -> text:lbuffer uint8 len -> key:lbuffer uint8 32ul -> n:lbuffer uint8 8ul -> ctr:size_t -> Stack unit
 		  (requires (fun h -> live h key /\ live h n /\ live h text /\ live h out /\ eq_or_disjoint text out))
 		  (ensures (fun h0 _ h1 -> modifies (loc out) h0 h1 /\

@@ -15,20 +15,22 @@ let size_block = 64   (* in bytes *)
 let size_tag = 16 (* in bytes *)
 
 type key = lbytes size_key
+type aekey = lbytes (size_key + size_key)
 type nonce = lbytes size_nonce
 type tag = lbytes size_tag
 
-let secretbox_init (k:key) (n:nonce) : key & key & key & lbytes 8 =
+let secretbox_init (k:key) (n:nonce) : key & aekey =
   let n0 : lbytes 16 = sub n 0 16 in
   let n1 : lbytes 8 = sub n 16 8 in
   let subkey : lbytes 32 = Spec.Salsa20.hsalsa20 k n0 in
   let aekey : lbytes 64 = Spec.Salsa20.salsa20_key_block0 subkey n1 in
-  let mkey : lbytes 32 = sub aekey 0 32 in
-  let ekey0 : lbytes 32 = sub aekey 32 32 in
-  (mkey,ekey0,subkey,n1)
+  (subkey,aekey)
 
 let secretbox_detached (k:key) (n:nonce) (m:bytes{length m / size_block <= max_size_t}) : (tag & c:bytes{length c = length m}) =
-  let (mkey,ekey0,subkey,n1) = secretbox_init k n in
+  let (subkey,aekey) = secretbox_init k n in
+  let n1 = sub n 16 8 in
+  let mkey = sub aekey 0 32 in
+  let ekey0 = sub aekey 0 32 in
   let block0 = create 32 (u8 0) in
   let mlen0 = if length m <= 32 then length m else 32 in
   let m0 = Seq.slice m 0 mlen0 in
@@ -46,7 +48,10 @@ let secretbox_detached (k:key) (n:nonce) (m:bytes{length m / size_block <= max_s
   (tg,c)
 
 let secretbox_open_detached (k:key) (n:nonce) (tg:tag) (c:bytes{length c / size_block <= max_size_t}) : option (m:bytes{length m = length c}) =
-  let (mkey,ekey0,subkey,n1) = secretbox_init k n in
+  let (subkey,aekey) = secretbox_init k n in
+  let n1 = sub n 16 8 in
+  let mkey = sub aekey 0 32 in
+  let ekey0 = sub aekey 0 32 in
   let tg' = Spec.Poly1305.poly1305_mac c mkey in
   if Lib.ByteSequence.lbytes_eq tg tg' then (
     let block0 = create 32 (u8 0) in
