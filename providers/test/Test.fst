@@ -288,8 +288,8 @@ let rec test_ctr_st (a: Spec.Agile.Cipher.cipher_alg)
   (output: B.buffer UInt8.t)
   (output_len: UInt32.t):
   ST unit
-  (requires (fun _ ->
-    B.recallable counter /\
+  (requires (fun h0 ->
+    B.live h0 counter /\
     B.recallable nonce /\
     B.recallable k /\
     B.recallable input /\
@@ -306,7 +306,7 @@ let rec test_ctr_st (a: Spec.Agile.Cipher.cipher_alg)
   let open EverCrypt.CTR in
 
   if not (k_len = key_len a) then
-    C.Failure.failwith !$"test_ctr_st: not (key_len = aead_key_length32 alg)"
+    C.Failure.failwith !$"test_ctr_st: not (key_len = key_len a)"
   else if not (counter_len = 4ul) then
     C.Failure.failwith !$"test_ctr_st: not (counter_len = 4)"
   else if not (nonce_bound a nonce_len) then
@@ -314,14 +314,13 @@ let rec test_ctr_st (a: Spec.Agile.Cipher.cipher_alg)
   else if not (input_len = output_len) then
     C.Failure.failwith !$"test_ctr_st: not (input_len = output_len)"
   else if not (input_len `U32.gte` block_len a) then
-    C.Failure.failwith !$"test_ctr_st: not (input_len = block_len a)"
+    C.Failure.failwith !$"test_ctr_st: not (input_len >= block_len a)"
 
   else begin
     B.recall k;
     B.recall nonce;
     B.recall input;
     B.recall output;
-    B.recall counter;
 
     // Might only be correct for AES
     let ctr = LowStar.Endianness.load32_be counter in
@@ -356,7 +355,40 @@ let rec test_ctr_st (a: Spec.Agile.Cipher.cipher_alg)
     end
   end
 
+
+let rec test_chacha20_ctr_loop (vs: lbuffer chacha20_vector): St unit =
+  let LB len vs = vs in
+  if len <> 0ul then begin
+    B.recall vs;
+    let v = vs.(0ul) in
+
+    let (LB key_len key), (LB iv_len iv), ctr, (LB plain_len plain), (LB cipher_len cipher) = v in
+    let round_len = (plain_len `U32.div` 64ul) `U32.mul` 64ul in
+    B.recall plain;
+    B.recall cipher;
+    B.recall key;
+    B.recall iv;
+    if cipher_len <> plain_len then
+      failwith !$"chacha-ctr: cipher len and plain len don't match"
+    else begin
+      let plain = B.sub plain 0ul round_len in
+      let cipher = B.sub cipher 0ul round_len in
+      push_frame ();
+      let counter = B.alloca 0uy 4ul in
+      LowStar.Endianness.store32_be counter ctr;
+      assume (B.disjoint plain cipher);
+      test_ctr_st Spec.Agile.Cipher.CHACHA20 counter 4ul iv iv_len key key_len
+        plain round_len cipher round_len;
+      pop_frame ()
+    end;
+
+    B.recall vs;
+    test_chacha20_ctr_loop (LB (len `U32.sub` 1ul) (B.offset vs 1ul))
+  end
 #pop-options
+
+let test_chacha20_ctr () : St unit =
+  test_chacha20_ctr_loop Test.Vectors.chacha20_vectors_low
 
 let rec test_aes128_ctr_loop (i: U32.t): St unit =
   let open Test.Vectors.Aes128 in
@@ -369,6 +401,7 @@ let rec test_aes128_ctr_loop (i: U32.t): St unit =
       vectors.(i)
     in
     assume (B.disjoint input output);
+    B.recall counter;
     test_ctr_st Spec.Agile.Cipher.AES128 counter counter_len nonce nonce_len key key_len
       input input_len output output_len;
     test_aes128_ctr_loop (i `U32.add_mod` 1ul)
@@ -637,12 +670,6 @@ let aes_gcm_test_set =
 
 inline_for_extraction
 noextract
-let aes_ctr_test_set =
-  (Vale, f_aesni `f_concat` f_avx) `ts_cons` (
-  ts_nil)
-
-inline_for_extraction
-noextract
 let chacha20poly1305_test_set =
   (Hacl, f_none) `ts_cons`
   ts_nil
@@ -705,6 +732,12 @@ let test_aes_ctr_body (print: C.String.t -> St unit) : St unit =
     test_aes128_ctr ()
 
 inline_for_extraction
+noextract
+let test_chacha20_ctr_body (print: C.String.t -> St unit) : St unit =
+    print !$"  >>>>>>>>> CTR (CHACHA20 vectors)\n";
+    test_chacha20_ctr ()
+
+inline_for_extraction
 let test_chacha20poly1305_body (print: C.String.t -> St unit) : St unit =
     print !$"  >>>>>>>>> AEAD (ChachaPoly vectors)\n";
     test_chacha20poly1305 ();
@@ -747,13 +780,16 @@ let print_sep () : St unit =
   C.String.print !$"=====================\n"
 
 let test_all () : St unit =
+  // The CTR-mode tests reuse the test modifiers for the underlying ciphers.
   poly1305_test_set         test_poly1305_body;
   print_sep ();
   curve25519_test_set       test_curve25519_body;
   print_sep ();
   aes_gcm_test_set          test_aes_gcm_body;
   print_sep ();
-  aes_ctr_test_set          test_aes_ctr_body;
+  aes_gcm_test_set          test_aes_ctr_body;
+  print_sep ();
+  chacha20_test_set         test_chacha20_ctr_body;
   print_sep ();
   chacha20poly1305_test_set test_chacha20poly1305_body;
   print_sep ();
