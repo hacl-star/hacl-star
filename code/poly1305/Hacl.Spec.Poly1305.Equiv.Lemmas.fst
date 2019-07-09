@@ -215,7 +215,9 @@ let poly_update_repeat_blocks_multi_lemma2 text acc_vec0 r =
   in
 
   FStar.Classical.forall_intro_2 (aux_repeat_bf);
-  normalizen_repeati_extensionality 2 nb_vec r repeat_bf_sc repeat_bf_vec acc_vec0
+  normalizen_repeati_extensionality 2 nb_vec r repeat_bf_sc repeat_bf_vec acc_vec0;
+  assert (normalize_2 (Loops.repeati nb_vec repeat_bf_vec acc_vec0) r == Loops.repeati nb repeat_bf_sc (normalize_2 acc_vec0 r));
+  assert (normalize_2 acc_vec1 r == acc2)
 
 val poly_update_repeat_blocks_multi_lemma4:
     text:bytes{length text % (4 * size_block) = 0}
@@ -280,8 +282,10 @@ let poly_update_repeat_blocks_multi_lemma4 text acc_vec0 r =
   in
 
   FStar.Classical.forall_intro_2 (aux_repeat_bf);
-  normalizen_repeati_extensionality 4 nb_vec r repeat_bf_sc repeat_bf_vec acc_vec0
-
+  normalizen_repeati_extensionality 4 nb_vec r repeat_bf_sc repeat_bf_vec acc_vec0;
+  assert (normalize_4 (Loops.repeati nb_vec repeat_bf_vec acc_vec0) r == Loops.repeati nb repeat_bf_sc (normalize_4 acc_vec0 r));
+  assert (acc1 == acc2)
+  
 val normalize_4_lemma: acc:elem 4 -> r:pfelem -> Lemma
   (normalize_4 acc r ==
     pfadd (pfadd (pfadd (pfmul acc.[0] (pfmul (pfmul r r) (pfmul r r)))
