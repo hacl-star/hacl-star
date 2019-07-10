@@ -11,7 +11,7 @@ open Hacl.Impl.Salsa20.Core32
 module Spec = Spec.Salsa20
 module Loop = Lib.LoopCombinators
 
-#set-options "--debug Hacl.Impl.Salsa20 --debug_level ExtractNorm"
+//#set-options "--debug Hacl.Impl.Salsa20 --debug_level ExtractNorm"
 
 //inline_for_extraction
 [@ CInline]

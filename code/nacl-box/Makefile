@@ -82,8 +82,11 @@ $(GENERATED_DIR)/Hacl_NaCl.c: $(ALL_KRML_FILES) | .depend
 	-no-prefix 'Hacl.NaCl' \
 	-bundle 'Lib.*' \
 	-bundle 'Spec.*' \
-	-bundle 'Hacl.NaCl=Hacl.Impl.*' \
-	-drop 'C,FStar,LowStar,Spec,Prims,Lib,C.Loops.*,C.*,Hacl.Spec.*,Hacl.Poly1305,Hacl.Chacha20,Hacl.Curve25519' \
+	-bundle 'Hacl.Salsa20=Hacl.Impl.HSalsa20,Hacl.Impl.Salsa20,Hacl.Impl.Salsa20.Core32' \
+	-bundle 'Hacl.Poly1305_32=Hacl.Impl.Poly1305,Hacl.Impl.Poly1305.*' \
+	-bundle 'Hacl.Curve25519_51=Hacl.Impl.Curve25519.*' \
+	-bundle 'Hacl.NaCl=Hacl.Impl.Box,Hacl.Impl.SecretBox' \
+	-drop 'C,FStar,LowStar,Spec,Prims,Lib,C.Loops.*,C.*,Hacl.Spec.*,Hacl.Poly1305.Field32xN.*' \
 	-add-include '"c/Lib_PrintBuffer.h"' \
 	-add-include '"FStar_UInt_8_16_32_64.h"' \
 	-tmpdir $(GENERATED_DIR) \
