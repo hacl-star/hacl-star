@@ -17,6 +17,7 @@ let while inv guard test body =
   in
   C.Loops.while #inv #(fun b h -> inv h /\ b == guard h) test body
 
+(*
 /// Test
 
 val square_while: unit -> Stack UInt32.t (fun _ -> true) (fun h0 x h1 -> x == 9ul)
@@ -44,3 +45,4 @@ let square_while () =
   let x = b.(2ul) in
   pop_frame();
   x
+*)

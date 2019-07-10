@@ -8,7 +8,7 @@
       1,
       [ "@query" ],
       0,
-      "557f0ca4ab3b2caa9a860dc0f29a872c"
+      "6383a130fc396bec73c8f998b9a4a10e"
     ],
     [
       "Lib.NatMod.modulo",
@@ -19,11 +19,11 @@
         "@MaxIFuel_assumption", "@query", "equation_Lib.NatMod.nat_mod_v",
         "equation_Prims.nat", "equation_Prims.pos", "int_inversion",
         "primitive_Prims.op_Modulus", "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
-        "refinement_interpretation_Tm_refine_f048236b5f8051f83b495ea5eaa6127b"
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
       ],
       0,
-      "00998931d29c79c48c8979384dfdc03b"
+      "473494f3434b8bb5915f289aed283606"
     ],
     [
       "Lib.NatMod.op_Plus_Percent",
@@ -34,10 +34,10 @@
         "@MaxIFuel_assumption", "@query", "equation_Prims.pos",
         "int_inversion", "primitive_Prims.op_Modulus",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_f048236b5f8051f83b495ea5eaa6127b"
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
       ],
       0,
-      "d85956c4a8ce5a8690997c7d03d21ded"
+      "9462a9c5f195c47c778a204700fcabfd"
     ],
     [
       "Lib.NatMod.op_Subtraction_Percent",
@@ -48,10 +48,10 @@
         "@MaxIFuel_assumption", "@query", "equation_Prims.pos",
         "int_inversion", "primitive_Prims.op_Modulus",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_f048236b5f8051f83b495ea5eaa6127b"
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
       ],
       0,
-      "114916dd4f87e657d685c07b8707976d"
+      "f9531c5e42ed795a154fb9f05840ca29"
     ],
     [
       "Lib.NatMod.op_Star_Percent",
@@ -62,10 +62,10 @@
         "@MaxIFuel_assumption", "@query", "equation_Prims.pos",
         "int_inversion", "primitive_Prims.op_Modulus",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_f048236b5f8051f83b495ea5eaa6127b"
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
       ],
       0,
-      "0d1e2c5fcd51f8627e96091e0b50531a"
+      "b59633c7b99f6965ffd0b31ecadb8608"
     ],
     [
       "Lib.NatMod.op_Star_Star_Percent",
@@ -75,7 +75,7 @@
       [
         "@MaxIFuel_assumption", "@query",
         "Prims_pretyping_ae567c2fb75be05905677af440075565",
-        "binder_x_cda60864cf6228d7a4fba58b6264c802_2",
+        "binder_x_f26957a7e62b271a8736230b1e9c83c1_2",
         "equality_tok_Prims.LexTop@tok", "equation_Prims.pos",
         "function_token_typing_Prims.__cache_version_number__",
         "int_inversion", "int_typing", "primitive_Prims.op_Division",
@@ -83,11 +83,11 @@
         "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_f048236b5f8051f83b495ea5eaa6127b",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
         "well-founded-ordering-on-nat"
       ],
       0,
-      "effe4b072f9f74e6af140e61f0e0bff8"
+      "b7f609aa67747396256966efab93e4f8"
     ],
     [
       "Lib.NatMod.op_Equals_Percent",
@@ -95,18 +95,15 @@
       2,
       1,
       [
-        "@MaxIFuel_assumption", "@query",
-        "Prims_pretyping_ae567c2fb75be05905677af440075565",
-        "equation_Lib.NatMod.nat_mod", "equation_Prims.eqtype",
-        "equation_Prims.nat",
-        "function_token_typing_Prims.__cache_version_number__",
+        "@MaxIFuel_assumption", "@query", "equation_Lib.NatMod.nat_mod",
+        "equation_Prims.eqtype", "equation_Prims.nat",
         "function_token_typing_Prims.int",
-        "haseqTm_refine_5514fbe9e08dfda40f950a7b9f1b2b98",
-        "haseqTm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "haseqTm_refine_c1424615841f28cac7fc34e92b7ff33c",
         "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "ac7ae0ee71befa5f622568a213652bc6"
+      "a1962ba2fe8bbc9a68153c4112e1b788"
     ],
     [
       "Lib.NatMod.op_Less_Greater_Percent",
@@ -114,18 +111,15 @@
       2,
       1,
       [
-        "@MaxIFuel_assumption", "@query",
-        "Prims_pretyping_ae567c2fb75be05905677af440075565",
-        "equation_Lib.NatMod.nat_mod", "equation_Prims.eqtype",
-        "equation_Prims.nat",
-        "function_token_typing_Prims.__cache_version_number__",
+        "@MaxIFuel_assumption", "@query", "equation_Lib.NatMod.nat_mod",
+        "equation_Prims.eqtype", "equation_Prims.nat",
         "function_token_typing_Prims.int",
-        "haseqTm_refine_5514fbe9e08dfda40f950a7b9f1b2b98",
-        "haseqTm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "haseqTm_refine_c1424615841f28cac7fc34e92b7ff33c",
         "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "e2fc9fdba1d09698b4074b8e3f95c3c0"
+      "ee781084fa2794e11b113e90b8330844"
     ]
   ]
 ]
