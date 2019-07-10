@@ -18,10 +18,12 @@ val pow2_127: n:nat -> Lemma (pow2 127 = 0x80000000000000000000000000000000) [SM
 type inttype =
   | U1 | U8 | U16 | U32 | U64 | U128 | S8 | S16 | S32 | S64 | S128
 
+inline_for_extraction
 let unsigned = function
   | U1 | U8 | U16 | U32 | U64 | U128 -> true
   | _ -> false
 
+inline_for_extraction
 let signed = function
   | S8 | S16 | S32 | S64 | S128 -> true
   | _ -> false

@@ -18,6 +18,8 @@ module ST = FStar.HyperStack.ST
 module LSeq = Lib.Sequence
 module BSeq = Lib.ByteSequence
 
+#set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 50 --using_facts_from '* -FStar.Seq'"
+
 inline_for_extraction noextract
 let felem (w:lanes) = lbuffer (uint64xN w) 5ul
 inline_for_extraction noextract
@@ -153,7 +155,7 @@ val set_bit128:
 let set_bit128 #w f =
   let b = u64 0x1000000 in
   assert_norm (0x1000000 = pow2 24);
-  uintv_extensionality b (u64 1 <<. 24ul);
+  assert (v b == v (u64 1 <<. 24ul));
   let mask = vec_load b w in
   let f4 = f.(4ul) in
   let h0 = ST.get () in
@@ -235,7 +237,7 @@ let fadd #w out f1 f2 =
   out.(3ul) <- o3;
   out.(4ul) <- o4
 
-#reset-options "--z3rlimit 50 --using_facts_from '* -FStar.Seq'"
+#push-options "--max_fuel 1"
 
 inline_for_extraction noextract
 val fmul_r:
@@ -283,6 +285,8 @@ let fmul_r #w out f1 r r5 =
   out.(2ul) <- o2;
   out.(3ul) <- o3;
   out.(4ul) <- o4
+
+#pop-options
 
 inline_for_extraction noextract
 val fadd_mul_r:
@@ -432,6 +436,8 @@ let load_felem #w f lo hi =
   f.(3ul) <- f3;
   f.(4ul) <- f4
 
+#push-options "--max_fuel 2"
+
 inline_for_extraction noextract
 val load_precompute_r1:
     p:precomp_r 1
@@ -556,6 +562,8 @@ let load_precompute_r #w p r0 r1 =
   | 1 -> load_precompute_r1 p r0 r1
   | 2 -> load_precompute_r2 p r0 r1
   | 4 -> load_precompute_r4 p r0 r1
+
+#pop-options
 
 inline_for_extraction noextract
 val load_felem1_le:

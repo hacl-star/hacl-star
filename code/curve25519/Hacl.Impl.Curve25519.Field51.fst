@@ -280,6 +280,9 @@ val fmul2:
       mul_inv_t h1 out1 /\
       fevalh h1 out0 == P.fmul (fevalh h0 f10) (fevalh h0 f20) /\
       fevalh h1 out1 == P.fmul (fevalh h0 f11) (fevalh h0 f21)))
+
+#set-options "--z3rlimit 100"
+
 [@ CInline]
 let fmul2 out f1 f2 =
   let f10 = f1.(0ul) in
@@ -439,11 +442,14 @@ let load_felem f u64s =
   let h0 = ST.get () in
   let f0l = u64s.(0ul) &. S.mask51 in
   let f0h = u64s.(0ul) >>. 51ul in
-  let f1l = (u64s.(1ul) &. u64 0x3fffffffff) <<. 13ul in
+  let x = (u64s.(1ul) &. u64 0x3fffffffff) in
+  let f1l = x <<. 13ul in
   let f1h = u64s.(1ul) >>. 38ul in
-  let f2l = (u64s.(2ul) &. u64 0x1ffffff) <<. 26ul in
+  let x = (u64s.(2ul) &. u64 0x1ffffff) in
+  let f2l = x <<. 26ul in
   let f2h = u64s.(2ul) >>. 25ul in
-  let f3l = (u64s.(3ul) &. u64 0xfff) <<. 39ul in
+  let x = (u64s.(3ul) &. u64 0xfff) in
+  let f3l = x <<. 39ul in
   let f3h = u64s.(3ul) >>. 12ul in
   f.(0ul) <- f0l;
   f.(1ul) <- f0h |. f1l;

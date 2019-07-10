@@ -51,7 +51,8 @@ endif
 
 CACHE_DIR     = .cache.$(VARIANT)
 OUTPUT_DIR    = .output.$(VARIANT)
-HINT_DIR      = .hints.$(VARIANT)
+#HINT_DIR      = .hints.$(VARIANT)
+HINT_DIR      = $(HACL_HOME)/.hints
 GENERATED_DIR = frodo-c.$(VARIANT)
 OUT_DIR	      = frodo-c.$(VARIANT)
 
@@ -106,7 +107,8 @@ FSTAR_INCLUDE_DIRS = \
   $(KREMLIN_HOME)/kremlib \
   $(HACL_HOME)/specs \
   $(HACL_HOME)/lib \
-  $(HACL_HOME)/code/sha3
+  $(HACL_HOME)/code/sha3 \
+  $(HACL_HOME)/.cache
 
 FSTAR_FLAGS = $(OTHERFLAGS) --cmi \
   --cache_checked_modules --cache_dir $(CACHE_DIR) --odir $(OUTPUT_DIR) \

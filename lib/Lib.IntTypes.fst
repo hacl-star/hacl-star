@@ -252,7 +252,19 @@ let cast #t #l t' l' u =
 
 #pop-options
 
-let ones t l = mk_int #t #l (ones_v t)
+let ones t l = 
+  match t with
+  | U1  -> 0x1uy
+  | U8  -> 0xFFuy
+  | U16 -> 0xFFFFus
+  | U32 -> 0xFFFFFFFFul
+  | U64 -> 0xFFFFFFFFFFFFFFFFuL
+  | U128 ->
+    let x = UInt128.uint64_to_uint128 0xFFFFFFFFFFFFFFFFuL in
+    let y = (UInt128.shift_left x 64ul) `UInt128.add` x in
+    assert_norm (UInt128.v y == pow2 128 - 1);
+    y
+  | _ -> mk_int (-1)
 
 let zeros t l = mk_int 0
 

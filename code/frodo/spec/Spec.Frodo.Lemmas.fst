@@ -57,12 +57,15 @@ let lemma_frodo_sample2 sign e =
     end
 
 let modulo_pow2_u16 a b =
+  FStar.Math.Lemmas.pow2_lt_compat 16 b;
   mod_mask_lemma #U16 a (UInt32.uint_to_t b)
 
 let modulo_pow2_u32 a b =
+  FStar.Math.Lemmas.pow2_lt_compat 32 b;
   mod_mask_lemma #U32 a (UInt32.uint_to_t b)
 
 let modulo_pow2_u64 a b =
+  FStar.Math.Lemmas.pow2_lt_compat 64 b;
   mod_mask_lemma #U64 a (UInt32.uint_to_t b)
 
 let lemma_mul_acc_comm a b c = ()

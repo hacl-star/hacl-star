@@ -619,11 +619,11 @@ let precomp_r5_as_tup64 #w r i =
   FStar.Math.Lemmas.modulo_lemma (5 * v tr2) (pow2 64);
   FStar.Math.Lemmas.modulo_lemma (5 * v tr3) (pow2 64);
   FStar.Math.Lemmas.modulo_lemma (5 * v tr4) (pow2 64);
-  uintv_extensionality tr50 (tr0 *! u64 5);
-  uintv_extensionality tr51 (tr1 *! u64 5);
-  uintv_extensionality tr52 (tr2 *! u64 5);
-  uintv_extensionality tr53 (tr3 *! u64 5);
-  uintv_extensionality tr54 (tr4 *! u64 5)
+  assert (v tr50 == v (tr0 *! u64 5));
+  assert (v tr51 == v (tr1 *! u64 5));
+  assert (v tr52 == v (tr2 *! u64 5));
+  assert (v tr53 == v (tr3 *! u64 5));
+  assert (v tr54 == v (tr4 *! u64 5))
 
 val mul_felem5_eval_as_tup64:
     #w:lanes
@@ -696,7 +696,7 @@ let carry26_wide_lemma_i #w #m l cin i =
   let l0 = l' &. mask26 in
   let l1 = l' >>. 26ul in
   mod_mask_lemma l' 26ul;
-  uintv_extensionality (mod_mask #U64 26ul) mask26;
+  assert (v (mod_mask #U64 #SEC 26ul) == v mask26);
   FStar.Math.Lemmas.pow2_modulo_modulo_lemma_1 (v l') 26 32;
   FStar.Math.Lemmas.euclidean_division_definition (v l') (pow2 26)
 
@@ -801,7 +801,7 @@ let carry26_lemma_i #w l cin i =
   let l0 = l' &. mask26 in
   let l1 = l' >>. 26ul in
   mod_mask_lemma l' 26ul;
-  uintv_extensionality (mod_mask #U64 26ul) mask26;
+  assert (v (mod_mask #U64 #SEC 26ul) == v mask26);
   FStar.Math.Lemmas.pow2_modulo_modulo_lemma_1 (v l') 26 32;
   FStar.Math.Lemmas.pow2_minus 32 26
 
@@ -1113,7 +1113,7 @@ let carry_reduce_lemma_i #w l cin i =
   let li0 = li' &. mask26 in
   let li1 = li' >>. 26ul in
   mod_mask_lemma li' 26ul;
-  uintv_extensionality (mod_mask #U64 26ul) mask26;
+  assert (v (mod_mask #U64 #SEC 26ul) == v mask26);
   FStar.Math.Lemmas.pow2_modulo_modulo_lemma_1 (v li') 26 32;
   FStar.Math.Lemmas.pow2_minus 32 26
 
@@ -1467,7 +1467,7 @@ let load_tup64_lemma lo hi =
 
   let f0 = lo &. mask26 in
   mod_mask_lemma lo 26ul;
-  uintv_extensionality (mod_mask #U64 26ul) mask26;
+  assert (v (mod_mask #U64 #SEC 26ul) == v mask26);
   assert (v f0 == v lo % pow2 26);
 
   let f1 = (lo >>. 26ul) &. mask26 in
@@ -1476,7 +1476,7 @@ let load_tup64_lemma lo hi =
   let f2 = (lo >>. 52ul) |. ((hi &. u64 0x3fff) <<. 12ul) in
   FStar.Math.Lemmas.lemma_div_lt (v lo) 64 52;
   mod_mask_lemma hi 14ul;
-  uintv_extensionality (mod_mask #U64 14ul) (u64 0x3fff);
+  assert (v (mod_mask #U64 #SEC 14ul) == v (u64 0x3fff));
   FStar.Math.Lemmas.pow2_multiplication_modulo_lemma_1 (v hi % pow2 14) 12 12;
   assert ((v (lo >>. 52ul)) < pow2 12);
   [@inline_let] let tmp = (hi &. u64 0x3fff) in

@@ -459,7 +459,7 @@ let lemma_carry51 l cin =
   let l0 = l' &. mask51 in
   let l1 = l' >>. 51ul in
   mod_mask_lemma (to_u64 l') 51ul;
-  uintv_extensionality (mod_mask #U64 #SEC 51ul) mask51;
+  assert (v (mod_mask #U64 #SEC 51ul) == v mask51);
   FStar.Math.Lemmas.pow2_modulo_modulo_lemma_1 (v l') 51 64;
   FStar.Math.Lemmas.euclidean_division_definition (v l') (pow2 51);
   FStar.Math.Lemmas.pow2_minus 64 51
@@ -481,7 +481,7 @@ let lemma_carry51_wide #m l cin =
   let l0 = (to_u64 l') &. mask51 in
   let l1 = to_u64 (l' >>. 51ul) in
   mod_mask_lemma (to_u64 l') 51ul;
-  uintv_extensionality (mod_mask #U64 #SEC 51ul) mask51;
+  assert (v (mod_mask #U64 #SEC 51ul) == v mask51);
   FStar.Math.Lemmas.pow2_modulo_modulo_lemma_1 (v l') 51 64;
   FStar.Math.Lemmas.euclidean_division_definition (v l') (pow2 51)
 
@@ -623,15 +623,17 @@ let lemma_load_felem u64s =
   let (s0, s1, s2, s3) = (u64s.[0], u64s.[1], u64s.[2], u64s.[3]) in
 
   let f0l = s0 &. mask51 in
+  FStar.Math.Lemmas.pow2_lt_compat 64 51;
   mod_mask_lemma s0 51ul;
-  uintv_extensionality (mod_mask #U64 51ul) mask51;
+  assert (v (mod_mask #U64 #SEC 51ul) == v mask51);
 
   let f0h = s0 >>. 51ul in
   FStar.Math.Lemmas.lemma_div_lt (v s0) 64 51;
 
   let f1l = (s1 &. u64 0x3fffffffff) <<. 13ul in
+  FStar.Math.Lemmas.pow2_lt_compat 64 38;
   mod_mask_lemma s1 38ul;
-  uintv_extensionality (mod_mask #U64 38ul) (u64 0x3fffffffff);
+  assert (v (mod_mask #U64 #SEC 38ul) == v (u64 0x3fffffffff));
   assert_norm (pow2 38 * pow2 13 = pow2 51);
   assert_norm (pow2 51 < pow2 64);
   FStar.Math.Lemmas.modulo_lemma ((v s1 % pow2 38) * pow2 13) (pow2 64);
@@ -640,8 +642,9 @@ let lemma_load_felem u64s =
   FStar.Math.Lemmas.lemma_div_lt (v s1) 64 38;
 
   let f2l = (s2 &. u64 0x1ffffff) <<. 26ul in
+  FStar.Math.Lemmas.pow2_lt_compat 64 25;
   mod_mask_lemma s2 25ul;
-  uintv_extensionality (mod_mask #U64 25ul) (u64 0x1ffffff);
+  assert (v (mod_mask #U64 #SEC 25ul) == v (u64 0x1ffffff));
   assert_norm (pow2 25 * pow2 26 = pow2 51);
   FStar.Math.Lemmas.modulo_lemma ((v s2 % pow2 25) * pow2 26) (pow2 64);
 
@@ -649,8 +652,9 @@ let lemma_load_felem u64s =
   FStar.Math.Lemmas.lemma_div_lt (v s2) 64 25;
 
   let f3l = (s3 &. u64 0xfff) <<. 39ul in
+  FStar.Math.Lemmas.pow2_lt_compat 64 12;
   mod_mask_lemma s3 12ul;
-  uintv_extensionality (mod_mask #U64 12ul) (u64 0xfff);
+  assert (v (mod_mask #U64 #SEC 12ul) == v (u64 0xfff));
   assert_norm (pow2 12 * pow2 39 = pow2 51);
   FStar.Math.Lemmas.modulo_lemma ((v s3 % pow2 12) * pow2 39) (pow2 64);
 
@@ -896,7 +900,7 @@ let lemma_cswap2_step bit p1 p2 =
   assert (v bit == 1 ==> v dummy == v (p1 ^. p2));
   assert (v bit == 0 ==> v dummy == 0);
   let p1' = p1 ^. dummy in
-  uintv_extensionality dummy (if v bit = 1 then (p1 ^. p2) else u64 0);
+  assert (v dummy == v (if v bit = 1 then (p1 ^. p2) else u64 0));
   logxor_lemma p1 p2;
   let p2' = p2 ^. dummy in
   logxor_lemma p2 p1

@@ -363,7 +363,7 @@ let lemma_felem64_mod255 a =
     (v a3 % pow2 63) * pow2 64 * pow2 64 * pow2 64);
   let a3' = a3 &. u64 0x7fffffffffffffff in
   assert_norm (0x7fffffffffffffff = pow2 63 - 1);
-  uintv_extensionality (mod_mask #U64 63ul) (u64 0x7fffffffffffffff);
+  assert (v (mod_mask #U64 #SEC 63ul) == v (u64 0x7fffffffffffffff));
   let r = a.[3] <- a3' in
   Hacl.Impl.Curve25519.Lemmas.lemma_nat_from_uints64_le_4 r
 

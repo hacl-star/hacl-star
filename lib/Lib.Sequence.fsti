@@ -464,7 +464,7 @@ val index_generate_blocks:
   -> n:pos{n <= max}
   -> f:(i:nat{i < max} -> unit -> unit & s:seq t{length s == len})
   -> i:nat{i < n * len}
-  -> Lemma (let j: j:nat{j < max} = i / len in
+  -> Lemma (let j = i / len in
            let a_spec (i:nat{i <= max}) = unit in
            let _,s1 = generate_blocks #t len max n a_spec f () in
            let _,s2 = f j () in

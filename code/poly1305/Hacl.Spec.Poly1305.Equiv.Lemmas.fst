@@ -217,6 +217,8 @@ let poly_update_repeat_blocks_multi_lemma2 text acc_vec0 r =
   FStar.Classical.forall_intro_2 (aux_repeat_bf);
   normalizen_repeati_extensionality 2 nb_vec r repeat_bf_sc repeat_bf_vec acc_vec0
 
+#set-options "--max_fuel 0"
+
 val poly_update_repeat_blocks_multi_lemma4:
     text:bytes{length text % (4 * size_block) = 0}
   -> acc:elem 4

@@ -97,7 +97,7 @@ ci: .clean-banner .clean-git .clean-snapshots
 # Temporary setting until code-verify, code-extract and code-test exist
 	$(MAKE) -C code/sha3
 	$(MAKE) -C code/blake2s
-	$(MAKE) -C code/chacha20 all verify
+	$(MAKE) -C code/chacha20
 	$(MAKE) -C code/poly1305
 	$(MAKE) -C code/chacha20poly1305
 	$(MAKE) -C code/curve25519
