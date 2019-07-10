@@ -23,6 +23,12 @@
     "NotificationChannel" : "#hacl-build",
     "PublicBranches" : [ "fstar-master" ],
 
+    "CompressBuildFolder": true,
+    "FolderToCompress" : "hacl-star",
+    "FoldersToExclude" : [ ],
+
+    "TrackPerformance" : false,
+
     "RepoVersions" : {
         "kremlin_version" : "origin/master",
         "mitls_version" : "origin/master",
