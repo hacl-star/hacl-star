@@ -9,8 +9,8 @@ open Lib.NumericTypes
 open Lib.Arithmetic.Group
 open Lib.Arithmetic.Ring
 open Lib.Arithmetic.Sums
-open Lib.Arithmetic.Group.Uint_t
-open Lib.Arithmetic.Ring.Uint_t
+//open Lib.Arithmetic.Group.Uint_t
+//open Lib.Arithmetic.Ring.Uint_t
 
 open Lib.Sequence
 open Lib.ByteSequence
@@ -51,8 +51,8 @@ val parse_xof: (input_len:size_nat{2+input_len<=max_size_t}) -> lbytes_l SEC inp
 let rec parse_inner (s:lbytes_l SEC (4*168)) (out:lseq (Group.t) params_n) (i:nat{i<=params_n}) (j:nat{j<=336}) : Tot (option (lseq (Group.t) params_n)) (decreases ((params_n-i)+(336-j))) =
     if (i=params_n) then Some out
     else if (j=336) then None
-    else let d = to_u16 s.[2*j] +. ((to_u16 s.[2*j+1]) <<. size 8) in
-    if v d < 19 * params_q then parse_inner s (upd out i (to_i16 ((Lib.RawIntTypes.u16_to_UInt16 d) %. uint #U16 #PUB params_q))) (i+1) (j+1)
+    else let d = v s.[2*j] + ((v s.[2*j+1]) * pow2 8) in
+    if d < 19 * params_q then (assert_norm(range (d % params_q) S16); parse_inner s (upd out i (i16 (d % params_q))) (i+1) (j+1))
     else parse_inner s out i (j+1)
 
 let parse_xof input_len l b1 b2 =
@@ -72,6 +72,8 @@ let rec parse_inner_lemma0 (s:lbytes_l SEC (4*168)) (out:lseq (Group.t) params_n
     let out' = upd out i (to_i16 ((Lib.RawIntTypes.u16_to_UInt16 d) %. uint #U16 #PUB params_q)) in
     parse_inner_lemma0 s out' (i+1) (j+1)
     else parse_inner_lemma0 s out i (j+1)
+
+#reset-options "--z3rlimit 300 --max_fuel 1 --max_ifuel 1"
 
 let rec parse_inner_lemma (s:lbytes_l SEC (4*168)) (out:lseq (Group.t) params_n) (i:nat{i<=params_n}) (out2:lseq (Group.t) params_n{forall (k:nat{i<=k /\ k<params_n}). sint_v out2.[k] = 0}) (j:nat{j<=336}) : Lemma (ensures (match (parse_inner s out i j),(parse_inner s out2 i j) with
                  |None, None -> True

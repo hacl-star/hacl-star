@@ -39,7 +39,7 @@ let lemma_plus_assoc (#a:Type0) [|ring a |] (x:a) (y:a) (z:a) : Lemma (plus (plu
 
 let lemma_plus_swap (#a:Type0) [|ring a|] (x:a) (y:a) : Lemma (plus x y == plus y x) =
   add_ag.lemma_swap x y
-  
+
 let lemma_plus_opp1 (#a:Type0) [| ring a |] (x:a) : Lemma (plus x (opp x) == zero) =
   add_ag.g.lemma_sym1 x
 
@@ -52,13 +52,13 @@ let lemma_plus_eq2 (#a:Type0) [| ring a |] (x:a) (y:a) (z:a) : Lemma (requires p
 
 let lemma_mul_assoc (#a:Type0) [| ring a |] (x:a) (y:a) (z:a) : Lemma (mul (mul x y) z == mul x (mul y z)) =
   mul_m.lemma_assoc x y z
-  
+
 let lemma_zero1 (#a:Type0) [| ring a |] (x:a) : Lemma (plus zero x == x) =
   add_ag.g.m.lemma_id1 x
-  
+
 let lemma_zero2 (#a:Type0) [| ring a |] (x:a) : Lemma (plus x zero == x) =
   add_ag.g.m.lemma_id2 x
-  
+
 let lemma_one1 (#a:Type0) [| ring a |] (x:a) : Lemma (mul one x == x) =
   mul_m.lemma_id1 x
 
@@ -107,13 +107,13 @@ let lemma_minus_assoc1 (#a:Type0) [| ring a |] (x:a) (y:a) (z:a) : Lemma (plus x
   lemma_plus_assoc x y (opp z)
 
 let lemma_minus_assoc2 (#a:Type0) [| ring a |] (x:a) (y:a) (z:a) : Lemma (minus x (minus y z) == plus x (minus z y)) =
-  let g = add_ag.g in
+  let g = (add_ag #a).g in
   lemma_sym_expand y (opp z);
   lemma_sym_involutive z;
   lemma_plus_assoc x z (opp y)
 
 let lemma_minus_assoc3 (#a:Type0) [| ring a |] (x:a) (y:a) (z:a) : Lemma (minus x (plus y z) == minus (minus x z) y) =
-  let g = add_ag.g in
+  let g = (add_ag #a).g in
   lemma_sym_expand y z;
   lemma_plus_assoc x (opp z) (opp y)
 
@@ -124,7 +124,7 @@ let lemma_minus_mul_distr_left (#a:Type0) [| ring a |] (x:a) (y:a) (z:a) : Lemma
 let lemma_minus_mul_distr_right (#a:Type0) [| ring a |] (x:a) (y:a) (z:a) : Lemma (mul (minus y z) x == minus (mul y x) (mul z x)) =
   lemma_distr_right x y (opp z);
   lemma_mul_opp1 z x
-  
+
 instance ring_int : ring int =
   { add_ag = abelian_group_int;
     mul_m = monoid_mul_int;
@@ -136,7 +136,7 @@ instance commutative_ring_int : commutative_ring int =
   { r = ring_int;
     lemma_mul_swap = (fun x y -> ());
    }
-   
+
 instance ring_mod : #(q:pos) -> ring (field q) =
   fun #q -> {
     add_ag = abelian_group_mod;
@@ -175,25 +175,25 @@ let lemma_exp_zero (#a:Type0) [| ring a |] (x:a) : Lemma (ensures exp x 0 == one
 let lemma_exp_morphism (#a:Type0) [| ring a |] (x:a) (n:nat) (m:nat) : Lemma (ensures exp x (n+m) == mul (exp x n) (exp x m)) =
   lemma_repeat_op_morphism #a #mul_m x n m
 
-let lemma_exp_one (#a:Type0) [| ring a |] (n:nat) : Lemma (exp one n == one) =
+let lemma_exp_one (#a:Type0) [| ring a |] (n:nat) : Lemma (exp #a one n == one) =
   lemma_repeat_op_id #a #mul_m n
 
 let lemma_exp_inv (#a:Type0) [| ring a |] (x:a) (y:a{mul x y == one}) (n:nat) : Lemma (ensures mul (exp x n) (exp #a y n) == one) =
   lemma_repeat_op_sym #a #mul_m x y n
 
 let lemma_exp_exp (#a:Type0) [| ring a |] (x:a) (n:nat) (m:nat) : Lemma (ensures exp x (n*m) == exp (exp x n) m) =
-  lemma_repeat_repeat_op #a #mul_m x n m 
+  lemma_repeat_repeat_op #a #mul_m x n m
 
 let lemma_simpl_exp (#a:Type0) [| ring a |] (x:a) (n:pos) (m:nat) : Lemma (requires exp x n == one) (ensures exp x m == exp x (m%n)) = lemma_simpl_repeat_op #a #mul_m x n m
 
-let lemma_simpl_exp_with_inv1 (#a:Type0) [| ring a |] (x:a) (invx:a) (n:pos) (j:nat) (k:nat) : Lemma (requires exp x n == one /\ mul x invx == one) (ensures mul (exp x j) (exp invx k) == exp x ((j-k)%n)) = lemma_simpl_repeat_op_with_sym1 #a #mul_m x invx n j k 
+let lemma_simpl_exp_with_inv1 (#a:Type0) [| ring a |] (x:a) (invx:a) (n:pos) (j:nat) (k:nat) : Lemma (requires exp x n == one /\ mul x invx == one) (ensures mul (exp x j) (exp invx k) == exp x ((j-k)%n)) = lemma_simpl_repeat_op_with_sym1 #a #mul_m x invx n j k
 
-let lemma_simpl_exp_with_inv2 (#a:Type0) [| ring a |] (x:a) (invx:a) (n:pos) (j:nat) (k:nat) : Lemma (requires exp x n == one /\ mul invx x == one) (ensures mul (exp invx j) (exp x k) == exp x ((k-j)%n)) = lemma_simpl_repeat_op_with_sym2 #a #mul_m x invx n j k 
+let lemma_simpl_exp_with_inv2 (#a:Type0) [| ring a |] (x:a) (invx:a) (n:pos) (j:nat) (k:nat) : Lemma (requires exp x n == one /\ mul invx x == one) (ensures mul (exp invx j) (exp x k) == exp x ((k-j)%n)) = lemma_simpl_repeat_op_with_sym2 #a #mul_m x invx n j k
 
 let repeat_plus (#a:Type0) [| ring a |] (x:a) (n:nat) = repeat_op #a #add_ag.g.m x n
 
 let rec lemma_repeat_plus_swap_mul (#a:Type0) [| ring a |] (x:a) (y:a) (n:nat) : Lemma (requires mul x y == mul y x) (ensures mul (repeat_plus x n) y == mul y (repeat_plus x n)) (decreases n) =
-  let m = add_ag.g.m in
+  let m = (add_ag #a).g.m in
   if n=0 then (lemma_repeat_op_zero #a #add_ag.g.m x; lemma_zero_absorb1 y; lemma_zero_absorb2 y)
   else begin
     lemma_repeat_op_succ1 x (n-1);

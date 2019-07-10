@@ -14,8 +14,8 @@ open Lib.Arithmetic.Ring
 open Lib.Arithmetic.Sums
 open Spec.Kyber2.Group
 open Spec.Kyber2.Ring
-open Lib.Arithmetic.Group.Uint_t
-open Lib.Arithmetic.Ring.Uint_t
+//open Lib.Arithmetic.Group.Uint_t
+//open Lib.Arithmetic.Ring.Uint_t
 
 open Lib.Sequence
 open Lib.ByteSequence

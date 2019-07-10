@@ -94,16 +94,16 @@ let lemma_op_eq1_m (#a:Type0) [| monoid a |] (x:a{has_sym x}) (y:a) (z:a) : Lemm
   let _lemma_r : Type = (y == z) in
   let _lemma_forall_to_exists (symx:a) : Lemma (_lemma_p symx ==> _lemma_r) =
     let _lemma (symx:a) : Lemma (requires _lemma_p symx) (ensures _lemma_r) =
-      lemma_op_eq1_m_witness x symx y z in    
+      lemma_op_eq1_m_witness x symx y z in
     move_requires #a #_lemma_p #(fun (x:a) -> _lemma_r) _lemma symx
  in FStar.Classical.forall_to_exists _lemma_forall_to_exists
-    
+
 let lemma_op_eq2_m (#a:Type0) [| monoid a |] (x:a{has_sym x}) (y:a) (z:a) : Lemma (requires op y x == op z x) (ensures y == z) =
   let _lemma_p (symx:a) : Type = (op x symx == id) in
   let _lemma_r : Type = (y == z) in
   let _lemma_forall_to_exists (symx:a) : Lemma (_lemma_p symx ==> _lemma_r) =
     let _lemma (symx:a) : Lemma (requires _lemma_p symx) (ensures _lemma_r) =
-      lemma_op_eq2_m_witness x symx y z in    
+      lemma_op_eq2_m_witness x symx y z in
     move_requires #a #_lemma_p #(fun (x:a) -> _lemma_r) _lemma symx
  in FStar.Classical.forall_to_exists _lemma_forall_to_exists
 
@@ -117,7 +117,7 @@ class group (a:Type0) = {
 let lemma_op_eq1 (#a:Type0) [| group a |] (x:a) (y:a) (z:a) : Lemma (requires m.op x y == m.op x z) (ensures y == z) =
   lemma_sym2 x;
   lemma_op_eq1_m_witness #a #m x (sym #a x) y z
-    
+
 let lemma_op_eq2 (#a:Type0) [| group a |] (x:a) (y:a) (z:a) : Lemma (requires m.op y x == m.op z x) (ensures y == z) =
   lemma_sym1 x;
   lemma_op_eq2_m_witness #a #m x (sym #a x) y z
@@ -128,8 +128,8 @@ let lemma_sym_involutive (#a:Type0) [| group a |] (x:a) : Lemma (ensures sym (sy
   lemma_op_eq1 (sym x) (sym (sym x)) x
 
 #reset-options
-let lemma_sym_expand (#a:Type0) [| group a |] (x:a) (y:a) : Lemma (ensures sym (m.op x y) == m.op (sym y) (sym x)) = 
-  let m = m in
+let lemma_sym_expand (#a:Type0) [| group a |] (x:a) (y:a) : Lemma (ensures sym (m.op x y) == m.op (sym y) (sym x)) =
+  let m = m #a in
   lemma_sym1 (op x y);
   lemma_assoc x y ((op (sym y) (sym x)));
   lemma_assoc y (sym y) (sym x);
@@ -137,7 +137,7 @@ let lemma_sym_expand (#a:Type0) [| group a |] (x:a) (y:a) : Lemma (ensures sym (
   lemma_id1 (sym x);
   lemma_sym1 x;
   lemma_op_eq1 (op x y) (sym (op x y)) (op (sym y) (sym x))
-  
+
 instance group_int : group int = {
   m = monoid_plus_int;
   sym = (fun x -> - x);
@@ -145,12 +145,12 @@ instance group_int : group int = {
   lemma_sym2 = (fun x -> ());
 }
 
-instance group_mod : (#q:pos) -> group (field q) = 
+instance group_mod : (#q:pos) -> group (field q) =
   fun #q -> {
     m = monoid_plus_mod;
     sym = modular_sub #q 0;
-    lemma_sym1 = (fun x -> ());
-    lemma_sym2 = (fun x -> ());
+    lemma_sym1 = (fun x -> assert_norm(x+(-x)=0));
+    lemma_sym2 = (fun x -> assert_norm(x+(-x)=0));
 }
 
 class abelian_group (a:Type0) = {
@@ -175,9 +175,9 @@ let rec repeat_op (#a:Type0) [| monoid a |] (x:a) (n:nat) : Tot a (decreases n) 
 
 #reset-options
 let rec lemma_repeat_op_succ1 (#a:Type0) [| monoid a |] (x:a) (n:nat) : Lemma (ensures repeat_op x (n+1) == op x (repeat_op x n)) (decreases n) =
-  if n=0 then lemma_id1 id else
+  if n=0 then lemma_id1 #a id else
   if n%2 = 0 then begin
-    assert(n/2 == (n+1)/2) 
+    assert(n/2 == (n+1)/2)
   end
   else begin
     assert(n/2 + 1 == (n+1)/2);
@@ -196,11 +196,11 @@ let rec lemma_repeat_op_succ1 (#a:Type0) [| monoid a |] (x:a) (n:nat) : Lemma (e
     lemma_assoc b1 b1 x;
     assert (r2 == op x (op (op b1 b1) x));
     assert ((n-1)%2 = 0);
-    if (n-1 = 0) then lemma_id1 id;
+    if (n-1 = 0) then lemma_id1 #a id;
     assert (r1 == op (op b1 b1) x)
     end
 and lemma_repeat_op_succ2 (#a:Type0) [| monoid a |] (x:a) (n:nat) : Lemma (ensures repeat_op x (n+1) == op (repeat_op x n) x) (decreases n) =
-  if n=0 then (lemma_id1 id; lemma_id1 x; lemma_id2 x) else
+  if n=0 then (lemma_id1 #a id; lemma_id1 x; lemma_id2 x) else
   if n%2 = 0 then begin
   let r0 = repeat_op x (n-1) in
   let r1 = repeat_op x n in
@@ -245,10 +245,10 @@ and lemma_repeat_op_succ2 (#a:Type0) [| monoid a |] (x:a) (n:nat) : Lemma (ensur
     end
 
 let lemma_repeat_op_zero (#a:Type0) [| monoid a |] (x:a) : Lemma (repeat_op x 0 == id) = ()
-let rec lemma_repeat_op_one (#a:Type0) [| monoid a |] (x:a) : Lemma (repeat_op x 1 == x) = 
-  lemma_id1 id;
+let rec lemma_repeat_op_one (#a:Type0) [| monoid a |] (x:a) : Lemma (repeat_op x 1 == x) =
+  lemma_id1 #a id;
   lemma_id2 x
-  
+
 let rec lemma_repeat_op_morphism (#a:Type0) [| monoid a |] (x:a) (n:nat) (m:nat) : Lemma (ensures repeat_op x (n+m) == op (repeat_op x n) (repeat_op x m)) (decreases m) =
   if (m=0) then lemma_id2 (repeat_op x n)
   else begin
@@ -258,16 +258,16 @@ let rec lemma_repeat_op_morphism (#a:Type0) [| monoid a |] (x:a) (n:nat) (m:nat)
     lemma_repeat_op_succ1 x (m-1)
     end
 
-let rec lemma_repeat_op_id (#a:Type0) [| monoid a |] (n:nat) : Lemma (ensures repeat_op id n == id) (decreases n) =
+let rec lemma_repeat_op_id (#a:Type0) [| monoid a |] (n:nat) : Lemma (ensures repeat_op #a id n == id) (decreases n) =
   if n=0 then ()
   else begin
-    lemma_repeat_op_succ1 id (n-1);
-    lemma_repeat_op_id (n-1);
-    lemma_id1 id
+    lemma_repeat_op_succ1 #a id (n-1);
+    lemma_repeat_op_id #a (n-1);
+    lemma_id1 #a id
     end
 #reset-options
 let rec lemma_repeat_op_sym (#a:Type0) [| monoid a |] (x:a) (y:a{op x y == id}) (n:nat) : Lemma (ensures op (repeat_op x n) (repeat_op #a y n) == id) (decreases n) =
-  if n=0 then lemma_id1 id
+  if n=0 then lemma_id1 #a id
   else begin
     let r = op (repeat_op x n) (repeat_op #a y n) in
     lemma_repeat_op_succ2 x (n-1);
@@ -289,7 +289,7 @@ let rec lemma_repeat_repeat_op (#a:Type0) [| monoid a |] (x:a) (n:nat) (m:nat) :
     assert(r== op (repeat_op x n) (repeat_op x (n*(m-1))));
     lemma_repeat_repeat_op x n (m-1);
     assert (r == op (repeat_op x n) (repeat_op (repeat_op x n) (m-1)));
-    lemma_repeat_op_succ1 (repeat_op x n) (m-1); 
+    lemma_repeat_op_succ1 (repeat_op x n) (m-1);
     assert (r == repeat_op (repeat_op x n) m)
     end
 
@@ -298,7 +298,7 @@ let lemma_simpl_repeat_op (#a:Type0) [| monoid a |] (x:a) (n:pos) (m:nat) : Lemm
     euclidean_division_definition m n;
     lemma_repeat_op_morphism x ((m/n)*n) (m%n);
     lemma_repeat_repeat_op x n (m/n);
-    lemma_repeat_op_id (m/n);
+    lemma_repeat_op_id #a (m/n);
     lemma_id1 (repeat_op x (m%n))
 
 #reset-options "--z3rlimit 300 --max_fuel 0 --max_ifuel 0"

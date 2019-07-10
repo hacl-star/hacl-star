@@ -2,13 +2,11 @@ module Lib.NumericTypes
 
 open Lib.Arithmetic.Group
 open Lib.Arithmetic.Group.Sequence
-open Lib.Arithmetic.Group.Uint_t
 
 open Lib.Arithmetic.Sums
 
 open Lib.Arithmetic.Ring
 open Lib.Arithmetic.Ring.Sequence
-open Lib.Arithmetic.Ring.Uint_t
 
 open Lib.ModularArithmetic
 open Lib.ModularArithmetic.Lemmas
@@ -276,9 +274,9 @@ instance ring_vector_t: #a:numeric_t -> (#[FStar.Tactics.Typeclasses.tcresolve (
 instance commutative_ring_vector_t: #a:numeric_t -> (#[FStar.Tactics.Typeclasses.tcresolve ()] cr:commutative_ring (base_t a)) -> #len:size_nat -> commutative_ring (vector_i #a len) =
   fun #a #cr #len -> let a' = Vec a len in lemma_interp_numeric_vector_i a len; commutative_ring_numeric_t a' #cr
   
-let v = Vec (Base int) 3
-let v2 = Vec (Vec (Base (sec_int_t U32)) 4) 2
-let r = ring_numeric_t v2 #(ring_uint_t #U32 #SEC)
+//let v = Vec (Base int) 3
+//let v2 = Vec (Vec (Base (sec_int_t U32)) 4) 2
+//let r = ring_numeric_t v2 #(ring_uint_t #U32 #SEC)
 
 
 let num_t (t:inttype) (l:secrecy_level) = Base (uint_t t l)

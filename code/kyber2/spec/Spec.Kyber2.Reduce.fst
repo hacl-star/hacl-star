@@ -56,64 +56,64 @@ let montgomery_reduce a =
 #reset-options "--z3rlimit 2000 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq'"
 
 val montgomery_reduce_int32:
-  a:int32{uint_v a >= - params_q * pow2 (params_logr-1) /\ uint_v a < params_q * pow2 (params_logr-1)}
-  -> Tot (t:int16{uint_v t > - params_q /\ uint_v t < params_q /\ (uint_v t * pow2 params_logr) % params_q = uint_v a % params_q})
+  a:int32{sint_v a >= - params_q * pow2 (params_logr-1) /\ sint_v a < params_q * pow2 (params_logr-1)}
+  -> Tot (t:int16{sint_v t > - params_q /\ sint_v t < params_q /\ (sint_v t * pow2 params_logr) % params_q = sint_v a % params_q})
 
 let montgomery_reduce_int32 a =
   let qinv = i32 (params_qinv) in
   let q = i32 (params_q) in
   let u = to_i16 (a *. qinv) in
-  assert (uint_v u = ((uint_v a * params_qinv) @% pow2 32) @% pow2 16);
-  assert (uint_v u % pow2 16 = ((uint_v a * params_qinv) @% pow2 32) % pow2 16);
-  assert (uint_v (a*.qinv) % pow2 32 = (uint_v a * params_qinv) % pow2 32);
+  assert (sint_v u = ((sint_v a * params_qinv) @% pow2 32) @% pow2 16);
+  assert (sint_v u % pow2 16 = ((sint_v a * params_qinv) @% pow2 32) % pow2 16);
+  assert (sint_v (a*.qinv) % pow2 32 = (sint_v a * params_qinv) % pow2 32);
   pow2_plus 16 16;
-  modulo_modulo_lemma (uint_v (a*.qinv)) (pow2 16) (pow2 16);
-  assert (uint_v u % pow2 16 = ((uint_v a * params_qinv) % pow2 32) % pow2 16);
-  modulo_modulo_lemma (uint_v a * params_qinv) (pow2 16) (pow2 16);
-  assert (uint_v u = ((uint_v a * params_qinv) @% pow2 16)); 
-  assert( - pow2 15 * params_q <= uint_v u * params_q /\ uint_v u * params_q < pow2 15 * params_q);
+  modulo_modulo_lemma (sint_v (a*.qinv)) (pow2 16) (pow2 16);
+  assert (sint_v u % pow2 16 = ((sint_v a * params_qinv) % pow2 32) % pow2 16);
+  modulo_modulo_lemma (sint_v a * params_qinv) (pow2 16) (pow2 16);
+  assert (sint_v u = ((sint_v a * params_qinv) @% pow2 16)); 
+  assert( - pow2 15 * params_q <= sint_v u * params_q /\ sint_v u * params_q < pow2 15 * params_q);
   pow2_double_mult 15;
-  assert ( - pow2 16 * params_q < uint_v a - (uint_v u * params_q) /\ uint_v a - (uint_v u * params_q) < pow2 16 * params_q);
+  assert ( - pow2 16 * params_q < sint_v a - (sint_v u * params_q) /\ sint_v a - (sint_v u * params_q) < pow2 16 * params_q);
   assert_norm (pow2 16 * params_q < pow2 31);
-  assert (range (uint_v a - (uint_v u * params_q)) S32);
-  let t:(t:int32{range (uint_v a - uint_v t) S32}) = (to_i32 u) *! q in
-  //assert (uint_v t = (uint_v u * params_q) @% pow2 32);
-  assert (uint_v t = (uint_v u * params_q));
-  lemma_mod_mul_distr_l (uint_v u) params_q (pow2 16); 
-  assert (uint_v t % pow2 16 = (((uint_v a * params_qinv) % pow2 16) * params_q) % pow2 16);
-  lemma_mod_mul_distr_l (uint_v a * params_qinv) params_q (pow2 16); 
-  assert (uint_v t % pow2 16 = ((uint_v a * params_qinv) * params_q) % pow2 16);
-  paren_mul_right (uint_v a) params_qinv params_q;
-  lemma_mod_mul_distr_r (uint_v a) (params_qinv * params_q) (pow2 16);
+  assert (range (sint_v a - (sint_v u * params_q)) S32);
+  let t:(t:int32{range (sint_v a - sint_v t) S32}) = (to_i32 u) *! q in
+  //assert (sint_v t = (sint_v u * params_q) @% pow2 32);
+  assert (sint_v t = (sint_v u * params_q));
+  lemma_mod_mul_distr_l (sint_v u) params_q (pow2 16); 
+  assert (sint_v t % pow2 16 = (((sint_v a * params_qinv) % pow2 16) * params_q) % pow2 16);
+  lemma_mod_mul_distr_l (sint_v a * params_qinv) params_q (pow2 16); 
+  assert (sint_v t % pow2 16 = ((sint_v a * params_qinv) * params_q) % pow2 16);
+  paren_mul_right (sint_v a) params_qinv params_q;
+  lemma_mod_mul_distr_r (sint_v a) (params_qinv * params_q) (pow2 16);
   assert_norm(params_qinv * params_q % pow2 16 = 1);
-  assert (uint_v t % pow2 16 = uint_v a % pow2 16);
-  assert (uint_v t % params_q = 0);
+  assert (sint_v t % pow2 16 = sint_v a % pow2 16);
+  assert (sint_v t % params_q = 0);
   let t2:int32 = a -! t in
- // assert (uint_v t2 = (uint_v a - uint_v t) @% pow2 32); 
-  assert(uint_v t2 = uint_v a - uint_v t);
-  assert (uint_v t2 % pow2 16 = (uint_v a - uint_v t) % pow2 16);
-  lemma_mod_plus_distr_l (uint_v a) (- uint_v t) (pow2 16);
-  assert (uint_v t2 % pow2 16 = (uint_v a % pow2 16 - uint_v t) % pow2 16);
-  lemma_mod_sub_distr (uint_v a % pow2 16) (uint_v t) (pow2 16);
-  assert (uint_v t2 % pow2 16 = 0);
-  lemma_mod_plus_distr_l (uint_v a) (- uint_v t) (params_q);
-  lemma_mod_sub_distr (uint_v a % params_q) (uint_v t) (params_q);
-  assert (uint_v t2 % params_q = uint_v a % params_q);
+ // assert (sint_v t2 = (sint_v a - sint_v t) @% pow2 32); 
+  assert(sint_v t2 = sint_v a - sint_v t);
+  assert (sint_v t2 % pow2 16 = (sint_v a - sint_v t) % pow2 16);
+  lemma_mod_plus_distr_l (sint_v a) (- sint_v t) (pow2 16);
+  assert (sint_v t2 % pow2 16 = (sint_v a % pow2 16 - sint_v t) % pow2 16);
+  lemma_mod_sub_distr (sint_v a % pow2 16) (sint_v t) (pow2 16);
+  assert (sint_v t2 % pow2 16 = 0);
+  lemma_mod_plus_distr_l (sint_v a) (- sint_v t) (params_q);
+  lemma_mod_sub_distr (sint_v a % params_q) (sint_v t) (params_q);
+  assert (sint_v t2 % params_q = sint_v a % params_q);
   let t3 = (t2 >>. size 16) in
   let t4 = to_i16 t3 in
-  assert(uint_v t3 = uint_v t2 / (pow2 16));
-  assert( ( - pow2 16 * params_q) / pow2 16 < uint_v t3 /\ uint_v t3 < (pow2 16 * params_q) / pow2 16);
+  assert(sint_v t3 = sint_v t2 / (pow2 16));
+  assert( ( - pow2 16 * params_q) / pow2 16 < sint_v t3 /\ sint_v t3 < (pow2 16 * params_q) / pow2 16);
   swap_neg_mul (pow2 16) params_q;
   cancel_mul_div params_q (pow2 16);
   cancel_mul_div (-params_q) (pow2 16);
-  assert ( - params_q < uint_v t3 /\ uint_v t3 < params_q);
-  assert ( (- pow2 31) / pow2 16 <= uint_v t3 /\ uint_v t3 < pow2 31 / pow2 16);
+  assert ( - params_q < sint_v t3 /\ sint_v t3 < params_q);
+  assert ( (- pow2 31) / pow2 16 <= sint_v t3 /\ sint_v t3 < pow2 31 / pow2 16);
   pow2_minus 31 16;
-  assert ( - pow2 15 <= uint_v t3 /\ uint_v t3 < pow2 15);
-  assert (uint_v t4 = uint_v t3);
-  assert (uint_v t4 * pow2 16 = uint_v t2); 
-  assert ( - params_q < uint_v t4 /\ uint_v t4 < params_q);
-  assert ((uint_v t4 * pow2 16) % params_q = uint_v a % params_q);
+  assert ( - pow2 15 <= sint_v t3 /\ sint_v t3 < pow2 15);
+  assert (sint_v t4 = sint_v t3);
+  assert (sint_v t4 * pow2 16 = sint_v t2); 
+  assert ( - params_q < sint_v t4 /\ sint_v t4 < params_q);
+  assert ((sint_v t4 * pow2 16) % params_q = sint_v a % params_q);
   t4
 
 #reset-options "--z3rlimit 500 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq'"

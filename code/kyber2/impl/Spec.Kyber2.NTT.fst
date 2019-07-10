@@ -9,9 +9,9 @@ open FStar.Math.Lemmas
 open FStar.Classical
 open FStar.Tactics
 
-open Spec.Kyber.Params
-open Spec.Kyber.Lemmas
-open Spec.Kyber.Poly
+open Spec.Kyber2.Params
+open Spec.Kyber2.Lemmas
+open Spec.Kyber2.Poly
 
 open Lib.ModularArithmetic
 open Lib.ModularArithmetic.Lemmas
@@ -33,9 +33,9 @@ type poly  =  p:(poly params_q){normal p}
 
 #reset-options "--z3rlimit 100 --max_fuel 1 --max_ifuel 1 --using_facts_from '* -FStar.Seq'"
 
-  
+
 val lemma_is_prime_params_q: unit -> Lemma (is_prime params_q)
-  
+
 let lemma_is_prime_params_q () =
   let customprop (p:field params_q{p>1}) = (params_q % p <> 0) in
   let f (p:field params_q{p>1}) : Lemma (customprop p) =
@@ -44,18 +44,18 @@ let lemma_is_prime_params_q () =
 
 (** continue here tomorrow *)
 
-val ntt:   
-  p:poly 
+val ntt:
+  p:poly
   -> Tot (p':nttpoly)
 
 let ntt p =
   let p': nttpoly = lib_ntt params_zeta p in p'
 
-val nttinv: 
-  p:nttpoly 
+val nttinv:
+  p:nttpoly
   -> Tot (p':poly)
 
-let nttinv p = 
+let nttinv p =
   let p':poly = lib_nttinv params_halfninv params_zetainv p in p'
 
 

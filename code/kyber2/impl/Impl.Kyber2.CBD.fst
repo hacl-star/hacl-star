@@ -14,7 +14,7 @@ open Spec.Kyber2.Group
 open Spec.Kyber2.Ring
 open Spec.Kyber2.CBD
 
-open Impl.Kyber2.Group
+//open Impl.Kyber2.Group
 
 open Lib.Sequence
 open Lib.ByteSequence
@@ -22,7 +22,7 @@ open Lib.IntTypes
 open Lib.ModularArithmetic
 open Lib.ModularArithmetic.Lemmas
 
-open Spec.Kyber2.FunctionInstantiation
+open Impl.Kyber2.FunctionInstantiation
 
 module Seq = Lib.Sequence
 
@@ -128,37 +128,100 @@ let to_bytes #l #len bits output =
       let h = ST.get () in
       as_seq_gsub h output i (size 1))
 
+#reset-options "--z3rlimit 500 --max_fuel 2 --max_ifuel 2 --using_facts_from '* -FStar.Seq'"
+
+let cbd_eta_inner_ (bits_a: lbuffer uint1 (size params_eta)) (bits_b:lbuffer uint1 (size params_eta)) (output:lbuffer int16 (size 1)) : Stack unit (requires fun h -> live h bits_a /\ live h bits_b /\ live h output /\ Buf.disjoint bits_a output /\ Buf.disjoint bits_b output) (ensures fun h0 _ h1 -> Group.int16_to_t (Seq.index h1.[|output|] 0) == cbd_eta_inner_ (Seq.map Group.int16_to_t (Seq.map to_i16 h0.[|bits_a|])) (Seq.map Group.int16_to_t (Seq.map to_i16 h0.[|bits_b|])) /\ (v h1.[|output|].[0] <= params_eta) /\ (v h1.[|output|].[0] >= - params_eta) /\ modifies1 output h0 h1) =
+  push_frame ();
+  let ab = create (size 2) (i16 0) in
+  let ha = ST.get () in
+  as_seq_gsub ha ab (size 0) (size 1);
+  Impl.Kyber2.Arithmetic.Sums.sum_n_cbd bits_a (Buf.sub ab (size 0) (size 1));
+  let hb = ST.get () in
+  as_seq_gsub hb ab (size 1) (size 1);
+  Impl.Kyber2.Arithmetic.Sums.sum_n_cbd bits_b (Buf.sub ab (size 1) (size 1));
+  let h = ST.get () in
+  assert(h.[|ab|].[0] == (Seq.sub h.[|ab|] 0 1).[0]);
+  assert(v h.[|ab|].[0] <= params_eta);
+  assert(h.[|ab|].[1] == (Seq.sub h.[|ab|] 1 1).[0]);
+  assert(v h.[|ab|].[1] <= params_eta);
+
+  assert_norm(params_eta < maxint S16);
+  assert_norm(- params_eta > minint S16);
+
+  assert(v h.[|ab|].[1] >= 0);
+  assert(v h.[|ab|].[0] >= 0);
+  assert (v h.[|ab|].[0] - v h.[|ab|].[1] <= params_eta);
+  assert (v h.[|ab|].[0] - v h.[|ab|].[1] >= - params_eta);
+  assert (range (v h.[|ab|].[0] - v h.[|ab|].[1]) S16);
+  let a:int16 = ab.(size 0) in
+  let b:(b:int16{range (v a - v b) S16}) = ab.(size 1) in
+  output.(size 0) <- a -! b;
+  opp_lemma_t (Group.int16_to_t b);
+  plus_lemma_t (Group.int16_to_t a) (opp_t (Group.int16_to_t b));
+  FStar.Math.Lemmas.lemma_mod_add_distr (v (Group.int16_to_t a)) (- v (Group.int16_to_t b)) params_q;
+  assert (v (minus #Group.t #ring_t (Group.int16_to_t a) (Group.int16_to_t b)) == (v (Group.int16_to_t a) - v (Group.int16_to_t b)) % params_q);
+  assert (int16_to_t (a -! b) == (minus #Group.t #ring_t (Group.int16_to_t a) (Group.int16_to_t b)));
+  pop_frame ()
+
+let cbd_eta_inner (bits:lbuffer uint1 ((size 2)*!(size params_n)*!(size params_eta))) (output:lbuffer int16 (size 1)) (i:size_t{v i < params_n}) : Stack unit (requires fun h -> live h bits /\ live h output /\ Buf.disjoint bits output) (ensures fun h0 _ h1 -> Group.int16_to_t (Seq.index h1.[|output|] 0) == cbd_eta_inner (Seq.map Group.int16_to_t (Seq.map to_i16 h0.[|bits|])) (v i) /\ (v h1.[|output|].[0] <= params_eta) /\ (v h1.[|output|].[0] >= - params_eta) /\ modifies1 output h0 h1) =
+  let h = ST.get () in
+  assert_norm (v ((size 2) *! i *! (size params_eta)) == 2*(v i)*params_eta);
+  assert_norm (v (((size 2) *! i *! (size params_eta)) +! (size params_eta)) == 2*(v i)*params_eta+params_eta);
+  as_seq_gsub h bits ((size 2) *! i *! (size params_eta)) (size params_eta);
+  as_seq_gsub h bits (((size 2) *! i *! (size params_eta)) +! (size params_eta)) (size params_eta);
+  cbd_eta_inner_ (sub bits ((size 2) *! i *! (size params_eta)) (size params_eta)) (sub bits (((size 2) *! i *! (size params_eta)) +! (size params_eta)) (size params_eta)) output;
+  let h1 = ST.get () in
+  assert(Group.int16_to_t (h1.[|output|].[0]) == Spec.Kyber2.CBD.cbd_eta_inner_ (Seq.map Group.int16_to_t (Seq.map to_i16 h.[|(gsub bits ((size 2) *!i*!(size params_eta)) (size params_eta))|])) (Seq.map Group.int16_to_t (Seq.map to_i16 h.[|gsub bits (((size 2)*!i*!(size params_eta)) +! (size params_eta)) (size params_eta)|])));
+  assert(Group.int16_to_t (h1.[|output|].[0]) == Spec.Kyber2.CBD.cbd_eta_inner_ (Seq.map Group.int16_to_t (Seq.map to_i16 (Seq.sub h.[|bits|] (2*(v i)*params_eta) params_eta))) (Seq.map Group.int16_to_t (Seq.map to_i16 (Seq.sub h.[|bits|] (2*(v i)*params_eta + params_eta) params_eta))));
+  eq_intro (Seq.map Group.int16_to_t (Seq.map to_i16 (Seq.sub h.[|bits|] (2*(v i)*params_eta) (params_eta)))) (Seq.sub (Seq.map Group.int16_to_t (Seq.map to_i16 h.[|bits|])) (2*(v i)*params_eta) (params_eta));
+  eq_intro (Seq.map Group.int16_to_t (Seq.map to_i16 (Seq.sub h.[|bits|] (2*(v i)*params_eta+params_eta) (params_eta)))) (Seq.sub (Seq.map Group.int16_to_t (Seq.map to_i16 h.[|bits|])) (2*(v i)*params_eta+params_eta) (params_eta))
+
+#reset-options "--z3rlimit 1000 --max_fuel 1 --max_ifuel 1 --using_facts_from '* -FStar.Seq'"
+
 val cbd_eta:
   bytes:lbytes_p SEC (size (64*params_eta))
-  -> output:lbuffer (Spec.Kyber2.Group.t) (size params_n)
+  -> output:lbuffer int16 (size params_n)
   -> Stack unit
   (requires fun h -> live h bytes /\ live h output /\ Buf.disjoint bytes output)
-  (ensures fun h0 _ h1 -> modifies1 output h0 h1 /\ h1.[|output|] == Spec.Kyber2.CBD.cbd_eta h0.[|bytes|])
+  (ensures fun h0 _ h1 -> modifies1 output h0 h1 /\ Seq.map Group.int16_to_t h1.[|output|] == Spec.Kyber2.CBD.cbd_eta h0.[|bytes|] /\ (forall (j:size_nat{j<params_n}). v h1.[|output|].[j] <= params_eta /\ v h1.[|output|].[j] >= - params_eta))
 
 let cbd_eta bytes output =
+  let h_begin = ST.get () in
   push_frame ();
-  let len = size (8*64*params_eta) in
+  let len = (size 8)*!(size 64) *! (size params_eta) in
   let tmp0 = create len (u1 0) in
-  let tmp1 = create len (i16 0) in
-  let tmp2 = create #(Group.t) len Group.zero_t in
   to_bits bytes tmp0;
-  mapT len tmp1 to_i16 tmp0;
-  mapT len tmp2 Group.int16_to_t tmp1;
-  pop_frame (); admit()
+  let h_ = ST.get () in
+  Lib.Loops.for (size 0) (size params_n) (fun h i -> live h tmp0 /\ live h output /\ Buf.disjoint tmp0 output /\ (forall (j:size_nat{j< i}). Group.int16_to_t h.[|output|].[j] == (Spec.Kyber2.CBD.cbd_eta h_begin.[|bytes|]).[j] /\ v h.[|output|].[j] <= params_eta /\ v h.[|output|].[j] >= - params_eta) /\ modifies1 output h_ h) (fun i ->
+    let h0 = ST.get () in
+    cbd_eta_inner tmp0 (sub output i (size 1)) i;
+    let h1 = ST.get () in
+    as_seq_gsub h1 output i (size 1);
+    eq_intro (Seq.map Spec.Kyber2.Group.int16_to_t (Seq.map to_i16 (Spec.Kyber2.CBD.to_bits h_begin.[|bytes|]))) (Seq.map Group.int16_to_t (Seq.map to_i16 (Spec.Kyber2.CBD.to_bits h_begin.[|bytes|])));
+    assert(Group.int16_to_t (h1.[|output|].[v i]) == Spec.Kyber2.CBD.cbd_eta_inner (Seq.map Spec.Kyber2.Group.int16_to_t (Seq.map to_i16 (Spec.Kyber2.CBD.to_bits h_begin.[|bytes|]))) (v i));
+    Spec.Kyber2.CBD.cbd_eta_lemma h_begin.[|bytes|] (v i);
+    assert(Group.int16_to_t (h1.[|output|].[v i]) == (Spec.Kyber2.CBD.cbd_eta h_begin.[|bytes|]).[v i]);
+    as_seq_gsub h1 output (size 0) i;
+    assert(Buf.disjoint (gsub output (size 0) i) (gsub output i (size 1)));
+    let customprop (j:size_nat{j < v i}) : GTot Type = (Group.int16_to_t (h1.[|output|].[j]) == (Spec.Kyber2.CBD.cbd_eta h_begin.[|bytes|]).[j] /\ v h1.[|output|].[j] <= params_eta /\ v h1.[|output|].[j] >= - params_eta) in
+    let customlemma (j:size_nat{j < v i}) : Lemma (customprop j) =
+      assert(h1.[|output|].[j] == h1.[|(gsub output (size 0) i)|].[j]);
+      assert(h1.[|gsub output (size 0) i|].[j] == h0.[|gsub output (size 0) i|].[j]);
+      as_seq_gsub h0 output (size 0) i;
+      assert(h0.[|output|].[j] == h0.[|(gsub output (size 0) i)|].[j]);
+      assert(h1.[|output|].[j] == h0.[|output|].[j])
+    in FStar.Classical.forall_intro customlemma;
+    assert(forall (j:size_nat{j < v i + 1}). Group.int16_to_t (h1.[|output|].[j]) == (Spec.Kyber2.CBD.cbd_eta h_begin.[|bytes|]).[j]));
+  let h_end = ST.get() in
+  eq_intro (Seq.map Group.int16_to_t h_end.[|output|]) (Spec.Kyber2.CBD.cbd_eta h_begin.[|bytes|]);
+  pop_frame()
 
-val cbd_eta: (bytes:lbytes_l SEC (64*params_eta)) -> lseq (Group.t) params_n
 
-let cbd_eta bytes =
-  let bits = Seq.map int16_to_t (Seq.map to_i16 (to_bits bytes)) in
-  let f (i:nat{i<params_n}) =
-    let m = monoid_plus_t in
-    let r = ring_t in
-    let a = sum_n (Seq.sub bits (2*i*params_eta) params_eta) in
-    let b = sum_n (Seq.sub bits (2*i*params_eta + params_eta) params_eta) in
-    minus a b
-  in
-  createi params_n f
+val cbd_kyber: (s:lbytes_p SEC (size 32)) -> (b:uint_t U8 SEC) -> (output:lbuffer int16 (size params_n)) -> Stack unit (requires fun h -> live h s /\ live h output /\ Buf.disjoint s output) (ensures fun h0 _ h1 -> modifies1 output h0 h1 /\ Seq.map Group.int16_to_t h1.[|output|] == Spec.Kyber2.CBD.cbd_kyber h0.[|s|] b /\ (forall (j:size_nat{j < params_n}). v h1.[|output|].[j] <= params_eta /\ v h1.[|output|].[j] >= - params_eta))
 
-val cbd_kyber: (s:lbytes_l SEC 32) -> (b:uint_t U8 SEC) -> lseq (Group.t) params_n
-
-let cbd_kyber s b = cbd_eta (prf (64*params_eta) s b)
+let cbd_kyber s b output =
+  push_frame ();
+  let tmp = create ((size 64)*!(size params_eta)) (u8 0) in
+  prf ((size 64)*!(size params_eta)) s b tmp;
+  cbd_eta tmp output;
+  pop_frame ()

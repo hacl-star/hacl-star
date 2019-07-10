@@ -16,8 +16,6 @@ open Lib.Arithmetic.Sums
 open Spec.Kyber2.Group
 open Spec.Kyber2.Ring
 open Spec.Kyber2.Reduce
-open Lib.Arithmetic.Group.Uint_t
-open Lib.Arithmetic.Ring.Uint_t
 
 open Lib.Sequence
 open Lib.ByteSequence
@@ -105,7 +103,7 @@ let lemma_max_dist_le #a #len f s1 s2 m b =
 
 val poly_linf: p:poly -> n:nat{n<=params_q/2 /\ (forall (i:nat). {:pattern (index #_ #params_n p i)} i < params_n ==> linf (index #_ #params_n p i) <= n) /\ (exists (i:nat{i<params_n}). {:pattern (index #_ #params_n p i)} linf (index #_ #params_n p i) == n)}
 
-let poly_linf p = 
+let poly_linf p =
   let res = max_elem #num #params_n linf p in
   res
 
@@ -116,7 +114,7 @@ let vec_linf p =
 
 val poly_distance_linf: p1:poly -> p2:poly -> n:nat{n<=params_q/2 /\ (forall (i:nat). i < params_n ==> distance_linf (index #_ #params_n p1 i) (index #_ #params_n p2 i) <= n) /\ (exists (i:nat{i<params_n}). distance_linf (index #_ #params_n p1 i) (index #_ #params_n p2 i) == n)}
 
-let poly_distance_linf p1 p2 = 
+let poly_distance_linf p1 p2 =
   let res = max_dist #num #params_n distance_linf p1 p2 in
   res
 
@@ -147,7 +145,7 @@ let compress d x =
   let xd_q = division_by_q_int32 xd in
   assert (sint_v xd_q = sint_v xd / params_q);
   let xd_q16 = to_i16 xd_q in
-  assert (sint_v xd_q16 = sint_v xd_q @% pow2 16);
+  assert (sint_v xd_q16 = sint_v xd_q @%. S16);
   lemma_mod_sub (sint_v xd_q % pow2 16) (pow2 16) 1;
   assert (sint_v xd_q16 % pow2 16 = sint_v xd_q % pow2 16);
   let res = xd_q16 &. mod_mask (size d) in
@@ -158,7 +156,7 @@ let compress d x =
   assert(sint_v res < pow2 d);
   compress_lemma d (sint_v x);
   res
-      
+
 #reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq'"
 
 let lemma_div_le_ (a:int) (b:int) (d:pos) : Lemma
@@ -187,7 +185,7 @@ let lemma_decompress a b d =
     assert (((a/d)*d < a) /\ (a < b*d));
     assert(false))
 
- 
+
 #reset-options "--z3rlimit 200 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq'"
 
 

@@ -312,12 +312,6 @@ val size_to_uint64: s:size_t -> u:uint64{u == u64 (v s)}
 inline_for_extraction
 val byte_to_uint8: s:byte_t -> u:uint8{u == u8 (v s)}
 
-let op_At_Percent = Int.op_At_Percent
-
-#reset-options
-inline_for_extraction
-val byte_to_int8: s:byte_t -> u:int8{u == i8 ((byte_v s) @% 256)}
-
 inline_for_extraction
 let op_At_Percent_Dot x t =
   if unsigned t then x % modulus t
@@ -442,6 +436,7 @@ val mul_lemma: #t:inttype{~(U128? t) /\ ~(S128? t)} -> #l:secrecy_level
   -> Lemma (v #t #l (mul #t #l a b) == v a * v b)
   [SMTPat (v #t #l (mul #t #l a b))]
 
+inline_for_extraction
 val mul64_wide: uint64 -> uint64 -> uint128
 
 val mul64_wide_lemma: a:uint64 -> b:uint64 -> Lemma
@@ -516,8 +511,8 @@ val logand_ones: #t:inttype -> #l:secrecy_level -> a:int_t t l ->
   Lemma (v (a `logand` ones t l) == v a)
 
 // For backwards compatibility
-val logand_lemma: #t:inttype -> #l:secrecy_level
-  -> a:int_t t l
+val logand_lemma: #t:inttype -> #l:secrecy_level 
+  -> a:int_t t l 
   -> b:int_t t l
   -> Lemma
     (requires v a = 0 \/ v a = ones_v t)
@@ -756,7 +751,7 @@ val mod: #t:inttype{~(U128? t) /\ ~(S128? t)}
 val mod_lemma: #t:inttype{~(U128? t) /\ ~(S128? t)}
   -> a:int_t t PUB
   -> b:int_t t PUB{v b <> 0 /\ (unsigned t \/ range FStar.Int.(v a / v b) t)}
-  -> Lemma (if signed t then
+  -> Lemma (if signed t then 
              v (mod a b) == FStar.Int.mod #(bits t) (v a) (v b)
            else
              v (mod a b) == FStar.UInt.mod #(bits t) (v a) (v b))

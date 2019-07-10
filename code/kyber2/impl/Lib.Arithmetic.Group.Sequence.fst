@@ -7,9 +7,9 @@ open FStar.Mul
 open Lib.Arithmetic.Group
 open Lib.Sequence
 
-let id_lseq (#a:Type0) [| monoid a |] (#len:size_nat) = create len (id)
+let id_lseq (#a:Type0) [| monoid a |] (#len:size_nat) = create len (id #a)
 
-let op_lseq (#a:Type0) [| monoid a |] (#len:size_nat) = Lib.Sequence.map2 #a #a #a #len (op)  
+let op_lseq (#a:Type0) [| monoid a |] (#len:size_nat) = Lib.Sequence.map2 #a #a #a #len (op)
 
 let lemma_assoc_lseq (#a:Type0) [| monoid a |] (#len:size_nat) (x:lseq a len) (y:lseq a len) (z:lseq a len) : Lemma (op_lseq (op_lseq x y) z == op_lseq x (op_lseq y z)) =
   let customprop (k:nat{k<len}) : Type0 = ((op_lseq (op_lseq x y) z).[k] == (op_lseq x (op_lseq y z)).[k]) in
@@ -63,7 +63,7 @@ let lemma_sym2_lseq (#a:Type0) [|group a|] (#len:size_nat) (x:lseq a len) : Lemm
   FStar.Classical.forall_intro customlemma;
   eq_intro (op_lseq #a #m (sym_lseq x) x) (id_lseq #a #m);
   eq_elim (op_lseq #a #m (sym_lseq x) x) (id_lseq #a #m)
-  
+
 instance group_lseq : (#a:Type0) -> (#[FStar.Tactics.Typeclasses.tcresolve ()] g:group a) -> (#len:size_nat) -> group (lseq a len) =
   fun #a #g #len ->
     {
@@ -84,7 +84,7 @@ let lemma_swap_lseq (#a:Type0) [|abelian_group a|] (#len:size_nat) (x:lseq a len
   eq_elim (op_lseq x y) (op_lseq y x)
 
 instance abelian_group_lseq : (#a:Type0) -> (#[FStar.Tactics.Typeclasses.tcresolve ()] ag:abelian_group a) -> (#len:size_nat) -> abelian_group (lseq a len) =
-  fun #a #ag #len -> 
+  fun #a #ag #len ->
     {
       g = group_lseq #a #ag.g;
       lemma_swap = lemma_swap_lseq;

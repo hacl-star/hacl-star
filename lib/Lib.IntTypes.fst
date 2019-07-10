@@ -264,11 +264,6 @@ let add_mod #t #l a b =
   | U32  -> UInt32.add_mod a b
   | U64  -> UInt64.add_mod a b
   | U128 -> UInt128.add_mod a b
-  | S8 -> Int8.int_to_t (Int.add_mod (Int8.v a) (Int8.v b))
-  | S16 -> Int16.int_to_t (Int.add_mod (Int16.v a) (Int16.v b))
-  | S32 -> Int32.int_to_t (Int.add_mod (Int32.v a) (Int32.v b))
-  | S64 -> Int64.int_to_t (Int.add_mod (Int64.v a) (Int64.v b))
-  | S128 -> Int128.int_to_t (Int.add_mod (Int128.v a) (Int128.v b))
 
 let add_mod_lemma #t #l a b = ()
 
@@ -315,10 +310,6 @@ let mul_mod #t #l a b =
   | U16 -> UInt16.mul_mod a b
   | U32 -> UInt32.mul_mod a b
   | U64 -> UInt64.mul_mod a b
-  | S8 -> Int8.int_to_t (Int.mul_mod (Int8.v a) (Int8.v b))
-  | S16 -> Int16.int_to_t (Int.mul_mod (Int16.v a) (Int16.v b))
-  | S32 -> Int32.int_to_t (Int.mul_mod (Int32.v a) (Int32.v b))
-  | S64 -> Int64.int_to_t (Int.mul_mod (Int64.v a) (Int64.v b))
 
 let mul_mod_lemma #t #l a b = ()
 
@@ -352,11 +343,6 @@ let sub_mod #t #l a b =
   | U32  -> UInt32.sub_mod a b
   | U64  -> UInt64.sub_mod a b
   | U128 -> UInt128.sub_mod a b
-  | S8 -> Int8.int_to_t (Int.sub_mod (Int8.v a) (Int8.v b))
-  | S16 -> Int16.int_to_t (Int.sub_mod (Int16.v a) (Int16.v b))
-  | S32 -> Int32.int_to_t (Int.sub_mod (Int32.v a) (Int32.v b))
-  | S64 -> Int64.int_to_t (Int.sub_mod (Int64.v a) (Int64.v b))
-  | S128 -> Int128.int_to_t (Int.sub_mod (Int128.v a) (Int128.v b))
 
 let sub_mod_lemma #t #l a b = ()
 
@@ -393,8 +379,6 @@ let decr #t #l a =
   | S128 -> Int128.sub a (Int128.int_to_t 1)
 
 let decr_lemma #t #l a = ()
-
-#reset-options "--z3rlimit 300"
 
 #pop-options
 
@@ -659,6 +643,7 @@ let shift_left #t #l a b =
 
 #push-options "--max_fuel 1"
 
+let shift_left_lemma #t #l a b = ()
 
 let rotate_right #t #l a b =
   logor (shift_right a b) (shift_left a (sub #U32 (size (bits t)) b))
@@ -844,8 +829,6 @@ let mod_mask_lemma #t #l a m =
     UInt.logand_lemma_1 #(bits t) (v a)
   else
     UInt.logand_mask #(bits t) (v a) (v m)
-
-#reset-options "--z3rlimit 3000 --max_fuel 1 --max_ifuel 1"
 
 let div #t x y =
   match t with
