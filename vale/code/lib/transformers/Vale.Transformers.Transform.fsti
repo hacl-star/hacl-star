@@ -37,18 +37,12 @@ let equiv_states (s1 s2:va_state) =
   s1.vs_memTaint == s2.vs_memTaint /\
   s1.vs_stackTaint == s2.vs_stackTaint
 
-noeq
-type transformation_result = {
-  success : pbool;
-  result : va_code;
-}
-
 /// The Instruction Reordering Transformation
 
 val reorder :
   orig:va_code ->
   hint:va_code ->
-  transformation_result
+  va_transformation_result
 
 val lemma_reorder :
   orig:va_code ->
