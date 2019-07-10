@@ -254,16 +254,20 @@ val loopi_blocks_f_nospec:
     (requires fun h -> live h inp /\ live h w /\ disjoint inp w)
     (ensures  fun h0 _ h1 -> modifies (loc w) h0 h1)
 
-#set-options "--z3rlimit 25 --max_fuel 0"
+#set-options "--z3rlimit 200 --max_fuel 0 --query_stats"
 
 let loopi_blocks_f_nospec #a #b #blen bs inpLen inp f nb i w =
   assert ((v i + 1) * v bs <= v nb * v bs);
   let block = sub inp (i *! bs) bs in
   f i block w
 
+let disjoint_lemma #a #b #len1 #len2 (inp:lbuffer a len1) (w:lbuffer b len2) (start:size_t) (n:size_t{v start + v n <= v len1}) : Lemma (requires disjoint inp w) (ensures disjoint (gsub inp start n) w) = ()
+
 let loopi_blocks #a #b #blen bs inpLen inp spec_f spec_l f l w =
   let nb = inpLen /. bs in
   let rem = inpLen %. bs in
+  div_lemma inpLen bs;
+  mod_lemma inpLen bs;
   [@ inline_let]
   let spec_fh h0 = Seq.repeati_blocks_f (v bs) (as_seq h0 inp) spec_f (v nb) in
   let h0 = ST.get () in
@@ -271,7 +275,10 @@ let loopi_blocks #a #b #blen bs inpLen inp spec_f spec_l f l w =
   (fun i ->
     Loop.unfold_repeati (v nb) (spec_fh h0) (as_seq h0 w) (v i);
     loopi_blocks_f #a #b #blen bs inpLen inp spec_f f nb i w);
-  let last = sub #_ #_ #inpLen  inp (nb *! bs) rem in
+  let last = sub #_ #_ #inpLen inp (nb *! bs) rem in
+  mul_lemma nb bs;
+  disjoint_lemma #_ #_ #inpLen #blen inp w (nb *! bs) rem;
+  assert_norm(v rem == v inpLen % v bs);
   l nb rem last w
 
 let loopi_blocks_nospec #a #b #blen bs inpLen inp f l w =
@@ -419,8 +426,8 @@ let fill_blocks_cst #t h0 len n output a_spec refl spec impl =
   assert (Seq.equal
     (as_seq h0 (gsub output (size 0) (size 0 *! len))) FStar.Seq.empty);
   assert_norm (
-    Seq.generate_blocks (v len) (v n) a_spec (spec h0) (refl h0 0) ==
-    norm [delta] Seq.generate_blocks (v len) (v n) a_spec (spec h0) (refl h0 0));
+    Seq.generate_blocks (v len) (v n) (v n) a_spec (spec h0) (refl h0 0) ==
+    norm [delta] Seq.generate_blocks (v len) (v n) (v n) a_spec (spec h0) (refl h0 0));
   let h1 = ST.get() in
   assert(refl' h1 (v n) == Loop.repeat_gen (v n)
 	       (Sequence.generate_blocks_a t (v len) (v n) a_spec)
@@ -574,10 +581,10 @@ let mapi #a #b h0 clen out spec_f f inp =
 let map_blocks_multi #t #a h0 bs nb inp output spec_f impl_f =
   Math.Lemmas.multiple_division_lemma (v nb) (v bs);
   [@inline_let]
-  let refl h (i:nat{i <= v nb}) : GTot (Seq.map_blocks_a a (v bs) (v nb) i) =
+  let refl h (i:size_nat{i <= v nb}) : GTot (Seq.map_blocks_a a (v bs) (v nb) i) =
     as_seq h (gsub output (size 0) (size i *! bs)) in
   [@inline_let]
-  let footprint (i:nat{i <= v nb}) = loc (gsub output 0ul (size i *! bs)) in
+  let footprint (i:size_nat{i <= v nb}) = loc (gsub output 0ul (size i *! bs)) in
   [@inline_let]
   let spec h0 = Seq.map_blocks_f #a (v bs) (v nb) (as_seq h0 inp) (spec_f h0) in
   let h0 = ST.get () in

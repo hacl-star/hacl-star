@@ -1006,7 +1006,6 @@ val fill:
 
 (** Fill a buffer with a stateful function
     this version is useful when the function needs an accumulator *)
-    
 inline_for_extraction
 val fill_direct:
     #a:Type
