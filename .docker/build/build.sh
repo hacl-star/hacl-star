@@ -195,7 +195,7 @@ function exec_build() {
     local status_file="../status.txt"
     echo -n false >$status_file
 
-    if [ ! -d "providers" ]; then
+    if [ ! -d "secure_api" ]; then
         echo "I don't seem to be in the right directory, bailing"
         echo Failure >$result_file
         return
