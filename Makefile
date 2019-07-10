@@ -90,7 +90,7 @@ package: .package-banner
 
 CC = $(GCC)
 
-ci: .clean-banner .clean-git .clean-snapshots
+ci: .clean-git
 	$(MAKE) lib-verify
 	$(MAKE) specs-verify
 	$(MAKE) specs-test
