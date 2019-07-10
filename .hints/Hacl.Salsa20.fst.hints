@@ -1,0 +1,65 @@
+[
+  "#d\"½\u001câf[­S\u001e‡‰/5Ø",
+  [
+    [
+      "Hacl.Salsa20.salsa20_encrypt",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "equation_FStar.HyperStack.ST.equal_domains",
+        "equation_FStar.HyperStack.ST.equal_stack_domains",
+        "lemma_FStar.HyperStack.ST.lemma_same_refs_in_all_regions_elim",
+        "lemma_FStar.HyperStack.ST.lemma_same_refs_in_stack_regions_intro",
+        "refinement_interpretation_Tm_refine_a2cb485ba04e5491b8eab23ab0d37e9a"
+      ],
+      0,
+      "5ae0b16d5750b7e2c6a8544b53e23125"
+    ],
+    [
+      "Hacl.Salsa20.salsa20_decrypt",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "equation_FStar.HyperStack.ST.equal_domains",
+        "equation_FStar.HyperStack.ST.equal_stack_domains",
+        "lemma_FStar.HyperStack.ST.lemma_same_refs_in_all_regions_elim",
+        "lemma_FStar.HyperStack.ST.lemma_same_refs_in_stack_regions_intro",
+        "refinement_interpretation_Tm_refine_a2cb485ba04e5491b8eab23ab0d37e9a"
+      ],
+      0,
+      "858761dea68f91dc801a984ce03f654b"
+    ],
+    [
+      "Hacl.Salsa20.salsa20_key_block0",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query", "equality_tok_Lib.Buffer.MUT@tok",
+        "equality_tok_Lib.IntTypes.PUB@tok",
+        "equality_tok_Lib.IntTypes.U32@tok", "equation_Lib.Buffer.lbuffer_t",
+        "equation_Lib.IntTypes.range", "equation_Lib.IntTypes.uint8",
+        "equation_Lib.IntTypes.v", "equation_Prims.nat",
+        "function_token_typing_Lib.IntTypes.uint8",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_9d89bf7b57667578cd0e1f4470daef3b",
+        "typing_Lib.Buffer.length", "typing_tok_Lib.Buffer.MUT@tok"
+      ],
+      0,
+      "99fca0b60207551659f92fca3cf7ea11"
+    ],
+    [
+      "Hacl.Salsa20.hsalsa20",
+      1,
+      2,
+      1,
+      [ "@query" ],
+      0,
+      "49e31533267ce036f22515d6d69ab38c"
+    ]
+  ]
+]

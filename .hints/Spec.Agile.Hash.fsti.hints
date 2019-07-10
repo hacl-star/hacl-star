@@ -10,6 +10,8 @@
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented",
         "@fuel_irrelevance_Prims.pow2.fuel_instrumented", "@query",
+        "constructor_distinct_Lib.IntTypes.S16",
+        "constructor_distinct_Lib.IntTypes.S8",
         "constructor_distinct_Lib.IntTypes.U32",
         "disc_equation_Spec.Agile.Hash.HASH_SHA2_224",
         "disc_equation_Spec.Agile.Hash.HASH_SHA2_256",
@@ -18,15 +20,15 @@
         "disc_equation_Spec.Agile.Hash.UNSAFE_HASH_MD5",
         "disc_equation_Spec.Agile.Hash.UNSAFE_HASH_SHA1",
         "equality_tok_Lib.IntTypes.U32@tok", "equation_Lib.IntTypes.bits",
-        "equation_Prims.nat",
-        "fuel_guarded_inversion_Spec.Agile.Hash.algorithm",
-        "lemma_Lib.IntTypes.pow2_values", "primitive_Prims.op_Subtraction",
+        "equation_Lib.IntTypes.unsigned", "equation_Prims.nat",
+        "fuel_guarded_inversion_Spec.Agile.Hash.algorithm", "int_typing",
+        "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "75e73207ce5c3d15d06819597dea72a4"
+      "5574064e34c6241f947395c1cf6d4a5b"
     ],
     [
       "Spec.Agile.Hash.size_hash",
@@ -37,6 +39,8 @@
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented",
         "@fuel_irrelevance_Prims.pow2.fuel_instrumented", "@query",
+        "constructor_distinct_Lib.IntTypes.S16",
+        "constructor_distinct_Lib.IntTypes.S8",
         "constructor_distinct_Lib.IntTypes.U32",
         "disc_equation_Spec.Agile.Hash.HASH_SHA2_224",
         "disc_equation_Spec.Agile.Hash.HASH_SHA2_256",
@@ -45,15 +49,15 @@
         "disc_equation_Spec.Agile.Hash.UNSAFE_HASH_MD5",
         "disc_equation_Spec.Agile.Hash.UNSAFE_HASH_SHA1",
         "equality_tok_Lib.IntTypes.U32@tok", "equation_Lib.IntTypes.bits",
-        "equation_Prims.nat",
-        "fuel_guarded_inversion_Spec.Agile.Hash.algorithm",
-        "lemma_Lib.IntTypes.pow2_values", "primitive_Prims.op_Subtraction",
+        "equation_Lib.IntTypes.unsigned", "equation_Prims.nat",
+        "fuel_guarded_inversion_Spec.Agile.Hash.algorithm", "int_typing",
+        "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "bb3d1343ad1591db392a85ef481a85a9"
+      "eb404da97bfd569d93805a6aad41bec5"
     ],
     [
       "Spec.Agile.Hash.size_hash_w",
@@ -64,15 +68,18 @@
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented",
         "@fuel_irrelevance_Prims.pow2.fuel_instrumented", "@query",
+        "constructor_distinct_Lib.IntTypes.S16",
+        "constructor_distinct_Lib.IntTypes.S8",
         "constructor_distinct_Lib.IntTypes.U32",
         "equality_tok_Lib.IntTypes.U32@tok", "equation_Lib.IntTypes.bits",
-        "equation_Prims.nat", "lemma_Lib.IntTypes.pow2_values",
-        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
+        "equation_Lib.IntTypes.unsigned", "equation_Prims.nat",
+        "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "e2962a22efb84db0566ea0a5793028ab"
+      "372b57654229a80c505eff10f13a17ef"
     ],
     [
       "Spec.Agile.Hash.max_input",
@@ -96,7 +103,7 @@
         "typing_Prims.pow2"
       ],
       0,
-      "22c55cb130f18f913ef4044f16032f46"
+      "453f7a82d1c8d0293e34a6d0e8dcbd78"
     ],
     [
       "Spec.Agile.Hash.update_last",
@@ -108,11 +115,24 @@
         "equation_Spec.Agile.Hash.size_block",
         "fuel_guarded_inversion_Spec.Agile.Hash.algorithm",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_a78e81a34494fa620ef91991a1267b1f",
+        "refinement_interpretation_Tm_refine_0ec011aea9f93256a3547ad9f0c667f1",
         "typing_Spec.Agile.Hash.size_block"
       ],
       0,
-      "da550f0f6d56c22350a6d642b55b4174"
+      "c7080ef639d488d1c56677efd225a6b8"
+    ],
+    [
+      "Spec.Agile.Hash.hash",
+      1,
+      2,
+      1,
+      [
+        "@query", "constructor_distinct_Lib.IntTypes.U8",
+        "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.unsigned",
+        "projection_inverse_BoxBool_proj_0"
+      ],
+      0,
+      "2227373cc7bf6a5c215388d295753af8"
     ]
   ]
 ]
