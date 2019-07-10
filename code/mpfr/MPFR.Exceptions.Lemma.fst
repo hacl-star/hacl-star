@@ -38,17 +38,39 @@ let mpfr_overflow_post_cond_lemma a p rnd_mode f r =
     end else ()
 
 let mpfr_underflow_spec (a:normal_fp{a.exp < mpfr_EMIN_spec}) 
-    (p:pos{p <= a.prec /\ mpfr_PREC_COND p}) (rnd_mode:mpfr_rnd_t) =
+    (p:pos{mpfr_PREC_COND p}) (rnd_mode:mpfr_rnd_t) =
     if mpfr_IS_LIKE_RNDZ rnd_mode (a.sign < 0) then mpfr_zero a.sign p
     else mpfr_min_value a.sign p
 
 let mpfr_underflow_ternary_spec (a:normal_fp{a.exp < mpfr_EMIN_spec})
-    (p:pos{p <= a.prec /\ mpfr_PREC_COND p}) (rnd_mode:mpfr_rnd_t) =
+    (p:pos{mpfr_PREC_COND p}) (rnd_mode:mpfr_rnd_t) =
     if mpfr_IS_LIKE_RNDZ rnd_mode (a.sign < 0) then (-a.sign)
     else a.sign
 
+val mpfr_underflow_post_cond_lemma_branch_else: a:normal_fp{a.exp < mpfr_EMIN_spec} ->
+    p:pos{mpfr_PREC_COND p} -> rnd_mode:mpfr_rnd_t ->
+    t:int -> r:mpfr_fp{r.prec = p} -> Lemma
+    (requires ((r == mpfr_underflow_spec a p rnd_mode /\
+               t = mpfr_underflow_ternary_spec a p rnd_mode) /\
+	       eval_abs (round_def a p rnd_mode) <. mpfr_underflow_bound p /\
+	       (MPFR_RNDN? rnd_mode ==>
+	        eval_abs (rndn_def a p) >. fdiv_pow2 (mpfr_underflow_bound p) 1) /\
+                not (mpfr_IS_LIKE_RNDZ rnd_mode (a.sign < 0))))
+    (ensures  (mpfr_round_cond a p rnd_mode r /\
+               mpfr_ternary_cond t a r))
+
+let mpfr_underflow_post_cond_lemma_branch_else a p rnd_mode f r =
+    let rnd = round_def a p rnd_mode in
+    exp_impl_no_overflow_lemma rnd;
+    eval_abs_lt_intro_lemma a r;
+    if a.sign > 0 then eval_lt_intro_lemma rnd r
+    else begin
+	 eval_lt_intro_lemma r rnd;
+	 eval_lt_intro_lemma r a
+    end
+
 val mpfr_underflow_post_cond_lemma: a:normal_fp{a.exp < mpfr_EMIN_spec} ->
-    p:pos{p <= a.prec /\ mpfr_PREC_COND p} -> rnd_mode:mpfr_rnd_t ->
+    p:pos{mpfr_PREC_COND p} -> rnd_mode:mpfr_rnd_t ->
     t:int -> r:mpfr_fp{r.prec = p} -> Lemma
     (requires ((r == mpfr_underflow_spec a p rnd_mode /\
                t = mpfr_underflow_ternary_spec a p rnd_mode) /\
@@ -61,14 +83,8 @@ val mpfr_underflow_post_cond_lemma: a:normal_fp{a.exp < mpfr_EMIN_spec} ->
 let mpfr_underflow_post_cond_lemma a p rnd_mode f r =
     let rnd = round_def a p rnd_mode in
     exp_impl_no_overflow_lemma rnd;
-    if mpfr_IS_LIKE_RNDZ rnd_mode (a.sign < 0) then begin
+    if mpfr_IS_LIKE_RNDZ rnd_mode (a.sign < 0) then begin 
         if a.sign > 0 then eval_lt_intro_lemma r rnd
 	else eval_lt_intro_lemma rnd r
-    end else begin
-        eval_abs_lt_intro_lemma a r;
-        if a.sign > 0 then eval_lt_intro_lemma rnd r
-	else begin
-	    eval_lt_intro_lemma r rnd;
-	    eval_lt_intro_lemma r a
-	end
-    end
+    end else
+      mpfr_underflow_post_cond_lemma_branch_else a p rnd_mode f r

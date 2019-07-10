@@ -50,8 +50,7 @@ let mpfr_overflow x rnd_mode sign =
 let test_cond x rnd_mode sign h0 t h1=let p = (as_struct h1 x).mpfr_prec in
         mpfr_live h1 x /\ mpfr_modifies x h0 h1 /\
         mpfr_valid_cond h1 x /\ (as_struct h1 x).mpfr_sign = sign /\
-	(forall (exact:normal_fp{exact.sign = I32.v sign /\ exact.exp < mpfr_EMIN_spec /\
-	                    exact.prec >= I64.v p}).
+	(forall (exact:normal_fp{exact.sign = I32.v sign /\ exact.exp < mpfr_EMIN_spec}).
 	as_fp h1 x == mpfr_underflow_spec exact (I64.v p) rnd_mode /\
 	I32.v t = mpfr_underflow_ternary_spec exact (I64.v p) rnd_mode)
 

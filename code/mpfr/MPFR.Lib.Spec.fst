@@ -269,8 +269,8 @@ let mpfr_PREC_MAX_spec = pow2 63 - 257
 
 let mpfr_PREC_COND (p:int) = mpfr_PREC_MIN_spec <= p /\ p <= mpfr_PREC_MAX_spec
 
-let mpfr_EMIN_spec = 1 - pow2 62
-let mpfr_EMAX_spec = pow2 62 - 1
+let mpfr_EMIN_spec = 1 - pow2 30
+let mpfr_EMAX_spec = pow2 30 - 1
 
 let mpfr_EXP_COND  (x:int) = mpfr_EMIN_spec <= x /\ x <= mpfr_EMAX_spec
 

@@ -92,13 +92,13 @@ let mpfr_EXP_INVALID =
 
 val mpfr_EMIN: x:i64{I64.v x = mpfr_EMIN_spec}
 let mpfr_EMIN = 
-    assert_norm(-0x3fffffffffffffff = 1 - pow2 62);
-    -0x3fffffffffffffffL
+    assert_norm(-0x000000003fffffff = 1 - pow2 30);
+    -0x000000003fffffffL
 
 val mpfr_EMAX: x:i64{I64.v x = mpfr_EMAX_spec}
 let mpfr_EMAX = 
-    assert_norm(0x3fffffffffffffff = pow2 62 - 1);
-    0x3fffffffffffffffL
+    assert_norm(0x000000003fffffff = pow2 30 - 1);
+    0x000000003fffffffL
 
 (* validity and regularity *)
 type mpfr_reg_prec_t = p:i64{mpfr_PREC_COND (I64.v p)}
@@ -163,13 +163,17 @@ val to_val_left_slice_lemma: s:Seq.seq u64{Seq.length s > 0} -> Lemma
     (ensures (to_val s = to_val (Seq.slice s 0 (Seq.length s - 1)) + v (Seq.index s (Seq.length s - 1)) * pow2 ((Seq.length s - 1) * 64)))
     (decreases (Seq.length s))
 
+#set-options "--z3rlimit 100"
+
 let rec to_val_left_slice_lemma s =
-    if Seq.length s = 1 then () else begin
+    if Seq.length s = 1 then () else begin 
 	let rs = Seq.slice s 1 (Seq.length s) in
         to_val_left_slice_lemma rs;
 	lemma_distr_add_left (pow2 64) (v (Seq.index rs 0)) (to_val (Seq.slice rs 1 (Seq.length rs)));
 	lemma_pow2_mul ((Seq.length s - 2) * 64) 64
     end
+
+#set-options "--z3rlimit 50"
 
 val to_val1_lemma: s:Seq.seq u64{Seq.length s = 1} -> Lemma
     (to_val s = v (Seq.index s 0))

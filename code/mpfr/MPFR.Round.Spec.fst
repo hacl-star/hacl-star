@@ -127,7 +127,7 @@ let low_mant a p =
 let mpfr_ROUND_COND (a:valid_fp)=normal_fp_cond a \/ a.flag=MPFR_ZERO
 
 (* RNDZ definition *)
-val rndz_def: a:normal_fp -> p:pos{p <= a.prec} ->
+val rndz_def: a:normal_fp -> p:pos ->
     Tot (r:normal_fp{r.prec = p /\
         eval_abs r <=. eval_abs a /\ eval_abs a <. eval_abs r +. ulp_p a p})
 	
@@ -142,7 +142,7 @@ let mpfr_rndz2_cond (a:valid_fp{mpfr_ROUND_COND a /\ mpfr_PREC_COND a.prec}) (r:
         valid_num_cond r /\ eval r =. eval a
 
 (* RNDA definition *)
-val rnda_def: a:normal_fp -> p:pos{p <= a.prec} ->
+val rnda_def: a:normal_fp -> p:pos ->
     Tot (r:normal_fp{r.prec = p /\
         eval_abs r >=. eval_abs a /\ eval_abs a +. ulp_p a p >. eval_abs r})
 
@@ -159,7 +159,7 @@ let mpfr_rnda2_cond (a:valid_fp{mpfr_ROUND_COND a /\ mpfr_PREC_COND a.prec}) (r:
         valid_num_cond r /\ eval r =. eval a
 
 (* RNDU definition *)
-val rndu_def: a:normal_fp -> p:pos{p <= a.prec} ->
+val rndu_def: a:normal_fp -> p:pos ->
     Tot (r:normal_fp{r.prec = p /\
         eval r >=. eval a /\ eval a >. eval r -. ulp_p a p})
 
@@ -180,7 +180,7 @@ let mpfr_rndu2_cond (a:valid_fp{mpfr_ROUND_COND a /\ mpfr_PREC_COND a.prec}) (r:
         valid_num_cond r /\ eval r =. eval a
 
 (* RNDD definition *)
-val rndd_def: a:normal_fp -> p:pos{p <= a.prec} ->
+val rndd_def: a:normal_fp -> p:pos ->
     Tot (r:normal_fp{r.prec = p /\
         eval r <=. eval a /\ eval a <. eval r +. ulp_p a p})
 
@@ -207,7 +207,7 @@ let mpfr_rndd2_cond (a:valid_fp{mpfr_ROUND_COND a /\ mpfr_PREC_COND a.prec}) (r:
 (* RNDN definition *)
 let is_even (a:normal_fp) = (nth #a.len a.limb (a.prec - 1) = false)
 
-let rndn_def (a:valid_fp{mpfr_ROUND_COND a}) (p:pos{p <= a.prec}): Tot (r:valid_fp{r.prec = p \/ r.flag=MPFR_ZERO}) =
+let rndn_def (a:valid_fp{mpfr_ROUND_COND a}) (p:pos): Tot (r:valid_fp{r.prec = p \/ r.flag=MPFR_ZERO}) =
     if a.flag=MPFR_ZERO then a else
     let high, low = high_mant a p, low_mant a p in
     if ((eval_abs low <. ulp_p high (p + 1)) ||
