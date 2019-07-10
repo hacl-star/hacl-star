@@ -22,7 +22,7 @@ let proc_name : string -> platform -> string =
 
 let parse_cmdline :
   (string * (Prims.bool ->
-    (Vale_X64_Decls.ins,Vale_X64_Decls.ocmp) Vale_X64_Machine_s.precode * Vale_Def_PossiblyMonad.pbool) * int * bool) list -> unit
+    (Vale_X64_Decls.ins,Vale_X64_Decls.ocmp) Vale_X64_Machine_s.precode * Vale_X64_Decls.va_pbool) * int * bool) list -> unit
   =
   fun l  ->
   let argc = Array.length Sys.argv in
@@ -59,9 +59,10 @@ let parse_cmdline :
 
     (* Ensure that we've actually got all the codes *)
     let l = List.map (fun (name, code_and_gen, nbr_args, return_public) ->
-        match code_and_gen windows with
-        | c, Vale_Def_PossiblyMonad.Ok () -> (name, (fun _ -> c), nbr_args, return_public)
-        | _, Vale_Def_PossiblyMonad.Err reason ->
+        let c, p = code_and_gen windows in
+        match Vale_X64_Decls.get_reason p with
+        | None -> (name, (fun _ -> c), nbr_args, return_public)
+        | Some reason ->
           failwith ("method " ^ name ^ " cannot be safely generated. Reason: " ^ reason)) l in
 
     (* Run taint analysis *)
