@@ -26,6 +26,15 @@ let ins = BS.ins
 type ocmp = BS.ocmp
 type va_fuel = nat
 
+type va_pbool = Vale.Def.PossiblyMonad.pbool
+let va_ttrue () = Vale.Def.PossiblyMonad.ttrue
+let va_ffalse = Vale.Def.PossiblyMonad.ffalse
+let va_pbool_and x y = Vale.Def.PossiblyMonad.op_Amp_Amp_Dot x y
+let get_reason p =
+  match p with
+  | Vale.Def.PossiblyMonad.Ok () -> None
+  | Vale.Def.PossiblyMonad.Err reason -> Some reason
+
 let mul_nat_helper x y =
   FStar.Math.Lemmas.nat_times_nat_is_nat x y
 
