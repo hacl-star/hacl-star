@@ -70,7 +70,7 @@ $(OUTPUT_DIR)/%.krml: | .depend
 
 # 2. Generation of .c files
 
-KREMLIN_TESTLIB=$(KREMLIB)/dist/generic/testlib.c
+KREMLIN_TESTLIB=-fbuiltin-uint128 $(KREMLIB)/dist/generic/testlib.c
 
 KREMLIN=$(KREMLIN_HOME)/krml
 
@@ -79,14 +79,13 @@ KREMLIN=$(KREMLIN_HOME)/krml
 # We use -drop (deprecated) only to avoid creating unnecessary .c,.h files
 $(GENERATED_DIR)/Hacl_NaCl.c: $(ALL_KRML_FILES) | .depend
 	$(KREMLIN) $(KREMLIN_TESTLIB) -skip-compilation \
-	-no-prefix 'Hacl.NaCl' \
 	-bundle 'Lib.*' \
 	-bundle 'Spec.*' \
 	-bundle 'Hacl.Salsa20=Hacl.Impl.HSalsa20,Hacl.Impl.Salsa20,Hacl.Impl.Salsa20.Core32' \
 	-bundle 'Hacl.Poly1305_32=Hacl.Impl.Poly1305,Hacl.Impl.Poly1305.*' \
 	-bundle 'Hacl.Curve25519_51=Hacl.Impl.Curve25519.*' \
 	-bundle 'Hacl.NaCl=Hacl.Impl.Box,Hacl.Impl.SecretBox' \
-	-drop 'C,FStar,LowStar,Spec,Prims,Lib,C.Loops.*,C.*,Hacl.Spec.*,Hacl.Poly1305.Field32xN.*' \
+	-drop 'FStar.UInt128,C,FStar,LowStar,Spec,Prims,Lib,C.Loops.*,C.*,Hacl.Spec.*,Hacl.Poly1305.Field32xN.*' \
 	-add-include '"c/Lib_PrintBuffer.h"' \
 	-add-include '"FStar_UInt_8_16_32_64.h"' \
 	-tmpdir $(GENERATED_DIR) \
@@ -116,8 +115,11 @@ ifeq ($(STAGE),2)
 #ALL_GENERATED_FILES = $(addprefix $(GENERATED_DIR)/,$(ALL_OUR_FILES))
 
 ALL_SOURCES = \
-	$(GENERATED_DIR)/Hacl_NaCl_Box.c \
-	$(HACL_HOME)/lib/c/Lib_PrintBuffer.c
+	$(GENERATED_DIR)/Hacl_Salsa20.c \
+	$(GENERATED_DIR)/Hacl_Poly1305_32.c \
+	$(GENERATED_DIR)/Hacl_Curve25519_51.c \
+	$(GENERATED_DIR)/Hacl_NaCl.c \
+	./test-box.c
 
 ALL_OBJS = $(patsubst %.c,%.o,$(ALL_SOURCES))
 
@@ -126,9 +128,9 @@ INCLUDE_DIRS = \
   $(KREMLIN_HOME)/kremlib \
   $(KREMLIN_HOME)/kremlib/dist/generic \
   $(HACL_HOME)/lib \
-  $(HACL_HOME)/lib/c
+  $(HACL_HOME)/lib/c \
+  $(GENERATED_DIR) \
 
-# TODO: remove -Wno-incompatible-pointer-types when issue with --cmi is fixed
 CFLAGS += -O3 -march=native -mtune=native -funroll-loops
 CFLAGS += $(addprefix -I ,$(INCLUDE_DIRS))
 
@@ -148,7 +150,7 @@ $(OUT_DIR):
 
 $(OUT_DIR)/test.exe: $(ALL_OBJS) | $(OUT_DIR)
 	$(info ALL_SOURCES is $(ALL_SOURCES))
-	$(CC) $(CFLAGS) -o $@ $^ -L $(KREMLIN_HOME)/kremlib/dist/generic -lkremlib
+	$(CC) $(CFLAGS) -o $@ $^ -L $(KREMLIN_HOME)/kremlib/dist/generic -lkremlib -lsodium -lpthread -ldl
 
 .PRECIOUS: %.o
 

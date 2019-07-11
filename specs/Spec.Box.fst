@@ -4,14 +4,14 @@ open FStar.Mul
 open Lib.IntTypes
 open Lib.Sequence
 open Lib.ByteSequence
-open Lib.RawIntTypes
-open Lib.LoopCombinators
+
 open Spec.SecretBox
 
-#set-options "--z3rlimit 100"
+#set-options "--z3rlimit 20 --max_fuel 0 --max_ifuel 0"
+
 (* Constants *)
 let size_publickey = 32 (* in bytes *)
-let size_secretkey = 32   (* in bytes *)
+let size_secretkey = 32 (* in bytes *)
 
 type publickey = lbytes size_publickey
 type secretkey = lbytes size_secretkey
