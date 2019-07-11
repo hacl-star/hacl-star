@@ -2,10 +2,11 @@ FSTAR_HOME   ?= ../../../FStar
 KREMLIN_HOME ?= ../../../kremlin
 HACL_HOME    ?= ../..
 
-OUTPUT_DIR    = .output
-HINT_DIR      = .hints
-GENERATED_DIR = blake2b-c
-OUT_DIR	      = blake2b-c
+CACHE_DIR     ?= $(HACL_HOME)/.cache
+HINT_DIR      ?= $(HACL_HOME)/.hints
+OUTPUT_DIR    ?= .output
+GENERATED_DIR ?= blake2b-c
+OUT_DIR	     ?= blake2b-c
 
 .PHONY: all test stage1 stage2 clean clean-c distclean
 
@@ -29,7 +30,7 @@ FSTAR_INCLUDE_DIRS = \
   $(HACL_HOME)/lib/c
 
 FSTAR_FLAGS = $(OTHERFLAGS) --cmi \
-  --cache_checked_modules --odir $(OUTPUT_DIR) \
+  --cache_checked_modules --cache_dir $(CACHE_DIR) --odir $(OUTPUT_DIR) \
   --already_cached "'Prims+FStar+LowStar+C+Spec.Loops+TestLib+Lib'" \
   $(addprefix --include ,$(FSTAR_INCLUDE_DIRS))
 
@@ -49,7 +50,10 @@ include .depend
 $(HINT_DIR):
 	mkdir -p $@
 
-%.checked: | .depend $(HINT_DIR)
+$(CACHE_DIR):
+	mkdir -p $@
+
+%.checked: | .depend $(HINT_DIR) $(CACHE_DIR)
 	$(FSTAR) $< $(ENABLE_HINTS) --hint_file $(HINT_DIR)/$(notdir $*).hints && \
 	touch -c $@
 
