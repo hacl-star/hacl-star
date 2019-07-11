@@ -276,6 +276,8 @@ let update1_last_st (s:field_spec) =
       (feval h1 acc).[0] == Scalar.poly1305_update1
         (feval h0 (gsub p 0ul 5ul)).[0] (v len) (as_seq h0 b) (feval h0 acc).[0])
 
+#push-options "--z3rlimit 100"
+
 inline_for_extraction noextract
 val update1_last_: #s:field_spec -> update1_last_st s
 let update1_last_ #s pre len b acc =
@@ -284,6 +286,8 @@ let update1_last_ #s pre len b acc =
   poly1305_encode_last e len b;
   fadd_mul_r acc e pre;
   pop_frame ()
+
+#pop-options
 
 [@CInline]
 let poly1305_update1_last_32 : update1_last_st M32 = update1_last_

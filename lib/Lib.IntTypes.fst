@@ -58,6 +58,14 @@ let v_injective #t #l a =
 
 let v_mk_int #t #l n = ()
 
+let u128 n = FStar.UInt128.uint64_to_uint128 (u64 n)
+
+// KreMLin will extract this to FStar_Int128_int_to_t, which isn't provided
+// We'll need to have FStar.Int128.int64_to_int128 to support int128_t literals
+let i128 n =
+  assert_norm (pow2 (bits S64 - 1) <= pow2 (bits S128 - 1));
+  sint #S128 #SEC n
+
 let size_to_uint32 x = x
 
 let size_to_uint64 x = Int.Cast.uint32_to_uint64 x

@@ -276,13 +276,11 @@ unfold
 let i64 (n:range_t S64) : u:int64{v u == n} = sint #S64 #SEC n
 
 (* We only support 64-bit literals, hence the unexpected upper limit *)
-unfold
-let u128 (n:range_t U64) : u:uint128{v #U128 u == n} = uint #U128 #SEC n
+inline_for_extraction
+val u128: n:range_t U64 -> u:uint128{v #U128 u == n}
 
-unfold
-let i128 (n:range_t S64) : u:int128{v #S128 u == n} =
-  assert_norm (pow2 (bits S64 - 1) <= pow2 (bits S128 - 1));
-  sint #S128 #SEC n
+inline_for_extraction
+val i128 (n:range_t S64) : u:int128{v #S128 u == n}
 
 unfold
 let max_size_t = maxint U32

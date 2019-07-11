@@ -44,12 +44,14 @@ FSTAR_INCLUDE_DIRS = \
   $(HACL_HOME)/specs \
   $(HACL_HOME)/specs/lemmas \
   $(HACL_HOME)/lib \
-  ./lemmas \
+  ./lemmas
+
+FSTAR_INCLUDE = $(addprefix --include ,$(FSTAR_INCLUDE_DIRS))
 
 FSTAR_FLAGS = $(OTHERFLAGS) --cmi \
   --cache_checked_modules --cache_dir $(CACHE_DIR) --odir $(OUTPUT_DIR) \
-  --already_cached "'Prims+FStar+LowStar+C+Spec.Loops+TestLib+Lib'" \
-  $(addprefix --include ,$(FSTAR_INCLUDE_DIRS))
+  --already_cached "'Prims FStar LowStar C Spec.Loops TestLib Lib'" \
+  $(FSTAR_INCLUDE)
 
 FSTAR = $(FSTAR_HOME)/bin/fstar.exe $(FSTAR_FLAGS)
 
@@ -198,11 +200,11 @@ endif # STAGE=2
 # 5. Targets for interactive mode
 
 %.fst-in:
-	@echo $(FSTAR_FLAGS) \
+	@echo $(FSTAR_INCLUDE) \
 	  $(ENABLE_HINTS) --hint_file $(HINT_DIR)/$(basename $@).fst.hints
 
 %.fsti-in:
-	@echo $(FSTAR_FLAGS) \
+	@echo $(FSTAR_INCLUDE) \
 	  $(ENABLE_HINTS) --hint_file $(HINT_DIR)/$(basename $@).fsti.hints
 
 # 6. Clean targets
