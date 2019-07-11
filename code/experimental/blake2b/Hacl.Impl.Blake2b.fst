@@ -413,6 +413,7 @@ let blake2b_init_branching hash key_block kk k nn =
     update_sub key_block (size 0) kk k;
     assert(uint_v (secret size_block) <= Spec.max_limb Spec.Blake2B);
     let prev64:uint64 = to_u64 (secret size_block) in
+    [@inline_let]
     let prev = Spec.word_to_limb Spec.Blake2B prev64 in
     blake2b_update_block hash prev key_block
   end
@@ -499,10 +500,9 @@ let prev1 (klen:size_t{v klen == 0 \/ v klen == 1})
 	  (i:size_t{v i < v dlen / 128}) :
 	  (prev:uint128{uint_v prev == spec_prev1 (v klen) (v dlen) (v i)})
 	  =
-     let p1r: size_t = klen +. i +. (size 1) in
-     let p1: uint64 = to_u64 p1r in
-     let p2: uint64 = u64 128 in
-     let p: uint128 = to_u128 (p1 *. p2) in
+     let p1: size_t = klen +. i +. (size 1) in
+     let p64: uint64 = (to_u64 p1) *. (u64 128) in
+     let p: uint128 = to_u128 p64 in
 	    assert (uint_v p == spec_prev1 (v klen) (v dlen) (v i));
 	    p
 #pop-options
