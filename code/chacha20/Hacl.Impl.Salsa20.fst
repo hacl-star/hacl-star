@@ -12,15 +12,12 @@ module Spec = Spec.Salsa20
 module Loop = Lib.LoopCombinators
 
 //#set-options "--debug Hacl.Impl.Salsa20 --debug_level ExtractNorm"
+#set-options "--z3rlimit 100 --max_fuel 0"
 
-//inline_for_extraction
-[@ CInline]
 val rounds: st:state -> Stack unit
 		  (requires (fun h -> live h st))
 		  (ensures (fun h0 _ h1 -> modifies (loc st) h0 h1 /\
 		    as_seq h1 st == Spec.rounds (as_seq h0 st)))
-
-#set-options "--z3rlimit 100 --max_fuel 0"
 [@ CInline]
 let rounds st =
   let h0 = ST.get () in
@@ -46,7 +43,6 @@ let rounds st =
   double_round st;
   double_round st
 
-[@ CInline ]
 val salsa20_core: k:state -> ctx0:state -> ctr:size_t -> Stack unit
 		  (requires (fun h -> live h ctx0 /\ live h k /\ disjoint ctx0 k))
 		  (ensures (fun h0 _ h1 -> modifies (loc k) h0 h1 /\
@@ -106,7 +102,6 @@ val salsa20_encrypt_block: ctx:state ->
 			    disjoint text ctx))
 		  (ensures (fun h0 _ h1 -> modifies (loc out) h0 h1 /\
 			      as_seq h1 out == Spec.salsa20_encrypt_block (as_seq h0 ctx) (v incr) (as_seq h0 text)))
-[@ CInline ]
 let salsa20_encrypt_block ctx out incr text =
     push_frame();
     let k = create 16ul (u32 0) in
@@ -130,7 +125,6 @@ val salsa20_encrypt_last: ctx:state ->
 			    disjoint text ctx))
 		  (ensures (fun h0 _ h1 -> modifies (loc out) h0 h1 /\
 			      as_seq h1 out == Spec.salsa20_encrypt_last (as_seq h0 ctx) (v incr) (v len) (as_seq h0 text)))
-[@ CInline ]
 let salsa20_encrypt_last ctx len out incr text =
     push_frame();
     let plain = create (size 64) (u8 0) in
@@ -152,7 +146,6 @@ val salsa20_update: ctx:state -> len:size_t -> out:lbuffer uint8 len -> text:lbu
 			    disjoint out ctx))
 		  (ensures (fun h0 _ h1 -> modifies (loc ctx |+| loc out) h0 h1 /\
 			      as_seq h1 out == Spec.salsa20_update (as_seq h0 ctx) (as_seq h0 text)))
-[@ CInline ]
 let salsa20_update ctx len out text =
   push_frame();
   let k = create_state () in
@@ -166,11 +159,11 @@ let salsa20_update ctx len out text =
     (fun i -> salsa20_encrypt_last ctx rem (sub out (i *! 64ul) rem) i (sub text (i *! 64ul) rem));
   pop_frame()
 
-inline_for_extraction
 val salsa20_key_block0: out:lbuffer uint8 64ul -> key:lbuffer uint8 32ul -> n:lbuffer uint8 8ul -> Stack unit
 		  (requires (fun h -> live h key /\ live h n /\ live h out))
 		  (ensures (fun h0 _ h1 -> modifies (loc out) h0 h1 /\
 			      as_seq h1 out == Spec.salsa20_key_block0 (as_seq h0 key) (as_seq h0 n)))
+[@CInline]
 let salsa20_key_block0 out key n =
     push_frame();
     let ctx = create_state () in
@@ -180,11 +173,11 @@ let salsa20_key_block0 out key n =
     store_state out k;
     pop_frame()
 
-inline_for_extraction
 val salsa20_encrypt: len:size_t -> out:lbuffer uint8 len -> text:lbuffer uint8 len -> key:lbuffer uint8 32ul -> n:lbuffer uint8 8ul -> ctr:size_t -> Stack unit
 		  (requires (fun h -> live h key /\ live h n /\ live h text /\ live h out /\ eq_or_disjoint text out))
 		  (ensures (fun h0 _ h1 -> modifies (loc out) h0 h1 /\
 			      as_seq h1 out == Spec.salsa20_encrypt_bytes (as_seq h0 key) (as_seq h0 n) (v ctr) (as_seq h0 text)))
+[@CInline]
 let salsa20_encrypt len out text key n ctr =
     push_frame();
     let ctx = create_state () in
@@ -192,13 +185,11 @@ let salsa20_encrypt len out text key n ctr =
     salsa20_update ctx len out text;
     pop_frame()
 
-
-
-inline_for_extraction
 val salsa20_decrypt: len:size_t -> out:lbuffer uint8 len -> cipher:lbuffer uint8 len -> key:lbuffer uint8 32ul -> n:lbuffer uint8 8ul -> ctr:size_t -> Stack unit
 		  (requires (fun h -> live h key /\ live h n /\ live h cipher /\ live h out /\ eq_or_disjoint cipher out))
 		  (ensures (fun h0 _ h1 -> modifies (loc out) h0 h1 /\
 			      as_seq h1 out == Spec.salsa20_decrypt_bytes (as_seq h0 key) (as_seq h0 n) (v ctr) (as_seq h0 cipher)))
+[@CInline]
 let salsa20_decrypt len out cipher key n ctr =
     push_frame();
     let ctx = create_state () in

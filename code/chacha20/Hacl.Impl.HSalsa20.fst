@@ -41,7 +41,7 @@ let hsalsa20_init ctx k n =
     let h1 = ST.get() in
     assert (modifies (loc ctx) h0 h1)
 
-inline_for_extraction
+//inline_for_extraction
 val hsalsa20: out:lbuffer uint8 32ul ->
 		   key:lbuffer uint8 32ul ->
 		   n:lbuffer uint8 16ul ->
