@@ -87,6 +87,8 @@ type va_transformation_result = {
   success : va_pbool;
   result : va_code;
 }
+unfold let va_get_success (r:va_transformation_result) : va_pbool = r.success
+unfold let va_get_result (r:va_transformation_result) : va_code = r.result
 
 val mul_nat_helper (x y:nat) : Lemma (x `op_Multiply` y >= 0)
 [@va_qattr] unfold let va_mul_nat (x y:nat) : nat =
