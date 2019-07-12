@@ -47,7 +47,7 @@ void hacl_aligned_free(void * ptr) {
 
 bool read_random_bytes(uint32_t len, uint8_t * buf) {
   #ifdef SYS_getrandom
-    uint64_t res = syscall(SYS_getrandom, buf, len, 0);
+    ssize_t res = syscall(SYS_getrandom, buf, (size_t)len, 0);
     if (res == -1) {
       printf("SYS_getrandom error\n");
       return false;
@@ -58,14 +58,18 @@ bool read_random_bytes(uint32_t len, uint8_t * buf) {
       printf("Cannot open /dev/urandom\n");
       return false;
     }
+    ssize_t res = read(fd, buf, (size_t)len);
+    if (res == -1) {
+      printf("Cannot read /dev/urandom\n");
+      return false;
+    }
+    close(fd);
   #endif // defined(SYS_getrandom)
   bool pass = true;
-  uint64_t res = read(fd, buf, (uint64_t)len);
-  if (res != (uint64_t)len) {
-    printf("Error on reading, expected %" PRIu64 " bytes, got %" PRIu64 " bytes\n", len, res);
+  if ((size_t)res != (size_t)len) {
+    printf("Error on reading, expected %" PRIu64 " bytes, got %" PRIu64 " bytes\n", (uint64_t)len, (uint64_t)res);
     pass = false;
   }
-  close(fd);
   return pass;
 }
 
