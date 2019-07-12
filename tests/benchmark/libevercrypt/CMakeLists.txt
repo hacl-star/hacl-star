@@ -9,7 +9,7 @@ message("-- Using EverCrypt at ${EVERCRYPT_SRC_DIR}")
 
 include(${CMAKE_CURRENT_SOURCE_DIR}/../libkremlib/CMakeLists.txt)
 
-add_library(evercrypt SHARED STATIC
+add_library(evercrypt STATIC
   ${EVERCRYPT_SRC_DIR}/EverCrypt_AEAD.c
   ${EVERCRYPT_SRC_DIR}/EverCrypt_AutoConfig2.c
   ${EVERCRYPT_SRC_DIR}/EverCrypt_Chacha20Poly1305.c

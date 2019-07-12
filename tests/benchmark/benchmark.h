@@ -7,6 +7,7 @@
 
 #include <string>
 #include <iostream>
+#include <iomanip>
 #include <list>
 #include <vector>
 #include <chrono>
@@ -135,6 +136,14 @@ class Benchmark
                           const std::vector<std::string> & sub_histo_titles = {},
                           size_t num_in_sub_histo = 0,
                           bool add_key = false);
+
+
+    void print_buffer(const uint8_t *buf, size_t len)
+    {
+      for (size_t i = 0; i < len; i++)
+        std::cout << std::hex << std::setfill('0') << std::setw(2) << (unsigned)buf[i];
+      std::cout << std::endl;
+    }
 };
 
 #endif
