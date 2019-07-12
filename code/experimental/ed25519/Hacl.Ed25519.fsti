@@ -16,12 +16,12 @@ val sign:
     (ensures  fun h0 _ h1 -> modifies (loc signature) h0 h1)
 
 val verify:
-    output:lbuffer uint8 32ul
+    public_key:lbuffer uint8 32ul
   -> len:size_t{v len + 64 <= max_size_t}
   -> msg:lbuffer uint8 len
   -> signature:lbuffer uint8 64ul ->
   Stack bool
-    (requires fun h -> live h output /\ live h msg /\ live h signature)
+    (requires fun h -> live h public_key /\ live h msg /\ live h signature)
     (ensures  fun h0 b h1 -> modifies0 h0 h1)
 
 val secret_to_public:
