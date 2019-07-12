@@ -46,11 +46,19 @@ void hacl_aligned_free(void * ptr) {
 #include <stdlib.h>
 
 bool read_random_bytes(uint32_t len, uint8_t * buf) {
-  int fd = open("/dev/urandom", O_RDONLY);
-  if (fd == -1) {
-    printf("Cannot open /dev/urandom\n");
-    return false;
-  }
+  #ifdef SYS_getrandom
+    uint64_t res = syscall(SYS_getrandom, buf, len, 0);
+    if (res == -1) {
+      printf("SYS_getrandom error\n");
+      return false;
+    }
+  #else // !defined(SYS_getrandom)
+    int fd = open("/dev/urandom", O_RDONLY);
+    if (fd == -1) {
+      printf("Cannot open /dev/urandom\n");
+      return false;
+    }
+  #endif // defined(SYS_getrandom)
   bool pass = true;
   uint64_t res = read(fd, buf, (uint64_t)len);
   if (res != (uint64_t)len) {
@@ -77,6 +85,5 @@ void hacl_aligned_free(void * ptr) {
 #endif // HACL_IS_WINDOWS
 
 void randombytes(uint8_t * x,uint32_t len) {
-  if (! (read_random_bytes(len, x)))
-    exit(1);
+  return (read_random_bytes(len, x));
 }
