@@ -1,0 +1,32 @@
+Learning with Errors Key Encapsulation: FrodoKEM-640
+Optimized implementation written in portable C
+=======================================================================
+
+Simply do:
+
+$ make clean; make
+
+And then execute the following to run the tests:
+
+$ ./frodo/test_KEM
+
+Or execute the following to run the KATs:
+
+$ ./frodo/PQCtestKAT_kem
+
+By default, AES128 is used to generate the matrix "A", OpenSSL's AES implementation
+is used for AES, x64 is the targeted architecture, and compilation is performed with GNU GCC.
+
+
+ADDITIONAL OPTIONS
+------------------
+
+make CC=[gcc/clang] ARCH=[x64/x86/ARM] GENERATION_A=[AES128/CSHAKE128] USE_OPENSSL=[TRUE/FALSE]
+
+If OpenSSL is being used and is installed in an alternate location, use the following make options:
+    OPENSSL_INCLUDE_DIR=/path/to/openssl/include
+    OPENSSL_LIB_DIR=/path/to/openssl/lib
+
+When using GENERATION_A=CSHAKE128, execute the following to run the KATs:
+
+$ ./frodo/PQCtestKAT_kem_cshake

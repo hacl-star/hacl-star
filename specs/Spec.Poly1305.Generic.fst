@@ -141,8 +141,8 @@ let mul_wide44 (a:uint64) (b:uint64) : tuple2 uint64 uint64 =
 let mul2 (s1:elem2) (s2:elem2) : elem2 = 
   let s4 = repeati 3 (fun i acc -> 
        repeati 3 (fun j acc ->
-                   let s2j = s2.[(3 + j - i) % 3] in
-		   let s2j = if i <= j then s2j else u64 20 *. s2j in
+		   let k = (3 + j - 1) % 3 in
+		   let s2j = if k <= j then s2.[j] else u64 20 *. s2.[j] in
 		   let (hij,lij) = mul_wide44 s1.[i] s2j in
 		   let acc = acc.[j] <- acc.[j] +. lij in
 		   acc.[j+1] <- acc.[j+1] +. hij) acc) (create 4 (u64 0)) in
@@ -164,7 +164,7 @@ let poly1305_field2 : finite_field 130 =
 let poly1305_2 (len:size_nat) (msg:lbytes len) (k:key) : tag =
     poly1305_generic #poly1305_field2 len msg k
 
-(***** LOW LEVEL 64-bit SPEC *****)
+(***** LOW LEVEL 32-bit SPEC *****)
 
 type elem3 = s:lseq uint32 5
 let mask26 = (((u32 1) <<. (u32 26)) -. (u32 1)) 

@@ -5,7 +5,6 @@ open Lib.IntTypes
 open Lib.RawIntTypes
 open Lib.Sequence
 open Lib.ByteSequence
-open Spec.Lib.Stateful
 open FStar.All
 
 open Spec.RSAPSS
@@ -27,9 +26,9 @@ let ctest modBits nLen n eLen e dLen d msgLen msg sLen salt sgnt_expected num =
 
   IO.print_string ("\n Test "); IO.print_string (UInt8.to_string (num));
   IO.print_string "\n sgnt_computed \n";
-  List.iter (fun a -> IO.print_string (UInt8.to_string_hex (u8_to_UInt8 a))) (as_list sgnt_computed);
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list sgnt_computed);
   IO.print_string "\n sgnt_expected \n";
-  List.iter (fun a -> IO.print_string (UInt8.to_string_hex (u8_to_UInt8 a))) (as_list sgnt_expected);
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list sgnt_expected);
   IO.print_string "\n";
   check && verify
 
@@ -288,4 +287,3 @@ let test() =
   let res = test1() && test2() && test3() && test4() in
   if res then IO.print_string "\nSuccess!\n"
   else IO.print_string "\nFailure"
-    

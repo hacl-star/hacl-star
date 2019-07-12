@@ -69,19 +69,19 @@ let test () =
   assert_norm(List.Tot.length aad = 12);
   assert_norm(List.Tot.length xcipher = 114);
   assert_norm(List.Tot.length xmac = 16);
-  let k = createL k in
-  let n = createL n in
-  let p = createL p in
-  let aad = createL aad in
-  let xcipher = createL xcipher in
-  let xmac = createL xmac in
-  let enc = Spec.Chacha20Poly1305.aead_encrypt k n 114 p 12 aad in
+  let k = of_list k in
+  let n = of_list n in
+  let p = of_list p in
+  let aad = of_list aad in
+  let xcipher = of_list xcipher in
+  let xmac = of_list xmac in
+  let enc = Spec.Chacha20Poly1305.aead_encrypt k n p aad in
   let cipher = sub enc 0 114 in
   let mac = sub enc 114 16 in
-  let dec = Spec.Chacha20Poly1305.aead_decrypt k n 114 cipher mac 12 aad in
+  let dec = Spec.Chacha20Poly1305.aead_decrypt k n enc aad in
   let result_encryption = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) cipher xcipher in
   let result_mac_compare = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) mac xmac in
   let dec_p = match dec with | Some p -> p | None -> create 114 (u8 0) in
-  let result_decryption = for_all2 #uint8 #uint8 #114 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) dec_p p in
+  let result_decryption = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) dec_p p in
   if result_encryption && result_mac_compare && result_decryption then IO.print_string "\nSuccess!\n"
   else IO.print_string "\nFailure :("

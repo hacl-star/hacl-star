@@ -59,25 +59,25 @@ let test () =
   assert_norm(List.Tot.length input2 = 32);
   assert_norm(List.Tot.length expected1 = 32);
   assert_norm(List.Tot.length expected2 = 32);
-  let scalar1 = createL scalar1 in
-  let scalar2 = createL scalar2 in
-  let input1 = createL input1 in
-  let input2 = createL input2 in
-  let expected1 : lseq uint8 32 = createL expected1 in
-  let expected2 : lseq uint8 32 = createL expected2 in
+  let scalar1 = of_list scalar1 in
+  let scalar2 = of_list scalar2 in
+  let input1 = of_list input1 in
+  let input2 = of_list input2 in
+  let expected1 : lseq uint8 32 = of_list expected1 in
+  let expected2 : lseq uint8 32 = of_list expected2 in
   let computed1 : lseq uint8 32 = scalarmult scalar1 input1 in
   let computed2 : lseq uint8 32 = scalarmult scalar2 input2 in
   let result1 : bool = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) computed1 expected1 in
   let result2 : bool = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) computed2 expected2 in
   IO.print_string   "Expected Shared Secret:";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list expected1);
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list expected1);
   IO.print_string "\nComputed Shared Secret:";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list computed1);
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list computed1);
   if result1 then   IO.print_string "\nSuccess!\n"
   else IO.print_string "\nFailure :(\n";
   IO.print_string   "Expected Shared Secret:";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list expected2);
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list expected2);
   IO.print_string "\nComputed Shared Secret:";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list computed2);
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list computed2);
   if result2 then   IO.print_string "\nSuccess!\n"
   else IO.print_string "\nFailure :(\n"

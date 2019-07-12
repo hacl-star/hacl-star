@@ -164,29 +164,29 @@ let test () =
 
   IO.print_string "\nTEST 1\n";
   let test1_ikm_len : size_nat = List.Tot.length test1_ikm in
-  let test1_ikm : lbytes test1_ikm_len = createL test1_ikm in
+  let test1_ikm : lbytes test1_ikm_len = of_list test1_ikm in
   let test1_salt_len :size_nat = List.Tot.length test1_salt in
-  let test1_salt : lbytes test1_salt_len = createL test1_salt in
+  let test1_salt : lbytes test1_salt_len = of_list test1_salt in
   let test1_info_len : size_nat = List.Tot.length test1_info in
-  let test1_info : lbytes test1_info_len = createL test1_info in
+  let test1_info : lbytes test1_info_len = of_list test1_info in
   let test1_expected_prk_len : size_nat = List.Tot.length test1_expected_prk in
-  let test1_expected_prk : lbytes test1_expected_prk_len = createL test1_expected_prk in
+  let test1_expected_prk : lbytes test1_expected_prk_len = of_list test1_expected_prk in
   let test1_expected_okm_len : size_nat = List.Tot.length test1_expected_okm in
-  let test1_expected_okm : lbytes test1_expected_okm_len = createL test1_expected_okm in
+  let test1_expected_okm : lbytes test1_expected_okm_len = of_list test1_expected_okm in
   let test1_prk : lbytes test1_expected_prk_len =
-    HKDF.hkdf_extract test1_hash test1_salt_len test1_salt test1_ikm_len test1_ikm in
+    HKDF.hkdf_extract test1_hash test1_salt test1_ikm in
   let test1_okm : lbytes test1_expected_okm_len =
-    HKDF.hkdf_expand test1_hash test1_expected_prk_len test1_expected_prk test1_info_len test1_info test1_len in
+    HKDF.hkdf_expand test1_hash test1_expected_prk test1_info test1_len in
   let r1_a = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) test1_expected_prk test1_prk in
   let r1_b = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) test1_expected_okm test1_okm in
   IO.print_string "\nExpected PRK: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list test1_expected_prk);
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test1_expected_prk);
   IO.print_string "\nComputed PRK: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list test1_prk);
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test1_prk);
   IO.print_string "\nExpected OKM: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list test1_expected_okm);
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test1_expected_okm);
   IO.print_string "\nComputed OKM: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list test1_okm);
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test1_okm);
 
   if r1_a then IO.print_string "\nHKDF Extract: Success!\n"
   else IO.print_string "\nHKDF Extract: Failure :(\n";
@@ -195,29 +195,29 @@ let test () =
 
   IO.print_string "\nTEST 2\n";
   let test2_ikm_len : size_nat = List.Tot.length test2_ikm in
-  let test2_ikm : lbytes test2_ikm_len = createL test2_ikm in
+  let test2_ikm : lbytes test2_ikm_len = of_list test2_ikm in
   let test2_salt_len :size_nat = List.Tot.length test2_salt in
-  let test2_salt : lbytes test2_salt_len = createL test2_salt in
+  let test2_salt : lbytes test2_salt_len = of_list test2_salt in
   let test2_info_len : size_nat = List.Tot.length test2_info in
-  let test2_info : lbytes test2_info_len = createL test2_info in
+  let test2_info : lbytes test2_info_len = of_list test2_info in
   let test2_expected_prk_len : size_nat = List.Tot.length test2_expected_prk in
-  let test2_expected_prk : lbytes test2_expected_prk_len = createL test2_expected_prk in
+  let test2_expected_prk : lbytes test2_expected_prk_len = of_list test2_expected_prk in
   let test2_expected_okm_len : size_nat = List.Tot.length test2_expected_okm in
-  let test2_expected_okm : lbytes test2_expected_okm_len = createL test2_expected_okm in
+  let test2_expected_okm : lbytes test2_expected_okm_len = of_list test2_expected_okm in
   let test2_prk : lbytes test2_expected_prk_len =
-    HKDF.hkdf_extract test2_hash test2_salt_len test2_salt test2_ikm_len test2_ikm in
+    HKDF.hkdf_extract test2_hash test2_salt test2_ikm in
   let test2_okm : lbytes test2_expected_okm_len =
-    HKDF.hkdf_expand test2_hash test2_expected_prk_len test2_expected_prk test2_info_len test2_info test2_len in
+    HKDF.hkdf_expand test2_hash test2_expected_prk test2_info test2_len in
   let r2_a = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) test2_expected_prk test2_prk in
   let r2_b = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) test2_expected_okm test2_okm in
   IO.print_string "\nExpected PRK: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list test2_expected_prk);
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test2_expected_prk);
   IO.print_string "\nComputed PRK: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list test2_prk);
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test2_prk);
   IO.print_string "\nExpected OKM: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list test2_expected_okm);
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test2_expected_okm);
   IO.print_string "\nComputed OKM: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list test2_okm);
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test2_okm);
 
   if r2_a then IO.print_string "\nHKDF Extract: Success!\n"
   else IO.print_string "\nHKDF Extract: Failure :(\n";
@@ -227,29 +227,29 @@ let test () =
 
   IO.print_string "\nTEST 3\n";
   let test3_ikm_len : size_nat = List.Tot.length test3_ikm in
-  let test3_ikm : lbytes test3_ikm_len = createL test3_ikm in
+  let test3_ikm : lbytes test3_ikm_len = of_list test3_ikm in
   let test3_salt_len :size_nat = List.Tot.length test3_salt in
-  let test3_salt : lbytes test3_salt_len = createL test3_salt in
+  let test3_salt : lbytes test3_salt_len = of_list test3_salt in
   let test3_info_len : size_nat = List.Tot.length test3_info in
-  let test3_info : lbytes test3_info_len = createL test3_info in
+  let test3_info : lbytes test3_info_len = of_list test3_info in
   let test3_expected_prk_len : size_nat = List.Tot.length test3_expected_prk in
-  let test3_expected_prk : lbytes test3_expected_prk_len = createL test3_expected_prk in
+  let test3_expected_prk : lbytes test3_expected_prk_len = of_list test3_expected_prk in
   let test3_expected_okm_len : size_nat = List.Tot.length test3_expected_okm in
-  let test3_expected_okm : lbytes test3_expected_okm_len = createL test3_expected_okm in
+  let test3_expected_okm : lbytes test3_expected_okm_len = of_list test3_expected_okm in
   let test3_prk : lbytes test3_expected_prk_len =
-    HKDF.hkdf_extract test3_hash test3_salt_len test3_salt test3_ikm_len test3_ikm in
+    HKDF.hkdf_extract test3_hash test3_salt test3_ikm in
   let test3_okm : lbytes test3_expected_okm_len =
-    HKDF.hkdf_expand test3_hash test3_expected_prk_len test3_expected_prk test3_info_len test3_info test3_len in
+    HKDF.hkdf_expand test3_hash test3_expected_prk test3_info test3_len in
   let r3_a = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) test3_expected_prk test3_prk in
   let r3_b = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) test3_expected_okm test3_okm in
   IO.print_string "\nExpected PRK: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list test3_expected_prk);
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test3_expected_prk);
   IO.print_string "\nComputed PRK: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list test3_prk);
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test3_prk);
   IO.print_string "\nExpected OKM: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list test3_expected_okm);
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test3_expected_okm);
   IO.print_string "\nComputed OKM: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list test3_okm);
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test3_okm);
 
   if r3_a then IO.print_string "\nHKDF Extract: Success!\n"
   else IO.print_string "\nHKDF Extract: Failure :(\n";

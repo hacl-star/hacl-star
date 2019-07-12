@@ -1,13 +1,12 @@
-### This Makefile is no longer used! Makefile.extract builds quicprovider-test.exe
-
 FSTAR_HOME ?= ../../../FStar
 KREMLIN_HOME ?= ../../../kremlin
 MITLS_HOME ?= ../../../mitls-fstar
-OPENSSL_HOME ?= ../../../MLCrypto/openssl
+MLCRYPTO_HOME ?= ../../../MLCrypto
+OPENSSL_HOME ?= $(MLCRYPTO_HOME)/openssl
 
 MARCH?=x86_64
 
-CFLAGS += -fPIC -std=c11 -Ofast -funroll-loops -g -I $(MITLS_HOME)/libs/ffi
+CFLAGS += -fPIC -std=c11 -Ofast -funroll-loops -g -I $(MITLS_HOME)/libs/ffi -D_GNU_SOURCE -D_BSD_SOURCE
 
 ifneq ($(VS140COMNTOOLS),)
 	VS_BIN_DOSPATH=$(VS140COMNTOOLS)/../../VC/bin
@@ -27,19 +26,20 @@ ifeq ($(OS),Windows_NT)
     # altered to include by default the mingw64 native DLLs. We also need to
     # find dllcorecrypto.dll; it is in the current directory, which Windows
     # always uses to search for DLLs.
-    EXTRA_PATH = PATH="/usr/$(MARCH)-w64-mingw32/sys-root/mingw/bin/:$(OPENSSL_HOME):$(PATH)"
+    EXTRA_PATH = PATH="$(shell cygpath -u $(OPENSSL_HOME)):../out:$(PATH)"
     EXTRA_OPTS =
     AR = $(MARCH)-w64-mingw32-ar
     CC = $(MARCH)-w64-mingw32-gcc
 else
     LIBQUICCRYPTO=libquiccrypto.so
-    EXTRA_PATH = LD_LIBRARY_PATH=.
     UNAME_S := $(shell uname -s)
     AR = ar
     ifeq ($(UNAME_S),Darwin)
+	EXTRA_PATH = DYLD_LIBRARY_PATH=$(OPENSSL_HOME):../out:.:$(DYLD_LIBRARY_PATH)
         EXTRA_OPTS =
         ARCH = osx
     else
+	EXTRA_PATH = LD_LIBRARY_PATH=$(OPENSSL_HOME):../out:.:$(LD_LIBRARY_PATH)
         EXTRA_OPTS = -thread -ccopt -fPIC
         ARCH = x86_64
     endif
@@ -57,7 +57,7 @@ else
 LIB_MACHINE=x86
 endif
 
-CFLAGS += -I $(KREMLIN_HOME)/include -I ../generated
+CFLAGS += -I $(KREMLIN_HOME)/include -I ../include
 LDFLAGS += -L ../out -levercrypt
 
 ifeq (,$(EVEREST_WINDOWS))

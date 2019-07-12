@@ -5,12 +5,15 @@ open Lib.IntTypes
 open Lib.Sequence
 open Lib.ByteSequence
 open Spec.GaloisField
+open Lib.LoopCombinators
 
-(* Field types and parameters *)
 
-let gf128 = mk_field 128 0xe1000000000000000000000000000000
+(* GF128 Field: note that bits are loaded in little-endian order *)
+let irred = u128 0x87
+let gf128 = gf U128 irred
 let elem = felem gf128
-let zero = zero #gf128
+let load_elem (b:lbytes 16) : elem = load_felem_le #gf128 b
+let store_elem (e:elem) : lbytes 16 = store_felem_le #gf128 e
 
 (* GCM types and specs *)
 let blocksize : size_nat = 16
@@ -19,42 +22,51 @@ type block = lbytes blocksize
 type tag   = lbytes blocksize
 type key   = lbytes keysize
 
+
 let encode (len:size_nat{len <= blocksize}) (w:lbytes len) : Tot elem =
   let b = create blocksize (u8 0) in
   let b = update_slice b 0 len w  in
-  to_felem (nat_from_bytes_be b)
+  load_elem b
 
-let decode (e:elem) : Tot block = nat_to_bytes_be blocksize (from_felem e)
+let decode (e:elem) : Tot block = store_elem e
 
-let update (r:elem ) (len:size_nat{len <= blocksize}) (w:lbytes len) (acc:elem) : Tot elem =
-    (encode len w `fadd` acc) `fmul` r
+noeq type state = {
+  r:elem;
+  acc:elem
+}
 
-val poly: len:size_nat -> text:lbytes len -> r:elem ->  Tot (a:elem)  (decreases len)
-let poly len text r =
-  let blocks = len / blocksize in
-  let rem = len % blocksize in
-  let init  : elem = zero in
-  let acc   : elem =
-    repeati blocks
-      (fun i acc  ->
-	let b = slice text (i * blocksize) ((i+1)*blocksize) in
-	update r blocksize b acc)
-      init in
-  let acc = if rem = 0 then acc else
-    update r rem (slice text (len-rem) len) acc in
-  acc
-let finish (a:elem) (s:tag) : Tot tag = decode (a `fadd` (encode blocksize s))
+let init (h:lbytes blocksize) : state = {
+  r =  encode blocksize h;
+  acc = zero
+}
 
-let gmul (len:size_nat) (text:lbytes len) (h:lbytes blocksize) : Tot tag  =
-    let r = encode blocksize h in
-    decode (poly len text r)
+let set_acc (st:state) (acc:elem) = {st with acc = acc}
+
+let update (len:size_nat{len <= blocksize}) (w:lbytes len) (st:state) : state =
+  let acc = (encode len w `fadd` st.acc) `fmul` st.r in
+  set_acc st acc
+
+let poly (text:seq uint8) (st:state) : state =
+  repeat_blocks #uint8 #state blocksize text
+    (fun b st -> update blocksize b st)
+    (fun rem b st -> if rem = 0 then st else update rem b st)
+  st
+
+let finish (st:state) (s:tag) : Tot tag =
+  decode (st.acc `fadd` (encode blocksize s))
+
+let gmul (text:bytes) (h:lbytes blocksize) : Tot tag  =
+  let st = init h in
+  let st = poly text st in
+  decode st.acc
 
 val gmac:
-  len:size_nat ->
-  text:lbytes len ->
-  h:lbytes blocksize ->
-  k:key ->
+    text: bytes
+  -> h: lbytes blocksize
+  -> k: key ->
   Tot tag
-let gmac len text h k =
-  let r = encode blocksize h in
-  finish (poly len text r) k
+
+let gmac text h k =
+  let st = init h in
+  let st = poly text st in
+  finish st k

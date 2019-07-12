@@ -148,26 +148,31 @@ providers:
 # CI
 #
 
-# JP: the clean-git target is egregious and prevents any serious work from
-# happening for anyone who wants to actually test ci. Removing it -- if this is
-# really important, it should be done at the level of the CI system.
-ci: # .clean-banner .clean-git .clean-snapshots
-	$(MAKE) extract-specs extract-all
-	$(MAKE) -C code clean-c
-	$(MAKE) -C code extract-c
-	$(MAKE) -C providers/
-	$(MAKE) -C providers/test
-	$(MAKE) -C secure_api runtime_switch verify # test both extraction & verification
-	$(MAKE) build-make
-	$(MAKE) test-all
-	$(MAKE) package
+CC = $(GCC)
+
+ci: .clean-banner .clean-git .clean-snapshots
+	$(MAKE) -C lib
+	$(MAKE) -C code/blake2 verify
+	$(MAKE) -C code/sha3
+	$(MAKE) -C frodo/spec
+	$(MAKE) -C frodo/code TARGET=
+	# $(MAKE) extract-specs
+	# $(MAKE) extract-all
+	# $(MAKE) -C code clean-c
+	# $(MAKE) -C code extract-c
+	# $(MAKE) -C providers/
+	# $(MAKE) -C providers/test
+	# $(MAKE) -C secure_api runtime_switch verify # test both extraction & verification
+	# $(MAKE) test-all
+	# $(MAKE) build-make
+	# $(MAKE) package
 
 #
 # Clean
 #
 
 .clean-banner:
-	@echo $(CYAN)"# Clean HaCl*"$(NORMAL)
+	@echo $(CYAN)"# Clean HACL*"$(NORMAL)
 
 .clean-git:
 	git reset HEAD --hard

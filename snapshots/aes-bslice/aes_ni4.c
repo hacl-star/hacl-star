@@ -1,38 +1,39 @@
-#include <inttypes.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/types.h>
-#include <wmmintrin.h>
-#include <smmintrin.h>
-#include "endianness.h"
 
+#define INTERLEAVE 4
 typedef __m128i* state_t;
+typedef __m128i key1_t;
+typedef __m128i* keyex_t;
 
-
-static inline void aes_enc(state_t st, state_t k) {
-  *st = _mm_aesenc_si128(*st,*k);
+static inline void aes_enc(state_t st, key1_t k) {
+#pragma unroll
+  for (int j = 0; j < INTERLEAVE; j++) 
+    st[j] = _mm_aesenc_si128(st[j],k);
 }
 
-static inline void aes_enc_last(state_t st, state_t k) {
-  *st = _mm_aesenclast_si128(*st,*k);
+static inline void aes_enc_last(state_t st, key1_t k) {
+#pragma unroll
+  for (int j = 0; j < INTERLEAVE; j++)
+    st[j] = _mm_aesenclast_si128(st[j],k);
 }
 
-#define INTERLEAVE 8
-static void rounds(state_t st, state_t key) {
+static void rounds(state_t st, keyex_t key) {
+#pragma unroll
   for (int i = 0; i < 9; i++) 
-    for (int j = 0; j < INTERLEAVE; j++) 
-      aes_enc(st+j,key+i);
+      aes_enc(st,key[i]);
 }
 
-static inline void block_cipher(state_t out, state_t key) {
-  state_t k0 = key;
-  state_t k = key + 1;
-  state_t kn = key + 10;
+inline static  void addRoundKey(state_t st, key1_t k) {
+#pragma unroll
   for (int j = 0; j < INTERLEAVE; j++)
-    out[j] = _mm_xor_si128(out[j], *k0); 
-  rounds(out,k);
-  for (int j = 0; j < INTERLEAVE; j++)
-    aes_enc_last(out+j,kn);
+    st[j] = _mm_xor_si128(st[j], k); 
+}
+
+
+static inline void block_cipher(state_t out, keyex_t key) {
+  state_t k1 = key + 1;
+  addRoundKey(out,key[0]);  
+  rounds(out,k1);
+  aes_enc_last(out,key[10]);
 }
 
 static inline void key_expansion_step(state_t next, state_t prev){
@@ -69,6 +70,7 @@ static void key_expansion(state_t out, uint8_t* key) {
 }
 
 static inline void aes128_block(state_t out,state_t kex, __m128i nvec, uint32_t c) {
+#pragma unroll
   for (int i = 0; i < INTERLEAVE; i++)
     out[i] = _mm_insert_epi32(nvec, __builtin_bswap32(c + i), 3);
   block_cipher(out,kex);
@@ -88,8 +90,7 @@ static void aes128_ctr(uint8_t* out, uint8_t* in, int in_len, uint8_t* k, uint8_
   for (int i = 0; i < blocks; i++) {
     aes128_block(kb,kex,nvec,c+(INTERLEAVE*i));
     for (int j = 0; j < INTERLEAVE; j++) {
-      kb[j] = _mm_xor_si128(kb[j],_mm_loadu_si128((__m128i*)&in[blocksize*i + 16*j]));
-      _mm_storeu_si128((__m128i*)&out[blocksize*i + 16*j],kb[j]);
+      _mm_storeu_si128((__m128i*)&out[blocksize*i + 16*j],_mm_xor_si128(kb[j],_mm_loadu_si128((__m128i*)&in[blocksize*i + 16*j])));
     }
   }
 

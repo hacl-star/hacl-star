@@ -3,106 +3,80 @@
 #include <string.h> 
 #include <sys/types.h> 
 #include "endianness.h"
+#include <wmmintrin.h>
+#include <smmintrin.h>
 
-typedef unsigned __int128 uint128;
-typedef uint128_t* transpose_t;
+typedef uint64_t* transpose_t;
 
 //#define static static inline __attribute((always_inline))
 
-static const uint64_t trans_mask[8] = {
-  0x8040201008040201LL,
-  0x4020100804020100LL,
-  0x2010080402010000LL,
-  0x1008040201000000LL,
-  0x0804020100000000LL,
-  0x0402010000000000LL,
-  0x0201000000000000LL,
-  0x0100000000000000LL
-}
-  
-  
-static uint64_t transpose128(uint128_t x) {
-  uint128_t y = 0;
-  uint128_t tm0 = (uint128_t)trans_mask[0] << 64 | trans_mask[0];
-  uint128_t tm1 = (uint128_t)trans_mask[1] << 64 | trans_mask[1];
-  uint128_t tm2 = (uint128_t)trans_mask[2] << 64 | trans_mask[2];
-  uint128_t tm3 = (uint128_t)trans_mask[3] << 64 | trans_mask[3];
-  uint128_t tm4 = (uint128_t)trans_mask[4] << 64 | trans_mask[4];
-  uint128_t tm5 = (uint128_t)trans_mask[5] << 64 | trans_mask[5];
-  uint128_t tm6 = (uint128_t)trans_mask[6] << 64 | trans_mask[6];
-  uint128_t tm7 = (uint128_t)trans_mask[7] << 64 | trans_mask[7];
-  y =  (x & tm0) | 
-    ((x & tm1) >>  7) |
-    ((x & tm2) >> 14) |
-    ((x & tm3) >> 21) |
-    ((x & tm4) >> 28) |
-    ((x & tm5) >> 35) |
-    ((x & tm6) >> 42) |
-    ((x & tm7) >> 49) |
-    ((x <<  7) & tm1) |
-    ((x << 14) & tm2) |
-    ((x << 21) & tm3) |
-    ((x << 28) & tm4) |
-    ((x << 35) & tm5) |
-    ((x << 42) & tm6) |
-    ((x << 49) & tm7);
-  
+static uint64_t transpose64(uint64_t x) {
+ uint64_t y = 0;
+
+  y =  (x & 0x8040201008040201LL)        |
+    ((x & 0x4020100804020100LL) >>  7) |
+    ((x & 0x2010080402010000LL) >> 14) |
+    ((x & 0x1008040201000000LL) >> 21) |
+    ((x & 0x0804020100000000LL) >> 28) |
+    ((x & 0x0402010000000000LL) >> 35) |
+    ((x & 0x0201000000000000LL) >> 42) |
+    ((x & 0x0100000000000000LL) >> 49) |
+    ((x <<  7) & 0x4020100804020100LL) |
+    ((x << 14) & 0x2010080402010000LL) |
+    ((x << 21) & 0x1008040201000000LL) |
+    ((x << 28) & 0x0804020100000000LL) |
+    ((x << 35) & 0x0402010000000000LL) |
+    ((x << 42) & 0x0201000000000000LL) |
+    ((x << 49) & 0x0100000000000000LL);
   return y;
-}
-  
-static uint128_t load128_le(uint8_t* in) {
-  uint18_t r;
-  memcpy(&r,in,16);
-  return r;
 }
 
 static  void to_transpose_block_copy(transpose_t out, uint8_t* in) {
-  st = load128_le(in);
-  st = transpose128(st);
+  uint64_t fst = load64_le(in);
+  uint64_t snd = load64_le(in+8);
+  fst = transpose64(fst);
+  snd = transpose64(snd);
   for (int i = 0; i < 8; i++) {
-    uint128_t u = (st >> (16*i)) & 0xffff;
+    uint64_t u = (fst >> (8*i)) & 0xff;
+    u ^= ((snd >> (8*i)) & 0xff) << 8;
     u ^= u << 16;
     u ^= u << 32;
-    u ^= u << 64;
     out[i] = u;
   }
 }
 
 static  void to_transpose_block(transpose_t out, uint8_t* in) {
-  st = load128_le(in);
-  st = transpose128(st);
+  uint64_t fst = load64_le(in);
+  uint64_t snd = load64_le(in+8);
+  fst = transpose64(fst);
+  snd = transpose64(snd);
   for (int i = 0; i < 8; i++) {
-    uint128_t u = (st >> (16*i)) & 0xffff;
+    uint64_t u = (fst >> (8*i)) & 0xff;
+    u ^= ((snd >> (8*i)) & 0xff) << 8;
     out[i] = u;
   }
 }
 
-static void from_transpose(uint8_t* out, transpose_t in) {
-  uint128_t tmp[8];
+static void from_transpose(uint64_t* out, transpose_t in) {
+  uint64_t t0 = (in[4] << 32) ^ (in[0] & 0xffffffff);
+  uint64_t t1 = (in[5] << 32) ^ (in[1] & 0xffffffff);
+  uint64_t t2 = (in[6] << 32) ^ (in[2] & 0xffffffff);
+  uint64_t t3 = (in[7] << 32) ^ (in[3] & 0xffffffff);
 
-  for (int i = 0; i < 4; i++) {
-    tmp[i] = (in[i+4] << 64) | (uint64_t)in[i];
-    tmp[i+4] = (in[i] >> 64) | (in[i+4] & (uint64_t)0) ;
-  }
+  
+  uint64_t t4 = (in[4] & 0xffffffff00000000) ^ (in[0] >> 32);
+  uint64_t t5 = (in[5] & 0xffffffff00000000) ^ (in[1] >> 32);
+  uint64_t t6 = (in[6] & 0xffffffff00000000) ^ (in[2] >> 32);
+  uint64_t t7 = (in[7] & 0xffffffff00000000) ^ (in[3] >> 32);
 
-  for (int i = 0; i < 8; i = i + 2) {
-    tmp[i] = (in[i+2] << 64) | (uint64_t)in[i];
-    tmp[i+2] = (in[i] >> 64) | (in[i+2] & (uint64_t)0) ;
-  }
-
-  for (int i = 0; i < 8; i = i + 2) {
-    tmp[i] = (in[i+1] << 64) | (uint64_t)in[i];
-    tmp[i+1] = (in[i] >> 64) | (in[i+1] & (uint64_t)0) ;
-  }
-
-  uint128_t t0_ = t0;
-  uint128_t t1_ = t1;
-  uint128_t t2_ = t3;
-  uint128_t t3_ = t3;
-  uint128_t t4_ = t4;
-  uint128_t t5_ = t5;
-  uint128_t t6_ = t6;
-  uint128_t t7_ = t7;
+  uint64_t t0_ = t0;
+  uint64_t t1_ = t1;
+  uint64_t t2_ = t3;
+  uint64_t t3_ = t3;
+  uint64_t t4_ = t4;
+  uint64_t t5_ = t5;
+  uint64_t t6_ = t6;
+  uint64_t t7_ = t7;
   
   t0 = (t0 & 0x0000ffff0000ffff) ^ ((t2 & 0x0000ffff0000ffff) << 16);
   t1 = (t1 & 0x0000ffff0000ffff) ^ ((t3 & 0x0000ffff0000ffff) << 16);
@@ -150,14 +124,23 @@ static void from_transpose(uint8_t* out, transpose_t in) {
   t6 = transpose64(t6);
   t7 = transpose64(t7);
 
-  store64_le(out,t0);
+  out[0] = t0;
+  out[1] = t1;
+  out[2] = t2;
+  out[3] = t3;
+  out[4] = t4;
+  out[5] = t5;
+  out[6] = t6;
+  out[7] = t7;
+  
+  /*  store64_le(out,t0);
   store64_le(out+8,t1);
   store64_le(out+16,t2);
   store64_le(out+24,t3);
   store64_le(out+32,t4);
   store64_le(out+40,t5);
   store64_le(out+48,t6);
-  store64_le(out+56,t7);
+  store64_le(out+56,t7); */
 
 }
 
@@ -304,6 +287,7 @@ static void subBytes(transpose_t st) {
 }
 
 static  void shiftRows(transpose_t st){
+  //#pragma unroll
   for (int i = 0; i < 8; i++) {
     uint64_t curr = st[i];
     curr = (curr & 0x1111111111111111) |
@@ -319,50 +303,81 @@ static  void shiftRows(transpose_t st){
 
 static  void mixColumns(transpose_t st) {
   uint64_t rot_prev = 0;
-  for (int i = 0; i < 8; i++) {
+  /*  for (int i = 0; i < 8; i++) {
     uint64_t col = st[i];
     uint64_t col01 = col ^ (((col & 0xeeeeeeeeeeeeeeee) >> 1) | ((col & 0x1111111111111111) << 3));
     uint64_t col0123 = col01 ^ (((col01 & 0xcccccccccccccccc ) >> 2) | ((col01 & 0x3333333333333333) << 2));
     st[i] ^= col0123 ^ rot_prev;
     rot_prev = col01;
+    }*/
+  uint64_t col[8] = {0};
+  #pragma unroll
+  for (int i = 0; i < 8; i++) {
+    col[i] = st[i] ^ (((st[i] & 0xeeeeeeeeeeeeeeee) >> 1) | ((st[i] & 0x1111111111111111) << 3));
   }
-  st[0] ^= rot_prev;
-  st[1] ^= rot_prev;
-  st[3] ^= rot_prev;
-  st[4] ^= rot_prev;
+
+  uint64_t ncol = col[0] ^ (((col[0] & 0xcccccccccccccccc ) >> 2) | ((col[0] & 0x3333333333333333) << 2));
+  st[0] = st[0] ^ ncol;
+  #pragma unroll
+  for (int i = 1; i < 8; i++) {
+    uint64_t coli = col[i] ^ (((col[i] & 0xcccccccccccccccc ) >> 2) | ((col[i] & 0x3333333333333333) << 2));
+    st[i] = st[i] ^ coli ^ col[i-1];
+  }
+
+  st[0] ^= col[7];
+  st[1] ^= col[7];
+  st[3] ^= col[7];
+  st[4] ^= col[7];
 }
 
 static  void addRoundKey(transpose_t st, transpose_t k) {
-  for (int i = 0; i < 8; i++)
-    st[i] ^= k[i];
+  //  for (int i = 0; i < 8; i++)
+  // st[i] ^= k[i];
+  st[0] ^= k[0];
+  st[1] ^= k[1];
+  st[2] ^= k[2];
+  st[3] ^= k[3];
+  st[4] ^= k[4];
+  st[5] ^= k[5];
+  st[6] ^= k[6];
+  st[7] ^= k[7];
 }
 
-static  void aes_enc(transpose_t st, transpose_t k) {
-  subBytes(st);
-  shiftRows(st);
-  mixColumns(st);
-  addRoundKey(st,k);
+inline static  void aes_enc(transpose_t st, transpose_t k) {
+  subBytes(st);      // 7-8 cy
+  shiftRows(st);     // 2-3 cy
+  mixColumns(st);    // 5 cy
+  addRoundKey(st,k); // 3 cy
 }
 
-static  void aes_enc_last(transpose_t st, transpose_t k) {
+inline static  void aes_enc_last(transpose_t st, transpose_t k) {
   subBytes(st);
   shiftRows(st);
   addRoundKey(st,k);
 }
 
 static  void rounds(transpose_t st, uint64_t* key) {
-  for (int i = 0; i < 9; i++)
-    aes_enc(st,key+(8*i));
+  //  for (int i = 0; i < 9; i++) 
+  //  aes_enc(st,key+(i << 3));
+  aes_enc(st,key);
+  aes_enc(st,key+8);
+  aes_enc(st,key+16);
+  aes_enc(st,key+24);
+  aes_enc(st,key+32);
+  aes_enc(st,key+40);
+  aes_enc(st,key+48);
+  aes_enc(st,key+56);
+  aes_enc(st,key+64);  
 }
 
-static void block_cipher(uint8_t* out, uint64_t* st, uint64_t* key) {
+static void block_cipher(uint64_t* out, uint64_t* st, uint64_t* key) {
   uint64_t* k0 = key;
   uint64_t* k = key + 8;
   uint64_t* kn = key + (8 * 10);
-  addRoundKey(st,k0);
-  rounds(st,k);
-  aes_enc_last(st,kn);
-  from_transpose(out,st);
+  addRoundKey(st,k0);     // 2-3 cy
+  rounds(st,k);           // 20 cy
+  aes_enc_last(st,kn);    // 3 cy
+  from_transpose(out,st); // 5 cy
 }
 
 const uint8_t rcon[11] = {
@@ -394,7 +409,7 @@ static void key_expansion(uint64_t* out, uint8_t* key) {
     key_expansion_step(out+(8*i),out+(8*i-8),rcon[i]);
 }
 
-static void aes128_block(uint8_t* out, uint64_t* kex, uint64_t* nt, uint32_t c) {
+static void aes128_block(uint64_t* out, uint64_t* kex, uint64_t* nt, uint32_t c) {
   uint8_t ctr[16] = {0};
   for (int i = 0; i < 4; i++) 
     store32_be(ctr+(4*i),c + i);
@@ -419,24 +434,34 @@ static void aes128_ctr(uint8_t* out, uint8_t* in, int in_len, uint8_t* k, uint8_
   uint64_t nt[8] = {0};
   to_transpose_block_copy(nt,nb);
   
-  uint8_t kb[64] = {0};
+  uint64_t kb[8] = {0};
   int blocks64 = in_len / 64;
+  __m128i b0,b1,b2,b3;
   for (int i = 0; i < blocks64; i++) {
     aes128_block(kb,kex,nt,c+(4*i));
-    for (int j = 0; j < 64; j++) {
-      out[64*i+j] = in[64*i+j] ^ kb[j];
-    }
+    b0 = _mm_set_epi64x(kb[1],kb[0]);
+    b1 = _mm_set_epi64x(kb[3],kb[2]);
+    b2 = _mm_set_epi64x(kb[5],kb[4]);
+    b3 = _mm_set_epi64x(kb[7],kb[6]);
+    _mm_store_si128((__m128i*)(out+64*i),_mm_xor_si128(b0,_mm_load_si128((__m128i*)(in+64*i))));
+    _mm_store_si128((__m128i*)(out+16+64*i),_mm_xor_si128(b1,_mm_load_si128((__m128i*)(in+16+64*i))));
+    _mm_store_si128((__m128i*)(out+32+64*i),_mm_xor_si128(b2,_mm_load_si128((__m128i*)(in+32+64*i))));
+    _mm_store_si128((__m128i*)(out+48+64*i),_mm_xor_si128(b3,_mm_load_si128((__m128i*)(in+48+64*i))));
   }
+
 
   int rem = in_len % 64;
   if (rem > 0) {
     in = in + (64 * blocks64);
     out = out + (64 * blocks64);
     c = c + (4 * blocks64);
+    uint8_t last[64] = {0};
+    memcpy(last,in,rem);
     aes128_block(kb,kex,nt,c);
-    for (int j = 0; j < rem; j++) {
-      out[j] = in[j] ^ kb[j];
+    for (int j = 0; j < 8; j++) {
+      store64_le(last+8*j,load64_le(last+8*j) ^ kb[j]);
     }
+    memcpy(out,last,rem);
   }
 }
 

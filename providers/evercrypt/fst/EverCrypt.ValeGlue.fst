@@ -39,7 +39,8 @@ let sha256_finish state hash =
   admit();
   C.Loops.for 0ul 8ul (fun _ _ -> True) (fun i ->
     let out = LowStar.Buffer.sub hash U32.(i *^ 4ul) 4ul in
-    store32_le !!out (htole32 (load32_be !!out)))
+    let out = LowStar.ToFStarBuffer.new_to_old_st out in
+    store32_le out (htole32 (load32_be out)))
 
 /// All-in one
 let sha256_hash state data len =

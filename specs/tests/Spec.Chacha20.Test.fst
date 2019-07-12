@@ -63,16 +63,16 @@ let test () =
   assert_norm(List.Tot.length test_ciphertext = 114);
   assert_norm(List.Tot.length test_key = 32);
   assert_norm(List.Tot.length test_nonce = 12);
-  let test_plaintext : lbytes 114 = createL test_plaintext in
-  let test_ciphertext : lbytes 114 = createL test_ciphertext in
-  let test_key : key = createL test_key in
-  let test_nonce : nonce = createL test_nonce in
-  let cipher : lbytes 114 = chacha20_encrypt_bytes test_key test_nonce test_counter 114 test_plaintext in
+  let test_plaintext : lbytes 114 = of_list test_plaintext in
+  let test_ciphertext : lbytes 114 = of_list test_ciphertext in
+  let test_key : key = of_list test_key in
+  let test_nonce : nonce = of_list test_nonce in
+  let cipher : lbytes 114 = chacha20_encrypt_bytes test_key test_nonce test_counter test_plaintext in
   let result = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) cipher test_ciphertext in
   IO.print_string   "Expected cipher:";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (as_list test_ciphertext);
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test_ciphertext);
   IO.print_string "\nComputed cipher:";
   List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a)))
-  (as_list cipher);
+  (to_list cipher);
   if result then   IO.print_string "\nSuccess!\n"
   else IO.print_string "\nFailure :("

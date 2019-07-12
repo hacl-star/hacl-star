@@ -4,6 +4,12 @@
 #include <stdint.h>
 #include <string.h>
 
+#if (defined(_WIN32) || defined(_WIN64))
+#  include <malloc.h>
+#else
+#  include <alloca.h>
+#endif
+
 #include "kremlib.h"
 #include "Crypto_HKDF_Crypto_HMAC.h"
 #include "EverCrypt.h"
@@ -83,47 +89,26 @@ int MITLS_CALLCONV quic_crypto_hkdf_expand(quic_hash a, unsigned char *okm, uint
   return 1;
 }
 
-int MITLS_CALLCONV quic_crypto_hkdf_tls_label(quic_hash a, unsigned char *info, size_t *info_len, const char *label)
+int MITLS_CALLCONV quic_crypto_hkdf_label(quic_hash a, unsigned char *info, size_t *info_len, const char *label, uint16_t out_len)
 {
   size_t label_len = strlen(label);
   uint32_t hlen = (a == TLS_hash_SHA256 ? 32 : (a == TLS_hash_SHA384 ? 48 : 64));
   unsigned char *hash = alloca(hlen);
 
-  if(a < TLS_hash_SHA256 || !info || !hash || label_len > 249)
+  if(a < TLS_hash_SHA256 || !info || !hash || label_len > 180)
     return 0;
 
-  info[0] = 0;
-  info[1] = hlen;
-  info[2] = label_len + 6;
-  memcpy(info+3, "tls13 ", 6);
-  memcpy(info+9, label, label_len);
-
-  if(!quic_crypto_hash(a, hash, (const unsigned char*)label, 0))
-    return 0;
-
-  info[9+label_len] = hlen;
-  memcpy(info + label_len + 10, hash, hlen);
-  *info_len = label_len + 10 + hlen;
-
-  return 1;
-}
-
-int MITLS_CALLCONV quic_crypto_hkdf_quic_label(quic_hash a, unsigned char *info, size_t *info_len, const char *label, uint16_t key_len)
-{
-  uint32_t hlen = (a == TLS_hash_SHA256 ? 32 :
-    (a == TLS_hash_SHA384 ? 48 : 64));
-  size_t label_len = strlen(label);
-
-  if(a < TLS_hash_SHA256 || !info || label_len > 249)
-    return 0;
-
-  info[0] = key_len >> 8;
-  info[1] = key_len & 255;
-  info[2] = (char)(label_len + 5);
-  memcpy(info+3, "QUIC ", 5);
+  info[0] = out_len >> 8;
+  info[1] = out_len & 255;
+  info[2] = label_len + 5;
+  memcpy(info+3, "quic ", 5);
   memcpy(info+8, label, label_len);
-  *info_len = label_len + 8;
+  info[8+label_len] = 0; // hlen;
 
+//  if(!quic_crypto_hash(a, info + label_len + 9, (const unsigned char*)label, 0))
+//    return 0;
+
+  *info_len = 9 + label_len; // + hlen;
   return 1;
 }
 
@@ -135,7 +120,7 @@ int MITLS_CALLCONV quic_crypto_tls_derive_secret(quic_secret *derived, const qui
   unsigned char info[323] = {0};
   size_t info_len;
 
-  if(!quic_crypto_hkdf_tls_label(secret->hash, info, &info_len, label))
+  if(!quic_crypto_hkdf_label(secret->hash, info, &info_len, label, hlen))
     return 0;
 
   derived->hash = secret->hash;
@@ -155,7 +140,7 @@ int MITLS_CALLCONV quic_crypto_tls_derive_secret(quic_secret *derived, const qui
   dump(tmp, hlen);
 #endif
 
-  if(!quic_crypto_hkdf_tls_label(secret->hash, info, &info_len, "exporter"))
+  if(!quic_crypto_hkdf_label(secret->hash, info, &info_len, "exporter", hlen))
     return 0;
 
   if(!quic_crypto_hkdf_expand(secret->hash, (uint8_t *) derived->secret, hlen,
@@ -171,7 +156,7 @@ int MITLS_CALLCONV quic_crypto_tls_derive_secret(quic_secret *derived, const qui
 }
 
 int MITLS_CALLCONV quic_derive_initial_secrets(quic_secret *client_in, quic_secret *server_in,
-   const unsigned char *con_id, size_t con_id_len, const unsigned char *salt, size_t salt_len, uint8_t is_draft13)
+   const unsigned char *con_id, size_t con_id_len, const unsigned char *salt, size_t salt_len)
 {
   quic_secret s0 = {
     .hash = TLS_hash_SHA256,
@@ -199,7 +184,7 @@ int MITLS_CALLCONV quic_derive_initial_secrets(quic_secret *client_in, quic_secr
   client_in->hash = s0.hash;
   client_in->ae = s0.ae;
 
-  if(!quic_crypto_hkdf_quic_label(s0.hash, info, &info_len, is_draft13 ? "client in" : "client hs", 32))
+  if(!quic_crypto_hkdf_label(s0.hash, info, &info_len, "client in", 32))
     return 0;
 
   if(!quic_crypto_hkdf_expand(s0.hash, (uint8_t *) client_in->secret, 32, (uint8_t *) s0.secret, 32, info, info_len))
@@ -213,7 +198,7 @@ int MITLS_CALLCONV quic_derive_initial_secrets(quic_secret *client_in, quic_secr
   server_in->hash = s0.hash;
   server_in->ae = s0.ae;
 
-  if(!quic_crypto_hkdf_quic_label(s0.hash, info, &info_len, is_draft13 ? "server in" : "server hs", 32))
+  if(!quic_crypto_hkdf_label(s0.hash, info, &info_len, "server in", 32))
     return 0;
 
   if(!quic_crypto_hkdf_expand(s0.hash, (uint8_t *) server_in->secret, 32, (uint8_t *) s0.secret, 32, info, info_len))
@@ -240,17 +225,17 @@ int MITLS_CALLCONV quic_crypto_derive_key(quic_key **k, const quic_secret *secre
   unsigned char pnkey[32];
   size_t info_len;
 
-  if(!quic_crypto_hkdf_quic_label(secret->hash, info, &info_len, "key", klen))
+  if(!quic_crypto_hkdf_label(secret->hash, info, &info_len, "key", klen))
     return 0;
   if(!quic_crypto_hkdf_expand(secret->hash, key->key, klen, (uint8_t *) secret->secret, slen, info, info_len))
     return 0;
 
-  if(!quic_crypto_hkdf_quic_label(secret->hash, info, &info_len, "iv", 12))
+  if(!quic_crypto_hkdf_label(secret->hash, info, &info_len, "iv", 12))
     return 0;
   if(!quic_crypto_hkdf_expand(secret->hash, key->static_iv, 12, (uint8_t *) secret->secret, slen, info, info_len))
     return 0;
 
-  if(!quic_crypto_hkdf_quic_label(secret->hash, info, &info_len, "pn", klen))
+  if(!quic_crypto_hkdf_label(secret->hash, info, &info_len, "pn", klen))
     return 0;
   if(!quic_crypto_hkdf_expand(secret->hash, pnkey, klen, (uint8_t *) secret->secret, slen, info, info_len))
     return 0;
@@ -295,9 +280,9 @@ int MITLS_CALLCONV quic_crypto_create(quic_key **key, mitls_aead alg, const unsi
   memcpy(k->static_iv, iv, 12);
 
   if(alg == TLS_aead_AES_128_GCM)
-    k->pne.case_aes128 = EverCrypt_aes128_create(pne_key);
+    k->pne.case_aes128 = EverCrypt_aes128_create((uint8_t*)pne_key);
   else if(alg == TLS_aead_AES_256_GCM)
-    k->pne.case_aes256 = EverCrypt_aes256_create(pne_key);
+    k->pne.case_aes256 = EverCrypt_aes256_create((uint8_t*)pne_key);
   else if(alg == TLS_aead_CHACHA20_POLY1305)
     memcpy(k->pne.case_chacha20, pne_key, 32);
 
@@ -314,15 +299,15 @@ int MITLS_CALLCONV quic_crypto_encrypt(quic_key *key, unsigned char *cipher, uin
 
   if(key->alg == TLS_aead_AES_128_GCM)
   {
-    EverCrypt_aes128_gcm_encrypt(key->key, iv, ad, ad_len, plain, plain_len, cipher, (cipher+plain_len));
+    EverCrypt_aes128_gcm_encrypt(key->key, iv, (uint8_t*)ad, ad_len, (uint8_t*)plain, plain_len, cipher, (cipher+plain_len));
   }
   else if(key->alg == TLS_aead_AES_256_GCM)
   {
-    EverCrypt_aes256_gcm_encrypt(key->key, iv, ad, ad_len, plain, plain_len, cipher, (cipher+plain_len));
+    EverCrypt_aes256_gcm_encrypt(key->key, iv, (uint8_t*)ad, ad_len, (uint8_t*)plain, plain_len, cipher, (cipher+plain_len));
   }
   else if(key->alg == TLS_aead_CHACHA20_POLY1305)
   {
-    EverCrypt_chacha20_poly1305_encrypt(key->key, iv, ad, ad_len, plain, plain_len, cipher, (cipher+plain_len));
+    EverCrypt_chacha20_poly1305_encrypt(key->key, iv, (uint8_t*)ad, ad_len, (uint8_t*)plain, plain_len, cipher, (cipher+plain_len));
   }
 
 #if DEBUG
@@ -346,19 +331,19 @@ int MITLS_CALLCONV quic_crypto_decrypt(quic_key *key, unsigned char *plain, uint
   if(cipher_len < quic_crypto_tag_length(key))
     return 0;
 
-  uint32_t r, plain_len = cipher_len - quic_crypto_tag_length(key);
+  uint32_t r = 0, plain_len = cipher_len - quic_crypto_tag_length(key);
 
   if(key->alg == TLS_aead_AES_128_GCM)
   {
-    r = EverCrypt_aes128_gcm_decrypt(key->key, iv, ad, ad_len, plain, plain_len, cipher, (cipher+plain_len));
+    r = EverCrypt_aes128_gcm_decrypt(key->key, iv, (uint8_t*)ad, ad_len, plain, plain_len, (uint8_t*)cipher, (uint8_t*)(cipher+plain_len));
   }
   else if(key->alg == TLS_aead_AES_256_GCM)
   {
-    r = EverCrypt_aes256_gcm_decrypt(key->key, iv, ad, ad_len, plain, plain_len, cipher, (cipher+plain_len));
+    r = EverCrypt_aes256_gcm_decrypt(key->key, iv, (uint8_t*)ad, ad_len, plain, plain_len, (uint8_t*)cipher, (uint8_t*)(cipher+plain_len));
   }
   else if(key->alg == TLS_aead_CHACHA20_POLY1305)
   {
-    r = EverCrypt_chacha20_poly1305_decrypt(key->key, iv, ad, ad_len, plain, plain_len, cipher, (cipher+plain_len));
+    r = EverCrypt_chacha20_poly1305_decrypt(key->key, iv, (uint8_t*)ad, ad_len, plain, plain_len, (uint8_t*)cipher, (uint8_t*)(cipher+plain_len));
   }
 
 #if DEBUG
@@ -377,14 +362,14 @@ int MITLS_CALLCONV quic_crypto_packet_number_otp(quic_key *key, const unsigned c
   unsigned char block[16];
   if(key->alg == TLS_aead_AES_128_GCM)
   {
-    EverCrypt_aes128_compute(key->pne.case_aes128, sample, block);
+    EverCrypt_aes128_compute(key->pne.case_aes128, (uint8_t*)sample, block);
     memcpy(mask, block, 4);
     return 1;
   }
 
   if(key->alg == TLS_aead_AES_256_GCM)
   {
-    EverCrypt_aes256_compute(key->pne.case_aes256, sample, block);
+    EverCrypt_aes256_compute(key->pne.case_aes256, (uint8_t*)sample, block);
     memcpy(mask, block, 4);
     return 1;
   }
@@ -394,7 +379,7 @@ int MITLS_CALLCONV quic_crypto_packet_number_otp(quic_key *key, const unsigned c
     uint8_t zero[4] = {0};
     uint32_t ctr = sample[0] + (sample[1] << 8) + (sample[2] << 16) + (sample[3] << 24);
 
-    EverCrypt_chacha20((uint8_t*)key->pne.case_chacha20, sample+4, ctr, zero, 4, mask);
+    EverCrypt_chacha20((uint8_t*)key->pne.case_chacha20, (uint8_t*)sample+4, ctr, zero, 4, mask);
     return 1;
   }
 

@@ -1,4 +1,4 @@
-module Spec.Lib.IntVec
+module Lib.IntVector
 
 open FStar.Mul
 open Spec.Lib.IntSeq

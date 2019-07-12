@@ -92,8 +92,13 @@ void EverCrypt_AutoConfig_init(EverCrypt_AutoConfig_cfg x0) {
     aes128_gcm_impl = BCrypt;
   } else if (EverCrypt_StaticConfig_openssl && prefer_openssl) {
     aes128_gcm_impl = OpenSSL;
+  } else if (EverCrypt_StaticConfig_bcrypt) {
+    aes128_gcm_impl = BCrypt;
+  } else if (EverCrypt_StaticConfig_openssl) {
+    aes128_gcm_impl = OpenSSL;
   } else {
-    aes128_gcm_impl = EverCrypt_StaticConfig_bcrypt ? BCrypt : OpenSSL;
+    //assert (EverCrypt_StaticConfig_vale);
+    aes128_gcm_impl = Vale;
   }
 
   // AES256-GCM: best = Vale (IF AES-NI), fallback = OpenSSL or BCrypt
@@ -103,8 +108,13 @@ void EverCrypt_AutoConfig_init(EverCrypt_AutoConfig_cfg x0) {
     aes256_gcm_impl = BCrypt;
   } else if (EverCrypt_StaticConfig_openssl && prefer_openssl) {
     aes256_gcm_impl = OpenSSL;
+  } else if (EverCrypt_StaticConfig_bcrypt) {
+    aes128_gcm_impl = BCrypt;
+  } else if (EverCrypt_StaticConfig_openssl) {
+    aes128_gcm_impl = OpenSSL;
   } else {
-    aes256_gcm_impl = EverCrypt_StaticConfig_bcrypt ? BCrypt : OpenSSL;
+    //assert (EverCrypt_StaticConfig_vale);
+    aes128_gcm_impl = Vale;
   }
 
   if (EverCrypt_StaticConfig_openssl && prefer_openssl) {

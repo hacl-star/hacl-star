@@ -1,0 +1,213 @@
+module X64.Vale.InsBasic
+
+#verbatim{:interface}
+open Types_s
+open X64.Machine_s
+open X64.Vale.State
+open X64.Vale.Decls
+open X64.Vale.QuickCode
+#endverbatim
+
+#verbatim
+open X64.Vale
+open X64.Vale.StateLemmas
+open X64.Vale.InsLemmas
+open X64.Taint_Semantics
+module S = X64.Bytes_Semantics_s
+#endverbatim
+
+#reset-options "--initial_fuel 4 --max_fuel 4 --max_ifuel 2 --z3rlimit 20"
+
+var{:state ok()} ok:bool;
+var{:state reg(Rax)} rax:nat64;
+var{:state reg(Rbx)} rbx:nat64;
+var{:state reg(Rcx)} rcx:nat64;
+var{:state reg(Rdx)} rdx:nat64;
+var{:state reg(Rsi)} rsi:nat64;
+var{:state reg(Rdi)} rdi:nat64;
+var{:state reg(Rbp)} rbp:nat64;
+var{:state reg(Rsp)} rsp:nat64;
+var{:state reg(R8)}  r8:nat64;
+var{:state reg(R9)}  r9:nat64;
+var{:state reg(R10)} r10:nat64;
+var{:state reg(R11)} r11:nat64;
+var{:state reg(R12)} r12:nat64;
+var{:state reg(R13)} r13:nat64;
+var{:state reg(R14)} r14:nat64;
+var{:state reg(R15)} r15:nat64;
+var{:state flags()} efl:nat64;
+var{:state mem()} mem:mem;
+var{:state memTaint()} memTaint:memTaint_type;
+
+procedure{:quick exportOnly} AssertQuickType(ghost p:Type0) returns(ghost u:squash(p))
+    requires
+        p;
+{
+    u := tuple();
+}
+
+procedure{:instruction mk_taint_ins2(S.Mov64, dst, src, list(dst), list(src))}{:fast_instruction}{:quick exportOnly} Mov64(inout dst: dst_opr64, src: opr64)
+    ensures
+        dst == old(src);
+{
+}
+
+procedure{:instruction mk_taint_ins2(S.Add64, dst, src, list(dst), list(dst, src))}{:quick exportOnly} Add64(inout dst: dst_opr64, src: opr64)
+    modifies
+        efl;
+    requires
+        src + dst < pow2_64;
+    ensures
+        dst == old(dst + src);
+{
+}
+
+procedure{:instruction mk_taint_ins2(S.Add64, dst, src, list(dst), list(dst, src))}{:fast_instruction}{:quick exportOnly} Add64Wrap(inout dst: dst_opr64, src: opr64)
+    modifies
+        efl;
+    ensures
+        dst == old(add_wrap(dst, src));
+        cf(efl) == old(dst + src >= pow2_64);
+{
+}
+
+
+procedure{:instruction mk_taint_ins2(S.Add64, dst, src, list(dst), list(dst, src))}{:fast_instruction}{:quick exportOnly} Add64Wrap_Mem(inout dst: dst_opr64, src: opr64)
+    modifies
+        efl;
+    ensures
+        dst == old(add_wrap(dst, src));
+        cf(efl) == old(dst + src >= pow2_64);
+{
+}
+
+procedure{:instruction mk_taint_ins3(S.AddLea64, dst, src1, src2, list(dst), list(dst, src1, src2))}{:quick exportOnly} AddLea64(out dst: dst_opr64, src1: opr64, src2: opr64)
+    requires
+        max_one_mem(@src1, @src2);
+        src1 + src2 < pow2_64;
+    ensures
+        dst == old(src1) + old(src2);
+{
+}
+
+procedure{:instruction mk_taint_ins2(S.AddCarry64, dst, src, list(dst), list(dst, src))}{:fast_instruction}{:quick exportOnly} Adc64Wrap(inout dst: dst_opr64, src: opr64)
+    modifies
+        efl;
+    ensures
+        dst == old(add_wrap(add_wrap(dst, src), (if cf(efl) then 1 else 0)));
+        cf(efl) == old(dst + src + (if cf(efl) then 1 else 0)) >= pow2_64;
+{
+}
+
+procedure{:instruction mk_taint_ins2(S.Adcx64, dst, src, list(dst), list(dst, src))}{:fast_instruction}{:quick exportOnly} Adcx64Wrap(inout dst: dst_opr64, src: opr64)
+    modifies
+        efl;
+    ensures
+        dst == old(add_wrap(add_wrap(dst, src), (if cf(efl) then 1 else 0)));
+        efl == update_cf(old(efl), old(dst + src + (if cf(efl) then 1 else 0)) >= pow2_64);
+{
+}
+
+procedure{:instruction mk_taint_ins2(S.Adox64, dst, src, list(dst), list(dst, src))}{:fast_instruction}{:quick exportOnly} Adox64Wrap(inout dst: dst_opr64, src: opr64)
+    modifies
+        efl;
+    ensures
+        dst == old(add_wrap(add_wrap(dst, src), (if overflow(efl) then 1 else 0)));
+        efl == update_of(old(efl), old(dst + src + (if overflow(efl) then 1 else 0)) >= pow2_64);
+{
+}
+
+procedure{:instruction mk_taint_ins2(S.Sub64, dst, src, list(dst), list(dst, src))}{:fast_instruction}{:quick exportOnly} Sub64(inout dst: dst_opr64, src: opr64)
+    requires
+        0 <= dst - src;
+    modifies
+        efl;
+    ensures
+        dst == old(dst) - old(src);
+{
+}
+
+procedure{:instruction mk_taint_ins2(S.Sub64, dst, src, list(dst), list(dst, src))}{:quick exportOnly} Sub64Wrap(inout dst: dst_opr64, src: opr64)
+    modifies
+        efl;
+    ensures
+        dst == old(dst - src) % pow2_64;
+{
+}
+
+#verbatim
+let lemma_fundamental_div_mod (a b:nat64) :
+  Lemma (pow2_64 `op_Multiply` (FStar.UInt.mul_div #64 a b) + (FStar.UInt.mul_mod #64 a b) == a `op_Multiply` b)
+  =
+  ()
+#endverbatim
+
+procedure{:instruction mk_taint_ins1(S.Mul64, src, list(TReg(Rax), TReg(Rdx)), list(TReg(Rax), src))}{:fast_instruction}{:quick exportOnly} Mul64Wrap(src: opr64)
+    modifies
+        efl;
+        rax;
+        rdx;
+    ensures
+        pow2_64 * rdx + rax == old(rax * src);
+{
+    lemma_fundamental_div_mod(old(rax), old(src));
+}
+
+procedure{:instruction mk_taint_ins3(S.Mulx64, dst_hi, dst_lo, src, list(dst_hi, dst_lo), list(TReg(Rdx), src))}{:fast_instruction}{:quick exportOnly} Mulx64(out dst_hi: dst_opr64, out dst_lo: dst_opr64, src: opr64)
+    requires @dst_hi != @dst_lo;
+    reads
+        rdx;
+    ensures
+        pow2_64 * dst_hi + dst_lo == old(rdx * src);
+{
+    lemma_fundamental_div_mod(old(rdx), old(src));
+}
+
+procedure{:instruction mk_taint_ins2(S.IMul64, dst, src, list(dst), list(dst, src))}{:fast_instruction}{:quick exportOnly} IMul64(inout dst: dst_opr64, src: opr64)
+    requires
+        dst * src < pow2_64;
+    modifies
+        efl;
+    ensures
+        dst == old(dst * src);
+{
+    lemma_mul_nat(old(dst), old(src));
+    lemma_mul_in_bounds(old(dst), old(src));
+}
+
+procedure{:instruction mk_taint_ins2(S.Xor64, dst, src, list(dst), list(dst, src))}{:quick exportOnly} Xor64(inout dst: dst_opr64, src: opr64)
+    modifies
+        efl;
+    ensures
+        dst == old(ixor(dst,src));
+        !overflow(efl);
+        !cf(efl);
+
+{
+}
+
+procedure{:instruction mk_taint_ins2(S.And64, dst, src, list(dst), list(dst, src))}{:fast_instruction}{:quick exportOnly} And64(inout dst: dst_opr64, src: opr64)
+    modifies
+        efl;
+    ensures
+        dst == old(iand(dst,src));
+{
+}
+
+procedure{:instruction mk_taint_ins2(S.Shl64, dst, amt, list(dst), list(dst, amt))}{:quick exportOnly} Shl64(inout dst: dst_opr64, amt: shift_amt64)
+    modifies
+        efl;
+//    requires
+//        0 <= src < 64;
+    ensures
+        dst == old(ishl(dst, amt));
+{
+}
+
+procedure{:instruction mk_taint_ins2(S.Shr64, dst, amt, list(dst), list(dst, amt))}{:fast_instruction}{:quick exportOnly} Shr64(inout dst: dst_opr64, amt: shift_amt64)
+    modifies
+        efl;
+    ensures
+        dst == old(ishr(dst, amt));
+{
+}

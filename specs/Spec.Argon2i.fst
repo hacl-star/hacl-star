@@ -7,7 +7,7 @@ open Lib.IntTypes
 open Lib.Sequence
 open Lib.ByteSequence
 open Lib.RawIntTypes
-open FStar.All
+open Lib.LoopCombinators
 
 let version_number : uint8 = assert_norm (0x13 < maxint (U8));u8 0x13
 let argon_type = 1
@@ -21,8 +21,8 @@ val h : a_len:size_nat{0 < a_len /\ a_len <=max_size_t - 2 *$line_size}
   -> Tot (lbytes nn)
 let h a_len a nn =
   let null_list = [] in
-  let null_key : lbytes 0 = assert_norm (List.Tot.length null_list = 0); createL #uint8 null_list in
-  Spec.Blake2b.blake2b a_len a 0 null_key nn
+  let null_key : lbytes 0 = assert_norm (List.Tot.length null_list = 0); of_list #uint8 null_list in
+  Spec.Blake2.blake2b a 0 null_key nn
 
 (** Concats the parameters for Argon2i and hashes them to provide the initial buffer *)
 val concat_and_hash :
@@ -107,7 +107,7 @@ let h' t_len x_len x =
     in
     update_slice output (r*$32) ((r*$32)+64) vlast
 
-let low_bits x = to_u64 #U32 (to_u32 #U64 x)
+let low_bits (x:uint64) : uint64 = to_u64 (to_u32 x)
 
 type idx = idx:size_nat{idx <= 15}
 
@@ -115,15 +115,15 @@ type idx = idx:size_nat{idx <= 15}
 Low-level compression function inspired by Blake2b
 See annex A of the Argon2 spec
 *)
-let g (a:uint64) (b:uint64) (c:uint64) (d:uint64) =
+let g (a:uint64) (b:uint64) (c:uint64) (d:uint64) : (uint64 & uint64 & uint64 & uint64) =
   let a = a +. b +. (u64 2) *. (low_bits a) *. (low_bits b) in
-  let d = (d ^. a) >>>. (u32 32) in
+  let d = (d ^. a) >>>. (size 32) in
   let c = c +. d +. (u64 2) *. (low_bits c) *. (low_bits d) in
-  let b = (b ^. c) >>>. (u32 24) in
+  let b = (b ^. c) >>>. (size 24) in
   let a = a +. b +. (u64 2) *. (low_bits a) *. (low_bits b) in
-  let d = (d ^. a) >>>. (u32 16) in
+  let d = (d ^. a) >>>. (size 16) in
   let c = c +. d +. (u64 2) *. (low_bits c) *. (low_bits d) in
-  let b = (b ^. c) >>>. (u32 63) in
+  let b = (b ^. c) >>>. (size 63) in
   (a,b,c,d)
 
 (** Wrapper around g *)
@@ -167,7 +167,7 @@ let xor_matrices (x:lbytes block_size) (y:lbytes block_size) : Tot (lbytes block
   let r = create block_size (u8 0) in
   repeati (block_size / 8) (fun i r ->
     update_slice r (8*$i) (8*$(i+1)) (uint_to_bytes_be (
-      (uint_from_bytes_be #U64 (sub x (8*$i) 8)) ^. (uint_from_bytes_be #U64 (sub y (8*$i) 8))
+      (uint_from_bytes_be #U64 #SEC (sub x (8*$i) 8)) ^. (uint_from_bytes_be #U64 (sub y (8*$i) 8))
     ))
   ) r
 
@@ -259,8 +259,8 @@ let concat_pseudo_rand_arg_block
 let concat_h0_j_i (h0:lbytes 64) (j:size_nat) (i:size_nat) : Tot (lbytes 72) =
    let output = create 72 (u8 0) in
    let output = update_slice output 0 64 h0 in
-   let output = update_slice output 64 68 (uint_to_bytes_le #U32 (u32 j)) in
-   update_slice output 68 72 (uint_to_bytes_le #U32 (u32 i))
+   let output = update_slice output 64 68 (uint_to_bytes_le (u32 j)) in
+   update_slice output 68 72 (uint_to_bytes_le (u32 i))
 
 (** Overwrite a block in memory with its new value *)
 let update_block
@@ -460,3 +460,4 @@ let argon2i p_len p s_len s lanes t_len m iterations x_len x k_len k =
   ) memory in
   let final_block = xor_last_column lanes columns memory in
   h' t_len block_size final_block
+

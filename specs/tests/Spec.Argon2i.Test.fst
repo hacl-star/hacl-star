@@ -15,20 +15,20 @@ let password_list = List.Tot.map u8_from_UInt8 [
   0x01uy; 0x01uy; 0x01uy; 0x01uy; 0x01uy; 0x01uy; 0x01uy; 0x01uy
 ]
 
-let password : lbytes 32 = assert_norm (List.Tot.length password_list = 32);createL password_list
+let password : lbytes 32 = assert_norm (List.Tot.length password_list = 32);of_list password_list
 
 let nonce_list = List.Tot.map u8_from_UInt8 [
   0x02uy; 0x02uy; 0x02uy; 0x02uy; 0x02uy; 0x02uy; 0x02uy; 0x02uy;
   0x02uy; 0x02uy; 0x02uy; 0x02uy; 0x02uy; 0x02uy; 0x02uy; 0x02uy
 ]
 
-let nonce : lbytes 16 = assert_norm (List.Tot.length nonce_list = 16);createL nonce_list
+let nonce : lbytes 16 = assert_norm (List.Tot.length nonce_list = 16);of_list nonce_list
 
 let key_list = List.Tot.map u8_from_UInt8 [
   0x03uy; 0x03uy; 0x03uy; 0x03uy; 0x03uy; 0x03uy; 0x03uy; 0x03uy
 ]
 
-let key : lbytes 8 = assert_norm (List.Tot.length key_list = 8);createL key_list
+let key : lbytes 8 = assert_norm (List.Tot.length key_list = 8);of_list key_list
 
 let associated_data_list = List.Tot.map u8_from_UInt8 [
   0x04uy; 0x04uy; 0x04uy; 0x04uy; 0x04uy; 0x04uy; 0x04uy; 0x04uy;
@@ -36,7 +36,7 @@ let associated_data_list = List.Tot.map u8_from_UInt8 [
 ]
 
 let associated_data : lbytes 12 = assert_norm (List.Tot.length associated_data_list = 12);
-  createL associated_data_list
+  of_list associated_data_list
 
 let expected_list = List.Tot.map u8_from_UInt8 [
   0xc8uy; 0x14uy; 0xd9uy; 0xd1uy; 0xdcuy; 0x7fuy; 0x37uy; 0xaauy;
@@ -45,7 +45,7 @@ let expected_list = List.Tot.map u8_from_UInt8 [
   0x99uy; 0x52uy; 0xa4uy; 0xc4uy; 0x67uy; 0x2buy; 0x6cuy; 0xe8uy
 ]
 
-let expected : lbytes 32 = assert_norm (List.Tot.length expected_list = 32); createL expected_list
+let expected : lbytes 32 = assert_norm (List.Tot.length expected_list = 32); of_list expected_list
 
 let test () =
 
@@ -67,10 +67,10 @@ let test () =
   in
   let result = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) expected output in
   IO.print_string "\nResult   ARGON2i: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string_hex (u8_to_UInt8 a))) (as_list output);
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list output);
 
   IO.print_string "\nExpected ARGON2i: ";
-  List.iter (fun a -> IO.print_string (UInt8.to_string_hex (u8_to_UInt8 a))) (as_list expected);
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list expected);
 
   if result then IO.print_string "\nARGON2i Test1 : Success!\n"
   else IO.print_string "\nARGON2i Test1: Failure :(\n"

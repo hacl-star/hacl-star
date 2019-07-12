@@ -145,7 +145,7 @@ let chacha20 key iv ctr plain len cipher =
   let i = AC.chacha20_impl () in
   if SC.hacl && i = AC.Hacl then
     EverCrypt.Hacl.chacha20 key iv ctr plain len cipher
-  else 
+  else
     failwith !$"ERROR: inconsistent configuration"
 
 /// AES128-GCM
@@ -381,7 +381,7 @@ let aead_create alg k =
       else if SC.openssl && i = AC.OpenSSL then
         AEAD_OPENSSL (OpenSSL.aead_create OpenSSL.AES256_GCM k)
       else
-        failwith !$"ERROR: inconsistent configuration"  
+        failwith !$"ERROR: inconsistent configuration"
     | CHACHA20_POLY1305 ->
       let i = AC.chacha20_poly1305_impl () in
       if SC.hacl && i = AC.Hacl then

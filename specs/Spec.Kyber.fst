@@ -5,6 +5,7 @@ open Lib.RawIntTypes
 open Lib.Sequence
 open Lib.ByteSequence
 open FStar.Mul
+open Lib.LoopCombinators
 
 let q = 7681
 let n = 256
@@ -54,21 +55,21 @@ let poly_mul (p1:poly) (p2:poly) : poly =
 
 let poly_scalar_mul (x:field) (p:poly) : poly = map (fun y -> x ** y) p
 
-let poly_shift_reduce (p:poly) =
-    let np = repeati 255 (fun i np -> np.[i+1] <- np.[i]) p in
+let poly_shift_reduce (p:poly) : poly =
+    let np = repeati #poly 255 (fun i np -> np.[i+1] <- np.[i]) p in
     np.[0] <- zero -- p.[255]
 
 let poly_mul_textbook_old (p1:poly) (p2:poly) : poly =
   let zero_poly : poly = create 256 zero in
-  let sum,_ = repeati 256 (fun i (sum,np1) ->
+  let sum,_ = repeati #(poly & poly) 256 (fun i (sum,np1) ->
 		 (poly_add sum (poly_scalar_mul p2.[255-i] np1)),
 		 (poly_shift_reduce np1)) (zero_poly,p1) in
   sum
 
 let poly_mul_textbook (p1:poly) (p2:poly) : poly =
   let sum = create 512 zero in
-  let sum = repeati 256 (fun i sum ->
-		 repeati 256 (fun j sum ->
+  let sum = repeati #(lseq field 512) 256 (fun i sum ->
+		 repeati #(lseq field 512) 256 (fun j sum ->
 			 sum.[i+j] <- sum.[i+j] ++ (p1.[i] ** p2.[j])) sum) sum in
   let high = sub sum 256 256 in
   let low = sub sum 0 256 in
@@ -123,19 +124,19 @@ let test () =
   let test0 = test0.[1] <- 1 in
   IO.print_string   "NTT(test0):";
   let result1 = ntt test0 in
-  List.iter (fun a -> IO.print_string (UInt32.to_string (u32_to_UInt32 (nat_to_uint #U32 a))); IO.print_string " ; ") (as_list result1);
+  List.iter (fun a -> IO.print_string (UInt32.to_string (u32_to_UInt32 (nat_to_uint #U32 a))); IO.print_string " ; ") (to_list result1);
   IO.print_string   "\nMul with NTT:";
   let result1 = poly_mul test0 test0 in
-  List.iter (fun a -> IO.print_string (UInt32.to_string (u32_to_UInt32 (nat_to_uint #U32 a))); IO.print_string " ; ") (as_list result1);
+  List.iter (fun a -> IO.print_string (UInt32.to_string (u32_to_UInt32 (nat_to_uint #U32 a))); IO.print_string " ; ") (to_list result1);
   IO.print_string "\nMul with Textbook:";
   let result2 = poly_mul_textbook test0 test0 in
-  List.iter (fun a -> IO.print_string (UInt32.to_string (u32_to_UInt32 (nat_to_uint #U32 a))); IO.print_string " ; ") (as_list result2);
+  List.iter (fun a -> IO.print_string (UInt32.to_string (u32_to_UInt32 (nat_to_uint #U32 a))); IO.print_string " ; ") (to_list result2);
 
-  let test1 = createL p1 in
+  let test1 = of_list p1 in
   IO.print_string   "\nMul with NTT:";
   let result1 = poly_mul test1 test1 in
-  List.iter (fun a -> IO.print_string (UInt32.to_string (u32_to_UInt32 (nat_to_uint #U32 a)))) (as_list result1);
+  List.iter (fun a -> IO.print_string (UInt32.to_string (u32_to_UInt32 (nat_to_uint #U32 a)))) (to_list result1);
   IO.print_string "\nMul with Textbook:";
   let result2 = poly_mul_textbook test1 test1 in
-  List.iter (fun a -> IO.print_string (UInt32.to_string (u32_to_UInt32 (nat_to_uint #U32 a)))) (as_list result2);
+  List.iter (fun a -> IO.print_string (UInt32.to_string (u32_to_UInt32 (nat_to_uint #U32 a)))) (to_list result2);
   ()

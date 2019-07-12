@@ -42,7 +42,7 @@ typedef struct quic_key quic_key;
 // (5) erase all secrets used for derivation.
 
 // con_id must be 8 bytes, salt must be the version-specific 20 bytes initial salt
-int MITLS_CALLCONV quic_derive_initial_secrets(/*out*/ quic_secret *client_in, /*out*/ quic_secret *server_in, const unsigned char *con_id, size_t con_id_len, const unsigned char *salt, size_t salt_len, uint8_t is_draft13);
+int MITLS_CALLCONV quic_derive_initial_secrets(/*out*/ quic_secret *client_in, /*out*/ quic_secret *server_in, const unsigned char *con_id, size_t con_id_len, const unsigned char *salt, size_t salt_len);
 int MITLS_CALLCONV quic_crypto_tls_derive_secret(/*out*/ quic_secret *derived, const quic_secret *secret, const char *label);
 int MITLS_CALLCONV quic_crypto_derive_key(/*out*/quic_key **key, const quic_secret *secret);
 
@@ -83,7 +83,6 @@ int MITLS_CALLCONV quic_crypto_hmac(quic_hash a, /*out*/ unsigned char *mac, con
 
 int MITLS_CALLCONV quic_crypto_hkdf_extract(quic_hash a, /*out*/ unsigned char *prk, const unsigned char *salt, uint32_t salt_len, const unsigned char *ikm, uint32_t ikm_len);
 int MITLS_CALLCONV quic_crypto_hkdf_expand(quic_hash a, /*out*/ unsigned char *okm, uint32_t okm_len, const unsigned char *prk, uint32_t prk_len, const unsigned char *info, uint32_t info_len);
-int MITLS_CALLCONV quic_crypto_hkdf_quic_label(quic_hash a, /*out*/ unsigned char *info, /*out*/ size_t *info_len, const char *label, uint16_t key_len);
-int MITLS_CALLCONV quic_crypto_hkdf_tls_label(quic_hash a, /*out*/ unsigned char *info, /*out*/ size_t *info_len, const char *label);
+int MITLS_CALLCONV quic_crypto_hkdf_label(quic_hash a, /*out*/ unsigned char *info, /*out*/ size_t *info_len, const char *label, uint16_t out_len);
 
 #endif /* end of include guard:  */

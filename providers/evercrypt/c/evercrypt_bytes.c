@@ -1,4 +1,3 @@
-#include "kremlib/extracted/FStar_Bytes.h"
 #include "kremlib.h"
 #include "EverCrypt_Bytes.h"
 #include "EverCrypt.h"

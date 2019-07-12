@@ -2,23 +2,16 @@ UNAME := $(shell uname)
 .DEFAULT_GOAL=all
 
 ifndef HACL_HOME
-	HACL_HOME:=$(abspath $(dir $(lastword $(MAKEFILE_LIST))))
-	HACL_HOME:=$(HACL_HOME:/=)
-else
-	HACL_HOME:=$(abspath $(HACL_HOME))
-	HACL_HOME:=$(HACL_HOME:/=)
+  HACL_HOME:=$(abspath $(dir $(lastword $(MAKEFILE_LIST))))
+  HACL_HOME:=$(HACL_HOME:/=)
 endif
 
 ifndef FSTAR_HOME
-  FSTAR_HOME:=$(abspath $(HACL_HOME)/dependencies/FStar)
-else
-  FSTAR_HOME:=$(abspath $(FSTAR_HOME))
+  FSTAR_HOME:=$(HACL_HOME)/../FStar
 endif
 
 ifndef KREMLIN_HOME
-  KREMLIN_HOME:=$(abspath $(HACL_HOME)/dependencies/kremlin)
-else
-  KREMLIN_HOME:=$(abspath $(KREMLIN_HOME))
+  KREMLIN_HOME:=$(HACL_HOME)/../kremlin
 endif
 
 export HACL_HOME
@@ -28,14 +21,6 @@ export KREMLIN_HOME
 # $(info $(HACL_HOME))
 # $(info $(FSTAR_HOME))
 # $(info $(KREMLIN_HOME))
-
-HACL_LIB=$(HACL_HOME)/code/lib
-HACL_FILES=Hacl.UInt8.fst Hacl.UInt16.fst Hacl.UInt32.fst Hacl.UInt64.fst Hacl.UInt128.fst Hacl.Cast.fst Hacl.Types.fst Hacl.Policies.fst
-HACL_LIB_FILES=$(addprefix $(HACL_LIB)/, $(HACL_FILES))
-HACL_KREMLIN=$(HACL_LIB)/kremlin
-HACL_KREMLIN_FILES=$(addprefix $(HACL_KREMLIN)/, $(HACL_FILES))
-HACL_API=$(HACL_HOME)/code/api
-HACL_CRYPTO_UTILS=$(HACL_HOME)/code/lib
 
 ifeq ($(CI),true)
 VERBOSE=
@@ -70,6 +55,14 @@ else
   KREMLIN_ARGS+=-ccopt -march=native $(VERBOSE) -ldopt -flto
 endif
 
+# BB. Check if this is necessary
+# Release mode (includes testlib if not release)
+ifdef HACL_RELEASE
+  KREMLIN_TESTLIB=
+else
+  KREMLIN_TESTLIB=-add-include '"extracted/TestLib.h"' $(KREMLIB)/c/testlib.c
+endif
+
 # License header
 ifdef HACL_LICENSE
   KREMLIN_ARGS+=-header $(HACL_LICENSE)
@@ -80,27 +73,15 @@ endif
 #
 
 FSTAR_LIB=$(FSTAR_HOME)/ulib
+
 HINTS_ENABLED?=--use_hints
-FSTAR_INCLUDES+=--include $(HACL_KREMLIN) --include $(KREMLIB) --include $(HACL_HOME)/specs --include $(HACL_HOME)/lib --include $(HACL_HOME)/lib/fst --query_stats
+FSTAR_INCLUDES+= \
+	--include $(HACL_HOME)/lib \
+	--include $(HACL_HOME)/lib/fst \
+	--include $(HACL_HOME)/specs \
+	--query_stats
 
 FSTAR=$(FSTAR_HOME)/bin/fstar.exe $(HINTS_ENABLED) $(OTHERFLAGS) $(FSTAR_INCLUDES)
-
-#
-# Azure cloud verification
-#
-
-ifdef CLOUD_VERIFY
-BATCH_JOB_ID=$(subst job-id:,,$(filter job-id:%, $(shell cat $(BATCH_ID_FILE))))
-BATCH_OUTPUT_SAS=$(subst output-sas:,,$(filter output-sas:%, $(shell cat $(BATCH_ID_FILE))))
-EABC=python /mnt/f/dev/sec/eabc/eabc.py
-CURRENT_SUBDIR:=$(subst $(HACL_HOME)/,,$(abspath $(shell pwd)))
-BATCH_ADD_CMD=$(EABC) add -d "hacl-star/$(CURRENT_SUBDIR)" $(EABC_EXTRA) "$(BATCH_OUTPUT_SAS)" $(BATCH_JOB_ID)
-BATCH_RUN_CMD=$(EABC) run -d "hacl-star/$(CURRENT_SUBDIR)" $(EABC_EXTRA) "$(BATCH_OUTPUT_SAS)" $(BATCH_JOB_ID)
-BATCH_CMD=$(BATCH_ADD_CMD)
-FSTAR_RELATIVIZED=$(subst $(abspath $(HACL_HOME)/..),\$$H,$(HINTS_ENABLED) $(OTHERFLAGS) $(FSTAR_INCLUDES))
-FSTAR=$(BATCH_CMD) \$$H/FStar/bin/fstar.exe $(FSTAR_RELATIVIZED)
-KREMLIN=$(BATCH_CMD) \$$H/kremlin/krml
-endif
 
 include $(FSTAR_HOME)/ulib/ml/Makefile.include
 
@@ -109,7 +90,6 @@ include $(FSTAR_HOME)/ulib/ml/Makefile.include
 #
 
 OCAMLOPT:=$(OCAMLOPT) -thread -package batteries,zarith,stdint -w -20-26-3-8-58
-OCAML_OPTIONS=-fsopt "--lax" -fsopt "--codegen OCaml" -fsopt "--no_location_info"
 
 #
 # Compilers and tools
@@ -133,35 +113,34 @@ GCC_OPTS=$(ENABLE_LTO) -std=c11 -D_GNU_SOURCE
 # HACL* generalized targets
 #
 
-ml-lib:
-	$(MAKE) -C $(ULIB_ML)
+# ml-lib:
+# 	$(MAKE) -C $(ULIB_ML)
 
-import-lib:
-	@cp $(HACL_LIB_FILES) .
+# import-lib:
+# 	@cp $(HACL_LIB_FILES) .
 
-import-kremlin:
-	@cp $(HACL_KREMLIN_FILES)) .
+# import-kremlin:
+# 	@cp $(HACL_KREMLIN_FILES)) .
 
 %.fst-lax: %.fst
 	$(FSTAR) --lax $^
+
 %.fsti-lax: %.fsti
 	$(FSTAR) --lax $^
 
-%.fst-krml: %.fst
-	$(KREMLIN) $(KREMLIN_ARGS) $(KREMLIN_INCLUDES) $<
-
 %.fst-verify: %.fst
-	$(FSTAR) --log_queries $< 
+	$(FSTAR) $<
+
 %.fsti-verify: %.fsti
 	$(FSTAR) $<
 
-%.fst-in: %.fst
+%.fst-in:
 	@echo --hint_info \
 	$(HINTS_ENABLED) \
 	$(OTHERFLAGS) \
 	$(FSTAR_INCLUDES)
 
-%.fsti-in: %.fsti
+%.fsti-in:
 	@echo --hint_info \
 	$(HINTS_ENABLED) \
 	$(OTHERFLAGS) \
@@ -169,6 +148,7 @@ import-kremlin:
 
 %.fst.hints: %.fst
 	$(FSTAR) --record_hints --z3rlimit_factor 5 $<
+
 %.fsti.hints: %.fsti
 	$(FSTAR) --record_hints --z3rlimit_factor 5 $<
 
@@ -181,19 +161,6 @@ import-kremlin:
 	$(FSTAR) --hint_file $(subst .reloc,,$(@F)) --record_hints $<
 %.fsti.reloc.hints: %.fsti
 	$(FSTAR) --hint_file $(subst .reloc,,$(@F)) --record_hints $<
-
-# Interactive verification
-%.fst-in: %.fst
-	@echo --hint_info \
-	$(HINTS_ENABLED) \
-	$(OTHERFLAGS) \
-	$(FSTAR_INCLUDES)
-
-%.fsti-in: %.fsti
-	@echo --hint_info \
-	$(HINTS_ENABLED) \
-	$(OTHERFLAGS) \
-	$(FSTAR_INCLUDES)
 
 # Directories
 %.dir-verify: %

@@ -3,7 +3,7 @@ module Flag
    It sets all the flags to false to extract only the concrete
    version of the code, without any of the cryptographic idealizations
 *)
- 
+
 module ST = FStar.HyperStack.ST
 
 // Secret-dependant access to sbox, dangerous
