@@ -88,6 +88,6 @@ void hacl_aligned_free(void * ptr) {
 
 #endif // HACL_IS_WINDOWS
 
-void randombytes(uint8_t * x,uint32_t len) {
+bool randombytes(uint8_t * x, uint32_t len) {
   return (read_random_bytes(len, x));
 }
