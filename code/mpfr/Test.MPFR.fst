@@ -15,10 +15,14 @@ open MPFR
 
 #set-options "--z3refresh --lax --max_fuel 1 --initial_fuel 0 --max_ifuel 1 --initial_ifuel 0"
 
-let cprint x = (*C.String.print (C.String.of_literal x)*) (*print_string x*) Printf.printf "%s" x
+inline_for_extraction
+let cprint x = C.String.print (C.String.of_literal "(TODO cprint)") // (*print_string x*) Printf.printf "%s" x
 
+inline_for_extraction
 let print_i32 x = cprint (string_of_int (I32.v x)); cprint " "
+inline_for_extraction
 let print_i64 x = cprint (string_of_int (I64.v x)); cprint " "
+inline_for_extraction
 let print_u64 x = cprint (string_of_int (U64.v x)); cprint " "
 
 let print_rnd rnd = match rnd with

@@ -1,104 +1,175 @@
-# For simplified Makefiles, define FSTAR_HOME, then include the file below.
-include ../../Makefile.include
+FSTAR_HOME   ?= ../../../../FStar
+KREMLIN_HOME ?= ../../../../kremlin
+HACL_HOME    ?= ../../..
 
-#You shoukd set FSTAR_HOME and KREMLIN_HOME to where you cloned those two repos
-#Usually it is better to define these environment variables in the .bash_profile
-#FSTAR_HOME=~/FStar
-#KREMLIN_HOME=~/kremlin
+CACHE_DIR     ?= .cache
+HINT_DIR      ?= .hints
+OUTPUT_DIR    ?= .output
+GENERATED_DIR ?= mpfr-c
+OUT_DIR	     ?= mpfr-c
 
-FSTAR=$(FSTAR_HOME)/bin/fstar.exe
+.PHONY: all test stage1 stage2 clean clean-c distclean
 
-all: test-ocaml
+all: test
 
-MPFR_FILES=	MPFR.Maths.fst \
-		MPFR.Dyadic.fst \
-		MPFR.Lib.Spec.fst \
-		MPFR.Add1.Spec.fst \
-		MPFR.RoundingMode.fst \
-		MPFR.Round.Spec.fst \
-		MPFR.Lib.fst \
-		MPFR.Exceptions.Lemma.fst \
-		MPFR.Exceptions.fst \
-		MPFR.Add1sp1.Lemma.fst \
-		MPFR.Add1sp1.fst \
-		MPFR.Umul_ppmm.fst \
-		MPFR.Mul.Spec.fst \
-		MPFR.Mul_1.fst \
-		MPFR.fst\
-		Test.MPFR.fst
+test:
+	rm -f .depend && $(MAKE) .depend
+	$(MAKE) stage1
+	STAGE=2 $(MAKE) stage2
 
-# This target is very concise and re-uses the variables defined in
-# Makefile.include. You shouldn't need to call `cp` ever.
+stage1: $(GENERATED_DIR)/MPFR.c $(GENERATED_DIR)/Test_MPFR.c
 
-#add1sp1-full-tests: out gen-add1sp1-tests MPFR.RoundingMode.fst MPFR.Lib.fst MPFR.Exceptions.fst MPFR.Add1sp1.fst test/Test_Add1sp1.ml
-#	$(FSTAR) $(FSTAR_DEFAULT_ARGS) --lax --odir out --codegen OCaml MPFR.Add1sp1.fst
-#	cp test/Test_Add1sp1.ml out/Test_Add1sp1.ml
-#	$(OCAMLOPT) -I $(FSTAR_HOME)/ulib/ml -I out out/MPFR_RoundingMode.ml out/MPFR_Lib.ml out/MPFR_Exceptions.ml out/MPFR_Add1sp1.ml out/Test_Add1sp1.ml -o out/Add1sp1
-#	out/Add1sp1
+stage2: mpfr.exe
+	./mpfr.exe
 
-#mul-1-full-tests: out gen-mul-1-tests MPFR.RoundingMode.fst MPFR.Lib.fst MPFR.Exceptions.fst MPFR.Umul_ppmm.fst MPFR.Mul_1.fst test/Test_Mul_1.ml
-#	$(FSTAR) $(FSTAR_DEFAULT_ARGS) --lax --odir out --codegen OCaml MPFR.Mul_1.fst
-#	cp test/Test_Mul_1.ml out/Test_Mul_1.ml
-#	$(OCAMLOPT) -I $(FSTAR_HOME)/ulib/ml -I out out/MPFR_RoundingMode.ml out/MPFR_Lib.ml out/MPFR_Exceptions.ml out/MPFR_Umul_ppmm.ml out/MPFR_Mul_1.ml out/Test_Mul_1.ml -o out/Mul_1
-#	out/Mul_1
+FSTAR_INCLUDE_DIRS = \
+  $(HACL_KREMLIN) \
+  $(KREMLIN_HOME)/kremlib \
+  $(HACL_HOME)/specs \
+  $(HACL_HOME)/lib/c \
+  $(HACL_HOME)/lib
 
-test-ocaml: out MPFR.RoundingMode.fst MPFR.Lib.fst MPFR.Exceptions.fst MPFR.Add1sp1.fst MPFR.Umul_ppmm.fst MPFR.Mul_1.fst MPFR.fst Test.MPFR.fst
-	$(FSTAR) $(FSTAR_DEFAULT_ARGS) --lax --odir out --codegen OCaml Test.MPFR.fst
-	echo "let _ = main ()" >> out/Test_MPFR.ml
-	$(OCAMLOPT) -I $(FSTAR_HOME)/ulib/ml -I out out/MPFR_RoundingMode.ml out/MPFR_Lib.ml out/MPFR_Exceptions.ml out/MPFR_Add1sp1.ml out/MPFR_Umul_ppmm.ml out/MPFR_Mul_1.ml out/MPFR.ml out/Test_MPFR.ml -o out/Test_MPFR
-	out/Test_MPFR
+FSTAR_FLAGS = $(OTHERFLAGS) --cmi \
+  --cache_checked_modules --cache_dir $(CACHE_DIR) --odir $(OUTPUT_DIR) \
+  --already_cached "'Prims+FStar+LowStar+C+Spec.Loops+TestLib+Lib'" \
+  $(addprefix --include ,$(FSTAR_INCLUDE_DIRS))
 
-%.fst-verify: %.fst
-	$(FSTAR) --include $(KREMLIN_HOME)/kremlib --use_hints --cache_checked_modules $*.fst
+FSTAR = $(FSTAR_HOME)/bin/fstar.exe $(FSTAR_FLAGS)
 
-%.fst-hints: %.fst
-	$(FSTAR) --z3rlimit_factor 5 --use_hints --record_hints $*.fst
+ENABLE_HINTS = --use_hints --use_hint_hashes --record_hints --query_stats
 
-%.fst-reg-hints: %.fst
-	$(FSTAR) --z3rlimit_factor 5 --record_hints $*.fst
+ROOTS = Test.MPFR.fst
 
-verify: $(addsuffix -verify, $(MPFR_FILES))
-hints: $(addsuffix -hints, $(MPFR_FILES))
-reg-hints: $(addsuffix -reg-hints, $(MPFR_FILES))
+.PRECIOUS: %.krml
 
-out:
-	mkdir -p out
+$(HINT_DIR):
+	mkdir -p $@
 
-#gen-add1sp1-tests: test/gen.c test/tadd_raw
-#	cc -o test/gen test/gen.c -lmpfr -lgmp
-#	test/gen test/tadd_raw test/add1sp1_tests
-#	rm test/gen
+$(CACHE_DIR):
+	mkdir -p $@
 
-#gen-mul-1-tests: test/gen.c test/tmul_raw
-#	cc -o test/gen test/gen.c -lmpfr -lgmp
-#	test/gen test/tmul_raw test/mul_1_tests
-#	rm test/gen
+.depend:
+	$(FSTAR) --dep full $(ROOTS) --extract '* -Prims -FStar +FStar.UInt128 -LowStar -Spec' > $@
 
-#gen-tests: gen-add1sp1-tests gen-mul-1-tests
+include .depend
 
+%.checked: | .depend $(HINT_DIR) $(CACHE_DIR)
+	$(FSTAR) $< $(ENABLE_HINTS) --hint_file $(HINT_DIR)/$(notdir $*).hints && \
+	touch -c $@
 
-KREMLIN_ARGS+=-tmpdir mpfr-c 
+$(OUTPUT_DIR)/%.krml: | .depend
+	$(FSTAR) --codegen Kremlin \
+	  --extract_module $(basename $(notdir $(subst .checked,,$<))) \
+	  $(notdir $(subst .checked,,$<)) && \
+	touch $@
 
-mpfr-c/out.krml: $(MPFR_FILES)
-	 $(KREMLIN) $(KREMLIN_ARGS) $(MPFR_FILES) -skip-translation
+# 2. Generation of .c files
 
-mpfr-c/MPFR.c: mpfr-c/out.krml
-	 $(KREMLIN) $(KREMLIN_ARGS) $^ -skip-compilation \
-	   -minimal -add-include '"kremlib.h"' -bundle 'MPFR=*' -fparentheses
+KREMLIN_TESTLIB=-fbuiltin-uint128 -fnocompound-literals -fc89-scope -fparentheses -fcurly-braces \
+	-funroll-loops 8 -warn-error +9 -add-include '"kremlib.h"' -add-include '"FStar_UInt_8_16_32_64.h"' $(KREMLIB)/dist/minimal/testlib.c
+KREMLIN=$(KREMLIN_HOME)/krml
 
-extract-c: mpfr-c/MPFR.c
+# We use -drop (deprecated) only to avoid creating unnecessary .c,.h files
+$(GENERATED_DIR)/MPFR.c: $(ALL_KRML_FILES) | .depend
+	$(KREMLIN) $(KREMLIN_TESTLIB) -skip-compilation \
+	-bundle 'Lib.*' \
+	-bundle 'Spec.\*' \
+	-bundle 'MPFR=*' \
+	-bundle 'FStar.*' \
+	-drop 'Lib.IntVector.Intrinsics,LowStar,Spec,Prims,Lib,C.Loops.*,Hacl.Spec.*' \
+	-tmpdir $(GENERATED_DIR) \
+	$^
 
-mpfr.exe: mpfr-c/MPFR.c mpfr-c/out.krml
-	$(KREMLIN) $(KREMLIN_ARGS) \
-	  -no-prefix 'Test.MPFR' -minimal -add-include '"kremlib.h"' \
-	  -bundle 'Test.MPFR=*' -library MPFR \
-	  $^ -o $@
+$(GENERATED_DIR)/Test_MPFR.c: $(ALL_KRML_FILES) | .depend
+	$(KREMLIN) $(KREMLIN_TESTLIB) -skip-compilation \
+	-no-prefix 'Test.MPFR' \
+	-library MPFR \
+	-bundle 'Lib.*' \
+	-bundle 'Spec.\*' \
+	-bundle 'Test.MPFR=*' \
+	-bundle 'FStar.*' \
+	-drop 'Lib.IntVector.Intrinsics,LowStar,Spec,Prims,Lib,C.Loops.*,Hacl.Spec.*' \
+	-tmpdir $(GENERATED_DIR) \
+	$^
 
-test: mpfr.exe
-	./$^
+# The Makefile is manually staged because GNU Make does not understand
+# dependencies between the Makefiles we include, i.e. it won't first generate
+# the .depend, parse it, then generate Makefile.include, parse it, then
+# generate dependencies among the C files
+ifeq ($(STAGE),2)
 
+# The top-level invocation guarantees that stage1 has been run and this file is
+# there.
+#include $(GENERATED_DIR)/Makefile.include
+
+# 3. Collecting all of our source files, and generating corresponding object
+# files.
+
+# This is auto-generated by KreMLin; since the Makefile is staged via the
+# inclusion of Makefile.include, the automated dependency analysis via $(CC) -MM
+# also captures the dependencies between these files.
+#
+# KreMLin sees the fsti's for the various Lib* and LowStar modules and creates .h/.c
+# files for them in $(GENERATED_DIR). However, we are only interested in the header,
+# and drop these (mostly empty) C files.
+#ALL_OUR_FILES 	    = $(filter-out FStar_* Lib.c LowStar.c C.c, $(ALL_C_FILES))
+#ALL_GENERATED_FILES = $(addprefix $(GENERATED_DIR)/,$(ALL_OUR_FILES))
+
+ALL_SOURCES = \
+  $(GENERATED_DIR)/MPFR.c \
+  $(GENERATED_DIR)/Test_MPFR.c
+
+ALL_OBJS = $(patsubst %.c,%.o,$(ALL_SOURCES))
+
+INCLUDE_DIRS = \
+  $(KREMLIN_HOME)/include \
+  $(KREMLIN_HOME)/kremlib \
+  $(KREMLIN_HOME)/kremlib/dist/generic \
+  $(HACL_HOME)/lib \
+  $(HACL_HOME)/lib/c
+
+CFLAGS += -O3 -march=native -mtune=native
+CFLAGS += $(addprefix -I ,$(INCLUDE_DIRS))
+#-Wall -Wextra -Werror \
+  -Wno-parentheses -Wno-unused-parameter -Wno-unused-variable
+
+# GNU Make manual section 4.14
+%.d: %.c
+	@set -e; rm -f $@; \
+	  $(CC) -MM $(CFLAGS) $< > $@.$$$$; \
+	  sed 's,\($(notdir $*)\)\.o[ :]*,$(dir $@)\1.o $@ : ,g' < $@.$$$$ > $@; \
+	  rm -f $@.$$$$
+
+-include $(patsubst %.c,%.d,$(ALL_SOURCES))
+
+mpfr.exe:
+	$(CC) $(CFLAGS) $(GENERATED_DIR)/MPFR.c $(GENERATED_DIR)/Test_MPFR.c -L $(KREMLIN_HOME)/kremlib/dist/generic -lkremlib -o mpfr.exe
+	./mpfr.exe
+
+.PRECIOUS: %.o
+
+endif # STAGE=2
+
+# 5. Targets for interactive mode
+
+%.fst-in:
+	@echo $(FSTAR_FLAGS) \
+	  $(ENABLE_HINTS) --hint_file $(HINT_DIR)/$(basename $@).fst.hints
+
+%.fsti-in:
+	@echo $(FSTAR_FLAGS) \
+	  $(ENABLE_HINTS) --hint_file $(HINT_DIR)/$(basename $@).fsti.hints
+
+# 6. Clean targets
+
+SHELL=/bin/bash
 
 clean:
-	rm -rf out mpfr-c
-	rm -f *~
-	rm -f test/*~ 
+	rm -rf $(GENERATED_DIR) $(OUT_DIR)/*.exe $(OUT_DIR)/*.a
+	rm -rf include/*.o include/*.d
+
+clean-c:
+	rm -rf $(GENERATED_DIR)/{*.{c,h},Makefile.include}
+
+distclean: clean
+	rm -rf $(OUT_DIR) $(OUTPUT_DIR) *.checked
