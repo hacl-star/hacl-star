@@ -216,3 +216,17 @@ procedure LoadBe64_fake128(
 {
     assume false;
 }
+
+procedure Store64_fake128(
+        in dst:reg_opr64, in src:reg_opr64, inline upper:bool,
+        ghost b_in:Seq.seq(quad32), ghost index:nat)
+    returns(ghost b:Seq.seq(quad32))
+    {:public}
+    {:quick exportOnly}
+    requires
+        0 <= index < Seq.length(b_in);
+    ensures
+        b == old(Seq.upd(b_in, index, insert_nat64_opaque(old(Seq.index(b_in, index)), src, if upper then 1 else 0)));
+{
+    b := old(Seq.upd(b_in, index, insert_nat64_opaque(old(Seq.index(b_in, index)), src, if upper then 1 else 0)));
+}
