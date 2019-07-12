@@ -553,3 +553,11 @@ let secret_to_public #s pub priv =
   mapT 32ul basepoint secret g25519;
   scalarmult #s pub priv basepoint;
   pop_frame()
+
+let ecdh #s out priv pub =
+  push_frame ();
+  let zeros = create 32ul (u8 0) in
+  scalarmult #s out priv pub;
+  let r = lbytes_eq #32ul out zeros in
+  pop_frame();
+  not r
