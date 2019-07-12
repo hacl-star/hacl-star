@@ -1563,9 +1563,23 @@ let rec bubble_to_top (cs:codes) (i:nat{i < L.length cs}) : possibly (cs':codes{
     )
 #pop-options
 
+let rec num_blocks_in_codes (c:codes) : nat =
+  match c with
+  | [] -> 0
+  | Block l :: t -> 1 + num_blocks_in_codes l + num_blocks_in_codes t
+  | _ :: t -> num_blocks_in_codes t
+
+let rec lemma_num_blocks_in_codes_append (c1 c2:codes) :
+  Lemma
+    (ensures (num_blocks_in_codes (c1 `L.append` c2) == num_blocks_in_codes c1 + num_blocks_in_codes c2))
+    [SMTPat (num_blocks_in_codes (c1 `L.append` c2))] =
+  match c1 with
+  | [] -> ()
+  | x :: xs -> lemma_num_blocks_in_codes_append xs c2
+
 let rec reordering_allowed (c1 c2 : codes) :
   Tot pbool
-    (decreases %[c2]) =
+    (decreases %[c2; num_blocks_in_codes c1]) =
   match c1, c2 with
   | [], [] -> ttrue
   | [], _ | _, [] -> ffalse "disagreeing lengths of codes"
@@ -1580,6 +1594,9 @@ let rec reordering_allowed (c1 c2 : codes) :
         match h1, h2 with
         | Block l1, Block l2 ->
           reordering_allowed l1 l2 &&. reordering_allowed t1 t2
+        | Block l1, _ -> (
+            reordering_allowed (l1 `L.append` t1) c2
+          )
         | _ -> Err reason (* TODO: Handle IfElse and While specially too? *)
       )
 
@@ -1588,7 +1605,7 @@ let rec perform_reordering (c1 c2 : codes) :
   Pure (codes)
     (requires !!(reordering_allowed c1 c2))
     (ensures (fun c_gen -> eq_codes c_gen c2))
-    (decreases %[c2]) =
+    (decreases %[c2; num_blocks_in_codes c1]) =
   match c1, c2 with
   | [], [] -> []
   | _, h2 :: t2 ->
@@ -1603,6 +1620,8 @@ let rec perform_reordering (c1 c2 : codes) :
         | Block l1, Block l2 ->
           assert (eq_code (Block (perform_reordering l1 l2)) (Block l2)); (* OBSERVE *)
           Block (perform_reordering l1 l2) :: perform_reordering t1 t2
+        | Block l1, _ ->
+          perform_reordering (l1 `L.append` t1) c2
       )
 
 /// If there are two sequences of instructions that can be transformed
@@ -1645,6 +1664,19 @@ let rec lemma_bubble_to_top (cs : codes) (i:nat{i < L.length cs}) (fuel:nat) (s 
     )
 #pop-options
 
+#push-options "--initial_fuel 3 --max_fuel 3 --initial_ifuel 1 --max_ifuel 1"
+let rec lemma_machine_eval_codes_block_to_append (c1 c2 : codes) (fuel:nat) (s:machine_state) :
+  Lemma
+    (ensures (machine_eval_codes (c1 `L.append` c2) fuel s == machine_eval_codes (Block c1 :: c2) fuel s)) =
+  match c1 with
+  | [] -> ()
+  | x :: xs ->
+    match machine_eval_code x fuel s with
+    | None -> ()
+    | Some s1 ->
+      lemma_machine_eval_codes_block_to_append xs c2 fuel s1
+#pop-options
+
 let rec lemma_reordering (c1 c2 : codes) (fuel:nat) (s1 : machine_state) :
   Lemma
     (requires (
@@ -1657,7 +1689,7 @@ let rec lemma_reordering (c1 c2 : codes) (fuel:nat) (s1 : machine_state) :
            machine_eval_codes c1 fuel s1,
            machine_eval_codes (perform_reordering c1 c2) fuel s1 in
          equiv_states_or_both_not_ok s1' s2')))
-    (decreases %[c2]) =
+    (decreases %[c2; num_blocks_in_codes c1]) =
   match c2 with
   | [] -> ()
   | h2 :: t2 ->
@@ -1696,4 +1728,7 @@ let rec lemma_reordering (c1 c2 : codes) (fuel:nat) (s1 : machine_state) :
           assert (equiv_states s2' s2'');
           assert (machine_eval_codes (perform_reordering c1 c2) fuel s1 == machine_eval_codes (perform_reordering t1 t2) fuel s1'');
           assert (Some s2'' == machine_eval_codes (perform_reordering c1 c2) fuel s1)
+        | Block l1, _ ->
+          lemma_machine_eval_codes_block_to_append l1 t1 fuel s1;
+          lemma_reordering (l1 `L.append` t1) c2 fuel s1
       )
