@@ -690,6 +690,76 @@ procedure Loop6x_step1_expected_code(
     VAESNI_enc(inout5, inout5, rndkey);
 }
 
+procedure Loop6x_step1_aes(
+        inline alg:algorithm,  // OpenSSL includes the number of rounds (nr) as a dynamic parameter (stored with the key).  Saves code space but adds extra instructions to the fast path.  Maybe branch predictor is good enough for it not to matter
+        inline rnd:nat,
+        inline stack_offset:nat,
+        ghost scratch_b:buffer128,
+
+        ghost key_words:seq(nat32),
+        ghost round_keys:seq(quad32),
+        ghost keys_b:buffer128,
+
+        ghost init0:quad32,
+        ghost init1:quad32,
+        ghost init2:quad32,
+        ghost init3:quad32,
+        ghost init4:quad32,
+        ghost init5:quad32)
+    {:quick}
+    lets
+        key @= rcx; Xip @= r9;
+        inout0 @= xmm9; inout1 @= xmm10; inout2 @= xmm11; inout3 @= xmm12;
+        inout4 @= xmm13; inout5 @= xmm14; rndkey @= xmm15;
+        in0 @= r14;
+
+    reads
+        key; rbp; in0; Xip;
+        memTaint;
+        mem;
+
+    modifies
+        inout0; inout1; inout2; inout3; inout4; inout5; rndkey;
+        efl;
+
+    requires
+        // AES reqs
+        aes_reqs_offset(alg, key_words, round_keys, keys_b, key, mem, memTaint);
+        rnd + 1 < length(round_keys);
+
+        inout0 == rounds_opaque(init0, round_keys, rnd);
+        inout1 == rounds_opaque(init1, round_keys, rnd);
+        inout2 == rounds_opaque(init2, round_keys, rnd);
+        inout3 == rounds_opaque(init3, round_keys, rnd);
+        inout4 == rounds_opaque(init4, round_keys, rnd);
+        inout5 == rounds_opaque(init5, round_keys, rnd);
+
+    ensures
+        // Framing
+        modifies_buffer_specific128(scratch_b, old(mem), mem, stack_offset, stack_offset);
+
+        // Semantics
+        inout0 == rounds_opaque(init0, round_keys, rnd + 1);
+        inout1 == rounds_opaque(init1, round_keys, rnd + 1);
+        inout2 == rounds_opaque(init2, round_keys, rnd + 1);
+        inout3 == rounds_opaque(init3, round_keys, rnd + 1);
+        inout4 == rounds_opaque(init4, round_keys, rnd + 1);
+        inout5 == rounds_opaque(init5, round_keys, rnd + 1);
+
+{
+    Load128_buffer(rndkey, key, (0x10 * (rnd + 1))-0x80, Secret, keys_b, rnd + 1);
+
+    VAESNI_enc(inout0, inout0, rndkey);
+    VAESNI_enc(inout1, inout1, rndkey);
+    VAESNI_enc(inout2, inout2, rndkey);
+    VAESNI_enc(inout3, inout3, rndkey);
+    VAESNI_enc(inout4, inout4, rndkey);
+    VAESNI_enc(inout5, inout5, rndkey);
+
+    Vale.Def.Opaque_s.reveal_opaque(rounds);
+    commute_sub_bytes_shift_rows_forall();
+}
+
 procedure Loop6x_step1(
         inline alg:algorithm,  // OpenSSL includes the number of rounds (nr) as a dynamic parameter (stored with the key).  Saves code space but adds extra instructions to the fast path.  Maybe branch predictor is good enough for it not to matter
         inline rnd:nat,
@@ -780,24 +850,8 @@ procedure Loop6x_step1(
         Z1 == h3;
         ~~Xi == old(~~Xi) +. s1;
 {
-    Load128_buffer(rndkey, key, (0x10 * (rnd + 1))-0x80, Secret, keys_b, rnd + 1);
 
-// -------------- AES Code -----------------------
-//   vaesenc $rndkey,$inout0,$inout0
-    VAESNI_enc(inout0, inout0, rndkey);
-//   vaesenc $rndkey,$inout1,$inout1
-    VAESNI_enc(inout1, inout1, rndkey);
-//   vaesenc $rndkey,$inout2,$inout2
-    VAESNI_enc(inout2, inout2, rndkey);
-//   vaesenc $rndkey,$inout3,$inout3
-    VAESNI_enc(inout3, inout3, rndkey);
-//   vaesenc $rndkey,$inout4,$inout4
-    VAESNI_enc(inout4, inout4, rndkey);
-//   vaesenc $rndkey,$inout5,$inout5
-    VAESNI_enc(inout5, inout5, rndkey);
-
-    Vale.Def.Opaque_s.reveal_opaque(rounds);
-    commute_sub_bytes_shift_rows_forall();
+    Loop6x_step1_aes(alg, rnd, stack_offset, scratch_b, key_words, round_keys, keys_b, init0, init1, init2, init3, init4, init5);
 
 // -------------- GHASH Code ---------------------
 
