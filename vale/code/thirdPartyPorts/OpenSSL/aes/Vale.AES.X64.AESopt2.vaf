@@ -125,7 +125,7 @@ procedure MulAdd_unroll_i(
     reads
         mem; memTaint; Xip; rbp; Xi;
     modifies
-        efl; rax; scratch_ptr; Ii; T1; T2; Hkey; Z0; Z1; Z2; Z3;
+        efl; scratch_ptr; Ii; T1; T2; Hkey; Z0; Z1; Z2; Z3;
     requires
         pclmulqdq_enabled && avx_enabled;
         n <= 5;
@@ -217,7 +217,7 @@ procedure MulAdd_unroll_n(
     reads
         mem; memTaint; Xip; rbp; n_reg;
     modifies
-        efl; rax; scratch_ptr; Ii; T1; T2; Hkey; Z0; Z1; Z2; Z3; Xi;
+        efl; scratch_ptr; Ii; T1; T2; Hkey; Z0; Z1; Z2; Z3; Xi;
     requires
         pclmulqdq_enabled && avx_enabled;
         1 <= n < 6;
@@ -248,23 +248,19 @@ procedure MulAdd_unroll_n(
     else
     {
         MulAdd_unroll_i(n, 0, true,  false, 1, hkeys_b, scratch_b, h, prev, data);
-        ghost var m:int := 1;
         if (n_reg != 2)
         {
-            MulAdd_unroll_i(n, m, false, false, 3, hkeys_b, scratch_b, h, prev, data);
-            m := m + 1;
+            MulAdd_unroll_i(n, 1, false, false, 3, hkeys_b, scratch_b, h, prev, data);
             if (n_reg != 3)
             {
-                MulAdd_unroll_i(n, m, false, false, 4, hkeys_b, scratch_b, h, prev, data);
-                m := m + 1;
+                MulAdd_unroll_i(n, 2, false, false, 4, hkeys_b, scratch_b, h, prev, data);
                 if (n_reg != 4)
                 {
-                    MulAdd_unroll_i(n, m, false, false, 6, hkeys_b, scratch_b, h, prev, data);
-                    m := m + 1;
+                    MulAdd_unroll_i(n, 3, false, false, 6, hkeys_b, scratch_b, h, prev, data);
                 }
             }
         }
-        MulAdd_unroll_i(n, m, false, true,  0, hkeys_b, scratch_b, h, prev, data);
+        MulAdd_unroll_i(n, #nat(n -  1), false, true,  0, hkeys_b, scratch_b, h, prev, data);
     }
 }
 
@@ -493,7 +489,7 @@ procedure GhashUnroll_n(
     reads
         mem; memTaint; Xip; rbp; n_reg;
     modifies
-        efl; rax; scratch_ptr; Ii; T1; T2; Hkey; Z0; Z1; Z2; Z3; Xi;
+        efl; scratch_ptr; Ii; T1; T2; Hkey; Z0; Z1; Z2; Z3; Xi;
     requires
         pclmulqdq_enabled && avx_enabled;
         1 <= n < 6;
@@ -508,7 +504,7 @@ procedure GhashUnroll_n(
 {
     MulAdd_unroll_n(hkeys_b, scratch_b, h, prev, data);
     ZeroXmm(Hkey);
-    PinsrdImm(Hkey, 0xc2000000, 3, rax);
+    PinsrdImm(Hkey, 0xc2000000, 3, scratch_ptr);
     lemma_gf128_low_shift();
     lemma_gf128_degree();
     Reduce(gf128_modulus_low_terms);
