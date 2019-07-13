@@ -75,6 +75,7 @@ inline_for_extraction val mpfr_add1sp1_gt_branch1:
 let mpfr_add1sp1_gt_branch1 a b c ap bp cp bx sh d mask =
     let h = ST.get() in
     let a0 = bp.(0ul) +%^ (cp.(0ul) >>^ (int64_to_uint32 d)) in
+    admit();
     let a0, bx = if a0 <^ bp.(0ul) then mpfr_LIMB_HIGHBIT |^ (a0 >>^ 1ul), I64.(bx +^ 1L)
 	         else a0, bx in
     let rb = a0 &^ (mpfr_LIMB_ONE <<^ (int64_to_uint32 I64.(sh -^ 1L))) in
@@ -100,6 +101,7 @@ let mpfr_add1sp1_gt_branch2 a b c ap bp cp bx sh d mask =
     let h = ST.get() in
     let sb = cp.(0ul) <<^ (int64_to_uint32 I64.(gmp_NUMB_BITS -^ d)) in
     let a0 = bp.(0ul) +%^ (cp.(0ul) >>^ (int64_to_uint32 d)) in
+    admit();
     let sb, a0, bx =
         if a0 <^ bp.(0ul) then
 	    sb |^ (a0 &^ 1uL), mpfr_LIMB_HIGHBIT |^ (a0 >>^ 1ul), I64.(bx +^ 1L)

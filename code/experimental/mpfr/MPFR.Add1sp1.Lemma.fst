@@ -71,6 +71,7 @@ val mpfr_add1sp1_gt_branch12_a0_bx_lemma:
     v a0 = r.limb / pow2 (r.len - 64) /\ I64.v bx = r.exp))
 
 let mpfr_add1sp1_gt_branch12_a0_bx_lemma h a b c sh d mask =
+    admit();
     let r = add1sp_exact (as_reg_fp_ h b) (as_reg_fp_ h c) in
     let bx = b.mpfr_exp in
     let b0 = Seq.index (as_seq h b.mpfr_d) 0 in
@@ -116,6 +117,7 @@ val mpfr_add1sp1_gt_branch12_value_lemma:
     let bx = b.mpfr_exp in
     let b0 = Seq.index (as_seq h bp) 0 in
     let c0 = Seq.index (as_seq h cp) 0 in
+    admit();
     let a0 = b0 +%^ (c0 >>^ (int64_to_uint32 d)) in
     let a0, bx = if a0 <^ b0 then mpfr_LIMB_HIGHBIT |^ (a0 >>^ 1ul), I64.(bx +^ 1L) else a0, bx in
     let a0 = a0 &^ (lognot mask) in
@@ -130,6 +132,7 @@ let mpfr_add1sp1_gt_branch12_value_lemma h a b c sh d mask =
     let bx = b.mpfr_exp in
     let b0 = Seq.index (as_seq h bp) 0 in
     let c0 = Seq.index (as_seq h cp) 0 in
+    admit();
     let a0 = b0 +%^ (c0 >>^ (int64_to_uint32 d)) in
     let t0 = v b0 + v c0 / pow2 (I64.v d) in
     let a0, bx = if a0 <^ b0 then mpfr_LIMB_HIGHBIT |^ (a0 >>^ 1ul), I64.(bx +^ 1L) else a0, bx in
@@ -495,10 +498,12 @@ val mpfr_add1sp1_eq_value_lemma:
     let bx = I64.(b.mpfr_exp +^ 1L) in
     let rb = a0 &^ (mpfr_LIMB_ONE <<^ (int64_to_uint32 I64.(sh -^ 1L))) in
     let a0 = a0 ^^ rb in
+    admit();
     v a0 * pow2 (r.len - 64) = r.limb /\ I64.v bx = r.exp /\
     v a0 >= pow2 63 /\ v a0 % pow2 (64 - p) = 0))
-    
+
 let mpfr_add1sp1_eq_value_lemma h a b c sh =
+    admit();
     let p = I64.v a.mpfr_prec in
     let r = add1sp_exact (as_reg_fp_ h b) (as_reg_fp_ h c) in
     let bp = b.mpfr_d in
