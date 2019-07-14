@@ -1,6 +1,5 @@
 module Hacl.Impl.SecretBox
 
-module ST = FStar.HyperStack.ST
 open FStar.HyperStack.All
 open FStar.HyperStack
 open FStar.Mul
@@ -12,25 +11,28 @@ open Lib.ByteBuffer
 open Hacl.Salsa20
 open Hacl.Poly1305_32
 
+module ST = FStar.HyperStack.ST
 module Spec = Spec.SecretBox
 module LSeq = Lib.Sequence
 
+
 #set-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
 
-let lbytebuf (x:size_t) = lbuffer uint8 x
-
 val secretbox_init:
-    xkeys:lbytebuf 96ul
-  -> k:lbytebuf 32ul
-  -> n:lbytebuf 24ul ->
+    xkeys:lbuffer uint8 96ul
+  -> k:lbuffer uint8 32ul
+  -> n:lbuffer uint8 24ul ->
   Stack unit
-  (requires fun h -> live h xkeys /\ live h k /\ live h n /\
+  (requires fun h ->
+    live h xkeys /\ live h k /\ live h n /\
     disjoint k xkeys /\ disjoint n xkeys)
-  (ensures  fun h0 _ h1 -> modifies (loc xkeys) h0 h1 /\
+  (ensures  fun h0 _ h1 ->
+    modifies (loc xkeys) h0 h1 /\
     (let xkeys = as_seq h1 xkeys in
     let subkey : Spec.key = LSeq.sub xkeys 0 32 in
     let aekey : Spec.aekey = LSeq.sub xkeys 32 64 in
     (subkey, aekey) == Spec.secretbox_init (as_seq h0 k) (as_seq h0 n)))
+
 let secretbox_init xkeys k n =
   let h0 = ST.get() in
   let subkey = sub xkeys 0ul 32ul in
@@ -40,9 +42,11 @@ let secretbox_init xkeys k n =
   hsalsa20 subkey k n0;
   salsa20_key_block0 aekey subkey n1
 
+
 inline_for_extraction noextract
 let get_len0 (len:size_t) : Tot (r:size_t{v r <= 32 /\ v r == Spec.get_len0 (v len)}) =
   if len <=. 32ul then len else 32ul
+
 
 #set-options "--z3rlimit 100"
 
@@ -50,9 +54,9 @@ inline_for_extraction noextract
 val secretbox_detached_cipher:
     mlen:size_t
   -> c:lbuffer uint8 mlen
-  -> k:lbytebuf 32ul
-  -> xkeys:lbytebuf 96ul
-  -> n:lbytebuf 24ul
+  -> k:lbuffer uint8 32ul
+  -> xkeys:lbuffer uint8 96ul
+  -> n:lbuffer uint8 24ul
   -> m:lbuffer uint8 mlen ->
   Stack unit
   (requires fun h ->
@@ -65,6 +69,7 @@ val secretbox_detached_cipher:
   (ensures  fun h0 _ h1 -> modifies (loc c) h0 h1 /\
     (let (tag, cipher) = Spec.secretbox_detached (as_seq h0 k) (as_seq h0 n) (as_seq h0 m) in
      as_seq h1 c == cipher))
+
 let secretbox_detached_cipher mlen c k xkeys n m =
   let h0 = ST.get () in
   push_frame ();
@@ -99,12 +104,13 @@ let secretbox_detached_cipher mlen c k xkeys n m =
     as_seq h3 c == cipher);
   pop_frame ()
 
+
 val secretbox_detached:
     mlen:size_t
   -> c:lbuffer uint8 mlen
   -> tag:lbuffer uint8 16ul
-  -> k:lbytebuf 32ul
-  -> n:lbytebuf 24ul
+  -> k:lbuffer uint8 32ul
+  -> n:lbuffer uint8 24ul
   -> m:lbuffer uint8 mlen ->
   Stack unit
   (requires fun h ->
@@ -113,6 +119,7 @@ val secretbox_detached:
     disjoint n m /\ disjoint n c)
   (ensures  fun h0 _ h1 -> modifies (loc c |+| loc tag) h0 h1 /\
     (as_seq h1 tag, as_seq h1 c) == Spec.secretbox_detached (as_seq h0 k) (as_seq h0 n) (as_seq h0 m))
+
 let secretbox_detached mlen c tag k n m =
   let h0 = ST.get () in
   push_frame();
@@ -127,12 +134,13 @@ let secretbox_detached mlen c tag k n m =
     (as_seq h1 tag, as_seq h1 c) == (tag1, cipher));
   pop_frame()
 
+
 inline_for_extraction noextract
 val secretbox_open_detached_plain:
     mlen:size_t
   -> m:lbuffer uint8 mlen
-  -> xkeys:lbytebuf 96ul
-  -> n:lbytebuf 24ul
+  -> xkeys:lbuffer uint8 96ul
+  -> n:lbuffer uint8 24ul
   -> c:lbuffer uint8 mlen ->
   Stack unit
   (requires fun h ->
@@ -156,6 +164,7 @@ val secretbox_open_detached_plain:
     let m1 = Spec.Salsa20.salsa20_decrypt_bytes subkey n1 1 c1 in
     let msg = Seq.append m0 m1 in
     as_seq h1 m == msg))
+
 let secretbox_open_detached_plain mlen m xkeys n c =
   push_frame ();
   let subkey = sub xkeys 0ul 32ul in
@@ -179,11 +188,12 @@ let secretbox_open_detached_plain mlen m xkeys n c =
   FStar.Seq.Properties.lemma_split (as_seq h1 m) (v mlen0);
   pop_frame ()
 
+
 val secretbox_open_detached:
     mlen:size_t
   -> m:lbuffer uint8 mlen
-  -> k:lbytebuf 32ul
-  -> n:lbytebuf 24ul
+  -> k:lbuffer uint8 32ul
+  -> n:lbuffer uint8 24ul
   -> c:lbuffer uint8 mlen
   -> tag:lbuffer uint8 16ul ->
   Stack size_t
@@ -195,6 +205,7 @@ val secretbox_open_detached:
     match r with
     | 0ul -> Some? msg /\ as_seq h1 m == Some?.v msg
     | _ -> None? msg))
+
 let secretbox_open_detached mlen m k n c tag =
   push_frame();
   let xkeys = create 96ul (u8 0) in
@@ -213,11 +224,12 @@ let secretbox_open_detached mlen m k n c tag =
   pop_frame ();
   res
 
+
 val secretbox_easy:
     mlen:size_t{v mlen + 16 <= max_size_t}
   -> c:lbuffer uint8 (mlen +! 16ul)
-  -> k:lbytebuf 32ul
-  -> n:lbytebuf 24ul
+  -> k:lbuffer uint8 32ul
+  -> n:lbuffer uint8 24ul
   -> m:lbuffer uint8 mlen ->
   Stack unit
   (requires fun h ->
@@ -225,6 +237,7 @@ val secretbox_easy:
     disjoint m c /\ disjoint n m /\ disjoint n c)
   (ensures  fun h0 _ h1 -> modifies (loc c) h0 h1 /\
     as_seq h1 c == Spec.secretbox_easy (as_seq h0 k) (as_seq h0 n) (as_seq h0 m))
+
 let secretbox_easy mlen c k n m =
   let tag = sub c 0ul 16ul in
   let cip = sub c 16ul mlen in
@@ -232,11 +245,12 @@ let secretbox_easy mlen c k n m =
   let h1 = ST.get () in
   FStar.Seq.Properties.lemma_split (as_seq h1 c) 16
 
+
 val secretbox_open_easy:
     mlen:size_t{v mlen + 16 <= max_size_t}
   -> m:lbuffer uint8 mlen
-  -> k:lbytebuf 32ul
-  -> n:lbytebuf 24ul
+  -> k:lbuffer uint8 32ul
+  -> n:lbuffer uint8 24ul
   -> c:lbuffer uint8 (mlen +! 16ul) ->
   Stack size_t
   (requires fun h ->
@@ -247,6 +261,7 @@ val secretbox_open_easy:
     match r with
     | 0ul -> Some? msg /\ as_seq h1 m == Some?.v msg
     | _ -> None? msg))
+
 let secretbox_open_easy mlen m k n c =
   let tag = sub c 0ul 16ul in
   let cip = sub c 16ul mlen in

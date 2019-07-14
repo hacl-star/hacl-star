@@ -81,8 +81,8 @@ int32_t test_api()
   int i;
 
   // Creating public/private key couples
-  Hacl_Curve25519_51_ecdh(pk1, sk1, basepoint);
-  Hacl_Curve25519_51_ecdh(pk2, sk2, basepoint);
+  Hacl_Curve25519_51_secret_to_public(pk1, sk1);
+  Hacl_Curve25519_51_secret_to_public(pk2, sk2);
 
   /* Testing the box primitives */
   i = Hacl_NaCl_crypto_box_detached(ciphertext+16, mac, msg, MESSAGE_LEN, nonce, pk1, sk2);
