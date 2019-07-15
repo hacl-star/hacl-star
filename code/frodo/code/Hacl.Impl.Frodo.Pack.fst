@@ -117,7 +117,7 @@ let frodo_unpack8 d b res =
   let maskd = to_u16 (u32 1 <<. d) -. u16 1 in
   let src = create (size 16) (u8 0) in
   update_sub src (size 16 -! d) d b;
-  let templong = uint_from_bytes_be #_ #SEC src in
+  let templong = uint_from_bytes_be #U128 #SEC src in
   res.(size 0) <- to_u16 (templong >>. (size 7 *! d)) &. maskd;
   res.(size 1) <- to_u16 (templong >>. (size 6 *! d)) &. maskd;
   res.(size 2) <- to_u16 (templong >>. (size 5 *! d)) &. maskd;

@@ -273,7 +273,7 @@ let load_blocks_lemma_index #w b i =
   assert (vec_v res.[j] == uints_from_bytes_le (sub b (j * w * 4) (w * 4)));
   let j1 = i % w in
   let b_j = sub b (j * w * 4) (w * 4) in
-  index_uints_from_bytes_le b_j j1;
+  index_uints_from_bytes_le #U32 b_j j1;
   assert ((vec_v res.[j]).[j1] == uint_from_bytes_le (sub b_j (j1 * 4) 4));
   FStar.Seq.slice_slice b (j * w * 4) (j * w * 4 + w * 4) (j1 * 4) (j1 * 4 + 4);
   assert (j * w * 4 + j1 * 4 == 4 * i);

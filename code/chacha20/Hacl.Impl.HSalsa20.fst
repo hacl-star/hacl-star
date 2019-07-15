@@ -71,5 +71,5 @@ let hsalsa20 out key n =
     let res_l = [r0;r1;r2;r3;r4;r5;r6;r7] in
     assert_norm (List.Tot.length res_l == 8);
     let res = createL res_l in
-    uints_to_bytes_le 8ul out res;
+    uints_to_bytes_le #U32 8ul out res;
     pop_frame()
