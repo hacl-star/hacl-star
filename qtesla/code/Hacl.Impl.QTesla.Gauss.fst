@@ -572,7 +572,9 @@ let kmxGauss z seed nonce =
     (fun i -> 
         assert_norm(v (_RADIX32 -. size 16) < 32);
         z.(i) <- 
-        let h = ST.get () in assume(I32.v (bget h sampg (v i)) >= 0);
+        let h = ST.get () in 
+        assume(I32.v (bget h sampg (v i)) >= 0);
+        assume(I32.v (bget h sampg (v i)) * pow2 (UI32.v (_RADIX32 -. size 16)) <= Int.max_int I32.n);
         let result = I32.((sampg.(i) <<^ (_RADIX32 -. size 16)) >>>^ (_RADIX32 -. size 16)) in
         assume(is_elem result);
         int32_to_elem result

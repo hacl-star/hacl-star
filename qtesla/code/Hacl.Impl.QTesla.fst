@@ -676,6 +676,8 @@ let qtesla_keygen_ randomness pk sk =
 
   let h5 = ST.get () in
   assert(modifies (loc nonce |+| loc e |+| loc s |+| loc a |+| loc s_ntt |+| loc t) h0 h5);
+  assert(is_poly_equal h2 h5 s);
+  assert(is_poly_k_equal h4 h5 e);
   encode_or_pack_sk sk s e rndsubbuffer;
   let h6 = ST.get () in
   assert(modifies (loc nonce |+| loc e |+| loc s |+| loc a |+| loc s_ntt |+| loc t |+| loc sk) h0 h6);
@@ -759,6 +761,7 @@ let sample_y_while_body y seed nblocks buf dmsp pos i =
     //assume(FStar.Int.fits (elem_v (to_elem 1 <<^ (params_b_bits +! size 1)) - 1) elem_n);
     //assume(is_elem (bufPosAsElem &^ ((to_elem 1 <<^ (params_b_bits +! size 1)) -^ to_elem 1)));
     Int.shift_left_value_lemma (elem_v (to_elem 1)) (v (params_b_bits +! size 1));
+    assume(1 * pow2 (v params_b_bits + 1) < Int.max_int elem_n);
     assert(elem_v (to_elem 1 <<^ (params_b_bits +! size 1)) = 1 * (pow2 (v (params_b_bits +! size 1))) @% (pow2 elem_n));
     assume(1 * (pow2 (v (params_b_bits +! size 1))) @% (pow2 elem_n) >= 0);
     assert(elem_v (to_elem 1 <<^ (params_b_bits +! size 1)) >= 0); 
@@ -828,6 +831,7 @@ val hash_H_inner_for:
 
 module S = QTesla.Params
 
+#push-options "--z3rlimit 300"
 let hash_H_inner_for v_ t index =
     let hInit = ST.get () in 
     assert(is_poly_k_montgomery hInit v_);
@@ -838,6 +842,7 @@ let hash_H_inner_for v_ t index =
     assert_norm(v (_RADIX32 -. size 1) < I32.n);
     let mask = I32.((params_q /^ 2l -^ temp) >>>^ (_RADIX32 -. size 1)) in
     let temp = I32.(((temp -^ params_q) &^ mask) |^ (temp &^ (lognot mask))) in
+    assume(1 * pow2 (v params_d) <= Int.max_int I32.n);
     assert_norm(FStar.Int.fits (I32.v (1l <<^ params_d)) I32.n); 
     Int.shift_left_value_lemma (I32.v 1l) (v params_d);
     assert_norm(pow2 (v params_d) > 0);
@@ -858,6 +863,7 @@ let hash_H_inner_for v_ t index =
     t.(index) <- Lib.RawIntTypes.u8_from_UInt8 (int32_to_uint8 I32.((temp -^ cL) >>>^ params_d));
     let hFinal = ST.get () in 
     assert(is_poly_k_equal hInit hFinal v_)
+#pop-options
 
 private inline_for_extraction noextract
 val hash_H_outer_for:
@@ -1319,10 +1325,12 @@ let test_correctness v_ =
         let t0:UI32.t = UI32.(int32_to_uint32 I32.(((lognot ((abs_ val_) -^ (params_q /^ 2l -^ params_rejection))))) >>^ (_RADIX32 -. size 1)) in
         let left:I32.t = val_ in
         assert_norm(v (params_d -. (size 1)) < I32.n);
+        assume(1 * pow2 (v params_d - 1) <= Int.max_int I32.n);
         assume(FStar.Int.fits (I32.v val_ + I32.v (1l <<^ (params_d -. (size 1)))) I32.n);
         assume(FStar.Int.fits (I32.v val_ + I32.v (1l <<^ (params_d -. (size 1))) - 1) I32.n);
         let val_:I32.t = I32.((val_ +^ (1l <<^ (params_d -. (size 1))) -^ 1l) >>>^ params_d) in
         assume(I32.v val_ >= 0);
+        assume(I32.v val_ * pow2 (v params_d) <= Int.max_int I32.n);
         assume(FStar.Int.fits (I32.v left - I32.v (val_ <<^ params_d)) I32.n);
         // val is always -1, 0, or 1 it looks like
         let val_:I32.t = I32.(left -^ (val_ <<^ params_d)) in

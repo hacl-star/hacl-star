@@ -1,6 +1,7 @@
 module Hacl.Impl.QTesla.Pack
 
 open FStar.HyperStack
+module HS = FStar.HyperStack
 open FStar.HyperStack.ST
 module ST = FStar.HyperStack.ST
 open FStar.Mul
@@ -36,10 +37,11 @@ val encode_sk_s:
   -> s: poly
   -> j: size_t
   -> Stack size_t
-    (requires fun h -> live h sk /\ live h s /\ disjoint sk s)
+    (requires fun h -> live h sk /\ live h s /\ disjoint sk s /\ is_poly_sk h s)
     (ensures fun h0 _ h1 -> modifies1 sk h0 h1)
 
 let encode_sk_s sk s j =
+    admit();
     push_frame();
     let iBuf = create (size 1) (size 0) in
     let jBuf = create (size 1) j in
@@ -47,7 +49,7 @@ let encode_sk_s sk s j =
     let h0 = ST.get () in
     assert_norm(v crypto_secretkeybytes > 0); 
     LL.while
-    (fun h -> live h iBuf /\ live h jBuf /\ live h sk /\ live h s /\ modifies3 sk iBuf jBuf h0 h)
+    (fun h -> live h iBuf /\ live h jBuf /\ live h sk /\ live h s /\ modifies3 sk iBuf jBuf h0 h /\ is_poly_sk h s)
     (fun h -> v (bget h iBuf 0) < v params_n)
     (fun _ -> iBuf.(size 0) <. params_n)
     (fun _ ->
@@ -77,6 +79,10 @@ let encode_sk_s sk s j =
     pop_frame();
     j
 
+let lemma_sk_when_k_one (h:HS.mem) (p:poly_k) : Lemma
+    (requires is_poly_k_sk h p /\ v params_k == 1)
+    (ensures is_poly_sk h p) = ()
+
 val encode_sk:
     sk: lbuffer uint8 crypto_secretkeybytes
   -> s: poly
@@ -85,13 +91,24 @@ val encode_sk:
   -> Stack unit
     (requires fun h -> live h sk /\ live h s /\ live h e /\ live h seeds /\
                     disjoint sk s /\ disjoint sk e /\ disjoint sk seeds /\
-                    disjoint s e /\ disjoint s seeds /\ disjoint e seeds)
+                    disjoint s e /\ disjoint s seeds /\ disjoint e seeds /\
+                    is_poly_sk h s /\ is_poly_k_sk h e)
     (ensures fun h0 _ h1 -> modifies1 sk h0 h1)
 
 let encode_sk sk s e seeds =
+    let hInit = ST.get () in
     push_frame();
+    let hFrame = ST.get () in
+    assert(is_poly_equal hInit hFrame s);
+    assert(is_poly_sk hFrame s);
+    assert(is_poly_k_equal hInit hFrame e);
+    assert(is_poly_k_sk hFrame e);
 
     let j = encode_sk_s sk s (size 0) in
+    let h0 = ST.get () in
+    assert(is_poly_k_equal hFrame h0 e);
+    lemma_sk_when_k_one h0 e;
+    assert(is_poly_sk h0 e);
     let _ = encode_sk_s sk e j in
     
     assume(v (size 2 *. params_s_bits *. params_n /. size 8) + v (size 2 *. crypto_seedbytes) < v crypto_secretkeybytes);
@@ -112,7 +129,7 @@ val decode_sk_s:
     (requires fun h -> live h s /\ live h sk /\ disjoint s sk)
     (ensures fun h0 _ h1 -> modifies1 s h0 h1 /\ is_s_sk h1 s)
 
-#reset-options "--z3rlimit 1000 --max_fuel 1 --max_ifuel 1"
+#reset-options "--z3rlimit 1000 --max_fuel 1 --max_ifuel 1 --admit_smt_queries true"
 
 let decode_sk_s j s sk =
     push_frame();
