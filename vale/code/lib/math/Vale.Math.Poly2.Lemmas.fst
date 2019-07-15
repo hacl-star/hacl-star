@@ -1,5 +1,9 @@
 module Vale.Math.Poly2.Lemmas
 
+let lemma_pointwise_equal a b pf =
+  FStar.Classical.forall_intro pf;
+  lemma_equal a b
+
 let lemma_index a =
   FStar.Classical.forall_intro (lemma_index_i a)
 
@@ -269,6 +273,12 @@ let lemma_shift_is_mul_left a n =
   lemma_shift_is_mul a n;
   lemma_mul_commute (monomial n) a
 
+let lemma_shift_shift a m n =
+  lemma_index_all ();
+  lemma_shift_define_all ();
+  lemma_equal (shift a (m + n)) (shift (shift a m) n);
+  ()
+
 let lemma_mul_all () =
   FStar.Classical.forall_intro_with_pat (fun a -> a *. zero) lemma_mul_zero;
   FStar.Classical.forall_intro_with_pat (fun a -> a *. one) lemma_mul_one;
@@ -378,6 +388,12 @@ let lemma_mod_mul_mod_right a b c =
   lemma_mul_all ();
   lemma_mod_mul_mod b c a
 
+let lemma_shift_mod a b n =
+  lemma_shift_is_mul a n;
+  lemma_shift_is_mul (a %. b) n;
+  lemma_mod_mul_mod a b (monomial n);
+  ()
+
 let lemma_mod_reduce a b c =
   calc (==) {
     (a *. b) %. (b +. c);
@@ -425,3 +441,9 @@ let lemma_shift_is_div a n =
   lemma_bitwise_all ();
   lemma_split_define a n;
   lemma_equal (shift a (-n)) (a /. monomial n)
+
+let lemma_mod_monomial a n =
+  lemma_index_all ();
+  lemma_split_define a n;
+  ()
+
