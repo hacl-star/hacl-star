@@ -29,7 +29,8 @@ FSTAR_INCLUDE_DIRS = \
   $(HACL_HOME)/lib/c \
   $(HACL_HOME)/code/curve25519 \
   $(HACL_HOME)/code/curve25519/lemmas \
-  $(HACL_HOME)/specs/lemmas
+  $(HACL_HOME)/specs/lemmas \
+  $(HACL_HOME)/code/hash
 
 FSTAR_FLAGS = $(OTHERFLAGS) --cmi \
   --cache_checked_modules --odir $(OUTPUT_DIR) \
@@ -80,8 +81,9 @@ $(GENERATED_DIR)/Makefile.include: $(ALL_KRML_FILES) | .depend
 	-bundle 'Lib.*' \
 	-bundle 'Spec.*' \
 	-bundle 'C=C.Endianness' \
+	-bundle 'Hacl.Hash.SHA2=Hacl.Hash.*,Spec.Hash.*' \
 	-bundle 'Hacl.Ed25519=Hacl.Impl.*,Hacl.Bignum25519,Hacl.Ed25519' \
-	-library 'Hacl.Hash.SHA2,C,FStar' \
+	-library 'C,FStar' \
 	-drop 'LowStar,Spec,Prims,Lib,C.Loops.*,Hacl.Spec.*,Hacl.Impl.Curve25519.Fields,Hacl.Impl.Curve25519.Field64,Hacl.Impl.Curve25519.Field64.*' \
 	-add-include '"c/Lib_PrintBuffer.h"' \
 	-tmpdir $(GENERATED_DIR) \
@@ -112,8 +114,6 @@ ALL_GENERATED_FILES = $(addprefix $(GENERATED_DIR)/,$(ALL_OUR_FILES))
 
 ALL_SOURCES = \
   $(ALL_GENERATED_FILES) \
-  include/Hacl_Hash_SHA2.c \
-  $(HACL_HOME)/snapshots/hacl-c/Hacl_SHA2_512.c \
   $(HACL_HOME)/lib/c/Lib_PrintBuffer.c \
 #Hacl.Benchmark.Ed25519.c
 
@@ -130,7 +130,8 @@ INCLUDE_DIRS = \
 CFLAGS += -O3 -march=native -mtune=native -funroll-loops
 CFLAGS += $(addprefix -I ,$(INCLUDE_DIRS)) -Wall -Wextra -Werror \
   -Wno-parentheses -Wno-unused-parameter -Wno-unused-variable \
-  -Wno-incompatible-pointer-types -Wno-unused-function
+  -Wno-incompatible-pointer-types -Wno-unused-function \
+  -Wno-deprecated-declarations -Wno-unused-but-set-variable
 
 # GNU Make manual section 4.14
 %.d: %.c
@@ -177,7 +178,6 @@ SHELL=/bin/bash
 
 clean:
 	rm -rf $(GENERATED_DIR) $(OUT_DIR)/*.exe $(OUT_DIR)/*.a
-	rm -rf include/*.o include/*.d
 
 clean-c:
 	rm -rf $(GENERATED_DIR)/{*.{c,h},Makefile.include}

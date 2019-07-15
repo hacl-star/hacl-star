@@ -67,7 +67,7 @@ $(OUTPUT_DIR)/%.krml: | .depend
 
 # 2. Generation of .c files
 
-KREMLIN_TESTLIB=-fbuiltin-uint128 -add-include '"TestLib.h"' -add-include '"C_String.h"' -add-include '"FStar_UInt_8_16_32_64.h"' $(KREMLIB)/dist/generic/testlib.c
+KREMLIN_TESTLIB=-fbuiltin-uint128 -add-include '"TestLib.h"' -add-include '"C_Endianness.h"' -add-include '"C_String.h"' -add-include '"FStar_UInt_8_16_32_64.h"' $(KREMLIB)/dist/generic/testlib.c
 
 KREMLIN=$(KREMLIN_HOME)/krml
 
@@ -128,7 +128,7 @@ INCLUDE_DIRS = \
 CFLAGS += -O3 -march=native -mtune=native -funroll-loops
 CFLAGS += $(addprefix -I ,$(INCLUDE_DIRS)) -Wall -Wextra -Werror \
   -Wno-parentheses -Wno-unused-parameter -Wno-unused-variable \
-  -Wno-incompatible-pointer-types
+  -Wno-incompatible-pointer-types -Wno-deprecated-declarations
 
 # GNU Make manual section 4.14
 %.d: %.c
