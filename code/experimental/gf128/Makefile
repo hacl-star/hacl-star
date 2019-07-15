@@ -15,7 +15,7 @@ all: gf128-ni.exe gf128-precomp.exe
 verify: test
 
 #CC=/usr/local/Cellar/llvm/7.0.0/bin/clang-7
-CC=gcc-9
+CC=gcc-8
 
 GF128_PRECOMP_FILES= $(HACL_HOME)/lib/Lib.IntTypes.fst \
 	$(HACL_HOME)/lib/Lib.RawIntTypes.fst \
