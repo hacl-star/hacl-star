@@ -8,7 +8,7 @@
       1,
       [ "@query" ],
       0,
-      "7a1b7f6c48d8fc2037789007216ebb6a"
+      "3e396abf60a831f42eb2a1a720548812"
     ],
     [
       "Spec.AES256.block",
@@ -29,7 +29,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "ccd214ad6dba793e4e917cf0f771ee96"
+      "a6498d871d0653c7ad302d7b2e68fe78"
     ],
     [
       "Spec.AES256.skey",
@@ -50,7 +50,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "5bf56e6a1349d3e931aaba8d3fbfadff"
+      "3756db54cd979f455741d624723700f1"
     ],
     [
       "Spec.AES256.xkey",
@@ -76,7 +76,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "994c87338089ca8bd0f33d2860e3c7f9"
+      "9d57d26585430cf6e1aa3f086a128b8e"
     ],
     [
       "Spec.AES256.word",
@@ -96,7 +96,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "eb400f940746a5ace41217d3a0b2418f"
+      "2411d2b92bc539b56f9cbf5501ba53e8"
     ],
     [
       "Spec.AES256.xtime",
@@ -121,6 +121,7 @@
         "equation_FStar.UInt.max_int", "equation_FStar.UInt.min_int",
         "equation_FStar.UInt.size", "equation_FStar.UInt.uint_t",
         "equation_Lib.IntTypes.bits", "equation_Lib.IntTypes.int_t",
+        "equation_Lib.IntTypes.maxint", "equation_Lib.IntTypes.minint",
         "equation_Lib.IntTypes.pub_int_t", "equation_Lib.IntTypes.pub_int_v",
         "equation_Lib.IntTypes.range", "equation_Lib.IntTypes.shiftval",
         "equation_Lib.IntTypes.unsigned", "equation_Lib.IntTypes.v",
@@ -132,14 +133,17 @@
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_83845a86f2550cdf941eeb1d9b59602b",
         "refinement_interpretation_Tm_refine_c6c18a7ceb46d419c35ff8551117551e",
         "refinement_interpretation_Tm_refine_e40dba697735a60216c598c2a27841b5",
         "refinement_interpretation_Tm_refine_f13070840248fced9d9d60d77bdae3ec",
         "typing_FStar.UInt.fits", "typing_FStar.UInt32.uint_to_t",
-        "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U8@tok"
+        "typing_Lib.IntTypes.bits", "typing_Lib.IntTypes.v",
+        "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok",
+        "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "425faf39ad4c79497b8f551db52f8a16"
+      "4eee76771e0c97abdd88d7303f75a163"
     ],
     [
       "Spec.AES256.multiply",
@@ -149,8 +153,7 @@
       [
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
-        "b2t_def", "bool_inversion", "bool_typing",
-        "constructor_distinct_Lib.IntTypes.PUB",
+        "b2t_def", "bool_inversion", "constructor_distinct_Lib.IntTypes.PUB",
         "constructor_distinct_Lib.IntTypes.S16",
         "constructor_distinct_Lib.IntTypes.S8",
         "constructor_distinct_Lib.IntTypes.U32",
@@ -163,27 +166,31 @@
         "equation_FStar.UInt.max_int", "equation_FStar.UInt.min_int",
         "equation_FStar.UInt.size", "equation_FStar.UInt.uint_t",
         "equation_Lib.IntTypes.bits", "equation_Lib.IntTypes.int_t",
+        "equation_Lib.IntTypes.maxint", "equation_Lib.IntTypes.minint",
         "equation_Lib.IntTypes.pub_int_t", "equation_Lib.IntTypes.pub_int_v",
         "equation_Lib.IntTypes.range", "equation_Lib.IntTypes.shiftval",
         "equation_Lib.IntTypes.unsigned", "equation_Lib.IntTypes.v",
-        "equation_Prims.nat", "equation_Spec.AES256.nk",
-        "equation_Spec.AES256.wordlen", "int_typing",
-        "lemma_FStar.UInt.pow2_values", "lemma_FStar.UInt32.vu_inv",
-        "primitive_Prims.op_AmpAmp", "primitive_Prims.op_LessThanOrEqual",
+        "equation_Prims.nat", "equation_Spec.AES256.keylen",
+        "equation_Spec.AES256.nk", "equation_Spec.AES256.wordlen",
+        "int_inversion", "int_typing", "lemma_FStar.UInt.pow2_values",
+        "lemma_FStar.UInt32.vu_inv", "primitive_Prims.op_AmpAmp",
+        "primitive_Prims.op_LessThanOrEqual", "primitive_Prims.op_Multiply",
         "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_27dc038cce58e6a175dcb6195f80808a",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_83845a86f2550cdf941eeb1d9b59602b",
         "refinement_interpretation_Tm_refine_c6c18a7ceb46d419c35ff8551117551e",
         "refinement_interpretation_Tm_refine_e40dba697735a60216c598c2a27841b5",
         "refinement_interpretation_Tm_refine_f13070840248fced9d9d60d77bdae3ec",
         "typing_FStar.UInt.fits", "typing_FStar.UInt32.uint_to_t",
-        "typing_Lib.IntTypes.bits", "typing_Spec.AES256.wordlen",
-        "typing_tok_Lib.IntTypes.U8@tok"
+        "typing_Lib.IntTypes.bits", "typing_Lib.IntTypes.v",
+        "typing_Spec.AES256.keylen", "typing_Spec.AES256.wordlen",
+        "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "3ce8ed8ec6980408f054014965b522a4"
+      "8fedb3e1676600c867e050b30c8728f1"
     ],
     [
       "Spec.AES256.inv_sbox",
@@ -208,7 +215,7 @@
         "typing_Spec.AES256.keylen", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "ad60a602c74f3b4f40d40f9c74a14d7a"
+      "14e2b659602491498115683c900bed8d"
     ],
     [
       "Spec.AES256.sbox",
@@ -233,7 +240,7 @@
         "typing_Spec.AES256.keylen", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "3c4f8a442e6c2822890766a6d7d4db17"
+      "88ca8ac717f541b59ae1d84c4c3544c6"
     ],
     [
       "Spec.AES256.access_sbox",
@@ -252,7 +259,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "63a38bc1d241bbab920808e3f64fc7b2"
+      "970ffbb5010e53d00b7c1cb64a8bc243"
     ],
     [
       "Spec.AES256.access_inv_sbox",
@@ -271,7 +278,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "5e8007ab3de5a3d5337a37f12f939560"
+      "32655c4f83b6afe05eb039bba4c232dd"
     ],
     [
       "Spec.AES256.subBytes_sbox",
@@ -288,6 +295,7 @@
         "equality_tok_Lib.IntTypes.SEC@tok",
         "equality_tok_Lib.IntTypes.U32@tok",
         "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.bits",
+        "equation_Lib.IntTypes.maxint", "equation_Lib.IntTypes.minint",
         "equation_Lib.IntTypes.range", "equation_Lib.IntTypes.unsigned",
         "equation_Lib.IntTypes.v", "equation_Lib.Sequence.lseq",
         "equation_Lib.Sequence.to_seq", "equation_Prims.eqtype",
@@ -317,7 +325,7 @@
         "typing_tok_Lib.IntTypes.U32@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "f6f2ae13d5b9da97d5728d6f8e06c2c5"
+      "a81d5d9e1d1214045f43ce30cf4170e8"
     ],
     [
       "Spec.AES256.shiftRows",
@@ -350,7 +358,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "331ccb013da7483ab0f1979cb8b698d3"
+      "d8f20c9f31f1627ede0805e040a712aa"
     ],
     [
       "Spec.AES256.mixColumns_",
@@ -364,6 +372,7 @@
         "constructor_distinct_Lib.IntTypes.U8",
         "equality_tok_Lib.IntTypes.U32@tok",
         "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.bits",
+        "equation_Lib.IntTypes.maxint", "equation_Lib.IntTypes.minint",
         "equation_Lib.IntTypes.range", "equation_Lib.IntTypes.unsigned",
         "equation_Lib.Sequence.lseq", "equation_Lib.Sequence.to_seq",
         "equation_Prims.eqtype", "equation_Prims.nat", "equation_Prims.pos",
@@ -392,7 +401,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "800a7981494c4c4aa164fcb5368c7a87"
+      "e33cd2250346b4b8366cc06530cb539b"
     ],
     [
       "Spec.AES256.mixColumns",
@@ -416,7 +425,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "67e05aa5870c7c7f67b37dbfb9b5549b"
+      "5cf10fde85815524e1f1346feb37ef7a"
     ],
     [
       "Spec.AES256.addRoundKey_",
@@ -461,7 +470,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "cf6017075d63c78ee67627ae6040ebf5"
+      "2ce7bb5897f604a1fa28b9cc9ae0fe9b"
     ],
     [
       "Spec.AES256.addRoundKey",
@@ -482,7 +491,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "94288571889265ca0704ff94b0e5ba6b"
+      "be804f5556afef2a1cfa3fc560958da3"
     ],
     [
       "Spec.AES256.cipher",
@@ -509,7 +518,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "b10666221f8631279d4ec0576c01eab1"
+      "c36a3712a0fc0d7c2f83447fbe680bbd"
     ],
     [
       "Spec.AES256.rotWord",
@@ -544,7 +553,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "b1efd39afb7c27b849aa5cf508a6a08e"
+      "dff7f8a86c466416a8a89dcdb35fbc39"
     ],
     [
       "Spec.AES256.subWord",
@@ -561,10 +570,10 @@
         "equality_tok_Lib.IntTypes.SEC@tok",
         "equality_tok_Lib.IntTypes.U32@tok",
         "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.bits",
-        "equation_Lib.IntTypes.range", "equation_Lib.IntTypes.unsigned",
-        "equation_Lib.IntTypes.v", "equation_Lib.Sequence.lseq",
-        "equation_Lib.Sequence.to_seq", "equation_Prims.eqtype",
-        "equation_Prims.nat", "equation_Prims.pos",
+        "equation_Lib.IntTypes.maxint", "equation_Lib.IntTypes.range",
+        "equation_Lib.IntTypes.unsigned", "equation_Lib.IntTypes.v",
+        "equation_Lib.Sequence.lseq", "equation_Lib.Sequence.to_seq",
+        "equation_Prims.eqtype", "equation_Prims.nat", "equation_Prims.pos",
         "equation_Spec.AES256.nk", "equation_Spec.AES256.word",
         "equation_Spec.AES256.wordlen", "function_token_typing_Prims.int",
         "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2", "int_typing",
@@ -594,7 +603,7 @@
         "typing_tok_Lib.IntTypes.U32@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "6c6a84454bb3b2db0165944f6037e4bf"
+      "09db576bd0d942e838672208dca1a785"
     ],
     [
       "Spec.AES256.rcon",
@@ -606,6 +615,7 @@
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
         "constructor_distinct_Lib.IntTypes.U8",
         "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.bits",
+        "equation_Lib.IntTypes.maxint", "equation_Lib.IntTypes.minint",
         "equation_Lib.IntTypes.range", "equation_Lib.IntTypes.unsigned",
         "equation_Prims.nat", "equation_Spec.AES256.nk", "int_inversion",
         "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_Subtraction",
@@ -615,7 +625,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "28c90bc98ccefa0b18ebef8a17b4ee8d"
+      "04f2d64d708ab965ac626c2e1ce5c2d9"
     ],
     [
       "Spec.AES256.keyExpansion_aux_0",
@@ -627,7 +637,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "fa039c6cb0cc683634dce4f1f69edff7"
+      "a3320dce0a10354e3b5f48a5880483cc"
     ],
     [
       "Spec.AES256.keyExpansion_aux_0",
@@ -639,7 +649,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "c4d23221d7332842424ee979c3676a63"
+      "fe95f437977adcd4faee8cd2b0dc2bcf"
     ],
     [
       "Spec.AES256.keyExpansion_aux_0",
@@ -654,6 +664,7 @@
         "constructor_distinct_Lib.IntTypes.U8",
         "equality_tok_Lib.IntTypes.U32@tok",
         "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.bits",
+        "equation_Lib.IntTypes.maxint", "equation_Lib.IntTypes.minint",
         "equation_Lib.IntTypes.range", "equation_Lib.IntTypes.uint8",
         "equation_Lib.IntTypes.unsigned", "equation_Lib.Sequence.lseq",
         "equation_Lib.Sequence.seq", "equation_Lib.Sequence.to_seq",
@@ -687,7 +698,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "9917d6330bcefc69b0060dcf1ceb569b"
+      "7c008015b2baf60173b076e03cad4467"
     ],
     [
       "Spec.AES256.keyExpansion_aux_1",
@@ -699,7 +710,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "9e0647b6e3d5182f24302a2188d07f4b"
+      "dd318112d3b7283220cffda0ed6ff033"
     ],
     [
       "Spec.AES256.keyExpansion_aux_1",
@@ -711,7 +722,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "256b670705dc8f6b6238264240612383"
+      "ee20988c9f763befe308d2b0bae0ea7d"
     ],
     [
       "Spec.AES256.keyExpansion_aux_1",
@@ -751,7 +762,7 @@
         "typing_Spec.AES256.keylen", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "a82bf586533a7f3612ad924793135821"
+      "2fb111d58a335ff73f4ecaa13b20de0c"
     ],
     [
       "Spec.AES256.xkeylen_w",
@@ -763,7 +774,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "47da48c712f76047cb64df3a8a69c11a"
+      "cbf2c1d509666d4754cc0f212229db99"
     ],
     [
       "Spec.AES256.keyExpansion_aux",
@@ -791,7 +802,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "a7610cb2b374431b1f3180403b614123"
+      "b037c5c022b49648d3104bd646ea68e3"
     ],
     [
       "Spec.AES256.keyExpansion",
@@ -807,6 +818,7 @@
         "constructor_distinct_Lib.IntTypes.U8",
         "equality_tok_Lib.IntTypes.U32@tok",
         "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.bits",
+        "equation_Lib.IntTypes.maxint", "equation_Lib.IntTypes.minint",
         "equation_Lib.IntTypes.range", "equation_Lib.IntTypes.unsigned",
         "equation_Lib.Sequence.lseq", "equation_Lib.Sequence.to_seq",
         "equation_Prims.nat", "equation_Prims.pos",
@@ -830,7 +842,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "7d656673ce1c1909bf5999a6ed01dc19"
+      "863758039e11e15f64536829e43853ee"
     ],
     [
       "Spec.AES256.invSubBytes_sbox",
@@ -847,6 +859,7 @@
         "equality_tok_Lib.IntTypes.SEC@tok",
         "equality_tok_Lib.IntTypes.U32@tok",
         "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.bits",
+        "equation_Lib.IntTypes.maxint", "equation_Lib.IntTypes.minint",
         "equation_Lib.IntTypes.range", "equation_Lib.IntTypes.unsigned",
         "equation_Lib.IntTypes.v", "equation_Lib.Sequence.lseq",
         "equation_Lib.Sequence.to_seq", "equation_Prims.eqtype",
@@ -876,7 +889,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "b5b47a781c776b5cc8a943a45d10867f"
+      "d641ec529acfac138b255ce7cc230702"
     ],
     [
       "Spec.AES256.invShiftRows",
@@ -909,7 +922,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "d8dae3e754e8880c3d941ec08d377749"
+      "87f45b29ab4aa214f83a0cdfc5880d46"
     ],
     [
       "Spec.AES256.invMixColumns_",
@@ -923,6 +936,7 @@
         "constructor_distinct_Lib.IntTypes.U8",
         "equality_tok_Lib.IntTypes.U32@tok",
         "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.bits",
+        "equation_Lib.IntTypes.maxint", "equation_Lib.IntTypes.minint",
         "equation_Lib.IntTypes.range", "equation_Lib.IntTypes.unsigned",
         "equation_Lib.Sequence.lseq", "equation_Lib.Sequence.to_seq",
         "equation_Prims.eqtype", "equation_Prims.nat", "equation_Prims.pos",
@@ -952,7 +966,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "261199fe397a6ec17cae1e161a0ea77c"
+      "b89f9b8f6ebadd7f906075e31d2d45d2"
     ],
     [
       "Spec.AES256.invMixColumns",
@@ -976,7 +990,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "d66ae24421dfe80a5fbd401971f20c35"
+      "8fed6b66da58f2b462c46bcadfcd290a"
     ],
     [
       "Spec.AES256.inv_cipher_round",
@@ -988,7 +1002,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "a704d920fabbde4b0e89956ea33a96c8"
+      "5fb93fafbe2180fa51db0a4d117da25e"
     ],
     [
       "Spec.AES256.inv_cipher",
@@ -1011,7 +1025,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "650180c4aa7ec4ae982b4288616dd975"
+      "3578975d8975d5ac4a72e95e4443c5b0"
     ]
   ]
 ]

@@ -1,5 +1,5 @@
 [
-  "0Þð—d\u0000ß3Š=ç\u0005\\\rhM",
+  "\\«#¹ÖÊ\u0017m®±qË\u007fÀa-",
   [
     [
       "Spec.SPARKLE.size_word",
@@ -20,7 +20,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "1a7462e49746fabbfb9bfe15fa1ad1e5"
+      "21e4bd9c077603d22c466fcbe7c0e0e5"
     ],
     [
       "Spec.SPARKLE.vsize_rcon",
@@ -41,7 +41,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "459798a0a899cf4c75c05a11aecb146b"
+      "a8c66889e3963d0980a754bb2d3ec4c4"
     ],
     [
       "Spec.SPARKLE.rcon_list",
@@ -55,6 +55,7 @@
         "constructor_distinct_Lib.IntTypes.S8",
         "constructor_distinct_Lib.IntTypes.U32",
         "equality_tok_Lib.IntTypes.U32@tok", "equation_Lib.IntTypes.bits",
+        "equation_Lib.IntTypes.maxint", "equation_Lib.IntTypes.minint",
         "equation_Lib.IntTypes.range", "equation_Lib.IntTypes.unsigned",
         "equation_Prims.nat", "lemma_FStar.UInt.pow2_values",
         "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
@@ -62,7 +63,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "a740ec6a419d36a6f17cdfd61496a7f5"
+      "9b11e85f2bef13dc2de01d021e5defc4"
     ],
     [
       "Spec.SPARKLE.rcon",
@@ -75,7 +76,7 @@
         "typing_Spec.SPARKLE.vsize_rcon"
       ],
       0,
-      "5c387d1e237bdf94c2667a5497ede4c5"
+      "34bedad259c8f130cabe35e300004478"
     ],
     [
       "Spec.SPARKLE.arx",
@@ -112,7 +113,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "3e94f3bf941b9206b4947df4acfee61c"
+      "e3466f35b221c32f6a9246176a1076bb"
     ],
     [
       "Spec.SPARKLE.l1",
@@ -127,6 +128,7 @@
         "constructor_distinct_Lib.IntTypes.U32",
         "equality_tok_Lib.IntTypes.PUB@tok",
         "equality_tok_Lib.IntTypes.U32@tok", "equation_Lib.IntTypes.bits",
+        "equation_Lib.IntTypes.maxint", "equation_Lib.IntTypes.minint",
         "equation_Lib.IntTypes.range", "equation_Lib.IntTypes.unsigned",
         "equation_Lib.IntTypes.v", "equation_Prims.nat",
         "lemma_FStar.UInt.pow2_values", "lemma_Lib.IntTypes.v_mk_int",
@@ -139,7 +141,7 @@
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "4dd299d709b0693023d8a60f3c07dd89"
+      "9cfed96035a338fca87fbb7d4dc11ed0"
     ],
     [
       "Spec.SPARKLE.add2",
@@ -149,7 +151,8 @@
       [
         "@MaxIFuel_assumption", "@query",
         "constructor_distinct_Lib.IntTypes.U32",
-        "equality_tok_Lib.IntTypes.U32@tok", "equation_Lib.IntTypes.range",
+        "equality_tok_Lib.IntTypes.U32@tok", "equation_Lib.IntTypes.maxint",
+        "equation_Lib.IntTypes.minint", "equation_Lib.IntTypes.range",
         "equation_Lib.IntTypes.unsigned", "equation_Prims.nat",
         "equation_Spec.SPARKLE.vsize_rcon", "int_inversion",
         "primitive_Prims.op_Modulus", "projection_inverse_BoxInt_proj_0",
@@ -157,7 +160,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "67c6d6c3f0c690bc43a4f542f1aab54e"
+      "443c17b1db741012aa783bb38736f9e3"
     ],
     [
       "Spec.SPARKLE.sparkle256",
@@ -178,7 +181,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "4e9103d59c4593daa14e7fcf01cc09cc"
+      "1247371f0facd7832220ac944c3e5949"
     ],
     [
       "Spec.SPARKLE.sparkle256",
@@ -197,7 +200,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "85f221bd32d5692043a5f6bd2e5f0bcd"
+      "f15792676bd42769fdf20643cef60d70"
     ],
     [
       "Spec.SPARKLE.sparkle256",
@@ -244,7 +247,7 @@
         "typing_FStar.Seq.Base.length"
       ],
       0,
-      "1539bc1bf36ba15bf1727f2f337f65cf"
+      "459434b721901b597f63064e4b29b4b4"
     ],
     [
       "Spec.SPARKLE.sparkle384",
@@ -265,7 +268,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "99271d18ac566c74ad1400043a4fee0c"
+      "b3472fcad05663bd764fed6f5f9639e4"
     ],
     [
       "Spec.SPARKLE.sparkle384",
@@ -284,7 +287,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "12e6fd2cbe81c010caa652bf44ffd443"
+      "c562f280b001d39cf3667fe3874dead3"
     ],
     [
       "Spec.SPARKLE.sparkle384",
@@ -337,7 +340,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "122cd59c9e9ac8dc6d7e9ee6436f8a25"
+      "bccbc4712a01e2f354d134bffa4a7b54"
     ],
     [
       "Spec.SPARKLE.sparkle512",
@@ -358,7 +361,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "3020e264744937fb4cd6ede689f2d33b"
+      "5ee8e8e8ed7ac99fb57167e890352fed"
     ],
     [
       "Spec.SPARKLE.sparkle512",
@@ -377,7 +380,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "ab28d8c9df4bc2be7bc4a8c1e020060e"
+      "0aa561606cc37efd3566de45a0196e7d"
     ],
     [
       "Spec.SPARKLE.sparkle512",
@@ -438,7 +441,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "4d0281c5e9f9ce00dbc9acc9ec9b4ff0"
+      "e5714c23613ee4a05c3a88470332a3a1"
     ]
   ]
 ]

@@ -8,11 +8,12 @@
       1,
       [
         "@query", "constructor_distinct_Lib.IntTypes.U8",
-        "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.range",
+        "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.maxint",
+        "equation_Lib.IntTypes.minint", "equation_Lib.IntTypes.range",
         "equation_Lib.IntTypes.unsigned", "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "65148575fbea4de438b116483fb7f35a"
+      "88199edd84fc02f099193029a8176c16"
     ],
     [
       "Spec.Argon2i.h",
@@ -40,7 +41,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "c9033ac305b93c7c640eed953679629a"
+      "535bf43bf2b8775014fb54473a7a60ab"
     ],
     [
       "Spec.Argon2i.concat_and_hash",
@@ -58,7 +59,7 @@
         "refinement_interpretation_Tm_refine_59af01ee8c0cb0be1008d973c94e4769"
       ],
       0,
-      "e1c384d2c7bab08733dd0e8633b9be87"
+      "8f06f14f3b77a82d78c183cf8803b840"
     ],
     [
       "Spec.Argon2i.concat_and_hash",
@@ -72,6 +73,7 @@
         "equality_tok_Lib.IntTypes.SEC@tok",
         "equality_tok_Lib.IntTypes.U32@tok",
         "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.bits",
+        "equation_Lib.IntTypes.maxint", "equation_Lib.IntTypes.minint",
         "equation_Lib.IntTypes.numbytes", "equation_Lib.IntTypes.range",
         "equation_Lib.IntTypes.unsigned", "equation_Lib.Sequence.lseq",
         "equation_Lib.Sequence.to_seq", "equation_Prims.nat",
@@ -119,7 +121,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "f9fd51606390f6190e1cf1f4a834061f"
+      "a9312f4ddeb5defa3c560bc8cedaceb0"
     ],
     [
       "Spec.Argon2i.ceil_32",
@@ -145,7 +147,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "3d6d957e2946feeb022a3f3a86da4d16"
+      "66c86e6fbbce539b5bcbb6264ef44c98"
     ],
     [
       "Spec.Argon2i.compute_variable_length_output_size",
@@ -166,7 +168,7 @@
         "typing_Spec.Argon2i.ceil_32"
       ],
       0,
-      "35b1fabe9c01d5288d9c250f0df8b3ca"
+      "32300d6ee725dcd666ed65bcfadc5d4d"
     ],
     [
       "Spec.Argon2i.h'",
@@ -175,7 +177,7 @@
       1,
       [ "@query" ],
       0,
-      "91123a9aea1a3a35c69fb63cd5fe9229"
+      "5dce3098d75733f50bd6bbcc25ea0cb0"
     ],
     [
       "Spec.Argon2i.h'",
@@ -197,6 +199,7 @@
         "equality_tok_Lib.IntTypes.U32@tok",
         "equality_tok_Lib.IntTypes.U64@tok",
         "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.bits",
+        "equation_Lib.IntTypes.maxint", "equation_Lib.IntTypes.minint",
         "equation_Lib.IntTypes.numbytes", "equation_Lib.IntTypes.range",
         "equation_Lib.IntTypes.unsigned", "equation_Lib.Sequence.lseq",
         "equation_Lib.Sequence.to_seq", "equation_Prims.nat",
@@ -204,16 +207,14 @@
         "equation_Spec.Argon2i.compute_variable_length_output_size",
         "equation_Spec.Argon2i.line_size",
         "equation_Spec.Argon2i.op_Star_Dollar", "int_inversion",
-        "int_typing", "lemma_FStar.UInt.pow2_values",
-        "primitive_Prims.op_Addition", "primitive_Prims.op_Division",
-        "primitive_Prims.op_LessThanOrEqual", "primitive_Prims.op_Multiply",
-        "primitive_Prims.op_Subtraction",
+        "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_Addition",
+        "primitive_Prims.op_Division", "primitive_Prims.op_LessThanOrEqual",
+        "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_42d15b239e0d267e11ad2e257517b70d",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "refinement_interpretation_Tm_refine_56f0835880ee86bf12905d72484d42c6",
-        "refinement_interpretation_Tm_refine_63cd07c430bbc17d7c5dc5f47347bfce",
         "refinement_interpretation_Tm_refine_65288dde8cd6b1226784f77f96a5388a",
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
         "refinement_interpretation_Tm_refine_8540f1316f51f84e87794c131189b5e2",
@@ -227,7 +228,7 @@
         "typing_tok_Lib.IntTypes.U32@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "fb142542ec3a59ffa156fb04dfc28144"
+      "b18a8d3d644d9f960174486fccb23d1e"
     ],
     [
       "Spec.Argon2i.low_bits",
@@ -242,7 +243,7 @@
         "equation_Lib.IntTypes.unsigned", "projection_inverse_BoxBool_proj_0"
       ],
       0,
-      "d2742cf535e07a65fe109960cfb0566e"
+      "0e14845220ee60e67dc49ef1efac8fd3"
     ],
     [
       "Spec.Argon2i.g",
@@ -261,6 +262,7 @@
         "equality_tok_Lib.IntTypes.PUB@tok",
         "equality_tok_Lib.IntTypes.U32@tok",
         "equality_tok_Lib.IntTypes.U64@tok", "equation_Lib.IntTypes.bits",
+        "equation_Lib.IntTypes.maxint", "equation_Lib.IntTypes.minint",
         "equation_Lib.IntTypes.range", "equation_Lib.IntTypes.unsigned",
         "equation_Prims.nat", "int_typing", "lemma_FStar.UInt.pow2_values",
         "primitive_Prims.op_Subtraction",
@@ -274,7 +276,7 @@
         "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "9819405e54e41230af3a2975ea5a6ce8"
+      "116d24f0bed314277d0cd39eff23ad8d"
     ],
     [
       "Spec.Argon2i.apply_g",
@@ -293,7 +295,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "a6837a3c04a1b6531b7377be24d86326"
+      "9c51b097d652bdb66ec0b8ebcfaa5f91"
     ],
     [
       "Spec.Argon2i.apply_g",
@@ -322,7 +324,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "b359b415134c47f234fb57c207bca744"
+      "27895cf4c76641185d8ec8396d70f53f"
     ],
     [
       "Spec.Argon2i.argon_permute",
@@ -343,7 +345,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "801019812d275ec6eec881a2fe22e39a"
+      "4ca1eb8be062ea86e81b2250eaf2f51b"
     ],
     [
       "Spec.Argon2i.argon_permute",
@@ -362,7 +364,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "50934abdce916e803338f7809f6ba1fd"
+      "04b38cfacde695764f9bf4b6b2b04a81"
     ],
     [
       "Spec.Argon2i.argon_permute",
@@ -381,6 +383,7 @@
         "disc_equation_Lib.IntTypes.U1", "equality_tok_Lib.IntTypes.U32@tok",
         "equality_tok_Lib.IntTypes.U64@tok",
         "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.bits",
+        "equation_Lib.IntTypes.maxint", "equation_Lib.IntTypes.minint",
         "equation_Lib.IntTypes.numbytes", "equation_Lib.IntTypes.range",
         "equation_Lib.IntTypes.unsigned", "equation_Lib.Sequence.lseq",
         "equation_Lib.Sequence.to_seq", "equation_Prims.eqtype",
@@ -402,7 +405,7 @@
         "typing_tok_Lib.IntTypes.U32@tok", "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "ff3bbf388cc43ebc4125e6454fc89af1"
+      "2dccfdcde8fb0ea580854c4f25a9efd9"
     ],
     [
       "Spec.Argon2i.xor_matrices",
@@ -423,7 +426,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "de9288b345e93fcb70df178acf737422"
+      "482860d8adef5ce89e91d79a6d8836a5"
     ],
     [
       "Spec.Argon2i.xor_matrices",
@@ -442,6 +445,7 @@
         "disc_equation_Lib.IntTypes.U1", "equality_tok_Lib.IntTypes.U32@tok",
         "equality_tok_Lib.IntTypes.U64@tok",
         "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.bits",
+        "equation_Lib.IntTypes.maxint", "equation_Lib.IntTypes.minint",
         "equation_Lib.IntTypes.numbytes", "equation_Lib.IntTypes.range",
         "equation_Lib.IntTypes.unsigned", "equation_Prims.nat",
         "equation_Prims.pos", "equation_Spec.Argon2i.block_size",
@@ -458,7 +462,7 @@
         "typing_tok_Lib.IntTypes.U32@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "597e8d23077fac86f9cc6a493c124f08"
+      "0d2f2426e415b28a70163aea1a26ae72"
     ],
     [
       "Spec.Argon2i.extract_column_from_matrix",
@@ -477,7 +481,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "66f8b515f7529a4af6b3f7b6d481feaf"
+      "45fce96946e67262e6ac02cc2bf6e1b3"
     ],
     [
       "Spec.Argon2i.extract_column_from_matrix",
@@ -491,6 +495,7 @@
         "constructor_distinct_Lib.IntTypes.U8",
         "equality_tok_Lib.IntTypes.U32@tok",
         "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.bits",
+        "equation_Lib.IntTypes.maxint", "equation_Lib.IntTypes.minint",
         "equation_Lib.IntTypes.range", "equation_Lib.IntTypes.unsigned",
         "equation_Prims.nat", "equation_Prims.pos",
         "equation_Spec.Argon2i.block_size",
@@ -508,7 +513,7 @@
         "typing_tok_Lib.IntTypes.U32@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "706cdb03b8b67549656c4f5c120ea072"
+      "73a489142888fee76c1d61ff35203376"
     ],
     [
       "Spec.Argon2i.update_column_to_matrix",
@@ -530,7 +535,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "246a825fc25d724e0646a888377f3c37"
+      "05336c96aea84bf654e12239b083e2e9"
     ],
     [
       "Spec.Argon2i.update_column_to_matrix",
@@ -558,7 +563,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "2db552fc454ebe13bb3085563d386705"
+      "a701ddddc0926a0e4aac4cae5dfeca67"
     ],
     [
       "Spec.Argon2i.argon_compress",
@@ -579,7 +584,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "fcae7257ed39525d5c422a450361bee7"
+      "ce672699eba293ea01b7b0392bc0aa8a"
     ],
     [
       "Spec.Argon2i.argon_compress",
@@ -595,6 +600,7 @@
         "constructor_distinct_Lib.IntTypes.U8",
         "equality_tok_Lib.IntTypes.U32@tok",
         "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.bits",
+        "equation_Lib.IntTypes.maxint", "equation_Lib.IntTypes.minint",
         "equation_Lib.IntTypes.range", "equation_Lib.IntTypes.unsigned",
         "equation_Lib.Sequence.lseq", "equation_Lib.Sequence.to_seq",
         "equation_Prims.nat", "equation_Prims.pos",
@@ -615,7 +621,7 @@
         "typing_tok_Lib.IntTypes.U32@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "944b4a730e1426e0f7c9087bddb4d21c"
+      "184ab82810712a7170215007c517b318"
     ],
     [
       "Spec.Argon2i.fill_block",
@@ -629,6 +635,7 @@
         "constructor_distinct_Lib.IntTypes.U8",
         "equality_tok_Lib.IntTypes.U32@tok",
         "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.bits",
+        "equation_Lib.IntTypes.maxint", "equation_Lib.IntTypes.minint",
         "equation_Lib.IntTypes.range", "equation_Lib.IntTypes.unsigned",
         "equation_Lib.Sequence.lseq", "equation_Prims.nat",
         "equation_Prims.pos", "equation_Spec.Argon2i.block_size",
@@ -644,7 +651,7 @@
         "typing_tok_Lib.IntTypes.U32@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "172bb0700619ca7ebe70abed9b78f5c4"
+      "edc9c10e69064d9d7d5346c88b7360da"
     ],
     [
       "Spec.Argon2i.block_offset",
@@ -670,7 +677,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "a7327882d7afe4a75fbdafb1b2c84f6c"
+      "95a94740969ba263f0134ff00994367a"
     ],
     [
       "Spec.Argon2i.xor_last_column",
@@ -696,7 +703,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "b24021b9571be765bd87d6783a481d04"
+      "ea37af84bfcd51343067167ecb50f67a"
     ],
     [
       "Spec.Argon2i.xor_last_column",
@@ -711,7 +718,7 @@
         "refinement_interpretation_Tm_refine_a13f6ebf6dc44a4dddeda66708154f68"
       ],
       0,
-      "1d4c680fd17ef00b57f0539dadc3e044"
+      "3b2e034c4050f11d6a99f3b8dc60b74f"
     ],
     [
       "Spec.Argon2i.xor_last_column",
@@ -749,7 +756,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "16dfa435b61cf80c923c859dcde815cd"
+      "ca212c3c1d10ff1b92632ef348c96d31"
     ],
     [
       "Spec.Argon2i.concat_pseudo_rand_arg_block",
@@ -769,6 +776,7 @@
         "equality_tok_Lib.IntTypes.U32@tok",
         "equality_tok_Lib.IntTypes.U64@tok",
         "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.bits",
+        "equation_Lib.IntTypes.maxint", "equation_Lib.IntTypes.minint",
         "equation_Lib.IntTypes.range", "equation_Lib.IntTypes.unsigned",
         "equation_Lib.Sequence.lseq", "equation_Lib.Sequence.to_seq",
         "equation_Prims.nat", "equation_Prims.pos",
@@ -800,7 +808,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "cdea39c7aeb56562f1d06c347753868c"
+      "4d6ece389ee71e2621a2508c95f43392"
     ],
     [
       "Spec.Argon2i.concat_h0_j_i",
@@ -820,7 +828,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "23d1adc4815804320f3856f5eaa8c983"
+      "8780ccbc7710edb2158b189bf25c4fb4"
     ],
     [
       "Spec.Argon2i.concat_h0_j_i",
@@ -834,6 +842,7 @@
         "constructor_distinct_Lib.IntTypes.U8",
         "equality_tok_Lib.IntTypes.U32@tok",
         "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.bits",
+        "equation_Lib.IntTypes.maxint", "equation_Lib.IntTypes.minint",
         "equation_Lib.IntTypes.range", "equation_Lib.IntTypes.unsigned",
         "equation_Lib.Sequence.lseq", "equation_Lib.Sequence.to_seq",
         "equation_Prims.nat", "equation_Prims.pos",
@@ -854,7 +863,7 @@
         "typing_tok_Lib.IntTypes.U32@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "15700560e318ff7f6a323439cd51200f"
+      "d2e810b810d69235ada60131ad5d2725"
     ],
     [
       "Spec.Argon2i.update_block",
@@ -878,7 +887,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "cdc1ce604b8b2d2ac2ab972083073cf6"
+      "77e5926dad933ea34b6e86c968a2d195"
     ],
     [
       "Spec.Argon2i.update_block",
@@ -913,7 +922,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "f8e167e66752674b910af29a0e04c9d0"
+      "ff58ab4b5228b29233f713569379f52b"
     ],
     [
       "Spec.Argon2i.square_lemma",
@@ -936,7 +945,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "b8f67f2c5a7b8cf0de5f28e645bfecaf"
+      "d01360a1e499e357438ca7d74ce409a8"
     ],
     [
       "Spec.Argon2i.square_lemma_helper",
@@ -952,7 +961,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "c3905dc031845f60f56c762a9df557e0"
+      "a46fa7099ba60cdccd07ce5835065fba"
     ],
     [
       "Spec.Argon2i.square_max_lemma",
@@ -967,7 +976,7 @@
         "refinement_interpretation_Tm_refine_0ec011aea9f93256a3547ad9f0c667f1"
       ],
       0,
-      "b2e8e9f82b30e794d778fcf050f59fa6"
+      "66dd731fda6ba5032cffed415c740a06"
     ],
     [
       "Spec.Argon2i.pseudo_random_generation",
@@ -994,7 +1003,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "108243aa4848ca9b7eb592d38ec3b5eb"
+      "7bcb5bb7f2ab47bd2e1105ff9a2793f6"
     ],
     [
       "Spec.Argon2i.seeds_length",
@@ -1020,7 +1029,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "fa480d8aa0bb3a489a6f1bb365c18b56"
+      "3c6cfd04d4f64b26b7ab92b378954cef"
     ],
     [
       "Spec.Argon2i.generate_seeds",
@@ -1035,6 +1044,7 @@
         "constructor_distinct_Lib.IntTypes.U8",
         "disc_equation_Lib.IntTypes.U1", "equality_tok_Lib.IntTypes.U32@tok",
         "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.bits",
+        "equation_Lib.IntTypes.maxint", "equation_Lib.IntTypes.minint",
         "equation_Lib.IntTypes.numbytes", "equation_Lib.IntTypes.range",
         "equation_Lib.IntTypes.unsigned", "equation_Lib.Sequence.lseq",
         "equation_Prims.nat", "equation_Prims.pos",
@@ -1058,7 +1068,7 @@
         "typing_tok_Lib.IntTypes.U32@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "f4ea44cf25f4cccdb8383758ef6c98ea"
+      "2754598502b34276bf23e622672db722"
     ],
     [
       "Spec.Argon2i.map_indexes",
@@ -1066,27 +1076,31 @@
       2,
       1,
       [
-        "@MaxIFuel_assumption", "@query",
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented",
+        "@fuel_irrelevance_Prims.pow2.fuel_instrumented", "@query",
         "Prims_pretyping_ae567c2fb75be05905677af440075565", "bool_inversion",
         "bool_typing", "constructor_distinct_Lib.IntTypes.U32",
         "equality_tok_Lib.IntTypes.SEC@tok",
         "equality_tok_Lib.IntTypes.U32@tok", "equation_Lib.IntTypes.bits",
+        "equation_Lib.IntTypes.maxint", "equation_Lib.IntTypes.minint",
         "equation_Lib.IntTypes.range", "equation_Lib.IntTypes.unsigned",
         "equation_Prims.eqtype", "equation_Prims.nat",
         "equation_Spec.Argon2i.op_Star_Dollar",
+        "equation_with_fuel_Prims.pow2.fuel_instrumented",
         "function_token_typing_Prims.__cache_version_number__",
         "function_token_typing_Prims.int",
         "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2", "int_inversion",
-        "int_typing", "primitive_Prims.op_Addition",
-        "primitive_Prims.op_AmpAmp", "primitive_Prims.op_BarBar",
-        "primitive_Prims.op_Division", "primitive_Prims.op_Equality",
-        "primitive_Prims.op_Modulus", "primitive_Prims.op_Multiply",
-        "primitive_Prims.op_Subtraction", "primitive_Prims.op_disEquality",
+        "int_typing", "lemma_FStar.UInt.pow2_values",
+        "primitive_Prims.op_Addition", "primitive_Prims.op_AmpAmp",
+        "primitive_Prims.op_BarBar", "primitive_Prims.op_Division",
+        "primitive_Prims.op_Equality", "primitive_Prims.op_Modulus",
+        "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
+        "primitive_Prims.op_disEquality",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_0ec011aea9f93256a3547ad9f0c667f1",
         "refinement_interpretation_Tm_refine_2b9ac1d6c43e9e240d84837e7e466c45",
-        "refinement_interpretation_Tm_refine_31b6e6d9cedfe3c2646b57a717663dc1",
         "refinement_interpretation_Tm_refine_34eb3b45bf95008028b753bf0c3067f0",
         "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
         "refinement_interpretation_Tm_refine_4bc6e5aa54bf8c509b51f5fbd048846b",
@@ -1096,11 +1110,11 @@
         "refinement_interpretation_Tm_refine_83845a86f2550cdf941eeb1d9b59602b",
         "refinement_interpretation_Tm_refine_9d795d377c76ee8f668c95d4c294c3f4",
         "refinement_interpretation_Tm_refine_a13f6ebf6dc44a4dddeda66708154f68",
-        "typing_Lib.IntTypes.v", "typing_tok_Lib.IntTypes.SEC@tok",
-        "typing_tok_Lib.IntTypes.U32@tok"
+        "typing_Lib.IntTypes.bits", "typing_Lib.IntTypes.v",
+        "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "470b3442022e00b548f9629052933c06"
+      "2bb352035ca681605e09ea0ed9830052"
     ],
     [
       "Spec.Argon2i.fill_segment",
@@ -1130,7 +1144,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "ba0e8964357045d06e1f633549cd4b01"
+      "c00da57ad651884838716438d6d8ae0d"
     ],
     [
       "Spec.Argon2i.fill_segment",
@@ -1156,7 +1170,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "3db336a6c73b70ef3e36c4cbd6beacc2"
+      "20ffe77af2b0e8d4d6494047ddb03c64"
     ],
     [
       "Spec.Argon2i.fill_segment",
@@ -1203,7 +1217,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "95080705a6a706fece785489ce80407c"
+      "9db35120bef000896800f0128e5aa466"
     ],
     [
       "Spec.Argon2i.argon2i",
@@ -1215,7 +1229,7 @@
         "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "496d8d3c2e769dd66fffd7dbddbe8bbc"
+      "aafce6dc534d964c3a640ea6b8986f92"
     ],
     [
       "Spec.Argon2i.argon2i",
@@ -1227,20 +1241,27 @@
         "@fuel_correspondence_Prims.pow2.fuel_instrumented",
         "@fuel_irrelevance_Prims.pow2.fuel_instrumented", "@query",
         "Prims_pretyping_ae567c2fb75be05905677af440075565",
+        "constructor_distinct_Lib.IntTypes.S32",
         "constructor_distinct_Lib.IntTypes.U1",
+        "constructor_distinct_Lib.IntTypes.U16",
         "constructor_distinct_Lib.IntTypes.U32",
+        "constructor_distinct_Lib.IntTypes.U64",
         "constructor_distinct_Lib.IntTypes.U8",
         "constructor_distinct_Spec.Blake2.Blake2B",
         "equality_tok_Lib.IntTypes.SEC@tok",
         "equality_tok_Lib.IntTypes.U32@tok",
+        "equality_tok_Lib.IntTypes.U64@tok",
         "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.bits",
+        "equation_Lib.IntTypes.maxint", "equation_Lib.IntTypes.minint",
         "equation_Lib.IntTypes.range", "equation_Lib.IntTypes.unsigned",
         "equation_Lib.IntTypes.v", "equation_Lib.Sequence.lseq",
-        "equation_Prims.nat", "equation_Spec.Argon2i.block_size",
+        "equation_Prims.nat", "equation_Prims.pos",
+        "equation_Spec.Argon2i.block_size",
         "equation_Spec.Argon2i.line_size",
         "equation_Spec.Argon2i.op_Star_Dollar",
         "equation_Spec.Argon2i.version_number",
         "equation_Spec.Blake2.max_key",
+        "equation_with_fuel_Prims.pow2.fuel_instrumented",
         "function_token_typing_Prims.__cache_version_number__",
         "int_inversion", "int_typing", "lemma_FStar.UInt.pow2_values",
         "primitive_Prims.op_Addition", "primitive_Prims.op_Division",
@@ -1252,19 +1273,23 @@
         "refinement_interpretation_Tm_refine_0ec011aea9f93256a3547ad9f0c667f1",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "refinement_interpretation_Tm_refine_5c4d693c1e4272f12115ebe07911cabb",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
+        "refinement_interpretation_Tm_refine_7acf795d50ec256996534a97e12bfa61",
         "refinement_interpretation_Tm_refine_83845a86f2550cdf941eeb1d9b59602b",
         "refinement_interpretation_Tm_refine_a13f6ebf6dc44a4dddeda66708154f68",
+        "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c",
         "refinement_interpretation_Tm_refine_d8d83307254a8900dd20598654272e42",
         "refinement_interpretation_Tm_refine_fe82d32f9252b18be877ba5ac7aaeb88",
+        "token_correspondence_Prims.pow2.fuel_instrumented",
         "typing_Lib.IntTypes.bits", "typing_Lib.IntTypes.v",
-        "typing_Spec.Argon2i.block_size",
+        "typing_Prims.pow2", "typing_Spec.Argon2i.block_size",
         "typing_Spec.Argon2i.op_Star_Dollar",
         "typing_Spec.Argon2i.version_number",
         "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U32@tok",
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "dc2d3b3184fc298dfad7a1b1a8a1f6c6"
+      "8942f98af328adb9a478235703cf4053"
     ]
   ]
 ]

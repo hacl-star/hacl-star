@@ -33,7 +33,7 @@
         "typing_tok_Lib.IntTypes.U128@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "77b3753e264ed4c70b6332e673dbe87b"
+      "189f741e36b9c1f79d3f52b2c26024b0"
     ],
     [
       "Spec.AES256_GCM.size_block",
@@ -51,7 +51,7 @@
         "typing_Spec.GF128.size_block"
       ],
       0,
-      "6cd73d46666bc418c72d27eb556d1fc4"
+      "02bfd45f7173f0cd58b5b3eb6e99ce8e"
     ],
     [
       "Spec.AES256_GCM.size_nonce",
@@ -82,7 +82,7 @@
         "equation_Lib.IntTypes.unsigned", "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "ebfe55e707a08e54c6fe9f2b6b456b12"
+      "4a2c2fda694661d5dcfee2d5c9b92085"
     ],
     [
       "Spec.AES256_GCM.padlen",
@@ -94,7 +94,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "a1160627ef8c98960efe4db9cc01f1d9"
+      "d22e252e0e75b0616bb66175832a49a9"
     ],
     [
       "Spec.AES256_GCM.ghash",
@@ -146,10 +146,11 @@
         "equality_tok_Lib.IntTypes.U1@tok",
         "equality_tok_Lib.IntTypes.U32@tok",
         "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.bits",
-        "equation_Lib.IntTypes.range", "equation_Lib.IntTypes.uint8",
-        "equation_Lib.IntTypes.unsigned", "equation_Lib.Sequence.length",
-        "equation_Prims.nat", "equation_Spec.AES.gf8",
-        "equation_Spec.AES.irred", "equation_Spec.AES256_GCM.padlen",
+        "equation_Lib.IntTypes.minint", "equation_Lib.IntTypes.range",
+        "equation_Lib.IntTypes.uint8", "equation_Lib.IntTypes.unsigned",
+        "equation_Lib.Sequence.length", "equation_Prims.nat",
+        "equation_Spec.AES.gf8", "equation_Spec.AES.irred",
+        "equation_Spec.AES256_GCM.padlen",
         "equation_Spec.AES256_GCM.size_block",
         "equation_Spec.AES256_GCM.size_key", "equation_Spec.GF128.gf128",
         "equation_Spec.GF128.irred", "equation_Spec.GF128.size_block",
@@ -178,7 +179,7 @@
         "typing_tok_Lib.IntTypes.U128@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "9691561c0d694d265c791d3b2c02d083"
+      "0ef3991fef8e5344f835f279c3c5d331"
     ],
     [
       "Spec.AES256_GCM.gcm",
@@ -195,7 +196,7 @@
         "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "9fe5bea396a9129668eef7ef038c58f7"
+      "11f60d569bd2f8a989892c4a1d9be089"
     ],
     [
       "Spec.AES256_GCM.gcm",
@@ -225,10 +226,11 @@
         "equality_tok_Lib.IntTypes.SEC@tok",
         "equality_tok_Lib.IntTypes.U128@tok",
         "equality_tok_Lib.IntTypes.U1@tok",
-        "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.range",
-        "equation_Lib.IntTypes.unsigned", "equation_Lib.Sequence.length",
-        "equation_Lib.Sequence.lseq", "equation_Spec.AES.gf8",
-        "equation_Spec.AES.irred", "equation_Spec.AES256_GCM.nonce",
+        "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.minint",
+        "equation_Lib.IntTypes.range", "equation_Lib.IntTypes.unsigned",
+        "equation_Lib.Sequence.length", "equation_Lib.Sequence.lseq",
+        "equation_Spec.AES.gf8", "equation_Spec.AES.irred",
+        "equation_Spec.AES256_GCM.nonce",
         "equation_Spec.AES256_GCM.size_key",
         "equation_Spec.AES256_GCM.size_nonce", "equation_Spec.GF128.gf128",
         "equation_Spec.GF128.irred", "equation_Spec.GaloisField.felem",
@@ -295,15 +297,12 @@
       1,
       1,
       [
-        "@MaxFuel_assumption", "@MaxIFuel_assumption",
-        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
-        "bool_inversion", "constructor_distinct_Lib.IntTypes.U32",
+        "@MaxIFuel_assumption", "@query", "bool_inversion",
         "constructor_distinct_Lib.IntTypes.U8",
         "equality_tok_Lib.IntTypes.SEC@tok",
         "equality_tok_Lib.IntTypes.U128@tok",
         "equality_tok_Lib.IntTypes.U1@tok",
-        "equality_tok_Lib.IntTypes.U32@tok",
-        "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.bits",
+        "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.minint",
         "equation_Lib.IntTypes.range", "equation_Lib.IntTypes.uint8",
         "equation_Lib.IntTypes.unsigned", "equation_Lib.Sequence.length",
         "equation_Lib.Sequence.lseq", "equation_Lib.Sequence.to_seq",
@@ -315,11 +314,9 @@
         "equation_Spec.GF128.irred", "equation_Spec.GF128.size_block",
         "equation_Spec.GF128.tag", "equation_Spec.GaloisField.felem",
         "equation_Spec.GaloisField.gf",
-        "equation_with_fuel_Prims.pow2.fuel_instrumented",
         "function_token_typing_Lib.IntTypes.uint8", "int_inversion",
-        "int_typing", "lemma_FStar.UInt.pow2_values",
-        "primitive_Prims.op_Addition", "primitive_Prims.op_Division",
-        "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
+        "int_typing", "primitive_Prims.op_Addition",
+        "primitive_Prims.op_Division", "primitive_Prims.op_Subtraction",
         "proj_equation_Spec.GaloisField.GF_t",
         "projection_inverse_BoxInt_proj_0",
         "projection_inverse_Spec.GaloisField.GF_t",
@@ -345,7 +342,7 @@
         "typing_tok_Lib.IntTypes.U128@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "3c0182c7f7890d3109a534ae5cd3b343"
+      "edc077e73a2efd8d392e51c1623a5801"
     ],
     [
       "Spec.AES256_GCM.aead_decrypt",
@@ -365,7 +362,7 @@
         "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "f7c2154794ec8c781088b782ad3f11ef"
+      "eb3c208895c0c10d8786741c8c13148c"
     ],
     [
       "Spec.AES256_GCM.aead_decrypt",
@@ -395,10 +392,10 @@
         "equality_tok_Lib.IntTypes.SEC@tok",
         "equality_tok_Lib.IntTypes.U128@tok",
         "equality_tok_Lib.IntTypes.U1@tok",
-        "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.range",
-        "equation_Lib.IntTypes.unsigned", "equation_Lib.Sequence.length",
-        "equation_Spec.AES.gf8", "equation_Spec.AES.irred",
-        "equation_Spec.AES256_GCM.padlen",
+        "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.minint",
+        "equation_Lib.IntTypes.range", "equation_Lib.IntTypes.unsigned",
+        "equation_Lib.Sequence.length", "equation_Spec.AES.gf8",
+        "equation_Spec.AES.irred", "equation_Spec.AES256_GCM.padlen",
         "equation_Spec.AES256_GCM.size_block",
         "equation_Spec.AES256_GCM.size_key",
         "equation_Spec.AES256_GCM.size_nonce", "equation_Spec.GF128.gf128",

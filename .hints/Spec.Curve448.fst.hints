@@ -15,7 +15,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "5e42b9e4a21cd30f49378a8d7e43b882"
+      "9181777d6c08a84244d965cb9a17b573"
     ],
     [
       "Spec.Curve448.to_elem",
@@ -31,7 +31,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "6c2d4b1dd8f2bb7c6b6f4f11b2190f1f"
+      "d4db0c373893e34bbda43502b84cc118"
     ],
     [
       "Spec.Curve448.from_elem",
@@ -45,7 +45,7 @@
         "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c"
       ],
       0,
-      "7d270fb6426374f6214de0ee8d2f0bd6"
+      "ccddef7a2c2690f562885716e9772f9c"
     ],
     [
       "Spec.Curve448.zero",
@@ -61,7 +61,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "d4d36e2ead7bcd25650e65784ddf71aa"
+      "a471afccc8fa89dc64b94234c0418d0d"
     ],
     [
       "Spec.Curve448.one",
@@ -77,7 +77,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "4acc87992f0b7bc43b161be35acbbc88"
+      "b57cc44b81457ba5f623c1c5b4ee4a7c"
     ],
     [
       "Spec.Curve448.scalar",
@@ -96,7 +96,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "e45bbc379f45ec5ba0485d34a028667d"
+      "9235de3c17fb078c77402115f5afd707"
     ],
     [
       "Spec.Curve448.serialized_point",
@@ -115,7 +115,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "61e8a036e509e1fd33b5b200ed5f3749"
+      "e756726310718631ff6d56941147acf1"
     ],
     [
       "Spec.Curve448.proj_point",
@@ -131,7 +131,7 @@
         "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "0e36b15b3e81dda020900922dc9c54b0"
+      "23aecd74cb349e81ae20d34e7e75dc8c"
     ],
     [
       "Spec.Curve448.decodeScalar448",
@@ -147,9 +147,10 @@
         "constructor_distinct_Lib.IntTypes.U8",
         "equality_tok_Lib.IntTypes.U32@tok",
         "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.bits",
+        "equation_Lib.IntTypes.maxint", "equation_Lib.IntTypes.minint",
         "equation_Lib.IntTypes.range", "equation_Lib.IntTypes.unsigned",
-        "equation_Prims.nat", "int_typing", "lemma_FStar.Int.pow2_values",
-        "lemma_Lib.IntTypes.pow2_3", "primitive_Prims.op_Subtraction",
+        "equation_Prims.nat", "lemma_FStar.Int.pow2_values",
+        "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
@@ -157,7 +158,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "8a388797c5f505f2e9d8a8a851e9e61a"
+      "04645beae765faef58aff6e421675192"
     ],
     [
       "Spec.Curve448.decodePoint",
@@ -179,7 +180,7 @@
         "refinement_interpretation_Tm_refine_d8d83307254a8900dd20598654272e42"
       ],
       0,
-      "7623ea3d62a0978f8e0676e9dc350702"
+      "757b9093d98af2f8a79eb16eb8115164"
     ],
     [
       "Spec.Curve448.add_and_double",
@@ -195,7 +196,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "c2c12897af7e2393439d8dd4fb0bfa3e"
+      "0513c8f5cbe04e1b0660df1bef748860"
     ],
     [
       "Spec.Curve448.add_and_double",
@@ -213,7 +214,7 @@
         "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c"
       ],
       0,
-      "0262acb6199d3c54213095662cb75fd5"
+      "25dad315759a3729c9e6ee94cdacb148"
     ],
     [
       "Spec.Curve448.ith_bit",
@@ -230,6 +231,7 @@
         "equality_tok_Lib.IntTypes.PUB@tok",
         "equality_tok_Lib.IntTypes.U32@tok",
         "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.bits",
+        "equation_Lib.IntTypes.maxint", "equation_Lib.IntTypes.minint",
         "equation_Lib.IntTypes.range", "equation_Lib.IntTypes.unsigned",
         "equation_Prims.nat", "int_inversion", "int_typing",
         "lemma_FStar.Int.pow2_values", "lemma_Lib.IntTypes.v_mk_int",
@@ -244,7 +246,7 @@
         "typing_tok_Lib.IntTypes.U32@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "ee849f89986389deeaacf7ef5569469d"
+      "e17d02663a3aef06345059a619ea248d"
     ],
     [
       "Spec.Curve448.montgomery_ladder_",
@@ -258,7 +260,7 @@
         "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c"
       ],
       0,
-      "153de9b95bb45d76ecf04789a92d80f6"
+      "4132fd1236138b32f28cfb93f26a3adc"
     ],
     [
       "Spec.Curve448.montgomery_ladder_",
@@ -280,7 +282,7 @@
         "well-founded-ordering-on-nat"
       ],
       0,
-      "35f5c981096635bc37519294b848b170"
+      "c79d4058f413ccf44daecb5ecea86e2b"
     ],
     [
       "Spec.Curve448.encodePoint",
@@ -300,7 +302,7 @@
         "typing_Prims.pow2"
       ],
       0,
-      "92611544b6e9c0b585eb705a47cc74c2"
+      "08e85ca8f9dfb0bffb5fc3c740d56fe9"
     ],
     [
       "Spec.Curve448.scalarmult",
@@ -324,7 +326,7 @@
         "refinement_interpretation_Tm_refine_d8d83307254a8900dd20598654272e42"
       ],
       0,
-      "80cc3f5e4694dcaf2abc76ecdba36b18"
+      "ac45453e27b8c0cc38ce0475dfffe602"
     ],
     [
       "Spec.Curve448.secret_to_public",
@@ -345,7 +347,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "0a3ef38016f14907538f3a8a9ec7e104"
+      "e19401da24bb957ff5a89da2c422c09f"
     ],
     [
       "Spec.Curve448.secret_to_public",
@@ -364,7 +366,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "73a70c9dfaa44244df38bddc57aa8af8"
+      "4097569be5c23dca18cbcad18267e4c2"
     ],
     [
       "Spec.Curve448.secret_to_public",
@@ -380,6 +382,7 @@
         "constructor_distinct_Lib.IntTypes.U8",
         "equality_tok_Lib.IntTypes.U32@tok",
         "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.bits",
+        "equation_Lib.IntTypes.maxint", "equation_Lib.IntTypes.minint",
         "equation_Lib.IntTypes.range", "equation_Lib.IntTypes.unsigned",
         "equation_Lib.Sequence.lseq", "equation_Lib.Sequence.to_seq",
         "equation_Prims.eqtype", "equation_Prims.nat", "equation_Prims.pos",
@@ -397,7 +400,7 @@
         "typing_tok_Lib.IntTypes.U32@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "afcb5ad188490f23bf55d4de465d8f2d"
+      "633c8439565084ea04625c428e38c3b2"
     ]
   ]
 ]

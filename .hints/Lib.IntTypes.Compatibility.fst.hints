@@ -16,7 +16,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "1d9274ff787eb9b3083b04fff3fb5559"
+      "2805e1f166255338b26562b69d7c2a68"
     ],
     [
       "Lib.IntTypes.Compatibility.uint_v_size_lemma",
@@ -27,7 +27,8 @@
         "@MaxIFuel_assumption", "@query",
         "constructor_distinct_Lib.IntTypes.U32",
         "equality_tok_Lib.IntTypes.PUB@tok",
-        "equality_tok_Lib.IntTypes.U32@tok", "equation_Lib.IntTypes.range",
+        "equality_tok_Lib.IntTypes.U32@tok", "equation_Lib.IntTypes.maxint",
+        "equation_Lib.IntTypes.minint", "equation_Lib.IntTypes.range",
         "equation_Lib.IntTypes.unsigned", "equation_Prims.nat",
         "int_inversion", "lemma_Lib.IntTypes.v_mk_int",
         "refinement_interpretation_Tm_refine_0ec011aea9f93256a3547ad9f0c667f1",
@@ -36,7 +37,7 @@
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "df5459b09aea53dcbc4d1ed6da138d00"
+      "bffbff94cdfecd2526d1c4bf6d61b711"
     ],
     [
       "Lib.IntTypes.Compatibility.uintv_extensionality",
@@ -45,7 +46,7 @@
       1,
       [ "@query" ],
       0,
-      "ad02c98ad7e9806414f7ef7600465bbe"
+      "c6e594f9923b8a97b7857810f7c6b40a"
     ],
     [
       "Lib.IntTypes.Compatibility.uintv_extensionality",
@@ -57,7 +58,7 @@
         "refinement_interpretation_Tm_refine_387e6d282145573240ab7b8a4b94cce5"
       ],
       0,
-      "fce01f3073a822c12a22d0565a583476"
+      "146ba0815245b1f9c61975ad64fb1db3"
     ],
     [
       "Lib.IntTypes.Compatibility.nat_to_uint",
@@ -66,15 +67,15 @@
       1,
       [
         "@MaxIFuel_assumption", "@query", "bool_inversion",
-        "equation_Lib.IntTypes.range", "equation_Lib.IntTypes.unsigned",
-        "equation_Prims.nat",
+        "equation_Lib.IntTypes.minint", "equation_Lib.IntTypes.range",
+        "equation_Lib.IntTypes.unsigned", "equation_Prims.nat",
         "refinement_interpretation_Tm_refine_387e6d282145573240ab7b8a4b94cce5",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_703c12a729f61c310bf3d018fbe38084",
+        "refinement_interpretation_Tm_refine_d42552e96cd645f5dfd1fbc0490bbe36",
         "typing_Lib.IntTypes.unsigned"
       ],
       0,
-      "6ca8874da8a2ff01006de644b8de41c0"
+      "065f4fb351a415a911d95d96d426fe92"
     ]
   ]
 ]

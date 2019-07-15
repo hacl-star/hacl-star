@@ -18,7 +18,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "4fdd7bdf1a474fdca4e22cd6a3925009"
+      "1d77d921b52a052abd4a9a5bb9ebb354"
     ],
     [
       "Spec.Chacha20.block",
@@ -37,7 +37,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "4671b249982844bbff9a1784a21ca807"
+      "43c8f7972d7ddcba9544d29fcd89bf70"
     ],
     [
       "Spec.Chacha20.nonce",
@@ -56,7 +56,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "f017ffd2c6da00ea5c3a403a1f75bd8b"
+      "614e0f2c306e944be685c604a4b3618d"
     ],
     [
       "Spec.Chacha20.subblock",
@@ -69,7 +69,7 @@
         "projection_inverse_BoxBool_proj_0"
       ],
       0,
-      "99207590e0419366b00c3c91b8d5ceec"
+      "365d12926d5bb61d9166cc43bff17105"
     ],
     [
       "Spec.Chacha20.state",
@@ -88,7 +88,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "3b34a40ad9bb01ea8d26c803bae00920"
+      "4f672c43f29f7da419a8d4a0d9b76fc5"
     ],
     [
       "Spec.Chacha20.line",
@@ -119,7 +119,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "9b743bbcfe878ce93b53cf9acfca9e0a"
+      "f7ab300b98da92f72651bfa780f75d97"
     ],
     [
       "Spec.Chacha20.quarter_round",
@@ -132,6 +132,7 @@
         "constructor_distinct_Lib.IntTypes.U32",
         "equality_tok_Lib.IntTypes.PUB@tok",
         "equality_tok_Lib.IntTypes.U32@tok", "equation_Lib.IntTypes.bits",
+        "equation_Lib.IntTypes.maxint", "equation_Lib.IntTypes.minint",
         "equation_Lib.IntTypes.range", "equation_Lib.IntTypes.unsigned",
         "equation_Lib.IntTypes.v", "equation_Prims.nat",
         "equation_Spec.Chacha20.size_nonce", "int_typing",
@@ -145,7 +146,7 @@
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "2ce12083b293d59be7d115ce0b12127e"
+      "2820a2f1112844f56e65fedeab6951a3"
     ],
     [
       "Spec.Chacha20.column_round",
@@ -168,7 +169,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "d6c3cbbebe841e59abf9d875c1681874"
+      "da4ce913723fec0a083028f3d8828440"
     ],
     [
       "Spec.Chacha20.diagonal_round",
@@ -191,7 +192,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "773dff80b8c6a9281453c8bb7df0be87"
+      "d84283521d7cb3715c4855fa8a6ed6f8"
     ],
     [
       "Spec.Chacha20.sum_state",
@@ -213,7 +214,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "f65282c420291aefb30833c0adc503db"
+      "965e22dcdbd2ea774225cd68d466724d"
     ],
     [
       "Spec.Chacha20.chacha20_add_counter",
@@ -225,6 +226,7 @@
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
         "constructor_distinct_Lib.IntTypes.U32",
         "equality_tok_Lib.IntTypes.U32@tok", "equation_Lib.IntTypes.bits",
+        "equation_Lib.IntTypes.maxint", "equation_Lib.IntTypes.minint",
         "equation_Lib.IntTypes.range", "equation_Lib.IntTypes.unsigned",
         "equation_Prims.nat", "equation_Spec.Chacha20.counter",
         "int_inversion", "lemma_FStar.UInt.pow2_values",
@@ -236,7 +238,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "cd798547fa766cd2bb5a5ce76f63adb2"
+      "0cec11340e9f0dcf12cad0c372d3bb8e"
     ],
     [
       "Spec.Chacha20.chacha20_constants",
@@ -257,7 +259,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "70f87dede033510bb376472b7b95e668"
+      "e63bc89f1c8231fb62b03305ec70bbec"
     ],
     [
       "Spec.Chacha20.setup",
@@ -269,7 +271,8 @@
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
         "constructor_distinct_Lib.IntTypes.U32",
         "disc_equation_Lib.IntTypes.U1", "equality_tok_Lib.IntTypes.U32@tok",
-        "equation_Lib.IntTypes.bits", "equation_Lib.IntTypes.numbytes",
+        "equation_Lib.IntTypes.bits", "equation_Lib.IntTypes.maxint",
+        "equation_Lib.IntTypes.minint", "equation_Lib.IntTypes.numbytes",
         "equation_Lib.IntTypes.range", "equation_Lib.IntTypes.uint8",
         "equation_Lib.IntTypes.unsigned", "equation_Lib.Sequence.lseq",
         "equation_Lib.Sequence.seq", "equation_Lib.Sequence.to_seq",
@@ -296,7 +299,7 @@
         "typing_FStar.Seq.Base.length"
       ],
       0,
-      "aa92ea039abac673c79ea038ebfbb43e"
+      "48a7d19c92dcd0e77650f8e811b92e59"
     ],
     [
       "Spec.Chacha20.chacha20_init",
@@ -308,6 +311,7 @@
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
         "constructor_distinct_Lib.IntTypes.U32",
         "equality_tok_Lib.IntTypes.U32@tok", "equation_Lib.IntTypes.bits",
+        "equation_Lib.IntTypes.maxint", "equation_Lib.IntTypes.minint",
         "equation_Lib.IntTypes.range", "equation_Lib.IntTypes.uint8",
         "equation_Lib.IntTypes.unsigned", "equation_Lib.Sequence.lseq",
         "equation_Lib.Sequence.seq", "equation_Spec.Chacha20.key",
@@ -319,7 +323,7 @@
         "typing_FStar.Seq.Base.length"
       ],
       0,
-      "2dab1ebc6bda91bee88009d764876fd7"
+      "fa9fb161549f03b252ceaefc6cbb8a5c"
     ],
     [
       "Spec.Chacha20.chacha20_key_block0",
@@ -347,7 +351,7 @@
         "typing_FStar.Seq.Base.length", "typing_Prims.pow2"
       ],
       0,
-      "78297f40b209f3e588c5e2093d9f88c2"
+      "cccf5fb461009f13405570ede0c27528"
     ],
     [
       "Spec.Chacha20.chacha20_key_block",
@@ -373,7 +377,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "b0977f0bae0ee1a6ad80ec20dc448f6d"
+      "6ac6784c2cf66ac12252aa79e4124652"
     ],
     [
       "Spec.Chacha20.xor_block",
@@ -397,7 +401,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "42dfd7261c3cc5694d14f2fd631a76a2"
+      "8ccf3f479d63bdf486913b7019a3450c"
     ],
     [
       "Spec.Chacha20.chacha20_encrypt_last",
@@ -411,6 +415,7 @@
         "constructor_distinct_Lib.IntTypes.U8",
         "equality_tok_Lib.IntTypes.U32@tok",
         "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.bits",
+        "equation_Lib.IntTypes.maxint", "equation_Lib.IntTypes.minint",
         "equation_Lib.IntTypes.range", "equation_Lib.IntTypes.unsigned",
         "equation_Lib.Sequence.lseq", "equation_Lib.Sequence.to_seq",
         "equation_Prims.nat", "equation_Prims.pos",
@@ -428,7 +433,7 @@
         "typing_tok_Lib.IntTypes.U32@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "8bfe9c077f34be8c1ad1a6562a5bf4ea"
+      "4c496638f4130d9f032239b01456e787"
     ],
     [
       "Spec.Chacha20.chacha20_update",
@@ -443,7 +448,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "a312fafdc5df7823fcc1a2cef8b86257"
+      "9aa24b1d548be8cfefd9a841f020b000"
     ],
     [
       "Spec.Chacha20.chacha20_update",
@@ -458,7 +463,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "beca49b648ffcba5103fef95837eacb7"
+      "f246cbd75fe89fedbd7307ad17462e12"
     ],
     [
       "Spec.Chacha20.chacha20_update",
@@ -482,7 +487,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "351fb62517a2975da321ec2d0d3adbb2"
+      "78c3bdeaf3789efdb741e20cd11a994d"
     ],
     [
       "Spec.Chacha20.chacha20_encrypt_bytes",
@@ -497,7 +502,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "d2df51ee0d3e3456cd0daddb520abfbb"
+      "40b3c5376dd2b9e9ad4bf21ffc7c9681"
     ],
     [
       "Spec.Chacha20.chacha20_encrypt_bytes",
@@ -512,7 +517,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "ebaf9b2c81c0db53adc27a4a620f8e47"
+      "f585ae35781457cecd564bbde7c34125"
     ],
     [
       "Spec.Chacha20.chacha20_decrypt_bytes",
@@ -527,7 +532,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "3b3efd38a56c3b38188ab975a4c9181c"
+      "fb056618f6c4d16008c2fd42f698131f"
     ],
     [
       "Spec.Chacha20.chacha20_decrypt_bytes",
@@ -542,7 +547,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "41dc832f0ba8973ea86cdf6415d6bd2c"
+      "7c7e18907228376c132a3dd0079c84ec"
     ],
     [
       "Spec.Chacha20.chacha20_decrypt_bytes",
@@ -551,7 +556,7 @@
       1,
       [ "@query" ],
       0,
-      "5622337e5aec30fac2a7bc2cb0eba704"
+      "7c5e0b61477ec56d040a2cbc6bc65891"
     ]
   ]
 ]

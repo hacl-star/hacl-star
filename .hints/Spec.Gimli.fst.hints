@@ -21,7 +21,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "b0c7d9aae68f98745b052ab5a8002082"
+      "3045391d4548277c92cc798698ddfba3"
     ],
     [
       "Spec.Gimli.rate",
@@ -43,7 +43,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "e0c062c9afdf5a19654eae223850fe4b"
+      "bad4512b99d5acee9fd0398771a3f579"
     ],
     [
       "Spec.Gimli.column_looped",
@@ -90,7 +90,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "e297e662df2e62b509b25ea27ecbe2b4"
+      "7e46b3596fc6c7f8f950de678bd8af60"
     ],
     [
       "Spec.Gimli.small_swap",
@@ -116,7 +116,7 @@
         "typing_Spec.Gimli.size_state"
       ],
       0,
-      "acea324834b9600951cc262586692ebd"
+      "74c026b24fa9e159f7d22eda512f087d"
     ],
     [
       "Spec.Gimli.big_swap",
@@ -142,7 +142,7 @@
         "typing_Spec.Gimli.size_state"
       ],
       0,
-      "7753375677f079d58d0828b69ddcab00"
+      "47c0ae634da369e53209d4082f543605"
     ],
     [
       "Spec.Gimli.c0",
@@ -155,6 +155,7 @@
         "@fuel_irrelevance_Prims.pow2.fuel_instrumented", "@query",
         "constructor_distinct_Lib.IntTypes.U32",
         "equality_tok_Lib.IntTypes.U32@tok", "equation_Lib.IntTypes.bits",
+        "equation_Lib.IntTypes.maxint", "equation_Lib.IntTypes.minint",
         "equation_Lib.IntTypes.range", "equation_Lib.IntTypes.unsigned",
         "equation_Prims.nat",
         "equation_with_fuel_Prims.pow2.fuel_instrumented", "int_typing",
@@ -164,7 +165,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "43f27f1ef370576c9cb973533477fb1b"
+      "957f5b3b99130f3948093fb8c0bdfa89"
     ],
     [
       "Spec.Gimli.round_add",
@@ -174,7 +175,8 @@
       [
         "@MaxIFuel_assumption", "@query",
         "constructor_distinct_Lib.IntTypes.U32",
-        "equality_tok_Lib.IntTypes.U32@tok", "equation_Lib.IntTypes.range",
+        "equality_tok_Lib.IntTypes.U32@tok", "equation_Lib.IntTypes.maxint",
+        "equation_Lib.IntTypes.minint", "equation_Lib.IntTypes.range",
         "equation_Lib.IntTypes.unsigned", "equation_Lib.Sequence.lseq",
         "equation_Lib.Sequence.to_seq", "equation_Prims.nat",
         "equation_Spec.Gimli.size_state", "equation_Spec.Gimli.state",
@@ -185,7 +187,7 @@
         "typing_Spec.Gimli.size_state"
       ],
       0,
-      "274b4957d11beca2c89ea99c840c3095"
+      "6fb006e53ab16fbdac1405ae7c562c8c"
     ],
     [
       "Spec.Gimli.inner_loop",
@@ -199,7 +201,7 @@
         "typing_Spec.Gimli.size_state"
       ],
       0,
-      "02a94e1d87e0ff2afef2d4cb7109a513"
+      "09ee7082fe866c919c2085395ff616c2"
     ],
     [
       "Spec.Gimli.round",
@@ -236,7 +238,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "35628e8160f13961aeda1b6dc8fc8720"
+      "a912afd9415540501c776633967e8280"
     ],
     [
       "Spec.Gimli.update_block",
@@ -258,7 +260,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "0163800047c34671d0e2fc9f5488dd89"
+      "4384266e990ddf7adb4084f40ea65d53"
     ],
     [
       "Spec.Gimli.update_block",
@@ -290,7 +292,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "684131dd2a9c195ae44d8ec9cd8247d3"
+      "9dd011763354abb9da26d41bc3f9ae1a"
     ],
     [
       "Spec.Gimli.update_last",
@@ -303,7 +305,7 @@
         "projection_inverse_BoxBool_proj_0"
       ],
       0,
-      "f4a70c6dd482e760c6e5c6eb82ddd030"
+      "e5df43baddb387c4765b8f649cc5a050"
     ],
     [
       "Spec.Gimli.update_last",
@@ -318,6 +320,7 @@
         "constructor_distinct_Lib.IntTypes.U8",
         "disc_equation_Lib.IntTypes.U1", "equality_tok_Lib.IntTypes.U32@tok",
         "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.bits",
+        "equation_Lib.IntTypes.maxint", "equation_Lib.IntTypes.minint",
         "equation_Lib.IntTypes.numbytes", "equation_Lib.IntTypes.range",
         "equation_Lib.IntTypes.unsigned", "equation_Lib.Sequence.length",
         "equation_Lib.Sequence.lseq", "equation_Lib.Sequence.to_seq",
@@ -345,7 +348,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "2cbe2f156a8f480fcd4c5f8891cc8b24"
+      "587aa598c7735659cc9ebe76145c5c71"
     ],
     [
       "Spec.Gimli.hash",
@@ -360,6 +363,7 @@
         "constructor_distinct_Lib.IntTypes.U8",
         "equality_tok_Lib.IntTypes.U32@tok",
         "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.bits",
+        "equation_Lib.IntTypes.maxint", "equation_Lib.IntTypes.minint",
         "equation_Lib.IntTypes.numbytes", "equation_Lib.IntTypes.range",
         "equation_Lib.IntTypes.unsigned", "equation_Lib.Sequence.length",
         "equation_Lib.Sequence.lseq", "equation_Lib.Sequence.to_seq",
@@ -388,7 +392,7 @@
         "typing_tok_Lib.IntTypes.U32@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "3a840bb00f56f8b85760fefc1a2995f0"
+      "f4d082ddfbaee987b0a718c02253bf62"
     ]
   ]
 ]

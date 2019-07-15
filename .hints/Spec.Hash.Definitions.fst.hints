@@ -17,7 +17,7 @@
         "fuel_guarded_inversion_Spec.Hash.Definitions.hash_alg"
       ],
       0,
-      "7e6f6472da28defeabb7b0dce0590659"
+      "878f4e3eef54e64a0782cb8f0e3bf0d3"
     ],
     [
       "Spec.Hash.Definitions.len_int_type",
@@ -35,7 +35,7 @@
         "fuel_guarded_inversion_Spec.Hash.Definitions.hash_alg"
       ],
       0,
-      "066bdf2cacdb20c17018bc6833d27741"
+      "8a1e2ee71ee344443d1ea0014741f739"
     ],
     [
       "Spec.Hash.Definitions.len_t",
@@ -54,7 +54,7 @@
         "projection_inverse_BoxBool_proj_0"
       ],
       0,
-      "21e8afb0a67eda9bf4e81bb2b105d9cd"
+      "1a18ebbabdc10b6b6f9ff4e0ca6589d7"
     ],
     [
       "Spec.Hash.Definitions.nat_to_len",
@@ -62,11 +62,15 @@
       2,
       1,
       [
-        "@query", "equation_Lib.IntTypes.range", "primitive_Prims.op_Minus",
-        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0"
+        "@query", "equation_Lib.IntTypes.maxint",
+        "equation_Lib.IntTypes.minint", "equation_Lib.IntTypes.range",
+        "equation_Lib.IntTypes.unsigned",
+        "equation_Spec.Hash.Definitions.len_int_type",
+        "primitive_Prims.op_Minus", "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "199a3c92156c67919b6ae39e528c51c7"
+      "3acb245859d36b17d06788b9afb7ff7a"
     ],
     [
       "Spec.Hash.Definitions.len_v",
@@ -83,8 +87,8 @@
         "constructor_distinct_Lib.IntTypes.U128",
         "constructor_distinct_Lib.IntTypes.U64",
         "equality_tok_Lib.IntTypes.U128@tok",
-        "equality_tok_Lib.IntTypes.U64@tok", "equation_Lib.IntTypes.range",
-        "equation_Lib.IntTypes.unsigned",
+        "equality_tok_Lib.IntTypes.U64@tok", "equation_Lib.IntTypes.minint",
+        "equation_Lib.IntTypes.range", "equation_Lib.IntTypes.unsigned",
         "equation_Spec.Hash.Definitions.len_int_type",
         "fuel_guarded_inversion_Lib.IntTypes.inttype",
         "fuel_guarded_inversion_Spec.Hash.Definitions.hash_alg",
@@ -92,7 +96,7 @@
         "typing_Spec.Hash.Definitions.len_int_type"
       ],
       0,
-      "9b216f0c600ce5a92ff8f30a72041706"
+      "c414f795558dd3e5234ee9cc3ce509af"
     ],
     [
       "Spec.Hash.Definitions.len_length",
@@ -110,7 +114,7 @@
         "fuel_guarded_inversion_Spec.Hash.Definitions.hash_alg"
       ],
       0,
-      "18cf48a74a4a7c5a88d0880fb4dab868"
+      "76a5641469bbfc3bda2790f0ba74ebc6"
     ],
     [
       "Spec.Hash.Definitions.len_len",
@@ -151,7 +155,7 @@
         "typing_Spec.Hash.Definitions.len_length"
       ],
       0,
-      "f08f814ee4609cba443d9b5c8d0fe7b4"
+      "16fc422bf341a1c6535ec938621da3c2"
     ],
     [
       "Spec.Hash.Definitions.len_len",
@@ -160,7 +164,7 @@
       1,
       [ "@query" ],
       0,
-      "ede20d32e6e86be5187757ba6e07b7c0"
+      "899e245f0d75990f2adddf057765b2c0"
     ],
     [
       "Spec.Hash.Definitions.word_t",
@@ -178,7 +182,7 @@
         "fuel_guarded_inversion_Spec.Hash.Definitions.hash_alg"
       ],
       0,
-      "e518d60ab2ded9ae89d4dc045b163fcb"
+      "167cdd938a66c9090e510f1a5d714b71"
     ],
     [
       "Spec.Hash.Definitions.word",
@@ -197,7 +201,7 @@
         "projection_inverse_BoxBool_proj_0"
       ],
       0,
-      "c4a4172b7e2cf006fd8261ba30caed1f"
+      "90e133c69f110a733b6c998c5c3513bd"
     ],
     [
       "Spec.Hash.Definitions.word_length",
@@ -215,7 +219,7 @@
         "fuel_guarded_inversion_Spec.Hash.Definitions.hash_alg"
       ],
       0,
-      "6051b27d16179a9caf6058fcccb74a79"
+      "43bfb09560652505e9f6514696be8bd4"
     ],
     [
       "Spec.Hash.Definitions.hash_word_length",
@@ -233,7 +237,7 @@
         "fuel_guarded_inversion_Spec.Hash.Definitions.hash_alg"
       ],
       0,
-      "672864f0782ab623e96c3abd24044a71"
+      "9f03b4de9bee4aee8f338c7472f600bf"
     ],
     [
       "Spec.Hash.Definitions.pad0_length",
@@ -255,7 +259,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "17ea127684ad8aacd21cb03097f6e09c"
+      "20a0e93e755e25a5f18e8e6edc53358b"
     ],
     [
       "Spec.Hash.Definitions.pad_length",
@@ -280,7 +284,7 @@
         "typing_Spec.Hash.Definitions.pad0_length"
       ],
       0,
-      "846b1f8ea876e1d13061f935d6bd7f67"
+      "b9360f7e3d7aa800f7d18ad1601d92ca"
     ],
     [
       "Spec.Hash.Definitions.lseq",
@@ -294,7 +298,7 @@
         "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "f083ac33a784b46a1ecf899485152ff9"
+      "219c06c39acd319fe5aa512dc1a3c35c"
     ],
     [
       "Spec.Hash.Definitions.bytes_of_words",
@@ -340,7 +344,7 @@
         "refinement_interpretation_Tm_refine_e78ecf464652a5ffd112c1b62bd9c25c"
       ],
       0,
-      "d1e3a545b6b909e5fe10f944afec685a"
+      "8410793dd0ad5d6458e6a5451a819121"
     ],
     [
       "Spec.Hash.Definitions.bytes_of_words",
@@ -364,7 +368,7 @@
         "refinement_interpretation_Tm_refine_e78ecf464652a5ffd112c1b62bd9c25c"
       ],
       0,
-      "0bf200d36a866beec4402647ee22e8e7"
+      "fd74f525014fbfad345a22dd4f34d3c3"
     ],
     [
       "Spec.Hash.Definitions.words_of_bytes",
@@ -411,7 +415,7 @@
         "refinement_interpretation_Tm_refine_e78ecf464652a5ffd112c1b62bd9c25c"
       ],
       0,
-      "a4c507212757d8d3316b58aa0450e366"
+      "f2e8569e83628fae0f0c39cda5aeb3e3"
     ],
     [
       "Spec.Hash.Definitions.words_of_bytes",
@@ -435,7 +439,7 @@
         "refinement_interpretation_Tm_refine_e78ecf464652a5ffd112c1b62bd9c25c"
       ],
       0,
-      "ca820a259631c98c830ea63250b4ddd9"
+      "9a50acf0ba84074faa0b9311184bc035"
     ],
     [
       "Spec.Hash.Definitions.bytes_blocks",
@@ -451,7 +455,7 @@
         "primitive_Prims.op_Multiply", "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "430c7fcb16807d810f2d2368cc36717d"
+      "6df5162a3cd26811f02dd4ed9bd1288c"
     ],
     [
       "Spec.Hash.Definitions.pad_t",
@@ -467,7 +471,7 @@
         "primitive_Prims.op_Multiply", "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "8f490d40bb74a881f8032f733a9b3088"
+      "0dd8d8ca41d60304272c355942ccef0c"
     ]
   ]
 ]

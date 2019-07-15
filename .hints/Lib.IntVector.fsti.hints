@@ -8,7 +8,7 @@
       1,
       [ "@query" ],
       0,
-      "6afa6cde87c1413428e021c0e9491ed9"
+      "fe316c2780a2df04ed191aac77c92469"
     ],
     [
       "Lib.IntVector.vec_v",
@@ -20,7 +20,7 @@
         "refinement_interpretation_Tm_refine_9920ad7fdb83d776ac74c5ec84d5fe0e"
       ],
       0,
-      "d0d94ca8870c8f60213c77a86d689283"
+      "e42ba60fb7723047207d6465db465e76"
     ],
     [
       "Lib.IntVector.vec_zero",
@@ -37,6 +37,7 @@
         "equality_tok_Lib.IntTypes.U1@tok",
         "equality_tok_Lib.IntTypes.U32@tok",
         "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.bits",
+        "equation_Lib.IntTypes.maxint", "equation_Lib.IntTypes.minint",
         "equation_Lib.IntTypes.range", "equation_Lib.IntTypes.unsigned",
         "equation_Lib.IntVector.v_inttype", "equation_Lib.IntVector.width",
         "equation_Prims.nat", "equation_Prims.pos", "equation_Spec.AES.gf8",
@@ -60,7 +61,7 @@
         "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "f30d234bdcd7378b2c546cad8a833cdd"
+      "60be115babe6e5cd02cb86fd10b67022"
     ],
     [
       "Lib.IntVector.vec_counter",
@@ -79,12 +80,14 @@
         "equality_tok_Lib.IntTypes.U1@tok",
         "equality_tok_Lib.IntTypes.U32@tok",
         "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.bits",
+        "equation_Lib.IntTypes.maxint", "equation_Lib.IntTypes.minint",
         "equation_Lib.IntTypes.range", "equation_Lib.IntTypes.unsigned",
         "equation_Lib.IntVector.v_inttype", "equation_Lib.IntVector.width",
         "equation_Prims.nat", "equation_Prims.pos", "equation_Spec.AES.gf8",
         "equation_Spec.AES.irred", "equation_Spec.GaloisField.gf",
-        "int_inversion", "lemma_FStar.UInt.pow2_values",
-        "primitive_Prims.op_Subtraction",
+        "equation_with_fuel_Prims.pow2.fuel_instrumented", "int_inversion",
+        "lemma_FStar.UInt.pow2_values", "lemma_Lib.IntTypes.pow2_127",
+        "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
         "proj_equation_Spec.GaloisField.GF_t",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
@@ -103,7 +106,7 @@
         "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "74fcf2d44a036b6b6e4395fee0914a5b"
+      "fc9798e717afc6c91182df2962f44978"
     ],
     [
       "Lib.IntVector.create2",
@@ -137,7 +140,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "07ee3061d75472e3be3bc3fa80c14194"
+      "76f740a7e33ca39fecc78471724be613"
     ],
     [
       "Lib.IntVector.create4",
@@ -171,7 +174,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "f8f7ac7144c1d214d593c32c351d64db"
+      "347d1c962439bca52060d185f4526450"
     ],
     [
       "Lib.IntVector.create8",
@@ -205,7 +208,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "6aaa2a3d5c9453e67da48276655e4a5a"
+      "60682824a7a47d736c642a2bdd8ec5ad"
     ],
     [
       "Lib.IntVector.create16",
@@ -239,7 +242,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "939a3b50e763fa6268d0379ee51f202b"
+      "6c9e284b04499a2d80d70691e7d657ab"
     ],
     [
       "Lib.IntVector.create32",
@@ -271,7 +274,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "a9196cdb914746270717116d6b8a6c45"
+      "e4f3af82f74889af6b0bbe04b3dcc8e8"
     ],
     [
       "Lib.IntVector.vec_load",
@@ -280,7 +283,7 @@
       1,
       [ "@query" ],
       0,
-      "689b6a18bb2a8914a00ccee494697bb6"
+      "4af2e3ccbaba5d04f1513cb90c8b6840"
     ],
     [
       "Lib.IntVector.vec_load2",
@@ -314,7 +317,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "14f77d91260f06d9251c4bf5d2f5dd3d"
+      "793370d3faca4dae91709612caee7023"
     ],
     [
       "Lib.IntVector.vec_load4",
@@ -346,7 +349,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "ab46acd06bf96c2af9f3d0a7a4917ecb"
+      "e12c0b893c722e906b29d33a4a557eaa"
     ],
     [
       "Lib.IntVector.vec_load8",
@@ -378,7 +381,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "26a119a7c7b9a6d04e044d627ec2998b"
+      "46861b7d65246ecd3effa6cb6a1599c1"
     ],
     [
       "Lib.IntVector.vec_load16",
@@ -410,7 +413,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "889e66881e89c4f6a250a4a56afbcf5c"
+      "5a91f1e71827732feb757878abc78ffa"
     ],
     [
       "Lib.IntVector.vec_load32",
@@ -442,7 +445,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "25a0cfcf0523465e8de75e8086e70177"
+      "5c4294f050098f7a188bac0134ac7e68"
     ],
     [
       "Lib.IntVector.vec_set",
@@ -455,20 +458,20 @@
         "constructor_distinct_Lib.IntTypes.U8",
         "equality_tok_Lib.IntTypes.U1@tok",
         "equality_tok_Lib.IntTypes.U32@tok",
-        "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.range",
-        "equation_Lib.IntTypes.unsigned", "equation_Lib.IntVector.vec_index",
-        "equation_Lib.IntVector.width", "equation_Prims.nat",
+        "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.minint",
+        "equation_Lib.IntTypes.range", "equation_Lib.IntTypes.unsigned",
+        "equation_Lib.IntVector.vec_index", "equation_Lib.IntVector.width",
         "equation_Spec.AES.gf8", "equation_Spec.AES.irred",
         "equation_Spec.GaloisField.gf",
         "proj_equation_Spec.GaloisField.GF_t",
         "projection_inverse_Spec.GaloisField.GF_t",
         "refinement_interpretation_Tm_refine_3facf057887685e46b124e02c2fdb250",
-        "refinement_interpretation_Tm_refine_a472098c72a7fa0d32ee74af205650fc",
+        "refinement_interpretation_Tm_refine_8f5bacb69a016785e5356e99e7760edf",
         "refinement_interpretation_Tm_refine_de8080fdc4bd6678af723874a7d70466",
         "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "9e87394a6acac236baccf848bcbdb9a7"
+      "25214a34d4251741a7a4043e0d261d5a"
     ],
     [
       "Lib.IntVector.vec_get",
@@ -481,20 +484,20 @@
         "constructor_distinct_Lib.IntTypes.U8",
         "equality_tok_Lib.IntTypes.U1@tok",
         "equality_tok_Lib.IntTypes.U32@tok",
-        "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.range",
-        "equation_Lib.IntTypes.unsigned", "equation_Lib.IntVector.vec_index",
-        "equation_Lib.IntVector.width", "equation_Prims.nat",
+        "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.minint",
+        "equation_Lib.IntTypes.range", "equation_Lib.IntTypes.unsigned",
+        "equation_Lib.IntVector.vec_index", "equation_Lib.IntVector.width",
         "equation_Spec.AES.gf8", "equation_Spec.AES.irred",
         "equation_Spec.GaloisField.gf",
         "proj_equation_Spec.GaloisField.GF_t",
         "projection_inverse_Spec.GaloisField.GF_t",
         "refinement_interpretation_Tm_refine_3facf057887685e46b124e02c2fdb250",
-        "refinement_interpretation_Tm_refine_a472098c72a7fa0d32ee74af205650fc",
+        "refinement_interpretation_Tm_refine_8f5bacb69a016785e5356e99e7760edf",
         "refinement_interpretation_Tm_refine_de8080fdc4bd6678af723874a7d70466",
         "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "b04e9617ffe1ed9eb213e09891799301"
+      "a0ee091d10737be8b9fe315c66f37b6f"
     ],
     [
       "Lib.IntVector.vec_add_mod_lemma",
@@ -503,7 +506,7 @@
       1,
       [ "@query" ],
       0,
-      "95b8b4ff32b7965c25013d0af2074cfb"
+      "9f8d772180c6e6298a0b9d38f301e4cf"
     ],
     [
       "Lib.IntVector.vec_sub_mod",
@@ -512,7 +515,7 @@
       1,
       [ "@query" ],
       0,
-      "2fdce4c3409891d66eb3c05dc5a5fbcd"
+      "debe84b4b7d9f7e852094a4701e5ffc0"
     ],
     [
       "Lib.IntVector.vec_mul_mod",
@@ -526,7 +529,7 @@
         "projection_inverse_BoxBool_proj_0"
       ],
       0,
-      "b6a2b8371d6e29d2a22a9a28ce5780d7"
+      "2d90235ffe541d8134cd683e4efdf3ec"
     ],
     [
       "Lib.IntVector.vec_smul_mod",
@@ -540,7 +543,7 @@
         "projection_inverse_BoxBool_proj_0"
       ],
       0,
-      "679153dda30fc0aceb3ec4ca78069492"
+      "46df1edcad30a9907c58f5cb92cb89d6"
     ],
     [
       "Lib.IntVector.vec_xor_lemma",
@@ -549,7 +552,7 @@
       1,
       [ "@query" ],
       0,
-      "55c7fe69e9cbf3c5d6744f975a9a9454"
+      "71a11e780806270d1d26e79428bc34c7"
     ],
     [
       "Lib.IntVector.vec_and_lemma",
@@ -558,7 +561,7 @@
       1,
       [ "@query" ],
       0,
-      "b3c04b99ceaa699426587a288b46a9b9"
+      "3ee41138abf31047fd4b323747e4a605"
     ],
     [
       "Lib.IntVector.vec_or",
@@ -567,7 +570,7 @@
       1,
       [ "@query" ],
       0,
-      "260c99d8ad10c82a0a21a27c74e80a07"
+      "5c8c828da55bd3f724d32bb76cc917dc"
     ],
     [
       "Lib.IntVector.vec_not_lemma",
@@ -576,7 +579,7 @@
       1,
       [ "@query" ],
       0,
-      "17666d1de499ecca8b1bc14c44e782cf"
+      "73bbb6aa28efe1c2fa1bb45560a409c4"
     ],
     [
       "Lib.IntVector.shift_right_i",
@@ -585,7 +588,7 @@
       1,
       [ "@query" ],
       0,
-      "86afd1a58dfc78af3d24f4ce46e05feb"
+      "2550d0a5a89f3db296e28aa0e63d2dc8"
     ],
     [
       "Lib.IntVector.shift_right_i",
@@ -594,7 +597,7 @@
       1,
       [ "@query" ],
       0,
-      "8ec2af53f1e9e1864b2b802f21e67f06"
+      "68e78c691ae9c61ad75354a5c4e7bd71"
     ],
     [
       "Lib.IntVector.shift_left_i",
@@ -603,7 +606,7 @@
       1,
       [ "@query" ],
       0,
-      "f679f3d962e6bdb4a3c8aff876010cdc"
+      "e0717a2776d1661bd44f64fe655e68a6"
     ],
     [
       "Lib.IntVector.shift_left_i",
@@ -615,7 +618,7 @@
         "refinement_interpretation_Tm_refine_9920ad7fdb83d776ac74c5ec84d5fe0e"
       ],
       0,
-      "5db62098d67a1ed1b02a31782ca282e9"
+      "b2f018bacaa15747db258f8c201e17a2"
     ],
     [
       "Lib.IntVector.rotate_right_i",
@@ -624,7 +627,7 @@
       1,
       [ "@query" ],
       0,
-      "1403bf498923b67ad05dcc8eba5c063a"
+      "ba02cfd5219e5a32ee1b9c48e899ff6d"
     ],
     [
       "Lib.IntVector.rotate_right_i",
@@ -636,7 +639,7 @@
         "refinement_interpretation_Tm_refine_9920ad7fdb83d776ac74c5ec84d5fe0e"
       ],
       0,
-      "1d8cbd89485a68ea0294726d2b65a7d4"
+      "193f82d75553b513b83fee197f5f9d92"
     ],
     [
       "Lib.IntVector.rotate_left_i",
@@ -645,7 +648,7 @@
       1,
       [ "@query" ],
       0,
-      "09e7fbb8703e0c52fd833b9fa89cd651"
+      "2fc6eb8a590749695de094ae3cbf7c6e"
     ],
     [
       "Lib.IntVector.rotate_left_i",
@@ -657,7 +660,7 @@
         "refinement_interpretation_Tm_refine_9920ad7fdb83d776ac74c5ec84d5fe0e"
       ],
       0,
-      "a8e2d5fc6487a4b12c9f2adfb548966c"
+      "eef2352aa739f1d49e5e008122ebb0aa"
     ],
     [
       "Lib.IntVector.vec_shift_right",
@@ -675,7 +678,7 @@
         "typing_Lib.IntTypes.unsigned", "typing_tok_Lib.IntTypes.U128@tok"
       ],
       0,
-      "92548f1ba78c40dd57131f772af18f8e"
+      "ca7b56b67f681e2807c0d86f3ca8637c"
     ],
     [
       "Lib.IntVector.vec_shift_left",
@@ -693,7 +696,7 @@
         "typing_Lib.IntTypes.unsigned", "typing_tok_Lib.IntTypes.U128@tok"
       ],
       0,
-      "b0e3f386d1d3090c5c91a9ba9fe6380f"
+      "152fe9e27f7f3ea09d5ad5dbdc1d39e2"
     ],
     [
       "Lib.IntVector.vec_rotate_right",
@@ -711,7 +714,7 @@
         "typing_Lib.IntTypes.unsigned", "typing_tok_Lib.IntTypes.U128@tok"
       ],
       0,
-      "977ab82556b7caed76c5c8337d6b1541"
+      "fc5f299202fbef2811913f2e3331e8c9"
     ],
     [
       "Lib.IntVector.vec_rotate_left",
@@ -729,7 +732,7 @@
         "typing_Lib.IntTypes.unsigned", "typing_tok_Lib.IntTypes.U128@tok"
       ],
       0,
-      "ca8408fb6b8aad4f89641ef3c5085bcb"
+      "0ce86f78766164f43beeea6c4cf443e1"
     ],
     [
       "Lib.IntVector.vec_eq_mask",
@@ -745,7 +748,7 @@
         "typing_Lib.IntTypes.unsigned"
       ],
       0,
-      "116319545442f5b260c50a8d713e9076"
+      "aaa5813fd92dc542124ad60f7116424c"
     ],
     [
       "Lib.IntVector.vec_neq_mask",
@@ -761,7 +764,7 @@
         "typing_Lib.IntTypes.unsigned"
       ],
       0,
-      "17a48a60fba604ec67c9687a9a85e2a1"
+      "fde180041fef37d90c243382ebb66f39"
     ],
     [
       "Lib.IntVector.vec_lt_mask",
@@ -770,7 +773,7 @@
       1,
       [ "@query" ],
       0,
-      "65f4135fa9a573cc99b3f5b64cb54828"
+      "fcdb16bad29abffd73fbf78e851bebb4"
     ],
     [
       "Lib.IntVector.vec_gt_mask",
@@ -779,7 +782,7 @@
       1,
       [ "@query" ],
       0,
-      "df5eaa6f5ff43a41c42382fcc834c73a"
+      "efc0da6a38c9aa67a6ac3b207d009411"
     ],
     [
       "Lib.IntVector.vec_lte_mask",
@@ -788,7 +791,7 @@
       1,
       [ "@query" ],
       0,
-      "ca57d1c88ca4e1b7b6e7ab85861b367f"
+      "d4fe7046c7ea0351581d6405cd842636"
     ],
     [
       "Lib.IntVector.vec_gte_mask",
@@ -797,7 +800,7 @@
       1,
       [ "@query" ],
       0,
-      "739a3131344cd3627efa4f4b8897b775"
+      "38e14cc50e68e0794a5805271cbb3aca"
     ],
     [
       "Lib.IntVector.vec_interleave_low_n",
@@ -817,7 +820,7 @@
         "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "e4f53711a4f0ceabfc4bc65fac662690"
+      "b65f1a30f85de6019e7b5df981485ade"
     ],
     [
       "Lib.IntVector.vec_interleave_low_lemma2",
@@ -851,7 +854,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "0e5f7afb2aee75f640f2426434b0dbdd"
+      "50c30ce03c5aedd7a883b1a6642036fa"
     ],
     [
       "Lib.IntVector.vec_interleave_low_lemma_uint32_4",
@@ -886,7 +889,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "6b1a7afefe25bfa037a1290d128e159a"
+      "ba6d9febbe9a04257913139410ccd815"
     ],
     [
       "Lib.IntVector.vec_interleave_low_lemma_uint32_8",
@@ -921,7 +924,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "5aeb0e61a8dc81e89b02065383f8f8cb"
+      "1a49f19b779b2a848b22ba0cdd700028"
     ],
     [
       "Lib.IntVector.vec_interleave_low_lemma_uint64_4",
@@ -958,7 +961,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "fc86e69fe2e924f3e3bdfa25e5f0a288"
+      "088a13eaa0b873ebf12ce42a097db8c2"
     ],
     [
       "Lib.IntVector.vec_interleave_low_n_lemma_uint32_4_2",
@@ -993,7 +996,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "a70961cfcb72d09afe6540c7637c45e8"
+      "b2f9c08731432a8e2156764ee99d3f64"
     ],
     [
       "Lib.IntVector.vec_interleave_low_n_lemma_uint32_8_2",
@@ -1028,7 +1031,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "798e6a583f77e27602e1ec0e3e03a048"
+      "56582973672c4a26663db3fe3f2b1211"
     ],
     [
       "Lib.IntVector.vec_interleave_low_n_lemma_uint32_8_4",
@@ -1063,7 +1066,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "9ee2d35bb5f89f4ddd91c863e0f56527"
+      "520bf267134c3df810223652190d1abc"
     ],
     [
       "Lib.IntVector.vec_interleave_low_n_lemma_uint64_4_2",
@@ -1100,7 +1103,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "0af149c833eef2798623d307844af643"
+      "9d286b2777e8e1be0e26e2006e465344"
     ],
     [
       "Lib.IntVector.vec_interleave_high_n",
@@ -1120,7 +1123,7 @@
         "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "242cae2e908d1a6a17509b7c6306484a"
+      "7aa370f6972fe3679a562993bce3abb1"
     ],
     [
       "Lib.IntVector.vec_interleave_high_lemma2",
@@ -1154,7 +1157,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "704db9fe6b4fa9d42d33987235a60f8c"
+      "24181ab4eace1bf6a9e66d809b59a8f6"
     ],
     [
       "Lib.IntVector.vec_interleave_high_lemma_uint32_4",
@@ -1189,7 +1192,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "3d4c408e530444e66f25a6e5f1cd8abc"
+      "da4a243085d8c2cd422ed0f143865f79"
     ],
     [
       "Lib.IntVector.vec_interleave_high_lemma_uint32_8",
@@ -1224,7 +1227,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "177b103c499db189030576a779597ebc"
+      "fea753c3ded32abaf4e297f9abb1e472"
     ],
     [
       "Lib.IntVector.vec_interleave_high_lemma_uint64_4",
@@ -1261,7 +1264,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "d912d78a1ce9e56689ad9cdbb4bfd35e"
+      "581a0e80f671b07782b440172f580624"
     ],
     [
       "Lib.IntVector.vec_interleave_high_n_lemma_uint32_4_2",
@@ -1296,7 +1299,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "213c7bbb7d186d590b1819610ac39867"
+      "75632bf14d8ebae63cbe4471ec7c50c0"
     ],
     [
       "Lib.IntVector.vec_interleave_high_n_lemma_uint32_8_2",
@@ -1331,7 +1334,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "4ae753de34f0e82c33e0add2531127bb"
+      "a14113ae85afca369eabb5eac3bd59bd"
     ],
     [
       "Lib.IntVector.vec_interleave_high_n_lemma_uint32_8_4",
@@ -1366,7 +1369,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "5fd4b8516af54feebb1b95511b2afa05"
+      "7d3208939655d1566b90075203ea75af"
     ],
     [
       "Lib.IntVector.vec_interleave_high_n_lemma_uint64_4_2",
@@ -1403,7 +1406,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "0d504e72e1e730e34b084c9349e416a2"
+      "255c6b1506e75ec3d6cd313967b5b375"
     ],
     [
       "Lib.IntVector.vec_permute2",
@@ -1421,9 +1424,10 @@
         "equality_tok_Lib.IntTypes.U1@tok",
         "equality_tok_Lib.IntTypes.U32@tok",
         "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.bits",
-        "equation_Lib.IntTypes.range", "equation_Lib.IntTypes.unsigned",
-        "equation_Lib.IntTypes.v", "equation_Lib.IntVector.vec_index",
-        "equation_Prims.nat", "equation_Prims.pos", "equation_Spec.AES.gf8",
+        "equation_Lib.IntTypes.minint", "equation_Lib.IntTypes.range",
+        "equation_Lib.IntTypes.unsigned", "equation_Lib.IntTypes.v",
+        "equation_Lib.IntVector.vec_index", "equation_Prims.nat",
+        "equation_Prims.pos", "equation_Spec.AES.gf8",
         "equation_Spec.AES.irred", "equation_Spec.GaloisField.gf",
         "equation_with_fuel_Prims.pow2.fuel_instrumented", "int_typing",
         "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
@@ -1441,7 +1445,7 @@
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "32e27e62d4249e72a832ce3ac6144bc1"
+      "966fca53844763202499056f53dcd695"
     ],
     [
       "Lib.IntVector.vec_permute4",
@@ -1460,11 +1464,12 @@
         "equality_tok_Lib.IntTypes.U1@tok",
         "equality_tok_Lib.IntTypes.U32@tok",
         "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.bits",
-        "equation_Lib.IntTypes.range", "equation_Lib.IntTypes.unsigned",
-        "equation_Lib.IntTypes.v", "equation_Lib.IntVector.vec_index",
-        "equation_Prims.nat", "equation_Spec.AES.gf8",
-        "equation_Spec.AES.irred", "equation_Spec.GaloisField.gf",
-        "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_Subtraction",
+        "equation_Lib.IntTypes.minint", "equation_Lib.IntTypes.range",
+        "equation_Lib.IntTypes.unsigned", "equation_Lib.IntTypes.v",
+        "equation_Lib.IntVector.vec_index", "equation_Prims.nat",
+        "equation_Spec.AES.gf8", "equation_Spec.AES.irred",
+        "equation_Spec.GaloisField.gf", "lemma_FStar.UInt.pow2_values",
+        "primitive_Prims.op_Subtraction",
         "proj_equation_Spec.GaloisField.GF_t",
         "projection_inverse_BoxInt_proj_0",
         "projection_inverse_Spec.GaloisField.GF_t",
@@ -1477,7 +1482,7 @@
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "69ff1312ae2ffac1dae30d2ce489eb34"
+      "a295039f207908cedc1acafd5b2dd159"
     ],
     [
       "Lib.IntVector.vec_permute8",
@@ -1496,11 +1501,12 @@
         "equality_tok_Lib.IntTypes.U1@tok",
         "equality_tok_Lib.IntTypes.U32@tok",
         "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.bits",
-        "equation_Lib.IntTypes.range", "equation_Lib.IntTypes.unsigned",
-        "equation_Lib.IntTypes.v", "equation_Lib.IntVector.vec_index",
-        "equation_Prims.nat", "equation_Spec.AES.gf8",
-        "equation_Spec.AES.irred", "equation_Spec.GaloisField.gf",
-        "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_Subtraction",
+        "equation_Lib.IntTypes.minint", "equation_Lib.IntTypes.range",
+        "equation_Lib.IntTypes.unsigned", "equation_Lib.IntTypes.v",
+        "equation_Lib.IntVector.vec_index", "equation_Prims.nat",
+        "equation_Spec.AES.gf8", "equation_Spec.AES.irred",
+        "equation_Spec.GaloisField.gf", "lemma_FStar.UInt.pow2_values",
+        "primitive_Prims.op_Subtraction",
         "proj_equation_Spec.GaloisField.GF_t",
         "projection_inverse_BoxInt_proj_0",
         "projection_inverse_Spec.GaloisField.GF_t",
@@ -1513,7 +1519,7 @@
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "88c45b9a3a76c1d55ddd9b420380f2ea"
+      "ec112b888ee68f516a00b88fc83b92e7"
     ],
     [
       "Lib.IntVector.vec_permute16",
@@ -1532,8 +1538,9 @@
         "equality_tok_Lib.IntTypes.U1@tok",
         "equality_tok_Lib.IntTypes.U32@tok",
         "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.bits",
-        "equation_Lib.IntTypes.range", "equation_Lib.IntTypes.unsigned",
-        "equation_Lib.IntTypes.v", "equation_Lib.IntVector.v_inttype",
+        "equation_Lib.IntTypes.minint", "equation_Lib.IntTypes.range",
+        "equation_Lib.IntTypes.unsigned", "equation_Lib.IntTypes.v",
+        "equation_Lib.IntVector.v_inttype",
         "equation_Lib.IntVector.vec_index", "equation_Prims.nat",
         "equation_Spec.AES.gf8", "equation_Spec.AES.irred",
         "equation_Spec.GaloisField.gf", "lemma_FStar.UInt.pow2_values",
@@ -1551,7 +1558,7 @@
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "a5c2cfbd0b22e580c75fd14a1597b09e"
+      "bf1422ae35cca28a1ee62a9d43d87197"
     ],
     [
       "Lib.IntVector.vec_permute32",
@@ -1570,8 +1577,9 @@
         "equality_tok_Lib.IntTypes.U1@tok",
         "equality_tok_Lib.IntTypes.U32@tok",
         "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.bits",
-        "equation_Lib.IntTypes.range", "equation_Lib.IntTypes.unsigned",
-        "equation_Lib.IntTypes.v", "equation_Lib.IntVector.v_inttype",
+        "equation_Lib.IntTypes.minint", "equation_Lib.IntTypes.range",
+        "equation_Lib.IntTypes.unsigned", "equation_Lib.IntTypes.v",
+        "equation_Lib.IntVector.v_inttype",
         "equation_Lib.IntVector.vec_index", "equation_Prims.nat",
         "equation_Spec.AES.gf8", "equation_Spec.AES.irred",
         "equation_Spec.GaloisField.gf", "lemma_FStar.UInt.pow2_values",
@@ -1589,7 +1597,7 @@
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "87c20dce2720299e6c9aea1af7f8e815"
+      "b8774710d2a5ce96559ea99be3e23434"
     ],
     [
       "Lib.IntVector.uint128x1",
@@ -1628,7 +1636,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "c4726235d105808a986b0344fc3879a8"
+      "4e86f2533f0182274fb38a66f7b687b6"
     ],
     [
       "Lib.IntVector.uint128x2",
@@ -1666,7 +1674,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "0d2959fda9867980575a8ec994bfcfdf"
+      "84959763a592d083e317c99098a0b2c1"
     ],
     [
       "Lib.IntVector.uint64x2",
@@ -1703,7 +1711,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "b9e971694f67f8258523281d8b772ec7"
+      "32ef78f32caafc6f769bc69c5238294a"
     ],
     [
       "Lib.IntVector.uint64x4",
@@ -1738,7 +1746,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "fe3f041ad7a80e40e6c36606dea2e739"
+      "0e1ee73a583727fac67931a37d39bc88"
     ],
     [
       "Lib.IntVector.uint32x4",
@@ -1770,7 +1778,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "d3d41999924db7118cc049d6f5ba43b8"
+      "b13e21ffc485d26d7f6deb8d8b49c256"
     ],
     [
       "Lib.IntVector.uint32x8",
@@ -1802,7 +1810,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "795bf453d744597b3016aa9c8e88f76f"
+      "8616cedb4658a94edc22cd6a14c82698"
     ],
     [
       "Lib.IntVector.uint16x8",
@@ -1835,7 +1843,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "c067ffb0a96f900b29e9d54bb8389b41"
+      "d373d5b31048c7f67c7d009a510d9202"
     ],
     [
       "Lib.IntVector.uint16x16",
@@ -1868,7 +1876,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "91f079a4765ca6e903af5f5e9488b3b5"
+      "540de73c23a80e6fd6aaa9f4878c0724"
     ],
     [
       "Lib.IntVector.uint8x16",
@@ -1899,7 +1907,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "f1841ba122272bea4696a4055e9b921a"
+      "458d16a24c5e01fba2bf5b1690919f1f"
     ],
     [
       "Lib.IntVector.uint8x32",
@@ -1930,7 +1938,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "c4941e453bb054e7f5b65d5f3a2d2082"
+      "d7fd604bbc3095b22ec284bc01420b60"
     ],
     [
       "Lib.IntVector.vec_aes_enc_lemma",
@@ -1963,7 +1971,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "3dff5650109b0ac9136d16695162d14e"
+      "4bcc7518cf8952b9afebb2ce4a6e0396"
     ],
     [
       "Lib.IntVector.vec_aes_enc_last_lemma",
@@ -1996,7 +2004,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "462e59411b433d142eba89aa565257d4"
+      "2e20d0b6bb35e6f4aa15b3a22e78a53b"
     ],
     [
       "Lib.IntVector.vec_aes_keygen_assist_lemma",
@@ -2029,7 +2037,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "7a35df0612b573f1c1166f9610e8ce0d"
+      "8aa2da31cb7b66fd3d08a072d1370eea"
     ],
     [
       "Lib.IntVector.op_Star_Bar",
@@ -2038,7 +2046,7 @@
       1,
       [ "@query", "assumption_Lib.IntTypes.inttype__uu___haseq" ],
       0,
-      "76e0d2cdb76c6813153eb7014e13d11f"
+      "f5281fbe7d983e97cf5c5b76a2c64212"
     ],
     [
       "Lib.IntVector.vec_from_bytes_le",
@@ -2078,7 +2086,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "be084b52637cc732227b108eb0a4814c"
+      "97c277072e656bf7cc383c70044c8b37"
     ],
     [
       "Lib.IntVector.vec_from_bytes_be",
@@ -2118,7 +2126,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "cb85c044e0da5dbd70240aa84babfb02"
+      "b3c99b8dc1bd449a8bd357ccdaac0fe6"
     ],
     [
       "Lib.IntVector.vec_load_le",
@@ -2141,11 +2149,12 @@
         "equality_tok_Lib.IntTypes.U1@tok",
         "equality_tok_Lib.IntTypes.U32@tok",
         "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.bits",
+        "equation_Lib.IntTypes.maxint", "equation_Lib.IntTypes.minint",
         "equation_Lib.IntTypes.numbytes", "equation_Lib.IntTypes.range",
         "equation_Lib.IntTypes.unsigned", "equation_Lib.IntVector.v_inttype",
         "equation_Lib.IntVector.width", "equation_Prims.nat",
         "equation_Spec.AES.gf8", "equation_Spec.AES.irred",
-        "equation_Spec.GaloisField.gf", "int_inversion",
+        "equation_Spec.GaloisField.gf", "int_inversion", "int_typing",
         "lemma_FStar.UInt.pow2_values", "lemma_Lib.IntTypes.mul_lemma",
         "lemma_Lib.IntTypes.v_mk_int", "primitive_Prims.op_Multiply",
         "primitive_Prims.op_Subtraction",
@@ -2162,14 +2171,13 @@
         "refinement_interpretation_Tm_refine_9ff150f589411d5a40376aa0c5e1ca86",
         "refinement_interpretation_Tm_refine_b550ca9347e0645a53715102a08d8fa1",
         "refinement_interpretation_Tm_refine_de8080fdc4bd6678af723874a7d70466",
-        "typing_Lib.IntTypes.bits", "typing_Lib.IntTypes.mk_int",
-        "typing_Lib.IntTypes.numbytes", "typing_Lib.IntTypes.unsigned",
-        "typing_Lib.IntTypes.uu___is_U1", "typing_Spec.AES.gf8",
-        "typing_Spec.GaloisField.__proj__GF__item__t",
+        "typing_Lib.IntTypes.mk_int", "typing_Lib.IntTypes.numbytes",
+        "typing_Lib.IntTypes.unsigned", "typing_Lib.IntTypes.uu___is_U1",
+        "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t",
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "1dd5fcf0e81cf458f398858a9dce1700"
+      "60bb53090af965515ca8f69815216acd"
     ],
     [
       "Lib.IntVector.vec_load_be",
@@ -2192,11 +2200,12 @@
         "equality_tok_Lib.IntTypes.U1@tok",
         "equality_tok_Lib.IntTypes.U32@tok",
         "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.bits",
+        "equation_Lib.IntTypes.maxint", "equation_Lib.IntTypes.minint",
         "equation_Lib.IntTypes.numbytes", "equation_Lib.IntTypes.range",
         "equation_Lib.IntTypes.unsigned", "equation_Lib.IntVector.v_inttype",
         "equation_Lib.IntVector.width", "equation_Prims.nat",
         "equation_Spec.AES.gf8", "equation_Spec.AES.irred",
-        "equation_Spec.GaloisField.gf", "int_inversion",
+        "equation_Spec.GaloisField.gf", "int_inversion", "int_typing",
         "lemma_FStar.UInt.pow2_values", "lemma_Lib.IntTypes.mul_lemma",
         "lemma_Lib.IntTypes.v_mk_int", "primitive_Prims.op_Multiply",
         "primitive_Prims.op_Subtraction",
@@ -2213,14 +2222,13 @@
         "refinement_interpretation_Tm_refine_9ff150f589411d5a40376aa0c5e1ca86",
         "refinement_interpretation_Tm_refine_b550ca9347e0645a53715102a08d8fa1",
         "refinement_interpretation_Tm_refine_de8080fdc4bd6678af723874a7d70466",
-        "typing_Lib.IntTypes.bits", "typing_Lib.IntTypes.mk_int",
-        "typing_Lib.IntTypes.numbytes", "typing_Lib.IntTypes.unsigned",
-        "typing_Lib.IntTypes.uu___is_U1", "typing_Spec.AES.gf8",
-        "typing_Spec.GaloisField.__proj__GF__item__t",
+        "typing_Lib.IntTypes.mk_int", "typing_Lib.IntTypes.numbytes",
+        "typing_Lib.IntTypes.unsigned", "typing_Lib.IntTypes.uu___is_U1",
+        "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t",
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "31c4a7d94c3e5fd4def7cfa34a87d1e6"
+      "2db6dfbd04b726c5d6e7bd58ed729b42"
     ],
     [
       "Lib.IntVector.vec_to_bytes_le",
@@ -2256,7 +2264,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "869fa77794922e5826cc4a609a7cff53"
+      "dc52bc3f9abd238dbf9223fcaeedf69f"
     ],
     [
       "Lib.IntVector.vec_to_bytes_be",
@@ -2292,7 +2300,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "9003f64e742d7afd928672c86fb0016c"
+      "ef4511bad14ab0d18cff15585811b995"
     ],
     [
       "Lib.IntVector.vec_store_le",
@@ -2315,7 +2323,8 @@
         "equality_tok_Lib.IntTypes.U1@tok",
         "equality_tok_Lib.IntTypes.U32@tok",
         "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.Buffer.lbuffer_t",
-        "equation_Lib.IntTypes.bits", "equation_Lib.IntTypes.numbytes",
+        "equation_Lib.IntTypes.bits", "equation_Lib.IntTypes.maxint",
+        "equation_Lib.IntTypes.minint", "equation_Lib.IntTypes.numbytes",
         "equation_Lib.IntTypes.range", "equation_Lib.IntTypes.unsigned",
         "equation_Lib.IntVector.v_inttype", "equation_Lib.IntVector.width",
         "equation_Prims.nat", "equation_Spec.AES.elem",
@@ -2329,8 +2338,6 @@
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
         "projection_inverse_Spec.GaloisField.GF_t",
-        "refinement_interpretation_Tm_refine_0ec011aea9f93256a3547ad9f0c667f1",
-        "refinement_interpretation_Tm_refine_2cca38936105581d33d174270a457f3d",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "refinement_interpretation_Tm_refine_83845a86f2550cdf941eeb1d9b59602b",
         "refinement_interpretation_Tm_refine_8f5bacb69a016785e5356e99e7760edf",
@@ -2338,15 +2345,15 @@
         "refinement_interpretation_Tm_refine_9d3fd79fd314167f1a9c213a188da3ec",
         "refinement_interpretation_Tm_refine_9d89bf7b57667578cd0e1f4470daef3b",
         "refinement_interpretation_Tm_refine_de8080fdc4bd6678af723874a7d70466",
-        "typing_Lib.Buffer.length", "typing_Lib.IntTypes.bits",
-        "typing_Lib.IntTypes.mk_int", "typing_Lib.IntTypes.numbytes",
-        "typing_Lib.IntTypes.unsigned", "typing_Lib.IntTypes.uu___is_U1",
-        "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t",
+        "typing_Lib.Buffer.length", "typing_Lib.IntTypes.mk_int",
+        "typing_Lib.IntTypes.numbytes", "typing_Lib.IntTypes.unsigned",
+        "typing_Lib.IntTypes.uu___is_U1", "typing_Spec.AES.gf8",
+        "typing_Spec.GaloisField.__proj__GF__item__t",
         "typing_tok_Lib.Buffer.MUT@tok", "typing_tok_Lib.IntTypes.PUB@tok",
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "9b2748a818354d78e9da29aaabbce111"
+      "225677e2bea89a12edd8ab3f2b644a4c"
     ],
     [
       "Lib.IntVector.vec_store_be",
@@ -2369,7 +2376,8 @@
         "equality_tok_Lib.IntTypes.U1@tok",
         "equality_tok_Lib.IntTypes.U32@tok",
         "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.Buffer.lbuffer_t",
-        "equation_Lib.IntTypes.bits", "equation_Lib.IntTypes.numbytes",
+        "equation_Lib.IntTypes.bits", "equation_Lib.IntTypes.maxint",
+        "equation_Lib.IntTypes.minint", "equation_Lib.IntTypes.numbytes",
         "equation_Lib.IntTypes.range", "equation_Lib.IntTypes.unsigned",
         "equation_Lib.IntVector.v_inttype", "equation_Lib.IntVector.width",
         "equation_Prims.nat", "equation_Spec.AES.elem",
@@ -2383,8 +2391,6 @@
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
         "projection_inverse_Spec.GaloisField.GF_t",
-        "refinement_interpretation_Tm_refine_0ec011aea9f93256a3547ad9f0c667f1",
-        "refinement_interpretation_Tm_refine_2cca38936105581d33d174270a457f3d",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "refinement_interpretation_Tm_refine_83845a86f2550cdf941eeb1d9b59602b",
         "refinement_interpretation_Tm_refine_8f5bacb69a016785e5356e99e7760edf",
@@ -2392,15 +2398,15 @@
         "refinement_interpretation_Tm_refine_9d3fd79fd314167f1a9c213a188da3ec",
         "refinement_interpretation_Tm_refine_9d89bf7b57667578cd0e1f4470daef3b",
         "refinement_interpretation_Tm_refine_de8080fdc4bd6678af723874a7d70466",
-        "typing_Lib.Buffer.length", "typing_Lib.IntTypes.bits",
-        "typing_Lib.IntTypes.mk_int", "typing_Lib.IntTypes.numbytes",
-        "typing_Lib.IntTypes.unsigned", "typing_Lib.IntTypes.uu___is_U1",
-        "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t",
+        "typing_Lib.Buffer.length", "typing_Lib.IntTypes.mk_int",
+        "typing_Lib.IntTypes.numbytes", "typing_Lib.IntTypes.unsigned",
+        "typing_Lib.IntTypes.uu___is_U1", "typing_Spec.AES.gf8",
+        "typing_Spec.GaloisField.__proj__GF__item__t",
         "typing_tok_Lib.Buffer.MUT@tok", "typing_tok_Lib.IntTypes.PUB@tok",
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "f0dbfe3f4356e89ef35914d0c63297dd"
+      "a5a43f64d0305fee54051abb102cd361"
     ]
   ]
 ]

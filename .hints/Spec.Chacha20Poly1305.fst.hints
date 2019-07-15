@@ -17,7 +17,7 @@
         "typing_Spec.Poly1305.size_key"
       ],
       0,
-      "7ef8a283aa30c8cb80ca954c0f829631"
+      "8f10b629559bb0b3f4279ba1c7222804"
     ],
     [
       "Spec.Chacha20Poly1305.size_nonce",
@@ -48,7 +48,7 @@
         "equation_Lib.IntTypes.unsigned", "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "d5a4eb4a2f9b00b058c8d393989823bb"
+      "a41f6ac60958fb854aa0b8d3c0a5a2df"
     ],
     [
       "Spec.Chacha20Poly1305.size_tag",
@@ -62,7 +62,7 @@
         "equation_Lib.IntTypes.unsigned", "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "b10cfca1dd5a240de4e19f479cc1b46a"
+      "b1c214d99e76cc9a24ef130c989ce739"
     ],
     [
       "Spec.Chacha20Poly1305.poly1305_padded",
@@ -75,6 +75,7 @@
         "constructor_distinct_Lib.IntTypes.U32",
         "constructor_distinct_Lib.IntTypes.U8",
         "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.bits",
+        "equation_Lib.IntTypes.maxint", "equation_Lib.IntTypes.minint",
         "equation_Lib.IntTypes.range", "equation_Lib.IntTypes.uint8",
         "equation_Lib.IntTypes.unsigned", "equation_Lib.Sequence.length",
         "equation_Lib.Sequence.lseq", "equation_Lib.Sequence.seq",
@@ -100,7 +101,7 @@
         "typing_Spec.Poly1305.size_key", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "2e11824a0a80c17c5aee2bd3099ad07a"
+      "35893ab06ab95b103d3198aec9be90a9"
     ],
     [
       "Spec.Chacha20Poly1305.poly1305_do",
@@ -113,7 +114,7 @@
         "projection_inverse_BoxBool_proj_0"
       ],
       0,
-      "fdbb0de82fb4612f25c273669ece8a21"
+      "0c768b75f449d2deaed1493f41e749e1"
     ],
     [
       "Spec.Chacha20Poly1305.poly1305_do",
@@ -126,7 +127,7 @@
         "projection_inverse_BoxBool_proj_0"
       ],
       0,
-      "ffc0593152e587e2243d9606180f0f36"
+      "1c51f7dd8b119057c27521580ebaacfd"
     ],
     [
       "Spec.Chacha20Poly1305.poly1305_do",
@@ -140,7 +141,8 @@
         "constructor_distinct_Lib.IntTypes.U64",
         "constructor_distinct_Lib.IntTypes.U8",
         "equality_tok_Lib.IntTypes.U64@tok",
-        "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.numbytes",
+        "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.maxint",
+        "equation_Lib.IntTypes.minint", "equation_Lib.IntTypes.numbytes",
         "equation_Lib.IntTypes.range", "equation_Lib.IntTypes.uint8",
         "equation_Lib.IntTypes.unsigned", "equation_Lib.Sequence.length",
         "equation_Prims.nat", "equation_Spec.Poly1305.felem",
@@ -159,7 +161,7 @@
         "typing_Spec.Poly1305.size_key"
       ],
       0,
-      "f73e587b10a9477996734c06dd63e892"
+      "447342eb64647a9d045ab68759c59c61"
     ],
     [
       "Spec.Chacha20Poly1305.aead_encrypt",
@@ -172,7 +174,7 @@
         "projection_inverse_BoxBool_proj_0"
       ],
       0,
-      "eda39792b6b90f07f8457d4db4199222"
+      "720e3ac871ff1df87619d7b6c20c0844"
     ],
     [
       "Spec.Chacha20Poly1305.aead_encrypt",
@@ -185,7 +187,7 @@
         "projection_inverse_BoxBool_proj_0"
       ],
       0,
-      "1f6b94fb6f2facad95e87bf7576a4e26"
+      "8749ddb68b3d48d7a168526eddc882e6"
     ],
     [
       "Spec.Chacha20Poly1305.aead_encrypt",
@@ -202,6 +204,7 @@
         "equality_tok_Lib.IntTypes.U32@tok",
         "equality_tok_Lib.IntTypes.U64@tok",
         "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.bits",
+        "equation_Lib.IntTypes.maxint", "equation_Lib.IntTypes.minint",
         "equation_Lib.IntTypes.range", "equation_Lib.IntTypes.uint8",
         "equation_Lib.IntTypes.unsigned", "equation_Lib.Sequence.length",
         "equation_Lib.Sequence.lseq", "equation_Lib.Sequence.seq",
@@ -230,7 +233,7 @@
         "typing_Spec.Poly1305.size_key", "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "84af9bd5213abaaf1dd41511bbae2310"
+      "b2ded6e34e8a374c7764d77b56794f9e"
     ],
     [
       "Spec.Chacha20Poly1305.aead_decrypt",
@@ -246,7 +249,7 @@
         "refinement_interpretation_Tm_refine_c5579466c1fcb6457bba4b009a86e2ac"
       ],
       0,
-      "fa1f5eeebb71fb06f74b1d3a394783df"
+      "a5d919cab51a22412b606dc452f767e8"
     ],
     [
       "Spec.Chacha20Poly1305.aead_decrypt",
@@ -259,7 +262,7 @@
         "projection_inverse_BoxBool_proj_0"
       ],
       0,
-      "959340bd17f04eb0e0441c5b13c5d34e"
+      "da62d24113c8d92d02d868c4ba7b5396"
     ],
     [
       "Spec.Chacha20Poly1305.aead_decrypt",
@@ -276,6 +279,7 @@
         "equality_tok_Lib.IntTypes.U32@tok",
         "equality_tok_Lib.IntTypes.U64@tok",
         "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.bits",
+        "equation_Lib.IntTypes.maxint", "equation_Lib.IntTypes.minint",
         "equation_Lib.IntTypes.range", "equation_Lib.IntTypes.unsigned",
         "equation_Lib.Sequence.length", "equation_Lib.Sequence.lseq",
         "equation_Lib.Sequence.to_seq", "equation_Prims.nat",
@@ -300,7 +304,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "25dc8b303cb6cc8c8d45414b4782dd3e"
+      "1919d1628b7e5328a46c37b98c00bae5"
     ]
   ]
 ]
