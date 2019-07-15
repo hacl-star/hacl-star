@@ -278,7 +278,7 @@ def fstar_default_args(relative=True):
 fstar_record_hints = ' --record_hints' if record_hints else ''
 
 vale_scons_args = '-disableVerify -omitUnverified' if is_single_vaf else ''
-vale_includes = f'-include {File("code/lib/util/Operator.vaf")}'
+vale_includes = f'-include {File("code/lib/util/Vale.Lib.Operator.vaf")}'
 
 if min_test:
   verify_paths = [
@@ -359,7 +359,7 @@ manual_dependencies = {
 # Table of special-case sources which requires non-default arguments
 #
 verify_options = [
-  ('code/lib/util/Operator.vaf', BuildOptions(fstar_default_args(), vale_includes = '')),
+  ('code/lib/util/Vale.Lib.Operator.vaf', BuildOptions(fstar_default_args(), vale_includes = '')),
 
   # Special treatment for sensitive modules
 
@@ -368,7 +368,7 @@ verify_options = [
 #  ('code/thirdPartyPorts/rfc7748/curve25519/x64/X64.FastSqr.vaf', None),
 
   # Temporarily deactivate verification of the whole interop layer in scons, since the Makefile will check
-  ('code/arch/x64/interop/*', None), 
+#  ('code/arch/x64/interop/*', None), 
 
   #('code/thirdPartyPorts/OpenSSL/sha/X64.SHA.vaf', None),
 #  ('code/arch/x64/interop/GCMencryptOpt_stdcalls.fst', BuildOptions(fstar_default_args_nosmtencoding())),

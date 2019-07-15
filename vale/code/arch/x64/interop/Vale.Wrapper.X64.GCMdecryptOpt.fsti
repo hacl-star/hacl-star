@@ -60,6 +60,7 @@ let length_aux5 (b:uint8_p) : Lemma
 inline_for_extraction noextract
 let decrypt_opt_stdcall_st (a: algorithm { a = AES_128 \/ a = AES_256 }) =
   key:Ghost.erased (Seq.seq nat32) ->
+  iv:Ghost.erased supported_iv_LE ->
   cipher_b:uint8_p ->
   cipher_len:uint64 ->
   auth_b:uint8_p ->
@@ -69,6 +70,7 @@ let decrypt_opt_stdcall_st (a: algorithm { a = AES_128 \/ a = AES_256 }) =
   tag_b:uint8_p ->
   keys_b:uint8_p ->
   hkeys_b:uint8_p ->
+  scratch_b:uint8_p ->
 
   Stack UInt64.t
     (requires fun h0 ->
@@ -89,10 +91,15 @@ let decrypt_opt_stdcall_st (a: algorithm { a = AES_128 \/ a = AES_256 }) =
       disjoint_or_eq keys_b hkeys_b /\
       B.disjoint keys_b auth_b /\ B.disjoint hkeys_b auth_b /\
 
+      B.disjoint cipher_b scratch_b /\ B.disjoint auth_b scratch_b /\
+      B.disjoint iv_b scratch_b /\ B.disjoint out_b scratch_b /\
+      B.disjoint tag_b scratch_b /\ B.disjoint keys_b scratch_b /\
+      B.disjoint hkeys_b scratch_b /\
+
       B.live h0 auth_b /\ B.live h0 keys_b /\
       B.live h0 iv_b /\ B.live h0 hkeys_b /\
       B.live h0 out_b /\ B.live h0 cipher_b /\
-      B.live h0 tag_b /\
+      B.live h0 tag_b /\ B.live h0 scratch_b /\
 
       B.length auth_b = UInt64.v auth_len /\
       B.length iv_b = 16 /\
@@ -101,6 +108,7 @@ let decrypt_opt_stdcall_st (a: algorithm { a = AES_128 \/ a = AES_256 }) =
       B.length hkeys_b = 128 /\
       B.length tag_b == 16 /\
       B.length keys_b = Vale.Wrapper.X64.AES.key_offset a /\
+      B.length scratch_b = 176 /\
 
       aesni_enabled /\ pclmulqdq_enabled /\ avx_enabled /\
       is_aes_key_LE a (Ghost.reveal key) /\
@@ -108,17 +116,20 @@ let decrypt_opt_stdcall_st (a: algorithm { a = AES_128 \/ a = AES_256 }) =
         (seq_nat8_to_seq_uint8 (le_seq_quad32_to_bytes (key_to_round_keys_LE a (Ghost.reveal key))))) /\
 
       hkeys_reqs_pub (le_bytes_to_seq_quad32 (seq_uint8_to_seq_nat8 (B.as_seq h0 hkeys_b)))
-        (reverse_bytes_quad32 (aes_encrypt_LE a (Ghost.reveal key) (Mkfour 0 0 0 0)))
+        (reverse_bytes_quad32 (aes_encrypt_LE a (Ghost.reveal key) (Mkfour 0 0 0 0))) /\
+
+      (be_bytes_to_quad32 (seq_uint8_to_seq_nat8 (B.as_seq h0 iv_b)) ==
+        compute_iv_BE (aes_encrypt_LE a (Ghost.reveal key) (Mkfour 0 0 0 0)) (Ghost.reveal iv))
     )
     (ensures fun h0 c h1 ->
-      B.modifies (B.loc_union (B.loc_buffer iv_b)
-                 (B.loc_buffer out_b)) h0 h1 /\
+      B.modifies (B.loc_union (B.loc_buffer scratch_b)
+                 (B.loc_union (B.loc_buffer iv_b)
+                 (B.loc_buffer out_b))) h0 h1 /\
 
-      (let iv = seq_uint8_to_seq_nat8 (B.as_seq h0 iv_b) in
-       let cipher = seq_uint8_to_seq_nat8 (B.as_seq h0 cipher_b) in
+      (let cipher = seq_uint8_to_seq_nat8 (B.as_seq h0 cipher_b) in
        let auth = seq_uint8_to_seq_nat8 (B.as_seq h0 auth_b) in
        let expected_tag = seq_uint8_to_seq_nat8 (B.as_seq h0 tag_b) in
-       let plain, result = gcm_decrypt_LE a (seq_nat32_to_seq_nat8_LE (Ghost.reveal key)) iv cipher auth expected_tag in
+       let plain, result = gcm_decrypt_LE a (seq_nat32_to_seq_nat8_LE (Ghost.reveal key)) (Ghost.reveal iv) cipher auth expected_tag in
        Seq.equal (seq_uint8_to_seq_nat8 (B.as_seq h1 out_b)) plain /\
        (UInt64.v c = 0) == result)
   )

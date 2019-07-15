@@ -67,6 +67,17 @@ let rec lemma_n_to_le_is_nat_to_bytes (len:nat) (n:nat) =
     ()
   );
   assert (equal (FE.n_to_le len n) (of_bytes (BS.nat_to_bytes_le len n)))
+
+let rec lemma_be_to_n_is_nat_from_bytes (s:FE.bytes) =
+  if length s > 0 then lemma_be_to_n_is_nat_from_bytes (Seq.slice s 0 (length s - 1))
+
+let rec lemma_n_to_be_is_nat_to_bytes (len: nat) (n: nat) =
+  if len > 0 then (
+    FStar.Math.Lemmas.pow2_plus 8 (8 * (len - 1));
+    lemma_n_to_be_is_nat_to_bytes (len - 1) (n / 256)
+  );
+  assert (equal (FE.n_to_be len n) (of_bytes (BS.nat_to_bytes_be len n)))
+
 #reset-options
 
 let nat_from_bytes_le_is_four_to_nat b =
@@ -106,7 +117,7 @@ let nat_from_bytes_le_is_le_bytes_to_nat64 b =
     index s01 0;
     == {}
     index (seq_map (four_to_nat 8) (seq_to_seq_four_LE sn)) 0;
-    == {}
+    == {FStar.Pervasives.reveal_opaque (`%seq_to_seq_four_LE) (seq_to_seq_four_LE #nat8)}
     four_to_nat 8 (Mkfour sn.[0] sn.[1] sn.[2] sn.[3]);
     == {nat_from_bytes_le_is_le_bytes_to_nat32 (slice b 0 4)}
     BS.nat_from_bytes_le (slice b 0 4);
@@ -115,7 +126,7 @@ let nat_from_bytes_le_is_le_bytes_to_nat64 b =
     index s01 1;
     == {}
     index (seq_map (four_to_nat 8) (seq_to_seq_four_LE sn)) 1;
-    == {}
+    == {FStar.Pervasives.reveal_opaque (`%seq_to_seq_four_LE) (seq_to_seq_four_LE #nat8)}
     four_to_nat 8 (Mkfour sn.[4] sn.[5] sn.[6] sn.[7]);
     == {nat_from_bytes_le_is_le_bytes_to_nat32 (slice b 4 8)}
     BS.nat_from_bytes_le (slice b 4 8);

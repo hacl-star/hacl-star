@@ -332,7 +332,7 @@ let rec stack_args' (max_arity:nat)
 let frame_update_get_heap (ptr:int) (v:MS.nat64) (mem:BS.machine_heap) (j:int) : Lemma
   (requires ptr >= j + 8)
   (ensures BS.get_heap_val64 j mem == BS.get_heap_val64 j (BS.update_heap64 ptr v mem))
-  =
+  =  
   Vale.Def.Opaque_s.reveal_opaque BS.get_heap_val64_def;
   Vale.Def.Opaque_s.reveal_opaque BS.update_heap64_def
 

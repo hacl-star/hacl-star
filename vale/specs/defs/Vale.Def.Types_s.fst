@@ -99,6 +99,10 @@ let le_seq_quad32_to_bytes_length (s:seq quad32) : Lemma
 let le_bytes_to_seq_quad32 (b:seq nat8) : Pure (seq quad32) (requires length b % 16 == 0) (ensures fun _ -> True) =
   seq_to_seq_four_LE (seq_nat8_to_seq_nat32_LE b)
 
+[@"opaque_to_smt"]
+let be_bytes_to_seq_quad32 (b:seq nat8) : Pure (seq quad32) (requires length b % 16 == 0) (ensures fun _ -> True) =
+  seq_to_seq_four_BE (seq_nat8_to_seq_nat32_BE b)
+
 let reverse_bytes_nat32_def (n:nat32) : nat32 =
   be_bytes_to_nat32 (reverse_seq (nat32_to_be_bytes n))
 let reverse_bytes_nat32 = make_opaque reverse_bytes_nat32_def

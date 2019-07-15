@@ -50,6 +50,15 @@ val lemma_n_to_le_is_nat_to_bytes (len:nat) (n:nat) : Lemma
   (ensures FE.n_to_le len n == of_bytes (BS.nat_to_bytes_le len n))
   (decreases len)
 
+val lemma_be_to_n_is_nat_from_bytes (s:FE.bytes) : Lemma
+  (ensures FE.be_to_n s == BS.nat_from_bytes_be (to_bytes s))
+  (decreases (length s))
+
+val lemma_n_to_be_is_nat_to_bytes (len:nat) (n:nat) : Lemma
+  (requires n < pow2 (8 * len))
+  (ensures FE.n_to_be len n == of_bytes (BS.nat_to_bytes_be len n))
+  (decreases len)
+
 val nat_from_bytes_le_is_four_to_nat (b:BS.bytes) : Lemma
   (requires length b == 4)
   (ensures

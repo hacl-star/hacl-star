@@ -40,9 +40,7 @@
 # - min-test: staged, runs only a subset of verification for the purposes of
 #   F*'s extended CI
 
-# Put your local configuration (e.g. HACL_HOME, KREMLIN_HOME, etc.) in
-# Makefile.config
--include Makefile.config
+include Makefile.common
 
 #########################
 # Catching setup errors #
@@ -112,7 +110,7 @@ all-unstaged: compile-compact compile-compact-msvc compile-compact-gcc \
 	FSTAR_DEPEND_FLAGS="--warn_error +285" $(MAKE) $*-unstaged
 
 .last_vale_version: vale/.vale_version
-	@if [[ $$(cat $@) != $$(cat $<) ]]; then \
+	@if [[ -f $@ && $$(cat $@) != $$(cat $<) ]]; then \
 	  echo ℹ️  Vale tool upgrade detected; \
 	  find vale -name '*.vaf' -exec touch {} \; ; \
 	fi
@@ -137,6 +135,7 @@ ci:
 	NOSHORTLOG=1 $(MAKE) vale-fst
 	FSTAR_DEPEND_FLAGS="--warn_error +285" NOSHORTLOG=1 $(MAKE) all-unstaged test-unstaged
 	NOSHORTLOG=1 $(MAKE) wasm
+	$(MAKE) -C providers/quic_provider # needs a checkout of miTLS, only valid on CI
 
 wasm:
 	tools/blast-staticconfig.sh wasm
@@ -162,8 +161,6 @@ clean:
 #################
 # Configuration #
 #################
-
-include Makefile.common
 
 IMPORT_FSTAR_TYPES := $(VALE_HOME)/bin/importFStarTypes.exe
 PYTHON3 ?= $(shell tools/findpython3.sh)
@@ -471,19 +468,10 @@ obj/Vale.Inline.X64.Fmul_inline.fst.checked: \
 obj/Vale.Inline.X64.Fsqr_inline.fst.checked: \
   FSTAR_FLAGS=$(VALE_FSTAR_FLAGS)
 
-obj/Vale.Stdcalls.X64.GCMencrypt.fst.checked: \
-  FSTAR_FLAGS=$(VALE_FSTAR_FLAGS)
-
-obj/Vale.Stdcalls.X64.GCMencryptOpt.fst.checked: \
-  USE_EXTRACTED_INTERFACES=false
-
 obj/Vale.Stdcalls.X64.GCMencryptOpt.fst.checked: \
   FSTAR_FLAGS=$(VALE_FSTAR_FLAGS)
 
 obj/Vale.Stdcalls.X64.GCMdecryptOpt.fst.checked: \
-  FSTAR_FLAGS=$(VALE_FSTAR_FLAGS)
-
-obj/Vale.Wrapper.X64.GCMencryptOpt.fst.checked: \
   FSTAR_FLAGS=$(VALE_FSTAR_FLAGS)
 
 obj/Vale.AES.GCM.fst.checked: \
@@ -614,6 +602,8 @@ obj/vale-%.exe: $(ALL_CMX_FILES) obj/CmdLineParser.cmx
 VALE_ASMS = $(foreach P,cpuid aesgcm sha256 curve25519 poly1305,\
   $(addprefix dist/vale/,$P-x86_64-mingw.S $P-x86_64-msvc.asm $P-x86_64-linux.S $P-x86_64-darwin.S)) \
   $(wildcard \
+    $(HACL_HOME)/secure_api/vale/asm/oldaesgcm-*.S \
+    $(HACL_HOME)/secure_api/vale/asm/oldaesgcm-*.asm \
     $(HACL_HOME)/secure_api/vale/asm/aes-*.S \
     $(HACL_HOME)/secure_api/vale/asm/aes-*.asm) \
   dist/vale/curve25519-inline.h
@@ -732,6 +722,7 @@ COMPACT_FLAGS	=\
   -bundle 'MerkleTree.New.Low+MerkleTree.New.Low.Serialization=[rename=MerkleTree]' \
   -bundle 'Test,Test.*,WindowsHack' \
   -bundle EverCrypt.Hash+EverCrypt.Hash.Incremental=[rename=EverCrypt_Hash] \
+  -bundle EverCrypt.CTR=EverCrypt.CTR.* \
   -library EverCrypt.AutoConfig,EverCrypt.OpenSSL,EverCrypt.BCrypt \
   -minimal \
   -add-include '"kremlin/internal/types.h"' \
@@ -857,6 +848,7 @@ dist/evercrypt-external-headers/Makefile.basic: $(ALL_KRML_FILES)
 	  -add-include '<inttypes.h>' \
 	  -add-include '<stdbool.h>' \
 	  -add-include '<kremlin/internal/types.h>' \
+	  -add-include '<kremlin/internal/target.h>' \
 	  -skip-compilation \
 	  -tmpdir $(dir $@) \
 	  $^

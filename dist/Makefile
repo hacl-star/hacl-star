@@ -38,6 +38,7 @@ else ifeq ($(OS),Windows_NT)
   AR		= $(MARCH)-w64-mingw32-ar
   VARIANT	= -mingw
   SO		= dll
+  LDFLAGS	= -Wl,--out-implib,libevercrypt.dll.a
 endif
 
 # 2. Parameters we want to compile with, for the generated Makefile
@@ -69,10 +70,9 @@ endif
 
 OBJS 		+= $(patsubst %.S,%.o,$(wildcard *-$(MARCH)$(VARIANT).S))
 
-
 include Makefile.basic
 
-CFLAGS		+= -Wno-parentheses -g -std=gnu11 -O3
+CFLAGS		+= -Wno-parentheses -Wno-deprecated-declarations -g -std=gnu11 -O3
 
 Hacl_Poly1305_128.o: CFLAGS += -mavx
 Hacl_Poly1305_256.o: CFLAGS += -mavx -mavx2

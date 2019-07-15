@@ -29,12 +29,19 @@ let is_supported_alg (a: alg): bool =
 
 let supported_alg = a:alg { is_supported_alg a }
 
+let cipher_alg_of_supported_alg (a: supported_alg): Spec.Agile.Cipher.cipher_alg =
+  let open Spec.Agile.Cipher in
+  match a with
+  | AES128_GCM -> AES128
+  | AES256_GCM -> AES256
+  | CHACHA20_POLY1305 -> CHACHA20
+
 // naming convention: length for nats, len for uint32s
-let key_length: alg -> nat =
-  function
-  | AES128_GCM        -> 16
-  | AES256_GCM        -> 32
-  | CHACHA20_POLY1305 -> 32
+let key_length (a: alg): nat =
+  match a with
+  | AES128_GCM
+  | AES256_GCM
+  | CHACHA20_POLY1305 -> Spec.Agile.Cipher.key_length (cipher_alg_of_supported_alg a)
   | AES128_CCM        -> 16
   | AES128_CCM8       -> 16
   | AES256_CCM        -> 32
@@ -50,14 +57,13 @@ let tag_length: alg -> nat =
   | AES128_CCM        -> 16
   | AES256_CCM        -> 16
 
-let iv_length (a: alg): nat =
-  12
-
-let ekv_length: supported_alg -> nat =
-  function
-  | CHACHA20_POLY1305 -> 32
-  | AES128_GCM -> 176 + 128 // Include the hashed keys here
-  | AES256_GCM -> 240 + 128 // Include the hashed keys here
+/// No sharing with Spec.Agile.Cipher, since AES-GCM offers IV reduction via the
+/// GHASH function.
+let iv_length (a: supported_alg) (len: nat) =
+  match a with
+  | AES128_GCM -> len > 0 /\ 8 * len <= pow2 64 - 1
+  | AES256_GCM -> len > 0 /\ 8 * len <= pow2 64 - 1
+  | CHACHA20_POLY1305 -> len == 12
 
 // Maximum length for both plaintexts and additional data.
 //
@@ -72,18 +78,20 @@ let ekv_length: supported_alg -> nat =
 let max_length: supported_alg -> nat =
   function
   | CHACHA20_POLY1305 -> pow2 32 - 1 - 16
-  | AES128_GCM | AES256_GCM -> pow2 32 - 1 
+  | AES128_GCM | AES256_GCM -> pow2 32 - 1
+
+let uint8 = Lib.IntTypes.uint8
 
 // Proudly defining this type abbreviation for the tenth time in HACL*!
-let lbytes (l:nat) = b:Seq.seq UInt8.t { Seq.length b = l }
+let lbytes (l:nat) = b:Seq.seq uint8 { Seq.length b = l }
 
 // Note: using <= for maximum admissible lengths
 // Note: not indexing the types over their lengths; we can use S.length in specs
 let kv a = lbytes (key_length a)
-let iv a = lbytes (iv_length a)
-let ad a = s:S.seq UInt8.t { S.length s <= max_length a }
-let plain (a: supported_alg) = s:S.seq UInt8.t { S.length s <= max_length a }
-let cipher (a: supported_alg) = s:S.seq UInt8.t { S.length s >= tag_length a }
+let iv a = s:S.seq uint8 { iv_length a (S.length s) }
+let ad a = s:S.seq uint8 { S.length s <= max_length a }
+let plain (a: supported_alg) = s:S.seq uint8 { S.length s <= max_length a }
+let cipher (a: supported_alg) = s:S.seq uint8 { S.length s >= tag_length a }
 
 let cipher_length #a (p: plain a) =
   S.length p + tag_length a
@@ -94,11 +102,9 @@ let decrypted #a (c: cipher a) = p:plain a { S.length c = cipher_length p }
 
 // Note: no GTot, specs need to be executable for testing
 
-// Expanded key value. Can't be abstract (see type ekv in implementation).
-let ekv (a: supported_alg) = lbytes (ekv_length a)
-
-// Note: expand corresponds to the "beginning" of the spec of encrypt. We know
-// nothing about it, even though, under this interface:
+// Note: the spec starts with key expansion, but we don't reveal it here, and
+// leave it up to EverCrypt.AEAD to rely on an abstract invariant to enforce
+// that key expansion is performed first, so as not to do it on each encryption:
 //
 // let encrypt ... =
 //   let ekv = expand ... in
@@ -111,7 +117,6 @@ let ekv (a: supported_alg) = lbytes (ekv_length a)
 
 // Note: adopting the argument order of EverCrypt... which doesn't match other
 // specs. Sigh.
-val expand: #(a: supported_alg) -> kv a -> ekv a
 val encrypt: #(a: supported_alg) -> kv a -> iv a -> ad a -> p:plain a -> encrypted p
 val decrypt: #(a: supported_alg) -> kv a -> iv a -> ad a ->
   c:cipher a { S.length c <= max_length a + tag_length a} ->

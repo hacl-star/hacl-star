@@ -15,7 +15,7 @@ module S = Hacl.Spec.Poly1305.Vec
 module LSeq = Lib.Sequence
 module BSeq = Lib.ByteSequence
 module F32xN = Hacl.Impl.Poly1305.Field32xN
-open F32xN
+open Hacl.Impl.Poly1305.Field32xN
 
 type field_spec =
   | M32

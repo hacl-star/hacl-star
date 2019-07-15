@@ -47,6 +47,7 @@ open FStar.Tactics
 
 let be_quad32_to_bytes_sel q i =
   FStar.Pervasives.reveal_opaque (`%be_quad32_to_bytes) be_quad32_to_bytes;
+  FStar.Pervasives.reveal_opaque (`%seq_four_to_seq_BE) (seq_four_to_seq_BE #nat8);
   let Mkfour q0 q1 q2 q3 = q in
   assert (Seq.index (Vale.Def.Words.Seq_s.four_to_seq_BE q) 0 == q3);
   assert (Seq.index (Vale.Def.Words.Seq_s.four_to_seq_BE q) 1 == q2);
@@ -213,6 +214,7 @@ let aes_simplify1 b h =
 
 
 let aes_simplify2 b h =
+  FStar.Pervasives.reveal_opaque (`%seq_to_seq_four_LE) (seq_to_seq_four_LE #nat8);
   let view = Vale.Interop.Views.up_view128 in
   let s_init = B.as_seq h b in
   let db = get_downview b in

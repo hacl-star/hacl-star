@@ -1,55 +1,17 @@
 [
-  "ˆ\u001e.3nœD˘—än˚5J©∂",
+  "Ì(ù\u001de≠â‘Ù«\u0017^7C\nq",
   [
     [
-      "Spec.AEAD.uu___4",
+      "Spec.AEAD.uu___2",
       1,
       0,
       0,
       [ "@query" ],
       0,
-      "e2f31120ae55eb05d3abb7c5d743ddd8"
+      "f726a9ecfb0c4be2c7893711405b86a3"
     ],
     [
-      "Spec.AEAD.key_length",
-      1,
-      2,
-      1,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_Spec.AEAD.AES128_CCM",
-        "disc_equation_Spec.AEAD.AES128_CCM8",
-        "disc_equation_Spec.AEAD.AES128_GCM",
-        "disc_equation_Spec.AEAD.AES256_CCM",
-        "disc_equation_Spec.AEAD.AES256_CCM8",
-        "disc_equation_Spec.AEAD.AES256_GCM",
-        "disc_equation_Spec.AEAD.CHACHA20_POLY1305",
-        "fuel_guarded_inversion_Spec.AEAD.alg"
-      ],
-      0,
-      "a3b7eacd9b57cf5014ae84943733b316"
-    ],
-    [
-      "Spec.AEAD.tag_length",
-      1,
-      2,
-      1,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "disc_equation_Spec.AEAD.AES128_CCM",
-        "disc_equation_Spec.AEAD.AES128_CCM8",
-        "disc_equation_Spec.AEAD.AES128_GCM",
-        "disc_equation_Spec.AEAD.AES256_CCM",
-        "disc_equation_Spec.AEAD.AES256_CCM8",
-        "disc_equation_Spec.AEAD.AES256_GCM",
-        "disc_equation_Spec.AEAD.CHACHA20_POLY1305",
-        "fuel_guarded_inversion_Spec.AEAD.alg"
-      ],
-      0,
-      "646b5f0184b7038e28719341add25ee7"
-    ],
-    [
-      "Spec.AEAD.ekv_length",
+      "Spec.AEAD.cipher_alg_of_supported_alg",
       1,
       0,
       0,
@@ -64,7 +26,75 @@
         "typing_Spec.AEAD.is_supported_alg"
       ],
       0,
-      "f648c07d4a097f136042c0b61e84efdf"
+      "7963b9b7621e552d4a652fc641e1442b"
+    ],
+    [
+      "Spec.AEAD.key_length",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "bool_inversion",
+        "disc_equation_Spec.AEAD.AES128_CCM",
+        "disc_equation_Spec.AEAD.AES128_CCM8",
+        "disc_equation_Spec.AEAD.AES128_GCM",
+        "disc_equation_Spec.AEAD.AES256_CCM",
+        "disc_equation_Spec.AEAD.AES256_CCM8",
+        "disc_equation_Spec.AEAD.AES256_GCM",
+        "disc_equation_Spec.AEAD.CHACHA20_POLY1305",
+        "equation_FStar.Pervasives.inversion",
+        "equation_Spec.AEAD.is_supported_alg",
+        "fuel_guarded_inversion_Spec.AEAD.alg", "inversion-interp",
+        "projection_inverse_BoxBool_proj_0",
+        "typing_Spec.AEAD.is_supported_alg"
+      ],
+      0,
+      "d76aade0f4a7f5964c58dcb128dbf680"
+    ],
+    [
+      "Spec.AEAD.tag_length",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "disc_equation_Spec.AEAD.AES128_CCM",
+        "disc_equation_Spec.AEAD.AES128_CCM8",
+        "disc_equation_Spec.AEAD.AES128_GCM",
+        "disc_equation_Spec.AEAD.AES256_CCM",
+        "disc_equation_Spec.AEAD.AES256_CCM8",
+        "disc_equation_Spec.AEAD.AES256_GCM",
+        "disc_equation_Spec.AEAD.CHACHA20_POLY1305",
+        "equation_FStar.Pervasives.inversion",
+        "fuel_guarded_inversion_Spec.AEAD.alg", "inversion-interp"
+      ],
+      0,
+      "e8dd1b34d9773a552e4bdb36d0e6b10f"
+    ],
+    [
+      "Spec.AEAD.iv_length",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "bool_inversion",
+        "constructor_distinct_FStar.Integers.Signed",
+        "constructor_distinct_FStar.Integers.W128",
+        "constructor_distinct_FStar.Integers.Winfinite",
+        "disc_equation_Spec.AEAD.AES128_GCM",
+        "disc_equation_Spec.AEAD.AES256_GCM",
+        "disc_equation_Spec.AEAD.CHACHA20_POLY1305",
+        "equality_tok_FStar.Integers.W128@tok",
+        "equality_tok_FStar.Integers.Winfinite@tok",
+        "equation_FStar.Integers.width_of_sw",
+        "equation_Spec.AEAD.is_supported_alg",
+        "equation_Spec.AEAD.supported_alg",
+        "projection_inverse_FStar.Integers.Signed__0",
+        "refinement_interpretation_Tm_refine_d2d399e4b0cd736cb6130361c7530aa2",
+        "typing_Spec.AEAD.is_supported_alg"
+      ],
+      0,
+      "633b5446edb2d03fd6b32cb6d42bca3d"
     ],
     [
       "Spec.AEAD.max_length",
@@ -74,34 +104,38 @@
       [
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
-        "bool_inversion", "constructor_distinct_FStar.Integers.Signed",
-        "constructor_distinct_FStar.Integers.Winfinite",
-        "disc_equation_Spec.AEAD.AES128_GCM",
+        "bool_inversion", "disc_equation_Spec.AEAD.AES128_GCM",
         "disc_equation_Spec.AEAD.AES256_GCM",
-        "disc_equation_Spec.AEAD.CHACHA20_POLY1305",
-        "equality_tok_FStar.Integers.Winfinite@tok",
-        "equation_FStar.Integers.int_t", "equation_Prims.nat",
+        "disc_equation_Spec.AEAD.CHACHA20_POLY1305", "equation_Prims.nat",
         "equation_Prims.pos", "equation_Spec.AEAD.is_supported_alg",
         "equation_Spec.AEAD.supported_alg", "int_typing",
         "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxInt_proj_0",
-        "projection_inverse_FStar.Integers.Signed__0",
-        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
         "refinement_interpretation_Tm_refine_d2d399e4b0cd736cb6130361c7530aa2",
-        "refinement_interpretation_Tm_refine_f048236b5f8051f83b495ea5eaa6127b",
         "typing_Prims.pow2", "typing_Spec.AEAD.is_supported_alg"
       ],
       0,
-      "7c4b0540bb9b44f53419cdd0eb29a44c"
+      "acb1d1f2f33929e10f645792453c7413"
     ],
     [
       "Spec.AEAD.lbytes",
       1,
-      2,
-      1,
+      0,
+      0,
       [ "@query" ],
       0,
-      "f54d39f513357d883ec5def0c7a18325"
+      "637c9be2db21573f26af8b75c44e9714"
+    ],
+    [
+      "Spec.AEAD.iv",
+      1,
+      0,
+      0,
+      [ "@query" ],
+      0,
+      "37464a6e2b0b3076dbb993e61be1b52f"
     ],
     [
       "Spec.AEAD.correctness",
@@ -109,21 +143,16 @@
       0,
       0,
       [
-        "@MaxIFuel_assumption", "@query",
-        "constructor_distinct_FStar.Integers.Unsigned",
-        "constructor_distinct_FStar.Integers.W8",
-        "equality_tok_FStar.Integers.W8@tok",
-        "equation_FStar.Integers.int_t", "equation_Spec.AEAD.cipher_length",
+        "@MaxIFuel_assumption", "@query", "equation_Spec.AEAD.cipher_length",
         "equation_Spec.AEAD.encrypted", "equation_Spec.AEAD.max_length",
         "equation_Spec.AEAD.plain", "equation_Spec.AEAD.tag_length",
         "primitive_Prims.op_Addition", "projection_inverse_BoxInt_proj_0",
-        "projection_inverse_FStar.Integers.Unsigned__0",
-        "refinement_interpretation_Tm_refine_67a684ae2cdcea98c0a7a1a09bcb3247",
-        "refinement_interpretation_Tm_refine_7001d717117afb7669cd45b51ad3dc27",
+        "refinement_interpretation_Tm_refine_064506d56a6af7ceef8b06aef3cb54e5",
+        "refinement_interpretation_Tm_refine_ff4fb9e743a804b2a539fcf5d276f129",
         "typing_Spec.AEAD.encrypt"
       ],
       0,
-      "3b79b5bc3213a5e633b1e59e37343bb3"
+      "5ad28cd59b82eba75668d01bce47ce84"
     ]
   ]
 ]

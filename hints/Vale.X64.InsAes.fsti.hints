@@ -11,7 +11,7 @@
         "fuel_guarded_inversion_FStar.Pervasives.Native.tuple3"
       ],
       0,
-      "4501d81bd98519195133172ab9da0f38"
+      "e47c1817504bc7cceda7f343bb073c0e"
     ],
     [
       "Vale.X64.InsAes.va_quick_VPclmulqdq",
@@ -23,7 +23,7 @@
         "fuel_guarded_inversion_FStar.Pervasives.Native.tuple3"
       ],
       0,
-      "9f02293e68e7865831ffa31945bae2a4"
+      "dc16aa8ed3b93173b653d4c17dd9f0fc"
     ],
     [
       "Vale.X64.InsAes.va_quick_AESNI_enc",
@@ -35,7 +35,7 @@
         "fuel_guarded_inversion_FStar.Pervasives.Native.tuple3"
       ],
       0,
-      "9fe453dc3c75e7f7362109ca968e6773"
+      "57efe3dd7bab45f8d3100d3eaf3111b9"
     ],
     [
       "Vale.X64.InsAes.va_quick_VAESNI_enc",
@@ -47,7 +47,7 @@
         "fuel_guarded_inversion_FStar.Pervasives.Native.tuple3"
       ],
       0,
-      "b7a3dd05f347ac08d50f02ba07b60c74"
+      "ca28daa08202acc5954c163e5a593f48"
     ],
     [
       "Vale.X64.InsAes.va_quick_AESNI_enc_last",
@@ -59,7 +59,7 @@
         "fuel_guarded_inversion_FStar.Pervasives.Native.tuple3"
       ],
       0,
-      "08a7ed70a3dbc1f40eacde4a21cb0918"
+      "41b9d075426e0ca2c64ead87742a047d"
     ],
     [
       "Vale.X64.InsAes.va_quick_VAESNI_enc_last",
@@ -71,7 +71,7 @@
         "fuel_guarded_inversion_FStar.Pervasives.Native.tuple3"
       ],
       0,
-      "f85ee5c4c15a770f211ef8fdf8a61d02"
+      "f97f8080dd2777044dd401414ad73189"
     ],
     [
       "Vale.X64.InsAes.va_lemma_AESNI_keygen_assist",
@@ -79,14 +79,12 @@
       1,
       0,
       [
-        "@MaxIFuel_assumption", "@query", "equation_Vale.X64.Machine_s.imm8",
-        "primitive_Prims.op_LessThan", "primitive_Prims.op_LessThanOrEqual",
-        "projection_inverse_BoxBool_proj_0",
-        "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_ed0c82b529ba35f1d88d0cb19afaf666"
+        "@MaxIFuel_assumption", "@query", "equation_Vale.Def.Words_s.nat8",
+        "equation_Vale.Def.Words_s.natN", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c"
       ],
       0,
-      "9a4b39dc9aa205350e63d48de5ac9a9f"
+      "0b3c25b0a226588067f527366a869fe3"
     ],
     [
       "Vale.X64.InsAes.va_wp_AESNI_keygen_assist",
@@ -94,14 +92,12 @@
       1,
       0,
       [
-        "@MaxIFuel_assumption", "@query", "equation_Vale.X64.Machine_s.imm8",
-        "primitive_Prims.op_LessThan", "primitive_Prims.op_LessThanOrEqual",
-        "projection_inverse_BoxBool_proj_0",
-        "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_ed0c82b529ba35f1d88d0cb19afaf666"
+        "@MaxIFuel_assumption", "@query", "equation_Vale.Def.Words_s.nat8",
+        "equation_Vale.Def.Words_s.natN", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c"
       ],
       0,
-      "3bce64926e0389ecea723ed4c7ada6ed"
+      "732863ecd55f926c5b55f9e0831876d6"
     ],
     [
       "Vale.X64.InsAes.va_quick_AESNI_keygen_assist",
@@ -113,7 +109,7 @@
         "fuel_guarded_inversion_FStar.Pervasives.Native.tuple3"
       ],
       0,
-      "11fad80e28f8d773b7e638a8d3181870"
+      "4fcd1c3d8e727aa670abc5a57531fee1"
     ]
   ]
 ]
