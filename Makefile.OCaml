@@ -46,7 +46,7 @@ build/ml/libhacl.cmxa: $(KREMLIN_LIBS_FILES) $(LIBS_FILES) $(HACL_FILES)
 		$(addprefix --extract_module , $(LIBS_MODULES)) \
 		$(addprefix --extract_module , $(HACL_MODULES)) \
 		--odir build/ml $^
-	OCAMLPATH="/opt/FStar/bin" ocamlfind opt -a -g -linkall -thread -w -20-26-3-8-58 \
+	OCAMLPATH="$(FSTAR_HOME)/bin" ocamlfind opt -a -g -linkall -thread -w -20-26-3-8-58 \
 		-package fstarlib -package batteries,zarith,stdint,cryptokit -I build/ml \
 		$(addprefix build/ml/, $(KREMLIN_LIBS_ML)) \
 		$(addprefix build/ml/, $(LIBS_ML)) \
