@@ -951,15 +951,121 @@ let rec lemma_unchanged_at_difference_elim (l1 l2:locations) (s1 s2:machine_stat
       lemma_unchanged_at_difference_elim xs l2 s1 s2
     )
 
+let rec lemma_unchanged_at_sym_diff_implies_difference (l1 l2:locations) (s1 s2:machine_state) :
+  Lemma
+    (requires (unchanged_at (sym_difference l1 l2) s1 s2))
+    (ensures (unchanged_at (l1 `difference` l2) s1 s2 /\ unchanged_at (l2 `difference` l1) s1 s2)) =
+  lemma_unchanged_at_append (l1 `difference` l2) (l2 `difference` l1) s1 s2
+
+let rec lemma_disjoint_location_from_locations_not_mem (locs:locations) (l:location) :
+  Lemma
+    (ensures (
+        !!(disjoint_location_from_locations l locs) <==>
+        not (L.mem l locs))) =
+  match locs with
+  | [] -> ()
+  | x :: xs ->
+    lemma_disjoint_location_from_locations_not_mem xs l
+
+let rec lemma_difference_disjoint (l1 l2:locations) :
+  Lemma
+    (ensures (
+        !!(disjoint_locations (l1 `difference` l2) l2))) =
+  match l1 with
+  | [] -> ()
+  | x :: xs ->
+    lemma_disjoint_location_from_locations_not_mem l2 x;
+    lemma_difference_disjoint xs l2
+
+let rec lemma_unchanged_except_to_at_difference (locs locs_change:locations) (s1 s2:machine_state) :
+  Lemma
+    (requires (unchanged_except locs_change s1 s2))
+    (ensures (unchanged_at (locs `difference` locs_change) s1 s2)) =
+  match locs with
+  | [] -> ()
+  | x :: xs ->
+    lemma_difference_disjoint locs locs_change;
+    lemma_unchanged_except_to_at_difference xs locs_change s1 s2
+
+let rec lemma_unchanged_at_maintained (locs locs_change:locations) (s1 s1' s2 s2':machine_state) :
+  Lemma
+    (requires (
+        (unchanged_at locs s1 s2) /\
+        (unchanged_except locs_change s1 s1') /\
+        (unchanged_except locs_change s2 s2') /\
+        (unchanged_at locs_change s1' s2')))
+    (ensures (
+        (unchanged_at locs s1' s2'))) =
+  match locs with
+  | [] -> ()
+  | x :: xs ->
+    lemma_unchanged_at_maintained xs locs_change s1 s1' s2 s2';
+    if x `L.mem` locs_change then (
+      lemma_unchanged_at_mem locs_change x s1' s2'
+    ) else (
+      lemma_unchanged_except_not_mem locs_change x
+    )
+
+let lemma_bounded_effects_parallel_aux1 rw1 rw2 f1 f2 s1 s2 :
+  Lemma
+    (requires (
+        let rw = rw_set_in_parallel rw1 rw2 in
+        (bounded_effects rw1 f1) /\
+        (bounded_effects rw2 f2) /\
+        (s1.ms_ok = s2.ms_ok) /\
+        (run f1 s1).ms_ok /\
+        (run f1 s2).ms_ok /\
+        unchanged_at rw.loc_reads s1 s2))
+    (ensures (
+        let rw = rw_set_in_parallel rw1 rw2 in
+        (unchanged_at rw.loc_writes (run f1 s1) (run f1 s2)))) =
+  lemma_unchanged_at_append rw1.loc_reads rw2.loc_reads s1 s2;
+  lemma_unchanged_at_append (sym_difference rw1.loc_writes rw2.loc_writes) (rw1.loc_reads `L.append` rw2.loc_reads) s1 s2;
+  lemma_unchanged_at_append rw1.loc_writes rw2.loc_writes (run f1 s1) (run f1 s2);
+  assert (unchanged_at rw1.loc_reads s1 s2);
+  assert (unchanged_at rw1.loc_writes (run f1 s1) (run f1 s2));
+  lemma_unchanged_at_sym_diff_implies_difference rw1.loc_writes rw2.loc_writes s1 s2;
+  assert (unchanged_at (rw2.loc_writes `difference` rw1.loc_writes) s1 s2);
+  lemma_unchanged_at_maintained (rw2.loc_writes `difference` rw1.loc_writes) rw1.loc_writes s1 (run f1 s1) s2 (run f1 s2);
+  assert (unchanged_at (rw2.loc_writes `difference` rw1.loc_writes) (run f1 s1) (run f1 s2));
+  lemma_unchanged_at_difference_elim rw2.loc_writes rw1.loc_writes (run f1 s1) (run f1 s2);
+  assert (unchanged_at rw2.loc_writes (run f1 s1) (run f1 s2))
+
+let lemma_bounded_effects_parallel_aux2 rw1 rw2 f1 f2 s1 s2 :
+  Lemma
+    (requires (
+        let rw = rw_set_in_parallel rw1 rw2 in
+        (bounded_effects rw1 f1) /\
+        (bounded_effects rw2 f2) /\
+        (s1.ms_ok = s2.ms_ok) /\
+        (run f2 s1).ms_ok /\
+        (run f2 s2).ms_ok /\
+        unchanged_at rw.loc_reads s1 s2))
+    (ensures (
+        let rw = rw_set_in_parallel rw1 rw2 in
+        (unchanged_at rw.loc_writes (run f2 s1) (run f2 s2)))) =
+  lemma_unchanged_at_append rw1.loc_reads rw2.loc_reads s1 s2;
+  lemma_unchanged_at_append (sym_difference rw1.loc_writes rw2.loc_writes) (rw1.loc_reads `L.append` rw2.loc_reads) s1 s2;
+  lemma_unchanged_at_append rw1.loc_writes rw2.loc_writes (run f2 s1) (run f2 s2);
+  assert (unchanged_at rw2.loc_reads s1 s2);
+  assert (unchanged_at rw2.loc_writes (run f2 s1) (run f2 s2));
+  lemma_unchanged_at_sym_diff_implies_difference rw1.loc_writes rw2.loc_writes s1 s2;
+  assert (unchanged_at (rw1.loc_writes `difference` rw2.loc_writes) s1 s2);
+  lemma_unchanged_at_maintained (rw1.loc_writes `difference` rw2.loc_writes) rw2.loc_writes s1 (run f2 s1) s2 (run f2 s2);
+  assert (unchanged_at (rw1.loc_writes `difference` rw2.loc_writes) (run f2 s1) (run f2 s2));
+  lemma_unchanged_at_difference_elim rw1.loc_writes rw2.loc_writes (run f2 s1) (run f2 s2);
+  assert (unchanged_at rw1.loc_writes (run f2 s1) (run f2 s2))
+
 (* See fsti *)
 let lemma_bounded_effects_parallel rw1 rw2 f1 f2 =
   let rw = rw_set_in_parallel rw1 rw2 in
 
   let aux s a :
     Lemma
-      (requires !!(disjoint_location_from_locations a rw.loc_writes))
+      (requires (
+          !!(disjoint_location_from_locations a rw.loc_writes) /\
+          (run f1 s).ms_ok))
       (ensures (eval_location a s == eval_location a (run f1 s))) =
-    admit ();
     lemma_disjoint_location_from_locations_append a rw1.loc_writes rw2.loc_writes;
     assert (unchanged_except rw1.loc_writes s (run f1 s)) (* OBSERVE *)
   in
@@ -967,9 +1073,10 @@ let lemma_bounded_effects_parallel rw1 rw2 f1 f2 =
   FStar.Classical.forall_intro_2 aux;
   let aux s a :
     Lemma
-      (requires !!(disjoint_location_from_locations a rw.loc_writes))
+      (requires (
+          !!(disjoint_location_from_locations a rw.loc_writes) /\
+          (run f2 s).ms_ok))
       (ensures (eval_location a s == eval_location a (run f2 s))) =
-    admit ();
     lemma_disjoint_location_from_locations_append a rw1.loc_writes rw2.loc_writes;
     assert (unchanged_except rw2.loc_writes s (run f2 s)) (* OBSERVE *)
   in
@@ -1035,12 +1142,7 @@ let lemma_bounded_effects_parallel rw1 rw2 f1 f2 =
                  unchanged_at rw.loc_reads s1 s2))
       (ensures (
           (unchanged_at rw.loc_writes (run f1 s1) (run f1 s2)))) =
-    lemma_unchanged_at_append rw1.loc_reads rw2.loc_reads s1 s2;
-    lemma_unchanged_at_append (sym_difference rw1.loc_writes rw2.loc_writes) (rw1.loc_reads `L.append` rw2.loc_reads) s1 s2;
-    lemma_unchanged_at_append rw1.loc_writes rw2.loc_writes (run f1 s1) (run f1 s2);
-    assert (unchanged_at rw1.loc_reads s1 s2);
-    assert (unchanged_at rw1.loc_writes (run f1 s1) (run f1 s2));
-    assume (unchanged_at rw2.loc_writes (run f1 s1) (run f1 s2)) (* TODO: Finish proving this *)
+    lemma_bounded_effects_parallel_aux1 rw1 rw2 f1 f2 s1 s2
   in
   let aux s1 = FStar.Classical.move_requires (aux s1) in
   FStar.Classical.forall_intro_2 aux;
@@ -1052,11 +1154,7 @@ let lemma_bounded_effects_parallel rw1 rw2 f1 f2 =
                  unchanged_at rw.loc_reads s1 s2))
       (ensures (
           (unchanged_at rw.loc_writes (run f2 s1) (run f2 s2)))) =
-    lemma_unchanged_at_append rw1.loc_reads rw2.loc_reads s1 s2;
-    lemma_unchanged_at_append (sym_difference rw1.loc_writes rw2.loc_writes) (rw1.loc_reads `L.append` rw2.loc_reads) s1 s2;
-    lemma_unchanged_at_append rw1.loc_writes rw2.loc_writes (run f2 s1) (run f2 s2);
-    assert (unchanged_at rw2.loc_writes (run f2 s1) (run f2 s2));
-    assume (unchanged_at rw1.loc_writes (run f2 s1) (run f2 s2)) (* TODO: Finish proving things *)
+    lemma_bounded_effects_parallel_aux2 rw1 rw2 f1 f2 s1 s2
   in
   let aux s1 = FStar.Classical.move_requires (aux s1) in
   FStar.Classical.forall_intro_2 aux;
@@ -1134,26 +1232,6 @@ let rec lemma_unchanged_at_except_disjoint (same change:locations) (s1 s2 s1' s2
   | [] -> ()
   | x :: xs ->
     lemma_unchanged_at_except_disjoint xs change s1 s2 s1' s2'
-
-let rec lemma_disjoint_location_from_locations_not_mem (locs:locations) (l:location) :
-  Lemma
-    (ensures (
-        !!(disjoint_location_from_locations l locs) <==>
-        not (L.mem l locs))) =
-  match locs with
-  | [] -> ()
-  | x :: xs ->
-    lemma_disjoint_location_from_locations_not_mem xs l
-
-let rec lemma_difference_disjoint (l1 l2:locations) :
-  Lemma
-    (ensures (
-        !!(disjoint_locations (l1 `difference` l2) l2))) =
-  match l1 with
-  | [] -> ()
-  | x :: xs ->
-    lemma_disjoint_location_from_locations_not_mem l2 x;
-    lemma_difference_disjoint xs l2
 
 let lemma_bounded_effects_series_aux3 rw1 rw2 f1 f2 s1 s2 :
   Lemma
