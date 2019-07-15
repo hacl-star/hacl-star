@@ -17,6 +17,7 @@ let sec_int_v #t u = pub_int_v u
 
 let secret #t x = x
 
+[@(strict_on_arguments [0])]
 let mk_int #t #l x =
   match t with
   | U1 -> UInt8.uint_to_t x
@@ -111,6 +112,7 @@ let int128_to_uint64 a = Int.Cast.Full.uint128_to_uint64 (int128_to_uint128 a)
 
 #push-options "--z3rlimit 700"
 
+[@(strict_on_arguments [0;2])]
 let cast #t #l t' l' u =
   assert_norm (pow2 8 = 2 * pow2 7);
   assert_norm (pow2 16 = 2 * pow2 15);
@@ -260,6 +262,7 @@ let cast #t #l t' l' u =
 
 #pop-options
 
+[@(strict_on_arguments [0])]
 let ones t l = 
   match t with
   | U1  -> 0x1uy
@@ -276,6 +279,7 @@ let ones t l =
 
 let zeros t l = mk_int 0
 
+[@(strict_on_arguments [0])]
 let add_mod #t #l a b =
   match t with
   | U1   -> UInt8.rem (UInt8.add_mod a b) 2uy
@@ -287,6 +291,7 @@ let add_mod #t #l a b =
 
 let add_mod_lemma #t #l a b = ()
 
+[@(strict_on_arguments [0])]
 let add #t #l a b =
   match t with
   | U1   -> UInt8.add a b
@@ -305,6 +310,7 @@ let add_lemma #t #l a b = ()
 
 #push-options "--max_fuel 1"
 
+[@(strict_on_arguments [0])]
 let incr #t #l a =
   match t with
   | U1   -> UInt8.add a 1uy
@@ -323,6 +329,7 @@ let incr_lemma #t #l a = ()
 
 #pop-options
 
+[@(strict_on_arguments [0])]
 let mul_mod #t #l a b =
   match t with
   | U1  -> UInt8.mul_mod a b
@@ -333,6 +340,7 @@ let mul_mod #t #l a b =
 
 let mul_mod_lemma #t #l a b = ()
 
+[@(strict_on_arguments [0])]
 let mul #t #l a b =
   match t with
   | U1  -> UInt8.mul a b
@@ -355,6 +363,7 @@ let mul_s64_wide a b = Int128.mul_wide a b
 
 let mul_s64_wide_lemma a b = ()
 
+[@(strict_on_arguments [0])]
 let sub_mod #t #l a b =
   match t with
   | U1   -> UInt8.rem (UInt8.sub_mod a b) 2uy
@@ -366,6 +375,7 @@ let sub_mod #t #l a b =
 
 let sub_mod_lemma #t #l a b = ()
 
+[@(strict_on_arguments [0])]
 let sub #t #l a b =
   match t with
   | U1   -> UInt8.sub a b
@@ -384,6 +394,7 @@ let sub_lemma #t #l a b = ()
 
 #push-options "--max_fuel 1"
 
+[@(strict_on_arguments [0])]
 let decr #t #l a =
   match t with
   | U1   -> UInt8.sub a 1uy
@@ -402,6 +413,7 @@ let decr_lemma #t #l a = ()
 
 #pop-options
 
+[@(strict_on_arguments [0])]
 let logxor #t #l a b =
   match t with
   | U1   ->
@@ -467,6 +479,7 @@ let logxor_lemma1 #t #l a b =
 
 #pop-options
 
+[@(strict_on_arguments [0])]
 let logand #t #l a b =
   match t with
   | U1   ->
@@ -517,6 +530,7 @@ let logand_spec #t #l a b =
     assert_norm (1 `logand_v #U1` 0 == 0 /\ 1 `logand_v #U1` 1 == 1)
   | _ -> ()
 
+[@(strict_on_arguments [0])]
 let logor #t #l a b =
   match t with
   | U1   ->
@@ -552,6 +566,7 @@ let logor_disjoint #t #l a b m =
 
 #pop-options
 
+[@(strict_on_arguments [0])]
 let lognot #t #l a =
   match t with
   | U1   -> UInt8.rem (UInt8.lognot a) 2uy
@@ -566,6 +581,7 @@ let lognot #t #l a =
   | S64  -> Int64.lognot a
   | S128 -> Int128.lognot a
 
+[@(strict_on_arguments [0])]
 let shift_right #t #l a b =
   match t with
   | U1   -> UInt8.shift_right a b
@@ -647,6 +663,7 @@ let shift_right_lemma #t #l a b =
     else
       shift_right_value_aux_3 #(bits t) (v a) (v b)
 
+[@(strict_on_arguments [0])]
 let shift_left #t #l a b =
   match t with
   | U1   -> UInt8.shift_left a b
@@ -671,6 +688,7 @@ let rotate_right #t #l a b =
 let rotate_left #t #l a b =
   logor (shift_left a b) (shift_right a (sub #U32 (size (bits t)) b))
 
+[@(strict_on_arguments [0])]
 let ct_abs #t #l a =
   match t with
   | S8  -> Int8.ct_abs a
@@ -680,6 +698,7 @@ let ct_abs #t #l a =
 
 #pop-options
 
+[@(strict_on_arguments [0])]
 let eq_mask #t a b =
   match t with
   | U1   -> lognot (logxor a b)
@@ -765,6 +784,7 @@ let eq_mask_logand_lemma #t a b c =
   | U1 | U8 | U16 | U32 | U64 | U128 -> UInt.logand_commutative #(bits t) (v (eq_mask a b)) (v c)
   | S8 | S16 | S32 | S64 -> Int.logand_commutative #(bits t) (v (eq_mask a b)) (v c)
 
+[@(strict_on_arguments [0])]
 let neq_mask #t a b = lognot (eq_mask #t a b)
 
 let neq_mask_lemma #t a b =
@@ -774,6 +794,7 @@ let neq_mask_lemma #t a b =
     UInt.lognot_lemma_1 #(bits t);
     UInt.lognot_self #(bits t) 0
 
+[@(strict_on_arguments [0])]
 let gte_mask #t a b =
   match t with
   | U1   -> logor a (lognot b)
@@ -913,6 +934,7 @@ let cast_mod #t #l t' l' a =
 
 #pop-options
 
+[@(strict_on_arguments [0])]
 let div #t x y =
   match t with
   | U1  -> UInt8.div x y
@@ -969,19 +991,7 @@ let eq #t x y =
 
 let eq_lemma #t x y = ()
 
-let ne #t x y =
-  match t with
-  | U1   -> not (UInt8.eq x y)
-  | U8   -> not (UInt8.eq x y)
-  | U16  -> not (UInt16.eq x y)
-  | U32  -> not (UInt32.eq x y)
-  | U64  -> not (UInt64.eq x y)
-  | U128 -> not (UInt128.eq x y)
-  | S8   -> not (Int8.eq x y)
-  | S16  -> not (Int16.eq x y)
-  | S32  -> not (Int32.eq x y)
-  | S64  -> not (Int64.eq x y)
-  | S128 -> not (Int128.eq x y)
+let ne #t x y = not (eq x y)
 
 let ne_lemma #t x y = ()
 
