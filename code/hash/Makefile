@@ -39,7 +39,7 @@ FSTAR = $(FSTAR_HOME)/bin/fstar.exe $(FSTAR_FLAGS)
 
 ENABLE_HINTS = --use_hints --use_hint_hashes --record_hints --query_stats
 
-ROOTS = Hacl.Hash.SHA2.fst
+ROOTS = Hacl.Test.SHA2.fst
 #ROOTS = Hacl.Test.CSHAKE.fst
 
 .PRECIOUS: %.krml
