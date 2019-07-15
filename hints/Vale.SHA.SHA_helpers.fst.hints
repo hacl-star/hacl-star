@@ -1958,7 +1958,8 @@
       0,
       0,
       [
-        "@MaxIFuel_assumption", "@query",
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
         "FStar.UInt32_interpretation_Tm_arrow_cf72fc55ad9e1407e5894cde5ad8c9cd",
         "Prims_pretyping_ae567c2fb75be05905677af440075565",
         "Spec.Loops_interpretation_Tm_arrow_31983ce7bb3fa3288ec94b088df0f02a",
@@ -1966,6 +1967,7 @@
         "constructor_distinct_Spec.Hash.Definitions.SHA2_256",
         "equality_tok_Spec.Hash.Definitions.SHA2_256@tok",
         "equation_FStar.UInt.add_mod", "equation_Prims.nat",
+        "equation_Prims.pos",
         "equation_Spec.Hash.Definitions.block_word_length",
         "equation_Spec.Hash.Definitions.is_sha2",
         "equation_Spec.Hash.Definitions.state_word_length",
@@ -1991,7 +1993,8 @@
         "int_typing",
         "interpretation_Tm_abs_cf8091bad039e8b863287924f81a7efc",
         "lemma_FStar.Seq.Base.lemma_eq_elim",
-        "lemma_FStar.Seq.Base.lemma_eq_intro", "lemma_FStar.UInt32.uv_inv",
+        "lemma_FStar.Seq.Base.lemma_eq_intro",
+        "lemma_FStar.UInt.pow2_values", "lemma_FStar.UInt32.uv_inv",
         "primitive_Prims.op_Addition", "primitive_Prims.op_Equality",
         "primitive_Prims.op_LessThan",
         "proj_equation_Vale.Def.Words_s.Mkfour_hi2",
@@ -2001,10 +2004,11 @@
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_16da5dd636ef303f4b4402f063fe1ef3",
+        "refinement_interpretation_Tm_refine_38ea215f7743a1f560b1b1fda2cb058c",
         "refinement_interpretation_Tm_refine_4303d0c89988fe82aadcf16754a5b20f",
         "refinement_interpretation_Tm_refine_516841552c075993547f605f17f21002",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_908622788b8925af8a1cc8708a07e8f3",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
         "refinement_interpretation_Tm_refine_a4161c172123906d0f0ca043dff400f6",
         "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c",
         "refinement_interpretation_Tm_refine_cb97368574c6f45cf8ffde116eb30689",
@@ -2013,7 +2017,8 @@
         "refinement_interpretation_Tm_refine_ff221e859aaa7c48bcc66955577d6f8e",
         "token_correspondence_Spec.SHA2.shuffle_aux",
         "token_correspondence_Spec.SHA2.word_add_mod",
-        "typing_FStar.Seq.Base.index", "typing_Spec.Loops.seq_map2",
+        "typing_FStar.Seq.Base.index", "typing_Prims.pow2",
+        "typing_Spec.Loops.seq_map2",
         "typing_Tm_abs_cf8091bad039e8b863287924f81a7efc",
         "typing_Vale.Def.Types_s.add_wrap",
         "typing_Vale.Def.Words_s.__proj__Mkfour__item__hi2",
@@ -2025,7 +2030,7 @@
         "well-founded-ordering-on-nat"
       ],
       0,
-      "5efd3838b560ea1ac53b4574fea2a6e5"
+      "f9b4e3840e2d6caf469918685a1081de"
     ],
     [
       "Vale.SHA.SHA_helpers.update_multi_quads",
@@ -2054,7 +2059,7 @@
         "typing_FStar.Seq.Base.length", "well-founded-ordering-on-nat"
       ],
       0,
-      "6729e5bcf9c596eaa6c8df83c8bac3aa"
+      "0da36df947289ccd72a01d42721acbbf"
     ],
     [
       "Vale.SHA.SHA_helpers.lemma_le_bytes_to_seq_quad32_empty",
@@ -2626,7 +2631,7 @@
         "well-founded-ordering-on-nat"
       ],
       0,
-      "dbe48f496c630b5bc3db11bd0a001081"
+      "bbe4f5686b3b192c02994137491cde1c"
     ],
     [
       "Vale.SHA.SHA_helpers.lemma_update_multi_quads",
@@ -2668,12 +2673,12 @@
         "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_2de20c066034c13bf76e9c0b94f4806c",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_576a5a06af2ed9c4e151ecb76b0e6e48",
         "refinement_interpretation_Tm_refine_8117376fa751a9089be3b927d5831062",
-        "refinement_interpretation_Tm_refine_dd74eeb72b06acb77d67d6ea46bcedfd",
         "typing_FStar.Seq.Base.length"
       ],
       0,
-      "c7c3258d5d2ad1f7210eaf05bb345129"
+      "39f1a79883ee4a9ecf0691231d472113"
     ],
     [
       "Vale.SHA.SHA_helpers.lemma_update_multi_quads",
