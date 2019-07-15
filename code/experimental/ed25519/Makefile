@@ -29,8 +29,7 @@ FSTAR_INCLUDE_DIRS = \
   $(HACL_HOME)/lib/c \
   $(HACL_HOME)/code/curve25519 \
   $(HACL_HOME)/code/curve25519/lemmas \
-  $(HACL_HOME)/specs/lemmas \
-  $(HACL_HOME)/code/hash
+  $(HACL_HOME)/specs/lemmas
 
 FSTAR_FLAGS = $(OTHERFLAGS) --cmi \
   --cache_checked_modules --odir $(OUTPUT_DIR) \
@@ -41,7 +40,7 @@ FSTAR = $(FSTAR_HOME)/bin/fstar.exe $(FSTAR_FLAGS)
 
 ENABLE_HINTS = --use_hints --use_hint_hashes --record_hints --query_stats
 
-ROOTS = Hacl.Ed25519.fst
+ROOTS = Hacl.Test.Ed25519.fst
 #Hacl.Ed25519.fst
 #Hacl.Test.Ed25519.fst
 
@@ -82,7 +81,7 @@ $(GENERATED_DIR)/Makefile.include: $(ALL_KRML_FILES) | .depend
 	-bundle 'Spec.*' \
 	-bundle 'C=C.Endianness' \
 	-bundle 'Hacl.Ed25519=Hacl.Impl.*,Hacl.Bignum25519,Hacl.Ed25519' \
-	-library 'Hacl.SHA512,C,FStar' \
+	-library 'Hacl.Hash.SHA2,C,FStar' \
 	-drop 'LowStar,Spec,Prims,Lib,C.Loops.*,Hacl.Spec.*,Hacl.Impl.Curve25519.Fields,Hacl.Impl.Curve25519.Field64,Hacl.Impl.Curve25519.Field64.*' \
 	-add-include '"c/Lib_PrintBuffer.h"' \
 	-tmpdir $(GENERATED_DIR) \
@@ -113,10 +112,10 @@ ALL_GENERATED_FILES = $(addprefix $(GENERATED_DIR)/,$(ALL_OUR_FILES))
 
 ALL_SOURCES = \
   $(ALL_GENERATED_FILES) \
-  include/Hacl_SHA512.c \
+  include/Hacl_Hash_SHA2.c \
   $(HACL_HOME)/snapshots/hacl-c/Hacl_SHA2_512.c \
   $(HACL_HOME)/lib/c/Lib_PrintBuffer.c \
-  Hacl.Benchmark.Ed25519.c
+#Hacl.Benchmark.Ed25519.c
 
 ALL_OBJS = $(patsubst %.c,%.o,$(ALL_SOURCES))
 
