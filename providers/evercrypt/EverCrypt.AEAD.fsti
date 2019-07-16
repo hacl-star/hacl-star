@@ -104,7 +104,7 @@ val frame_invariant: #a:alg -> l:B.loc -> s:state a -> h0:HS.mem -> h1:HS.mem ->
 /// -------------------
 
 noextract
-let bytes = Seq.seq UInt8.t
+let bytes = Seq.seq uint8
 
 val alg_of_state (a: G.erased alg) (s: state (G.reveal a)): Stack alg
   (requires (fun h0 -> invariant #(G.reveal a) h0 s))
@@ -120,7 +120,7 @@ inline_for_extraction noextract
 let create_in_st (a: alg) =
   r:HS.rid ->
   dst:B.pointer (B.pointer_or_null (state_s a)) ->
-  k:B.buffer UInt8.t { B.length k = key_length a } ->
+  k:B.buffer uint8 { B.length k = key_length a } ->
   ST error_code
     (requires fun h0 ->
       ST.is_eternal_region r /\
@@ -147,18 +147,19 @@ let create_in_st (a: alg) =
       | _ -> False)
 
 /// This function takes a pointer to a caller-allocated reference ``dst`` then,
-/// if the algorithm is supported, allocates a fresh state and modifies ``dst``
-/// to point to it. The key-value associated with this can be obtained via ``kv
-/// (B.deref dst)``; as long as ``dst`` is not modified, then the caller can
-/// derive that the ``kv`` remains the same, which will be required for encrypt.
+/// if the algorithm is supported (on this platform), allocates a fresh state
+/// and modifies ``dst`` to point to it. The key-value associated with this can
+/// be obtained via ``kv (B.deref dst)``; as long as ``dst`` is not modified,
+/// then the caller can derive that the ``kv`` remains the same, which will be
+/// required for encrypt.
 (** @type: true
 *)
 val create_in: #a:alg -> create_in_st a
 
-let iv_p a = iv:B.buffer UInt8.t { iv_length (B.length iv) a }
-let ad_p a = ad:B.buffer UInt8.t { B.length ad <= max_length a }
-let plain_p a = p:B.buffer UInt8.t { B.length p <= max_length a }
-let cipher_p a = p:B.buffer UInt8.t { B.length p + tag_length a <= max_length a }
+let iv_p a = iv:B.buffer uint8 { iv_length a (B.length iv)}
+let ad_p a = ad:B.buffer uint8 { B.length ad <= max_length a }
+let plain_p a = p:B.buffer uint8 { B.length p <= max_length a }
+let cipher_p a = p:B.buffer uint8 { B.length p + tag_length a <= max_length a }
 
 inline_for_extraction noextract
 let encrypt_st (a: supported_alg) =
@@ -169,8 +170,8 @@ let encrypt_st (a: supported_alg) =
   ad_len: UInt32.t { v ad_len = B.length ad /\ v ad_len <= pow2 31 } ->
   plain: plain_p a ->
   plain_len: UInt32.t { v plain_len = B.length plain /\ v plain_len <= max_length a } ->
-  cipher: B.buffer UInt8.t { B.length cipher = B.length plain } ->
-  tag: B.buffer UInt8.t { B.length tag = tag_length a } ->
+  cipher: B.buffer uint8 { B.length cipher = B.length plain } ->
+  tag: B.buffer uint8 { B.length tag = tag_length a } ->
   Stack error_code
     (requires fun h0 ->
       not (B.g_is_null s) ==>
@@ -218,8 +219,8 @@ let decrypt_st (a: supported_alg) =
   ad_len: UInt32.t { v ad_len = B.length ad /\ v ad_len <= pow2 31 } ->
   cipher: cipher_p a ->
   cipher_len: UInt32.t { v cipher_len = B.length cipher } ->
-  tag: B.buffer UInt8.t { B.length tag = tag_length a } ->
-  dst: B.buffer UInt8.t { B.length dst = B.length cipher } ->
+  tag: B.buffer uint8 { B.length tag = tag_length a } ->
+  dst: B.buffer uint8 { B.length dst = B.length cipher } ->
   Stack error_code
     (requires fun h0 ->
       not (B.g_is_null s) ==>

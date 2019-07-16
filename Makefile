@@ -40,9 +40,7 @@
 # - min-test: staged, runs only a subset of verification for the purposes of
 #   F*'s extended CI
 
-# Put your local configuration (e.g. HACL_HOME, KREMLIN_HOME, etc.) in
-# Makefile.config
--include Makefile.config
+include Makefile.common
 
 #########################
 # Catching setup errors #
@@ -137,6 +135,7 @@ ci:
 	NOSHORTLOG=1 $(MAKE) vale-fst
 	FSTAR_DEPEND_FLAGS="--warn_error +285" NOSHORTLOG=1 $(MAKE) all-unstaged test-unstaged
 	NOSHORTLOG=1 $(MAKE) wasm
+	$(MAKE) -C providers/quic_provider # needs a checkout of miTLS, only valid on CI
 
 wasm:
 	tools/blast-staticconfig.sh wasm
@@ -162,8 +161,6 @@ clean:
 #################
 # Configuration #
 #################
-
-include Makefile.common
 
 IMPORT_FSTAR_TYPES := $(VALE_HOME)/bin/importFStarTypes.exe
 PYTHON3 ?= $(shell tools/findpython3.sh)
@@ -268,7 +265,7 @@ ifndef MAKE_RESTARTS
 	@if ! [ -f .didhelp ]; then echo "💡 Did you know? If your dependency graph didn't change (e.g. no files added or removed, no reference to a new module in your code), run NODEPEND=1 make <your-target> to skip dependency graph regeneration!"; touch .didhelp; fi
 	$(call run-with-log,\
 	  $(FSTAR_NO_FLAGS) --dep $* $(notdir $(FSTAR_ROOTS)) --warn_error '-285' $(FSTAR_DEPEND_FLAGS) \
-	    --extract '* -Prims -LowStar -Lib.Buffer -Hacl -FStar +FStar.Kremlin.Endianness -EverCrypt -MerkleTree -Vale.Lib.Tactics -Vale.Curve25519.FastHybrid_helpers -Vale.Curve25519.FastMul_helpers -Vale.Curve25519.FastSqr_helpers -Vale.Curve25519.FastUtil_helpers -TestLib -EverCrypt -MerkleTree -Test -Vale_memcpy -Vale.AsLowStar.Test -Lib.IntVector' > $@ && \
+	    --extract '-* +FStar.Kremlin.Endianness +Vale.X64 -Vale.X64.MemoryAdapters +Vale.Def +Vale.Lib -Vale.Lib.Tactics +Vale.Math +Vale.AES +Vale.Interop +Vale.Arch.Types +Vale.Lib.X64 +Vale.SHA.X64 +Vale.SHA.SHA_helpers +Vale.Curve25519.X64 +Vale.Poly1305.X64 +Vale.Inline +Vale.AsLowStar +Vale.Test +Spec +Lib -Lib.IntVector +C' > $@ && \
 	  $(SED) -i 's!$(HACL_HOME)/obj/\(.*.checked\)!obj/\1!;s!/bin/../ulib/!/ulib/!g' $@ \
 	  ,[FSTAR-DEPEND ($*)],$(call to-obj-dir,$@))
 
@@ -725,6 +722,7 @@ COMPACT_FLAGS	=\
   -bundle 'MerkleTree.New.Low+MerkleTree.New.Low.Serialization=[rename=MerkleTree]' \
   -bundle 'Test,Test.*,WindowsHack' \
   -bundle EverCrypt.Hash+EverCrypt.Hash.Incremental=[rename=EverCrypt_Hash] \
+  -bundle EverCrypt.CTR=EverCrypt.CTR.* \
   -library EverCrypt.AutoConfig,EverCrypt.OpenSSL,EverCrypt.BCrypt \
   -minimal \
   -add-include '"kremlin/internal/types.h"' \
@@ -850,6 +848,7 @@ dist/evercrypt-external-headers/Makefile.basic: $(ALL_KRML_FILES)
 	  -add-include '<inttypes.h>' \
 	  -add-include '<stdbool.h>' \
 	  -add-include '<kremlin/internal/types.h>' \
+	  -add-include '<kremlin/internal/target.h>' \
 	  -skip-compilation \
 	  -tmpdir $(dir $@) \
 	  $^

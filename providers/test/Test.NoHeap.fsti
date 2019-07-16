@@ -14,6 +14,7 @@ let test_many #a (label: C.String.t)
   Stack unit (fun _ -> True) (fun _ _ _ -> True)
 =
   C.String.print label;
+  C.String.(print !$"\n");
   let L.LB len vs = vec in
   let f (i:UInt32.t{FStar.UInt32.(0 <= v i /\ v i < v len)}): Stack unit
     (requires fun h -> True)

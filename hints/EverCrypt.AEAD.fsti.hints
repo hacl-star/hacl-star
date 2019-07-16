@@ -1,5 +1,5 @@
 [
-  "€€Z‚€°H\"ÿ¬¡¶æ¶”ê",
+  "–òŸ]À\u001d]‰ß\u00116Ôx“iŒ",
   [
     [
       "EverCrypt.AEAD.loc_includes_union_l_footprint_s",
@@ -8,7 +8,7 @@
       0,
       [ "@query" ],
       0,
-      "3f3f59440ed808f6f7b270159c6f775f"
+      "5bb8c15a75f32a23a84dd3d87f141362"
     ],
     [
       "EverCrypt.AEAD.invariant",
@@ -22,7 +22,7 @@
         "refinement_interpretation_Tm_refine_573cfed777dae20cc82e8fef9622857e"
       ],
       0,
-      "cfe72b8f72303274a08fe3e0596d3392"
+      "1d077e507024590fbc33a7803418df0f"
     ],
     [
       "EverCrypt.AEAD.create_in_st",
@@ -31,7 +31,7 @@
       0,
       [ "@query", "projection_inverse_BoxBool_proj_0" ],
       0,
-      "d35993b428c2e3a061088b3c947f2e64"
+      "af7381438457f7d56102e22316993b96"
     ],
     [
       "EverCrypt.AEAD.iv_p",
@@ -40,7 +40,7 @@
       0,
       [ "@query" ],
       0,
-      "789b57363c6da2d4cf5bb20c27b3794b"
+      "5baff134cb64429866ea1630ca9e1ebe"
     ],
     [
       "EverCrypt.AEAD.encrypt_st",
@@ -49,31 +49,31 @@
       0,
       [
         "@MaxIFuel_assumption", "@query", "bool_inversion",
-        "constructor_distinct_FStar.Integers.Unsigned",
-        "constructor_distinct_FStar.Integers.W8",
-        "equality_tok_FStar.Integers.W8@tok", "equation_EverCrypt.AEAD.ad_p",
+        "equality_tok_Lib.IntTypes.U8@tok", "equation_EverCrypt.AEAD.ad_p",
         "equation_EverCrypt.AEAD.iv_p", "equation_EverCrypt.AEAD.plain_p",
-        "equation_FStar.Integers.int_t", "equation_FStar.Integers.uint_8",
-        "equation_LowStar.Buffer.buffer",
+        "equation_Lib.IntTypes.uint8", "equation_LowStar.Buffer.buffer",
         "equation_LowStar.Buffer.pointer_or_null",
         "equation_LowStar.Buffer.trivial_preorder", "equation_Prims.eqtype",
         "equation_Prims.nat", "equation_Spec.AEAD.is_supported_alg",
-        "equation_Spec.AEAD.supported_alg",
-        "function_token_typing_FStar.Integers.uint_8",
-        "function_token_typing_Prims.int",
+        "equation_Spec.AEAD.supported_alg", "equation_Spec.AEAD.uint8",
+        "equation_Spec.AES.elem", "equation_Spec.AES.gf8",
+        "equation_Spec.AES.irred", "equation_Spec.GaloisField.felem",
+        "equation_Spec.GaloisField.gf", "function_token_typing_Prims.int",
+        "function_token_typing_Spec.AES.elem",
         "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "lemma_LowStar.Monotonic.Buffer.length_as_seq",
-        "projection_inverse_FStar.Integers.Unsigned__0",
+        "proj_equation_Spec.GaloisField.GF_t",
+        "projection_inverse_Spec.GaloisField.GF_t",
         "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
-        "refinement_interpretation_Tm_refine_421cdb7f3f4c67e87363a9897fde607b",
-        "refinement_interpretation_Tm_refine_4dac7c9a34291217032726b7e28dcb0e",
+        "refinement_interpretation_Tm_refine_4afc3f41917294d43a86f8a62107c500",
+        "refinement_interpretation_Tm_refine_926284c2ac392c5e8bbe3ab6fa421c94",
         "refinement_interpretation_Tm_refine_cd18e9962a0d204005dcfcda04529ffc",
         "refinement_interpretation_Tm_refine_d2d399e4b0cd736cb6130361c7530aa2",
         "typing_LowStar.Buffer.trivial_preorder",
         "typing_Spec.AEAD.is_supported_alg"
       ],
       0,
-      "e3474023dd8fc8317367f663f1083dce"
+      "0698e67063edcccd73d86287750a218d"
     ],
     [
       "EverCrypt.AEAD.decrypt_st",
@@ -82,39 +82,41 @@
       0,
       [
         "@MaxIFuel_assumption", "@query", "bool_inversion",
-        "constructor_distinct_FStar.Integers.Unsigned",
-        "constructor_distinct_FStar.Integers.W8",
-        "equality_tok_FStar.Integers.W8@tok", "equation_EverCrypt.AEAD.ad_p",
+        "equality_tok_Lib.IntTypes.U8@tok", "equation_EverCrypt.AEAD.ad_p",
         "equation_EverCrypt.AEAD.cipher_p", "equation_EverCrypt.AEAD.iv_p",
-        "equation_FStar.Integers.int_t", "equation_FStar.Integers.nat",
-        "equation_FStar.Integers.uint_8", "equation_LowStar.Buffer.buffer",
+        "equation_FStar.Integers.nat", "equation_Lib.IntTypes.uint8",
+        "equation_LowStar.Buffer.buffer",
         "equation_LowStar.Buffer.pointer_or_null",
         "equation_LowStar.Buffer.trivial_preorder", "equation_Prims.eqtype",
         "equation_Prims.nat", "equation_Spec.AEAD.is_supported_alg",
         "equation_Spec.AEAD.max_length", "equation_Spec.AEAD.supported_alg",
-        "function_token_typing_FStar.Integers.uint_8",
+        "equation_Spec.AEAD.uint8", "equation_Spec.AES.elem",
+        "equation_Spec.AES.gf8", "equation_Spec.AES.irred",
+        "equation_Spec.GaloisField.felem", "equation_Spec.GaloisField.gf",
         "function_token_typing_Prims.int",
+        "function_token_typing_Spec.AES.elem",
         "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "lemma_FStar.Seq.Base.lemma_len_append",
         "lemma_LowStar.Monotonic.Buffer.length_as_seq",
-        "primitive_Prims.op_Addition", "projection_inverse_BoxInt_proj_0",
-        "projection_inverse_FStar.Integers.Unsigned__0",
-        "refinement_interpretation_Tm_refine_028fd002eb0fdc5a6a25b9a3c0c06a18",
+        "primitive_Prims.op_Addition", "proj_equation_Spec.GaloisField.GF_t",
+        "projection_inverse_BoxInt_proj_0",
+        "projection_inverse_Spec.GaloisField.GF_t",
         "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
-        "refinement_interpretation_Tm_refine_421cdb7f3f4c67e87363a9897fde607b",
-        "refinement_interpretation_Tm_refine_4dac7c9a34291217032726b7e28dcb0e",
+        "refinement_interpretation_Tm_refine_4afc3f41917294d43a86f8a62107c500",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_c03032fa139a68b5f2472b267f75f313",
+        "refinement_interpretation_Tm_refine_926284c2ac392c5e8bbe3ab6fa421c94",
+        "refinement_interpretation_Tm_refine_a3e4d56c6b42a921753edb9a8f586d85",
         "refinement_interpretation_Tm_refine_cd18e9962a0d204005dcfcda04529ffc",
         "refinement_interpretation_Tm_refine_d2d399e4b0cd736cb6130361c7530aa2",
         "refinement_interpretation_Tm_refine_ef3919256654f6b3ff3f6a54193365a0",
+        "refinement_interpretation_Tm_refine_fdeddf07a32054c3ffcf4cc2d1d62357",
         "typing_LowStar.Buffer.trivial_preorder",
         "typing_LowStar.Monotonic.Buffer.as_seq",
         "typing_LowStar.Monotonic.Buffer.length",
         "typing_Spec.AEAD.is_supported_alg", "typing_Spec.AEAD.tag_length"
       ],
       0,
-      "757314b2a1309e0798b240fd4a9a27a8"
+      "4c8caeba83677a8c89450b75aa208f59"
     ]
   ]
 ]
