@@ -164,17 +164,29 @@ val copy_column:
   -> Stack unit
     (requires fun h0 -> live h0 m /\ live h0 output /\ Buf.disjoint m output)
     (ensures fun h0 _ h1 -> modifies1 output h0 h1 /\ live h1 output /\ to_spec_vec h1 output == Spec.Kyber2.NumericTypes.get_column (to_spec_matrix h0 m) (v j))
-#reset-options "--z3rlimit 1000 --max_fuel 2 --max_ifuel 2 --print_universes"
+
+#reset-options "--z3rlimit 200 --max_fuel 2 --max_ifuel 2 --print_universes"
 
 let copy_column m output j =
+  let h0 = ST.get () in
   push_frame ();
   let i = create 1ul 0ul in
-  let h0 = ST.get () in
-  Lib.Loops.while (fun h -> live h output /\ live h m /\ Buf.disjoint m output /\ modifies1 output h0 h /\ Seq.sub #_ #params_k (to_spec_vec h output) 0 (v h.[|i|].[0]) == Seq.sub #_ #params_k (Spec.Kyber2.NumericTypes.get_column (to_spec_matrix h0 m) (v j)) 0 (v h.[|i|].[0]))
+  let h' = ST.get () in
+  Lib.Loops.while (fun h -> v h.[|i|].[0] <= params_k /\ live h output /\ live h m /\ live h i /\ Buf.disjoint m output /\ Buf.disjoint m i /\ Buf.disjoint output i /\ modifies2 output i h' h /\ (forall (x:size_nat{x< v #U32 #PUB h.[|i|].[0]}). Spec.Kyber2.NumericTypes.index_vec (to_spec_vec h output) x == Spec.Kyber2.NumericTypes.index_vec (Spec.Kyber2.NumericTypes.get_column (to_spec_matrix h0 m) (v j)) x))
     (fun h -> v h.[|i|].[0] < params_k)
     (fun () -> i.(0ul) <. size params_k)
-    (fun () -> let k = i.(0ul) in assert(v k<params_k); assert(Buf.disjoint m output); copy_element m (get_index_vec output m i.(0ul)) i.(0ul) j; assert_norm(params_k < maxint U32); i.(0ul) <- k +! 1ul);
+    (fun () -> let k = i.(0ul) in assert(v k<params_k);
+       let p = get_index_vec output m k in
+       assert(p == gsub output (k*!size params_n) (size params_n));
+       copy_element m (get_index_vec output m k) k j;
+       assert_norm(params_k < maxint U32); i.(0ul) <- k +! 1ul;
+       let h = ST.get () in
+       assert (h.[|p|] == Spec.Kyber2.NumericTypes.get_element (to_spec_matrix h0 m) (v k) (v j));
+       (let v':Spec.Kyber2.NumericTypes.vec = (Spec.Kyber2.NumericTypes.get_column (to_spec_matrix h0 m) (v j)) in
+       assert(h.[|p|] == Spec.Kyber2.NumericTypes.index_vec v' (v k));
+       let output':Spec.Kyber2.NumericTypes.vec = (to_spec_vec h output) in
+       assert(Spec.Kyber2.NumericTypes.index_vec output' (v k) == h.[|p|]));admit()
+       );
   pop_frame ();
   let h1 = ST.get () in
-  Spec.Kyber2.NumericTypes.eq_vec (to_spec_vec h1 output) (Seq.sub #_ #params_k (to_spec_vec h1 output) 0 params_k);
   Spec.Kyber2.NumericTypes.eq_vec (to_spec_vec h1 output) (Spec.Kyber2.NumericTypes.get_column (to_spec_matrix h0 m) (v j))
