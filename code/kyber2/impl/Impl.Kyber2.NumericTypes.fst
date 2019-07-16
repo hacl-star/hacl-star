@@ -185,7 +185,7 @@ let copy_column m output j =
        (let v':Spec.Kyber2.NumericTypes.vec = (Spec.Kyber2.NumericTypes.get_column (to_spec_matrix h0 m) (v j)) in
        assert(h.[|p|] == Spec.Kyber2.NumericTypes.index_vec v' (v k));
        let output':Spec.Kyber2.NumericTypes.vec = (to_spec_vec h output) in
-       assert(Spec.Kyber2.NumericTypes.index_vec output' (v k) == h.[|p|]));admit()
+       assert(Spec.Kyber2.NumericTypes.index_vec output' (v k) == h.[|p|]))
        );
   pop_frame ();
   let h1 = ST.get () in
