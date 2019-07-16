@@ -15,11 +15,15 @@ module S = Spec.GF128
 module GF = Spec.GaloisField
 module Vec = Hacl.Spec.GF128.Vec
 
+friend Lib.LoopCombinators
+
 
 #set-options "--z3rlimit 50 --max_fuel 0"
 
-inline_for_extraction noextract
-let gcm_ctx (s:field_spec) = lbuffer (elem_t s) (felem_len s +! precomp_len s)
+
+let as_get_acc #s h ctx = feval h (gsub ctx 0ul (felem_len s))
+
+let as_get_r #s h ctx = feval h (gsub ctx (felem4_len s) (felem_len s))
 
 inline_for_extraction noextract
 let get_acc #s (ctx:gcm_ctx s) = sub ctx 0ul (felem_len s)
@@ -37,7 +41,7 @@ val encode:
   -> x:felem s
   -> y:block ->
   Stack unit
-  (requires fun h -> live h x /\ live h y)
+  (requires fun h -> live h x /\ live h y /\ disjoint x y)
   (ensures  fun h0 _ h1 -> modifies1 x h0 h1 /\
     feval h1 x == S.encode (as_seq h0 y))
 
@@ -63,7 +67,7 @@ val decode:
   -> x:block
   -> y:felem s ->
   Stack unit
-  (requires fun h -> live h x /\ live h y)
+  (requires fun h -> live h x /\ live h y /\ disjoint x y)
   (ensures  fun h0 _ h1 -> modifies1 x h0 h1 /\
     as_seq h1 x == S.decode (feval #s h0 y))
 
@@ -77,7 +81,7 @@ val encode_last:
   -> len:size_t{v len < 16}
   -> y:lbuffer uint8 len ->
   Stack unit
-  (requires fun h -> live h x /\ live h y)
+  (requires fun h -> live h x /\ live h y /\ disjoint x y)
   (ensures  fun h0 _ h1 -> modifies1 x h0 h1 /\
     feval h1 x == S.encode_last (v len) (as_seq h0 y))
 
@@ -96,7 +100,9 @@ val gf128_update1:
   -> x:block
   -> r:felem s ->
   Stack unit
-  (requires fun h -> live h x /\ live h r /\ live h acc)
+  (requires fun h ->
+    live h x /\ live h r /\ live h acc /\
+    disjoint acc r /\ disjoint acc x)
   (ensures  fun h0 _ h1 -> modifies1 acc h0 h1 /\
     feval h1 acc == S.gf128_update1 (feval h0 r) (as_seq h0 x) (feval h0 acc))
 
@@ -106,37 +112,54 @@ let gf128_update1 #s acc x r =
   encode elem x;
   fadd acc elem;
   fmul acc r;
-  pop_frame(); admit()
+  pop_frame()
 
-(*
-let gf128_update1 (r:elem) (b:lbytes size_block) (acc:elem) : Tot elem =
-(encode b `fadd` acc) `fmul_be` r
-*)
 
 inline_for_extraction
 val gf128_update_last:
     #s:field_spec
   -> acc:felem s
-  -> len:size_t{v len < 16}
+  -> len:size_t{0 < v len /\ v len < 16}
   -> x:lbuffer uint8 len
   -> r:felem s ->
   Stack unit
-  (requires fun h -> live h x /\ live h r /\ live h acc)
+  (requires fun h ->
+    live h x /\ live h r /\ live h acc /\
+    disjoint acc x /\ disjoint acc r)
   (ensures  fun h0 _ h1 -> modifies1 acc h0 h1 /\
     feval h1 acc == S.gf128_update_last (feval h0 r) (v len) (as_seq h0 x) (feval h0 acc))
 
-let gf128_update_last #s acc l x r =
+let gf128_update_last #s acc len x r =
   push_frame();
   let elem = create_felem s in
-  encode_last elem l x;
+  encode_last elem len x;
   fadd acc elem;
   fmul acc r;
-  pop_frame(); admit()
+  pop_frame()
 
-(*
-let gf128_update_last (r:elem) (l:size_nat{l < size_block}) (b:lbytes l) (acc:elem) =
-  if l = 0 then acc else (encode_last l b `fadd` acc) `fmul_be` r
-*)
+inline_for_extraction noextract
+val gf128_update_scalar_f:
+    #s:field_spec
+  -> r:felem s
+  -> nb:size_t
+  -> len:size_t{v nb == v len / 16}
+  -> text:lbuffer uint8 len
+  -> i:size_t{v i < v nb}
+  -> acc:felem s ->
+  Stack unit
+  (requires fun h ->
+    live h r /\ live h acc /\ live h text /\
+    disjoint acc r /\ disjoint acc text)
+  (ensures  fun h0 _ h1 -> modifies1 acc h0 h1 /\
+    feval h1 acc == LSeq.repeat_blocks_f #uint8 #S.elem 16 (as_seq h0 text)
+      (S.gf128_update1 (feval h0 r)) (v nb) (v i) (feval h0 acc))
+
+let gf128_update_scalar_f #s r nb len text i acc =
+  let tb = sub text (i *. 16ul) 16ul in
+  gf128_update1 #s acc tb r
+
+
+#set-options "--max_fuel 1"
 
 inline_for_extraction
 val gf128_update_scalar:
@@ -146,23 +169,48 @@ val gf128_update_scalar:
   -> len:size_t
   -> text:lbuffer uint8 len ->
   Stack unit
-  (requires fun h -> live h acc /\ live h r /\ live h text)
+  (requires fun h ->
+    live h acc /\ live h r /\ live h text /\
+    disjoint acc r /\ disjoint acc text)
   (ensures  fun h0 _ h1 -> modifies1 acc h0 h1 /\
     feval h1 acc == S.gf128_update (as_seq h0 text) (feval h0 acc) (feval h0 r))
 
 let gf128_update_scalar #s acc r len text =
-  let blocks = len /. size 16 in
-  let h2 = ST.get() in
+  let nb = len /. 16ul in
+  let rem = len %. 16ul in
+  let h0 = ST.get () in
 
-  loop_nospec #h2 blocks acc
+  LSeq.lemma_repeat_blocks #uint8 #S.elem 16 (as_seq h0 text)
+  (S.gf128_update1 (feval h0 r))
+  (S.gf128_update_last (feval h0 r))
+  (feval h0 acc);
+
+  [@ inline_let]
+  let spec_fh h0 =
+    LSeq.repeat_blocks_f 16 (as_seq h0 text)
+      (S.gf128_update1 (feval h0 r)) (v nb) in
+
+  [@ inline_let]
+  let inv h (i:nat{i <= v nb}) =
+    modifies1 acc h0 h /\
+    live h acc /\ live h r /\ live h text /\
+    disjoint acc r /\ disjoint acc text /\
+    feval h acc == Lib.LoopCombinators.repeati i (spec_fh h0) (feval h0 acc) in
+
+  Lib.Loops.for (size 0) nb inv
   (fun i ->
-    let tb = sub text (i *. size 16) (size 16) in
-    gf128_update1 #s acc tb r);
+    Lib.LoopCombinators.unfold_repeati (v nb) (spec_fh h0) (feval h0 acc) (v i);
+    gf128_update_scalar_f #s r nb len text i acc);
 
-  let rem = len %. size 16 in
-  if (rem >. size 0) then (
-    let last = sub text (blocks *. size 16) rem in
-    gf128_update_last #s acc rem last r); admit()
+  let h1 = ST.get () in
+  assert (feval h1 acc == Lib.LoopCombinators.repeati (v nb) (spec_fh h0) (feval h0 acc));
+
+  if rem >. 0ul then (
+    let last = sub text (nb *! 16ul) rem in
+    as_seq_gsub h1 text (nb *! 16ul) rem;
+    assert (disjoint acc last);
+    gf128_update_last #s acc rem last r)
+
 
 //NI
 inline_for_extraction
@@ -173,7 +221,9 @@ val gf128_update_multi_add_mul:
   -> len:size_t{0 < v len /\ v len % 64 = 0}
   -> text:lbuffer uint8 len ->
   Stack unit
-  (requires fun h -> live h acc /\ live h pre /\ live h text)
+  (requires fun h ->
+    live h acc /\ live h pre /\ live h text /\
+    disjoint acc pre /\ disjoint acc text)
   (ensures  fun h0 _ h1 -> modifies1 acc h0 h1 /\
     feval h1 acc == Vec.gf128_update_multi_add_mul (as_seq h0 text) (feval h0 acc) (get_r1 h0 pre))
 
@@ -199,7 +249,9 @@ val gf128_update_multi_mul_add:
   -> len:size_t{0 < v len /\ v len % 64 = 0}
   -> text:lbuffer uint8 len ->
   Stack unit
-  (requires fun h -> live h acc /\ live h pre /\ live h text)
+  (requires fun h ->
+    live h acc /\ live h pre /\ live h text /\
+    disjoint acc pre /\ disjoint acc text)
   (ensures  fun h0 _ h1 -> modifies1 acc h0 h1 /\
     feval h1 acc == Vec.gf128_update_multi_mul_add (as_seq h0 text) (feval h0 acc) (get_r1 h0 pre))
 
@@ -236,7 +288,9 @@ val gf128_update_multi:
   -> len:size_t{0 < v len /\ v len % 64 = 0}
   -> text:lbuffer uint8 len ->
   Stack unit
-  (requires fun h -> live h acc /\ live h pre /\ live h text)
+  (requires fun h ->
+    live h acc /\ live h pre /\ live h text /\
+    disjoint acc pre /\ disjoint acc text)
   (ensures  fun h0 _ h1 -> modifies1 acc h0 h1 /\
     feval h1 acc == Vec.gf128_update_multi s (as_seq h0 text) (feval h0 acc) (get_r1 h0 pre))
 
@@ -254,7 +308,9 @@ val gf128_update_vec:
   -> len:size_t
   -> text:lbuffer uint8 len ->
   Stack unit
-  (requires fun h -> live h acc /\ live h pre /\ live h text)
+  (requires fun h ->
+    live h acc /\ live h pre /\ live h text /\
+    disjoint acc pre /\ disjoint acc text)
   (ensures  fun h0 _ h1 -> modifies1 acc h0 h1 /\
     feval h1 acc == Vec.gf128_update_vec s (as_seq h0 text) (feval h0 acc) (get_r1 h0 pre))
 
@@ -269,16 +325,7 @@ let gf128_update_vec #s acc pre len text =
   gf128_update_scalar #s acc r1 len1 t1; admit()
 
 
-inline_for_extraction
-val gcm_init:
-    #s:field_spec
-  -> ctx:gcm_ctx s
-  -> key:block ->
-  Stack unit
-  (requires fun h -> live h ctx /\ live h key /\ disjoint ctx key)
-  (ensures  fun h0 _ h1 -> modifies1 ctx h0 h1)
-
-let gcm_init #s ctx key =
+let gf128_init #s ctx key =
   let acc = get_acc ctx in
   let pre = get_precomp ctx in
 
@@ -286,23 +333,24 @@ let gcm_init #s ctx key =
   load_precompute_r pre key
 
 
-inline_for_extraction
-val ghash:
-    #s:field_spec
-  -> tag:block
-  -> len:size_t
-  -> text:lbuffer uint8 len
-  -> key:block ->
-  Stack unit
-  (requires fun h -> live h tag /\ live h text /\ live h key)
-  (ensures  fun h0 _ h1 -> modifies1 tag h0 h1)
+let gf128_update #s ctx len text =
+  let acc = get_acc ctx in
+  let pre = get_precomp ctx in
+  let h0 = ST.get () in
+  gf128_update_vec #s acc pre len text;
+  let h1 = ST.get () in
+  assume (as_get_acc h1 ctx == S.gf128_update (as_seq h0 text) (as_get_acc h0 ctx) (as_get_r h0 ctx))
+
+
+let gf128_emit #s tag ctx =
+  let acc = get_acc ctx in
+  decode tag acc
+
 
 let ghash #s tag len text key =
   push_frame();
   let ctx : gcm_ctx s = create (felem_len s +! precomp_len s) (elem_zero s) in
-  gcm_init ctx key;
-  let acc = get_acc ctx in
-  let pre = get_precomp ctx in
-  gf128_update_vec acc pre len text;
-  decode tag acc;
+  gf128_init ctx key;
+  gf128_update ctx len text;
+  gf128_emit tag ctx;
   pop_frame()
