@@ -1577,16 +1577,30 @@ let rec lemma_num_blocks_in_codes_append (c1 c2:codes) :
   | [] -> ()
   | x :: xs -> lemma_num_blocks_in_codes_append xs c2
 
-let rec unblock_once (c : codes) :
+let rec unblock_for (c:code) (cs : codes) :
   Pure (possibly codes)
     (requires True)
-    (ensures (fun r -> Ok? r ==> num_blocks_in_codes c = num_blocks_in_codes (Ok?.v r) + 1)) =
-  match c with
-  | [] -> Err "Cannot unblock further"
-  | Block l :: xs -> Ok (l `L.append` xs)
-  | x :: xs ->
-    xs' <-- unblock_once xs;
-    return (x :: xs')
+    (ensures (fun r ->
+         Ok? r ==> (
+           (Ok? (find_code c cs) ==> num_blocks_in_codes cs = num_blocks_in_codes (Ok?.v r)) /\
+           (Err? (find_code c cs) ==> num_blocks_in_codes cs > num_blocks_in_codes (Ok?.v r))))) =
+  match find_code c cs with
+  | Ok _ -> Ok cs
+  | Err _ -> (
+      match cs with
+      | [] -> Err "Cannot unblock further"
+      | Block l :: xs -> (
+          match unblock_for c l with
+          | Ok l' -> Ok (l' `L.append` xs)
+          | Err r -> (
+              xs' <-- unblock_for c xs;
+              return (Block l :: xs')
+            )
+        )
+      | x :: xs ->
+        xs' <-- unblock_for c xs;
+        return (x :: xs')
+    )
 
 let rec reordering_allowed (c1 c2 : codes) :
   Tot pbool
@@ -1606,7 +1620,7 @@ let rec reordering_allowed (c1 c2 : codes) :
         | Block l1, Block l2 ->
           reordering_allowed l1 l2 &&. reordering_allowed t1 t2
         | _ -> (
-            match unblock_once c1 with
+            match unblock_for h2 c1 with
             | Ok c1' ->
               reordering_allowed c1' c2 (* TODO: Handle IfElse and While specially too? *)
             | Err _ -> Err reason
@@ -1634,7 +1648,7 @@ let rec perform_reordering (c1 c2 : codes) :
           assert (eq_code (Block (perform_reordering l1 l2)) (Block l2)); (* OBSERVE *)
           Block (perform_reordering l1 l2) :: perform_reordering t1 t2
         | _ ->
-          perform_reordering (Ok?.v (unblock_once c1)) c2
+          perform_reordering (Ok?.v (unblock_for h2 c1)) c2
       )
 
 /// If there are two sequences of instructions that can be transformed
@@ -1690,21 +1704,39 @@ let rec lemma_machine_eval_codes_block_to_append (c1 c2 : codes) (fuel:nat) (s:m
       lemma_machine_eval_codes_block_to_append xs c2 fuel s1
 #pop-options
 
-let rec lemma_unblock_once (c : codes) (fuel:nat) (s:machine_state) :
+let rec lemma_unblock_for (c:code) (cs:codes) (fuel:nat) (s:machine_state) :
   Lemma
-    (requires (Ok? (unblock_once c)))
+    (requires (Ok? (unblock_for c cs)))
     (ensures (
-        let Ok c' = unblock_once c in
-        machine_eval_codes c fuel s == machine_eval_codes c' fuel s)) =
-  match c with
-  | Block x :: xs -> (
-      lemma_machine_eval_codes_block_to_append x xs fuel s
-    )
-  | x :: xs -> (
-      match machine_eval_code x fuel s with
-      | None -> ()
-      | Some s1 ->
-        lemma_unblock_once xs fuel s1
+        let Ok cs' = unblock_for c cs in
+        machine_eval_codes cs fuel s == machine_eval_codes cs' fuel s)) =
+  match find_code c cs with
+  | Ok _ -> ()
+  | Err _ -> (
+      match cs with
+      | Block l :: xs -> (
+          match unblock_for c l with
+          | Ok l' -> (
+              lemma_unblock_for c l fuel s;
+              assert (machine_eval_code (Block l) fuel s == machine_eval_code (Block l') fuel s);
+              assert (machine_eval_codes (Block l :: xs) fuel s == machine_eval_codes (Block l' :: xs) fuel s);
+              assert (machine_eval_codes cs fuel s == machine_eval_codes (Block l' :: xs) fuel s);
+              lemma_machine_eval_codes_block_to_append l' xs fuel s;
+              assert (machine_eval_codes cs fuel s == machine_eval_codes (l' `L.append` xs) fuel s)
+            )
+          | Err _ -> (
+              match machine_eval_code (Block l) fuel s with
+              | None -> ()
+              | Some s1 ->
+                lemma_unblock_for c xs fuel s1
+            )
+        )
+      | x :: xs -> (
+          match machine_eval_code x fuel s with
+          | None -> ()
+          | Some s1 ->
+            lemma_unblock_for c xs fuel s1
+        )
     )
 
 let rec lemma_reordering (c1 c2 : codes) (fuel:nat) (s1 : machine_state) :
@@ -1759,6 +1791,6 @@ let rec lemma_reordering (c1 c2 : codes) (fuel:nat) (s1 : machine_state) :
           assert (machine_eval_codes (perform_reordering c1 c2) fuel s1 == machine_eval_codes (perform_reordering t1 t2) fuel s1'');
           assert (Some s2'' == machine_eval_codes (perform_reordering c1 c2) fuel s1)
         | _ ->
-          lemma_unblock_once c1 fuel s1;
-          lemma_reordering (Ok?.v (unblock_once c1)) c2 fuel s1
+          lemma_unblock_for h2 c1 fuel s1;
+          lemma_reordering (Ok?.v (unblock_for h2 c1)) c2 fuel s1
       )
