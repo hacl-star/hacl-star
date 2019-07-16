@@ -28,11 +28,11 @@ module Loops = Lib.LoopCombinators
 #reset-options "--z3rlimit 200 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq'"
 
 val br: i:size_nat -> x:nat{x<pow2 i} -> y:nat{y<pow2 i}
-let br i x = 
+let br i x =
   let v = UInt.to_vec #i x in
   let vbr = Seq.createi i (fun p -> (index #_ #i v (i-1-p))) in
   UInt.from_vec #i vbr
-  
+
 val br_involutive: i:size_nat -> x:nat{x<pow2 i} -> Lemma (br i (br i x) = x)
 
 let br_involutive i x =
@@ -70,11 +70,11 @@ let reorg_involutive #a #n i p =
   in FStar.Classical.forall_intro customlemma;
   eq_intro p' p;
   eq_elim p' p
-  
+
 val split_seq:
    #a:Type0
    -> #n:size_nat{n%2=0}
-   -> p:lib_poly a n 
+   -> p:lib_poly a n
    -> Tot (p':((lib_poly a (n / 2)) & (lib_poly a (n / 2))){let (peven,podd)=p' in forall(k:nat{k < n / 2}). peven.[k] == p.[2*k] /\ podd.[k] == p.[2*k+1]})
 
 let split_seq #a #n p =
@@ -86,7 +86,7 @@ val join_seq:
   #a:Type0
   -> #[tcresolve ()] r:ring a
   -> #n:size_nat{n%2=0}
-  -> peven:lib_poly a (n/2) 
+  -> peven:lib_poly a (n/2)
   -> podd:lib_poly a (n/2)
   -> p:lib_poly a n{forall(k:nat{k<n/2}). p.[2*k] == peven.[k] /\ p.[2*k+1] == podd.[k]}
 
@@ -96,7 +96,7 @@ let join_seq #a [|ring a|] #n peven podd =
   let p = createi n f in
   let customprop (k:nat{k<n/2}) : Type0 = ((==) #a p.[2*k] peven.[k] /\ (==) #a p.[2*k+1] podd.[k]) in
   let customlemma (k:nat{k<n/2}) : Lemma (customprop k) =
-    let m = add_ag.g.m in
+    let m = (add_ag #a).g.m in
     //assert (p.[2*k] == peven.[k]);
     cancel_mul_mod k 2;
     lemma_repeat_op_zero #a one;
@@ -118,11 +118,11 @@ let join_seq #a [|ring a|] #n peven podd =
   FStar.Classical.forall_intro customlemma;
   p
 
-val lemma_split_join: 
+val lemma_split_join:
   #a:Type0
   -> #[tcresolve ()] r:ring a
   -> #n:size_nat{n%2=0}
-  -> p:lib_poly a n 
+  -> p:lib_poly a n
   -> Lemma (let peven,podd = split_seq p in join_seq peven podd == p)
 
 let lemma_split_join #a [| ring a |] #n p =
@@ -144,7 +144,7 @@ let lemma_split_join #a [| ring a |] #n p =
       p.[2*i];
 	== {}
       p.[k];
-    } end else 
+    } end else
     begin assert (k=2*i+1);
     calc (==) {
       p'.[k];
@@ -179,22 +179,65 @@ let lemma_join_split #a [| ring a |] #n p1 p2 =
   eq_intro p2 podd;
   eq_elim p2 podd
 
+val lib_ntt:
+  #a:Type0
+  -> #[tcresolve ()] r:ring a
+  -> #n:size_nat{n%2=0}
+  -> i:size_nat{pow2 i = n/2}
+  -> zeta:a
+  -> p:lib_poly a n
+  -> Tot (p':lib_poly a n)
 
-let lib_ntt #a [| ring a |] #n i zeta p = 
+let lib_ntt #a [| ring a |] #n i zeta p =
   let (peven, podd) = split_seq p in
   join_seq (reorg i (Lib.Poly.NTT.lib_ntt (exp #a zeta 2) zeta peven)) (reorg i (Lib.Poly.NTT.lib_ntt (exp #a zeta 2) zeta podd))
 
 
 //let lib_ntt_lemma #n #m omega psi p p' = ()
 
-let lib_nttinv #a [| ring a |] #n i halfninv zetainv p = 
+val lib_nttinv:
+  #a:Type0
+  -> #[tcresolve ()] r:ring a
+  -> #n:size_nat{n%2=0}
+  -> i:size_nat{pow2 i = n/2}
+  -> halfninv:a
+  -> zetainv:a
+  -> (p:lib_poly a n)
+  -> Tot (p':lib_poly a n)
+
+
+let lib_nttinv #a [| ring a |] #n i halfninv zetainv p =
   let (peven, podd) = split_seq p in
   join_seq (Lib.Poly.NTT.lib_nttinv halfninv (exp #a zetainv 2) zetainv (reorg i peven)) (Lib.Poly.NTT.lib_nttinv halfninv (exp #a zetainv 2) zetainv (reorg i podd))
 
 //let lib_nttinv_lemma #n #m ninv omegainv psiinv p p' = ()
 
-  
+
 #reset-options "--z3rlimit 200 --max_fuel 1 --max_ifuel 1 --using_facts_from '* -FStar.Seq'"
+
+val lib_ntt_inversion_lemma1:
+  #a:Type0
+  -> #[tcresolve ()] r:ring a
+  -> #n:size_nat{n%2=0}
+  -> i:size_nat{pow2 i = n/2}
+  -> halfninv:a{mul halfninv (repeat_plus one (n/2)) == one}
+  -> zeta:a{exp zeta n == one /\ (forall (nn:nat{nn<n}). (exp zeta nn == one ==> nn = 0) /\ (~(is_invertible(minus (exp zeta nn) one)) ==> nn = 0))}
+  -> zetainv:a{mul zetainv zeta == one /\ mul zeta zetainv == one}
+  -> p:lib_poly a n
+  -> Lemma(lib_nttinv i halfninv zetainv (lib_ntt i zeta p) == p)
+
+val lib_ntt_inversion_lemma2:
+  #a:Type0
+  -> #[tcresolve ()] r:ring a
+  -> #n:size_nat{n%2=0}
+  -> i:size_nat{pow2 i = n/2}
+  -> halfninv:a{mul halfninv (repeat_plus one (n/2)) == one}
+  -> zeta:a{exp zeta n == one /\ (forall (nn:nat{nn<n}). (exp zeta nn == one ==> nn = 0) /\ (~(is_invertible(minus (exp zeta nn) one)) ==> nn = 0))}
+  -> zetainv:a{mul zetainv zeta == one /\ mul zeta zetainv == one}
+  -> p:lib_poly a n
+  -> Lemma(lib_ntt i zeta (lib_nttinv i halfninv zetainv p) == p)
+
+val lib_ntt_ring : (#a:Type0) -> (#[tcresolve ()] r:ring a) -> (#n:size_nat{n%2=0}) -> (i:size_nat{pow2 i = n/2}) -> (zeta:a{forall (x:a). mul x zeta == mul zeta x}) -> ring (lib_poly a n)
 
 
 let lib_ntt_inversion_lemma1 #a [| ring a |] #n i halfninv zeta zetainv p =
@@ -220,9 +263,9 @@ let lib_ntt_inversion_lemma1 #a [| ring a |] #n i halfninv zeta zetainv p =
   eq_elim p1' peven';
   eq_intro p2' podd';
   eq_elim p2' podd';
-  
+
   lemma_exp_exp #a zeta 2 (n/2);
-  assert (exp zeta2 (n/2) == one);  
+  assert (exp zeta2 (n/2) == one);
   let customprop (nn:nat{nn<(n/2)}) : Type0 = (exp #a zeta2 nn == one ==> nn = 0) /\ ((~(is_invertible(minus (exp #a zeta2 nn) one)) ==> nn = 0)) in
   let customlemma (nn:nat{nn<(n/2)}) : Lemma (customprop nn) =
      lemma_exp_exp #a zeta 2 (nn)
@@ -230,8 +273,8 @@ let lib_ntt_inversion_lemma1 #a [| ring a |] #n i halfninv zeta zetainv p =
   FStar.Classical.forall_intro customlemma;
   lemma_exp_inv zeta zetainv 2;
   lib_ntt_inversion_lemma1 halfninv zeta2 zetainv2 zeta zetainv peven;
-  lib_ntt_inversion_lemma1 halfninv zeta2 zetainv2 zeta zetainv podd; 
-  assert(peven == peven'); 
+  lib_ntt_inversion_lemma1 halfninv zeta2 zetainv2 zeta zetainv podd;
+  assert(peven == peven');
   assert(podd == podd');
 
   lemma_split_join p;
@@ -265,7 +308,7 @@ let lib_ntt_inversion_lemma2 #a [| ring a |] #n i halfninv zeta zetainv p =
   eq_elim p2' podd';
 
   lemma_exp_exp #a zeta 2 (n/2);
-  assert (exp zeta2 (n/2) == one);  
+  assert (exp zeta2 (n/2) == one);
   let customprop (nn:nat{nn<(n/2)}) : Type0 = (exp #a zeta2 nn == one ==> nn = 0) /\ ((~(is_invertible(minus (exp #a zeta2 nn) one)) ==> nn = 0)) in
   let customlemma (nn:nat{nn<(n/2)}) : Lemma (customprop nn) =
      lemma_exp_exp #a zeta 2 (nn)
@@ -273,15 +316,15 @@ let lib_ntt_inversion_lemma2 #a [| ring a |] #n i halfninv zeta zetainv p =
   FStar.Classical.forall_intro customlemma;
   lemma_exp_inv zetainv zeta 2;
   lib_ntt_inversion_lemma2 halfninv zeta2 zetainv2 zeta zetainv (reorg i peven);
-  lib_ntt_inversion_lemma2 halfninv zeta2 zetainv2 zeta zetainv (reorg i podd); 
-  assert(reorg i peven == peven'); 
+  lib_ntt_inversion_lemma2 halfninv zeta2 zetainv2 zeta zetainv (reorg i podd);
+  assert(reorg i peven == peven');
   assert(reorg i podd == podd');
 
   lemma_split_join p;
 
   reorg_involutive i peven;
   reorg_involutive i podd;
-  
+
   eq_intro p (join_seq (reorg i peven') (reorg i podd'));
   eq_elim p (join_seq (reorg i peven') (reorg i podd'));
 
@@ -306,7 +349,7 @@ val lib_ntt_zero:
   -> #n:size_nat{n%2=0}
   -> p:lib_poly a n
 
-let lib_ntt_zero #a [| ring a |] #n = 
+let lib_ntt_zero #a [| ring a |] #n =
   Lib.Arithmetic.Group.Sequence.id_lseq #a #add_ag.g.m #n
 
 val lib_ntt_lemma_plus_assoc:
@@ -417,7 +460,7 @@ val lib_ntt_mul:
   -> p1:lib_poly a n
   -> p2:lib_poly a n
   -> p:lib_poly a n
-  
+
 let lib_ntt_mul #a [| ring a |] #n i zeta p1 p2 =
   let plus = plus #a in
   let mul = mul #a in
@@ -427,6 +470,36 @@ let lib_ntt_mul #a [| ring a |] #n i zeta p1 p2 =
   let g (k:nat{k<n/2}) = plus (mul p1odd.[k] p2even.[k]) (mul p1even.[k] p2odd.[k]) in
   let l = createi (n/2) (fun x -> x) in
   join_seq (Seq.map f l) (Seq.map g l)
+
+val lib_ntt_mul_even_lemma_instantiate:
+  #a:Type0
+  -> #[tcresolve ()] r:ring a
+  -> #n:size_nat{n%2=0}
+  -> i:size_nat{pow2 i =(n/2)}
+  -> zeta:a
+  -> p1:lib_poly a n
+  -> p2:lib_poly a n
+  -> p:lib_poly a n
+  -> k:size_nat{k<n /\ k%2=0}
+  -> Lemma (requires (p == lib_ntt_mul i zeta p1 p2)) (ensures (p.[k] == plus #a (mul p1.[k] p2.[k]) (mul (mul p1.[k+1] p2.[k+1]) (exp zeta (2*(br i (k/2))+1)))))
+
+let lib_ntt_mul_even_lemma_instantiate #a [| ring a |] #n i zeta p1 p2 p k =
+  lemma_div_exact k 2
+
+val lib_ntt_mul_odd_lemma_instantiate:
+  #a:Type0
+  -> #[tcresolve ()] r:ring a
+  -> #n:size_nat{n%2=0}
+  -> i:size_nat{pow2 i =(n/2)}
+  -> zeta:a
+  -> p1:lib_poly a n
+  -> p2:lib_poly a n
+  -> p:lib_poly a n
+  -> k:size_nat{k<n /\ k%2=1}
+  -> Lemma (requires (p == lib_ntt_mul i zeta p1 p2)) (ensures (p.[k] == plus #a (mul p1.[k] p2.[k-1]) (mul p1.[k-1] p2.[k])))
+
+let lib_ntt_mul_odd_lemma_instantiate #a [| ring a |] #n i zeta p1 p2 p k =
+  euclidean_division_definition k 2
 
 val lib_ntt_one:
   #a:Type0
@@ -450,7 +523,7 @@ val lib_ntt_lemma_mul_assoc:
   -> p3:lib_poly a n
   -> Lemma (lib_ntt_mul i zeta (lib_ntt_mul i zeta p1 p2) p3 == lib_ntt_mul i zeta p1 (lib_ntt_mul i zeta p2 p3))
 
-let lib_ntt_lemma_mul_assoc #a [| ring a |] #n i zeta p1 p2 p3 = 
+let lib_ntt_lemma_mul_assoc #a [| ring a |] #n i zeta p1 p2 p3 =
   let rec commut_zeta (x:a) (j:nat) : Lemma (ensures mul #a x (exp zeta j) == mul #a (exp zeta j) x) (decreases j) =
     if (j=0) then
       (lemma_exp_zero #a zeta; lemma_one1 x; lemma_one2 x)
@@ -472,7 +545,7 @@ let lib_ntt_lemma_mul_assoc #a [| ring a |] #n i zeta p1 p2 p3 =
   let lemma_distr_left = lemma_distr_left #a in
   let customprop (k:nat{k<n}) : Type0 = (p12_3.[k] == p1_23.[k]) in
   let customlemma (k:nat{k<n}) : Lemma (customprop k) =
-  euclidean_division_definition k 2; 
+  euclidean_division_definition k 2;
   if (k%2 = 0) then begin
     let k' = 2*(br i (k/2)) in
     assert(k == (k/2)*2);
@@ -482,16 +555,16 @@ let lib_ntt_lemma_mul_assoc #a [| ring a |] #n i zeta p1 p2 p3 =
     lemma_distr_right p3.[k+1] (mul p1.[k+1] p2.[k]) (mul p1.[k] p2.[k+1]);
     lemma_distr_right (exp zeta (k'+1)) (mul (mul p1.[k+1] p2.[k]) p3.[k+1]) (mul (mul p1.[k] p2.[k+1]) p3.[k+1]);
     assert(p12_3.[k] == plus #a (plus #a (mul (mul p1.[k] p2.[k]) p3.[k]) (mul (mul (mul p1.[k+1] p2.[k+1]) (exp zeta (k'+1))) p3.[k])) (plus #a (mul (mul (mul p1.[k+1] p2.[k]) p3.[k+1]) (exp zeta (k'+1))) (mul (mul (mul p1.[k] p2.[k+1]) p3.[k+1]) (exp zeta (k'+1)))));
-    
+
     lemma_mul_assoc p1.[k] p2.[k] p3.[k];
-    
+
     lemma_mul_assoc (mul p1.[k+1] p2.[k+1]) (exp zeta (k'+1)) p3.[k];
     commut_zeta p3.[k] (k'+1);
     lemma_mul_assoc (mul p1.[k+1] p2.[k+1]) p3.[k] (exp zeta (k'+1));
     lemma_mul_assoc p1.[k+1] p2.[k+1] p3.[k];
-    
+
     lemma_mul_assoc p1.[k+1] p2.[k] p3.[k+1];
-    
+
     lemma_mul_assoc p1.[k] p2.[k+1] p3.[k+1];
     lemma_mul_assoc p1.[k] (mul p2.[k+1] p3.[k+1]) (exp zeta (k'+1));
 
@@ -539,7 +612,7 @@ let lib_ntt_lemma_mul_assoc #a [| ring a |] #n i zeta p1 p2 p3 =
   eq_intro p12_3 p1_23;
   eq_elim p12_3 p1_23
 
-#reset-options "--z3rlimit 200 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq'"
+#reset-options "--z3rlimit 1000 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq'"
 
 val lib_ntt_lemma_one1:
   #a:Type0
@@ -557,21 +630,23 @@ let lib_ntt_lemma_one1 #a [| ring a |] #n i zeta p =
   let customlemma (k:nat{k<n}) : Lemma (customprop k) =
     if(k%2=0) then begin
       let k' = 2*(br i (k/2)) in
+      lib_ntt_mul_even_lemma_instantiate i zeta lib_ntt_one p p' k;
       lemma_one1 #a p.[k];
       lemma_zero_absorb1 #a p.[k+1];
       lemma_zero_absorb1 #a (exp zeta (k'+1));
       lemma_zero2 #a p.[k]
       end
     else begin
+      lib_ntt_mul_odd_lemma_instantiate i zeta lib_ntt_one p p' k;
       lemma_zero_absorb1 #a p.[k-1];
       lemma_one1 #a p.[k];
       lemma_zero1 #a p.[k]
-      end    
+      end
   in FStar.Classical.forall_intro customlemma;
   eq_intro p' p;
   eq_elim p' p
 
- 
+
 val lib_ntt_lemma_one2:
   #a:Type0
   -> #[tcresolve ()] r: ring a
@@ -587,6 +662,7 @@ let lib_ntt_lemma_one2 #a [| ring a |] #n i zeta p =
   let customprop (k:nat{k<n}) : Type0 = (p'.[k] == p.[k]) in
   let customlemma (k:nat{k<n}) : Lemma (customprop k) =
     if(k%2=0) then begin
+      lib_ntt_mul_even_lemma_instantiate i zeta p lib_ntt_one p' k;
       let k' = 2*(br i (k/2)) in
       lemma_one2 #a p.[k];
       lemma_zero_absorb2 #a p.[k+1];
@@ -594,6 +670,7 @@ let lib_ntt_lemma_one2 #a [| ring a |] #n i zeta p =
       lemma_zero2 #a p.[k]
       end
     else begin
+      lib_ntt_mul_odd_lemma_instantiate i zeta p lib_ntt_one p' k;
       lemma_zero_absorb2 #a p.[k-1];
       lemma_one2 #a p.[k];
       lemma_zero2 #a p.[k]
@@ -632,6 +709,7 @@ let lib_ntt_lemma_distr_left #a [| ring a |] #n i zeta p1 p2 p3 =
   let customlemma (k:nat{k<n}) : Lemma (customprop k) =
    if(k%2=0) then begin
       let k' = 2*(br i (k/2)) in
+      lib_ntt_mul_even_lemma_instantiate i zeta p1 (lib_ntt_plus p2 p3) p1_23 k;
       assert(p1_23.[k] == plus #a (mul p1.[k] (plus p2.[k] p3.[k])) (mul (mul p1.[k+1] (plus p2.[k+1] p3.[k+1])) (exp zeta (k'+1))));
       lemma_distr_left #a p1.[k] p2.[k] p3.[k];
       lemma_distr_left #a p1.[k+1] p2.[k+1] p3.[k+1];
@@ -644,16 +722,21 @@ let lib_ntt_lemma_distr_left #a [| ring a |] #n i zeta p1 p2 p3 =
       lemma_plus_swap #a (mul p1.[k] p3.[k]) (mul (mul p1.[k+1] p2.[k+1]) (exp zeta (k'+1)));
       assert(p1_23.[k] == plus #a (plus (mul p1.[k] p2.[k]) (plus (mul (mul p1.[k+1] p2.[k+1]) (exp zeta (k'+1))) (mul p1.[k] p3.[k]))) (mul (mul p1.[k+1] p3.[k+1]) (exp zeta (k'+1))));
       lemma_plus_assoc #a (mul p1.[k] p2.[k]) (mul (mul p1.[k+1] p2.[k+1]) (exp zeta (k'+1))) (mul p1.[k] p3.[k]);
-      lemma_plus_assoc #a (plus (mul p1.[k] p2.[k]) (mul (mul p1.[k+1] p2.[k+1]) (exp zeta (k'+1)))) (mul p1.[k] p3.[k]) (mul (mul p1.[k+1] p3.[k+1]) (exp zeta (k'+1)))
+      lemma_plus_assoc #a (plus (mul p1.[k] p2.[k]) (mul (mul p1.[k+1] p2.[k+1]) (exp zeta (k'+1)))) (mul p1.[k] p3.[k]) (mul (mul p1.[k+1] p3.[k+1]) (exp zeta (k'+1)));
+      lib_ntt_mul_even_lemma_instantiate i zeta p1 p2 (lib_ntt_mul i zeta p1 p2) k;
+      lib_ntt_mul_even_lemma_instantiate i zeta p1 p3 (lib_ntt_mul i zeta p1 p3) k
     end
     else begin
+      lib_ntt_mul_odd_lemma_instantiate i zeta p1 (lib_ntt_plus p2 p3) p1_23 k;
       lemma_distr_left #a p1.[k] p2.[k-1] p3.[k-1];
       lemma_distr_left #a p1.[k-1] p2.[k] p3.[k];
       lemma_plus_assoc #a (plus (mul p1.[k] p2.[k-1]) (mul p1.[k] p3.[k-1])) (mul p1.[k-1] p2.[k]) (mul p1.[k-1] p3.[k]);
       lemma_plus_assoc #a (mul p1.[k] p2.[k-1]) (mul p1.[k] p3.[k-1]) (mul p1.[k-1] p2.[k]);
       lemma_plus_swap #a (mul p1.[k] p3.[k-1]) (mul p1.[k-1] p2.[k]);
       lemma_plus_assoc #a (mul p1.[k] p2.[k-1]) (mul p1.[k-1] p2.[k]) (mul p1.[k] p3.[k-1]);
-      lemma_plus_assoc #a (plus (mul p1.[k] p2.[k-1]) (mul p1.[k-1] p2.[k])) (mul p1.[k] p3.[k-1]) (mul p1.[k-1] p3.[k])
+      lemma_plus_assoc #a (plus (mul p1.[k] p2.[k-1]) (mul p1.[k-1] p2.[k])) (mul p1.[k] p3.[k-1]) (mul p1.[k-1] p3.[k]);
+      lib_ntt_mul_odd_lemma_instantiate i zeta p1 p2 (lib_ntt_mul i zeta p1 p2) k;
+      lib_ntt_mul_odd_lemma_instantiate i zeta p1 p3 (lib_ntt_mul i zeta p1 p3) k
     end
   in FStar.Classical.forall_intro customlemma;
   eq_intro p1_23 p12_13;
@@ -673,12 +756,13 @@ val lib_ntt_lemma_distr_right:
   -> Lemma (lib_ntt_mul i zeta (lib_ntt_plus p2 p3) p1 == lib_ntt_plus (lib_ntt_mul i zeta p2 p1) (lib_ntt_mul i zeta p3 p1))
 
 let lib_ntt_lemma_distr_right #a [| ring a |] #n i zeta p1 p2 p3 =
-  let p23_1 = lib_ntt_mul i zeta (lib_ntt_plus p2 p3) p1 in
-  let p21_31 = lib_ntt_plus (lib_ntt_mul i zeta p2 p1) (lib_ntt_mul i zeta p3 p1) in
-  let customprop (k:nat{k<n}) : Type0 = (p23_1.[k] == p21_31.[k]) in
+  let p23_1 : lib_poly a n = lib_ntt_mul i zeta (lib_ntt_plus p2 p3) p1 in
+  let p21_31 : lib_poly a n = lib_ntt_plus (lib_ntt_mul i zeta p2 p1) (lib_ntt_mul i zeta p3 p1) in
+  let customprop (k:size_nat{k<n}) : GTot Type0 = (p23_1.[k] == p21_31.[k]) in
   let customlemma (k:nat{k<n}) : Lemma (customprop k) =
     if(k%2=0) then begin
       let k' = 2*(br i (k/2)) in
+      lib_ntt_mul_even_lemma_instantiate i zeta (lib_ntt_plus p2 p3) p1 p23_1 k;
       assert(p23_1.[k] == plus #a (mul (plus p2.[k] p3.[k]) p1.[k]) (mul (mul (plus p2.[k+1] p3.[k+1]) p1.[k+1]) (exp zeta (k'+1))));
       lemma_distr_right #a p1.[k] p2.[k] p3.[k];
       lemma_distr_right #a p1.[k+1] p2.[k+1] p3.[k+1];
@@ -690,16 +774,21 @@ let lib_ntt_lemma_distr_right #a [| ring a |] #n i zeta p1 p2 p3 =
       assert(p23_1.[k] == plus #a (plus (mul p2.[k] p1.[k]) (plus (mul p3.[k] p1.[k]) (mul (mul p2.[k+1] p1.[k+1]) (exp zeta (k'+1))))) (mul (mul p3.[k+1] p1.[k+1]) (exp zeta (k'+1))));
       lemma_plus_swap #a (mul p3.[k] p1.[k]) (mul (mul p2.[k+1] p1.[k+1]) (exp zeta (k'+1)));
       lemma_plus_assoc #a (mul p2.[k] p1.[k]) (mul (mul p2.[k+1] p1.[k+1]) (exp zeta (k'+1))) (mul p3.[k] p1.[k]);
-      lemma_plus_assoc #a (plus (mul p2.[k] p1.[k]) (mul (mul p2.[k+1] p1.[k+1]) (exp zeta (k'+1)))) (mul p3.[k] p1.[k]) (mul (mul p3.[k+1] p1.[k+1]) (exp zeta (k'+1)))
+      lemma_plus_assoc #a (plus (mul p2.[k] p1.[k]) (mul (mul p2.[k+1] p1.[k+1]) (exp zeta (k'+1)))) (mul p3.[k] p1.[k]) (mul (mul p3.[k+1] p1.[k+1]) (exp zeta (k'+1)));
+      lib_ntt_mul_even_lemma_instantiate i zeta p2 p1 (lib_ntt_mul i zeta p2 p1) k;
+      lib_ntt_mul_even_lemma_instantiate i zeta p3 p1 (lib_ntt_mul i zeta p3 p1) k
     end
     else begin
+      lib_ntt_mul_odd_lemma_instantiate i zeta (lib_ntt_plus p2 p3) p1 p23_1 k;
       lemma_distr_right #a p1.[k-1] p2.[k] p3.[k];
       lemma_distr_right #a p1.[k] p2.[k-1] p3.[k-1];
       lemma_plus_assoc #a (plus (mul p2.[k] p1.[k-1]) (mul p3.[k] p1.[k-1])) (mul p2.[k-1] p1.[k]) (mul p3.[k-1] p1.[k]);
       lemma_plus_assoc #a (mul p2.[k] p1.[k-1]) (mul p3.[k] p1.[k-1]) (mul p2.[k-1] p1.[k]);
       lemma_plus_swap #a (mul p3.[k] p1.[k-1]) (mul p2.[k-1] p1.[k]);
       lemma_plus_assoc #a (mul p2.[k] p1.[k-1]) (mul p2.[k-1] p1.[k]) (mul p3.[k] p1.[k-1]);
-      lemma_plus_assoc #a (plus (mul p2.[k] p1.[k-1]) (mul p2.[k-1] p1.[k])) (mul p3.[k] p1.[k-1]) (mul p3.[k-1] p1.[k])
+      lemma_plus_assoc #a (plus (mul p2.[k] p1.[k-1]) (mul p2.[k-1] p1.[k])) (mul p3.[k] p1.[k-1]) (mul p3.[k-1] p1.[k]);
+      lib_ntt_mul_odd_lemma_instantiate i zeta p2 p1 (lib_ntt_mul i zeta p2 p1) k;
+      lib_ntt_mul_odd_lemma_instantiate i zeta p3 p1 (lib_ntt_mul i zeta p3 p1) k
     end
   in FStar.Classical.forall_intro customlemma;
   eq_intro p23_1 p21_31;
@@ -730,6 +819,94 @@ let lib_nttinv_mul #a [| ring a |] #n i halfninv zeta zetainv p1 p2 =
   lib_nttinv i halfninv zetainv (lib_ntt_mul i zeta (lib_ntt i zeta p1) (lib_ntt i zeta p2))
 
 (* *************************************************************************** *) 
+
+val lib_nttinv_mul_even_lemma:
+  #a:Type0
+  -> #[tcresolve ()] r:ring a
+  -> #n:size_nat{n%2=0}
+  -> i:size_nat{pow2 i = (n/2)}
+  //-> halfninv:a{mul halfninv (repeat_plus one (n/2)) == one}
+  -> zeta:a//{exp zeta n == one /\ (forall (nn:nat{nn<n}). (exp zeta nn == one ==> nn = 0) /\ (~(is_invertible(minus (exp zeta nn) one)) ==> nn = 0))}
+  //-> zetainv:a{mul zetainv zeta == one /\ mul zeta zetainv == one}
+  -> p1:lib_poly a n
+  -> p2:lib_poly a n
+  -> j:size_nat{j<n/2}
+  -> Lemma ((lib_ntt_mul i zeta (lib_ntt i zeta p1) (lib_ntt i zeta p2)).[ 2 * br i j] == plus #a (mul p1.[2 * br i j] p2.[2*br i j]) (mul (mul p1.[2 * (br i j) + 1] p2.[2*(br i j)+1]) (exp zeta (2*j+1))))
+
+#reset-options "--z3rlimit 500 --max_fuel 1 --max_ifuel 1 --using_facts_from '* -FStar.Seq'"
+
+val lib_nttinv_mul_even_seq1_:
+  #a:Type0
+  -> #[tcresolve ()] r:ring a
+  -> #n:size_nat{n%2=0}
+  //-> i:size_nat{pow2 i = (n/2)}
+  -> zeta:a
+  -> p1:lib_poly a n
+  -> p2:lib_poly a n
+  -> j:size_nat{j<n/2}
+  -> l:size_nat{l<n/2}
+  -> Tot (lib_poly a (n/2))
+
+let lib_nttinv_mul_even_seq1_ #a [|ring a |] #n zeta p1 p2 j l =
+  Seq.createi (n/2) (fun k -> (mul #a (mul p1.[2*l] p2.[2*k]) (exp zeta ((2*j+1)*(l+k)))))
+
+val lib_nttinv_mul_even_seq1:
+  #a:Type0
+  -> #[tcresolve ()] r:ring a
+  -> #n:size_nat{n%2=0}
+  //-> i:size_nat{pow2 i = (n/2)}
+  -> zeta:a
+  -> p1:lib_poly a n
+  -> p2:lib_poly a n
+  -> j:size_nat{j<n/2}
+  -> Tot (lib_poly a (n/2))
+
+let lib_nttinv_mul_even_seq1 #a [|ring a |] #n zeta p1 p2 j =
+Seq.createi (n/2) (fun l -> sum_n #a #add_ag.g.m (lib_nttinv_mul_even_seq1_ zeta p1 p2 j l))
+
+#reset-options "--z3rlimit 1000 --max_fuel 1 --max_ifuel 1 --using_facts_from '* -FStar.Seq'"
+let mul_nat_nat_is_nat (a:nat) (b:nat) : Lemma (a*b >=0) = ()
+
+let lib_nttinv_mul_even_lemma #a [|ring a |] #n i zeta p1 p2 j =
+  //let sum_n = sum_n #a #(add_ag #a).g.m #(n/2) in
+  let m = (add_ag #a).g.m in
+  let q = (lib_ntt_mul i zeta (lib_ntt i zeta p1) (lib_ntt i zeta p2)) in
+  let plus = plus #a in
+  let mul = mul #a in
+  let p1even,p1odd = split_seq p1 in
+  let p2even,p2odd = split_seq p2 in
+  let p1even_ = (Lib.Poly.NTT.lib_ntt (exp # a zeta 2) zeta p1even) in
+  let p1odd_ = (Lib.Poly.NTT.lib_ntt (exp # a zeta 2) zeta p1odd) in
+  let p2even_ = (Lib.Poly.NTT.lib_ntt (exp # a zeta 2) zeta p2even) in
+  let p2odd_ = (Lib.Poly.NTT.lib_ntt (exp # a zeta 2) zeta p2odd) in
+  lemma_join_split (reorg i p1even_) (reorg i p1odd_);
+  lemma_join_split (reorg i p2even_) (reorg i p2odd_);
+  br_involutive i j;
+  lib_ntt_mul_even_lemma_instantiate i zeta (lib_ntt i zeta p1) (lib_ntt i zeta p2) q (2 * br i j);
+  assert(q.[2 * br i j] == plus (mul p1even_.[j] p2even_.[j]) (mul (mul p1odd_.[j] p2odd_.[j]) (exp zeta (2*j+1))));
+  Lib.Poly.NTT.lib_ntt_lemma_instantiate (exp #a zeta 2) zeta p1even p1even_ j;
+  //Lib.Poly.NTT.lib_ntt_lemma_instantiate (exp #a zeta 2) zeta p1odd p1odd_ j;
+  Lib.Poly.NTT.lib_ntt_lemma_instantiate (exp #a zeta 2) zeta p2even p2even_ j;
+  //Lib.Poly.NTT.lib_ntt_lemma_instantiate (exp #a zeta 2) zeta p2odd p2odd_ j;
+  assert(p1even_.[j] == sum_n #a (Lib.Poly.NTT.lib_ntt_sequence (exp #a zeta 2) zeta p1even j));
+  assert(p2even_.[j] == sum_n #a (Lib.Poly.NTT.lib_ntt_sequence (exp #a zeta 2) zeta p2even j));
+  Lib.Arithmetic.Sums.sum_n_mul_distrib_r_lemma (Lib.Poly.NTT.lib_ntt_sequence (exp #a zeta 2) zeta p1even j) p2even_.[j];
+  let customprop1 (k:size_nat{k<n/2}) : Type0 = ((mul ((Lib.Poly.NTT.lib_ntt_sequence (exp #a zeta 2) zeta p1even j).[k]) p2even_.[k]) == sum_n #a (lib_nttinv_mul_even_seq1_ zeta p1 p2 j k)) in
+  let customlemma1 (k:size_nat{k<n/2}) : Lemma (customprop1 k) =
+    let x = (mul ((Lib.Poly.NTT.lib_ntt_sequence (exp #a zeta 2) zeta p1even j).[k]) p2even_.[k]) in
+    Lib.Poly.NTT.lib_ntt_sequence_instantiate (exp #a zeta 2) zeta p1even (Lib.Poly.NTT.lib_ntt_sequence (exp #a zeta 2) zeta p1even j) j k;
+    assert(x == mul (mul (exp zeta k) (mul p1even.[k] (exp (exp zeta 2) (j*k)))) p2even.[k]); admit();
+    mul_nat_nat_is_nat j k;
+    lemma_exp_exp #a zeta 2 (j*k);
+    let y = mul (exp zeta k) (mul p1even.[k] (exp zeta (2*j*k))) in
+    assert(x == mul y p2even_.[k]);
+    admit()
+  in admit()
+
+(*
+  assert(mul p1even_.[j] p2even_.[j] == (mul (sum_n (mapi (fun k g -> mul (exp zeta k) (mul g (exp (exp #a zeta 2) (j*k)))) p1even)) (sum_n (mapi (fun l g -> mul (exp zeta l) (mul g (exp (exp #a zeta 2) (j*l)))) p2even)))); admit()
+
+  assert(q.[2 * br i j] == plus (mul (sum_n (mapi (fun k g -> mul (exp zeta k) (mul g (exp (exp #a zeta 2) (j*k)))) p1even)) (sum_n (mapi (fun l g -> mul (exp zeta l) (mul g (exp (exp #a zeta 2) (j*l)))) p2even))) (mul (mul (sum_n (mapi (fun k g -> mul (exp zeta k) (mul g (exp (exp #a zeta 2) (j*k)))) p1odd)) (sum_n (mapi (fun l g -> mul (exp zeta l) (mul g (exp (exp #a zeta 2) (j*l)))) p2odd))) (exp zeta (2*j+1)))); admit()
 
 (*#reset-options "--z3rlimit 200 --max_fuel 2 --max_ifuel 2 --using_facts_from '* -FStar.Seq'"
 

@@ -30,18 +30,40 @@ val powers:
   -> o:a
   -> p:lib_poly a n{forall (k:nat{k<n}). p.[k] == exp #a o k}
 
-val sum_nth_root_unity_lemma: 
+val sum_nth_root_unity_lemma:
   #a: Type0
   -> #[tcresolve ()] r: ring a
-  -> n:size_nat 
-  -> o:a{exp o n == one /\ ~(o == one) /\ is_invertible (minus o one)} 
+  -> n:size_nat
+  -> o:a{exp o n == one /\ ~(o == one) /\ is_invertible (minus o one)}
   -> Lemma (sum_n #a #add_ag.g.m (powers n o) == zero)
 
-val lib_ntt: 
+val lib_ntt_sequence:
+  #a: Type0
+  -> #[tcresolve ()] r: ring a
+  -> #n:size_nat
+  -> omega:a
+  -> psi:a
+  -> p:lib_poly a n
+  -> k:size_nat{k<n}
+  -> Tot (p':lib_poly a n)
+
+val lib_ntt_sequence_instantiate:
+  #a: Type0
+  -> #[tcresolve ()] r: ring a
+  -> #n:size_nat
+  -> omega:a
+  -> psi:a
+  -> p:lib_poly a n
+  -> p':lib_poly a n
+  -> k:size_nat{k<n}
+  -> j:size_nat{j<n}
+  -> Lemma (requires p' == lib_ntt_sequence omega psi p k) (ensures p'.[j] == mul #a (exp psi j) (mul p.[j] (exp omega (k*j))))
+
+val lib_ntt:
   #a:Type0
   -> #[tcresolve ()] r: ring a
   -> #n:size_nat
-  -> omega:a 
+  -> omega:a
   -> psi:a
   -> p:lib_poly a n
   -> Tot (p':lib_poly a n)
@@ -49,63 +71,83 @@ val lib_ntt:
 val lib_ntt_lemma_instantiate:
   #a:Type0
   -> #[tcresolve ()] r:ring a
-  -> #n:size_nat 
-  -> omega:a 
+  -> #n:size_nat
+  -> omega:a
   -> psi:a
   -> p:lib_poly a n
   -> p':lib_poly a n{p' == lib_ntt omega psi p}
   -> k:nat{k<n}
-  -> Lemma (p'.[k] == sum_n #a #add_ag.g.m (mapi (fun j g -> mul (exp psi j) (mul g (exp omega (k*j)))) p))
+  -> Lemma (p'.[k] == sum_n #a #add_ag.g.m (lib_ntt_sequence omega psi p k))
 
 val lib_ntt_lemma:
   #a:Type0
   -> #[tcresolve ()] r:ring a
-  -> #n:size_nat 
-  -> omega:a 
+  -> #n:size_nat
+  -> omega:a
   -> psi:a
   -> p:lib_poly a n
   -> p':lib_poly a n{p' == lib_ntt omega psi p}
   -> Lemma (forall (k:nat{k<n}). p'.[k] == sum_n #a #add_ag.g.m (mapi (fun j g -> mul (exp psi j) (mul g (exp omega (k*j)))) p))
 
-val lib_nttinv: 
+val lib_nttinv_sequence:
+  #a: Type0
+  -> #[tcresolve ()] r: ring a
+  -> #n:size_nat
+  -> omegainv:a
+  -> p:lib_poly a n
+  -> k:size_nat{k<n}
+  -> Tot (p':lib_poly a n)
+
+val lib_nttinv_sequence_instantiate:
+  #a: Type0
+  -> #[tcresolve ()] r: ring a
+  -> #n:size_nat
+  -> omegainv:a
+  -> p:lib_poly a n
+  -> p':lib_poly a n
+  -> k:size_nat{k<n}
+  -> j:size_nat{j<n}
+  -> Lemma (requires p' == lib_nttinv_sequence omegainv p k) (ensures p'.[j] == mul #a p.[j] (exp omegainv (k*j)))
+
+val lib_nttinv:
   #a:Type0
   -> #[tcresolve ()] r:ring a
   -> #n:size_nat
   -> ninv:a
-  -> omegainv:a 
+  -> omegainv:a
   -> psiinv:a
-  -> (p:lib_poly a n) 
+  -> (p:lib_poly a n)
   -> Tot (p':lib_poly a n)
 
 val lib_nttinv_lemma_instantiate:
   #a:Type0
   -> #[tcresolve ()] r:ring a
-  -> #n:size_nat 
+  -> #n:size_nat
   -> ninv:a
-  -> omegainv:a 
+  -> omegainv:a
   -> psiinv:a
   -> p:lib_poly a n
   -> p':lib_poly a n{p' == lib_nttinv ninv omegainv psiinv p}
   -> k:nat{k<n}
-  -> Lemma (p'.[k] == mul #a ninv (mul (exp psiinv k) (sum_n #a #add_ag.g.m (mapi (fun j g -> mul g (exp omegainv (k*j))) p)))) 
+  -> Lemma (p'.[k] == mul #a ninv (mul (exp psiinv k) (sum_n #a #add_ag.g.m (lib_nttinv_sequence omegainv p k))))
 
 val lib_nttinv_lemma:
   #a:Type0
   -> #[tcresolve ()] r:ring a
-  -> #n:size_nat 
+  -> #n:size_nat
   -> ninv:a
-  -> omegainv:a 
+  -> omegainv:a
   -> psiinv:a
   -> p:lib_poly a n
   -> p':lib_poly a n{p' == lib_nttinv ninv omegainv psiinv p}
-  -> Lemma (forall (k:nat{k<n}). p'.[k] == mul #a ninv (mul (exp psiinv k) (sum_n #a #add_ag.g.m (mapi (fun j g -> mul g (exp omegainv (k*j))) p)))) 
+  -> Lemma (forall (k:nat{k<n}). p'.[k] == mul #a ninv (mul (exp psiinv k) (sum_n #a #add_ag.g.m (lib_nttinv_sequence omegainv p k))))
 
-val lib_ntt_inversion_lemma1: 
+val lib_ntt_inversion_lemma1:
   #a:Type0
   -> #[tcresolve ()] r:ring a
   -> #n:size_nat
   -> ninv:a{mul ninv (repeat_plus one n) == one}
-  -> omega:a{exp omega n == one /\ (forall (nn:nat{nn<n}). (exp omega nn == one ==> nn = 0) /\ (~(is_invertible(minus (exp omega nn) one)) ==> nn = 0))} 
+  -> omega:a{exp omega n == one /\ (forall (nn:nat{nn<n}). (exp omega nn == one ==> nn = 0) /\ (~(is_invertible(minus (exp omega nn) one)) ==> nn = 0))}
   -> omegainv:a{mul omega omegainv == one}
   -> psi:a
   -> psiinv:a{mul psiinv psi == one}
@@ -113,12 +155,12 @@ val lib_ntt_inversion_lemma1:
   -> Lemma(lib_nttinv ninv omegainv psiinv (lib_ntt omega psi p) == p)
 
 
-val lib_ntt_inversion_lemma2: 
+val lib_ntt_inversion_lemma2:
   #a:Type0
   -> #[tcresolve ()] r:ring a
   -> #n:size_nat
   -> ninv:a{mul ninv (repeat_plus one n) == one}
-  -> omega:a{exp omega n == one /\ (forall (nn:nat{nn<n}). (exp omega nn == one ==> nn = 0) /\ (~(is_invertible(minus (exp omega nn) one)) ==> nn = 0))} 
+  -> omega:a{exp omega n == one /\ (forall (nn:nat{nn<n}). (exp omega nn == one ==> nn = 0) /\ (~(is_invertible(minus (exp omega nn) one)) ==> nn = 0))}
   -> omegainv:a{mul omegainv omega == one}
   -> psi:a
   -> psiinv:a{mul psi psiinv == one}

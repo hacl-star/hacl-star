@@ -144,17 +144,17 @@ let compress d x =
   assert (sint_v xd = sint_v x * pow2 d + (params_q/2));
   let xd_q = division_by_q_int32 xd in
   assert (sint_v xd_q = sint_v xd / params_q);
-  let xd_q16 = to_i16 xd_q in
-  assert (sint_v xd_q16 = sint_v xd_q @%. S16);
-  lemma_mod_sub (sint_v xd_q % pow2 16) (pow2 16) 1;
-  assert (sint_v xd_q16 % pow2 16 = sint_v xd_q % pow2 16);
-  let res = xd_q16 &. mod_mask (size d) in
+  pow2_lt_compat 16 d;
+  assert_norm(pow2 16 < maxint S32);
+  let xd_qd = xd_q &. mod_mask (size d) in
   mod_mask_lemma xd_q (size d);
-  assert(sint_v res = sint_v xd_q16 % pow2 d);
+  assert(sint_v xd_qd = sint_v xd_q % pow2 d);
+  let res = to_i16 xd_qd in
   assert(sint_v res = sint_v xd_q % pow2 d);
   assert(sint_v res >=0 /\ sint_v res < params_q);
   assert(sint_v res < pow2 d);
   compress_lemma d (sint_v x);
+  assert(0<= sint_v xd_q /\ sint_v xd_q <= pow2 d);
   res
 
 #reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq'"
@@ -215,7 +215,7 @@ let sub_lemma1 d x x' c =
 
 val lemma_le_inv: a:nat->b:pos->c:pos{b<=c} -> Lemma (a / b >= a / c)
 
-let lemma_le_inv a b c = 
+let lemma_le_inv a b c =
   calc (<=) {
     (a/c) * b;
       <= {}
@@ -227,7 +227,7 @@ let lemma_le_inv a b c =
 #reset-options "--z3rlimit 300 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq'"
 
 val sub_lemma2: d:size_nat{d > 0 /\ d < 16 /\ pow2 d < params_q} -> x:num -> x':num{sint_v x' == sint_v (decompress d (compress d x))} -> c:num{sint_v c < (pow2 d) /\ sint_v c == sint_v (compress d x) /\ (sint_v c = ((sint_v x * pow2 d + (params_q /2))/params_q)) /\ (sint_v x' * pow2 (d+1) <= 2*params_q * sint_v c + pow2 d)} -> Lemma (let p = (sint_v x' - sint_v x) %+- params_q in let b = (params_q + pow2 d) / pow2 (d+1) in -b <= p /\ p <= b)
-  
+
 let sub_lemma2 d x x' c =
   let p = (sint_v x' - sint_v x) %+- params_q in
   let b = (params_q + pow2 d) / pow2 (d+1) in
@@ -240,7 +240,7 @@ let sub_lemma2 d x x' c =
       >= {pow2_double_mult d; ()}
     sint_v x * pow2 (d+1) - params_q - pow2 d;
   };
-  
+
   calc (>=) {
     sint_v x' - sint_v x;
       = {cancel_mul_div (sint_v x' - sint_v x) (pow2 (d+1))}
@@ -248,9 +248,9 @@ let sub_lemma2 d x x' c =
       >= {lemma_decompress (- params_q - pow2 d) (sint_v x' - sint_v x) (pow2 (d+1))}
       (-params_q - pow2 d)/pow2(d+1)+1;
       >= {}
-    -(params_q+pow2 d)/pow2(d+1);  
+    -(params_q+pow2 d)/pow2(d+1);
   };
-  
+
   calc (<=) {
     sint_v x' * pow2 (d+1);
       <= {pow2_double_mult d; ()}
@@ -268,7 +268,7 @@ let sub_lemma2 d x x' c =
       <= {lemma_div_le ((sint_v x' - sint_v x) * pow2 (d+1)) (params_q + pow2 d) (pow2 (d+1))}
     (params_q + pow2 d)/pow2(d+1);
   };
-  
+
   lemma_div_le (params_q+pow2 d) (2*params_q) (pow2 (d+1));
   pow2_multiplication_modulo_lemma_2 params_q (d+1) 1;
   assert(b <= params_q/ pow2 d);
@@ -307,7 +307,7 @@ let sub_lemma3 d x =
     assert(p= sint_v x' - sint_v x + params_q);
     lemma_div_le params_q (params_q+pow2 d) (pow2 (d+1));
     assert(params_q/pow2 (d+1) <= b)
-    
+
 
 #reset-options "--z3rlimit 500 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq'"
 
@@ -319,7 +319,7 @@ let decompress_compress_lemma d x x' =
   let a = (sint_v x * pow2 d + (params_q /2))/params_q in
   let b = (params_q + pow2 d)/pow2 (d+1) in
   if d = 0 then
-    assert(params_q/2 <= b)    
+    assert(params_q/2 <= b)
   else if(sint_v c > 0 || (sint_v c = a)) then
     sub_lemma2 d x x' c
   else
@@ -334,7 +334,7 @@ let poly_compress d p = Seq.map #_ #_ #params_n (compress d) p
 
 val poly_decompress: d:size_nat{d < 16 /\ pow2 d < params_q} -> p:poly{forall (i:nat). {:pattern (index #_ #params_n p i)} i < params_n ==> sint_v #S16 #SEC (index #_ #params_n p i) < pow2 d} -> Tot (p':poly{(forall (i:nat). {:pattern (index #_ #params_n p' i)} i < params_n ==> sint_v #S16 #SEC (index #_ #params_n p' i) == sint_v #S16 #SEC (decompress d (index #_ #params_n p i)))})
 
-let poly_decompress d p = 
+let poly_decompress d p =
   assert (interp_numeric #0 num_t == num);
   let l:lseq (x:num{sint_v x < pow2 d}) params_n = createi params_n (fun i -> let x:(x:num{sint_v x < pow2 d}) = index #_ #params_n p i in x) in
   Seq.map #(x:num{sint_v x <pow2 d}) #num #params_n (decompress d) l
@@ -349,9 +349,9 @@ let poly_decompress_compress_lemma d p p' =
   let customprop (i:nat{i<params_n}) : GTot Type0 =
     distance_linf (index #_ #params_n p' i) (index #_ #params_n p i) <= b in
   let g (i:nat{i<params_n}) : Lemma (customprop i) =
-    assert(index #_ #params_n p' i == decompress d (compress d (index #_ #params_n p i))); 
+    assert(index #_ #params_n p' i == decompress d (compress d (index #_ #params_n p i)));
     decompress_compress_lemma d (index #_ #params_n p i) (index #_ #params_n p' i)
-  in 
+  in
   FStar.Classical.forall_intro g;
   lemma_max_dist_le #_ #params_n distance_linf p' p m b
 
@@ -363,7 +363,7 @@ let vec_compress d p = Seq.map #_ #_ #params_k (poly_compress d) p
 
 val vec_decompress: d:size_nat{d < 16 /\ pow2 d < params_q} -> p:vec{forall (i:nat{i<params_k}). forall (j:nat{j<params_n}). sint_v #S16 #SEC (index #_ #params_n (index #_ #params_k p i) j) < pow2 d} -> Tot (p':vec{(forall (i:nat). {:pattern (index #_ #params_k p' i)} i < params_k ==> index #_ #params_k p' i == poly_decompress d (index #_ #params_k p i))})
 
-let vec_decompress d p = 
+let vec_decompress d p =
   let l:lseq (x:poly{forall (i:nat). {:pattern (index #_ #params_n x i)} i < params_n ==> sint_v #S16 #SEC (index #_ #params_n x i) < pow2 d}) params_k = createi params_k (fun i -> let x:(x:poly{forall (i:nat). {:pattern (index #_ #params_n x i)} i < params_n ==> sint_v #S16 #SEC (index #_ #params_n x i) < pow2 d}) = index #_ #params_k p i in x) in
   Seq.map #_ #_ #params_k (poly_decompress d) l
 
@@ -378,10 +378,8 @@ let vec_decompress_compress_lemma d p p' =
   let customprop (i:nat{i<params_k}) : GTot Type0 =
     poly_distance_linf (index #_ #params_k p' i) (index #_ #params_k p i) <= b in
   let g (i:nat{i<params_k}) : Lemma (customprop i) =
-    assert((index #_ #params_k p' i) == poly_decompress d (poly_compress d (index #_ #params_k p i))); 
+    assert((index #_ #params_k p' i) == poly_decompress d (poly_compress d (index #_ #params_k p i)));
     poly_decompress_compress_lemma d (index #_ #params_k p i) (index #_ #params_k p' i)
-  in 
+  in
   FStar.Classical.forall_intro g;
   lemma_max_dist_le #_ #params_k poly_distance_linf p' p m b
-
-

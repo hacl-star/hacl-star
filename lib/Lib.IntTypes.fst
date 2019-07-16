@@ -58,6 +58,14 @@ let v_injective #t #l a =
 
 let v_mk_int #t #l n = ()
 
+let u128 n = FStar.UInt128.uint64_to_uint128 (u64 n)
+
+// KreMLin will extract this to FStar_Int128_int_to_t, which isn't provided
+// We'll need to have FStar.Int128.int64_to_int128 to support int128_t literals
+let i128 n =
+  assert_norm (pow2 (bits S64 - 1) <= pow2 (bits S128 - 1));
+  sint #S128 #SEC n
+
 let size_to_uint32 x = x
 
 let size_to_uint64 x = Int.Cast.uint32_to_uint64 x
@@ -101,7 +109,7 @@ let int64_to_uint128 a = int128_to_uint128 (int64_to_int128 a)
 val int128_to_uint64: a:Int128.t -> b:UInt64.t{UInt64.v b == Int128.v a % pow2 64}
 let int128_to_uint64 a = Int.Cast.Full.uint128_to_uint64 (int128_to_uint128 a)
 
-#push-options "--z3rlimit 500"
+#push-options "--z3rlimit 700"
 
 let cast #t #l t' l' u =
   assert_norm (pow2 8 = 2 * pow2 7);
@@ -252,7 +260,19 @@ let cast #t #l t' l' u =
 
 #pop-options
 
-let ones t l = mk_int #t #l (ones_v t)
+let ones t l = 
+  match t with
+  | U1  -> 0x1uy
+  | U8  -> 0xFFuy
+  | U16 -> 0xFFFFus
+  | U32 -> 0xFFFFFFFFul
+  | U64 -> 0xFFFFFFFFFFFFFFFFuL
+  | U128 ->
+    let x = UInt128.uint64_to_uint128 0xFFFFFFFFFFFFFFFFuL in
+    let y = (UInt128.shift_left x 64ul) `UInt128.add` x in
+    assert_norm (UInt128.v y == pow2 128 - 1);
+    y
+  | _ -> mk_int (-1)
 
 let zeros t l = mk_int 0
 
@@ -685,6 +705,8 @@ let eq_mask_lemma_unsigned #t a b =
       lognot (u1 1) == u1 0 /\ lognot (u1 0) == u1 1)
   | U8 | U16 | U32 | U64 | U128 -> ()
 
+#push-options "--z3rlimit 100"
+
 val eq_mask_lemma_signed: #t:inttype{signed t /\ ~(S128? t)} -> a:int_t t SEC -> b:int_t t SEC -> Lemma
   (if v a = v b then v (eq_mask a b) == ones_v t
                 else v (eq_mask a b) == 0)
@@ -728,6 +750,8 @@ let eq_mask_lemma_signed #t a b =
       modulo_lemma (v a + pow2 64) (pow2 64)
       end
     end
+
+#pop-options
 
 let eq_mask_lemma #t a b =
   if signed t then eq_mask_lemma_signed a b
@@ -810,25 +834,84 @@ let lte_mask_lemma #t a b =
     else
       UInt.logor_lemma_1 #(bits t) (v (lt_mask a b))
 
-private
-val mod_mask_value: #t:inttype{unsigned t} -> #l:secrecy_level -> m:shiftval t ->
-  Lemma (v (mod_mask #t #l m) == pow2 (v m) - 1)
-
 #push-options "--max_fuel 1"
 
+val mod_mask_value: #t:inttype -> #l:secrecy_level -> m:shiftval t{pow2 (uint_v m) <= maxint t} ->
+  Lemma (v (mod_mask #t #l m) == pow2 (v m) - 1)
 let mod_mask_value #t #l m =
   shift_left_lemma (mk_int #t #l 1) m;
   pow2_double_mult (bits t - 1);
   pow2_lt_compat (bits t) (v m);
   small_modulo_lemma_1 (pow2 (v m)) (pow2 (bits t));
-  small_modulo_lemma_1 ((pow2 (v m)) -1) (pow2 (bits t))
+  small_modulo_lemma_1 (pow2 (v m) - 1) (pow2 (bits t))
 
 let mod_mask_lemma #t #l a m =
   mod_mask_value #t #l m;
-  if v m = 0 then
-    UInt.logand_lemma_1 #(bits t) (v a)
+  if unsigned t || 0 <= v a then
+    if v m = 0 then
+      UInt.logand_lemma_1 #(bits t) (v a)
+    else
+      UInt.logand_mask #(bits t) (v a) (v m)
   else
-    UInt.logand_mask #(bits t) (v a) (v m)
+    begin
+    let a1 = v a in
+    let a2 = v a + pow2 (bits t) in
+    pow2_plus (bits t - v m) (v m);
+    pow2_le_compat (bits t - 1) (v m);
+    lemma_mod_plus a1 (pow2 (bits t - v m)) (pow2 (v m));
+    if v m = 0 then
+      UInt.logand_lemma_1 #(bits t) a2
+    else
+      UInt.logand_mask #(bits t) a2 (v m)
+    end
+
+#pop-options
+
+#push-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 1000"
+
+(**
+  Conditionally subtracts 2^(bits t') from a in constant-time,
+  so that the result fits in t'; i.e.
+  b = if a >= 2^(bits t' - 1) then a - 2^(bits t') else a
+*)
+inline_for_extraction noextract
+val conditional_subtract:
+    #t:inttype{signed t}
+  -> #l:secrecy_level
+  -> t':inttype{signed t' /\ bits t' < bits t}
+  -> a:int_t t l{0 <= v a /\ v a <= pow2 (bits t') - 1}
+  -> b:int_t t l{v b = v a @%. t'}
+let conditional_subtract #t #l t' a =
+  assert_norm (pow2 7 = 128);
+  assert_norm (pow2 15 = 32768);
+  let pow2_bits = shift_left #t #l (mk_int 1) (size (bits t')) in
+  shift_left_lemma #t #l (mk_int 1) (size (bits t'));
+  let pow2_bits_minus_one = shift_left #t #l (mk_int 1) (size (bits t' - 1)) in
+  shift_left_lemma #t #l (mk_int 1) (size (bits t' - 1));
+  // assert (v pow2_bits == pow2 (bits t'));
+  // assert (v pow2_bits_minus_one == pow2 (bits t' - 1));
+  let a2 = a `sub` pow2_bits_minus_one in
+  let mask = shift_right a2 (size (bits t - 1)) in
+  shift_right_lemma a2 (size (bits t - 1));
+  // assert (if v a2 < 0 then v mask = -1 else v mask = 0);
+  let a3 = a `sub` pow2_bits in
+  logand_lemma mask pow2_bits;
+  a3 `add` (mask `logand` pow2_bits)
+
+let cast_mod #t #l t' l' a =
+  assert_norm (pow2 7 = 128);
+  assert_norm (pow2 15 = 32768);
+  if bits t' >= bits t then
+    cast t' l' a
+  else
+    begin
+    let m = size (bits t') in
+    mod_mask_lemma a m;
+    let b = conditional_subtract t' (a `logand` mod_mask m) in
+    cast t' l' b
+    end
+
+#pop-options
 
 let div #t x y =
   match t with

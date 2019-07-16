@@ -46,3 +46,7 @@ instance commutative_ring_t : commutative_ring t =
     lemma_mul_swap = lemma_mul_swap_t;
   }
 
+let minus_lemma_t (x:t) (y:t) : Lemma (Group.v (minus x y) = (Group.v x - Group.v y) % params_q) =
+  plus_lemma_t x (opp_t y);
+  opp_lemma_t y;
+  FStar.Math.Lemmas.lemma_mod_plus_distr_r (Group.v x) (- Group.v y) params_q

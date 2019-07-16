@@ -27,15 +27,15 @@ module Loops = Lib.LoopCombinators
 let powers #a [|ring a|] n o =
   createi n (fun i -> exp o i)
 
-val sum_nth_root_unity_lemma_:  
+val sum_nth_root_unity_lemma_:
   #a: Type0
   -> #[tcresolve ()] r: ring a
   -> n:size_nat
-  -> o:a{exp o n == one /\ ~(o==one)} 
+  -> o:a{exp o n == one /\ ~(o==one)}
   -> Lemma (sum_n #a #add_ag.g.m (powers n o) == mul #a o (sum_n #a #add_ag.g.m (powers n o)))
 
 let sum_nth_root_unity_lemma_ #a [| ring a |] n o =
-  let m = add_ag.g.m in
+  let m = (add_ag #a).g.m in
   let p = powers #a n o in
   let s = sum_n p in
   let p' = Seq.map (fun x -> mul #a o x) p in
@@ -60,12 +60,12 @@ let sum_nth_root_unity_lemma_ #a [| ring a |] n o =
   end
 
 #reset-options "--z3rlimit 200 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq'"
-    
+
 let sum_nth_root_unity_lemma #a [| ring a |] n o =
-  let m = add_ag.g.m in
+  let m = (add_ag #a).g.m in
   let p = powers #a n o in
   let s = sum_n p in
-  
+
   sum_nth_root_unity_lemma_ n o;
   assert (s == mul #a o s);
   lemma_plus_opp1 s;
@@ -74,20 +74,30 @@ let sum_nth_root_unity_lemma #a [| ring a |] n o =
   assert (mul (minus #a o one) s == zero);
   lemma_zero_absorb2 (minus #a o one);
   lemma_mul_eq1_m #a (minus #a o one) s zero
-  
+
 #reset-options "--z3rlimit 200 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq'"
 
-  
-let lib_ntt #a [| ring a |] #n omega psi p = 
-  let m = add_ag.g.m in
+let lib_ntt_sequence #a [| ring a |] #n omega psi p k =
+  mapi (fun j g -> mul (exp psi j) (mul g (exp omega (k*j)))) p
+
+let lib_ntt_sequence_instantiate #a [| ring a |] #n omega psi p p' k j =
+  ()
+
+let lib_ntt #a [| ring a |] #n omega psi p =
+  let m = (add_ag #a).g.m in
   createi n (fun k -> sum_n (mapi (fun j g -> mul (exp psi j) (mul g (exp omega (k*j)))) p))
 
 let lib_ntt_lemma_instantiate #a [| ring a |] #n omega psi p p' k = ()
 
 let lib_ntt_lemma #a [| ring a |] #n omega psi p p' = ()
 
+let lib_nttinv_sequence #a [| ring a |] #n omegainv p k =
+  mapi (fun j g -> mul #a g (exp omegainv (k*j))) p
+
+let lib_nttinv_sequence_instantiate #a [| ring a |] #n omegainv p p' k j = ()
+
 let lib_nttinv #a [| ring a |] #n ninv omegainv psiinv p =
-  let m = add_ag.g.m in
+  let m = (add_ag #a).g.m in
   createi n (fun k -> mul ninv (mul (exp psiinv k) (sum_n (mapi (fun j g -> mul g (exp omegainv (k*j))) p))))
 
 let lib_nttinv_lemma_instantiate #a [| ring a |] #n ninv omegainv psiinv p p' k = ()
@@ -96,15 +106,14 @@ let lib_nttinv_lemma #a [| ring a |] #n ninv omegainv psiinv p p' = ()
 
 #reset-options "--z3rlimit 1000 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq'"
 
-
-val lib_ntt_inversion1_sublemma_kj: 
+val lib_ntt_inversion1_sublemma_kj:
   #a:Type0
   -> #[tcresolve ()] r:ring a
   -> #n:size_nat
   -> omega:a
   -> omegainv :a
-  -> psi:a 
-  -> p:lib_poly a n 
+  -> psi:a
+  -> p:lib_poly a n
   -> k:nat{k<n}
   -> j:nat{j<n} ->
   Lemma(let pntt = lib_ntt omega psi p in
@@ -112,7 +121,7 @@ val lib_ntt_inversion1_sublemma_kj:
 
 
 let lib_ntt_inversion1_sublemma_kj #a [| ring a |] #n omega omegainv psi p k j =
-  let m = add_ag.g.m in
+  let m = (add_ag #a).g.m in
   let pntt = lib_ntt omega psi p in
   let sk = mapi (fun l g -> mul g (exp omegainv (k*l))) pntt in
   let l = createi n (fun x -> x) in
@@ -136,21 +145,21 @@ let lib_ntt_inversion1_sublemma_kj #a [| ring a |] #n omega omegainv psi p k j =
   eq_elim s (Seq.map (fun y -> f j y) l)
 
 #reset-options "--z3rlimit 300 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq'"
- 
-val lib_ntt_inversion1_sublemma_kjd': 
+
+val lib_ntt_inversion1_sublemma_kjd':
   #a:Type0
   -> #[tcresolve ()] r:ring a
   -> #n:size_nat
-  -> omega:a{exp omega n == one} 
-  -> omegainv: a{mul omega omegainv == one} 
-  -> psi:a 
-  -> p:lib_poly a n 
-  -> k:nat{k<n} 
-  -> j:nat{j<n} 
-  -> d:nat{d<n} 
+  -> omega:a{exp omega n == one}
+  -> omegainv: a{mul omega omegainv == one}
+  -> psi:a
+  -> p:lib_poly a n
+  -> k:nat{k<n}
+  -> j:nat{j<n}
+  -> d:nat{d<n}
   -> Lemma(let l = createi n (fun x -> x) in
-	  let f = (fun (x:nat{x<n}) (y:nat{y<n}) -> mul (exp psi y) (mul p.[y] (mul (exp omega (x*y)) (exp #a omegainv (k*x))))) in 
-	  let s = Seq.map (fun x -> f x j) l in 
+	  let f = (fun (x:nat{x<n}) (y:nat{y<n}) -> mul (exp psi y) (mul p.[y] (mul (exp omega (x*y)) (exp #a omegainv (k*x))))) in
+	  let s = Seq.map (fun x -> f x j) l in
 	  s.[d] == mul #a (mul #a (exp psi j) p.[j]) (exp (exp omega ((j-k)%n)) d))
 
 
@@ -175,24 +184,24 @@ let lib_ntt_inversion1_sublemma_kjd' #a [| ring a |] #n omega omegainv psi p k j
 
 #reset-options "--z3rlimit 100 --max_fuel 1 --max_ifuel 1 --using_facts_from '* -FStar.Seq'"
 
-val lib_ntt_inversion1_sublemma_kj'_: 
+val lib_ntt_inversion1_sublemma_kj'_:
   #a:Type0
   -> #[tcresolve ()] r:ring a
   -> #n:size_nat
-  -> omega:a{exp omega n == one} 
-  -> omegainv:a{mul omega omegainv == one} 
-  -> psi:a 
+  -> omega:a{exp omega n == one}
+  -> omegainv:a{mul omega omegainv == one}
+  -> psi:a
   -> p:lib_poly a n
   -> k:nat{k<n}
-  -> j:nat{j<n} 
-  -> Lemma(let l = createi n (fun x -> x) in 
+  -> j:nat{j<n}
+  -> Lemma(let l = createi n (fun x -> x) in
 	  let f : (x:nat{x<n}) -> (y:nat{y<n}) -> a = (fun x y -> mul (exp psi y) (mul p.[y] (mul (exp omega (x*y)) (exp omegainv (k*x))))) in
 	  let sk' = Seq.map (fun y -> sum_n #a #add_ag.g.m (Seq.map (fun x -> f x y) l)) l in
-	  let pows = powers n (exp omega ((j-k)%n)) in 
+	  let pows = powers n (exp omega ((j-k)%n)) in
 	  sk'.[j] == mul #a (mul (exp psi j) p.[j]) (sum_n #a #add_ag.g.m pows))
 
 let lib_ntt_inversion1_sublemma_kj'_ #a [| ring a |] #n omega omegainv psi p k j =
-  let m = add_ag.g.m in
+  let m = (add_ag #a).g.m in
   let l = createi n (fun x -> x) in
   let f : (x:nat{x<n}) -> (y:nat{y<n}) -> a = (fun x y -> mul (exp psi y) (mul p.[y] (mul (exp omega (x*y)) (exp omegainv (k*x))))) in
   let sk' = Seq.map (fun y -> sum_n (Seq.map (fun x -> f x y) l)) l in
@@ -207,35 +216,35 @@ let lib_ntt_inversion1_sublemma_kj'_ #a [| ring a |] #n omega omegainv psi p k j
   FStar.Classical.forall_intro customlemma;
   eq_intro s (Seq.map (fun y -> mul (mul (exp psi j) p.[j]) y) pows);
   eq_elim s (Seq.map (fun y -> mul (mul (exp psi j) p.[j]) y) pows);
-  sum_n_mul_distrib_l_lemma pows (mul (exp psi j) p.[j]);  
+  sum_n_mul_distrib_l_lemma pows (mul (exp psi j) p.[j]);
   assert( sum_n s == mul (mul (exp psi j) p.[j]) (sum_n pows));
   assert(sk'.[j] == mul (mul (exp psi j) p.[j]) (sum_n pows))
 
 #reset-options "--z3rlimit 300 --max_fuel 1 --max_ifuel 1 --using_facts_from '* -FStar.Seq'"
 
-val lib_ntt_inversion1_sublemma_kj': 
+val lib_ntt_inversion1_sublemma_kj':
   #a:Type0
   -> #[tcresolve ()] r:ring a
   -> #n:size_nat
-  -> omega:a{exp omega n == one /\ (forall (nn:nat{nn<n}). (exp omega nn == one ==> nn = 0) /\ (~(is_invertible(minus (exp omega nn) one)) ==> nn = 0))} 
-  -> omegainv:a{mul omega omegainv == one} 
+  -> omega:a{exp omega n == one /\ (forall (nn:nat{nn<n}). (exp omega nn == one ==> nn = 0) /\ (~(is_invertible(minus (exp omega nn) one)) ==> nn = 0))}
+  -> omegainv:a{mul omega omegainv == one}
   -> psi:a
   -> p:lib_poly a n
-  -> k:nat{k<n} 
-  -> j:nat{j<n /\ j <>k} 
+  -> k:nat{k<n}
+  -> j:nat{j<n /\ j <>k}
   -> Lemma(let l = createi n (fun x -> x) in
-	  let f : (y:nat{y<n}) -> (y:nat{y<n}) -> a = (fun x y -> mul (exp psi y) (mul p.[y] (mul (exp omega (x*y)) (exp omegainv (k*x))))) in 
-	  let sk' = Seq.map (fun y -> sum_n #a #add_ag.g.m (Seq.map (fun x -> f x y) l)) l in 
+	  let f : (y:nat{y<n}) -> (y:nat{y<n}) -> a = (fun x y -> mul (exp psi y) (mul p.[y] (mul (exp omega (x*y)) (exp omegainv (k*x))))) in
+	  let sk' = Seq.map (fun y -> sum_n #a #add_ag.g.m (Seq.map (fun x -> f x y) l)) l in
 	  let pows = powers #a n (exp omega ((j-k)%n)) in
 	  sk'.[j] == zero #a)
 
 #reset-options "--z3rlimit 500 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq'"
 
 let lib_ntt_inversion1_sublemma_kj' #a [| ring a |] #n omega omegainv psi p k j =
-    let m = add_ag.g.m in
+    let m = (add_ag #a).g.m in
     let l = createi n (fun x -> x) in
-    let f : (y:nat{y<n}) -> (y:nat{y<n}) -> a = (fun x y -> mul (exp psi y) (mul p.[y] (mul (exp omega (x*y)) (exp omegainv (k*x))))) in 
-    let sk' = Seq.map (fun y -> sum_n #a #add_ag.g.m (Seq.map (fun x -> f x y) l)) l in 
+    let f : (y:nat{y<n}) -> (y:nat{y<n}) -> a = (fun x y -> mul (exp psi y) (mul p.[y] (mul (exp omega (x*y)) (exp omegainv (k*x))))) in
+    let sk' = Seq.map (fun y -> sum_n #a #add_ag.g.m (Seq.map (fun x -> f x y) l)) l in
     let h = ((j-k)%n) in
     let pows = powers #a n (exp omega h) in
     lib_ntt_inversion1_sublemma_kj'_ omega omegainv psi p k j;
@@ -245,30 +254,30 @@ let lib_ntt_inversion1_sublemma_kj' #a [| ring a |] #n omega omegainv psi p k j 
     lemma_exp_exp #a omega h n;
     lemma_exp_exp #a omega n h;
     assert (exp #a (exp omega h) n == exp #a (exp omega n) h);
-    lemma_exp_one h;
-    let o = (exp #a omega h) in    
+    lemma_exp_one #a h;
+    let o = (exp #a omega h) in
     sum_nth_root_unity_lemma n o;
     assert (sum_n pows == zero);
     lemma_zero_absorb2 #a (mul (exp psi j) p.[j])
 
 #reset-options "--z3rlimit 200 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq'"
 
-val lib_ntt_inversion1_sublemma_kk': 
+val lib_ntt_inversion1_sublemma_kk':
   #a:Type0
   -> #[tcresolve ()] r:ring a
   -> #n:size_nat
-  -> omega:a{exp omega n == one} 
-  -> omegainv:a{mul omega omegainv == one} 
-  -> psi:a 
-  -> p:lib_poly a n 
+  -> omega:a{exp omega n == one}
+  -> omegainv:a{mul omega omegainv == one}
+  -> psi:a
+  -> p:lib_poly a n
   -> k:nat{k<n}
-  -> Lemma(let l = createi n (fun x -> x) in 
+  -> Lemma(let l = createi n (fun x -> x) in
 	  let f : (x:nat{x<n}) -> (y:nat{y<n}) -> a = (fun x y -> mul (exp psi y) (mul p.[y] (mul (exp omega (x*y)) (exp omegainv (k*x))))) in
 	  let sk' = Seq.map (fun y -> sum_n #a #add_ag.g.m (Seq.map (fun x -> f x y) l)) l in
 	  sk'.[k] == mul #a (mul (exp psi k) (repeat_plus one n)) p.[k])
 
-let lib_ntt_inversion1_sublemma_kk' #a [|ring a|] #n omega omegainv psi p k = 
-  let m = add_ag.g.m in
+let lib_ntt_inversion1_sublemma_kk' #a [|ring a|] #n omega omegainv psi p k =
+  let m = (add_ag #a).g.m in
   let l = createi n (fun x -> x) in
   let f : (x:nat{x<n}) -> (y:nat{y<n}) -> a = (fun x y -> mul (exp psi y) (mul p.[y] (mul (exp omega (x*y)) (exp omegainv (k*x))))) in
   let sk' = Seq.map (fun y -> sum_n #a (Seq.map (fun x -> f x y) l)) l in
@@ -288,21 +297,21 @@ let lib_ntt_inversion1_sublemma_kk' #a [|ring a|] #n omega omegainv psi p k =
   lemma_one2 #a p.[k];
   lemma_repeat_plus_swap_mul #a one p.[k] n;
   lemma_mul_assoc (exp psi k) (repeat_plus #a one n) p.[k]
-  
+
 
 #reset-options "--z3rlimit 500 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq'"
- 
-val lib_ntt_inversion1_fubini_k: 
+
+val lib_ntt_inversion1_fubini_k:
   #a:Type0
   -> #[tcresolve ()] r:ring a
   -> #n:size_nat
   -> ninv: a//{mul (repeat_plus one n) ninv == one}
   -> omega:a
-  -> omegainv:a//{mul omega omegainv == 1} 
-  -> psi:a 
-  -> psiinv:a//{mul psiinv psi == 1} 
-  -> p:lib_poly a n 
-  -> k:nat{k<n} 
+  -> omegainv:a//{mul omega omegainv == 1}
+  -> psi:a
+  -> psiinv:a//{mul psiinv psi == 1}
+  -> p:lib_poly a n
+  -> k:nat{k<n}
   -> Lemma(let p' = lib_nttinv ninv omegainv psiinv (lib_ntt omega psi p) in
 	  let l = createi n (fun x -> x) in
 	  let f (x:nat{x<n}) (y:nat{y<n}) : a = mul (exp psi y) (mul p.[y] (mul (exp omega (x*y)) (exp omegainv (k*x)))) in
@@ -311,7 +320,7 @@ val lib_ntt_inversion1_fubini_k:
 
 
 let lib_ntt_inversion1_fubini_k #a [| ring a |] #n ninv omega omegainv psi psiinv p k =
-  let m = add_ag.g.m in
+  let m = (add_ag #a).g.m in
   let pntt = lib_ntt omega psi p in
   let p' = lib_nttinv ninv omegainv psiinv pntt in
   lemma_mul_assoc ninv (exp psiinv k) (sum_n (mapi (fun j g -> mul g (exp omegainv (k*j))) pntt));
@@ -319,7 +328,7 @@ let lib_ntt_inversion1_fubini_k #a [| ring a |] #n ninv omega omegainv psi psiin
   let l = createi n (fun x -> x) in
   let f (x:nat{x<n}) (y:nat{y<n}) : a = mul (exp psi y) (mul p.[y] (mul (exp omega (x*y)) (exp omegainv (k*x)))) in
   let sk = mapi (fun j g -> mul g (exp omegainv (k*j))) pntt in
-  let sk' = Seq.map (fun y -> sum_n (Seq.map (fun x -> f x y) l)) l in  
+  let sk' = Seq.map (fun y -> sum_n (Seq.map (fun x -> f x y) l)) l in
   assert(p'.[k] == mul #a (mul ninv (exp psiinv k)) (sum_n sk));
   let customprop (j:nat{j<n}) : GTot Type0 =
     sk.[j] == sum_n (Seq.map (fun y -> f j y) l) in
@@ -332,37 +341,36 @@ let lib_ntt_inversion1_fubini_k #a [| ring a |] #n ninv omega omegainv psi psiin
   let s1 = (Seq.map (fun x -> sum_n (Seq.map (fun y -> f x y) l)) l) in
   let s2 = (Seq.map (fun y -> sum_n (Seq.map (fun x -> f x y) l)) l) in
   sum_n_fubini_ring f l l
-  
 
 #reset-options "--z3rlimit 500 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq'"
 
-val lib_ntt_inversion1_lemma_k_: 
+val lib_ntt_inversion1_lemma_k_:
   #a:Type0
   -> #[tcresolve ()] r:ring a
   -> #n:size_nat
   -> ninv: a//{mul (repeat_plus one n) ninv == one}
-  -> omega:a{exp omega n == one /\ (forall (nn:nat{nn<n}). (exp omega nn == one ==> nn = 0) /\ (~(is_invertible(minus (exp omega nn) one)) ==> nn = 0))} 
-  -> omegainv:a{mul omega omegainv == one} 
-  -> psi:a 
-  -> psiinv:a//{mul psiinv psi == one} 
+  -> omega:a{exp omega n == one /\ (forall (nn:nat{nn<n}). (exp omega nn == one ==> nn = 0) /\ (~(is_invertible(minus (exp omega nn) one)) ==> nn = 0))}
+  -> omegainv:a{mul omega omegainv == one}
+  -> psi:a
+  -> psiinv:a//{mul psiinv psi == one}
   -> p:lib_poly a n
-  -> k:nat{k<n} 
+  -> k:nat{k<n}
   -> Lemma(let p' = lib_nttinv ninv omegainv psiinv (lib_ntt omega psi p) in p'.[k] == mul #a (mul ninv (exp psiinv k)) (mul (mul (exp psi k) (repeat_plus one n)) p.[k]))
 
 
 let lib_ntt_inversion1_lemma_k_ #a [| ring a |] #n ninv omega omegainv psi psiinv p k =
-  let m = add_ag.g.m in
+  let m = (add_ag #a).g.m in
   let p' = lib_nttinv ninv omegainv psiinv (lib_ntt omega psi p) in
   let l = createi n (fun x -> x) in
   let f (x:nat{x<n}) (y:nat{y<n}) : a = mul (exp psi y) (mul p.[y] (mul (exp omega (x*y)) (exp omegainv (k*x)))) in
-  let sk' = Seq.map (fun y -> sum_n (Seq.map (fun x -> f x y) l)) l in  
+  let sk' = Seq.map (fun y -> sum_n (Seq.map (fun x -> f x y) l)) l in
 
   lib_ntt_inversion1_fubini_k ninv omega omegainv psi psiinv p k;
   let customprop' (j:nat{j<n /\ j<>k}) : Type0 =
     sk'.[j] == zero #a in
   let customlemma' (j:nat{j<n /\ j<>k}) : Lemma (customprop' j) =
     assert(customprop' j) by (apply_lemma (`lib_ntt_inversion1_sublemma_kj'))
-  in 
+  in
   FStar.Classical.forall_intro customlemma';
   assert(sum_n sk' == sk'.[k]) by (apply_lemma(`sum_n_one_non_id_coeff));
   assert (p'.[k] == mul #a (mul ninv (exp psiinv k)) sk'.[k]);
@@ -370,17 +378,17 @@ let lib_ntt_inversion1_lemma_k_ #a [| ring a |] #n ninv omega omegainv psi psiin
 
 #reset-options "--z3rlimit 500 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq'"
 
-val lib_ntt_inversion1_lemma_k: 
+val lib_ntt_inversion1_lemma_k:
   #a:Type0
   -> #[tcresolve ()] r:ring a
   -> #n:size_nat
   -> ninv:a{mul ninv (repeat_plus one n) == one}
-  -> omega:a{exp omega n == one /\ (forall (nn:nat{nn<n}). (exp omega nn == one ==> nn = 0) /\ (~(is_invertible(minus (exp omega nn) one)) ==> nn = 0))} 
-  -> omegainv:a{mul omega omegainv == one} 
+  -> omega:a{exp omega n == one /\ (forall (nn:nat{nn<n}). (exp omega nn == one ==> nn = 0) /\ (~(is_invertible(minus (exp omega nn) one)) ==> nn = 0))}
+  -> omegainv:a{mul omega omegainv == one}
   -> psi:a
-  -> psiinv:a{mul psiinv psi == one} 
+  -> psiinv:a{mul psiinv psi == one}
   -> p:lib_poly a n
-  -> k:nat{k<n} 
+  -> k:nat{k<n}
   -> Lemma(let p' = lib_nttinv ninv omegainv psiinv (lib_ntt omega psi p) in p'.[k] == p.[k])
 
 #reset-options "--z3rlimit 500 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq'"
@@ -394,7 +402,7 @@ let lib_ntt_inversion1_lemma_k #a [| ring a |] #n ninv omega omegainv psi psiinv
   lemma_exp_inv #a psiinv psi k;
   lemma_one2 #a ninv;
   lemma_one1 #a p.[k]
-  
+
 #reset-options "--z3rlimit 500 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq'"
 
 
@@ -424,7 +432,7 @@ val lib_ntt_inversion2_sublemma_kj:
   -> p:lib_poly a n
   -> k:nat{k<n}
   -> j:nat{j<n}
-  -> Lemma(let m = add_ag.g.m in
+  -> Lemma(let m = (add_ag #a).g.m in
 	  let pnttinv = lib_nttinv ninv omegainv psiinv p in
 	  let l = createi n (fun x -> x) in
 	  let s = mapi (fun j g -> mul (exp psi j) (mul g (exp #a omega (k*j)))) pnttinv in
@@ -432,7 +440,7 @@ val lib_ntt_inversion2_sublemma_kj:
 	  s.[j] == mul #a ninv (sum_n (Seq.map (fun y -> f j y) l)))
 
 let lib_ntt_inversion2_sublemma_kj #a [| ring a |] #n ninv omega omegainv psi psiinv p k j =
-  let m = add_ag.g.m in
+  let m = (add_ag #a).g.m in
   let pnttinv = lib_nttinv ninv omegainv psiinv p in
   let p' = lib_ntt omega psi pnttinv in
   let l = createi n (fun x -> x) in
@@ -472,19 +480,19 @@ let lib_ntt_inversion2_sublemma_kj #a [| ring a |] #n ninv omega omegainv psi ps
   eq_intro s2 (Seq.map (fun y -> f j y) l);
   eq_elim s2 (Seq.map (fun y -> f j y) l)
 
-val lib_ntt_inversion2_sublemma_kjd': 
+val lib_ntt_inversion2_sublemma_kjd':
   #a:Type0
   -> #[tcresolve ()] r:ring a
   -> #n:size_nat
-  -> omega:a{exp omega n == one} 
+  -> omega:a{exp omega n == one}
   -> omegainv: a{mul omegainv omega == one}
-  -> p:lib_poly a n 
-  -> k:nat{k<n} 
-  -> j:nat{j<n} 
-  -> d:nat{d<n} 
+  -> p:lib_poly a n
+  -> k:nat{k<n}
+  -> j:nat{j<n}
+  -> d:nat{d<n}
   -> Lemma(let l = createi n (fun x -> x) in
-	  let f = (fun (x:nat{x<n}) (y:nat{y<n}) -> mul #a p.[y] (mul (exp omegainv (x*y)) (exp #a omega (k*x)))) in 
-	  let s = Seq.map (fun x -> f x j) l in 
+	  let f = (fun (x:nat{x<n}) (y:nat{y<n}) -> mul #a p.[y] (mul (exp omegainv (x*y)) (exp #a omega (k*x)))) in
+	  let s = Seq.map (fun x -> f x j) l in
 	  s.[d] == mul #a p.[j] (exp (exp omega ((k-j)%n)) d))
 
 
@@ -503,24 +511,24 @@ let lib_ntt_inversion2_sublemma_kjd' #a [| ring a |] #n omega omegainv p k j d =
   lemma_mod_mul_distr_l (k-j) d n;
   lemma_simpl_exp #a omega n (((k-j)%n)*d);
   lemma_exp_exp #a omega ((k-j)%n) d
-  
-val lib_ntt_inversion2_sublemma_kj'_: 
+
+val lib_ntt_inversion2_sublemma_kj'_:
   #a:Type0
   -> #[tcresolve ()] r:ring a
   -> #n:size_nat
-  -> omega:a{exp omega n == one} 
-  -> omegainv:a{mul omegainv omega == one} 
+  -> omega:a{exp omega n == one}
+  -> omegainv:a{mul omegainv omega == one}
   -> p:lib_poly a n
   -> k:nat{k<n}
-  -> j:nat{j<n} 
-  -> Lemma(let l = createi n (fun x -> x) in 
+  -> j:nat{j<n}
+  -> Lemma(let l = createi n (fun x -> x) in
 	  let f : (x:nat{x<n}) -> (y:nat{y<n}) -> a = (fun x y -> mul p.[y] (mul (exp omegainv (x*y)) (exp omega (k*x)))) in
 	  let sk = Seq.map (fun y -> sum_n #a #add_ag.g.m (Seq.map (fun x -> f x y) l)) l in
-	  let pows = powers n (exp omega ((k-j)%n)) in 
+	  let pows = powers n (exp omega ((k-j)%n)) in
 	  sk.[j] == mul #a p.[j] (sum_n #a #add_ag.g.m pows))
 
 let lib_ntt_inversion2_sublemma_kj'_ #a [| ring a |] #n omega omegainv p k j =
-  let m = add_ag.g.m in
+  let m = (add_ag #a).g.m in
   let l = createi n (fun x -> x) in
   let f : (x:nat{x<n}) -> (y:nat{y<n}) -> a = (fun x y -> mul #a p.[y] (mul (exp omegainv (x*y)) (exp omega (k*x)))) in
   let sk = Seq.map (fun y -> sum_n (Seq.map (fun x -> f x y) l)) l in
@@ -535,30 +543,30 @@ let lib_ntt_inversion2_sublemma_kj'_ #a [| ring a |] #n omega omegainv p k j =
   FStar.Classical.forall_intro customlemma;
   eq_intro s (Seq.map (fun y -> mul #a p.[j] y) pows);
   eq_elim s (Seq.map (fun y -> mul #a p.[j] y) pows);
-  sum_n_mul_distrib_l_lemma pows (p.[j]);  
+  sum_n_mul_distrib_l_lemma pows (p.[j]);
   assert( sum_n s == mul #a p.[j] (sum_n pows));
   assert(sk.[j] == mul #a p.[j] (sum_n pows))
-  
-val lib_ntt_inversion2_sublemma_kj': 
+
+val lib_ntt_inversion2_sublemma_kj':
   #a:Type0
   -> #[tcresolve ()] r:ring a
   -> #n:size_nat
-  -> omega:a{exp omega n == one /\ (forall (nn:nat{nn<n}). (exp omega nn == one ==> nn = 0) /\ (~(is_invertible(minus (exp omega nn) one)) ==> nn = 0))} 
-  -> omegainv:a{mul omegainv omega == one}  
+  -> omega:a{exp omega n == one /\ (forall (nn:nat{nn<n}). (exp omega nn == one ==> nn = 0) /\ (~(is_invertible(minus (exp omega nn) one)) ==> nn = 0))}
+  -> omegainv:a{mul omegainv omega == one}
   -> p:lib_poly a n
-  -> k:nat{k<n} 
+  -> k:nat{k<n}
   -> j:nat{j<n /\ j<>k}
-  -> Lemma(let m = add_ag.g.m in
+  -> Lemma(let m = (add_ag #a).g.m in
 	  let l = createi n (fun x -> x) in
 	  let f (x:nat{x<n}) (y:nat{y<n}) : a = mul #a p.[y] (mul (exp omegainv (x*y)) (exp omega (k*x))) in
 	  let sk = Seq.map (fun y -> sum_n (Seq.map (fun x -> f x y) l)) l in
 	  sk.[j] == zero #a)
 
 let lib_ntt_inversion2_sublemma_kj' #a [| ring a |] #n omega omegainv p k j =
-  let m = add_ag.g.m in
+  let m = (add_ag #a).g.m in
   let l = createi n (fun x -> x) in
-  let f : (y:nat{y<n}) -> (y:nat{y<n}) -> a = (fun x y -> mul #a p.[y] (mul (exp omegainv (x*y)) (exp omega (k*x)))) in 
-  let sk = Seq.map (fun y -> sum_n #a #add_ag.g.m (Seq.map (fun x -> f x y) l)) l in 
+  let f : (y:nat{y<n}) -> (y:nat{y<n}) -> a = (fun x y -> mul #a p.[y] (mul (exp omegainv (x*y)) (exp omega (k*x)))) in
+  let sk = Seq.map (fun y -> sum_n #a #add_ag.g.m (Seq.map (fun x -> f x y) l)) l in
   let h = ((k-j)%n) in
   let pows = powers #a n (exp omega h) in
   lib_ntt_inversion2_sublemma_kj'_ omega omegainv p k j;
@@ -568,27 +576,27 @@ let lib_ntt_inversion2_sublemma_kj' #a [| ring a |] #n omega omegainv p k j =
   lemma_exp_exp #a omega h n;
   lemma_exp_exp #a omega n h;
   assert (exp #a (exp omega h) n == exp #a (exp omega n) h);
-  lemma_exp_one h;
-  let o = (exp #a omega h) in    
+  lemma_exp_one #a h;
+  let o = (exp #a omega h) in
   sum_nth_root_unity_lemma n o;
   assert (sum_n pows == zero);
   lemma_zero_absorb2 #a p.[j]
 
-val lib_ntt_inversion2_sublemma_kk': 
+val lib_ntt_inversion2_sublemma_kk':
   #a:Type0
   -> #[tcresolve ()] r:ring a
   -> #n:size_nat
-  -> omega:a{exp omega n == one} 
-  -> omegainv:a{mul omegainv omega == one} 
-  -> p:lib_poly a n 
+  -> omega:a{exp omega n == one}
+  -> omegainv:a{mul omegainv omega == one}
+  -> p:lib_poly a n
   -> k:nat{k<n}
-  -> Lemma(let l = createi n (fun x -> x) in 
+  -> Lemma(let l = createi n (fun x -> x) in
 	  let f : (x:nat{x<n}) -> (y:nat{y<n}) -> a = (fun x y -> mul p.[y] (mul (exp omegainv (x*y)) (exp omega (k*x)))) in
 	  let sk' = Seq.map (fun y -> sum_n #a #add_ag.g.m (Seq.map (fun x -> f x y) l)) l in
 	  sk'.[k] == mul #a (repeat_plus one n) p.[k])
 
-let lib_ntt_inversion2_sublemma_kk' #a [|ring a|] #n omega omegainv p k = 
-  let m = add_ag.g.m in
+let lib_ntt_inversion2_sublemma_kk' #a [|ring a|] #n omega omegainv p k =
+  let m = (add_ag #a).g.m in
   let l = createi n (fun x -> x) in
   let f : (x:nat{x<n}) -> (y:nat{y<n}) -> a = (fun x y -> mul #a p.[y] (mul (exp omegainv (x*y)) (exp omega (k*x)))) in
   let sk' = Seq.map (fun y -> sum_n #a (Seq.map (fun x -> f x y) l)) l in
@@ -606,22 +614,22 @@ let lib_ntt_inversion2_sublemma_kk' #a [|ring a|] #n omega omegainv p k =
   lemma_one1 #a p.[k];
   lemma_one2 #a p.[k];
   lemma_repeat_plus_swap_mul #a one p.[k] n
-  
-val lib_ntt_inversion2_lemma_k: 
+
+val lib_ntt_inversion2_lemma_k:
   #a:Type0
   -> #[tcresolve ()] r:ring a
   -> #n:size_nat
   -> ninv:a{mul ninv (repeat_plus one n) == one}
-  -> omega:a{exp omega n == one /\ (forall (nn:nat{nn<n}). (exp omega nn == one ==> nn = 0) /\ (~(is_invertible(minus (exp omega nn) one)) ==> nn = 0))} 
-  -> omegainv:a{mul omegainv omega == one} 
+  -> omega:a{exp omega n == one /\ (forall (nn:nat{nn<n}). (exp omega nn == one ==> nn = 0) /\ (~(is_invertible(minus (exp omega nn) one)) ==> nn = 0))}
+  -> omegainv:a{mul omegainv omega == one}
   -> psi:a
-  -> psiinv:a{mul psi psiinv == one} 
+  -> psiinv:a{mul psi psiinv == one}
   -> p:lib_poly a n
-  -> k:nat{k<n} 
+  -> k:nat{k<n}
   -> Lemma(let p' = lib_ntt omega psi (lib_nttinv ninv omegainv psiinv p) in p'.[k] == p.[k])
 
 let lib_ntt_inversion2_lemma_k #a [| ring a |] #n ninv omega omegainv psi psiinv p k =
-  let m = add_ag.g.m in
+  let m = (add_ag #a).g.m in
   let pnttinv = lib_nttinv ninv omegainv psiinv p in
   let p' = lib_ntt omega psi pnttinv in
   let l = createi n (fun x -> x) in

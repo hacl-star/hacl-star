@@ -70,7 +70,7 @@ let encode l x =
     let u : int16 = (index #_ #params_n x i) in
     let g(j:nat{j<l}) = if j < 16 then to_u1 (u >>. size j) else to_u1 (u >>. size 15) in
     0, createi l g
-  in let _,s= generate_blocks l params_n a f 0 in
+  in let _,s= generate_blocks l params_n params_n a f 0 in
   to_bytes s
 
 val decode: l:nat{l*params_n<=max_size_t} -> s:lbytes_l SEC (l*params_n/8) -> x:poly{forall (i:nat{i<params_n}). sint_v #S16 #SEC (index #_ #params_n x i) < pow2 l}
@@ -105,7 +105,7 @@ let encode_vec l x =
   let a (i:nat{i<=params_k}) = int in
   let f (i:nat{i<params_k}) (acc: a i) : a (i+1) & lbytes_l SEC (l*params_n/8) =
     0, encode l (index #_ #params_k x i)
-  in let _,s = generate_blocks (l*params_n/8) params_k a f 0 in
+  in let _,s = generate_blocks (l*params_n/8) params_k params_k a f 0 in
   s
 
 val decode_vec: l:nat{l*params_n*params_k<=max_size_t} -> s:lbytes_l SEC (params_k*l*params_n/8) -> vec
