@@ -481,7 +481,7 @@ let squeeze_inner rateInBytes outputByteLen s output i =
   storeState rateInBytes s output;
   state_permute s
 
-#reset-options "--z3rlimit 150 --max_fuel 1 --max_ifuel 1"
+#reset-options "--z3rlimit 300 --max_fuel 1 --max_ifuel 1"
 
 val squeeze:
     s:state
