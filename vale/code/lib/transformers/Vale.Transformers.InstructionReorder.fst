@@ -1577,79 +1577,83 @@ let rec lemma_num_blocks_in_codes_append (c1 c2:codes) :
   | [] -> ()
   | x :: xs -> lemma_num_blocks_in_codes_append xs c2
 
-let rec unblock_for (c:code) (cs : codes) :
-  Pure (possibly codes)
-    (requires True)
-    (ensures (fun r ->
-         Ok? r ==> (
-           (Ok? (find_code c cs) ==> num_blocks_in_codes cs = num_blocks_in_codes (Ok?.v r)) /\
-           (Err? (find_code c cs) ==> num_blocks_in_codes cs > num_blocks_in_codes (Ok?.v r))))) =
-  match find_code c cs with
-  | Ok _ -> Ok cs
-  | Err _ -> (
-      match cs with
-      | [] -> Err "Cannot unblock further"
-      | Block l :: xs -> (
-          match unblock_for c l with
-          | Ok l' -> Ok (l' `L.append` xs)
-          | Err r -> (
-              xs' <-- unblock_for c xs;
-              return (Block l :: xs')
-            )
+type transformation_hint =
+  | MoveUpFrom : p:nat -> transformation_hint
+  | DiveInAt : p:nat -> q:transformation_hint -> transformation_hint
+
+type transformation_hints = list transformation_hint
+
+let rec string_of_transformation_hint (t:transformation_hint) : string =
+  match t with
+  | MoveUpFrom p -> "(MoveUpFrom " ^ string_of_int p ^ ")"
+  | DiveInAt p q -> "(DiveInAt " ^ string_of_int p ^ " " ^ string_of_transformation_hint q ^ ")"
+
+irreducible
+(* Our proofs do not depend on how the hints are found. As long as
+   some hints are provided, we validate the hints to perform the
+   transformation and use it. Thus, we make this function
+   [irreducible] to explicitly prevent any of the proofs from
+   reasoning about it. *)
+let rec find_transfomation_hints (c1 c2:codes) : possibly transformation_hints =
+  Err "temp. no transformation found. TODO FIXME"
+
+(* XXX: Copied from List.Tot.Base because of an extraction issue.
+   See https://github.com/FStarLang/FStar/pull/1822. *)
+val split3: #a:Type -> l:list a -> i:nat{i < L.length l} -> Tot (list a * a * list a)
+let split3 #a l i =
+  let a, as = L.splitAt i l in
+  L.lemma_splitAt_snd_length i l;
+  let b :: c = as in
+  a, b, c
+
+let rec perform_reordering_with_hint (t:transformation_hint) (c:codes) : possibly codes =
+  match c with
+  | [] -> Err "trying to transform empty code"
+  | x :: xs -> (
+      match t with
+      | MoveUpFrom i -> (
+          if i < L.length c then (
+            c' <-- bubble_to_top c i;
+            return (L.index c i :: c')
+          ) else (
+            Err ("invalid hint : " ^ string_of_transformation_hint t)
+          )
         )
-      | x :: xs ->
-        xs' <-- unblock_for c xs;
-        return (x :: xs')
+      | DiveInAt i t' ->
+        if i < L.length c then (
+          FStar.List.Pure.lemma_split3_length c i;
+          let left, mid, right = split3 c i in
+          match mid with
+          | Block l ->
+            l' <-- perform_reordering_with_hint t' l; (
+              match l' with
+              | [] -> Err "impossible"
+              | y :: ys ->
+                L.append_length left [y];
+                left' <-- bubble_to_top (left `L.append` [y]) i;
+                return (y :: (left' `L.append` (Block ys :: right)))
+            )
+          | _ ->
+            Err ("trying to dive into a non-block : " ^ string_of_transformation_hint t ^ " " ^ fst (print_code (Block c) 0 gcc))
+        ) else (
+          Err ("invalid hint : " ^ string_of_transformation_hint t)
+        )
     )
 
-let rec reordering_allowed (c1 c2 : codes) :
-  Tot pbool
-    (decreases %[c2; num_blocks_in_codes c1]) =
-  match c1, c2 with
-  | [], [] -> ttrue
-  | [], _ | _, [] -> ffalse "disagreeing lengths of codes"
-  | _, h2 :: t2 ->
-    match find_code h2 c1 with
-    | Ok i -> (
-        t1 <-- bubble_to_top c1 i;
-        reordering_allowed t1 t2
-      )
-    | Err reason -> (
-        let h1 :: t1 = c1 in
-        match h1, h2 with
-        | Block l1, Block l2 ->
-          reordering_allowed l1 l2 &&. reordering_allowed t1 t2
-        | _ -> (
-            match unblock_for h2 c1 with
-            | Ok c1' ->
-              reordering_allowed c1' c2 (* TODO: Handle IfElse and While specially too? *)
-            | Err _ -> Err reason
-          )
-      )
-
-(** Transform [c1] into the ordering specified by [c2] *)
-let rec perform_reordering (c1 c2 : codes) :
-  Pure (codes)
-    (requires !!(reordering_allowed c1 c2))
-    (ensures (fun c_gen -> eq_codes c_gen c2))
-    (decreases %[c2; num_blocks_in_codes c1]) =
-  match c1, c2 with
-  | [], [] -> []
-  | _, h2 :: t2 ->
-    match find_code h2 c1 with
-    | Ok i -> (
-        let Ok t1 = bubble_to_top c1 i in
-        L.index c1 i :: perform_reordering t1 t2
-      )
-    | Err _ -> (
-        let h1 :: t1 = c1 in
-        match h1, h2 with
-        | Block l1, Block l2 ->
-          assert (eq_code (Block (perform_reordering l1 l2)) (Block l2)); (* OBSERVE *)
-          Block (perform_reordering l1 l2) :: perform_reordering t1 t2
-        | _ ->
-          perform_reordering (Ok?.v (unblock_for h2 c1)) c2
-      )
+let rec perform_reordering_with_hints (ts:transformation_hints) (c:codes) : possibly codes =
+  match ts with
+  | [] -> (
+      match c with
+      | [] -> return []
+      | _ -> Err ("no more transformation hints for " ^ fst (print_code (Block c) 0 gcc))
+    )
+  | t :: ts' ->
+    c' <-- perform_reordering_with_hint t c;
+    match c' with
+    | [] -> Err "impossible"
+    | x :: xs ->
+      xs' <-- perform_reordering_with_hints ts' xs;
+      return (x :: xs')
 
 /// If there are two sequences of instructions that can be transformed
 /// amongst each other, then they behave identically as per the
@@ -1704,93 +1708,110 @@ let rec lemma_machine_eval_codes_block_to_append (c1 c2 : codes) (fuel:nat) (s:m
       lemma_machine_eval_codes_block_to_append xs c2 fuel s1
 #pop-options
 
-let rec lemma_unblock_for (c:code) (cs:codes) (fuel:nat) (s:machine_state) :
+let rec lemma_append_single (xs:list 'a) (y:'a) (i:nat) :
   Lemma
-    (requires (Ok? (unblock_for c cs)))
+    (requires (i == L.length xs))
     (ensures (
-        let Ok cs' = unblock_for c cs in
-        machine_eval_codes cs fuel s == machine_eval_codes cs' fuel s)) =
-  match find_code c cs with
-  | Ok _ -> ()
-  | Err _ -> (
-      match cs with
-      | Block l :: xs -> (
-          match unblock_for c l with
-          | Ok l' -> (
-              lemma_unblock_for c l fuel s;
-              assert (machine_eval_code (Block l) fuel s == machine_eval_code (Block l') fuel s);
-              assert (machine_eval_codes (Block l :: xs) fuel s == machine_eval_codes (Block l' :: xs) fuel s);
-              assert (machine_eval_codes cs fuel s == machine_eval_codes (Block l' :: xs) fuel s);
-              lemma_machine_eval_codes_block_to_append l' xs fuel s;
-              assert (machine_eval_codes cs fuel s == machine_eval_codes (l' `L.append` xs) fuel s)
-            )
-          | Err _ -> (
-              match machine_eval_code (Block l) fuel s with
-              | None -> ()
-              | Some s1 ->
-                lemma_unblock_for c xs fuel s1
-            )
-        )
-      | x :: xs -> (
-          match machine_eval_code x fuel s with
-          | None -> ()
-          | Some s1 ->
-            lemma_unblock_for c xs fuel s1
-        )
-    )
+        L.length (xs `L.append` [y]) = L.length xs + 1 /\
+        L.index (xs `L.append` [y]) i == y)) =
+  match xs with
+  | [] -> ()
+  | x :: xs -> lemma_append_single xs y (i - 1)
 
-let rec lemma_reordering (c1 c2 : codes) (fuel:nat) (s1 : machine_state) :
+#push-options "--z3rlimit 20 --initial_fuel 3 --max_fuel 3 --initial_ifuel 1 --max_ifuel 1"
+let rec lemma_perform_reordering_with_hint (t:transformation_hint) (cs:codes) (fuel:nat) (s:machine_state) :
   Lemma
     (requires (
-        !!(reordering_allowed c1 c2) /\
-        (Some? (machine_eval_codes c1 fuel s1)) /\
-        (Some?.v (machine_eval_codes c1 fuel s1)).ms_ok))
+        (Ok? (perform_reordering_with_hint t cs)) /\
+        (Some? (machine_eval_codes cs fuel s)) /\
+        (Some?.v (machine_eval_codes cs fuel s)).ms_ok))
     (ensures (
-        (Some? (machine_eval_codes (perform_reordering c1 c2) fuel s1)) /\
-        (let Some s1', Some s2' =
-           machine_eval_codes c1 fuel s1,
-           machine_eval_codes (perform_reordering c1 c2) fuel s1 in
-         equiv_states_or_both_not_ok s1' s2')))
-    (decreases %[c2; num_blocks_in_codes c1]) =
-  match c2 with
+        let Ok cs' = perform_reordering_with_hint t cs in
+        equiv_ostates
+          (machine_eval_codes cs fuel s)
+          (machine_eval_codes cs' fuel s))) =
+  let c = cs in
+  let Ok cs' = perform_reordering_with_hint t cs in
+  let Some s' = machine_eval_codes cs fuel s in
+  let x :: xs = cs in
+  match t with
+  | MoveUpFrom i -> (
+      let Ok c' = bubble_to_top c i in
+      lemma_bubble_to_top c i fuel s s'
+    )
+  | DiveInAt i t' -> (
+      FStar.List.Pure.lemma_split3_append c i;
+      FStar.List.Pure.lemma_split3_length c i;
+      let left, mid, right = L.split3 c i in
+      let Block l = mid in
+      let Ok (y :: ys) = perform_reordering_with_hint t' l in
+      L.append_length left [y];
+      let Ok left' = bubble_to_top (left `L.append` [y]) i in
+      //
+      assert (cs' == y :: (left' `L.append` (Block ys :: right)));
+      assert (left `L.append` (mid :: right) == c);
+      L.append_l_cons mid right left;
+      assert ((left `L.append` [mid]) `L.append` right == c);
+      lemma_machine_eval_codes_block_to_append (left `L.append` [mid]) right fuel s;
+      let Some s_1 = machine_eval_code (Block (left `L.append` [mid])) fuel s in
+      assert (Some s_1 == machine_eval_codes (left `L.append` [mid]) fuel s);
+      lemma_machine_eval_codes_block_to_append left [mid] fuel s;
+      let Some s_2 = machine_eval_code (Block left) fuel s in
+      assert (Some s_2 == machine_eval_codes left fuel s);
+      //
+      assert (Some s_1 == machine_eval_codes [mid] fuel s_2);
+      assert (Some s_1 == machine_eval_code (Block l) fuel s_2);
+      assert (Some s_1 == machine_eval_codes l fuel s_2);
+      assert (Some s' == machine_eval_codes right fuel s_1);
+      if s_1.ms_ok then () else lemma_not_ok_propagate_codes right fuel s_1;
+      lemma_perform_reordering_with_hint t' l fuel s_2;
+      //
+      let Some s_11 = machine_eval_codes (y :: ys) fuel s_2 in
+      let Some s_12 = machine_eval_code y fuel s_2 in
+      if s_12.ms_ok then () else lemma_not_ok_propagate_codes ys fuel s_12;
+      assert (Some s_2 == machine_eval_codes left fuel s);
+      assert (Some s_2 == machine_eval_code (Block left) fuel s);
+      assert (Some s_12 == machine_eval_codes (Block left :: [y]) fuel s);
+      lemma_machine_eval_codes_block_to_append left [y] fuel s;
+      assert (Some s_12 == machine_eval_codes (left `L.append` [y]) fuel s);
+      lemma_bubble_to_top (left `L.append` [y]) i fuel s s_12;
+      //
+      lemma_append_single left y i;
+      assert (L.index (left `L.append` [y]) i == y);
+      //
+      let Some s_3 = machine_eval_codes (y :: left') fuel s in
+      assert (equiv_states s_3 s_12);
+      lemma_eval_codes_equiv_states right fuel s_1 s_11;
+      let Some s_0 = machine_eval_codes right fuel s_11 in
+      lemma_eval_codes_equiv_states (Block ys :: right) fuel s_12 s_3;
+      let Some s_00 = machine_eval_codes (Block ys :: right) fuel s_3 in
+      //
+      assert (equiv_states s_00 s');
+      assert (Some s_3 == machine_eval_code (Block (y :: left')) fuel s);
+      assert (Some s_00 == machine_eval_codes (Block ys :: right) fuel s_3);
+      lemma_machine_eval_codes_block_to_append (y :: left') (Block ys :: right) fuel s
+    )
+#pop-options
+
+let rec lemma_perform_reordering_with_hints (ts:transformation_hints) (cs:codes) (fuel:nat) (s:machine_state) :
+  Lemma
+    (requires (
+        (Ok? (perform_reordering_with_hints ts cs)) /\
+        (Some? (machine_eval_codes cs fuel s)) /\
+        (Some?.v (machine_eval_codes cs fuel s)).ms_ok))
+    (ensures (
+        let Ok cs' = perform_reordering_with_hints ts cs in
+        equiv_ostates
+          (machine_eval_codes cs fuel s)
+          (machine_eval_codes cs' fuel s))) =
+  let c = cs in
+  let Ok cs' = perform_reordering_with_hints ts cs in
+  let Some s' = machine_eval_codes cs fuel s in
+  match ts with
   | [] -> ()
-  | h2 :: t2 ->
-    let c_gen = perform_reordering c1 c2 in
-    match find_code h2 c1 with
-    | Ok i -> (
-        let Ok t1 = bubble_to_top c1 i in
-        let h' = L.index c1 i in
-        let t' = perform_reordering t1 t2 in
-        lemma_bubble_to_top c1 i fuel s1 (Some?.v (machine_eval_codes c1 fuel s1));
-        let Some sa1' = machine_eval_code h' fuel s1 in
-        let Some sa2' = machine_eval_codes t1 fuel sa1' in
-        lemma_reordering t1 t2 fuel sa1'
-      )
-    | Err _ -> (
-        let h1 :: t1 = c1 in
-        match h1, h2 with
-        | Block l1, Block l2 ->
-          assert (machine_eval_code (Block l1) fuel s1 == machine_eval_codes l1 fuel s1);
-          assert (machine_eval_code (Block l2) fuel s1 == machine_eval_codes l2 fuel s1);
-          assert (Some? (machine_eval_code (Block l1) fuel s1));
-          assert (Some? (machine_eval_codes l1 fuel s1));
-          let Some s1' = machine_eval_codes l1 fuel s1 in
-          if s1'.ms_ok then () else (
-            lemma_not_ok_propagate_codes t1 fuel s1'
-          );
-          lemma_reordering l1 l2 fuel s1;
-          let Some s1'' = machine_eval_codes (perform_reordering l1 l2) fuel s1 in
-          assert (Some s1'' == machine_eval_code (Block (perform_reordering l1 l2)) fuel s1);
-          lemma_reordering t1 t2 fuel s1';
-          lemma_eval_codes_equiv_states (perform_reordering t1 t2) fuel s1' s1'';
-          let Some s2 = machine_eval_codes c1 fuel s1 in
-          let Some s2' = machine_eval_codes t1 fuel s1' in
-          let Some s2'' = machine_eval_codes (perform_reordering t1 t2) fuel s1'' in
-          assert (equiv_states s2 s2');
-          assert (equiv_states s2' s2'');
-          assert (machine_eval_codes (perform_reordering c1 c2) fuel s1 == machine_eval_codes (perform_reordering t1 t2) fuel s1'');
-          assert (Some s2'' == machine_eval_codes (perform_reordering c1 c2) fuel s1)
-        | _ ->
-          lemma_unblock_for h2 c1 fuel s1;
-          lemma_reordering (Ok?.v (unblock_for h2 c1)) c2 fuel s1
-      )
+  | t :: ts' ->
+    let Ok (x :: xs) = perform_reordering_with_hint t c in
+    lemma_perform_reordering_with_hint t c fuel s;
+    let Ok xs' = perform_reordering_with_hints ts' xs in
+    let Some s1 = machine_eval_code x fuel s in
+    lemma_perform_reordering_with_hints ts' xs fuel s1
