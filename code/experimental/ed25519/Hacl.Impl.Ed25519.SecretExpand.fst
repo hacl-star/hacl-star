@@ -6,12 +6,10 @@ open FStar.HyperStack.All
 open Lib.IntTypes
 open Lib.Buffer
 
-val secret_expand:
-    expanded:lbuffer uint8 64ul
-  -> secret:lbuffer uint8 32ul ->
-  Stack unit
-    (requires fun h -> live h expanded /\ live h secret /\ disjoint expanded secret)
-    (ensures  fun h0 _ h1 -> modifies (loc expanded) h0 h1)
+friend Spec.Agile.Hash
+
+#set-options "--z3rlimit 10 --max_fuel 0 --max_ifuel 0"
+
 let secret_expand expanded secret =
   assert_norm(pow2 32 <= pow2 125 - 1);
   Hacl.Hash.SHA2.hash_512 secret 32ul expanded;

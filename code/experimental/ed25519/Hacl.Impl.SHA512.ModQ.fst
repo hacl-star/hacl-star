@@ -4,6 +4,8 @@ module ST = FStar.HyperStack.ST
 open FStar.HyperStack.All
 
 open Lib.IntTypes
+open Lib.ByteSequence
+open Lib.Sequence
 open Lib.Buffer
 
 #reset-options "--max_fuel 0 --max_ifuel 0"
@@ -56,14 +58,22 @@ val sha512_modq_pre:
     (requires fun h ->
       live h input /\ live h out /\ live h prefix /\
       disjoint prefix out /\  disjoint out input)
-    (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1)
+    (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
+      nat_from_intseq_le (as_seq h1 out) ==
+      Spec.Ed25519.sha512_modq (32 + v len)
+        (concat #uint8 #32 #(v len) (as_seq h0 prefix) (as_seq h0 input))
+    )
+
 let sha512_modq_pre out prefix len input =
   push_frame();
   let tmp = create 10ul (u64 0) in
   let hash = create 64ul (u8 0) in
+  let h0 = ST.get() in
   sha512_pre_msg hash prefix len input;
+  let h1 = ST.get() in
   Hacl.Impl.Load56.load_64_bytes tmp hash;
   Hacl.Impl.BignumQ.Mul.barrett_reduction out tmp;
+  admit();
   pop_frame()
 
 val sha512_modq_pre_pre2:
