@@ -553,7 +553,7 @@ let qtesla_keygen_compute_tk t a e s_ntt k =
     poly_mul tk ak s_ntt;
     poly_add_correct tk tk ek;
     let hLoopEnd = ST.get () in
-    assume(is_poly_pk hLoopEnd tk);
+    assert(is_poly_pk hLoopEnd tk); // result of poly_add_correct
     assert(forall (i:nat{i < UI32.v k * v params_n}) . {:pattern bget hLoopEnd t i} bget hLoopStart t i == bget hLoopEnd t i);
     assert(tk == gsub t (k *! params_n) params_n);
     assert(forall (i:nat{i < v params_n}) . is_pk (bget hLoopEnd tk i));
@@ -610,7 +610,7 @@ val qtesla_keygen_:
 
 let qtesla_keygen_ randomness pk sk =
   push_frame();
-  assume(v randomness_extended_size > 0);
+  assert(v randomness_extended_size > 0);
   let randomness_extended = create randomness_extended_size (u8 0) in
   let e:poly_k = poly_k_create () in
   let s:poly = poly_create () in
@@ -712,12 +712,40 @@ let qtesla_keygen pk sk =
 private let nblocks_shake = shake_rate /. (((params_b_bits +! (size 1)) +! (size 7)) /. (size 8))
 private let bplus1bytes = ((params_b_bits +! size 1) +! (size 7)) /. (size 8)
 
+// This lemma needs to unroll pow2 some number of times, so it needs more fuel.
+#push-options "--max_fuel 8 --max_ifuel 0"
+let lemma_pow2_b_bits_1 () : Lemma (ensures 1 * pow2 (v params_b_bits + 1) < Int.max_int elem_n) = ()
+let lemma_b_equals_pow2_b_bits () : Lemma (ensures elem_v params_B == pow2 (v params_b_bits) - 1) = ()
+#pop-options
+
+let lemma_logand_with_pos (x:I32.t) (y:I32.t{I32.v y >= 0}) : Lemma (ensures I32.v (I32.logand x y) >= 0) =
+    let x = I32.v x in
+    let y = I32.v y in
+    let r = Int.logand x y in
+    Int.sign_bit_positive y;
+    Int.sign_bit_positive r
+
+let lemma_logand_with_one_pos (#n:pos{1 < n}) (x:Int.int_t n) (y:Int.int_t n) : Lemma
+    (requires x >= 0 \/ y >= 0)
+    (ensures Int.logand x y >= 0) =
+    let r = Int.logand x y in
+    if (x >= 0)
+    then Int.sign_bit_positive x
+    else Int.sign_bit_positive y;
+    Int.sign_bit_positive r
+
+let lemma_logand_le_one_pos (#n:pos) (a:Int.int_t n) (b:Int.int_t n{0 <= b}) : Lemma
+    (ensures Int.logand a b <= b) =
+    let vb = Int.to_vec b in
+    let vand = Int.to_vec (Int.logand a b) in
+    UInt.subset_vec_le_lemma #n vand vb
+
 private inline_for_extraction noextract
 val sample_y_while_body:
     y : poly
   -> seed : lbuffer uint8 crypto_randombytes
   -> nblocks : lbuffer size_t (size 1)
-  -> buf : lbuffer uint8 (params_n *! bplus1bytes)
+  -> buf : lbuffer uint8 (params_n *! bplus1bytes +! size 1)
   -> dmsp : lbuffer uint16 (size 1)
   -> pos : lbuffer size_t (size 1)
   -> i : lbuffer size_t (size 1)
@@ -726,19 +754,23 @@ val sample_y_while_body:
                     FStar.BigOps.big_and (live_buf h) bufs /\ FStar.BigOps.pairwise_and disjoint_buf bufs /\
                     (v (bget h nblocks 0) == v params_n \/ v (bget h nblocks 0) == v nblocks_shake) /\
                     v (bget h i 0) < v params_n /\
-                    (v (bget h pos 0) + numbytes U32 <= v params_n * v bplus1bytes \/ v (bget h pos 0) >= v params_n * v bplus1bytes)) 
+                    v (bget h pos 0) % v bplus1bytes == 0 /\
+                    (v (bget h pos 0) + numbytes U32 <= length buf \/ v (bget h pos 0) >= v params_n * v bplus1bytes) /\
+                    is_poly_y_sampler_output_i h y (v (bget h i 0)))
     (ensures fun h0 _ h1 -> modifies (loc y |+| loc nblocks |+| loc buf |+| loc dmsp |+| loc pos |+| loc i) h0 h1 /\
                          (v (bget h1 i 0) == v (bget h0 i 0) \/ v (bget h1 i 0) == v (bget h0 i 0) + 1) /\
                          (v (bget h1 nblocks 0) == v params_n \/ v (bget h1 nblocks 0) == v nblocks_shake) /\
+                         v (bget h1 pos 0) % v bplus1bytes == 0 /\
 
-                         (v (bget h1 pos 0) + numbytes U32 <= v params_n * v bplus1bytes \/ v (bget h1 pos 0) >= v params_n * v bplus1bytes) /\
+                         (v (bget h1 pos 0) + numbytes U32 <= length buf \/ v (bget h1 pos 0) >= v params_n * v bplus1bytes) /\
     
                          is_poly_y_sampler_output_i h1 y (v (bget h1 i 0)))
 
+#push-options "--z3rlimit 300"
 let sample_y_while_body y seed nblocks buf dmsp pos i =
     let nbytes = bplus1bytes in
     let nBlocksVal = nblocks.(size 0) in
-    let h = ST.get () in
+    let hInitial = ST.get () in
     if pos.(size 0) >=. nBlocksVal *! nbytes
     then (
         nblocks.(size 0) <- nblocks_shake;
@@ -748,34 +780,53 @@ let sample_y_while_body y seed nblocks buf dmsp pos i =
     ) else ();
 
     let h0 = ST.get () in
-    assert(v (bget h0 pos 0) + numbytes U32 <= v params_n * v bplus1bytes);
+    assert(v (bget h0 pos 0) + numbytes U32 <= length buf); // v params_n * v bplus1bytes);
 
     let pos0 = pos.(size 0) in
-    //assume(v pos0 + numbytes U32 <= v (params_n *! bplus1bytes));
     let subbuff = sub buf pos0 (size (numbytes U32)) in
     let bufPosAsU32 = uint_from_bytes_le #U32 #_ subbuff in
     let bufPosAsElem = uint32_to_elem (Lib.RawIntTypes.u32_to_UInt32 bufPosAsU32) in
     let i0 = i.(size 0) in
     // Heuristic parameter sets do four at once. Perf. But optional.
     let h1 = ST.get () in
-    //assume(FStar.Int.fits (elem_v (to_elem 1 <<^ (params_b_bits +! size 1)) - 1) elem_n);
-    //assume(is_elem (bufPosAsElem &^ ((to_elem 1 <<^ (params_b_bits +! size 1)) -^ to_elem 1)));
     Int.shift_left_value_lemma (elem_v (to_elem 1)) (v (params_b_bits +! size 1));
-    assume(1 * pow2 (v params_b_bits + 1) < Int.max_int elem_n);
+    lemma_pow2_b_bits_1 ();
+    assert(1 * pow2 (v params_b_bits + 1) < Int.max_int elem_n);
     assert(elem_v (to_elem 1 <<^ (params_b_bits +! size 1)) = 1 * (pow2 (v (params_b_bits +! size 1))) @% (pow2 elem_n));
-    assume(1 * (pow2 (v (params_b_bits +! size 1))) @% (pow2 elem_n) >= 0);
+    assert(1 * (pow2 (v (params_b_bits +! size 1))) @% (pow2 elem_n) >= 0);
     assert(elem_v (to_elem 1 <<^ (params_b_bits +! size 1)) >= 0); 
     y.(i0) <- bufPosAsElem &^ ((to_elem 1 <<^ (params_b_bits +! size 1)) -^ to_elem 1);
     let h2 = ST.get () in
-    assume(Int.fits ( (elem_v (bget h2 y (v i0))) - (elem_v params_B) ) elem_n);
+    lemma_logand_with_one_pos (elem_v bufPosAsElem) (elem_v ((to_elem 1 <<^ (params_b_bits +! size 1)) -^ to_elem 1));
+    assert(elem_v (bget h2 y (v i0)) >= 0);
+    lemma_logand_le_one_pos (elem_v bufPosAsElem) (elem_v ((to_elem 1 <<^ (params_b_bits +! size 1)) -^ to_elem 1));
+    lemma_b_equals_pow2_b_bits ();
+    
+    assert(elem_v (bget h2 y (v i0)) <= elem_v (((to_elem 1 <<^ (params_b_bits +! size 1)) -^ to_elem 1)));
+    assert(elem_v (((to_elem 1 <<^ (params_b_bits +! size 1)) -^ to_elem 1)) == pow2 (v params_b_bits + 1) - 1);
+    assert(pow2 (v params_b_bits + 1) == 2 * pow2 (v params_b_bits));
+    assert(elem_v (bget h2 y (v i0)) <= 2 * elem_v params_B + 1);
+    assert(Int.fits ( (elem_v (bget h2 y (v i0))) - (elem_v params_B) ) elem_n);
     y.(i0) <- y.(i0) -^ params_B;
     if y.(i0) <> (to_elem 1 <<^ params_b_bits)
     then ( i.(size 0) <- i0 +. size 1 )
     else ();
+    let h3 = ST.get () in
+    assert(v (bget h3 pos 0) + numbytes U32 <= length buf);
+    assert(v bplus1bytes == v nbytes);
     pos.(size 0) <- pos.(size 0) +. nbytes;
+    // i0 is still the original index, not affected by whether or not we incremented above
+    //assert(elem_v (bget h3 y (v (bget h3 i 0) - 1)) <= elem_v params_B);
+    //assert(elem_v (bget h3 y (v i0)) >= -(elem_v params_B));
+    assert((bget h3 y (v i0)) == (to_elem 1 <<^ params_b_bits) \/ is_y_sampler_output (bget h3 y (v i0)));
     let hFinal = ST.get () in
-    assume(v (bget hFinal pos 0) + numbytes U32 <= v params_n * v bplus1bytes \/ v (bget hFinal pos 0) >= v params_n * v bplus1bytes);
-    assume(is_poly_y_sampler_output_i hFinal y (v (bget hFinal i 0)))
+    assert(v (bget h3 pos 0) % v nbytes == 0); 
+    assert(v (bget hFinal pos 0) % v nbytes == 0);
+    assert(v (bget hFinal pos 0) + numbytes U32 <= length buf \/ v (bget hFinal pos 0) >= v params_n * v bplus1bytes);
+    assert(is_poly_equal_except hInitial hFinal y (v i0));
+    assert(is_poly_y_sampler_output_i hFinal y (v i0));
+    assert(is_poly_y_sampler_output_i hFinal y (v (bget hFinal i 0)))
+#pop-options
 
 val sample_y:
     y : poly
@@ -791,12 +842,12 @@ let sample_y y seed nonce =
     let i = create (size 1) (size 0) in
     let pos = create (size 1) (size 0) in
     let nblocks = create (size 1) params_n in
-    let buf = create (params_n *! bplus1bytes) (u8 0) in
+    let buf = create (params_n *! bplus1bytes +! size 1) (u8 0) in
     let nbytes = bplus1bytes in
     [@inline_let] let dmspVal:uint16 = cast U16 SEC (Lib.RawIntTypes.u16_from_UInt16 (uint32_to_uint16 UI32.(nonce <<^ 8ul))) in
     let dmsp = create (size 1) dmspVal in
 
-    params_cSHAKE crypto_randombytes seed dmsp.(size 0) (params_n *! nbytes) buf;
+    params_cSHAKE crypto_randombytes seed dmsp.(size 0) (params_n *! nbytes) (sub buf (size 0) (params_n *! nbytes));
     let hInit = ST.get () in
     dmsp.(size 0) <- dmsp.(size 0) +. u16 1;
 
@@ -806,7 +857,8 @@ let sample_y y seed nonce =
     (fun h -> live h y /\ live h i /\ live h pos /\ live h nblocks /\ live h buf /\ live h dmsp /\
            modifies (loc y |+| loc i |+| loc pos |+| loc nblocks |+| loc buf |+| loc dmsp) h0 h /\
            (v (bget h nblocks 0) == v params_n \/ v (bget h nblocks 0) == v nblocks_shake) /\
-           (v (bget h pos 0) + numbytes U32 <= v params_n * v bplus1bytes \/ v (bget h pos 0) >= v params_n * v bplus1bytes) /\
+           (v (bget h pos 0) + numbytes U32 <= length buf \/ v (bget h pos 0) >= v params_n * v bplus1bytes) /\
+           v (bget h pos 0) % v bplus1bytes == 0 /\
            v (bget h i 0) <= v params_n /\
            is_poly_y_sampler_output_i h y (v (bget h i 0)))
     (fun h -> v (bget h i 0) < v params_n)

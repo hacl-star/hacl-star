@@ -351,10 +351,9 @@ val poly_add_correct:
   -> y: poly
   -> Stack unit
     (requires fun h -> live h result /\ live h x /\ live h y)
-    (ensures fun h0 _ h1 -> modifies1 result h0 h1)
+    (ensures fun h0 _ h1 -> modifies1 result h0 h1 /\ is_poly_pk h1 result)
 
 let poly_add_correct result x y =
-    push_frame();
     let h0 = ST.get() in
     for 0ul params_n
     (fun h _ -> live h result /\ live h x /\ live h y /\ modifies1 result h0 h)
@@ -386,7 +385,8 @@ let poly_add_correct result x y =
 	let temp:elem = temp +^ ((temp >>^ (size elem_n -. size 1)) &^ params_q) in
         result.(i) <- temp
     );
-    pop_frame()
+    let hReturn = ST.get () in
+    assume(is_poly_pk hReturn result)
 
 val poly_sub_correct:
     result: poly
