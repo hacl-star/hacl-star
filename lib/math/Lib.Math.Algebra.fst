@@ -198,6 +198,11 @@ val gcd_forall_elim: a:pos -> b:pos -> g:pos -> Lemma
   (ensures (is_gcd a b g))
 let gcd_forall_elim a b g = gcd_forall_to_exists a b (fun g' -> g' = g)
 
+val gcd_divides: a:pos -> b:pos -> Lemma
+  (requires divides a b)
+  (ensures is_gcd a b a)
+let gcd_divides a b = ()
+
 val gcd_prop_add_arg: a:nat -> b:pos -> g:pos{is_gcd a b g} -> Lemma
   (is_gcd (a+b) b g)
 let gcd_prop_add_arg a b g =
@@ -339,6 +344,16 @@ let gcd_prop_subdiv a b g d =
 
   move_requires l ()
 
+val gcd_mod_nonzero: a:pos -> b:pos -> g:pos -> Lemma
+  (requires (a <> b /\ is_gcd a b g /\ g < a))
+  (ensures ~(divides a b))
+let gcd_mod_nonzero a b g = assert (divides a b ==> is_gcd a b a)
+
+val gcd_one_different: a:pos -> b:pos -> Lemma
+  (requires (is_gcd a b 1 /\ a > 1))
+  (ensures a <> b)
+let gcd_one_different a b = assert (a = b ==> is_gcd a b a)
+
 val divides_exactly_one_multiple: a:pos -> b:nat -> c:pos -> Lemma
   (requires (divides a (b*c) /\ is_gcd a c 1))
   (ensures (divides a b))
@@ -431,6 +446,7 @@ let gcd_to_factor_one n m a =
   assert (forall g'. (is_gcd a n g' ==> g' = 1));
   gcd_forall_elim a n 1
 
+// n = a = 1 is the only input combination that gives a % n = 0
 val gcd_mod_reduce: n:pos -> a:pos -> Lemma
   (requires (is_gcd a n 1))
   (ensures ((a % n) = 0 \/ is_gcd (a % n) n 1))
@@ -450,6 +466,15 @@ let gcd_mod_reduce n a =
       assert (False);
       assert (is_gcd (a % n) n 1)
      end)
+
+val gcd_mod_reduce_big: n:big -> a:pos -> Lemma
+  (requires (is_gcd a n 1))
+  (ensures (is_gcd (a % n) n 1))
+let gcd_mod_reduce_big n a =
+  gcd_mod_reduce n a;
+  gcd_one_different n a;
+  assert (a <> n);
+  gcd_mod_nonzero n a 1
 
 (* Algebra *)
 
@@ -1144,3 +1169,31 @@ let g_pow_isunit_rev #n g x =
     fexp_mul1 g (x-1) 1;
     assert (g *% (fexp g (x-1) *% y) = 1)
   end
+
+#reset-options "--z3rlimit 50"
+
+val mult_order_of_fexp: #n:big -> g:fe n{isunit g} -> e1:pos -> e2:pos -> Lemma
+  (requires is_mult_order g (e1 * e2))
+  (ensures (g_pow_isunit g e1; is_mult_order (fexp g e1) e2))
+let mult_order_of_fexp #n g e1 e2 =
+  g_pow_isunit g e1;
+  fexp_exp g e1 e2;
+  assert (fexp (fexp g e1) e2 = one);
+
+  let l (e3:pos{e3 < e2}): Lemma (requires (fexp (fexp g e1) e3 = one))
+                                 (ensures False) = begin
+      fexp_exp g e1 e3;
+      assert (fexp g (e1 * e3) = one);
+      multiplication_order_lemma_strict e3 e2 e1;
+      assert (e1 * e3 < e1 * e2);
+      assert (~(is_mult_order g (e1 * e2)));
+      assert (False)
+    end in
+
+  let l' (e3:pos{e3 < e2}): Lemma (fexp (fexp g e1) e3 = one ==> False) = begin
+      move_requires l e3
+    end in
+
+  forall_intro l'
+
+#reset-options
