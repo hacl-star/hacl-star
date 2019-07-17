@@ -1594,36 +1594,6 @@ let rec wrap_diveinat (p:nat) (l:transformation_hints) : transformation_hints =
   | x :: xs ->
     DiveInAt p x :: wrap_diveinat p xs
 
-irreducible
-(* Our proofs do not depend on how the hints are found. As long as
-   some hints are provided, we validate the hints to perform the
-   transformation and use it. Thus, we make this function
-   [irreducible] to explicitly prevent any of the proofs from
-   reasoning about it. *)
-let rec find_transformation_hints (c1 c2:codes) :
-  Tot (possibly transformation_hints)
-    (decreases %[c2]) =
-  match c1, c2 with
-  | [], [] -> return []
-  | [], _ | _, [] -> Err "disagreeing lengths of code"
-  | _, h2 :: t2 ->
-    match find_code h2 c1 with
-    | Ok i -> (
-        t1 <-- bubble_to_top c1 i;
-        t_hints2 <-- find_transformation_hints t1 t2;
-        return (MoveUpFrom i :: t_hints2)
-      )
-    | Err reason -> (
-        let h1 :: t1 = c1 in
-        match h1, h2 with
-        | Block l1, Block l2 ->
-          t_hints1 <-- find_transformation_hints l1 l2;
-          t_hints2 <-- find_transformation_hints t1 t2;
-          return (wrap_diveinat 0 t_hints1 `L.append` t_hints2)
-        | _ ->
-          Err reason
-      )
-
 (* XXX: Copied from List.Tot.Base because of an extraction issue.
    See https://github.com/FStarLang/FStar/pull/1822. *)
 val split3: #a:Type -> l:list a -> i:nat{i < L.length l} -> Tot (list a * a * list a)
@@ -1689,6 +1659,67 @@ let rec perform_reordering_with_hints (ts:transformation_hints) (c:codes) : poss
     | x :: xs ->
       xs' <-- perform_reordering_with_hints ts' xs;
       return (x :: xs')
+
+let increment_hint (th:transformation_hint) : transformation_hint =
+  match th with
+  | MoveUpFrom p -> MoveUpFrom (p + 1)
+  | DiveInAt p q -> DiveInAt (p + 1) q
+
+let rec find_deep_code_transform (c:code) (cs:codes) : possibly transformation_hint =
+  match cs with
+  | [] ->
+    Err ("Not found (during find_deep_code_transform): " ^ fst (print_code c 0 gcc))
+  | x :: xs ->
+    if eq_code x c then (
+      return (MoveUpFrom 0)
+    ) else (
+      match x with
+      | Block l -> (
+          match find_deep_code_transform c l with
+          | Ok t -> return (DiveInAt 0 t)
+          | Err reason ->
+            th <-- find_deep_code_transform c xs;
+            return (increment_hint th)
+        )
+      | _ ->
+        th <-- find_deep_code_transform c xs;
+        return (increment_hint th)
+    )
+
+irreducible
+(* Our proofs do not depend on how the hints are found. As long as
+   some hints are provided, we validate the hints to perform the
+   transformation and use it. Thus, we make this function
+   [irreducible] to explicitly prevent any of the proofs from
+   reasoning about it. *)
+let rec find_transformation_hints (c1 c2:codes) :
+  Tot (possibly transformation_hints)
+    (decreases %[c2]) =
+  match c1, c2 with
+  | [], [] -> return []
+  | _, [] -> if is_empty_codes c1 then return [] else Err "non empty first code"
+  | [], _ -> if is_empty_codes c2 then return [] else Err "non empty second code"
+  | _, h2 :: t2 ->
+    match find_deep_code_transform h2 c1 with
+    | Ok th -> (
+        match perform_reordering_with_hint th c1 with
+        | Ok (h1 :: t1) ->
+          t_hints2 <-- find_transformation_hints t1 t2;
+          return (th :: t_hints2)
+        | Ok [] -> Err "Impossible"
+        | Err reason ->
+          Err ("Unable to find valid movement for : " ^ fst (print_code h2 0 gcc) ^ ". Reason: " ^ reason)
+      )
+    | Err reason -> (
+        let h1 :: t1 = c1 in
+        match h1, h2 with
+        | Block l1, Block l2 ->
+          t_hints1 <-- find_transformation_hints l1 l2;
+          t_hints2 <-- find_transformation_hints t1 t2;
+          return (wrap_diveinat 0 t_hints1 `L.append` t_hints2)
+        | _ ->
+          Err reason
+      )
 
 /// If a transformation can be performed, then the result behaves
 /// identically as per the [equiv_states] relation.
