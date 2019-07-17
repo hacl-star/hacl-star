@@ -55,6 +55,11 @@ let upd #a #len b i v =
 
 let bget_as_seq #t #a #len h b i = ()
 
+let recall #t #a #len b =
+  match t with
+  | IMMUT -> B.recall (b <: ibuffer a)
+  | MUT -> B.recall (b <: buffer a)
+
 let create #a clen init =
   B.alloca init (normalize_term clen)
 

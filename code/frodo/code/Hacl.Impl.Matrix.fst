@@ -80,10 +80,18 @@ let mset #n1 #n2 a i j x =
   a.(i *. n2 +. j) <- x
 
 noextract unfold
-let op_String_Access #n1 #n2 (m:matrix_t n1 n2) (i, j) = mget m i j
+let op_String_Access (#n1:size_t) (#n2:size_t{v n1 * v n2 <= max_size_t}) (m:matrix_t n1 n2) (ij:(size_t & size_t){let i, j = ij in v i < v n1 /\ v j < v n2}) 
+  : Stack elem 
+    (requires fun h0 -> live h0 m) 
+    (ensures  fun h0 x h1 -> let i, j = ij in modifies loc_none h0 h1 /\ x == M.mget (as_matrix h0 m) (v i) (v j)) 
+  = let i, j = ij in mget m i j
 
 noextract unfold
-let op_String_Assignment #n1 #n2 (m:matrix_t n1 n2) (i, j) x = mset m i j x
+let op_String_Assignment (#n1:size_t) (#n2:size_t{v n1 * v n2 <= max_size_t}) (m:matrix_t n1 n2) (ij:(size_t & size_t){let i, j = ij in v i < v n1 /\ v j < v n2}) (x:elem)
+  : Stack unit
+    (requires fun h0 -> live h0 m)
+    (ensures  fun h0 _ h1 -> let i, j = ij in modifies1 m h0 h1 /\ live h1 m /\ as_matrix h1 m == M.mset (as_matrix h0 m) (v i) (v j) x) 
+  = let i, j = ij in mset m i j x
 
 unfold
 let get #n1 #n2 h (m:matrix_t n1 n2) i j = M.mget (as_matrix h m) i j

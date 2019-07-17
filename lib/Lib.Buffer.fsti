@@ -274,16 +274,16 @@ val upd:
 
 (** Operator for updating a mutable buffer: b.(i) <- x *)
 inline_for_extraction
-let op_Array_Assignment #a #len b i x = upd #a #len b i x
+let op_Array_Assignment #a #len = upd #a #len
 
 (** Operator for accessing a buffer: b.(i) *)
 inline_for_extraction
-let op_Array_Access #t #a #len b i = index #t #a #len b i
+let op_Array_Access #t #a #len = index #t #a #len
 
 (* 2018.16.11 SZ: this doesn't parse: let f a len (b:lbuffer a len) h = h.[| b |] *)
 (** Operator for getting a ghost view of a buffer as a sequence: h.[(b)] *)
 inline_for_extraction
-let op_Brack_Lens_Access #t #a #len h b = as_seq #t #a #len h b
+let op_Brack_Lens_Access #t #a #len = as_seq #t #a #len
 
 (** Ghostly read an element in a buffer *)
 let bget (#t:buftype) (#a:Type0) (#len:size_t) (h:mem) (b:lbuffer_t t a len)
@@ -325,10 +325,14 @@ let recallable (#t:buftype) (#a:Type0) (#len:size_t) (b:lbuffer_t t a len) =
   | MUT -> B.recallable (b <: buffer a)
 
 inline_for_extraction noextract
-let recall (#t:buftype) (#a:Type0) (#len:size_t) (b:lbuffer_t t a len) =
-  match t with
-  | IMMUT -> B.recall (b <: ibuffer a)
-  | MUT -> B.recall (b <: buffer a)
+val recall:
+    #t:buftype 
+  -> #a:Type0
+  -> #len:size_t
+  -> b:lbuffer_t t a len -> 
+  Stack unit
+    (requires fun _ -> recallable b)
+    (ensures  fun h0 _ h1 -> h0 == h1 /\ live h0 b)
 
 unfold private
 let cpred (#a:Type0) (s:Seq.seq a) : B.spred a = fun s1 -> FStar.Seq.equal s s1

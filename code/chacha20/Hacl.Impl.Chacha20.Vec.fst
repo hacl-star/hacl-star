@@ -61,11 +61,11 @@ let chacha20_core_ #w k ctx ctr =
 
 
 [@CInline]
-let chacha20_core1 k ctx0 ctr = chacha20_core_ #1 k ctx0 ctr
+let chacha20_core1 = chacha20_core_ #1
 [@CInline]
-let chacha20_core4 k ctx0 ctr = chacha20_core_ #4 k ctx0 ctr
+let chacha20_core4 = chacha20_core_ #4
 [@CInline]
-let chacha20_core8 k ctx0 ctr = chacha20_core_ #8 k ctx0 ctr
+let chacha20_core8 = chacha20_core_ #8
 
 inline_for_extraction noextract
 val chacha20_core:
@@ -150,11 +150,11 @@ let chacha20_init_ #w ctx k n ctr =
   pop_frame()
 
 [@CInline]
-let chacha20_init1 ctx k n ctr = chacha20_init_ #1 ctx k n ctr
+let chacha20_init1 = chacha20_init_ #1
 [@CInline]
-let chacha20_init4 ctx k n ctr = chacha20_init_ #4 ctx k n ctr
+let chacha20_init4 = chacha20_init_ #4
 [@CInline]
-let chacha20_init8 ctx k n ctr = chacha20_init_ #8 ctx k n ctr
+let chacha20_init8 = chacha20_init_ #8
 
 inline_for_extraction noextract
 val chacha20_init:

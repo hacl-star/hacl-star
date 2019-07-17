@@ -82,9 +82,9 @@ let decode_point_ #s o i =
 
 (* WRAPPER to Prevent Inlining *)
 inline_for_extraction noextract
-let decode_point_51 (o:point51) i = decode_point_ #M51 o i
+let decode_point_51 (o:point51) = decode_point_ #M51 o
 inline_for_extraction noextract
-let decode_point_64 (o:point64) i = decode_point_ #M64 o i
+let decode_point_64 (o:point64) = decode_point_ #M64 o
 
 inline_for_extraction noextract
 val decode_point:
@@ -138,9 +138,9 @@ let encode_point_ #s o i =
 
 (* WRAPPER to Prevent Inlining *)
 inline_for_extraction noextract
-let encode_point_51 o (i:point51) = encode_point_ #M51 o i
+let encode_point_51 = encode_point_ #M51
 inline_for_extraction noextract
-let encode_point_64 o (i:point64) = encode_point_ #M64 o i
+let encode_point_64 = encode_point_ #M64
 
 inline_for_extraction noextract
 val encode_point:
@@ -510,9 +510,9 @@ let montgomery_ladder_ #s out key init =
 
 (* WRAPPER to Prevent Inlining *)
 [@CInline]
-let montgomery_ladder_51 (out:point51) key (init:point51) = montgomery_ladder_ #M51 out key init
+let montgomery_ladder_51 = montgomery_ladder_ #M51
 [@CInline]
-let montgomery_ladder_64 (out:point64) key (init:point64) = montgomery_ladder_ #M64 out key init
+let montgomery_ladder_64 = montgomery_ladder_ #M64
 
 inline_for_extraction noextract
 val montgomery_ladder:
