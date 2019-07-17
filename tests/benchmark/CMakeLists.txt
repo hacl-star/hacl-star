@@ -73,6 +73,8 @@ if(USE_OPENSSL)
   find_library(OPENSSL_LIB libcrypto.a) # search default paths
   find_path(OPENSSL_INC openssl/crypto.h PATHS $ENV{MLCRYPTO_HOME}/openssl/include NO_DEFAULT_PATH)
   find_path(OPENSSL_INC openssl/crypto.h) # search default paths
+  get_filename_component(OPENSSL_LIB ${OPENSSL_LIB} REALPATH)
+  get_filename_component(OPENSSL_INC ${OPENSSL_INC} REALPATH)
   message("-- Using OpenSSL at ${OPENSSL_LIB} with headers at ${OPENSSL_INC}")
   target_compile_definitions(runbenchmark PRIVATE HAVE_OPENSSL)
   target_link_libraries(runbenchmark PRIVATE ${OPENSSL_LIB})
