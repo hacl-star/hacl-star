@@ -13,19 +13,23 @@
 
    Usage:
 
-     Given two [codes], say [c1] and [c2], [reordering_allowed c1 c2]
-     tells you whether this transformer considers them to be safe
-     permutations of each-other. If they indeed are safe, one can use
-     [perform_reordering c1 c2] to generate a new [codes] object, say
-     [c_gen], such that it is an actual reordering of [c1] which
-     satisfies the order of [c2]. Via [lemma_reordering c1 c2], the
-     transformation is shown to be correct. That is, starting from the
-     same state, execution of [c1] and [c2] leads to equivalent final
-     states.
+     Actual vale-tool or user-facing code should probably use the even
+     nicer interface provided by the [Vale.Transformers.Transform]
+     module.
 
-     If the reordering is not allowed, then this transformer gives a
-     (human-readable) reason for why it believes that the reordering
-     is not possible.
+     To use this module, you need to generate a [transformation_hints]
+     object (a nice default is provided in this module via
+     [find_transformation_hints], but users of this module can write
+     their own, without needing to change any proofs), that can then
+     be applied to a [codes] object (say [c1]) via
+     [perform_reordering_with_hints] which tells you if this is a safe
+     reordering, and if so, it produces the transformed [codes]
+     object. If it is not considered to be safe, then the transformer
+     gives a (human-readable) reason for why it doesn't consider it a
+     safe reordering. If the transformation is safe and was indeed
+     performed, then you can use [lemma_perform_reordering_with_hints]
+     to reason about the reordered code having semantically equivalent
+     behavior as the untransformed code.
 
 *)
 module Vale.Transformers.InstructionReorder
@@ -130,10 +134,6 @@ let lemma_ins_exchange_allowed_symmetric (i1 i2 : ins) :
 
 /// First, we must define what it means for two states to be
 /// equivalent. Here, we basically say they must be exactly the same.
-///
-/// TODO: We should figure out a way to handle flags better. Currently
-/// any two instructions that havoc flags cannot be exchanged since
-/// they will not lead to equiv states.
 
 let equiv_states (s1 s2 : machine_state) : GTot Type0 =
   (s1.ms_ok == s2.ms_ok) /\
@@ -1655,9 +1655,8 @@ let rec perform_reordering_with_hints (ts:transformation_hints) (c:codes) : poss
       xs' <-- perform_reordering_with_hints ts' xs;
       return (x :: xs')
 
-/// If there are two sequences of instructions that can be transformed
-/// amongst each other, then they behave identically as per the
-/// [equiv_states] relation.
+/// If a transformation can be performed, then the result behaves
+/// identically as per the [equiv_states] relation.
 
 #push-options "--initial_fuel 3 --max_fuel 3 --initial_ifuel 1 --max_ifuel 1"
 let rec lemma_bubble_to_top (cs : codes) (i:nat{i < L.length cs}) (fuel:nat) (s s' : machine_state) :
