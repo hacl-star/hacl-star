@@ -7,6 +7,7 @@
 #include <benchmark.h>
 
 extern "C" {
+#include <EverCrypt_AutoConfig2.h>
 #include <EverCrypt_Cipher.h>
 }
 
@@ -31,7 +32,8 @@ class CipherBenchmark : public Benchmark
 {
   protected:
     const size_t key_sz = 32;
-    size_t msg_len, iv_len = 12;
+    const size_t iv_len = 16;
+    size_t msg_len;
 
     uint8_t *key;
     uint8_t *plain;
@@ -74,6 +76,8 @@ class CipherBenchmark : public Benchmark
       randomize((char*)key, key_sz);
       randomize((char*)plain, msg_len);
       randomize((char*)iv, iv_len);
+      for (size_t i = 12; i < 16; i++)
+        iv[i] = 0;
     }
 
     virtual void report(std::ostream & rs, const BenchmarkSettings & s) const
@@ -86,13 +90,12 @@ class CipherBenchmark : public Benchmark
     }
 };
 
-
 class EverCryptChaCha20 : public CipherBenchmark
 {
   public:
     EverCryptChaCha20(size_t msg_len) :
       CipherBenchmark(msg_len)
-      { set_name("EverCrypt", "Chacha20\\nPoly1305"); }
+      { set_name("EverCrypt", "ChaCha20"); }
     virtual void bench_setup(const BenchmarkSettings & s)
     {
       CipherBenchmark::bench_setup(s);
@@ -109,6 +112,7 @@ class EverCryptChaCha20 : public CipherBenchmark
 };
 
 
+
 #ifdef HAVE_OPENSSL
 // See https://github.com/openssl/openssl/blob/master/demos/evp/aesgcm.c
 
@@ -122,24 +126,37 @@ class OpenSSLChaCha20 : public CipherBenchmark
     OpenSSLChaCha20(size_t msg_len) :
       CipherBenchmark(msg_len)
       {
-        set_name("OpenSSL", "Chacha20\\nPoly1305");
+        set_name("OpenSSL", "ChaCha20");
         ctx = EVP_CIPHER_CTX_new();
       }
     virtual void bench_setup(const BenchmarkSettings & s)
     {
       CipherBenchmark::bench_setup(s);
-      if ((EVP_EncryptInit_ex(ctx, EVP_chacha20(), NULL, key, iv)  <= 0))
+      // cwinter: something's wrong with OpenSSL's handling of the IV, but it works if it's all zero.
+      for (size_t i = 0; i < iv_len; i++)
+        iv[i] = 0;
+      if ((EVP_CipherInit_ex(ctx, EVP_chacha20(), NULL, key, iv, 1) <= 0))
           throw std::logic_error("OpenSSL cipher initialization failed");
     }
     virtual void bench_func()
     {
       #ifdef _DEBUG
       if ((EVP_EncryptUpdate(ctx, cipher, &outlen, plain, msg_len) <= 0) ||
-          (EVP_EncryptFinal_ex(ctx, cipher, &outlen) <= 0))
+          (EVP_EncryptFinal(ctx, cipher, &outlen) <= 0))
           throw std::logic_error("OpenSSL encryption failed");
+
+      uint8_t tmp[msg_len];
+      EverCrypt_Cipher_chacha20(msg_len, tmp, plain, key, iv, 0);
+
+      for (size_t i = 0; i < msg_len; i++)
+        if (cipher[i] != tmp[i]) {
+          std::cout << "EverCrypt: "; Benchmark::print_buffer(tmp, msg_len);
+          std::cout << "OpenSSL  : "; Benchmark::print_buffer(cipher, msg_len);
+          throw std::logic_error("Encryption mismatch");
+        }
       #else
       EVP_EncryptUpdate(ctx, cipher, &outlen, plain, msg_len);
-      EVP_EncryptFinal_ex(ctx, cipher, &outlen);
+      EVP_EncryptFinal(ctx, cipher, &outlen);
       #endif
     }
     virtual ~OpenSSLChaCha20() { EVP_CIPHER_CTX_free(ctx); }
@@ -148,26 +165,23 @@ class OpenSSLChaCha20 : public CipherBenchmark
 #endif
 
 #ifdef HAVE_BCRYPT
-// TODO
+#undef HAVE_BCRYPT // TODO
 #endif
 
 
 #ifdef HAVE_JC
+enum JCInstructionSet { REF, AVX, AVX2 };
+
+template<JCInstructionSet is>
 class JCChaCha20 : public CipherBenchmark
 {
-  void (*f)(uint64_t*, uint64_t*, uint32_t, uint64_t*, uint64_t*, uint32_t) = nullptr;
+  static void (*f)(uint64_t*, uint64_t*, uint32_t, uint64_t*, uint64_t*, uint32_t);
 
   public:
-    enum InstructionSet { JC_REF, /*  JC_AVX, */ JC_AVX2 };
-
-    JCChaCha20(InstructionSet is, size_t msg_len) :
+    JCChaCha20(size_t msg_len) :
       CipherBenchmark(msg_len)
     {
-        switch(is) {
-          case JC_REF: set_name("libjc", "Chacha20 (ref)"); f = chacha20_ref; break;
-          // case JC_AVX: set_name("libjc", "Chacha20"); f = chacha20_avx; break; // cwinter: can't link both, avx and avx2, because of symbol name clashes
-          case JC_AVX2: set_name("libjc", "Chacha20"); f = chacha20_avx2; break;
-        }
+      set_name("libjc", "ChaCha20");
     }
     virtual void bench_setup(const BenchmarkSettings & s)
     {
@@ -175,7 +189,21 @@ class JCChaCha20 : public CipherBenchmark
     }
     virtual void bench_func()
     {
+      #ifdef _DEBUG
+      uint8_t tmp[msg_len];
+      EverCrypt_Cipher_chacha20(msg_len, tmp, plain, key, iv, ctr);
+      #endif
+
       f((uint64_t*)cipher, (uint64_t*)plain, msg_len, (uint64_t*)key, (uint64_t*)iv, ctr);
+
+      #ifdef _DEBUG
+      for (size_t i = 0; i < msg_len; i++)
+        if (cipher[i] != tmp[i]) {
+          std::cout << "EverCrypt: "; Benchmark::print_buffer(tmp, msg_len);
+          std::cout << "libjc    : "; Benchmark::print_buffer(cipher, msg_len);
+          throw std::logic_error("Encryption mismatch");
+        }
+      #endif
     }
     virtual void bench_cleanup(const BenchmarkSettings & s)
     {
@@ -183,6 +211,10 @@ class JCChaCha20 : public CipherBenchmark
     }
     virtual ~JCChaCha20() { }
 };
+
+template<> void (*JCChaCha20<REF>::f)(uint64_t*, uint64_t*, uint32_t, uint64_t*, uint64_t*, uint32_t) = chacha20_ref;
+template<> void (*JCChaCha20<AVX>::f)(uint64_t*, uint64_t*, uint32_t, uint64_t*, uint64_t*, uint32_t) = libjc_avx_chacha20_avx;
+template<> void (*JCChaCha20<AVX2>::f)(uint64_t*, uint64_t*, uint32_t, uint64_t*, uint64_t*, uint32_t) = libjc_avx2_chacha20_avx2;
 #endif
 
 static std::string filter(const std::string & data_filename, const std::string & keyword)
@@ -227,7 +259,7 @@ void bench_cipher(const BenchmarkSettings & s)
       #endif
 
       #ifdef HAVE_JC
-      new JCChaCha20(JCChaCha20::JC_AVX2, ds),
+      new JCChaCha20<JCInstructionSet::AVX2>(ds),
       #endif
       };
 
@@ -244,14 +276,14 @@ void bench_cipher(const BenchmarkSettings & s)
       #ifdef HAVE_JC
       plot_specs_ds_cycles += Benchmark::histogram_line(filter(data_filename.str(), "libjc"), "libjc", "Avg", "strcol('Algorithm')", 0, false);
       #endif
-      Benchmark::add_label_offsets(plot_specs_ds_cycles);
+      Benchmark::add_label_offsets(plot_specs_ds_cycles, 0.5, 8.0);
 
       std::stringstream extras;
       extras << "set key top left inside\n";
       extras << "set style histogram clustered gap 3 title\n";
       extras << "set style data histograms\n";
       extras << "set bmargin 5\n";
-      extras << "set xrange [-0.5:2.5]\n";
+      extras << "set xrange [-0.5:0.5]\n";
 
       Benchmark::make_plot(s,
                       "svg",
@@ -273,7 +305,7 @@ void bench_cipher(const BenchmarkSettings & s)
       #ifdef HAVE_JC
       plot_specs_ds_bytes += Benchmark::histogram_line(filter(data_filename.str(), "libjc"), "libjc", "Avg Cycles/Byte", "strcol('Algorithm')", 2, false);
       #endif
-      Benchmark::add_label_offsets(plot_specs_ds_bytes);
+      Benchmark::add_label_offsets(plot_specs_ds_bytes, 0.5, 8.0);
 
       Benchmark::make_plot(s,
                       "svg",
@@ -310,7 +342,7 @@ void bench_cipher(const BenchmarkSettings & s)
   }
 
   std::stringstream extras;
-  extras << "set key top left inside\n";
+  extras << "set key top right inside\n";
   extras << "set style histogram clustered gap 3 title\n";
   extras << "set style data histograms\n";
   extras << "set bmargin 5\n";

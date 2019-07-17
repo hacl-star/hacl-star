@@ -7,7 +7,9 @@
 #include <benchmark.h>
 
 extern "C" {
+#include <Hacl_Poly1305_32.h>
 #include <Hacl_Poly1305_128.h>
+#include <Hacl_Poly1305_256.h>
 }
 
 #ifdef HAVE_OPENSSL
@@ -30,7 +32,8 @@ extern "C" {
 class MACBenchmark : public Benchmark
 {
   protected:
-    const size_t key_sz = 32;
+    size_t key_sz;
+    size_t mac_sz;
     size_t msg_len;
 
     uint8_t *key;
@@ -41,14 +44,15 @@ class MACBenchmark : public Benchmark
   public:
     static std::string column_headers() { return "\"Provider\", \"Algorithm\", \"Size [b]\"" + Benchmark::column_headers() + ", \"Avg Cycles/Byte\""; }
 
-    MACBenchmark(size_t msg_len) : Benchmark(), msg_len(msg_len)
+    MACBenchmark(size_t key_sz, size_t mac_sz, size_t msg_len) :
+      Benchmark(), key_sz(key_sz), mac_sz(mac_sz), msg_len(msg_len)
     {
       if (msg_len == 0)
         throw std::logic_error("Need msg_len > 0");
 
       key = new uint8_t[key_sz];
       msg = new uint8_t[msg_len];
-      mac = new uint8_t[32];
+      mac = new uint8_t[mac_sz];
     }
 
     void set_name(const std::string & provider, const std::string & algorithm)
@@ -80,11 +84,15 @@ class MACBenchmark : public Benchmark
     }
 };
 
+template<size_t key_size, size_t mac_size>
 class EverCryptPoly1305 : public MACBenchmark
 {
+  protected:
+    static void (*f)(uint8_t *tag, uint32_t len, uint8_t *text, uint8_t *key);
+
   public:
     EverCryptPoly1305(size_t msg_len) :
-      MACBenchmark(msg_len)
+      MACBenchmark(key_size, mac_size, msg_len)
       { set_name("EverCrypt", "Poly1305"); }
     virtual void bench_setup(const BenchmarkSettings & s)
     {
@@ -101,55 +109,60 @@ class EverCryptPoly1305 : public MACBenchmark
     virtual ~EverCryptPoly1305() { }
 };
 
+template<> void (*EverCryptPoly1305<32, 4>::f)(uint8_t*, uint32_t, uint8_t*, uint8_t*) = Hacl_Poly1305_32_poly1305_mac;
+template<> void (*EverCryptPoly1305<32, 16>::f)(uint8_t*, uint32_t, uint8_t*, uint8_t*) = Hacl_Poly1305_128_poly1305_mac;
+template<> void (*EverCryptPoly1305<32, 32>::f)(uint8_t*, uint32_t, uint8_t*, uint8_t*) = Hacl_Poly1305_256_poly1305_mac;
+
 
 #ifdef HAVE_OPENSSL
-// See https://github.com/openssl/openssl/blob/master/demos/evp/aesgcm.c
+#undef HAVE_OPENSSL // TODO
 
+// template<size_t key_size, size_t mac_size>
 // class OpenSSLPoly1305 : public MACBenchmark
 // {
 //   protected:
-//     EVP_MAC_CTX *ctx;
+//     EVP_PKEY_CTX *ctx;
 //     int outlen;
 
 //   public:
 //     OpenSSLPoly1305(size_t msg_len) :
-//       MACBenchmark(msg_len)
+//       MACBenchmark(key_size, mac_size, msg_len)
 //       {
-//         set_name("OpenSSL", "Poly1305\\nPoly1305");
-//         ctx = EVP_MAC_CTX_new();
+//         set_name("OpenSSL", "Poly1305");
+//         ctx = EVP_PKEY_CTX_new(EVP_PKEY_new(), 0);
 //       }
 //     virtual void bench_setup(const BenchmarkSettings & s)
 //     {
 //       MACBenchmark::bench_setup(s);
-//       EVP_PKEY_POLY1305
-//       if ((EVP_EncryptInit_ex(ctx, EVP_Poly1305(), NULL, key, iv)  <= 0))
+
+//       if ((EVP_EncryptInit_ex(ctx, EVP_PKEY_POLY1305, NULL, key, NULL)  <= 0))
 //           throw std::logic_error("OpenSSL MAC initialization failed");
 //     }
 //     virtual void bench_func()
 //     {
 //       #ifdef _DEBUG
-//       if ((EVP_EncryptUpdate(ctx, MAC, &outlen, msg, msg_len) <= 0) ||
-//           (EVP_EncryptFinal_ex(ctx, MAC, &outlen) <= 0))
+//       if ((EVP_EncryptUpdate(ctx, mac, &outlen, msg, msg_len) <= 0) ||
+//           (EVP_EncryptFinal_ex(ctx, mac, &outlen) <= 0))
 //           throw std::logic_error("OpenSSL encryption failed");
 //       #else
 //       EVP_EncryptUpdate(ctx, MAC, &outlen, msg, msg_len);
 //       EVP_EncryptFinal_ex(ctx, MAC, &outlen);
 //       #endif
 //     }
-//     virtual ~OpenSSLPoly1305() { EVP_MAC_CTX_free(ctx); }
+//     virtual ~OpenSSLPoly1305() { EVP_PKEY_CTX_free(ctx); }
 // };
 
 #endif
 
 #ifdef HAVE_BCRYPT
-// TODO
+#undef HAVE_BCRYPT // TODO
 #endif
 
 
 #ifdef HAVE_JC
 enum JCInstructionSet { REF, AVX, AVX2 };
 
-template<JCInstructionSet is>
+template<size_t key_size, size_t mac_size, JCInstructionSet is>
 class JCPoly1305 : public MACBenchmark
 {
   protected:
@@ -157,7 +170,7 @@ class JCPoly1305 : public MACBenchmark
 
   public:
     JCPoly1305(size_t msg_len) :
-      MACBenchmark(msg_len)
+      MACBenchmark(key_size, mac_size, msg_len)
     {
       set_name("libjc", "Poly1305");
     }
@@ -167,7 +180,18 @@ class JCPoly1305 : public MACBenchmark
     }
     virtual void bench_func()
     {
+      #ifdef _DEBUG
+      uint8_t tmp[this->mac_sz];
+      Hacl_Poly1305_128_poly1305_mac(tmp, msg_len, msg, key);
+      #endif
+
       f((uint64_t*)mac, (uint64_t*)msg, msg_len, (uint64_t*)key);
+
+      #ifdef _DEBUG
+      for (size_t i = 0; i < this->mac_sz; i++)
+        if (mac[i] != tmp[i])
+          throw std::logic_error("MAC mismatch");
+      #endif
     }
     virtual void bench_cleanup(const BenchmarkSettings & s)
     {
@@ -176,10 +200,9 @@ class JCPoly1305 : public MACBenchmark
     virtual ~JCPoly1305() { }
 };
 
-template<> void (*JCPoly1305<JCInstructionSet::REF>::f)(uint64_t*, uint64_t*, uint64_t, uint64_t*) = poly1305_ref3;
-// cwinter: can't link both, avx and avx2, because of symbol name clashes
-//template<> void (*JCPoly1305<JCInstructionSet::AVX>::f)(uint64_t*, uint64_t*, uint64_t, uint64_t*) = poly1305_avx;
-template<> void (*JCPoly1305<JCInstructionSet::AVX2>::f)(uint64_t*, uint64_t*, uint64_t, uint64_t*) = poly1305_avx2;
+template<> void (*JCPoly1305<32, 16, JCInstructionSet::REF>::f)(uint64_t*, uint64_t*, uint64_t, uint64_t*) = poly1305_ref3;
+template<> void (*JCPoly1305<32, 16, JCInstructionSet::AVX>::f)(uint64_t*, uint64_t*, uint64_t, uint64_t*) = libjc_avx_poly1305_avx;
+template<> void (*JCPoly1305<32, 16, JCInstructionSet::AVX2>::f)(uint64_t*, uint64_t*, uint64_t, uint64_t*) = libjc_avx2_poly1305_avx2;
 #endif
 
 static std::string filter(const std::string & data_filename, const std::string & keyword)
@@ -214,7 +237,7 @@ void bench_mac(const BenchmarkSettings & s)
     }
 
     std::list<Benchmark*> todo = {
-      new EverCryptPoly1305(ds),
+      new EverCryptPoly1305<32, 16>(ds),
 
       #ifdef HAVE_OPENSSL
       //new OpenSSLPoly1305(ds),
@@ -224,7 +247,7 @@ void bench_mac(const BenchmarkSettings & s)
       #endif
 
       #ifdef HAVE_JC
-      new JCPoly1305<JCInstructionSet::AVX2>(ds),
+      new JCPoly1305<32, 16, JCInstructionSet::AVX2>(ds),
       #endif
       };
 
@@ -241,14 +264,14 @@ void bench_mac(const BenchmarkSettings & s)
       #ifdef HAVE_JC
       plot_specs_ds_cycles += Benchmark::histogram_line(filter(data_filename.str(), "libjc"), "libjc", "Avg", "strcol('Algorithm')", 0, false);
       #endif
-      Benchmark::add_label_offsets(plot_specs_ds_cycles);
+      Benchmark::add_label_offsets(plot_specs_ds_cycles, 0.5, 3.0);
 
       std::stringstream extras;
       extras << "set key top left inside\n";
       extras << "set style histogram clustered gap 3 title\n";
       extras << "set style data histograms\n";
       extras << "set bmargin 5\n";
-      extras << "set xrange [-0.5:2.5]\n";
+      extras << "set xrange [-0.5:0.5]\n";
 
       Benchmark::make_plot(s,
                       "svg",
@@ -270,7 +293,7 @@ void bench_mac(const BenchmarkSettings & s)
       #ifdef HAVE_JC
       plot_specs_ds_bytes += Benchmark::histogram_line(filter(data_filename.str(), "libjc"), "libjc", "Avg Cycles/Byte", "strcol('Algorithm')", 2, false);
       #endif
-      Benchmark::add_label_offsets(plot_specs_ds_bytes);
+      Benchmark::add_label_offsets(plot_specs_ds_bytes, 0.5, 3.0);
 
       Benchmark::make_plot(s,
                       "svg",
@@ -307,7 +330,7 @@ void bench_mac(const BenchmarkSettings & s)
   }
 
   std::stringstream extras;
-  extras << "set key top left inside\n";
+  extras << "set key top right inside\n";
   extras << "set style histogram clustered gap 3 title\n";
   extras << "set style data histograms\n";
   extras << "set bmargin 5\n";

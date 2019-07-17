@@ -119,7 +119,7 @@ class Benchmark
                                    unsigned label_digits,
                                    bool label_rotate = false);
 
-    static void add_label_offsets(PlotSpec & ps, double label_offset_y = 0.5);
+    static void add_label_offsets(PlotSpec & ps, double label_offset_y = 0.5, double scale = 1.0);
 
     static PlotSpec candlestick_line(const std::string & data_filename,
                                      const std::string & title,
