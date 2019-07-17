@@ -13,7 +13,8 @@ val sign:
   -> msg:lbuffer uint8 len ->
   Stack unit
     (requires fun h -> live h signature /\ live h msg /\ live h secret)
-    (ensures  fun h0 _ h1 -> modifies (loc signature) h0 h1)
+    (ensures  fun h0 _ h1 -> modifies (loc signature) h0 h1 /\
+      as_seq h1 signature == Spec.Ed25519.sign (as_seq h0 secret) (as_seq h0 msg))
 
 val verify:
     output:lbuffer uint8 32ul
