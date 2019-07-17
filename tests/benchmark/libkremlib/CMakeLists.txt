@@ -10,7 +10,7 @@ message("-- Using KreMLib sources at ${KREMLIB_DIR}")
 if (NOT KREMLIN_INC)
   set(KREMLIN_INC ${KREMLIN_HOME}/include CACHE PATH "Where to find the KreMLin headers.")
 endif()
-get_filename_component(KREMLIN_INC ${KREMLIN_INC} ABSOLUTE)
+get_filename_component(KREMLIN_INC ${KREMLIN_INC} REALPATH)
 message("-- Using KreMLin at ${KREMLIN_INC}")
 
 add_library(kremlib STATIC
