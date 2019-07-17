@@ -204,7 +204,8 @@ val load_precompute_r:
   Stack unit
   (requires fun h -> live h pre /\ live h key /\ disjoint pre key)
   (ensures  fun h0 _ h1 -> modifies1 pre h0 h1 /\
-    get_r4321 h1 pre == load_precompute_r (S.load_elem (as_seq h0 key)))
+    get_r1 h1 pre == S.load_elem (as_seq h0 key) /\
+    get_r4321 h1 pre == load_precompute_r (get_r1 h1 pre))
 let load_precompute_r #s pre key =
   match s with
   | PreComp -> Hacl.Impl.Gf128.FieldPreComp.load_precompute_r pre key
@@ -274,8 +275,7 @@ val fmul_r4:
   Stack unit
   (requires fun h -> live h x /\ live h y /\ disjoint x y)
   (ensures  fun h0 _ h1 -> modifies1 x h0 h1 /\
-   (let r4 = get_r4 h0 y in
-    feval4 h1 x == fmul4 (feval4 h0 x) (create4 r4 r4 r4 r4)))
+    feval4 h1 x == fmul4 (feval4 h0 x) (LSeq.create 4 (get_r4 h0 y)))
 let fmul_r4 #s x pre =
   match s with
   | PreComp -> Hacl.Impl.Gf128.FieldPreComp.fmul_r4 x pre
@@ -290,7 +290,7 @@ val normalize4:
   Stack unit
   (requires fun h -> live h acc /\ live h x /\ live h y)
   (ensures  fun h0 _ h1 -> modifies1 acc h0 h1 /\
-   (let x = Hacl.Spec.GF128.Vec.fadd4 (create4 (feval h0 acc) GF.zero GF.zero GF.zero) (feval4 h0 x) in
+   (let x = Hacl.Spec.GF128.Vec.fadd4 (create4 (feval h0 acc) zero zero zero) (feval4 h0 x) in
     feval h1 acc == normalize4 x (get_r4321 h0 y)))
 let normalize4 #s acc x pre =
   match s with

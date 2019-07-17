@@ -365,6 +365,7 @@ val load_precompute_r:
   (requires fun h -> live h pre /\ live h key /\ disjoint pre key)
   (ensures  fun h0 _ h1 -> modifies1 pre h0 h1 /\
     (let r = S.load_elem (as_seq h0 key) in
+    feval h1 (gsub pre 3ul 1ul) == r /\
     feval4 h1 pre == Vec.load_precompute_r r))
 
 let load_precompute_r pre key =
@@ -404,7 +405,7 @@ val fmul_r4:
   (requires fun h -> live h x /\ live h pre /\ disjoint x pre)
   (ensures  fun h0 _ h1 -> modifies1 x h0 h1 /\
     (let r4 = feval h0 (gsub pre 0ul 1ul) in
-    feval4 h1 x == Vec.fmul4 (feval4 h0 x) (create4 r4 r4 r4 r4)))
+    feval4 h1 x == Vec.fmul4 (feval4 h0 x) (LSeq.create 4 r4)))
 
 let fmul_r4 x pre =
   let h0 = ST.get () in
@@ -413,8 +414,8 @@ let fmul_r4 x pre =
   fmul (sub x (size 2) (size 1)) (sub pre (size 0) (size 1));
   fmul (sub x (size 3) (size 1)) (sub pre (size 0) (size 1));
   let h1 = ST.get () in
-  let r4 = feval h0 (gsub pre 0ul 1ul) in
-  LSeq.eq_intro (feval4 h1 x) (Vec.fmul4 (feval4 h0 x) (create4 r4 r4 r4 r4))
+  LSeq.eq_intro (feval4 h1 x)
+    (Vec.fmul4 (feval4 h0 x) (LSeq.create 4 (feval h0 (gsub pre 0ul 1ul))))
 
 
 [@CInline]
