@@ -19,17 +19,24 @@ friend Vale.X64.StateLemmas
 
 module IR = Vale.Transformers.InstructionReorder
 
-(* See fsti *)
-let reorder orig hint =
-  match IR.reordering_allowed [orig] [hint] with
-  | Ok () -> {
+unfold
+let transformation_result_of_possibly_codes (c:possibly codes) (if_fail:code) =
+  match c with
+  | Ok c -> {
       success = ttrue;
-      result = Block (IR.perform_reordering [orig] [hint])
+      result = Block c;
     }
   | Err reason -> {
       success = ffalse reason;
-      result = orig;
+      result = if_fail;
     }
+
+(* See fsti *)
+let reorder orig hint =
+  transformation_result_of_possibly_codes (
+    ts <-- IR.find_transfomation_hints [orig] [hint];
+    IR.perform_reordering_with_hints ts [orig]
+  ) orig
 
 #push-options "--max_fuel 2 --max_ifuel 1"
 let lemma_code_codes (c:code) (fuel:nat) (s:machine_state) :
@@ -54,11 +61,15 @@ let lemma_IR_equiv_states_to_equiv_states (vs0:vale_state) (s1 s2:machine_state)
 
 (* See fsti *)
 let lemma_reorder orig hint transformed va_s0 va_sM va_fM =
-  match IR.reordering_allowed [orig] [hint] with
-  | Ok () -> (
+  match IR.find_transfomation_hints [orig] [hint] with
+  | Err _ -> va_sM, va_fM
+  | Ok ts ->
+    match IR.perform_reordering_with_hints ts [orig] with
+    | Err _ -> va_sM, va_fM
+    | Ok tr ->
       lemma_code_codes orig va_fM (state_to_S va_s0);
-      IR.lemma_reordering [orig] [hint] va_fM (state_to_S va_s0);
-      lemma_codes_code (IR.perform_reordering [orig] [hint]) va_fM (state_to_S va_s0);
+      IR.lemma_perform_reordering_with_hints ts [orig] va_fM (state_to_S va_s0);
+      lemma_codes_code tr va_fM (state_to_S va_s0);
       let Some s = machine_eval_code orig va_fM (state_to_S va_s0) in
       let Some s' = machine_eval_code transformed va_fM (state_to_S va_s0) in
       assert (same_domain va_sM s);
@@ -74,5 +85,3 @@ let lemma_reorder orig hint transformed va_s0 va_sM va_fM =
       assert (equiv_states va_sM va_sM');
       assert (va_ensure_total transformed va_s0 va_sM' va_fM);
       va_sM', va_fM
-    )
-  | Err reason -> va_sM, va_fM
