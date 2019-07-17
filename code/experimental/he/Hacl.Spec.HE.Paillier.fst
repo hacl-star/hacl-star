@@ -52,7 +52,7 @@ let shrink_unit #n a =
   inv_as_gcd2 a;
   gcd_to_factor_one n n a;
   assert (is_gcd a n 1);
-  gcd_mod_reduce n a;
+  gcd_mod_reduce_big n a;
   assert (is_gcd (to_fe #n a) n 1);
   inv_as_gcd1 (to_fe #n a)
 
