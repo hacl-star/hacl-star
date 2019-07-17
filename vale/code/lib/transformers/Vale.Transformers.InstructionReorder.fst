@@ -1588,14 +1588,41 @@ let rec string_of_transformation_hint (t:transformation_hint) : string =
   | MoveUpFrom p -> "(MoveUpFrom " ^ string_of_int p ^ ")"
   | DiveInAt p q -> "(DiveInAt " ^ string_of_int p ^ " " ^ string_of_transformation_hint q ^ ")"
 
+let rec wrap_diveinat (p:nat) (l:transformation_hints) : transformation_hints =
+  match l with
+  | [] -> []
+  | x :: xs ->
+    DiveInAt p x :: wrap_diveinat p xs
+
 irreducible
 (* Our proofs do not depend on how the hints are found. As long as
    some hints are provided, we validate the hints to perform the
    transformation and use it. Thus, we make this function
    [irreducible] to explicitly prevent any of the proofs from
    reasoning about it. *)
-let rec find_transfomation_hints (c1 c2:codes) : possibly transformation_hints =
-  Err "temp. no transformation found. TODO FIXME"
+let rec find_transformation_hints (c1 c2:codes) :
+  Tot (possibly transformation_hints)
+    (decreases %[c2]) =
+  match c1, c2 with
+  | [], [] -> return []
+  | [], _ | _, [] -> Err "disagreeing lengths of code"
+  | _, h2 :: t2 ->
+    match find_code h2 c1 with
+    | Ok i -> (
+        t1 <-- bubble_to_top c1 i;
+        t_hints2 <-- find_transformation_hints t1 t2;
+        return (MoveUpFrom i :: t_hints2)
+      )
+    | Err reason -> (
+        let h1 :: t1 = c1 in
+        match h1, h2 with
+        | Block l1, Block l2 ->
+          t_hints1 <-- find_transformation_hints l1 l2;
+          t_hints2 <-- find_transformation_hints t1 t2;
+          return (wrap_diveinat 0 t_hints1 `L.append` t_hints2)
+        | _ ->
+          Err reason
+      )
 
 (* XXX: Copied from List.Tot.Base because of an extraction issue.
    See https://github.com/FStarLang/FStar/pull/1822. *)

@@ -34,7 +34,7 @@ let transformation_result_of_possibly_codes (c:possibly codes) (if_fail:code) =
 (* See fsti *)
 let reorder orig hint =
   transformation_result_of_possibly_codes (
-    ts <-- IR.find_transfomation_hints [orig] [hint];
+    ts <-- IR.find_transformation_hints [orig] [hint];
     IR.perform_reordering_with_hints ts [orig]
   ) orig
 
@@ -61,7 +61,7 @@ let lemma_IR_equiv_states_to_equiv_states (vs0:vale_state) (s1 s2:machine_state)
 
 (* See fsti *)
 let lemma_reorder orig hint transformed va_s0 va_sM va_fM =
-  match IR.find_transfomation_hints [orig] [hint] with
+  match IR.find_transformation_hints [orig] [hint] with
   | Err _ -> va_sM, va_fM
   | Ok ts ->
     match IR.perform_reordering_with_hints ts [orig] with
