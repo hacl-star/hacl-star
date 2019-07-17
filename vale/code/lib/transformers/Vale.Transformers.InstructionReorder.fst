@@ -1667,12 +1667,20 @@ let rec perform_reordering_with_hint (t:transformation_hint) (c:codes) : possibl
         )
     )
 
+let rec is_empty_codes (c:codes) : bool =
+  match c with
+  | [] -> true
+  | Block l :: xs -> is_empty_codes l && is_empty_codes xs
+  | x :: xs -> false
+
 let rec perform_reordering_with_hints (ts:transformation_hints) (c:codes) : possibly codes =
   match ts with
   | [] -> (
-      match c with
-      | [] -> return []
-      | _ -> Err ("no more transformation hints for " ^ fst (print_code (Block c) 0 gcc))
+      if is_empty_codes c then (
+        return []
+      ) else (
+        Err ("no more transformation hints for " ^ fst (print_code (Block c) 0 gcc))
+      )
     )
   | t :: ts' ->
     c' <-- perform_reordering_with_hint t c;
@@ -1819,6 +1827,18 @@ let rec lemma_perform_reordering_with_hint (t:transformation_hint) (cs:codes) (f
     )
 #pop-options
 
+#push-options "--initial_fuel 3 --max_fuel 3 --initial_ifuel 1 --max_ifuel 1"
+let rec lemma_is_empty_codes (cs:codes) (fuel:nat) (s:machine_state) :
+  Lemma
+    (requires (is_empty_codes cs))
+    (ensures (machine_eval_codes cs fuel s == machine_eval_codes [] fuel s)) =
+  match cs with
+  | [] -> ()
+  | Block l :: xs ->
+    lemma_is_empty_codes l fuel s;
+    lemma_is_empty_codes xs fuel s
+#pop-options
+
 let rec lemma_perform_reordering_with_hints (ts:transformation_hints) (cs:codes) (fuel:nat) (s:machine_state) :
   Lemma
     (requires (
@@ -1834,7 +1854,7 @@ let rec lemma_perform_reordering_with_hints (ts:transformation_hints) (cs:codes)
   let Ok cs' = perform_reordering_with_hints ts cs in
   let Some s' = machine_eval_codes cs fuel s in
   match ts with
-  | [] -> ()
+  | [] -> lemma_is_empty_codes cs fuel s
   | t :: ts' ->
     let Ok (x :: xs) = perform_reordering_with_hint t c in
     lemma_perform_reordering_with_hint t c fuel s;
