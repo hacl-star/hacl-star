@@ -1,0 +1,829 @@
+#include "../ref3/poly1305.jazz"
+
+#ifndef INLINE_U
+#define INLINE_U 1
+#endif
+
+u64 zero_u64 = 0;
+u64 five_u64 = 5;
+u64 mask26_u64 = 0x3ffffff;
+u64 bit25_u64 = 0x1000000;
+
+#define inlined_unpack(r1234,rt, o) \
+    mask26 = 0x3ffffff;\
+    l = rt[0];\
+    l &= mask26;\
+    r1234[u64 o + 0] = l;\
+    l = rt[0];\
+    l >>= 26;\
+    l &= mask26;\
+    r1234[u64 o + 4] = l;\
+    l = rt[0];\
+    l = #x86_SHRD(l, rt[1], 52);\
+    h = l;\
+    l &= mask26;\
+    r1234[u64 o + 8] = l;\
+    l = h;\
+    l >>= 26;\
+    l &= mask26;\
+    r1234[u64 o + 12] = l;\
+    l = rt[1];\
+    l = #x86_SHRD(l, rt[2], 40);\
+    r1234[u64 o + 16] = l;
+
+#if !INLINE_U
+fn unpack(stack u256[5] r1234, reg u64[3] rt, inline int o) -> stack u256[5]
+{
+  inline int mask26;
+  reg u64 h, l;
+
+  mask26 = 0x3ffffff;
+
+  l = rt[0];
+  l &= mask26;
+  r1234[u64 o + 0] = l;
+
+  l = rt[0];
+  l >>= 26;
+  l &= mask26;
+  r1234[u64 o + 4] = l;
+
+  l = rt[0];
+  l = #x86_SHRD(l, rt[1], 52);
+  h = l;
+  l &= mask26;
+  r1234[u64 o + 8] = l; // 12 bits from rt[0] and 14 bits from rt[1] 
+
+  l = h;
+  l >>= 26;
+  l &= mask26;
+  r1234[u64 o + 12] = l;
+  // 26 bits from rt[1]; there are still some bits to copy:
+  // - higher 24 bits of rt[1] and 2+x of rt[2] where x can be:
+  //   - +1 bit if there is a carry propagated until the end (check last part of mulmod)
+  //   - up until +3 bits (rt[2] can be 0,1,2,3 or 4 hence 4*5 = 20 (10100b))
+  //   - total number of bits to copy should be at most 24+5 = 29 bits 
+
+  l = rt[1];
+  l = #x86_SHRD(l, rt[2], 40);
+  r1234[u64 o + 16] = l;
+
+  return r1234;
+}
+#endif
+
+
+fn times_5(stack u256[5] r1234) -> stack u256[4]
+{
+  inline int i;
+  stack u256[4] r1234x5;
+  reg u256 t, five;
+
+  five = #x86_VPBROADCAST_4u64(five_u64);
+  for i=0 to 4
+  { t = #x86_VPMULU_256(five, r1234[1+i]);
+    r1234x5[i] = t; }
+  return r1234x5;
+}
+
+
+
+fn broadcast_r4(stack u256[5] r1234, stack u256[4] r1234x5) -> stack u256[5], stack u256[4]
+{
+  inline int i;
+  stack u256[5] r4444;
+  stack u256[4] r4444x5;
+  reg   u256[5] t;
+
+  for i=0 to 5
+  { t[i] = #x86_VPBROADCAST_4u64(r1234[u64 4*i]);
+    r4444[i] = t[i]; }
+
+  for i=0 to 4
+  { t[i] = #x86_VPBROADCAST_4u64(r1234x5[u64 4*i]);
+    r4444x5[i] = t[i]; }
+
+  return r4444, r4444x5;
+}
+
+
+
+fn poly1305_avx2_setup(reg u64[3] r) ->
+  stack u256[5], stack u256[4],
+  stack u256[5], stack u256[4]
+{
+  inline int i mask26;
+  stack u256[5] r4444   r1234;
+  stack u256[4] r4444x5 r1234x5;
+  reg u256 t;
+  reg u64[3] rt;
+  reg u64 h l;
+
+  // rt = r; store rt
+  for i=0 to 2 { rt[i] = r[i]; } rt[2] = 0;
+  // r^1
+  #if INLINE_U
+    inlined_unpack(r1234, rt, 3)
+  #else
+    r1234 = unpack(r1234, rt, 3);
+  #endif
+
+
+  // precompute r^2 r^3 r^4
+  for i=0 to 3
+  { rt = mulmod(rt, r);
+    #if INLINE_U
+      inlined_unpack(r1234, rt, (2-i))
+    #else
+      r1234 = unpack(r1234, rt, 2-i);
+    #endif
+  }
+
+  // compute r1234x5
+  r1234x5 = times_5(r1234);
+
+  // broadcast r^4 and r^4*5 from r1234 r1234x5 into r4444 and r4444x5
+  r4444, r4444x5 = broadcast_r4(r1234, r1234x5);
+
+  return r4444, r4444x5, r1234, r1234x5;
+}
+
+
+
+// very close (pratically the same except the first 5 lines) adaptation of the
+// strategy used by OpenSSL's AVX2 codepath to load 64 bytes for poly1305
+// it includes some annotations to easy out the correction proof
+fn load_avx2(reg u64 in, reg u256 mask26, stack u256 s_bit25) -> reg u256[5], reg u64
+{
+  reg u256[5] m;
+  reg u256 t;
+
+  t    = (u256)[in + 0];
+  m[1] = (u256)[in + 32];
+  in += 64;
+  //    t = { in[128:257] , in[0:127]   }
+  // m[1] = { in[384:511] , in[256:383] }
+
+  m[0] = #x86_VPERM2I128(t, m[1], (2u4)[2,0]); //0x20
+  m[1] = #x86_VPERM2I128(t, m[1], (2u4)[3,1]); //0x31
+  // m[0] = { in[256:383] , in[0:127] }
+  // m[1] = { in[384:511] , in[128:257] }
+
+  m[2] = #x86_VPSRLDQ_256(m[0], 6);
+  m[3] = #x86_VPSRLDQ_256(m[1], 6);
+  // m[2] = { in[304:383], in[48:127] }
+  // m[3] = { in[432:511], in[176:257] }
+
+  m[4] = #x86_VPUNPCKH_4u64(m[0], m[1]);
+  m[0] = #x86_VPUNPCKL_4u64(m[0], m[1]);
+  // m[4] = { in[384+64:511], in[256+64:383], in[128+64:257], in[0+64:127] }
+  //        { in[448:511]   , in[320:383]   , in[192:257]   , in[64:127  ] }
+  //
+  // m[0] = { in[384:511-64], in[256:383-64], in[128:257-64], in[0:127-64] }
+  //        { in[384:447]   , in[256:319]   , in[128:191]   , in[0:63]     }
+
+  m[3] = #x86_VPUNPCKL_4u64(m[2], m[3]);
+  // m[3] = { in[432:495], in[304:367], in[176:239], in[48:111] }
+
+  m[2] = m[3] >>4u64 4;
+  // m[2] = { in[436:495], in[308:367], in[180:239], in[52:111] }
+
+  m[2] &= mask26;
+  // m[2] = { in[436:461], in[308:333], in[180:205], in[52:77] }
+
+  m[1] = m[0] >>4u64 26;
+  // m[1] = { in[410:447], in[282:319], in[154:191], in[26:63] }
+
+  m[0] &= mask26;
+  // m[0] = { in[384:409], in[256:281], in[128:153], in[0:25]  }
+
+  m[3] >>4u64= 30;
+  // m[3] = { in[462:495], in[334:367], in[206:239], in[78:111] }
+
+  m[3] &= mask26;
+  // m[3] = { in[462:487], in[334:359], in[206:231], in[78:103] }
+
+  m[4] >>4u64= 40;
+  // m[4] = { in[488:511], in[380:383], in[232:257], in[104:127] }
+
+  m[4] |= s_bit25;
+
+  m[1] &= mask26;
+  // m[1] = { in[410:435], in[282:307], in[154:179], in[26:51] }
+
+  return m, in;
+}
+
+
+
+fn pack_avx2(reg u256[5] h) -> reg u64[3]
+{
+  reg bool cf;
+  inline int i;
+  reg u256[3] t;
+  reg u128 t0;
+  reg u256[2] u;
+  reg u64[3] d r;
+  reg u64 c cx4;
+
+  // we start by saying that t0 will be equal to:
+  //   { a3+b3*2^26, a2+b2*2^26, a1+b1*2^26, a0+b0*2^26 }
+  // and for simplicity we can just write
+  //   { ab(3), ab(2), ab(1), ab(0) }
+  t[0] = h[1] <<4u64 26;
+  t[0] +4u64= h[0];
+
+  // and t1 will be equal to:
+  //   { c3+d3*2^26, c2+d2*2^26, c1+d1*2^26, c0+d0*2^26 }
+  // and for simplicity we can just write
+  //   { cd(3), cd(2), cd(1), cd(0) }
+  t[1] = h[3] <<4u64 26;
+  t[1] +4u64= h[2];
+
+  // and t2 will be equal to:
+  //   { e3, e(2+3), e1, e(0+1) }
+  t[2] = #x86_VPSRLDQ_256(h[4], 8);
+  t[2] +4u64= h[4];
+
+  // we then permute the internal state of t2 so that:
+  // t2 = { e(2+3), e(0+1), xxx, yyy }
+  // and since we are not interested in e1 and e3 anymore we just write xxx, yyy
+  t[2] = #x86_VPERMQ(t[2], (4u2)[2,0,0,0]);
+
+  // let u0 be { cd(1), cd(0), ab(1), ab(0) } and
+  //     u1 be { cd(3), cd(2), ab(3), ab(2) } and
+  u[0] = #x86_VPERM2I128(t[0], t[1], (2u4)[2,0]);
+  u[1] = #x86_VPERM2I128(t[0], t[1], (2u4)[3,1]);
+
+  // t0 = { cd(1+3), cd(0+2), ab(1+3), ab(0+2) }
+  t[0] = u[0] +4u64 u[1];
+
+  // u0 = { e(0+1), cd(0+2), yyy, ab(0+2) }
+  // u1 = { e(2+3), cd(1+3), xxx, ab(1+3) }
+  u[0] = #x86_VPUNPCKL_4u64(t[0], t[2]);
+  u[1] = #x86_VPUNPCKH_4u64(t[0], t[2]);
+
+  // t0 = { e(0+1+2+3), cd(0+2+1+3), yyy+yyy, ab(0+2+1+3) }
+  t[0] = u[0] +4u64 u[1];
+  
+  // extract t0 values into u64 registers
+  t0 = #x86_VEXTRACTI128(t[0], 1);
+  d[0] = #x86_VPEXTR_64(t[0], 0); // ~55 bits
+  d[1] = #x86_VPEXTR_64(t0,   0); // ~55 bits
+  d[2] = #x86_VPEXTR_64(t0,   1); // ~29 bits
+
+  // at this point we have that 
+  //   R = r0*2^0 + r1^2^52 + r2*2^104
+  // and we want it to be
+  //   R = r0*2^0 + r1*2^64 + r2*2^128
+
+  r[0] = d[1];
+  r[0] <<= 52; // 12 bits from d[1]
+
+  r[1] = d[1];
+  r[1] >>= 12; // 52 bits from d[1] (only ~43 should be set)
+
+  r[2] = d[2];
+  r[2] >>= 24; // 128 - 104
+
+  d[2] <<= 40; // 64 - (128 - 104)
+
+  cf, r[0] += d[0];
+  cf, r[1] += d[2] + cf;
+   _, r[2] += 0 + cf;
+
+  // reduce (check comments in mulmod function of ref3 implementation)
+  c = r[2];
+  cx4 = r[2];
+  r[2] &= 3; // clear the remaining bits
+  c >>= 2;   // (r[2]>>2)
+  cx4 &= -4; // clear first 2 bits: (r[2]>>2)<<2
+  c += cx4; 
+
+  cf, r[0] += c;
+  cf, r[1] += 0 + cf;
+   _, r[2] += 0 + cf;
+
+  return r; 
+}
+
+
+
+fn carry_reduce_avx2(reg u256[5] x, reg u256 mask26) -> reg u256[5]
+{
+  reg u256[2] z;
+  reg u256 t;
+
+  z[0] = x[0] >>4u64 26;
+  z[1] = x[3] >>4u64 26;
+
+  x[0] &= mask26;
+  x[3] &= mask26;
+
+  x[1] +4u64= z[0];
+  x[4] +4u64= z[1];
+
+  z[0] = x[1] >>4u64 26;
+  z[1] = x[4] >>4u64 26;
+
+  t = z[1] <<4u64 2;
+  z[1] +4u64= t;
+
+  x[1] &= mask26;
+  x[4] &= mask26;
+  x[2] +4u64= z[0];
+  x[0] +4u64= z[1];
+
+  z[0] = x[2] >>4u64 26;
+  z[1] = x[0] >>4u64 26;
+  x[2] &= mask26;
+  x[0] &= mask26;
+  x[3] +4u64= z[0];
+  x[1] +4u64= z[1];
+
+  z[0] = x[3] >>4u64 26;
+  x[3] &= mask26;
+  x[4] +4u64= z[0];
+
+  return x;
+}
+
+
+
+// in this function we want to perform the following computation:
+// - H = (H+M)*R
+// the firt step is easy to do, we just need to add h to m:
+// - H = H+M
+//
+// for the multiplication we need to expand a bit: we are working with five limbs,
+// each with 26 bits. Then we have that the multiplication of an h with r could
+// happen as follows:
+
+// - with h being = h0*2^0 + h1*2^26 + h2*2^52 + h3*2^78 + h4*2^104
+// - and r being = r0*2^0 + r1*2^26 + r2*2^52 + r3*2^78 + r4*2^104
+//
+// h * r can be expressed by the following formula:
+//
+//  (h0*r0) * 2^0 + 
+//  (h0*r1 + h1*r0) * 2^26 +
+//  (h0*r2 + h1*r1 + h2*r0) * 2^52 +
+//  (h0*r3 + h1*r2 + h2*r1 + h3*r0) * 2^78 +
+//  (h0*r4 + h1*r3 + h2*r2 + h3*r1 + h4*r0) * 2^104 +
+//  (h1*r4 + h2*r3 + h3*r2 + h4*r1) * 2^130 +
+//  (h2*r4 + h3*r3 + h4*r2) * 2^156 +
+//  (h3*r4 + h4*r3) * 2^182 +
+//  (h4*r4) * 2^208
+//
+// if we multiply by 5 anything that is above 2^130 we can reduce the degree
+// (because the calculations are modulus 2^130 - 5)
+//
+//  (h0*r0 + h1*r4*5 + h2*r3*5 + h3*r2*5 + h4*r1*5) * 2^0 + 
+//  (h0*r1 + h1*r0   + h2*r4*5 + h3*r3*5 + h4*r2*5) * 2^26 +
+//  (h0*r2 + h1*r1   + h2*r0   + h3*r4*5 + h4*r3*5) * 2^52 +
+//  (h0*r3 + h1*r2   + h2*r1   + h3*r0   + h4r4*5 ) * 2^78 +
+//  (h0*r4 + h1*r3   + h2*r2   + h3*r1   + h4*r0  ) * 2^104
+//
+// since our r's and r's*5 are in stack, and since we don't have
+// enough registers to keep everything live (just h's, which are 5,
+// temporary accumulators, also 5+?, and some other values) let's take
+// a look at how many times each r is used:
+//  5 times : r0 
+//  4 times : r1 and r4*5
+//  3 times : r2 and r3*5
+//  2 times : r3 and r2*5
+//  1 time  : r4 and r1*5
+//
+// and we can rearrange the order:
+//
+//  (h0*r0 +         h1*r4*5 +           h2*r3*5 +         h3*r2*5 + h4*r1*5) * 2^0 + 
+//  (h1*r0 + h0*r1 + h2*r4*5 +           h3*r3*5 +         h4*r2*5          ) * 2^26 +
+//  (h2*r0 + h1*r1 + h3*r4*5 + h0*r2   + h4*r3*5                            ) * 2^52 +
+//  (h3*r0 + h2*r1 + h4*r4*5 + h1*r2   +         + h0*r3                    ) * 2^78 +
+//  (h4*r0 + h3*r1 +           h2*r2   +         + h1*r3 +           h0*r4  ) * 2^104
+
+fn add_mulmod_avx2(
+  reg u256[5] h,
+  reg u256[5] m,
+  stack u256[5] s_r,
+  stack u256[4] s_rx5,
+  stack u256 s_mask26,
+  stack u256 s_bit25
+) -> reg u256[5]
+{
+  reg u256[5] t;
+  reg u256[4] u;
+  reg u256 r0, r1, r4x5, r2, r3x5, r3, r2x5;
+  reg u256 mask26;
+
+  // pre fetching first 3 r's
+  r0 = s_r[0];
+  r1 = s_r[1];
+  r4x5 = s_rx5[4-1];
+
+  // h += m
+  h[0] +4u64= m[0];
+  h[1] +4u64= m[1];
+  h[2] +4u64= m[2];
+  h[3] +4u64= m[3];
+  h[4] +4u64= m[4];
+
+  // t0 = h0*r0
+  // t1 = h1*r0
+  // t2 = h2*r0
+  // t3 = h3*r0
+  // t4 = h4*r0
+  t[0] = #x86_VPMULU_256(h[0], r0);
+  t[1] = #x86_VPMULU_256(h[1], r0);
+  t[2] = #x86_VPMULU_256(h[2], r0);
+  t[3] = #x86_VPMULU_256(h[3], r0);
+  t[4] = #x86_VPMULU_256(h[4], r0);
+
+  // t1 += h0*r1
+  // t2 += h1*r1
+  // t3 += h2*r1
+  // t4 += h3*r1
+  u[0] = #x86_VPMULU_256(h[0], r1);
+  u[1] = #x86_VPMULU_256(h[1], r1);
+  u[2] = #x86_VPMULU_256(h[2], r1);
+  u[3] = #x86_VPMULU_256(h[3], r1);
+
+  // prefetch r2
+  r2 = s_r[2];
+
+  t[1] +4u64= u[0];
+  t[2] +4u64= u[1];
+  t[3] +4u64= u[2];
+  t[4] +4u64= u[3];
+
+  // t0 += h1*r4*5
+  // t1 += h2*r4*5
+  // t2 += h3*r4*5
+  // t3 += h4*r4*5
+
+  u[0] = #x86_VPMULU_256(h[1], r4x5);
+  u[1] = #x86_VPMULU_256(h[2], r4x5);
+  u[2] = #x86_VPMULU_256(h[3], r4x5);
+  u[3] = #x86_VPMULU_256(h[4], r4x5);
+
+  // prefetch r3*5
+  r3x5 = s_rx5[3-1];
+
+  t[0] +4u64= u[0];
+  t[1] +4u64= u[1];
+  t[2] +4u64= u[2];
+  t[3] +4u64= u[3];
+
+  // t2 += h0*r2
+  // t3 += h1*r2
+  // t4 += h2*r2
+
+  u[0] = #x86_VPMULU_256(h[0], r2);
+  u[1] = #x86_VPMULU_256(h[1], r2);
+  u[2] = #x86_VPMULU_256(h[2], r2);
+
+  // prefetch r3
+  r3 = s_r[3];
+
+  t[2] +4u64= u[0];
+  t[3] +4u64= u[1];
+  t[4] +4u64= u[2];
+
+  // t0 += h2*r3*5
+  // t1 += h3*r3*5
+  // t2 += h4*r3*5
+
+  u[0] = #x86_VPMULU_256(h[2], r3x5); // h2 dead
+  u[1] = #x86_VPMULU_256(h[3], r3x5);
+  h[2] = #x86_VPMULU_256(h[4], r3x5);
+
+  // prefetch r2*5
+  r2x5 = s_rx5[2-1];
+
+  t[0] +4u64= u[0];
+  t[1] +4u64= u[1];
+  h[2] +4u64= t[2]; // t2 dead // h[2] contains final h2
+
+  // t3 += h0*r3
+  // t4 += h1*r3
+
+  u[0] = #x86_VPMULU_256(h[0], r3);
+  u[1] = #x86_VPMULU_256(h[1], r3); // h1 dead
+
+  t[3] +4u64= u[0];
+  t[4] +4u64= u[1];
+
+  // t0 += h3*r2*5
+  // t1 += h4*r2*5
+
+  u[0] = #x86_VPMULU_256(h[3], r2x5); // h3 dead
+  h[1] = #x86_VPMULU_256(h[4], r2x5);
+
+  t[0] +4u64= u[0];
+  h[1] +4u64= t[1]; // t1 dead // h[1] contains final h1
+
+  // t0 += h4*r1*5
+  // t4 += h0*r4
+
+  u[0] = #x86_VPMULU_256(h[4], s_rx5[1-1]); // h4 dead
+  u[1] = #x86_VPMULU_256(h[0], s_r[4]); // h0 dead
+
+  h[0] = t[0] +4u64 u[0];
+  h[3] = t[3];
+  h[4] = t[4] +4u64 u[1];
+
+  return h;
+}
+
+
+
+fn mainloop_avx2_v0(
+  reg u256[5] h,
+  reg u256[5] m,
+  reg u64 in,
+  stack u256[5] s_r,
+  stack u256[4] s_rx5,
+  stack u256 s_mask26,
+  stack u256 s_bit25
+) -> reg u256[5],
+     reg u256[5],
+     reg u64
+{
+  reg u256 mask26;
+
+  h = add_mulmod_avx2(h, m, s_r, s_rx5, s_mask26, s_bit25);
+  mask26 = s_mask26;
+  h = carry_reduce_avx2(h, mask26);
+  m, in = load_avx2(in, mask26, s_bit25);
+
+  return h, m, in;
+}
+
+
+// full inline and instruction permutation of mainloop_avx2_v0
+fn mainloop_avx2_v1(
+  reg u256[5] h,
+  reg u256[5] m,
+  reg u64 in,
+  stack u256[5] s_r,
+  stack u256[4] s_rx5,
+  stack u256 s_mask26,
+  stack u256 s_bit25
+) -> reg u256[5],
+     reg u256[5],
+     reg u64
+{
+  reg u256[5] t;
+  reg u256[4] u;
+  reg u256[2] z;
+  reg u256 z0, m0, r0, r1, r4x5, r2, r3x5, r3, r2x5;
+  reg u256 mask26;
+
+  // pre fetching first 3 r's
+  r0 = s_r[0];
+  r1 = s_r[1];
+  r4x5 = s_rx5[4-1];
+
+  // h += m
+  //
+  // t0 = h0*r0
+  // t1 = h1*r0
+  // t2 = h2*r0
+  // t3 = h3*r0
+  // t4 = h4*r0
+  //
+  //
+  // t1 += h0*r1
+  // t2 += h1*r1
+  // t3 += h2*r1
+  // t4 += h3*r1
+
+  h[0] +4u64= m[0];
+  h[1] +4u64= m[1];
+  
+  t[0] = #x86_VPMULU_256(h[0], r0); h[2] +4u64= m[2]; 
+  u[0] = #x86_VPMULU_256(h[0], r1); h[3] +4u64= m[3];
+  t[1] = #x86_VPMULU_256(h[1], r0); h[4] +4u64= m[4];
+  u[1] = #x86_VPMULU_256(h[1], r1);
+  t[2] = #x86_VPMULU_256(h[2], r0);
+  u[2] = #x86_VPMULU_256(h[2], r1);
+  t[3] = #x86_VPMULU_256(h[3], r0); t[1] +4u64= u[0];
+  u[3] = #x86_VPMULU_256(h[3], r1); t[2] +4u64= u[1];
+  t[4] = #x86_VPMULU_256(h[4], r0); t[3] +4u64= u[2];
+
+  t[4] +4u64= u[3];
+
+  
+  // t0 += h1*r4*5
+  // t1 += h2*r4*5
+  // t2 += h3*r4*5
+  // t3 += h4*r4*5
+
+                                      
+  u[0] = #x86_VPMULU_256(h[1], r4x5); m0 = (u256)[in + 0];
+  u[1] = #x86_VPMULU_256(h[2], r4x5); r2 = s_r[2];
+  u[2] = #x86_VPMULU_256(h[3], r4x5);
+  u[3] = #x86_VPMULU_256(h[4], r4x5);
+                      
+  t[0] +4u64= u[0]; m[1] = (u256)[in + 32];
+  t[1] +4u64= u[1];
+  t[2] +4u64= u[2];
+  t[3] +4u64= u[3];
+
+  // t2 += h0*r2
+  // t3 += h1*r2
+  // t4 += h2*r2
+  u[0] = #x86_VPMULU_256(h[0], r2); m[0] = #x86_VPERM2I128(m0, m[1], (2u4)[2,0]);
+  u[1] = #x86_VPMULU_256(h[1], r2); m[1] = #x86_VPERM2I128(m0, m[1], (2u4)[3,1]);
+  u[2] = #x86_VPMULU_256(h[2], r2);
+
+  
+  t[2] +4u64= u[0]; r3x5 = s_rx5[3-1];
+  t[3] +4u64= u[1];
+  t[4] +4u64= u[2];
+
+  // t0 += h2*r3*5
+  // t1 += h3*r3*5
+  // t2 += h4*r3*5
+
+  u[0] = #x86_VPMULU_256(h[2], r3x5); // h2 dead
+  u[1] = #x86_VPMULU_256(h[3], r3x5); r3 = s_r[3];
+  h[2] = #x86_VPMULU_256(h[4], r3x5); m[2] = #x86_VPSRLDQ_256(m[0], 6);
+
+
+  t[0] +4u64= u[0];                   m[3] = #x86_VPSRLDQ_256(m[1], 6);
+  t[1] +4u64= u[1];
+  h[2] +4u64= t[2]; // t2 dead // h[2] contains final h2
+
+  // t3 += h0*r3
+  // t4 += h1*r3
+
+  r2x5 = s_rx5[2-1];
+
+  u[0] = #x86_VPMULU_256(h[0], r3); //s_r[3]);
+  u[1] = #x86_VPMULU_256(h[1], r3); //s_r[3]); // h1 dead
+
+
+                                      m[4] = #x86_VPUNPCKH_4u64(m[0], m[1]);
+                                      m[0] = #x86_VPUNPCKL_4u64(m[0], m[1]);
+
+  t[3] +4u64= u[0];
+  t[4] +4u64= u[1];
+
+  // t0 += h3*r2*5
+  // t1 += h4*r2*5
+
+  u[0] = #x86_VPMULU_256(h[3], r2x5); // h3 dead
+  h[1] = #x86_VPMULU_256(h[4], r2x5);
+
+
+  t[0] +4u64= u[0];
+  h[1] +4u64= t[1]; // t1 dead // h[1] contains final h1
+
+  mask26 = s_mask26;
+
+  // t0 += h4*r1*5
+  // t4 += h0*r4
+
+  u[0] = #x86_VPMULU_256(h[4], s_rx5[1-1]); // h4 dead
+  u[1] = #x86_VPMULU_256(h[0], s_r[4]); // h0 dead
+
+                                      m[3] = #x86_VPUNPCKL_4u64(m[2], m[3]);
+                                      m[2] = m[3] >>4u64 4;
+
+  h[0] = t[0] +4u64 u[0];
+                                                            z[0] = h[0] >>4u64 26;
+                                                            h[0] &= mask26;
+  //h[3] = t[3];
+  h[3] = t[3] & mask26;
+                                                            z[1] = t[3] >>4u64 26;
+
+  h[4] = t[4] +4u64 u[1];
+
+                                      m[2] &= mask26;
+                                      m[1] = m[0] >>4u64 26;
+
+
+                                                            h[1] +4u64= z[0];
+                                                            h[4] +4u64= z[1];
+
+                                                            z[0] = h[1] >>4u64 26;
+                                                            z[1] = h[4] >>4u64 26;
+
+                                                            z0 = z[1] <<4u64 2;
+                                                            z[1] +4u64= z0;
+
+                                                            h[1] &= mask26;
+                                                            h[4] &= mask26;
+                                                            h[2] +4u64= z[0];
+                                                            h[0] +4u64= z[1];
+
+                                                            z[0] = h[2] >>4u64 26;
+                                                            z[1] = h[0] >>4u64 26;
+                                                            h[2] &= mask26;
+                                                            h[0] &= mask26;
+                                                            h[3] +4u64= z[0];
+                                                            h[1] +4u64= z[1];
+
+                                                            z[0] = h[3] >>4u64 26;
+                                                            h[3] &= mask26;
+                                                            h[4] +4u64= z[0];
+
+                                      in += 64;
+                                      m[0] &= mask26;
+                                      m[3] >>4u64= 30;
+                                      m[3] &= mask26;
+                                      m[4] >>4u64= 40;
+                                      m[4] |= s_bit25;
+                                      m[1] &= mask26;
+
+  return h, m, in;
+}
+
+
+
+fn final_avx2_v0(
+  reg u256[5] h,
+  reg u256[5] m,
+  stack u256[5] s_r,
+  stack u256[4] s_rx5,
+  stack u256 s_mask26,
+  stack u256 s_bit25
+) -> reg u256[5]
+{
+  reg u256 mask26;
+
+  h = add_mulmod_avx2(h, m, s_r, s_rx5, s_mask26, s_bit25);
+  mask26 = s_mask26;
+  h = carry_reduce_avx2(h, mask26);
+
+  return h;
+}
+
+
+
+// update AVX2
+fn poly1305_avx2_update(
+  reg u64 in, reg u64 len,
+  stack u256[5] r4444,  
+  stack u256[4] r4444x5,
+  stack u256[5] r1234,
+  stack u256[4] r1234x5
+) -> reg u64, reg u64, reg u64[3]
+{
+  inline int i;
+  stack u256 s_mask26, s_bit25;
+  reg u256[5] h m;
+  reg u256 mask26 t;
+  reg u64[3] h64;
+
+  for i=0 to 5
+  { h[i] = #x86_VPBROADCAST_4u64(zero_u64); } // zero out me better 
+  t = #x86_VPBROADCAST_4u64(mask26_u64); s_mask26 = t; mask26 = t;
+  t = #x86_VPBROADCAST_4u64(bit25_u64); s_bit25 = t;
+
+  // load first 64 bytes of input
+  m, in = load_avx2(in, mask26, s_bit25);
+
+  while(len >= 128)
+  { h, m, in = mainloop_avx2_v1(h, m, in, r4444, r4444x5, s_mask26, s_bit25);
+    len -= 64;
+  }
+  len -= 64;
+
+  h = final_avx2_v0(h, m, r1234, r1234x5, s_mask26, s_bit25);
+  h64 = pack_avx2(h);
+
+  return in, len, h64;
+}
+
+
+
+fn poly1305_avx2_wrapper(reg u64 out, reg u64 in, reg u64 inlen, reg u64 k)
+{
+  reg u64[3] h;
+  reg u64[3] r;
+  reg u64 len;
+  stack u256[5] r4444   r1234;
+  stack u256[4] r4444x5 r1234x5;
+
+  len = inlen;
+
+  h, r, k = poly1305_ref3_setup(k);
+  r4444, r4444x5, r1234, r1234x5 = poly1305_avx2_setup(r);
+
+  in, len, h = poly1305_avx2_update(in, len, r4444, r4444x5, r1234, r1234x5);
+  in, len, h = poly1305_ref3_update(in, len, h, r);
+
+  poly1305_ref3_last(out, in, len, k, h, r);
+}
+
+
+
+export fn poly1305_avx2(reg u64 out, reg u64 in, reg u64 inlen, reg u64 k)
+{
+  if(inlen < 257)
+  { poly1305_ref3_local(out, in, inlen, k); }
+  else
+  { poly1305_avx2_wrapper(out, in, inlen, k); }
+}
+

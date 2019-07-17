@@ -1,0 +1,397 @@
+fn init(reg u64 key nonce, reg u32 counter) -> stack u32[16]
+{
+  inline int i;
+  stack u32[16] st;
+  reg u32[8] k;
+  reg u32[3] n;
+
+  st[0] = 0x61707865;
+  st[1] = 0x3320646e;
+  st[2] = 0x79622d32;
+  st[3] = 0x6b206574;
+
+  for i=0 to 8
+  { k[i] = (u32)[key + 4*i];
+    st[4+i] = k[i]; }
+
+  st[12] = counter;
+
+  for i=0 to 3
+  { n[i] = (u32)[nonce + 4*i];
+    st[13+i] = n[i]; }
+
+  return st;
+}
+
+
+
+fn copy_state(stack u32[16] st) -> reg u32[16], stack u32
+{
+  inline int i;
+  reg   u32     k15;
+  reg   u32[16] k;
+  stack u32     s_k15;
+
+  k15 = st[15];
+  s_k15 = k15;
+
+  for i=0 to 15
+  { k[i] = st[i]; }
+
+  return k, s_k15;
+}
+
+
+
+fn line(reg u32[16] k, inline int a b c r) -> reg u32[16]
+{
+  k[a] += k[b];
+  k[c] ^= k[a];
+  _, _, k[c] = #x86_ROL_32(k[c], r);
+  return k;
+}
+
+
+
+fn quarter_round(reg u32[16] k, inline int a b c d) -> reg u32[16]
+{
+  k = line(k, a, b, d, 16);
+  k = line(k, c, d, b, 12);
+  k = line(k, a, b, d, 8);
+  k = line(k, c, d, b, 7);
+  return k;
+}
+
+fn inlined_double_quarter_round(
+  reg u32[16] k,
+  inline int a0 b0 c0 d0
+             a1 b1 c1 d1
+) -> reg u32[16]
+{
+
+  //k = line(k, a, b, d, 16);
+  k[a0] += k[b0];
+  k[a1] += k[b1];
+
+  k[d0] ^= k[a0];
+  k[d1] ^= k[a1];
+
+  _, _, k[d0] = #x86_ROL_32(k[d0], 16);
+  _, _, k[d1] = #x86_ROL_32(k[d1], 16);
+
+  //k = line(k, c, d, b, 12);
+  k[c0] += k[d0];
+  k[c1] += k[d1];
+
+  k[b0] ^= k[c0];
+  k[b1] ^= k[c1];
+
+  _, _, k[b0] = #x86_ROL_32(k[b0], 12);
+  _, _, k[b1] = #x86_ROL_32(k[b1], 12);
+
+  //k = line(k, a, b, d, 8);
+  k[a0] += k[b0];
+  k[a1] += k[b1];
+
+  k[d0] ^= k[a0];
+  k[d1] ^= k[a1];
+
+  _, _, k[d0] = #x86_ROL_32(k[d0], 8);
+  _, _, k[d1] = #x86_ROL_32(k[d1], 8);
+
+  //k = line(k, c, d, b, 7);
+  k[c0] += k[d0];
+  k[c1] += k[d1];
+
+  k[b0] ^= k[c0];
+  k[b1] ^= k[c1];
+
+  _, _, k[b0] = #x86_ROL_32(k[b0], 7);
+  _, _, k[b1] = #x86_ROL_32(k[b1], 7);
+
+  return k;
+}
+
+
+
+fn rounds(reg u32[16] k, stack u32 k15) -> reg u32[16], stack u32
+{
+  inline int i;
+  stack u32 c, k14;
+  stack u32 k14;
+  reg bool zf;
+
+  //c = 0;
+  //while(c < 10)
+  //{
+
+  c = 10;
+  while {
+
+    //k = quarter_round(k, 0, 4, 8, 12);
+    //k = quarter_round(k, 2, 6, 10, 14);
+    k = inlined_double_quarter_round(k, 0, 4, 8, 12,
+                                        2, 6, 10, 14);
+
+    k14 = k[14];
+    k[15] = k15;
+
+    //k = quarter_round(k, 1, 5, 9, 13);
+    //k = quarter_round(k, 3, 7, 11, 15);
+    k = inlined_double_quarter_round(k, 1, 5, 9, 13,
+                                        3, 7, 11, 15);
+
+    //k = quarter_round(k, 1, 6, 11, 12);
+    //k = quarter_round(k, 0, 5, 10, 15);
+    k = inlined_double_quarter_round(k, 1, 6, 11, 12,
+                                        0, 5, 10, 15);
+
+    k15 = k[15];
+    k[14] = k14;
+
+    //k = quarter_round(k, 2, 7, 8, 13);
+    //k = quarter_round(k, 3, 4, 9, 14);
+
+    k = inlined_double_quarter_round(k, 2, 7, 8, 13,
+                                        3, 4, 9, 14); 
+
+    (_,_,_,zf,c) = #x86_DEC_32(c);
+  } (!zf)
+
+  //  c += 1; 
+  //}  
+
+  return k, k15;
+}
+
+
+
+fn sum_states(reg u32[16] k, stack u32 k15, stack u32[16] st) -> reg u32[16], stack u32
+{
+  inline int i;
+  stack u32 k14;
+  reg u32 t;
+
+  for i=0 to 15
+  { k[i] += st[i]; }
+
+  k14 = k[14];
+
+  t = k15;
+  t += st[15];
+  k15 = t;
+
+  k[14] = k14;
+
+  return k, k15;
+}
+
+
+
+fn update_ptr(reg u64 output plain, reg u32 len, inline int n) -> reg u64, reg u64, reg u32
+{
+  output += n;
+  plain += n;
+  len -= n;
+  return output, plain, len;
+}
+
+
+
+fn store(stack u64 s_output s_plain, stack u32 s_len, reg u32[16] k, stack u32 k15) -> stack u64, stack u64, stack u32
+{
+  inline int i;
+  reg u64[8] kk;
+  reg u64 output, plain, aux;
+  reg u32 len;
+
+  // i = 0 : 1 dead
+  kk[0] = (64u) k[1];
+  kk[0] <<= 32;
+  aux = (64u)k[0];
+  kk[0] ^= aux;
+  plain = s_plain;
+  kk[0] ^= (u64)[plain + 8*0];
+
+  // i = 1 : 2 dead
+  kk[1] = (64u) k[3];
+  kk[1] <<= 32;
+  aux = (64u)k[2];
+  kk[1] ^= aux;
+  kk[1] ^= (u64)[plain + 8*1];
+  output = s_output;
+  (u64)[output + 8*0] = kk[0];
+
+  for i=2 to 8
+  {
+    kk[i] = (64u)((i == 7) ? k15 : k[2*i+1]);
+    kk[i] <<= 32;
+    aux = (64u)k[2*i];
+    kk[i] ^= aux;
+    kk[i] ^= (u64)[plain + 8*i];
+    (u64)[output + 8*(i-1)] = kk[i-1];
+  }
+
+  (u64)[output + 8*7] = kk[7];
+
+  len = s_len;
+
+  output, plain, len = update_ptr(output, plain, len, 64);
+
+  s_output = output;
+  s_plain = plain;
+  s_len = len;
+
+  return s_output, s_plain, s_len;
+}
+
+
+fn sum_states_store(
+  stack u64 s_output s_plain,
+  stack u32 s_len,
+  reg u32[16] k, stack u32 k15,
+  stack u32[16] st
+) -> stack u64, stack u64, stack u32
+{
+  inline int i;
+  reg u64[8] kk;
+  reg u64 output, plain, aux;
+  reg u32 len;
+
+  // i = 0 : 1 dead
+                                                  k[1] += st[1];
+                                                  k[0] += st[0];
+  kk[0] = (64u) k[1];
+  kk[0] <<= 32;
+  aux = (64u)k[0];
+  kk[0] ^= aux;
+  plain = s_plain;
+  kk[0] ^= (u64)[plain + 8*0];
+
+  // i = 1 : 2 dead
+                                                  k[3] += st[3];
+                                                  k[2] += st[2];
+  kk[1] = (64u) k[3];
+  kk[1] <<= 32;
+  aux = (64u)k[2];
+  kk[1] ^= aux;
+  kk[1] ^= (u64)[plain + 8*1];
+  output = s_output;
+  (u64)[output + 8*0] = kk[0];
+
+  for i=2 to 8
+  {
+                                                  if (2*i+1 == 15) { k[2*i+1] = k15; }
+                                                  k[2*i+1] += st[2*i+1];
+                                                  k[2*i] += st[2*i];
+    kk[i] = (64u)(k[2*i+1]);
+    kk[i] <<= 32;
+    aux = (64u)k[2*i];
+    kk[i] ^= aux;
+    kk[i] ^= (u64)[plain + 8*i];
+    (u64)[output + 8*(i-1)] = kk[i-1];
+  }
+
+  (u64)[output + 8*7] = kk[7];
+
+  len = s_len;
+
+  output, plain, len = update_ptr(output, plain, len, 64);
+
+  s_output = output;
+  s_plain = plain;
+  s_len = len;
+
+  return s_output, s_plain, s_len;
+}
+
+
+
+fn store_last(stack u64 s_output s_plain, stack u32 s_len, reg u32[16] k, stack u32 k15)
+{
+  inline int i;
+  reg u64 t j output plain;
+  reg u32 u len len8;
+  stack u32[16] s_k;
+  reg u8 pi;
+
+  // copy k to stack
+  for i=0 to 15
+  { s_k[i] = k[i]; }
+  u = k15;
+  s_k[15] = u;
+
+  // store
+  output = s_output;
+  plain = s_plain;
+  len = s_len;
+
+  // 8 bytes
+  len8 = len;
+  len8 >>= 3;
+  j = 0;
+  while(j < len8)
+  {
+    t = (u64)[plain + 8*j];
+    t ^= s_k[u64 (int)j];
+    (u64)[output + 8*j] = t;
+    j += 1;
+  }
+  j <<= 3;
+
+  while(j < len)
+  {
+    pi = (u8)[plain + j];
+    pi ^= s_k[u8 (int)j];
+    (u8)[output + j] = pi;
+    j += 1;
+  }
+}
+
+
+
+fn increment_counter(stack u32[16] st) -> stack u32[16]
+{
+  reg u32 t;
+  t = 1;
+  t += st[12];
+  st[12] = t;
+  return st;
+}
+
+
+
+export fn chacha20_ref(reg u64 output plain, reg u32 len, reg u64 key nonce, reg u32 counter)
+{
+  stack u64 s_output, s_plain;
+  stack u32 s_len;
+
+  stack u32[16] st;
+  reg   u32[16] k;  // the full state is in k[0..14] and k15;
+  stack u32     k15;
+
+  s_output = output;
+  s_plain = plain;
+  s_len = len;
+
+  st = init(key, nonce, counter);
+
+  while(s_len >= 64)
+  {
+    k, k15 = copy_state(st);
+    k, k15 = rounds(k, k15);
+    //k, k15 = sum_states(k, k15, st);
+    //s_output, s_plain, s_len = store(s_output, s_plain, s_len, k, k15);
+    s_output, s_plain, s_len = sum_states_store(s_output, s_plain, s_len, k, k15, st); 
+    st = increment_counter(st);
+  }
+
+  if(s_len > 0)
+  {
+    k, k15 = copy_state(st);
+    k, k15 = rounds(k, k15);
+    k, k15 = sum_states(k, k15, st);
+    store_last(s_output, s_plain, s_len, k, k15); 
+  }
+}
+
