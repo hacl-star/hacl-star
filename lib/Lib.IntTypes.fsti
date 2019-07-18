@@ -145,6 +145,15 @@ inline_for_extraction
 unfold type size_t = uint_t U32 PUB
 
 inline_for_extraction
+unfold type size32_t = uint_t U32 PUB
+
+inline_for_extraction
+unfold type size64_t = uint_t U64 PUB
+
+inline_for_extraction
+unfold type size128_t = uint_t U128 PUB
+
+inline_for_extraction
 unfold type pub_uint8 = uint_t U8 PUB
 
 inline_for_extraction
