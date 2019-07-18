@@ -74,17 +74,75 @@ let eq_matrix_column (m1:matrix) (m2:matrix) : Lemma (requires forall j. {:patte
   in FStar.Classical.forall_intro_2 customlemma; eq_matrix_element m1 m2
 
 inline_for_extraction noextract
-let rec gen_matrix_ (m:matrix) (f: (i:nat{i<params_k}) -> (j:nat{j<params_k}) -> Tot (option poly)) (i:size_nat{i<=params_k}) (j:size_nat{j<=params_k}) : Tot (option matrix) (decreases ((params_k+1)*(params_k+1) -(params_k+1)*i-j)) =
+let rec gen_matrix_inner (m:matrix) (f: (i:nat{i<params_k}) -> (j:nat{j<params_k}) -> Tot (option poly)) (i:size_nat{i<=params_k}) (j:size_nat{j<=params_k}) : Tot (option matrix) (decreases ((params_k+1)*(params_k+1) -(params_k+1)*i-j)) =
   if (i=params_k) then Some m
-  else if (j=params_k) then gen_matrix_ m f (i+1) 0
+  else if (j=params_k) then gen_matrix_inner m f (i+1) 0
   else
   match f i j with
   |None -> None
-  |Some p -> gen_matrix_ (upd_matrix m i j p) f i (j+1)
+  |Some p -> gen_matrix_inner (upd_matrix m i j p) f i (j+1)
 
 val gen_matrix: (f: (i:nat{i<params_k}) -> (j:nat{j<params_k}) -> Tot (option poly)) -> Tot (option matrix)
 
-let gen_matrix f = gen_matrix_ (new_matrix ()) f 0 0
+let gen_matrix f = gen_matrix_inner (new_matrix ()) f 0 0
+
+val gen_matrix_inner_lemma0:
+  (m:matrix)
+  -> f: ((i:nat{i<params_k}) -> (j:nat{j<params_k}) -> Tot (option poly))
+  -> (i:size_nat{i<=params_k})
+  -> (j:size_nat{j<=params_k})
+  -> Lemma (ensures (match gen_matrix_inner m f i j with
+          |None -> True
+          |Some m' -> forall (k:size_nat{k <= i /\ k < params_k}) (l:size_nat{(k < i \/ l < j) /\ l < params_k}). get_element m k l == get_element m' k l)) (decreases ((params_k+1)*(params_k+1) - (i*(params_k+1) + j)))
+
+let rec gen_matrix_inner_lemma0 m f i j =
+  if(i=params_k) then ()
+  else if (j=params_k) then gen_matrix_inner_lemma0 m f (i+1) 0
+  else match f i j with
+    |None -> ()
+    |Some p -> gen_matrix_inner_lemma0 (upd_matrix m i j p) f i (j+1)
+
+val gen_matrix_inner_lemma:
+  (m1:matrix)
+  -> (m2:matrix)
+  -> f: ((i:nat{i<params_k}) -> (j:nat{j<params_k}) -> Tot (option poly))
+  -> (i:size_nat{i<=params_k})
+  -> (j:size_nat{j<=params_k})
+  -> Lemma (requires forall (k:size_nat{i <= k /\ k < params_k}) (l:size_nat{(i < k \/ j <= l) /\ l < params_k}). (get_element m2 k l) == new_poly ())
+    (ensures (match (gen_matrix_inner m1 f i j), (gen_matrix_inner m2 f i j) with
+      |None,None -> True
+      |Some mat, Some mat' -> forall (k:size_nat{i <= k /\ k < params_k}) (l:size_nat{(i < k \/ j <= l) /\ l < params_k}). get_element mat k l == get_element mat' k l
+      |_,_ -> False)) (decreases ((params_k+1)*(params_k+1) - (i*(params_k+1) + j)))
+
+let rec gen_matrix_inner_lemma m1 m2 f i j =
+  if(i = params_k) then ()
+  else if (j=params_k) then gen_matrix_inner_lemma m1 m2 f (i+1) 0
+  else match f i j with
+  |None -> ()
+  |Some p ->
+    let m1' = upd_matrix m1 i j p in
+    let m2' = upd_matrix m2 i j p in
+    let b (k:size_nat{i <= k /\ k < params_k}) : Type0 = (l:size_nat{(i < k \/ j + 1 <= l) /\ l < params_k}) in
+    let customprop (k:size_nat{i <= k /\ k < params_k}) (l:b k) : Type0 = (get_element m2' k l == new_poly ()) in
+    let customlemma (k:size_nat{i <= k /\ k < params_k}) (l:b k) : Lemma (customprop k l) =
+      assert(get_element m2' k l == get_element m2 k l)
+    in (FStar.Classical.forall_intro_2 customlemma;
+    gen_matrix_inner_lemma m1' m2' f i (j+1);
+    gen_matrix_inner_lemma0 m1' f i (j+1);
+    gen_matrix_inner_lemma0 m2' f i (j+1))
+
+val gen_matrix_inner_cst_lemma:
+  m:matrix
+  -> f: ((i:nat{i<params_k}) -> (j:nat{j<params_k}) -> Tot (option poly))
+  -> Lemma (gen_matrix_inner m f 0 0 == gen_matrix_inner (new_matrix ()) f 0 0)
+
+let gen_matrix_inner_cst_lemma m f =
+  let m0 = new_matrix () in
+  gen_matrix_inner_lemma m m0 f 0 0;
+  match gen_matrix_inner m f 0 0, gen_matrix_inner m0 f 0 0 with
+  |None, None -> ()
+  |Some mat, Some mat' -> eq_matrix_element mat mat'
+  |_,_ -> ()
 
 let dot_product (x:vec) (y:vec) = Lib.NumericTypes.dot_product x y
 
