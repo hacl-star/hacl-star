@@ -9,10 +9,13 @@ open Lib.Buffer
 open FStar.Mul
 
 module S = Hacl.Spec.Ed25519.Field56.Definition
+module P = Spec.Curve25519
 
 open FStar.Calc
 
 let felem = lbuffer uint64 5ul
+
+let point = lbuffer uint64 20ul
 
 let paren_mul4 (a b c d:nat) : Lemma (a * b * c * d == a * (b * c * d))
   = ()
@@ -88,3 +91,16 @@ let as_nat h e =
   let s4 = s.[4] in
   lemma_fits_as_nat5 (s0, s1, s2, s3, s4);
   S.as_nat5 (s0, s1, s2, s3, s4)
+
+noextract
+val fevalh: h:mem -> f:felem -> GTot P.elem
+let fevalh h f = (as_nat h f) % P.prime
+
+noextract
+val point_eval:h:mem -> p:point -> GTot Spec.Ed25519.ext_point
+let point_eval h p =
+  let x = gsub p 0ul 5ul in
+  let y = gsub p 5ul 5ul in
+  let z = gsub p 10ul 5ul in
+  let t = gsub p 15ul 5ul in
+  (fevalh h x, fevalh h y, fevalh h z, fevalh h t)

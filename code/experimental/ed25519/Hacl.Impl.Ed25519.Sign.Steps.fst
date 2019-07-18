@@ -47,7 +47,6 @@ let point_mul_g_compress out s =
   let tmp:point = create 20ul (u64 0) in
   Hacl.Impl.Ed25519.Ladder.point_mul_g tmp s;
   Hacl.Impl.Ed25519.PointCompress.point_compress out tmp;
-  admit();
   pop_frame()
 
 val sign_step_1:

@@ -8,6 +8,8 @@ open Lib.Buffer
 
 open Hacl.Bignum25519
 
+module F = Hacl.Impl.Ed25519.Field56
+
 inline_for_extraction noextract
 val point_add_step_1:
     p:point
@@ -83,7 +85,9 @@ val point_add_:
       live h out /\ live h p /\ live h q /\ live h tmp /\
       disjoint tmp p /\ disjoint tmp q /\ disjoint tmp out /\
       disjoint p out /\ disjoint q out)
-    (ensures fun h0 _ h1 -> modifies (loc out |+| loc tmp) h0 h1)
+    (ensures fun h0 _ h1 -> modifies (loc out |+| loc tmp) h0 h1 /\
+      F.point_eval h1 out == Spec.Ed25519.point_add (F.point_eval h0 p) (F.point_eval h0 q)
+    )
 let point_add_ out p q tmp =
   point_add_step_1 p q tmp;
   point_add_step_2 p q tmp;
@@ -100,7 +104,8 @@ let point_add_ out p q tmp =
   fmul x3 tmp1 tmp6;
   fmul y3 tmp5 tmp4;
   fmul t3 tmp1 tmp4;
-  fmul z3 tmp5 tmp6
+  fmul z3 tmp5 tmp6;
+  admit()
 
 val point_add:
     out:point
@@ -110,7 +115,9 @@ val point_add:
     (requires fun h ->
       live h out /\ live h p /\ live h q /\
       disjoint p out /\ disjoint q out)
-    (ensures fun h0 _ h1 -> modifies (loc out) h0 h1)
+    (ensures fun h0 _ h1 -> modifies (loc out) h0 h1 /\
+      F.point_eval h1 out == Spec.Ed25519.point_add (F.point_eval h0 p) (F.point_eval h0 q)
+    )
 let point_add out p q =
   push_frame();
   let tmp = create 30ul (u64 0) in

@@ -6,6 +6,9 @@ open FStar.HyperStack.All
 open Lib.IntTypes
 open Lib.Buffer
 
+module S = Hacl.Spec.Ed25519.Field56.Definition
+module F = Hacl.Impl.Ed25519.Field56
+
 (* Type abbreviations *)
 inline_for_extraction noextract
 let felem = lbuffer uint64 5ul
@@ -14,14 +17,28 @@ let felem = lbuffer uint64 5ul
 inline_for_extraction noextract
 let point = lbuffer uint64 20ul
 
+#set-options "--z3rlimit 10 --max_fuel 0 --max_ifuel 0"
+
 inline_for_extraction noextract
-let getx (p:point) = sub p 0ul 5ul
+let getx (p:point) : Stack felem
+  (requires fun h -> live h p)
+  (ensures fun h0 f h1 -> f == gsub p 0ul 5ul /\ h0 == h1)
+  = sub p 0ul 5ul
 inline_for_extraction noextract
-let gety (p:point) = sub p 5ul 5ul
+let gety (p:point) : Stack felem
+  (requires fun h -> live h p)
+  (ensures fun h0 f h1 -> f == gsub p 5ul 5ul /\ h0 == h1)
+  = sub p 5ul 5ul
 inline_for_extraction noextract
-let getz (p:point) = sub p 10ul 5ul
+let getz (p:point) : Stack felem
+  (requires fun h -> live h p)
+  (ensures fun h0 f h1 -> f == gsub p 10ul 5ul /\ h0 == h1)
+  = sub p 10ul 5ul
 inline_for_extraction noextract
-let gett (p:point) = sub p 15ul 5ul
+let gett (p:point) : Stack felem
+  (requires fun h -> live h p)
+  (ensures fun h0 f h1 -> f == gsub p 15ul 5ul /\ h0 == h1)
+  = sub p 15ul 5ul
 
 inline_for_extraction noextract
 val make_u64_5:
@@ -29,7 +46,9 @@ val make_u64_5:
   -> s0:uint64 -> s1:uint64 -> s2:uint64 -> s3:uint64 -> s4:uint64 ->
   Stack unit
     (requires fun h -> live h b)
-    (ensures  fun h0 _ h1 -> modifies (loc b) h0 h1)
+    (ensures  fun h0 _ h1 -> modifies (loc b) h0 h1 /\
+      F.as_nat h1 b == S.as_nat5 (s0, s1, s2, s3, s4)
+    )
 
 inline_for_extraction noextract
 val make_u64_10:
@@ -54,14 +73,18 @@ val make_zero:
   b:lbuffer uint64 5ul ->
   Stack unit
     (requires fun h -> live h b)
-    (ensures  fun h0 _ h1 -> modifies (loc b) h0 h1)
+    (ensures  fun h0 _ h1 -> modifies (loc b) h0 h1 /\
+      F.fevalh h1 b == Spec.Curve25519.zero
+    )
 
 inline_for_extraction noextract
 val make_one:
   b:lbuffer uint64 5ul ->
   Stack unit
     (requires fun h -> live h b)
-    (ensures  fun h0 _ h1 -> modifies (loc b) h0 h1)
+    (ensures  fun h0 _ h1 -> modifies (loc b) h0 h1 /\
+      F.fevalh h1 b == Spec.Curve25519.one
+    )
 
 val fsum:
     a:felem

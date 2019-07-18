@@ -50,14 +50,16 @@ let make_zero b =
   b.(1ul) <- u64 0;
   b.(2ul) <- u64 0;
   b.(3ul) <- u64 0;
-  b.(4ul) <- u64 0
+  b.(4ul) <- u64 0;
+  admit()
 
 let make_one b =
   b.(0ul) <- u64 1;
   b.(1ul) <- u64 0;
   b.(2ul) <- u64 0;
   b.(3ul) <- u64 0;
-  b.(4ul) <- u64 0
+  b.(4ul) <- u64 0;
+  admit()
 
 let fsum a b = admit();
   BN.fadd a a b

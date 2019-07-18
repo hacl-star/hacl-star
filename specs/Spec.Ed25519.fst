@@ -91,7 +91,7 @@ let ith_bit (k:lbytes 32) (i:size_nat{i < 256}) =
 let cswap2 (sw:uint8) (x:ext_point) (xp1:ext_point) =
   if uint_to_nat sw = 1 then (xp1, x) else (x, xp1)
 
-let ladder_step (k:lbytes 32) (i:nat{i <= 255}) (x, xp1) =
+let ladder_step (k:lbytes 32) (i:nat{i < 256}) (x, xp1) =
   let bit = ith_bit k (255 - i) in
   let x, xp1 = cswap2 bit x xp1 in
   let xx = point_double x in

@@ -9,6 +9,8 @@ open Lib.Buffer
 
 open Hacl.Bignum25519
 
+module F = Hacl.Impl.Ed25519.Field56
+
 val swap_conditional_step:
     out_a:felem
   -> out_b:felem
@@ -60,7 +62,10 @@ val swap_conditional:
       live h a /\ live h b /\ live h out_a /\ live h out_b /\
       disjoint out_a out_b /\ disjoint a out_a /\disjoint a out_b /\
       disjoint b out_b /\ disjoint b out_a /\ disjoint a b)
-    (ensures  fun h0 _ h1 -> modifies (loc out_a |+| loc out_b) h0 h1)
+    (ensures  fun h0 _ h1 -> modifies (loc out_a |+| loc out_b) h0 h1 /\
+      (F.point_eval h1 out_a, F.point_eval h1 out_b) ==
+      Spec.Ed25519.cswap2 (to_u8 i) (F.point_eval h0 a) (F.point_eval h0 b)
+    )
 //      (if v i = 1 then (as_seq h1 out_a == as_seq h0 b /\ as_seq h1 out_b == as_seq h0 a)
 //         else (as_seq h1 out_a == as_seq h0 a /\ as_seq h1 out_b == as_seq h0 b))
 let swap_conditional a' b' a b iswap =
@@ -68,7 +73,8 @@ let swap_conditional a' b' a b iswap =
   swap_conditional_step (getx a') (getx b') (getx a) (getx b) swap;
   swap_conditional_step (gety a') (gety b') (gety a) (gety b) swap;
   swap_conditional_step (getz a') (getz b') (getz a) (getz b) swap;
-  swap_conditional_step (gett a') (gett b') (gett a) (gett b) swap
+  swap_conditional_step (gett a') (gett b') (gett a) (gett b) swap;
+  admit()
 
 val swap_conditional_inplace:
     a:point
@@ -76,10 +82,14 @@ val swap_conditional_inplace:
   -> i:uint64{v i = 0 \/ v i = 1} ->
   Stack unit
     (requires fun h -> live h a /\ live h b /\ disjoint a b)
-    (ensures  fun h0 _ h1 -> modifies (loc a |+| loc b) h0 h1)
+    (ensures  fun h0 _ h1 -> modifies (loc a |+| loc b) h0 h1 /\
+      (F.point_eval h1 a, F.point_eval h1 b) ==
+      Spec.Ed25519.cswap2 (to_u8 i) (F.point_eval h0 a) (F.point_eval h0 b)
+    )
 let swap_conditional_inplace a b iswap =
   let swap = u64 0 -. iswap in
   swap_conditional_step (getx a) (getx b) (getx a) (getx b) swap;
   swap_conditional_step (gety a) (gety b) (gety a) (gety b) swap;
   swap_conditional_step (getz a) (getz b) (getz a) (getz b) swap;
-  swap_conditional_step (gett a) (gett b) (gett a) (gett b) swap
+  swap_conditional_step (gett a) (gett b) (gett a) (gett b) swap;
+  admit()

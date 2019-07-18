@@ -9,6 +9,8 @@ open Lib.Buffer
 
 open Hacl.Bignum25519
 
+module F = Hacl.Impl.Ed25519.Field56
+
 inline_for_extraction noextract
 val x_mod_2:
   x:felem ->
@@ -59,7 +61,9 @@ val point_compress:
   -> p:point ->
   Stack unit
     (requires fun h -> live h out /\ live h p)
-    (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1)
+    (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
+      as_seq h1 out == Spec.Ed25519.point_compress (F.point_eval h0 p)
+    )
 let point_compress z p =
   push_frame();
   let tmp  = create 15ul (u64 0) in
@@ -70,4 +74,5 @@ let point_compress z p =
   let b = x_mod_2 x in
   store_51 z out;
   add_sign z b;
+  admit();
   pop_frame()
