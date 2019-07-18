@@ -18,12 +18,19 @@ module Spec = Spec.Blake2
 
 #set-options "--z3rlimit 50 --max_ifuel 0 --max_fuel 0"
 
-val declassify: word_t -> Tot (Spec.pub_word_t Spec.Blake2.Blake2B)
-let declassify x =
-  admit();
-  let l :uint_t (Spec.wt Spec.Blake2.Blake2B) PUB = x in
+val declassify_word: word_t -> Tot (Spec.pub_word_t Spec.Blake2.Blake2B)
+let declassify_word x =
+  let px = Lib.RawIntTypes.u64_to_UInt64 x in
+  let l :uint_t (Spec.wt Spec.Blake2.Blake2B) PUB = px in
   l
 
+
+val declassify_word_to_size: word_t -> Tot size_t
+let declassify_word_to_size x =
+  let x32 = to_u32 x in
+  let y32 = Lib.RawIntTypes.u32_to_UInt32 x32 in
+  let l :size_t = Lib.RawIntTypes.size_from_UInt32 y32 in
+  l
 
 
 (** Define the size of the state *)
@@ -175,19 +182,23 @@ val blake2b_partial_update:
     modifies1 state h0 h1)
 
 let blake2b_partial_update state ll input =
+  (* let h0 = ST.get () in *)
+  (* [@inline_let] *)
+  (* let spec _ h1 = live h1 s /\ h1.[|s|] == Spec.blake2_compress Spec.Blake2B h0.[|s|] h0.[|m|] offset flag in *)
+  (* salloc1 h0 (size 16) (u64 0) (Ghost.hide (loc s)) spec *)
+  (* (fun wv -> ) *)
   let hash = get_state_hash state in
   let kkb = get_state_kk state in
   let kk = get_state_kk_value state in
-  let nblocks = get_state_nblocks state in
-  let plength = get_state_plength_value state in
+  let nb = get_state_nblocks state in
   let block = get_state_block state in
   (* The length is public and we need to declassify it *)
-  let pplen = declassify plength in
+  let pl = declassify_word_to_size (get_state_plength_value state) in
   (* Compute the remaining space in the partial block *)
-  (* let rem = size_block -. pplen in *)
+  let rem = size_block -. pl in
   (* Copy all input or the size available in the partial block *)
-  (* let clen = if ll <=. rem then ll else rem in *)
-  (* let rinput = sub input 0ul clen in *)
-  (* update_sub #MUT #word_t #(size ) block pplen rem; *)
+  let clen = if ll <=. rem then ll else rem in
+  let rinput = sub input 0ul clen in
+  update_sub #MUT #word_t #(size ) block pplen rem;
   (* Process the block *)
   ()
