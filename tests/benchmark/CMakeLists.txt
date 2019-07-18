@@ -11,7 +11,7 @@ option(USE_OPENSSL "Use OpenSSL." ON)
 option(USE_RFC7748 "Use the RFC 7748 reference implementation" ON)
 option(USE_FIAT_CURVE25519 "Use the Fiat Curve25519 implementation" ON)
 option(USE_LIBCURVE25519 "Use the library Curve25519 implementations" ON)
-option(USE_LIBJC "Use libjc, the Jasmin crypto library." OFF)
+option(USE_LIBJC "Use libjc, the Jasmin crypto library." ON)
 
 option(ASAN "Enable clang address sanitizer" OFF)
 
