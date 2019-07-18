@@ -53,6 +53,7 @@ type state_inv (h:mem) (s:state_r) =
   live h s.hash /\ live h s.block /\ disjoint s.hash s.block
 
 
+
 val blake2b_init_partial:
     state: state_r
   -> kk: size_t{v kk <= 64}
@@ -90,23 +91,29 @@ val blake2b_update_partial:
     modifies2 state.hash state.block h0 h1)
 
 let blake2b_update_partial state ll input =
-  let n = ll /. size_block in
-  let r = ll %. size_block in
-  let h0 = ST.get () in
-  loop_nospec #h0 n state.hash
-  (fun i ->
-    let block = sub input (i *. size_block) size_block in
-    let h1 = ST.get () in
-    blake2b_update_block state.hash (secret state.prev) block);
   (* Compute the remaining space in the partial block *)
   let rem: r:size_t{v r <= v size_block} = size_block -. state.pl in
   (* Copy all input or the size available in the partial block *)
-  let ll0 = if r <=. rem then ll else rem in
+  let ll0 = if ll <=. rem then ll else rem in
   let input0 = sub input 0ul ll0 in
   update_sub #MUT #uint8 #size_block state.block state.pl ll0 input0;
   if not (ll0 =. rem) then state // This needs to be updated
   else (
     blake2b_update_block state.hash (secret state.prev) state.block;
+    (* Handle the remaining blocks *)
+    let ll1 = ll -. ll0 in
+    let input1 = sub input ll0 ll1 in
+    let n = ll1 /. size_block in
+    let ll2 = ll1 %. size_block in
+    let h0 = ST.get () in
+    loop_nospec #h0 n state.hash
+    (fun i ->
+      let block = sub input1 (i *. size_block) size_block in
+      let h1 = ST.get () in
+      blake2b_update_block state.hash (secret state.prev) block);
+    (* Handle the remaining partial block *)
+    let input2 = sub input (ll0 +. ll1) ll2 in
+    update_sub #MUT #uint8 #size_block state.block 0ul ll2 input2;
     state // This needs to be updated
   )
 
