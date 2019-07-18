@@ -1,0 +1,43 @@
+#ifndef KECCAK_SCALAR_G_H
+#define KECCAK_SCALAR_G_H
+
+#ifndef STATE_IN_STACK
+  // 0 uses external memory for the stack space
+  // 1 uses stack u64[] array
+  #define STATE_IN_STACK 1
+#endif
+
+#if !STATE_IN_STACK
+
+  #define _state_t reg u64
+  #define _mem m
+  #define _mem_arg _mem,
+  #define OFFSET 100
+  #define S(base,x,y) [base + 8*(5*((x) % 5) + ((y) % 5)) - OFFSET]
+  #define B(base,x) [base + 8*(x)]
+  #define B8(base,x) (u8)[base + (x)]
+  fn swap(_state_t a b) -> _state_t, _state_t
+  { _state_t t;
+    t = a; a = b; b = t; // TODO XCHG
+    return a, b; }
+  #define setup(a,b) a += OFFSET;b = a + 200;
+  #define restore(a,b) a -= OFFSET;
+
+#else
+
+  #define _state_t stack u64[25]
+  #define _mem
+  #define _mem_arg
+  #define S(base,x,y) base[(5*((x) % 5) + ((y) % 5))]
+  #define B(base,x) base[(int)x]
+  #define B8(base,x) base[u8 (int)(x)]
+  #if 0
+  // swap is undefined when state is in stack because it implies a full
+  // (not logical) swap. For instance, atm, loop should be unrolled twice
+  // when using stack for the state to avoid this.
+  #endif
+  #define setup(a,b)
+  #define restore(a,b)
+
+#endif
+#endif

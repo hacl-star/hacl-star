@@ -1,0 +1,43 @@
+#define KECCAK_1600_ADD_FULL_BLOCK_IMPLEMENTATION 1
+
+u64 s_zero = 0;
+
+fn add_full_block(
+  reg u256[7] state,
+  stack u64[28] s_state,
+  reg u64 a_jagged,
+  reg u64 in inlen,
+  reg u64 rate
+) -> reg u256[7], stack u64[28], reg u64, reg u64
+{
+  reg u256 a00 a10 a01 a11;
+  reg u256 t11 t12 t13;
+  reg u256 zero;
+
+  zero = #x86_VPBROADCAST_4u64(s_zero);
+
+  a00  = #x86_VPBROADCAST_4u64([in + 8*0]); // (0,0) (0,0) (0,0) (0,0)
+  a10  = #x86_VPBROADCAST_4u64([in + 8*5]); // (1,0) (1,0) (1,0) (1,0)
+  a01  = (u256)[in + 8*1];                  // (0,4) (0,3) (0,2) (0,1)
+  a11  = (u256)[in + 8*6 ];                 // (1,4) (1,3) (1,2) (1,1)
+
+  state[0] ^= a00;
+  state[1] ^= a01;
+
+  a01 = #x86_VPBLENDD_256(a10, zero, (8u1)[1,1,0,0,1,1,1,1]); //  ___  (1,0)  ___   ___
+  t12 = #x86_VPBLENDD_256(a11, zero, (8u1)[1,1,1,1,0,0,1,1]); //  ___   ___  (1,2)  ___
+  t13 = #x86_VPBLENDD_256(a11, zero, (8u1)[1,1,0,0,1,1,1,1]); //  ___  (1,3)  ___   ___
+  t11 = #x86_VPBLENDD_256(a11, zero, (8u1)[1,1,1,1,1,1,0,0]); //  ___   ___   ___  (1,1)
+
+  state[2] ^= a01;
+  state[3] ^= t12;
+  state[4] ^= t13;
+  state[6] ^= t11; 
+
+  in += rate;
+  inlen -= rate;
+
+  return state, s_state, in, inlen;
+}
+
+#include "crypto_hash/keccak1600/avx2/keccak_1600.jazz"

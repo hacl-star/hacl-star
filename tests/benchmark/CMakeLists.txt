@@ -11,6 +11,7 @@ option(USE_OPENSSL "Use OpenSSL." ON)
 option(USE_RFC7748 "Use the RFC 7748 reference implementation" ON)
 option(USE_FIAT_CURVE25519 "Use the Fiat Curve25519 implementation" ON)
 option(USE_LIBCURVE25519 "Use the library Curve25519 implementations" ON)
+option(USE_LIBJC "Use libjc, the Jasmin crypto library." ON)
 
 option(ASAN "Enable clang address sanitizer" OFF)
 
@@ -34,7 +35,9 @@ add_executable(runbenchmark
   bench_aead.cpp
   bench_curve25519.cpp
   bench_ed25519.cpp
-  bench_merkle.cpp)
+  bench_merkle.cpp
+  bench_cipher.cpp
+  bench_mac.cpp)
 target_include_directories(runbenchmark PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(runbenchmark PRIVATE benchmark evercrypt)
 target_compile_options(runbenchmark PRIVATE -march=native -mtune=native -std=c++11)
@@ -97,6 +100,12 @@ if(USE_FIAT_CURVE25519)
   add_subdirectory(libfiat-curve25519)
   target_compile_definitions(runbenchmark PRIVATE HAVE_FIAT_CURVE25519)
   target_link_libraries(runbenchmark PRIVATE fiat-curve25519)
+endif()
+
+if(USE_LIBJC)
+  add_subdirectory(libjc)
+  target_compile_definitions(runbenchmark PRIVATE HAVE_JC)
+  target_link_libraries(runbenchmark PRIVATE jc)
 endif()
 
 if(ASAN)
