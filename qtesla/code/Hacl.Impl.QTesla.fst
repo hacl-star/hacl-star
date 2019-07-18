@@ -1028,11 +1028,11 @@ let encode_c_while_body pos_list sign_list c_bin c r dmsp cnt i =
     let rCntVal1:uint8 = r.(cntVal +. size 1) in
     [@inline_let] let rCntVal1:size_t = unsafe_declassify (cast U32 SEC rCntVal1) in
     let pos:size_t = (rCntVal <<. size 8) |. rCntVal1 in
-    //assert(v pos >= 0);
-    //Int.logand_pos_le #(numbytes U32) (v pos) (v (params_n -. size 1));
+    UInt.logand_le #(bits U32) (v pos) (v params_n - 1);
+    logand_spec pos (params_n -. size 1);
     let pos:size_t = pos &. (params_n -. (size 1)) in
 
-    assume(v pos < v params_n);
+    assert(v pos <= v params_n - 1);
 
     let h1 = ST.get () in
     assert(forall (j:nat{j < v params_h}) . {:pattern bget h1 pos_list j} bget h0 pos_list j == bget h1 pos_list j);
