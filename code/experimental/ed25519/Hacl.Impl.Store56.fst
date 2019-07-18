@@ -5,8 +5,11 @@ open FStar.HyperStack.All
 open FStar.Mul
 
 open Lib.IntTypes
+open Lib.ByteSequence
 open Lib.Buffer
 open Lib.ByteBuffer
+
+module F = Hacl.Impl.Ed25519.Field56
 
 val hstore56_le:
     out:lbuffer uint8 32ul
@@ -24,7 +27,10 @@ val store_56:
   -> b:lbuffer uint64 5ul ->
   Stack unit
     (requires fun h -> live h out /\ live h b)
-    (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1)
+    (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
+      nat_to_bytes_le 32 (F.as_nat h0 b) == as_seq h1 out
+    )
+
 let store_56 out b =
   let b0 = b.(0ul) in
   let b1 = b.(1ul) in
@@ -37,4 +43,5 @@ let store_56 out b =
   hstore56_le out 7ul b1;
   hstore56_le out 14ul b2;
   hstore56_le out 21ul b3;
-  uint_to_bytes_le (sub out 28ul 4ul) b4
+  uint_to_bytes_le (sub out 28ul 4ul) b4;
+  admit()

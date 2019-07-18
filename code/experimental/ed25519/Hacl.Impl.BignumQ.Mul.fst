@@ -538,6 +538,7 @@ let mul_modq out x y =
   mul_5 z x y;
   carry z' z;
   barrett_reduction_ out z';
+  admit();
   pop_frame()
 
 inline_for_extraction noextract
@@ -547,7 +548,9 @@ val add_modq_:
   -> y:qelemB ->
   Stack unit
     (requires fun h -> live h z /\ live h x /\ live h y)
-    (ensures  fun h0 _ h1 -> modifies (loc z) h0 h1)
+    (ensures  fun h0 _ h1 -> modifies (loc z) h0 h1 /\
+      F.as_nat h1 z == (F.as_nat h0 x + F.as_nat h0 y) % Spec.Ed25519.q
+    )
 let add_modq_ out x y =
   push_frame();
   let tmp = create 5ul (u64 0) in
@@ -587,6 +590,7 @@ let add_modq_ out x y =
   let x3 = t in let x4 = y +. carry in
   Hacl.Bignum25519.make_u64_5 tmp x0 x1 x2 x3 x4;
   subm_conditional out tmp;
+  admit();
   pop_frame()
 
 let add_modq out x y = add_modq_ out x y

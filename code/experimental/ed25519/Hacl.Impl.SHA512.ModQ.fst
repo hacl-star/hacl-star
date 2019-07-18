@@ -8,6 +8,8 @@ open Lib.ByteSequence
 open Lib.Sequence
 open Lib.Buffer
 
+module F = Hacl.Impl.Ed25519.Field56
+
 #reset-options "--max_fuel 0 --max_ifuel 0"
 
 //FIX
@@ -59,7 +61,7 @@ val sha512_modq_pre:
       live h input /\ live h out /\ live h prefix /\
       disjoint prefix out /\  disjoint out input)
     (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
-      nat_from_intseq_le (as_seq h1 out) ==
+      F.as_nat h1 out ==
       Spec.Ed25519.sha512_modq (32 + v len)
         (concat #uint8 #32 #(v len) (as_seq h0 prefix) (as_seq h0 input))
     )
@@ -86,7 +88,16 @@ val sha512_modq_pre_pre2:
     (requires fun h ->
       live h input /\ live h out /\ live h prefix /\ live h prefix2 /\
       disjoint prefix out /\ disjoint prefix2 out /\ disjoint out input)
-    (ensures  fun h0 _ h1 ->  modifies (loc out) h0 h1)
+    (ensures  fun h0 _ h1 ->  modifies (loc out) h0 h1 /\
+     F.as_nat h1 out ==
+      Spec.Ed25519.sha512_modq (64 + v len)
+        (concat #uint8 #64 #(v len)
+          (concat #uint8 #32 #32
+            (as_seq h0 prefix)
+            (as_seq h0 prefix2))
+          (as_seq h0 input)
+        )
+      )
 let sha512_modq_pre_pre2 out prefix prefix2 len input =
   push_frame();
   let tmp = create 10ul (u64 0) in
@@ -94,4 +105,5 @@ let sha512_modq_pre_pre2 out prefix prefix2 len input =
   sha512_pre_pre2_msg hash prefix prefix2 len input;
   Hacl.Impl.Load56.load_64_bytes tmp hash;
   Hacl.Impl.BignumQ.Mul.barrett_reduction out tmp;
+  admit();
   pop_frame()
