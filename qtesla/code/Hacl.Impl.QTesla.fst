@@ -735,7 +735,7 @@ let lemma_logand_with_one_pos (#n:pos{1 < n}) (x:Int.int_t n) (y:Int.int_t n) : 
     Int.sign_bit_positive r
 
 let lemma_logand_le_one_pos (#n:pos) (a:Int.int_t n) (b:Int.int_t n{0 <= b}) : Lemma
-    (ensures Int.logand a b <= b) =
+    (ensures Int.logand a b <= b /\ Int.logand a b >= 0) =
     let vb = Int.to_vec b in
     let vand = Int.to_vec (Int.logand a b) in
     UInt.subset_vec_le_lemma #n vand vb
@@ -883,8 +883,14 @@ val hash_H_inner_for:
 
 module S = QTesla.Params
 
-#push-options "--z3rlimit 300"
+#push-options "--max_fuel 8"
+let lemma_pow2_d_fits () : Lemma
+    (ensures 1 * pow2 (v params_d) <= Int.max_int I32.n) = ()
+#pop-options
+
+#push-options "--z3rlimit 500"
 let hash_H_inner_for v_ t index =
+    let params_q = elem_to_int32 params_q in
     let hInit = ST.get () in 
     assert(is_poly_k_montgomery hInit v_);
     assert(is_montgomery (bget hInit v_ (v index)));
@@ -893,8 +899,16 @@ let hash_H_inner_for v_ t index =
     let temp:I32.t = elem_to_int32 vindex in
     assert_norm(v (_RADIX32 -. size 1) < I32.n);
     let mask = I32.((params_q /^ 2l -^ temp) >>>^ (_RADIX32 -. size 1)) in
+    lemma_mask I32.(params_q /^ 2l -^ temp) mask;
+    assert(is_montgomery (int32_to_elem temp));
+    assert(I32.v temp - I32.v params_q >= -(I32.v params_q));
+    let temp_prev = temp in // this should get erased as we only use it in proof
     let temp = I32.(((temp -^ params_q) &^ mask) |^ (temp &^ (lognot mask))) in
-    assume(1 * pow2 (v params_d) <= Int.max_int I32.n);
+    lemma_mask_logor I32.(temp_prev -^ params_q) temp_prev mask temp;
+    assert(I32.v temp >= -(I32.v params_q));
+    assert(I32.v temp <= 2 * (I32.v params_q));
+    assert(temp == temp_prev \/ temp == I32.(temp_prev -^ params_q));
+    lemma_pow2_d_fits ();
     assert_norm(FStar.Int.fits (I32.v (1l <<^ params_d)) I32.n); 
     Int.shift_left_value_lemma (I32.v 1l) (v params_d);
     assert_norm(pow2 (v params_d) > 0);
@@ -903,15 +917,18 @@ let hash_H_inner_for v_ t index =
     assert(I32.v (1l <<^ params_d) == pow2 (v params_d));
     assert(FStar.Int.fits (I32.v (1l <<^ params_d) - 1) I32.n);
     let cL = I32.(temp &^ ((1l <<^ params_d) -^ 1l)) in
+    lemma_logand_le_one_pos (I32.v temp) (I32.v ((1l <<^ params_d) -^ 1l));
+    assert(I32.v cL >= 0);
+    assert(I32.v cL <= I32.v ((1l <<^ params_d) -^ 1l));
     assert_norm(v (params_d -. size 1) < I32.n);
     //Int.logand_pos_le (I32.v temp) (I32.v ((1l <<^ params_d) -^ 1l));
     Int.sign_bit_positive (I32.v cL);
-    assert(I32.v cL >= 0);
+    lemma_logand_le_one_pos (I32.v temp) (I32.v ((1l <<^ params_d) -^ 1l));
     let mask = I32.(((1l <<^ (params_d -. (size 1))) -^ cL) >>>^ (_RADIX32 -. size 1)) in
+    lemma_mask ((1l <<^ (params_d -. (size 1))) -^ cL) mask;
+    let cL_prev = cL in
     let cL = I32.(((cL -^ (1l <<^ params_d)) &^ mask) |^ (cL &^ (lognot mask))) in
-    assume(FStar.Int.fits (I32.v temp - I32.v cL) I32.n);
-    //assume(I32.v temp >= -(S.params_q / 2) /\ I32.v temp <= S.params_q / 2);
-    //assume(I32.v cL >= 0 /\ I32.v cL <= pow2 S.params_d);
+    lemma_mask_logor I32.(cL_prev -^ (1l <<^ params_d)) cL_prev mask cL;
     t.(index) <- Lib.RawIntTypes.u8_from_UInt8 (int32_to_uint8 I32.((temp -^ cL) >>>^ params_d));
     let hFinal = ST.get () in 
     assert(is_poly_k_equal hInit hFinal v_)

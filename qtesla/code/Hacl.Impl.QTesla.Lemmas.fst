@@ -125,3 +125,25 @@ val lemma_logand_value_max: x:I64.t -> n:nat -> Lemma
 (*private let lemma_q_log_fact _ : Lemma (ensures pow2 (v params_q_log) < 2 * elem_v params_q) =
     assert_norm(pow2 (v params_q_log) < 2 * elem_v params_q)*)
 
+val lemma_mask_logor: a:I32.t -> b:I32.t -> mask:I32.t{I32.v mask == 0 \/ I32.v mask == (-1)} -> r:I32.t -> Lemma
+    (requires r == I32.logor (I32.logand a mask) (I32.logand b (I32.lognot mask)))
+    (ensures ((I32.v mask = 0) ==> (b == r)) /\ ((I32.v mask = (-1)) ==> (a == r)))
+
+let lemma_mask_logor a b mask r =
+    if I32.v mask = 0 then
+      begin
+      Int.nth_lemma #I32.n (I32.v mask) (Int.zero I32.n);
+      Int.nth_lemma #I32.n (I32.v (I32.lognot mask)) (Int.ones I32.n);
+      Int.logand_lemma_1 #I32.n (I32.v a);
+      Int.logand_lemma_2 #I32.n (I32.v b);
+      lemma_int32_logor_zero b
+      end
+    else 
+      begin 
+      Int.nth_lemma #I32.n (I32.v mask) (Int.ones I32.n);
+      Int.nth_lemma #I32.n (I32.v (I32.lognot mask)) (Int.zero I32.n);
+      Int.logand_lemma_1 #I32.n (I32.v b);
+      Int.logand_lemma_2 #I32.n (I32.v a);
+      lemma_int32_logor_zero a
+      end
+      
