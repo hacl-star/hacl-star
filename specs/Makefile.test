@@ -1,16 +1,18 @@
-FSTAR_HOME=../../FStar
-HACL_HOME=..
+FSTAR_HOME   ?= ../../FStar
+KREMLIN_HOME ?= ../../kremlin
+HACL_HOME    ?= ..
+
 include ../Makefile.include
 
 FSTAR_INCLUDES+= \
-	--include ../lib/ml \
-	--include ../../kremlin/kremlib \
-	--include ../lib \
-	--include ../specs/lemmas \
+	--include $(HACL_HOME)/lib/ml \
+	--include $(KREMLIN_HOME)/kremlib \
+	--include $(HACL_HOME)/lib \
+	--include $(HACL_HOME)/specs/lemmas \
 	--expose_interfaces
 
 LIBS = Lib.IntTypes.fst Lib.RawIntTypes.fst Lib.NatMod.fst Lib.LoopCombinators.fst Lib.Sequence.fst Lib.ByteSequence.fst Lib.PrintSequence.fst Lib.FixedSequence.fst # Lib.IntVector.fst
-LIBS_FILES= $(addprefix ../lib/, $(LIBS)) ../../kremlin/kremlib/Spec.Loops.fst
+LIBS_FILES= $(addprefix $(HACL_HOME)/lib/, $(LIBS)) $(KREMLIN_HOME)/kremlib/Spec.Loops.fst
 LIBS_ML = Spec_Loops.ml Lib_IntTypes.ml Lib_RawIntTypes.ml Lib_NatMod.ml Lib_LoopCombinators.ml Lib_Sequence.ml Lib_ByteSequence.ml  Lib_FixedSequence.ml Lib_PrintSequence.ml # Lib_IntVector.ml
 LIBS_EX = $(addprefix --extract_module , $(LIBS:.fst=)) --extract_module Spec.Loops
 
