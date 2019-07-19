@@ -124,14 +124,14 @@ aes_gcm.exe: $(LIBS_FILES) Spec.GaloisField.fst Spec.AES.fst Spec.GF128.fst Spec
 
 aes128gcm.exe: $(LIBS_FILES) Spec.GaloisField.fst Spec.AES.fst Spec.GF128.fst Spec.AES_GCM.fst tests/Spec.AES128_GCM.Test.fst
 	mkdir -p aesgcm128-ml
-	$(FSTAR) --codegen OCaml --lax $(LIBS_EX) --extract_module Spec.GaloisField --extract_module Spec.AES --extract_module Spec.AES_GCM  --extract_module Spec.AES128_GCM.Test --extract_module Spec.GF128 --odir aesgcm128-ml $^
+	$(FSTAR) --codegen OCaml --lax $(LIBS_EX) --extract_module Spec.GaloisField --extract_module Spec.AES --extract_module Spec.AES_GCM --extract_module Spec.AES128_GCM.Test --extract_module Spec.GF128 --odir aesgcm128-ml $^
 	@echo 'let _ = test()' >> aesgcm128-ml/Spec_AES128_GCM_Test.ml
 	$(OCAMLOPT) -I aesgcm128-ml $(OCAML_INCLUDES) $(addprefix aesgcm128-ml/, $(LIBS_ML)) aesgcm128-ml/Spec_GaloisField.ml aesgcm128-ml/Spec_AES.ml aesgcm128-ml/Spec_GF128.ml aesgcm128-ml/Spec_AES_GCM.ml aesgcm128-ml/Spec_AES128_GCM_Test.ml -o aes128gcm.exe
 	./aes128gcm.exe
 
 aes256gcm.exe: $(LIBS_FILES) Spec.GaloisField.fst Spec.AES.fst Spec.GF128.fst Spec.AES_GCM.fst tests/Spec.AES256_GCM.Test.fst
 	mkdir -p aesgcm256-ml
-	$(FSTAR) --codegen OCaml --lax $(LIBS_EX) --extract_module Spec.GaloisField --extract_module Spec.AES --extract_module Spec.AES256_GCM  --extract_module Spec.AES256_GCM.Test --extract_module Spec.GF128 --odir aesgcm256-ml $^
+	$(FSTAR) --codegen OCaml --lax $(LIBS_EX) --extract_module Spec.GaloisField --extract_module Spec.AES --extract_module Spec.AES_GCM --extract_module Spec.AES256_GCM.Test --extract_module Spec.GF128 --odir aesgcm256-ml $^
 	@echo 'let _ = test()' >> aesgcm256-ml/Spec_AES256_GCM_Test.ml
 	$(OCAMLOPT) -I aesgcm256-ml $(OCAML_INCLUDES) $(addprefix aesgcm256-ml/, $(LIBS_ML)) aesgcm256-ml/Spec_GaloisField.ml aesgcm256-ml/Spec_AES.ml aesgcm256-ml/Spec_GF128.ml aesgcm256-ml/Spec_AES_GCM.ml aesgcm256-ml/Spec_AES256_GCM_Test.ml -o aes256gcm.exe
 	./aes256gcm.exe
