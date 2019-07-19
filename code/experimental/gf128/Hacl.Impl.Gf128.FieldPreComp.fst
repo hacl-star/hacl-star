@@ -40,16 +40,16 @@ let op_String_Access #a #len = LSeq.index #a #len
 noextract
 let feval (h:mem) (f:felem) : GTot Vec.elem =
   let f = as_seq h f in
-  nat_to_uint #U128 #SEC (v f.[1] * pow2 64 + v f.[0])
+  uint #U128 #SEC (v f.[1] * pow2 64 + v f.[0])
 
 
 noextract
 let feval4 (h:mem) (f:felem4) : GTot Vec.elem4 =
   let f = as_seq h f in
-  let f0 = nat_to_uint #U128 #SEC (v f.[1] * pow2 64 + v f.[0]) in
-  let f1 = nat_to_uint #U128 #SEC (v f.[3] * pow2 64 + v f.[2]) in
-  let f2 = nat_to_uint #U128 #SEC (v f.[5] * pow2 64 + v f.[4]) in
-  let f3 = nat_to_uint #U128 #SEC (v f.[7] * pow2 64 + v f.[6]) in
+  let f0 = uint #U128 #SEC (v f.[1] * pow2 64 + v f.[0]) in
+  let f1 = uint #U128 #SEC (v f.[3] * pow2 64 + v f.[2]) in
+  let f2 = uint #U128 #SEC (v f.[5] * pow2 64 + v f.[4]) in
+  let f3 = uint #U128 #SEC (v f.[7] * pow2 64 + v f.[6]) in
   Lib.IntVector.create4 f0 f1 f2 f3
 
 
