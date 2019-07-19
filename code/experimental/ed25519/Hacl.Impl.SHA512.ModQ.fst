@@ -22,13 +22,19 @@ val sha512_pre_msg:
     (requires fun h ->
       live h hash /\ live h prefix /\ live h input /\
       disjoint input hash /\ disjoint prefix hash)
-    (ensures fun h0 _ h1 -> modifies (loc hash) h0 h1)
+    (ensures fun h0 _ h1 -> modifies (loc hash) h0 h1 /\
+      as_seq h1 hash == Spec.Agile.Hash.hash Spec.Agile.Hash.HASH_SHA2_512
+          (concat #uint8 #32 #(v len) (as_seq h0 prefix) (as_seq h0 input))
+    )
 let sha512_pre_msg h prefix len input =
   push_frame ();
   assert_norm(pow2 32 <= pow2 125 - 1);
   let pre_msg = create (len +. 32ul) (u8 0) in
   concat2 32ul prefix len input pre_msg;
+  (**) let h0 = get() in
+  // TODO: Replace that with agile call
   Hacl.Hash.SHA2.hash_512 pre_msg (len +. 32ul) h;
+  (**) Hacl.Impl.Hash.Reveal.reveal_agile_sha512 (as_seq h0 pre_msg);
   pop_frame ()
 
 //FIX

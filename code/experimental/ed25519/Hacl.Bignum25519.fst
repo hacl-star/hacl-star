@@ -8,6 +8,8 @@ open Lib.IntTypes
 open Lib.Buffer
 open Lib.ByteBuffer
 
+module S51 = Hacl.Spec.Curve25519.Field51.Definition
+
 module BN = Hacl.Impl.Curve25519.Field51
 
 #reset-options "--max_fuel 0"
@@ -51,7 +53,7 @@ let make_zero b =
   b.(2ul) <- u64 0;
   b.(3ul) <- u64 0;
   b.(4ul) <- u64 0;
-  admit()
+  assert_norm (S51.as_nat5 (u64 0, u64 0, u64 0, u64 0, u64 0) % Spec.Curve25519.prime == 0)
 
 let make_one b =
   b.(0ul) <- u64 1;
@@ -59,7 +61,7 @@ let make_one b =
   b.(2ul) <- u64 0;
   b.(3ul) <- u64 0;
   b.(4ul) <- u64 0;
-  admit()
+  assert_norm (S51.as_nat5 (u64 1, u64 0, u64 0, u64 0, u64 0) % Spec.Curve25519.prime == 1)
 
 let fsum a b = admit();
   BN.fadd a a b
