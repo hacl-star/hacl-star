@@ -204,6 +204,10 @@ type byte_t = uint_t U8 PUB
 unfold
 type size_t = uint_t U32 PUB
 
+// 2019.7.19: Used only by experimental Blake2b; remove?
+unfold 
+type size128_t = uint_t U128 PUB
+
 unfold
 type pub_uint8 = uint_t U8 PUB
 

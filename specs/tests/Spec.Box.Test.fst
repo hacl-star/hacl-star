@@ -12,10 +12,6 @@ open Spec.Box
 
 
 let plain = List.Tot.map u8_from_UInt8 [
-  0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy;
-  0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy;
-  0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy;
-  0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy; 0x00uy;
   0x00uy;  0x01uy;  0x02uy;  0x03uy;   0x04uy;  0x05uy;  0x06uy;  0x07uy;
   0x08uy;  0x09uy;  0x10uy;  0x11uy;   0x12uy;  0x13uy;  0x14uy;  0x15uy;
   0x16uy;  0x17uy;  0x18uy;  0x19uy;   0x20uy;  0x21uy;  0x22uy;  0x23uy;
@@ -75,7 +71,7 @@ let test () =
   assert_norm(List.Tot.length sk1 = 32);
   assert_norm(List.Tot.length sk2 = 32);
   assert_norm(List.Tot.length nonce = 24);
-  assert_norm(List.Tot.length plain = 104);
+  assert_norm(List.Tot.length plain = 72);
 
   let sk1 = of_list sk1 in
   let sk2 = of_list sk2 in
@@ -85,9 +81,11 @@ let test () =
   let pk1 = Spec.Curve25519.secret_to_public sk1 in
   let pk2 = Spec.Curve25519.secret_to_public sk2 in
 
-  let (mac,cipher) = box_detached sk1 pk2 nonce plaintext in
+  let mac_cipher = box_detached sk1 pk2 nonce plaintext in
+  let (mac, cipher) = match mac_cipher with | Some p -> p | None -> (create 16 (u8 0), create 72 (u8 0)) in
+
   let dec = box_open_detached pk1 sk2 nonce mac cipher in
-  let dec_p = match dec with | Some p -> p | None -> create 104 (u8 0) in
+  let dec_p = match dec with | Some p -> p | None -> create 72 (u8 0) in
   let result_decryption = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) dec_p plaintext in
 
   if result_decryption then IO.print_string "\nSuccess!\n"

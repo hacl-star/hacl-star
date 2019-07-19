@@ -1,6 +1,5 @@
 module Hacl.Chacha20.Vec32
 
-module ST = FStar.HyperStack.ST
 open FStar.HyperStack
 open FStar.HyperStack.All
 

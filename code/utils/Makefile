@@ -4,27 +4,23 @@ HACL_HOME    ?= ../..
 
 CACHE_DIR     ?= $(HACL_HOME)/.cache
 HINT_DIR      ?= $(HACL_HOME)/.hints
-OUTPUT_DIR    = .output
-GENERATED_DIR = hash-c
-OUT_DIR	      = hash-c
+OUTPUT_DIR    ?= .output
+GENERATED_DIR ?= utils-c
+OUT_DIR	     ?= utils-c
 
 .PHONY: all test stage1 stage2 clean clean-c distclean
 
-all: test
+all: extract
 
 test:
 	rm -f .depend && $(MAKE) .depend
-	$(MAKE) stage1
-	STAGE=2 $(MAKE) stage2
+	$(MAKE) extract
 
-stage1: $(GENERATED_DIR)/Makefile.include
+extract: $(GENERATED_DIR)/Makefile.include
 
-stage2: $(OUT_DIR)/test.exe
-	$(OUT_DIR)/test.exe
 
 FSTAR_INCLUDE_DIRS = \
   $(HACL_KREMLIN) \
-  $(KREMLIN_HOME)/include/kremlin \
   $(KREMLIN_HOME)/kremlib \
   $(HACL_HOME)/specs \
   $(HACL_HOME)/lib \
@@ -39,21 +35,20 @@ FSTAR = $(FSTAR_HOME)/bin/fstar.exe $(FSTAR_FLAGS)
 
 ENABLE_HINTS = --use_hints --use_hint_hashes --record_hints --query_stats
 
-ROOTS = Hacl.Test.SHA2.fst
-#ROOTS = Hacl.Test.CSHAKE.fst
+ROOTS = Hacl.Utils.fst
 
 .PRECIOUS: %.krml
+
+.depend:
+	$(FSTAR) --dep full $(ROOTS) --extract '* -Prims -FStar +FStar.UInt128 -LowStar -Spec' > $@
+
+include .depend
 
 $(HINT_DIR):
 	mkdir -p $@
 
 $(CACHE_DIR):
 	mkdir -p $@
-
-.depend:
-	$(FSTAR) --dep full $(ROOTS) --extract '* -Prims -FStar +FStar.UInt128 -LowStar -Spec' > $@
-
-include .depend
 
 %.checked: | .depend $(HINT_DIR) $(CACHE_DIR)
 	$(FSTAR) $< $(ENABLE_HINTS) --hint_file $(HINT_DIR)/$(notdir $*).hints && \
@@ -67,7 +62,7 @@ $(OUTPUT_DIR)/%.krml: | .depend
 
 # 2. Generation of .c files
 
-KREMLIN_TESTLIB=-fbuiltin-uint128 -add-include '"TestLib.h"' -add-include '"C_Endianness.h"' -add-include '"C_String.h"' -add-include '"FStar_UInt_8_16_32_64.h"' $(KREMLIB)/dist/generic/testlib.c
+KREMLIN_TESTLIB=
 
 KREMLIN=$(KREMLIN_HOME)/krml
 
@@ -75,16 +70,13 @@ KREMLIN=$(KREMLIN_HOME)/krml
 
 # We use -drop (deprecated) only to avoid creating unnecessary .c,.h files
 $(GENERATED_DIR)/Makefile.include: $(ALL_KRML_FILES) | .depend
-	$(KREMLIN) $(KREMLIN_TESTLIB) -skip-compilation \
-	-no-prefix 'Hacl.Test.SHA2' \
-	-no-prefix 'Hacl.Hash.SHA2' \
+	$(KREMLIN) -skip-compilation \
+	-no-prefix 'Hacl.Utils' \
 	-bundle 'Lib.*' \
 	-bundle 'Spec.*' \
 	-bundle 'C=C.Endianness' \
-	-bundle 'Hacl.Hash.SHA2=Hacl.Impl.*,Hacl.Hash.*,Spec.Hash.*' \
 	-library 'C,FStar' \
-	-drop 'LowStar,Spec,Prims,Lib,C.Loops.*,FStar,C,C.String' \
-	-add-include '"c/Lib_PrintBuffer.h"' \
+	-drop 'LowStar,Spec,Prims,Lib,C.Loops.*,C,C.*' \
 	-tmpdir $(GENERATED_DIR) \
 	$^
 
@@ -112,14 +104,12 @@ ALL_OUR_FILES 	    = $(filter-out FStar_* Lib.c LowStar.c C.c, $(ALL_C_FILES))
 ALL_GENERATED_FILES = $(addprefix $(GENERATED_DIR)/,$(ALL_OUR_FILES))
 
 ALL_SOURCES = \
-  $(ALL_GENERATED_FILES) \
-  $(HACL_HOME)/lib/c/Lib_PrintBuffer.c
+  $(ALL_GENERATED_FILES)
 
 ALL_OBJS = $(patsubst %.c,%.o,$(ALL_SOURCES))
 
 INCLUDE_DIRS = \
   $(KREMLIN_HOME)/include \
-  $(KREMLIN_HOME)/include/kremlin \
   $(KREMLIN_HOME)/kremlib \
   $(KREMLIN_HOME)/kremlib/dist/generic \
   $(HACL_HOME)/lib
@@ -128,7 +118,7 @@ INCLUDE_DIRS = \
 CFLAGS += -O3 -march=native -mtune=native -funroll-loops
 CFLAGS += $(addprefix -I ,$(INCLUDE_DIRS)) -Wall -Wextra -Werror \
   -Wno-parentheses -Wno-unused-parameter -Wno-unused-variable \
-  -Wno-incompatible-pointer-types -Wno-deprecated-declarations
+  -Wno-incompatible-pointer-types
 
 # GNU Make manual section 4.14
 %.d: %.c

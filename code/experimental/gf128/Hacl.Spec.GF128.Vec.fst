@@ -58,15 +58,15 @@ let gf128_update_multi_add_mul (text:bytes{0 < length text /\ length text % 64 =
 
 
 //Precomp
-let gf128_update4_mul_add (r4:elem4) (b:lbytes 64) (acc4:elem4) : Tot elem4 =
+let gf128_update4_mul_add (pre:elem4) (b:lbytes 64) (acc4:elem4) : Tot elem4 =
+  let r4 = create 4 pre.[0] in
   fadd4 (fmul4 acc4 r4) (encode4 b)
 
 let gf128_update_multi_mul_add (text:bytes{0 < length text /\ length text % 64 = 0}) (acc:elem) (r:elem) : elem =
   let acc = load_acc acc (Seq.slice text 0 64) in
   let text = Seq.slice text 64 (length text) in
   let pre = load_precompute_r r in
-  let r4 = create 4 pre.[0] in
-  let acc = repeat_blocks_multi #uint8 #elem4 64 text (gf128_update4_mul_add r4) acc in
+  let acc = repeat_blocks_multi #uint8 #elem4 64 text (gf128_update4_mul_add pre) acc in
   normalize4 acc pre
 
 

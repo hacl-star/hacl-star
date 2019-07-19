@@ -43,13 +43,13 @@ let gf128_init (h:lbytes size_block) : Tot (elem & elem) =
   zero, r
 
 let gf128_update1 (r:elem) (b:lbytes size_block) (acc:elem) : Tot elem =
-  (encode b `fadd` acc) `fmul_be` r
+  (acc `fadd` encode b) `fmul_be` r
 
 let gf128_finish (s:key) (acc:elem) : Tot tag =
-  decode (acc `fadd` (load_elem s))
+  decode (acc `fadd` load_elem s)
 
 let gf128_update_last (r:elem) (l:size_nat{l < size_block}) (b:lbytes l) (acc:elem) =
-  if l = 0 then acc else (encode_last l b `fadd` acc) `fmul_be` r
+  if l = 0 then acc else (acc `fadd` encode_last l b) `fmul_be` r
 
 let gf128_update (text:bytes) (acc:elem) (r:elem) : Tot elem =
   repeat_blocks #uint8 #elem size_block text

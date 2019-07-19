@@ -37,9 +37,6 @@ val poly1305_update_blocks:
 let poly1305_update_blocks ctx len text =
   poly1305_update ctx len text
 
-let poly1305_update_padded: poly1305_update_st M128 =
-  poly1305_update
-
 val poly1305_update_last:
     ctx:poly1305_ctx
   -> len:size_t{v len < 16}
@@ -60,4 +57,4 @@ let poly1305_finish: poly1305_finish_st M128 =
   poly1305_finish #M128
 
 let poly1305_mac: poly1305_mac_st M128 =
-  mk_poly1305_mac #M128 poly1305_init poly1305_update_padded poly1305_finish
+  mk_poly1305_mac #M128 poly1305_init poly1305_update poly1305_finish

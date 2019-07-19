@@ -149,24 +149,6 @@ let seq_update_sub #a s start n x =
   Seq.lemma_eq_intro (Seq.slice o start (start + n)) x;
   o
 
-(*
-let map_blocks #a bs inp f g =
-  let len = length inp in
-  let nb = len / bs in
-  let rem = len % bs in
-  let out = inp in
-  let out =
-    repeati #(s:seq a{length s == len}) nb
-    (fun i out ->
-      assert ((i+1) * bs <= nb * bs);
-      seq_update_sub out (i * bs) bs (f i (seq_sub inp (i * bs) bs))
-    ) out in
-  if rem > 0 then
-    seq_update_sub out (nb * bs) rem (g nb rem (seq_sub inp (nb * bs) rem))
-  else out
-
-*)
-
 #push-options "--max_ifuel 1"
 val repeati_blocks_f:
     #a:Type0
@@ -360,54 +342,3 @@ let rec index_generate_blocks #t len max n f i =
     Seq.lemma_index_app2 s s' i;
     mod_prop len (n-1) i
     end
-
-
-(***** The following lemmas are work in progress: Do not rely on them ****)
-
-let map_blocks_multi_lemma #a blocksize n inp f i = admit()
-let map_blocks_lemma #a blocksize inp f g i = admit()
-
-let map_blocks_n_fits_lemma len blocksize n i j =
-  assert (i < len / (n * blocksize));
-  assert (i+1 <= len / (n*blocksize));
-  assert ((i + 1) * n * blocksize <= len);
-  assert (((i + 1) * n) * blocksize <= len);
-  Math.Lemmas.lemma_div_le (((i+1) * n)*blocksize) len blocksize;
-  assert ((((i + 1) * n) * blocksize) / blocksize <= len / blocksize);
-  Math.Lemmas.multiple_division_lemma ((i + 1) * n) blocksize;
-  assert ((i + 1) * n <= len / blocksize);
-  assert (i * n + n - 1 < len / blocksize);
-  assert (n * i + j < len / blocksize)
-
-let map_blocks_n_lemma #a blocksize n inp f g = admit()
-
-let repeat_blocks_n_fits_lemma blocksize n len = admit()
-
-let repeat_blocks_n_lemma #a #b blocksize n inp f l init = admit()
-
-let generate_blocks1_lemma #t len a f acc0 =
-  let a0 : generate_blocks_a t len 1 a 0 = (acc0, (Seq.empty <: s:seq t{length s == 0 * len}))  in
-  unfold_repeat_gen 1 (generate_blocks_a t len 1 a) (generate_blocks_inner t len 1 a f) a0 0;
-  eq_repeat_gen0 1 (generate_blocks_a t len 1 a) (generate_blocks_inner t len 1 a f) a0;
-  let a',b = f 0 acc0 in
-  assert (Seq.equal (Seq.append Seq.empty b) b)
-
-
-let map_blocks_multi1_lemma #a blocksize inp f =  admit()
-
-(*
-let map_blocks #a bs inp f g =
-  let len = length inp in
-  let nb = len / bs in
-  let rem = len % bs in
-  let out = inp in
-  let out =
-    repeati #(s:seq a{length s == len}) nb
-    (fun i out ->
-      assert ((i+1) * bs <= nb * bs);
-      seq_update_sub out (i * bs) bs (f i (seq_sub inp (i * bs) bs))
-    ) out in
-  if rem > 0 then
-    seq_update_sub out (nb * bs) rem (g nb rem (seq_sub inp (nb * bs) rem))
-  else out
-*)
