@@ -9,6 +9,7 @@ open Lib.ByteSequence
 open Lib.Sequence
 open Lib.Buffer
 
+module F51 = Hacl.Impl.Ed25519.Field51
 module F56 = Hacl.Impl.Ed25519.Field56
 
 #set-options "--z3rlimit 10 --max_fuel 0 --max_ifuel 0"
@@ -23,7 +24,8 @@ val point_mul_compress:
   Stack unit
     (requires fun h ->
       live h out /\ live h s /\ live h p /\
-      disjoint s out /\ disjoint p out)
+      disjoint s out /\ disjoint p out /\
+      F51.point_inv_t h p)
     (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1)
 let point_mul_compress out s p =
   push_frame();

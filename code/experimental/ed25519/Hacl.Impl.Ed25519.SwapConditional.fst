@@ -12,6 +12,8 @@ open Hacl.Bignum25519
 module F51 = Hacl.Impl.Ed25519.Field51
 module F56 = Hacl.Impl.Ed25519.Field56
 
+#set-options "--z3rlimit 20 --max_fuel 0 --max_ifuel 0"
+
 val swap_conditional_step:
     out_a:felem
   -> out_b:felem
@@ -62,11 +64,15 @@ val swap_conditional:
     (requires fun h ->
       live h a /\ live h b /\ live h out_a /\ live h out_b /\
       disjoint out_a out_b /\ disjoint a out_a /\disjoint a out_b /\
-      disjoint b out_b /\ disjoint b out_a /\ disjoint a b)
+      disjoint b out_b /\ disjoint b out_a /\ disjoint a b /\
+      F51.point_inv_t h a /\ F51.point_inv_t h b
+    )
     (ensures  fun h0 _ h1 -> modifies (loc out_a |+| loc out_b) h0 h1 /\
+      F51.point_inv_t h1 out_a /\ F51.point_inv_t h1 out_b /\
       (F51.point_eval h1 out_a, F51.point_eval h1 out_b) ==
       Spec.Ed25519.cswap2 (to_u8 i) (F51.point_eval h0 a) (F51.point_eval h0 b)
     )
+
 //      (if v i = 1 then (as_seq h1 out_a == as_seq h0 b /\ as_seq h1 out_b == as_seq h0 a)
 //         else (as_seq h1 out_a == as_seq h0 a /\ as_seq h1 out_b == as_seq h0 b))
 let swap_conditional a' b' a b iswap =
@@ -82,8 +88,11 @@ val swap_conditional_inplace:
   -> b:point
   -> i:uint64{v i = 0 \/ v i = 1} ->
   Stack unit
-    (requires fun h -> live h a /\ live h b /\ disjoint a b)
+    (requires fun h -> live h a /\ live h b /\ disjoint a b /\
+      F51.point_inv_t h a /\ F51.point_inv_t h b
+    )
     (ensures  fun h0 _ h1 -> modifies (loc a |+| loc b) h0 h1 /\
+      F51.point_inv_t h1 a /\ F51.point_inv_t h1 b /\
       (F51.point_eval h1 a, F51.point_eval h1 b) ==
       Spec.Ed25519.cswap2 (to_u8 i) (F51.point_eval h0 a) (F51.point_eval h0 b)
     )

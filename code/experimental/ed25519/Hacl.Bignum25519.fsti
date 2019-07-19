@@ -52,6 +52,7 @@ val make_u64_5:
   Stack unit
     (requires fun h -> live h b)
     (ensures  fun h0 _ h1 -> modifies (loc b) h0 h1 /\
+      F51.as_felem h1 b == (s0, s1, s2, s3, s4) /\
       F51.as_nat h1 b == S51.as_nat5 (s0, s1, s2, s3, s4)
     )
 
@@ -79,6 +80,7 @@ val make_zero:
   Stack unit
     (requires fun h -> live h b)
     (ensures  fun h0 _ h1 -> modifies (loc b) h0 h1 /\
+      F51.mul_inv_t h1 b /\
       F51.fevalh h1 b == SC.zero
     )
 
@@ -88,6 +90,7 @@ val make_one:
   Stack unit
     (requires fun h -> live h b)
     (ensures  fun h0 _ h1 -> modifies (loc b) h0 h1 /\
+      F51.mul_inv_t h1 b /\
       F51.fevalh h1 b == SC.one
     )
 
@@ -95,8 +98,12 @@ val fsum:
     a:felem
   -> b:felem ->
   Stack unit
-    (requires fun h -> live h a /\ live h b /\ disjoint a b)
+    (requires fun h -> live h a /\ live h b /\ disjoint a b /\
+      F51.felem_fits h a (1, 2, 1, 1, 1) /\
+      F51.felem_fits h b (1, 2, 1, 1, 1)
+    )
     (ensures  fun h0 _ h1 -> modifies (loc a) h0 h1 /\
+      F51.felem_fits h1 a (2, 4, 2, 2, 2) /\
       F51.fevalh h1 a == F51.fevalh h0 a `SC.fadd` F51.fevalh h0 b
     )
 
@@ -104,8 +111,12 @@ val fdifference:
     a:felem
   -> b:felem ->
   Stack unit
-    (requires fun h -> live h a /\ live h b /\ disjoint a b)
+    (requires fun h -> live h a /\ live h b /\ disjoint a b /\
+      F51.felem_fits h a (1, 2, 1, 1, 1) /\
+      F51.felem_fits h b (1, 2, 1, 1, 1)
+    )
     (ensures  fun h0 _ h1 -> modifies (loc a) h0 h1 /\
+      F51.felem_fits h1 a (9, 10, 9, 9, 9) /\
       F51.fevalh h1 a == F51.fevalh h0 b `SC.fsub` F51.fevalh h0 a
     )
 
@@ -114,25 +125,22 @@ val reduce_513:
   Stack unit
     (requires fun h -> live h a)
     (ensures  fun h0 _ h1 -> modifies (loc a) h0 h1 /\
-      F51.fevalh h1 a == F51.fevalh h0 a
+      F51.fevalh h1 a == F51.fevalh h0 a /\
+      F51.mul_inv_t h1 a
     )
 
-val fdifference_reduced:
-    a:felem
-  -> b:felem ->
-  Stack unit
-    (requires fun h -> live h a /\ live h b /\ disjoint a b)
-    (ensures  fun h0 _ h1 -> modifies (loc a) h0 h1 /\
-      F51.fevalh h1 a == F51.fevalh h0 b `SC.fsub` F51.fevalh h0 a
-    )
 
 val fmul:
     out:felem
   -> a:felem
   -> b:felem ->
   Stack unit
-    (requires fun h -> live h out /\ live h a /\ live h b)
+    (requires fun h -> live h out /\ live h a /\ live h b /\
+      F51.felem_fits h a (9, 10, 9, 9, 9) /\
+      F51.felem_fits h b (9, 10, 9, 9, 9)
+    )
     (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
+      F51.mul_inv_t h1 out /\
       F51.fevalh h1 out == SC.fmul (F51.fevalh h0 a) (F51.fevalh h0 b)
     )
 
@@ -142,6 +150,7 @@ val times_2:
   Stack unit
     (requires fun h -> live h out /\ live h a)
     (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
+      F51.mul_inv_t h1 out /\
       F51.fevalh h1 out == 2 `SC.fmul` F51.fevalh h0 a
     )
 
@@ -158,6 +167,7 @@ val times_2d:
   Stack unit
     (requires fun h -> live h out /\ live h a)
     (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
+      F51.mul_inv_t h1 out /\
       F51.fevalh h1 out == 2 `SC.fmul` Spec.Ed25519.d `SC.fmul` F51.fevalh h0 a
     )
 
@@ -165,8 +175,11 @@ val fsquare:
     out:felem
   -> a:felem ->
   Stack unit
-    (requires fun h -> live h out /\ live h a /\ disjoint a out)
+    (requires fun h -> live h out /\ live h a /\ disjoint a out /\
+      F51.felem_fits h a (9, 10, 9, 9, 9)
+    )
     (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
+      F51.mul_inv_t h1 out /\
       F51.fevalh h1 out == F51.fevalh h0 a `SC.fmul` F51.fevalh h0 a
     )
 

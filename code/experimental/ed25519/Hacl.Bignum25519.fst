@@ -63,10 +63,10 @@ let make_one b =
   b.(4ul) <- u64 0;
   assert_norm (S51.as_nat5 (u64 1, u64 0, u64 0, u64 0, u64 0) % Spec.Curve25519.prime == 1)
 
-let fsum a b = admit();
+let fsum a b =
   BN.fadd a a b
 
-let fdifference a b = admit();
+let fdifference a b =
   BN.fsub a b a
 
 inline_for_extraction noextract

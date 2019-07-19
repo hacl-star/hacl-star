@@ -21,6 +21,7 @@ val make_point_inf:
   Stack unit
     (requires fun h -> live h b)
     (ensures  fun h0 _ h1 -> modifies (loc b) h0 h1 /\
+      F51.point_inv_t h1 b /\
       F51.point_eval h1 b == Spec.Curve25519.(zero, one, one, zero)
     )
 let make_point_inf b =
@@ -39,6 +40,7 @@ val make_g:
   Stack unit
     (requires fun h -> live h g)
     (ensures fun h0 _ h1 -> modifies (loc g) h0 h1 /\
+      F51.point_inv_t h1 g /\
       F51.point_eval h1 g == Spec.Ed25519.g
     )
 
@@ -87,8 +89,14 @@ val loop_step:
   -> k:lbuffer uint8 32ul
   -> ctr:size_t{v ctr < 256} ->
   Stack unit
-    (requires fun h -> live h b /\ live h k /\ disjoint k b)
+    (requires fun h -> live h b /\ live h k /\ disjoint k b /\
+      F51.point_inv_t h (gsub b 0ul 20ul) /\
+      F51.point_inv_t h (gsub b 20ul 20ul)
+    )
     (ensures  fun h0 _ h1 -> modifies (loc b) h0 h1 /\
+      F51.point_inv_t h1 (gsub b 0ul 20ul) /\
+      F51.point_inv_t h1 (gsub b 20ul 20ul) /\
+
       (F51.point_eval h1 (gsub b 0ul 20ul), F51.point_eval h1 (gsub b 20ul 20ul)) ==
       Spec.Ed25519.ladder_step (as_seq h0 k) (v ctr)
        (F51.point_eval h0 (gsub b 0ul 20ul), F51.point_eval h0 (gsub b 20ul 20ul))
@@ -120,9 +128,11 @@ val point_mul_:
   -> k:lbuffer uint8 32ul ->
   Stack unit
     (requires fun h -> live h k /\ live h b /\ disjoint b k /\
+      F51.point_inv_t h (gsub b 0ul 20ul) /\ F51.point_inv_t h (gsub b 20ul 20ul) /\
       F51.point_eval h (gsub b 0ul 20ul) == Spec.Curve25519.(zero, one, one, zero)
     )
     (ensures  fun h0 _ h1 -> modifies (loc b) h0 h1 /\
+       F51.point_inv_t h1 (gsub b 0ul 20ul) /\ F51.point_inv_t h1 (gsub b 20ul 20ul) /\
        F51.point_eval h1 (gsub b 0ul 20ul) ==
        Spec.Ed25519.point_mul (as_seq h0 k) (F51.point_eval h0 (gsub b 20ul 20ul))
     )
@@ -142,6 +152,7 @@ let point_mul_ b k =
 
   [@inline_let]
   let inv h (i:nat{i <= 256}) = modifies (loc b) h0 h /\
+    F51.point_inv_t h (gsub b 0ul 20ul) /\ F51.point_inv_t h (gsub b 20ul 20ul) /\
     acc h == Lib.LoopCombinators.repeati i (spec h0) (acc h0)
   in
 
@@ -156,8 +167,11 @@ val point_mul:
   -> scalar:lbuffer uint8 32ul
   -> q:point ->
   Stack unit
-    (requires fun h -> live h scalar /\ live h q /\ live h result)
+    (requires fun h -> live h scalar /\ live h q /\ live h result /\
+      F51.point_inv_t h q
+    )
     (ensures  fun h0 _ h1 -> modifies (loc result) h0 h1 /\
+      F51.point_inv_t h1 result /\
       F51.point_eval h1 result == Spec.Ed25519.point_mul (as_seq h0 scalar) (F51.point_eval h0 q)
     )
 
@@ -179,6 +193,7 @@ val point_mul_g:
     (requires fun h ->
       live h scalar /\ live h result /\ disjoint result scalar)
     (ensures  fun h0 _ h1 -> modifies (loc result) h0 h1 /\
+      F51.point_inv_t h1 result /\
       F51.point_eval h1 result == Spec.Ed25519.point_mul (as_seq h0 scalar) Spec.Ed25519.g
     )
 let point_mul_g result scalar =
