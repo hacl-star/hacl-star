@@ -671,3 +671,243 @@ let lib_ntt_inversion_lemma2 #a [| ring a |] #n ninv omega omegainv psi psiinv p
   FStar.Classical.forall_intro customlemma;
   eq_intro p' p;
   eq_elim p' p
+
+val lemma_ntt_split1even:
+  #a:Type0
+  -> #[tcresolve ()] r:ring a
+  -> #n:size_nat{n%2 = 0}
+  -> omega:a
+  -> psi:a
+  -> p:lib_poly a n
+  -> peven:lib_poly a (n/2)
+  -> podd:lib_poly a (n/2)
+  -> pseq:lib_poly a n
+  -> p1:lib_poly a (n/2)
+  -> p2:lib_poly a (n/2)
+  -> k:size_nat{k<n/2}
+  -> Lemma (requires pseq == lib_ntt_sequence omega psi p k /\ (peven,podd) == split_seq p /\ (p1,p2) == split_seq pseq)
+    (ensures (sum_n #a #add_ag.g.m p1 == (lib_ntt (exp omega 2) (exp psi 2) peven).[k]))
+
+let lemma_ntt_split1even #a [|ring a|] #n omega psi p peven podd pseq p1 p2 k =
+  let m = (add_ag #a).g.m in
+  let omega2 = exp omega 2 in
+  let psi2 = exp psi 2 in
+  let p1' = lib_ntt_sequence omega2 psi2 peven k in
+  let p2' = lib_ntt_sequence omega2 psi2 podd k in
+  let customprop1 (i:size_nat{i<n/2}) : Type0 = (p1.[i] == p1'.[i]) in
+  let customlemma1 (i:size_nat{i<n/2}) : Lemma (customprop1 i) =
+    lib_ntt_sequence_instantiate omega psi p pseq k (2*i);
+    assert(p1.[i] == mul #a (exp psi (2*i)) (mul p.[2*i] (exp omega (k*2*i))));
+    lemma_exp_exp psi 2 i;
+    lemma_exp_exp #a omega 2 (k*i);
+    assert(p1.[i] == mul #a (exp psi2 i) (mul p.[2*i] (exp omega2 (k*i))));
+    lib_ntt_sequence_instantiate omega2 psi2 peven p1' k i
+    in
+  FStar.Classical.forall_intro customlemma1;
+  eq_intro p1 p1';
+  lib_ntt_lemma_instantiate omega2 psi2 peven (lib_ntt (exp omega 2) (exp psi 2) peven) k
+
+val lemma_ntt_split1odd:
+  #a:Type0
+  -> #[tcresolve ()] r:ring a
+  -> #n:size_nat{n%2 = 0}
+  -> omega:a
+  -> psi:a
+  -> p:lib_poly a n
+  -> peven:lib_poly a (n/2)
+  -> podd:lib_poly a (n/2)
+  -> pseq:lib_poly a n
+  -> p1:lib_poly a (n/2)
+  -> p2:lib_poly a (n/2)
+  -> k:size_nat{k<n/2}
+  -> Lemma (requires pseq == lib_ntt_sequence omega psi p k /\ (peven,podd) == split_seq p /\ (p1,p2) == split_seq pseq)
+    (ensures (sum_n #a #add_ag.g.m p2 == mul psi (mul (lib_ntt (exp omega 2) (exp psi 2) podd).[k] (exp omega k))))
+
+let lemma_ntt_split1odd #a [|ring a|] #n omega psi p peven podd pseq p1 p2 k =
+  let m = (add_ag #a).g.m in
+  let omega2 = exp omega 2 in
+  let psi2 = exp psi 2 in
+  let p1' = lib_ntt_sequence omega2 psi2 peven k in
+  let p2' = lib_ntt_sequence omega2 psi2 podd k in
+  let customprop2 (i:size_nat{i<n/2}) : Type0 = (p2.[i] == (Seq.map (fun x -> mul psi x) (Seq.map (fun x -> mul #a x (exp omega k)) p2')).[i]) in
+  let customlemma2 (i:size_nat{i<n/2}) : Lemma (customprop2 i) =
+    lib_ntt_sequence_instantiate omega psi p pseq k (2*i);
+    assert(p2.[i] == mul #a (exp psi (2*i+1)) (mul p.[2*i+1] (exp omega (k*(2*i+1)))));
+    lemma_exp_succ1 psi (2*i);
+    lemma_exp_exp psi 2 i;
+    lemma_mul_assoc psi (exp psi2 i) (mul #a p.[2*i+1] (exp omega (k*(2*i+1))));
+    assert(p2.[i] == mul #a psi (mul (exp psi2 i) (mul p.[2*i+1] (exp omega (k*(2*i+1))))));
+    distributivity_add_right k (2*i) 1;
+    lemma_exp_morphism #a omega (k*2*i) k;
+    lemma_exp_exp #a omega 2 (k*i);
+    lemma_mul_assoc #a p.[2*i+1] (exp omega2 (k*i)) (exp omega k);
+    assert(p2.[i] == mul #a psi (mul (exp psi2 i) (mul (mul p.[2*i+1] (exp omega2 (k*i))) (exp omega k))));
+    lemma_mul_assoc #a (exp psi2 i) (mul #a p.[2*i+1] (exp omega2 (k*i))) (exp omega k);
+    lib_ntt_sequence_instantiate omega2 psi2 podd p2' k i
+  in
+  FStar.Classical.forall_intro customlemma2;
+  eq_intro p2 (Seq.map (fun x -> mul psi x) (Seq.map (fun x -> mul #a x (exp omega k)) p2'));
+  sum_n_mul_distrib_l_lemma #a (Seq.map (fun x -> mul #a x (exp omega k)) p2') psi;
+  sum_n_mul_distrib_r_lemma #a p2' (exp omega k);
+  lib_ntt_lemma_instantiate omega2 psi2 podd (lib_ntt (exp omega 2) (exp psi 2) podd) k
+
+
+val lemma_ntt_split1:
+  #a:Type0
+  -> #[tcresolve ()] r:ring a
+  -> #n:size_nat{n%2 = 0}
+  -> omega:a
+  -> psi:a
+  -> p:lib_poly a n
+  -> peven:lib_poly a (n/2)
+  -> podd:lib_poly a (n/2)
+  -> k:size_nat{k<n/2}
+  -> Lemma (requires (peven,podd) == split_seq p)
+    (ensures (lib_ntt omega psi p).[k] == plus #a (lib_ntt (exp omega 2) (exp psi 2) peven).[k] (mul psi (mul (lib_ntt (exp omega 2) (exp psi 2) podd).[k] (exp omega k))))
+
+let lemma_ntt_split1 #a [| ring a |] #n omega psi p peven podd k =
+  let m = (add_ag #a).g.m in
+  let p' = lib_ntt omega psi p in
+  let omega2 = exp omega 2 in
+  let psi2 = exp psi 2 in
+  lib_ntt_lemma_instantiate omega psi p p' k;
+  let pseq = lib_ntt_sequence omega psi p k in
+  let p1,p2 = split_seq pseq in
+  let p1' = lib_ntt_sequence omega2 psi2 peven k in
+  let p2' = lib_ntt_sequence omega2 psi2 podd k in
+  sum_n_split_lemma pseq p1 p2;
+  assert(p'.[k] == plus #a (sum_n p1) (sum_n p2));
+  lemma_ntt_split1even omega psi p peven podd pseq p1 p2 k;
+  lemma_ntt_split1odd omega psi p peven podd pseq p1 p2 k
+
+
+val lemma_ntt_split2even:
+  #a:Type0
+  -> #[tcresolve ()] r:ring a
+  -> #n:size_nat{n%2 = 0}
+  -> omega:a
+  -> psi:a
+  -> p:lib_poly a n
+  -> peven:lib_poly a (n/2)
+  -> podd:lib_poly a (n/2)
+  -> pseq:lib_poly a n
+  -> p1:lib_poly a (n/2)
+  -> p2:lib_poly a (n/2)
+  -> k:size_nat{k<n/2}
+  -> Lemma (requires exp omega n == one #a /\ pseq == lib_ntt_sequence omega psi p (k+n/2) /\ (peven,podd) == split_seq p /\ (p1,p2) == split_seq pseq)
+    (ensures (sum_n #a #add_ag.g.m p1 == (lib_ntt (exp omega 2) (exp psi 2) peven).[k]))
+
+let lemma_ntt_split2even #a [|ring a|] #n omega psi p peven podd pseq p1 p2 k =
+  let m = (add_ag #a).g.m in
+  let omega2 = exp omega 2 in
+  let psi2 = exp psi 2 in
+  let p1' = lib_ntt_sequence omega2 psi2 peven k in
+  let p2' = lib_ntt_sequence omega2 psi2 podd k in
+  let customprop1 (i:size_nat{i<n/2}) : Type0 = (p1.[i] == p1'.[i]) in
+  let customlemma1 (i:size_nat{i<n/2}) : Lemma (customprop1 i) =
+    lib_ntt_sequence_instantiate omega psi p pseq (k+n/2) (2*i);
+    assert(p1.[i] == mul #a (exp psi (2*i)) (mul p.[2*i] (exp omega ((k+n/2)*2*i))));
+    distributivity_add_left k (n/2) (2*i);
+    lemma_exp_morphism omega (k*2*i) (n/2*2*i);
+    div_exact_r n 2;
+    assert(p1.[i] == mul #a (exp psi (2*i)) (mul p.[2*i] (mul (exp omega (k*2*i)) (exp omega (n*i)))));
+    lemma_exp_exp omega n i;
+    lemma_exp_one #a i;
+    lemma_one2 (exp omega (k*2*i));
+    lemma_exp_exp omega 2 (k*i);
+    lemma_exp_exp psi 2 i;
+    assert(p1.[i] == mul #a (exp psi2 i) (mul p.[2*i] (exp omega2 (k*i))));
+    lib_ntt_sequence_instantiate omega2 psi2 peven p1' k i
+    in
+  FStar.Classical.forall_intro customlemma1;
+  eq_intro p1 p1';
+  lib_ntt_lemma_instantiate omega2 psi2 peven (lib_ntt (exp omega 2) (exp psi 2) peven) k
+
+val lemma_ntt_split2odd:
+  #a:Type0
+  -> #[tcresolve ()] r:ring a
+  -> #n:size_nat{n%2 = 0}
+  -> omega:a
+  -> psi:a
+  -> p:lib_poly a n
+  -> peven:lib_poly a (n/2)
+  -> podd:lib_poly a (n/2)
+  -> pseq:lib_poly a n
+  -> p1:lib_poly a (n/2)
+  -> p2:lib_poly a (n/2)
+  -> k:size_nat{k<n/2}
+  -> Lemma (requires exp omega n == one #a /\ pseq == lib_ntt_sequence omega psi p (k+n/2) /\ (peven,podd) == split_seq p /\ (p1,p2) == split_seq pseq)
+    (ensures (sum_n #a #add_ag.g.m p2 == mul psi (mul (lib_ntt (exp omega 2) (exp psi 2) podd).[k] (exp omega (k+n/2)))))
+
+#reset-options "--z3rlimit 1000 --max_fuel 1 --max_ifuel 1 --using_facts_from '* -FStar.Seq'"
+let sub_lemma_omega #a [|ring a|] (n:size_nat{n%2=0}) (omega:a) (k:nat) (i:nat) : Lemma (requires exp omega n == one #a) (ensures exp omega ((k+n/2)*(2*i+1)) == mul (exp (exp omega 2) (k*i)) (exp omega (k+n/2))) =
+  distributivity_add_right (k+n/2) (2*i) 1;
+  lemma_exp_morphism #a omega ((k+n/2)*2*i) (k+n/2);
+  assert(exp omega ((k+n/2)*(2*i+1)) == mul (exp omega ((k+n/2)*2*i)) (exp omega (k+n/2)));
+  distributivity_add_left k (n/2) (2*i);
+  lemma_exp_morphism omega (k*2*i) (n/2*2*i);
+  assert(exp omega ((k+n/2)*(2*i+1)) == mul (mul (exp omega (k*2*i)) (exp omega (n/2*2*i))) (exp omega (k+n/2)));
+  div_exact_r n 2;
+  lemma_exp_exp omega n i;
+  lemma_exp_one #a i;
+  lemma_one2 (exp omega (k*2*i));
+  assert(exp omega ((k+n/2)*(2*i+1)) == mul (exp omega (k*2*i)) (exp omega (k+n/2)));
+  lemma_exp_exp #a omega 2 (k*i)
+
+
+let lemma_ntt_split2odd #a [|ring a|] #n omega psi p peven podd pseq p1 p2 k =
+  let m = (add_ag #a).g.m in
+  let omega2 = exp omega 2 in
+  let psi2 = exp psi 2 in
+  let p1' = lib_ntt_sequence omega2 psi2 peven k in
+  let p2' = lib_ntt_sequence omega2 psi2 podd k in
+  let customprop2 (i:size_nat{i<n/2}) : Type0 = (p2.[i] == (Seq.map (fun x -> mul psi x) (Seq.map (fun x -> mul #a x (exp omega (k+n/2))) p2')).[i]) in
+  let customlemma2 (i:size_nat{i<n/2}) : Lemma (customprop2 i) =
+    lib_ntt_sequence_instantiate omega psi p pseq (k+n/2) (2*i);
+    assert(p2.[i] == mul #a (exp psi (2*i+1)) (mul podd.[i] (exp omega ((k+n/2)*(2*i+1)))));
+    lemma_exp_succ1 psi (2*i);
+    lemma_exp_exp psi 2 i;
+    lemma_mul_assoc psi (exp psi2 i) (mul #a podd.[i] (exp omega ((k+n/2)*(2*i+1))));
+    assert(p2.[i] == mul #a psi (mul (exp psi2 i) (mul podd.[i] (exp omega ((k+n/2)*(2*i+1))))));
+    sub_lemma_omega n omega k i;
+    assert(p2.[i] == mul #a psi (mul (exp psi2 i) (mul podd.[i] (mul (exp omega2 (k*i)) (exp omega (k+n/2))))));
+    lemma_mul_assoc #a podd.[i] (exp omega2 (k*i)) (exp omega (k+n/2));
+    assert(p2.[i] == mul #a psi (mul (exp psi2 i) (mul (mul podd.[i] (exp omega2 (k*i))) (exp omega (k+n/2)))));
+    lemma_mul_assoc #a (exp psi2 i) (mul #a podd.[i] (exp omega2 (k*i))) (exp omega (k+n/2));
+    assert(p2.[i] == mul #a psi (mul (mul (exp psi2 i) (mul podd.[i] (exp omega2 (k*i)))) (exp omega (k+n/2))));
+    lib_ntt_sequence_instantiate omega2 psi2 podd p2' k i
+  in
+  FStar.Classical.forall_intro customlemma2;
+  eq_intro p2 (Seq.map (fun x -> mul psi x) (Seq.map (fun x -> mul #a x (exp omega (k+n/2))) p2'));
+  sum_n_mul_distrib_l_lemma #a (Seq.map (fun x -> mul #a x (exp omega (k+n/2))) p2') psi;
+  sum_n_mul_distrib_r_lemma #a p2' (exp omega (k+n/2));
+  lib_ntt_lemma_instantiate omega2 psi2 podd (lib_ntt (exp omega 2) (exp psi 2) podd) k
+
+
+val lemma_ntt_split2:
+  #a:Type0
+  -> #[tcresolve ()] r:ring a
+  -> #n:size_nat{n%2 = 0}
+  -> omega:a
+  -> psi:a
+  -> p:lib_poly a n
+  -> peven:lib_poly a (n/2)
+  -> podd:lib_poly a (n/2)
+  -> k:size_nat{k<n/2}
+  -> Lemma (requires exp omega n == one #a /\ (peven,podd) == split_seq p)
+    (ensures (lib_ntt omega psi p).[k+n/2] == plus #a (lib_ntt (exp omega 2) (exp psi 2) peven).[k] (mul psi (mul (lib_ntt (exp omega 2) (exp psi 2) podd).[k] (exp omega (k+n/2)))))
+
+let lemma_ntt_split2 #a [| ring a |] #n omega psi p peven podd k =
+  let m = (add_ag #a).g.m in
+  let p' = lib_ntt omega psi p in
+  let omega2 = exp #a omega 2 in
+  let psi2 = exp psi 2 in
+  lib_ntt_lemma_instantiate omega psi p p' (k+n/2);
+  let pseq = lib_ntt_sequence omega psi p (k+n/2) in
+  let p1,p2 = split_seq pseq in
+  let p1' = lib_ntt_sequence omega2 psi2 peven k in
+  let p2' = lib_ntt_sequence omega2 psi2 podd k in
+  sum_n_split_lemma pseq p1 p2;
+  assert(p'.[k+n/2] == plus #a (sum_n p1) (sum_n p2));
+  lemma_ntt_split2even omega psi p peven podd pseq p1 p2 k;
+  lemma_ntt_split2odd omega psi p peven podd pseq p1 p2 k

@@ -5,10 +5,133 @@ open FStar.Tactics.Typeclasses
 open Lib.Arithmetic.Group
 open Lib.Arithmetic.Ring
 
+open FStar.Math.Lemmas
+
+open FStar.Mul
+
 module Seq = Lib.Sequence
 module Loops = Lib.LoopCombinators
 
 #reset-options "--z3rlimit 200 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq'"
+
+let br i x =
+  let v = UInt.to_vec #i x in
+  let vbr = Seq.createi i (fun p -> (index #_ #i v (i-1-p))) in
+  UInt.from_vec #i vbr
+
+let br_involutive i x =
+  let v1 = UInt.to_vec #i x in
+  let v1br = Seq.createi i (fun p -> (index #_ #i v1 (i-1-p))) in
+  assert (forall (j:nat{j<i}). index #_ #i v1br j = index #_ #i v1 (i-1-j));
+  let xbr:(y:nat{y<pow2 i}) = UInt.from_vec #i v1br in
+  assert(xbr = br i x);
+  let v2 = UInt.to_vec #i xbr in
+  assert (Seq.equal v2 v1br);
+  let v2br = Seq.createi i (fun p -> (index #_ #i v2 (i-1-p))) in
+  assert (forall (j:nat{j<i}). index #_ #i v2br j = index #_ #i v2 (i-1-j));
+  let x' = UInt.from_vec #i v2br in
+  assert_norm (x' = br i xbr);
+  assert (forall (j:nat{j<i}). index #_ #i v2br j = index #_ #i v2 (i-1-j));
+  assert (forall (j:nat{j<i}). index #_ #i v2br j = index #_ #i v1br (i-1-j));
+  assert (forall (j:nat{j<i}). index #_ #i v2br j = index #_ #i v1 (i-1-(i-1-j)));
+  assert(Seq.equal v2br v1);
+  assert (x' = br i (br i x));
+  assert (x' = x)
+
+let reorg #a #n i p =
+  Seq.createi n (fun x -> p.[br i x])
+
+
+let reorg_involutive #a #n i p =
+  let p1 = reorg i p in
+  let p' = reorg i p1 in
+  let customprop (k:nat{k<n}) : Type0 = p'.[k] == p.[k] in
+  let customlemma (k:nat{k<n}) : Lemma (customprop k) =
+    assert (p'.[k] == p.[br i (br i k)]);
+    br_involutive i k
+  in FStar.Classical.forall_intro customlemma;
+  eq_intro p' p;
+  eq_elim p' p
+
+let split_seq #a #n p =
+  let peven = createi (n/2) (fun i -> p.[2*i]) in
+  let podd = createi (n/2) (fun i -> p.[2*i+1]) in
+  peven,podd
+
+let join_seq #a [|ring a|] #n peven podd =
+  let f (i:nat{i<n}) : a =
+    plus #a (mul (repeat_plus one ((i+1)%2)) peven.[i/2]) (mul (repeat_plus one (i%2)) podd.[i/2]) in
+  let p = createi n f in
+  let customprop (k:nat{k<n/2}) : Type0 = ((==) #a p.[2*k] peven.[k] /\ (==) #a p.[2*k+1] podd.[k]) in
+  let customlemma (k:nat{k<n/2}) : Lemma (customprop k) =
+    let m = (add_ag #a).g.m in
+    //assert (p.[2*k] == peven.[k]);
+    cancel_mul_mod k 2;
+    lemma_repeat_op_zero #a one;
+    lemma_zero_absorb1 #a podd.[(2*k)/2];
+    lemma_mod_plus 1 k 2;
+    lemma_repeat_op_succ1 #a one 0;
+    lemma_zero2 #a one;
+    cancel_mul_div k 2;
+    lemma_one1 #a peven.[k];
+    lemma_zero2 #a peven.[k];
+    //assert (p.[2*k+1] == podd.[k]);
+    distributivity_add_left k 1 2;
+    cancel_mul_mod (k+1) 2;
+    lemma_zero_absorb1 #a peven.[(2*k+1)/2];
+    lemma_div_plus 1 k 2;
+    lemma_one1 #a podd.[k];
+    lemma_zero1 #a podd.[k]
+    in
+  FStar.Classical.forall_intro customlemma;
+  p
+
+let lemma_split_join #a [| ring a |] #n p =
+  let peven,podd = split_seq p in
+  let p' = join_seq peven podd in
+  let customprop (k:nat{k<n}) : Type0 = (p'.[k] == p.[k]) in
+  let customlemma (k:nat{k<n}) : Lemma (customprop k) =
+    let i = k/2 in
+    assert(i<n/2);
+    if (k%2=0) then
+    begin assert (k=2*i);
+    calc (==) {
+      p'.[k];
+	== {}
+      p'.[2*i];
+	== {}
+      peven.[i];
+	== {}
+      p.[2*i];
+	== {}
+      p.[k];
+    } end else
+    begin assert (k=2*i+1);
+    calc (==) {
+      p'.[k];
+	== {}
+      p'.[2*i+1];
+	== {}
+      podd.[i];
+	== {}
+      p.[2*i+1];
+	== {}
+      p.[k];
+    } end
+  in FStar.Classical.forall_intro customlemma;
+  eq_intro p' p;
+  eq_elim p' p
+
+let lemma_join_split #a [| ring a |] #n p1 p2 =
+  let p = join_seq p1 p2 in
+  let peven,podd = split_seq p in
+  lemma_split_join p;
+  assert(join_seq peven podd == p);
+  eq_intro p1 peven;
+  eq_elim p1 peven;
+  eq_intro p2 podd;
+  eq_elim p2 podd
+
 
 let rec sum_n_spec #a [|monoid a|] #n (l:lseq a n) =
   if n=0 then id
@@ -106,6 +229,24 @@ let rec sum_n_simple_lemma1 #a [|monoid a|] #n l =
     lemma_assoc l.[0] (sum_n (sub l 1 (n-2))) l.[n-1];
     simpl_seq_sub_sub_lemma l 1 (n-1) 0 (n-2);
     sum_n_simple_lemma2 (sub l 1 (n-1))
+    end
+
+let rec sum_n_split_lemma #a [| ring a |] #n l leven lodd =
+  let m = (add_ag #a).g.m in
+  if (n = 0) then (sum_n_zero_elements_is_id l; sum_n_zero_elements_is_id leven; sum_n_zero_elements_is_id lodd; lemma_zero1 #a zero) else begin
+    sum_n_simple_lemma2 l;
+    sum_n_simple_lemma2 (Seq.sub l 0 (n-1));
+    Seq.eq_intro (Seq.sub (Seq.sub l 0 (n-1)) 0 (n-2)) (Seq.sub l 0 (n-2));
+    let (l1,l2) = split_seq (Seq.sub l 0 (n-2)) in
+    sum_n_split_lemma (Seq.sub l 0 (n-2)) l1 l2;
+    eq_intro l1 (Seq.sub leven 0 (n/2 - 1));
+    eq_intro l2 (Seq.sub lodd 0 (n/2 - 1));
+    lemma_plus_assoc (sum_n l1) (sum_n l2) l.[n-2];
+    lemma_plus_swap (sum_n l2) l.[n-2];
+    lemma_plus_assoc (sum_n l1) l.[n-2] (sum_n l2);
+    sum_n_simple_lemma2 leven;
+    lemma_plus_assoc (sum_n leven) (sum_n l2) l.[n-1];
+    sum_n_simple_lemma2 lodd
     end
 
 val map_sub_commutativity_lemma:
