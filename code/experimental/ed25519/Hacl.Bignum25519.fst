@@ -134,11 +134,6 @@ let reduce_513 a =
   reduce_513_ a;
   admit()
 
-let fdifference_reduced a b =
-  fdifference a b;
-  reduce_513 a;
-  admit()
-
 inline_for_extraction noextract
 val fcontract_first_carry_full:
   input:felem ->
@@ -218,8 +213,7 @@ let reduce_ out =
   fcontract_second_carry_full out;
   fcontract_trim out
 
-let fmul output input input2 = admit();
-  BN.fmul output input input2
+let fmul output input input2 = BN.fmul output input input2
 
 let times_2 out a =
   let a0 = a.(0ul) in
@@ -243,6 +237,7 @@ let times_d out a =
   d.(2ul) <- u64 0x0005e7a26001c029;
   d.(3ul) <- u64 0x000739c663a03cbb;
   d.(4ul) <- u64 0x00052036cee2b6ff;
+  admit();
   fmul out d a;
   pop_frame()
 
@@ -258,8 +253,7 @@ let times_2d out a =
   pop_frame();
   admit()
 
-let fsquare out a = admit();
-  BN.fsqr out a
+let fsquare out a = BN.fsqr out a
 
 inline_for_extraction noextract
 val fsquare_times_:

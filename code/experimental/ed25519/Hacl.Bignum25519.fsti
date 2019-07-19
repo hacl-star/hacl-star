@@ -165,7 +165,9 @@ val times_2d:
     out:felem
   -> a:felem ->
   Stack unit
-    (requires fun h -> live h out /\ live h a)
+    (requires fun h -> live h out /\ live h a /\
+      F51.mul_inv_t h a
+    )
     (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
       F51.mul_inv_t h1 out /\
       F51.fevalh h1 out == 2 `SC.fmul` Spec.Ed25519.d `SC.fmul` F51.fevalh h0 a

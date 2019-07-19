@@ -9,6 +9,10 @@ open Lib.Buffer
 
 open Hacl.Bignum25519
 
+module F51 = Hacl.Impl.Ed25519.Field51
+
+#set-options "--z3rlimit 15 --max_fuel 0 --max_ifuel 0"
+
 inline_for_extraction noextract
 val most_significant_bit:
   s:lbuffer uint8 32ul ->
@@ -34,6 +38,7 @@ let point_decompress_ out s tmp =
   let y    = sub tmp 0ul 5ul in
   let x    = sub tmp 5ul 5ul in
   let sign = most_significant_bit s in
+  admit();
   load_51 y s;
   let z = Hacl.Impl.Ed25519.RecoverX.recover_x x y sign in
 
@@ -57,10 +62,14 @@ val point_decompress:
   -> s:lbuffer uint8 32ul ->
   Stack bool
     (requires fun h -> live h out /\ live h s)
-    (ensures  fun h0 b h1 -> modifies (loc out) h0 h1)
+    (ensures  fun h0 b h1 -> modifies (loc out) h0 h1 /\
+      (b ==> Some? (Spec.Ed25519.point_decompress (as_seq h0 s))) /\
+      (b ==> (F51.point_eval h1 out == Some?.v (Spec.Ed25519.point_decompress (as_seq h0 s))))
+    )
 let point_decompress out s =
   push_frame();
   let tmp  = create 10ul (u64 0) in
   let res = point_decompress_ out s tmp in
   pop_frame();
+  admit();
   res

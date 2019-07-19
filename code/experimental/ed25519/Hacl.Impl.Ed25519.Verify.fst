@@ -66,7 +66,9 @@ val verify_:
       live h public /\ live h msg /\ live h signature /\ live h tmp /\ live h tmp' /\
       disjoint tmp public /\ disjoint tmp msg /\ disjoint tmp signature /\
       disjoint tmp tmp' /\ disjoint tmp' signature /\ disjoint tmp' public /\ disjoint tmp' msg)
-    (ensures fun h0 z h1 -> modifies (loc tmp |+| loc tmp') h0 h1)
+    (ensures fun h0 z h1 -> modifies (loc tmp |+| loc tmp') h0 h1 /\
+      z == Spec.Ed25519.verify (as_seq h0 public) (as_seq h0 msg) (as_seq h0 signature)
+    )
 let verify_ public msg len signature tmp tmp' =
   let a' = sub tmp 0ul  20ul in
   let r' = sub tmp 20ul 20ul in
@@ -86,6 +88,7 @@ let verify_ public msg len signature tmp tmp' =
 	verify_step_2 (sub signature 32ul 32ul) h' a' r')
     ) else false
   ) else false in
+  admit();
   res
 
 inline_for_extraction noextract
@@ -96,7 +99,9 @@ val verify:
   -> signature:lbuffer uint8 64ul ->
   Stack bool
     (requires fun h -> live h public /\ live h msg /\ live h signature)
-    (ensures  fun h0 z h1 -> modifies0 h0 h1)
+    (ensures  fun h0 z h1 -> modifies0 h0 h1 /\
+      z == Spec.Ed25519.verify (as_seq h0 public) (as_seq h0 msg) (as_seq h0 signature)
+    )
 let verify public msg len signature =
   push_frame();
   let tmp = create 45ul (u64 0) in

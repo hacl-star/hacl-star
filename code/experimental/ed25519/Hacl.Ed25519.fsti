@@ -23,14 +23,18 @@ val verify:
   -> signature:lbuffer uint8 64ul ->
   Stack bool
     (requires fun h -> live h output /\ live h msg /\ live h signature)
-    (ensures  fun h0 b h1 -> modifies0 h0 h1)
+    (ensures  fun h0 b h1 -> modifies0 h0 h1 /\
+      b == Spec.Ed25519.verify (as_seq h0 output) (as_seq h0 msg) (as_seq h0 signature)
+    )
 
 val secret_to_public:
     output:lbuffer uint8 32ul
   -> secret:lbuffer uint8 32ul ->
   Stack unit
     (requires fun h -> live h output /\ live h secret /\ disjoint output secret)
-    (ensures  fun h0 _ h1 -> modifies (loc output) h0 h1)
+    (ensures  fun h0 _ h1 -> modifies (loc output) h0 h1 /\
+      as_seq h1 output == Spec.Ed25519.secret_to_public (as_seq h0 secret)
+    )
 
 val expand_keys:
     ks:lbuffer uint8 96ul
