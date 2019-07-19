@@ -527,6 +527,8 @@ procedure GhashUnroll_n(
     lemma_to_of_quad32(reverse_bytes_quad32(ghash_incremental(h_LE, y_prev, data)));
 }
 
+// TODO: Pair this up with a version of gcm_make_length_quad that doesn't reverse it's output,
+//       since that reversal will cancel with this one
 
 // Expects input to be hashed to reside in Ii
 procedure Ghash_register(
