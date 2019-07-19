@@ -9,6 +9,19 @@ friend Lib.IntTypes
 
 #reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq'"
 
+let cast_range a t : Lemma (requires range a t) (ensures a @%. t = a) =
+  pow2_le_compat (bits t) (bits t -1);
+  pow2_double_mult (bits t - 1);
+  cancel_mul_div (pow2 (bits t - 1)) 2;
+  assert(a < modulus t);
+  if (a>=0) then modulo_lemma a (modulus t)
+  else begin
+    pow2_double_sum (bits t - 1);
+    assert(pow2 (bits t - 1) <= a + modulus t);
+    modulo_lemma (a + modulus t) (modulus t);
+    lemma_mod_plus a 1 (modulus t)
+    end
+
 let modulo_plus_minus a n =
   let b = a % n in
   if b > n/2 then b - n else b
@@ -18,7 +31,8 @@ let lemma_mod_plus_minus_injective n a p =
 
 let lemma_mod_plus_minus_opposite n a =
   ()
-  
+
+
 let modulo_pow2_u16 a b =
   mod_mask_lemma #U16 a (UInt32.uint_to_t b)
 

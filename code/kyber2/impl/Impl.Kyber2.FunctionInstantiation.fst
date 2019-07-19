@@ -21,6 +21,7 @@ open Lib.Buffer
 open Lib.ByteBuffer
 open FStar.HyperStack
 open FStar.HyperStack.ST
+open Impl.Kyber2.GroupMontgomery
 
 module ST = FStar.HyperStack.ST
 
@@ -333,3 +334,118 @@ let parse_xof_no_modulo input_len input b1 b2 output =
   let h_end = ST.get () in
   assert(modifies1 output h_begin h_end);
   b
+
+let parse_inv_montgomery (h0 h:mem) (s:lbytes_p SEC (size (4*168))) (out:lbuffer montgomery_t (size params_n)) (i:lbuffer (i:size_t{v i <= params_n}) 1ul) (j:lbuffer (j:size_t{v j <= 336}) 1ul) : GTot Type0 =
+  match Spec.Kyber2.FunctionInstantiation.parse_inner h0.[|s|] (Seq.map to_t h0.[|out|]) 0 0 with
+  |None -> (match Spec.Kyber2.FunctionInstantiation.parse_inner h.[|s|] (Seq.map to_t h.[|out|]) (v h.[|i|].[0]) (v h.[|j|].[0]) with
+              |None -> (v h.[|i|].[0] < params_n)
+              |Some _ -> False)
+  |Some seq -> match Spec.Kyber2.FunctionInstantiation.parse_inner h.[|s|] (Seq.map to_t h.[|out|]) (v h.[|i|].[0]) (v h.[|j|].[0]) with
+              |None -> False
+              |Some seq' -> seq == seq'
+
+val parse_inner_montgomery:
+  (h_:mem)
+  -> s:lbytes_p SEC (size (4*168))
+  -> out:lbuffer montgomery_t (size params_n)
+  -> (i:lbuffer (i:size_t{v i <= params_n}) 1ul)
+  -> (j:lbuffer (j:size_t{v j <= 336}) 1ul)
+  -> Stack unit
+    (requires fun h -> live h s /\ live h out /\ live h i /\ live h j /\
+      Buf.disjoint s out /\ Buf.disjoint s i /\ Buf.disjoint s j /\
+      Buf.disjoint out i /\ Buf.disjoint out j /\
+      Buf.disjoint i j /\
+      modifies3 out i j h_ h /\
+      h.[|i|].[0] <. size params_n /\ h.[|j|].[0] <. size 336 /\
+      parse_inv_montgomery h_ h s out i j)
+    (ensures fun h0 _ h1 -> ((h0.[|i|].[0] == h1.[|i|].[0]) <==> modifies1 j h0 h1) /\
+                         modifies3 out i j h0 h1 /\ v h1.[|j|].[0] = v h0.[|j|].[0] + 1 /\
+                         h1.[|i|].[0] <=. size params_n /\ h1.[|j|].[0] <=. size 336 /\
+                         parse_inv_montgomery h_ h1 s out i j)
+
+
+#reset-options "--z3rlimit 1000 --max_fuel 1 --max_ifuel 1"
+
+let parse_inner_montgomery h_ s out i j =
+  let h0 = ST.get () in
+  let a = s.(2ul *. j.(0ul)) in
+  let b = s.((2ul *. j.(0ul)) +. 1ul) in
+  let h_0 = ST.get () in assert(h0 == h_0);
+  let d = ((to_u16 a) +! ((to_u16 b) <<. size 8)) in
+  j.(0ul) <- j.(0ul) +. 1ul;
+  let h_ = ST.get () in
+  let mask = Lib.IntTypes.lt_mask d (u16 (19) *! u16 params_q) in
+  lt_mask_lemma d (u16 19 *! u16 params_q);
+  if (Lib.RawIntTypes.u16_to_UInt16 mask <>. mk_int #U16 #PUB 0) then
+    (assert_norm(v d < 19 * params_q);
+     assert_norm(v d == v a + (v b * pow2 8));
+    out.(i.(0ul)) <- from_cbd d;
+    i.(0ul) <- i.(0ul) +. 1ul;
+    let h1 = ST.get () in
+    assert(let s = h0.[|s|] in let i = v h0.[|i|].[0] in let j = v h0.[|j|].[0] in
+             let d = v s.[2*j] + ((v s.[2*j+1]) * pow2 8) in
+             d < 19 * params_q /\ h1.[|out|] == Seq.upd h0.[|out|] i (from_cbd (u16 d)));
+    eq_intro (h1.[|out|]) (Seq.upd h0.[|out|] (v h0.[|i|].[0]) (from_cbd d));
+    let customprop (k:size_nat{k < params_n}) : GTot Type = (let a:Group.t = (Seq.map to_t h1.[|out|]).[k] in let b:Group.t = (Seq.upd (Seq.map to_t h0.[|out|]) (v h0.[|i|].[0]) (Group.uint16_to_t d)).[k] in a == b) in
+    let customlemma (k:size_nat{k < params_n}) : Lemma (customprop k) =
+      assert ((Seq.map to_t h1.[|out|]).[k] == to_t (h1.[|out|].[k]));
+      if (k = v h0.[|i|].[0]) then (assert(h1.[|out|].[k] == from_cbd d);
+        assert((Seq.upd (Seq.map to_t h0.[|out|]) (v h0.[|i|].[0]) (Group.uint16_to_t d)).[k] == Group.uint16_to_t d);
+        from_cbd_to_t_lemma d;
+        assert ((Seq.map to_t h1.[|out|]).[k] == Group.uint16_to_t d))
+      else (assert((Seq.upd (Seq.map to_t h0.[|out|]) (v h0.[|i|].[0]) (Group.uint16_to_t d)).[k] == (Seq.map to_t h0.[|out|]).[k]))
+    in FStar.Classical.forall_intro customlemma;
+    eq_intro (Seq.map to_t h1.[|out|]) (Seq.upd (Seq.map to_t h0.[|out|]) (v h0.[|i|].[0]) (Group.uint16_to_t d));
+    assert((Group.uint16_to_t d) == i16 (v d % params_q));
+    let a () : GTot (lseq Group.t params_n) = Seq.map to_t h0.[|out|] in
+    eq_intro (Seq.map to_t h1.[|out|]) (Seq.upd (a ()) (v h0.[|i|].[0]) (i16 (v d%params_q)));
+    assert(modifies2 out i h_ h1);
+    assert(Spec.Kyber2.FunctionInstantiation.parse_inner h0.[|s|] (Seq.map to_t h0.[|out|]) (v h0.[|i|].[0]) (v h0.[|j|].[0]) == Spec.Kyber2.FunctionInstantiation.parse_inner h1.[|s|] (Seq.map to_t h1.[|out|]) (v h1.[|i|].[0]) (v h1.[|j|].[0])))
+  else
+    (let h1 = ST.get () in
+     assert(modifies1 j h0 h1);
+     assert(let s = h0.[|s|] in let out = h0.[|out|] in let i = v h0.[|i|].[0] in let j = v h0.[|j|].[0] in
+             let d2 = to_u16 s.[2*j] +. ((to_u16 s.[2*j+1]) <<. size 8) in
+             v d2 >= 19 * params_q /\ i < params_n /\ j < 336);
+     assert(Spec.Kyber2.FunctionInstantiation.parse_inner h0.[|s|] (Seq.map to_t h0.[|out|]) (v h0.[|i|].[0]) (v h0.[|j|].[0]) == Spec.Kyber2.FunctionInstantiation.parse_inner h1.[|s|] (Seq.map to_t h1.[|out|]) (v h1.[|i|].[0]) (v h1.[|j|].[0])));
+  let h1 = ST.get () in
+  assert(modifies2 out i h_ h1);
+  assert(modifies1 j h0 h_);
+  assert(modifies3 out i j h0 h1)
+
+val parse_xof_montgomery:
+  input_len:size_t{2+v input_len <= max_size_t}
+  -> input:lbytes_p SEC input_len
+  -> b1:uint_t U8 SEC
+  -> b2:uint_t U8 SEC
+  -> output:lbuffer montgomery_t (size params_n)
+  -> Stack bool
+    (requires fun h -> live h input /\ live h output /\ Buf.disjoint input output)
+    (ensures fun h0 res h1 -> modifies1 output h0 h1 /\ (match (Spec.Kyber2.FunctionInstantiation.parse_xof (v input_len) h0.[|input|] b1 b2) with |None -> (res == false) |Some l -> ((Seq.map to_t h1.[|output|]) == l /\ res == true)))
+
+#reset-options "--z3rlimit 500 --max_fuel 1 --max_ifuel 1"
+
+let parse_xof_montgomery input_len input b1 b2 output =
+  let h_begin = ST.get() in
+  push_frame ();
+  let tmp = create (size (4*168)) (u8 0) in
+  xof input_len (size (4*168)) input b1 b2 tmp;
+  let i = create 1ul (size 0) in
+  let j = create 1ul (size 0) in
+  let h0 = ST.get () in
+  Lib.Loops.while
+    (fun h -> live h i /\ live h j /\ (v h.[|j|].[0] <= 336) /\ (v h.[|i|].[0] <= params_n) /\ modifies3 output i j h0 h /\ parse_inv_montgomery h0 h tmp output i j)
+    (fun h -> (v h.[|j|].[0] < 336) && (v h.[|i|].[0] < params_n))
+    (fun () -> let a = (j.(0ul) <. size 336) in
+      let c = (i.(0ul) <. size params_n) in
+      a && c)
+    (fun () -> parse_inner_montgomery h0 tmp output i j);
+  let h2 = ST.get () in
+  Spec.Kyber2.FunctionInstantiation.parse_inner_cst_lemma h0.[|tmp|] (Seq.map to_t h0.[|output|]);
+  let b = ( i.(0ul) =. size params_n) in
+  pop_frame ();
+  let h_end = ST.get () in
+  assert(modifies1 output h_begin h_end);
+  b
+
+
