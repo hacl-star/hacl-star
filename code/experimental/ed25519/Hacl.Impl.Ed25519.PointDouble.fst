@@ -11,13 +11,26 @@ open Hacl.Bignum25519
 module F51 = Hacl.Impl.Ed25519.Field51
 module F56 = Hacl.Impl.Ed25519.Field56
 
+module SC = Spec.Curve25519
+
 inline_for_extraction noextract
 val point_double_step_1:
     p:point
   -> tmp:lbuffer uint64 30ul ->
   Stack unit
     (requires fun h -> live h p /\ live h tmp /\ disjoint p tmp)
-    (ensures  fun h0 _ h1 -> modifies (loc tmp) h0 h1)
+    (ensures  fun h0 _ h1 -> modifies (loc tmp) h0 h1 /\
+      (let x1, y1, z1, t1 = F51.point_eval h0 p in
+       let a = x1 `SC.fmul` x1 in
+       let b = y1 `SC.fmul` y1 in
+       let c = 2 `SC.fmul` (z1 `SC.fmul` z1) in
+       let h = a `SC.fadd` b in
+       F51.fevalh h1 (gsub tmp 0ul 5ul) == a /\
+       F51.fevalh h1 (gsub tmp 5ul 5ul) == b /\
+       F51.fevalh h1 (gsub tmp 10ul 5ul) == h /\
+       F51.fevalh h1 (gsub tmp 15ul 5ul) == c
+      )
+    )
 let point_double_step_1 p tmp =
   let tmp1 = sub tmp 0ul 5ul in
   let tmp2 = sub tmp 5ul 5ul in
@@ -42,7 +55,21 @@ val point_double_step_2:
   -> tmp:lbuffer uint64 30ul ->
   Stack unit
     (requires fun h -> live h p /\ live h tmp /\ disjoint p tmp)
-    (ensures  fun h0 _ h1 -> modifies (loc tmp) h0 h1)
+    (ensures  fun h0 _ h1 -> modifies (loc tmp) h0 h1 /\
+     ( let x1, y1, z1, t1 = F51.point_eval h0 p in
+       let a = F51.fevalh h0 (gsub tmp 0ul 5ul) in
+       let b = F51.fevalh h0 (gsub tmp 5ul 5ul) in
+       let c = F51.fevalh h0 (gsub tmp 15ul 5ul) in
+       let h = F51.fevalh h0 (gsub tmp 10ul 5ul) in
+       let e = h `SC.fsub` ((x1 `SC.fadd` y1) `SC.fmul` (x1 `SC.fadd` y1)) in
+       let g = a `SC.fsub` b in
+       let f = c `SC.fadd` g in
+       F51.fevalh h1 (gsub tmp 5ul 5ul) == g /\
+       F51.fevalh h1 (gsub tmp 10ul 5ul) == h /\
+       F51.fevalh h1 (gsub tmp 15ul 5ul) == f /\
+       F51.fevalh h1 (gsub tmp 25ul 5ul) == e
+     )
+    )
 let point_double_step_2 p tmp =
   let tmp1 = sub tmp 0ul 5ul in
   let tmp2 = sub tmp 5ul 5ul in
@@ -60,6 +87,7 @@ let point_double_step_2 p tmp =
   fdifference_reduced tmp2 tmp1;      // tmp2 = g
   reduce_513 tmp4;
   fsum tmp4 tmp2             // tmp4 = f
+
 
 inline_for_extraction noextract
 val point_double_:
@@ -84,13 +112,13 @@ let point_double_ out p tmp =
   let y3 = gety out in
   let z3 = getz out in
   let t3 = gett out in
+  let h0 = get()in
   point_double_step_1 p tmp;
   point_double_step_2 p tmp;
   fmul x3 tmp4 tmp6;
   fmul y3 tmp2 tmp3;
-  fmul t3 tmp3 tmp6;
-  fmul z3 tmp4 tmp2;
-  admit()
+  fmul t3 tmp6 tmp3;
+  fmul z3 tmp4 tmp2
 
 val point_double:
     out:point

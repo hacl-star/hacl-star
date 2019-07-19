@@ -11,6 +11,10 @@ open Hacl.Bignum25519
 module F51 = Hacl.Impl.Ed25519.Field51
 module F56 = Hacl.Impl.Ed25519.Field56
 
+module SC = Spec.Curve25519
+
+#set-options "--z3rlimit 20 --max_fuel 0 --max_ifuel 0"
+
 inline_for_extraction noextract
 val point_add_step_1:
     p:point
@@ -20,7 +24,16 @@ val point_add_step_1:
     (requires fun h ->
       live h p /\ live h q /\ live h tmp /\
       disjoint tmp p /\ disjoint tmp q)
-    (ensures fun h0 _ h1 -> modifies (loc tmp) h0 h1)
+    (ensures fun h0 _ h1 -> modifies (loc tmp) h0 h1 /\
+      (let x1 = F51.fevalh h0 (gsub p 0ul 5ul) in
+       let y1 = F51.fevalh h0 (gsub p 5ul 5ul) in
+       let x2 = F51.fevalh h0 (gsub q 0ul 5ul) in
+       let y2 = F51.fevalh h0 (gsub q 5ul 5ul) in
+       let a = (y1 `SC.fsub` x1) `SC.fmul` (y2 `SC.fsub` x2) in
+       let b = (y1 `SC.fadd` x1) `SC.fmul` (y2 `SC.fadd` x2) in
+       F51.fevalh h1 (gsub tmp 10ul 5ul) == a /\
+       F51.fevalh h1 (gsub tmp 15ul 5ul) == b)
+    )
 let point_add_step_1 p q tmp =
   let tmp1 = sub tmp 0ul 5ul in
   let tmp2 = sub tmp 5ul 5ul in
@@ -52,7 +65,24 @@ val point_add_step_2:
     (requires fun h ->
       live h p /\ live h q /\ live h tmp /\
       disjoint tmp p /\ disjoint tmp q)
-    (ensures fun h0 _ h1 -> modifies (loc tmp) h0 h1)
+    (ensures fun h0 _ h1 -> modifies (loc tmp) h0 h1 /\
+      (let z1 = F51.fevalh h0 (gsub p 10ul 5ul) in
+       let t1 = F51.fevalh h0 (gsub p 15ul 5ul) in
+       let z2 = F51.fevalh h0 (gsub q 10ul 5ul) in
+       let t2 = F51.fevalh h0 (gsub q 15ul 5ul) in
+       let a = F51.fevalh h0 (gsub tmp 10ul 5ul) in
+       let b = F51.fevalh h0 (gsub tmp 15ul 5ul) in
+       let c = (2 `SC.fmul` Spec.Ed25519.d `SC.fmul` t1) `SC.fmul` t2 in
+       let d = (2 `SC.fmul` z1) `SC.fmul` z2 in
+       let e = b `SC.fsub` a in
+       let f = d `SC.fsub` c in
+       let g = d `SC.fadd` c in
+       let h = b `SC.fadd` a in
+       F51.fevalh h1 (gsub tmp 0ul 5ul) == e /\
+       F51.fevalh h1 (gsub tmp 25ul 5ul) == f /\
+       F51.fevalh h1 (gsub tmp 20ul 5ul) == g /\
+       F51.fevalh h1 (gsub tmp 15ul 5ul) == h)
+    )
 let point_add_step_2 p q tmp =
   let tmp1 = sub tmp 0ul 5ul in
   let tmp2 = sub tmp 5ul 5ul in
@@ -90,8 +120,10 @@ val point_add_:
       F51.point_eval h1 out == Spec.Ed25519.point_add (F51.point_eval h0 p) (F51.point_eval h0 q)
     )
 let point_add_ out p q tmp =
+  let h0 = get() in
   point_add_step_1 p q tmp;
   point_add_step_2 p q tmp;
+  let h1 = get() in
   let tmp1 = sub tmp 0ul 5ul in
   //let tmp2 = sub tmp 5ul 5ul in
   //let tmp3 = sub tmp 10ul 5ul in
@@ -105,8 +137,7 @@ let point_add_ out p q tmp =
   fmul x3 tmp1 tmp6;
   fmul y3 tmp5 tmp4;
   fmul t3 tmp1 tmp4;
-  fmul z3 tmp5 tmp6;
-  admit()
+  fmul z3 tmp6 tmp5
 
 val point_add:
     out:point

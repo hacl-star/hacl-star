@@ -129,11 +129,13 @@ let reduce_513_ a =
   carry_0_to_1 a
 
 let reduce_513 a =
-  reduce_513_ a
+  reduce_513_ a;
+  admit()
 
 let fdifference_reduced a b =
   fdifference a b;
-  reduce_513 a
+  reduce_513 a;
+  admit()
 
 inline_for_extraction noextract
 val fcontract_first_carry_full:
@@ -228,7 +230,8 @@ let times_2 out a =
   let o2 = u64 2 *. a2 in
   let o3 = u64 2 *. a3 in
   let o4 = u64 2 *. a4 in
-  make_u64_5 out o0 o1 o2 o3 o4
+  make_u64_5 out o0 o1 o2 o3 o4;
+  admit()
 
 let times_d out a =
   push_frame();
@@ -250,7 +253,8 @@ let times_2d out a =
   d2.(3ul) <- u64 0x0006738cc7407977;
   d2.(4ul) <- u64 0x0002406d9dc56dff;
   fmul out a d2;
-  pop_frame()
+  pop_frame();
+  admit()
 
 let fsquare out a = admit();
   BN.fsqr out a
