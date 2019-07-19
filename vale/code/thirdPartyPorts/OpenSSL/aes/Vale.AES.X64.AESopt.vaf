@@ -23,7 +23,6 @@ include{:fstar}{:open} "Vale.AES.GCTR_s"
 include{:fstar}{:open} "Vale.AES.GCTR"
 include{:fstar}{:open} "Vale.Arch.TypesNative"
 include{:fstar}{:open} "Vale.X64.CPU_Features_s"
-include{:fstar}{:open} "Vale.Test.X64.Vale_memcpy"
 
 module Vale.AES.X64.AESopt
 
@@ -547,7 +546,7 @@ procedure Loop6x_step_fake(
         inline in0_offset:nat,
         inline stack_offset:nat,
         ghost count:nat,
-        ghost in0_b:Seq.seq(quad32),
+        ghost in0_b:seq(quad32),
         ghost stack_b_in:Seq.seq(quad32),
 
         ghost key_words:seq(nat32),
