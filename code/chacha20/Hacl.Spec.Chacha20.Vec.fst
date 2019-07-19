@@ -16,11 +16,6 @@ let size_key = 32
 let size_block = 64
 let size_nonce = 12
 
-(* TODO: Remove, left here to avoid breaking implementation *)
-let keylen = 32   (* in bytes *)
-let blocklen = 64 (* in bytes *)
-let noncelen = 12 (* in bytes *)
-
 type key = lbytes size_key
 type block1 = lbytes size_block
 type nonce = lbytes size_nonce
